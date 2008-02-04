@@ -21,7 +21,7 @@ uses
  msedesignintf,msepropertyeditors,msemenus,msegui,msepipestream,sysutils,
  msegraphutils,regkernel_bmp,msegraphics,msestrings,msepostscriptprinter,
  mseprinter,msetypes,msedatalist,msedatamodules,mseclasses,formdesigner,
- mseapplication,mseglob,mseguiglob,mseskin,msedesigner;
+ mseapplication,mseglob,mseguiglob,mseskin,msedesigner,typinfo;
 
 type
  twidget1 = class(twidget);
@@ -64,16 +64,23 @@ type
    procedure edit; override;
  end;
  
- tactivatorclientspropertyeditor = class(tarraypropertyeditor)
+ tactivatorclientspropertyeditor = class(tconstarraypropertyeditor)
   protected
-   function getdefaultstate: propertystatesty; override;
    procedure itemmoved(const source,dest: integer); override;
-   function allequal: boolean; override;
   public
-   function getvalue: msestring; override;
-   function name: msestring; override;
-   procedure setvalue(const value: msestring); override;
    function subproperties: propertyeditorarty; override;
+ end;
+
+ tsysshortcutelementeditor = class(tarrayelementeditor)
+  public
+   function name: msestring; override;
+ end;
+ 
+ tsysshortcutspropertyeditor = class(tconstarraypropertyeditor)
+  protected
+   function geteditorclass: propertyeditorclassty; override;
+   function getelementeditorclass: elementeditorclassty; override;
+  public
  end;
  
 const   
@@ -95,6 +102,7 @@ begin
  registerpropertyeditor(typeinfo(tcustomaction),nil,'',tactionpropertyeditor);
  registerpropertyeditor(typeinfo(tshortcutactions),nil,'',
                            tshortcutactionspropertyeditor);
+ registerpropertyeditor(typeinfo(tsysshortcuts),nil,'',tsysshortcutspropertyeditor);
  registerpropertyeditor(typeinfo(string),tfont,'name',tfontnamepropertyeditor);
  registerpropertyeditor(typeinfo(actionstatesty),nil,'',tshapestatespropertyeditor);
  registerpropertyeditor(typeinfo(shortcutty),nil,'',tshortcutpropertyeditor);
@@ -191,24 +199,7 @@ begin
  end;
 end;
 
-
 { tactivatorclientspropertyeditor }
-
-function tactivatorclientspropertyeditor.getdefaultstate: propertystatesty;
-begin
- result:= inherited getdefaultstate + 
-         [ps_subproperties,ps_noadditems,ps_nodeleteitems{,ps_volatile}];
-end;
-
-function tactivatorclientspropertyeditor.getvalue: msestring;
-begin
- result:= ''
-end;
-
-procedure tactivatorclientspropertyeditor.setvalue(const value: msestring);
-begin
- //dummy
-end;
 
 function tactivatorclientspropertyeditor.subproperties: propertyeditorarty;
 var
@@ -227,11 +218,6 @@ begin
  end;
 end;
 
-function tactivatorclientspropertyeditor.name: msestring;
-begin
- result:= 'clients';
-end;
-
 procedure tactivatorclientspropertyeditor.itemmoved(const source: integer;
                         const dest: integer);
 begin
@@ -239,9 +225,16 @@ begin
  modified;
 end;
 
-function tactivatorclientspropertyeditor.allequal: boolean;
+{ tsysshortcutspropertyeditor }
+
+function tsysshortcutspropertyeditor.geteditorclass: propertyeditorclassty;
 begin
- result:= false;
+ result:= tshortcutpropertyeditor;
+end;
+
+function tsysshortcutspropertyeditor.getelementeditorclass: elementeditorclassty;
+begin
+ result:= tsysshortcutelementeditor;
 end;
 
 { tshortcutactionpropertyeditor }
@@ -268,6 +261,13 @@ end;
 function tshortcutactionspropertyeditor.geteditorclass: propertyeditorclassty;
 begin
  result:= tshortcutactionpropertyeditor;
+end;
+
+{ tsysshortcutelementeditor }
+
+function tsysshortcutelementeditor.name: msestring;
+begin
+ result:= getenumname(typeinfo(sysshortcutty),findex);
 end;
 
 initialization

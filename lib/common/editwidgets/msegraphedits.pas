@@ -637,6 +637,8 @@ type
    procedure setimagedist(const avalue: integer);
    procedure setshortcut(const avalue: shortcutty);
    function isshortcutstored: boolean;
+   procedure setshortcut1(const avalue: shortcutty);
+   function isshortcut1stored: boolean;
    procedure setonexecute(const avalue: notifyeventty);
    function isonexecutestored: boolean;
    procedure setstate(const avalue: actionstatesty);
@@ -700,6 +702,8 @@ type
                       stored iscolorglyphstored default cl_glyph;
    property shortcut: shortcutty read factioninfo.shortcut write setshortcut
                             stored isshortcutstored;
+   property shortcut1: shortcutty read factioninfo.shortcut1 write setshortcut1
+                            stored isshortcut1stored;
    property onexecute: notifyeventty read factioninfo.onexecute
                             write setonexecute stored isonexecutestored;
 
@@ -2620,6 +2624,16 @@ end;
 function tcustomdatabutton.isshortcutstored: boolean;
 begin
  result:= isactionshortcutstored(factioninfo);
+end;
+
+procedure tcustomdatabutton.setshortcut1(const avalue: shortcutty);
+begin
+ setactionshortcut1(iactionlink(self),avalue);
+end;
+
+function tcustomdatabutton.isshortcut1stored: boolean;
+begin
+ result:= isactionshortcut1stored(factioninfo);
 end;
 
 procedure tcustomdatabutton.setonexecute(const avalue: notifyeventty);

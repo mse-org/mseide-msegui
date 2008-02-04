@@ -312,7 +312,7 @@ uses
  formdesigner_mfm,mselist,msekeyboard,mseguiglob,msepointer,msebits,sysutils,
  msestockobjects,msedrawtext,selectsubmoduledialogform,mseshapes,settaborderform,
  msedatalist,objectinspector,projectoptionsform,main,msedatamodules,msetypes,
- setcreateorderform;
+ setcreateorderform,mseactions;
 
 type
  tcomponent1 = class(tcomponent);
@@ -1378,6 +1378,23 @@ begin
     end;
    end;
    if not (es_processed in eventstate) then begin
+    if issysshortcut(sho_copy,info) then begin
+     docopy(false);
+     include(eventstate,es_processed);
+    end
+    else begin
+     if issysshortcut(sho_cut,info) then begin
+      docut;
+      include(eventstate,es_processed);
+     end
+     else begin
+      if issysshortcut(sho_paste,info) then begin
+       dopaste(false);
+       include(eventstate,es_processed);
+      end;
+     end;
+    end;
+    (*
     if shiftstate = [ss_ctrl] then begin
      include(eventstate,es_processed);
      case key of
@@ -1397,6 +1414,7 @@ begin
       end;
      end;
     end;
+    *)
    end;
   end;
  end;

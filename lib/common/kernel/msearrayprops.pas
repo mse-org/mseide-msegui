@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -38,11 +38,11 @@ type
    ffixcount: integer;
 //   fonsizechanged: arraysizechangeeventty;
    procedure internalinsert(const index: integer; const init: boolean);
-   procedure setfixcount(const avalue: integer);
   protected
    fstate: arraypropsstatesty;
    fupdating: integer;
    fcountbefore: integer;
+   procedure setfixcount(const avalue: integer); virtual;
    procedure change(const index: integer); virtual;
    function getcount: integer; virtual; abstract;
    function getdatapo: pointer; virtual; abstract;
@@ -83,10 +83,10 @@ type
 
  tintegerarrayprop = class(tarrayprop)
   private
-   function getitems(const index: integer): integer;
-   procedure setitems(const index: integer; const Value: integer);
   protected
    fitems: integerarty;
+   function getitems(const index: integer): integer;
+   procedure setitems(const index: integer; const Value: integer);
    function getcount: integer; override;
    procedure setcount1(acount: integer; doinit: boolean); override;
    procedure writeitem(const index: integer; writer: twriter); override;
@@ -184,25 +184,16 @@ type
 
  tsetarrayprop = class(tintegerarrayprop)
   private
-//   fsize: integer;
    function getitems(const index: integer): tintegerset;
   protected
    ftypeinfo: ptypeinfo;
-//   fitems: array of tintegerset;
    procedure setitems(const index: integer; const Value: tintegerset); virtual;
-//   function getcount: integer; override;
-//   procedure setcount1(acount: integer; doinit: boolean); override;
    procedure writeitem(const index: integer; writer: twriter); override;
    procedure readitem(const index: integer; reader: treader); override;
-//   function getsize: integer; override;
-//   function getdatapo: pointer; override;
-//   function getitemspo(const index: integer): pointer; override;
   public
    constructor create(typeinfo: ptypeinfo); reintroduce;
    property typeinfo: ptypeinfo read ftypeinfo;
    property items[const index: integer]: tintegerset read getitems write setitems; default;
-//   procedure getset(const index: integer; out value);
-//   procedure setset(const index: integer; const value);
  end;
 
  tpersistentarrayprop = class(tarrayprop,iobjectlink)

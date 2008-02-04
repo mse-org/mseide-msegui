@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -13,13 +13,20 @@ interface
 uses
  classes,mseact,mseglob,mseguiglob,msegui,mseevent,mseclasses,msebitmap,msekeyboard,
  msetypes,msestrings,msearrayprops,msestatfile,msestat;
+
 type
+ sysshortcutty = (sho_copy,sho_paste,sho_cut,
+                  sho_rowinsert,sho_rowappend,sho_rowdelete);
+ sysshortcutaty = array[sysshortcutty] of shortcutty;
+ psysshortcutaty = ^sysshortcutaty;
+ 
  taction = class(tcustomaction)
   private
    function getimagelist: timagelist;
    procedure setimagelist(const Value: timagelist);
 //   function getshortcut: shortcutty;
-   procedure setshortcut(const Value: shortcutty);
+   procedure setshortcut(const avalue: shortcutty);
+   procedure setshortcut1(const avalue: shortcutty);
   protected
    procedure registeronshortcut(const avalue: boolean); override;
    procedure doshortcut(const sender: twidget; var info: keyeventinfoty);
@@ -27,7 +34,10 @@ type
   public
   published
    property imagelist: timagelist read getimagelist write setimagelist;
-   property shortcut: shortcutty read finfo.shortcut write setshortcut default ord(key_none);
+   property shortcut: shortcutty read finfo.shortcut write setshortcut
+                                default ord(key_none);
+   property shortcut1: shortcutty read finfo.shortcut1 write setshortcut1
+                                default ord(key_none);
    property caption;
    property state;
    property group;
@@ -60,19 +70,67 @@ type
 
  tshortcutcontroller = class; 
  tshortcutactions = class(townedpersistentarrayprop)
+  private
+  protected
+   function getitems(const index: integer): tshortcutaction;
   public
-   constructor create(const aowner: tshortcutcontroller);
+   constructor create(const aowner: tshortcutcontroller); reintroduce;
+  public
+   property items[const index: integer]: tshortcutaction read getitems;
+                                                   default;
  end;
-  
+
+ type
+  shortcutrecarty = array of 
+                     record 
+                      name: string;
+                      value: integer;
+                     end;
+ tsysshortcuts = class(tintegerarrayprop)
+  private
+   fowner: tcomponent;
+   fdatapo: psysshortcutaty;
+   fshortcuts: shortcutrecarty;
+   function getitems(const index: sysshortcutty): shortcutty;
+   procedure setitems(const index: sysshortcutty; const avalue: shortcutty);
+   function getshortcutrecord(const index: integer): msestring;
+   procedure setshortcutcount(const acount: integer);
+   procedure setshortcutrecord(const index: integer; const avalue: msestring);
+  protected
+   procedure setfixcount(const avalue: integer); override;
+   procedure dochange(const aindex: integer); override;
+   procedure dostatread(const varname: string; const reader: tstatreader);
+   procedure dostatwrite(const varname: string; const writer: tstatwriter);
+  public
+   constructor create(const aowner: tcomponent; const adatapo: psysshortcutaty);
+   property items[const index: sysshortcutty]: shortcutty read getitems 
+                       write setitems; default;
+ end;
+ 
+ shortcutstatinfoty = record
+  name: ansistring;
+  shortcut: integer;
+  shortcut1: integer;
+ end;
+ shortcutstatinfoarty = array of shortcutstatinfoty;
+   
  tshortcutcontroller = class(tmsecomponent,istatfile)
   private
    factions: tshortcutactions;
    fstatfile: tstatfile;
    fstatvarname: msestring;
+   fstatinfos: shortcutstatinfoarty;
+   fsysshortcuts: tsysshortcuts;
+   fsysshortcuts1: tsysshortcuts;
    procedure setactions(const avalue: tshortcutactions);
    procedure setstatfile(const avalue: tstatfile);
    function getactionrecord(const index: integer): msestring;
+   procedure setactionreccount(const acount: integer);
+   procedure setactionrecord(const index: integer; const avalue: msestring);
+   procedure setsysshortcuts(const avalue: tsysshortcuts);
+   procedure setsysshortcuts1(const avalue: tsysshortcuts);
   protected
+   procedure updateaction(const aaction: taction);
    //istatfile
    procedure dostatread(const reader: tstatreader); virtual;
    procedure dostatwrite(const writer: tstatwriter); virtual;
@@ -84,12 +142,16 @@ type
    destructor destroy; override;
   published
    property actions: tshortcutactions read factions write setactions;
+   property sysshortcuts: tsysshortcuts read fsysshortcuts write setsysshortcuts;
+   property sysshortcuts1: tsysshortcuts read fsysshortcuts1 write setsysshortcuts1;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
  end;
 
 procedure setactionshortcut(const sender: iactionlink; const value: shortcutty);
+procedure setactionshortcut1(const sender: iactionlink; const value: shortcutty);
 function isactionshortcutstored(const info: actioninfoty): boolean;
+function isactionshortcut1stored(const info: actioninfoty): boolean;
 procedure setactionimagelist(const sender: iactionlink; const value: timagelist);
 function isactionimageliststored(const info: actioninfoty): boolean;
  
@@ -99,12 +161,34 @@ function checkshortcutcode(const shortcut: shortcutty; const info: keyeventinfot
 function doactionshortcut(const sender: tobject; var info: actioninfoty;
                         var keyinfo: keyeventinfoty): boolean; //true if done
 procedure calccaptiontext(var info: actioninfoty; const aseparator: msechar);
+function issysshortcut(const ashortcut: sysshortcutty;
+                                  const ainfo: keyeventinfoty): boolean;
 
+var
+ sysshortcuts: sysshortcutaty;
+ sysshortcuts1: sysshortcutaty;
+ 
 implementation
 uses
- sysutils,mserichstring,msestream;
+ sysutils,mserichstring,msestream,typinfo;
  
 const
+ shift = ord(key_modshift);
+ ctrl = ord(key_modctrl);
+ alt = ord(key_modalt);
+ 
+ defaultsysshortcuts: sysshortcutaty = 
+//sho_copy,            sho_paste,                 sho_cut,   
+ (ctrl+ord(key_c),     ctrl+ord(key_v),           ctrl+ord(key_x),
+//sho_rowinsert,       sho_rowappend,             sho_rowdelete
+  ctrl+ord(key_insert),shift+ctrl+ord(key_insert),ctrl+ord(key_delete));
+
+ defaultsysshortcuts1: sysshortcutaty = 
+//sho_copy,            sho_paste,                 sho_cut,   
+ (ord(key_none),       shift+ord(key_insert),     shift+ord(key_delete),
+//sho_rowinsert,       sho_rowappend,             sho_rowdelete
+  ord(key_none),       ord(key_none),             ord(key_none));
+ 
  letterkeycount = ord('z') - ord('a') + 1;
  cipherkeycount = ord('9') - ord('0') + 1;
  functionkeycount = 12;
@@ -118,6 +202,13 @@ const
 var
  shortcutkeys: integerarty;
  shortcutnames: msestringarty;
+
+function issysshortcut(const ashortcut: sysshortcutty;
+                                 const ainfo: keyeventinfoty): boolean;
+begin
+ result:= checkshortcutcode(sysshortcuts[ashortcut],ainfo) or
+                           checkshortcutcode(sysshortcuts1[ashortcut],ainfo);
+end;
 
 procedure getshortcutlist(out keys: integerarty; out names: msestringarty);
 var
@@ -234,16 +325,7 @@ var
  str1: msestring;
 begin
  str1:= info.captiontext;
- if (info.shortcut <> 0) and (mao_shortcutcaption in info.options)
-           {and not (as_disabled in info.state)} then begin
-{           
-  if mao_shortcutright in info.options then begin
-   str1:= str1 + c_tab;
-  end
-  else begin
-   str1:= str1 + ' ';
-  end;
-}
+ if (info.shortcut <> 0) and (mao_shortcutcaption in info.options) then begin
   str1:= str1 + aseparator + '('+getshortcutname(info.shortcut)+')';
  end;
  captiontorichstring(str1,info.caption1);
@@ -262,10 +344,31 @@ begin
  sender.actionchanged;
 end;
 
+procedure setactionshortcut1(const sender: iactionlink; const value: shortcutty);
+var
+ po1: pactioninfoty;
+begin
+ po1:= sender.getactioninfopo;
+ with po1^ do begin
+  shortcut1:= value;
+  include(state,as_localshortcut1);
+ end;
+// calccaptiontext(po1^,sender.shortcutseparator);
+ sender.actionchanged;
+end;
+
 function isactionshortcutstored(const info: actioninfoty): boolean;
 begin
  with info do begin
   result:= (as_localshortcut in state) and
+         not ((action = nil) and (shortcut = ord(key_none)));
+ end;
+end;
+
+function isactionshortcut1stored(const info: actioninfoty): boolean;
+begin
+ with info do begin
+  result:= (as_localshortcut1 in state) and
          not ((action = nil) and (shortcut = ord(key_none)));
  end;
 end;
@@ -335,12 +438,24 @@ var
 begin
  result:= false;
  with info do begin
-  if (shortcut <> 0) and not (as_disabled in state) and
-                         not (es_processed in keyinfo.eventstate) then begin
-   if checkshortcutcode(shortcut,keyinfo) then begin
-    doactionexecute(sender,info);
+  if not (as_disabled in state) and 
+           not (es_processed in keyinfo.eventstate) then begin
+   if shortcut <> 0 then begin
+    if checkshortcutcode(shortcut,keyinfo) then begin
+     doactionexecute(sender,info);
+     result:= true;
+    end;
+   end;
+   if not result then begin
+    if shortcut1 <> 0 then begin
+     if checkshortcutcode(shortcut1,keyinfo) then begin
+      doactionexecute(sender,info);
+      result:= true;
+     end;
+    end;
+   end;
+   if result then begin
     include(keyinfo.eventstate,es_processed);
-    result:= true;
    end;
   end;
  end;
@@ -366,9 +481,15 @@ begin
  result:= shortcutty(finfo.shortcut);
 end;
 }
-procedure taction.setshortcut(const Value: shortcutty);
+procedure taction.setshortcut(const avalue: shortcutty);
 begin
- finfo.shortcut := Value;
+ finfo.shortcut:= avalue;
+ changed;
+end;
+
+procedure taction.setshortcut1(const avalue: shortcutty);
+begin
+ finfo.shortcut1:= avalue;
  changed;
 end;
 
@@ -406,11 +527,18 @@ begin
  inherited create(aowner,tshortcutaction);
 end;
 
+function tshortcutactions.getitems(const index: integer): tshortcutaction;
+begin
+ result:= tshortcutaction(inherited getitems(index));
+end;
+
 { tshortcutcontroller }
 
 constructor tshortcutcontroller.create(aowner: tcomponent);
 begin
  factions:= tshortcutactions.create(self);
+ fsysshortcuts:= tsysshortcuts.create(self,@mseactions.sysshortcuts);
+ fsysshortcuts1:= tsysshortcuts.create(self,@mseactions.sysshortcuts1);
  inherited;
 end;
 
@@ -418,6 +546,8 @@ destructor tshortcutcontroller.destroy;
 begin
  inherited;
  factions.free;
+ fsysshortcuts.free;
+ fsysshortcuts1.free;
 end;
 
 procedure tshortcutcontroller.setactions(const avalue: tshortcutactions);
@@ -430,34 +560,34 @@ begin
  setstatfilevar(istatfile(self),avalue,fstatfile);
 end;
 
+procedure tshortcutcontroller.setactionreccount(const acount: integer);
+begin
+ fstatinfos:= nil;
+ setlength(fstatinfos,acount);
+end;
+
+procedure tshortcutcontroller.setactionrecord(const index: integer;
+               const avalue: msestring);
+begin
+ with fstatinfos[index] do begin
+  decoderecord(avalue,[@name,@shortcut,@shortcut1],'sii');
+ end;
+end;
+
 procedure tshortcutcontroller.dostatread(const reader: tstatreader);
 begin
-end;
-
-procedure tshortcutcontroller.dostatwrite(const writer: tstatwriter);
-begin
- writer.writerecordarray('shortcuts',factions.count,
-                               {$ifdef FPC}@{$endif}getactionrecord);
-end;
-
-procedure tshortcutcontroller.statreading;
-begin
-end;
-
-procedure tshortcutcontroller.statread;
-begin
-end;
-
-function tshortcutcontroller.getstatvarname: msestring;
-begin
- result:= fstatvarname;
+ fsysshortcuts.dostatread('sysshortcuts',reader);
+ fsysshortcuts1.dostatread('sysshortcuts1',reader);
+ reader.readrecordarray('shortcuts',{$ifdef FPC}@{$endif}setactionreccount,
+           {$ifdef FPC}@{$endif}setactionrecord);
 end;
 
 function tshortcutcontroller.getactionrecord(const index: integer): msestring;
 begin
  with tshortcutaction(factions[index]) do begin
   if action <> nil then begin
-   result:= encoderecord([ownernamepath(action),integer(action.shortcut)]);
+   result:= encoderecord([ownernamepath(action),integer(action.shortcut),
+                       integer(action.shortcut1)]);
   end
   else begin
    result:= '';
@@ -465,11 +595,170 @@ begin
  end;
 end;
 
+procedure tshortcutcontroller.dostatwrite(const writer: tstatwriter);
+begin
+ fsysshortcuts.dostatwrite('sysshortcuts',writer);
+ fsysshortcuts1.dostatwrite('sysshortcuts1',writer);
+ writer.writerecordarray('shortcuts',factions.count,
+                               {$ifdef FPC}@{$endif}getactionrecord);
+end;
+
+procedure tshortcutcontroller.statreading;
+begin
+ //dummy
+end;
+
+procedure tshortcutcontroller.statread;
+var
+ int1: integer;
+begin
+ for int1:= 0 to factions.count - 1 do begin
+  with factions[int1] do begin
+   if action <> nil then begin
+    updateaction(action);
+   end;
+  end;
+ end;
+end;
+
+function tshortcutcontroller.getstatvarname: msestring;
+begin
+ result:= fstatvarname;
+end;
+
+procedure tshortcutcontroller.updateaction(const aaction: taction);
+var
+ int1: integer;
+ str1: ansistring;
+begin
+ str1:= ownernamepath(aaction);
+ for int1:= 0 to high(fstatinfos) do begin
+  with fstatinfos[int1] do begin
+   if str1 = name then begin
+    aaction.shortcut:= shortcut;
+    aaction.shortcut1:= shortcut1;
+   end;
+  end;
+ end;
+end;
+
+procedure tshortcutcontroller.setsysshortcuts(const avalue: tsysshortcuts);
+begin
+ fsysshortcuts.assign(avalue);
+end;
+
+procedure tshortcutcontroller.setsysshortcuts1(const avalue: tsysshortcuts);
+begin
+ fsysshortcuts1.assign(avalue);
+end;
+
 { tshortcutaction }
 
 procedure tshortcutaction.setaction(const avalue: taction);
 begin
- tshortcutcontroller(fowner).setlinkedvar(avalue,faction);
+ with tshortcutcontroller(fowner) do begin
+  setlinkedvar(avalue,faction);
+  if avalue <> nil then begin
+   updateaction(avalue);
+  end;
+ end;  
 end;
 
+{ tsysshortcuts }
+
+constructor tsysshortcuts.create(const aowner: tcomponent;
+            const adatapo: psysshortcutaty);
+var
+ sc1: sysshortcutty;
+begin
+ inherited create;
+ inherited setfixcount(ord(high(sysshortcutty))+1);
+ fowner:= aowner;
+ fdatapo:= adatapo;
+ for sc1:= low(sc1) to high(sc1) do begin
+  fitems[ord(sc1)]:= ord(fdatapo^[sc1]); //init with current values
+ end;
+end;
+
+function tsysshortcuts.getitems(const index: sysshortcutty): shortcutty;
+begin
+ result:= inherited getitems(ord(index));
+end;
+
+procedure tsysshortcuts.setitems(const index: sysshortcutty;
+               const avalue: shortcutty);
+begin
+ inherited setitems(ord(index),ord(avalue));
+end;
+
+procedure tsysshortcuts.setfixcount(const avalue: integer);
+begin
+ //dummy
+end;
+
+procedure tsysshortcuts.dochange(const aindex: integer);
+var
+ sc1: sysshortcutty;
+begin
+ inherited;
+ if (fowner <> nil) and not (csdesigning in fowner.componentstate) then begin
+  if aindex < 0 then begin
+   for sc1:= low(sc1) to high(sc1) do begin
+    fdatapo^[sc1]:= fitems[ord(sc1)];
+   end;
+  end
+  else begin
+   fdatapo^[sysshortcutty(aindex)]:= fitems[aindex];
+  end;
+ end;
+end;
+
+procedure tsysshortcuts.setshortcutcount(const acount: integer);
+begin
+ setlength(fshortcuts,count);
+end;
+
+procedure tsysshortcuts.setshortcutrecord(const index: integer;
+               const avalue: msestring);
+begin
+ with fshortcuts[index] do begin
+  decoderecord(avalue,[@name,@value],'si');
+ end;
+end;
+
+procedure tsysshortcuts.dostatread(const varname: string;
+               const reader: tstatreader);
+var
+ int1,int2: integer;
+begin
+ fshortcuts:= nil;
+ reader.readrecordarray(varname,{$ifdef FPC}@{$endif}setshortcutcount,
+           {$ifdef FPC}@{$endif}setshortcutrecord);
+ for int1:= 0 to high(fshortcuts) do begin
+  with fshortcuts[int1] do begin
+   int2:= getenumvalue(typeinfo(sysshortcutty),name);
+   if int2 >= 0 then begin
+    items[sysshortcutty(int2)]:= value;
+   end;
+  end;
+ end;
+ fshortcuts:= nil;
+end;
+
+function tsysshortcuts.getshortcutrecord(const index: integer): msestring;
+begin
+ result:= encoderecord([getenumname(typeinfo(sysshortcutty),index),fitems[index]]);
+end;
+
+procedure tsysshortcuts.dostatwrite(const varname: string;
+               const writer: tstatwriter);
+begin
+ writer.writerecordarray(varname,count,
+                               {$ifdef FPC}@{$endif}getshortcutrecord);
+end;
+
+initialization
+ sysshortcuts:= defaultsysshortcuts; 
+ sysshortcuts1:= defaultsysshortcuts1; 
+finalization
 end.

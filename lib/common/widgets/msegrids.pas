@@ -1752,7 +1752,7 @@ function cellkeypress(const info: celleventinfoty): keyty;
 
 implementation
 uses
- mseguiintf,mseshapes,msestockobjects,mseact;
+ mseguiintf,mseshapes,msestockobjects,mseact,mseactions;
 type
  tframe1 = class(tcustomframe);
  tdatalist1 = class(tdatalist);
@@ -8826,51 +8826,35 @@ begin
     end;
    end;
   end;
-  if not (es_processed in info.eventstate) and (info.shiftstate = [ss_ctrl]) or
-                       (info.shiftstate = [ss_ctrl,ss_shift])then begin
-   include(info.eventstate,es_processed);
-   case info.key of
-    key_insert: begin
-     if og_rowinserting in foptionsgrid then begin
-      if (ss_shift in info.shiftstate) then begin
-       doappendrow(nil);
-//       doinsertrow(nil);
-      end
-      else begin
-       doinsertrow(nil);
-//       doappendrow(nil);
-      end;
-     end
-     else begin
-      exclude(info.eventstate,es_processed);
-     end;
+  if not (es_processed in info.eventstate) then begin
+   if issysshortcut(sho_copy,info) then begin
+    if copyselection then begin
+     include(info.eventstate,es_processed);
     end;
-    key_delete: begin
-     if og_rowdeleting in foptionsgrid then begin
-      if (info.shiftstate = [ss_ctrl]) then begin
-       dodeleterows(nil);
-      end;
-     end
-     else begin
-      exclude(info.eventstate,es_processed);
-     end;
+   end
+   else begin
+    if pasteselection then begin
+     include(info.eventstate,es_processed);
     end;
+   end;    
+  end;
+  if not (es_processed in info.eventstate) then begin
+   if og_rowinserting in foptionsgrid then begin
+    if issysshortcut(sho_rowinsert,info) then begin
+     doinsertrow(nil);
+     include(info.eventstate,es_processed);
+    end
     else begin
-     exclude(info.eventstate,es_processed);
+     if issysshortcut(sho_rowappend,info) then begin
+      doappendrow(nil);
+      include(info.eventstate,es_processed);
+     end;
     end;
    end;
-  end;
-  if not (es_processed in info.eventstate) and (info.shiftstate = [ss_ctrl]) then begin
-   case info.key of
-    key_c{,key_insert}: begin
-     if copyselection then begin
-      include(info.eventstate,es_processed);
-     end;
-    end;
-    key_v: begin
-     if pasteselection then begin
-      include(info.eventstate,es_processed);
-     end;
+   if not (es_processed in info.eventstate) then begin
+    if (og_rowdeleting in foptionsgrid) and issysshortcut(sho_rowdelete,info) then begin
+     dodeleterows(nil);
+     include(info.eventstate,es_processed);
     end;
    end;
   end;

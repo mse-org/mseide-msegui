@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -213,8 +213,6 @@ type
  pundoinfoty = ^undoinfoty;
 
  iundo = interface
-//  function getpos: tpoint;
-//  procedure setpos(const pos: gridcoordty; shift: boolean);
   procedure setedpos(const Value: gridcoordty; const select: boolean;
                                const donotify: boolean);
   procedure deletetext(const startpos,endpos: gridcoordty);
@@ -241,7 +239,6 @@ type
    function checkrecord(atype: undotypety; const astartpos,aendpos: gridcoordty;
               selected: boolean; backwards: boolean; alink: boolean;
               textlength: integer): pundoinfoty;
-//   function rechneendpos(rec: undoinforecpoty; reverse: boolean = false): tpoint;
    property items[const index: integer]: pundoinfoty read getitems;
    function getcanundo: boolean;
    function getcanredo: boolean;
@@ -300,7 +297,7 @@ function textendpoint(const start: pointty; const text: msestring): pointty;
 
 implementation
 uses
- msekeyboard,sysutils,msesysutils,msebits,msewidgets,classes;
+ msekeyboard,sysutils,msesysutils,msebits,msewidgets,classes,mseactions;
  
 var
  overwrite: boolean; //insertstate
@@ -844,30 +841,35 @@ begin
   if ss_shift in kinfo.shiftstate then begin
    include(actioninfo.state,eas_shift);
   end;
-  if shiftstate = [ss_ctrl] then begin
-   finished:= false;
-   case key of
-    key_c{,key_insert}: begin
-     if (fsellength > 0) or fintf.hasselection then begin
-      copytoclipboard;
-      finished:= true;
-     end;
+  if issysshortcut(sho_copy,kinfo) then begin
+   copytoclipboard;
+  end
+  else begin
+   if issysshortcut(sho_paste,kinfo) then begin
+    if canedit then begin
+     pastefromclipboard;
+    end
+    else begin
+     finished:= false;
     end;
-    key_v: begin
+   end
+   else begin
+    if issysshortcut(sho_cut,kinfo) then begin
      if canedit then begin
-      pastefromclipboard;
-      finished:= true;
-     end;
-    end;
-    key_x: begin
-     if canedit and ((fsellength > 0) or fintf.hasselection) then begin
       cuttoclipboard;
-      finished:= true;
+     end
+     else begin
+      finished:= false;
+     end;
+    end
+    else begin
+     if shiftstate = [ss_ctrl] then begin
+      finished:= false;
      end;
     end;
    end;
-  end
-  else begin
+  end;
+  if shiftstate <> [ss_ctrl] then begin
    bo1:= true;
    if key = key_return then  begin
     removechar1(chars,c_return);
@@ -957,28 +959,8 @@ begin
     end
     else begin
      if shiftstate = [ss_shift] then begin
-      case key of
-       key_delete: begin
-        if canedit then begin
-         cuttoclipboard;
-        end
-        else begin
-         finished:= false;
-        end;
-       end;
-       key_insert: begin
-        if canedit then begin
-         pastefromclipboard;
-        end
-        else begin
-         finished:= false;
-        end;
-       end;
-       else begin
-        finished:= false;
-        nochars:= false;
-       end;
-      end;
+      finished:= false;
+      nochars:= false;
      end
      else begin
       finished:= false;

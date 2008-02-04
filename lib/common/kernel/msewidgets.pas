@@ -942,7 +942,7 @@ procedure buttonoptionstoshapestate(avalue: buttonoptionsty;
 implementation
 
 uses
- msebits,mseguiintf,msestockobjects,msekeyboard,sysutils,msemenuwidgets;
+ msebits,mseguiintf,msestockobjects,msekeyboard,sysutils,msemenuwidgets,mseactions;
 
 const
  captionmargin = 1; //distance focusrect to caption in tcaptionframe
@@ -1535,8 +1535,7 @@ end;
 
 procedure tshowmessagewidget.dokeydown(var ainfo: keyeventinfoty);
 begin
- if (ainfo.shiftstate = [ss_ctrl]) and 
-      ((ainfo.key = key_c) {or (ainfo.key = key_insert)})  then begin
+ if issysshortcut(sho_copy,ainfo) or issysshortcut(sho_cut,ainfo) then begin
   copytoclipboard(info.text.text);
  end;
  inherited;

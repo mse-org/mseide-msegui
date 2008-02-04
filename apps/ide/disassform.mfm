@@ -21,9 +21,8 @@ object disassfo: tdisassfo
   options = [fo_savepos, fo_savestate]
   statfile = mainfo.projectstatfile
   caption = 'Assembler'
-  icon.transparentcolor = -2147483648
+  icon.transparentcolor = -2147483642
   icon.options = [bmo_masked]
-  icon.transparency = -2147483648
   icon.image = {
     0000000002000000180000001800000040030000000000000000000000000000
     0000000000000000000000000000000000000000804CF01AE0E0E00F804CF009
@@ -55,7 +54,8 @@ object disassfo: tdisassfo
     A8ECE81280808001804CF00480808014804CF01A00000008FCFF0100FCFF03BF
     FCFF0708FCFF0F08FCFF1F00FCFF3F08FCFF3F08FCFF3F08FCFF3F08FCFF3FBF
     FCFF3F08FCFF3F03FCFF3F08FCFF3FBFFCFF3F08FCFF3F00FCFF3F03FCFF3F40
-    FCFF3F00FCFF3FBFFCFF3F00FCFF3F0000000000}
+    FCFF3F00FCFF3FBFFCFF3F00FCFF3F0000000000
+  }
   onshow = disassfoonshow
   moduleclassname = 'tdockform'
   object grid: tstringgrid
@@ -64,28 +64,29 @@ object disassfo: tdisassfo
     bounds_y = 0
     bounds_cx = 554
     bounds_cy = 210
+    color = -1879048187
     frame.dummy = 0
     anchors = []
     optionsgrid = [og_colsizing, og_colchangeontabkey, og_autopopup]
     datacols.count = 2
     datacols.options = [co_readonly, co_drawfocus, co_savestate]
-    datacols.items = <
+    datacols.items = <    
       item
         width = 76
         options = [co_readonly, co_drawfocus, co_savestate, co_rowcolor]
         optionsedit = [scoe_eatreturn]
-      end
+      end    
       item
         width = 472
         options = [co_readonly, co_drawfocus, co_fill, co_savestate, co_rowcolor]
         optionsedit = [scoe_eatreturn]
       end>
-    rowcount = 0
     rowcolors.count = 2
     rowcolors.items = (
       14745599
-      16777184)
-    datarowheight = 15
-    reffontheight = 13
+      16777184
+    )
+    datarowheight = 16
+    reffontheight = 14
   end
 end

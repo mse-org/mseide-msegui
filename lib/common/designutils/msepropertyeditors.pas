@@ -506,21 +506,7 @@ type
  end;
 
  elementeditorclassty = class of tarrayelementeditor;
- 
- tconstelementeditor = class(tarrayelementeditor)
-  protected
-   fvalue: msestring;
-  public
-   constructor create(const avalue: msestring;
-            aindex: integer; aparenteditor: tarraypropertyeditor;
-            aeditorclass: propertyeditorclassty;
-            const adesigner: idesigner;
-            const aobjectinspector: iobjectinspector;
-            const aprops: propinstancearty; atypinfo: ptypeinfo); reintroduce;
-   procedure dragdrop(const sender: tpropertyeditor); override;
-   function getvalue: msestring; override;
- end;
-
+  
  tarraypropertyeditor = class(tclasspropertyeditor)
   private
    procedure doappend(const sender: tobject);
@@ -540,6 +526,30 @@ type
                           var mouseinfo: mouseeventinfoty); override;
  end;
  
+  tconstelementeditor = class(tarrayelementeditor)
+  protected
+   fvalue: msestring;
+  public
+   constructor create(const avalue: msestring;
+            aindex: integer; aparenteditor: tarraypropertyeditor;
+            aeditorclass: propertyeditorclassty;
+            const adesigner: idesigner;
+            const aobjectinspector: iobjectinspector;
+            const aprops: propinstancearty; atypinfo: ptypeinfo); reintroduce;
+   procedure dragdrop(const sender: tpropertyeditor); override;
+   function getvalue: msestring; override;
+ end;
+
+ tconstarraypropertyeditor = class(tarraypropertyeditor)
+  protected
+   function getdefaultstate: propertystatesty; override;
+   function allequal: boolean; override;
+  public
+   function getvalue: msestring; override;
+   function name: msestring; override;
+   procedure setvalue(const value: msestring); override;
+ end;
+
  tcollectionpropertyeditor = class;
  
  tcollectionitemeditor = class(tpropertyeditor,iremotepropertyeditor)
@@ -2702,6 +2712,34 @@ begin
   end;
  end;
  inherited;
+end;
+
+{ tconstarraypropertyeditor }
+
+function tconstarraypropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate + 
+         [ps_subproperties,ps_noadditems,ps_nodeleteitems{,ps_volatile}];
+end;
+
+function tconstarraypropertyeditor.getvalue: msestring;
+begin
+ result:= ''
+end;
+
+procedure tconstarraypropertyeditor.setvalue(const value: msestring);
+begin
+ //dummy
+end;
+
+function tconstarraypropertyeditor.name: msestring;
+begin
+ result:= fname;
+end;
+
+function tconstarraypropertyeditor.allequal: boolean;
+begin
+ result:= false;
 end;
 
 { tclasselementeditor }

@@ -116,6 +116,8 @@ type
    procedure setimagedist(const avalue: integer);
    procedure setshortcut(const avalue: shortcutty);
    function isshortcutstored: boolean;
+   procedure setshortcut1(const avalue: shortcutty);
+   function isshortcut1stored: boolean;
   protected
    procedure setcolor(const avalue: colorty); override;
    //iactionlink
@@ -171,6 +173,8 @@ type
                       stored iscolorglyphstored default cl_glyph;
    property shortcut: shortcutty read factioninfo.shortcut write setshortcut
                             stored isshortcutstored;
+   property shortcut1: shortcutty read factioninfo.shortcut1 write setshortcut1
+                            stored isshortcut1stored;
    property onexecute: notifyeventty read factioninfo.onexecute
                             write setonexecute stored isonexecutestored;
    property autosize_cx: integer read fautosize_cx write setautosize_cx;
@@ -550,6 +554,7 @@ procedure tcustombutton.doshortcut(var info: keyeventinfoty; const sender: twidg
 begin
  if not (es_processed in info.eventstate) then begin
   if checkshortcutcode(factioninfo.shortcut,info) or
+     checkshortcutcode(factioninfo.shortcut1,info) or
     (bo_executeonshortcut in options) and not (ss_disabled in finfo.state) and
            mserichstring.checkshortcut(info,factioninfo.caption1,true) or
     (finfo.state * [ss_invisible,ss_disabled,ss_default] = [ss_default]) and
@@ -714,6 +719,16 @@ end;
 function tcustombutton.isshortcutstored: boolean;
 begin
  result:= isactionshortcutstored(factioninfo);
+end;
+
+procedure tcustombutton.setshortcut1(const avalue: shortcutty);
+begin
+ setactionshortcut1(iactionlink(self),avalue);
+end;
+
+function tcustombutton.isshortcut1stored: boolean;
+begin
+ result:= isactionshortcut1stored(factioninfo);
 end;
 
 function tcustombutton.getstate: actionstatesty;

@@ -25,9 +25,8 @@ object stackfo: tstackfo
   options = [fo_savepos, fo_savestate]
   statfile = mainfo.projectstatfile
   caption = 'Stack'
-  icon.transparentcolor = -2147483648
+  icon.transparentcolor = -2147483642
   icon.options = [bmo_masked]
-  icon.transparency = -2147483648
   icon.image = {
     00000000020000001800000018000000BC000000000000000000000000000000
     0000000000000000000000000000000000000000E0E0E0370000F801E0E0E017
@@ -50,6 +49,7 @@ object stackfo: tstackfo
     bounds_y = 20
     bounds_cx = 244
     bounds_cy = 160
+    color = -1879048187
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
     anchors = [an_top, an_bottom]

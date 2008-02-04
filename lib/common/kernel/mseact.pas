@@ -42,7 +42,7 @@ type
                   as_localimagelist,as_localimagenr,as_localimagenrdisabled,
                   as_localimagecheckedoffset,
                   as_localcolorglyph,as_localcolor,
-                  as_localhint,as_localshortcut,as_localtag,
+                  as_localhint,as_localshortcut,as_localshortcut1,as_localtag,
                   as_localgroup,as_localonexecute);
  actionstatesty = set of actionstatety;
 
@@ -62,16 +62,16 @@ const
  actionoptionshapelshift = ord(ss_separator);
 
  localactionstates: actionstatesty =
-                  [as_localdisabled,as_localinvisible,as_localchecked,as_localdefault,
-                  as_localcaption,
-                  as_localimagelist,as_localimagenr,as_localimagenrdisabled,
-                  as_localimagecheckedoffset,
-                  as_localcolorglyph,as_localcolor,
-                  as_localhint,as_localshortcut,as_localtag,
-                  as_localgroup,as_localonexecute];
+            [as_localdisabled,as_localinvisible,as_localchecked,as_localdefault,
+             as_localcaption,
+             as_localimagelist,as_localimagenr,as_localimagenrdisabled,
+             as_localimagecheckedoffset,
+             as_localcolorglyph,as_localcolor,
+             as_localhint,as_localshortcut,as_localshortcut1,as_localtag,
+             as_localgroup,as_localonexecute];
  localactionlshift = ord(as_localdisabled);
  localactionstatestates: actionstatesty =
-                  [as_localdisabled,as_localinvisible,as_localchecked,as_localdefault];
+          [as_localdisabled,as_localinvisible,as_localchecked,as_localdefault];
 type
  tcustomaction = class;
  actioneventty = procedure(const sender: tcustomaction) of object;
@@ -83,6 +83,7 @@ type
   state: actionstatesty;
   options: menuactionoptionsty;
   shortcut: shortcutty;
+  shortcut1: shortcutty;
   group: integer;
   imagenr: integer;
   imagenrdisabled: integer; //-2 -> grayed
@@ -373,6 +374,9 @@ begin
      if not (as_localshortcut in state) then begin
       shortcut:= 0;
       sender.calccaptiontext(info);
+     end;
+     if not (as_localshortcut1 in state) then begin
+      shortcut1:= 0;
      end;
      if not (as_localimagelist in state) then begin
       imagelist:= nil; //do not unink,imagelist is owned by action
@@ -894,6 +898,11 @@ begin
               (shortcut <> finfo.shortcut) then begin
    shortcut:= finfo.shortcut;
    sender.calccaptiontext(po1^);
+   bo1:= true;
+  end;
+  if not (as_localshortcut1 in state) and
+              (shortcut1 <> finfo.shortcut1) then begin
+   shortcut1:= finfo.shortcut1;
    bo1:= true;
   end;
   if not (as_localimagelist in state) and
