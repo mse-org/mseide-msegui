@@ -11444,6 +11444,7 @@ begin
   if findwindow(fwinid,window1) then begin
    fillchar(info,sizeof(info),0);
    with info do begin
+    eventkind:= fkind;
     key:= fkey;
     keynomod:= fkeynomod;
     case key of

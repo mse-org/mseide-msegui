@@ -85,7 +85,7 @@ type
    procedure docellevent(const ownedcol: boolean; var info: celleventinfoty); virtual;
    procedure sortfunc(const l,r; var result: integer); virtual;
    procedure gridvaluechanged(const index: integer); virtual;
-   procedure updatecoloptions(var aoptions: coloptionsty);
+   procedure updatecoloptions(const aoptions: coloptionsty);
    procedure setoptionsedit(const avalue: optionseditty); override;
    procedure statdataread; virtual;
    procedure griddatasourcechanged; virtual;
@@ -143,6 +143,7 @@ type
    property oncheckvalue: checkvalueeventty read foncheckvalue write foncheckvalue;
    property ondataentered: notifyeventty read fondataentered write fondataentered;
    property onkeydown;
+   property onkeyup;
  end;
 
  tcustomstringedit = class(tdataedit)
@@ -1209,7 +1210,7 @@ begin
  end;
 end;
 
-procedure tdataedit.updatecoloptions(var aoptions: coloptionsty);
+procedure tdataedit.updatecoloptions(const aoptions: coloptionsty);
 begin
  fgridintf.coloptionstoeditoptions(foptionsedit);
 end;

@@ -132,7 +132,7 @@ type
    procedure docellevent(const ownedcol: boolean; var info: celleventinfoty); virtual;
    procedure sortfunc(const l,r; var result: integer);
    procedure gridvaluechanged(const index: integer); virtual;
-   procedure updatecoloptions(var aoptions: coloptionsty);
+   procedure updatecoloptions(const aoptions: coloptionsty);
    procedure statdataread; virtual;
    procedure griddatasourcechanged;
 
@@ -254,6 +254,7 @@ type
    property textflags;
    property textflagsactive;
    property onkeydown;
+   property onkeyup;
    property statfile;
    property statvarname;
    property marginlinepos;
@@ -524,7 +525,7 @@ begin
  modified:= true;
 end;
 
-procedure tcustomtextedit.updatecoloptions(var aoptions: coloptionsty);
+procedure tcustomtextedit.updatecoloptions(const aoptions: coloptionsty);
 begin
  fgridintf.coloptionstoeditoptions(foptionsedit);
 end;

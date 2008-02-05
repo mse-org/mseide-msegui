@@ -251,14 +251,17 @@ type
    property focusedindex: integer read getfocusedindex write setfocusedindex;
    function celltoitem(const acell: gridcoordty): tlistitem;
    function finditembycaption(const acaption: msestring): tlistitem;
-   function findcellbycaption(const acaption: msestring; var cell: gridcoordty): boolean;
+   function findcellbycaption(const acaption: msestring;
+                                               var cell: gridcoordty): boolean;
    function getselecteditems: listitemarty;
 
    property items[const index: integer]: tlistitem read getitems write setitems;
    property editing: boolean read fediting write setediting;
 
-   property colorselect: colorty read getcolorselect write setcolorselect default cl_default;
-   property colorglyph: colorty read fcolorglyph write setcolorglyph default cl_black;
+   property colorselect: colorty read getcolorselect 
+                                    write setcolorselect default cl_default;
+   property colorglyph: colorty read fcolorglyph 
+                                    write setcolorglyph default cl_black;
    property cellwidth: integer read fcellwidth write setcellwidth
                    default defaultcellwidth;
    property cellheight: integer read fdatarowheight write setdatarowheight
@@ -269,7 +272,8 @@ type
    property itemlist: titemviewlist read fitemlist write setitemlist;
    property options: listviewoptionsty read foptions write setoptions
                             default defaultlistviewoptions;
-   property cellfocusrectdist: integer read getcellfocusrectdist write setcellfocusrectdist default 0;
+   property cellfocusrectdist: integer read getcellfocusrectdist 
+                                        write setcellfocusrectdist default 0;
    property filtertext: msestring read ffiltertext write setfiltertext;
    property datacollinewidth: integer read getdatacollinewidth
                     write setdatacollinewidth default defaultgridlinewidth;
@@ -329,8 +333,8 @@ type
    procedure setcolorglyph(const Value: colorty);
   protected
    procedure doitemchange(const index: integer); override;
-   procedure nodenotification(const sender: tlistitem; var ainfo: nodeactioninfoty);
-                   override;
+   procedure nodenotification(const sender: tlistitem; 
+                                      var ainfo: nodeactioninfoty); override;
    procedure compare(const l,r; var result: integer); override;
   public
    constructor create(const intf: iitemlist; const owner: titemedit); reintroduce;
@@ -338,7 +342,8 @@ type
    procedure add(const anode: tlistitem);
    procedure refreshitemvalues;
    property owner: titemedit read fowner;
-   property colorglyph: colorty read fcolorglyph write setcolorglyph default cl_black;
+   property colorglyph: colorty read fcolorglyph 
+                                    write setcolorglyph default cl_black;
                       //for monochrome imagelist
    property onitemnotification: nodenotificationeventty
                  read fonitemnotification write fonitemnotification;
@@ -379,6 +384,7 @@ type
    fitemlist: tcustomitemeditlist;
    fonsetvalue: setstringeventty;
    fonkeydown: keyeventty;
+   fonkeyup: keyeventty;
    fonmouseevent: mouseeventty;
    fonbuttonaction: buttoneventty;
    fonupdaterowvalues: itemindexeventty;
@@ -426,6 +432,7 @@ type
    procedure setupeditor; override;
    procedure dopaint(const acanvas: tcanvas); override;
    procedure dokeydown(var info: keyeventinfoty); override;
+   procedure dokeyup(var info: keyeventinfoty); override;
 
    procedure getitemvalues; virtual;
    procedure internalcreateframe; override;
@@ -435,7 +442,8 @@ type
          const buttonindex: integer); virtual;
 
    procedure mouseevent(var info: mouseeventinfoty); override;
-   procedure docellevent(const ownedcol: boolean; var info: celleventinfoty); override;
+   procedure docellevent(const ownedcol: boolean;
+                                         var info: celleventinfoty); override;
 
 //   procedure dostatread(const reader: tstatreader); override;
 //   procedure dostatwrite(const writer: tstatwriter); override;
@@ -450,7 +458,8 @@ type
    function item: tlistitem;
    procedure beginedit;
    procedure endedit;
-   property items[const index: integer]: tlistitem read getitems write setitems; default;
+   property items[const index: integer]: tlistitem read getitems 
+                                                    write setitems; default;
    property activerow: integer read factiverow;
    property filtertext: msestring read ffiltertext write setfiltertext;
   published
@@ -458,6 +467,7 @@ type
    property onsetvalue: setstringeventty read fonsetvalue write fonsetvalue;
    property onmouseevent: mouseeventty read fonmouseevent write fonmouseevent;
    property onkeydown: keyeventty read fonkeydown write fonkeydown;
+   property onkeyup: keyeventty read fonkeyup write fonkeyup;
    property optionsedit;
    property font;
    property passwordchar;
@@ -465,8 +475,10 @@ type
    property textflags default defaultitemedittextflags;
    property textflagsactive default defaultitemedittextflagsactive;
    property onchange;
-   property onbuttonaction: buttoneventty read fonbuttonaction write fonbuttonaction;
-   property onupdaterowvalues: itemindexeventty read fonupdaterowvalues write fonupdaterowvalues;
+   property onbuttonaction: buttoneventty read fonbuttonaction 
+                                                   write fonbuttonaction;
+   property onupdaterowvalues: itemindexeventty read fonupdaterowvalues 
+                                       write fonupdaterowvalues;
    property oncellevent: celleventty read foncellevent write foncellevent;
  end;
 
@@ -2427,6 +2439,16 @@ begin
  end;
 end;
 
+procedure titemedit.dokeyup(var info: keyeventinfoty);
+begin
+ if canevent(tmethod(fonkeyup)) then begin
+  fonkeyup(self,info);
+ end;
+ if not (es_processed in info.eventstate) then begin
+  inherited;
+ end;
+end;
+
 function titemedit.getvaluetext: msestring;
 begin
  if (fvalue <> nil) then begin
@@ -2600,16 +2622,25 @@ begin
     feditor.selectall;
    end
    else begin
+    if foptionsedit * [oe_autoselect,oe_locate] = [oe_autoselect] then begin
+     feditor.selectall;
+    end;
     updatefilterselect;
    end;
   end;
+ end
+ else begin
+  fediting:= false;
  end;
 end;
 
 function titemedit.getoptionsedit: optionseditty;
 begin
  result:= inherited getoptionsedit;
- if not editing then begin
+ if oe_readonly in result then begin
+  editing:= false;
+ end;
+ if not editing and not (csdesigning in componentstate) then begin
   include(result,oe_readonly);
  end;
 end;
@@ -3637,7 +3668,8 @@ begin
  end;
 end;
 
-procedure ttreeitemedit.updateitemvalues(const index: integer; const count: integer);
+procedure ttreeitemedit.updateitemvalues(const index: integer; 
+                                           const count: integer);
 var
  int1: integer;
  po1: ptreelistedititematy;
@@ -3664,13 +3696,15 @@ var
 
 begin
  with info do begin
-  if (fgridintf <> nil) and not (es_processed in eventstate) and (fvalue <> nil) then begin
+  if (fgridintf <> nil) and not (es_processed in eventstate) and
+                                                  (fvalue <> nil) then begin
    with twidgetgrid1(fgridintf.getcol.grid),ttreelistitem1(fvalue) do begin
     if shiftstate = [] then begin
      atreelevel:= treelevel;
      equallevelindex:= -1;
      cellbefore:= ffocusedcell;
-     if (teo_treecolnavig in self.foptions) and not editing then begin
+     if (teo_treecolnavig in self.foptions) and 
+                    not editing then begin
       include(eventstate,es_processed);
       case key of
        key_right: begin

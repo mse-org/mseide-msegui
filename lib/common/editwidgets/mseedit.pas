@@ -288,6 +288,7 @@ type
    ftextflags: textflagsty;
    ftextflagsactive: textflagsty;
    fonkeydown: keyeventty;
+   fonkeyup: keyeventty;
 {$ifdef mse_with_ifi}
    fifiserverintf: iifiserver;
    //iifiwidget
@@ -332,6 +333,7 @@ type
    procedure editnotification(var info: editnotificationinfoty); virtual;
      //interface to inplaceedit
    procedure dokeydown(var info: keyeventinfoty); override;
+   procedure dokeyup(var info: keyeventinfoty); override;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure dopopup(var amenu: tpopupmenu; var mouseinfo: mouseeventinfoty); override;
    procedure doactivate; override;
@@ -379,6 +381,7 @@ type
    property onchange: notifyeventty read fonchange write fonchange;
    property ontextedited: texteditedeventty read fontextedited write fontextedited;
    property onkeydown: keyeventty read fonkeydown write fonkeydown;
+   property onkeyup: keyeventty read fonkeyup write fonkeyup;
   published
    property cursor default cr_ibeam;
  end;
@@ -396,6 +399,7 @@ type
    property onchange;
    property ontextedited;
    property onkeydown;
+   property onkeyup;
  end;
 
 implementation
@@ -1033,6 +1037,16 @@ begin
   if not (es_processed in info.eventstate) then begin
    inherited;
   end;
+ end;
+end;
+
+procedure tcustomedit.dokeyup(var info: keyeventinfoty);
+begin
+ if canevent(tmethod(fonkeyup)) then begin
+  fonkeyup(self,info);
+ end;
+ if not (es_processed in info.eventstate) then begin
+  inherited;
  end;
 end;
 

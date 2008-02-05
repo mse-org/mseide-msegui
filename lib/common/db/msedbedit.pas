@@ -565,6 +565,7 @@ type
    property action;
    property caption;
    property shortcut;
+   property shortcut1;
    property captionpos;
    property captiondist;
    property imagelist;

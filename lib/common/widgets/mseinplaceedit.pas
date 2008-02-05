@@ -1387,7 +1387,8 @@ procedure tinplaceedit.initfocus;
 begin
  resetoffset;
  invalidatetextrect(-bigint,bigint);
- if oe_autoselect in iedit(fintf).getoptionsedit then begin
+ if iedit(fintf).getoptionsedit  * [oe_autoselect,oe_locate] = 
+                                              [oe_autoselect] then begin
   selectall;
  end
  else begin

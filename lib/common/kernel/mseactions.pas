@@ -63,9 +63,17 @@ type
  tshortcutaction = class(townedpersistent)
   private
    faction: taction;
+   fshortcutdefault: shortcutty;
+   fshortcut1default: shortcutty;
+   fdispname: msestring;
+   fhint: msestring;
    procedure setaction(const avalue: taction);
   published
    property action: taction read faction write setaction;
+   property shortcutdefault: shortcutty read fshortcutdefault write fshortcutdefault;
+   property shortcut1default: shortcutty read fshortcut1default write fshortcut1default;
+   property dispname: msestring read fdispname write fdispname;
+   property hint: msestring read fhint write fhint;
  end;
 
  type
@@ -158,6 +166,10 @@ function isactionimageliststored(const info: actioninfoty): boolean;
  
 procedure getshortcutlist(out keys: integerarty; out names: msestringarty);
 function getshortcutname(key: shortcutty): msestring;
+function getsysshortcutdispname(const aitem: sysshortcutty): msestring;
+
+function isvalidshortcut(const ashortcut: shortcutty): boolean;
+function encodeshortcutname(const key: shortcutty): msestring;
 function checkshortcutcode(const shortcut: shortcutty; const info: keyeventinfoty): boolean;
 function doactionshortcut(const sender: tobject; var info: actioninfoty;
                         var keyinfo: keyeventinfoty): boolean; //true if done
@@ -171,13 +183,14 @@ var
  
 implementation
 uses
- sysutils,mserichstring,msestream,typinfo;
+ sysutils,mserichstring,msestream,typinfo,mseformatstr;
  
 const
  shift = ord(key_modshift);
  ctrl = ord(key_modctrl);
  alt = ord(key_modalt);
- 
+ modmask = shift or ctrl or alt;
+  
  defaultsysshortcuts: sysshortcutaty = 
 //sho_copy,            sho_paste,                 sho_cut,   
  (ctrl+ord(key_c),     ctrl+ord(key_v),           ctrl+ord(key_x),
@@ -199,10 +212,13 @@ const
  shortcutcount = (letterkeycount + cipherkeycount) * 2 + //ctrl,shiftctrl
                  functionkeycount * 4 +              //none,shift,ctrl,shiftctrl
                  specialkeycount * 4;                //none,shift,ctrl,shiftctrl
-
+ baseshortcutcount = letterkeycount + cipherkeycount +
+                     functionkeycount + specialkeycount;
 var
  shortcutkeys: integerarty;
  shortcutnames: msestringarty;
+ baseshortcutkeys: integerarty;
+ baseshortcutnames: msestringarty;
 
 function issysshortcut(const ashortcut: sysshortcutty;
                                  const ainfo: keyeventinfoty): boolean;
@@ -211,46 +227,48 @@ begin
                            checkshortcutcode(sysshortcuts1[ashortcut],ainfo);
 end;
 
+procedure getvalues(var bottom: integer; const prefix: msestring;
+            const modvalue: integer; var keys: integerarty; 
+            var names: msestringarty);
+var
+ int1: integer;
+ akey: keyty;
+begin
+ for int1:= bottom to bottom+cipherkeycount-1 do begin
+  keys[int1]:= ord(key_0) + int1-bottom + modvalue;
+  names[int1]:= prefix+'+'+msestring(msechar(int1-bottom+ord('0')));
+ end;
+ bottom:= bottom + cipherkeycount;
+ for int1:= bottom to bottom+letterkeycount-1 do begin
+  keys[int1]:= ord(key_a) + int1-bottom + modvalue;
+  names[int1]:= prefix+'+'+msestring(msechar(int1-bottom+ord('A')));
+ end;
+ bottom:= bottom + letterkeycount;
+ for int1:= bottom to bottom + functionkeycount - 1 do begin
+  keys[int1]:= (ord(key_f1) + int1-bottom) or modvalue;
+  names[int1]:= prefix+'+F'+inttostr(int1-bottom+1);
+ end;
+ bottom:= bottom+functionkeycount;
+ for int1:= bottom to bottom+misckeycount-1 do begin
+  akey:= keyty(ord(key_escape) + int1-bottom);
+  keys[int1]:= ord(akey)or modvalue;
+  names[int1]:= prefix+'+'+misckeynames[akey];
+ end;
+ bottom:= bottom+misckeycount;
+ for int1:= bottom to bottom+cursorkeycount-1 do begin
+  akey:= keyty(ord(key_home) + int1-bottom);
+  keys[int1]:= ord(akey)or modvalue;
+  names[int1]:= prefix+'+'+cursorkeynames[akey];
+ end;
+ bottom:= bottom+cursorkeycount;
+end;
+
 procedure getshortcutlist(out keys: integerarty; out names: msestringarty);
 var
  int1: integer;
  bo1: boolean;
  bottom: integer;
  akey: keyty;
- 
- procedure getvalues(const prefix: msestring; const modvalue: integer);
- var
-  int1: integer;
- begin
-  for int1:= bottom to bottom+cipherkeycount-1 do begin
-   keys[int1]:= ord(key_0) + int1-bottom + modvalue;
-   names[int1]:= prefix+'+'+msestring(msechar(int1-bottom+ord('0')));
-  end;
-  bottom:= bottom + cipherkeycount;
-  for int1:= bottom to bottom+letterkeycount-1 do begin
-   keys[int1]:= ord(key_a) + int1-bottom + modvalue;
-   names[int1]:= prefix+'+'+msestring(msechar(int1-bottom+ord('A')));
-  end;
-  bottom:= bottom + letterkeycount;
-  for int1:= bottom to bottom + functionkeycount - 1 do begin
-   keys[int1]:= (ord(key_f1) + int1-bottom) or modvalue;
-   names[int1]:= prefix+'+F'+inttostr(int1-bottom+1);
-  end;
-  bottom:= bottom+functionkeycount;
-  for int1:= bottom to bottom+misckeycount-1 do begin
-   akey:= keyty(ord(key_escape) + int1-bottom);
-   keys[int1]:= ord(akey)or modvalue;
-   names[int1]:= prefix+'+'+misckeynames[akey];
-  end;
-  bottom:= bottom+misckeycount;
-  for int1:= bottom to bottom+cursorkeycount-1 do begin
-   akey:= keyty(ord(key_home) + int1-bottom);
-   keys[int1]:= ord(akey)or modvalue;
-   names[int1]:= prefix+'+'+cursorkeynames[akey];
-  end;
-  bottom:= bottom+cursorkeycount;
- end;
- 
 begin
  bo1:= false;
  if shortcutkeys = nil then begin
@@ -299,8 +317,8 @@ begin
    names[int1]:= 'Shift+'+cursorkeynames[akey];
   end;
   bottom:= bottom+cursorkeycount;
-  getvalues('Ctrl',key_modctrl);
-  getvalues('Shift+Ctrl',key_modshiftctrl);
+  getvalues(bottom,'Ctrl',key_modctrl,keys,names);
+  getvalues(bottom,'Shift+Ctrl',key_modshiftctrl,keys,names);
  end;
 end;
 
@@ -318,6 +336,105 @@ begin
    result:= names[int1];
    break;
   end;
+ end;
+end;
+
+//todo: internationalize
+function getsysshortcutdispname(const aitem: sysshortcutty): msestring;
+const
+ list: array[sysshortcutty] of msestring = (
+        'Copy','Paste','Cut','Row insert','Row append','Row delete');
+begin
+ result:= list[aitem];
+end;
+
+function isnormalkey(const akey: shortcutty): boolean;
+begin
+ result:= (akey >= ord(key_0)) and (akey <= ord(key_9)) or
+          (akey >= ord(key_a)) and (akey <= ord(key_z)) or
+          (akey = ord(key_left)) or
+          (akey = ord(key_right)) or
+          (akey = ord(key_up)) or
+          (akey = ord(key_down)) or
+          (akey = ord(key_space));
+end;
+
+function isnormalshiftkey(const akey: shortcutty): boolean;
+begin
+ result:= (akey >= ord(key_0)) and (akey <= ord(key_9)) or
+          (akey >= ord(key_a)) and (akey <= ord(key_z));
+end;
+
+function isvalidshortcut(const ashortcut: shortcutty): boolean;
+var
+ key: word;
+begin
+ key:= ashortcut and not modmask;
+ result:= key <> 0;
+ if result then begin
+  if ashortcut and modmask = 0 then begin
+   result:= not isnormalkey(key);
+  end
+  else begin
+   if ashortcut and modmask = shift then begin
+    result:= not isnormalshiftkey(key);
+   end;
+  end;
+ end;
+end;
+
+function encodeshortcutname(const key: shortcutty): msestring;
+var
+ bo1: boolean;
+ int1: integer;
+ k1: shortcutty;
+ mstr1: msestring;
+begin
+ bo1:= false;
+ if baseshortcutkeys = nil then begin
+  setlength(baseshortcutkeys,baseshortcutcount);
+  bo1:= true;
+ end;
+ if baseshortcutnames = nil then begin
+  setlength(baseshortcutnames,baseshortcutcount);
+  bo1:= true;
+ end;
+ if bo1 then begin
+  int1:= 0;
+  getvalues(int1,'',0,baseshortcutkeys,baseshortcutnames);
+  for int1:= 0 to high(baseshortcutnames) do begin
+   baseshortcutnames[int1]:= copy(baseshortcutnames[int1],2,bigint);
+           //remove '+'
+  end;
+ end;
+ k1:= key and not modmask;
+ mstr1:= '';
+ for int1:= 0 to high(baseshortcutkeys) do begin
+  if baseshortcutkeys[int1] = k1 then begin
+   mstr1:= baseshortcutnames[int1];
+   break;
+  end;
+ end;
+ if mstr1 = '' then begin
+  if key = 0 then begin
+   result:= '';
+  end
+  else begin
+   result:= '$'+hextostr(key,4);
+  end;
+ end
+ else begin
+  result:= '';
+  if (key and shift) <> 0 then begin
+   result:= result + 'Shift+';
+  end;
+  if (key and alt) <> 0 then begin
+   result:= result + 'Alt+';
+  end;
+  if (key and ctrl) <> 0 then begin
+   result:= result + 'Ctrl+';
+  end;
+  result:= result + mstr1;
  end;
 end;
 
@@ -659,8 +776,14 @@ procedure tshortcutaction.setaction(const avalue: taction);
 begin
  with tshortcutcontroller(fowner) do begin
   setlinkedvar(avalue,tmsecomponent(faction));
-  if avalue <> nil then begin
-   updateaction(avalue);
+  if (avalue <> nil) then begin
+   if csdesigning in componentstate then begin
+    shortcutdefault:= avalue.shortcut;
+    shortcut1default:= avalue.shortcut1;
+   end
+   else begin
+    updateaction(avalue);
+   end;
   end;
  end;  
 end;

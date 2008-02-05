@@ -51,7 +51,7 @@ type
    procedure docellevent(const ownedcol: boolean; var info: celleventinfoty); virtual;
    procedure sortfunc(const l,r; var result: integer); virtual;
    procedure gridvaluechanged(const index: integer); virtual;
-   procedure updatecoloptions(var aoptions: coloptionsty);
+   procedure updatecoloptions(const aoptions: coloptionsty);
    procedure statdataread; virtual;
    procedure griddatasourcechanged; virtual;
   public
@@ -223,7 +223,7 @@ procedure tcustomdataimage.gridvaluechanged(const index: integer);
 begin
 end;
 
-procedure tcustomdataimage.updatecoloptions(var aoptions: coloptionsty);
+procedure tcustomdataimage.updatecoloptions(const aoptions: coloptionsty);
 begin
  //dummy
 end;

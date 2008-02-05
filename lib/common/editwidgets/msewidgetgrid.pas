@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -61,7 +61,7 @@ type
   procedure docellevent(const ownedcol: boolean; var info: celleventinfoty);
   procedure sortfunc(const l,r; var result: integer);
   procedure gridvaluechanged(const index: integer); //index = -1 -> undefined, all
-  procedure updatecoloptions(var aoptions: coloptionsty);
+  procedure updatecoloptions(const aoptions: coloptionsty);
   procedure statdataread;
   procedure griddatasourcechanged;
   procedure setreadonly(const avalue: boolean);
@@ -1239,10 +1239,11 @@ begin
  if co_nohscroll in aoptions then begin
   include(aoptions,co_nofocus);
  end;
- if fintf <> nil then begin
-  fintf.updatecoloptions(aoptions);
- end;
  inherited setoptions(aoptions);
+ if fintf <> nil then begin
+//  fintf.updatecoloptions(aoptions);
+  fintf.updatecoloptions(foptions);
+ end;
 end;
 
 function twidgetcol.getcursor: cursorshapety;

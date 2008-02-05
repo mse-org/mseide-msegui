@@ -139,7 +139,7 @@ type
    procedure docellevent(const ownedcol: boolean; var info: celleventinfoty); virtual;
    procedure sortfunc(const l,r; var result: integer); virtual;
    procedure gridvaluechanged(const index: integer); virtual;
-   procedure updatecoloptions(var aoptions: coloptionsty);
+   procedure updatecoloptions(const aoptions: coloptionsty);
    procedure statdataread; virtual;
    procedure griddatasourcechanged; virtual;
 
@@ -736,6 +736,7 @@ type
    property action;
    property caption;
    property shortcut;
+   property shortcut1;
    property captionpos;
    property captiondist;
    property imagelist;
@@ -1567,7 +1568,7 @@ begin
  //dummy
 end;
 
-procedure tgraphdataedit.updatecoloptions(var aoptions: coloptionsty);
+procedure tgraphdataedit.updatecoloptions(const aoptions: coloptionsty);
 begin
  fgridintf.coloptionstoeditoptions(foptionsedit);
 end;

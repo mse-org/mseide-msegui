@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -245,7 +245,7 @@ var
 begin
  item1:= tshortcutaction(getordvalue);
  if item1.action = nil then begin
-  result:= '<>';
+  result:= '<--->';
  end
  else begin
   result:= '<';
@@ -254,6 +254,7 @@ begin
   end;
   result:= result+designer.getcomponentdispname(item1.action)+'>';
  end;
+ result:= result + '<' + item1.dispname + '>';
 end;
 
 { tshortcutactionspropertyeditor }

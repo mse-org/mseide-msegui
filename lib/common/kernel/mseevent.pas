@@ -70,6 +70,7 @@ type
  pmousewheeleventty = ^mousewheeleventinfoty;
  
  keyeventinfoty = record
+  eventkind: eventkindty;
   key,keynomod: keyty;
   chars: msestring;
   shiftstate: shiftstatesty;
