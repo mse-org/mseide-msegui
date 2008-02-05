@@ -317,6 +317,7 @@ function esys.geterror: syserrorty;
 begin
  result:= syserrorty(ferror);
 end;
+
 {$ifdef FPC}
 
  {$ifopt S+}
@@ -324,11 +325,30 @@ end;
  {$S-}
  {$endif OPT S }
 
-Procedure CatchUnhandledExcept (Obj : TObject; Addr: Pointer; FrameCount: Longint;
+procedure listexceptionstack(Obj: TObject; Addr:Pointer; FrameCount: Longint;
                                   Frames: PPointer);
 Var
-  Message : String;
-  i : longint;
+ Message: String;
+ i: longint;
+begin
+ if Obj is exception then begin
+    Message:=Exception(Obj).ClassName+' : '+Exception(Obj).Message;
+    debugWriteln(Message);
+ end
+ else begin
+  debugWriteln('Exception object '+Obj.ClassName+' is not of class Exception.');
+ end;
+ debugWriteln(BackTraceStrFunc(Addr));
+ if (FrameCount>0) then begin
+  for i:=0 to FrameCount-1 do begin
+    debugWriteln(BackTraceStrFunc(Frames[i]));
+  end;
+ end;
+ debugWriteln('');
+end;
+
+Procedure CatchUnhandledExcept(Obj : TObject; Addr: Pointer; FrameCount: Longint;
+                                  Frames: PPointer);
 begin
  {$ifdef MSWINDOWS}
   if getstdhandle(std_error_handle) <= 0 then begin
@@ -338,26 +358,27 @@ begin
  {$endif}
    debugWriteln('An unhandled exception occurred at $'+
                HexStr(Ptrint(Addr),sizeof(PtrInt)*2)+' :');
-   if Obj is exception then
-    begin
-      Message:=Exception(Obj).ClassName+' : '+Exception(Obj).Message;
-      debugWriteln(Message);
-    end
-   else
-    debugWriteln('Exception object '+Obj.ClassName+' is not of class Exception.');
-   debugWriteln(BackTraceStrFunc(Addr));
-   if (FrameCount>0) then
-     begin
-       for i:=0 to FrameCount-1 do
-         debugWriteln(BackTraceStrFunc(Frames[i]));
-     end;
-   debugWriteln('');
+   listexceptionstack(obj,addr,framecount,frames);
   {$ifdef MSWINDOWS}
   end;
   {$endif}
 end;
 
+{$ifdef mse_debugexception}
+procedure raisepro(obj: tobject; addr: pointer; framecount: longint;
+                                     frames: ppointer);
+begin
+ debugWriteln('An exception occurred at $'+
+               HexStr(Ptrint(Addr),sizeof(PtrInt)*2)+' :');
+ listexceptionstack(obj,addr,framecount,frames);
+end;
+{$endif}
+
 initialization
  exceptproc:= @catchunhandledexcept;
+ {$ifdef mse_debugexception}
+ raiseproc:= @raisepro;
+ raisemaxframecount:= 100;
+ {$endif}
 {$endif} 
 end.
