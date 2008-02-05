@@ -176,21 +176,12 @@ function doactionshortcut(const sender: tobject; var info: actioninfoty;
 procedure calccaptiontext(var info: actioninfoty; const aseparator: msechar);
 function issysshortcut(const ashortcut: sysshortcutty;
                                   const ainfo: keyeventinfoty): boolean;
-
-var
- sysshortcuts: sysshortcutaty;
- sysshortcuts1: sysshortcutaty;
- 
-implementation
-uses
- sysutils,mserichstring,msestream,typinfo,mseformatstr;
- 
 const
  shift = ord(key_modshift);
  ctrl = ord(key_modctrl);
  alt = ord(key_modalt);
  modmask = shift or ctrl or alt;
-  
+
  defaultsysshortcuts: sysshortcutaty = 
 //sho_copy,            sho_paste,                 sho_cut,   
  (ctrl+ord(key_c),     ctrl+ord(key_v),           ctrl+ord(key_x),
@@ -202,7 +193,15 @@ const
  (ord(key_none),       shift+ord(key_insert),     shift+ord(key_delete),
 //sho_rowinsert,       sho_rowappend,             sho_rowdelete
   ord(key_none),       ord(key_none),             ord(key_none));
+var
+ sysshortcuts: sysshortcutaty;
+ sysshortcuts1: sysshortcutaty;
  
+implementation
+uses
+ sysutils,mserichstring,msestream,typinfo,mseformatstr;
+ 
+const   
  letterkeycount = ord('z') - ord('a') + 1;
  cipherkeycount = ord('9') - ord('0') + 1;
  functionkeycount = 12;
@@ -356,13 +355,15 @@ begin
           (akey = ord(key_right)) or
           (akey = ord(key_up)) or
           (akey = ord(key_down)) or
+          (akey = ord(key_tab)) or
           (akey = ord(key_space));
 end;
 
 function isnormalshiftkey(const akey: shortcutty): boolean;
 begin
  result:= (akey >= ord(key_0)) and (akey <= ord(key_9)) or
-          (akey >= ord(key_a)) and (akey <= ord(key_z));
+          (akey >= ord(key_a)) and (akey <= ord(key_z)) or
+          (akey = ord(key_tab));
 end;
 
 function isvalidshortcut(const ashortcut: shortcutty): boolean;

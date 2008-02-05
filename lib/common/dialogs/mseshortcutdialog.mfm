@@ -1,0 +1,191 @@
+object mseshortcutdialogfo: tmseshortcutdialogfo
+  bounds_x = 87
+  bounds_y = 222
+  bounds_cx = 476
+  bounds_cy = 340
+  taborder = 1
+  visible = False
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_mousewheel, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
+  container.bounds_cx = 476
+  container.bounds_cy = 340
+  container.frame.dummy = 0
+  options = [fo_screencentered, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
+  moduleclassname = 'tmseform'
+  object grid: twidgetgrid
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 0
+    bounds_y = 0
+    bounds_cx = 476
+    bounds_cy = 282
+    frame.dummy = 0
+    anchors = [an_top, an_bottom]
+    fixrows.count = 1
+    fixrows.items = <    
+      item
+        height = 16
+      end>
+    datacols.count = 3
+    datacols.options = [co_focusselect, co_rowselect, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+    datacols.items = <    
+      item
+        width = 274
+        options = [co_readonly, co_drawfocus, co_focusselect, co_rowselect, co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        widgetname = 'sc'
+      end    
+      item
+        width = 97
+        options = [co_readonly, co_nofocus, co_focusselect, co_rowselect, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        widgetname = 'scdi'
+      end    
+      item
+        width = 98
+        options = [co_readonly, co_nofocus, co_focusselect, co_rowselect, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        widgetname = 'sc1di'
+      end>
+    datarowheight = 16
+    oncellevent = gridcellevent
+    reffontheight = 14
+    object sc: ttreeitemedit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      optionsskin = [osk_framebuttononly]
+      bounds_x = 0
+      bounds_y = 0
+      bounds_cx = 274
+      bounds_cy = 16
+      frame.levelo = 0
+      frame.colorclient = -2147483645
+      frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+      frame.dummy = 0
+      taborder = 1
+      visible = False
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_locate, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+      onupdaterowvalues = updaterowvalues
+      options = [teo_treecolnavig]
+      reffontheight = 14
+    end
+    object scdi: tstringedit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+      optionsskin = [osk_framebuttononly]
+      bounds_x = 275
+      bounds_y = 0
+      bounds_cx = 97
+      bounds_cy = 16
+      frame.levelo = 0
+      frame.colorclient = -2147483645
+      frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+      frame.dummy = 0
+      taborder = 2
+      visible = False
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+      reffontheight = 14
+    end
+    object sc1di: tstringedit
+      Tag = 1
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+      optionsskin = [osk_framebuttononly]
+      bounds_x = 373
+      bounds_y = 0
+      bounds_cx = 98
+      bounds_cy = 16
+      frame.levelo = 0
+      frame.colorclient = -2147483645
+      frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+      frame.dummy = 0
+      taborder = 3
+      visible = False
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+      reffontheight = 14
+    end
+  end
+  object tbutton1: tbutton
+    bounds_x = 360
+    bounds_y = 304
+    bounds_cx = 50
+    bounds_cy = 20
+    anchors = [an_right, an_bottom]
+    taborder = 1
+    state = [as_localcaption]
+    caption = 'OK'
+    modalresult = mr_ok
+  end
+  object tbutton2: tbutton
+    bounds_x = 416
+    bounds_y = 304
+    bounds_cx = 50
+    bounds_cy = 20
+    anchors = [an_right, an_bottom]
+    taborder = 2
+    state = [as_localcaption]
+    caption = 'Cancel'
+    modalresult = mr_cancel
+  end
+  object sc1ed: tstringedit
+    Tag = 1
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 208
+    bounds_y = 287
+    bounds_cx = 132
+    bounds_cy = 37
+    frame.levelo = 0
+    frame.framewidth = 1
+    frame.colorframe = -1610612734
+    frame.caption = '&Alternate'
+    frame.localprops = [frl_levelo, frl_framewidth, frl_colorframe, frl_fileft]
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      17
+      0
+      0
+    )
+    anchors = [an_right, an_bottom]
+    taborder = 3
+    onactivate = edactivate
+    ondeactivate = eddeactivate
+    optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+    onkeydown = scdikey
+    onkeyup = scdikey
+    reffontheight = 14
+  end
+  object sced: tstringedit
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 63
+    bounds_y = 287
+    bounds_cx = 140
+    bounds_cy = 37
+    frame.levelo = 0
+    frame.framewidth = 1
+    frame.colorframe = -1610612734
+    frame.caption = '&Shortcut'
+    frame.localprops = [frl_levelo, frl_framewidth, frl_colorframe]
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      17
+      0
+      0
+    )
+    anchors = [an_right, an_bottom]
+    taborder = 4
+    onactivate = edactivate
+    ondeactivate = eddeactivate
+    optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+    onkeydown = scdikey
+    onkeyup = scdikey
+    reffontheight = 14
+  end
+  object defaultbu: tbutton
+    bounds_x = 8
+    bounds_y = 304
+    bounds_cx = 50
+    bounds_cy = 20
+    color = -2147483645
+    anchors = [an_right, an_bottom]
+    taborder = 5
+    state = [as_localcaption, as_localcolor, as_localonexecute]
+    caption = 'Default'
+    onexecute = defaultex
+  end
+end
