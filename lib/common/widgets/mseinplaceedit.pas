@@ -863,11 +863,12 @@ begin
      end;
     end
     else begin
-     if shiftstate = [ss_ctrl] then begin
-      finished:= false;
-     end;
+     finished:= false;
     end;
    end;
+  end;
+  if finished then begin
+   exit;
   end;
   if shiftstate <> [ss_ctrl] then begin
    bo1:= true;
