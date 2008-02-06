@@ -518,19 +518,22 @@ function checkshortcutcode(const shortcut: shortcutty;
 var
  acode: shortcutty;
 begin
- with info do begin
-  acode:= 0;
-  if ss_shift in info.shiftstate then begin
-   acode:= acode or key_modshift;
+ result:= false;
+ if shortcut <> 0 then begin
+  with info do begin
+   acode:= 0;
+   if ss_shift in info.shiftstate then begin
+    acode:= acode or key_modshift;
+   end;
+   if ss_ctrl in info.shiftstate then begin
+    acode:= acode or key_modctrl;
+   end;
+   if ss_alt in info.shiftstate then begin
+    acode:= acode or key_modalt;
+   end;
+   result:= (acode or ord(info.key) = shortcut) or 
+            (acode or ord(info.keynomod) = shortcut);
   end;
-  if ss_ctrl in info.shiftstate then begin
-   acode:= acode or key_modctrl;
-  end;
-  if ss_alt in info.shiftstate then begin
-   acode:= acode or key_modalt;
-  end;
-  result:= (acode or ord(info.key) = shortcut) or 
-                     (acode or ord(info.keynomod) = shortcut);
  end;
 end;
 
