@@ -356,7 +356,8 @@ begin
           (akey = ord(key_up)) or
           (akey = ord(key_down)) or
           (akey = ord(key_tab)) or
-          (akey = ord(key_space));
+          (akey = ord(key_space)) or
+          (akey = ord(key_return));
 end;
 
 function isnormalshiftkey(const akey: shortcutty): boolean;

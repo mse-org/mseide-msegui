@@ -298,6 +298,7 @@ begin
       else begin
        tshortcutitem(sc.item).shortcut1:= sc1;
       end;
+      include(eventstate,es_processed);
      end;
      checkconflict;
     end;
