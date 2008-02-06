@@ -1,5 +1,4 @@
 object mseshortcutdialogfo: tmseshortcutdialogfo
-  optionswidget = [ow_arrowfocus, ow_subfocus, ow_nochildshortcut, ow_noparentshortcut, ow_mousewheel, ow_destroywidgets, ow_hinton, ow_autoscale]
   bounds_x = 87
   bounds_y = 222
   bounds_cx = 578
@@ -12,7 +11,7 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
   container.bounds_cx = 578
   container.bounds_cy = 340
   container.frame.dummy = 0
-  options = [fo_screencentered, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
+  options = [fo_screencentered, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
   caption = 'Shortcuts'
   moduleclassname = 'tmseform'
   object grid: twidgetgrid
