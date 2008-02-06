@@ -161,6 +161,7 @@ type
                    cep_rowcentered,cep_rowcenteredif);
 
  celleventkindty = (cek_none,cek_enter,cek_exit,cek_select,
+                    cek_focusedcellchanged,
                     cek_mousemove,cek_mousepark,cek_firstmousepark,
                     cek_buttonpress,cek_buttonrelease,
                     cek_mouseleave,
@@ -181,7 +182,7 @@ type
   cell: gridcoordty;
   grid: tcustomgrid;
   case eventkind: celleventkindty of
-   cek_exit,cek_enter:
+   cek_exit,cek_enter,cek_focusedcellchanged:
     (cellbefore,newcell: gridcoordty; selectaction: focuscellactionty);
    cek_select:
     (selected: boolean; accept: boolean);
@@ -1373,6 +1374,8 @@ end;
                    //store edited value to grid
    procedure beforefocuscell(const cell: gridcoordty;
                              const selectaction: focuscellactionty); virtual;
+   procedure afterfocuscell(const cellbefore: gridcoordty;
+                             const selectaction: focuscellactionty); virtual;
    function wheelheight: integer;
    
    //idragcontroller
@@ -1456,13 +1459,14 @@ end;
    procedure invalidatefocusedcell;
    procedure invalidaterow(const arow: integer);
    function selectcell(const cell: gridcoordty; 
-                          const amode: cellselectmodety): boolean;  //true if accepted
+                          const amode: cellselectmodety): boolean; 
+                          //true if accepted
    function getselectedrange: gridrectty;
    function getselectedrows: integerarty;
 
    function focuscell(cell: gridcoordty;
-                   selectaction: focuscellactionty = fca_focusin;
-                   const selectmode: selectcellmodety = scm_cell): boolean; virtual;
+              selectaction: focuscellactionty = fca_focusin;
+              const selectmode: selectcellmodety = scm_cell): boolean; virtual;
                                                //true if ok
    procedure focuscolbyname(const aname: string);
                  //case sensitive
@@ -1478,7 +1482,8 @@ end;
                                     //returns shifted amount
    function showcaretrect(const arect: rectty;
                                const aframe: tcustomframe): pointty; overload;
-   function showcaretrect(const arect: rectty; const aframe: framety): pointty; overload;
+   function showcaretrect(const arect: rectty; 
+                       const aframe: framety): pointty; overload;
    function showcellrect(const rect: rectty;
                    const origin: cellinnerlevelty = cil_paint): pointty;
    procedure showcell(const cell: gridcoordty; 
@@ -7323,15 +7328,6 @@ procedure tcustomgrid.docellevent(var info: celleventinfoty);
 begin
  with info do begin
   grid:= self;
- {
-  case eventkind of
-   cek_enter: begin
-    if selectaction <> fca_none then begin
-     showcell(newcell);
-    end;
-   end;
-  end;
-  }
   if canevent(tmethod(foncellevent)) then begin
    foncellevent(self,info);
   end;
@@ -7396,6 +7392,18 @@ procedure tcustomgrid.beforefocuscell(const cell: gridcoordty;
                              const selectaction: focuscellactionty);
 begin
  //dummy
+end;
+
+procedure tcustomgrid.afterfocuscell(const cellbefore: gridcoordty;
+                             const selectaction: focuscellactionty);
+var
+ info: celleventinfoty;
+begin
+ initeventinfo(ffocusedcell,cek_focusedcellchanged,info);
+ info.cellbefore:= cellbefore;
+ info.newcell:= ffocusedcell;
+ info.selectaction:= selectaction;
+ docellevent(info);
 end;
 
 function tcustomgrid.focuscell(cell: gridcoordty;
@@ -7600,6 +7608,7 @@ var
  int1: integer;
  rect1: rectty;
  nullchecklocked: boolean;
+ cellbefore: gridcoordty;
  
 begin     //focuscell
  inc(ffocuscount);
@@ -7670,8 +7679,6 @@ begin     //focuscell
         (selectaction in [fca_entergrid,fca_focusinforce]) or 
         (gs_restorerow in fstate) then begin
    exclude(fstate,gs_restorerow);
-//   inc(ffocuscount);
-//   focuscount:= ffocuscount;
    coord1:= ffocusedcell;
    if (selectaction <> fca_entergrid) and isdatacell(coord1) then begin
     include(fstate,gs_cellexiting);
@@ -7717,7 +7724,7 @@ begin     //focuscell
      exit;
     end;
    end;
- 
+   cellbefore:= ffocusedcell; 
    if (selectaction = fca_exitgrid) or ((coord1.row >= 0) and
           (coord1.row >= frowcount-1) and (cell.row < coord1.row)) then begin
     int1:= ffocusedcell.row;
@@ -7774,11 +7781,6 @@ begin     //focuscell
      exit;
     end;
    end;
-//   else begin
-//    if bo1 then begin
-//     showcell(cell);
-//    end;
-//   end;
   end
   else begin
    if bo1 then begin
@@ -7794,6 +7796,7 @@ begin     //focuscell
    endnonullcheck;
   end;
  end;
+ afterfocuscell(cellbefore,selectaction); 
  result:= true;
 end;
 

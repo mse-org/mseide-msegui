@@ -181,6 +181,8 @@ type
    procedure swap(const a,b: integer);
    procedure move(const source,dest: integer);
    procedure statreadsubnode(const reader: tstatreader; var anode: ttreelistitem); virtual;
+   procedure internalexpandall;
+   procedure internalcollapseall;
   public
    constructor create(const aowner: tcustomitemlist = nil;
               const aparent: ttreelistitem = nil); virtual;
@@ -225,6 +227,8 @@ type
    procedure add(const aitems: treelistitemarty); overload;
    procedure add(const acount: integer; itemclass: treelistitemclassty = nil); overload;
    procedure clear;
+   procedure expandall;
+   procedure collapseall;
    function remove(const aindex: integer): ttreelistitem;
    procedure sort(casesensitive: boolean);
    property count: integer read fcount;
@@ -1405,6 +1409,46 @@ begin
  end;
  fitems:= nil; //ev. free unused memory
  exclude(fstate,ns_noowner);
+end;
+
+procedure ttreelistitem.internalcollapseall;
+var
+ int1: integer;
+begin
+ expanded:= false;
+ for int1:= 0 to count - 1 do begin
+  fitems[int1].internalcollapseall;
+ end;
+end;
+
+procedure ttreelistitem.collapseall;
+begin
+ beginupdate;
+ try
+  internalcollapseall;
+ finally
+  endupdate;
+ end;
+end;
+
+procedure ttreelistitem.internalexpandall;
+var
+ int1: integer;
+begin
+ expanded:= true;
+ for int1:= 0 to count - 1 do begin
+  fitems[int1].internalexpandall;
+ end;
+end;
+
+procedure ttreelistitem.expandall;
+begin
+ beginupdate;
+ try
+  internalexpandall;
+ finally
+  endupdate;
+ end;
 end;
 
 procedure ttreelistitem.internalcheckitems(

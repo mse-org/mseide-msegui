@@ -21,6 +21,7 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
     bounds_cy = 282
     frame.dummy = 0
     anchors = [an_top, an_bottom]
+    popupmenu = tpopupmenu1
     fixrows.count = 1
     fixrows.items = <    
       item
@@ -60,7 +61,7 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
       frame.dummy = 0
       taborder = 1
       visible = False
-      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_locate, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_locate, oe_keyexecute, oe_savevalue, oe_savestate]
       onupdaterowvalues = updaterowvalues
       options = [teo_treecolnavig]
       reffontheight = 14
@@ -100,7 +101,7 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
     end
   end
   object tbutton1: tbutton
-    bounds_x = 360
+    bounds_x = 365
     bounds_y = 304
     bounds_cx = 50
     bounds_cy = 20
@@ -111,7 +112,7 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
     modalresult = mr_ok
   end
   object tbutton2: tbutton
-    bounds_x = 416
+    bounds_x = 421
     bounds_y = 304
     bounds_cx = 50
     bounds_cy = 20
@@ -187,5 +188,21 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
     state = [as_localcaption, as_localcolor, as_localonexecute]
     caption = 'Default'
     onexecute = defaultex
+  end
+  object tpopupmenu1: tpopupmenu
+    menu.submenu.count = 2
+    menu.submenu.items = <    
+      item
+        caption = 'Expand all'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = expandall
+      end    
+      item
+        caption = 'Collapse all'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = collapseall
+      end>
+    left = 32
+    top = 64
   end
 end

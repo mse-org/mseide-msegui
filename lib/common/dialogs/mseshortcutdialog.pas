@@ -17,6 +17,7 @@ type
    sc1ed: tstringedit;
    sced: tstringedit;
    defaultbu: tbutton;
+   tpopupmenu1: tpopupmenu;
    procedure updaterowvalues(const sender: TObject; const aindex: Integer;
                    const aitem: tlistitem);
    procedure scdikey(const sender: twidget; var info: keyeventinfoty);
@@ -24,6 +25,8 @@ type
    procedure edactivate(const sender: TObject);
    procedure eddeactivate(const sender: TObject);
    procedure defaultex(const sender: TObject);
+   procedure collapseall(const sender: TObject);
+   procedure expandall(const sender: TObject);
   private
    fkeyentering: boolean;
    procedure updateedits;
@@ -68,39 +71,40 @@ var
  ss1: sysshortcutty;
 begin
  fo1:= tmseshortcutdialogfo.create(nil);
- no1:= tsysshortcutitem.create('System');
- for ss1:= low(ss1) to high(ss1) do begin
-  no1.add(tsysshortcutitem.create(acontroller,ss1));
- end;
- fo1.sc.itemlist.add(no1);
- with acontroller.actions do begin
-  if count > 0 then begin
-   if items[0].action <> nil then begin
-    no:= tshortcutitem.create(items[0]);
-   end
-   else begin
-    no:= nil;
-   end;
-   for int1:= 0 to count - 1 do begin
-    item1:= items[int1];
-    with item1 do begin
-     if action = nil then begin
-      if no <> nil then begin
-       fo1.sc.itemlist.add(no);
+ try
+  no1:= tsysshortcutitem.create('System');
+  for ss1:= low(ss1) to high(ss1) do begin
+   no1.add(tsysshortcutitem.create(acontroller,ss1));
+  end;
+  fo1.sc.itemlist.add(no1);
+  with acontroller.actions do begin
+   if count > 0 then begin
+    if items[0].action <> nil then begin
+     no:= tshortcutitem.create(items[0]);
+    end
+    else begin
+     no:= nil;
+    end;
+    for int1:= 0 to count - 1 do begin
+     item1:= items[int1];
+     with item1 do begin
+      if action = nil then begin
+       if no <> nil then begin
+        fo1.sc.itemlist.add(no);
+       end;
+       no:= tshortcutitem.create(item1);
+      end
+      else begin
+       no.add(tshortcutitem.create(item1));
       end;
-      no:= tshortcutitem.create(item1);
-     end
-     else begin
-      no.add(tshortcutitem.create(item1));
      end;
     end;
-   end;
-   if no <> nil then begin
-    fo1.sc.itemlist.add(no);
+    if no <> nil then begin
+     fo1.sc.itemlist.add(no);
+    end;
    end;
   end;
- end;
- try
+  fo1.sc.itemlist.expandall;
   result:= fo1.show(true);
  finally
   fo1.free;
@@ -245,9 +249,9 @@ var
  bo1: boolean;
 begin
  case info.eventkind of
-  cek_enter: begin
+  cek_focusedcellchanged: begin
    updateedits;
-   bo1:= not tshortcutitem(sc.item).fisgroup;
+   bo1:= not ((sc.item = nil) or tshortcutitem(sc.item).fisgroup);
    sced.enabled:= bo1;
    sc1ed.enabled:= bo1;
    defaultbu.enabled:= bo1;
@@ -276,6 +280,16 @@ begin
   shortcut1:= fshortcut1default;
   updateedits;
  end;
+end;
+
+procedure tmseshortcutdialogfo.collapseall(const sender: TObject);
+begin
+ sc.itemlist.collapseall;
+end;
+
+procedure tmseshortcutdialogfo.expandall(const sender: TObject);
+begin
+ sc.itemlist.expandall;
 end;
 
 end.

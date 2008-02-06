@@ -134,8 +134,9 @@ type
                    //index -1 -> undefined
    function datatyp: datatypty; virtual;
    procedure checkindex(var index: integer); //bringt absolute zeilennummer in ringpuffer
-   procedure beginupdate;
+   procedure beginupdate; virtual;
    procedure endupdate; virtual;
+   procedure incupdate;
    procedure decupdate;
    function updating: boolean;
    procedure clear; virtual;//loescht daten
@@ -2941,6 +2942,11 @@ begin
  if fnochange = 0 then begin
   change(-1);
  end;
+end;
+
+procedure tdatalist.incupdate;
+begin
+ inc(fnochange);
 end;
 
 procedure tdatalist.decupdate;

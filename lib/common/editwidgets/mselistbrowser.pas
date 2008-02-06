@@ -590,6 +590,7 @@ type
                                var processed: boolean);
   public
    constructor create(const intf: iitemlist; const aowner: ttreeitemedit);
+   procedure beginupdate; override;
    procedure endupdate; override;
    procedure assign(const root: ttreelistedititem); reintroduce; overload;
                  //root is freed
@@ -597,6 +598,8 @@ type
                  //adds toplevel node
    procedure add(const anodes: treelistedititemarty); overload;
    function toplevelnodes: treelistedititemarty;
+   procedure expandall;
+   procedure collapseall;
    procedure moverow(const source,dest: integer);
     //source and dest must belong to the same parent, ignored otherwise
    property items[const index: integer]: ttreelistedititem read getitems 
@@ -2005,6 +2008,7 @@ begin
  beginupdate;
  try
   int1:= internaladddata(anode,false);
+  tlistitem1(anode).findex:= int1;
   tlistitem1(anode).setowner(self);
   fintf.itemcountchanged;
   fintf.updateitemvalues(int1,1);
@@ -2184,7 +2188,7 @@ begin
  else begin
   fvalue:= fitemlist[int1];
   if not (ies_updating in fstate) then begin
-   fitemlist.beginupdate;
+   fitemlist.incupdate;
    try
     updateitemvalues(int1,1);
    finally
@@ -2198,7 +2202,7 @@ end;
 
 procedure titemedit.valuetogrid(const arow: integer);
 begin
- fitemlist.beginupdate;
+ fitemlist.incupdate;
  try
   updateitemvalues(arow,1);
  finally
@@ -3119,7 +3123,7 @@ procedure ttreeitemeditlist.nodenotification(const sender: tlistitem;
     try
      include(fstate,ies_updating);
      grid1:= fgridintf.getcol.grid;
-     beginupdate;
+     incupdate;
      grid1.insertrow(finsertcount,int1);      
      decupdate;
      exclude(fstate,ies_updating);
@@ -3159,7 +3163,7 @@ begin
      int1:= 1;
     end;
    end;
-   beginupdate;
+   incupdate;
    fowner.fgridintf.getcol.grid.deleterow(int2,int1);
    decupdate;
   end;
@@ -3209,7 +3213,12 @@ begin
     end;
    end;
    na_expand: begin
-    expand;
+    if not (ils_subnodecountupdating in fstate) then begin
+     expand;
+    end
+    else begin
+     include(fstate,ils_subnodecountinvalid);
+    end;
    end;
    na_collapse: begin
     if not (ils_subnodecountupdating in fstate) then begin
@@ -3219,6 +3228,9 @@ begin
        expandedchanged(false);
       end;
      end;
+    end
+    else begin
+     include(fstate,ils_subnodecountinvalid);
     end;
    end;
   end;
@@ -3241,19 +3253,69 @@ begin
  setlength(result,int2);
 end;
 
+procedure ttreeitemeditlist.expandall;
+var
+ int1: integer;
+ po1: ptreelistedititematy;
+begin
+ beginupdate;
+ try
+  po1:= datapo;
+  for int1:= 0 to count - 1 do begin
+   with po1^[int1] do begin
+    if ftreelevel = 0 then begin
+     expandall;
+    end;
+   end;
+  end;
+ finally
+  endupdate;
+ end;
+end;
+
+procedure ttreeitemeditlist.collapseall;
+var
+ int1: integer;
+ po1: ptreelistedititematy;
+begin
+ beginupdate;
+ try
+  po1:= datapo;
+  for int1:= 0 to count - 1 do begin
+   with po1^[int1] do begin
+    if ftreelevel = 0 then begin
+     collapseall;
+    end;
+   end;
+  end;
+ finally
+  endupdate;
+ end;
+end;
+
+procedure ttreeitemeditlist.beginupdate;
+begin
+ if nochange = 0 then begin
+  include(fstate,ils_subnodecountupdating);
+ end;
+ inherited;
+end;
+
 procedure ttreeitemeditlist.endupdate;
 var
  ar1: treelistedititemarty;
 begin
  ar1:= nil; //compilerwarning
- if (nochange = 1) and (ils_subnodecountinvalid in fstate) then begin
-  ar1:= toplevelnodes;
-  include(fstate,ils_subnodecountupdating);
-  try
+ if (nochange = 1) then begin
+  if (ils_subnodecountinvalid in fstate) then begin
+   exclude(fstate,ils_subnodecountinvalid);
+   ar1:= toplevelnodes;
    fowner.fgridintf.getcol.grid.rowcount:= 0;
+   exclude(fstate,ils_subnodecountupdating);
    add(ar1);
-  finally
-   fstate:= fstate - [ils_subnodecountinvalid,ils_subnodecountupdating];
+  end
+  else begin
+   exclude(fstate,ils_subnodecountupdating);
   end;
  end;
  inherited;

@@ -594,6 +594,7 @@ end;
 }
 procedure tcustombutton.actionchanged;
 begin
+ finfo.color:= fcolor;
  actioninfotoshapeinfo(self,factioninfo,finfo);
  inherited setcolor(finfo.color); 
  finfo.color:= cl_transparent;
