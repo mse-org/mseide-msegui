@@ -148,6 +148,14 @@ uses
 procedure configureide;
 begin
  if editsettings('Configure MSEide',actionsmo.shortcuts) then begin
+  with actionsmo do begin
+   copy.shortcut:= sysshortcuts[sho_copy];
+   copy.shortcut1:= sysshortcuts1[sho_copy];
+   copy.shortcut:= sysshortcuts[sho_copy];
+   copy.shortcut1:= sysshortcuts1[sho_copy];
+   paste.shortcut:= sysshortcuts[sho_paste];
+   paste.shortcut1:= sysshortcuts1[sho_paste];
+  end;
   expandprojectmacros;
  end;
 end;

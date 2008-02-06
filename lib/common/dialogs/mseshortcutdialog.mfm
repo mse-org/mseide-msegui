@@ -1,4 +1,5 @@
 object mseshortcutdialogfo: tmseshortcutdialogfo
+  optionswidget = [ow_arrowfocus, ow_subfocus, ow_nochildshortcut, ow_noparentshortcut, ow_mousewheel, ow_destroywidgets, ow_hinton, ow_autoscale]
   bounds_x = 87
   bounds_y = 222
   bounds_cx = 578
