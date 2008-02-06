@@ -21,38 +21,38 @@ object actionsmo: tactionsmo
     top = 268
   end
   object step: taction
-    caption = '&Step'
     imagelist = buttonicons
+    shortcut = 4150
+    caption = '&Step'
     imagenr = 1
     hint = 'Step'
-    shortcut = 4150
     onexecute = stepactonexecute
     left = 16
     top = 308
   end
   object next: taction
-    caption = '&Next'
     imagelist = buttonicons
+    shortcut = 4151
+    caption = '&Next'
     imagenr = 2
     hint = 'Next'
-    shortcut = 4151
     onexecute = nextactonexecute
     left = 16
     top = 284
   end
   object continue: taction
-    caption = '&Continue'
     imagelist = buttonicons
+    shortcut = 4152
+    caption = '&Continue'
     imagenr = 4
     hint = 'Continue'
-    shortcut = 4152
     onexecute = continueactonexecute
     left = 16
     top = 356
   end
   object interrupt: taction
-    caption = '&Interrupt'
     imagelist = buttonicons
+    caption = '&Interrupt'
     imagenr = 5
     hint = 'Interrupt'
     onexecute = interruptactonexecute
@@ -60,8 +60,8 @@ object actionsmo: tactionsmo
     top = 258
   end
   object reset: taction
-    caption = '&Reset'
     imagelist = buttonicons
+    caption = '&Reset'
     imagenr = 6
     hint = 'Reset'
     onexecute = resetactonexecute
@@ -69,32 +69,32 @@ object actionsmo: tactionsmo
     top = 234
   end
   object opensource: taction
-    caption = '&Open'
     shortcut = 16463
+    caption = '&Open'
     onexecute = opensourceactonexecute
     left = 8
     top = 4
   end
   object finish: taction
-    caption = '&Finish'
     imagelist = buttonicons
+    shortcut = 12342
+    caption = '&Finish'
     imagenr = 3
     hint = 'Finish'
-    shortcut = 12342
     onexecute = finishactonexecute
     left = 16
     top = 332
   end
   object save: taction
-    caption = '&Save'
     shortcut = 16467
+    caption = '&Save'
     onexecute = saveactonexecute
     left = 8
     top = 28
   end
   object close: taction
-    caption = '&Close'
     shortcut = 20531
+    caption = '&Close'
     onexecute = closeactonexecute
     left = 8
     top = 100
@@ -106,36 +106,36 @@ object actionsmo: tactionsmo
     top = 34
   end
   object undo: taction
-    caption = '&Undo'
     shortcut = 16474
+    caption = '&Undo'
     onexecute = undoactonexecute
     left = 280
     top = 4
   end
   object redo: taction
-    caption = '&Redo'
     shortcut = 24666
+    caption = '&Redo'
     onexecute = redoactonexecute
     left = 280
     top = 28
   end
   object cut: taction
-    caption = 'Cu&t'
     shortcut = 16472
+    caption = 'Cu&t'
     onexecute = cutactonexecute
     left = 280
     top = 52
   end
   object copy: taction
-    caption = '&Copy'
     shortcut = 16451
+    caption = '&Copy'
     onexecute = copyactonexecute
     left = 280
     top = 76
   end
   object paste: taction
-    caption = '&Paste'
     shortcut = 16470
+    caption = '&Paste'
     onexecute = pasteactonexecute
     left = 280
     top = 100
@@ -153,15 +153,15 @@ object actionsmo: tactionsmo
     top = 52
   end
   object find: taction
-    caption = '&Find'
     shortcut = 16454
+    caption = '&Find'
     onexecute = findactonexecute
     left = 152
     top = 36
   end
   object repeatfind: taction
-    caption = '&Search again'
     shortcut = 4146
+    caption = '&Search again'
     onexecute = repeatfindactonexecute
     left = 152
     top = 60
@@ -185,45 +185,45 @@ object actionsmo: tactionsmo
     top = 76
   end
   object bkptsonact: taction
+    imagelist = buttonicons
+    shortcut = 16450
     caption = '&Breakpoints on'
     state = [as_checked]
-    imagelist = buttonicons
     imagenr = 7
     hint = 'Breakpoints on/off'
-    shortcut = 16450
     onexecute = bkptsononexecute
     left = 168
     top = 236
   end
   object watchesonact: taction
+    imagelist = buttonicons
+    shortcut = 16471
     caption = '&Watches on'
     state = [as_checked]
-    imagelist = buttonicons
     imagenr = 9
     hint = 'Watches on/off'
-    shortcut = 16471
     statfile = mainfo.projectstatfile
     onexecute = watchesononexecute
     left = 168
     top = 260
   end
   object line: taction
-    caption = '&Line'
     shortcut = 16460
+    caption = '&Line'
     onexecute = lineactonexecute
     left = 152
     top = 12
   end
   object togglebkpt: taction
-    caption = '&Toggle Breakpoint'
     shortcut = 4148
+    caption = '&Toggle Breakpoint'
     onexecute = togglebreakpointexe
     left = 168
     top = 188
   end
   object togglebkptenable: taction
-    caption = 'Toggle Bkpt. &enabled'
     shortcut = 12340
+    caption = 'Toggle Bkpt. &enabled'
     onexecute = togglebkptenableactonexecute
     left = 168
     top = 212
@@ -231,10 +231,9 @@ object actionsmo: tactionsmo
   object buttonicons: timagelist
     width = 24
     height = 24
-    transparentcolor = -2147483648
     count = 15
     left = 160
-    top = 136
+    top = 168
     image = {
       00000000020000006000000060000000F40E0000000000000000000000000000
       0000000000000000000000000000000000000000C0C0C018F8FCF848C0C0C018
@@ -397,56 +396,56 @@ object actionsmo: tactionsmo
     }
   end
   object selecteditpage: taction
-    caption = 'Select &Edit Page'
     shortcut = 16453
+    caption = 'Select &Edit Page'
     options = [ao_globalshortcut]
     onexecute = selecteditpageonexecute
-    left = 152
-    top = 160
+    left = 280
+    top = 144
   end
   object indent: taction
-    caption = '&Indent'
     shortcut = 16457
+    caption = '&Indent'
     onexecute = indentonexecute
     left = 280
     top = 176
   end
   object unindent: taction
-    caption = 'U&nindent'
     shortcut = 16469
+    caption = 'U&nindent'
     onexecute = unindentonexecute
     left = 280
     top = 200
   end
   object toggleformunit: taction
-    caption = 'Toggle Form/&Unit'
     shortcut = 4155
+    caption = 'Toggle Form/&Unit'
     onexecute = toggleformunitonexecute
     left = 152
     top = 112
   end
   object nexti: taction
-    caption = 'Next Instruction'
     imagelist = buttonicons
-    imagenr = 13
     shortcut = 28727
+    caption = 'Next Instruction'
+    imagenr = 13
     onexecute = nextiactonexecute
     left = 72
     top = 280
   end
   object stepi: taction
-    caption = 'Step Instruction'
     imagelist = buttonicons
-    imagenr = 12
     shortcut = 28726
+    caption = 'Step Instruction'
+    imagenr = 12
     onexecute = stepiactonexecute
     left = 72
     top = 304
   end
   object bluedotsonact: taction
+    imagelist = buttonicons
     caption = 'Exec Line Hint on'
     state = [as_checked]
-    imagelist = buttonicons
     imagenr = 14
     hint = 'Executable lines hint on/off'
     statfile = mainfo.projectstatfile
@@ -455,8 +454,8 @@ object actionsmo: tactionsmo
     top = 280
   end
   object replace: taction
-    caption = 'Find && &replace'
     shortcut = 16466
+    caption = 'Find && &replace'
     onexecute = replaceactonexecute
     left = 208
     top = 32
@@ -492,5 +491,215 @@ object actionsmo: tactionsmo
     onupdate = enableonselect
     left = 360
     top = 200
+  end
+  object shortcuts: tshortcutcontroller
+    actions.count = 40
+    actions.items = <    
+      item
+        dispname = 'File'
+      end    
+      item
+        action = opensource
+        shortcutdefault = 16463
+        dispname = 'Open'
+      end    
+      item
+        action = save
+        shortcutdefault = 16467
+        dispname = 'Save'
+      end    
+      item
+        action = saveas
+        dispname = 'Save as'
+      end    
+      item
+        action = close
+        shortcutdefault = 20531
+        dispname = 'Close'
+      end    
+      item
+        action = closeall
+        dispname = 'Close all'
+      end    
+      item
+        action = print
+        dispname = 'Print'
+      end    
+      item
+        dispname = 'Search'
+      end    
+      item
+        action = line
+        shortcutdefault = 16460
+        dispname = 'Line'
+      end    
+      item
+        action = find
+        shortcutdefault = 16454
+        dispname = 'Find'
+      end    
+      item
+        action = repeatfind
+        shortcutdefault = 4146
+        dispname = 'Repeat Find'
+      end    
+      item
+        action = replace
+        shortcutdefault = 16466
+        dispname = 'Find and replace'
+      end    
+      item
+        action = findinfile
+        dispname = 'Findinfile'
+      end    
+      item
+        dispname = 'Edit'
+      end    
+      item
+        action = undo
+        shortcutdefault = 16474
+        dispname = 'Undo'
+      end    
+      item
+        action = redo
+        shortcutdefault = 24666
+        dispname = 'Redo'
+      end    
+      item
+        action = selecteditpage
+        shortcutdefault = 16453
+        dispname = 'Select Editpage'
+      end    
+      item
+        action = indent
+        shortcutdefault = 16457
+        dispname = 'Indent'
+      end    
+      item
+        action = unindent
+        shortcutdefault = 16469
+        dispname = 'Unindent'
+      end    
+      item
+        action = lowercase
+        dispname = 'Lowercase'
+      end    
+      item
+        action = uppercase
+        dispname = 'Uppercase'
+      end    
+      item
+        dispname = 'Target'
+      end    
+      item
+        action = attachprocess
+        dispname = 'Attach Process'
+      end    
+      item
+        action = detachtarget
+        dispname = 'Detach Target'
+      end    
+      item
+        action = continue
+        shortcutdefault = 4152
+        dispname = 'Continue'
+      end    
+      item
+        action = reset
+        dispname = 'Reset'
+      end    
+      item
+        action = interrupt
+        dispname = 'Interrupt'
+      end    
+      item
+        action = next
+        shortcutdefault = 4151
+        dispname = 'Next'
+      end    
+      item
+        action = nexti
+        shortcutdefault = 28727
+        dispname = 'Next Instruction'
+      end    
+      item
+        action = step
+        shortcutdefault = 4150
+        dispname = 'Step'
+      end    
+      item
+        action = stepi
+        shortcutdefault = 28726
+        dispname = 'Step Instruction'
+      end    
+      item
+        action = finish
+        shortcutdefault = 12342
+        dispname = 'Finish'
+      end    
+      item
+        action = bkptsonact
+        shortcutdefault = 16450
+        dispname = 'Breakpoints on/off'
+      end    
+      item
+        action = togglebkpt
+        shortcutdefault = 4148
+        dispname = 'Toggle Breakpoint'
+      end    
+      item
+        action = togglebkptenable
+        shortcutdefault = 12340
+        dispname = 'Toggle Breakpoint enabled'
+      end    
+      item
+        action = watchesonact
+        shortcutdefault = 16471
+        dispname = 'Watches on/off'
+      end    
+      item
+        action = bluedotsonact
+        dispname = 'Exec Line Hints on/off'
+      end    
+      item
+        dispname = 'View'
+      end    
+      item
+        action = toggleinspector
+        shortcutdefault = 4154
+        dispname = 'Toggle Form/Object Inspector'
+      end    
+      item
+        action = toggleformunit
+        shortcutdefault = 4155
+        dispname = 'Toggle Form/Unit'
+      end>
+    sysshortcuts.count = 6
+    sysshortcuts.items = (
+      16451
+      16470
+      16472
+      20486
+      28678
+      20487
+    )
+    sysshortcuts1.count = 6
+    sysshortcuts1.items = (
+      0
+      12294
+      12295
+      0
+      0
+      0
+    )
+    statfile = mainfo.mainstatfile
+    left = 176
+    top = 312
+  end
+  object toggleinspector: taction
+    shortcut = 4154
+    caption = 'Toggle Form/Inspector'
+    left = 152
+    top = 136
   end
 end

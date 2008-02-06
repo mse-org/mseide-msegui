@@ -334,6 +334,16 @@ object settingsfo: tsettingsfo
     controller.ongetfilename = epandfilenamemacro
     reffontheight = 14
   end
+  object shortcutbu: tbutton
+    bounds_x = 10
+    bounds_y = 541
+    bounds_cx = 78
+    bounds_cy = 22
+    taborder = 14
+    state = [as_localcaption, as_localonexecute]
+    caption = 'Shortcuts'
+    onexecute = editshortcuts
+  end
   object tstatfile1: tstatfile
     filename = 'settingsfo.sta'
     options = [sfo_memory]

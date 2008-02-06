@@ -20,8 +20,7 @@ unit actionsmodule;
 
 interface
 uses
- mseclasses,mseact,mseactions,msebitmap,msestrings,msegui,msedatamodules,
- mseglob;
+ mseclasses,mseact,mseactions,msebitmap,msestrings,msegui,msedatamodules,mseglob;
  
 type
  tactionsmo = class(tmsedatamodule)
@@ -77,6 +76,8 @@ type
 
    run: taction;
    //common
+   shortcuts: tshortcutcontroller;
+   toggleinspector: taction;
    procedure findinfileonexecute(const sender: tobject);
 
    //file
@@ -146,7 +147,7 @@ uses
 
 procedure configureide;
 begin
- if editsettings('Configure MSEide') then begin
+ if editsettings('Configure MSEide',actionsmo.shortcuts) then begin
   expandprojectmacros;
  end;
 end;

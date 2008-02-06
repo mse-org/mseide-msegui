@@ -1,47 +1,72 @@
 object mseshortcutdialogfo: tmseshortcutdialogfo
   bounds_x = 87
   bounds_y = 222
-  bounds_cx = 476
+  bounds_cx = 578
   bounds_cy = 340
   taborder = 1
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_mousewheel, ow_destroywidgets, ow_autoscale]
   container.bounds_x = 0
   container.bounds_y = 0
-  container.bounds_cx = 476
+  container.bounds_cx = 578
   container.bounds_cy = 340
   container.frame.dummy = 0
   options = [fo_screencentered, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
+  caption = 'Shortcuts'
   moduleclassname = 'tmseform'
   object grid: twidgetgrid
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 0
-    bounds_cx = 476
-    bounds_cy = 282
+    bounds_cx = 578
+    bounds_cy = 286
     frame.dummy = 0
     anchors = [an_top, an_bottom]
     popupmenu = tpopupmenu1
+    optionsgrid = [og_colsizing, og_focuscellonenter, og_colchangeontabkey, og_autopopup, og_mousescrollcol]
     fixrows.count = 1
     fixrows.items = <    
       item
         height = 16
+        captions.count = 3
+        captions.items = <        
+          item
+            caption = 'Action'
+            font.name = 'stf_default'
+            font.xscale =  1.0000000000000000E+0000
+            font.dummy = 0
+          end        
+          item
+            caption = 'Shortcut'
+            font.name = 'stf_default'
+            font.xscale =  1.0000000000000000E+0000
+            font.dummy = 0
+          end        
+          item
+            caption = 'Alternate'
+            font.name = 'stf_default'
+            font.xscale =  1.0000000000000000E+0000
+            font.dummy = 0
+          end>
       end>
     datacols.count = 3
     datacols.options = [co_focusselect, co_rowselect, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
     datacols.items = <    
       item
-        width = 274
+        width = 321
+        onbeforedrawcell = beforedrawnode
         options = [co_readonly, co_drawfocus, co_focusselect, co_rowselect, co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         widgetname = 'sc'
       end    
       item
-        width = 97
+        width = 125
+        onbeforedrawcell = beforedraw
         options = [co_readonly, co_nofocus, co_focusselect, co_rowselect, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         widgetname = 'scdi'
       end    
       item
-        width = 98
+        width = 125
+        onbeforedrawcell = beforedraw1
         options = [co_readonly, co_nofocus, co_focusselect, co_rowselect, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         widgetname = 'sc1di'
       end>
@@ -53,7 +78,7 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
       optionsskin = [osk_framebuttononly]
       bounds_x = 0
       bounds_y = 0
-      bounds_cx = 274
+      bounds_cx = 321
       bounds_cy = 16
       frame.levelo = 0
       frame.colorclient = -2147483645
@@ -69,9 +94,9 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
     object scdi: tstringedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
       optionsskin = [osk_framebuttononly]
-      bounds_x = 275
+      bounds_x = 322
       bounds_y = 0
-      bounds_cx = 97
+      bounds_cx = 125
       bounds_cy = 16
       frame.levelo = 0
       frame.colorclient = -2147483645
@@ -86,9 +111,9 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
       Tag = 1
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
       optionsskin = [osk_framebuttononly]
-      bounds_x = 373
+      bounds_x = 448
       bounds_y = 0
-      bounds_cx = 98
+      bounds_cx = 125
       bounds_cy = 16
       frame.levelo = 0
       frame.colorclient = -2147483645
@@ -101,22 +126,22 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
     end
   end
   object tbutton1: tbutton
-    bounds_x = 365
-    bounds_y = 304
+    bounds_x = 461
+    bounds_y = 306
     bounds_cx = 50
     bounds_cy = 20
-    anchors = [an_right, an_bottom]
+    anchors = [an_left, an_bottom]
     taborder = 1
     state = [as_localcaption]
     caption = 'OK'
     modalresult = mr_ok
   end
   object tbutton2: tbutton
-    bounds_x = 421
-    bounds_y = 304
+    bounds_x = 517
+    bounds_y = 306
     bounds_cx = 50
     bounds_cy = 20
-    anchors = [an_right, an_bottom]
+    anchors = [an_left, an_bottom]
     taborder = 2
     state = [as_localcaption]
     caption = 'Cancel'
@@ -125,9 +150,9 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
   object sc1ed: tstringedit
     Tag = 1
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 208
-    bounds_y = 287
-    bounds_cx = 132
+    bounds_x = 272
+    bounds_y = 289
+    bounds_cx = 180
     bounds_cy = 37
     frame.levelo = 0
     frame.framewidth = 1
@@ -141,7 +166,7 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
       0
       0
     )
-    anchors = [an_right, an_bottom]
+    anchors = [an_left, an_bottom]
     taborder = 3
     onactivate = edactivate
     ondeactivate = eddeactivate
@@ -152,9 +177,9 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
   end
   object sced: tstringedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 63
-    bounds_y = 287
-    bounds_cx = 140
+    bounds_x = 67
+    bounds_y = 289
+    bounds_cx = 196
     bounds_cy = 37
     frame.levelo = 0
     frame.framewidth = 1
@@ -168,7 +193,7 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
       0
       0
     )
-    anchors = [an_right, an_bottom]
+    anchors = [an_left, an_bottom]
     taborder = 4
     onactivate = edactivate
     ondeactivate = eddeactivate
@@ -179,11 +204,11 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
   end
   object defaultbu: tbutton
     bounds_x = 8
-    bounds_y = 304
+    bounds_y = 306
     bounds_cx = 50
     bounds_cy = 20
     color = -2147483645
-    anchors = [an_right, an_bottom]
+    anchors = [an_left, an_bottom]
     taborder = 5
     state = [as_localcaption, as_localcolor, as_localonexecute]
     caption = 'Default'

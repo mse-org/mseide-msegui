@@ -415,6 +415,7 @@ type
    procedure rearange(const list: tintegerdatalist); virtual; abstract;
 
    function isopaque: boolean; virtual;
+   function getdatapo(const arow: integer): pointer; virtual;
    procedure paint(const info: colpaintinfoty); virtual;
    class function defaultstep(width: integer): integer; virtual;
    function step(getscrollable: boolean = true): integer; override;
@@ -494,6 +495,7 @@ type
    fdata: tdatalist;
    fname: string;
    fonchange: notifyeventty;
+   function getdatapo(const arow: integer): pointer; override;
    procedure beforedragevent(var ainfo: draginfoty; const arow: integer;
                                      var processed: boolean); virtual;
    procedure afterdragevent(var ainfo: draginfoty; const arow: integer;
@@ -1347,10 +1349,12 @@ end;
                                 const acellinfopo: pcelleventinfoty = nil);
    procedure dofocusedcellposchanged; virtual;
 
-   function internalsort(sortfunc: gridsorteventty; var refindex: integer): boolean;
-            //true if moved
+   function internalsort(sortfunc: gridsorteventty; 
+                                 var refindex: integer): boolean;
+                              //true if moved
 
-   procedure objectevent(const sender: tobject; const event: objecteventty); override;
+   procedure objectevent(const sender: tobject; 
+                                 const event: objecteventty); override;
    procedure loaded; override;
    procedure doexit; override;
    procedure dofocus; override;
@@ -1392,8 +1396,9 @@ end;
    procedure beginpickmove(const objects: integerarty);
    procedure endpickmove(const apos,offset: pointty; const objects: integerarty);
    procedure paintxorpic(const canvas: tcanvas; const apos,offset: pointty;
-                 const objects: integerarty);
-   function calcshowshift(const rect: rectty; const position: cellpositionty): pointty;
+                                   const objects: integerarty);
+   function calcshowshift(const rect: rectty; 
+                                   const position: cellpositionty): pointty;
 
    //istatfile
    procedure dostatread(const reader: tstatreader); virtual;
@@ -2440,6 +2445,10 @@ begin
  end;
 end;
 
+function tcol.getdatapo(const arow: integer): pointer;
+begin
+ result:= nil;
+end;
 
 procedure tcol.paint(const info: colpaintinfoty);
 var
@@ -2468,6 +2477,7 @@ begin
      fcellinfo.font:= font1;
      canvas.font:= font1;
     end;
+    fcellinfo.datapo:= getdatapo(int1);
     fcellinfo.cell.row:= int1;
     fcellinfo.selected:= getselected(int1);
     fcellinfo.notext:= false;
@@ -3942,46 +3952,9 @@ begin
  end;
 end;
 
-procedure tcustomgrid.cellmouseevent(const acell: gridcoordty; 
-                    var info: mouseeventinfoty; const acellinfopo: pcelleventinfoty = nil);
-var
- cellinfo: celleventinfoty;
- po1: pointty;
- cellinfopo: pcelleventinfoty;
-begin
- cellinfopo:= acellinfopo;
- if cellinfopo = nil then begin
-  cellinfopo:= @cellinfo;
- end;
- fillchar(cellinfopo^,sizeof(cellinfo),0);
- with cellinfopo^ do begin
-  mouseeventinfopo:= @info;
-  cell:= acell;
-  grid:= self;
-  gridmousepos:= info.pos;
-  case info.eventkind of
-   ek_mousemove: eventkind:= cek_mousemove;
-   ek_mousepark: eventkind:= cek_mousepark;
-   ek_buttonpress: eventkind:= cek_buttonpress;
-   ek_buttonrelease: eventkind:= cek_buttonrelease;
-   ek_clientmouseleave: eventkind:= cek_mouseleave;
-  end;
-  if (acellinfopo = nil) and (eventkind <> cek_none) then begin
-   po1:= cellrect(cellinfo.cell).pos;
-   try
-    subpoint1(info.pos,po1);
-    docellevent(cellinfopo^);
-   finally
-    addpoint1(info.pos,po1);
-   end;
-  end;
- end;
-end;
-
 procedure tdatacol.clientmouseevent(const acell: gridcoordty; 
                                               var info: mouseeventinfoty);
 var
-// event: celleventkindty;
  cellinfo: celleventinfoty;
  po1: pointty;
 begin
@@ -4001,40 +3974,6 @@ begin
    end;
   end;
  end;
-  
-{
- fillchar(cellinfo,sizeof(cellinfo),0);
- with cellinfo do begin
-  mouseeventinfopo:= @info;
-  cell:= acell;
-  case info.eventkind of
-   ek_mousemove: event:= cek_mousemove;
-   ek_mousepark: event:= cek_mousepark;
-   ek_buttonpress: event:= cek_buttonpress;
-   ek_buttonrelease: event:= cek_buttonrelease;
-   ek_clientmouseleave: begin
-    event:= cek_none;
-    eventkind:= cek_mouseleave;
-    fgrid.docellevent(cellinfo);
-   end
-   else event:= cek_none;
-  end;
-  if event <> cek_none then begin
-   cellinfo.eventkind:= event;
-   gridmousepos:= info.pos;
-   po1:= fgrid.cellrect(cellinfo.cell).pos;
-   try
-    subpoint1(info.pos,po1);
-    cellinfo.zone:= cz_none;
-    updatecellzone(info.pos,cellinfo.zone);
-    grid:= fgrid;
-    fgrid.docellevent(cellinfo);
-   finally
-    addpoint1(info.pos,po1);
-   end;
-  end;
- end;
- }
 end;
 
 function tdatacol.getselected(const row: integer): boolean;
@@ -4416,6 +4355,16 @@ begin
  end
  else begin
   options:= options - [co_readonly];
+ end;
+end;
+
+function tdatacol.getdatapo(const arow: integer): pointer;
+begin
+ if fdata <> nil then begin
+  result:= fdata.getitempo(arow);
+ end
+ else begin
+  result:= nil;
  end;
 end;
 
@@ -7034,58 +6983,50 @@ var
  var
   po1: pointty;
   action: focuscellactionty;
-  bo1: boolean;
+  bo1,bo2: boolean;
+  cell1: gridcoordty;
  begin      //checkfocuscell
   po1:= fscrollrect.pos;
   action:= fca_focusin;
   case cellkind of
    ck_data: begin
     if not (gs_mousecellredirected in fstate) then begin
-     if not fdatacols[fmousecell.col].canfocus(info.button) then begin
+     cell1:= fmousecell;
+     bo2:= fdatacols[fmousecell.col].canfocus(info.button);
+     if not bo2 then begin
+      cell1.col:= ffocusedcell.col;
+      if cell1.col < 0 then begin
+       cell1.col:= nextfocusablecol(0);
+      end;
+     end;
+     bo1:= not gridcoordisequal(cell1,ffocusedcell);
+     if (info.shiftstate * [ss_left,ss_middle,ss_right] = [ss_left])
+                 {(info.button = mb_left)} and
+            (co_mouseselect in fdatacols[cell1.col].foptions) then begin
+      if (info.shiftstate * keyshiftstatesmask = [ss_shift]) then begin
+       action:= fca_selectend;
+      end
+      else begin
+       if info.shiftstate * keyshiftstatesmask = [ss_ctrl] then begin
+        if (info.button = mb_left) or (cell1.col <> ffocusedcell.col) or
+                  (cell1.row <> ffocusedcell.row) then begin
+         action:= fca_reverse;
+        end;
+       end;
+      end;
+     end
+     else begin
+      if (action = fca_focusin) and (ss_shift in info.shiftstate) then begin
+       action:= fca_focusinshift;
+      end;
+     end;
+     focuscell(cell1,action);
+     if bo2 then begin
       showcell(fmousecell);
      end
      else begin
-      bo1:= not gridcoordisequal(fmousecell,ffocusedcell);
-      if (info.shiftstate * [ss_left,ss_middle,ss_right] = [ss_left])
-                  {(info.button = mb_left)} and
-             (co_mouseselect in fdatacols[fmousecell.col].foptions) then begin
-       if (info.shiftstate * keyshiftstatesmask = [ss_shift]) then begin
-        action:= fca_selectend;
-       end
-       else begin
-        if info.shiftstate * keyshiftstatesmask = [ss_ctrl] then begin
-         if (info.button = mb_left) or (fmousecell.col <> ffocusedcell.col) or
-                   (fmousecell.row <> ffocusedcell.row) then begin
-          action:= fca_reverse;
-         end;
-        end
-        else begin
-         if info.button = mb_left then begin
-//          action:= fca_focusinforce;
-         end;
-        end;
-       end;
-      end
-      else begin
-       if (action = fca_focusin) and (ss_shift in info.shiftstate) then begin
-        action:= fca_focusinshift;
-       end;
- 
-//       if (info.shiftstate * [ss_left,ss_middle,ss_right] = [ss_left]){info.button = mb_left} then begin
-//        if ss_shift in info.shiftstate then begin
-//         action:= fca_focusinshift;
-//        end;
-//       end
-//       else begin
-//        action:= fca_none;
-//       end;
-      end;
-      focuscell(fmousecell,action);
       if bo1 then begin
- //      if not (action in [fca_focusin,fca_focusinforce,fca_none]) then begin
- //       include(info.eventstate,es_processed);
- //      end;
-       firstcellclick(fmousecell,info);
+       firstcellclick(cell1,info);
       end;
      end;
     end;
@@ -7342,6 +7283,43 @@ begin
      eventkind:= cek_firstmousepark;
      docellevent(info);
     end;
+   end;
+  end;
+ end;
+end;
+
+procedure tcustomgrid.cellmouseevent(const acell: gridcoordty; 
+                           var info: mouseeventinfoty;
+                           const acellinfopo: pcelleventinfoty = nil);
+var
+ cellinfo: celleventinfoty;
+ po1: pointty;
+ cellinfopo: pcelleventinfoty;
+begin
+ cellinfopo:= acellinfopo;
+ if cellinfopo = nil then begin
+  cellinfopo:= @cellinfo;
+ end;
+ fillchar(cellinfopo^,sizeof(cellinfo),0);
+ with cellinfopo^ do begin
+  mouseeventinfopo:= @info;
+  cell:= acell;
+  grid:= self;
+  gridmousepos:= info.pos;
+  case info.eventkind of
+   ek_mousemove: eventkind:= cek_mousemove;
+   ek_mousepark: eventkind:= cek_mousepark;
+   ek_buttonpress: eventkind:= cek_buttonpress;
+   ek_buttonrelease: eventkind:= cek_buttonrelease;
+   ek_clientmouseleave: eventkind:= cek_mouseleave;
+  end;
+  if (acellinfopo = nil) and (eventkind <> cek_none) then begin
+   po1:= cellrect(cellinfo.cell).pos;
+   try
+    subpoint1(info.pos,po1);
+    docellevent(cellinfopo^);
+   finally
+    addpoint1(info.pos,po1);
    end;
   end;
  end;

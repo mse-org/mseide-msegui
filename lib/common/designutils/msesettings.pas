@@ -1,3 +1,19 @@
+{ MSEide Copyright (c) 2002-2008 by Martin Schreiber
+   
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+}
 unit msesettings;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
@@ -5,7 +21,7 @@ uses
  mseglob,mseguiglob,msegui,mseclasses,mseforms,msestat,msestatfile,
  msesimplewidgets,msefiledialog,msestrings,msesysenv,msedataedits,msebitmap,
  msedatanodes,mseedit,mseevent,msegraphutils,msegrids,mselistbrowser,msemenus,
- msesys,msetypes;
+ msesys,msetypes,msegraphics,msewidgets,mseactions;
 
 type
  settingsmacroty = (sma_fpcdir,sma_fpclibdir,sma_msedir,sma_mselibdir,
@@ -51,6 +67,7 @@ type
    target: tstringedit;
    printcomm: tstringedit;
    compstoredir: tfilenameedit;
+   shortcutbu: tbutton;
    procedure epandfilenamemacro(const sender: TObject; var avalue: msestring;
                      var accept: Boolean);
    procedure formoncreate(const sender: TObject);
@@ -58,6 +75,9 @@ type
              var accept: Boolean);
    procedure setprintcomm(const sender: TObject; var avalue: msestring;
                              var accept: Boolean);
+   procedure editshortcuts(const sender: TObject);
+  private
+   fshortcutcontroller: tshortcutcontroller;
   protected
    function widgetstomacros: settingsmacrosty;
  end;
@@ -69,11 +89,12 @@ procedure updatesettings(const filer: tstatfiler);
 function getsettingsmacros: macroinfoarty;
 function getsyssettingsmacros: macroinfoarty;
 function getprintcommand: string;
-function editsettings(const caption: msestring = ''): boolean;
+function editsettings(const acaption: msestring = '';
+                           const shortcuts: tshortcutcontroller = nil): boolean;
  
 implementation
 uses
- msesettings_mfm,classes,msesysintf,msefileutils;
+ msesettings_mfm,classes,msesysintf,msefileutils,mseshortcutdialog;
  
 function getsettingsmacros1(const amacros: settingsmacrosty): macroinfoarty;
 var
@@ -128,17 +149,22 @@ begin
  end;
 end;
 
-function editsettings(const caption: msestring = ''): boolean;
+function editsettings(const acaption: msestring = '';
+                  const shortcuts: tshortcutcontroller = nil): boolean;
 var
  settingsfo: tsettingsfo;
 begin
  result:= false;
  settingsfo:= tsettingsfo.create(nil);
- if caption <> '' then begin
-  settingsfo.caption:= caption;
- end;
  with settingsfo do begin
   try
+   fshortcutcontroller:= shortcuts;
+   if shortcuts = nil then begin
+    shortcutbu.visible:= false;
+   end;
+   if acaption <> '' then begin
+    settingsfo.caption:= acaption;
+   end;
    if show(true) = mr_ok then begin
     result:= true;
     with settings do begin
@@ -208,6 +234,11 @@ begin
  if avalue = '' then begin
   avalue:= sys_getprintcommand;
  end;
+end;
+
+procedure tsettingsfo.editshortcuts(const sender: TObject);
+begin
+ shortcutdialog(fshortcutcontroller);
 end;
 
 end.

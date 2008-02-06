@@ -488,10 +488,9 @@ object mainfo: tmainfo
             options = [mao_separator, mao_shortcutcaption]
           end        
           item
-            caption = 'Toggle Form/Inspector'
-            state = [as_localcaption, as_localimagelist, as_localshortcut, as_localonexecute]
+            action = actionsmo.toggleinspector
+            state = [as_localimagelist, as_localonexecute]
             options = [mao_shortcutcaption, mao_asyncexecute]
-            shortcut = 4154
             imagelist = vievmenuicons
             onexecute = toggleobjectinspectoronexecute
           end        
