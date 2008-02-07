@@ -8,9 +8,9 @@ object mainfo: tmainfo
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
   container.bounds_x = 0
-  container.bounds_y = 16
+  container.bounds_y = 17
   container.bounds_cx = 429
-  container.bounds_cy = 122
+  container.bounds_cy = 121
   container.frame.framei_left = 0
   container.frame.framei_top = 0
   container.frame.framei_right = 0
@@ -50,7 +50,7 @@ object mainfo: tmainfo
     bounds_x = 0
     bounds_y = 1
     bounds_cx = 429
-    bounds_cy = 18
+    bounds_cy = 19
     frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
     frame.dummy = 0
     anchors = [an_top]
@@ -59,7 +59,7 @@ object mainfo: tmainfo
     font.xscale =  1.0000000000000000E+0000
     font.dummy = 0
     options = [dwo_hintclippedtext]
-    reffontheight = 14
+    reffontheight = 15
   end
   object gdb: tgdbmi
     onevent = gdbonevent
@@ -514,41 +514,44 @@ object mainfo: tmainfo
         submenu.items = <        
           item
             action = actionsmo.makeact
-            state = [as_localtag]
+            caption = '&Make'
+            state = [as_localcaption, as_localtag]
             tag = 1
           end        
           item
-            action = actionsmo.makeact
+            action = actionsmo.build
             caption = '&Build'
             state = [as_localcaption, as_localtag]
             tag = 2
           end        
           item
-            action = actionsmo.makeact
+            action = actionsmo.make1
             caption = 'Make &1'
             state = [as_localcaption, as_localtag]
             tag = 4
           end        
           item
-            action = actionsmo.makeact
+            action = actionsmo.make2
             caption = 'Make &2'
             state = [as_localcaption, as_localtag]
             tag = 8
           end        
           item
-            action = actionsmo.makeact
+            action = actionsmo.make3
             caption = 'Make &3'
             state = [as_localcaption, as_localtag]
             tag = 16
           end        
           item
-            action = actionsmo.makeact
+            action = actionsmo.make4
             caption = 'Make &4'
             state = [as_localcaption, as_localtag]
             tag = 32
           end        
           item
             action = actionsmo.abortmake
+            caption = '&Abort Make'
+            state = [as_localcaption, as_localtag]
           end        
           item
             options = [mao_separator, mao_shortcutcaption]
@@ -625,7 +628,8 @@ object mainfo: tmainfo
           end>
         caption = '&Project'
         name = 'project'
-        state = [as_localcaption]
+        state = [as_localcaption, as_localonexecute]
+        onexecute = aboutonexecute
       end    
       item
         submenu.count = 2

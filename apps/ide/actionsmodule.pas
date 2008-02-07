@@ -78,6 +78,11 @@ type
    //common
    shortcuts: tshortcutcontroller;
    toggleinspector: taction;
+   build: taction;
+   make1: taction;
+   make2: taction;
+   make3: taction;
+   make4: taction;
    procedure findinfileonexecute(const sender: tobject);
 
    //file

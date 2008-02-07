@@ -4,14 +4,14 @@ object actionsmo: tactionsmo
   moduleclassname = 'tmsedatamodule'
   size = (
     474
-    412
+    523
   )
   object makeact: taction
     Tag = 1
     caption = '&Make'
     onexecute = makeactonexecute
-    left = 352
-    top = 4
+    left = 168
+    top = 316
   end
   object run: taction
     caption = '&Run'
@@ -102,8 +102,8 @@ object actionsmo: tactionsmo
   object abortmake: taction
     caption = '&Abort Make'
     onexecute = abortmakeactonexecute
-    left = 357
-    top = 34
+    left = 165
+    top = 458
   end
   object undo: taction
     shortcut = 16474
@@ -493,7 +493,7 @@ object actionsmo: tactionsmo
     top = 200
   end
   object shortcuts: tshortcutcontroller
-    actions.count = 40
+    actions.count = 48
     actions.items = <    
       item
         dispname = 'File'
@@ -673,6 +673,37 @@ object actionsmo: tactionsmo
         action = toggleformunit
         shortcutdefault = 4155
         dispname = 'Toggle Form/Unit'
+      end    
+      item
+        dispname = 'Project'
+      end    
+      item
+        action = makeact
+        dispname = 'Make'
+      end    
+      item
+        action = build
+        dispname = 'Build'
+      end    
+      item
+        action = make1
+        dispname = 'Make 1'
+      end    
+      item
+        action = make2
+        dispname = 'Make 2'
+      end    
+      item
+        action = make3
+        dispname = 'Make 3'
+      end    
+      item
+        action = make4
+        dispname = 'Make 4'
+      end    
+      item
+        action = abortmake
+        dispname = 'Abort Make'
       end>
     sysshortcuts.count = 6
     sysshortcuts.items = (
@@ -693,7 +724,7 @@ object actionsmo: tactionsmo
       0
     )
     statfile = mainfo.mainstatfile
-    left = 176
+    left = 344
     top = 312
   end
   object toggleinspector: taction
@@ -701,5 +732,30 @@ object actionsmo: tactionsmo
     caption = 'Toggle Form/Inspector'
     left = 152
     top = 136
+  end
+  object build: taction
+    onexecute = makeactonexecute
+    left = 168
+    top = 336
+  end
+  object make1: taction
+    onexecute = makeactonexecute
+    left = 168
+    top = 360
+  end
+  object make2: taction
+    onexecute = makeactonexecute
+    left = 168
+    top = 384
+  end
+  object make3: taction
+    onexecute = makeactonexecute
+    left = 168
+    top = 408
+  end
+  object make4: taction
+    onexecute = makeactonexecute
+    left = 168
+    top = 432
   end
 end
