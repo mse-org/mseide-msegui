@@ -133,7 +133,7 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
     anchors = [an_left, an_bottom]
     taborder = 1
     state = [as_localcaption]
-    caption = 'OK'
+    caption = '&OK'
     modalresult = mr_ok
   end
   object tbutton2: tbutton
@@ -144,12 +144,12 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
     anchors = [an_left, an_bottom]
     taborder = 2
     state = [as_localcaption]
-    caption = 'Cancel'
+    caption = '&Cancel'
     modalresult = mr_cancel
   end
   object sc1ed: tstringedit
     Tag = 1
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_multiplehint, ow_fontglyphheight, ow_autoscale]
     bounds_x = 272
     bounds_y = 289
     bounds_cx = 180
@@ -157,8 +157,9 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
     frame.levelo = 0
     frame.framewidth = 1
     frame.colorframe = -1610612734
+    frame.colorclient = -1879048185
     frame.caption = '&Alternate'
-    frame.localprops = [frl_levelo, frl_framewidth, frl_colorframe, frl_fileft]
+    frame.localprops = [frl_levelo, frl_framewidth, frl_colorframe, frl_fileft, frl_colorclient]
     frame.dummy = 0
     frame.outerframe = (
       0
@@ -168,6 +169,8 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
     )
     anchors = [an_left, an_bottom]
     taborder = 3
+    hint = 'Press the desired key combination.'
+    onshowhint = keyhint
     onactivate = edactivate
     ondeactivate = eddeactivate
     optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
@@ -176,7 +179,7 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
     reffontheight = 14
   end
   object sced: tstringedit
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_multiplehint, ow_fontglyphheight, ow_autoscale]
     bounds_x = 67
     bounds_y = 289
     bounds_cx = 196
@@ -184,8 +187,9 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
     frame.levelo = 0
     frame.framewidth = 1
     frame.colorframe = -1610612734
+    frame.colorclient = -1879048185
     frame.caption = '&Shortcut'
-    frame.localprops = [frl_levelo, frl_framewidth, frl_colorframe]
+    frame.localprops = [frl_levelo, frl_framewidth, frl_colorframe, frl_colorclient]
     frame.dummy = 0
     frame.outerframe = (
       0
@@ -195,6 +199,8 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
     )
     anchors = [an_left, an_bottom]
     taborder = 4
+    hint = 'Press the desired key combination.'
+    onshowhint = keyhint
     onactivate = edactivate
     ondeactivate = eddeactivate
     optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
@@ -211,7 +217,7 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
     anchors = [an_left, an_bottom]
     taborder = 5
     state = [as_localcaption, as_localcolor, as_localonexecute]
-    caption = 'Default'
+    caption = '&Default'
     onexecute = defaultex
   end
   object tpopupmenu1: tpopupmenu

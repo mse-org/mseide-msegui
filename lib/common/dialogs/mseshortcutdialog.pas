@@ -33,6 +33,7 @@ type
                    var cellinfo: cellinfoty; var processed: Boolean);
    procedure beforedraw1(const sender: tcol; const canvas: tcanvas;
                    var cellinfo: cellinfoty; var processed: Boolean);
+   procedure keyhint(const sender: TObject; var info: hintinfoty);
   private
    fkeyentering: boolean;
    frootnodes: treelistedititemarty;
@@ -509,8 +510,15 @@ procedure tmseshortcutdialogfo.beforedraw(const sender: tcol;
                var processed: Boolean);
 begin
  with tshortcutitem(sc[cellinfo.cell.row]) do begin
-  if not fisgroup and fconflict then begin
-   cellinfo.color:= errorcolor;
+  if not fisgroup then begin
+   if fconflict then begin
+    cellinfo.color:= errorcolor;
+   end
+   else begin
+    if fshortcut <> fshortcutdefault then begin
+     cellinfo.color:= cl_infobackground;
+    end;
+   end; 
   end;
  end;
 end;
@@ -520,9 +528,24 @@ procedure tmseshortcutdialogfo.beforedraw1(const sender: tcol;
                var processed: Boolean);
 begin
  with tshortcutitem(sc[cellinfo.cell.row]) do begin
-  if not fisgroup and fconflict1 then begin
-   cellinfo.color:= errorcolor;
+  if not fisgroup then begin
+   if fconflict1 then begin
+    cellinfo.color:= errorcolor;
+   end
+   else begin
+    if fshortcut1 <> fshortcut1default then begin
+     cellinfo.color:= cl_infobackground;
+    end;
+   end;
   end;
+ end;
+end;
+
+procedure tmseshortcutdialogfo.keyhint(const sender: TObject;
+               var info: hintinfoty);
+begin
+ if not twidget(sender).active then begin
+  info.caption:= '';
  end;
 end;
 
