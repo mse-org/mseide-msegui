@@ -1071,7 +1071,7 @@ type
    constructor create(const aowner: tcustomgrid; const aintf: igriddatalink);
    destructor destroy; override;
    property firstrecord: integer read getfirstrecord;
-   function getdummystringbuffer: pstring;
+   function getdummystringbuffer: pansistring;
    function getrowfieldisnull(const afield: tfield; const row: integer): boolean;
    function getansistringbuffer(const afield: tfield; const row: integer): pointer;
    function getstringbuffer(const afield: tfield; const row: integer): pointer;
@@ -6054,7 +6054,7 @@ begin
  end;
 end;
 
-function tgriddatalink.getdummystringbuffer: pstring;
+function tgriddatalink.getdummystringbuffer: pansistring;
 begin
  fdummystringbuffer:= '';
  result:= @fdummystringbuffer;
