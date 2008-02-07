@@ -884,17 +884,20 @@ procedure getdropdownpos(const parent: twidget; var rect: rectty);
 
 
 //following routines are thread save
+//exttext will be appended for copy to clipboard
 function showmessage(const atext,caption: msestring;
                      const buttons: array of modalresultty;
                      const defaultbutton: modalresultty = mr_cancel;
                      const noshortcut: modalresultsty = [];
-                     const minwidth: integer = 0): modalresultty; overload;
+                     const minwidth: integer = 0;
+                     const exttext: msestring = ''): modalresultty; overload;
 function showmessage(const atext,caption: msestring;
                      const buttons: array of modalresultty;
                      const defaultbutton: modalresultty;
                      const noshortcut: modalresultsty;
                      const minwidth: integer;
-                     const actions: array of notifyeventty): modalresultty; overload;
+                     const actions: array of notifyeventty;
+                     const exttext: msestring = ''): modalresultty; overload;
 function showmessage(const atext,caption: msestring;
                      const buttons: array of modalresultty;
                      const adest: rectty; const awidget: twidget = nil;
@@ -902,13 +905,16 @@ function showmessage(const atext,caption: msestring;
                      const placement: captionposty = cp_bottomleft;
                      const defaultbutton: modalresultty = mr_cancel;
                      const noshortcut: modalresultsty = [];
-                     const minwidth: integer = 0): modalresultty; overload;
+                     const minwidth: integer = 0;
+                     const exttext: msestring = ''): modalresultty; overload;
 function showmessage(const atext: msestring; const caption: msestring = '';
-                     const minwidth: integer = 0): modalresultty; overload;
+                     const minwidth: integer = 0;
+                     const exttext: msestring = ''): modalresultty; overload;
 procedure showmessage1(const atext: msestring; const caption: msestring);
             //for ps
 procedure showerror(const atext: msestring; const caption: msestring = 'ERROR';
-                     const minwidth: integer = 0);
+                     const minwidth: integer = 0;
+                     const exttext: msestring = '');
 function askok(const atext: msestring; const caption: msestring = '';
                      const defaultbutton: modalresultty = mr_ok;  
                      const minwidth: integer = 0): boolean;
@@ -965,8 +971,12 @@ type
  tshowmessagewidget = class(tmessagewidget)
   protected
    info: drawtextinfoty;
+   fexttext: msestring;
    procedure dopaint(const canvas: tcanvas); override;
    procedure dokeydown(var ainfo: keyeventinfoty); override;
+  public
+   constructor create(const aowner: tcomponent; const apopuptransient: boolean;
+                        const ahasaction: boolean; const exttext: msestring);
 end;
 {
 procedure buttonoptionstoshapestate(avalue: buttonoptionsty; var astate: shapestatesty);
@@ -1120,7 +1130,8 @@ function internalshowmessage(const atext,caption: msestring;
                   defaultbutton: modalresultty;
                   noshortcut: modalresultsty;
                   placementrect: prectty; placement: captionposty;
-                  minwidth: integer; actions: array of notifyeventty): modalresultty;
+                  minwidth: integer; actions: array of notifyeventty;
+                  const exttext: msestring): modalresultty;
 const
  maxtextwidth = 500;
  verttextdist = 10;
@@ -1147,7 +1158,7 @@ begin
         //stays invisible, no wm_configured processing on win32
   widget:= tshowmessagewidget.create(nil,(transientfor <> nil) and 
               (wo_popup in transientfor.options) and transientfor.owner.visible,
-              high(actions) >= 0);
+              high(actions) >= 0,exttext);
   widget.parentwidget:= widget1; //do not create window handle of widget
   try
    acanvas:= widget1.getcanvas; 
@@ -1257,10 +1268,11 @@ function showmessage(const atext,caption: msestring;
                      const buttons: array of modalresultty;
                      const defaultbutton: modalresultty = mr_cancel;
                      const noshortcut: modalresultsty = [];
-                     const minwidth: integer = 0): modalresultty;
+                     const minwidth: integer = 0;
+                     const exttext: msestring = ''): modalresultty;
 begin
  result:= internalshowmessage(atext,caption,buttons,defaultbutton,
-                 noshortcut,nil,cp_bottomleft,minwidth,[]);
+                 noshortcut,nil,cp_bottomleft,minwidth,[],exttext);
 end;
 
 function showmessage(const atext,caption: msestring;
@@ -1268,10 +1280,11 @@ function showmessage(const atext,caption: msestring;
                      const defaultbutton: modalresultty;
                      const noshortcut: modalresultsty;
                      const minwidth: integer;
-                     const actions: array of notifyeventty): modalresultty;
+                     const actions: array of notifyeventty;
+                     const exttext: msestring = ''): modalresultty;
 begin
  result:= internalshowmessage(atext,caption,buttons,defaultbutton,
-                 noshortcut,nil,cp_bottomleft,minwidth,actions);
+                 noshortcut,nil,cp_bottomleft,minwidth,actions,exttext);
 end;
 
 function showmessage(const atext,caption: msestring;
@@ -1281,7 +1294,8 @@ function showmessage(const atext,caption: msestring;
                      const placement: captionposty = cp_bottomleft;
                      const defaultbutton: modalresultty = mr_cancel;
                      const noshortcut: modalresultsty = [];
-                     const minwidth: integer = 0): modalresultty; overload;
+                     const minwidth: integer = 0;
+                     const exttext: msestring = ''): modalresultty; overload;
 var
  rect1: rectty;
 begin
@@ -1293,13 +1307,14 @@ begin
  end;
  rect1.size:= adest.size;
  result:= internalshowmessage(atext,caption,buttons,defaultbutton,noshortcut,
-                @rect1,placement,minwidth,[]);
+                @rect1,placement,minwidth,[],exttext);
 end;
 
 function showmessage(const atext: msestring; const caption: msestring = '';
-                        const minwidth: integer = 0): modalresultty;
+                        const minwidth: integer = 0;
+                        const exttext: msestring = ''): modalresultty;
 begin
- result:= showmessage(atext,caption,[mr_ok],mr_ok,[],minwidth);
+ result:= showmessage(atext,caption,[mr_ok],mr_ok,[],minwidth,exttext);
 end;
 
 procedure showmessage1(const atext: msestring; const caption: msestring);
@@ -1309,9 +1324,10 @@ begin
 end;
 
 procedure showerror(const atext: msestring; const caption: msestring = 'ERROR';
-                    const minwidth: integer = 0);
+                    const minwidth: integer = 0;
+                    const exttext: msestring = '');
 begin
- showmessage(atext,caption,minwidth);
+ showmessage(atext,caption,minwidth,exttext);
 end;
 
 function askok(const atext: msestring; const caption: msestring = '';
@@ -1527,6 +1543,14 @@ end;
 
 { tshowmessagewidget }
 
+constructor tshowmessagewidget.create(const aowner: tcomponent;
+           const apopuptransient: boolean; const ahasaction: boolean;
+           const exttext: msestring);
+begin
+ fexttext:= exttext;
+ inherited create(aowner,apopuptransient,ahasaction);
+end;
+
 procedure tshowmessagewidget.dopaint(const canvas: tcanvas);
 begin
  inherited;
@@ -1536,7 +1560,7 @@ end;
 procedure tshowmessagewidget.dokeydown(var ainfo: keyeventinfoty);
 begin
  if issysshortcut(sho_copy,ainfo) or issysshortcut(sho_cut,ainfo) then begin
-  copytoclipboard(info.text.text);
+  copytoclipboard(info.text.text+fexttext);
  end;
  inherited;
 end;

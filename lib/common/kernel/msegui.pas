@@ -12565,7 +12565,9 @@ begin
  end
  else begin
   str1:= leadingtext + e.Message;
-  showmessage(str1,'Exception');
+  showmessage(str1,'Exception'{$ifdef FPC},0,lineend+
+              getexceptiontext(exceptobject,
+                            exceptaddr,exceptframecount,exceptframes){$endif});
  end;
 end;
 

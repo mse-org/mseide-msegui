@@ -146,7 +146,10 @@ procedure getprocaddresses(const lib: tlibhandle; const anames: array of string;
 function getprocaddresses(const libnames: array of string; 
                              const anames: array of string; 
                              const adest: array of ppointer): tlibhandle; overload;
-
+{$ifdef FPC}
+function getexceptiontext(obj: tobject; addr: pointer; framecount: longint;
+                                     frames: ppointer): msestring;
+{$endif}
 threadvar
  mselasterror: integer;
 
@@ -325,12 +328,44 @@ end;
  {$S-}
  {$endif OPT S }
 
+function getexceptionstack(obj: tobject; addr: pointer; framecount: longint;
+                                     frames: ppointer): msestring;
+Var
+ i: longint;
+begin
+ if Obj is exception then begin
+    result:= result + Exception(Obj).ClassName+' : '+Exception(Obj).Message+
+               lineend;
+ end
+ else begin
+  result:= result + 'Exception object '+Obj.ClassName+
+       ' is not of class Exception.'+lineend;
+ end;
+ result:= result + BackTraceStrFunc(Addr)+lineend;
+ if (FrameCount>0) then begin
+  for i:=0 to FrameCount-1 do begin
+    result:= result+BackTraceStrFunc(Frames[i])+lineend;
+  end;
+ end;
+end;
+
+function getexceptiontext(obj: tobject; addr: pointer; framecount: longint;
+                                     frames: ppointer): msestring;
+begin
+ result:= 'An exception occurred at $'+
+               HexStr(Ptrint(Addr),sizeof(PtrInt)*2)+' :' + lineend;
+ result:= result + getexceptionstack(obj,addr,framecount,frames); 
+end;
+
 procedure listexceptionstack(Obj: TObject; Addr:Pointer; FrameCount: Longint;
                                   Frames: PPointer);
+{
 Var
  Message: String;
  i: longint;
+}
 begin
+{
  if Obj is exception then begin
     Message:=Exception(Obj).ClassName+' : '+Exception(Obj).Message;
     debugWriteln(Message);
@@ -345,6 +380,8 @@ begin
   end;
  end;
  debugWriteln('');
+}
+ debugwriteln(getexceptionstack(obj,addr,framecount,frames));
 end;
 
 Procedure CatchUnhandledExcept(Obj : TObject; Addr: Pointer; FrameCount: Longint;
