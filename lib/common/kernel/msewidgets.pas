@@ -1560,7 +1560,7 @@ end;
 procedure tshowmessagewidget.dokeydown(var ainfo: keyeventinfoty);
 begin
  if issysshortcut(sho_copy,ainfo) or issysshortcut(sho_cut,ainfo) then begin
-  copytoclipboard(info.text.text+fexttext);
+  copytoclipboard(replacechar(info.text.text+fexttext,#0 ,' '));
  end;
  inherited;
 end;

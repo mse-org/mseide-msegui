@@ -334,12 +334,11 @@ Var
  i: longint;
 begin
  if Obj is exception then begin
-    result:= result + Exception(Obj).ClassName+' : '+Exception(Obj).Message+
-               lineend;
+    result:= Exception(Obj).ClassName+' : '+Exception(Obj).Message+ lineend;
  end
  else begin
-  result:= result + 'Exception object '+Obj.ClassName+
-       ' is not of class Exception.'+lineend;
+  result:= 'Exception object '+Obj.ClassName+
+           ' is not of class Exception.'+lineend;
  end;
  result:= result + BackTraceStrFunc(Addr)+lineend;
  if (FrameCount>0) then begin
