@@ -741,7 +741,7 @@ begin
   if caption.text <> '' then begin
    rect1:= arect;
    case pos of
-    cp_left: begin
+    cp_left,cp_leftcenter: begin
      textflags:= [tf_ycentered,tf_clipi];
      inc(rect1.x,captiondist);
      dec(rect1.cx,captiondist);
@@ -750,21 +750,31 @@ begin
       tab1[0].pos:= info.tabpos / defaultppmm;
      end;
     end;
-    cp_right: begin
+    cp_right,cp_rightcenter: begin
      textflags:= [tf_ycentered,tf_right,tf_clipi];
      dec(rect1.cx,captiondist);
     end;
-    cp_top: begin
+    cp_top,cp_topcenter: begin
      textflags:= [tf_xcentered,tf_clipi];
      inc(rect1.y,captiondist);
      dec(rect1.cy,captiondist);
     end;
-    cp_bottom: begin
+    cp_bottom,cp_bottomcenter: begin
      textflags:= [tf_xcentered,tf_bottom,tf_clipi];
      dec(rect1.cy,captiondist);
     end;
     else begin
      textflags:= [tf_ycentered,tf_xcentered,tf_clipi];
+    end;
+   end;
+   if pos in [cp_rightcenter,cp_leftcenter] then begin
+    include(textflags,tf_xcentered);
+    exclude(textflags,tf_right);
+   end
+   else begin
+    if pos in [cp_topcenter,cp_bottomcenter] then begin
+     include(textflags,tf_ycentered);
+     exclude(textflags,tf_bottom);
     end;
    end;
    if ss_disabled in state then begin
@@ -790,16 +800,16 @@ begin
  if not (ss_invisible in info.state) and drawbuttonframe(canvas,info,rect1) then begin
   rect2:= rect1;
   case info.captionpos of
-   cp_right: begin
+   cp_right,cp_rightcenter: begin
     pos:= cp_left;
    end;
-   cp_left: begin
+   cp_left,cp_leftcenter: begin
     pos:= cp_right;
    end;
-   cp_top: begin
+   cp_top,cp_topcenter: begin
     pos:= cp_bottom;
    end;
-   cp_bottom: begin
+   cp_bottom,cp_bottomcenter: begin
     pos:= cp_top;
    end
    else begin
@@ -813,17 +823,23 @@ begin
    end;
    if imagelist = nil then begin
     pos:= captionpos;
-   end;
-   {
+   end
    else begin
-    if captionpos = cp_center then begin
-     pos:= cp_center;
-    end
-    else begin
-     pos:= cp_left;
+    case info.captionpos of
+     cp_rightcenter: begin
+      pos:= cp_leftcenter;
+     end;
+     cp_leftcenter: begin
+      pos:= cp_rightcenter;
+     end;
+     cp_topcenter: begin
+      pos:= cp_bottomcenter;
+     end;
+     cp_bottomcenter: begin
+      pos:= cp_topcenter;
+     end;
     end;
    end;
-   }
    drawbuttoncaption(canvas,info,rect1,pos,nil);
   end;
  end;

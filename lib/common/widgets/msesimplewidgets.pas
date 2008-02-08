@@ -765,7 +765,9 @@ end;
 procedure tcustombutton.setcaptionpos(const avalue: captionposty);
 begin
  if avalue <> finfo.captionpos then begin
-  if avalue in [cp_left,cp_right,cp_top,cp_bottom] then begin
+  if avalue in [cp_left,cp_right,cp_top,cp_bottom,
+                cp_leftcenter,cp_rightcenter,
+                cp_topcenter,cp_bottomcenter] then begin
    finfo.captionpos:= avalue;
   end
   else begin
@@ -889,7 +891,7 @@ var
  int1: integer;
 begin
  asize:= textrect(getcanvas,finfo.caption,[],font).size;
- if captionpos in [cp_top,cp_bottom] then begin
+ if captionpos in [cp_top,cp_bottom,cp_topcenter,cp_bottomcenter] then begin
   inc(asize.cy,finfo.captiondist);
  end
  else begin  
@@ -897,7 +899,7 @@ begin
  end;
  if imagelist <> nil then begin
   with imagelist do begin
-   if captionpos in [cp_top,cp_bottom] then begin
+   if captionpos in [cp_top,cp_bottom,cp_topcenter,cp_bottomcenter] then begin
     if width > asize.cx then begin
      asize.cx:= width;
     end;

@@ -43,7 +43,7 @@ type
    function isfontstored: Boolean;
    procedure setfont(const Value: tframefont);
    function getfont: tframefont;
-   procedure setcaptionpos(const Value: captionposty);
+   procedure setcaptionpos(const avalue: captionposty);
    procedure setcaptiondist(const Value: integer);
    procedure setcaptionoffset(const Value: integer);
    procedure readouterframe(reader: treader);
@@ -1595,10 +1595,16 @@ begin
  internalupdatestate;
 end;
 
-procedure tcustomcaptionframe.setcaptionpos(const Value: captionposty);
+procedure tcustomcaptionframe.setcaptionpos(const avalue: captionposty);
 begin
- if fcaptionpos <> value then begin
-  fcaptionpos := Value;
+ if (fcaptionpos <> avalue) then begin
+  case avalue of
+   cp_leftcenter: fcaptionpos:= cp_left;
+   cp_rightcenter: fcaptionpos:= cp_right;
+   cp_topcenter: fcaptionpos:= cp_top;
+   cp_bottomcenter: fcaptionpos:= cp_bottom;
+   else fcaptionpos:= avalue;
+  end;
   internalupdatestate;
  end;
 end;
