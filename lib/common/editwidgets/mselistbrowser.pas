@@ -1834,7 +1834,7 @@ begin
     end;
    end;
    if not (es_processed in info.eventstate) then begin
-    if (shiftstate = []) and (key = key_return) then begin
+    if (shiftstate = []) and isenterkey(key) then begin
      if not editing then begin
       editing:= (focuseditem <> nil) and not (ns_readonly in focuseditem.state);
       if editing then begin
@@ -2403,7 +2403,7 @@ begin
   fonkeydown(self,info);
  end;
  with info do begin
-  if (oe_locate in foptionsedit) and (key = key_return) and 
+  if (oe_locate in foptionsedit) and isenterkey(key) and 
                       (shiftstate = []) then begin
    if not editing then begin
     editing:= (item <> nil) and not (ns_readonly in item.state) and 

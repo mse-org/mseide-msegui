@@ -1409,7 +1409,7 @@ begin
    if shiftstate = [] then begin
     include(eventstate,es_processed);
     case key of
-     key_return,key_tab: begin
+     key_return,key_enter,key_tab: begin
       if ffocusedcell.row < 0 then begin
        itemselected(-2,key); //nil selection
       end

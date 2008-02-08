@@ -562,7 +562,7 @@ begin
      end;
     end;
    end;
-   if (info.key = key_return) and (shiftstate - [ss_shift] = []) and
+   if isenterkey(info.key) and (shiftstate - [ss_shift] = []) and
           (foptionsedit * [oe_readonly,oe_linebreak] = [oe_linebreak]) and
          ((ss_shift in shiftstate) xor not (oe_shiftreturn in foptionsedit))
                                              then begin

@@ -1809,7 +1809,7 @@ begin
    cek_keydown: begin
     if not (ccr_nokeyreturn in restrictions) then begin
      with info.keyeventinfopo^ do begin
-      if (key = key_return) and (shiftstate = []) then begin
+      if isenterkey(key) and (shiftstate = []) then begin
        result:= true;
        include(eventstate,es_processed);
       end;

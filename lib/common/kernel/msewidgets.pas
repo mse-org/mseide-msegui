@@ -837,7 +837,8 @@ destructor destroy; override;
  buttonoptionsty = set of buttonoptionty;
 
 const
- defaultbuttonoptions = [bo_executeonclick,bo_executeonkey,bo_executeonshortcut];
+ defaultbuttonoptions = [bo_executeonclick,bo_executeonkey,
+                         bo_executeonshortcut,bo_executedefaultonenterkey];
 
 type
  tactionsimplebutton = class(tactionpublishedwidget)
@@ -1454,7 +1455,7 @@ begin
    invalidateframestaterect(finfo.dim);
   end
   else begin
-   if info.key = key_return then begin
+   if isenterkey(info.key) then begin
     include(info.eventstate,es_processed);
     internalexecute;
    end;

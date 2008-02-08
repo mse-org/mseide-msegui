@@ -561,7 +561,7 @@ begin
            mserichstring.checkshortcut(info,factioninfo.caption1,true) or
     (finfo.state * [ss_invisible,ss_disabled,ss_default] = [ss_default]) and
        ((info.key = key_return) or 
-        (info.key = key_enter) and (bo_executedefaultonenterkey in options)) and 
+        (info.key = key_enter) and (bo_executedefaultonenterkey in options)) and
        (info.shiftstate = []) then begin
    exclude(info.eventstate,es_processed); //set by checkshortcut
    if checkfocusshortcut(info) then begin

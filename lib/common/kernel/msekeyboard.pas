@@ -276,8 +276,14 @@ const
   ('Home','End','Left','Up','Right','Down','PageUp','PageDown');
 
 function keytomsechar(key: keyty): msechar; //only 0..9, a..z
+function isenterkey(const key: keyty): boolean;
 
 implementation
+
+function isenterkey(const key: keyty): boolean;
+begin
+ result:= (key = key_enter) or (key = key_return);
+end;
 
 function keytomsechar(key: keyty): msechar;
 begin
