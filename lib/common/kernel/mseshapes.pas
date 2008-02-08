@@ -651,7 +651,7 @@ function drawbuttonimage(const canvas: tcanvas; const info: shapeinfoty;
 var
  align1: alignmentsty;
  rect1: rectty;
- int1: integer;
+ int1,int2: integer;
  reg1: regionty;
 begin
  with canvas,info do begin
@@ -660,9 +660,11 @@ begin
    canvas.intersectcliprect(arect);
    result:= true;
    rect1:= arect;
-   inc(rect1.y,imagedisttop + 
-    (rect1.cy - imagedisttop - imagedistbottom - imagelist.height) div 2);
-   rect1.cy:= imagelist.height;
+   if not (pos in [cp_top,cp_bottom]) then begin
+    inc(rect1.y,imagedisttop + 
+     (rect1.cy - imagedisttop - imagedistbottom - imagelist.height) div 2);
+    rect1.cy:= imagelist.height;
+   end;
    case pos of
     cp_right: begin
      align1:= [al_right{,al_ycentered}];
@@ -672,7 +674,15 @@ begin
      align1:= [{al_ycentered}];
      inc(rect1.x,imagedist);
      dec(rect1.cx,imagedist);
-    end
+    end;
+    cp_bottom: begin
+     align1:= [al_xcentered,al_bottom];
+     dec(rect1.cy,imagedist+imagedistbottom);
+    end;
+    cp_top: begin
+     align1:= [al_xcentered];
+     inc(rect1.y,imagedist+imagedistbottom);
+    end;
     else begin
      align1:= [al_xcentered{,al_ycentered}];
     end;
@@ -695,6 +705,7 @@ begin
    end;
    canvas.clipregion:= reg1;
    int1:= imagelist.width + imagedist;
+   int2:= imagelist.height + imagedist;
    case pos of
     cp_right: begin
      dec(arect.cx,int1);
@@ -702,6 +713,13 @@ begin
     cp_left: begin
      inc(arect.x,int1);
      dec(arect.cx,int1);
+    end;
+    cp_top: begin
+     inc(arect.y,int2);
+     dec(arect.cy,int2);
+    end;
+    cp_bottom: begin
+     dec(arect.cy,int2);
     end;
    end;
   end
@@ -736,6 +754,15 @@ begin
      textflags:= [tf_ycentered,tf_right,tf_clipi];
      dec(rect1.cx,captiondist);
     end;
+    cp_top: begin
+     textflags:= [tf_xcentered,tf_clipi];
+     inc(rect1.y,captiondist);
+     dec(rect1.cy,captiondist);
+    end;
+    cp_bottom: begin
+     textflags:= [tf_xcentered,tf_bottom,tf_clipi];
+     dec(rect1.cy,captiondist);
+    end;
     else begin
      textflags:= [tf_ycentered,tf_xcentered,tf_clipi];
     end;
@@ -768,6 +795,12 @@ begin
    end;
    cp_left: begin
     pos:= cp_right;
+   end;
+   cp_top: begin
+    pos:= cp_bottom;
+   end;
+   cp_bottom: begin
+    pos:= cp_top;
    end
    else begin
     pos:= cp_center;

@@ -765,14 +765,14 @@ end;
 procedure tcustombutton.setcaptionpos(const avalue: captionposty);
 begin
  if avalue <> finfo.captionpos then begin
-  if avalue in [cp_left,cp_right] then begin
+  if avalue in [cp_left,cp_right,cp_top,cp_bottom] then begin
    finfo.captionpos:= avalue;
   end
   else begin
    finfo.captionpos:= cp_center;
   end;
   checkautosize;
-//  invalidate;
+  invalidate;
  end;
 end;
 

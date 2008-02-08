@@ -985,7 +985,10 @@ begin
    wakeupmainthread;
   end;
   unlock;
- end;
+ end
+ else begin
+  exclude(fstate,aps_terminated);
+ end;  
 end;
 
 procedure tcustomapplication.wakeupmainthread;
