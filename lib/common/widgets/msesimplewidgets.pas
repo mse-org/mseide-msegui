@@ -885,23 +885,39 @@ begin
 end;
 
 procedure tcustombutton.getautopaintsize(var asize: sizety);
+var
+ int1: integer;
 begin
  asize:= textrect(getcanvas,finfo.caption,[],font).size;
- inc(asize.cx,finfo.captiondist);
+ if captionpos in [cp_top,cp_bottom] then begin
+  inc(asize.cy,finfo.captiondist);
+ end
+ else begin  
+  inc(asize.cx,finfo.captiondist);
+ end;
  if imagelist <> nil then begin
   with imagelist do begin
-   if height > asize.cy then begin
-    asize.cy:= height;
-   end;
-   if captionpos <> cp_center then begin
-    asize.cx:= asize.cx + width;
-   end
-   else begin
+   if captionpos in [cp_top,cp_bottom] then begin
     if width > asize.cx then begin
      asize.cx:= width;
     end;
+    inc(asize.cy,finfo.imagedist+height);
+   end
+   else begin
+    int1:= height {+ imagedisttop+imagedistbottom};
+    if int1 > asize.cy then begin
+     asize.cy:= int1;
+    end;
+    if captionpos <> cp_center then begin
+     asize.cx:= asize.cx + width;
+    end
+    else begin
+     if width > asize.cx then begin
+      asize.cx:= width;
+     end;
+    end;
+    inc(asize.cx,finfo.imagedist);
    end;
-   inc(asize.cx,finfo.imagedist);
   end;
  end;
  inc(asize.cx,8+fautosize_cx);
