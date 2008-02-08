@@ -782,7 +782,8 @@ begin
   ch1:= #0;
  end;
  bo1:= nofullinvalidateneeded and (ch1 <> c_return) and (ch1 <> c_linefeed);
- if (ch1 = c_linefeed) and (fcurindex > 1) then begin
+ if (fcurindex > 1) and (finfo.text.text[fcurindex-1] = c_return) and 
+               (ch1 = c_linefeed) and (fcurindex > 1) then begin
   richdelete(finfo.text,fcurindex-1,2);
   fcurindex:= fcurindex - 2;
  end
@@ -871,8 +872,9 @@ begin
    exit;
   end;
   if shiftstate <> [ss_ctrl] then begin
+   finished:= true;
    bo1:= true;
-   if key = key_return then  begin
+   if (key = key_return) then  begin
     removechar1(chars,c_return);
     removechar1(chars,c_linefeed);
     if (shiftstate - [ss_shift] = []) and (oe_linebreak in opt1) and 
