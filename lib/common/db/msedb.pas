@@ -4599,7 +4599,7 @@ begin
      '-': // possible start of -- comment
        begin
          Inc(p);
-         if p='-' then // -- comment
+         if p^='-' then // -- comment
          begin
            repeat // skip until at end of line
              Inc(p);
