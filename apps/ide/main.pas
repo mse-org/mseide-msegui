@@ -134,7 +134,8 @@ type
    procedure newproject(const fromprogram,empty: boolean);
    function checkgdberror(aresult: gdbresultty): boolean;
    procedure doshowform(const sender: tobject);
-   procedure setprojectname(const aname: filenamety);
+   procedure setprojectname(aname: filenamety); 
+            //not const because of not refcounted widestrings
    procedure dofindmodulebyname(const amodule: pmoduleinfoty; const aname: string;
                          var action: modalresultty);
    procedure dofindmodulebytype(const atypename: string);
@@ -1718,7 +1719,7 @@ begin
  }
 end;
 
-procedure tmainfo.setprojectname(const aname: filenamety);
+procedure tmainfo.setprojectname(aname: filenamety);
 begin
  fprojectname:= aname;
  if aname = '' then begin
@@ -1795,10 +1796,14 @@ procedure tmainfo.saveproject(const aname: filenamety;
                                    const ascopy: boolean = false);
 begin
  if aname <> '' then begin
-  saveprojectoptions(aname);
-  if not ascopy then begin
-   setprojectname(aname);
-   expandprojectmacros;
+  try
+   saveprojectoptions(aname);
+   if not ascopy then begin
+    setprojectname(aname);
+    expandprojectmacros;
+   end;
+  except
+   application.handleexception(nil);
   end;
  end;
 end;

@@ -11388,8 +11388,11 @@ begin
      widget1:= widget1.widgetatpos(info.pos);
              //search diabled child
     end;
-    while (widget1 <> nil) and not (widget1.enabled or 
-                (ow_disabledhint in widget1.foptionswidget)) do begin
+    while (widget1 <> nil) and 
+      ((ow_mousetransparent in widget1.foptionswidget) or 
+        not widget1.isvisible or
+        not (widget1.enabled or (ow_disabledhint in widget1.foptionswidget))
+      ) do begin
      widget1:= widget1.parentwidget;
     end;
     if widget1 <> nil then begin
@@ -11753,6 +11756,7 @@ var
 begin       //eventloop
  lock;
  try
+  result:= false;
   ftimertick:= false;
   fillchar(modalinfo,sizeof(modalinfo),0);
   waitcountbefore:= fwaitcount;

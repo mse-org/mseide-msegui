@@ -14,6 +14,7 @@ unit mseprocutils;
 
 interface
 uses
+ {$ifdef mswindows}windows{$else}libc{$endif},
  msetypes,msestream,msepipestream,sysutils,msesysutils,msesys;
 
 const
@@ -37,7 +38,7 @@ function execmse(const commandline: string;
                 ): boolean;
 //starts program, true if OK
 
-function execmse1(const commandline: string; topipe: pinteger = nil;
+function execmse1(const commandline: ansistring; topipe: pinteger = nil;
              frompipe: pinteger = nil;
              errorpipe: pinteger = nil;
              sessionleader: boolean = false;
@@ -158,7 +159,7 @@ type
 
 implementation
 uses 
- {$ifdef mswindows}windows{$else}libc{$endif},msesysintf,msestrings,msedatalist,
+ msesysintf,msestrings,msedatalist,
  {mseguiintf,}mseguiglob;
 
 function getpid: integer;
@@ -928,7 +929,7 @@ end;
 
 {$endif}
 
-function execmse1(const commandline: string; topipe: pinteger = nil;
+function execmse1(const commandline: ansistring; topipe: pinteger = nil;
              frompipe: pinteger = nil;
              errorpipe: pinteger = nil;
              sessionleader: boolean = false;
@@ -939,7 +940,7 @@ function execmse1(const commandline: string; topipe: pinteger = nil;
              tty: boolean = false;
              nostdhandle: boolean = false
                               //windows only
-                         ): integer;
+                 ): integer;
         //creates pipes
 begin
  if topipe <> nil then begin
