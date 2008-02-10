@@ -479,14 +479,23 @@ begin
 end;
 
 procedure tmsesqlquery.doidleapplyupdates;
+var
+ bo1: boolean;
 begin
- if (changecount > 0) and (changecount >= fcontroller.delayedapplycount) then begin
+ if not (bs_idle in fbstate) and (changecount > 0) and 
+           (changecount >= fcontroller.delayedapplycount) then begin
   application.beginwait;
   include(fbstate,bs_idle);
+  bo1:= false;
   try
    applyupdates;
-  finally
-   exclude(fbstate,bs_idle);
+  except
+   bo1:= true;
+   application.endwait;
+   application.handleexception(self);
+  end;
+  exclude(fbstate,bs_idle);
+  if not bo1 then begin
    application.endwait;
   end;
  end;
