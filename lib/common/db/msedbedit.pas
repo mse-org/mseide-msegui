@@ -1097,9 +1097,10 @@ type
                                 write fonupdaterowdata;
    property datafield: string read getdatafield 
                                        write setdatafield;
-             //integer field, selects grid rowcolor (field value and $ff) and
-             //grid rowfont ((fieldvalue shr 8) and $ff). 
-             // $xxff = default color, $ffxx = default font.
+             //integer field, selects grid rowcolor (field value and $7f),
+             //readonlystate (field value and $80 and
+             //grid rowfont ((fieldvalue shr 8) and $7f). 
+             // $xx7f = default color, $7fxx = default font.
  end;
 
  tdropdownlistdatalink = class(tgriddatalink)
