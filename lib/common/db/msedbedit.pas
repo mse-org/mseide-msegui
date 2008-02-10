@@ -1098,9 +1098,9 @@ type
    property datafield: string read getdatafield 
                                        write setdatafield;
              //integer field, selects grid rowcolor (field value and $7f),
-             //readonlystate (not (field value and $80)) and
+             //readonlystate (field value and $80) and
              //grid rowfont ((fieldvalue shr 8) and $7f). 
-             // $xx7f = default color, $7fxx = default font.
+             //$xx7f = default color, $7fxx = default font.
  end;
 
  tdropdownlistdatalink = class(tgriddatalink)
@@ -5297,7 +5297,7 @@ procedure tgriddatalink.doupdaterowdata(const row: integer);
   else begin
    int1:= field.asinteger;
    fgrid.rowcolorstate[arow]:= rowstatenumty(int1 and $7f);
-   fgrid.rowreadonlystate[arow]:= rowstatenumty(int1 and $80) = 0;
+   fgrid.rowreadonlystate[arow]:= rowstatenumty(int1 and $80) <> 0;
    fgrid.rowfontstate[arow]:= rowstatenumty((int1 shr 8) and $7f);
   end;
  end;
