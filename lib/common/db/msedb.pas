@@ -1258,7 +1258,7 @@ begin
    end;
    ftmemo: begin
     if field is tmsememofield then begin
-     encodesqlstring(tmsememofield(field).asmsestring);
+     result:= encodesqlstring(tmsememofield(field).asmsestring);
     end
     else begin
      result:= encodesqlstring(field.asstring);
