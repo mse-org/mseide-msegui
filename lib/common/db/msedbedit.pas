@@ -5659,7 +5659,7 @@ begin
    fgrid.row:= invalidaxis;
   end;
   int1:= activerecord;
-  if int1 < fgrid.rowcount then begin
+  if (int1 < fgrid.rowcount) and active then begin
    fgrid.row:= int1; //else empty dataset
   end;
  finally
