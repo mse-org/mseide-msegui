@@ -14,7 +14,8 @@ unit mseinplaceedit;
 interface
 uses
  msegui,mseguiglob,msegraphics,msedrawtext,msegraphutils,
- mserichstring,msetimer,mseevent,msetypes,msestrings,mseeditglob,msedatalist;
+ mserichstring,msetimer,mseevent,msetypes,msestrings,mseeditglob,msedatalist,
+ msemenus,mseactions,mseact;
 
 const
  defaultundomaxcount = 256;
@@ -52,6 +53,7 @@ type
   function hasselection: boolean;
   function getoptionsedit: optionseditty;
   procedure editnotification(var info: editnotificationinfoty);
+  function getwidget: twidget;
  end;
 
  inplaceeditstatety = (ies_focused,ies_poschanging,ies_firstclick,ies_istextedit,
@@ -122,6 +124,11 @@ type
    function checkaction(const aaction: editactionty): boolean; overload;
    function checkaction(var info: editnotificationinfoty): boolean; overload;
    procedure enterchars(const chars: msestring); virtual;
+
+   procedure onundo(const sender: tobject);
+   procedure oncopy(const sender: tobject);
+   procedure oncut(const sender: tobject);
+   procedure onpaste(const sender: tobject);
   public
    constructor create(aowner: twidget; editintf: iedit; istextedit: boolean = false);
    destructor destroy; override;
@@ -142,6 +149,9 @@ type
 
    procedure dokeydown(var kinfo: keyeventinfoty);
    procedure mouseevent(var minfo: mouseeventinfoty);
+   procedure dopopup(var amenu: tpopupmenu; const popupmenu: tpopupmenu; 
+                     var mouseinfo: mouseeventinfoty; 
+                     const hasselection, cangridcopy: boolean);
    procedure setfirstclick;
    procedure doactivate;
    procedure dodeactivate;
@@ -297,7 +307,7 @@ function textendpoint(const start: pointty; const text: msestring): pointty;
 
 implementation
 uses
- msekeyboard,sysutils,msesysutils,msebits,msewidgets,classes,mseactions;
+ msekeyboard,sysutils,msesysutils,msebits,msewidgets,classes,msestockobjects;
  
 var
  overwrite: boolean; //insertstate
@@ -334,6 +344,78 @@ destructor tinplaceedit.destroy;
 begin
  killrepeater;
  inherited;
+end;
+
+procedure tinplaceedit.onundo(const sender: tobject);
+begin
+ undo;
+end;
+
+procedure tinplaceedit.oncopy(const sender: tobject);
+begin
+ copytoclipboard;
+end;
+
+procedure tinplaceedit.oncut(const sender: tobject);
+begin
+ cuttoclipboard;
+end;
+
+procedure tinplaceedit.onpaste(const sender: tobject);
+begin
+ pastefromclipboard;
+end;
+
+procedure tinplaceedit.dopopup(var amenu: tpopupmenu; 
+                const popupmenu: tpopupmenu; var mouseinfo: mouseeventinfoty;
+                const hasselection, cangridcopy: boolean);
+var
+ states: array[0..3] of actionstatesty;
+ sepchar: msechar;
+ bo1: boolean;
+begin  
+ if canundo then begin
+  states[0]:= []; //undo
+ end
+ else begin
+  states[0]:= [as_disabled];
+ end;
+ bo1:= cancopy or hasselection;
+ if bo1 or cangridcopy then begin
+  states[1]:= []; //copy
+  if bo1 and canedit then begin
+   states[2]:= [];
+  end
+  else begin
+   states[2]:= [as_disabled]; //cut
+  end;
+ end
+ else begin
+  states[1]:= [as_disabled]; //copy
+  states[2]:= [as_disabled]; //cut
+ end;
+ if canpaste then begin
+  states[3]:= []; //paste
+ end
+ else begin
+  states[3]:= [as_disabled];
+ end;
+ if popupmenu <> nil then begin
+  sepchar:= popupmenu.shortcutseparator;
+ end
+ else begin
+  sepchar:= tcustommenu.getshortcutseparator(amenu);
+ end;
+ tpopupmenu.additems(amenu,fintf.getwidget,mouseinfo,
+    [stockobjects.captions[sc_Undo]+sepchar+'(Esc)',
+     stockobjects.captions[sc_Copy]+sepchar+
+             '('+encodeshortcutname(sysshortcuts[sho_copy])+')',
+     stockobjects.captions[sc_Cut]+sepchar+
+             '('+encodeshortcutname(sysshortcuts[sho_cut])+')',
+     stockobjects.captions[sc_Paste]+sepchar+
+             '('+encodeshortcutname(sysshortcuts[sho_paste])+')'],
+    [],states,[{$ifdef FPC}@{$endif}onundo,{$ifdef FPC}@{$endif}oncopy,
+    {$ifdef FPC}@{$endif}oncut,{$ifdef FPC}@{$endif}onpaste]);
 end;
 
 procedure tinplaceedit.notify(var info: editnotificationinfoty);

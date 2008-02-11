@@ -63,10 +63,15 @@ const
   'M'#237'n.',                  //sc_Min
   'M'#225'x.',                  //sc_Max
   'Error de rango',             //sc_Range_error  
-  '&Deshacer',                  //sc_Undo  ///
-  '&Copiar',                    //sc_Copy   // hotkeys
-  'C&ortar',                    //sc_Cut    //
-  '&Pegar',                     //sc_Paste ///
+
+  '&Deshacer',                  //sc_Undo  ///              ///
+  '&Copiar',                    //sc_Copy   // hotkeys       //
+  'C&ortar',                    //sc_Cut    //               //
+  '&Pegar',                     //sc_Paste ///               // hotkeys
+  '&Insert Row',                //sc_insert_row ///          //
+  '&Append Row',                //sc_append_row  // hotkeys  //
+  '&Delete Row',                //sc_delete_row ///         ///
+
   '&Directorio',                //sc_Dir               /// 
   '&Subir',                     //sc_Up                 //
   'N&uevo dir.',                //sc_New_dir            // hotkeys

@@ -1357,7 +1357,8 @@ end;
    procedure drawfocusedcell(const acanvas: tcanvas); virtual;
    procedure drawcellbackground(const acanvas: tcanvas);
 
-   procedure dopopup(var amenu: tpopupmenu; var mouseinfo: mouseeventinfoty); override;
+   procedure dopopup(var amenu: tpopupmenu; 
+                         var mouseinfo: mouseeventinfoty); override;
    function rowatpos(y: integer): integer; //0..rowcount-1, invalidaxis if invalid
    function ystep: integer;
    function nextfocusablecol(acol: integer; const aleft: boolean = false): integer;
@@ -1671,6 +1672,8 @@ end;
    procedure dodeactivate; override;
 
    procedure doselectionchanged; override;
+   procedure dopopup(var amenu: tpopupmenu; 
+                         var mouseinfo: mouseeventinfoty); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -6660,16 +6663,27 @@ begin
  end;
 end;
 
-procedure tcustomgrid.dopopup(var amenu: tpopupmenu; var mouseinfo: mouseeventinfoty);
+procedure tcustomgrid.dopopup(var amenu: tpopupmenu; 
+                                    var mouseinfo: mouseeventinfoty);
 var
  bo1: boolean;
  state1: actionstatesty;
+ sepchar: msechar;
 begin
  if (og_autopopup in foptionsgrid) then begin
+  if popupmenu <> nil then begin
+   sepchar:= popupmenu.shortcutseparator;
+  end
+  else begin
+   sepchar:= tcustommenu.getshortcutseparator(amenu);
+  end;
   bo1:= og_rowinserting in foptionsgrid;
   if bo1 then begin
-   tpopupmenu.additems(amenu,self,mouseinfo,['&Insert Row (Shift+Ctrl+Insert)',
-       '&Append Row (Ctrl+Insert)'],[],[],
+   tpopupmenu.additems(amenu,self,mouseinfo,[
+              stockobjects.captions[sc_insert_row]+sepchar+
+         '('+encodeshortcutname(sysshortcuts[sho_rowinsert])+')',
+              stockobjects.captions[sc_append_row]+sepchar+
+       '('+encodeshortcutname(sysshortcuts[sho_rowappend])+')'],[],[],
         [{$ifdef FPC}@{$endif}doinsertrow,{$ifdef FPC}@{$endif}doappendrow]);
   end;
   if og_rowdeleting in foptionsgrid then begin
@@ -6679,7 +6693,9 @@ begin
    else begin
     state1:= [as_disabled];
    end;
-   tpopupmenu.additems(amenu,self,mouseinfo,['&Delete Row (Ctrl+Delete)'],
+   tpopupmenu.additems(amenu,self,mouseinfo,[
+         stockobjects.captions[sc_delete_row]+sepchar+
+       '('+encodeshortcutname(sysshortcuts[sho_rowdelete])+')'],
                   [],[state1],[{$ifdef FPC}@{$endif}dodeleterows],not bo1);
   end;
  end;
@@ -10636,6 +10652,15 @@ procedure tcustomstringgrid.doselectionchanged;
 begin
  if isdatacell(focusedcell) then begin
   feditor.font:= fdatacols[ffocusedcell.col].rowfont(ffocusedcell.row)
+ end;
+ inherited;
+end;
+
+procedure tcustomstringgrid.dopopup(var amenu: tpopupmenu; 
+                         var mouseinfo: mouseeventinfoty);
+begin
+ if isdatacell(ffocusedcell) then begin
+  feditor.dopopup(amenu,popupmenu,mouseinfo,false,fdatacols.hasselection);
  end;
  inherited;
 end;

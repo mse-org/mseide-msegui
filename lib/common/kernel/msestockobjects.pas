@@ -67,6 +67,7 @@ type
  stockcaptionty = (sc_none,sc_is_invalid,sc_Format_error,sc_Value_is_required,
                     sc_Error,sc_Min,sc_Max,sc_Range_error,
                     sc_Undo,sc_copy,sc_cut,sc_paste,
+                    sc_insert_row,sc_append_row,sc_delete_row,
                     sc_Dir,sc_Up,sc_New_dir,sc_Name,
                     sc_Show_hidden_files,sc_Filter,
                     sc_Save,sc_Open,
@@ -82,7 +83,7 @@ type
                     sc_first,sc_prior,sc_next,sc_last,
                     sc_append,sc_delete,sc_edit,sc_post,sc_cancel,sc_refresh,
                     sc_edit_filter,sc_edit_filter_min,sc_edit_filter_max,
-                    sc_filter_on,sc_search,sc_insert,sc_filter_off
+                    sc_filter_on,sc_search,sc_insert,sc_filter_off                    
                     );
  
  tstockobjects = class

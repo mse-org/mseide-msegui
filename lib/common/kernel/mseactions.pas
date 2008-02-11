@@ -11,8 +11,8 @@ unit mseactions;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- classes,mseact,mseglob,mseguiglob,msegui,mseevent,mseclasses,msebitmap,msekeyboard,
- msetypes,msestrings,msearrayprops,msestatfile,msestat;
+ classes,mseact,mseglob,mseguiglob,msegui,mseevent,mseclasses,msebitmap,
+ msekeyboard,msetypes,msestrings,msearrayprops,msestatfile,msestat;
 
 type
  sysshortcutty = (sho_copy,sho_paste,sho_cut,

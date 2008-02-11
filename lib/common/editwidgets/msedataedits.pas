@@ -111,6 +111,7 @@ type
    procedure writestatstate(const writer: tstatwriter); virtual;
    procedure writestatoptions(const writer: tstatwriter); virtual;
 
+   function cangridcopy: boolean; override;
    function isempty (const atext: msestring): boolean; virtual;
    procedure setnullvalue; virtual; //for dbedits
    function nullcheckneeded(const newfocus: twidget): boolean; virtual;
@@ -1021,6 +1022,11 @@ begin
  {$ifdef FPC} {$checkpointer default} {$endif}
  fedited:= false;
  inherited;
+end;
+
+function tdataedit.cangridcopy: boolean;
+begin
+ result:= (fgridintf <> nil) and fgridintf.cangridcopy;
 end;
 
 procedure tdataedit.initgridwidget;

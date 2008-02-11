@@ -30,6 +30,7 @@ type
   procedure setrow(arow: integer);
   procedure changed;
   function empty(index: integer): boolean;
+  function cangridcopy: boolean;
   procedure updateeditoptions(var aoptions: optionseditty);
   procedure coloptionstoeditoptions(var dest: optionseditty);
   function showcaretrect(const arect: rectty; const aframe: tcustomframe): pointty;
@@ -89,6 +90,7 @@ type
    function getrow: integer;
    procedure setrow(arow: integer);
    function empty(aindex: integer): boolean;
+   function cangridcopy: boolean;
    procedure updateeditoptions(var aoptions: optionseditty);
    function showcaretrect(const arect: rectty; const aframe: tcustomframe): pointty;
    procedure widgetpainted(const canvas: tcanvas);
@@ -1078,6 +1080,11 @@ begin
    result:= tdatalist1(fdata).empty(aindex);
   end;
  end;
+end;
+
+function twidgetcol.cangridcopy: boolean;
+begin
+ result:= tcustomwidgetgrid(fgrid).datacols.hasselection;
 end;
 
 procedure twidgetcol.updateeditoptions(var aoptions: optionseditty);

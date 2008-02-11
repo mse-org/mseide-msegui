@@ -60,10 +60,15 @@ const
   'Min',                     //sc_Min
   'Max',                     //sc_Max
   'Bereichs Fehler',         //sc_Range_error  
-  '&R'#252'ckg'#228'ngig',   //sc_Undo  ///
-  '&Kopieren',               //sc_Copy   // hotkeys
-  '&Ausschneiden',           //sc_Cut    //
-  '&Einf'#252'gen',          //sc_Paste ///
+
+  '&R'#252'ckg'#228'ngig',   //sc_Undo  ///              ///
+  '&Kopieren',               //sc_Copy   // hotkeys       //
+  '&Ausschneiden',           //sc_Cut    //               //
+  '&Einf'#252'gen',          //sc_Paste ///               // hotkeys
+  'Zeile e&inf'#252'gen',    //sc_insert_row ///          //
+  'Zeile a&nf'#252'gen',     //sc_append_row  // hotkeys  //
+  'Zeile &l'#246'schen',     //sc_delete_row ///         ///
+
   '&Dir',               //sc_Dir               /// 
   '&Auf',               //sc_Up                 //
   'Dir &neu',           //sc_New_dir            // hotkeys

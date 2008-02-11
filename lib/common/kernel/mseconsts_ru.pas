@@ -76,12 +76,16 @@ const
   #1076#1080#1072#1087#1072#1079#1086#1085#1091 ,
                                                   //sc_Range_error => 
                                                   //Nesootvetstvie diapazonu
+
                                        // hotkeys///
   #1042#1077#1088#1085#1091#1090#1100 ,           //sc_Undo     => Vernut`
   #1057#1082#1086#1087#1080#1088#1086#1074#1072#1090#1100 , 
                                                   //sc_Copy    => Skopirovat`
   #1042#1099#1088#1077#1079#1072#1090#1100 ,      //sc_Cut      => Vyrezat`
   #1042#1089#1090#1072#1074#1080#1090#1100 ,     ///sc_Paste    => Vstavit`
+  '&Insert Row',        //sc_insert_row ///          //
+  '&Append Row',        //sc_append_row  // hotkeys  //
+  '&Delete Row',        //sc_delete_row ///         ///
   
                                        // hotkeys///
   '&'#1050#1072#1090#1072#1083#1086#1075 ,        //sc_Dir      => Katalog

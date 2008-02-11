@@ -1100,7 +1100,7 @@ type
              //integer field, selects grid rowcolor (field value and $7f),
              //readonlystate (field value and $80) and
              //grid rowfont ((fieldvalue shr 8) and $7f). 
-             //$xx7f = default color, $7fxx = default font.
+             // $xx7f = default color, $7fxx = default font.
  end;
 
  tdropdownlistdatalink = class(tgriddatalink)
@@ -1546,6 +1546,7 @@ type
    procedure checkcellvalue(var accept: boolean); override;
    procedure dopaint(const acanvas: tcanvas); override;
    procedure loaded; override;
+   function cangridcopy: boolean;
 
    procedure doinsertrow(const sender: tobject); override;
    procedure doappendrow(const sender: tobject); override;
@@ -7082,6 +7083,11 @@ procedure tcustomdbstringgrid.loaded;
 begin
  inherited;
  fdatalink.loaded;
+end;
+
+function tcustomdbstringgrid.cangridcopy: boolean;
+begin
+ result:= fdatacols.hasselection;
 end;
 
 function tcustomdbstringgrid.getgrid: tcustomwidgetgrid;

@@ -106,10 +106,15 @@ const
   'Min',                //sc_Min
   'Max',                //sc_Max
   'Range error',        //sc_Range_error  
-  '&Undo',              //sc_Undo  ///
-  '&Copy',              //sc_Copy   // hotkeys
-  'Cu&t',               //sc_Cut    //
-  '&Paste',             //sc_Paste ///
+
+  '&Undo',              //sc_Undo  ///              ///
+  '&Copy',              //sc_Copy   // hotkeys       //
+  'Cu&t',               //sc_Cut    //               //
+  '&Paste',             //sc_Paste ///               // hotkeys
+  '&Insert Row',        //sc_insert_row ///          //
+  '&Append Row',        //sc_append_row  // hotkeys  //
+  '&Delete Row',        //sc_delete_row ///         ///
+
   '&Dir',               //sc_Dir               /// 
   '&Up',                //sc_Up                 //
   '&New dir',           //sc_New_dir            // hotkeys
@@ -155,7 +160,7 @@ const
   'Filter on',          //sc_filter_on
   'Search',             //sc_search
   'Insert',             //sc_insert
-  'Filter off'         //sc_filter_off
+  'Filter off'          //sc_filter_off
 
                        );
 

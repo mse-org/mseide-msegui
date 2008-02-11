@@ -305,10 +305,10 @@ type
    procedure settextflags(const value: textflagsty);
    procedure settextflagsactive(const value: textflagsty);
    procedure updatetextflags;
-   procedure onundo(const sender: tobject);
-   procedure oncopy(const sender: tobject);
-   procedure oncut(const sender: tobject);
-   procedure onpaste(const sender: tobject);
+//   procedure onundo(const sender: tobject);
+//   procedure oncopy(const sender: tobject);
+//   procedure oncut(const sender: tobject);
+//   procedure onpaste(const sender: tobject);
    function getcaretwidth: integer;
    procedure setcaretwidth(const Value: integer);
    
@@ -328,6 +328,7 @@ type
    function getoptionsedit: optionseditty; virtual;//iedit
    function getoptionsdb: optionseditdbty;
    function hasselection: boolean; virtual;
+   function cangridcopy: boolean; virtual;
    procedure setoptionsedit(const avalue: optionseditty); virtual;
    procedure updatereadonlystate; virtual;
    procedure editnotification(var info: editnotificationinfoty); virtual;
@@ -1271,7 +1272,7 @@ function tcustomedit.geteditor: tinplaceedit;
 begin
  result:= feditor;
 end;
-
+(*
 procedure tcustomedit.onundo(const sender: tobject);
 begin
  feditor.undo;
@@ -1297,30 +1298,31 @@ procedure tcustomedit.dopopup(var amenu: tpopupmenu;
 var
  states: array[0..3] of actionstatesty;
  sepchar: msechar;
-
+ bo1: boolean;
 begin
  if oe_autopopupmenu in foptionsedit then begin
   if feditor.canundo then begin
-   states[0]:= [];
+   states[0]:= []; //undo
   end
   else begin
    states[0]:= [as_disabled];
   end;
-  if feditor.cancopy then begin
-   states[1]:= [];
-   if oe_readonly in foptionsedit then begin
-    states[2]:= [as_disabled];
+  bo1:= feditor.cancopy or hasselection;
+  if bo1 or cangridcopy then begin
+   states[1]:= []; //copy
+   if bo1 and not (oe_readonly in foptionsedit) then begin
+    states[2]:= [];
    end
    else begin
-    states[2]:= [];
+    states[2]:= [as_disabled]; //cut
    end;
   end
   else begin
-   states[1]:= [as_disabled];
-   states[2]:= [as_disabled];
+   states[1]:= [as_disabled]; //copy
+   states[2]:= [as_disabled]; //cut
   end;
   if feditor.canpaste then begin
-   states[3]:= [];
+   states[3]:= []; //paste
   end
   else begin
    states[3]:= [as_disabled];
@@ -1338,6 +1340,15 @@ begin
       stockobjects.captions[sc_Paste]+sepchar+'(Ctrl+V)'],
      [],states,[{$ifdef FPC}@{$endif}onundo,{$ifdef FPC}@{$endif}oncopy,
      {$ifdef FPC}@{$endif}oncut,{$ifdef FPC}@{$endif}onpaste]);
+ end;
+ inherited;
+end;
+*)
+procedure tcustomedit.dopopup(var amenu: tpopupmenu;
+                        var mouseinfo: mouseeventinfoty);
+begin
+ if oe_autopopupmenu in foptionsedit then begin
+  feditor.dopopup(amenu,popupmenu,mouseinfo,hasselection,cangridcopy);
  end;
  inherited;
 end;
@@ -1383,6 +1394,11 @@ begin
 end;
 
 function tcustomedit.hasselection: boolean;
+begin
+ result:= false;
+end;
+
+function tcustomedit.cangridcopy: boolean;
 begin
  result:= false;
 end;
