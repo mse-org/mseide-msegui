@@ -30,7 +30,7 @@ type
   protected
    function geteditorclass: propertyeditorclassty; override;  
   public
-   procedure move(const curindex,newindex: integer); override;
+//   procedure move(const curindex,newindex: integer); override;
  end;
  
 implementation
@@ -62,7 +62,7 @@ type
   protected
    function getelementeditorclass: elementeditorclassty; override;
   public
-   procedure move(const curindex,newindex: integer); override;
+//   procedure move(const curindex,newindex: integer); override;
  end;
 
  tcolheaderelementeditor = class(tclasselementeditor)
@@ -187,39 +187,44 @@ function tdatacolseditor.geteditorclass: propertyeditorclassty;
 begin
  result:= tdatacoleditor;
 end;
-
+(*
 procedure tdatacolseditor.move(const curindex: integer;
                const newindex: integer);
 var
  int1: integer;
 begin
+ inherited;
+ {
  for int1:= 0 to high(fprops) do begin
   with tdatacols1(getordvalue(int1)) do begin
    move(curindex,newindex);
-   tfixrows1(fgrid.fixrows).movecol(curindex,newindex);
+//   tfixrows1(fgrid.fixrows).movecol(curindex,newindex);
   end;   
  end;
+ }
 end;
-
+*)
 { tfixcolseditor }
 
 function tfixcolseditor.getelementeditorclass: elementeditorclassty;
 begin
  result:= tfixgridpropeditor;
 end;
-
+(*
 procedure tfixcolseditor.move(const curindex: integer; const newindex: integer);
 var
  int1: integer;
 begin
+{
  for int1:= 0 to high(fprops) do begin
   with tfixcols1(getordvalue(int1)) do begin
-   tfixrows1(fgrid.fixrows).movecol(-curindex-1,-newindex-1);
+//   tfixrows1(fgrid.fixrows).movecol(-curindex-1,-newindex-1);
   end;   
  end;
+ }
  inherited;
 end;
-
+*)
 { tcolheaderelementeditor }
 
 function tcolheaderelementeditor.getvalue: msestring;

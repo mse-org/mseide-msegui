@@ -255,13 +255,6 @@ type
    procedure setlinecolorfix(const Value: colorty);
    procedure setcolorselect(const Value: colorty);
    procedure setcoloractive(avalue: colorty);
-   {
-   function islinewidthstored: boolean;
-   function islinecolorstored: boolean;
-   function islinecolorfixstored: boolean;
-   function iscolorselectstored : boolean;
-   function iscoloractivestored : boolean;
-   }
   protected
    flinepos: integer;
    flinewidth: integer;
@@ -285,7 +278,6 @@ type
    function getwidget: twidget;
    procedure setframeinstance(instance: tcustomframe);
    function getwidgetrect: rectty;
-//   procedure setwidgetrect(const rect: rectty);
    procedure setstaticframe(value: boolean);
    function widgetstate: widgetstatesty;
    procedure scrollwidgets(const dist: pointty);
@@ -294,10 +286,6 @@ type
    procedure invalidate;
    procedure invalidatewidget;
    procedure invalidaterect(const rect: rectty; org: originty = org_client);
-//   function getframefont: tfont;
-//   function getcanvas(aorigin: originty = org_client): tcanvas;
-//   function canfocus: boolean;
-//   function setfocus(aactivate: boolean = true): boolean;
    function getframeclicked: boolean;
    function getframemouse: boolean;
    function getframeactive: boolean;
@@ -322,15 +310,14 @@ type
    property frame: tcellframe read getframe write setframe;
    property face: tcellface read getface write setface;
    property linewidth: integer read flinewidth write setlinewidth 
-                   {stored islinewidthstored} default defaultgridlinewidth;
+                                       default defaultgridlinewidth;
    property linecolor: colorty read flinecolor write setlinecolor;
-//                   stored islinecolorstored;
    property linecolorfix: colorty read flinecolorfix write setlinecolorfix 
-                   {stored islinecolorfixstored} default defaultfixlinecolor;
+                                       default defaultfixlinecolor;
    property colorselect: colorty read fcolorselect write setcolorselect
-                  {stored iscolorselectstored} default cl_default;
+                                       default cl_default;
    property coloractive: colorty read fcoloractive write setcoloractive
-                  {stored iscoloractivestored} default cl_none;
+                                       default cl_none;
    property tag: integer read ftag write ftag;
  end;
 
@@ -361,8 +348,7 @@ type
   rowrange: cellaxisrangety;
  end;
 
- colstatety = ({cos_hasselection,}cos_selected,cos_noinvalidate,cos_edited,
-                cos_readonlyupdating);
+ colstatety = (cos_selected,cos_noinvalidate,cos_edited,cos_readonlyupdating);
  colstatesty = set of colstatety;
 
  tcolselectfont = class(tparentfont)
@@ -392,11 +378,6 @@ type
    procedure setrowcoloroffsetselect(const avalue: integer);
    procedure setrowfontoffset(const avalue: integer);
    procedure setrowfontoffsetselect(const avalue: integer);
-{
-   function iswidthstored: boolean;
-   function isoptionsstored: boolean;
-   function isfocusrectdiststored: boolean;
-}
    function getfontselect: tcolselectfont;
    function isfontselectstored: Boolean;
    procedure setfontselect(const Value: tcolselectfont);
@@ -430,9 +411,8 @@ type
    procedure deleterow(const aindex: integer;
                   const count: integer = 1); virtual; abstract;
    property options: coloptionsty read foptions write setoptions;
-//                  stored isoptionsstored nodefault; //default [];
    property focusrectdist: integer read ffocusrectdist write setfocusrectdist
-                  {stored isfocusrectdiststored} default 0;
+                                        default 0;
   public
    constructor create(const agrid: tcustomgrid; 
                         const aowner: tgridarrayprop); override;
@@ -713,7 +693,6 @@ type
    function getwidget: twidget;
    procedure setframeinstance(instance: tcustomframe);
    function getwidgetrect: rectty;
-//   procedure setwidgetrect(const rect: rectty);
    procedure setstaticframe(value: boolean);
    function widgetstate: widgetstatesty;
    procedure scrollwidgets(const dist: pointty);
@@ -753,6 +732,7 @@ type
    procedure setitems(const index: integer; const Value: tcolheader);
   protected
    procedure movecol(const curindex,newindex: integer);
+   procedure colcountchanged(const acount: integer);
    procedure updatelayout(const cols: tgridarrayprop);
    procedure dosizechanged; override;
   public
@@ -792,6 +772,8 @@ type
    procedure setvisible(const avalue: boolean);
   protected
    ftextinfo: drawtextinfoty;
+   procedure datacolscountchanged(const acount: integer);
+   procedure fixcolscountchanged(const acount: integer);
    procedure cellchanged(const col: integer); virtual;
    procedure changed; override;
    procedure updatelayout; override;
@@ -799,7 +781,7 @@ type
    function step(getscrollable: boolean = true): integer; override;
    procedure paint(const info: rowpaintinfoty); virtual;
    procedure drawcell(const canvas: tcanvas);{ virtual;}
-   procedure movecol(const curindex,newindex: integer);
+   procedure movecol(const curindex,newindex: integer; const isfix: boolean);
    procedure orderdatacols(const neworder: integerarty);
    function mergedline(acol: integer): boolean;
   public
@@ -903,7 +885,8 @@ end;
    constructor create(aowner: tcustomgrid; aclasstype: gridpropclassty);
    procedure move(const curindex,newindex: integer); override;
    property cols[const index: integer]: tcol read getcols; default;
-   property focusrectdist: integer read ffocusrectdist write setfocusrectdist default 0;
+   property focusrectdist: integer read ffocusrectdist 
+                                write setfocusrectdist default 0;
   published
    property width: integer read fwidth
                 write setwidth default griddefaultcolwidth;
@@ -949,6 +932,7 @@ end;
    procedure begindataupdate; override;
    procedure enddataupdate; override;
    procedure dosizechanged; override;
+   procedure countchanged; override;
    procedure rearange(const list: tintegerdatalist); override;
    procedure setcount1(acount: integer; doinit: boolean); override;
    procedure setrowcountmax(const value: integer);
@@ -1040,6 +1024,7 @@ end;
    function getcols(const index: integer): tfixcol;
    procedure setcols(const index: integer; const Value: tfixcol);
   protected
+   procedure countchanged; override;
    procedure updatelayout; override;
    function colatpos(const x: integer): integer; //-cout..-1, 0 if invalid
   public
@@ -1064,7 +1049,9 @@ end;
    procedure updatemergedcells;
    function rowatpos(const y: integer): integer; //-count..-1, 0 if invalid
    procedure paint(const info: rowspaintinfoty);
-   procedure movecol(const curindex,newindex: integer);
+   procedure movecol(const curindex,newindex: integer; const isfix: boolean);
+   procedure datacolscountchanged;
+   procedure fixcolscountchanged;
    procedure orderdatacols(const neworder: integerarty);
    procedure dofontheightdelta(var delta: integer);
   public
@@ -3016,6 +3003,10 @@ begin
  end;
 end;
 
+procedure tcolheaders.colcountchanged(const acount: integer);
+begin
+end;
+
 procedure tcolheaders.updatelayout(const cols: tgridarrayprop);
 var
  int1,int2,int3,int4: integer;
@@ -3109,32 +3100,36 @@ begin
 // fhints.free;
 end;
 
-procedure tfixrow.movecol(const curindex,newindex: integer);
+procedure tfixrow.movecol(const curindex,newindex: integer; const isfix: boolean);
 begin
+ if isfix then begin
+  fcaptionsfix.movecol(curindex,newindex);
+ end
+ else begin
+  fcaptions.movecol(curindex,newindex);
+ end;
+ {
  if (curindex >= 0) then begin
   fcaptions.movecol(curindex,newindex);
-  {
-  with fhints do begin
-   if (curindex < count) or (newindex < count) then begin
-    int1:= curindex;
-    if newindex >= count then begin
-     count:= newindex + 1;
-    end;
-    if curindex >= count then begin
-     count:= count + 1;
-     int1:= count-1;
-    end;
-    move(int1,newindex);
-   end;
-  end;
-  }
  end
  else begin
   with fcaptionsfix do begin
    movecol(-curindex-1,-newindex-1);
   end;
  end;
+ }
 end;
+
+procedure tfixrow.datacolscountchanged(const acount: integer);
+begin
+ fcaptions.colcountchanged(acount);
+end;
+
+procedure tfixrow.fixcolscountchanged(const acount: integer);
+begin
+ fcaptionsfix.colcountchanged(acount);
+end;
+
 
 procedure tfixrow.orderdatacols(const neworder: integerarty);
 begin
@@ -4954,6 +4949,7 @@ end;
 procedure tcols.move(const curindex, newindex: integer);
 begin
  inherited;
+ fgrid.ffixrows.movecol(curindex,newindex,freversedorder);
  fgrid.layoutchanged;
 end;
 
@@ -5608,6 +5604,12 @@ begin
  end;
 end;
 
+procedure tdatacols.countchanged;
+begin
+ fgrid.ffixrows.datacolscountchanged;
+ inherited;
+end;
+
 { tdrawcols }
 
 constructor tdrawcols.create(aowner: tcustomgrid);
@@ -5745,6 +5747,12 @@ begin
  inherited;
 end;
 
+procedure tfixcols.countchanged;
+begin
+ fgrid.fixrows.fixcolscountchanged;
+ inherited;
+end;
+
 { tfixrows }
 
 constructor tfixrows.create(aowner: tcustomgrid);
@@ -5874,12 +5882,31 @@ begin
  end;
 end;
 
-procedure tfixrows.movecol(const curindex,newindex: integer);
+procedure tfixrows.movecol(const curindex,newindex: integer;
+                               const isfix: boolean);
 var
  int1: integer;
 begin
  for int1:= 0 to high(fitems) do begin
-  tfixrow(fitems[int1]).movecol(curindex,newindex);
+  tfixrow(fitems[int1]).movecol(curindex,newindex,isfix);
+ end;
+end;
+
+procedure tfixrows.datacolscountchanged;
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fitems) do begin
+  tfixrow(fitems[int1]).datacolscountchanged(count);
+ end;
+end;
+
+procedure tfixrows.fixcolscountchanged;
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fitems) do begin
+  tfixrow(fitems[int1]).fixcolscountchanged(count);
  end;
 end;
 
@@ -9487,7 +9514,6 @@ begin
    end;
   end;
   fdatacols.move(curindex,newindex);
-  ffixrows.movecol(curindex,newindex);
  end;
  endupdate;
  docolmoved(curindex,newindex);

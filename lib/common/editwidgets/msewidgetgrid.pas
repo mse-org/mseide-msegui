@@ -224,7 +224,6 @@ type
    procedure updatelayout; override;
    procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
    procedure loaded; override;
-//   procedure widgetremoved(const child: twidget);
    function scrollcaret: boolean; override;
    procedure docellevent(var info: celleventinfoty); override;
    procedure checkcellvalue(var accept: boolean); override; //store edited value to grid
