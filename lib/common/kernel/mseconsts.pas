@@ -36,7 +36,8 @@ const
             const modalresulttextnoshortcut: defaultmodalresulttextty);
  function setlangconsts(const name: string): boolean;
                  //true if ok, no change otherwise
-
+ function getcurrentlangconstsname: string;
+ 
 implementation
 uses
  sysutils,msesysintf;
@@ -229,6 +230,11 @@ begin
    end;
   end;
  end;
+end;
+
+function getcurrentlangconstsname: string;
+begin
+ result:= lang.name;
 end;
 
 function setlangconsts(const name: string): boolean;
