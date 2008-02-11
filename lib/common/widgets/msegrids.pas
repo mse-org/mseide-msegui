@@ -8841,7 +8841,7 @@ begin
     end;
    end
    else begin
-    if pasteselection then begin
+    if issysshortcut(sho_paste,info) and pasteselection then begin
      include(info.eventstate,es_processed);
     end;
    end;    
@@ -8860,7 +8860,8 @@ begin
     end;
    end;
    if not (es_processed in info.eventstate) then begin
-    if (og_rowdeleting in foptionsgrid) and issysshortcut(sho_rowdelete,info) then begin
+    if (og_rowdeleting in foptionsgrid) and 
+                         issysshortcut(sho_rowdelete,info) then begin
      dodeleterows(nil);
      include(info.eventstate,es_processed);
     end;

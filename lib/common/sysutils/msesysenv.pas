@@ -1007,6 +1007,8 @@ begin
       inc(po2)
      end
      else begin
+      addstringsegment(avalue,po1,pmsechar(str1)+length(str1));
+             //append the rest for missing }
       str2:= '';
      end;
     end
@@ -1037,7 +1039,7 @@ begin
     if (int1 > bigint) and not (mao_removeunknown in foptions) then begin
      avalue:= avalue + stringsegment(po1,po2);
     end;
-    if po2^ = #0 then begin
+    if (po2 = nil) or (po2^ = #0) then begin
      break;
     end;
     po1:= checkmacrostart(po2);
