@@ -1459,7 +1459,8 @@ end;
 
    function focuscell(cell: gridcoordty;
               selectaction: focuscellactionty = fca_focusin;
-              const selectmode: selectcellmodety = scm_cell): boolean; virtual;
+              const selectmode: selectcellmodety = scm_cell;
+              const noshowcell: boolean = false): boolean; virtual;
                                                //true if ok
    procedure focuscolbyname(const aname: string);
                  //case sensitive
@@ -7065,12 +7066,12 @@ var
         action:= fca_focusinshift;
        end;
       end;
-      focuscell(cell1,action);
+      focuscell(cell1,action,scm_cell,not bo2);
       if not bo2 then begin
        if bo1 then begin
         firstcellclick(cell1,info);
        end;
-//       showcell(fmousecell); //gives endless loop with scrolling
+       showcell(fmousecell);
       end;
      end
      else begin
@@ -7433,7 +7434,8 @@ end;
 
 function tcustomgrid.focuscell(cell: gridcoordty;
           selectaction: focuscellactionty = fca_focusin;
-          const selectmode: selectcellmodety = scm_cell): boolean;
+          const selectmode: selectcellmodety = scm_cell;
+          const noshowcell: boolean = false): boolean;
 
  procedure doselectaction;
 
@@ -7699,7 +7701,8 @@ begin     //focuscell
     end;
    end;
   end;
-  bo1:= (cell.col <> invalidaxis) or (cell.row <> invalidaxis);
+  bo1:= ((cell.col <> invalidaxis) or (cell.row <> invalidaxis)) and 
+                                not noshowcell;
   if (cell.col <> ffocusedcell.col) or (cell.row <> ffocusedcell.row) or
         (selectaction in [fca_entergrid,fca_focusinforce]) or 
         (gs_restorerow in fstate) then begin
