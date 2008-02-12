@@ -1078,7 +1078,7 @@ begin
    ffileloaderror:= true;
    application.handleexception(self);
    hide;
-   parentwidget:= nil;
+//   parentwidget:= nil;
    release;
   end;
  end;
