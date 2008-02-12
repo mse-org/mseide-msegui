@@ -7037,40 +7037,44 @@ var
      cell1:= fmousecell;
      bo2:= fdatacols[fmousecell.col].canfocus(info.button);
      if not bo2 then begin
-      cell1.col:= ffocusedcell.col;
+      cell1.col:= ffocusedcell.col; //try to focus mouse row
       if cell1.col < 0 then begin
        cell1.col:= nextfocusablecol(0);
       end;
      end;
-     bo1:= not gridcoordisequal(cell1,ffocusedcell);
-     if (info.shiftstate * [ss_left,ss_middle,ss_right] = [ss_left])
-                 {(info.button = mb_left)} and
-            (co_mouseselect in fdatacols[cell1.col].foptions) then begin
-      if (info.shiftstate * keyshiftstatesmask = [ss_shift]) then begin
-       action:= fca_selectend;
-      end
-      else begin
-       if info.shiftstate * keyshiftstatesmask = [ss_ctrl] then begin
-        if (info.button = mb_left) or (cell1.col <> ffocusedcell.col) or
-                  (cell1.row <> ffocusedcell.row) then begin
-         action:= fca_reverse;
+     if (cell1.col >= 0) and 
+                fdatacols[cell1.col].canfocus(info.button) then begin
+      bo1:= not gridcoordisequal(cell1,ffocusedcell);
+      if (info.shiftstate * [ss_left,ss_middle,ss_right] = [ss_left])
+                  {(info.button = mb_left)} and
+             (co_mouseselect in fdatacols[cell1.col].foptions) then begin
+       if (info.shiftstate * keyshiftstatesmask = [ss_shift]) then begin
+        action:= fca_selectend;
+       end
+       else begin
+        if info.shiftstate * keyshiftstatesmask = [ss_ctrl] then begin
+         if (info.button = mb_left) or (cell1.col <> ffocusedcell.col) or
+                   (cell1.row <> ffocusedcell.row) then begin
+          action:= fca_reverse;
+         end;
         end;
        end;
+      end
+      else begin
+       if (action = fca_focusin) and (ss_shift in info.shiftstate) then begin
+        action:= fca_focusinshift;
+       end;
+      end;
+      focuscell(cell1,action);
+      if not bo2 then begin
+       if bo1 then begin
+        firstcellclick(cell1,info);
+       end;
+//       showcell(fmousecell); //gives endless loop with scrolling
       end;
      end
      else begin
-      if (action = fca_focusin) and (ss_shift in info.shiftstate) then begin
-       action:= fca_focusinshift;
-      end;
-     end;
-     focuscell(cell1,action);
-     if bo2 then begin
       showcell(fmousecell);
-     end
-     else begin
-      if bo1 then begin
-       firstcellclick(cell1,info);
-      end;
      end;
     end;
    end;

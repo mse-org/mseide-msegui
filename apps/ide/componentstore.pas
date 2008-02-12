@@ -120,6 +120,8 @@ type
    procedure opengroup(const sender: TObject);
    procedure savegroupas(const sender: TObject);
    procedure savegroup(const sender: TObject);
+   procedure nodeenter(const sender: TObject);
+   procedure nodeexit(const sender: TObject);
   private
 //   frootnode: tstoredcomponent;
    far1: storedcomponentarty;
@@ -862,6 +864,18 @@ begin
    end;
   end;
  end;
+end;
+
+procedure tcomponentstorefo.nodeenter(const sender: TObject);
+begin
+ copycompact.shortcut:= sysshortcuts[sho_copy];
+ pastecompact.shortcut:= sysshortcuts[sho_paste];
+end;
+
+procedure tcomponentstorefo.nodeexit(const sender: TObject);
+begin
+ copycompact.shortcut:= 0;
+ pastecompact.shortcut:= 0;
 end;
 
 end.

@@ -165,9 +165,9 @@ type
    procedure moveindex(newindex: integer; shift: boolean = false;
             donotify: boolean = true); virtual;
    procedure inserttext(const text: msestring; nooverwrite: boolean = true);
-   procedure copytoclipboard;
-   procedure cuttoclipboard; virtual;
-   procedure pastefromclipboard; virtual;
+   function copytoclipboard: boolean;           //true if copied
+   function cuttoclipboard: boolean; virtual;   //true if cut
+   function pastefromclipboard: boolean; virtual;        //true if pasted
    procedure deleteselection;
    procedure clearundo;
    procedure undo;
@@ -295,8 +295,8 @@ type
    procedure endgroup; override;
    procedure moveindex(newindex: integer; shift: boolean = false;
             donotify: boolean = true); override;
-   procedure cuttoclipboard; override;
-   procedure pastefromclipboard; override;
+   function cuttoclipboard: boolean; override;
+   function pastefromclipboard: boolean; override;
    property undolist: ttextundolist read fundolist;
  end;
 
@@ -924,31 +924,36 @@ begin
   if ss_shift in kinfo.shiftstate then begin
    include(actioninfo.state,eas_shift);
   end;
-  if issysshortcut(sho_copy,kinfo) then begin
-   copytoclipboard;
-  end
-  else begin
-   if issysshortcut(sho_paste,kinfo) then begin
-    if canedit then begin
-     pastefromclipboard;
-    end
-    else begin
-     finished:= false;
-    end;
+  if oe_autopopupmenu in opt1 then begin
+   if issysshortcut(sho_copy,kinfo) then begin
+    finished:= copytoclipboard;
    end
    else begin
-    if issysshortcut(sho_cut,kinfo) then begin
+    if issysshortcut(sho_paste,kinfo) then begin
      if canedit then begin
-      cuttoclipboard;
+      finished:= pastefromclipboard;
      end
      else begin
       finished:= false;
      end;
     end
     else begin
-     finished:= false;
+     if issysshortcut(sho_cut,kinfo) then begin
+      if canedit then begin
+       finished:= cuttoclipboard;
+      end
+      else begin
+       finished:= false;
+      end;
+     end
+     else begin
+      finished:= false;
+     end;
     end;
    end;
+  end
+  else begin
+   finished:= false;
   end;
   if finished then begin
    exit;
@@ -1385,35 +1390,45 @@ begin
  end;
 end;
 
-procedure tinplaceedit.copytoclipboard;
+function tinplaceedit.copytoclipboard: boolean;
 begin
+ result:= true;
  if checkaction(ea_copyselection) then begin
   if fsellength > 0 then begin
    msewidgets.copytoclipboard(selectedtext);
+  end
+  else begin
+   result:= false;
   end;
  end;
 end;
 
-procedure tinplaceedit.cuttoclipboard;
+function tinplaceedit.cuttoclipboard: boolean;
 begin
- copytoclipboard;
+ result:= copytoclipboard;
  deleteselection;
 end;
 
-procedure tinplaceedit.pastefromclipboard;
+function tinplaceedit.pastefromclipboard: boolean;
 var
  int1: integer;
  info: editnotificationinfoty;
  wstr1: msestring;
 begin
  info:= initactioninfo(ea_pasteselection);
- if checkaction(info) and msewidgets.pastefromclipboard(wstr1) then begin
-  deleteselection;
-  int1:= fcurindex;
-  inserttext(wstr1);
-  fselstart:= int1;
-  fsellength:= length(wstr1);
-  updateselect;
+ result:= true;
+ if checkaction(info) then begin
+  if msewidgets.pastefromclipboard(wstr1) then begin
+   deleteselection;
+   int1:= fcurindex;
+   inserttext(wstr1);
+   fselstart:= int1;
+   fsellength:= length(wstr1);
+   updateselect;
+  end
+  else begin
+   result:= false;
+  end;
  end;
 end;
 
@@ -2067,21 +2082,21 @@ begin
  fundolist.setpos(makegridcoord(fcurindex,frow),shift);
 end;
 
-procedure tundoinplaceedit.cuttoclipboard;
+function tundoinplaceedit.cuttoclipboard: boolean;
 begin
  fundolist.beginlink(ut_none,true);
  try
-  inherited;
+  result:= inherited cuttoclipboard;
  finally
   fundolist.endlink(true);
  end;
 end;
 
-procedure tundoinplaceedit.pastefromclipboard;
+function tundoinplaceedit.pastefromclipboard: boolean;
 begin
  fundolist.beginlink(ut_none,true);
  try
-  inherited;
+  result:= inherited pastefromclipboard;
  finally
   fundolist.endlink(true);
  end;

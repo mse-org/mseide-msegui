@@ -105,6 +105,7 @@ type
    procedure defineproperties(filer: tfiler); override;
    procedure drawcell(const canvas: tcanvas); override;
    procedure drawfocusedcell(const acanvas: tcanvas); override;
+   procedure drawfocus(const acanvas: tcanvas); override;
    procedure sortcompare(const index1,index2: integer; var result: integer); override;
    procedure itemchanged(sender: tdatalist; aindex: integer); override;
    procedure setwidget(const awidget: twidget);
@@ -1202,6 +1203,11 @@ end;
 procedure twidgetcol.drawfocusedcell(const acanvas: tcanvas);
 begin
  //no paint
+end;
+
+procedure twidgetcol.drawfocus(const acanvas: tcanvas);
+begin
+ //no paint, done in widgetpainted
 end;
 
 procedure twidgetcol.sortcompare(const index1, index2: integer;

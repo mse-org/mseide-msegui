@@ -94,7 +94,7 @@ type
    procedure rangeerror(const min,max; const quiet: boolean);
    procedure notnullerror(const quiet: boolean);
    
-   procedure dopaint(const canvas: tcanvas); override;
+   procedure doafterpaint(const canvas: tcanvas); override;
    function needsfocuspaint: boolean; override;
 
    //istatfile
@@ -1402,7 +1402,7 @@ begin
  end;
 end;
 
-procedure tdataedit.dopaint(const canvas: tcanvas);
+procedure tdataedit.doafterpaint(const canvas: tcanvas);
 begin
  inherited;
  if (fgridintf <> nil) and not (csdesigning in componentstate) then begin
