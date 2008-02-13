@@ -924,36 +924,31 @@ begin
   if ss_shift in kinfo.shiftstate then begin
    include(actioninfo.state,eas_shift);
   end;
-  if oe_autopopupmenu in opt1 then begin
-   if issysshortcut(sho_copy,kinfo) then begin
-    finished:= copytoclipboard;
+  if issysshortcut(sho_copy,kinfo) then begin
+   finished:= copytoclipboard;
+  end
+  else begin
+   if issysshortcut(sho_paste,kinfo) then begin
+    if canedit then begin
+     finished:= pastefromclipboard;
+    end
+    else begin
+     finished:= false;
+    end;
    end
    else begin
-    if issysshortcut(sho_paste,kinfo) then begin
+    if issysshortcut(sho_cut,kinfo) then begin
      if canedit then begin
-      finished:= pastefromclipboard;
+      finished:= cuttoclipboard;
      end
      else begin
       finished:= false;
      end;
     end
     else begin
-     if issysshortcut(sho_cut,kinfo) then begin
-      if canedit then begin
-       finished:= cuttoclipboard;
-      end
-      else begin
-       finished:= false;
-      end;
-     end
-     else begin
-      finished:= false;
-     end;
+     finished:= false;
     end;
    end;
-  end
-  else begin
-   finished:= false;
   end;
   if finished then begin
    exit;

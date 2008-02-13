@@ -148,6 +148,7 @@ begin
      end;
     end;
    end;
+   acontroller.doafterupdate;
   end;
  finally
   fo1.free;

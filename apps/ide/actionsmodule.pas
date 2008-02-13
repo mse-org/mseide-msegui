@@ -136,6 +136,7 @@ type
    procedure printactonexecute(const sender: TObject);
    procedure ondetachtarget(const sender: TObject);
    procedure onattachprocess(const sender: TObject);
+   procedure updateshortcuts(const sender: tshortcutcontroller);
  end;
 
 var
@@ -153,19 +154,21 @@ uses
 procedure configureide;
 begin
  if editsettings('Configure MSEide',actionsmo.shortcuts) then begin
-  with actionsmo do begin
-   copy.shortcut:= sysshortcuts[sho_copy];
-   copy.shortcut1:= sysshortcuts1[sho_copy];
-   copy.shortcut:= sysshortcuts[sho_copy];
-   copy.shortcut1:= sysshortcuts1[sho_copy];
-   paste.shortcut:= sysshortcuts[sho_paste];
-   paste.shortcut1:= sysshortcuts1[sho_paste];
-  end;
   expandprojectmacros;
  end;
 end;
 
 { tactionsmo }
+
+procedure tactionsmo.updateshortcuts(const sender: tshortcutcontroller);
+begin
+ copy.shortcut:= sysshortcuts[sho_copy];
+ copy.shortcut1:= sysshortcuts1[sho_copy];
+ cut.shortcut:= sysshortcuts[sho_cut];
+ cut.shortcut1:= sysshortcuts1[sho_cut];
+ paste.shortcut:= sysshortcuts[sho_paste];
+ paste.shortcut1:= sysshortcuts1[sho_paste];
+end;
 
 //common
 procedure tactionsmo.findinfileonexecute(const sender: tobject);

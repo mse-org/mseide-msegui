@@ -122,7 +122,8 @@ type
   shortcut1: integer;
  end;
  shortcutstatinfoarty = array of shortcutstatinfoty;
-   
+ shortcutcontrollereventty = procedure(
+                        const sender: tshortcutcontroller) of object;   
  tshortcutcontroller = class(tmsecomponent,istatfile)
   private
    factions: tshortcutactions;
@@ -131,6 +132,7 @@ type
    fstatinfos: shortcutstatinfoarty;
    fsysshortcuts: tsysshortcuts;
    fsysshortcuts1: tsysshortcuts;
+   fonafterupdate: shortcutcontrollereventty;
    procedure setactions(const avalue: tshortcutactions);
    procedure setstatfile(const avalue: tstatfile);
    function getactionrecord(const index: integer): msestring;
@@ -149,12 +151,15 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure doafterupdate;
   published
    property actions: tshortcutactions read factions write setactions;
    property sysshortcuts: tsysshortcuts read fsysshortcuts write setsysshortcuts;
    property sysshortcuts1: tsysshortcuts read fsysshortcuts1 write setsysshortcuts1;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
+   property onafterupdate: shortcutcontrollereventty read fonafterupdate 
+                                write fonafterupdate;
  end;
 
 procedure setactionshortcut(const sender: iactionlink; const value: shortcutty);
@@ -732,6 +737,13 @@ begin
  //dummy
 end;
 
+procedure tshortcutcontroller.doafterupdate;
+begin
+ if canevent(tmethod(fonafterupdate)) then begin
+  fonafterupdate(self);
+ end;
+end;
+
 procedure tshortcutcontroller.statread;
 var
  int1: integer;
@@ -743,6 +755,7 @@ begin
    end;
   end;
  end;
+ doafterupdate;
 end;
 
 function tshortcutcontroller.getstatvarname: msestring;

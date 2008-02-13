@@ -121,6 +121,7 @@ object actionsmo: tactionsmo
   end
   object cut: taction
     shortcut = 16472
+    shortcut1 = 12295
     caption = 'Cu&t'
     onexecute = cutactonexecute
     left = 280
@@ -135,6 +136,7 @@ object actionsmo: tactionsmo
   end
   object paste: taction
     shortcut = 16470
+    shortcut1 = 12294
     caption = '&Paste'
     onexecute = pasteactonexecute
     left = 280
@@ -724,7 +726,8 @@ object actionsmo: tactionsmo
       0
     )
     statfile = mainfo.mainstatfile
-    left = 344
+    onafterupdate = updateshortcuts
+    left = 320
     top = 312
   end
   object toggleinspector: taction
