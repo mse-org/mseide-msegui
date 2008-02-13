@@ -1782,7 +1782,7 @@ end;
 
 initialization
 {$ifdef FPC}
- winwidestringalloc:= false;
+// winwidestringalloc:= false;
  {$endif}
  doinit;
 //iswin95:= true;
