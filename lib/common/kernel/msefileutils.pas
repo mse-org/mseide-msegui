@@ -87,7 +87,7 @@ function filepath(const directory: filenamety; const filename: filenamety;
                         kind: filekindty = fk_default;
                         relative: boolean = false): filenamety; overload;
  //directory ignored if filename starts with root
-function filepath(const path: filenamety;
+function filepath({const} path: filenamety;
                         kind: filekindty = fk_default;
                         relative: boolean = false): filenamety; overload;
 function relativepath(const path: filenamety; const root: filenamety = '';
@@ -943,7 +943,7 @@ begin
  end;
 end;
 
-function filepath(const path: filenamety;
+function filepath({const} path: filenamety;
      kind: filekindty = fk_default; relative: boolean = false): filenamety; overload;
 var
  ar1,ar2: filenamearty;

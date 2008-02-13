@@ -348,17 +348,12 @@ begin
   bottom:= abottom;
  end;
 end;
-{
-function gui_windowgetfocus(var awindow: windowty): guierrorty;
+
+function gui_grouphideminimizedwindows: boolean;
 begin
- result:= gue_ok;
+ result:= true;
 end;
 
-function gui_windowloosefocus(var awindow: windowty): guierrorty;
-begin
- result:= gue_ok;
-end;
-}
 function gui_setimefocus(var awindow: windowty): guierrorty;
 begin
  result:= gue_ok;

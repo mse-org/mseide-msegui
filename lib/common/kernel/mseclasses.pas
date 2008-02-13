@@ -363,12 +363,12 @@ type
    property actualclassname: string read getactualclassname;
    property msecomponentstate: msecomponentstatesty read fmsecomponentstate;
    property tagpo: pointer read ftagpo write ftagpo;
-  published
-   property helpcontext: msestring read gethelpcontext write fhelpcontext;
    property onbeforeupdateskin: notifyeventty read fonbeforeupdateskin 
                                    write fonbeforeupdateskin;
    property onafterupdateskin: notifyeventty read fonafterupdateskin 
                                    write fonafterupdateskin;
+  published
+   property helpcontext: msestring read gethelpcontext write fhelpcontext;
  end;
 
  msecomponenteventty = procedure(const sender: tmsecomponent) of object;

@@ -822,7 +822,9 @@ var
  int1: integer;
 begin
  err:= nil;
+{$ifdef FPC} {$checkpointer off} {$endif};
  int1:= sqlite3_exec(fhandle,pchar(asql),nil,nil^,@err);
+{$ifdef FPC} {$checkpointer default} {$endif};
  if err <> nil then begin
   str1:= err;
   sqlite3_free(err);

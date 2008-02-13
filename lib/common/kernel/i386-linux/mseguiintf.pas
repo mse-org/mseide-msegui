@@ -738,6 +738,11 @@ var
 // lastshiftstate: shiftstatesty;
  clipboard: msestring;
 
+function gui_grouphideminimizedwindows: boolean;
+begin
+ result:= false;
+end;
+
 function hasxft: boolean;
 begin
  result:= fhasxft;

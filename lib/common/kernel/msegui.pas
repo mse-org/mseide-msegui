@@ -1391,6 +1391,9 @@ type
    property taborder: integer read ftaborder write settaborder default 0;
    property hint: msestring read gethint write sethint stored ishintstored;
    property zorder: integer read getzorder write setzorder;
+  published
+   property onbeforeupdateskin;
+   property onafterupdateskin;
  end;
 
  windowstatety = (tws_posvalid,tws_sizevalid,tws_windowvisible,
@@ -1636,6 +1639,7 @@ type
   private
    finiting: integer;
    fwindows: windowarty;
+   fgroupzorder: windowarty;
    factivewindow: twindow;
    fwantedactivewindow: twindow; //set by twindow.activate if modal
    finactivewindow: twindow;
@@ -9990,6 +9994,7 @@ procedure twindow.hide(windowevent: boolean);
 var
  int1: integer;
  window1: twindow;
+ bo1: boolean;
 begin
  releasemouse;
  if not(ws_visible in fowner.fwidgetstate) then begin
@@ -10001,11 +10006,12 @@ begin
     if (application.fmainwindow = self) and not appinst.terminated then begin
      gui_flushgdi;
      sys_sched_yield;
-//     sleep(0);     //give windowmanager time to unmap all windows
-     appinst.sortzorder;
      exclude(fstate,tws_windowvisible);
      include(fstate,tws_grouphidden);
      include(fstate,tws_groupminimized);
+     bo1:= gui_grouphideminimizedwindows;
+     application.sortzorder;
+     appinst.fgroupzorder:= copy(appinst.fwindows);
      for int1:= 0 to high(appinst.fwindows) do begin
       window1:= appinst.fwindows[int1];
       if (window1 <> self) and (window1.fwindow.id <> 0) and 
@@ -10016,6 +10022,9 @@ begin
          include(fstate,tws_groupminimized);
         end;
         gui_setwindowstate(winid,wsi_minimized,false);
+        if bo1 then begin
+         gui_hidewindow(winid);
+        end;
        end;
       end;
      end;
@@ -10038,6 +10047,7 @@ var
  int1: integer;
  window1: twindow;
  size1: windowsizety;
+ bo1,bo2: boolean;
 begin
  if (ws_visible in fowner.fwidgetstate) then begin
   if not visible then begin
@@ -10068,6 +10078,8 @@ begin
     end;
     exclude(fstate,tws_grouphidden);
     exclude(fstate,tws_groupminimized);
+    bo1:= gui_grouphideminimizedwindows;
+    bo2:= false;
     for int1:= 0 to high(appinst.fwindows) do begin
      window1:= appinst.fwindows[int1];
      if window1 <> self then begin
@@ -10080,9 +10092,31 @@ begin
          size1:= wsi_minimized;
         end;
         gui_setwindowstate(winid,size1,true);
+        bo2:= true;
+//        if bo1 then begin
+//         gui_showwindow(winid);
+//        end;
        end;
        exclude(fstate,tws_grouphidden);
        exclude(fstate,tws_groupminimized);
+      end;
+     end;
+    end;
+    if bo2 then begin
+     activate;
+     with appinst do begin
+      if fgroupzorder <> nil then begin
+       removeitem(pointerarty(fgroupzorder),window1);
+       additem(pointerarty(fgroupzorder),window1);
+       fwindowstack:= nil;
+       setlength(fwindowstack,high(fgroupzorder));
+       window1:= fgroupzorder[0]; //lowest
+       for int1:= 1 to high(fgroupzorder) do begin
+        fwindowstack[int1-1].upper:= fgroupzorder[int1];
+        fwindowstack[int1-1].lower:= window1;
+        window1:= fgroupzorder[int1];
+       end;
+       include(fstate,aps_needsupdatewindowstack);
       end;
      end;
     end;
@@ -11122,6 +11156,11 @@ begin
    end;
   end;
  end;
+ for int1:= high(fgroupzorder) downto 0 do begin
+  if fgroupzorder[int1] = sender then begin
+   deleteitem(pointerarty(fgroupzorder),int1);
+  end;
+ end;
  if factivewindow = sender then begin
   factivewindow:= nil;
  end;
@@ -12056,7 +12095,8 @@ begin
  end;
 end;
 
-procedure tinternalapplication.stackunder(const sender: twindow; const predecessor: twindow);
+procedure tinternalapplication.stackunder(const sender: twindow; 
+                                              const predecessor: twindow);
 begin
  setlength(fwindowstack,high(fwindowstack)+2);
  with fwindowstack[high(fwindowstack)] do begin
@@ -12065,7 +12105,8 @@ begin
  end;
 end;
 
-procedure tinternalapplication.stackover(const sender: twindow; const predecessor: twindow);
+procedure tinternalapplication.stackover(const sender: twindow;
+                                             const predecessor: twindow);
 begin
  setlength(fwindowstack,high(fwindowstack)+2);
  with fwindowstack[high(fwindowstack)] do begin
@@ -12118,7 +12159,8 @@ begin
   for int1:= 0 to high(fwindowstack) do begin
    findlevel(fwindowstack[int1]);
   end;
-  sortarray(fwindowstack,{$ifdef FPC}@{$endif}cmpwindowstack,sizeof(windowstackinfoty));
+  sortarray(fwindowstack,{$ifdef FPC}@{$endif}cmpwindowstack,
+                                            sizeof(windowstackinfoty));
   if gui_canstackunder then begin
    for int1:= 0 to high(fwindowstack) do begin
     with fwindowstack[int1] do begin
