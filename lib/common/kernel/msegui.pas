@@ -10102,7 +10102,7 @@ begin
       end;
      end;
     end;
-    if bo2 then begin
+    if bo1 and bo2 then begin
      activate;
      with appinst do begin
       if fgroupzorder <> nil then begin
