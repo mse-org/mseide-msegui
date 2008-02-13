@@ -1075,11 +1075,13 @@ begin
    loadfile;
    mainfo.checkbluedots;
   except
-   ffileloaderror:= true;
-   application.handleexception(self);
-   hide;
-//   parentwidget:= nil;
-   release;
+   on e: exception do begin
+    ffileloaderror:= true;
+    application.showasyncexception(e,'');
+    hide;
+ //   parentwidget:= nil;
+    release;
+   end;
   end;
  end;
 end;
