@@ -360,7 +360,9 @@ begin
 
  openconnection(fhandle);
 // This does only work for pg>=8.0, so timestamps won't work with earlier versions of pg which are compiled with integer_datetimes on
- FIntegerDatetimes := pqparameterstatus(FHandle,'integer_datetimes') = 'on';
+ if pqparameterstatus <> nil then begin
+  FIntegerDatetimes := pqparameterstatus(FHandle,'integer_datetimes') = 'on';
+ end;
  with tdatabasecracker(self) do begin
   bo1:= fconnected;
   fconnected:= true;
