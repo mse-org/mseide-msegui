@@ -1225,7 +1225,7 @@ begin
         Dec(Index);
 //        Move(PWideChar(S)[Index+Size],PWideChar(S)[Index],(LS-Index+1)*sizeof(WideChar));
         Move(PWideChar(S)[Index+Size],PWideChar(S)[Index],(LS-Index-Size+1)*sizeof(WideChar));
-                       //2008-02-14 mse
+                        //2008-02-14 mse 
       end;
      Setlength(s,LS-Size);
    end;
