@@ -17,9 +17,6 @@ uses
  mseevent,msepointer,
  mseguiglob,msethread,mseformatstr,msesysintf,msestockobjects,msestrings;
  
-var
- pixmapcount: integer;
- 
 const
 // pixel0 = $000000;
 // pixel1 = $ffffff;
@@ -33,6 +30,14 @@ const
 {$endif}
 
 function getapplicationwindow: hwnd;
+
+{$ifdef mse_debuggdi}
+var
+ pixmapcount: integer;
+ fontcount: integer;
+ windowcount: integer;
+ regioncount: integer;
+{$endif}
 
 implementation
 //todo: 19.10.03 rasterops for textout
@@ -648,7 +653,6 @@ var
  dc,dc1: hdc;
 
 begin
- inc(pixmapcount);
  if monochrome then begin
   result:= createbitmap(size.cx,size.cy,1,1,nil);
  end
@@ -657,6 +661,11 @@ begin
   result:= createcompatiblebitmap(dc,size.cx,size.cy);
   releasedc(winid,dc);
  end;
+{$ifdef mse_debuggdi}
+ if result <> 0 then begin
+  inc(pixmapcount);
+ end;
+{$endif}
  if (result <> 0) and (copyfrom <> 0) then begin
   dc:= createcompatibledc(0);
   dc1:= createcompatibledc(0);
@@ -775,11 +784,13 @@ end;
 
 function gui_freepixmap(pixmap: pixmapty): gdierrorty;
 begin
- dec(pixmapcount);
  if not deleteobject(pixmap) then begin
   result:= gde_freepixmap;
  end
  else begin
+{$ifdef mse_debuggdi}
+  dec(pixmapcount);
+{$endif}
   result:= gde_ok;
  end;
 end;
@@ -1469,6 +1480,11 @@ begin
   end;
  end;
 endlab:
+{$ifdef mse_debuggdi}
+ if result then begin
+  inc(fontcount);
+ end;
+{$endif}
  closedc; 
 end;
 
@@ -1489,9 +1505,15 @@ begin
    dispose(charwidths);
   end;
   if font <> 0 then begin
+{$ifdef mse_debuggdi}
+   dec(fontcount);
+{$endif}
    deleteobject(font);
   end;
   if fonthighres <> 0 then begin
+{$ifdef mse_debuggdi}
+   dec(fontcount);
+{$endif}
    deleteobject(fonthighres);
   end;
  end;
@@ -1745,6 +1767,9 @@ begin
  with awindow do begin
   if id <> 0 then begin
    if windows.DestroyWindow(id) then begin
+{$ifdef mse_debuggdi}
+    dec(windowcount);
+{$endif}
     result:= gue_ok;
    end
    else begin //foreign thread
@@ -2237,6 +2262,9 @@ end;
 
 function createregion: regionty; overload;
 begin
+{$ifdef mse_debuggdi}
+ inc(regioncount);
+{$endif}
  result:= createrectrgnindirect(trect(nullrect));
 end;
 
@@ -2244,6 +2272,9 @@ function createregion(var rect: rectty; const gc: gcty): regionty; overload;
 var
  rect1: rectty;
 begin
+{$ifdef mse_debuggdi}
+ inc(regioncount);
+{$endif}
  if win32gcty(gc.platformdata).kind = gck_printer then begin
   rect1:= rect;
   recttowinrect(rect1);
@@ -2260,6 +2291,9 @@ end;
 
 procedure gui_createemptyregion(var drawinfo: drawinfoty);
 begin
+{$ifdef mse_debuggdi}
+ inc(regioncount);
+{$endif}
  with drawinfo.regionoperation do begin
   dest:= createregion;
  end;
@@ -2279,6 +2313,9 @@ begin
     selectcliprgn(handle,reg1);
    end;
    deleteobject(reg1);
+{$ifdef mse_debuggdi}
+   dec(regioncount);
+{$endif}
   end;
   gccliporigin:= cliporigin;
  end;
@@ -2329,6 +2366,9 @@ procedure gui_destroyregion(var drawinfo: drawinfoty);
 begin
  with drawinfo.regionoperation do begin
   if source <> 0 then begin
+{$ifdef mse_debuggdi}
+   dec(regioncount);
+{$endif}
    deleteobject(source);
   end;
  end;
@@ -2388,6 +2428,9 @@ begin
   reg1:= createregion(rect,drawinfo.gc);
   combinergn(dest,dest,reg1,rgn_diff);
   deleteobject(reg1);
+{$ifdef mse_debuggdi}
+  dec(regioncount);
+{$endif}
  end;
 end;
 
@@ -2406,6 +2449,9 @@ begin
   reg1:= createregion(rect,drawinfo.gc);
   combinergn(dest,dest,reg1,rgn_or);
   deleteobject(reg1);
+{$ifdef mse_debuggdi}
+  dec(regioncount);
+{$endif}
  end;
 end;
 
@@ -2424,6 +2470,9 @@ begin
   reg1:= createregion(rect,drawinfo.gc);
   combinergn(dest,dest,reg1,rgn_and);
   deleteobject(reg1);
+{$ifdef mse_debuggdi}
+  dec(regioncount);
+{$endif}
  end;
 end;
 
@@ -4220,6 +4269,9 @@ begin
    result:= gue_createwindow;
   end
   else begin
+{$ifdef mse_debuggdi}
+   inc(windowcount);
+{$endif}
    if not (pos = wp_default) and (parent = 0) then begin
     result:= gui_reposwindow(id,rect);
    end
