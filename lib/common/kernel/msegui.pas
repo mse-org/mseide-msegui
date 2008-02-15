@@ -6046,6 +6046,8 @@ begin
 end;
 
 procedure twidget.paint(const canvas: tcanvas);
+label
+ endlab;
 var
  int1,int2: integer;
  saveindex: integer;
@@ -6061,8 +6063,7 @@ begin
  rect1.size:= fwidgetrect.size;
  canvas.intersectcliprect(rect1);
  if canvas.clipregionisempty then begin
-  canvas.restore;
-  exit;
+  goto endlab;
  end;
  canvas.save;
  if not (ws_nopaint in fwidgetstate) then begin
@@ -6127,6 +6128,7 @@ begin
          reg1:= createregion;
          addopaquechildren(reg1);
          subclipregion(reg1);
+         destroyregion(reg1);
         end;
        end;
       end;
@@ -6149,6 +6151,7 @@ begin
  end;
  dopaintoverlay(canvas);
  doafterpaint(canvas);
+endlab:
  canvas.restore;
 end;
 

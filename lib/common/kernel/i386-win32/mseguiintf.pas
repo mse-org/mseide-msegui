@@ -37,6 +37,7 @@ var
  fontcount: integer;
  windowcount: integer;
  regioncount: integer;
+ gccount: integer;
 {$endif}
 
 implementation
@@ -1160,6 +1161,9 @@ begin
   end;
  end;
  if gc.handle <> 0 then begin
+{$ifdef mse_debuggdi}
+  inc(gccount);
+{$endif}
   win32gcty(gc.platformdata).kind:= akind;
   settextalign(gc.handle,ta_left or ta_baseline or ta_noupdatecp);
   setbkmode(gc.handle,transparent);
@@ -1173,6 +1177,9 @@ begin
  with drawinfo,gc,win32gcty(platformdata) do begin
   selectobject(handle,nullpen);
   selectobject(handle,nullbrush);
+{$ifdef mse_debuggdi}
+  dec(gccount);
+{$endif}
   if kind in [gck_pixmap,gck_printer] then begin
 //   bmp1:= createcompatiblebitmap(handle,0,0);
 //   bmp2:= selectobject(handle,bmp1); //select actual bitmap out of dc
@@ -2291,9 +2298,6 @@ end;
 
 procedure gui_createemptyregion(var drawinfo: drawinfoty);
 begin
-{$ifdef mse_debuggdi}
- inc(regioncount);
-{$endif}
  with drawinfo.regionoperation do begin
   dest:= createregion;
  end;
@@ -3217,7 +3221,9 @@ begin
    end;
    bufferbmpback:= bufferbmp;
    gui_imagetopixmap(destimage,pixmapty(bufferbmp),handle);
+{$ifdef mse_debuggdi}
    dec(pixmapcount);
+{$endif}
    gui_freeimagemem(destimage.pixels);
    gui_freeimagemem(sourceimage.pixels);
    if mask <> nil then begin
