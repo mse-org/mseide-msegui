@@ -1466,7 +1466,7 @@ type
    procedure sizeconstraintschanged;
    procedure createwindow;
    procedure checkwindow(windowevent: boolean);
-   procedure destroywindow;
+//   procedure destroywindow;
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); virtual;
                                       //nil if from application
    procedure show(windowevent: boolean);
@@ -1510,6 +1510,7 @@ type
    procedure unlockactivate;
    procedure setzorder(const value: integer);
   public
+   procedure destroywindow;
    constructor create(aowner: twidget);
    destructor destroy; override;
    procedure registeronscroll(const method: notifyeventty);

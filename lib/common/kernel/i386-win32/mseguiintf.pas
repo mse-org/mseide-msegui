@@ -1770,9 +1770,15 @@ begin
 end;
 
 function gui_destroywindow(var awindow: windowty): guierrorty;
+var
+ ico1: hicon;
 begin
  with awindow do begin
   if id <> 0 then begin
+   ico1:= sendmessage(id,wm_seticon,icon_big,0);
+   if ico1 <> 0 then begin
+    destroyicon(ico1);
+   end;
    if windows.DestroyWindow(id) then begin
 {$ifdef mse_debuggdi}
     dec(windowcount);
