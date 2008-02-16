@@ -2488,7 +2488,8 @@ begin
    result:= false;
    exit;
   end;
-  inc(RefCount);
+//  inc(RefCount);
+  refcount:= 2; //releasing the library is unsafe!
   LoadedLibrary:=LibraryName;
   pointer(isc_attach_database) := GetProcedureAddress(IBaseLibraryHandle,'isc_attach_database');
   pointer(isc_array_gen_sdl) := GetProcedureAddress(IBaseLibraryHandle,'isc_array_gen_sdl');
@@ -2714,7 +2715,7 @@ begin
   dec(refcount);
  end
  else begin
-  if unloadlibrary(ibaselibraryhandle) then begin
+  if (refcount = 1) and unloadlibrary(ibaselibraryhandle) then begin
    dec(refcount);
    ibaselibraryhandle := nilhandle;
    loadedlibrary:='';
