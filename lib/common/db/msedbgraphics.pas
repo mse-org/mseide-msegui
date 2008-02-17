@@ -93,7 +93,7 @@ type
      //idbeditfieldlink
    function getgriddatasource: tdatasource;
    function edited: boolean;
-   procedure initfocus;
+   procedure initeditfocus;
    function checkvalue(const quiet: boolean = false): boolean;
    procedure valuetofield;
    procedure updatereadonlystate;
@@ -199,7 +199,7 @@ begin
  result:= false;
 end;
 
-procedure tdbdataimage.initfocus;
+procedure tdbdataimage.initeditfocus;
 begin
  //dummy
 end;
