@@ -15,14 +15,15 @@ interface
 uses
  msegrids,Classes,msestream,mseclasses,msepipestream,mseevent,mseinplaceedit,
  msetextedit,msestrings,msesys,mseeditglob,msemenus,msegui;
+type
+ sendtexteventty = procedure(var atext: msestring; var donotsend: boolean) of object;
+ terminaloptionty = (teo_readonly,teo_tty);
+ terminaloptionsty = set of terminaloptionty;
 const
  defaultterminaleditoptions = (defaulttexteditoptions + [oe_caretonreadonly])-
                             [oe_linebreak];
-type
- sendtexteventty = procedure(var atext: msestring; var donotsend: boolean) of object;
- terminaloptionty = (teo_readonly);
- terminaloptionsty = set of terminaloptionty;
- 
+ defaultterminaloptions = [teo_tty];
+type 
  tterminal = class(tcustomtextedit)
   private
    foutput: tpipewriter;
@@ -70,7 +71,8 @@ type
    property onerrorpipebroken: notifyeventty read fonerrorpipebroken 
                                                    write fonerrorpipebroken;
    property onsendtext: sendtexteventty read fonsendtext write fonsendtext;
-   property options: terminaloptionsty read foptions write setoptions default [];
+   property options: terminaloptionsty read foptions write setoptions 
+                          default defaultterminaloptions;
  end;
 
 implementation
@@ -83,6 +85,7 @@ uses
 constructor tterminal.create(aowner: tcomponent);
 begin
  fprochandle:= invalidprochandle;
+ foptions:= defaultterminaloptions;
  inherited;
  optionsedit:= defaultterminaleditoptions;
  foutput:= tpipewriter.create;
@@ -253,7 +256,8 @@ end;
 function tterminal.execprog(const commandline: string): integer;
 begin
  fprochandle:= invalidprochandle;
- result:= execmse2(commandline,foutput,finput,ferrorinput);
+ result:= execmse2(commandline,foutput,finput,ferrorinput,false,-1,true,false,
+                      teo_tty in foptions);
  fprochandle:= result;
 end;
 

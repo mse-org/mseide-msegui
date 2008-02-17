@@ -4564,9 +4564,9 @@ end;
 
 procedure tcustomstringcol.readpipe(const text: string; const processeditchars: boolean = false);
 var
- ar1: stringarty;
+ ar1: msestringarty;
  int1: integer;
- mstr1: string;
+ mstr1: msestring;
 begin
  ar1:= nil; //compiler warning
  if text <> '' then begin

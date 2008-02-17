@@ -66,7 +66,8 @@ type
 
    function setdropdowntext(const avalue: msestring; const docheckvalue: boolean;
                 const canceled: boolean; const akey: keyty): boolean;
-                
+   procedure initeditfocus;
+                   
    //igridwidget
    procedure setfirstclick;
    function createdatalist(const sender: twidgetcol): tdatalist; virtual; abstract;
@@ -1639,6 +1640,12 @@ procedure tdataedit.aftercelldragevent(var ainfo: draginfoty; const arow: intege
                var handled: boolean);
 begin
  //dummy
+end;
+
+procedure tdataedit.initeditfocus;
+begin
+ fedited:= false;
+ initfocus;
 end;
 
 { tcustomstringedit }

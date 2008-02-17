@@ -121,6 +121,8 @@ type
    procedure dofontheightdelta(var delta: integer); override;
    
    procedure updatereadonlystate; virtual;
+   procedure initeditfocus;
+   
    //igridwidget
    procedure setfirstclick;
    function createdatalist(const sender: twidgetcol): tdatalist; virtual; abstract;
@@ -164,7 +166,6 @@ type
    procedure initgridwidget; virtual;
 
    function edited: boolean;
-   procedure initfocus;
    function actualcolor: colorty; override;
    function col: twidgetcol;
    function row: integer;
@@ -1266,7 +1267,7 @@ begin
  result:= fedited;
 end;
 
-procedure tgraphdataedit.initfocus;
+procedure tgraphdataedit.initeditfocus;
 begin
  //dummy
 end;

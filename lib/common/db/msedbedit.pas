@@ -129,7 +129,7 @@ type
   function getgriddatasource: tdatasource;
   function edited: boolean;
   function seteditfocus: boolean;
-  procedure initfocus;
+  procedure initeditfocus;
   function checkvalue(const quiet: boolean = false): boolean;
   procedure valuetofield;
   procedure fieldtovalue;
@@ -1413,7 +1413,7 @@ type
    function getwidget: twidget;
    function seteditfocus: boolean;
    function edited: boolean;
-   procedure initfocus;
+   procedure initeditfocus;
    function checkvalue(const quiet: boolean = false): boolean;
    procedure valuetofield;
    procedure fieldtovalue;
@@ -2339,7 +2339,7 @@ begin
      fintf.setnullvalue;
     end;
     if fintf.getwidget.focused then begin
-     fintf.initfocus;
+     fintf.initeditfocus;
     end;
    finally
     dec(frecordchange);
@@ -6542,7 +6542,7 @@ begin
  result:= ewds_modified in fdatalink.fstate;
 end;
 
-procedure tdbstringcol.initfocus;
+procedure tdbstringcol.initeditfocus;
 begin
  //dummy
 end;
