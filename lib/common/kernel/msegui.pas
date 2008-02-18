@@ -1415,6 +1415,7 @@ type
   groupleader: winidty;
   icon,iconmask: pixmapty;
  end;
+ pinternalwindowoptionsty = ^internalwindowoptionsty;
 
  pmodalinfoty = ^modalinfoty;
  modalinfoty = record
@@ -1428,6 +1429,7 @@ type
   id: winidty;
   platformdata: array[0..7] of pointer;
  end;
+ pwindowty = ^windowty;
  
  twindow = class(teventobject,icanvas)
   private
@@ -1919,6 +1921,23 @@ type
    fmodalresult: modalresultty;
    fmodal: boolean;
    ftransientfor: twindow;
+  protected
+   procedure execute; override;
+ end;
+ 
+ tcreatewindowevent = class(tsynchronizeevent)
+  private
+   fsender: twindow;
+   frect: rectty;
+   foptionspo: pinternalwindowoptionsty;
+   fwindowpo: pwindowty;
+  protected
+   procedure execute; override;
+ end;
+
+ tdestroywindowevent = class(tsynchronizeevent)
+  private
+   fwindowpo: pwindowty;
   protected
    procedure execute; override;
  end;
@@ -7783,7 +7802,7 @@ function twidget.show(const modal: boolean = false;
 var
  event: twidgetshowevent;
 begin
- if not application.ismainthread then begin
+ if modal and not application.ismainthread then begin
   event:= twidgetshowevent.create(false);
   event.fwidget:= self;
   event.fmodal:= modal;
@@ -9731,6 +9750,7 @@ var
  gc: gcty;
  aoptions: windowinfoty;
  aoptions1: internalwindowoptionsty;
+ event: tcreatewindowevent;
 begin
  if fwindow.id = 0 then begin
   fnormalwindowrect:= fowner.fwidgetrect;
@@ -9773,8 +9793,23 @@ begin
     aoptions1.groupleader:= aoptions.groupleader.winid;
    end;
   end;
-
-  guierror(gui_createwindow(fowner.fwidgetrect,aoptions1,fwindow),self);
+  if application.ismainthread then begin
+   guierror(gui_createwindow(fowner.fwidgetrect,aoptions1,fwindow),self);
+  end
+  else begin //needed for win32
+   event:= tcreatewindowevent.create(false);
+   with event do begin
+    fsender:= self;
+    frect:= fowner.widgetrect;
+    foptionspo:= @aoptions1;
+    fwindowpo:= @self.fwindow;
+    synchronizeevent(event);
+    free;
+   end;
+   if fwindow.id = 0 then begin
+    abort;
+   end;
+  end;
   sizeconstraintschanged;
   fstate:= fstate - [tws_posvalid,tws_sizevalid];
   fillchar(gc,sizeof(gcty),0);
@@ -9798,6 +9833,8 @@ begin
 end;
 
 procedure twindow.destroywindow;
+var
+ event: tdestroywindowevent;
 begin
  releasemouse;
 // endmodal;
@@ -9813,7 +9850,15 @@ begin
  if fwindow.id <> 0 then begin
   appinst.windowdestroyed(fwindow.id);
  end;
- gui_destroywindow(fwindow);
+ if application.ismainthread then begin
+  gui_destroywindow(fwindow);
+ end
+ else begin
+  event:= tdestroywindowevent.create(false);
+  event.fwindowpo:= @fwindow;
+  synchronizeevent(event);
+  event.free;
+ end;
  fillchar(fwindow,sizeof(fwindow),0);
  exclude(fstate,tws_windowvisible);
 end;
@@ -13473,6 +13518,20 @@ end;
 procedure twidgetshowevent.execute;
 begin
  fmodalresult:= fwidget.show(fmodal,ftransientfor);
+end;
+
+{ tcreatewindowevent }
+
+procedure tcreatewindowevent.execute;
+begin
+ guierror(gui_createwindow(frect,foptionspo^,fwindowpo^),fsender);
+end;
+
+{ tdestroywindowevent }
+
+procedure tdestroywindowevent.execute;
+begin
+ gui_destroywindow(fwindowpo^);
 end;
 
 initialization
