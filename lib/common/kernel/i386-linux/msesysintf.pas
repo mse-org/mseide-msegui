@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -632,6 +632,7 @@ begin
  end;
 end;
 
+{$R-}
 function sys_gettimeus: cardinal;
 var
  time: timeval;
@@ -639,12 +640,7 @@ begin
  gettimeofday(@time,ptimezone(nil));
  result:= time.tv_sec * 1000000 + time.tv_usec;
 end;
-{
-function sys_getlastsyserror: integer;
-begin
- result:= sys_getlasterror;
-end;
-}
+
 function sys_mutexcreate(out mutex: mutexty): syserrorty;
 begin
  initmutex(linuxmutexty(mutex).mutex);
