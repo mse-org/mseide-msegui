@@ -40,12 +40,14 @@ type
  optionwidgetty = (ow_background,ow_top,ow_noautosizing,{ow_nofocusrect,}
                    ow_mousefocus,ow_tabfocus,ow_parenttabfocus,ow_arrowfocus,
                    ow_arrowfocusin,ow_arrowfocusout,
-                   ow_subfocus, //reflects focus to children
+                   ow_subfocus,         //reflects focus to children
                    ow_focusbackonesc,
                    ow_nochildshortcut,  //do not propagate shortcuts to parent
                    ow_noparentshortcut, //do not react to shortcuts from parent
                    ow_canclosenil,      //canclose calls canclose(nil)
-                   ow_mousetransparent,ow_mousewheel,ow_noscroll,ow_destroywidgets,
+                   ow_mousetransparent,ow_mousewheel,
+                   ow_noscroll,ow_nochildpaintclip,
+                   ow_destroywidgets,
                    ow_hinton,ow_hintoff,ow_disabledhint,ow_multiplehint,
                    ow_timedhint,
                    ow_fontglyphheight, 
@@ -6108,7 +6110,7 @@ begin
   updatewidgetregion;
  end;
  if (widgetcount > 0) then begin
-  if fframe <> nil then begin
+  if (fframe <> nil) and not (ow_nochildpaintclip in foptionswidget) then begin
    fframe.checkstate;
    canvas.intersectcliprect(fframe.fpaintrect);
   end;
@@ -6771,7 +6773,8 @@ begin
     exit;
    end;
   end;
-  if (frame = nil) or pointinrect(pos,fframe.fpaintrect) then begin
+  if (frame = nil) or (ow_nochildpaintclip in foptionswidget) or 
+                                 pointinrect(pos,fframe.fpaintrect) then begin
    for int1:= widgetcount - 1 downto 0 do begin
     with widgets[int1] do begin
      subpoint1(info.pos,fwidgetrect.pos);
