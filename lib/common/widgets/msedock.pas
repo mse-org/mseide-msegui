@@ -614,7 +614,14 @@ begin
 end;
 
 destructor tdocktabwidget.destroy;
+//var
+// int1: integer;
 begin
+// for int1:= 0 to count - 1 do begin
+//  with items[int1] do begin
+//   optionswidget:= optionswidget + [ow_destroywidgets];
+//  end;
+// end;
  if fcontroller.ftabwidget = self then begin
   fcontroller.ftabwidget:= nil;
  end;
@@ -684,7 +691,8 @@ begin
  end;
  }
  if (sender <> nil) and (sender = ftarget) and not sender.visible and
-  (fparentwidget <> nil) and (fparentwidget.parentwidget <> nil) then begin
+  (fparentwidget <> nil) and (fparentwidget.parentwidget <> nil) and
+            not (csdestroying in sender.componentstate) then begin
    sender.parentwidget:= fparentwidget.parentwidget;  //remove page
  end;
 end;

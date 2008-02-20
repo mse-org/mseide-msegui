@@ -1024,7 +1024,11 @@ end;
 
 procedure tcustomedit.dodefocus;
 begin
- feditor.dodefocus;
+ if not (csdestroying in componentstate) and (fwindow <> nil) and 
+    fwindow.haswinid 
+    then begin
+  feditor.dodefocus;
+ end;
  inherited;
 end;
 

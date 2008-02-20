@@ -4759,10 +4759,7 @@ begin
  if fparentwidget <> nil then begin
   clearparentwidget;
  end;
-// parentwidget:= nil;
-// if ownswindow1 then begin
-  fwindow.Free;
-// end;
+ fwindow.Free;
  ffont.free;
  fframe.free;
  fface.free;
@@ -5236,6 +5233,10 @@ begin
    colorchanged;
    enabledchanged; //-> statechanged
    parentchanged;
+   if (fparentwidget <> nil) and fparentwidget.focused and 
+           (ow_subfocus in fparentwidget.foptionswidget) and canfocus then begin
+    setfocus(fparentwidget.active);
+   end;
   end;
  end;
 end;
@@ -9790,7 +9791,8 @@ begin
           aoptions.groupleader.fowner.isgroupleader then begin
    aoptions1.setgroup:= true;
    if aoptions.groupleader <> self then begin
-    aoptions1.groupleader:= aoptions.groupleader.winid;
+    aoptions1.groupleader:= aoptions.groupleader.fwindow.id;
+                 //do not create winid
    end;
   end;
   if application.ismainthread then begin
@@ -12399,6 +12401,7 @@ begin
   fkeyboardcapturewidget:= nil; 
  end;
  if fcaretwidget = widget then begin
+  caret.hide;
   fcaretwidget:= nil;
  end;
  if fmousewidget = widget then begin

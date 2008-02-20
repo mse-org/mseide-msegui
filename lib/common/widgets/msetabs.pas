@@ -1228,8 +1228,8 @@ end;
 
 destructor tcustomtabbar.destroy;
 begin
- inherited;
  flayoutinfo.tabs.Free;
+ inherited;
 end;
 
 procedure tcustomtabbar.settabs(const Value: ttabs);
@@ -2272,6 +2272,14 @@ begin
       changepage(1);
       if factivepageindex = activepageindexbefore then begin
        setactivepageindex(-1); //select none
+      end
+      else begin
+       if (activepage <> nil) and not activepage.entered and 
+        (entered or ((fwindow <> nil) and 
+                 (fwindow.focusedwidget = nil))) then begin
+                 //probable page destroyed
+        activepage.setfocus(active);
+       end;
       end;
      end;
     end;

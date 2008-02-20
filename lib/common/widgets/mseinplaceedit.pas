@@ -87,7 +87,8 @@ type
    procedure setselstart(const Value: integer);
    function getforcecaret: boolean;
    procedure setforcecaret(const avalue: boolean);
-   procedure internalupdatecaret(force: boolean = false; nocaret: boolean = false);
+   procedure internalupdatecaret(force: boolean = false;
+                                             nocaret: boolean = false);
    procedure updateselect;
    procedure updatetextflags(active: boolean);
    function internaldeleteselection(textinput: boolean): boolean;
@@ -574,7 +575,6 @@ begin
    finfo.text.text:= stringfromchar(fpasswordchar,length(wstr1));
   end;
   fcaretpos:= textindextopos(canvas,finfo,fcurindex);
-//  postotextindex(canvas,finfo,fcaretpos,fcurindex);
   if fpasswordchar <> #0 then begin
    finfo.text.text:= wstr1;
   end;
@@ -595,10 +595,6 @@ begin
     end;
     caretrect.x:= fcaretpos.x - showrect.cx;
     inc(caretrect.x,afont.caretshift);
-//    if fcurindex > 0 then begin
-//     inc(caretrect.x,afont.caretshift);
-//     inc(showrect.x,afont.caretshift);
-//    end;
    end
    else begin
     font1:= tfont.create;
@@ -611,7 +607,6 @@ begin
      metrics:= canvas.getfontmetrics('o',font1);
     end;             
     font1.Free;
-//    caretrect.cx:= metrics.sum;
     caretrect.cx:= metrics.width;
     if caretrect.cx < int1 then begin
      caretrect.cx:= int1;
@@ -650,9 +645,6 @@ begin
       po1.y:= ftextrect.y + ftextrect.cy - y -cy;
      end;
     end;
-//    if fnovscroll then begin
-//     po1.y:= 0;
-//    end;
     if not isnullpoint(po1) then begin
      addpoint1(fcaretpos,po1);
      addpoint1(dest.pos,po1);
@@ -1502,7 +1494,6 @@ end;
 procedure tinplaceedit.dofocus;
 begin
  include(fstate,ies_focused);
-// updatetextflags(true);
  initfocus;
 end;
 
@@ -1513,7 +1504,6 @@ begin
  if oe_resetselectonexit in iedit(fintf).getoptionsedit then begin
   sellength:= 0;
   resetoffset;
-//  moveindex(0);
  end;
  internalupdatecaret(true,true);
 end;

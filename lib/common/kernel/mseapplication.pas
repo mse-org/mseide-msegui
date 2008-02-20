@@ -368,7 +368,8 @@ end;
 
 procedure tactcomponent.release;
 begin
- if not (acs_releasing in fstate) then begin
+ if not (acs_releasing in fstate) and 
+                       not (csdestroying in componentstate) then begin
   appinst.postevent(tobjectevent.create(ek_release,ievent(self)));
   include(fstate,acs_releasing);
  end;
