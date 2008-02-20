@@ -1146,6 +1146,8 @@ type
    function hasparent: boolean; override;               //tcomponent
    function getparentcomponent: tcomponent; override;   //tcomponent
    function hascaret: boolean;
+   function windowallocated: boolean;
+                //true if winid allocated and not loading and not destroying
    function ownswindow: boolean;
                       //true if valid toplevelwindow with assigned winid
    function updaterect: rectty; //invalidated area, origin = clientpos
@@ -6303,6 +6305,13 @@ end;
 function twidget.ownswindow1: boolean;
 begin
  result:= (fwindow <> nil) and (fwindow.fowner = self);
+end;
+
+function twidget.windowallocated: boolean;
+begin
+ result:= (fwindow <> nil) and fwindow.haswinid and 
+         (componentstate * [csloading,csdestroying] = []);
+ 
 end;
 
 function twidget.ownswindow: boolean;

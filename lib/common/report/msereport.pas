@@ -567,9 +567,12 @@ type
  
  bandareaarty = array of tcustombandarea;
  
+ recordbandarty = array of tcustomrecordband;
+ 
  tcustomrecordband = class(tcustomscalingwidget,idbeditinfo,ireccontrol,
                                 iobjectpicker,ireportclient)
   private
+   fbands: recordbandarty;
    fparentintf: ibandparent;
    fonbeforerender: beforerenderrecordeventty;
    fonpaint: painteventty;
@@ -807,11 +810,8 @@ type
    property format;
  end;
  
- recordbandarty = array of tcustomrecordband;
- 
  tcustombandgroup = class(tcustomrecordband,ibandparent)
   private
-   fbands: recordbandarty;
    procedure setdatasource(const avalue: tdatasource); override;
            //ibandparent;
    procedure registerclient(const aclient: ireportclient);
@@ -841,7 +841,7 @@ type
    procedure unregisterchildwidget(const child: twidget); override;
    procedure dobeforerender(var empty: boolean); override;
    procedure dopaint(const acanvas: tcanvas); override;
-   procedure updatevisibility; override;
+//   procedure updatevisibility; override;
    function getminbandsize: sizety; override;
    procedure initpage; override;
    procedure init; override;
@@ -3658,8 +3658,17 @@ begin
 end;
 
 procedure tcustomrecordband.updatevisibility;
+var
+ int1: integer;
 begin
  visible:= getvisibility;
+ beginscaling;
+ for int1:= 0 to high(fbands) do begin
+  with fbands[int1] do begin
+   updatevisibility;
+  end;
+ end;
+ endscaling;
 end;
 
 function tcustomrecordband.lastbandheight: integer;
@@ -3867,11 +3876,15 @@ begin
  if child is tcustombandarea then begin
   additem(pointerarty(fareas),child);
  end;
+ if child is tcustomrecordband then begin
+  additem(pointerarty(fbands),child);
+ end;
 end;
 
 procedure tcustomrecordband.unregisterchildwidget(const child: twidget);
 begin
  removeitem(pointerarty(fareas),child);
+ removeitem(pointerarty(fbands),child);
  inherited;
 end;
 
@@ -3881,7 +3894,7 @@ procedure tcustombandgroup.registerchildwidget(const child: twidget);
 begin
  if child is tcustomrecordband then begin
   inherited;
-  additem(pointerarty(fbands),child);
+//  additem(pointerarty(fbands),child);
   with tcustomrecordband(child) do begin
    fparentintf:= ibandparent(self);
    include(fwidgetstate1,ws1_nominsize);
@@ -3894,7 +3907,7 @@ end;
 
 procedure tcustombandgroup.unregisterchildwidget(const child: twidget);
 begin
- removeitem(pointerarty(fbands),child);
+// removeitem(pointerarty(fbands),child);
  tcustomrecordband(child).fparentintf:= nil;
  inherited;
  exclude(tcustomrecordband(child).fwidgetstate1,ws1_nominsize);
@@ -3975,7 +3988,7 @@ begin
   fbands[int1].fparentintf:= fparentintf;
  end;
 end;
-
+{
 procedure tcustombandgroup.updatevisibility;
 var
  int1: integer;
@@ -3989,7 +4002,7 @@ begin
  end;
  endscaling;
 end;
-
+}
 function tcustombandgroup.getminbandsize: sizety;
 var
  int1,int2,int3: integer;

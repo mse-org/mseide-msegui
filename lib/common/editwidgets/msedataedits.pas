@@ -1994,7 +1994,7 @@ var
  rect1: rectty;
 begin
  inherited;
- if fcreated and not (csloading in componentstate) then begin
+ if fcreated and windowallocated then begin
   case info.action of
    ea_textchanged: begin
     updatescrollbars;
