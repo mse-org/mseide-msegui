@@ -5496,6 +5496,7 @@ function tcustomreport.exec(thread: tmsethread): integer;
 var
  terminated1: boolean; 
  recnos: integerarty;
+ renderbegin: boolean;
  
  procedure dofinish(const islast: boolean);
  var
@@ -5505,8 +5506,10 @@ var
   try
    fakevisible(self,false);
    flastpagecount:= fpagenum;
-   for int1:= 0 to high(freppages) do begin
-    freppages[int1].endrender;
+   if renderbegin then begin
+    for int1:= 0 to high(freppages) do begin
+     freppages[int1].endrender;
+    end;
    end;
    terminated1:= checkterminated;
    if islast or (rs_endpass in fstate) or terminated1 then begin
@@ -5582,6 +5585,7 @@ begin
   repeat
    fpagenum:= 0;
    factivepage:= 0;
+   renderbegin:= false;
    fakevisible(self,true);
    try
     if fprinter <> nil then begin
@@ -5626,9 +5630,6 @@ begin
       end;
      end;
     end;   
-    for int1:= 0 to high(freppages) do begin
-     freppages[int1].beginrender;
-    end;
     if canevent(tmethod(fonbeforerender)) then begin
      application.lock;
      try
@@ -5640,6 +5641,10 @@ begin
    except
     dofinish(true);
     raise;
+   end;
+   renderbegin:= true;
+   for int1:= 0 to high(freppages) do begin
+    freppages[int1].beginrender;
    end;
    try
     if high(freppages) >= factivepage then begin
