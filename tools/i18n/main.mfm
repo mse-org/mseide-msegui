@@ -7,9 +7,9 @@ object mainfo: tmainfo
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_mousewheel, ow_destroywidgets, ow_autoscale]
   container.bounds_x = 0
-  container.bounds_y = 22
+  container.bounds_y = 21
   container.bounds_cx = 624
-  container.bounds_cy = 368
+  container.bounds_cy = 369
   container.frame.levelo = 1
   container.frame.localprops = [frl_levelo]
   container.frame.sbhorz.facebutton.template = concavex
@@ -26,7 +26,6 @@ object mainfo: tmainfo
   options = [fo_main, fo_terminateonclose, fo_savepos]
   statfile = projectfo.projectstat
   caption = 'MSEi18n'
-  icon.transparency = -2147483648
   oncreate = tmainfooncreate
   oneventloopstart = tmainfoonloaded
   ondestroy = tmainfoondestroy
@@ -66,7 +65,7 @@ object mainfo: tmainfo
       item
         face.template = convexx
         face.dummy = 0
-        height = 18
+        height = 17
         captions.count = 5
         captions.items = <        
           item
@@ -112,15 +111,15 @@ object mainfo: tmainfo
         options = [co_readonly, co_proportional, co_savestate]
         widgetname = 'value'
       end>
-    datarowheight = 18
+    datarowheight = 17
     statfile = projectfo.projectstat
-    reffontheight = 16
+    reffontheight = 15
     object tree: ttreeitemedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 210
-      bounds_cy = 18
+      bounds_cy = 17
       color = -1879048185
       frame.levelo = 0
       frame.colorclient = -2147483646
@@ -131,20 +130,19 @@ object mainfo: tmainfo
       optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_exitoncursor, oe_savestate]
       onupdaterowvalues = treeonupdaterowvalues
       options = [teo_treecolnavig]
-      reffontheight = 16
+      reffontheight = 15
     end
     object typedisp: tenumtypeedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
       bounds_x = 211
       bounds_y = 0
       bounds_cx = 50
-      bounds_cy = 18
+      bounds_cy = 17
       color = -1879048185
       frame.levelo = 0
       frame.colorclient = -2147483646
       frame.localprops = [frl_levelo, frl_colorclient]
-      frame.button.visible = False
-      frame.button.enabled = False
+      frame.button.options = [fbo_invisible, fbo_disabled]
       frame.dummy = 0
       taborder = 2
       visible = False
@@ -155,21 +153,21 @@ object mainfo: tmainfo
         item
         end>
       oninit = typedisponinit
-      reffontheight = 16
+      reffontheight = 15
     end
     object donottranslate: tbooleanedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
       bounds_x = 262
       bounds_y = 0
       bounds_cx = 19
-      bounds_cy = 18
+      bounds_cy = 17
       color = -2147483646
       frame.levelo = 0
       frame.localprops = [frl_levelo]
       frame.dummy = 0
       taborder = 3
-      visible = False
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+      visible = False
       onsetvalue = donottranslateonsetvalue
     end
     object comment: tstringedit
@@ -177,7 +175,7 @@ object mainfo: tmainfo
       bounds_x = 282
       bounds_y = 0
       bounds_cx = 133
-      bounds_cy = 18
+      bounds_cy = 17
       frame.levelo = 0
       frame.colorclient = -2147483646
       frame.localprops = [frl_levelo, frl_colorclient]
@@ -185,19 +183,19 @@ object mainfo: tmainfo
       taborder = 4
       visible = False
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
-      font.colorshadow = -2147483648
       font.height = 12
       font.name = 'stf_default'
+      font.xscale = 1.00000000000000000
       font.dummy = 0
       onsetvalue = commentonsetvalue
-      reffontheight = 16
+      reffontheight = 15
     end
     object value: tstringedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
       bounds_x = 416
       bounds_y = 0
       bounds_cx = 110
-      bounds_cy = 18
+      bounds_cy = 17
       color = -1879048185
       frame.levelo = 0
       frame.colorclient = -2147483646
@@ -206,22 +204,22 @@ object mainfo: tmainfo
       taborder = 5
       visible = False
       optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_exitoncursor, oe_savestate]
-      reffontheight = 16
+      reffontheight = 15
     end
   end
   object flat: tbooleanedit
     bounds_x = 9
     bounds_y = 4
-    bounds_cx = 34
-    bounds_cy = 18
+    bounds_cx = 36
+    bounds_cy = 17
     color = -2147483645
     frame.caption = 'flat'
     frame.dummy = 0
     frame.outerframe = (
       0
       2
-      21
-      3
+      23
+      2
     )
     taborder = 1
     statfile = projectfo.projectstat
@@ -231,16 +229,16 @@ object mainfo: tmainfo
   object stringonly: tbooleanedit
     bounds_x = 57
     bounds_y = 4
-    bounds_cx = 78
-    bounds_cy = 18
+    bounds_cx = 81
+    bounds_cy = 17
     color = -2147483645
     frame.caption = 'string only'
     frame.dummy = 0
     frame.outerframe = (
       0
       2
-      65
-      3
+      68
+      2
     )
     taborder = 2
     statfile = projectfo.projectstat
@@ -249,16 +247,16 @@ object mainfo: tmainfo
   object nont: tbooleanedit
     bounds_x = 153
     bounds_y = 4
-    bounds_cx = 51
-    bounds_cy = 18
+    bounds_cx = 52
+    bounds_cy = 17
     color = -2147483645
     frame.caption = 'no NT'
     frame.dummy = 0
     frame.outerframe = (
       0
       2
-      38
-      3
+      39
+      2
     )
     taborder = 3
     statfile = projectfo.projectstat
@@ -269,7 +267,7 @@ object mainfo: tmainfo
     bounds_x = 233
     bounds_y = 4
     bounds_cx = 61
-    bounds_cy = 18
+    bounds_cy = 17
     color = -2147483645
     frame.caption = 'NT only'
     frame.dummy = 0
@@ -277,7 +275,7 @@ object mainfo: tmainfo
       0
       2
       48
-      3
+      2
     )
     taborder = 4
     statfile = projectfo.projectstat
@@ -292,6 +290,10 @@ object mainfo: tmainfo
     top = 96
   end
   object mainmenu1: tmainmenu
+    onupdate = mainmenuupdate
+    facetemplate = convexx
+    itemframetemplate = menuitemframe
+    itemframetemplateactive = menuitemframe
     menu.submenu.count = 9
     menu.submenu.items = <    
       item
@@ -359,10 +361,6 @@ object mainfo: tmainfo
         name = 'settings'
         state = [as_localcaption]
       end>
-    onupdate = mainmenuupdate
-    facetemplate = convexx
-    itemframetemplate = menuitemframe
-    itemframetemplateactive = menuitemframe
     left = 256
     top = 160
   end
@@ -389,11 +387,10 @@ object mainfo: tmainfo
     top = 115
   end
   object convexx: tfacecomp
-    template.image.transparency = -2147483648
     template.fade_pos.count = 2
     template.fade_pos.items = (
-      0
-      1
+      0.00000000000000000
+      1.00000000000000000
     )
     template.fade_color.count = 2
     template.fade_color.items = (
@@ -401,7 +398,6 @@ object mainfo: tmainfo
       -1610612731
     )
     template.fade_direction = gd_up
-    template.fade_transparency = -2147483648
     left = 385
     top = 103
   end
@@ -412,11 +408,10 @@ object mainfo: tmainfo
     top = 227
   end
   object convexy: tfacecomp
-    template.image.transparency = -2147483648
     template.fade_pos.count = 2
     template.fade_pos.items = (
-      0
-      1
+      0.00000000000000000
+      1.00000000000000000
     )
     template.fade_color.count = 2
     template.fade_color.items = (
@@ -424,16 +419,14 @@ object mainfo: tmainfo
       -1610612731
     )
     template.fade_direction = gd_left
-    template.fade_transparency = -2147483648
     left = 481
     top = 103
   end
   object concavex: tfacecomp
-    template.image.transparency = -2147483648
     template.fade_pos.count = 2
     template.fade_pos.items = (
-      0
-      1
+      0.00000000000000000
+      1.00000000000000000
     )
     template.fade_color.count = 2
     template.fade_color.items = (
@@ -441,23 +434,20 @@ object mainfo: tmainfo
       -1610612731
     )
     template.fade_direction = gd_down
-    template.fade_transparency = -2147483648
     left = 385
     top = 135
   end
   object concavey: tfacecomp
-    template.image.transparency = -2147483648
     template.fade_pos.count = 2
     template.fade_pos.items = (
-      0
-      1
+      0.00000000000000000
+      1.00000000000000000
     )
     template.fade_color.count = 2
     template.fade_color.items = (
       -1610612732
       -1610612731
     )
-    template.fade_transparency = -2147483648
     left = 481
     top = 135
   end
