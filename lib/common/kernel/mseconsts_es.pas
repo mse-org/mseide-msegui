@@ -100,24 +100,24 @@ const
   'Todo',                              //sc_All
   'Confirme',                          //sc_Confirmation
   #191'Borrar el registro?',           //sc_Delete_record
-  'Cerrar p'#225'gina',                 //sc_close_page
-  'First',              //sc_first
-  'Prior',              //sc_prior
-  'Next',               //sc_next
-  'Last',               //sc_last
-  'Append',             //sc_append
-  'Delete',             //sc_delete
-  'Edit',               //sc_edit
-  'Post',               //sc_post
-  'Cancel',             //sc_cancel
-  'Refresh',            //sc_refresh
-  'Edit filter',        //sc_filter_filter
-  'Edit filter minimum',//sc_edit_filter_min
-  'Edit filter maximum',//sc_filter_edit_max
-  'Filter on',          //sc_filter_on
-  'Search',             //sc_search
-  'Insert',             //sc_insert
-  'Filter off'         //sc_filter_off
+  'Cerrar p'#225'gina',                //sc_close_page
+  'Primero',                           //sc_first
+  'Anterior',                          //sc_prior
+  'Siguiente',                         //sc_next
+  #218'ltimo',                         //sc_last
+  'A'#241'adir',                       //sc_append
+  'Borrar',                            //sc_delete
+  'Editar',                            //sc_edit
+  'Guardar',                           //sc_post
+  'Cancelar',                          //sc_cancel
+  'Refrescar',                         //sc_refresh
+  'Filtro edici'#243'n',               //sc_filter_filter
+  'Filtro edici'#243'n m'#237'nimo',   //sc_edit_filter_min
+  'Filtro edici'#243'n m'#237'nimo',   //sc_filter_edit_max
+  'Filtro activo',                     //sc_filter_on
+  'Buscar',                            //sc_search
+  'Insertar',                          //sc_insert
+  'Filtro apagado'                     //sc_filter_off
 );
     
 initialization
