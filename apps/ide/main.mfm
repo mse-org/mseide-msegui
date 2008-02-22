@@ -56,7 +56,7 @@ object mainfo: tmainfo
     anchors = [an_top]
     taborder = 1
     font.name = 'stf_default'
-    font.xscale =  1.0000000000000000E+0000
+    font.xscale = 1.00000000000000000
     font.dummy = 0
     options = [dwo_hintclippedtext]
     reffontheight = 15
@@ -519,37 +519,37 @@ object mainfo: tmainfo
             tag = 1
           end        
           item
-            action = actionsmo.build
+            action = actionsmo.buildact
             caption = '&Build'
             state = [as_localcaption, as_localtag]
             tag = 2
           end        
           item
-            action = actionsmo.make1
+            action = actionsmo.make1act
             caption = 'Make &1'
             state = [as_localcaption, as_localtag]
             tag = 4
           end        
           item
-            action = actionsmo.make2
+            action = actionsmo.make2act
             caption = 'Make &2'
             state = [as_localcaption, as_localtag]
             tag = 8
           end        
           item
-            action = actionsmo.make3
+            action = actionsmo.make3act
             caption = 'Make &3'
             state = [as_localcaption, as_localtag]
             tag = 16
           end        
           item
-            action = actionsmo.make4
+            action = actionsmo.make4act
             caption = 'Make &4'
             state = [as_localcaption, as_localtag]
             tag = 32
           end        
           item
-            action = actionsmo.abortmake
+            action = actionsmo.abortmakeact
             caption = '&Abort Make'
             state = [as_localcaption, as_localtag]
           end        

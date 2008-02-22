@@ -99,7 +99,7 @@ object actionsmo: tactionsmo
     left = 8
     top = 100
   end
-  object abortmake: taction
+  object abortmakeact: taction
     caption = '&Abort Make'
     onexecute = abortmakeactonexecute
     left = 165
@@ -684,27 +684,27 @@ object actionsmo: tactionsmo
         dispname = 'Make'
       end    
       item
-        action = build
+        action = buildact
         dispname = 'Build'
       end    
       item
-        action = make1
+        action = make1act
         dispname = 'Make 1'
       end    
       item
-        action = make2
+        action = make2act
         dispname = 'Make 2'
       end    
       item
-        action = make3
+        action = make3act
         dispname = 'Make 3'
       end    
       item
-        action = make4
+        action = make4act
         dispname = 'Make 4'
       end    
       item
-        action = abortmake
+        action = abortmakeact
         dispname = 'Abort Make'
       end>
     sysshortcuts.count = 6
@@ -736,27 +736,27 @@ object actionsmo: tactionsmo
     left = 152
     top = 136
   end
-  object build: taction
+  object buildact: taction
     onexecute = makeactonexecute
     left = 168
     top = 336
   end
-  object make1: taction
+  object make1act: taction
     onexecute = makeactonexecute
     left = 168
     top = 360
   end
-  object make2: taction
+  object make2act: taction
     onexecute = makeactonexecute
     left = 168
     top = 384
   end
-  object make3: taction
+  object make3act: taction
     onexecute = makeactonexecute
     left = 168
     top = 408
   end
-  object make4: taction
+  object make4act: taction
     onexecute = makeactonexecute
     left = 168
     top = 432

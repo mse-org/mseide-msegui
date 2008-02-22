@@ -1024,7 +1024,12 @@ begin
   interrupt.enabled:= gdb.running;
   reset.enabled:= gdb.started or gdb.attached;
   makeact.enabled:= not making;
-  abortmake.enabled:= making;
+  buildact.enabled:= not making;
+  make1act.enabled:= not making;
+  make2act.enabled:= not making;
+  make3act.enabled:= not making;
+  make4act.enabled:= not making;
+  abortmakeact.enabled:= making;
   saveall.enabled:= sourcefo.modified or designer.modified or projectoptions.modified;
   actionsmo.toggleformunit.enabled:= (flastform <> nil) or
                                             (designer.modules.count > 0);

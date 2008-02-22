@@ -70,7 +70,7 @@ type
    bkptsonact: taction;
    watchesonact: taction;
 
-   abortmake: taction;
+   abortmakeact: taction;
    makeact: taction;
    selecteditpage: taction;
 
@@ -78,11 +78,11 @@ type
    //common
    shortcuts: tshortcutcontroller;
    toggleinspector: taction;
-   build: taction;
-   make1: taction;
-   make2: taction;
-   make3: taction;
-   make4: taction;
+   buildact: taction;
+   make1act: taction;
+   make2act: taction;
+   make3act: taction;
+   make4act: taction;
    procedure findinfileonexecute(const sender: tobject);
 
    //file
