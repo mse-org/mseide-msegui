@@ -129,7 +129,6 @@ type
    procedure setcolor(const avalue: colorty);
    function getface: tface;
    procedure setface(const avalue: tface);
-   procedure createface;
   protected
    procedure createitem(const index: integer; var item: tpersistent); override;
    procedure dochange(const index: integer); override;
@@ -137,6 +136,7 @@ type
   public
    constructor create(const aowner: tcustomtoolbar); reintroduce;
    destructor destroy; override;
+   procedure createface;
    procedure resetradioitems(const group: integer);
    function getcheckedradioitem(const group: integer): ttoolbutton;
    function add: ttoolbutton;
@@ -189,6 +189,7 @@ type
    procedure setstatfile(const Value: tstatfile);
    procedure setdragcontroller(const Value: tdragcontroller);
   protected
+   class function classskininfo: skininfoty; override;
    procedure buttonchanged(sender: ttoolbutton);
    procedure checkvert(const asize: sizety);
    procedure getautopaintsize(var asize: sizety); override;
@@ -680,7 +681,9 @@ end;
 
 procedure ttoolbuttons.createface;
 begin
- fface:= tface.create(iface(tcustomtoolbar(fowner)));
+ if fface = nil then begin
+  fface:= tface.create(iface(tcustomtoolbar(fowner)));
+ end;
 end;
 
 function ttoolbuttons.getface: tface;
@@ -1017,6 +1020,12 @@ begin
    dec(fupdating);
   end;
  end;
+end;
+
+class function tcustomtoolbar.classskininfo: skininfoty;
+begin
+ result:= inherited classskininfo;
+ result.objectkind:= sok_toolbar;
 end;
 
 procedure tcustomtoolbar.buttonchanged(sender: ttoolbutton);

@@ -459,6 +459,8 @@ type
    property buttonsinvisible;
    property buttonsvisible;
    property mousewheel;
+   property localprops;
+   property template;
  end;
 
  stepdirty = (sd_right,sd_up,sd_left,sd_down);

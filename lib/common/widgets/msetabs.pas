@@ -184,9 +184,9 @@ type
    procedure setoptions(const avalue: tabbaroptionsty);
    function gethintpos(const aindex: integer): rectty;
    function getbuttonhint(const aindex: integer): msestring;
-   class function classskininfo: skininfoty; override;
   protected
    foptions: tabbaroptionsty;
+   class function classskininfo: skininfoty; override;
    procedure dostep(const event: stepkindty); override;
    procedure doactivetabchanged;
    procedure tabchanged(const sender: ttab);
