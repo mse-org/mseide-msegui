@@ -201,7 +201,6 @@ const
 var
  sysshortcuts: sysshortcutaty;
  sysshortcuts1: sysshortcutaty;
- 
 implementation
 uses
  sysutils,mserichstring,msestream,typinfo,mseformatstr;
@@ -212,8 +211,10 @@ const
  functionkeycount = 12;
  misckeycount = ord(key_sysreq) - ord(key_escape) + 1;
  cursorkeycount = ord(key_pagedown) - ord(key_home) + 1;
- specialkeycount = misckeycount + cursorkeycount;
+ specialshortcutcount = ord(high(specialshortcutty))+1;
+ specialkeycount = misckeycount + specialshortcutcount + cursorkeycount;
  shortcutcount = (letterkeycount + cipherkeycount) * 2 + //ctrl,shiftctrl
+                 3 + //space
                  functionkeycount * 4 +              //none,shift,ctrl,shiftctrl
                  specialkeycount * 4;                //none,shift,ctrl,shiftctrl
  baseshortcutcount = letterkeycount + cipherkeycount +
@@ -238,6 +239,9 @@ var
  int1: integer;
  akey: keyty;
 begin
+ keys[bottom]:= ord(key_space) + modvalue;
+ names[bottom]:= prefix+'+'+spacekeyname;
+ inc(bottom);
  for int1:= bottom to bottom+cipherkeycount-1 do begin
   keys[int1]:= ord(key_0) + int1-bottom + modvalue;
   names[int1]:= prefix+'+'+msestring(msechar(int1-bottom+ord('0')));
@@ -256,13 +260,18 @@ begin
  for int1:= bottom to bottom+misckeycount-1 do begin
   akey:= keyty(ord(key_escape) + int1-bottom);
   keys[int1]:= ord(akey)or modvalue;
-  names[int1]:= prefix+'+'+misckeynames[akey];
+  names[int1]:= prefix+'+'+shortmisckeynames[akey];
  end;
  bottom:= bottom+misckeycount;
+ for int1:= bottom to bottom+specialshortcutcount-1 do begin
+  keys[int1]:= ord(specialkeys[specialshortcutty(int1-bottom)]) or modvalue;
+  names[int1]:= prefix+'+'+specialkeynames[specialshortcutty(int1-bottom)];
+ end;
+ bottom:= bottom+specialshortcutcount;
  for int1:= bottom to bottom+cursorkeycount-1 do begin
   akey:= keyty(ord(key_home) + int1-bottom);
   keys[int1]:= ord(akey)or modvalue;
-  names[int1]:= prefix+'+'+cursorkeynames[akey];
+  names[int1]:= prefix+'+'+shortcursorkeynames[akey];
  end;
  bottom:= bottom+cursorkeycount;
 end;
@@ -295,13 +304,17 @@ begin
   for int1:= bottom to bottom+misckeycount-1 do begin
    akey:= keyty(ord(key_escape) + int1-bottom);
    keys[int1]:= ord(akey);
-   names[int1]:= misckeynames[akey];
+   names[int1]:= shortmisckeynames[akey];
   end;
   bottom:= bottom+misckeycount;
+  for int1:= bottom to bottom+specialshortcutcount-1 do begin
+   keys[int1]:= ord(specialkeys[specialshortcutty(int1-bottom)]);
+   names[int1]:= specialkeynames[specialshortcutty(int1-bottom)];
+  end;
   for int1:= bottom to bottom+cursorkeycount-1 do begin
    akey:= keyty(ord(key_home) + int1-bottom);
    keys[int1]:= ord(akey);
-   names[int1]:= cursorkeynames[akey];
+   names[int1]:= shortcursorkeynames[akey];
   end;
   bottom:= bottom+cursorkeycount;
   for int1:= bottom to bottom + functionkeycount - 1 do begin
@@ -309,16 +322,24 @@ begin
    names[int1]:= 'Shift+F'+inttostr(int1-bottom+1);
   end;
   bottom:= bottom+functionkeycount;
+  keys[bottom]:= ord(key_space) or key_modshift;
+  names[bottom]:= 'Shift+'+spacekeyname;
+  inc(bottom);
   for int1:= bottom to bottom+misckeycount-1 do begin
    akey:= keyty(ord(key_escape) + int1-bottom);
    keys[int1]:= ord(akey)or key_modshift;
-   names[int1]:= 'Shift+'+misckeynames[akey];
+   names[int1]:= 'Shift+'+shortmisckeynames[akey];
   end;
   bottom:= bottom+misckeycount;
+  for int1:= bottom to bottom+specialshortcutcount-1 do begin
+   keys[int1]:= ord(specialkeys[specialshortcutty(int1-bottom)]) or key_modshift;
+   names[int1]:= 'Shift+'+specialkeynames[specialshortcutty(int1-bottom)];
+  end;
+  bottom:= bottom+specialshortcutcount;
   for int1:= bottom to bottom+cursorkeycount-1 do begin
    akey:= keyty(ord(key_home) + int1-bottom);
    keys[int1]:= ord(akey)or key_modshift;
-   names[int1]:= 'Shift+'+cursorkeynames[akey];
+   names[int1]:= 'Shift+'+shortcursorkeynames[akey];
   end;
   bottom:= bottom+cursorkeycount;
   getvalues(bottom,'Ctrl',key_modctrl,keys,names);

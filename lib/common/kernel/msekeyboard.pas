@@ -274,6 +274,17 @@ const
    'Insert','Delete','Pause','Print','SysReq');
  cursorkeynames: array[key_home..key_pagedown] of msestring =
   ('Home','End','Left','Up','Right','Down','PageUp','PageDown');
+ shortmisckeynames: array[key_escape..key_sysreq] of msestring =
+  ('Esc','Tab','Backtab','Back','Ret','Enter',
+   'Ins','Del','Pause','Print','SysReq');
+ shortcursorkeynames: array[key_home..key_pagedown] of msestring =
+  ('Home','End','Left','Up','Right','Down','PgUp','PgDown');
+type
+ specialshortcutty = (sso_menu,sso_help);
+const
+ specialkeys: array[specialshortcutty] of keyty = (key_menu,key_help);
+ specialkeynames: array[specialshortcutty] of msestring = ('Menu','Help');
+ spacekeyname = 'Space';
 
 function keytomsechar(key: keyty): msechar; //only 0..9, a..z
 function isenterkey(const key: keyty): boolean;
