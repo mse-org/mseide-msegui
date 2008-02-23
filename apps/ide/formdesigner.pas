@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2008 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -2838,6 +2838,9 @@ procedure tformdesignerfo.beginstreaming;
 begin
  if fmodule is twidget then begin
   twidget1(fmodule).fwidgetrect.pos:= modulerect.pos;
+ end
+ else begin
+  setcomponentpos(fmodule,modulerect.pos);
  end;
  if fform is tcustommseform then begin
   tcustommseform(fform).container.scrollpos:= nullpoint;
