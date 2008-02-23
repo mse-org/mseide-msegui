@@ -2534,7 +2534,8 @@ procedure tcol.updatepropwidth;
 var
  int1: integer;
 begin
- if not (csloading in fgrid.componentstate) and not (gs_updatelocked in fgrid.fstate) then begin
+ if not (csloading in fgrid.componentstate) and 
+                        not (gs_updatelocked in fgrid.fstate) then begin
 //  int1:= tgridframe(fgrid.fframe).fpaintrect.cx;
   int1:= fgrid.fpropcolwidthref;
   if int1 <> 0 then begin
@@ -2597,6 +2598,7 @@ end;
 procedure tcol.setoptions(const Value: coloptionsty);
 var
  valuebefore: coloptionsty;
+ int1: integer;
 begin
  if foptions <> value then begin
   valuebefore:= foptions;
@@ -2604,7 +2606,14 @@ begin
   if bitschanged({$ifdef FPC}longword{$else}longword{$endif}(value),
          {$ifdef FPC}longword{$else}longword{$endif}(valuebefore),
          {$ifdef FPC}longword{$else}longword{$endif}(layoutchangedcoloptions)) then begin
-   fgrid.layoutchanged;
+   if not (csreading in fgrid.componentstate) then begin
+    fgrid.layoutchanged;
+    with tgridarrayprop(prop) do begin //grid propewidthref is invalid
+     for int1:= 0 to high(fitems) do begin
+      tcol(fitems[int1]).fpropwidth:= 0;
+     end;
+    end;     
+   end;
   end
   else begin
    changed;
