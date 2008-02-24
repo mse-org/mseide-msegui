@@ -217,7 +217,7 @@ const
                  3 + //space
                  functionkeycount * 4 +              //none,shift,ctrl,shiftctrl
                  specialkeycount * 4;                //none,shift,ctrl,shiftctrl
- baseshortcutcount = letterkeycount + cipherkeycount +
+ baseshortcutcount = letterkeycount + cipherkeycount + 1 + //Space
                      functionkeycount + specialkeycount;
 var
  shortcutkeys: integerarty;
