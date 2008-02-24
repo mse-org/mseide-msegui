@@ -5654,7 +5654,9 @@ var
  int1: integer;
 begin
  int1:= frowexited;
- checkscroll;
+ if tcustomgrid1(fgrid).fcellvaluechecking = 0 then begin
+  checkscroll;
+ end;
  fgrid.invalidaterow(activerecord);
  tcustomgrid1(fgrid).beginnonullcheck;
  tcustomgrid1(fgrid).beginnocheckvalue;
@@ -5663,7 +5665,8 @@ begin
    fgrid.row:= invalidaxis;
   end;
   int1:= activerecord;
-  if (int1 < fgrid.rowcount) and active then begin
+  if (int1 < fgrid.rowcount) and active and  
+                (tcustomgrid1(fgrid).fcellvaluechecking = 0) then begin
    fgrid.row:= int1; //else empty dataset
   end;
  finally

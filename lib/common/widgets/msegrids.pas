@@ -1234,6 +1234,7 @@ end;
    procedure setrowreadonlystate(const index: integer; const avalue: boolean);
   protected
    ffocuscount: integer;
+   fcellvaluechecking: integer;
    fpropcolwidthref: integer;
    fzebra_start: integer;
    fzebra_color: colorty;
@@ -6968,7 +6969,8 @@ begin
  end;
 end;
 
-procedure tcustomgrid.firstcellclick(const cell: gridcoordty; const info: mouseeventinfoty);
+procedure tcustomgrid.firstcellclick(const cell: gridcoordty;
+                                              const info: mouseeventinfoty);
 begin
  //dummy
 end;
@@ -7077,10 +7079,12 @@ var
       end;
       focuscell(cell1,action,scm_cell,not bo2);
       if not bo2 then begin
+       showcell(fmousecell);
+      end
+      else begin
        if bo1 then begin
         firstcellclick(cell1,info);
        end;
-       showcell(fmousecell);
       end;
      end
      else begin
@@ -10135,7 +10139,12 @@ function tcustomgrid.docheckcellvalue: boolean;
 begin
  result:= true;
  if focusedcellvalid and (fnullchecking = 0) then begin
-  checkcellvalue(result);
+  inc(fcellvaluechecking);
+  try
+   checkcellvalue(result);
+  finally
+   dec(fcellvaluechecking);
+  end;
  end;
 end;
 
@@ -10736,7 +10745,8 @@ begin
  end;
 end;
 
-procedure tcustomstringgrid.firstcellclick(const cell: gridcoordty; const info: mouseeventinfoty);
+procedure tcustomstringgrid.firstcellclick(const cell: gridcoordty;
+                                           const info: mouseeventinfoty);
 begin
  inherited;
  feditor.setfirstclick;
@@ -10746,45 +10756,13 @@ procedure tcustomstringgrid.clientmouseevent(var info: mouseeventinfoty);
 var
  bo2: boolean;
 begin
- bo2:=  gs_cellclicked in fstate;
+ bo2:= gs_cellclicked in fstate;
  inherited;
  if not (es_processed in info.eventstate) and focusedcellvalid and
          (info.eventkind in mouseposevents) and
                (gridcoordisequal(ffocusedcell,fmousecell) or bo2) then begin
   feditor.mouseevent(info);
  end;
-{
- po1:= addpoint(info.pos,clientpos);
- bo1:= (gs_cellclicked in fstate);
- if bo1 and (info.eventkind in [ek_mousemove,ek_mousepark]) then begin
-  bo1:= (not ((ffocusedcell.col >= 0) and 
-                (co_mousescrollrow in datacols[ffocusedcell.col].options)) or 
-            (po1.y + mousescrolldist >= fdatarect.y) and 
-            (po1.y - mousescrolldist < fdatarect.y + fdatarect.cy)) and
-        (not (og_mousescrollcol in foptionsgrid) or 
-            (po1.x + mousescrolldist >= fdatarect.x) and 
-            (po1.x - mousescrolldist < fdatarect.x + fdatarect.cx));
- end;            
- if not bo1 then begin
-  inherited;
- end
- else begin
-  if (info.eventkind = ek_buttonrelease) and (gs_cellclicked in fstate) then begin
-   killrepeater;
-   exclude(fstate, gs_cellclicked);
-  end;
- end;
- if not (es_processed in info.eventstate) and focusedcellvalid and
-         (info.eventkind in mouseposevents) and
-         gridcoordisequal(ffocusedcell,fmousecell) then begin
-  feditor.mouseevent(info);
- end
- else begin
-  if bo1 then begin
-   inherited;
-  end;
- end;
- }
 end;
 
 procedure tcustomstringgrid.doactivate;
@@ -10866,12 +10844,6 @@ begin
    if (og_rowinserting in optionsgrid) and
         ((high(ar4) > 0) or (high(ar5) > 0)) then begin
     int5:= row;
-//    if (col < 0) or (co_rowselect in datacols[col].options) then begin
-//      acol:= 0;
-//    end
-//    else begin
-//     acol:= col;
-//    end;
     beginupdate;
     try
      datacols.clearselection;
@@ -10880,7 +10852,6 @@ begin
      for int2:= int1 to int1 + high(ar4) do begin
       datacols.selected[makegridcoord(invalidaxis,int2)]:= true;
      end;
-//     int4:= datacols.count - acol -1;
      for int1:= 0 to high(ar4) do begin
       ar5:= splitstring(ar4[int1],c_tab);
       int3:= 0;

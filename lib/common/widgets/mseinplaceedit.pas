@@ -71,7 +71,6 @@ type
    fsellength: halfinteger;
    fcurindex: integer;
    curindexbackup,selstartbackup,sellengthbackup: integer;
-   fstate: inplaceeditstatesty;
    fcaretpos: pointty;
    ftextrect: rectty;
    ftextflags: textflagsty;
@@ -115,6 +114,7 @@ type
    function gettextrect: rectty;
 
   protected
+   fstate: inplaceeditstatesty;
    fcaretwidth: integer;
    frow: integer;
    function initactioninfo(aaction: editactionty): editnotificationinfoty;
@@ -1138,6 +1138,7 @@ procedure tinplaceedit.setfirstclick;
 begin
  include(fstate,ies_firstclick);
  resetoffset;
+ finfo.flags:= ftextflags;
 end;
 
 procedure tinplaceedit.mouseevent(var minfo: mouseeventinfoty);
@@ -1149,7 +1150,7 @@ begin
   case eventkind of
    ek_buttonpress: begin
     if (minfo.button = mb_left) and pointinrect(pos,finfo.clip) then begin
-     if not fowner.focused{entered} and fowner.canfocus and
+     if not fowner.focused and fowner.canfocus and
                 (ow_mousefocus in fowner.optionswidget) then begin
       include(fstate,ies_firstclick);
       include(minfo.eventstate,es_processed);
@@ -1174,9 +1175,15 @@ begin
      else begin
       postotextindex(fowner.getcanvas,finfo,pos,int1);
       po1:= textindextopos(fowner.getcanvas,finfo,int1);
-      if (ies_firstclick in fstate) and
-            (oe_autoselectonfirstclick in fintf.getoptionsedit) then begin
+      if (ies_firstclick in fstate) then begin
+       finfo.flags:= ftextflagsactive;
+       if (oe_autoselectonfirstclick in fintf.getoptionsedit) then begin
         selectall;
+       end
+       else begin
+        initfocus;
+        moveindex(int1,false);
+       end;
       end
       else begin
        moveindex(int1,ss_shift in shiftstate);
@@ -1185,16 +1192,13 @@ begin
      end;
      subpoint1(pos,po1);
      po1:= subpoint(ftextrect.pos,pos);
-     if (po1.x > 0) or (po1.y > 0) then begin
+     if (po1.x > 0) or (po1.y > 0) then begin //shift cursor in textrect
       if po1.x < 0 then begin
        po1.x:= 0;
       end;
       if po1.y < 0 then begin
        po1.y:= 0;
       end;
-//     if (pos.x < ftextrect.x) then begin
-//      po1.x:= ftextrect.x - pos.x;
-//      po1.y:= 0;
       addpoint1(pos,po1);
       if po1.x > ftextrect.x - finfo.dest.pos.x then begin
        po1.x:= ftextrect.x - finfo.dest.pos.x;
@@ -1206,6 +1210,7 @@ begin
       fowner.scrollcaret(po1);
      end;
     end;
+//    exclude(fstate,ies_firstclick);
    end;
    ek_buttonrelease,ek_mousecaptureend: begin
     killrepeater;
