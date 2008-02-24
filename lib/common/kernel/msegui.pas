@@ -11296,18 +11296,10 @@ end;
 procedure tinternalapplication.processleavewindow;
 begin
  fmouseparktimer.enabled:= false;
- {
- if factmousewindow <> nil then begin
-  fillchar(info,sizeof(info),0);
-  info.eventkind:= ek_mouseleave;
-  factmousewindow.dispatchmouseevent(info,nil);
- end;
- }
  factmousewindow:= nil;
  if fmousecapturewidget = nil then begin
   setmousewidget(nil);
-//    deactivatehint;
-//    fhintedwidget:= nil;
+  cursorshape:= cr_default;
  end
  else begin
   if (fclientmousewidget <> nil) and
