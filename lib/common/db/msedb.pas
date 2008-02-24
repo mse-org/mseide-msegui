@@ -38,6 +38,9 @@ const
  defaultproviderflags = [pfInUpdate,pfInWhere];
 
  varsizefields = [ftstring,ftbytes,ftvarbytes,ftwidestring];
+ 
+ converrorstring = '?';
+ 
 type
  isqlpropertyeditor = interface(inullinterface)
                             ['{001C24B7-548C-4A4D-A42D-6FBAFBAA7A57}']
@@ -3432,11 +3435,15 @@ begin
   result:= tmsestringfield(ffield).asmsestring;
  end
  else begin
-  if utf8 then begin
-   result:= utf8tostring(field.asstring);
-  end
-  else begin
-   result:= field.asstring;
+  try
+   if utf8 then begin
+    result:= utf8tostring(field.asstring);
+   end
+   else begin
+    result:= field.asstring;
+   end;
+  except
+   result:= converrorstring;
   end;
  end;
 end;

@@ -1894,11 +1894,15 @@ begin
        end;
        setlength(str1,int2);
        po2:= pointer(@buffer) + offset;
-       if bs_utf8 in fbstate then begin
-        po2^:= utf8tostring(str1);
-       end
-       else begin
-        po2^:= msestring(str1);
+       try
+        if bs_utf8 in fbstate then begin
+         po2^:= utf8tostring(str1);
+        end
+        else begin
+         po2^:= msestring(str1);
+        end;
+       except
+        po2^:= converrorstring;
        end;
        if length(po2^) > dbfieldsize then begin
         setlength(po2^,dbfieldsize);
