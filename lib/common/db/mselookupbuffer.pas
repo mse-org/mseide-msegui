@@ -1273,11 +1273,15 @@ begin
             ftextdata[int4].data[int1]:= tmsestringfield(textf[int4]).asmsestring;
            end
            else begin
-            if utf8 then begin
-             ftextdata[int4].data[int1]:= utf8tostring(textf[int4].asstring);
-            end
-            else begin
-             ftextdata[int4].data[int1]:= textf[int4].asstring;
+            try
+             if utf8 then begin
+              ftextdata[int4].data[int1]:= utf8tostring(textf[int4].asstring);
+             end
+             else begin
+              ftextdata[int4].data[int1]:= textf[int4].asstring;
+             end;
+            except
+             ftextdata[int4].data[int1]:= converrorstring;
             end;
            end;
           end;
