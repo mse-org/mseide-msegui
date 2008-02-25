@@ -1030,6 +1030,7 @@ type
    procedure endnullchecking;
    procedure setdatafield(const avalue: string);
    function getdatafield: string;
+   procedure forcecalcrange;
    
    function getobjectlinker: tobjectlinker;
     //iobjectlink
@@ -5516,6 +5517,10 @@ begin
   int1:= 1;
  end;
  BufferCount:= int1;
+ if active then begin
+  forcecalcrange;
+  checkscroll;
+ end;
  updaterowcount;
  checkscrollbar;
 end;
@@ -5560,6 +5565,16 @@ begin
  recordchanged(nil);
 end;
 
+procedure tgriddatalink.forcecalcrange;
+begin
+ inc(fdatasetchangedlock);
+ try
+  dataevent(dedatasetchange,0); //force tdatalink.calcrange
+ finally
+  dec(fdatasetchangedlock);
+ end;
+end;
+
 procedure tgriddatalink.activechanged;
 begin
  inherited;
@@ -5576,12 +5591,7 @@ begin
  gridinvalidate;
  checkscrollbar;
  if active then begin
-  inc(fdatasetchangedlock);
-  try
-   dataevent(dedatasetchange,0); //force tdatalink.calcrange
-  finally
-   dec(fdatasetchangedlock);
-  end;
+  forcecalcrange;
   if (fgrid.rowcount > 0) then begin
    if (fgrid.col < 0) and (fgrid.entered) then begin
     fgrid.focuscell(makegridcoord(fgrid.col,activerecord),fca_entergrid);
