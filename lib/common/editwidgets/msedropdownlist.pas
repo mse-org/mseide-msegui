@@ -937,6 +937,7 @@ begin
    raise;
   end;
  end;
+ fdropdownwidget.name:= '_dropdownwidget'; //debug purposes
 end;
 
 function tdropdownwidgetcontroller.getdropdownwidget: twidget;
@@ -1065,6 +1066,7 @@ end;
 function tcustomdropdownlistcontroller.createdropdownlist: tdropdownlist;
 begin
  result:= tdropdownlist.create(self,fdropdownitems);
+ result.name:= '_dropdownlist'; //debug purposes
 end;
 
 procedure tcustomdropdownlistcontroller.receiveevent(const event: tobjectevent);
@@ -1080,6 +1082,7 @@ begin
     fdropdownitems:= fcols;
    end;
    setlinkedcomponent(ievent(self),createdropdownlist,tmsecomponent(fdropdownlist));
+   fdropdownlist.name:= '_dropdownlist'; //debug purposes
    fdropdownlist.updateskin;
    try
     with fdropdownlist.frame.sbvert do begin

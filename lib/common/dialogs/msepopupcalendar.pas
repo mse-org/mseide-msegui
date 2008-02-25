@@ -230,7 +230,8 @@ procedure tpopupcalendarfo.cellevent(const sender: TObject;
 begin
  if (fcontroller <> nil) and iscellclick(info,[ccr_buttonpress]) then begin
   setcellvalue;
-  hide;
+  options:= options - [fo_freeonclose];
+  hide; //do not show error messages above the popup window
   if fcontroller.setdropdowntext(datetimetostr(fvalue),true,false,key_none) then begin
 //   release;
   end;

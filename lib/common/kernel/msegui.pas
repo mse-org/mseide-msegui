@@ -10101,7 +10101,7 @@ begin
     end;
    end;
   end;
-  settransientfor(nil,windowevent);
+//  settransientfor(nil,windowevent); //is still active window.
  end;
 end;
 
@@ -12340,6 +12340,29 @@ end;
  end;  
 end;
 
+{$ifdef mse_debugzorder}
+procedure printwindowstackinfo(const ar3: windowarty);
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(ar3) do begin
+  if ar3[int1].fowner.visible then begin
+   debugwrite('+ ');
+  end
+  else begin
+   debugwrite('- ');
+  end;
+  debugwrite(ar3[int1].fowner.name+' ');
+  if ar3[int1].ftransientfor = nil then begin
+   debugwriteln('nil');
+  end
+  else begin
+   debugwriteln(ar3[int1].ftransientfor.fowner.name);
+  end;
+ end;
+end;
+{$endif}
+
 procedure tinternalapplication.updatewindowstack;
 var
  ar3,ar4: windowarty;
@@ -12349,31 +12372,15 @@ begin
  sortzorder;
  ar3:= windowar; //refcount 1
 {$ifdef mse_debugzorder}
- writeln('*********');
- for int1:= 0 to high(ar3) do begin
-  write(ar3[int1].fowner.name,' ');
-  if ar3[int1].ftransientfor = nil then begin
-   writeln('nil');
-  end
-  else begin
-   writeln(ar3[int1].ftransientfor.fowner.name);
-  end;
- end;
+ debugwriteln('******************************');
+ printwindowstackinfo(ar3);
 {$endif}
  ar4:= copy(ar3);
  sortarray(ar3,{$ifdef FPC}@{$endif}compwindowzorder,sizeof(ar3[0]));
  int2:= -1;
 {$ifdef mse_debugzorder}
- writeln('+++');
- for int1:= 0 to high(ar3) do begin
-  write(ar3[int1].fowner.name,' ');
-  if ar3[int1].ftransientfor = nil then begin
-   writeln('nil');
-  end
-  else begin
-   writeln(ar3[int1].ftransientfor.fowner.name);
-  end;
- end;
+ debugwriteln('++++');
+ printwindowstackinfo(ar3);
 {$endif}
  for int1:= 0 to high(ar4) do begin
   if ar3[int1] <> ar4[int1] then begin
@@ -12735,7 +12742,8 @@ end;
 function tguiapplication.unreleasedactivewindow: twindow;
 begin
  result:= factivewindow;
- while (result <> nil) and result.fowner.releasing do begin
+ while (result <> nil) and 
+            (result.fowner.releasing or not result.fowner.visible) do begin
   result:= result.ftransientfor;
  end;
 end;

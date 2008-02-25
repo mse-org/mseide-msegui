@@ -1160,6 +1160,7 @@ begin
   widget:= tshowmessagewidget.create(nil,(transientfor <> nil) and 
               (wo_popup in transientfor.options) and transientfor.owner.visible,
               high(actions) >= 0,exttext);
+  widget.name:= '_showmessage'; //debug purpose
   widget.parentwidget:= widget1; //do not create window handle of widget
   try
    acanvas:= widget1.getcanvas; 
