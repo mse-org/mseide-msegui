@@ -6023,6 +6023,7 @@ end;
 
 procedure tcustomgrid.invalidate;
 begin
+ finvalidatedcells:= nil;
  if caninvalidate then begin
   inherited;
   exclude(fstate,gs_invalidated);
@@ -6850,7 +6851,7 @@ begin
  end
  else begin
   if fnoinvalidate = 0 then begin
-   if not (gs_invalidated in fstate) then begin
+   if fstate * [gs_invalidated,gs_layoutvalid] = [gs_layoutvalid] then begin
     if high(finvalidatedcells) > 20 then begin
      include(fstate,gs_invalidated);
      finvalidatedcells:= nil;
@@ -9866,7 +9867,6 @@ var
 begin
  if gs_invalidated in fstate then begin
   invalidate;
-  finvalidatedcells:= nil;
  end
  else begin
   if finvalidatedcells <> nil then begin
