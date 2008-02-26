@@ -2120,7 +2120,6 @@ var
    acanvas.move(makepoint(adest.x,0));
    acanvas.addcliprect(inflaterect(makerect(nullpoint,fband.size),1000));
                    //allow line drawing everywhere
-//   acanvas.addclipframe(makerect(nullpoint,fband.paintsize),1000);
   end;
   with ainfo do begin
    acanvas.linewidthmm:= widthmm;
@@ -2204,15 +2203,11 @@ var
  
 begin
  fminsize:= nullsize;
-// bandcx:= fband.innerclientsize.cx;
  bandcx:= adest.cx;
  bo1:= false;
  if apaint then begin  
   with fband do begin
    cellrect:= adest;
-//   if fframe <> nil then begin
-//    inflaterect1(cellrect,fframe.innerframe);
-//   end;
    if not rendering or (fparentintf = nil) then begin 
     visiblemask:= [lv_topofpage,lv_nottopofpage,
                    lv_firstofpage,lv_normal,lv_lastofpage,
@@ -2244,14 +2239,14 @@ begin
      if fband.islastofgroup then begin
       include(visiblemask,lv_lastofgroup);
      end;
-     if isfirstrecord then begin
-      include(visiblemask,lv_firstrecord);
-      exclude(visiblemask,lv_normal);
-     end;
-     if islastrecord then begin
-      include(visiblemask,lv_lastrecord);
-      exclude(visiblemask,lv_normal);
-     end;
+    end;
+    if isfirstrecord then begin
+     include(visiblemask,lv_firstrecord);
+     exclude(visiblemask,lv_normal);
+    end;
+    if islastrecord then begin
+     include(visiblemask,lv_lastrecord);
+     exclude(visiblemask,lv_normal);
     end;
    end;
   end;
