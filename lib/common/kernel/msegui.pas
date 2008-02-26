@@ -784,7 +784,8 @@ type
 
  twindow = class;
 
- windowoptionty = (wo_popup,wo_message,wo_buttonendmodal,wo_groupleader);
+ windowoptionty = (wo_popup,wo_message,wo_buttonendmodal,wo_groupleader,
+                   wo_windowcentermessage); //showmessage centered in window
  windowoptionsty = set of windowoptionty;
 
  windowposty = (wp_normal,wp_screencentered,wp_minimized,wp_maximized,wp_default,

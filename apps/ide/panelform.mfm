@@ -24,7 +24,6 @@ object panelfo: tpanelfo
   dragdock.onlayoutchanged = panellayoutchanged
   options = [fo_globalshortcuts, fo_savepos, fo_savestate]
   statfile = mainfo.projectstatfile
-  icon.transparency = -2147483648
   onclose = onclo
   moduleclassname = 'tdockform'
 end

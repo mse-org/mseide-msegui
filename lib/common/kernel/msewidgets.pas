@@ -881,6 +881,9 @@ type
 //   property visible;
  end;
 
+type
+ messagepositionty = (mepo_default,mepo_screencentered,mepo_windowcentered);
+ 
 procedure getdropdownpos(const parent: twidget; var rect: rectty);
 
 
@@ -891,14 +894,16 @@ function showmessage(const atext,caption: msestring;
                      const defaultbutton: modalresultty = mr_cancel;
                      const noshortcut: modalresultsty = [];
                      const minwidth: integer = 0;
-                     const exttext: msestring = ''): modalresultty; overload;
+                     const exttext: msestring = '';
+                     const position: messagepositionty = mepo_default): modalresultty; overload;
 function showmessage(const atext,caption: msestring;
                      const buttons: array of modalresultty;
                      const defaultbutton: modalresultty;
                      const noshortcut: modalresultsty;
                      const minwidth: integer;
                      const actions: array of notifyeventty;
-                     const exttext: msestring = ''): modalresultty; overload;
+                     const exttext: msestring = '';
+                     const position: messagepositionty = mepo_default): modalresultty; overload;
 function showmessage(const atext,caption: msestring;
                      const buttons: array of modalresultty;
                      const adest: rectty; const awidget: twidget = nil;
@@ -937,7 +942,7 @@ function pastefromclipboard(out value: msestring): boolean;
             //false if empty
 function placepopuprect(const awindow: twindow; const adest: rectty; //screenorig
                  const placement: captionposty; const asize: sizety): rectty; overload;
- //placement actually only cp_bottomleft
+ //placement actually only cp_bottomleft and cp_center
  //todo
 function placepopuprect(const awidget: twidget; const adest: rectty; //clientorig
                  const placement: captionposty; const asize: sizety): rectty; overload;
@@ -1278,17 +1283,23 @@ begin
  end;
 end;
 
-function messagerect(out arect: rectty): prectty;
+function messagerect(const position: messagepositionty; 
+                                        out arect: rectty): prectty;
 var
  window1: twindow;
 begin
- window1:= application.unreleasedactivewindow;
- if window1 <> nil then begin
-  arect:= window1.owner.widgetrect;
-  result:= @arect;
- end
- else begin
-  result:= nil;
+ result:= nil;
+ if position <> mepo_screencentered then begin
+  window1:= application.unreleasedactivewindow;
+  if (window1 <> nil) and 
+         ((position = mepo_windowcentered) or 
+          (wo_windowcentermessage in window1.options)) then begin
+   arect:= window1.owner.widgetrect;
+   result:= @arect;
+  end
+  else begin
+   result:= nil;
+  end;
  end;
 end;
 
@@ -1297,12 +1308,13 @@ function showmessage(const atext,caption: msestring;
                      const defaultbutton: modalresultty = mr_cancel;
                      const noshortcut: modalresultsty = [];
                      const minwidth: integer = 0;
-                     const exttext: msestring = ''): modalresultty;
+                     const exttext: msestring = '';
+                     const position: messagepositionty = mepo_default): modalresultty;
 var
  rect1: rectty;
 begin
  result:= internalshowmessage(atext,caption,buttons,defaultbutton,
-                 noshortcut,messagerect(rect1),cp_center,minwidth,[],exttext);
+                 noshortcut,messagerect(position,rect1),cp_center,minwidth,[],exttext);
 end;
 
 function showmessage(const atext,caption: msestring;
@@ -1311,12 +1323,14 @@ function showmessage(const atext,caption: msestring;
                      const noshortcut: modalresultsty;
                      const minwidth: integer;
                      const actions: array of notifyeventty;
-                     const exttext: msestring = ''): modalresultty;
+                     const exttext: msestring = '';
+                     const position: messagepositionty = mepo_default): modalresultty;
 var
  rect1: rectty;
 begin
  result:= internalshowmessage(atext,caption,buttons,defaultbutton,
-                 noshortcut,messagerect(rect1),cp_center,minwidth,actions,exttext);
+                 noshortcut,messagerect(position,rect1),cp_center,
+                                                 minwidth,actions,exttext);
 end;
 
 function showmessage(const atext,caption: msestring;

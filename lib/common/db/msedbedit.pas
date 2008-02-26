@@ -37,7 +37,7 @@ const
  
 type
 
- dbnavigatoroptionty = (dno_confirmdelete,dno_append);
+ dbnavigatoroptionty = (dno_confirmdelete,dno_append,dno_shortcuthint);
  dbnavigatoroptionsty = set of dbnavigatoroptionty;
 
 const
@@ -79,6 +79,7 @@ type
    procedure setcolorglyph(const avalue: colorty);
    procedure setoptions(const avalue: dbnavigatoroptionsty);
   protected
+   procedure inithints;
    procedure doexecute(const sender: tobject);
    procedure loaded; override;
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
@@ -2013,7 +2014,6 @@ begin
    imagenr:= int1 + ord(stg_dbfirst);
    tag:= int1;
    onexecute:= {$ifdef FPC}@{$endif}doexecute;
-   hint:= stockobjects.captions[stockcaptionty(int1+ord(sc_first))];
   end;
  end;
  fdatalink:= tnavigdatalink.Create(idbnaviglink(self));
@@ -2024,6 +2024,22 @@ destructor tdbnavigator.destroy;
 begin
  inherited;
  fdatalink.Free;
+end;
+
+procedure tdbnavigator.inithints;
+var
+ int1: integer;
+begin
+ for int1:= 0 to ord(high(dbnavigbuttonty)) do begin
+  with buttons[int1] do begin
+   hint:= stockobjects.captions[stockcaptionty(int1+ord(sc_first))];
+   if (dno_shortcuthint in foptions) and 
+             (fshortcuts[dbnavigbuttonty(int1)] <> 0) then begin
+    hint:= hint + ' (' + 
+                  encodeshortcutname(fshortcuts[dbnavigbuttonty(int1)])+')';
+   end;
+  end;
+ end;
 end;
 
 procedure tdbnavigator.doasyncevent(var atag: integer);
@@ -2155,6 +2171,7 @@ begin
     hint:= stockobjects.captions[sc_insert];
    end;
   end;
+  inithints;
  end;
 end;
 
