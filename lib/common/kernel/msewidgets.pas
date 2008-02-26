@@ -1064,19 +1064,25 @@ end;
 
 function placepopuprect(const awindow: twindow; const adest: rectty;
                  const placement: captionposty; const asize: sizety): rectty;
- //placement actually only cp_bottomleft
+ //placement actually only cp_bottomleft and cp_center
  //todo
 
 var
- rect1: rectty;
  int1: integer;
+ rect1: rectty;
 begin
  result.size:= asize;
  with adest do begin
-  result.x:= x;
-  result.y:= y + cy;
+  if placement = cp_bottomleft then begin
+   result.x:= x;
+   result.y:= y + cy;
+  end
+  else begin
+   result.x:= x + (cx - asize.cx) div 2;
+   result.y:= y + (cy - asize.cy) div 2;
+  end;
   rect1:= application.workarea(awindow);
-  with result do begin
+  with result do begin //shift in workarea
    int1:= (rect1.x + rect1.cx) - (x + cx);
    if int1 < 0 then begin
     inc(x,int1);
@@ -1085,7 +1091,12 @@ begin
     end;
    end;
    if y + cy > rect1.y + rect1.cy then begin
-    y:= adest.y - asize.cy;
+    if placement = cp_bottomleft then begin
+     y:= adest.y - asize.cy; //above destrect
+    end
+    else begin
+     y:= rect1.y + rect1.cy - asize.cy;
+    end;
     if y < rect1.y then begin
      y:= rect1.y;
     end;
@@ -1214,13 +1225,14 @@ begin
    widget.parentwidget:= nil;  //remove dummy parent
    widget.clientsize:= rect1.size;
    if placementrect = nil then begin
- //   widget.widgetrect:= makerect(rect1.pos,addsize(rect1.size,widget.framewidth));
     widget.window.windowpos:= wp_screencentered;
    end
    else begin
     rect2:= placementrect^;
-    dec(rect2.y,8);
-    inc(rect2.cy,28); //for windowdecoration
+    if placement = cp_bottomleft then begin
+     dec(rect2.y,8);
+     inc(rect2.cy,28); //for windowdecoration
+    end;
     widget.widgetrect:= placepopuprect(transientfor,rect2,placement,widget.size);
    end;
  
@@ -1266,15 +1278,31 @@ begin
  end;
 end;
 
+function messagerect(out arect: rectty): prectty;
+var
+ window1: twindow;
+begin
+ window1:= application.unreleasedactivewindow;
+ if window1 <> nil then begin
+  arect:= window1.owner.widgetrect;
+  result:= @arect;
+ end
+ else begin
+  result:= nil;
+ end;
+end;
+
 function showmessage(const atext,caption: msestring;
                      const buttons: array of modalresultty;
                      const defaultbutton: modalresultty = mr_cancel;
                      const noshortcut: modalresultsty = [];
                      const minwidth: integer = 0;
                      const exttext: msestring = ''): modalresultty;
+var
+ rect1: rectty;
 begin
  result:= internalshowmessage(atext,caption,buttons,defaultbutton,
-                 noshortcut,nil,cp_bottomleft,minwidth,[],exttext);
+                 noshortcut,messagerect(rect1),cp_center,minwidth,[],exttext);
 end;
 
 function showmessage(const atext,caption: msestring;
@@ -1284,9 +1312,11 @@ function showmessage(const atext,caption: msestring;
                      const minwidth: integer;
                      const actions: array of notifyeventty;
                      const exttext: msestring = ''): modalresultty;
+var
+ rect1: rectty;
 begin
  result:= internalshowmessage(atext,caption,buttons,defaultbutton,
-                 noshortcut,nil,cp_bottomleft,minwidth,actions,exttext);
+                 noshortcut,messagerect(rect1),cp_center,minwidth,actions,exttext);
 end;
 
 function showmessage(const atext,caption: msestring;
