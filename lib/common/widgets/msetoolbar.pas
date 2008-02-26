@@ -150,9 +150,10 @@ type
    property face: tface read getface write setface;
  end;
 
- toolbaroptionty = ({tbo_autosize,}tbo_dragsource,tbo_dragdest,
-                     tbo_dragsourceenabledonly,tbo_dragdestenabledonly,
-                     tbo_nohorz,tbo_novert);
+ toolbaroptionty = (tbo_dragsource,tbo_dragdest,
+                    tbo_dragsourceenabledonly,tbo_dragdestenabledonly,
+                    tbo_nohorz,tbo_novert,
+                    tbo_shortcuthint);
  toolbaroptionsty = set of toolbaroptionty;
 
  toolbarlayoutinfoty = record
@@ -1153,7 +1154,15 @@ end;
 
 function tcustomtoolbar.getbuttonhint(const aindex: integer): msestring;
 begin
- result:= buttons[aindex].hint;
+ with buttons[aindex] do begin
+  result:= hint;
+  if (tbo_shortcuthint in self.foptions) and (shortcut <> 0) then begin
+   if result <> '' then begin
+    result:= result + ' ';
+   end;
+   result:= result + '('+encodeshortcutname(shortcut)+')';
+  end;
+ end;
 end;
 
 procedure tcustomtoolbar.clientmouseevent(var info: mouseeventinfoty);
