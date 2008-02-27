@@ -1,18 +1,20 @@
 object findinfileadialogfo: tfindinfiledialogfo
-  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousewheel, ow_destroywidgets, ow_hinton, ow_autoscale]
+  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
   bounds_x = 268
   bounds_y = 415
   bounds_cx = 331
   bounds_cy = 249
+  taborder = 1
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
+  container.bounds_x = 0
+  container.bounds_y = 0
   container.bounds_cx = 331
   container.bounds_cy = 249
   container.frame.dummy = 0
   options = [fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos]
   statfile = statfile1
   caption = 'Find Text in Files'
-  icon.transparency = -2147483648
   moduleclassname = 'tmseform'
   object findtext: thistoryedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
@@ -30,7 +32,6 @@ object findinfileadialogfo: tfindinfiledialogfo
     )
     anchors = [an_left, an_top, an_right]
     statfile = statfile1
-    dropdown.options = [deo_autosavehistory]
     dropdown.cols.count = 1
     dropdown.cols.items = <    
       item
@@ -62,14 +63,14 @@ object findinfileadialogfo: tfindinfiledialogfo
   object casesensitive: tbooleanedit
     bounds_x = 8
     bounds_y = 56
-    bounds_cx = 90
+    bounds_cx = 92
     bounds_cy = 16
     frame.caption = 'c&asesensitive'
     frame.dummy = 0
     frame.outerframe = (
       0
       1
-      77
+      79
       2
     )
     taborder = 1
@@ -94,14 +95,14 @@ object findinfileadialogfo: tfindinfiledialogfo
   object indirectories: tbooleaneditradio
     bounds_x = 8
     bounds_y = 80
-    bounds_cx = 128
+    bounds_cx = 129
     bounds_cy = 16
     frame.caption = 'Search in &directories'
     frame.dummy = 0
     frame.outerframe = (
       0
       1
-      115
+      116
       2
     )
     taborder = 3
@@ -112,14 +113,14 @@ object findinfileadialogfo: tfindinfiledialogfo
     Tag = 1
     bounds_x = 160
     bounds_y = 80
-    bounds_cx = 139
+    bounds_cx = 141
     bounds_cy = 16
     frame.caption = 'Search in all &open files'
     frame.dummy = 0
     frame.outerframe = (
       0
       1
-      126
+      128
       2
     )
     taborder = 4
@@ -167,7 +168,6 @@ object findinfileadialogfo: tfindinfiledialogfo
     taborder = 6
     statfile = statfile1
     value = '"*.pas" "*.pp" "*.inc"'
-    dropdown.options = [deo_autosavehistory]
     dropdown.cols.count = 1
     dropdown.cols.items = <    
       item
@@ -177,14 +177,14 @@ object findinfileadialogfo: tfindinfiledialogfo
   object subdirs: tbooleanedit
     bounds_x = 8
     bounds_y = 216
-    bounds_cx = 135
+    bounds_cx = 138
     bounds_cy = 16
     frame.caption = '&Include subdirectories'
     frame.dummy = 0
     frame.outerframe = (
       0
       1
-      122
+      125
       2
     )
     taborder = 7
