@@ -5600,7 +5600,7 @@ begin
  bo1:= ws_opaque in fwidgetstate;
  if isvisible then begin
   include(fwidgetstate,ws_isvisible);
-  if (fwidgetstate * [ws_nopaint] = [])  and
+  if (fparentwidget = nil) or (fwidgetstate * [ws_nopaint] = [])  and
               (actualcolor <> cl_transparent) then begin
    include(fwidgetstate,ws_opaque);
   end
@@ -6078,6 +6078,7 @@ var
  int1,int2: integer;
  saveindex: integer;
  actcolor: colorty;
+ col1: colorty;
  reg1: regionty;
  rect1: rectty;
  widget1: twidget;
@@ -6103,7 +6104,11 @@ begin
   bo1:= not canvas.clipregionisempty;
   if bo1 then begin
    if ws_opaque in fwidgetstate then begin
-    canvas.fillrect(rect1,actcolor);
+    col1:= actcolor;
+    if actcolor = cl_transparent then begin
+     col1:= cl_background; //no parent
+    end;
+    canvas.fillrect(rect1,col1);
    end;
    {$ifdef mse_slowdrawing}
    sleep(500);
@@ -6294,6 +6299,7 @@ var
  int1: integer;
 begin
  if not (ws_loadedproc in fwidgetstate) then begin
+  updateopaque(false);
   parentfontchanged;
   for int1:= 0 to high(fwidgets) do begin
    with fwidgets[int1] do begin

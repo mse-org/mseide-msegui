@@ -4,7 +4,6 @@ object debuggerfo: tdebuggerfo
   bounds_y = 130
   bounds_cx = 441
   bounds_cy = 100
-  color = -2147483647
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton]
   frame.dummy = 0
