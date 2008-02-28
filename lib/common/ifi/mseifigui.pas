@@ -4,7 +4,7 @@ interface
 uses
  classes,mseclasses,mseifiglob,mseifi,mseact,msegui,typinfo,msestrings,
  msearrayprops,mseglob,msetypes,mseifilink,msewidgetgrid,msemenus,
- mseevent,msegrids;
+ mseevent,msegrids,msegraphutils;
  
 type
  
@@ -17,9 +17,10 @@ type
    procedure setwidget(const avalue: twidget);
    procedure checkwidget;
   protected
+   procedure setdata(const adata: pifidataty; const aname: ansistring); override;
    procedure sendvalue(const aproperty: ppropinfo); overload;
-   procedure setdata(const adata: pifidataty); override;
   public
+   procedure sendvalue(const aname: string; const avalue: colorty); overload;
    procedure sendproperties;
   published
    property widget: twidget read fwidget write setwidget;
@@ -46,7 +47,7 @@ type
                       const adata: pifibytesty): boolean;
    function processdataitem(const adata: pifirecty; var adatapo: pchar;
                   const atag: integer; const aname: string): boolean; override;
-   procedure valuechanged(const sender: iifiwidget);
+   procedure valuechanged(const sender: iifiwidget); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -124,7 +125,7 @@ begin
  if fintf <> nil then begin
   fintf.setifiserverintf(iifiserver(tcustommodulelink(fowner)));
  end;
- fwidget:= avalue;
+ setlinkedvar(avalue,tmsecomponent(fwidget));
  if avalue <> nil then begin
   fvalueproperty:= getpropinfo(avalue,'value');
  end;
@@ -137,25 +138,37 @@ begin
  end;
 end;
 
-procedure tvaluewidgetlink.setdata(const adata: pifidataty);
+procedure tvaluewidgetlink.setdata(const adata: pifidataty; 
+                                               const aname: ansistring);
+var
+ aproperty: ppropinfo;
 begin
  inherited;
+ aproperty:= nil;
  with adata^ do begin
-  if fvalueproperty <> nil then begin
+  if aname = 'value' then begin
+   aproperty:= fvalueproperty;
+  end
+  else begin
+   if fwidget <> nil then begin
+    aproperty:= getpropinfo(fwidget,aname);
+   end;
+  end;
+  if aproperty <> nil then begin
    inc(fupdatelock);
    try
-    case fvalueproperty^.proptype^.kind of
+    case aproperty^.proptype^.kind of
      tkInteger,tkBool,tkInt64: begin
-      setordprop(fwidget,fvalueproperty,aslargeint);
+      setordprop(fwidget,aproperty,aslargeint);
      end;
      tkFloat: begin
-      setfloatprop(fwidget,fvalueproperty,asfloat);
+      setfloatprop(fwidget,aproperty,asfloat);
      end;
      tkWString: begin
-      setwidestrprop(fwidget,fvalueproperty,asmsestring);
+      setwidestrprop(fwidget,aproperty,asmsestring);
      end;
      tkSString,tkLString,tkAString: begin
-      setstrprop(fwidget,fvalueproperty,asstring);
+      setstrprop(fwidget,aproperty,asstring);
      end;
     end;
    finally
@@ -201,6 +214,12 @@ begin
   stream1.free;
  end;
  tcustommodulelink1(fowner).senddata(str1);
+end;
+
+procedure tvaluewidgetlink.sendvalue(const aname: string;
+               const avalue: colorty);
+begin
+ sendvalue(aname,int64(avalue));
 end;
 
 { tvaluewidgetlinks }

@@ -529,6 +529,9 @@ begin
  for int1:= 0 to high(ffielddefindex) do begin
   int2:= int2 + length(fielddefs[ffielddefindex[int1]].name);
  end;
+if int1 = 0 then begin
+ beep;
+end;
  setlength(result,sizeof(fdefdataty)+length(ffielddefindex)*sizeof(fdefitemty)+
                               int2*6);
  with pfdefdataty(result)^ do begin

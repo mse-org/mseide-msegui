@@ -927,7 +927,6 @@ end;
 
 procedure tcustomsocketserver.doafterchconnect(const sender: tcustomsocketpipes);
 begin
- debugwriteln('afterchconnect');
  if canevent(tmethod(fonafterchconnect)) then begin
   application.lock;
   try

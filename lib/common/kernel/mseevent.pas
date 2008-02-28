@@ -28,19 +28,19 @@ type
                 ek_enterwindow,ek_leavewindow,
                 ek_buttonpress,ek_buttonrelease,ek_mousewheel,
                 ek_mousemove,ek_mousepark,
-                ek_mouseenter,ek_mouseleave,{ek_mousecapturebegin,}ek_mousecaptureend,
+                ek_mouseenter,ek_mouseleave,ek_mousecaptureend,
                 ek_clientmouseenter,ek_clientmouseleave,
                 ek_expose,ek_configure,
                 ek_terminate,ek_abort,ek_destroy,ek_show,ek_hide,ek_close,
                 ek_activate,ek_loaded,
                 ek_keypress,ek_keyrelease,ek_timer,ek_wakeup,
-                ek_release,ek_childscaled,ek_resize,
+                ek_release,ek_closeform,ek_childscaled,ek_resize,
                 ek_dropdown,ek_async,ek_execute,ek_component,ek_synchronize,
                 ek_dbedit,ek_dbupdaterowdata,ek_data,ek_objectdata,ek_mse,
                 ek_user);
 const
  mouseregionevents = [ek_mousepark,ek_mouseenter,ek_mouseleave,
-                      {ek_mousecapturebegin,}ek_mousecaptureend,
+                      ek_mousecaptureend,
                       ek_clientmouseenter,ek_clientmouseleave];
  mouseposevents = [ek_buttonpress,ek_buttonrelease,ek_mousemove,ek_mousepark];
  waitignoreevents = [ek_keypress,ek_buttonpress,ek_mousewheel];

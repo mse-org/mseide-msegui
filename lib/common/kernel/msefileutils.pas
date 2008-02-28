@@ -83,7 +83,7 @@ function combinerootpath(const rootpath: filenamety;
 function combinerootpath(const rootpaths: filenamearty; 
                                const name: filenamety): filenamearty; overload;
 
-function filepath(const directory: filenamety; const filename: filenamety;
+function filepath({const} directory: filenamety; {const} filename: filenamety;
                         kind: filekindty = fk_default;
                         relative: boolean = false): filenamety; overload;
  //directory ignored if filename starts with root
@@ -1017,7 +1017,7 @@ begin
  end;
 end;
 
-function filepath(const directory,filename: filenamety; kind: filekindty = fk_default;
+function filepath({const} directory,filename: filenamety; kind: filekindty = fk_default;
                            relative: boolean = false): filenamety; overload;
 begin
  if not isrelativepath(filename) then begin

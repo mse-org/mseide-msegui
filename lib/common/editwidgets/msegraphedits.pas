@@ -264,7 +264,6 @@ type
    fonsetvalue: setrealeventty;
    fdirection: graphicdirectionty;
    procedure setvalue(const avalue: realty);
-   procedure setdirection(const avalue: graphicdirectionty);
    function getgridvalue(const index: integer): realty;
    procedure setgridvalue(const index: integer; const avalue: realty);
    function getgridvalues: realarty;
@@ -272,6 +271,7 @@ type
   protected
    fvalue: realty;
    fisdb: boolean;
+   procedure setdirection(const avalue: graphicdirectionty); virtual;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatyp: datatypty; override;
    procedure valuetogrid(const arow: integer); override;
@@ -311,6 +311,7 @@ type
    fupdating: integer;
    procedure setscrollbar(const avalue: tsliderscrollbar);
   protected
+   procedure setdirection(const avalue: graphicdirectionty); override;
    procedure objectchanged(const sender: tobject); override;
    procedure clientrectchanged; override;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
@@ -327,8 +328,6 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   procedure changedirection(const avalue: graphicdirectionty;
-                                            var dest: graphicdirectionty); override;
    property scrollbar: tsliderscrollbar read fscrollbar write setscrollbar;
  end;
 
@@ -961,7 +960,12 @@ end;
 procedure tcustomrealgraphdataedit.setdirection(const avalue: graphicdirectionty);
 begin
  if fdirection <> avalue then begin
-  changedirection(avalue,fdirection);
+  if not (csreading in componentstate) then begin
+   changedirection(avalue,fdirection);  
+  end
+  else begin
+   fdirection:= avalue;
+  end;
  end;
 end;
 
@@ -1051,8 +1055,7 @@ begin
  dec(fupdating);
 end;
 
-procedure tcustomslider.changedirection(const avalue: graphicdirectionty;
-                                            var dest: graphicdirectionty);
+procedure tcustomslider.setdirection(const avalue: graphicdirectionty);
 begin
  fscrollbar.direction:= avalue;
  inherited;

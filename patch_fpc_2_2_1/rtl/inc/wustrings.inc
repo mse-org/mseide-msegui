@@ -571,20 +571,27 @@ begin
     end;
 end;
 
-
+//copied from trunk 20080228 mse
 procedure fpc_WideStr_Concat_multi (var DestS:Widestring;const sarr:array of Widestring); compilerproc;
 Var
-  lowstart,i  : Longint;
+  i           : Longint;
   p,pc        : pointer;
-  Size,NewLen,
+  Size,NewLen : SizeInt;
+{$ifndef FPC_WINLIKEWIDESTRING}
+  lowstart    : longint;
+  destcopy    : pointer;
   OldDestLen  : SizeInt;
-  destcopy    : widestring;
+{$else FPC_WINLIKEWIDESTRING}
+  DestTmp     : Widestring;
+{$endif FPC_WINLIKEWIDESTRING}
 begin
   if high(sarr)=0 then
     begin
       DestS:='';
       exit;
     end;
+{$ifndef FPC_WINLIKEWIDESTRING}
+  destcopy:=nil;
   lowstart:=low(sarr);
   if Pointer(DestS)=Pointer(sarr[lowstart]) then
     inc(lowstart);
@@ -596,8 +603,11 @@ begin
         begin
           { if DestS is used somewhere in the middle of the expression,
             we need to make sure the original string still exists after
-            we empty/modify DestS                                       }
-          destcopy:=dests;
+            we empty/modify DestS.
+            This trick only works with reference counted strings. Therefor
+            this optimization is disabled for WINLIKEWIDESTRING }
+          destcopy:=pointer(dests);
+          fpc_WideStr_Incr_Ref(destcopy);
           lowstart:=low(sarr);
           break;
         end;
@@ -626,6 +636,27 @@ begin
           inc(pc,size*sizeof(WideChar));
         end;
     end;
+  fpc_WideStr_Decr_Ref(destcopy);
+{$else FPC_WINLIKEWIDESTRING}
+  { First calculate size of the result so we can do
+    a single call to SetLength() }
+  NewLen:=0;
+  for i:=low(sarr) to high(sarr) do
+    inc(NewLen,length(sarr[i]));
+  SetLength(DestTmp,NewLen);
+  pc:=pwidechar(DestTmp);
+  for i:=low(sarr) to high(sarr) do
+    begin
+      p:=pointer(sarr[i]);
+      if assigned(p) then
+        begin
+          Size:=length(widestring(p));
+          Move(p^,pc^,(Size+1)*sizeof(WideChar));
+          inc(pc,size*sizeof(WideChar));
+        end;
+    end;
+  DestS:=DestTmp;
+{$endif FPC_WINLIKEWIDESTRING}
 end;
 
 {$endif STR_CONCAT_PROCS}
@@ -1358,9 +1389,7 @@ begin
      if Index+Size<=LS then
       begin
         Dec(Index);
-//        Move(PWideChar(S)[Index+Size],PWideChar(S)[Index],(LS-Index+1)*sizeof(WideChar));
-        Move(PWideChar(S)[Index+Size],PWideChar(S)[Index],
-           (LS-Index-Size+1)*sizeof(WideChar)); //2008-02-09 mse
+        Move(PWideChar(S)[Index+Size],PWideChar(S)[Index],(LS-Index-Size+1)*sizeof(WideChar));
       end;
      Setlength(s,LS-Size);
    end;
@@ -1899,7 +1928,7 @@ begin
       p^:=widechar(nc);
       inc(index);
     end
-  else if (nc<=$10ffff) then
+  else if (dword(nc)<=$10ffff) then
     begin
       p^:=widechar((nc - $10000) shr 10 + $d800);
       (p+1)^:=widechar((nc - $10000) and $3ff + $dc00);
@@ -1918,7 +1947,6 @@ function UCS4StringToWideString(const s : UCS4String) : WideString;
   var
     i        : SizeInt;
     resindex : SizeInt;
-    len      : longint;
   begin
     { skip terminating #0 }
     SetLength(result,length(s)-1);

@@ -683,7 +683,7 @@ begin
  inherited;
  case acommand of
   icc_close: begin
-   close;
+   application.postevent(tobjectevent.create(ek_closeform,ievent(self)));
   end;
  end;
 end;
@@ -850,11 +850,16 @@ end;
 procedure tcustommseform.receiveevent(const event: tobjectevent);
 begin
  inherited;
- if event.kind = ek_loaded then begin
-  doeventloopstart;
-  if (fo_modal in foptions) and not (csloading in componentstate) and 
-                          showing  then begin
-   show(true);
+ case event.kind of
+  ek_loaded: begin
+   doeventloopstart;
+   if (fo_modal in foptions) and not (csloading in componentstate) and 
+                           showing  then begin
+    show(true);
+   end;
+  end;
+  ek_closeform: begin
+   close;
   end;
  end;
 end;
@@ -910,9 +915,6 @@ begin
     setmainmenu(nil);
    end;
    oe_changed: begin
-//    if fmainmenuwidget <> nil then begin
-//     fmainmenuwidget.updatetemplates;
-//    end;
     updatemainmenutemplates;
     if (sender = fmainmenu) and (fmainmenuwidget <> nil) then begin
      fmainmenuwidget.menuchanged(nil);

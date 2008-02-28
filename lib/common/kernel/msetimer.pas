@@ -42,11 +42,13 @@ type
    ftimer: tsimpletimer;
    fenabled: boolean; //for design
    function getenabled: boolean;
-   procedure setenabled(const Value: boolean);
+   procedure setenabled(const avalue: boolean);
    function getinterval: integer;
-   procedure setinterval(const Value: integer);
+   procedure setinterval(const avalue: integer);
    function getontimer: notifyeventty;
    procedure setontimer(const Value: notifyeventty);
+  protected
+   procedure doasyncevent(var atag: integer); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -67,6 +69,9 @@ implementation
 uses
  msesysintf,SysUtils,mseapplication,msesys,msesysutils;
 
+const
+ enabletimertag = 8346320;
+ 
 type
  ptimerinfoty = ^timerinfoty;
  timerinfoty = record
@@ -162,8 +167,6 @@ var
 begin
  int1:= first^.nexttime-reftime;
  if int1 < 1000 then begin
-//writeln('post');
-//flush(output);
   application.postevent(tevent.create(ek_timer));
  end
  else begin
@@ -176,8 +179,6 @@ var
  po: ptimerinfoty;
  time: cardinal;
 begin
-//writeln('set ',ainterval);
-//flush(output);
  new(po);
  sys_mutexlock(mutex);
  time:= sys_gettimeus;
@@ -198,8 +199,7 @@ begin
   starttimer(time);
  end
  else begin
-//  if (integer(first^.nexttime - time) < 0) and not rewaked then begin//todo!!!!!: FPC bug 4768
-  if later(first^.nexttime,time) {and not rewaked} then begin
+  if later(first^.nexttime,time) then begin
    rewaked:= true;
    application.postevent(tevent.create(ek_timer)); //timerevent is ev. lost
   end;
@@ -218,7 +218,6 @@ begin
  if first <> nil then begin
   time:= sys_gettimeus;
   po:= first;
-//  while (po <> nil) and (integer(po^.nexttime - time) < 0) do begin//todo!!!!!: FPC bug 4768
   while (po <> nil) and laterorsame(po^.nexttime,time) do begin
    extract(po);
    ontimer:= po^.ontimer;
@@ -230,7 +229,6 @@ begin
    else begin
     repeat
      inc(po^.nexttime,po^.interval)
-//    until integer(po^.nexttime-time) > 0;//todo!!!!!: FPC bug 4768
     until later(time,po^.nexttime);
     insert(po);
    end;
@@ -350,13 +348,34 @@ begin
  end;
 end;
 
-procedure ttimer.setenabled(const Value: boolean);
+procedure ttimer.setenabled(const avalue: boolean);
 begin
- if csdesigning in componentstate then begin
-  fenabled:= value;
+ if not (csdesigning in componentstate) then begin
+  if not application.ismainthread then begin
+   sys_mutexlock(mutex);
+   fenabled:= avalue;
+   if avalue and not ftimer.enabled then begin
+    asyncevent(enabletimertag); //win32 settimer must be in mainthread
+    sys_mutexunlock(mutex);
+   end
+   else begin
+    sys_mutexunlock(mutex);
+    ftimer.enabled:= avalue;
+   end;
+  end
+  else begin
+   ftimer.enabled:= avalue;
+  end;
  end
  else begin
-  ftimer.enabled:= value;
+  fenabled:= avalue;
+ end;
+end;
+
+procedure ttimer.doasyncevent(var atag: integer);
+begin
+ if fenabled and (atag = enabletimertag) then begin
+  ftimer.enabled:= true;
  end;
 end;
 
@@ -365,9 +384,16 @@ begin
  result:= ftimer.interval;
 end;
 
-procedure ttimer.setinterval(const Value: integer);
+procedure ttimer.setinterval(const avalue: integer);
 begin
- ftimer.interval:= value;
+ if not application.ismainthread and ftimer.enabled then begin
+  enabled:= false;
+  ftimer.interval:= avalue; //win32 settimer must be in main thread
+  enabled:= true;
+ end
+ else begin
+  ftimer.interval:= avalue;
+ end;
 end;
 
 function ttimer.getontimer: notifyeventty;

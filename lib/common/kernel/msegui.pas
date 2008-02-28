@@ -11941,8 +11941,6 @@ begin       //eventloop
     getevents;
     event:= tevent(eventlist.getfirst);
     if event <> nil then begin
-//writeln('event ',getenumname(typeinfo(eventkindty),ord(event.kind)));
-//flush(output);
      try
       try
        case event.kind of

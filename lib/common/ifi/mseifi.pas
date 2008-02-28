@@ -1142,10 +1142,10 @@ procedure tcustompipeiochannel.internalconnect;
 begin
  resetrxbuffer;
  if fserverapp <> '' then begin
-  fprochandle:= execmse2(fserverapp,ftx,frx);
+//  fprochandle:= execmse2(fserverapp,ftx,frx,nil,false,-1,true,true);
+  fprochandle:= execmse2(fserverapp,ftx,frx,nil,false,-1,true,false);
  end
  else begin
-debugwriteln('internalconnect');
   ftx.handle:= sys_stdout;
   frx.handle:= sys_stdin;
  end;
@@ -1155,7 +1155,6 @@ procedure tcustompipeiochannel.internaldisconnect;
 var
  int1: integer;
 begin
- frx.terminate; 
  ftx.close;
  frx.close;
  fbuffer:= '';

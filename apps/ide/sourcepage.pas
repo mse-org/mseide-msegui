@@ -156,7 +156,8 @@ uses
  sysutils,msewidgets,finddialogform,replacedialogform,msekeyboard,
  sourceupdate,mseparser,msefiledialog,mseintegerenter,msedesigner,
  projectoptionsform,msesys,make,actionsmodule,msegraphics,sourcehintform,
- mseedit,msedrawtext,msebits,msedatalist,msestream,msedesignintf;
+ mseedit,msedrawtext,msebits,msedatalist,msestream,msedesignintf,
+ msesysutils;
 
 const
  pascaldelims = msestring(' :;+-*/(){},=<>' + c_linefeed + c_return + c_tab);
@@ -352,7 +353,6 @@ var
  int1: integer;
 begin
  if not fileloaded then begin
-//  mstr1:= relativepath(finitialfilepath,projectoptions.projectdir);
   mstr1:= relpath;
   if findfile(mstr1) then begin
    mstr1:= msefileutils.filepath(mstr1);

@@ -221,7 +221,7 @@ type
    procedure setenabled(const avalue: boolean);
    procedure setvisible(const avalue: boolean);
   protected
-   procedure setdata(const adata: pifidataty); virtual;
+   procedure setdata(const adata: pifidataty; const aname: ansistring); virtual;
    procedure initpropertyrecord(out arec: string; const apropertyname: string;
        const akind: ifidatakindty; const datasize: integer; out datapo: pchar);
    procedure sendvalue(const aname: string; const avalue: int64); overload;
@@ -807,7 +807,7 @@ begin
  tcustommodulelink(fowner).senddata(str1);
 end;
 
-procedure tvaluelink.setdata(const adata: pifidataty);
+procedure tvaluelink.setdata(const adata: pifidataty; const aname: ansistring);
 var
  str1: string;
 begin
@@ -1322,16 +1322,14 @@ begin
    with pifibytesty(po1)^ do begin
     stream1:= tmemorycopystream.create(@data,length);
     try
-     fmodule:= createtmpmodule(str1,stream1,@moduleloaded);
-     fmodule.getcorbainterface(typeinfo(iificommand),fcommandintf);
+     comp1:= createtmpmodule(str1,stream1,@moduleloaded);
+     comp1.getcorbainterface(typeinfo(iificommand),fcommandintf);
     finally
      stream1.free;
     end;
    end;
-   setlinkedvar(fmodule,fmodule);
+   setlinkedvar(comp1,fmodule);
   end;
-//  application.postevent(tmoduledataevent.create(fchannel.rxdata,ievent(self),
-//                       mo1,adata));
  end;
 end;
 
@@ -1345,7 +1343,7 @@ begin
  result:= wi1 <> nil;
  if result then begin
   with wi1 do begin
-   setdata(adata);
+   setdata(adata,apropertyname);
    if assigned(fonpropertychanged) then begin
     fonpropertychanged(wi1,atag,apropertyname);
    end;

@@ -78,6 +78,8 @@ type
    function getcolorglyph: colorty;
    procedure setcolorglyph(const avalue: colorty);
    procedure setoptions(const avalue: dbnavigatoroptionsty);
+   function getbuttonface: tface;
+   procedure setbuttonface(const avalue: tface);
   protected
    procedure inithints;
    procedure doexecute(const sender: tobject);
@@ -96,6 +98,7 @@ type
    property visiblebuttons: dbnavigbuttonsty read fvisiblebuttons 
                  write setvisiblebuttons default defaultvisibledbnavigbuttons;
    property colorglyph: colorty read getcolorglyph write setcolorglyph default cl_glyph;
+   property buttonface: tface read getbuttonface write setbuttonface;
    property bounds_cx default defaultdbnavigatorwidth;
    property bounds_cy default defaultdbnavigatorheight;
    property shortcut_first: shortcutty read fshortcuts[dbnb_first] 
@@ -2114,6 +2117,16 @@ end;
 procedure tdbnavigator.setcolorglyph(const avalue: colorty);
 begin
  buttons.colorglyph:= avalue;
+end;
+
+function tdbnavigator.getbuttonface: tface;
+begin
+ result:= buttons.face;
+end;
+
+procedure tdbnavigator.setbuttonface(const avalue: tface);
+begin
+ buttons.face:= avalue;
 end;
 
 procedure tdbnavigator.loaded;
