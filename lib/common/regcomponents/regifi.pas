@@ -5,7 +5,7 @@ implementation
 uses
  classes,mseifi,msedesignintf,msepropertyeditors,msestrings,msedesigner,
  mseclasses,mseifids,mseifiglob,msegui,typinfo,msesockets,mseifigui,
- mseifilink,msessl,db;
+ mseifilink,msessl,db,regifi_bmp;
  
 type
  tmodulelinkitemeditor = class(tclasselementeditor)
