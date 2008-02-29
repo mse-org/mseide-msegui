@@ -37,6 +37,8 @@ const
  function setlangconsts(const name: string): boolean;
                  //true if ok, no change otherwise
  function getcurrentlangconstsname: string;
+ procedure setuserlangconsts(const name: string);
+                 //called by setlangconsts automatically
  
 implementation
 uses
