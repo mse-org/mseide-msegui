@@ -796,7 +796,7 @@ type
    property template;
    property disabledbuttons;
    property buttonsvisible default [sk_up,sk_down];
-   property buttonsinvisible;
+   property buttonsinvisible default [];
    property buttonsize;
    property buttonpos;
    property buttonslast;
@@ -816,6 +816,7 @@ type
    procedure internalcreateframe; override;
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure domousewheelevent(var info: mousewheeleventinfoty); override;
+   procedure updatereadonlystate; override;
    //istepbar
    procedure dostep(const event: stepkindty);
   public
@@ -3661,7 +3662,8 @@ begin
  fi.colorclient:= cl_foreground;
  fi.levelo:= -2;
  inflateframe(fi.innerframe,1);
- buttonsvisible:= [sk_up,sk_down];
+ fforcevisiblebuttons:= [sk_up,sk_down];
+ fforceinvisiblebuttons:= [];
  internalupdatestate;
 end;
 
@@ -3765,6 +3767,19 @@ procedure tcustomrealspinedit.domousewheelevent(var info: mousewheeleventinfoty)
 begin
  tspineditframe(fframe).domousewheelevent(info);
  inherited;
+end;
+
+procedure tcustomrealspinedit.updatereadonlystate;
+begin
+ inherited;
+ if fframe <> nil then begin
+  if readonly then begin
+   frame.disabledbuttons:= allstepkinds;
+  end
+  else begin
+   frame.disabledbuttons:= [];
+  end;
+ end;
 end;
 
 { tcustomdatetimeedit }

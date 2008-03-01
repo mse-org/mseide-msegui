@@ -238,7 +238,7 @@ begin
       tdbbooleantextedit,
       tdbkeystringedit,tdbkeystringeditdb,tdbkeystringeditlb,
       tdbintegeredit,tdbenumedit,tdbenumeditdb,tdbenumeditlb,
-      tdbdataicon,tdbdataimage,tdbdatabutton,tdbrealedit,
+      tdbdataicon,tdbdataimage,tdbdatabutton,tdbrealedit,tdbrealspinedit,
       tdbprogressbar,tdbslider,
       tdbdatetimeedit,
       tdbcalendardatetimeedit,tdbfilenameedit,tdbcoloredit,

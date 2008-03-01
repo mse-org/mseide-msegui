@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -675,6 +675,51 @@ type
    property formatdisp;
    property valuescale;
    property onsetvalue;
+ end;
+
+ tdbrealspinedit = class(tcustomrealspinedit,idbeditfieldlink,idbeditinfo,ireccontrol)
+  private
+   fdatalink: teditwidgetdatalink;
+   function getdatafield: string;
+   procedure setdatafield(const avalue: string);
+   function getdatasource: tdatasource; overload;
+   function getdatasource(const aindex: integer): tdatasource; overload;
+   procedure setdatasource(const avalue: tdatasource);
+  protected
+
+   function nullcheckneeded(const newfocus: twidget): boolean; override;
+   procedure griddatasourcechanged; override;
+   function getgriddatasource: tdatasource;
+   function createdatalist(const sender: twidgetcol): tdatalist; override;
+   procedure modified; override;
+   function getoptionsedit: optionseditty; override;
+
+   function getrowdatapo(const info: cellinfoty): pointer; override;
+   //idbeditfieldlink
+   procedure valuetofield;
+   procedure fieldtovalue;
+   //idbeditinfo
+   procedure getfieldtypes(out propertynames: stringarty;
+                          out fieldtypes: fieldtypesarty);
+   //ireccontrol
+   procedure recchanged;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+   function checkvalue(const quiet: boolean = false): boolean; override;
+   property datalink: teditwidgetdatalink read fdatalink;
+  published
+   property datafield: string read getdatafield write setdatafield;
+   property datasource: tdatasource read getdatasource write setdatasource;
+   property optionsdb;
+
+   property min stored false;
+   property max stored false;
+   property formatedit;
+   property formatdisp;
+   property valuescale;
+   property onsetvalue;
+   property step;
  end;
 
  tdbslider = class(tcustomslider,idbeditfieldlink,idbeditinfo,ireccontrol)
@@ -3810,6 +3855,128 @@ begin
 end;
 
 procedure tdbrealedit.recchanged;
+begin
+ fdatalink.recordchanged(nil);
+end;
+
+{ tdbrealspinedit }
+
+constructor tdbrealspinedit.create(aowner: tcomponent);
+begin
+ fisdb:= true;
+ fdatalink:= teditwidgetdatalink.Create(idbeditfieldlink(self));
+ inherited;
+end;
+
+destructor tdbrealspinedit.destroy;
+begin
+ inherited;
+ fdatalink.free;
+end;
+
+function tdbrealspinedit.getdatafield: string;
+begin
+ result:= fdatalink.fieldname;
+end;
+
+procedure tdbrealspinedit.setdatafield(const avalue: string);
+begin
+ fdatalink.fieldname:= avalue;
+end;
+
+function tdbrealspinedit.getdatasource: tdatasource;
+begin
+ result:= fdatalink.datasource;
+end;
+
+procedure tdbrealspinedit.setdatasource(const avalue: tdatasource);
+begin
+ fdatalink.setwidgetdatasource(avalue);
+end;
+
+function tdbrealspinedit.checkvalue(const quiet: boolean = false): boolean;
+begin
+ result:= inherited checkvalue(quiet) and fdatalink.dataentered;
+end;
+
+procedure tdbrealspinedit.modified;
+begin
+ fdatalink.Modified;
+ inherited;
+end;
+
+function tdbrealspinedit.getoptionsedit: optionseditty;
+begin
+ result:= inherited getoptionsedit;
+ fdatalink.updateoptionsedit(result);
+end;
+
+procedure tdbrealspinedit.valuetofield;
+begin
+ if isemptyreal(value) then begin
+  fdatalink.field.clear;
+ end
+ else begin
+  fdatalink.field.asfloat:= value;
+ end;
+end;
+
+procedure tdbrealspinedit.fieldtovalue;
+begin
+ if fdatalink.field.isnull then begin
+  value:= emptyreal;
+ end
+ else begin
+  value:= fdatalink.field.asfloat;
+ end;
+end;
+
+function tdbrealspinedit.getrowdatapo(const info: cellinfoty): pointer;
+begin
+ with info do begin
+  if griddatalink <> nil then begin
+   result:= tgriddatalink(griddatalink).getrealtybuffer(fdatalink.field,cell.row);
+  end
+  else begin
+   result:= nil;
+  end;
+ end;
+end;
+
+function tdbrealspinedit.createdatalist(const sender: twidgetcol): tdatalist;
+begin
+ result:= nil;
+end;
+
+procedure tdbrealspinedit.griddatasourcechanged;
+begin
+ fdatalink.griddatasourcechanged;
+end;
+
+function tdbrealspinedit.getgriddatasource: tdatasource;
+begin
+ result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datasource;
+end;
+
+procedure tdbrealspinedit.getfieldtypes(out propertynames: stringarty; 
+                    out fieldtypes: fieldtypesarty);
+begin
+ propertynames:= nil;
+ setlength(fieldtypes,1);
+ fieldtypes[0]:= realfields + integerfields;
+end;
+
+function tdbrealspinedit.nullcheckneeded(const newfocus: twidget): boolean;
+begin
+ result:= inherited nullcheckneeded(newfocus) and fdatalink.nullcheckneeded;
+end;
+
+function tdbrealspinedit.getdatasource(const aindex: integer): tdatasource;
+begin
+ result:= datasource;
+end;
+
+procedure tdbrealspinedit.recchanged;
 begin
  fdatalink.recordchanged(nil);
 end;

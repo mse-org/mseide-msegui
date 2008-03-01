@@ -369,7 +369,9 @@ type
 
  stepkindty = (sk_right,sk_up,sk_left,sk_down,sk_first,sk_last);
  stepkindsty = set of stepkindty;
-
+const 
+ allstepkinds = [sk_right,sk_up,sk_left,sk_down,sk_first,sk_last];
+type
  istepbar = interface
   function translatecolor(const aclor: colorty): colorty;
   procedure invalidaterect(const rect: rectty; org: originty);
@@ -399,8 +401,6 @@ type
    fbuttonslast: boolean;
    fdisabledbuttons: stepkindsty;
    fneededbuttons: stepkindsty;
-   fforceinvisiblebuttons: stepkindsty;
-   fforcevisiblebuttons: stepkindsty;
    fbuttonsinline: boolean;
    fmousewheel: boolean;
    frepeater: tsimpletimer;
@@ -415,6 +415,8 @@ type
    procedure setbuttonsvisible(const avalue: stepkindsty);
    procedure setneededbuttons(const avalue: stepkindsty);
   protected
+   fforceinvisiblebuttons: stepkindsty;
+   fforcevisiblebuttons: stepkindsty;
    fstepstate: stepframestatesty;
    procedure dorepeat(const sender: tobject);
    procedure killrepeater;
