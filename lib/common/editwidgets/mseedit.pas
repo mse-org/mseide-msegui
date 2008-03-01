@@ -305,10 +305,6 @@ type
    procedure settextflags(const value: textflagsty);
    procedure settextflagsactive(const value: textflagsty);
    procedure updatetextflags;
-//   procedure onundo(const sender: tobject);
-//   procedure oncopy(const sender: tobject);
-//   procedure oncut(const sender: tobject);
-//   procedure onpaste(const sender: tobject);
    function getcaretwidth: integer;
    procedure setcaretwidth(const Value: integer);
    
@@ -359,8 +355,6 @@ type
    procedure initfocus;
    procedure synctofontheight; override;
 
-   property optionswidget default defaulteditwidgetoptions; //first!
-
    property editor: tinplaceedit read feditor;
    property optionsedit: optionseditty read getoptionsedit write setoptionsedit
                    default defaultoptionsedit;
@@ -384,6 +378,7 @@ type
    property onkeydown: keyeventty read fonkeydown write fonkeydown;
    property onkeyup: keyeventty read fonkeyup write fonkeyup;
   published
+   property optionswidget default defaulteditwidgetoptions; //first!
    property cursor default cr_ibeam;
  end;
 

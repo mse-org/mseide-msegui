@@ -1349,6 +1349,7 @@ var
 var
  po2: pdefinfoty;   
  newimp: boolean;
+ classindex1: integer;
 begin                        //completeclass
  result:= false;
  with infopo^ do begin
@@ -1359,7 +1360,8 @@ begin                        //completeclass
     scope:= po2^.deflist;
    end;
    if (scope <> nil) and (scope.kind = syk_classdef) then begin
-    cpo:= infopo^.classinfolist[scope.definfopo^.classindex];
+    classindex1:= scope.definfopo^.classindex;
+    cpo:= infopo^.classinfolist[classindex1];
    end
   end;
   if cpo <> nil then begin
@@ -1455,33 +1457,36 @@ begin                        //completeclass
      updateunit(infopo,false);
     end;
     newimp:= false;
-    if isemptysourcepos(procimpstart) then begin
-     newimp:= true;
-     replacetext(infopo,infopo^.implementationend,infopo^.implementationend,
-      '{ '+name+' }'+lineend);
-     result:= true;
-     procimpstart:= infopo^.implementationend;
-     inc(procimpstart.pos.row,1);
-     procimpstart.pos.col:= 0;
-     procimpend:= procimpstart;
-    end;
-    for int1:= 0 to procedurelist.count - 1 do begin
-     ppo:= procedurelist[int1];
-     with ppo^ do begin
-      if isemptysourcepos(impheaderstartpos) and 
-                 not (mef_abstract in params.flags) then begin
-       str1:= lineend + 
-           limitlinelength(composeprocedureheader(ppo,cpo,true),
-                                       fmaxlinelength,';',14) + lineend +
-                 'begin'+lineend+
-                 'end;'+lineend;
-       if newimp and (int1 = procedurelist.count - 1) then begin
-        str1:= str1 + lineend;
+    with infopo^.classinfolist[classindex1]^ do begin 
+                     //cpo is invalid after updateunit
+     if isemptysourcepos(procimpstart) then begin
+      newimp:= true;
+      replacetext(infopo,infopo^.implementationend,infopo^.implementationend,
+       '{ '+name+' }'+lineend);
+      result:= true;
+      procimpstart:= infopo^.implementationend;
+      inc(procimpstart.pos.row,1);
+      procimpstart.pos.col:= 0;
+      procimpend:= procimpstart;
+     end;
+     for int1:= 0 to procedurelist.count - 1 do begin
+      ppo:= procedurelist[int1];
+      with ppo^ do begin
+       if isemptysourcepos(impheaderstartpos) and 
+                  not (mef_abstract in params.flags) then begin
+        str1:= lineend + 
+            limitlinelength(composeprocedureheader(ppo,cpo,true),
+                                        fmaxlinelength,';',14) + lineend +
+                  'begin'+lineend+
+                  'end;'+lineend;
+        if newimp and (int1 = procedurelist.count - 1) then begin
+         str1:= str1 + lineend;
+        end;
+        replacetext(infopo,procimpend,procimpend,str1);
+        result:= true;
+        inc(procimpend.pos.row,high(breaklines(str1)));
+        procimpend.pos.col:= 0;
        end;
-       replacetext(infopo,procimpend,procimpend,str1);
-       result:= true;
-       inc(procimpend.pos.row,high(breaklines(str1)));
-       procimpend.pos.col:= 0;
       end;
      end;
     end;
@@ -1942,7 +1947,8 @@ begin
  end;
 end;
 
-procedure tsourceupdater.updateunit(const infopo: punitinfoty; const interfaceonly: boolean);
+procedure tsourceupdater.updateunit(const infopo: punitinfoty; 
+                                             const interfaceonly: boolean);
 var
  scanner: tpascalscanner;
  parser: tpascaldesignparser;

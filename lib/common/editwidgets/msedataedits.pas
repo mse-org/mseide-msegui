@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -9,7 +9,7 @@
 }
 unit msedataedits;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$goto on}{$endif}
 
 interface
 uses
@@ -710,6 +710,7 @@ type
    procedure setasinteger(const avalue: integer);
   protected
    fisdb: boolean;
+   function gettextvalue(var accept: boolean; const quiet: boolean): realty; virtual;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    function datatotext(const data): msestring; override;
    procedure texttodata(const atext: msestring; var data); override;
@@ -736,6 +737,8 @@ type
    property gridvalue[const index: integer]: realty
         read getgridvalue write setgridvalue; default;
    property gridvalues: realarty read getgridvalues write setgridvalues;
+  published
+   property optionswidget default defaulteditwidgetoptions + [ow_mousewheel]; //first!
  end;
 
  trealedit = class(tcustomrealedit)
@@ -747,6 +750,91 @@ type
    property valuescale;
    property min stored false;
    property max stored false;
+ end;
+
+ tspineditframe = class(tcustomstepframe)
+  public
+   constructor create(const intf: icaptionframe; const stepintf: istepbar);
+  published
+   property options;
+   property levelo default -2;
+   property leveli;
+   property framewidth;
+   property colorframe;
+   property colorframeactive;
+   property colordkshadow;
+   property colorshadow;
+   property colorlight;
+   property colorhighlight;
+   property colordkwidth;
+   property colorhlwidth;
+   property colorclient default cl_foreground;
+   property colorbutton;
+   property framei_left default -1;
+   property framei_top default -1;
+   property framei_right default -1;
+   property framei_bottom default -1;
+
+   property frameimage_list;
+   property frameimage_left;
+   property frameimage_top;
+   property frameimage_right;
+   property frameimage_bottom;
+   property frameimage_offset;
+   property frameimage_offsetmouse;
+   property frameimage_offsetclicked;
+   property frameimage_offsetactive;
+   property frameimage_offsetactivemouse;
+   property frameimage_offsetactiveclicked;
+   
+   property optionsskin;
+ 
+   property caption;
+   property captionpos;
+   property font;
+   property localprops; //before template
+   property template;
+   property disabledbuttons;
+   property buttonsvisible default [sk_up,sk_down];
+   property buttonsinvisible;
+   property buttonsize;
+   property buttonpos;
+   property buttonslast;
+   property buttonsinline;
+//   property mousewheel;
+ end;
+ 
+ tcustomrealspinedit = class(tcustomrealedit,istepbar)
+  private
+   fstep: real;
+   fstepflag: stepkindty;
+   function getframe: tspineditframe;
+   procedure setframe(const avalue: tspineditframe);
+  protected
+   function gettextvalue(var accept: boolean; 
+                                      const quiet: boolean): realty; override;
+   procedure internalcreateframe; override;
+   procedure mouseevent(var info: mouseeventinfoty); override;
+   procedure domousewheelevent(var info: mousewheeleventinfoty); override;
+   //istepbar
+   procedure dostep(const event: stepkindty);
+  public
+   constructor create(aowner: tcomponent); override;
+   property step: real read fstep write fstep; //default 1
+  published
+   property frame: tspineditframe read getframe write setframe;
+ end;
+ 
+ trealspinedit = class(tcustomrealspinedit)
+  published
+   property onsetvalue;
+   property value stored false;
+   property formatedit;
+   property formatdisp;
+   property valuescale;
+   property min stored false;
+   property max stored false;
+   property step;
  end;
 
  tcustomdatetimeedit = class(tnumedit)
@@ -3296,6 +3384,7 @@ begin
  fmin:= emptyreal;
  fmax:= bigreal;
  inherited;
+ include(foptionswidget,ow_mousewheel);
 end;
 
 procedure tcustomrealedit.setformatdisp(const Value: msestring);
@@ -3358,17 +3447,23 @@ begin
  valuechanged;
 end;
 
+function tcustomrealedit.gettextvalue(var accept: boolean; 
+                                             const quiet: boolean): realty;
+begin
+ try
+  result:= strtorealty(feditor.text);
+ except
+  formaterror(quiet);
+  accept:= false
+ end;
+end;
+
 procedure tcustomrealedit.texttovalue(var accept: boolean; const quiet: boolean);
 var
  rea1,rea2: realty;
  str1: msestring;
 begin
- try
-  rea1:= strtorealty(feditor.text);
- except
-  formaterror(quiet);
-  accept:= false
- end;
+ rea1:= gettextvalue(accept,quiet);
  if accept then begin
   str1:= realtytostr(rea1,fformatedit);
   try
@@ -3554,6 +3649,122 @@ end;
 function tcustomrealedit.isnull: boolean;
 begin
  result:= isemptyreal(value);
+end;
+
+{ tspineditframe }
+
+constructor tspineditframe.create(const intf: icaptionframe;
+               const stepintf: istepbar);
+begin
+ include(fstepstate,sfs_spinedit);
+ inherited;
+ fi.colorclient:= cl_foreground;
+ fi.levelo:= -2;
+ inflateframe(fi.innerframe,1);
+ buttonsvisible:= [sk_up,sk_down];
+ internalupdatestate;
+end;
+
+{ tcustomrealspinedit }
+
+constructor tcustomrealspinedit.create(aowner: tcomponent);
+begin
+ fstep:= 1;
+ inherited;
+end;
+
+procedure tcustomrealspinedit.internalcreateframe;
+begin
+ tspineditframe.create(iscrollframe(self),istepbar(self));
+end;
+
+function tcustomrealspinedit.gettextvalue(var accept: boolean;
+               const quiet: boolean): realty;
+label
+ endlab,endlab1;
+begin
+ case fstepflag of
+  sk_last: begin
+   result:= fmax;
+  end;
+  sk_first: begin
+   result:= fmin;
+  end;
+  sk_up: begin
+   result:= fvalue;
+   if isemptyreal(fvalue) then begin
+    result:= fmin;
+    if isemptyreal(result) then begin
+     result:= 0;
+    end;
+    goto endlab;
+   end;
+   result:= result + fstep;
+  end;
+  sk_down: begin
+   result:= fvalue;
+   if isemptyreal(fvalue) then begin
+    result:= fmax;
+    if isemptyreal(result) then begin
+     result:= 0;
+    end;
+    goto endlab;
+   end;
+   result:= result - fstep;
+  end;
+  else begin
+   result:= inherited gettextvalue(accept,quiet);
+   goto endlab1;
+  end;   
+ end;
+endlab:
+ if result < fmin then begin
+  result:= fmin;
+ end;
+ if result > fmax then begin
+  result:= fmax;
+ end;
+endlab1:
+ fstepflag:= stepkindty(-1);
+end;
+
+procedure tcustomrealspinedit.dostep(const event: stepkindty);
+begin
+ if not (csdesigning in componentstate) then begin
+  if event in [sk_up,sk_down,sk_first,sk_last] then begin
+   if edited then begin
+    if not checkvalue then begin
+     exit;
+    end;
+   end;
+   fstepflag:= event; 
+   checkvalue;
+  end;
+ end;
+end;
+
+procedure tcustomrealspinedit.mouseevent(var info: mouseeventinfoty);
+begin
+ tspineditframe(fframe).mouseevent(info);
+ if not (es_processed in info.eventstate) then begin
+  inherited;
+ end;
+end;
+
+function tcustomrealspinedit.getframe: tspineditframe;
+begin
+ result:= tspineditframe(inherited frame);
+end;
+
+procedure tcustomrealspinedit.setframe(const avalue: tspineditframe);
+begin
+ inherited frame:= tcaptionframe(avalue);
+end;
+
+procedure tcustomrealspinedit.domousewheelevent(var info: mousewheeleventinfoty);
+begin
+ tspineditframe(fframe).domousewheelevent(info);
+ inherited;
 end;
 
 { tcustomdatetimeedit }

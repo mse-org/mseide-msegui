@@ -458,11 +458,16 @@ type
    property buttonsinline;
    property buttonsinvisible;
    property buttonsvisible;
-   property mousewheel;
+//   property mousewheel;
    property localprops;
    property template;
  end;
 
+ tstepboxframe1 = class(tstepboxframe)
+  published
+   property mousewheel;
+ end;
+ 
  stepdirty = (sd_right,sd_up,sd_left,sd_down);
 
  stepeventty = procedure (const sender: tobject; const stepkind: stepkindty) of object;

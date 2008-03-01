@@ -60,8 +60,8 @@ type
   stg_dbfilter,stg_dbfiltermin,stg_dbfiltermax,stg_dbfilteron,stg_dbfind,
  //     33              34              35            36
   stg_dbfilteroff,stg_dbindbrowse,stg_dbindedit,stg_dbindinsert,
- //  37        38
-  stg_dot,stg_dotsmall
+ //  37        38           39                    40 
+  stg_dot,stg_dotsmall,stg_arrowtopsmall,stg_arrowbottomsmall
                  );
 
  stockcaptionty = (sc_none,sc_is_invalid,sc_Format_error,sc_Value_is_required,

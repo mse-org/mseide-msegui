@@ -61,7 +61,7 @@ begin
    tpointeredit,
    tstringedit,tdropdownlistedit,thistoryedit,tdialogstringedit,
    thexstringedit,tmemoedit,
-   tintegeredit,trealedit,tdatetimeedit,tcalendardatetimeedit,tkeystringedit,
+   tintegeredit,trealedit,trealspinedit,tdatetimeedit,tcalendardatetimeedit,tkeystringedit,
    tenumedit,tenumtypeedit,tselector,
    {tstringlistedit,}
    titemedit,tdropdownitemedit,tmbdropdownitemedit,ttreeitemedit,

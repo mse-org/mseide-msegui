@@ -15,7 +15,7 @@ interface
 uses
  classes,msegui,mseguiglob,msetypes,msestrings,msegraphutils,msegraphics,mseevent,
  msescrollbar,msemenus,mserichstring,msedrawtext,mseglob,mseact,mseshapes,
- mseclasses,msebitmap;
+ mseclasses,msebitmap,msetimer;
 
 type
 
@@ -385,6 +385,9 @@ const
  defaultstepbuttonsize = 13;
 
 type
+ stepframestatety = (sfs_spinedit);
+ stepframestatesty = set of stepframestatety;
+ 
  tcustomstepframe = class(tcustomcaptionframe)
   private
    fstepintf: istepbar;
@@ -400,6 +403,8 @@ type
    fforcevisiblebuttons: stepkindsty;
    fbuttonsinline: boolean;
    fmousewheel: boolean;
+   frepeater: tsimpletimer;
+   frepeatedbutton: integer;
    procedure setbuttonsize(const Value: integer);
    procedure setbuttonpos(const Value: stepbuttonposty);
    procedure setbuttonsinline(const value: boolean);
@@ -410,6 +415,9 @@ type
    procedure setbuttonsvisible(const avalue: stepkindsty);
    procedure setneededbuttons(const avalue: stepkindsty);
   protected
+   fstepstate: stepframestatesty;
+   procedure dorepeat(const sender: tobject);
+   procedure killrepeater;
    procedure layoutchanged;
    procedure updaterects; override;
    procedure getpaintframe(var frame: framety); override;
@@ -418,6 +426,7 @@ type
    property neededbuttons: stepkindsty read fneededbuttons write setneededbuttons;
   public
    constructor create(const intf: icaptionframe; const stepintf: istepbar);
+   destructor destroy; override;
    procedure updatemousestate(const sender: twidget; const apos: pointty); override;
    procedure mouseevent(var info: mouseeventinfoty); virtual;
    procedure domousewheelevent(var info: mousewheeleventinfoty); virtual;
@@ -2413,7 +2422,20 @@ begin
  fcolorbutton:= cl_parent;
  intf.setstaticframe(true);
  fmousewheel:= true;
+ frepeatedbutton:= -1;
  inherited create(intf);
+end;
+
+destructor tcustomstepframe.destroy;
+begin
+ killrepeater;
+ inherited;
+end;
+
+procedure tcustomstepframe.killrepeater;
+begin
+ freeandnil(frepeater);
+ frepeatedbutton:= -1;
 end;
 
 procedure tcustomstepframe.execute(const tag: integer; const info: mouseeventinfoty);
@@ -2450,16 +2472,40 @@ begin
  end;
 end;
 
+procedure tcustomstepframe.dorepeat(const sender: tobject);
+begin
+ with tsimpletimer(sender) do begin
+  if interval < 0 then begin
+   interval:= repeatrepeattime;
+   enabled:= true;
+  end;
+  execute(frepeatedbutton,pmouseeventinfoty(nil)^);
+ end;
+end;
+
 procedure tcustomstepframe.mouseevent(var info: mouseeventinfoty);
 var
  int1: integer;
+ clickedbutton: integer;
 begin
+ clickedbutton:= -1;
  for int1:= 0 to high(fbuttons) do begin
   if updatemouseshapestate(fbuttons[int1],info,nil) then begin
    icaptionframe(fintf).getwidget.invalidaterect(fbuttons[int1].dim,org_widget);
    if info.eventkind in [ek_buttonpress,ek_buttonrelease] then begin
     include(info.eventstate,es_processed);
    end;
+  end;
+  if ss_clicked in fbuttons[int1].state then begin
+   clickedbutton:= int1;
+  end;
+ end;
+ if frepeatedbutton <> clickedbutton then begin
+  killrepeater;
+  if clickedbutton >= 0 then begin
+   frepeatedbutton:= clickedbutton;
+   frepeater:= tsimpletimer.create(-repeatdelaytime,
+                                       {$ifdef FPC}@{$endif}dorepeat,true);
   end;
  end;
 end;
@@ -2604,11 +2650,11 @@ begin
  end;
 end;
 
-procedure tcustomstepframe.updatelayout;
 type
  buttonarty = array[stepkindty] of stepkindty;
+ buttonposarty = array[boolean,stepbuttonposty] of buttonarty; 
 const
- buttonpos1: array[boolean,stepbuttonposty] of buttonarty =
+ buttonposstep: buttonposarty =
     (
      (                                   //not fbuttonsinline
       (sk_left,sk_right,sk_up,sk_down,sk_first,sk_last),  //sbp_right
@@ -2623,6 +2669,30 @@ const
       (sk_up,sk_down,sk_left,sk_right,sk_first,sk_last)   //sbp_bottom
      )
     );
+ buttonposspin: buttonposarty =
+    (
+     (                                   //not fbuttonsinline
+      (sk_left,sk_right,sk_up,sk_last,sk_down,sk_first),  //sbp_right
+      (sk_left,sk_up,sk_right,sk_down,sk_last,sk_first),  //sbp_top
+      (sk_left,sk_right,sk_up,sk_last,sk_down,sk_first),  //sbp_left
+      (sk_up,sk_left,sk_down,sk_right,sk_last,sk_first)   //sbp_bottom
+     ),
+     (                                   //fbuttonsinline
+      (sk_left,sk_right,sk_up,sk_down,sk_last,sk_first),  //sbp_right
+      (sk_up,sk_down,sk_left,sk_right,sk_first,sk_last),  //sbp_top
+      (sk_left,sk_right,sk_up,sk_down,sk_last,sk_first),  //sbp_left
+      (sk_up,sk_down,sk_left,sk_right,sk_first,sk_last)   //sbp_bottom
+     )
+    );
+    
+ images: array[stepkindty] of stockglyphty =
+  ( stg_arrowrightsmall,stg_arrowupsmall,stg_arrowleftsmall,stg_arrowdownsmall,
+    stg_arrowfirstsmall,stg_arrowlastsmall);
+ imagesedit: array[stepkindty] of stockglyphty =
+  ( stg_arrowrightsmall,stg_arrowupsmall,stg_arrowleftsmall,stg_arrowdownsmall,
+    stg_arrowbottomsmall,stg_arrowtopsmall);
+    
+procedure tcustomstepframe.updatelayout;
 var
  buttoncount: integer;
  acx,acy: integer;
@@ -2659,8 +2729,16 @@ var
  bo1: boolean;
  bo2: boolean;
  color1: colorty;
+ buttonpos1: ^buttonposarty;
 
 begin             //updatelayout
+ if sfs_spinedit in fstepstate then begin
+  buttonpos1:= @buttonposspin;
+ end
+ else begin
+  buttonpos1:= @buttonposstep;
+ end;
+ 
  setlength(fbuttons,ord(high(stepkindty)) + 1);
  buttoncount:= 0;
  a:= 0; //compilerwarning
@@ -2738,7 +2816,12 @@ begin             //updatelayout
   for int1:= 0 to high(fbuttons) do begin
    with fbuttons[int1] do begin
     imagelist:= stockobjects.glyphs;
-    imagenr:= integer(stg_arrowrightsmall) + int1;
+    if sfs_spinedit in fstepstate then begin
+     imagenr:= ord(imagesedit[stepkindty(int1)]);
+    end
+    else begin
+     imagenr:= ord(images[stepkindty(int1)]);
+    end;
     imagenrdisabled:= -2;
     color:= color1;
     tag:= int1;
@@ -2761,27 +2844,12 @@ begin             //updatelayout
       ay:= fdim.y;
      end;
     end;
-     checkbutton(buttonpos1[fbuttonsinline][fbuttonpos][akind],not odd(buttoncount) xor bo1);
+     checkbutton(buttonpos1^[fbuttonsinline][fbuttonpos][akind],not odd(buttoncount) xor bo1);
    end
    else begin
-    checkbutton(buttonpos1[fbuttonsinline][fbuttonpos][akind],bo1);
+    checkbutton(buttonpos1^[fbuttonsinline][fbuttonpos][akind],bo1);
    end;
   end;
-  {
-  if bo1 then begin  //left or right
-   acx:= acx * b;
-   acy:= acy * a;
-  end
-  else begin
-   acx:= acx * a;
-   acy:= acy * b;
-   int2:= fpaintrect.cx-acx;
-   for int1:= 0 to high(fbuttons) do begin
-    inc(fbuttons[int1].dim.x,int2);
-   end;
-   inc(fdim.x,int2);
-  end;
-  }
   if bo1 then begin  //left or right
    fdim.cx:= acx * b;
    fdim.cy:= acy * a;
@@ -2811,17 +2879,24 @@ begin
  end;
 end;
 
-procedure tcustomstepframe.domousewheelevent(var info: mousewheeleventinfoty);
 const
- stepdir: array[stepbuttonposty,boolean] of stepkindty =
+ stepdirstep: array[stepbuttonposty,boolean] of stepkindty =
                   //down     //up
              ((sk_down,        sk_up),          //sbp_right
               (sk_right,      sk_left),       //sbp_top
               (sk_down,        sk_up),          //sbp_left
               (sk_right,      sk_left));      //sbp_bottom
+ stepdirspin: array[boolean] of stepkindty = (sk_down,sk_up);
+
+procedure tcustomstepframe.domousewheelevent(var info: mousewheeleventinfoty);
 begin
  if fmousewheel and (info.wheel <> mw_none) then begin
-  fstepintf.dostep(stepdir[fbuttonpos][info.wheel = mw_up]);
+  if sfs_spinedit in fstepstate then begin
+   fstepintf.dostep(stepdirspin[info.wheel = mw_up]);
+  end
+  else begin
+   fstepintf.dostep(stepdirstep[fbuttonpos][info.wheel = mw_up]);
+  end;
   include(info.eventstate,es_processed);
  end;
 end;

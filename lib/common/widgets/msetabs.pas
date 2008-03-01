@@ -221,6 +221,11 @@ type
    property onclientmouseevent: mouseeventty read fonclientmouseevent write fonclientmouseevent;
  end;
 
+ tcustomtabbar1 = class(tcustomtabbar)
+  protected
+   procedure internalcreateframe; override;
+ end;
+ 
  ttabbar = class(tcustomtabbar,istatfile)
   private
    fstatfile: tstatfile;
@@ -408,7 +413,7 @@ type
 
  tcustomtabwidget = class(tactionwidget,iobjectpicker,istatfile)
   private
-   ftabs: tcustomtabbar;
+   ftabs: tcustomtabbar1;
    fobjectpicker: tobjectpicker;
    factivepageindex: integer;
    fonactivepagechanged: notifyeventty;
@@ -429,8 +434,8 @@ type
    procedure setoptions(const avalue: tabbaroptionsty);
    function gettab_color: colorty;
    procedure settab_color(const avalue: colorty);
-   function gettab_frame: tstepboxframe;
-   procedure settab_frame(const avalue: tstepboxframe);
+   function gettab_frame: tstepboxframe1;
+   procedure settab_frame(const avalue: tstepboxframe1);
    function gettab_face: tface;
    procedure settab_face(const avalue: tface);
    procedure settab_size(const avalue: integer);
@@ -524,7 +529,7 @@ type
    property optionswidget default defaulttaboptionswidget;
    property options: tabbaroptionsty read getoptions write setoptions default [];
    property font: twidgetfont read getfont write setfont stored isfontstored;
-   property tab_frame: tstepboxframe read gettab_frame write settab_frame;
+   property tab_frame: tstepboxframe1 read gettab_frame write settab_frame;
    property tab_face: tface read gettab_face write settab_face;
    property tab_color: colorty read gettab_color write settab_color default cl_default;
    property tab_colortab: colorty read gettab_colortab 
@@ -2203,7 +2208,7 @@ begin
  ftab_sizemax:= defaulttabsizemax;
  inherited;
  foptionswidget:= defaulttaboptionswidget;
- ftabs:= tcustomtabbar.create(self);
+ ftabs:= tcustomtabbar1.create(self);
  ftabs.fanchors:= [an_left,an_top,an_right];
  ftab_size:= ftabs.size.cy;
  ftabs.SetSubComponent(true);
@@ -2989,12 +2994,12 @@ begin
  ftabs.color:= avalue;
 end;
 
-function tcustomtabwidget.gettab_frame: tstepboxframe;
+function tcustomtabwidget.gettab_frame: tstepboxframe1;
 begin
- Result := ftabs.frame;
+ result:= tstepboxframe1(ftabs.frame);
 end;
 
-procedure tcustomtabwidget.settab_frame(const avalue: tstepboxframe);
+procedure tcustomtabwidget.settab_frame(const avalue: tstepboxframe1);
 begin
  ftabs.frame:= avalue;
 end;
@@ -3193,6 +3198,13 @@ end;
 function tpagetab.page: twidget;
 begin
  result:= fpageintf.getwidget;
+end;
+
+{ tcustomtabbar1 }
+
+procedure tcustomtabbar1.internalcreateframe;
+begin
+ tstepboxframe1.create(iscrollframe(self),istepbar(self));
 end;
 
 end.

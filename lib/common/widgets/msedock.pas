@@ -583,7 +583,7 @@ begin
   self.tab_sizemin:= ftab_sizemin;
   self.tab_sizemax:= ftab_sizemax;
   if ftab_frame <> nil then begin
-   self.tab_frame:= tstepboxframe(1);
+   self.tab_frame:= tstepboxframe1(1);
    self.tab_frame.assign(ftab_frame);
   end
   else begin
