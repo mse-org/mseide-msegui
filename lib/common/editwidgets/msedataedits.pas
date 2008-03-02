@@ -752,9 +752,16 @@ type
    property max stored false;
  end;
 
+const
+ spinstepbuttons = [sk_up,sk_down,sk_first,sk_last];
+ 
+type
  tspineditframe = class(tcustomstepframe)
+  private
+   procedure setbuttonsvisible(const avalue: stepkindsty);
   public
    constructor create(const intf: icaptionframe; const stepintf: istepbar);
+   property buttonsinvisible default [];
   published
    property options;
    property levelo default -2;
@@ -794,9 +801,10 @@ type
    property font;
    property localprops; //before template
    property template;
-   property disabledbuttons;
-   property buttonsvisible default [sk_up,sk_down];
-   property buttonsinvisible default [];
+//   property disabledbuttons;
+   property buttonsvisible read fforcevisiblebuttons write setbuttonsvisible 
+                                                    default [sk_up,sk_down];
+//   property buttonsinvisible default [];
    property buttonsize;
    property buttonpos;
    property buttonslast;
@@ -3665,6 +3673,11 @@ begin
  fforcevisiblebuttons:= [sk_up,sk_down];
  fforceinvisiblebuttons:= [];
  internalupdatestate;
+end;
+
+procedure tspineditframe.setbuttonsvisible(const avalue: stepkindsty);
+begin
+ inherited buttonsvisible:= avalue * spinstepbuttons;
 end;
 
 { tcustomrealspinedit }
