@@ -58,7 +58,8 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   procedure loadbitmap(const abitmap: tmaskedbitmap; aformat: string);
+   procedure loadbitmap(const abitmap: tmaskedbitmap;
+                             aformat: string = '');
    procedure clearcache; override;
   published
    property format: string read fformat write fformat;
@@ -285,7 +286,7 @@ begin
 end;
 
 procedure tmsegraphicfield.loadbitmap(const abitmap: tmaskedbitmap; 
-                                             aformat: string);
+                                            aformat: string = '');
 var
  stream1: tstringcopystream;
  str1: string;
