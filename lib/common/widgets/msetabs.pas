@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -270,6 +270,7 @@ type
   function getimagelist: timagelist;
   function getimagenr: integer;
   function getimagenrdisabled: integer;
+  function getinvisible: boolean;
   procedure doselect;
   procedure dodeselect;
  end;
@@ -285,6 +286,7 @@ type
    fcolortab,fcoloractivetab: colorty;
    fonselect: notifyeventty;
    fondeselect: notifyeventty;
+   finvisible: boolean;
    function getcaption: captionty;
    procedure setcaption(const Value: captionty);
    function gettabhint: msestring;
@@ -303,6 +305,8 @@ type
    procedure setimagenr(const avalue: integer);
    function getimagenrdisabled: integer;
    procedure setimagenrdisabled(const avalue: integer);
+   function getinvisible: boolean;
+   procedure setinvisible(const avalue: boolean);
   protected
    procedure changed;
    procedure visiblechanged; override;
@@ -320,6 +324,7 @@ type
    property tabwidget: tcustomtabwidget read ftabwidget;
    property tabindex: integer read gettabindex write settabindex;
   published
+   property invisible: boolean read getinvisible write setinvisible;
    property caption: captionty read getcaption write setcaption;
    property tabhint: msestring read gettabhint write settabhint;
    property colortab: colorty read getcolortab
@@ -353,6 +358,7 @@ type
    ftabhint: msestring;
    fonselect: notifyeventty;
    fondeselect: notifyeventty;
+   finvisible: boolean;
    procedure settabwidget(const value: tcustomtabwidget);
    function gettabwidget: tcustomtabwidget;
    procedure changed;
@@ -372,6 +378,8 @@ type
 //   procedure setimagenractive(const avalue: integer);
    function getimagenrdisabled: integer;
    procedure setimagenrdisabled(const avalue: integer);
+   function getinvisible: boolean;
+   procedure setinvisible(const avalue: boolean);
   protected
    procedure visiblechanged; override;
    procedure setcaption(const value: msestring); override;
@@ -400,6 +408,7 @@ type
                 //-2 -> same as imagenr
    property onselect: notifyeventty read fonselect write fonselect;
    property ondeselect: notifyeventty read fondeselect write fondeselect;
+   property invisible: boolean read getinvisible write setinvisible;
    property visible default false;
  end;
 
@@ -623,14 +632,10 @@ procedure calctablayout(var layout: tabbarlayoutinfoty;
  begin
   with tab,cell do begin
    caption:= fcaption;
-//   captiondist:= layout.tabs.fcaptiondist;
    imagedist:= layout.tabs.fimagedist;
    captionpos:= layout.tabs.fcaptionpos;
    imagelist:= fimagelist;
    imagenr:= fimagenr;
-//   if getactive and (fimagenractive <> -2) then begin
-//    imagenr:= fimagenractive;
-//   end;
    imagenrdisabled:= fimagenrdisabled;
    if imagelist <> nil then begin
     inc(textrect.cx,fimagelist.width+imagedist);
@@ -1243,6 +1248,8 @@ begin
 end;
 
 procedure tcustomtabbar.updatelayout;
+var
+ int1,int2: integer;
 begin
  with flayoutinfo do begin
   dim:= innerclientrect;
@@ -1264,7 +1271,19 @@ begin
    frame.buttonslast:= ((tabo_opposite in foptions) xor
                    (tabo_buttonsoutside in foptions));
   end;
-  frame.updatebuttonstate(firsttab,stepinfo.pageup,tabs.count);
+  int2:= tabs.count;
+  for int1:= int2 - 1 downto 0 do begin
+   if not (ts_invisible in tabs[int1].fstate) then begin
+    int2:= int1+1; //count to last visible
+    break;
+   end
+   else begin
+    if int1 = 0 then begin
+     int2:= 0;
+    end;
+   end;
+  end;
+  frame.updatebuttonstate(firsttab,stepinfo.pageup,int2);
  end;
  invalidate;
 end;
@@ -1994,6 +2013,19 @@ begin
  end;
 end;
 
+function ttabpage.getinvisible: boolean;
+begin
+ result:= finvisible;
+end;
+
+procedure ttabpage.setinvisible(const avalue: boolean);
+begin
+ if finvisible <> avalue then begin
+  finvisible:= avalue;
+  changed;
+ end;
+end;
+
 procedure ttabpage.objectevent(const sender: tobject;
                const event: objecteventty);
 begin
@@ -2199,6 +2231,19 @@ begin
  end;
 end;
 
+function ttabform.getinvisible: boolean;
+begin
+ result:= finvisible;
+end;
+
+procedure ttabform.setinvisible(const avalue: boolean);
+begin
+ if finvisible <> avalue then begin
+  finvisible:= avalue;
+  changed;
+ end;
+end;
+
 { tcustomtabwidget }
 
 constructor tcustomtabwidget.create(aowner: tcomponent);
@@ -2244,6 +2289,7 @@ var
  widget1: twidget1;
  int1: integer;
  activepageindexbefore: integer;
+ bo1: boolean;
 begin
  if not (ws_destroying in fwidgetstate) then begin
   widget1:= twidget1(sender.getwidget);
@@ -2259,6 +2305,7 @@ begin
     imagenr:= sender.getimagenr;
 //    imagenractive:= sender.getimagenractive;
     imagenrdisabled:= sender.getimagenrdisabled;
+    bo1:= not (csdesigning in componentstate) and sender.getinvisible;
 
     if not widget1.enabled then begin
      state:= state + [ts_disabled];
@@ -2266,7 +2313,13 @@ begin
     else begin
      state:= state - [ts_disabled];
     end;   
-    if widget1.isvisible and (widget1.enabled or 
+    if bo1 then begin
+     state:= state + [ts_invisible]
+    end
+    else begin
+     state:= state - [ts_invisible]
+    end;
+    if not bo1 and widget1.isvisible and (widget1.enabled or 
                      (csdesigning in widget1.componentstate)) then begin
      state:= state - [ts_invisible];
      setactivepageindex(int1);
