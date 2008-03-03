@@ -12,7 +12,7 @@ unit mseconsts;
 interface
 
 uses
- msestockobjects,mseglob,msestrings,mseapplication;
+ msestockobjects,mseglob,msestrings,mseapplication,msetypes;
  
 type
  stockcaptionaty = array[stockcaptionty] of widestring;
@@ -20,6 +20,7 @@ type
  defaultmodalresulttextty = array[modalresultty] of msestring;
  pdefaultmodalresulttextty = ^defaultmodalresulttextty;
  langty = (la_none,la_en,la_de,la_ru,la_es,la_uzcyr,la_id);
+ 
 const
  langnames: array[langty] of string = ('','en','de','ru','es','uz_cyr','id');
 
@@ -39,10 +40,15 @@ const
  function getcurrentlangconstsname: string;
  procedure setuserlangconsts(const name: string);
                  //called by setlangconsts automatically
+type
+ langchangeprocty = procedure(const langname: ansistring);
+  
+ procedure registerlangchangeproc(const aproc: langchangeprocty); 
+ procedure unregisterlangchangeproc(const aproc: langchangeprocty); 
  
 implementation
 uses
- sysutils,msesysintf;
+ sysutils,msesysintf,msedatalist;
  
 type
  langinfoty = record
@@ -59,8 +65,10 @@ type
 var
  langs: array of langinfoty;
  lang: langinfoty;
+ langbefore: ansistring;
  userlangs: array of userlanginfoty;
  userlang: userlanginfoty;
+ langchangeprocs: array of langchangeprocty;
  
 const
  en_modalresulttext: defaultmodalresulttextty =
@@ -279,10 +287,13 @@ begin
      modalresulttextnoshortcut:= @en_modalresulttextnoshortcut;
     end;
    end;
-  end
-  else begin
-   application.langchanged;
   end;
+ end;
+ if lowercase(str1) <> langbefore then begin
+  for int1:= 0 to high(langchangeprocs) do begin
+   langchangeprocs[int1](str1);
+  end;
+  application.langchanged;
  end;
 end;
 
@@ -322,7 +333,18 @@ begin
  result:= lang.stockcaption^[index];
 end;
 
+procedure registerlangchangeproc(const aproc: langchangeprocty); 
+begin
+ additem(pointerarty(langchangeprocs),aproc);
+end;
+
+procedure unregisterlangchangeproc(const aproc: langchangeprocty); 
+begin
+ removeitem(pointerarty(langchangeprocs),aproc);
+end;
+
 initialization
  registerlangconsts(langnames[la_en],en_stockcaption,en_modalresulttext,
                                en_modalresulttextnoshortcut);
+ langbefore:= langnames[la_en];
 end.
