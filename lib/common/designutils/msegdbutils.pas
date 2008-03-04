@@ -36,7 +36,7 @@ const
 
 type
  gdbstatety = (gs_syncget,gs_syncack,gs_clicommand,gs_clilist,gs_started,
-                    gs_execloaded,gs_attached,gs_detached,
+                    gs_execloaded,gs_attached,gs_detached,gs_downloaded,
                     gs_internalrunning,gs_running,gs_interrupted,gs_restarted,gs_closing);
  gdbstatesty = set of gdbstatety;
 
@@ -50,8 +50,8 @@ const
  defaultsynctimeout = 2000000; //2 seconds
 type
  valuekindty = (vk_value,vk_tuple,vk_list);
- gdbeventkindty = (gek_done,gek_error,gek_running,gek_stopped,gek_targetoutput,
-                                          gek_writeerror);
+ gdbeventkindty = (gek_done,gek_error,gek_connected,gek_running,gek_stopped,
+                   gek_targetoutput,gek_writeerror);
 
  resultinfoty = record
   variablename: string;
@@ -241,6 +241,8 @@ type
    {$ifdef mswindows}
    fnewconsole: boolean;
    {$endif}
+   fremoteconnection: msestring;
+   fgdbdownload: boolean;
    procedure setstoponexception(const avalue: boolean);
    procedure checkactive;
    procedure resetexec;
@@ -374,7 +376,8 @@ type
    function clearenvvars: gdbresultty;
    function setenvvar(const aname,avalue: string): gdbresultty;
 
-   procedure run;
+   function download: gdbresultty;
+   function run: gdbresultty;
    procedure continue;
    procedure next;
    procedure step;
@@ -449,6 +452,9 @@ type
    property newconsole: boolean read fnewconsole write fnewconsole;
    {$endif}
   published
+   property remoteconnection: msestring read fremoteconnection 
+                                                    write fremoteconnection;
+   property gdbdownload: boolean read fgdbdownload write fgdbdownload;
    property onevent: gdbeventty read fonevent write fonevent;
    property onerror: gdbeventty read fonerror write fonerror;
  end;
@@ -619,7 +625,7 @@ procedure tgdbmi.resetexec;
 begin
  fstate:= fstate - [gs_internalrunning,gs_running,gs_execloaded,
                           gs_attached,gs_started,gs_detached,
-                          gs_interrupted,gs_restarted];
+                          gs_interrupted,gs_restarted,gs_downloaded];
  {$ifdef mswindows}
  finterruptthreadid:= 0;
  {$endif}
@@ -1192,6 +1198,9 @@ begin
    '^': begin    //result
     if getrecordinfo(low(resultclassty),high(resultclassty)) then begin
      case recordclass of
+      rec_connected: begin
+       doevent(token,gek_connected,resultar);
+      end;
       rec_running: begin
        doevent(token,gek_running,resultar);
       end;
@@ -1411,7 +1420,8 @@ begin
   result:= synccommand('-file-exec-and-symbols');
  end
  else begin
-  result:= synccommand('-file-exec-and-symbols '+togdbfilepath(filename),10000000);
+  result:= synccommand('-file-exec-and-symbols '+togdbfilepath(filename),
+                                    10000000);
   updatebit({$ifdef FPC}longword{$else}word{$endif}(fstate),
                  ord(gs_execloaded),result = gdb_ok);
   if result = gdb_ok then begin
@@ -1487,13 +1497,32 @@ begin
  end;
 end;
 
-procedure tgdbmi.run;
+function tgdbmi.download: gdbresultty;
+begin
+ result:= gdb_ok;
+ include(fstate,gs_downloaded);
+end;
+
+function tgdbmi.run: gdbresultty;
 var
  int1: integer;
  ar1,ar2: stringarty;
  ca1: cardinal;
  str1: string;
 begin
+ result:= gdb_ok;
+ if fremoteconnection <> '' then begin
+  result:= synccommand('-target-select '+fremoteconnection);
+  if result <> gdb_ok then begin
+   exit;
+  end;
+ end;
+ if fgdbdownload and not (gs_downloaded in fstate) then begin
+  result:= download;
+  if result <> gdb_ok then begin
+   exit;
+  end;
+ end;
  str1:= '';
  if getcliresult('info file',ar1) = gdb_ok then begin
   for int1:= 0 to high(ar1) do begin

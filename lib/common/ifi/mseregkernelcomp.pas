@@ -3,7 +3,7 @@ unit mseregkernelcomp;
 interface
 implementation
 uses
- classes,msestatfile,mseact,mseapplication,msetimer,mseguithread,
+ classes,msestatfile,mseact,mseapplication,msetimer,msethreadcomp,
  msepipestream,msemenus,msegui,msebitmap,mseactions,mseprinter;
 initialization
  registerclasses([tstatfile,tnoguiaction,tactivator,

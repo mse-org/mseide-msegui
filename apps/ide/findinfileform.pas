@@ -20,7 +20,7 @@ unit findinfileform;
 
 interface
 uses
- finddialogform,mseforms,msegrids,mseguithread,msesimplewidgets,
+ finddialogform,mseforms,msegrids,msethreadcomp,msesimplewidgets,
  msesysutils,msedispwidgets,msetypes,msestrings,msewidgetgrid,msetextedit,
  msestat,msetabs,projectoptionsform;
 

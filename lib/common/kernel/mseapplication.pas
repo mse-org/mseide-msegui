@@ -12,7 +12,7 @@ unit mseapplication;
 interface
 uses
  classes,mseclasses,mseevent,mseglob,sysutils,msetypes,mselist,
-     msethread,msesys,mseguithread,msestrings
+     msethread,msesys,msethreadcomp,msestrings
      {$ifdef mse_with_ifi},mseifiglob{$endif};
  
 type
@@ -165,7 +165,8 @@ type
          aps_invalidated,aps_zordervalid,aps_needsupdatewindowstack,
          aps_focused,aps_activewindowchecked,aps_exitloop,
          aps_active,aps_waiting,aps_terminating,aps_deinitializing,
-         aps_waitstarted,aps_waitcanceled,aps_waitterminated,aps_waitok);
+         aps_waitstarted,aps_waitcanceled,aps_waitterminated,aps_waitok,
+         aps_waitidlelock);
  applicationstatesty = set of applicationstatety;
 
  tcustomapplication = class(tmsecomponent)
@@ -227,7 +228,8 @@ type
    function waitdialog(const athread: tthreadcomp = nil; const atext: msestring = '';
                    const caption: msestring = '';
                    const acancelaction: notifyeventty = nil;
-                   const aexecuteaction: notifyeventty = nil): boolean; virtual;
+                   const aexecuteaction: notifyeventty = nil;
+                   const aidleaction: notifyeventty = nil): boolean; virtual;
    procedure handleexception(sender: tobject = nil; 
                                        const leadingtext: string = '');
    procedure showexception(e: exception; const leadingtext: string = '');
@@ -1017,7 +1019,8 @@ end;
 function tcustomapplication.waitdialog(const athread: tthreadcomp = nil;
                const atext: msestring = ''; const caption: msestring = '';
                const acancelaction: notifyeventty = nil;
-               const aexecuteaction: notifyeventty = nil): boolean;
+               const aexecuteaction: notifyeventty = nil;
+               const aidleaction: notifyeventty = nil): boolean;
 begin
  //dummy
 end;

@@ -16,7 +16,7 @@ interface
 implementation
 
 uses
- classes,mseguithread,msebitmap,msetimer,msestatfile,mseact,mseactions,
+ classes,msethreadcomp,msebitmap,msetimer,msestatfile,mseact,mseactions,
  mseshapes,
  msedesignintf,msepropertyeditors,msemenus,msegui,msepipestream,sysutils,
  msegraphutils,regkernel_bmp,msegraphics,msestrings,msepostscriptprinter,

@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2008 by Martin Schreiber
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -131,6 +131,11 @@ type
    fprojectname: filenamety;
    fcheckmodulelevel: integer;
    fcheckmodulerecursion: boolean;
+   fuploadprocid: integer;
+   fuploadexitcode: integer;
+   fgdbserverprocid: integer;
+   fgdbserverexitcode: integer;
+   procedure dorun;
    procedure newproject(const fromprogram,empty: boolean);
    function checkgdberror(aresult: gdbresultty): boolean;
    procedure doshowform(const sender: tobject);
@@ -186,6 +191,10 @@ type
                             //true if ok
    procedure createform(const aname: filenamety; const kind: formkindty);
    procedure removemodulemenuitem(const amodule: pmoduleinfoty);
+   procedure uploadexe(const sender: tobject);
+   procedure uploadcancel(const sender: tobject);
+   procedure gdbserverexe(const sender: tobject);
+   procedure gdbservercancel(const sender: tobject);
   public
    factivedesignmodule: pmoduleinfoty;
    fprojectloaded: boolean;
@@ -815,10 +824,51 @@ begin
  end;
 end;
 
+procedure tmainfo.gdbserverexe(const sender: tobject);
+begin
+ if getprocessexitcode(fgdbserverprocid,fgdbserverexitcode,100000) then begin
+  application.terminatewait;
+ end;
+end;
+
+procedure tmainfo.gdbservercancel(const sender: tobject);
+begin
+ killprocess(fgdbserverprocid);
+end;
+
+procedure tmainfo.dorun;
+begin
+ with projectoptions.texp do begin
+  if gdbservercommand <> '' then begin
+   fgdbserverprocid:= execmse1(gdbservercommand);
+   if fgdbserverprocid <> invalidprochandle then begin
+    if application.waitdialog(nil,'Start gdb server command "'+
+                           gdbservercommand+'" running.','Start gdb Server',
+              @gdbservercancel,nil,@gdbserverexe) then begin
+     if fgdbserverexitcode <> 0 then begin
+      setstattext('gdb server start error '+inttostr(fgdbserverexitcode)+'.',
+                mtk_error);
+      exit;
+     end;
+    end
+    else begin
+     setstattext('gdb server start canceled.',mtk_error);
+     exit;
+    end;                
+   end
+   else begin
+    setstattext('Can not run start gdb command.',mtk_error);
+    exit;
+   end;
+  end;
+ end;
+ checkgdberror(gdb.run);
+end;
+
 procedure tmainfo.runexec(const sender: tobject);
 begin
  if checkremake(sc_continue) then begin
-  gdb.run;
+  dorun;
  end;
 end;
 
@@ -881,11 +931,24 @@ begin
  {$endif}
 end;
 
+procedure tmainfo.uploadexe(const sender: tobject);
+begin
+ if getprocessexitcode(fuploadprocid,fuploadexitcode,100000) then begin
+  application.terminatewait;
+ end;
+end;
+
+procedure tmainfo.uploadcancel(const sender: tobject);
+begin
+ killprocess(fuploadprocid);
+end;
+
 function tmainfo.loadexec(isattach: boolean): boolean;
 var
  str1: filenamety;
  int1: integer;
 begin
+ result:= false;
  if isattach then begin
   inc(fexecstamp);
   breakpointsfo.updatebreakpoints;
@@ -893,12 +956,29 @@ begin
  end
  else begin
   if not gdb.execloaded then begin
-   if projectoptions.texp.debugtarget <> '' then begin
-    str1:= projectoptions.texp.debugtarget;
-   end
-   else begin
-    str1:= projectoptions.texp.targetfile;
-   end; 
+   with projectoptions.texp do begin
+    if debugtarget <> '' then begin
+     str1:= debugtarget;
+    end
+    else begin
+     str1:= targetfile;
+    end; 
+    if not gdbdownload and (uploadcommand <> '') then begin
+     fuploadprocid:= execmse1(uploadcommand);
+     if fuploadprocid <> invalidprochandle then begin
+      if application.waitdialog(nil,'Uploadcommand "'+uploadcommand+'" running.',
+          'Uploading',@uploadcancel,nil,@uploadexe) then begin
+      end
+      else begin
+       setstattext('Upload canceled.',mtk_error);
+       exit;
+      end;                
+     end;
+    end
+    else begin
+     setstattext('Can not run upload command.',mtk_error);
+    end;
+   end;
    if checkgdberror(gdb.fileexec(str1)) then begin
     inc(fexecstamp);
     breakpointsfo.updatebreakpoints;
@@ -942,8 +1022,11 @@ end;
 
 procedure tmainfo.startgdbonexecute(const sender: tobject);
 begin
- gdb.startgdb(tosysfilepath(quotefilename(projectoptions.texp.debugcommand))+ ' ' + 
-                         projectoptions.texp.debugoptions);
+ with projectoptions,texp do begin
+  gdb.remoteconnection:= remoteconnection;
+  gdb.gdbdownload:= gdbdownload;
+  gdb.startgdb(tosysfilepath(quotefilename(debugcommand))+ ' ' + debugoptions);
+ end;
  updatesigsettings;
  cleardebugdisp;
  checkbluedots;
@@ -2074,7 +2157,7 @@ begin
    if not gdb.started then begin
     result:= false;
     if loadexec(false) then begin
-     gdb.run;
+     dorun;
     end;
    end;
   end;
@@ -2082,7 +2165,7 @@ begin
  else begin
   if not gdb.started then begin
    result:= false;
-   gdb.run;
+   dorun;
   end;
  end;
 end;
@@ -2206,7 +2289,7 @@ begin
   end;
   if fstartcommand <> sc_none then begin
    if loadexec(false) then begin
-    gdb.run;
+    dorun;
    end;
   end;
  end;

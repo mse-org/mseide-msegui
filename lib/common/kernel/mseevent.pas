@@ -132,12 +132,12 @@ type
  tuserevent = class(tobjectevent)
    ftag: integer;
   public
-   constructor create(const eventinterface: ievent; tag: integer);
+   constructor create(const dest: ievent; tag: integer);
    property tag: integer read ftag;
  end;
 
  tasyncevent = class(tuserevent)
-  constructor create(const eventinterface: ievent; atag: integer);
+  constructor create(const dest: ievent; atag: integer);
  end;
 
  teventqueue = class(tobjectqueue)
@@ -241,15 +241,15 @@ end;
 
 { tuserevent }
 
-constructor tuserevent.create(const eventinterface: ievent; tag: integer);
+constructor tuserevent.create(const dest: ievent; tag: integer);
 begin
  ftag:= tag;
- inherited create(ek_user,eventinterface);
+ inherited create(ek_user,dest);
 end;
 
 { tasyncevent }
 
-constructor tasyncevent.create(const eventinterface: ievent; atag: integer);
+constructor tasyncevent.create(const dest: ievent; atag: integer);
 begin
  inherited;
  fkind:= ek_async;

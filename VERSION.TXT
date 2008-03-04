@@ -1,4 +1,6 @@
 MSEide+MSEgui version history
+2008-03-04
+ mseguithread.pas -> msethreadcomp.pas
 2008-02-02
  tscrollbar.options sbo_flat and sbo_noanim moved to tframe.optionsskin.
  tbutton.options bo_flat,bo_noanim,bo_nofocusrect,bo_nodefaultrect

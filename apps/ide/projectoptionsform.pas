@@ -26,7 +26,7 @@ uses
  msegraphutils,mseevent,msetabsglob,msedatalist,msegraphics,msedropdownlist,
  mseformatstr,mseinplaceedit,msedatanodes,mselistbrowser,msebitmap,
  msecolordialog,msedrawtext,msewidgets,msepointer,mseguiglob,msepipestream,
- msemenus,sysutils,mseglob;
+ msemenus,sysutils,mseglob,mseedit;
 
 const
  defaultsourceprintfont = 'Courier';
@@ -61,8 +61,12 @@ type
   messageoutputfile: filenamety;
   makecommand: filenamety;
   debugcommand: filenamety;
-  debugoptions: filenamety;
+  debugoptions: msestring;
   debugtarget: filenamety;
+  remoteconnection: msestring;
+  uploadcommand: filenamety;
+  gdbdownload: boolean;
+  gdbservercommand: filenamety;
   sourcedirs: msestringarty;
   defines: msestringarty;
   unitdirs: msestringarty;
@@ -352,6 +356,11 @@ type
    makepage: ttabpage;
    ok: tbutton;
    cancel: tbutton;
+   ttabpage16: ttabpage;
+   remoteconnection: tstringedit;
+   uploadcommand: tfilenameedit;
+   gdbservercommand: tfilenameedit;
+   gdbdownload: tbooleanedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -381,6 +390,7 @@ type
    procedure colsetvalue(const sender: TObject; var avalue: colorty;
                    var accept: Boolean);
    procedure copycolorcode(const sender: TObject);
+   procedure downloadchange(const sender: TObject);
   private
    procedure activegroupchanged;
  end;
@@ -412,7 +422,7 @@ uses
  projectoptionsform_mfm,breakpointsform,sourceform,mseact,
  objectinspector,msebits,msefileutils,msedesignintf,guitemplates,
  watchform,stackform,main,projecttreeform,findinfileform,
- selecteditpageform,programparametersform,sourceupdate,mseedit,
+ selecteditpageform,programparametersform,sourceupdate,
  msedesigner,panelform,watchpointsform,commandlineform,msestream,
  componentpaletteform,mserichstring,msesettings,formdesigner,
  msestringlisteditor,msetexteditor,msepropertyeditors,mseshapes,mseactions,
@@ -615,6 +625,9 @@ begin
    li.expandmacros(debugcommand);
    li.expandmacros(debugoptions);
    li.expandmacros(debugtarget);
+   li.expandmacros(remoteconnection);
+   li.expandmacros(uploadcommand);
+   li.expandmacros(gdbservercommand);
    li.expandmacros(sourcedirs);
    li.expandmacros(defines);
    li.expandmacros(unitdirs);
@@ -852,6 +865,10 @@ begin
   debugcommand:= '${DEBUGGER}';
   debugoptions:= '';
   debugtarget:= '';
+  remoteconnection:= '';
+  uploadcommand:= '';
+  gdbdownload:= false;
+  gdbservercommand:= '';
   sourcefilemasks:= nil;
   syntaxdeffiles:= nil;
   filemasknames:= nil;
@@ -1023,6 +1040,10 @@ begin
   updatevalue('debugcommand',debugcommand);
   updatevalue('debugoptions',debugoptions);
   updatevalue('debugtarget',debugtarget);
+  updatevalue('remoteconnection',remoteconnection);
+  updatevalue('uploadcommand',uploadcommand);
+  updatevalue('gdbdownload',gdbdownload);
+  updatevalue('gdbservercommand',gdbservercommand);
   updatevalue('defaultmake',defaultmake,1,maxdefaultmake+1);
   updatevalue('makeoptions',makeoptions);
   updatevalue('makeoptionson',makeoptionson);
@@ -1226,6 +1247,10 @@ begin
   fo.debugcommand.value:= debugcommand;
   fo.debugoptions.value:= debugoptions;
   fo.debugtarget.value:= debugtarget;
+  fo.remoteconnection.value:= remoteconnection;
+  fo.uploadcommand.value:= uploadcommand;
+  fo.gdbdownload.value:= gdbdownload;
+  fo.gdbservercommand.value:= gdbservercommand;
   fo.defaultmake.value:= lowestbit(defaultmake);
   fo.makeoptions.gridvalues:= makeoptions;
   for int1:= 0 to fo.makeoptionsgrid.rowhigh do begin
@@ -1397,6 +1422,10 @@ begin
   debugcommand:= fo.debugcommand.value;
   debugoptions:= fo.debugoptions.value;
   debugtarget:= fo.debugtarget.value;
+  remoteconnection:= fo.remoteconnection.value;
+  uploadcommand:= fo.uploadcommand.value;
+  gdbdownload:= fo.gdbdownload.value;
+  gdbservercommand:= fo.gdbservercommand.value;
   defaultmake:= 1 shl fo.defaultmake.value;
   makeoptions:= fo.makeoptions.gridvalues;
   setlength(makeoptionson,fo.makeoptionsgrid.rowcount);
@@ -1503,6 +1532,7 @@ begin
  try
   result:= fo.show(true,nil) = mr_ok;
   if result then begin
+   mainfo.gdb.closegdb;
    fo.window.nofocus; //remove empty grid lines
    formtoprojectoptions(fo);
    projectoptionsmodified;
@@ -1742,6 +1772,11 @@ begin
   end;
  end;
  copytoclipboard(str1);
+end;
+
+procedure tprojectoptionsfo.downloadchange(const sender: TObject);
+begin
+ uploadcommand.enabled:= not gdbdownload.value;
 end;
 
 end.

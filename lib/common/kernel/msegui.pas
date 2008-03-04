@@ -18,7 +18,7 @@ uses
  msestrings,mseerr,msegraphutils,mseapplication,
  msepointer,mseevent,msekeyboard,mseclasses,mseglob,mseguiglob,mselist,msesys,
  msethread,
- msebitmap,msearrayprops,mseguithread{,msedatamodules};
+ msebitmap,msearrayprops,msethreadcomp{,msedatamodules};
 
 const
  mseguiversiontext = '1.7 unstable';
@@ -1674,6 +1674,7 @@ type
    fmodalwindowbeforewaitdialog: twindow;
    fonterminatebefore: threadcompeventty;
    fexecuteaction: notifyeventty;
+   fidleaction: notifyeventty;
    feventlooping: integer;
    procedure invalidated;
    function grabpointer(const id: winidty): boolean;
@@ -1692,6 +1693,7 @@ type
    procedure destroyforms;
    procedure dothreadterminated(const sender: tthreadcomp);
    procedure dowaitidle(var again: boolean);
+   procedure dowaitidle1(var again: boolean);
   protected  
    procedure dopostevent(const aevent: tevent); override;
    procedure eventloop(const once: boolean = false);
@@ -1723,7 +1725,8 @@ type
    function waitdialog(const athread: tthreadcomp = nil; const atext: msestring = '';
                    const caption: msestring = '';
                    const acancelaction: notifyeventty = nil;
-                   const aexecuteaction: notifyeventty = nil): boolean; override;
+                   const aexecuteaction: notifyeventty = nil;
+                   const aidleaction: notifyeventty = nil): boolean; override;
               //true if not canceled
    procedure terminatewait;
    procedure cancelwait;
@@ -13370,11 +13373,25 @@ begin
  fexecuteaction(self);
 end;
 
+procedure tguiapplication.dowaitidle1(var again: boolean);
+begin
+ if fstate * [aps_waitok,aps_waitcanceled,aps_waitidlelock] = [] then begin
+  include(fstate,aps_waitidlelock);
+  fidleaction(self);
+  if fstate * [aps_waitok,aps_waitcanceled] = [] then begin
+   registeronidle({$ifdef FPC}@{$endif}dowaitidle1);
+   again:= true;
+   exclude(fstate,aps_waitidlelock);
+  end;
+ end;
+end;
+
 function tguiapplication.waitdialog(const athread: tthreadcomp = nil;
                const atext: msestring = '';
                const caption: msestring = '';
                const acancelaction: notifyeventty = nil;
-               const aexecuteaction: notifyeventty = nil): boolean;
+               const aexecuteaction: notifyeventty = nil;
+               const aidleaction: notifyeventty = nil): boolean;
 var
  res1: modalresultty;
  wo1: longword;
@@ -13390,8 +13407,12 @@ begin
    resetwaitdialog;
    include(fstate,aps_waitstarted);
    fexecuteaction:= aexecuteaction;
+   fidleaction:= aidleaction;
    if assigned(aexecuteaction) then begin
     registeronidle({$ifdef FPC}@{$endif}dowaitidle);
+   end;
+   if assigned(aidleaction) then begin
+    registeronidle({$ifdef FPC}@{$endif}dowaitidle1);
    end;
    try
     if athread <> nil then begin
@@ -13417,6 +13438,8 @@ begin
      athread.waitfor;
     end;
    finally
+    unregisteronidle({$ifdef FPC}@{$endif}dowaitidle);
+    unregisteronidle({$ifdef FPC}@{$endif}dowaitidle1);
     exclude(fstate,aps_waitstarted);
     if athread <> nil then begin
      athread.onterminate:= fonterminatebefore;
@@ -13450,7 +13473,7 @@ procedure tguiapplication.resetwaitdialog;
 begin
  lock;
  fstate:= fstate - [aps_waitstarted,aps_waitcanceled,aps_waitterminated,
-                                          aps_waitok];
+                    aps_waitok,aps_waitidlelock];
  unlock;
 end;
 
