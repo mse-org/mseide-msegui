@@ -26,6 +26,8 @@ type
  coloptionty = (co_readonly, co_nofocus,     co_invisible, co_disabled,
          //     lvo_drawfocus,lvo_mousemovefocus,lvo_leftbuttonfocusonly,
                 co_drawfocus,co_mousemovefocus,co_leftbuttonfocusonly,
+         //     lvo_noctrlmousefocus,
+                co_noctrlmousefocus,
          //     lvo_focusselect,lvo_mouseselect,lvo_keyselect,
                 co_focusselect, co_mouseselect, co_keyselect,
          //     lvo_multiselect,lvo_resetselectonexit,lvo_noresetselect
@@ -510,7 +512,8 @@ type
    destructor destroy; override;
 
    procedure cellchanged(const row: integer); override;
-   function canfocus(const abutton: mousebuttonty): boolean; virtual;
+   function canfocus(const abutton: mousebuttonty;
+                     const ashiftstate: shiftstatesty): boolean; virtual;
    function isreadonly: boolean; //col readonly or row readonly
    procedure updatecellzone(const pos: pointty; var result: cellzonety); virtual;
    property datalist: tdatalist read fdata;
@@ -4217,11 +4220,14 @@ begin
  end;
 end;
 
-function tdatacol.canfocus(const abutton: mousebuttonty): boolean;
+function tdatacol.canfocus(const abutton: mousebuttonty;
+                                     const ashiftstate: shiftstatesty): boolean;
 begin
  result:= (foptions * [co_invisible,co_disabled,co_nofocus] = []) and
-          ((abutton = mb_left) or (abutton = mb_none) or
-                     not (co_leftbuttonfocusonly in foptions));
+          (((abutton = mb_left) or (abutton = mb_none) or
+                     not (co_leftbuttonfocusonly in foptions)) and 
+         ((ashiftstate*[ss_ctrl] = []) or 
+                            not (co_noctrlmousefocus in foptions)));
 end;
 
 procedure tdatacol.rearange(const list: tintegerdatalist);
@@ -7063,7 +7069,7 @@ var
    ck_data: begin
     if not (gs_mousecellredirected in fstate) then begin
      cell1:= fmousecell;
-     bo2:= fdatacols[fmousecell.col].canfocus(info.button);
+     bo2:= fdatacols[fmousecell.col].canfocus(info.button,info.shiftstate);
      if not bo2 then begin
       cell1.col:= ffocusedcell.col; //try to focus mouse row
       if cell1.col < 0 then begin
@@ -7071,7 +7077,7 @@ var
       end;
      end;
      if (cell1.col >= 0) and 
-                fdatacols[cell1.col].canfocus(info.button) then begin
+                fdatacols[cell1.col].canfocus(info.button,info.shiftstate) then begin
       bo1:= not gridcoordisequal(cell1,ffocusedcell);
       if (info.shiftstate * [ss_left,ss_middle,ss_right] = [ss_left])
                   {(info.button = mb_left)} and
@@ -7254,7 +7260,7 @@ begin
         end;
         if (distance(fmouserefpos,info.pos) > 3) and active then begin
          fmouserefpos:= info.pos;
-         if not fdatacols[fmousecell.col].canfocus(info.button) then begin
+         if not fdatacols[fmousecell.col].canfocus(info.button,info.shiftstate) then begin
           showcell(fmousecell);
          end
          else begin
@@ -7693,7 +7699,7 @@ begin     //focuscell
    end;
   end;
   if (selectaction in [fca_focusin,fca_focusinrepeater,fca_focusinforce]) and 
-      ((cell.col < 0) or  not fdatacols[cell.col].canfocus(mb_none)) then begin
+      ((cell.col < 0) or  not fdatacols[cell.col].canfocus(mb_none,[])) then begin
    selectaction:= fca_setfocusedcell;
   end;
   if selectaction = fca_entergrid then begin
@@ -8630,7 +8636,7 @@ begin
       inc(arow);
      end;
     end;
-    if fdatacols[int1].canfocus(mb_none) then begin
+    if fdatacols[int1].canfocus(mb_none,[]) then begin
      dec(step);
     end;
    end
@@ -8642,7 +8648,7 @@ begin
       dec(arow);
      end;
     end;
-    if fdatacols[int1].canfocus(mb_none) then begin
+    if fdatacols[int1].canfocus(mb_none,[]) then begin
      inc(step);
     end;
    end;
@@ -10118,7 +10124,7 @@ begin
      int1:=  fdatacols.count - 1;
      inc(loopcount);
     end;
-    if fdatacols[int1].canfocus(mb_none) then begin
+    if fdatacols[int1].canfocus(mb_none,[]) then begin
      result:= int1;
      break;
     end;
@@ -10135,7 +10141,7 @@ begin
      int1:= 0;
      inc(loopcount);
     end;
-    if fdatacols[int1].canfocus(mb_none) then begin
+    if fdatacols[int1].canfocus(mb_none,[]) then begin
      result:= int1;
      break;
     end;

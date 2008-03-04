@@ -1026,6 +1026,7 @@ begin
    end;
    cek_buttonpress: begin
     if mouseeventinfopo^.shiftstate = [ss_ctrl,ss_left] then begin
+//     include(info.mouseeventinfopo^.eventstate,es_processed);
      pos1.pos:= info.pos;
      pos1.filename:= designer.designfiles.find(edit.filename);
      if findlinkdest(edit,pos1,str1) then begin

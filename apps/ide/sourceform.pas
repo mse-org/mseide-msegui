@@ -35,10 +35,10 @@ type
   private
    fsourcefo: tsourcefo;
    findex: integer;
-   procedure updateshowpos;
+   procedure updateshowpos(const acellpos: cellpositionty = cep_rowcenteredif);
   public
    constructor create;
-   procedure showsource(const apos: sourceposty; asetfocus: boolean = false);
+   procedure showsource(const apos: sourceposty; const asetfocus: boolean = false);
    function back: boolean;
    function forward: boolean;
  end;
@@ -231,10 +231,11 @@ begin
  inherited;
 end;
 
-procedure tnaviglist.updateshowpos;
+procedure tnaviglist.updateshowpos(
+                         const acellpos: cellpositionty = cep_rowcenteredif);
 begin
  with fsourcefo do begin
-  showsourcepos(self.items[findex]^,true,cep_rowcenteredif);
+  showsourcepos(self.items[findex]^,true,acellpos);
   navigforwardact.enabled:= findex < fcount - 1;
   navigbackact.enabled:= findex > 0;
  end;
@@ -264,7 +265,8 @@ begin
  end;
 end;
 
-procedure tnaviglist.showsource(const apos: sourceposty; asetfocus: boolean = false);
+procedure tnaviglist.showsource(const apos: sourceposty;
+                                       const asetfocus: boolean = false);
 begin
  count:= findex + 1;
  if count = 0 then begin
@@ -274,7 +276,7 @@ begin
   items[findex]^:= fsourcefo.sourcepos;
  end;
  findex:= add(apos);
- updateshowpos;
+ updateshowpos(cep_top);
 end;
 
 { tsourcefo }
