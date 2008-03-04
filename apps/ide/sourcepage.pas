@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2008 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,11 +25,11 @@ uses
  msehash,msebitmap,msetabs,msetypes,
  mseglob,mseguiglob,msegui,msesyntaxedit,mseeditglob,
  mseinplaceedit,msedispwidgets,msegraphutils,msegrids,breakpointsform,
- pascaldesignparser,msefilechange,msestrings,mserichstring;
+ pascaldesignparser,msefilechange,msestrings,mserichstring,mseparser;
 
 
 type
- sourcepageasynctagty = (spat_showasform,spat_checkbracket);
+ sourcepageasynctagty = (spat_showasform,spat_checkbracket,spat_showsource);
  
  bookmarkty = record
   row: integer;
@@ -74,6 +74,7 @@ type
    frelpath: filenamety;
    fbracketsetting: integer;
    fbracketchecking: integer;
+   fshowsourcepos: sourceposty;
    procedure setactiverow(const Value: integer);
    procedure setgdb(agdb: tgdbmi);
    procedure setfilepath(const value: filenamety);
@@ -154,7 +155,7 @@ implementation
 uses
  sourcepage_mfm,msefileutils,sourceform,main,
  sysutils,msewidgets,finddialogform,replacedialogform,msekeyboard,
- sourceupdate,mseparser,msefiledialog,mseintegerenter,msedesigner,
+ sourceupdate,msefiledialog,mseintegerenter,msedesigner,
  projectoptionsform,msesys,make,actionsmodule,msegraphics,sourcehintform,
  mseedit,msedrawtext,msebits,msedatalist,msestream,msedesignintf,
  msesysutils;
@@ -232,6 +233,9 @@ begin
   spat_checkbracket: begin
    dec(fbracketchecking);
    checkbrackets;
+  end;
+  spat_showsource: begin
+   sourcefo.naviglist.showsource(fshowsourcepos,true);
   end;
  end;
 end;
@@ -976,7 +980,7 @@ end;
 
 procedure tsourcepage.showlink(const apos: gridcoordty);
 begin
- edit.showlink(apos,pascaldelims + '.');
+ edit.showlink(apos,pascaldelims + '.[]');
 end;
 
 procedure tsourcepage.editontextmouseevent(const sender: tobject;
@@ -1013,7 +1017,7 @@ begin
  with info do begin
   case eventkind of
    cek_mousemove: begin
-    if (mouseeventinfopo^.shiftstate = [ss_ctrl]) then begin
+    if (mouseeventinfopo^.shiftstate = [ss_ctrl]) and active then begin
      showlink(info.pos);
     end;
    end;
@@ -1025,12 +1029,14 @@ begin
      pos1.pos:= info.pos;
      pos1.filename:= designer.designfiles.find(edit.filename);
      if findlinkdest(edit,pos1,str1) then begin
-      sourcefo.naviglist.showsource(pos1,true);
+      fshowsourcepos:= pos1;
+      asyncevent(ord(spat_showsource));
+//      sourcefo.naviglist.showsource(pos1,true);
      end;
     end
     else begin
      if edit.isdblclicked(info.mouseeventinfopo^) then begin
-      edit.selectword(info.pos,pascaldelims+'.');
+      edit.selectword(info.pos,pascaldelims+'.[]');
       include(info.mouseeventinfopo^.eventstate,es_processed);
      end;
     end;

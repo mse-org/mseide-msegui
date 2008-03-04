@@ -1499,6 +1499,9 @@ end;
 
 function tgdbmi.download: gdbresultty;
 begin
+ if not internalcommand('-target-download') then begin
+  result:= gdb_writeerror;
+ end;
  result:= gdb_ok;
  include(fstate,gs_downloaded);
 end;

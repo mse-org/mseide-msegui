@@ -880,7 +880,7 @@ type
    procedure setminsize(const avalue: sizety);
    procedure setmaxsize(const avalue: sizety);
 
-   procedure setcursor(const Value: cursorshapety);
+   procedure setcursor(const avalue: cursorshapety);
    function getsize: sizety;
 
    procedure widgetregioninvalid;
@@ -1026,6 +1026,7 @@ type
    function getframefont: tfont;
    procedure fontchanged; virtual;
    procedure fontcanvaschanged; virtual;
+   procedure updatecursorshape{(force: boolean = false)};
 
    procedure parentclientrectchanged; virtual;
    procedure parentwidgetregionchanged(const sender: twidget); virtual;
@@ -1191,7 +1192,6 @@ type
 
    procedure paint(const canvas: tcanvas); virtual;
    procedure update; virtual;
-   procedure updatecursorshape(force: boolean = false);
    procedure scrollwidgets(const dist: pointty);
    procedure scrollrect(const dist: pointty; const rect: rectty; scrollcaret: boolean);
                              //origin = paintrect.pos
@@ -1389,6 +1389,7 @@ type
                  write setoptionswidget default defaultoptionswidget;
    property optionsskin: optionsskinty read foptionsskin 
                                             write setoptionsskin default [];
+   function actualcursor: cursorshapety; virtual;
    property cursor: cursorshapety read fcursor write setcursor default cr_default;
    property color: colorty read fcolor write setcolor default defaultwidgetcolor;
    property visible: boolean read getvisible write setvisible default true;
@@ -1691,6 +1692,7 @@ type
    procedure internalshowhint(const sender: twidget);
    procedure setmainwindow(const Value: twindow);
    procedure setcursorshape(const avalue: cursorshapety);
+   procedure setwidgetcursorshape(const avalue: cursorshapety);
    function getwindows(const index: integer): twindow;
    procedure destroyforms;
    procedure dothreadterminated(const sender: tthreadcomp);
@@ -1815,7 +1817,7 @@ type
    property cursorshape: cursorshapety read fcursorshape write setcursorshape;
                 //persistent
    property widgetcursorshape: cursorshapety read fwidgetcursorshape write
-                                        fwidgetcursorshape;
+                                        setwidgetcursorshape;
                 //removed by mouse widget change
    procedure updatecursorshape; //restores cursorshape of mousewidget
    property mousewidget: twidget read fmousewidget;
@@ -6948,28 +6950,6 @@ begin
  end;
 end;
 
-procedure twidget.updatecursorshape(force: boolean = false);
-var
- widget: twidget;
- cursor1: cursorshapety;
-begin
- if (appinst <> nil) then begin
-  if force or (appinst.fclientmousewidget = self) or
-    (appinst.cursorshape = cr_default) and
-      checkdescendent(appinst.fclientmousewidget) then begin
-   widget:= self;
-   repeat
-    cursor1:= widget.fcursor;
-    widget:= widget.fparentwidget;
-   until (cursor1 <> cr_default) or (widget = nil);
-   if (widget = nil) and (cursor1 = cr_default) then begin
-    cursor1:= cr_arrow;
-   end;
-   appinst.widgetcursorshape:= cursor1;
-  end;
- end;
-end;
-
 function twidget.getclientoffset: pointty;
 begin
  if fframe <> nil then begin
@@ -7053,7 +7033,7 @@ begin
      end;
      if appinst.fmousewidget = self then begin
       if fparentwidget <> nil then begin
-       fparentwidget.updatecursorshape(true);
+       fparentwidget.updatecursorshape{(true)};
       end
       else begin
        appinst.widgetcursorshape:= cr_default;
@@ -7071,7 +7051,7 @@ begin
        end;
       end;
      end;
-     updatecursorshape(true);
+     updatecursorshape{(true)};
      clientmouseevent(info);
     end;
     ek_buttonpress: begin
@@ -8114,12 +8094,42 @@ begin
  end;
 end;
 
-procedure twidget.setcursor(const Value: cursorshapety);
+procedure twidget.updatecursorshape{(force: boolean = false)};
+var
+ widget: twidget;
+ cursor1: cursorshapety;
 begin
- if fcursor <> value then begin
-  fcursor := Value;
-  updatecursorshape;
+// if (appinst <> nil) then begin
+//  if force or (appinst.fclientmousewidget = self) or
+//    (appinst.cursorshape = cr_default) and
+//      checkdescendent(appinst.fclientmousewidget) then begin
+   widget:= self;
+   repeat
+    cursor1:= widget.actualcursor;
+    widget:= widget.fparentwidget;
+   until (cursor1 <> cr_default) or (widget = nil);
+   if (widget = nil) and (cursor1 = cr_default) then begin
+    cursor1:= cr_arrow;
+   end;
+   appinst.fwidgetcursorshape:= cursor1;
+//  end;
+// end;
+end;
+
+procedure twidget.setcursor(const avalue: cursorshapety);
+begin
+ if fcursor <> avalue then begin
+  fcursor:= avalue;
+  if not (csloading in componentstate) and (appinst <> nil) and 
+         checkdescendent(appinst.fclientmousewidget) then begin
+   appinst.fclientmousewidget.updatecursorshape;
+  end;
  end;
+end;
+
+function twidget.actualcursor: cursorshapety;
+begin
+ result:= fcursor;
 end;
 
 function twidget.containswidget(awidget: twidget): boolean;
@@ -12027,9 +12037,14 @@ begin       //eventloop
          processconfigureevent(twindowrectevent(event));
         end;
         ek_enterwindow: begin
-         processwindowcrossingevent(twindowevent(event));
-         if event is tmouseenterevent then begin
-          processmouseevent(tmouseenterevent(event));
+         if (fmousewidget = nil) or (fmousewidget.fwindow = nil) or
+          (fmousewidget.fwindow.fwindow.id <> 
+                   twindowevent(event).fwinid) then begin
+                   //there can be an additional enterwindow by mouse click
+          processwindowcrossingevent(twindowevent(event));
+          if event is tmouseenterevent then begin
+           processmouseevent(tmouseenterevent(event));
+          end;
          end;
         end;
         ek_leavewindow: begin
@@ -13222,7 +13237,7 @@ end;
 procedure tguiapplication.updatecursorshape; //restores cursorshape of mousewidget
 begin
  if fclientmousewidget <> nil then begin
-  fclientmousewidget.updatecursorshape(true);
+  fclientmousewidget.updatecursorshape{(true)};
  end
  else begin
   widgetcursorshape:= cr_default;
@@ -13231,10 +13246,27 @@ end;
 
 procedure tguiapplication.setcursorshape(const avalue: cursorshapety);
 begin
- fcursorshape:= avalue; //wanted shape
- if not waiting then begin
-  if fthread <> sys_getcurrentthread then begin
-   mouse.shape:= fcursorshape; //show new cursor immediately
+ if fcursorshape <> avalue then begin
+  fcursorshape:= avalue; //wanted shape
+  if not waiting then begin
+   if fthread <> sys_getcurrentthread then begin
+    mouse.shape:= fcursorshape; //show new cursor immediately
+   end
+   else begin
+    if avalue = cr_default then begin
+     updatecursorshape;
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure tguiapplication.setwidgetcursorshape(const avalue: cursorshapety);
+begin
+ if fwidgetcursorshape <> avalue then begin
+  fwidgetcursorshape:= avalue;
+  if (avalue = cr_default) and (fclientmousewidget <> nil) then begin
+   fclientmousewidget.updatecursorshape;
   end;
  end;
 end;

@@ -830,7 +830,9 @@ procedure tcustomscrollbar.mouseevent(var info: mouseeventinfoty);
  var
   ar2: scrollbarareaty;
  begin
-  application.widgetcursorshape:= cr_arrow;
+  if ord(ar1) >= 0 then begin
+   application.widgetcursorshape:= cr_arrow;
+  end;
   if clickedareaisvalid then begin
    if (ar1 <> fclickedarea) and (fclickedarea <> sbbu_move) then begin
     releasebutton(false);

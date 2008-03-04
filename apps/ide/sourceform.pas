@@ -234,7 +234,7 @@ end;
 procedure tnaviglist.updateshowpos;
 begin
  with fsourcefo do begin
-  showsourcepos(self.items[findex]^,true);
+  showsourcepos(self.items[findex]^,true,cep_rowcenteredif);
   navigforwardact.enabled:= findex < fcount - 1;
   navigbackact.enabled:= findex > 0;
  end;

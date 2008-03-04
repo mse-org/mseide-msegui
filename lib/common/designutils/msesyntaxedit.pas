@@ -79,8 +79,7 @@ function checkbracketkind(const achar: msechar; out open: boolean): bracketkindt
 
 implementation
 uses
- mserichstring,msegraphics,msekeyboard,
- msegraphutils;
+ mserichstring,msegraphics,msekeyboard,msegraphutils,msepointer;
 
 type
  tundoinplaceedit1 = class(tundoinplaceedit);
@@ -390,10 +389,13 @@ end;
 
 procedure tsyntaxedit.removelink;
 begin
- if (flinkpos.row >= 0) and (flinkpos.row < datalist.count) then begin
-  if updatefontstyle(datalist.getformatpo(flinkpos.row)^,flinkpos.col,
-         flinklength,fs_underline,false) then begin
-   fgridintf.getcol.cellchanged(flinkpos.row);
+ if (flinkpos.row >= 0) then begin
+  application.cursorshape:= cr_default;
+  if (flinkpos.row < datalist.count) then begin
+   if updatefontstyle(datalist.getformatpo(flinkpos.row)^,flinkpos.col,
+          flinklength,fs_underline,false) then begin
+    fgridintf.getcol.cellchanged(flinkpos.row);
+   end;
   end;
   flinkpos.row:= invalidaxis;
  end;
@@ -414,6 +416,7 @@ begin
   flinkpos:= pos1;
   flinklength:= length1;
   if flinklength > 0 then begin
+   application.cursorshape:= cr_pointinghand;
    if updatefontstyle(datalist.getformatpo(flinkpos.row)^,flinkpos.col,
           flinklength,fs_underline,true) then begin
     fgridintf.getcol.cellchanged(flinkpos.row);

@@ -45,7 +45,7 @@ type
                 const aobjects: integerarty);
  end;
 
- objectpickerstatety = (ops_moving,ops_xorpicpainted,ops_cursorchanged);
+ objectpickerstatety = (ops_moving,ops_xorpicpainted{,ops_cursorchanged});
  objectpickerstatesty = set of objectpickerstatety;
 
  tobjectpicker = class      //todo: area selecting, area deselecting
@@ -56,7 +56,7 @@ type
    fpickoffset: pointty;
    fstate: objectpickerstatesty;
    forigin: originty;
-   fcursorbefore: cursorshapety;
+//   fcursorbefore: cursorshapety;
    procedure removexorpic;
    procedure paintxorpic;
    procedure dokeypress(const sender: twidget; var info: keyeventinfoty);
@@ -97,8 +97,9 @@ begin
  application.unregisteronkeypress({$ifdef FPC}@{$endif}dokeypress);
  removexorpic;
  widget1:= twidget1(fintf.getwidget);
- widget1.cursor:= fcursorbefore;
+// widget1.cursor:= fcursorbefore;
  widget1.releasemouse;
+ application.widgetcursorshape:= cr_default;
  exclude(fstate,ops_moving);
 end;
 
@@ -120,8 +121,8 @@ begin
      application.registeronkeypress({$ifdef FPC}@{$endif}dokeypress);
      include(fstate,ops_moving);
      widget1:= twidget1(fintf.getwidget);
-     fcursorbefore:= widget1.cursor;
-     widget1.cursor:= application.mouse.shape;
+//     fcursorbefore:= widget1.cursor;
+//     widget1.cursor:= application.mouse.shape;
      widget1.capturemouse(true);
      fintf.beginpickmove(fobjects);
      paintxorpic;
@@ -133,6 +134,10 @@ begin
    if (info.button = mb_left) and (ops_moving in fstate) then begin
     endmoving;
     fintf.endpickmove(info.pos,fpickoffset,fobjects);
+    shape:= fintf.getwidget.actualcursor;
+    fintf.getcursorshape(info.pos,info.shiftstate,shape);
+    application.widgetcursorshape:= shape;
+           //restore pick cursor
     include(info.eventstate,es_processed);
    end;
   end;
@@ -144,23 +149,24 @@ begin
     include(info.eventstate,es_processed);
    end
    else begin
-    shape:= fintf.getwidget.cursor;
+    shape:= fintf.getwidget.actualcursor;
     if fintf.getcursorshape(info.pos,info.shiftstate,shape) then begin
      include(info.eventstate,es_processed);
-     include(fstate,ops_cursorchanged);
+//     include(fstate,ops_cursorchanged);
      application.widgetcursorshape:= shape;
     end
     else begin
-     if ops_cursorchanged in fstate then begin
-      exclude(fstate,ops_cursorchanged);
-      application.updatecursorshape;
-     end;
+     application.widgetcursorshape:= cr_default;
+//     if ops_cursorchanged in fstate then begin
+//      exclude(fstate,ops_cursorchanged);
+//      application.updatecursorshape;
+//     end;
     end;
    end;
   end;
-  ek_mouseleave,ek_clientmouseleave: begin
-   fintf.getwidget.updatecursorshape(true);
-  end;
+//  ek_mouseleave,ek_clientmouseleave: begin
+//   fintf.getwidget.updatecursorshape{(true)};
+//  end;
  end;
 end;
 

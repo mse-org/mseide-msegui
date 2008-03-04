@@ -1549,7 +1549,7 @@ procedure tdesignwindow.dispatchmouseevent(var info: mouseeventinfoty;
    ht_left,ht_right: shape:= cr_sizehor;
    else shape:= cr_arrow;
   end;
-  application.cursorshape:= shape;
+  application.widgetcursorshape:= shape;
  end;
 
 

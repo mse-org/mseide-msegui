@@ -1292,6 +1292,7 @@ end;
    procedure error(aerror: griderrorty; text: string = '');
    procedure indexerror(row: boolean; index: integer; text: string = '');
 
+   function actualcursor: cursorshapety; override;
    function getdisprect: rectty; override;
    procedure dofontheightdelta(var delta: integer); override;
    procedure fontchanged; override;
@@ -6994,6 +6995,18 @@ begin
  inherited;
 end;
 
+function tcustomgrid.actualcursor: cursorshapety;
+begin
+ with fmousecell do begin
+  if (row >= 0) and (col >= 0) and (col < datacols.count) then begin
+   result:= datacols[fmousecell.col].getcursor;
+  end
+  else begin
+   result:= inherited actualcursor;
+  end;
+ end;
+end;
+
 procedure tcustomgrid.clientmouseevent(var info: mouseeventinfoty);
 
  procedure mouseleavecol;
@@ -7203,7 +7216,7 @@ begin
        application.widgetcursorshape:= datacols[fmousecell.col].getcursor;
       end
       else begin
-       application.widgetcursorshape:= cursor;
+       application.widgetcursorshape:= cr_default{cursor};
        if (eventkind = ek_mousepark) and (cellkind = ck_fixrow) and 
               ((fmousecell.row <> fmouseparkcell.row) or 
                (fmousecell.col <> fmouseparkcell.col)) then begin
