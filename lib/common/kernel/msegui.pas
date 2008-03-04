@@ -1666,6 +1666,7 @@ type
    fmainwindow: twindow;
    fdblclicktime: integer;
    fcursorshape: cursorshapety;
+   fwidgetcursorshape: cursorshapety;
 //   facursorshape: cursorshapety;
    fbuttonpresswidgetbefore: twidget;
    fbuttonreleasewidgetbefore: twidget;
@@ -1676,6 +1677,7 @@ type
    fexecuteaction: notifyeventty;
    fidleaction: notifyeventty;
    feventlooping: integer;
+
    procedure invalidated;
    function grabpointer(const id: winidty): boolean;
    function ungrabpointer: boolean;
@@ -1688,7 +1690,7 @@ type
    procedure hinttimer(const sender: tobject);
    procedure internalshowhint(const sender: twidget);
    procedure setmainwindow(const Value: twindow);
-   procedure setcursorshape(const Value: cursorshapety);
+   procedure setcursorshape(const avalue: cursorshapety);
    function getwindows(const index: integer): twindow;
    procedure destroyforms;
    procedure dothreadterminated(const sender: tthreadcomp);
@@ -1701,7 +1703,10 @@ type
    procedure exitloop;  //used in win32 cancelshutdown
    procedure receiveevent(const event: tobjectevent); override;
    procedure doafterrun; override;
+   property widgetcursorshape: cursorshapety read fwidgetcursorshape write
+                                        fwidgetcursorshape;
   public
+   constructor create(aowner: tcomponent); override;
    procedure langchanged; override;
    procedure settimer(const us: integer); override;
    function findwindow(id: winidty; out window: twindow): boolean;
@@ -6958,7 +6963,7 @@ begin
    if (widget = nil) and (cursor1 = cr_default) then begin
     cursor1:= cr_arrow;
    end;
-   appinst.cursorshape:= cursor1;
+   appinst.widgetcursorshape:= cursor1;
   end;
  end;
 end;
@@ -7049,7 +7054,7 @@ begin
        fparentwidget.updatecursorshape(true);
       end
       else begin
-       appinst.cursorshape:= cr_default;
+       appinst.widgetcursorshape:= cr_default;
       end;
      end;
      clientmouseevent(info);
@@ -11309,7 +11314,8 @@ begin
  factmousewindow:= nil;
  if fmousecapturewidget = nil then begin
   setmousewidget(nil);
-  cursorshape:= cr_default;
+  widgetcursorshape:= cr_default;
+//  cursorshape:= cr_default;
  end
  else begin
   if (fclientmousewidget <> nil) and
@@ -11865,7 +11871,8 @@ begin       //eventloop
   fillchar(modalinfo,sizeof(modalinfo),0);
   waitcountbefore:= fwaitcount;
   fwaitcount:= 0;
-  mouse.shape:= fcursorshape;
+  checkcursorshape;
+//  mouse.shape:= fcursorshape;
   if amodalwindow <> nil then begin
    if fmodalwindow <> nil then begin
     setlinkedvar(fmodalwindow,tlinkedobject(modalinfo.modalwindowbefore));
@@ -12443,7 +12450,39 @@ begin
  end;
 end;
 
+procedure tinternalapplication.checkcursorshape;
+begin
+ if not waiting then begin
+  if fcursorshape = cr_default then begin
+   fmouse.shape:= fwidgetcursorshape;
+  end
+  else begin
+   fmouse.shape:= fcursorshape;
+  end;
+ end
+ else begin
+  fmouse.shape:= cr_wait;
+ end;
+end;
+
+procedure tinternalapplication.dopostevent(const aevent: tevent);
+begin
+ gui_postevent(aevent);
+end;
+
+procedure tinternalapplication.doeventloop(const once: boolean);
+begin
+ eventloop(nil,once);
+end;
+
+
 { tguiapplication }
+
+constructor tguiapplication.create(aowner: tcomponent);
+begin
+ fwidgetcursorshape:= cr_default;
+ inherited;
+end;
 
 procedure tguiapplication.initialize;
 begin
@@ -13184,44 +13223,18 @@ begin
   fclientmousewidget.updatecursorshape(true);
  end
  else begin
-  cursorshape:= cr_default;
+  widgetcursorshape:= cr_default;
  end;
 end;
 
-procedure tguiapplication.setcursorshape(const Value: cursorshapety);
+procedure tguiapplication.setcursorshape(const avalue: cursorshapety);
 begin
- fcursorshape:= Value; //wanted shape
+ fcursorshape:= avalue; //wanted shape
  if not waiting then begin
   if fthread <> sys_getcurrentthread then begin
-//   fcursorshape:= value;
-   mouse.shape:= fcursorshape;
-   //show new cursor immediately
+   mouse.shape:= fcursorshape; //show new cursor immediately
   end;
  end;
-// else begin
-//  fcursorshape:= value;
-   //show new cursor in  eventloop
-// end;
-end;
-
-procedure tinternalapplication.checkcursorshape;
-begin
-// if facursorshape <> fcursorshape then begin
-//  fcursorshape:= facursorshape;
-  if not waiting then begin
-   fmouse.shape:= fcursorshape;
-  end;
-// end;
-end;
-
-procedure tinternalapplication.dopostevent(const aevent: tevent);
-begin
- gui_postevent(aevent);
-end;
-
-procedure tinternalapplication.doeventloop(const once: boolean);
-begin
- eventloop(nil,once);
 end;
 
 procedure tguiapplication.beginwait;
