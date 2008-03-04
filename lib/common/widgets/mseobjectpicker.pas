@@ -148,7 +148,7 @@ begin
     if fintf.getcursorshape(info.pos,info.shiftstate,shape) then begin
      include(info.eventstate,es_processed);
      include(fstate,ops_cursorchanged);
-     application.cursorshape:= shape;
+     application.widgetcursorshape:= shape;
     end
     else begin
      if ops_cursorchanged in fstate then begin

@@ -7200,10 +7200,10 @@ begin
     ek_mousemove,ek_mousepark: begin
      if not (es_child in info.eventstate) then begin
       if cellkind = ck_data then begin
-       application.cursorshape:= datacols[fmousecell.col].getcursor;
+       application.widgetcursorshape:= datacols[fmousecell.col].getcursor;
       end
       else begin
-       application.cursorshape:= cursor;
+       application.widgetcursorshape:= cursor;
        if (eventkind = ek_mousepark) and (cellkind = ck_fixrow) and 
               ((fmousecell.row <> fmouseparkcell.row) or 
                (fmousecell.col <> fmouseparkcell.col)) then begin

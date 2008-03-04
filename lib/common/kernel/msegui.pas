@@ -1703,8 +1703,6 @@ type
    procedure exitloop;  //used in win32 cancelshutdown
    procedure receiveevent(const event: tobjectevent); override;
    procedure doafterrun; override;
-   property widgetcursorshape: cursorshapety read fwidgetcursorshape write
-                                        fwidgetcursorshape;
   public
    constructor create(aowner: tcomponent); override;
    procedure langchanged; override;
@@ -1815,6 +1813,10 @@ type
    procedure mouseparkevent; //simulates mouseparkevent
    procedure delayedmouseshift(const ashift: pointty);
    property cursorshape: cursorshapety read fcursorshape write setcursorshape;
+                //persistent
+   property widgetcursorshape: cursorshapety read fwidgetcursorshape write
+                                        fwidgetcursorshape;
+                //removed by mouse widget change
    procedure updatecursorshape; //restores cursorshape of mousewidget
    property mousewidget: twidget read fmousewidget;
    property mousecapturewidget: twidget read fmousecapturewidget;
