@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -7,7 +7,7 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
-unit mseguithread;
+unit msethreadcomp;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 
