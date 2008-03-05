@@ -11349,9 +11349,6 @@ begin
   end
   else begin
    fmousewinid:= event.fwinid;
-//   if window.owner <> fhintwidget then begin
-//    deactivatehint;
-//   end;
   end;
  end;
 end;
@@ -12037,9 +12034,7 @@ begin       //eventloop
          processconfigureevent(twindowrectevent(event));
         end;
         ek_enterwindow: begin
-         if (fmousewidget = nil) or (fmousewidget.fwindow = nil) or
-          (fmousewidget.fwindow.fwindow.id <> 
-                   twindowevent(event).fwinid) then begin
+         if fmousewinid <> twindowevent(event).fwinid then begin
                    //there can be an additional enterwindow by mouse click
           processwindowcrossingevent(twindowevent(event));
           if event is tmouseenterevent then begin
