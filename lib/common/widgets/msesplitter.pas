@@ -226,6 +226,7 @@ type
    property placey_mindist: integer read fplacey_mindist write setplacey_mindist;
    property placey_maxdist: integer read fplacey_maxdist write setplacey_maxdist
                                      default bigint;
+   property visible default true;
  end;
  
 implementation
@@ -975,6 +976,7 @@ begin
  fplacex_maxdist:= bigint;
  fplacey_maxdist:= bigint;
  inherited;
+ include(fwidgetstate,ws_visible);
 end;
 
 procedure tlayouter.setoptionslayout(const avalue: layoutoptionsty);
