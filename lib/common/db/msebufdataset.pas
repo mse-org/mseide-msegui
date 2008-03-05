@@ -1106,7 +1106,8 @@ begin
  datatype:= tfieldtype(readinteger);  
  size:= readinteger;
  if datatype in blobfields then begin
-  size:= fowner.getblobdatasize;
+//  size:= fowner.getblobdatasize;
+  size:= 0;
  end;
  required:= boolean(readinteger);
  fieldno:= readinteger;

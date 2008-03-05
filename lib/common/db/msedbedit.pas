@@ -7243,7 +7243,7 @@ begin
         end;
         datafield:= fieldname;
         int2:= displaywidth;
-        if int2 > maxautodisplaywidth then begin
+        if (int2 = 0) or (int2 > maxautodisplaywidth) then begin
          int2:= maxautodisplaywidth;
         end;
         width:= charwi * int2;
