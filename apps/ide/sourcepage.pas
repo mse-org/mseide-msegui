@@ -560,7 +560,8 @@ var
  
 begin
  if iscellclick(info,[ccr_nokeyreturn,ccr_dblclick]) and 
-                          (dataicon[info.cell.row] >= 0) then begin
+           (dataicon[info.cell.row] and integer($80000000) <> 0) and
+           (info.mouseeventinfopo^.shiftstate = [ss_double]) then begin
   breakpointsfo.showbreakpoint(filepath,info.cell.row + 1,true);
  end;
  case info.eventkind of
@@ -1036,7 +1037,8 @@ begin
      end;
     end
     else begin
-     if edit.isdblclicked(info.mouseeventinfopo^) then begin
+     if edit.isdblclicked(info.mouseeventinfopo^) and 
+                (mouseeventinfopo^.shiftstate = [ss_double,ss_shift,ss_left]) then begin
       edit.selectword(info.pos,pascaldelims+'.[]');
       include(info.mouseeventinfopo^.eventstate,es_processed);
      end;
