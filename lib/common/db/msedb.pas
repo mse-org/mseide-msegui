@@ -1026,6 +1026,11 @@ function encodesqlboolean(const avalue: boolean): msestring;
 
 procedure regfieldclass(const atype: fieldclasstypety; const aclass: fieldclassty);
 
+procedure varianttorealty(const value: variant; out dest: realty); overload;
+function varianttorealty(const value: variant):realty; overload;
+procedure realtytovariant(const value: realty; out dest: variant); overload;
+function realtytovariant(const value: realty): variant; overload;
+
 implementation
 uses
  rtlconsts,msefileutils,typinfo,dbconst,msedatalist,mseformatstr,
@@ -1056,6 +1061,46 @@ type
     FSize : Word;
  end;
  tdataset1 = class(tdataset);
+
+procedure varianttorealty(const value: variant; out dest: realty);
+begin
+ if varisnull(value) then begin
+  dest:= emptyreal;
+ end
+ else begin
+  real(dest):= value;
+ end;
+end;
+
+function varianttorealty(const value: variant): realty; overload;
+begin
+ if varisnull(value) then begin
+  result:= emptyreal;
+ end
+ else begin
+  real(result):= value;
+ end;
+end;
+
+procedure realtytovariant(const value: realty; out dest: variant);
+begin
+ if isemptyreal(value) then begin
+  dest:= null;
+ end
+ else begin
+  dest:= value;
+ end;
+end;
+
+function realtytovariant(const value: realty): variant; overload;
+begin
+ if isemptyreal(value) then begin
+  result:= null;
+ end
+ else begin
+  result:= value;
+ end;
+end;
 
 procedure regfieldclass(const atype: fieldclasstypety; const aclass: fieldclassty);
 begin

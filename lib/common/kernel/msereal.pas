@@ -28,12 +28,7 @@ function strtorealty(const ein: string; forcevalue: boolean = false): realty;
 function strtorealtydot(const ein: string): realty;
 function realtytostr(const val: realty; const format: msestring = ''): msestring;
 function realtytostrdot(const val: realty): string;
-{
-procedure varianttorealty(const value: variant; out ziel: realty); overload;
-function varianttorealty(const value: variant):realty; overload;
-procedure realtytovariant(const value: realty; out ziel: variant); overload;
-function realtytovariant(const value: realty): variant; overload;
-}
+
 function addrealty(const a,b: realty): realty; //result = a - b
 function subrealty(const a,b: realty): realty; //result = a + b
 function mulrealty(const a,b: realty): realty; //result = a * b
@@ -197,45 +192,5 @@ begin
  {$endif}
  end;
 end;
-{
-procedure varianttorealty(const value: variant; out ziel: realty);
-begin
- if varisnull(value) then begin
-  ziel:= emptyreal;
- end
- else begin
-  ziel:= value;
- end;
-end;
 
-function varianttorealty(const value: variant): realty; overload;
-begin
- if varisnull(value) then begin
-  result:= emptyreal;
- end
- else begin
-  result:= value;
- end;
-end;
-
-procedure realtytovariant(const value: realty; out ziel: variant);
-begin
- if isemptyreal(value) then begin
-  ziel:= null;
- end
- else begin
-  ziel:= value;
- end;
-end;
-
-function realtytovariant(const value: realty): variant; overload;
-begin
- if isemptyreal(value) then begin
-  result:= null;
- end
- else begin
-  result:= value;
- end;
-end;
-}
 end.
