@@ -1159,89 +1159,114 @@ object projectoptionsfo: tprojectoptionsfo
           visible = True
           caption = 'E&mbedded'
           reffontheight = 15
-          object remoteconnection: tstringedit
-            bounds_x = 0
+          object tlayouter2: tlayouter
+            bounds_x = 7
             bounds_y = 6
-            bounds_cx = 264
-            bounds_cy = 39
-            frame.caption = 'Remote connection'
-            frame.captionoffset = 3
-            frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
-            frame.dummy = 0
-            frame.outerframe = (
-              0
-              18
-              0
-              0
-            )
-            anchors = [an_left, an_top, an_right]
-            hint = '"--tty DEVICE" to set target terminal'
-            onshowhint = hintexpandedmacros
-            reffontheight = 15
-          end
-          object uploadcommand: tfilenameedit
-            optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-            bounds_x = 1
-            bounds_y = 54
-            bounds_cx = 264
-            bounds_cy = 39
-            frame.caption = 'Upload command'
-            frame.captionoffset = 3
-            frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
-            frame.button.imagenr = 17
-            frame.dummy = 0
-            frame.outerframe = (
-              0
-              18
-              0
-              0
-            )
-            anchors = [an_left, an_top, an_right]
-            taborder = 1
-            controller.lastdir = '/home/mse/packs/standard/svn/mse/trunk/apps/ide'
-            controller.options = []
-            controller.historymaxcount = 0
-            reffontheight = 15
-          end
-          object gdbservercommand: tfilenameedit
-            optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-            bounds_x = 1
-            bounds_y = 102
-            bounds_cx = 264
-            bounds_cy = 39
-            frame.caption = 'Start gdb server command'
-            frame.captionoffset = 3
-            frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
-            frame.button.imagenr = 17
-            frame.dummy = 0
-            frame.outerframe = (
-              0
-              18
-              0
-              0
-            )
-            anchors = [an_left, an_top, an_right]
-            taborder = 2
-            controller.lastdir = '/home/mse/packs/standard/svn/mse/trunk/apps/ide'
-            controller.options = []
-            controller.historymaxcount = 0
-            reffontheight = 15
-          end
-          object gdbdownload: tbooleanedit
-            bounds_x = 275
-            bounds_y = 74
-            bounds_cx = 104
-            bounds_cy = 17
-            frame.caption = 'gdb download'
-            frame.dummy = 0
-            frame.outerframe = (
-              0
-              2
-              91
-              2
-            )
-            taborder = 3
-            onchange = downloadchange
+            bounds_cx = 450
+            bounds_cy = 194
+            optionslayout = [lao_placey]
+            placey_mindist = 5
+            placey_maxdist = 5
+            object gdbservercommand: tfilenameedit
+              optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+              bounds_x = 1
+              bounds_y = 89
+              bounds_cx = 313
+              bounds_cy = 39
+              frame.caption = 'Start gdb server command'
+              frame.captionoffset = 3
+              frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
+              frame.button.imagenr = 17
+              frame.dummy = 0
+              frame.outerframe = (
+                0
+                18
+                0
+                0
+              )
+              anchors = [an_left, an_top, an_right]
+              controller.lastdir = '/home/mse/packs/standard/svn/mse/trunk/apps/ide'
+              controller.options = []
+              controller.historymaxcount = 0
+              reffontheight = 15
+            end
+            object tlayouter1: tlayouter
+              bounds_x = 0
+              bounds_y = 44
+              bounds_cx = 445
+              bounds_cy = 40
+              frame.framei_right = 5
+              frame.localprops = [frl_firight]
+              frame.dummy = 0
+              anchors = [an_top]
+              taborder = 1
+              optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
+              optionslayout = [lao_aligny]
+              object uploadcommand: tfilenameedit
+                optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+                bounds_x = 0
+                bounds_y = 0
+                bounds_cx = 315
+                bounds_cy = 39
+                frame.options = [cfo_fixtop]
+                frame.caption = 'Upload command'
+                frame.captionoffset = 3
+                frame.font.name = 'stf_default'
+                frame.font.xscale = 1.00000000000000000
+                frame.font.dummy = 0
+                frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
+                frame.button.imagenr = 17
+                frame.dummy = 0
+                frame.outerframe = (
+                  0
+                  18
+                  0
+                  0
+                )
+                anchors = [an_left, an_top, an_right]
+                taborder = 1
+                controller.lastdir = '/home/mse/packs/standard/svn/mse/trunk/apps/ide'
+                controller.options = []
+                controller.historymaxcount = 0
+                reffontheight = 15
+              end
+              object gdbdownload: tbooleanedit
+                bounds_x = 336
+                bounds_y = 20
+                bounds_cx = 104
+                bounds_cy = 17
+                frame.caption = 'gdb download'
+                frame.dummy = 0
+                frame.outerframe = (
+                  0
+                  2
+                  91
+                  2
+                )
+                onchange = downloadchange
+              end
+            end
+            object remoteconnection: tstringedit
+              bounds_x = 1
+              bounds_y = 0
+              bounds_cx = 321
+              bounds_cy = 39
+              frame.caption = 'Remote connection'
+              frame.captionoffset = 3
+              frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
+              frame.dummy = 0
+              frame.outerframe = (
+                0
+                18
+                0
+                0
+              )
+              anchors = [an_left, an_top, an_right]
+              taborder = 2
+              hint = '"--tty DEVICE" to set target terminal'
+              onshowhint = hintexpandedmacros
+              reffontheight = 15
+            end
           end
         end
       end

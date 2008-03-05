@@ -180,6 +180,8 @@ type
    fplacex_maxdist: integer;
    fplacey_mindist: integer;
    fplacey_maxdist: integer;
+   falignx_glue: widgetalignmodety;
+   faligny_glue: widgetalignmodety;
    procedure setoptionslayout(const avalue: layoutoptionsty);
    procedure setalignx_mode(const avalue: widgetalignmodety);
    procedure setaligny_mode(const avalue: widgetalignmodety);
@@ -189,7 +191,13 @@ type
    procedure setplacex_maxdist(const avalue: integer);
    procedure setplacey_mindist(const avalue: integer);
    procedure setplacey_maxdist(const avalue: integer);
+   procedure setalignx_glue(const avalue: widgetalignmodety);
+   procedure setaligny_glue(const avalue: widgetalignmodety);
   protected
+   function childrenleft: integer;
+   function childrentop: integer;
+   function childrenright: integer;
+   function childrenbottom: integer;
    function childrenwidth: integer;
    function childrenheight: integer;
    procedure updatelayout;
@@ -208,6 +216,10 @@ type
                                      default wam_center;
    property alignx_leader: twidget read falignx_leader write setalignx_leader;
    property aligny_leader: twidget read faligny_leader write setaligny_leader;
+   property alignx_glue: widgetalignmodety read falignx_glue write setalignx_glue
+                                 default wam_none;
+   property aligny_glue: widgetalignmodety read faligny_glue write setaligny_glue
+                                 default wam_none;
    property placex_mindist: integer read fplacex_mindist write setplacex_mindist;
    property placex_maxdist: integer read fplacex_maxdist write setplacex_maxdist
                                      default bigint;
@@ -1004,6 +1016,66 @@ begin
  end;
 end;
 
+function tlayouter.childrenleft: integer;
+var
+ int1: integer;
+begin
+ result:= bigint;
+ for int1:= 0 to high(fwidgets) do begin
+  with fwidgets[int1] do begin
+   if fwidgetrect.x < result then begin
+    result:= fwidgetrect.x;
+   end;
+  end;
+ end;
+end;
+
+function tlayouter.childrenright: integer;
+var
+ int1: integer;
+ int2: integer;
+begin
+ result:= -bigint;
+ for int1:= 0 to high(fwidgets) do begin
+  with fwidgets[int1] do begin
+   int2:= fwidgetrect.x + fwidgetrect.cx;
+   if int2 > result then begin
+    result:= int2;
+   end;
+  end;
+ end;
+end;
+
+function tlayouter.childrentop: integer;
+var
+ int1: integer;
+begin
+ result:= bigint;
+ for int1:= 0 to high(fwidgets) do begin
+  with fwidgets[int1] do begin
+   if fwidgetrect.y < result then begin
+    result:= fwidgetrect.y;
+   end;
+  end;
+ end;
+end;
+
+function tlayouter.childrenbottom: integer;
+var
+ int1: integer;
+ int2: integer;
+begin
+ result:= -bigint;
+ for int1:= 0 to high(fwidgets) do begin
+  with fwidgets[int1] do begin
+   int2:= fwidgetrect.y + fwidgetrect.cy;
+   if int2 > result then begin
+    result:= int2;
+   end;
+  end;
+ end;
+end;
+
 procedure tlayouter.updatelayout;
 var
  ar1: widgetarty;
@@ -1038,34 +1110,78 @@ begin
    beginscaling;
    if widgetcount > 0 then begin
     if lao_alignx in foptionslayout then begin
-     setlength(ar1,widgetcount);
-     int2:= 0;
-     if (falignx_leader <> nil) and (falignx_leader.parentwidget = self) then begin
-      ar1[0]:= falignx_leader;
-      int2:= 1;
+     if alignx_mode <> wam_none then begin
+      setlength(ar1,widgetcount);
+      int2:= 0;
+      if (falignx_leader <> nil) and (falignx_leader.parentwidget = self) then begin
+       ar1[0]:= falignx_leader;
+       int2:= 1;
+      end;
+      for int1:= 0 to high(ar1) do begin
+       if fwidgets[int1] <> falignx_leader then begin
+        ar1[int2]:= fwidgets[int1];
+        inc(int2);
+       end;
+      end;
+      alignx(alignx_mode,ar1);
      end;
-     for int1:= 0 to high(ar1) do begin
-      if fwidgets[int1] <> falignx_leader then begin
-       ar1[int2]:= fwidgets[int1];
-       inc(int2);
+     int2:= 0;
+     case falignx_glue of
+      wam_start: begin
+       int2:= innerclientwidgetpos.y - childrentop;
+      end;
+      wam_center: begin
+       int2:= innerclientwidgetpos.y + 
+              (innerclientsize.cy - childrentop - childrenbottom) div 2;
+      end;
+      wam_end: begin
+       int2:= innerclientwidgetpos.y + innerclientsize.cy - childrenbottom;
       end;
      end;
-     alignx(alignx_mode,ar1);
+     if int2 <> 0 then begin
+      for int1:= 0 to high(fwidgets) do begin
+       with fwidgets[int1] do begin
+        bounds_y:= bounds_y + int2;
+       end;
+      end;
+     end;
     end;
     if lao_aligny in foptionslayout then begin
-     setlength(ar1,widgetcount);
-     int2:= 0;
-     if (faligny_leader <> nil) and (faligny_leader.parentwidget = self) then begin
-      ar1[0]:= faligny_leader;
-      int2:= 1;
+     if alignx_mode <> wam_none then begin
+      setlength(ar1,widgetcount);
+      int2:= 0;
+      if (faligny_leader <> nil) and (faligny_leader.parentwidget = self) then begin
+       ar1[0]:= faligny_leader;
+       int2:= 1;
+      end;
+      for int1:= 0 to high(ar1) do begin
+       if fwidgets[int1] <> faligny_leader then begin
+        ar1[int2]:= fwidgets[int1];
+        inc(int2);
+       end;
+      end;
+      aligny(aligny_mode,ar1);
      end;
-     for int1:= 0 to high(ar1) do begin
-      if fwidgets[int1] <> faligny_leader then begin
-       ar1[int2]:= fwidgets[int1];
-       inc(int2);
+     int2:= 0;
+     case faligny_glue of
+      wam_start: begin
+       int2:= innerclientwidgetpos.x - childrenleft;
+      end;
+      wam_center: begin
+       int2:= innerclientwidgetpos.x + 
+              (innerclientsize.cx - childrenleft - childrenright) div 2;
+      end;
+      wam_end: begin
+       int2:= innerclientwidgetpos.x + innerclientsize.cx - childrenright;
       end;
      end;
-     aligny(aligny_mode,ar1);
+     if int2 <> 0 then begin
+      for int1:= 0 to high(fwidgets) do begin
+       with fwidgets[int1] do begin
+        bounds_x:= bounds_x + int2;
+       end;
+      end;
+     end;
     end;
     if lao_placex in foptionslayout then begin
      if high(fwidgets) > 0 then begin
@@ -1152,6 +1268,22 @@ procedure tlayouter.setaligny_mode(const avalue: widgetalignmodety);
 begin
  if avalue <> faligny_mode then begin
   faligny_mode:= avalue;
+  updatelayout;
+ end;
+end;
+
+procedure tlayouter.setalignx_glue(const avalue: widgetalignmodety);
+begin
+ if falignx_glue <> avalue then begin
+  falignx_glue:= avalue;
+  updatelayout;
+ end;
+end;
+
+procedure tlayouter.setaligny_glue(const avalue: widgetalignmodety);
+begin
+ if faligny_glue <> avalue then begin
+  faligny_glue:= avalue;
   updatelayout;
  end;
 end;

@@ -845,7 +845,7 @@ type
  twidgetevent = class(tcomponentevent)
  end;
 
- widgetalignmodety = (wam_start,wam_center,wam_end);
+ widgetalignmodety = (wam_none,wam_start,wam_center,wam_end);
  widgetclassty = class of twidget;
  
  twidget = class(tactcomponent,iscrollframe,iface)
@@ -5022,7 +5022,7 @@ var
  ref,int1,int3: integer;
 
 begin
- if high(awidgets) >= 0 then begin
+ if (mode <> wam_none) and (high(awidgets) >= 0) then begin
   ref:= getrefpoint(awidgets[0]);
   with awidgets[0] do begin
    if fparentwidget <> nil then begin
@@ -5079,7 +5079,7 @@ var
  ref,int1,int3: integer;
 
 begin
- if high(awidgets) >= 0 then begin
+ if (mode <> wam_none) and (high(awidgets) >= 0) then begin
   ref:= getrefpoint(awidgets[0]);
   with awidgets[0] do begin
    if fparentwidget <> nil then begin

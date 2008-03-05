@@ -357,10 +357,12 @@ type
    ok: tbutton;
    cancel: tbutton;
    ttabpage16: ttabpage;
-   remoteconnection: tstringedit;
-   uploadcommand: tfilenameedit;
+   tlayouter2: tlayouter;
    gdbservercommand: tfilenameedit;
+   tlayouter1: tlayouter;
    gdbdownload: tbooleanedit;
+   uploadcommand: tfilenameedit;
+   remoteconnection: tstringedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
