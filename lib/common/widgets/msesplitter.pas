@@ -1238,7 +1238,7 @@ begin
   result.cx:= childrenwidth + high(fwidgets) * fplacex_mindist + innerframewidth.cx;
  end;
  if lao_placey in foptionslayout then begin
-  result.cy:= childrenwidth + high(fwidgets) * fplacey_mindist + innerframewidth.cy;
+  result.cy:= childrenheight + high(fwidgets) * fplacey_mindist + innerframewidth.cy;
  end;
 end;
 

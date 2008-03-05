@@ -1160,17 +1160,18 @@ object projectoptionsfo: tprojectoptionsfo
           caption = 'E&mbedded'
           reffontheight = 15
           object tlayouter2: tlayouter
-            bounds_x = 7
-            bounds_y = 6
+            bounds_x = -1
+            bounds_y = 3
             bounds_cx = 450
-            bounds_cy = 194
+            bounds_cy = 1081
+            optionsscale = [osc_expandy, osc_shrinky]
             optionslayout = [lao_placey]
             placey_mindist = 5
             placey_maxdist = 5
             object gdbservercommand: tfilenameedit
               optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-              bounds_x = 1
-              bounds_y = 89
+              bounds_x = 2
+              bounds_y = 88
               bounds_cx = 313
               bounds_cy = 39
               frame.caption = 'Start gdb server command'
@@ -1194,7 +1195,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_x = 0
               bounds_y = 44
               bounds_cx = 445
-              bounds_cy = 40
+              bounds_cy = 39
               frame.framei_right = 5
               frame.localprops = [frl_firight]
               frame.dummy = 0
@@ -1204,7 +1205,7 @@ object projectoptionsfo: tprojectoptionsfo
               optionslayout = [lao_aligny]
               object uploadcommand: tfilenameedit
                 optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-                bounds_x = 0
+                bounds_x = 2
                 bounds_y = 0
                 bounds_cx = 315
                 bounds_cy = 39
@@ -1247,9 +1248,9 @@ object projectoptionsfo: tprojectoptionsfo
               end
             end
             object remoteconnection: tstringedit
-              bounds_x = 1
+              bounds_x = 2
               bounds_y = 0
-              bounds_cx = 321
+              bounds_cx = 313
               bounds_cy = 39
               frame.caption = 'Remote connection'
               frame.captionoffset = 3

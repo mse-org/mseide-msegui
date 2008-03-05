@@ -562,6 +562,7 @@ begin
  if iscellclick(info,[ccr_nokeyreturn,ccr_dblclick]) and 
            (dataicon[info.cell.row] and integer($80000000) <> 0) and
            (info.mouseeventinfopo^.shiftstate = [ss_double]) then begin
+  include(info.mouseeventinfopo^.eventstate,es_processed);
   breakpointsfo.showbreakpoint(filepath,info.cell.row + 1,true);
  end;
  case info.eventkind of
@@ -1027,7 +1028,7 @@ begin
    end;
    cek_buttonpress: begin
     if mouseeventinfopo^.shiftstate = [ss_ctrl,ss_left] then begin
-//     include(info.mouseeventinfopo^.eventstate,es_processed);
+     include(info.mouseeventinfopo^.eventstate,es_processed);
      pos1.pos:= info.pos;
      pos1.filename:= designer.designfiles.find(edit.filename);
      if findlinkdest(edit,pos1,str1) then begin
