@@ -161,9 +161,64 @@ type
    property optionswidget default defaultoptionswidgetnofocus;
    property visible default false;
  end;
+
+ layoutoptionty = (lao_alignx,lao_placex,lao_aligny,lao_placey);
+ layoutoptionsty = set of layoutoptionty; 
+const
+ defaultlayoutoptions = [];
+
+type  
+ tlayouter = class(tspacer)
+  private
+   foptionslayout: layoutoptionsty;
+   flayoutupdating: integer;
+   falignx_mode: widgetalignmodety;
+   faligny_mode: widgetalignmodety;
+   falignx_leader: twidget;
+   faligny_leader: twidget;
+   fplacex_mindist: integer;
+   fplacex_maxdist: integer;
+   fplacey_mindist: integer;
+   fplacey_maxdist: integer;
+   procedure setoptionslayout(const avalue: layoutoptionsty);
+   procedure setalignx_mode(const avalue: widgetalignmodety);
+   procedure setaligny_mode(const avalue: widgetalignmodety);
+   procedure setalignx_leader(const avalue: twidget);
+   procedure setaligny_leader(const avalue: twidget);
+   procedure setplacex_mindist(const avalue: integer);
+   procedure setplacex_maxdist(const avalue: integer);
+   procedure setplacey_mindist(const avalue: integer);
+   procedure setplacey_maxdist(const avalue: integer);
+  protected
+   function childrenwidth: integer;
+   function childrenheight: integer;
+   procedure updatelayout;
+   procedure loaded; override;
+   procedure widgetregionchanged(const sender: twidget); override;
+   procedure clientrectchanged; override;
+   function calcminscrollsize: sizety; override;
+  public
+   constructor create(aowner: tcomponent); override;
+  published
+   property optionslayout: layoutoptionsty read foptionslayout write setoptionslayout
+                           default defaultlayoutoptions;
+   property alignx_mode: widgetalignmodety read falignx_mode write setalignx_mode
+                                     default wam_center;
+   property aligny_mode: widgetalignmodety read faligny_mode write setaligny_mode
+                                     default wam_center;
+   property alignx_leader: twidget read falignx_leader write setalignx_leader;
+   property aligny_leader: twidget read faligny_leader write setaligny_leader;
+   property placex_mindist: integer read fplacex_mindist write setplacex_mindist;
+   property placex_maxdist: integer read fplacex_maxdist write setplacex_maxdist
+                                     default bigint;
+   property placey_mindist: integer read fplacey_mindist write setplacey_mindist;
+   property placey_maxdist: integer read fplacey_maxdist write setplacey_maxdist
+                                     default bigint;
+ end;
  
 implementation
-
+uses
+ msebits;
 type
  twidget1 = class(twidget);
 
@@ -896,6 +951,263 @@ begin
                          (sender = self)) then begin
   updatespace;
  end;
+end;
+
+{ tlayouter }
+
+constructor tlayouter.create(aowner: tcomponent);
+begin
+ foptionslayout:= defaultlayoutoptions;
+ falignx_mode:= wam_center;
+ faligny_mode:= wam_center;
+ fplacex_maxdist:= bigint;
+ fplacey_maxdist:= bigint;
+ inherited;
+end;
+
+procedure tlayouter.setoptionslayout(const avalue: layoutoptionsty);
+const
+ mask1: layoutoptionsty = [lao_alignx,lao_placex];
+ mask2: layoutoptionsty = [lao_aligny,lao_placey];
+var
+ lao1,lao2: layoutoptionsty;
+begin
+ if avalue <> foptionslayout then begin
+  lao1:= layoutoptionsty(setsinglebit(longword(avalue),
+                         longword(foptionslayout),
+                         longword(mask1)))*mask1;
+  lao2:= layoutoptionsty(setsinglebit(longword(avalue),
+                         longword(foptionslayout),
+                         longword(mask2)))*mask2;
+  foptionslayout:= (avalue - (mask1+mask2)) + lao1 + lao2;
+  updatelayout;
+ end;
+end;
+
+function tlayouter.childrenwidth: integer;
+var
+ int1: integer;
+begin
+ result:= 0;
+ for int1:= 0 to high(fwidgets) do begin
+  result:= result + twidget1(fwidgets[int1]).fwidgetrect.cx;
+ end;
+end;
+
+function tlayouter.childrenheight: integer;
+var
+ int1: integer;
+begin
+ result:= 0;
+ for int1:= 0 to high(fwidgets) do begin
+  result:= result + twidget1(fwidgets[int1]).fwidgetrect.cy;
+ end;
+end;
+
+procedure tlayouter.updatelayout;
+var
+ ar1: widgetarty;
+ ar2: integerarty;
+ procedure calcarray(const awidth: integer; const amin,amax: integer);
+ var
+  int1: integer;
+  rea1,rea2: real;
+ begin
+  rea1:= awidth / high(fwidgets);
+  if rea1 < amin then begin
+   rea1:= amin;
+  end;
+  if rea1 > amax then begin
+   rea1:= amax;
+  end;
+  rea2:= rea1;
+  setlength(ar2,high(fwidgets));
+  for int1:= 0 to high(ar2) do begin
+   ar2[int1]:= round(rea2);
+   rea2:= rea2 - ar2[int1] + rea1;
+  end;
+ end;
+var
+ int1,int2,int3: integer;
+ 
+begin
+ if (componentstate * [csloading,csdestroying] = []) and 
+                            (flayoutupdating = 0) then begin
+  inc(flayoutupdating);
+  try  
+   beginscaling;
+   if widgetcount > 0 then begin
+    if lao_alignx in foptionslayout then begin
+     setlength(ar1,widgetcount);
+     int2:= 0;
+     if (falignx_leader <> nil) and (falignx_leader.parentwidget = self) then begin
+      ar1[0]:= falignx_leader;
+      int2:= 1;
+     end;
+     for int1:= 0 to high(ar1) do begin
+      if fwidgets[int1] <> falignx_leader then begin
+       ar1[int2]:= fwidgets[int1];
+       inc(int2);
+      end;
+     end;
+     alignx(alignx_mode,ar1);
+    end;
+    if lao_aligny in foptionslayout then begin
+     setlength(ar1,widgetcount);
+     int2:= 0;
+     if (faligny_leader <> nil) and (faligny_leader.parentwidget = self) then begin
+      ar1[0]:= faligny_leader;
+      int2:= 1;
+     end;
+     for int1:= 0 to high(ar1) do begin
+      if fwidgets[int1] <> faligny_leader then begin
+       ar1[int2]:= fwidgets[int1];
+       inc(int2);
+      end;
+     end;
+     aligny(aligny_mode,ar1);
+    end;
+    if lao_placex in foptionslayout then begin
+     if high(fwidgets) > 0 then begin
+      ar1:= copy(fwidgets);
+      sortwidgetsxorder(ar1,self);
+      if fplacex_mindist <> fplacex_maxdist then begin
+       int3:= innerclientsize.cx - childrenwidth;
+       calcarray(int3,fplacex_mindist,fplacex_maxdist);
+       placexorder(innerclientpos.x,ar2,ar1);
+      end
+      else begin
+       placexorder(innerclientpos.x,[fplacex_mindist],ar1);
+      end;
+     end
+     else begin
+      with fwidgets[0] do begin
+       bounds_x:= self.innerclientwidgetpos.x + 
+             (self.innerclientsize.cx - bounds_cx) div 2;
+      end;
+     end;
+    end;
+    if lao_placey in foptionslayout then begin
+     if high(fwidgets) > 0 then begin
+      ar1:= copy(fwidgets);
+      sortwidgetsyorder(ar1,self);
+      if fplacey_mindist <> fplacey_maxdist then begin
+       int3:= innerclientsize.cy - childrenheight;
+       calcarray(int3,fplacey_mindist,fplacey_maxdist);
+       placeyorder(innerclientpos.y,ar2,ar1);
+      end
+      else begin
+       placeyorder(innerclientpos.y,[fplacey_mindist],ar1);
+      end;
+     end
+     else begin
+      with fwidgets[0] do begin
+       bounds_y:= self.innerclientwidgetpos.y + 
+             (self.innerclientsize.cy - bounds_cy) div 2;
+      end;
+     end;
+    end;
+   end;
+  finally
+   endscaling;
+   dec(flayoutupdating);
+  end;
+ end;
+end;
+
+function tlayouter.calcminscrollsize: sizety;
+begin
+ result:= inherited calcminscrollsize;
+ if lao_placex in foptionslayout then begin
+  result.cx:= childrenwidth + high(fwidgets) * fplacex_mindist + innerframewidth.cx;
+ end;
+ if lao_placey in foptionslayout then begin
+  result.cy:= childrenwidth + high(fwidgets) * fplacey_mindist + innerframewidth.cy;
+ end;
+end;
+
+procedure tlayouter.loaded;
+begin
+ inherited;
+ updatelayout;
+end;
+
+procedure tlayouter.widgetregionchanged(const sender: twidget);
+begin
+ inherited;
+ if not (ws_loadedproc in fwidgetstate) then begin
+  updatelayout;
+ end;
+end;
+
+procedure tlayouter.setalignx_mode(const avalue: widgetalignmodety);
+begin
+ if avalue <> falignx_mode then begin
+  falignx_mode:= avalue;
+  updatelayout;
+ end;
+end;
+
+procedure tlayouter.setaligny_mode(const avalue: widgetalignmodety);
+begin
+ if avalue <> faligny_mode then begin
+  faligny_mode:= avalue;
+  updatelayout;
+ end;
+end;
+
+procedure tlayouter.setalignx_leader(const avalue: twidget);
+begin
+ if falignx_leader <> avalue then begin
+  setlinkedvar(avalue,falignx_leader);
+  updatelayout;
+ end;
+end;
+
+procedure tlayouter.setaligny_leader(const avalue: twidget);
+begin
+ if faligny_leader <> avalue then begin
+  setlinkedvar(avalue,faligny_leader);
+  updatelayout;
+ end;
+end;
+
+procedure tlayouter.setplacex_mindist(const avalue: integer);
+begin
+ if fplacex_mindist <> avalue then begin
+  fplacex_mindist:= avalue;
+  updatelayout;
+ end;
+end;
+
+procedure tlayouter.setplacex_maxdist(const avalue: integer);
+begin
+ if fplacex_maxdist <> avalue then begin
+  fplacex_maxdist:= avalue;
+  updatelayout;
+ end;
+end;
+
+procedure tlayouter.setplacey_mindist(const avalue: integer);
+begin
+ if fplacey_mindist <> avalue then begin
+  fplacey_mindist:= avalue;
+  updatelayout;
+ end;
+end;
+
+procedure tlayouter.setplacey_maxdist(const avalue: integer);
+begin
+ if fplacey_maxdist <> avalue then begin
+  fplacey_maxdist:= avalue;
+  updatelayout;
+ end;
+end;
+
+procedure tlayouter.clientrectchanged;
+begin
+ inherited;
+ updatelayout;
 end;
 
 end.

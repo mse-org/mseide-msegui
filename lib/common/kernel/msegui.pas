@@ -1372,12 +1372,12 @@ type
                 const awidgets: array of twidget;
                 const endmargin: integer = minint);
                //origin = clientpos, endmargin by size adjust of widgets 
-               //with [an_left,an_right], minit -> no change
+               //with [an_left,an_right], minint -> no change
    procedure placeyorder(const starty: integer; const dist: array of integer;
                 const awidgets: array of twidget;
                 const endmargin: integer = minint);
                //origin = clientpos, endmargin by size adjust of widgets 
-               //with [an_top,an_bottom], minit -> no change
+               //with [an_top,an_bottom], minint -> no change
    function aligny(const mode: widgetalignmodety;
                         const awidgets: array of twidget): integer;
                         //returns reference point

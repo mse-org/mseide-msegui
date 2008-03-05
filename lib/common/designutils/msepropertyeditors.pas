@@ -330,6 +330,13 @@ type
    function getvalues: msestringarty; override;
  end;
   
+ tchildwidgetpropertyeditor = class(tcomponentpropertyeditor)
+  protected
+   function getdefaultstate: propertystatesty; override;
+  public
+   function getvalues: msestringarty; override;
+ end;
+ 
  tlocalcomponentpropertyeditor = class(tcomponentpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
@@ -2174,6 +2181,40 @@ begin
 end;
 
 function tsisterwidgetpropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate + [ps_sortlist];
+end;
+
+{ tchildwidgetpropertyeditor }
+
+function tchildwidgetpropertyeditor.getvalues: msestringarty;
+var
+ ar1: componentarty;
+ widget1: twidget;
+ int1: integer;
+begin
+ ar1:= nil; //compiler warning
+ if issubcomponent then begin
+  result:= inherited getvalues;
+ end
+ else begin
+  result:= nil;
+  widget1:= twidget(fcomponent);
+  ar1:= fdesigner.getcomponentlist(tcomponentclass(typedata^.classtype));
+  for int1:= 0 to high(ar1) do begin
+   if (twidget(ar1[int1]).parentwidget <> widget1) then begin
+    ar1[int1]:= nil;
+   end;
+  end;
+  for int1:= 0 to high(ar1) do begin
+   if ar1[int1] <> nil then begin
+    additem(result,msestring(ar1[int1].name));
+   end;
+  end;
+ end;
+end;
+
+function tchildwidgetpropertyeditor.getdefaultstate: propertystatesty;
 begin
  result:= inherited getdefaultstate + [ps_sortlist];
 end;

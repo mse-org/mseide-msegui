@@ -102,7 +102,7 @@ begin
   tintegerdisp,trealdisp,tdatetimedisp,tstringdisp,tbytestringdisp,tbooleandisp,
   tgroupbox,tscrollbox,tstepbox,tdockpanel,tdockhandle,tmseformwidget,
   tdockformwidget,tmainmenuwidget,
-  tsplitter,tspacer,ttoolbar,ttabbar,ttabwidget,ttabpage,
+  tsplitter,tspacer,tlayouter,ttoolbar,ttabbar,ttabwidget,ttabpage,
   tdial,tchart,tchartrecorder,twindowwidget{$ifdef FPC},topenglwidget{$endif}]);
  registercomponenttabhints(['Widget'],
          ['Display Widgets, Widgets which can''t be placed into twidgetgrid']);
@@ -132,6 +132,11 @@ begin
                                  tsisterwidgetpropertyeditor);
  registerpropertyeditor(typeinfo(twidget),tspacer,'linkbottom',
                                  tsisterwidgetpropertyeditor);
+
+ registerpropertyeditor(typeinfo(twidget),tlayouter,'alignx_leader',
+                                 tchildwidgetpropertyeditor);
+ registerpropertyeditor(typeinfo(twidget),tlayouter,'aligny_leader',
+                                 tchildwidgetpropertyeditor);
  
  registerunitgroup(['msegrids'],['msegui','msegraphutils','mseclasses']);
  registerunitgroup(['msewidgetgrid'],['msedataedits',
