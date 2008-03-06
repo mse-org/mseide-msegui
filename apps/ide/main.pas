@@ -858,7 +858,8 @@ begin
    if fgdbserverprocid <> invalidprochandle then begin
     if application.waitdialog(nil,'Start gdb server command "'+
                            gdbservercommand+'" running.','Start gdb Server',
-              @gdbservercancel,nil,@gdbserverexe) then begin
+              {$ifdef FPC}@{$endif}gdbservercancel,nil,
+              {$ifdef FPC}@{$endif}gdbserverexe) then begin
      if fgdbserverexitcode <> 0 then begin
       setstattext('gdb server start error '+inttostr(fgdbserverexitcode)+'.',
                 mtk_error);
@@ -981,7 +982,8 @@ begin
      fuploadprocid:= execmse1(uploadcommand);
      if fuploadprocid <> invalidprochandle then begin
       if application.waitdialog(nil,'Uploadcommand "'+uploadcommand+'" running.',
-          'Uploading',@uploadcancel,nil,@uploadexe) then begin
+          'Uploading',{$ifdef FPC}@{$endif}uploadcancel,nil,
+          {$ifdef FPC}@{$endif}uploadexe) then begin
       end
       else begin
        setstattext('Upload canceled.',mtk_error);
