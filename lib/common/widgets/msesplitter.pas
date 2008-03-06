@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -227,6 +227,7 @@ type
    property placey_maxdist: integer read fplacey_maxdist write setplacey_maxdist
                                      default bigint;
    property visible default true;
+   property optionswidget default defaultgroupboxoptionswidget;
  end;
  
 implementation
@@ -976,6 +977,7 @@ begin
  fplacex_maxdist:= bigint;
  fplacey_maxdist:= bigint;
  inherited;
+ foptionswidget:= defaultgroupboxoptionswidget;
  include(fwidgetstate,ws_visible);
 end;
 

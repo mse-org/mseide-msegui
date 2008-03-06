@@ -823,10 +823,16 @@ begin
   end;
   gek_download: begin
    with stopinfo do begin
-    if downloadtotal > 0 then begin
-     setstattext('Downloading '+inttostr(round(downloaded/downloadtotal*100))+'%',
-                      mtk_running);
+    if sectionsize > 0 then begin
+     setstattext('Downloading '+section+' '+
+         inttostr(round(sectionsent/sectionsize*100))+'%',mtk_running);
     end;
+   end;
+  end;
+  gek_done: begin
+   if sender.downloading then begin
+    setstattext('Downloaded '+formatfloat('0.00,',stopinfo.totalsent/1024)+'kB',
+                     mtk_running);      
    end;
   end;
  end;
@@ -1105,15 +1111,15 @@ begin
  with actionsmo do begin
   detachtarget.enabled:= gdb.execloaded;
   attachprocess.enabled:= not (gdb.execloaded or gdb.attached);
-  run.enabled:= not gdb.running;
-  step.enabled:= not gdb.running;
-  stepi.enabled:= not gdb.running;
-  next.enabled:= not gdb.running;
-  nexti.enabled:= not gdb.running;
+  run.enabled:= not gdb.running and not gdb.downloading;
+  step.enabled:= not gdb.running and not gdb.downloading;
+  stepi.enabled:= not gdb.running and not gdb.downloading;
+  next.enabled:= not gdb.running and not gdb.downloading;
+  nexti.enabled:= not gdb.running and not gdb.downloading;
   finish.enabled:= not gdb.running and gdb.started;
-  continue.enabled:= not gdb.running;
-  interrupt.enabled:= gdb.running;
-  reset.enabled:= gdb.started or gdb.attached;
+  continue.enabled:= not gdb.running and not gdb.downloading;
+  interrupt.enabled:= gdb.running and not gdb.downloading;
+  reset.enabled:= gdb.started or gdb.attached or gdb.downloading;
   makeact.enabled:= not making;
   buildact.enabled:= not making;
   make1act.enabled:= not making;

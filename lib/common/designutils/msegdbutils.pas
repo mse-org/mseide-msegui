@@ -36,8 +36,9 @@ const
 
 type
  gdbstatety = (gs_syncget,gs_syncack,gs_clicommand,gs_clilist,gs_started,
-                    gs_execloaded,gs_attached,gs_detached,gs_downloaded,
-                    gs_internalrunning,gs_running,gs_interrupted,gs_restarted,gs_closing);
+               gs_execloaded,gs_attached,gs_detached,
+               gs_remote,gs_downloaded,gs_downloading,
+               gs_internalrunning,gs_running,gs_interrupted,gs_restarted,gs_closing);
  gdbstatesty = set of gdbstatety;
 
  recordclassty = (rec_done,rec_running,rec_connected,rec_error,rec_exit,
@@ -47,6 +48,8 @@ type
 const
  recordclassnames: array[recordclassty] of string =
          ('done','running','connected','error','exit','stopped','download');
+ recordclassnoname: array[recordclassty] of boolean =
+         (false, false,    false,      false,  false, false,     true);
  defaultsynctimeout = 2000000; //2 seconds
 type
  valuekindty = (vk_value,vk_tuple,vk_list);
@@ -96,7 +99,8 @@ type
   signalmeaning: string;
   messagetext: string;
   expression,oldvalue,newvalue: string;
-  downloaded,downloadtotal: integer;
+  section: string;
+  sectionsent,sectionsize,totalsent,totalsize: integer;
  end;
 {
  errorinfoty = record
@@ -266,6 +270,7 @@ type
    procedure receiveevent(const event: tobjectevent); override;
    procedure doevent(const token: cardinal; const eventkind: gdbeventkindty;
                        const values: resultinfoarty);
+   procedure dorun;
    function internalcommand(acommand: string): boolean;
    function synccommand(const acommand: string; atimeout: integer = defaultsynctimeout): gdbresultty;
    function clicommand(const acommand: string; list: boolean = false;
@@ -398,6 +403,7 @@ type
    function active: boolean;  //gdb running
    function started: boolean; //target active, run command applied or attached
    property running: boolean read getrunning; //target running
+   function downloading: boolean;
 
    function threadselect(const aid: integer; out filename: filenamety; 
                                              out line: integer): gdbresultty;
@@ -626,8 +632,9 @@ end;
 procedure tgdbmi.resetexec;
 begin
  fstate:= fstate - [gs_internalrunning,gs_running,gs_execloaded,
-                          gs_attached,gs_started,gs_detached,
-                          gs_interrupted,gs_restarted,gs_downloaded];
+                          gs_attached,gs_started,gs_detached,gs_remote,
+                          gs_interrupted,gs_restarted,
+                          gs_downloaded,gs_downloading];
  {$ifdef mswindows}
  finterruptthreadid:= 0;
  {$endif}
@@ -937,6 +944,7 @@ var
  bo1: boolean;
  int1: integer;
  str1,str2: string;
+ ar1: resultinfoarty;
  {$ifdef mswindows}
  threadids: integerarty;
  mstr1: filenamety;
@@ -1030,17 +1038,42 @@ begin
     gek_error,gek_writeerror: begin
      getstringvalue(values,'msg',stopinfo.messagetext);
     end;
+    gek_done: begin
+     if gs_downloading in fstate then begin
+      with stopinfo do begin
+       getintegervalue(values,'load-size',totalsent);
+       include(fstate,gs_downloaded);
+       initproginfo;
+      end;
+     end;
+    end;
     gek_download: begin
-     getintegervalue(values,'total-size',stopinfo.downloadtotal);
-     getintegervalue(values,'total-sent',stopinfo.downloaded);
+     if (high(values) >= 0) and gettuplevalue(values[0],ar1) then begin
+      with stopinfo do begin
+       getstringvalue(ar1,'section',section);
+       getintegervalue(ar1,'section-sent',sectionsent);
+       getintegervalue(ar1,'section-size',sectionsize);
+       getintegervalue(ar1,'total-sent',totalsent);
+       getintegervalue(ar1,'total-size',totalsize);
+      end;
+     end;
     end;
    end;
-   if assigned(fonevent) and 
-     not((eventkind = gek_stopped) and (stopinfo.reason = sr_none)) then begin
-    fonevent(self,eventkind,values,stopinfo);
-   end;
-   if (eventkind = gek_error) and assigned(fonerror) then begin
-    fonerror(self,eventkind,values,stopinfo);
+   try
+    if assigned(fonevent) and 
+      not((eventkind = gek_stopped) and (stopinfo.reason = sr_none)) then begin
+     fonevent(self,eventkind,values,stopinfo);
+    end;
+    if (eventkind = gek_error) and assigned(fonerror) then begin
+     fonerror(self,eventkind,values,stopinfo);
+    end;
+    if (eventkind = gek_done) and downloading then begin
+     dorun;
+    end;
+   finally
+    if eventkind = gek_done then begin
+     exclude(fstate,gs_downloading);
+    end;
    end;
   end;
  end
@@ -1061,12 +1094,24 @@ begin
   exclude(fstate,gs_syncget);
  end;
  if not (gs_detached in fstate) then begin
-  if eventkind = gek_running then begin
-   frunsequence:= token;
-   fstate:= fstate + [gs_internalrunning,gs_started];
-  end;
-  if eventkind = gek_stopped then begin
-   exclude(fstate,gs_internalrunning);
+  case eventkind of
+   gek_running: begin
+    frunsequence:= token;
+    fstate:= fstate + [gs_internalrunning,gs_started];
+   end;
+   gek_stopped: begin
+    exclude(fstate,gs_internalrunning);
+   end;
+   gek_error: begin
+    exclude(fstate,gs_downloading);
+   end;
+   {
+   gek_done: begin
+    if gs_downloading in fstate then begin
+     initproginfo;
+    end;
+   end;
+   }
   end;
   if (eventkind = gek_error) and (token = frunsequence) then begin
    doevent(token,gek_stopped,values);
@@ -1155,7 +1200,7 @@ var
       setlength(resultar,2*high(resultar)+8);
      end;
      inc(po2);
-     decoderesult(false,po2,resultar[int1]);
+     decoderesult(recordclassnoname[recordclass],po2,resultar[int1]);
      inc(int1);
     end;
     break;
@@ -1510,31 +1555,20 @@ function tgdbmi.download: gdbresultty;
 begin
  if not internalcommand('-target-download') then begin
   result:= gdb_writeerror;
+ end
+ else begin
+  include(fstate,gs_downloading);
  end;
  result:= gdb_ok;
- include(fstate,gs_downloaded);
 end;
 
-function tgdbmi.run: gdbresultty;
+procedure tgdbmi.dorun;
 var
  int1: integer;
  ar1,ar2: stringarty;
  ca1: cardinal;
  str1: string;
 begin
- result:= gdb_ok;
- if fremoteconnection <> '' then begin
-  result:= synccommand('-target-select '+fremoteconnection);
-  if result <> gdb_ok then begin
-   exit;
-  end;
- end;
- if fgdbdownload and not (gs_downloaded in fstate) then begin
-  result:= download;
-//  if result <> gdb_ok then begin
-   exit;
-//  end;
- end;
  str1:= '';
  if getcliresult('info file',ar1) = gdb_ok then begin
   for int1:= 0 to high(ar1) do begin
@@ -1580,7 +1614,31 @@ begin
   synccommand('-gdb-set new-console off');
  end;
  {$endif}
- internalcommand('-exec-run');
+ if gs_remote in fstate then begin
+  internalcommand('-exec-continue');
+ end
+ else begin
+  internalcommand('-exec-run');
+ end;
+end;
+
+function tgdbmi.run: gdbresultty;
+begin
+ result:= gdb_ok;
+ if fremoteconnection <> '' then begin
+  result:= synccommand('-target-select '+fremoteconnection);
+  if result <> gdb_ok then begin
+   exit;
+  end;
+  include(fstate,gs_remote);
+  initproginfo;
+ end;
+ if fgdbdownload and not (gs_downloaded in fstate) then begin
+  result:= download;
+ end
+ else begin
+  dorun;
+ end;
 end;
 
 procedure tgdbmi.continue;
@@ -1665,6 +1723,12 @@ begin
  {$else}
    kill(fprocid,sigint);
  {$endif !mswindows}
+ end
+ else begin
+//  internalcommand('-exec-interrupt');
+  {$ifdef linux}
+  kill(fgdb,sigint);
+  {$endif}
  end;
 end;
 
@@ -1718,6 +1782,11 @@ begin
   exclude(fstate,gs_interrupted);
   clicommand('kill');
   finterruptcount:= 0;
+ end
+ else begin
+  if downloading then begin
+   closegdb;
+  end;
  end;
 end;
 
@@ -1776,7 +1845,7 @@ begin
  else begin
   str1:= str1 + ' pass';
  end;
- result:= clicommand('handle '+signame+' '+str1);
+ result:= clicommand('handle '+signame+' '+str1); 
 end;
 
 function tgdbmi.breakinsert(var info: breakpointinfoty): gdbresultty;
@@ -3302,6 +3371,11 @@ begin
   fgdbto.writeln(avalue);
   {$endif}
  end;
+end;
+
+function tgdbmi.downloading: boolean;
+begin
+ result:= gs_downloading in fstate;
 end;
 
 {$ifdef UNIX}
