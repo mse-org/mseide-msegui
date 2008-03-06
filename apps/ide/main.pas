@@ -821,6 +821,14 @@ begin
   gek_targetoutput: begin
    targetconsolefo.addtext(values[0].value);
   end;
+  gek_download: begin
+   with stopinfo do begin
+    if downloadtotal > 0 then begin
+     setstattext('Downloading '+inttostr(round(downloaded/downloadtotal*100))+'%',
+                      mtk_running);
+    end;
+   end;
+  end;
  end;
 end;
 

@@ -41,16 +41,17 @@ type
  gdbstatesty = set of gdbstatety;
 
  recordclassty = (rec_done,rec_running,rec_connected,rec_error,rec_exit,
-                  rec_stopped);
+                  rec_stopped,rec_download);
  resultclassty = rec_done..rec_exit;
- asyncclassty = rec_stopped..rec_stopped;
+ asyncclassty = rec_stopped..rec_download;
 const
  recordclassnames: array[recordclassty] of string =
-         ('done','running','connected','error','exit','stopped');
+         ('done','running','connected','error','exit','stopped','download');
  defaultsynctimeout = 2000000; //2 seconds
 type
  valuekindty = (vk_value,vk_tuple,vk_list);
- gdbeventkindty = (gek_done,gek_error,gek_connected,gek_running,gek_stopped,
+ gdbeventkindty = (gek_done,gek_error,gek_connected,gek_running,
+                   gek_stopped,gek_download,
                    gek_targetoutput,gek_writeerror);
 
  resultinfoty = record
@@ -95,6 +96,7 @@ type
   signalmeaning: string;
   messagetext: string;
   expression,oldvalue,newvalue: string;
+  downloaded,downloadtotal: integer;
  end;
 {
  errorinfoty = record
@@ -1028,6 +1030,10 @@ begin
     gek_error,gek_writeerror: begin
      getstringvalue(values,'msg',stopinfo.messagetext);
     end;
+    gek_download: begin
+     getintegervalue(values,'total-size',stopinfo.downloadtotal);
+     getintegervalue(values,'total-sent',stopinfo.downloaded);
+    end;
    end;
    if assigned(fonevent) and 
      not((eventkind = gek_stopped) and (stopinfo.reason = sr_none)) then begin
@@ -1226,6 +1232,9 @@ begin
      case recordclass of
       rec_stopped: begin
        doevent(token,gek_stopped,resultar);
+      end;
+      rec_download: begin
+       doevent(token,gek_download,resultar);
       end;
      end;
     end;
@@ -1522,9 +1531,9 @@ begin
  end;
  if fgdbdownload and not (gs_downloaded in fstate) then begin
   result:= download;
-  if result <> gdb_ok then begin
+//  if result <> gdb_ok then begin
    exit;
-  end;
+//  end;
  end;
  str1:= '';
  if getcliresult('info file',ar1) = gdb_ok then begin

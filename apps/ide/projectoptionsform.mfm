@@ -1173,7 +1173,7 @@ object projectoptionsfo: tprojectoptionsfo
             object gdbservercommand: tfilenameedit
               optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
               bounds_x = 2
-              bounds_y = 88
+              bounds_y = 0
               bounds_cx = 267
               bounds_cy = 39
               frame.caption = 'Start gdb server command'
@@ -1195,7 +1195,7 @@ object projectoptionsfo: tprojectoptionsfo
             end
             object tlayouter1: tlayouter
               bounds_x = 0
-              bounds_y = 44
+              bounds_y = 88
               bounds_cx = 404
               bounds_cy = 39
               frame.framei_right = 5
@@ -1251,7 +1251,7 @@ object projectoptionsfo: tprojectoptionsfo
             end
             object remoteconnection: tstringedit
               bounds_x = 2
-              bounds_y = 0
+              bounds_y = 44
               bounds_cx = 267
               bounds_cy = 39
               frame.caption = 'Remote connection'
