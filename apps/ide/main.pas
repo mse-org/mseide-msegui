@@ -295,7 +295,6 @@ begin
  watchpointsfo.gdb:= gdb;
  stackfo.gdb:= gdb;
  threadsfo.gdb:= gdb;
- cpufo.gdb:= gdb;
  disassfo.gdb:= gdb;
  initprojectoptions;
  sourceupdate.init(designer);
@@ -971,14 +970,14 @@ begin
  end
  else begin
   if not gdb.execloaded then begin
-   with projectoptions.texp do begin
+   with projectoptions,texp do begin
     if debugtarget <> '' then begin
      str1:= debugtarget;
     end
     else begin
      str1:= targetfile;
     end; 
-    if not gdbdownload and (uploadcommand <> '') then begin
+    if not gdbdownload and not gdbsimulator and (uploadcommand <> '') then begin
      fuploadprocid:= execmse1(uploadcommand);
      if fuploadprocid <> invalidprochandle then begin
       if application.waitdialog(nil,'Uploadcommand "'+uploadcommand+'" running.',
@@ -989,11 +988,11 @@ begin
        setstattext('Upload canceled.',mtk_error);
        exit;
       end;                
+     end
+     else begin
+      setstattext('Can not run upload command.',mtk_error);
      end;
     end
-    else begin
-     setstattext('Can not run upload command.',mtk_error);
-    end;
    end;
    if checkgdberror(gdb.fileexec(str1)) then begin
     inc(fexecstamp);
@@ -1041,6 +1040,8 @@ begin
  with projectoptions,texp do begin
   gdb.remoteconnection:= remoteconnection;
   gdb.gdbdownload:= gdbdownload;
+  gdb.simulator:= gdbsimulator;
+  gdb.processorname:= gdbprocessor;
   gdb.startgdb(tosysfilepath(quotefilename(debugcommand))+ ' ' + debugoptions);
  end;
  updatesigsettings;

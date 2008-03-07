@@ -65,7 +65,7 @@ type
   debugtarget: filenamety;
   remoteconnection: msestring;
   uploadcommand: filenamety;
-  gdbdownload: boolean;
+  gdbprocessor: msestring;
   gdbservercommand: filenamety;
   sourcedirs: msestringarty;
   defines: msestringarty;
@@ -171,6 +171,8 @@ type
   showconsole: boolean;
   externalconsole: boolean;
   sigsettings: sigsetinfoarty;
+  gdbdownload: boolean;
+  gdbsimulator: boolean;
   
   usercolors: colorarty;
   usercolorcomment: msestringarty;
@@ -363,7 +365,8 @@ type
    uploadcommand: tfilenameedit;
    tlayouter1: tlayouter;
    gdbdownload: tbooleanedit;
-   tbooleanedit1: tbooleanedit;
+   gdbsimulator: tbooleanedit;
+   gdbprocessor: tdropdownlistedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -394,6 +397,7 @@ type
                    var accept: Boolean);
    procedure copycolorcode(const sender: TObject);
    procedure downloadchange(const sender: TObject);
+   procedure processorchange(const sender: TObject);
   private
    procedure activegroupchanged;
  end;
@@ -429,7 +433,7 @@ uses
  msedesigner,panelform,watchpointsform,commandlineform,msestream,
  componentpaletteform,mserichstring,msesettings,formdesigner,
  msestringlisteditor,msetexteditor,msepropertyeditors,mseshapes,mseactions,
- componentstore
+ componentstore,cpuform
  {$ifdef FPC}{$ifndef mse_withoutdb},msedbfieldeditor{$endif}{$endif};
 
 type
@@ -631,6 +635,7 @@ begin
    li.expandmacros(remoteconnection);
    li.expandmacros(uploadcommand);
    li.expandmacros(gdbservercommand);
+   li.expandmacros(gdbprocessor);
    li.expandmacros(sourcedirs);
    li.expandmacros(defines);
    li.expandmacros(unitdirs);
@@ -871,6 +876,8 @@ begin
   remoteconnection:= '';
   uploadcommand:= '';
   gdbdownload:= false;
+  gdbsimulator:= false;
+  gdbprocessor:= 'i386';
   gdbservercommand:= '';
   sourcefilemasks:= nil;
   syntaxdeffiles:= nil;
@@ -1046,6 +1053,8 @@ begin
   updatevalue('remoteconnection',remoteconnection);
   updatevalue('uploadcommand',uploadcommand);
   updatevalue('gdbdownload',gdbdownload);
+  updatevalue('gdbsimulator',gdbsimulator);
+  updatevalue('gdbprocessor',gdbprocessor);
   updatevalue('gdbservercommand',gdbservercommand);
   updatevalue('defaultmake',defaultmake,1,maxdefaultmake+1);
   updatevalue('makeoptions',makeoptions);
@@ -1253,6 +1262,8 @@ begin
   fo.remoteconnection.value:= remoteconnection;
   fo.uploadcommand.value:= uploadcommand;
   fo.gdbdownload.value:= gdbdownload;
+  fo.gdbsimulator.value:= gdbsimulator;
+  fo.gdbprocessor.value:= gdbprocessor;
   fo.gdbservercommand.value:= gdbservercommand;
   fo.defaultmake.value:= lowestbit(defaultmake);
   fo.makeoptions.gridvalues:= makeoptions;
@@ -1428,6 +1439,8 @@ begin
   remoteconnection:= fo.remoteconnection.value;
   uploadcommand:= fo.uploadcommand.value;
   gdbdownload:= fo.gdbdownload.value;
+  gdbsimulator:= fo.gdbsimulator.value;
+  gdbprocessor:= fo.gdbprocessor.value;
   gdbservercommand:= fo.gdbservercommand.value;
   defaultmake:= 1 shl fo.defaultmake.value;
   makeoptions:= fo.makeoptions.gridvalues;
@@ -1483,6 +1496,7 @@ begin
  for int1:= 0 to designer.modules.count - 1 do begin
   tdesignwindow(designer.modules[int1]^.designform.window).updateprojectoptions;
  end;
+ createcpufo;
 end;
 
 function readprojectoptions(const filename: filenamety): boolean;
@@ -1780,6 +1794,22 @@ end;
 procedure tprojectoptionsfo.downloadchange(const sender: TObject);
 begin
  uploadcommand.enabled:= not gdbdownload.value;
+ uploadcommand.enabled:= not gdbsimulator.value;
+ gdbservercommand.enabled:= not gdbsimulator.value;
+ remoteconnection.enabled:= not gdbsimulator.value;
+ gdbdownload.enabled:= not gdbsimulator.value;
+end;
+
+procedure tprojectoptionsfo.processorchange(const sender: TObject);
+begin
+ mainfo.gdb.processorname:= gdbprocessor.value;
+ if not (mainfo.gdb.processor in simulatorprocessors) then begin
+  gdbsimulator.value:= false;
+  gdbsimulator.enabled:= false;
+ end
+ else begin
+  gdbsimulator.enabled:= true;
+ end;
 end;
 
 end.

@@ -48,10 +48,11 @@ begin
  application.createform(tstackfo, stackfo);
  application.createform(tprojecttreefo, projecttreefo);
  application.createform(tfindinfilefo, findinfilefo);
- application.createform(tcpufo, cpufo);
+// application.createform(tcpufo, cpufo);
  application.createform(tdisassfo, disassfo);
  application.createform(tthreadsfo, threadsfo);
  application.createform(ttargetconsolefo,targetconsolefo);
  application.createform(tmainfo, mainfo);
+ createcpufo;
  application.run;
 end.

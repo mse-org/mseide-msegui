@@ -1188,6 +1188,7 @@ object projectoptionsfo: tprojectoptionsfo
                 0
               )
               anchors = [an_top]
+              onshowhint = hintexpandedmacros
               controller.lastdir = '/home/mse/packs/standard/svn/mse/trunk/apps/ide'
               controller.options = []
               controller.historymaxcount = 0
@@ -1211,6 +1212,7 @@ object projectoptionsfo: tprojectoptionsfo
               anchors = [an_top]
               taborder = 1
               hint = '"--tty DEVICE" to set target terminal'
+              onshowhint = hintexpandedmacros
               reffontheight = 15
             end
             object uploadcommand: tfilenameedit
@@ -1236,6 +1238,7 @@ object projectoptionsfo: tprojectoptionsfo
               )
               anchors = [an_top]
               taborder = 2
+              onshowhint = hintexpandedmacros
               controller.lastdir = '/home/mse/packs/standard/svn/mse/trunk/apps/ide'
               controller.options = []
               controller.historymaxcount = 0
@@ -1243,18 +1246,19 @@ object projectoptionsfo: tprojectoptionsfo
             end
           end
           object tlayouter1: tlayouter
-            bounds_x = 15
+            bounds_x = 7
             bounds_y = 134
-            bounds_cx = 322
-            bounds_cy = 50
+            bounds_cx = 189
+            bounds_cy = 17
             taborder = 1
+            optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
             optionslayout = [lao_placex, lao_aligny]
-            align_glue = wam_end
+            align_glue = wam_start
             place_mindist = 10
             place_maxdist = 10
             object gdbdownload: tbooleanedit
               bounds_x = 0
-              bounds_y = 16
+              bounds_y = 0
               bounds_cx = 104
               bounds_cy = 17
               frame.caption = 'gdb download'
@@ -1267,12 +1271,50 @@ object projectoptionsfo: tprojectoptionsfo
               )
               onchange = downloadchange
             end
-            object tbooleanedit1: tbooleanedit
+            object gdbsimulator: tbooleanedit
               bounds_x = 114
-              bounds_y = 18
+              bounds_y = 0
+              bounds_cx = 75
+              bounds_cy = 17
+              frame.caption = 'Simulator'
               frame.dummy = 0
+              frame.outerframe = (
+                0
+                2
+                62
+                2
+              )
               taborder = 1
+              onchange = downloadchange
             end
+          end
+          object gdbprocessor: tdropdownlistedit
+            bounds_x = 274
+            bounds_y = 3
+            bounds_cx = 84
+            bounds_cy = 39
+            frame.caption = 'Processor'
+            frame.dummy = 0
+            frame.outerframe = (
+              0
+              18
+              0
+              0
+            )
+            taborder = 2
+            onshowhint = hintexpandedmacros
+            onchange = processorchange
+            value = 'i386'
+            dropdown.options = [deo_autodropdown, deo_keydropdown]
+            dropdown.cols.count = 1
+            dropdown.cols.items = <            
+              item
+                data = (
+                  'i386'
+                  'arm'
+                )
+              end>
+            reffontheight = 15
           end
         end
       end

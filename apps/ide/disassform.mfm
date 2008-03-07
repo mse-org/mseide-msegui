@@ -79,6 +79,8 @@ object disassfo: tdisassfo
       item
         width = 472
         options = [co_readonly, co_drawfocus, co_fill, co_savestate, co_rowcolor]
+        textflags = [tf_ycentered, tf_noselect, tf_tabtospace]
+        textflagsactive = [tf_ycentered, tf_tabtospace]
         optionsedit = [scoe_eatreturn]
       end>
     rowcolors.count = 2
@@ -86,7 +88,7 @@ object disassfo: tdisassfo
       14745599
       16777184
     )
-    datarowheight = 16
-    reffontheight = 14
+    datarowheight = 17
+    reffontheight = 15
   end
 end

@@ -21,62 +21,58 @@ unit cpuform;
 interface
 
 uses
- classes,msegui,mseclasses,mseforms,msegdbutils,msetypes,msedataedits,msegraphics,
- msegraphedits;
+ classes,msegui,mseclasses,mseforms,msegdbutils,msetypes,msedataedits,
+ msegraphics,msegraphedits,mseevent,msemenus;
 
 type
 
  tcpufo = class(tdockform)
-   eax: tintegeredit;
-   ebx: tintegeredit;
    on: tbooleanedit;
-   ecx: tintegeredit;
-   edx: tintegeredit;
-   esi: tintegeredit;
-   edi: tintegeredit;
-   ebp: tintegeredit;
-   esp: tintegeredit;
-   eip: tintegeredit;
-   eflags: tintegeredit;
-   cs: tintegeredit;
-   ds: tintegeredit;
-   es: tintegeredit;
-   fs: tintegeredit;
-   gs: tintegeredit;
-   ss: tintegeredit;
-   o: tbooleanedit;
-   d: tbooleanedit;
-   i: tbooleanedit;
-   t: tbooleanedit;
-   s: tbooleanedit;
-   r: tbooleanedit;
-   nt: tbooleanedit;
-   io: tbooleanedit;
-   v: tbooleanedit;
-   z: tbooleanedit;
-   a: tbooleanedit;
-   p: tbooleanedit;
-   c: tbooleanedit;
    procedure cpuonshow(const sender: TObject);
-   procedure flagonchange(const sender: TObject);
-   procedure flagsetvalue(const sender: TObject; var avalue: Boolean; var accept: Boolean);
    procedure ononchange(const sender: TObject);
-   procedure regsetvalue(const sender: TObject; var avalue: Integer; var accept: Boolean);
-   procedure cpufoonchildscaled(const sender: TObject);
-  private
+  protected
+   fflagswidget: tintegeredit;
+   procedure doregsetvalue(const sender: TObject; var avalue: Integer; var accept: Boolean);
+   procedure doflagsetvalue(const sender: TObject;
+                   var avalue: Boolean; var accept: Boolean);
+   procedure doflagonchange(const sender: TObject);
    fregisternames: stringarty;
    fedits: array of tdataedit;
   public
-   gdb: tgdbmi;
    procedure refresh;
  end;
 
 var
  cpufo: tcpufo;
 
+procedure createcpufo;
+
 implementation
 uses
- cpuform_mfm,main,sysutils,mseformatstr,msebits,msestrings,msegraphutils;
+ cpuform_mfm,main,sysutils,mseformatstr,msebits,msestrings,msegraphutils,
+ cpui386form,cpuarmform,projectoptionsform;
+var
+ currentproc: processorty;
+  
+procedure createcpufo;
+begin
+ mainfo.gdb.processorname:= projectoptions.texp.gdbprocessor;
+ if (cpufo = nil) or (currentproc <> mainfo.gdb.processor) then begin
+  freeandnil(cpufo);
+  currentproc:= mainfo.gdb.processor;
+  case mainfo.gdb.processor of
+   pro_i386: begin
+    application.createform(tcpui386fo,cpufo);
+   end;
+   pro_arm: begin
+    application.createform(tcpuarmfo,cpufo);
+   end;
+   else begin
+    application.createform(tcpufo,cpufo);
+   end;
+  end;
+ end;
+end;
 
 { tcpufo }
 
@@ -88,9 +84,9 @@ var
  ed1: tdataedit;
  str1: msestring;
 begin
- if visible and gdb.active and on.value then begin
+ if visible and mainfo.gdb.active and on.value then begin
   if fregisternames = nil then begin
-   if gdb.listregisternames(fregisternames) <> gdb_ok then begin
+   if mainfo.gdb.listregisternames(fregisternames) <> gdb_ok then begin
     exit;
    end;
    fedits:= nil;
@@ -110,7 +106,7 @@ begin
     end;
    end;
   end;
-  if gdb.listregistervalues(ar1) = gdb_ok then begin
+  if mainfo.gdb.listregistervalues(ar1) = gdb_ok then begin
    for int1:= 0 to high(ar1) do begin
     with ar1[int1] do begin
      if (num >= 0) and (num <= high(fedits)) then begin
@@ -138,42 +134,6 @@ begin
  refresh;
 end;
 
-procedure tcpufo.flagonchange(const sender: TObject);
-var
- int1: integer;
- ed1: tcustombooleanedit;
- bo1: boolean;
- ca1: cardinal;
-begin
- ca1:= eflags.value;
- for int1:= 0 to 31 do begin
-  ed1:= on.tagitem(int1);
-  if (ed1 <> nil) then begin
-   bo1:= bits[int1] and ca1 <> 0;
-   if ed1.value <> bo1 then begin
-    ed1.frame.colorclient:= cl_ltred;
-   end
-   else begin
-    ed1.frame.colorclient:= cl_active;
-   end;
-   ed1.value:= bo1;
-  end;
- end;
-end;
-
-procedure tcpufo.flagsetvalue(const sender: TObject; var avalue: Boolean; var accept: Boolean);
-begin
- with tbooleanedit(sender) do begin
-  if avalue then begin
-   eflags.value:= cardinal(eflags.value) or bits[tag];
-  end
-  else begin
-   eflags.value:= cardinal(eflags.value) and not bits[tag];
-  end;
-  eflags.checkvalue;
- end;
-end;
-
 procedure tcpufo.ononchange(const sender: TObject);
 var
  int1: integer;
@@ -193,13 +153,14 @@ begin
  end;
 end;
 
-procedure tcpufo.regsetvalue(const sender: TObject; var avalue: Integer; var accept: Boolean);
+procedure tcpufo.doregsetvalue(const sender: TObject; var avalue: Integer;
+                    var accept: Boolean);
 var
  str1: string;
 begin
- if gdb.active and not gdb.running then begin
+ if mainfo.gdb.active and not mainfo.gdb.running then begin
   with tintegeredit(sender) do begin
-   if gdb.writepascalvariable(
+   if mainfo.gdb.writepascalvariable(
         '$'+fregisternames[tag],inttostr(avalue),str1) <> gdb_ok then begin
     accept:= false;
    end;
@@ -210,12 +171,45 @@ begin
  end;
 end;
 
-procedure tcpufo.cpufoonchildscaled(const sender: TObject);
+procedure tcpufo.doflagsetvalue(const sender: TObject;
+                   var avalue: Boolean; var accept: Boolean);
 begin
- placeyorder(eax.bounds_y,[0],[eax,ebx,ecx,edx,esi,edi,ebp]);
- placeyorder(eflags.bounds_y,[0],[eflags,esp,eip]);
- placeyorder(esi.bounds_y,[0],[cs,ds,es]);
- placeyorder(esi.bounds_y,[0],[fs,gs,ss]);
+ if fflagswidget <> nil then begin
+  with tbooleanedit(sender) do begin
+   if avalue then begin
+    fflagswidget.value:= cardinal(fflagswidget.value) or bits[tag];
+   end
+   else begin
+    fflagswidget.value:= cardinal(fflagswidget.value) and not bits[tag];
+   end;
+   fflagswidget.checkvalue;
+  end;
+ end;
+end;
+
+procedure tcpufo.doflagonchange(const sender: TObject);
+var
+ int1: integer;
+ ed1: tcustombooleanedit;
+ bo1: boolean;
+ ca1: cardinal;
+begin
+ if fflagswidget <> nil then begin
+  ca1:= fflagswidget.value;
+  for int1:= 0 to 31 do begin
+   ed1:= on.tagitem(int1);
+   if (ed1 <> nil) then begin
+    bo1:= bits[int1] and ca1 <> 0;
+    if ed1.value <> bo1 then begin
+     ed1.frame.colorclient:= cl_ltred;
+    end
+    else begin
+     ed1.frame.colorclient:= cl_active;
+    end;
+    ed1.value:= bo1;
+   end;
+  end;
+ end;
 end;
 
 end.

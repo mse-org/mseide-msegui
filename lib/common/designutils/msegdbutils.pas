@@ -26,14 +26,17 @@ type
 
  sigflagty = (sfl_internal,sfl_stop,sfl_handle);
  sigflagsty = set of sigflagty;
-
+ 
+ processorty = (pro_i386,pro_arm);
 
 const
  gdberrortexts: array[gdbresultty] of string =
           ('','Error','Timeout','Data error','Message','Target running',
            'Write error');
  niltext = 'nil';
-
+ processornames: array[processorty] of ansistring = ('i386','arm');
+ simulatorprocessors = [pro_arm];
+ 
 type
  gdbstatety = (gs_syncget,gs_syncack,gs_clicommand,gs_clilist,gs_started,
                gs_execloaded,gs_attached,gs_detached,
@@ -171,6 +174,8 @@ type
                         const values: resultinfoarty; const stoppinfo: stopinfoty) of object;
 
  tgdbevent = class(tobjectevent)
+  private
+   flastconsoleoutput: ansistring;
   public
    eventkind: gdbeventkindty;
    values: resultinfoarty;
@@ -249,6 +254,9 @@ type
    {$endif}
    fremoteconnection: msestring;
    fgdbdownload: boolean;
+   fsimulator: boolean;
+   flastconsoleoutput: ansistring;
+   fprocessor: processorty;
    procedure setstoponexception(const avalue: boolean);
    procedure checkactive;
    procedure resetexec;
@@ -256,6 +264,8 @@ type
    function getexecloaded: boolean;
    function getattached: boolean;
    procedure setignoreexceptionclasses(const avalue: stringarty);
+   function getprocessorname: ansistring;
+   procedure setprocessorname(const avalue: ansistring);
   protected
    {$ifdef UNIX}
    procedure targetfrom(const sender: tpipereader);
@@ -329,7 +339,8 @@ type
    function breakcondition(bkptnum: integer; const condition: string): gdbresultty;
    function watchinsert(var info: watchpointinfoty): gdbresultty;
 
-   function getstopinfo(const response: resultinfoarty; out info: stopinfoty): boolean;
+   function getstopinfo(const response: resultinfoarty;
+              const lastconsoleoutput: ansistring; out info: stopinfoty): boolean;
 //   function geterrorinfo(const response: resultinfoarty; out info: stopinfoty): boolean;
 
    function getvalueindex(const response: resultinfoarty; const aname: string): integer;
@@ -459,10 +470,13 @@ type
    {$ifdef mswindows}
    property newconsole: boolean read fnewconsole write fnewconsole;
    {$endif}
+   property processorname: ansistring read getprocessorname write setprocessorname;
   published
    property remoteconnection: msestring read fremoteconnection 
                                                     write fremoteconnection;
    property gdbdownload: boolean read fgdbdownload write fgdbdownload;
+   property simulator: boolean read fsimulator write fsimulator;
+   property processor: processorty read fprocessor write fprocessor default pro_i386;
    property onevent: gdbeventty read fonevent write fonevent;
    property onerror: gdbeventty read fonerror write fonerror;
  end;
@@ -993,7 +1007,7 @@ begin
       finterruptthreadid:= 0;
      end;
      {$endif mswindows}
-     bo1:= getstopinfo(values,stopinfo);
+     bo1:= getstopinfo(values,flastconsoleoutput,stopinfo);
      if not bo1 then begin
       stopinfo.messagetext:= 'Stop error: ' + stopinfo.messagetext;
      end
@@ -1127,6 +1141,7 @@ begin
     ev:= tgdbevent.create(ek_none,ievent(self));
     ev.eventkind:= eventkind;
     ev.values:= copy(values);
+    ev.flastconsoleoutput:= flastconsoleoutput;
     application.postevent(ev);
    end;
    if eventkind = gek_running then begin
@@ -1241,7 +1256,8 @@ begin
      end;
     end
     else begin
-     consoleoutput(cstringtostring(po2));
+     flastconsoleoutput:= cstringtostring(po2);
+     consoleoutput(flastconsoleoutput);
     end;
    end;
    '@': targetoutput(cstringtostring(po2));
@@ -1575,7 +1591,7 @@ begin
    if startsstr('Entry point',ar1[int1]) then begin
     ar2:= nil;
     splitstring(ar1[int1],ar2,' ');
-    if high(ar2) = 2 then begin
+    if high(ar2) >= 2 then begin
      str1:= ar2[2];
     end;
     break;
@@ -1625,19 +1641,30 @@ end;
 function tgdbmi.run: gdbresultty;
 begin
  result:= gdb_ok;
- if fremoteconnection <> '' then begin
-  result:= synccommand('-target-select '+fremoteconnection);
-  if result <> gdb_ok then begin
-   exit;
+ if fsimulator then begin
+  result:= synccommand('-target-select sim');
+  if result = gdb_ok then begin
+   result:= synccommand('-target-download');
+   if result = gdb_ok then begin
+    dorun;
+   end;
   end;
-  include(fstate,gs_remote);
-  initproginfo;
- end;
- if fgdbdownload and not (gs_downloaded in fstate) then begin
-  result:= download;
  end
  else begin
-  dorun;
+  if fremoteconnection <> '' then begin
+   result:= synccommand('-target-select '+fremoteconnection);
+   if result <> gdb_ok then begin
+    exit;
+   end;
+   include(fstate,gs_remote);
+   initproginfo;
+  end;
+  if fgdbdownload and not (gs_downloaded in fstate) then begin
+   result:= download;
+  end
+  else begin
+   dorun;
+  end;
  end;
 end;
 
@@ -2462,6 +2489,7 @@ begin
 end;
                         
 function tgdbmi.getstopinfo(const response: resultinfoarty;
+                  const lastconsoleoutput: ansistring;
                   out info: stopinfoty): boolean;
 var
  int1: integer;
@@ -2487,6 +2515,9 @@ begin
   if reason = sr_signal_received then begin
    getstringvalue(response,'signal-name',signalname);
    getstringvalue(response,'signal-meaning',signalmeaning);
+   if fsimulator and (signalname = '0') then begin
+    signalmeaning:= lastconsoleoutput;
+   end;
   end;
   if reason = sr_watchpointtrigger then begin
    if gettuplevalue(response,'wpt',ar1) then begin
@@ -3376,6 +3407,24 @@ end;
 function tgdbmi.downloading: boolean;
 begin
  result:= gs_downloading in fstate;
+end;
+
+function tgdbmi.getprocessorname: ansistring;
+begin
+ result:= processornames[fprocessor];
+end;
+
+procedure tgdbmi.setprocessorname(const avalue: ansistring);
+var
+ pro1: processorty;
+begin
+ fprocessor:= pro_i386;
+ for pro1:= low(processorty) to high(processorty) do begin
+  if processornames[pro1] = avalue then begin
+   fprocessor:= pro1;
+   break;
+  end;
+ end;
 end;
 
 {$ifdef UNIX}
