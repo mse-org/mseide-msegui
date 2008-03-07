@@ -172,27 +172,27 @@ type
   private
    foptionslayout: layoutoptionsty;
    flayoutupdating: integer;
-   falignx_mode: widgetalignmodety;
-   faligny_mode: widgetalignmodety;
-   falignx_leader: twidget;
-   faligny_leader: twidget;
-   fplacex_mindist: integer;
-   fplacex_maxdist: integer;
-   fplacey_mindist: integer;
-   fplacey_maxdist: integer;
-   falignx_glue: widgetalignmodety;
-   faligny_glue: widgetalignmodety;
+   falign_mode: widgetalignmodety;
+//   falign_mode: widgetalignmodety;
+   falign_leader: twidget;
+//   faligny_leader: twidget;
+   fplace_mindist: integer;
+   fplace_maxdist: integer;
+//   fplacey_mindist: integer;
+//   fplacey_maxdist: integer;
+   falign_glue: widgetalignmodety;
+//   faligny_glue: widgetalignmodety;
    procedure setoptionslayout(const avalue: layoutoptionsty);
-   procedure setalignx_mode(const avalue: widgetalignmodety);
-   procedure setaligny_mode(const avalue: widgetalignmodety);
-   procedure setalignx_leader(const avalue: twidget);
-   procedure setaligny_leader(const avalue: twidget);
-   procedure setplacex_mindist(const avalue: integer);
-   procedure setplacex_maxdist(const avalue: integer);
-   procedure setplacey_mindist(const avalue: integer);
-   procedure setplacey_maxdist(const avalue: integer);
-   procedure setalignx_glue(const avalue: widgetalignmodety);
-   procedure setaligny_glue(const avalue: widgetalignmodety);
+   procedure setalign_mode(const avalue: widgetalignmodety);
+//   procedure setaligny_mode(const avalue: widgetalignmodety);
+   procedure setalign_leader(const avalue: twidget);
+//   procedure setaligny_leader(const avalue: twidget);
+   procedure setplace_mindist(const avalue: integer);
+//   procedure setplacex_maxdist(const avalue: integer);
+   procedure setplace_maxdist(const avalue: integer);
+//   procedure setplacey_maxdist(const avalue: integer);
+   procedure setalign_glue(const avalue: widgetalignmodety);
+//   procedure setaligny_glue(const avalue: widgetalignmodety);
   protected
    function childrenleft: integer;
    function childrentop: integer;
@@ -210,22 +210,22 @@ type
   published
    property optionslayout: layoutoptionsty read foptionslayout write setoptionslayout
                            default defaultlayoutoptions;
-   property alignx_mode: widgetalignmodety read falignx_mode write setalignx_mode
+   property align_mode: widgetalignmodety read falign_mode write setalign_mode
                                      default wam_center;
-   property aligny_mode: widgetalignmodety read faligny_mode write setaligny_mode
-                                     default wam_center;
-   property alignx_leader: twidget read falignx_leader write setalignx_leader;
-   property aligny_leader: twidget read faligny_leader write setaligny_leader;
-   property alignx_glue: widgetalignmodety read falignx_glue write setalignx_glue
+//   property aligny_mode: widgetalignmodety read faligny_mode write setaligny_mode
+//                                     default wam_center;
+   property align_leader: twidget read falign_leader write setalign_leader;
+//   property aligny_leader: twidget read faligny_leader write setaligny_leader;
+   property align_glue: widgetalignmodety read falign_glue write setalign_glue
                                  default wam_none;
-   property aligny_glue: widgetalignmodety read faligny_glue write setaligny_glue
-                                 default wam_none;
-   property placex_mindist: integer read fplacex_mindist write setplacex_mindist;
-   property placex_maxdist: integer read fplacex_maxdist write setplacex_maxdist
+//   property aligny_glue: widgetalignmodety read faligny_glue write setaligny_glue
+//                                 default wam_none;
+   property place_mindist: integer read fplace_mindist write setplace_mindist;
+   property place_maxdist: integer read fplace_maxdist write setplace_maxdist
                                      default bigint;
-   property placey_mindist: integer read fplacey_mindist write setplacey_mindist;
-   property placey_maxdist: integer read fplacey_maxdist write setplacey_maxdist
-                                     default bigint;
+//   property placey_mindist: integer read fplacey_mindist write setplacey_mindist;
+//   property placey_maxdist: integer read fplacey_maxdist write setplacey_maxdist
+//                                     default bigint;
    property visible default true;
    property optionswidget default defaultgroupboxoptionswidget;
  end;
@@ -972,10 +972,10 @@ end;
 constructor tlayouter.create(aowner: tcomponent);
 begin
  foptionslayout:= defaultlayoutoptions;
- falignx_mode:= wam_center;
- faligny_mode:= wam_center;
- fplacex_maxdist:= bigint;
- fplacey_maxdist:= bigint;
+ falign_mode:= wam_center;
+// faligny_mode:= wam_center;
+ fplace_maxdist:= bigint;
+// fplacey_maxdist:= bigint;
  inherited;
  foptionswidget:= defaultgroupboxoptionswidget;
  include(fwidgetstate,ws_visible);
@@ -1114,60 +1114,23 @@ begin
    beginscaling;
    if widgetcount > 0 then begin
     if lao_alignx in foptionslayout then begin
-     if alignx_mode <> wam_none then begin
+     if align_mode <> wam_none then begin
       setlength(ar1,widgetcount);
       int2:= 0;
-      if (falignx_leader <> nil) and (falignx_leader.parentwidget = self) then begin
-       ar1[0]:= falignx_leader;
+      if (falign_leader <> nil) and (falign_leader.parentwidget = self) then begin
+       ar1[0]:= falign_leader;
        int2:= 1;
       end;
       for int1:= 0 to high(ar1) do begin
-       if fwidgets[int1] <> falignx_leader then begin
+       if fwidgets[int1] <> falign_leader then begin
         ar1[int2]:= fwidgets[int1];
         inc(int2);
        end;
       end;
-      alignx(alignx_mode,ar1);
+      alignx(align_mode,ar1);
      end;
      int2:= 0;
-     case falignx_glue of
-      wam_start: begin
-       int2:= innerclientwidgetpos.y - childrentop;
-      end;
-      wam_center: begin
-       int2:= innerclientwidgetpos.y + 
-              (innerclientsize.cy - childrentop - childrenbottom) div 2;
-      end;
-      wam_end: begin
-       int2:= innerclientwidgetpos.y + innerclientsize.cy - childrenbottom;
-      end;
-     end;
-     if int2 <> 0 then begin
-      for int1:= 0 to high(fwidgets) do begin
-       with fwidgets[int1] do begin
-        bounds_y:= bounds_y + int2;
-       end;
-      end;
-     end;
-    end;
-    if lao_aligny in foptionslayout then begin
-     if alignx_mode <> wam_none then begin
-      setlength(ar1,widgetcount);
-      int2:= 0;
-      if (faligny_leader <> nil) and (faligny_leader.parentwidget = self) then begin
-       ar1[0]:= faligny_leader;
-       int2:= 1;
-      end;
-      for int1:= 0 to high(ar1) do begin
-       if fwidgets[int1] <> faligny_leader then begin
-        ar1[int2]:= fwidgets[int1];
-        inc(int2);
-       end;
-      end;
-      aligny(aligny_mode,ar1);
-     end;
-     int2:= 0;
-     case faligny_glue of
+     case falign_glue of
       wam_start: begin
        int2:= innerclientwidgetpos.x - childrenleft;
       end;
@@ -1187,17 +1150,54 @@ begin
       end;
      end;
     end;
+    if lao_aligny in foptionslayout then begin
+     if align_mode <> wam_none then begin
+      setlength(ar1,widgetcount);
+      int2:= 0;
+      if (falign_leader <> nil) and (falign_leader.parentwidget = self) then begin
+       ar1[0]:= falign_leader;
+       int2:= 1;
+      end;
+      for int1:= 0 to high(ar1) do begin
+       if fwidgets[int1] <> falign_leader then begin
+        ar1[int2]:= fwidgets[int1];
+        inc(int2);
+       end;
+      end;
+      aligny(align_mode,ar1);
+     end;
+     int2:= 0;
+     case falign_glue of
+      wam_start: begin
+       int2:= innerclientwidgetpos.y - childrentop;
+      end;
+      wam_center: begin
+       int2:= innerclientwidgetpos.y + 
+              (innerclientsize.cy - childrentop - childrenbottom) div 2;
+      end;
+      wam_end: begin
+       int2:= innerclientwidgetpos.y + innerclientsize.cy - childrenbottom;
+      end;
+     end;
+     if int2 <> 0 then begin
+      for int1:= 0 to high(fwidgets) do begin
+       with fwidgets[int1] do begin
+        bounds_y:= bounds_y + int2;
+       end;
+      end;
+     end;
+    end;
     if lao_placex in foptionslayout then begin
      if high(fwidgets) > 0 then begin
       ar1:= copy(fwidgets);
       sortwidgetsxorder(ar1,self);
-      if fplacex_mindist <> fplacex_maxdist then begin
+      if fplace_mindist <> fplace_maxdist then begin
        int3:= innerclientsize.cx - childrenwidth;
-       calcarray(int3,fplacex_mindist,fplacex_maxdist);
+       calcarray(int3,fplace_mindist,fplace_maxdist);
        placexorder(innerclientpos.x,ar2,ar1);
       end
       else begin
-       placexorder(innerclientpos.x,[fplacex_mindist],ar1);
+       placexorder(innerclientpos.x,[fplace_mindist],ar1);
       end;
      end
      else begin
@@ -1211,13 +1211,13 @@ begin
      if high(fwidgets) > 0 then begin
       ar1:= copy(fwidgets);
       sortwidgetsyorder(ar1,self);
-      if fplacey_mindist <> fplacey_maxdist then begin
+      if fplace_mindist <> fplace_maxdist then begin
        int3:= innerclientsize.cy - childrenheight;
-       calcarray(int3,fplacey_mindist,fplacey_maxdist);
+       calcarray(int3,fplace_mindist,fplace_maxdist);
        placeyorder(innerclientpos.y,ar2,ar1);
       end
       else begin
-       placeyorder(innerclientpos.y,[fplacey_mindist],ar1);
+       placeyorder(innerclientpos.y,[fplace_mindist],ar1);
       end;
      end
      else begin
@@ -1239,10 +1239,10 @@ function tlayouter.calcminscrollsize: sizety;
 begin
  result:= inherited calcminscrollsize;
  if lao_placex in foptionslayout then begin
-  result.cx:= childrenwidth + high(fwidgets) * fplacex_mindist + innerframewidth.cx;
+  result.cx:= childrenwidth + high(fwidgets) * fplace_mindist + innerframewidth.cx;
  end;
  if lao_placey in foptionslayout then begin
-  result.cy:= childrenheight + high(fwidgets) * fplacey_mindist + innerframewidth.cy;
+  result.cy:= childrenheight + high(fwidgets) * fplace_mindist + innerframewidth.cy;
  end;
 end;
 
@@ -1260,14 +1260,14 @@ begin
  end;
 end;
 
-procedure tlayouter.setalignx_mode(const avalue: widgetalignmodety);
+procedure tlayouter.setalign_mode(const avalue: widgetalignmodety);
 begin
- if avalue <> falignx_mode then begin
-  falignx_mode:= avalue;
+ if avalue <> falign_mode then begin
+  falign_mode:= avalue;
   updatelayout;
  end;
 end;
-
+{
 procedure tlayouter.setaligny_mode(const avalue: widgetalignmodety);
 begin
  if avalue <> faligny_mode then begin
@@ -1275,15 +1275,15 @@ begin
   updatelayout;
  end;
 end;
-
-procedure tlayouter.setalignx_glue(const avalue: widgetalignmodety);
+}
+procedure tlayouter.setalign_glue(const avalue: widgetalignmodety);
 begin
- if falignx_glue <> avalue then begin
-  falignx_glue:= avalue;
+ if falign_glue <> avalue then begin
+  falign_glue:= avalue;
   updatelayout;
  end;
 end;
-
+{
 procedure tlayouter.setaligny_glue(const avalue: widgetalignmodety);
 begin
  if faligny_glue <> avalue then begin
@@ -1291,15 +1291,15 @@ begin
   updatelayout;
  end;
 end;
-
-procedure tlayouter.setalignx_leader(const avalue: twidget);
+}
+procedure tlayouter.setalign_leader(const avalue: twidget);
 begin
- if falignx_leader <> avalue then begin
-  setlinkedvar(avalue,falignx_leader);
+ if falign_leader <> avalue then begin
+  setlinkedvar(avalue,falign_leader);
   updatelayout;
  end;
 end;
-
+{
 procedure tlayouter.setaligny_leader(const avalue: twidget);
 begin
  if faligny_leader <> avalue then begin
@@ -1307,23 +1307,23 @@ begin
   updatelayout;
  end;
 end;
-
-procedure tlayouter.setplacex_mindist(const avalue: integer);
+}
+procedure tlayouter.setplace_mindist(const avalue: integer);
 begin
- if fplacex_mindist <> avalue then begin
-  fplacex_mindist:= avalue;
+ if fplace_mindist <> avalue then begin
+  fplace_mindist:= avalue;
   updatelayout;
  end;
 end;
 
-procedure tlayouter.setplacex_maxdist(const avalue: integer);
+procedure tlayouter.setplace_maxdist(const avalue: integer);
 begin
- if fplacex_maxdist <> avalue then begin
-  fplacex_maxdist:= avalue;
+ if fplace_maxdist <> avalue then begin
+  fplace_maxdist:= avalue;
   updatelayout;
  end;
 end;
-
+{
 procedure tlayouter.setplacey_mindist(const avalue: integer);
 begin
  if fplacey_mindist <> avalue then begin
@@ -1339,7 +1339,7 @@ begin
   updatelayout;
  end;
 end;
-
+}
 procedure tlayouter.clientrectchanged;
 begin
  inherited;
