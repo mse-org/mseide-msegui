@@ -37,7 +37,7 @@ implementation
 uses
  sysutils,classes,msesimplewidgets,msegrids,msemenus,mseimage,msedispwidgets,
  msetoolbar,msetabs,msedesignintf,regwidgets_bmp,mselistbrowser,
- msesplitter,msedock,mseforms,mseclasses,typinfo,msearrayprops,
+ msesplitter,msedock,mseforms,mseclasses,typinfo,msearrayprops,msewidgets,
  msegui,formdesigner,msedial,msemenuwidgets,msewindowwidget,msechart
  {$ifdef FPC},mseopenglwidget{$endif};
  
@@ -96,7 +96,7 @@ const
 
 procedure Register;
 begin
- registercomponents('Widget',[teventwidget,tbutton,trichbutton,tstockglyphbutton,
+ registercomponents('Widget',[tsimplewidget,teventwidget,tbutton,trichbutton,tstockglyphbutton,
   tdrawgrid,tstringgrid,tlistview,
   tlabel,tpaintbox,timage,
   tintegerdisp,trealdisp,tdatetimedisp,tstringdisp,tbytestringdisp,tbooleandisp,

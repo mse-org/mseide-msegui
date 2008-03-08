@@ -581,6 +581,13 @@ type
    property visible;
  end;
 
+ tsimplewidget = class(tpublishedwidget)
+  public
+   constructor create(aowner: tcomponent); override;
+  published
+   property visible default false;
+ end;
+ 
  tcustomeventwidget = class(tpublishedwidget)
   private
    fonloaded: notifyeventty;
@@ -4125,6 +4132,14 @@ end;
 function tscrollframe.getsbvert: tscrollbar;
 begin
  result:= tscrollbar(inherited sbvert);
+end;
+
+{ tsimplewidget }
+
+constructor tsimplewidget.create(aowner: tcomponent);
+begin
+ inherited;
+ exclude(fwidgetstate,ws_visible);
 end;
 
 end.
