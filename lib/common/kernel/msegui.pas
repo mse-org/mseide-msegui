@@ -1345,6 +1345,7 @@ type
    function innerclientrect: rectty;         //origin = clientpos
    function innerclientsize: sizety;
    function innerclientpos: pointty;         //origin = clientpos
+   function innerclientframe: framety;
    function innerclientwidgetpos: pointty;   //origin = pos
 
 
@@ -9722,6 +9723,16 @@ begin
  result:= inherited skininfo;
  if osk_container in foptionsskin then begin
   include(result.options,sko_container);
+ end;
+end;
+
+function twidget.innerclientframe: framety;
+begin
+ if fframe = nil then begin
+  result:= nullframe;
+ end
+ else begin
+  result:= fframe.fi.innerframe;
  end;
 end;
 
