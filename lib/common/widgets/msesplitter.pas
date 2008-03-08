@@ -989,12 +989,12 @@ var
  lao1,lao2: layoutoptionsty;
 begin
  if avalue <> foptionslayout then begin
-  lao1:= layoutoptionsty(setsinglebit(longword(avalue),
-                         longword(foptionslayout),
-                         longword(mask1)))*mask1;
-  lao2:= layoutoptionsty(setsinglebit(longword(avalue),
-                         longword(foptionslayout),
-                         longword(mask2)))*mask2;
+  lao1:= layoutoptionsty(setsinglebit({$ifdef FPC}longword{$else}byte{$endif}(avalue),
+                         {$ifdef FPC}longword{$else}byte{$endif}(foptionslayout),
+                         {$ifdef FPC}longword{$else}byte{$endif}(mask1)))*mask1;
+  lao2:= layoutoptionsty(setsinglebit({$ifdef FPC}longword{$else}byte{$endif}(avalue),
+                         {$ifdef FPC}longword{$else}byte{$endif}(foptionslayout),
+                         {$ifdef FPC}longword{$else}byte{$endif}(mask2)))*mask2;
   foptionslayout:= (avalue - (mask1+mask2)) + lao1 + lao2;
   updatelayout;
  end;
@@ -1295,7 +1295,7 @@ end;
 procedure tlayouter.setalign_leader(const avalue: twidget);
 begin
  if falign_leader <> avalue then begin
-  setlinkedvar(avalue,falign_leader);
+  setlinkedvar(avalue,tmsecomponent(falign_leader));
   updatelayout;
  end;
 end;

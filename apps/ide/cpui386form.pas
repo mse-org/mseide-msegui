@@ -73,7 +73,7 @@ uses
 
 constructor tcpui386fo.create(aowner: tcomponent);
 begin
- inherited;
+ inherited create(aowner);
  fflagswidget:= eflags;
 end;
 

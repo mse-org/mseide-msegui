@@ -335,12 +335,12 @@ end;
 
 procedure registerlangchangeproc(const aproc: langchangeprocty); 
 begin
- additem(pointerarty(langchangeprocs),aproc);
+ additem(pointerarty(langchangeprocs),{$ifndef FPC}@{$endif}aproc);
 end;
 
-procedure unregisterlangchangeproc(const aproc: langchangeprocty); 
+procedure unregisterlangchangeproc(const aproc: langchangeprocty);
 begin
- removeitem(pointerarty(langchangeprocs),aproc);
+ removeitem(pointerarty(langchangeprocs),{$ifndef FPC}@{$endif}aproc);
 end;
 
 initialization

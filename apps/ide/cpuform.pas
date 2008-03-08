@@ -32,12 +32,12 @@ type
    procedure ononchange(const sender: TObject);
   protected
    fflagswidget: tintegeredit;
+   fregisternames: stringarty;
+   fedits: array of tdataedit;
    procedure doregsetvalue(const sender: TObject; var avalue: Integer; var accept: Boolean);
    procedure doflagsetvalue(const sender: TObject;
                    var avalue: Boolean; var accept: Boolean);
    procedure doflagonchange(const sender: TObject);
-   fregisternames: stringarty;
-   fedits: array of tdataedit;
   public
    procedure refresh;
  end;

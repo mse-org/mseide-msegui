@@ -65,7 +65,7 @@ uses
  
 constructor tcpuarmfo.create(aowner: tcomponent);
 begin
- inherited;
+ inherited create(aowner);
  fflagswidget:= cpsr;
 end;
 
