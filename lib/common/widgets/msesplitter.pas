@@ -182,6 +182,7 @@ type
 //   fplacey_maxdist: integer;
    falign_glue: widgetalignmodety;
 //   faligny_glue: widgetalignmodety;
+   fplace_mode: widgetalignmodety;
    procedure setoptionslayout(const avalue: layoutoptionsty);
    procedure setalign_mode(const avalue: widgetalignmodety);
 //   procedure setaligny_mode(const avalue: widgetalignmodety);
@@ -193,6 +194,7 @@ type
 //   procedure setplacey_maxdist(const avalue: integer);
    procedure setalign_glue(const avalue: widgetalignmodety);
 //   procedure setaligny_glue(const avalue: widgetalignmodety);
+   procedure setplacemode(const avalue: widgetalignmodety);
   protected
    function childrenleft: integer;
    function childrentop: integer;
@@ -223,6 +225,9 @@ type
    property place_mindist: integer read fplace_mindist write setplace_mindist;
    property place_maxdist: integer read fplace_maxdist write setplace_maxdist
                                      default bigint;
+   property place_mode: widgetalignmodety read fplace_mode write setplacemode 
+                                     default wam_start;
+                                  
 //   property placey_mindist: integer read fplacey_mindist write setplacey_mindist;
 //   property placey_maxdist: integer read fplacey_maxdist write setplacey_maxdist
 //                                     default bigint;
@@ -975,6 +980,7 @@ begin
  falign_mode:= wam_center;
 // faligny_mode:= wam_center;
  fplace_maxdist:= bigint;
+ fplace_mode:= wam_start;
 // fplacey_maxdist:= bigint;
  inherited;
  foptionswidget:= defaultgroupboxoptionswidget;
@@ -1084,27 +1090,37 @@ procedure tlayouter.updatelayout;
 var
  ar1: widgetarty;
  ar2: integerarty;
+ space: integer;
+ 
  procedure calcarray(const awidth: integer; const amin,amax: integer);
  var
-  int1: integer;
+  int1,int2: integer;
   rea1,rea2: real;
  begin
-  rea1:= awidth / high(fwidgets);
-  if rea1 < amin then begin
-   rea1:= amin;
-  end;
-  if rea1 > amax then begin
-   rea1:= amax;
-  end;
-  rea2:= rea1;
-  setlength(ar2,high(fwidgets));
-  for int1:= 0 to high(ar2) do begin
-   ar2[int1]:= round(rea2);
-   rea2:= rea2 - ar2[int1] + rea1;
+  if high(fwidgets) > 0 then begin
+   rea1:= awidth / high(fwidgets);
+   if rea1 < amin then begin
+    rea1:= amin;
+   end;
+   if rea1 > amax then begin
+    rea1:= amax;
+   end;
+   rea2:= rea1;
+   setlength(ar2,high(fwidgets));
+   space:= 0;
+   for int1:= 0 to high(ar2) do begin
+    int2:= round(rea2);
+    space:= space + int2;
+    ar2[int1]:= int2;
+    rea2:= rea2 - ar2[int1] + rea1;
+   end;
+  end
+  else begin
+   space:= 0;
   end;
  end;
 var
- int1,int2,int3: integer;
+ int1,int2,int3,int4: integer;
  
 begin
  if (componentstate * [csloading,csdestroying] = []) and 
@@ -1187,45 +1203,55 @@ begin
       end;
      end;
     end;
-    if lao_placex in foptionslayout then begin
-     if high(fwidgets) > 0 then begin
-      ar1:= copy(fwidgets);
-      sortwidgetsxorder(ar1,self);
-      if fplace_mindist <> fplace_maxdist then begin
-       int3:= innerclientsize.cx - childrenwidth;
-       calcarray(int3,fplace_mindist,fplace_maxdist);
-       placexorder(innerclientpos.x,ar2,ar1);
-      end
-      else begin
-       placexorder(innerclientpos.x,[fplace_mindist],ar1);
-      end;
+    if (lao_placex in foptionslayout) and (fplace_mode <> wam_none) then begin
+     ar1:= copy(fwidgets);
+     sortwidgetsxorder(ar1,self);
+     int4:= childrenwidth;
+     if fplace_mindist <> fplace_maxdist then begin
+      calcarray(innerclientsize.cx - int4,fplace_mindist,fplace_maxdist);
      end
-     else begin
-      with fwidgets[0] do begin
-       bounds_x:= self.innerclientwidgetpos.x + 
-             (self.innerclientsize.cx - bounds_cx) div 2;
+     else begin      
+      setlength(ar2,1);
+      ar2[0]:=  fplace_mindist;
+      space:= fplace_mindist * high(ar1);
+     end;
+     case fplace_mode of 
+      wam_start: begin
+       int3:= innerclientpos.x;
+      end;
+      wam_center: begin
+       int3:= innerclientpos.x + (innerclientsize.cx - int4 - space) div 2;
+      end;
+      wam_end: begin
+       int3:= innerclientpos.x + innerclientsize.cx - int4 - space;
       end;
      end;
+     placexorder(int3,ar2,ar1);
     end;
-    if lao_placey in foptionslayout then begin
-     if high(fwidgets) > 0 then begin
-      ar1:= copy(fwidgets);
-      sortwidgetsyorder(ar1,self);
-      if fplace_mindist <> fplace_maxdist then begin
-       int3:= innerclientsize.cy - childrenheight;
-       calcarray(int3,fplace_mindist,fplace_maxdist);
-       placeyorder(innerclientpos.y,ar2,ar1);
-      end
-      else begin
-       placeyorder(innerclientpos.y,[fplace_mindist],ar1);
-      end;
+    if (lao_placey in foptionslayout) and (fplace_mode <> wam_none) then begin
+     ar1:= copy(fwidgets);
+     sortwidgetsyorder(ar1,self);
+     int4:= childrenheight;
+     if fplace_mindist <> fplace_maxdist then begin
+      calcarray(innerclientsize.cy - int4,fplace_mindist,fplace_maxdist);
      end
-     else begin
-      with fwidgets[0] do begin
-       bounds_y:= self.innerclientwidgetpos.y + 
-             (self.innerclientsize.cy - bounds_cy) div 2;
+     else begin      
+      setlength(ar2,1);
+      ar2[0]:=  fplace_mindist;
+      space:= fplace_mindist * high(ar1);
+     end;
+     case fplace_mode of 
+      wam_start: begin
+       int3:= innerclientpos.y;
+      end;
+      wam_center: begin
+       int3:= innerclientpos.y + (innerclientsize.cy - int4 - space) div 2;
+      end;
+      wam_end: begin
+       int3:= innerclientpos.y + innerclientsize.cy - int4 - space;
       end;
      end;
+     placeyorder(int3,ar2,ar1);
     end;
    end;
   finally
@@ -1323,6 +1349,15 @@ begin
   updatelayout;
  end;
 end;
+
+procedure tlayouter.setplacemode(const avalue: widgetalignmodety);
+begin
+ if fplace_mode <> avalue then begin
+  fplace_mode:= avalue;
+  updatelayout;
+ end;
+end;
+
 {
 procedure tlayouter.setplacey_mindist(const avalue: integer);
 begin
