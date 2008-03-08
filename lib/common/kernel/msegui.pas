@@ -99,7 +99,7 @@ type
                  fs_sbhorztop,fs_sbvertleft,
                  fs_sbleft,fs_sbtop,fs_sbright,fs_sbbottom,
                  fs_nowidget,fs_nosetinstance,fs_disabled,
-                 fs_captiondistouter,fs_captionnoclip,
+                 fs_captiondistouter,fs_captionnoclip,fs_captionframecentered,
                  fs_drawfocusrect,fs_paintrectfocus,
                  fs_captionfocus,fs_captionhint,fs_rectsvalid,
                  fs_widgetactive,fs_paintposinited);
@@ -2955,14 +2955,11 @@ var
 begin
  include(fstate,fs_rectsvalid);   //avoid recursion
  updaterects;
- if {not (ws_loadedproc in fintf.widgetstate) and}
-//         not (csloading in fintf.getcomponentstate) and
-         not (csreading in fintf.getcomponentstate) and
+ if not (csreading in fintf.getcomponentstate) and
          not (fs_nowidget in fstate) then begin
   po1:= subpoint(fpaintrect.pos,fpaintposbefore);
   fintf.scrollwidgets(po1);
  end;
-// addpoint1(fclientrect.pos,po1);
  fpaintposbefore:= fpaintrect.pos;
  updateclientrect;
  include(fstate,fs_rectsvalid);
@@ -2971,7 +2968,7 @@ end;
 
 procedure tcustomframe.internalupdatestate;
 begin
- if not ((csloading in fintf.getcomponentstate){ or (fs_nowidget in fstate)}) then begin
+ if not (csloading in fintf.getcomponentstate) then begin
   updatestate;
  end
  else begin

@@ -79,6 +79,7 @@ type
    property captionpos;
    property captiondist;
    property captiondistouter;
+   property captionframecentered;
    property captionoffset;
    property captionnoclip;
    property font;

@@ -33,8 +33,6 @@ type
  tcustomcaptionframe = class(tcustomframe)
   private
    fcaptionpos: captionposty;
-   fcaptiondist: integer;
-   fcaptionoffset: integer;
    fupdating: integer;
    foptions: captionframeoptionsty;
    function getcaption: msestring;
@@ -52,9 +50,13 @@ type
    procedure setcaptiondistouter(const Value: boolean);
    procedure setcaptionnoclip(const avalue: boolean);
    function getcaptionnoclip: boolean;
+   procedure setcaptionframecentered(const avalue: boolean);
+   function getcaptionframecentered: boolean;
   protected
    ffont: tframefont;
    finfo: drawtextinfoty;
+   fcaptiondist: integer;
+   fcaptionoffset: integer;
    procedure parentfontchanged; override;
    procedure fontcanvaschanged; override;
    procedure visiblechanged; override;
@@ -71,8 +73,6 @@ type
    procedure paintoverlay(const canvas: tcanvas; const arect: rectty); override;
    procedure scale(const ascale: real); override;
    procedure createfont;
-//   procedure paintoverlay(const canvas: tcanvas; const arect: rectty);
-//   procedure afterpaint(const canvas: tcanvas); override;
    procedure updatemousestate(const sender: twidget; const apos: pointty); override;
    function pointincaption(const point: pointty): boolean; override;
                 //origin = widgetrect
@@ -84,6 +84,8 @@ type
    property captiondist: integer read fcaptiondist write setcaptiondist default 1;
    property captiondistouter: boolean read getcaptiondistouter
                  write setcaptiondistouter default false;
+   property captionframecentered: boolean read getcaptionframecentered 
+                     write setcaptionframecentered default false;
    property captionoffset: integer read fcaptionoffset write setcaptionoffset 
                                         default 0;
    property captionnoclip: boolean read getcaptionnoclip write setcaptionnoclip
@@ -129,6 +131,7 @@ type
    property captionpos;
    property captiondist;
    property captiondistouter;
+   property captionframecentered;
    property captionoffset;
    property captionnoclip;
    property font;
@@ -261,6 +264,7 @@ type
    property caption;
    property captionpos;
    property captiondist;
+   property captionframecentered;
    property captiondistouter;
    property captionoffset;
    property captionnoclip;
@@ -358,6 +362,7 @@ type
    property captionpos;
    property captiondist;
    property captiondistouter;
+   property captionframecentered;
    property captionoffset;
    property captionnoclip;
    property font;
@@ -1786,19 +1791,21 @@ var
  canvas: tcanvas;
  fra1: framety;
  rect1,rect2: rectty;
- bo1: boolean;
+ bo1,bo2: boolean;
 begin
  inherited;
  fra1:= fouterframe;
  if (finfo.text.text <> '') and 
              twidget1(icaptionframe(fintf).getwidget).isvisible then begin
-  updatebit({$ifdef FPC}longword{$else}word{$endif}(finfo.flags),ord(tf_grayed),fs_disabled in fstate);
+  updatebit({$ifdef FPC}longword{$else}word{$endif}(finfo.flags),
+                                      ord(tf_grayed),fs_disabled in fstate);
   canvas:= icaptionframe(fintf).getcanvas;
   canvas.font:= getfont;
   finfo.dest:= textrect(canvas,finfo.text);
   rect1:= deflaterect(makerect(nullpoint,icaptionframe(fintf).getwidgetrect.size),
                                  fouterframe);
   bo1:= fs_captiondistouter in fstate;
+  bo2:= fs_captionframecentered in fstate;
   rect2:= inflaterect(finfo.dest,captionmargin);
   with rect2 do begin
    if fcaptionpos = cp_center then begin
@@ -1811,6 +1818,9 @@ begin
       x:= rect1.x - fcaptiondist;
       if not bo1 then begin
        x:= x - cx;
+       if bo2 then begin
+        x:= x + (cx + fwidth.left) div 2;
+       end;
       end;
      end;
      cp_topleft,cp_bottomleft: begin
@@ -1826,6 +1836,11 @@ begin
       x:= rect1.x + rect1.cx + fcaptiondist;
       if bo1 then begin
        x:= x - cx;
+      end
+      else begin
+       if bo2 then begin
+        x:= x - (fwidth.right + cx) div 2;
+       end;
       end;
      end;
     end;
@@ -1834,6 +1849,9 @@ begin
       y:= rect1.y - fcaptiondist;
       if not bo1 then begin
        y:= y - cy;
+       if bo2 then begin
+        y:= y + (cy+fwidth.top) div 2;
+       end;
       end;
      end;
      cp_lefttop,cp_righttop: begin
@@ -1849,6 +1867,9 @@ begin
       y:= rect1.y + rect1.cy + fcaptiondist;
       if bo1 then begin
        y:= y - cy;
+      end
+      else begin
+       y:= y - (cy + fwidth.bottom) div 2;
       end;
      end;
     end;
@@ -1935,12 +1956,31 @@ begin
  result:= fs_captiondistouter in fstate;
 end;
 
+function tcustomcaptionframe.getcaptionframecentered: boolean;
+begin
+ result:= fs_captionframecentered in fstate;
+end;
+
+procedure tcustomcaptionframe.setcaptionframecentered(const avalue: boolean);
+begin
+ if updatebit({$ifdef FPC}longword{$else}longword{$endif}(fstate),
+       ord(fs_captionframecentered),avalue) then begin
+  if avalue then begin
+   exclude(fstate,fs_captiondistouter);
+  end;
+  internalupdatestate;
+ end;
+end;
+
 procedure tcustomcaptionframe.setcaptiondistouter(const Value: boolean);
 var
  size1: sizety;
 begin
  if updatebit({$ifdef FPC}longword{$else}longword{$endif}(fstate),
        ord(fs_captiondistouter),value) then begin
+  if value then begin
+   exclude(fstate,fs_captionframecentered);
+  end;
   if (fintf.getcomponentstate * [csdesigning,csloading] = [csdesigning]) and
                             (caption <> '') then begin
    size1.cy:= font.glyphheight + 2 * captionmargin;

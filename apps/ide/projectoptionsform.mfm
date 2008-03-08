@@ -32,7 +32,7 @@ object projectoptionsfo: tprojectoptionsfo
     frame.dummy = 0
     anchors = [an_top, an_bottom]
     taborder = 1
-    activepageindex = 1
+    activepageindex = 2
     tab_frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
     tab_frame.dummy = 0
     tab_size = 19
@@ -305,15 +305,15 @@ object projectoptionsfo: tprojectoptionsfo
       object tgroupbox1: tgroupbox
         optionswidget = [ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
         bounds_x = 7
-        bounds_y = 9
+        bounds_y = 11
         bounds_cx = 563
-        bounds_cy = 76
+        bounds_cy = 74
         frame.caption = 'Form designer'
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.dummy = 0
         frame.outerframe = (
           0
-          10
+          8
           0
           0
         )
@@ -665,7 +665,6 @@ object projectoptionsfo: tprojectoptionsfo
       frame.dummy = 0
       anchors = [an_left, an_top, an_right, an_bottom]
       taborder = 4
-      visible = True
       caption = '&Debugger'
       onchildscaled = debuggeronchildscaled
       object stoponexception: tbooleanedit
@@ -1164,6 +1163,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_y = 3
             bounds_cx = 262
             bounds_cy = 123
+            visible = True
             optionsscale = [osc_expandy, osc_shrinky]
             linkbottom = tlayouter1
             dist_bottom = 8
@@ -1251,6 +1251,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_cx = 189
             bounds_cy = 17
             taborder = 1
+            visible = True
             optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
             optionslayout = [lao_placex, lao_aligny]
             align_glue = wam_start
@@ -1372,6 +1373,7 @@ object projectoptionsfo: tprojectoptionsfo
       frame.dummy = 0
       anchors = [an_top, an_bottom]
       taborder = 6
+      visible = True
       caption = '&Make'
       onchildscaled = makepageonchildscaled
       object mainfile: tfilenameedit

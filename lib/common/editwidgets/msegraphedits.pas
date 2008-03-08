@@ -65,6 +65,7 @@ type
    property captionpos default cp_right;
    property captiondist;
    property captiondistouter;
+   property captionframecentered;
    property captionoffset;
    property captionnoclip;
    property font;
