@@ -1963,17 +1963,21 @@ end;
 procedure tcustomcaptionframe.setoptions(const avalue: captionframeoptionsty);
 const
  mask1: captionframeoptionsty = [cfo_captiondistouter,cfo_captionframecentered];
+ mask2: captionframeoptionsty = [cfo_captiondistouter];
 var
  optionsbefore: captionframeoptionsty;
  size1: sizety;
 begin
  if avalue <> foptions then begin
   optionsbefore:= foptions;
-  foptions:= captionframeoptionsty(setsinglebit(longword(avalue),
-               longword(foptions),longword(mask1)));
+  foptions:= captionframeoptionsty(setsinglebit(
+            {$ifdef FPC}longword{$else}byte{$endif}(avalue),
+            {$ifdef FPC}longword{$else}byte{$endif}(foptions),
+            {$ifdef FPC}longword{$else}byte{$endif}(mask1)));
 
-  if ((longword(optionsbefore) xor longword(foptions)) and 
-      longword([cfo_captiondistouter]) <> 0) and
+  if (({$ifdef FPC}longword{$else}byte{$endif}(optionsbefore) xor
+       {$ifdef FPC}longword{$else}byte{$endif}(foptions)) and
+       {$ifdef FPC}longword{$else}byte{$endif}(mask2) <> 0) and
      (fintf.getcomponentstate * [csdesigning,csloading] = [csdesigning]) and
      (caption <> '') then begin
    size1.cy:= font.glyphheight + 2 * captionmargin;
