@@ -168,6 +168,11 @@ const
  defaultlayoutoptions = [];
 
 type  
+ placeoptionty = (plo_endmargin,plo_propmargin,plo_syncmaxautosize,
+                  plo_synccaptiondistx,plo_synccaptiondisty,
+                  plo_syncminframewidth,plo_syncminframeheight);
+ placeoptionsty = set of placeoptionty;
+ 
  tlayouter = class(tspacer)
   private
    foptionslayout: layoutoptionsty;
@@ -178,8 +183,8 @@ type
    fplace_maxdist: integer;
    falign_glue: widgetalignmodety;
    fplace_mode: widgetalignmodety;
-   fplace_endmargin: boolean;
-//   fplace_endmargin: integer;
+//   fplace_endmargin: boolean;
+   fplace_options: placeoptionsty;
    procedure setoptionslayout(const avalue: layoutoptionsty);
    procedure setalign_mode(const avalue: widgetalignmodety);
    procedure setalign_leader(const avalue: twidget);
@@ -187,8 +192,7 @@ type
    procedure setplace_maxdist(const avalue: integer);
    procedure setalign_glue(const avalue: widgetalignmodety);
    procedure setplace_mode(const avalue: widgetalignmodety);
-   procedure setplace_endmargin(const avalue: boolean);
-//   procedure setplace_endmargin(const avalue: integer);
+   procedure setplace_options(const avalue: placeoptionsty);
   protected
    function childrenleft: integer;
    function childrentop: integer;
@@ -199,6 +203,7 @@ type
    procedure updatelayout;
    procedure loaded; override;
    procedure widgetregionchanged(const sender: twidget); override;
+   procedure childautosizechanged(const sender: twidget); override;
    procedure clientrectchanged; override;
    function calcminscrollsize: sizety; override;
   public
@@ -216,8 +221,10 @@ type
                                      default bigint;
    property place_mode: widgetalignmodety read fplace_mode write setplace_mode 
                                      default wam_start;
-   property place_endmargin: boolean read fplace_endmargin 
-                                         write setplace_endmargin;
+   property place_options: placeoptionsty read fplace_options 
+                                     write setplace_options default [];
+//   property place_endmargin: boolean read fplace_endmargin 
+//                                         write setplace_endmargin;
 //   property place_endmargin: integer read fplace_endmargin write setplace_endmargin;
 //   property visible default true;
    property optionswidget default defaultgroupboxoptionswidget;
@@ -1078,20 +1085,29 @@ procedure tlayouter.updatelayout;
 var
  ar1: widgetarty;
  ar2: integerarty;
- space: integer;
+ space,margin: integer;
  
  procedure calcarray(const awidth: integer; const amin,amax: integer);
  var
   int1,int2: integer;
   rea1,rea2: real;
  begin
+  margin:= 0;
   if high(fwidgets) > 0 then begin
-   rea1:= awidth / high(fwidgets);
+   if plo_propmargin in fplace_options then begin
+    rea1:= awidth / (high(fwidgets)+2);
+   end
+   else begin
+    rea1:= awidth / high(fwidgets);
+   end;
    if rea1 < amin then begin
     rea1:= amin;
    end;
    if rea1 > amax then begin
     rea1:= amax;
+   end;
+   if plo_propmargin in fplace_options then begin
+    margin:= round(rea1);
    end;
    rea2:= rea1;
    setlength(ar2,high(fwidgets));
@@ -1105,6 +1121,15 @@ var
   end
   else begin
    space:= 0;
+   if plo_propmargin in fplace_options then begin
+    margin:= awidth div 2;
+    if margin < amin then begin
+     margin:= amin;
+    end;
+    if margin > amax then begin
+     margin:= amax;
+    end;
+   end;
   end;
  end;
  
@@ -1116,8 +1141,24 @@ begin
                             (flayoutupdating = 0) then begin
   inc(flayoutupdating);
   try  
+   updateoptionsscale;
    beginscaling;
    if widgetcount > 0 then begin
+    if plo_syncmaxautosize in fplace_options then begin
+     syncmaxautosize(fwidgets);
+    end;
+    if plo_syncminframewidth in fplace_options then begin
+     syncminframewidth(fwidgets);
+    end;
+    if plo_syncminframeheight in fplace_options then begin
+     syncminframeheight(fwidgets);
+    end;
+    if plo_synccaptiondistx in fplace_options then begin
+     synccaptiondistx(fwidgets);
+    end;
+    if plo_synccaptiondisty in fplace_options then begin
+     synccaptiondisty(fwidgets);
+    end;
     if lao_alignx in foptionslayout then begin
      if align_mode <> wam_none then begin
       setlength(ar1,widgetcount);
@@ -1196,27 +1237,21 @@ begin
      ar1:= copy(fwidgets);
      sortwidgetsxorder(ar1,self);
      int4:= childrenwidth;
-     if fplace_mindist <> fplace_maxdist then begin
-      calcarray(innerclientsize.cx - int4,fplace_mindist,fplace_maxdist);
-     end
-     else begin      
-      setlength(ar2,1);
-      ar2[0]:=  fplace_mindist;
-      space:= fplace_mindist * high(ar1);
-     end;
-     if fplace_endmargin then begin
-      placexorder(innerclientpos.x,ar2,ar1,innerclientframe.right);
+     calcarray(innerclientsize.cx - int4,fplace_mindist,fplace_maxdist);
+     if plo_endmargin in fplace_options then begin
+      placexorder(innerclientpos.x + margin,ar2,ar1,
+                                          innerclientframe.right + margin);
      end
      else begin
       case fplace_mode of 
        wam_start: begin
-        int3:= innerclientpos.x;
+        int3:= innerclientpos.x + margin;
        end;
        wam_center: begin
         int3:= innerclientpos.x + (innerclientsize.cx - int4 - space) div 2;
        end;
        wam_end: begin
-        int3:= innerclientpos.x + innerclientsize.cx - int4 - space;
+        int3:= innerclientpos.x + innerclientsize.cx - int4 - space - margin;
        end;
       end;
       placexorder(int3,ar2,ar1);
@@ -1226,27 +1261,21 @@ begin
      ar1:= copy(fwidgets);
      sortwidgetsyorder(ar1,self);
      int4:= childrenheight;
-     if fplace_mindist <> fplace_maxdist then begin
-      calcarray(innerclientsize.cy - int4,fplace_mindist,fplace_maxdist);
-     end
-     else begin      
-      setlength(ar2,1);
-      ar2[0]:=  fplace_mindist;
-      space:= fplace_mindist * high(ar1);
-     end;
-     if fplace_endmargin then begin
-      placeyorder(innerclientpos.y,ar2,ar1,innerclientframe.bottom);
+     calcarray(innerclientsize.cy - int4,fplace_mindist,fplace_maxdist);
+     if plo_endmargin in fplace_options then begin
+      placeyorder(innerclientpos.y + margin,ar2,ar1,
+                                          innerclientframe.bottom + margin);
      end
      else begin
       case fplace_mode of 
        wam_start: begin
-        int3:= innerclientpos.y;
+        int3:= innerclientpos.y + margin;
        end;
        wam_center: begin
         int3:= innerclientpos.y + (innerclientsize.cy - int4 - space) div 2;
        end;
        wam_end: begin
-        int3:= innerclientpos.y + innerclientsize.cy - int4 - space;
+        int3:= innerclientpos.y + innerclientsize.cy - int4 - space - margin;
        end;
       end;
       placeyorder(int3,ar2,ar1);
@@ -1265,9 +1294,15 @@ begin
  result:= inherited calcminscrollsize;
  if lao_placex in foptionslayout then begin
   result.cx:= childrenwidth + high(fwidgets) * fplace_mindist + innerframewidth.cx;
+  if plo_propmargin in fplace_options then begin
+   result.cx:= result.cx + 2 * fplace_mindist;
+  end;
  end;
  if lao_placey in foptionslayout then begin
   result.cy:= childrenheight + high(fwidgets) * fplace_mindist + innerframewidth.cy;
+  if plo_propmargin in fplace_options then begin
+   result.cy:= result.cy + 2 * fplace_mindist;
+  end;
  end;
 end;
 
@@ -1333,23 +1368,21 @@ begin
  end;
 end;
 
-procedure tlayouter.setplace_endmargin(const avalue: boolean);
+procedure tlayouter.setplace_options(const avalue: placeoptionsty);
 begin
- if fplace_endmargin <> avalue then begin
-  fplace_endmargin:= avalue;
+ if fplace_options <> avalue then begin
+  fplace_options:= avalue;
   updatelayout;
  end;
 end;
-{
-procedure tlayouter.setplace_endmargin(const avalue: integer);
-begin
- if fplace_endmargin <> avalue then begin
-  fplace_endmargin:= avalue;
-  updatelayout;
- end;
-end;
-}
+
 procedure tlayouter.clientrectchanged;
+begin
+ inherited;
+ updatelayout;
+end;
+
+procedure tlayouter.childautosizechanged(const sender: twidget);
 begin
  inherited;
  updatelayout;

@@ -99,6 +99,7 @@ type
                  fs_sbhorztop,fs_sbvertleft,
                  fs_sbleft,fs_sbtop,fs_sbright,fs_sbbottom,
                  fs_nowidget,fs_nosetinstance,fs_disabled,
+                 fs_cancaptionsyncx,fs_cancaptionsyncy,
                  {
                  fs_captiondistouter,fs_captionnoclip,fs_captionframecentered,
                  }
@@ -1042,6 +1043,7 @@ type
    procedure sizechanged; virtual;
    procedure getautopaintsize(var asize: sizety); virtual;
    procedure checkautosize;
+   procedure childautosizechanged(const sender: twidget); virtual;
    procedure poschanged; virtual;
    procedure clientrectchanged; virtual;
    procedure parentchanged; virtual;
@@ -1863,7 +1865,16 @@ procedure sortwidgetsxorder(var awidgets: widgetarty; const parent: twidget = ni
 procedure sortwidgetsyorder(var awidgets: widgetarty; const parent: twidget = nil);
 
 procedure syncmaxautosize(const widgets: array of twidget);
-procedure syncminframewidth(const awidth: integer; const awidgets: array of twidget);
+procedure syncminframewidth(const awidgets: array of twidget;
+                               const awidth: integer = -1);
+                               //biggest if < 0
+      //synchronizes paintwidth with paintwidth of largest outer framewidth 
+      //(ex. largest caption)
+procedure syncminframeheight(const awidgets: array of twidget;
+                               const aheight: integer = -1);
+                               //biggest if < 0
+      //synchronizes paintheight with paintheight of largest outer framewidth 
+      //(ex. largest caption)
 
 type
  getwidgetintegerty = function(const awidget: twidget): integer;
@@ -2326,7 +2337,10 @@ var
 begin
  size1:= nullsize;
  for int1:= high(widgets) downto 0 do begin
-  widgets[int1].getautopaintsize(size2);
+  with widgets[int1] do begin
+   size2:= clientsize;   
+   getautopaintsize(size2);
+  end;
   if size2.cx > size1.cx then begin
    size1.cx:= size2.cx;
   end;
@@ -2350,7 +2364,8 @@ begin
  end;
 end;
 
-procedure syncminframewidth(const awidth: integer; const awidgets: array of twidget);
+procedure syncminframewidth(const awidgets: array of twidget;
+                   const awidth: integer = -1);
 var
  int1,int2,int3: integer;
  widget1: twidget;
@@ -2372,7 +2387,9 @@ begin
     int2:= int3;
    end;
   end;
-  widget1.bounds_cx:= awidth;
+  if awidth >= 0 then begin
+   widget1.bounds_cx:= awidth;
+  end;
   int2:= widget1.bounds_cx - int2; //min frame width
   for int1:= 0 to high(awidgets) do begin
    with awidgets[int1] do begin
@@ -2383,6 +2400,47 @@ begin
      int3:= fframe.fouterframe.left + fframe.fouterframe.right;
     end;
     bounds_cx:= int2 + int3;
+   end;
+  end;
+ end;
+end;
+
+procedure syncminframeheight(const awidgets: array of twidget;
+                   const aheight: integer = -1);
+var
+ int1,int2,int3: integer;
+ widget1: twidget;
+begin
+ if high(awidgets) >= 0 then begin
+  int2:= -bigint;
+  widget1:= awidgets[0]; //compiler warning
+  for int1:= high(awidgets) downto 0 do begin
+   with awidgets[int1] do begin
+    if fframe = nil then begin
+     int3:= 0;
+    end
+    else begin
+     int3:= fframe.fouterframe.top + fframe.fouterframe.bottom;
+    end;
+   end;
+   if int3 > int2 then begin
+    widget1:= awidgets[int1];
+    int2:= int3;
+   end;
+  end;
+  if aheight >= 0 then begin
+   widget1.bounds_cy:= aheight;
+  end;
+  int2:= widget1.bounds_cy - int2; //min frame width
+  for int1:= 0 to high(awidgets) do begin
+   with awidgets[int1] do begin
+    if fframe = nil then begin
+     int3:= 0;
+    end
+    else begin
+     int3:= fframe.fouterframe.top + fframe.fouterframe.bottom;
+    end;
+    bounds_cy:= int2 + int3;
    end;
   end;
  end;
@@ -9630,10 +9688,21 @@ end;
 
 procedure twidget.checkautosize;
 begin
- if (ow_autosize in foptionswidget) and 
-         ([csloading,csdestroying] * componentstate = []) then begin
-  internalsetwidgetrect(fwidgetrect,false);
+ if [csloading,csdestroying] * componentstate = [] then begin
+  if (ow_autosize in foptionswidget) then begin
+   internalsetwidgetrect(fwidgetrect,false);
+  end
+  else begin
+   if fparentwidget <> nil then begin
+    fparentwidget.childautosizechanged(self);
+   end;
+  end;
  end;
+end;
+
+procedure twidget.childautosizechanged(const sender: twidget);
+begin
+ //dummy
 end;
 
 procedure twidget.scale(const ascale: real);

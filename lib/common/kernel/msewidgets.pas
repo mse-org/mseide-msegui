@@ -53,12 +53,6 @@ type
    procedure readcaptionnoclip(reader: treader);
    procedure readcaptiondistouter(reader: treader);
    procedure setoptions(const avalue: captionframeoptionsty);
-//   function getcaptiondistouter: boolean;
-//   procedure setcaptiondistouter(const Value: boolean);
-//   procedure setcaptionnoclip(const avalue: boolean);
-//   function getcaptionnoclip: boolean;
-//   procedure setcaptionframecentered(const avalue: boolean);
-//   function getcaptionframecentered: boolean;
   protected
    ffont: tframefont;
    finfo: drawtextinfoty;
@@ -91,14 +85,8 @@ type
    property captionpos: captionposty read fcaptionpos
              write setcaptionpos default cp_topleft;
    property captiondist: integer read fcaptiondist write setcaptiondist default 1;
-//   property captiondistouter: boolean read getcaptiondistouter
-//                 write setcaptiondistouter default false;
-//   property captionframecentered: boolean read getcaptionframecentered 
-//                     write setcaptionframecentered default false;
    property captionoffset: integer read fcaptionoffset write setcaptionoffset 
                                         default 0;
-//   property captionnoclip: boolean read getcaptionnoclip write setcaptionnoclip
-//                                        default false;   
    property font: tframefont read getfont write setfont stored isfontstored;
  end;
 
@@ -139,10 +127,7 @@ type
    property caption;
    property captionpos;
    property captiondist;
-//   property captiondistouter;
-//   property captionframecentered;
    property captionoffset;
-//   property captionnoclip;
    property font;
    property localprops;  //before template
    property template;
@@ -273,10 +258,7 @@ type
    property caption;
    property captionpos;
    property captiondist;
-//   property captionframecentered;
-//   property captiondistouter;
    property captionoffset;
-//   property captionnoclip;
    property font;
    property localprops; //before template
    property template;
@@ -370,10 +352,7 @@ type
    property caption;
    property captionpos;
    property captiondist;
-//   property captiondistouter;
-//   property captionframecentered;
    property captionoffset;
-//   property captionnoclip;
    property font;
    property localprops; //before template
    property template;
@@ -612,10 +591,6 @@ type
    fonkeyup: keyeventty;
    fonkeydown: keyeventty;
    fonshortcut: keyeventty;
-//   fonenter: notifyeventty;
-//   fonexit: notifyeventty;
-//   fonfocus: notifyeventty;
-//   fondefocus: notifyeventty;
    fonpaint: painteventty;
    fonbeforepaint: painteventty;
    fonafterpaint: painteventty;
@@ -623,8 +598,6 @@ type
    fonresize: notifyeventty;
    fonhide: notifyeventty;
    fonshow: notifyeventty;
-//   fonactivate: notifyeventty;
-//   fondeactivate: notifyeventty;
    fonclosequery: queryeventty;
    fonevent: eventeventty;
    fonasyncevent: asynceventeventty;
@@ -645,23 +618,13 @@ type
    procedure dokeyup(var info: keyeventinfoty); override;
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
    procedure dofocuschanged(const oldwidget,newwidget: twidget); override;
-//   procedure doenter; override;
-//   procedure doexit; override;
-//   procedure dofocus; override;
-//   procedure dodefocus; override;
    procedure doloaded; override;
    procedure dohide; override;
    procedure doshow; override;
-//   procedure doactivate; override;
-//   procedure dodeactivate; override;
    procedure receiveevent(const event: tobjectevent); override;
    procedure doasyncevent(var atag: integer); override;
   public
    function canclose(const newfocus: twidget): boolean; override;
-//   property onenter: notifyeventty read fonenter write fonenter;
-//   property onexit: notifyeventty read fonexit write fonexit;
-//   property onfocus: notifyeventty read fonfocus write fonfocus;
-//   property ondefocus: notifyeventty read fondefocus write fondefocus;
    property onfocusedwidgetchanged: focuschangeeventty 
                      read fonfocusedwidgetchanged write fonfocusedwidgetchanged;
 
@@ -838,7 +801,7 @@ type
   public
    constructor create(aowner: tcomponent; transientfor: twindow;
                              var info: hintinfoty);
-destructor destroy; override;
+   destructor destroy; override;
  end;
 
  tmessagewidget = class(tcaptionwidget)
@@ -915,7 +878,14 @@ type
 
 type
  messagepositionty = (mepo_default,mepo_screencentered,mepo_windowcentered);
- 
+
+procedure synccaptiondistx(const awidgets: widgetarty);
+                //adjusts captiondist for equal distouter
+                //don't set cfo_captiondistouter
+procedure synccaptiondisty(const awidgets: widgetarty);
+                //adjusts captiondist for equal distouter
+                //don't set cfo_captiondistouter
+                
 procedure getdropdownpos(const parent: twidget; var rect: rectty);
 
 
@@ -996,6 +966,7 @@ type
  twindow1 = class(twindow);
  tcustomscrollbar1 = class(tcustomscrollbar);
  tbitmap1 = class(tbitmap);
+ tcustomframe1 = class(tcustomframe);
 
  tmessagebutton = class(tsimplebutton)
   protected
@@ -1016,35 +987,75 @@ type
    constructor create(const aowner: tcomponent; const apopuptransient: boolean;
                         const ahasaction: boolean; const exttext: msestring);
 end;
-{
-procedure buttonoptionstoshapestate(avalue: buttonoptionsty; var astate: shapestatesty);
+
+procedure synccaptiondistx(const awidgets: widgetarty);
+                //adjusts captiondist for equal distouter
+                //don't set cfo_captiondistouter
+var
+ int1,int2,int3: integer;
 begin
- if bo_flat in avalue then begin
-  include(astate,ss_flat);
- end
- else begin
-  exclude(astate,ss_flat);
+ int2:= bigint;
+ int3:= 0;
+ for int1:= 0 to high(awidgets) do begin
+  with twidget1(awidgets[int1]) do begin
+   if (fframe <> nil) and (fs_cancaptionsyncx in tcustomframe1(fframe).fstate) then begin
+    with tcustomcaptionframe(fframe) do begin
+     if fcaptiondist < int2 then begin
+      int2:= fcaptiondist;
+     end;
+     if finfo.dest.cx > int3 then begin
+      int3:= finfo.dest.cx;
+     end;
+    end;
+   end;
+  end;
  end;
- if bo_noanim in avalue then begin
-  include(astate,ss_noanimation);
- end
- else begin
-  exclude(astate,ss_noanimation);
- end;
- if bo_nofocusrect in avalue then begin
-  exclude(astate,ss_showfocusrect);
- end
- else begin
-  include(astate,ss_showfocusrect);
- end;
- if bo_nodefaultrect in avalue then begin
-  exclude(astate,ss_showdefaultrect);
- end
- else begin
-  include(astate,ss_showdefaultrect);
+ int3:= int3 + int2; //max outer dist
+ for int1:= 0 to high(awidgets) do begin
+  with twidget1(awidgets[int1]) do begin
+   if (fframe <> nil) and (fs_cancaptionsyncx in tcustomframe1(fframe).fstate) then begin
+    with tcustomcaptionframe(fframe) do begin
+     captiondist:= int3 - finfo.dest.cx;
+    end;
+   end;
+  end;
  end;
 end;
-}
+
+procedure synccaptiondisty(const awidgets: widgetarty);
+                //adjusts captiondist for equal distouter
+                //don't set cfo_captiondistouter
+var
+ int1,int2,int3: integer;
+begin
+ int2:= bigint;
+ int3:= 0;
+ for int1:= 0 to high(awidgets) do begin
+  with twidget1(awidgets[int1]) do begin
+   if (fframe <> nil) and (fs_cancaptionsyncy in tcustomframe1(fframe).fstate) then begin
+    with tcustomcaptionframe(fframe) do begin
+     if fcaptiondist < int2 then begin
+      int2:= fcaptiondist;
+     end;
+     if finfo.dest.cy > int3 then begin
+      int3:= finfo.dest.cy;
+     end;
+    end;
+   end;
+  end;
+ end;
+ int3:= int3 + int2; //max outer dist
+ for int1:= 0 to high(awidgets) do begin
+  with twidget1(awidgets[int1]) do begin
+   if (fframe <> nil) and (fs_cancaptionsyncy in tcustomframe1(fframe).fstate) then begin
+    with tcustomcaptionframe(fframe) do begin
+     captiondist:= int3 - finfo.dest.cy;
+    end;
+   end;
+  end;
+ end;
+end;
+
 procedure copytoclipboard(const value: msestring);
 begin
  gui_copytoclipboard(value);
@@ -1801,11 +1812,13 @@ var
  fra1: framety;
  rect1,rect2: rectty;
  bo1,bo2: boolean;
+ widget1: twidget1;
 begin
  inherited;
  fra1:= fouterframe;
- if (finfo.text.text <> '') and 
-             twidget1(icaptionframe(fintf).getwidget).isvisible then begin
+ fstate:= fstate - [fs_cancaptionsyncx,fs_cancaptionsyncy];
+ if (finfo.text.text <> '') {and 
+             twidget1(icaptionframe(fintf).getwidget).isvisible} then begin
   updatebit({$ifdef FPC}longword{$else}word{$endif}(finfo.flags),
                                       ord(tf_grayed),fs_disabled in fstate);
   canvas:= icaptionframe(fintf).getcanvas;
@@ -1824,6 +1837,7 @@ begin
    else begin
     case fcaptionpos of
      cp_lefttop,cp_left,cp_leftbottom: begin
+      include(fstate,fs_cancaptionsyncx);
       x:= rect1.x - fcaptiondist;
       if not bo1 then begin
        x:= x - cx;
@@ -1833,15 +1847,19 @@ begin
       end;
      end;
      cp_topleft,cp_bottomleft: begin
+      include(fstate,fs_cancaptionsyncy);
       x:=  rect1.x + fcaptionoffset;
      end;
      cp_top,cp_bottom: begin
+      include(fstate,fs_cancaptionsyncy);
       x:= rect1.x + (rect1.cx - cx) div 2 + fcaptionoffset;
      end;
      cp_topright,cp_bottomright: begin
+      include(fstate,fs_cancaptionsyncy);
       x:= rect1.x + rect1.cx - cx + fcaptionoffset;
      end;
      cp_righttop,cp_right,cp_rightbottom: begin
+      include(fstate,fs_cancaptionsyncx);
       x:= rect1.x + rect1.cx + fcaptiondist;
       if bo1 then begin
        x:= x - cx;
@@ -1878,7 +1896,9 @@ begin
        y:= y - cy;
       end
       else begin
-       y:= y - (cy + fwidth.bottom) div 2;
+       if bo2 then begin
+        y:= y - (cy + fwidth.bottom) div 2;
+       end;
       end;
      end;
     end;
@@ -1902,8 +1922,12 @@ begin
   end;
   finfo.dest:= inflaterect(rect2,-captionmargin);
  end
- else begin
+ else begin //caption = '' or invisible
   fouterframe:= nullframe;
+ end;
+ if bo1 then begin
+  fstate:= fstate - [fs_cancaptionsyncx,fs_cancaptionsyncy];
+                 //captiondistouter set
  end;
  subframe1(fra1,fouterframe);
  if not isnullframe(fra1) then begin
@@ -1935,7 +1959,15 @@ begin
       rect2.y:= rect1.y+rect1.cy-rect2.cy;
      end;
     end;
-    icaptionframe(fintf).setwidgetrect(rect2);
+    if (fupdating = 1) and rectisequal(icaptionframe(fintf).getwidgetrect,rect2) then begin
+     widget1:= twidget1(icaptionframe(fintf).getwidget);
+     if widget1.fparentwidget <> nil then begin
+      twidget1(widget1.fparentwidget).childautosizechanged(widget1);
+     end; //activate tlayouter
+    end
+    else begin
+     icaptionframe(fintf).setwidgetrect(rect2);
+    end;
    finally
     dec(fupdating);
    end;

@@ -1171,7 +1171,7 @@ begin
  aligny(wam_center,[dir,up,createdir]);
  aligny(wam_center,[filename,showhidden]);
  aligny(wam_center,[filter,ok,cancel]);
- syncminframewidth(namecont.bounds_cx,[filename,filter]);
+ syncminframewidth([filename,filter],namecont.bounds_cx);
  listview.synctofontheight;
 end;
 

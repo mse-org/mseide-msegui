@@ -132,7 +132,6 @@ type
    function ishintstored: boolean; override;
 
    procedure setenabled(const avalue: boolean); override;
-//   procedure enabledchanged; override;
    procedure readstate(reader: treader); override;
    procedure loaded; override;
    procedure clientrectchanged; override;
@@ -326,7 +325,6 @@ type
    property captiondist default 0;
    property options 
            default defaultcaptionframeoptions + [cfo_captionframecentered];
-//   property captionframecentered default true;
    property captionoffset default 4;
  end;
 
@@ -451,10 +449,7 @@ type
    property caption;
    property captionpos;
    property captiondist;
-//   property captiondistouter;
-//   property captionframecentered;
    property captionoffset;
-//   property captionnoclip;
    property font;
    property buttonsize;
    property buttonpos;
@@ -462,7 +457,6 @@ type
    property buttonsinline;
    property buttonsinvisible;
    property buttonsvisible;
-//   property mousewheel;
    property localprops;
    property template;
  end;
@@ -520,14 +514,6 @@ end;
 procedure tcustombutton.setoptions(const avalue: buttonoptionsty);
 begin
  inherited;
- {
- if bo_flat in avalue then begin
-  exclude(fwidgetstate1,ws1_nodesignframe);
- end
- else begin
-  include(fwidgetstate1,ws1_nodesignframe);
- end;
- }
  if bo_shortcutcaption in avalue then begin
   setactionoptions(iactionlink(self),factioninfo.options + [mao_shortcutcaption]);
  end
