@@ -66,10 +66,10 @@ type
    property caption;
    property captionpos;
    property captiondist;
-   property captiondistouter;
-   property captionframecentered;
+//   property captiondistouter;
+//   property captionframecentered;
    property captionoffset;
-   property captionnoclip;
+//   property captionnoclip;
    property font;
    property localprops; //before template
    property template;
@@ -100,10 +100,10 @@ type
    property caption;
    property captionpos;
    property captiondist;
-   property captiondistouter;
-   property captionframecentered;
+//   property captiondistouter;
+//   property captionframecentered;
    property captionoffset;
-   property captionnoclip;
+//   property captionnoclip;
    property font;
    property localprops; //before template
    property template;
@@ -134,10 +134,10 @@ type
    property caption;
    property captionpos;
    property captiondist;
-   property captiondistouter;
-   property captionframecentered;
+//   property captiondistouter;
+//   property captionframecentered;
    property captionoffset;
-   property captionnoclip;
+//   property captionnoclip;
    property font;
    property localprops; //before template
    property template;

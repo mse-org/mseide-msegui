@@ -324,7 +324,9 @@ type
    property levelo default -1;
    property leveli default 1;
    property captiondist default 0;
-   property captionframecentered default true;
+   property options 
+           default defaultcaptionframeoptions + [cfo_captionframecentered];
+//   property captionframecentered default true;
    property captionoffset default 4;
  end;
 
@@ -449,10 +451,10 @@ type
    property caption;
    property captionpos;
    property captiondist;
-   property captiondistouter;
-   property captionframecentered;
+//   property captiondistouter;
+//   property captionframecentered;
    property captionoffset;
-   property captionnoclip;
+//   property captionnoclip;
    property font;
    property buttonsize;
    property buttonpos;
@@ -1246,7 +1248,7 @@ begin
  fi.innerframe.bottom:= 2;
  fcaptiondist:= 0;
  fcaptionoffset:= 4;
- include(fstate,fs_captionframecentered);
+ include(foptions,cfo_captionframecentered);
 end;
 
 { tcustomscalingwidget }

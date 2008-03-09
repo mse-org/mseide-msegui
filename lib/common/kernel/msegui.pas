@@ -99,7 +99,9 @@ type
                  fs_sbhorztop,fs_sbvertleft,
                  fs_sbleft,fs_sbtop,fs_sbright,fs_sbbottom,
                  fs_nowidget,fs_nosetinstance,fs_disabled,
+                 {
                  fs_captiondistouter,fs_captionnoclip,fs_captionframecentered,
+                 }
                  fs_drawfocusrect,fs_paintrectfocus,
                  fs_captionfocus,fs_captionhint,fs_rectsvalid,
                  fs_widgetactive,fs_paintposinited);

@@ -1,4 +1,7 @@
 MSEide+MSEgui version history
+2008-03-09
+ tcustomcaptionframe.captiondistouter -> options cfo_captiondistouter.
+ tcustomcaptionframe.captionnoclip -> options cfo_captionnoclip.
 2008-03-04
  mseguithread.pas -> msethreadcomp.pas
 2008-02-02

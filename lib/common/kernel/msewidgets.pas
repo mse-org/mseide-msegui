@@ -27,14 +27,18 @@ type
  end;
 
  captionframeoptionty = (cfo_fixleft,cfo_fixright,cfo_fixtop,cfo_fixbottom,
-                         cfo_nofocusrect);
+                         cfo_captiondistouter,cfo_captionframecentered,
+                         cfo_captionnoclip,cfo_nofocusrect);
  captionframeoptionsty = set of captionframeoptionty;
- 
+
+const
+ defaultcaptionframeoptions = [];
+type
+
  tcustomcaptionframe = class(tcustomframe)
   private
    fcaptionpos: captionposty;
    fupdating: integer;
-   foptions: captionframeoptionsty;
    function getcaption: msestring;
    procedure setcaption(const Value: msestring);
    procedure fontchanged(const sender: tobject);
@@ -46,17 +50,21 @@ type
    procedure setcaptionoffset(const Value: integer);
    procedure readouterframe(reader: treader);
    procedure writeouterframe(writer: twriter);
-   function getcaptiondistouter: boolean;
-   procedure setcaptiondistouter(const Value: boolean);
-   procedure setcaptionnoclip(const avalue: boolean);
-   function getcaptionnoclip: boolean;
-   procedure setcaptionframecentered(const avalue: boolean);
-   function getcaptionframecentered: boolean;
+   procedure readcaptionnoclip(reader: treader);
+   procedure readcaptiondistouter(reader: treader);
+   procedure setoptions(const avalue: captionframeoptionsty);
+//   function getcaptiondistouter: boolean;
+//   procedure setcaptiondistouter(const Value: boolean);
+//   procedure setcaptionnoclip(const avalue: boolean);
+//   function getcaptionnoclip: boolean;
+//   procedure setcaptionframecentered(const avalue: boolean);
+//   function getcaptionframecentered: boolean;
   protected
    ffont: tframefont;
    finfo: drawtextinfoty;
    fcaptiondist: integer;
    fcaptionoffset: integer;
+   foptions: captionframeoptionsty;
    procedure parentfontchanged; override;
    procedure fontcanvaschanged; override;
    procedure visiblechanged; override;
@@ -77,19 +85,20 @@ type
    function pointincaption(const point: pointty): boolean; override;
                 //origin = widgetrect
 
-   property options: captionframeoptionsty read foptions write foptions;
+   property options: captionframeoptionsty read foptions 
+                     write setoptions default defaultcaptionframeoptions;
    property caption: msestring read getcaption write setcaption;
    property captionpos: captionposty read fcaptionpos
              write setcaptionpos default cp_topleft;
    property captiondist: integer read fcaptiondist write setcaptiondist default 1;
-   property captiondistouter: boolean read getcaptiondistouter
-                 write setcaptiondistouter default false;
-   property captionframecentered: boolean read getcaptionframecentered 
-                     write setcaptionframecentered default false;
+//   property captiondistouter: boolean read getcaptiondistouter
+//                 write setcaptiondistouter default false;
+//   property captionframecentered: boolean read getcaptionframecentered 
+//                     write setcaptionframecentered default false;
    property captionoffset: integer read fcaptionoffset write setcaptionoffset 
                                         default 0;
-   property captionnoclip: boolean read getcaptionnoclip write setcaptionnoclip
-                                        default false;   
+//   property captionnoclip: boolean read getcaptionnoclip write setcaptionnoclip
+//                                        default false;   
    property font: tframefont read getfont write setfont stored isfontstored;
  end;
 
@@ -130,10 +139,10 @@ type
    property caption;
    property captionpos;
    property captiondist;
-   property captiondistouter;
-   property captionframecentered;
+//   property captiondistouter;
+//   property captionframecentered;
    property captionoffset;
-   property captionnoclip;
+//   property captionnoclip;
    property font;
    property localprops;  //before template
    property template;
@@ -264,10 +273,10 @@ type
    property caption;
    property captionpos;
    property captiondist;
-   property captionframecentered;
-   property captiondistouter;
+//   property captionframecentered;
+//   property captiondistouter;
    property captionoffset;
-   property captionnoclip;
+//   property captionnoclip;
    property font;
    property localprops; //before template
    property template;
@@ -361,10 +370,10 @@ type
    property caption;
    property captionpos;
    property captiondist;
-   property captiondistouter;
-   property captionframecentered;
+//   property captiondistouter;
+//   property captionframecentered;
    property captionoffset;
-   property captionnoclip;
+//   property captionnoclip;
    property font;
    property localprops; //before template
    property template;
@@ -1704,7 +1713,7 @@ var
  reg1: regionty;
 begin
  reg1:= 0;
- if not (fs_captionnoclip in fstate) and (finfo.text.text <> '') then begin
+ if not (cfo_captionnoclip in foptions) and (finfo.text.text <> '') then begin
   reg1:= canvas.copyclipregion;
 //  drawtext(canvas,finfo);
   canvas.subcliprect(inflaterect(finfo.dest,captionmargin));
@@ -1804,8 +1813,8 @@ begin
   finfo.dest:= textrect(canvas,finfo.text);
   rect1:= deflaterect(makerect(nullpoint,icaptionframe(fintf).getwidgetrect.size),
                                  fouterframe);
-  bo1:= fs_captiondistouter in fstate;
-  bo2:= fs_captionframecentered in fstate;
+  bo1:= cfo_captiondistouter in foptions;
+  bo2:= cfo_captionframecentered in foptions;
   rect2:= inflaterect(finfo.dest,captionmargin);
   with rect2 do begin
    if fcaptionpos = cp_center then begin
@@ -1951,6 +1960,51 @@ begin
  end;
 end;
 
+procedure tcustomcaptionframe.setoptions(const avalue: captionframeoptionsty);
+const
+ mask1: captionframeoptionsty = [cfo_captiondistouter,cfo_captionframecentered];
+var
+ optionsbefore: captionframeoptionsty;
+ size1: sizety;
+begin
+ if avalue <> foptions then begin
+  optionsbefore:= foptions;
+  foptions:= captionframeoptionsty(setsinglebit(longword(avalue),
+               longword(foptions),longword(mask1)));
+
+  if ((longword(optionsbefore) xor longword(foptions)) and 
+      longword([cfo_captiondistouter]) <> 0) and
+     (fintf.getcomponentstate * [csdesigning,csloading] = [csdesigning]) and
+     (caption <> '') then begin
+   size1.cy:= font.glyphheight + 2 * captionmargin;
+   size1.cx:= icaptionframe(fintf).getcanvas.getstringwidth(caption,getfont) + 
+                        2 * captionmargin;
+   case captionpos of
+    cp_center: begin
+    end;
+    cp_lefttop,cp_left,cp_leftbottom,cp_rightbottom,cp_right,cp_righttop: begin
+     if cfo_captiondistouter in foptions then begin
+      fcaptiondist:= fcaptiondist + size1.cx;
+     end
+     else begin
+      fcaptiondist:= fcaptiondist - size1.cx;
+     end;
+    end;
+    cp_topright,cp_top,cp_topleft,cp_bottomleft,cp_bottom,cp_bottomright: begin
+     if cfo_captiondistouter in foptions then begin
+      fcaptiondist:= fcaptiondist + size1.cy;
+     end
+     else begin
+      fcaptiondist:= fcaptiondist - size1.cy;
+     end;
+    end;
+   end;
+  end;
+  internalupdatestate;
+ end;
+end;
+
+(*
 function tcustomcaptionframe.getcaptiondistouter: boolean;
 begin
  result:= fs_captiondistouter in fstate;
@@ -2023,7 +2077,7 @@ begin
   internalupdatestate;
  end;   
 end;
-
+*)
 procedure tcustomcaptionframe.defineproperties(filer: tfiler);
 var
  bo1: boolean;
@@ -2037,6 +2091,10 @@ begin
  end;
  filer.DefineProperty('outerframe',{$ifdef FPC}@{$endif}readouterframe,
                   {$ifdef FPC}@{$endif}writeouterframe,bo1);
+ filer.DefineProperty('captiondistouter',  //backward compatibility
+            {$ifdef FPC}@{$endif}readcaptiondistouter,nil,false);
+ filer.DefineProperty('captionnoclip', //backward compatibility
+            {$ifdef FPC}@{$endif}readcaptionnoclip,nil,false);
 end;
 
 procedure tcustomcaptionframe.readouterframe(reader: treader);
@@ -2060,6 +2118,26 @@ begin
   writeinteger(right);
   writeinteger(bottom);
   writelistend;
+ end;
+end;
+
+procedure tcustomcaptionframe.readcaptionnoclip(reader: treader);
+begin
+ if reader.readboolean then begin
+  options:= options + [cfo_captionnoclip];
+ end
+ else begin
+  options:= options - [cfo_captionnoclip];
+ end;
+end;
+
+procedure tcustomcaptionframe.readcaptiondistouter(reader: treader);
+begin
+ if reader.readboolean then begin
+  options:= options + [cfo_captiondistouter];
+ end
+ else begin
+  options:= options - [cfo_captiondistouter];
  end;
 end;
 
