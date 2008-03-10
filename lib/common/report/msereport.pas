@@ -548,7 +548,7 @@ const
                    ];
  defaultrepvaluedispoptions = [bo_evenpage,bo_oddpage];
 type                     
- trepspacer = class(tspacer,ireportclient)
+ trepspacer = class(tlayouter,ireportclient)
   private
    foptionsrep: bandoptionshowsty;   
    fparentintf: ibandparent;
