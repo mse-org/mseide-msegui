@@ -2388,7 +2388,12 @@ begin
    end;
   end;
   if awidth >= 0 then begin
-   widget1.bounds_cx:= awidth;
+   with widget1 do begin
+    if an_right in fanchors then begin
+     bounds_x:= bounds_x - awidth + bounds_cx;
+    end;
+    bounds_cx:= awidth;
+   end;
   end;
   int2:= widget1.bounds_cx - int2; //min frame width
   for int1:= 0 to high(awidgets) do begin
@@ -2399,7 +2404,11 @@ begin
     else begin
      int3:= fframe.fouterframe.left + fframe.fouterframe.right;
     end;
-    bounds_cx:= int2 + int3;
+    int3:= int3 + int2;
+    if an_right in fanchors then begin
+     bounds_x:= bounds_x - int3 + bounds_cx;
+    end;
+    bounds_cx:= int3;
    end;
   end;
  end;
@@ -2429,7 +2438,12 @@ begin
    end;
   end;
   if aheight >= 0 then begin
-   widget1.bounds_cy:= aheight;
+   with widget1 do begin
+    if an_bottom in fanchors then begin
+     bounds_y:= bounds_y - aheight + bounds_cy;
+    end;
+    bounds_cy:= aheight;
+   end;
   end;
   int2:= widget1.bounds_cy - int2; //min frame width
   for int1:= 0 to high(awidgets) do begin
@@ -2440,7 +2454,11 @@ begin
     else begin
      int3:= fframe.fouterframe.top + fframe.fouterframe.bottom;
     end;
-    bounds_cy:= int2 + int3;
+    int3:= int3 + int2;
+    if an_bottom in fanchors then begin
+     bounds_y:= bounds_y - int3 + bounds_cy;
+    end;
+    bounds_cy:= int3;
    end;
   end;
  end;
