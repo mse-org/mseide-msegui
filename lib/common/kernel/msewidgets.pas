@@ -523,6 +523,7 @@ type
    procedure dodefocus; override;
    procedure doactivate; override;
    procedure dodeactivate; override;
+   procedure dokeydown(var info: keyeventinfoty); override;
    procedure internalcreateframe; override;
    procedure enabledchanged; override;
    property frame: tcaptionframe read getframe write setframe;
@@ -3559,6 +3560,28 @@ begin
    po1:= info.pos;
    dopopup(dummy,info);
    info.pos:= po1; //no mousemove by chage of popup pos
+  end;
+ end;
+end;
+
+procedure tactionwidget.dokeydown(var info: keyeventinfoty);
+var
+ dummy: tpopupmenu;
+ mouseinfo: mouseeventinfoty;
+begin
+ with info do begin
+  if (key = key_menu) and (shiftstate = []) and 
+                    not(es_processed in eventstate) then begin
+   dummy:= nil;
+   fillchar(mouseinfo,sizeof(mouseinfo),0);
+   with mouseinfo do begin
+    pos:= pointty(paintsize);
+    pos.x:= pos.x div 2;
+    pos.y:= pos.y div 2;
+    button:= mb_none;
+   end;
+   dummy:= nil;
+   dopopup(dummy,mouseinfo);
   end;
  end;
 end;
