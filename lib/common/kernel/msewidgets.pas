@@ -1922,13 +1922,13 @@ begin
    end;
   end;
   finfo.dest:= inflaterect(rect2,-captionmargin);
+  if bo1 then begin
+   fstate:= fstate - [fs_cancaptionsyncx,fs_cancaptionsyncy];
+                 //captiondistouter set
+  end;
  end
  else begin //caption = '' or invisible
   fouterframe:= nullframe;
- end;
- if bo1 then begin
-  fstate:= fstate - [fs_cancaptionsyncx,fs_cancaptionsyncy];
-                 //captiondistouter set
  end;
  subframe1(fra1,fouterframe);
  if not isnullframe(fra1) then begin
@@ -3570,18 +3570,19 @@ var
  mouseinfo: mouseeventinfoty;
 begin
  with info do begin
-  if (key = key_menu) and (shiftstate = []) and 
+  if (key = key_menu) and (shiftstate = []) and
                     not(es_processed in eventstate) then begin
    dummy:= nil;
    fillchar(mouseinfo,sizeof(mouseinfo),0);
    with mouseinfo do begin
-    pos:= pointty(paintsize);
-    pos.x:= pos.x div 2;
-    pos.y:= pos.y div 2;
+    pos:= translateclientpoint(application.mouse.pos,nil,self);
     button:= mb_none;
    end;
    dummy:= nil;
    dopopup(dummy,mouseinfo);
+  end
+  else begin
+   inherited;
   end;
  end;
 end;
