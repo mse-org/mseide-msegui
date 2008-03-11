@@ -433,10 +433,10 @@ begin
      end;
      mstr1:= relativepath(modulenames[int1],projectoptions.projectdir);
      if findfile(mstr1) then begin
-      mainfo.openformfile(filepath(mstr1),bo1,false,true);
+      mainfo.openformfile(filepath(mstr1),bo1,false,false,true);
      end
      else begin
-      mainfo.openformfile(modulenames[int1],bo1,false,true);
+      mainfo.openformfile(modulenames[int1],bo1,false,false,true);
      end;
     except
      if checkprojectloadabort then begin

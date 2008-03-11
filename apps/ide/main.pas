@@ -220,7 +220,7 @@ type
                         const aactivate: boolean = true): boolean;
             //true if filedialog not canceled
    function openformfile(const filename: filenamety; 
-                const ashow,showsource,createmenu: boolean): pmoduleinfoty;
+                const ashow,aactivate,showsource,createmenu: boolean): pmoduleinfoty;
    function formmenuitemstart: integer;
    procedure loadformbysource(const sourcefilename: filenamety);
    procedure loadsourcebyform(const formfilename: filenamety; 
@@ -326,7 +326,7 @@ var
             findfile(filename(modulefilenames[int1]),
             projectoptions.texp.sourcedirs,wstr1) then begin
       try
-       po1:= openformfile(wstr1,false,false,false);
+       po1:= openformfile(wstr1,false,false,false,false);
        result:= (po1 <> nil) and (struppercase(po1^.instancevarname) = wstr2);
       except
        result:= false;
@@ -366,7 +366,7 @@ begin
                  ['Formfiles'],['*.mfm'],'',nil,nil,nil,[fa_all],[fa_hidden]);
                  //defaultvalues don't work on kylix
     if action = mr_ok then begin
-     openformfile(wstr2,false,true,true);
+     openformfile(wstr2,false,false,true,true);
     end;
    end;
   end;
@@ -387,7 +387,7 @@ var
    if findfile(fname,texp.sourcedirs,wstr1) or
           findfile(fname,texp.sourcedirs,wstr1) then begin
     try
-     po1:= openformfile(wstr1,false,false,false);
+     po1:= openformfile(wstr1,false,false,false,false);
     except
      on e: eabort do begin
       raise;
@@ -440,7 +440,7 @@ begin
     wstr2:= '';
     if filedialog(wstr2,[fdo_checkexist],'Formfile for '+ atypename,
                    ['Formfiles'],['*.mfm']) = mr_ok then begin
-     openformfile(wstr2,false,false,false);
+     openformfile(wstr2,false,false,false,false);
     end;
    end;
   end;
@@ -1192,7 +1192,7 @@ begin
 end;
 
 function tmainfo.openformfile(const filename: filenamety;
-              const ashow,showsource,createmenu: boolean): pmoduleinfoty;
+       const ashow,aactivate,showsource,createmenu: boolean): pmoduleinfoty;
 var
  item1: tmenuitem;
  wstr1,wstr2: filenamety;
@@ -1261,6 +1261,9 @@ begin
   end;
   if ashow then begin
    result^.designform.show;
+   if aactivate then begin
+    result^.designform.activate;
+   end;
   end;
  end;
 end;
@@ -1275,7 +1278,7 @@ begin
   if findfile(str1) then begin
    activebefore:= factivedesignmodule;
    try
-    openformfile(str1,true,false,true);
+    openformfile(str1,true,false,false,true);
    finally
     factivedesignmodule:= activebefore;
    end;
@@ -1312,7 +1315,7 @@ begin //opensourceactonexecute
     if checkfileext(filenames[int1],[formfileext]) then begin
      page:= sourcefo.findsourcepage(filenames[int1]);
      if page = nil then begin
-      po1:= openformfile(filenames[int1],true,false,true);
+      po1:= openformfile(filenames[int1],true,false,false,true);
      end;
     end
     else begin
@@ -1322,7 +1325,7 @@ begin //opensourceactonexecute
      end;
      str1:= designer.sourcenametoformname(filenames[int1]);
      if findfile(str1) then begin
-      po1:= openformfile(str1,true,false,true);
+      po1:= openformfile(str1,true,false,false,true);
       if addtoproject then begin
        unitnode.setformfile(str1);
       end;
@@ -1475,7 +1478,7 @@ begin
   finally
    stream1.Free;
   end;
-  po1:= openformfile(str1,true,true,true);
+  po1:= openformfile(str1,true,false,true,true);
   if kind = fok_main then begin
    with tmseform(po1^.instance) do begin
     options:= options + [fo_main,fo_terminateonclose];
@@ -1685,7 +1688,7 @@ begin
             ['%UNITNAME%','%FORMNAME%','%ANCESTORUNIT%','%ANCESTORCLASS%'],
             ['${%FILENAMEBASE%}',str4,ancestorunit,ancestorclass]); //form
    sourcefo.openfile(str1,true);
-   openformfile(str5,true,false,true);
+   openformfile(str5,true,false,false,true);
    po1:= designer.modules.findmodule(str5);
    if po1 <> nil then begin
     po1^.modified:= true; //initial create of ..._mfm.pas
@@ -2013,7 +2016,7 @@ begin
       end;
       if loadprojectfile[int1] then begin
        if checkfileext(copiedfiles[int1],[formfileext])then begin
-        openformfile(copiedfiles[int1],true,false,true);
+        openformfile(copiedfiles[int1],true,false,false,true);
        end
        else begin
         sourcefo.openfile(copiedfiles[int1],bo1);

@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2008 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -255,7 +255,7 @@ begin
  if value <> '' then begin
   po1:= nil;
   try
-   po1:= mainfo.openformfile(value,false,false,true);
+   po1:= mainfo.openformfile(value,false,false,false,true);
   except
   end;
   if po1 <> nil then begin
@@ -556,7 +556,7 @@ begin
     with tunitnode(node1) do begin
      case fkind of
       pnk_form: begin
-       mainfo.openformfile(ffilename,true,true,true);
+       mainfo.openformfile(ffilename,true,true,true,true);
       end;
       pnk_source: begin
        sourcefo.openfile(ffilename,true);
