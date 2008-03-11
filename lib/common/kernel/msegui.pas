@@ -1121,7 +1121,6 @@ type
    function calcminscrollsize: sizety; virtual;
    function getcontainer: twidget; virtual;
    function getchildwidgets(const index: integer): twidget; virtual;
-   function gettaborderedwidgets: widgetarty;
 
    function getright: integer;       //if placed in datamodule
    procedure setright(const avalue: integer);
@@ -1236,7 +1235,6 @@ type
    function widgetatpos(const pos: pointty): twidget; overload;
    function widgetatpos(const pos: pointty; 
                    const state: widgetstatesty): twidget; overload;
-   property taborderedwidgets: widgetarty read gettaborderedwidgets;
    function findtagwidget(const atag: integer; const aclass: widgetclassty): twidget;
               //returns first matching descendent
 
@@ -1246,6 +1244,8 @@ type
    property children[const index: integer]: twidget read getchildwidgets; default;
    function childatpos(const pos: pointty; 
                    const clientorigin: boolean = true): twidget; virtual;
+   function gettaborderedwidgets: widgetarty;
+   function getvisiblewidgets: widgetarty;
    function getsortxchildren: widgetarty;
    function getsortychildren: widgetarty;
    property focusedchild: twidget read ffocusedchild;
@@ -2389,7 +2389,7 @@ begin
   end;
   if awidth >= 0 then begin
    with widget1 do begin
-    if an_right in fanchors then begin
+    if anchors * [an_left,an_right] = [an_right] then begin
      bounds_x:= bounds_x - awidth + bounds_cx;
     end;
     bounds_cx:= awidth;
@@ -2405,7 +2405,7 @@ begin
      int3:= fframe.fouterframe.left + fframe.fouterframe.right;
     end;
     int3:= int3 + int2;
-    if an_right in fanchors then begin
+    if anchors * [an_left,an_right] = [an_right] then begin
      bounds_x:= bounds_x - int3 + bounds_cx;
     end;
     bounds_cx:= int3;
@@ -2439,7 +2439,7 @@ begin
   end;
   if aheight >= 0 then begin
    with widget1 do begin
-    if an_bottom in fanchors then begin
+    if anchors * [an_top,an_bottom] = [an_bottom] then begin
      bounds_y:= bounds_y - aheight + bounds_cy;
     end;
     bounds_cy:= aheight;
@@ -2455,7 +2455,7 @@ begin
      int3:= fframe.fouterframe.top + fframe.fouterframe.bottom;
     end;
     int3:= int3 + int2;
-    if an_bottom in fanchors then begin
+    if anchors * [an_top,an_bottom] = [an_bottom] then begin
      bounds_y:= bounds_y - int3 + bounds_cy;
     end;
     bounds_cy:= int3;
@@ -5018,7 +5018,7 @@ begin
 end;
 
 procedure twidget.placeyorder(const starty: integer; const dist: array of integer;
-                const awidgets: array of twidget; const endmargin: integer = minint);
+        const awidgets: array of twidget; const endmargin: integer = minint);
                //origin = clientpos, endmargin by size adjust of widgets 
                //with [an_top,an_bottom], minit -> no change
 var
@@ -8844,6 +8844,21 @@ function twidget.gettaborderedwidgets: widgetarty;
 begin
  result:= copy(fwidgets);
  sortarray(pointerarty(result),{$ifdef FPC}@{$endif}comparetaborder);
+end;
+
+function twidget.getvisiblewidgets: widgetarty;
+var
+ int1,int2: integer;
+begin
+ setlength(result,length(fwidgets));
+ int2:= 0;
+ for int1:= 0 to high(fwidgets) do begin
+  if fwidgets[int1].isvisible then begin
+   result[int2]:= fwidgets[int1];
+   inc(int2);
+  end;
+ end;
+ setlength(result,int2);
 end;
 
 procedure twidget.updatetaborder(awidget: twidget);

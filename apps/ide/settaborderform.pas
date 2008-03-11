@@ -129,7 +129,7 @@ procedure tsettaborderfo.formonloaded(const sender: TObject);
 var
  int1: integer;
 begin
- fchildren:= fparent.container.taborderedwidgets;
+ fchildren:= fparent.container.gettaborderedwidgets;
  grid.rowcount:= length(fchildren);
  for int1:= 0 to high(fchildren) do begin
   wname[int1]:= fchildren[int1].Name;

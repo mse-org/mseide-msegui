@@ -168,7 +168,8 @@ const
  defaultlayoutoptions = [];
 
 type  
- placeoptionty = (plo_endmargin,plo_propmargin,plo_syncmaxautosize,
+ placeoptionty = (plo_noinvisible,
+                  plo_endmargin,plo_propmargin,plo_syncmaxautosize,
                   plo_synccaptiondistx,plo_synccaptiondisty,
                   plo_syncminframewidth,plo_syncminframeheight);
  placeoptionsty = set of placeoptionty;
@@ -223,10 +224,6 @@ type
                                      default wam_start;
    property place_options: placeoptionsty read fplace_options 
                                      write setplace_options default [];
-//   property place_endmargin: boolean read fplace_endmargin 
-//                                         write setplace_endmargin;
-//   property place_endmargin: integer read fplace_endmargin write setplace_endmargin;
-//   property visible default true;
    property optionswidget default defaultgroupboxoptionswidget;
  end;
  
@@ -1007,7 +1004,11 @@ var
 begin
  result:= 0;
  for int1:= 0 to high(fwidgets) do begin
-  result:= result + twidget1(fwidgets[int1]).fwidgetrect.cx;
+  with twidget1(fwidgets[int1]) do begin
+   if (not(plo_noinvisible in fplace_options) or isvisible) then begin
+    result:= result + fwidgetrect.cx;
+   end;
+  end;
  end;
 end;
 
@@ -1017,7 +1018,11 @@ var
 begin
  result:= 0;
  for int1:= 0 to high(fwidgets) do begin
-  result:= result + twidget1(fwidgets[int1]).fwidgetrect.cy;
+  with twidget1(fwidgets[int1]) do begin
+   if (not(plo_noinvisible in fplace_options) or isvisible) then begin
+    result:= result + fwidgetrect.cy;
+   end;
+  end;
  end;
 end;
 
@@ -1028,10 +1033,14 @@ begin
  result:= bigint;
  for int1:= 0 to high(fwidgets) do begin
   with fwidgets[int1] do begin
-   if fwidgetrect.x < result then begin
+   if (not(plo_noinvisible in fplace_options) or isvisible) and 
+                                     (fwidgetrect.x < result) then begin
     result:= fwidgetrect.x;
    end;
   end;
+ end;
+ if result = bigint then begin
+  result:= 0;
  end;
 end;
 
@@ -1044,10 +1053,14 @@ begin
  for int1:= 0 to high(fwidgets) do begin
   with fwidgets[int1] do begin
    int2:= fwidgetrect.x + fwidgetrect.cx;
-   if int2 > result then begin
+   if (not(plo_noinvisible in fplace_options) or isvisible) and 
+                                     (int2 > result) then begin
     result:= int2;
    end;
   end;
+ end;
+ if result = -bigint then begin
+  result:= 0;
  end;
 end;
 
@@ -1058,10 +1071,14 @@ begin
  result:= bigint;
  for int1:= 0 to high(fwidgets) do begin
   with fwidgets[int1] do begin
-   if fwidgetrect.y < result then begin
+   if (not(plo_noinvisible in fplace_options) or isvisible) and 
+                                     (fwidgetrect.y < result) then begin
     result:= fwidgetrect.y;
    end;
   end;
+ end;
+ if result = bigint then begin
+  result:= 0;
  end;
 end;
 
@@ -1074,31 +1091,35 @@ begin
  for int1:= 0 to high(fwidgets) do begin
   with fwidgets[int1] do begin
    int2:= fwidgetrect.y + fwidgetrect.cy;
-   if int2 > result then begin
+   if (not (plo_noinvisible in fplace_options) or isvisible) and 
+                                     (int2 > result) then begin
     result:= int2;
    end;
   end;
+ end;
+ if result = -bigint then begin
+  result:= 0;
  end;
 end;
 
 procedure tlayouter.updatelayout;
 var
- ar1: widgetarty;
  ar2: integerarty;
  space,margin: integer;
  
- procedure calcarray(const awidth: integer; const amin,amax: integer);
+ procedure calcarray(const awidgets: widgetarty; const awidth: integer;
+                                 const amin,amax: integer);
  var
   int1,int2: integer;
   rea1,rea2: real;
  begin
   margin:= 0;
-  if high(fwidgets) > 0 then begin
+  if high(awidgets) > 0 then begin
    if plo_propmargin in fplace_options then begin
-    rea1:= awidth / (high(fwidgets)+2);
+    rea1:= awidth / (high(awidgets)+2);
    end
    else begin
-    rea1:= awidth / high(fwidgets);
+    rea1:= awidth / high(awidgets);
    end;
    if rea1 < amin then begin
     rea1:= amin;
@@ -1110,7 +1131,7 @@ var
     margin:= round(rea1);
    end;
    rea2:= rea1;
-   setlength(ar2,high(fwidgets));
+   setlength(ar2,high(awidgets));
    space:= 0;
    for int1:= 0 to high(ar2) do begin
     int2:= round(rea2);
@@ -1135,6 +1156,7 @@ var
  
 var
  int1,int2,int3,int4: integer;
+ ar1: widgetarty;
  
 begin
  if (componentstate * [csloading,csdestroying] = []) and 
@@ -1233,52 +1255,59 @@ begin
       end;
      end;
     end;
-    if (lao_placex in foptionslayout) and (fplace_mode <> wam_none) then begin
-     ar1:= copy(fwidgets);
-     sortwidgetsxorder(ar1,self);
-     int4:= childrenwidth;
-     calcarray(innerclientsize.cx - int4,fplace_mindist,fplace_maxdist);
-     if plo_endmargin in fplace_options then begin
-      placexorder(innerclientpos.x + margin,ar2,ar1,
-                                          innerclientframe.right + margin);
+    if (fplace_mode <> wam_none) and 
+            (foptionslayout * [lao_placex,lao_placey] <> []) then begin
+     if plo_noinvisible in fplace_options then begin
+      ar1:= getvisiblewidgets;
      end
      else begin
-      case fplace_mode of 
-       wam_start: begin
-        int3:= innerclientpos.x + margin;
-       end;
-       wam_center: begin
-        int3:= innerclientpos.x + (innerclientsize.cx - int4 - space) div 2;
-       end;
-       wam_end: begin
-        int3:= innerclientpos.x + innerclientsize.cx - int4 - space - margin;
-       end;
-      end;
-      placexorder(int3,ar2,ar1);
+      ar1:= copy(fwidgets);
      end;
-    end;
-    if (lao_placey in foptionslayout) and (fplace_mode <> wam_none) then begin
-     ar1:= copy(fwidgets);
-     sortwidgetsyorder(ar1,self);
-     int4:= childrenheight;
-     calcarray(innerclientsize.cy - int4,fplace_mindist,fplace_maxdist);
-     if plo_endmargin in fplace_options then begin
-      placeyorder(innerclientpos.y + margin,ar2,ar1,
-                                          innerclientframe.bottom + margin);
-     end
-     else begin
-      case fplace_mode of 
-       wam_start: begin
-        int3:= innerclientpos.y + margin;
+     if lao_placex in foptionslayout then begin
+      sortwidgetsxorder(ar1,self);
+      int4:= childrenwidth;
+      calcarray(ar1,innerclientsize.cx - int4,fplace_mindist,fplace_maxdist);
+      if plo_endmargin in fplace_options then begin
+       placexorder(innerclientpos.x + margin,ar2,ar1,
+                                           innerclientframe.right + margin);
+      end
+      else begin
+       case fplace_mode of 
+        wam_start: begin
+         int3:= innerclientpos.x + margin;
+        end;
+        wam_center: begin
+         int3:= innerclientpos.x + (innerclientsize.cx - int4 - space) div 2;
+        end;
+        wam_end: begin
+         int3:= innerclientpos.x + innerclientsize.cx - int4 - space - margin;
+        end;
        end;
-       wam_center: begin
-        int3:= innerclientpos.y + (innerclientsize.cy - int4 - space) div 2;
-       end;
-       wam_end: begin
-        int3:= innerclientpos.y + innerclientsize.cy - int4 - space - margin;
-       end;
+       placexorder(int3,ar2,ar1);
       end;
-      placeyorder(int3,ar2,ar1);
+     end;
+     if (lao_placey in foptionslayout) and (fplace_mode <> wam_none) then begin
+      sortwidgetsyorder(ar1,self);
+      int4:= childrenheight;
+      calcarray(ar1,innerclientsize.cy - int4,fplace_mindist,fplace_maxdist);
+      if plo_endmargin in fplace_options then begin
+       placeyorder(innerclientpos.y + margin,ar2,ar1,
+                                           innerclientframe.bottom + margin);
+      end
+      else begin
+       case fplace_mode of 
+        wam_start: begin
+         int3:= innerclientpos.y + margin;
+        end;
+        wam_center: begin
+         int3:= innerclientpos.y + (innerclientsize.cy - int4 - space) div 2;
+        end;
+        wam_end: begin
+         int3:= innerclientpos.y + innerclientsize.cy - int4 - space - margin;
+        end;
+       end;
+       placeyorder(int3,ar2,ar1);
+      end;
      end;
     end;
    end;

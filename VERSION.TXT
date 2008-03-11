@@ -1,4 +1,6 @@
 MSEide+MSEgui version history
+2008-03-11
+ twidget.taborderedwidgets -> gettaborderedwidgets.
 2008-03-09
  tcustomcaptionframe.captiondistouter -> options cfo_captiondistouter.
  tcustomcaptionframe.captionnoclip -> options cfo_captionnoclip.
