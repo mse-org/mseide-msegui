@@ -1026,22 +1026,10 @@ begin
         add(comp2);
        end;
       end;
-      (*
-      reader.Readcomponents(comp1,nil,{$ifdef FPC}@{$endif}dosetactcomp);
-      if factcomp <> nil then begin
-       designer.doswapmethodpointers(factcomp,true);
-       if assigned(initproc) then begin
-        initproc(factcomp,aparent);
-       end;
-       add(factcomp);
-       tcomponent1(factcomp).GetChildren({$ifdef FPC}@{$endif}doadd,factcomp.owner);
-      end;
-      *)
       if assigned(initproc) then begin
        for int1:= comp1.componentcount - 1 downto 0 do begin
         comp2:= comp1.components[int1]; 
         if comp2.getparentcomponent = nil then begin
-//         comp1.removecomponent(comp2);
          initproc(comp2,aparent);
         end;
        end;
@@ -1053,7 +1041,8 @@ begin
      end;
     end;
     if pastingmodulepo <> nil then begin
-     designer.checkmethodtypes(pastingmodulepo,false,comp1);  //////////todo: quiet not working
+     designer.checkmethodtypes(pastingmodulepo,false,comp1);  
+     //////////todo: quiet not working
     end;
    finally
     binstream.Free;

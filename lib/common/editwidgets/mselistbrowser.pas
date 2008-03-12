@@ -904,7 +904,8 @@ procedure tlistcol.setselected(const row: integer; value: boolean);
   item: tlistitem;
  begin
   item:= items[index];
-  if item <> nil then begin
+  if (item <> nil) and (item.selected <> value) then begin
+   include(tcustomgrid1(fgrid).fstate,gs_selectionchanged);
    item.selected:= value;
   end;
  end;

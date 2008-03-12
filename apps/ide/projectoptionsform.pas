@@ -60,6 +60,7 @@ type
   targetfile: filenamety;
   messageoutputfile: filenamety;
   makecommand: filenamety;
+  makedir: filenamety;
   debugcommand: filenamety;
   debugoptions: msestring;
   debugtarget: filenamety;
@@ -367,6 +368,8 @@ type
    gdbdownload: tbooleanedit;
    gdbsimulator: tbooleanedit;
    gdbprocessor: tdropdownlistedit;
+   makedir: tfilenameedit;
+   tsplitter1: tsplitter;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -629,6 +632,7 @@ begin
    li.expandmacros(targetfile);
    li.expandmacros(messageoutputfile);
    li.expandmacros(makecommand);
+   li.expandmacros(makedir);
    li.expandmacros(debugcommand);
    li.expandmacros(debugoptions);
    li.expandmacros(debugtarget);
@@ -870,6 +874,7 @@ begin
   objpref:= '-Fo';
   targpref:= '-o';
   makecommand:= '${COMPILER}';
+  makedir:= '';
   debugcommand:= '${DEBUGGER}';
   debugoptions:= '';
   debugtarget:= '';
@@ -1047,6 +1052,7 @@ begin
   updatevalue('closemessages',closemessages);
   updatevalue('checkmethods',checkmethods);
   updatevalue('makecommand',makecommand);
+  updatevalue('makedir',makedir);
   updatevalue('debugcommand',debugcommand);
   updatevalue('debugoptions',debugoptions);
   updatevalue('debugtarget',debugtarget);
@@ -1256,6 +1262,7 @@ begin
   fo.inheritedform.value:= newinheritedform;
 
   fo.makecommand.value:= makecommand;
+  fo.makedir.value:= makedir;
   fo.debugcommand.value:= debugcommand;
   fo.debugoptions.value:= debugoptions;
   fo.debugtarget.value:= debugtarget;
@@ -1433,6 +1440,7 @@ begin
   newinheritedform:= fo.inheritedform.value;
   
   makecommand:= fo.makecommand.value;
+  makedir:= fo.makedir.value;
   debugcommand:= fo.debugcommand.value;
   debugoptions:= fo.debugoptions.value;
   debugtarget:= fo.debugtarget.value;
@@ -1698,10 +1706,8 @@ var
 begin
  placeyorder(0,[0,0,0,0,15],[mainfile,targetfile,makecommand,messageoutputfile,
                     defaultmake,makegroupbox],0);
-// int1:= makesplitter.bounds_y;
-// placeyorder(0,[0],[makeoptionsgrid,makesplitter,unitdirgrid],0);
-// makesplitter.move(makepoint(0,int1-makesplitter.bounds_y)); //restore stat value
  aligny(wam_center,[targetfile,targpref]);
+ aligny(wam_center,[makecommand,makedir]);
  int1:= aligny(wam_center,[defaultmake,showcommandline]);
  with copymessages do begin
   bounds_y:= int1 - bounds_cy - 2;

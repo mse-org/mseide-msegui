@@ -140,27 +140,35 @@ constructor tmaker.create(atag: integer);
 var
  int1: integer;
  str3: string;
+ wdbefore: filenamety;
 begin
  with projectoptions,texp do begin
   if copymessages and (messageoutputfile <> '') then begin
    fmessagefile:= ttextstream.create(messageoutputfile,fm_create);
   end;
- end;
- messagepipe:= tpipereader.create;
- messagepipe.oninputavailable:= {$ifdef FPC}@{$endif}inputavailable;
- messagepipe.onpipebroken:= {$ifdef FPC}@{$endif}dofinished;
- messagefo.messages.rowcount:= 0;
- procid:= invalidprochandle;
- int1:= 1; //defaulterror
- str3:= buildmakecommandline(atag);
- try
-  procid:= execmse2(str3,nil,messagepipe,messagepipe,false,-1,true,false,true);
- except
-  on e: exception do begin
-   if e is eoserror then begin
-    int1:= eoserror(e).error;
+  messagepipe:= tpipereader.create;
+  messagepipe.oninputavailable:= {$ifdef FPC}@{$endif}inputavailable;
+  messagepipe.onpipebroken:= {$ifdef FPC}@{$endif}dofinished;
+  messagefo.messages.rowcount:= 0;
+  procid:= invalidprochandle;
+  int1:= 1; //defaulterror
+  str3:= buildmakecommandline(atag);
+  if makedir <> '' then begin
+   wdbefore:= getcurrentdir;
+   setcurrentdir(makedir);
+  end;
+  try
+   procid:= execmse2(str3,nil,messagepipe,messagepipe,false,-1,true,false,true);
+  except
+   on e: exception do begin
+    if e is eoserror then begin
+     int1:= eoserror(e).error;
+    end;
+    application.handleexception(nil,'Runerror with "'+str3+'": ');
    end;
-   application.handleexception(nil,'Runerror with "'+str3+'": ');
+  end;
+  if makedir <> '' then begin
+   setcurrentdir(wdbefore);
   end;
  end;
  if procid <> invalidprochandle then begin

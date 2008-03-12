@@ -628,21 +628,23 @@ begin
    showrect.cy:= caretrect.cy;
 
    po1:= nullpoint;
-   with showrect do begin    //bring caret into clientrect;
-    if x < ftextrect.x then begin
-     po1.x:= ftextrect.x - x;
-    end
-    else begin
-     if x + cx > ftextrect.x + ftextrect.cx then begin
-      po1.x:= ftextrect.x + ftextrect.cx - x -cx;
+   if ies_focused in fstate then begin
+    with showrect do begin    //bring caret into clientrect;
+     if x < ftextrect.x then begin
+      po1.x:= ftextrect.x - x;
+     end
+     else begin
+      if x + cx > ftextrect.x + ftextrect.cx then begin
+       po1.x:= ftextrect.x + ftextrect.cx - x -cx;
+      end;
      end;
-    end;
-    if y < ftextrect.y then begin
-     po1.y:= ftextrect.y - y;
-    end
-    else begin
-     if y + cy > ftextrect.y + ftextrect.cy then begin
-      po1.y:= ftextrect.y + ftextrect.cy - y -cy;
+     if y < ftextrect.y then begin
+      po1.y:= ftextrect.y - y;
+     end
+     else begin
+      if y + cy > ftextrect.y + ftextrect.cy then begin
+       po1.y:= ftextrect.y + ftextrect.cy - y -cy;
+      end;
      end;
     end;
     if not isnullpoint(po1) then begin

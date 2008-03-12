@@ -154,7 +154,7 @@ type
    property sourcehintwidget: twidget read fsourcehintwidget write setsourcehintwidget;
  end;
 
-  errorlevelty = (el_all,el_hint,el_warning,el_error);
+  errorlevelty = (el_none,el_all,el_note,el_hint,el_warning,el_error);
 
 var
  sourcefo: tsourcefo;
@@ -182,12 +182,14 @@ var
 begin
  apage:= nil;
  result:= false;
+ col:= 0;
+ row:= 0;
  splitstring(text,ar1,msechar('('));
- if length(ar1) > 1 then begin
+ if length(ar1) > 1 then begin         //try FPC
   splitstring(ar1[1],ar2,msechar(')'));
   if length(ar2) > 1 then begin
    splitstring(ar2[0],ar3,msechar(','));
-   if (length(ar3) >= 1) then begin
+   if (high(ar3) >= 0) then begin
     if startsstr(' Error:',ar2[1]) or startsstr(' Fatal:',ar2[1]) then begin
      alevel:= el_error;
     end
@@ -200,27 +202,64 @@ begin
        alevel:= el_hint;
       end
       else begin
-       alevel:= el_all;
+       if startsstr(' Note:',ar2[1]) then begin
+        alevel:= el_hint;
+       end
+       else begin
+        alevel:= el_all;
+       end;
       end;
      end;
     end;
     if alevel >= minlevel then begin
      try
-      result:= true;
       row:= strtoint(ar3[0]) - 1;
       if high(ar3) >= 1 then begin
        col:= strtoint(ar3[1]) - 1;
-      end
-      else begin
-       col:= 0;
       end;
       apage:= sourcefo.showsourceline(ar1[0],row,col,true);
+      result:= true;
      except
      end;
     end;
    end;
   end;
  end;
+ // try gcc
+ ar1:= nil;
+ ar2:= nil;
+ splitstring(text,ar1,':');
+ if high(ar1) > 2 then begin
+  if (ar1[2] = ' error') or (ar1[3] = ' error') then begin
+   alevel:= el_error;
+  end
+  else begin
+   if (ar1[2] = ' warning') or (ar1[3] = ' warning') then begin
+    alevel:= el_warning;
+   end
+   else begin
+    if (ar1[2] = ' hint') or (ar1[3] = ' hint') then begin
+     alevel:= el_hint;
+    end
+    else begin
+     alevel:= el_all;
+    end;
+   end;
+  end;
+  if alevel >= minlevel then begin
+   try
+    result:= true;
+    row:= strtoint(ar1[1]) - 1;
+    try
+     col:= strtoint(ar1[2]) - 1;
+    except
+     col:= 0;
+    end;
+    apage:= sourcefo.showsourceline(ar1[0],row,col,true);
+   except
+   end; 
+  end;
+ end; 
 end;
 
 { tnaviglist }
