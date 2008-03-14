@@ -184,7 +184,6 @@ type
    fplace_maxdist: integer;
    falign_glue: widgetalignmodety;
    fplace_mode: widgetalignmodety;
-//   fplace_endmargin: boolean;
    fplace_options: placeoptionsty;
    procedure setoptionslayout(const avalue: layoutoptionsty);
    procedure setalign_mode(const avalue: widgetalignmodety);
@@ -225,6 +224,7 @@ type
    property place_options: placeoptionsty read fplace_options 
                                      write setplace_options default [];
    property optionswidget default defaultgroupboxoptionswidget;
+   property visible default true;
  end;
  
 implementation

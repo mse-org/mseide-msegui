@@ -882,10 +882,10 @@ type
 
 procedure synccaptiondistx(const awidgets: widgetarty);
                 //adjusts captiondist for equal distouter
-                //don't set cfo_captiondistouter
+                //don't set cfo_captiondistouter!
 procedure synccaptiondisty(const awidgets: widgetarty);
                 //adjusts captiondist for equal distouter
-                //don't set cfo_captiondistouter
+                //don't set cfo_captiondistouter!
                 
 procedure getdropdownpos(const parent: twidget; var rect: rectty);
 
