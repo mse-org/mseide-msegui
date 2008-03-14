@@ -307,7 +307,6 @@ type
    toolfile: tfilenameedit;
    tspacer1: tspacer;
    targpref: tstringedit;
-   tspacer2: tspacer;
    filefiltergrid: tstringgrid;
    toolmenu: tstringedit;
    toolparam: tstringedit;
@@ -370,6 +369,7 @@ type
    gdbprocessor: tdropdownlistedit;
    makedir: tfilenameedit;
    tsplitter1: tsplitter;
+   tsplitter2: tsplitter;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -1704,9 +1704,9 @@ procedure tprojectoptionsfo.makepageonchildscaled(const sender: TObject);
 var
  int1: integer;
 begin
- placeyorder(0,[0,0,0,0,15],[mainfile,targetfile,makecommand,messageoutputfile,
+ placeyorder(0,[0,0,0,15],[mainfile,makecommand,messageoutputfile,
                     defaultmake,makegroupbox],0);
- aligny(wam_center,[targetfile,targpref]);
+ aligny(wam_center,[mainfile,targetfile,targpref]);
  aligny(wam_center,[makecommand,makedir]);
  int1:= aligny(wam_center,[defaultmake,showcommandline]);
  with copymessages do begin

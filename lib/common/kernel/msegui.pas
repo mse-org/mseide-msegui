@@ -1865,13 +1865,13 @@ procedure sortwidgetsxorder(var awidgets: widgetarty; const parent: twidget = ni
 procedure sortwidgetsyorder(var awidgets: widgetarty; const parent: twidget = nil);
 
 procedure syncmaxautosize(const widgets: array of twidget);
-procedure syncminframewidth(const awidgets: array of twidget;
-                               const awidth: integer = -1);
+procedure syncpaintwidth(const awidgets: array of twidget;
+                               const awidgetwidth: integer = -1);
                                //biggest if < 0
-      //synchronizes paintwidth with paintwidth of largest outer framewidth 
+      //synchronizes paintwidth with paintwidth of largest outer framewidth
       //(ex. largest caption)
-procedure syncminframeheight(const awidgets: array of twidget;
-                               const aheight: integer = -1);
+procedure syncpaintheight(const awidgets: array of twidget;
+                               const awidgetheight: integer = -1);
                                //biggest if < 0
       //synchronizes paintheight with paintheight of largest outer framewidth 
       //(ex. largest caption)
@@ -2364,8 +2364,8 @@ begin
  end;
 end;
 
-procedure syncminframewidth(const awidgets: array of twidget;
-                   const awidth: integer = -1);
+procedure syncpaintwidth(const awidgets: array of twidget;
+                            const awidgetwidth: integer = -1);
 var
  int1,int2,int3: integer;
  widget1: twidget;
@@ -2387,12 +2387,12 @@ begin
     int2:= int3;
    end;
   end;
-  if awidth >= 0 then begin
-   with widget1 do begin
+  if awidgetwidth >= 0 then begin
+   with widget1 do begin //biggest frame
     if anchors * [an_left,an_right] = [an_right] then begin
-     bounds_x:= bounds_x - awidth + bounds_cx;
+     bounds_x:= bounds_x - awidgetwidth + bounds_cx;
     end;
-    bounds_cx:= awidth;
+    bounds_cx:= awidgetwidth;
    end;
   end;
   int2:= widget1.bounds_cx - int2; //min frame width
@@ -2414,8 +2414,8 @@ begin
  end;
 end;
 
-procedure syncminframeheight(const awidgets: array of twidget;
-                   const aheight: integer = -1);
+procedure syncpaintheight(const awidgets: array of twidget;
+                   const awidgetheight: integer = -1);
 var
  int1,int2,int3: integer;
  widget1: twidget;
@@ -2437,12 +2437,12 @@ begin
     int2:= int3;
    end;
   end;
-  if aheight >= 0 then begin
+  if awidgetheight >= 0 then begin
    with widget1 do begin
     if anchors * [an_top,an_bottom] = [an_bottom] then begin
-     bounds_y:= bounds_y - aheight + bounds_cy;
+     bounds_y:= bounds_y - awidgetheight + bounds_cy;
     end;
-    bounds_cy:= aheight;
+    bounds_cy:= awidgetheight;
    end;
   end;
   int2:= widget1.bounds_cy - int2; //min frame width

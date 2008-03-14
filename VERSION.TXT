@@ -1,4 +1,7 @@
 MSEide+MSEgui version history
+2008-03-14
+ syncminframewidth -> syncpaintwidth.
+ syncminframeheight -> syncpaintheight.
 2008-03-11
  twidget.taborderedwidgets -> gettaborderedwidgets.
 2008-03-09

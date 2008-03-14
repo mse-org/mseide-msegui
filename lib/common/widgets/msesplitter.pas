@@ -171,7 +171,7 @@ type
  placeoptionty = (plo_noinvisible,
                   plo_endmargin,plo_propmargin,plo_syncmaxautosize,
                   plo_synccaptiondistx,plo_synccaptiondisty,
-                  plo_syncminframewidth,plo_syncminframeheight);
+                  plo_syncpaintwidth,plo_syncpaintheight);
  placeoptionsty = set of placeoptionty;
  
  tlayouter = class(tspacer)
@@ -1169,11 +1169,21 @@ begin
     if plo_syncmaxautosize in fplace_options then begin
      syncmaxautosize(fwidgets);
     end;
-    if plo_syncminframewidth in fplace_options then begin
-     syncminframewidth(fwidgets);
+    if plo_syncpaintwidth in fplace_options then begin
+     int1:= -1;
+     if (lao_alignx in foptionslayout) and 
+                              (falign_glue in [wam_start,wam_end]) then begin
+      int1:= innerclientsize.cx;
+     end;
+     syncpaintwidth(fwidgets,int1);
     end;
-    if plo_syncminframeheight in fplace_options then begin
-     syncminframeheight(fwidgets);
+    if plo_syncpaintheight in fplace_options then begin
+     int1:= -1;
+     if (lao_aligny in foptionslayout) and
+                         (falign_glue in [wam_start,wam_end]) then begin
+      int1:= innerclientsize.cy;
+     end;
+     syncpaintheight(fwidgets);
     end;
     if plo_synccaptiondistx in fplace_options then begin
      synccaptiondistx(fwidgets);
