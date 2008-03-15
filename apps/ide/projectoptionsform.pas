@@ -361,7 +361,6 @@ type
    ttabpage16: ttabpage;
    tlayouter2: tlayouter;
    gdbservercommand: tfilenameedit;
-   remoteconnection: tstringedit;
    uploadcommand: tfilenameedit;
    tlayouter1: tlayouter;
    gdbdownload: tbooleanedit;
@@ -370,6 +369,11 @@ type
    makedir: tfilenameedit;
    tsplitter1: tsplitter;
    tsplitter2: tsplitter;
+   tsplitter3: tsplitter;
+   tspacer2: tspacer;
+   tsplitter4: tsplitter;
+   tsplitter5: tsplitter;
+   remoteconnection: tstringedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -401,6 +405,7 @@ type
    procedure copycolorcode(const sender: TObject);
    procedure downloadchange(const sender: TObject);
    procedure processorchange(const sender: TObject);
+   procedure copymessagechanged(const sender: TObject);
   private
    procedure activegroupchanged;
  end;
@@ -1708,11 +1713,12 @@ begin
                     defaultmake,makegroupbox],0);
  aligny(wam_center,[mainfile,targetfile,targpref]);
  aligny(wam_center,[makecommand,makedir]);
+ aligny(wam_center,[messageoutputfile,copymessages]);
  int1:= aligny(wam_center,[defaultmake,showcommandline]);
- with copymessages do begin
+ with checkmethods do begin
   bounds_y:= int1 - bounds_cy - 2;
  end;
- checkmethods.bounds_y:= copymessages.bounds_y;
+ checkmethods.bounds_y:= checkmethods.bounds_y;
  with closemessages do begin
   bounds_y:= int1;
  end;
@@ -1816,6 +1822,11 @@ begin
  else begin
   gdbsimulator.enabled:= true;
  end;
+end;
+
+procedure tprojectoptionsfo.copymessagechanged(const sender: TObject);
+begin
+ messageoutputfile.enabled:= copymessages.value;
 end;
 
 end.

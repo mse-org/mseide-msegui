@@ -50,7 +50,7 @@ procedure createcpufo;
 implementation
 uses
  cpuform_mfm,main,sysutils,mseformatstr,msebits,msestrings,msegraphutils,
- cpui386form,cpuarmform,projectoptionsform;
+ cpui386form,cpuarmform,cpucpu32form,projectoptionsform;
 var
  currentproc: processorty;
   
@@ -66,6 +66,9 @@ begin
    end;
    pro_arm: begin
     application.createform(tcpuarmfo,cpufo);
+   end;
+   pro_cpu32: begin
+    application.createform(tcpucpu32fo,cpufo);
    end;
    else begin
     application.createform(tcpufo,cpufo);

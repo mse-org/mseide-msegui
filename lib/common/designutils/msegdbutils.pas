@@ -27,14 +27,14 @@ type
  sigflagty = (sfl_internal,sfl_stop,sfl_handle);
  sigflagsty = set of sigflagty;
  
- processorty = (pro_i386,pro_arm);
+ processorty = (pro_i386,pro_arm,pro_cpu32);
 
 const
  gdberrortexts: array[gdbresultty] of string =
           ('','Error','Timeout','Data error','Message','Target running',
            'Write error');
  niltext = 'nil';
- processornames: array[processorty] of ansistring = ('i386','arm');
+ processornames: array[processorty] of ansistring = ('i386','arm','cpu32');
  simulatorprocessors = [pro_arm];
  
 type
@@ -504,10 +504,13 @@ begin
   if text^ = '"' then begin
    po1:= text;
    repeat
-    inc(po1);
     if po1^ = '\' then begin
-     inc(po1,2);
+     inc(po1);
+     if po1^ = #0 then begin
+      break;
+     end;
     end;
+    inc(po1);
    until (po1^ = '"') or (po1^ = #0);
    if po1^ <> #0 then begin
     text:= po1+1;
