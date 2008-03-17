@@ -1409,9 +1409,10 @@ type
 
  windowstatety = (tws_posvalid,tws_sizevalid,tws_windowvisible,
                   tws_modal,tws_needsdefaultpos,
-                  tws_closing,tws_globalshortcuts,tws_localshortcuts,
+                  tws_closing,tws_painting,tws_activating,
+                  tws_globalshortcuts,tws_localshortcuts,
                   tws_buttonendmodal,tws_grouphidden,tws_groupminimized,
-                  tws_grab,tws_painting,tws_activatelocked,
+                  tws_grab,tws_activatelocked,
                   tws_canvasoverride);
  windowstatesty = set of windowstatety;
 
@@ -1445,6 +1446,7 @@ type
    fstate: windowstatesty;
    ffocuscount: cardinal; //for recursive setwidgetfocus
    factivecount: cardinal; //for recursive activate,deactivate
+   factivating: integer;
    fmoving: integer;
    ffocusedwidget: twidget;
    fmodalinfopo: pmodalinfoty;
@@ -1479,7 +1481,6 @@ type
    procedure sizeconstraintschanged;
    procedure createwindow;
    procedure checkwindow(windowevent: boolean);
-//   procedure destroywindow;
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); virtual;
                                       //nil if from application
    procedure show(windowevent: boolean);
@@ -1563,6 +1564,7 @@ type
    function haswinid: boolean;
    function state: windowstatesty;
    function visible: boolean;
+   function activating: boolean; //in internalactivate proc
    function normalwindowrect: rectty;
    property updateregion: regionty read fupdateregion;
    function updaterect: rectty;
@@ -10039,6 +10041,11 @@ begin
  end;
 end;
 
+function twindow.activating: boolean; //in internalactivate proc
+begin
+ result:= factivating > 0;
+end;
+
 procedure twindow.internalactivate(const windowevent: boolean;
                          const force: boolean = false);
 
@@ -10060,58 +10067,60 @@ var
  widgetar: widgetarty;
  int1: integer;
 begin
- if appinst.finactivewindow = self then begin
-  appinst.finactivewindow:= nil;
- end;
- activewindowbefore:= appinst.factivewindow;
- show(windowevent);
- widgetar:= nil; //compilerwarning
- if  activewindowbefore <> self then begin
-  if force or (appinst.fmodalwindow = nil) or (appinst.fmodalwindow = self) or 
-                        (ftransientfor = appinst.fmodalwindow) then begin
-   if (ffocusedwidget = nil) and fowner.canfocus then begin
-    fowner.setfocus(true);
-    exit;
-   end;
-   if activewindowbefore <> nil then begin
-    activewindowbefore.deactivate;
-   end;
-   if appinst.factivewindow = nil then begin
-    if not (ws_active in fowner.fwidgetstate) then begin
-     if not (tws_activatelocked in fstate) then begin
-      inc(factivecount);
-      activecountbefore:= factivecount;
-      if ffocusedwidget <> nil then begin
-       widgetar:= ffocusedwidget.getrootwidgetpath;
-       for int1:= high(widgetar) downto 0 do begin
-        widgetar[int1].internaldoactivate;
-        if factivecount <> activecountbefore then begin
-         exit;
+ inc(factivating);
+ try
+  if appinst.finactivewindow = self then begin
+   appinst.finactivewindow:= nil;
+  end;
+  activewindowbefore:= appinst.factivewindow;
+  show(windowevent);
+  widgetar:= nil; //compilerwarning
+  if  activewindowbefore <> self then begin
+   if force or (appinst.fmodalwindow = nil) or (appinst.fmodalwindow = self) or 
+                         (ftransientfor = appinst.fmodalwindow) then begin
+    if (ffocusedwidget = nil) and fowner.canfocus then begin
+     fowner.setfocus(true);
+     exit;
+    end;
+    if activewindowbefore <> nil then begin
+     activewindowbefore.deactivate;
+    end;
+    if appinst.factivewindow = nil then begin
+     if not (ws_active in fowner.fwidgetstate) then begin
+      if not (tws_activatelocked in fstate) then begin
+       inc(factivecount);
+       activecountbefore:= factivecount;
+       if ffocusedwidget <> nil then begin
+        widgetar:= ffocusedwidget.getrootwidgetpath;
+        for int1:= high(widgetar) downto 0 do begin
+         widgetar[int1].internaldoactivate;
+         if factivecount <> activecountbefore then begin
+          exit;
+         end;
         end;
        end;
       end;
-     end;
-     appinst.factivewindow:= self;
-//     if factivecount <> activecountbefore then begin
-//      exit;
-//     end;
-     gui_setimefocus(fwindow);
-     if not windowevent then begin
-      setwinfoc;
-     end
-     else begin
-      appinst.ffocuslockwindow:= nil;
+      appinst.factivewindow:= self;
+      gui_setimefocus(fwindow);
+      if not windowevent then begin
+       setwinfoc;
+      end
+      else begin
+       appinst.ffocuslockwindow:= nil;
+      end;
      end;
     end;
+    appinst.fonactivechangelist.doactivechange(activewindowbefore,self);
+   end
+   else begin
+    appinst.fwantedactivewindow:= self;
    end;
-   appinst.fonactivechangelist.doactivechange(activewindowbefore,self);
   end
   else begin
-   appinst.fwantedactivewindow:= self;
+   setwinfoc;
   end;
- end
- else begin
-  setwinfoc;
+ finally
+  dec(factivating);
  end;
 end;
 

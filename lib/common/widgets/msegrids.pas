@@ -8197,7 +8197,8 @@ function tcustomgrid.showcaretrect(const arect: rectty;
 var
  rect1: rectty;
 begin
- if not (gs_cellexiting in fstate) and (fnoshowcaretrect = 0) and
+ if not window.activating and not (gs_cellexiting in fstate) and 
+   (fnoshowcaretrect = 0) and
    intersectrect(inflaterect(arect,aframe),cellrect(ffocusedcell),rect1) then begin
   result:= showrect(rect1,cep_nearest,noscrollingcol);
  end
