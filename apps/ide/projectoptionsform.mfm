@@ -32,7 +32,7 @@ object projectoptionsfo: tprojectoptionsfo
     frame.dummy = 0
     anchors = [an_top, an_bottom]
     taborder = 1
-    activepageindex = 2
+    activepageindex = 1
     tab_frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
     tab_frame.dummy = 0
     tab_size = 19
@@ -665,6 +665,7 @@ object projectoptionsfo: tprojectoptionsfo
       frame.dummy = 0
       anchors = [an_left, an_top, an_right, an_bottom]
       taborder = 4
+      visible = True
       caption = '&Debugger'
       onchildscaled = debuggeronchildscaled
       object stoponexception: tbooleanedit
@@ -726,7 +727,7 @@ object projectoptionsfo: tprojectoptionsfo
       object debugoptions: tstringedit
         bounds_x = 1
         bounds_y = 57
-        bounds_cx = 609
+        bounds_cx = 610
         bounds_cy = 39
         frame.caption = 'Debug &options'
         frame.captionoffset = 3
@@ -1224,10 +1225,10 @@ object projectoptionsfo: tprojectoptionsfo
             end
           end
           object tlayouter1: tlayouter
-            bounds_x = 7
+            bounds_x = 1
             bounds_y = 92
-            bounds_cx = 189
-            bounds_cy = 17
+            bounds_cx = 464
+            bounds_cy = 39
             taborder = 1
             optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
             linkbottom = remoteconnection
@@ -1237,8 +1238,8 @@ object projectoptionsfo: tprojectoptionsfo
             place_mindist = 10
             place_maxdist = 10
             object gdbdownload: tbooleanedit
-              bounds_x = 0
-              bounds_y = 0
+              bounds_x = 275
+              bounds_y = 20
               bounds_cx = 104
               bounds_cy = 17
               frame.caption = 'gdb download'
@@ -1252,8 +1253,8 @@ object projectoptionsfo: tprojectoptionsfo
               onchange = downloadchange
             end
             object gdbsimulator: tbooleanedit
-              bounds_x = 114
-              bounds_y = 0
+              bounds_x = 389
+              bounds_y = 20
               bounds_cx = 75
               bounds_cy = 17
               frame.caption = 'Simulator'
@@ -1266,6 +1267,31 @@ object projectoptionsfo: tprojectoptionsfo
               )
               taborder = 1
               onchange = downloadchange
+            end
+            object beforeload: tfilenameedit
+              bounds_x = 0
+              bounds_y = 0
+              bounds_cx = 265
+              bounds_cy = 39
+              frame.caption = 'Before load gdb script'
+              frame.button.imagenr = 17
+              frame.dummy = 0
+              frame.outerframe = (
+                0
+                18
+                0
+                0
+              )
+              taborder = 2
+              onshowhint = hintexpandedmacros
+              controller.filterlist.data = (
+                (
+                  'gdb Scripts'
+                  '*.gdb'
+                )
+              )
+              controller.options = [fdo_checkexist, fdo_savelastdir]
+              reffontheight = 15
             end
           end
           object gdbprocessor: tdropdownlistedit
@@ -1298,9 +1324,9 @@ object projectoptionsfo: tprojectoptionsfo
             reffontheight = 15
           end
           object remoteconnection: tstringedit
-            bounds_x = 0
-            bounds_y = 112
-            bounds_cx = 613
+            bounds_x = 1
+            bounds_y = 134
+            bounds_cx = 611
             bounds_cy = 39
             frame.caption = 'Connection'
             frame.captionoffset = 3
@@ -1312,7 +1338,7 @@ object projectoptionsfo: tprojectoptionsfo
               0
               0
             )
-            anchors = [an_top]
+            anchors = [an_left, an_top, an_right]
             taborder = 3
             hint = '"--tty DEVICE" to set target terminal'
             onshowhint = hintexpandedmacros
@@ -1374,7 +1400,6 @@ object projectoptionsfo: tprojectoptionsfo
       frame.dummy = 0
       anchors = [an_top, an_bottom]
       taborder = 6
-      visible = True
       caption = '&Make'
       onchildscaled = makepageonchildscaled
       object tspacer2: tspacer

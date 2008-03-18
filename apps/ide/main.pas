@@ -1042,6 +1042,7 @@ begin
   gdb.gdbdownload:= gdbdownload;
   gdb.simulator:= gdbsimulator;
   gdb.processorname:= gdbprocessor;
+  gdb.beforeload:= beforeload;
   gdb.startgdb(tosysfilepath(quotefilename(debugcommand))+ ' ' + debugoptions);
  end;
  updatesigsettings;

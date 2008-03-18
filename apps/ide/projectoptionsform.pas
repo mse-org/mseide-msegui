@@ -68,6 +68,7 @@ type
   uploadcommand: filenamety;
   gdbprocessor: msestring;
   gdbservercommand: filenamety;
+  beforeload: filenamety;
   sourcedirs: msestringarty;
   defines: msestringarty;
   unitdirs: msestringarty;
@@ -374,6 +375,7 @@ type
    tsplitter4: tsplitter;
    tsplitter5: tsplitter;
    remoteconnection: tstringedit;
+   beforeload: tfilenameedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -644,6 +646,7 @@ begin
    li.expandmacros(remoteconnection);
    li.expandmacros(uploadcommand);
    li.expandmacros(gdbservercommand);
+   li.expandmacros(beforeload);
    li.expandmacros(gdbprocessor);
    li.expandmacros(sourcedirs);
    li.expandmacros(defines);
@@ -889,6 +892,7 @@ begin
   gdbsimulator:= false;
   gdbprocessor:= 'i386';
   gdbservercommand:= '';
+  beforeload:= '';
   sourcefilemasks:= nil;
   syntaxdeffiles:= nil;
   filemasknames:= nil;
@@ -1067,6 +1071,7 @@ begin
   updatevalue('gdbsimulator',gdbsimulator);
   updatevalue('gdbprocessor',gdbprocessor);
   updatevalue('gdbservercommand',gdbservercommand);
+  updatevalue('beforeload',beforeload);
   updatevalue('defaultmake',defaultmake,1,maxdefaultmake+1);
   updatevalue('makeoptions',makeoptions);
   updatevalue('makeoptionson',makeoptionson);
@@ -1277,6 +1282,7 @@ begin
   fo.gdbsimulator.value:= gdbsimulator;
   fo.gdbprocessor.value:= gdbprocessor;
   fo.gdbservercommand.value:= gdbservercommand;
+  fo.gdbservercommand.value:= beforeload;
   fo.defaultmake.value:= lowestbit(defaultmake);
   fo.makeoptions.gridvalues:= makeoptions;
   for int1:= 0 to fo.makeoptionsgrid.rowhigh do begin
@@ -1455,6 +1461,7 @@ begin
   gdbsimulator:= fo.gdbsimulator.value;
   gdbprocessor:= fo.gdbprocessor.value;
   gdbservercommand:= fo.gdbservercommand.value;
+  beforeload:= fo.beforeload.value;
   defaultmake:= 1 shl fo.defaultmake.value;
   makeoptions:= fo.makeoptions.gridvalues;
   setlength(makeoptionson,fo.makeoptionsgrid.rowcount);
@@ -1805,8 +1812,7 @@ end;
 
 procedure tprojectoptionsfo.downloadchange(const sender: TObject);
 begin
- uploadcommand.enabled:= not gdbdownload.value;
- uploadcommand.enabled:= not gdbsimulator.value;
+ uploadcommand.enabled:= not gdbdownload.value and not gdbsimulator.value;
  gdbservercommand.enabled:= not gdbsimulator.value;
  remoteconnection.enabled:= not gdbsimulator.value;
  gdbdownload.enabled:= not gdbsimulator.value;

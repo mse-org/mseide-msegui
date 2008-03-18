@@ -132,12 +132,14 @@ begin
  end;
 end;
 
-procedure twatchfo.expresultonsetvalue(const sender: tobject; var avalue: msestring; var accept: boolean);
+procedure twatchfo.expresultonsetvalue(const sender: tobject; 
+                     var avalue: msestring; var accept: boolean);
 var
  str1: string;
 begin
  accept:= gdb.writepascalvariable(expression.value,avalue,str1) = gdb_ok;
  if accept then begin
+  refresh;
   avalue:= str1;
  end
  else begin

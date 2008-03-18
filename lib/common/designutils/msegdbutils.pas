@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -257,6 +257,7 @@ type
    fsimulator: boolean;
    flastconsoleoutput: ansistring;
    fprocessor: processorty;
+   fbeforeload: filenamety;
    procedure setstoponexception(const avalue: boolean);
    procedure checkactive;
    procedure resetexec;
@@ -282,13 +283,18 @@ type
                        const values: resultinfoarty);
    procedure dorun;
    function internalcommand(acommand: string): boolean;
-   function synccommand(const acommand: string; atimeout: integer = defaultsynctimeout): gdbresultty;
+   function synccommand(const acommand: string; 
+                         atimeout: integer = defaultsynctimeout): gdbresultty;
    function clicommand(const acommand: string; list: boolean = false;
                               timeout: integer = defaultsynctimeout): gdbresultty;
-   function getcliresult(const acommand: string; var aresult: stringarty): gdbresultty;
-   function getcliresultstring(const acommand: string; var aresult: string): gdbresultty;
-   function getclistring(const aname: string; const response: string; out aresult: string): boolean;
-   function getcliinteger(const aname: string; const response: string; out aresult: integer): boolean;
+   function getcliresult(const acommand: string; 
+                                       var aresult: stringarty): gdbresultty;
+   function getcliresultstring(const acommand: string;
+                                       var aresult: string): gdbresultty;
+   function getclistring(const aname: string;
+                         const response: string; out aresult: string): boolean;
+   function getcliinteger(const aname: string;
+                         const response: string; out aresult: integer): boolean;
 
    function decodelist(const noname: boolean; const inp: string;
                             var value: resultinfoarty): boolean;
@@ -320,6 +326,7 @@ type
    function togdbfilepath(const filename: filenamety): filenamety;
 
    procedure consolecommand(acommand: string);
+   function source(const afilename: filenamety): gdbresultty; //run script
    function micommand(const command: string; out values: resultinfoarty): gdbresultty;
                   //false on error or timeout, values = nil on timeout
    function geterrormessage(const aresult: gdbresultty): string;
@@ -477,6 +484,8 @@ type
    property gdbdownload: boolean read fgdbdownload write fgdbdownload;
    property simulator: boolean read fsimulator write fsimulator;
    property processor: processorty read fprocessor write fprocessor default pro_i386;
+   property beforeload: filenamety read fbeforeload write fbeforeload;
+                     //gdb script
    property onevent: gdbeventty read fonevent write fonevent;
    property onerror: gdbeventty read fonerror write fonerror;
  end;
@@ -1059,8 +1068,9 @@ begin
      if gs_downloading in fstate then begin
       with stopinfo do begin
        getintegervalue(values,'load-size',totalsent);
-       include(fstate,gs_downloaded);
        initproginfo;
+       fstate:= fstate + [gs_downloaded,gs_downloading];
+                //restore downloading flag;
       end;
      end;
     end;
@@ -1085,6 +1095,7 @@ begin
      fonerror(self,eventkind,values,stopinfo);
     end;
     if (eventkind = gek_done) and downloading then begin
+     exclude(fstate,gs_downloading);
      dorun;
     end;
    finally
@@ -1407,6 +1418,11 @@ begin
  fconsolesequence:= fsequence;
 end;
 
+function tgdbmi.source(const afilename: filenamety): gdbresultty;
+begin
+ result:= synccommand('source '+quotefilename(tosysfilepath(afilename)));
+end;
+
 function tgdbmi.synccommand(const acommand: string; 
                      atimeout: integer = defaultsynctimeout): gdbresultty;
 var
@@ -1572,13 +1588,18 @@ end;
 
 function tgdbmi.download: gdbresultty;
 begin
- if not internalcommand('-target-download') then begin
-  result:= gdb_writeerror;
- end
- else begin
-  include(fstate,gs_downloading);
- end;
  result:= gdb_ok;
+ if fbeforeload <> '' then begin
+  result:= source(fbeforeload);
+ end;
+ if result = gdb_ok then begin
+  if not internalcommand('-target-download') then begin
+   result:= gdb_writeerror;
+  end
+  else begin
+   include(fstate,gs_downloading);
+  end;
+ end;
 end;
 
 procedure tgdbmi.dorun;

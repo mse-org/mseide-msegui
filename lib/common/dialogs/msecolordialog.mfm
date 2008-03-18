@@ -29,16 +29,14 @@ object colordialogfo: tcolordialogfo
     frame.dummy = 0
     anchors = [an_left, an_top, an_bottom]
     taborder = 11
-    onsetvalue = redonsetvalue
-    direction = gd_up
     scrollbar.options = [sbo_moveauto]
     scrollbar.color = -2147483645
     scrollbar.colorpattern = -2147483642
     scrollbar.face.image.transparentcolor = -2147483648
     scrollbar.face.fade_pos.count = 2
     scrollbar.face.fade_pos.items = (
-       0.0000000000000000E+0000
-       1.0000000000000000E+0000
+      0.00000000000000000
+      1.00000000000000000
     )
     scrollbar.face.fade_color.count = 2
     scrollbar.face.fade_color.items = (
@@ -48,6 +46,8 @@ object colordialogfo: tcolordialogfo
     scrollbar.face.fade_direction = gd_up
     scrollbar.face.localprops = [fal_fadirection, fal_fatransparency]
     scrollbar.face.dummy = 0
+    onsetvalue = redonsetvalue
+    direction = gd_up
   end
   object slidergreen: tslider
     optionswidget = [ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -62,16 +62,14 @@ object colordialogfo: tcolordialogfo
     frame.dummy = 0
     anchors = [an_left, an_top, an_bottom]
     taborder = 12
-    onsetvalue = greenonsetvalue
-    direction = gd_up
     scrollbar.options = [sbo_moveauto]
     scrollbar.color = -2147483645
     scrollbar.colorpattern = -2147483642
     scrollbar.face.image.transparentcolor = -2147483648
     scrollbar.face.fade_pos.count = 2
     scrollbar.face.fade_pos.items = (
-       0.0000000000000000E+0000
-       1.0000000000000000E+0000
+      0.00000000000000000
+      1.00000000000000000
     )
     scrollbar.face.fade_color.count = 2
     scrollbar.face.fade_color.items = (
@@ -81,6 +79,8 @@ object colordialogfo: tcolordialogfo
     scrollbar.face.fade_direction = gd_up
     scrollbar.face.localprops = [fal_fadirection, fal_fatransparency]
     scrollbar.face.dummy = 0
+    onsetvalue = greenonsetvalue
+    direction = gd_up
   end
   object sliderblue: tslider
     optionswidget = [ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -95,16 +95,14 @@ object colordialogfo: tcolordialogfo
     frame.dummy = 0
     anchors = [an_left, an_top, an_bottom]
     taborder = 13
-    onsetvalue = blueonsetvalue
-    direction = gd_up
     scrollbar.options = [sbo_moveauto]
     scrollbar.color = -2147483645
     scrollbar.colorpattern = -2147483642
     scrollbar.face.image.transparentcolor = -2147483648
     scrollbar.face.fade_pos.count = 2
     scrollbar.face.fade_pos.items = (
-       0.0000000000000000E+0000
-       1.0000000000000000E+0000
+      0.00000000000000000
+      1.00000000000000000
     )
     scrollbar.face.fade_color.count = 2
     scrollbar.face.fade_color.items = (
@@ -114,20 +112,22 @@ object colordialogfo: tcolordialogfo
     scrollbar.face.fade_direction = gd_up
     scrollbar.face.localprops = [fal_fadirection, fal_fatransparency]
     scrollbar.face.dummy = 0
+    onsetvalue = blueonsetvalue
+    direction = gd_up
   end
   object red: tintegeredit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 220
-    bounds_y = 229
+    bounds_y = 227
     bounds_cx = 36
-    bounds_cy = 37
+    bounds_cy = 39
     color = -2147483645
     frame.caption = 'red'
     frame.captionpos = cp_top
     frame.dummy = 0
     frame.outerframe = (
       0
-      17
+      18
       0
       0
     )
@@ -135,43 +135,43 @@ object colordialogfo: tcolordialogfo
     taborder = 5
     onchange = rgbchange
     max = 255
-    reffontheight = 14
+    reffontheight = 15
   end
   object green: tintegeredit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 257
-    bounds_y = 229
-    bounds_cx = 36
-    bounds_cy = 37
+    bounds_x = 256
+    bounds_y = 227
+    bounds_cx = 39
+    bounds_cy = 39
     color = -2147483645
     frame.caption = 'green'
     frame.captionpos = cp_top
     frame.dummy = 0
     frame.outerframe = (
-      0
-      17
-      0
+      1
+      18
+      2
       0
     )
     anchors = [an_left, an_bottom]
     taborder = 6
     onchange = rgbchange
     max = 255
-    reffontheight = 14
+    reffontheight = 15
   end
   object blue: tintegeredit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 294
-    bounds_y = 229
+    bounds_y = 227
     bounds_cx = 36
-    bounds_cy = 37
+    bounds_cy = 39
     color = -2147483645
     frame.caption = 'blue'
     frame.captionpos = cp_top
     frame.dummy = 0
     frame.outerframe = (
       0
-      17
+      18
       0
       0
     )
@@ -179,7 +179,7 @@ object colordialogfo: tcolordialogfo
     taborder = 7
     onchange = rgbchange
     max = 255
-    reffontheight = 14
+    reffontheight = 15
   end
   object sliderhue: tslider
     optionswidget = [ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -194,21 +194,19 @@ object colordialogfo: tcolordialogfo
     frame.dummy = 0
     anchors = [an_left, an_top, an_bottom]
     taborder = 8
-    onsetvalue = hueonsetvalue
-    direction = gd_up
     scrollbar.options = [sbo_moveauto]
     scrollbar.color = -2147483645
     scrollbar.colorpattern = -2147483642
     scrollbar.face.image.transparentcolor = -2147483648
     scrollbar.face.fade_pos.count = 7
     scrollbar.face.fade_pos.items = (
-       0.0000000000000000E+0000
-       1.6666666599999999E-0001
-       3.3333333300000001E-0001
-       5.0000000000000000E-0001
-       6.6666665999999997E-0001
-       8.3333332999999998E-0001
-       1.0000000000000000E+0000
+      0.00000000000000000
+      0.16666666599999999
+      0.33333333300000001
+      0.50000000000000000
+      0.66666665999999997
+      0.83333332999999998
+      1.00000000000000000
     )
     scrollbar.face.fade_color.count = 7
     scrollbar.face.fade_color.items = (
@@ -223,6 +221,8 @@ object colordialogfo: tcolordialogfo
     scrollbar.face.fade_direction = gd_up
     scrollbar.face.localprops = [fal_fadirection, fal_fatransparency]
     scrollbar.face.dummy = 0
+    onsetvalue = hueonsetvalue
+    direction = gd_up
   end
   object slidersat: tslider
     optionswidget = [ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -237,16 +237,14 @@ object colordialogfo: tcolordialogfo
     frame.dummy = 0
     anchors = [an_left, an_top, an_bottom]
     taborder = 9
-    onsetvalue = satonsetvalue
-    direction = gd_up
     scrollbar.options = [sbo_moveauto]
     scrollbar.color = -2147483645
     scrollbar.colorpattern = -2147483642
     scrollbar.face.image.transparentcolor = -2147483648
     scrollbar.face.fade_pos.count = 2
     scrollbar.face.fade_pos.items = (
-       0.0000000000000000E+0000
-       1.0000000000000000E+0000
+      0.00000000000000000
+      1.00000000000000000
     )
     scrollbar.face.fade_color.count = 2
     scrollbar.face.fade_color.items = (
@@ -256,6 +254,8 @@ object colordialogfo: tcolordialogfo
     scrollbar.face.fade_direction = gd_up
     scrollbar.face.localprops = [fal_fadirection, fal_fatransparency]
     scrollbar.face.dummy = 0
+    onsetvalue = satonsetvalue
+    direction = gd_up
   end
   object sliderbright: tslider
     optionswidget = [ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -270,16 +270,14 @@ object colordialogfo: tcolordialogfo
     frame.dummy = 0
     anchors = [an_left, an_top, an_bottom]
     taborder = 10
-    onsetvalue = brightonsetvalue
-    direction = gd_up
     scrollbar.options = [sbo_moveauto]
     scrollbar.color = -2147483645
     scrollbar.colorpattern = -2147483642
     scrollbar.face.image.transparentcolor = -2147483648
     scrollbar.face.fade_pos.count = 2
     scrollbar.face.fade_pos.items = (
-       0.0000000000000000E+0000
-       1.0000000000000000E+0000
+      0.00000000000000000
+      1.00000000000000000
     )
     scrollbar.face.fade_color.count = 2
     scrollbar.face.fade_color.items = (
@@ -289,20 +287,22 @@ object colordialogfo: tcolordialogfo
     scrollbar.face.fade_direction = gd_up
     scrollbar.face.localprops = [fal_fadirection, fal_fatransparency]
     scrollbar.face.dummy = 0
+    onsetvalue = brightonsetvalue
+    direction = gd_up
   end
   object hue: tintegeredit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 109
-    bounds_y = 229
+    bounds_y = 227
     bounds_cx = 36
-    bounds_cy = 37
+    bounds_cy = 39
     color = -2147483645
     frame.caption = 'HUE'
     frame.captionpos = cp_top
     frame.dummy = 0
     frame.outerframe = (
       0
-      17
+      18
       0
       0
     )
@@ -310,21 +310,21 @@ object colordialogfo: tcolordialogfo
     taborder = 2
     onchange = hsbchange
     max = 359
-    reffontheight = 14
+    reffontheight = 15
   end
   object sat: tintegeredit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 145
-    bounds_y = 229
+    bounds_y = 227
     bounds_cx = 36
-    bounds_cy = 37
+    bounds_cy = 39
     color = -2147483645
     frame.caption = 'SAT'
     frame.captionpos = cp_top
     frame.dummy = 0
     frame.outerframe = (
       0
-      17
+      18
       0
       0
     )
@@ -332,21 +332,21 @@ object colordialogfo: tcolordialogfo
     taborder = 3
     onchange = hsbchange
     max = 100
-    reffontheight = 14
+    reffontheight = 15
   end
   object bright: tintegeredit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 181
-    bounds_y = 229
+    bounds_y = 227
     bounds_cx = 36
-    bounds_cy = 37
+    bounds_cy = 39
     color = -2147483645
     frame.caption = 'BRI'
     frame.captionpos = cp_top
     frame.dummy = 0
     frame.outerframe = (
       0
-      17
+      18
       0
       0
     )
@@ -354,14 +354,14 @@ object colordialogfo: tcolordialogfo
     taborder = 4
     onchange = hsbchange
     max = 100
-    reffontheight = 14
+    reffontheight = 15
   end
   object colorarea: tpaintbox
     optionswidget = [ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
     bounds_x = 56
     bounds_y = 8
     bounds_cx = 50
-    bounds_cy = 235
+    bounds_cy = 236
     color = -2147483645
     frame.colorframe = -1610612734
     frame.caption = 'new'
@@ -372,7 +372,7 @@ object colordialogfo: tcolordialogfo
       0
       0
       0
-      17
+      18
     )
     anchors = [an_left, an_top, an_bottom]
     taborder = 15
@@ -380,35 +380,35 @@ object colordialogfo: tcolordialogfo
   object ok: tbutton
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 223
-    bounds_y = 274
+    bounds_y = 273
     bounds_cx = 50
-    bounds_cy = 20
+    bounds_cy = 21
     anchors = [an_left, an_bottom]
     taborder = 16
     state = [as_default, as_localdefault, as_localcaption]
     caption = 'Ok'
     modalresult = mr_ok
-    reffontheight = 14
+    reffontheight = 15
   end
   object cancel: tbutton
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 279
-    bounds_y = 274
+    bounds_y = 273
     bounds_cx = 50
-    bounds_cy = 20
+    bounds_cy = 21
     anchors = [an_left, an_bottom]
     taborder = 1
     state = [as_localcaption]
     caption = 'Cancel'
     modalresult = mr_cancel
-    reffontheight = 14
+    reffontheight = 15
   end
   object colorareabefore: tpaintbox
     optionswidget = [ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
     bounds_x = 6
     bounds_y = 8
     bounds_cx = 50
-    bounds_cy = 235
+    bounds_cy = 236
     color = -2147483645
     frame.colorframe = -1610612734
     frame.caption = 'old'
@@ -419,17 +419,19 @@ object colordialogfo: tcolordialogfo
       0
       0
       0
-      17
+      18
     )
     anchors = [an_left, an_top, an_bottom]
     taborder = 14
   end
   object tgroupbox1: tgroupbox
+    optionsskin = [osk_noskin]
     bounds_x = 6
     bounds_y = 8
     bounds_cx = 100
     bounds_cy = 218
     color = -2147483645
+    frame.localprops = [frl_levelo, frl_leveli]
     frame.dummy = 0
     anchors = [an_left, an_top, an_bottom]
   end
