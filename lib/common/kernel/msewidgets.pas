@@ -516,6 +516,7 @@ type
   protected
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure showhint(var info: hintinfoty); override;
+   procedure getpopuppos(var apos: pointty); virtual;
    procedure dopopup(var amenu: tpopupmenu; var mouseinfo: mouseeventinfoty); virtual;
    procedure doenter; override;
    procedure doexit; override;
@@ -3575,7 +3576,16 @@ begin
    dummy:= nil;
    fillchar(mouseinfo,sizeof(mouseinfo),0);
    with mouseinfo do begin
-    pos:= translateclientpoint(application.mouse.pos,nil,self);
+    with application.caret do begin
+     if active then begin
+      mouseinfo.pos:= pos;
+      mouseinfo.pos.y:= mouseinfo.pos.y + height;
+     end
+     else begin
+      mouseinfo.pos:= rectcenter(clippedpaintrect);
+     end;
+    end;
+    getpopuppos(pos);
     button:= mb_none;
    end;
    dummy:= nil;
@@ -3680,6 +3690,11 @@ begin
  if canevent(tmethod(fondeactivate)) then begin
   fondeactivate(self);
  end;
+end;
+
+procedure tactionwidget.getpopuppos(var apos: pointty);
+begin
+ //dummy
 end;
 
 { tcustomeventwidget }

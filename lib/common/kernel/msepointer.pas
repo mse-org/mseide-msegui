@@ -111,6 +111,7 @@ type
    procedure hide;    //stops timer
    procedure show;    //restarts timer
    procedure move(const dist: pointty);
+   function active: boolean;
 
    property origin: pointty read forigin;
    property bounds: rectty read getbounds write setbounds;
@@ -574,6 +575,11 @@ end;
 procedure tcaret.move(const dist: pointty);
 begin
  pos:= addpoint(pos,dist);
+end;
+
+function tcaret.active: boolean;
+begin
+ result:= cas_active in fstate;
 end;
 
 end.
