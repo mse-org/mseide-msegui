@@ -557,13 +557,16 @@ var
  canvas: tcanvas;
  afont,font1: tfont;
  actioninfo: editnotificationinfoty;
- int1: integer;
+ int1,int2: integer;
+ posbefore: pointty;
 
 begin
  if (ws_destroying in fowner.widgetstate) or
                     (csdestroying in fowner.componentstate) then begin
   exit;  //no createwindow by getcanvas
  end;
+ posbefore:= finfo.dest.pos;
+ 
  if not (canedit or (oe_caretonreadonly in iedit(fintf).getoptionsedit)) then begin
   nocaret:= true;
  end;
@@ -574,7 +577,31 @@ begin
    wstr1:= finfo.text.text;
    finfo.text.text:= stringfromchar(fpasswordchar,length(wstr1));
   end;
-  fcaretpos:= textindextopos(canvas,finfo,fcurindex);
+  fcaretpos:= textindextopos(canvas,finfo,fcurindex); 
+             //updates finfo.res
+
+  int1:= finfo.dest.x + finfo.res.cx;
+  int2:= ftextrect.x + ftextrect.cx;
+  if int1 < int2 then begin //right margin
+   int1:= int2 - int1 + finfo.dest.x;
+   if int1 > ftextrect.x then begin
+    int1:= ftextrect.x;
+   end;
+   finfo.dest.x:= int1;
+  end;
+  int1:= finfo.dest.y + finfo.res.cy;
+  int2:= ftextrect.y + ftextrect.cy;
+  if int1 < int2 then begin //bottom margin
+   int1:= int2 - int1 + finfo.dest.y;
+   if int1 > ftextrect.y then begin
+    int1:= ftextrect.y;
+   end;
+   finfo.dest.y:= int1;
+  end;
+  fcaretpos.x:= fcaretpos.x + finfo.dest.x - posbefore.x; 
+  fcaretpos.y:= fcaretpos.y + finfo.dest.y - posbefore.y; 
+             //add shift
+
   if fpasswordchar <> #0 then begin
    finfo.text.text:= wstr1;
   end;
@@ -652,7 +679,6 @@ begin
      addpoint1(dest.pos,po1);
      addpoint1(caretrect.pos,po1);
      addpoint1(showrect.pos,po1);
-     invalidatetextrect(minint,bigint);
     end;
    end;
   end;
@@ -668,9 +694,11 @@ begin
     if fowner.hascaret then begin
      application.caret.hide;
     end;
-    invalidatetextrect(minint,bigint);
    end;
   end;
+ end;
+ if (finfo.dest.x <> posbefore.x) or (finfo.dest.y <> posbefore.y) then begin
+  invalidatetextrect(minint,bigint);
  end;
 end;
 
@@ -763,6 +791,7 @@ end;
 function tinplaceedit.nofullinvalidateneeded: boolean;
 begin
  result:= finfo.flags * [tf_wordbreak,tf_xcentered,tf_right] = [];
+             
 end;
 
 function tinplaceedit.getinsertstate: boolean;
@@ -892,9 +921,9 @@ begin
   richdelete(finfo.text,fcurindex+1,1);
  end;
  invalidatetext(true,bo1);
- if not bo1 then begin
+// if not bo1 then begin
   internalupdatecaret;
- end;
+// end;
 end;
 
 procedure tinplaceedit.dokeydown(var kinfo: keyeventinfoty);
