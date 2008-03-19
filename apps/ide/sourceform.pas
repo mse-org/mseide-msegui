@@ -179,6 +179,7 @@ var
  ar1,ar2,ar3: msestringarty;
  col,row: integer;
  alevel: errorlevelty;
+ int1: integer;
 begin
  apage:= nil;
  result:= false;
@@ -230,15 +231,18 @@ begin
  ar2:= nil;
  splitstring(text,ar1,':');
  if high(ar1) > 2 then begin
-  if (ar1[2] = ' error') or (ar1[3] = ' error') then begin
+  for int1:= 2 to 3 do begin
+   ar1[int1]:= struppercase(ar1[int1]);
+  end;
+  if (ar1[2] = ' ERROR') or (ar1[3] = ' ERROR') then begin
    alevel:= el_error;
   end
   else begin
-   if (ar1[2] = ' warning') or (ar1[3] = ' warning') then begin
+   if (ar1[2] = ' WARNING') or (ar1[3] = ' WARNING') then begin
     alevel:= el_warning;
    end
    else begin
-    if (ar1[2] = ' hint') or (ar1[3] = ' hint') then begin
+    if (ar1[2] = ' HINT') or (ar1[3] = ' HINT') then begin
      alevel:= el_hint;
     end
     else begin

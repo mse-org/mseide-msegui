@@ -291,13 +291,14 @@ function mseuppercase(const s: msestring): msestring;
 
 function msestartstr(const atext: msestring; trenner: msechar): msestring;
 
-
+//ascii only
 function charuppercase(const c: char): char; overload;
 function charuppercase(const c: msechar): msechar; overload;
 function struppercase(const s: string): string; overload;
 function struppercase(const s: msestring): msestring; overload;
 function struppercase(const s: lmsestringty): msestring; overload;
 function struppercase(const s: lstringty): string; overload;
+//ascii only
 
 function mseremspace(const s: msestring): msestring;
     //entfernt alle space und steuerzeichen
