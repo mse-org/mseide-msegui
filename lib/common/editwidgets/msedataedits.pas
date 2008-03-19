@@ -2144,20 +2144,10 @@ begin
       int1:= (innerpaintrect.cy - self.font.lineheight);
      end;
      key_up: begin
-//      if (info.key = key_wheelup) and not (ow_mousewheel in optionswidget) then begin
-//       exclude(info.eventstate,es_processed);
-//      end
-//      else begin
-       int1:= - self.font.lineheight;
-//      end;
+      int1:= - self.font.lineheight;
      end;
      key_down: begin
-//      if (info.key = key_wheeldown) and not (ow_mousewheel in optionswidget) then begin
-//       exclude(info.eventstate,es_processed);
-//      end
-//      else begin
-       int1:= self.font.lineheight; 
-//      end;
+      int1:= self.font.lineheight; 
      end;
      else begin
       exclude(info.eventstate,es_processed);
