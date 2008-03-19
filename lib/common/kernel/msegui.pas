@@ -2375,7 +2375,7 @@ begin
  if high(awidgets) >= 0 then begin
   int2:= -bigint;
   widget1:= awidgets[0]; //compiler warning
-  for int1:= high(awidgets) downto 0 do begin
+  for int1:= 0 to high(awidgets) do begin //first widget first
    with awidgets[int1] do begin
     if fframe = nil then begin
      int3:= 0;
@@ -2398,7 +2398,7 @@ begin
    end;
   end;
   int2:= widget1.bounds_cx - int2; //min frame width
-  for int1:= 0 to high(awidgets) do begin
+  for int1:= high(awidgets) downto 0 do begin
    with awidgets[int1] do begin
     if fframe = nil then begin
      int3:= 0;
@@ -2425,7 +2425,7 @@ begin
  if high(awidgets) >= 0 then begin
   int2:= -bigint;
   widget1:= awidgets[0]; //compiler warning
-  for int1:= high(awidgets) downto 0 do begin
+  for int1:= 0 to high(awidgets) do begin //first widget first
    with awidgets[int1] do begin
     if fframe = nil then begin
      int3:= 0;
@@ -2448,7 +2448,7 @@ begin
    end;
   end;
   int2:= widget1.bounds_cy - int2; //min frame width
-  for int1:= 0 to high(awidgets) do begin
+  for int1:= high(awidgets) downto 0 do begin
    with awidgets[int1] do begin
     if fframe = nil then begin
      int3:= 0;
