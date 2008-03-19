@@ -2020,11 +2020,11 @@ begin
    init;
    int1:= -stepsize;
   end;
-  sbe_pageup: begin
+  sbe_pageup,sbe_wheelup: begin
    init;
    int1:=  pagesize;
   end;
-  sbe_pagedown: begin
+  sbe_pagedown,sbe_wheeldown: begin
    init;
    int1:=  -pagesize;
   end;
