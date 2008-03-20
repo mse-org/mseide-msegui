@@ -1,4 +1,9 @@
 MSEide+MSEgui version history
+2008-03-20
+ gridcoordty parameter for griddataeventty.
+ gridcoordty parameter for griddatablockeventty.
+ griddatamovedeventty -> gridblockmovedeventty.
+ gridbeforedatablockeventty -> gridbeforeblockeventty.
 2008-03-14
  syncminframewidth -> syncpaintwidth.
  syncminframeheight -> syncpaintheight.

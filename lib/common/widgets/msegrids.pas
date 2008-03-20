@@ -1135,10 +1135,15 @@ end;
  selectcellmodety = (scm_cell,scm_row,scm_col);
 
  gridnotifyeventty = procedure(const sender: tcustomgrid) of object;
- griddataeventty = procedure(const sender: tcustomgrid; const aindex: integer) of object;
- griddatamovedeventty = procedure(const sender: tcustomgrid; const fromindex,toindex,acount: integer) of object;
- gridbeforedatablockeventty = procedure(const sender: tcustomgrid; var aindex,acount: integer) of object;
- griddatablockeventty = procedure(const sender: tcustomgrid; const aindex,acount: integer) of object;
+ griddataeventty = procedure(const sender: tcustomgrid; 
+                             const acell: gridcoordty) of object;
+ griddatablockeventty = procedure(const sender: tcustomgrid; 
+                  const acell: gridcoordty; const acount: integer) of object;
+ gridblockmovedeventty = procedure(const sender: tcustomgrid; 
+                  const fromindex,toindex,acount: integer) of object;
+ gridbeforeblockeventty = procedure(const sender: tcustomgrid; var aindex,acount: integer) of object;
+ gridblockeventty = procedure(const sender: tcustomgrid; 
+                  const aindex: integer; const acount: integer) of object;
  gridsorteventty = procedure(sender: tcustomgrid;
                        const index1,index2: integer; var aresult: integer) of object;
 
@@ -1161,13 +1166,13 @@ end;
    finvalidatedcells: gridcoordarty;
 
    foncellevent: celleventty;
-   fonrowsmoved: griddatamovedeventty;
+   fonrowsmoved: gridblockmovedeventty;
    fonrowdatachanged: griddataeventty;
    fonrowsdatachanged: griddatablockeventty;
-   fonrowsinserting: gridbeforedatablockeventty;
-   fonrowsinserted: griddatablockeventty;
-   fonrowsdeleting: gridbeforedatablockeventty;
-   fonrowsdeleted: griddatablockeventty;
+   fonrowsinserting: gridbeforeblockeventty;
+   fonrowsinserted: gridblockeventty;
+   fonrowsdeleting: gridbeforeblockeventty;
+   fonrowsdeleted: gridblockeventty;
    fonrowcountchanged: gridnotifyeventty;
    fonlayoutchanged: gridnotifyeventty;
    fonsort: gridsorteventty;
@@ -1176,7 +1181,7 @@ end;
    fdatarowlinecolor: colorty;
    fdatarowlinecolorfix: colorty;
 
-   foncolmoved: griddatamovedeventty;
+   foncolmoved: gridblockmovedeventty;
    fonselectionchanged: notifyeventty;
    fgridframecolor: colorty;
    fgridframewidth: integer;
@@ -1335,7 +1340,8 @@ end;
    procedure dorowsinserted(const index,count: integer); virtual;
    procedure dorowsdeleting(var index,count: integer); virtual;
    procedure dorowsdeleted(index,count: integer); virtual;
-   procedure dorowsdatachanged(const index,count: integer); virtual;
+   procedure dorowsdatachanged(const acell: gridcoordty; 
+                                           const acount: integer); virtual;
    procedure dorowcountchanged(const countbefore,newcount: integer); virtual;
    procedure docellevent(var info: celleventinfoty); virtual;
    procedure cellmouseevent(const acell: gridcoordty; var info: mouseeventinfoty;
@@ -1422,7 +1428,8 @@ end;
    function calcminscrollsize: sizety; override;
    procedure layoutchanged;
    function cellclicked: boolean;
-   procedure rowdatachanged(const index: integer; const count: integer = 1);
+   procedure rowdatachanged(const acell: gridcoordty; const count: integer = 1);
+                 //acell.col = invalidaxis -> col unknown
 
    procedure rowup(const action: focuscellactionty = fca_focusin); virtual;
    procedure rowdown(const action: focuscellactionty = fca_focusin); virtual;
@@ -1552,7 +1559,7 @@ end;
 
    property onlayoutchanged: gridnotifyeventty read fonlayoutchanged
               write fonlayoutchanged;
-   property oncolmoved: griddatamovedeventty read foncolmoved
+   property oncolmoved: gridblockmovedeventty read foncolmoved
               write foncolmoved;
    property onrowcountchanged: gridnotifyeventty read fonrowcountchanged
               write fonrowcountchanged;
@@ -1560,17 +1567,17 @@ end;
               write fonrowsdatachanged;
    property onrowdatachanged: griddataeventty read fonrowdatachanged
               write fonrowdatachanged;
-   property onrowsmoved: griddatamovedeventty read fonrowsmoved
+   property onrowsmoved: gridblockmovedeventty read fonrowsmoved
               write fonrowsmoved;
 
-   property onrowsinserting: gridbeforedatablockeventty read fonrowsinserting
+   property onrowsinserting: gridbeforeblockeventty read fonrowsinserting
               write fonrowsinserting;
-   property onrowsinserted: griddatablockeventty read fonrowsinserted
+   property onrowsinserted: gridblockeventty read fonrowsinserted
               write fonrowsinserted;
 
-   property onrowsdeleting: gridbeforedatablockeventty read fonrowsdeleting
+   property onrowsdeleting: gridbeforeblockeventty read fonrowsdeleting
               write fonrowsdeleting;
-   property onrowsdeleted: griddatablockeventty read fonrowsdeleted
+   property onrowsdeleted: gridblockeventty read fonrowsdeleted
               write fonrowsdeleted;
 
    property onsort: gridsorteventty read fonsort write fonsort;
@@ -4317,15 +4324,20 @@ begin
 end;
 
 procedure tdatacol.cellchanged(const row: integer);
+var
+ coord1: gridcoordty;
 begin
  inherited;
  if (co_rowdatachange in foptions) and (fgrid.frowdatachanging = 0) then begin
                                           //no recursion
+  coord1.col:= index;
   if row < 0 then begin
-   fgrid.rowdatachanged(0,fgrid.frowcount);
+   coord1.row:= 0;
+   fgrid.rowdatachanged(coord1,fgrid.frowcount);
   end
   else begin
-   fgrid.rowdatachanged(row);
+   coord1.row:= row;
+   fgrid.rowdatachanged(coord1);
   end;
  end;
 end;
@@ -6059,15 +6071,15 @@ begin
  end;
 end;
 
-procedure tcustomgrid.rowdatachanged(const index: integer;
-                const count: integer = 1);
+procedure tcustomgrid.rowdatachanged(const acell: gridcoordty;
+                                              const count: integer = 1);
 begin
  if not (csloading in componentstate) then begin
   if fupdating = 0 then begin
    exclude(fstate,gs_rowdatachanged);
    inc(frowdatachanging);
    try
-    dorowsdatachanged(index,count);
+    dorowsdatachanged(acell,count);
    finally
     dec(frowdatachanging);
    end;
@@ -6803,16 +6815,20 @@ begin
  end;
 end;
 
-procedure tcustomgrid.dorowsdatachanged(const index,count: integer);
+procedure tcustomgrid.dorowsdatachanged(const acell: gridcoordty; 
+                                         const acount: integer);
 var
  int1: integer;
+ coord1: gridcoordty;
 begin
  if canevent(tmethod(fonrowsdatachanged)) then begin
-  fonrowsdatachanged(self,index,count);
+  fonrowsdatachanged(self,acell,acount);
  end;
  if canevent(tmethod(fonrowdatachanged)) then begin
-  for int1:= index to index + count-1 do begin
-   fonrowdatachanged(self,int1);
+  coord1.col:= acell.col;
+  for int1:= acell.row to acell.row + acount-1 do begin
+   coord1.row:= int1;
+   fonrowdatachanged(self,coord1);
   end;
  end;
 end;
@@ -9017,7 +9033,7 @@ procedure tcustomgrid.loaded;
 begin
  inherited;
  fdatacols.checkindexrange;
- dorowsdatachanged(0,frowcount);
+ dorowsdatachanged(makegridcoord(invalidaxis,0),frowcount);
 end;
 
 procedure tcustomgrid.doexit;
@@ -9932,7 +9948,7 @@ begin
   checksort;
   checkinvalidate;
   if gs_rowdatachanged in fstate then begin
-   rowdatachanged(0,frowcount);
+   rowdatachanged(makegridcoord(invalidaxis,0),frowcount);
   end; 
   if gs_selectionchanged in fstate then begin
    internalselectionchanged;
@@ -9969,7 +9985,7 @@ begin
  if canevent(tmethod(fonrowsinserted)) then begin
   fonrowsinserted(self,index,count);
  end;
- dorowsdatachanged(index,count);
+ dorowsdatachanged(makegridcoord(invalidaxis,index),count);
 end;
 
 procedure tcustomgrid.dorowsdeleting(var index, count: integer);

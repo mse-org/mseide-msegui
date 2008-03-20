@@ -108,6 +108,9 @@ type
  end;
  
 implementation
+uses
+ msegraphutils;
+ 
 type
  teditwidgetdatalink1 = class(teditwidgetdatalink);
  
@@ -247,7 +250,7 @@ begin
  fisdb:= true;
  fdatalink:= teditwidgetdatalink.create(idbeditfieldlink(self));
  inherited;
- valuedefault:= -1;
+ valuedefault:= colorty(-1);
 end;
 
 destructor tdbcoloredit.destroy;
@@ -296,7 +299,7 @@ end;
 
 procedure tdbcoloredit.valuetofield;
 begin
- if value = -1 then begin
+ if value = colorty(-1) then begin
   fdatalink.field.clear;
  end
  else begin

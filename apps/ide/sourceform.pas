@@ -185,6 +185,7 @@ begin
  result:= false;
  col:= 0;
  row:= 0;
+ alevel:= el_all;
  splitstring(text,ar1,msechar('('));
  if length(ar1) > 1 then begin         //try FPC
   splitstring(ar1[1],ar2,msechar(')'));
@@ -205,9 +206,6 @@ begin
       else begin
        if startsstr(' Note:',ar2[1]) then begin
         alevel:= el_hint;
-       end
-       else begin
-        alevel:= el_all;
        end;
       end;
      end;
@@ -226,44 +224,46 @@ begin
    end;
   end;
  end;
- // try gcc
- ar1:= nil;
- ar2:= nil;
- splitstring(text,ar1,':');
- if high(ar1) > 2 then begin
-  for int1:= 2 to 3 do begin
-   ar1[int1]:= struppercase(ar1[int1]);
-  end;
-  if (ar1[2] = ' ERROR') or (ar1[3] = ' ERROR') then begin
-   alevel:= el_error;
-  end
-  else begin
-   if (ar1[2] = ' WARNING') or (ar1[3] = ' WARNING') then begin
-    alevel:= el_warning;
+ if (alevel <> el_all) and not result then begin
+  // try gcc
+  ar1:= nil;
+  ar2:= nil;
+  splitstring(text,ar1,':');
+  if high(ar1) > 2 then begin
+   for int1:= 2 to 3 do begin
+    ar1[int1]:= struppercase(ar1[int1]);
+   end;
+   if (ar1[2] = ' ERROR') or (ar1[3] = ' ERROR') then begin
+    alevel:= el_error;
    end
    else begin
-    if (ar1[2] = ' HINT') or (ar1[3] = ' HINT') then begin
-     alevel:= el_hint;
+    if (ar1[2] = ' WARNING') or (ar1[3] = ' WARNING') then begin
+     alevel:= el_warning;
     end
     else begin
-     alevel:= el_all;
+     if (ar1[2] = ' HINT') or (ar1[3] = ' HINT') then begin
+      alevel:= el_hint;
+     end
+     else begin
+      alevel:= el_all;
+     end;
     end;
    end;
-  end;
-  if alevel >= minlevel then begin
-   try
-    result:= true;
-    row:= strtoint(ar1[1]) - 1;
+   if alevel >= minlevel then begin
     try
-     col:= strtoint(ar1[2]) - 1;
+     result:= true;
+     row:= strtoint(ar1[1]) - 1;
+     try
+      col:= strtoint(ar1[2]) - 1;
+     except
+      col:= 0;
+     end;
+     apage:= sourcefo.showsourceline(ar1[0],row,col,true);
     except
-     col:= 0;
-    end;
-    apage:= sourcefo.showsourceline(ar1[0],row,col,true);
-   except
-   end; 
-  end;
- end; 
+    end; 
+   end;
+  end; 
+ end;
 end;
 
 { tnaviglist }

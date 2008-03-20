@@ -186,7 +186,7 @@ type
 //   fcolorselect: colorty;
    fcolorglyph: colorty;
    fediting: boolean;
-   fonitemsmoved: griddatamovedeventty;
+   fonitemsmoved: gridblockmovedeventty;
    ffiltertext: msestring;
    fcellframe: tcellframe;
    procedure createcellframe;
@@ -287,7 +287,7 @@ type
                   write fonafterupdatelayout;
    property onitemevent: itemeventty read fonitemevent write fonitemevent;
 
-   property onitemsmoved: griddatamovedeventty read fonitemsmoved
+   property onitemsmoved: gridblockmovedeventty read fonitemsmoved
               write fonitemsmoved;
    property optionsgrid default defaultlistviewoptionsgrid;
    property onselectionchanged: listvieweventty read getonselectionchanged 
@@ -2161,7 +2161,7 @@ begin
  if fgridintf <> nil then begin
   with fgridintf.getcol.grid do begin
    rowcount:= fitemlist.count;
-   rowdatachanged(0,fitemlist.count);
+   rowdatachanged(makegridcoord(invalidaxis,0),fitemlist.count);
   end;
  end;
 end;

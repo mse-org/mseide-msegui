@@ -84,7 +84,7 @@ type
                   const newindex: Integer; var accept: Boolean);
    procedure tmseformcreate(const sender: TObject);
    procedure gridrowsdatachanged(const sender: tcustomgrid;
-      const aindex: Integer; const count: integer);
+      const acell: gridcoordty; const count: integer);
    procedure compselectorbeforedropdown(const sender: TObject);
    procedure compselectoronsetvalue(const sender: tobject; var avalue: msestring;
                    var accept: boolean);
@@ -605,35 +605,25 @@ begin
 end;
 
 procedure tobjectinspectorfo.gridrowsdatachanged(const sender: tcustomgrid;
-  const aindex: Integer; const count: integer);
+  const acell: gridcoordty; const count: integer);
 var
  int1: integer;
 begin
  props.itemlist.beginupdate;
  values.itemlist.beginupdate;
  try
-  for int1:= aindex to aindex + count - 1 do begin
+  for int1:= acell.row to acell.row + count - 1 do begin
    tpropertyitem(props.itemlist[int1]).updatestate;
    tpropertyvalue(values.itemlist[int1]).feditor:=
            tpropertyitem(props.itemlist[int1]).feditor;
    tpropertyvalue(values.itemlist[int1]).updatestate;
   end;
-//  valueupdaterowvalue(nil,grid.row,values.itemlist[int1]);
  finally
   props.itemlist.endupdate;
   values.itemlist.endupdate;
  end;
 end;
-{
-procedure tobjectinspectorfo.compselectordataentered(
-  const sender: TObject);
-begin
- if fchanging > 0 then begin
-  readprops(factmodule,factcomp);
- end;
- selectedcompchanged;
-end;
-}
+
 procedure tobjectinspectorfo.moduleactivated(const adesigner: idesigner;
                   const amodule: tmsecomponent);
 begin
