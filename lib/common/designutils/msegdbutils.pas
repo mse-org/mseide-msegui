@@ -258,6 +258,7 @@ type
    flastconsoleoutput: ansistring;
    fprocessor: processorty;
    fbeforeload: filenamety;
+   fafterload: filenamety;
    procedure setstoponexception(const avalue: boolean);
    procedure checkactive;
    procedure resetexec;
@@ -281,6 +282,7 @@ type
    procedure receiveevent(const event: tobjectevent); override;
    procedure doevent(const token: cardinal; const eventkind: gdbeventkindty;
                        const values: resultinfoarty);
+   procedure postsyncerror;
    procedure dorun;
    function internalcommand(acommand: string): boolean;
    function synccommand(const acommand: string; 
@@ -485,6 +487,7 @@ type
    property simulator: boolean read fsimulator write fsimulator;
    property processor: processorty read fprocessor write fprocessor default pro_i386;
    property beforeload: filenamety read fbeforeload write fbeforeload;
+   property afterload: filenamety read fafterload write fafterload;
                      //gdb script
    property onevent: gdbeventty read fonevent write fonevent;
    property onerror: gdbeventty read fonerror write fonerror;
@@ -1068,9 +1071,16 @@ begin
      if gs_downloading in fstate then begin
       with stopinfo do begin
        getintegervalue(values,'load-size',totalsent);
-       initproginfo;
        fstate:= fstate + [gs_downloaded,gs_downloading];
                 //restore downloading flag;
+       if fafterload <> '' then begin
+        if source(fafterload) <> gdb_ok then begin
+         exclude(fstate,gs_downloaded);
+         postsyncerror;
+        end;
+       end;
+       initproginfo;
+       dorun;
       end;
      end;
     end;
@@ -1115,7 +1125,7 @@ procedure tgdbmi.doevent(const token: cardinal; const eventkind: gdbeventkindty;
 var
  ev: tgdbevent;
 begin
- if token = fsyncsequence then begin
+ if (token <> 0) and (token = fsyncsequence) then begin
   fsyncvalues:= values;
   fsynceventkind:= eventkind;
   include(fstate,gs_syncack);
@@ -1141,7 +1151,7 @@ begin
    end;
    }
   end;
-  if (eventkind = gek_error) and (token = frunsequence) then begin
+  if (eventkind = gek_error) and (token <> 0) and (token = frunsequence) then begin
    doevent(token,gek_stopped,values);
   end
   else begin
@@ -1150,7 +1160,7 @@ begin
       not ((eventkind = gek_running) and (gs_restarted in fstate)) and
       not ((eventkind = gek_error) and (fsyncsequence <> 0) and
            (integer(token-fsyncsequence) < 0)) and
-      ((token <> fsyncsequence) or (eventkind = gek_running) or
+      ((token = 0) or (token <> fsyncsequence) or (eventkind = gek_running) or
                                         (eventkind = gek_stopped)) then begin
     ev:= tgdbevent.create(ek_none,ievent(self));
     ev.eventkind:= eventkind;
@@ -1163,6 +1173,11 @@ begin
    end;
   end;
  end;
+end;
+
+procedure tgdbmi.postsyncerror;
+begin
+ doevent(0,gek_error,fsyncvalues);
 end;
 
 procedure tgdbmi.sequenceend;

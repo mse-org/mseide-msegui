@@ -69,6 +69,7 @@ type
   gdbprocessor: msestring;
   gdbservercommand: filenamety;
   beforeload: filenamety;
+  afterload: filenamety;
   sourcedirs: msestringarty;
   defines: msestringarty;
   unitdirs: msestringarty;
@@ -362,11 +363,7 @@ type
    ttabpage16: ttabpage;
    tlayouter2: tlayouter;
    gdbservercommand: tfilenameedit;
-   uploadcommand: tfilenameedit;
    tlayouter1: tlayouter;
-   gdbdownload: tbooleanedit;
-   gdbsimulator: tbooleanedit;
-   gdbprocessor: tdropdownlistedit;
    makedir: tfilenameedit;
    tsplitter1: tsplitter;
    tsplitter2: tsplitter;
@@ -375,7 +372,16 @@ type
    tsplitter4: tsplitter;
    tsplitter5: tsplitter;
    remoteconnection: tstringedit;
-   beforeload: tfilenameedit;
+   uploadcommand: tfilenameedit;
+   tsplitter6: tsplitter;
+   tlayouter3: tlayouter;
+   gdbprocessor: tdropdownlistedit;
+   gdbsimulator: tbooleanedit;
+   gdbdownload: tbooleanedit;
+   tlayouter4: tlayouter;
+   gdbbeforeload: tfilenameedit;
+   tsplitter7: tsplitter;
+   gdbafterload: tfilenameedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -647,6 +653,7 @@ begin
    li.expandmacros(uploadcommand);
    li.expandmacros(gdbservercommand);
    li.expandmacros(beforeload);
+   li.expandmacros(afterload);
    li.expandmacros(gdbprocessor);
    li.expandmacros(sourcedirs);
    li.expandmacros(defines);
@@ -893,6 +900,7 @@ begin
   gdbprocessor:= 'i386';
   gdbservercommand:= '';
   beforeload:= '';
+  afterload:= '';
   sourcefilemasks:= nil;
   syntaxdeffiles:= nil;
   filemasknames:= nil;
@@ -1072,6 +1080,7 @@ begin
   updatevalue('gdbprocessor',gdbprocessor);
   updatevalue('gdbservercommand',gdbservercommand);
   updatevalue('beforeload',beforeload);
+  updatevalue('afterload',afterload);
   updatevalue('defaultmake',defaultmake,1,maxdefaultmake+1);
   updatevalue('makeoptions',makeoptions);
   updatevalue('makeoptionson',makeoptionson);
@@ -1282,7 +1291,8 @@ begin
   fo.gdbsimulator.value:= gdbsimulator;
   fo.gdbprocessor.value:= gdbprocessor;
   fo.gdbservercommand.value:= gdbservercommand;
-  fo.gdbservercommand.value:= beforeload;
+  fo.gdbbeforeload.value:= beforeload;
+  fo.gdbafterload.value:= afterload;
   fo.defaultmake.value:= lowestbit(defaultmake);
   fo.makeoptions.gridvalues:= makeoptions;
   for int1:= 0 to fo.makeoptionsgrid.rowhigh do begin
@@ -1461,7 +1471,8 @@ begin
   gdbsimulator:= fo.gdbsimulator.value;
   gdbprocessor:= fo.gdbprocessor.value;
   gdbservercommand:= fo.gdbservercommand.value;
-  beforeload:= fo.beforeload.value;
+  beforeload:= fo.gdbbeforeload.value;
+  afterload:= fo.gdbafterload.value;
   defaultmake:= 1 shl fo.defaultmake.value;
   makeoptions:= fo.makeoptions.gridvalues;
   setlength(makeoptionson,fo.makeoptionsgrid.rowcount);
@@ -1813,6 +1824,8 @@ end;
 procedure tprojectoptionsfo.downloadchange(const sender: TObject);
 begin
  uploadcommand.enabled:= not gdbdownload.value and not gdbsimulator.value;
+ gdbbeforeload.enabled:= gdbdownload.value;
+ gdbafterload.enabled:= gdbdownload.value;
  gdbservercommand.enabled:= not gdbsimulator.value;
  remoteconnection.enabled:= not gdbsimulator.value;
  gdbdownload.enabled:= not gdbsimulator.value;

@@ -1,7 +1,7 @@
 object projectoptionsfo: tprojectoptionsfo
   optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton]
-  bounds_x = 117
-  bounds_y = 128
+  bounds_x = 56
+  bounds_y = 119
   bounds_cx = 615
   bounds_cy = 455
   taborder = 1
@@ -1160,21 +1160,22 @@ object projectoptionsfo: tprojectoptionsfo
           caption = 'E&mbedded'
           reffontheight = 15
           object tlayouter2: tlayouter
-            bounds_x = 1
-            bounds_y = 3
-            bounds_cx = 262
-            bounds_cy = 81
+            bounds_x = 0
+            bounds_y = 0
+            bounds_cx = 613
+            bounds_cy = 47
+            anchors = [an_top]
             optionsscale = [osc_expandy, osc_shrinky]
-            linkbottom = tlayouter1
-            dist_bottom = 8
-            optionslayout = [lao_placey]
+            linkbottom = remoteconnection
+            dist_bottom = 3
+            optionslayout = [lao_aligny]
             place_mindist = 3
             place_maxdist = 3
             object gdbservercommand: tfilenameedit
               optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-              bounds_x = 0
-              bounds_y = 42
-              bounds_cx = 262
+              bounds_x = 321
+              bounds_y = 8
+              bounds_cx = 292
               bounds_cy = 39
               frame.caption = 'Start gdb server command'
               frame.captionoffset = 3
@@ -1187,7 +1188,7 @@ object projectoptionsfo: tprojectoptionsfo
                 0
                 0
               )
-              anchors = [an_top]
+              anchors = [an_left, an_top, an_right]
               onshowhint = hintexpandedmacros
               controller.lastdir = '/home/mse/packs/standard/svn/mse/trunk/apps/ide'
               controller.options = []
@@ -1196,9 +1197,9 @@ object projectoptionsfo: tprojectoptionsfo
             end
             object uploadcommand: tfilenameedit
               optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-              bounds_x = 0
-              bounds_y = 0
-              bounds_cx = 262
+              bounds_x = 1
+              bounds_y = 8
+              bounds_cx = 317
               bounds_cy = 39
               frame.options = [cfo_fixtop]
               frame.caption = 'Upload command'
@@ -1215,7 +1216,6 @@ object projectoptionsfo: tprojectoptionsfo
                 0
                 0
               )
-              anchors = [an_top]
               taborder = 1
               onshowhint = hintexpandedmacros
               controller.lastdir = '/home/mse/packs/standard/svn/mse/trunk/apps/ide'
@@ -1223,37 +1223,96 @@ object projectoptionsfo: tprojectoptionsfo
               controller.historymaxcount = 0
               reffontheight = 15
             end
+            object tsplitter6: tsplitter
+              bounds_x = 318
+              bounds_y = 26
+              bounds_cx = 3
+              bounds_cy = 20
+              taborder = 2
+              visible = False
+              options = [spo_hprop, spo_dockleft, spo_docktop, spo_dockright, spo_dockbottom]
+              linkleft = uploadcommand
+              linkright = gdbservercommand
+            end
           end
           object tlayouter1: tlayouter
-            bounds_x = 1
-            bounds_y = 92
-            bounds_cx = 464
-            bounds_cy = 39
+            bounds_x = 17
+            bounds_y = 146
+            bounds_cx = -10
+            bounds_cy = 0
             taborder = 1
             optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
-            linkbottom = remoteconnection
             dist_bottom = 3
             optionslayout = [lao_placex, lao_aligny]
             align_glue = wam_start
             place_mindist = 10
             place_maxdist = 10
-            object gdbdownload: tbooleanedit
-              bounds_x = 275
-              bounds_y = 20
-              bounds_cx = 104
-              bounds_cy = 17
-              frame.caption = 'gdb download'
+          end
+          object remoteconnection: tstringedit
+            bounds_x = 1
+            bounds_y = 50
+            bounds_cx = 611
+            bounds_cy = 39
+            frame.caption = 'Connection'
+            frame.captionoffset = 3
+            frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
+            frame.dummy = 0
+            frame.outerframe = (
+              0
+              18
+              0
+              0
+            )
+            anchors = [an_left, an_top, an_right]
+            taborder = 2
+            hint = '"--tty DEVICE" to set target terminal'
+            onshowhint = hintexpandedmacros
+            reffontheight = 15
+          end
+          object tlayouter3: tlayouter
+            bounds_x = 0
+            bounds_y = 92
+            bounds_cx = 613
+            bounds_cy = 39
+            anchors = [an_top]
+            taborder = 3
+            optionsscale = [osc_expandy, osc_shrinky]
+            linktop = remoteconnection
+            dist_top = 3
+            optionslayout = [lao_placex, lao_aligny]
+            align_glue = wam_start
+            place_mindist = 5
+            place_maxdist = 5
+            object gdbprocessor: tdropdownlistedit
+              bounds_x = 0
+              bounds_y = 0
+              bounds_cx = 84
+              bounds_cy = 39
+              frame.caption = 'Processor'
               frame.dummy = 0
               frame.outerframe = (
                 0
-                2
-                91
-                2
+                18
+                0
+                0
               )
-              onchange = downloadchange
+              onshowhint = hintexpandedmacros
+              onchange = processorchange
+              value = 'i386'
+              dropdown.options = [deo_autodropdown, deo_keydropdown]
+              dropdown.cols.count = 1
+              dropdown.cols.items = <              
+                item
+                  data = (
+                    'i386'
+                    'arm'
+                    'cpu32'
+                  )
+                end>
+              reffontheight = 15
             end
             object gdbsimulator: tbooleanedit
-              bounds_x = 389
+              bounds_x = 89
               bounds_y = 20
               bounds_cx = 75
               bounds_cy = 17
@@ -1268,10 +1327,39 @@ object projectoptionsfo: tprojectoptionsfo
               taborder = 1
               onchange = downloadchange
             end
-            object beforeload: tfilenameedit
-              bounds_x = 0
+            object gdbdownload: tbooleanedit
+              bounds_x = 169
+              bounds_y = 20
+              bounds_cx = 104
+              bounds_cy = 17
+              frame.caption = 'gdb download'
+              frame.dummy = 0
+              frame.outerframe = (
+                0
+                2
+                91
+                2
+              )
+              taborder = 2
+              onchange = downloadchange
+            end
+          end
+          object tlayouter4: tlayouter
+            bounds_x = 0
+            bounds_y = 134
+            bounds_cx = 613
+            bounds_cy = 39
+            anchors = [an_top]
+            taborder = 4
+            optionsscale = [osc_expandy, osc_shrinky]
+            linktop = tlayouter3
+            dist_top = 3
+            optionslayout = [lao_aligny]
+            align_glue = wam_start
+            object gdbbeforeload: tfilenameedit
+              bounds_x = 1
               bounds_y = 0
-              bounds_cx = 265
+              bounds_cx = 318
               bounds_cy = 39
               frame.caption = 'Before load gdb script'
               frame.button.imagenr = 17
@@ -1282,6 +1370,42 @@ object projectoptionsfo: tprojectoptionsfo
                 0
                 0
               )
+              onshowhint = hintexpandedmacros
+              controller.filterlist.data = (
+                (
+                  'gdb Scripts'
+                  '*.gdb'
+                )
+              )
+              controller.options = [fdo_checkexist, fdo_savelastdir]
+              reffontheight = 15
+            end
+            object tsplitter7: tsplitter
+              bounds_x = 319
+              bounds_y = 18
+              bounds_cx = 3
+              bounds_cy = 20
+              taborder = 1
+              visible = False
+              options = [spo_hprop, spo_dockleft, spo_docktop, spo_dockright, spo_dockbottom]
+              linkleft = gdbbeforeload
+              linkright = gdbafterload
+            end
+            object gdbafterload: tfilenameedit
+              bounds_x = 322
+              bounds_y = 0
+              bounds_cx = 290
+              bounds_cy = 39
+              frame.caption = 'After load gdb script'
+              frame.button.imagenr = 17
+              frame.dummy = 0
+              frame.outerframe = (
+                0
+                18
+                0
+                0
+              )
+              anchors = [an_left, an_top, an_right]
               taborder = 2
               onshowhint = hintexpandedmacros
               controller.filterlist.data = (
@@ -1293,56 +1417,6 @@ object projectoptionsfo: tprojectoptionsfo
               controller.options = [fdo_checkexist, fdo_savelastdir]
               reffontheight = 15
             end
-          end
-          object gdbprocessor: tdropdownlistedit
-            bounds_x = 274
-            bounds_y = 3
-            bounds_cx = 84
-            bounds_cy = 39
-            frame.caption = 'Processor'
-            frame.dummy = 0
-            frame.outerframe = (
-              0
-              18
-              0
-              0
-            )
-            taborder = 2
-            onshowhint = hintexpandedmacros
-            onchange = processorchange
-            value = 'i386'
-            dropdown.options = [deo_autodropdown, deo_keydropdown]
-            dropdown.cols.count = 1
-            dropdown.cols.items = <            
-              item
-                data = (
-                  'i386'
-                  'arm'
-                  'cpu32'
-                )
-              end>
-            reffontheight = 15
-          end
-          object remoteconnection: tstringedit
-            bounds_x = 1
-            bounds_y = 134
-            bounds_cx = 611
-            bounds_cy = 39
-            frame.caption = 'Connection'
-            frame.captionoffset = 3
-            frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
-            frame.dummy = 0
-            frame.outerframe = (
-              0
-              18
-              0
-              0
-            )
-            anchors = [an_left, an_top, an_right]
-            taborder = 3
-            hint = '"--tty DEVICE" to set target terminal'
-            onshowhint = hintexpandedmacros
-            reffontheight = 15
           end
         end
       end
