@@ -224,7 +224,7 @@ begin
    end;
   end;
  end;
- if (alevel <> el_all) and not result then begin
+ if (alevel = el_all) and not result then begin
   // try gcc
   ar1:= nil;
   ar2:= nil;
