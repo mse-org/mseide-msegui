@@ -122,6 +122,7 @@ type
    procedure savegroup(const sender: TObject);
    procedure nodeenter(const sender: TObject);
    procedure nodeexit(const sender: TObject);
+   procedure doupdatecomponent(const sender: TObject);
   private
 //   frootnode: tstoredcomponent;
    far1: storedcomponentarty;
@@ -344,6 +345,43 @@ begin
   stream2.free;
   stream3.free;
  end; 
+end;
+
+procedure tcomponentstorefo.doupdatecomponent(const sender: TObject);
+var
+ mstr1: msestring;
+ str1: ansistring;
+ bo1: boolean;
+ stream1,stream2: tstream;
+ stream3: ttextstream;
+begin
+ if askyesno('Do you want to overwrite "'+filepath.value+
+            '" with current clipboard content?','WARNING') then begin
+  bo1:= false;
+  if pastefromclipboard(mstr1) then begin
+   stream1:= tstringcopystream.create(mstr1);
+   str1:= mstr1;
+   stream2:= ttextstream.create;
+   try
+    objecttexttobinary(stream1,stream2);
+    bo1:= true; //no error
+   except
+   end;
+   stream1.free;
+   stream2.free;
+   if bo1 then begin
+    stream3:= ttextstream.create(filepath.value,fm_create);
+    try
+     stream3.writedatastring(str1);
+    finally
+     stream3.free;
+    end;
+   end;
+  end;
+  if not bo1 then begin
+   showerror('No component(s) in clipboard.');
+  end;
+ end;
 end;
 
 procedure tcomponentstorefo.docopycomponent(const sender: TObject);
@@ -589,14 +627,16 @@ end;
 
 procedure tcomponentstorefo.popupupdate(const sender: tcustommenu);
 var
- bo1: boolean;
+ bo1,bo2: boolean;
 begin
  bo1:= isnode;
+ bo2:= iscomp;
  sender.menu.submenu.itembyname('addnode').enabled:= bo1;
  sender.menu.submenu.itembyname('pastenode').enabled:= bo1;
- sender.menu.submenu.itembyname('removestore').enabled:= isnode and 
+ sender.menu.submenu.itembyname('updatenode').enabled:= bo2;
+ sender.menu.submenu.itembyname('removestore').enabled:= bo1 and 
                                       node.item.isroot;
- sender.menu.submenu.itembyname('removecomp').enabled:= iscomp;
+ sender.menu.submenu.itembyname('removecomp').enabled:= bo2;
  bo1:= isnode and not node.item.isroot;
  sender.menu.submenu.itembyname('removenode').enabled:= bo1;
  sender.menu.submenu.itembyname('copynode').enabled:= bo1;

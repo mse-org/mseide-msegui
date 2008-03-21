@@ -57,7 +57,7 @@ object componentstorefo: tcomponentstorefo
     fixrows.count = 1
     fixrows.items = <    
       item
-        height = 16
+        height = 17
         captions.count = 3
         captions.items = <        
           item
@@ -92,7 +92,7 @@ object componentstorefo: tcomponentstorefo
     statfile = mainfo.projectstatfile
     oncellevent = docellevent
     drag.onbeforedragbegin = beforedrag
-    reffontheight = 14
+    reffontheight = 15
     object node: ttreeitemedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
       bounds_x = 0
@@ -119,7 +119,7 @@ object componentstorefo: tcomponentstorefo
       onsetvalue = compnamesetva
       onupdaterowvalues = doupdaterowvalues
       options = [teo_treecolnavig, teo_keyrowmoving]
-      reffontheight = 14
+      reffontheight = 15
     end
     object compdesc: tmemodialogedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
@@ -137,7 +137,7 @@ object componentstorefo: tcomponentstorefo
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savestate]
       ondataentered = datent
       onsetvalue = compdescsetva
-      reffontheight = 14
+      reffontheight = 15
     end
     object filepath: tfilenameedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
@@ -157,7 +157,7 @@ object componentstorefo: tcomponentstorefo
       textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
       ondataentered = datent
       onsetvalue = filenamesetva
-      reffontheight = 14
+      reffontheight = 15
     end
   end
   object copycompact: taction
@@ -178,7 +178,7 @@ object componentstorefo: tcomponentstorefo
   end
   object tpopupmenu1: tpopupmenu
     onupdate = popupupdate
-    menu.submenu.count = 16
+    menu.submenu.count = 17
     menu.submenu.items = <    
       item
         action = copycompact
@@ -187,6 +187,12 @@ object componentstorefo: tcomponentstorefo
       end    
       item
         action = pastecompact
+      end    
+      item
+        caption = 'Update Component(s)'
+        name = 'updatenode'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = doupdatecomponent
       end    
       item
         caption = 'Remove Component(s)'
