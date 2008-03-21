@@ -1043,6 +1043,7 @@ begin
   gdb.simulator:= gdbsimulator;
   gdb.processorname:= gdbprocessor;
   gdb.beforeload:= beforeload;
+  gdb.beforerun:= beforerun;
   gdb.afterload:= afterload;
   gdb.startgdb(tosysfilepath(quotefilename(debugcommand))+ ' ' + debugoptions);
  end;

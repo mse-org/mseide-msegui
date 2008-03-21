@@ -259,6 +259,7 @@ type
    fprocessor: processorty;
    fbeforeload: filenamety;
    fafterload: filenamety;
+   fbeforerun: filenamety;
    procedure setstoponexception(const avalue: boolean);
    procedure checkactive;
    procedure resetexec;
@@ -488,6 +489,7 @@ type
    property processor: processorty read fprocessor write fprocessor default pro_i386;
    property beforeload: filenamety read fbeforeload write fbeforeload;
    property afterload: filenamety read fafterload write fafterload;
+   property beforerun: filenamety read fbeforerun write fbeforerun;
                      //gdb script
    property onevent: gdbeventty read fonevent write fonevent;
    property onerror: gdbeventty read fonerror write fonerror;
@@ -1624,6 +1626,12 @@ var
  ca1: cardinal;
  str1: string;
 begin
+ if fbeforerun <> '' then begin
+  if source(fbeforerun) <> gdb_ok then begin
+   postsyncerror;
+   exit;
+  end;
+ end;
  str1:= '';
  if getcliresult('info file',ar1) = gdb_ok then begin
   for int1:= 0 to high(ar1) do begin
@@ -1640,9 +1648,6 @@ begin
  if str1 <> '' then begin
   try
    ca1:= strtointvalue(str1);
-   {$ifdef UNIX}
-//   ca1:= ca1+1; // todo: breakpoint at entrypoint does not work sometimes?
-   {$endif}
    if synccommand('-break-insert -t *'+hextocstr(ca1,8)) <> gdb_ok then begin
 
     str1:= '';
