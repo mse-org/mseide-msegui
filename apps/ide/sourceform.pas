@@ -228,7 +228,7 @@ begin
   // try gcc
   ar1:= nil;
   ar2:= nil;
-  splitstring(text,ar1,':');
+  splitstring(text,ar1,msechar(':'));
   if high(ar1) > 2 then begin
    for int1:= 2 to 3 do begin
     ar1[int1]:= struppercase(ar1[int1]);
