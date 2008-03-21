@@ -1,4 +1,5 @@
 MSEide+MSEgui version history
+Version 1.8beta1
 2008-03-20
  gridcoordty parameter for griddataeventty.
  gridcoordty parameter for griddatablockeventty.
