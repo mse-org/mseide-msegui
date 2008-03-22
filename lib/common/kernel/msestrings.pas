@@ -304,6 +304,7 @@ function mseremspace(const s: msestring): msestring;
     //entfernt alle space und steuerzeichen
 function removelinebreaks(const s: msestring): msestring;
     //replaces linebreaks with space
+procedure removetabterminator(var s: msestring);
 
 procedure msestrtotvarrec(const value: ansistring; out varrec: tvarrec); overload;
 procedure msestrtotvarrec(const value: msestring; out varrec: tvarrec); overload;
@@ -3747,6 +3748,16 @@ function removelinebreaks(const s: msestring): msestring;
     //replaces linebreaks with space
 begin
  result:= concatstrings(breaklines(s),' ');
+end;
+
+procedure removetabterminator(var s: msestring);
+var
+ int1: integer;
+begin
+ int1:= length(s);
+ if (int1 > 0) and (s[int1] = c_tab) then begin
+  setlength(s,int1-1);
+ end;
 end;
 
 { tmemorystringstream }

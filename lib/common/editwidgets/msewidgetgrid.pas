@@ -2253,7 +2253,7 @@ begin
   for int1:= 0 to high(ar1) do begin
    with ar1[int1] do begin
     if row <> int2 then begin
-//     setlength(wstr1,length(wstr1)-1); //remove last tab
+     removetabterminator(wstr1);
      wstr1:= wstr1 + lineend;
      int2:= row;
     end;
@@ -2275,9 +2275,8 @@ begin
     end;
    end;
   end;
-//  if length(wstr1) > 0 then begin
-//   setlength(wstr1,length(wstr1)-1); //remove last tab
-//  end;
+  removetabterminator(wstr1);
+  wstr1:= wstr1 + lineend; //terminator
   copytoclipboard(wstr1);
   result:= true;
  end;
@@ -2289,10 +2288,9 @@ var
  ar3: datalistarty;
  ar1: gridcoordarty;
  wstr1: msestring;
- int1,int2,int3,{int4,}int5: integer;
+ int1,int2,int3,int5: integer;
  ar4,ar5: msestringarty;
-// acol: integer;
- bo1: boolean;
+ bo1,bo2: boolean;
 
 begin
  ar1:= nil; //compiler warning
@@ -2312,72 +2310,75 @@ begin
  end;
  if bo1 and pastefromclipboard(wstr1) then begin
   ar4:= breaklines(wstr1);
-  if high(ar4) >= 0 then begin
-   ar5:= splitstring(ar4[0],c_tab);
-   if {(og_rowinserting in optionsgrid) and}
-        ((high(ar4) > 0) or (high(ar5) > 0)) then begin
-    int5:= row;
-    beginupdate;
-    try
-     datacols.clearselection;
-     int1:= row;
-     if og_rowinserting in optionsgrid then begin
-      insertrow(row,length(ar4));
+  if high(ar4) > 0 then begin
+   if ar4[high(ar4)] = '' then begin
+    setlength(ar4,high(ar4)); //remove terminator
+   end;
+   int5:= row;
+   beginupdate;
+   try
+    datacols.clearselection;
+    int1:= row;
+    bo2:= og_rowinserting in optionsgrid;
+    if bo2 then begin
+     insertrow(row,length(ar4));
+    end;
+    if high(ar4) >= rowcount - int1 then begin
+     setlength(ar4,rowcount-int1);
+    end;
+    for int1:= 0 to high(ar4) do begin
+     if bo2 then begin
+      datacols.selected[makegridcoord(invalidaxis,int5)]:= true;
      end;
-     if high(ar4) >= rowcount - int1 then begin
-      setlength(ar4,rowcount-int1);
-     end;
-     for int2:= int1 to int1 + high(ar4) do begin
-      datacols.selected[makegridcoord(invalidaxis,int2)]:= true;
-     end;
-     for int1:= 0 to high(ar4) do begin
-      ar5:= splitstring(ar4[int1],c_tab);
-      int3:= 0;
-      for int2:= 0 to high(ar5) do begin
-       while (int3 < datacols.count) and
-                  not (co_canpaste in datacols[int3].options) do begin
-        inc(int3);
-       end;
-       if int3 >= datacols.count then begin
-        break;
-       end;
-       try
-        if ar2[int3] <> nil then begin
-         if ar3[int3] <> nil then begin
-          tdataedit1(ar2[int3]).texttodata(ar5[int2],ar3[int3].getitempo(int5)^);
-          ar3[int3].change(int5);         
-         end;
-        end
-        else begin
-         if ar3[int3] <> nil then begin
-          case ar3[int3].datatyp of
-           dl_integer: begin
-            tintegerdatalist(ar3[int3]).items[int5]:= strtoint(ar5[int2]);
-           end;
+     ar5:= splitstring(ar4[int1],c_tab);
+     int3:= 0;
+     for int2:= 0 to high(ar5) do begin
+      while (int3 < datacols.count) and
+                 not (co_canpaste in datacols[int3].options) do begin
+       inc(int3);
+      end;
+      if int3 >= datacols.count then begin
+       break;
+      end;
+      if not bo2 then begin
+       datacols[int3].selected[int5]:= true;
+      end;
+      try
+       if ar2[int3] <> nil then begin
+        if ar3[int3] <> nil then begin
+         tdataedit1(ar2[int3]).texttodata(ar5[int2],ar3[int3].getitempo(int5)^);
+         ar3[int3].change(int5);         
+        end;
+       end
+       else begin
+        if ar3[int3] <> nil then begin
+         case ar3[int3].datatyp of
+          dl_integer: begin
+           tintegerdatalist(ar3[int3]).items[int5]:= strtoint(ar5[int2]);
           end;
          end;
         end;
-       except
        end;
-       inc(int3);
+      except
       end;
-      inc(int5);
+      inc(int3);
+     end;
+     inc(int5);
+    end;
+   finally
+    try
+     for int1:= 0 to datacols.count - 1 do begin
+      with twidgetcol(fdatacols[int1]) do begin
+       if fintf <> nil then begin
+        fintf.gridtovalue(-1); //restore grid value
+       end;
+      end;
      end;
     finally
-     try
-      for int1:= 0 to datacols.count - 1 do begin
-       with twidgetcol(fdatacols[int1]) do begin
-        if fintf <> nil then begin
-         fintf.gridtovalue(-1); //restore grid value
-        end;
-       end;
-      end;
-     finally
-      endupdate;
-     end;
+     endupdate;
     end;
-    result:= true;
    end;
+   result:= true;
   end;
  end;
 end;

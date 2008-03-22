@@ -10845,6 +10845,7 @@ begin
    int2:= ar1[0].row;
    for int1:= 0 to high(ar1) do begin
     if ar1[int1].row <> int2 then begin
+     removetabterminator(wstr1);
      wstr1:= wstr1 + lineend;
      int2:= ar1[int1].row;
     end;
@@ -10852,6 +10853,8 @@ begin
      wstr1:= wstr1 + self.items[ar1[int1]] + c_tab;
     end;
    end;
+   removetabterminator(wstr1);
+   wstr1:= wstr1 + lineend; //terminator
    msewidgets.copytoclipboard(wstr1);
    result:= true;
   end;
@@ -10861,10 +10864,9 @@ end;
 function tcustomstringgrid.pasteselection: boolean;
 var
  wstr1: msestring;
- int1,int2,int3,{int4,}int5: integer;
+ int1,int2,int3,int5: integer;
  ar4,ar5: msestringarty;
- bo1: boolean;
-// acol: integer;
+ bo1,bo2: boolean;
 begin
  result:= false;
  bo1:= false;
@@ -10878,41 +10880,51 @@ begin
  end;
  if bo1 and pastefromclipboard(wstr1) then begin
   ar4:= breaklines(wstr1);
-  if high(ar4) >= 0 then begin
-   ar5:= splitstring(ar4[0],c_tab);
-   if (og_rowinserting in optionsgrid) and
-        ((high(ar4) > 0) or (high(ar5) > 0)) then begin
-    int5:= row;
-    beginupdate;
-    try
-     datacols.clearselection;
-     int1:= row;
+  if high(ar4) > 0 then begin
+   if ar4[high(ar4)] = '' then begin
+    setlength(ar4,high(ar4)); //remove terminator
+   end;
+   int5:= row;
+   beginupdate;
+   try
+    datacols.clearselection;
+    int1:= row;
+    bo2:= og_rowinserting in optionsgrid;
+    if bo2 then begin
      insertrow(row,length(ar4));
-     for int2:= int1 to int1 + high(ar4) do begin
-      datacols.selected[makegridcoord(invalidaxis,int2)]:= true;
+    end;
+    if high(ar4) >= rowcount - int1 then begin
+     setlength(ar4,rowcount-int1);
+    end;
+    for int2:= int1 to int1 + high(ar4) do begin
+    end;
+    for int1:= 0 to high(ar4) do begin
+     if bo2 then begin
+      datacols.selected[makegridcoord(invalidaxis,int5)]:= true;
      end;
-     for int1:= 0 to high(ar4) do begin
-      ar5:= splitstring(ar4[int1],c_tab);
-      int3:= 0;
-      for int2:= 0 to high(ar5) do begin
-       while (int3 < datacols.count) and
-                  not (co_canpaste in datacols[int3].options) do begin
-        inc(int3);
-       end;
-       if int3 >= datacols.count then begin
-        break;
-       end;
-       datacols[int3][int5]:= ar5[int2];
+     ar5:= splitstring(ar4[int1],c_tab);
+     int3:= 0;
+     for int2:= 0 to high(ar5) do begin
+      while (int3 < datacols.count) and
+                 not (co_canpaste in datacols[int3].options) do begin
        inc(int3);
       end;
-      inc(int5);
+      if int3 >= datacols.count then begin
+       break;
+      end;
+      if not bo2 then begin
+       datacols[int3].selected[int5]:= true;
+      end;
+      datacols[int3][int5]:= ar5[int2];
+      inc(int3);
      end;
-    finally
-     endupdate;
+     inc(int5);
     end;
-    result:= true;
+   finally
+    endupdate;
    end;
-  end
+   result:= true;
+  end;
  end;
 end;
 
