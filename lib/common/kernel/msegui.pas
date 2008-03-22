@@ -1797,7 +1797,7 @@ type
       //lowest visible window in stackorder, calls sortzorder
    function topwindow: twindow;
       //highest visible window in stackorder, calls sortzorder
-   function candefocus: boolean;
+   function candefocus: boolean; override;
       //checks candefocus of all windows
 
    procedure registeronkeypress(const method: keyeventty);

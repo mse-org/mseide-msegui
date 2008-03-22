@@ -264,6 +264,7 @@ type
    procedure langchanged; virtual;
    procedure beginwait; virtual;
    procedure endwait; virtual;
+   function candefocus: boolean; virtual;
    property terminated: boolean read getterminated write setterminated;
    property exceptioncount: longword read fexceptioncount;
    property onexception: exceptioneventty read fonexception write fonexception;
@@ -1142,6 +1143,11 @@ end;
 function tcustomapplication.idle: boolean;
 begin
  result:= (high(fpostedevents) < 0) and (feventlist.count = 0);
+end;
+
+function tcustomapplication.candefocus: boolean;
+begin
+ result:= true; //dummy
 end;
 
 { tactivatorcontroller }

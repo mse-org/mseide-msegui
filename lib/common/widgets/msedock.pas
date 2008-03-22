@@ -230,6 +230,7 @@ type
    procedure updatesplitterrects(const awidgets: widgetarty);
    procedure setoptionsdock(const avalue: optionsdockty); virtual;
    function isfullarea: boolean;
+   function istabed: boolean;
    function ismdi: boolean;
    function isfloating: boolean;
    function canmdisize: boolean;
@@ -488,14 +489,16 @@ type
    destructor destroy; override;
  end;
 
- tdocktabpage = class(ttabpage)
+ tdocktabpage = class(ttabpage,idocktarget)
   private
+   fcontroller: tdockcontroller;
    ftarget: twidget;
    ftargetanchors: anchorsty;
+   //idocktarget
+   function getdockcontroller: tdockcontroller;
   protected
    procedure unregisterchildwidget(const child: twidget); override;
    procedure widgetregionchanged(const sender: twidget); override;
-//   procedure visiblechanged; override;
   public
    constructor create(const atabwidget: tdocktabwidget; const awidget: twidget);
               reintroduce;
@@ -651,6 +654,7 @@ constructor tdocktabpage.create(const atabwidget: tdocktabwidget;
 var
  intf1: idocktarget;
 begin
+ fcontroller:= atabwidget.fcontroller;
  inherited create(nil);
  optionswidget:= optionswidget - [ow_destroywidgets];
  ftarget:= awidget;
@@ -696,6 +700,12 @@ begin
    sender.parentwidget:= fparentwidget.parentwidget;  //remove page
  end;
 end;
+
+function tdocktabpage.getdockcontroller: tdockcontroller;
+begin
+ result:= fcontroller;
+end;
+
 {
 procedure tdocktabpage.visiblechanged;
 begin
@@ -2589,6 +2599,14 @@ begin
               (acontroller.fsplitdir <> sd_none);
 end;
 
+function tdockcontroller.istabed: boolean;
+var
+ acontroller: tdockcontroller;
+begin
+ result:= getparentcontroller(acontroller) and 
+              (acontroller.fsplitdir = sd_tabed);
+end;
+
 function tdockcontroller.ismdi: boolean;
 var
  acontroller: tdockcontroller;
@@ -3426,7 +3444,7 @@ begin
     initrect(dbr_minimize);
    end;
   end;
-  if bo1 and (bo3 or designing) and 
+  if bo1 and (bo3 and not fcontroller.istabed or designing) and 
                              (go_fixsizebutton in fgrip_options) then begin
    initrect(dbr_fixsize);
   end;

@@ -24,7 +24,6 @@ type
   private
    function getimagelist: timagelist;
    procedure setimagelist(const Value: timagelist);
-//   function getshortcut: shortcutty;
    procedure setshortcut(const avalue: shortcutty);
    procedure setshortcut1(const avalue: shortcutty);
   protected
@@ -42,14 +41,12 @@ type
    property state;
    property group;
    property tagaction;
-//   property imagelist;
    property imagenr;
    property imagenrdisabled;
    property colorglyph;
    property color;
    property imagecheckedoffset;
    property hint;
-//   property shortcut;
    property statfile;
    property statvarname;
    property options;

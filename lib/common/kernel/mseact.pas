@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -107,7 +107,11 @@ type
  
  asynceventty = procedure(const sender: tobject; var atag: integer) of object;
  
- actionoptionty = (ao_updateonidle,ao_localshortcut,ao_globalshortcut);
+ actionoptionty = (ao_updateonidle,ao_localshortcut,ao_globalshortcut,
+                   ao_nocandefocus);
+const
+ defaultactionoptions = [];
+type
  actionoptionsty = set of actionoptionty;
 
  tcustomaction = class(tactcomponent,istatfile)
@@ -165,7 +169,6 @@ type
    procedure execute;
    procedure updateinfo(const sender: iactionlink);
    property caption: captionty read getcaption write setcaption;
-//   property shortcut: shortcutty read getshortcut write setshortcut default ord(key_none);
    property state: actionstatesty read getstate write setstate default [];
    property enabled: boolean read getenabled write setenabled;
    property checked: boolean read getchecked write setchecked;
@@ -178,7 +181,8 @@ type
    property imagecheckedoffset: integer read finfo.imagecheckedoffset write setimagecheckedoffset default 0;
    property hint: msestring read finfo.hint write sethint;
    property tagaction: integer read finfo.tag write settag default 0;
-   property options: actionoptionsty read foptions write setoptions default [];
+   property options: actionoptionsty read foptions write setoptions 
+                 default defaultactionoptions;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
 
@@ -276,6 +280,12 @@ begin
  result:= false;
  with info do begin
   if not (as_disabled in state) then begin
+   if (action = nil) or not(ao_nocandefocus in action.options) then begin
+    result:= application.candefocus;
+    if not result then begin
+     exit;
+    end;
+   end;
    if not nocheckbox and (mao_checkbox in info.options) then begin
     if action <> nil then begin
      action.checked:= not action.checked;
@@ -742,6 +752,7 @@ constructor tcustomaction.create(aowner: tcomponent);
 begin
  initactioninfo(finfo);
  finfo.action:= self;
+ foptions:= defaultactionoptions;
  inherited;
 end;
 
@@ -1016,9 +1027,6 @@ begin
  if doactionexecute(self,finfo) then begin
   changed;
  end;
-// if assigned(finfo.onexecute) then begin
-//  finfo.onexecute(self);
-// end;
 end;
 
 procedure tcustomaction.objectevent(const sender: tobject;
