@@ -67,6 +67,7 @@ object disassfo: tdisassfo
     color = -1879048187
     frame.dummy = 0
     anchors = []
+    onkeydown = keydo
     optionsgrid = [og_colsizing, og_colchangeontabkey, og_autopopup]
     datacols.count = 2
     datacols.options = [co_readonly, co_drawfocus, co_savestate]
@@ -88,7 +89,7 @@ object disassfo: tdisassfo
       14745599
       16777184
     )
-    datarowheight = 17
-    reffontheight = 15
+    datarowheight = 16
+    reffontheight = 14
   end
 end

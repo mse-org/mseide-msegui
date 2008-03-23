@@ -16,7 +16,7 @@ interface
 uses
  classes,msefiledialog,db,mseinplaceedit,msedbedit,msegui,msewidgetgrid,
  msedatalist,mseeditglob,msegrids,msetypes,msedb,msemenus,mseedit,
- msedataedits,mseevent,msestrings,msecolordialog;
+ msedataedits,mseevent,msestrings,msecolordialog,msegraphutils;
  
 type
  tdbfilenameedit = class(tcustomfilenameedit,idbeditfieldlink,idbeditinfo,
@@ -108,8 +108,6 @@ type
  end;
  
 implementation
-uses
- msegraphutils;
  
 type
  teditwidgetdatalink1 = class(teditwidgetdatalink);

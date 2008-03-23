@@ -20,16 +20,20 @@ unit disassform;
 
 interface
 uses
- msegui,mseclasses,mseforms,msegdbutils,msegrids,msetypes,msestrings;
+ msegui,mseclasses,mseforms,msegdbutils,msegrids,msetypes,msestrings,
+ mseevent;
 
 type
  tdisassfo = class(tdockform)
    grid: tstringgrid;
    procedure disassfoonshow(const sender: TObject);
+   procedure keydo(const sender: twidget; var info: keyeventinfoty);
   private
    faddress: cardinal;
+   flastaddress: cardinal;
    factiverow: integer;
    procedure internalrefresh;
+   procedure addlines(const aaddress: longword; const alinecount: integer);
   public
    gdb: tgdbmi;
    procedure refresh(const addr: ptrint);
@@ -43,7 +47,7 @@ var
 implementation
 
 uses
- disassform_mfm,sourceform,sourcepage,mseformatstr,sysutils;
+ disassform_mfm,sourceform,sourcepage,mseformatstr,sysutils,msekeyboard;
 
 { tdisassfo }
 
@@ -57,7 +61,8 @@ begin
  grid.clear;
 end;
 
-procedure tdisassfo.internalrefresh;
+procedure tdisassfo.addlines(const aaddress: longword; 
+                                            const alinecount: integer);
 var
  ar1: asmlinearty;
  int1,int2: integer;
@@ -66,61 +71,70 @@ var
  start,stop: cardinal;
  fname1: filenamety;
  ca1,ca2: cardinal;
+ endrow: integer;
 
 begin
- grid.rowcount:= 0;
- if visible and gdb.active then begin
-  int2:= 0;
-  if gdb.infoline(faddress,fname1,aline,start,stop) <> gdb_ok then begin
-   start:= faddress;
-   stop:= faddress + $100;
-   aline:= 0;
-  end;
-  grid.beginupdate;
-  try
-   while int2 < grid.rowsperpage do begin
-    if gdb.disassemble(ar1,start,stop) = gdb_ok then begin
-     if aline > 0 then begin
-      apage:= sourcefo.openfile(fname1);
-      grid.rowcount:= int2 + 1 + length(ar1);
-      if (apage <> nil) and (aline > 0) and (aline <= apage.grid.rowcount) then begin
-       grid[1][int2]:= apage.edit[aline-1];
-      end
-      else begin
-       grid[1][int2]:= '<line ' + inttostr(aline)+'>';
-      end;
-      grid.rowcolorstate[int2]:= 1;
-      inc(int2);
+ int2:= grid.rowcount;
+ endrow:= int2 + alinecount;
+ if gdb.infoline(aaddress,fname1,aline,start,stop) <> gdb_ok then begin
+  start:= aaddress;
+  stop:= aaddress + $100;
+  aline:= 0;
+ end;
+ grid.beginupdate;
+ try
+  while int2 < endrow do begin
+   flastaddress:= stop;
+   if gdb.disassemble(ar1,start,stop) = gdb_ok then begin
+    if aline > 0 then begin
+     apage:= sourcefo.openfile(fname1);
+     grid.rowcount:= int2 + 1 + length(ar1);
+     if (apage <> nil) and (aline > 0) and 
+                              (aline <= apage.grid.rowcount) then begin
+      grid[1][int2]:= apage.edit[aline-1];
      end
      else begin
-      grid.rowcount:= int2 + length(ar1);
+      grid[1][int2]:= '<line ' + inttostr(aline)+'>';
      end;
-     for int1:= 0 to high(ar1) do begin
-      with ar1[int1] do begin
-       grid[0][int2]:= hextostr(address,8);
-       grid[1][int2]:= instruction;
-       if address = faddress then begin
-        factiverow:= int2;
-        grid.rowcolorstate[int2]:= 0;
-       end;
+     grid.rowcolorstate[int2]:= 1;
+     inc(int2);
+    end
+    else begin
+     grid.rowcount:= int2 + length(ar1);
+    end;
+    for int1:= 0 to high(ar1) do begin
+     with ar1[int1] do begin
+      grid[0][int2]:= hextostr(address,8);
+      grid[1][int2]:= instruction;
+      if address = faddress then begin
+       factiverow:= int2;
+       grid.rowcolorstate[int2]:= 0;
       end;
-      inc(int2);
      end;
-     if gdb.infoline(stop,fname1,aline,ca1,ca2) = gdb_ok then begin
-      start:= ca1;
-      stop:= ca2;
-     end
-     else begin
-      break;
-     end;
+     inc(int2);
+    end;
+    if gdb.infoline(stop,fname1,aline,ca1,ca2) = gdb_ok then begin
+     start:= ca1;
+     stop:= ca2;
     end
     else begin
      break;
     end;
+   end
+   else begin
+    break;
    end;
-  finally
-   grid.endupdate;
   end;
+ finally
+  grid.endupdate;
+ end;
+end;
+
+procedure tdisassfo.internalrefresh;
+begin
+ grid.rowcount:= 0;
+ if visible and gdb.active then begin
+  addlines(faddress,grid.rowsperpage);
  end;
 end;
 
@@ -134,6 +148,32 @@ procedure tdisassfo.resetactiverow;
 begin
  if (factiverow < grid.rowcount) then begin
   grid.rowcolorstate[factiverow]:= -1;
+ end;
+end;
+
+procedure tdisassfo.keydo(const sender: twidget; var info: keyeventinfoty);
+var
+ rowcountbefore,rowbefore,activerowbefore: integer;
+ int1: integer;
+begin
+ if visible and gdb.active and not gdb.running then begin
+  with grid,info do begin
+   if (shiftstate = []) then begin
+    if ((key = key_down) or (key = key_pagedown)) and (row = rowhigh) then begin
+     addlines(flastaddress,grid.rowsperpage);
+    end
+    else begin
+     if ((key = key_up) or (key = key_pageup)) and (row = 0) then begin
+      rowcountbefore:= rowcount;
+      rowbefore:= row;
+      activerowbefore:= factiverow;
+      clear;
+      addlines(faddress-$40,rowcountbefore+$40);
+      row:= rowbefore + factiverow - activerowbefore;
+     end;
+    end;
+   end;
+  end;
  end;
 end;
 
