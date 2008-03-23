@@ -34,11 +34,10 @@ inherited cpui386fo: tcpui386fo
     00040001101010010004000178787801E0E0E003A0A4A0010000000550545001
     E0E0E001F8FCF801804CF00280808001E0E0E005D0D0D001B8B8B801D0D4D001
     E0E0E00CF8FCF801804CF002F8FCF816804CF0610000000800000008000000BF
-    000000080000000000000008FEFF7F03FEFF7FC0FEFF7F00FEFF7F08FEFF7F00
-    FEFF7F08FEFF7F08FEFF7F08FEFF7FBFFEFF7F08FEFF7F00FEFF7F03FEFF7F40
-    FEFF7F0000000000000000000000000000000000
+    000000080000000000000008FEFF7F04FEFF7FC0FEFF7F00FEFF7F08FEFF7FBF
+    FEFF7F08FEFF7F08FEFF7F08FEFF7FBFFEFF7F08FEFF7F00FEFF7F04FEFF7F40
+    FEFF7F0000000000000000BF0000000000000008
   }
-  onshow = nil
   onchildscaled = cpufoonchildscaled
   moduleclassname = 'tcpufo'
   inherited on: tbooleanedit
@@ -47,9 +46,9 @@ inherited cpui386fo: tcpui386fo
   object v: tbooleanedit
     Tag = 17
     bounds_x = 76
-    bounds_y = 0
+    bounds_y = 1
     bounds_cx = 11
-    bounds_cy = 29
+    bounds_cy = 28
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -59,7 +58,7 @@ inherited cpui386fo: tcpui386fo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
@@ -69,9 +68,9 @@ inherited cpui386fo: tcpui386fo
   object r: tbooleanedit
     Tag = 16
     bounds_x = 92
-    bounds_y = 0
+    bounds_y = 1
     bounds_cx = 11
-    bounds_cy = 29
+    bounds_cy = 28
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -81,7 +80,7 @@ inherited cpui386fo: tcpui386fo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
@@ -92,7 +91,7 @@ inherited cpui386fo: tcpui386fo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 32
-    bounds_cx = 118
+    bounds_cx = 115
     bounds_cy = 21
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -103,7 +102,7 @@ inherited cpui386fo: tcpui386fo
     frame.outerframe = (
       0
       0
-      25
+      22
       0
     )
     taborder = 1
@@ -120,7 +119,7 @@ inherited cpui386fo: tcpui386fo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 53
-    bounds_cx = 118
+    bounds_cx = 115
     bounds_cy = 21
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -131,7 +130,7 @@ inherited cpui386fo: tcpui386fo
     frame.outerframe = (
       0
       0
-      25
+      22
       0
     )
     taborder = 2
@@ -148,7 +147,7 @@ inherited cpui386fo: tcpui386fo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 74
-    bounds_cx = 117
+    bounds_cx = 114
     bounds_cy = 21
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -159,7 +158,7 @@ inherited cpui386fo: tcpui386fo
     frame.outerframe = (
       0
       0
-      24
+      21
       0
     )
     taborder = 3
@@ -176,7 +175,7 @@ inherited cpui386fo: tcpui386fo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 95
-    bounds_cx = 118
+    bounds_cx = 115
     bounds_cy = 21
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -187,7 +186,7 @@ inherited cpui386fo: tcpui386fo
     frame.outerframe = (
       0
       0
-      25
+      22
       0
     )
     taborder = 4
@@ -204,7 +203,7 @@ inherited cpui386fo: tcpui386fo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 116
-    bounds_cx = 114
+    bounds_cx = 113
     bounds_cy = 21
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -215,7 +214,7 @@ inherited cpui386fo: tcpui386fo
     frame.outerframe = (
       0
       0
-      21
+      20
       0
     )
     taborder = 5
@@ -232,7 +231,7 @@ inherited cpui386fo: tcpui386fo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 137
-    bounds_cx = 115
+    bounds_cx = 113
     bounds_cy = 21
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -243,7 +242,7 @@ inherited cpui386fo: tcpui386fo
     frame.outerframe = (
       0
       0
-      22
+      20
       0
     )
     taborder = 6
@@ -260,7 +259,7 @@ inherited cpui386fo: tcpui386fo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 158
-    bounds_cx = 120
+    bounds_cx = 117
     bounds_cy = 21
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -271,7 +270,7 @@ inherited cpui386fo: tcpui386fo
     frame.outerframe = (
       0
       0
-      27
+      24
       0
     )
     taborder = 7
@@ -288,7 +287,7 @@ inherited cpui386fo: tcpui386fo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 120
     bounds_y = 53
-    bounds_cx = 126
+    bounds_cx = 124
     bounds_cy = 21
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -299,7 +298,7 @@ inherited cpui386fo: tcpui386fo
     frame.outerframe = (
       0
       0
-      26
+      24
       0
     )
     taborder = 9
@@ -316,7 +315,7 @@ inherited cpui386fo: tcpui386fo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 120
     bounds_y = 74
-    bounds_cx = 122
+    bounds_cx = 120
     bounds_cy = 21
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -327,7 +326,7 @@ inherited cpui386fo: tcpui386fo
     frame.outerframe = (
       0
       0
-      22
+      20
       0
     )
     taborder = 10
@@ -344,7 +343,7 @@ inherited cpui386fo: tcpui386fo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 120
     bounds_y = 32
-    bounds_cx = 118
+    bounds_cx = 116
     bounds_cy = 21
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -355,7 +354,7 @@ inherited cpui386fo: tcpui386fo
     frame.outerframe = (
       0
       0
-      18
+      16
       0
     )
     taborder = 8
@@ -373,7 +372,7 @@ inherited cpui386fo: tcpui386fo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 120
     bounds_y = 116
-    bounds_cx = 58
+    bounds_cx = 57
     bounds_cy = 21
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -384,7 +383,7 @@ inherited cpui386fo: tcpui386fo
     frame.outerframe = (
       0
       0
-      17
+      16
       0
     )
     taborder = 11
@@ -402,7 +401,7 @@ inherited cpui386fo: tcpui386fo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 120
     bounds_y = 137
-    bounds_cx = 59
+    bounds_cx = 58
     bounds_cy = 21
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -413,7 +412,7 @@ inherited cpui386fo: tcpui386fo
     frame.outerframe = (
       0
       0
-      18
+      17
       0
     )
     taborder = 13
@@ -431,7 +430,7 @@ inherited cpui386fo: tcpui386fo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 120
     bounds_y = 158
-    bounds_cx = 59
+    bounds_cx = 58
     bounds_cy = 21
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -442,7 +441,7 @@ inherited cpui386fo: tcpui386fo
     frame.outerframe = (
       0
       0
-      18
+      17
       0
     )
     taborder = 15
@@ -460,7 +459,7 @@ inherited cpui386fo: tcpui386fo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 179
     bounds_y = 116
-    bounds_cx = 55
+    bounds_cx = 54
     bounds_cy = 21
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -471,7 +470,7 @@ inherited cpui386fo: tcpui386fo
     frame.outerframe = (
       0
       0
-      14
+      13
       0
     )
     taborder = 12
@@ -489,7 +488,7 @@ inherited cpui386fo: tcpui386fo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 179
     bounds_y = 137
-    bounds_cx = 59
+    bounds_cx = 58
     bounds_cy = 21
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -500,7 +499,7 @@ inherited cpui386fo: tcpui386fo
     frame.outerframe = (
       0
       0
-      18
+      17
       0
     )
     taborder = 14
@@ -546,9 +545,9 @@ inherited cpui386fo: tcpui386fo
   object o: tbooleanedit
     Tag = 11
     bounds_x = 142
-    bounds_y = 0
+    bounds_y = 1
     bounds_cx = 11
-    bounds_cy = 29
+    bounds_cy = 28
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -558,7 +557,7 @@ inherited cpui386fo: tcpui386fo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
@@ -568,9 +567,9 @@ inherited cpui386fo: tcpui386fo
   object d: tbooleanedit
     Tag = 10
     bounds_x = 153
-    bounds_y = 0
+    bounds_y = 1
     bounds_cx = 11
-    bounds_cy = 29
+    bounds_cy = 28
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -580,7 +579,7 @@ inherited cpui386fo: tcpui386fo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
@@ -590,9 +589,9 @@ inherited cpui386fo: tcpui386fo
   object i: tbooleanedit
     Tag = 9
     bounds_x = 164
-    bounds_y = 0
+    bounds_y = 1
     bounds_cx = 11
-    bounds_cy = 29
+    bounds_cy = 28
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -602,7 +601,7 @@ inherited cpui386fo: tcpui386fo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
@@ -612,9 +611,9 @@ inherited cpui386fo: tcpui386fo
   object t: tbooleanedit
     Tag = 8
     bounds_x = 175
-    bounds_y = 0
+    bounds_y = 1
     bounds_cx = 11
-    bounds_cy = 29
+    bounds_cy = 28
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -624,7 +623,7 @@ inherited cpui386fo: tcpui386fo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
@@ -634,9 +633,9 @@ inherited cpui386fo: tcpui386fo
   object s: tbooleanedit
     Tag = 7
     bounds_x = 186
-    bounds_y = 0
+    bounds_y = 1
     bounds_cx = 11
-    bounds_cy = 29
+    bounds_cy = 28
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -646,7 +645,7 @@ inherited cpui386fo: tcpui386fo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
@@ -656,9 +655,9 @@ inherited cpui386fo: tcpui386fo
   object z: tbooleanedit
     Tag = 6
     bounds_x = 197
-    bounds_y = 0
+    bounds_y = 1
     bounds_cx = 11
-    bounds_cy = 29
+    bounds_cy = 28
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -668,7 +667,7 @@ inherited cpui386fo: tcpui386fo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
@@ -678,9 +677,9 @@ inherited cpui386fo: tcpui386fo
   object a: tbooleanedit
     Tag = 4
     bounds_x = 208
-    bounds_y = 0
+    bounds_y = 1
     bounds_cx = 11
-    bounds_cy = 29
+    bounds_cy = 28
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -690,7 +689,7 @@ inherited cpui386fo: tcpui386fo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
@@ -700,9 +699,9 @@ inherited cpui386fo: tcpui386fo
   object p: tbooleanedit
     Tag = 2
     bounds_x = 219
-    bounds_y = 0
+    bounds_y = 1
     bounds_cx = 11
-    bounds_cy = 29
+    bounds_cy = 28
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -712,7 +711,7 @@ inherited cpui386fo: tcpui386fo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
@@ -721,9 +720,9 @@ inherited cpui386fo: tcpui386fo
   end
   object c: tbooleanedit
     bounds_x = 230
-    bounds_y = 0
+    bounds_y = 1
     bounds_cx = 11
-    bounds_cy = 29
+    bounds_cy = 28
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -733,7 +732,7 @@ inherited cpui386fo: tcpui386fo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
@@ -743,9 +742,9 @@ inherited cpui386fo: tcpui386fo
   object nt: tbooleanedit
     Tag = 15
     bounds_x = 106
-    bounds_y = 0
+    bounds_y = 1
     bounds_cx = 18
-    bounds_cy = 29
+    bounds_cy = 28
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -755,7 +754,7 @@ inherited cpui386fo: tcpui386fo
     frame.dummy = 0
     frame.outerframe = (
       3
-      18
+      17
       4
       0
     )
@@ -765,9 +764,9 @@ inherited cpui386fo: tcpui386fo
   object io: tbooleanedit
     Tag = 12
     bounds_x = 126
-    bounds_y = 0
+    bounds_y = 1
     bounds_cx = 14
-    bounds_cy = 29
+    bounds_cy = 28
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -777,7 +776,7 @@ inherited cpui386fo: tcpui386fo
     frame.dummy = 0
     frame.outerframe = (
       1
-      18
+      17
       2
       0
     )

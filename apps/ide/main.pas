@@ -182,6 +182,7 @@ type
    function checksave: modalresultty;
    procedure unloadexec;
    procedure cleardebugdisp;
+   procedure resetdebugdisp; //called before running debbuggee
    procedure createprogramfile(const aname: filenamety);
    function copynewfile(const aname,newname: filenamety;
                             const autoincrement: boolean;
@@ -637,8 +638,10 @@ end;
 
 procedure tmainfo.stackframechanged(const frameno: integer);
 begin
- gdb.selectstackframe(frameno);
- refreshframe;
+ if not gdb.running then begin
+  gdb.selectstackframe(frameno);
+  refreshframe;
+ end;
 end;
 
 procedure tmainfo.toggleformunit;
@@ -715,14 +718,20 @@ end;
 
 procedure tmainfo.cleardebugdisp;
 begin
+ resetdebugdisp;
+ stackfo.clear;
+ threadsfo.clear;
+ disassfo.clear;
+end;
+
+procedure tmainfo.resetdebugdisp;
+begin
  setstattext('',mtk_info);
  if sourcefo.gdbpage <> nil then begin
   sourcefo.gdbpage.hidehint;
  end;
  sourcefo.resetactiverow;
- stackfo.clear;
- threadsfo.clear;
- disassfo.clear;
+ disassfo.resetactiverow;
 end;
 
 procedure tmainfo.programfinished;
@@ -811,7 +820,7 @@ begin
    fstartcommand:= sc_none;
   end;
   gek_running: begin
-   cleardebugdisp;
+   resetdebugdisp;
    setstattext('*** Running ***',mtk_running);
   end;
   gek_error,gek_writeerror: begin

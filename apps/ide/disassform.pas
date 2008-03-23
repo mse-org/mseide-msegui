@@ -28,11 +28,13 @@ type
    procedure disassfoonshow(const sender: TObject);
   private
    faddress: cardinal;
+   factiverow: integer;
    procedure internalrefresh;
   public
    gdb: tgdbmi;
    procedure refresh(const addr: ptrint);
    procedure clear;
+   procedure resetactiverow;
  end;
 
 var
@@ -98,6 +100,7 @@ begin
        grid[0][int2]:= hextostr(address,8);
        grid[1][int2]:= instruction;
        if address = faddress then begin
+        factiverow:= int2;
         grid.rowcolorstate[int2]:= 0;
        end;
       end;
@@ -125,6 +128,13 @@ procedure tdisassfo.refresh(const addr: ptrint);
 begin
  faddress:= addr;
  internalrefresh;
+end;
+
+procedure tdisassfo.resetactiverow;
+begin
+ if (factiverow < grid.rowcount) then begin
+  grid.rowcolorstate[factiverow]:= -1;
+ end;
 end;
 
 end.

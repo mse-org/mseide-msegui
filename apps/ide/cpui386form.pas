@@ -58,7 +58,7 @@ type
    c: tbooleanedit;
    procedure flagonchange(const sender: TObject);
    procedure flagsetvalue(const sender: TObject; var avalue: Boolean; var accept: Boolean);
-   procedure ononchange(const sender: TObject);
+//   procedure ononchange(const sender: TObject);
    procedure regsetvalue(const sender: TObject; var avalue: Integer; var accept: Boolean);
    procedure cpufoonchildscaled(const sender: TObject);
   public
@@ -87,7 +87,7 @@ procedure tcpui386fo.flagsetvalue(const sender: TObject;
 begin
  doflagsetvalue(sender,avalue,accept);
 end;
-
+{
 procedure tcpui386fo.ononchange(const sender: TObject);
 var
  int1: integer;
@@ -106,7 +106,7 @@ begin
   end;
  end;
 end;
-
+}
 procedure tcpui386fo.regsetvalue(const sender: TObject; var avalue: Integer; var accept: Boolean);
 begin
  doregsetvalue(sender,avalue,accept);
