@@ -2571,7 +2571,7 @@ function application: tguiapplication;
 begin
  if appinst = nil then begin
   tinternalapplication.create(nil);
-  appinst.initialize;
+//  appinst.initialize;
  end;
  result:= appinst;
 end;
@@ -11333,6 +11333,7 @@ begin
  fmouse:= tmouse.create(imouse(self));
  fhinttimer:= tsimpletimer.create(0,{$ifdef FPC}@{$endif}hinttimer,false);
  fmouseparktimer:= tsimpletimer.create(0,{$ifdef FPC}@{$endif}mouseparktimer,false);
+ initialize;
 end;
 
 destructor tinternalapplication.destroy;
