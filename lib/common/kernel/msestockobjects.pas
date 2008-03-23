@@ -238,14 +238,17 @@ function stockobjects: tstockobjects;
 begin
  if stockobjs = nil then begin
   stockobjs:= tstockobjects.create;
+  application.initialize; //stockdata needs initialized application
  end;
  result:= stockobjs;
 end;
 
 procedure init;
 begin
- deinit;
- stockdata:= tstockdata.create(nil,true);
+// deinit;
+ if stockdata = nil then begin
+  stockdata:= tstockdata.create(nil,true);
+ end;
 end;
 
 procedure deinit;

@@ -73,6 +73,12 @@ const
  localactionstatestates: actionstatesty =
           [as_localdisabled,as_localinvisible,as_localchecked,as_localdefault];
 type
+ actionoptionty = (ao_updateonidle,ao_localshortcut,ao_globalshortcut,
+                   ao_nocandefocus);
+const
+ defaultactionoptions = [];
+
+type
  tcustomaction = class;
  actioneventty = procedure(const sender: tcustomaction) of object;
 
@@ -104,14 +110,9 @@ type
   function shortcutseparator: msechar;
   procedure calccaptiontext(var ainfo: actioninfoty);
  end;
- 
+
  asynceventty = procedure(const sender: tobject; var atag: integer) of object;
- 
- actionoptionty = (ao_updateonidle,ao_localshortcut,ao_globalshortcut,
-                   ao_nocandefocus);
-const
- defaultactionoptions = [];
-type
+
  actionoptionsty = set of actionoptionty;
 
  tcustomaction = class(tactcomponent,istatfile)
