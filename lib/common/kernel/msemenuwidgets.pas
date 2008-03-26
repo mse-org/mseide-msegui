@@ -306,8 +306,10 @@ var
  shift,regioncount: integer;
  amax: integer;
  frame1: framety;
- framehalfwidth: integer;
- framewidth1: integer;
+ frame: framety;
+ framewidth,frameheight: integer;
+// framehalfwidth: integer;
+// framewidth1: integer;
  extrasp: integer;
  imagedi: integer;
  imageditop: integer;
@@ -325,23 +327,38 @@ begin
   sizerect.pos:= nullpoint;
   commonwidth:= (owner <> nil) and (mo_commonwidth in owner.options) and
                       (mlo_horz in layout.options);
-  framehalfwidth:= 0;
+//  framehalfwidth:= 0;
   needsmenuarrow:= not (mlo_horz in layout.options) or (owner <> nil) and 
                         (mo_mainarrow in owner.options);
 
   if itemframetemplateactive <> nil then begin
-   with tframetemplate1(itemframetemplateactive) do begin
-    framehalfwidth:= (abs(levelo) + abs(leveli) + framewidth);
-   end;
+   frame:= itemframetemplateactive.paintframe;
+//   with tframetemplate1(itemframetemplateactive) do begin
+//    framehalfwidth:= (abs(levelo) + abs(leveli) + framewidth);
+//   end;
   end
   else begin
+   frame:= nullframe;
   end;
   if itemframetemplate <> nil then begin
    with tframetemplate1(itemframetemplate) do begin
-    int1:= (abs(levelo) + abs(leveli) + framewidth);
-    if int1 > framehalfwidth then begin
-     framehalfwidth:= int1;
+    frame1:= paintframe;
+    if frame1.left > frame.left then begin
+     frame.left:= frame1.left;
     end;
+    if frame1.top > frame.top then begin
+     frame.top:= frame1.top;
+    end;
+    if frame1.right > frame.right then begin
+     frame.right:= frame1.right;
+    end;
+    if frame1.bottom > frame.bottom then begin
+     frame.bottom:= frame1.bottom;
+    end;
+//    int1:= (abs(levelo) + abs(leveli) + framewidth);
+//    if int1 > framehalfwidth then begin
+//     framehalfwidth:= int1;
+//    end;
     frame1:= fi.innerframe;
     extrasp:= fextraspace;
     imagedi:= fimagedist;
@@ -358,12 +375,16 @@ begin
    imagedibottom:= 0;
    noanim1:= false;
   end; 
-  framewidth1:= framehalfwidth * 2;
-  framewidth1:= framewidth1 + extrasp;
+  framewidth:= frame.left + frame.right + extrasp;
+  frameheight:= frame.top + frame.bottom + extrasp;
+//  framewidth1:= framehalfwidth * 2;
+//  framewidth1:= framewidth1 + extrasp;
   setlength(cells,count);
   maxheight:= 0;
-  ay:= framehalfwidth;
-  ax:= framehalfwidth;
+//  ay:= framehalfwidth;
+//  ax:= framehalfwidth;
+  ay:= frame.top;
+  ax:= frame.left;
   textwidth:= 0;
   shortcutwidth:= 0;
   hassubmenu:= false;
@@ -483,7 +504,7 @@ begin
         if commonwidth then begin
          atextsize.cx:= cx;
         end;
-        inc(ax,cx+framewidth1);
+        inc(ax,cx+framewidth);
        end
        else begin                                              //vertical
         y:= ay;
@@ -493,7 +514,7 @@ begin
         else begin
          cy:= atextsize.cy;
         end;
-        inc(ay,cy+framewidth1);
+        inc(ay,cy+frameheight);
        end;
       end;
       if atextsize.cy > maxheight then begin
@@ -527,7 +548,8 @@ begin
      amax:= maxsize;
     end;
     if commonwidth then begin
-     ax:= framehalfwidth;
+//     ax:= framehalfwidth;
+     ax:= frame.left;
 //     textwidth:= textwidth + 4;
     end;
     for int1:= 0 to count - 1 do begin
@@ -539,22 +561,22 @@ begin
         if not (ss_separator in state) then begin
          dim.cx:= textwidth;
         end;
-        ax:= ax + dim.cx + framewidth1;
+        ax:= ax + dim.cx + framewidth;
        end;
        dim.x:= dim.x + shift;
        if (int1 > 0) and 
-               (dim.x + dim.cx + framewidth1 - extrasp - framehalfwidth > amax) then begin
-        shift:= shift - dim.x + framehalfwidth;
-        dim.x:= framehalfwidth;
+               (dim.x + dim.cx + frame.right > amax) then begin
+        shift:= shift - dim.x + frame.left; 
+        dim.x:= frame.left;
         inc(regioncount);
        end;
-       dim.y:= framehalfwidth + (maxheight+framewidth1) * (regioncount - 1);
+       dim.y:= frame.top + (maxheight+frameheight) * (regioncount - 1);
        dim.cy:= maxheight;
       end;
      end;
     end;
-    sizerect.cx:= ax - extrasp - framehalfwidth;
-    sizerect.cy:= regioncount * (maxheight + framewidth1) - extrasp;
+    sizerect.cx:= ax - extrasp - frame.right;
+    sizerect.cy:= regioncount * (maxheight + frameheight) - extrasp;
    end
    else begin                                              //vertical
     if mao_singleregion in layout.menu.options then begin
@@ -563,7 +585,7 @@ begin
     else begin
      amax:= maxsize;
     end;
-    ax:= framehalfwidth;
+    ax:= frame.left;
     textwidth:= textwidth + 4;
     if hassubmenu then begin
      textwidth:= textwidth + menuarrowwidth;
@@ -576,11 +598,11 @@ begin
      with cells[int1].buttoninfo,dim do begin
       tabpos:= tabpos + tabpos1;
       y:= y + shift;
-      int2:= y + cy  + framewidth1;
+      int2:= y + cy  + frameheight;
       if (int1 > 0) and (int2 - extrasp > amax) then begin
-       shift:= shift - y + framehalfwidth;
-       y:= framehalfwidth;
-       ax:= ax + textwidth + framewidth1;
+       shift:= shift - y + frame.top;
+       y:= frame.top;
+       ax:= ax + textwidth + framewidth;
        inc(regioncount);
       end
       else begin
@@ -592,8 +614,8 @@ begin
       cx:= textwidth;
      end;
     end;
-    sizerect.cx:=  regioncount * (textwidth  + framewidth1) - extrasp;
-    sizerect.cy:= maxheight - framehalfwidth - extrasp;
+    sizerect.cx:=  regioncount * (textwidth  + framewidth) - extrasp;
+    sizerect.cy:= maxheight - frame.bottom - extrasp;
    end;
   end
   else begin
@@ -601,7 +623,7 @@ begin
   end;
   for int1:= 0 to count - 1 do begin
    with cells[int1],buttoninfo do begin
-    dimouter:= inflaterect(dim,framehalfwidth);
+    dimouter:= inflaterect(dim,frame);
     imagedisttop:= imageditop;
     imagedistbottom:= imagedibottom;
    end;
@@ -651,24 +673,32 @@ begin
    po2:= nil;
   end; 
   for int1:= 0 to high(cells) do begin
-   with cells[int1] do begin
+   with cells[int1],buttoninfo do begin
     if int1 = activeitem then begin
      if itemframetemplateactive <> nil then begin
-      itemframetemplateactive.draw3dframe(canvas,buttoninfo.dim);
+      itemframetemplateactive.paintbackground(canvas,dim);
      end;
-     buttoninfo.face:= itemfaceactive;
-     buttoninfo.font:= fontactive;
-     include(buttoninfo.state,ss_active);
+     face:= itemfaceactive;
+     font:= fontactive;
+     include(state,ss_active);
      drawmenubutton(canvas,buttoninfo,po2);
+     if itemframetemplateactive <> nil then begin
+      itemframetemplateactive.paintoverlay(canvas,dim,true,
+                     ss_clicked in state,false);
+     end;
     end
     else begin
      if itemframetemplate <> nil then begin
-      itemframetemplate.draw3dframe(canvas,buttoninfo.dim);
+      itemframetemplate.paintbackground(canvas,dim);
      end;
-     buttoninfo.face:= itemface;
-     buttoninfo.font:= fontinactive;
-     exclude(buttoninfo.state,ss_active);
+     face:= itemface;
+     font:= fontinactive;
+     exclude(state,ss_active);
      drawmenubutton(canvas,buttoninfo,po1);
+     if itemframetemplate <> nil then begin
+      itemframetemplate.paintoverlay(canvas,dim,false,
+                     ss_clicked in state,false);
+     end;
     end;
    end;
   end;
@@ -1054,6 +1084,7 @@ begin
   if (eventkind = ek_mousemove) and (fnextpopup <> nil) and
          pointinrect(po1,fnextpopup.fwidgetrect) and 
                              not (mlo_childreninactive in options) then begin
+   invalidaterect(cells[activeitem].dimouter);
    fnextpopup.activatemenu(false,ss_left in info.shiftstate);
    exit;
   end;
@@ -1090,27 +1121,27 @@ begin
       end;
       exit;
      end;
-     with cells[activeitem].buttoninfo do begin
+     with cells[activeitem],buttoninfo do begin
       include(state,ss_clicked);
-      invalidaterect(dim);
+      invalidaterect(dimouter);
      end;
     end;
    end;
    ek_buttonrelease: begin
     if (activeitem >= 0) and (button = mb_left) then begin
-     with cells[activeitem].buttoninfo do begin
+     with cells[activeitem],buttoninfo do begin
       bo1:= ss_clicked in state;
       exclude(state,ss_clicked);
-      invalidaterect(dim);
+      invalidaterect(dimouter);
       if bo1 then begin
        include(info.eventstate,es_processed);
-//       int1:= activeitem;
+       int1:= activeitem;
        selectmenu(false);
        include(state,ss_mouse);
-//       if (activeitem < 0) and (application.mousecapturewidget = nil) and 
-//                 (int1 <= high(cells)) then begin
-//        activeitem:= int1; //restore mouseactivating
-//       end;
+       if (activeitem < 0) and (application.mousecapturewidget = nil) and 
+                 (int1 <= high(cells)) then begin
+        activeitem:= int1; //restore mouseactivating
+       end;
       end;
      end;
     end;
@@ -1122,7 +1153,7 @@ begin
     else begin
      if activeitem >= 0 then begin
       subpoint1(info.pos,clientpos);
-      updatemouseshapestate(cells[activeitem].buttoninfo,info,self);
+      updatemouseshapestate(cells[activeitem].buttoninfo,info,self,nil);
       include (cells[activeitem].buttoninfo.state,ss_mouse);
      end;
     end;

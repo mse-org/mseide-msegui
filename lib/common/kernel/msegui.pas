@@ -85,7 +85,8 @@ type
  widgetstatesty = set of widgetstatety;
  widgetstate1ty = ({ws1_releasing,}ws1_childscaled,ws1_fontheightlock,
                    ws1_widgetregionvalid,ws1_rootvalid,
-                   ws1_anchorsizing,ws1_isstreamed,
+                   ws1_anchorsizing,ws1_parentclientsizeinited,
+                   ws1_isstreamed,//used by ttabwidget
                    ws1_scaled, //used in tcustomscalingwidget
                    ws1_noclipchildren,
                    ws1_nodesignvisible,ws1_nodesignframe,ws1_nodesignhandles,
@@ -193,9 +194,11 @@ type
   procedure scrollwidgets(const dist: pointty);
   procedure clientrectchanged;
   function getcomponentstate: tcomponentstate;
+  function getmsecomponentstate: msecomponentstatesty;
   procedure invalidate;
   procedure invalidatewidget;
-  procedure invalidaterect(const rect: rectty; org: originty = org_client);
+  procedure invalidaterect(const rect: rectty; 
+              const org: originty = org_client; const noclip: boolean = false);
   function getwidget: twidget;
   function getwidgetrect: rectty;
   function getframeclicked: boolean;
@@ -326,6 +329,7 @@ type
    fi: frameinfoty;
    procedure setdisabled(const value: boolean); virtual;
    procedure updateclientrect; virtual;
+   class function calcpaintframe(const afi: frameinfoty): framety;
    procedure calcrects;
    procedure updaterects; virtual;
    procedure internalupdatestate;
@@ -342,8 +346,12 @@ type
    procedure dopaintfocusrect(const canvas: tcanvas; const rect: rectty); virtual;
    procedure updatewidgetstate; virtual;
    procedure updatemousestate(const sender: twidget; const apos: pointty); virtual;
+   function needsactiveinvalidate: boolean;
+   function needsmouseinvalidate: boolean;
    procedure activechanged; virtual;
    function needsfocuspaint: boolean; virtual;
+   class procedure drawframe(const canvas: tcanvas; const rect2: rectty; 
+           const afi: frameinfoty; const active,clicked,mouse: boolean);
   public
    constructor create(const intf: iframe); reintroduce;
    destructor destroy; override;
@@ -533,8 +541,12 @@ type
   public
    constructor create(const owner: tmsecomponent;
                   const onchange: notifyeventty); override;
-   procedure draw3dframe(const acanvas: tcanvas; const arect: rectty);
+   procedure paintbackground(const acanvas: tcanvas; const arect: rectty);
                                        //arect = paintrect
+   procedure paintoverlay(const acanvas: tcanvas; const arect: rectty;
+                        const active,clicked,mouse: boolean);
+                                       //arect = paintrect
+   function paintframe: framety;
   published
    property levelo: integer read fi.levelo write setlevelo default 0;
    property leveli: integer read fi.leveli write setleveli default 0;
@@ -1011,6 +1023,7 @@ type
    procedure setoptionswidget(const avalue: optionswidgetty); virtual;
    procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
 
+   procedure initparentclientsize;
    function getcaretcliprect: rectty; virtual;  //origin = clientrect.pos
    procedure beginread; override;
    procedure doendread; override;
@@ -1214,10 +1227,11 @@ type
 
    procedure invalidatewidget;     //invalidates whole widget
    procedure invalidate;           //invalidates clientrect
-   procedure invalidaterect(const rect: rectty; org: originty = org_client);
+   procedure invalidaterect(const rect: rectty; 
+               const org: originty = org_client; const noclip: boolean = false);
    procedure invalidateframestate;
-   procedure invalidateframestaterect(const rect: rectty; 
-                                        const org: originty = org_client);   
+   procedure invalidateframestaterect(const rect: rectty;
+               const aframe: tcustomframe; const org: originty = org_client);   
    function hasoverlappingsiblings(arect: rectty): boolean; //origin = pos
 
 
@@ -2748,15 +2762,31 @@ begin
  end;
 end;
 
-procedure tcustomframe.activechanged;
+function tcustomframe.needsactiveinvalidate: boolean;
 begin
  with fi do begin
-  if (frameimage_list <> nil) and 
+  result:= (frameimage_list <> nil) and 
     ((frameimage_offsetactive <> 0) or 
     (frameimage_offsetactivemouse <> frameimage_offsetmouse) or
-    (frameimage_offsetactiveclicked <> frameimage_offsetclicked)) then begin
-   fintf.getwidget.invalidatewidget;
-  end;
+    (frameimage_offsetactiveclicked <> frameimage_offsetclicked));
+ end;
+end;
+
+function tcustomframe.needsmouseinvalidate: boolean;
+begin
+ with fi do begin
+  result:= (frameimage_list <> nil) and 
+    ((frameimage_offsetmouse <> 0) or 
+    (frameimage_offsetactivemouse <> 0) or
+    (frameimage_offsetactiveclicked <> 0) or
+    (frameimage_offsetclicked <> 0));
+ end;
+end;
+
+procedure tcustomframe.activechanged;
+begin
+ if needsactiveinvalidate then begin
+  fintf.getwidget.invalidatewidget;
  end;
 end;
 
@@ -2778,90 +2808,88 @@ begin
  canvas.move(addpoint(fpaintrect.pos,fclientrect.pos));
 end;
 
-procedure tcustomframe.paintoverlay(const canvas: tcanvas; const arect: rectty);
+class procedure tcustomframe.drawframe(const canvas: tcanvas; 
+                         const rect2: rectty; const afi: frameinfoty; 
+                                 const active,clicked,mouse: boolean);
 var
+ imageoffs: integer;
  rect1: rectty;
  col1: colorty;
- imageoffs: integer;
- rect2: rectty;
 begin
- rect1:= deflaterect(arect,fouterframe);
- rect2:= rect1;
- if fi.levelo <> 0 then begin
-  draw3dframe(canvas,rect1,fi.levelo,fi.framecolors);
-  inflaterect1(rect1,-abs(fi.levelo));
+ rect1:= rect2;
+ if afi.levelo <> 0 then begin
+  draw3dframe(canvas,rect1,afi.levelo,afi.framecolors);
+  inflaterect1(rect1,-abs(afi.levelo));
  end;
- if fi.framewidth > 0 then begin
-  if (fi.colorframeactive = cl_default) or not fintf.getwidget.active then begin
-   col1:= fi.colorframe;
+ if afi.framewidth > 0 then begin
+  if (afi.colorframeactive = cl_default) or not active then begin
+   col1:= afi.colorframe;
   end
   else begin
-   col1:= fi.colorframeactive;
+   col1:= afi.colorframeactive;
   end; 
-  canvas.drawframe(rect1,-fi.framewidth,col1);
-  inflaterect1(rect1,-fi.framewidth);
+  canvas.drawframe(rect1,-afi.framewidth,col1);
+  inflaterect1(rect1,-afi.framewidth);
  end;
- if fi.leveli <> 0 then begin
-  draw3dframe(canvas,rect1,fi.leveli,fi.framecolors);
+ if afi.leveli <> 0 then begin
+  draw3dframe(canvas,rect1,afi.leveli,afi.framecolors);
  end;
- if fi.frameimage_list <> nil then begin
-  imageoffs:= fi.frameimage_offset;
-  with fintf do begin
-   if getframeactive then begin
-    if getframeclicked then begin
-     imageoffs:= imageoffs + fi.frameimage_offsetactiveclicked;
-    end
-    else begin
-     if getframemouse then begin
-      imageoffs:= imageoffs + fi.frameimage_offsetactivemouse;
-     end
-     else begin
-      imageoffs:= imageoffs + fi.frameimage_offsetactive;
-     end;
-    end;
+ if afi.frameimage_list <> nil then begin
+  imageoffs:= afi.frameimage_offset;
+  if active then begin
+   if clicked then begin
+    imageoffs:= imageoffs + afi.frameimage_offsetactiveclicked;
    end
    else begin
-    if getframeclicked then begin
-     imageoffs:= imageoffs + fi.frameimage_offsetclicked;
+    if mouse then begin
+     imageoffs:= imageoffs + afi.frameimage_offsetactivemouse;
     end
     else begin
-     if getframemouse then begin
-      imageoffs:= imageoffs + fi.frameimage_offsetmouse;
-     end;
+     imageoffs:= imageoffs + afi.frameimage_offsetactive;
+    end;
+   end;
+  end
+  else begin
+   if clicked then begin
+    imageoffs:= imageoffs + afi.frameimage_offsetclicked;
+   end
+   else begin
+    if mouse then begin
+     imageoffs:= imageoffs + afi.frameimage_offsetmouse;
     end;
    end;
   end;
   if imageoffs >= 0 then begin
-   fi.frameimage_list.paint(canvas,imageoffs,rect2.pos);
-   fi.frameimage_list.paint(canvas,imageoffs+1,
-      makerect(rect2.x,rect2.y+fi.frameimage_list.height,
-               fi.frameimage_list.width,rect2.cy-2*fi.frameimage_list.height),
+   afi.frameimage_list.paint(canvas,imageoffs,rect2.pos);
+   afi.frameimage_list.paint(canvas,imageoffs+1,
+      makerect(rect2.x,rect2.y+afi.frameimage_list.height,
+               afi.frameimage_list.width,rect2.cy-2*afi.frameimage_list.height),
                [al_stretchy]);
-   fi.frameimage_list.paint(canvas,imageoffs+2,rect2,[al_bottom]);
-   fi.frameimage_list.paint(canvas,imageoffs+3,
-      makerect(rect2.x+fi.frameimage_list.width,
-               rect2.y+rect2.cy-fi.frameimage_list.height,
-               rect2.cx-2*fi.frameimage_list.width,fi.frameimage_list.height),
+   afi.frameimage_list.paint(canvas,imageoffs+2,rect2,[al_bottom]);
+   afi.frameimage_list.paint(canvas,imageoffs+3,
+      makerect(rect2.x+afi.frameimage_list.width,
+               rect2.y+rect2.cy-afi.frameimage_list.height,
+               rect2.cx-2*afi.frameimage_list.width,afi.frameimage_list.height),
                [al_stretchx]);
-   fi.frameimage_list.paint(canvas,imageoffs+4,rect2,[al_bottom,al_right]);
-   fi.frameimage_list.paint(canvas,imageoffs+5,
-      makerect(rect2.x+rect2.cx-fi.frameimage_list.width,
-               rect2.y+fi.frameimage_list.height,
-               fi.frameimage_list.width,rect2.cy-2*fi.frameimage_list.height),
+   afi.frameimage_list.paint(canvas,imageoffs+4,rect2,[al_bottom,al_right]);
+   afi.frameimage_list.paint(canvas,imageoffs+5,
+      makerect(rect2.x+rect2.cx-afi.frameimage_list.width,
+               rect2.y+afi.frameimage_list.height,
+               afi.frameimage_list.width,rect2.cy-2*afi.frameimage_list.height),
                [al_stretchy]);
-   fi.frameimage_list.paint(canvas,imageoffs+6,rect2,[al_right]);
-   fi.frameimage_list.paint(canvas,imageoffs+7,
-      makerect(rect2.x+fi.frameimage_list.width,rect2.y,
-               rect2.cx-2*fi.frameimage_list.width,
-               fi.frameimage_list.height),[al_stretchx]);
+   afi.frameimage_list.paint(canvas,imageoffs+6,rect2,[al_right]);
+   afi.frameimage_list.paint(canvas,imageoffs+7,
+      makerect(rect2.x+afi.frameimage_list.width,rect2.y,
+               rect2.cx-2*afi.frameimage_list.width,
+               afi.frameimage_list.height),[al_stretchx]);
   end;
  end;
- {
- if fi.colorclient <> cl_transparent then begin
-  rect1:= deflaterect(arect,fpaintframe);
-  canvas.fillrect(rect1,fi.colorclient);
- end;
- }
+end;
+
+procedure tcustomframe.paintoverlay(const canvas: tcanvas; const arect: rectty);
+begin
+ drawframe(canvas,deflaterect(arect,fouterframe),fi,fintf.getframeactive,
+                                fintf.getframeclicked,fintf.getframemouse);
 end;
 {
 procedure tcustomframe.paintoverlay(const canvas: tcanvas; const arect: rectty);
@@ -2983,32 +3011,39 @@ begin
  finnerclientrect:= deflaterect(fclientrect,fi.innerframe);
 end;
 
-procedure tcustomframe.calcrects;
+class function tcustomframe.calcpaintframe(const afi: frameinfoty): framety;
 var
  int1: integer;
 begin
- fwidth.left:= abs(fi.levelo) + fi.framewidth + abs(fi.leveli);
- fwidth.top:= fwidth.left;
- fwidth.right:= fwidth.left;
- fwidth.bottom:= fwidth.top;
- if fi.frameimage_list <> nil then begin
-  int1:= fi.frameimage_list.width + fi.frameimage_left;
-  if int1 > fwidth.left then begin
-   fwidth.left:= int1;
-  end;
-  int1:= fi.frameimage_list.width + fi.frameimage_right;
-  if int1 > fwidth.right then begin
-   fwidth.right:= int1;
-  end;
-  int1:= fi.frameimage_list.height + fi.frameimage_top;
-  if int1 > fwidth.top then begin
-   fwidth.top:= int1;
-  end;
-  int1:= fi.frameimage_list.height + fi.frameimage_bottom;
-  if int1 > fwidth.bottom then begin
-   fwidth.bottom:= int1;
+ with result do begin
+  left:= abs(afi.levelo) + afi.framewidth + abs(afi.leveli);
+  top:= left;
+  right:= left;
+  bottom:= top;
+  if afi.frameimage_list <> nil then begin
+   int1:= afi.frameimage_list.width + afi.frameimage_left;
+   if int1 > left then begin
+    left:= int1;
+   end;
+   int1:= afi.frameimage_list.width + afi.frameimage_right;
+   if int1 > right then begin
+    right:= int1;
+   end;
+   int1:= afi.frameimage_list.height + afi.frameimage_top;
+   if int1 > top then begin
+    top:= int1;
+   end;
+   int1:= afi.frameimage_list.height + afi.frameimage_bottom;
+   if int1 > bottom then begin
+    bottom:= int1;
+   end;
   end;
  end;
+end;
+
+procedure tcustomframe.calcrects;
+begin
+ fwidth:= calcpaintframe(fi);
  fpaintframedelta:= nullframe;
  getpaintframe(fpaintframedelta);
  fpaintframe:= addframe(fpaintframedelta,fouterframe);
@@ -3356,7 +3391,8 @@ end;
 procedure tcustomframe.settemplate(const avalue: tframecomp);
 begin
  fintf.getwidget.setlinkedvar(avalue,tmsecomponent(ftemplate));
- if (avalue <> nil) and not (csloading in avalue.componentstate) then begin
+// if (avalue <> nil) and not (csloading in avalue.componentstate) then begin
+ if (avalue <> nil) and not (csreading in avalue.componentstate) then begin
   assign(avalue);
  end;
 end;
@@ -3997,7 +4033,12 @@ begin
   with tcustomframe(dest) do begin
    if (cs_loadedproc in fowner.msecomponentstate) or 
                  (csloading in fintf.getcomponentstate) then begin
-    exclude(fstate,fs_paintposinited);
+//    if cs_updateskinproc in fintf.getmsecomponentstate then begin
+//     updatestate;
+//    end
+//    else begin
+     exclude(fstate,fs_paintposinited);
+//    end;
    end;
    settemplateinfo(self.fi);
   end;
@@ -4008,31 +4049,30 @@ begin
  end;
 end;
 
-procedure tframetemplate.draw3dframe(const acanvas: tcanvas; const arect: rectty);
-var
- rect1: rectty;
+procedure tframetemplate.paintbackground(const acanvas: tcanvas;
+                       const arect: rectty);
 begin
  if fi.colorclient <> cl_transparent then begin
   acanvas.fillrect(arect,fi.colorclient);
  end;
- rect1:= inflaterect(arect,abs(fi.leveli));
- if fi.leveli <> 0 then begin
-  mseshapes.draw3dframe(acanvas,rect1,fi.leveli,fi.framecolors);
- end;
- if fi.framewidth > 0 then begin
-  inflaterect1(rect1,fi.framewidth);
-  acanvas.drawframe(rect1,-fi.framewidth,fi.colorframe);
- end;
- if fi.levelo <> 0 then begin
-  inflaterect1(rect1,abs(fi.levelo));
-  mseshapes.draw3dframe(acanvas,rect1,fi.levelo,fi.framecolors);
- end;
+end;
+
+procedure tframetemplate.paintoverlay(const acanvas: tcanvas; const arect: rectty;
+                         const active,clicked,mouse: boolean);
+begin
+ tcustomframe.drawframe(acanvas,
+     inflaterect(arect,tcustomframe.calcpaintframe(fi)),fi,active,clicked,mouse);
 end;
 
 procedure tframetemplate.copyinfo(const source: tpersistenttemplate);
 begin
  setlinkedvar(tframetemplate(source).frameimage_list,
                   tmsecomponent(fi.frameimage_list));
+end;
+
+function tframetemplate.paintframe: framety;
+begin
+ result:= tcustomframe.calcpaintframe(fi);
 end;
 
 { tframecomp }
@@ -4809,7 +4849,7 @@ begin
  fwidgetrect.cy:= defaultwidgetheight;
  fcolor:= defaultwidgetcolor;
  inherited;
- include(fmsecomponentstate,cs_hasskin);
+// include(fmsecomponentstate,cs_hasskin);
 end;
 
 procedure twidget.afterconstruction;
@@ -5638,6 +5678,7 @@ begin
  if fframe <> nil then begin
   exclude(fframe.fstate,fs_paintposinited);
  end;
+ exclude(fwidgetstate1,ws1_parentclientsizeinited);
  inherited;
 end;
 
@@ -5647,6 +5688,22 @@ begin
   fframe.calcrects; //rects must be valid for parentfontchanged
  end;
  inherited;
+end;
+
+procedure twidget.initparentclientsize;
+var
+ int1: integer;
+begin
+ include(fwidgetstate1,ws1_parentclientsizeinited);
+ if fparentwidget <> nil then begin
+  fparentclientsize:= fparentwidget.minclientsize;
+ end
+ else begin
+  fparentclientsize:= fwidgetrect.size;
+ end;
+ for int1:= 0 to high(fwidgets) do begin
+  fwidgets[int1].initparentclientsize;
+ end;
 end;
 
 procedure twidget.loaded;
@@ -5662,6 +5719,9 @@ begin
   if ffont <> nil then begin
    fontchanged;
   end;
+  if not (ws1_parentclientsizeinited in fwidgetstate1) then begin
+   initparentclientsize;
+  end;   
   sizechanged;
   poschanged;
   colorchanged;
@@ -5678,6 +5738,7 @@ begin
  finally
   exclude(fwidgetstate,ws_loadedproc);
  end;
+ updateskin;
 end;
 
 function twidget.updateopaque(const children: boolean): boolean;
@@ -5884,17 +5945,19 @@ procedure twidget.parentclientrectchanged;
 
  function agetsize: sizety;
  begin
+ {
   if ws_loadedproc in fwidgetstate then begin
    result:= fparentclientsize;
   end
   else begin
+  }
    if fparentwidget = nil then begin
     result:= fwidgetrect.size;
    end
    else begin
     result:= fparentwidget.minclientsize;
    end;
-  end;
+//  end;
  end;
 
 var
@@ -5906,8 +5969,7 @@ var
 
 begin
  if not (csloading in componentstate) and
-  (not (ws1_anchorsizing in fwidgetstate1){ or
-               (ws1_clientsizing in fparentwidget.fwidgetstate1)}) then begin
+                        not (ws1_anchorsizing in fwidgetstate1) then begin
   int1:= 0; //loopcount
   repeat
    size1:= agetsize;
@@ -5915,7 +5977,7 @@ begin
    delta:= subsize(size1,fparentclientsize);
    anch:= fanchors * [an_left,an_right];
    if anch <> [an_left] then begin
-    if (anch = [an_left,an_right]){ or (anch = []) and (delta.cx <> 0)} then begin
+    if (anch = [an_left,an_right]) then begin
      inc(rect1.cx,delta.cx);
     end
     else begin
@@ -5927,8 +5989,6 @@ begin
        if fparentwidget <> nil then begin
         rect1.x:= fparentwidget.clientwidgetpos.x;
         rect1.cx:= fparentwidget.clientsize.cx;
-//        rect1.x:= fparentwidget.paintpos.x;
-//        rect1.cx:= fparentwidget.paintsize.cx;
        end;
       end;
      end;
@@ -5936,7 +5996,7 @@ begin
    end;
    anch:= fanchors * [an_top,an_bottom];
    if anch <> [an_top] then begin
-    if (anch = [an_top,an_bottom]){ or (anch = []) and (delta.cy <> 0)} then begin
+    if (anch = [an_top,an_bottom]) then begin
      inc(rect1.cy,delta.cy);
     end
     else begin
@@ -5948,22 +6008,17 @@ begin
        if fparentwidget <> nil then begin
         rect1.y:= fparentwidget.clientwidgetpos.y;
         rect1.cy:= fparentwidget.clientsize.cy;
-//        rect1.y:= fparentwidget.paintpos.y;
-//        rect1.cy:= fparentwidget.paintsize.cy;
        end;
       end;
      end;
     end;
    end;
    fparentclientsize:= size1;
-//   bo1:= ws1_anchorsizing in fwidgetstate1;
    include(fwidgetstate1, ws1_anchorsizing);
    try
     setwidgetrect(rect1);
    finally
-//    if not bo1 then begin
-     exclude(fwidgetstate1, ws1_anchorsizing);
-//    end;
+    exclude(fwidgetstate1, ws1_anchorsizing);
    end;
    inc(int1);
   until sizeisequal(size1,agetsize) or (int1 > 5);
@@ -5988,14 +6043,17 @@ begin
   invalidatewidget;
   reclipcaret;
  end;
- if ws_loadedproc in fwidgetstate then begin
+ if (ws_loadedproc in fwidgetstate) {and 
+               not (cs_updateskinproc in fmsecomponentstate)} then begin
 //  initparentclientrect;
+{
   if fparentwidget <> nil then begin
    fparentclientsize:= fparentwidget.minclientsize;
   end
   else begin
    fparentclientsize:= fwidgetrect.size;
   end;
+ }
   parentclientrectchanged;
  end
  else begin
@@ -6753,13 +6811,18 @@ begin
  end;
 end;
 
-procedure twidget.invalidaterect(const rect: rectty; org: originty = org_client);
+procedure twidget.invalidaterect(const rect: rectty;
+                const org: originty = org_client; const noclip: boolean = false);
 var
- rect1: rectty;
+ rect1,rect2: rectty;
+ po1: prectty;
 begin
  if invalidateneeded then begin
   updateroot;
   rect1:= rect;
+  rect2.pos:= nullpoint;
+  rect2.size:= fwidgetrect.size;
+  po1:= @rect2;
   case org of
    org_client: begin
     if fframe <> nil then begin
@@ -6767,10 +6830,7 @@ begin
      inc(rect1.x,fframe.fpaintrect.pos.x);
      inc(rect1.y,fframe.fclientrect.pos.y);
      inc(rect1.y,fframe.fpaintrect.pos.y);
-     msegraphutils.intersectrect(rect1,fframe.fpaintrect,rect1);
-    end
-    else begin
-     msegraphutils.intersectrect(rect1,makerect(nullpoint,fwidgetrect.size),rect1);
+     po1:= @fframe.fpaintrect;
     end;
    end;
    org_inner: begin
@@ -6779,15 +6839,12 @@ begin
      inc(rect1.y,fframe.finnerclientrect.pos.y);
      inc(rect1.x,fframe.fpaintrect.pos.x);
      inc(rect1.y,fframe.fpaintrect.pos.y);
-     msegraphutils.intersectrect(rect1,fframe.fpaintrect,rect1);
-    end
-    else begin
-     msegraphutils.intersectrect(rect1,makerect(nullpoint,fwidgetrect.size),rect1);
+     po1:= @fframe.fpaintrect;
     end;
    end;
-   else begin
-    msegraphutils.intersectrect(rect1,makerect(nullpoint,fwidgetrect.size),rect1);
-   end;
+  end;
+  if not noclip then begin
+   msegraphutils.intersectrect(rect1,po1^,rect1);
   end;
   inc(rect1.x,frootpos.x);
   inc(rect1.y,frootpos.y);
@@ -6795,14 +6852,15 @@ begin
  end;
 end;
 
-procedure twidget.invalidateframestaterect(const rect: rectty; 
-                                        const org: originty = org_client);
+procedure twidget.invalidateframestaterect(const rect: rectty;
+      const aframe: tcustomframe; const org: originty = org_client);
 begin
  if (fframe = nil) or (fframe.fi.frameimage_list = nil) then begin
-  invalidaterect(rect,org);
+  invalidaterect(rect,org,true);
  end
  else begin
-  invalidatewidget;
+  invalidaterect(inflaterect(rect,aframe.innerframe),org,true);
+//  invalidatewidget;
  end;
 end;
 
@@ -7280,9 +7338,19 @@ begin
 end;
 
 procedure twidget.setclientsize(const asize: sizety);
+var
+ rect1: rectty;
 begin
 // include(fwidgetstate1,ws1_clientsizing);
- size:= addsize(asize,clientframewidth);
+ rect1.size:= addsize(asize,clientframewidth);
+ rect1.pos:= fwidgetrect.pos;
+ if fanchors * [an_left,an_right] = [an_right] then begin
+  rect1.x:= rect1.x - rect1.cx + fwidgetrect.cx;
+ end;
+ if fanchors * [an_top,an_bottom] = [an_bottom] then begin
+  rect1.y:= rect1.y - rect1.cy + fwidgetrect.cy;
+ end;
+ widgetrect:= rect1;
 // exclude(fwidgetstate1,ws1_clientsizing);
 end;
 

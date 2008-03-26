@@ -55,7 +55,8 @@ type
  iscrollbar = interface
   function getwidget: twidget;
   function translatecolor(const acolor: colorty): colorty;
-  procedure invalidaterect(const rect: rectty; org: originty);
+  procedure invalidaterect(const rect: rectty; const org: originty;
+                    const noclip: boolean = false);
   procedure scrollevent(sender: tcustomscrollbar; event: scrolleventty);
  end;
 
@@ -136,8 +137,10 @@ type
   procedure scrollwidgets(const dist: pointty);
   procedure clientrectchanged;
   function getcomponentstate: tcomponentstate;
+  function getmsecomponentstate: msecomponentstatesty;
   procedure invalidatewidget;
-  procedure invalidaterect(const rect: rectty; org: originty = org_client);
+  procedure invalidaterect(const rect: rectty; 
+            const org: originty = org_client; const noclip: boolean = false);
   function getwidget: twidget;
   function getwidgetrect: rectty;
   function getframeclicked: boolean;
@@ -1263,13 +1266,18 @@ begin
  result:= fintf.getwidget.componentstate;
 end;
 
+function tcustomscrollbar.getmsecomponentstate: msecomponentstatesty;
+begin
+ result:= fintf.getwidget.msecomponentstate;
+end;
+
 procedure tcustomscrollbar.invalidatewidget;
 begin
  invalidate;
 end;
 
 procedure tcustomscrollbar.invalidaterect(const rect: rectty;
-               org: originty = org_client);
+               const org: originty = org_client; const noclip: boolean = false);
 begin
  invalidate;
 end;

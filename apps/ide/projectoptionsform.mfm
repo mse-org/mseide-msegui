@@ -513,7 +513,7 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_x = 0
         bounds_y = 323
         bounds_cx = 613
-        bounds_cy = 202
+        bounds_cy = 201
         bounds_cymin = 84
         anchors = [an_top, an_bottom]
         taborder = 21
@@ -529,7 +529,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_x = 0
           bounds_y = 19
           bounds_cx = 613
-          bounds_cy = 183
+          bounds_cy = 182
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.dummy = 0
           anchors = [an_left, an_top, an_right, an_bottom]
@@ -542,7 +542,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 0
             bounds_y = 0
             bounds_cx = 613
-            bounds_cy = 183
+            bounds_cy = 182
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.dummy = 0
             anchors = []
@@ -587,7 +587,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_x = 0
           bounds_y = 19
           bounds_cx = 613
-          bounds_cy = 183
+          bounds_cy = 182
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.dummy = 0
           anchors = [an_left, an_top, an_right, an_bottom]
@@ -599,7 +599,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 0
             bounds_y = 0
             bounds_cx = 613
-            bounds_cy = 183
+            bounds_cy = 182
             bounds_cymin = 60
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.dummy = 0
@@ -2919,7 +2919,7 @@ object projectoptionsfo: tprojectoptionsfo
               )
             )
           end>
-        datarowheight = 16
+        datarowheight = 17
         reffontheight = 15
         object coldi: tpointeredit
           optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
@@ -2927,19 +2927,18 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_x = 0
           bounds_y = 0
           bounds_cx = 22
-          bounds_cy = 16
+          bounds_cy = 17
           taborder = 1
           optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
           visible = False
           onpaintglyph = drawcol
         end
         object usercolors: tcoloredit
-          optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
           optionsskin = [osk_framebuttononly]
           bounds_x = 23
           bounds_y = 0
           bounds_cx = 97
-          bounds_cy = 16
+          bounds_cy = 17
           frame.levelo = 0
           frame.colorclient = -2147483645
           frame.localprops = [frl_levelo, frl_colorclient]
@@ -2959,7 +2958,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_x = 121
           bounds_y = 0
           bounds_cx = 406
-          bounds_cy = 16
+          bounds_cy = 17
           frame.levelo = 0
           frame.colorclient = -2147483645
           frame.localprops = [frl_levelo, frl_colorclient]
@@ -3694,7 +3693,7 @@ object projectoptionsfo: tprojectoptionsfo
             options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
             widgetname = 'toolparam'
           end>
-        datarowheight = 16
+        datarowheight = 17
         statfile = statfile1
         reffontheight = 15
         object toolsave: tbooleanedit
@@ -3702,7 +3701,7 @@ object projectoptionsfo: tprojectoptionsfo
           optionsskin = [osk_framebuttononly]
           bounds_x = 0
           bounds_y = 0
-          bounds_cy = 16
+          bounds_cy = 17
           frame.levelo = 0
           frame.colorclient = -2147483645
           frame.localprops = [frl_levelo, frl_leveli, frl_fileft, frl_fitop, frl_firight, frl_fibottom, frl_colorclient]
@@ -3716,7 +3715,7 @@ object projectoptionsfo: tprojectoptionsfo
           optionsskin = [osk_framebuttononly]
           bounds_x = 14
           bounds_y = 0
-          bounds_cy = 16
+          bounds_cy = 17
           frame.levelo = 0
           frame.colorclient = -2147483645
           frame.localprops = [frl_levelo, frl_leveli, frl_fileft, frl_fitop, frl_firight, frl_fibottom, frl_colorclient]
@@ -3730,7 +3729,7 @@ object projectoptionsfo: tprojectoptionsfo
           optionsskin = [osk_framebuttononly]
           bounds_x = 28
           bounds_y = 0
-          bounds_cy = 16
+          bounds_cy = 17
           frame.levelo = 0
           frame.colorclient = -2147483645
           frame.localprops = [frl_levelo, frl_leveli, frl_fileft, frl_fitop, frl_firight, frl_fibottom, frl_colorclient]
@@ -3740,12 +3739,11 @@ object projectoptionsfo: tprojectoptionsfo
           visible = False
         end
         object toolmenu: tstringedit
-          optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
           optionsskin = [osk_framebuttononly]
           bounds_x = 42
           bounds_y = 0
           bounds_cx = 104
-          bounds_cy = 16
+          bounds_cy = 17
           frame.levelo = 0
           frame.colorclient = -2147483645
           frame.localprops = [frl_levelo, frl_colorclient]
@@ -3761,7 +3759,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_x = 147
           bounds_y = 0
           bounds_cx = 203
-          bounds_cy = 16
+          bounds_cy = 17
           frame.levelo = 0
           frame.colorclient = -2147483645
           frame.localprops = [frl_levelo, frl_colorclient]
@@ -3780,7 +3778,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_x = 351
           bounds_y = 0
           bounds_cx = 238
-          bounds_cy = 16
+          bounds_cy = 17
           frame.levelo = 0
           frame.colorclient = -2147483645
           frame.localprops = [frl_levelo, frl_colorclient]

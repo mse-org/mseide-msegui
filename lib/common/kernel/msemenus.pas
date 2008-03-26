@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -426,7 +426,7 @@ constructor tcustommenu.create(aowner: tcomponent);
 begin
  foptions:= defaultmenuoptions;
  inherited;
- include(fmsecomponentstate,cs_hasskin);
+// include(fmsecomponentstate,cs_hasskin);
  fmenu:= tmenuitem.create(nil,self);
 end;
 
@@ -466,6 +466,7 @@ procedure tcustommenu.loaded;
 begin
  fmenu.endload;
  inherited;
+ updateskin;
 end;
 
 procedure tcustommenu.setexecitem(const avalue: tmenuitem);

@@ -181,11 +181,13 @@ type
    procedure setstaticframe(value: boolean);
    function getwidgetrect: rectty;
    function getcomponentstate: tcomponentstate;
+   function getmsecomponentstate: msecomponentstatesty;
    procedure scrollwidgets(const dist: pointty);
    procedure clientrectchanged;
    procedure invalidate;
    procedure invalidatewidget;
-   procedure invalidaterect(const rect: rectty; org: originty = org_client);
+   procedure invalidaterect(const rect: rectty; const org: originty = org_client;
+                               const noclip: boolean = false);
    function getwidget: twidget;
    
    function getframeclicked: boolean; virtual;
@@ -239,6 +241,7 @@ type
    function getitems1(const index: integer): tframebutton;
   protected
    procedure dosizechanged; override;
+   procedure updatestate;
   public
    constructor create(const aowner: tcustombuttonframe;
                     const buttonclass: framebuttonclassty);
@@ -258,6 +261,7 @@ type
    procedure getpaintframe(var aframe: framety); override;
    function getbuttonclass: framebuttonclassty; virtual;
    procedure checktemplate(const sender: tobject); override;
+   procedure updatestate; override;
   public
    constructor create(const intf: icaptionframe; const buttonintf: ibutton);
                                                    reintroduce; virtual;
@@ -561,7 +565,7 @@ var
 begin
  with finfo do begin
   bo1:= ss_clicked in state;
-  if updatemouseshapestate(finfo,info,nil) then begin
+  if updatemouseshapestate(finfo,info,nil,nil) then begin
    invalidate;
   end;
   if ss_clicked in state then begin
@@ -645,7 +649,7 @@ end;
 
 procedure tframebutton.updatewidgetstate(const awidget: twidget);
 begin
- updatewidgetshapestate(finfo,awidget,fbo_disabled in foptions);
+ updatewidgetshapestate(finfo,awidget,fbo_disabled in foptions,fframe);
 end;
 
 procedure tframebutton.assign(source: tpersistent);
@@ -694,6 +698,11 @@ begin
  result:= tcustombuttonframe(fowner).fintf.getwidget.componentstate;
 end;
 
+function tframebutton.getmsecomponentstate: msecomponentstatesty;
+begin
+ result:= tcustombuttonframe(fowner).fintf.getwidget.msecomponentstate;
+end;
+
 procedure tframebutton.scrollwidgets(const dist: pointty);
 begin
  //dummy
@@ -716,7 +725,7 @@ begin
 end;
 
 procedure tframebutton.invalidaterect(const rect: rectty;
-               org: originty = org_client);
+               const org: originty = org_client; const noclip: boolean = false);
 begin
  invalidate;
 end;
@@ -816,6 +825,18 @@ var
 begin
  for int1:= 0 to high(fitems) do begin
   tframebutton(fitems[int1]).checktemplate(sender);
+ end;
+end;
+
+procedure tframebuttons.updatestate;
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fitems) do begin
+  with tframebutton(fitems[int1]) do begin
+   frameskinoptionstoshapestate(fframe,finfo.state);
+   finfo.state:= finfo.state - [ss_showfocusrect,ss_showdefaultrect];
+  end;
  end;
 end;
 
@@ -925,24 +946,26 @@ begin
  color2:= cl_none;
  for int1:= 0 to fbuttons.count-1 do begin
   with fbuttons[int1] do begin
-   if fframe <> nil then begin
-    canvas.save;
-    fframe.paintbackground(canvas,fframerect);
-    canvas.restore;
-   end;
-   if color = cl_parent then begin
-    if color2 = cl_none then begin
-     color2:= fintf.getwidget.parentcolor;
+   if not (fbo_invisible in foptions) then begin
+    if fframe <> nil then begin
+     canvas.save;
+     fframe.paintbackground(canvas,fframerect);
+     canvas.restore;
     end;
-    finfo.color:= color2;
-    drawtoolbutton(canvas,finfo);
-    finfo.color:= cl_parent;
-   end
-   else begin
-    drawtoolbutton(canvas,finfo);
-   end;
-   if fframe <> nil then begin
-    fframe.paintoverlay(canvas,fframerect);
+    if color = cl_parent then begin
+     if color2 = cl_none then begin
+      color2:= fintf.getwidget.parentcolor;
+     end;
+     finfo.color:= color2;
+     drawtoolbutton(canvas,finfo);
+     finfo.color:= cl_parent;
+    end
+    else begin
+     drawtoolbutton(canvas,finfo);
+    end;
+    if fframe <> nil then begin
+     fframe.paintoverlay(canvas,fframerect);
+    end;
    end;
   end;
  end;
@@ -975,6 +998,12 @@ procedure tcustombuttonframe.checktemplate(const sender: tobject);
 begin
  inherited;
  fbuttons.checktemplate(sender);
+end;
+
+procedure tcustombuttonframe.updatestate;
+begin
+ fbuttons.updatestate; //set skin options
+ inherited; 
 end;
 
 { tcustomedit }

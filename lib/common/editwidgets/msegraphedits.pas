@@ -2373,7 +2373,8 @@ begin
         not (es_processed in info.eventstate)} then begin
   subpoint1(info.pos,paintpos);
   try
-   updatemouseshapestate(finfo,info,self,nil,bo_executeonclick in foptions);
+   updatemouseshapestate(finfo,info,self,fframe,nil,
+                              bo_executeonclick in foptions);
   finally
    addpoint1(info.pos,paintpos);
   end;

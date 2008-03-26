@@ -296,7 +296,8 @@ type
    procedure scrollevent(sender: tcustomscrollbar; event: scrolleventty); virtual;
    //iscrollbar
    function translatecolor(const acolor: colorty): colorty;
-   procedure invalidaterect(const rect: rectty; org: originty);
+   procedure invalidaterect(const rect: rectty; const org: originty;
+                              const noclip: boolean = false);
     //iscrollbox
    function getscrollsize: sizety;
   public
@@ -367,7 +368,8 @@ const
 type
  istepbar = interface
   function translatecolor(const aclor: colorty): colorty;
-  procedure invalidaterect(const rect: rectty; org: originty);
+  procedure invalidaterect(const rect: rectty; const org: originty;
+                               const noclip: boolean = false);
   procedure dostep(const event: stepkindty);
  end;
  stepbuttonposty = (sbp_right,sbp_top,sbp_left,sbp_bottom);
@@ -1532,7 +1534,7 @@ begin
  inherited;
  if not (csdesigning in componentstate) and 
         not (es_processed in info.eventstate) then begin
-  updatemouseshapestate(finfo,info,self,nil,bo_executeonclick in foptions);
+  updatemouseshapestate(finfo,info,self,fframe,nil,bo_executeonclick in foptions);
  end;
 end;
 
@@ -1542,7 +1544,7 @@ begin
  if (info.shiftstate = []) and (bo_executeonkey in foptions) then begin
   if (info.key = key_space) then begin
    include(finfo.state,ss_clicked);
-   invalidateframestaterect(finfo.dim);
+   invalidateframestaterect(finfo.dim,fframe);
   end
   else begin
    if isenterkey(info.key) then begin
@@ -1558,7 +1560,7 @@ begin
  inherited;
  if (info.key = key_space) and (ss_clicked in finfo.state) then begin
   exclude(finfo.state,ss_clicked);
-  invalidateframestaterect(finfo.dim);
+  invalidateframestaterect(finfo.dim,fframe);
   if (info.shiftstate = []) and (bo_executeonkey in foptions) then begin
    include(info.eventstate,es_processed);
    internalexecute;
@@ -1569,7 +1571,7 @@ end;
 procedure tactionsimplebutton.statechanged;
 begin
  inherited;
- updatewidgetshapestate(finfo,self);
+ updatewidgetshapestate(finfo,self,false,fframe);
 end;
 
 procedure tactionsimplebutton.setcolorglyph(const value: colorty);
@@ -2655,7 +2657,7 @@ var
 begin
  clickedbutton:= -1;
  for int1:= 0 to high(fbuttons) do begin
-  if updatemouseshapestate(fbuttons[int1],info,nil) then begin
+  if updatemouseshapestate(fbuttons[int1],info,nil,nil) then begin
    icaptionframe(fintf).getwidget.invalidaterect(fbuttons[int1].dim,org_widget);
    if info.eventkind in [ek_buttonpress,ek_buttonrelease] then begin
     include(info.eventstate,es_processed);
@@ -3273,9 +3275,10 @@ begin
  result:= fowner.translatecolor(acolor);
 end;
 
-procedure tcustomscrollboxframe.invalidaterect(const rect: rectty; org: originty);
+procedure tcustomscrollboxframe.invalidaterect(const rect: rectty; 
+                 const org: originty; const noclip: boolean = false);
 begin
- fowner.invalidaterect(rect,org);
+ fowner.invalidaterect(rect,org,noclip);
 end;
 
 function tcustomscrollboxframe.getscrollsize: sizety;

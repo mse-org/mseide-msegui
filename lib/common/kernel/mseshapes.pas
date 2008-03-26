@@ -71,7 +71,7 @@ procedure drawtab(const canvas: tcanvas; const info: shapeinfoty;
                                const innerframe: pframety = nil);
 function updatemouseshapestate(var info: shapeinfoty;
                  const mouseevent: mouseeventinfoty;
-                 const widget: twidget;
+                 const widget: twidget; const aframe: tcustomframe;
                  const infoarpo: pshapeinfoarty = nil;
                  const canclick: boolean = true): boolean; overload;
 function updatemouseshapestate(var infos: shapeinfoarty;
@@ -81,7 +81,8 @@ function updatemouseshapestate(var infos: shapeinfoarty;
 function getmouseshape(const infos: shapeinfoarty): integer;
          //returns shape index under mouse, -1 if none
 function updatewidgetshapestate(var info: shapeinfoty; const widget: twidget;
-                    const adisabled: boolean = false): boolean;
+                    const adisabled: boolean = false;
+                    const aframe: tcustomframe = nil): boolean;
 function findshapeatpos(const infoar: shapeinfoarty; const apos: pointty;
                const rejectstates: shapestatesty = [ss_disabled,ss_invisible]): integer;
 procedure initshapeinfo(var ainfo: shapeinfoty);
@@ -106,6 +107,7 @@ uses
  classes,msedrawtext,msestockobjects,msebits,sysutils;
 type
  twidget1 = class(twidget);
+ tframe1 = class(tcustomframe);
 var
  buttontab: tcustomtabulators;
 
@@ -243,9 +245,11 @@ begin
 end;
 
 function updatewidgetshapestate(var info: shapeinfoty; const widget: twidget;
-            const adisabled: boolean = false): boolean;
+            const adisabled: boolean = false;
+            const aframe: tcustomframe = nil): boolean;
 var
  statebefore: shapestatesty;
+ rect1: rectty;
 begin
  with info do begin
   statebefore:= state;
@@ -253,12 +257,24 @@ begin
   updatebit(cardinal(state),ord(ss_focused),widget.active);
   result:= state <> statebefore;
   if result then begin
+   rect1:= dim;
+   if (aframe <> nil) and tframe1(aframe).needsactiveinvalidate then begin
+    inflaterect1(rect1,aframe.innerframe);
+   end;
    if ss_widgetorg in state then begin
-    widget.invalidateframestaterect(dim,org_widget);
+    widget.invalidaterect(rect1,org_widget);
    end
    else begin
-    widget.invalidateframestaterect(dim);
+    widget.invalidaterect(rect1);
    end;
+   {
+   if ss_widgetorg in state then begin
+    widget.invalidateframestaterect(rect1,org_widget);
+   end
+   else begin
+    widget.invalidateframestaterect(rect1);
+   end;
+   }
   end;
  end;
 end;
@@ -277,7 +293,7 @@ end;
 
 function updatemouseshapestate(var info: shapeinfoty;
                  const mouseevent: mouseeventinfoty;
-                 const widget: twidget;
+                 const widget: twidget; const aframe: tcustomframe;
                  const infoarpo: pshapeinfoarty = nil;
                  const canclick: boolean = true): boolean;
          //true on change
@@ -286,6 +302,7 @@ var
  int1: integer;
  po1: pshapeinfoty;
  bo1: boolean;
+ rect1: rectty;
 
 begin
  result:= false;
@@ -372,7 +389,12 @@ begin
   end;
   result:= result or (state <> statebefore);
   if result and (widget <> nil) then begin
-   widget.invalidateframestaterect(dim);
+   if (aframe <> nil) and tframe1(aframe).needsmouseinvalidate then begin
+    widget.invalidaterect(inflaterect(dim,aframe.innerframe));
+   end
+   else begin
+    widget.invalidaterect(dim);
+   end;
   end;
  end;
 end;
@@ -385,7 +407,8 @@ var
 begin
  result:= false;
  for int1:= 0 to high(infos) do begin
-  result:= updatemouseshapestate(infos[int1],mouseevent,widget,@infos) or result;
+  result:= updatemouseshapestate(infos[int1],mouseevent,widget,
+                                                 nil,@infos) or result;
  end;
 end;
 

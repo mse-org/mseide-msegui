@@ -285,9 +285,11 @@ type
    procedure scrollwidgets(const dist: pointty);
    procedure clientrectchanged;
    function getcomponentstate: tcomponentstate;
+   function getmsecomponentstate: msecomponentstatesty;
    procedure invalidate;
    procedure invalidatewidget;
-   procedure invalidaterect(const rect: rectty; org: originty = org_client);
+   procedure invalidaterect(const rect: rectty; const org: originty = org_client;
+                                  const noclip: boolean = false);
    function getframeclicked: boolean;
    function getframemouse: boolean;
    function getframeactive: boolean;
@@ -701,9 +703,11 @@ type
    procedure scrollwidgets(const dist: pointty);
    procedure clientrectchanged;
    function getcomponentstate: tcomponentstate;
+   function getmsecomponentstate: msecomponentstatesty;
    procedure invalidate;
    procedure invalidatewidget;
-   procedure invalidaterect(const rect: rectty; org: originty = org_client);
+   procedure invalidaterect(const rect: rectty; const org: originty = org_client;
+                              const noclip: boolean = false);
    function getframeclicked: boolean;
    function getframemouse: boolean;
    function getframeactive: boolean;
@@ -2103,7 +2107,12 @@ end;
 
 function tgridprop.getcomponentstate: tcomponentstate;
 begin
- result:= twidget1(getwidget).getcomponentstate;
+ result:= getwidget.componentstate;
+end;
+
+function tgridprop.getmsecomponentstate: msecomponentstatesty;
+begin
+ result:= getwidget.msecomponentstate;
 end;
 
 procedure tgridprop.invalidate;
@@ -2116,9 +2125,10 @@ begin
  getwidget.invalidatewidget;
 end;
 
-procedure tgridprop.invalidaterect(const rect: rectty; org: originty = org_client);
+procedure tgridprop.invalidaterect(const rect: rectty; 
+               const org: originty = org_client; const noclip: boolean = false);
 begin
- getwidget.invalidaterect(rect,org);
+ getwidget.invalidaterect(rect,org,noclip);
 end;
 {
 function tgridprop.getframefont: tfont;
@@ -2863,7 +2873,12 @@ end;
 
 function tcolheader.getcomponentstate: tcomponentstate;
 begin
- result:= twidget1(getwidget).getcomponentstate;
+ result:= getwidget.componentstate;
+end;
+
+function tcolheader.getmsecomponentstate: msecomponentstatesty;
+begin
+ result:= getwidget.msecomponentstate;
 end;
 
 procedure tcolheader.invalidate;
@@ -2878,7 +2893,8 @@ begin
 // getwidget.invalidatewidget;
 end;
 
-procedure tcolheader.invalidaterect(const rect: rectty; org: originty = org_client);
+procedure tcolheader.invalidaterect(const rect: rectty; 
+        const org: originty = org_client; const noclip: boolean = false);
 begin
  changed;
 // getwidget.invalidaterect(rect,org);

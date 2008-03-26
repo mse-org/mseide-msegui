@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -248,7 +248,7 @@ type
  end;
 
  msecomponentstatety = (cs_ismodule,cs_endreadproc,cs_loadedproc,cs_noload,
-                        cs_hasskin,cs_noskin);
+                        {cs_hasskin,}cs_noskin{,cs_updateskinproc});
  msecomponentstatesty = set of msecomponentstatety;
 
  createprocty = procedure of object;
@@ -283,6 +283,7 @@ type
    factualclassname: pshortstring;
    fancestorclassname: string;
    fhelpcontext: msestring;
+   function getmsecomponentstate: msecomponentstatesty;
    function getobjectlinker: tobjectlinker;
    procedure objectevent(const sender: tobject; const event: objecteventty); virtual;
    procedure beginread; virtual;
@@ -2769,9 +2770,11 @@ end;
 
 procedure tmsecomponent.loaded;
 begin
+{
  if cs_hasskin in fmsecomponentstate then begin
   updateskin;
  end;
+ }
  inherited;
  include(fmsecomponentstate,cs_loadedproc);
  try
@@ -2970,16 +2973,26 @@ begin
     end;
    end;
   end;
-  if not (cs_noskin in fmsecomponentstate) then begin
-   if assigned(fonbeforeupdateskin) then begin
-    fonbeforeupdateskin(tobject(tmethod(oninitskinobject).data));
+//  include(fmsecomponentstate,cs_updateskinproc);
+//  try
+   if not (cs_noskin in fmsecomponentstate) then begin
+    if assigned(fonbeforeupdateskin) then begin
+     fonbeforeupdateskin(tobject(tmethod(oninitskinobject).data));
+    end;
+    oninitskinobject(self,skininfo);
+    if assigned(fonbeforeupdateskin) then begin
+     fonafterupdateskin(tobject(tmethod(oninitskinobject).data));
+    end;   
    end;
-   oninitskinobject(self,skininfo);
-   if assigned(fonbeforeupdateskin) then begin
-    fonafterupdateskin(tobject(tmethod(oninitskinobject).data));
-   end;   
-  end;
+//  finally
+//   exclude(fmsecomponentstate,cs_updateskinproc);
+//  end;
  end;
+end;
+
+function tmsecomponent.getmsecomponentstate: msecomponentstatesty;
+begin
+ result:= fmsecomponentstate;
 end;
 
 {$ifdef mse_with_ifi}

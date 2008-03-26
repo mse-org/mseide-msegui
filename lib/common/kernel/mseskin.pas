@@ -494,6 +494,7 @@ uses
  msewidgets,msetabsglob,sysutils;
 type
  twidget1 = class(twidget);
+ tcustomframe1 = class(tcustomframe);
   
 { tskincolor }
 
@@ -733,15 +734,18 @@ var
  size1: sizety;
  col1: colorty;
 begin
- with instance do begin
+ with twidget1(instance) do begin
   if (aframe <> nil) and (frame = nil) and 
                  not (osk_framebuttononly in optionsskin) then begin
-   createframe;
+   if fframe = nil then begin
+    createframe;
+    include(tcustomframe1(fframe).fstate,fs_paintposinited);
+   end;
    col1:= frame.colorclient;
    size1:= clientsize;
    frame.template:= aframe;
    frame.colorclient:= col1;
-   clientsize:= size1;
+   clientsize:= size1;      //same clientsize as before
   end;
  end;
 end;
@@ -752,15 +756,18 @@ var
  size1: sizety;
  col1: colorty;
 begin
- with instance do begin
+ with twidget1(instance) do begin
   if (aframe <> nil) and not (osk_framebuttononly in optionsskin) then begin
-   createframe;
+   if fframe = nil then begin
+    createframe;
+    include(tcustomframe1(fframe).fstate,fs_paintposinited);
+   end;
    if  frame.template = nil then begin
     col1:= frame.colorclient;
     size1:= clientsize;
     frame.template:= aframe;
     frame.colorclient:= col1;
-    clientsize:= size1;
+    clientsize:= size1;          //same clientsize as before
    end;
   end;
  end;

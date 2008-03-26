@@ -819,15 +819,17 @@ end;
 
 procedure tcustommseform.loaded;
 begin
- fscrollbox.updateskin;
  exclude(fscrollbox.fwidgetstate,ws_loadlock);
- if fmainmenuwidget <> nil then begin
-  fmainmenuwidget.loaded;
- end;
+// if fmainmenuwidget <> nil then begin
+//  fmainmenuwidget.loaded;
+// end;
  if (fo_screencentered in foptions) and not (csdesigning in componentstate) then begin
   window.windowpos:= wp_screencentered;
  end;
  inherited;
+ if fmainmenuwidget <> nil then begin
+  fmainmenuwidget.loaded;
+ end;
  updateoptions;
  updatemainmenutemplates;
  application.postevent(tobjectevent.create(ek_loaded,ievent(self)));

@@ -1,4 +1,8 @@
 MSEide+MSEgui version history
+2008-03-26
+ tbuttonframe.options fbo_flat, fbo_noanim -> 
+ tcustomframe.optionsskin fso_flat, fso_noanim.
+ 
 Version 1.8beta1
 2008-03-20
  gridcoordty parameter for griddataeventty.
