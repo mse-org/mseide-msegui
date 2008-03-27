@@ -9,7 +9,7 @@
 }
 unit mseguiintf; //i386-linux
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$GOTO ON}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$GOTO ON}{$endif}
 {$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
 
 interface

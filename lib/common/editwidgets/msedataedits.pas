@@ -9,7 +9,7 @@
 }
 unit msedataedits;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$goto on}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
 
 interface
 uses

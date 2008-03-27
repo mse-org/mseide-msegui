@@ -1,5 +1,5 @@
 unit main;
-{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
  msegui,mseclasses,mseforms,msemenus,msedataedits,msestat,msestatfile,msebitmap;

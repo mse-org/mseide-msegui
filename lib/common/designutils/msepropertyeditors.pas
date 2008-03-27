@@ -9,7 +9,7 @@
 }
 unit msepropertyeditors;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
 interface
 uses
@@ -32,7 +32,7 @@ type
  propinstancearty = array of propinstancety;
  ppropinstancearty = ^propinstancearty;
 
- iobjectinspector = interface
+ iobjectinspector = interface(inullinterface)
   procedure propertymodified(const sender: tpropertyeditor);
   function getproperties(const objects: objectarty;
                           const amodule: tmsecomponent;
@@ -50,7 +50,7 @@ type
                    ps_link);  //do not display selected components
  propertystatesty = set of propertystatety;
 
- iremotepropertyeditor = interface
+ iremotepropertyeditor = interface(inullinterface)
   function getordvalue(const index: integer = 0): integer;
   procedure setordvalue(const value: longword); overload;
   procedure setordvalue(const index: integer; const value: longword); overload;

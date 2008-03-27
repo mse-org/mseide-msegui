@@ -8,7 +8,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 unit msepostscriptprinter;
-{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$GOTO ON}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$GOTO ON}{$endif}
 
 interface
 

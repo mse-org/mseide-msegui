@@ -9,7 +9,7 @@
 }
 unit msebits;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 //bitmanipulationhelpers
 interface
 type

@@ -9,7 +9,7 @@
 }
 unit msemysql41conn;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
  db,classes,mmysql41conn,msestrings,msedb,msqldb,msedatabase;

@@ -1,5 +1,5 @@
 unit setcreateorderform;
-{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
  classes,msegui,mseclasses,mseforms,msestat,msestatfile,msestrings,msedatalist,

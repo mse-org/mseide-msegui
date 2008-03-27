@@ -8,7 +8,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 unit mseopenglwidget;
-{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
  msewindowwidget,msegl,{$ifdef unix}mseglx,x,xlib,{$else}windows,{$endif}

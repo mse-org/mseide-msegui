@@ -9,13 +9,13 @@
 }
 unit mseinplaceedit;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
 interface
 uses
  msegui,mseguiglob,msegraphics,msedrawtext,msegraphutils,
  mserichstring,msetimer,mseevent,msetypes,msestrings,mseeditglob,msedatalist,
- msemenus,mseactions,mseact;
+ msemenus,mseactions,mseact,mseglob;
 
 const
  defaultundomaxcount = 256;
@@ -49,7 +49,7 @@ type
  editnotificationeventty = procedure(const sender: tobject;
           var info: editnotificationinfoty) of object;
 
- iedit = interface
+ iedit = interface(inullinterface)
   function hasselection: boolean;
   function getoptionsedit: optionseditty;
   procedure editnotification(var info: editnotificationinfoty);
@@ -223,7 +223,7 @@ type
 
  pundoinfoty = ^undoinfoty;
 
- iundo = interface
+ iundo = interface(inullinterface)
   procedure setedpos(const Value: gridcoordty; const select: boolean;
                                const donotify: boolean);
   procedure deletetext(const startpos,endpos: gridcoordty);

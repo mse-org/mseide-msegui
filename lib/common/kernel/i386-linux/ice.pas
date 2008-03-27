@@ -1,7 +1,7 @@
 
 unit ice;
 interface
-{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
   const
     External_library='libICE.so';
 

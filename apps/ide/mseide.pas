@@ -16,7 +16,7 @@
 }
 program mseide;
 {$ifdef FPC}
- {$mode objfpc}{$h+}{$INTERFACES CORBA}
+ {$mode objfpc}{$h+}
  {$ifdef mswindows}
   {$ifdef mse_debug}{$apptype console}{$else}{$apptype gui}{$endif}
  {$endif}

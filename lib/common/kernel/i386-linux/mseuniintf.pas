@@ -9,7 +9,7 @@
 }
 unit mseuniintf; //i386-linux
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
  msegraphics,msestrings;

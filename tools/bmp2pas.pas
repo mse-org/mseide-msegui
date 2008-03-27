@@ -20,7 +20,7 @@ program bmp2pas;
 // 'bmp2pas -oregcomps_bmp.pas tcomp1.bmp tcomp2.bmp tcomp3.bmp'
 // -> bitmapunit for tcomp1,tcomp2,tcomp3
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 {$ifndef FPC}
 {$APPTYPE CONSOLE}
 {$endif}

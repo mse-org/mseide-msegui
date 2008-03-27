@@ -9,7 +9,7 @@
 }
 unit mselist;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$GOTO ON}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$GOTO ON}{$endif}
 
 interface
 

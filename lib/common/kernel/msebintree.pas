@@ -8,7 +8,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 unit msebintree;
-{$ifdef FPC}{$mode objfpc}{$h+}{$GOTO ON}{$INTERFACES CORBA}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$GOTO ON}{$endif}
 interface
 type
  tavlnode = class

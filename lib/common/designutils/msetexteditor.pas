@@ -1,5 +1,5 @@
 unit msetexteditor;
-{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
  msegui,mseglob,mseguiglob,mseclasses,mseforms,

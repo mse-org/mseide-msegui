@@ -9,12 +9,12 @@
 }
 unit msegraphics;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$GOTO ON}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$GOTO ON}{$endif}
 
 interface
 uses
  {$ifdef FPC}classes{$else}Classes{$endif},msetypes,msestrings,mseerr,
- msegraphutils,mseguiglob,mseclasses;
+ msegraphutils,mseguiglob,mseclasses,mseglob;
 
 const
 
@@ -162,7 +162,7 @@ type
  end;
  pfontinfoty = ^fontinfoty;
 
- icanvas = interface
+ icanvas = interface(inullinterface)
   procedure gcneeded(const sender: tcanvas);
   function getmonochrome: boolean;
   function getsize: sizety;

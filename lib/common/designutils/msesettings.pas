@@ -15,7 +15,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 }
 unit msesettings;
-{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
  mseglob,mseguiglob,msegui,mseclasses,mseforms,msestat,msestatfile,

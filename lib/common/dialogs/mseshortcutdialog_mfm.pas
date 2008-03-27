@@ -1,5 +1,5 @@
 unit mseshortcutdialog_mfm;
-{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
 interface
 

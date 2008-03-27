@@ -1,5 +1,5 @@
 unit mseprinter;
-{$ifdef FPC}{$mode objfpc}{$h+}{$GOTO ON}{$INTERFACES CORBA}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$GOTO ON}{$endif}
 
 interface
 uses

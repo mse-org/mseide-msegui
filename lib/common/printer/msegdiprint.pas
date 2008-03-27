@@ -1,5 +1,5 @@
 unit msegdiprint;
-{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
  classes,mseprinter,msegraphics,msegraphutils,msetypes,msestrings,msedrawtext,

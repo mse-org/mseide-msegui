@@ -9,7 +9,7 @@
 }
 unit msedatanodes;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
 interface
 uses
@@ -70,7 +70,7 @@ type
   
  tlistitem = class;
 
- iitemlist = interface
+ iitemlist = interface(inullinterface)
   function getlayoutinfo: plistitemlayoutinfoty;
   procedure updatelayout;
   procedure itemcountchanged;

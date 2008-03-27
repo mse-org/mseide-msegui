@@ -1,5 +1,5 @@
 unit msesockets;
-{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
  classes,mseglob,mseguiglob,mseclasses,msesys,msestrings,msepipestream,

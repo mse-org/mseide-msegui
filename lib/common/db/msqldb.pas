@@ -20,13 +20,13 @@ unit msqldb;
 {$mode objfpc}
 {$H+}
 {$M+}   // ### remove this!!!
-{$interfaces corba}
+
 
 interface
 
 uses 
  sysutils,classes,db,msebufdataset,msetypes,msedb,mseclasses,msedatabase,
- msestrings,msedatalist,mseapplication;
+ msestrings,msedatalist,mseapplication,mseglob;
 
 type 
  TSchemaType = (stNoSchema,stTables,stSysTables,stProcedures,stColumns,
@@ -473,7 +473,7 @@ type
 const
  blobidsize = sizeof(integer);
 type
- iblobconnection = interface
+ iblobconnection = interface(inullinterface)
                 ['{947B58E1-0CA4-436D-A06F-2174D8CA676F}']
   procedure writeblobdata(const atransaction: tsqltransaction;
               const tablename: string; const acursor: tsqlcursor;

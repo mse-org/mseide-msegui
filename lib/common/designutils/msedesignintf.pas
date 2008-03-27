@@ -9,12 +9,12 @@
 }
 unit msedesignintf;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
 interface
 uses
  classes,msegraphutils,mselist,sysutils,typinfo,msebitmap,
- msetypes,msestrings,msegraphics,msegui,
+ msetypes,msestrings,msegraphics,msegui,mseglob,
  mseclasses,mseforms,msestat,mserichstring;
 const
  defaultmoduleclassname = 'tmseform';
@@ -74,7 +74,7 @@ type
  //nil for unselect
  end;
 
- idesignerselections = interface
+ idesignerselections = interface(inullinterface)
   function add(const item: tcomponent): integer;
   function equals(const list: idesignerselections): boolean;
   function get(index: integer): tcomponent;
@@ -87,14 +87,14 @@ type
  componenteditorstatety = (cs_canedit);
  componenteditorstatesty = set of componenteditorstatety;
 
- icomponenteditor = interface
+ icomponenteditor = interface(inullinterface)
   procedure edit;
   function state: componenteditorstatesty;
  end;
 
  compfilterfuncty = function(const acomponent: tcomponent): boolean of object;
  
- idesigner = interface
+ idesigner = interface(inullinterface)
   procedure componentmodified(const component: tobject);
   function createcurrentcomponent(const module: tmsecomponent): tcomponent;
   function hascurrentcomponent: boolean;
@@ -137,7 +137,7 @@ type
   procedure setmoduley(const amodule: tmsecomponent; avalue: integer);
  end;
 
- idesignnotification = interface
+ idesignnotification = interface(inullinterface)
   procedure itemdeleted(const adesigner: idesigner;
               const amodule: tmsecomponent; const aitem: tcomponent);
   procedure iteminserted(const adesigner: idesigner;

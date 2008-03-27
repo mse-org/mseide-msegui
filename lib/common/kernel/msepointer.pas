@@ -9,7 +9,7 @@
 }
 unit msepointer;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
 interface
 uses
@@ -36,11 +36,11 @@ const
    (cr_default,cr_sizehor,cr_toprightcorner,cr_sizever,cr_topleftcorner,
     cr_sizehor,cr_bottomleftcorner,cr_sizever,cr_bottomrightcorner);
 type
- imouse = interface
+ imouse = interface(inullinterface)
   function getmousewinid: winidty;
  end;
 {
- icaret = interface
+ icaret = interface(inullinterface)
   procedure remove;
   procedure restore;
   procedure scroll(const dist: pointty);

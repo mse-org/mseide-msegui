@@ -9,7 +9,7 @@
 }
 unit mseformatstr;     //stringwandelroutinen 31.5.99 mse
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
 interface
 uses

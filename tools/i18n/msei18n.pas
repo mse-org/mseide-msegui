@@ -16,7 +16,7 @@
 }
 program msei18n;
 {$ifdef FPC}
- {$mode objfpc}{$h+}{$INTERFACES CORBA}
+ {$mode objfpc}{$h+}
  {$ifdef mswindows}{$apptype gui}{$endif}
 {$endif}
 

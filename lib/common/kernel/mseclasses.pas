@@ -9,7 +9,7 @@
 }
 unit mseclasses;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
 interface
 uses
@@ -19,7 +19,7 @@ uses
 { $define debugobjectlink}
 
 {$ifdef FPC}
- {$interfaces corba}
+ 
 const
  s_ok = 0;
 {$endif}
@@ -27,7 +27,7 @@ const
  moduleclassnamename = 'moduleclassname';
 // inheritedmoduleclassnamename = 'inheritedmoduleclassname';
  compilerdefaults =
-     '{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}';
+     '{$ifdef FPC}{$mode objfpc}{$h+}{$endif}';
 
 type
  notifyeventty = procedure (const sender: tobject) of object;

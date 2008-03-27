@@ -9,7 +9,7 @@
 }
 unit msewidgets;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
 interface
 uses
@@ -366,7 +366,7 @@ type
 const 
  allstepkinds = [sk_right,sk_up,sk_left,sk_down,sk_first,sk_last];
 type
- istepbar = interface
+ istepbar = interface(inullinterface)
   function translatecolor(const aclor: colorty): colorty;
   procedure invalidaterect(const rect: rectty; const org: originty;
                                const noclip: boolean = false);
@@ -702,7 +702,7 @@ type
    property frame: tscrollframe read getframe write setframe;
  end;
 
- iautoscrollframe = interface
+ iautoscrollframe = interface(inullinterface)
   function getscrollrect: rectty;
   procedure setscrollrect(const rect: rectty);
   procedure scrollevent(sender: tcustomscrollbar; event: scrolleventty);

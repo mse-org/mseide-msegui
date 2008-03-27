@@ -9,13 +9,13 @@
 }
 unit msescrollbar;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
 interface
 
 uses
  mseguiglob,msegraphics,msegraphutils,msetimer,mseevent,mseshapes,classes,
- msetypes,msegui,mseclasses;
+ msetypes,msegui,mseclasses,mseglob;
 
 const
  defaultscrollbarwidth = 15;
@@ -52,7 +52,7 @@ type
                    sbe_pageup,sbe_pagedown,sbe_wheelup,sbe_wheeldown,
                    sbe_thumbposition,sbe_thumbtrack);
 
- iscrollbar = interface
+ iscrollbar = interface(inullinterface)
   function getwidget: twidget;
   function translatecolor(const acolor: colorty): colorty;
   procedure invalidaterect(const rect: rectty; const org: originty;

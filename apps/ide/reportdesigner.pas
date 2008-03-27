@@ -1,5 +1,5 @@
 unit reportdesigner;
-{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
  classes,msegui,mseclasses,mseforms,formdesigner,msesimplewidgets,msetabs,

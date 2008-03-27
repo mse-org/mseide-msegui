@@ -9,13 +9,13 @@
 }
 unit mseguiglob;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
 interface
 uses
  Classes,msegraphutils,msetypes,msekeyboard,mseerr;
 {$ifdef FPC}
- {$interfaces corba}
+ 
 {$endif}
 
 type

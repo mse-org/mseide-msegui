@@ -1,5 +1,5 @@
 unit msezeos;
-{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
  classes,db,ZDataset,msedb,ZStoredProcedure,msestrings;

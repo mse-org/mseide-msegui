@@ -23,7 +23,7 @@ program form2pas;
 //'form2pas main.mfm formdesigner.mfm' ->
 //convert main.mfm to main_mfm.pas, formdesigner.mfm to formdesigner_mfm.pas
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 {$ifndef FPC}
 {$APPTYPE CONSOLE}
 {$endif}

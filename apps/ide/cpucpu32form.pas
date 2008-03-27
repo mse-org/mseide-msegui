@@ -1,5 +1,5 @@
 unit cpucpu32form;
-{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
  classes,mseglob,mseguiglob,mseapplication,msestat,msemenus,msegui,msegraphics,

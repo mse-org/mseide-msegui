@@ -1,5 +1,5 @@
 unit xrender;
-{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
  {$ifdef FPC} x,{$endif}Xlib;

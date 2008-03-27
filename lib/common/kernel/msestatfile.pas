@@ -1,5 +1,5 @@
 unit msestatfile;
-{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
  classes,msestat,mseapplication,msetypes,msestrings,mseclasses,msestream,
