@@ -30,6 +30,7 @@ type
    procedure keydo(const sender: twidget; var info: keyeventinfoty);
   private
    faddress: cardinal;
+   ffirstaddress: cardinal;
    flastaddress: cardinal;
    factiverow: integer;
    procedure internalrefresh;
@@ -80,6 +81,9 @@ begin
   start:= aaddress;
   stop:= aaddress + $100;
   aline:= 0;
+ end;
+ if start < ffirstaddress then begin
+  ffirstaddress:= start;
  end;
  grid.beginupdate;
  try
@@ -140,6 +144,7 @@ end;
 
 procedure tdisassfo.refresh(const addr: ptrint);
 begin
+ ffirstaddress:= not 0;
  faddress:= addr;
  internalrefresh;
 end;
@@ -168,7 +173,7 @@ begin
       rowbefore:= row;
       activerowbefore:= factiverow;
       clear;
-      addlines(faddress-$40,rowcountbefore+$40);
+      addlines((ffirstaddress and not $7)-$40,rowcountbefore+$48);
       row:= rowbefore + factiverow - activerowbefore;
      end;
     end;
