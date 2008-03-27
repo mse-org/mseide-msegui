@@ -235,6 +235,8 @@ type
    fsourcefiles: thashedmsestrings;
    fsourcefiledirs: filenamearty;  //dirs for fsourcefiles
    fexceptionbkpt: integer;
+   fstartupbreakpoint: integer;
+   fstartupbreakpoint1: integer;
    fstoponexception: boolean;
    ferrormessage: string;
    fprocid: cardinal;
@@ -341,6 +343,7 @@ type
    function breakinsert(var info: breakpointinfoty): gdbresultty; overload;
    function breakinsert(const funcname: string): integer; overload;
                 //returns bkpt id, -1 on error
+   function breakinsert(const address: int64): integer;
    function breaklist(var list: breakpointinfoarty; full: boolean): gdbresultty;
                //full = false -> only bkptno and passcount
    function breakdelete(bkptnum: integer): gdbresultty; //bkptnum = 0 -> all
@@ -674,6 +677,8 @@ begin
  flastbreakpoint:= 0;
  ftargetdebugbegin:= 0;
  ftargetdebugend:= 0;
+ fstartupbreakpoint:= -1;
+ fstartupbreakpoint1:= -1;
 end;
 
 procedure tgdbmi.closegdb;
@@ -1055,6 +1060,14 @@ begin
        exclude(fstate,gs_started);
       end;
       if stopinfo.reason = sr_startup then begin
+       if fstartupbreakpoint >= 0 then begin
+        breakdelete(fstartupbreakpoint);
+        fstartupbreakpoint:= -1;
+       end;
+       if fstartupbreakpoint1 >= 0 then begin
+        breakdelete(fstartupbreakpoint1);
+        fstartupbreakpoint1:= -1;
+       end;
        fprocid:= 0;
        getprocid(fprocid);
        {$ifdef UNIX}
@@ -1626,6 +1639,8 @@ var
  ca1: cardinal;
  str1: string;
 begin
+ fstartupbreakpoint:= -1;
+ fstartupbreakpoint1:= -1;
  if fbeforerun <> '' then begin
   if source(fbeforerun) <> gdb_ok then begin
    postsyncerror;
@@ -1648,8 +1663,9 @@ begin
  if str1 <> '' then begin
   try
    ca1:= strtointvalue(str1);
-   if synccommand('-break-insert -t *'+hextocstr(ca1,8)) <> gdb_ok then begin
-
+   fstartupbreakpoint:= breakinsert(ca1); //does not always work
+   fstartupbreakpoint1:= breakinsert(ca1+1);
+   if (fstartupbreakpoint < 0) and (fstartupbreakpoint1 < 0) then begin
     str1:= '';
    end;
   except
@@ -1975,6 +1991,16 @@ end;
 function tgdbmi.breakinsert(const funcname: string): integer;
 begin
  if synccommand('-break-insert '+funcname) <> gdb_ok then begin
+  result:= -1;
+ end
+ else begin
+  result:= getbkptid;
+ end;
+end;
+
+function tgdbmi.breakinsert(const address: int64): integer;
+begin
+ if synccommand('-break-insert *'+hextocstr(address,8)) <> gdb_ok then begin
   result:= -1;
  end
  else begin
@@ -2555,6 +2581,11 @@ begin
   end;
   if reason = sr_breakpoint_hit then begin
    getintegervalue(response,'bkptno',info.bkptno);
+   if (info.bkptno = fstartupbreakpoint) or 
+                      (info.bkptno = fstartupbreakpoint1) then begin
+    reason:= sr_startup;
+    result:= false;
+   end; 
   end;
   if reason = sr_signal_received then begin
    getstringvalue(response,'signal-name',signalname);
