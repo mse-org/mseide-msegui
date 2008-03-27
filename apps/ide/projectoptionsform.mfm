@@ -58,6 +58,8 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_cy = 92
         frame.caption = 'Test'
         frame.captionpos = cp_topright
+        frame.font.xscale = 1.00000000000000000
+        frame.font.dummy = 0
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.dummy = 0
         frame.outerframe = (
@@ -68,6 +70,8 @@ object projectoptionsfo: tprojectoptionsfo
         )
         anchors = [an_left, an_top, an_right]
         taborder = 19
+        font.xscale = 1.00000000000000000
+        font.dummy = 0
         optionsgrid = [og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_autopopup]
         rowcount = 2
         datacols.count = 1
@@ -409,6 +413,8 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_cx = 65
         bounds_cy = 39
         frame.caption = 'Grid size X'
+        frame.font.xscale = 1.00000000000000000
+        frame.font.dummy = 0
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.dummy = 0
         frame.outerframe = (
@@ -418,6 +424,8 @@ object projectoptionsfo: tprojectoptionsfo
           0
         )
         taborder = 2
+        font.xscale = 1.00000000000000000
+        font.dummy = 0
         value = 8
         min = 1
         max = 1000
@@ -721,7 +729,7 @@ object projectoptionsfo: tprojectoptionsfo
           113
           2
         )
-        taborder = 2
+        taborder = 3
       end
       object debugoptions: tstringedit
         bounds_x = 1
@@ -739,7 +747,7 @@ object projectoptionsfo: tprojectoptionsfo
           0
         )
         anchors = [an_left, an_top, an_right]
-        taborder = 3
+        taborder = 1
         hint = '"--tty DEVICE" to set target terminal'
         onshowhint = hintexpandedmacros
         reffontheight = 15
@@ -768,7 +776,7 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_cy = 337
         anchors = [an_left, an_top, an_right, an_bottom]
         taborder = 7
-        activepageindex = 0
+        activepageindex = 4
         tab_frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
         tab_frame.dummy = 0
         tab_face.localprops = [fal_frameimageoffset]
@@ -785,7 +793,6 @@ object projectoptionsfo: tprojectoptionsfo
           frame.dummy = 0
           anchors = [an_left, an_top, an_right, an_bottom]
           taborder = 4
-          visible = True
           caption = 'Source &directories'
           reffontheight = 15
           object sourcedirgrid: twidgetgrid
@@ -1157,6 +1164,7 @@ object projectoptionsfo: tprojectoptionsfo
           frame.dummy = 0
           anchors = [an_left, an_top, an_right, an_bottom]
           taborder = 5
+          visible = True
           caption = 'E&mbedded'
           reffontheight = 15
           object tlayouter2: tlayouter
@@ -1189,6 +1197,7 @@ object projectoptionsfo: tprojectoptionsfo
                 0
               )
               anchors = [an_left, an_top, an_right]
+              taborder = 1
               onshowhint = hintexpandedmacros
               textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
               controller.lastdir = '/home/mse/packs/standard/svn/mse/trunk/apps/ide'
@@ -1217,7 +1226,6 @@ object projectoptionsfo: tprojectoptionsfo
                 0
                 0
               )
-              taborder = 1
               onshowhint = hintexpandedmacros
               textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
               controller.lastdir = '/home/mse/packs/standard/svn/mse/trunk/apps/ide'
@@ -1237,19 +1245,6 @@ object projectoptionsfo: tprojectoptionsfo
               linkright = gdbservercommand
             end
           end
-          object tlayouter1: tlayouter
-            bounds_x = 17
-            bounds_y = 146
-            bounds_cx = -10
-            bounds_cy = 0
-            taborder = 1
-            optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
-            dist_bottom = 3
-            optionslayout = [lao_placex, lao_aligny]
-            align_glue = wam_start
-            place_mindist = 10
-            place_maxdist = 10
-          end
           object remoteconnection: tstringedit
             bounds_x = 1
             bounds_y = 50
@@ -1266,7 +1261,7 @@ object projectoptionsfo: tprojectoptionsfo
               0
             )
             anchors = [an_left, an_top, an_right]
-            taborder = 2
+            taborder = 1
             hint = '"--tty DEVICE" to set target terminal'
             onshowhint = hintexpandedmacros
             reffontheight = 15
@@ -1277,7 +1272,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_cx = 613
             bounds_cy = 39
             anchors = [an_top]
-            taborder = 3
+            taborder = 2
             optionsscale = [osc_expandy, osc_shrinky]
             linktop = remoteconnection
             dist_top = 3
@@ -1355,7 +1350,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_cx = 613
             bounds_cy = 39
             anchors = [an_top]
-            taborder = 4
+            taborder = 3
             optionsscale = [osc_expandy, osc_shrinky]
             linktop = tlayouter3
             dist_top = 3
@@ -1433,7 +1428,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_cx = 613
             bounds_cy = 39
             anchors = [an_top]
-            taborder = 5
+            taborder = 4
             optionsscale = [osc_expandy, osc_shrinky]
             linktop = tlayouter4
             dist_top = 3
@@ -1496,7 +1491,7 @@ object projectoptionsfo: tprojectoptionsfo
           0
         )
         anchors = [an_left, an_top, an_right]
-        taborder = 1
+        taborder = 2
         onshowhint = hintexpandedmacros
         controller.lastdir = '/home/mse/packs/standard/svn/mse/trunk/apps/ide'
         controller.options = []
@@ -1967,6 +1962,8 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_cymin = 40
             frame.caption = 'Unit, include and library &directories'
             frame.captionoffset = 3
+            frame.font.xscale = 1.00000000000000000
+            frame.font.dummy = 0
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.dummy = 0
             frame.outerframe = (
@@ -1976,6 +1973,8 @@ object projectoptionsfo: tprojectoptionsfo
               0
             )
             anchors = [an_top, an_bottom]
+            font.xscale = 1.00000000000000000
+            font.dummy = 0
             optionsgrid = [og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_autopopup]
             fixrows.count = 1
             fixrows.items = <            
@@ -2615,6 +2614,8 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_cymin = 40
         frame.caption = 'Active group'
         frame.captionoffset = 3
+        frame.font.xscale = 1.00000000000000000
+        frame.font.dummy = 0
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.dummy = 0
         frame.outerframe = (
@@ -2624,6 +2625,8 @@ object projectoptionsfo: tprojectoptionsfo
           0
         )
         anchors = [an_top]
+        font.xscale = 1.00000000000000000
+        font.dummy = 0
         optionsgrid = [og_keyrowmoving, og_focuscellonenter, og_autopopup]
         fixcols.count = 1
         fixcols.items = <        

@@ -364,7 +364,6 @@ type
    ttabpage16: ttabpage;
    tlayouter2: tlayouter;
    gdbservercommand: tfilenameedit;
-   tlayouter1: tlayouter;
    makedir: tfilenameedit;
    tsplitter1: tsplitter;
    tsplitter2: tsplitter;

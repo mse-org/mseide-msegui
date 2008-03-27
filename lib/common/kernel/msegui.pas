@@ -7545,9 +7545,19 @@ begin
 end;
 
 function twidget.cantabfocus: boolean;
+var
+ int1: integer;
 begin
  result:= (ow_tabfocus in foptionswidget) and
            (fwidgetstate * focusstates = focusstates);
+ if result and (ow_subfocus in foptionswidget) then begin
+  for int1:= 0 to high(fwidgets) do begin
+   if fwidgets[int1].cantabfocus then begin
+    exit;
+   end;
+  end;
+  result:= false;
+ end;
 end;
 
 function twidget.firsttabfocus: twidget;
