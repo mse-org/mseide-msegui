@@ -5352,6 +5352,7 @@ begin
   if fparentwidget <> nil then begin
    fparentwidget.registerchildwidget(self);
    if not (ws_loadlock in fwidgetstate) then begin
+    fparentclientsize:= fparentwidget.minclientsize;
     parentclientrectchanged;
    end;
   end
@@ -5942,7 +5943,7 @@ begin
 end;
 
 procedure twidget.parentclientrectchanged;
-
+(*
  function agetsize: sizety;
  begin
  {
@@ -5959,7 +5960,7 @@ procedure twidget.parentclientrectchanged;
    end;
 //  end;
  end;
-
+*)
 var
  size1,delta: sizety;
  anch: anchorsty;
@@ -5968,11 +5969,12 @@ var
 // bo1: boolean;
 
 begin
- if not (csloading in componentstate) and
+ if not (csloading in componentstate) and (fparentwidget <> nil) and
                         not (ws1_anchorsizing in fwidgetstate1) then begin
   int1:= 0; //loopcount
   repeat
-   size1:= agetsize;
+//   size1:= agetsize;
+   size1:= fparentwidget.minclientsize;
    rect1:= fwidgetrect;
    delta:= subsize(size1,fparentclientsize);
    anch:= fanchors * [an_left,an_right];
@@ -6021,7 +6023,8 @@ begin
     exclude(fwidgetstate1, ws1_anchorsizing);
    end;
    inc(int1);
-  until sizeisequal(size1,agetsize) or (int1 > 5);
+//  until sizeisequal(size1,agetsize) or (int1 > 5);
+  until sizeisequal(size1,fparentwidget.minclientsize) or (int1 > 5);
  end;
 end;
 

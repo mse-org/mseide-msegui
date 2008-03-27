@@ -289,7 +289,9 @@ type
    function getniltext: string; virtual;
    function getinstance: tpersistent; virtual;
    function getdefaultstate: propertystatesty; override;
+   procedure deleteinstance;
   public
+   procedure setvalue(const avalue: msestring); override;
    function getvalue: msestring; override;
    procedure edit; override;
  end;
@@ -2240,21 +2242,24 @@ begin
  result:= inherited getdefaultstate + [ps_dialog,ps_volatile];
 end;
 
+procedure toptionalclasspropertyeditor.deleteinstance;
+begin
+ if checkfreeoptionalclass then begin
+  setordvalue(0);
+ end;
+end;
+
 procedure toptionalclasspropertyeditor.edit;
 var
  obj1: tobject;
 begin
-  obj1:= getinstance;
-  if obj1 = nil then begin
-   setordvalue(1);
-  end
-  else begin
-   if not checkfreeoptionalclass then begin
-    exit;
-   end;
-   setordvalue(0);
-  end;
-//  modified;
+ obj1:= getinstance;
+ if obj1 = nil then begin
+  setordvalue(1);
+ end
+ else begin
+  deleteinstance;
+ end;
 end;
 
 function toptionalclasspropertyeditor.getinstance: tpersistent;
@@ -2265,6 +2270,16 @@ end;
 function toptionalclasspropertyeditor.getniltext: string;
 begin
  result:= '<disabled>';
+end;
+
+procedure toptionalclasspropertyeditor.setvalue(const avalue: msestring);
+begin
+ if avalue = '' then begin
+  deleteinstance;
+ end
+ else begin
+  inherited;
+ end;
 end;
 
 function toptionalclasspropertyeditor.getvalue: msestring;
