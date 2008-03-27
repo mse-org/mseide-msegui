@@ -117,6 +117,7 @@ type
    fmodule: tmsecomponent;
    fmoduleintf: pdesignmoduleintfty;
    fmodulesetting: integer;
+   fformsizesetting: integer;
    procedure setmodule(const Value: tmsecomponent);
    function getselections: tformdesignerselections;
   protected
@@ -2302,7 +2303,8 @@ end;
 procedure tformdesignerfo.widgetregionchanged(const sender: twidget);
 begin
  inherited;
- if (fform <> nil) and (sender = fform) then begin
+ if (fform <> nil) and (sender = fform) and 
+        not(ws1_anchorsizing in fform.widgetstate1) then begin
   size:= fform.size; //syc with modulesize
  end;
 end;
@@ -2328,7 +2330,8 @@ begin
   fde_syncsize: begin
    if not fixformsize then begin
     if form <> nil then begin
-     form.size:= size;
+     form.widgetrect:= makerect(nullpoint,size);
+//     form.size:= size;
      size:= form.size;
     end
     else begin
