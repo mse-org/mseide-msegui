@@ -595,6 +595,7 @@ begin
  with projectoptions do begin
   result:= tmacrolist.create([mao_caseinsensitive]);
   result.add(getsettingsmacros);
+  result.add(getcommandlinemacros);
   result.add(getprojectmacros);
   mask:= bits[macrogroup];
   setlength(macrovalues,length(macronames));
