@@ -1,5 +1,5 @@
 unit mseifilink;
-{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
  classes,mseclasses,mseifiglob,mseifi,msearrayprops,mseapplication,mseact,

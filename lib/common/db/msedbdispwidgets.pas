@@ -1,5 +1,5 @@
 unit msedbdispwidgets;
-{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
  db,classes,msesimplewidgets,msedb,msetypes,mseclasses,mseguiglob,mseglob,

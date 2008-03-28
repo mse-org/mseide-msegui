@@ -9,7 +9,7 @@
 }
 unit msedrag;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 
 interface
 uses

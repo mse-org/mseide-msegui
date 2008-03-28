@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -9,15 +9,11 @@
 }
 unit mseevent;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 
 interface
 uses
  mselist,mseglob,mseguiglob,msegraphutils,msekeyboard,msetypes,msestrings,msesys;
-
-{$ifdef FPC}
- { $interfaces corba}
-{$endif}
 
 const
 // eta_timer = 1; //tags for userevents
