@@ -46,7 +46,7 @@ begin
   ar1:= values[ord(env_macrodef)];
   for int1:= 0 to high(ar1) do begin
    ar2:= nil;
-   splitstringquoted(ar1[int1],ar2,'"',',');
+   splitstringquoted(ar1[int1],ar2,msechar('"'),msechar(','));
    if ar2 <> nil then begin
     int3:= length(result);
     int4:= (high(ar2)+2) div 2; //pair count
