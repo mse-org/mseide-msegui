@@ -144,7 +144,7 @@ end;
 
 procedure tdisassfo.refresh(const addr: ptrint);
 begin
- ffirstaddress:= not 0;
+ ffirstaddress:= cardinal(not 0);
  faddress:= addr;
  internalrefresh;
 end;

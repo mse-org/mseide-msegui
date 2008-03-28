@@ -343,7 +343,7 @@ type
    function breakinsert(var info: breakpointinfoty): gdbresultty; overload;
    function breakinsert(const funcname: string): integer; overload;
                 //returns bkpt id, -1 on error
-   function breakinsert(const address: int64): integer;
+   function breakinsert(const address: int64): integer; overload;
    function breaklist(var list: breakpointinfoarty; full: boolean): gdbresultty;
                //full = false -> only bkptno and passcount
    function breakdelete(bkptnum: integer): gdbresultty; //bkptnum = 0 -> all
