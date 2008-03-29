@@ -827,7 +827,7 @@ begin
   additem(makeoptions,'-l -Mobjfpc -Sh');
   additem(makeoptions,'-gl');
   additem(makeoptions,'-B');
-  additem(makeoptions,'-OG2p3 -XX -XC -Xs');
+  additem(makeoptions,'-OG2p3 -XX -CX -Xs');
   setlength(makeoptionson,length(makeoptions));
   for int1:= 0 to high(makeoptionson) do begin
    makeoptionson[int1]:= alloptionson;

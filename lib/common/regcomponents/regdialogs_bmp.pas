@@ -1,5 +1,5 @@
 unit regdialogs_bmp;
-{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 
 interface
 

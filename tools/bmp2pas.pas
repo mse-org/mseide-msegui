@@ -79,7 +79,7 @@ begin
       end;
       writestdout(
       'Converting file "'+ar2[0]+'" componentname "'+bmps[int1].name+'".',true);
-      bmps[int1].bitmap.readimagefile(ar2[0]);
+      bmps[int1].bitmap.loadfromfile(ar2[0]);
      end;
     end;
     str2:= removefileext(filename(str1));
