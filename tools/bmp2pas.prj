@@ -1,0 +1,656 @@
+[componentpalette]
+order0=37
+ 0
+ 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+ 10
+ 11
+ 12
+ 13
+ 14
+ 15
+ 16
+ 17
+ 18
+ 19
+ 20
+ 21
+ 22
+ 23
+ 24
+ 25
+ 26
+ 27
+ 28
+ 29
+ 30
+ 31
+ 32
+ 33
+ 34
+ 35
+ 36
+order1=0
+order2=0
+order3=0
+order4=0
+order5=0
+order6=0
+order7=0
+order8=0
+order9=0
+order10=0
+order11=0
+order12=0
+[projectoptions]
+projectdir=/home/mse/packs/standard/svn/mse/trunk/tools
+projectfilename=/home/mse/packs/standard/svn/mse/trunk/tools/bmp2pas.prj
+settings=9
+ [settingsfo]
+ stackedunder=
+ x=411
+ y=56
+ cx=506
+ cy=601
+ wsize=0
+ active=1
+ visible=1
+sigsettings=27
+ 1,1,T,F
+ 3,3,T,F
+ 4,4,T,F
+ 6,6,T,F
+ 7,7,T,F
+ 8,8,T,F
+ 9,9,T,F
+ 10,10,T,F
+ 11,11,T,F
+ 12,12,T,F
+ 13,13,T,F
+ 15,15,T,F
+ 16,16,T,F
+ 17,17,F,F
+ 18,18,T,F
+ 19,19,T,F
+ 20,20,T,F
+ 21,21,T,F
+ 22,22,T,F
+ 23,23,T,F
+ 24,24,T,F
+ 25,25,T,F
+ 26,26,T,F
+ 27,27,T,F
+ 28,28,T,F
+ 29,29,T,F
+ 30,30,T,F
+gridsizex=8
+gridsizey=8
+exceptclassnames=1
+ EconvertError
+exceptignore=1
+ 0
+modulenames=0
+moduletypes=0
+modulefiles=0
+mainfile=bmp2pas.pas
+targetfile=bmp2pas${EXEEXT}
+messageoutputfile=
+copymessages=0
+closemessages=1
+checkmethods=1
+makecommand=${COMPILER}
+makedir=
+debugcommand=${DEBUGGER}
+debugoptions=
+debugtarget=
+remoteconnection=
+uploadcommand=
+gdbdownload=0
+gdbsimulator=0
+gdbprocessor=i386
+gdbservercommand=
+beforeload=
+afterload=
+beforerun=
+defaultmake=1
+makeoptions=4
+ -l -Mobjfpc -Sh
+ -gl
+ -B
+ -OG2p3 -XX -CX -Xs
+makeoptionson=4
+ 63
+ 31
+ 34
+ 32
+macroon=0
+macronames=0
+macrovalues=0
+macrogroup=0
+groupcomments=0
+sourcedirs=3
+ ${MSELIBDIR}kernel/$TARGET/
+ ${MSELIBDIR}*/
+ ./
+defines=0
+defineson=0
+unitdirs=3
+ ${MSELIBDIR}kernel/$TARGET/
+ ${MSELIBDIR}kernel/
+ ${MSELIBDIR}*/
+unitdirson=3
+ 65599
+ 196671
+ 65599
+unitpref=-Fu
+incpref=-Fi
+libpref=-Fl
+objpref=-Fo
+targpref=-o
+sourcefilemasks=3
+ "*.pas" "*.dpr" "*.pp" "*.inc"
+ "*.c" "*.cc" "*.h"
+ "*.mfm"
+syntaxdeffiles=3
+ ${SYNTAXDEFDIR}pascal.sdef
+ ${SYNTAXDEFDIR}cpp.sdef
+ ${SYNTAXDEFDIR}objecttext.sdef
+filemasknames=3
+ Source
+ Forms
+ All Files
+filemasks=3
+ "*.pp" "*.pas" "*.inc" "*.dpr"
+ *.mfm
+ *
+toolsave=0
+toolhide=0
+toolparse=0
+toolmenus=0
+toolfiles=0
+toolparams=0
+fontalias=0
+fontnames=0
+fontheights=0
+usercolors=0
+usercolorcomment=0
+showgrid=1
+snaptogrid=1
+moveonfirstclick=1
+autoindent=1
+blockindent=1
+rightmarginon=1
+rightmarginchars=80
+tabstops=4
+spacetabs=0
+editfontname=mseide_source
+editfontheight=0
+editfontwidth=0
+editfontextraspace=0
+editfontantialiased=1
+editmarkbrackets=1
+backupfilecount=2
+encoding=0
+newprojectfiles=0
+newprojectfilesdest=0
+expandprojectfilemacros=0
+loadprojectfile=0
+newprogramfile=${TEMPLATEDIR}default/program.pas
+newunitfile=${TEMPLATEDIR}default/unit.pas
+newmainfosource=${TEMPLATEDIR}default/mainform.pas
+newmainfoform=${TEMPLATEDIR}default/mainform.mfm
+newsimplefosource=${TEMPLATEDIR}default/simpleform.pas
+newsimplefoform=${TEMPLATEDIR}default/simpleform.mfm
+newdockingfosource=${TEMPLATEDIR}default/dockingform.pas
+newdockingfoform=${TEMPLATEDIR}default/dockingform.mfm
+newdatamodsource=${TEMPLATEDIR}default/datamodule.pas
+newdatamodform=${TEMPLATEDIR}default/datamodule.mfm
+newsubfosource=${TEMPLATEDIR}default/subform.pas
+newsubfoform=${TEMPLATEDIR}default/subform.mfm
+newreportsource=${TEMPLATEDIR}default/report.pas
+newreportform=${TEMPLATEDIR}default/report.mfm
+newinheritedsource=${TEMPLATEDIR}default/inheritedform.pas
+newinheritedform=${TEMPLATEDIR}default/inheritedform.mfm
+stoponexception=0
+activateonbreak=1
+showconsole=0
+externalconsole=0
+[breakpoints]
+on=0
+path=0
+line=0
+ignore=0
+condition=0
+panels=2
+ panel1
+ panel2
+units=
+ (
+ modulefilenames=0
+ modulenames=0
+ moduleclassnames=0
+ a=0,4133,0,Unit
+ )
+files=
+ (
+ a=0,4133,0,Files
+ )
+[componentstore]
+storedir=/home/mse/test/msegui/apps/ide/compstore/
+filename=/home/mse/packs/standard/svn/mse/trunk/apps/ide/compstore/default.stg
+[layout]
+windowlayout=367
+ [mainfo]
+ stackedunder=
+ x=4
+ y=23
+ cx=315
+ cy=77
+ wsize=0
+ active=0
+ visible=1
+ [mainfo.basedock]
+ splitdir=2
+ useroptions=6048
+ [mainfo.openfile]
+ filenames=0
+ filehistory=10
+  /home/mse/packs/standard/svn/mse/trunk/apps/ide/guitemplates.pas
+  /home/mse/packs/standard/svn/mse/trunk/lib/common/ifi/mseifids.pas
+  /home/mse/packs/standard/svn/mse/trunk/lib/common/ifi/mseifilink.pas
+  /home/mse/packs/standard/svn/mse/trunk/lib/common/db/msedbgraphics.pas
+  /home/mse/packs/standard/svn/mse/trunk/lib/common/db/msedbdispwidgets.pas
+  /home/mse/packs/standard/svn/mse/trunk/lib/common/db/msedbevents.pas
+  /home/mse/packs/standard/svn/mse/trunk/lib/common/db/msesqlresult.pas
+  /home/mse/packs/standard/svn/mse/trunk/lib/common/db/msedbedit.pas
+  /home/mse/packs/standard/svn/mse/trunk/lib/common/db/msqldb.pas
+  /home/mse/packs/standard/svn/mse/trunk/lib/common/db/msesqldb.pas
+ filefilterindex=0
+ filecolwidth=158
+ [actionsmo.watchesonact]
+ checked=1
+ [actionsmo.bluedotsonact]
+ checked=1
+ [sourcefo]
+ splitdir=0
+ useroptions=2075
+ parent=mainfo.panel1.container
+ visible=1
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=0
+ y=0
+ cx=879
+ cy=606
+ [debuggerfo]
+ splitdir=0
+ useroptions=3099
+ parent=mainfo.basedock
+ visible=1
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=0
+ y=0
+ cx=315
+ cy=41
+ [componentpalettefo]
+ splitdir=0
+ useroptions=3099
+ stackedunder=cpucpu32fo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=411
+ y=20
+ cx=554
+ cy=80
+ wsize=0
+ active=0
+ visible=0
+ [componentpalettefo.componentpages]
+ activetab=8
+ [componentstorefo]
+ splitdir=0
+ useroptions=3097
+ stackedunder=watchpointsfo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=100
+ y=100
+ cx=445
+ cy=354
+ wsize=0
+ active=0
+ visible=0
+ [componentstorefo.grid]
+ width0=111
+ width1=157
+ width2=160
+ [componentstorefo.storefiledialog]
+ filenames=1
+  /home/mse/packs/standard/svn/mse/trunk/apps/ide/compstore/
+ lastdir=/home/mse/packs/standard/svn/mse/trunk/apps/ide/compstore/
+ filehistory=0
+ filefilterindex=0
+ filecolwidth=0
+ [componentstorefo.groupfiledialog]
+ filenames=1
+  /home/mse/packs/standard/svn/mse/trunk/apps/ide/compstore/
+ lastdir=/home/mse/packs/standard/svn/mse/trunk/apps/ide/compstore/
+ filehistory=0
+ filefilterindex=0
+ filecolwidth=0
+ [messagefo]
+ splitdir=0
+ useroptions=6171
+ parent=mainfo.panel1.container
+ visible=0
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=0
+ y=477
+ cx=879
+ cy=129
+ [watchfo]
+ splitdir=0
+ useroptions=3099
+ stackedunder=mainfo.panel2
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=362
+ y=20
+ cx=399
+ cy=270
+ wsize=0
+ active=0
+ visible=1
+ [watchfo.grid]
+ width0=13
+ values1=0
+ width1=243
+ values2=0
+ [watchfo.watchon]
+ [watchfo.expression]
+ [watchfo.watcheson]
+ value=1
+ [objectinspectorfo]
+ splitdir=0
+ useroptions=2075
+ stackedunder=watchfo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=707
+ y=234
+ cx=313
+ cy=500
+ wsize=0
+ active=0
+ visible=1
+ [objectinspectorfo.grid]
+ width0=170
+ width1=127
+ [breakpointsfo]
+ splitdir=0
+ useroptions=2075
+ stackedunder=disassfo
+ parent=
+ mdistate=3
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=136
+ y=427
+ cx=575
+ cy=251
+ wsize=0
+ active=0
+ visible=0
+ [breakpointsfo.bkptson]
+ value=0
+ [watchpointsfo]
+ splitdir=0
+ useroptions=2075
+ stackedunder=projecttreefo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=136
+ y=427
+ cx=575
+ cy=251
+ wsize=0
+ active=0
+ visible=0
+ [watchpointsfo.grid]
+ width0=16
+ values1=0
+ width1=33
+ values2=0
+ width2=357
+ width4=34
+ values5=0
+ width5=38
+ values6=0
+ width6=77
+ [stackfo]
+ splitdir=0
+ useroptions=2075
+ parent=mainfo.panel2.container
+ visible=1
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=0
+ y=0
+ cx=823
+ cy=530
+ [projecttreefo]
+ splitdir=0
+ useroptions=27
+ stackedunder=findinfilefo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=4
+ y=424
+ cx=670
+ cy=288
+ wsize=0
+ active=0
+ visible=0
+ [findinfilefo]
+ splitdir=0
+ useroptions=2075
+ stackedunder=componentpalettefo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=4
+ y=83
+ cx=1016
+ cy=651
+ [disassfo]
+ splitdir=0
+ useroptions=2075
+ stackedunder=componentstorefo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=136
+ y=427
+ cx=575
+ cy=251
+ wsize=0
+ active=0
+ visible=0
+ [threadsfo]
+ splitdir=0
+ useroptions=2075
+ stackedunder=objectinspectorfo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=136
+ y=208
+ cx=460
+ cy=170
+ wsize=0
+ active=0
+ visible=1
+ [targetconsolefo]
+ splitdir=0
+ useroptions=2075
+ stackedunder=mainfo.panel1
+ parent=
+ mdistate=3
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=140
+ y=443
+ cx=576
+ cy=292
+ wsize=0
+ active=0
+ visible=1
+ [mainfo.panel1]
+ splitdir=2
+ useroptions=4091
+ stackedunder=mainfo
+ parent=
+ mdistate=3
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=7
+ y=128
+ cx=889
+ cy=606
+ wsize=0
+ active=1
+ visible=1
+ [mainfo.panel2]
+ splitdir=2
+ useroptions=4091
+ stackedunder=targetconsolefo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=186
+ y=204
+ cx=833
+ cy=530
+ wsize=0
+ active=0
+ visible=1
+ [cpucpu32fo]
+ splitdir=0
+ useroptions=2075
+ stackedunder=threadsfo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=175
+ y=435
+ cx=254
+ cy=275
+ wsize=0
+ active=0
+ visible=0
+[edit]
+hintwidth=695
+hintheight=54
+autoindent=1
+blockindent=1
+rightmarginon=1
+rightmarginchars=80
+tabstops=4
+finddtext=
+findhistory=0
+findoptions=1
+editpos=1
+ 0,0
+bookmarks0=0
+sourcefiles=1
+ /home/mse/packs/standard/svn/mse/trunk/tools/bmp2pas.pas
+relpaths=1
+ bmp2pas.pas
+ismoduletexts=1
+ 0
+modules=0
+visiblemodules=0
+[sourcefo.tabwidget]
+tabsize=150
+firsttab=0
+index=0
+[components]
+[selecteditpage]
+colwidth=133
+x=208
+y=117
+cx=708
+cy=409
+[progparams]
+parameters=
+progparamhistory=0
+workingdirectory=
+envvarons=0
+envvarnames=0
+envvarvalues=0
