@@ -1971,12 +1971,16 @@ end;
 
 procedure tgridprop.createframe;
 begin
- tcellframe.create(iframe(self));
+ if fframe = nil then begin
+  tcellframe.create(iframe(self));
+ end;
 end;
 
 procedure tgridprop.createface;
 begin
- fface:= tcellface.create(iface(self));
+ if fface = nil then begin
+  fface:= tcellface.create(iface(self));
+ end;
 end;
 
 procedure tgridprop.setlinewidth(const Value: integer);
