@@ -21,7 +21,7 @@ type
    tpagesizeselector1: tpagesizeselector;
    tstatfile1: tstatfile;
    pages: tstringedit;
-   procedure pronpagestart(const sender: tprinter);
+   procedure pronpagestart(const sender: tcustomprinter);
    procedure printidle(var again: Boolean);
    procedure runonexecute(const sender: TObject);
    procedure cancelexec(const sender: TObject);
@@ -113,7 +113,7 @@ begin
  end;
 end;
 
-procedure tprintfo.pronpagestart(const sender: tprinter);
+procedure tprintfo.pronpagestart(const sender: tcustomprinter);
 begin
  with sender.canvas do begin
   save;

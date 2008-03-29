@@ -21,6 +21,7 @@ uses
  msestrings,xft,xrender;
 
 {$ifdef FPC}
+{$define xbooleanresult}
 {$ifndef VER2_3} {$define xboolean} {$endif}
 {$ifdef UNIX}
 {$ifdef msedebug}
@@ -806,14 +807,14 @@ var
   xdeleteproperty(appdisp,appid,convertselectionpropertyatom);
   repeat      //remove pending notifications
   until not (xcheckwindowevent(appdisp,appid,propertychangemask,@event)
-             {$ifndef xboolean} <> 0{$endif});
+             {$ifndef xbooleanresult} <> 0{$endif});
   xconvertselection(appdisp,clipboardatom,target,convertselectionpropertyatom,
                        appid,lasteventtime);
   time1:= timestep(2000000); //2 sec
   bo1:= true;
   repeat
    bo1:= not (xcheckwindowevent(appdisp,appid,propertychangemask,@event)
-             {$ifndef xboolean} = 0 {$endif});
+             {$ifndef xbooleanresult} = 0 {$endif});
    if bo1 then begin
     with event.xproperty do begin
      bo1:= eventlater(time) and (atom = convertselectionpropertyatom) and
