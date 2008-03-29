@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -21,6 +21,7 @@ uses
  msestrings,xft,xrender;
 
 {$ifdef FPC}
+{$ifndef VER2_3} {$define xboolean} {$endif}
 {$ifdef UNIX}
 {$ifdef msedebug}
 var
@@ -805,14 +806,14 @@ var
   xdeleteproperty(appdisp,appid,convertselectionpropertyatom);
   repeat      //remove pending notifications
   until not (xcheckwindowevent(appdisp,appid,propertychangemask,@event)
-             {$ifndef FPC} <> 0{$endif});
+             {$ifndef xboolean} <> 0{$endif});
   xconvertselection(appdisp,clipboardatom,target,convertselectionpropertyatom,
                        appid,lasteventtime);
   time1:= timestep(2000000); //2 sec
   bo1:= true;
   repeat
    bo1:= not (xcheckwindowevent(appdisp,appid,propertychangemask,@event)
-             {$ifndef FPC} = 0 {$endif});
+             {$ifndef xboolean} = 0 {$endif});
    if bo1 then begin
     with event.xproperty do begin
      bo1:= eventlater(time) and (atom = convertselectionpropertyatom) and
@@ -840,7 +841,7 @@ var
      value1:= '';
      repeat
       if xgetwindowproperty(appdisp,appid,convertselectionpropertyatom,
-           longoffset,transferbuffersize,{$ifdef FPC} true{$else}1{$endif},
+           longoffset,transferbuffersize,{$ifdef xboolean} true{$else}1{$endif},
           anypropertytype,@acttype,@actformat,@nitems,@bytesafter,@po1) = success then begin
        if (resulttarget = 0) or (acttype = resulttarget) then begin
         int1:= (actformat div 8) * nitems; //bytecount
@@ -996,7 +997,7 @@ var
  prop: pchar;
 begin
  result:= false;
- if xgetwindowproperty(appdisp,id,name,0,count,{$ifdef FPC}false{$else}0{$endif},
+ if xgetwindowproperty(appdisp,id,name,0,count,{$ifdef xboolean}false{$else}0{$endif},
         anypropertytype,@actualtype,@actualformat,@nitems,@bytesafter,@prop) = success then begin
   if nitems = count then begin
  {$ifdef FPC} {$checkpointer off} {$endif}
@@ -1017,7 +1018,7 @@ var
  prop: pchar;
 begin
  result:= false;
- if xgetwindowproperty(appdisp,id,name,0,10000,{$ifdef FPC}false{$else}0{$endif},
+ if xgetwindowproperty(appdisp,id,name,0,10000,{$ifdef xboolean}false{$else}0{$endif},
    atomatom,@actualtype,@actualformat,@nitems,@bytesafter,@prop) = success then begin
   if actualtype = atomatom then begin
    setlength(value,nitems);
@@ -1077,7 +1078,7 @@ var
 begin
  result:= wms_none;
  if xgetwindowproperty(appdisp,id,wmstateatom,0,2,
-      {$ifdef FPC}false{$else}0{$endif},wmstateatom,@typeatom,@format,
+      {$ifdef xboolean}false{$else}0{$endif},wmstateatom,@typeatom,@format,
       @itemcount,@bytesafterreturn,@po1) = success then begin
 {$ifdef FPC} {$checkpointer off} {$endif}
   if (format = 32) and (itemcount = 2) then begin
@@ -1148,7 +1149,7 @@ begin
    data.l[0]:= ord(operation);
    data.l[1]:= netatoms[value1];
    data.l[2]:= netatoms[value2];
-   if xsendevent(appdisp,mserootwindow(id),{$ifdef FPC}false{$else}0{$endif},
+   if xsendevent(appdisp,mserootwindow(id),{$ifdef xboolean}false{$else}0{$endif},
             substructurenotifymask or substructureredirectmask,@xevent) <> 0 then begin
     result:= true;
    end;
@@ -1599,7 +1600,7 @@ var
 function gui_grabpointer(id: winidty): guierrorty;
 begin
  xflush(appdisp);
- if xgrabpointer(appdisp,id,{$ifdef FPC}false{$else}0{$endif},
+ if xgrabpointer(appdisp,id,{$ifdef xboolean}false{$else}0{$endif},
            mouseeventmask,grabmodeasync,grabmodeasync,
            none,none,currenttime) = grabsuccess then begin
   result:= gue_ok;
@@ -1781,7 +1782,7 @@ begin
  end;
  pixmap:= gui_createpixmap(image.size,0,image.monochrome);
  gc:= xcreategc(appdisp,pixmap,0,nil);
- xsetgraphicsexposures(appdisp,gc,{$ifdef FPC}false{$else}0{$endif});
+ xsetgraphicsexposures(appdisp,gc,{$ifdef xboolean}false{$else}0{$endif});
  xputimage(appdisp,pixmap,gc,ximage,0,0,0,0,image.size.cx,image.size.cy);
  xfreegc(appdisp,gc);
 {$ifdef FPC} {$checkpointer off} {$endif}
@@ -1918,7 +1919,7 @@ var
  attributes: xwindowattributes;
 begin
  xgetwindowattributes(appdisp,id,@attributes);
- result:= (attributes.override_redirect {$ifndef FPC}<> 0{$endif});
+ result:= (attributes.override_redirect {$ifndef xboolean}<> 0{$endif});
 end;
 
 function gui_showwindow(id: winidty): guierrorty;
@@ -2084,7 +2085,7 @@ begin
   message_type:= mseclientmessageatom;
   data.l[0]:= integer(event);
  end;
- if xsendevent(appdisp,appid,{$ifdef FPC}false{$else}0{$endif},0,@xevent) = 0 then begin
+ if xsendevent(appdisp,appid,{$ifdef xboolean}false{$else}0{$endif},0,@xevent) = 0 then begin
   result:= gue_postevent;
  end
  else begin
@@ -2588,7 +2589,7 @@ begin
  result:= settransientforhint(id,transientfor);
  if result = gue_ok then begin
   if xgetwindowattributes(appdisp,id,@attributes) <> 0 then begin
-   if attributes.override_redirect{$ifndef FPC} <> 0 {$endif}then begin
+   if attributes.override_redirect{$ifndef xboolean} <> 0 {$endif}then begin
     gui_stackunderwindow(transientfor,id);
    end;
   end;
@@ -2643,7 +2644,7 @@ begin
  with awindow,x11windowty(platformdata) do begin
   valuemask:= 0;
   if wo_popup in options.options then begin
-   attributes.override_redirect:= {$ifdef FPC}true{$else}1{$endif};
+   attributes.override_redirect:= {$ifdef xboolean}true{$else}1{$endif};
    valuemask:= valuemask or cwoverrideredirect;
   end;
   {
@@ -2903,7 +2904,7 @@ begin
   result:= gue_creategc;
  end
  else begin
-  xsetgraphicsexposures(appdisp,tgc(gc.handle),{$ifdef FPC}false{$else}0{$endif});
+  xsetgraphicsexposures(appdisp,tgc(gc.handle),{$ifdef xboolean}false{$else}0{$endif});
   with x11gcty(gc.platformdata) do begin
    //nothing to do, gc is nulled
   end;
@@ -4663,7 +4664,7 @@ begin
     end;
    end;
    if df_colorconvert in gc.drawingflags then begin
-    xvalues.graphics_exposures:= {$ifdef FPC}false{$else}0{$endif};
+    xvalues.graphics_exposures:= {$ifdef xboolean}false{$else}0{$endif};
     if df_canvasismonochrome in gc.drawingflags then begin
                         //convert to monochrome
      pixmap:= gui_createpixmap(size);
@@ -5228,7 +5229,7 @@ begin
                   propmodereplace,pbyte(pchar(str1)),length(str1));
        end;
       end;
-      xsendevent(appdisp,requestor,{$ifdef FPC}false{$else}0{$endif},0,@event);
+      xsendevent(appdisp,requestor,{$ifdef xboolean}false{$else}0{$endif},0,@event);
       exit;
      end;
     end;
@@ -5732,17 +5733,17 @@ begin
  end;
  defcolormap:= xdefaultcolormapofscreen(defscreen);
  atomatom:= xinternatom(appdisp,'ATOM',
-          {$ifdef FPC}true{$else}1{$endif});
+          {$ifdef xboolean}true{$else}1{$endif});
  mseclientmessageatom:= xinternatom(appdisp,'mseclientmessage',
-          {$ifdef FPC}false{$else}0{$endif});
+          {$ifdef xboolean}false{$else}0{$endif});
  wmprotocolsatom:= xinternatom(appdisp,'WM_PROTOCOLS',
-           {$ifdef FPC}false{$else}0{$endif});
+           {$ifdef xboolean}false{$else}0{$endif});
  wmnameatom:= xinternatom(appdisp,'WM_NAME',
-           {$ifdef FPC}false{$else}0{$endif});
+           {$ifdef xboolean}false{$else}0{$endif});
  wmclassatom:= xinternatom(appdisp,'WM_CLASS',
-           {$ifdef FPC}false{$else}0{$endif});
+           {$ifdef xboolean}false{$else}0{$endif});
  wmprotocols[wm_delete_window]:= xinternatom(appdisp,'WM_DELETE_WINDOW',
-           {$ifdef FPC}false{$else}0{$endif});
+           {$ifdef xboolean}false{$else}0{$endif});
 {$ifdef hassaveyourself}
  wmprotocols[wm_save_yourself]:= xinternatom(appdisp,'WM_SAVE_YOURSELF',
            {$ifdef FPC}false{$else}0{$endif});
@@ -5750,42 +5751,42 @@ begin
            {$ifdef FPC}false{$else}0{$endif});
 {$endif}
  wmstateatom:= xinternatom(appdisp,'WM_STATE',
-           {$ifdef FPC}false{$else}0{$endif});
+           {$ifdef xboolean}false{$else}0{$endif});
  wmclientleaderatom:= xinternatom(appdisp,'WM_CLIENT_LEADER',
-           {$ifdef FPC}false{$else}0{$endif});
+           {$ifdef xboolean}false{$else}0{$endif});
  clipboardatom:= xinternatom(appdisp,'CLIPBOARD',
-           {$ifdef FPC}false{$else}0{$endif});
+           {$ifdef xboolean}false{$else}0{$endif});
  cardinalatom:= xinternatom(appdisp,'CARDINAL',
-           {$ifdef FPC}false{$else}0{$endif});
+           {$ifdef xboolean}false{$else}0{$endif});
  windowatom:= xinternatom(appdisp,'WINDOW',
-           {$ifdef FPC}false{$else}0{$endif});
+           {$ifdef xboolean}false{$else}0{$endif});
  stringatom:= xinternatom(appdisp,'STRING',
-           {$ifdef FPC}false{$else}0{$endif});
+           {$ifdef xboolean}false{$else}0{$endif});
  textatom:= xinternatom(appdisp,'TEXT',
-           {$ifdef FPC}false{$else}0{$endif});
+           {$ifdef xboolean}false{$else}0{$endif});
  compound_textatom:= xinternatom(appdisp,'COMPOUND_TEXT',
-           {$ifdef FPC}false{$else}0{$endif});
+           {$ifdef xboolean}false{$else}0{$endif});
  utf8_stringatom:= xinternatom(appdisp,'UTF8_STRING',
-           {$ifdef FPC}false{$else}0{$endif});
+           {$ifdef xboolean}false{$else}0{$endif});
  targetsatom:= xinternatom(appdisp,'TARGETS',
-           {$ifdef FPC}false{$else}0{$endif});
+           {$ifdef xboolean}false{$else}0{$endif});
  convertselectionpropertyatom:= xinternatom(appdisp,'mseconvselprop',
-           {$ifdef FPC}false{$else}0{$endif});
+           {$ifdef xboolean}false{$else}0{$endif});
 
  netsupportedatom:= xinternatom(appdisp,'_NET_SUPPORTED',
-           {$ifdef FPC}false{$else}0{$endif});
+           {$ifdef xboolean}false{$else}0{$endif});
 
  for propnum:= low(fontpropertiesty) to high(fontpropertiesty) do begin
   fontpropnames[propnum]:= fontpropertynames[propnum].name;
  end;
 
  xinternatoms(appdisp,@fontpropnames[low(fontpropertiesty)],
-          integer(high(fontpropertiesty)),{$ifdef FPC}true{$else}1{$endif},
+          integer(high(fontpropertiesty)),{$ifdef xboolean}true{$else}1{$endif},
           @fontpropertyatoms[low(fontpropertiesty)]);
 
  fillchar(netatoms,sizeof(netatoms),0);               //check _net_
  xinternatoms(appdisp,@netatomnames[low(netatomty)],
-          integer(high(netatomty)),{$ifdef FPC}true{$else}1{$endif},
+          integer(high(netatomty)),{$ifdef xboolean}true{$else}1{$endif},
           @netatoms[low(netatomty)]);
  netsupported:= true;
  for netnum:= low(netatomty) to needednetatom do begin
@@ -5798,7 +5799,7 @@ begin
  if netsupported and (netatoms[net_wm_state_fullscreen] = 0) then begin
   netatoms[net_wm_state_fullscreen]:= xinternatom(appdisp,
           @netatomnames[net_wm_state_fullscreen],
-           {$ifdef FPC}false{$else}0{$endif});
+           {$ifdef xboolean}false{$else}0{$endif});
            //fake
   canfullscreen:= false;
  end; 
@@ -5820,7 +5821,7 @@ begin
  end;
  result:= gue_ok;
  {$ifdef mse_flushgdi}
- xsynchronize(appdisp,{$ifdef FPC}true{$else}1{$endif});
+ xsynchronize(appdisp,{$ifdef xboolean}true{$else}1{$endif});
  {$endif}
  errorhandlerbefore:= xseterrorhandler({$ifdef FPC}@{$endif}errorhandler);
  exit;

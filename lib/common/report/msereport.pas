@@ -3135,12 +3135,12 @@ end;
 
 procedure trepspacer.beginrender(const arestart: boolean);
 begin
- include(widgetstate1,ws1_noclipchildren);
+ include(fwidgetstate1,ws1_noclipchildren);
 end;
 
 procedure trepspacer.endrender;
 begin
- exclude(widgetstate1,ws1_noclipchildren);
+ exclude(fwidgetstate1,ws1_noclipchildren);
 end;
 
 procedure trepspacer.adddatasets(var adatasets: datasetarty);
@@ -3310,7 +3310,7 @@ begin
  else begin
   fstate:= [rbs_rendering];
  end;
- include(widgetstate1,ws1_noclipchildren);
+ include(fwidgetstate1,ws1_noclipchildren);
  if fdatalink.active then begin
   application.lock;
   try
@@ -3341,7 +3341,7 @@ begin
   fareas[int1].endrender;
  end;
  exclude(fstate,rbs_rendering);
- exclude(widgetstate1,ws1_noclipchildren);
+ exclude(fwidgetstate1,ws1_noclipchildren);
 end;
 
 procedure tcustomrecordband.adddatasets(var adatasets: datasetarty);
