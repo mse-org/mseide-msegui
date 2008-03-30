@@ -2346,7 +2346,7 @@ procedure toptionalpersistent.defineproperties(filer: tfiler);
 begin
  inherited;
  filer.defineproperty('dummy',{$ifdef FPC}@{$endif}readdummy,
-            {$ifdef FPC}@{$endif}writedummy,true);
+             {$ifdef FPC}@{$endif}writedummy,filer.ancestor = nil);
  //to create optional instance
 end;
 
