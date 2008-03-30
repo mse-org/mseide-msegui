@@ -269,7 +269,7 @@ type
    function includefile(const filename: filenamety;
               const statementstart,statementend: sourceposty): integer;
      //-1 on error, scanner index otherwise
-
+   function origoffset: integer;
    property scanner: tscanner read getscanner write setscanner;
    property recursivecomment: boolean read frecursivecomment 
                           write frecursivecomment default false;
@@ -751,6 +751,14 @@ begin
     ascanner.Free;
    end;
   end;
+ end;
+end;
+
+function tparser.origoffset: integer;
+begin
+ result:= 0;
+ if fscanner <> nil then begin
+  result:= fscanner.forigoffset;
  end;
 end;
 

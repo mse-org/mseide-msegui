@@ -1806,7 +1806,7 @@ var
     with ainfo^ do begin
      params:= methodinfo;
      lstr1:= procname;
-     inc(lstr1.po,scanner.origoffset);
+     inc(lstr1.po,origoffset);
      name:= lstringtostring(lstr1);
      uppername:= lstringtostring(procname);
     end;
