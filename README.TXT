@@ -63,14 +63,6 @@ FPC 2.0.4 written form files with incompatible fielddefs property.
 - wstrings.inc, fixed buffer overflow in widestring delete
   (FPC Mantis 10800).
 
-FPC 2.2.1
-*********
-In patch_fpc_2_2_1 are some patched FPC files:
-- classes.inc, fixed BinaryToText for reals (FPC Mantis 10791).
-- wustrings.inc, fixed buffer overflow in widestring delete
-  (FPC Mantis 10800), fixed Memory error in fpc_WideStr_Concat_multi
-  (FPC Mantis 10825).
-  
 Debugging
 *********
 Breakpoints don't work on win32 in units compiled with -CX 
