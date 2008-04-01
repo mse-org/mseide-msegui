@@ -162,7 +162,8 @@ type
    property visible default false;
  end;
 
- layoutoptionty = (lao_alignx,lao_placex,lao_aligny,lao_placey);
+ layoutoptionty = (lao_alignx,lao_placex,lao_aligny,lao_placey,lao_scalewidth,
+                   lao_scaleheight);
  layoutoptionsty = set of layoutoptionty; 
 const
  defaultlayoutoptions = [];
@@ -173,6 +174,18 @@ type
                   plo_synccaptiondistx,plo_synccaptiondisty,
                   plo_syncpaintwidth,plo_syncpaintheight);
  placeoptionsty = set of placeoptionty;
+
+ widgetlayoutinfoty = record
+  widget: twidget;
+  size: sizety;
+  actsize: sizety;
+  refsize: sizety;
+ end;
+ pwidgetlayoutinfoty = ^widgetlayoutinfoty;
+ widgetlayoutinfoarty = array of widgetlayoutinfoty;
+
+ layouterstatety = (las_propsizing);
+ layouterstatesty = set of layouterstatety;
  
  tlayouter = class(tspacer)
   private
@@ -185,6 +198,8 @@ type
    falign_glue: widgetalignmodety;
    fplace_mode: widgetalignmodety;
    fplace_options: placeoptionsty;
+   fwidgetinfos: widgetlayoutinfoarty;
+   fstate: layouterstatesty;
    procedure setoptionslayout(const avalue: layoutoptionsty);
    procedure setalign_mode(const avalue: widgetalignmodety);
    procedure setalign_leader(const avalue: twidget);
@@ -203,9 +218,16 @@ type
    procedure updatelayout;
    procedure loaded; override;
    procedure widgetregionchanged(const sender: twidget); override;
+   procedure childclientrectchanged(const sender: twidget); override;
    procedure childautosizechanged(const sender: twidget); override;
    procedure clientrectchanged; override;
+//   procedure sizechanged; override;
    function calcminscrollsize: sizety; override;
+   procedure registerchildwidget(const child: twidget); override;
+   procedure unregisterchildwidget(const child: twidget); override;
+   function widgetinfoindex(const awidget: twidget): integer;
+   procedure updatewidgetinfo(var ainfo: widgetlayoutinfoty; 
+                                    const awidget: twidget);
   public
    constructor create(aowner: tcomponent); override;
   published
@@ -1351,6 +1373,19 @@ begin
  updatelayout;
 end;
 
+procedure tlayouter.childclientrectchanged(const sender: twidget);
+var
+ int1: integer;
+begin
+ inherited;
+ if not (las_propsizing in fstate) then begin
+  int1:= widgetinfoindex(sender);
+  if int1 >= 0 then begin
+   updatewidgetinfo(fwidgetinfos[int1],sender);
+  end;
+ end;
+end;
+
 procedure tlayouter.widgetregionchanged(const sender: twidget);
 begin
  inherited;
@@ -1416,9 +1451,42 @@ begin
 end;
 
 procedure tlayouter.clientrectchanged;
+var
+ refsi: sizety;
+ size1: sizety;
+ int1: integer;
 begin
  inherited;
- updatelayout;
+ if componentstate * [csloading,csdestroying] = [] then begin
+  if (foptionslayout * [lao_scalewidth,lao_scaleheight] <> []) and 
+        not (las_propsizing in fstate) then begin
+   beginscaling;
+   include(fstate,las_propsizing);
+   try
+    refsi:= paintsize;
+    for int1:= high(fwidgetinfos) downto 0 do begin
+     with fwidgetinfos[int1] do begin
+      size1:= widget.clientsize;
+      if (lao_scalewidth in foptionslayout) and 
+                 not (osk_nopropwidth in widget.optionsskin) and 
+                 (refsize.cx <> 0) then begin
+       size1.cx:= (size.cx * refsi.cx) div refsize.cx;
+      end;
+      if (lao_scaleheight in foptionslayout) and 
+                 not (osk_nopropheight in widget.optionsskin) and 
+                 (refsize.cy <> 0) then begin
+       size1.cy:= (size.cy * refsi.cy) div refsize.cy;
+      end;
+      widget.clientsize:= size1;
+     end;
+    end;
+   finally
+    exclude(fstate,las_propsizing);
+    endscaling;
+   end;
+  end;
+  updatelayout;
+ end;
 end;
 
 procedure tlayouter.childautosizechanged(const sender: twidget);
@@ -1427,4 +1495,97 @@ begin
  updatelayout;
 end;
 
+procedure tlayouter.registerchildwidget(const child: twidget);
+begin
+ setlength(fwidgetinfos,high(fwidgetinfos)+2);
+ updatewidgetinfo(fwidgetinfos[high(fwidgetinfos)],child);
+ inherited;
+end;
+
+procedure tlayouter.unregisterchildwidget(const child: twidget);
+var
+ int1: integer;
+begin
+ if not (csdestroying in componentstate) then begin
+  int1:= widgetinfoindex(child);
+  if int1 >= 0 then begin
+   finalize(fwidgetinfos[int1]);
+   move(fwidgetinfos[int1+1],fwidgetinfos[int1],
+            (high(fwidgetinfos)-int1)*sizeof(widgetlayoutinfoty));
+   setlength(fwidgetinfos,high(fwidgetinfos));
+  end;
+ end;
+ inherited;
+end;
+
+function tlayouter.widgetinfoindex(const awidget: twidget): integer;
+var
+ int1: integer;
+begin
+ result:= -1;
+ for int1:= high(fwidgetinfos) downto 0 do begin
+  if fwidgetinfos[int1].widget = awidget then begin
+   result:= int1;
+   break;
+  end;
+ end;
+end;
+
+procedure tlayouter.updatewidgetinfo(var ainfo: widgetlayoutinfoty;
+               const awidget: twidget);
+var
+ size1: sizety;
+begin
+ with ainfo do begin
+  widget:= awidget;
+  size1:= awidget.clientsize;
+  if size1.cx <> actsize.cx then begin
+   refsize.cx:= paintsize.cx;
+   size.cx:= size1.cx;
+   actsize.cx:= size1.cx;
+  end;
+  if size1.cy <> actsize.cy then begin
+   refsize.cy:= paintsize.cy;
+   size.cy:= size1.cy;
+   actsize.cy:= size1.cy;
+  end;
+ end;
+end;
+{
+procedure tlayouter.sizechanged;
+var
+ refsi: sizety;
+ size1: sizety;
+ int1: integer;
+begin
+ if (foptionslayout * [lao_scalewidth,lao_scaleheight] <> []) and 
+       not (las_propsizing in fstate) then begin
+  beginscaling;
+  include(fstate,las_propsizing);
+  try
+   refsi:= size;
+   for int1:= high(fwidgetinfos) downto 0 do begin
+    with fwidgetinfos[int1] do begin
+     size1:= widget.clientsize;
+     if (lao_scalewidth in foptionslayout) and 
+                not (osk_nopropwidth in widget.optionsskin) and 
+                (refsize.cx <> 0) then begin
+      size1.cx:= (size.cx * refsi.cx) div refsize.cx;
+     end;
+     if (lao_scaleheight in foptionslayout) and 
+                not (osk_nopropheight in widget.optionsskin) and 
+                (refsize.cy <> 0) then begin
+      size1.cy:= (size.cy * refsi.cy) div refsize.cy;
+     end;
+     widget.clientsize:= size1;
+    end;
+   end;
+  finally
+   exclude(fstate,las_propsizing);
+   endscaling;
+  end;
+ end;
+ inherited;
+end;
+}
 end.

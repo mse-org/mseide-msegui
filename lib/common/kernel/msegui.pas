@@ -62,7 +62,9 @@ type
                    );
  optionswidgetty = set of optionwidgetty;
 
- optionskinty = (osk_noskin,osk_framebuttononly,osk_container);
+ optionskinty = (osk_noskin,osk_framebuttononly,osk_container,
+                 osk_nopropwidth,osk_nopropheight //used by tlayouter
+                 );
  optionsskinty = set of optionskinty;
  
  anchorty = (an_left,an_top,an_right,an_bottom);
@@ -1056,6 +1058,7 @@ type
    procedure sizechanged; virtual;
    procedure getautopaintsize(var asize: sizety); virtual;
    procedure checkautosize;
+   procedure childclientrectchanged(const sender: twidget); virtual;
    procedure childautosizechanged(const sender: twidget); virtual;
    procedure poschanged; virtual;
    procedure clientrectchanged; virtual;
@@ -5942,6 +5945,11 @@ begin
  end;
 end;
 
+procedure twidget.childclientrectchanged(const sender: twidget);
+begin
+ //dummy
+end;
+
 procedure twidget.parentclientrectchanged;
 (*
  function agetsize: sizety;
@@ -6063,6 +6071,10 @@ begin
   for int1:= 0 to high(fwidgets) do begin
    fwidgets[int1].parentclientrectchanged;
   end;
+ end;
+ if ([csloading,csdestroying] * componentstate = []) and 
+                                         (fparentwidget <> nil) then begin
+  fparentwidget.childclientrectchanged(self);
  end;
 end;
 

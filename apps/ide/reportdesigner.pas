@@ -288,7 +288,8 @@ begin
  comp1:= report[tabbar.activetab];
  if askok('Do you wish to delete '''+
                           comp1.name+'''?','WARNING',mr_cancel) then begin
-  designer.deletecomponent(comp1);
+//  designer.deletecomponent(comp1);
+  deletecomponent(comp1);
  end;
 end;
 

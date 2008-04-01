@@ -2323,8 +2323,10 @@ procedure tdesigner.deletecomponent(const acomponent: tcomponent);
 begin
  if acomponent <> nil then begin
   fmodules.componentmodified(acomponent);
-  designnotifications.ItemDeleted(idesigner(self),
-            fmodules.findmodulebycomponent(acomponent)^.instance,acomponent);
+  fnotifymodule:= fmodules.findmodulebycomponent(acomponent)^.instance;
+  notifydeleted(acomponent);
+//  designnotifications.ItemDeleted(idesigner(self),
+//            fmodules.findmodulebycomponent(acomponent)^.instance,acomponent);
   acomponent.free;
  end;
 end;

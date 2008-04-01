@@ -152,6 +152,7 @@ type
    class function fixformsize: boolean; virtual;
    function getdesignrect: rectty; virtual;
    procedure setdesignrect(const arect: rectty); virtual;
+   procedure deletecomponent(const comp: tcomponent);
    function candelete(const acomponent: tcomponent): boolean; virtual;
    procedure componentmoving(const apos: pointty); virtual;
    procedure placecomponent(const component: tcomponent; const apos: pointty;
@@ -2893,6 +2894,15 @@ end;
 function tformdesignerfo.getselections: tformdesignerselections;
 begin
  result:= tdesignwindow(fwindow).fselections;
+end;
+
+procedure tformdesignerfo.deletecomponent(const comp: tcomponent);
+begin
+ with tdesignwindow(fwindow) do begin
+  fselections.clear;
+  fselections.add(comp);
+  dodelete;
+ end;
 end;
 
 initialization
