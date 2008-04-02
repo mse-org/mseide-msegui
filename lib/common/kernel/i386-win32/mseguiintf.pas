@@ -3767,8 +3767,15 @@ begin
 end;
 
 function gui_getwindowpos(id: winidty; out pos: pointty): guierrorty;
+var
+ rect1: trect;
 begin
- result:= gue_ok; //todo
+ result:= gue_error;
+ if windows.GetWindowRect(id,rect1) then begin
+  pos.x:= rect1.left;
+  pos.y:= rect1.top;
+  result:= gue_ok;
+ end;
 end;
 
 function gui_reposwindow(id: winidty; const rect: rectty;
@@ -4304,8 +4311,7 @@ end;
 
 function gui_getparentwindow(const awindow: winidty): winidty;
 begin
- result:= 0;
- //todo
+ result:= getparent(awindow);
 end;
 
 function gui_setmainthread: guierrorty; //set mainthread to currentthread
