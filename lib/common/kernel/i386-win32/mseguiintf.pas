@@ -3768,7 +3768,7 @@ end;
 
 function gui_getwindowpos(id: winidty; out pos: pointty): guierrorty;
 begin
- result:= gui_ok; //todo
+ result:= gue_ok; //todo
 end;
 
 function gui_reposwindow(id: winidty; const rect: rectty;
