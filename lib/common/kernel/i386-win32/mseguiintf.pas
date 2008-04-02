@@ -3766,6 +3766,11 @@ begin
  result:= gue_ok;
 end;
 
+function gui_getwindowpos(id: winidty; out pos: pointty): guierrorty;
+begin
+ result:= gui_ok; //todo
+end;
+
 function gui_reposwindow(id: winidty; const rect: rectty;
                        const embedded: boolean = false): guierrorty;
 var
@@ -4295,6 +4300,12 @@ begin
    gui_setwindowicon(id,icon,iconmask);
   end;
  end;
+end;
+
+function gui_getparentwindow(const awindow: winidty): winidty;
+begin
+ result:= 0;
+ //todo
 end;
 
 function gui_setmainthread: guierrorty; //set mainthread to currentthread

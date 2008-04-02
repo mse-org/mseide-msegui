@@ -2546,6 +2546,23 @@ begin
  result:= true;
 end;
 
+function gui_getparentwindow(const awindow: winidty): winidty;
+var
+ root,parent: {$ifdef FPC}dword{$else}xlib.twindow{$endif};
+ children: pwindow;
+ count: integer;
+ ca1: cardinal;
+begin
+ result:= 0;
+ if xquerytree(appdisp,awindow,@root,@parent,@children,@ca1) = 0 then begin
+  exit;
+ end;
+ if children <> nil then begin
+  xfree(children);
+ end;
+ result:= parent;
+end;
+
 function getrootoffset(const id: winidty; out offset: pointty): boolean;
 var
  int1: integer;
@@ -2684,9 +2701,10 @@ begin
    exit;
   end;
   result:= gue_ok;
-  if options.parent <> 0 then begin
-   xselectinput(appdisp,id,structurenotifymask);
-   exit;          //embedded window
+  if options.parent <> 0 then begin //embedded window
+//   xselectinput(appdisp,id,structurenotifymask); //do not send to parent
+   xselectinput(appdisp,id,exposuremask); //will be mapped to parent
+   exit;          
   end;
   if (options.transientfor <> 0) or
           (options.options * [wo_popup,wo_message] <> []) then begin
@@ -2800,6 +2818,19 @@ begin
     addpoint1(rect.pos,po1);
     result:= gue_ok;
    end;
+  end;
+ end;
+end;
+
+function gui_getwindowpos(id: winidty; out pos: pointty): guierrorty;
+var
+ int1: integer;
+ po1: pointty;
+begin
+ result:= gue_error;
+ with pos do begin
+  if xgetgeometry(appdisp,id,@int1,@x,@y,@int1,@int1,@int1,@int1) <> 0 then begin
+   result:= gue_ok;
   end;
  end;
 end;

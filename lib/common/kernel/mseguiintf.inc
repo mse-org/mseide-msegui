@@ -31,6 +31,7 @@ function gui_createwindow(const rect: rectty; const options: internalwindowoptio
                                var awindow: windowty): guierrorty;
 function gui_destroywindow(var awindow: windowty): guierrorty;
                       //id can be 0
+function gui_getparentwindow(const awindow: winidty): winidty;
 
 function gui_creategc(paintdevice: paintdevicety; const akind: gckindty;
                 var gc: gcty; const aprintername: msestring = ''): guierrorty;
@@ -46,6 +47,10 @@ function gui_canstackunder: boolean; //no way found to change stacking order in 
 function gui_getzorder(const ids: winidarty; out zorders: integerarty): guierrorty;
     //topevel -> highest, numbers have not to be contiguous
 function gui_getwindowrect(id: winidty; out rect: rectty): guierrorty;
+             //screen coordinates
+function gui_getwindowpos(id: winidty; out pos: pointty): guierrorty;
+             //parent window coordinates
+            
 function gui_setsizeconstraints(id: winidty; const min,max: sizety): guierrorty;
 function gui_reposwindow(id: winidty; const rect: rectty;
                               const embedded: boolean = false): guierrorty;

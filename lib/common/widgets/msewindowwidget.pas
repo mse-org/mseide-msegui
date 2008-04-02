@@ -56,6 +56,7 @@ type
    procedure docreatewinid(const aparent: winidty; const awidgetrect: rectty;
                   var aid: winidty); virtual;
    procedure dodestroywinid; virtual;
+   procedure doclientrectchanged; virtual;
    procedure doclientpaint(const aupdaterect: rectty); virtual;
    procedure doonpaint(const acanvas: tcanvas); override;
    procedure doloaded; override;
@@ -200,6 +201,13 @@ begin
  fchildrect:= nullrect;
 end;
 
+procedure tcustomwindowwidget.doclientrectchanged;
+begin
+ if canevent(tmethod(fonclientrectchanged)) then begin
+  fonclientrectchanged(self);
+ end;
+end;
+
 procedure tcustomwindowwidget.checkwindowrect;
 var
  rect1,rect2: rectty;
@@ -228,8 +236,8 @@ begin
    fviewport:= rect1;
    updateviewport(fviewport);
   end;
-  if bo1 and canevent(tmethod(fonclientrectchanged)) then begin
-   fonclientrectchanged(self);
+  if bo1 then begin 
+   doclientrectchanged;
   end;
  end;
 end;

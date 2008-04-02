@@ -11500,10 +11500,22 @@ end;
 procedure tinternalapplication.processexposeevent(event: twindowrectevent);
 var
  window: twindow;
+ parentid: winidty;
+ pt1: pointty;
 begin
  with event do begin
   if findwindow(fwinid,window) then begin
    window.invalidaterect(frect);
+  end
+  else begin
+   parentid:= gui_getparentwindow(fwinid);
+   if parentid <> 0 then begin
+    if findwindow(parentid,window) and 
+                  (gui_getwindowpos(fwinid,pt1) = gue_ok) then begin
+     addpoint1(frect.pos,pt1);
+     window.invalidaterect(frect);
+    end;
+   end;
   end;
  end;
 end;
