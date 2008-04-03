@@ -5354,7 +5354,8 @@ begin
   fwidgetrect.pos:= newpos;
   if fparentwidget <> nil then begin
    fparentwidget.registerchildwidget(self);
-   if not (ws_loadlock in fwidgetstate) then begin
+   if not (csloading in componentstate) and 
+                       not (ws_loadlock in fwidgetstate) then begin
     fparentclientsize:= fparentwidget.minclientsize;
     parentclientrectchanged;
    end;
