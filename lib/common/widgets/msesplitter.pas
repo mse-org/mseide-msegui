@@ -1463,7 +1463,7 @@ begin
    beginscaling;
    include(fstate,las_propsizing);
    try
-    refsi:= paintsize;
+    refsi:= innerclientsize;
     for int1:= high(fwidgetinfos) downto 0 do begin
      with fwidgetinfos[int1] do begin
       size1:= widget.clientsize;
@@ -1534,18 +1534,19 @@ end;
 procedure tlayouter.updatewidgetinfo(var ainfo: widgetlayoutinfoty;
                const awidget: twidget);
 var
- size1: sizety;
+ size1,size2: sizety;
 begin
  with ainfo do begin
   widget:= awidget;
   size1:= awidget.clientsize;
+  size2:= innerclientsize;
   if size1.cx <> actsize.cx then begin
-   refsize.cx:= paintsize.cx;
+   refsize.cx:= size2.cx;
    size.cx:= size1.cx;
    actsize.cx:= size1.cx;
   end;
   if size1.cy <> actsize.cy then begin
-   refsize.cy:= paintsize.cy;
+   refsize.cy:= size2.cy;
    size.cy:= size1.cy;
    actsize.cy:= size1.cy;
   end;
