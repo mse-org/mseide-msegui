@@ -815,9 +815,11 @@ begin
   fancestorclassname:= ancestorclassname1;
   factualclassname:= actualclassname1;
  end;
- tcomponent1(comp2).setancestor(true);
  if not isroot then begin
-  tmsecomponent1(comp2).setinline(true);
+  initinline(comp2);
+ end
+ else begin
+  tcomponent1(comp2).setancestor(true);
  end;
  {
  if isroot then begin
@@ -2407,11 +2409,10 @@ var
 begin
  asubmoduleinfopo:= fsubmoduleinfopo;    //can be recursive
  if asubmoduleinfopo <> nil then begin
+  fsubmoduleinfopo:= nil; 
   component:= copycomponent(asubmoduleinfopo^.instance,asubmoduleinfopo^.instance);
   reader.root.insertcomponent(component);
-  tmsecomponent1(component).setinline(true);
-  tmsecomponent1(component).setancestor(true);
-//  checkinline(component);
+  initinline(component);
   if (submodulecopy = 0) and 
           (reader.root.componentstate * [csinline{,csancestor}] = [])  then begin
    additem(pointerarty(floadedsubmodules),component);

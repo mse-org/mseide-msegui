@@ -171,6 +171,7 @@ type
   breakpointconditions: msestringarty;
 
   stoponexception: boolean;
+  valuehints: boolean;
   activateonbreak: boolean;
   showconsole: boolean;
   externalconsole: boolean;
@@ -244,7 +245,6 @@ type
    mainfile: tfilenameedit;
    makecommand: tfilenameedit;
    debuggerpage: ttabpage;
-   stoponexception: tbooleanedit;
    targetfile: tfilenameedit;
    autoindent: tbooleanedit;
    blockindent: tintegeredit;
@@ -265,7 +265,6 @@ type
    tabstops: tintegeredit;
    editfontheight: tintegeredit;
    editfontwidth: tintegeredit;
-   activateonbreak: tbooleanedit;
    editfontextraspace: tintegeredit;
    macronames: tstringedit;
    macrovalues: tstringedit;
@@ -290,12 +289,9 @@ type
    subfoform: tfilenameedit;
    newprojectfilesdest: tstringedit;
    loadprojectfile: tbooleanedit;
-   showconsole: tbooleanedit;
    exceptignore: tbooleanedit;
-   debugtarget: tfilenameedit;
    encoding: tenumedit;
    checkmethods: tbooleanedit;
-   externalconsole: tbooleanedit;
    defon: tbooleanedit;
    reportsource: tfilenameedit;
    reportform: tfilenameedit;
@@ -385,6 +381,14 @@ type
    tlayouter5: tlayouter;
    gdbbeforerun: tfilenameedit;
    tsplitter8: tsplitter;
+   valuehints: tbooleanedit;
+   tlayouter1: tlayouter;
+   externalconsole: tbooleanedit;
+   showconsole: tbooleanedit;
+   stoponexception: tbooleanedit;
+   activateonbreak: tbooleanedit;
+   tlayouter6: tlayouter;
+   debugtarget: tfilenameedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -863,6 +867,7 @@ begin
   editmarkbrackets:= true;
   backupfilecount:= 2;
   encoding:= 0;
+  valuehints:= true;
   activateonbreak:= true;
   showconsole:= false;
   externalconsole:= false;
@@ -1168,6 +1173,7 @@ begin
    expandprojectmacros;
   end;
   updatevalue('stoponexception',stoponexception);
+  updatevalue('valuehints',valuehints);
   updatevalue('activateonbreak',activateonbreak);
   updatevalue('showconsole',showconsole);
   updatevalue('externalconsole',externalconsole);
@@ -1370,6 +1376,7 @@ begin
   fo.def.gridvalues:= defines;
   fo.defon.gridvalues:= defineson;
   fo.stoponexception.value:= stoponexception;
+  fo.valuehints.value:= valuehints;
   fo.activateonbreak.value:= activateonbreak;
   fo.showconsole.value:= showconsole;
   fo.externalconsole.value:= externalconsole;
@@ -1521,6 +1528,7 @@ begin
   toolfiles:= fo.toolfile.gridvalues;
   toolparams:= fo.toolparam.gridvalues;  
   stoponexception:= fo.stoponexception.value;
+  valuehints:= fo.valuehints.value;
   activateonbreak:= fo.activateonbreak.value;
   showconsole:= fo.showconsole.value;
   externalconsole:= fo.externalconsole.value;

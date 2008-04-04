@@ -993,7 +993,7 @@ var
  str1,str2: msestring;
  pos1: sourceposty;
 begin
- if {(info.pos.row >= 0) and} mainfo.gdb.started  then begin
+ if mainfo.gdb.started and projectoptions.valuehints then begin
   if info.eventkind = cek_mousepark then begin
    str1:= getpascalvarname(edit,info.pos,po1);
    if (po1.row <> flasthint.row) or (po1.col <> flasthint.col) or

@@ -2595,14 +2595,8 @@ begin
  po1:= selectinheritedmodule(fdesigner.modules.findmodulebyinstance(module));
  if po1 <> nil then begin
   comp:= fdesigner.copycomponent(po1^.instance,nil);
-  {$ifdef FPC}
-  comp.setinline(true);
-  comp.setancestor(true);
-  {$else}
-  tcomponent1(comp).setinline(true);
-  tcomponent1(comp).setancestor(true);
-  {$endif}
-  checkinline(comp);
+  initinline(comp);
+//  checkinline(comp);
   comp.name:= po1^.instance.name;
   fdesigner.addancestorinfo(comp,po1^.instance);
   with tdesignwindow(window) do begin

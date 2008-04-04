@@ -581,6 +581,8 @@ procedure refreshancestor(const descendent,newancestor,oldancestor: tcomponent;
               const onfindmethod: tfindmethodevent = nil;
               const sourcemethodtab: pointer = nil;
               const destmethodtab: pointer = nil);
+procedure initinline(const acomponent: tcomponent);
+                 //sets inline, resets ancestor, sets ancestor of children
 procedure checkinline(const acomponent: tcomponent);
                  //resets csancestor of csinline components
 procedure initrootdescendent(const acomponent: tcomponent);
@@ -751,6 +753,20 @@ begin
  tmsecomponent(acomponent).setinline(false);
  for int1:= 0 to acomponent.componentcount - 1 do begin
   clearinline(acomponent.components[int1]);
+ end;
+end;
+
+procedure initinline(const acomponent: tcomponent);
+                 //sets inline, resets ancestor, sets ancestor of children
+var
+ int1: integer;
+begin
+ with tcomponentcracker(acomponent) do begin
+  exclude(fcomponentstate,csancestor);
+  include(fcomponentstate,csinline);   
+ end; 
+ for int1:= 0 to acomponent.componentcount - 1 do begin
+  tcomponent1(acomponent.components[int1]).setancestor(true);
  end;
 end;
 
@@ -996,7 +1012,17 @@ begin
    stream.position:= 0;
    objectbinarytotext(stream,debugstream);
    debugstream.position:= 0;
-   writeln(output,'copycomponent');
+   writeln(output,'copycomponent source');
+   debugstream.writetotext(output);
+   stream.clear;
+   writer:= twriter.Create(stream,4096);
+   writer.Writerootcomponent(result);
+   writer.Free;
+   stream.position:= 0;
+   debugstream.clear;
+   objectbinarytotext(stream,debugstream);
+   debugstream.position:= 0;
+   writeln(output,'copycomponent dest');
    debugstream.writetotext(output);
    flush(output);
    debugstream.free;

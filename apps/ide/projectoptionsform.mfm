@@ -32,7 +32,7 @@ object projectoptionsfo: tprojectoptionsfo
     frame.dummy = 0
     anchors = [an_top, an_bottom]
     taborder = 1
-    activepageindex = 2
+    activepageindex = 1
     tab_frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
     tab_frame.dummy = 0
     tab_size = 19
@@ -58,7 +58,7 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_cy = 92
         frame.caption = 'Test'
         frame.captionpos = cp_topright
-        frame.font.xscale = 1.00000000000000000
+        frame.font.xscale =  1.0000000000000000E+0000
         frame.font.dummy = 0
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.dummy = 0
@@ -70,7 +70,7 @@ object projectoptionsfo: tprojectoptionsfo
         )
         anchors = [an_left, an_top, an_right]
         taborder = 19
-        font.xscale = 1.00000000000000000
+        font.xscale =  1.0000000000000000E+0000
         font.dummy = 0
         optionsgrid = [og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_autopopup]
         rowcount = 2
@@ -103,7 +103,7 @@ object projectoptionsfo: tprojectoptionsfo
           taborder = 1
           visible = False
           font.name = 'stf_default'
-          font.xscale = 1.00000000000000000
+          font.xscale =  1.0000000000000000E+0000
           font.dummy = 0
           optionsedit = [oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_linebreak, oe_eatreturn, oe_autoselectonfirstclick, oe_keyexecute, oe_savestate]
           reffontheight = 15
@@ -413,7 +413,7 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_cx = 65
         bounds_cy = 39
         frame.caption = 'Grid size X'
-        frame.font.xscale = 1.00000000000000000
+        frame.font.xscale =  1.0000000000000000E+0000
         frame.font.dummy = 0
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.dummy = 0
@@ -424,7 +424,7 @@ object projectoptionsfo: tprojectoptionsfo
           0
         )
         taborder = 2
-        font.xscale = 1.00000000000000000
+        font.xscale =  1.0000000000000000E+0000
         font.dummy = 0
         value = 8
         min = 1
@@ -673,24 +673,9 @@ object projectoptionsfo: tprojectoptionsfo
       frame.dummy = 0
       anchors = [an_left, an_top, an_right, an_bottom]
       taborder = 4
+      visible = True
       caption = '&Debugger'
       onchildscaled = debuggeronchildscaled
-      object stoponexception: tbooleanedit
-        bounds_x = 151
-        bounds_y = 154
-        bounds_cx = 130
-        bounds_cy = 17
-        frame.caption = '&Stop on exception'
-        frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
-        frame.dummy = 0
-        frame.outerframe = (
-          0
-          2
-          117
-          2
-        )
-        taborder = 4
-      end
       object debugcommand: tfilenameedit
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
         bounds_x = 1
@@ -715,22 +700,6 @@ object projectoptionsfo: tprojectoptionsfo
         controller.ongetfilename = expandfilename
         reffontheight = 15
       end
-      object activateonbreak: tbooleanedit
-        bounds_x = 7
-        bounds_y = 154
-        bounds_cx = 126
-        bounds_cy = 17
-        frame.caption = '&Activate on break'
-        frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
-        frame.dummy = 0
-        frame.outerframe = (
-          0
-          2
-          113
-          2
-        )
-        taborder = 3
-      end
       object debugoptions: tstringedit
         bounds_x = 1
         bounds_y = 57
@@ -752,22 +721,6 @@ object projectoptionsfo: tprojectoptionsfo
         onshowhint = hintexpandedmacros
         reffontheight = 15
       end
-      object showconsole: tbooleanedit
-        bounds_x = 287
-        bounds_y = 154
-        bounds_cx = 147
-        bounds_cy = 17
-        frame.caption = 'Show &console on run'
-        frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
-        frame.dummy = 0
-        frame.outerframe = (
-          0
-          2
-          134
-          2
-        )
-        taborder = 5
-      end
       object ttabwidget1: ttabwidget
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_fontglyphheight]
         bounds_x = 0
@@ -775,7 +728,7 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_cx = 613
         bounds_cy = 337
         anchors = [an_left, an_top, an_right, an_bottom]
-        taborder = 7
+        taborder = 4
         activepageindex = 4
         tab_frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
         tab_frame.dummy = 0
@@ -1215,7 +1168,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.caption = 'Upload command'
               frame.captionoffset = 3
               frame.font.name = 'stf_default'
-              frame.font.xscale = 1.00000000000000000
+              frame.font.xscale =  1.0000000000000000E+0000
               frame.font.dummy = 0
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.button.imagenr = 17
@@ -1473,48 +1426,141 @@ object projectoptionsfo: tprojectoptionsfo
           end
         end
       end
-      object debugtarget: tfilenameedit
-        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-        bounds_x = 1
-        bounds_y = 105
-        bounds_cx = 611
-        bounds_cy = 39
-        frame.caption = 'Debug &target (empty = make targetfile)'
-        frame.captionoffset = 3
-        frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
-        frame.button.imagenr = 17
-        frame.dummy = 0
-        frame.outerframe = (
-          0
-          18
-          0
-          0
-        )
-        anchors = [an_left, an_top, an_right]
-        taborder = 2
-        onshowhint = hintexpandedmacros
-        controller.lastdir = '/home/mse/packs/standard/svn/mse/trunk/apps/ide'
-        controller.options = []
-        controller.historymaxcount = 0
-        controller.ongetfilename = expandfilename
-        reffontheight = 15
-      end
-      object externalconsole: tbooleanedit
-        bounds_x = 439
-        bounds_y = 154
-        bounds_cx = 120
+      object tlayouter1: tlayouter
+        bounds_x = 7
+        bounds_y = 156
+        bounds_cx = 558
         bounds_cy = 17
-        frame.caption = 'External console'
-        frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
+        taborder = 3
+        optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
+        optionslayout = [lao_placex, lao_aligny]
+        align_glue = wam_start
+        place_mindist = 10
+        place_maxdist = 10
+        place_options = [plo_noinvisible]
+        object externalconsole: tbooleanedit
+          bounds_x = 437
+          bounds_y = 0
+          bounds_cx = 121
+          bounds_cy = 17
+          frame.caption = '&External Console'
+          frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
+          frame.dummy = 0
+          frame.outerframe = (
+            0
+            2
+            108
+            2
+          )
+          taborder = 3
+          visible = False
+        end
+        object showconsole: tbooleanedit
+          bounds_x = 276
+          bounds_y = 0
+          bounds_cx = 151
+          bounds_cy = 17
+          frame.caption = 'Show &Console on Run'
+          frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
+          frame.dummy = 0
+          frame.outerframe = (
+            0
+            2
+            138
+            2
+          )
+          taborder = 2
+        end
+        object stoponexception: tbooleanedit
+          bounds_x = 136
+          bounds_y = 0
+          bounds_cx = 130
+          bounds_cy = 17
+          frame.caption = '&Stop on Exception'
+          frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
+          frame.dummy = 0
+          frame.outerframe = (
+            0
+            2
+            117
+            2
+          )
+          taborder = 1
+        end
+        object activateonbreak: tbooleanedit
+          bounds_x = 0
+          bounds_y = 0
+          bounds_cx = 126
+          bounds_cy = 17
+          frame.caption = '&Activate on Break'
+          frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
+          frame.dummy = 0
+          frame.outerframe = (
+            0
+            2
+            113
+            2
+          )
+        end
+      end
+      object tlayouter6: tlayouter
+        bounds_x = 0
+        bounds_y = 104
+        bounds_cx = 613
+        bounds_cy = 39
+        frame.framei_left = 1
+        frame.framei_right = 3
+        frame.localprops = [frl_fileft, frl_firight]
         frame.dummy = 0
-        frame.outerframe = (
-          0
-          2
-          107
-          2
-        )
-        taborder = 6
-        visible = False
+        anchors = [an_top]
+        taborder = 2
+        optionsscale = [osc_expandy, osc_shrinky]
+        optionslayout = [lao_placex, lao_aligny]
+        align_glue = wam_start
+        place_mindist = 10
+        place_maxdist = 10
+        place_mode = wam_end
+        place_options = [plo_endmargin]
+        object valuehints: tbooleanedit
+          bounds_x = 523
+          bounds_y = 20
+          bounds_cx = 87
+          bounds_cy = 17
+          frame.caption = '&Value Hints'
+          frame.dummy = 0
+          frame.outerframe = (
+            0
+            2
+            74
+            2
+          )
+          taborder = 1
+        end
+        object debugtarget: tfilenameedit
+          optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+          bounds_x = 1
+          bounds_y = 0
+          bounds_cx = 512
+          bounds_cy = 39
+          frame.caption = 'Debug &target (empty = make targetfile)'
+          frame.captionoffset = 3
+          frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
+          frame.button.imagenr = 17
+          frame.dummy = 0
+          frame.outerframe = (
+            0
+            18
+            0
+            0
+          )
+          anchors = [an_left, an_top, an_right]
+          onshowhint = hintexpandedmacros
+          controller.lastdir = '/home/mse/packs/standard/svn/mse/trunk/apps/ide'
+          controller.options = []
+          controller.historymaxcount = 0
+          controller.ongetfilename = expandfilename
+          reffontheight = 15
+        end
       end
     end
     object makepage: ttabpage
@@ -1527,7 +1573,6 @@ object projectoptionsfo: tprojectoptionsfo
       frame.dummy = 0
       anchors = [an_top, an_bottom]
       taborder = 6
-      visible = True
       caption = '&Make'
       onchildscaled = makepageonchildscaled
       object tspacer2: tspacer
@@ -1962,7 +2007,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_cymin = 40
             frame.caption = 'Unit, include and library &directories'
             frame.captionoffset = 3
-            frame.font.xscale = 1.00000000000000000
+            frame.font.xscale =  1.0000000000000000E+0000
             frame.font.dummy = 0
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.dummy = 0
@@ -1973,7 +2018,7 @@ object projectoptionsfo: tprojectoptionsfo
               0
             )
             anchors = [an_top, an_bottom]
-            font.xscale = 1.00000000000000000
+            font.xscale =  1.0000000000000000E+0000
             font.dummy = 0
             optionsgrid = [og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_autopopup]
             fixrows.count = 1
@@ -2614,7 +2659,7 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_cymin = 40
         frame.caption = 'Active group'
         frame.captionoffset = 3
-        frame.font.xscale = 1.00000000000000000
+        frame.font.xscale =  1.0000000000000000E+0000
         frame.font.dummy = 0
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.dummy = 0
@@ -2625,7 +2670,7 @@ object projectoptionsfo: tprojectoptionsfo
           0
         )
         anchors = [an_top]
-        font.xscale = 1.00000000000000000
+        font.xscale =  1.0000000000000000E+0000
         font.dummy = 0
         optionsgrid = [og_keyrowmoving, og_focuscellonenter, og_autopopup]
         fixcols.count = 1
