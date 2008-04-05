@@ -360,6 +360,8 @@ type
    procedure checktemplate(const sender: tobject); virtual;
    procedure assign(source: tpersistent); override;
    procedure scale(const ascale: real); virtual;
+   procedure checkwidgetsize(var asize: sizety); virtual;
+                //extends to minimal size
 
    procedure paintbackground(const canvas: tcanvas; const arect: rectty); virtual;
    procedure paintoverlay(const canvas: tcanvas; const arect: rectty); virtual;
@@ -3819,6 +3821,11 @@ begin
  result.bottom:= finnerframe.bottom - fpaintframedelta.bottom;
 end;
 
+procedure tcustomframe.checkwidgetsize(var asize: sizety);
+begin
+ //dummy
+end;
+
 { tframetemplate }
 
 constructor tframetemplate.create(const owner: tmsecomponent;
@@ -5012,6 +5019,7 @@ procedure twidget.placexorder(const startx: integer; const dist: array of intege
                //with [an_left,an_right], minit -> no change
 var
  int1,int2,int3,int4,int5: integer;
+ size1: sizety;
  widget1: twidget;
  ar1: integerarty;
 begin
@@ -5043,21 +5051,28 @@ begin
     int2:= 0;
    end;
    int4:= 0;
+   size1.cy:= 0;
    for int1:= 0 to high(awidgets) do begin
     with awidgets[int1] do begin
      bounds_x:= ar1[int1] + int4;
      if anchors * [an_left,an_right] = [an_left,an_right] then begin
-      int3:= bounds_cx;
-      bounds_cx:= bounds_cx - int2;
+      int3:= bounds_cx;      
+      size1.cx:= bounds_cx - int2;
+      if fframe <> nil then begin
+       fframe.checkwidgetsize(size1);
+      end;
+      bounds_cx:= size1.cx;
       int3:= bounds_cx - int3; //delta
       int2:= int2 + int3;
       int4:= int4 + int3;
      end;
     end;
    end;
+   {
    with awidgets[high(awidgets)] do begin
     bounds_cx:= bounds_cx - int2;
    end;
+   }
   end;
  end;
 end;
@@ -5068,6 +5083,7 @@ procedure twidget.placeyorder(const starty: integer; const dist: array of intege
                //with [an_top,an_bottom], minit -> no change
 var
  int1,int2,int3,int4,int5: integer;
+ size1: sizety;
  widget1: twidget;
  ar1: integerarty;
 begin
@@ -5099,21 +5115,28 @@ begin
     int2:= 0;
    end;
    int4:= 0;
+   size1.cx:= 0;
    for int1:= 0 to high(awidgets) do begin
     with awidgets[int1] do begin
      bounds_y:= ar1[int1] + int4;
      if anchors * [an_top,an_bottom] = [an_top,an_bottom] then begin
       int3:= bounds_cy;
-      bounds_cy:= bounds_cy - int2;
+      size1.cy:= bounds_cy - int2;
+      if fframe <> nil then begin
+       fframe.checkwidgetsize(size1);
+      end;
+      bounds_cy:= size1.cy;
       int3:= bounds_cy - int3; //delta
       int2:= int2 + int3;
       int4:= int4 + int3;
      end;
     end;
    end;
+   {
    with awidgets[high(awidgets)] do begin
     bounds_cy:= bounds_cy - int2;
    end;
+   }
   end;
  end;
 end;
@@ -6032,7 +6055,6 @@ begin
     exclude(fwidgetstate1, ws1_anchorsizing);
    end;
    inc(int1);
-//  until sizeisequal(size1,agetsize) or (int1 > 5);
   until sizeisequal(size1,fparentwidget.minclientsize) or (int1 > 5);
  end;
 end;

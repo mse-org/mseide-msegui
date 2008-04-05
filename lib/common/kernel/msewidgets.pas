@@ -78,6 +78,8 @@ type
    procedure updatemousestate(const sender: twidget; const apos: pointty); override;
    function pointincaption(const point: pointty): boolean; override;
                 //origin = widgetrect
+   procedure checkwidgetsize(var asize: sizety); override;
+                //extends to minimal size
 
    property options: captionframeoptionsty read foptions 
                      write setoptions default defaultcaptionframeoptions;
@@ -1932,6 +1934,7 @@ begin
  end
  else begin //caption = '' or invisible
   fouterframe:= nullframe;
+  finfo.dest:= nullrect;
  end;
  subframe1(fra1,fouterframe);
  if not isnullframe(fra1) then begin
@@ -1978,6 +1981,38 @@ begin
   end;
  end;
  inherited;
+end;
+
+procedure tcustomcaptionframe.checkwidgetsize(var asize: sizety);
+var
+ size1: sizety;
+begin
+ checkstate;
+ size1:= finfo.dest.size;
+ size1.cx:= size1.cx + 2*captionmargin;
+ size1.cy:= size1.cy + 2*captionmargin;
+ case fcaptionpos of
+  cp_lefttop,cp_left,cp_leftbottom,
+  cp_righttop,cp_right,cp_rightbottom: begin
+   if fcaptiondist > 0 then begin
+    size1.cx:= size1.cx + fcaptiondist;
+   end;
+   size1.cy:= size1.cy + abs(fcaptionoffset);
+  end;
+  cp_topleft,cp_top,cp_topright,
+  cp_bottomleft,cp_bottom,cp_bottomright: begin
+   if fcaptiondist > 0 then begin
+    size1.cy:= size1.cy + fcaptiondist;
+   end;
+   size1.cx:= size1.cx + abs(fcaptionoffset);
+  end;
+ end;
+ if asize.cx < size1.cx then begin
+  asize.cx:= size1.cx;
+ end;
+ if asize.cy < size1.cy then begin
+  asize.cy:= size1.cy;
+ end;
 end;
 
 procedure tcustomcaptionframe.setcaptiondist(const Value: integer);
