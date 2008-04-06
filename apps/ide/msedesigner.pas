@@ -3472,9 +3472,9 @@ begin //loadformfile
          reader.onfindcomponentclass:= {$ifdef FPC}@{$endif}findcomponentclass;
          reader.onancestornotfound:= {$ifdef FPC}@{$endif}ancestornotfound;
          reader.oncreatecomponent:= {$ifdef FPC}@{$endif}createcomponent;
+         module.Name:= modulename;
          reader.ReadrootComponent(module);
          doswapmethodpointers(module,true);
-         module.Name:= modulename;
          result^.components.assigncomps(module);
          rootnames:= tstringlist.create;
          getfixupreferencenames(module,rootnames);

@@ -330,6 +330,7 @@ var
        po1:= openformfile(wstr1,false,false,false,false);
        result:= (po1 <> nil) and (struppercase(po1^.instancevarname) = wstr2);
       except
+       application.handleexception;
        result:= false;
       end;
      end;

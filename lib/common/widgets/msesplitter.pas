@@ -162,14 +162,15 @@ type
    property visible default false;
  end;
 
- layoutoptionty = (lao_alignx,lao_placex,lao_aligny,lao_placey,lao_scalewidth,
-                   lao_scaleheight);
+ layoutoptionty = (lao_alignx,lao_placex,lao_aligny,lao_placey,
+                   lao_scaleleft,lao_scaletop,
+                   lao_scalewidth,lao_scaleheight);
  layoutoptionsty = set of layoutoptionty; 
 const
  defaultlayoutoptions = [];
 
 type  
- placeoptionty = (plo_noinvisible,
+ placeoptionty = (plo_noinvisible,plo_scalesize,
                   plo_endmargin,plo_propmargin,plo_syncmaxautosize,
                   plo_synccaptiondistx,plo_synccaptiondisty,
                   plo_syncpaintwidth,plo_syncpaintheight);
@@ -177,14 +178,19 @@ type
 
  widgetlayoutinfoty = record
   widget: twidget;
+  pos: pointty;
   size: sizety;
+  actpos: pointty;
   actsize: sizety;
   refsize: sizety;
+  scalesize: sizety;
+  actscalesize: sizety;
+  refscalesize: sizety;  
  end;
  pwidgetlayoutinfoty = ^widgetlayoutinfoty;
  widgetlayoutinfoarty = array of widgetlayoutinfoty;
 
- layouterstatety = (las_propsizing);
+ layouterstatety = (las_propsizing,las_scalesizerefvalid);
  layouterstatesty = set of layouterstatety;
  
  tlayouter = class(tspacer)
@@ -200,6 +206,7 @@ type
    fplace_options: placeoptionsty;
    fwidgetinfos: widgetlayoutinfoarty;
    fstate: layouterstatesty;
+   fscalesizeref: sizety;
    procedure setoptionslayout(const avalue: layoutoptionsty);
    procedure setalign_mode(const avalue: widgetalignmodety);
    procedure setalign_leader(const avalue: twidget);
@@ -209,12 +216,15 @@ type
    procedure setplace_mode(const avalue: widgetalignmodety);
    procedure setplace_options(const avalue: placeoptionsty);
   protected
+   function scalesizeref: sizety;
    function childrenleft: integer;
    function childrentop: integer;
    function childrenright: integer;
    function childrenbottom: integer;
    function childrenwidth: integer;
    function childrenheight: integer;
+   procedure scalesizerefchanged;
+   procedure updatescalesizeref;
    procedure updatelayout;
    procedure loaded; override;
    procedure widgetregionchanged(const sender: twidget); override;
@@ -1179,6 +1189,7 @@ var
 var
  int1,int2,int3,int4: integer;
  ar1: widgetarty;
+ size1: sizety;
  
 begin
  if (componentstate * [csloading,csdestroying] = []) and 
@@ -1188,6 +1199,31 @@ begin
    updateoptionsscale;
    beginscaling;
    if widgetcount > 0 then begin
+    if (foptionslayout*[lao_placex,lao_placey] <> []) and
+                       (plo_scalesize in fplace_options) then begin
+        //scale to variable clientsize
+     size1:= scalesizeref;
+     if lao_placex in foptionslayout then begin
+      for int1:= high(fwidgetinfos) downto 0 do begin
+       with fwidgetinfos[int1] do begin
+        if not (osk_nopropwidth in widget.optionsskin) and 
+                                      (refscalesize.cx <> 0) then begin
+         widget.clientwidth:= (scalesize.cx * size1.cx) div refscalesize.cx;
+        end;
+       end;
+      end;
+     end
+     else begin
+      for int1:= high(fwidgetinfos) downto 0 do begin
+       with fwidgetinfos[int1] do begin
+        if not (osk_nopropheight in widget.optionsskin) and 
+                                      (refscalesize.cy <> 0) then begin
+         widget.clientheight:= (scalesize.cy * size1.cy) div refscalesize.cy;
+        end;
+       end;
+      end;
+     end;
+    end;
     if plo_syncmaxautosize in fplace_options then begin
      syncmaxautosize(fwidgets);
     end;
@@ -1350,6 +1386,50 @@ begin
  end;
 end;
 
+procedure tlayouter.updatescalesizeref;
+var
+ int1,int3: integer;
+ xsum,ysum: integer;
+ bo1: boolean;
+begin
+ if plo_scalesize in fplace_options then begin
+  if foptionslayout * [lao_placex,lao_placey] <> [] then begin
+   xsum:= 0; //fix size sum
+   ysum:= 0;
+   bo1:= not (plo_noinvisible in fplace_options);
+   for int1:= 0 to high(fwidgets) do begin
+    with widgets[int1] do begin
+     if (bo1 or visible) and (osk_nopropwidth in optionsskin) then begin 
+      xsum:= xsum + width; //fix width
+      ysum:= ysum + height; //fix height
+     end;
+    end;
+   end;
+   if bo1 then begin
+    int3:= length(fwidgets);
+   end
+   else begin
+    int3:= 0;
+    for int1:= 0 to high(fwidgets) do begin
+     if fwidgets[int1].visible then begin
+      inc(int3);
+     end;
+    end;
+   end;
+   if not (plo_propmargin in fplace_options) then begin
+    dec(int3);
+   end;
+   fscalesizeref:= innerclientsize;
+   if int3 > 0 then begin
+    int3:= int3 * fplace_mindist;
+    fscalesizeref.cx:= fscalesizeref.cx - int3;
+    fscalesizeref.cy:= fscalesizeref.cy - int3;
+   end;
+  end;
+ end;
+ include(fstate,las_scalesizerefvalid);
+end;
+
 function tlayouter.calcminscrollsize: sizety;
 begin
  result:= inherited calcminscrollsize;
@@ -1368,8 +1448,13 @@ begin
 end;
 
 procedure tlayouter.loaded;
+var
+ int1: integer;
 begin
  inherited;
+ for int1:= high(fwidgetinfos) downto 0 do begin
+  updatewidgetinfo(fwidgetinfos[int1],nil);
+ end;
  updatelayout;
 end;
 
@@ -1387,9 +1472,18 @@ begin
 end;
 
 procedure tlayouter.widgetregionchanged(const sender: twidget);
+var
+ int1: integer;
 begin
  inherited;
+ if not (las_propsizing in fstate) then begin
+  int1:= widgetinfoindex(sender);
+  if int1 >= 0 then begin
+   updatewidgetinfo(fwidgetinfos[int1],sender);
+  end;
+ end;
  if not (ws_loadedproc in fwidgetstate) then begin
+  scalesizerefchanged;
   updatelayout;
  end;
 end;
@@ -1445,6 +1539,12 @@ end;
 procedure tlayouter.setplace_options(const avalue: placeoptionsty);
 begin
  if fplace_options <> avalue then begin
+  if (plo_scalesize in avalue) and 
+       (not (plo_scalesize in fplace_options) or 
+        ((plo_noinvisible in avalue) xor 
+         (plo_noinvisible in fplace_options))) then begin
+   exclude(fstate,las_scalesizerefvalid);
+  end;
   fplace_options:= avalue;
   updatelayout;
  end;
@@ -1453,10 +1553,12 @@ end;
 procedure tlayouter.clientrectchanged;
 var
  refsi: sizety;
+ pt1: pointty;
  size1: sizety;
  int1: integer;
 begin
  inherited;
+ exclude(fstate,las_scalesizerefvalid);
  if componentstate * [csloading,csdestroying] = [] then begin
   if (foptionslayout * [lao_scalewidth,lao_scaleheight] <> []) and 
         not (las_propsizing in fstate) then begin
@@ -1466,18 +1568,30 @@ begin
     refsi:= innerclientsize;
     for int1:= high(fwidgetinfos) downto 0 do begin
      with fwidgetinfos[int1] do begin
+      pt1:= widget.pos;
       size1:= widget.clientsize;
-      if (lao_scalewidth in foptionslayout) and 
-                 not (osk_nopropwidth in widget.optionsskin) and 
-                 (refsize.cx <> 0) then begin
-       size1.cx:= (size.cx * refsi.cx) div refsize.cx;
+      if refsize.cx <> 0 then begin
+       if (lao_scaleleft in foptionslayout) and 
+                  not (osk_nopropleft in widget.optionsskin) then begin
+        pt1.x:= (pos.x * refsi.cx) div refsize.cx;
+       end;
+       if (lao_scalewidth in foptionslayout) and 
+                  not (osk_nopropwidth in widget.optionsskin) then begin
+        size1.cx:= (size.cx * refsi.cx) div refsize.cx;
+       end;
       end;
-      if (lao_scaleheight in foptionslayout) and 
-                 not (osk_nopropheight in widget.optionsskin) and 
-                 (refsize.cy <> 0) then begin
-       size1.cy:= (size.cy * refsi.cy) div refsize.cy;
+      if refsize.cy <> 0 then begin
+       if (lao_scaletop in foptionslayout) and 
+                  not (osk_noproptop in widget.optionsskin) then begin
+        pt1.y:= (pos.y * refsi.cy) div refsize.cy;
+       end;
+       if (lao_scaleheight in foptionslayout) and 
+                  not (osk_nopropheight in widget.optionsskin) then begin
+        size1.cy:= (size.cy * refsi.cy) div refsize.cy;
+       end;
       end;
       widget.clientsize:= size1;
+      widget.pos:= pt1;
      end;
     end;
    finally
@@ -1537,9 +1651,34 @@ var
  size1,size2: sizety;
 begin
  with ainfo do begin
-  widget:= awidget;
-  size1:= awidget.clientsize;
+  if awidget <> nil then begin
+   widget:= awidget;
+  end;
+  size1:= widget.clientsize;
+  if not (csloading in componentstate) and (flayoutupdating = 0) then begin
+   size2:= self.scalesizeref;
+   if size1.cx <> actscalesize.cx then begin
+    refscalesize.cx:= size2.cx;
+    scalesize.cx:= size1.cx;
+    actscalesize.cx:= scalesize.cx;
+   end;
+   if size1.cy <> actscalesize.cy then begin
+    refscalesize.cy:= size2.cy;
+    scalesize.cy:= size1.cy;
+    actscalesize.cy:= scalesize.cy;
+   end;
+  end;
   size2:= innerclientsize;
+  if widget.bounds_x <> actpos.x then begin
+   refsize.cx:= size2.cx;
+   pos.x:= widget.bounds_x;
+   actpos.x:= pos.x;
+  end;
+  if widget.bounds_y <> actpos.y then begin
+   refsize.cy:= size2.cy;
+   pos.y:= widget.bounds_y;
+   actpos.y:= pos.y;
+  end;
   if size1.cx <> actsize.cx then begin
    refsize.cx:= size2.cx;
    size.cx:= size1.cx;
@@ -1552,41 +1691,21 @@ begin
   end;
  end;
 end;
-{
-procedure tlayouter.sizechanged;
-var
- refsi: sizety;
- size1: sizety;
- int1: integer;
+
+function tlayouter.scalesizeref: sizety;
 begin
- if (foptionslayout * [lao_scalewidth,lao_scaleheight] <> []) and 
-       not (las_propsizing in fstate) then begin
-  beginscaling;
-  include(fstate,las_propsizing);
-  try
-   refsi:= size;
-   for int1:= high(fwidgetinfos) downto 0 do begin
-    with fwidgetinfos[int1] do begin
-     size1:= widget.clientsize;
-     if (lao_scalewidth in foptionslayout) and 
-                not (osk_nopropwidth in widget.optionsskin) and 
-                (refsize.cx <> 0) then begin
-      size1.cx:= (size.cx * refsi.cx) div refsize.cx;
-     end;
-     if (lao_scaleheight in foptionslayout) and 
-                not (osk_nopropheight in widget.optionsskin) and 
-                (refsize.cy <> 0) then begin
-      size1.cy:= (size.cy * refsi.cy) div refsize.cy;
-     end;
-     widget.clientsize:= size1;
-    end;
-   end;
-  finally
-   exclude(fstate,las_propsizing);
-   endscaling;
-  end;
+ if not (las_scalesizerefvalid in fstate) then begin
+  updatescalesizeref;
  end;
- inherited;
+ result:= fscalesizeref;
 end;
-}
+
+procedure tlayouter.scalesizerefchanged;
+begin
+ if (componentstate * [csloading,csdestroying] = []) and 
+                            (flayoutupdating = 0) then begin
+  exclude(fstate,las_scalesizerefvalid);
+ end;
+end;
+
 end.
