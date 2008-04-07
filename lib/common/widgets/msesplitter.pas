@@ -216,6 +216,7 @@ type
    procedure setplace_mode(const avalue: widgetalignmodety);
    procedure setplace_options(const avalue: placeoptionsty);
   protected
+   procedure scalebasechanged(const sender: twidget); override;
    function scalesizeref: sizety;
    function childrenleft: integer;
    function childrentop: integer;
@@ -1389,19 +1390,24 @@ end;
 procedure tlayouter.updatescalesizeref;
 var
  int1,int3: integer;
- xsum,ysum: integer;
+ sum: sizety;
  bo1: boolean;
 begin
  if plo_scalesize in fplace_options then begin
   if foptionslayout * [lao_placex,lao_placey] <> [] then begin
-   xsum:= 0; //fix size sum
-   ysum:= 0;
+   sum:= nullsize;
    bo1:= not (plo_noinvisible in fplace_options);
    for int1:= 0 to high(fwidgets) do begin
     with widgets[int1] do begin
-     if (bo1 or visible) and (osk_nopropwidth in optionsskin) then begin 
-      xsum:= xsum + width; //fix width
-      ysum:= ysum + height; //fix height
+     if (bo1 or visible) then begin
+      if osk_nopropwidth in optionsskin then begin 
+       addsize1(sum,size);
+      end
+      else begin
+       addsize1(sum,framewidth);
+      end;
+     end
+     else begin
      end;
     end;
    end;
@@ -1420,6 +1426,7 @@ begin
     dec(int3);
    end;
    fscalesizeref:= innerclientsize;
+   subsize1(fscalesizeref,sum);
    if int3 > 0 then begin
     int3:= int3 * fplace_mindist;
     fscalesizeref.cx:= fscalesizeref.cx - int3;
@@ -1476,15 +1483,21 @@ var
  int1: integer;
 begin
  inherited;
- if not (las_propsizing in fstate) then begin
-  int1:= widgetinfoindex(sender);
-  if int1 >= 0 then begin
-   updatewidgetinfo(fwidgetinfos[int1],sender);
+ if not (csloading in componentstate) then begin
+  if not (las_propsizing in fstate) then begin
+   int1:= widgetinfoindex(sender);
+   if int1 >= 0 then begin
+    updatewidgetinfo(fwidgetinfos[int1],sender);
+   end;
   end;
- end;
- if not (ws_loadedproc in fwidgetstate) then begin
-  scalesizerefchanged;
-  updatelayout;
+  if not (ws_loadedproc in fwidgetstate) then begin
+   scalesizerefchanged;
+   if (flayoutupdating = 0) and (plo_scalesize in fplace_options) and
+       (sender.optionsskin * [osk_nopropwidth,osk_nopropheight] <> []) then begin
+    scalebasechanged(sender);
+   end;
+   updatelayout;
+  end;
  end;
 end;
 
@@ -1516,6 +1529,7 @@ procedure tlayouter.setplace_mindist(const avalue: integer);
 begin
  if fplace_mindist <> avalue then begin
   fplace_mindist:= avalue;
+  scalebasechanged(nil);
   updatelayout;
  end;
 end;
@@ -1544,6 +1558,7 @@ begin
         ((plo_noinvisible in avalue) xor 
          (plo_noinvisible in fplace_options))) then begin
    exclude(fstate,las_scalesizerefvalid);
+   scalebasechanged(nil);
   end;
   fplace_options:= avalue;
   updatelayout;
@@ -1705,6 +1720,24 @@ begin
  if (componentstate * [csloading,csdestroying] = []) and 
                             (flayoutupdating = 0) then begin
   exclude(fstate,las_scalesizerefvalid);
+ end;
+end;
+
+procedure tlayouter.scalebasechanged(const sender: twidget);
+var
+ int1: integer;
+ size1: sizety;
+begin
+ if not (csloading in componentstate) then begin
+  scalesizerefchanged;
+  size1:= scalesizeref;
+  for int1:= high(fwidgetinfos) downto 0 do begin
+   with fwidgetinfos[int1] do begin
+    scalesize:= widget.clientsize;
+    actscalesize:= scalesize;
+    refscalesize:= size1;
+   end;
+  end;
  end;
 end;
 

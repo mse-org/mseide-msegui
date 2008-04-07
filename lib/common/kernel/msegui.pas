@@ -1052,6 +1052,7 @@ type
    procedure parentclientrectchanged; virtual;
    procedure parentwidgetregionchanged(const sender: twidget); virtual;
    procedure widgetregionchanged(const sender: twidget); virtual;
+   procedure scalebasechanged(const sender: twidget); virtual; //used by tlayouter
    procedure statechanged; virtual; //enabled,active,visible
    procedure enabledchanged; virtual;
    procedure activechanged; virtual;
@@ -9928,13 +9929,20 @@ begin
 end;
 
 procedure twidget.setoptionsskin(const avalue: optionsskinty);
+var
+ valuebefore: optionsskinty;
 begin
+ valuebefore:= foptionsskin;
  foptionsskin:= avalue;
  if osk_noskin in avalue then begin
   include(fmsecomponentstate,cs_noskin);
  end
  else begin
   exclude(fmsecomponentstate,cs_noskin);
+ end;
+ if (optionsskinty(longword(valuebefore) xor longword(avalue)) * 
+    [osk_nopropwidth,osk_nopropheight] <> []) and (fparentwidget <> nil) then begin
+  fparentwidget.scalebasechanged(self); //for tlayouter
  end;
 end;
 
@@ -9954,6 +9962,11 @@ begin
  else begin
   result:= fframe.fi.innerframe;
  end;
+end;
+
+procedure twidget.scalebasechanged(const sender: twidget);
+begin
+ //dummy
 end;
 
 { twindow }
