@@ -235,6 +235,7 @@ type
  tmseformwidget = class(tcustommseform)
   published
    property optionswidget;
+   property optionsskin;
    property optionswindow;
    property mainmenu;
    property color;
@@ -339,6 +340,7 @@ type
  tdockformwidget = class(tcustomdockform)
   published
    property optionswidget;
+   property optionsskin;
    property optionswindow;
    property mainmenu;
    property color;

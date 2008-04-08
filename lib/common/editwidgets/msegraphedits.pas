@@ -186,7 +186,6 @@ type
    property statvarname: msestring read getstatvarname write fstatvarname;
    property optionsedit: optionseditty read getoptionsedit write setoptionsedit
                               default defaultoptionsedit;
-   property optionsskin;
    property onchange: notifyeventty read fonchange write fonchange;
    property ondataentered: notifyeventty read fondataentered write fondataentered;
 //   property onmouseevent: mouseeventty read fonmouseevent write fonmouseevent;
@@ -731,6 +730,7 @@ type
  tdatabutton = class(tcustomdatabutton)
   published
    property optionswidget;
+   property optionsskin;
    property valuefaces;
    property font;
 
@@ -771,6 +771,7 @@ type
    property glyph: stockglyphty read fglyph write setglyph default stg_none;
    property imagenums;
    property optionswidget;
+   property optionsskin;
    property valuefaces;
    property font;
    property caption;

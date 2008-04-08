@@ -111,6 +111,7 @@ type
   published
    property onrender;
    property optionswidget;
+   property optionsskin;
    property bounds_x;
    property bounds_y;
    property bounds_cx;

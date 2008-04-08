@@ -562,6 +562,7 @@ type
    property datasource: tdatasource read getdatasource write setdatasource;
    property optionsdb;
    property optionswidget;
+   property optionsskin;
    property valuefaces;
    property font;
 

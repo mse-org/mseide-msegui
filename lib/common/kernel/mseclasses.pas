@@ -247,8 +247,8 @@ type
    property sender: tobject read fsender;
  end;
 
- msecomponentstatety = (cs_ismodule,cs_endreadproc,cs_loadedproc,cs_noload,
-                        {cs_hasskin,}cs_noskin{,cs_updateskinproc});
+ msecomponentstatety = (cs_ismodule,cs_endreadproc,cs_loadedproc,cs_noload{,}
+                        {cs_hasskin,}{cs_noskin}{,cs_updateskinproc});
  msecomponentstatesty = set of msecomponentstatety;
 
  createprocty = procedure of object;
@@ -297,6 +297,7 @@ type
 
    class function classskininfo: skininfoty; virtual;
    function skininfo: skininfoty; virtual;
+   function hasskin: boolean; virtual;
    
     //iobjectlink
    procedure link(const source,dest: iobjectlink; valuepo: pointer = nil;
@@ -3001,7 +3002,7 @@ begin
   end;
 //  include(fmsecomponentstate,cs_updateskinproc);
 //  try
-   if not (cs_noskin in fmsecomponentstate) then begin
+   if hasskin{not (cs_noskin in fmsecomponentstate)} then begin
     if assigned(fonbeforeupdateskin) then begin
      fonbeforeupdateskin(tobject(tmethod(oninitskinobject).data));
     end;
@@ -3019,6 +3020,11 @@ end;
 function tmsecomponent.getmsecomponentstate: msecomponentstatesty;
 begin
  result:= fmsecomponentstate;
+end;
+
+function tmsecomponent.hasskin: boolean;
+begin
+ result:= true;
 end;
 
 {$ifdef mse_with_ifi}

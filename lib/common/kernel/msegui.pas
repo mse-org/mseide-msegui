@@ -62,7 +62,7 @@ type
                    );
  optionswidgetty = set of optionwidgetty;
 
- optionskinty = (osk_noskin,osk_framebuttononly,osk_container,
+ optionskinty = (osk_skin,osk_noskin,osk_framebuttononly,osk_container,
                  osk_nopropleft,osk_noproptop,
                  osk_nopropwidth,osk_nopropheight //used by tlayouter
                  );
@@ -966,6 +966,7 @@ type
    function gethelpcontext: msestring; override;
    class function classskininfo: skininfoty; override;
    function skininfo: skininfoty; override;
+   function hasskin: boolean; override;
 
    function navigstartrect: rectty; virtual; //org = clientpos
    function navigrect: rectty; virtual;      //org = clientpos
@@ -9936,17 +9937,24 @@ begin
 end;
 
 procedure twidget.setoptionsskin(const avalue: optionsskinty);
+const
+ mask: optionsskinty = [osk_skin,osk_noskin];
 var
  valuebefore: optionsskinty;
 begin
  valuebefore:= foptionsskin;
- foptionsskin:= avalue;
+ foptionsskin:= optionsskinty(setsinglebit(
+                 {$ifdef FPC}longword{$else}byte{$endif}(avalue),
+                 {$ifdef FPC}longword{$else}byte{$endif}(foptionsskin),
+                 {$ifdef FPC}longword{$else}byte{$endif}(mask)));
+ {
  if osk_noskin in avalue then begin
   include(fmsecomponentstate,cs_noskin);
  end
  else begin
   exclude(fmsecomponentstate,cs_noskin);
  end;
+ }
  if (optionsskinty(longword(valuebefore) xor longword(avalue)) * 
     [osk_nopropwidth,osk_nopropheight] <> []) and (fparentwidget <> nil) then begin
   fparentwidget.scalebasechanged(self); //for tlayouter
@@ -9958,6 +9966,21 @@ begin
  result:= inherited skininfo;
  if osk_container in foptionsskin then begin
   include(result.options,sko_container);
+ end;
+end;
+
+function twidget.hasskin: boolean;
+begin
+ result:= true;
+ if not (osk_skin in foptionsskin) then begin
+  if osk_noskin in foptionsskin then begin
+   result:= false;
+  end
+  else begin
+   if fparentwidget <> nil then begin
+    result:= fparentwidget.hasskin;
+   end;
+  end;
  end;
 end;
 

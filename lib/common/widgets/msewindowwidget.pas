@@ -96,6 +96,7 @@ type
  twindowwidget = class(tcustomwindowwidget)
   published
    property optionswidget;
+   property optionsskin;
    property bounds_x;
    property bounds_y;
    property bounds_cx;
