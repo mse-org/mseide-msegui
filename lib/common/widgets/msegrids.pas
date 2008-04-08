@@ -60,7 +60,8 @@ type
                  og_focuscellonenter,og_containerfocusbackonesc,
                  og_autofirstrow,og_autoappend,og_appendempty,
                  og_savestate,og_sorted,
-                 og_colchangeontabkey,og_rotaterow,
+                 og_colchangeontabkey,og_colchangeonreturnkey,
+                 og_rotaterow,
                  og_autopopup,
                  og_mousescrollcol,og_noresetselect);
  optionsgridty = set of optiongridty;
@@ -8840,6 +8841,15 @@ begin
        pagedown(action);
       end;
      end;
+     key_return,key_enter: begin
+      if (og_colchangeonreturnkey in foptionsgrid) and 
+                 (info.shiftstate = []) then begin
+       colstep(fca_focusin,1,true);
+      end
+      else begin
+       exclude(info.eventstate,es_processed);
+      end;
+     end;
      key_tab,key_backtab: begin
       if not (og_colchangeontabkey in foptionsgrid) then begin
        exclude(info.eventstate,es_processed);
@@ -10951,6 +10961,7 @@ end;
 procedure tcustomstringgrid.editnotification(var info: editnotificationinfoty);
 var
  frame1: framety;
+ bo1: boolean;
 begin
  if focusedcellvalid then begin
   with tcustomstringcol(fdatacols[ffocusedcell.col]) do begin
@@ -10959,13 +10970,18 @@ begin
      modified;
     end;
     ea_textentered: begin
+     bo1:= true;
      if (cos_edited in fstate) or 
            (scoe_forcereturncheckvalue in foptionsedit) then begin
       include(fstate,cos_edited);
-      docheckcellvalue;
+      bo1:= docheckcellvalue;
       if scoe_eatreturn in foptionsedit then begin
        info.action:= ea_none;
       end;
+     end;
+     if bo1 and (og_colchangeonreturnkey in fgrid.optionsgrid) then begin
+      info.action:= ea_none;
+      fgrid.colstep(fca_focusin,1,true);
      end;
     end;
     ea_undo: begin

@@ -27,6 +27,7 @@ type
                     oe_forcereturncheckvalue, 
                        //call checkvalue unconditionally by key_return
                     oe_eatreturn,
+                    oe_returntaborder, //key_return selects next widget in taborder
                     oe_resetselectonexit,
 
                     //same layout as strincoleditoptionty

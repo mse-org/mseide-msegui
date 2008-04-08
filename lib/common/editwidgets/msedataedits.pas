@@ -1138,13 +1138,29 @@ begin
 end;
 
 procedure tdataedit.editnotification(var info: editnotificationinfoty);
+var
+ bo1: boolean;
 begin
  case info.action of
   ea_textentered: begin
+   bo1:= true;
    if fedited or (oe_forcereturncheckvalue in foptionsedit) then begin
-//    checkvalue;
-    if not checkvalue or (oe_eatreturn in foptionsedit) then begin
+    bo1:= checkvalue;
+    if not bo1 or (oe_eatreturn in foptionsedit) then begin
      info.action:= ea_none;
+    end;
+   end;
+   if bo1 then begin
+    if (oe_returntaborder in foptionsedit) or 
+      (fgridintf <> nil) and 
+       (og_colchangeonreturnkey in fgridintf.getcol.grid.optionsgrid)then begin
+     info.action:= ea_none;    
+     if fgridintf = nil then begin
+      nextfocus;
+     end
+     else begin
+      fgridintf.getcol.grid.colstep(fca_focusin,1,true);
+     end;
     end;
    end;
   end;
