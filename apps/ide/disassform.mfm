@@ -8,6 +8,8 @@ object disassfo: tdisassfo
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
   frame.dummy = 0
   taborder = 1
+  onactivate = act
+  ondeactivate = deact
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
   container.bounds_x = 0
@@ -89,7 +91,7 @@ object disassfo: tdisassfo
       14745599
       16777184
     )
-    datarowheight = 16
-    reffontheight = 14
+    datarowheight = 17
+    reffontheight = 15
   end
 end

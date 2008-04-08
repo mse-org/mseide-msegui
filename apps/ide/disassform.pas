@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2008 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,11 +28,15 @@ type
    grid: tstringgrid;
    procedure disassfoonshow(const sender: TObject);
    procedure keydo(const sender: twidget; var info: keyeventinfoty);
+   procedure deact(const sender: TObject);
+   procedure act(const sender: TObject);
   private
    faddress: cardinal;
    ffirstaddress: cardinal;
    flastaddress: cardinal;
    factiverow: integer;
+   fshortcutsswapped: boolean;
+   procedure swapshortcuts;
    procedure internalrefresh;
    procedure addlines(const aaddress: longword; const alinecount: integer);
   public
@@ -48,7 +52,8 @@ var
 implementation
 
 uses
- disassform_mfm,sourceform,sourcepage,mseformatstr,sysutils,msekeyboard;
+ disassform_mfm,sourceform,sourcepage,mseformatstr,sysutils,msekeyboard,mseglob,
+ actionsmodule;
 
 { tdisassfo }
 
@@ -179,6 +184,36 @@ begin
     end;
    end;
   end;
+ end;
+end;
+
+procedure tdisassfo.swapshortcuts;
+var
+ sho1: shortcutty;
+begin
+ with actionsmo do begin
+  sho1:= step.shortcut;
+  step.shortcut:= stepi.shortcut;
+  stepi.shortcut:= sho1;
+  sho1:= next.shortcut;
+  next.shortcut:= nexti.shortcut;
+  nexti.shortcut:= sho1;
+ end;
+end;
+
+procedure tdisassfo.deact(const sender: TObject);
+begin
+ if (application.inactivewindow <> window) and fshortcutsswapped then begin
+  swapshortcuts;
+  fshortcutsswapped:= false;
+ end; 
+end;
+
+procedure tdisassfo.act(const sender: TObject);
+begin
+ if not fshortcutsswapped then begin
+  swapshortcuts;
+  fshortcutsswapped:= true;
  end;
 end;
 

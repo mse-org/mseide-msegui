@@ -1798,7 +1798,8 @@ type
    function screensize: sizety;
    function workarea(const awindow: twindow = nil): rectty;
                           //nil -> current active window
-   function activewindow: twindow;
+   property activewindow: twindow read factivewindow;
+   property inactivewindow: twindow read finactivewindow;
    function regularactivewindow: twindow;
    function unreleasedactivewindow: twindow;
    function activewidget: twidget;
@@ -1838,6 +1839,7 @@ type
         //calls canclose of all windows except sender and terminatequery
    function terminating: boolean;
    function deinitializing: boolean;
+   function shortcutting: boolean; //widget is in doshortcut procedure
    property caret: tcaret read fcaret;
    property mouse: tmouse read fmouse;
    procedure mouseparkevent; //simulates mouseparkevent
@@ -8269,7 +8271,12 @@ begin
   dokeydown(info);
  end;
  if not (es_processed in info.eventstate) then begin
-  doshortcut(info,self);
+  include(appinst.fstate,aps_shortcutting);
+  try
+   doshortcut(info,self);
+  finally
+   exclude(appinst.fstate,aps_shortcutting);
+  end;
  end;
  if not (es_processed in info.eventstate) then begin
   dokeydownaftershortcut(info);
@@ -10315,13 +10322,19 @@ end;
 
 function twindow.deactivateintermediate: boolean;
 begin
- deactivate;
- if appinst.factivewindow = nil then begin
-  result:= true;
-  appinst.finactivewindow:= self;
- end
- else begin
-  result:= false;
+ appinst.finactivewindow:= self;
+ try
+  deactivate;
+ finally
+  if appinst.factivewindow = nil then begin
+   result:= true;
+  end
+  else begin
+   if appinst.finactivewindow = self then begin
+    appinst.finactivewindow:= nil;
+   end;
+   result:= false;
+  end;
  end;
 end;
 
@@ -13049,11 +13062,6 @@ begin
  result:= gui_getworkarea(id);
 end;
 
-function tguiapplication.activewindow: twindow;
-begin
- result:= factivewindow;
-end;
-
 function tguiapplication.regularactivewindow: twindow;
 begin
  result:= factivewindow;
@@ -13838,6 +13846,11 @@ end;
 function tguiapplication.idle: boolean;
 begin
  result:= inherited idle and not gui_hasevent;
+end;
+
+function tguiapplication.shortcutting: boolean;
+begin
+ result:= aps_shortcutting in fstate;
 end;
 
 { tasyncmessageevent }

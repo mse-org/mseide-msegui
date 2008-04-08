@@ -320,6 +320,7 @@ type
                                      const event: objecteventty); override;
   public
    constructor create(aowner: tcomponent); override;
+   procedure initnewcomponent(const ascale: real); override;
    function isactivepage: boolean;
    property tabwidget: tcustomtabwidget read ftabwidget;
    property tabindex: integer read gettabindex write settabindex;
@@ -2041,6 +2042,12 @@ begin
    end;
   end;
  end;
+end;
+
+procedure ttabpage.initnewcomponent(const ascale: real);
+begin
+ inherited;
+ caption:= 'caption';
 end;
 
 { ttabform }
