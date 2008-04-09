@@ -568,13 +568,14 @@ type
  bandareaarty = array of tcustombandarea;
  
  recordbandarty = array of tcustomrecordband;
- 
+ recordbandeventty = procedure(const sender: tcustomrecordband) of object; 
  tcustomrecordband = class(tcustomscalingwidget,idbeditinfo,ireccontrol,
                                 iobjectpicker,ireportclient)
   private
    fbands: recordbandarty;
    fparentintf: ibandparent;
    fonbeforerender: beforerenderrecordeventty;
+   fonafterrender: recordbandeventty;
    fonpaint: painteventty;
    fonafterpaint: painteventty;
    fstate: recordbandstatesty;
@@ -897,6 +898,7 @@ type
    freportpage: tcustomreportpage;
    frecordband: tcustomrecordband;
    fonbeforerender: bandareaeventty;
+   fonafterrender: bandareaeventty;
    fonpaint: bandareapainteventty;
    fonafterpaint: bandareapainteventty;
    fonfirstarea: bandareaeventty;
@@ -946,8 +948,6 @@ type
    function islastband(const addheight: integer = 0): boolean;
    function isfirstrecord: boolean;
    function islastrecord: boolean;
-//   function isfirstofgroup: boolean;
-//   function islastofgroup: boolean;
    function remainingheight: integer;
    function pagepagenum: integer; //null based
    function reppagenum: integer; //null based
@@ -964,6 +964,8 @@ type
    property onfirstarea: bandareaeventty read fonfirstarea write fonfirstarea;
    property onbeforerender: bandareaeventty read fonbeforerender
                                write fonbeforerender;
+   property onafterrender: bandareaeventty read fonafterrender
+                               write fonafterrender;
    property onpaint: bandareapainteventty read fonpaint write fonpaint;
    property onafterpaint: bandareapainteventty read fonafterpaint write fonafterpaint;
  end; 
@@ -973,11 +975,13 @@ type
    property font;
    property onfirstarea;
    property onbeforerender;
+   property onafterrender;
    property onpaint;
    property onafterpaint;
  end;
 
  reportpagestatety = (rpps_inited,rpps_rendering,rpps_backgroundrendered,
+                      rpps_restart,
                       rpps_showed,rpps_finish,rpps_notfirstrecord,rpps_lastrecord);
  reportpagestatesty = set of reportpagestatety;
  
@@ -1003,6 +1007,7 @@ type
    fareas: bandareaarty;
    fstate: reportpagestatesty;
    fonbeforerender: beforerenderpageeventty;
+   fonafterrender: reportpageeventty;
    fonpaint: reportpagepainteventty;
    fonafterpaint: reportpagepainteventty;
    fpagewidth: real;
@@ -1045,7 +1050,7 @@ type
    function getfontclass: widgetfontclassty; override;
 
    procedure renderbackground(const acanvas: tcanvas);
-   procedure beginrender;
+   procedure beginrender(const arestart: boolean);
    procedure endrender;
    procedure adddatasets(var adatasets: datasetarty);
    function rendering: boolean;
@@ -1118,6 +1123,8 @@ type
                                write fonfirstpage;
    property onbeforerender: beforerenderpageeventty read fonbeforerender
                                write fonbeforerender;
+   property onafterrender: reportpageeventty read fonafterrender
+                               write fonafterrender;
    property onpaint: reportpagepainteventty read fonpaint write fonpaint;
    property onafterpaint: reportpagepainteventty read fonafterpaint 
                         write fonafterpaint;
@@ -1149,6 +1156,7 @@ type
  
    property onfirstpage;
    property onbeforerender;
+   property onafterrender;
    property onpaint;   
    property onafterpaint;
    property onbeforenextrecord;
@@ -1163,7 +1171,7 @@ type
   snaptogrid: boolean;
  end;
  
- repstatety = (rs_activepageset,rs_finish,rs_running,rs_endpass);
+ repstatety = (rs_activepageset,rs_finish,rs_restart,rs_running,rs_endpass);
  repstatesty = set of repstatety;
 
  reporteventty = procedure(const sender: tcustomreport) of object;
@@ -1182,9 +1190,10 @@ type
  tcustomreport = class(twidget)
   private
    fppmm: real;
-   fonbeforerender: notifyeventty;
-   fonafterrender: notifyeventty;
-//   fprinter: tstreamprinter; //preliminary 
+   fonreportstart: reporteventty;
+   fonbeforerender: reporteventty;
+   fonafterrender: reporteventty;
+   fonreportfinished: notifyeventty;
    fprinter: tcustomprinter; //preliminary 
    fstream: ttextstream;
    fstreamset: boolean;
@@ -1302,10 +1311,13 @@ type
    property dialogcaption: msestring read fdialogcaption write fdialogcaption;
 
    property onpreamble: preambleeventty read fonpreamble write fonpreamble;
-   property onbeforerender: notifyeventty read fonbeforerender
+   property onreportstart: reporteventty read fonreportstart write fonreportstart;
+   property onbeforerender: reporteventty read fonbeforerender
                                write fonbeforerender;
-   property onafterrender: notifyeventty read fonafterrender
+   property onafterrender: reporteventty read fonafterrender
                                write fonafterrender;
+   property onreportfinished: notifyeventty read fonreportfinished 
+                                                     write fonreportfinished;
         //executed in main thread context
    property onpagebeforerender: beforerenderpageeventty read fonpagebeforerender
                                write fonpagebeforerender;
@@ -1341,8 +1353,10 @@ type
    property dialogtext;
    property dialogcaption;
    property onpreamble;
+   property onreportstart;
    property onbeforerender;
    property onafterrender;
+   property onreportfinished;
    property onpagebeforerender;
    property onpagepaint;
    property onpageafterpaint;
@@ -3248,6 +3262,14 @@ begin
    finally
     fparentintf.endband(acanvas,self);
    end;
+   if canevent(tmethod(fonafterrender)) then begin
+    application.lock;
+    try
+     fonafterrender(self);
+    finally
+     application.unlock;
+    end;
+   end;
   end;
   nextrecord;
  end;
@@ -4286,9 +4308,6 @@ begin
   dofirstarea;
  end;
  try
-//  if frecordband = nil then begin
-//   initpage;
-//  end;
   if factiveband <= high(fbands) then begin
    updatevisible;
    dobeforerender;
@@ -4321,8 +4340,6 @@ begin
        isfinished:= bo1;
       end;
       bo1:= bo1 or bo2{(bv_everypage in fvisibility)};
-//      fstate:= fstate + [rbs_showed,rbs_pageshowed];
-//      result:= bo1;
       result:= result and bo1;
       if bo1 then begin //empty
        if fnextbandifempty <> nil then begin
@@ -4357,6 +4374,16 @@ begin
          end;         
         end;
        end;
+      end;
+     end;
+    end;
+    if factiveband > high(fbands) then begin
+     if canevent(tmethod(fonafterrender)) then begin
+      application.lock;
+      try
+       fonafterrender(self);
+      finally
+       application.unlock;
       end;
      end;
     end;
@@ -4932,6 +4959,21 @@ begin
   end;
   freport.doprogress;
   result:= result and bo1;
+  if bo1 or (fnextpage <> nil) or (rpps_finish in fstate) then begin 
+                        //next page
+   if canevent(tmethod(fonafterrender)) then begin
+    application.lock;
+    try
+     exclude(fstate,rpps_restart);
+     fonafterrender(self);
+     if rpps_restart in fstate then begin
+      bo1:= false;
+     end;
+    finally
+     application.unlock;
+    end;
+   end;
+  end;
  until bo1 or (fnextpage <> nil);
  doafterlastpage;
 end;
@@ -5010,7 +5052,7 @@ begin
  end;
 end;
 
-procedure tcustomreportpage.beginrender;
+procedure tcustomreportpage.beginrender(const arestart: boolean);
  procedure addreccontrols(const awidget: twidget);
  var
   int1: integer;
@@ -5028,7 +5070,12 @@ var
 begin
  freccontrols:= nil;
  addreccontrols(self);
- fstate:= [rpps_rendering];
+ if arestart then begin
+  fstate:= fstate * [rpps_inited,rpps_rendering];
+ end
+ else begin
+  fstate:= [rpps_rendering];
+ end;
  include(fwidgetstate1,ws1_noclipchildren);
  with fdatalink do begin
   if active then begin
@@ -5044,11 +5091,6 @@ begin
    self.recordchanged;
   end;
  end;
- {
- for int1:= 0 to high(fbands) do begin
-  fbands[int1].beginrender;
- end;
- }
  for int1:= 0 to high(fclients) do begin
   fclients[int1].beginrender(false);
  end;
@@ -5065,11 +5107,6 @@ begin
  freccontrols:= nil;
  exclude(fstate,rpps_rendering);
  exclude(fwidgetstate1,ws1_noclipchildren);
- {
- for int1:= 0 to high(fbands) do begin
-  fbands[int1].endrender;
- end;
- }
  for int1:= 0 to high(fclients) do begin
   fclients[int1].endrender;
  end;
@@ -5222,11 +5259,6 @@ begin
  for int1:= 0 to high(fclients) do begin
   fclients[int1].updatevisibility;
  end;
- {
- for int1:= 0 to high(fbands) do begin
-  fbands[int1].updatevisibility;
- end;
- }
  for int1:= 0 to high(fareas) do begin
   fareas[int1].updatevisible;
  end;
@@ -5279,7 +5311,8 @@ end;
 
 procedure tcustomreportpage.restart;
 begin
- beginrender;
+ beginrender(true);
+ include(fstate,rpps_restart);
  recordchanged;
 end;
 
@@ -5315,17 +5348,7 @@ begin
   result:= false;
  end;
 end;
-{
-function tcustomreportpage.isfirstofgroup: boolean;
-begin
- result:= false;
-end;
 
-function tcustomreportpage.islastofgroup: boolean;
-begin
- result:= false;
-end;
-}
 procedure tcustomreportpage.recordchanged;
 var
  int1: integer;
@@ -5545,6 +5568,7 @@ var
  page1: tcustomreportpage;
  stream1: ttextstream;
  str1: string;
+ restarted: boolean;
  
 begin
  fstate:= [rs_running];
@@ -5577,7 +5601,7 @@ begin
   end;
  end;
  try
-  repeat
+  repeat //until terminated1
    fpagenum:= 0;
    factivepage:= 0;
    renderbegin:= false;
@@ -5625,10 +5649,10 @@ begin
       end;
      end;
     end;   
-    if canevent(tmethod(fonbeforerender)) then begin
+    if canevent(tmethod(fonreportstart)) then begin
      application.lock;
      try
-      fonbeforerender(self);
+      fonreportstart(self);
      finally
       application.unlock;
      end;
@@ -5637,62 +5661,84 @@ begin
     dofinish(true);
     raise;
    end;
-   renderbegin:= true;
-   for int1:= 0 to high(freppages) do begin
-    freppages[int1].beginrender;
-   end;
-   try
-    if high(freppages) >= factivepage then begin
-     page1:= freppages[factivepage];
-     while true do begin
-      for int1:= finditem(pointerarty(freppages),page1) to high(freppages) do begin
-       if freppages[int1].visiblepage then begin
-        page1:= freppages[int1];
-        break;
-       end;
+   restarted:= false;
+   repeat //until not restarted
+    try
+     if canevent(tmethod(fonbeforerender)) then begin
+      application.lock;
+      try
+       fonbeforerender(self);
+      finally
+       application.unlock;
       end;
-      if page1.visiblepage and not checkterminated then begin
-       exclude(fstate,rs_activepageset);
-       factivepage:= finditem(pointerarty(freppages),page1);
-       bo1:= page1.render(fcanvas);
-       if rs_finish in fstate then begin
-        break;
+     end;
+     renderbegin:= true;
+     for int1:= 0 to high(freppages) do begin
+      freppages[int1].beginrender(false);
+     end;
+     if high(freppages) >= factivepage then begin
+      page1:= freppages[factivepage];
+      while true do begin
+       for int1:= finditem(pointerarty(freppages),page1) to high(freppages) do begin
+        if freppages[int1].visiblepage then begin
+         page1:= freppages[int1];
+         break;
+        end;
        end;
-       if rs_activepageset in fstate then begin
-        page1:= freppages[factivepage];
-       end
-       else begin
-        if not bo1 and (page1.nextpage <> nil) then begin
-          page1:= page1.nextpage;
+       if page1.visiblepage and not checkterminated then begin
+        exclude(fstate,rs_activepageset);
+        factivepage:= finditem(pointerarty(freppages),page1);
+        bo1:= page1.render(fcanvas);
+        if rs_finish in fstate then begin
+         break;
+        end;
+        if rs_activepageset in fstate then begin
+         page1:= freppages[factivepage];
         end
         else begin
-         if bo1 and (page1.nextpageifempty <> nil) then begin
-          page1:= page1.nextpageifempty;
+         if not bo1 and (page1.nextpage <> nil) then begin
+           page1:= page1.nextpage;
          end
          else begin
-          int1:= finditem(pointerarty(freppages),page1);
-          if (int1 >= 0) and (int1 < high(freppages)) then begin
-           page1:= freppages[int1+1];
+          if bo1 and (page1.nextpageifempty <> nil) then begin
+           page1:= page1.nextpageifempty;
           end
           else begin
-           page1:= nil;
+           int1:= finditem(pointerarty(freppages),page1);
+           if (int1 >= 0) and (int1 < high(freppages)) then begin
+            page1:= freppages[int1+1];
+           end
+           else begin
+            page1:= nil;
+           end;
           end;
          end;
         end;
-       end;
-       if finditem(pointerarty(freppages),page1) < 0 then begin
+        if finditem(pointerarty(freppages),page1) < 0 then begin
+         break;
+        end;
+       end
+       else begin
         break;
        end;
-      end
-      else begin
-       break;
       end;
      end;
+    except
+     dofinish(true);
+     raise;
     end;
-   except
-    dofinish(true);
-    raise;
-   end;
+    restarted:= false;
+    if canevent(tmethod(fonafterrender)) then begin
+     application.lock;
+     try
+      exclude(fstate,rs_restart);
+      fonafterrender(self);
+      restarted:= rs_restart in fstate;
+     finally
+      application.unlock;
+     end;
+    end;
+   until not restarted;
    dofinish(false);
    if (rs_endpass in fstate) then begin
     break;
@@ -5978,8 +6024,8 @@ begin
  inherited;
  if (atag = endrendertag) then begin
   try
-   if canevent(tmethod(fonafterrender)) then begin
-    fonafterrender(self);
+   if canevent(tmethod(fonreportfinished)) then begin
+    fonreportfinished(self);
    end;
    if canevent(tmethod(fonrenderfinish)) then begin
     fonrenderfinish(self);
@@ -6027,6 +6073,7 @@ procedure tcustomreport.restart;
 var
  int1: integer;
 begin
+ include(fstate,rs_restart);
  for int1:= 0 to high(freppages) do begin
   freppages[int1].restart;
  end;

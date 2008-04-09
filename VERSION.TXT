@@ -1,4 +1,7 @@
 MSEide+MSEgui version history
+2008-04-09
+ treport.onbeforerender -> reporteventty.
+ treport.onafterrender -> onreportfinished.
 2008-03-26
  tbuttonframe.options fbo_flat, fbo_noanim -> 
  tcustomframe.optionsskin fso_flat, fso_noanim.

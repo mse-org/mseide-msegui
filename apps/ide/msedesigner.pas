@@ -1269,6 +1269,7 @@ begin
         ferrorhandler.froot:= modifiedowners[int1]^.instance;
         comp1:= infos[int1]^.descendent;
         if ismodule(comp1) then begin //inherited form
+         fdesigner.beginstreaming(modifiedowners[int1]);
          with tformdesignerfo(modifiedowners[int1]^.designform) do begin
           beginplacement;
           dec(submodulecopy);
@@ -1288,6 +1289,7 @@ begin
            notifygloballoading;
           finally
            endgloballoading;
+           fdesigner.endstreaming(modifiedowners[int1]);
           end;
          end;
         end
