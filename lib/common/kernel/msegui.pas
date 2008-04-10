@@ -9955,7 +9955,8 @@ begin
   exclude(fmsecomponentstate,cs_noskin);
  end;
  }
- if (optionsskinty(longword(valuebefore) xor longword(avalue)) * 
+ if (optionsskinty({$ifdef FPC}longword{$else}byte{$endif}(valuebefore) xor
+                   {$ifdef FPC}longword{$else}byte{$endif}(avalue)) * 
     [osk_nopropwidth,osk_nopropheight] <> []) and (fparentwidget <> nil) then begin
   fparentwidget.scalebasechanged(self); //for tlayouter
  end;
