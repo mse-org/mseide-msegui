@@ -3096,14 +3096,16 @@ var
  colormask: tsimplebitmap1;
  bufferbmpback: hbitmap;
  point1: tpoint;
- 
+ maskbefore: tsimplebitmap; 
 begin
  with drawinfo,copyarea,gc,win32gcty(platformdata) do begin
+  
   nomaskblt:= iswin95 or (kind = gck_printer);
   setintpolmode(handle);
   getclipbox(handle,trect(rect1));
   winrecttorect(rect1);
   intersectrect(destrect^,rect1,rect1);
+  maskbefore:= mask;
   if (mask <> nil) and not mask.monochrome then begin
    colormask:= tsimplebitmap1(mask);
    mask:= nil;
@@ -3293,6 +3295,7 @@ begin
    deletedc(destbmpdc);
    deleteobject(destbmp);
   end;
+  mask:= maskbefore;
  end;
 end;
 
