@@ -114,6 +114,7 @@ type
    property pixel[const index: pointty]: colorty read getpixel write setpixel;
    property pixels[const x,y: integer]: colorty read getpixels write setpixels;
    property scanline[index: integer]: pointer read getscanline;
+   function scanhigh: integer; //max index in scanline[0]
    property colorforeground: colorty read fcolorforeground write setcolorforeground default cl_black;
                  //used for monochrome -> color conversion
    property colorbackground: colorty read fcolorbackground write setcolorbackground default cl_white;
@@ -439,6 +440,9 @@ var
  col1,col2: colorty;
  transp: colorty;
  canvas2: tcanvas;
+ bmp1: tmaskedbitmap;
+ po2: prgbtripleaty;
+ int1,int2: integer;
 begin
  if atransparency = cl_default then begin
   transp:= transparency;
@@ -459,34 +463,57 @@ begin
    amask:= getmask;
 //   maskpx:= getmaskhandle(maskgchandle);
    if (al_grayed in aalignment) and ((amask <> nil) or monochrome) then begin
-    if monochrome then begin
-     canvas2:= canvas;
+    if (amask <> nil) and not amask.monochrome then begin
+                     //reduced contrast grayscale
+     bmp1:= tmaskedbitmap.create(false);
+     bmp1.colormask:= true;
+     bmp1.size:= rect2.size;
+     bmp1.canvas.copyarea(canvas,rect2,nullpoint);
+     bmp1.mask.canvas.copyarea(amask.canvas,rect2,nullpoint);
+     po2:= bmp1.scanline[0];
+     for int1:= bmp1.scanhigh downto 0 do begin
+      with po2^[int1] do begin
+       int2:= (red+green+blue) div 8 + $80;
+       red:= int2;
+       green:= int2;
+       blue:= int2;
+      end;
+     end;
+     rect2.pos:= nullpoint;
+     tcanvas1(acanvas).internalcopyarea(bmp1.canvas,rect2,
+               rect1,acanvas.rasterop,cl_default,bmp1.mask,aalignment,po1,transp);
+     bmp1.free;     
     end
-    else begin
-     canvas2:= amask.canvas;
-    end;
-    with acanvas do begin
-     col1:= colorbackground;
-     col2:= color;
-     colorbackground:= cl_transparent;
-     color:= cl_white;
-//     copyarea(canvas2,rect2,addpoint(rect1.pos,makepoint(1,1)),acanvas.rasterop);
-     inc(rect1.x);
-     inc(rect1.y);
-     inc(po1.x);
-     inc(po1.y);
-     tcanvas1(acanvas).internalcopyarea(canvas2,rect2,
-               rect1,acanvas.rasterop,cl_default,amask{maskpx,maskgchandle},aalignment,po1,transp);
-     color:= cl_dkgray;
-//     copyarea(canvas2,rect2,rect1.pos,acanvas.rasterop);
-     dec(rect1.x);
-     dec(rect1.y);
-     dec(po1.x);
-     dec(po1.y);
-     tcanvas1(acanvas).internalcopyarea(canvas2,rect2,
-               rect1,acanvas.rasterop,cl_default,amask{maskpx,maskgchandle},aalignment,po1,transp);
-     color:= col2;
-     colorbackground:= col1;
+    else begin //shaddowed mask
+     if monochrome then begin
+      canvas2:= canvas;
+     end
+     else begin
+      canvas2:= amask.canvas;
+     end;
+     with acanvas do begin
+      col1:= colorbackground;
+      col2:= color;
+      colorbackground:= cl_transparent;
+      color:= cl_white;
+ //     copyarea(canvas2,rect2,addpoint(rect1.pos,makepoint(1,1)),acanvas.rasterop);
+      inc(rect1.x);
+      inc(rect1.y);
+      inc(po1.x);
+      inc(po1.y);
+      tcanvas1(acanvas).internalcopyarea(canvas2,rect2,
+                rect1,acanvas.rasterop,cl_default,amask{maskpx,maskgchandle},aalignment,po1,transp);
+      color:= cl_dkgray;
+ //     copyarea(canvas2,rect2,rect1.pos,acanvas.rasterop);
+      dec(rect1.x);
+      dec(rect1.y);
+      dec(po1.x);
+      dec(po1.y);
+      tcanvas1(acanvas).internalcopyarea(canvas2,rect2,
+                rect1,acanvas.rasterop,cl_default,amask{maskpx,maskgchandle},aalignment,po1,transp);
+      color:= col2;
+      colorbackground:= col1;
+     end;
     end;
    end
    else begin
@@ -1070,6 +1097,11 @@ begin
   putimage;
   fimage.pixels:= nil;  //does not own image
  end;
+end;
+
+function tbitmap.scanhigh: integer;
+begin
+ result:= fsize.cx * fsize.cy - 1;
 end;
 
 { tmaskedbitmap }

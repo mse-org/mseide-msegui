@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -3354,7 +3354,7 @@ end;
 
 procedure tbitmappropertyeditor.edit;
 var
- bmp: tmaskedbitmap;
+ bmp,bmp1: tmaskedbitmap;
  int1: integer;
  dialog: tfiledialog;
  statfile1: tstatfile;
@@ -3377,7 +3377,14 @@ begin
     try
      bmp.loadfromfile(filename,graphicfilefilterlabel(filterindex));
      for int1:= 0 to high(fprops) do begin
-//      tmaskedbitmap(getordvalue(int1)).assign(bmp);
+      bmp1:= tmaskedbitmap(getordvalue(int1));
+      if bmp1 <> nil then begin
+       bmp.alignment:= bmp1.alignment;
+       bmp.colorbackground:= bmp1.colorbackground;
+       bmp.colorforeground:= bmp1.colorforeground;
+       bmp.transparency:= bmp1.transparency;
+       bmp.transparentcolor:= bmp1.transparentcolor;
+      end;
       setordvalue(int1,ptruint(bmp));
      end;
      modified;
