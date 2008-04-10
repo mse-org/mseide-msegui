@@ -49,17 +49,17 @@ object projecttreefo: tprojecttreefo
         options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         widgetname = 'edit'
       end>
-    datarowheight = 16
+    datarowheight = 17
     drag.onbeforedragbegin = gridondragbegin
     drag.onbeforedragdrop = gridonderagdrop
     drag.onafterdragover = gridondragover
-    reffontheight = 14
+    reffontheight = 15
     object projectedit: ttreeitemedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 141
-      bounds_cy = 16
+      bounds_cy = 17
       color = -1879048185
       frame.levelo = 0
       frame.colorclient = -2147483646
@@ -75,14 +75,14 @@ object projecttreefo: tprojecttreefo
       fieldedit = edit
       options = [teo_treecolnavig, teo_keyrowmoving]
       oncheckrowmove = itemoncheckrowmove
-      reffontheight = 14
+      reffontheight = 15
     end
     object edit: trecordfieldedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
       bounds_x = 142
       bounds_y = 0
       bounds_cx = 129
-      bounds_cy = 16
+      bounds_cy = 17
       color = -1879048185
       frame.levelo = 0
       frame.colorclient = -2147483645
@@ -90,7 +90,9 @@ object projecttreefo: tprojecttreefo
       frame.dummy = 0
       taborder = 2
       visible = False
-      reffontheight = 14
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+      textflags = [tf_ycentered, tf_clipo, tf_noselect, tf_ellipseleft]
+      reffontheight = 15
     end
   end
   object unitpopup: tpopupmenu

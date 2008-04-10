@@ -2216,6 +2216,7 @@ end;
 procedure titemedit.drawcell(const canvas: tcanvas);
 begin
  with cellinfoty(canvas.drawinfopo^) do begin
+  flayoutinfo.textflags:= textflags;
   tlistitem(datapo^).drawcell(canvas);
  end;
 end;

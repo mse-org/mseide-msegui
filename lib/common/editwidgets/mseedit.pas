@@ -311,9 +311,9 @@ type
    procedure settext(const Value: msestring);
    procedure settextflags(const value: textflagsty);
    procedure settextflagsactive(const value: textflagsty);
-   procedure updatetextflags;
    function getcaretwidth: integer;
    procedure setcaretwidth(const Value: integer);
+   procedure updatetextflags;
    
   protected
    feditor: tinplaceedit;
