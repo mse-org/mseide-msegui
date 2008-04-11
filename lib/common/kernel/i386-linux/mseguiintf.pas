@@ -2918,6 +2918,8 @@ begin
     flags:= pwingravity;
     xsetwmnormalhints(appdisp,id,sizehints);
    end;
+   xflush(appdisp);
+   sleep(100); //windowmanager has to work
   end;
   xfree(sizehints);
  {$ifdef FPC} {$checkpointer default} {$endif}
