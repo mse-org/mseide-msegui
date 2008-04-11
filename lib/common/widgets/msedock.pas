@@ -2057,7 +2057,7 @@ begin
     end;
     window.caption:= getfloatcaption;
    end;
-   widgetrect:= rect1;
+   setclippedwidgetrect(rect1);
    visible:= bo1;
   end;
  end;

@@ -1018,7 +1018,7 @@ end;
 
 procedure tcustommseform.dostatread1(const reader: tstatreader);
 var
- rect1: rectty;
+ rect1,rect2: rectty;
  str1: string;
  widget1: twidget;
 begin
@@ -1042,7 +1042,7 @@ begin
     end;
    end;
   end;
-  widgetrect:= rect1;
+  setclippedwidgetrect(rect1);
  end;
 end;
 

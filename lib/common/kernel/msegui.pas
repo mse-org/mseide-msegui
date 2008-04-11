@@ -1333,6 +1333,9 @@ type
    property width: integer read fwidgetrect.cx write setbounds_cx;
    property height: integer read fwidgetrect.cy write setbounds_cy;
 
+   procedure setclippedwidgetrect(arect: rectty);
+                //clips into parentwidget
+   
    property anchors: anchorsty read fanchors write setanchors default defaultanchors;
    property defaultfocuschild: twidget read getdefaultfocuschild write setdefaultfocuschild;
 
@@ -9998,6 +10001,25 @@ end;
 procedure twidget.scalebasechanged(const sender: twidget);
 begin
  //dummy
+end;
+
+procedure twidget.setclippedwidgetrect(arect: rectty);
+begin
+ if parentwidget = nil then begin
+  if not rectinrect(inflaterect(arect,2),application.workarea) then begin 
+   clipinrect1(arect,application.workarea);
+   gui_reposwindow(window.winid,arect,true);
+   gui_getwindowrect(window.winid,arect);
+   widgetrect:= arect;
+  end
+  else begin
+   widgetrect:= arect;
+  end;
+ end
+ else begin
+  clipinrect1(arect,fparentwidget.widgetsizerect);
+  widgetrect:= arect;
+ end;
 end;
 
 { twindow }
