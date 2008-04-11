@@ -10350,14 +10350,14 @@ begin
  try
   deactivate;
  finally
-  if appinst.factivewindow = nil then begin
-   result:= true;
-  end
-  else begin
+  if appinst.factivewindow = self then begin
    if appinst.finactivewindow = self then begin
     appinst.finactivewindow:= nil;
    end;
    result:= false;
+  end
+  else begin
+   result:= true;
   end;
  end;
 end;

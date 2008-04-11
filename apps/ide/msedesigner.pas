@@ -344,6 +344,7 @@ type
                    var ComponentClass: TComponentClass);
    procedure findancestor(Writer: TWriter; Component: TComponent;
               const aName: string; var Ancestor, RootAncestor: TComponent);
+   function findancestorcomponent(const acomponent: tcomponent): tcomponent;
    procedure createcomponent(Reader: TReader; ComponentClass: TComponentClass;
                    var Component: TComponent);
    function selectedcomponents: componentarty;
@@ -2400,9 +2401,31 @@ procedure tdesigner.ancestornotfound(Reader: TReader; const ComponentName: strin
 begin
  component:= fmodules.findmoduleinstancebyclass(componentclass);
  if component = nil then begin
-  component:= findancestorcomponent(reader,componentname);
+  component:= mseclasses.findancestorcomponent(reader,componentname);
  end;
 end;
+
+function tdesigner.findancestorcomponent(const acomponent: tcomponent): tcomponent;
+var
+ ancestormodule: tmsecomponent;
+begin
+ result:= nil;
+ if csinline in acomponent.componentstate then begin
+  result:= descendentinstancelist.findancestor(acomponent);
+ end
+ else begin
+  if acomponent.owner = nil then begin
+   ancestormodule:= descendentinstancelist.findancestor(acomponent);
+  end
+  else begin
+   ancestormodule:= descendentinstancelist.findancestor(acomponent.owner);
+  end;
+  while (ancestormodule <> nil) and (result = nil) do begin
+   result:= ancestormodule.findcomponent(acomponent.name);
+  end;
+ end;
+end;
+
 
 procedure tdesigner.createcomponent(Reader: TReader; ComponentClass: TComponentClass;
                    var Component: TComponent);

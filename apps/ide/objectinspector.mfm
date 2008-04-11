@@ -48,7 +48,7 @@ object objectinspectorfo: tobjectinspectorfo
     bounds_x = 0
     bounds_y = 1
     bounds_cx = 220
-    bounds_cy = 20
+    bounds_cy = 21
     frame.dummy = 0
     anchors = [an_left, an_top, an_right]
     taborder = 2
@@ -59,7 +59,7 @@ object objectinspectorfo: tobjectinspectorfo
       item
       end>
     onbeforedropdown = compselectorbeforedropdown
-    reffontheight = 14
+    reffontheight = 15
   end
   object grid: twidgetgrid
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
@@ -133,20 +133,20 @@ object objectinspectorfo: tobjectinspectorfo
         widgetname = 'values'
       end>
     datarowlinecolor = -1610612731
-    datarowheight = 16
+    datarowheight = 17
     statfile = mainfo.projectstatfile
     onrowsdatachanged = gridrowsdatachanged
     oncellevent = gridcellevent
     drag.onbeforedragbegin = gridondragbegin
     drag.onbeforedragover = gridondragover
     drag.onbeforedragdrop = gridondragdrop
-    reffontheight = 14
+    reffontheight = 15
     object props: ttreeitemedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 90
-      bounds_cy = 16
+      bounds_cy = 17
       color = -1879048185
       frame.levelo = 0
       frame.colorclient = -2147483646
@@ -159,14 +159,14 @@ object objectinspectorfo: tobjectinspectorfo
       onupdaterowvalues = propupdaterowvalue
       options = [teo_treecolnavig, teo_keyrowmoving]
       oncheckrowmove = propsoncheckrowmove
-      reffontheight = 14
+      reffontheight = 15
     end
     object values: tmbdropdownitemedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight]
       bounds_x = 91
       bounds_y = 0
       bounds_cx = 148
-      bounds_cy = 16
+      bounds_cy = 17
       color = -1879048185
       frame.levelo = 0
       frame.colorclient = -2147483646
@@ -203,7 +203,7 @@ object objectinspectorfo: tobjectinspectorfo
         item
         end>
       onbeforedropdown = valuesbeforedropdown
-      reffontheight = 14
+      reffontheight = 15
     end
   end
   object compedit: tbutton
@@ -211,21 +211,28 @@ object objectinspectorfo: tobjectinspectorfo
     bounds_x = 223
     bounds_y = 2
     bounds_cx = 19
-    bounds_cy = 18
+    bounds_cy = 19
     anchors = [an_top, an_right]
     hint = 'Show component editor.'
     state = [as_disabled, as_localdisabled, as_localcaption, as_localhint, as_localonexecute]
     caption = 'ED'
     onexecute = compeditonexecute
-    reffontheight = 14
+    reffontheight = 15
   end
   object tpopupmenu1: tpopupmenu
-    menu.submenu.count = 1
+    onupdate = popupupdate
+    menu.submenu.count = 2
     menu.submenu.items = <    
       item
         caption = 'Collapse tree'
         state = [as_localcaption, as_localonexecute]
         onexecute = collapseexe
+      end    
+      item
+        caption = 'Revert to inherited'
+        name = 'revert'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = revertexe
       end>
     left = 112
     top = 80

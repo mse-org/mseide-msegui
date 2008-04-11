@@ -115,6 +115,8 @@ type
    procedure propupdaterowvalue(const sender: TObject; const aindex: integer;
                                     const aitem: tlistitem);
    procedure collapseexe(const sender: TObject);
+   procedure popupupdate(const sender: tcustommenu);
+   procedure revertexe(const sender: TObject);
   private
    factmodule: tmsecomponent;
    factcomp: tcomponent;
@@ -1650,6 +1652,28 @@ procedure tobjectinspectorfo.beforefilesave(const adesigner: idesigner;
                const afilename: filenamety);
 begin
  //dummy
+end;
+
+procedure tobjectinspectorfo.popupupdate(const sender: tcustommenu);
+begin
+ with sender.menu.itembyname('revert') do begin
+  enabled:= (props.item <> nil) and (tpropertyitem(props.item).feditor <> nil) and
+                             tpropertyitem(props.item).feditor.canrevert;
+ end;
+end;
+
+procedure tobjectinspectorfo.revertexe(const sender: TObject);
+var
+ comp1: tcomponent;
+begin
+ with tpropertyitem(props.item).feditor do begin
+//  if askyesno('Do you want to revert to inherited '+name+'?','WARNING') then begin
+   comp1:= designer.findancestorcomponent(component);
+   if comp1 <> nil then begin
+    copyproperty(comp1);
+   end;
+//  end;
+ end;
 end;
 
 initialization

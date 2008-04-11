@@ -55,6 +55,9 @@ type
   procedure setordvalue(const value: longword); overload;
   procedure setordvalue(const index: integer; const value: longword); overload;
   procedure setbitvalue(const value: boolean; const bitindex: integer);
+  function getint64value(const index: integer = 0): int64;
+  procedure setint64value(const value: int64); overload;
+  procedure setint64value(const index: integer; const value: int64); overload;
   function getfloatvalue(const index: integer = 0): extended;
   procedure setfloatvalue(const value: extended);
   function getcurrencyvalue(const index: integer = 0): currency;
@@ -94,6 +97,9 @@ type
    function getordvalue(const index: integer = 0): integer;
    procedure setordvalue(const value: longword); overload;
    procedure setordvalue(const index: integer; const value: longword); overload;
+   function getint64value(const index: integer = 0): int64;
+   procedure setint64value(const value: int64); overload;
+   procedure setint64value(const index: integer; const value: int64); overload;
    procedure setbitvalue(const value: boolean; const bitindex: integer);
    function getfloatvalue(const index: integer = 0): extended;
    procedure setfloatvalue(const value: extended);
@@ -121,6 +127,8 @@ type
             const aprops: propinstancearty; atypeinfo: ptypeinfo); virtual;
    destructor destroy; override;
    procedure setremote(intf: iremotepropertyeditor);
+   function canrevert: boolean; virtual;
+   procedure copyproperty(const asource: tobject); virtual;
 
    function propertyname: msestring; virtual;
    function name: msestring; virtual;
@@ -291,6 +299,7 @@ type
    function getdefaultstate: propertystatesty; override;
    procedure deleteinstance;
   public
+   function canrevert: boolean; override;
    procedure setvalue(const avalue: msestring); override;
    function getvalue: msestring; override;
    procedure edit; override;
@@ -362,8 +371,8 @@ type
             const aobjectinspector: iobjectinspector;
             const aprops: propinstancearty; atypeinfo: ptypeinfo;
             const aparent: tsetpropertyeditor; const aindex: integer);
-                             reintroduce; virtual;
-  
+                             reintroduce; virtual;  
+   function canrevert: boolean; override;
    function allequal: boolean; override;
    function propertyname: msestring; override;
    function name: msestring; override;
@@ -501,6 +510,7 @@ type
             const aprops: propinstancearty; atypinfo: ptypeinfo); reintroduce;
                                                          virtual;
    destructor destroy; override;
+   function canrevert: boolean; override;
    procedure setvalue(const value: msestring); override;
    function getvalue: msestring; override;
    function getvalues: msestringarty; override;
@@ -1129,6 +1139,36 @@ begin
  end;
 end;
 
+function tpropertyeditor.canrevert: boolean;
+begin
+ result:= (ftypeinfo <> nil) and (fremote = nil) and 
+  (csancestor in component.componentstate) and (fprops[0].instance = component);
+end;
+
+procedure tpropertyeditor.copyproperty(const asource: tobject);
+begin 
+ case ftypeinfo^.kind of
+  tkInteger,tkChar,tkEnumeration,tkSet,tkWChar,tkBool,tkClass: begin
+   setordvalue(getordprop(asource,fprops[0].propinfo));
+  end;
+  tkFloat: begin
+   setfloatvalue(getfloatprop(asource,fprops[0].propinfo));
+  end;
+  tkMethod: begin
+   setmethodvalue(getmethodprop(asource,fprops[0].propinfo));
+  end;
+  tkSString,tkLString,tkAString: begin
+   setstringvalue(getstrprop(asource,fprops[0].propinfo));
+  end;
+  tkWString: begin
+   setmsestringvalue(getwidestrprop(asource,fprops[0].propinfo));
+  end;
+  tkInt64,tkQWord: begin
+   setint64value(getint64prop(asource,fprops[0].propinfo));
+  end;
+ end;
+end;
+
 function tpropertyeditor.getvalue: msestring;
 begin
  result:= 'Unknown';
@@ -1237,6 +1277,51 @@ begin
  else begin
   with fprops[index] do begin
    setordprop(instance, propinfo, value);
+  end;
+  updatedefaultvalue;
+  modified;
+ end;
+end;
+
+function tpropertyeditor.getint64value(const index: integer): int64;
+
+begin
+ if fremote <> nil then begin
+  result:= fremote.getint64value(index);
+ end
+ else begin
+  with fprops[index] do begin
+   result:= GetOrdProp(instance,propinfo);
+  end;
+ end;
+end;
+
+procedure tpropertyeditor.setint64value(const value: int64);
+var
+ int1: integer;
+begin
+ if fremote <> nil then begin
+  fremote.setint64value(value);
+ end
+ else begin
+  for int1:= 0 to high(fprops) do begin
+   with fprops[int1] do begin
+    setint64prop(instance, propinfo, value);
+   end;
+  end;
+  updatedefaultvalue;
+  modified;
+ end;
+end;
+
+procedure tpropertyeditor.setint64value(const index: integer; const value: int64);
+begin
+ if fremote <> nil then begin
+  fremote.setint64value(index,value);
+ end
+ else begin
+  with fprops[index] do begin
+   setint64prop(instance, propinfo, value);
   end;
   updatedefaultvalue;
   modified;
@@ -1948,6 +2033,11 @@ begin
  result:= name;
 end;
 
+function tsetelementeditor.canrevert: boolean;
+begin
+ result:= false;
+end;
+
 { tclasspropertyeditor }
 
 function tclasspropertyeditor.getdefaultstate: propertystatesty;
@@ -2107,7 +2197,7 @@ begin
     co1:= nil;
    end;
    result:= fdesigner.getcomponentnamelist(
-                  tcomponentclass(typedata^.classtype),false,co1,
+                  tcomponentclass(typedata^.classtype),true{false},co1,
                   {$ifdef FPC}@{$endif}filtercomponent);
   end;
  end;
@@ -2116,6 +2206,7 @@ end;
 procedure tcomponentpropertyeditor.setvalue(const value: msestring);
 var
  comp: tcomponent;
+ int1: integer;
 begin
  if issubcomponent then begin
   inherited setvalue(value);
@@ -2126,7 +2217,13 @@ begin
   end
   else begin
    if value <> getvalue then begin
-    comp:= fdesigner.getcomponent(value,fmodule);
+    int1:= pos('<',value);
+    if int1 > 0 then begin
+     comp:= fmodule.findcomponent(copy(value,1,int1-1));
+    end
+    else begin
+     comp:= fdesigner.getcomponent(value,fmodule);
+    end;
     if (comp = nil) or not comp.InheritsFrom(gettypedata(ftypeinfo)^.classtype) then begin
      properror;
     end;
@@ -2145,7 +2242,8 @@ begin
  //dummy
 end;
 
-function tcomponentpropertyeditor.filtercomponent(const acomponent: tcomponent): boolean;
+function tcomponentpropertyeditor.filtercomponent(
+                               const acomponent: tcomponent): boolean;
 begin
  result:= true;
 end;
@@ -2290,6 +2388,11 @@ begin
  else begin
   result:= inherited getvalue;
  end;
+end;
+
+function toptionalclasspropertyeditor.canrevert: boolean;
+begin
+ result:= false;
 end;
 
 { tparentclasspropertyeditor }
@@ -2838,6 +2941,11 @@ end;
 procedure tarrayelementeditor.setvalue(const value: msestring);
 begin
  feditor.setvalue(value);
+end;
+
+function tarrayelementeditor.canrevert: boolean;
+begin
+ result:= false;
 end;
 
 { tpersistentarraypropertyeditor }
