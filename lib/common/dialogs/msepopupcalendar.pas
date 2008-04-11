@@ -306,10 +306,10 @@ begin
     end;
     mw_down: begin
      if shiftstate = [ss_ctrl] then begin
-      yearup(nil);
+      yeardown(nil);
      end
      else begin
-      moup(nil);
+      modown(nil);
      end;
     end;
    end;
