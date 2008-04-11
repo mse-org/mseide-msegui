@@ -1148,7 +1148,8 @@ end;
 procedure tpropertyeditor.copyproperty(const asource: tobject);
 begin 
  case ftypeinfo^.kind of
-  tkInteger,tkChar,tkEnumeration,tkSet,tkWChar,tkBool,tkClass: begin
+  tkInteger,tkChar,tkEnumeration,tkSet,tkWChar,
+                         {$ifdef FPC}tkBool,{$endif}tkClass: begin
    setordvalue(getordprop(asource,fprops[0].propinfo));
   end;
   tkFloat: begin
@@ -1157,13 +1158,13 @@ begin
   tkMethod: begin
    setmethodvalue(getmethodprop(asource,fprops[0].propinfo));
   end;
-  tkSString,tkLString,tkAString: begin
+  {$ifdef FPC}tkSString,tkAString,{$endif}tkLString: begin
    setstringvalue(getstrprop(asource,fprops[0].propinfo));
   end;
   tkWString: begin
    setmsestringvalue(getwidestrprop(asource,fprops[0].propinfo));
   end;
-  tkInt64,tkQWord: begin
+  tkInt64{$ifdef FPC},tkQWord{$endif}: begin
    setint64value(getint64prop(asource,fprops[0].propinfo));
   end;
  end;
