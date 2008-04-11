@@ -29,8 +29,8 @@ type
    monthdisp: tdatetimedisp;
    tstockglyphbutton1: tstockglyphbutton;
    tstockglyphbutton2: tstockglyphbutton;
-   tstockglyphbutton3: tstockglyphbutton;
-   tstockglyphbutton4: tstockglyphbutton;
+   buup: tstockglyphbutton;
+   budo: tstockglyphbutton;
    yeardisp: tdatetimedisp;
    procedure formoncreate(const sender: TObject);
    procedure drawcell(const sender: tcol; const canvas: tcanvas;
@@ -291,13 +291,23 @@ begin
 end;
 
 procedure tpopupcalendarfo.mousewheelevent(var info: mousewheeleventinfoty);
+ function bigstep: boolean;
+ begin
+  with info do begin
+   result:= (shiftstate = [ss_ctrl]) or 
+                 pointinrect(pos,yeardisp.widgetrect) or
+                 pointinrect(pos,buup.widgetrect) or
+                 pointinrect(pos,budo.widgetrect);
+  end;
+ end;
+ 
 begin
  with info do begin
   if not (es_processed in eventstate) then begin
    include(eventstate,es_processed);
    case wheel of 
     mw_up: begin
-     if shiftstate = [ss_ctrl] then begin
+     if bigstep then begin
       yearup(nil);
      end
      else begin
@@ -305,7 +315,7 @@ begin
      end;
     end;
     mw_down: begin
-     if shiftstate = [ss_ctrl] then begin
+     if bigstep then begin
       yeardown(nil);
      end
      else begin

@@ -87,7 +87,7 @@ object msepopupcalendarfo: tpopupcalendarfo
         ondrawcell = drawcell
         font.color = -1610612729
         font.name = 'stf_default'
-        font.xscale =  1.0000000000000000E+0000
+        font.xscale = 1.00000000000000000
         font.dummy = 0
       end>
     fixrows.count = 1
@@ -163,7 +163,7 @@ object msepopupcalendarfo: tpopupcalendarfo
     glyph = stg_arrowdownsmall
     onexecute = modown
   end
-  object tstockglyphbutton3: tstockglyphbutton
+  object buup: tstockglyphbutton
     optionswidget = [ow_mousewheel, ow_destroywidgets, ow_autoscale]
     bounds_x = 72
     bounds_y = 0
@@ -174,7 +174,7 @@ object msepopupcalendarfo: tpopupcalendarfo
     glyph = stg_arrowupsmall
     onexecute = yearup
   end
-  object tstockglyphbutton4: tstockglyphbutton
+  object budo: tstockglyphbutton
     optionswidget = [ow_mousewheel, ow_destroywidgets, ow_autoscale]
     bounds_x = 72
     bounds_y = 11
