@@ -2840,10 +2840,12 @@ function gui_reposwindow(id: winidty; const rect: rectty;
 var
  changes: xwindowchanges;
  sizehints: pxsizehints;
- int1: integer;
-
+ int1,int2: integer;
+ win1: winidty;
+ rect1: rectty;
+ bo1: boolean;
+ ar1: cardinalarty;
 begin
-// result:= gue_resizewindow;
  fillchar(changes,sizeof(changes),0);
  changes.x:= rect.x;
  changes.y:= rect.y;
@@ -2859,12 +2861,8 @@ begin
  else begin
   changes.height:= rect.cy;
  end;
-// if not getrootoffset(id,offset) then begin
-//  exit;
-// end;
-// dec(changes.x,offset.x);
-// dec(changes.y,offset.y);
- if not hasoverrideredirect(id) then begin
+ bo1:= not hasoverrideredirect(id);
+ if bo1 then begin
   sizehints:= xallocsizehints;
   {$ifdef FPC} {$checkpointer off} {$endif}
   xgetwmnormalhints(appdisp,id,sizehints,@int1);
@@ -2877,13 +2875,53 @@ begin
    height:= changes.height;
    base_width:= width;
    base_height:= height;
-   win_gravity:= staticgravity;
+   if embedded then begin
+    win_gravity:= northwestgravity;
+   end
+   else begin
+    win_gravity:= staticgravity;
+   end;
   end;
- {$ifdef FPC} {$checkpointer default} {$endif}
   xsetwmnormalhints(appdisp,id,sizehints);
-  xfree(sizehints);
  end;
  xconfigurewindow(appdisp,id,cwx or cwy or cwwidth or cwheight,@changes);
+ if bo1 then begin
+  if embedded then begin
+   {  
+   if getrootpath(id,ar1) and (high(ar1) > 1) then begin
+    with rect1 do begin
+     if xgetgeometry(appdisp,ar1[high(ar1)-1],@int1,@x,@y,@cx,@cy,
+                                                  @int2,@int2) <> 0 then begin
+      changes.width:= changes.width - (rect1.cx - rect.cx);
+      changes.height:= changes.height - (rect1.cy - rect.cy);
+      if changes.width <= 0 then begin
+       changes.width:= 1;
+      end;
+      if changes.height <= 0 then begin
+       changes.height:= 1;
+      end;
+      with sizehints^ do begin
+       width:= changes.width;
+       height:= changes.height;
+       base_width:= width;
+       base_height:= height;
+      end;
+      xsetwmnormalhints(appdisp,id,sizehints);
+      xconfigurewindow(appdisp,id,cwx or cwy or cwwidth or cwheight,@changes);
+        //correct decoration size
+     end;
+    end;
+   end;
+   }
+   with sizehints^ do begin
+    win_gravity:= staticgravity;
+    flags:= pwingravity;
+    xsetwmnormalhints(appdisp,id,sizehints);
+   end;
+  end;
+  xfree(sizehints);
+ {$ifdef FPC} {$checkpointer default} {$endif}
+ end;
  result:= gue_ok;
 end;
 
