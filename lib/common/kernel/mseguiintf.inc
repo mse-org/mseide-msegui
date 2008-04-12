@@ -52,8 +52,9 @@ function gui_getwindowpos(id: winidty; out pos: pointty): guierrorty;
              //parent window coordinates
             
 function gui_setsizeconstraints(id: winidty; const min,max: sizety): guierrorty;
-function gui_reposwindow(id: winidty; const rect: rectty;
-                              const embedded: boolean = false): guierrorty;
+function gui_reposwindow(id: winidty; const rect: rectty): guierrorty;
+function gui_setdecoratedwindowrect(id: winidty; const rect: rectty; 
+                                    out clientrect: rectty): guierrorty;
 function gui_setwindowfocus(id: winidty): guierrorty;
 function gui_setimefocus(var awindow: windowty): guierrorty;
 function gui_unsetimefocus(var awindow: windowty): guierrorty;

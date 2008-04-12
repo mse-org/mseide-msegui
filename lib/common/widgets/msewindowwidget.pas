@@ -211,7 +211,7 @@ end;
 
 procedure tcustomwindowwidget.checkwindowrect;
 var
- rect1,rect2: rectty;
+ rect1,rect2,rect3: rectty;
  bo1: boolean;
 begin
  if fclientwindow.id <> 0 then begin
@@ -224,7 +224,8 @@ begin
   if not rectisequal(rect2,fchildrect) then begin
    bo1:= true;
    fchildrect:= rect2;
-   gui_reposwindow(fclientwindow.id,rect2,true);
+   gui_setdecoratedwindowrect(fclientwindow.id,rect2,rect3);
+//   gui_reposwindow(fclientwindow.id,rect2,true);
   end;
   if not rectisequal(rect1,fviewport) then begin
    bo1:= true;

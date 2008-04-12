@@ -10004,13 +10004,14 @@ begin
 end;
 
 procedure twidget.setclippedwidgetrect(arect: rectty);
+var
+ rect1: rectty;
 begin
  if parentwidget = nil then begin
   if not rectinrect(inflaterect(arect,2),application.workarea) then begin 
    clipinrect1(arect,application.workarea);
-   gui_reposwindow(window.winid,arect,true);
-   gui_getwindowrect(window.winid,arect);
-   widgetrect:= arect;
+   gui_setdecoratedwindowrect(window.winid,arect,rect1);
+   widgetrect:= rect1;
   end
   else begin
    widgetrect:= arect;

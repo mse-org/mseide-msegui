@@ -702,7 +702,7 @@ var
  
 type
  netatomty = 
-      (net_supported,net_workarea,
+      (net_supported,net_workarea,net_frame_extents,
        net_wm_state,
        net_wm_state_maximized_vert,net_wm_state_maximized_horz,
        net_wm_state_fullscreen,
@@ -711,7 +711,7 @@ type
  netwmstateoperationty = (nso_remove,nso_add,nso_toggle);
 const
  netatomnames: array[netatomty] of string = 
-      ('_NET_SUPPORTED','_NET_WORKAREA',
+      ('_NET_SUPPORTED','_NET_WORKAREA','_NET_FRAME_EXTENTS',
        '_NET_WM_STATE',
        '_NET_WM_STATE_MAXIMIZED_VERT','_NET_WM_STATE_MAXIMIZED_HORZ',
        '_NET_WM_STATE_FULLSCREEN', //not needed
@@ -1108,6 +1108,7 @@ var
  state: wmstatety;
  atomar: atomarty;
  int1: integer;
+ maxh,maxv: boolean;
 begin
  state:= getwmstate(id);
  case state of
@@ -1117,16 +1118,24 @@ begin
   else begin
    result:= wsi_normal;
    if netsupported and readatomproperty(id,netatoms[net_wm_state],atomar) then begin
+    maxh:= false;
+    maxv:= false;
     for int1:= 0 to high(atomar) do begin
      if atomar[int1] = netatoms[net_wm_state_fullscreen] then begin
       result:= wsi_fullscreen;
       break;
      end;
-     if (atomar[int1] = netatoms[net_wm_state_maximized_vert]) or
-        (atomar[int1] = netatoms[net_wm_state_maximized_horz]) then begin
-      result:= wsi_maximized;
-      break;
+     if (atomar[int1] = netatoms[net_wm_state_maximized_vert]) then begin
+      maxv:= true;
+     end
+     else begin
+      if (atomar[int1] = netatoms[net_wm_state_maximized_horz]) then begin
+       maxh:= true;
+      end;
      end;
+    end;
+    if (result = wsi_normal) and maxh and maxv then begin
+     result:= wsi_maximized;
     end;
    end;
   end;
@@ -1566,6 +1575,28 @@ begin
  end;
  if not bo1 then begin
   result:= makerect(nullpoint,gui_getscreensize);
+ end;
+end;
+
+function getwindowframe(id: winidty): framety;
+var
+ bo1: boolean;
+ ar1: array[0..3] of integer;
+begin
+ bo1:= false;
+ if netsupported then begin
+  bo1:= readlongproperty(id,netatoms[net_frame_extents],4,ar1);
+ end;
+ if bo1 then begin
+  with result do begin
+   left:= ar1[0];
+   top:= ar1[2];
+   right:= ar1[1];
+   bottom:= ar1[3];
+  end;
+ end
+ else begin
+  result:= nullframe;
  end;
 end;
 
@@ -2835,96 +2866,61 @@ begin
  end;
 end;
 
-function gui_reposwindow(id: winidty; const rect: rectty;
-                                const embedded: boolean = false): guierrorty;
+function gui_reposwindow(id: winidty; const rect: rectty): guierrorty;
 var
  changes: xwindowchanges;
  sizehints: pxsizehints;
- int1,int2: integer;
- win1: winidty;
- rect1: rectty;
- bo1: boolean;
- ar1: cardinalarty;
+ int1: integer;
 begin
  fillchar(changes,sizeof(changes),0);
- changes.x:= rect.x;
- changes.y:= rect.y;
- if rect.cx <= 0 then begin
-  changes.width:= 1;
- end
- else begin
-  changes.width:= rect.cx;
+ with changes do begin
+  x:= rect.x;
+  y:= rect.y;
+  width:= rect.cx;
+  height:= rect.cy;
+  if width <= 0 then begin
+   width:= 1;
+  end;
+  if height <= 0 then begin
+   height:= 1;
+  end;
  end;
- if rect.cy <= 0 then begin
-  changes.height:= 1;
- end
- else begin
-  changes.height:= rect.cy;
- end;
- bo1:= not hasoverrideredirect(id);
- if bo1 then begin
-  sizehints:= xallocsizehints;
+ if not hasoverrideredirect(id) then begin
   {$ifdef FPC} {$checkpointer off} {$endif}
+  sizehints:= xallocsizehints;
   xgetwmnormalhints(appdisp,id,sizehints,@int1);
   with sizehints^ do begin
    flags:= flags or pposition or psize or usposition or ussize {or pbasesize} or
-                       pwingravity;
+                                           pwingravity;
    x:= changes.x;
    y:= changes.y;
    width:= changes.width;
    height:= changes.height;
    base_width:= width;
    base_height:= height;
-   if embedded then begin
-    win_gravity:= northwestgravity;
-   end
-   else begin
-    win_gravity:= staticgravity;
-   end;
+   win_gravity:= staticgravity;
   end;
   xsetwmnormalhints(appdisp,id,sizehints);
+  xfree(sizehints);
  end;
  xconfigurewindow(appdisp,id,cwx or cwy or cwwidth or cwheight,@changes);
- if bo1 then begin
-  if embedded then begin
-   {  
-   if getrootpath(id,ar1) and (high(ar1) > 1) then begin
-    with rect1 do begin
-     if xgetgeometry(appdisp,ar1[high(ar1)-1],@int1,@x,@y,@cx,@cy,
-                                                  @int2,@int2) <> 0 then begin
-      changes.width:= changes.width - (rect1.cx - rect.cx);
-      changes.height:= changes.height - (rect1.cy - rect.cy);
-      if changes.width <= 0 then begin
-       changes.width:= 1;
-      end;
-      if changes.height <= 0 then begin
-       changes.height:= 1;
-      end;
-      with sizehints^ do begin
-       width:= changes.width;
-       height:= changes.height;
-       base_width:= width;
-       base_height:= height;
-      end;
-      xsetwmnormalhints(appdisp,id,sizehints);
-      xconfigurewindow(appdisp,id,cwx or cwy or cwwidth or cwheight,@changes);
-        //correct decoration size
-     end;
-    end;
-   end;
-   }
-   with sizehints^ do begin
-    win_gravity:= staticgravity;
-    flags:= pwingravity;
-    xsetwmnormalhints(appdisp,id,sizehints);
-   end;
-   xflush(appdisp);
-   sleep(100); //windowmanager has to work
-  end;
-  xfree(sizehints);
  {$ifdef FPC} {$checkpointer default} {$endif}
- end;
  result:= gue_ok;
+end;
+
+function gui_setdecoratedwindowrect(id: winidty; const rect: rectty; 
+                                    out clientrect: rectty): guierrorty;
+var
+ frame1: framety;
+begin
+ frame1:= getwindowframe(id);
+ with clientrect,frame1 do begin
+  x:= rect.x + left;
+  cx:= rect.cx - left - right;
+  y:= rect.y + top;
+  cy:= rect.cy - top - bottom;
+ end;
+ result:= gui_reposwindow(id,clientrect);
 end;
 
 function gui_setsizeconstraints(id: winidty; const min,max: sizety): guierrorty;

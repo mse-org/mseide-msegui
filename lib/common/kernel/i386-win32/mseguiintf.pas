@@ -3781,32 +3781,38 @@ begin
  end;
 end;
 
-function gui_reposwindow(id: winidty; const rect: rectty;
-                       const embedded: boolean = false): guierrorty;
+function gui_reposwindow(id: winidty; const rect: rectty): guierrorty;
 var
  rect1,rect2: trect;
  arect: rectty;
  frame: framety;
 begin
  result:= gue_resizewindow;
- if embedded then begin
-  if windows.SetWindowPos(id,0,rect.x,rect.y,rect.cx,rect.cy,
-               swp_nozorder or swp_noactivate) then begin
-   result:= gue_ok;
-  end;
- end
- else begin
-  if windows.getwindowrect(id,rect1) then begin
-   if windows.GetclientRect(id,rect2) then begin
-    getframe(rect1,rect2,frame);
-    arect:= inflaterect(rect,frame);
-    if windows.SetWindowPos(id,0,arect.x,arect.y,arect.cx,arect.cy,
-                 swp_nozorder or swp_noactivate) then begin
-     result:= gue_ok;
-    end;
+ if windows.getwindowrect(id,rect1) then begin
+  if windows.GetclientRect(id,rect2) then begin
+   getframe(rect1,rect2,frame);
+   arect:= inflaterect(rect,frame);
+   if windows.SetWindowPos(id,0,arect.x,arect.y,arect.cx,arect.cy,
+                swp_nozorder or swp_noactivate) then begin
+    result:= gue_ok;
    end;
   end;
  end;
+end;
+
+function gui_setdecoratedwindowrect(id: winidty; const rect: rectty; 
+                                    out clientrect: rectty): guierrorty;
+var
+ rect1: rectty;
+begin
+ result:= gue_resizewindow;
+ clientrect:= rect;
+ if windows.SetWindowPos(id,0,rect.x,rect.y,rect.cx,rect.cy,
+               swp_nozorder or swp_noactivate) then begin
+  if getclientrect(id,clientrect) then begin
+   result:= gue_ok;
+  end;
+ end
 end;
 
 var

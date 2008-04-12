@@ -1,7 +1,7 @@
 object msepopupcalendarfo: tpopupcalendarfo
   optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
-  bounds_x = 337
-  bounds_y = 284
+  bounds_x = 341
+  bounds_y = 304
   bounds_cx = 233
   bounds_cy = 179
   frame.framewidth = 1
