@@ -124,7 +124,7 @@ type
    constructor create(const agrid: tcustomgrid;
                      const aowner: tgridarrayprop); override;
    destructor destroy; override;
-   procedure changed; override;
+//   procedure changed; override;
    function actualfont: tfont; override;
    procedure cellchanged(const row: integer); override;
    property editwidget: twidget read geteditwidget write seteditwidget;
@@ -1163,7 +1163,7 @@ begin
   end;
  end;
 end;
-
+{
 procedure twidgetcol.changed;
 begin
  inherited;
@@ -1171,7 +1171,7 @@ begin
   fintf.gridtovalue(fgrid.row);
  end;
 end;
-
+}
 function twidgetcol.getinnerframe: framety;
 begin
  if fintf <> nil then begin
