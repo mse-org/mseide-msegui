@@ -2082,6 +2082,7 @@ type
     //application must be locked
    procedure checkactivewindow;
    procedure checkapplicationactive;
+   function winiddestroyed(const aid: winidty): boolean;
    function eventloop(const amodalwindow: twindow; const once: boolean = false): boolean;
                  //true if actual modalwindow destroyed
    function beginmodal(const sender: twindow): boolean;
@@ -11605,12 +11606,14 @@ begin
    window.invalidaterect(frect);
   end
   else begin
-   parentid:= gui_getparentwindow(fwinid);
-   if parentid <> 0 then begin
-    if findwindow(parentid,window) and 
-                  (gui_getwindowpos(fwinid,pt1) = gue_ok) then begin
-     addpoint1(frect.pos,pt1);
-     window.invalidaterect(frect);
+   if not winiddestroyed(fwinid) then begin
+    parentid:= gui_getparentwindow(fwinid); //embedded or destroyed window 
+    if parentid <> 0 then begin
+     if findwindow(parentid,window) and 
+                   (gui_getwindowpos(fwinid,pt1) = gue_ok) then begin
+      addpoint1(frect.pos,pt1);
+      window.invalidaterect(frect);
+     end;
     end;
    end;
   end;
@@ -12154,6 +12157,29 @@ begin
   else begin
    exclude(fstate,aps_active);
    hidehint;
+  end;
+ end;
+end;
+
+function tinternalapplication.winiddestroyed(const aid: winidty): boolean;
+type
+ windoweventaty = array[0..0] of twindowevent;
+ pwindoweventaty = ^windoweventaty;
+var
+ int1: integer;
+ po1: pwindoweventaty;
+begin
+ result:= false;
+ getevents;
+ po1:= pointer(eventlist.datapo);
+ for int1:= 0 to eventlist.count - 1 do begin
+  if po1^[int1] <> nil then begin
+   with po1^[int1] do begin
+    if (kind = ek_destroy) and (fwinid = aid) then begin
+     result:= true;
+     break;
+    end;
+   end;
   end;
  end;
 end;
