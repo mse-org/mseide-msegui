@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -55,6 +55,7 @@ function gui_setsizeconstraints(id: winidty; const min,max: sizety): guierrorty;
 function gui_reposwindow(id: winidty; const rect: rectty): guierrorty;
 function gui_setdecoratedwindowrect(id: winidty; const rect: rectty; 
                                     out clientrect: rectty): guierrorty;
+function gui_setembeddedwindowrect(id: winidty; const rect: rectty): guierrorty;
 function gui_setwindowfocus(id: winidty): guierrorty;
 function gui_setimefocus(var awindow: windowty): guierrorty;
 function gui_unsetimefocus(var awindow: windowty): guierrorty;

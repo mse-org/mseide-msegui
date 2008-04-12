@@ -702,26 +702,33 @@ var
  
 type
  netatomty = 
-      (net_supported,net_workarea,net_frame_extents,
+      (net_supported,net_workarea,
        net_wm_state,
        net_wm_state_maximized_vert,net_wm_state_maximized_horz,
+       //not needed below
        net_wm_state_fullscreen,
+       net_frame_extents,
+       net_request_frame_extents,
        net_wm_pid,
        net_none);
  netwmstateoperationty = (nso_remove,nso_add,nso_toggle);
 const
  netatomnames: array[netatomty] of string = 
-      ('_NET_SUPPORTED','_NET_WORKAREA','_NET_FRAME_EXTENTS',
+      ('_NET_SUPPORTED','_NET_WORKAREA',
        '_NET_WM_STATE',
        '_NET_WM_STATE_MAXIMIZED_VERT','_NET_WM_STATE_MAXIMIZED_HORZ',
-       '_NET_WM_STATE_FULLSCREEN', //not needed
+       //not needed below
+       '_NET_WM_STATE_FULLSCREEN',
+       '_NET_FRAME_EXTENTS', 
+       '_NET_REQUEST_FRAME_EXTENTS',
        '_NET_WM_PID', 
        ''); 
- needednetatom = netatomty(ord(high(netatomty))-3);
+ needednetatom = netatomty(ord(high(netatomty))-4);
 var
  netatoms: array[netatomty] of atom;
  netsupported: boolean;
  canfullscreen: boolean;
+ canframeextents: boolean;
  netsupportedatom: atom;
 
  sigtimerbefore: sighandler_t;
@@ -1582,9 +1589,14 @@ function getwindowframe(id: winidty): framety;
 var
  bo1: boolean;
  ar1: array[0..3] of integer;
+ win1: winidty;
+ root: winidty;
+ rect1,rect2: rectty;
+ int1: integer;
+ pt1: pointty;
 begin
  bo1:= false;
- if netsupported then begin
+ if canframeextents then begin
   bo1:= readlongproperty(id,netatoms[net_frame_extents],4,ar1);
  end;
  if bo1 then begin
@@ -1597,6 +1609,13 @@ begin
  end
  else begin
   result:= nullframe;
+  if (gui_getwindowrect(id,rect1) = gue_ok) and 
+              (gui_getwindowrect(toplevelwindow(id),rect2) = gue_ok) then begin
+   result.left:= rect1.x - rect2.x;
+   result.top:= rect1.y - rect2.y;                                              
+   result.right:= rect2.x + rect2.cx - rect1.x - rect1.cx;
+   result.bottom:= rect2.y + rect2.cy - rect1.y - rect1.cy;
+  end;  
  end;
 end;
 
@@ -2921,6 +2940,11 @@ begin
   cy:= rect.cy - top - bottom;
  end;
  result:= gui_reposwindow(id,clientrect);
+end;
+
+function gui_setembeddedwindowrect(id: winidty; const rect: rectty): guierrorty;
+begin
+ result:= gui_reposwindow(id,rect);
 end;
 
 function gui_setsizeconstraints(id: winidty; const min,max: sizety): guierrorty;
@@ -5856,13 +5880,15 @@ begin
  xinternatoms(appdisp,@netatomnames[low(netatomty)],
           integer(high(netatomty)),{$ifdef xboolean}true{$else}1{$endif},
           @netatoms[low(netatomty)]);
- netsupported:= true;
+ netsupported:= netsupportedatom <> 0;
  for netnum:= low(netatomty) to needednetatom do begin
   if netatoms[netnum] = 0 then begin
    netsupported:= false;
    break;
   end;
  end;
+
+ canframeextents:= netatoms[net_frame_extents] <> 0;
  canfullscreen:= netsupported;
  if netsupported and (netatoms[net_wm_state_fullscreen] = 0) then begin
   netatoms[net_wm_state_fullscreen]:= xinternatom(appdisp,
@@ -5871,9 +5897,9 @@ begin
            //fake
   canfullscreen:= false;
  end; 
- if canfullscreen then begin
-  canfullscreen:= false;
-  if readatomproperty(rootid,netsupportedatom,atomar) then begin
+ if readatomproperty(rootid,netsupportedatom,atomar) then begin
+  if canfullscreen then begin
+   canfullscreen:= false;
    for int1:= 0 to high(atomar) do begin
     if atomar[int1] = netatoms[net_wm_state_fullscreen] then begin
      canfullscreen:= true;
@@ -5881,6 +5907,18 @@ begin
     end;
    end;
   end;
+  {
+  if canframeextents and (netatoms[net_request_frame_extents] <> 0) then begin
+   canframeextents:= false;
+   for int1:= 0 to high(atomar) do begin
+    if (atomar[int1] = netatoms[net_request_frame_extents]) or 
+        (atomar[int1] = netatoms[net_frame_extents]) then begin
+     canframeextents:= true;
+     break;
+    end;
+   end;
+  end;
+  }
  end;
  if netsupported then begin
   if not readlongproperty(rootid,netatoms[net_workarea],4,rect1) then begin

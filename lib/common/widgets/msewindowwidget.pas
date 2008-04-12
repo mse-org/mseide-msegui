@@ -224,7 +224,7 @@ begin
   if not rectisequal(rect2,fchildrect) then begin
    bo1:= true;
    fchildrect:= rect2;
-   gui_setdecoratedwindowrect(fclientwindow.id,rect2,rect3);
+   gui_setembeddedwindowrect(fclientwindow.id,rect2);
 //   gui_reposwindow(fclientwindow.id,rect2,true);
   end;
   if not rectisequal(rect1,fviewport) then begin

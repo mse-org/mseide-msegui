@@ -3814,6 +3814,15 @@ begin
  end
 end;
 
+function gui_setembeddedwindowrect(id: winidty; const rect: rectty): guierrorty;
+begin
+ result:= gue_resizewindow;
+ if windows.SetWindowPos(id,0,rect.x,rect.y,rect.cx,rect.cy,
+               swp_nozorder or swp_noactivate) then begin
+  result:= gue_ok;
+ end
+end;
+
 var
  mousewheelpos: integer;
  sizingwindow: hwnd;
