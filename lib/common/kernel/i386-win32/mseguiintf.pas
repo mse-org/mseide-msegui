@@ -3809,9 +3809,8 @@ begin
  clientrect:= rect;
  if windows.SetWindowPos(id,0,rect.x,rect.y,rect.cx,rect.cy,
                swp_nozorder or swp_noactivate) then begin
-  if getclientrect(id,clientrect) then begin
-   result:= gue_ok;
-  end;
+  clientrect:= getclientrect(id);
+  result:= gue_ok;
  end
 end;
 
