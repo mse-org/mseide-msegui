@@ -76,6 +76,8 @@ type
 
 const
  E_NOINTERFACE = longword($80004002);
+var
+ nozorderhandling: boolean;
 
 procedure guierror(error: guierrorty; text: string = ''); overload;
 procedure guierror(error: guierrorty; sender: tobject; text: string = ''); overload;

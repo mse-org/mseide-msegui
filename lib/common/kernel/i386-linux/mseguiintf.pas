@@ -5686,7 +5686,10 @@ begin
   if ar1[int1] = '--TOPLEVELRAISE' then begin
    toplevelraise:= true;
    deletecommandlineargument(int1);
-   break;
+  end;
+  if ar1[int1] = '--NOZORDERHANDLING' then begin
+   nozorderhandling:= true;
+   deletecommandlineargument(int1);
   end;
  end;
  {$ifdef hassm} 

@@ -12562,46 +12562,48 @@ var
  int1: integer;
 begin
  if fwindowstack <> nil then begin
-  for int1:= 0 to high(fwindowstack) do begin
-   findlevel(fwindowstack[int1]);
-  end;
-  sortarray(fwindowstack,{$ifdef FPC}@{$endif}cmpwindowstack,
-                                            sizeof(windowstackinfoty));
-  if gui_canstackunder then begin
+  if not nozorderhandling then begin
    for int1:= 0 to high(fwindowstack) do begin
-    with fwindowstack[int1] do begin
-     if lower <> nil then begin
-      if upper = nil then begin
-       gui_raisewindow(lower.winid);
-      end
-      else begin
-       gui_stackunderwindow(lower.winid,upper.winid);
+    findlevel(fwindowstack[int1]);
+   end;
+   sortarray(fwindowstack,{$ifdef FPC}@{$endif}cmpwindowstack,
+                                             sizeof(windowstackinfoty));
+   if gui_canstackunder then begin
+    for int1:= 0 to high(fwindowstack) do begin
+     with fwindowstack[int1] do begin
+      if lower <> nil then begin
+       if upper = nil then begin
+        gui_raisewindow(lower.winid);
+       end
+       else begin
+        gui_stackunderwindow(lower.winid,upper.winid);
+       end;
+      end;
+     end;
+    end;
+   end
+   else begin
+    for int1:= high(fwindowstack) downto 0 do begin
+     with fwindowstack[int1] do begin
+      if (lower <> nil) then begin
+       gui_raisewindow(fwindowstack[int1].lower.winid);
+      end;
+     end;
+    end;
+    for int1:= 0 to high(fwindowstack) do begin //raise top level window
+     with fwindowstack[int1] do begin
+      if lower <> nil then begin
+       if upper <> nil then begin
+        gui_raisewindow(fwindowstack[int1].upper.winid);
+       end;
+       break;
       end;
      end;
     end;
    end;
-  end
-  else begin
-   for int1:= high(fwindowstack) downto 0 do begin
-    with fwindowstack[int1] do begin
-     if (lower <> nil) then begin
-      gui_raisewindow(fwindowstack[int1].lower.winid);
-     end;
-    end;
-   end;
-   for int1:= 0 to high(fwindowstack) do begin //raise top level window
-    with fwindowstack[int1] do begin
-     if lower <> nil then begin
-      if upper <> nil then begin
-       gui_raisewindow(fwindowstack[int1].upper.winid);
-      end;
-      break;
-     end;
-    end;
-   end;
+   exclude(fstate,aps_zordervalid);
   end;
   fwindowstack:= nil;
-  exclude(fstate,aps_zordervalid);
  end;
 end;
 
@@ -13253,8 +13255,6 @@ begin
    sortarray(ar2,ar3);
    orderarray(ar3,pointerarty(fwindows));
    sortarray(pointerarty(fwindows),{$ifdef FPC}@{$endif}cmpwindowvisibility);
-//   fwindows.order(ar3);
-//   fwindows.sort({$ifdef FPC}@{$endif}cmpwindowvisibility);
   end;
   include(fstate,aps_zordervalid);
  end;
