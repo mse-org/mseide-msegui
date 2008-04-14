@@ -141,8 +141,8 @@ end;
 
 procedure tdisassfo.internalrefresh;
 begin
- grid.rowcount:= 0;
- if visible and gdb.active then begin
+ if visible and gdb.cancommand then begin
+  grid.rowcount:= 0;
   addlines(faddress,grid.rowsperpage);
  end;
 end;
@@ -166,7 +166,7 @@ var
  rowcountbefore,rowbefore,activerowbefore: integer;
  int1: integer;
 begin
- if visible and gdb.active and not gdb.running then begin
+ if visible and gdb.cancommand then begin
   with grid,info do begin
    if (shiftstate = []) then begin
     if ((key = key_down) or (key = key_pagedown)) and (row = rowhigh) then begin

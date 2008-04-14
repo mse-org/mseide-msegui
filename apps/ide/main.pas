@@ -639,7 +639,7 @@ end;
 
 procedure tmainfo.stackframechanged(const frameno: integer);
 begin
- if not gdb.running then begin
+ if gdb.cancommand then begin
   gdb.selectstackframe(frameno);
   refreshframe;
  end;

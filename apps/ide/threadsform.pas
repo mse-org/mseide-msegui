@@ -57,7 +57,7 @@ var
  wstr1: msestring;
 begin
  frefreshedrow:= -1;
- if visible and gdb.active then begin
+ if visible and gdb.cancommand then begin
   if gdb.getthreadinfolist(ar1) = gdb_ok then begin
    setlength(fids,length(ar1));
    grid.rowcount:= length(ar1);

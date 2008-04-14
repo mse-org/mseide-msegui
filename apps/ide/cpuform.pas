@@ -87,7 +87,7 @@ var
  ed1: tdataedit;
  str1: msestring;
 begin
- if visible and mainfo.gdb.active and on.value then begin
+ if visible and mainfo.gdb.cancommand and on.value then begin
   if fregisternames = nil then begin
    if mainfo.gdb.listregisternames(fregisternames) <> gdb_ok then begin
     exit;
@@ -161,7 +161,7 @@ procedure tcpufo.doregsetvalue(const sender: TObject; var avalue: Integer;
 var
  str1: string;
 begin
- if mainfo.gdb.active and not mainfo.gdb.running then begin
+ if mainfo.gdb.cancommand then begin
   with tintegeredit(sender) do begin
    if mainfo.gdb.writepascalvariable(
         '$'+fregisternames[tag],inttostr(avalue),str1) <> gdb_ok then begin

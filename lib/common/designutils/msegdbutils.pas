@@ -425,6 +425,7 @@ type
                          //automatically on every target start
    
    function active: boolean;  //gdb running
+   function cancommand: boolean; //active and target not running
    function started: boolean; //target active, run command applied or attached
    property running: boolean read getrunning; //target running
    function downloading: boolean;
@@ -782,6 +783,11 @@ end;
 function tgdbmi.active: boolean;
 begin
  result:= fgdb <> invalidprochandle;
+end;
+
+function tgdbmi.cancommand: boolean;
+begin
+ result:= active and not running;
 end;
 
 procedure tgdbmi.setstoponexception(const avalue: boolean);

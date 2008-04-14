@@ -102,7 +102,7 @@ procedure twatchfo.refreshitem(const index: integer);
 var
  mstr1: msestring;
 begin
- if gdb.active then begin
+ if gdb.cancommand then begin
   if watcheson.value and watchon[index] then begin
    gdb.readpascalvariable(expression[index],mstr1);
    if (expresult[index] <> mstr1) then begin
@@ -137,6 +137,7 @@ procedure twatchfo.expresultonsetvalue(const sender: tobject;
 var
  str1: string;
 begin
+ gdb.interrupttarget;
  accept:= gdb.writepascalvariable(expression.value,avalue,str1) = gdb_ok;
  if accept then begin
   refresh;
@@ -144,7 +145,9 @@ begin
  end
  else begin
   showerror(str1);
+  tstringedit(sender).editor.undo;
  end;
+ gdb.restarttarget;
 end;
 
 procedure twatchfo.addwatch(aexpression: msestring);
@@ -153,7 +156,7 @@ var
 begin
  int1:= grid.appendrow;
  expression[int1]:= aexpression;
- if gdb.active then begin
+ if gdb.cancommand then begin
   refreshitem(int1);
  end;
 end;

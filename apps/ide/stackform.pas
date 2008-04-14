@@ -124,7 +124,7 @@ var
  int1,int2: integer;
  str1: string;
 begin
- if visible and gdb.active then begin
+ if visible and gdb.cancommand then begin
   gdb.stacklistframes(frameinfo);
   grid.row:= -1;
   grid.rowcount:= length(frameinfo);

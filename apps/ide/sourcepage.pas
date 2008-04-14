@@ -416,7 +416,7 @@ var
  po1: pintegeraty;
  int1,int2: integer;
 begin
- if not mainfo.gdb.running then begin
+ if mainfo.gdb.cancommand then begin
   if fexecstamp <> mainfo.execstamp then begin
    fexecstamp:= mainfo.execstamp;
    application.beginwait;
