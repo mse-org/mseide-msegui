@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -1065,6 +1065,12 @@ begin
                               ord(high(windowposty))));
     bo1:= readboolean('visible',visible);
     bo1:= visible or bo1;
+    if fo_main in foptions then begin
+     bo1:= true;
+     if pos1 = wp_minimized then begin
+      pos1:= wp_normal;
+     end;
+    end;
     if bo1 then begin
      if pos1 <> wp_minimized then begin
       show;
