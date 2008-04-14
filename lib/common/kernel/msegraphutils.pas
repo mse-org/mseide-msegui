@@ -521,9 +521,11 @@ begin
  for int1:= 1 to cl_nonenum-1 do begin
   result[int1+int2]:= defaultfunctional[int1].name;
  end;
+ {
  for int1:= cl_nonenum+1 to high(defaultfunctional) do begin
   result[int1+int2-1]:= defaultfunctional[int1].name;
  end;
+ }
  inc(int2,functionalcolorcount-1);
  for int1:= 0 to high(defaultuser) do begin
   result[int1+int2]:= defaultuser[int1].name;
@@ -548,9 +550,11 @@ begin
  for int1:= 1 to cl_nonenum-1 do begin
   result[int1+int2]:= cl_functional + cardinal(int1);
  end;
+ {
  for int1:= cl_nonenum + 1 to high(defaultfunctional) do begin
   result[int1+int2-1]:= cl_functional + cardinal(int1);
  end;
+ }
  inc(int2,functionalcolorcount-1);
  for int1:= 0 to high(defaultuser) do begin
   result[int1+int2]:= cl_user + cardinal(int1);
