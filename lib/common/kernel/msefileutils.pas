@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -13,7 +13,7 @@ unit msefileutils;
 
 interface
 uses
- msedatalist,msesys,msebits,msetypes,msestream,msestrings;
+ msesysintf,msedatalist,msesys,msebits,msetypes,msestream,msestrings;
 
 type
  filelistoptionty = (flo_sortname,flo_sorttime,flo_sortsize,
@@ -175,8 +175,10 @@ function compfiletime(const a,b: tdatetime): integer;
             //-1 if a < b, 0 if a = b, 1 if a > b
 
 implementation
+
 uses
- msesysintf,sysutils,msedate;
+ {msesysintf,}sysutils,msedate;
+
 const
  quotechar = msechar('"');
 
