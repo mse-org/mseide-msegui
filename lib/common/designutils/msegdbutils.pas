@@ -504,7 +504,7 @@ implementation
 uses
  sysutils,mseformatstr,mseprocutils,msesysutils,msefileutils,
  msebits,msesys,msesysintf,mseguiintf
-        {$ifdef UNIX},libc{$else},windows{$endif};
+        {$ifdef UNIX},libc,msesysbindings{$else},windows{$endif};
 
 const                                      
  stopreasons: array[stopreasonty] of string = 

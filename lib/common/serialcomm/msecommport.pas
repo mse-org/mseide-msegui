@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -412,7 +412,7 @@ function asciitobin(const chars: string): string;
 
 implementation
 uses
- {$ifdef UNIX} kernelioctl, {$endif}
+ {$ifdef UNIX} kernelioctl,msesysbindings, {$endif}
  sysutils,mseapplication,msesysintf,msesysutils,msetypes;
 
 const
