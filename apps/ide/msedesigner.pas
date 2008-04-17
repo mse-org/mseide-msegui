@@ -3425,6 +3425,7 @@ var
  loadingmodulepobefore: pmoduleinfoty;
  isinherited: boolean;
  str1: string;
+ fixupmodule: string;
 
 begin //loadformfile
  filename:= filepath(filename);
@@ -3508,6 +3509,7 @@ begin //loadformfile
           result^.referencedmodules[int1]:= rootnames[int1];
          end;
          dofixup;
+         fixupmodule:= '';
          while true do begin
           rootnames.clear;
           getfixupreferencenames(module,rootnames);
@@ -3515,7 +3517,11 @@ begin //loadformfile
            if assigned(fongetmodulenamefile) then begin
             try
              res1:= mr_cancel;
-             fongetmodulenamefile(result,rootnames[0],res1);
+             if fixupmodule = rootnames[0] then begin
+              break;
+             end;
+             fixupmodule:= rootnames[0];
+             fongetmodulenamefile(result,fixupmodule,res1);
              dofixup;
              case res1 of
               mr_ok: begin
