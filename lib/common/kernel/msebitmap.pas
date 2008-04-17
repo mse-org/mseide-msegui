@@ -172,6 +172,7 @@ type
    procedure acquirehandle; override;
    procedure destroyhandle; override;
    procedure setsize(const Value: sizety); override;
+   function writedata(const ancestor: tmaskedbitmap): boolean;
    procedure defineproperties(filer: tfiler); override;
    procedure objectevent(const sender: tobject; const event: objecteventty);
     //iobjectlink
@@ -1599,12 +1600,38 @@ begin
  end;
 end;
 
+function tmaskedbitmap.writedata(const ancestor: tmaskedbitmap): boolean;
+begin
+ result:= (fsource = nil) and not isempty and not (pms_nosave in fstate);
+ if result and (ancestor <> nil) then begin
+  result:= (masked <> ancestor.masked) or
+           (colormask <> ancestor.colormask) or
+           (monochrome <> ancestor.monochrome) or
+           (size.cx <> ancestor.size.cx) or
+           (size.cy <> ancestor.size.cy);
+  if not result then begin
+   if masked then begin
+    fmask.checkimage;
+    ancestor.fmask.checkimage;
+    result:= not comparemem(fmask.fimage.pixels,ancestor.fmask.fimage.pixels,
+                         fmask.fimage.length * sizeof(longword));
+   end;
+   if not result then begin
+    checkimage;
+    ancestor.checkimage;
+    result:= not comparemem(fimage.pixels,ancestor.fimage.pixels,
+                         fimage.length * sizeof(longword));
+   end;
+  end;
+ end;
+end;
+
 procedure tmaskedbitmap.defineproperties(filer: tfiler);
 begin
  inherited;
  filer.DefineBinaryProperty('image',{$ifdef FPC}@{$endif}readimage,
                                      {$ifdef FPC}@{$endif}writeimage,
-           (fsource = nil) and not isempty and not (pms_nosave in fstate));
+                                     writedata(tmaskedbitmap(filer.ancestor)));
 end;
 
 procedure tmaskedbitmap.writeimage(stream: tstream);
@@ -2260,12 +2287,16 @@ begin
 end;
 
 procedure timagelist.defineproperties(filer: tfiler);
+var
+ ancestorbefore: tpersistent;
 begin
  inherited;
- fbitmap.defineproperties(filer);
-// filer.DefineBinaryProperty('image',{$ifdef FPC}@{$endif}fbitmap.readimage,
-//                                     {$ifdef FPC}@{$endif}fbitmap.writeimage,
-//           (fsource = nil) and not isempty);
+ ancestorbefore:= filer.ancestor;
+ if ancestorbefore <> nil then begin
+  filer.ancestor:= timagelist(ancestorbefore).fbitmap;
+ end;
+ fbitmap.defineproperties(filer); //imagedata
+ filer.ancestor:= ancestorbefore;
 end;
 
 procedure timagelist.assign(sender: tpersistent);
