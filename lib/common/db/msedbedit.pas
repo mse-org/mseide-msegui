@@ -5626,11 +5626,16 @@ begin
     fstringbuffer:= tmsestringfield(afield).asmsestring;
    end
    else begin
-    if utf8 then begin
-     fstringbuffer:= utf8tostring(afield.displaytext);
+    if afield is tmsememofield then begin
+     fstringbuffer:= tmsememofield(afield).asmsestring;
     end
     else begin
-     fstringbuffer:= afield.displaytext;
+     if utf8 then begin
+      fstringbuffer:= utf8tostring(afield.displaytext);
+     end
+     else begin
+      fstringbuffer:= afield.displaytext;
+     end;
     end;
    end;
   end;
