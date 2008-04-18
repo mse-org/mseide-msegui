@@ -552,14 +552,16 @@ end;
 procedure tcustombutton.doshortcut(var info: keyeventinfoty; const sender: twidget);
 begin
  if not (es_processed in info.eventstate) then begin
-  if checkshortcutcode(factioninfo.shortcut,info) or
+  if not (csdesigning in componentstate) and 
+    (checkshortcutcode(factioninfo.shortcut,info) or
      checkshortcutcode(factioninfo.shortcut1,info) or
     (bo_executeonshortcut in options) and not (ss_disabled in finfo.state) and
            mserichstring.checkshortcut(info,factioninfo.caption1,true) or
     (finfo.state * [ss_invisible,ss_disabled,ss_default] = [ss_default]) and
        ((info.key = key_return) or 
         (info.key = key_enter) and (bo_executedefaultonenterkey in options)) and
-       (info.shiftstate = []) then begin
+       (info.shiftstate = [])
+    ) then begin
    exclude(info.eventstate,es_processed); //set by checkshortcut
    if checkfocusshortcut(info) then begin
     setfocus;
