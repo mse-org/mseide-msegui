@@ -56,6 +56,7 @@ type
    property frameimage_right;
    property frameimage_bottom;
    property frameimage_offset;
+   property frameimage_offsetdisabled;
    property frameimage_offsetmouse;
    property frameimage_offsetclicked;
    property frameimage_offsetactive;
@@ -189,10 +190,13 @@ type
    procedure invalidaterect(const rect: rectty; const org: originty = org_client;
                                const noclip: boolean = false);
    function getwidget: twidget;
-   
+   function getframestateflags: framestateflagsty; virtual;
+{   
+   function getframedisabled: boolean; virtual;
    function getframeclicked: boolean; virtual;
    function getframemouse: boolean; virtual;
    function getframeactive: boolean; virtual;
+   }
   protected
    fframerect: rectty;
    finfo: shapeinfoty;
@@ -735,6 +739,19 @@ begin
  result:= tcustombuttonframe(fowner).fintf.getwidget
 end;
 
+function tframebutton.getframestateflags: framestateflagsty;
+begin
+ with finfo do begin
+  result:= combineframestateflags(ss_disabled in state,getwidget.active,
+             ss_mouse in state,ss_clicked in state);
+ end;
+end;
+{
+function tframebutton.getframedisabled: boolean;
+begin
+ result:= ss_disabled in finfo.state;
+end;
+
 function tframebutton.getframeclicked: boolean;
 begin
  result:= ss_clicked in finfo.state;
@@ -749,7 +766,7 @@ function tframebutton.getframeactive: boolean;
 begin
  result:= getwidget.active;
 end;
-
+}
 { tstockglyphframebutton}
 
 constructor tstockglyphframebutton.create(aowner: tobject);

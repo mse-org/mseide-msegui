@@ -154,7 +154,8 @@ type
                      frl_fileft,frl_fitop,frl_firight,frl_fibottom,
                      frl_frameimagelist,frl_frameimageleft,frl_frameimagetop,
                      frl_frameimageright,frl_frameimagebottom,
-                     frl_frameimageoffset,frl_frameimageoffsetmouse,
+                     frl_frameimageoffset,
+                     frl_frameimageoffsetdisabled,frl_frameimageoffsetmouse,
                      frl_frameimageoffsetclicked,frl_frameimageoffsetactive,
                      frl_frameimageoffsetactivemouse,
                      frl_frameimageoffsetactiveclicked,
@@ -163,13 +164,17 @@ type
                      frl_nodisable);
  framelocalpropsty = set of framelocalpropty;
 
+ framestateflagty = (fsf_disabled,fsf_active,fsf_mouse,fsf_clicked);
+ framestateflagsty = set of framestateflagty;
+ 
 const
  allframelocalprops: framelocalpropsty =
                     [frl_levelo,frl_leveli,frl_framewidth,frl_colorframe,
                      frl_fileft,frl_fitop,frl_firight,frl_fibottom,
                      frl_frameimagelist,frl_frameimageleft,frl_frameimagetop,
                      frl_frameimageright,frl_frameimagebottom,
-                     frl_frameimageoffset,frl_frameimageoffsetmouse,
+                     frl_frameimageoffset,
+                     frl_frameimageoffsetdisabled,frl_frameimageoffsetmouse,
                      frl_frameimageoffsetclicked,frl_frameimageoffsetactive,
                      frl_frameimageoffsetactivemouse,
                      frl_frameimageoffsetactiveclicked,
@@ -204,9 +209,13 @@ type
               const org: originty = org_client; const noclip: boolean = false);
   function getwidget: twidget;
   function getwidgetrect: rectty;
+  function getframestateflags: framestateflagsty;
+  {
+  function getframedisabled: boolean;
   function getframeclicked: boolean;
   function getframemouse: boolean;
   function getframeactive: boolean;
+  }
  end;
 
  icaptionframe = interface(iframe)
@@ -236,6 +245,7 @@ type
   frameimage_right: integer;
   frameimage_bottom: integer;
   frameimage_offset: integer;
+  frameimage_offsetdisabled: integer;
   frameimage_offsetmouse: integer;
   frameimage_offsetclicked: integer;
   frameimage_offsetactive: integer;
@@ -299,6 +309,8 @@ type
    
    procedure setframeimage_offset(const avalue: integer);
    function isframeimage_offsetstored: boolean;
+   procedure setframeimage_offsetdisabled(const avalue: integer);
+   function isframeimage_offsetdisabledstored: boolean;
    procedure setframeimage_offsetmouse(const avalue: integer);
    function isframeimage_offsetmousestored: boolean;
    procedure setframeimage_offsetclicked(const avalue: integer);
@@ -354,7 +366,8 @@ type
    procedure activechanged; virtual;
    function needsfocuspaint: boolean; virtual;
    class procedure drawframe(const canvas: tcanvas; const rect2: rectty; 
-           const afi: frameinfoty; const active,clicked,mouse: boolean);
+           const afi: frameinfoty; const astate: framestateflagsty
+           {const disabled,active,clicked,mouse: boolean});
   public
    constructor create(const intf: iframe); reintroduce;
    destructor destroy; override;
@@ -436,6 +449,9 @@ type
                     //added to imagelist size.
    property frameimage_offset: integer read fi.frameimage_offset
                     write setframeimage_offset stored isframeimage_offsetstored;
+   property frameimage_offsetdisabled: integer read fi.frameimage_offsetdisabled 
+                    write setframeimage_offsetdisabled 
+                    stored isframeimage_offsetdisabledstored;
    property frameimage_offsetmouse: integer read fi.frameimage_offsetmouse 
                     write setframeimage_offsetmouse 
                     stored isframeimage_offsetmousestored;
@@ -477,6 +493,7 @@ type
    property frameimage_top;
    property frameimage_bottom;
    property frameimage_offset;
+   property frameimage_offsetdisabled;
    property frameimage_offsetmouse;
    property frameimage_offsetclicked;
    property frameimage_offsetactive;
@@ -526,6 +543,7 @@ type
    procedure setframeimage_right(const avalue: integer);
    procedure setframeimage_bottom(const avalue: integer);
    procedure setframeimage_offset(const avalue: integer);
+   procedure setframeimage_offsetdisabled(const avalue: integer);
    procedure setframeimage_offsetmouse(const avalue: integer);
    procedure setframeimage_offsetclicked(const avalue: integer);
    procedure setframeimage_offsetactive(const avalue: integer);
@@ -549,7 +567,7 @@ type
    procedure paintbackground(const acanvas: tcanvas; const arect: rectty);
                                        //arect = paintrect
    procedure paintoverlay(const acanvas: tcanvas; const arect: rectty;
-                        const active,clicked,mouse: boolean);
+                        const astate: framestateflagsty);
                                        //arect = paintrect
    function paintframe: framety;
   published
@@ -585,6 +603,8 @@ type
                     //added to imagelist size.
    property frameimage_offset: integer read fi.frameimage_offset
                      write setframeimage_offset;
+   property frameimage_offsetdisabled: integer read fi.frameimage_offsetdisabled 
+                     write setframeimage_offsetdisabled;
    property frameimage_offsetmouse: integer read fi.frameimage_offsetmouse 
                      write setframeimage_offsetmouse;
    property frameimage_offsetclicked: integer read fi.frameimage_offsetclicked
@@ -1000,11 +1020,14 @@ type
    procedure setstaticframe(value: boolean);
    function getwidgetrect: rectty;
    function getcomponentstate: tcomponentstate;
-   
+
+   function getframestateflags: framestateflagsty; virtual;
+{   
+   function getframedisabled: boolean; virtual;
    function getframeclicked: boolean; virtual;
    function getframemouse: boolean; virtual;
    function getframeactive: boolean; virtual;
-   
+}  
    //igridcomp,itabwidget
    function getwidget: twidget;
 
@@ -1947,6 +1970,8 @@ function getprocesswindow(const procid: integer): winidty;
 function activateprocesswindow(const procid: integer; 
                     const araise: boolean = true): boolean;
          //true if ok
+function combineframestateflags(
+            const disabled,active,mouse,clicked: boolean): framestateflagsty;
 
 implementation
 
@@ -2110,6 +2135,16 @@ type
 
 var
  appinst: tinternalapplication;
+
+function combineframestateflags(
+            const disabled,active,mouse,clicked: boolean): framestateflagsty;
+begin
+ result:= [];
+ if disabled then include(result,fsf_disabled);
+ if active then include(result,fsf_active);
+ if mouse then include(result,fsf_mouse);
+ if clicked then include(result,fsf_clicked);
+end;
 
 function wbounds_x(const awidget: twidget): integer;
 begin
@@ -2824,7 +2859,8 @@ end;
 
 class procedure tcustomframe.drawframe(const canvas: tcanvas; 
                          const rect2: rectty; const afi: frameinfoty; 
-                                 const active,clicked,mouse: boolean);
+                         const astate: framestateflagsty
+                                 {const disabled,active,clicked,mouse: boolean});
 var
  imageoffs: integer;
  rect1: rectty;
@@ -2836,7 +2872,7 @@ begin
   inflaterect1(rect1,-abs(afi.levelo));
  end;
  if afi.framewidth > 0 then begin
-  if (afi.colorframeactive = cl_default) or not active then begin
+  if (afi.colorframeactive = cl_default) or not (fsf_active in astate) then begin
    col1:= afi.colorframe;
   end
   else begin
@@ -2850,26 +2886,31 @@ begin
  end;
  if afi.frameimage_list <> nil then begin
   imageoffs:= afi.frameimage_offset;
-  if active then begin
-   if clicked then begin
-    imageoffs:= imageoffs + afi.frameimage_offsetactiveclicked;
-   end
-   else begin
-    if mouse then begin
-     imageoffs:= imageoffs + afi.frameimage_offsetactivemouse;
-    end
-    else begin
-     imageoffs:= imageoffs + afi.frameimage_offsetactive;
-    end;
-   end;
+  if fsf_disabled in astate then begin
+   imageoffs:= imageoffs + afi.frameimage_offsetdisabled;
   end
   else begin
-   if clicked then begin
-    imageoffs:= imageoffs + afi.frameimage_offsetclicked;
+   if fsf_active in astate then begin
+    if fsf_clicked in astate then begin
+     imageoffs:= imageoffs + afi.frameimage_offsetactiveclicked;
+    end
+    else begin
+     if fsf_mouse in astate then begin
+      imageoffs:= imageoffs + afi.frameimage_offsetactivemouse;
+     end
+     else begin
+      imageoffs:= imageoffs + afi.frameimage_offsetactive;
+     end;
+    end;
    end
    else begin
-    if mouse then begin
-     imageoffs:= imageoffs + afi.frameimage_offsetmouse;
+    if fsf_clicked in astate then begin
+     imageoffs:= imageoffs + afi.frameimage_offsetclicked;
+    end
+    else begin
+     if fsf_mouse in astate then begin
+      imageoffs:= imageoffs + afi.frameimage_offsetmouse;
+     end;
     end;
    end;
   end;
@@ -2902,8 +2943,7 @@ end;
 
 procedure tcustomframe.paintoverlay(const canvas: tcanvas; const arect: rectty);
 begin
- drawframe(canvas,deflaterect(arect,fouterframe),fi,fintf.getframeactive,
-                                fintf.getframeclicked,fintf.getframemouse);
+ drawframe(canvas,deflaterect(arect,fouterframe),fi,fintf.getframestateflags);
 end;
 {
 procedure tcustomframe.paintoverlay(const canvas: tcanvas; const arect: rectty);
@@ -3267,6 +3307,15 @@ begin
  end;
 end;
 
+procedure tcustomframe.setframeimage_offsetdisabled(const avalue: integer);
+begin
+ include(flocalprops,frl_frameimageoffsetdisabled);
+ if fi.frameimage_offsetdisabled <> avalue then begin
+  fi.frameimage_offsetdisabled:= avalue;
+  internalupdatestate;
+ end;
+end;
+
 procedure tcustomframe.setframeimage_offsetmouse(const avalue: integer);
 begin
  include(flocalprops,frl_frameimageoffsetmouse);
@@ -3489,6 +3538,9 @@ begin
   if not (frl_frameimageoffset in flocalprops) then begin
    frameimage_offset:= ainfo.frameimage_offset;
   end;
+  if not (frl_frameimageoffsetdisabled in flocalprops) then begin
+   frameimage_offsetdisabled:= ainfo.frameimage_offsetdisabled;
+  end;
   if not (frl_frameimageoffsetmouse in flocalprops) then begin
    frameimage_offsetmouse:= ainfo.frameimage_offsetmouse;
   end;
@@ -3622,6 +3674,11 @@ end;
 procedure tcustomframe.setdisabled(const value: boolean);
 begin
  updatebit({$ifdef FPC}longword{$else}longword{$endif}(fstate),ord(fs_disabled),value);
+ with fi do begin
+  if (frameimage_list <> nil) and (frameimage_offsetdisabled <> 0) then begin
+   fintf.getwidget.invalidatewidget;
+  end;
+ end; 
 end;
 
 function tcustomframe.pointincaption(const point: pointty): boolean;
@@ -3744,6 +3801,11 @@ end;
 function tcustomframe.isframeimage_offsetstored: boolean;
 begin
  result:= (ftemplate = nil) or (frl_frameimageoffset in flocalprops);
+end;
+
+function tcustomframe.isframeimage_offsetdisabledstored: boolean;
+begin
+ result:= (ftemplate = nil) or (frl_frameimageoffsetdisabled in flocalprops);
 end;
 
 function tcustomframe.isframeimage_offsetmousestored: boolean;
@@ -4000,6 +4062,12 @@ begin
  changed;
 end;
 
+procedure tframetemplate.setframeimage_offsetdisabled(const avalue: integer);
+begin
+ fi.frameimage_offsetdisabled:= avalue;
+ changed;
+end;
+
 procedure tframetemplate.setframeimage_offsetmouse(const avalue: integer);
 begin
  fi.frameimage_offsetmouse:= avalue;
@@ -4077,10 +4145,10 @@ begin
 end;
 
 procedure tframetemplate.paintoverlay(const acanvas: tcanvas; const arect: rectty;
-                         const active,clicked,mouse: boolean);
+                         const astate: framestateflagsty);
 begin
  tcustomframe.drawframe(acanvas,
-     inflaterect(arect,tcustomframe.calcpaintframe(fi)),fi,active,clicked,mouse);
+     inflaterect(arect,tcustomframe.calcpaintframe(fi)),fi,astate);
 end;
 
 procedure tframetemplate.copyinfo(const source: tpersistenttemplate);
@@ -9647,6 +9715,12 @@ begin
  result:= componentstate;
 end;
 
+function twidget.getframestateflags: framestateflagsty;
+begin
+ result:= combineframestateflags(not isenabled,ws_active in fwidgetstate,
+             ws_mouseinclient in fwidgetstate,ws_clicked in fwidgetstate);
+end;
+{
 function twidget.getframeclicked: boolean;
 begin
  result:= ws_clicked in widgetstate;
@@ -9662,6 +9736,11 @@ begin
  result:= ws_active in fwidgetstate;
 end;
 
+function twidget.getframedisabled: boolean;
+begin
+ result:= not isenabled;
+end;
+}
 procedure twidget.setframeinstance(instance: tcustomframe);
 begin
  fframe:= instance;

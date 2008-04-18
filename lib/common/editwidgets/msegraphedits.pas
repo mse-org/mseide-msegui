@@ -54,6 +54,7 @@ type
    property frameimage_right;
    property frameimage_bottom;
    property frameimage_offset;
+   property frameimage_offsetdisabled;
    property frameimage_offsetmouse;
    property frameimage_offsetclicked;
    property frameimage_offsetactive;
@@ -663,9 +664,12 @@ type
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure dokeyup(var info: keyeventinfoty); override;
    procedure clientrectchanged; override;
+   function getframestateflags: framestateflagsty; override;
+   {
    function getframeclicked: boolean; override;
    function getframemouse: boolean; override;
    function getframeactive: boolean; override;
+   }
    procedure paintglyph(const canvas: tcanvas; const avalue;
                     const arect: rectty); override;
    procedure internalcreateframe; override;
@@ -2343,6 +2347,15 @@ begin
  finfo.dim:= innerclientrect;
 end;
 
+function tcustomdatabutton.getframestateflags: framestateflagsty;
+begin
+ with finfo do begin
+  result:= combineframestateflags(not isenabled,not (bo_nodefaultframeactive in foptions) and 
+                           (ss_default in finfo.state) or active,
+              ss_mouse in state,ss_clicked in state);
+ end;
+end;
+{
 function tcustomdatabutton.getframeclicked: boolean;
 begin
  result:= ss_clicked in finfo.state;
@@ -2358,7 +2371,7 @@ begin
  result:= not (bo_nodefaultframeactive in foptions) and 
                            (ss_default in finfo.state) or active;
 end;
-
+}
 procedure tcustomdatabutton.doexecute;
 begin
  doactionexecute(self,factioninfo);

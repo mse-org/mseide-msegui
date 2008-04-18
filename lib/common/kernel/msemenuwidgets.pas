@@ -683,8 +683,8 @@ begin
      include(state,ss_active);
      drawmenubutton(canvas,buttoninfo,po2);
      if itemframetemplateactive <> nil then begin
-      itemframetemplateactive.paintoverlay(canvas,dim,true,
-                     ss_clicked in state,false);
+      itemframetemplateactive.paintoverlay(canvas,dim,
+            combineframestateflags(false,true,ss_clicked in state,false));
      end;
     end
     else begin
@@ -696,8 +696,9 @@ begin
      exclude(state,ss_active);
      drawmenubutton(canvas,buttoninfo,po1);
      if itemframetemplate <> nil then begin
-      itemframetemplate.paintoverlay(canvas,dim,false,
-                     ss_clicked in state,false);
+          itemframetemplate.paintoverlay(canvas,dim,
+                 combineframestateflags(ss_disabled in state,false,
+                 ss_clicked in state,false));
      end;
     end;
    end;

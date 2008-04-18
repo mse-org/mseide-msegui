@@ -117,6 +117,7 @@ type
    property frameimage_right;
    property frameimage_bottom;
    property frameimage_offset;
+   property frameimage_offsetdisabled;
    property frameimage_offsetmouse;
    property frameimage_offsetclicked;
    property frameimage_offsetactive;
@@ -246,6 +247,7 @@ type
    property frameimage_right;
    property frameimage_bottom;
    property frameimage_offset;
+   property frameimage_offsetdisabled;
    property frameimage_offsetmouse;
    property frameimage_offsetclicked;
    property frameimage_offsetactive;
@@ -344,6 +346,7 @@ type
    property frameimage_right;
    property frameimage_bottom;
    property frameimage_offset;
+   property frameimage_offsetdisabled;
    property frameimage_offsetmouse;
    property frameimage_offsetclicked;
    property frameimage_offsetactive;
@@ -474,6 +477,7 @@ type
    property frameimage_right;
    property frameimage_bottom;
    property frameimage_offset;
+   property frameimage_offsetdisabled;
    property frameimage_offsetmouse;
    property frameimage_offsetclicked;
    property frameimage_offsetactive;
@@ -861,9 +865,12 @@ type
    procedure dopaint(const canvas: tcanvas); override;
    procedure clientrectchanged; override;
 //   procedure setoptionswidget(const avalue: optionswidgetty); override;
+   function getframestateflags: framestateflagsty; override;
+   {
    function getframeclicked: boolean; override;
    function getframemouse: boolean; override;
    function getframeactive: boolean; override;
+   }
   public
    constructor create(aowner: tcomponent); override;
    property options: buttonoptionsty read foptions write setoptions
@@ -1599,6 +1606,14 @@ begin
  end;
 end;
 
+function tactionsimplebutton.getframestateflags: framestateflagsty;
+begin
+ result:= combineframestateflags(not isenabled,
+                     not (bo_nodefaultframeactive in foptions) and 
+                           (ss_default in finfo.state) or active,
+                     ss_mouse in finfo.state,ss_clicked in finfo.state);
+end;
+{
 function tactionsimplebutton.getframeclicked: boolean;
 begin
  result:= ss_clicked in finfo.state;
@@ -1614,7 +1629,7 @@ begin
  result:= not (bo_nodefaultframeactive in foptions) and 
                            (ss_default in finfo.state) or active;
 end;
-
+}
 { tmessagebutton }
 
 procedure tmessagebutton.doexecute;

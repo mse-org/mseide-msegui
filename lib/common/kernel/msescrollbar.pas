@@ -143,9 +143,13 @@ type
             const org: originty = org_client; const noclip: boolean = false);
   function getwidget: twidget;
   function getwidgetrect: rectty;
+  function getframestateflags: framestateflagsty;
+  {
+  function getframedisabled: boolean;
   function getframeclicked: boolean;
   function getframemouse: boolean;
   function getframeactive: boolean;
+  }
   protected
    fintf: iscrollbar;
    foptions: scrollbaroptionsty;
@@ -1292,6 +1296,14 @@ begin
  result:= fdim;
 end;
 
+function tcustomscrollbar.getframestateflags: framestateflagsty;
+begin
+ with fdrawinfo.areas[fpaintedbutton],fintf.getwidget do begin
+  result:= combineframestateflags(not isenabled,active,
+       ss_mouse in state, ss_clicked in state); 
+ end;
+end;
+{
 function tcustomscrollbar.getframeclicked: boolean;
 begin
  result:= ss_clicked in fdrawinfo.areas[fpaintedbutton].state; 
@@ -1307,6 +1319,11 @@ begin
  result:= fintf.getwidget.active;
 end;
 
+function tcustomscrollbar.getframedisabled: boolean;
+begin
+ result:= not fintf.getwidget.isenabled;
+end;
+}
 procedure tcustomscrollbar.activechanged;
 begin
  if (fframeendbutton1 <> nil) or (fframebutton <> nil) or 

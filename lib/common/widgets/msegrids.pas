@@ -291,10 +291,13 @@ type
    procedure invalidatewidget;
    procedure invalidaterect(const rect: rectty; const org: originty = org_client;
                                   const noclip: boolean = false);
+   function getframestateflags: framestateflagsty;
+   {
+   function getframedisabled: boolean;
    function getframeclicked: boolean;
    function getframemouse: boolean;
    function getframeactive: boolean;
-   
+   }
    //iface
    function translatecolor(const acolor: colorty): colorty;
 
@@ -709,10 +712,13 @@ type
    procedure invalidatewidget;
    procedure invalidaterect(const rect: rectty; const org: originty = org_client;
                               const noclip: boolean = false);
+   function getframestateflags: framestateflagsty;
+   {
+   function getframedisabled: boolean;
    function getframeclicked: boolean;
    function getframemouse: boolean;
    function getframeactive: boolean;
-
+   }
    //iface
    function translatecolor(const acolor: colorty): colorty;
    
@@ -1104,6 +1110,7 @@ end;
    property frameimage_right;
    property frameimage_bottom;
    property frameimage_offset;
+   property frameimage_offsetdisabled;
    property frameimage_offsetmouse;
    property frameimage_offsetclicked;
    property frameimage_offsetactive;
@@ -2277,6 +2284,16 @@ begin
  end;
 end;
 
+function tgridprop.getframestateflags: framestateflagsty;
+begin
+ result:= [];
+end;
+{
+function tgridprop.getframedisabled: boolean;
+begin
+ result:= false;
+end;
+
 function tgridprop.getframeclicked: boolean;
 begin
  result:= false;
@@ -2291,7 +2308,7 @@ function tgridprop.getframeactive: boolean;
 begin
  result:= false;
 end;
-
+}
 { tcolselectfont }
 
 class function tcolselectfont.getinstancepo(owner: tobject): pfont;
@@ -2999,6 +3016,17 @@ begin
  end;
 end;
 
+function tcolheader.getframestateflags: framestateflagsty;
+begin
+ result:= [];
+end;
+
+{
+function tcolheader.getframedisabled: boolean;
+begin
+ result:= false;
+end;
+
 function tcolheader.getframeclicked: boolean;
 begin
  result:= false;
@@ -3013,7 +3041,7 @@ function tcolheader.getframeactive: boolean;
 begin
  result:= false;
 end;
-
+}
 { tcolheaders }
 
 constructor tcolheaders.create(const agridprop: tgridprop);
