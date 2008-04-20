@@ -1493,7 +1493,7 @@ end;
 procedure tfixcontainer.widgetregionchanged(const sender: twidget);
 var
  cell1: gridcoordty;
- int1,int2: integer;
+ int1,int2,int3: integer;
 begin
  inherited;
  if not (gs_layoutupdating in fgrid.fstate) and 
@@ -1505,19 +1505,27 @@ begin
    with ffixrows[cell1.row] do begin
     height:= sender.bounds_cy;
     int1:= 0;
+    int3:= 0;
     if cell1.col < 0 then begin
      int2:= ffixcols.count + cell1.col;
      if int2 < captionsfix.count then begin
-      int1:= captionsfix[int2].mergedcx;
+      with captionsfix[int2] do begin
+       int1:= mergedcx;
+       int3:= mergedcy;
+      end;
      end;
      ffixcols[cell1.col].width:= sender.bounds_cx - int1;
     end
     else begin
      if cell1.col < captions.count then begin
-      int1:= captions[cell1.col].mergedcx;
+      with captions[cell1.col] do begin
+       int1:= mergedcx;
+       int3:= mergedcy;
+      end;
      end;
      fdatacols[cell1.col].width:= sender.bounds_cx - int1;
     end;
+    height:= sender.bounds_cy - int3;
    end;
    layoutchanged;
   end;
@@ -1964,7 +1972,7 @@ begin
     for int2:= 0 to high(ffixrowwidgets) do begin
      if ffixrowwidgets[int2] = awidget then begin
       result.col:= int1;
-      result.row:= int2-ffixrows.count;
+      result.row:= -int2-1; //int2-ffixrows.count;
       exit;
      end;
     end;
@@ -1974,8 +1982,8 @@ begin
    with twidgetfixcol(ffixcols.items[int1]) do begin
     for int2:= 0 to high(ffixrowwidgets) do begin
      if ffixrowwidgets[int2] = awidget then begin
-      result.col:= int1 - fixcols.count;
-      result.row:= int2 - fixrows.count;
+      result.col:= -int1 - 1; //int1 - fixcols.count;
+      result.row:= -int2 - 1; //int2 - fixrows.count;
      end;
     end;
    end;

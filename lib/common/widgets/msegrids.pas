@@ -9,7 +9,7 @@
 }
 unit msegrids;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$goto on}{$endif}
 
 interface
 uses
@@ -666,6 +666,9 @@ type
    class function getinstancepo(owner: tobject): pfont; override;
  end;
 
+ cellmergeflagty = (cmf_h,cmf_v,cmf_rline);
+ cellmergeflagsty = set of cellmergeflagty;
+ 
  tcolheader = class(tindexpersistent,iframe,iface)
   private
    fcaption: msestring;
@@ -674,9 +677,13 @@ type
    fcolor: colorty;
    fhint: msestring;
    fmergecols: integer;
-   fmerged: boolean;
+   fmergerows: integer;
+   fmergeflags: cellmergeflagsty;
    fmergedcx: integer;
    fmergedx: integer;
+   fmergedcy: integer;
+   fmergedy: integer;
+   frefcell: gridcoordty;
    procedure setcaption(const avalue: msestring);
    procedure settextflags(const Value: textflagsty);
    function getfont: tcolheaderfont;
@@ -691,6 +698,7 @@ type
    procedure createface;
    procedure setcolor(const avalue: colorty);
    procedure setmergecols(const avalue: integer);
+   procedure setmergerows(const avalue: integer);
   protected
    fgrid: tcustomgrid;
    fframe: tfixcellframe;
@@ -713,12 +721,6 @@ type
    procedure invalidaterect(const rect: rectty; const org: originty = org_client;
                               const noclip: boolean = false);
    function getframestateflags: framestateflagsty;
-   {
-   function getframedisabled: boolean;
-   function getframeclicked: boolean;
-   function getframemouse: boolean;
-   function getframeactive: boolean;
-   }
    //iface
    function translatecolor(const acolor: colorty): colorty;
    
@@ -728,6 +730,8 @@ type
    destructor destroy; override;   
    property mergedcx: integer read fmergedcx;
    property mergedx: integer read fmergedx;
+   property mergedcy: integer read fmergedcy;
+   property mergedy: integer read fmergedy;
   published
    property color: colorty read fcolor write setcolor default cl_parent;
    property caption: msestring read fcaption write setcaption;
@@ -736,12 +740,14 @@ type
    property frame: tfixcellframe read getframe write setframe;
    property face: tfixcellface read getface write setface;
    property mergecols: integer read fmergecols write setmergecols default 0;
+   property mergerows: integer read fmergerows write setmergerows default 0;
    property hint: msestring read fhint write fhint;
  end;
 
  tcolheaders = class(tindexpersistentarrayprop)
   private
    fgridprop: tgridprop;
+   ffixcol: boolean;
    function getitems(const index: integer): tcolheader;
    procedure setitems(const index: integer; const Value: tcolheader);
   protected
@@ -760,6 +766,7 @@ type
    function getitems(const index: integer): tcolheader;
    procedure setitems(const index: integer; const Value: tcolheader);
   public
+   constructor create(const agridprop: tgridprop);
    property items[const index: integer]: tcolheader read getitems
                  write setitems; default;
  end;
@@ -797,7 +804,11 @@ type
    procedure drawcell(const canvas: tcanvas);{ virtual;}
    procedure movecol(const curindex,newindex: integer; const isfix: boolean);
    procedure orderdatacols(const neworder: integerarty);
-   function mergedline(acol: integer): boolean;
+//   function mergedline(acol: integer): boolean;
+   {
+   function mergedlineh(acol: integer): boolean;
+   function mergedlinev(acol: integer): boolean;
+   }
   public
    constructor create(const agrid: tcustomgrid; 
                         const aowner: tgridarrayprop); override;
@@ -1466,7 +1477,8 @@ end;
                  //origin = paintrect.pos
    function cellatpos(const apos: pointty): gridcoordty; overload;
    function cellrect(const cell: gridcoordty;
-                 const innerlevel: cellinnerlevelty = cil_all): rectty;
+                 const innerlevel: cellinnerlevelty = cil_all;
+                 const nomerged: boolean = false): rectty;
                  //origin = paintrect.pos
    function clippedcellrect(const cell: gridcoordty;
                  const innerlevel: cellinnerlevelty = cil_all): rectty;
@@ -3016,6 +3028,18 @@ begin
  end;
 end;
 
+procedure tcolheader.setmergerows(const avalue: integer);
+begin
+ if fmergerows <> avalue then begin
+  fmergerows:= avalue;
+  fgrid.layoutchanged;
+  if fgrid.componentstate * [csloading,csdesigning,csdestroying] = 
+                            [csdesigning] then begin
+   fgrid.updatelayout; //check colheaders.count
+  end;
+ end;
+end;
+
 function tcolheader.getframestateflags: framestateflagsty;
 begin
  result:= [];
@@ -3085,11 +3109,17 @@ end;
 procedure tcolheaders.updatelayout(const cols: tgridarrayprop);
 var
  int1,int2,int3,int4: integer;
+ headers1: tcolheaders;
+ header1: tcolheader;
+ lastmergedcol: integer;
+ lastmergedrow: integer;
+ bo1: boolean;
+ cell1: gridcoordty;
 begin
  int2:= count;
  for int1:= 0 to count - 1 do begin
   with tcolheader(fitems[int1]) do begin
-   fmerged:= false;
+   fmergeflags:= [];
    int3:= int1 + fmergecols;
    if int3 >= int2 then begin
     int2:= int3 + 1;
@@ -3099,26 +3129,36 @@ begin
  if int2 > count then begin
   count:= int2;
  end;
+ cell1.row:= -fgridprop.index - 1;
  for int1:= 0 to count -1 do begin
+  if ffixcol then begin
+   cell1.col:= -int1-1;
+  end
+  else begin
+   cell1.col:= int1;
+  end;
   with tcolheader(fitems[int1]) do begin
-   int3:= int1 + fmergecols;
-   if int3 >= count then begin
-    int3:= count - 1;
+   lastmergedcol:= int1 + fmergecols;
+   if lastmergedcol >= count then begin
+    lastmergedcol:= count - 1;
    end;
-   if int3 >= cols.count then begin
-    int3:= cols.count - 1;
+   if lastmergedcol >= cols.count then begin
+    lastmergedcol:= cols.count - 1;
    end;
-   if int1 < int3 then begin
+   if int1 < lastmergedcol then begin
     fmergedcx:= tgridprop(cols.fitems[int1]).flinewidth -
-                tgridprop(cols.fitems[int3]).flinewidth;
+                tgridprop(cols.fitems[lastmergedcol]).flinewidth;
     if cols.freversedorder then begin
      fmergedx:= -fmergedcx;
     end
     else begin
      fmergedx:= 0;
     end;
-    for int2:= int1 + 1 to int3 do begin
-     tcolheader(fitems[int2]).fmerged:= true;
+    for int2:= int1 + 1 to lastmergedcol do begin
+     with tcolheader(fitems[int2]) do begin
+      include(fmergeflags,cmf_h);
+      frefcell:= cell1;
+     end;
      int4:= tgridprop(cols.fitems[int2]).step;
      inc(fmergedcx,int4);
      if cols.freversedorder then begin
@@ -3129,6 +3169,76 @@ begin
    else begin
     fmergedcx:= 0;
     fmergedx:= 0;
+   end;
+   lastmergedrow:= fgridprop.index + fmergerows;
+   if lastmergedrow >= fgrid.fixrows.count then begin
+    lastmergedrow:= fgrid.fixrows.count-1;
+   end;
+   if fgridprop.index < lastmergedrow then begin
+    fmergedcy:= fgridprop.flinewidth -
+                tfixrow(fgrid.ffixrows.fitems[lastmergedrow]).flinewidth;
+    fmergedy:= -fmergedcy;
+    if lastmergedcol < int1 then begin
+     lastmergedcol:= int1;
+    end;
+    bo1:= fgridprop.index >= fgrid.ffixrows.count - 
+                                          fgrid.ffixrows.foppositecount;
+    for int2:= fgridprop.index + 1 to lastmergedrow do begin
+     with tfixrow(fgrid.ffixrows.fitems[int2]) do begin
+      int4:= step;
+      inc(fmergedcy,int4);
+      dec(fmergedy,int4);
+      if ffixcol then begin
+       headers1:= fcaptionsfix;
+      end
+      else begin
+       headers1:= fcaptions;
+      end;
+     end;
+     if headers1.count <= lastmergedcol then begin
+      headers1.count:= lastmergedcol + 1;
+     end;
+     header1:= tcolheader(headers1.fitems[int1]);
+     include(header1.fmergeflags,cmf_v);
+     header1.frefcell:= cell1;
+     if not bo1 then begin
+      include(header1.fmergeflags,cmf_rline);
+     end;
+     for int3:= int1 + 1 to lastmergedcol do begin
+      with tcolheader(headers1.fitems[int3]) do begin
+       if not bo1 then begin
+        fmergeflags:= fmergeflags + [cmf_v,cmf_h,cmf_rline];
+       end
+       else begin
+        fmergeflags:= fmergeflags + [cmf_v,cmf_h];
+       end;
+       frefcell:= cell1;
+      end;
+     end;
+    end;
+    if bo1 then begin
+     for int2:= fgridprop.index to lastmergedrow - 1 do begin
+      with tfixrow(fgrid.ffixrows.fitems[int2]) do begin
+       if ffixcol then begin
+        headers1:= fcaptionsfix;
+       end
+       else begin
+        headers1:= fcaptions;
+       end;
+      end;
+      header1:= tcolheader(headers1.fitems[int1]);
+      include(header1.fmergeflags,cmf_rline);
+      for int3:= int1 + 1 to lastmergedcol do begin
+       with tcolheader(headers1.fitems[int3]) do begin
+        include(fmergeflags,cmf_rline);
+       end;
+      end;
+     end;
+    end;
+   end
+   else begin
+    fmergedcy:= 0;
+    fmergedy:= 0;
    end;
   end;
  end;
@@ -3141,6 +3251,12 @@ begin
 end;
 
 { tfixcolheaders }
+
+constructor tfixcolheaders.create(const agridprop: tgridprop);
+begin
+ ffixcol:= true;
+ inherited;
+end;
 
 function tfixcolheaders.getitems(const index: integer): tcolheader;
 begin
@@ -3243,12 +3359,16 @@ begin
 end;
 
 procedure tfixrow.drawcell(const canvas: tcanvas);
+label
+ endlab;
 var
  int1,linewidthbefore: integer;
  frame1: tcustomframe;
  face1: tcustomface;
  headers1: tcolheaders;
  po1: pointty;
+ sizebefore: sizety;
+ linemerged: boolean;
 
 begin
  with cellinfoty(canvas.drawinfopo^) do begin
@@ -3264,17 +3384,21 @@ begin
   frame1:= fframe;
   face1:= fface;
   po1:= nullpoint;
+  sizebefore:= fcellrect.size;
+  linemerged:= false;
   if (int1 >= 0) and (int1 < headers1.count) then begin
    with tcolheader(headers1.fitems[int1]) do begin
-    if fmerged then begin
-     exit;
-    end;
+    linemerged:= cmf_rline in fmergeflags;
+    if fmergeflags * [cmf_v,cmf_h] <> [] then begin
+     goto endlab;
+    end;     
     if fcolor <> cl_parent then begin
      fcellinfo.color:= fcolor;
     end;
     inc(fcellrect.cx,fmergedcx);
+    inc(fcellrect.cy,fmergedcy);
     po1.x:= fmergedx;
-    canvas.move(po1);
+    po1.y:= fmergedy;
     if fframe <> nil then begin
      frame1:= fframe;
      tframe1(frame1).checkstate;
@@ -3284,6 +3408,7 @@ begin
     end;
    end;
   end;
+  canvas.move(po1);
   updatecellrect(frame1);
   ftextinfo.dest:= fcellinfo.innerrect;
   canvas.save;
@@ -3302,7 +3427,9 @@ begin
   end;
   canvas.restore;
   drawcelloverlay(canvas,frame1);
-  if flinewidth > 0 then begin
+  canvas.remove(makepoint(0,po1.y));
+endlab:
+  if (flinewidth > 0) and not linemerged then begin
    linewidthbefore:= canvas.linewidth;
    if flinewidth = 1 then begin
     canvas.linewidth:= 0;
@@ -3314,7 +3441,8 @@ begin
                      makepoint(fcellrect.x+fcellrect.cx{-1},flinepos),colorline);
    canvas.linewidth:= linewidthbefore;
   end;
-  canvas.remove(po1);
+  canvas.remove(makepoint(po1.x,0));
+  fcellrect.size:= sizebefore;
  end;
 end;
 
@@ -3343,7 +3471,7 @@ var
    if range.startindex < headers1.count then begin
     for int3:= range.startindex downto 0 do begin
      int2:= int3;
-     if not tcolheader(headers1.fitems[int3]).fmerged then begin
+     if not (cmf_h in tcolheader(headers1.fitems[int3]).fmergeflags) then begin
       break;
      end;
     end;
@@ -3353,7 +3481,7 @@ var
      bo1:= (colrange.scrollables xor (co_nohscroll in foptions)) and
         (not (co_invisible in foptions) or (csdesigning in fgrid.componentstate));
      if bo1 then begin
-      self.fcellrect.size.cx:= fwidth;
+      self.fcellrect.cx:= fwidth;
       self.fcellinfo.cell.col:= fcellinfo.cell.col;
       po2.x:= po1.x + fstart + fcellrect.x;
      end;
@@ -3551,7 +3679,7 @@ begin
   options:= options + [fro_invisible];
  end;
 end;
-
+{
 function tfixrow.mergedline(acol: integer): boolean;
 var
  header1: tcolheaders;
@@ -3563,10 +3691,42 @@ begin
  else begin
   header1:= fcaptions;
  end;
+ result:= (acol < header1.count) and 
+            (tcolheader(header1.fitems[acol]).fmergeflags * [cmf_h,cmf_v] <> []);
+end;
+}
+{
+function tfixrow.mergedlineh(acol: integer): boolean;
+var
+ header1: tcolheaders;
+begin
+ if acol < 0 then begin
+  acol:= -acol-1;
+  header1:= fcaptionsfix;
+ end
+ else begin
+  header1:= fcaptions;
+ end;
  inc(acol);
- result:= (acol < header1.count) and tcolheader(header1.fitems[acol]).fmerged;
+ result:= (acol < header1.count) and 
+            (cmf_h in tcolheader(header1.fitems[acol]).fmergeflags);
 end;
 
+function tfixrow.mergedlinev(acol: integer): boolean;
+var
+ header1: tcolheaders;
+begin
+ if acol < 0 then begin
+  acol:= -acol-1;
+  header1:= fcaptionsfix;
+ end
+ else begin
+  header1:= fcaptions;
+ end;
+ result:= (acol < header1.count) and 
+          (cmf_v in tcolheader(header1.fitems[acol]).fmergeflags);
+end;
+}
 { tgridarrayprop }
 
 constructor tgridarrayprop.create(aowner: tcustomgrid; aclasstype: gridpropclassty);
@@ -3843,8 +4003,10 @@ begin
  length:= startpos + length;
  with range do begin
   scrollables:= ascrollables;
-  calcrange(foppositecount,count-1,range1);
-  calcrange(0,foppositecount-1,range2);
+//  calcrange(foppositecount,count-1,range1);
+//  calcrange(0,foppositecount-1,range2);
+  calcrange(count-foppositecount,count-1,range1);
+  calcrange(0,count-foppositecount-1,range2);
  end;
 end;
 
@@ -5887,7 +6049,7 @@ procedure tfixrows.updatemergedcells;
 var
  int1: integer;
 begin
- for int1:= 0 to count - 1 do begin
+ for int1:= count - 1 downto 0 do begin //top down for row merging
   tfixrow(items[int1]).updatemergedcells;
  end;
 end;
@@ -8337,7 +8499,8 @@ begin
 end;
 
 function tcustomgrid.cellrect(const cell: gridcoordty;
-              const innerlevel: cellinnerlevelty = cil_all): rectty;
+              const innerlevel: cellinnerlevelty = cil_all;
+              const nomerged: boolean = false): rectty;
 
  procedure updatex(const aprop: tgridprop);
  begin
@@ -8411,17 +8574,33 @@ begin  //cellrect
        end;
       end;
      end;
-     if col >= 0 then begin
-      if col < fcaptions.count then begin
-       inc(cx,tcolheader(fcaptions.fitems[col]).fmergedcx);
-      end;
-     end
-     else begin
-      int1:= -col - 1;
-      if int1 < fcaptionsfix.count then begin
-       with tcolheader(fcaptionsfix.fitems[int1]) do begin
-        inc(x,fmergedx);
-        inc(cx,fmergedcx);
+     if not nomerged then begin
+      if col >= 0 then begin
+       if col < fcaptions.count then begin
+        with tcolheader(fcaptions.fitems[col]) do begin
+         if fmergeflags * [cmf_v,cmf_h] <> [] then begin
+          result:= cellrect(frefcell,innerlevel);
+          exit;
+         end;
+         inc(cx,fmergedcx);
+         inc(y,fmergedy);
+         inc(cy,fmergedcy);
+        end;
+       end;
+      end
+      else begin
+       int1:= -col - 1;
+       if int1 < fcaptionsfix.count then begin
+        with tcolheader(fcaptionsfix.fitems[int1]) do begin
+         if fmergeflags * [cmf_v,cmf_h] <> [] then begin
+          result:= cellrect(frefcell,innerlevel);
+          exit;
+         end;
+         inc(x,fmergedx);
+         inc(cx,fmergedcx);
+         inc(y,fmergedy);
+         inc(cy,fmergedcy);
+        end;
        end;
       end;
      end;
@@ -9154,32 +9333,38 @@ var
  begin
   result:= false;
   with rect do begin
-   if (pos.y <= rect1.y + sizingtol) then begin
+   if (cell.row >= 0) and (pos.y <= rect1.y + sizingtol) then begin
     if canrowsizing then begin
      objects[0]:= pickobjectstep * (cell.row-1) + integer(pok_datarowsize);
     end;
    end
    else begin
-    if (pos.y >= rect1.y + rect1.cy - sizingtol) then begin
+    if (cell.row >= 0) and (pos.y >= rect1.y + rect1.cy - sizingtol) then begin
      if canrowsizing then begin
       objects[0]:= pickobjectstep * (cell.row) + integer(pok_datarowsize);
      end;
     end
     else begin
      if (csdesigning in componentstate) and not nofixed then begin
-      if (pos.x <= rect1.x + sizingtol) and
+      if (pos.x <= rect1.x + sizingtol) and //left line
            (cell.col <> ffixcols.ffirstopposite + 1) then begin
-       if cell.col <= ffixcols.ffirstopposite then begin
+                   //not left col
+       if cell.col <= ffixcols.ffirstopposite then begin //right of table
         objects[0]:= -pickobjectstep * (cell.col) + integer(pok_fixcolsize);
        end
-       else begin
+       else begin              //left of table
         objects[0]:= -pickobjectstep * (cell.col-1) + integer(pok_fixcolsize);
        end;
       end
       else begin
-       if (pos.x >= rect1.x + rect1.cx - sizingtol) then begin
-        if (cell.col <> ffixcols.ffirstopposite) then begin
-         objects[0]:= -pickobjectstep * (cell.col) + integer(pok_fixcolsize);
+       if (pos.x >= rect1.x + rect1.cx - sizingtol) then begin //right line
+        if (cell.col <> ffixcols.ffirstopposite) then begin //not right col
+         if cell.col <= ffixcols.ffirstopposite then begin //right of table
+          objects[0]:= -pickobjectstep * (cell.col+1) + integer(pok_fixcolsize);
+         end
+         else begin
+          objects[0]:= -pickobjectstep * (cell.col) + integer(pok_fixcolsize);
+         end;
         end;
        end;
       end;
@@ -9202,35 +9387,49 @@ var
   result:= false;
   with rect do begin
    if (pos.x >= rect1.x + rect1.cx - sizingtol) then begin
-    if cancolsizing(cell.col) and 
-          (nofixed or not ffixrows[cell.row].mergedline(cell.col)) then begin
+    if (cell.col >= 0) and cancolsizing(cell.col) {and 
+          (nofixed or not ffixrows[cell.row].mergedline(cell.col))} then begin
      objects[0]:= pickobjectstep * (cell.col) + integer(pok_datacolsize);
     end;
    end
    else begin
     if (pos.x <= rect1.x + sizingtol) then begin
      int1:= fdatacols.previosvisiblecol(cell.col);
-     if cancolsizing(int1) and 
-          (nofixed or not ffixrows[cell.row].mergedline(int1)) then begin
+     if (int1 >= 0) and cancolsizing(int1) {and 
+          (nofixed or not ffixrows[cell.row].mergedline(int1))} then begin
       objects[0]:= pickobjectstep * (int1) + integer(pok_datacolsize);
      end;
     end
     else begin
      if (csdesigning in componentstate) and not nofixed then begin
       if (pos.y <= rect1.y + sizingtol) then begin
-       if cell.row <> ffixrows.ffirstopposite + 1 then begin
-        if cell.row <= ffixrows.ffirstopposite then begin
-         objects[0]:= -pickobjectstep * (cell.row) + integer(pok_fixrowsize);
+                //top line
+       if cell.row <> ffixrows.ffirstopposite + 1 then begin //not top row
+        if cell.row <= ffixrows.ffirstopposite then begin //below the table
+//         if (-cell.row = ffixrows.count) or //last row
+//                not ffixrows[cell.row-1].mergedline(cell.col) then begin
+          objects[0]:= -pickobjectstep * (cell.row) + integer(pok_fixrowsize);
+//         end;
         end
-        else begin
-         objects[0]:= -pickobjectstep * (cell.row-1) + integer(pok_fixrowsize);
+        else begin //above the table
+//         if not ffixrows[cell.row-1].mergedline(cell.col) then begin
+          objects[0]:= -pickobjectstep * (cell.row-1) + integer(pok_fixrowsize);
+//         end;
         end;
        end;
       end
       else begin
        if (pos.y >= rect1.y + rect1.cy - sizingtol) and
               (cell.row <> ffixrows.ffirstopposite) then begin
-        objects[0]:= -pickobjectstep * (cell.row) + integer(pok_fixrowsize);
+              //bottom line, not bottom row
+//        if not ffixrows[cell.row].mergedline(cell.col) then begin
+         if cell.row <= ffixrows.ffirstopposite then begin //below the table
+          objects[0]:= -pickobjectstep * (cell.row+1) + integer(pok_fixrowsize);
+         end
+         else begin
+          objects[0]:= -pickobjectstep * (cell.row) + integer(pok_fixrowsize);
+         end;
+//        end;
        end
        else begin        
         if not (gs_child in fstate) then begin
@@ -9252,14 +9451,14 @@ var
  end;
 
 begin
- if shiftstate <> [ss_left] then begin
+ if (shiftstate <> [ss_left]) or (gs_child in fstate) then begin
   exit;
  end;
  setlength(objects,1);
  objects[0]:= -1; //none
  with rect do begin
   cellkind:= cellatpos(pos,cell);
-  rect1:= cellrect(cell,cil_noline);
+  rect1:= cellrect(cell,cil_noline,true);
   case cellkind of
    ck_fixcolrow: begin
     if (csdesigning in componentstate) then begin
