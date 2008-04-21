@@ -53,13 +53,17 @@ type
   caption: msestring;
 //  kind: dialdatakindty;
  end;
-  
+
+ dialtickoptionty =  (dto_opposite);
+ dialtickoptionsty = set of dialtickoptionty;
+
  dialtickinfoty = record
   ticks: segmentarty;
   ticksreal: realarty;
   captions: tickcaptionarty;
   intervalcount: real;
   afont: tfont;
+  options: dialtickoptionsty;
  end;
 
  tdialprop = class(townedpersistent)
@@ -160,12 +164,15 @@ type
   private
    finfo: dialtickinfoty;
    procedure setintervalcount(const avalue: real);
+   procedure setoptions(const avalue: dialtickoptionsty);
   protected
 //   procedure paint(const acanvas: tcanvas);
   public
   published
    property intervalcount: real read finfo.intervalcount write setintervalcount;
                       //0 -> off
+   property options: dialtickoptionsty read finfo.options 
+                          write setoptions default [];
  end;
  
  tdialticks = class(townedpersistentarrayprop)
@@ -698,6 +705,14 @@ begin
  end;
 end;
 
+procedure tdialtick.setoptions(const avalue: dialtickoptionsty);
+begin
+ if finfo.options <> avalue then begin
+  finfo.options:= avalue;
+  changed;
+ end;
+end;
+
 { tdialticks }
 
 constructor tdialticks.create(const aowner: tcustomdialcontroller);
@@ -1008,7 +1023,7 @@ begin
       ticks:= nil;
      end
      else begin
-      calclineend(fli,false,rect1,linestart,lineend,dir1);
+      calclineend(fli,dto_opposite in options,rect1,linestart,lineend,dir1);
       step:= 1/intervalcount;
       valstep:= step * frange;
       first:= (offset*intervalcount)/range;
