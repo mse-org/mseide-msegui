@@ -612,7 +612,6 @@ type
   private
    fonexecute: notifyeventty;
    fvaluefaces: tvaluefacearrayprop;
-//   fcaption: captionty;
    fimageoffset: integer;
    fimagenums: tintegerarrayprop;
    fimagenr: integer;
@@ -649,6 +648,8 @@ type
   protected
    finfo: shapeinfoty;
    factioninfo: actioninfoty;
+   procedure loaded; override;
+   
    //iactionlink
    function getactioninfopo: pactioninfoty;
    function shortcutseparator: msechar;
@@ -665,11 +666,6 @@ type
    procedure dokeyup(var info: keyeventinfoty); override;
    procedure clientrectchanged; override;
    function getframestateflags: framestateflagsty; override;
-   {
-   function getframeclicked: boolean; override;
-   function getframemouse: boolean; override;
-   function getframeactive: boolean; override;
-   }
    procedure paintglyph(const canvas: tcanvas; const avalue;
                     const arect: rectty); override;
    procedure internalcreateframe; override;
@@ -677,7 +673,6 @@ type
    function checkfocusshortcut(var info: keyeventinfoty): boolean; override;
    procedure setactualimagenr(const avalue: integer);
    procedure setoptions(const avalue: buttonoptionsty); override;
-//   procedure setoptionswidget(const avalue: optionswidgetty); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -782,6 +777,7 @@ type
    property captionpos;
    property captiondist;
    property options;
+   property imagedist;
    property focusrectdist;
    property onexecute;
    property onsetvalue;
@@ -2741,6 +2737,12 @@ end;
 function tcustomdatabutton.isstatestored: boolean;
 begin
  result:= isactionstatestored(factioninfo);
+end;
+
+procedure tcustomdatabutton.loaded;
+begin
+ inherited;
+ actionendload(iactionlink(self));
 end;
 
 { tstockglyphdatabutton }

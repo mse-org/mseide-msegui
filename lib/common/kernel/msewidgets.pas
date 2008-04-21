@@ -864,13 +864,7 @@ type
    procedure dokeyup(var info: keyeventinfoty); override;
    procedure dopaint(const canvas: tcanvas); override;
    procedure clientrectchanged; override;
-//   procedure setoptionswidget(const avalue: optionswidgetty); override;
    function getframestateflags: framestateflagsty; override;
-   {
-   function getframeclicked: boolean; override;
-   function getframemouse: boolean; override;
-   function getframeactive: boolean; override;
-   }
   public
    constructor create(aowner: tcomponent); override;
    property options: buttonoptionsty read foptions write setoptions

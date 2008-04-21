@@ -221,10 +221,13 @@ type
    property shortcut;
    property shortcut1;
    property captionpos;
+   property captiondist;
    property font;
    property modalresult;
    property colorglyph;
+   property imagedist;
    property options;
+   property focusrectdist;
    property onexecute;
  end;
 
