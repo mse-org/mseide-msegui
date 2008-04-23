@@ -2305,7 +2305,9 @@ procedure tformdesignerfo.widgetregionchanged(const sender: twidget);
 begin
  inherited;
  if (fform <> nil) and (sender = fform) and 
-        not(ws1_anchorsizing in fform.widgetstate1) then begin
+        not(ws1_anchorsizing in fform.widgetstate1) and 
+        not (csdestroying in fform.componentstate) and
+        not (csdestroying in componentstate) then begin
   size:= fform.size; //syc with modulesize
  end;
 end;
@@ -2445,8 +2447,8 @@ begin
   fmodule.free;
   fmodule:= Value;
   if fmodule <> nil then begin
-//   fmodule.freenotification(self);
-   insertcomponent(value);
+   fmodule.freenotification(self);
+//   insertcomponent(value);
    placemodule;
   end;
  end;

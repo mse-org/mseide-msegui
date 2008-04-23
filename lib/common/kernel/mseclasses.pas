@@ -1152,7 +1152,9 @@ begin
   writer:= twriter.Create(stream2,4096);
   inl:= csinline in newancestor.componentstate;
   anc:= csancestor in newancestor.componentstate;
-  tmsecomponent(newancestor).SetInline(true);
+  if csinline in descendent.componentstate then begin
+   tmsecomponent(newancestor).SetInline(true);
+  end;
   tcomponent1(newancestor).SetAncestor(true);
   if sourcemethodtab <> nil then begin
    tabbefore:= swapmethodtable(newancestor,sourcemethodtab);

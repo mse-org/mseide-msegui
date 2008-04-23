@@ -473,7 +473,8 @@ end;
 
 function ismodule(const acomponent: tcomponent): boolean;
 begin
- result:= (acomponent.owner = nil) or (acomponent.owner.owner = nil);
+ result:= (acomponent = nil) or (acomponent.owner = nil);
+// result:= (acomponent.owner = nil) or (acomponent.owner.owner = nil);
 end;
 
 function getglobalcomponent(const Name: string): TComponent;
@@ -1281,6 +1282,9 @@ begin
             reader1.readrootcomponent(comp1);
             checkinline(comp1);
             placemodule;
+            inc(submodulecopy);
+            designer.dofixup;
+            dec(submodulecopy);
             notifygloballoading;
            finally
             designer.doswapmethodpointers(comp1,true);
@@ -1322,8 +1326,12 @@ begin
         end;
        end;
  {$ifdef mse_debugsubmodule}
+//       designer.doswapmethodpointers(infos[int1]^.descendent,false);
+//       designer.doswapmethodpointers(infos[int1]^.ancestor,false);
        debugbinout('after load ' + infos[int1]^.descendent.name,
                          infos[int1]^.descendent,infos[int1]^.ancestor);
+//       designer.doswapmethodpointers(infos[int1]^.descendent,true);
+//       designer.doswapmethodpointers(infos[int1]^.ancestor,true);
  {$endif}
       finally
        modifiedowners[int1]^.designform.window.endmoving;
@@ -1967,6 +1975,7 @@ begin
                                           fdesigner.fsubmodulelist);
     tmsecomponent1(instance).factualclassname:= @moduleclassname;
     tmsecomponent1(instance).fancestorclassname:= designmoduleclassname;
+//    initrootdescendent(instance);
     tmsecomponent1(instance).setancestor(true);
    end
    else begin
@@ -2408,20 +2417,38 @@ end;
 function tdesigner.findancestorcomponent(const acomponent: tcomponent): tcomponent;
 var
  ancestormodule: tmsecomponent;
+ comp1: tcomponent;
+ ar1: stringarty;
+ int1: integer;
 begin
  result:= nil;
- if csinline in acomponent.componentstate then begin
+ if acomponent.owner = nil then begin //module
   result:= descendentinstancelist.findancestor(acomponent);
  end
- else begin
-  if acomponent.owner = nil then begin
-   ancestormodule:= descendentinstancelist.findancestor(acomponent);
-  end
-  else begin
-   ancestormodule:= descendentinstancelist.findancestor(acomponent.owner);
+ else begin //embedded component
+  ar1:= nil;
+  result:= nil;
+  comp1:= acomponent;
+  while (comp1.owner <> nil) and 
+        (comp1.componentstate * [csinline,csancestor] <> [csinline]) do begin
+   if comp1.name = '' then begin
+    exit;
+   end;
+   additem(ar1,comp1.name);
+   comp1:= comp1.owner;
   end;
-  while (ancestormodule <> nil) and (result = nil) do begin
-   result:= ancestormodule.findcomponent(acomponent.name);
+  if (comp1.owner <> nil) and 
+                     (csancestor in comp1.owner.componentstate) then begin
+     //inherited submodule
+   additem(ar1,comp1.name);
+   comp1:= comp1.owner;
+  end;
+  result:= descendentinstancelist.findancestor(comp1);
+  for int1:= high(ar1) downto 0 do begin
+   if result = nil then begin 
+    exit;
+   end;
+   result:= result.findcomponent(ar1[int1]);
   end;
  end;
 end;
@@ -2892,7 +2919,9 @@ var
  pos1: pointty;
 begin
  po2:= fmodules.findmodule(tmsecomponent(acomponent.owner));
- if csinline in acomponent.componentstate then begin
+ if (csinline in acomponent.componentstate) and (acomponent.owner <> nil) and
+          not (csancestor in acomponent.owner.componentstate) then begin
+          //submodule
   po1:= fdescendentinstancelist.finddescendentinfo(acomponent);
   if po1 <> nil then begin
    if po2 <> nil then begin
@@ -2909,7 +2938,30 @@ begin
  end
  else begin
   if csancestor in acomponent.componentstate then begin
-   comp1:= fdescendentinstancelist.findancestor(acomponent.owner);
+   comp1:= findancestorcomponent(acomponent);
+   if comp1 <> nil then begin
+    fdescendentinstancelist.beginstreaming;
+    doswapmethodpointers(acomponent,false);
+    doswapmethodpointers(comp1,false);
+    try
+     refreshancestor(acomponent,comp1,comp1,true,
+      {$ifdef FPC}@{$endif}findancestor,
+      {$ifdef FPC}@{$endif}findcomponentclass,
+      {$ifdef FPC}@{$endif}createcomponent);
+     docopymethods(comp1,acomponent,true);
+//      dorefreshmethods(acomponent,comp1,acomponent);
+    finally
+     doswapmethodpointers(acomponent,true);
+     doswapmethodpointers(comp1,true);
+     fdescendentinstancelist.endstreaming;
+    end;
+   end;
+   (*
+   comp1:= acomponent.owner;
+   if comp1 = nil then begin
+    comp1:= acomponent;
+   end;
+   comp1:= fdescendentinstancelist.findancestor(comp1);
    if comp1 <> nil then begin
     comp1:= comp1.findcomponent(acomponent.name);
     if comp1 <> nil then begin
@@ -2930,6 +2982,7 @@ begin
      end;
     end;
    end;
+   *)
   end;
  end;
  componentmodified(acomponent);
