@@ -42,6 +42,7 @@ type
    procedure closebuonexecute(const sender: TObject);
    procedure againonexecute(const sender: TObject);
    procedure childscaled(const sender: TObject);
+   procedure formdestroy(const sender: TObject);
   private
    finfo: findinfileinfoty;
    procedure dorun;
@@ -249,6 +250,12 @@ begin
  if findinfiledialogexecute(finfo,true) then begin
   dorun;
  end;
+end;
+
+procedure tfindinfilepagefo.formdestroy(const sender: TObject);
+begin
+ thread.terminate;
+ thread.waitfor;
 end;
 
 end.

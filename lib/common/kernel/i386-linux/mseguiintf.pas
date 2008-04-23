@@ -2134,8 +2134,9 @@ begin
   xtype:= clientmessage;
   format:= 32;
   message_type:= mseclientmessageatom;
-  data.l[0]:= integer(event);
+  data.l[0]:= integer(event); //todo: 64bit
  end;
+ gdi_lock;
  if xsendevent(appdisp,appid,{$ifdef xboolean}false{$else}0{$endif},0,@xevent) = 0 then begin
   result:= gue_postevent;
  end
@@ -2143,6 +2144,7 @@ begin
   xflush(appdisp);
   result:= gue_ok;
  end;
+ gdi_unlock;
 end;
 
 function settimer1(us: cardinal): guierrorty;
@@ -2438,7 +2440,9 @@ end;
 
 function gui_hasevent: boolean;
 begin
+ gdi_lock;
  result:= xpending(appdisp) > 0;
+ gdi_unlock;
 end;
 
 function xkeytokey(key: keysym): keyty;
@@ -5162,7 +5166,10 @@ var
  chars: msestring;
  int1: integer;
  event: xevent;
- fdsetr,fdsete: tfdset;
+ pollinfo: array[0..1] of pollfd;
+             //0 connection, 1 sessionmanagement
+ pollcount: integer;
+// fdsetr,fdsete: tfdset;
  str1: string;
  {$ifdef hassm}
  int2: integer;
@@ -5181,11 +5188,22 @@ begin
   if gui_hasevent then begin
    break;
   end;
-  fd_zero(fdsetr);
-  fd_set(xconnectionnumber(appdisp),fdsetr);
+  fillchar(pollinfo,sizeof(pollinfo),0);
+  pollcount:= 1;
+  with pollinfo[0] do begin
+   fd:= xconnectionnumber(appdisp);
+   events:= pollin or pollpri;
+  end;
+//  fd_zero(fdsetr);
+//  fd_set(xconnectionnumber(appdisp),fdsetr);
 {$ifdef hassm}
   if sminfo.fd > 0 then begin
-   fd_set(sminfo.fd,fdsetr);
+   with pollinfo[1] do begin
+    fd:= sminfo.fd;
+    events:= pollin or pollpri;
+   end;
+   inc(pollcount);
+//   fd_set(sminfo.fd,fdsetr);
   end;
 {$endif}
   if not timerevent and not terminated then begin
@@ -5193,12 +5211,15 @@ begin
     if not application.unlock then begin
      guierror(gue_notlocked);
     end;
-    fdsete:= fdsetr;
-    int1:= select(fd_setsize,@fdsetr,nil,@fdsete,nil);
+//    fdsete:= fdsetr;
+    int1:= poll(@pollinfo,pollcount,1000); 
+     //wakeup clientmessages are sometimes missed with xcb ???
+//    int1:= select(fd_setsize,@fdsetr,nil,@fdsete,nil);
     application.lock;
    until (int1 <> -1) or timerevent or terminated;
  {$ifdef hassm}
-   if (int1 > 0) and fd_isset(sminfo.fd,fdsetr) then begin
+//   if (int1 > 0) and fd_isset(sminfo.fd,fdsetr) then begin
+   if (int1 > 0) and (pollinfo[1].revents <> 0) then begin
     iceprocessmessages(sminfo.iceconnection,nil,int2);
     with sminfo do begin
      if shutdown then begin
@@ -5333,7 +5354,7 @@ begin
    with xev.xclient do begin
     if display = appdisp then begin
      if message_type = mseclientmessageatom then begin
-      result:= tevent(data.l[0]);
+      result:= tevent(data.l[0]); //todo: 64bit
      end
      else begin
       if message_type = wmprotocolsatom then begin

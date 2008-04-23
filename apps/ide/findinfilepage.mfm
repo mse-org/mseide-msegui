@@ -14,6 +14,7 @@ object findinfilepagefo: tfindinfilepagefo
   container.frame.dummy = 0
   container.onchildscaled = childscaled
   icon.options = [bmo_masked]
+  ondestroy = formdestroy
   onchildscaled = childscaled
   moduleclassname = 'tmseform'
   object grid: twidgetgrid
