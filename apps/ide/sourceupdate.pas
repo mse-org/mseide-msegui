@@ -1456,37 +1456,37 @@ begin                        //completeclass
     if result then begin
      updateunit(infopo,false);
     end;
-    newimp:= false;
-    with infopo^.classinfolist[classindex1]^ do begin 
-                     //cpo is invalid after updateunit
-     if isemptysourcepos(procimpstart) then begin
-      newimp:= true;
-      replacetext(infopo,infopo^.implementationend,infopo^.implementationend,
-       '{ '+name+' }'+lineend);
-      result:= true;
-      procimpstart:= infopo^.implementationend;
-      inc(procimpstart.pos.row,1);
-      procimpstart.pos.col:= 0;
-      procimpend:= procimpstart;
-     end;
-     for int1:= 0 to procedurelist.count - 1 do begin
-      ppo:= procedurelist[int1];
-      with ppo^ do begin
-       if isemptysourcepos(impheaderstartpos) and 
-                  not (mef_abstract in params.flags) then begin
-        str1:= lineend + 
-            limitlinelength(composeprocedureheader(ppo,cpo,true),
-                                        fmaxlinelength,';',14) + lineend +
-                  'begin'+lineend+
-                  'end;'+lineend;
-        if newimp and (int1 = procedurelist.count - 1) then begin
-         str1:= str1 + lineend;
-        end;
-        replacetext(infopo,procimpend,procimpend,str1);
-        result:= true;
-        inc(procimpend.pos.row,high(breaklines(str1)));
-        procimpend.pos.col:= 0;
+   end;
+   newimp:= false;
+   cpo:= infopo^.classinfolist[classindex1]; //cpo is invalid after updateunit
+   with cpo^ do begin                     
+    if isemptysourcepos(procimpstart) then begin
+     newimp:= true;
+     replacetext(infopo,infopo^.implementationend,infopo^.implementationend,
+      '{ '+name+' }'+lineend);
+     result:= true;
+     procimpstart:= infopo^.implementationend;
+     inc(procimpstart.pos.row,1);
+     procimpstart.pos.col:= 0;
+     procimpend:= procimpstart;
+    end;
+    for int1:= 0 to procedurelist.count - 1 do begin
+     ppo:= procedurelist[int1];
+     with ppo^ do begin
+      if isemptysourcepos(impheaderstartpos) and 
+                 not (mef_abstract in params.flags) then begin
+       str1:= lineend + 
+           limitlinelength(composeprocedureheader(ppo,cpo,true),
+                                       fmaxlinelength,';',14) + lineend +
+                 'begin'+lineend+
+                 'end;'+lineend;
+       if newimp and (int1 = procedurelist.count - 1) then begin
+        str1:= str1 + lineend;
        end;
+       replacetext(infopo,procimpend,procimpend,str1);
+       result:= true;
+       inc(procimpend.pos.row,high(breaklines(str1)));
+       procimpend.pos.col:= 0;
       end;
      end;
     end;
