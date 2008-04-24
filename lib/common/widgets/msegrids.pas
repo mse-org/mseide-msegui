@@ -1629,8 +1629,11 @@ end;
   private
    function getdatacols: tdrawcols;
    procedure setdatacols(const value: tdrawcols);
+   function getcols(index: integer): tdrawcol;
+   procedure setcols(index: integer; const avalue: tdrawcol);
   protected
    function createdatacols: tdatacols; override;
+   property cols[index: integer]: tdrawcol read getcols write setcols; default;
   published
    property optionsgrid;
    property datacols: tdrawcols read getdatacols write setdatacols;
@@ -5079,7 +5082,7 @@ begin
  fwidth:= griddefaultcolwidth;
  inherited;
 end;
-
+var testvar1,testvar2: integer;
 procedure tcols.paint(const info: colpaintinfoty; const scrollables: boolean = true);
 var
  startx,endx: integer;
@@ -5095,9 +5098,11 @@ begin
   po2:= po1;
   for int1:= 0 to count-1 do begin
    with tcol(fitems[int1]) do begin
+testvar1:= fstart;
+testvar2:= fend;
     if (scrollables xor (co_nohscroll in foptions)) and 
-     not ((startx < fstart) and (endx < fstart) or 
-          (startx >= fend) and (endx >= fend)) then begin
+     not ((startx < fstart) and (endx <= fstart) or 
+          (startx >= fend) and (endx > fend)) then begin
      po2.x:= fstart + po1.x;
      canvas.origin:= po2;
      paint(info);
@@ -6627,7 +6632,7 @@ begin
      startrow:= 0;
     end;
     ystart:= startrow * ystep;
-    endrow:= (rect1.y + rect1.cy) div ystep;
+    endrow:= (rect1.y + rect1.cy - 1) div ystep;
     if endrow >= frowcount then begin
      endrow:= frowcount - 1;
     end;
@@ -7409,11 +7414,13 @@ begin
    if eventkind in mouseposevents then  begin
     coord1:= fmousecell;
     cellkind:= cellatpos(pos,fmousecell);
+    {
     if (coord1.col <> fmousecell.col) or 
             (coord1.row <> fmousecell.row) then begin
      invalidatesinglecell(coord1);
      invalidatesinglecell(fmousecell);
     end;
+    }
     if (fmousecell.row <> fmouseparkcell.row) or 
                               (fmousecell.col <> fmouseparkcell.col) then begin
      fmouseparkcell:= invalidcell;
@@ -10900,6 +10907,16 @@ end;
 procedure tdrawgrid.setdatacols(const value: tdrawcols);
 begin
  fdatacols.assign(value);
+end;
+
+function tdrawgrid.getcols(index: integer): tdrawcol;
+begin
+ result:= tdrawcol(fdatacols[index]);
+end;
+
+procedure tdrawgrid.setcols(index: integer; const avalue: tdrawcol);
+begin
+ tdrawcol(fdatacols[index]).assign(avalue);
 end;
 
 { tcellgrid }
