@@ -277,9 +277,17 @@ function applicationallocated: boolean;
 
 procedure registerapplicationclass(const aclass: applicationclassty);
 
-var
+procedure freedesigncomponent(const acomponent: tcomponent);
+procedure designvalidaterename(const acomponent: tcomponent;
+                                   const curname, newname: string);
+
+type
+ validaterenameeventty = procedure(const acomponent: tcomponent;
+                                const curname, newname: string) of object;
+var //designer hooks
  ondesignchanged: notifyeventty;
  onfreedesigncomponent: componenteventty;
+ ondesignvalidaterename: validaterenameeventty;
  
 implementation
 uses
@@ -296,6 +304,24 @@ type
 var
  appinst: tcustomapplication;
  appclass: applicationclassty;
+
+procedure freedesigncomponent(const acomponent: tcomponent);
+begin
+ if assigned(onfreedesigncomponent) then begin
+  onfreedesigncomponent(acomponent);
+ end
+ else begin
+  acomponent.free;
+ end;
+end;
+
+procedure designvalidaterename(const acomponent: tcomponent;
+                                   const curname, newname: string);
+begin
+ if assigned(ondesignvalidaterename) then begin
+  ondesignvalidaterename(acomponent,curname,newname);
+ end;
+end;
 
 function application: tcustomapplication;
 begin

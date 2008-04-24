@@ -290,6 +290,8 @@ type
    procedure doendread; virtual;
    procedure readstate(reader: treader); override;
    procedure loaded; override;
+   procedure validaterename(acomponent: tcomponent;
+                         const curname, newname: string); override;
    procedure sendchangeevent(const aevent: objecteventty = oe_changed);
    function linkcount: integer;
    function candestroyevent(const event: tmethod): boolean;
@@ -3027,6 +3029,19 @@ end;
 function tmsecomponent.hasskin: boolean;
 begin
  result:= true;
+end;
+
+procedure tmsecomponent.validaterename(acomponent: tcomponent;
+               const curname: string; const newname: string);
+begin
+ inherited;
+ if componentstate * [csdesigning,csreading,csloading,csdestroying] = 
+                                                    [csdesigning] then begin
+  if acomponent = nil then begin
+   acomponent:= self;
+  end;
+  designvalidaterename(acomponent,curname,newname);
+ end;
 end;
 
 {$ifdef mse_with_ifi}

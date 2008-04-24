@@ -1964,7 +1964,6 @@ procedure writewidgetnames(const writer: twriter; const ar: widgetarty);
 function needswidgetnamewriting(const ar: widgetarty): boolean;
 
 procedure designeventloop;
-procedure freedesigncomponent(const acomponent: tcomponent);
 
 function getprocesswindow(const procid: integer): winidty;
 function activateprocesswindow(const procid: integer; 
@@ -2618,16 +2617,6 @@ begin
   end;
  end;
  writer.writelistend;
-end;
-
-procedure freedesigncomponent(const acomponent: tcomponent);
-begin
- if assigned(onfreedesigncomponent) then begin
-  onfreedesigncomponent(acomponent);
- end
- else begin
-  acomponent.free;
- end;
 end;
 
 function application: tguiapplication;

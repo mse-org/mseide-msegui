@@ -358,7 +358,7 @@ procedure gridwidgetfontheightdelta(const sender: twidget; const gridintf: iwidg
 implementation
 uses
  sysutils,msebits,msedataedits,msewidgets,mseshapes,msekeyboard,typinfo,
- msereal;
+ msereal,mseapplication;
 
 type
  tdatalist1 = class(tdatalist);

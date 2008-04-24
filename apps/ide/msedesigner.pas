@@ -2172,6 +2172,7 @@ begin
  fdesignfiles:= tindexedfilenamelist.create;
  ondesignchanged:= {$ifdef FPC}@{$endif}componentmodified;
  onfreedesigncomponent:= {$ifdef FPC}@{$endif}deletecomponent;
+ ondesignvalidaterename:= {$ifdef FPC}@{$endif}validaterename;
 end;
 
 destructor tdesigner.destroy;
@@ -4180,30 +4181,32 @@ var
  int1: integer;
  comp1: tcomponent;
 begin
- ar1:= nil; //compiler warning
- po1:= findcomponentmodule(acomponent);
- if po1 <> nil then begin
-  if newname = '' then begin
-   raise exception.Create('Invalid component name,');
-  end;
-  if acomponent.name <> newname then begin
-   comp1:= acomponent.getparentcomponent;
-   if (comp1 <> nil) and (comp1.findcomponent(newname) <> nil) then begin
-    raise EComponentError.Createfmt(SDuplicateName,[newname]);
+ if loadingdesigner = nil then begin
+  ar1:= nil; //compiler warning
+  po1:= findcomponentmodule(acomponent);
+  if po1 <> nil then begin
+   if newname = '' then begin
+    raise exception.Create('Invalid component name,');
    end;
-   po1^.components.namechanged(acomponent,newname);
-   designnotifications.componentnamechanging(idesigner(self),po1^.instance,
-                                      acomponent,newname);
-   if acomponent is tmsecomponent then begin
-    ar1:= tmsecomponent(acomponent).linkedobjects;
-   end
-   else begin
-    ar1:= objectarty(getlinkedcomponents(acomponent));
+   if acomponent.name <> newname then begin
+    comp1:= acomponent.getparentcomponent;
+    if (comp1 <> nil) and (comp1.findcomponent(newname) <> nil) then begin
+     raise EComponentError.Createfmt(SDuplicateName,[newname]);
+    end;
+    po1^.components.namechanged(acomponent,newname);
+    designnotifications.componentnamechanging(idesigner(self),po1^.instance,
+                                       acomponent,newname);
+    if acomponent is tmsecomponent then begin
+     ar1:= tmsecomponent(acomponent).linkedobjects;
+    end
+    else begin
+     ar1:= objectarty(getlinkedcomponents(acomponent));
+    end;
    end;
-  end;
-  for int1:= 0 to high(ar1) do begin
-   if ar1[int1] is tcomponent then begin
-    componentmodified(tcomponent(ar1[int1]));
+   for int1:= 0 to high(ar1) do begin
+    if ar1[int1] is tcomponent then begin
+     componentmodified(tcomponent(ar1[int1]));
+    end;
    end;
   end;
  end;
