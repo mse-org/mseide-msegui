@@ -30,12 +30,13 @@ type
                 co_noctrlmousefocus,
          //     lvo_focusselect,lvo_mouseselect,lvo_keyselect,
                 co_focusselect, co_mouseselect, co_keyselect,
-         //     lvo_multiselect,lvo_resetselectonexit,lvo_noresetselect
-                co_multiselect, co_resetselectonexit,{co_noresetselect,} co_rowselect,
+         //     lvo_multiselect,lvo_resetselectonexit{,lvo_noresetselect}
+                co_multiselect, co_resetselectonexit,{co_noresetselect,}
+                co_rowselect,
 
                 co_fixwidth,co_fixpos,co_fill,co_proportional,co_nohscroll,
                 co_savevalue,co_savestate,
-                co_rowfont,co_rowcolor,co_zebracolor,
+                co_rowfont,co_rowcolor,co_zebracolor,co_rowcoloractive,
                 co_nosort,co_sortdescent,co_norearange,
                 co_cancopy,co_canpaste,co_mousescrollrow,co_rowdatachange
                 );
@@ -104,7 +105,7 @@ const
  gridvaluevarname = 'values';
  pickobjectstep = integer(high(pickobjectkindty)) + 1;
  layoutchangedcoloptions: coloptionsty = [co_fill,co_proportional,co_invisible,
- co_nohscroll];
+                              co_nohscroll,co_rowcoloractive];
  notfixcoloptions = [co_fixwidth,co_fixpos,co_fill,co_proportional,co_nohscroll,
                      co_rowdatachange];
  defaultoptionsgrid = [og_autopopup,og_colchangeontabkey,og_focuscellonenter,
@@ -150,6 +151,7 @@ type
       gs_selectionchanged,gs_rowdatachanged,gs_invalidated,{gs_rowappended,}
       gs_mouseentered,gs_childmousecaptured,gs_child,
       gs_mousecellredirected,gs_restorerow,gs_cellexiting,gs_rowremoving,
+      gs_hasactiverowcolor,
       gs_needszebraoffset, //has zebrastep or autonumcol
       gs_islist,//contiguous select blocks
       gs_isdb); //do not change rowcount
@@ -356,7 +358,7 @@ type
   rowrange: cellaxisrangety;
  end;
 
- colstatety = (cos_selected,cos_noinvalidate,cos_edited,cos_readonlyupdating);
+ colstatety = (cos_fix,cos_selected,cos_noinvalidate,cos_edited,cos_readonlyupdating);
  colstatesty = set of colstatety;
 
  tcolselectfont = class(tparentfont)
@@ -2059,7 +2061,8 @@ begin
   avalue:= cl_none;
  end;
  if avalue <> fcoloractive then begin
-  fcoloractive := avalue;
+  fcoloractive:= avalue;
+  fgrid.layoutchanged;
   changed;
  end;
 end;
@@ -2426,7 +2429,9 @@ begin
     result:= defaultselectedcellcolor;
    end;
   end;
-  if (aindex = fgrid.ffocusedcell.row) and (result = cl_none) then begin
+  if (result = cl_none) and fgrid.entered and (aindex = fgrid.ffocusedcell.row) and 
+          ((cos_fix in fstate) or (co_rowcoloractive in foptions) or 
+                               (findex = fgrid.ffocusedcell.col)) then begin
    result:= fcoloractive;
   end;
   if result = cl_none then begin
@@ -4132,11 +4137,18 @@ procedure tdatacol.dofocusedcellchanged(enter: boolean;
                   const selectaction: focuscellactionty);
 var
  info: celleventinfoty;
+ bo1: boolean;
 begin
+ bo1:= (gs_hasactiverowcolor in fgrid.fstate) and (newcell.row <> cellbefore.row);
  if enter then begin
   fgrid.factiverow:= newcell.row;
-  if co_drawfocus in foptions then begin
-   cellchanged(newcell.row);
+  if bo1 then begin
+   fgrid.invalidaterow(newcell.row);
+  end
+  else begin
+   if (co_drawfocus in foptions) or (fcoloractive <> cl_none) then begin
+    invalidatecell(newcell.row);
+   end;
   end;
   fgrid.initeventinfo(newcell,cek_enter,info);
  end
@@ -4144,8 +4156,13 @@ begin
   if selectaction <> fca_exitgrid then begin
    fgrid.factiverow:= newcell.row;
   end;
-  if co_drawfocus in foptions then begin
-   cellchanged(cellbefore.row);
+  if bo1 then begin
+   fgrid.invalidaterow(cellbefore.row);
+  end
+  else begin
+   if (co_drawfocus in foptions) or (fcoloractive <> cl_none) then begin
+    invalidatecell(cellbefore.row);
+   end;
   end;
   fgrid.initeventinfo(cellbefore{newcell},cek_exit,info);
  end;
@@ -4917,6 +4934,7 @@ begin
  fcaptions:= tmsestringdatalist.create;
  fcaptions.onitemchange:= {$ifdef FPC}@{$endif}captionchanged;
  inherited;
+ include(fstate,cos_fix);
  fcolor:= cl_parent;
 end;
 
@@ -6408,15 +6426,28 @@ var
  scrollstate: framestatesty;
  int1,int2,int3: integer;
 begin
+ exclude(fstate,gs_hasactiverowcolor);
+ exclude(fstate,gs_needszebraoffset);
  if (zebra_step <> 0) then begin
   include(fstate,gs_needszebraoffset);
- end
- else begin
-  exclude(fstate,gs_needszebraoffset);
-  for int1:= 0 to fixcols.count -1 do begin
-   if tfixcol(fixcols.items[int1]).numstep <> 0 then begin
-    include(fstate,gs_needszebraoffset);
-    break;
+ end;
+ for int1:= 0 to ffixcols.count -1 do begin
+  with tfixcol(ffixcols.items[int1]) do begin
+   if numstep <> 0 then begin
+    include(self.fstate,gs_needszebraoffset);
+   end;
+   if coloractive <> cl_none then begin
+    include(self.fstate,gs_hasactiverowcolor);
+   end;
+  end;
+ end;
+ if not (gs_hasactiverowcolor in fstate) then begin
+  for int1:= 0 to fdatacols.count -1 do begin
+   with tdatacol(fdatacols.items[int1]) do begin
+    if (fcoloractive <> cl_none) and (co_rowcoloractive in foptions) then begin
+     include(self.fstate,gs_hasactiverowcolor);
+     break;
+    end;
    end;
   end;
  end;
@@ -7945,6 +7976,9 @@ begin     //focuscell
     cell.col:= 0;
    end;
    cell.col:= nextfocusablecol(cell.col,false);
+   if (gs_hasactiverowcolor in fstate) and (cell.row < frowcount) then begin
+    invalidaterow(cell.row);
+   end;
   end;
   if cell.row < 0 then begin
    cell.row:= invalidaxis;
