@@ -63,7 +63,7 @@ object settaborderfo: tsettaborderfo
       frame.dummy = 0
       taborder = 1
       visible = False
-      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
       reffontheight = 14
     end
     object windex: tintegeredit
