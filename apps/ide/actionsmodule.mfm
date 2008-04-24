@@ -495,7 +495,7 @@ object actionsmo: tactionsmo
     top = 200
   end
   object shortcuts: tshortcutcontroller
-    actions.count = 48
+    actions.count = 49
     actions.items = <    
       item
         dispname = 'File'
@@ -509,6 +509,10 @@ object actionsmo: tactionsmo
         action = save
         shortcutdefault = 16467
         dispname = 'Save'
+      end    
+      item
+        action = saveall
+        dispname = 'Save all'
       end    
       item
         action = saveas
