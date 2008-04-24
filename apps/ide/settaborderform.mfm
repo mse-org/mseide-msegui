@@ -1,22 +1,26 @@
 object settaborderfo: tsettaborderfo
+  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
   bounds_x = 471
   bounds_y = 402
   bounds_cx = 292
   bounds_cy = 205
+  taborder = 1
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
   container.bounds_cx = 292
   container.bounds_cy = 205
   container.frame.dummy = 0
   options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos]
   statfile = statfile1
   caption = 'Set Tab Order'
-  icon.transparency = -2147483648
   oneventloopstart = formonloaded
   onclosequery = formonclosequery
   onmouseevent = formmouseevent
   moduleclassname = 'tmseform'
   object grid: twidgetgrid
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 0
     bounds_y = 29
     bounds_cx = 290
     bounds_cy = 150
@@ -25,32 +29,33 @@ object settaborderfo: tsettaborderfo
     anchors = [an_left, an_top, an_right, an_bottom]
     optionsgrid = [og_rowmoving, og_keyrowmoving, og_focuscellonenter, og_colchangeontabkey, og_autopopup]
     fixcols.count = 1
-    fixcols.items = <
+    fixcols.items = <    
       item
         width = 32
         numstep = 1
       end>
-    rowcount = 0
     datacols.count = 2
-    datacols.items = <
+    datacols.items = <    
       item
-        width = 201
-        options = [co_focusselect, co_fill, co_savevalue, co_savestate]
         colorselect = -1879048185
+        width = 201
+        options = [co_readonly, co_focusselect, co_fill, co_savevalue, co_savestate]
         widgetname = 'wname'
-      end
+      end    
       item
         options = [co_invisible, co_savevalue, co_savestate]
         widgetname = 'windex'
       end>
-    datarowheight = 15
+    datarowheight = 16
     onrowsmoved = gridonrowsmoved
     oncellevent = gridoncellevent
-    reffontheight = 13
+    reffontheight = 14
     object wname: tstringedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      bounds_x = 0
+      bounds_y = 0
       bounds_cx = 201
-      bounds_cy = 15
+      bounds_cy = 16
       color = -1879048185
       frame.levelo = 0
       frame.colorclient = -2147483646
@@ -58,19 +63,22 @@ object settaborderfo: tsettaborderfo
       frame.dummy = 0
       taborder = 1
       visible = False
-      reffontheight = 13
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+      reffontheight = 14
     end
     object windex: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
       bounds_x = 202
+      bounds_y = 0
       bounds_cx = 50
-      bounds_cy = 15
+      bounds_cy = 16
       frame.levelo = 0
       frame.colorclient = -2147483646
       frame.localprops = [frl_levelo, frl_colorclient]
       frame.dummy = 0
+      taborder = 2
       visible = False
-      reffontheight = 13
+      reffontheight = 14
     end
   end
   object ok: tbutton
@@ -100,12 +108,12 @@ object settaborderfo: tsettaborderfo
     bounds_x = 3
     bounds_y = 4
     bounds_cx = 60
-    bounds_cy = 17
+    bounds_cy = 18
     frame.captionpos = cp_right
     frame.dummy = 0
     taborder = 1
     onsetvalue = mousetaborderonsetvalue
-    reffontheight = 13
+    reffontheight = 14
   end
   object start: tbutton
     bounds_x = 69
@@ -130,16 +138,16 @@ object settaborderfo: tsettaborderfo
   object tlabel1: tlabel
     bounds_x = 176
     bounds_y = 5
-    bounds_cx = 98
-    bounds_cy = 18
+    bounds_cx = 64
+    bounds_cy = 14
     taborder = 6
     caption = 'Mouse click'
-    reffontheight = 13
+    reffontheight = 14
   end
   object statfile1: tstatfile
     filename = 'settaborderfo.sta'
     options = [sfo_memory]
-    Left = 80
-    Top = 8
+    left = 80
+    top = 8
   end
 end
