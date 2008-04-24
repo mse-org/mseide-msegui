@@ -1125,6 +1125,7 @@ begin
    else begin
     edit.encoding:= ce_ansi;
    end;
+   grid.wheelscrollheight:= scrollheight;
   end;
  end;
 end;
