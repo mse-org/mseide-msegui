@@ -89,6 +89,7 @@ type
  widgetstate1ty = ({ws1_releasing,}ws1_childscaled,ws1_fontheightlock,
                    ws1_widgetregionvalid,ws1_rootvalid,
                    ws1_anchorsizing,ws1_parentclientsizeinited,
+                   ws1_parentupdating, //set while setparentwidget
                    ws1_isstreamed,//used by ttabwidget
                    ws1_scaled, //used in tcustomscalingwidget
                    ws1_noclipchildren,
@@ -5410,59 +5411,68 @@ end;
 procedure twidget.setparentwidget(const Value: twidget);
 var
  newpos: pointty;
+ updatingbefore: boolean;
 begin
  if fparentwidget <> value then begin
-  if entered then begin
-   window.nofocus;
-  end;
-  if (value <> nil) then begin
-   if value = self then begin
-    raise exception.create('Recursive parent.');
+  updatingbefore:= ws1_parentupdating in fwidgetstate1;
+  include(fwidgetstate1,ws1_parentupdating);
+  try
+   if entered then begin
+    window.nofocus;
    end;
-   if (fwindow <> nil) and ownswindow1 then begin
-    newpos:= translatewidgetpoint(fwidgetrect.pos,nil,value);
-    fwindow.fowner:= nil;
-    freeandnil(fwindow);
+   if (value <> nil) then begin
+    if value = self then begin
+     raise exception.create('Recursive parent.');
+    end;
+    if (fwindow <> nil) and ownswindow1 then begin
+     newpos:= translatewidgetpoint(fwidgetrect.pos,nil,value);
+     fwindow.fowner:= nil;
+     freeandnil(fwindow);
+    end
+    else begin
+     newpos:= fwidgetrect.pos;
+    end;
    end
    else begin
-    newpos:= fwidgetrect.pos;
+    newpos:= addpoint(rootwidget.fwidgetrect.pos,rootpos);
+    fcolor:= translatecolor(fcolor);
    end;
-  end
-  else begin
-   newpos:= addpoint(rootwidget.fwidgetrect.pos,rootpos);
-   fcolor:= translatecolor(fcolor);
-  end;
-
-  if fparentwidget <> nil then begin
-   subpoint1(newpos,clearparentwidget.clientwidgetpos);
-  end;
-  if fparentwidget <> nil then begin
-   exit;                   //interrupt
-  end;
-  fparentwidget:= Value;
-  fwidgetrect.pos:= newpos;
-  if fparentwidget <> nil then begin
-   fparentwidget.registerchildwidget(self);
-   if not (csloading in componentstate) and 
-                       not (ws_loadlock in fwidgetstate) then begin
-    fparentclientsize:= fparentwidget.minclientsize;
-    parentclientrectchanged;
+ 
+   if fparentwidget <> nil then begin
+    subpoint1(newpos,clearparentwidget.clientwidgetpos);
    end;
-  end
-  else begin
-   if visible and not (ws_destroying in fwidgetstate) and 
-             not (csdestroying in componentstate) then begin
-    window.show(false);
+   if fparentwidget <> nil then begin
+    exit;                   //interrupt
    end;
-  end;
-  if not isloading then begin
-   fontchanged;
-   colorchanged;
-   enabledchanged; //-> statechanged
-   parentchanged;
-   if (fparentwidget <> nil) and fparentwidget.focused and 
-           (ow_subfocus in fparentwidget.foptionswidget) and canfocus then begin
-    setfocus(fparentwidget.active);
+   fparentwidget:= Value;
+   fwidgetrect.pos:= newpos;
+   if fparentwidget <> nil then begin
+    fparentwidget.registerchildwidget(self);
+    if not (csloading in componentstate) and 
+                        not (ws_loadlock in fwidgetstate) then begin
+     fparentclientsize:= fparentwidget.minclientsize;
+     parentclientrectchanged;
+    end;
+   end
+   else begin
+    if visible and not (ws_destroying in fwidgetstate) and 
+              not (csdestroying in componentstate) then begin
+     window.show(false);
+    end;
+   end;
+   if not isloading then begin
+    fontchanged;
+    colorchanged;
+    enabledchanged; //-> statechanged
+    parentchanged;
+    if (fparentwidget <> nil) and fparentwidget.focused and 
+            (ow_subfocus in fparentwidget.foptionswidget) and canfocus then begin
+     setfocus(fparentwidget.active);
+    end;
+   end;
+  finally
+   if not updatingbefore then begin
+    exclude(fwidgetstate1,ws1_parentupdating);
    end;
   end;
  end;

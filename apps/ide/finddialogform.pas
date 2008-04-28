@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2008 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,18 +21,22 @@ unit finddialogform;
 interface
 uses
  mseforms,msesimplewidgets,msedataedits,msegraphedits,msetextedit,msestrings,
- msetypes,msestat,msestatfile,projectoptionsform,mseglob;
+ msetypes,msestat,msestatfile,projectoptionsform,mseglob,mseevent,msegui,
+ msemenus,msesplitter,msegraphics,msegraphutils,msewidgets;
 
 type
 
  tfinddialogfo = class(tmseform)
    findtext: thistoryedit;
-   casesensitive: tbooleanedit;
    statfile1: tstatfile;
-   wholeword: tbooleanedit;
-   selectedonly: tbooleanedit;
    ok: tbutton;
+   tlayouter1: tlayouter;
    cancel: tbutton;
+   tbutton2: tbutton;
+   tlayouter2: tlayouter;
+   selectedonly: tbooleanedit;
+   wholeword: tbooleanedit;
+   casesensitive: tbooleanedit;
   private
    procedure valuestoinfo(out info: findinfoty);
    procedure infotovalues(const info: findinfoty);
@@ -42,7 +46,7 @@ function finddialogexecute(var info: findinfoty): boolean;
 
 implementation
 uses
- mseguiglob,msegui,finddialogform_mfm;
+ mseguiglob,finddialogform_mfm;
 
 function finddialogexecute(var info: findinfoty): boolean;
 var

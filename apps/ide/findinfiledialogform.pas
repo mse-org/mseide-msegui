@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2008 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,22 +20,28 @@ unit findinfiledialogform;
 
 interface
 uses
- finddialogform,findinfileform,mseforms,msedataedits,msesimplewidgets,msegraphedits,
- msefiledialog,msetypes,mseglob,mseguiglob,msegui,msestat,msestatfile;
+ finddialogform,findinfileform,mseforms,msedataedits,msesimplewidgets,
+ msegraphedits,msefiledialog,msetypes,mseglob,mseguiglob,msegui,msestat,
+ msestatfile,mseevent,msemenus,msesplitter,msegraphics,msegraphutils,msewidgets;
 
 type
 
  tfindinfiledialogfo = class(tmseform)
    findtext: thistoryedit;
-   casesensitive: tbooleanedit;
    statfile1: tstatfile;
-   wholeword: tbooleanedit;
-   indirectories,inopenfiles: tbooleaneditradio;
    dir: tfilenameedit;
    mask: thistoryedit;
-   subdirs: tbooleanedit;
+   tlayouter1: tlayouter;
+   indirectories: tbooleaneditradio;
+   casesensitive: tbooleanedit;
+   tlayouter2: tlayouter;
+   wholeword: tbooleanedit;
+   inopenfiles: tbooleaneditradio;
+   tlayouter4: tlayouter;
+   tlayouter3: tlayouter;
    ok: tbutton;
    cancel: tbutton;
+   subdirs: tbooleanedit;
    procedure dironbeforeexecute(const sender: tfiledialogcontroller;
                    var dialogkind: filedialogkindty; var aresult: modalresultty);
    procedure dirshowhint(const sender: TObject; var info: hintinfoty);

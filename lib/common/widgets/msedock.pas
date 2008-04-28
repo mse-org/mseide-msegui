@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -223,7 +223,7 @@ type
    function canfloat: boolean;
    procedure refused(const apos: pointty);
    procedure calclayout(const dragobject: tdockdragobject;
-                      const nonewplace: boolean);
+                        const nonewplace: boolean);
    procedure setpickshape(const ashape: cursorshapety);
    procedure restorepickshape;
    function checkbuttonarea(const apos: pointty): dockbuttonrectty;
@@ -364,10 +364,10 @@ type
    //iface
    function getwidget: twidget;
    function translatecolor(const acolor: colorty): colorty;
-      //iobjectpicker
+   //iobjectpicker
    function getcursorshape(const pos: pointty; const shiftstate: shiftstatesty; 
                                      var shape: cursorshapety): boolean;
-    //true if found
+                   //true if found
    procedure getpickobjects(const rect: rectty;  const shiftstate: shiftstatesty;
                                      var objects: integerarty);
    procedure beginpickmove(const objects: integerarty);
@@ -1335,7 +1335,7 @@ begin
 end;
 
 procedure tdockcontroller.calclayout(const dragobject: tdockdragobject;
-                                                  const nonewplace: boolean);
+                                     const nonewplace: boolean);
 var
  rect1: rectty;
  po1: pointty;
@@ -2546,16 +2546,13 @@ procedure tdockcontroller.widgetregionchanged(const sender: twidget);
 begin
  if (sender <> nil) and
          (fdockstate * [dos_updating1,dos_updating2,dos_updating3,dos_updating4,
-                       dos_updating5] = [])then begin
+                       dos_updating5] = []) then begin
   with fintf.getwidget do begin
    if (componentstate * [csloading,csdesigning] = []) and not (ws_destroying in widgetstate) and
      not (ow_noautosizing in sender.optionswidget) then begin
     include(fdockstate,dos_updating3);
     try
-//     if (ftabwidget <> nil) and sender.visible then begin
-//      tdocktabpage.create(tdocktabwidget(ftabwidget),sender);
-//     end;
-     calclayout(nil,false);
+     calclayout(nil,not(ws1_parentupdating in sender.widgetstate1));
     finally
      exclude(fdockstate,dos_updating3);
     end;
