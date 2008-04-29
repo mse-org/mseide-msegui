@@ -115,6 +115,7 @@ type
   
  tmsefield = class(tfield)
   private
+   ftagpo: pointer;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
@@ -126,6 +127,7 @@ type
   public
    procedure Clear; override;
    property asmsestring: msestring read getasmsestring write setasmsestring;
+   property tagpo: pointer read ftagpo write ftagpo;
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
@@ -144,6 +146,7 @@ type
    fgetmsestringdata: getmsestringdataty;
    fsetmsestringdata: setmsestringdataty;
    fcharacterlength: integer;
+   ftagpo: pointer;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
    //ifieldcomponent
@@ -171,6 +174,7 @@ type
    property asmsestring: msestring read getasmsestring write setasmsestring;
    function oldmsestring(out aisnull: boolean): msestring;
    property characterlength: integer read fcharacterlength;
+   property tagpo: pointer read ftagpo write ftagpo;
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
@@ -178,6 +182,7 @@ type
 
  tmsenumericfield = class(tnumericfield)
   private
+   ftagpo: pointer;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
@@ -191,12 +196,14 @@ type
    function assql: string;
    function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
+   property tagpo: pointer read ftagpo write ftagpo;
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
  tmselongintfield = class(tlongintfield)
   private
+   ftagpo: pointer;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
    procedure setasenum(const avalue: integer);
@@ -216,12 +223,14 @@ type
    function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
    property asenum: integer read getaslongint write setasenum;
+   property tagpo: pointer read ftagpo write ftagpo;
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
  tmselargeintfield = class(tlargeintfield)
   private
+   ftagpo: pointer;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
@@ -238,12 +247,14 @@ type
    function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
    property Value: Largeint read GetAsLargeint write SetAsLargeint;
+   property tagpo: pointer read ftagpo write ftagpo;
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
  tmsesmallintfield = class(tsmallintfield)
   private
+   ftagpo: pointer;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
@@ -259,12 +270,14 @@ type
    function assql: string;
    function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
+   property tagpo: pointer read ftagpo write ftagpo;
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
  tmsewordfield = class(twordfield)
   private
+   ftagpo: pointer;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
@@ -280,12 +293,14 @@ type
    function assql: string;
    function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
+   property tagpo: pointer read ftagpo write ftagpo;
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
  tmseautoincfield = class(tautoincfield)
   private
+   ftagpo: pointer;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
@@ -299,12 +314,14 @@ type
    function assql: string;
    function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
+   property tagpo: pointer read ftagpo write ftagpo;
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
  tmsefloatfield = class(tfloatfield)
   private
+   ftagpo: pointer;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
@@ -321,12 +338,14 @@ type
    function assql: string;
    function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
+   property tagpo: pointer read ftagpo write ftagpo;
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
  tmsecurrencyfield = class(tcurrencyfield)
   private
+   ftagpo: pointer;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
@@ -341,6 +360,7 @@ type
    function assql: string;
    function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
+   property tagpo: pointer read ftagpo write ftagpo;
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
@@ -349,6 +369,7 @@ type
   private
    fdisplayvalues: msestring;
    fdisplays : array[boolean,boolean] of msestring;
+   ftagpo: pointer;
    procedure setdisplayvalues(const avalue: msestring);
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
@@ -373,6 +394,7 @@ type
    function assql: string;
    function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
+   property tagpo: pointer read ftagpo write ftagpo;
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
@@ -385,6 +407,7 @@ type
  tmsedatetimefield = class(tdatetimefield)
   private
    foptions: datetimefieldoptionsty;
+   ftagpo: pointer;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
    procedure setoptions(const avalue: datetimefieldoptionsty);
@@ -403,6 +426,7 @@ type
    function assql: string;
    function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
+   property tagpo: pointer read ftagpo write ftagpo;
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
@@ -419,6 +443,7 @@ type
  
  tmsebinaryfield = class(tbinaryfield)
   private
+   ftagpo: pointer;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
@@ -432,12 +457,14 @@ type
    function assql: string;
    function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
+   property tagpo: pointer read ftagpo write ftagpo;
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
  tmsebytesfield = class(tbytesfield)
   private
+   ftagpo: pointer;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
@@ -451,12 +478,14 @@ type
    function assql: string;
    function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
+   property tagpo: pointer read ftagpo write ftagpo;
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
  tmsevarbytesfield = class(tvarbytesfield)
   private
+   ftagpo: pointer;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
@@ -470,12 +499,14 @@ type
    function assql: string;
    function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
+   property tagpo: pointer read ftagpo write ftagpo;
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
  tmsebcdfield = class(tbcdfield)
   private
+   ftagpo: pointer;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
@@ -486,6 +517,7 @@ type
    function HasParent: Boolean; override;
    procedure setasfloat(avalue: double); override;
    class procedure checktypesize(avalue: longint); override;
+   property tagpo: pointer read ftagpo write ftagpo;
   public
    procedure Clear; override;
    function assql: string;
@@ -527,6 +559,7 @@ type
  tmseblobfield = class(tblobfield)
   private
    fcache: tblobcache;
+   ftagpo: pointer;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
    procedure setcachekb(const avalue: integer);
@@ -550,6 +583,7 @@ type
    procedure LoadFromStream(Stream: TStream);
    procedure LoadFromFile(const FileName: filenamety);
    procedure SaveToFile(const FileName: filenamety);
+   property tagpo: pointer read ftagpo write ftagpo;
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;

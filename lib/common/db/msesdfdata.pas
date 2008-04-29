@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -18,6 +18,7 @@ type
   private
    ffilename: filenamety;
    fcontroller: tdscontroller;
+   ftagpo: pointer;
    procedure setfilename(const avalue: filenamety);
    procedure setcontroller(const avalue: tdscontroller);
    function getcontroller: tdscontroller;
@@ -61,6 +62,7 @@ type
    procedure cancel; override;
    procedure post; override;
    function moveby(const distance: integer): integer;
+   property tagpo: pointer read ftagpo write ftagpo;
   published
    property FileName: filenamety read ffilename write setfilename;
    property controller: tdscontroller read fcontroller write setcontroller;
@@ -71,6 +73,7 @@ type
   private
    ffilename: filenamety;
    fcontroller: tdscontroller;
+   ftagpo: pointer;
    procedure setfilename(const avalue: filenamety);
    procedure setcontroller(const avalue: tdscontroller);
    function getcontroller: tdscontroller;
@@ -113,7 +116,8 @@ type
    procedure AppendRecord(const Values: array of const);
    procedure cancel; override;
    procedure post; override;
-  function moveby(const distance: integer): integer;
+   function moveby(const distance: integer): integer;
+   property tagpo: pointer read ftagpo write ftagpo;
   published
    property FileName: filenamety read ffilename write setfilename;
    property controller: tdscontroller read fcontroller write setcontroller;
