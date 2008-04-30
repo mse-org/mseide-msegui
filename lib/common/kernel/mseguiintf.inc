@@ -64,6 +64,7 @@ function gui_windowgetfocus(var awindow: windowty): guierrorty;
 function gui_windowloosefocus(var awindow: windowty): guierrorty;
 }
 function gui_setappfocus(id: winidty): guierrorty;
+function gui_minimizeapplication: guierrorty;
 function gui_setwindowgroup(id: winidty; group: winidty): guierrorty;
 function gui_settransientfor(id: winidty; transientfor: winidty): guierrorty;
 function gui_movewindowrect(id: winidty; const dist: pointty; const rect: rectty): guierrorty;

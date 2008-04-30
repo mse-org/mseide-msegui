@@ -1065,7 +1065,7 @@ var
 begin
  result:= bigint;
  for int1:= 0 to high(fwidgets) do begin
-  with fwidgets[int1] do begin
+  with twidget1(fwidgets[int1]) do begin
    if (not(plo_noinvisible in fplace_options) or isvisible) and 
                                      (fwidgetrect.x < result) then begin
     result:= fwidgetrect.x;
@@ -1084,9 +1084,9 @@ var
 begin
  result:= -bigint;
  for int1:= 0 to high(fwidgets) do begin
-  with fwidgets[int1] do begin
+  with twidget1(fwidgets[int1]) do begin
    int2:= fwidgetrect.x + fwidgetrect.cx;
-   if (not(plo_noinvisible in fplace_options) or isvisible) and 
+   if (not(plo_noinvisible in fplace_options) or isvisible) and
                                      (int2 > result) then begin
     result:= int2;
    end;
@@ -1103,8 +1103,8 @@ var
 begin
  result:= bigint;
  for int1:= 0 to high(fwidgets) do begin
-  with fwidgets[int1] do begin
-   if (not(plo_noinvisible in fplace_options) or isvisible) and 
+  with twidget1(fwidgets[int1]) do begin
+   if (not(plo_noinvisible in fplace_options) or isvisible) and
                                      (fwidgetrect.y < result) then begin
     result:= fwidgetrect.y;
    end;
@@ -1122,9 +1122,9 @@ var
 begin
  result:= -bigint;
  for int1:= 0 to high(fwidgets) do begin
-  with fwidgets[int1] do begin
+  with twidget1(fwidgets[int1]) do begin
    int2:= fwidgetrect.y + fwidgetrect.cy;
-   if (not (plo_noinvisible in fplace_options) or isvisible) and 
+   if (not (plo_noinvisible in fplace_options) or isvisible) and
                                      (int2 > result) then begin
     result:= int2;
    end;

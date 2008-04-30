@@ -10484,12 +10484,12 @@ begin
      endmodal;
     end;
     if (application.fmainwindow = self) and not appinst.terminated then begin
+     bo1:= gui_grouphideminimizedwindows;
      gui_flushgdi;
      sys_sched_yield;
      exclude(fstate,tws_windowvisible);
      include(fstate,tws_grouphidden);
      include(fstate,tws_groupminimized);
-     bo1:= gui_grouphideminimizedwindows;
      application.sortzorder;
      appinst.fgroupzorder:= copy(appinst.fwindows);
      for int1:= 0 to high(appinst.fwindows) do begin
@@ -10507,6 +10507,9 @@ begin
         end;
        end;
       end;
+     end;
+     if bo1 then begin
+      gui_minimizeapplication;
      end;
     end
     else begin

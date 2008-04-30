@@ -256,6 +256,8 @@ var
  mouseidletimer: cardinal;
  mainthread: cardinal;
  mousewindow: hwnd;
+ lastfocuswindow: hwnd;
+ groupleaderwindow: hwnd;
  mousecursor: hcursor;
  keystate: tkeyboardstate;
  charbuffer: msestring;
@@ -970,6 +972,12 @@ begin
    attachthreadinput(selfthread,otherthread,false)
   end;
  end;
+end;
+
+function gui_minimizeapplication: guierrorty;
+begin
+ result:= gue_ok;
+ showwindow(applicationwindow,sw_minimize);
 end;
 
 const
@@ -1767,6 +1775,12 @@ begin
  if mousewindow = id then begin
   mousewindow:= 0;
  end;
+ if lastfocuswindow = id then begin
+  lastfocuswindow:= 0;
+ end;
+ if groupleaderwindow = id then begin
+  groupleaderwindow:= 0;
+ end;
 end;
 
 function gui_destroywindow(var awindow: windowty): guierrorty;
@@ -1876,20 +1890,27 @@ begin
 end;
 
 function gui_setwindowcaption(id: winidty; const caption: msestring): guierrorty;
-var
- str1: string;
+ procedure setcap(const id: winidty);
+ var
+  str1: string;
+ begin
+  if iswin95 then begin
+   str1:= caption;
+   if windows.SetWindowTextA(id,pchar(str1)) then begin
+    result:= gue_ok;
+   end
+  end
+  else begin
+   if windows.SetWindowTextW(id,pwidechar(caption)) then begin
+    result:= gue_ok;
+   end
+  end;
+ end;
 begin
  result:= gue_error;
- if iswin95 then begin
-  str1:= caption;
-  if windows.SetWindowTextA(id,pchar(str1)) then begin
-   result:= gue_ok;
-  end
- end
- else begin
-  if windows.SetWindowTextW(id,pwidechar(caption)) then begin
-   result:= gue_ok;
-  end
+ setcap(id);
+ if (id = groupleaderwindow) and (result = gue_ok) then begin
+  setcap(applicationwindow);
  end;
 end;
 
@@ -3911,8 +3932,13 @@ begin
    charbuffer:= '';
   end;
   wm_close: begin
-   eventlist.add(twindowevent.create(ek_close,ahwnd));
-   result:= 0;
+   if ahwnd = applicationwindow then begin
+    eventlist.add(tevent.create(ek_terminate));
+   end
+   else begin
+    eventlist.add(twindowevent.create(ek_close,ahwnd));
+    result:= 0;
+   end;
    exit;
   end;
   wm_queryendsession: begin
@@ -3927,8 +3953,14 @@ begin
    eventlist.add(twindowevent.create(ek_destroy,ahwnd));
   end;
   wm_setfocus: begin
-   if windowvisible(ahwnd) then begin
-    eventlist.add(twindowevent.create(ek_focusin,ahwnd));
+   if (ahwnd = applicationwindow) and (lastfocuswindow <> 0) then begin
+    setfocus(lastfocuswindow);
+   end
+   else begin
+    if windowvisible(ahwnd) then begin
+     lastfocuswindow:= ahwnd;
+     eventlist.add(twindowevent.create(ek_focusin,ahwnd));
+    end;
    end;
   end;
   wm_killfocus: begin
@@ -4215,12 +4247,20 @@ end;
 function createapphandle(out id: winidty): guierrorty;
 var
  str1: string;
+ menu1: hmenu;
 begin
  str1:= application.applicationname;
-// id:= windows.CreateWindow(widgetclassname,pchar(str1),ws_overlappedwindow,
-//                   0,0,0,0,0,0,hinstance,nil);
- id:= windows.CreateWindowex(ws_ex_appwindow,widgetclassname,pchar(str1),
-        ws_overlappedwindow,0,0,0,0,0,0,hinstance,nil);
+ id:= windows.CreateWindow(widgetclassname,pchar(str1),
+             WS_POPUP or WS_CAPTION or WS_CLIPSIBLINGS or 
+             WS_SYSMENU or WS_MINIMIZEBOX,0,0,0,0,0,0,hinstance,nil);
+ menu1:= getsystemmenu(id,false);
+ deletemenu(menu1,sc_maximize,mf_bycommand);
+ deletemenu(menu1,sc_size,mf_bycommand);
+ deletemenu(menu1,sc_move,mf_bycommand);
+ showwindow(id,sw_shownoactivate);
+  
+// id:= windows.CreateWindowex(ws_ex_appwindow,widgetclassname,pchar(str1),
+//        ws_overlappedwindow,0,0,0,0,0,0,hinstance,nil);
  if id = 0 then begin
   result:= gue_createwindow;
  end
@@ -4299,12 +4339,18 @@ begin
     ca2:= applicationwindow;
     classname:= widgetclassname;
    end;
+   {
    if setgroup and (groupleader = 0) or (wo_groupleader in options) then begin
-    windowstyleex:= ws_ex_appwindow; //create a groupleader
+//    windowstyleex:= ws_ex_appwindow; //create a groupleader
+         ////disturbs application taskbar icon.
 //    ca2:= 0;
    end;
+   }
    id:= windows.CreateWindowex(windowstyleex,pchar(classname),nil,
          windowstyle,rect1.x,rect1.y,rect1.cx,rect1.cy,ca2,0,hinstance,nil);
+   if setgroup and (groupleader = 0) or (wo_groupleader in options) then begin
+    groupleaderwindow:= id;
+   end;
   end;
   if id = 0 then begin
    result:= gue_createwindow;

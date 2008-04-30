@@ -1050,7 +1050,7 @@ function tcustomapplication.waitdialog(const athread: tthreadcomp = nil;
                const aexecuteaction: notifyeventty = nil;
                const aidleaction: notifyeventty = nil): boolean;
 begin
- //dummy
+ result:= false; //dummy
 end;
 
 procedure tcustomapplication.handleexception(sender: tobject = nil;

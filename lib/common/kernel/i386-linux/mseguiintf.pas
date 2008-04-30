@@ -2093,6 +2093,11 @@ begin
  result:= gui_setwindowfocus(id);
 end;
 
+function gui_minimizeapplication: guierrorty;
+begin
+ result:= gue_ok; //dummy
+end;
+
 function gui_setcursorshape(winid: winidty; shape: cursorshapety): guierrorty;
 begin
  result:= gue_ok;
