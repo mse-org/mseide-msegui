@@ -13,18 +13,7 @@ object sourcepage: tsourcepage
   container.bounds_y = 0
   container.bounds_cx = 311
   container.bounds_cy = 228
-  container.frame.frameimage_left = 0
-  container.frame.frameimage_top = 0
-  container.frame.frameimage_right = 0
-  container.frame.frameimage_bottom = 0
-  container.frame.frameimage_offset = 0
-  container.frame.frameimage_offsetdisabled = 0
-  container.frame.frameimage_offsetmouse = 0
-  container.frame.frameimage_offsetclicked = 0
-  container.frame.frameimage_offsetactive = 0
-  container.frame.frameimage_offsetactivemouse = 0
-  container.frame.frameimage_offsetactiveclicked = 0
-  container.frame.optionsskin = []
+  container.frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
   container.frame.dummy = 0
   icon.transparentcolor = -2147483648
   oncreate = sourcefooncreate
@@ -41,41 +30,27 @@ object sourcepage: tsourcepage
     bounds_cx = 311
     bounds_cy = 206
     color = -1879048187
-    frame.frameimage_left = 0
-    frame.frameimage_top = 0
-    frame.frameimage_right = 0
-    frame.frameimage_bottom = 0
-    frame.frameimage_offset = 0
-    frame.frameimage_offsetdisabled = 0
-    frame.frameimage_offsetmouse = 0
-    frame.frameimage_offsetclicked = 0
-    frame.frameimage_offsetactive = 0
-    frame.frameimage_offsetactivemouse = 0
-    frame.frameimage_offsetactiveclicked = 0
-    frame.optionsskin = []
+    frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
     frame.dummy = 0
     anchors = [an_top, an_bottom]
-    wheelscrollheight = 0
     optionsgrid = [og_focuscellonenter, og_autofirstrow, og_visiblerowpagestep]
-    rowcount = 0
     rowcolors.count = 4
     rowcolors.items = (
       14745599
       65535
       16711680
-      -2147483646)
+      -2147483646
+    )
     datacols.count = 2
-    datacols.items = <
+    datacols.items = <    
       item
         linecolor = -1610612732
-        tag = 0
         width = 15
         options = [co_nofocus, co_nohscroll, co_rowcolor]
         oncellevent = icononcellevent
         widgetname = 'dataicon'
-      end
+      end    
       item
-        tag = 0
         width = 2000
         options = [co_leftbuttonfocusonly, co_savestate, co_rowcolor, co_mousescrollrow]
         onchange = textchanged
@@ -86,7 +61,7 @@ object sourcepage: tsourcepage
     onrowsinserted = gridonrowsinserted
     onrowsdeleted = gridonrowsdeleted
     oncellevent = gridoncellevent
-    reffontheight = 13
+    reffontheight = 14
     object dataicon: tdataicon
       optionsskin = [osk_framebuttononly]
       bounds_x = 2
@@ -114,7 +89,8 @@ object sourcepage: tsourcepage
         10
         11
         12
-        13)
+        13
+      )
     end
     object edit: tsyntaxedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontlineheight]
@@ -126,68 +102,45 @@ object sourcepage: tsourcepage
       taborder = 1
       visible = False
       font.name = 'mseide_source'
-      font.xscale = 1.000000000000000000
+      font.xscale =  1.0000000000000000E+0000
       font.dummy = 0
       optionsedit = [oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_linebreak, oe_eatreturn, oe_keyexecute, oe_savestate]
-      encoding = ce_ansi
       onkeydown = editonkeydown
-      tabulators.ppmm = 3.000000000000000000
+      tabulators.ppmm =  3.0000000000000000E+0000
       onfontchanged = editonfontchanged
       onmodifiedchanged = editonmodifiedchanged
       ontextmouseevent = editontextmouseevent
       oneditnotifcation = editoneditnotification
       oncellevent = editoncellevent
       maxundocount = 10000
-      reffontheight = 18
+      reffontheight = 19
     end
   end
   object linedisp: tstringdisp
     optionsskin = [osk_framebuttononly]
     bounds_x = 0
-    bounds_y = 210
+    bounds_y = 209
     bounds_cx = 68
-    bounds_cy = 17
-    frame.frameimage_left = 0
-    frame.frameimage_top = 0
-    frame.frameimage_right = 0
-    frame.frameimage_bottom = 0
-    frame.frameimage_offset = 0
-    frame.frameimage_offsetdisabled = 0
-    frame.frameimage_offsetmouse = 0
-    frame.frameimage_offsetclicked = 0
-    frame.frameimage_offsetactive = 0
-    frame.frameimage_offsetactivemouse = 0
-    frame.frameimage_offsetactiveclicked = 0
-    frame.optionsskin = []
+    bounds_cy = 18
+    frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
     frame.dummy = 0
     anchors = [an_left, an_bottom]
     taborder = 2
     textflags = [tf_xcentered, tf_ycentered]
-    reffontheight = 13
+    reffontheight = 14
   end
   object pathdisp: tstringdisp
     optionsskin = [osk_framebuttononly]
     bounds_x = 68
-    bounds_y = 210
+    bounds_y = 209
     bounds_cx = 243
-    bounds_cy = 17
-    frame.frameimage_left = 0
-    frame.frameimage_top = 0
-    frame.frameimage_right = 0
-    frame.frameimage_bottom = 0
-    frame.frameimage_offset = 0
-    frame.frameimage_offsetdisabled = 0
-    frame.frameimage_offsetmouse = 0
-    frame.frameimage_offsetclicked = 0
-    frame.frameimage_offsetactive = 0
-    frame.frameimage_offsetactivemouse = 0
-    frame.frameimage_offsetactiveclicked = 0
-    frame.optionsskin = []
+    bounds_cy = 18
+    frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
     frame.dummy = 0
     anchors = [an_left, an_right, an_bottom]
     taborder = 1
     textflags = [tf_ycentered, tf_ellipseleft]
     options = [dwo_hintclippedtext]
-    reffontheight = 13
+    reffontheight = 14
   end
 end
