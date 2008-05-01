@@ -2692,7 +2692,7 @@ begin
   end;
  end;
  if (ainstance is tcomponent) then begin
-  with tcomponent(ainstance) do begin
+  with tcomponent1(ainstance) do begin
    if dochildren then begin
    {
     for int1:= 0 to componentcount - 1 do begin
@@ -2704,7 +2704,7 @@ begin
      try
       if bo2 then begin
        root:= owner;
-       if (root = nil) or (ainstance is tmsecomponent) and 
+       if (root = nil) or (ainstance is tmsecomponent) and
          (fmodules.findmodule(tmsecomponent(ainstance)) <> nil) then begin
         root:= tcomponent(ainstance); //ainstance is a module
        end;

@@ -69,7 +69,9 @@ type
  resultinfoararty = array of resultinfoarty;
 
  stopreasonty = (sr_none,sr_error,sr_startup,sr_exception,
-                 sr_breakpoint_hit,sr_watchpointtrigger,
+                 sr_breakpoint_hit,
+                 sr_watchpointtrigger,sr_readwatchpointtrigger,
+                 sr_accesswatchpointtrigger,
                  sr_end_stepping_range,sr_function_finished,
                  sr_exited_normally,sr_exited,sr_detached,sr_signal_received);
 const
@@ -80,6 +82,8 @@ const
           'Exception',
           'Breakpoint hit',
           'Watchpoint triggered',
+          'Read Watchpoint triggered',
+          'Access Watchpoint triggered',
           'End stepping range',
           'Function finished',
           'Exited normally',
@@ -445,8 +449,9 @@ type
    function writepascalvariable(const varname: string; const value: string;
                 var aresult: string): gdbresultty;
    function evaluateexpression(const expression: string;
-                  var aresult: string): gdbresultty;
-   function symboltype(const symbol: string; var aresult: string): gdbresultty;
+                                           out aresult: string): gdbresultty;
+   function symboltype(const symbol: string; out aresult: ansistring): gdbresultty;
+   function symboladdress(const symbol: string; out aresult: ansistring): gdbresultty;
    function stacklistframes(out list: frameinfoarty; first: integer = 0;
                     last: integer = 100): gdbresultty;
    function selectstackframe(const aframe: integer): gdbresultty;
@@ -510,7 +515,8 @@ const
  stopreasons: array[stopreasonty] of string = 
            //sr_none sr_error sr_startup sr_exception
              ('',     '',     '',          '',      
-              'breakpoint-hit','watchpoint-trigger',
+              'breakpoint-hit','watchpoint-trigger','read-watchpoint-trigger',
+              'access-watchpoint-trigger',
               'end-stepping-range','function-finished','exited-normally',
               'exited','detached','signal-received');
 
@@ -1503,6 +1509,9 @@ begin
   exclude(fstate,gs_syncget);
   fsyncsequence:= 0;
   restarttarget;
+ end;
+ if result = gdb_timeout then begin
+  ferrormessage:= 'Timeout.';
  end;
 end;
 
@@ -2678,7 +2687,8 @@ begin
  end;
 end;
 }
-function tgdbmi.evaluateexpression(const expression: string; var aresult: string): gdbresultty;
+function tgdbmi.evaluateexpression(const expression: string; 
+                                          out aresult: string): gdbresultty;
 begin
  aresult:= '';
  result:= synccommand('-data-evaluate-expression ' + '"'+expression+'"');
@@ -2695,7 +2705,7 @@ begin
  end;
 end;
 
-function tgdbmi.symboltype(const symbol: string; var aresult: string): gdbresultty;
+function tgdbmi.symboltype(const symbol: string; out aresult: string): gdbresultty;
 begin
  result:= clicommand('ptype '+symbol);
  case result of
@@ -2709,6 +2719,12 @@ begin
    aresult:= '';
   end;
  end;
+end;
+
+function tgdbmi.symboladdress(const symbol: ansistring; 
+                                    out aresult: ansistring): gdbresultty;
+begin
+ result:= evaluateexpression('@('+symbol+')',aresult);
 end;
 
 function tgdbmi.threadselect(const aid: integer; out filename: filenamety; 

@@ -9,7 +9,7 @@
 }
 unit msemenus;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 
 interface
 uses
@@ -71,13 +71,18 @@ type
  
  tcustommenu = class;
 
- tmenuitem = class(teventpersistent,iactionlink)
+ imenuitem = interface(ievent)
+  procedure setstate(const avalue: actionstatesty);
+  function getstate: actionstatesty;  
+ end;
+ 
+ tmenuitem = class(teventpersistent,iactionlink,imenuitem)
   private
    fparentmenu: tmenuitem;
    fonchange: menuitemeventty;
    fname: string;
-   fgroup: integer;
-   fsource: ievent;
+//   fgroup: integer;
+   fsource: imenuitem;
    ffont: tmenufont;
    ffontactive: tmenufontactive;
    fcoloractive: colorty;
@@ -85,7 +90,8 @@ type
    procedure setsubmenu(const Value: tmenuitems);
    procedure setcaption(const Value: captionty);
    function iscaptionstored: Boolean;
-   procedure setstate(const Value: actionstatesty);
+   procedure setstate(const avalue: actionstatesty);
+   function getstate: actionstatesty;
    function isstatestored: Boolean;
 
    procedure actionchanged;
@@ -132,6 +138,8 @@ type
    procedure sethint(const avalue: msestring);
    function ishintstored: boolean;
    procedure setcoloractive(const avalue: colorty);
+   function getcheckedtag: integer;
+   procedure setcheckedtag(const avalue: integer);
   protected
    finfo: actioninfoty;
    fowner: tcustommenu;
@@ -171,6 +179,8 @@ type
                          write setitems; default;
    function itembyname(const name: string): tmenuitem;
    function index: integer; //-1 if no parent menu
+   property checkedtag: integer read getcheckedtag write setcheckedtag;
+                             //-1 if none checked
    property checked: boolean read getchecked write setchecked;
    property enabled: boolean read getenabled write setenabled;
    property visible: boolean read getvisible write setvisible;
@@ -404,7 +414,7 @@ uses
  sysutils,msestockobjects,rtlconsts,msebits,msemenuwidgets,msedatalist,
  mseactions;
 
-procedure freetransientmenu(var amenu: tcustommenu);
+procedure freetransientmenu(var amenu: tcustommenu); 
 begin
  if (amenu <> nil) and amenu.ftransient then begin
   freeandnil(amenu);
@@ -749,9 +759,9 @@ begin
  result:= isactionhintstored(finfo);
 end;
 
-procedure tmenuitem.setstate(const Value: actionstatesty);
+procedure tmenuitem.setstate(const avalue: actionstatesty);
 begin
- setactionstate(iactionlink(self),value);
+ setactionstate(iactionlink(self),avalue);
 end;
 
 function tmenuitem.isstatestored: Boolean;
@@ -824,12 +834,23 @@ begin
 end;
 
 procedure tmenuitem.actionchanged;
+const
+ mask: actionstatesty = [as_checked];
+var
+ state1: actionstatesty;
 begin
  if assigned(fonchange) then begin
   fonchange(self);
  end;
  if (fparentmenu <> nil) and assigned(fparentmenu.fonchange) then begin
   fparentmenu.fonchange(self);
+ end;
+ if ([mao_checkbox,mao_radiobutton] * finfo.options <> []) and
+         (fsource <> nil) and (fowner <> nil) and (fowner.ftransient) then begin
+  state1:= fsource.getstate;
+  state1:= actionstatesty(
+          replacebits(longword(state),longword(state1),longword(mask)));
+  fsource.setstate(state1);  
  end;
 end;
 
@@ -874,7 +895,6 @@ end;
 
 function tmenuitem.internalexecute(async: boolean): boolean;
 begin
-
  if [mao_checkbox,mao_radiobutton] * finfo.options <> [] then begin
   if mao_checkbox in finfo.options then begin
    checked:= not checked;
@@ -883,7 +903,6 @@ begin
    checked:= true;
   end;
  end;
-
  result:= canactivate {and assigned(finfo.onexecute)};
  if result then begin
   if async then begin
@@ -1026,7 +1045,7 @@ var
  action1: tcustomaction;
 begin
  if source is tmenuitem then begin
-  fsource:= ievent(tmenuitem(source));
+  fsource:= imenuitem(tmenuitem(source));
   action1:= finfo.action;
   with tmenuitem(source) do begin
    self.finfo:= finfo;
@@ -1061,7 +1080,7 @@ begin
     item1:= fparentmenu[int1];
     with item1 do begin
      if (finfo.options * [{mao_checkbox,}mao_radiobutton] = [{mao_checkbox,}mao_radiobutton]) and
-             (fgroup = self.fgroup) then begin
+             (finfo.group = self.finfo.group) then begin
       setactionchecked(iactionlink(item1),false);
      end;
     end;
@@ -1294,6 +1313,55 @@ begin
  else begin
   if result = cl_default then begin
    result:= actualcolor;
+  end;
+ end;
+end;
+
+function tmenuitem.getstate: actionstatesty;
+begin
+ result:= finfo.state;
+end;
+
+function tmenuitem.getcheckedtag: integer;
+var
+ int1: integer;
+begin
+ result:= -1;
+ if fparentmenu <> nil then begin
+  with fparentmenu.fsubmenu do begin
+   for int1:= 0 to high(fitems) do begin
+    with tmenuitem(fitems[int1]) do begin
+     if (mao_radiobutton in finfo.options) and (finfo.group = self.finfo.group) and 
+                                                          checked then begin
+      result:= finfo.tag;
+      break;
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure tmenuitem.setcheckedtag(const avalue: integer);
+var
+ int1: integer;
+begin
+ if fparentmenu <> nil then begin
+  with fparentmenu.fsubmenu do begin
+   for int1:= 0 to high(fitems) do begin
+    with tmenuitem(fitems[int1]) do begin
+     if (mao_radiobutton in finfo.options) and 
+                             (finfo.group = self.finfo.group) then begin
+      if finfo.tag = avalue then begin
+       checked:= true;
+       break;
+      end
+      else begin
+       checked:= false;
+      end;
+     end;
+    end;
+   end;
   end;
  end;
 end;

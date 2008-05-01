@@ -627,7 +627,6 @@ var
  startstate,statebefore: actionstatesty;
  bo1: boolean;
  po1: pactioninfoty;
-// obj1: tobject;
 begin
  po1:= sender.getactioninfopo;
  with po1^ do begin
@@ -679,7 +678,8 @@ end;
 procedure setactionoptions(const sender: iactionlink;
                                           const value: menuactionoptionsty);
 const
- mask: menuactionoptionsty = [mao_showhint,mao_noshowhint];
+ mask1: menuactionoptionsty = [mao_showhint,mao_noshowhint];
+ mask2: menuactionoptionsty = [mao_checkbox,mao_radiobutton];
 var
  optionsbefore: menuactionoptionsty;
  po1: pactioninfoty;
@@ -687,9 +687,14 @@ begin
  po1:= sender.getactioninfopo;
  with po1^ do begin
   optionsbefore:= options;
-  options:= menuactionoptionsty(setsinglebit({$ifdef FPC}longword{$else}byte{$endif}(value),
+  options:= menuactionoptionsty(setsinglebit(
+                         {$ifdef FPC}longword{$else}byte{$endif}(value),
                          {$ifdef FPC}longword{$else}byte{$endif}(options),
-                         {$ifdef FPC}longword{$else}byte{$endif}(mask)));
+                         {$ifdef FPC}longword{$else}byte{$endif}(mask1)));
+  options:= menuactionoptionsty(setsinglebit(
+                         {$ifdef FPC}longword{$else}byte{$endif}(options),
+                         {$ifdef FPC}longword{$else}byte{$endif}(optionsbefore),
+                         {$ifdef FPC}longword{$else}byte{$endif}(mask2)));
   if optionsbefore * [mao_shortcutcaption] <> options * 
                                      [mao_shortcutcaption] then begin
    sender.calccaptiontext(po1^);

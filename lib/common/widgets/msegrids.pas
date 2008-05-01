@@ -62,7 +62,7 @@ type
                  og_autofirstrow,og_autoappend,og_appendempty,
                  og_savestate,og_sorted,
                  og_colchangeontabkey,og_colchangeonreturnkey,
-                 og_rotaterow,
+                 og_rotaterow,og_visiblerowpagestep,
                  og_autopopup,
                  og_mousescrollcol,og_noresetselect);
  optionsgridty = set of optiongridty;
@@ -9075,7 +9075,12 @@ begin
      end;
      key_pageup: begin
       if ss_ctrl in info.shiftstate then begin
-       firstrow(action);
+       if og_visiblerowpagestep in foptionsgrid then begin
+        focuscell(makegridcoord(ffocusedcell.col,ffirstvisiblerow),action);
+       end
+       else begin
+        firstrow(action);
+       end;
       end
       else begin
        pageup(action);
@@ -9083,7 +9088,12 @@ begin
      end;
      key_pagedown: begin
       if ss_ctrl in info.shiftstate then begin
-       lastrow(action);
+       if og_visiblerowpagestep in foptionsgrid then begin
+        focuscell(makegridcoord(ffocusedcell.col,flastvisiblerow),action);
+       end
+       else begin
+        lastrow(action);
+       end;
       end
       else begin
        pagedown(action);

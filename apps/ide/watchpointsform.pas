@@ -21,7 +21,7 @@ unit watchpointsform;
 interface
 uses
  msegui,mseclasses,mseforms,msedataedits,msegraphedits,msewidgetgrid,msestat,
- msegdbutils,msesimplewidgets,msemenus;
+ msegdbutils,msesimplewidgets,msemenus,msestrings,msegrids;
 
 type
  twatchpointsfo = class(tdockform)
@@ -40,6 +40,8 @@ type
                         var accept: Boolean);
    procedure watchpointsonshow(const sender: TObject);
    procedure deleteallonexecute(const sender: TObject);
+   procedure deleterow(const sender: tcustomgrid; var aindex: Integer;
+                   var acount: Integer);
   private
    procedure changed;
    function watchpointerror(const error: gdbresultty): boolean;
@@ -47,6 +49,7 @@ type
    gdb: tgdbmi;
    procedure refresh(const breakpoints: breakpointinfoarty);
    procedure clear(const all: boolean = false);
+   procedure addwatch(const expression: msestring);
  end;
 
 var
@@ -101,7 +104,7 @@ var
 begin
  result:= error <> gdb_ok;
  if result then begin
-  if error = gdb_message then begin
+  if error in [gdb_message,gdb_timeout] then begin
    str1:= gdb.errormessage;
   end
   else begin
@@ -159,9 +162,38 @@ begin
 end;
 
 procedure twatchpointsfo.deleteallonexecute(const sender: TObject);
+var
+ int1,int2: integer;
 begin
  if askok('Do you wish to delete all watchpoints?','Confirmation') then begin
+  int1:= 0;
+  int2:= grid.rowcount;
+  deleterow(nil,int1,int2);
   grid.clear;
+ end;
+end;
+
+procedure twatchpointsfo.addwatch(const expression: msestring);
+begin
+ grid.show;
+ grid.setfocus(false);
+ if not grid.datacols.rowempty(grid.row) then begin
+  grid.row:= grid.appendrow;
+ end;
+ wptexpression.value:= expression;
+ wpton.value:= true;
+ wpton.checkvalue;
+end;
+
+procedure twatchpointsfo.deleterow(const sender: tcustomgrid;
+               var aindex: Integer; var acount: Integer);
+var
+ int1: integer;
+begin
+ for int1:= aindex to aindex + acount - 1 do begin
+  if wptno.value <> 0 then begin
+   gdb.breakdelete(wptno[int1]);
+  end;
  end;
 end;
 
