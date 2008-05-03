@@ -550,7 +550,8 @@ function tcustombutton.checkfocusshortcut(var info: keyeventinfoty): boolean;
 begin
  result:= inherited checkfocusshortcut(info) or
      (bo_focusonshortcut in options) and
-          mserichstring.checkshortcut(info,factioninfo.caption1,true) and canfocus;
+          mserichstring.checkshortcut(info,factioninfo.caption1,
+          bo_altshortcut in options) and canfocus;
 end;
 
 procedure tcustombutton.doshortcut(var info: keyeventinfoty; const sender: twidget);
@@ -560,7 +561,8 @@ begin
     (checkshortcutcode(factioninfo.shortcut,info) or
      checkshortcutcode(factioninfo.shortcut1,info) or
     (bo_executeonshortcut in options) and not (ss_disabled in finfo.state) and
-           mserichstring.checkshortcut(info,factioninfo.caption1,true) or
+           mserichstring.checkshortcut(info,factioninfo.caption1,
+           bo_altshortcut in options) or
     (finfo.state * [ss_invisible,ss_disabled,ss_default] = [ss_default]) and
        ((info.key = key_return) or 
         (info.key = key_enter) and (bo_executedefaultonenterkey in options)) and

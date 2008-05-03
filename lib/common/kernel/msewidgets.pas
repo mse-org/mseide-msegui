@@ -835,7 +835,7 @@ type
                    bo_executedefaultonenterkey,
                    bo_asyncexecute,
                    bo_focusonshortcut, //for tcustombutton
-                   bo_shortcutcaption,
+                   bo_shortcutcaption,bo_altshortcut,
                    {bo_flat,bo_noanim,bo_nofocusrect,bo_nodefaultrect,}
                    bo_nodefaultframeactive
                    );
@@ -1636,7 +1636,7 @@ end;
 
 procedure tmessagebutton.doshortcut(var info: keyeventinfoty; const sender: twidget);
 begin
- if checkshortcut(info,finfo.caption,true) then begin
+ if checkshortcut(info,finfo.caption,bo_altshortcut in options) then begin
   include(info.eventstate,es_processed);
   internalexecute;
  end
