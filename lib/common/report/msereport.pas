@@ -696,6 +696,8 @@ type
    property onbeforepaint: painteventty read fonbeforepaint write fonbeforepaint;
    property onpaint: painteventty read fonpaint write fonpaint;
    property onafterpaint: painteventty read fonafterpaint write fonafterpaint;
+   property onafterrender: recordbandeventty read fonafterrender 
+                                   write fonafterrender;
    property onbeforenextrecord: notifyeventty read fonbeforenextrecord 
                                                  write fonbeforenextrecord;
    property onafternextrecord: notifyeventty read fonafternextrecord 
@@ -725,6 +727,7 @@ type
    property onbeforepaint;
    property onpaint;
    property onafterpaint;
+   property onafterrender;
    property onbeforenextrecord;
    property onafternextrecord;
   end;
@@ -4858,13 +4861,16 @@ end;
 function tcustomreportpage.render(const acanvas: tcanvas): boolean;
 var
  int1: integer;
- bo1,bo2,bo3,bo4,bo5: boolean;
+ bo1,bo2,bo4: boolean;
+ customdataempty: boolean;
+ backgroundrendered: boolean;
  hascustomdata: boolean;
  
  procedure renderband(const aband: tcustomrecordband);
  begin
   with aband do begin
-   bo4:= bo5 and (bo2 and (bo_oddpage in foptions) or 
+   bo4:= (not customdataempty or backgroundrendered) and 
+          (bo2 and (bo_oddpage in foptions) or 
            not bo2 and (bo_evenpage in foptions)); //has data
    bo4:= not(bo4 or ((bo_once in foptions) and not (rbs_showed in fstate)));
                 //empty
@@ -4901,7 +4907,7 @@ begin
   bo1:= (not fdatalink.active or fdatalink.dataset.eof) and
          not ((rpo_once in foptions) and not (rpps_showed in fstate));
   dobeforerender(bo1);
-  bo3:= bo1; //customdata empty
+  customdataempty:= bo1;
   for int1:= 0 to high(fareas) do begin
    fareas[int1].initpage;
   end;
@@ -4910,30 +4916,37 @@ begin
   end;
   updatevisible;
   for int1:= 0 to high(fareas) do begin
-   bo1:= fareas[int1].render(acanvas) and bo1;
+   with fareas[int1] do begin
+    if visible then begin
+     bo1:= render(acanvas) and bo1;
+    end;
+   end;
   end;
   sortwidgetsyorder(widgetarty(fbands),self);
   bo2:= odd(reppagenum);
 //  bo5:= true;
-  bo5:= rpps_backgroundrendered in fstate;
+  backgroundrendered:= rpps_backgroundrendered in fstate;
   for int1:= 0 to high(fbands) do begin
    if not (fbands[int1] is tcustomrepvaluedisp) then begin
     renderband(fbands[int1]);
    end;
   end;
-  bo5:= rpps_backgroundrendered in fstate;
+  backgroundrendered:= rpps_backgroundrendered in fstate;
   for int1:= 0 to high(fbands) do begin
    if fbands[int1] is tcustomrepvaluedisp then begin
     renderband(fbands[int1]);
    end;
   end;
-  if not (rpps_backgroundrendered in fstate) and not bo3 then begin
+  if not (rpps_backgroundrendered in fstate) and not customdataempty then begin
    renderbackground(acanvas);  
   end;
               
   if rpps_backgroundrendered in fstate then begin
    doafterpaint1(acanvas);
-   if fdatalink.active then begin
+   if canevent(tmethod(fonafterrender)) then begin
+    fonafterrender(self);
+   end;
+   if not (rpps_finish in fstate) and  fdatalink.active then begin
     bo1:= false;
     application.lock;
     try
@@ -4961,21 +4974,13 @@ begin
   result:= result and bo1;
   if bo1 or (fnextpage <> nil) or (rpps_finish in fstate) then begin 
                         //next page
-   if canevent(tmethod(fonafterrender)) then begin
-    application.lock;
-    try
-     exclude(fstate,rpps_restart);
-     fonafterrender(self);
-     if rpps_restart in fstate then begin
-      bo1:= false;
-     end;
-    finally
-     application.unlock;
-    end;
+   exclude(fstate,rpps_restart);
+   doafterlastpage;
+   if rpps_restart in fstate then begin
+    bo1:= false;
    end;
   end;
  until bo1 or (fnextpage <> nil);
- doafterlastpage;
 end;
 
 function tcustomreportpage.rendering: boolean;

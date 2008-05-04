@@ -85,8 +85,11 @@ function execmse3(const commandline: string; topipe: pinteger = nil;
 //don't forget closehandle on windows!
 //uses existing file handles
 
-function execwaitmse(const commandline: string): integer;
-//startet programm, wartet auf ende, bringt exitcode
+function execwaitmse(const commandline: string;
+                      const inactive: boolean = true): integer;
+//runs programm, waits for program termination, retourns program exitcode
+//inactive true -> no console window (win32 only)
+
 procedure killprocess(handle: integer);
 function terminateprocess(handle: integer): integer;
            //sendet sigterm, bringt exitresult
@@ -258,7 +261,6 @@ begin
      result:= false;
      break;
     end;
-//    sleep(0);
     sys_sched_yield;
    end;
   end
@@ -460,7 +462,8 @@ begin
  end;
 end;
 
-function execwaitmse(const commandline: string): integer;
+function execwaitmse(const commandline: string;
+                      const inactive: boolean = true): integer;
 //startet programm, wartet auf ende, bring exitcode, -1 wenn start nicht moeglich
 var
  prochandle: integer;
@@ -469,17 +472,19 @@ var
 begin
  result:= -1;
    //programm wurde nicht gestartet oder getexitcodeprozessproblem
- prochandle:= execmse1(commandline);
+ prochandle:= execmse1(commandline,nil,nil,nil,false,-1,inactive);
  if prochandle <> invalidprochandle then begin
+  result:= waitforprocess(prochandle);
+  {
   repeat
    sys_sched_yield;
-//   sleep(0);
    bo1:= getexitcodeprocess(prochandle,dwo1);
    if bo1 then begin
     result:= dwo1;
    end;
   until not bo1 or (dwo1 <> still_active);
   closehandle(prochandle);
+  }
  end;
 end;
 
@@ -547,7 +552,8 @@ begin
  end;
 end;
 
-function execwaitmse(const commandline: string): integer;
+function execwaitmse(const commandline: string;
+                      const inactive: boolean = true): integer;
 begin
  result:= libc.{$ifdef FPC}__system{$else}system{$endif}(pchar(commandline));
 end;
