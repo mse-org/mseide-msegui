@@ -919,9 +919,11 @@ begin
     setmainmenu(nil);
    end;
    oe_changed: begin
-    updatemainmenutemplates;
-    if (sender = fmainmenu) and (fmainmenuwidget <> nil) then begin
-     fmainmenuwidget.menuchanged(nil);
+    if not (csdestroying in componentstate) then begin
+     updatemainmenutemplates;
+     if fmainmenuwidget <> nil then begin
+      fmainmenuwidget.menuchanged(nil);
+     end;
     end;
    end;
   end;
@@ -1166,6 +1168,9 @@ procedure tcustommseform.updatewindowinfo(var info: windowinfoty);
 begin
  inherited;
  info.options:= foptionswindow;
+ if csdesigning in componentstate then begin
+  exclude(info.options,wo_groupleader);
+ end;
  if fo_maximized in foptions then begin
   info.initialwindowpos:= wp_maximized;
  end
