@@ -79,9 +79,12 @@ type
  colorspacety = (cos_gray,cos_rgb);
  pageorientationty = (pao_portrait,pao_landscape);
 
- printeroptionty = (pro_inactivewindow); //win32: start exe with inactive window
+ printeroptionty = (pro_inactivewindow); 
+                        //win32: start exe with inactive window
  printeroptionsty = set of printeroptionty;
- 
+const
+ defaultprinteroptions = [pro_inactivewindow]; 
+type
  tcustomprinter = class(tmsecomponent,istatfile)
   private
    fonpagestart: printereventty;
@@ -150,7 +153,8 @@ type
 //   property colorspace: colorspacety read getcolorspace write setcolorspace;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read fstatvarname write fstatvarname;
-   property options: printeroptionsty read foptions write foptions;
+   property options: printeroptionsty read foptions write foptions 
+                                             default defaultprinteroptions;
  end;
 
  tprinter = class(tcustomprinter)
@@ -443,6 +447,7 @@ end;
 constructor tcustomprinter.create(aowner: tcomponent);
 begin
 // fppmm:= defaultppmm;
+ foptions:= defaultprinteroptions;
  fpa_size:= sps_a4;
  with stdpagesizes[fpa_size] do begin
   fpa_width:= width;
