@@ -1674,7 +1674,7 @@ begin
     key:= fdatalink.field.asinteger;
     case flookupkind of
      lk_text: begin
-      result.text:= flookupbuffer.lookuptext(flookupkeyfieldno,
+      result.text:= fformat + flookupbuffer.lookuptext(flookupkeyfieldno,
                    flookupvaluefieldno,key);
      end;
      lk_integer: begin

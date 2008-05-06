@@ -3544,23 +3544,23 @@ begin
 end;
 
 function tfielddatalink.msedisplaytext(const aformat: msestring = ''): msestring;
- procedure defaulttext;
+ function defaulttext: msestring;
  begin
   if utf8 then begin
-   result:= aformat + utf8tostring(ffield.displaytext);
+   result:= utf8tostring(ffield.displaytext);
   end
   else begin
-   result:= aformat + ffield.displaytext;
+   result:= ffield.displaytext;
   end;
  end;
 begin
  result:= '';
  if ffield <> nil then begin
-  if fismsestring then begin
-   result:= aformat + tmsestringfield(ffield).asmsestring;
-  end
-  else begin
-   if not ffield.isnull then begin
+  if not ffield.isnull then begin
+   if fismsestring then begin
+    result:= aformat + tmsestringfield(ffield).asmsestring;
+   end
+   else begin
     if aformat <> '' then begin
      case ffield.datatype of
       ftsmallint,ftinteger,ftword,ftlargeint,ftbcd,ftfloat,ftcurrency: begin
@@ -3573,12 +3573,12 @@ begin
        result:= formatdatetime(aformat,field.asdatetime);
       end;
       else begin
-       defaulttext;
+       result:= aformat + defaulttext;
       end;
      end;
     end
     else begin
-     defaulttext;
+     result:= defaulttext;
     end;
    end;
   end;

@@ -1324,7 +1324,7 @@ end;
 
 constructor tstreamprinter.create(aowner: tcomponent);
 begin
- fprintcommand:= sys_getprintcommand;
+// fprintcommand:= sys_getprintcommand;
  inherited;
 end;
 
