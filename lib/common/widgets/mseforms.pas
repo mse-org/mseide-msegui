@@ -693,16 +693,15 @@ end;
 
 function tcustommseform.canclose(const newfocus: twidget): boolean;
 var
- modres: modalresultty;
+ modresbefore,modres: modalresultty;
 begin
  result:= inherited canclose(newfocus);
  if result and (newfocus = nil) then begin
+  modresbefore:= twindow1(window).fmodalresult;
   if canevent(tmethod(fonclosequery)) then begin
-   if twindow1(window).fmodalresult = mr_none then begin
+   modres:= modresbefore;
+   if modresbefore = mr_none then begin
     modres:= mr_canclose;
-   end
-   else begin
-    modres:= twindow1(window).fmodalresult;
    end;
    fonclosequery(self,modres);
    result:= modres <> mr_none;
@@ -710,7 +709,8 @@ begin
     twindow1(window).fmodalresult:= modres;
    end;
   end;
-  if result and (twindow1(window).fmodalresult <> mr_none) then begin
+  if result and ((twindow1(window).fmodalresult <> mr_none) or 
+                                        (modresbefore = mr_none)) then begin
    if canevent(tmethod(fonclose)) then begin
     fonclose(self);
    end;
