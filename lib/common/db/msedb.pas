@@ -3547,17 +3547,17 @@ function tfielddatalink.msedisplaytext(const aformat: msestring = ''): msestring
  procedure defaulttext;
  begin
   if utf8 then begin
-   result:= utf8tostring(ffield.displaytext);
+   result:= aformat + utf8tostring(ffield.displaytext);
   end
   else begin
-   result:= ffield.displaytext;
+   result:= aformat + ffield.displaytext;
   end;
  end;
 begin
  result:= '';
  if ffield <> nil then begin
   if fismsestring then begin
-   result:= tmsestringfield(ffield).asmsestring;
+   result:= aformat + tmsestringfield(ffield).asmsestring;
   end
   else begin
    if not ffield.isnull then begin

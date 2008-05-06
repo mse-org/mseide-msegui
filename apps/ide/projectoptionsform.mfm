@@ -50,6 +50,7 @@ object projectoptionsfo: tprojectoptionsfo
     frame.frameimage_offsetactivemouse = 0
     frame.frameimage_offsetactiveclicked = 0
     frame.optionsskin = []
+    frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
     frame.dummy = 0
     anchors = []
     optionsscale = []
@@ -204,6 +205,7 @@ object projectoptionsfo: tprojectoptionsfo
           frame.frameimage_offsetactivemouse = 0
           frame.frameimage_offsetactiveclicked = 0
           frame.optionsskin = []
+          frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
           frame.dummy = 0
           anchors = [an_top]
           taborder = 6
@@ -301,6 +303,7 @@ object projectoptionsfo: tprojectoptionsfo
             frame.frameimage_offsetactivemouse = 0
             frame.frameimage_offsetactiveclicked = 0
             frame.optionsskin = []
+            frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
             frame.dummy = 0
             anchors = [an_top]
             taborder = 1
@@ -359,6 +362,7 @@ object projectoptionsfo: tprojectoptionsfo
                 58
                 1)
               taborder = 1
+              ondataentered = fontondataentered
               value = True
             end
             object editfontextraspace: tintegeredit
@@ -388,6 +392,7 @@ object projectoptionsfo: tprojectoptionsfo
                 24
                 0)
               taborder = 2
+              ondataentered = fontondataentered
               min = -1000
               max = 1000
               reffontheight = 13
@@ -418,6 +423,7 @@ object projectoptionsfo: tprojectoptionsfo
                 0
                 0)
               taborder = 3
+              ondataentered = fontondataentered
               reffontheight = 13
             end
             object editfontheight: tintegeredit
@@ -446,6 +452,7 @@ object projectoptionsfo: tprojectoptionsfo
                 0
                 0)
               taborder = 4
+              ondataentered = fontondataentered
               reffontheight = 13
             end
             object editfontname: tstringedit
@@ -474,6 +481,7 @@ object projectoptionsfo: tprojectoptionsfo
                 0
                 0)
               taborder = 5
+              ondataentered = fontondataentered
               value = 'mseide_source'
               reffontheight = 13
             end
@@ -495,6 +503,7 @@ object projectoptionsfo: tprojectoptionsfo
             frame.frameimage_offsetactivemouse = 0
             frame.frameimage_offsetactiveclicked = 0
             frame.optionsskin = []
+            frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
             frame.dummy = 0
             anchors = [an_top]
             taborder = 2
@@ -644,6 +653,7 @@ object projectoptionsfo: tprojectoptionsfo
             frame.frameimage_offsetactivemouse = 0
             frame.frameimage_offsetactiveclicked = 0
             frame.optionsskin = []
+            frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
             frame.dummy = 0
             anchors = [an_top]
             taborder = 3
@@ -1946,6 +1956,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.frameimage_offsetactivemouse = 0
               frame.frameimage_offsetactiveclicked = 0
               frame.optionsskin = []
+              frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
               frame.dummy = 0
               anchors = [an_top]
               optionsscale = [osc_expandy, osc_shrinky]
@@ -2043,7 +2054,7 @@ object projectoptionsfo: tprojectoptionsfo
             end
             object remoteconnection: tstringedit
               bounds_x = 1
-              bounds_y = 49
+              bounds_y = 48
               bounds_cx = 1224
               bounds_cy = 35
               frame.frameimage_left = 0
@@ -2074,7 +2085,7 @@ object projectoptionsfo: tprojectoptionsfo
             end
             object tlayouter3: tlayouter
               bounds_x = 0
-              bounds_y = 87
+              bounds_y = 86
               bounds_cx = 613
               bounds_cy = 35
               frame.frameimage_left = 0
@@ -2089,6 +2100,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.frameimage_offsetactivemouse = 0
               frame.frameimage_offsetactiveclicked = 0
               frame.optionsskin = []
+              frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
               frame.dummy = 0
               anchors = [an_top]
               taborder = 2
@@ -2194,7 +2206,7 @@ object projectoptionsfo: tprojectoptionsfo
             end
             object tlayouter4: tlayouter
               bounds_x = 0
-              bounds_y = 125
+              bounds_y = 124
               bounds_cx = 613
               bounds_cy = 35
               frame.frameimage_left = 0
@@ -2209,6 +2221,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.frameimage_offsetactivemouse = 0
               frame.frameimage_offsetactiveclicked = 0
               frame.optionsskin = []
+              frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
               frame.dummy = 0
               anchors = [an_top]
               taborder = 3
@@ -2303,7 +2316,7 @@ object projectoptionsfo: tprojectoptionsfo
             end
             object tlayouter5: tlayouter
               bounds_x = 0
-              bounds_y = 163
+              bounds_y = 162
               bounds_cx = 613
               bounds_cy = 35
               frame.frameimage_left = 0
@@ -2318,6 +2331,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.frameimage_offsetactivemouse = 0
               frame.frameimage_offsetactiveclicked = 0
               frame.optionsskin = []
+              frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
               frame.dummy = 0
               anchors = [an_top]
               taborder = 4
@@ -2392,6 +2406,7 @@ object projectoptionsfo: tprojectoptionsfo
           frame.frameimage_offsetactivemouse = 0
           frame.frameimage_offsetactiveclicked = 0
           frame.optionsskin = []
+          frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
           frame.dummy = 0
           taborder = 3
           optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
@@ -2552,6 +2567,7 @@ object projectoptionsfo: tprojectoptionsfo
             frame.frameimage_offsetactivemouse = 0
             frame.frameimage_offsetactiveclicked = 0
             frame.caption = '&Value Hints'
+            frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.dummy = 0
             frame.outerframe = (
               0
@@ -4275,6 +4291,7 @@ object projectoptionsfo: tprojectoptionsfo
           frame.frameimage_offsetactivemouse = 0
           frame.frameimage_offsetactiveclicked = 0
           frame.optionsskin = []
+          frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
           frame.dummy = 0
           anchors = [an_bottom]
           taborder = 1
