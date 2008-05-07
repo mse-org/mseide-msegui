@@ -586,8 +586,10 @@ type
    fvisigrouplink: tfielddatalink;
    foptions: bandoptionsty;
    foptionsshow: bandoptionshowsty;
-   fgroupnum: integer;
+   fgroupnum: int64;
+   fgroupstring: msestring;
    fnextgroupnum: integer;
+   fnextgroupstring: msestring;
    fobjectpicker: tobjectpicker;
    fnextband: tcustomrecordband;
    fnextbandifempty: tcustomrecordband;
@@ -3284,7 +3286,12 @@ var
 begin
  exclude(fstate,rbs_finish);
  if fvisigrouplink.fieldactive then begin
-  fgroupnum:= fvisigrouplink.asinteger;
+  if fvisigrouplink.isstringfield then begin
+   fgroupstring:= fvisigrouplink.asmsestring;
+  end
+  else begin
+   fgroupnum:= fvisigrouplink.aslargeint;
+  end;
 //  fnextgroupnum:= fgroupnum; set by beginrender
  end;
  for int1:= 0 to high(fareas) do begin
@@ -3390,14 +3397,24 @@ procedure tcustomrecordband.dobeforenextrecord(const adatasource: tdatasource);
 begin
  ftabs.dobeforenextrecord(adatasource);
  if fvisigrouplink.fieldactive then begin
-  fgroupnum:= fvisigrouplink.field.asinteger;
+  if fvisigrouplink.isstringfield then begin
+   fgroupstring:= fvisigrouplink.asmsestring;
+  end
+  else begin
+   fgroupnum:= fvisigrouplink.field.aslargeint;
+  end;
  end;
 end;
 
 procedure tcustomrecordband.dosyncnextrecord;
 begin
  if fvisigrouplink.fieldactive then begin
-  fnextgroupnum:= fvisigrouplink.field.asinteger;
+  if fvisigrouplink.isstringfield then begin
+   fnextgroupstring:= fvisigrouplink.asmsestring;
+  end
+  else begin
+   fnextgroupnum:= fvisigrouplink.field.aslargeint;
+  end;
  end;
 end;
 
@@ -3585,14 +3602,26 @@ end;
 
 function tcustomrecordband.isfirstofgroup: boolean;
 begin
- result:= fvisigrouplink.fieldactive and (isfirstrecord or 
-                   (fvisigrouplink.field.asinteger <> fgroupnum));
+ if fvisigrouplink.isstringfield then begin
+  result:= fvisigrouplink.fieldactive and (isfirstrecord or 
+                   (fvisigrouplink.asmsestring <> fgroupstring));
+ end
+ else begin
+  result:= fvisigrouplink.fieldactive and (isfirstrecord or 
+                   (fvisigrouplink.field.aslargeint <> fgroupnum));
+ end;
 end;
 
 function tcustomrecordband.islastofgroup: boolean;
 begin
- result:= fvisigrouplink.fieldactive and (islastrecord or 
-                   (fvisigrouplink.field.asinteger <> fnextgroupnum));
+ if fvisigrouplink.isstringfield then begin
+  result:= fvisigrouplink.fieldactive and (islastrecord or 
+                   (fvisigrouplink.asmsestring <> fnextgroupstring));
+ end
+ else begin
+  result:= fvisigrouplink.fieldactive and (islastrecord or 
+                   (fvisigrouplink.field.aslargeint <> fnextgroupnum));
+ end;
 end;
 
 function tcustomrecordband.bandisvisible(const checklast: boolean): boolean;
@@ -3606,18 +3635,35 @@ begin
  firstrecord:= isfirstrecord;
  lastrecord:= islastrecord;
  if fvisigrouplink.fieldactive then begin
-  if (bo_visigroupfirst in foptions) and (firstrecord or 
-                  (fvisigrouplink.field.asinteger <> fgroupnum)) or
-         (bo_visigrouplast in foptions) and (lastrecord or 
-                  (fvisigrouplink.field.asinteger <> fnextgroupnum)) or 
-         (bo_visigroupnotfirst in foptions) and not (firstrecord or 
-                  (fvisigrouplink.field.asinteger <> fgroupnum)) or
-         (bo_visigroupnotlast in foptions) and not(lastrecord or 
-                  (fvisigrouplink.field.asinteger <> fnextgroupnum)) then begin
-   result:= true;
+  if fvisigrouplink.isstringfield then begin
+   if (bo_visigroupfirst in foptions) and (firstrecord or 
+                   (fvisigrouplink.asmsestring <> fgroupstring)) or
+          (bo_visigrouplast in foptions) and (lastrecord or 
+                   (fvisigrouplink.asmsestring <> fnextgroupstring)) or 
+          (bo_visigroupnotfirst in foptions) and not (firstrecord or 
+                   (fvisigrouplink.asmsestring <> fgroupstring)) or
+          (bo_visigroupnotlast in foptions) and not(lastrecord or 
+                   (fvisigrouplink.asmsestring <> fnextgroupstring)) then begin
+    result:= true;
+   end
+   else begin
+    result:= false;
+   end;
   end
   else begin
-   result:= false;
+   if (bo_visigroupfirst in foptions) and (firstrecord or 
+                   (fvisigrouplink.field.aslargeint <> fgroupnum)) or
+          (bo_visigrouplast in foptions) and (lastrecord or 
+                   (fvisigrouplink.field.aslargeint <> fnextgroupnum)) or 
+          (bo_visigroupnotfirst in foptions) and not (firstrecord or 
+                   (fvisigrouplink.field.aslargeint <> fgroupnum)) or
+          (bo_visigroupnotlast in foptions) and not(lastrecord or 
+                   (fvisigrouplink.field.aslargeint <> fnextgroupnum)) then begin
+    result:= true;
+   end
+   else begin
+    result:= false;
+   end;
   end;
  end; 
  if fvisidatalink.fieldactive then begin
@@ -3775,7 +3821,7 @@ begin
  setlength(afieldtypes,2);
  afieldtypes[0]:= [];
  afieldtypes[1]:= [ftinteger,ftlargeint,ftsmallint,
-                     ftword,ftboolean];
+                     ftword,ftboolean] + textfields;
 end;
 
 function tcustomrecordband.getvisigroupfield: string;

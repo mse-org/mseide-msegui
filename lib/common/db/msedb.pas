@@ -644,6 +644,7 @@ type
    ffield: tfield;
    ffieldname: string;
    fismsestring: boolean;
+   fisstringfield: boolean;
    procedure setfieldname(const Value: string);
    procedure updatefield;
    function getasmsestring: msestring;
@@ -676,6 +677,7 @@ type
    function fieldactive: boolean;
    property field: tfield read ffield;
    property fieldname: string read ffieldname write setfieldname;
+   property isstringfield: boolean read fisstringfield;
    
    property AsBoolean: Boolean read GetAsBoolean write SetAsBoolean;
    property AsCurrency: Currency read GetAsCurrency write SetAsCurrency;
@@ -3482,6 +3484,7 @@ begin
  if ffield <> value then begin
   ffield := value;
   fismsestring:= (ffield <> nil) and (ffield is tmsestringfield);
+  fisstringfield:= (ffield <> nil) and (ffield.datatype in textfields);
   editingchanged;
   recordchanged(nil);
  end;
