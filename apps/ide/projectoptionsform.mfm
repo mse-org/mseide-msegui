@@ -34,9 +34,9 @@ object projectoptionsfo: tprojectoptionsfo
     place_options = [plo_endmargin]
     object tlayouter8: tlayouter
       bounds_x = 0
-      bounds_y = 546
+      bounds_y = 545
       bounds_cx = 616
-      bounds_cy = 30
+      bounds_cy = 31
       frame.framei_top = 5
       frame.framei_bottom = 5
       frame.localprops = [frl_fitop, frl_fibottom]
@@ -53,10 +53,9 @@ object projectoptionsfo: tprojectoptionsfo
       object cancel: tbutton
         optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
         bounds_x = 562
-        bounds_y = 5
+        bounds_y = 6
         bounds_cx = 49
         bounds_cy = 20
-        anchors = [an_right, an_bottom]
         state = [as_localcaption]
         caption = 'Cancel'
         modalresult = mr_cancel
@@ -65,10 +64,9 @@ object projectoptionsfo: tprojectoptionsfo
       object ok: tbutton
         optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
         bounds_x = 508
-        bounds_y = 5
+        bounds_y = 6
         bounds_cx = 49
         bounds_cy = 20
-        anchors = [an_right, an_bottom]
         taborder = 1
         state = [as_default, as_localdefault, as_localcaption]
         caption = 'Ok'
@@ -81,7 +79,7 @@ object projectoptionsfo: tprojectoptionsfo
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 616
-      bounds_cy = 546
+      bounds_cy = 545
       frame.levelo = -1
       frame.captionoffset = 3
       frame.localprops = [frl_levelo]
@@ -99,7 +97,7 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_x = 1
         bounds_y = 19
         bounds_cx = 614
-        bounds_cy = 526
+        bounds_cy = 525
         frame.framei_bottom = 0
         frame.localprops = [frl_fibottom, frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.dummy = 0
@@ -644,7 +642,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_x = 0
           bounds_y = 299
           bounds_cx = 614
-          bounds_cy = 227
+          bounds_cy = 226
           bounds_cymin = 84
           anchors = [an_top, an_bottom]
           taborder = 7
@@ -659,7 +657,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 614
-            bounds_cy = 209
+            bounds_cy = 208
             frame.framei_bottom = 0
             frame.localprops = [frl_fibottom, frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.dummy = 0
@@ -681,7 +679,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_x = 0
               bounds_y = 0
               bounds_cx = 614
-              bounds_cy = 209
+              bounds_cy = 208
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.dummy = 0
               anchors = []
@@ -725,7 +723,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 614
-            bounds_cy = 209
+            bounds_cy = 208
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.dummy = 0
             anchors = [an_left, an_top, an_right, an_bottom]
@@ -737,7 +735,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_x = 0
               bounds_y = 0
               bounds_cx = 614
-              bounds_cy = 209
+              bounds_cy = 208
               bounds_cymin = 60
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.dummy = 0
@@ -794,7 +792,7 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_x = 1
         bounds_y = 19
         bounds_cx = 614
-        bounds_cy = 526
+        bounds_cy = 525
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.sbhorz.options = [sbo_moveauto, sbo_showauto]
         frame.sbvert.options = [sbo_moveauto, sbo_showauto]
@@ -853,7 +851,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_x = 0
           bounds_y = 187
           bounds_cx = 614
-          bounds_cy = 339
+          bounds_cy = 338
           anchors = [an_left, an_top, an_right, an_bottom]
           taborder = 4
           activepageindex = 4
@@ -868,7 +866,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 614
-            bounds_cy = 321
+            bounds_cy = 320
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.dummy = 0
             anchors = [an_left, an_top, an_right, an_bottom]
@@ -880,7 +878,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_x = 0
               bounds_y = 0
               bounds_cx = 614
-              bounds_cy = 321
+              bounds_cy = 320
               bounds_cymin = 40
               frame.captionoffset = 3
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
@@ -928,7 +926,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 614
-            bounds_cy = 321
+            bounds_cy = 320
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.dummy = 0
             anchors = [an_left, an_top, an_right, an_bottom]
@@ -940,7 +938,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_x = 0
               bounds_y = 0
               bounds_cx = 614
-              bounds_cy = 321
+              bounds_cy = 320
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.dummy = 0
               anchors = []
@@ -1009,7 +1007,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 614
-            bounds_cy = 321
+            bounds_cy = 320
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.dummy = 0
             anchors = [an_left, an_top, an_right, an_bottom]
@@ -1021,7 +1019,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_x = 0
               bounds_y = 0
               bounds_cx = 614
-              bounds_cy = 321
+              bounds_cy = 320
               bounds_cymin = 40
               frame.captionoffset = 3
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
@@ -1159,7 +1157,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 614
-            bounds_cy = 321
+            bounds_cy = 320
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.dummy = 0
             anchors = [an_left, an_top, an_right, an_bottom]
@@ -1171,7 +1169,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_x = 0
               bounds_y = 0
               bounds_cx = 614
-              bounds_cy = 321
+              bounds_cy = 320
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.dummy = 0
               anchors = []
@@ -1239,7 +1237,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 614
-            bounds_cy = 321
+            bounds_cy = 320
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
             frame.dummy = 0
             anchors = [an_left, an_top, an_right, an_bottom]
@@ -1706,7 +1704,7 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_x = 1
         bounds_y = 19
         bounds_cx = 614
-        bounds_cy = 526
+        bounds_cy = 525
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.dummy = 0
         anchors = [an_top, an_bottom]
@@ -1933,7 +1931,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_x = 0
           bounds_y = 187
           bounds_cx = 614
-          bounds_cy = 339
+          bounds_cy = 338
           anchors = [an_top, an_bottom]
           taborder = 11
           activepageindex = 0
@@ -1948,7 +1946,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 614
-            bounds_cy = 321
+            bounds_cy = 320
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.dummy = 0
             face.localprops = [fal_frameimageoffset]
@@ -1963,7 +1961,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_x = 0
               bounds_y = 0
               bounds_cx = 614
-              bounds_cy = 321
+              bounds_cy = 320
               bounds_cymin = 40
               frame.captionoffset = 3
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
@@ -2130,7 +2128,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 614
-            bounds_cy = 321
+            bounds_cy = 320
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.dummy = 0
             anchors = [an_left, an_top, an_right, an_bottom]
@@ -2142,7 +2140,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_x = 0
               bounds_y = 47
               bounds_cx = 614
-              bounds_cy = 274
+              bounds_cy = 273
               bounds_cymin = 40
               frame.caption = 'Unit, include and library &directories'
               frame.captionoffset = 3
@@ -2595,7 +2593,7 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_x = 1
         bounds_y = 19
         bounds_cx = 614
-        bounds_cy = 526
+        bounds_cy = 525
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.dummy = 0
         anchors = [an_left, an_top, an_right, an_bottom]
@@ -2607,7 +2605,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_x = 0
           bounds_y = 124
           bounds_cx = 614
-          bounds_cy = 403
+          bounds_cy = 402
           bounds_cymin = 40
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.dummy = 0
@@ -2897,7 +2895,7 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_x = 1
         bounds_y = 19
         bounds_cx = 614
-        bounds_cy = 526
+        bounds_cy = 525
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.dummy = 0
         anchors = [an_left, an_top, an_right, an_bottom]
@@ -2908,7 +2906,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_x = 0
           bounds_y = 0
           bounds_cx = 614
-          bounds_cy = 526
+          bounds_cy = 525
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.dummy = 0
           anchors = []
@@ -2987,7 +2985,7 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_x = 1
         bounds_y = 19
         bounds_cx = 614
-        bounds_cy = 526
+        bounds_cy = 525
         frame.framei_bottom = 0
         frame.localprops = [frl_fibottom, frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.dummy = 0
@@ -2997,7 +2995,7 @@ object projectoptionsfo: tprojectoptionsfo
         reffontheight = 14
         object tlayouter7: tlayouter
           bounds_x = 0
-          bounds_y = 1009
+          bounds_y = 1008
           bounds_cx = 614
           bounds_cy = 42
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
@@ -3024,7 +3022,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_x = 0
           bounds_y = 0
           bounds_cx = 614
-          bounds_cy = 526
+          bounds_cy = 525
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.dummy = 0
           anchors = []
@@ -3183,7 +3181,7 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_x = 1
         bounds_y = 19
         bounds_cx = 614
-        bounds_cy = 526
+        bounds_cy = 525
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.dummy = 0
         anchors = [an_left, an_top, an_right, an_bottom]
@@ -3194,7 +3192,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_x = 0
           bounds_y = 0
           bounds_cx = 614
-          bounds_cy = 526
+          bounds_cy = 525
           anchors = []
           activepageindex = 0
           tab_frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
@@ -3206,7 +3204,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 614
-            bounds_cy = 508
+            bounds_cy = 507
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.dummy = 0
             anchors = [an_left, an_top, an_right, an_bottom]
@@ -3219,7 +3217,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_x = 0
               bounds_y = 0
               bounds_cx = 614
-              bounds_cy = 508
+              bounds_cy = 507
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.dummy = 0
               anchors = []
@@ -3341,7 +3339,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 614
-            bounds_cy = 508
+            bounds_cy = 507
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.dummy = 0
             anchors = [an_left, an_top, an_right, an_bottom]
@@ -3394,7 +3392,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 614
-            bounds_cy = 508
+            bounds_cy = 507
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.dummy = 0
             anchors = [an_left, an_top, an_right, an_bottom]
@@ -3800,7 +3798,7 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_x = 1
         bounds_y = 19
         bounds_cx = 614
-        bounds_cy = 526
+        bounds_cy = 525
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.dummy = 0
         anchors = [an_left, an_top, an_right, an_bottom]
@@ -3812,7 +3810,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_x = 0
           bounds_y = 0
           bounds_cx = 614
-          bounds_cy = 526
+          bounds_cy = 525
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.dummy = 0
           anchors = []

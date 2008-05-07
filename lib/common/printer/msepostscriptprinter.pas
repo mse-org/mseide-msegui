@@ -126,6 +126,8 @@ type
    property pslevel: pslevelty read fpslevel write fpslevel default psl_2;
  end;
  
+function psrealtostr(const avalue: real): string;
+ 
 implementation
 uses
  msegui,mseguiglob,msesys,sysutils,msedatalist,mseformatstr,mseunicodeps,

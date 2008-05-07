@@ -194,7 +194,7 @@ type
  layouterstatesty = set of layouterstatety;
  
  tlayouter = class;
- layoutereventty = procedure(const senter: tlayouter) of object;
+ layoutereventty = procedure(const sender: tlayouter) of object;
   
  tlayouter = class(tspacer)
   private
@@ -1595,50 +1595,55 @@ var
  size1: sizety;
  int1: integer;
 begin
- inherited;
- exclude(fstate,las_scalesizerefvalid);
- if componentstate * [csloading,csdestroying] = [] then begin
-  if (foptionslayout * [lao_scalewidth,lao_scaleheight] <> []) and 
-        not (las_propsizing in fstate) then begin
-   beginscaling;
-   include(fstate,las_propsizing);
-   try
-    refsi:= innerclientsize;
-    for int1:= high(fwidgetinfos) downto 0 do begin
-     with fwidgetinfos[int1] do begin
-      pt1:= widget.pos;
-      size1:= widget.clientsize;
-      if refsize.cx <> 0 then begin
-       if (lao_scaleleft in foptionslayout) and 
-                  not (osk_nopropleft in widget.optionsskin) then begin
-        pt1.x:= (pos.x * refsi.cx) div refsize.cx;
+ inc(flayoutupdating);
+ try
+  inherited;
+  exclude(fstate,las_scalesizerefvalid);
+  if componentstate * [csloading,csdestroying] = [] then begin
+   if (foptionslayout * [lao_scalewidth,lao_scaleheight] <> []) and 
+         not (las_propsizing in fstate) then begin
+    beginscaling;
+    include(fstate,las_propsizing);
+    try
+     refsi:= innerclientsize;
+     for int1:= high(fwidgetinfos) downto 0 do begin
+      with fwidgetinfos[int1] do begin
+       pt1:= widget.pos;
+       size1:= widget.clientsize;
+       if refsize.cx <> 0 then begin
+        if (lao_scaleleft in foptionslayout) and 
+                   not (osk_nopropleft in widget.optionsskin) then begin
+         pt1.x:= (pos.x * refsi.cx) div refsize.cx;
+        end;
+        if (lao_scalewidth in foptionslayout) and 
+                   not (osk_nopropwidth in widget.optionsskin) then begin
+         size1.cx:= (size.cx * refsi.cx) div refsize.cx;
+        end;
        end;
-       if (lao_scalewidth in foptionslayout) and 
-                  not (osk_nopropwidth in widget.optionsskin) then begin
-        size1.cx:= (size.cx * refsi.cx) div refsize.cx;
+       if refsize.cy <> 0 then begin
+        if (lao_scaletop in foptionslayout) and 
+                   not (osk_noproptop in widget.optionsskin) then begin
+         pt1.y:= (pos.y * refsi.cy) div refsize.cy;
+        end;
+        if (lao_scaleheight in foptionslayout) and 
+                   not (osk_nopropheight in widget.optionsskin) then begin
+         size1.cy:= (size.cy * refsi.cy) div refsize.cy;
+        end;
        end;
+       widget.clientsize:= size1;
+       widget.pos:= pt1;
       end;
-      if refsize.cy <> 0 then begin
-       if (lao_scaletop in foptionslayout) and 
-                  not (osk_noproptop in widget.optionsskin) then begin
-        pt1.y:= (pos.y * refsi.cy) div refsize.cy;
-       end;
-       if (lao_scaleheight in foptionslayout) and 
-                  not (osk_nopropheight in widget.optionsskin) then begin
-        size1.cy:= (size.cy * refsi.cy) div refsize.cy;
-       end;
-      end;
-      widget.clientsize:= size1;
-      widget.pos:= pt1;
      end;
+    finally
+     exclude(fstate,las_propsizing);
+     endscaling;
     end;
-   finally
-    exclude(fstate,las_propsizing);
-    endscaling;
    end;
   end;
-  updatelayout;
+ finally
+  dec(flayoutupdating);
  end;
+ updatelayout;
 end;
 
 procedure tlayouter.childautosizechanged(const sender: twidget);

@@ -431,6 +431,12 @@ type
    procedure downloadchange(const sender: TObject);
    procedure processorchange(const sender: TObject);
    procedure copymessagechanged(const sender: TObject);
+   {
+   procedure befla(const sender: tlayouter);
+   procedure afterla(const sender: tlayouter);
+   procedure bef1(const sender: tlayouter);
+   procedure aft1(const sender: tlayouter);
+   }
   private
    procedure activegroupchanged;
  end;
@@ -1878,5 +1884,29 @@ procedure tprojectoptionsfo.copymessagechanged(const sender: TObject);
 begin
  messageoutputfile.enabled:= copymessages.value;
 end;
+{
+procedure tprojectoptionsfo.befla(const sender: tlayouter);
+begin
+ writeln('before '+sender.widgets[0].name+':',sender.widgets[0].bounds_x,' '+
+         sender.widgets[1].name+':',sender.widgets[1].bounds_x);
+end;
 
+procedure tprojectoptionsfo.afterla(const sender: tlayouter);
+begin
+ writeln('after '+sender.widgets[0].name+':',sender.widgets[0].bounds_x,' '+
+         sender.widgets[1].name+':',sender.widgets[1].bounds_x);
+end;
+
+procedure tprojectoptionsfo.bef1(const sender: tlayouter);
+begin
+ writeln('before1 '+sender.widgets[0].name+':',sender.widgets[0].bounds_y,' '+
+         sender.widgets[1].name+':',sender.widgets[1].bounds_y);
+end;
+
+procedure tprojectoptionsfo.aft1(const sender: tlayouter);
+begin
+ writeln('after1 '+sender.widgets[0].name+':',sender.widgets[0].bounds_y,' '+
+         sender.widgets[1].name+':',sender.widgets[1].bounds_y);
+end;
+}
 end.
