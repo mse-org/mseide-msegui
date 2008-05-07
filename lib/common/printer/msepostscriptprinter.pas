@@ -69,7 +69,6 @@ type
    procedure selectfont(const afont: fontnumty; const acodepage: integer);
    procedure definefont(const adata: fontnumty; const acodepage: integer);
    procedure setpslinewidth(const avalue: integer);
-   function gcposstring(const apos: pointty): string;
    function strokestr: string;
    function rectscalestring(const arect: rectty): string; 
                  //transform unity cell to arect
@@ -113,10 +112,11 @@ type
    function registermap(const acodepage: integer): string;
                  //returns mapname ('E00' for latin 1)  
    procedure checkmap(const acodepage: integer);
+   function gcposstring(const apos: pointty): string;
   public
    constructor create(const user: tprinter; const intf: icanvas);
 
-   function posstring(const apos: pointty): string;
+   function posstring(const apos: pointty): string;  
    function diststring(const adist: integer): string;
    function rectsizestring(const asize: sizety): string;
    function sizestring(const asize: sizety): string;
@@ -962,6 +962,9 @@ end;
 
 function tpostscriptcanvas.posstring(const apos: pointty): string;
 begin
+ if not (cs_origin in fstate) then begin
+  checkgcstate([cs_origin]);
+ end;
  result:= 
   psrealtostr(apos.x*fgcscale+foriginx)+' '+
   psrealtostr(foriginy-apos.y*fgcscale);

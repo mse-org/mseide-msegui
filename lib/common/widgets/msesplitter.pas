@@ -193,6 +193,9 @@ type
  layouterstatety = (las_propsizing,las_scalesizerefvalid);
  layouterstatesty = set of layouterstatety;
  
+ tlayouter = class;
+ layoutereventty = procedure(const senter: tlayouter) of object;
+  
  tlayouter = class(tspacer)
   private
    foptionslayout: layoutoptionsty;
@@ -207,6 +210,8 @@ type
    fwidgetinfos: widgetlayoutinfoarty;
    fstate: layouterstatesty;
    fscalesizeref: sizety;
+   fonbeforelayout: layoutereventty;
+   fonafterlayout: layoutereventty;
    procedure setoptionslayout(const avalue: layoutoptionsty);
    procedure setalign_mode(const avalue: widgetalignmodety);
    procedure setalign_leader(const avalue: twidget);
@@ -257,6 +262,10 @@ type
    property place_options: placeoptionsty read fplace_options 
                                      write setplace_options default [];
    property optionswidget default defaultgroupboxoptionswidget;
+   property onbeforelayout: layoutereventty read fonbeforelayout 
+                                                    write fonbeforelayout;
+   property onafterlayout: layoutereventty read fonafterlayout 
+                                                    write fonafterlayout;
    property visible default true;
  end;
  
@@ -521,6 +530,12 @@ begin
   po2.y:= po1.y;
  end;
  setpickoffset(subpoint(po2,po1));
+ if foptions * [spo_hmove,spo_hprop] = [spo_hmove,spo_hprop] then begin
+  fhprop:= reader.readreal('xprop',fhprop,0,1);
+ end;
+ if foptions * [spo_vmove,spo_vprop] = [spo_vmove,spo_vprop] then begin
+  fvprop:= reader.readreal('yprop',fvprop,0,1);
+ end;
 end;
 
 procedure tsplitter.dostatwrite(const writer: tstatwriter);
@@ -530,6 +545,8 @@ begin
  po1:= parentclientpos;
  writer.writeinteger('x',po1.x);
  writer.writeinteger('y',po1.y);
+ writer.writereal('xprop',fhprop);
+ writer.writereal('yprop',fvprop);
 end;
 
 procedure tsplitter.statreading;
@@ -1195,6 +1212,9 @@ var
 begin
  if (componentstate * [csloading,csdestroying] = []) and 
                             (flayoutupdating = 0) then begin
+  if canevent(tmethod(fonbeforelayout)) then begin
+   fonbeforelayout(self);
+  end;
   inc(flayoutupdating);
   try  
    updateoptionsscale;
@@ -1383,6 +1403,9 @@ begin
   finally
    endscaling;
    dec(flayoutupdating);
+  end;
+  if canevent(tmethod(fonafterlayout)) then begin
+   fonafterlayout(self);
   end;
  end;
 end;
