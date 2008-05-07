@@ -848,8 +848,8 @@ begin
       designer.doswapmethodpointers(component,false);
       try
        writer.Root:= component.Owner;
-       tfilercracker(writer).flookuproot:= comp1;
-        //force qualified component names     
+//       tfilercracker(writer).flookuproot:= comp1;
+//        //force qualified component names     
        designer.descendentinstancelist.beginstreaming; 
        comp2:= designer.descendentinstancelist.findancestor(component);
        writer.ancestor:= comp2;

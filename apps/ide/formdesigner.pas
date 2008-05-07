@@ -1596,13 +1596,15 @@ begin
    if (eventkind = ek_buttonpress) and (button = mb_left) then begin
     fpickpos:= pos;
     if (ss1 = [ss_left]) or (ss1 = [ss_left,ss_ctrl]) or 
+                (ss1 = [ss_left,ss_ctrl,ss_shift]) or
                 (ss1 = [ss_left,ss_double]) then begin
      factarea:= fselections.getareainfo(pos,factcompindex);
      if factcompindex >= 0 then begin
       fsizerect:= fselections.itempo(factcompindex)^.rect;
       factsizerect:= fsizerect;
      end;
-     if (factarea in [ar_component,ar_none]) then begin
+     if (factarea in [ar_component,ar_none]) and 
+                                     not (ss_shift in ss1) then begin
       if isinpaintrect then begin
        component:= componentatpos(pos);
        if (component = nil) then begin
