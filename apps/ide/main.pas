@@ -1775,7 +1775,7 @@ begin
   if result then begin
    sourcefo.closeall(true);
    while designer.modules.count > 0 do begin
-    closemodule(designer.modules.itempo[designer.modules.count-1],nosave,true);
+    closemodule(designer.modules.itempo[designer.modules.count-1],not nosave,true);
    end;
   end;
  end;

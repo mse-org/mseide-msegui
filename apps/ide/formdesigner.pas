@@ -1132,6 +1132,9 @@ begin
 // if csinline in component.ComponentState then begin
  if component.ComponentState * [csancestor,csinline] <> [] then begin
   tcomponent1(component).getchildren({$ifdef FPC}@{$endif}doaddcomponent,component);
+  if comp1 <> nil then begin
+   tcomponent1(component).getchildren({$ifdef FPC}@{$endif}doaddcomponent,comp1);
+  end;
  end
  else begin
 // if comp1 <> nil then begin //else submodule
