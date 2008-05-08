@@ -862,7 +862,7 @@ type
  tbandgroup = class(tcustombandgroup)
   published
    property font;
-//   property tabs;
+   property tabs;
    property datasource;
    property nextband;
    property nextbandifempty;
