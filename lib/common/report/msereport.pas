@@ -73,7 +73,7 @@ const
          dashes: defaulttablinedashes; dist: defaulttablinedist;
          visible: defaulttablinevisible);
 type
- tcustombandarea = class;
+ tbasebandarea = class;
  tcustomrecordband = class;
  tcustomreportpage = class;
  rendereventty = procedure(const sender: tobject;
@@ -565,7 +565,7 @@ type
                                         write setoptionsrep default [];
  end;
  
- bandareaarty = array of tcustombandarea;
+ bandareaarty = array of tbasebandarea;
  
  recordbandarty = array of tcustomrecordband;
  recordbandeventty = procedure(const sender: tcustomrecordband) of object; 
@@ -789,6 +789,7 @@ type
    property onbeforepaint;
    property onpaint;
    property onafterpaint;
+   property onafterrender;
    property ongettext;
  end;
 
@@ -887,19 +888,14 @@ type
                     bas_activebandchanged,bas_finished);
  bandareastatesty = set of bandareastatety; 
    
- bandareaeventty = procedure(const sender: tcustombandarea) of object;
- bandareapainteventty = procedure(const sender: tcustombandarea;
+ bandareaeventty = procedure(const sender: tbasebandarea) of object;
+ bandareapainteventty = procedure(const sender: tbasebandarea;
                               const acanvas: tcanvas) of object;
                               
- tcustombandarea = class(tpublishedwidget,ibandparent)
+ tbasebandarea = class(tpublishedwidget,ibandparent)
   private
    fbands: recordbandarty;
    fstate: bandareastatesty;
-   factiveband: integer;
-   facty: integer;
-   factybefore: integer;
-   fbandnum: integer;
-   fsaveindex: integer;
    freportpage: tcustomreportpage;
    frecordband: tcustomrecordband;
    fonbeforerender: bandareaeventty;
@@ -907,17 +903,16 @@ type
    fonpaint: bandareapainteventty;
    fonafterpaint: bandareapainteventty;
    fonfirstarea: bandareaeventty;
+   fonlastarea: bandareaeventty;
    forigin: pointty;
-   function getareafull: boolean;
-   procedure setareafull(const avalue: boolean);
-   function getacty: integer;
+   fsaveindex: integer;
   protected
    procedure registerchildwidget(const child: twidget); override;
    procedure unregisterchildwidget(const child: twidget); override;
    procedure setparentwidget(const avalue: twidget); override;   
    procedure paint(const canvas: tcanvas); override;
    procedure renderbackground(const acanvas: tcanvas);
-   function render(const acanvas: tcanvas): boolean;
+   function render(const acanvas: tcanvas): boolean; virtual;
           //true if finished
    function rendering: boolean;
    procedure beginrender(const arestart: boolean);
@@ -928,8 +923,8 @@ type
    procedure doonpaint(const acanvas: tcanvas); override;
    procedure doafterpaint1(const acanvas: tcanvas); virtual;
    procedure init; virtual;
-   procedure initareapage;
-   procedure initband;
+   procedure initareapage; virtual;
+   procedure initband; virtual;
    procedure initpage;
    procedure dobeforenextrecord(const adatasource: tdatasource);
    procedure dosyncnextrecord;
@@ -938,9 +933,10 @@ type
    procedure registerclient(const aclient: ireportclient);
    procedure unregisterclient(const aclient: ireportclient);
    function beginband(const acanvas: tcanvas;
-                               const sender: tcustomrecordband): boolean;
+                               const sender: tcustomrecordband): boolean; virtual;
                     //true if area full
-   procedure endband(const acanvas: tcanvas; const sender: tcustomrecordband);  
+   procedure endband(const acanvas: tcanvas; 
+                      const sender: tcustomrecordband); virtual;  
    procedure updatevisible;
    function getlastpagepagecount: integer;
    function getlastreppagecount: integer;
@@ -948,25 +944,24 @@ type
    function getfont: trepwidgetfont;
    function getfontclass: widgetfontclassty; override;
   public
-   function istopband: boolean;
-   function isfirstband: boolean;
-   function islastband(const addheight: integer = 0): boolean;
    function isfirstrecord: boolean;
    function islastrecord: boolean;
-   function remainingheight: integer;
+   function istopband: boolean; virtual;
+   function isfirstband: boolean; virtual;
+   function islastband(const addheight: integer = 0): boolean; virtual;
+   function remainingheight: integer; virtual;
+
    function pagepagenum: integer; //null based
    function reppagenum: integer; //null based
    function pageprintstarttime: tdatetime;
    function repprintstarttime: tdatetime;
    function getreppage: tcustomreportpage;
 
-   procedure restart;
-   
-   property acty: integer read getacty;
-   property areafull: boolean read getareafull write setareafull;
-   
+   procedure restart; virtual;
+      
    property font: trepwidgetfont read getfont write setfont stored isfontstored;
    property onfirstarea: bandareaeventty read fonfirstarea write fonfirstarea;
+   property onlastarea: bandareaeventty read fonlastarea write fonlastarea;
    property onbeforerender: bandareaeventty read fonbeforerender
                                write fonbeforerender;
    property onafterrender: bandareaeventty read fonafterrender
@@ -974,17 +969,257 @@ type
    property onpaint: bandareapainteventty read fonpaint write fonpaint;
    property onafterpaint: bandareapainteventty read fonafterpaint write fonafterpaint;
  end; 
- 
+
+ tcustombandarea = class(tbasebandarea)
+  private
+   factiveband: integer;
+   facty: integer;
+   factybefore: integer;
+   fbandnum: integer;
+   function getareafull: boolean;
+   procedure setareafull(const avalue: boolean);
+   function getacty: integer;
+  protected
+   procedure init; override;
+   procedure initband; override;
+   procedure initareapage; override;
+   function render(const acanvas: tcanvas): boolean; override;
+          //true if finished
+   function beginband(const acanvas: tcanvas;
+                      const sender: tcustomrecordband): boolean; override;
+                    //true if area full
+   procedure endband(const acanvas: tcanvas; 
+                      const sender: tcustomrecordband); override;  
+  public
+   function isfirstband: boolean; override;
+   function islastband(const addheight: integer = 0): boolean; override;
+   function remainingheight: integer; override;
+   procedure restart; override;
+
+   property acty: integer read getacty;
+   property areafull: boolean read getareafull write setareafull;
+ end;
+  
  tbandarea = class(tcustombandarea)
   published
    property font;
    property onfirstarea;
+   property onlastarea;
    property onbeforerender;
    property onafterrender;
    property onpaint;
    property onafterpaint;
  end;
 
+ tileareaoptionty = (tao_vertical);
+ tileareaoptionsty = set of tileareaoptionty;
+ 
+ tcustomtilearea = class(tbasebandarea)
+  private
+   fcolcount: integer;
+   frowcount: integer;
+   fcellorigin: pointty;
+   flihorz: tablineinfoty;
+   flivert: tablineinfoty;
+   flileft: tablineinfoty;
+   flitop: tablineinfoty;
+   fliright: tablineinfoty;
+   flibottom: tablineinfoty;
+   foptions: tileareaoptionsty;
+   procedure setcolcount(const avalue: integer);
+   procedure setrowcount(const avalue: integer);
+
+   procedure setlivert_widthmm(const avalue: real);
+   procedure setlivert_color(const avalue: colorty);
+   procedure setlivert_colorgap(const avalue: colorty);
+   procedure setlivert_capstyle(const avalue: capstylety);
+   procedure setlivert_dashes(const avalue: string);
+
+   procedure setlihorz_widthmm(const avalue: real);
+   procedure setlihorz_color(const avalue: colorty);
+   procedure setlihorz_colorgap(const avalue: colorty);
+   procedure setlihorz_capstyle(const avalue: capstylety);
+   procedure setlihorz_dashes(const avalue: string);
+
+   procedure setlileft_widthmm(const avalue: real);
+   procedure setlileft_color(const avalue: colorty);
+   procedure setlileft_colorgap(const avalue: colorty);
+   procedure setlileft_capstyle(const avalue: capstylety);
+   procedure setlileft_dashes(const avalue: string);
+   procedure setlileft_dist(const avalue: integer);
+
+   procedure setlitop_widthmm(const avalue: real);
+   procedure setlitop_color(const avalue: colorty);
+   procedure setlitop_colorgap(const avalue: colorty);
+   procedure setlitop_capstyle(const avalue: capstylety);
+   procedure setlitop_dashes(const avalue: string);
+   procedure setlitop_dist(const avalue: integer);
+
+   procedure setliright_widthmm(const avalue: real);
+   procedure setliright_color(const avalue: colorty);
+   procedure setliright_colorgap(const avalue: colorty);
+   procedure setliright_capstyle(const avalue: capstylety);
+   procedure setliright_dashes(const avalue: string);
+   procedure setliright_dist(const avalue: integer);
+
+   procedure setlibottom_widthmm(const avalue: real);
+   procedure setlibottom_color(const avalue: colorty);
+   procedure setlibottom_colorgap(const avalue: colorty);
+   procedure setlibottom_capstyle(const avalue: capstylety);
+   procedure setlibottom_dashes(const avalue: string);
+   procedure setlibottom_dist(const avalue: integer);
+
+  protected
+   procedure drawline(const acanvas: tcanvas; const ainfo: tablineinfoty;
+                                     const start,stop: pointty);
+   procedure drawlines(const acanvas: tcanvas);
+   procedure dopaintoverlay(const canvas: tcanvas); override;
+   function render(const acanvas: tcanvas): boolean; override;
+          //true if finished
+   function beginband(const acanvas: tcanvas;
+                               const sender: tcustomrecordband): boolean; override;
+   procedure endband(const acanvas: tcanvas; const sender: tcustomrecordband); override;  
+  public
+   constructor create(aowner: tcomponent); override;
+   function cellwidthmm: real;
+   function cellheightmm: real;
+   
+   property colcount: integer read fcolcount write setcolcount default 2;
+   property rowcount: integer read frowcount write setrowcount default 2;
+
+   property livert_widthmm: real read flivert.widthmm write
+                 setlivert_widthmm;
+   property livert_color: colorty read flivert.color write
+                 setlivert_color default defaulttablinecolor;
+   property livert_colorgap: colorty read flivert.colorgap write
+                 setlivert_colorgap default defaulttablinecolorgap;
+   property livert_capstyle: capstylety read flivert.capstyle write
+                 setlivert_capstyle default defaulttablinecapstyle;
+   property livert_dashes: string read flivert.dashes write
+                 setlivert_dashes;
+
+   property lihorz_widthmm: real read flihorz.widthmm write
+                 setlihorz_widthmm;
+   property lihorz_color: colorty read flihorz.color write
+                 setlihorz_color default defaulttablinecolor;
+   property lihorz_colorgap: colorty read flihorz.colorgap write
+                 setlihorz_colorgap default defaulttablinecolorgap;
+   property lihorz_capstyle: capstylety read flihorz.capstyle write
+                 setlihorz_capstyle default defaulttablinecapstyle;
+   property lihorz_dashes: string read flihorz.dashes write
+                 setlihorz_dashes;
+
+   property lileft_widthmm: real read flileft.widthmm write
+                 setlileft_widthmm;
+   property lileft_color: colorty read flileft.color write
+                 setlileft_color default defaulttablinecolor;
+   property lileft_colorgap: colorty read flileft.colorgap write
+                 setlileft_colorgap default defaulttablinecolorgap;
+   property lileft_capstyle: capstylety read flileft.capstyle write
+                 setlileft_capstyle default defaulttablinecapstyle;
+   property lileft_dashes: string read flileft.dashes write
+                 setlileft_dashes;
+   property lileft_dist: integer read flileft.dist write
+                 setlileft_dist default defaulttablinedist;
+                 
+   property litop_widthmm: real read flitop.widthmm write
+                 setlitop_widthmm;                 
+   property litop_color: colorty read flitop.color write
+                 setlitop_color default defaulttablinecolor;
+   property litop_colorgap: colorty read flitop.colorgap write
+                 setlitop_colorgap default defaulttablinecolorgap;
+   property litop_capstyle: capstylety read flitop.capstyle write
+                 setlitop_capstyle default defaulttablinecapstyle;
+   property litop_dashes: string read flitop.dashes write
+                 setlitop_dashes;
+   property litop_dist: integer read flitop.dist write
+                 setlitop_dist default defaulttablinedist;
+
+   property liright_widthmm: real read fliright.widthmm write
+                 setliright_widthmm;
+   property liright_color: colorty read fliright.color write
+                 setliright_color default defaulttablinecolor;
+   property liright_colorgap: colorty read fliright.colorgap write
+                 setliright_colorgap default defaulttablinecolorgap;
+   property liright_capstyle: capstylety read fliright.capstyle write
+                 setliright_capstyle default defaulttablinecapstyle;
+   property liright_dashes: string read fliright.dashes write
+                 setliright_dashes;
+   property liright_dist: integer read fliright.dist write
+                 setliright_dist default defaulttablinedist;
+
+   property libottom_widthmm: real read flibottom.widthmm write
+                 setlibottom_widthmm;
+   property libottom_color: colorty read flibottom.color write
+                 setlibottom_color default defaulttablinecolor;
+   property libottom_colorgap: colorty read flibottom.colorgap write
+                 setlibottom_colorgap default defaulttablinecolorgap;
+   property libottom_capstyle: capstylety read flibottom.capstyle write
+                 setlibottom_capstyle default defaulttablinecapstyle;
+   property libottom_dashes: string read flibottom.dashes write
+                 setlibottom_dashes;
+   property libottom_dist: integer read flibottom.dist write
+                 setlibottom_dist default defaulttablinedist;
+
+   property options: tileareaoptionsty read foptions write foptions default [];
+ end;
+ 
+ ttilearea = class(tcustomtilearea)
+  published
+   property colcount;
+   property rowcount;
+
+   property livert_widthmm;
+   property livert_color;
+   property livert_colorgap;
+   property livert_capstyle;
+   property livert_dashes;
+
+   property lihorz_widthmm;
+   property lihorz_color;
+   property lihorz_colorgap;
+   property lihorz_capstyle;
+   property lihorz_dashes;
+
+   property lileft_widthmm;
+   property lileft_color;
+   property lileft_colorgap;
+   property lileft_capstyle;
+   property lileft_dashes;
+   property lileft_dist;
+                 
+   property litop_widthmm;                 
+   property litop_color;
+   property litop_colorgap;
+   property litop_capstyle;
+   property litop_dashes;
+   property litop_dist;
+
+   property liright_widthmm;
+   property liright_color;
+   property liright_colorgap;
+   property liright_capstyle;
+   property liright_dashes;
+   property liright_dist;
+
+   property libottom_widthmm;
+   property libottom_color;
+   property libottom_colorgap;
+   property libottom_capstyle;
+   property libottom_dashes;
+   property libottom_dist;
+
+   property options;
+   
+   property font;
+   property onfirstarea;
+   property onlastarea;
+   property onbeforerender;
+   property onafterrender;
+   property onpaint;
+   property onafterpaint;
+ end;
+ 
  reportpagestatety = (rpps_inited,rpps_rendering,rpps_backgroundrendered,
                       rpps_restart,
                       rpps_showed,rpps_finish,rpps_notfirstrecord,rpps_lastrecord);
@@ -1059,7 +1294,7 @@ type
    procedure endrender;
    procedure adddatasets(var adatasets: datasetarty);
    function rendering: boolean;
-   procedure beginarea(const acanvas: tcanvas; const sender: tcustombandarea);
+   procedure beginarea(const acanvas: tcanvas; const sender: tbasebandarea);
    procedure dofirstpage; virtual;
    procedure dobeforerender(var empty: boolean); virtual;
    procedure doonpaint(const acanvas: tcanvas); override;
@@ -1382,7 +1617,7 @@ function getreportscale(const amodule: tcomponent): real;
 
 implementation
 uses
- msedatalist,sysutils,msestreaming,msebits,msereal;
+ msedatalist,sysutils,msestreaming,msebits,msereal,math;
 type
  tcustomframe1 = class(tcustomframe);
  twidget1 = class(twidget);
@@ -3939,7 +4174,7 @@ end;
 procedure tcustomrecordband.registerchildwidget(const child: twidget);
 begin
  inherited;
- if child is tcustombandarea then begin
+ if child is tbasebandarea then begin
   additem(pointerarty(fareas),child);
  end;
  if child is tcustomrecordband then begin
@@ -4260,9 +4495,9 @@ begin
  end;
 end;
 
-{ tcustombandarea }
+{ tbasebandarea }
 
-procedure tcustombandarea.registerchildwidget(const child: twidget);
+procedure tbasebandarea.registerchildwidget(const child: twidget);
 begin
  inherited;
  if child is tcustomrecordband then begin
@@ -4270,23 +4505,23 @@ begin
  end;
 end;
 
-procedure tcustombandarea.unregisterchildwidget(const child: twidget);
+procedure tbasebandarea.unregisterchildwidget(const child: twidget);
 begin
  removeitem(pointerarty(fbands),child);
  inherited;
 end;
 
-procedure tcustombandarea.registerclient(const aclient: ireportclient);
+procedure tbasebandarea.registerclient(const aclient: ireportclient);
 begin
  //dummy, register children only
 end;
 
-procedure tcustombandarea.unregisterclient(const aclient: ireportclient);
+procedure tbasebandarea.unregisterclient(const aclient: ireportclient);
 begin
  //dummy, register children only
 end;
 
-procedure tcustombandarea.setparentwidget(const avalue: twidget);
+procedure tbasebandarea.setparentwidget(const avalue: twidget);
 var
  widget1: twidget;
 begin
@@ -4313,11 +4548,10 @@ begin
  inherited;
 end;
 
-procedure tcustombandarea.init;
+procedure tbasebandarea.init;
 var
  int1: integer;
 begin
- factiveband:= 0;
  include(fstate,bas_inited);
  sortwidgetsyorder(widgetarty(fbands));
  for int1:= 0 to high(fbands) do begin
@@ -4326,15 +4560,14 @@ begin
  initareapage;
 end;
 
-procedure tcustombandarea.initband;
+procedure tbasebandarea.initband;
 begin
- factiveband:= 0;
  sortwidgetsyorder(widgetarty(fbands));
  fstate:= fstate - [bas_areafull,bas_backgroundrendered,bas_notfirstband,
                              bas_lastband];
 end;
 
-procedure tcustombandarea.initpage;
+procedure tbasebandarea.initpage;
 var
  int1: integer;
 begin
@@ -4345,122 +4578,18 @@ begin
  initband;
 end;
 
-function tcustombandarea.render(const acanvas: tcanvas): boolean;
-var                     //true if finished
- bo1,bo2: boolean;
- int1,int2: integer;
- isfinished: boolean;
+function tbasebandarea.render(const acanvas: tcanvas): boolean;
 begin
- result:= true;
- if not (bas_inited in fstate) then begin
-  init;
-  dofirstarea;
- end;
- try
-  if factiveband <= high(fbands) then begin
-   updatevisible;
-   dobeforerender;
-   isfinished:= true;
-   while (factiveband <= high(fbands)) and not areafull do begin
-    exclude(fstate,bas_bandstarted);
-    while (factiveband <= high(fbands)) and 
-                            not fbands[factiveband].visible do begin
-     inc(factiveband);
-    end;
-    if factiveband <= high(fbands) then begin
-     exclude(fstate,bas_activebandchanged);
-     with fbands[factiveband] do begin
-      if not (bas_finished in self.fstate) then begin
-       bo2:= odd(fparentintf.reppagenum);
-       bo2:= bo2 and (bo_oddpage in foptions) or 
-             not bo2 and (bo_evenpage in foptions); //has data
-      end
-      else begin
-       bo2:= false;
-      end;
-      bo1:= ((rbs_showed in fstate) or not(bo_once in foptions)) and
-            ((rbs_pageshowed in fstate) or not bo2);   //empty    
-      render(acanvas,bo1);
-      if bas_activebandchanged in self.fstate then begin
-       updatevisible;
-       continue;
-      end;
-      if not bo2 then begin
-       isfinished:= bo1;
-      end;
-      bo1:= bo1 or bo2{(bv_everypage in fvisibility)};
-      result:= result and bo1;
-      if bo1 then begin //empty
-       if fnextbandifempty <> nil then begin
-        for int1:= 0 to high(fbands) do begin
-         if fbands[int1] = fnextbandifempty then begin
-          for int2:= int1 to factiveband do begin
-           exclude(fbands[int2].fstate,rbs_showed);
-          end;
-          factiveband:= int1-1;
-          break;
-         end;         
-        end;
-       end;
-       repeat
-        inc(factiveband);
-       until (factiveband > high(fbands)) or fbands[factiveband].visible;
-      end
-      else begin
-       if not (bas_areafull in self.fstate) and (fnextband <> nil) and 
-                  not (fdatalink.active and fdatalink.dataset.eof) then begin
-        for int1:= 0 to high(fbands) do begin
-         if fbands[int1] = fnextband then begin
-          for int2:= int1 to factiveband do begin
-           exclude(fbands[int2].fstate,rbs_showed);
-          end;
-          factiveband:= int1;
-          while (factiveband <= high(fbands)) and 
-                          not fbands[factiveband].visible do begin
-           inc(factiveband);
-          end;
-          break;
-         end;         
-        end;
-       end;
-      end;
-     end;
-    end;
-    if factiveband > high(fbands) then begin
-     if canevent(tmethod(fonafterrender)) then begin
-      application.lock;
-      try
-       fonafterrender(self);
-      finally
-       application.unlock;
-      end;
-     end;
-    end;
-   end;
-   if isfinished then begin
-    include(fstate,bas_finished);
-   end;
-  end;
- finally
-  if result then begin
-   exclude(fstate,bas_inited);
-  end;
-//  exclude(fstate,bas_rendering);
- end;
- if bas_backgroundrendered in fstate then begin
-  doafterpaint1(acanvas);
- end;
+ //dummy
 end;
 
-procedure tcustombandarea.initareapage;
+procedure tbasebandarea.initareapage;
 begin
  exclude(fstate,bas_notfirstband);
  include(fstate,bas_top);
- facty:= innerclientwidgetpos.y + bounds_y;
- fbandnum:= 0;
 end;
 
-procedure tcustombandarea.dofirstarea;
+procedure tbasebandarea.dofirstarea;
 begin
  if canevent(tmethod(fonfirstarea)) then begin
   application.lock;
@@ -4472,7 +4601,7 @@ begin
  end;
 end;
 
-procedure tcustombandarea.dobeforerender;
+procedure tbasebandarea.dobeforerender;
 begin
  if canevent(tmethod(fonbeforerender)) then begin
   application.lock;
@@ -4484,7 +4613,7 @@ begin
  end;
 end;
 
-procedure tcustombandarea.doonpaint(const acanvas: tcanvas);
+procedure tbasebandarea.doonpaint(const acanvas: tcanvas);
 begin
  if canevent(tmethod(fonpaint)) then begin
   application.lock;
@@ -4496,7 +4625,7 @@ begin
  end;
 end;
 
-procedure tcustombandarea.doafterpaint1(const acanvas: tcanvas);
+procedure tbasebandarea.doafterpaint1(const acanvas: tcanvas);
 begin
  if canevent(tmethod(fonafterpaint)) then begin
   application.lock;
@@ -4508,7 +4637,7 @@ begin
  end;
 end;
 
-procedure tcustombandarea.renderbackground(const acanvas: tcanvas);
+procedure tbasebandarea.renderbackground(const acanvas: tcanvas);
 begin
  if frecordband = nil then begin
   freportpage.beginarea(acanvas,self);
@@ -4520,7 +4649,7 @@ begin
  inherited paint(acanvas);
 end;
 
-function tcustombandarea.checkareafull(ay: integer): boolean;
+function tbasebandarea.checkareafull(ay: integer): boolean;
 begin
  if frame <> nil then begin
   ay:= ay + fframe.innerframe.bottom;
@@ -4528,83 +4657,19 @@ begin
  result:= ay > bounds_y + bounds_cy;
 end;
 
-function tcustombandarea.getacty: integer;
-begin
- if (bas_bandstarted in fstate) then begin
-  result:= factybefore;
- end
- else begin
-  result:= facty;
- end;
- result:= result - (innerclientwidgetpos.y + bounds_y);
-end;
-
-function tcustombandarea.remainingheight: integer;
-begin
- result:= facty - (bounds_y + bounds_cy);
- if fframe <> nil then begin
-  result:= result - fframe.innerframe.bottom;
- end;
-end;
-
-function tcustombandarea.beginband(const acanvas: tcanvas;
+function tbasebandarea.beginband(const acanvas: tcanvas;
                              const sender: tcustomrecordband): boolean;
-var
- bo1: boolean;
- pt1: pointty;
 begin
- fsaveindex:= acanvas.save;
- bo1:= (bas_backgroundrendered in fstate);
- if not bo1 then begin
-  include(fstate,bas_backgroundrendered);
-  renderbackground(acanvas);
-  initareapage;
- end;
- if frecordband <> nil then begin
-  pt1.x:= sender.bounds_x + forigin.x;
-  pt1.y:= forigin.y + facty - sender.bounds_y;
- end
- else begin
-  pt1:= makepoint(sender.bounds_x+bounds_x,facty);
- end;
- acanvas.origin:= pt1;
- factybefore:= facty;
- inc(facty,sender.bandheight);
- include(fstate,bas_bandstarted);
- result:= bo1 and checkareafull(facty);
-                //print minimum one band
- if result then begin
-  include(fstate,bas_areafull);
-  initareapage;
- end;
+ result:= false; //dummy
 end;
 
-procedure tcustombandarea.endband(const acanvas: tcanvas;
+procedure tbasebandarea.endband(const acanvas: tcanvas;
                                       const sender: tcustomrecordband);
 begin
- acanvas.restore(fsaveindex); 
- include(fstate,bas_notfirstband);
- exclude(fstate,bas_top);
- sender.fstate:= sender.fstate + [rbs_showed,rbs_pageshowed];
- inc(fbandnum);
+ //dummy
 end;
 
-function tcustombandarea.getareafull: boolean;
-begin
- result:= bas_areafull in fstate;
-end;
-
-procedure tcustombandarea.setareafull(const avalue: boolean);
-begin
- if avalue then begin
-  include(fstate,bas_areafull);
- end
- else begin
-  exclude(fstate,bas_areafull);
- end;
-end;
-
-procedure tcustombandarea.paint(const canvas: tcanvas);
+procedure tbasebandarea.paint(const canvas: tcanvas);
 begin
  if not rendering then begin
   inherited;
@@ -4617,12 +4682,12 @@ begin
  end;
 end;
 
-function tcustombandarea.rendering: boolean;
+function tbasebandarea.rendering: boolean;
 begin
  result:= bas_rendering in fstate;
 end;
 
-procedure tcustombandarea.beginrender(const arestart: boolean);
+procedure tbasebandarea.beginrender(const arestart: boolean);
 var
  int1: integer;
 begin
@@ -4640,7 +4705,7 @@ begin
  end;
 end;
 
-procedure tcustombandarea.endrender;
+procedure tbasebandarea.endrender;
 var
  int1: integer;
 begin
@@ -4651,7 +4716,7 @@ begin
  end;
 end;
 
-procedure tcustombandarea.adddatasets(var adatasets: datasetarty);
+procedure tbasebandarea.adddatasets(var adatasets: datasetarty);
 var
  int1: integer;
 begin
@@ -4660,35 +4725,27 @@ begin
  end;
 end;
 
-function tcustombandarea.istopband: boolean;
+function tbasebandarea.istopband: boolean;
 begin
  result:= bas_top in fstate;
 end;
 
-function tcustombandarea.isfirstband: boolean;
+function tbasebandarea.isfirstband: boolean;
 begin
- result:= (factiveband <= high(fbands)) and 
-                    not (rbs_pageshowed in fbands[factiveband].fstate);
-// result:= not (bas_notfirstband in fstate);
+ result:= false; //dummy
 end;
 
-function tcustombandarea.islastband(const addheight: integer = 0): boolean;
-var
- int1: integer;
+function tbasebandarea.islastband(const addheight: integer = 0): boolean;
 begin
- result:= fstate * [bas_lastband{,bas_lastchecking}] <> [];
- if not result and (factiveband <= high(fbands)) then begin
-  with fbands[factiveband] do begin
-   int1:= facty + addheight + lastbandheight;
-   if not (bas_bandstarted in self.fstate) then begin
-    int1:= int1 + bounds_cy;
-   end;
-  end;
-  result:= checkareafull(int1);
- end;
+ result:= false; //dummy
 end;
 
-procedure tcustombandarea.updatevisible;
+function tbasebandarea.remainingheight: integer;
+begin
+ result:= 0; //dummy
+end;
+
+procedure tbasebandarea.updatevisible;
 var
  int1: integer;
 begin
@@ -4697,42 +4754,42 @@ begin
  end;
 end;
 
-function tcustombandarea.pagepagenum: integer;
+function tbasebandarea.pagepagenum: integer;
 begin
  result:= freportpage.pagenum;
 end;
 
-function tcustombandarea.reppagenum: integer;
+function tbasebandarea.reppagenum: integer;
 begin
  result:= freportpage.freport.pagenum;
 end;
 
-function tcustombandarea.pageprintstarttime: tdatetime;
+function tbasebandarea.pageprintstarttime: tdatetime;
 begin
  result:= freportpage.fprintstarttime;
 end;
 
-function tcustombandarea.getlastpagepagecount: integer;
+function tbasebandarea.getlastpagepagecount: integer;
 begin
  result:= freportpage.flastpagecount;
 end;
 
-function tcustombandarea.getlastreppagecount: integer;
+function tbasebandarea.getlastreppagecount: integer;
 begin
  result:= freportpage.freport.flastpagecount;
 end;
 
-function tcustombandarea.repprintstarttime: tdatetime;
+function tbasebandarea.repprintstarttime: tdatetime;
 begin
  result:= freportpage.freport.fprintstarttime;
 end;
 
-function tcustombandarea.getreppage: tcustomreportpage;
+function tbasebandarea.getreppage: tcustomreportpage;
 begin
  result:= freportpage;
 end;
 
-function tcustombandarea.isfirstrecord: boolean;
+function tbasebandarea.isfirstrecord: boolean;
 begin
  if frecordband <> nil then begin
   result:= frecordband.isfirstrecord;
@@ -4742,7 +4799,7 @@ begin
  end;
 end;
 
-function tcustombandarea.islastrecord: boolean;
+function tbasebandarea.islastrecord: boolean;
 begin
  if frecordband <> nil then begin
   result:= frecordband.islastrecord;
@@ -4752,7 +4809,7 @@ begin
  end;
 end;
 
-procedure tcustombandarea.dobeforenextrecord(const adatasource: tdatasource);
+procedure tbasebandarea.dobeforenextrecord(const adatasource: tdatasource);
 var
  int1: integer;
 begin
@@ -4761,7 +4818,7 @@ begin
  end;
 end;
 
-procedure tcustombandarea.dosyncnextrecord;
+procedure tbasebandarea.dosyncnextrecord;
 var
  int1: integer;
 begin
@@ -4770,25 +4827,23 @@ begin
  end;
 end;
 
-procedure tcustombandarea.setfont(const avalue: trepwidgetfont);
+procedure tbasebandarea.setfont(const avalue: trepwidgetfont);
 begin
  inherited setfont(avalue);
 end;
 
-function tcustombandarea.getfont: trepwidgetfont;
+function tbasebandarea.getfont: trepwidgetfont;
 begin
  result:= trepwidgetfont(inherited getfont);
 end;
 
-function tcustombandarea.getfontclass: widgetfontclassty;
+function tbasebandarea.getfontclass: widgetfontclassty;
 begin
  result:= trepwidgetfont;
 end;
 
-procedure tcustombandarea.restart;
+procedure tbasebandarea.restart;
 begin
- factiveband:= 0;
- include(fstate,bas_activebandchanged);
  beginrender(true);
  if freportpage <> nil then begin
   freportpage.recordchanged;
@@ -4823,7 +4878,7 @@ end;
 procedure tcustomreportpage.registerchildwidget(const child: twidget);
 begin
  inherited;
- if child is tcustombandarea then begin
+ if child is tbasebandarea then begin
   additem(pointerarty(fareas),child);
  end;
 end;
@@ -5095,7 +5150,7 @@ begin
 end;
 
 procedure tcustomreportpage.beginarea(const acanvas: tcanvas;
-                                              const sender: tcustombandarea);
+                                              const sender: tbasebandarea);
 begin
  if not (rpps_backgroundrendered in fstate) then begin
   include(fstate,rpps_backgroundrendered);
@@ -6703,6 +6758,789 @@ begin
  change;
 end;
 *)
+
+{ tcustombandarea }
+
+procedure tcustombandarea.init;
+begin
+ factiveband:= 0;
+ inherited;
+end;
+
+procedure tcustombandarea.initband;
+begin
+ factiveband:= 0;
+ inherited;
+end;
+
+procedure tcustombandarea.initareapage;
+begin
+ facty:= innerclientwidgetpos.y + bounds_y;
+ fbandnum:= 0;
+ inherited;
+end;
+
+function tcustombandarea.render(const acanvas: tcanvas): boolean;
+var                     //true if finished
+ bo1,bo2: boolean;
+ int1,int2: integer;
+ isfinished: boolean;
+begin
+ result:= true;
+ if not (bas_inited in fstate) then begin
+  init;
+  dofirstarea;
+ end;
+ try
+  if factiveband <= high(fbands) then begin
+   updatevisible;
+   dobeforerender;
+   isfinished:= true;
+   while (factiveband <= high(fbands)) and not areafull do begin
+    exclude(fstate,bas_bandstarted);
+    while (factiveband <= high(fbands)) and 
+                            not fbands[factiveband].visible do begin
+     inc(factiveband);
+    end;
+    if factiveband <= high(fbands) then begin
+     exclude(fstate,bas_activebandchanged);
+     with fbands[factiveband] do begin
+      if not (bas_finished in self.fstate) then begin
+       bo2:= odd(fparentintf.reppagenum);
+       bo2:= bo2 and (bo_oddpage in foptions) or 
+             not bo2 and (bo_evenpage in foptions); //has data
+      end
+      else begin
+       bo2:= false;
+      end;
+      bo1:= ((rbs_showed in fstate) or not(bo_once in foptions)) and
+            ((rbs_pageshowed in fstate) or not bo2);   //empty    
+      render(acanvas,bo1);
+      if bas_activebandchanged in self.fstate then begin
+       updatevisible;
+       continue;
+      end;
+      if not bo2 then begin
+       isfinished:= bo1;
+      end;
+      bo1:= bo1 or bo2;
+      result:= result and bo1;
+      if bo1 then begin //empty
+       if fnextbandifempty <> nil then begin
+        for int1:= 0 to high(fbands) do begin
+         if fbands[int1] = fnextbandifempty then begin
+          for int2:= int1 to factiveband do begin
+           exclude(fbands[int2].fstate,rbs_showed);
+          end;
+          factiveband:= int1-1;
+          break;
+         end;         
+        end;
+       end;
+       repeat
+        inc(factiveband);
+       until (factiveband > high(fbands)) or fbands[factiveband].visible;
+      end
+      else begin
+       if not (bas_areafull in self.fstate) and (fnextband <> nil) and 
+                  not (fdatalink.active and fdatalink.dataset.eof) then begin
+        for int1:= 0 to high(fbands) do begin
+         if fbands[int1] = fnextband then begin
+          for int2:= int1 to factiveband do begin
+           exclude(fbands[int2].fstate,rbs_showed);
+          end;
+          factiveband:= int1;
+          while (factiveband <= high(fbands)) and 
+                          not fbands[factiveband].visible do begin
+           inc(factiveband);
+          end;
+          break;
+         end;         
+        end;
+       end;
+      end;
+     end;
+    end;
+   end;
+   if isfinished then begin
+    include(fstate,bas_finished);
+   end;
+  end;
+ finally
+  if result then begin
+   exclude(fstate,bas_inited);
+  end;
+ end;
+ if bas_backgroundrendered in fstate then begin
+  doafterpaint1(acanvas);
+  if canevent(tmethod(fonafterrender)) then begin
+   application.lock;
+   try
+    fonafterrender(self);
+   finally
+    application.unlock;
+   end;
+  end;
+ end;
+ if result and canevent(tmethod(fonlastarea)) then begin
+  application.lock;
+  try
+   fonlastarea(self);
+  finally
+   application.unlock;
+  end;
+ end;
+end;
+
+function tcustombandarea.beginband(const acanvas: tcanvas;
+                              const sender: tcustomrecordband): boolean;
+                    //true if area full
+var
+ bo1: boolean;
+ pt1: pointty;
+begin
+ fsaveindex:= acanvas.save;
+ bo1:= (bas_backgroundrendered in fstate);
+ if not bo1 then begin
+  include(fstate,bas_backgroundrendered);
+  renderbackground(acanvas);
+  initareapage;
+ end;
+ if frecordband <> nil then begin
+  pt1.x:= sender.bounds_x + forigin.x;
+  pt1.y:= forigin.y + facty - sender.bounds_y;
+ end
+ else begin
+  pt1:= makepoint(sender.bounds_x+bounds_x,facty);
+ end;
+ acanvas.origin:= pt1;
+ factybefore:= facty;
+ inc(facty,sender.bandheight);
+ include(fstate,bas_bandstarted);
+ result:= bo1 and checkareafull(facty);
+                //print minimum one band
+ if result then begin
+  include(fstate,bas_areafull);
+  initareapage;
+ end;
+end;
+    
+procedure tcustombandarea.endband(const acanvas: tcanvas; 
+                      const sender: tcustomrecordband);
+begin
+ acanvas.restore(fsaveindex); 
+ include(fstate,bas_notfirstband);
+ exclude(fstate,bas_top);
+ sender.fstate:= sender.fstate + [rbs_showed,rbs_pageshowed];
+ inc(fbandnum);
+end;
+
+function tcustombandarea.getacty: integer;
+begin
+ if (bas_bandstarted in fstate) then begin
+  result:= factybefore;
+ end
+ else begin
+  result:= facty;
+ end;
+ result:= result - (innerclientwidgetpos.y + bounds_y);
+end;
+
+function tcustombandarea.remainingheight: integer;
+begin
+ result:= facty - (bounds_y + bounds_cy);
+ if fframe <> nil then begin
+  result:= result - fframe.innerframe.bottom;
+ end;
+end;
+
+procedure tcustombandarea.restart;
+begin
+ factiveband:= 0;
+ include(fstate,bas_activebandchanged);
+ inherited;
+end;
+
+function tcustombandarea.getareafull: boolean;
+begin
+ result:= bas_areafull in fstate;
+end;
+
+procedure tcustombandarea.setareafull(const avalue: boolean);
+begin
+ if avalue then begin
+  include(fstate,bas_areafull);
+ end
+ else begin
+  exclude(fstate,bas_areafull);
+ end;
+end;
+
+function tcustombandarea.isfirstband: boolean;
+begin
+ result:= (factiveband <= high(fbands)) and 
+                    not (rbs_pageshowed in fbands[factiveband].fstate);
+// result:= not (bas_notfirstband in fstate);
+end;
+
+function tcustombandarea.islastband(const addheight: integer = 0): boolean;
+var
+ int1: integer;
+begin
+ result:= fstate * [bas_lastband{,bas_lastchecking}] <> [];
+ if not result and (factiveband <= high(fbands)) then begin
+  with fbands[factiveband] do begin
+   int1:= facty + addheight + lastbandheight;
+   if not (bas_bandstarted in self.fstate) then begin
+    int1:= int1 + bounds_cy;
+   end;
+  end;
+  result:= checkareafull(int1);
+ end;
+end;
+
+{ tcustomtilearea }
+
+constructor tcustomtilearea.create(aowner: tcomponent);
+begin
+ fcolcount:= 2;
+ frowcount:= 2;
+ flivert:= defaulttablineinfo;
+ flihorz:= defaulttablineinfo;
+ flileft:= defaulttablineinfo;
+ flitop:= defaulttablineinfo;
+ fliright:= defaulttablineinfo;
+ flibottom:= defaulttablineinfo;
+ inherited;
+end;
+
+function tcustomtilearea.cellwidthmm: real;
+begin
+ result:= innerclientsize.cx / (freportpage.ppmm * fcolcount);
+end;
+
+function tcustomtilearea.cellheightmm: real;
+begin
+ result:= innerclientsize.cy / (freportpage.ppmm * frowcount);
+end;
+
+function tcustomtilearea.render(const acanvas: tcanvas): boolean;
+var                     //true if finished
+ bo1,bo2: boolean;
+ int1,int2: integer;
+ isfinished: boolean;
+ col,row: integer;
+ cellwidthmm1,cellheightmm1: real;
+ y: real;
+begin
+ result:= true;
+ if not (bas_inited in fstate) then begin
+  init;
+  dofirstarea;
+ end;
+ col:= 0;
+ row:= 0;
+ cellwidthmm1:= cellwidthmm;
+ cellheightmm1:= cellheightmm;
+ try
+  updatevisible;
+  dobeforerender;
+  isfinished:= true;
+  repeat
+   fcellorigin.x:= round(col*cellwidthmm1*freportpage.ppmm);
+   fcellorigin.y:= round(row*cellheightmm1*freportpage.ppmm);
+   for int1:= 0 to high(fbands) do begin
+    with fbands[int1] do begin
+     if visible then begin
+      if not (bas_finished in self.fstate) then begin
+       bo2:= odd(fparentintf.reppagenum);
+       bo2:= bo2 and (bo_oddpage in foptions) or 
+             not bo2 and (bo_evenpage in foptions); //has data
+      end
+      else begin
+       bo2:= false;
+      end;
+      bo1:= ((rbs_showed in fstate) or not(bo_once in foptions)) and
+            ((rbs_pageshowed in fstate) or not bo2);   //empty    
+      render(acanvas,bo1);
+      if not bo2 then begin
+       isfinished:= bo1;
+      end;
+      bo1:= bo1 or bo2;
+      result:= result and bo1;
+     end;
+    end;
+    if isfinished then begin
+     include(fstate,bas_finished);
+    end;
+   end;
+   if tao_vertical in foptions then begin
+    inc(row);
+    if row >= frowcount then begin
+     row:= 0;
+     inc(col);
+     if col >= fcolcount then begin
+      break;
+     end;
+    end;
+   end
+   else begin
+    inc(col);
+    if col >= fcolcount then begin
+     col:= 0;
+     inc(row);
+     if row >= frowcount then begin
+      break;
+     end;
+    end;
+   end;
+  until isfinished;
+ finally
+  if result then begin
+   exclude(fstate,bas_inited);
+  end;
+ end;
+ if bas_backgroundrendered in fstate then begin
+  acanvas.save;
+  try
+   if frecordband <> nil then begin
+    acanvas.move(forigin);
+   end
+   else begin
+    acanvas.move(pos);
+   end;
+   drawlines(acanvas);
+   doafterpaint1(acanvas);
+  finally
+   acanvas.restore;
+  end;
+  if canevent(tmethod(fonafterrender)) then begin
+   application.lock;
+   try
+    fonafterrender(self);
+   finally
+    application.unlock;
+   end;
+  end;
+ end;
+ if result and canevent(tmethod(fonlastarea)) then begin
+  application.lock;
+  try
+   fonlastarea(self);
+  finally
+   application.unlock;
+  end;
+ end;
+end;
+
+procedure tcustomtilearea.setcolcount(const avalue: integer);
+begin
+ fcolcount:= avalue;
+ if avalue <= 0 then begin
+  fcolcount:= 1;
+ end;
+ invalidate;
+end;
+
+procedure tcustomtilearea.setrowcount(const avalue: integer);
+begin
+ frowcount:= avalue;
+ if avalue <= 0 then begin
+  frowcount:= 1;
+ end;
+ invalidate;
+end;
+
+function tcustomtilearea.beginband(const acanvas: tcanvas;
+               const sender: tcustomrecordband): boolean;
+var
+ bo1: boolean;
+ pt1: pointty;
+begin
+ fsaveindex:= acanvas.save;
+ bo1:= (bas_backgroundrendered in fstate);
+ if not bo1 then begin
+  include(fstate,bas_backgroundrendered);
+  renderbackground(acanvas);
+  initareapage;
+ end;
+ pt1:= sender.pos;
+ if frecordband <> nil then begin
+  addpoint1(pt1,forigin);
+ end
+ else begin
+  addpoint1(pt1,pos);
+ end;
+ addpoint1(pt1,fcellorigin);
+ acanvas.origin:= pt1;
+ include(fstate,bas_bandstarted);
+ result:= false;
+end;
+
+procedure tcustomtilearea.endband(const acanvas: tcanvas;
+               const sender: tcustomrecordband);
+begin
+ acanvas.restore(fsaveindex); 
+ include(fstate,bas_notfirstband);
+ exclude(fstate,bas_top);
+ sender.fstate:= sender.fstate + [rbs_showed,rbs_pageshowed];
+// inc(fbandnum);
+end;
+
+procedure tcustomtilearea.setlivert_widthmm(const avalue: real);
+begin
+ if avalue <> flivert.widthmm then begin
+  flivert.widthmm:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcustomtilearea.setlivert_color(const avalue: colorty);
+begin
+ if avalue <> flivert.color then begin
+  flivert.color:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcustomtilearea.setlivert_colorgap(const avalue: colorty);
+begin
+ if avalue <> flivert.colorgap then begin
+  flivert.colorgap:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcustomtilearea.setlivert_capstyle(const avalue: capstylety);
+begin
+ if avalue <> flivert.capstyle then begin
+  flivert.capstyle:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcustomtilearea.setlivert_dashes(const avalue: string);
+begin
+ if avalue <> flivert.dashes then begin
+  flivert.dashes:= checkdashes(avalue);
+  invalidate;
+ end;
+end;
+
+procedure tcustomtilearea.setlihorz_widthmm(const avalue: real);
+begin
+ if avalue <> flihorz.widthmm then begin
+  flihorz.widthmm:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcustomtilearea.setlihorz_color(const avalue: colorty);
+begin
+ if avalue <> flihorz.color then begin
+  flihorz.color:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcustomtilearea.setlihorz_colorgap(const avalue: colorty);
+begin
+ if avalue <> flihorz.colorgap then begin
+  flihorz.colorgap:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcustomtilearea.setlihorz_capstyle(const avalue: capstylety);
+begin
+ if avalue <> flihorz.capstyle then begin
+  flihorz.capstyle:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcustomtilearea.setlihorz_dashes(const avalue: string);
+begin
+ if avalue <> flihorz.dashes then begin
+  flihorz.dashes:= checkdashes(avalue);
+  invalidate;
+ end;
+end;
+
+procedure tcustomtilearea.setlileft_widthmm(const avalue: real);
+begin
+ if avalue <> flileft.widthmm then begin
+  flileft.widthmm:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcustomtilearea.setlileft_color(const avalue: colorty);
+begin
+ if avalue <> flileft.color then begin
+  flileft.color:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcustomtilearea.setlileft_colorgap(const avalue: colorty);
+begin
+ if avalue <> flileft.colorgap then begin
+  flileft.colorgap:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcustomtilearea.setlileft_capstyle(const avalue: capstylety);
+begin
+ if avalue <> flileft.capstyle then begin
+  flileft.capstyle:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcustomtilearea.setlileft_dashes(const avalue: string);
+begin
+ if avalue <> flileft.dashes then begin
+  flileft.dashes:= checkdashes(avalue);
+  invalidate;
+ end;
+end;
+
+procedure tcustomtilearea.setlileft_dist(const avalue: integer);
+begin
+ if avalue <> flileft.dist then begin
+  flileft.dist:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcustomtilearea.setlitop_widthmm(const avalue: real);
+begin
+ if avalue <> flitop.widthmm then begin
+  flitop.widthmm:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcustomtilearea.setlitop_color(const avalue: colorty);
+begin
+ if avalue <> flitop.color then begin
+  flitop.color:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcustomtilearea.setlitop_colorgap(const avalue: colorty);
+begin
+ if avalue <> flitop.colorgap then begin
+  flitop.colorgap:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcustomtilearea.setlitop_capstyle(const avalue: capstylety);
+begin
+ if avalue <> flitop.capstyle then begin
+  flitop.capstyle:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcustomtilearea.setlitop_dashes(const avalue: string);
+begin
+ if avalue <> flitop.dashes then begin
+  flitop.dashes:= checkdashes(avalue);
+  invalidate;
+ end;
+end;
+
+procedure tcustomtilearea.setlitop_dist(const avalue: integer);
+begin
+ if avalue <> flitop.dist then begin
+  flitop.dist:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcustomtilearea.setliright_widthmm(const avalue: real);
+begin
+ if avalue <> fliright.widthmm then begin
+  fliright.widthmm:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcustomtilearea.setliright_color(const avalue: colorty);
+begin
+ if avalue <> fliright.color then begin
+  fliright.color:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcustomtilearea.setliright_colorgap(const avalue: colorty);
+begin
+ if avalue <> fliright.colorgap then begin
+  fliright.colorgap:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcustomtilearea.setliright_capstyle(const avalue: capstylety);
+begin
+ if avalue <> fliright.capstyle then begin
+  fliright.capstyle:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcustomtilearea.setliright_dashes(const avalue: string);
+begin
+ if avalue <> fliright.dashes then begin
+  fliright.dashes:= checkdashes(avalue);
+  invalidate;
+ end;
+end;
+
+procedure tcustomtilearea.setliright_dist(const avalue: integer);
+begin
+ if avalue <> fliright.dist then begin
+  fliright.dist:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcustomtilearea.setlibottom_widthmm(const avalue: real);
+begin
+ if avalue <> flibottom.widthmm then begin
+  flibottom.widthmm:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcustomtilearea.setlibottom_color(const avalue: colorty);
+begin
+ if avalue <> flibottom.color then begin
+  flibottom.color:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcustomtilearea.setlibottom_colorgap(const avalue: colorty);
+begin
+ if avalue <> flibottom.colorgap then begin
+  flibottom.colorgap:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcustomtilearea.setlibottom_capstyle(const avalue: capstylety);
+begin
+ if avalue <> flibottom.capstyle then begin
+  flibottom.capstyle:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcustomtilearea.setlibottom_dashes(const avalue: string);
+begin
+ if avalue <> flibottom.dashes then begin
+  flibottom.dashes:= checkdashes(avalue);
+  invalidate;
+ end;
+end;
+
+procedure tcustomtilearea.setlibottom_dist(const avalue: integer);
+begin
+ if avalue <> flibottom.dist then begin
+  flibottom.dist:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcustomtilearea.drawline(const acanvas: tcanvas; const ainfo: tablineinfoty;
+                  const start,stop: pointty);
+begin
+ if ainfo.widthmm > 0 then begin
+  with acanvas do begin
+   linewidthmm:= ainfo.widthmm;
+   colorbackground:= ainfo.colorgap;
+   capstyle:= ainfo.capstyle;
+   dashes:= ainfo.dashes;
+   acanvas.drawline(start,stop,ainfo.color);
+  end;
+ end
+ else begin
+  if csdesigning in componentstate then begin
+   with acanvas do begin
+    linewidth:= 0;
+    dashes:= #2#3;
+    capstyle:= cs_butt;
+    acanvas.drawline(start,stop,cl_black);
+   end;
+  end;
+ end;
+end;
+
+procedure tcustomtilearea.drawlines(const acanvas: tcanvas);
+var
+ rect1: rectty;
+ pt1,pt2: pointty;
+ int1: integer; 
+ cellh,cellv: real; 
+begin
+ acanvas.save;
+ acanvas.addcliprect(inflaterect(widgetsizerect,1000));
+ rect1:= innerwidgetrect;
+ with rect1 do begin
+  cellh:= cellwidthmm * freportpage.ppmm;
+  cellv:= cellheightmm * freportpage.ppmm;
+
+  pt1.y:= y - flitop.dist;
+  pt2.y:= y + cy + flibottom.dist;
+  for int1:= 1 to fcolcount - 1 do begin
+   pt1.x:= x + round(int1 * cellh);
+   pt2.x:= pt1.x;
+   drawline(acanvas,flivert,pt1,pt2);
+  end;
+
+  pt1.x:= x - flileft.dist;
+  pt2.x:= x + cx + fliright.dist;
+  for int1:= 1 to frowcount - 1 do begin
+   pt1.y:= y + round(int1 * cellv);
+   pt2.y:= pt1.y;
+   drawline(acanvas,flihorz,pt1,pt2);
+  end;
+  
+  pt1.y:= y - flitop.dist;  
+  pt2.y:= pt1.y;
+  drawline(acanvas,flitop,pt1,pt2);
+  pt1.y:= y + cy + flibottom.dist;
+  pt2.y:= pt1.y;
+  drawline(acanvas,flibottom,pt1,pt2);
+
+  pt1.y:= y - flitop.dist;
+  pt2.y:= y + cy + flibottom.dist;
+  pt1.x:= x - flileft.dist;  
+  pt2.x:= pt1.x;
+  drawline(acanvas,flileft,pt1,pt2);
+  pt1.x:= x + cx + fliright.dist;
+  pt2.x:= pt1.x;
+  drawline(acanvas,fliright,pt1,pt2);
+ end;
+
+ acanvas.restore;
+end;
+
+procedure tcustomtilearea.dopaintoverlay(const canvas: tcanvas);
+begin
+ if not rendering then begin
+  drawlines(canvas);
+ end;
+ inherited;
+end;
+
 initialization
  registerclass(treport);
 end.

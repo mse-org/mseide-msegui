@@ -33,7 +33,7 @@ type
    
 procedure Register;
 begin
- registercomponents('Rep',[{treportpage,}tbandarea,tbandgroup,
+ registercomponents('Rep',[{treportpage,}tbandarea,ttilearea,tbandgroup,
                     trecordband,
                     trepvaluedisp,treppagenumdisp,trepprintdatedisp,
                     {trepstringdisplb,trepintegerdisplb,treprealdisplb,
