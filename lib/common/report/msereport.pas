@@ -1411,7 +1411,8 @@ type
   snaptogrid: boolean;
  end;
  
- repstatety = (rs_activepageset,rs_finish,rs_restart,rs_running,rs_endpass);
+ repstatety = (rs_activepageset,rs_finish,rs_restart,rs_running,rs_endpass,
+               rs_dummypage);
  repstatesty = set of repstatety;
 
  reporteventty = procedure(const sender: tcustomreport) of object;
@@ -4990,7 +4991,12 @@ begin
  if bo1 and (rpo_firsteven in foptions) or not bo1 and 
                          (rpo_firstodd in foptions) then begin
   freport.nextpage(acanvas);  
-  inc(freport.fpagenum);
+  with freport do begin
+   if fpagenum = 0 then begin
+    include(fstate,rs_dummypage);
+   end; 
+   inc(fpagenum);
+  end;
  end;
  fpagenum:= 0;
  exclude(fstate,rpps_finish);
@@ -5132,9 +5138,10 @@ procedure tcustomreportpage.renderbackground(const acanvas: tcanvas);
 var
  orient1: pageorientationty;
 begin
- if freport.fpagenum <> 0 then begin
+ if (freport.fpagenum <> 0) and not (rs_dummypage in freport.fstate) then begin
   freport.nextpage(acanvas);
  end;
+ exclude(freport.fstate,rs_dummypage);
  if acanvas is tprintercanvas then begin
   if fprintorientation = rpo_default then begin
    orient1:= freport.fdefaultprintorientation;
@@ -7049,6 +7056,7 @@ begin
   repeat
    fcellorigin.x:= round(col*cellwidthmm1*freportpage.ppmm);
    fcellorigin.y:= round(row*cellheightmm1*freportpage.ppmm);
+   isfinished:= true;
    for int1:= 0 to high(fbands) do begin
     with fbands[int1] do begin
      if visible then begin
@@ -7058,21 +7066,21 @@ begin
              not bo2 and (bo_evenpage in foptions); //has data
       end
       else begin
-       bo2:= false;
+       bo2:= false; //has no autodata
       end;
       bo1:= ((rbs_showed in fstate) or not(bo_once in foptions)) and
             ((rbs_pageshowed in fstate) or not bo2);   //empty    
       render(acanvas,bo1);
       if not bo2 then begin
-       isfinished:= bo1;
+       isfinished:= isfinished and bo1;
       end;
       bo1:= bo1 or bo2;
       result:= result and bo1;
      end;
     end;
-    if isfinished then begin
-     include(fstate,bas_finished);
-    end;
+   end;
+   if isfinished then begin
+    include(fstate,bas_finished);
    end;
    if tao_vertical in foptions then begin
     inc(row);

@@ -759,6 +759,7 @@ end;
 
 procedure tcustomprintercanvas.endpage;
 begin
+ checkgcstate([cs_gc]); //could be an empty page
  with fprinter do begin
   if canevent(tmethod(fonpageend)) then begin
    fonpageend(fprinter);
