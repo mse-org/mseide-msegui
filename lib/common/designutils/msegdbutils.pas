@@ -809,13 +809,18 @@ begin
  end;
 end;
 
+var
+ workaround: string;
+ 
 procedure tgdbmi.setignoreexceptionclasses(const avalue: stringarty);
 var
  int1: integer;
 begin
  setlength(fignoreexceptionclasses,length(avalue));
  for int1:= 0 to high(avalue) do begin
-  fignoreexceptionclasses[int1]:= uppercase(avalue[int1]);
+  workaround:= uppercase(avalue[int1]); //see FPC Mantis 11290
+  fignoreexceptionclasses[int1]:= workaround; 
+//  fignoreexceptionclasses[int1]:= uppercase(avalue[int1]);
  end;
 end;
 
