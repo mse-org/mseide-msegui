@@ -112,23 +112,36 @@ type
 
  IceWatchProc = procedure(_iceConn: IceConn; clientData: IcePointer;
                      opening: Bool; var watchData: IcePointer); cdecl;
-                     
-function IceConnectionNumber(_iceConn: IceConn): integer;
-             cdecl; external External_library name 'IceConnectionNumber';
- 
-function IceAddConnectionWatch(watchProc: IceWatchProc;
-                     clientData: IcePointer): Status;
-              cdecl; external External_library name 'IceAddConnectionWatch';
-              
-procedure IceRemoveConnectionWatch(watchProc: IceWatchProc;
-                     clientData: IcePointer);
-              cdecl; external External_library name 'IceRemoveConnectionWatch';
 
-function IceProcessMessages(_iceConn: IceConn; replyWait: pIceReplyWaitInfo;
-                   var replyReadyRet: bool): IceProcessMessagesStatus;
-              cdecl; external External_library name 'IceProcessMessages';
-              
+var
+ IceConnectionNumber: function (_iceConn: IceConn): integer; cdecl;
+ IceAddConnectionWatch: function(watchProc: IceWatchProc;
+                     clientData: IcePointer): Status; cdecl;              
+ IceRemoveConnectionWatch: procedure(watchProc: IceWatchProc;
+                     clientData: IcePointer); cdecl;
+ IceProcessMessages: function(_iceConn: IceConn; replyWait: pIceReplyWaitInfo;
+                   var replyReadyRet: bool): IceProcessMessagesStatus; cdecl;                     
+function geticelib: boolean;
+
 implementation
-
+uses
+ msesys;
+ 
+function geticelib: boolean;
+begin
+ result:= checkprocaddresses([external_library],
+ [
+ 'IceConnectionNumber',                          //0
+ 'IceAddConnectionWatch',                        //1
+ 'IceRemoveConnectionWatch',                     //2
+ 'IceProcessMessages'                            //3
+ ],
+ [
+ {$ifndef FPC}@{$endif}@IceConnectionNumber,     //0
+ {$ifndef FPC}@{$endif}@IceAddConnectionWatch,   //1
+ {$ifndef FPC}@{$endif}@IceRemoveConnectionWatch,//2
+ {$ifndef FPC}@{$endif}@IceProcessMessages       //3
+ ]);
+end;
 
 end.

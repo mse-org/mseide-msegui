@@ -146,6 +146,9 @@ procedure getprocaddresses(const lib: tlibhandle; const anames: array of string;
 function getprocaddresses(const libnames: array of string; 
                              const anames: array of string; 
                              const adest: array of ppointer): tlibhandle; overload;
+function checkprocaddresses(const libnames: array of string; 
+                             const anames: array of string; 
+                             const adest: array of ppointer): boolean;
 {$ifdef FPC}
 function getexceptiontext(obj: tobject; addr: pointer; framecount: longint;
                                      frames: ppointer): msestring;
@@ -209,6 +212,18 @@ begin
   raise exception.create('Library '+str1+'not found.');
  end;
  getprocaddresses(result,anames,adest);
+end;
+
+function checkprocaddresses(const libnames: array of string; 
+                             const anames: array of string; 
+                             const adest: array of ppointer): boolean;
+begin
+ result:= true;
+ try
+  getprocaddresses(libnames,anames,adest);
+ except
+  result:= false;
+ end;
 end;
 
 const

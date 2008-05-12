@@ -154,27 +154,43 @@ type
 
  SmcInteractProc = procedure(_smcConn: SmcConn; clientData: SmPointer); cdecl;
  
-function SmcOpenConnection(networkIdsList: pchar; context: Pointer;
+var
+ SmcOpenConnection: function(networkIdsList: pchar; context: Pointer;
              xsmpMajorRev: integer; xsmpMinorRev: integer;
              mask: cardinal; var callbacks: SmcCallbacks;
              previousId: pchar; var clientIdRet: pchar;
-             errorLength: integer; errorStringRet: pchar): SmcConn;
-              cdecl; external External_library name 'SmcOpenConnection';
-      
-function SmcCloseConnection (_smcConn: SmcConn;
-            count: integer; reasonMsgs: ppchar): SmcCloseStatus;
-              cdecl; external External_library name 'SmcCloseConnection';
-            
-procedure SmcSaveYourselfDone(_smcConn: SmcConn; success: Bool);
-              cdecl; external External_library name 'SmcSaveYourselfDone';
-
-function SmcInteractRequest(_smcConn: SmcConn; dialogType: integer;
+             errorLength: integer; errorStringRet: pchar): SmcConn; cdecl;      
+ SmcCloseConnection: function(_smcConn: SmcConn;
+            count: integer; reasonMsgs: ppchar): SmcCloseStatus; cdecl;
+ SmcSaveYourselfDone: procedure(_smcConn: SmcConn; success: Bool); cdecl;
+ SmcInteractRequest: function(_smcConn: SmcConn; dialogType: integer;
                 interactProc: SmcInteractProc; clientData: SmPointer): Status;
-              cdecl; external External_library name 'SmcInteractRequest';
+                           cdecl;
+ SmcInteractDone: procedure(_smcConn: SmcConn; cancelShutdown: Bool); cdecl; 
 
-procedure SmcInteractDone(_smcConn: SmcConn; cancelShutdown: Bool);
-              cdecl; external External_library name 'SmcInteractDone';
+function getsmlib: boolean;
               
 implementation
+uses
+ msesys;
+
+function getsmlib: boolean;
+begin
+ result:= checkprocaddresses([external_library],
+ [
+ 'SmcOpenConnection',                         //0
+ 'SmcCloseConnection',                        //1
+ 'SmcSaveYourselfDone',                       //2
+ 'SmcInteractRequest',                        //3
+ 'SmcInteractDone'                            //4
+ ],
+ [
+ {$ifndef FPC}@{$endif}@SmcOpenConnection,    //0
+ {$ifndef FPC}@{$endif}@SmcCloseConnection,   //1
+ {$ifndef FPC}@{$endif}@SmcSaveYourselfDone,  //2
+ {$ifndef FPC}@{$endif}@SmcInteractRequest,   //3
+ {$ifndef FPC}@{$endif}@SmcInteractDone       //4
+ ]);
+end;
 
 end.

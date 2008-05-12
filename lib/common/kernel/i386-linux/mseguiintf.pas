@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+	{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -40,10 +40,10 @@ var
 
 {$include ../mseguiintf.inc}
 
-{$define hassm}
+{$define with_sm}
 
-{$ifndef hassm}
- { $define hassaveyourself}
+{$ifndef with_sm}
+ { $define with_saveyourself}
 {$endif}
 
 const
@@ -252,7 +252,7 @@ implementation
 
 uses
  msebits,msekeyboard,sysutils,msesysutils,msefileutils,msedatalist
- {$ifdef hassm},sm,ice{$endif};
+ {$ifdef with_sm},sm,ice{$endif};
 
 const
  highresfontshift = 6;  //64
@@ -644,7 +644,7 @@ const
       defaultshape);
 type
  wmprotocolty = (wm_delete_window
-  {$ifdef hassaveyourself},wm_save_yourself{$endif});
+  {$ifdef with_saveyourself},wm_save_yourself{$endif});
  XErrorHandler = function (Display: PDisplay; ErrorEvent: PXErrorEvent):
     Longint; cdecl;
  wmstatety = (wms_none,wms_withdrawn,wms_normal,wms_invalid,wms_iconic);
@@ -665,6 +665,7 @@ var
  defcolormap: colormap;
  hasxrender: boolean;
  fhasxft: boolean;
+ hassm: boolean;
  toplevelraise: boolean;
  screenrenderpictformat,bitmaprenderpictformat,alpharenderpictformat: pxrenderpictformat;
 
@@ -679,7 +680,7 @@ var
  targetsatom: atom;
  convertselectionpropertyatom: atom;
 
- {$ifdef hassm}
+ {$ifdef with_sm}
 type
  sminfoty = record
   iceconnection: iceconn;
@@ -695,7 +696,7 @@ var
  sminfo: sminfoty;
  {$endif}
  
- {$ifdef hassaveyourself}
+ {$ifdef with_saveyourself}
  wmcommandatom: atom;
  saveyourselfwindow: integer;
  {$endif}
@@ -2830,12 +2831,12 @@ begin
    ic:= nil;
   end;
   if id <> 0 then begin
-  {$ifdef hassaveyourself}
+  {$ifdef with_saveyourself}
    if id <> saveyourselfwindow then begin
   {$endif}
     unsetime(id);
     xdestroywindow(appdisp,id);
-  {$ifdef hassaveyourself}
+  {$ifdef with_saveyourself}
    end;
   {$endif}
   end;
@@ -4229,7 +4230,7 @@ var
  res1: tfcresult;
  po1: pxftfont;
 begin
- if hasxft then begin
+ if fhasxft then begin
   with drawinfo.getfont do begin
    pat1:= fontdatatoxftpat(fontdata^,true);
    pat2:= xftfontmatch(appdisp,xdefaultscreen(appdisp),pat1,@res1);
@@ -5043,7 +5044,7 @@ begin
  result:= defscreen;
 end;
 
-{$ifdef hassm}
+{$ifdef with_sm}
 //callbacks
 procedure icewatch(_iceConn: IceConn; clientData: IcePointer;
                      opening: Bool; var watchData: IcePointer); cdecl;
@@ -5106,7 +5107,7 @@ end;
 
 procedure gui_cancelshutdown;
 begin
- {$ifdef hassm}
+ {$ifdef with_sm}
  with sminfo do begin
 {$ifdef smdebug}
   writeln('gui_cancelshutdown ',shutdown,shutdownpending,
@@ -5176,7 +5177,7 @@ var
  pollcount: integer;
 // fdsetr,fdsete: tfdset;
  str1: string;
- {$ifdef hassm}
+ {$ifdef with_sm}
  int2: integer;
  {$endif}
  shiftstate1: shiftstatesty;
@@ -5201,7 +5202,7 @@ begin
   end;
 //  fd_zero(fdsetr);
 //  fd_set(xconnectionnumber(appdisp),fdsetr);
-{$ifdef hassm}
+{$ifdef with_sm}
   if sminfo.fd > 0 then begin
    with pollinfo[1] do begin
     fd:= sminfo.fd;
@@ -5222,7 +5223,7 @@ begin
 //    int1:= select(fd_setsize,@fdsetr,nil,@fdsete,nil);
     application.lock;
    until (int1 <> -1) or timerevent or terminated;
- {$ifdef hassm}
+ {$ifdef with_sm}
 //   if (int1 > 0) and fd_isset(sminfo.fd,fdsetr) then begin
    if (int1 > 0) and (pollinfo[1].revents <> 0) then begin
     iceprocessmessages(sminfo.iceconnection,nil,int2);
@@ -5365,7 +5366,7 @@ begin
       if message_type = wmprotocolsatom then begin
        if cardinal(data.l[0]) = wmprotocols[wm_delete_window] then begin
         result:= twindowevent.create(ek_close,xwindow);
-{$ifdef hassaveyourself}
+{$ifdef with_saveyourself}
        end
        else begin
         if cardinal(data.l[0]) = wmprotocols[wm_save_yourself] then begin
@@ -5697,7 +5698,7 @@ var
  po1: pchar;
  atomar: atomarty;
  rect1: rectty;
-{$ifdef hassm}
+{$ifdef with_sm}
  smcb: smccallbacks;
  clientid: pchar;
  smerror: array[0..255] of char;
@@ -5718,7 +5719,7 @@ begin
    deletecommandlineargument(int1);
   end;
  end;
- {$ifdef hassm} 
+ {$ifdef with_sm} 
   //todo: error handling
  if sminfo.smconnection = nil then begin
   if iceaddconnectionwatch({$ifdef FPC}@{$endif}icewatch,@sminfo) <> 0 then begin
@@ -5742,7 +5743,7 @@ begin
   end;
  end;
  {$endif}
- {$ifdef hassaveyourself}
+ {$ifdef with_saveyourself}
  saveyourselfwindow:= 0;
  {$endif}
  lasteventtime:= currenttime;
@@ -5865,7 +5866,7 @@ begin
            {$ifdef xboolean}false{$else}0{$endif});
  wmprotocols[wm_delete_window]:= xinternatom(appdisp,'WM_DELETE_WINDOW',
            {$ifdef xboolean}false{$else}0{$endif});
-{$ifdef hassaveyourself}
+{$ifdef with_saveyourself}
  wmprotocols[wm_save_yourself]:= xinternatom(appdisp,'WM_SAVE_YOURSELF',
            {$ifdef FPC}false{$else}0{$endif});
  wmcommandatom:= xinternatom(appdisp,'WM_COMMAND',
@@ -5971,7 +5972,7 @@ begin
  settimer1(0); //kill timer
  terminated:= true;
  freeclientevents;
-{$ifdef hassm}
+{$ifdef with_sm}
  with sminfo do begin
   if smconnection <> nil then begin
    if shutdown and shutdownpending then begin
@@ -5998,7 +5999,7 @@ begin
   end;
  end;
 {$endif}
-{$ifdef hassaveyourself}
+{$ifdef with_saveyourself}
  if saveyourselfwindow <> 0 then begin
   setstringproperty(saveyourselfwindow,wmcommandatom,'');
  end;
@@ -6107,6 +6108,7 @@ end;
 initialization
  fhasxft:= getxftlib;
  hasxrender:= getxrenderlib;
+ hassm:= geticelib and getsmlib;
  initdefaultfont;
 end.
 
