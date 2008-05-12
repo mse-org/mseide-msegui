@@ -5107,26 +5107,28 @@ end;
 
 procedure gui_cancelshutdown;
 begin
- {$ifdef with_sm}
- with sminfo do begin
-{$ifdef smdebug}
-  writeln('gui_cancelshutdown ',shutdown,shutdownpending,
-                  interactwaiting,interactgranted);
-{$endif}
-  if shutdown and shutdownpending and interactgranted then begin
-   smcinteractdone(smconnection,1);
-{$ifdef smdebug}
-   writeln('gui_cancelshutdown smcinteractdone');
-{$endif}
-   smcsaveyourselfdone(smconnection,1);
-{$ifdef smdebug}
-   writeln('gui_cancelshutdown smcsaveyourselfdone');
-{$endif}
-   interactwaiting:= false;
-   interactgranted:= false;
+{$ifdef with_sm}
+ if hassm then begin
+  with sminfo do begin
+ {$ifdef smdebug}
+   writeln('gui_cancelshutdown ',shutdown,shutdownpending,
+                   interactwaiting,interactgranted);
+ {$endif}
+   if shutdown and shutdownpending and interactgranted then begin
+    smcinteractdone(smconnection,1);
+ {$ifdef smdebug}
+    writeln('gui_cancelshutdown smcinteractdone');
+ {$endif}
+    smcsaveyourselfdone(smconnection,1);
+ {$ifdef smdebug}
+    writeln('gui_cancelshutdown smcsaveyourselfdone');
+ {$endif}
+    interactwaiting:= false;
+    interactgranted:= false;
+   end;
   end;
  end;
- {$endif}
+{$endif}
 end;
 
 var
@@ -5203,13 +5205,15 @@ begin
 //  fd_zero(fdsetr);
 //  fd_set(xconnectionnumber(appdisp),fdsetr);
 {$ifdef with_sm}
-  if sminfo.fd > 0 then begin
-   with pollinfo[1] do begin
-    fd:= sminfo.fd;
-    events:= pollin or pollpri;
+  if hassm then begin
+   if sminfo.fd > 0 then begin
+    with pollinfo[1] do begin
+     fd:= sminfo.fd;
+     events:= pollin or pollpri;
+    end;
+    inc(pollcount);
+ //   fd_set(sminfo.fd,fdsetr);
    end;
-   inc(pollcount);
-//   fd_set(sminfo.fd,fdsetr);
   end;
 {$endif}
   if not timerevent and not terminated then begin
@@ -5224,36 +5228,38 @@ begin
     application.lock;
    until (int1 <> -1) or timerevent or terminated;
  {$ifdef with_sm}
+   if hassm then begin
 //   if (int1 > 0) and fd_isset(sminfo.fd,fdsetr) then begin
-   if (int1 > 0) and (pollinfo[1].revents <> 0) then begin
-    iceprocessmessages(sminfo.iceconnection,nil,int2);
-    with sminfo do begin
-     if shutdown then begin
-      if not shutdownpending then begin
-       interactgranted:= false;
-       shutdownpending:= true;
-       if (interactstyle = sminteractstyleerrors) or 
-            (interactstyle = sminteractstyleany) then begin
-        if SmcInteractRequest(smconnection,smdialognormal,
-                 {$ifdef FPC}@{$endif}interact,@sminfo) = 0 then begin
-{$ifdef smdebug}
-         writeln('gui_getevent SmcInteractRequest');
-{$endif}
-         terminated:= true;
+    if (int1 > 0) and (pollinfo[1].revents <> 0) then begin
+     iceprocessmessages(sminfo.iceconnection,nil,int2);
+     with sminfo do begin
+      if shutdown then begin
+       if not shutdownpending then begin
+        interactgranted:= false;
+        shutdownpending:= true;
+        if (interactstyle = sminteractstyleerrors) or 
+             (interactstyle = sminteractstyleany) then begin
+         if SmcInteractRequest(smconnection,smdialognormal,
+                  {$ifdef FPC}@{$endif}interact,@sminfo) = 0 then begin
+ {$ifdef smdebug}
+          writeln('gui_getevent SmcInteractRequest');
+ {$endif}
+          terminated:= true;
+         end
+         else begin
+          interactwaiting:= true;
+         end;
         end
         else begin
-         interactwaiting:= true;
+         interactwaiting:= false;
+         terminated:= true;
         end;
        end
        else begin
-        interactwaiting:= false;
-        terminated:= true;
-       end;
-      end
-      else begin
-       if interactwaiting and interactgranted then begin
-        terminated:= true;
-        interactwaiting:= false;
+        if interactwaiting and interactgranted then begin
+         terminated:= true;
+         interactwaiting:= false;
+        end;
        end;
       end;
      end;
@@ -5720,25 +5726,27 @@ begin
   end;
  end;
  {$ifdef with_sm} 
-  //todo: error handling
- if sminfo.smconnection = nil then begin
-  if iceaddconnectionwatch({$ifdef FPC}@{$endif}icewatch,@sminfo) <> 0 then begin
-   with smcb do begin
-    save_yourself.callback:= {$ifdef FPC}@{$endif}SmcSaveYourself;
-    save_yourself.client_data:= @sminfo;
-    die.callback:= {$ifdef FPC}@{$endif}SmcDie;
-    die.client_data:= @sminfo;
-    save_complete.callback:= {$ifdef FPC}@{$endif}SmcSaveComplete;
-    save_complete.client_data:= @sminfo;
-    shutdown_cancelled.callback:= {$ifdef FPC}@{$endif}SmcShutdownCancelled;
-    shutdown_cancelled.client_data:= @sminfo;
-   end;
-   
-   sminfo.smconnection:= smcopenconnection(nil,nil,SmProtoMajor,SmProtoMinor,
-       SmcSaveYourselfProcMask or SmcDieProcMask or SmcSaveCompleteProcMask or
-       SmcShutdownCancelledProcMask,smcb,nil,clientid,sizeof(smerror),@smerror);
-   if clientid <> nil then begin
-    xfree(clientid);
+ if hassm then begin
+   //todo: error handling
+  if sminfo.smconnection = nil then begin
+   if iceaddconnectionwatch({$ifdef FPC}@{$endif}icewatch,@sminfo) <> 0 then begin
+    with smcb do begin
+     save_yourself.callback:= {$ifdef FPC}@{$endif}SmcSaveYourself;
+     save_yourself.client_data:= @sminfo;
+     die.callback:= {$ifdef FPC}@{$endif}SmcDie;
+     die.client_data:= @sminfo;
+     save_complete.callback:= {$ifdef FPC}@{$endif}SmcSaveComplete;
+     save_complete.client_data:= @sminfo;
+     shutdown_cancelled.callback:= {$ifdef FPC}@{$endif}SmcShutdownCancelled;
+     shutdown_cancelled.client_data:= @sminfo;
+    end;
+    
+    sminfo.smconnection:= smcopenconnection(nil,nil,SmProtoMajor,SmProtoMinor,
+        SmcSaveYourselfProcMask or SmcDieProcMask or SmcSaveCompleteProcMask or
+        SmcShutdownCancelledProcMask,smcb,nil,clientid,sizeof(smerror),@smerror);
+    if clientid <> nil then begin
+     xfree(clientid);
+    end;
    end;
   end;
  end;
@@ -5973,29 +5981,31 @@ begin
  terminated:= true;
  freeclientevents;
 {$ifdef with_sm}
- with sminfo do begin
-  if smconnection <> nil then begin
-   if shutdown and shutdownpending then begin
-    if interactwaiting and interactgranted then begin
-     smcinteractdone(smconnection,0);
-{$ifdef smdebug}
-     writeln('gui_deinit smcinteractdone');
-{$endif}
+ if hassm then begin
+  with sminfo do begin
+   if smconnection <> nil then begin
+    if shutdown and shutdownpending then begin
+     if interactwaiting and interactgranted then begin
+      smcinteractdone(smconnection,0);
+ {$ifdef smdebug}
+      writeln('gui_deinit smcinteractdone');
+ {$endif}
+     end;
+     smcsaveyourselfdone(smconnection,1);
+ {$ifdef smdebug}
+     writeln('gui_deinit saveyourselfdone');
+ {$endif}
     end;
-    smcsaveyourselfdone(smconnection,1);
-{$ifdef smdebug}
-    writeln('gui_deinit saveyourselfdone');
-{$endif}
+    iceremoveconnectionwatch({$ifdef FPC}@{$endif}icewatch,@sminfo);
+ {$ifdef smdebug}
+    writeln('gui_deinit iceremoveconnectionwatch');
+ {$endif}
+    smccloseconnection(sminfo.smconnection,0,nil);
+ {$ifdef smdebug}
+    writeln('gui_deinit smccloseconnection');
+ {$endif}
+    fillchar(sminfo,sizeof(sminfo),0);
    end;
-   iceremoveconnectionwatch({$ifdef FPC}@{$endif}icewatch,@sminfo);
-{$ifdef smdebug}
-   writeln('gui_deinit iceremoveconnectionwatch');
-{$endif}
-   smccloseconnection(sminfo.smconnection,0,nil);
-{$ifdef smdebug}
-   writeln('gui_deinit smccloseconnection');
-{$endif}
-   fillchar(sminfo,sizeof(sminfo),0);
   end;
  end;
 {$endif}
