@@ -65,7 +65,13 @@ const
   (name: 'Letter';    width:   216; height:  279),
   (name: 'Tabloid';   width:   279; height:  432)
   );
-  
+
+type
+ printeroptionty = (pro_inactivewindow);
+                        //win32: start exe with inactive window
+ printeroptionsty = set of printeroptionty;
+const
+ defaultprinteroptions = [pro_inactivewindow];
 type
  tcustomprinter = class;
  tcustomprintercanvas = class;
@@ -79,12 +85,6 @@ type
  colorspacety = (cos_gray,cos_rgb);
  pageorientationty = (pao_portrait,pao_landscape);
 
- printeroptionty = (pro_inactivewindow); 
-                        //win32: start exe with inactive window
- printeroptionsty = set of printeroptionty;
-const
- defaultprinteroptions = [pro_inactivewindow]; 
-type
  tcustomprinter = class(tmsecomponent,istatfile)
   private
    fonpagestart: printereventty;
