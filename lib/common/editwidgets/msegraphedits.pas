@@ -649,6 +649,8 @@ type
    finfo: shapeinfoty;
    factioninfo: actioninfoty;
    procedure loaded; override;
+   procedure setenabled(const avalue: boolean); override;
+   procedure setvisible(const avalue: boolean); override;
    
    //iactionlink
    function getactioninfopo: pactioninfoty;
@@ -656,7 +658,6 @@ type
    procedure calccaptiontext(var ainfo: actioninfoty);
    procedure actionchanged;
 
-   procedure setenabled(const avalue: boolean); override;
    procedure setnullvalue;
    procedure doexecute; virtual;
    procedure togglevalue; override;
@@ -2730,6 +2731,17 @@ begin
  end
  else begin
   include(factioninfo.state,as_disabled);
+ end;
+ inherited;
+end;
+
+procedure tcustomdatabutton.setvisible(const avalue: boolean);
+begin
+ if avalue then begin
+  exclude(factioninfo.state,as_invisible);
+ end
+ else begin
+  include(factioninfo.state,as_invisible);
  end;
  inherited;
 end;

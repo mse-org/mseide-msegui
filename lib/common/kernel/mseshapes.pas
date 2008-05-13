@@ -253,6 +253,7 @@ var
 begin
  with info do begin
   statebefore:= state;
+  updatebit(cardinal(state),ord(ss_invisible),not widget.visible);
   updatebit(cardinal(state),ord(ss_disabled),not widget.isenabled or adisabled);
   updatebit(cardinal(state),ord(ss_focused),widget.active);
   result:= state <> statebefore;

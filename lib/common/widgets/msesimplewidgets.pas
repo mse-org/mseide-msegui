@@ -132,6 +132,7 @@ type
    function ishintstored: boolean; override;
 
    procedure setenabled(const avalue: boolean); override;
+   procedure setvisible(const avalue: boolean); override;
    procedure readstate(reader: treader); override;
    procedure loaded; override;
    procedure clientrectchanged; override;
@@ -758,6 +759,17 @@ begin
  end
  else begin
   include(factioninfo.state,as_disabled);
+ end;
+ inherited;
+end;
+
+procedure tcustombutton.setvisible(const avalue: boolean);
+begin
+ if avalue then begin
+  exclude(factioninfo.state,as_invisible);
+ end
+ else begin
+  include(factioninfo.state,as_invisible);
  end;
  inherited;
 end;
