@@ -6773,6 +6773,7 @@ procedure tcustomgrid.dostatread(const reader: tstatreader);
 var
  po1: gridcoordty;
 begin
+ fpropcolwidthref:= reader.readinteger('propcolwidthref',fpropcolwidthref,0);
  fdatacols.dostatread(reader);
  if og_savestate in foptionsgrid then begin
   po1.col:= reader.readinteger('col',ffocusedcell.col);
@@ -6784,6 +6785,7 @@ end;
 procedure tcustomgrid.dostatwrite(const writer: tstatwriter);
 begin
  removeappendedrow;
+ writer.writeinteger('propcolwidthref',fpropcolwidthref);
  fdatacols.dostatwrite(writer);
  if og_savestate in foptionsgrid then begin
   writer.writeinteger('col',ffocusedcell.col);
