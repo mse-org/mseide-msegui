@@ -1574,7 +1574,7 @@ end;
 procedure tactionsimplebutton.statechanged;
 begin
  inherited;
- updatewidgetshapestate(finfo,self,false,fframe);
+ updatewidgetshapestate(finfo,self,false,false,fframe);
 end;
 
 procedure tactionsimplebutton.setcolorglyph(const value: colorty);

@@ -210,7 +210,8 @@ type
    procedure createface;
    procedure createframe;
    procedure checktemplate(const sender: tobject);
-   procedure updatewidgetstate(const awidget: twidget);
+   function updatewidgetstate(const awidget: twidget): boolean;
+                   //true if changed
    procedure assign(source: tpersistent); override;
    property visible: boolean read getvisible write setvisible default true;
    property enabled: boolean read getenabled write setenabled default true;
@@ -249,7 +250,7 @@ type
   public
    constructor create(const aowner: tcustombuttonframe;
                     const buttonclass: framebuttonclassty);
-   procedure updatewidgetstate;
+   function updatewidgetstate: boolean; //true if changed
    function wantmouseevent(const apos: pointty): boolean;
   public
    property items[const index: integer]: tframebutton read getitems1; default;
@@ -481,13 +482,16 @@ begin
 end;
 
 procedure tframebutton.setoptions(const Value: framebuttonoptionsty);
+var
+ statebefore: shapestatesty;
 begin
- if foptions <> value then begin
-  foptions:= Value;
-  updatebit(cardinal(finfo.state),ord(ss_invisible),fbo_invisible in value);
-  updatebit(cardinal(finfo.state),ord(ss_disabled),fbo_disabled in value);
-  updatebit(cardinal(finfo.state),ord(ss_flat),fbo_flat in value);
-  updatebit(cardinal(finfo.state),ord(ss_noanimation),fbo_noanim in value);
+ statebefore:= finfo.state;
+ foptions:= Value;
+ updatebit(cardinal(finfo.state),ord(ss_invisible),fbo_invisible in value);
+ updatebit(cardinal(finfo.state),ord(ss_disabled),fbo_disabled in value);
+ updatebit(cardinal(finfo.state),ord(ss_flat),fbo_flat in value);
+ updatebit(cardinal(finfo.state),ord(ss_noanimation),fbo_noanim in value);
+ if statebefore <> finfo.state then begin
   changed;
  end;
 end;
@@ -651,9 +655,10 @@ begin
 end;
 
 
-procedure tframebutton.updatewidgetstate(const awidget: twidget);
+function tframebutton.updatewidgetstate(const awidget: twidget): boolean;
 begin
- updatewidgetshapestate(finfo,awidget,fbo_disabled in foptions,fframe);
+ result:= updatewidgetshapestate(finfo,awidget,fbo_disabled in foptions,
+                                 fbo_invisible in foptions,fframe);
 end;
 
 procedure tframebutton.assign(source: tpersistent);
@@ -809,15 +814,16 @@ begin
  result:= tframebutton(inherited getitems(index));
 end;
 
-procedure tframebuttons.updatewidgetstate;
+function tframebuttons.updatewidgetstate: boolean;
 var
  int1: integer;
  widget1: twidget;
 begin
  widget1:= tcustombuttonframe1(fowner).fintf.getwidget;
+ result:= false;
  for int1:= 0 to high(fitems) do begin
 //  updatewidgetshapestate(tframebutton(fitems[int1]).finfo,widget1);
-  tframebutton(fitems[int1]).updatewidgetstate(widget1);
+  result:= tframebutton(fitems[int1]).updatewidgetstate(widget1) or result;
  end;
 end;
 
@@ -1008,7 +1014,9 @@ end;
 procedure tcustombuttonframe.updatewidgetstate;
 begin
  inherited;
- fbuttons.updatewidgetstate;
+ if fbuttons.updatewidgetstate then begin
+  internalupdatestate;
+ end;
 end;
 
 procedure tcustombuttonframe.checktemplate(const sender: tobject);
