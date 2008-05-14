@@ -362,7 +362,7 @@ type
  recupdatebufferarty = array of recupdatebufferty;
  
  bufdatasetstatety = (bs_opening,bs_loading,bs_fetching,
-                      bs_applying,bs_recapplying,
+                      bs_applying,bs_recapplying,bs_curvaluemodified,
                       bs_connected,
                       bs_hasindex,bs_fetchall,bs_initinternalcalc,
                       bs_blobsfetched,bs_blobscached,bs_blobssorted,
@@ -443,6 +443,7 @@ type
    procedure addrefstrings(var header: recheaderty);
    procedure intfinalizerecord(const buffer: pintrecordty);
    procedure intfreerecord(var buffer: pintrecordty);
+   procedure freeblobcache(const arec: precheaderty; const afield: tfield);
 
    procedure clearindex;
    procedure checkindexsize;    
@@ -489,6 +490,8 @@ type
    findexes: array of indexty;
    fblobcache: blobcacheinfoarty;
    fblobcount: integer;
+   ffreedblobs: integerarty;
+   ffreedblobcount: integer;
    fcurrentbuf: pintrecordty;
 
    function getfieldbuffer(const afield: tfield;
@@ -497,6 +500,7 @@ type
    function getfieldbuffer(const afield: tfield;
              const isnull: boolean; out datasize: integer): pointer; virtual; overload;
              //write
+   procedure fieldchanged(const field: tfield);
    function getfiltereditkind: filtereditkindty;
    function blobsarefetched: boolean;
    function getblobcache: blobcacheinfoarty;
@@ -511,7 +515,7 @@ type
    procedure internalcancel; override;
    procedure cancelrecupdate(var arec: recupdatebufferty);
    procedure setdatastringvalue(const afield: tfield; const avalue: string);
-   procedure setcurvalue(const afield: tfield; const avalue: int64);
+//   procedure setcurvalue(const afield: tfield; const avalue: int64);
 
    function wantblobfetch: boolean; virtual;
    procedure resetblobcache;
@@ -1348,15 +1352,39 @@ begin
  result:= tblobbuffer.create(self,afield);
 end;
 
+procedure tmsebufdataset.freeblobcache(const arec: precheaderty;
+                                                 const afield: tfield);
+var
+ fieldindex: integer;
+ blobid: integer;
+begin
+//todo: free offline blobs
+ if bs_blobscached in fbstate then begin
+  fieldindex:= afield.fieldno-1;
+  if not getfieldisnull(arec^.fielddata.nullmask,fieldindex) then begin
+   blobid:= pinteger(pbyte(arec) + ffieldinfos[fieldindex].offset)^;   
+   fblobcache[blobid].data:= '';
+   additem(ffreedblobs,blobid,ffreedblobcount,(high(ffreedblobs)+129)*2);
+  end;
+ end;
+end;
+
 procedure tmsebufdataset.addblob(const ablob: tblobbuffer);
 var
  int1,int2: integer;
  bo1: boolean;
  po2: pointer;
+ po1: precheaderty;
 begin
  bo1:= false;
  int2:= -1;
- with pdsrecordty(activebuffer)^.header do begin
+ if bs_recapplying in fbstate then begin
+  po1:= @fnewvaluebuffer^.header;
+ end
+ else begin
+  po1:= @pdsrecordty(activebuffer)^.header;
+ end;
+ with po1^{pdsrecordty(activebuffer)^.header} do begin
   for int1:= high(blobinfo) downto 0 do begin
    with blobinfo[int1] do begin
     if new then begin
@@ -1367,13 +1395,16 @@ begin
     end;
    end;
   end;
-  if not bo1 then begin //copy needed
+  if not bo1 and not (bs_recapplying in fbstate) then begin //copy needed
    po2:= pointer(blobinfo);
    pointer(blobinfo):= nil;
    blobinfo:= copy(blobinfoarty(po2));
   end;
   if int2 >= 0 then begin
    deleteblob(blobinfo,int2);
+  end
+  else begin
+   freeblobcache(po1,ablob.ffield);
   end;
   setlength(blobinfo,high(blobinfo)+2);
   with blobinfo[high(blobinfo)],ablob do begin
@@ -1381,16 +1412,16 @@ begin
    reallocmem(data,size);
    datalength:= size;
    field:= ffield;
-   new:= true;
+   if not (bs_recapplying in fbstate) then begin
+    new:= true;
+   end;
    if size = 0 then begin
     setfieldisnull(fielddata.nullmask,field.fieldno-1);
    end
    else begin
     unsetfieldisnull(fielddata.nullmask,field.fieldno-1);
    end;
-   if not (State in [dsCalcFields, dsFilter, dsNewValue]) then begin
-    DataEvent(deFieldChange, Ptrint(Field));
-   end;
+   fieldchanged(field);
   end;
  end;
 end;
@@ -2040,7 +2071,7 @@ begin
   avalue:= '';
  end;
 end;
-
+{
 procedure tmsebufdataset.setcurvalue(const afield: tfield; const avalue: int64);
 var
  po1: pointer;
@@ -2049,8 +2080,9 @@ begin
  if bs_recapplying in fbstate then begin
   int1:= afield.fieldno - 1;
   if int1 >= 0 then begin
-   po1:= @fupdatebuffer[fcurrentupdatebuffer].bookmark.recordpo^.header;
- //  po1:= @fcurrentbuf^.header;
+//   po1:= @fupdatebuffer[fcurrentupdatebuffer].bookmark.recordpo^.header;
+   po1:= @fnewvaluebuffer^.header;
+//   po1:= @fcurrentbuf^.header;
    if getfieldisnull(precheaderty(po1)^.fielddata.nullmask,int1) then begin
     unsetfieldisnull(precheaderty(po1)^.fielddata.nullmask,int1);
     inc(po1,ffieldinfos[int1].offset);
@@ -2058,26 +2090,35 @@ begin
      ftinteger,ftautoinc: pinteger(po1)^:= avalue;
      ftlargeint: pint64(po1)^:= avalue;
     end;
+    include(fbstate,bs_curvaluemodified);
    end;
   end;
  end;
 end;
-
+}
 function tmsebufdataset.getfieldbuffer(const afield: tfield;
                         const isnull: boolean; out datasize: integer): pointer;
            //write buffer
 var
  int1: integer;
+ state1: tdatasetstate;
 begin 
- if not ((state in dswritemodes - [dsinternalcalc,dscalcfields]) or 
-       (afield.fieldkind = fkinternalcalc) and 
-                                (state = dsinternalcalc) or
-       (afield.fieldkind = fkcalculated) and 
-                                (state = dscalcfields)) then begin
-  databaseerrorfmt(snotineditstate,[name],self);
+ if (bs_recapplying in fbstate) and (state = dsbrowse) then begin
+  state1:= dsedit; //dummy
+  include(fbstate,bs_curvaluemodified);
+ end
+ else begin
+  if not ((state in dswritemodes - [dsinternalcalc,dscalcfields]) or 
+        (afield.fieldkind = fkinternalcalc) and 
+                                 (state = dsinternalcalc) or
+        (afield.fieldkind = fkcalculated) and 
+                                 (state = dscalcfields)) then begin
+   databaseerrorfmt(snotineditstate,[name],self);
+  end;
+  state1:= state;
  end;
  int1:= afield.fieldno-1;
- case state of
+ case state1 of
   dscalcfields: begin
    result:= @pdsrecordty(calcbuffer)^.header;
   end;
@@ -2133,6 +2174,15 @@ begin
  end;
 end;
 
+procedure tmsebufdataset.fieldchanged(const field: tfield);
+begin
+ if (field.fieldno > 0) and not 
+                 (state in [dscalcfields,dsinternalcalc,{dsfilter,}dsnewvalue]) and
+                 not (bs_recapplying in fbstate) then begin
+  dataevent(defieldchange, ptrint(field));
+ end;
+end;
+
 procedure tmsebufdataset.setfielddata(field: tfield; buffer: pointer);
 
 var 
@@ -2143,10 +2193,7 @@ begin
  if buffer <> nil then begin
   move(buffer^,po1^,datasize);
  end;
- if (field.fieldno > 0) and not 
-                 (state in [dscalcfields,dsinternalcalc,{dsfilter,}dsnewvalue]) then begin
-  dataevent(defieldchange, ptrint(field));
- end;
+ fieldchanged(field);
 end;
 
 procedure tmsebufdataset.setmsestringdata(const sender: tmsestringfield;
@@ -2161,10 +2208,7 @@ begin
                      (length(avalue) > sender.characterlength) then begin
   setlength(msestring(po1^),sender.characterlength);
  end;
- if (sender.fieldno > 0) and not 
-                 (state in [dscalcfields,dsinternalcalc,{dsfilter,}dsnewvalue]) then begin
-  dataevent(defieldchange,ptrint(sender));
- end;
+ fieldchanged(sender);
 end;
 
 procedure tmsebufdataset.setfielddata(field: tfield; buffer: pointer;
@@ -2319,6 +2363,7 @@ begin
  by1:= not islocal;
  with fupdatebuffer[fcurrentupdatebuffer] do begin
   try
+   exclude(fbstate,bs_curvaluemodified);
    move(bookmark.recordpo^.header,fnewvaluebuffer^.header,frecordsize);
    getcalcfields(pchar(fnewvaluebuffer));
    Response:= rrApply;
@@ -2328,8 +2373,11 @@ begin
       ApplyRecUpdate(UpdateKind);
      end;
     finally
-     pointer(bookmark.recordpo^.header.blobinfo):= 
-         pointer(fnewvaluebuffer^.header.blobinfo); //update deleted blobs
+     if bs_curvaluemodified in fbstate then begin
+      move(fnewvaluebuffer^.header,bookmark.recordpo^.header,frecordsize);
+     end;
+//     pointer(bookmark.recordpo^.header.blobinfo):= 
+//         pointer(fnewvaluebuffer^.header.blobinfo); //update deleted blobs
     end;
    except
     on E: EDatabaseError do begin
@@ -2971,7 +3019,12 @@ begin
    result:= @fcurrentbuf^.header;
   end
   else begin
-   result:= @pdsrecordty(activebuffer)^.header;
+   if bs_recapplying in fbstate then begin
+    result:= @fnewvaluebuffer^.header;
+   end
+   else begin
+    result:= @pdsrecordty(activebuffer)^.header;
+   end;
   end;
  end;
 end;
@@ -2982,7 +3035,8 @@ var
  int1: integer;
  buffer: pointer;
 begin
- if (mode <> bmread) and not (state in dseditmodes) then begin
+ if (mode <> bmread) and not ((state in dseditmodes) or 
+                              (bs_recapplying in fbstate)) then begin
   databaseerrorfmt(snotineditstate,[name],self);
  end;  
  result:= nil;
@@ -3075,6 +3129,8 @@ procedure tmsebufdataset.resetblobcache;
 begin
  fblobcache:= nil;
  fblobcount:= 0;
+ ffreedblobs:= nil;
+ ffreedblobcount:= 0;
  exclude(fbstate,bs_blobssorted);
 end;
 
@@ -3205,7 +3261,9 @@ var
  int1: integer;
 begin
  if bs_recapplying in fbstate then begin
-  po1:= pbyte(@fupdatebuffer[fcurrentupdatebuffer].bookmark.recordpo^.header);
+//  po1:= pbyte(@fupdatebuffer[fcurrentupdatebuffer].bookmark.recordpo^.header);
+  po1:= @fnewvaluebuffer^.header;
+  include(fbstate,bs_curvaluemodified);
  end
  else begin
   po1:= pbyte(@fcurrentbuf^.header);
@@ -4314,10 +4372,19 @@ end;
 function tmsebufdataset.addblobcache(const adata: pointer;
                          const alength: integer): integer;
 begin
- result:= fblobcount;
- inc(fblobcount);
- if result > high(fblobcache) then begin
-  setlength(fblobcache,2*result+256);
+ if ffreedblobcount > 0 then begin
+  dec(ffreedblobcount);
+  result:= ffreedblobs[ffreedblobcount];
+  if (ffreedblobcount = 0) and (high(ffreedblobs) > 10000) then begin
+   ffreedblobs:= nil;
+  end;
+ end
+ else begin
+  result:= fblobcount;
+  inc(fblobcount);
+  if result > high(fblobcache) then begin
+   setlength(fblobcache,2*result+256);
+  end;
  end;
  with fblobcache[result] do begin
   id:= result;

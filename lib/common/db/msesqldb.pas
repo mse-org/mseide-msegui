@@ -38,6 +38,9 @@ type
  applyrecupdateeventty = 
      procedure(const sender: tmsesqlquery; const updatekind: tupdatekind;
                         var asql: string; var done: boolean) of object;
+ afterapplyrecupdateeventty = 
+     procedure(const sender: tmsesqlquery; 
+                           const updatekind: tupdatekind) of object;
  updateerroreventty = procedure(const sender: tmsesqlquery;
                           const aupdatekind: tupdatekind;
                           var aupdateaction: tupdateaction) of object;
@@ -49,6 +52,7 @@ type
    fcontroller: tdscontroller;
    fmstate: sqlquerystatesty;
    fonapplyrecupdate: applyrecupdateeventty;
+   fafterapplyrecupdate: afterapplyrecupdateeventty;
    procedure setcontroller(const avalue: tdscontroller);
    procedure setactive1(value : boolean);
    function getactive: boolean;
@@ -108,6 +112,8 @@ type
    property Active: boolean read getactive write setactive1;
    property onapplyrecupdate: applyrecupdateeventty read fonapplyrecupdate
                                   write setonapplyrecupdate;
+   property afterapplyrecupdate: afterapplyrecupdateeventty read fafterapplyrecupdate 
+                                  write fafterapplyrecupdate;
    property UpdateMode default upWhereKeyOnly;
    property UsePrimaryKeyAsKey default true;
    property IndexDefs : TIndexDefs read getindexdefs write setindexdefs;
@@ -424,6 +430,9 @@ begin
   end
   else begin
    internalapplyrecupdate(updatekind);
+  end;
+  if checkcanevent(self,tmethod(fafterapplyrecupdate)) then begin
+   fafterapplyrecupdate(self,updatekind);
   end;
  except
   include(fmstate,sqs_updateerror);

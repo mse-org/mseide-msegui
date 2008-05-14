@@ -970,9 +970,12 @@ end;
 
 procedure tsqlite3connection.updateprimarykeyfield(const afield: tfield);
 begin
+ afield.aslargeint:= getinsertid;
+ {
  with tmsebufdataset1(afield.dataset) do begin
   setcurvalue(afield,getinsertid);
  end;
+ }
 end;
 
 function tsqlite3connection.cantransaction: boolean;

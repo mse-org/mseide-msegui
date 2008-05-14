@@ -601,7 +601,8 @@ type
     procedure UnPrepare; virtual;
     procedure ExecSQL; virtual;
     function rowsreturned: integer; //-1 if not supported
-    function executedirect(const asql: string): integer; //uses transaction of tsqlquery
+    function executedirect(const asql: string): integer; 
+              //uses writetransaction of tsqlquery
     procedure SetSchemaInfo( SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string); virtual;
     function CreateBlobStream(Field: TField; Mode: TBlobStreamMode): TStream; override;
     property Prepared : boolean read IsPrepared;
@@ -3160,7 +3161,7 @@ end;
 function TSQLQuery.executedirect(const asql: string): integer;
 begin
  checkdatabase(name,fdatabase);
- result:= database.executedirect(asql,tsqltransaction(transaction)); 
+ result:= database.executedirect(asql,writetransaction); 
 end;
 
 procedure TSQLQuery.setparams(const avalue: TmseParams);

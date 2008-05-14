@@ -1,4 +1,7 @@
 MSEide+MSEgui version history
+
+2008-05-14
+ tsqlquery.executedirect uses write transaction.
 2008-04-09
  treport.onbeforerender -> reporteventty.
  treport.onafterrender -> onreportfinished.

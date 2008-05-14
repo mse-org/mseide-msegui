@@ -1008,9 +1008,12 @@ end;
 
 procedure TConnectionName.updateprimarykeyfield(const afield: tfield);
 begin
+ afield.aslargeint:= getinsertid;
+ {
  with tmsebufdataset1(afield.dataset) do begin
   setcurvalue(afield,getinsertid);
  end;
+ }
 end;
 
 function TConnectionName.identquotechar: ansistring;
