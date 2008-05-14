@@ -33,6 +33,7 @@ uses
 | NUMERIC[...]       | INTEGER 8           | ftbcd       | currency    |
 | VARCHAR[(n)]       | TEXT                | ftstring    | msestring   |
 | TEXT               | TEXT                | ftmemo      | utf8 string |
+| TEXT               | TEXT dso_stringmemo | ftstring    | msestring   |
 | BLOB               | BLOB                | ftblob      | string      |
 +--------------------+---------------------+-------------+-------------+
 }
@@ -414,7 +415,7 @@ begin
              else begin
               if pos('VARCHAR',str2) = 1 then begin
                ft1:= ftstring;
-               size1:= 255; //default
+//               size1:= 255; //default
                ar1:= splitstring(str2,'(');
                if high(ar1) >= 1 then begin
                 ar1:= splitstring(ar1[1],')');
@@ -428,7 +429,12 @@ begin
               end
               else begin
                if str2 = 'TEXT' then begin
-                ft1:= ftmemo;
+                if stringmemo then begin
+                 ft1:= ftstring;
+                end
+                else begin
+                 ft1:= ftmemo;
+                end;
                end
                else begin
                 if str2 = 'BLOB' then begin

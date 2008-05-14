@@ -78,7 +78,10 @@ type
    function  getcanmodify: boolean; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
    function islocal: boolean; override;
-       //idscontroller
+   //icursorclient
+   function stringmemo: boolean; override;
+       //memo fields are text(0) fields
+   //idscontroller
    procedure inheriteddataevent(const event: tdataevent; const info: ptrint);
    procedure inheritedcancel;
    procedure inheritedpost;
@@ -654,6 +657,11 @@ end;
 procedure tmsesqlquery.internalclose;
 begin
  fcontroller.internalclose;
+end;
+
+function tmsesqlquery.stringmemo: boolean;
+begin
+ result:= dso_stringmemo in fcontroller.options;
 end;
 
 { tparamsourcedatalink }

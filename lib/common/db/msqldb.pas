@@ -59,6 +59,7 @@ type
   end;
   
   icursorclient = interface(iblobchache)
+   function stringmemo: boolean; //memo fields are text(0) fields
   end; 
 
   TSQLCursor = Class(TSQLHandle)
@@ -80,6 +81,7 @@ type
                    //aowner can be nil
     procedure close; virtual;
     function wantblobfetch: boolean;
+    function stringmemo: boolean;
     function getcachedblob(const blobid: integer): tstream;
     function addblobdata(const adata: pointer; const alength: integer): integer;
                                             overload;
@@ -592,6 +594,9 @@ type
    procedure SetFilterText(const Value: string); override;
    Function GetDataSource : TDatasource; override;
    Procedure SetDataSource(AValue : TDatasource);    
+   //icursorclient
+   function stringmemo: boolean; virtual;
+        //memo fields are text(0) fields
   public
     constructor Create(AOwner : TComponent); override;
     destructor Destroy; override;
@@ -3329,6 +3334,12 @@ begin
  //dummy
 end;
 
+function TSQLQuery.stringmemo: boolean;
+begin
+ result:= false;
+ //dummy
+end;
+
 { TSQLCursor }
 
 constructor TSQLCursor.create(const aowner: icursorclient; const aname: ansistring);
@@ -3413,6 +3424,11 @@ end;
 function TSQLCursor.wantblobfetch: boolean;
 begin
  result:= (fowner <> nil) and fowner.blobsarefetched;
+end;
+
+function TSQLCursor.stringmemo: boolean;
+begin
+ result:= (fowner <> nil) and fowner.stringmemo;
 end;
 
 { tcustomsqlstatement }

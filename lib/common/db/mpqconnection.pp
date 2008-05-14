@@ -653,10 +653,14 @@ begin
       size:= pqfmod(res,i)-4;
 // WARNING string length is actual bigger for multi byte encodings (utf8!) 
 // 5.11.2006 MSE
-      if size = -5 then begin
-       fieldtype:= ftmemo;
-       size:= blobidsize;
-//       size:= dsMaxStringSize;
+      if size = -5 then begin //text
+       if stringmemo then begin
+        size:= 0;
+       end
+       else begin
+        fieldtype:= ftmemo;
+        size:= blobidsize;
+       end;
       end;
      end;
     end;

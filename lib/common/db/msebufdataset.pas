@@ -1937,7 +1937,7 @@ begin
        except
         po2^:= converrorstring;
        end;
-       if length(po2^) > dbfieldsize then begin
+       if (dbfieldsize <> 0) and (length(po2^) > dbfieldsize)  then begin
         setlength(po2^,dbfieldsize);
        end;
       end;
@@ -3557,7 +3557,7 @@ begin
    end
    else begin
     mstr1:= asmsestring;
-    if length(mstr1) > characterlength then begin
+    if (characterlength <> 0) and (length(mstr1) > characterlength)  then begin
      setlength(mstr1,characterlength);
     end;
     if bs_utf8 in fbstate then begin

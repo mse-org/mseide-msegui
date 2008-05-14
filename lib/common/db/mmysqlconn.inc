@@ -506,13 +506,13 @@ begin
     end;
     {$ifdef mysql41}     
     field_type_blob: begin
+     newsize:= sizeof(integer);
      if charsetnr = 63 then begin //binary
       newtype:= ftblob;
      end
      else begin 
       newtype:= ftmemo;
      end;
-     newsize:= sizeof(integer);
     end;
     {$endif}
    else begin
@@ -552,6 +552,10 @@ begin
     end;
    end;
    if MySQLDataType(field^,DFT,DFS) then begin
+    if (dft = ftmemo) and (cursor.stringmemo) then begin
+     dft:= ftstring;
+     dfs:= 0;
+    end;
     str1:= field^.name;
     if not(dft in varsizefields) then begin
      dfs:= 0;
@@ -613,6 +617,7 @@ begin
    alen:= mysql_fetch_lengths(c.fres)[c.MapDSRowToMSQLRow[fno]];
    if bufsize < alen then begin 
     bufsize:= -alen;
+    result:= true;
     exit;
    end
    else begin
@@ -769,20 +774,31 @@ function TConnectionName.MySQLWriteData(const acursor: tsqlcursor;
                      AFieldType: TFieldType;Source, Dest: PChar): Boolean;
 
 var
-  VI: Integer;
-  VL: largeint;
-  VF: Double;
-  VC: Currency;
-  VD: TDateTime;
-  Src : String;
-  int1: integer;
+ VI: Integer;
+ VL: largeint;
+ VF: Double;
+ VC: Currency;
+ VD: TDateTime;
+ Src : String;
+ int1: integer;
 begin
-  Result := False;
-  if Source = Nil then
-    exit;
-  Result := True;
-  Src:=StrPas(Source);
-  case AType of
+ Result:= False;
+ if Source = Nil then begin
+  exit;
+ end;
+ Result:= True;
+ case afieldtype of
+  ftstring: begin
+   Move(Source^, Dest^, ASize)
+  end;
+  ftblob,ftmemo: begin
+   int1:= acursor.addblobdata(source,asize);
+   move(int1,dest^,sizeof(int1));
+    //save id
+  end;
+  else begin
+   Src:=StrPas(Source);
+   case AType of
     FIELD_TYPE_TINY, FIELD_TYPE_SHORT, FIELD_TYPE_LONG,
     FIELD_TYPE_INT24:
       begin
@@ -860,9 +876,10 @@ begin
      int1:= acursor.addblobdata(source,asize);
      move(int1,dest^,sizeof(int1));
       //save id
-    end;
-    
+    end;     
+   end;
   end;
+ end;
 end;
 
 procedure TConnectionName.UpdateIndexDefs(var IndexDefs : TIndexDefs;

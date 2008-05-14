@@ -726,7 +726,8 @@ type
    property items[const index: integer]: tfield read getitems write setitems; default;
  end;
 
- datasetoptionty = (dso_utf8,dso_numboolean,dso_initinternalcalc,
+ datasetoptionty = (dso_utf8,dso_stringmemo,dso_numboolean,
+                         dso_initinternalcalc,
                          dso_refreshtransaction,
                          dso_cancelupdateonerror,dso_cancelupdatesonerror,                         
                          dso_autoapply,{dso_applyonidle,}
