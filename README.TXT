@@ -158,6 +158,7 @@ tsqlite3connection is available without -dmse_with_sqlite. Field type mapping:
 | NUMERIC[...]       | INTEGER 8           | ftbcd       | currency    |
 | VARCHAR[(n)]       | TEXT                | ftstring    | msestring   |
 | TEXT               | TEXT                | ftmemo      | utf8 string |
+| TEXT               | TEXT dso_stringmemo | ftstring    | msestring   |
 | BLOB               | BLOB                | ftblob      | string      |
 +--------------------+---------------------+-------------+-------------+
 
