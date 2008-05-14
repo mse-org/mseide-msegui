@@ -17,6 +17,7 @@ object componentstorefo: tcomponentstorefo
   container.frame.dummy = 0
   dragdock.caption = 'Component Store'
   dragdock.optionsdock = [od_savepos, od_canfloat, od_candock, od_proportional, od_propsize]
+  options = [fo_savepos, fo_savestate]
   statfile = mainfo.projectstatfile
   icon.transparentcolor = -2147483642
   icon.options = [bmo_masked]
@@ -57,7 +58,7 @@ object componentstorefo: tcomponentstorefo
     fixrows.count = 1
     fixrows.items = <    
       item
-        height = 17
+        height = 16
         captions.count = 3
         captions.items = <        
           item
@@ -92,7 +93,7 @@ object componentstorefo: tcomponentstorefo
     statfile = mainfo.projectstatfile
     oncellevent = docellevent
     drag.onbeforedragbegin = beforedrag
-    reffontheight = 15
+    reffontheight = 14
     object node: ttreeitemedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
       bounds_x = 0
@@ -119,7 +120,7 @@ object componentstorefo: tcomponentstorefo
       onsetvalue = compnamesetva
       onupdaterowvalues = doupdaterowvalues
       options = [teo_treecolnavig, teo_keyrowmoving]
-      reffontheight = 15
+      reffontheight = 14
     end
     object compdesc: tmemodialogedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
@@ -137,7 +138,7 @@ object componentstorefo: tcomponentstorefo
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savestate]
       ondataentered = datent
       onsetvalue = compdescsetva
-      reffontheight = 15
+      reffontheight = 14
     end
     object filepath: tfilenameedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
@@ -157,7 +158,7 @@ object componentstorefo: tcomponentstorefo
       textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
       ondataentered = datent
       onsetvalue = filenamesetva
-      reffontheight = 15
+      reffontheight = 14
     end
   end
   object copycompact: taction

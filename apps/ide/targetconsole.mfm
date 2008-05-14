@@ -17,11 +17,11 @@ object targetconsolefo: ttargetconsolefo
   container.bounds_cy = 137
   container.frame.dummy = 0
   dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_propsize]
+  options = [fo_savepos, fo_savestate]
   statfile = mainfo.projectstatfile
   caption = 'Target console'
-  icon.transparentcolor = -2147483648
+  icon.transparentcolor = -2147483642
   icon.options = [bmo_masked]
-  icon.transparency = -2147483648
   icon.image = {
     0000000002000000180000001800000078030000000000000000000000000000
     0000000000000000000000000000000000000000E0E0E019F8FCF816E0E0E002
@@ -55,7 +55,8 @@ object targetconsolefo: ttargetconsolefo
     E0E0E00280808016E0E0E01900000000FEFF7F00FEFF7FBFFEFF5F08FEFF5F00
     FEFF5F00FEFD5F00FEFF5F00FEFF5F00FEFF5F00FEFF5F00FEFF5F03FEFF5F00
     FEFF5F00FEFF5FBFFEFF5F08FEFF5F00FEFF5F03FEFF5F40FEFF5F00FEFF5F00
-    02004000FEFF7F0000000000}
+    02004000FEFF7F0000000000
+  }
   onidle = targetconsoleonidle
   onshow = tartgetconsoleonshow
   moduleclassname = 'tdockform'
@@ -68,12 +69,12 @@ object targetconsolefo: ttargetconsolefo
     frame.dummy = 0
     anchors = []
     font.name = 'stf_fixed'
+    font.xscale =  1.0000000000000000E+0000
     font.dummy = 0
     optionsgrid = [og_focuscellonenter, og_autofirstrow, og_colchangeontabkey, og_autopopup]
-    rowcount = 0
     rowcountmax = 5000
     datacols.count = 1
-    datacols.items = <
+    datacols.items = <    
       item
         width = 3000
         options = [co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
@@ -81,29 +82,29 @@ object targetconsolefo: ttargetconsolefo
         widgetname = 'terminal'
       end>
     datarowlinewidth = 0
-    datarowheight = 15
-    reffontheight = 13
+    datarowheight = 16
+    reffontheight = 14
     object terminal: tterminal
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontlineheight, ow_autoscale]
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 3000
-      bounds_cy = 15
+      bounds_cy = 16
       taborder = 1
       visible = False
       onsendtext = sendtext
-      reffontheight = 13
+      reffontheight = 14
     end
   end
   object tpopupmenu1: tpopupmenu
     menu.submenu.count = 1
-    menu.submenu.items = <
+    menu.submenu.items = <    
       item
         caption = 'Clear'
         state = [as_localcaption, as_localonexecute]
         onexecute = clearexe
       end>
-    Left = 88
-    Top = 48
+    left = 88
+    top = 48
   end
 end
