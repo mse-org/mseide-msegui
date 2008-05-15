@@ -270,14 +270,6 @@ begin
    else begin
     widget.invalidaterect(rect1);
    end;
-   {
-   if ss_widgetorg in state then begin
-    widget.invalidateframestaterect(rect1,org_widget);
-   end
-   else begin
-    widget.invalidateframestaterect(rect1);
-   end;
-   }
   end;
  end;
 end;

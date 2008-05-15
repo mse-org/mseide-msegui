@@ -210,8 +210,7 @@ type
    procedure createface;
    procedure createframe;
    procedure checktemplate(const sender: tobject);
-   function updatewidgetstate(const awidget: twidget): boolean;
-                   //true if changed
+   procedure updatewidgetstate(const awidget: twidget);
    procedure assign(source: tpersistent); override;
    property visible: boolean read getvisible write setvisible default true;
    property enabled: boolean read getenabled write setenabled default true;
@@ -250,7 +249,7 @@ type
   public
    constructor create(const aowner: tcustombuttonframe;
                     const buttonclass: framebuttonclassty);
-   function updatewidgetstate: boolean; //true if changed
+   procedure updatewidgetstate;
    function wantmouseevent(const apos: pointty): boolean;
   public
    property items[const index: integer]: tframebutton read getitems1; default;
@@ -655,10 +654,14 @@ begin
 end;
 
 
-function tframebutton.updatewidgetstate(const awidget: twidget): boolean;
+procedure tframebutton.updatewidgetstate(const awidget: twidget);
+var
+ invisiblebefore: boolean;
 begin
- result:= updatewidgetshapestate(finfo,awidget,fbo_disabled in foptions,
+ invisiblebefore:= ss_invisible in finfo.state;
+ updatewidgetshapestate(finfo,awidget,fbo_disabled in foptions,
                                  fbo_invisible in foptions,fframe);
+ updatebit(cardinal(finfo.state),ord(ss_invisible),invisiblebefore);
 end;
 
 procedure tframebutton.assign(source: tpersistent);
@@ -814,16 +817,15 @@ begin
  result:= tframebutton(inherited getitems(index));
 end;
 
-function tframebuttons.updatewidgetstate: boolean;
+procedure tframebuttons.updatewidgetstate;
 var
  int1: integer;
  widget1: twidget;
 begin
  widget1:= tcustombuttonframe1(fowner).fintf.getwidget;
- result:= false;
  for int1:= 0 to high(fitems) do begin
 //  updatewidgetshapestate(tframebutton(fitems[int1]).finfo,widget1);
-  result:= tframebutton(fitems[int1]).updatewidgetstate(widget1) or result;
+  tframebutton(fitems[int1]).updatewidgetstate(widget1);
  end;
 end;
 
@@ -1014,9 +1016,7 @@ end;
 procedure tcustombuttonframe.updatewidgetstate;
 begin
  inherited;
- if fbuttons.updatewidgetstate then begin
-  internalupdatestate;
- end;
+ fbuttons.updatewidgetstate;
 end;
 
 procedure tcustombuttonframe.checktemplate(const sender: tobject);
