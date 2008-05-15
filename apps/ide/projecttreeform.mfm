@@ -49,17 +49,17 @@ object projecttreefo: tprojecttreefo
         options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         widgetname = 'edit'
       end>
-    datarowheight = 17
+    datarowheight = 16
     drag.onbeforedragbegin = gridondragbegin
     drag.onbeforedragdrop = gridonderagdrop
     drag.onafterdragover = gridondragover
-    reffontheight = 15
+    reffontheight = 14
     object projectedit: ttreeitemedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 141
-      bounds_cy = 17
+      bounds_cy = 16
       color = -1879048185
       frame.levelo = 0
       frame.colorclient = -2147483646
@@ -75,14 +75,14 @@ object projecttreefo: tprojecttreefo
       fieldedit = edit
       options = [teo_treecolnavig, teo_keyrowmoving]
       oncheckrowmove = itemoncheckrowmove
-      reffontheight = 15
+      reffontheight = 14
     end
     object edit: trecordfieldedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
       bounds_x = 142
       bounds_y = 0
       bounds_cx = 129
-      bounds_cy = 17
+      bounds_cy = 16
       color = -1879048185
       frame.levelo = 0
       frame.colorclient = -2147483645
@@ -92,7 +92,7 @@ object projecttreefo: tprojecttreefo
       visible = False
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
       textflags = [tf_ycentered, tf_clipo, tf_noselect, tf_ellipseleft]
-      reffontheight = 15
+      reffontheight = 14
     end
   end
   object unitpopup: tpopupmenu
@@ -126,5 +126,26 @@ object projecttreefo: tprojecttreefo
     onexecute = removeunitfileonexecute
     left = 32
     top = 96
+  end
+  object filepopup: tpopupmenu
+    menu.submenu.count = 2
+    menu.submenu.items = <    
+      item
+        action = addfileact
+      end    
+      item
+        action = removefileact
+      end>
+    menu.state = [as_localhint]
+    left = 32
+    top = 128
+  end
+  object addfileact: taction
+    left = 136
+    top = 128
+  end
+  object removefileact: taction
+    left = 136
+    top = 152
   end
 end

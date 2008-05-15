@@ -6153,17 +6153,7 @@ begin
   invalidatewidget;
   reclipcaret;
  end;
- if (ws_loadedproc in fwidgetstate) {and 
-               not (cs_updateskinproc in fmsecomponentstate)} then begin
-//  initparentclientrect;
-{
-  if fparentwidget <> nil then begin
-   fparentclientsize:= fparentwidget.minclientsize;
-  end
-  else begin
-   fparentclientsize:= fwidgetrect.size;
-  end;
- }
+ if (ws_loadedproc in fwidgetstate) then begin
   parentclientrectchanged;
  end
  else begin

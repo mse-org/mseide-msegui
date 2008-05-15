@@ -34,6 +34,9 @@ type
    addunitfileact: taction;
    removeunitfileact: taction;
    unitfiledialog: tfiledialog;
+   filepopup: tpopupmenu;
+   addfileact: taction;
+   removefileact: taction;
    procedure projecteditonchange(const sender: TObject);
    procedure projecteditonstatreaditem(const sender: TObject; 
                 const reader: tstatreader; var aitem: ttreelistitem);
@@ -171,7 +174,10 @@ implementation
 uses
  projecttreeform_mfm,msefileutils,sysutils,main,sourceform,msewidgets,
  msedatalist,msedrag;
-
+const
+ unitscaption = 'Units';
+ filescaption = 'Text Files';
+ 
 function isformfile(const aname: filenamety): boolean;
 begin
  result:= issamefilename(aname,replacefileext(aname,formfileext));
@@ -343,7 +349,7 @@ constructor tfilesnode.create;
 begin
  inherited create(pnk_files);
  fstate:= fstate + [ns_readonly,ns_drawemptybox];
- caption:= 'Files';
+ caption:= filescaption;
 end;
 
 function tfilesnode.addfile(const afilename: filenamety): tfilenode;
@@ -402,7 +408,7 @@ end;
 constructor tunitsnode.create;
 begin
  inherited create;
- caption:= 'Units';
+ caption:= unitscaption;
 end;
 
 function tunitsnode.createnode(const afilename: filenamety): tfilenode;
@@ -527,6 +533,7 @@ begin
     filer.updatevalue('moduleclassnames',funits.fmoduleclassnames);
     funits.dostatupdate(filer);
     filer.endlist;
+    funits.caption:= unitscaption;
    end;
   finally
    funits.fstatreading:= false;
@@ -534,6 +541,7 @@ begin
   if filer.beginlist('files') then begin
    ffiles.dostatupdate(filer);
    filer.endlist;
+   ffiles.caption:= filescaption;
   end;
  finally
   if not filer.iswriter then begin
@@ -619,8 +627,8 @@ end;
 
 procedure tprojecttreefo.projecttreefoonloaded(const sender: tobject);
 begin
- projecttree.units.caption:= 'Units';
- projecttree.files.caption:= 'Files';
+ projecttree.units.caption:= unitscaption;
+ projecttree.files.caption:= filescaption;
  projectedit.itemlist.add(ttreelistedititem(projecttree.units));
  projectedit.itemlist.add(ttreelistedititem(projecttree.files));
 end;

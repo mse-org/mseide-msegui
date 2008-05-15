@@ -13,9 +13,8 @@ object formdesignerfo: tformdesignerfo
   container.bounds_cy = 300
   container.frame.dummy = 0
   container.oncalcminscrollsize = calcscrollsize
-  icon.transparentcolor = -2147483648
+  icon.transparentcolor = -2147483642
   icon.options = [bmo_masked]
-  icon.transparency = -2147483648
   icon.image = {
     0000000002000000180000001800000078010000000000000000000000000000
     0000000000000000000000000000000000000000804CF019F8FCF816804CF002

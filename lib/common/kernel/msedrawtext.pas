@@ -50,12 +50,12 @@ type
    fkind: tabulatorkindty;
    fpos: real;
    procedure setkind(const avalue: tabulatorkindty);
-   procedure setpos(const avalue: real);
    procedure setdistleft(const avalue: real);
    procedure setdistright(const avalue: real);
   protected
    fdistleft: real;
    fdistright: real;
+   procedure setpos(const avalue: real); virtual;
    property distleft: real read fdistleft write setdistleft; //mm
    property distright: real read fdistright write setdistright; //mm
   public
@@ -1186,11 +1186,6 @@ procedure ttabulatoritem.setpos(const avalue: real);
 begin
  if fpos <> avalue then begin
   fpos:= avalue;
-  {
-  if isemptyreal(fpos) then begin
-   fpos:= 0;
-  end;
-  }
   tcustomtabulators(fowner).changed(self);
  end;
 end;
@@ -1199,11 +1194,6 @@ procedure ttabulatoritem.setdistleft(const avalue: real);
 begin
  if fdistleft <> avalue then begin
   fdistleft:= avalue;
-{
-  if isemptyreal(fdistleft) then begin
-   fdistleft:= 0;
-  end;
-  }
   tcustomtabulators(fowner).changed(self);
  end;
 end;
@@ -1212,11 +1202,6 @@ procedure ttabulatoritem.setdistright(const avalue: real);
 begin
  if fdistright <> avalue then begin
   fdistright:= avalue;
-  {
-  if isemptyreal(fdistright) then begin
-   fdistright:= 0;
-  end;
-  }
   tcustomtabulators(fowner).changed(self);
  end;
 end;

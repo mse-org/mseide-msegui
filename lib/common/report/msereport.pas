@@ -165,7 +165,6 @@ type
    procedure changed;
    procedure fontchanged(const asender: tobject);
    procedure settextflags(const avalue: textflagsty);
-   procedure setdatafiled(const avalue: string);
    function getdatasource1: tdatasource;
    procedure setdatasource(const avalue: tdatasource);
    function getdatafield: string;
@@ -215,6 +214,7 @@ type
    procedure setoptions(const avalue: reptabulatoritemoptionsty);
    function getsumcount: integer;
   protected
+   procedure setpos(const avalue: real); override;
    function xlineoffset: integer;
    procedure dobeforenextrecord(const adatasource: tdatasource);
   public 
@@ -1839,11 +1839,19 @@ procedure treptabulatoritem.changed;
 begin
  with treptabulators(fowner),fband do begin
   fsizevalid:= false;
-  if rendering or ([csdesigning,csdestroying] * componentstate = [csdesigning]) then begin
+  if rendering or ([csdesigning,csdestroying] * componentstate = 
+                                                   [csdesigning]) then begin
    minclientsizechanged;
-   change(-1);
+//   change(-1);
   end;
  end;
+end;
+
+procedure treptabulatoritem.setpos(const avalue: real);
+begin
+ inherited;
+ treptabulators(fowner).fband.sendchangeevent(oe_designchanged);  
+         //syncronize linked tabs
 end;
 
 procedure treptabulatoritem.fontchanged(const asender: tobject);
@@ -1857,11 +1865,6 @@ begin
   ftextflags:= checktextflags(ftextflags,avalue);
   changed;
  end;
-end;
-
-procedure treptabulatoritem.setdatafiled(const avalue: string);
-begin
- fdatalink.fieldname:= avalue
 end;
 
 function treptabulatoritem.getdatasource1: tdatasource;
@@ -3105,8 +3108,9 @@ end;
 
 procedure treptabulators.dochange(const aindex: integer);
 begin
+ fsizevalid:= false;
  inherited;
- fband.sendchangeevent(oe_designchanged); 
+// fband.sendchangeevent(oe_designchanged); 
 end;
 
 procedure treptabulators.setcount1(acount: integer; doinit: boolean);
@@ -4143,7 +4147,7 @@ begin
  inherited;
  if (event = oe_designchanged) and (sender = ftabs.flinksource) then begin
   ftabs.sourcechanged;
-  designchanged;
+//  designchanged;
  end;
 end;
 
