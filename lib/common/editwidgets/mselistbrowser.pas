@@ -3036,7 +3036,9 @@ begin
   if int1 >= 0 then begin
    beginupdate;
    try
+    exclude(fstate,ils_subnodecountupdating); //free nodes
     clear;
+    include(fstate,ils_subnodecountupdating);
     count:= int1;
     setlength(expanded,count);
     po1:= datapo;
