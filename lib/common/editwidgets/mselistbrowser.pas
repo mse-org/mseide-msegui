@@ -541,10 +541,12 @@ type
  ttreeitemdragobject = class(tdragobject)
   private
    fitem: ttreelistitem;
+   fdestrow: integer;
   public
    constructor create(const asender: tobject; var instance: tdragobject;
                           const apickpos: pointty; const aitem: ttreelistitem);
    property item: ttreelistitem read fitem;
+   property destrow: integer read fdestrow;
  end;
  
  treeitemdragbegineventty = procedure(const sender: ttreeitemedit;
@@ -722,6 +724,7 @@ type
    function item: ttreelistitem;
    property items[const index: integer]: ttreelistitem read getitems write setitems; default;
    function candragsource(const apos: pointty): boolean;
+   procedure dragdrop(const adragobject: ttreeitemdragobject);
   published
    property itemlist: ttreeitemeditlist read getitemlist write setitemlist;
    property fieldedit: trecordfieldedit read ffieldedit write setfieldedit;
@@ -3388,11 +3391,16 @@ begin
      fondragbegin(ttreeitemedit(fowner),item1,bo1,
                      ttreeitemdragobject(ainfo.dragobjectpo^),processed);
     end;
-    if not processed and bo1 and (ainfo.dragobjectpo^ = nil) then begin
-     ttreeitemdragobject.create(ttreeitemedit(fowner),ainfo.dragobjectpo^,
-                     ainfo.pickpos,item1);
-     processed:= true;
+    if not processed and bo1 then begin
+     if ainfo.dragobjectpo^ = nil then begin
+      ttreeitemdragobject.create(ttreeitemedit(fowner),ainfo.dragobjectpo^,
+                      ainfo.pickpos,item1);
+      processed:= true;
+     end;
     end;
+//    if ainfo.dragobjectpo^ <> nil then begin
+//     ttreeitemdragobject(ainfo.dragobjectpo^).fsourcerow:= arow;
+//    end;
    end;
   end;
   dek_check: begin
@@ -3401,6 +3409,7 @@ begin
      if item <> item1 then begin
       bo1:= item1.candrop(item);
       if assigned(fondragover) then begin
+       fdestrow:= arow;
        fondragover(ttreeitemedit(fowner),item,item1,
                       ttreeitemdragobject(ainfo.dragobjectpo^),bo1,processed);
        ainfo.accept:= bo1;
@@ -3413,6 +3422,7 @@ begin
    if istreeitemdrag(ainfo) then begin
     with ttreeitemdragobject(ainfo.dragobjectpo^) do begin
      if (item.owner = self) and assigned(fondragdrop) then begin
+      fdestrow:= arow;
       fondragdrop(ttreeitemedit(fowner),item,item1,
                      ttreeitemdragobject(ainfo.dragobjectpo^),processed);
      end;
@@ -3892,6 +3902,37 @@ begin
  end;
 end;
 
+procedure ttreeitemedit.dragdrop(const adragobject: ttreeitemdragobject);
+var
+ bo1: boolean;
+ de,pa: ttreelistitem;
+ sourcer: integer;
+ destr: integer;
+begin
+ if fgridintf <> nil then begin
+  with adragobject do begin
+   de:= items[destrow];
+   pa:= de.parent;
+   if pa <> nil then begin
+    fitemlist.beginupdate;
+    bo1:= (item.owner = fitemlist) and 
+                   not (ils_subnodecountinvalid in fitemlist.fstate);
+    sourcer:= item.index;
+    pa.insert(item,de.parentindex);
+    if bo1 then begin
+     destr:= destrow;
+     if destr > sourcer then begin
+      destr:= destr + de.rowheight - 1;
+     end;
+     fgridintf.getcol.grid.moverow(sourcer,destr,item.rowheight);
+     exclude(fitemlist.fstate,ils_subnodecountinvalid);
+    end;
+    fitemlist.endupdate;
+   end;
+  end;   
+ end;
+end;
+
 procedure ttreeitemedit.doitembuttonpress(var info: mouseeventinfoty);
 var
  cellzone: cellzonety;
@@ -3955,6 +3996,7 @@ procedure ttreeitemedit.aftercelldragevent(var ainfo: draginfoty;
 begin
  ttreeitemeditlist(fitemlist).afterdragevent(ainfo,arow,processed);
 end;
+
 (*
 { ttreeitemdragcontroller }
 
@@ -3997,6 +4039,8 @@ constructor ttreeitemdragobject.create(const asender: tobject;
                const aitem: ttreelistitem);
 begin
  fitem:= aitem;
+// fsourcerow:= invalidaxis;
+ fdestrow:= invalidaxis;
  inherited create(asender,instance,apickpos);
 end;
 

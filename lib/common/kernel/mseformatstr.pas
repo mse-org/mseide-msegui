@@ -1671,7 +1671,7 @@ begin
      result:= strtohex1(copy(inp,3,length(inp)-2));
     end
     else begin
-     result:= strtoint(inp);
+     result:= strtoint64(inp);
     end;
    end;
   end;

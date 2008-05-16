@@ -199,6 +199,7 @@ type
    function treelevel: integer;
    function levelshift: integer;
    function treeheight: integer; //total hight of children
+   function rowheight: integer;  //toatal needed grid rows
    function isroot: boolean;
    function issinglerootrow: boolean; //keyrowmove can be used
    function checkdescendent(node: ttreelistitem): boolean;
@@ -226,6 +227,7 @@ type
                    //returns index, nil ignored
    procedure add(const aitems: treelistitemarty); overload;
    procedure add(const acount: integer; itemclass: treelistitemclassty = nil); overload;
+   procedure insert(const aitem: ttreelistitem; const aindex: integer);
    procedure clear;
    procedure expandall;
    procedure collapseall;
@@ -1269,13 +1271,28 @@ var
  int1: integer;
 begin
  if aitem <> nil then begin
-  if aitem.fparent <> nil then begin
-   aitem.fparent.remove(aitem.fparentindex);
+  if aitem.parent = self then begin
+   move(aitem.parentindex,fcount-1);
+  end
+  else begin
+   if aitem.fparent <> nil then begin
+    aitem.fparent.remove(aitem.fparentindex);
+   end;
+   int1:= treeheight;
+   result:= fcount;
+   setitems(inccount,aitem);
+   countchange(int1);
   end;
-  int1:= treeheight;
-  result:= fcount;
-  setitems(inccount,aitem);
-  countchange(int1);
+ end;
+end;
+
+procedure ttreelistitem.insert(const aitem: ttreelistitem; const aindex: integer);
+begin
+ if aitem.parent = self then begin
+  move(aitem.parentindex,aindex);
+ end
+ else begin
+  move(add(aitem),aindex);
  end;
 end;
 
@@ -1829,7 +1846,7 @@ begin
  end;
 end;
 
-function ttreelistitem.treeheight: integer; //needed rowcount
+function ttreelistitem.treeheight: integer; //total hight of children
 var
  int1: integer;
 begin
@@ -1841,6 +1858,16 @@ begin
     result:= result + treeheight;
    end;
   end;
+ end;
+end;
+
+function ttreelistitem.rowheight: integer;  //total needed grid rows
+begin
+ if expanded then begin
+  result:= treeheight + 1;
+ end
+ else begin
+  result:= 1;
  end;
 end;
 

@@ -1,103 +1,114 @@
 object reallisteditor: treallisteditor
-  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
   bounds_x = 182
   bounds_y = 208
   bounds_cx = 119
   bounds_cy = 297
+  taborder = 1
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
   container.bounds_cx = 119
   container.bounds_cy = 297
   container.frame.dummy = 0
   options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos]
   statfile = tstatfile1
   caption = 'Reallisteditor'
-  icon.transparency = -2147483648
   moduleclassname = 'tmseform'
   object ok: tbutton
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_y = 271
+    bounds_x = 0
+    bounds_y = 270
     bounds_cx = 50
-    bounds_cy = 19
+    bounds_cy = 20
     anchors = [an_left, an_bottom]
     taborder = 3
     state = [as_default, as_localdefault, as_localcaption]
     caption = '&OK'
     modalresult = mr_ok
-    reffontheight = 13
+    reffontheight = 14
   end
   object cancel: tbutton
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 64
-    bounds_y = 271
+    bounds_y = 270
     bounds_cx = 50
-    bounds_cy = 19
+    bounds_cy = 20
     anchors = [an_left, an_bottom]
+    state = [as_localcaption]
     caption = '&Cancel'
     modalresult = mr_cancel
-    reffontheight = 13
+    reffontheight = 14
   end
   object grid: twidgetgrid
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusout, ow_focusbackonesc, ow_destroywidgets, ow_fontlineheight]
-    bounds_cx = 119
+    bounds_x = 0
+    bounds_y = 0
+    bounds_cx = 121
     bounds_cy = 242
     frame.dummy = 0
     anchors = [an_top, an_bottom]
     taborder = 1
     optionsgrid = [og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autopopup]
     fixcols.count = 1
-    fixcols.items = <
+    fixcols.items = <    
       item
         width = 24
         numstep = 1
       end>
-    rowcount = 0
     zebra_start = 1
     zebra_height = 1
     datacols.count = 1
-    datacols.items = <
+    datacols.items = <    
       item
-        width = 89
+        width = 91
         options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         widgetname = 'valueedit'
       end>
-    datarowheight = 15
+    datarowheight = 16
     onrowcountchanged = gridonrowcountchanged
-    reffontheight = 13
+    reffontheight = 14
     object valueedit: trealedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-      bounds_cx = 89
-      bounds_cy = 15
+      optionsskin = [osk_framebuttononly]
+      bounds_x = 0
+      bounds_y = 0
+      bounds_cx = 91
+      bounds_cy = 16
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_colorclient]
       frame.dummy = 0
+      taborder = 1
       visible = False
-      reffontheight = 13
+      reffontheight = 14
     end
   end
   object rowcount: tintegeredit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_y = 247
-    bounds_cx = 103
-    bounds_cy = 19
+    bounds_x = 0
+    bounds_y = 246
+    bounds_cx = 110
+    bounds_cy = 20
     frame.caption = 'Rowcount'
     frame.captionpos = cp_right
     frame.dummy = 0
     frame.outerframe = (
       0
       0
-      51
-      0)
+      58
+      0
+    )
     anchors = [an_left, an_bottom]
     taborder = 2
     onsetvalue = rowcountonsetvalue
-    reffontheight = 13
+    reffontheight = 14
   end
   object tstatfile1: tstatfile
     filename = 'stringlisteditor.sta'
     options = [sfo_memory]
-    Left = 40
-    Top = 88
+    left = 40
+    top = 88
   end
 end

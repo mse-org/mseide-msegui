@@ -39,20 +39,17 @@ object projecttreefo: tprojecttreefo
       item
         linecolorfix = -1610612733
         width = 141
-        options = [co_readonly, co_savevalue]
+        options = [co_readonly, co_savevalue, co_mousescrollrow]
         oncellevent = projecteditoncellevent
         widgetname = 'projectedit'
       end    
       item
         linecolorfix = -1610612733
         width = 129
-        options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+        options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         widgetname = 'edit'
       end>
     datarowheight = 16
-    drag.onbeforedragbegin = gridondragbegin
-    drag.onbeforedragdrop = gridonderagdrop
-    drag.onafterdragover = gridondragover
     reffontheight = 14
     object projectedit: ttreeitemedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
@@ -71,6 +68,9 @@ object projecttreefo: tprojecttreefo
       optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_exitoncursor, oe_locate, oe_savevalue, oe_savestate]
       onchange = projecteditonchange
       itemlist.onstatreaditem = projecteditonstatreaditem
+      itemlist.ondragbegin = editdragbegin
+      itemlist.ondragover = editdragover
+      itemlist.ondragdrop = editdragrop
       onupdaterowvalues = projecteditonupdaterowvalues
       fieldedit = edit
       options = [teo_treecolnavig, teo_keyrowmoving]
@@ -115,7 +115,8 @@ object projecttreefo: tprojecttreefo
     left = 32
     top = 72
   end
-  object unitfiledialog: tfiledialog
+  object filedialog: tfiledialog
+    controller.options = [fdo_checkexist, fdo_savelastdir]
     controller.historymaxcount = 0
     dialogkind = fdk_none
     left = 144
@@ -128,6 +129,7 @@ object projecttreefo: tprojecttreefo
     top = 96
   end
   object filepopup: tpopupmenu
+    onupdate = filepopuponupdate
     menu.submenu.count = 2
     menu.submenu.items = <    
       item
@@ -141,10 +143,13 @@ object projecttreefo: tprojecttreefo
     top = 128
   end
   object addfileact: taction
+    caption = 'Add Text File'
+    onexecute = addfileonexecute
     left = 136
     top = 128
   end
   object removefileact: taction
+    caption = 'Remove Text File'
     left = 136
     top = 152
   end

@@ -15,7 +15,6 @@ object stringlisteditor: tstringlisteditor
   options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos]
   statfile = tstatfile1
   caption = 'Stringlisteditor'
-  icon.transparency = -2147483648
   moduleclassname = 'tmseform'
   object ok: tbutton
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
@@ -64,7 +63,7 @@ object stringlisteditor: tstringlisteditor
     datacols.items = <    
       item
         width = 245
-        options = [co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+        options = [co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         widgetname = 'valueedit'
       end>
     datarowheight = 16
@@ -72,6 +71,7 @@ object stringlisteditor: tstringlisteditor
     reffontheight = 14
     object valueedit: ttextedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontlineheight, ow_autoscale]
+      optionsskin = [osk_framebuttononly]
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 245
@@ -79,7 +79,6 @@ object stringlisteditor: tstringlisteditor
       taborder = 1
       visible = False
       optionsedit = [oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_linebreak, oe_shiftreturn, oe_eatreturn, oe_keyexecute, oe_savestate]
-      marginlinecolor = -2147483648
       reffontheight = 14
     end
   end

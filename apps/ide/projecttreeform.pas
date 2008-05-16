@@ -33,7 +33,7 @@ type
    unitpopup: tpopupmenu;
    addunitfileact: taction;
    removeunitfileact: taction;
-   unitfiledialog: tfiledialog;
+   filedialog: tfiledialog;
    filepopup: tpopupmenu;
    addfileact: taction;
    removefileact: taction;
@@ -60,13 +60,18 @@ type
    procedure itemoncheckrowmove(const curindex: Integer; const newindex: Integer;
                     var accept: Boolean);
 
-   procedure gridondragbegin(const sender: TObject; const apos: pointty; 
-                  var dragobject: tdragobject; var processed: Boolean);
-   procedure gridonderagdrop(const sender: TObject; const apos: pointty; 
-                  var dragobject: tdragobject; var processed: Boolean);
-   procedure gridondragover(const sender: TObject; const apos: pointty; 
-                  var dragobject: tdragobject; var accept: Boolean;
-                  var processed: Boolean);
+   procedure filepopuponupdate(const sender: tcustommenu);
+   procedure addfileonexecute(const sender: TObject);
+   procedure editdragbegin(const sender: ttreeitemedit;
+                   const aitem: ttreelistitem; var candrag: Boolean;
+                   var dragobject: ttreeitemdragobject; var processed: Boolean);
+   procedure editdragover(const sender: ttreeitemedit;
+                   const source: ttreelistitem; const dest: ttreelistitem;
+                   var dragobject: ttreeitemdragobject; var accept: Boolean;
+                   var processed: Boolean);
+   procedure editdragrop(const sender: ttreeitemedit;
+                   const source: ttreelistitem; const dest: ttreelistitem;
+                   var dragobject: ttreeitemdragobject; var processed: Boolean);
   protected
   public
    procedure clear;
@@ -173,7 +178,7 @@ function isformfile(const aname: filenamety): boolean;
 implementation
 uses
  projecttreeform_mfm,msefileutils,sysutils,main,sourceform,msewidgets,
- msedatalist,msedrag;
+ msedatalist,msedrag,mseglob;
 const
  unitscaption = 'Units';
  filescaption = 'Text Files';
@@ -575,7 +580,7 @@ begin
    else begin
     if node2 = ffiles then begin
      with tfilenode(node1) do begin
-      sourcefo.openfile(ffilename);
+      sourcefo.openfile(ffilename,true);
      end;
     end;
    end;
@@ -650,6 +655,12 @@ begin
  if projectedit.item.rootnode = projecttree.units then begin
   freeandnil(amenu);
   tpopupmenu.additems(amenu,self,mouseinfo,unitpopup);
+ end
+ else begin
+  if projectedit.item.rootnode = projecttree.files then begin
+   freeandnil(amenu);
+   tpopupmenu.additems(amenu,self,mouseinfo,filepopup);
+  end
  end;
 end;
 
@@ -657,6 +668,14 @@ procedure tprojecttreefo.addunitfileonexecute(const sender: tobject);
 begin
  mainfo.opensource(fk_unit,true,false);
  activate; //windowmanager can activate new form window
+end;
+
+procedure tprojecttreefo.addfileonexecute(const sender: TObject);
+begin
+ if filedialog.execute = mr_ok then begin
+  sourcefo.openfile(filedialog.controller.filename);
+  projecttree.files.addfile(filedialog.controller.filename);
+ end;
 end;
 
 procedure tprojecttreefo.removeunitfileonexecute(const sender: tobject);
@@ -701,36 +720,36 @@ begin
  removeunitfileact.enabled:= projectedit.item.treelevel = 1;
 end;
 
+procedure tprojecttreefo.filepopuponupdate(const sender: tcustommenu);
+begin
+ removefileact.enabled:= projectedit.item.treelevel = 1;
+end;
+
 procedure tprojecttreefo.projecteditonchange(const sender: TObject);
 begin
 // updatesubmodules;
 end;
 
-procedure tprojecttreefo.gridondragbegin(const sender: TObject; const apos: pointty;
-           var dragobject: tdragobject; var processed: Boolean);
+procedure tprojecttreefo.editdragbegin(const sender: ttreeitemedit;
+               const aitem: ttreelistitem; var candrag: Boolean;
+               var dragobject: ttreeitemdragobject; var processed: Boolean);
 begin
- if projectedit.candragsource(translateclientpoint(apos,grid,projectedit)) then begin
-  ttagdragobject.create(self,dragobject,nullpoint,grid.cellatpos(apos).row);
- end;
+ candrag:= aitem.treelevel = 1;
 end;
 
-procedure tprojecttreefo.gridondragover(const sender: TObject; const apos: pointty;
-        var dragobject: tdragobject; var accept: Boolean; var processed: Boolean);
-var
- cell1: gridcoordty;
+procedure tprojecttreefo.editdragover(const sender: ttreeitemedit;
+               const source: ttreelistitem; const dest: ttreelistitem;
+               var dragobject: ttreeitemdragobject; var accept: Boolean;
+               var processed: Boolean);
 begin
- if dragobject is ttagdragobject then begin
-  processed:= true;
-  if grid.editwidgetatpos(apos,cell1) = projectedit then begin
-   itemoncheckrowmove(ttagdragobject(dragobject).tag,cell1.row,accept);
-  end;
- end;
+ accept:= source.parent = dest.parent;
 end;
 
-procedure tprojecttreefo.gridonderagdrop(const sender: TObject; const apos: pointty;
-                        var dragobject: tdragobject; var processed: Boolean);
+procedure tprojecttreefo.editdragrop(const sender: ttreeitemedit;
+               const source: ttreelistitem; const dest: ttreelistitem;
+               var dragobject: ttreeitemdragobject; var processed: Boolean);
 begin
- grid.moverow(ttagdragobject(dragobject).tag,grid.cellatpos(apos).row);
+ sender.dragdrop(dragobject);
 end;
 
 end.

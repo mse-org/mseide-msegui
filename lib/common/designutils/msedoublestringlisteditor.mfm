@@ -4,36 +4,38 @@ object doublestringlisteditor: tdoublestringlisteditor
   bounds_y = 203
   bounds_cx = 338
   bounds_cy = 194
+  taborder = 1
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
   container.bounds_cx = 338
   container.bounds_cy = 194
   container.frame.dummy = 0
   options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat]
   caption = 'Stringlisteditor'
-  icon.transparency = -2147483648
   moduleclassname = 'tmseform'
   object ok: tbutton
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 212
     bounds_y = 160
     bounds_cx = 50
-    bounds_cy = 22
+    bounds_cy = 20
     taborder = 3
     state = [as_default, as_localdefault, as_localcaption]
     caption = '&OK'
     modalresult = mr_ok
-    reffontheight = 16
+    reffontheight = 14
   end
   object cancel: tbutton
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 276
     bounds_y = 160
     bounds_cx = 50
-    bounds_cy = 22
+    bounds_cy = 20
     state = [as_localcaption]
     caption = '&Cancel'
     modalresult = mr_cancel
-    reffontheight = 16
+    reffontheight = 14
   end
   object grid: twidgetgrid
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
@@ -54,7 +56,7 @@ object doublestringlisteditor: tdoublestringlisteditor
     fixrows.count = 1
     fixrows.items = <    
       item
-        height = 18
+        height = 16
         captions.count = 2
         captions.items = <        
           item
@@ -77,51 +79,57 @@ object doublestringlisteditor: tdoublestringlisteditor
         options = [co_fill, co_savevalue]
         widgetname = 'textb'
       end>
-    datarowheight = 18
+    datarowheight = 16
     onrowcountchanged = gridonrowcountchanged
-    reffontheight = 16
+    reffontheight = 14
     object texta: tstringedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      optionsskin = [osk_framebuttononly]
+      bounds_x = 0
+      bounds_y = 0
       bounds_cx = 142
-      bounds_cy = 18
+      bounds_cy = 16
       frame.levelo = 0
       frame.colorclient = -2147483646
       frame.localprops = [frl_levelo, frl_colorclient]
       frame.dummy = 0
       taborder = 1
       visible = False
-      reffontheight = 16
+      reffontheight = 14
     end
     object textb: tstringedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      optionsskin = [osk_framebuttononly]
       bounds_x = 143
+      bounds_y = 0
       bounds_cx = 140
-      bounds_cy = 18
+      bounds_cy = 16
       frame.levelo = 0
       frame.colorclient = -2147483646
       frame.localprops = [frl_levelo, frl_colorclient]
       frame.dummy = 0
+      taborder = 2
       visible = False
-      reffontheight = 16
+      reffontheight = 14
     end
   end
   object rowcount: tintegeredit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 36
     bounds_y = 160
-    bounds_cx = 111
-    bounds_cy = 22
+    bounds_cx = 108
+    bounds_cy = 20
     frame.caption = 'Rowcount'
     frame.captionpos = cp_right
     frame.dummy = 0
     frame.outerframe = (
       0
       0
-      61
+      58
       0
     )
     taborder = 1
     onsetvalue = rowcountonsetvalue
-    reffontheight = 16
+    reffontheight = 14
   end
 end

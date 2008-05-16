@@ -62,7 +62,7 @@ uses
  watchform_mfm,main,msewidgets,projectoptionsform,actionsmodule,msegraphutils,
  mseguiglob,mseformatstr,msebits,sysutils,watchpointsform;
 type
- numformatty = (nf_default,nf_bin,nf_dec,nf_hex);
+ numformatty = (nf_default,nf_bin,nf_decs,nf_decu,nf_hex);
  numsizety = (ns_default,ns_8,ns_16,ns_32);
  
 { twatchfo }
@@ -137,8 +137,11 @@ begin
        end;
        mstr1:= '%'+bintostr(int1,int2);
       end;
-      nf_dec: begin
+      nf_decs: begin
        mstr1:= inttostr(int1);
+      end;
+      nf_decu: begin
+       mstr1:= inttostr(longword(int1));
       end;
       nf_hex: begin
        int2:= int2 div 4 + 1; //nibble count

@@ -22,7 +22,7 @@ uses
 
 type
  gdbresultty = (gdb_ok,gdb_error,gdb_timeout,gdb_dataerror,gdb_message,gdb_running,
-                gdb_writeerror);
+                gdb_writeerror,gdb_notactive);
 
  sigflagty = (sfl_internal,sfl_stop,sfl_handle);
  sigflagsty = set of sigflagty;
@@ -32,7 +32,7 @@ type
 const
  gdberrortexts: array[gdbresultty] of string =
           ('','Error','Timeout','Data error','Message','Target running',
-           'Write error');
+           'Write error','gdb not active');
  niltext = 'nil';
  processornames: array[processorty] of ansistring = ('i386','arm','cpu32');
  simulatorprocessors = [pro_arm];
@@ -1477,6 +1477,10 @@ var
  int1: integer;
 
 begin
+ if not active then begin
+  result:= gdb_notactive;
+  exit;
+ end;
  result:= gdb_timeout;
  interrupttarget;
  setlength(fsyncvalues,0);
@@ -2706,6 +2710,9 @@ begin
   end;
   gdb_message: begin
    aresult:= errormessage;
+  end;
+  else begin
+   aresult:= gdberrortexts[result];
   end;
  end;
 end;

@@ -1795,7 +1795,7 @@ function cellkeypress(const info: celleventinfoty): keyty;
 
 implementation
 uses
- mseguiintf,mseshapes,msestockobjects,mseact,mseactions;
+ mseguiintf,mseshapes,msestockobjects,mseact,mseactions,rtlconsts;
 type
  tframe1 = class(tcustomframe);
  tdatalist1 = class(tdatalist);
@@ -9915,39 +9915,56 @@ var
  int1: integer;
  rowbefore: integer;
 begin
- rowbefore:= ffocusedcell.row;
- beginupdate;
- if curindex >= 0 then begin //datarows
-  if (ffocusedcell.row >= 0) then begin
-   if (ffocusedcell.row >= curindex) and
-         (ffocusedcell.row < curindex + count) then begin
-    int1:= newindex;
-    if int1 + count > frowcount then begin
-     int1:= frowcount - count;
-    end;
-    ffocusedcell.row:= int1 + ffocusedcell.row - curindex;
-   end
-   else begin
-    if (ffocusedcell.row > curindex) and  (ffocusedcell.row <= newindex) then begin
-     dec(ffocusedcell.row,count);
+ if count > 0 then begin
+  if (curindex < 0) or (curindex + count > rowcount) then begin
+   tlist.Error(SListIndexError,curindex);
+  end;
+  if (newindex < 0) or (newindex >= rowcount) then begin
+   tlist.Error(SListIndexError,newindex);
+  end;
+
+  rowbefore:= ffocusedcell.row;
+  beginupdate;
+  if curindex >= 0 then begin //datarows
+   if (ffocusedcell.row >= 0) then begin
+    if (ffocusedcell.row >= curindex) and
+          (ffocusedcell.row < curindex + count) then begin
+                 //focus in moved block
+     int1:= newindex;
+     if int1 >= curindex + count then begin
+      int1:= int1 - count + 1;
+     end;
+     ffocusedcell.row:= ffocusedcell.row + int1 - curindex;
+     {
+     int1:= newindex;
+     if int1 + count > frowcount then begin
+      int1:= frowcount - count;
+     end;
+     ffocusedcell.row:= int1 + ffocusedcell.row - curindex;
+     }
     end
     else begin
-     if (ffocusedcell.row < curindex) and  (ffocusedcell.row >= newindex) then begin
-      inc(ffocusedcell.row,count);
+     if (ffocusedcell.row > curindex) and  (ffocusedcell.row < newindex + count) then begin
+      dec(ffocusedcell.row,count);
+     end
+     else begin
+      if (ffocusedcell.row < curindex) and  (ffocusedcell.row >= newindex) then begin
+       inc(ffocusedcell.row,count);
+      end;
      end;
     end;
    end;
+   if factiverow >= 0 then begin
+    factiverow:= ffocusedcell.row;
+   end;
+   fdatacols.moverow(curindex,newindex,count);
+   invalidate //for fixcols colorselect
   end;
-  if factiverow >= 0 then begin
-   factiverow:= ffocusedcell.row;
+  endupdate;
+  dorowsmoved(curindex,newindex,count);
+  if rowbefore <> ffocusedcell.row then begin
+   dofocusedcellposchanged;
   end;
-  fdatacols.moverow(curindex,newindex,count);
-  invalidate //for fixcols colorselect
- end;
- endupdate;
- dorowsmoved(curindex,newindex,count);
- if rowbefore <> ffocusedcell.row then begin
-  dofocusedcellposchanged;
  end;
 end;
 

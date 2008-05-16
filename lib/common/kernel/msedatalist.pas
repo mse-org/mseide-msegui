@@ -2717,7 +2717,7 @@ begin
   freecount:= count-ueberlappung;
   if mode = bcm_rotate then begin
    if toindex < fromindex then begin
-    self.count:= fcount + freecount;
+    internalsetcount(fcount + freecount,true);
     move((fdatapo+freestart*fsize)^,
                 (fdatapo+(fcount-freecount)*fsize)^,freecount*fsize);
     move((fdatapo+fromindex*fsize)^,
@@ -2733,7 +2733,7 @@ begin
    end
    else begin
     if ueberlappung = 0 then begin
-     self.count:= fcount + freecount;
+     internalsetcount(fcount + freecount,true);
      move((fdatapo+fromindex*fsize)^,
                 (fdatapo+(fcount-freecount)*fsize)^,freecount*fsize);
      move((fdatapo+(fromindex+freecount)*fsize)^,
@@ -2747,7 +2747,7 @@ begin
       toindex:= fcount-count;
      end;
      freecount:= toindex-fromindex;
-     self.count:= fcount + freecount;
+     internalsetcount(fcount + freecount,true);
      move((fdatapo+(fromindex+count)*fsize)^,
                 (fdatapo+(fcount-freecount)*fsize)^,freecount*fsize);
      move((fdatapo+(fromindex)*fsize)^,
