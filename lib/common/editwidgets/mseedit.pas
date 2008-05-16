@@ -330,6 +330,7 @@ type
    procedure clientrectchanged; override;
    procedure fontchanged; override;
    procedure enabledchanged; override;
+   procedure dragstarted; override;
 
    class function classskininfo: skininfoty; override;
    function getoptionsedit: optionseditty; virtual;//iedit
@@ -1465,6 +1466,12 @@ begin
                       editor.textclipped and getshowhint then begin
   info.caption:= text;
  end;
+ inherited;
+end;
+
+procedure tcustomedit.dragstarted;
+begin
+ feditor.dragstarted;
  inherited;
 end;
 

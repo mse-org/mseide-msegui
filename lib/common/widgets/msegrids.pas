@@ -7428,6 +7428,61 @@ var
                //shift mouse with grid;
  end;
 
+ procedure checkrepeater(const drag: boolean);
+ begin     
+  with info do begin
+   if gs_cellclicked in fstate then begin
+    if drag then begin
+     frepeataction:= fca_none;
+    end
+    else begin
+     if ss_shift in shiftstate then begin
+      if co_mouseselect in fdatacols[ffocusedcell.col].foptions then begin
+       frepeataction:= fca_selectend;
+      end
+      else begin
+       frepeataction:= fca_focusinshift;
+      end;
+     end
+     else begin
+      frepeataction:= fca_focusinrepeater;
+     end;
+    end;
+    if pos.y < fdatarect.y - mousescrolldist then begin
+     if (ffocusedcell.col >= 0) and 
+              (co_mousescrollrow in datacols[ffocusedcell.col].options) then begin
+      startrepeater(gs_scrolldown,fastrepeat);
+     end;
+    end
+    else begin
+     if pos.y - mousescrolldist >= fdatarect.y + fdatarect.cy then begin
+      if (ffocusedcell.col >= 0) and 
+              (co_mousescrollrow in datacols[ffocusedcell.col].options) then begin
+       startrepeater(gs_scrollup,fastrepeat);
+      end;
+     end
+     else begin
+      if pos.x < fdatarect.x - mousescrolldist then begin
+       if og_mousescrollcol in foptionsgrid then begin
+        startrepeater(gs_scrollleft,slowrepeat);
+       end;
+      end
+      else begin
+       if pos.x - mousescrolldist >= fdatarect.x + fdatarect.cx then begin
+        if og_mousescrollcol in foptionsgrid then begin
+         startrepeater(gs_scrollright,slowrepeat);
+        end;
+       end
+       else begin
+        killrepeater;
+       end;
+      end;
+     end;
+    end;
+   end;
+  end;
+ end;
+
 var
  coord1: gridcoordty;
  str1: msestring;
@@ -7441,169 +7496,123 @@ begin
  if not (es_processed in info.eventstate) then begin
   fdragcontroller.clientmouseevent(info);
  end;
- if not (es_processed in info.eventstate) and
-                           not(csdesigning in componentstate) then begin
-  with info do begin
-   if eventkind in mouseposevents then  begin
-    coord1:= fmousecell;
-    cellkind:= cellatpos(pos,fmousecell);
-    {
-    if (coord1.col <> fmousecell.col) or 
-            (coord1.row <> fmousecell.row) then begin
-     invalidatesinglecell(coord1);
-     invalidatesinglecell(fmousecell);
-    end;
-    }
-    if (fmousecell.row <> fmouseparkcell.row) or 
-                              (fmousecell.col <> fmouseparkcell.col) then begin
-     fmouseparkcell:= invalidcell;
-    end;
-   end
-   else begin
-    cellkind:= ck_invalid;
+ if not(csdesigning in componentstate) then begin
+  if es_processed in info.eventstate then begin
+   if info.eventkind in [ek_mousemove,ek_mousepark] then begin
+    checkrepeater(true);
    end;
-   case eventkind of
-    ek_clientmouseenter: begin
-     include(fstate,gs_mouseentered);
-    end;
-    ek_clientmouseleave: begin
-     invalidatesinglecell(fmousecell);
-     fmousecell:= invalidcell;
-     fmouseparkcell:= invalidcell;
-    end;
-    ek_buttonpress: begin
-     mousewidgetbefore:= application.mousewidget;
-     checkfocuscell;
-     if (mousewidgetbefore = application.mousewidget) and 
-                      //not interrupted by beginmodal
-        (button = mb_left) and isdatacell(fmousecell)
-               {and isdatacell(ffocusedcell) and 
-              gridcoordisequal(fmousecell,ffocusedcell)} then begin
-      include(fstate,gs_cellclicked);
-      fclickedcellbefore:= fclickedcell;
-      fclickedcell:= fmousecell;
-     end;                
-    end;
-    ek_mousemove,ek_mousepark: begin
-     if not (es_child in info.eventstate) then begin
-      if cellkind = ck_data then begin
-       application.widgetcursorshape:= datacols[fmousecell.col].getcursor;
-      end
-      else begin
-       application.widgetcursorshape:= cr_default{cursor};
-       if (eventkind = ek_mousepark) and (cellkind = ck_fixrow) and 
-              ((fmousecell.row <> fmouseparkcell.row) or 
-               (fmousecell.col <> fmouseparkcell.col)) then begin
-        fmouseparkcell:= fmousecell;
-        str1:= '';
-        with ffixrows[fmouseparkcell.row] do begin
-         if fmouseparkcell.col >= 0 then begin
-          if fmouseparkcell.col < fcaptions.count then begin
-           str1:= fcaptions[fmouseparkcell.col].hint;
-          end;
-         end
-         else begin
-          if -fmouseparkcell.row <= fcaptionsfix.count then begin
-           str1:= fcaptionsfix[fmouseparkcell.col].hint;
-          end;
-         end;
-        end;
-        if (str1 <> '') and application.active then begin
-         application.inithintinfo(hintinfo,self);
-         hintinfo.caption:= str1;
-         application.showhint(self,hintinfo);
-        end;
-       end;
-      end;
-      if (info.shiftstate * [ss_left,ss_middle,ss_right] = [ss_left]) and
-         (ws_clicked in fwidgetstate) then begin
-       checkfocuscell;
-      end
-      else begin
-       if (shiftstate = []) and (cellkind = ck_data) and
-                (co_mousemovefocus in fdatacols[fmousecell.col].foptions) then begin
-        if gs_mouseentered in fstate then begin
-         exclude(fstate,gs_mouseentered);
-         fmouserefpos:= info.pos;
-        end;
-        if (distance(fmouserefpos,info.pos) > 3) and active then begin
-         fmouserefpos:= info.pos;
-         if not fdatacols[fmousecell.col].canfocus(info.button,info.shiftstate) then begin
-          showcell(fmousecell);
-         end
-         else begin
-          focuscell(fmousecell);
-//          include(info.eventstate,es_processed);
-         end;
-        end;
-       end;
-      end;
+  end
+  else begin                           
+   with info do begin
+    if eventkind in mouseposevents then  begin
+     coord1:= fmousecell;
+     cellkind:= cellatpos(pos,fmousecell);
+     if (fmousecell.row <> fmouseparkcell.row) or 
+                               (fmousecell.col <> fmouseparkcell.col) then begin
+      fmouseparkcell:= invalidcell;
      end;
-     if gs_cellclicked in fstate then begin
-      if ss_shift in shiftstate then begin
-       if co_mouseselect in fdatacols[ffocusedcell.col].foptions then begin
-        frepeataction:= fca_selectend;
+    end
+    else begin
+     cellkind:= ck_invalid;
+    end;
+    case eventkind of
+     ek_clientmouseenter: begin
+      include(fstate,gs_mouseentered);
+     end;
+     ek_clientmouseleave: begin
+      invalidatesinglecell(fmousecell);
+      fmousecell:= invalidcell;
+      fmouseparkcell:= invalidcell;
+     end;
+     ek_buttonpress: begin
+      mousewidgetbefore:= application.mousewidget;
+      checkfocuscell;
+      if (mousewidgetbefore = application.mousewidget) and 
+                       //not interrupted by beginmodal
+         (button = mb_left) and isdatacell(fmousecell)
+                {and isdatacell(ffocusedcell) and 
+               gridcoordisequal(fmousecell,ffocusedcell)} then begin
+       include(fstate,gs_cellclicked);
+       fclickedcellbefore:= fclickedcell;
+       fclickedcell:= fmousecell;
+      end;                
+     end;
+     ek_mousemove,ek_mousepark: begin
+      if not (es_child in info.eventstate) then begin
+       if cellkind = ck_data then begin
+        application.widgetcursorshape:= datacols[fmousecell.col].getcursor;
        end
        else begin
-        frepeataction:= fca_focusinshift;
-       end;
-      end
-      else begin
-       frepeataction:= fca_focusinrepeater;
-      end;
-//      int1:= pos.y - clientpos.y;
-      if pos.y < fdatarect.y - mousescrolldist then begin
-       if (ffocusedcell.col >= 0) and 
-                (co_mousescrollrow in datacols[ffocusedcell.col].options) then begin
-        startrepeater(gs_scrolldown,fastrepeat);
-       end;
-      end
-      else begin
-       if pos.y - mousescrolldist >= fdatarect.y + fdatarect.cy then begin
-        if (ffocusedcell.col >= 0) and 
-                (co_mousescrollrow in datacols[ffocusedcell.col].options) then begin
-         startrepeater(gs_scrollup,fastrepeat);
+        application.widgetcursorshape:= cr_default{cursor};
+        if (eventkind = ek_mousepark) and (cellkind = ck_fixrow) and 
+               ((fmousecell.row <> fmouseparkcell.row) or 
+                (fmousecell.col <> fmouseparkcell.col)) then begin
+         fmouseparkcell:= fmousecell;
+         str1:= '';
+         with ffixrows[fmouseparkcell.row] do begin
+          if fmouseparkcell.col >= 0 then begin
+           if fmouseparkcell.col < fcaptions.count then begin
+            str1:= fcaptions[fmouseparkcell.col].hint;
+           end;
+          end
+          else begin
+           if -fmouseparkcell.row <= fcaptionsfix.count then begin
+            str1:= fcaptionsfix[fmouseparkcell.col].hint;
+           end;
+          end;
+         end;
+         if (str1 <> '') and application.active then begin
+          application.inithintinfo(hintinfo,self);
+          hintinfo.caption:= str1;
+          application.showhint(self,hintinfo);
+         end;
         end;
+       end;
+       if (info.shiftstate * [ss_left,ss_middle,ss_right] = [ss_left]) and
+          (ws_clicked in fwidgetstate) then begin
+        checkfocuscell;
        end
        else begin
-        if pos.x < fdatarect.x - mousescrolldist then begin
-         if og_mousescrollcol in foptionsgrid then begin
-          startrepeater(gs_scrollleft,slowrepeat);
+        if (shiftstate = []) and (cellkind = ck_data) and
+                 (co_mousemovefocus in fdatacols[fmousecell.col].foptions) then begin
+         if gs_mouseentered in fstate then begin
+          exclude(fstate,gs_mouseentered);
+          fmouserefpos:= info.pos;
          end;
-        end
-        else begin
-         if pos.x - mousescrolldist >= fdatarect.x + fdatarect.cx then begin
-          if og_mousescrollcol in foptionsgrid then begin
-           startrepeater(gs_scrollright,slowrepeat);
+         if (distance(fmouserefpos,info.pos) > 3) and active then begin
+          fmouserefpos:= info.pos;
+          if not fdatacols[fmousecell.col].canfocus(info.button,info.shiftstate) then begin
+           showcell(fmousecell);
+          end
+          else begin
+           focuscell(fmousecell);
           end;
-         end
-         else begin
-          killrepeater;
          end;
         end;
        end;
       end;
+      checkrepeater(false);
      end;
     end;
-   end;
-   if cellkind = ck_data then begin
-    if fmousecell.col <> fmouseeventcol then begin
+    if cellkind = ck_data then begin
+     if fmousecell.col <> fmouseeventcol then begin
+      mouseleavecol;
+     end;
+     fmouseeventcol:= fmousecell.col;
+     if not (es_processed in info.eventstate) and 
+               (fmousecell.col >= 0) then begin //ek_clientmouseleave otherwise
+      coord1:= ffocusedcell;
+      fdatacols[fmousecell.col].clientmouseevent(fmousecell,info);
+      if not gridcoordisequal(ffocusedcell,coord1) then begin
+       include(fstate,gs_mousecellredirected);
+      end;
+     end;
+    end
+    else begin
      mouseleavecol;
-    end;
-    fmouseeventcol:= fmousecell.col;
-    if not (es_processed in info.eventstate) and 
-              (fmousecell.col >= 0) then begin //ek_clientmouseleave otherwise
-     coord1:= ffocusedcell;
-     fdatacols[fmousecell.col].clientmouseevent(fmousecell,info);
-     if not gridcoordisequal(ffocusedcell,coord1) then begin
-      include(fstate,gs_mousecellredirected);
+     if not (es_processed in info.eventstate) then begin
+      cellmouseevent(fmousecell,info);
      end;
-    end;
-   end
-   else begin
-    mouseleavecol;
-    if not (es_processed in info.eventstate) then begin
-     cellmouseevent(fmousecell,info);
     end;
    end;
   end;
@@ -9822,48 +9831,51 @@ begin
 end;
 
 procedure tcustomgrid.repeatproc(const sender: tobject);
+var
+ bo1: boolean;
 begin
+ bo1:= (gs_cellclicked in fstate) and (frepeataction <> fca_none);
  if gs_scrollup in fstate then begin
-  if gs_cellclicked in fstate then begin
+  if bo1 then begin
    if row < rowcount - 1 then begin
     rowdown(frepeataction);
    end;
   end
   else begin
-   scrollrows(1);
+   scrollrows(-1);
   end;
  end
  else begin
   if gs_scrolldown in fstate then begin
-   if gs_cellclicked in fstate then begin
+   if bo1 then begin
     if row > 0 then begin
      rowup(frepeataction);
     end;
    end
    else begin
-    scrollrows(-1);
+    scrollrows(1);
    end;
   end
   else begin
    if gs_scrollleft in fstate then begin
-    if gs_cellclicked in fstate then begin
+    if bo1 then begin
      if ffocusedcell.col > 0 then begin
       colstep(frepeataction,-1,false);
      end;
     end
     else begin
-     scrollright;
+     scrollleft;
     end;
    end
    else begin
     if gs_scrollright in fstate then begin
-     if gs_cellclicked in fstate then begin
+     if bo1 then begin
       if ffocusedcell.col < fdatacols.count - 1 then begin
        colstep(frepeataction,1,false);
       end;
      end
      else begin
-      scrollleft;
+      scrollright;
      end;
     end
    end;

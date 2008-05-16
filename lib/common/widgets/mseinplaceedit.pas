@@ -160,6 +160,7 @@ type
    procedure dodefocus;
    procedure dopaint(const canvas: tcanvas);
    procedure poschanged;
+   procedure dragstarted; //kills repeater
 
    procedure clear; virtual;
    procedure initfocus;
@@ -1735,6 +1736,11 @@ begin
    end;
   end;   
  end;
+end;
+
+procedure tinplaceedit.dragstarted;
+begin
+ killrepeater;
 end;
 
 { ttextundolist }

@@ -1012,7 +1012,7 @@ type
    function parentvisible: boolean;  //checks visible flags of ancestors
    function updateopaque(const children: boolean): boolean;
                    //true if widgetregionchanged called
-
+   procedure dragstarted; virtual; //called by tapplication.dragstarted
    //idragcontroller
    function getdragrect(const apos: pointty): rectty; virtual;
    //iface
@@ -1870,6 +1870,7 @@ type
    function shortcutting: boolean; //widget is in doshortcut procedure
    property caret: tcaret read fcaret;
    property mouse: tmouse read fmouse;
+   procedure dragstarted; //calls dragstarted of all known widgets
    procedure mouseparkevent; //simulates mouseparkevent
    procedure delayedmouseshift(const ashift: pointty);
    property cursorshape: cursorshapety read fcursorshape write setcursorshape;
@@ -4890,6 +4891,7 @@ begin
  instance.Free;
  instance:= self;
  fpickpos:= apickpos;
+ application.dragstarted;
 end;
 
 destructor tdragobject.destroy;
@@ -10092,6 +10094,15 @@ begin
  end;
 end;
 
+procedure twidget.dragstarted;
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fwidgets) do begin
+  fwidgets[int1].dragstarted;
+ end;
+end;
+
 { twindow }
 
 constructor twindow.create(aowner: twidget);
@@ -13575,6 +13586,15 @@ begin
     end;
    end;
   end;
+ end;
+end;
+
+procedure tguiapplication.dragstarted; //calls dragstarted of all known widgets
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fwindows) do begin
+  fwindows[int1].fowner.dragstarted;
  end;
 end;
 

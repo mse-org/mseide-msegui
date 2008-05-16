@@ -3894,6 +3894,7 @@ begin
         end;
        end;
       end;
+      showcell(focusedcell);
      end;
     end;
    end

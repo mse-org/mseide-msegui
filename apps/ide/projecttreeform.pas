@@ -72,6 +72,7 @@ type
    procedure editdragrop(const sender: ttreeitemedit;
                    const source: ttreelistitem; const dest: ttreelistitem;
                    var dragobject: ttreeitemdragobject; var processed: Boolean);
+   procedure editoncellevent(const sender: TObject; var info: celleventinfoty);
   protected
   public
    procedure clear;
@@ -698,6 +699,12 @@ end;
 
 procedure tprojecttreefo.projecteditoncellevent(const sender: tobject;
   var info: celleventinfoty);
+begin
+ projecttree.docellevent(projectedit,info);
+end;
+
+procedure tprojecttreefo.editoncellevent(const sender: TObject;
+               var info: celleventinfoty);
 begin
  projecttree.docellevent(projectedit,info);
 end;
