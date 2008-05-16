@@ -1903,14 +1903,14 @@ procedure tcustomwidgetgrid.insertwidget(const awidget: twidget;
              const apos: pointty);
 var
  po1: pointty;
- cell1: gridcoordty;
+ cell1,cell2: gridcoordty;
  intf: igridwidget;
 begin
  if not (csloading in componentstate) then begin
   internalupdatelayout;
   po1:= subpoint(apos,paintpos);
   cell1:= cellatpos(po1);
- if (cell1.row <> invalidaxis) and (cell1.col <> invalidaxis) and 
+  if (cell1.row <> invalidaxis) and (cell1.col <> invalidaxis) and 
             (cell1.row < 0) then begin
    if not checkdescendent(awidget) then begin //new insert
     exclude(twidget1(awidget).foptionswidget,ow_autoscale);
@@ -1930,6 +1930,15 @@ begin
      end;
      if cell1.col < 0 then begin
       cell1.col:= fdatacols.count;
+     end
+     else begin
+      with twidgetcol(fdatacols[cell1.col]) do begin
+       po1.x:= po1.x + (fend - fstart) div 2;
+       cell2:= cellatpos(po1);
+       if cell2.col <> cell1.col then begin
+        inc(cell1.col); //next col
+       end;
+      end;
      end;
      fdatacols.insertdefault(cell1.col);
      awidget.parentwidget:= fcontainer2;

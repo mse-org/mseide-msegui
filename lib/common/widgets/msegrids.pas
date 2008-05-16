@@ -243,7 +243,6 @@ type
 
  tgridprop = class(tindexpersistent,iframe,iface)
   private
-   fstart,fend: integer;
    fcellrect: rectty;
    ftag: integer;
    function getframe: tcellframe;
@@ -261,6 +260,7 @@ type
    procedure setcolorselect(const Value: colorty);
    procedure setcoloractive(avalue: colorty);
   protected
+   fstart,fend: integer;
    flinepos: integer;
    flinewidth: integer;
    flinecolor: colorty;
