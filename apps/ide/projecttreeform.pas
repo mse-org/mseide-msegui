@@ -73,6 +73,7 @@ type
                    const source: ttreelistitem; const dest: ttreelistitem;
                    var dragobject: ttreeitemdragobject; var processed: Boolean);
    procedure editoncellevent(const sender: TObject; var info: celleventinfoty);
+   procedure removefileonexecute(const sender: TObject);
   protected
   public
    procedure clear;
@@ -689,6 +690,11 @@ begin
    end;
   end;
  end;
+end;
+
+procedure tprojecttreefo.removefileonexecute(const sender: TObject);
+begin
+ removeunitfileonexecute(sender);
 end;
 
 procedure tprojecttreefo.projecttreeonupdatestat(const sender: tobject;

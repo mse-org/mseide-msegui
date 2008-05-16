@@ -26,7 +26,7 @@ object projecttreefo: tprojecttreefo
   onstatupdate = projecttreeonupdatestat
   moduleclassname = 'tdockform'
   object grid: twidgetgrid
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 276
@@ -151,6 +151,7 @@ object projecttreefo: tprojecttreefo
   end
   object removefileact: taction
     caption = 'Remove Text File'
+    onexecute = removefileonexecute
     left = 136
     top = 152
   end
