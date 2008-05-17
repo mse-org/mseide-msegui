@@ -1471,6 +1471,7 @@ end;
                  //step > 0 -> right, step < 0 left
 
    function isdatacell(const coord: gridcoordty): boolean;
+   function isvalidcell(const coord: gridcoordty): boolean;
    function isfixrow(const coord: gridcoordty): boolean;
    function isfixcol(const coord: gridcoordty): boolean;
    function rowvisible(const arow: integer): integer;
@@ -7510,7 +7511,7 @@ begin
      cellkind:= cellatpos(pos,fmousecell);
      if (coord1.col <> fmousecell.col) or 
              (coord1.row <> fmousecell.row) then begin
-      if (coord1.row <> invalidaxis) and (coord1.col <> invalidaxis) then begin
+      if isvalidcell(coord1) then begin
        cellmouseevent(coord1,info,nil,cek_mouseleave);
       end;
       if (fmousecell.row <> invalidaxis) and (fmousecell.col <> invalidaxis) then begin
@@ -8198,6 +8199,14 @@ begin
  with coord do begin
   result:= (col >= 0) and (row >= 0) and
         (col < fdatacols.count) and (row < frowcount);
+ end;
+end;
+
+function tcustomgrid.isvalidcell(const coord: gridcoordty): boolean;
+begin
+ with coord do begin
+  result:= (col < fdatacols.count) and (col >= -ffixcols.count) and
+           (row < frowcount) and (row >= -ffixrows.count);
  end;
 end;
 
