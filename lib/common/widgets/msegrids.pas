@@ -169,7 +169,7 @@ type
                     cek_focusedcellchanged,
                     cek_mousemove,cek_mousepark,cek_firstmousepark,
                     cek_buttonpress,cek_buttonrelease,
-                    cek_mouseleave,
+                    cek_mouseenter,cek_mouseleave,
                     cek_keydown,cek_keyup);
 const
  mousecellevents = [cek_mousemove,cek_mousepark,cek_firstmousepark,
@@ -1370,7 +1370,8 @@ end;
    procedure dorowcountchanged(const countbefore,newcount: integer); virtual;
    procedure docellevent(var info: celleventinfoty); virtual;
    procedure cellmouseevent(const acell: gridcoordty; var info: mouseeventinfoty;
-                                const acellinfopo: pcelleventinfoty = nil);
+                                const acellinfopo: pcelleventinfoty = nil;
+                                const aeventkind: celleventkindty = cek_none);
    procedure dofocusedcellposchanged; virtual;
 
    function internalsort(sortfunc: gridsorteventty; 
@@ -7507,6 +7508,17 @@ begin
     if eventkind in mouseposevents then  begin
      coord1:= fmousecell;
      cellkind:= cellatpos(pos,fmousecell);
+     if (coord1.col <> fmousecell.col) or 
+             (coord1.row <> fmousecell.row) then begin
+      if (coord1.row <> invalidaxis) and (coord1.col <> invalidaxis) then begin
+       cellmouseevent(coord1,info,nil,cek_mouseleave);
+      end;
+      if (fmousecell.row <> invalidaxis) and (fmousecell.col <> invalidaxis) then begin
+       cellmouseevent(fmousecell,info,nil,cek_mouseenter);
+      end;
+//      invalidatesinglecell(coord1);
+//      invalidatesinglecell(fmousecell);
+     end;
      if (fmousecell.row <> fmouseparkcell.row) or 
                                (fmousecell.col <> fmouseparkcell.col) then begin
       fmouseparkcell:= invalidcell;
@@ -7520,7 +7532,11 @@ begin
       include(fstate,gs_mouseentered);
      end;
      ek_clientmouseleave: begin
-      invalidatesinglecell(fmousecell);
+//      invalidatesinglecell(fmousecell);
+      if (fmousecell.col <> invalidaxis) and 
+                            (fmousecell.row <> invalidaxis) then begin
+       cellmouseevent(fmousecell,info,nil,cek_mouseleave);
+      end;
       fmousecell:= invalidcell;
       fmouseparkcell:= invalidcell;
      end;
@@ -7650,7 +7666,8 @@ end;
 
 procedure tcustomgrid.cellmouseevent(const acell: gridcoordty; 
                            var info: mouseeventinfoty;
-                           const acellinfopo: pcelleventinfoty = nil);
+                           const acellinfopo: pcelleventinfoty = nil;
+                           const aeventkind: celleventkindty = cek_none);
 var
  cellinfo: celleventinfoty;
  po1: pointty;
@@ -7666,12 +7683,15 @@ begin
   cell:= acell;
   grid:= self;
   gridmousepos:= info.pos;
-  case info.eventkind of
-   ek_mousemove: eventkind:= cek_mousemove;
-   ek_mousepark: eventkind:= cek_mousepark;
-   ek_buttonpress: eventkind:= cek_buttonpress;
-   ek_buttonrelease: eventkind:= cek_buttonrelease;
-   ek_clientmouseleave: eventkind:= cek_mouseleave;
+  eventkind:= aeventkind;
+  if eventkind = cek_none then begin
+   case info.eventkind of
+    ek_mousemove: eventkind:= cek_mousemove;
+    ek_mousepark: eventkind:= cek_mousepark;
+    ek_buttonpress: eventkind:= cek_buttonpress;
+    ek_buttonrelease: eventkind:= cek_buttonrelease;
+//    ek_clientmouseleave: eventkind:= cek_mouseleave;
+   end;
   end;
   if (acellinfopo = nil) and (eventkind <> cek_none) then begin
    po1:= cellrect(cellinfo.cell).pos;

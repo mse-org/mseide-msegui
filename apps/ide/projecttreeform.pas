@@ -681,12 +681,16 @@ begin
 end;
 
 procedure tprojecttreefo.removeunitfileonexecute(const sender: tobject);
+var
+ rowbefore: integer;
 begin
  with tfilenode(projectedit.item) do begin
   if askok('Do you wish to remove "'+ ffilename +
             '"?','') then begin
    if sourcefo.closepage(ffilename) then begin
+    rowbefore:= grid.row;
     projectedit.item.Free;
+    grid.row:= rowbefore;
    end;
   end;
  end;

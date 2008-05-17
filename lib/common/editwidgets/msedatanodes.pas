@@ -1206,10 +1206,10 @@ begin
    checkaction(na_destroying);
   end;
  end;
- clear;
  if (fparent <> nil) and not (ns_destroying in fparent.fstate)  then begin
   fparent.remove(fparentindex);
  end;
+ clear;
  inherited;
 end;
 

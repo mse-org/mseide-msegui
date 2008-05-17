@@ -1988,7 +1988,9 @@ var
 begin
  beginupdate;
  try
+  exclude(fstate,ils_subnodecountupdating); //free nodes
   clear;
+  include(fstate,ils_subnodecountupdating);
   capacity:= length(aitems);
   fcount:= length(aitems);
   if fcount > 0 then begin
@@ -3125,8 +3127,8 @@ procedure ttreeitemeditlist.nodenotification(const sender: tlistitem;
   with ttreeitemedit(fowner) do begin
    if ttreelistitem1(sender).fcount > 0 then begin
     fchangingnode:= ttreelistitem(sender);
-    int2:= sender.index+1;
-    finsertcount:= int2;
+    int2:= sender.index+1; //list row insert position
+    finsertcount:= int2;   //list row insert position counter
     finsertindex:= 0;
     int1:= ttreelistitem(sender).treeheight;
     try

@@ -651,6 +651,9 @@ type
    procedure loaded; override;
    procedure setenabled(const avalue: boolean); override;
    procedure setvisible(const avalue: boolean); override;
+
+   procedure docellevent(const ownedcol: boolean; 
+                       var info: celleventinfoty); override;
    
    //iactionlink
    function getactioninfopo: pactioninfoty;
@@ -2705,9 +2708,9 @@ end;
 procedure tcustomdatabutton.actionchanged;
 begin
  actioninfotoshapeinfo(self,factioninfo,finfo);
- if csdesigning in componentstate then begin
+// if csdesigning in componentstate then begin
   exclude(finfo.state,ss_invisible);
- end;
+// end;
  formatchanged;
  checkautosize;
 end;
@@ -2755,6 +2758,14 @@ procedure tcustomdatabutton.loaded;
 begin
  inherited;
  actionendload(iactionlink(self));
+end;
+
+procedure tcustomdatabutton.docellevent(const ownedcol: boolean;
+               var info: celleventinfoty);
+begin
+ if ownedcol and (info.eventkind in [cek_mouseenter,cek_mouseleave]) then begin
+  fgridintf.getcol.grid.invalidatecell(info.cell);
+ end;
 end;
 
 { tstockglyphdatabutton }

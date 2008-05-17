@@ -656,13 +656,13 @@ end;
 
 
 procedure tframebutton.updatewidgetstate(const awidget: twidget);
-var
- invisiblebefore: boolean;
+//var
+// invisiblebefore: boolean;
 begin
- invisiblebefore:= ss_invisible in finfo.state;
+// invisiblebefore:= ss_invisible in finfo.state;
  updatewidgetshapestate(finfo,awidget,fbo_disabled in foptions,
-                                 fbo_invisible in foptions,fframe);
- updatebit(cardinal(finfo.state),ord(ss_invisible),invisiblebefore);
+                                 {fbo_invisible in foptions,}fframe);
+// updatebit(cardinal(finfo.state),ord(ss_invisible),invisiblebefore);
 end;
 
 procedure tframebutton.assign(source: tpersistent);

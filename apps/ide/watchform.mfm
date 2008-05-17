@@ -76,7 +76,7 @@ object watchfo: twatchfo
     fixrows.items = <    
       item
         height = 16
-        captions.count = 5
+        captions.count = 6
         captions.items = <        
           item
             caption = 'A'
@@ -87,6 +87,8 @@ object watchfo: twatchfo
           end        
           item
             caption = 'Result'
+          end        
+          item
           end        
           item
           end        
@@ -114,21 +116,21 @@ object watchfo: twatchfo
         widgetname = 'expression'
       end    
       item
-        width = 79
+        width = 82
         options = [co_fill, co_savevalue, co_rowfont]
         widthmin = 50
         oncellevent = resultcellevent
         widgetname = 'expresult'
       end    
       item
+        color = -2147483646
+        width = 12
+        widgetname = 'formatcode'
+      end    
+      item
         width = 13
         options = [co_invisible, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         widgetname = 'sizecode'
-      end    
-      item
-        width = 15
-        options = [co_invisible, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
-        widgetname = 'formatcode'
       end>
     datarowheight = 16
     statfile = mainfo.projectstatfile
@@ -161,39 +163,48 @@ object watchfo: twatchfo
       reffontheight = 14
     end
     object expresult: tstringedit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_autoscale]
       optionsskin = [osk_framebuttononly]
       bounds_x = 167
       bounds_y = 0
-      bounds_cx = 79
+      bounds_cx = 82
       bounds_cy = 16
       taborder = 3
       visible = False
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
       onsetvalue = expresultonsetvalue
-      reffontheight = 14
+    end
+    object formatcode: tdatabutton
+      optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
+      optionsskin = [osk_framebuttononly]
+      bounds_x = 250
+      bounds_y = 0
+      bounds_cx = 12
+      bounds_cy = 16
+      frame.optionsskin = [fso_nofocusrect, fso_nodefaultrect]
+      frame.localprops = [frl_optionsskin]
+      frame.dummy = 0
+      taborder = 4
+      ondataentered = formatent
+      state = [as_invisible, as_localimagelist]
+      imagelist = timagelist1
+      imagenums.count = 5
+      imagenums.items = (
+        -1
+        0
+        1
+        2
+        3
+      )
+      min = 0
+      max = 4
     end
     object sizecode: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
       optionsskin = [osk_framebuttononly]
-      bounds_x = 247
+      bounds_x = 263
       bounds_y = 0
       bounds_cx = 13
-      bounds_cy = 16
-      frame.levelo = 0
-      frame.colorclient = -2147483645
-      frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
-      frame.dummy = 0
-      taborder = 4
-      visible = False
-      reffontheight = 14
-    end
-    object formatcode: tintegeredit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
-      optionsskin = [osk_framebuttononly]
-      bounds_x = 261
-      bounds_y = 0
-      bounds_cx = 15
       bounds_cy = 16
       frame.levelo = 0
       frame.colorclient = -2147483645
@@ -226,7 +237,7 @@ object watchfo: twatchfo
   end
   object gripopup: tpopupmenu
     onupdate = popupdate
-    menu.submenu.count = 16
+    menu.submenu.count = 18
     menu.submenu.items = <    
       item
         caption = 'Delete all'
@@ -329,11 +340,49 @@ object watchfo: twatchfo
         tag = 3
         group = 1
         onexecute = sizeexecute
+      end    
+      item
+        options = [mao_separator, mao_shortcutcaption]
+      end    
+      item
+        caption = '&Reset Formats'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = resetformats
       end>
     menu.name = 'gridpopup'
     menu.state = [as_localonexecute]
     menu.onexecute = deletallexecute
     left = 96
     top = 112
+  end
+  object timagelist1: timagelist
+    width = 10
+    height = 18
+    count = 4
+    left = 96
+    top = 152
+    image = {
+      00000000020000001400000024000000CC010000000000000000000000000000
+      0000000000000000000000000000000000000000FFFFFF6700000003FFFFFF07
+      00000003FFFFFF0700000001FFFFFF0200000001FFFFFF0600000001FFFFFF02
+      00000001FFFFFF0600000001FFFFFF0200000001FFFFFF0600000001FFFFFF02
+      00000001FFFFFF0600000003FFFFFF0700000001FFFFFF0200000001FFFFFF06
+      00000001FFFFFF0200000001FFFFFF0600000001FFFFFF0200000001FFFFFF06
+      00000001FFFFFF0200000001FFFFFF0600000001FFFFFF0200000001FFFFFF06
+      00000001FFFFFF0200000001FFFFFF0600000001FFFFFF0200000001FFFFFF06
+      00000003FFFFFF0700000003FFFFFFCF00000001FFFFFF0200000001FFFFFF06
+      00000001FFFFFF0200000001FFFFFF0600000001FFFFFF0200000001FFFFFF06
+      00000001FFFFFF0200000001FFFFFF0600000001FFFFFF0200000001FFFFFF06
+      00000001FFFFFF0200000001FFFFFF0600000001FFFFFF0200000001FFFFFF06
+      00000001FFFFFF0200000001FFFFFF0600000001FFFFFF0200000001FFFFFF06
+      00000004FFFFFF0600000001FFFFFF0200000001FFFFFF0600000001FFFFFF02
+      00000001FFFFFF0600000001FFFFFF0200000001FFFFFF0600000001FFFFFF02
+      00000001FFFFFF0700000002FFFFFF0700000001FFFFFF0200000001FFFFFF67
+      000010080000D0BF00009008000000000000900838E08005482001C048200100
+      38209108482001004820D1BF4820110838E09008000020080000D0BF00000008
+      000000000000900800008005000000C000000000000090080000000048201108
+      48209108482091084820D1BF48E0010848200100482081053020014000000000
+      00000000000000000000000000000000
+    }
   end
 end

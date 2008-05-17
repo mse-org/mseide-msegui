@@ -22,7 +22,7 @@ interface
 
 uses
  mseforms,msedataedits,msewidgetgrid,msegdbutils,msegraphedits,msedock,msegrids,
- msegui,msestrings,msemenus,mseedit,mseevent,msetypes;
+ msegui,msestrings,msemenus,mseedit,mseevent,msetypes,msegraphics,msebitmap;
 
 type
  twatchfo = class(tdockform)
@@ -32,8 +32,9 @@ type
    gripopup: tpopupmenu;
    watchon: tbooleanedit;
    watcheson: tbooleanedit;
-   formatcode: tintegeredit;
    sizecode: tintegeredit;
+   formatcode: tdatabutton;
+   timagelist1: timagelist;
    procedure expressionondataentered(const sender: tobject);
    procedure expresultonsetvalue(const sender: tobject; var avalue: msestring; var accept: boolean);
    procedure resultcellevent(const sender: TObject; var info: celleventinfoty);
@@ -45,6 +46,8 @@ type
    procedure sizeexecute(const sender: TObject);
    procedure addwatchpoint(const sender: TObject);
    procedure addresswatch(const sender: TObject);
+   procedure formatent(const sender: TObject);
+   procedure resetformats(const sender: TObject);
   public
    gdb: tgdbmi;
    procedure clear(const all: boolean = false);
@@ -231,6 +234,20 @@ begin
   end;
  end;
 end;
+
+procedure twatchfo.formatent(const sender: TObject);
+begin
+ sizecode.value:= 0; //ns_default
+ refreshitem(grid.row);
+end;
+
+procedure twatchfo.resetformats(const sender: TObject);
+begin
+ formatcode.fillcol(0);
+ sizecode.fillcol(0);
+ refresh; 
+end;
+
 
 procedure twatchfo.sizeexecute(const sender: TObject);
 var

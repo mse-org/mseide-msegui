@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -82,7 +82,7 @@ function getmouseshape(const infos: shapeinfoarty): integer;
          //returns shape index under mouse, -1 if none
 function updatewidgetshapestate(var info: shapeinfoty; const widget: twidget;
                     const adisabled: boolean = false;
-                    const ainvisible: boolean = false;
+//                    const ainvisible: boolean = false;
                     const aframe: tcustomframe = nil): boolean;
 function findshapeatpos(const infoar: shapeinfoarty; const apos: pointty;
                const rejectstates: shapestatesty = [ss_disabled,ss_invisible]): integer;
@@ -247,7 +247,7 @@ end;
 
 function updatewidgetshapestate(var info: shapeinfoty; const widget: twidget;
             const adisabled: boolean = false;
-            const ainvisible: boolean = false;
+//            const ainvisible: boolean = false;
             const aframe: tcustomframe = nil): boolean;
 var
  statebefore: shapestatesty;
@@ -255,7 +255,7 @@ var
 begin
  with info do begin
   statebefore:= state;
-  updatebit(cardinal(state),ord(ss_invisible),not widget.visible or ainvisible);
+//  updatebit(cardinal(state),ord(ss_invisible),not widget.visible or ainvisible);
   updatebit(cardinal(state),ord(ss_disabled),not widget.isenabled or adisabled);
   updatebit(cardinal(state),ord(ss_focused),widget.active);
   result:= state <> statebefore;

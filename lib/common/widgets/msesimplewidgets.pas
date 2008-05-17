@@ -604,9 +604,9 @@ begin
  actioninfotoshapeinfo(self,factioninfo,finfo);
  inherited setcolor(finfo.color); 
  finfo.color:= cl_transparent;
- if csdesigning in componentstate then begin
+// if csdesigning in componentstate then begin
   exclude(finfo.state,ss_invisible);
- end;
+// end;
  checkautosize;
 end;
 
