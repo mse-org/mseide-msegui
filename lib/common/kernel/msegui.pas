@@ -965,6 +965,8 @@ type
    procedure checkwidgetsize(var size: sizety);
               //check size constraints
    procedure setoptionsskin(const avalue: optionsskinty);
+   function getpaintsize: sizety;
+   procedure setpaintsize(const avalue: sizety);
   protected
    fwidgets: widgetarty;
    fnoinvalidate: integer;
@@ -1372,11 +1374,13 @@ type
    function framesize: sizety;
    function paintrect: rectty;               //origin = pos
    function paintpos: pointty;               //origin = pos
-   function paintsize: sizety;
+   property paintsize: sizety read getpaintsize write setpaintsize;
    function clippedpaintrect: rectty;        //origin = pos, 
                                              //clipped by all parentpaintrects
    function innerpaintrect: rectty;          //origin = pos
 
+   procedure setanchordwidgetsize(const asize: sizety);
+                //checks bottom-right anchors
    function widgetsizerect: rectty;          //pos = nullpoint
    function clientrect: rectty;              //origin = paintrect.pos
    procedure changeclientsize(const delta: sizety); //asynchronous
@@ -6788,17 +6792,6 @@ begin
  end;
 end;
 
-function twidget.paintsize: sizety;
-begin
- if fframe <> nil then begin
-  fframe.checkstate;
-  result:= fframe.fpaintrect.size;
- end
- else begin
-  result:= fwidgetrect.size;
- end;
-end;
-
 function twidget.innerpaintrect: rectty;          //origin = pos
 begin
  if fframe <> nil then begin
@@ -7443,13 +7436,12 @@ begin
  application.postevent(tresizeevent.create(ievent(self),delta));
 end;
 
-procedure twidget.setclientsize(const asize: sizety);
+procedure twidget.setanchordwidgetsize(const asize: sizety);
 var
  rect1: rectty;
 begin
-// include(fwidgetstate1,ws1_clientsizing);
- rect1.size:= addsize(asize,clientframewidth);
  rect1.pos:= fwidgetrect.pos;
+ rect1.size:= asize;
  if fanchors * [an_left,an_right] = [an_right] then begin
   rect1.x:= rect1.x - rect1.cx + fwidgetrect.cx;
  end;
@@ -7457,7 +7449,11 @@ begin
   rect1.y:= rect1.y - rect1.cy + fwidgetrect.cy;
  end;
  widgetrect:= rect1;
-// exclude(fwidgetstate1,ws1_clientsizing);
+end;
+
+procedure twidget.setclientsize(const asize: sizety);
+begin
+ setanchordwidgetsize(addsize(asize,clientframewidth));
 end;
 
 function twidget.getclientwidth: integer;
@@ -7478,6 +7474,22 @@ end;
 procedure twidget.setclientheight(const avalue: integer);
 begin
  setclientsize(makesize(getclientsize.cx,avalue));
+end;
+
+function twidget.getpaintsize: sizety;
+begin
+ if fframe <> nil then begin
+  fframe.checkstate;
+  result:= fframe.fpaintrect.size;
+ end
+ else begin
+  result:= fwidgetrect.size;
+ end;
+end;
+
+procedure twidget.setpaintsize(const avalue: sizety);
+begin
+ setanchordwidgetsize(addsize(avalue,framewidth));
 end;
 
 function twidget.clientwidgetrect: rectty;        //origin = pos
