@@ -16,10 +16,10 @@ object projecttreefo: tprojecttreefo
   container.bounds_cy = 201
   container.frame.dummy = 0
   dragdock.splitter_size = 0
-  dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock]
+  dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_propsize]
   options = [fo_savepos, fo_savestate]
   statfile = mainfo.projectstatfile
-  caption = 'project'
+  caption = 'Project Tree'
   oncreate = projecttreefooncreate
   oneventloopstart = projecttreefoonloaded
   ondestroy = projecttreefoondestroy
