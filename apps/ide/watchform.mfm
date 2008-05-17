@@ -242,12 +242,15 @@ object watchfo: twatchfo
   end
   object gripopup: tpopupmenu
     onupdate = popupdate
-    menu.submenu.count = 18
+    menu.submenu.count = 19
     menu.submenu.items = <    
       item
         caption = 'Delete all'
         state = [as_localcaption, as_localonexecute]
         onexecute = deletallexecute
+      end    
+      item
+        options = [mao_separator, mao_shortcutcaption]
       end    
       item
         caption = 'Add Watchpoint'

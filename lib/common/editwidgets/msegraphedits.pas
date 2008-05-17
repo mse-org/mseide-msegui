@@ -1735,7 +1735,7 @@ begin
     end;
    end;
    cek_buttonrelease: begin
-    if not focused and (fclickedrow >= 0) then begin
+    if {not info.processed and} not focused and (fclickedrow >= 0) then begin
      togglegridvalue(fclickedrow);
     end;
     fclickedrow:= -1;

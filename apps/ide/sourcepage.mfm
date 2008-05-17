@@ -70,6 +70,7 @@ object sourcepage: tsourcepage
       bounds_cy = 16
       taborder = 3
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
+      options = [bo_executeonkey, bo_executeonshortcut, bo_executedefaultonenterkey]
       visible = False
       valuedefault = -2147483648
       min = -1

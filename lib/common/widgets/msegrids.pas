@@ -186,6 +186,7 @@ type
  celleventinfoty = record
   cell: gridcoordty;
   grid: tcustomgrid;
+//  processed: boolean;
   case eventkind: celleventkindty of
    cek_exit,cek_enter,cek_focusedcellchanged:
     (cellbefore,newcell: gridcoordty; selectaction: focuscellactionty);
