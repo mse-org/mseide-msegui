@@ -929,41 +929,44 @@ var
 begin
  dl1:= fdata;
  fdata:= nil;
- if fintf <> nil then begin
-  fintf.setgridintf(nil);
- end;
- if awidget <> nil then begin
-  awidget.visible:= false;
-  awidget.getcorbainterface(typeinfo(igridwidget),fintf);
-//  awidget.getcorbainterface(igridwidget,fintf);
-  fdata:= fintf.createdatalist(self);
-  fintf.setgridintf(iwidgetgrid(self));
-  options:= foptions; //call updatecoloptions;
-  po1:= fintf.getdefaultvalue;
-  if fdata <> nil then begin
-   if dl1 <> nil then begin //from streaming
-    fdata.assign(dl1);
-   end
-   else begin
-    if po1 <> nil then begin
-     tdatalist1(fdata).internalfill(fgrid.rowcount,po1^);
+ try
+  if fintf <> nil then begin
+   fintf.setgridintf(nil);
+  end;
+  if awidget <> nil then begin
+   awidget.visible:= false;
+   awidget.getcorbainterface(typeinfo(igridwidget),fintf);
+ //  awidget.getcorbainterface(igridwidget,fintf);
+   fdata:= fintf.createdatalist(self);
+   fintf.setgridintf(iwidgetgrid(self));
+   options:= foptions; //call updatecoloptions;
+   po1:= fintf.getdefaultvalue;
+   if fdata <> nil then begin
+    if dl1 <> nil then begin //from streaming
+     fdata.assign(dl1);
     end
     else begin
-     fdata.count:= fgrid.rowcount;
+     if po1 <> nil then begin
+      tdatalist1(fdata).internalfill(fgrid.rowcount,po1^);
+     end
+     else begin
+      fdata.count:= fgrid.rowcount;
+     end;
     end;
+    fdata.maxcount:= fgrid.rowcountmax;
+    fdata.onitemchange:= {$ifdef FPC}@{$endif}itemchanged;
    end;
-   fdata.maxcount:= fgrid.rowcountmax;
-   fdata.onitemchange:= {$ifdef FPC}@{$endif}itemchanged;
+   if gs_isdb in tcustomgrid1(fgrid).fstate then begin
+    datasourcechanged;
+   end;
+   tcustomgrid1(fgrid).layoutchanged;
+  end
+  else begin
+   fintf:= nil;
   end;
-  if gs_isdb in tcustomgrid1(fgrid).fstate then begin
-   datasourcechanged;
-  end;
-  tcustomgrid1(fgrid).layoutchanged;
- end
- else begin
-  fintf:= nil;
+ finally
+  dl1.free;
  end;
- dl1.free;
 end;
 
 procedure twidgetcol.getdata(aindex: integer; var dest);

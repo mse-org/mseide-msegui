@@ -89,6 +89,8 @@ object watchfo: twatchfo
             caption = 'Result'
           end        
           item
+            caption = 'F'
+            hint = 'Display format'#10'B = Binary'#10'D = Decimal signed'#10'U = Decimal unsigned'#10'H = Hex'
           end        
           item
           end        
@@ -124,6 +126,7 @@ object watchfo: twatchfo
       end    
       item
         color = -2147483646
+        coloractive = -1879048185
         width = 12
         widgetname = 'formatcode'
       end    
@@ -196,6 +199,8 @@ object watchfo: twatchfo
         2
         3
       )
+      value = 0
+      valuedefault = 0
       min = 0
       max = 4
     end

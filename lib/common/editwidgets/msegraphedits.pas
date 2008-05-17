@@ -430,12 +430,17 @@ type
    foptions: buttonoptionsty;
   protected
    fcheckcaption: boolean;
+   fclickedrow: integer;
    procedure setoptions(const avalue: buttonoptionsty); virtual;
    procedure togglevalue; virtual; abstract;
+   procedure togglegridvalue(const index: integer); virtual; abstract;
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure dokeyup(var info: keyeventinfoty); override;
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
-  public
+   procedure statechanged; override;
+   procedure docellevent(const ownedcol: boolean; 
+                       var info: celleventinfoty); override;
+ public
    constructor create(aowner: tcomponent); override;
   published
    property options: buttonoptionsty read foptions write setoptions
@@ -483,7 +488,7 @@ type
    constructor create(aowner: tcomponent); override;
    procedure fillcol(const avalue: longbool);
    function checkvalue: boolean; override;
-   procedure togglegridvalue(const index: integer); virtual;
+   procedure togglegridvalue(const index: integer); override;
    
    property value: boolean read getvalue write setvalue default false;
    property valuedefault: boolean read getvaluedefault write setvaluedefault default false;
@@ -582,7 +587,7 @@ type
    procedure doinc(var avalue: integer);
   public
    function checkvalue: boolean; override;
-   procedure togglegridvalue(const index: integer);
+   procedure togglegridvalue(const index: integer); override;
    procedure fillcol(const avalue: integer);
    property gridvalue[const index: integer]: integer
         read getgridvalue write setgridvalue; default;
@@ -1665,6 +1670,7 @@ end;
 
 constructor ttogglegraphdataedit.create(aowner: tcomponent);
 begin
+ fclickedrow:= -1;
  foptions:= defaultbuttonoptions;
  inherited;
 end;
@@ -1703,6 +1709,48 @@ begin
 //  include(info.eventstate,es_processed); 
          //twidgetgrid needs childmouseevent
   togglevalue;
+ end;
+ inherited;
+end;
+
+procedure ttogglegraphdataedit.docellevent(const ownedcol: boolean;
+               var info: celleventinfoty);
+var
+ clickedrowbefore: integer;
+begin
+ inherited;
+ if ownedcol and (info.eventkind in 
+             [cek_buttonpress,cek_buttonrelease,cek_mouseleave]) then begin
+  clickedrowbefore:= fclickedrow;
+  case info.eventkind of
+   cek_mouseleave: begin
+    fclickedrow:= -1;
+   end;
+   cek_buttonpress: begin
+    if (bo_executeonclick in foptions) and
+       (info.mouseeventinfopo^.shiftstate*keyshiftstatesmask = []) and
+       (info.mouseeventinfopo^.button = mb_left) and
+                       enabled and not readonly then begin
+     fclickedrow:= info.cell.row;
+    end;
+   end;
+   cek_buttonrelease: begin
+    if not focused and (fclickedrow >= 0) then begin
+     togglegridvalue(fclickedrow);
+    end;
+    fclickedrow:= -1;
+   end;
+  end;
+  if fclickedrow <> clickedrowbefore then begin
+   fgridintf.getcol.grid.invalidatecell(info.cell);
+  end;
+ end;
+end;
+
+procedure ttogglegraphdataedit.statechanged;
+begin
+ if not enabled then begin
+  fclickedrow:= -1;
  end;
  inherited;
 end;
@@ -2489,8 +2537,14 @@ begin
   dimbefore:= finfo.dim;
   finfo.dim:= arect;
   finfo.state:= finfo.state - [ss_focused,ss_clicked,ss_mouse];
-  if pcellinfoty(canvas.drawinfopo)^.ismousecell then begin
-   include(finfo.state,ss_mouse);
+  with pcellinfoty(canvas.drawinfopo)^ do begin
+   if ismousecell and (bo_executeonclick in foptions) and 
+                                   enabled and not readonly then begin
+    include(finfo.state,ss_mouse);
+   end;
+   if cell.row = fclickedrow then begin
+    include(finfo.state,ss_clicked);
+   end;
   end;
   setactualimagenr(integer(avalue));
   drawbutton(canvas,finfo);
@@ -2763,6 +2817,7 @@ end;
 procedure tcustomdatabutton.docellevent(const ownedcol: boolean;
                var info: celleventinfoty);
 begin
+ inherited;
  if ownedcol and (info.eventkind in [cek_mouseenter,cek_mouseleave]) then begin
   fgridintf.getcol.grid.invalidatecell(info.cell);
  end;
