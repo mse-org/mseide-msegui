@@ -36,7 +36,8 @@ type
 
                 co_fixwidth,co_fixpos,co_fill,co_proportional,co_nohscroll,
                 co_savevalue,co_savestate,
-                co_rowfont,co_rowcolor,co_zebracolor,co_rowcoloractive,
+                co_rowfont,co_rowcolor,co_zebracolor,
+                co_rowcoloractive,
                 co_nosort,co_sortdescent,co_norearange,
                 co_cancopy,co_canpaste,co_mousescrollrow,co_rowdatachange
                 );
@@ -308,7 +309,7 @@ type
    property font: tgridpropfont read getfont write setfont stored isfontstored;
   public
    constructor create(const agrid: tcustomgrid; 
-               const aowner: tgridarrayprop); reintroduce; virtual;
+               const aprop: tgridarrayprop); reintroduce; virtual;
    destructor destroy; override;
    procedure createframe;
    procedure createface;
@@ -382,6 +383,7 @@ type
    fonbeforedrawcell: beforedrawcelleventty;
    fonafterdrawcell: drawcelleventty;
    frowcoloroffsetselect: integer;
+   ffontactivenum: integer;
    function getcolindex: integer;
    procedure setfocusrectdist(const avalue: integer);
    procedure updatepropwidth;
@@ -393,6 +395,7 @@ type
    function isfontselectstored: Boolean;
    procedure setfontselect(const Value: tcolselectfont);
 
+   procedure setfontactivenum(const avalue: integer);
   protected
    fwidth: integer;
    fpropwidth: real;
@@ -406,6 +409,8 @@ type
    procedure updatelayout; override;
    procedure rearange(const list: tintegerdatalist); virtual; abstract;
 
+   function checkactivecolor(const aindex: integer): boolean;
+         //true if coloractive and fontactivenum active
    function isopaque: boolean; virtual;
    function getdatapo(const arow: integer): pointer; virtual;
    procedure paint(const info: colpaintinfoty); virtual;
@@ -451,6 +456,9 @@ type
                                setrowfontoffsetselect default 0;
    property fontselect: tcolselectfont read getfontselect write
                      setfontselect stored isfontselectstored;
+   property fontactivenum: integer read ffontactivenum 
+                                write setfontactivenum default -1;
+             //index in grid.rowfonts, uses row active if co_rowcoloractive set
    property onbeforedrawcell: beforedrawcelleventty read fonbeforedrawcell
                                 write fonbeforedrawcell;
    property onafterdrawcell: drawcelleventty read fonafterdrawcell
@@ -805,7 +813,7 @@ type
    function step(getscrollable: boolean = true): integer; override;
    procedure paint(const info: rowpaintinfoty); virtual;
    procedure drawcell(const canvas: tcanvas);{ virtual;}
-   procedure movecol(const curindex,newindex: integer; const isfix: boolean);
+   procedure movecol(const curindex,newindex: integer; const aisfix: boolean);
    procedure orderdatacols(const neworder: integerarty);
 //   function mergedline(acol: integer): boolean;
    {
@@ -889,10 +897,12 @@ end;
    fwidth: integer;
    foptions: coloptionsty;
    ffocusrectdist: integer;
+   ffontactivenum: integer;
    function getcols(const index: integer): tcol;
    procedure setwidth(const value: integer);
    procedure setoptions(const Value: coloptionsty);
    procedure setfocusrectdist(const avalue: integer);
+   procedure setfontactivenum(const avalue: integer);
   protected
    fdataupdating: integer;
    procedure begindataupdate; virtual;
@@ -918,6 +928,9 @@ end;
   published
    property width: integer read fwidth
                 write setwidth default griddefaultcolwidth;
+   property fontactivenum: integer read ffontactivenum 
+                                write setfontactivenum default -1;
+             //index in grid.rowfonts, uses row active if co_rowcoloractive set
  end;
 
  rowstatety = record
@@ -1976,16 +1989,16 @@ end;
 { tgridprop }
 
 constructor tgridprop.create(const agrid: tcustomgrid; 
-                                 const aowner: tgridarrayprop);
+                                 const aprop: tgridarrayprop);
 begin
  fgrid:= agrid;
  fcolor:= cl_default;
- fcolorselect:= aowner.fcolorselect;
- fcoloractive:= aowner.fcoloractive;
- flinecolor:= aowner.linecolor;
- flinecolorfix:= aowner.linecolorfix;
- flinewidth:= aowner.linewidth;
- inherited create(agrid,aowner);
+ fcolorselect:= aprop.fcolorselect;
+ fcoloractive:= aprop.fcoloractive;
+ flinecolor:= aprop.linecolor;
+ flinecolorfix:= aprop.linecolorfix;
+ flinewidth:= aprop.linewidth;
+ inherited create(agrid,aprop);
  agrid.initcellinfo(fcellinfo);
 end;
 
@@ -2309,6 +2322,7 @@ function tgridprop.getframestateflags: framestateflagsty;
 begin
  result:= [];
 end;
+
 {
 function tgridprop.getframedisabled: boolean;
 begin
@@ -2347,6 +2361,7 @@ begin
  foptions:= tcols(aowner).foptions;
  flinewidth:= tcols(aowner).flinewidth;
  flinecolor:= tcols(aowner).flinecolor;
+ ffontactivenum:= tcols(aowner).ffontactivenum;
 end;
 
 destructor tcol.destroy;
@@ -2401,6 +2416,14 @@ begin
  result:= actualcolor <> cl_transparent;
 end;
 
+function tcol.checkactivecolor(const aindex: integer): boolean; 
+         //true if coloractive and fontactivenum active
+begin
+ result:= fgrid.entered and (aindex = fgrid.ffocusedcell.row) and 
+          ((cos_fix in fstate) or (co_rowcoloractive in foptions) or 
+                               (findex = fgrid.ffocusedcell.col))
+end;
+
 function tcol.rowcolor(const aindex: integer): colorty;
 var
  po1: prowstatety;
@@ -2432,9 +2455,7 @@ begin
     result:= defaultselectedcellcolor;
    end;
   end;
-  if (result = cl_none) and fgrid.entered and (aindex = fgrid.ffocusedcell.row) and 
-          ((cos_fix in fstate) or (co_rowcoloractive in foptions) or 
-                               (findex = fgrid.ffocusedcell.col)) then begin
+  if (result = cl_none) and checkactivecolor(aindex) then begin
    result:= fcoloractive;
   end;
   if result = cl_none then begin
@@ -2491,7 +2512,7 @@ begin
      int1:= int1 + frowfontoffsetselect;
     end;
     if (int1 >= 0) and (int1 < fgrid.frowfonts.count) then begin
-     result:= tfont(fgrid.frowfonts[int1]);
+     result:= tfont(fgrid.frowfonts.fitems[int1]);
     end;
    end;
   end;
@@ -2500,7 +2521,14 @@ begin
   end;
  end;
  if result = nil then begin
-  result:= actualfont;
+  if (ffontactivenum >= 0) and (ffontactivenum < fgrid.frowfonts.count) then begin
+   if checkactivecolor(aindex) then begin
+    result:= tfont(fgrid.frowfonts.fitems[ffontactivenum]);
+   end;
+  end;
+  if result = nil then begin
+   result:= actualfont;
+  end;
  end;
 end;
 
@@ -2788,6 +2816,14 @@ end;
 function tcol.isfontselectstored: Boolean;
 begin
  result:= ffontselect <> nil;
+end;
+
+procedure tcol.setfontactivenum(const avalue: integer);
+begin
+ if ffontactivenum <> avalue then begin
+  ffontactivenum:= avalue;
+  invalidate;
+ end;
 end;
 
 procedure tcol.createfontselect;
@@ -3302,24 +3338,14 @@ begin
 // fhints.free;
 end;
 
-procedure tfixrow.movecol(const curindex,newindex: integer; const isfix: boolean);
+procedure tfixrow.movecol(const curindex,newindex: integer; const aisfix: boolean);
 begin
- if isfix then begin
+ if aisfix then begin
   fcaptionsfix.movecol(curindex,newindex);
  end
  else begin
   fcaptions.movecol(curindex,newindex);
  end;
- {
- if (curindex >= 0) then begin
-  fcaptions.movecol(curindex,newindex);
- end
- else begin
-  with fcaptionsfix do begin
-   movecol(-curindex-1,-newindex-1);
-  end;
- end;
- }
 end;
 
 procedure tfixrow.datacolscountchanged(const acount: integer);
@@ -5101,9 +5127,10 @@ end;
 constructor tcols.create(aowner: tcustomgrid; aclasstype: gridpropclassty);
 begin
  fwidth:= griddefaultcolwidth;
+ ffontactivenum:= -1;
  inherited;
 end;
-var testvar1,testvar2: integer;
+
 procedure tcols.paint(const info: colpaintinfoty; const scrollables: boolean = true);
 var
  startx,endx: integer;
@@ -5119,8 +5146,6 @@ begin
   po2:= po1;
   for int1:= 0 to count-1 do begin
    with tcol(fitems[int1]) do begin
-testvar1:= fstart;
-testvar2:= fend;
     if (scrollables xor (co_nohscroll in foptions)) and 
      not ((startx < fstart) and (endx <= fstart) or 
           (startx >= fend) and (endx > fend)) then begin
@@ -5199,6 +5224,20 @@ begin
    for int1:= 0 to count - 1 do begin
     tcol(items[int1]).options:= coloptionsty(replacebits(longword(value),
                    longword(tcol(items[int1]).options),mask));
+   end;
+  end;
+ end;
+end;
+
+procedure tcols.setfontactivenum(const avalue: integer);
+var
+ int1: integer;
+begin
+ if ffontactivenum <> avalue then begin
+  ffontactivenum:= avalue;
+  if not (csloading in fgrid.componentstate) then begin
+   for int1:= 0 to count - 1 do begin
+    tcol(items[int1]).fontactivenum:= avalue;
    end;
   end;
  end;
@@ -6439,7 +6478,7 @@ begin
    if numstep <> 0 then begin
     include(self.fstate,gs_needszebraoffset);
    end;
-   if coloractive <> cl_none then begin
+   if (coloractive <> cl_none) or (fontactivenum >= 0) then begin
     include(self.fstate,gs_hasactiverowcolor);
    end;
   end;
@@ -6447,7 +6486,8 @@ begin
  if not (gs_hasactiverowcolor in fstate) then begin
   for int1:= 0 to fdatacols.count -1 do begin
    with tdatacol(fdatacols.items[int1]) do begin
-    if (fcoloractive <> cl_none) and (co_rowcoloractive in foptions) then begin
+    if ((fcoloractive <> cl_none)  or (fontactivenum >= 0)) and 
+                            (co_rowcoloractive in foptions) then begin
      include(self.fstate,gs_hasactiverowcolor);
      break;
     end;
@@ -7972,6 +8012,19 @@ var
  cellbefore: gridcoordty;
  
 begin     //focuscell
+ if selectaction <> fca_exitgrid then begin
+  if (cell.row > invalidaxis) and (cell.col > invalidaxis) then begin
+   rect1:= cellrect(cell);
+   with rect1 do begin
+    if (cell.row >= 0) and 
+         ((x < fdatarect.x) or (x + cx > fdatarect.x + fdatarect.cx)) or
+       (cell.col >= 0) and 
+         ((y < fdatarect.y) or (y + cy > fdatarect.y + fdatarect.cy)) then begin
+     update; //scrolling needed, update pending paintings with old focused cell
+    end;
+   end;
+  end;
+ end;
  inc(ffocuscount);
  focuscount:= ffocuscount;
  beforefocuscell(cell,selectaction);
@@ -8118,17 +8171,6 @@ begin     //focuscell
     doselectaction;
    end;
    if selectaction <> fca_exitgrid then begin
-    if (cell.row > invalidaxis) and (cell.col > invalidaxis) then begin
-     rect1:= cellrect(cell);
-     with rect1 do begin
-      if (cell.row >= 0) and 
-           ((x < fdatarect.x) or (x + cx > fdatarect.x + fdatarect.cx)) or
-         (cell.col >= 0) and 
-           ((y < fdatarect.y) or (y + cy > fdatarect.y + fdatarect.cy)) then begin
-       update; //scrolling needed, update pending paintings with old focused cell
-      end;
-     end;
-    end;
     ffocusedcell:= cell;
    end;
    if bo1 then begin
