@@ -7419,7 +7419,12 @@ var
       end;
      end
      else begin
-      showcell(fmousecell);
+      if fmousecell.row >= 0 then begin
+       focuscell(makegridcoord(invalidaxis,fmousecell.row));
+      end
+      else begin
+       showcell(fmousecell);
+      end;
      end;
     end;
    end;
@@ -8141,6 +8146,14 @@ begin     //focuscell
      focuscell(coord1,selectaction); //restore previous row
      exit;
     end;
+   end
+   else begin
+    if cell.row >= frowcount then begin
+     cell.row:= frowcount - 1;
+     if cell.row < 0 then begin
+      cell.row:= invalidaxis;
+     end;
+    end;
    end;
    cellbefore:= ffocusedcell; 
    if (selectaction = fca_exitgrid) or ((coord1.row >= 0) and
@@ -8186,6 +8199,17 @@ begin     //focuscell
     if ((cell.col <> coord2.col) or (cell.row <> coord2.row)) then begin
      focuscell(cell,selectaction);
      exit;
+    end;
+   end
+   else begin
+    if (gs_hasactiverowcolor in fstate) and 
+             (ffocusedcell.row <> cellbefore.row) then begin
+     if cellbefore.row >= 0 then begin
+      invalidaterow(cellbefore.row);
+     end;
+     if ffocusedcell.row >= 0 then begin
+      invalidaterow(ffocusedcell.row);
+     end;
     end;
    end;
   end
@@ -9103,6 +9127,7 @@ var
  action: focuscellactionty;
  focusbefore: gridcoordty;
  mo1: cellselectmodety;
+ celleventinfo: celleventinfoty;
 begin
  if canevent(tmethod(fonkeydown)) then begin
   fonkeydown(self,info);
@@ -9110,10 +9135,16 @@ begin
  if not(es_processed in info.eventstate) then begin
   if ffocusedcell.col >= 0 then begin
    fdatacols[ffocusedcell.col].dokeyevent(info,false);
-   if not (es_processed in info.eventstate) and
-       (info.shiftstate - [ss_shift,ss_ctrl] = []){ and
-       (info.shiftstate <> [ss_shift,ss_ctrl])} then begin
-    include(info.eventstate,es_processed);
+  end
+  else begin
+   with celleventinfo do begin
+    initeventinfo(ffocusedcell,cek_keydown,celleventinfo);
+    keyeventinfopo:= @info;
+    docellevent(celleventinfo);
+   end;
+  end;
+  if info.shiftstate - [ss_shift,ss_ctrl] = [] then begin
+   if not (es_processed in info.eventstate) then begin
     if ss_shift in info.shiftstate then begin
      action:= fca_focusinshift;
     end
@@ -9121,6 +9152,7 @@ begin
      action:= fca_focusin;
     end;
     focusbefore:= ffocusedcell;
+    include(info.eventstate,es_processed);
     case info.key of
      key_up: begin
       if info.shiftstate = [ss_ctrl] then begin
@@ -9182,6 +9214,15 @@ begin
        pagedown(action);
       end;
      end;
+     else begin
+      exclude(info.eventstate,es_processed);
+     end;
+    end;
+   end;
+   if not(es_processed in info.eventstate) and 
+                                (ffocusedcell.col >= 0) then begin
+    include(info.eventstate,es_processed);
+    case info.key of
      key_return,key_enter: begin
       if (og_colchangeonreturnkey in foptionsgrid) and 
                  (info.shiftstate = []) then begin
@@ -9264,7 +9305,7 @@ begin
      end;
     end;
    end;
-   if not (es_processed in info.eventstate) then begin
+   if not (es_processed in info.eventstate) and (ffocusedcell.col >= 0) then begin
     with fdatacols[ffocusedcell.col] do begin
      if (info.key = key_space) and
           (foptions * [co_keyselect,co_multiselect] = [co_keyselect,co_multiselect]) and
@@ -9321,9 +9362,18 @@ begin
 end;
 
 procedure tcustomgrid.dokeyup(var info: keyeventinfoty);
+var
+ celleventinfo: celleventinfoty;
 begin
  if ffocusedcell.col >= 0 then begin
   fdatacols[ffocusedcell.col].dokeyevent(info,true);
+ end
+ else begin
+  with celleventinfo do begin
+   initeventinfo(ffocusedcell,cek_keyup,celleventinfo);
+   keyeventinfopo:= @info;
+   docellevent(celleventinfo);
+  end;
  end;
  if not (es_processed in info.eventstate) then begin
   inherited;

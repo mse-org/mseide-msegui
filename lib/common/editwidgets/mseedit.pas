@@ -1161,7 +1161,7 @@ end;
 
 function tcustomedit.geteditfont: tfont;
 begin
- result:= font;
+ result:= getfont1;
 end;
 
 procedure tcustomedit.setupeditor;

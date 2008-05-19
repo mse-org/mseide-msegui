@@ -2413,9 +2413,11 @@ begin
                 checkreflectmouseevent(info,false) then begin
   fmousefocusedcell.col:= -1;
   releasemouse;
-  with twidgetcols(fdatacols)[ffocusedcell.col] do begin
-   if fintf <> nil then begin
-    fintf.setfirstclick;
+  if ffocusedcell.col >= 0 then begin
+   with twidgetcols(fdatacols)[ffocusedcell.col] do begin
+    if fintf <> nil then begin
+     fintf.setfirstclick;
+    end;
    end;
   end;
   reflectmouseevent(info);

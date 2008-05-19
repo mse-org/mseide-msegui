@@ -118,7 +118,8 @@ type
    procedure dopaint(const canvas: tcanvas); override;
    function needsfocuspaint: boolean; override;
    procedure internalcheckvalue(var avalue; var accept: boolean); virtual; abstract;
-   procedure paintglyph(const canvas: tcanvas; const avalue; const arect: rectty);
+   procedure paintglyph(const canvas: tcanvas; const acolorglyph: colorty;
+                        const avalue; const arect: rectty);
                  virtual; abstract;
    procedure dofontheightdelta(var delta: integer); override;
    
@@ -146,6 +147,7 @@ type
    procedure updatecoloptions(const aoptions: coloptionsty);
    procedure statdataread; virtual;
    procedure griddatasourcechanged; virtual;
+   procedure fontchanged; override;
 
    //istatfile
    procedure dostatread(const reader: tstatreader);
@@ -211,8 +213,8 @@ type
   protected
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatyp: datatypty; override;
-   procedure paintglyph(const canvas: tcanvas; const avalue; const arect: rectty);
-                 override;
+   procedure paintglyph(const canvas: tcanvas; const acolorglyph: colorty;
+                const avalue; const arect: rectty); override;
 //   procedure dopaint(const canvas: tcanvas); override;
   public
    procedure initnewcomponent(const ascale: real); override;
@@ -223,7 +225,8 @@ type
   published
    property visible;
    property enabled;
-   property onpaintglyph: paintpointerglypheventty read fonpaintglyph write fonpaintglyph;
+   property onpaintglyph: paintpointerglypheventty read fonpaintglyph 
+                                                         write fonpaintglyph;
  end;
  
  tsliderscrollbar = class(tcustomscrollbar,iface)
@@ -323,7 +326,7 @@ type
    procedure scrollevent(sender: tcustomscrollbar; event: scrolleventty);
 
    procedure dochange; override;
-   procedure paintglyph(const canvas: tcanvas; 
+   procedure paintglyph(const canvas: tcanvas;  const acolorglyph: colorty;
                   const avalue; const arect: rectty); override;
    procedure initgridwidget; override;
   public
@@ -385,7 +388,7 @@ type
   protected
    procedure clientrectchanged; override;
    procedure dochange; override;
-   procedure paintglyph(const canvas: tcanvas; 
+   procedure paintglyph(const canvas: tcanvas;  const acolorglyph: colorty;
                   const avalue; const arect: rectty); override;
    procedure internalcreateframe; override;
    procedure defineproperties(filer: tfiler); override;
@@ -475,8 +478,8 @@ type
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatyp: datatypty; override;
    procedure togglevalue; override;
-   procedure paintglyph(const canvas: tcanvas; const avalue; const arect: rectty);
-                 override;
+   procedure paintglyph(const canvas: tcanvas;  const acolorglyph: colorty; 
+                    const avalue; const arect: rectty); override;
    procedure internalcheckvalue(var avalue; var accept: boolean); override;
    procedure readstatvalue(const reader: tstatreader); override;
    procedure writestatvalue(const writer: tstatwriter); override;
@@ -675,8 +678,8 @@ type
    procedure dokeyup(var info: keyeventinfoty); override;
    procedure clientrectchanged; override;
    function getframestateflags: framestateflagsty; override;
-   procedure paintglyph(const canvas: tcanvas; const avalue;
-                    const arect: rectty); override;
+   procedure paintglyph(const canvas: tcanvas; const acolorglyph: colorty;
+                  const avalue; const arect: rectty); override;
    procedure internalcreateframe; override;
    procedure setgridintf(const intf: iwidgetgrid); override;
    function checkfocusshortcut(var info: keyeventinfoty): boolean; override;
@@ -810,8 +813,8 @@ type
    procedure setimagenums(const avalue: tintegerarrayprop);
   protected
    procedure setnullvalue;
-   procedure paintglyph(const canvas: tcanvas; const avalue;
-           const arect: rectty); override;
+   procedure paintglyph(const canvas: tcanvas; const acolorglyph: colorty;
+                const avalue; const arect: rectty); override;
    procedure objectevent(const sender: tobject;
                              const event: objecteventty); override;
   public
@@ -1037,8 +1040,8 @@ begin
  inherited;
 end;
 
-procedure tcustomslider.paintglyph(const canvas: tcanvas; const avalue;
-                                                      const arect: rectty);
+procedure tcustomslider.paintglyph(const canvas: tcanvas;
+               const acolorglyph: colorty; const avalue; const arect: rectty);
 var
  rea1: realty;
  col1: colorty;
@@ -1185,10 +1188,23 @@ begin
 end;
 
 procedure tgraphdataedit.dopaint(const canvas: tcanvas);
+var
+ col1: colorty;
 begin
  inherited;
+ col1:= fcolorglyph;
+ if col1 = cl_font then begin
+  if (fgridintf <> nil) and (ffont = nil) then begin
+   with fgridintf.getcol do begin
+    col1:= rowfont(grid.row).color;
+   end;
+  end
+  else begin
+   col1:= getfont1.color;
+  end;
+ end;
  {$ifdef FPC} {$checkpointer off} {$endif}
- paintglyph(canvas,nil^,innerclientrect);
+ paintglyph(canvas,col1,nil^,innerclientrect);
  {$ifdef FPC} {$checkpointer default} {$endif}
  if (fgridintf <> nil) and not (csdesigning in componentstate) then begin
   fgridintf.widgetpainted(canvas);
@@ -1237,10 +1253,16 @@ begin
 end;
 
 procedure tgraphdataedit.drawcell(const canvas: tcanvas);
+var
+ col1: colorty;
 begin
  with cellinfoty(canvas.drawinfopo^) do begin
   if datapo <> nil then begin
-   paintglyph(canvas,datapo^,innerrect);
+   col1:= fcolorglyph;
+   if col1 = cl_font then begin
+    col1:= font.color;
+   end;
+   paintglyph(canvas,col1,datapo^,innerrect);
   end;
  end;
 end;
@@ -1654,6 +1676,14 @@ begin
  //dummy
 end;
 
+procedure tgraphdataedit.fontchanged;
+begin
+ inherited;
+ if fcolorglyph = cl_font then begin
+  invalidate;
+ end;
+end;
+
 {$ifdef mse_with_ifi}
 procedure tgraphdataedit.setifiserverintf(const aintf: iifiserver);
 begin
@@ -1803,7 +1833,8 @@ begin
  result:= stg_checked;
 end;
 
-procedure tcustombooleanedit.paintglyph(const canvas: tcanvas; const avalue;
+procedure tcustombooleanedit.paintglyph(const canvas: tcanvas; 
+                               const acolorglyph: colorty; const avalue;
                                const arect: rectty);
 var
  bo1: boolean;
@@ -1815,7 +1846,7 @@ begin
   bo1:= boolean(avalue);
  end;
  if bo1 then begin
-   stockobjects.paintglyph(canvas,getglyph,arect,not isenabled,fcolorglyph);
+   stockobjects.paintglyph(canvas,getglyph,arect,not isenabled,acolorglyph);
  end;
 end;
 
@@ -2512,8 +2543,9 @@ begin
  end;
 end;
 
-procedure tcustomdatabutton.paintglyph(const canvas: tcanvas; const avalue;
-               const arect: rectty);
+procedure tcustomdatabutton.paintglyph(const canvas: tcanvas;
+                const acolorglyph: colorty; const avalue;
+                const arect: rectty);
                
  function actualface(const aindex: integer): tface;
  begin
@@ -2529,7 +2561,7 @@ var
  statebefore: shapestatesty;
  dimbefore: rectty;
 begin
- finfo.colorglyph:= fcolorglyph;
+ finfo.colorglyph:= acolorglyph;
  finfo.imagenrdisabled:= fimagenrdisabled;
  if (@avalue <> nil) then begin
   finfo.face:= actualface(integer(avalue));
@@ -2869,8 +2901,9 @@ begin
  end;
 end;
 
-procedure tcustomdataicon.paintglyph(const canvas: tcanvas; const avalue;
-                                          const arect: rectty);
+procedure tcustomdataicon.paintglyph(const canvas: tcanvas;
+                       const acolorglyph: colorty; const avalue;
+                       const arect: rectty);
 var
  int1,int2: integer;
  po1: pintegeraty;
@@ -2974,7 +3007,8 @@ begin
  //do nothing
 end;
 
-procedure tpointeredit.paintglyph(const canvas: tcanvas; const avalue;
+procedure tpointeredit.paintglyph(const canvas: tcanvas; 
+               const acolorglyph: colorty; const avalue;
                const arect: rectty);
 var
  po1: pointer;
@@ -3125,8 +3159,9 @@ begin
  updatebar;
 end;
 
-procedure tcustomprogressbar.paintglyph(const canvas: tcanvas; const avalue;
-                                         const arect: rectty);
+procedure tcustomprogressbar.paintglyph(const canvas: tcanvas;
+                               const acolorglyph: colorty; const avalue;
+                               const arect: rectty);
 var
  po1,po2,po3: prectty;
  rect1,rect2,rect3: rectty;

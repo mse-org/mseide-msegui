@@ -64,7 +64,8 @@ const
  cl_brush =                  cl_functional + 4;
  cl_brushcanvas =            cl_functional + 5;
  cl_none =                   cl_functional + 6; cl_nonenum = 6;
- cl_lastfunctional =         cl_functional + 7;
+ cl_font =                   cl_functional + 7; //use color of current font
+ cl_lastfunctional =         cl_functional + 8;
 
  cl_dkshadow =               cl_mapped + 0;
  cl_shadow =                 cl_mapped + 1;
@@ -158,7 +159,8 @@ const
     (name: 'cl_transparent'; rgb:            (blue: $00; green: $00; red: $00; res: $00)), //3
     (name: 'cl_brush';  rgb:                 (blue: $00; green: $00; red: $00; res: $00)), //4
     (name: 'cl_brushcanvas'; rgb:            (blue: $00; green: $00; red: $00; res: $00)), //5
-    (name: 'cl_none';  rgb:                  (blue: $00; green: $00; red: $00; res: $00))  //6
+    (name: 'cl_none';  rgb:                  (blue: $00; green: $00; red: $00; res: $00)), //6
+    (name: 'cl_font';  rgb:                  (blue: $00; green: $00; red: $00; res: $00))  //7
 //    (name: 'cl_mask'; rgb:                   (blue: $00; green: $00; red: $00; res: $00))
 //    (name: 'cl_grayed'; rgb:                 (blue: $80; green: $80; red: $80; res: $00))
    );
@@ -521,6 +523,9 @@ begin
  for int1:= 1 to cl_nonenum-1 do begin
   result[int1+int2]:= defaultfunctional[int1].name;
  end;
+ for int1:= cl_nonenum + 1 to functionalcolorcount-1 do begin
+  result[int1-1+int2]:= defaultfunctional[int1].name;
+ end;
  {
  for int1:= cl_nonenum+1 to high(defaultfunctional) do begin
   result[int1+int2-1]:= defaultfunctional[int1].name;
@@ -548,6 +553,9 @@ begin
  inc(int2,mappedcolorcount);
  result[int2]:= cl_functional+cl_nonenum;
  for int1:= 1 to cl_nonenum-1 do begin
+  result[int1+int2]:= cl_functional + cardinal(int1);
+ end;
+ for int1:= cl_nonenum+1 to functionalcolorcount-1 do begin
   result[int1+int2]:= cl_functional + cardinal(int1);
  end;
  {
