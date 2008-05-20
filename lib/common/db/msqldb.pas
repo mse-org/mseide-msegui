@@ -616,7 +616,7 @@ type
     property connected: boolean read getconnected write setconnected;
     property updaterowsaffected: integer read fupdaterowsaffected;
               //sum of rowsaffected of insert, update and delete query,
-              //reseted by close, applyupdate and applyupdates, -1 if not supported.
+              //reset by close, applyupdate and applyupdates, -1 if not supported.
   published
     property ReadOnly : Boolean read FReadOnly write SetReadOnly default false;
     property ParseSQL : Boolean read FParseSQL write SetParseSQL default true;
