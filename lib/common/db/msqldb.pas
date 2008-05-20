@@ -520,6 +520,7 @@ type
    FParseSQL: boolean;
    FMasterLink: TmseMasterParamsDatalink;
    FUpdateQry,FDeleteQry,FInsertQry: TSQLQuery;
+   fupdaterowsaffected: integer;
    fblobintf: iblobconnection;   
    fbeforeexecute: tmsesqlscript;
    procedure FreeFldBuffers;
@@ -585,8 +586,6 @@ type
    function  GetCanModify: Boolean; override;
    Procedure internalApplyRecUpdate(UpdateKind : TUpdateKind);
    procedure dobeforeapplyupdate; override;
-   procedure applyupdates(const maxerrors: integer;
-                   const cancelonerror: boolean); override;
    procedure ApplyRecUpdate(UpdateKind : TUpdateKind); override;
    Function IsPrepared: Boolean; virtual;
    Procedure SetActive (Value : Boolean); override;
@@ -600,6 +599,9 @@ type
   public
     constructor Create(AOwner : TComponent); override;
     destructor Destroy; override;
+    procedure applyupdate(const cancelonerror: boolean); override;
+    procedure applyupdates(const maxerrors: integer;
+                   const cancelonerror: boolean); override;
     function writetransaction: tsqltransaction;
                    //self.transaction if self.transactionwrite = nil
     procedure Prepare; virtual;
@@ -612,6 +614,9 @@ type
     function CreateBlobStream(Field: TField; Mode: TBlobStreamMode): TStream; override;
     property Prepared : boolean read IsPrepared;
     property connected: boolean read getconnected write setconnected;
+    property updaterowsaffected: integer read fupdaterowsaffected;
+              //sum of rowsaffected of insert, update and delete query,
+              //reseted by close, applyupdate and applyupdates, -1 if not supported.
   published
     property ReadOnly : Boolean read FReadOnly write SetReadOnly default false;
     property ParseSQL : Boolean read FParseSQL write SetParseSQL default true;
@@ -2212,6 +2217,7 @@ begin
 // assigned, and .open is called
  disconnect;
  freemodifyqueries;
+ fupdaterowsaffected:= 0;
  fblobintf:= nil;
  fprimarykeyfield:= nil;
  if StatementType = stSelect then FreeFldBuffers;
@@ -2887,6 +2893,14 @@ begin
    if (updatekind = ukinsert) and (self.fprimarykeyfield <> nil) then begin
     tcustomsqlconnection(database).updateprimarykeyfield(self.fprimarykeyfield);
    end;
+   if self.fupdaterowsaffected >= 0 then begin
+    if fcursor.frowsaffected < 0 then begin
+     self.fupdaterowsaffected:= -1;
+    end
+    else begin
+     inc(self.fupdaterowsaffected,fcursor.frowsaffected);
+    end;
+   end;
   finally
    for int1:= high(freeblobar) downto 0 do begin
     deleteblob(blobspo^,tfield(freeblobar[int1]));
@@ -3287,9 +3301,16 @@ begin
  inherited transactionwrite:= avalue;
 end;
 
+procedure TSQLQuery.applyupdate(const cancelonerror: boolean);
+begin
+ fupdaterowsaffected:= 0;
+ inherited;
+end;
+
 procedure TSQLQuery.applyupdates(const maxerrors: integer;
                const cancelonerror: boolean);
 begin
+ fupdaterowsaffected:= 0;
  if fdatabase = nil then begin
   inherited;
  end
