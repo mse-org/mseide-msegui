@@ -260,7 +260,8 @@ procedure actionendload(const sender: iactionlink);
 //function doactionshortcut(const sender: tobject; var info: actioninfoty;
 //                        var keyinfo: keyeventinfoty): boolean; //true if done
 function doactionexecute(const sender: tobject; var info: actioninfoty;
-                               const nocheckbox: boolean = false): boolean;
+                               const nocheckbox: boolean = false;
+                               const nocandefocus: boolean = false): boolean;
       //true if local checked changed
 
 procedure initactioninfo(var info: actioninfoty; aoptions: menuactionoptionsty = []);
@@ -275,13 +276,15 @@ uses
  msebits,sysutils,typinfo,msekeyboard;
 
 function doactionexecute(const sender: tobject; var info: actioninfoty;
-                         const nocheckbox: boolean = false): boolean;
+                         const nocheckbox: boolean = false;
+                         const nocandefocus: boolean = false): boolean;
       //true if local checked changed
 begin
  result:= false;
  with info do begin
   if not (as_disabled in state) then begin
-   if (action = nil) or not(ao_nocandefocus in action.options) then begin
+   if not nocandefocus and 
+     ((action = nil) or not(ao_nocandefocus in action.options)) then begin
     result:= application.candefocus;
     if not result then begin
      exit;

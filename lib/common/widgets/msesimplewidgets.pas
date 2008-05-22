@@ -535,7 +535,7 @@ end;
 
 procedure tcustombutton.doexecute;
 begin
- doactionexecute(self,factioninfo);
+ doactionexecute(self,factioninfo,false,fmodalresult <> mr_none);
  if fmodalresult <> mr_none then begin
   window.modalresult:= fmodalresult;
  end;
