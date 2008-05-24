@@ -965,6 +965,7 @@ begin
  if checksave(true) then begin
   messagesfo.messages.clear;
   messagesfo.running:= true;
+  messagesfo.show; //winid must exist
   threadcomp.run; 
   messagesfo.show(true);
   loadproject;

@@ -105,7 +105,7 @@ debugoptions=
 debugtarget=
 defaultmake=1
 makeoptions=4
- -l -Mobjfpc -Sh
+ -l -Mobjfpc -Sh -O-
  -gl
  -B
  -OG2p3 -XX -Xs
