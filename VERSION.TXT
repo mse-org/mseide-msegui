@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+Version 1.8rc1
+2008-05-24
 2008-05-14
  tsqlquery.executedirect uses write transaction.
 2008-04-09
