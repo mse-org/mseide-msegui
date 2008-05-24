@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 2007 by Martin Schreiber
+{ MSEide Copyright (c) 2007-2008 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -51,7 +51,7 @@ begin
  registerunitgroup(['msesyntaxedit'],['msemenus','mseevent','msegui','msetextedit','mseinplaceedit','msegrids']);
  registerunitgroup(['msecolordialog'],['msemenus','mseevent','msegui','mseedit','msestrings','msedataedits','msegraphutils']);
  registerunitgroup(['msememodialog'],['msemenus','mseevent','msegui','mseedit','msestrings','msedataedits']);
- registerunitgroup(['msereport'],['msemenus','mseevent','msegui','msegraphics','msestrings']);
+ registerunitgroup(['msereport'],['msemenus','mseevent','msegui','msesplitter','msegraphics','msestrings']);
  registerunitgroup(['mseprinter'],['msemenus','mseevent','msegui','mseedit','msestrings','msedataedits']);
  registerunitgroup(['mseimage'],['msemenus','mseevent','msegui']);
  registerunitgroup(['msedial'],['msemenus','mseevent','msegui']);
@@ -87,6 +87,7 @@ begin
  registerunitgroup(['msezeos'],['db']);
  registerunitgroup(['msepascalscript'],['uPSComponent','uPSCompiler','uPSRuntime','uPSPreProcessor']);
  registerunitgroup(['msecommutils'],['msemenus','mseevent','msegui','mseedit','msestrings','msedataedits','msecommport']);
+
 end;
 
 initialization
