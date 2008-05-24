@@ -118,7 +118,7 @@ debugtarget=
 defaultmake=1
 makeoptions=4
  -l -Mdelphi -Sh
- -gl
+ -gl -O-
  -B
  -OG2p3 -XX -Xs
 makeoptionson=4

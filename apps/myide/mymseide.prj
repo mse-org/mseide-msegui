@@ -151,7 +151,7 @@ debugtarget=
 defaultmake=1
 makeoptions=4
  -l -Mobjfpc -Sh -FE../myide -FU. -dmorecomponents
- -gl
+ -gl -O-
  -B
  -XX -Xs -OG2p3
 makeoptionson=4
