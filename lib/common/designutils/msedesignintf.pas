@@ -1401,12 +1401,6 @@ begin
    end;
   end;
   setlength(ar4,int2);
-{
-writeln('**********');
-for int1:= 0 to high(ar4) do begin
- writeln(int1,' ',ar4[int1]);
-end;
-}
   inc(level);
  until (high(ar4) = highbefore) or (level > 16);
  setlength(result,length(ar4));
