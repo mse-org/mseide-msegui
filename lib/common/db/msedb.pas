@@ -265,6 +265,8 @@ type
    function HasParent: Boolean; override;
    function getasboolean: boolean; override;
    procedure setasboolean(avalue: boolean); override;
+   procedure setaslargeint(avalue: largeint); override;
+   function getaslargeint: largeint; override;
   public
    procedure Clear; override;
    function assql: string;
@@ -288,6 +290,8 @@ type
    function HasParent: Boolean; override;
    function getasboolean: boolean; override;
    procedure setasboolean(avalue: boolean); override;
+   procedure setaslargeint(avalue: largeint); override;
+   function getaslargeint: largeint; override;
   public
    procedure Clear; override;
    function assql: string;
@@ -2322,6 +2326,19 @@ begin
  end;
 end;
 
+procedure tmsesmallintfield.setaslargeint(avalue: largeint);
+begin
+ if (avalue < low(smallint)) or (avalue > high(smallint)) then begin
+  rangeerror(avalue,low(smallint),high(smallint));
+ end;
+ setaslongint(avalue);
+end;
+
+function tmsesmallintfield.getaslargeint: largeint;
+begin
+ result:= getaslongint;
+end;
+
 procedure tmsesmallintfield.Clear;
 begin
  setdata(nil);
@@ -2379,6 +2396,19 @@ begin
  else begin
   asinteger:= 0;
  end;
+end;
+
+procedure tmsewordfield.setaslargeint(avalue: largeint);
+begin
+ if (avalue < low(word)) or (avalue > high(word)) then begin
+  rangeerror(avalue,low(word),high(word));
+ end;
+ setaslongint(avalue);
+end;
+
+function tmsewordfield.getaslargeint: largeint;
+begin
+ result:= getaslongint;
 end;
 
 procedure tmsewordfield.Clear;
