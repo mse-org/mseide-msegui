@@ -530,7 +530,8 @@ type
 
    procedure cellchanged(const row: integer); override;
    function canfocus(const abutton: mousebuttonty;
-                     const ashiftstate: shiftstatesty): boolean; virtual;
+                     const ashiftstate: shiftstatesty;
+                     out canrowfocus: boolean): boolean; virtual;
    function isreadonly: boolean; //col readonly or row readonly
    procedure updatecellzone(const pos: pointty; var result: cellzonety); virtual;
    property datalist: tdatalist read fdata;
@@ -4489,13 +4490,15 @@ begin
 end;
 
 function tdatacol.canfocus(const abutton: mousebuttonty;
-                                     const ashiftstate: shiftstatesty): boolean;
+                                     const ashiftstate: shiftstatesty;
+                                     out canrowfocus: boolean): boolean;
 begin
+ canrowfocus:= ((abutton = mb_left) or (abutton = mb_none) or
+                     not (co_leftbuttonfocusonly in foptions)) and
+               ((ashiftstate*[ss_ctrl] = []) or 
+                            not (co_noctrlmousefocus in foptions));
  result:= (foptions * [co_invisible,co_disabled,co_nofocus] = []) and
-          (((abutton = mb_left) or (abutton = mb_none) or
-                     not (co_leftbuttonfocusonly in foptions)) and 
-         ((ashiftstate*[ss_ctrl] = []) or 
-                            not (co_noctrlmousefocus in foptions)));
+                           canrowfocus;
 end;
 
 procedure tdatacol.rearange(const list: tintegerdatalist);
@@ -7371,6 +7374,7 @@ var
   action: focuscellactionty;
   bo1,bo2: boolean;
   cell1: gridcoordty;
+  rowfocus: boolean;
  begin      //checkfocuscell
   po1:= fscrollrect.pos;
   action:= fca_focusin;
@@ -7378,7 +7382,7 @@ var
    ck_data: begin
     if not (gs_mousecellredirected in fstate) then begin
      cell1:= fmousecell;
-     bo2:= fdatacols[fmousecell.col].canfocus(info.button,info.shiftstate);
+     bo2:= fdatacols[fmousecell.col].canfocus(info.button,info.shiftstate,rowfocus);
      if not bo2 then begin
       cell1.col:= ffocusedcell.col; //try to focus mouse row
       if cell1.col < 0 then begin
@@ -7386,7 +7390,7 @@ var
       end;
      end;
      if (cell1.col >= 0) and 
-                fdatacols[cell1.col].canfocus(info.button,info.shiftstate) then begin
+                fdatacols[cell1.col].canfocus(info.button,info.shiftstate,bo1) then begin
       bo1:= not gridcoordisequal(cell1,ffocusedcell);
       if (info.shiftstate * [ss_left,ss_middle,ss_right] = [ss_left])
                   {(info.button = mb_left)} and
@@ -7419,7 +7423,7 @@ var
       end;
      end
      else begin
-      if fmousecell.row >= 0 then begin
+      if (fmousecell.row >= 0) and rowfocus then begin
        focuscell(makegridcoord(invalidaxis,fmousecell.row));
       end
       else begin
@@ -7537,6 +7541,7 @@ var
  hintinfo: hintinfoty;
 // int1: integer;
  mousewidgetbefore: twidget;
+ bo1: boolean;
 
 begin
  inherited;
@@ -7644,7 +7649,8 @@ begin
          end;
          if (distance(fmouserefpos,info.pos) > 3) and active then begin
           fmouserefpos:= info.pos;
-          if not fdatacols[fmousecell.col].canfocus(info.button,info.shiftstate) then begin
+          if not fdatacols[fmousecell.col].canfocus(info.button,info.shiftstate,
+                                                    bo1) then begin
            showcell(fmousecell);
           end
           else begin
@@ -8056,7 +8062,7 @@ begin     //focuscell
    end;
   end;
   if (selectaction in [fca_focusin,fca_focusinrepeater,fca_focusinforce]) and 
-      ((cell.col < 0) or  not fdatacols[cell.col].canfocus(mb_none,[])) then begin
+      ((cell.col < 0) or  not fdatacols[cell.col].canfocus(mb_none,[],bo1)) then begin
    selectaction:= fca_setfocusedcell;
   end;
   if selectaction = fca_entergrid then begin
@@ -8995,6 +9001,7 @@ procedure tcustomgrid.colstep(const action: focuscellactionty; step: integer;
 var
  int1: integer;
  arow: integer;
+ bo1: boolean;
 begin
  if fdatacols.count > 0 then begin
   arow:= ffocusedcell.row;
@@ -9030,7 +9037,7 @@ begin
       inc(arow);
      end;
     end;
-    if fdatacols[int1].canfocus(mb_none,[]) then begin
+    if fdatacols[int1].canfocus(mb_none,[],bo1) then begin
      dec(step);
     end;
    end
@@ -9042,7 +9049,7 @@ begin
       dec(arow);
      end;
     end;
-    if fdatacols[int1].canfocus(mb_none,[]) then begin
+    if fdatacols[int1].canfocus(mb_none,[],bo1) then begin
      inc(step);
     end;
    end;
@@ -10583,6 +10590,7 @@ function tcustomgrid.nextfocusablecol(acol: integer;
 var
  int1: integer;
  loopcount: integer;
+ bo1: boolean;
 begin
  result:= -1;
  if fdatacols.count > 0 then begin
@@ -10603,7 +10611,7 @@ begin
      int1:=  fdatacols.count - 1;
      inc(loopcount);
     end;
-    if fdatacols[int1].canfocus(mb_none,[]) then begin
+    if fdatacols[int1].canfocus(mb_none,[],bo1) then begin
      result:= int1;
      break;
     end;
@@ -10620,7 +10628,7 @@ begin
      int1:= 0;
      inc(loopcount);
     end;
-    if fdatacols[int1].canfocus(mb_none,[]) then begin
+    if fdatacols[int1].canfocus(mb_none,[],bo1) then begin
      result:= int1;
      break;
     end;
