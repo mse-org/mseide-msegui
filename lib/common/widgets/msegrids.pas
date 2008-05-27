@@ -7106,10 +7106,10 @@ begin
  layoutchanged;
  ffixcols.rowcountchanged(newcount);
  fdatacols.rowcountchanged(newcount);
- if (countbefore = 0) and (newcount > 0) and (og_focuscellonenter in foptionsgrid)
-    and not isdatacell(ffocusedcell) and entered then begin
-  focuscell(ffocusedcell,fca_entergrid);
- end;
+// if (countbefore = 0) and (newcount > 0) and (og_focuscellonenter in foptionsgrid)
+//    and not isdatacell(ffocusedcell) and entered then begin
+//  focuscell(ffocusedcell,fca_entergrid);
+// end; too dangerous, called after beginupdate
  if canevent(tmethod(fonrowcountchanged)) then begin
   fonrowcountchanged(self);
  end;
