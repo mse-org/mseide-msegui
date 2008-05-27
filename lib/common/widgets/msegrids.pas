@@ -1400,6 +1400,7 @@ end;
    procedure dofocus; override;
    procedure doactivate; override;
    procedure dodeactivate; override;
+   procedure activechanged; override;
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure domousewheelevent(var info: mousewheeleventinfoty); override;
@@ -9491,6 +9492,14 @@ begin
   fdatacols[ffocusedcell.col].dodeactivate;
  end;
  inherited;
+end;
+
+procedure tcustomgrid.activechanged;
+begin
+ inherited;
+ if (ffocusedcell.row >= 0) and (gs_hasactiverowcolor in fstate) then begin
+  invalidaterow(ffocusedcell.row);
+ end;
 end;
 
 procedure tcustomgrid.getpickobjects(const rect: rectty; 
