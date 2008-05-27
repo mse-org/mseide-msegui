@@ -572,7 +572,7 @@ type
  tcustomrecordband = class(tcustomscalingwidget,idbeditinfo,ireccontrol,
                                 iobjectpicker,ireportclient)
   private
-   fbands: recordbandarty;
+   frecbands: recordbandarty;
    fparentintf: ibandparent;
    fonbeforerender: beforerenderrecordeventty;
    fonafterrender: recordbandeventty;
@@ -894,7 +894,7 @@ type
                               
  tbasebandarea = class(tpublishedwidget,ibandparent)
   private
-   fbands: recordbandarty;
+   fareabands: recordbandarty;
    fstate: bandareastatesty;
    freportpage: tcustomreportpage;
    frecordband: tcustomrecordband;
@@ -3969,8 +3969,8 @@ var
 begin
  visible:= getvisibility;
  beginscaling;
- for int1:= 0 to high(fbands) do begin
-  with fbands[int1] do begin
+ for int1:= 0 to high(frecbands) do begin
+  with frecbands[int1] do begin
    updatevisibility;
   end;
  end;
@@ -4183,14 +4183,14 @@ begin
   additem(pointerarty(fareas),child);
  end;
  if child is tcustomrecordband then begin
-  additem(pointerarty(fbands),child);
+  additem(pointerarty(frecbands),child);
  end;
 end;
 
 procedure tcustomrecordband.unregisterchildwidget(const child: twidget);
 begin
  removeitem(pointerarty(fareas),child);
- removeitem(pointerarty(fbands),child);
+ removeitem(pointerarty(frecbands),child);
  inherited;
 end;
 
@@ -4235,9 +4235,9 @@ var
  bo1: boolean;
 begin
  inherited;
- for int1:= 0 to high(fbands) do begin
+ for int1:= 0 to high(frecbands) do begin
   bo1:= empty;
-  fbands[int1].dobeforerender(bo1);
+  frecbands[int1].dobeforerender(bo1);
  end;
 end;
 
@@ -4251,8 +4251,8 @@ begin
   pt1:= acanvas.origin;
   int2:= pt1.x - paintpos.x;
   int3:= pt1.y + innerclientpos.y;
-  for int1:= 0 to high(fbands) do begin
-   with fbands[int1] do begin
+  for int1:= 0 to high(frecbands) do begin
+   with frecbands[int1] do begin
     if visible then begin
      acanvas.origin:= makepoint(int2 + bounds_x,int3);
      inheritedpaint(acanvas);
@@ -4273,8 +4273,8 @@ begin
  inherited;
  if (componentstate*[csdesigning,csloading] = [csdesigning]) and 
                                                (avalue <> nil) then begin
-  for int1:= 0 to high(fbands) do begin
-   with fbands[int1] do begin
+  for int1:= 0 to high(frecbands) do begin
+   with frecbands[int1] do begin
     if datasource = nil then begin
      for int2:= 0 to ftabs.count - 1 do begin
       ftabs[int2].datasource:= avalue;
@@ -4290,8 +4290,8 @@ var
  int1: integer;
 begin
  inherited;
- for int1:= 0 to high(fbands) do begin
-  fbands[int1].fparentintf:= fparentintf;
+ for int1:= 0 to high(frecbands) do begin
+  frecbands[int1].fparentintf:= fparentintf;
  end;
 end;
 {
@@ -4315,8 +4315,8 @@ var
 begin
  result:= inherited getminbandsize;
  int2:= 0;
- for int1:= 0 to high(fbands) do begin
-  with fbands[int1] do begin
+ for int1:= 0 to high(frecbands) do begin
+  with frecbands[int1] do begin
    if visible then begin
     int3:= bounds_x + bounds_cx;
     if int3 > result.cx then begin
@@ -4338,8 +4338,8 @@ begin
  result:= inherited lastbandheight;
  if osc_expandy in optionsscale then begin
   int2:= innerclientframewidth.cy;
-  for int1:= 0 to high(fbands) do begin
-   with fbands[int1] do begin
+  for int1:= 0 to high(frecbands) do begin
+   with frecbands[int1] do begin
     if bandisvisible(false) and not (bos_hidelastofpage in foptionsshow) or 
            (bos_showlastofpage in foptionsshow) then begin
      int2:= int2 + bounds_cy;
@@ -4356,10 +4356,10 @@ procedure tcustombandgroup.init;
 var
  int1: integer;
 begin
- sortwidgetsyorder(widgetarty(fbands));
+ sortwidgetsyorder(widgetarty(frecbands));
  inherited;
- for int1:= 0 to high(fbands) do begin
-  fbands[int1].init;
+ for int1:= 0 to high(frecbands) do begin
+  frecbands[int1].init;
  end;
 end;
 
@@ -4368,8 +4368,8 @@ var
  int1: integer;
 begin
  inherited;
- for int1:= 0 to high(fbands) do begin
-  fbands[int1].beginrender(arestart);
+ for int1:= 0 to high(frecbands) do begin
+  frecbands[int1].beginrender(arestart);
  end;
 end;
 
@@ -4378,8 +4378,8 @@ var
  int1: integer;
 begin
  inherited;
- for int1:= 0 to high(fbands) do begin
-  fbands[int1].endrender;
+ for int1:= 0 to high(frecbands) do begin
+  frecbands[int1].endrender;
  end;
 end;
 
@@ -4388,8 +4388,8 @@ var
  int1: integer;
 begin
  inherited;
- for int1:= 0 to high(fbands) do begin
-  fbands[int1].adddatasets(adatasets);
+ for int1:= 0 to high(frecbands) do begin
+  frecbands[int1].adddatasets(adatasets);
  end;
 end;
 
@@ -4475,8 +4475,8 @@ var
  int1: integer;
 begin
  inherited;
- for int1:= 0 to high(fbands) do begin
-  fbands[int1].dobeforenextrecord(adatasource);
+ for int1:= 0 to high(frecbands) do begin
+  frecbands[int1].dobeforenextrecord(adatasource);
  end;
 end;
 
@@ -4485,8 +4485,8 @@ var
  int1: integer;
 begin
  inherited;
- for int1:= 0 to high(fbands) do begin
-  fbands[int1].dosyncnextrecord;
+ for int1:= 0 to high(frecbands) do begin
+  frecbands[int1].dosyncnextrecord;
  end;
 end;
 
@@ -4495,8 +4495,8 @@ var
  int1: integer;
 begin
  inherited;
- for int1:= 0 to high(fbands) do begin
-  fbands[int1].initpage;
+ for int1:= 0 to high(frecbands) do begin
+  frecbands[int1].initpage;
  end;
 end;
 
@@ -4506,13 +4506,13 @@ procedure tbasebandarea.registerchildwidget(const child: twidget);
 begin
  inherited;
  if child is tcustomrecordband then begin
-  additem(pointerarty(fbands),child);
+  additem(pointerarty(fareabands),child);
  end;
 end;
 
 procedure tbasebandarea.unregisterchildwidget(const child: twidget);
 begin
- removeitem(pointerarty(fbands),child);
+ removeitem(pointerarty(fareabands),child);
  inherited;
 end;
 
@@ -4558,16 +4558,16 @@ var
  int1: integer;
 begin
  include(fstate,bas_inited);
- sortwidgetsyorder(widgetarty(fbands));
- for int1:= 0 to high(fbands) do begin
-  fbands[int1].init;
+ sortwidgetsyorder(widgetarty(fareabands));
+ for int1:= 0 to high(fareabands) do begin
+  fareabands[int1].init;
  end;
  initareapage;
 end;
 
 procedure tbasebandarea.initband;
 begin
- sortwidgetsyorder(widgetarty(fbands));
+ sortwidgetsyorder(widgetarty(fareabands));
  fstate:= fstate - [bas_areafull,bas_backgroundrendered,bas_notfirstband,
                              bas_lastband];
 end;
@@ -4577,8 +4577,8 @@ var
  int1: integer;
 begin
  include(fstate,bas_top);
- for int1:= 0 to high(fbands) do begin
-  fbands[int1].initpage;
+ for int1:= 0 to high(fareabands) do begin
+  fareabands[int1].initpage;
  end;
  initband;
 end;
@@ -4703,8 +4703,8 @@ begin
   fstate:= [bas_rendering];
  end;
  include(fwidgetstate1,ws1_noclipchildren);
- for int1:= 0 to high(fbands) do begin
-  with fbands[int1] do begin
+ for int1:= 0 to high(fareabands) do begin
+  with fareabands[int1] do begin
    beginrender(false);
   end;
  end;
@@ -4716,8 +4716,8 @@ var
 begin
  exclude(fstate,bas_rendering);
  exclude(fwidgetstate1,ws1_noclipchildren);
- for int1:= 0 to high(fbands) do begin
-  fbands[int1].endrender;
+ for int1:= 0 to high(fareabands) do begin
+  fareabands[int1].endrender;
  end;
 end;
 
@@ -4725,8 +4725,8 @@ procedure tbasebandarea.adddatasets(var adatasets: datasetarty);
 var
  int1: integer;
 begin
- for int1:= 0 to high(fbands) do begin
-  fbands[int1].adddatasets(adatasets);
+ for int1:= 0 to high(fareabands) do begin
+  fareabands[int1].adddatasets(adatasets);
  end;
 end;
 
@@ -4754,8 +4754,8 @@ procedure tbasebandarea.updatevisible;
 var
  int1: integer;
 begin
- for int1:= 0 to high(fbands) do begin
-  fbands[int1].updatevisibility;
+ for int1:= 0 to high(fareabands) do begin
+  fareabands[int1].updatevisibility;
  end;
 end;
 
@@ -4818,8 +4818,8 @@ procedure tbasebandarea.dobeforenextrecord(const adatasource: tdatasource);
 var
  int1: integer;
 begin
- for int1:= 0 to high(fbands) do begin
-  fbands[int1].dobeforenextrecord(adatasource);
+ for int1:= 0 to high(fareabands) do begin
+  fareabands[int1].dobeforenextrecord(adatasource);
  end;
 end;
 
@@ -4827,8 +4827,8 @@ procedure tbasebandarea.dosyncnextrecord;
 var
  int1: integer;
 begin
- for int1:= 0 to high(fbands) do begin
-  fbands[int1].dosyncnextrecord;
+ for int1:= 0 to high(fareabands) do begin
+  fareabands[int1].dosyncnextrecord;
  end;
 end;
 
@@ -6803,19 +6803,19 @@ begin
   dofirstarea;
  end;
  try
-  if factiveband <= high(fbands) then begin
+  if factiveband <= high(fareabands) then begin
    updatevisible;
    dobeforerender;
    isfinished:= true;
-   while (factiveband <= high(fbands)) and not areafull do begin
+   while (factiveband <= high(fareabands)) and not areafull do begin
     exclude(fstate,bas_bandstarted);
-    while (factiveband <= high(fbands)) and 
-                            not fbands[factiveband].visible do begin
+    while (factiveband <= high(fareabands)) and 
+                            not fareabands[factiveband].visible do begin
      inc(factiveband);
     end;
-    if factiveband <= high(fbands) then begin
+    if factiveband <= high(fareabands) then begin
      exclude(fstate,bas_activebandchanged);
-     with fbands[factiveband] do begin
+     with fareabands[factiveband] do begin
       if not (bas_finished in self.fstate) then begin
        bo2:= odd(fparentintf.reppagenum);
        bo2:= bo2 and (bo_oddpage in foptions) or 
@@ -6838,10 +6838,10 @@ begin
       result:= result and bo1;
       if bo1 then begin //empty
        if fnextbandifempty <> nil then begin
-        for int1:= 0 to high(fbands) do begin
-         if fbands[int1] = fnextbandifempty then begin
+        for int1:= 0 to high(fareabands) do begin
+         if fareabands[int1] = fnextbandifempty then begin
           for int2:= int1 to factiveband do begin
-           exclude(fbands[int2].fstate,rbs_showed);
+           exclude(fareabands[int2].fstate,rbs_showed);
           end;
           factiveband:= int1-1;
           break;
@@ -6850,19 +6850,19 @@ begin
        end;
        repeat
         inc(factiveband);
-       until (factiveband > high(fbands)) or fbands[factiveband].visible;
+       until (factiveband > high(fareabands)) or fareabands[factiveband].visible;
       end
       else begin
        if not (bas_areafull in self.fstate) and (fnextband <> nil) and 
                   not (fdatalink.active and fdatalink.dataset.eof) then begin
-        for int1:= 0 to high(fbands) do begin
-         if fbands[int1] = fnextband then begin
+        for int1:= 0 to high(fareabands) do begin
+         if fareabands[int1] = fnextband then begin
           for int2:= int1 to factiveband do begin
-           exclude(fbands[int2].fstate,rbs_showed);
+           exclude(fareabands[int2].fstate,rbs_showed);
           end;
           factiveband:= int1;
-          while (factiveband <= high(fbands)) and 
-                          not fbands[factiveband].visible do begin
+          while (factiveband <= high(fareabands)) and 
+                          not fareabands[factiveband].visible do begin
            inc(factiveband);
           end;
           break;
@@ -6989,8 +6989,8 @@ end;
 
 function tcustombandarea.isfirstband: boolean;
 begin
- result:= (factiveband <= high(fbands)) and 
-                    not (rbs_pageshowed in fbands[factiveband].fstate);
+ result:= (factiveband <= high(fareabands)) and 
+                    not (rbs_pageshowed in fareabands[factiveband].fstate);
 // result:= not (bas_notfirstband in fstate);
 end;
 
@@ -6999,8 +6999,8 @@ var
  int1: integer;
 begin
  result:= fstate * [bas_lastband{,bas_lastchecking}] <> [];
- if not result and (factiveband <= high(fbands)) then begin
-  with fbands[factiveband] do begin
+ if not result and (factiveband <= high(fareabands)) then begin
+  with fareabands[factiveband] do begin
    int1:= facty + addheight + lastbandheight;
    if not (bas_bandstarted in self.fstate) then begin
     int1:= int1 + bounds_cy;
@@ -7061,8 +7061,8 @@ begin
    fcellorigin.x:= round(col*cellwidthmm1*freportpage.ppmm);
    fcellorigin.y:= round(row*cellheightmm1*freportpage.ppmm);
    isfinished:= true;
-   for int1:= 0 to high(fbands) do begin
-    with fbands[int1] do begin
+   for int1:= 0 to high(fareabands) do begin
+    with fareabands[int1] do begin
      if visible then begin
       if not (bas_finished in self.fstate) then begin
        bo2:= odd(fparentintf.reppagenum);
