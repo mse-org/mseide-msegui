@@ -1183,15 +1183,20 @@ end;
 procedure tpersistentarrayprop.setcount1(acount: integer; doinit: boolean);
 var
  lengthvorher,int1: integer;
+ ar1: persistentarty;
 begin
  checkcount(acount);
- lengthvorher:= length(fitems);
- if acount < lengthvorher then begin
-  for int1:= lengthvorher-1 downto acount do begin
-   fitems[int1].free;
+ int1:= length(fitems) - acount;
+ if int1 > 0 then begin
+  ar1:= copy(fitems,acount,int1);
+  setlength(fitems,acount); //return new count
+  for int1:= high(ar1) downto 0 do begin
+   ar1[int1].free;
   end;
+ end
+ else begin
+  setlength(fitems,acount);
  end;
- setlength(fitems,acount);
  inherited;
 end;
 

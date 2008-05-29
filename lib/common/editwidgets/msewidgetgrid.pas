@@ -1505,32 +1505,34 @@ begin
          (twidget1(sender).fparentwidget = self) then begin
   with fgrid do begin
    cell1:= widgetcell(sender);
-   with ffixrows[cell1.row] do begin
-    height:= sender.bounds_cy;
-    int1:= 0;
-    int3:= 0;
-    if cell1.col < 0 then begin
-     int2:= ffixcols.count + cell1.col;
-     if int2 < captionsfix.count then begin
-      with captionsfix[int2] do begin
-       int1:= mergedcx;
-       int3:= mergedcy;
+   if cell1.row <> invalidaxis then begin
+    with ffixrows[cell1.row] do begin
+     height:= sender.bounds_cy;
+     int1:= 0;
+     int3:= 0;
+     if cell1.col < 0 then begin
+      int2:= ffixcols.count + cell1.col;
+      if int2 < captionsfix.count then begin
+       with captionsfix[int2] do begin
+        int1:= mergedcx;
+        int3:= mergedcy;
+       end;
       end;
-     end;
-     ffixcols[cell1.col].width:= sender.bounds_cx - int1;
-    end
-    else begin
-     if cell1.col < captions.count then begin
-      with captions[cell1.col] do begin
-       int1:= mergedcx;
-       int3:= mergedcy;
+      ffixcols[cell1.col].width:= sender.bounds_cx - int1;
+     end
+     else begin
+      if cell1.col < captions.count then begin
+       with captions[cell1.col] do begin
+        int1:= mergedcx;
+        int3:= mergedcy;
+       end;
       end;
+      fdatacols[cell1.col].width:= sender.bounds_cx - int1;
      end;
-     fdatacols[cell1.col].width:= sender.bounds_cx - int1;
+     height:= sender.bounds_cy - int3;
     end;
-    height:= sender.bounds_cy - int3;
+    layoutchanged;
    end;
-   layoutchanged;
   end;
  end;
 end;
