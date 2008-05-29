@@ -582,8 +582,9 @@ begin
      with AParams[i] do begin
       if not IsNull then begin
        case DataType of
-        ftdatetime: s:= formatdatetime('YYYY-MM-DD',AsDateTime);
+        ftdatetime: s:= formatdatetime('YYYY-MM-DD hh:nn:ss',AsDateTime);
         ftdate: s:= formatdatetime('YYYY-MM-DD',AsDateTime);
+        fttime: s:= formatdatetime('hh:nn:ss',AsDateTime);
         ftfloat,ftcurrency: s:= realtostr(asfloat);
         ftbcd: s:= realtostr(ascurrency);
         else begin
