@@ -765,10 +765,33 @@ begin
  tcomponent1(child).getchildren({$ifdef FPC}@{$endif}addcomp,child);
 end;
 
+type
+ tdelcomp = class(tcomponent)
+  private
+   fdelcomps: componentarty;
+  protected
+   procedure notification(acomponent: tcomponent; operation: toperation); override;
+ end;
+ 
+procedure tdelcomp.notification(acomponent: tcomponent; operation: toperation);
+var
+ int1: integer;
+begin
+ inherited;
+ if operation = opremove then begin
+  for int1:= high(fdelcomps) downto 0 do begin
+   if fdelcomps[int1] = acomponent then begin
+    fdelcomps[int1]:= nil;
+   end;
+  end;
+ end;
+end;
+
 procedure tdescendentinstancelist.revert(const info: pancestorinfoty; 
             const module: pmoduleinfoty; const norootposition: boolean = false); 
 var
  comp1,comp2: tmsecomponent;
+ decomp: tdelcomp;
  parent1: twidget;
  str1: string;
  int1: integer;
@@ -803,8 +826,17 @@ begin
   froot:= comp1;
  end;
  delcomp(comp1);
- for int1:= 0 to high(fdelcomps) do begin
-  fdelcomps[int1].free;
+ try
+  decomp:= tdelcomp.create(nil);
+  decomp.fdelcomps:= fdelcomps;
+  for int1:= high(fdelcomps) downto 0 do begin
+   fdelcomps[int1].freenotification(decomp);
+  end;  
+  for int1:= high(fdelcomps) downto 0 do begin
+   fdelcomps[int1].free;
+  end;
+ finally
+  decomp.free;
  end;
  fdelcomps:= nil;
  comp2:= fdesigner.copycomponent(info^.ancestor,info^.ancestor);
