@@ -567,7 +567,6 @@ var
  i: integer;
  s: string;
  lengths,formats: integerarty;
-// par1: tparam;
 
 begin
  with TPQCursor(cursor) do begin
