@@ -34,13 +34,19 @@ type
   function getname: ansistring;
   function getactive: boolean;
   procedure setactive(avalue: boolean);
+  function gettransaction: tmdbtransaction;
+  function getrecno: integer;
+  procedure setrecno(value: integer);
+  procedure disablecontrols;
+  procedure enablecontrols;
+  function moveby(distance: longint): longint;
  end; 
  
  itransactionclient = interface(idbclient)
   procedure settransaction(const avalue: tmdbtransaction);
   procedure settransactionwrite(const avalue: tmdbtransaction);
   function getactive: boolean;
-  procedure refresh;
+  procedure refreshtransaction;
  end;
  itransactionclientarty = array of itransactionclient;
  pitransactionclientarty = ^itransactionclientarty;
@@ -114,7 +120,7 @@ type
     procedure DoDisconnect; virtual;
     function GetConnected : boolean; virtual;
     Function GetDataset(Index : longint) : TDataset; virtual;
-    Function GetDataSetCount : Longint; virtual;
+//    Function GetDataSetCount : Longint; virtual;
     procedure InternalHandleException; virtual;
     procedure Loaded; override;
     procedure SetConnected (const avalue : boolean); virtual;
@@ -122,8 +128,8 @@ type
     procedure Close;
     destructor Destroy; override;
     procedure Open;
-    property DataSetCount: Longint read GetDataSetCount;
-    property DataSets[Index: Longint]: TDataSet read GetDataSet;
+//    property DataSetCount: Longint read GetDataSetCount;
+//    property DataSets[Index: Longint]: TDataSet read GetDataSet;
    property tagpo: pointer read ftagpo write ftagpo;
   published
     property Connected: Boolean read GetConnected write SetConnected;
@@ -178,7 +184,7 @@ type
    procedure doafterinternalconnect; virtual;
    procedure dobeforeinternaldisconnect; virtual;
    function GetConnected : boolean; override;
-   Function GetDataset(Index : longint) : TDataset; override;
+//   Function GetDataset(Index : longint) : TDataset; override;
 //    Function GetDataSetCount : Longint; override;
    Procedure DoInternalConnect; Virtual;Abstract;
    Procedure DoInternalDisConnect; Virtual;Abstract;
@@ -194,7 +200,7 @@ type
    property Transactions[Index: Longint]: tmdbtransaction read GetTransaction;
    property Directory: string read FDirectory write FDirectory;
    property IsSQLBased: Boolean read FSQLBased;
-
+   property datasets: idatabaseclientarty read fdatasets;
   published
    property Connected: Boolean read FConnected write SetConnected;
    property DatabaseName: string read FDatabaseName write FDatabaseName;
@@ -214,26 +220,28 @@ type
 
   tmdbdatasetClass = Class of tmdbdataset;
   tmdbdataset = Class(TDataset,idatabaseclient,itransactionclient)
-    Private
-   ftagpo: pointer;
-    Protected
-      FDatabase : tmdatabase;
-      FTransaction : tmdbtransaction;
-      ftransactionwrite : tmdbtransaction;
-      Procedure SetDatabase (const Value: tmdatabase); virtual;
-      Procedure SetTransaction(const Value: tmdbtransaction); virtual;
-      procedure settransactionwrite(const value: tmdbtransaction); virtual;
-//      Procedure CheckDatabase;
-      //idbclient
-      function getinstance: tobject;
-      function getname: ansistring;
-    Public
-      Destructor destroy; override;
-      Property DataBase : tmdatabase Read FDatabase Write SetDatabase;
-      Property Transaction : tmdbtransaction Read FTransaction Write SetTransaction;
-      property transactionwrite : tmdbtransaction read ftransactionwrite 
-                             write settransactionwrite;
-     property tagpo: pointer read ftagpo write ftagpo;
+   private
+    ftagpo: pointer;
+   protected
+    fdatabase : tmdatabase;
+    ftransaction : tmdbtransaction;
+    ftransactionwrite : tmdbtransaction;
+    procedure setdatabase (const value: tmdatabase); virtual;
+    procedure settransaction(const value: tmdbtransaction); virtual;
+    procedure settransactionwrite(const value: tmdbtransaction); virtual;
+//      procedure checkdatabase;
+    //idbclient
+    function getinstance: tobject;
+    function getname: ansistring;
+    function gettransaction: tmdbtransaction;
+    procedure refreshtransaction; virtual; abstract;
+   public
+    destructor destroy; override;
+    property database : tmdatabase read fdatabase write setdatabase;
+    property transaction : tmdbtransaction read ftransaction write settransaction;
+    property transactionwrite : tmdbtransaction read ftransactionwrite 
+                           write settransactionwrite;
+    property tagpo: pointer read ftagpo write ftagpo;
   end;
 
  ttacontroller = class(tactivatorcontroller)
@@ -560,7 +568,7 @@ begin
   else
     Result:=0;
 end;
-
+{
 Function tmdatabase.GetDataset(Index : longint) : TDataset;
 
 begin
@@ -572,7 +580,7 @@ begin
     DatabaseError(SNoDatasets);
     end;
 end;
-
+}
 Function tmdatabase.GetTransaction(Index : longint) : tmdbtransaction;
 
 begin
@@ -657,6 +665,11 @@ end;
 function tmdbdataset.getname: ansistring;
 begin
  result:= name;
+end;
+
+function tmdbdataset.gettransaction: tmdbtransaction;
+begin
+ result:= ftransaction;
 end;
 
 Destructor tmdbdataset.Destroy;
@@ -779,7 +792,7 @@ begin
   for int1:= high(fwritedatasets) downto 0 do begin
    with fwritedatasets[int1] do begin
     if getactive then begin
-     refresh;
+     refreshtransaction;
     end;
    end;
   end;
@@ -788,7 +801,7 @@ begin
   for int1:= high(fdatasets) downto 0 do begin
    with fdatasets[int1] do begin
     if getactive then begin
-     refresh;
+     refreshtransaction;
     end;
    end;
   end;
@@ -888,12 +901,12 @@ function TCustomConnection.GetDataSet(Index: Longint): TDataSet;
 begin
   Result := nil;
 end;
-
+{
 function TCustomConnection.GetDataSetCount: Longint;
 begin
   Result := 0;
 end;
-
+}
 procedure TCustomConnection.InternalHandleException;
 begin
   if assigned(classes.ApplicationHandleException) then

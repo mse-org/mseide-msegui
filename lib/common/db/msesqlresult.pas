@@ -239,8 +239,15 @@ type
    //isqlclient
    procedure setdatabase(const avalue: tmdatabase);
    function getname: ansistring;
+   function gettransaction: tmdbtransaction;
+   function getrecno: integer;
+   procedure setrecno(value: integer);
+   procedure disablecontrols;
+   procedure enablecontrols;
+   function moveby(distance: longint): longint;
    function getsqltransactionwrite: tsqltransaction;
    procedure setsqltransactionwrite(const avalue: tsqltransaction);
+   procedure refreshtransaction;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -1072,6 +1079,11 @@ begin
  end;
 end;
 
+procedure tsqlresult.refreshtransaction;
+begin
+ refresh;
+end;
+
 procedure tsqlresult.setbeforeopen(const avalue: tmsesqlscript);
 begin
  setlinkedvar(avalue,fbeforeopen);
@@ -1212,6 +1224,36 @@ begin
  else begin
   result:= -1
  end;
+end;
+
+function tsqlresult.gettransaction: tmdbtransaction;
+begin
+ result:= ftransaction;
+end;
+
+function tsqlresult.getrecno: integer;
+begin
+ result:= -1;
+end;
+
+procedure tsqlresult.setrecno(value: integer);
+begin
+ //dummy
+end;
+
+procedure tsqlresult.disablecontrols;
+begin
+ //dummy
+end;
+
+procedure tsqlresult.enablecontrols;
+begin
+ //dummy
+end;
+
+function tsqlresult.moveby(distance: longint): longint;
+begin
+ result:= 0;
 end;
 
 { tdbcolnamearrayprop }

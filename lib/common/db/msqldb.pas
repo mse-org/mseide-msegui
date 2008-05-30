@@ -143,7 +143,7 @@ type
 
    fafterconnect: tmsesqlscript;
    fbeforedisconnect: tmsesqlscript;
-   fdatasets1: datasetarty;
+//   fdatasets1: datasetarty;
    frecnos: integerarty;
    ftransactionwrite: tsqltransaction;
    procedure setcontroller(const avalue: tdbcontroller);
@@ -153,8 +153,8 @@ type
    function getconnected: boolean;
    procedure setafteconnect(const avalue: tmsesqlscript);
    procedure setbeforedisconnect(const avalue: tmsesqlscript);
-   procedure closeds;
-   procedure reopends;
+//   procedure closeds;
+//   procedure reopends;
   protected
    FConnOptions: sqlconnoptionsty;
    fcontroller: tdbcontroller;
@@ -410,9 +410,15 @@ type
    procedure setactive(avalue: boolean); virtual;
    procedure settransaction(const avalue: tmdbtransaction);
    procedure settransactionwrite(const avalue: tmdbtransaction);
-   procedure refresh;
+   procedure refreshtransaction;
    //idbclient
    procedure setdatabase(const avalue: tmdatabase);
+   function gettransaction: tmdbtransaction;
+   function getrecno: integer;
+   procedure setrecno(value: integer);
+   procedure disablecontrols;
+   procedure enablecontrols;
+   function moveby(distance: longint): longint;
   protected
    
    procedure dobeforeexecute(const adatabase: tcustomsqlconnection;
@@ -552,6 +558,7 @@ type
    function getsqltransactionwrite: tsqltransaction;
    procedure setsqltransactionwrite(const avalue: tsqltransaction);
    procedure resetparsing;
+   procedure dorefresh(const atransaction: boolean);
   protected
    FTableName: string;
    FReadOnly: boolean;
@@ -583,6 +590,8 @@ type
    procedure InternalOpen; override;
    function closetransactiononrefresh: boolean; virtual;
    procedure internalrefresh; override;
+   procedure refreshtransaction; override;
+   
    function  GetCanModify: Boolean; override;
    Procedure internalApplyRecUpdate(UpdateKind : TUpdateKind);
    procedure dobeforeapplyupdate; override;
@@ -1299,12 +1308,12 @@ procedure tcustomsqlconnection.closeds(out activeds: integerarty);
 var
  int1: integer;
 begin
- setlength(activeds,datasetcount);
+ setlength(activeds,length(datasets));
  for int1:= 0 to high(activeds) do begin
   with datasets[int1] do begin
-   if active then begin
-    activeds[int1]:= datasets[int1].recno;
-    active:= false;
+   if getactive then begin
+    activeds[int1]:= datasets[int1].getrecno;
+    setactive(false);
    end
    else begin
     activeds[int1]:= -2;
@@ -1320,12 +1329,12 @@ begin
  for int1:= 0 to high(activeds) do begin
   if activeds[int1] >= -1 then begin
    with datasets[int1] do begin
-    active:= true;
+    setactive(true);
     disablecontrols;
     if activeds[int1] >= 0 then begin
      try
       moveby(maxint);
-      recno:= activeds[int1];
+      setrecno(activeds[int1]);
      except
      end;
     end;
@@ -1355,6 +1364,14 @@ begin
  if fbeforedisconnect <> nil then begin
   fbeforedisconnect.execute(self);
  end;
+ for int1:= high(datasets) downto 0 do begin
+  with datasets[int1] do begin
+   if (gettransaction = nil) or (gettransaction.active) then begin
+    setactive(false); //not disconnected
+   end;
+  end;
+ end;
+ {
  for int1:= datasetcount - 1 downto 0 do begin
   with tsqlquery(datasets[int1]) do begin
    if (transaction = nil) or (transaction.active) then begin
@@ -1362,6 +1379,7 @@ begin
    end;
   end;
  end;
+ }
 end;
 {
 procedure tcustomsqlconnection.setconnected(const avalue: boolean);
@@ -1462,10 +1480,12 @@ begin
   if acomponent = fbeforedisconnect then begin
    fbeforedisconnect:= nil;
   end;
+  {
   int1:= finditem(pointerarty(fdatasets1),acomponent);
   if int1 >= 0 then begin
    fdatasets1[int1]:= nil;
   end;
+  }
  end;
  inherited;
 end;
@@ -1506,12 +1526,11 @@ begin
  result:= false;
 end;
 
-
 function tcustomsqlconnection.getinsertid: int64;
 begin
  databaseerror('Connection has no insert ID''s.');
 end;
-
+{
 procedure tcustomsqlconnection.closeds;
 var
  int1: integer;
@@ -1564,9 +1583,11 @@ begin
   end;
  end;
 end;
-
+}
 procedure tcustomsqlconnection.CommitRetaining(trans: TSQLHandle);
 begin
+ internalcommitretaining(trans);
+ {
  if sco_emulateretaining in fconnoptions then begin
   closeds; //cursors are lost
   try
@@ -1583,10 +1604,13 @@ begin
  else begin
   internalcommitretaining(trans);
  end;
+ }
 end;
 
 procedure tcustomsqlconnection.RollBackRetaining(trans: TSQLHandle);
 begin
+ internalrollbackretaining(trans);
+{
  if sco_emulateretaining in fconnoptions then begin
   closeds; //cursors are lost
   try
@@ -1603,6 +1627,7 @@ begin
  else begin
   internalrollbackretaining(trans);
  end;
+}
 end;
 
 procedure tcustomsqlconnection.finalizetransaction(const atransaction: tsqlhandle);
@@ -1750,9 +1775,13 @@ function tsqltransaction.docommit(const retaining: boolean): boolean;
   if not retaining then begin
    closetrans;
    closedatasets;
-  end;
-  if tao_refreshdatasets in foptions then begin
-   refreshdatasets(true,retaining);
+  end
+  else begin
+   if (tao_refreshdatasets in foptions) or 
+      (sco_emulateretaining in 
+              tcustomsqlconnection(database).connoptions) then begin
+    refreshdatasets(true,true);
+   end;
   end;
  end;
  
@@ -1846,9 +1875,11 @@ begin
   if not (tao_fake in foptions) then begin
    tcustomsqlconnection(database).RollBackRetaining(FTrans);
   end;
-  if tao_refreshdatasets in foptions then begin
+//  if (tao_refreshdatasets in foptions) or
+//       (sco_emulateretaining in 
+//             tcustomsqlconnection(database).connoptions) then begin
    refreshdatasets;
-  end;
+//  end;
   if checkcanevent(self,tmethod(fonafterrollbackretaining)) then begin
    fonafterrollback(self);
   end;
@@ -2560,40 +2591,38 @@ begin
  connect(true);
  inherited;
 end;
- 
-procedure tsqlquery.internalrefresh;
+
+procedure tsqlquery.dorefresh(const atransaction: boolean);
 var
  int1: integer;
-// statebefore: tdatasetstate;
 begin
  int1:= recno;
-// statebefore:= state;
-// disablecontrols;            
-// try
-  include(fbstate,bs_refreshing);
-  try
-   active:= false;
-   if closetransactiononrefresh then begin
-    transaction.active:= false;
-    transaction.active:= true;
-   end;
-   active:= true;
-   setrecno1(int1,true);
-  finally
-   exclude(fbstate,bs_refreshing);
-   if not active then begin
-    freefieldbuffers;
-    freequery;
-   end;
+ include(fbstate,bs_refreshing);
+ try
+  active:= false;
+  if not atransaction and closetransactiononrefresh then begin
+   transaction.active:= false;
+   transaction.active:= true;
   end;
-// finally
-//  if active and (statebefore <> dsinactive) then begin
-//   tdatasetcracker(self).fdisablecontrolsstate:= dsinactive;
-//   //there is no updtestate in enablecontrols otherwise
-//   //...does not work because TDatasource has its own state transition recognition
-//  end;
-//  enablecontrols;
-// end;
+  active:= true;
+  setrecno1(int1,true);
+ finally
+  exclude(fbstate,bs_refreshing);
+  if not active then begin
+   freefieldbuffers;
+   freequery;
+  end;
+ end;
+end;
+
+procedure tsqlquery.refreshtransaction;
+begin
+ dorefresh(true);
+end;
+ 
+procedure tsqlquery.internalrefresh;
+begin
+ dorefresh(false);
 end;
 
 procedure TSQLQuery.ExecSQL;
@@ -3546,7 +3575,7 @@ begin
  //dummy
 end;
 
-procedure tcustomsqlstatement.refresh;
+procedure tcustomsqlstatement.refreshtransaction;
 begin
  //dummy
 end;
@@ -3588,6 +3617,36 @@ begin
   foptions:= sqlstatementoptionsty(setsinglebit(
            longword(avalue),longword(foptions),longword(mask)));
  end;
+end;
+
+function tcustomsqlstatement.gettransaction: tmdbtransaction;
+begin
+ result:= ftransaction;
+end;
+
+function tcustomsqlstatement.getrecno: integer;
+begin
+ result:= -1;
+end;
+
+procedure tcustomsqlstatement.setrecno(value: integer);
+begin
+ //dummy
+end;
+
+procedure tcustomsqlstatement.disablecontrols;
+begin
+ //dummy
+end;
+
+procedure tcustomsqlstatement.enablecontrols;
+begin
+ //dummy
+end;
+
+function tcustomsqlstatement.moveby(distance: longint): longint;
+begin
+ result:= 0;
 end;
 
 { tmsesqlscript }
