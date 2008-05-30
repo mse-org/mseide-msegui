@@ -223,7 +223,7 @@ begin
  result:= true;
  if result and stringonly.value then begin
   result:= tpropinfonode(anode).info.valuetype in
-           [vastring,valstring,vawstring{$ifndef FPC},vautf8string{$endif},
+           [vastring,valstring,vawstring,vautf8string,
                    vanull,valist,vacollection];
  end;
  if result then begin
@@ -618,7 +618,7 @@ begin
   bo2:= not nont.value or not info.donottranslate;
   if fparent <> nil then begin
    bo1:= not stringonly.value or (info.valuetype in
-             [vastring,valstring,vawstring{$ifndef FPC},vautf8string{$endif}]);
+             [vastring,valstring,vawstring,vautf8string]);
    if bo1 and bo2 then begin
     writerecord(sender);
    end;

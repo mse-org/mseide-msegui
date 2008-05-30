@@ -31,7 +31,7 @@ type
   comment: widestring;
   variants: msestringarty;
   case valuetype: tvaluetype of
-   vastring,valstring,{$ifndef FPC}vautf8string,{$endif}vawstring:
+   vastring,valstring,vautf8string,vawstring:
     (coffset: integer; clen: integer); //filemarker for const units
    vaInt8,vaint16,vaint32: (integervalue: integer);
    vaint64: (int64value: int64);
@@ -145,10 +145,11 @@ begin
   vaSingle,vaCurrency,vaDate,vaExtended: begin
    result:= floattostr(info.realvalue);
   end;
-  vaset,vaident,vastring,valstring: begin
+//  vaset,vaident,vastring,valstring: begin
+  vaset,vaident: begin
    result:= info.stringvalue;
   end;
-  vawstring{$ifndef FPC},vautf8string{$endif}: begin
+  vastring,valstring,vawstring,vautf8string: begin
    result:= info.widestringvalue;
   end;
   else begin
@@ -297,10 +298,10 @@ var
         readvalue;
         stringvalue:= {$ifdef FPC}driver.{$endif}readstr;
        end;
-       vaString,vaLString:  begin
-        stringvalue:= readstring;
-       end;
-       vaWString{$ifndef FPC},vautf8string{$endif}: begin
+//       vaString,vaLString:  begin
+//        stringvalue:= readstring;
+//       end;
+       vastring,valstring,vaWString,vautf8string: begin
         widestringvalue:= readwidestring;
        end;
        vaSet: begin
@@ -478,12 +479,17 @@ var
        vaIdent: begin
         writeident(stringvalue);
        end;
+       vaString,vaLString,vaWString,vautf8string: begin
+        writewidestring(widestringvalue);
+       end;
+       (*
        vaString,vaLString:  begin
         writestring(stringvalue);
        end;
        vaWString{$ifndef FPC},vautf8string{$endif}: begin
         writewidestring(widestringvalue);
        end;
+       *)
        vaSet: begin
         ar1:= nil;
         str1:= trim(stringvalue);
@@ -642,10 +648,10 @@ begin
  for int1:= 0 to node.fcount - 1 do begin
   with tpropinfonode(node.fitems[int1]).info do begin
    case valuetype of
-    vaString,vaLString:  begin
-     str1:= stringtopascalstring(stringvalue);
-    end;
-    vaWString{$ifndef FPC},vautf8string{$endif}: begin
+//    vaString,vaLString:  begin
+//     str1:= stringtopascalstring(stringvalue);
+//    end;
+    vastring,valstring,vaWString,vautf8string: begin
      str1:= stringtopascalstring(widestringvalue);
     end;
     else begin
@@ -693,10 +699,10 @@ begin
  for int1:= 0 to high(ar1) do begin
   with tpropinfonode(ar1[int1]).info do begin
    case valuetype of
-    vaString,vaLString:  begin
-     str1:= stringtocstring(stringvalue);
-    end;
-    vaWString{$ifndef FPC},vautf8string{$endif}: begin
+//    vaString,vaLString:  begin
+//     str1:= stringtocstring(stringvalue);
+//    end;
+    vastring,valstring,vaWString,vautf8string: begin
      str1:= stringtocstring(widestringvalue);
     end;
     else begin
@@ -754,10 +760,10 @@ begin
  with tpropinfonode(sender).info do begin
   if not donottranslate and (alang <= high(variants)) then begin
    case valuetype of
-    vaString,vaLString: begin
-     stringvalue:= variants[alang];
-    end;
-    vaWString{$ifndef FPC},vautf8string{$endif}: begin
+//    vaString,vaLString: begin
+//     stringvalue:= variants[alang];
+//    end;
+    vastring,valstring,vaWString,vautf8string: begin
      widestringvalue:= variants[alang];
     end;
     vaint8,vaint16,vaint32: begin
@@ -807,13 +813,13 @@ var
 begin
  with tpropinfonode(sender).info do begin
   case valuetype of
-   vaString,vaLString: begin
-    setlength(variants,alang);
-    for int1:= 0 to alang - 1 do begin
-     variants[int1]:= stringvalue;
-    end;
-   end;
-   vaWString{$ifndef FPC},vautf8string{$endif}: begin
+//   vaString,vaLString: begin
+//    setlength(variants,alang);
+//    for int1:= 0 to alang - 1 do begin
+//     variants[int1]:= stringvalue;
+//    end;
+//   end;
+   vastring,valstring,vaWString,vautf8string: begin
     setlength(variants,alang);
     for int1:= 0 to alang - 1 do begin
      variants[int1]:= widestringvalue;
