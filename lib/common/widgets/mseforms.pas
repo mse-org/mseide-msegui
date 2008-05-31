@@ -1326,7 +1326,7 @@ begin
    (((fo_closeonesc in foptions) or (fo_cancelonesc in foptions)) and 
      (key = key_escape) or
      (fo_closeonf10 in foptions) and (key = key_f10) or
-     (fo_closeonenter in foptions) and isenterkey(key))  then begin
+     (fo_closeonenter in foptions) and isenterkey(self,key))  then begin
    include(eventstate,es_processed);
    if key = key_f10 then begin
     modres1:= mr_f10;

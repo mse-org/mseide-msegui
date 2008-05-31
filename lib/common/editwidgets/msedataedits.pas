@@ -1152,16 +1152,16 @@ begin
     end;
    end;
    if bo1 then begin
-    if (oe_returntaborder in foptionsedit) or 
+    if {(ow_keyreturntaborder in foptionswidget) or} 
       (fgridintf <> nil) and 
        (og_colchangeonreturnkey in fgridintf.getcol.grid.optionsgrid)then begin
      info.action:= ea_none;    
-     if fgridintf = nil then begin
-      nextfocus;
-     end
-     else begin
+//     if fgridintf = nil then begin
+//      nextfocus;
+//     end
+//     else begin
       fgridintf.getcol.grid.colstep(fca_focusin,1,true);
-     end;
+//     end;
     end;
    end;
   end;

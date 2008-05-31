@@ -980,7 +980,7 @@ begin
   if shiftstate <> [ss_ctrl] then begin
    finished:= true;
    bo1:= true;
-   if (key = key_return) then  begin
+   if (key = key_return) or (key = key_enter) then  begin
     removechar1(chars,c_return);
     removechar1(chars,c_linefeed);
     if (shiftstate - [ss_shift] = []) and (oe_linebreak in opt1) and 

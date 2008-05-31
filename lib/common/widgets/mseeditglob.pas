@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -27,7 +27,8 @@ type
                     oe_forcereturncheckvalue, 
                        //call checkvalue unconditionally by key_return
                     oe_eatreturn,
-                    oe_returntaborder, //key_return selects next widget in taborder
+              //      oe_returntaborder, //key_return selects next widget in taborder
+                    //moved to twidget.optionswidget ow_keyreturntaborder
                     oe_resetselectonexit,
 
                     //same layout as strincoleditoptionty

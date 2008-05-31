@@ -38,10 +38,13 @@ type
  frameskinoptionsty = set of frameskinoptionty;
  
  optionwidgetty = (ow_background,ow_top,ow_noautosizing,{ow_nofocusrect,}
-                   ow_mousefocus,ow_tabfocus,ow_parenttabfocus,ow_arrowfocus,
+                   ow_mousefocus,ow_tabfocus,
+                   ow_parenttabfocus,ow_arrowfocus,
                    ow_arrowfocusin,ow_arrowfocusout,
                    ow_subfocus,         //reflects focus to children
-                   ow_focusbackonesc,
+                   ow_focusbackonesc,                   
+                   ow_keyreturntaborder, 
+                     //key_return and key_enter work like key_tab
                    ow_nochildshortcut,  //do not propagate shortcuts to parent
                    ow_noparentshortcut, //do not react to shortcuts from parent
                    ow_canclosenil,      //canclose calls canclose(nil)
@@ -1957,6 +1960,7 @@ procedure wsetbounds_cymax(const awidget: twidget; const avalue: integer);
 
 function application: tguiapplication;
 function mousebuttontoshiftstate(button: mousebuttonty): shiftstatesty;
+function isenterkey(const awidget: twidget; const key: keyty): boolean;
 
 procedure beep;
 procedure enablewidgets(awidgets: array of twidget);
@@ -2643,6 +2647,12 @@ begin
   result:= [shiftstatety(cardinal(ss_left) +
                   cardinal(button) - cardinal(mb_left))];
  end;
+end;
+
+function isenterkey(const awidget: twidget; const key: keyty): boolean;
+begin
+ result:= ((awidget = nil) or not (ow_keyreturntaborder in awidget.optionswidget)) and 
+          ((key = key_enter) or (key = key_return));
 end;
 
 procedure destroyregion(var region: regionty);
@@ -8293,37 +8303,48 @@ var
 begin
  with info do begin
   if not (es_processed in eventstate) then begin
-   if (shiftstate = []) or
-        (shiftstate = [ss_shift]) and (key = key_backtab) then begin
+   if (ow_keyreturntaborder in foptionswidget) and 
+      ((key = key_enter) or (key = key_return)) and 
+      (shiftstate - [ss_shift] =  []) then begin
     include(eventstate,es_processed);
-    with naviginfo do begin
-     direction:= gd_none;
-     case info.key of
-      key_tab,key_backtab: begin
-       widget1:= nexttaborder(key = key_backtab);
-       if widget1 <> nil then begin
-        widget1.setfocus;
+    widget1:= nexttaborder(ss_shift in shiftstate);
+    if widget1 <> nil then begin
+     widget1.setfocus;
+    end;
+   end
+   else begin
+    if (shiftstate = []) or
+         (shiftstate = [ss_shift]) and (key = key_backtab) then begin
+     include(eventstate,es_processed);
+     with naviginfo do begin
+      direction:= gd_none;
+      case key of
+       key_tab,key_backtab: begin
+        widget1:= nexttaborder(key = key_backtab);
+        if widget1 <> nil then begin
+         widget1.setfocus;
+        end;
+       end;
+       key_right: direction:= gd_right;
+       key_up: direction:= gd_up;
+       key_left: direction:= gd_left;
+       key_down: direction:= gd_down;
+       else begin
+        exclude(eventstate,es_processed);
        end;
       end;
-      key_right: direction:= gd_right;
-      key_up: direction:= gd_up;
-      key_left: direction:= gd_left;
-      key_down: direction:= gd_down;
-      else begin
-       exclude(info.eventstate,es_processed);
-      end;
-     end;
-     if direction <> gd_none then begin
-      if fparentwidget <> nil then begin
-       distance:= bigint;
-       nearest:= nil;
-       sender:= self;
-       down:= false;
-       startingrect:= navigstartrect;
-       translateclientpoint1(startingrect.pos,self,nil);
-       fparentwidget.navigrequest(naviginfo);
-       if nearest <> nil then begin
-        nearest.setfocus;
+      if direction <> gd_none then begin
+       if fparentwidget <> nil then begin
+        distance:= bigint;
+        nearest:= nil;
+        sender:= self;
+        down:= false;
+        startingrect:= navigstartrect;
+        translateclientpoint1(startingrect.pos,self,nil);
+        fparentwidget.navigrequest(naviginfo);
+        if nearest <> nil then begin
+         nearest.setfocus;
+        end;
        end;
       end;
      end;

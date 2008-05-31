@@ -1298,7 +1298,7 @@ end;
 procedure tobjectinspectorfo.valueskeydown(const sender: twidget;
                 var info: keyeventinfoty);
 begin
- if isenterkey(info.key) and (info.shiftstate = []) and
+ if isenterkey(nil,info.key) and (info.shiftstate = []) and
                             not values.edited then begin
   with tpropertyvalue(values.item),feditor do begin
    if ps_dialog in state then begin

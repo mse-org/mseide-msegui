@@ -2483,7 +2483,7 @@ begin
    invalidaterect(finfo.dim);
   end
   else begin
-   if isenterkey(info.key) then begin
+   if isenterkey(self,info.key) then begin
     include(info.eventstate,es_processed);
     togglevalue;
    end;
