@@ -199,7 +199,7 @@ type
  tpersistentarrayprop = class(tarrayprop,iobjectlink)
   private                           //same layout as tintegerarrayprop!
   protected
-   fitems: array of tpersistent;    //same layout as tintegerarrayprop!
+   fitems: persistentarty;    //same layout as tintegerarrayprop!
    fitemclasstype: virtualpersistentclassty;
    fobjectlinker: tobjectlinker;
 
