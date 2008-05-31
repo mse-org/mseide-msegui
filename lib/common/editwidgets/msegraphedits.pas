@@ -487,6 +487,7 @@ type
    procedure setvaluebitmask(const avalue: longword);
    function getgridvaluebitmask(const index: integer): longword;
    procedure setgridvaluebitmask(const index: integer; const avalue: longword);
+   procedure dokeydown(var info: keyeventinfoty); override;
   public
    constructor create(aowner: tcomponent); override;
    procedure fillcol(const avalue: longbool);
@@ -2102,6 +2103,25 @@ begin
           (widget1.tag = atag) then begin
     result:= tbooleanedit(widget1);
     break;
+   end;
+  end;
+ end;
+end;
+
+procedure tcustombooleanedit.dokeydown(var info: keyeventinfoty);
+begin
+ with info do begin
+  if not (es_processed in eventstate) then begin
+   if not (oe_readonly in getoptionsedit) and 
+    ((key = key_0) or (key = key_1) or (key = key_period)) and
+         (shiftstate = []) and (bo_executeonkey in foptions) then begin
+    include(eventstate,es_processed);
+    if ((key = key_1) xor value) or (key = key_period) then begin
+     togglevalue;
+    end;
+   end;
+   if not (es_processed in eventstate) then begin
+    inherited;
    end;
   end;
  end;

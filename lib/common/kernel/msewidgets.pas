@@ -1544,15 +1544,17 @@ end;
 procedure tactionsimplebutton.dokeydown(var info: keyeventinfoty);
 begin
  inherited;
- if (info.shiftstate = []) and (bo_executeonkey in foptions) then begin
-  if (info.key = key_space) then begin
-   include(finfo.state,ss_clicked);
-   invalidateframestaterect(finfo.dim,fframe);
-  end
-  else begin
-   if isenterkey(self,info.key) then begin
-    include(info.eventstate,es_processed);
-    internalexecute;
+ with info do begin
+  if (shiftstate = []) and (bo_executeonkey in foptions) then begin
+   if (key = key_space) then begin
+    include(finfo.state,ss_clicked);
+    invalidateframestaterect(finfo.dim,fframe);
+   end
+   else begin
+    if isenterkey(self,key) or (key = key_period) then begin
+     include(eventstate,es_processed);
+     internalexecute;
+    end;
    end;
   end;
  end;
