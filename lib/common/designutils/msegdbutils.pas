@@ -323,6 +323,7 @@ type
                            const mixed: boolean): gdbresultty;
    function getshortstring(const address: string; out avalue: string): boolean;
    function setenv(const aname,avalue: string): gdbresultty;
+   function getsysregnum(const varname: string; out num: integer): boolean;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -3338,16 +3339,54 @@ begin
  end;
 end;
 
+function tgdbmi.getsysregnum(const varname: string; out num: integer): boolean;
+var
+ str1: string;
+ int1: integer;
+begin
+ result:= false;
+ num:= 0;
+ if startsstr('sysreg[',varname) then begin
+  int1:= findchar(varname,']') - 8;
+  if int1 > 0 then begin
+   str1:= copy(varname,8,int1);
+   try
+    num:= strtoint(str1);
+    result:= true;
+   except
+   end;
+  end;
+ end;
+end;
+
 function tgdbmi.readpascalvariable(const varname: string; 
                                           out aresult: msestring): gdbresultty;
 var
  str1,str2: string;
+ int1,int2: integer;
+ ar1: stringarty;
 begin
  if running then begin
   result:= gdb_running;
   aresult:= '';
  end
  else begin
+  if getsysregnum(varname,int1) then begin
+   result:= getcliresultstring('show sysreg '+inttostr(int1),str2);
+   if result = gdb_ok then begin
+    ar1:= splitstring(str2,'=');
+    if high(ar1) = 1 then begin
+     aresult:= trim(ar1[1]);
+    end
+    else begin
+     aresult:= str2;
+    end;
+   end
+   else begin
+    aresult:= geterrormessage(result);
+   end;
+   exit;
+  end;
   result:= symboltype(varname,str1);
   if result = gdb_ok then begin
    result:= evaluateexpression(varname,str2);
@@ -3371,8 +3410,23 @@ end;
 
 function tgdbmi.writepascalvariable(const varname: string; const value: string;
                         var aresult: string): gdbresultty;
+var
+ int1: integer; 
+ mstr1: msestring;
 begin
- result:= evaluateexpression(varname+':= '+value,aresult);
+ if getsysregnum(varname,int1) then begin
+  result:= synccommand('set sysreg '+inttostr(int1)+'='+value);
+  if result <> gdb_ok then begin
+   aresult:= geterrormessage(result);
+  end
+  else begin
+   result:= readpascalvariable('sysreg['+inttostr(int1)+']',mstr1);
+   aresult:= mstr1;
+  end;
+ end
+ else begin
+  result:= evaluateexpression(varname+':= '+value,aresult);
+ end;
 end;
 
 function tgdbmi.clicommand(const acommand: string; list: boolean = false;

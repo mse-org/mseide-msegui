@@ -161,7 +161,7 @@ object watchfo: twatchfo
       taborder = 2
       visible = False
       statfile = mainfo.projectstatfile
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_forcereturncheckvalue, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
       ondataentered = expressionondataentered
       reffontheight = 14
     end
