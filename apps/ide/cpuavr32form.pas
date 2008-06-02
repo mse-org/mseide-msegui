@@ -1,4 +1,4 @@
-unit cpuarmform;
+unit cpuavr32form;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
@@ -7,7 +7,7 @@ uses
  mseedit,msestrings,msetypes,msegraphedits;
 
 type
- tcpuarmfo = class(tcpufo)
+ tcpuavr32fo = class(tcpufo)
    tlayouter1: tlayouter;
    r1: tintegeredit;
    r0: tintegeredit;
@@ -26,7 +26,6 @@ type
    lr: tintegeredit;
    pc: tintegeredit;
    fps: tintegeredit;
-   cpsr: tintegeredit;
    c: tbooleanedit;
    tbooleanedit2: tbooleanedit;
    tbooleanedit3: tbooleanedit;
@@ -47,42 +46,77 @@ type
    tbooleanedit18: tbooleanedit;
    tbooleanedit17: tbooleanedit;
    tbooleanedit16: tbooleanedit;
+   sr: tintegeredit;
    procedure regsetvalue(const sender: TObject; var avalue: Integer;
                    var accept: Boolean);
    procedure flagssetvalue(const sender: TObject; var avalue: Boolean;
                    var accept: Boolean);
    procedure flagonchange(const sender: TObject);
+   function internalrefresh: boolean; override;
   public
    constructor create(aowner: tcomponent); override;
  end;
-
+ 
 implementation
 uses
- cpuarmform_mfm;
+ cpuavr32form_mfm,main,msegdbutils;
 
-{ tcpuarmfo }
+{ tcpuavr32fo }
  
-constructor tcpuarmfo.create(aowner: tcomponent);
+constructor tcpuavr32fo.create(aowner: tcomponent);
 begin
  inherited create(aowner);
- fflagswidget:= cpsr;
+ fflagswidget:= sr;
 end;
 
-procedure tcpuarmfo.regsetvalue(const sender: TObject; var avalue: Integer;
+procedure tcpuavr32fo.regsetvalue(const sender: TObject; var avalue: Integer;
                var accept: Boolean);
+var
+ str1: string;
 begin
- doregsetvalue(sender,avalue,accept);
+ if mainfo.gdb.cancommand then begin
+  with tintegeredit(sender) do begin
+   if mainfo.gdb.setsystemregister(0,value) <> gdb_ok then begin
+    accept:= false;
+   end;
+  end;
+ end
+ else begin
+  accept:= false;
+ end;
 end;
 
-procedure tcpuarmfo.flagssetvalue(const sender: TObject; var avalue: Boolean;
+procedure tcpuavr32fo.flagssetvalue(const sender: TObject; var avalue: Boolean;
                var accept: Boolean);
 begin
  doflagsetvalue(sender,avalue,accept);
 end;
 
-procedure tcpuarmfo.flagonchange(const sender: TObject);
+procedure tcpuavr32fo.flagonchange(const sender: TObject);
 begin
  doflagonchange(sender);
+end;
+
+function tcpuavr32fo.internalrefresh: boolean;
+var
+ int1: ptrint;
+begin
+ result:= inherited internalrefresh;
+ if result then begin
+  if mainfo.gdb.getsystemregister(0,int1) = gdb_ok then begin
+   if sr.value <> int1 then begin
+    sr.font.color:= cl_red;
+   end
+   else begin
+    sr.font.color:= cl_black;
+   end;
+   sr.value:= int1;
+   result:= true;
+  end
+  else begin
+   result:= false;
+  end;
+ end;
 end;
 
 end.

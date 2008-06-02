@@ -38,9 +38,10 @@ type
    procedure doflagsetvalue(const sender: TObject;
                    var avalue: Boolean; var accept: Boolean);
    procedure doflagonchange(const sender: TObject);
+   function internalrefresh: boolean; virtual;
   public
    procedure refresh;
- end;
+  end;
 
 var
  cpufo: tcpufo;
@@ -50,7 +51,7 @@ procedure createcpufo;
 implementation
 uses
  cpuform_mfm,main,sysutils,mseformatstr,msebits,msestrings,msegraphutils,
- cpui386form,cpuarmform,cpucpu32form,projectoptionsform;
+ cpui386form,cpuarmform,cpucpu32form,cpuavr32form,projectoptionsform;
 var
  currentproc: processorty;
   
@@ -70,6 +71,9 @@ begin
    pro_cpu32: begin
     application.createform(tcpucpu32fo,cpufo);
    end;
+   pro_avr32: begin
+    application.createform(tcpuavr32fo,cpufo);
+   end;
    else begin
     application.createform(tcpufo,cpufo);
    end;
@@ -79,7 +83,7 @@ end;
 
 { tcpufo }
 
-procedure tcpufo.refresh;
+function tcpufo.internalrefresh: boolean;
 var
  ar1: registerinfoarty;
  int1,int2: integer;
@@ -87,48 +91,55 @@ var
  ed1: tdataedit;
  str1: msestring;
 begin
+ result:= false;
+ if fregisternames = nil then begin
+  if mainfo.gdb.listregisternames(fregisternames) <> gdb_ok then begin
+   exit;
+  end;
+  fedits:= nil;
+  setlength(fedits,length(fregisternames));
+  for int1:= 0 to high(fregisternames) do begin
+   if fregisternames[int1] <> '' then begin
+    for int2:= 0 to componentcount - 1 do begin
+     comp1:= components[int2];
+     if (comp1.Name = fregisternames[int1]) then begin
+      if (comp1 is tdataedit) then begin
+       fedits[int1]:= tdataedit(comp1);
+       comp1.Tag:= int1;
+      end;
+      break;
+     end;
+    end;
+   end;
+  end;
+ end;
+ if mainfo.gdb.listregistervalues(ar1) = gdb_ok then begin
+  for int1:= 0 to high(ar1) do begin
+   with ar1[int1] do begin
+    if (num >= 0) and (num <= high(fedits)) then begin
+     ed1:= fedits[num];
+     if ed1 <> nil then begin
+      str1:= ed1.text;
+      ed1.text:= ar1[int1].bits;
+      ed1.checkvalue(true);
+      if ed1.text <> str1 then begin
+       ed1.font.color:= cl_red;
+      end
+      else begin
+       ed1.font.color:= cl_black;
+      end;
+     end;
+    end;
+   end;
+  end;
+  result:= true;
+ end;
+end;
+
+procedure tcpufo.refresh;
+begin
  if visible and mainfo.gdb.cancommand and on.value then begin
-  if fregisternames = nil then begin
-   if mainfo.gdb.listregisternames(fregisternames) <> gdb_ok then begin
-    exit;
-   end;
-   fedits:= nil;
-   setlength(fedits,length(fregisternames));
-   for int1:= 0 to high(fregisternames) do begin
-    if fregisternames[int1] <> '' then begin
-     for int2:= 0 to componentcount - 1 do begin
-      comp1:= components[int2];
-      if (comp1.Name = fregisternames[int1]) then begin
-       if (comp1 is tdataedit) then begin
-        fedits[int1]:= tdataedit(comp1);
-        comp1.Tag:= int1;
-       end;
-       break;
-      end;
-     end;
-    end;
-   end;
-  end;
-  if mainfo.gdb.listregistervalues(ar1) = gdb_ok then begin
-   for int1:= 0 to high(ar1) do begin
-    with ar1[int1] do begin
-     if (num >= 0) and (num <= high(fedits)) then begin
-      ed1:= fedits[num];
-      if ed1 <> nil then begin
-       str1:= ed1.text;
-       ed1.text:= ar1[int1].bits;
-       ed1.checkvalue(true);
-       if ed1.text <> str1 then begin
-        ed1.font.color:= cl_red;
-       end
-       else begin
-        ed1.font.color:= cl_black;
-       end;
-      end;
-     end;
-    end;
-   end;
-  end;
+  internalrefresh;
  end;
 end;
 

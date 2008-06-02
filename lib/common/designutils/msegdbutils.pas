@@ -27,14 +27,14 @@ type
  sigflagty = (sfl_internal,sfl_stop,sfl_handle);
  sigflagsty = set of sigflagty;
  
- processorty = (pro_i386,pro_arm,pro_cpu32);
+ processorty = (pro_i386,pro_arm,pro_cpu32,pro_avr32);
 
 const
  gdberrortexts: array[gdbresultty] of string =
           ('','Error','Timeout','Data error','Message','Target running',
            'Write error','gdb not active');
  niltext = 'nil';
- processornames: array[processorty] of ansistring = ('i386','arm','cpu32');
+ processornames: array[processorty] of ansistring = ('i386','arm','cpu32','avr32');
  simulatorprocessors = [pro_arm];
  
 type
@@ -466,6 +466,9 @@ type
    function listlines(const path: filenamety;
                           out lines: integerarty; out addresses: ptrintarty): gdbresultty;
 
+   function getsystemregister(const anumber: integer; out avalue: ptrint): gdbresultty;
+   function setsystemregister(const anumber: integer; const avalue: ptrint): gdbresultty;
+                      //for avr32
    function infoline(const filename: filenamety; const line: integer;
                          out start,stop: cardinal): gdbresultty; overload;
    function infoline(const address: cardinal; out filename: filenamety; out line: integer;
@@ -3125,6 +3128,35 @@ begin
   end;
   result:= gdb_ok;
  end;
+end;
+
+function tgdbmi.getsystemregister(const anumber: integer;
+                                           out avalue: ptrint): gdbresultty;
+                      //for avr32
+var
+ str1: ansistring;
+ ar1: stringarty;
+begin
+ avalue:= 0;
+ result:= getcliresultstring('show sysreg '+inttostr(anumber),str1);
+ if result = gdb_ok then begin
+  result:= gdb_dataerror;
+  ar1:= splitstring(str1,'=',true);
+  if high(ar1) = 1 then begin
+   try
+    avalue:= strtointvalue(trimright(ar1[1]));
+    result:= gdb_ok;
+   except
+   end;
+  end;
+ end;
+end;
+
+function tgdbmi.setsystemregister(const anumber: integer;
+                                           const avalue: ptrint): gdbresultty;
+                      //for avr32
+begin
+ result:= synccommand('set sysreg '+inttostr(anumber)+'=0x'+hextostr(avalue,8));
 end;
 
 function tgdbmi.getpcharvar(address: cardinal): string;

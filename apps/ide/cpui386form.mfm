@@ -3,10 +3,8 @@ inherited cpui386fo: tcpui386fo
   bounds_y = 295
   bounds_cx = 283
   bounds_cy = 210
-  frame.dummy = 0
   container.bounds_cx = 273
   container.bounds_cy = 210
-  container.frame.dummy = 0
   container.onchildscaled = cpufoonchildscaled
   statfile = nil
   icon.image = {
@@ -34,16 +32,15 @@ inherited cpui386fo: tcpui386fo
     00040001101010010004000178787801E0E0E003A0A4A0010000000550545001
     E0E0E001F8FCF801804CF00280808001E0E0E005D0D0D001B8B8B801D0D4D001
     E0E0E00CF8FCF801804CF002F8FCF816804CF0610000000800000008000000BF
-    000000080000000000000008FEFF7F04FEFF7FC0FEFF7F00FEFF7F08FEFF7FBF
-    FEFF7F08FEFF7F08FEFF7F08FEFF7FBFFEFF7F08FEFF7F00FEFF7F04FEFF7F40
+    000000080000000000000008FEFF7F03FEFF7FC0FEFF7F00FEFF7F08FEFF7FBF
+    FEFF7F08FEFF7F08FEFF7F08FEFF7FBFFEFF7F08FEFF7F00FEFF7F03FEFF7F40
     FEFF7F0000000000000000BF0000000000000008
   }
   onchildscaled = cpufoonchildscaled
   moduleclassname = 'tcpufo'
   inherited on: tbooleanedit
-    frame.dummy = 0
   end
-  object v: tbooleanedit
+  object v: tbooleanedit[1]
     Tag = 17
     bounds_x = 76
     bounds_y = 1
@@ -65,7 +62,7 @@ inherited cpui386fo: tcpui386fo
     taborder = 17
     onsetvalue = flagsetvalue
   end
-  object r: tbooleanedit
+  object r: tbooleanedit[2]
     Tag = 16
     bounds_x = 92
     bounds_y = 1
@@ -87,7 +84,7 @@ inherited cpui386fo: tcpui386fo
     taborder = 18
     onsetvalue = flagsetvalue
   end
-  object eax: tintegeredit
+  object eax: tintegeredit[3]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 32
@@ -108,14 +105,14 @@ inherited cpui386fo: tcpui386fo
     taborder = 1
     font.height = 14
     font.name = 'stf_fixed'
-    font.xscale = 1.00000000000000000
+    font.xscale =  1.0000000000000000E+0000
     font.dummy = 0
     onsetvalue = regsetvalue
     base = nb_hex
     max = -1
     reffontheight = 17
   end
-  object ebx: tintegeredit
+  object ebx: tintegeredit[4]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 53
@@ -136,14 +133,14 @@ inherited cpui386fo: tcpui386fo
     taborder = 2
     font.height = 14
     font.name = 'stf_fixed'
-    font.xscale = 1.00000000000000000
+    font.xscale =  1.0000000000000000E+0000
     font.dummy = 0
     onsetvalue = regsetvalue
     base = nb_hex
     max = -1
     reffontheight = 17
   end
-  object ecx: tintegeredit
+  object ecx: tintegeredit[5]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 74
@@ -164,14 +161,14 @@ inherited cpui386fo: tcpui386fo
     taborder = 3
     font.height = 14
     font.name = 'stf_fixed'
-    font.xscale = 1.00000000000000000
+    font.xscale =  1.0000000000000000E+0000
     font.dummy = 0
     onsetvalue = regsetvalue
     base = nb_hex
     max = -1
     reffontheight = 17
   end
-  object edx: tintegeredit
+  object edx: tintegeredit[6]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 95
@@ -192,14 +189,14 @@ inherited cpui386fo: tcpui386fo
     taborder = 4
     font.height = 14
     font.name = 'stf_fixed'
-    font.xscale = 1.00000000000000000
+    font.xscale =  1.0000000000000000E+0000
     font.dummy = 0
     onsetvalue = regsetvalue
     base = nb_hex
     max = -1
     reffontheight = 17
   end
-  object esi: tintegeredit
+  object esi: tintegeredit[7]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 116
@@ -220,14 +217,14 @@ inherited cpui386fo: tcpui386fo
     taborder = 5
     font.height = 14
     font.name = 'stf_fixed'
-    font.xscale = 1.00000000000000000
+    font.xscale =  1.0000000000000000E+0000
     font.dummy = 0
     onsetvalue = regsetvalue
     base = nb_hex
     max = -1
     reffontheight = 17
   end
-  object edi: tintegeredit
+  object edi: tintegeredit[8]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 137
@@ -248,14 +245,14 @@ inherited cpui386fo: tcpui386fo
     taborder = 6
     font.height = 14
     font.name = 'stf_fixed'
-    font.xscale = 1.00000000000000000
+    font.xscale =  1.0000000000000000E+0000
     font.dummy = 0
     onsetvalue = regsetvalue
     base = nb_hex
     max = -1
     reffontheight = 17
   end
-  object ebp: tintegeredit
+  object ebp: tintegeredit[9]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 158
@@ -276,14 +273,14 @@ inherited cpui386fo: tcpui386fo
     taborder = 7
     font.height = 14
     font.name = 'stf_fixed'
-    font.xscale = 1.00000000000000000
+    font.xscale =  1.0000000000000000E+0000
     font.dummy = 0
     onsetvalue = regsetvalue
     base = nb_hex
     max = -1
     reffontheight = 17
   end
-  object esp: tintegeredit
+  object esp: tintegeredit[10]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 120
     bounds_y = 53
@@ -304,14 +301,14 @@ inherited cpui386fo: tcpui386fo
     taborder = 9
     font.height = 14
     font.name = 'stf_fixed'
-    font.xscale = 1.00000000000000000
+    font.xscale =  1.0000000000000000E+0000
     font.dummy = 0
     onsetvalue = regsetvalue
     base = nb_hex
     max = -1
     reffontheight = 17
   end
-  object eip: tintegeredit
+  object eip: tintegeredit[11]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 120
     bounds_y = 74
@@ -332,14 +329,14 @@ inherited cpui386fo: tcpui386fo
     taborder = 10
     font.height = 14
     font.name = 'stf_fixed'
-    font.xscale = 1.00000000000000000
+    font.xscale =  1.0000000000000000E+0000
     font.dummy = 0
     onsetvalue = regsetvalue
     base = nb_hex
     max = -1
     reffontheight = 17
   end
-  object eflags: tintegeredit
+  object eflags: tintegeredit[12]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 120
     bounds_y = 32
@@ -360,7 +357,7 @@ inherited cpui386fo: tcpui386fo
     taborder = 8
     font.height = 14
     font.name = 'stf_fixed'
-    font.xscale = 1.00000000000000000
+    font.xscale =  1.0000000000000000E+0000
     font.dummy = 0
     onchange = flagonchange
     onsetvalue = regsetvalue
@@ -368,7 +365,7 @@ inherited cpui386fo: tcpui386fo
     max = -1
     reffontheight = 17
   end
-  object cs: tintegeredit
+  object cs: tintegeredit[13]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 120
     bounds_y = 116
@@ -389,7 +386,7 @@ inherited cpui386fo: tcpui386fo
     taborder = 11
     font.height = 14
     font.name = 'stf_fixed'
-    font.xscale = 1.00000000000000000
+    font.xscale =  1.0000000000000000E+0000
     font.dummy = 0
     onsetvalue = regsetvalue
     base = nb_hex
@@ -397,7 +394,7 @@ inherited cpui386fo: tcpui386fo
     max = -1
     reffontheight = 17
   end
-  object ds: tintegeredit
+  object ds: tintegeredit[14]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 120
     bounds_y = 137
@@ -418,7 +415,7 @@ inherited cpui386fo: tcpui386fo
     taborder = 13
     font.height = 14
     font.name = 'stf_fixed'
-    font.xscale = 1.00000000000000000
+    font.xscale =  1.0000000000000000E+0000
     font.dummy = 0
     onsetvalue = regsetvalue
     base = nb_hex
@@ -426,7 +423,7 @@ inherited cpui386fo: tcpui386fo
     max = -1
     reffontheight = 17
   end
-  object es: tintegeredit
+  object es: tintegeredit[15]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 120
     bounds_y = 158
@@ -447,7 +444,7 @@ inherited cpui386fo: tcpui386fo
     taborder = 15
     font.height = 14
     font.name = 'stf_fixed'
-    font.xscale = 1.00000000000000000
+    font.xscale =  1.0000000000000000E+0000
     font.dummy = 0
     onsetvalue = regsetvalue
     base = nb_hex
@@ -455,7 +452,7 @@ inherited cpui386fo: tcpui386fo
     max = -1
     reffontheight = 17
   end
-  object fs: tintegeredit
+  object fs: tintegeredit[16]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 179
     bounds_y = 116
@@ -476,7 +473,7 @@ inherited cpui386fo: tcpui386fo
     taborder = 12
     font.height = 14
     font.name = 'stf_fixed'
-    font.xscale = 1.00000000000000000
+    font.xscale =  1.0000000000000000E+0000
     font.dummy = 0
     onsetvalue = regsetvalue
     base = nb_hex
@@ -484,7 +481,7 @@ inherited cpui386fo: tcpui386fo
     max = -1
     reffontheight = 17
   end
-  object gs: tintegeredit
+  object gs: tintegeredit[17]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 179
     bounds_y = 137
@@ -505,7 +502,7 @@ inherited cpui386fo: tcpui386fo
     taborder = 14
     font.height = 14
     font.name = 'stf_fixed'
-    font.xscale = 1.00000000000000000
+    font.xscale =  1.0000000000000000E+0000
     font.dummy = 0
     onsetvalue = regsetvalue
     base = nb_hex
@@ -513,7 +510,7 @@ inherited cpui386fo: tcpui386fo
     max = -1
     reffontheight = 17
   end
-  object ss: tintegeredit
+  object ss: tintegeredit[18]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 179
     bounds_y = 158
@@ -534,7 +531,7 @@ inherited cpui386fo: tcpui386fo
     taborder = 16
     font.height = 14
     font.name = 'stf_fixed'
-    font.xscale = 1.00000000000000000
+    font.xscale =  1.0000000000000000E+0000
     font.dummy = 0
     onsetvalue = regsetvalue
     base = nb_hex
@@ -542,7 +539,7 @@ inherited cpui386fo: tcpui386fo
     max = -1
     reffontheight = 17
   end
-  object o: tbooleanedit
+  object o: tbooleanedit[19]
     Tag = 11
     bounds_x = 142
     bounds_y = 1
@@ -564,7 +561,7 @@ inherited cpui386fo: tcpui386fo
     taborder = 21
     onsetvalue = flagsetvalue
   end
-  object d: tbooleanedit
+  object d: tbooleanedit[20]
     Tag = 10
     bounds_x = 153
     bounds_y = 1
@@ -586,7 +583,7 @@ inherited cpui386fo: tcpui386fo
     taborder = 22
     onsetvalue = flagsetvalue
   end
-  object i: tbooleanedit
+  object i: tbooleanedit[21]
     Tag = 9
     bounds_x = 164
     bounds_y = 1
@@ -608,7 +605,7 @@ inherited cpui386fo: tcpui386fo
     taborder = 23
     onsetvalue = flagsetvalue
   end
-  object t: tbooleanedit
+  object t: tbooleanedit[22]
     Tag = 8
     bounds_x = 175
     bounds_y = 1
@@ -630,7 +627,7 @@ inherited cpui386fo: tcpui386fo
     taborder = 24
     onsetvalue = flagsetvalue
   end
-  object s: tbooleanedit
+  object s: tbooleanedit[23]
     Tag = 7
     bounds_x = 186
     bounds_y = 1
@@ -652,7 +649,7 @@ inherited cpui386fo: tcpui386fo
     taborder = 25
     onsetvalue = flagsetvalue
   end
-  object z: tbooleanedit
+  object z: tbooleanedit[24]
     Tag = 6
     bounds_x = 197
     bounds_y = 1
@@ -674,7 +671,7 @@ inherited cpui386fo: tcpui386fo
     taborder = 26
     onsetvalue = flagsetvalue
   end
-  object a: tbooleanedit
+  object a: tbooleanedit[25]
     Tag = 4
     bounds_x = 208
     bounds_y = 1
@@ -696,7 +693,7 @@ inherited cpui386fo: tcpui386fo
     taborder = 27
     onsetvalue = flagsetvalue
   end
-  object p: tbooleanedit
+  object p: tbooleanedit[26]
     Tag = 2
     bounds_x = 219
     bounds_y = 1
@@ -718,7 +715,7 @@ inherited cpui386fo: tcpui386fo
     taborder = 28
     onsetvalue = flagsetvalue
   end
-  object c: tbooleanedit
+  object c: tbooleanedit[27]
     bounds_x = 230
     bounds_y = 1
     bounds_cx = 11
@@ -739,7 +736,7 @@ inherited cpui386fo: tcpui386fo
     taborder = 29
     onsetvalue = flagsetvalue
   end
-  object nt: tbooleanedit
+  object nt: tbooleanedit[28]
     Tag = 15
     bounds_x = 106
     bounds_y = 1
@@ -761,7 +758,7 @@ inherited cpui386fo: tcpui386fo
     taborder = 19
     onsetvalue = flagsetvalue
   end
-  object io: tbooleanedit
+  object io: tbooleanedit[29]
     Tag = 12
     bounds_x = 126
     bounds_y = 1
