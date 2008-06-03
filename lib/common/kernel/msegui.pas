@@ -1288,6 +1288,8 @@ type
                    const state: widgetstatesty): twidget; overload;
    function findtagwidget(const atag: integer; const aclass: widgetclassty): twidget;
               //returns first matching descendent
+   function findwidget(aname: ansistring): twidget;
+              //searches in countainer.widgets, case insensitive
 
    property container: twidget read getcontainer;
    function containeroffset: pointty;
@@ -9919,6 +9921,22 @@ begin
    result:= fwidgets[int1].findtagwidget(atag,aclass);
    if result <> nil then begin
     exit;
+   end;
+  end;
+ end;
+end;
+
+function twidget.findwidget(aname: ansistring): twidget;
+var
+ int1: integer;
+begin
+ result:= nil;
+ aname:= struppercase(aname);
+ with container do begin
+  for int1:= 0 to high(fwidgets) do begin
+   if stringicomp1(fwidgets[int1].name,aname) = 0 then begin
+    result:= fwidgets[int1];
+    break;
    end;
   end;
  end;

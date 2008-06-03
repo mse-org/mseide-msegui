@@ -200,6 +200,7 @@ type
    fuseinitcompsoffset: boolean;
    fcompsoffsetused: boolean;
    fclickedcompbefore: tcomponent;
+   fselectwidget: twidget;
    procedure drawgrid(const canvas: tcanvas);
    procedure hidexorpic(const canvas: tcanvas);
    procedure showxorpic(const canvas: tcanvas);
@@ -248,6 +249,7 @@ type
    procedure clearselection;
    procedure domodified;
 
+   procedure selectchildexec(const sender: tobject);
    procedure dopopup(var info: mouseeventinfoty);
 
    function widgetatpos(const apos: pointty; onlywidgets: boolean): twidget;
@@ -1428,10 +1430,24 @@ begin
  end;
 end;
 
+procedure tdesignwindow.selectchildexec(const sender: tobject);
+var
+ ar1: msestringarty;
+begin
+ with tmenuitem(sender) do begin
+  ar1:= splitstring(caption,' ');
+  fselections.clear;
+  fselections.add(fselectwidget.findwidget(ar1[0]));
+ end;
+end;
+
 procedure tdesignwindow.dopopup(var info: mouseeventinfoty);
 
 var
  bo1,bo2: boolean;
+ item1: tmenuitem;
+ ar1: msestringarty;
+ int1: integer;
 begin
  with tformdesignerfo(fowner),popupme,menu do begin
   bo1:= (fselections.count > 0) and (fselections[0] <> module);
@@ -1454,7 +1470,30 @@ begin
   itembyname('settabord').enabled:= bo1 and 
           (twidget(fselections.items[0]).parentwidget.childrencount >= 2);
   itembyname('synctofo').enabled:= fselections.count > 0;
+  item1:= itembyname('selectchild');
+  item1.enabled:= (fselections.count = 1) and (fselections[0] is twidget) and
+                   (twidget(fselections[0]).container.widgetcount > 0);  
+  if item1.enabled then begin
+   fselectwidget:= twidget(fselections[0]);
+   with fselectwidget.container do begin
+    setlength(ar1,widgetcount);
+    item1.submenu.count:= length(ar1);
+    for int1:= 0 to high(ar1) do begin
+     with widgets[int1] do begin
+      ar1[int1]:= name + ' (' + classname+')';
+     end;
+    end;
+    sortarray(ar1);
+    for int1:= 0 to high(ar1) do begin
+     with item1.submenu[int1] do begin
+      caption:= ar1[int1];
+      onexecute:= {$ifdef FPC}@{$endif}selectchildexec;
+     end;
+    end;
+   end;
+  end;
   show(fowner,info);
+  item1.submenu.clear; 
  end;
 end;
 

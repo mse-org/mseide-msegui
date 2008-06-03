@@ -39,7 +39,7 @@ object formdesignerfo: tformdesignerfo
   top = 180
   moduleclassname = 'tmseform'
   object popupme: tpopupmenu
-    menu.submenu.count = 21
+    menu.submenu.count = 22
     menu.submenu.items = <    
       item
         caption = 'Show objectinspector'
@@ -98,6 +98,11 @@ object formdesignerfo: tformdesignerfo
       end    
       item
         options = [mao_separator, mao_shortcutcaption]
+      end    
+      item
+        caption = 'Select Childwidget'
+        name = 'selectchild'
+        state = [as_localcaption]
       end    
       item
         caption = 'Edit Component'

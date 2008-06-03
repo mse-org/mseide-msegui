@@ -179,6 +179,7 @@ type
   sigsettings: sigsetinfoarty;
   gdbdownload: boolean;
   gdbsimulator: boolean;
+  gdbserverwait: real;
   
   usercolors: colorarty;
   usercolorcomment: msestringarty;
@@ -242,10 +243,6 @@ type
    exceptignore: tbooleanedit;
    exceptclassnames: tstringedit;
    ttabpage16: ttabpage;
-   tlayouter2: tlayouter;
-   gdbservercommand: tfilenameedit;
-   uploadcommand: tfilenameedit;
-   tsplitter6: tsplitter;
    remoteconnection: tstringedit;
    tlayouter3: tlayouter;
    gdbprocessor: tdropdownlistedit;
@@ -399,6 +396,10 @@ type
    filefiltergrid: tstringgrid;
    ttabpage14: ttabpage;
    grid: tstringgrid;
+   tlayouter14: tlayouter;
+   uploadcommand: tfilenameedit;
+   gdbservercommand: tfilenameedit;
+   gdbserverwait: trealedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -926,6 +927,7 @@ begin
   gdbsimulator:= false;
   gdbprocessor:= 'i386';
   gdbservercommand:= '';
+  gdbserverwait:= 0;
   beforeload:= '';
   afterload:= '';
   beforerun:= '';
@@ -1107,6 +1109,7 @@ begin
   updatevalue('gdbsimulator',gdbsimulator);
   updatevalue('gdbprocessor',gdbprocessor);
   updatevalue('gdbservercommand',gdbservercommand);
+  updatevalue('gdbserverwait',gdbserverwait);
   updatevalue('beforeload',beforeload);
   updatevalue('afterload',afterload);
   updatevalue('beforerun',beforerun);
@@ -1323,6 +1326,7 @@ begin
   fo.gdbsimulator.value:= gdbsimulator;
   fo.gdbprocessor.value:= gdbprocessor;
   fo.gdbservercommand.value:= gdbservercommand;
+  fo.gdbserverwait.value:= gdbserverwait;
   fo.gdbbeforeload.value:= beforeload;
   fo.gdbafterload.value:= afterload;
   fo.gdbbeforerun.value:= beforerun;
@@ -1506,6 +1510,7 @@ begin
   gdbsimulator:= fo.gdbsimulator.value;
   gdbprocessor:= fo.gdbprocessor.value;
   gdbservercommand:= fo.gdbservercommand.value;
+  gdbserverwait:= fo.gdbserverwait.value;
   beforeload:= fo.gdbbeforeload.value;
   afterload:= fo.gdbafterload.value;
   beforerun:= fo.gdbbeforerun.value;
@@ -1864,6 +1869,7 @@ begin
  gdbbeforeload.enabled:= gdbdownload.value and not gdbsimulator.value;
  gdbafterload.enabled:= gdbdownload.value and not gdbsimulator.value;
  gdbservercommand.enabled:= not gdbsimulator.value;
+ gdbserverwait.enabled:= not gdbsimulator.value;
  remoteconnection.enabled:= not gdbsimulator.value;
  gdbdownload.enabled:= not gdbsimulator.value;
 end;

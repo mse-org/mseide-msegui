@@ -135,6 +135,7 @@ type
    fuploadexitcode: integer;
    fgdbserverprocid: integer;
    fgdbserverexitcode: integer;
+   fgdbservertimeout: longword;
    procedure dorun;
    procedure newproject(const fromprogram,empty: boolean);
    function checkgdberror(aresult: gdbresultty): boolean;
@@ -247,7 +248,7 @@ procedure handleerror(const e: exception; const text: string);
 
 implementation
 uses
- mseparser,
+ mseparser,msesysintf,
  regwidgets,regeditwidgets,regkernel,regdialogs,regprinter,
  {$ifdef FPC}{$ifndef mse_withoutdb}regdb,regreport,{$endif}{$endif}
  {$ifdef mse_with_ifi}regifi,{$endif}
@@ -849,7 +850,9 @@ end;
 
 procedure tmainfo.gdbserverexe(const sender: tobject);
 begin
- if getprocessexitcode(fgdbserverprocid,fgdbserverexitcode,100000) then begin
+ sys_sched_yield;
+ if timeout(fgdbservertimeout) and 
+     getprocessexitcode(fgdbserverprocid,fgdbserverexitcode,100000) then begin
   application.terminatewait;
  end;
 end;
@@ -861,10 +864,11 @@ end;
 
 procedure tmainfo.dorun;
 begin
- with projectoptions.texp do begin
+ with projectoptions,texp do begin
   if gdbservercommand <> '' then begin
    fgdbserverprocid:= execmse1(gdbservercommand);
    if fgdbserverprocid <> invalidprochandle then begin
+    fgdbservertimeout:= timestep(round(1000000*gdbserverwait));
     if application.waitdialog(nil,'Start gdb server command "'+
                            gdbservercommand+'" running.','Start gdb Server',
               {$ifdef FPC}@{$endif}gdbservercancel,nil,

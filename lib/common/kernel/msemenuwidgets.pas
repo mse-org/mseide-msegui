@@ -1177,7 +1177,7 @@ begin
    value1:= -1;
   end; 
   if (activeitem <> value1) or force then begin
-   if activeitem >= 0 then begin
+   if (activeitem >= 0) and (activeitem < menu.submenu.count) then begin
     if (fnextpopup <> nil) then begin
      fnextpopup.release;
     end;
