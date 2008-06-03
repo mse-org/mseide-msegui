@@ -1361,6 +1361,31 @@ object projectoptionsfo: tprojectoptionsfo
                 )
                 taborder = 3
               end
+              object startupbkpt: tintegeredit
+                bounds_x = 398
+                bounds_y = 0
+                bounds_cx = 100
+                bounds_cy = 37
+                frame.caption = 'Startup BKPT'
+                frame.dummy = 0
+                frame.outerframe = (
+                  0
+                  17
+                  0
+                  0
+                )
+                taborder = 4
+                base = nb_hex
+                max = -1
+                reffontheight = 14
+              end
+              object startupbkpton: tbooleanedit
+                bounds_x = 503
+                bounds_y = 21
+                frame.dummy = 0
+                taborder = 5
+                onchange = downloadchange
+              end
             end
             object tlayouter4: tlayouter
               bounds_x = 0

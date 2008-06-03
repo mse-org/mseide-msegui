@@ -58,7 +58,7 @@ type
  valuekindty = (vk_value,vk_tuple,vk_list);
  gdbeventkindty = (gek_done,gek_error,gek_connected,gek_running,
                    gek_stopped,gek_download,
-                   gek_targetoutput,gek_writeerror);
+                   gek_targetoutput,gek_writeerror,gek_startup);
 
  resultinfoty = record
   variablename: string;
@@ -185,6 +185,12 @@ type
    values: resultinfoarty;
  end;
 
+ tgdbstartupevent = class(tgdbevent)
+  public
+   stopinfo: stopinfoty;
+   constructor create(const dest: ievent);
+ end;
+ 
  setnumprocty = procedure(var dataarray; const index: integer; const text: string);
  setlenprocty = procedure(var dataarray; const len: integer);
 
@@ -266,6 +272,8 @@ type
    fbeforeload: filenamety;
    fafterload: filenamety;
    fbeforerun: filenamety;
+   fstartupbkpt: longword;
+   fstartupbkpton: boolean;
    procedure setstoponexception(const avalue: boolean);
    procedure checkactive;
    function checkconnection: gdbresultty;
@@ -505,6 +513,8 @@ type
    property afterload: filenamety read fafterload write fafterload;
    property beforerun: filenamety read fbeforerun write fbeforerun;
                      //gdb script
+   property startupbkpt: longword read fstartupbkpt write fstartupbkpt;
+   property startupbkpton: boolean read fstartupbkpton write fstartupbkpton;
    property onevent: gdbeventty read fonevent write fonevent;
    property onerror: gdbeventty read fonerror write fonerror;
  end;
@@ -648,6 +658,14 @@ begin
   end;
  end;
  text:= po1;
+end;
+
+{ tgdbstartupevent }
+
+constructor tgdbstartupevent.create(const dest: ievent);
+begin
+ inherited create(ek_none,dest);
+ eventkind:= gek_startup;
 end;
 
 { tgdbmi }
@@ -1014,6 +1032,10 @@ begin
   fillchar(stopinfo,sizeof(stopinfo),0);
   with tgdbevent(event) do begin
    case eventkind of
+    gek_startup: begin
+     stopinfo:= tgdbstartupevent(event).stopinfo;
+     eventkind:= gek_stopped;
+    end;
     gek_stopped: begin
      exclude(fstate,gs_running);
      {$ifdef mswindows}
@@ -1677,6 +1699,8 @@ var
  ar1,ar2: stringarty;
  ca1: cardinal;
  str1: string;
+ frames1: frameinfoarty;
+ ev: tgdbstartupevent;
 begin
  fstartupbreakpoint:= -1;
  fstartupbreakpoint1:= -1;
@@ -1687,32 +1711,53 @@ begin
   end;
  end;
  str1:= '';
- if getcliresult('info file',ar1) = gdb_ok then begin
-  for int1:= 0 to high(ar1) do begin
-   if startsstr('Entry point',ar1[int1]) then begin
-    ar2:= nil;
-    splitstring(ar1[int1],ar2,' ');
-    if high(ar2) >= 2 then begin
-     str1:= ar2[2];
+ if fstartupbkpton then begin
+  fstartupbreakpoint:= breakinsert(fstartupbkpt);  
+ end
+ else begin
+  if (gs_remote in fstate) and (stacklistframes(frames1,0,1) = gdb_ok) then begin
+   ev:= tgdbstartupevent.create(ievent(self));
+   with ev do begin
+    stopinfo.reason:= sr_startup;
+    with frames1[0] do begin
+     stopinfo.addr:= ptruint(addr);
+     stopinfo.filename:= filename;
+     stopinfo.line:= line;
+     stopinfo.messagetext:= 'Startup. File: '+
+                         filename+':'+inttostr(line)+' Function: '+func;
     end;
-    break;
+   end;
+   include(fstate,gs_started);
+   application.postevent(ev);
+   exit;
+  end; 
+  if getcliresult('info file',ar1) = gdb_ok then begin
+   for int1:= 0 to high(ar1) do begin
+    if startsstr('Entry point',ar1[int1]) then begin
+     ar2:= nil;
+     splitstring(ar1[int1],ar2,' ');
+     if high(ar2) >= 2 then begin
+      str1:= ar2[2];
+     end;
+     break;
+    end;
    end;
   end;
- end;
- if str1 <> '' then begin
-  try
-   ca1:= strtointvalue(str1);
-   fstartupbreakpoint:= breakinsert(ca1); //does not always work
-   fstartupbreakpoint1:= breakinsert(ca1+1);
-   if (fstartupbreakpoint < 0) and (fstartupbreakpoint1 < 0) then begin
+  if str1 <> '' then begin
+   try
+    ca1:= strtointvalue(str1);
+    fstartupbreakpoint:= breakinsert(ca1); //does not always work
+    fstartupbreakpoint1:= breakinsert(ca1+1);
+    if (fstartupbreakpoint < 0) and (fstartupbreakpoint1 < 0) then begin
+     str1:= '';
+    end;
+   except
     str1:= '';
    end;
-  except
-   str1:= '';
   end;
- end;
- if str1 = '' then begin
-  synccommand('-break-insert -t main');
+  if str1 = '' then begin
+   synccommand('-break-insert -t main');
+  end;
  end;
  synccommand('-exec-arguments '+ fprogparameters);
  synccommand('-environment-cd '+ tosysfilepath(filepath(fworkingdirectory)));

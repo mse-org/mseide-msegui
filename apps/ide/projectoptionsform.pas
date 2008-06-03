@@ -179,6 +179,8 @@ type
   sigsettings: sigsetinfoarty;
   gdbdownload: boolean;
   downloadalways: boolean;
+  startupbkpt: integer;
+  startupbkpton: boolean;
   gdbsimulator: boolean;
   gdbserverwait: real;
   
@@ -402,6 +404,8 @@ type
    gdbservercommand: tfilenameedit;
    gdbserverwait: trealedit;
    downloadalways: tbooleanedit;
+   startupbkpt: tintegeredit;
+   startupbkpton: tbooleanedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -927,6 +931,8 @@ begin
   uploadcommand:= '';
   gdbdownload:= false;
   downloadalways:= false;
+  startupbkpt:= 0;
+  startupbkpton:= false;
   gdbsimulator:= false;
   gdbprocessor:= 'i386';
   gdbservercommand:= '';
@@ -1110,6 +1116,8 @@ begin
   updatevalue('uploadcommand',uploadcommand);
   updatevalue('gdbdownload',gdbdownload);
   updatevalue('downloadalways',downloadalways);
+  updatevalue('startupbkpt',startupbkpt);
+  updatevalue('startupbkpton',startupbkpton);
   updatevalue('gdbsimulator',gdbsimulator);
   updatevalue('gdbprocessor',gdbprocessor);
   updatevalue('gdbservercommand',gdbservercommand);
@@ -1328,6 +1336,8 @@ begin
   fo.uploadcommand.value:= uploadcommand;
   fo.gdbdownload.value:= gdbdownload;
   fo.downloadalways.value:= downloadalways;
+  fo.startupbkpt.value:= startupbkpt;
+  fo.startupbkpton.value:= startupbkpton;
   fo.gdbsimulator.value:= gdbsimulator;
   fo.gdbprocessor.value:= gdbprocessor;
   fo.gdbservercommand.value:= gdbservercommand;
@@ -1513,6 +1523,8 @@ begin
   uploadcommand:= fo.uploadcommand.value;
   gdbdownload:= fo.gdbdownload.value;
   downloadalways:= fo.downloadalways.value;
+  startupbkpt:= fo.startupbkpt.value;
+  startupbkpton:= fo.startupbkpton.value;
   gdbsimulator:= fo.gdbsimulator.value;
   gdbprocessor:= fo.gdbprocessor.value;
   gdbservercommand:= fo.gdbservercommand.value;
@@ -1879,6 +1891,7 @@ begin
  remoteconnection.enabled:= not gdbsimulator.value;
  gdbdownload.enabled:= not gdbsimulator.value;
  downloadalways.enabled:= not gdbsimulator.value;
+ startupbkpt.enabled:= startupbkpton.value;
 end;
 
 procedure tprojectoptionsfo.processorchange(const sender: TObject);
