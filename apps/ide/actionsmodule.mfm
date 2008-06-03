@@ -27,8 +27,8 @@ object actionsmo: tactionsmo
     imagenr = 1
     hint = 'Step'
     onexecute = stepactonexecute
-    left = 16
-    top = 308
+    left = 24
+    top = 340
   end
   object next: taction
     imagelist = buttonicons
@@ -37,8 +37,8 @@ object actionsmo: tactionsmo
     imagenr = 2
     hint = 'Next'
     onexecute = nextactonexecute
-    left = 16
-    top = 284
+    left = 24
+    top = 316
   end
   object continue: taction
     imagelist = buttonicons
@@ -47,8 +47,8 @@ object actionsmo: tactionsmo
     imagenr = 4
     hint = 'Continue'
     onexecute = continueactonexecute
-    left = 16
-    top = 356
+    left = 24
+    top = 388
   end
   object interrupt: taction
     imagelist = buttonicons
@@ -56,8 +56,8 @@ object actionsmo: tactionsmo
     imagenr = 5
     hint = 'Interrupt'
     onexecute = interruptactonexecute
-    left = 14
-    top = 258
+    left = 22
+    top = 290
   end
   object reset: taction
     imagelist = buttonicons
@@ -65,8 +65,8 @@ object actionsmo: tactionsmo
     imagenr = 6
     hint = 'Reset'
     onexecute = resetactonexecute
-    left = 9
-    top = 234
+    left = 17
+    top = 266
   end
   object opensource: taction
     shortcut = 16463
@@ -82,8 +82,8 @@ object actionsmo: tactionsmo
     imagenr = 3
     hint = 'Finish'
     onexecute = finishactonexecute
-    left = 16
-    top = 332
+    left = 24
+    top = 364
   end
   object save: taction
     shortcut = 16467
@@ -432,8 +432,8 @@ object actionsmo: tactionsmo
     caption = 'Next Instruction'
     imagenr = 13
     onexecute = nextiactonexecute
-    left = 72
-    top = 280
+    left = 80
+    top = 312
   end
   object stepi: taction
     imagelist = buttonicons
@@ -441,8 +441,8 @@ object actionsmo: tactionsmo
     caption = 'Step Instruction'
     imagenr = 12
     onexecute = stepiactonexecute
-    left = 72
-    top = 304
+    left = 80
+    top = 336
   end
   object bluedotsonact: taction
     imagelist = buttonicons
@@ -764,5 +764,11 @@ object actionsmo: tactionsmo
     onexecute = makeactonexecute
     left = 168
     top = 432
+  end
+  object download: taction
+    caption = 'Download'
+    onexecute = downloadexe
+    left = 16
+    top = 216
   end
 end

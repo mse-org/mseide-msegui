@@ -36,6 +36,7 @@ type
   private
    fexitcode: integer;
    fmessagefile: ttextstream;
+   ftargettimestamp: tdatetime;
   protected
    procid: integer;
    procedure doasyncevent(var atag: integer); override;
@@ -143,6 +144,7 @@ var
  wdbefore: filenamety;
 begin
  with projectoptions,texp do begin
+  ftargettimestamp:= getfilemodtime(targetfile);
   if copymessages and (messageoutputfile <> '') then begin
    fmessagefile:= ttextstream.create(messageoutputfile,fm_create);
   end;
@@ -213,6 +215,9 @@ end;
 
 procedure tmaker.dofinished(const sender: tpipereader);
 begin
+ if ftargettimestamp <> getfilemodtime(projectoptions.texp.targetfile) then begin
+  mainfo.targetfilemodified;
+ end;
  asyncevent(0);
 end;
 

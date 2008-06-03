@@ -136,6 +136,8 @@ type
    fgdbserverprocid: integer;
    fgdbserverexitcode: integer;
    fgdbservertimeout: longword;
+   ftargetfilemodified: boolean;
+   function startgdbconnection: boolean;
    procedure dorun;
    procedure newproject(const fromprogram,empty: boolean);
    function checkgdberror(aresult: gdbresultty): boolean;
@@ -197,17 +199,19 @@ type
    procedure uploadcancel(const sender: tobject);
    procedure gdbserverexe(const sender: tobject);
    procedure gdbservercancel(const sender: tobject);
+   function needsdownload: boolean;
   public
    factivedesignmodule: pmoduleinfoty;
    fprojectloaded: boolean;
    errorformfilename: filenamety;
-   function loadexec(isattach: boolean): boolean; //true if ok
+   function loadexec(isattach: boolean; const force: boolean): boolean; //true if ok
    procedure setstattext(const atext: msestring; const akind: messagetextkindty = mtk_info);
    procedure refreshstopinfo(const stopinfo: stopinfoty);
    procedure updatemodifiedforms;
    function checkremake(startcommand: startcommandty): boolean;
    procedure resetstartcommand;
    procedure domake(atag: integer);
+   procedure targetfilemodified;
    function checksavecancel(const aresult: modalresultty): modalresultty;
    function closeall(const nosave: boolean): boolean; //false in cancel
    function closemodule(const amodule: pmoduleinfoty;
@@ -842,7 +846,8 @@ begin
   gek_done: begin
    if sender.downloading then begin
     setstattext('Downloaded '+formatfloat('0.00,',stopinfo.totalsent/1024)+'kB',
-                     mtk_running);      
+                     mtk_finished);      
+    sender.abort;
    end;
   end;
  end;
@@ -862,8 +867,9 @@ begin
  killprocess(fgdbserverprocid);
 end;
 
-procedure tmainfo.dorun;
+function tmainfo.startgdbconnection: boolean;
 begin
+ result:= false;
  with projectoptions,texp do begin
   if gdbservercommand <> '' then begin
    fgdbserverprocid:= execmse1(gdbservercommand);
@@ -890,7 +896,16 @@ begin
    end;
   end;
  end;
- checkgdberror(gdb.run);
+ result:= true;
+end;
+
+procedure tmainfo.dorun;
+begin
+ if startgdbconnection then begin
+  gdb.gdbdownload:= projectoptions.gdbdownload and 
+                        (needsdownload or projectoptions.downloadalways);
+  checkgdberror(gdb.run);
+ end;
 end;
 
 procedure tmainfo.runexec(const sender: tobject);
@@ -971,7 +986,12 @@ begin
  killprocess(fuploadprocid);
 end;
 
-function tmainfo.loadexec(isattach: boolean): boolean;
+function tmainfo.needsdownload: boolean;
+begin
+ result:= ftargetfilemodified or projectoptions.downloadalways;
+end;
+
+function tmainfo.loadexec(isattach: boolean; const force: boolean): boolean;
 var
  str1: filenamety;
  int1: integer;
@@ -983,7 +1003,10 @@ begin
   checkbluedots;
  end
  else begin
-  if not gdb.execloaded then begin
+  if not gdb.execloaded or force then begin
+   if not gdb.active then begin
+    startgdbonexecute(nil);
+   end;
    with projectoptions,texp do begin
     if debugtarget <> '' then begin
      str1:= debugtarget;
@@ -991,7 +1014,8 @@ begin
     else begin
      str1:= targetfile;
     end; 
-    if not gdbdownload and not gdbsimulator and (uploadcommand <> '') then begin
+    if not gdbdownload and not gdbsimulator and (uploadcommand <> '') and 
+                   (needsdownload or force) then begin
      fuploadprocid:= execmse1(uploadcommand);
      if fuploadprocid <> invalidprochandle then begin
       if application.waitdialog(nil,'Uploadcommand "'+uploadcommand+'" running.',
@@ -1036,6 +1060,11 @@ begin
   targetconsolefo.clear;
   if projectoptions.showconsole then begin
    targetconsolefo.activate;
+  end;
+  if force and projectoptions.gdbdownload then begin
+   if startgdbconnection then begin
+    gdb.download(false);
+   end;
   end;
  end;
 end;
@@ -1130,6 +1159,7 @@ procedure tmainfo.mainmenuonupdate(const sender: tcustommenu);
 begin
  with actionsmo do begin
   detachtarget.enabled:= gdb.execloaded;
+  download.enabled:= not gdb.started and not gdb.downloading;
   attachprocess.enabled:= not (gdb.execloaded or gdb.attached);
   run.enabled:= not gdb.running and not gdb.downloading;
   step.enabled:= not gdb.running and not gdb.downloading;
@@ -2158,6 +2188,11 @@ begin
  end;
 end;
 
+procedure tmainfo.targetfilemodified;
+begin
+ ftargetfilemodified:= true;
+end;
+
 procedure tmainfo.domake(atag: integer);
 begin
  unloadexec;
@@ -2165,6 +2200,7 @@ begin
          (checksavecancel(sourcefo.saveall(true)) <> mr_cancel) and
          (checksavecancel(designer.saveall(true,true)) <> mr_cancel) then begin
   updatemodifiedforms;
+  ftargetfilemodified:= false;
   make.domake(atag);
  end;
 end;
@@ -2193,7 +2229,7 @@ begin
   if result then begin
    if not gdb.started then begin
     result:= false;
-    if loadexec(false) then begin
+    if loadexec(false,false) then begin
      dorun;
     end;
    end;
@@ -2325,7 +2361,7 @@ begin
    messagefo.hide;
   end;
   if fstartcommand <> sc_none then begin
-   if loadexec(false) then begin
+   if loadexec(false,false) then begin
     dorun;
    end;
   end;

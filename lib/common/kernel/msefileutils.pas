@@ -167,6 +167,8 @@ procedure clearfileinfo(var info: fileinfoty);
 procedure initdirfileinfo(var info: fileinfoty; const aname: filenamety; open: boolean = false);
 function getfileinfo(const path: filenamety; var info: fileinfoty): boolean;
                   //false if not found
+function getfilemodtime(const path: filenamety): tdatetime; 
+           //empty date if not found
 
 function filesystemiscaseinsensitive: boolean;
 
@@ -243,6 +245,19 @@ function getfileinfo(const path: filenamety; var info: fileinfoty): boolean;
                   //false if not found
 begin
  result:= sys_getfileinfo(path,info);
+end;
+
+function getfilemodtime(const path: filenamety): tdatetime; 
+           //empty date if not found
+var
+ info1: fileinfoty;
+begin
+ if getfileinfo(path,info1) then begin
+  result:= info1.extinfo1.modtime;
+ end
+ else begin
+  result:= emptydatetime;
+ end;
 end;
 
 function copyfile(const oldfile,newfile: filenamety; 

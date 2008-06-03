@@ -83,6 +83,7 @@ type
    make2act: taction;
    make3act: taction;
    make4act: taction;
+   download: taction;
    procedure findinfileonexecute(const sender: tobject);
 
    //file
@@ -137,6 +138,7 @@ type
    procedure ondetachtarget(const sender: TObject);
    procedure onattachprocess(const sender: TObject);
    procedure updateshortcuts(const sender: tshortcutcontroller);
+   procedure downloadexe(const sender: TObject);
  end;
 
 var
@@ -487,10 +489,15 @@ begin
           'Process ID','Attach to process') = mr_ok then begin
    startgdbonexecute(nil);
    gdb.attach(int1,info);
-   loadexec(true);
+   loadexec(true,false);
    refreshstopinfo(info);
   end;
  end;
+end;
+
+procedure tactionsmo.downloadexe(const sender: TObject);
+begin
+ mainfo.loadexec(false,true);
 end;
 
 end.

@@ -1346,6 +1346,21 @@ object projectoptionsfo: tprojectoptionsfo
                 taborder = 2
                 onchange = downloadchange
               end
+              object downloadalways: tbooleanedit
+                bounds_x = 262
+                bounds_y = 20
+                bounds_cx = 131
+                bounds_cy = 16
+                frame.caption = 'Download before run'
+                frame.dummy = 0
+                frame.outerframe = (
+                  0
+                  1
+                  118
+                  2
+                )
+                taborder = 3
+              end
             end
             object tlayouter4: tlayouter
               bounds_x = 0
@@ -1542,7 +1557,7 @@ object projectoptionsfo: tprojectoptionsfo
               optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
               bounds_x = 1
               bounds_y = 0
-              bounds_cx = 611
+              bounds_cx = 612
               bounds_cy = 37
               frame.options = [cfo_fixtop]
               frame.caption = 'Upload command'

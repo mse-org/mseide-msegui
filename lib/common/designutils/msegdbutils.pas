@@ -40,7 +40,7 @@ const
 type
  gdbstatety = (gs_syncget,gs_syncack,gs_clicommand,gs_clilist,gs_started,
                gs_execloaded,gs_attached,gs_detached,
-               gs_remote,gs_downloaded,gs_downloading,
+               gs_remote,gs_downloaded,gs_downloading,gs_runafterload,
                gs_internalrunning,gs_running,gs_interrupted,gs_restarted,gs_closing);
  gdbstatesty = set of gdbstatety;
 
@@ -268,6 +268,7 @@ type
    fbeforerun: filenamety;
    procedure setstoponexception(const avalue: boolean);
    procedure checkactive;
+   function checkconnection: gdbresultty;
    procedure resetexec;
    function getrunning: boolean;
    function getexecloaded: boolean;
@@ -412,7 +413,7 @@ type
    function clearenvvars: gdbresultty;
    function setenvvar(const aname,avalue: string): gdbresultty;
 
-   function download: gdbresultty;
+   function download(const runafterload: boolean): gdbresultty;
    function run: gdbresultty;
    procedure continue;
    procedure next;
@@ -1105,10 +1106,9 @@ begin
     end;
     gek_done: begin
      if gs_downloading in fstate then begin
+      include(fstate,gs_downloaded);
       with stopinfo do begin
        getintegervalue(values,'load-size',totalsent);
-       fstate:= fstate + [gs_downloaded,gs_downloading];
-                //restore downloading flag;
        if fafterload <> '' then begin
         if source(fafterload) <> gdb_ok then begin
          exclude(fstate,gs_downloaded);
@@ -1116,7 +1116,11 @@ begin
         end;
        end;
        initproginfo;
-       dorun;
+       include(fstate,gs_downloading);
+                //restore downloading flag;
+       if gs_runafterload in fstate then begin
+        dorun;
+       end;
       end;
      end;
     end;
@@ -1140,7 +1144,9 @@ begin
     if (eventkind = gek_error) and assigned(fonerror) then begin
      fonerror(self,eventkind,values,stopinfo);
     end;
-    if (eventkind = gek_done) and downloading then begin
+    if (eventkind = gek_done) and 
+             (fstate * [gs_downloading,gs_runafterload] =
+                    [gs_downloading,gs_runafterload]) then begin
      exclude(fstate,gs_downloading);
      dorun;
     end;
@@ -1644,18 +1650,23 @@ begin
  end;
 end;
 
-function tgdbmi.download: gdbresultty;
+function tgdbmi.download(const runafterload: boolean): gdbresultty;
 begin
- result:= gdb_ok;
- if fbeforeload <> '' then begin
-  result:= source(fbeforeload);
- end;
+ result:= checkconnection;
  if result = gdb_ok then begin
-  if not internalcommand('-target-download') then begin
-   result:= gdb_writeerror;
-  end
-  else begin
-   include(fstate,gs_downloading);
+  if fbeforeload <> '' then begin
+   result:= source(fbeforeload);
+  end;
+  if result = gdb_ok then begin
+   if not internalcommand('-target-download') then begin
+    result:= gdb_writeerror;
+   end
+   else begin
+    fstate:= fstate + [gs_downloading,gs_runafterload];
+    if not runafterload then begin
+     exclude(fstate,gs_runafterload);
+    end;
+   end;
   end;
  end;
 end;
@@ -1726,6 +1737,19 @@ begin
  end;
 end;
 
+function tgdbmi.checkconnection: gdbresultty;
+begin
+ result:= gdb_ok;
+ if fremoteconnection <> '' then begin
+  result:= synccommand('-target-select '+fremoteconnection);
+  if result <> gdb_ok then begin
+   exit;
+  end;
+  include(fstate,gs_remote);
+  initproginfo;
+ end;
+end;
+
 function tgdbmi.run: gdbresultty;
 begin
  result:= gdb_ok;
@@ -1739,19 +1763,14 @@ begin
   end;
  end
  else begin
-  if fremoteconnection <> '' then begin
-   result:= synccommand('-target-select '+fremoteconnection);
-   if result <> gdb_ok then begin
-    exit;
-   end;
-   include(fstate,gs_remote);
-   initproginfo;
-  end;
   if fgdbdownload and not (gs_downloaded in fstate) then begin
-   result:= download;
+   result:= download(true);
   end
   else begin
-   dorun;
+   result:= checkconnection;
+   if result = gdb_ok then begin
+    dorun;
+   end;
   end;
  end;
 end;

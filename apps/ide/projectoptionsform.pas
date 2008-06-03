@@ -178,6 +178,7 @@ type
   externalconsole: boolean;
   sigsettings: sigsetinfoarty;
   gdbdownload: boolean;
+  downloadalways: boolean;
   gdbsimulator: boolean;
   gdbserverwait: real;
   
@@ -400,6 +401,7 @@ type
    uploadcommand: tfilenameedit;
    gdbservercommand: tfilenameedit;
    gdbserverwait: trealedit;
+   downloadalways: tbooleanedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -924,6 +926,7 @@ begin
   remoteconnection:= '';
   uploadcommand:= '';
   gdbdownload:= false;
+  downloadalways:= false;
   gdbsimulator:= false;
   gdbprocessor:= 'i386';
   gdbservercommand:= '';
@@ -1106,6 +1109,7 @@ begin
   updatevalue('remoteconnection',remoteconnection);
   updatevalue('uploadcommand',uploadcommand);
   updatevalue('gdbdownload',gdbdownload);
+  updatevalue('downloadalways',downloadalways);
   updatevalue('gdbsimulator',gdbsimulator);
   updatevalue('gdbprocessor',gdbprocessor);
   updatevalue('gdbservercommand',gdbservercommand);
@@ -1323,6 +1327,7 @@ begin
   fo.remoteconnection.value:= remoteconnection;
   fo.uploadcommand.value:= uploadcommand;
   fo.gdbdownload.value:= gdbdownload;
+  fo.downloadalways.value:= downloadalways;
   fo.gdbsimulator.value:= gdbsimulator;
   fo.gdbprocessor.value:= gdbprocessor;
   fo.gdbservercommand.value:= gdbservercommand;
@@ -1507,6 +1512,7 @@ begin
   remoteconnection:= fo.remoteconnection.value;
   uploadcommand:= fo.uploadcommand.value;
   gdbdownload:= fo.gdbdownload.value;
+  downloadalways:= fo.downloadalways.value;
   gdbsimulator:= fo.gdbsimulator.value;
   gdbprocessor:= fo.gdbprocessor.value;
   gdbservercommand:= fo.gdbservercommand.value;
@@ -1872,6 +1878,7 @@ begin
  gdbserverwait.enabled:= not gdbsimulator.value;
  remoteconnection.enabled:= not gdbsimulator.value;
  gdbdownload.enabled:= not gdbsimulator.value;
+ downloadalways.enabled:= not gdbsimulator.value;
 end;
 
 procedure tprojectoptionsfo.processorchange(const sender: TObject);
