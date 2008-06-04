@@ -708,6 +708,8 @@ type
    procedure setvaluescale(const Value: real);
    function getasinteger: integer;
    procedure setasinteger(const avalue: integer);
+   function getascurrency: currency;
+   procedure setascurrency(const avalue: currency);
   protected
    fisdb: boolean;
    function gettextvalue(var accept: boolean; const quiet: boolean): realty; virtual;
@@ -727,6 +729,7 @@ type
    procedure assigncol(const value: trealdatalist);
    function isnull: boolean;
    property asinteger: integer read getasinteger write setasinteger;
+   property ascurrency: currency read getascurrency write setascurrency;
    property onsetvalue: setrealeventty read fonsetvalue write fonsetvalue;
    property value: realty read fvalue write setvalue stored false;
    property formatedit: msestring read fformatedit write setformatedit;
@@ -3658,6 +3661,21 @@ begin
 end;
 
 procedure tcustomrealedit.setasinteger(const avalue: integer);
+begin
+ value:= avalue;
+end;
+
+function tcustomrealedit.getascurrency: currency;
+begin
+ if isnull then begin
+  result:= 0;
+ end
+ else begin
+  result:= value;
+ end;
+end;
+
+procedure tcustomrealedit.setascurrency(const avalue: currency);
 begin
  value:= avalue;
 end;
