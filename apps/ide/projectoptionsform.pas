@@ -264,7 +264,6 @@ type
    stoponexception: tbooleanedit;
    activateonbreak: tbooleanedit;
    tlayouter6: tlayouter;
-   valuehints: tbooleanedit;
    debugtarget: tfilenameedit;
    makepage: ttabpage;
    tspacer2: tspacer;
@@ -406,6 +405,7 @@ type
    downloadalways: tbooleanedit;
    startupbkpt: tintegeredit;
    startupbkpton: tbooleanedit;
+   valuehints: tbooleanedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);

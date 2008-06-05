@@ -854,7 +854,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_cy = 338
           anchors = [an_left, an_top, an_right, an_bottom]
           taborder = 4
-          activepageindex = 4
+          activepageindex = 0
           tab_frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
           tab_frame.dummy = 0
           tab_face.localprops = [fal_frameimageoffset]
@@ -871,6 +871,7 @@ object projectoptionsfo: tprojectoptionsfo
             frame.dummy = 0
             anchors = [an_left, an_top, an_right, an_bottom]
             taborder = 4
+            visible = True
             caption = 'Source &directories'
             reffontheight = 14
             object sourcedirgrid: twidgetgrid
@@ -1242,7 +1243,6 @@ object projectoptionsfo: tprojectoptionsfo
             frame.dummy = 0
             anchors = [an_left, an_top, an_right, an_bottom]
             taborder = 5
-            visible = True
             caption = 'E&mbedded'
             reffontheight = 14
             object remoteconnection: tstringedit
@@ -1612,7 +1612,7 @@ object projectoptionsfo: tprojectoptionsfo
         object tlayouter1: tlayouter
           bounds_x = 7
           bounds_y = 156
-          bounds_cx = 503
+          bounds_cx = 592
           bounds_cy = 16
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
           frame.dummy = 0
@@ -1687,6 +1687,22 @@ object projectoptionsfo: tprojectoptionsfo
               2
             )
           end
+          object valuehints: tbooleanedit
+            bounds_x = 513
+            bounds_y = 0
+            bounds_cx = 79
+            bounds_cy = 16
+            frame.caption = '&Value Hints'
+            frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
+            frame.dummy = 0
+            frame.outerframe = (
+              0
+              1
+              66
+              2
+            )
+            taborder = 4
+          end
         end
         object tlayouter6: tlayouter
           bounds_x = 0
@@ -1706,27 +1722,11 @@ object projectoptionsfo: tprojectoptionsfo
           place_maxdist = 10
           place_mode = wam_end
           place_options = [plo_endmargin]
-          object valuehints: tbooleanedit
-            bounds_x = 532
-            bounds_y = 20
-            bounds_cx = 79
-            bounds_cy = 16
-            frame.caption = '&Value Hints'
-            frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
-            frame.dummy = 0
-            frame.outerframe = (
-              0
-              1
-              66
-              2
-            )
-            taborder = 1
-          end
           object debugtarget: tfilenameedit
             optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
             bounds_x = 1
             bounds_y = 0
-            bounds_cx = 521
+            bounds_cx = 610
             bounds_cy = 37
             frame.caption = 'Debug &target (empty = make targetfile)'
             frame.captionoffset = 3
