@@ -727,7 +727,7 @@ function tsourcefo.locate(const info: stopinfoty): tsourcepage;
 begin
  resetactiverow;
  if info.filename <> '' then begin
-  result:= openfile(info.filename);
+  result:= openfile(filepath(projectoptions.texp.makedir,info.filename));
   if result <> nil then begin
    result.activerow:= info.line-1;
    result.show;
