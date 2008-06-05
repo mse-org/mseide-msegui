@@ -1217,7 +1217,7 @@ var
  transientfor: twindow;
  
 begin 
- application.lock;
+ application.lockifnotmainthread;
  try
   transientfor:= application.unreleasedactivewindow;
   widget1:= twidget.create(nil); 
@@ -1329,7 +1329,7 @@ begin
    widget.Free;
   end;
  finally
-  application.unlock;
+  application.unlockifnotmainthread;
  end;
 end;
 

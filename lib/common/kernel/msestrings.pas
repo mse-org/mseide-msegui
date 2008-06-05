@@ -215,6 +215,8 @@ function stringsearch(const substring,s: string; start: integer;
                       const substringupcase: string = ''): integer; overload;
 
 
+procedure addeditchars(const source: msestring; var buffer: msestring; var cursorpos: integer);
+                                  //cursorpos nullbased
 function processeditchars(var value: msestring; stripcontrolchars: boolean): integer;
            //bringt offset durch backspace
 function mseextractprintchars(const value: msestring): msestring;
@@ -979,7 +981,7 @@ var
 begin
  result:= nil;
  splitstring(source,result,c_linefeed);
- for int1:= 0 to high(result) do begin
+ for int1:= 0 to high(result) - 1 do begin
   int2:= length(result[int1]);
   if (int2 > 0) and (result[int1][int2] = c_return) then begin
    setlength(result[int1],int2-1);
@@ -2545,6 +2547,58 @@ end;
 function tvarrectomsestring(value: tvarrec): msestring;
 begin
  result:= msestring(value.vwidestring^); //msestringimplementation
+end;
+
+procedure addeditchars(const source: msestring; var buffer: msestring; 
+                                  var cursorpos: integer);
+                                  //cursorpos nullbased
+var
+ s,d: pmsechar;
+ len1: integer;
+ ch1: msechar;
+ int1,int2: integer;
+ i: integer;
+begin
+ len1:= length(buffer);
+ i:= cursorpos;
+ if i > len1 then begin
+  i:= len1;
+ end;
+ int1:= len1;
+ int2:= cursorpos + length(source);
+ if int1 < int2 then begin
+  int1:= int2;
+ end;
+ setlength(buffer,int1); //refcount one
+ s:= pmsechar(source);
+ d:= pmsechar(buffer);
+ while true do begin
+  ch1:= s^;
+  case ch1 of
+   #0: begin
+    break;
+   end;
+   c_backspace: begin
+    if i > 0 then begin
+     dec(i);
+     dec(len1,2);
+    end;
+   end;
+   c_return: begin
+    i:= 0;
+   end;
+   else begin
+    (d+i)^:= ch1;
+    inc(i);
+    if i > len1 then begin
+     len1:= i;
+    end;
+   end;
+  end;
+  inc(s);
+ end; 
+ setlength(buffer,len1);
+ cursorpos:= i;
 end;
 
 function processeditchars(var value: msestring; stripcontrolchars: boolean): integer;

@@ -13909,7 +13909,7 @@ begin
   fidleaction(self);
   if fstate * [aps_waitok,aps_waitcanceled] = [] then begin
    registeronidle({$ifdef FPC}@{$endif}dowaitidle1);
-   again:= true;
+//   again:= true;
    exclude(fstate,aps_waitidlelock);
   end;
  end;

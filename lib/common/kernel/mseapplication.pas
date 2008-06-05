@@ -255,6 +255,8 @@ type
     //release mutex recursive if calling thread holds the mutex,
     //returns count for relockall
    procedure relockall(count: integer);
+   procedure lockifnotmainthread;
+   procedure unlockifnotmainthread;
    function synchronize(const proc: objectprocty;
                        const quite: boolean = false): boolean;
      //true if not aborted, quiet -> show no exceptions
@@ -901,6 +903,20 @@ begin
   if ismainthread then begin
    dec(fcheckoverloadlock);
   end;
+ end;
+end;
+
+procedure tcustomapplication.lockifnotmainthread;
+begin
+ if not ismainthread then begin
+  lock;
+ end;
+end;
+
+procedure tcustomapplication.unlockifnotmainthread;
+begin
+ if not ismainthread then begin
+  unlock;
  end;
 end;
 

@@ -310,6 +310,7 @@ procedure tmainfo.mainfoondestroy(const sender: tobject);
 begin
  designnotifications.unRegisternotification(idesignnotification(self));
  abortmake;
+ abortdownload;
  sourceupdate.deinit(designer);
 end;
 
@@ -976,14 +977,20 @@ end;
 
 procedure tmainfo.uploadexe(const sender: tobject);
 begin
+ if not downloading then begin
+  application.terminatewait;
+ end;
+{
  if getprocessexitcode(fuploadprocid,fuploadexitcode,100000) then begin
   application.terminatewait;
  end;
+}
 end;
 
 procedure tmainfo.uploadcancel(const sender: tobject);
 begin
- killprocess(fuploadprocid);
+ abortdownload;
+// killprocess(fuploadprocid);
 end;
 
 function tmainfo.needsdownload: boolean;
@@ -996,6 +1003,7 @@ var
  str1: filenamety;
  int1: integer;
 begin
+ setstattext('');
  result:= false;
  if isattach then begin
   inc(fexecstamp);
@@ -1012,10 +1020,30 @@ begin
      str1:= debugtarget;
     end
     else begin
-     str1:= targetfile;
+     str1:= makedir+targetfile;
     end; 
     if not gdbdownload and not gdbsimulator and (uploadcommand <> '') and 
                    (needsdownload or force) then begin
+     dodownload;
+     if application.waitdialog(nil,'Uploadcommand "'+uploadcommand+'" running.',
+         'Uploading',{$ifdef FPC}@{$endif}uploadcancel,nil,
+         {$ifdef FPC}@{$endif}uploadexe) then begin
+      if downloadresult <> 0 then begin
+       setstattext('Download ***ERROR*** ' + inttostr(downloadresult)+'.',mtk_error);
+       exit;
+      end
+      else begin
+       setstattext('Download finished.',mtk_finished);
+       if projectoptions.closemessages then begin
+        messagefo.hide;
+       end;
+      end;
+     end
+     else begin
+      setstattext('Download canceled.',mtk_error);
+      exit;
+     end;                
+(*                   
      fuploadprocid:= execmse1(uploadcommand);
      if fuploadprocid <> invalidprochandle then begin
       if application.waitdialog(nil,'Uploadcommand "'+uploadcommand+'" running.',
@@ -1030,6 +1058,7 @@ begin
      else begin
       setstattext('Can not run upload command.',mtk_error);
      end;
+*)
     end
    end;
    if checkgdberror(gdb.fileexec(str1)) then begin
@@ -1041,7 +1070,6 @@ begin
  end;
  result:= gdb.execloaded or gdb.attached;
  if result then begin
-  setstattext('');
   with projectoptions do begin
    gdb.progparameters:= progparameters;
    gdb.workingdirectory:= progworkingdirectory;
@@ -1159,9 +1187,10 @@ end;
 
 procedure tmainfo.mainmenuonupdate(const sender: tcustommenu);
 begin
- with actionsmo do begin
+ with projectoptions,texp,actionsmo do begin
   detachtarget.enabled:= gdb.execloaded;
-  download.enabled:= not gdb.started and not gdb.downloading;
+  download.enabled:= not gdb.started and not gdb.downloading and 
+               ((uploadcommand <> '') or gdbdownload);
   attachprocess.enabled:= not (gdb.execloaded or gdb.attached);
   run.enabled:= not gdb.running and not gdb.downloading;
   step.enabled:= not gdb.running and not gdb.downloading;

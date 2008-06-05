@@ -1585,7 +1585,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_cx = 612
               bounds_cy = 37
               frame.options = [cfo_fixtop]
-              frame.caption = 'Upload command'
+              frame.caption = 'Download command'
               frame.captionoffset = 3
               frame.font.name = 'stf_default'
               frame.font.xscale =  1.0000000000000000E+0000

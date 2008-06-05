@@ -401,6 +401,7 @@ type
 
  tpoorstringdatalist = class(tdynamicpointerdatalist)
   private
+   feditcharindex: integer;
    function Getitems(index: integer): msestring;
    procedure Setitems(index: integer; const Value: msestring);
    function getasarray: msestringarty;
@@ -4412,6 +4413,53 @@ function tpoorstringdatalist.addchars(const value: msestring;
                     const processeditchars: boolean = true): integer;		
 var
  int1,int2: integer;
+ ar1: msestringarty;
+ first: pmsestring;
+ mstr1: msestring; 
+begin
+ ar1:= nil; //compilerwarning
+ if value <> '' then begin
+  ar1:= breaklines(value);
+  if high(ar1) > 0 then begin
+   beginupdate;
+  end;
+  if fcount = 0 then begin
+   count:= 1;
+  end;
+  int1:= fcount - 1;
+  int2:= int1;
+  checkindex(int1);
+  first:= pmsestring(fdatapo+int1*fsize);
+  if processeditchars then begin
+   addeditchars(ar1[0],first^,feditcharindex);
+   for int1:= 1 to high(ar1) do begin
+    mstr1:= '';
+    feditcharindex:= 0;
+    addeditchars(ar1[int1],mstr1,feditcharindex);
+    add(mstr1);
+   end;
+  end
+  else begin
+   first^:= first^ + ar1[0];
+   for int1:= 1 to high(ar1) do begin
+    add(ar1[int1]);
+   end;
+  end;
+  if high(ar1) > 0 then begin
+   endupdate;
+  end
+  else begin
+   change(int2);
+  end;
+ end;
+ result:= fcount-1;
+end;
+
+(*
+function tpoorstringdatalist.addchars(const value: msestring;
+                    const processeditchars: boolean = true): integer;		
+var
+ int1,int2: integer;
  po1: pmsestring;
  ar1: msestringarty;
  backdelete: integer;
@@ -4441,7 +4489,7 @@ begin
     po1:= pointer(fdatapo+int1*fsize);
     po1^:= copy(po1^,1,length(po1^)+backdelete) + ar1[int2];
     change(int1);
-    doitemchange(int1);
+//    doitemchange(int1);
    end;
   end;
   if high(ar1) > 0 then begin
@@ -4450,7 +4498,7 @@ begin
  end;
  result:= fcount-1;
 end;
-
+*)
 procedure tpoorstringdatalist.assign(source: tpersistent);
 var
  int1: integer;

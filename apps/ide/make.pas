@@ -25,40 +25,84 @@ procedure abortmake;
 function making: boolean;
 function buildmakecommandline(const atag: integer): string;
 
+procedure dodownload;
+procedure abortdownload;
+function downloading: boolean;
+function downloadresult: integer;
+
 implementation
 uses
- mseprocutils,main,msestream,projectoptionsform,sysutils,msegrids,msetypes,
+ classes,mseprocutils,main,msestream,projectoptionsform,sysutils,msegrids,msetypes,
  sourceform,mseclasses,mseapplication,mseeditglob,msefileutils,msesys,msepipestream,
  msesysutils,msegraphics,msestrings,messageform,msedesignintf,msedesigner;
 
 type
- tmaker = class(tactcomponent)
+ tprogrunner = class(tactcomponent)
   private
    fexitcode: integer;
    fmessagefile: ttextstream;
-   ftargettimestamp: tdatetime;
   protected
    procid: integer;
    procedure doasyncevent(var atag: integer); override;
    procedure inputavailable(const sender: tpipereader);
-   procedure dofinished(const sender: tpipereader);
+   procedure dofinished(const sender: tpipereader); virtual;
+   function getcommandline: ansistring; virtual;
   public
    messagepipe: tpipereader;
-   constructor create(atag: integer); reintroduce;
+   constructor create(aowner: tcomponent); override;
    destructor destroy; override;
  end;
 
+ tmaker = class(tprogrunner)
+  private
+   ftargettimestamp: tdatetime;
+   fmaketag: integer;
+  protected
+   procedure doasyncevent(var atag: integer); override;
+   procedure dofinished(const sender: tpipereader); override;
+   function getcommandline: ansistring; override;
+  public
+   constructor create(atag: integer); reintroduce;
+ end;
+  
+ tloader = class(tprogrunner)
+  protected
+   procedure dofinished(const sender: tpipereader); override;
+   function getcommandline: ansistring; override;
+  public
+   constructor create(aowner: tcomponent); override;
+ end;
+ 
 var
  maker: tmaker;
+ loader: tloader;
 
 function making: boolean;
 begin
  result:= (maker <> nil) and (maker.procid <> invalidprochandle);
 end;
 
+function downloading: boolean;
+begin
+ result:= (loader <> nil) and (loader.procid <> invalidprochandle);
+end;
+
+function downloadresult: integer;
+begin
+ result:= -1;
+ if loader <> nil then begin
+  result:= loader.fexitcode;
+ end;
+end;
+
 procedure killmake;
 begin
  freeandnil(maker);
+end;
+
+procedure killload;
+begin
+ freeandnil(loader);
 end;
 
 procedure domake(atag: integer);
@@ -81,6 +125,14 @@ begin
  if maker <> nil then begin
   killmake;
   mainfo.setstattext('Make aborted.',mtk_error);
+ end;
+end;
+
+procedure abortdownload;
+begin
+ if loader <> nil then begin
+  killload;
+  mainfo.setstattext('Download aborted.',mtk_error);
  end;
 end;
 
@@ -135,16 +187,25 @@ begin
  result:= str1;
 end;
 
-{ tmaker }
+procedure dodownload;
+begin
+ killload;
+ if projectoptions.closemessages then begin
+  messagefo.messages.show;
+ end;
+ loader:= tloader.create(nil);
+end;
 
-constructor tmaker.create(atag: integer);
+{ tprogrunner }
+
+constructor tprogrunner.create(aowner: tcomponent);
 var
- int1: integer;
  str3: string;
  wdbefore: filenamety;
 begin
+ inherited;
+ str3:= getcommandline; 
  with projectoptions,texp do begin
-  ftargettimestamp:= getfilemodtime(targetfile);
   if copymessages and (messageoutputfile <> '') then begin
    fmessagefile:= ttextstream.create(messageoutputfile,fm_create);
   end;
@@ -153,8 +214,7 @@ begin
   messagepipe.onpipebroken:= {$ifdef FPC}@{$endif}dofinished;
   messagefo.messages.rowcount:= 0;
   procid:= invalidprochandle;
-  int1:= 1; //defaulterror
-  str3:= buildmakecommandline(atag);
+  fexitcode:= 1; //defaulterror
   if makedir <> '' then begin
    wdbefore:= getcurrentdir;
    setcurrentdir(makedir);
@@ -164,7 +224,7 @@ begin
   except
    on e: exception do begin
     if e is eoserror then begin
-     int1:= eoserror(e).error;
+     fexitcode:= eoserror(e).error;
     end;
     application.handleexception(nil,'Runerror with "'+str3+'": ');
    end;
@@ -173,19 +233,9 @@ begin
    setcurrentdir(wdbefore);
   end;
  end;
- if procid <> invalidprochandle then begin
-  mainfo.setstattext('Making.',mtk_running);
-  messagefo.messages.font.options:= messagefo.messages.font.options -
-               [foo_antialiased] + [foo_nonantialiased];
- end
- else begin
-  mainfo.setstattext('Make not running.',mtk_error);
-  designnotifications.aftermake(idesigner(designer),int1);
-//  mainfo.makefinished(int1);
- end;
 end;
 
-destructor tmaker.destroy;
+destructor tprogrunner.destroy;
 begin
 // messagepipe.handle:= invalidfilehandle;
  if (procid <> invalidprochandle) then begin
@@ -200,28 +250,24 @@ begin
  inherited;
 end;
 
-procedure tmaker.doasyncevent(var atag: integer);
+procedure tprogrunner.doasyncevent(var atag: integer);
 begin
  if not getprocessexitcode(procid,fexitcode,5000000) then begin
   messagefo.messages.appendrow(['Error: Timeout.']);
   messagefo.messages.appendrow(['']);
  end;
  procid:= invalidprochandle;
- designnotifications.aftermake(idesigner(designer),fexitcode);
 // mainfo.makefinished(fexitcode);
  messagefo.messages.font.options:= messagefo.messages.font.options +
              [foo_antialiased] - [foo_nonantialiased];
 end;
 
-procedure tmaker.dofinished(const sender: tpipereader);
+procedure tprogrunner.dofinished(const sender: tpipereader);
 begin
- if ftargettimestamp <> getfilemodtime(projectoptions.texp.targetfile) then begin
-  mainfo.targetfilemodified;
- end;
  asyncevent(0);
 end;
 
-procedure tmaker.inputavailable(const sender: tpipereader);
+procedure tprogrunner.inputavailable(const sender: tpipereader);
 var
  str1: string;
 begin
@@ -235,12 +281,80 @@ begin
   application.lock;
  end;
  with messagefo.messages do begin
-  datacols[0].readpipe(str1);
+  datacols[0].readpipe(str1,true);
   showlastrow;
  end;
  if fmessagefile <> nil then begin
   fmessagefile.writestr(str1);
  end;
+end;
+
+function tprogrunner.getcommandline: ansistring;
+begin
+ result:= ''; //dummy
+end;
+
+{ tmaker }
+
+constructor tmaker.create(atag: integer);
+begin
+ fmaketag:= atag;
+ ftargettimestamp:= getfilemodtime(projectoptions.texp.targetfile);
+ inherited create(nil);
+ if procid <> invalidprochandle then begin
+  mainfo.setstattext('Making.',mtk_running);
+  messagefo.messages.font.options:= messagefo.messages.font.options -
+               [foo_antialiased] + [foo_nonantialiased];
+ end
+ else begin
+  mainfo.setstattext('Make not running.',mtk_error);
+  designnotifications.aftermake(idesigner(designer),fexitcode);
+ end;
+end;
+
+procedure tmaker.dofinished(const sender: tpipereader);
+begin
+ if ftargettimestamp <> getfilemodtime(projectoptions.texp.targetfile) then begin
+  mainfo.targetfilemodified;
+ end;
+ inherited;
+end;
+
+function tmaker.getcommandline: ansistring;
+begin
+ result:= buildmakecommandline(fmaketag);
+end;
+
+procedure tmaker.doasyncevent(var atag: integer);
+begin
+ inherited;
+ designnotifications.aftermake(idesigner(designer),fexitcode);
+end;
+
+{ tloader }
+
+constructor tloader.create(aowner: tcomponent);
+begin
+ inherited;
+ if procid <> invalidprochandle then begin
+  mainfo.setstattext('Downloading.',mtk_running);
+  messagefo.messages.font.options:= messagefo.messages.font.options -
+               [foo_antialiased] + [foo_nonantialiased];
+ end
+ else begin
+  mainfo.setstattext('Download not running.',mtk_error);
+//  designnotifications.aftermake(idesigner(designer),int1);
+ end;
+end;
+
+procedure tloader.dofinished(const sender: tpipereader);
+begin
+ inherited;
+end;
+
+function tloader.getcommandline: ansistring;
+begin
+ result:= projectoptions.texp.uploadcommand;
 end;
 
 end.
