@@ -2105,6 +2105,14 @@ begin
  inc(tcontainer(fcontainer2).flayoutupdating);
  try
   ar1:= copy(fwidgets);
+  for int1:= 0 to high(fwidgets) do begin
+   with fwidgets[int1] do begin
+    for int2:= 0 to high(fwidgets) do begin
+     additem(pointerarty(ar1),pointer(fwidgets[int2])); 
+           //add children, possibly inherited
+    end;
+   end;
+  end;
   for int1:= 0 to fdatacols.count - 1 do begin
    with twidgetcols(fdatacols)[int1] do begin
     for int2:= 0 to high(ar1) do begin
