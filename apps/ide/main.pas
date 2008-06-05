@@ -235,6 +235,7 @@ type
    procedure updatesigsettings;
    procedure runtool(const sender: tobject);
 
+   procedure downloaded;
    procedure programfinished;
    procedure showfirsterror;
    procedure sourceformactivated;
@@ -846,6 +847,7 @@ begin
   end;
   gek_done: begin
    if sender.downloading then begin
+    downloaded;
     setstattext('Downloaded '+formatfloat('0.00,',stopinfo.totalsent/1024)+'kB',
                      mtk_finished);      
     sender.abort;
@@ -998,6 +1000,11 @@ begin
  result:= ftargetfilemodified or projectoptions.downloadalways;
 end;
 
+procedure tmainfo.downloaded;
+begin
+ ftargetfilemodified:= false;
+end;
+
 function tmainfo.loadexec(isattach: boolean; const force: boolean): boolean;
 var
  str1: filenamety;
@@ -1034,6 +1041,7 @@ begin
       end
       else begin
        setstattext('Download finished.',mtk_finished);
+       downloaded;
        if projectoptions.closemessages then begin
         messagefo.hide;
        end;

@@ -216,7 +216,7 @@ begin
       if high(ar3) >= 1 then begin
        col:= strtoint(ar3[1]) - 1;
       end;
-      apage:= sourcefo.showsourceline(ar1[0],row,col,true);
+      apage:= sourcefo.showsourceline(objpath(ar1[0]),row,col,true);
       result:= true;
      except
      end;
@@ -258,7 +258,7 @@ begin
      except
       col:= 0;
      end;
-     apage:= sourcefo.showsourceline(ar1[0],row,col,true);
+     apage:= sourcefo.showsourceline(objpath(ar1[0]),row,col,true);
     except
     end; 
    end;

@@ -299,7 +299,7 @@ end;
 constructor tmaker.create(atag: integer);
 begin
  fmaketag:= atag;
- ftargettimestamp:= getfilemodtime(projectoptions.texp.targetfile);
+ ftargettimestamp:= getfilemodtime(gettargetfile);
  inherited create(nil);
  if procid <> invalidprochandle then begin
   mainfo.setstattext('Making.',mtk_running);
@@ -314,7 +314,7 @@ end;
 
 procedure tmaker.dofinished(const sender: tpipereader);
 begin
- if ftargettimestamp <> getfilemodtime(projectoptions.texp.targetfile) then begin
+ if ftargettimestamp <> getfilemodtime(gettargetfile) then begin
   mainfo.targetfilemodified;
  end;
  inherited;

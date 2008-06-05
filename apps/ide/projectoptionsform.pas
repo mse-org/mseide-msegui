@@ -465,6 +465,8 @@ function checkprojectloadabort: boolean; //true on load abort
 
 function getsigname(const anum: integer): string;
 procedure projectoptionstofont(const afont: tfont);
+function objpath(const aname: filenamety): filenamety;
+function gettargetfile: filenamety;
 
 var
  projectoptions: projectoptionsty;
@@ -551,6 +553,11 @@ begin
  end;
 end;
 
+function objpath(const aname: filenamety): filenamety;
+begin
+ result:= filepath(projectoptions.texp.makedir,aname);
+end;
+
 function getprojectmacros: macroinfoarty;
 begin
  setlength(result,2);
@@ -562,6 +569,18 @@ begin
   with result[1] do begin
    name:= 'PROJECTDIR';
    value:= tosysfilepath(getcurrentdir)+pathdelim;
+  end;
+ end;
+end;
+
+function gettargetfile: filenamety;
+begin
+ with projectoptions.texp do begin
+  if trim(debugtarget) <> '' then begin
+   result:= debugtarget;
+  end
+  else begin
+   result:= objpath(targetfile);
   end;
  end;
 end;

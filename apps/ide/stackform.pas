@@ -49,7 +49,7 @@ implementation
 
 uses
  sysutils,stackform_mfm,sourceform,msefileutils,mseformatstr,main,mseguiglob,
- msegraphutils,msestrings;
+ msegraphutils,msestrings,projectoptionsform;
 
 { tstackfo }
 
@@ -58,7 +58,7 @@ begin
  if (aframenr >= 0) and (aframenr <= high(frameinfo)) then begin
   grid.row:= aframenr;
   with frameinfo[aframenr] do begin
-   result:= sourcefo.showsourceline(filename,line-1,0,true) <> nil;
+   result:= sourcefo.showsourceline(objpath(filename),line-1,0,true) <> nil;
   end;
  end
  else begin
