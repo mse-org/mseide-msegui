@@ -62,9 +62,16 @@ type
   eventstate: eventstatesty;
   timestamp: cardinal; //usec, 0 -> invalid
   wheel: mousewheelty;
+  delta: real;
  end;
  pmousewheeleventty = ^mousewheeleventinfoty;
  
+ moeventinfoty = record
+  case integer of
+   0: (mouse: mouseeventinfoty);
+   1: (wheel: mousewheeleventinfoty);
+ end;
+
  keyeventinfoty = record
   eventkind: eventkindty;
   key,keynomod: keyty;

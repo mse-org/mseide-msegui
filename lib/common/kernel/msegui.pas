@@ -1578,7 +1578,7 @@ type
    procedure mouseparked;
    procedure movewindowrect(const dist: pointty; const rect: rectty); virtual;
    procedure checkmousewidget(const info: mouseeventinfoty; var capture: twidget);
-   procedure dispatchmouseevent(var info: mouseeventinfoty; capture: twidget); virtual;
+   procedure dispatchmouseevent(var info: moeventinfoty; capture: twidget); virtual;
    procedure dispatchkeyevent(const eventkind: eventkindty; var info: keyeventinfoty); virtual;
    procedure sizechanged; virtual;
    procedure poschanged; virtual;
@@ -1751,6 +1751,12 @@ type
    fidleaction: notifyeventty;
    feventlooping: integer;
 
+   fmousewheelfrequmin: real;
+   fmousewheelfrequmax: real;
+   fmousewheeldeltamin: real;
+   fmousewheeldeltamax: real;
+   flastmousewheeltimestamp: cardinal;
+
    procedure invalidated;
    function grabpointer(const id: winidty): boolean;
    function ungrabpointer: boolean;
@@ -1889,6 +1895,9 @@ type
    procedure dragstarted; //calls dragstarted of all known widgets
    procedure mouseparkevent; //simulates mouseparkevent
    procedure delayedmouseshift(const ashift: pointty);
+   procedure calcmousewheeldelta(var info: mousewheeleventinfoty;
+               const fmin,fmax,deltamin,deltamax: real);  
+ 
    property cursorshape: cursorshapety read fcursorshape write setcursorshape;
                 //persistent
    property widgetcursorshape: cursorshapety read fwidgetcursorshape write
@@ -1904,6 +1913,10 @@ type
    property buttonreleasewidgetbefore: twidget read fbuttonreleasewidgetbefore;
    property dblclicktime: integer read fdblclicktime write fdblclicktime default
                  defaultdblclicktime; //us
+   property mousewhweelfrequmin: real read fmousewheelfrequmin write fmousewheelfrequmin;
+   property mousewhweelfrequmax: real read fmousewheelfrequmax write fmousewheelfrequmax;
+   property mousewhweeldeltamin: real read fmousewheeldeltamin write fmousewheeldeltamin;
+   property mousewhweeldeltamax: real read fmousewheeldeltamax write fmousewheeldeltamax;
  end;
 
 function translatewidgetpoint(const point: pointty;
@@ -10849,11 +10862,11 @@ end;
 
 procedure twindow.mouseparked;
 var
- info: mouseeventinfoty;
+ info: moeventinfoty;
 begin
- info:= appinst.fmouseparkeventinfo;
- info.eventkind:= ek_mousepark;
- exclude(info.eventstate,es_processed);
+ info.mouse:= appinst.fmouseparkeventinfo;
+ info.mouse.eventkind:= ek_mousepark;
+ exclude(info.mouse.eventstate,es_processed);
  dispatchmouseevent(info,appinst.fmousecapturewidget);
 end;
 
@@ -10868,7 +10881,7 @@ begin
  appinst.setmousewidget(capture);
 end;
 
-procedure twindow.dispatchmouseevent(var info: mouseeventinfoty;
+procedure twindow.dispatchmouseevent(var info: moeventinfoty;
                            capture: twidget);
 var
  posbefore: pointty;
@@ -10880,24 +10893,24 @@ begin
   exit;
  end;
  }
- if info.eventkind = ek_mousewheel then begin
-  capture:= fowner.mouseeventwidget(info);
+ if info.mouse.eventkind = ek_mousewheel then begin
+  capture:= fowner.mouseeventwidget(info.mouse);
  end
  else begin
-  checkmousewidget(info,capture);
+  checkmousewidget(info.mouse,capture);
  end;
  if capture <> nil then begin
   with capture do begin
-   subpoint1(info.pos,rootpos);
-   posbefore:= info.pos;
+   subpoint1(info.mouse.pos,rootpos);
+   posbefore:= info.mouse.pos;
    appinst.fdelayedmouseshift:= nullpoint;
-   if info.eventkind = ek_mousewheel then begin
-    mousewheelevent(mousewheeleventinfoty(info));
+   if info.mouse.eventkind = ek_mousewheel then begin
+    mousewheelevent(info.wheel);
    end
    else begin
-    mouseevent(info);
+    mouseevent(info.mouse);
    end;
-   posbefore:= subpoint(info.pos,posbefore);
+   posbefore:= subpoint(info.mouse.pos,posbefore);
    addpoint1(posbefore,appinst.fdelayedmouseshift);
    if (posbefore.x <> 0) or (posbefore.y <> 0) then begin
     gui_flushgdi;
@@ -10915,7 +10928,7 @@ begin
   end;
  end
  else begin
-  if (info.eventkind = ek_buttonpress) and (tws_buttonendmodal in fstate) then begin
+  if (info.mouse.eventkind = ek_buttonpress) and (tws_buttonendmodal in fstate) then begin
    endmodal;
   end;
  end;
@@ -11862,7 +11875,7 @@ end;
 procedure tinternalapplication.processmouseevent(event: tmouseevent);
 var
  window: twindow;
- info: mouseeventinfoty;
+ info: moeventinfoty;
  shift: shiftstatesty;
  abspos: pointty;
  int1: integer;
@@ -11874,29 +11887,33 @@ begin
  with event do begin
   if findwindow(fwinid,window) then begin
    fillchar(info,sizeof(info),0);
-   with info do begin
+   with info.mouse do begin
+    timestamp:= ftimestamp;
     if freflected then begin
      include(eventstate,es_reflected);
     end;
     if kind = ek_enterwindow then begin
-     info.eventkind:= ek_mousemove;
+     eventkind:= ek_mousemove;
     end
     else begin
-     info.eventkind:= kind;
+     eventkind:= kind;
     end;
+    shift:= [];
     if kind = ek_mousewheel then begin
-     mousewheeleventinfoty(info).wheel:= fwheel;
+     info.wheel.wheel:= fwheel;
+     calcmousewheeldelta(info.wheel,fmousewheelfrequmin,fmousewheelfrequmax,
+                         fmousewheeldeltamin,fmousewheeldeltamax);
+     if ftimestamp <> 0 then begin
+      flastmousewheeltimestamp:= ftimestamp;
+     end;
     end
     else begin
      button:= fbutton;
-    end;
-    pos:= fpos;
-    abspos:= addpoint(window.fowner.fwidgetrect.pos,pos);
-    case info.button of
-     mb_left: shift:= [ss_left];
-     mb_middle: shift:= [ss_middle];
-     mb_right: shift:= [ss_right];
-     else shift:= [];
+     case button of
+      mb_left: shift:= [ss_left];
+      mb_middle: shift:= [ss_middle];
+      mb_right: shift:= [ss_right];
+     end;
     end;
     if eventkind = ek_buttonpress then begin
      shiftstate:= fshiftstate + shift;
@@ -11904,15 +11921,18 @@ begin
     else begin
      shiftstate:= fshiftstate - shift;
     end;
+    pos:= fpos;
+    abspos:= addpoint(window.fowner.fwidgetrect.pos,pos);
    end;
+   
    if (fmodalwindow <> nil) and (window <> fmodalwindow) then begin
-    addpoint1(info.pos,subpoint(window.fowner.fwidgetrect.pos,
+    addpoint1(info.mouse.pos,subpoint(window.fowner.fwidgetrect.pos,
         fmodalwindow.fowner.fwidgetrect.pos));
     window:= fmodalwindow;
    end;
    if (fmousecapturewidget <> nil) and 
                    (fmousecapturewidget.window <> window) then begin
-    addpoint1(info.pos,subpoint(window.fowner.fwidgetrect.pos,
+    addpoint1(info.mouse.pos,subpoint(window.fowner.fwidgetrect.pos,
         fmousecapturewidget.fwindow.fowner.fwidgetrect.pos));
     window:= fmousecapturewidget.fwindow;
    end;
@@ -11923,9 +11943,9 @@ begin
    if (fhintwidget <> nil) and
     (fhintinfo.flags*[{hfl_custom,}hfl_noautohidemove] = [{hfl_custom}]) and
       (
-      (info.eventkind = ek_buttonpress) or
-      (info.eventkind = ek_buttonrelease) or
-      (info.eventkind = ek_mousemove) and
+      (info.mouse.eventkind = ek_buttonpress) or
+      (info.mouse.eventkind = ek_buttonrelease) or
+      (info.mouse.eventkind = ek_mousemove) and
          (distance(fhintinfo.mouserefpos,abspos) > 3)
        ) then begin
     bo1:= window = fhintwidget.window;
@@ -11934,7 +11954,7 @@ begin
      exit; //widow is destroyed
     end;
    end;
-   fmouseparkeventinfo:= info;
+   fmouseparkeventinfo:= info.mouse;
    {
    if factmousewindow <> window then begin
     ek1:= info.eventkind;
@@ -11947,7 +11967,6 @@ begin
    fmouseparktimer.interval:= -mouseparktime;
    fmouseparktimer.enabled:= true;
    if ftimestamp <> 0 then begin
-    info.timestamp:= ftimestamp;
     if (fbutton <> mb_none) then begin
                 //test reflected event
      if kind = ek_buttonpress then begin
@@ -11977,7 +11996,7 @@ begin
       end;
      end;
      if (int1 >= 0) and (int1 < fdblclicktime) then begin
-      include(info.shiftstate,ss_double);
+      include(info.mouse.shiftstate,ss_double);
      end;
     end;
    end;
@@ -12002,7 +12021,7 @@ begin
     widget1:= fmousewidget;
 //    widget1:= fmousehintwidget;
     if widget1 <> nil then begin
-     widget1:= widget1.widgetatpos(info.pos);
+     widget1:= widget1.widgetatpos(info.mouse.pos);
              //search diabled child
     end;
     while (widget1 <> nil) and 
@@ -13016,6 +13035,10 @@ end;
 constructor tguiapplication.create(aowner: tcomponent);
 begin
  fwidgetcursorshape:= cr_default;
+ fmousewheelfrequmin:= 1;
+ fmousewheelfrequmax:= 100;
+ fmousewheeldeltamin:= 0.05;
+ fmousewheeldeltamax:= 30;
  inherited;
 end;
 
@@ -13903,6 +13926,60 @@ begin
  addpoint1(fdelayedmouseshift,ashift);
 end;
 
+procedure tguiapplication.calcmousewheeldelta(var info: mousewheeleventinfoty;
+               const fmin,fmax,deltamin,deltamax: real);  
+var
+ frequ: real;
+begin
+ if (flastmousewheeltimestamp <> 0) and 
+                  (flastmousewheeltimestamp <> info.timestamp) then begin
+  frequ:= 1000000/(info.timestamp-flastmousewheeltimestamp); //Hz
+  if frequ > fmax then begin
+   frequ:= fmax;
+  end;
+  if frequ < fmin then begin
+   frequ:= fmin;
+  end;
+  info.delta:= (frequ*(deltamax-deltamin)+(deltamin*fmax-deltamax*fmin))/
+                                   (fmax-fmin);
+ end
+ else begin
+  info.delta:= deltamin;
+ end;
+ if info.wheel = mw_down then begin
+  info.delta:= - info.delta;
+ end;
+end;
+{
+procedure tguiapplication.calcmousewheeldelta(var info: mousewheeleventinfoty;
+               const fmin,fmax,deltamin,deltamax: real);  
+var
+ lndmin,lndmax: real;
+ frequ: real;
+begin
+ if (flastmousewheeltimestamp <> 0) and 
+                  (flastmousewheeltimestamp <> info.timestamp) then begin
+  frequ:= 1000000/(info.timestamp-flastmousewheeltimestamp); //Hz
+  if frequ > fmax then begin
+   frequ:= fmax;
+  end;
+  if frequ < fmin then begin
+   frequ:= fmin;
+  end;
+  lndmin:= ln(deltamin);
+  lndmax:= ln(deltamax);
+  info.delta:= exp(
+                   ((lndmin-lndmax)*frequ+(lndmax*fmin - lndmin*fmax))/
+                                  (fmin-fmax));
+ end
+ else begin
+  info.delta:= deltamin;
+ end;
+ if info.wheel = mw_down then begin
+  info.delta:= - info.delta;
+ end;
+end;
+}
 procedure tguiapplication.invalidate;
 var
  int1: integer;
