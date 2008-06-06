@@ -908,6 +908,8 @@ type
    procedure invalidateparentminclientsize;
    function minclientsize: sizety;
    function getwidgets(const index: integer): twidget;
+   function dofindwidget(const awidgets: widgetarty; 
+                                           aname: ansistring): twidget;
 
    procedure setpos(const Value: pointty);
    procedure setsize(const Value: sizety);
@@ -1288,7 +1290,7 @@ type
                    const state: widgetstatesty): twidget; overload;
    function findtagwidget(const atag: integer; const aclass: widgetclassty): twidget;
               //returns first matching descendent
-   function findwidget(aname: ansistring): twidget;
+   function findwidget(const aname: ansistring): twidget;
               //searches in countainer.widgets, case insensitive
 
    property container: twidget read getcontainer;
@@ -1301,6 +1303,11 @@ type
    function getvisiblewidgets: widgetarty;
    function getsortxchildren: widgetarty;
    function getsortychildren: widgetarty;
+   function getlogicalchildren: widgetarty; virtual; //children of container
+   procedure addlogicalchildren(var achildren: widgetarty);
+   function findlogicalchild(const aname: ansistring): twidget;
+                  //case insensitive
+   
    property focusedchild: twidget read ffocusedchild;
    property focusedchildbefore: twidget read ffocusedchildbefore;
 
@@ -7147,6 +7154,33 @@ begin
  result:= widgetatpos(info);
 end;
 
+function twidget.getlogicalchildren: widgetarty; //children of container
+var
+ int1,int2: integer;
+begin
+ with container do begin 
+  setlength(result,length(fwidgets));
+  int2:= 0;
+  for int1:= 0 to high(result) do begin
+   result[int2]:= fwidgets[int1];
+   if ws_iswidget in result[int2].fwidgetstate then begin
+    inc(int2);
+   end;
+  end;
+  setlength(result,int2);
+ end;
+end;
+
+procedure twidget.addlogicalchildren(var achildren: widgetarty);
+begin
+ stackarray(pointerarty(getlogicalchildren),pointerarty(achildren));
+end;
+
+function twidget.findlogicalchild(const aname: ansistring): twidget;
+begin
+ result:= dofindwidget(getlogicalchildren,aname);
+end;
+
 function twidget.mouseeventwidget(const info: mouseeventinfoty): twidget;
 var
  findinfo: widgetatposinfoty;
@@ -9926,20 +9960,24 @@ begin
  end;
 end;
 
-function twidget.findwidget(aname: ansistring): twidget;
+function twidget.dofindwidget(const awidgets: widgetarty; 
+                                           aname: ansistring): twidget;
 var
  int1: integer;
 begin
  result:= nil;
  aname:= struppercase(aname);
- with container do begin
-  for int1:= 0 to high(fwidgets) do begin
-   if stringicomp1(fwidgets[int1].name,aname) = 0 then begin
-    result:= fwidgets[int1];
-    break;
-   end;
+ for int1:= 0 to high(awidgets) do begin
+  if stringicomp1(awidgets[int1].name,aname) = 0 then begin
+   result:= awidgets[int1];
+   break;
   end;
  end;
+end;
+
+function twidget.findwidget(const aname: ansistring): twidget;
+begin
+ result:= dofindwidget(container.fwidgets,aname); 
 end;
 
 function twidget.gethelpcontext: msestring;

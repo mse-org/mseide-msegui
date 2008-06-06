@@ -246,6 +246,8 @@ type
    destructor destroy; override;
    procedure insertwidget(const awidget: twidget; const apos: pointty); override;
    function childrencount: integer; override;
+   function getlogicalchildren: widgetarty; override;
+   
    function editwidgetatpos(const apos: pointty; out cell: gridcoordty): twidget;
    function widgetcell(const awidget: twidget): gridcoordty;
    function copyselection: boolean; override;
@@ -1457,6 +1459,7 @@ constructor tdummywidget.create(aowner: tcomponent);
 begin
  inherited;
  foptionswidget:= defaultoptionswidgetnofocus; 
+ exclude(fwidgetstate,ws_iswidget);
  size:= nullsize;
 end;
 
@@ -2035,6 +2038,13 @@ function tcustomwidgetgrid.childrencount: integer;
 begin
  result:= fcontainer2.childrencount + fcontainer1.childrencount + 
                     fcontainer3.childrencount;
+end;
+
+function tcustomwidgetgrid.getlogicalchildren: widgetarty;
+begin
+ result:= inherited getlogicalchildren;
+ fcontainer1.addlogicalchildren(result);
+ fcontainer3.addlogicalchildren(result);
 end;
 
 function tcustomwidgetgrid.createdatacols: tdatacols;

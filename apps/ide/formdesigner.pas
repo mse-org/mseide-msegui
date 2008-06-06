@@ -1279,8 +1279,19 @@ begin
 end;
 
 procedure tdesignwindow.dodelete;
+var
+ int1: integer;
 begin
- with fselections do begin
+ with fselections do begin  
+  for int1:= 0 to count - 1 do begin
+   with items[int1] do begin
+    if componentstate * [csancestor,csinline] = [csancestor] then begin
+     showmessage('Inherited component "'+name+
+                     '" can not be deleted.','ERROR');
+     exit;
+    end;             
+   end;
+  end;
   removeforeign;
   fdelobjs:= fselections.getobjinfoar;
   deletecomponents;
@@ -1437,7 +1448,7 @@ begin
  with tmenuitem(sender) do begin
   ar1:= splitstring(caption,' ');
   fselections.clear;
-  fselections.add(fselectwidget.findwidget(ar1[0]));
+  fselections.add(fselectwidget.findlogicalchild(ar1[0]));
  end;
 end;
 
@@ -1447,6 +1458,7 @@ var
  bo1,bo2: boolean;
  item1: tmenuitem;
  ar1: msestringarty;
+ ar2: widgetarty;
  int1: integer;
 begin
  with tformdesignerfo(fowner),popupme,menu do begin
@@ -1475,20 +1487,19 @@ begin
                    (twidget(fselections[0]).container.widgetcount > 0);  
   if item1.enabled then begin
    fselectwidget:= twidget(fselections[0]);
-   with fselectwidget.container do begin
-    setlength(ar1,widgetcount);
-    item1.submenu.count:= length(ar1);
-    for int1:= 0 to high(ar1) do begin
-     with widgets[int1] do begin
-      ar1[int1]:= name + ' (' + classname+')';
-     end;
+   ar2:= fselectwidget.getlogicalchildren;
+   setlength(ar1,length(ar2));
+   for int1:= 0 to high(ar1) do begin
+    with ar2[int1] do begin
+     ar1[int1]:= name + ' (' + classname+')';
     end;
-    sortarray(ar1);
-    for int1:= 0 to high(ar1) do begin
-     with item1.submenu[int1] do begin
-      caption:= ar1[int1];
-      onexecute:= {$ifdef FPC}@{$endif}selectchildexec;
-     end;
+   end;
+   sortarray(ar1);
+   item1.submenu.count:= length(ar1);
+   for int1:= 0 to high(ar1) do begin
+    with item1.submenu[int1] do begin
+     caption:= ar1[int1];
+     onexecute:= {$ifdef FPC}@{$endif}selectchildexec;
     end;
    end;
   end;
