@@ -1851,7 +1851,10 @@ type
   published
    property dropdown: tlbdropdownlistcontroller read getdropdown write setdropdown;
  end;
- 
+
+function encoderowstate(const color: integer = -1; const font: integer = -1;
+                            const readonly: boolean = false): integer;
+                            
 implementation
 uses
  msestockobjects,mseshapes,msereal,msebits,
@@ -1865,6 +1868,15 @@ type
  tdataedit1 = class(tdataedit);
  tdataset1 = class(tdataset);
  tdatasource1 = class(tdatasource);
+
+function encoderowstate(const color: integer = -1; const font: integer = -1;
+                            const readonly: boolean = false): integer;
+begin
+ result:= (color and $7f) or ((font and $7f) shl 8);
+ if readonly then begin
+  result:= result or $80;
+ end;
+end;
 
 procedure drawindicatorcell(const canvas: tcanvas; const datalink: tgriddatalink;
                              const acolor: colorty);
