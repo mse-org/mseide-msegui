@@ -228,7 +228,7 @@ type
  
    procedure sizechanged; override;
    procedure poschanged; override;
-   procedure dispatchmouseevent(var info: mouseeventinfoty; capture: twidget); override;
+   procedure dispatchmouseevent(var info: moeventinfoty; capture: twidget); override;
    procedure dispatchkeyevent(const eventkind: eventkindty; var info: keyeventinfoty); override;
    procedure dobeforepaint(const canvas: tcanvas);
    procedure doafterpaint(const canvas: tcanvas);
@@ -1534,12 +1534,12 @@ begin
  tformdesignerfo(fowner).recalcclientsize;
 end;
 
-procedure tdesignwindow.dispatchmouseevent(var info: mouseeventinfoty;
+procedure tdesignwindow.dispatchmouseevent(var info: moeventinfoty;
                          capture: twidget);
 
  function griddelta: pointty;
  begin
-  result:= snaptogriddelta(subpoint(info.pos,fpickpos));
+  result:= snaptogriddelta(subpoint(info.mouse.pos,fpickpos));
  end;
 
  procedure updatesizerect;
@@ -1582,10 +1582,10 @@ procedure tdesignwindow.dispatchmouseevent(var info: mouseeventinfoty;
   end;
   case factarea of
    ht_top,ht_bottom: begin
-    info.pos.x:= fpickpos.x;
+    info.mouse.pos.x:= fpickpos.x;
    end;
    ht_left,ht_right: begin
-    info.pos.y:= fpickpos.y;
+    info.mouse.pos.y:= fpickpos.y;
    end;
   end;
   application.mouse.move(subpoint(pos1,posbefore));
@@ -1629,12 +1629,12 @@ begin
   inherited;
   exit;
  end;
- if info.eventkind in [ek_mouseleave,ek_mouseenter] then begin
+ if info.mouse.eventkind in [ek_mouseleave,ek_mouseenter] then begin
   fclickedcompbefore:= nil;
   exit;
  end;
- checkmousewidget(info,capture);
- with info do begin
+ checkmousewidget(info.mouse,capture);
+ with info.mouse do begin
   ss1:= shiftstate * shiftstatesmask;
   isinpaintrect:= pointinrect(pos,tformdesignerfo(fowner).gridrect);
 //  clipo:= fowner.container.clientpos;
@@ -1703,7 +1703,7 @@ begin
    end;
    if (eventkind = ek_buttonrelease) and (button = mb_right) and
            not (es_processed in eventstate) then begin
-    dopopup(info);
+    dopopup(info.mouse);
    end;
    if not (es_processed in eventstate) then begin
     area1:= fselections.getareainfo(pos,int1);
