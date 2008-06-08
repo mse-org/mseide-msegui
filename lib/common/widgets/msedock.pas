@@ -29,7 +29,7 @@ const
  defaultsplittersize = 3;
 
 type
- optiondockty = (od_savepos,
+ optiondockty = (od_savepos,od_savezorder,
             od_canmove,od_cansize,od_canfloat,od_candock,od_acceptsdock,
             od_dockparent,
             od_splitvert,od_splithorz,od_tabed,od_proportional,
@@ -40,7 +40,7 @@ type
                      dbr_minimize,dbr_fixsize,
                      dbr_top,dbr_background);
 const
- defaultoptionsdock = [od_savepos];
+ defaultoptionsdock = [od_savepos,od_savezorder];
  dbr_first = dbr_handle;
  dbr_last = dbr_background;
  defaulttaboptions= [tabo_dragdest,tabo_dragsource];
@@ -2008,8 +2008,8 @@ begin
 // setoptionsdock(foptionsdock); //check valid values
  ftaborder:= reader.readarray('order',msestringarty(nil));
  factivetab:= reader.readinteger('activetab',0);
- if od_savepos in foptionsdock then begin
-  with fintf.getwidget do begin
+ with fintf.getwidget do begin
+  if od_savepos in foptionsdock then begin
    if parentwidget = nil then begin
     str1:= '';
    end
@@ -2041,24 +2041,24 @@ begin
     if not parentwidget.getcorbainterface(typeinfo(idocktarget),intf1)then begin
      rect1:= clipinrect(rect1,parentwidget.paintrect);
     end;
-   end
-   else begin
-    str1:= '~';
-    str1:= reader.readstring('stackedunder',str1);
-    if str1 <> '~' then begin
-     if trim(str1) = '' then begin
-      window.stackunder(nil);
-     end
-     else begin
-      if application.findwidget(str1,widget1) and (widget1 <> nil) then begin
-       window.stackunder(widget1.window);
-      end;
-     end;
-    end;
-    window.caption:= getfloatcaption;
    end;
    setclippedwidgetrect(rect1);
    visible:= bo1;
+  end;
+  if (parentwidget = nil) and (od_savezorder in foptionsdock) then  begin
+   str1:= '~';
+   str1:= reader.readstring('stackedunder',str1);
+   if str1 <> '~' then begin
+    if trim(str1) = '' then begin
+     window.stackunder(nil);
+    end
+    else begin
+     if application.findwidget(str1,widget1) and (widget1 <> nil) then begin
+      window.stackunder(widget1.window);
+     end;
+    end;
+   end;
+   window.caption:= getfloatcaption;
   end;
  end;
 end;
@@ -2084,9 +2084,8 @@ begin
    writer.writeinteger('activetab',activepageindex);
   end;
  end;
- if od_savepos in foptionsdock then begin
-  with twidget1(fintf.getwidget) do begin
-   tabed:= (parentwidget is tdocktabpage) and (parentwidget.parentwidget <> nil);
+ with twidget1(fintf.getwidget) do begin
+  if od_savezorder in foptionsdock then begin
    if parentwidget = nil then begin
     str1:= '';
     window1:= window.stackedunder;
@@ -2096,8 +2095,11 @@ begin
     else begin
      writer.writestring('stackedunder','');
     end;
-   end
-   else begin
+   end;
+  end;
+  if od_savepos in foptionsdock then begin
+   tabed:= (parentwidget is tdocktabpage) and (parentwidget.parentwidget <> nil);
+   if parentwidget <> nil then begin
     if tabed then begin
      str1:= ownernamepath(parentwidget.parentwidget.parentwidget);
     end

@@ -1480,6 +1480,8 @@ begin
  inherited;
  updatebit({$ifdef FPC}longword{$else}longword{$endif}(tdockform(fintf.getwidget).foptions),
              ord(fo_savepos),od_savepos in foptionsdock);
+ updatebit({$ifdef FPC}longword{$else}longword{$endif}(tdockform(fintf.getwidget).foptions),
+             ord(fo_savezorder),od_savezorder in foptionsdock);
 end;
 
 { tcustomdockform }
@@ -1538,12 +1540,8 @@ procedure tcustomdockform.updateoptions;
 begin
  updatebit({$ifdef FPC}longword{$else}word{$endif}(fdragdock.foptionsdock),
          ord(od_savepos),fo_savepos in foptions);
- if fo_savepos in foptions then begin
-  fdragdock.optionsdock:= fdragdock.optionsdock + [od_savepos];
- end
- else begin
-  fdragdock.optionsdock:= fdragdock.optionsdock - [od_savepos];
- end;
+ updatebit({$ifdef FPC}longword{$else}word{$endif}(fdragdock.foptionsdock),
+         ord(od_savezorder),fo_savezorder in foptions);
  inherited;
 end;
 
@@ -1554,6 +1552,12 @@ begin
  end
  else begin
   exclude(foptions,fo_savepos);
+ end;
+ if od_savezorder in fdragdock.optionsdock then begin
+  include(foptions,fo_savezorder);
+ end
+ else begin
+  exclude(foptions,fo_savezorder);
  end;
  result:= inherited getoptions;
 end;
