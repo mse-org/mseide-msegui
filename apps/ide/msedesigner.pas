@@ -185,6 +185,7 @@ type
   protected
    procedure dounlink(var item); override;
    procedure itemdestroyed(const sender: iobjectlink); override;
+   function getdescendentar(const aancestor: tmsecomponent): msecomponentarty;
   public
    constructor create;
    function findancestor(const adescendent: tcomponent): tmsecomponent;
@@ -209,7 +210,7 @@ type
   protected
    procedure finalizerecord(var item); override;
   public
-   procedure add(const amodule: tmsecomponent);
+   procedure add(const amodule: tmsecomponent); overload;
    procedure renewbackup(const amodule: tmsecomponent);
  end;
 
@@ -240,6 +241,12 @@ type
    procedure delcomp(child: tcomponent);
    procedure addcomp(child: tcomponent);
   protected
+   procedure savechanges(const amodule: pmoduleinfoty;
+                      const infopo: pancestorinfoty;  const ancestor: tcomponent;
+                      var astream: tstream);
+   procedure restorechanges(const amodule: pmoduleinfoty;
+                      const infopo: pancestorinfoty;{  const ancestor: tcomponent;}
+                      var astream: tstream);
    procedure modulemodified(const amodule: pmoduleinfoty);
    procedure revert(const info: pancestorinfoty; const module: pmoduleinfoty;
                     const norootposition: boolean = false);
@@ -247,7 +254,7 @@ type
    procedure restorepos(const aroot: twidget);
   public
    procedure add(const instance,ancestor: tmsecomponent;
-                                         const submodulelist: tsubmodulelist);
+                        const submodulelist: tsubmodulelist); overload;
    function getclassname(const comp: tcomponent): string;
                    //returns submodule or root classname if appropriate
    function getancestors(const adescendent: tcomponent): componentarty;
@@ -449,7 +456,8 @@ uses
  msestream,msefileutils,{$ifdef mswindows}windows{$else}libc{$endif},
  designer_bmp,msesys,msewidgets,formdesigner,mseevent,objectinspector,
  msefiledialog,projectoptionsform,sourceupdate,sourceform,sourcepage,
- pascaldesignparser,msearrayprops,rtlconsts;
+ pascaldesignparser,msearrayprops,rtlconsts,
+ msesimplewidgets;
 
 type
  tcomponent1 = class(tcomponent);
@@ -525,6 +533,25 @@ begin
    end;
   end;
  end;
+end;
+
+function tancestorlist.getdescendentar(
+                             const aancestor: tmsecomponent): msecomponentarty;
+var
+ int1,int2: integer;
+ po1: pancestorinfoty;
+begin
+ setlength(result,count);
+ int2:= 0;
+ po1:= datapo;
+ for int1:= 0 to high(result) do begin
+  if po1^.ancestor = aancestor then begin
+   result[int2]:= po1^.descendent;
+   inc(int2);
+  end;
+  inc(po1);
+ end;
+ setlength(result,int2);
 end;
 
 procedure tancestorlist.add(const adescendent, aancestor: tmsecomponent);
@@ -663,7 +690,8 @@ end;
 procedure tsubmodulelist.add(const amodule: tmsecomponent);
 begin
  if findancestor(amodule) = nil then begin
-  inherited add(amodule,fdesigner.copycomponent(amodule,amodule));
+//  inherited add(amodule,fdesigner.copycomponent(amodule,amodule));
+  inherited add(amodule,fdesigner.copycomponent(amodule,nil));
  end;
 end;
 
@@ -799,9 +827,21 @@ var
  ancestorclassname1: string;
  actualclassname1: pshortstring;
  pt1: pointty;
+ ar1: msecomponentarty;
+ ancestorbefore: tmsecomponent;
+ po1: pancestorinfoty;
 begin
  comp1:= info^.descendent;
  isroot:= comp1 = module^.instance;
+ if isroot then begin
+  ar1:= getdescendentar(comp1); //restore after revert 
+  ancestorbefore:= nil;
+  po1:= fdesigner.fsubmodulelist.finddescendentinfo(comp1);
+  if po1 <> nil then begin
+   ancestorbefore:= po1^.ancestor;
+   po1^.ancestor:= nil; //don't free
+  end;
+ end;
  with tmsecomponent1(comp1) do begin
   ancestorclassname1:= fancestorclassname;
   actualclassname1:= factualclassname;
@@ -839,8 +879,11 @@ begin
   decomp.free;
  end;
  fdelcomps:= nil;
- comp2:= fdesigner.copycomponent(info^.ancestor,info^.ancestor);
- if isroot then begin
+ if not isroot then begin
+  comp2:= fdesigner.copycomponent(info^.ancestor,nil);
+ end
+ else begin
+  comp2:= fdesigner.copycomponent(info^.ancestor,info^.ancestor);
   initrootdescendent(comp2);
  end;
  info^.descendent:= comp2;
@@ -889,6 +932,18 @@ begin
  fmodule:= module;
  addcomp(comp2);
  removefixupreferences(module^.instance,'');
+ if isroot then begin
+  for int1:= 0 to high(ar1) do begin
+   add(ar1[int1],comp2);
+                     //restore entry;
+  end;
+  if ancestorbefore = nil then begin
+   fdesigner.fsubmodulelist.add(comp2); //shhould not happen
+  end
+  else begin
+   fdesigner.fsubmodulelist.add(comp2,ancestorbefore);
+  end;
+ end;
 end;         
 
 function tdescendentinstancelist.getancestors(
@@ -961,203 +1016,131 @@ begin
  recursionlevel:= 32; //max
  adddescendent(aancestor);
 end;
-(*
-procedure tdescendentinstancelist.modulemodified(const amodule: pmoduleinfoty);
-type
- streamarty = array of tstream;
- ancestorinfopoarty = array of pancestorinfoty;
 
-{$ifdef mse_debugsubmodule}
+procedure tdescendentinstancelist.savechanges(const amodule: pmoduleinfoty;
+                  const infopo: pancestorinfoty; const ancestor: tcomponent;
+                  var astream: tstream);
 var
- teststream: ttextstream;
- procedure debugout(const atext: string; const stream: tstream);
- begin
-  writeln(atext);
-  stream.position:= 0;
-  teststream.size:= 0;
-  objectbinarytotextmse(stream,teststream);
-  teststream.position:= 0;
-  teststream.writetotext(output);
- end;
- procedure debugbinout(const atext: string; const acomp,aancestor: tcomponent);
- var
-  stream1: tmemorystream;
-  writer1: twriter;
- begin
-  stream1:= tmemorystream.create;
-  writer1:= twriter.create(stream1,1024);
-  writer1.onfindancestor:= {$ifdef FPC}@{$endif}fdesigner.findancestor;
-  writer1.writedescendent(acomp,aancestor);
-  writer1.free;
-  debugout(atext,stream1);
-  stream1.free;
- end;
- 
-{$endif}
-
-var
- modifiedowners,dependentmodules: moduleinfopoarty;
- streams: streamarty;
- infos: ancestorinfopoarty;
- stream1: tmemorystream;
  writer1: twriter;
- reader1: treader;
- comp1,ancestor: tcomponent;
- int1,int2: integer;
- po1: pancestorinfoty;
- po2: pmoduleinfoty;
- rect1: rectty;
-
+ comp1: tmsecomponent;
 begin
- if fmodifiedlevel >= 16 then begin
-  exit;
+ fdesigner.buildmethodtable(amodule);
+ if ismodule(infopo^.descendent.owner) then begin //inherited form
+  fdesigner.beginstreaming(amodule);
  end;
- inc(fmodifiedlevel);
  try
-  po1:= datapo;
-  if fmodifiedlevel = 16 then begin
-   showmessage('Recursive form inheritance of "'+
-                               amodule^.filename+'".','ERROR');
-   sysutils.abort;
+  astream:= tmemorystream.create;
+  writer1:= twriter.create(astream,4096);
+  writer1.onfindancestor:= {$ifdef FPC}@{$endif}fdesigner.findancestor;
+  comp1:= infopo^.descendent;
+  try
+   designer.doswapmethodpointers(ancestor,false);
+   designer.doswapmethodpointers(comp1,false);
+   writer1.root:= amodule^.instance;
+   writer1.ancestor:= ancestor;
+   writer1.rootancestor:= ancestor;
+   writer1.writecomponent(comp1); //changes
+  finally
+   designer.doswapmethodpointers(ancestor,true);
+   designer.doswapmethodpointers(comp1,true);
+   if ismodule(infopo^.descendent.owner) then begin //inherited form
+    fdesigner.endstreaming(amodule);
+   end;
+   writer1.free;
   end;
-  for int1:= 0 to fcount - 1 do begin
-   if po1^.ancestor = amodule^.instance then begin
-    additem(pointerarty(infos),po1);
-    if ismodule(po1^.descendent) then begin  //inherited form        
-     comp1:= po1^.descendent;
-    end
-    else begin
-     comp1:= po1^.descendent.owner;
+ finally
+  fdesigner.releasemethodtable(amodule);
+ end;
+end;
+
+procedure tdescendentinstancelist.restorechanges(const amodule: pmoduleinfoty;
+                  const infopo: pancestorinfoty;{ const ancestor: tcomponent;}
+                  var astream: tstream);
+var
+ reader1: treader;
+ comp1: tcomponent;
+ int2: integer;
+begin
+ amodule^.designform.window.beginmoving; //no flicker
+ try
+  astream.position:= 0;
+  
+  revert(infopo,amodule,true); //revert to new inherited state
+  reader1:= treader.create(astream,4096);
+  fdesigner.buildmethodtable(amodule);
+  try
+   reader1.onerror:= {$ifdef FPC}@{$endif}ferrorhandler.onerror;
+   reader1.onancestornotfound:= 
+                     {$ifdef FPC}@{$endif}ferrorhandler.ancestornotfound;
+   reader1.onsetname:= {$ifdef FPC}@{$endif}ferrorhandler.onsetname;
+   reader1.onfindcomponentclass:= 
+                     {$ifdef FPC}@{$endif}fdesigner.findcomponentclass;
+   reader1.oncreatecomponent:= {$ifdef FPC}@{$endif}fdesigner.createcomponent;
+   reader1.onfindmethod:= {$ifdef FPC}@{$endif}fdesigner.findmethod2;
+   reader1.root:= amodule^.instance;
+   ferrorhandler.fnewcomponents:= nil;
+   reader1.root:= amodule^.instance;
+   ferrorhandler.froot:= amodule^.instance;
+   comp1:= infopo^.descendent;
+   if ismodule(comp1) then begin //inherited form
+    fdesigner.beginstreaming(amodule);
+    with tformdesignerfo(amodule^.designform) do begin
+     beginplacement;
+     dec(submodulecopy);
+     designer.doswapmethodpointers(comp1,false);
+     try
+      begingloballoading;
+      try
+       reader1.readrootcomponent(comp1);
+       checkinline(comp1);
+       placemodule;
+       inc(submodulecopy);
+       designer.dofixup;
+       dec(submodulecopy);
+       notifygloballoading;
+      finally
+       designer.doswapmethodpointers(comp1,true);
+       inc(submodulecopy);
+       endplacement;
+      end;
+      notifygloballoading;
+     finally
+      endgloballoading;
+      fdesigner.endstreaming(amodule);
+     end;
     end;
-    po2:= fdesigner.modules.findmodule(tmsecomponent(comp1));
-    additem(pointerarty(modifiedowners),po2);
-    if finditem(pointerarty(dependentmodules),po2) < 0 then begin
-     additem(pointerarty(dependentmodules),po2);
+   end
+   else begin
+    reader1.parent:= comp1.getparentcomponent;
+    {$ifdef FPC}
+    reader1.driver.beginrootcomponent;
+    {$else}
+    reader1.readsignature;
+    {$endif}
+    reader1.beginreferences;
+    try
+     designer.doswapmethodpointers(comp1,false);
+     reader1.readcomponent(comp1);
+    finally
+     reader1.fixupreferences;
+     reader1.endreferences;
+     designer.doswapmethodpointers(comp1,true);
     end;
    end;
-   inc(po1);
+  finally
+   reader1.free;
+   fdesigner.releasemethodtable(amodule);
+   removefixupreferences(amodule^.instance,'');
   end;
-  if high(infos) >= 0 then begin
-  {$ifdef mse_debugsubmodule}
-   teststream:= ttextstream.create;
-  {$endif}
-   ancestor:= fdesigner.fsubmodulelist.findancestor(amodule^.instance);
-   beginsubmodulecopy;
-   try 
-    setlength(streams,length(infos));
-    for int1:= 0 to high(modifiedowners) do begin
-     fdesigner.buildmethodtable(modifiedowners[int1]);
-     if ismodule(infos[int1]^.descendent.owner) then begin //inherited form
-      fdesigner.beginstreaming(modifiedowners[int1]);
-     end;
-     try
-      streams[int1]:= tmemorystream.create;
-      writer1:= twriter.create(streams[int1],4096);
-      try
-       writer1.onfindancestor:= {$ifdef FPC}@{$endif}fdesigner.findancestor;
-       writer1.writedescendent(infos[int1]^.descendent,ancestor);
-      finally
-       if ismodule(infos[int1]^.descendent.owner) then begin //inherited form
-        fdesigner.endstreaming(modifiedowners[int1]);
-       end;
-       writer1.free;
-      end;
-  {$ifdef mse_debugsubmodule}
-      debugout('state ' + modifiedowners[int1]^.instance.name,streams[int1]);
-  {$endif}
-     finally
-      fdesigner.releasemethodtable(modifiedowners[int1]);
-     end;
-    end;
-    fdesigner.fsubmodulelist.renewbackup(amodule^.instance);
-    ferrorhandler:= treaderrorhandler.create(nil);
-    try
-     for int1:= 0 to high(modifiedowners) do begin
-      modifiedowners[int1]^.designform.window.beginmoving; //no flicker
-      try
-       streams[int1].position:= 0;
-       revert(infos[int1],modifiedowners[int1],true);
-       reader1:= treader.create(streams[int1],4096);
-       fdesigner.buildmethodtable(modifiedowners[int1]);
-       try
-        reader1.onerror:= {$ifdef FPC}@{$endif}ferrorhandler.onerror;
-        reader1.onancestornotfound:= 
-                          {$ifdef FPC}@{$endif}ferrorhandler.ancestornotfound;
-        reader1.onsetname:= {$ifdef FPC}@{$endif}ferrorhandler.onsetname;
-        reader1.onfindcomponentclass:= 
-                          {$ifdef FPC}@{$endif}fdesigner.findcomponentclass;
-        reader1.oncreatecomponent:= {$ifdef FPC}@{$endif}fdesigner.createcomponent;
-        reader1.onfindmethod:= {$ifdef FPC}@{$endif}fdesigner.findmethod2;
-        reader1.root:= modifiedowners[int1]^.instance;
-        ferrorhandler.fnewcomponents:= nil;
-        reader1.root:= modifiedowners[int1]^.instance;
-        ferrorhandler.froot:= modifiedowners[int1]^.instance;
-        comp1:= infos[int1]^.descendent;
-        if ismodule(comp1) then begin //inherited form
-         with tformdesignerfo(modifiedowners[int1]^.designform) do begin
-          beginplacement;
-          dec(submodulecopy);
-          try
-           reader1.readrootcomponent(comp1);
-           checkinline(comp1);
-           placemodule;
-          finally
-           inc(submodulecopy);
-           endplacement;
-          end;
-         end;
-        end
-        else begin
-         reader1.parent:= infos[int1]^.descendent.getparentcomponent;
-         {$ifdef FPC}
-         reader1.driver.beginrootcomponent;
-         {$else}
-         reader1.readsignature;
-         {$endif}
-         reader1.beginreferences;
-         reader1.readcomponent(infos[int1]^.descendent);
-         reader1.fixupreferences;
-         reader1.endreferences;
-        end;
-       finally
-        reader1.free;
-        fdesigner.releasemethodtable(modifiedowners[int1]);
-        removefixupreferences(modifiedowners[int1]^.instance,'');
-       end;
-       for int2:= high(ferrorhandler.fnewcomponents) downto 0 do begin
-        if ferrorhandler.fnewcomponents[int2] <> infos[int1]^.descendent then begin
-         modifiedowners[int1]^.components.add(ferrorhandler.fnewcomponents[int2]);
-        end;
-       end;
- {$ifdef mse_debugsubmodule}
-       debugbinout('after load ' + infos[int1]^.descendent.name,
-                         infos[int1]^.descendent,infos[int1]^.ancestor);
- {$endif}
-      finally
-       modifiedowners[int1]^.designform.window.endmoving;
-      end;
-     end;
-    finally
-     ferrorhandler.free;
-     for int1:= 0 to high(streams) do begin
-      streams[int1].free;
-     end;
-    end;
-    for int1:= 0 to high(dependentmodules) do begin
-     fdesigner.componentmodified(dependentmodules[int1]^.instance);
-    end;
-   finally
-    endsubmodulecopy;
-  {$ifdef mse_debugsubmodule}
-    teststream.free;
-  {$endif}
+  for int2:= high(ferrorhandler.fnewcomponents) downto 0 do begin
+   if ferrorhandler.fnewcomponents[int2] <> infopo^.descendent then begin
+    amodule^.components.add(ferrorhandler.fnewcomponents[int2]);
    end;
   end;
  finally
-  dec(fmodifiedlevel);
+  amodule^.designform.window.endmoving;
  end;
 end;
-*)
 
 procedure tdescendentinstancelist.modulemodified(const amodule: pmoduleinfoty);
 type
@@ -1197,14 +1180,10 @@ var
  modifiedowners,dependentmodules: moduleinfopoarty;
  streams: streamarty;
  infos: ancestorinfopoarty;
-// stream1: tmemorystream;
- writer1: twriter;
- reader1: treader;
  comp1,ancestor: tcomponent;
  int1,int2: integer;
  po1: pancestorinfoty;
  po2: pmoduleinfoty;
-// rect1: rectty;
 
 begin
  if fmodifiedlevel >= 16 then begin
@@ -1240,134 +1219,25 @@ begin
    teststream:= ttextstream.create;
   {$endif}
    ancestor:= fdesigner.fsubmodulelist.findancestor(amodule^.instance);
-//   designer.doswapmethodpointers(ancestor,false);
    beginsubmodulecopy;
    beginstreaming;
    try 
     setlength(streams,length(infos));
     for int1:= 0 to high(modifiedowners) do begin
-     fdesigner.buildmethodtable(modifiedowners[int1]);
-     if ismodule(infos[int1]^.descendent.owner) then begin //inherited form
-      fdesigner.beginstreaming(modifiedowners[int1]);
-     end;
-     try
-      streams[int1]:= tmemorystream.create;
-      writer1:= twriter.create(streams[int1],4096);
-      writer1.onfindancestor:= {$ifdef FPC}@{$endif}fdesigner.findancestor;
-      comp1:= infos[int1]^.descendent;
-      try
-       designer.doswapmethodpointers(ancestor,false);
-       designer.doswapmethodpointers(comp1,false);
-       writer1.root:= modifiedowners[int1]^.instance;
-       writer1.ancestor:= ancestor;
-       writer1.rootancestor:= ancestor;
-       writer1.writecomponent(comp1);
-//       writer1.writedescendent(comp1,ancestor);
-      finally
-       designer.doswapmethodpointers(ancestor,true);
-       designer.doswapmethodpointers(comp1,true);
-       if ismodule(infos[int1]^.descendent.owner) then begin //inherited form
-        fdesigner.endstreaming(modifiedowners[int1]);
-       end;
-       writer1.free;
-      end;
+     savechanges(modifiedowners[int1],infos[int1],ancestor,streams[int1]);
   {$ifdef mse_debugsubmodule}
-      debugout('state ' + modifiedowners[int1]^.instance.name,streams[int1]);
+     debugout('state ' + modifiedowners[int1]^.instance.name,streams[int1]);
   {$endif}
-     finally
-      fdesigner.releasemethodtable(modifiedowners[int1]);
-     end;
     end;
-    fdesigner.fsubmodulelist.renewbackup(amodule^.instance);
+//    fdesigner.fsubmodulelist.renewbackup(amodule^.instance);
     ferrorhandler:= treaderrorhandler.create(nil);
     try
      for int1:= 0 to high(modifiedowners) do begin
-      modifiedowners[int1]^.designform.window.beginmoving; //no flicker
-      try
-       streams[int1].position:= 0;
-       revert(infos[int1],modifiedowners[int1],true);
-       reader1:= treader.create(streams[int1],4096);
-       fdesigner.buildmethodtable(modifiedowners[int1]);
-       try
-        reader1.onerror:= {$ifdef FPC}@{$endif}ferrorhandler.onerror;
-        reader1.onancestornotfound:= 
-                          {$ifdef FPC}@{$endif}ferrorhandler.ancestornotfound;
-        reader1.onsetname:= {$ifdef FPC}@{$endif}ferrorhandler.onsetname;
-        reader1.onfindcomponentclass:= 
-                          {$ifdef FPC}@{$endif}fdesigner.findcomponentclass;
-        reader1.oncreatecomponent:= {$ifdef FPC}@{$endif}fdesigner.createcomponent;
-        reader1.onfindmethod:= {$ifdef FPC}@{$endif}fdesigner.findmethod2;
-        reader1.root:= modifiedowners[int1]^.instance;
-        ferrorhandler.fnewcomponents:= nil;
-        reader1.root:= modifiedowners[int1]^.instance;
-        ferrorhandler.froot:= modifiedowners[int1]^.instance;
-        comp1:= infos[int1]^.descendent;
-        if ismodule(comp1) then begin //inherited form
-         fdesigner.beginstreaming(modifiedowners[int1]);
-         with tformdesignerfo(modifiedowners[int1]^.designform) do begin
-          beginplacement;
-          dec(submodulecopy);
-          designer.doswapmethodpointers(comp1,false);
-          try
-           begingloballoading;
-           try
-            reader1.readrootcomponent(comp1);
-            checkinline(comp1);
-            placemodule;
-            inc(submodulecopy);
-            designer.dofixup;
-            dec(submodulecopy);
-            notifygloballoading;
-           finally
-            designer.doswapmethodpointers(comp1,true);
-            inc(submodulecopy);
-            endplacement;
-           end;
-           notifygloballoading;
-          finally
-           endgloballoading;
-           fdesigner.endstreaming(modifiedowners[int1]);
-          end;
-         end;
-        end
-        else begin
-         reader1.parent:= comp1.getparentcomponent;
-         {$ifdef FPC}
-         reader1.driver.beginrootcomponent;
-         {$else}
-         reader1.readsignature;
-         {$endif}
-         reader1.beginreferences;
-         try
-          designer.doswapmethodpointers(comp1,false);
-          reader1.readcomponent(comp1);
-         finally
-          reader1.fixupreferences;
-          reader1.endreferences;
-          designer.doswapmethodpointers(comp1,true);
-         end;
-        end;
-       finally
-        reader1.free;
-        fdesigner.releasemethodtable(modifiedowners[int1]);
-        removefixupreferences(modifiedowners[int1]^.instance,'');
-       end;
-       for int2:= high(ferrorhandler.fnewcomponents) downto 0 do begin
-        if ferrorhandler.fnewcomponents[int2] <> infos[int1]^.descendent then begin
-         modifiedowners[int1]^.components.add(ferrorhandler.fnewcomponents[int2]);
-        end;
-       end;
+      restorechanges(modifiedowners[int1],infos[int1],{ancestor,}streams[int1]);
  {$ifdef mse_debugsubmodule}
-//       designer.doswapmethodpointers(infos[int1]^.descendent,false);
-//       designer.doswapmethodpointers(infos[int1]^.ancestor,false);
-       debugbinout('after load ' + infos[int1]^.descendent.name,
+      debugbinout('after load ' + infos[int1]^.descendent.name,
                          infos[int1]^.descendent,infos[int1]^.ancestor);
-//       designer.doswapmethodpointers(infos[int1]^.descendent,true);
-//       designer.doswapmethodpointers(infos[int1]^.ancestor,true);
  {$endif}
-      finally
-       modifiedowners[int1]^.designform.window.endmoving;
-      end;
      end;
     finally
      ferrorhandler.free;
@@ -1385,6 +1255,7 @@ begin
    for int1:= 0 to high(dependentmodules) do begin
     fdesigner.componentmodified(dependentmodules[int1]^.instance);
    end;
+   fdesigner.fsubmodulelist.renewbackup(amodule^.instance);
   end;
  finally
   dec(fmodifiedlevel);
@@ -2486,7 +2357,6 @@ begin
  end;
 end;
 
-
 procedure tdesigner.createcomponent(Reader: TReader; ComponentClass: TComponentClass;
                    var Component: TComponent);
 var
@@ -2495,7 +2365,8 @@ begin
  asubmoduleinfopo:= fsubmoduleinfopo;    //can be recursive
  if asubmoduleinfopo <> nil then begin
   fsubmoduleinfopo:= nil; 
-  component:= copycomponent(asubmoduleinfopo^.instance,asubmoduleinfopo^.instance);
+//  component:= copycomponent(asubmoduleinfopo^.instance,asubmoduleinfopo^.instance);
+  component:= copycomponent(asubmoduleinfopo^.instance,nil);
   reader.root.insertcomponent(component);
   initinline(component);
   if (submodulecopy = 0) and 
