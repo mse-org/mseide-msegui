@@ -12,7 +12,7 @@ object printfo: tprintfo
   container.bounds_cx = 392
   container.bounds_cy = 281
   container.frame.dummy = 0
-  options = [fo_screencentered, fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
+  options = [fo_screencentered, fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder, fo_savestate]
   statfile = tstatfile1
   caption = 'Print File'
   onidle = printidle
@@ -40,16 +40,16 @@ object printfo: tprintfo
   end
   object linenum: tbooleanedit
     bounds_x = 112
-    bounds_y = 67
-    bounds_cx = 71
-    bounds_cy = 32
+    bounds_y = 68
+    bounds_cx = 66
+    bounds_cy = 30
     frame.caption = 'Print line'#10'&numbers'
     frame.dummy = 0
     frame.outerframe = (
       0
+      8
+      53
       9
-      58
-      10
     )
     taborder = 6
     statfile = tstatfile1
@@ -58,15 +58,15 @@ object printfo: tprintfo
   object fontsize: trealedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 16
-    bounds_y = 54
-    bounds_cx = 84
-    bounds_cy = 39
+    bounds_y = 55
+    bounds_cx = 73
+    bounds_cy = 37
     frame.caption = 'Font &size (Pt)'
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
-      16
+      17
+      5
       0
     )
     taborder = 5
@@ -74,22 +74,22 @@ object printfo: tprintfo
     optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
     formatedit = '0.0'
     formatdisp = '0.0'
-    valuescale = 3.52777999999999990
-    reffontheight = 15
-    val = 35.27779999999999900
-    mi = 21.16669999999999900
-    ma = 49.38890000000000000
+    valuescale =  3.5277799999999999E+0000
+    reffontheight = 14
+    val =  3.5277799999999999E+0001
+    mi =  2.1166699999999999E+0001
+    ma =  4.9388900000000000E+0001
   end
   object titlefont: tstringedit
     bounds_x = 16
-    bounds_y = 118
+    bounds_y = 119
     bounds_cx = 361
-    bounds_cy = 39
+    bounds_cy = 37
     frame.caption = '&Title font'
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
@@ -99,18 +99,18 @@ object printfo: tprintfo
     optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
     value = 'Helvetica'
     onsetvalue = titlefosetvalue
-    reffontheight = 15
+    reffontheight = 14
   end
   object sourcefont: tstringedit
     bounds_x = 16
-    bounds_y = 166
+    bounds_y = 167
     bounds_cx = 361
-    bounds_cy = 39
+    bounds_cy = 37
     frame.caption = 'So&urce font'
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
@@ -120,19 +120,19 @@ object printfo: tprintfo
     optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
     value = 'Courier'
     onsetvalue = sourcefosetvalue
-    reffontheight = 15
+    reffontheight = 14
   end
   object colorset: tbooleanedit
     bounds_x = 192
-    bounds_y = 74
-    bounds_cx = 48
-    bounds_cy = 17
+    bounds_y = 75
+    bounds_cx = 46
+    bounds_cy = 16
     frame.caption = '&Color'
     frame.dummy = 0
     frame.outerframe = (
       0
-      2
-      35
+      1
+      33
       2
     )
     taborder = 7
@@ -141,14 +141,14 @@ object printfo: tprintfo
   end
   object tpagesizeselector1: tpagesizeselector
     bounds_x = 184
-    bounds_y = 6
+    bounds_y = 7
     bounds_cx = 79
-    bounds_cy = 39
+    bounds_cy = 37
     frame.caption = 'Paper size'
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
@@ -194,19 +194,19 @@ object printfo: tprintfo
       end>
     dropdown.itemindex = 5
     printer = printer
-    reffontheight = 15
+    reffontheight = 14
   end
   object tpageorientationselector1: tpageorientationselector
     bounds_x = 275
-    bounds_y = 6
-    bounds_cx = 112
-    bounds_cy = 39
+    bounds_y = 7
+    bounds_cx = 102
+    bounds_cy = 37
     frame.caption = 'Paper orientation'
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
-      10
+      17
+      0
       0
     )
     anchors = [an_top, an_right]
@@ -221,19 +221,19 @@ object printfo: tprintfo
       end>
     dropdown.itemindex = 0
     printer = printer
-    reffontheight = 15
+    reffontheight = 14
   end
   object rotate: tbooleanedit
     bounds_x = 283
-    bounds_y = 74
-    bounds_cx = 89
-    bounds_cy = 17
+    bounds_y = 75
+    bounds_cx = 84
+    bounds_cy = 16
     frame.caption = 'Rotate CCW'
     frame.dummy = 0
     frame.outerframe = (
       0
-      2
-      76
+      1
+      71
       2
     )
     taborder = 8
@@ -243,35 +243,35 @@ object printfo: tprintfo
   object pages: tstringedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 16
-    bounds_y = 6
+    bounds_y = 7
     bounds_cx = 156
-    bounds_cy = 39
+    bounds_cy = 37
     frame.caption = 'Pages'
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
     anchors = [an_left, an_top, an_right]
     taborder = 2
     onsetvalue = pagessetvalue
-    reffontheight = 15
+    reffontheight = 14
   end
   object printer: tpostscriptprinter
     canvas.font.color = -1610612734
-    canvas.font.xscale = 1.00000000000000000
+    canvas.font.xscale =  1.0000000000000000E+0000
     canvas.font.dummy = 0
-    canvas.ppmm = 10.00000000000000000
+    canvas.ppmm =  1.0000000000000000E+0001
     onpagestart = pronpagestart
-    pa_width = 210.00000000000000000
-    pa_height = 297.00000000000000000
+    pa_width =  2.1000000000000000E+0002
+    pa_height =  2.9700000000000000E+0002
     pa_size = sps_a4
-    pa_frameleft = 10.00000000000000000
-    pa_frametop = 10.00000000000000000
-    pa_frameright = 10.00000000000000000
-    pa_framebottom = 10.00000000000000000
+    pa_frameleft =  1.0000000000000000E+0001
+    pa_frametop =  1.0000000000000000E+0001
+    pa_frameright =  1.0000000000000000E+0001
+    pa_framebottom =  1.0000000000000000E+0001
     statfile = tstatfile1
     printcommand = 'lp -'
     left = 184

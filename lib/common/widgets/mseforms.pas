@@ -24,11 +24,13 @@ type
                fo_minimized,fo_maximized,fo_fullscreen,
                fo_closeonesc,fo_cancelonesc,fo_closeonenter,fo_closeonf10,
                fo_globalshortcuts,fo_localshortcuts,
-               fo_autoreadstat,fo_autowritestat,fo_savepos,fo_savestate);
+               fo_autoreadstat,fo_autowritestat,
+               fo_savepos,fo_savezorder,fo_savestate);
  formoptionsty = set of formoptionty;
 
 const
- defaultformoptions = [fo_autoreadstat,fo_autowritestat,fo_savepos,fo_savestate];
+ defaultformoptions = [fo_autoreadstat,fo_autowritestat,
+                       fo_savepos,fo_savezorder,fo_savestate];
  defaultformwidgetoptions = (defaultoptionswidgetmousewheel - 
                          [ow_mousefocus,ow_tabfocus]) + [ow_subfocus,ow_hinton];
  defaultcontaineroptionswidget = defaultoptionswidgetmousewheel + 
@@ -1031,6 +1033,9 @@ begin
    cx:= reader.readinteger('cx',cx,0);
    cy:= reader.readinteger('cy',cy,0);
   end;
+  setclippedwidgetrect(rect1);
+ end;
+ if fo_savezorder in foptions then begin
   str1:= '~';
   str1:= reader.readstring('stackedunder',str1);
   if str1 <> '~' then begin
@@ -1043,7 +1048,6 @@ begin
     end;
    end;
   end;
-  setclippedwidgetrect(rect1);
  end;
 end;
 
@@ -1104,19 +1108,23 @@ procedure tcustommseform.dostatwrite1(const writer: tstatwriter);
 var
  window1: twindow;
 begin
- if (fparentwidget = nil) and (fo_savepos in foptions) then begin
-  window1:= window.stackedunder;
-  if window1 <> nil then begin
-   writer.writestring('stackedunder',ownernamepath(window1.owner));
-  end
-  else begin
-   writer.writestring('stackedunder','');
+ if fparentwidget = nil then begin
+  if fo_savezorder in foptions then begin
+   window1:= window.stackedunder;
+   if window1 <> nil then begin
+    writer.writestring('stackedunder',ownernamepath(window1.owner));
+   end
+   else begin
+    writer.writestring('stackedunder','');
+   end;
   end;
-  with window.normalwindowrect do begin
-   writer.writeinteger('x',x);
-   writer.writeinteger('y',y);
-   writer.writeinteger('cx',cx);
-   writer.writeinteger('cy',cy);
+  if  fo_savepos in foptions then begin
+   with window.normalwindowrect do begin
+    writer.writeinteger('x',x);
+    writer.writeinteger('y',y);
+    writer.writeinteger('cx',cx);
+    writer.writeinteger('cy',cy);
+   end;
   end;
  end;
 end;

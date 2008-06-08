@@ -1,16 +1,19 @@
 object selectsubmoduledialogfo: tselectsubmoduledialogfo
+  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
   bounds_x = 391
   bounds_y = 320
   bounds_cx = 241
   bounds_cy = 81
+  taborder = 1
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
   container.bounds_cx = 241
   container.bounds_cy = 81
   container.frame.dummy = 0
-  options = [fo_screencentered, fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
+  options = [fo_screencentered, fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder, fo_savestate]
   caption = 'Select subform'
-  icon.transparency = -2147483648
   moduleclassname = 'tmseform'
   object ok: tbutton
     bounds_x = 120
@@ -30,23 +33,23 @@ object selectsubmoduledialogfo: tselectsubmoduledialogfo
     bounds_cy = 22
     anchors = [an_top, an_right]
     taborder = 2
+    state = [as_localcaption]
     caption = 'Cancel'
     modalresult = mr_cancel
   end
   object submodule: tdropdownlistedit
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 8
     bounds_y = 8
     bounds_cx = 228
-    bounds_cy = 22
+    bounds_cy = 20
     frame.dummy = 0
     anchors = [an_left, an_top, an_right]
     dropdown.options = [deo_selectonly, deo_autodropdown, deo_keydropdown, deo_sorted]
     dropdown.cols.count = 1
-    dropdown.cols.items = <
+    dropdown.cols.items = <    
       item
         textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
       end>
-    reffontheight = 16
+    reffontheight = 14
   end
 end

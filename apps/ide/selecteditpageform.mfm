@@ -13,10 +13,9 @@ object selecteditpagefo: tselecteditpagefo
   container.bounds_cy = 473
   container.frame.dummy = 0
   container.onchildscaled = formonchildscaled
-  options = [fo_screencentered, fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
+  options = [fo_screencentered, fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder, fo_savestate]
   caption = 'Select edit page (Ctrl+E)'
   icon.transparentcolor = -2147483648
-  icon.transparency = -2147483648
   oneventloopstart = fooncreate
   onchildscaled = formonchildscaled
   moduleclassname = 'tmseform'

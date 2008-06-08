@@ -7,6 +7,7 @@ object findinfilefo: tfindinfilefo
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
   frame.dummy = 0
+  taborder = 1
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
   container.bounds_x = 0
@@ -17,11 +18,11 @@ object findinfilefo: tfindinfilefo
   dragdock.splitter_size = 0
   dragdock.caption = 'Findresults'
   dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_propsize]
-  options = [fo_savepos]
+  options = [fo_savepos, fo_savezorder]
   statfile = mainfo.projectstatfile
   caption = 'Find in file results'
+  icon.transparentcolor = -2147483642
   icon.options = [bmo_masked]
-  icon.transparency = -2147483648
   icon.image = {
     000000000200000010000000100000006C010000000000000000000000000000
     0000000000000000000000000000000000000000D0D0D0146868680140404001
@@ -41,17 +42,15 @@ object findinfilefo: tfindinfilefo
   }
   moduleclassname = 'tdockform'
   object tabs: ttabwidget
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 359
     bounds_cy = 198
     anchors = []
-    activepageindex = -1
     options = [tabo_opposite]
     tab_frame.buttonslast = True
     tab_frame.dummy = 0
-    tab_size = 20
-    reffontheight = 16
+    tab_size = 18
+    reffontheight = 14
   end
 end

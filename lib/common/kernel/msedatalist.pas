@@ -2840,10 +2840,31 @@ begin
 end;
 
 procedure tdatalist.defineproperties(filer: tfiler);
+var
+ bo1: boolean;
+ int1,int2: integer;
+ po1: pchar;
 begin
  inherited;
+ if filer.ancestor = nil then begin
+  bo1:= (fcount <> 0);
+ end
+ else begin
+  bo1:= tdatalist(filer.ancestor).fcount <> fcount;
+  if not bo1 and (filer is twriter) then begin
+   datapo; //normalize ring
+   po1:= tdatalist(filer.ancestor).datapo;
+   for int1:= 0 to fcount-1 do begin
+    compare((fdatapo+int1*fsize)^,(po1+int1*fsize)^,int2);
+    if int2 <> 0 then begin
+     bo1:= true;
+     break;
+    end;
+   end;
+  end;
+ end;
  filer.defineproperty('data',
-  {$ifdef FPC}@{$endif}readdata,{$ifdef FPC}@{$endif}writedata,fcount <> 0);
+  {$ifdef FPC}@{$endif}readdata,{$ifdef FPC}@{$endif}writedata,bo1);
 end;
 
 procedure tdatalist.freedata(var data);

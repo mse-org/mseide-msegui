@@ -11,9 +11,8 @@ object commandlinefo: tcommandlinefo
   container.bounds_cx = 542
   container.bounds_cy = 100
   container.frame.dummy = 0
-  options = [fo_screencentered, fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
+  options = [fo_screencentered, fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder, fo_savestate]
   caption = 'Command Line'
-  icon.transparency = -2147483648
   moduleclassname = 'tmseform'
   object disp: tmemoedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]

@@ -19,7 +19,7 @@ object objectinspectorfo: tobjectinspectorfo
   dragdock.splitter_size = 0
   dragdock.caption = 'Objectinspector'
   dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_propsize]
-  options = [fo_savepos, fo_savestate]
+  options = [fo_savepos, fo_savezorder, fo_savestate]
   statfile = mainfo.projectstatfile
   caption = 'Object Inspector'
   icon.transparentcolor = -2147483642

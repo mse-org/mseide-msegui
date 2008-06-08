@@ -18,7 +18,7 @@ object cpufo: tcpufo
   dragdock.splitter_size = 0
   dragdock.caption = 'CPU'
   dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_propsize]
-  options = [fo_savepos, fo_savestate]
+  options = [fo_savepos, fo_savezorder, fo_savestate]
   statfile = mainfo.projectstatfile
   caption = 'CPU'
   icon.transparentcolor = -2147483642
@@ -57,15 +57,15 @@ object cpufo: tcpufo
   object on: tbooleanedit
     Tag = -1
     bounds_x = 7
-    bounds_y = 8
-    bounds_cx = 61
-    bounds_cy = 17
+    bounds_y = 9
+    bounds_cx = 59
+    bounds_cy = 16
     frame.caption = 'CPU on'
     frame.dummy = 0
     frame.outerframe = (
       0
-      2
-      48
+      1
+      46
       2
     )
     onchange = ononchange

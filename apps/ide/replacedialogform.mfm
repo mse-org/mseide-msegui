@@ -4,13 +4,15 @@ object replacedialogfo: treplacedialogfo
   bounds_y = 302
   bounds_cx = 421
   bounds_cy = 163
+  taborder = 1
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
   container.bounds_cx = 421
   container.bounds_cy = 163
   container.frame.dummy = 0
-  options = [fo_freeonclose, fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos]
+  options = [fo_freeonclose, fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder]
   statfile = statfile1
-  icon.transparency = -2147483648
   moduleclassname = 'tmseform'
   object findtext: thistoryedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
@@ -59,14 +61,14 @@ object replacedialogfo: treplacedialogfo
   object casesensitive: tbooleanedit
     bounds_x = 8
     bounds_y = 96
-    bounds_cx = 90
+    bounds_cx = 92
     bounds_cy = 16
     frame.caption = '&casesensitive'
     frame.dummy = 0
     frame.outerframe = (
       0
       1
-      77
+      79
       2
     )
     taborder = 2
@@ -135,14 +137,14 @@ object replacedialogfo: treplacedialogfo
   object promptonreplace: tbooleanedit
     bounds_x = 312
     bounds_y = 96
-    bounds_cx = 93
+    bounds_cx = 96
     bounds_cy = 16
     frame.caption = '&prompt on rep.'
     frame.dummy = 0
     frame.outerframe = (
       0
       1
-      80
+      83
       2
     )
     taborder = 5

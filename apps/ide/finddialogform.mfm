@@ -12,7 +12,7 @@ object finddialogfo: tfinddialogfo
   container.bounds_cx = 331
   container.bounds_cy = 116
   container.frame.dummy = 0
-  options = [fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos]
+  options = [fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder]
   statfile = statfile1
   caption = 'Find Text'
   moduleclassname = 'tmseform'
@@ -21,6 +21,7 @@ object finddialogfo: tfinddialogfo
     bounds_y = 45
     bounds_cx = 267
     bounds_cy = 40
+    frame.dummy = 0
     taborder = 2
     optionsscale = [osc_expandx, osc_shrinkx]
     optionslayout = [lao_placex]
@@ -99,6 +100,7 @@ object finddialogfo: tfinddialogfo
     bounds_y = 88
     bounds_cx = 103
     bounds_cy = 20
+    frame.dummy = 0
     anchors = [an_top, an_right]
     taborder = 1
     optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]

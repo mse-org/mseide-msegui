@@ -16,7 +16,7 @@ object projectoptionsfo: tprojectoptionsfo
   container.frame.sbhorz.options = [sbo_moveauto, sbo_showauto]
   container.frame.sbvert.options = [sbo_moveauto, sbo_showauto]
   container.frame.dummy = 0
-  options = [fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos]
+  options = [fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder]
   statfile = statfile1
   caption = 'Projectoptions'
   oncreate = createexe

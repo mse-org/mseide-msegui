@@ -22,7 +22,7 @@ object mainfo: tmainfo
   container.onchildscaled = onscale
   optionswindow = [wo_groupleader]
   mainmenu = mainmenu1
-  options = [fo_main, fo_terminateonclose, fo_globalshortcuts, fo_savepos, fo_savestate]
+  options = [fo_main, fo_terminateonclose, fo_globalshortcuts, fo_savepos, fo_savezorder, fo_savestate]
   statfile = projectstatfile
   caption = 'MSEide'
   oncreate = mainfooncreate

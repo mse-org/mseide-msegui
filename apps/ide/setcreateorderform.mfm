@@ -10,9 +10,8 @@ object setcreateorderfo: tsetcreateorderfo
   container.bounds_cx = 381
   container.bounds_cy = 340
   container.frame.dummy = 0
-  options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
+  options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder, fo_savestate]
   statfile = statfile1
-  icon.transparency = -2147483648
   onclosequery = formonclosequery
   moduleclassname = 'tmseform'
   object grid: tstringgrid
