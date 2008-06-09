@@ -35,7 +35,7 @@ type
    foptions: statfileoptionsty;
    fencoding: charencodingty;
    fstatfile: tstatfile;
-   fsavedmemorystatfiles: msestring;
+   fsavedmemoryfiles: msestring;
    procedure dolinkstatread(const info: linkinfoty);
    procedure dolinkstatreading(const info: linkinfoty);
    procedure dolinkstatreaded(const info: linkinfoty);
@@ -70,8 +70,8 @@ type
    property statfile: tstatfile read fstatfile write setstatfile;
             //filename is stored in linked statfile, dostatread and dostatwrite are
             //called by linked statfile
-   property savedmemorystatfiles: msestring read fsavedmemorystatfiles write
-                           fsavedmemorystatfiles;
+   property savedmemoryfiles: msestring read fsavedmemoryfiles write
+                           fsavedmemoryfiles;
             //use quotes for several filenames '"file1.sta" "file2.sta*"', 
             //'*' and '?' wildcards supported.
    property statvarname: msestring read getstatvarname write fstatvarname;
@@ -145,8 +145,8 @@ begin
   statread;
  end
  else begin
-  if fsavedmemorystatfiles <> '' then begin
-   ar3:= reader.readarray('savedmemorystatfiles',msestringarty(nil));
+  if fsavedmemoryfiles <> '' then begin
+   ar3:= reader.readarray('savedmemoryfiles',msestringarty(nil));
    for int1:= 0 to high(ar3) do begin
     reader.readmemorystatstream(ar3[int1],ar3[int1]);
    end;
@@ -188,9 +188,9 @@ begin
 //  end;
  end
  else begin
-  if fsavedmemorystatfiles <> '' then begin
-   ar3:= memorystatstreams.findfiles(fsavedmemorystatfiles);
-   writer.writearray('savedmemorystatfiles',ar3);
+  if fsavedmemoryfiles <> '' then begin
+   ar3:= memorystatstreams.findfiles(fsavedmemoryfiles);
+   writer.writearray('savedmemoryfiles',ar3);
    for int1:= 0 to high(ar3) do begin
     writer.writememorystatstream(ar3[int1],ar3[int1]);
    end;
