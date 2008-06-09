@@ -220,6 +220,7 @@ type
    function open(const streamname: msestring;
                   const openmode: fileopenmodety): ttextstream;
    procedure delete(const name: msestring);
+   function findfiles(const aname: msestring): msestringarty;
  end;
  
 procedure deletememorystatstream(const streamname: msestring);
@@ -1384,6 +1385,24 @@ begin
   end;
  end;
  result:= tmemorytextstream.create(self,streamname,openmode,fstreams[int1]);
+end;
+
+function tmemorystreams.findfiles(const aname: msestring): msestringarty;
+var
+ ar1: msestringarty;
+ int1,int2: integer;
+begin
+ ar1:= nil;
+ int2:= 0;
+ splitstringquoted(aname,ar1);
+ setlength(result,length(fstreams)); //max
+ for int1:= 0 to high(result) do begin
+  if checkfilename(fstreams[int1].name,ar1) then begin
+   result[int2]:= fstreams[int1].name;
+   inc(int2);
+  end;
+ end;
+ setlength(result,int2);
 end;
 
 initialization

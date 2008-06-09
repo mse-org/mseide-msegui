@@ -35,6 +35,7 @@ type
    foptions: statfileoptionsty;
    fencoding: charencodingty;
    fstatfile: tstatfile;
+   fsavedmemorystatfiles: msestring;
    procedure dolinkstatread(const info: linkinfoty);
    procedure dolinkstatreading(const info: linkinfoty);
    procedure dolinkstatreaded(const info: linkinfoty);
@@ -69,6 +70,10 @@ type
    property statfile: tstatfile read fstatfile write setstatfile;
             //filename is stored in linked statfile, dostatread and dostatwrite are
             //called by linked statfile
+   property savedmemorystatfiles: msestring read fsavedmemorystatfiles write
+                           fsavedmemorystatfiles;
+            //use quotes for several filenames '"file1.sta" "file2.sta*"', 
+            //'*' and '?' wildcards supported.
    property statvarname: msestring read getstatvarname write fstatvarname;
    property activator;
    property onstatupdate: statupdateeventty read fonstatupdate write fonstatupdate;
@@ -110,7 +115,9 @@ end;
 procedure tstatfile.dostatread(const reader: tstatreader);
 var
  ar1,ar2: stringarty;
+ ar3: msestringarty;
  stream1: ttextstream;
+ int1: integer;
 begin
  ar1:= nil; //compiler warning
  ar2:= nil; //compiler warning
@@ -138,6 +145,12 @@ begin
   statread;
  end
  else begin
+  if fsavedmemorystatfiles <> '' then begin
+   ar3:= reader.readarray('savedmemorystatfiles',msestringarty(nil));
+   for int1:= 0 to high(ar3) do begin
+    reader.readmemorystatstream(ar3[int1],ar3[int1]);
+   end;
+  end;
   if assigned(fonstatupdate) then begin
    fonstatupdate(self,reader);
   end;
@@ -150,7 +163,9 @@ end;
 procedure tstatfile.dostatwrite(const writer: tstatwriter);
 var
  ar1: stringarty;
+ ar3: msestringarty;
  stream1: ttextstream;
+ int1: integer;
 begin
  ar1:= nil;  //compiler warning
  if (writer <> awriter) then begin
@@ -173,6 +188,13 @@ begin
 //  end;
  end
  else begin
+  if fsavedmemorystatfiles <> '' then begin
+   ar3:= memorystatstreams.findfiles(fsavedmemorystatfiles);
+   writer.writearray('savedmemorystatfiles',ar3);
+   for int1:= 0 to high(ar3) do begin
+    writer.writememorystatstream(ar3[int1],ar3[int1]);
+   end;
+  end;
   if assigned(fonstatupdate) then begin
    fonstatupdate(self,writer);
   end;

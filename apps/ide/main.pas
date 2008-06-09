@@ -1022,13 +1022,14 @@ begin
    if not gdb.active then begin
     startgdbonexecute(nil);
    end;
+   str1:= gettargetfile;
    with projectoptions,texp do begin
-    if debugtarget <> '' then begin
-     str1:= debugtarget;
-    end
-    else begin
-     str1:= makedir+targetfile;
-    end; 
+//    if debugtarget <> '' then begin
+//     str1:= debugtarget;
+//    end
+//    else begin
+//     str1:= makedir+targetfile;
+//    end; 
     if not gdbdownload and not gdbsimulator and (uploadcommand <> '') and 
                    (needsdownload or force) then begin
      dodownload;

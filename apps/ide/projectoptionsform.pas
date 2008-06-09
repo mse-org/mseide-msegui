@@ -577,7 +577,7 @@ function gettargetfile: filenamety;
 begin
  with projectoptions.texp do begin
   if trim(debugtarget) <> '' then begin
-   result:= debugtarget;
+   result:= objpath(debugtarget);
   end
   else begin
    result:= objpath(targetfile);
