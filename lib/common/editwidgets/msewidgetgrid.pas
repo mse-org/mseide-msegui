@@ -1701,52 +1701,54 @@ var
  po1: pointty;
  rect1: rectty;
 begin
- inherited;
- if not (gs_layoutupdating in fgrid.fstate) and 
-     (fgrid.componentstate * [csdesigning,csloading] = 
-      [csdesigning]) and (sender <> nil) and (flayoutupdating = 0) and 
-         (twidget1(sender).fparentwidget = self) then begin
-  with fgrid do begin
-   int3:= -1;
-   for int1:= 0 to datacols.count-1 do begin
-    with datacols[int1] do begin
-     if sender = editwidget then begin
-      int3:= int1;
-      break;
-     end;
-    end
-   end;  
-   if int3 >= 0 then begin
-    int4:= sender.bounds_cy; //updatelayout modifies widgetrect
-    rect1:= cellrect(makegridcoord(0,0));
-    po1:= translatepaintpoint(nullpoint,sender,fgrid);
-    int2:= datacols.count;
+ if not (csdestroying in fgrid.componentstate) then begin
+  inherited;
+  if not (gs_layoutupdating in fgrid.fstate) and 
+      (fgrid.componentstate * [csdesigning,csloading] = 
+       [csdesigning]) and (sender <> nil) and (flayoutupdating = 0) and 
+          (twidget1(sender).fparentwidget = self) then begin
+   with fgrid do begin
+    int3:= -1;
     for int1:= 0 to datacols.count-1 do begin
      with datacols[int1] do begin
-      if po1.x < rect1.x + width div 2 then begin
-       int2:= int1;
+      if sender = editwidget then begin
+       int3:= int1;
        break;
       end;
-      inc(rect1.x,step);
+     end
+    end;  
+    if int3 >= 0 then begin
+     int4:= sender.bounds_cy; //updatelayout modifies widgetrect
+     rect1:= cellrect(makegridcoord(0,0));
+     po1:= translatepaintpoint(nullpoint,sender,fgrid);
+     int2:= datacols.count;
+     for int1:= 0 to datacols.count-1 do begin
+      with datacols[int1] do begin
+       if po1.x < rect1.x + width div 2 then begin
+        int2:= int1;
+        break;
+       end;
+       inc(rect1.x,step);
+      end;
+     end;
+     if int2 > int3 then begin
+      dec(int2);
+     end;
+     inc(flayoutupdating);
+     try
+      sender.bounds_cy:= int4;
+      datarowheight:= int4;
+      datacols[int3].width:= sender.bounds_cx;
+      layoutchanged;
+      if int3 <> int2 then begin
+       movecol(int3,int2);
+      end;
+     finally
+      dec(flayoutupdating);
      end;
     end;
-    if int2 > int3 then begin
-     dec(int2);
-    end;
-    inc(flayoutupdating);
-    try
-     sender.bounds_cy:= int4;
-     datarowheight:= int4;
-     datacols[int3].width:= sender.bounds_cx;
-     layoutchanged;
-     if int3 <> int2 then begin
-      movecol(int3,int2);
-     end;
-    finally
-     dec(flayoutupdating);
-    end;
+    updatelayout;
    end;
-   updatelayout;
   end;
  end;
 end;

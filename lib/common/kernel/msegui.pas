@@ -6485,11 +6485,13 @@ procedure twidget.widgetregionchanged(const sender: twidget);
 var
  int1: integer;
 begin
- widgetregioninvalid;
- invalidaterect(sender.fwidgetrect,org_widget);
- if componentstate * [csloading,csdestroying] = [] then begin
-  for int1:= 0 to high(fwidgets) do begin
-   fwidgets[int1].parentwidgetregionchanged(sender);
+ if not (csdestroying in componentstate) then begin
+  widgetregioninvalid;
+  invalidaterect(sender.fwidgetrect,org_widget);
+  if componentstate * [csloading,csdestroying] = [] then begin
+   for int1:= 0 to high(fwidgets) do begin
+    fwidgets[int1].parentwidgetregionchanged(sender);
+   end;
   end;
  end;
 end;

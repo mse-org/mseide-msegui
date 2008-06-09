@@ -543,9 +543,14 @@ begin
    res := pqexec(tr.fconn,pchar('deallocate prepst'+nr));
    if (PQresultStatus(res) <> PGRES_COMMAND_OK) then begin
     pqclear(res);
+    rollback(tr);
+    res := pqexec(tr.fconn,pchar('deallocate prepst'+nr));
+    {
        DatabaseError(SErrPrepareFailed + ' (PostgreSQL: ' + 
             PQerrorMessage(tr.fconn) + ')',self)
+     }
    end;
+      //problem with aborted transaction
    pqclear(res);
 //  end;
    FPrepared := False;

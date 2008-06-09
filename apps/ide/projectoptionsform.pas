@@ -1659,7 +1659,11 @@ begin
  try
   result:= fo.show(true,nil) = mr_ok;
   if result then begin
-   mainfo.gdb.closegdb;
+   with mainfo.gdb do begin
+    if not started then begin
+     closegdb;
+    end;
+   end;
    fo.window.nofocus; //remove empty grid lines
    formtoprojectoptions(fo);
    projectoptionsmodified;
