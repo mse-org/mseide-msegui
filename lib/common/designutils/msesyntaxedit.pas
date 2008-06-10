@@ -57,7 +57,8 @@ type
    function charatpos(const apos: gridcoordty): msechar; //0 if none
    function charbeforepos(const apos: gridcoordty): msechar; //0 if none
    function wordatpos(const apos: gridcoordty; out word: msestring;
-               const delimchars: msestring {= defaultmsedelimchars}): gridcoordty;
+                             const delimchars: msestring; 
+                             const nodelimstrings: array of msestring): gridcoordty;
    procedure indent(const acount: integer);
    procedure unindent(const acount: integer);
    procedure removelink;
@@ -263,7 +264,8 @@ begin
 end;
 
 function tsyntaxedit.wordatpos(const apos: gridcoordty; out word: msestring;
-                 const delimchars: msestring {= defaultmsedelimchars}): gridcoordty;
+                 const delimchars: msestring;
+                 const nodelimstrings:  array of msestring): gridcoordty;
      //returns startpos
 var
  po1,po2: pmsechar;
@@ -279,10 +281,10 @@ begin
   stringpo:= pmsestring(flines.getitempo(apos.row));
   if stringpo^ <> '' then begin
    if delimchars <> '' then begin
-    wordatindex(stringpo^,apos.col,po1,po2,delimchars);
+    wordatindex(stringpo^,apos.col,po1,po2,delimchars,nodelimstrings);
    end
    else begin
-    wordatindex(stringpo^,apos.col,po1,po2,defaultmsedelimchars);
+    wordatindex(stringpo^,apos.col,po1,po2,defaultmsedelimchars,nodelimstrings);
    end;
    if po1 = po2 then begin
     po1:= nil;
@@ -408,7 +410,7 @@ var
  pos1: gridcoordty;
  length1: integer;
 begin
- pos1:= wordatpos(apos,str1,delimchars);
+ pos1:= wordatpos(apos,str1,delimchars,[]);
  length1:= length(str1);
  if (pos1.col <> flinkpos.col) or (pos1.row <> flinkpos.row) or
      (length1 <> flinklength) then begin
@@ -431,7 +433,7 @@ var
  str1: msestring;
  pos1: gridcoordty;
 begin
- pos1:= wordatpos(apos,str1,delimchars);
+ pos1:= wordatpos(apos,str1,delimchars,[]);
  if str1 <> '' then begin
   setselection(pos1,makegridcoord(pos1.col+length(str1),pos1.row),true);
  end;

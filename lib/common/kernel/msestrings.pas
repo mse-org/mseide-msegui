@@ -328,10 +328,12 @@ procedure resizearray(var value; newlength, elementsize: integer);
 
 procedure wordatindex(const value: msestring; const index: integer;
                           out first,pastlast: pmsechar;
-                     const delimchars: msestring {= defaultmsedelimchars)}); overload;
+                     const delimchars: msestring;
+                     const nodelimstrings:  array of msestring); overload;
                           //index = 0..length(value)-1
 function wordatindex(const value: msestring; const index: integer;
-            const delimchars: msestring {= defaultmsedelimchars}): msestring; overload;
+            const delimchars: msestring;
+            const nodelimstrings:  array of msestring): msestring; overload;
 
 function quotestring(const value: string; quotechar: char): string; overload;
 function quotestring(const value: msestring; quotechar: msechar): msestring; overload;
@@ -2153,7 +2155,8 @@ end;
 
 procedure wordatindex(const value: msestring; const index: integer;
                           out first,pastlast: pmsechar;
-                     const delimchars: msestring {= defaultmsedelimchars});
+                     const delimchars: msestring;
+                     const nodelimstrings:  array of msestring);
 
  function checkdelimchars(achar: msechar): boolean;
  var
@@ -2170,17 +2173,77 @@ procedure wordatindex(const value: msestring; const index: integer;
   end;
  end;
 
+ function checknodelimstringsdown(var po1: pmsechar; var int1: integer): boolean;
+ var
+  bo1,bo2: boolean;
+  int2,int3,int4: integer;
+  po2: pmsechar;
+ begin
+  result:= true;
+  for int2:= high(nodelimstrings) downto 0 do begin
+   po2:= po1;
+   int4:= length(nodelimstrings[int2])-1;
+   int3:= int1 - int4;
+   if int3 >= 0 then begin
+    bo2:= true;
+    for int3:= int4 downto 0 do begin
+     if (pmsechar(pointer(nodelimstrings[int2]))+int3)^ <> po2^ then begin
+      bo2:= false;
+      break;
+     end;
+     dec(po2);
+    end;
+    if bo2 then begin
+     inc(po2);
+     result:= false;
+     int1:= int1 - (po1 - po2);
+     po1:= po2;
+     break;
+    end;
+   end;
+  end;
+ end;
+
+ function checknodelimstringsup(var po1: pmsechar; var int3: integer): boolean;
+ var
+  int1,int2: integer;
+  bo1: boolean;
+  po2: pmsechar;
+ begin
+  result:= true;
+  for int2:= high(nodelimstrings) downto 0 do begin
+   bo1:= true;
+   po2:= po1;
+   for int1:= 0 to length(nodelimstrings[int2]) - 1 do begin
+    if po2^ <> (pmsechar(pointer(nodelimstrings[int2]))+int1)^ then begin
+     bo1:= false;
+     break;
+    end;
+    inc(po2);
+   end;
+   if bo1 then begin
+    dec(po2);
+    int3:= int3 - (po1 - po2);
+    po1:= po2;
+    result:= false;
+    break;
+   end;
+  end;
+ end;
+ 
 var
  int1: integer;
  po1: pmsechar;
+ bo1,bo2: boolean;
 begin
  first:= nil;
  pastlast:= nil;
  if (index >= 0) and (index < length(value)) then begin
   first:= pmsechar(pointer(value)) + index;
   po1:= first;
-  for int1:= index downto 0 do begin
-   if checkdelimchars(po1^) then begin
+  int1:= index;
+  while int1 >= 0 do begin
+   if checkdelimchars(po1^) and checknodelimstringsdown(po1,int1) then begin
     if po1 = first then begin
      first:= nil;
      exit;
@@ -2188,24 +2251,28 @@ begin
     break;
    end;
    dec(po1);
+   dec(int1);
   end;
   pastlast:= first + 1;
   first:= po1 + 1;
-  for int1:= length(value) - index - 2 downto 0 do begin
-   if checkdelimchars(pastlast^) then begin
+  int1:= length(value) - index - 2;
+  while int1 >= 0 do begin
+   if checkdelimchars(pastlast^) and checknodelimstringsup(pastlast,int1) then begin
     break;
    end;
    inc(pastlast);
+   dec(int1);
   end;
  end;
 end;
 
 function wordatindex(const value: msestring; const index: integer;
-            const delimchars: msestring {= defaultmsedelimchars}): msestring;
+            const delimchars: msestring;
+            const nodelimstrings:  array of msestring): msestring;
 var
  po1,po2: pmsechar;
 begin
- wordatindex(value,index,po1,po2,delimchars);
+ wordatindex(value,index,po1,po2,delimchars,nodelimstrings);
  result:= copy(msestring(po1),1,po2-po1);
 end;
 
