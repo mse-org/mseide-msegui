@@ -162,6 +162,7 @@ uses
 
 const
  pascaldelims = msestring(' :;+-*/(){},=<>' + c_linefeed + c_return + c_tab);
+ nodelimstrings: array[0..0] of msestring = ('->'); //for c
  bmbitshift = 4;
  bmbitmask = integer($3ff0);
 
@@ -170,14 +171,14 @@ function getpascalvarname(const edit: tsyntaxedit; pos: gridcoordty;
 var
  int1: integer;
 begin
- startpos:= edit.wordatpos(pos,result,pascaldelims);
+ startpos:= edit.wordatpos(pos,result,pascaldelims,nodelimstrings);
  if (result = '') and (pos.col > 0) then begin
   dec(pos.col);
-  startpos:= edit.wordatpos(pos,result,pascaldelims);
+  startpos:= edit.wordatpos(pos,result,pascaldelims,nodelimstrings);
  end; 
  if result <> '' then begin
   for int1:= pos.col - startpos.col + 1 to length(result) do begin
-   if result[int1] = '.' then begin
+   if (result[int1] = '.') or (result[int1] = '-') and (result[int1+1] = '>') then begin
     setlength(result,int1-1);
     break;
    end;

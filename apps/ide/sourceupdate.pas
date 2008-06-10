@@ -369,7 +369,7 @@ begin
    if po2 <> nil then begin
     case po2^.kind of
      sik_uses: begin
-      coord1:= edit.wordatpos(apos.pos,str1,defaultdelimchars + ',;{}/');
+      coord1:= edit.wordatpos(apos.pos,str1,defaultdelimchars + ',;{}/',[]);
       if str1 <> '' then begin
        definition:= str1;
        str1:= findunitfile(str1);
