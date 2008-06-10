@@ -2814,6 +2814,7 @@ begin
   try
    gotobookmark(@bm);
   except        //catch exception by filter
+   resync([]); //record not found
   end;
  end
  else begin
