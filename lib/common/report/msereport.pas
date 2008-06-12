@@ -488,6 +488,7 @@ type
   procedure updatevisible;
   function getwidget: twidget;
   function remainingheight: integer;
+  procedure setareafull(const avalue: boolean);
   function pagepagenum: integer; //null based
   function reppagenum: integer; //null based
   function getlastpagepagecount: integer;
@@ -505,11 +506,12 @@ type
                   //defines hasdata, page nums are null based
                  bo_visigroupfirst,bo_visigroupnotfirst,
                  bo_visigrouplast,bo_visigroupnotlast,
-                 bo_localvalue 
+                 bo_localvalue,
                   //used in treppagenumdisp to show the number of the current 
                   //treportpage instead the number of the printed pages
                   //and in trepprinttimedisp to show now instead of 
                   //print start time
+                 bo_topofarea //sets areafull if not first of page before render
                  );
  bandoptionsty = set of bandoptionty;
 
@@ -890,6 +892,7 @@ type
    procedure endrender; override;
    procedure adddatasets(var adatasets: datasetarty); override;
    function lastbandheight: integer; override;
+   procedure setareafull(const avalue: boolean);
   public
    procedure resetzebra; override;
    property font: trepwidgetfont read getfont write setfont stored isfontstored;
@@ -946,6 +949,8 @@ type
    fonlastarea: bandareaeventty;
    forigin: pointty;
    fsaveindex: integer;
+   function getareafull: boolean;
+   procedure setareafull(const avalue: boolean);
   protected
    procedure registerchildwidget(const child: twidget); override;
    procedure unregisterchildwidget(const child: twidget); override;
@@ -1017,8 +1022,6 @@ type
    facty: integer;
    factybefore: integer;
    fbandnum: integer;
-   function getareafull: boolean;
-   procedure setareafull(const avalue: boolean);
    function getacty: integer;
   protected
    procedure init; override;
@@ -1358,6 +1361,8 @@ type
    function istopband: boolean;
    function isfirstband: boolean;
    function islastband(const addheight: integer = 0): boolean;
+   procedure setareafull(const avalue: boolean);
+   
    procedure updatevisible;
    function remainingheight: integer;
    function pagepagenum: integer; //null based
@@ -3515,6 +3520,10 @@ begin
    application.unlock;
   end;
  end;
+ if not empty and visible and (bo_topofarea in foptions) and 
+         (fparentintf <> nil) and not fparentintf.isfirstband  then begin
+  fparentintf.setareafull(true);
+ end;
 end;
 
 procedure tcustomrecordband.doonpaint(const acanvas: tcanvas);
@@ -4450,6 +4459,13 @@ begin
  end;
 end;
 
+procedure tcustombandgroup.setareafull(const avalue: boolean);
+begin
+ if fparentintf <> nil then begin
+  fparentintf.setareafull(avalue);
+ end;
+end;
+
 procedure tcustombandgroup.init;
 var
  int1: integer;
@@ -4609,6 +4625,21 @@ begin
 end;
 
 { tbasebandarea }
+
+function tbasebandarea.getareafull: boolean;
+begin
+ result:= bas_areafull in fstate;
+end;
+
+procedure tbasebandarea.setareafull(const avalue: boolean);
+begin
+ if avalue then begin
+  include(fstate,bas_areafull);
+ end
+ else begin
+  exclude(fstate,bas_areafull);
+ end;
+end;
 
 procedure tbasebandarea.registerchildwidget(const child: twidget);
 begin
@@ -5496,6 +5527,11 @@ end;
 function tcustomreportpage.islastband(const addheight: integer = 0): boolean;
 begin
  result:= false;
+end;
+
+procedure tcustomreportpage.setareafull(const avalue: boolean);
+begin
+ //dummy
 end;
 
 procedure tcustomreportpage.updatevisible;
@@ -7039,26 +7075,29 @@ var
  bo1: boolean;
  pt1: pointty;
 begin
- fsaveindex:= acanvas.save;
- bo1:= (bas_backgroundrendered in fstate);
- if not bo1 then begin
-  include(fstate,bas_backgroundrendered);
-  renderbackground(acanvas);
-  initareapage;
+ result:= bas_areafull in fstate;
+ if not result then begin
+  fsaveindex:= acanvas.save;
+  bo1:= (bas_backgroundrendered in fstate);
+  if not bo1 then begin
+   include(fstate,bas_backgroundrendered);
+   renderbackground(acanvas);
+   initareapage;
+  end;
+  if frecordband <> nil then begin
+   pt1.x:= sender.bounds_x + forigin.x;
+   pt1.y:= forigin.y + facty - sender.bounds_y;
+  end
+  else begin
+   pt1:= makepoint(sender.bounds_x+bounds_x,facty);
+  end;
+  acanvas.origin:= pt1;
+  factybefore:= facty;
+  inc(facty,sender.bandheight);
+  include(fstate,bas_bandstarted);
+  result:= bo1 and checkareafull(facty);
+                 //print minimum one band
  end;
- if frecordband <> nil then begin
-  pt1.x:= sender.bounds_x + forigin.x;
-  pt1.y:= forigin.y + facty - sender.bounds_y;
- end
- else begin
-  pt1:= makepoint(sender.bounds_x+bounds_x,facty);
- end;
- acanvas.origin:= pt1;
- factybefore:= facty;
- inc(facty,sender.bandheight);
- include(fstate,bas_bandstarted);
- result:= bo1 and checkareafull(facty);
-                //print minimum one band
  if result then begin
   include(fstate,bas_areafull);
   initareapage;
@@ -7099,21 +7138,6 @@ begin
  factiveband:= 0;
  include(fstate,bas_activebandchanged);
  inherited;
-end;
-
-function tcustombandarea.getareafull: boolean;
-begin
- result:= bas_areafull in fstate;
-end;
-
-procedure tcustombandarea.setareafull(const avalue: boolean);
-begin
- if avalue then begin
-  include(fstate,bas_areafull);
- end
- else begin
-  exclude(fstate,bas_areafull);
- end;
 end;
 
 function tcustombandarea.isfirstband: boolean;
