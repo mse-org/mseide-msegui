@@ -3,7 +3,7 @@
     Copyright (c) 1999-2000 by Michael Van Canneyt, member of the
     Free Pascal development team
     
-    Rewritten 2006-2007 by Martin Schreiber
+    Rewritten 2006-2008 by Martin Schreiber
     
     BufDataset implementation
 
@@ -646,6 +646,8 @@ type
                    const options: locateoptionsty = []): locateresultty;
    function locate(const key: msestring; const field: tfield; 
                  const options: locateoptionsty = []): locateresultty;
+   function locaterecno(const arecno: integer): boolean;
+        //moves to next valid recno, //returns true if resulting recno = arecno
 
    function countvisiblerecords: integer;
    procedure fetchall;
@@ -3801,6 +3803,31 @@ function tmsebufdataset.locate(const key: msestring; const field: tfield;
                       const options: locateoptionsty = []): locateresultty;
 begin
  result:= locaterecord(self,isutf8,key,field,options);
+end;
+
+function tmsebufdataset.locaterecno(const arecno: integer): boolean;
+        //moves to next valid recno, //returns true if resulting recno = arecno
+var
+ int1: integer;
+begin
+ result:= false;
+ int1:= arecno-1;
+ if int1 <> frecno then begin
+  if int1 < 0 then begin 
+   int1:= 0;
+  end;
+  if int1 >= recordcount then begin
+   int1:= fbrecordcount - 1;
+  end;
+  if int1 > 0 then begin
+   internalsetrecno(int1);
+   resync([]);
+   result:= int1 = frecno;
+  end;
+ end
+ else begin
+  result:= true;
+ end;
 end;
 
 procedure tmsebufdataset.beginfilteredit(const akind: filtereditkindty);
