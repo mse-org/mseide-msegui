@@ -1713,17 +1713,21 @@ function checkislastrecord(const adatalink: tmsedatalink;
                                const syncproc: synceventty): boolean;
 var
  bm: string;
+ int1: integer;
 begin                     
  with adatalink do begin          //todo: optimize   
   if active then begin
    if not dataset.eof then begin
-    bm:= dataset.bookmark;
+//    bm:= dataset.7; //boookmarks are broken for TFixedFormatDataSet
+// and recnos are faster anyway
+    int1:= dataset.recno; 
     dataset.next;
     result:= dataset.eof;
     if assigned(syncproc) and not result then begin
      syncproc;
     end;
-    dataset.bookmark:= bm;
+//    dataset.bookmark:= bm;
+    dataset.recno:= int1;
    end
    else begin
     result:= true;

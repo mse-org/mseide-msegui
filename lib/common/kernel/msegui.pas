@@ -6393,7 +6393,7 @@ begin
   end;
   bo1:= not canvas.clipregionisempty;
   if bo1 then begin
-   if ws_opaque in fwidgetstate then begin
+   if (ws_opaque in fwidgetstate) or (actcolor <> cl_transparent) then begin
     col1:= actcolor;
     if actcolor = cl_transparent then begin
      col1:= cl_background; //no parent
