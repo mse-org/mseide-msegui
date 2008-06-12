@@ -466,6 +466,7 @@ type
   procedure endrender;
   procedure adddatasets(var adatasets: datasetarty);
   procedure init;
+  procedure resetzebra;
  end;
  ireportclientarty = array of ireportclient;
  
@@ -494,6 +495,7 @@ type
   function pageprintstarttime: tdatetime;
   function repprintstarttime: tdatetime;
   function getreppage: tcustomreportpage;
+  procedure resetzebra;
  end;
 
  trecordbanddatalink = class(tmsedatalink)
@@ -560,6 +562,7 @@ type
    procedure endrender;
    procedure adddatasets(var adatasets: datasetarty);
    procedure init;
+   procedure resetzebra;
   published
    property optionsrep: bandoptionshowsty read foptionsrep 
                                         write setoptionsrep default [];
@@ -569,6 +572,10 @@ type
  
  recordbandarty = array of tcustomrecordband;
  recordbandeventty = procedure(const sender: tcustomrecordband) of object; 
+ 
+ zebraoptionty = (zo_resetonpagestart,zo_resetparent);
+ zebraoptionsty = set of zebraoptionty;
+ 
  tcustomrecordband = class(tcustomscalingwidget,idbeditinfo,ireccontrol,
                                 iobjectpicker,ireportclient)
   private
@@ -597,6 +604,12 @@ type
    fonbeforepaint: painteventty;
    fonbeforenextrecord: notifyeventty;
    fonafternextrecord: notifyeventty;
+   fzebra_color: colorty;
+   fzebra_start: integer;
+   fzebra_height: integer;
+   fzebra_step: integer;
+   fzebra_counter: integer;
+   fzebra_options: zebraoptionsty;
    procedure settabs(const avalue: treptabulators);
    procedure setoptionsshow(const avalue: bandoptionshowsty);
    function getvisidatasource: tdatasource;
@@ -631,6 +644,7 @@ type
    procedure parentchanged; override; //update fparentintf
    function getminbandsize: sizety; virtual;
    function calcminscrollsize: sizety; override;
+   function actualcolor: colorty; override;
    procedure render(const acanvas: tcanvas; var empty: boolean); virtual;
    procedure init; virtual;
    procedure initpage; virtual;
@@ -677,6 +691,7 @@ type
    function isfirstofgroup: boolean;
    function islastofgroup: boolean;
    procedure restart;
+   procedure resetzebra; virtual;
    
    property tabs: treptabulators read ftabs write settabs;
    property font: trepwidgetfont read getfont write setfont stored isfontstored;
@@ -693,6 +708,14 @@ type
    property nextbandifempty: tcustomrecordband read fnextbandifempty 
                                        write setnextbandifempty;
                        //used by tcustombandarea
+   property zebra_counter: integer read fzebra_counter write fzebra_counter;
+   property zebra_color: colorty read fzebra_color write fzebra_color default cl_infobackground;
+   property zebra_start: integer read fzebra_start write fzebra_start default 0;
+   property zebra_height: integer read fzebra_height write fzebra_height default 0;
+   property zebra_step: integer read fzebra_step write fzebra_step default 2;
+   property zebra_options: zebraoptionsty read fzebra_options 
+                                         write fzebra_options default [];
+   
    property onbeforerender: beforerenderrecordeventty read fonbeforerender
                                write fonbeforerender;
    property onbeforepaint: painteventty read fonbeforepaint write fonbeforepaint;
@@ -722,6 +745,12 @@ type
    property visigroupfield;
    property nextband;
    property nextbandifempty;
+   
+   property zebra_color;
+   property zebra_start;
+   property zebra_height;
+   property zebra_step;
+   property zebra_options;
    property onfontheightdelta;
    property onchildscaled;
 
@@ -782,6 +811,11 @@ type
    property visidatasource;
    property visidatafield;
    property visigroupfield;
+   property zebra_color;
+   property zebra_start;
+   property zebra_height;
+   property zebra_step;
+   property zebra_options;
    property onfontheightdelta;
    property onchildscaled;
 
@@ -857,6 +891,7 @@ type
    procedure adddatasets(var adatasets: datasetarty); override;
    function lastbandheight: integer; override;
   public
+   procedure resetzebra; override;
    property font: trepwidgetfont read getfont write setfont stored isfontstored;
  end;
 
@@ -873,6 +908,11 @@ type
    property visidatasource;
    property visidatafield;
    property visigroupfield;
+   property zebra_color;
+   property zebra_start;
+   property zebra_height;
+   property zebra_step;
+   property zebra_options;
 
    property onfontheightdelta;
    property onchildscaled;
@@ -958,6 +998,7 @@ type
    function getreppage: tcustomreportpage;
 
    procedure restart; virtual;
+   procedure resetzebra;
       
    property font: trepwidgetfont read getfont write setfont stored isfontstored;
    property onfirstarea: bandareaeventty read fonfirstarea write fonfirstarea;
@@ -1345,6 +1386,7 @@ type
    procedure activatepage;
    procedure finish;
    procedure restart;
+   procedure resetzebra;
    
    property pagewidth: real read fpagewidth write setpagewidth;
    property pageheight: real read fpageheight write setpageheight;
@@ -3412,6 +3454,11 @@ begin
  //dummy
 end;
 
+procedure trepspacer.resetzebra;
+begin
+ //dummy
+end;
+
 { tcustomrecordband }
 
 constructor tcustomrecordband.create(aowner: tcomponent);
@@ -3420,6 +3467,8 @@ begin
  fdatalink:= trecordbanddatalink.create;
  fvisidatalink:= tfielddatalink.create;
  fvisigrouplink:= tfielddatalink.create;
+ fzebra_step:= 2;
+ fzebra_color:= cl_infobackground;
  inherited;
  fanchors:= defaultbandanchors;
  foptionswidget:= defaultbandoptionswidget;
@@ -3476,6 +3525,33 @@ begin
  end;
 end;
 
+function tcustomrecordband.actualcolor: colorty;
+var
+ bo1: boolean;
+ int1: integer;
+begin
+ bo1:= false;
+ if (rbs_rendering in fstate) and (fzebra_height > 0) and (fzebra_step > 0) then begin
+  int1:= (fzebra_counter - fzebra_start) mod fzebra_step;
+  if int1 < 0 then begin
+   if int1  < fzebra_height - fzebra_step then begin
+    bo1:= true;
+   end;
+  end
+  else begin
+   if int1 < fzebra_height then begin
+    bo1:= true;
+   end;
+  end;
+ end;
+ if bo1 then begin
+  result:= fzebra_color;
+ end
+ else begin
+  result:= inherited actualcolor;
+ end;
+end;
+
 procedure tcustomrecordband.render(const acanvas: tcanvas; var empty: boolean);
 var
  widget1: twidget;
@@ -3503,7 +3579,7 @@ begin
     for int1:= 0 to high(fareas) do begin
      fareas[int1].initband;
     end;
-    inherited paint(acanvas);
+    inheritedpaint(acanvas);
    finally
     fparentintf.endband(acanvas,self);
    end;
@@ -3543,6 +3619,9 @@ procedure tcustomrecordband.initpage;
 var
  int1: integer;
 begin
+ if (zo_resetonpagestart in fzebra_options) then begin
+  fzebra_counter:= 0;
+ end;
  exclude(fstate,rbs_pageshowed);
  for int1:= 0 to high(fareas) do begin
   fareas[int1].initpage;
@@ -3562,6 +3641,10 @@ end;
 procedure tcustomrecordband.inheritedpaint(const acanvas: tcanvas);
 begin
  inherited paint(acanvas);
+ inc(fzebra_counter);
+ if (zo_resetparent in fzebra_options) and (fparentintf <> nil) then begin
+  fparentintf.resetzebra;
+ end;
 end;
 
 procedure tcustomrecordband.paint(const canvas: tcanvas);
@@ -3576,6 +3659,7 @@ var
  int1: integer;
 begin
  ftabs.initsums;
+ fzebra_counter:= 0;
  if arestart then begin
   fstate:= (fstate * [rbs_pageshowed]) + [rbs_rendering]
  end
@@ -3603,6 +3687,16 @@ end;
 procedure tcustomrecordband.restart;
 begin
  beginrender(true);
+end;
+
+procedure tcustomrecordband.resetzebra;
+var
+ int1: integer;
+begin
+ fzebra_counter:= 0;
+ for int1:= 0 to high(fareas) do begin
+  fareas[int1].resetzebra;
+ end;
 end;
 
 procedure tcustomrecordband.endrender;
@@ -4373,6 +4467,16 @@ begin
  end;
 end;
 
+procedure tcustombandgroup.resetzebra;
+var
+ int1: integer;
+begin
+ inherited;
+ for int1:= 0 to high(frecbands) do begin
+  frecbands[int1].resetzebra;
+ end;
+end;
+
 procedure tcustombandgroup.endrender;
 var
  int1: integer;
@@ -4707,6 +4811,15 @@ begin
   with fareabands[int1] do begin
    beginrender(false);
   end;
+ end;
+end;
+
+procedure tbasebandarea.resetzebra;
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fareabands) do begin
+  fareabands[int1].resetzebra;
  end;
 end;
 
@@ -5213,6 +5326,18 @@ begin
  end;
  for int1:= 0 to high(fareas) do begin
   fareas[int1].beginrender(false);
+ end;
+end;
+
+procedure tcustomreportpage.resetzebra;
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fclients) do begin
+  fclients[int1].resetzebra;
+ end;
+ for int1:= 0 to high(fareas) do begin
+  fareas[int1].resetzebra;
  end;
 end;
 
