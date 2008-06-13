@@ -1750,6 +1750,7 @@ type
    fexecuteaction: notifyeventty;
    fidleaction: notifyeventty;
    feventlooping: integer;
+   flastshiftstate: shiftstatesty;
 
    fmousewheelfrequmin: real;
    fmousewheelfrequmax: real;
@@ -1897,7 +1898,9 @@ type
    procedure delayedmouseshift(const ashift: pointty);
    procedure calcmousewheeldelta(var info: mousewheeleventinfoty;
                const fmin,fmax,deltamin,deltamax: real);  
- 
+
+   property lastshiftstate: shiftstatesty read flastshiftstate;
+    
    property cursorshape: cursorshapety read fcursorshape write setcursorshape;
                 //persistent
    property widgetcursorshape: cursorshapety read fwidgetcursorshape write
@@ -12002,6 +12005,7 @@ begin
      end;
     end;
    end;
+   flastshiftstate:= info.mouse.shiftstate;
    window.dispatchmouseevent(info,fmousecapturewidget);
    if (ftimestamp <> 0) and (fbutton <> mb_none) then begin
     if kind = ek_buttonpress then begin
@@ -12101,6 +12105,7 @@ begin
     else begin
      shiftstate:= fshiftstate - shift;
     end;
+    flastshiftstate:= shiftstate;
     if fkeyboardcapturewidget <> nil then begin
      window1:= fkeyboardcapturewidget.window;
      widget1:= fkeyboardcapturewidget;
