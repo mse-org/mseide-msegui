@@ -1751,6 +1751,8 @@ type
    fidleaction: notifyeventty;
    feventlooping: integer;
    flastshiftstate: shiftstatesty;
+   flastkey: keyty;
+   flastbutton: mousebuttonty;
 
    fmousewheelfrequmin: real;
    fmousewheelfrequmax: real;
@@ -1900,7 +1902,9 @@ type
                const fmin,fmax,deltamin,deltamax: real);  
 
    property lastshiftstate: shiftstatesty read flastshiftstate;
-    
+   property lastkey: keyty read flastkey;
+   property lastbutton: mousebuttonty read flastbutton;
+       
    property cursorshape: cursorshapety read fcursorshape write setcursorshape;
                 //persistent
    property widgetcursorshape: cursorshapety read fwidgetcursorshape write
@@ -12003,6 +12007,7 @@ begin
      if (int1 >= 0) and (int1 < fdblclicktime) then begin
       include(info.mouse.shiftstate,ss_double);
      end;
+     flastbutton:= fbutton;
     end;
    end;
    flastshiftstate:= info.mouse.shiftstate;
@@ -12106,6 +12111,7 @@ begin
      shiftstate:= fshiftstate - shift;
     end;
     flastshiftstate:= shiftstate;
+    flastkey:= key;
     if fkeyboardcapturewidget <> nil then begin
      window1:= fkeyboardcapturewidget.window;
      widget1:= fkeyboardcapturewidget;
