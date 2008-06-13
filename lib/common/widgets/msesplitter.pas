@@ -164,7 +164,8 @@ type
 
  layoutoptionty = (lao_alignx,lao_placex,lao_aligny,lao_placey,
                    lao_scaleleft,lao_scaletop,
-                   lao_scalewidth,lao_scaleheight);
+                   lao_scalewidth,lao_scaleheight,
+                   lao_scalefont);
  layoutoptionsty = set of layoutoptionty; 
 const
  defaultlayoutoptions = [];
@@ -210,6 +211,9 @@ type
    fwidgetinfos: widgetlayoutinfoarty;
    fstate: layouterstatesty;
    fscalesizeref: sizety;
+   ffontsizeref: sizety;
+   ffontheightref: integer;
+   ffontxscaleref: real;
    fonbeforelayout: layoutereventty;
    fonafterlayout: layoutereventty;
    procedure setoptionslayout(const avalue: layoutoptionsty);
@@ -233,6 +237,7 @@ type
    procedure updatescalesizeref;
    procedure updatelayout;
    procedure loaded; override;
+   procedure fontchanged; override;
    procedure widgetregionchanged(const sender: twidget); override;
    procedure childclientrectchanged(const sender: twidget); override;
    procedure childautosizechanged(const sender: twidget); override;
@@ -267,6 +272,7 @@ type
    property onafterlayout: layoutereventty read fonafterlayout 
                                                     write fonafterlayout;
    property visible default true;
+   property font: twidgetfont read getfont write setfont;
  end;
  
 implementation
@@ -1218,7 +1224,7 @@ begin
   inc(flayoutupdating);
   try  
    updateoptionsscale;
-   beginscaling;
+   beginscaling;   
    if widgetcount > 0 then begin
     if (foptionslayout*[lao_placex,lao_placey] <> []) and
                        (plo_scalesize in fplace_options) then begin
@@ -1488,6 +1494,19 @@ begin
  updatelayout;
 end;
 
+procedure tlayouter.fontchanged;
+begin
+ inherited;
+ if flayoutupdating = 0 then begin
+  ffontheightref:= getfont.height;
+//  if ffontheightref = 0 then begin
+//   ffontheightref:= font.glyphheight;
+//  end;
+  ffontxscaleref:= getfont.xscale;
+  ffontsizeref:= clientsize;
+ end;
+end;
+
 procedure tlayouter.childclientrectchanged(const sender: twidget);
 var
  int1: integer;
@@ -1600,38 +1619,46 @@ begin
   inherited;
   exclude(fstate,las_scalesizerefvalid);
   if componentstate * [csloading,csdestroying] = [] then begin
-   if (foptionslayout * [lao_scalewidth,lao_scaleheight] <> []) and 
+   if (foptionslayout * [lao_scalewidth,lao_scaleheight,lao_scalefont] <> []) and 
          not (las_propsizing in fstate) then begin
     beginscaling;
     include(fstate,las_propsizing);
     try
-     refsi:= innerclientsize;
-     for int1:= high(fwidgetinfos) downto 0 do begin
-      with fwidgetinfos[int1] do begin
-       pt1:= widget.pos;
-       size1:= widget.clientsize;
-       if refsize.cx <> 0 then begin
-        if (lao_scaleleft in foptionslayout) and 
-                   not (osk_nopropleft in widget.optionsskin) then begin
-         pt1.x:= (pos.x * refsi.cx) div refsize.cx;
+     if (lao_scalefont in foptionslayout) and (ffontsizeref.cx <> 0) and 
+                  (ffontsizeref.cy <> 0) then begin
+      font.height:= round((ffontheightref*clientheight)/ffontsizeref.cy);
+      font.xscale:= (ffontxscaleref * (clientwidth/ffontsizeref.cx))/
+                    (clientheight/ffontsizeref.cy);
+     end;
+     if foptionslayout * [lao_scalewidth,lao_scaleheight] <> [] then begin
+      refsi:= innerclientsize;
+      for int1:= high(fwidgetinfos) downto 0 do begin
+       with fwidgetinfos[int1] do begin
+        pt1:= widget.pos;
+        size1:= widget.clientsize;
+        if refsize.cx <> 0 then begin
+         if (lao_scaleleft in foptionslayout) and 
+                    not (osk_nopropleft in widget.optionsskin) then begin
+          pt1.x:= (pos.x * refsi.cx) div refsize.cx;
+         end;
+         if (lao_scalewidth in foptionslayout) and 
+                    not (osk_nopropwidth in widget.optionsskin) then begin
+          size1.cx:= (size.cx * refsi.cx) div refsize.cx;
+         end;
         end;
-        if (lao_scalewidth in foptionslayout) and 
-                   not (osk_nopropwidth in widget.optionsskin) then begin
-         size1.cx:= (size.cx * refsi.cx) div refsize.cx;
+        if refsize.cy <> 0 then begin
+         if (lao_scaletop in foptionslayout) and 
+                    not (osk_noproptop in widget.optionsskin) then begin
+          pt1.y:= (pos.y * refsi.cy) div refsize.cy;
+         end;
+         if (lao_scaleheight in foptionslayout) and 
+                    not (osk_nopropheight in widget.optionsskin) then begin
+          size1.cy:= (size.cy * refsi.cy) div refsize.cy;
+         end;
         end;
+        widget.clientsize:= size1;
+        widget.pos:= pt1;
        end;
-       if refsize.cy <> 0 then begin
-        if (lao_scaletop in foptionslayout) and 
-                   not (osk_noproptop in widget.optionsskin) then begin
-         pt1.y:= (pos.y * refsi.cy) div refsize.cy;
-        end;
-        if (lao_scaleheight in foptionslayout) and 
-                   not (osk_nopropheight in widget.optionsskin) then begin
-         size1.cy:= (size.cy * refsi.cy) div refsize.cy;
-        end;
-       end;
-       widget.clientsize:= size1;
-       widget.pos:= pt1;
       end;
      end;
     finally
