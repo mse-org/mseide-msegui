@@ -66,8 +66,9 @@ type
  optionswidgetty = set of optionwidgetty;
 
  optionskinty = (osk_skin,osk_noskin,osk_framebuttononly,osk_container,
-                 osk_nopropleft,osk_noproptop,
-                 osk_nopropwidth,osk_nopropheight //used by tlayouter
+                 osk_nopropleft,osk_noproptop,     //used by tlayouter
+                 osk_nopropwidth,osk_nopropheight, //used by tlayouter
+                 osk_nopropfont                    //used by tlayouter
                  );
  optionsskinty = set of optionskinty;
  

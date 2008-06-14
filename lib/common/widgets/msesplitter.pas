@@ -165,7 +165,7 @@ type
  layoutoptionty = (lao_alignx,lao_placex,lao_aligny,lao_placey,
                    lao_scaleleft,lao_scaletop,
                    lao_scalewidth,lao_scaleheight,
-                   lao_scalefont);
+                   lao_scalefont,lao_scalechildfont);
  layoutoptionsty = set of layoutoptionty; 
 const
  defaultlayoutoptions = [];
@@ -187,6 +187,11 @@ type
   scalesize: sizety;
   actscalesize: sizety;
   refscalesize: sizety;  
+  reffontsize: sizety;
+  fontheight: integer;
+  actfontheight: integer;
+  fontxscale: real;
+  actfontxscale: real;
  end;
  pwidgetlayoutinfoty = ^widgetlayoutinfoty;
  widgetlayoutinfoarty = array of widgetlayoutinfoty;
@@ -1619,7 +1624,8 @@ begin
   inherited;
   exclude(fstate,las_scalesizerefvalid);
   if componentstate * [csloading,csdestroying] = [] then begin
-   if (foptionslayout * [lao_scalewidth,lao_scaleheight,lao_scalefont] <> []) and 
+   if (foptionslayout * [lao_scalewidth,lao_scaleheight,lao_scalefont,
+                         lao_scalechildfont] <> []) and 
          not (las_propsizing in fstate) then begin
     beginscaling;
     include(fstate,las_propsizing);
@@ -1630,10 +1636,21 @@ begin
       font.xscale:= (ffontxscaleref * (clientwidth/ffontsizeref.cx))/
                     (clientheight/ffontsizeref.cy);
      end;
-     if foptionslayout * [lao_scalewidth,lao_scaleheight] <> [] then begin
+     if foptionslayout * 
+               [lao_scalewidth,lao_scaleheight,lao_scalefont] <> [] then begin
       refsi:= innerclientsize;
       for int1:= high(fwidgetinfos) downto 0 do begin
        with fwidgetinfos[int1] do begin
+        if (lao_scalechildfont in foptionslayout) and 
+                    not (osk_nopropfont in widget.optionsskin) and
+                    (twidget1(widget).ffont <> nil) and
+                    (reffontsize.cx <> 0) and (reffontsize.cy <> 0) and
+                    (refsi.cy > 0) then begin
+         twidget1(widget).ffont.height:= 
+                              round(fontheight * refsi.cy / reffontsize.cy);
+         twidget1(widget).ffont.xscale:= (fontxscale * (refsi.cx/refsi.cy))/
+                      (reffontsize.cx/reffontsize.cy);
+        end;
         pt1:= widget.pos;
         size1:= widget.clientsize;
         if refsize.cx <> 0 then begin
@@ -1719,6 +1736,8 @@ procedure tlayouter.updatewidgetinfo(var ainfo: widgetlayoutinfoty;
                const awidget: twidget);
 var
  size1,size2: sizety;
+ int1: integer;
+ rea1: real;
 begin
  with ainfo do begin
   if awidget <> nil then begin
@@ -1726,6 +1745,7 @@ begin
   end;
   size1:= widget.clientsize;
   if not (csloading in componentstate) and (flayoutupdating = 0) then begin
+        //synchronize ref values with changed widget values
    size2:= self.scalesizeref;
    if size1.cx <> actscalesize.cx then begin
     refscalesize.cx:= size2.cx;
@@ -1758,6 +1778,17 @@ begin
    refsize.cy:= size2.cy;
    size.cy:= size1.cy;
    actsize.cy:= size1.cy;
+  end;
+  if twidget1(widget).ffont <> nil then begin
+   int1:= twidget1(widget).ffont.height;
+   rea1:= twidget1(widget).ffont.xscale;
+   if (int1 <> actfontheight) or (rea1 <> actfontxscale) then begin
+    reffontsize:= size2;
+    fontheight:= int1;
+    actfontheight:= int1;
+    fontxscale:= rea1;
+    actfontxscale:= rea1;
+   end;
   end;
  end;
 end;
