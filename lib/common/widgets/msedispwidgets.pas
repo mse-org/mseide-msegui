@@ -94,6 +94,7 @@ type
  tdispwidget = class(tpublishedwidget{$ifdef mse_with_ifi},iifiwidget{$endif})
   private
    finfo: drawtextinfoty;
+   ftext: msestring;
    foptions: dispwidgetoptionsty;
    ftextflags: textflagsty;
 {$ifdef mse_with_ifi}
@@ -105,6 +106,7 @@ type
    procedure updatetextflags;
    procedure settextflags(const value: textflagsty);
    procedure setoptions(const avalue: dispwidgetoptionsty);
+   procedure settext(const avalue: msestring);
   protected
    procedure valuechanged; virtual;
    procedure formatchanged;
@@ -121,6 +123,8 @@ type
    procedure initnewcomponent(const ascale: real); override;
    procedure synctofontheight; override;
   published
+   property text: msestring read ftext write settext;
+                //overrides valuetext
    property bounds_cx default defaultdispwidgetwidth;
    property bounds_cy default defaultdispwidgetheight;
    property font: twidgetfont read getfont write setfont stored isfontstored;
@@ -355,10 +359,24 @@ begin
  tdispframe.create(iscrollframe(self));
 end;
 
+procedure tdispwidget.settext(const avalue: msestring);
+begin
+ ftext:= avalue;
+ if avalue = '' then begin
+  finfo.text.text:= getvaluetext;
+ end
+ else begin
+  finfo.text.text:= avalue;
+ end;
+ invalidate;
+end;
+
 procedure tdispwidget.valuechanged;
 begin
- finfo.text.text:= getvaluetext;
- invalidate;
+ if ftext = '' then begin
+  finfo.text.text:= getvaluetext;
+  invalidate;
+ end;
 {$ifdef mse_with_ifi}
  if not (ws_loadedproc in fwidgetstate) then begin
   if fifiserverintf <> nil then begin
@@ -370,8 +388,10 @@ end;
 
 procedure tdispwidget.formatchanged;
 begin
- finfo.text.text:= getvaluetext;
- invalidate;
+ if ftext = '' then begin
+  finfo.text.text:= getvaluetext;
+  invalidate;
+ end;
 end;
 
 procedure tdispwidget.doloaded;
