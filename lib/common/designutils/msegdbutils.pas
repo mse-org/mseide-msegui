@@ -333,6 +333,8 @@ type
    function getshortstring(const address: string; out avalue: string): boolean;
    function setenv(const aname,avalue: string): gdbresultty;
    function getsysregnum(const varname: string; out num: integer): boolean;
+   function currentlang: string;
+   function assignoperator: string;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -3423,6 +3425,30 @@ begin
  end;
 end;
 
+function tgdbmi.currentlang: string;
+var
+ str1: string;
+ ar1: stringarty;
+ int1,int2: integer;
+begin
+ result:= 'pascal'; //default
+ if getcliresult('show language',ar1) = gdb_ok then begin
+  ar1:= splitstring(ar1[0],' ');
+  ar1:= splitstring(ar1[high(ar1)],'"');
+  result:= ar1[0];
+ end;
+end;
+
+function tgdbmi.assignoperator: string;
+begin
+ if currentlang <> 'pascal' then begin
+  result:= '=';
+ end
+ else begin
+  result:= ':=';
+ end;
+end;
+
 function tgdbmi.readpascalvariable(const varname: string; 
                                           out aresult: msestring): gdbresultty;
 var
@@ -3489,7 +3515,7 @@ begin
   end;
  end
  else begin
-  result:= evaluateexpression(varname+':= '+value,aresult);
+  result:= evaluateexpression(varname+assignoperator+value,aresult);
  end;
 end;
 
