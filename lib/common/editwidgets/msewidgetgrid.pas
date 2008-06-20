@@ -945,7 +945,12 @@ begin
    po1:= fintf.getdefaultvalue;
    if fdata <> nil then begin
     if dl1 <> nil then begin //from streaming
-     fdata.assign(dl1);
+     if dl1 <> fdata then begin
+      fdata.assign(dl1);
+     end
+     else begin
+      dl1:= nil;
+     end;
     end
     else begin
      if po1 <> nil then begin

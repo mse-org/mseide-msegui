@@ -10130,9 +10130,9 @@ var
 begin
  valuebefore:= foptionsskin;
  foptionsskin:= optionsskinty(setsinglebit(
-                 {$ifdef FPC}longword{$else}byte{$endif}(avalue),
-                 {$ifdef FPC}longword{$else}byte{$endif}(foptionsskin),
-                 {$ifdef FPC}longword{$else}byte{$endif}(mask)));
+                 {$ifdef FPC}longword{$else}word{$endif}(avalue),
+                 {$ifdef FPC}longword{$else}word{$endif}(foptionsskin),
+                 {$ifdef FPC}longword{$else}word{$endif}(mask)));
  {
  if osk_noskin in avalue then begin
   include(fmsecomponentstate,cs_noskin);
@@ -10141,8 +10141,8 @@ begin
   exclude(fmsecomponentstate,cs_noskin);
  end;
  }
- if (optionsskinty({$ifdef FPC}longword{$else}byte{$endif}(valuebefore) xor
-                   {$ifdef FPC}longword{$else}byte{$endif}(avalue)) * 
+ if (optionsskinty({$ifdef FPC}longword{$else}word{$endif}(valuebefore) xor
+                   {$ifdef FPC}longword{$else}word{$endif}(avalue)) * 
     [osk_nopropwidth,osk_nopropheight] <> []) and (fparentwidget <> nil) then begin
   fparentwidget.scalebasechanged(self); //for tlayouter
  end;

@@ -1599,7 +1599,7 @@ begin
  else begin
   result:= synccommand('-file-exec-and-symbols '+togdbfilepath(filename),
                                     10000000);
-  updatebit({$ifdef FPC}longword{$else}word{$endif}(fstate),
+  updatebit({$ifdef FPC}longword{$else}longword{$endif}(fstate),
                  ord(gs_execloaded),result = gdb_ok);
   if result = gdb_ok then begin
    initinternalbkpts;

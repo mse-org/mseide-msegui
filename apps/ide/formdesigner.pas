@@ -1446,7 +1446,7 @@ var
  ar1: msestringarty;
 begin
  with tmenuitem(sender) do begin
-  ar1:= splitstring(caption,' ');
+  ar1:= splitstring(caption,widechar(' '));
   fselections.clear;
   fselections.add(fselectwidget.findlogicalchild(ar1[0]));
  end;

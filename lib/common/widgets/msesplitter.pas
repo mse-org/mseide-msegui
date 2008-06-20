@@ -1048,12 +1048,12 @@ var
  lao1,lao2: layoutoptionsty;
 begin
  if avalue <> foptionslayout then begin
-  lao1:= layoutoptionsty(setsinglebit({$ifdef FPC}longword{$else}byte{$endif}(avalue),
-                         {$ifdef FPC}longword{$else}byte{$endif}(foptionslayout),
-                         {$ifdef FPC}longword{$else}byte{$endif}(mask1)))*mask1;
-  lao2:= layoutoptionsty(setsinglebit({$ifdef FPC}longword{$else}byte{$endif}(avalue),
-                         {$ifdef FPC}longword{$else}byte{$endif}(foptionslayout),
-                         {$ifdef FPC}longword{$else}byte{$endif}(mask2)))*mask2;
+  lao1:= layoutoptionsty(setsinglebit({$ifdef FPC}longword{$else}word{$endif}(avalue),
+                         {$ifdef FPC}longword{$else}word{$endif}(foptionslayout),
+                         {$ifdef FPC}longword{$else}word{$endif}(mask1)))*mask1;
+  lao2:= layoutoptionsty(setsinglebit({$ifdef FPC}longword{$else}word{$endif}(avalue),
+                         {$ifdef FPC}longword{$else}word{$endif}(foptionslayout),
+                         {$ifdef FPC}longword{$else}word{$endif}(mask2)))*mask2;
   foptionslayout:= (avalue - (mask1+mask2)) + lao1 + lao2;
   updatelayout;
  end;
