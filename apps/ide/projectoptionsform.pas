@@ -1859,7 +1859,7 @@ begin
  else begin
   mstr1:= 'utf8';
  end;
- accept:= askyesno('Wrong encoding can destroy your source files.'+lineend+
+ accept:= askyesno('Wrong encoding can damage your source files.'+lineend+
              'Do you wish to set encoding to '+mstr1+'?','*** WARNING ***');
 end;
 
