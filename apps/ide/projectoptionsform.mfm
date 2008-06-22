@@ -32,6 +32,9 @@ object projectoptionsfo: tprojectoptionsfo
     optionslayout = [lao_placey]
     place_maxdist = 0
     place_options = [plo_endmargin]
+    font.name = 'stf_default'
+    font.xscale =  1.0000000000000000E+0000
+    font.dummy = 0
     object tlayouter8: tlayouter
       bounds_x = 0
       bounds_y = 545
@@ -50,6 +53,9 @@ object projectoptionsfo: tprojectoptionsfo
       place_maxdist = 5
       place_mode = wam_end
       place_options = [plo_propmargin, plo_syncmaxautosize]
+      font.name = 'stf_default'
+      font.xscale =  1.0000000000000000E+0000
+      font.dummy = 0
       object cancel: tbutton
         optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
         bounds_x = 562
@@ -121,6 +127,9 @@ object projectoptionsfo: tprojectoptionsfo
           place_mindist = 2
           place_maxdist = 2
           place_options = [plo_endmargin]
+          font.name = 'stf_default'
+          font.xscale =  1.0000000000000000E+0000
+          font.dummy = 0
           object dispgrid: twidgetgrid
             optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight]
             bounds_x = 6
@@ -191,6 +200,9 @@ object projectoptionsfo: tprojectoptionsfo
             optionsscale = [osc_expandy, osc_shrinky]
             optionslayout = [lao_aligny]
             align_glue = wam_start
+            font.name = 'stf_default'
+            font.xscale =  1.0000000000000000E+0000
+            font.dummy = 0
             object editmarkbrackets: tbooleanedit
               bounds_x = 463
               bounds_y = 20
@@ -318,6 +330,9 @@ object projectoptionsfo: tprojectoptionsfo
             optionsscale = [osc_expandy, osc_shrinky]
             optionslayout = [lao_aligny]
             align_glue = wam_start
+            font.name = 'stf_default'
+            font.xscale =  1.0000000000000000E+0000
+            font.dummy = 0
             object encoding: tenumedit
               bounds_x = 463
               bounds_y = 0
@@ -333,6 +348,7 @@ object projectoptionsfo: tprojectoptionsfo
                 0
               )
               value = 0
+              onsetvalue = encodingsetvalue
               dropdown.options = [deo_selectonly, deo_forceselect, deo_autodropdown, deo_keydropdown]
               dropdown.cols.count = 1
               dropdown.cols.items = <              
@@ -416,6 +432,9 @@ object projectoptionsfo: tprojectoptionsfo
             optionsscale = [osc_expandy, osc_shrinky]
             optionslayout = [lao_aligny]
             align_glue = wam_start
+            font.name = 'stf_default'
+            font.xscale =  1.0000000000000000E+0000
+            font.dummy = 0
             object backupfilecount: tintegeredit
               bounds_x = 463
               bounds_y = 0
@@ -1259,6 +1278,9 @@ object projectoptionsfo: tprojectoptionsfo
               optionslayout = [lao_aligny]
               place_mindist = 3
               place_maxdist = 3
+              font.name = 'stf_default'
+              font.xscale =  1.0000000000000000E+0000
+              font.dummy = 0
               object gdbservercommand: tfilenameedit
                 optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
                 bounds_x = 321
@@ -1362,6 +1384,9 @@ object projectoptionsfo: tprojectoptionsfo
               align_glue = wam_start
               place_mindist = 5
               place_maxdist = 5
+              font.name = 'stf_default'
+              font.xscale =  1.0000000000000000E+0000
+              font.dummy = 0
               object gdbprocessor: tdropdownlistedit
                 bounds_x = 0
                 bounds_y = 0
@@ -1440,6 +1465,9 @@ object projectoptionsfo: tprojectoptionsfo
               dist_top = 3
               optionslayout = [lao_aligny]
               align_glue = wam_start
+              font.name = 'stf_default'
+              font.xscale =  1.0000000000000000E+0000
+              font.dummy = 0
               object gdbbeforeload: tfilenameedit
                 bounds_x = 1
                 bounds_y = 0
@@ -1520,6 +1548,9 @@ object projectoptionsfo: tprojectoptionsfo
               dist_top = 3
               optionslayout = [lao_aligny]
               align_glue = wam_start
+              font.name = 'stf_default'
+              font.xscale =  1.0000000000000000E+0000
+              font.dummy = 0
               object gdbbeforerun: tfilenameedit
                 bounds_x = 1
                 bounds_y = 0
@@ -1573,6 +1604,9 @@ object projectoptionsfo: tprojectoptionsfo
           place_mindist = 10
           place_maxdist = 10
           place_options = [plo_noinvisible]
+          font.name = 'stf_default'
+          font.xscale =  1.0000000000000000E+0000
+          font.dummy = 0
           object externalconsole: tbooleanedit
             bounds_x = 393
             bounds_y = 0
@@ -1656,6 +1690,9 @@ object projectoptionsfo: tprojectoptionsfo
           place_maxdist = 10
           place_mode = wam_end
           place_options = [plo_endmargin]
+          font.name = 'stf_default'
+          font.xscale =  1.0000000000000000E+0000
+          font.dummy = 0
           object valuehints: tbooleanedit
             bounds_x = 532
             bounds_y = 20
@@ -3004,6 +3041,9 @@ object projectoptionsfo: tprojectoptionsfo
           taborder = 1
           optionslayout = [lao_aligny]
           align_glue = wam_center
+          font.name = 'stf_default'
+          font.xscale =  1.0000000000000000E+0000
+          font.dummy = 0
           object tbutton1: tbutton
             optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_autoscale, ow_autosize]
             bounds_x = 15
