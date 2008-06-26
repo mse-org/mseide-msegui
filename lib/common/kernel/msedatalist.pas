@@ -128,6 +128,7 @@ type
              //do not use in copyinstance,initinstance,freedata
    function getitempo(index: integer): pointer;
              //invalid after capacity change
+   procedure assign(sender: tpersistent); override;
    procedure assignb(const source: tdatalist); virtual;
              //assign auf 2. spalte falls vorhanden, sonst exception
    procedure change(const index: integer); virtual;
@@ -3162,6 +3163,13 @@ function tdatalist.getitempo(index: integer): pointer;
 begin
  checkindex(index);
  result:= fdatapo + index*fsize;
+end;
+
+procedure tdatalist.assign(sender: tpersistent);
+begin
+ if sender <> self then begin
+  inherited;
+ end;
 end;
 
 { tintegerdatalist }

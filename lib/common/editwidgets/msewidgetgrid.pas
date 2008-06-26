@@ -923,12 +923,13 @@ begin
  ffixrowwidgets[-rowindex-1]:= awidget;
  fgrid.layoutchanged;
 end;
-
+var testvar: twidget;
 procedure twidgetcol.setwidget(const awidget: twidget);
 var
  po1: pointer;
  dl1: tdatalist;
 begin
+testvar:= awidget;
  dl1:= fdata;
  fdata:= nil;
  try
@@ -2123,7 +2124,7 @@ begin
  try
   ar1:= copy(fwidgets);
   for int1:= 0 to high(fwidgets) do begin
-   with fwidgets[int1] do begin
+   with twidget1(fwidgets[int1]) do begin
     for int2:= 0 to high(fwidgets) do begin
      additem(pointerarty(ar1),pointer(fwidgets[int2])); 
            //add children, possibly inherited
