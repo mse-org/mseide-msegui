@@ -923,13 +923,12 @@ begin
  ffixrowwidgets[-rowindex-1]:= awidget;
  fgrid.layoutchanged;
 end;
-var testvar: twidget;
+
 procedure twidgetcol.setwidget(const awidget: twidget);
 var
  po1: pointer;
  dl1: tdatalist;
 begin
-testvar:= awidget;
  dl1:= fdata;
  fdata:= nil;
  try
