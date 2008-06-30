@@ -691,7 +691,7 @@ begin
       end;
      end;
     end;
-    if FStatementType = stselect then
+    if FStatementType in datareturningtypes then
       begin
 ///////////////////////      FPrepared := False;
       if isc_dsql_describe(@Status, @Statement, 1, SQLDA) <> 0 then

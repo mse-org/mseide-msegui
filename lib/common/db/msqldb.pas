@@ -98,7 +98,7 @@ const
                   'create', 'get', 'put', 'execute',
                   'start','commit','rollback', '?'
                  );
-
+ datareturningtypes = [stselect,stexecprocedure];
 
 type
  
@@ -1088,7 +1088,7 @@ var T : TStatementType;
 
 begin
   S:=Lowercase(s);
-  For t:=stselect to strollback do
+  For t:= stselect to strollback do
     if (S=StatementTokens[t]) then
       Exit(t);
 end;
@@ -2140,7 +2140,7 @@ begin
    Db.PrepareStatement(Fcursor,sqltr,FSQLBuf,FParams);
   end;
   ftablename:= '';
-  if (FCursor.FStatementType = stSelect) then begin
+  if FCursor.FStatementType in datareturningtypes then begin
    FCursor.FInitFieldDef := True;
    fupdateable:= not readonly and 
          (fsqlupdate.count > 0) and (fsqlinsert.count > 0) and 
@@ -2175,7 +2175,7 @@ end;
 
 function TSQLQuery.Fetch : boolean;
 begin
- if not (Fcursor.FStatementType in [stSelect]) then begin
+ if not (Fcursor.FStatementType in datareturningtypes) then begin
   result:= false;
   Exit;
  end;
@@ -2251,7 +2251,7 @@ begin
  fupdaterowsaffected:= 0;
  fblobintf:= nil;
  fprimarykeyfield:= nil;
- if StatementType = stSelect then FreeFldBuffers;
+ if StatementType in datareturningtypes then FreeFldBuffers;
  if DefaultFields then
    DestroyFields;
  FIsEOF := False;
@@ -2529,7 +2529,7 @@ begin
  if not streamloading then begin  
   try
    Prepare;
-   if FCursor.FStatementType in [stSelect] then begin
+   if FCursor.FStatementType in datareturningtypes then begin
     if aexecute then begin
      if fbeforeexecute <> nil then begin
       fbeforeexecute.execute(database,tsqltransaction(transaction));
@@ -3062,7 +3062,8 @@ begin
   result:= active and not freadonly;
  end
  else begin
-  if (fcursor <> nil) and (FCursor.FStatementType = stSelect) then begin
+  if (fcursor <> nil) and 
+                     (FCursor.FStatementType in datareturningtypes) then begin
    Result:= Active and  FUpdateable and (not FReadOnly)
   end
   else begin

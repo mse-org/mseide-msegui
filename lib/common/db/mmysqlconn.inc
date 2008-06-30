@@ -389,7 +389,7 @@ begin
     FStatementm:= AParams.ParseSQL(FStatementm,false,false,false,psSimulated,
                      paramBinding,ParamReplaceString);
   end;
-  if FStatementType = stSelect then begin
+  if FStatementType in datareturningtypes then begin
    FNeedData:=True;
   end;
   fprepared:= true;
@@ -419,7 +419,7 @@ Var
 
 begin
   C:= TCursorName(cursor);
-  if c.FStatementType=stSelect then
+  if c.FStatementType in datareturningtypes then
     c.FNeedData:=False;
   freeresultbuffer(c);
   SetLength(c.MapDSRowToMSQLRow,0);
