@@ -837,7 +837,7 @@ type
                    bo_focusonshortcut, //for tcustombutton
                    bo_shortcutcaption,bo_altshortcut,
                    {bo_flat,bo_noanim,bo_nofocusrect,bo_nodefaultrect,}
-                   bo_nodefaultframeactive
+                   bo_nodefaultframeactive,bo_nocandefocus
                    );
  buttonoptionsty = set of buttonoptionty;
 

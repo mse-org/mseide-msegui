@@ -112,6 +112,9 @@ type
  end;
  ptoolbutton = ^ttoolbutton;
 
+ toolbuttonsstatety = (tbs_nocandefocus);
+ toolbuttonsstatesty = set of toolbuttonsstatety;
+ 
  ttoolbuttons = class(tindexpersistentarrayprop)
   private
    fheight: integer;
@@ -130,6 +133,7 @@ type
    function getface: tface;
    procedure setface(const avalue: tface);
   protected
+   fbuttonstate: toolbuttonsstatesty;
    procedure createitem(const index: integer; var item: tpersistent); override;
    procedure dochange(const index: integer); override;
    procedure objectchanged(const sender: tobject);
@@ -458,7 +462,8 @@ end;
 
 procedure ttoolbutton.doexecute(const tag: integer; const info: mouseeventinfoty);
 begin
- if doactionexecute(self,finfo) then begin
+ if doactionexecute(self,finfo,false,
+      tbs_nocandefocus in ttoolbuttons(prop).fbuttonstate) then begin
   changed;
  end;
 end;

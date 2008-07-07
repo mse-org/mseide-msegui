@@ -1890,6 +1890,7 @@ type
  tdataedit1 = class(tdataedit);
  tdataset1 = class(tdataset);
  tdatasource1 = class(tdatasource);
+ ttoolbuttons1 = class(ttoolbuttons);
 
 function encoderowstate(const color: integer = -1; const font: integer = -1;
                             const readonly: boolean = false): integer;
@@ -2090,6 +2091,7 @@ begin
  inherited;
  include(fwidgetstate1,ws1_designactive);
  size:= makesize(defaultdbnavigatorwidth,defaultdbnavigatorheight);
+ include(ttoolbuttons1(buttons).fbuttonstate,tbs_nocandefocus);
  buttons.count:= ord(high(dbnavigbuttonty))+1;
  for int1:= 0 to ord(high(dbnavigbuttonty)) do begin
   with buttons[int1] do begin

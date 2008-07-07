@@ -345,7 +345,8 @@ begin
  states:= states + localactionstates;
 end;
 
-procedure initactioninfo(var info: actioninfoty; aoptions: menuactionoptionsty = []);
+procedure initactioninfo(var info: actioninfoty;
+                     aoptions: menuactionoptionsty = []);
 begin
  with info do begin
   imagenr:= -1;
