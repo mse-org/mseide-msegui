@@ -488,7 +488,8 @@ function tcustommenu.checkexec: boolean;
 begin
  result:= fexecitem <> nil;
  if result then begin
-  doactionexecute(fexecitem,fexecitem.finfo,true);
+  doactionexecute(fexecitem,fexecitem.finfo,true,
+         mao_nocandefocus in fexecitem.options);
  end;
 // if result and canevent(tmethod(fexecitem.onexecute)) then begin
 //  fexecitem.onexecute(fexecitem);
