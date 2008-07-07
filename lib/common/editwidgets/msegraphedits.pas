@@ -114,6 +114,7 @@ type
    procedure dochange; virtual;
    function docheckvalue(var avalue): boolean; virtual;
    procedure valuechanged;
+   procedure modified; virtual; //for dbwidgets
    procedure formatchanged;
    procedure dopaint(const canvas: tcanvas); override;
    function needsfocuspaint: boolean; override;
@@ -1575,6 +1576,9 @@ begin
   if (fgridintf <> nil) and not (csdesigning in componentstate) then begin
    valuetogrid(fgridintf.getrow);
   end;
+  if not (ws_loadedproc in fwidgetstate) then begin
+   modified;
+  end;
   dochange;
  end;
 end;
@@ -1683,6 +1687,11 @@ begin
  if fcolorglyph = cl_font then begin
   invalidate;
  end;
+end;
+
+procedure tgraphdataedit.modified;
+begin
+ //dummy
 end;
 
 {$ifdef mse_with_ifi}

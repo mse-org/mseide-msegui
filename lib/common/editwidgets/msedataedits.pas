@@ -2689,6 +2689,9 @@ end;
 procedure tcustomintegeredit.setvalue(const Value: integer);
 begin
  fvalue := Value;
+ if fvaluechecking = 0 then begin
+  fisnull:= false;
+ end;
  valuechanged;
 end;
 
@@ -2777,6 +2780,7 @@ procedure tcustomintegeredit.setnullvalue;
 begin
  value:= 0;
  text:= '';
+ fisnull:= true;
 end;
 
 procedure tcustomintegeredit.setbase(const Value: numbasety);

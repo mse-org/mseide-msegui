@@ -176,7 +176,8 @@ type
    procedure griddatasourcechanged;
    function edit: Boolean;
    procedure modified;
-   function dataentered: boolean;
+//   function dataentered: boolean;
+   procedure dataentered;
    procedure updateoptionsedit(var aoptions: optionseditty);
    function cuttext(const atext: msestring; out maxlength: integer): boolean; 
              //true if text to long
@@ -199,6 +200,7 @@ type
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
+   procedure dochange; override;
 
    function getrowdatapo(const info: cellinfoty): pointer; override;
    //idbeditfieldlink
@@ -212,7 +214,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   function checkvalue(const quiet: boolean = false): boolean; override;
+//   function checkvalue(const quiet: boolean = false): boolean; override;
    property datalink: teditwidgetdatalink read fdatalink;
   published
    property datafield: string read getdatafield write setdatafield;
@@ -240,6 +242,7 @@ type
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
+   procedure dochange; override;
 
    function getrowdatapo(const info: cellinfoty): pointer; override;
    //idbeditfieldlink
@@ -253,7 +256,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   function checkvalue(const quiet: boolean = false): boolean; override;
+//   function checkvalue(const quiet: boolean = false): boolean; override;
    property datalink: teditwidgetdatalink read fdatalink;
   published
    property datafield: string read getdatafield write setdatafield;
@@ -282,6 +285,7 @@ type
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
+   procedure dochange; override;
 
    function getrowdatapo(const info: cellinfoty): pointer; override;
    //idbeditfieldlink
@@ -295,7 +299,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   function checkvalue(const quiet: boolean = false): boolean; override;
+//   function checkvalue(const quiet: boolean = false): boolean; override;
    property datalink: teditwidgetdatalink read fdatalink;
    property datafield: string read getdatafield write setdatafield;
    property datasource: tdatasource read getdatasource write setdatasource;
@@ -328,6 +332,7 @@ type
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
+   procedure dochange; override;
 
    function getrowdatapo(const info: cellinfoty): pointer; override;
    //idbeditfieldlink
@@ -341,7 +346,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   function checkvalue(const quiet: boolean = false): boolean; override;
+//   function checkvalue(const quiet: boolean = false): boolean; override;
    property datalink: teditwidgetdatalink read fdatalink;
   published
    property datafield: string read getdatafield write setdatafield;
@@ -372,6 +377,7 @@ type
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
+   procedure dochange; override;
 
    function getrowdatapo(const info: cellinfoty): pointer; override;
    //idbeditfieldlink
@@ -385,7 +391,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   function checkvalue(const quiet: boolean = false): boolean; override;
+//   function checkvalue(const quiet: boolean = false): boolean; override;
    property datalink: teditwidgetdatalink read fdatalink;
   published
    property datafield: string read getdatafield write setdatafield;
@@ -412,6 +418,7 @@ type
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
+   procedure dochange; override;
 
    function datatotext(const data): msestring; override;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
@@ -428,7 +435,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   function checkvalue(const quiet: boolean = false): boolean; override;
+//   function checkvalue(const quiet: boolean = false): boolean; override;
    property isnull: boolean read fisnull;
    property datalink: teditwidgetdatalink read fdatalink;
   published
@@ -457,7 +464,9 @@ type
    function getgriddatasource: tdatasource;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function checkvalue(const quiet: boolean = false): boolean; reintroduce;
-   function docheckvalue(var avalue): boolean; override;
+//   function docheckvalue(var avalue): boolean; override;
+   procedure dochange; override;
+   procedure modified; override;
    function getoptionsedit: optionseditty; override;
 
    function getrowdatapo(const info: cellinfoty): pointer; override;
@@ -498,7 +507,9 @@ type
    function getgriddatasource: tdatasource;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function checkvalue(const quiet: boolean = false): boolean; reintroduce;
-   function docheckvalue(var avalue): boolean; override;
+//   function docheckvalue(var avalue): boolean; override;
+   procedure modified; override;
+   procedure dochange; override;
    function getoptionsedit: optionseditty; override;
 
    function getrowdatapo(const info: cellinfoty): pointer; override;
@@ -541,7 +552,9 @@ type
    function getgriddatasource: tdatasource;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function checkvalue(const quiet: boolean = false): boolean; reintroduce;
-   function docheckvalue(var avalue): boolean; override;
+//   function docheckvalue(var avalue): boolean; override;
+   procedure dochange; override;
+   procedure modified; override;
    function getoptionsedit: optionseditty; override;
 
    function getrowdatapo(const info: cellinfoty): pointer; override;
@@ -608,6 +621,8 @@ type
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function checkvalue(const quiet: boolean = false): boolean; reintroduce;
    function docheckvalue(var avalue): boolean; override;
+   procedure dochange; override;
+   procedure modified; override;
    function getoptionsedit: optionseditty; override;
 
    function getrowdatapo(const info: cellinfoty): pointer; override;
@@ -650,6 +665,7 @@ type
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
+   procedure dochange; override;
 
    function getrowdatapo(const info: cellinfoty): pointer; override;
    //idbeditfieldlink
@@ -663,7 +679,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   function checkvalue(const quiet: boolean = false): boolean; override;
+//   function checkvalue(const quiet: boolean = false): boolean; override;
    property datalink: teditwidgetdatalink read fdatalink;
   published
    property datafield: string read getdatafield write setdatafield;
@@ -694,6 +710,7 @@ type
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
+   procedure dochange; override;
 
    function getrowdatapo(const info: cellinfoty): pointer; override;
    //idbeditfieldlink
@@ -707,7 +724,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   function checkvalue(const quiet: boolean = false): boolean; override;
+//   function checkvalue(const quiet: boolean = false): boolean; override;
    property datalink: teditwidgetdatalink read fdatalink;
   published
    property datafield: string read getdatafield write setdatafield;
@@ -739,7 +756,9 @@ type
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getoptionsedit: optionseditty; override;
 
-   function docheckvalue(var avalue): boolean; override;
+//   function docheckvalue(var avalue): boolean; override;
+   procedure dochange; override;
+   procedure modified; override;
    function getrowdatapo(const info: cellinfoty): pointer; override;
    //idbeditfieldlink
    procedure valuetofield;
@@ -819,6 +838,7 @@ type
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
+   procedure dochange; override;
 
    function getrowdatapo(const info: cellinfoty): pointer; override;
    //idbeditfieldlink
@@ -832,7 +852,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   function checkvalue(const quiet: boolean = false): boolean; override;
+//   function checkvalue(const quiet: boolean = false): boolean; override;
    property datalink: teditwidgetdatalink read fdatalink;
   published
    property datafield: string read getdatafield write setdatafield;
@@ -863,6 +883,7 @@ type
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
+   procedure dochange; override;
 
    function getrowdatapo(const info: cellinfoty): pointer; override;
    //idbeditfieldlink
@@ -876,7 +897,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   function checkvalue(const quiet: boolean = false): boolean; override;
+//   function checkvalue(const quiet: boolean = false): boolean; override;
    property datalink: teditwidgetdatalink read fdatalink;
   published
    property datafield: string read getdatafield write setdatafield;
@@ -908,6 +929,7 @@ type
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
+   procedure dochange; override;
 
    function getrowdatapo(const info: cellinfoty): pointer; override;
    //idbeditfieldlink
@@ -921,7 +943,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   function checkvalue(const quiet: boolean = false): boolean; override;
+//   function checkvalue(const quiet: boolean = false): boolean; override;
    property datalink: teditwidgetdatalink read fdatalink;
    property datafield: string read getdatafield write setdatafield;
    property datasource: tdatasource read getdatasource write setdatasource;
@@ -2288,7 +2310,7 @@ end;
 procedure teditwidgetdatalink.modified;
 begin
  if not editing and (frecordchange = 0) and 
-                    not (ewds_filterediting in fstate) then begin
+                not (ewds_filterediting in fstate) then begin
   inc(fbeginedit);
   try
    edit;
@@ -2463,15 +2485,16 @@ begin
  end;
 end;
 
-function teditwidgetdatalink.dataentered: boolean;
+//function teditwidgetdatalink.dataentered: boolean;
+procedure teditwidgetdatalink.dataentered;
 var
  widget1: twidget;
- bo1: boolean;
+ bo1,bo2: boolean;
 begin
- result:= true;
- if fposting = 0 then begin
+ if (frecordchange = 0) and (fposting = 0) then begin
   widget1:= fintf.getwidget;
-  if (field <> nil) and not ((oe_checkmrcancel in fintf.getoptionsedit) and
+  if not (ws_loadedproc in widget1.widgetstate) and (field <> nil) and 
+               not ((oe_checkmrcancel in fintf.getoptionsedit) and
              (widget1.window.modalresult = mr_cancel)) then begin
    if ewds_filterediting in fstate then begin
     fintf.valuetofield;
@@ -2496,14 +2519,14 @@ begin
          bo1:= false;
         end;
         try
-         result:= widget1.canparentclose;
+         bo2:= widget1.canparentclose;
         finally
          if bo1 then begin
           inc(tcustomgrid1(widget1.parentwidget).fnonullcheck);
          end;
         end;
        end;
-       if result then begin
+       if bo2 then begin
         dataset.post;
        end;
       finally
@@ -2580,11 +2603,6 @@ end;
 procedure tdbstringedit.setdatasource(const avalue: tdatasource);
 begin
  fdatalink.setwidgetdatasource(avalue);
-end;
-
-function tdbstringedit.checkvalue(const quiet: boolean = false): boolean;
-begin
- result:= inherited checkvalue(quiet) and fdatalink.dataentered;
 end;
 
 procedure tdbstringedit.modified;
@@ -2676,6 +2694,19 @@ begin
  fdatalink.recordchanged(nil);
 end;
 
+{
+function tdbstringedit.checkvalue(const quiet: boolean = false): boolean;
+begin
+ result:= inherited checkvalue(quiet) and fdatalink.dataentered;
+end;
+}
+
+procedure tdbstringedit.dochange;
+begin
+ fdatalink.dataentered;
+ inherited;
+end;
+
 { tdbdialogstringedit }
 
 constructor tdbdialogstringedit.create(aowner: tcomponent);
@@ -2708,11 +2739,6 @@ end;
 procedure tdbdialogstringedit.setdatasource(const avalue: tdatasource);
 begin
  fdatalink.setwidgetdatasource(avalue);
-end;
-
-function tdbdialogstringedit.checkvalue(const quiet: boolean = false): boolean;
-begin
- result:= inherited checkvalue(quiet) and fdatalink.dataentered;
 end;
 
 procedure tdbdialogstringedit.modified;
@@ -2792,6 +2818,19 @@ begin
  fdatalink.recordchanged(nil);
 end;
 
+{
+function tdbdialogstringedit.checkvalue(const quiet: boolean = false): boolean;
+begin
+ result:= inherited checkvalue(quiet) and fdatalink.dataentered;
+end;
+}
+
+procedure tdbdialogstringedit.dochange;
+begin
+ fdatalink.dataentered;
+ inherited;
+end;
+
 { tcustomdbdropdownlistedit }
 
 constructor tcustomdbdropdownlistedit.create(aowner: tcomponent);
@@ -2824,11 +2863,6 @@ end;
 procedure tcustomdbdropdownlistedit.setdatasource(const avalue: tdatasource);
 begin
  fdatalink.setwidgetdatasource(avalue);
-end;
-
-function tcustomdbdropdownlistedit.checkvalue(const quiet: boolean = false): boolean;
-begin
- result:= inherited checkvalue(quiet) and fdatalink.dataentered;
 end;
 
 procedure tcustomdbdropdownlistedit.modified;
@@ -2908,6 +2942,19 @@ begin
  fdatalink.recordchanged(nil);
 end;
 
+{
+function tcustomdbdropdownlistedit.checkvalue(const quiet: boolean = false): boolean;
+begin
+ result:= inherited checkvalue(quiet) and fdatalink.dataentered;
+end;
+}
+
+procedure tcustomdbdropdownlistedit.dochange;
+begin
+ fdatalink.dataentered;
+ inherited;
+end;
+
 { tdbkeystringedit }
 
 constructor tdbkeystringedit.create(aowner: tcomponent);
@@ -2940,11 +2987,6 @@ end;
 procedure tdbkeystringedit.setdatasource(const avalue: tdatasource);
 begin
  fdatalink.setwidgetdatasource(avalue);
-end;
-
-function tdbkeystringedit.checkvalue(const quiet: boolean = false): boolean;
-begin
- result:= inherited checkvalue(quiet) and fdatalink.dataentered;
 end;
 
 procedure tdbkeystringedit.modified;
@@ -3025,6 +3067,19 @@ begin
  fdatalink.recordchanged(nil);
 end;
 
+{
+function tdbkeystringedit.checkvalue(const quiet: boolean = false): boolean;
+begin
+ result:= inherited checkvalue(quiet) and fdatalink.dataentered;
+end;
+}
+
+procedure tdbkeystringedit.dochange;
+begin
+ fdatalink.dataentered;
+ inherited;
+end;
+
 { tdbmemoedit }
 
 constructor tdbmemoedit.create(aowner: tcomponent);
@@ -3057,11 +3112,6 @@ end;
 procedure tdbmemoedit.setdatasource(const avalue: tdatasource);
 begin
  fdatalink.setwidgetdatasource(avalue);
-end;
-
-function tdbmemoedit.checkvalue(const quiet: boolean = false): boolean;
-begin
- result:= inherited checkvalue(quiet) and fdatalink.dataentered;
 end;
 
 procedure tdbmemoedit.modified;
@@ -3141,6 +3191,19 @@ begin
  fdatalink.recordchanged(nil);
 end;
 
+{
+function tdbmemoedit.checkvalue(const quiet: boolean = false): boolean;
+begin
+ result:= inherited checkvalue(quiet) and fdatalink.dataentered;
+end;
+}
+
+procedure tdbmemoedit.dochange;
+begin
+ fdatalink.dataentered;
+ inherited;
+end;
+
 { tdbintegeredit }
 
 constructor tdbintegeredit.create(aowner: tcomponent);
@@ -3174,11 +3237,6 @@ end;
 procedure tdbintegeredit.setdatasource(const avalue: tdatasource);
 begin
  fdatalink.setwidgetdatasource(avalue);
-end;
-
-function tdbintegeredit.checkvalue(const quiet: boolean = false): boolean;
-begin
- result:= inherited checkvalue(quiet) and fdatalink.dataentered;
 end;
 
 procedure tdbintegeredit.modified;
@@ -3281,6 +3339,19 @@ begin
  fdatalink.recordchanged(nil);
 end;
 
+{
+function tdbintegeredit.checkvalue(const quiet: boolean = false): boolean;
+begin
+ result:= inherited checkvalue(quiet) and fdatalink.dataentered;
+end;
+}
+
+procedure tdbintegeredit.dochange;
+begin
+ fdatalink.dataentered;
+ inherited;
+end;
+
 { tdbbooleanedit }
 
 constructor tdbbooleanedit.create(aowner: tcomponent);
@@ -3319,15 +3390,6 @@ function tdbbooleanedit.checkvalue(const quiet: boolean = false): boolean;
 begin
  result:= false;
  //dummy
-end;
-
-function tdbbooleanedit.docheckvalue(var avalue): boolean;
-begin
- result:= inherited docheckvalue(avalue);
- if result then begin
-  fdatalink.modified;
-  result:= fdatalink.dataentered;
- end;
 end;
 
 function tdbbooleanedit.getoptionsedit: optionseditty;
@@ -3391,6 +3453,29 @@ begin
  fdatalink.recordchanged(nil);
 end;
 
+{
+function tdbbooleanedit.docheckvalue(var avalue): boolean;
+begin
+ result:= inherited docheckvalue(avalue);
+ if result then begin
+  fdatalink.modified;
+  result:= fdatalink.dataentered;
+ end;
+end;
+}
+
+procedure tdbbooleanedit.dochange;
+begin
+ fdatalink.dataentered;
+ inherited;
+end;
+
+procedure tdbbooleanedit.modified;
+begin
+ fdatalink.modified;
+ inherited;
+end;
+
 { tdbdataicon }
 
 constructor tdbdataicon.create(aowner: tcomponent);
@@ -3429,18 +3514,6 @@ function tdbdataicon.checkvalue(const quiet: boolean = false): boolean;
 begin
  result:= false;
  //dummy
-end;
-
-function tdbdataicon.docheckvalue(var avalue): boolean;
-var
- widget: twidget;
- int1: integer;
-begin
- result:= inherited docheckvalue(avalue);
- if result then begin
-  fdatalink.modified;
-  result:= fdatalink.dataentered;
- end;
 end;
 
 function tdbdataicon.getoptionsedit: optionseditty;
@@ -3509,6 +3582,32 @@ begin
  fdatalink.recordchanged(nil);
 end;
 
+{
+function tdbdataicon.docheckvalue(var avalue): boolean;
+var
+ widget: twidget;
+ int1: integer;
+begin
+ result:= inherited docheckvalue(avalue);
+ if result then begin
+  fdatalink.modified;
+  result:= fdatalink.dataentered;
+ end;
+end;
+}
+
+procedure tdbdataicon.dochange;
+begin
+ fdatalink.dataentered;
+ inherited;
+end;
+
+procedure tdbdataicon.modified;
+begin
+ fdatalink.modified;
+ inherited;
+end;
+
 { tdbdatabutton }
 
 constructor tdbdatabutton.create(aowner: tcomponent);
@@ -3547,18 +3646,6 @@ function tdbdatabutton.checkvalue(const quiet: boolean = false): boolean;
 begin
  result:= false;
  //dummy
-end;
-
-function tdbdatabutton.docheckvalue(var avalue): boolean;
-var
- widget: twidget;
- int1: integer;
-begin
- result:= inherited docheckvalue(avalue);
- if result then begin
-  fdatalink.modified;
-  result:= fdatalink.dataentered;
- end;
 end;
 
 function tdbdatabutton.getoptionsedit: optionseditty;
@@ -3627,6 +3714,32 @@ begin
  fdatalink.recordchanged(nil);
 end;
 
+{
+function tdbdatabutton.docheckvalue(var avalue): boolean;
+var
+ widget: twidget;
+ int1: integer;
+begin
+ result:= inherited docheckvalue(avalue);
+ if result then begin
+  fdatalink.modified;
+  result:= fdatalink.dataentered;
+ end;
+end;
+}
+
+procedure tdbdatabutton.dochange;
+begin
+ fdatalink.dataentered;
+ inherited;
+end;
+
+procedure tdbdatabutton.modified;
+begin
+ fdatalink.modified;
+ inherited;
+end;
+
 { tdbbooleaneditradio }
 
 constructor tdbbooleaneditradio.create(aowner: tcomponent);
@@ -3683,10 +3796,24 @@ begin
   end;
  end;
  result:= inherited docheckvalue(avalue);
+ {
  if result then begin
   fdatalink.modified;
   result:= fdatalink.dataentered;
  end;
+ }
+end;
+
+procedure tdbbooleaneditradio.dochange;
+begin
+ fdatalink.dataentered;
+ inherited;
+end;
+
+procedure tdbbooleaneditradio.modified;
+begin
+ fdatalink.modified;
+ inherited;
 end;
 
 function tdbbooleaneditradio.getoptionsedit: optionseditty;
@@ -3785,11 +3912,6 @@ begin
  fdatalink.setwidgetdatasource(avalue);
 end;
 
-function tdbrealedit.checkvalue(const quiet: boolean = false): boolean;
-begin
- result:= inherited checkvalue(quiet) and fdatalink.dataentered;
-end;
-
 procedure tdbrealedit.modified;
 begin
  fdatalink.Modified;
@@ -3872,6 +3994,19 @@ begin
  fdatalink.recordchanged(nil);
 end;
 
+{
+function tdbrealedit.checkvalue(const quiet: boolean = false): boolean;
+begin
+ result:= inherited checkvalue(quiet) and fdatalink.dataentered;
+end;
+}
+
+procedure tdbrealedit.dochange;
+begin
+ fdatalink.dataentered;
+ inherited;
+end;
+
 { tdbrealspinedit }
 
 constructor tdbrealspinedit.create(aowner: tcomponent);
@@ -3905,11 +4040,6 @@ end;
 procedure tdbrealspinedit.setdatasource(const avalue: tdatasource);
 begin
  fdatalink.setwidgetdatasource(avalue);
-end;
-
-function tdbrealspinedit.checkvalue(const quiet: boolean = false): boolean;
-begin
- result:= inherited checkvalue(quiet) and fdatalink.dataentered;
 end;
 
 procedure tdbrealspinedit.modified;
@@ -3994,6 +4124,19 @@ begin
  fdatalink.recordchanged(nil);
 end;
 
+{
+function tdbrealspinedit.checkvalue(const quiet: boolean = false): boolean;
+begin
+ result:= inherited checkvalue(quiet) and fdatalink.dataentered;
+end;
+}
+
+procedure tdbrealspinedit.dochange;
+begin
+ fdatalink.dataentered;
+ inherited;
+end;
+
 { tdbslider }
 
 constructor tdbslider.create(aowner: tcomponent);
@@ -4040,15 +4183,6 @@ function tdbslider.getoptionsedit: optionseditty;
 begin
  result:= inherited getoptionsedit;
  fdatalink.updateoptionsedit(result);
-end;
-
-function tdbslider.docheckvalue(var avalue): boolean;
-begin
- result:= inherited docheckvalue(avalue);
- if result then begin
-  fdatalink.modified;
-  result:= fdatalink.dataentered;
- end;
 end;
 
 procedure tdbslider.valuetofield;
@@ -4125,6 +4259,29 @@ end;
 procedure tdbslider.recchanged;
 begin
  fdatalink.recordchanged(nil);
+end;
+
+{
+function tdbslider.docheckvalue(var avalue): boolean;
+begin
+ result:= inherited docheckvalue(avalue);
+ if result then begin
+  fdatalink.modified;
+  result:= fdatalink.dataentered;
+ end;
+end;
+}
+
+procedure tdbslider.dochange;
+begin
+ fdatalink.dataentered;
+ inherited;
+end;
+
+procedure tdbslider.modified;
+begin
+ fdatalink.modified;
+ inherited;
 end;
 
 { tdbprogressbar }
@@ -4278,11 +4435,6 @@ begin
  fdatalink.setwidgetdatasource(avalue);
 end;
 
-function tdbdatetimeedit.checkvalue(const quiet: boolean = false): boolean;
-begin
- result:= inherited checkvalue(quiet) and fdatalink.dataentered;
-end;
-
 procedure tdbdatetimeedit.modified;
 begin
  fdatalink.modified;
@@ -4371,6 +4523,19 @@ begin
  fdatalink.recordchanged(nil);
 end;
 
+{
+function tdbdatetimeedit.checkvalue(const quiet: boolean = false): boolean;
+begin
+ result:= inherited checkvalue(quiet) and fdatalink.dataentered;
+end;
+}
+
+procedure tdbdatetimeedit.dochange;
+begin
+ fdatalink.dataentered;
+ inherited;
+end;
+
 { tdbcalendardatetimeedit }
 
 constructor tdbcalendardatetimeedit.create(aowner: tcomponent);
@@ -4404,11 +4569,6 @@ end;
 procedure tdbcalendardatetimeedit.setdatasource(const avalue: tdatasource);
 begin
  fdatalink.setwidgetdatasource(avalue);
-end;
-
-function tdbcalendardatetimeedit.checkvalue(const quiet: boolean = false): boolean;
-begin
- result:= inherited checkvalue(quiet) and fdatalink.dataentered;
 end;
 
 procedure tdbcalendardatetimeedit.modified;
@@ -4499,6 +4659,19 @@ begin
  fdatalink.recordchanged(nil);
 end;
 
+{
+function tdbcalendardatetimeedit.checkvalue(const quiet: boolean = false): boolean;
+begin
+ result:= inherited checkvalue(quiet) and fdatalink.dataentered;
+end;
+}
+
+procedure tdbcalendardatetimeedit.dochange;
+begin
+ fdatalink.dataentered;
+ inherited;
+end;
+
 { tcustomdbenumedit }
 
 constructor tcustomdbenumedit.create(aowner: tcomponent);
@@ -4532,11 +4705,6 @@ end;
 procedure tcustomdbenumedit.setdatasource(const avalue: tdatasource);
 begin
  fdatalink.setwidgetdatasource(avalue);
-end;
-
-function tcustomdbenumedit.checkvalue(const quiet: boolean = false): boolean;
-begin
- result:= inherited checkvalue(quiet) and fdatalink.dataentered;
 end;
 
 procedure tcustomdbenumedit.modified;
@@ -4625,6 +4793,19 @@ end;
 procedure tcustomdbenumedit.recchanged;
 begin
  fdatalink.recordchanged(nil);
+end;
+
+{
+function tcustomdbenumedit.checkvalue(const quiet: boolean = false): boolean;
+begin
+ result:= inherited checkvalue(quiet) and fdatalink.dataentered;
+end;
+}
+
+procedure tcustomdbenumedit.dochange;
+begin
+ fdatalink.dataentered;
+ inherited;
 end;
 
 { tdbbooleantextedit }

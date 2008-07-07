@@ -37,6 +37,7 @@ type
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
+   procedure dochange; override;
 
    function getrowdatapo(const info: cellinfoty): pointer; override;
    //idbeditfieldlink
@@ -50,7 +51,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   function checkvalue(const quiet: boolean = false): boolean; override;
+//   function checkvalue(const quiet: boolean = false): boolean; override;
    property datalink: teditwidgetdatalink read fdatalink;
   published
    property datafield: string read getdatafield write setdatafield;
@@ -83,6 +84,7 @@ type
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
+   procedure dochange; override;
 
    function getrowdatapo(const info: cellinfoty): pointer; override;
    //idbeditfieldlink
@@ -96,7 +98,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   function checkvalue(const quiet: boolean = false): boolean; override;
+//   function checkvalue(const quiet: boolean = false): boolean; override;
   published
    property datalink: teditwidgetdatalink read fdatalink;
    property datafield: string read getdatafield write setdatafield;
@@ -145,10 +147,17 @@ procedure tdbfilenameedit.setdatasource(const avalue: tdatasource);
 begin
  teditwidgetdatalink1(fdatalink).setwidgetdatasource(avalue);
 end;
-
+{
 function tdbfilenameedit.checkvalue(const quiet: boolean = false): boolean;
 begin
  result:= inherited checkvalue(quiet) and fdatalink.dataentered;
+end;
+}
+
+procedure tdbfilenameedit.dochange;
+begin
+ fdatalink.dataentered;
+ inherited;
 end;
 
 procedure tdbfilenameedit.modified;
@@ -276,10 +285,16 @@ procedure tdbcoloredit.setdatasource(const avalue: tdatasource);
 begin
  fdatalink.setwidgetdatasource(avalue);
 end;
-
+{
 function tdbcoloredit.checkvalue(const quiet: boolean = false): boolean;
 begin
  result:= inherited checkvalue(quiet) and fdatalink.dataentered;
+end;
+}
+procedure tdbcoloredit.dochange;
+begin
+ fdatalink.dataentered;
+ inherited;
 end;
 
 procedure tdbcoloredit.modified;
@@ -379,6 +394,5 @@ begin
   result:= inherited internaldatatotext(avalue);
  end;
 end;
-
 
 end.
