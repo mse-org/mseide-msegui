@@ -1857,11 +1857,15 @@ begin
    fonbeforerollback(self);
   end;
   closedatasets;
-  if (tao_fake in foptions) or tcustomsqlconnection(database).RollBack(FTrans) then begin
+  try
+   if not (tao_fake in foptions) then begin
+    tcustomsqlconnection(database).RollBack(FTrans);
+   end;
+  finally
    CloseTrans;
-  end;
-  if checkcanevent(self,tmethod(fonafterrollback)) then begin
-   fonafterrollback(self);
+   if checkcanevent(self,tmethod(fonafterrollback)) then begin
+    fonafterrollback(self);
+   end;
   end;
  end;
 end;

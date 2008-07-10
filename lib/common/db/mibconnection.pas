@@ -339,10 +339,14 @@ end;
 
 function TIBConnection.RollBack(trans : TSQLHandle) : boolean;
 begin
-  result := false;
-  if isc_rollback_transaction(@TIBTrans(trans).Status, @TIBTrans(trans).TransactionHandle) <> 0 then
-    CheckError('Rollback', TIBTrans(trans).Status)
-  else result := true;
+ result:= false;
+ if isc_rollback_transaction(@TIBTrans(trans).Status,
+                @TIBTrans(trans).TransactionHandle) <> 0 then begin
+  CheckError('Rollback', TIBTrans(trans).Status);
+ end
+ else begin
+  result := true;
+ end;
 end;
 
 function TIBConnection.StartDBTransaction(

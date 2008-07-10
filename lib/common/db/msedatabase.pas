@@ -522,14 +522,17 @@ procedure tmdatabase.CloseTransactions;
 Var I : longint;
 
 begin
-  If Assigned(FTransactions) then
-    begin
-    For I:=FTransactions.Count-1 downto 0 do
-      with tmdbtransaction(FTransactions[i]) do begin
-       EndTransaction;
-       finalizetransaction;
-      end; 
+ If Assigned(FTransactions) then begin
+  For I:=FTransactions.Count-1 downto 0 do begin
+   with tmdbtransaction(FTransactions[i]) do begin
+    try
+     EndTransaction;
+    except
     end;
+    finalizetransaction;
+   end; 
+  end;
+ end;
 end;
 
 procedure tmdatabase.RemoveDataSets;
