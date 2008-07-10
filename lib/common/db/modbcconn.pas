@@ -800,7 +800,7 @@ begin
     // convert type
     // NOTE: I made some guesses here after I found only limited information about TFieldType; please report any problems
     case DataType of
-      SQL_CHAR:          begin FieldType:=ftFixedChar;  FieldSize:=ColumnSize+1; end;
+      SQL_CHAR:          begin FieldType:=ftString;     FieldSize:=ColumnSize+1; end;
       SQL_VARCHAR:       begin FieldType:=ftString;     FieldSize:=ColumnSize+1; end;
       SQL_LONGVARCHAR:   begin FieldType:=ftMemo;       FieldSize:=sizeof(pointer); end; // is a blob
       SQL_WCHAR:         begin FieldType:=ftWideString; FieldSize:=ColumnSize+1; end;
