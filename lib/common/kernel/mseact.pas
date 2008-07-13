@@ -317,13 +317,13 @@ begin
            {$ifdef FPC}longword{$else}longword{$endif}(actionshapestates)));
  dest:= shapestatesty(replacebits(
   {$ifdef FPC}longword{$else}word{$endif}(
-        {$ifdef FPC}longword{$else}byte{$endif}(source.options)
+        {$ifdef FPC}longword{$else}word{$endif}(source.options)
                shl {$ifdef FPC}longword{$else}word{$endif}(actionoptionshapelshift)
                                            ),
            {$ifdef FPC}longword{$else}longword{$endif}(dest),
   {$ifdef FPC}longword{$else}word{$endif}(
-           {$ifdef FPC}longword{$else}byte{$endif}(actionoptionshapestates)
-                shl {$ifdef FPC}longword{$else}word{$endif}(actionoptionshapelshift))
+           {$ifdef FPC}longword{$else}word{$endif}(actionoptionshapestates)
+                shl {$ifdef FPC}longword{$else}longword{$endif}(actionoptionshapelshift))
                                            )
                 );
 end;
@@ -693,13 +693,13 @@ begin
  with po1^ do begin
   optionsbefore:= options;
   options:= menuactionoptionsty(setsinglebit(
-                         {$ifdef FPC}longword{$else}byte{$endif}(value),
-                         {$ifdef FPC}longword{$else}byte{$endif}(options),
-                         {$ifdef FPC}longword{$else}byte{$endif}(mask1)));
+                         {$ifdef FPC}longword{$else}word{$endif}(value),
+                         {$ifdef FPC}longword{$else}word{$endif}(options),
+                         {$ifdef FPC}longword{$else}word{$endif}(mask1)));
   options:= menuactionoptionsty(setsinglebit(
-                         {$ifdef FPC}longword{$else}byte{$endif}(options),
-                         {$ifdef FPC}longword{$else}byte{$endif}(optionsbefore),
-                         {$ifdef FPC}longword{$else}byte{$endif}(mask2)));
+                         {$ifdef FPC}longword{$else}word{$endif}(options),
+                         {$ifdef FPC}longword{$else}word{$endif}(optionsbefore),
+                         {$ifdef FPC}longword{$else}word{$endif}(mask2)));
   if optionsbefore * [mao_shortcutcaption] <> options * 
                                      [mao_shortcutcaption] then begin
    sender.calccaptiontext(po1^);
