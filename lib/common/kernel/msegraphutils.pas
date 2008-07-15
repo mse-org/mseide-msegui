@@ -335,6 +335,7 @@ function makesize(const cx,cy: integer): sizety;
 function makerect(const x,y,cx,cy: integer): rectty; overload;
 function makerect(const pos: pointty; const size: sizety): rectty; overload;
 
+function bottomright(const rect: rectty): pointty;
 function isnullpoint(const point: pointty): boolean;
 function isnullsize(const size: sizety): boolean;
 function isnullrect(const rect: rectty): boolean;
@@ -683,6 +684,12 @@ function makerect(const pos: pointty; const size: sizety): rectty; overload;
 begin
  result.pos:= pos;
  result.size:= size;
+end;
+
+function bottomright(const rect: rectty): pointty;
+begin
+ result.x:= rect.x + rect.cx;
+ result.y:= rect.y + rect.cy;
 end;
 
 function isnullpoint(const point: pointty): boolean;

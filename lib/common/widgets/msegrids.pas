@@ -782,6 +782,12 @@ type
    property items[const index: integer]: tcolheader read getitems
                  write setitems; default;
  end;
+
+ tfixrow = class;
+ beforefixdrawcelleventty = procedure(const sender: tfixrow; const canvas: tcanvas;
+                          var cellinfo: cellinfoty; var processed: boolean) of object;
+ drawfixcelleventty = procedure(const sender: tfixrow; const canvas: tcanvas;
+                          const cellinfo: cellinfoty) of object;
  
  tfixrows = class;
  tfixrow = class(tgridprop)
@@ -792,6 +798,8 @@ type
    fcaptions: tcolheaders;
    fcaptionsfix: tfixcolheaders;
    foptionsfix: fixrowoptionsty;
+   fonbeforedrawcell: beforefixdrawcelleventty;
+   fonafterdrawcell: drawfixcelleventty;
    procedure setheight(const Value: integer);
    function getrowindex: integer;
    procedure captionchanged(const sender: tarrayprop; const aindex: integer);
@@ -839,6 +847,10 @@ type
    property font;
    property linecolor default defaultfixlinecolor;
    property options: fixrowoptionsty read foptionsfix write setoptionsfix;
+   property onbeforedrawcell: beforefixdrawcelleventty read fonbeforedrawcell
+                                write fonbeforedrawcell;
+   property onafterdrawcell: drawfixcelleventty read fonafterdrawcell
+                                write fonafterdrawcell;
  end;
 
  tgridarrayprop = class(tindexpersistentarrayprop)
@@ -3492,11 +3504,12 @@ var
 var
  linewidthbefore: integer;
  color1: colorty;
+ canbeforedrawcell,canafterdrawcell: boolean;
  
  procedure paintcols(const range: rangety);
  var
   int1,int2,int3: integer;
-  bo1: boolean;
+  bo1,bo2: boolean;
   headers1: tcolheaders;
  begin
   with info do begin
@@ -3543,7 +3556,16 @@ var
       end;
      end;
      canvas.origin:= po2;
-     drawcell(canvas);
+     bo2:= false;
+     if canbeforedrawcell then begin
+      fonbeforedrawcell(self,canvas,fcellinfo,bo2);
+     end;
+     if not bo2 then begin
+      drawcell(canvas);
+     end;
+     if canafterdrawcell then begin
+      fonafterdrawcell(self,canvas,fcellinfo);
+     end;
     end;
    end;
   end;
@@ -3575,6 +3597,8 @@ begin
     fcellinfo.colorline:= flinecolor;
    end;
    po2.y:= po1.y+fcellrect.y;
+   canbeforedrawcell:= fgrid.canevent(tmethod(fonbeforedrawcell));
+   canafterdrawcell:= fgrid.canevent(tmethod(fonafterdrawcell));
    paintcols(colrange.range1);
    paintcols(colrange.range2);
    canvas.origin:= po1;
