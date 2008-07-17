@@ -10,6 +10,7 @@
 unit msedb;
 
 {$ifdef VER2_1_5} {$define mse_FPC_2_2} {$endif}
+{$ifdef VER2_2_0} {$define focuscontrolbug} {$endif}
 {$ifdef VER2_2} {$define mse_FPC_2_2} {$define hasaswidestring} {$endif}
 {$ifdef VER2_3} {$define mse_FPC_2_2} {$define hasaswidestring} {$endif}
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
@@ -4137,10 +4138,12 @@ begin
   defieldlistchange: begin
    updatelinkedfields;
   end;
+{$ifdef focuscontrolbug}
   defocuscontrol: begin
    field1:= tfield(info); //workaround for fpc bug 
    info:= ptrint(@field1);
   end;
+{$endif}
  end;
  if not fmovebylock or (event <> dedatasetchange) then begin
   fintf.inheriteddataevent(event,info);
