@@ -147,6 +147,8 @@ type
    fsetmsestringdata: setmsestringdataty;
    fcharacterlength: integer;
    ftagpo: pointer;
+   fvaluebuffer: msestring;
+   fvalidating: boolean;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
    //ifieldcomponent
@@ -169,6 +171,7 @@ type
   public
    destructor destroy; override;
    procedure Clear; override;
+//   procedure validate(const buffer: msestring);
    function assql: string;
    function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
@@ -1102,6 +1105,47 @@ type
     FRequired : Boolean;
     FSize : Word;
  end;
+ 
+ TFieldcracker = class(TComponent)
+  Private
+    FAlignMent : TAlignment;
+    FAttributeSet : String;
+    FCalculated : Boolean;
+    FConstraintErrorMessage : String;
+    FCustomConstraint : String;
+    FDataSet : TDataSet;
+//    FDataSize : Word;
+    FDataType : TFieldType;
+    FDefaultExpression : String;
+    FDisplayLabel : String;
+    FDisplayWidth : Longint;
+    FFieldKind : TFieldKind;
+    FFieldName : String;
+    FFieldNo : Longint;
+    FFields : TFields;
+    FHasConstraints : Boolean;
+    FImportedConstraint : String;
+    FIsIndexField : Boolean;
+    FKeyFields : String;
+    FLookupCache : Boolean;
+    FLookupDataSet : TDataSet;
+    FLookupKeyfields : String;
+    FLookupresultField : String;
+    FLookupList: TLookupList;
+    FOffset : Word;
+    FOnChange : TFieldNotifyEvent;
+    FOnGetText: TFieldGetTextEvent;
+    FOnSetText: TFieldSetTextEvent;
+    FOnValidate: TFieldNotifyEvent;
+    FOrigin : String;
+    FReadOnly : Boolean;
+    FRequired : Boolean;
+    FSize : Word;
+    FValidChars : TFieldChars;
+    FValueBuffer : Pointer;
+    FValidating : Boolean;
+  end;
+  
  tdataset1 = class(tdataset);
 
 procedure varianttorealty(const value: variant; out dest: realty);
@@ -1856,14 +1900,40 @@ function tmsestringfield.assql: string;
 begin
  result:= fieldtosql(self);
 end;
-
+{
+procedure tmsestringfield.validate(const buffer: msestring);
+begin
+ if assigned(onvalidate) then begin
+  fvaluebuffer:= buffer;
+  fvalidating:= true;
+  try
+   onvalidate(self);
+  finally
+   fvalidating:= false;
+   fvaluebuffer:= '';
+  end;
+ end;
+end;
+}
 function tmsestringfield.getasmsestring: msestring;
 begin
- if assigned(fgetmsestringdata) then begin
-  fgetmsestringdata(self,result);
- end
- else begin
-  result:= fieldgetmsestring(self,fdsintf);
+ with tfieldcracker(self) do begin
+  if assigned(fgetmsestringdata) then begin
+   if fvalidating then begin
+    if fvaluebuffer = nil then begin
+     result:= '';
+    end
+    else begin
+     result:= msestring(fvaluebuffer^);
+    end;
+   end
+   else begin
+    fgetmsestringdata(self,result);
+   end;
+  end
+  else begin
+   result:= fieldgetmsestring(self,fdsintf);
+  end;
  end;
 end;
 

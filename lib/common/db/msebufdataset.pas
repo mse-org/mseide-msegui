@@ -2191,6 +2191,7 @@ var
  po1: pointer;
  datasize: integer;
 begin
+ field.validate(buffer);
  po1:= getfieldbuffer(field,buffer = nil,datasize);
  if buffer <> nil then begin
   move(buffer^,po1^,datasize);
@@ -2204,6 +2205,7 @@ var
  po1: pointer;
  int1: integer;
 begin
+ sender.validate(@avalue);
  po1:= getfieldbuffer(sender,false,int1);
  msestring(po1^):= avalue;
  if (sender.characterlength > 0) and 
