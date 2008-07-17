@@ -45,6 +45,8 @@ type
    procedure dironbeforeexecute(const sender: tfiledialogcontroller;
                    var dialogkind: filedialogkindty; var aresult: modalresultty);
    procedure dirshowhint(const sender: TObject; var info: hintinfoty);
+   procedure chaindirectories(const sender: TObject);
+   procedure chainopenfiles(const sender: TObject);
   private
    procedure valuestoinfo(out info: findinfileinfoty);
    procedure infotovalues(const info: findinfileinfoty);
@@ -136,6 +138,20 @@ procedure tfindinfiledialogfo.dirshowhint(const sender: TObject;
 begin
  if dir.editor.textclipped then begin
   info.caption:= dir.value;
+ end;
+end;
+
+procedure tfindinfiledialogfo.chaindirectories(const sender: TObject);
+begin
+ if indirectories.value then begin
+  inopenfiles.value:= false;
+ end;
+end;
+
+procedure tfindinfiledialogfo.chainopenfiles(const sender: TObject);
+begin
+ if inopenfiles.value then begin
+  indirectories.value:= false;
  end;
 end;
 
