@@ -1738,55 +1738,57 @@ var
  int1: integer;
  rea1: real;
 begin
- with ainfo do begin
+  with ainfo do begin
   if awidget <> nil then begin
    widget:= awidget;
   end;
-  size1:= widget.clientsize;
-  if not (csloading in componentstate) and (flayoutupdating = 0) then begin
-        //synchronize ref values with changed widget values
-   size2:= self.scalesizeref;
-   if size1.cx <> actscalesize.cx then begin
-    refscalesize.cx:= size2.cx;
-    scalesize.cx:= size1.cx;
-    actscalesize.cx:= scalesize.cx;
+  if not (csloading in componentstate) then begin
+   size1:= widget.clientsize;
+   if (flayoutupdating = 0) then begin
+         //synchronize ref values with changed widget values
+    size2:= self.scalesizeref;
+    if size1.cx <> actscalesize.cx then begin
+     refscalesize.cx:= size2.cx;
+     scalesize.cx:= size1.cx;
+     actscalesize.cx:= scalesize.cx;
+    end;
+    if size1.cy <> actscalesize.cy then begin
+     refscalesize.cy:= size2.cy;
+     scalesize.cy:= size1.cy;
+     actscalesize.cy:= scalesize.cy;
+    end;
    end;
-   if size1.cy <> actscalesize.cy then begin
-    refscalesize.cy:= size2.cy;
-    scalesize.cy:= size1.cy;
-    actscalesize.cy:= scalesize.cy;
+   size2:= innerclientsize;
+   if widget.bounds_x <> actpos.x then begin
+    refsize.cx:= size2.cx;
+    pos.x:= widget.bounds_x;
+    actpos.x:= pos.x;
    end;
-  end;
-  size2:= innerclientsize;
-  if widget.bounds_x <> actpos.x then begin
-   refsize.cx:= size2.cx;
-   pos.x:= widget.bounds_x;
-   actpos.x:= pos.x;
-  end;
-  if widget.bounds_y <> actpos.y then begin
-   refsize.cy:= size2.cy;
-   pos.y:= widget.bounds_y;
-   actpos.y:= pos.y;
-  end;
-  if size1.cx <> actsize.cx then begin
-   refsize.cx:= size2.cx;
-   size.cx:= size1.cx;
-   actsize.cx:= size1.cx;
-  end;
-  if size1.cy <> actsize.cy then begin
-   refsize.cy:= size2.cy;
-   size.cy:= size1.cy;
-   actsize.cy:= size1.cy;
-  end;
-  if twidget1(widget).ffont <> nil then begin
-   int1:= twidget1(widget).ffont.height;
-   rea1:= twidget1(widget).ffont.xscale;
-   if (int1 <> actfontheight) or (rea1 <> actfontxscale) then begin
-    reffontsize:= size2;
-    fontheight:= int1;
-    actfontheight:= int1;
-    fontxscale:= rea1;
-    actfontxscale:= rea1;
+   if widget.bounds_y <> actpos.y then begin
+    refsize.cy:= size2.cy;
+    pos.y:= widget.bounds_y;
+    actpos.y:= pos.y;
+   end;
+   if size1.cx <> actsize.cx then begin
+    refsize.cx:= size2.cx;
+    size.cx:= size1.cx;
+    actsize.cx:= size1.cx;
+   end;
+   if size1.cy <> actsize.cy then begin
+    refsize.cy:= size2.cy;
+    size.cy:= size1.cy;
+    actsize.cy:= size1.cy;
+   end;
+   if twidget1(widget).ffont <> nil then begin
+    int1:= twidget1(widget).ffont.height;
+    rea1:= twidget1(widget).ffont.xscale;
+    if (int1 <> actfontheight) or (rea1 <> actfontxscale) then begin
+     reffontsize:= size2;
+     fontheight:= int1;
+     actfontheight:= int1;
+     fontxscale:= rea1;
+     actfontxscale:= rea1;
+    end;
    end;
   end;
  end;

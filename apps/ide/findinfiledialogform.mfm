@@ -91,7 +91,6 @@ object findinfileadialogfo: tfindinfiledialogfo
     bounds_y = 48
     bounds_cx = 137
     bounds_cy = 66
-    frame.dummy = 0
     taborder = 3
     optionsscale = [osc_expandx, osc_shrinkx]
     linkright = tlayouter2
@@ -134,7 +133,6 @@ object findinfileadialogfo: tfindinfiledialogfo
     bounds_y = 48
     bounds_cx = 149
     bounds_cy = 66
-    frame.dummy = 0
     taborder = 4
     optionsscale = [osc_expandx, osc_shrinkx]
     object wholeword: tbooleanedit
@@ -176,7 +174,6 @@ object findinfileadialogfo: tfindinfiledialogfo
     bounds_y = 208
     bounds_cx = 331
     bounds_cy = 30
-    frame.dummy = 0
     anchors = [an_top]
     taborder = 5
     optionsscale = [osc_expandy, osc_shrinky]
