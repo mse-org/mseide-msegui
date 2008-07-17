@@ -95,9 +95,6 @@ object findinfileadialogfo: tfindinfiledialogfo
     taborder = 3
     optionsscale = [osc_expandx, osc_shrinkx]
     linkright = tlayouter2
-    font.name = 'stf_default'
-    font.xscale =  1.0000000000000000E+0000
-    font.dummy = 0
     object indirectories: tbooleaneditradio
       bounds_x = 8
       bounds_y = 40
@@ -140,9 +137,6 @@ object findinfileadialogfo: tfindinfiledialogfo
     frame.dummy = 0
     taborder = 4
     optionsscale = [osc_expandx, osc_shrinkx]
-    font.name = 'stf_default'
-    font.xscale =  1.0000000000000000E+0000
-    font.dummy = 0
     object wholeword: tbooleanedit
       bounds_x = 8
       bounds_y = 16
@@ -188,9 +182,6 @@ object findinfileadialogfo: tfindinfiledialogfo
     optionsscale = [osc_expandy, osc_shrinky]
     optionslayout = [lao_aligny]
     align_glue = wam_start
-    font.name = 'stf_default'
-    font.xscale =  1.0000000000000000E+0000
-    font.dummy = 0
     object tlayouter3: tlayouter
       bounds_x = 216
       bounds_y = 0
@@ -208,9 +199,6 @@ object findinfileadialogfo: tfindinfiledialogfo
       place_maxdist = 5
       place_mode = wam_end
       place_options = [plo_propmargin, plo_syncmaxautosize]
-      font.name = 'stf_default'
-      font.xscale =  1.0000000000000000E+0000
-      font.dummy = 0
       object ok: tbutton
         optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
         bounds_x = 5

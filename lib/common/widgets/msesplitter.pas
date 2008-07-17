@@ -277,7 +277,6 @@ type
    property onafterlayout: layoutereventty read fonafterlayout 
                                                     write fonafterlayout;
    property visible default true;
-   property font: twidgetfont read getfont write setfont;
  end;
  
 implementation

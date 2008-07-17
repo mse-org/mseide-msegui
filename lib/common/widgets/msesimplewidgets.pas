@@ -369,6 +369,7 @@ type
  
  tscalingwidget = class(tcustomscalingwidget)
   published
+   property font: twidgetfont read getfont write setfont stored isfontstored;
    property optionsscale;
    property onfontheightdelta;
    property onchildscaled;
