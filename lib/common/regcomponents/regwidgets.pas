@@ -133,9 +133,7 @@ begin
  registerpropertyeditor(typeinfo(twidget),tspacer,'linkbottom',
                                  tsisterwidgetpropertyeditor);
 
- registerpropertyeditor(typeinfo(twidget),tlayouter,'alignx_leader',
-                                 tchildwidgetpropertyeditor);
- registerpropertyeditor(typeinfo(twidget),tlayouter,'aligny_leader',
+ registerpropertyeditor(typeinfo(twidget),tlayouter,'align_leader',
                                  tchildwidgetpropertyeditor);
  
  registerunitgroup(['msegrids'],['msegui','msegraphutils','mseclasses']);
