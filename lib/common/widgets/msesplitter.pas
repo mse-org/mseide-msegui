@@ -1632,8 +1632,10 @@ begin
      if (lao_scalefont in foptionslayout) and (ffontsizeref.cx <> 0) and 
                   (ffontsizeref.cy <> 0) then begin
       font.height:= round((ffontheightref*clientheight)/ffontsizeref.cy);
-      font.xscale:= (ffontxscaleref * (clientwidth/ffontsizeref.cx))/
-                    (clientheight/ffontsizeref.cy);
+      if clientheight > 0 then begin
+       font.xscale:= (ffontxscaleref * (clientwidth/ffontsizeref.cx))/
+                     (clientheight/ffontsizeref.cy);
+      end;
      end;
      if foptionslayout * 
                [lao_scalewidth,lao_scaleheight,lao_scalefont] <> [] then begin
