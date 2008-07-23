@@ -4,7 +4,7 @@ interface
 uses
  classes,mseglob,mseguiglob,mseapplication,msestat,msemenus,msegui,msegraphics,
  msegraphutils,mseevent,mseclasses,mseforms,cpuform,msesplitter,msedataedits,
- mseedit,msestrings,msetypes,msegraphedits;
+ mseedit,msestrings,msetypes,msegraphedits,msesimplewidgets,msewidgets;
 
 type
  tcpuavr32fo = class(tcpufo)
@@ -47,20 +47,24 @@ type
    tbooleanedit17: tbooleanedit;
    tbooleanedit16: tbooleanedit;
    sr: tintegeredit;
+   exceptstack: tbutton;
    procedure regsetvalue(const sender: TObject; var avalue: Integer;
                    var accept: Boolean);
    procedure flagssetvalue(const sender: TObject; var avalue: Boolean;
                    var accept: Boolean);
    procedure flagonchange(const sender: TObject);
    function internalrefresh: boolean; override;
+   procedure checkexcept(const sender: TObject);
   public
    constructor create(aowner: tcomponent); override;
  end;
  
 implementation
 uses
- cpuavr32form_mfm,main,msegdbutils;
-
+ cpuavr32form_mfm,main,msegdbutils,sourceform,mseformatstr,sysutils;
+const
+ modebits =   $01c00000;
+ exceptmode = $00800000; //irq level 0
 { tcpuavr32fo }
  
 constructor tcpuavr32fo.create(aowner: tcomponent);
@@ -112,10 +116,47 @@ begin
    end;
    sr.value:= int1;
    result:= true;
+   exceptstack.enabled:= int1 and modebits >= exceptmode;
   end
   else begin
    result:= false;
   end;
+ end;
+ if not result then begin
+  exceptstack.enabled:= false;
+ end;
+end;
+
+procedure tcpuavr32fo.checkexcept(const sender: TObject);
+var
+ lwo1: longword;
+ filename: filenamety;
+ line: integer;
+ start,stop: cardinal;
+ mstr1,mstr2: msestring;
+ bo1: boolean;
+ str1: string;
+begin
+ with mainfo.gdb do begin
+  if readmemorylongword(sp.value+4,lwo1) = gdb_ok then begin
+//   selectstackpointer(sp.value-8*4);
+   mstr2:= '';
+   bo1:= infoline(lwo1,filename,line,start,stop) = gdb_ok;
+   if bo1 then begin
+    if sourcefo.showsourceline(filename,line-1,0,true) <> nil then begin
+     exit;
+    end;
+    mstr2:= filename+':'+inttostr(line);
+   end;
+   str1:= hextostr(lwo1,8);
+   if infosymbol('*0x'+str1,mstr1) = gdb_ok then begin
+    mstr2:= mstr2+lineend+mstr1;
+   end
+   else begin
+    mstr2:= mstr2+lineend+'Return address: '+str1;
+   end;
+  end;
+  showmessage(mstr2,'Exception return');
  end;
 end;
 

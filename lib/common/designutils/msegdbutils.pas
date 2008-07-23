@@ -455,6 +455,11 @@ type
                  var aresult: bytearty): gdbresultty;
    function readmemorywords(const address: ptrint; const count: integer;
                  var aresult: wordarty): gdbresultty;
+   function readmemorylongwords(const address: ptrint; const count: integer;
+                 var aresult: longwordarty): gdbresultty;
+   function readmemorybyte(const address: ptrint; out aresult: byte): gdbresultty;
+   function readmemoryword(const address: ptrint; out aresult: word): gdbresultty;
+   function readmemorylongword(const address: ptrint; out aresult: longword): gdbresultty;
    function readmemorypointer(const address: ptrint; out aresult: ptrint): gdbresultty;
 
    function readpascalvariable(const varname: string; out aresult: msestring): gdbresultty;
@@ -467,6 +472,7 @@ type
    function stacklistframes(out list: frameinfoarty; first: integer = 0;
                     last: integer = 100): gdbresultty;
    function selectstackframe(const aframe: integer): gdbresultty;
+   function selectstackpointer(const aframe: ptrint): gdbresultty;
    function getsourcename(var path: filenamety; frame: integer = 0): gdbresultty;
    function getprocaddress(const procname: string;
                         out aaddress: ptrint): gdbresultty;
@@ -485,6 +491,7 @@ type
                          out start,stop: cardinal): gdbresultty; overload;
    function infoline(const address: cardinal; out filename: filenamety; out line: integer;
                          out start,stop: cardinal): gdbresultty; overload;
+   function infosymbol(const symbol: msestring; out info: msestring): gdbresultty;
    function disassemble(out aresult: asmlinearty; const filename: filenamety;
                  const line: integer; const count: integer): gdbresultty; overload;
    function disassemble(out aresult: asmlinearty; const start,stop: cardinal): gdbresultty; overload;
@@ -2963,10 +2970,59 @@ begin
  end;
 end;
 
-function tgdbmi.readmemorypointer(const address: ptrint; out aresult: ptrint): gdbresultty;
+function tgdbmi.readmemorylongwords(const address: ptrint; const count: integer;
+                 var aresult: longwordarty): gdbresultty;
+var
+ ar1,ar2: resultinfoarty;
+begin
+ aresult:= nil;
+ result:= synccommand('-data-read-memory '+ ptrinttocstr(address) + ' u 4 1 ' + inttostr(count));
+ if result = gdb_ok then begin
+  result:= gdb_dataerror;
+  if getarrayvalue(fsyncvalues,'memory',false,ar1) then begin
+   if gettuplevalue(ar1,'',ar2)  then begin
+    if getlongwordarrayvalue(ar2,'data',aresult) then begin
+     result:= gdb_ok;
+    end;
+   end;
+  end;
+ end;
+end;
+
+function tgdbmi.readmemorybyte(const address: ptrint; out aresult: byte): gdbresultty;
 var
  ar1: bytearty;
 begin
+ result:= readmemorybytes(address,1,ar1);
+ if result = gdb_ok then begin
+  aresult:= ar1[0];
+ end;
+end;
+
+function tgdbmi.readmemoryword(const address: ptrint; out aresult: word): gdbresultty;
+var
+ ar1: wordarty;
+begin
+ result:= readmemorywords(address,1,ar1);
+ if result = gdb_ok then begin
+  aresult:= ar1[0];
+ end;
+end;
+
+function tgdbmi.readmemorylongword(const address: ptrint; out aresult: longword): gdbresultty;
+var
+ ar1: longwordarty;
+begin
+ result:= readmemorylongwords(address,1,ar1);
+ if result = gdb_ok then begin
+  aresult:= ar1[0];
+ end;
+end;
+
+function tgdbmi.readmemorypointer(const address: ptrint; out aresult: ptrint): gdbresultty;
+var
+ ar1: bytearty;
+begin //todo: endianess
  result:= readmemorybytes(address,fpointersize,ar1);
  if result = gdb_ok then begin
   aresult:= pptrint(pointer(ar1))^;
@@ -2992,7 +3048,7 @@ function tgdbmi.infoline(const address: cardinal; out filename: filenamety; out 
 var
  str1,str2: string;
 begin
-  result:= getcliresultstring('info line *'+inttostr(address),str1);
+ result:= getcliresultstring('info line *'+inttostr(address),str1);
  if result = gdb_ok then begin
   if getclistring('of "',str1,str2) and getcliinteger('Line',str1,line) and
      getcliinteger('starts at address',str1,integer(start)) and
@@ -3002,6 +3058,16 @@ begin
   else begin
    result:= gdb_dataerror;
   end;
+ end;
+end;
+
+function tgdbmi.infosymbol(const symbol: msestring; out info: msestring): gdbresultty;
+var
+ str1: string;
+begin
+ result:= getcliresultstring('info symbol '+symbol,str1);
+ if result = gdb_ok then begin
+  info:= str1;
  end;
 end;
 
@@ -3671,6 +3737,11 @@ end;
 function tgdbmi.selectstackframe(const aframe: integer): gdbresultty;
 begin
  result:= synccommand('-stack-select-frame '+inttostr(aframe));
+end;
+
+function tgdbmi.selectstackpointer(const aframe: ptrint): gdbresultty;
+begin
+ result:= synccommand('frame '+hextocstr(aframe,8));
 end;
 
 function tgdbmi.started: boolean;
