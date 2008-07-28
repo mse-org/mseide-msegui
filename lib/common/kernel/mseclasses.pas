@@ -529,6 +529,7 @@ type
  
 function ownernamepath(const acomponent: tcomponent): string; 
                      //namepath from root to acomponent separated by '.'
+function rootcomponent(const acomponent: tcomponent): tcomponent;
 procedure setcomponentorder(const owner: tcomponent; const anames: msestringarty);
 
 function getpropinfoar(const obj: tobject): propinfopoarty; overload;
@@ -898,6 +899,14 @@ begin
    end;
    comp:= comp.Owner;
   end;
+ end;
+end;
+
+function rootcomponent(const acomponent: tcomponent): tcomponent;
+begin
+ result:= acomponent;
+ while result.owner <> nil do begin
+  result:= result.owner;
  end;
 end;
 

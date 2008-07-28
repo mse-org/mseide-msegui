@@ -115,6 +115,8 @@ type
                  const atype: ptypeinfo): tmethod;
   procedure checkmethod(const method: tmethod; const name: string;
                const module: tmsecomponent; const atype: ptypeinfo);
+  function isownedmethod(const root: tcomponent;
+                                          const method: tmethod): boolean;
   function getcomponentname(const comp: tcomponent): string;
                    //returns qualified name
   procedure validaterename(const acomponent: tcomponent; const curname, newname: string);
@@ -160,6 +162,7 @@ type
                           const amodule: tmsecomponent);
   procedure moduledestroyed(const adesigner: idesigner;
                           const amodule: tmsecomponent);
+
   procedure methodcreated(const adesigner: idesigner;
                           const amodule: tmsecomponent;
                           const aname: string; const atype: ptypeinfo);
@@ -844,7 +847,9 @@ begin
      comp1:= tcomponent.create(nil);
      try
       modulepo:= designer.modules.findmodulebycomponent(component);
-      po1:= swapmethodtable(comp1,modulepo^.methods.createmethodtable);
+      po1:= swapmethodtable(comp1,
+                         modulepo^.methods.createmethodtable(
+                                 designer.getancestormethods(modulepo)));
       designer.doswapmethodpointers(component,false);
       try
        writer.Root:= component.Owner;

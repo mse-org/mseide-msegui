@@ -39,7 +39,9 @@ type
   typeinfo: ptypeinfo;
  end;
  pmethodinfoty = ^methodinfoty;
-
+ tmethods = class;
+ methodsarty = array of tmethods;
+ 
  tmethods = class(tbucketlist)
   private
    fdesigner: tdesigner;
@@ -54,10 +56,10 @@ type
    constructor create(adesigner: tdesigner);
    destructor destroy; override;
    function findmethod(const aadress: pointer): pmethodinfoty;
-   function findmethodbyname(const aname: string;
-         const atype: ptypeinfo; out namefound: boolean): pmethodinfoty; overload;
+   function findmethodbyname(const aname: string; const atype: ptypeinfo;
+                             out namefound: boolean): pmethodinfoty; overload;
    function findmethodbyname(const aname: string): pmethodinfoty; overload;
-   function createmethodtable: pointer;
+   function createmethodtable(const ancestors: methodsarty): pointer;
    procedure releasemethodtable;
  end;
 
@@ -159,6 +161,7 @@ type
    function findmodulebyclassname(aclassname: string): pmoduleinfoty;
    function findmodulebycomponent(const acomponent: tobject): pmoduleinfoty;
    function findmodulebyinstance(const ainstance: tcomponent): pmoduleinfoty;
+   function findownermodule(const acomponent: tcomponent): pmoduleinfoty;
    function filenames: filenamearty;
 
    property itempo[const index: integer]: pmoduleinfoty read getitempo1; default;
@@ -352,6 +355,7 @@ type
    procedure findancestor(Writer: TWriter; Component: TComponent;
               const aName: string; var Ancestor, RootAncestor: TComponent);
    function findancestorcomponent(const acomponent: tcomponent): tcomponent;
+   function getancestormethods(const amodule: pmoduleinfoty): methodsarty;
    procedure createcomponent(Reader: TReader; ComponentClass: TComponentClass;
                    var Component: TComponent);
    function selectedcomponents: componentarty;
@@ -403,7 +407,8 @@ type
    procedure setmodulex(const amodule: tmsecomponent; avalue: integer);
    procedure setmoduley(const amodule: tmsecomponent; avalue: integer);
 
-
+   function isownedmethod(const root: tcomponent; 
+                                             const method: tmethod): boolean;
    procedure getmethodinfo(const method: tmethod; out moduleinfo: pmoduleinfoty;
                       out methodinfo: pmethodinfoty);
    function getmodules: tmodulelist;
@@ -690,8 +695,8 @@ end;
 procedure tsubmodulelist.add(const amodule: tmsecomponent);
 begin
  if findancestor(amodule) = nil then begin
-//  inherited add(amodule,fdesigner.copycomponent(amodule,amodule));
-  inherited add(amodule,fdesigner.copycomponent(amodule,nil));
+  inherited add(amodule,fdesigner.copycomponent(amodule,amodule));
+//  inherited add(amodule,fdesigner.copycomponent(amodule,nil));
  end;
 end;
 
@@ -705,8 +710,8 @@ begin
   comp:= po1^.ancestor;
   po1^.ancestor:= nil;
   comp.Free;  
-//  po1^.ancestor:= fdesigner.copycomponent(amodule,amodule);
-  po1^.ancestor:= fdesigner.copycomponent(amodule,nil);
+  po1^.ancestor:= fdesigner.copycomponent(amodule,amodule);
+//  po1^.ancestor:= fdesigner.copycomponent(amodule,nil);
   fobjectlinker.link(po1^.ancestor);
  end;
 end;
@@ -880,7 +885,8 @@ begin
  end;
  fdelcomps:= nil;
  if not isroot then begin
-  comp2:= fdesigner.copycomponent(info^.ancestor,nil);
+//  comp2:= fdesigner.copycomponent(info^.ancestor,nil);
+  comp2:= fdesigner.copycomponent(info^.ancestor,info^.ancestor);
  end
  else begin
   comp2:= fdesigner.copycomponent(info^.ancestor,info^.ancestor);
@@ -1065,9 +1071,9 @@ begin
  try
   astream.position:= 0;
   
+  fdesigner.buildmethodtable(amodule);
   revert(infopo,amodule,true); //revert to new inherited state
   reader1:= treader.create(astream,4096);
-  fdesigner.buildmethodtable(amodule);
   try
    reader1.onerror:= {$ifdef FPC}@{$endif}ferrorhandler.onerror;
    reader1.onancestornotfound:= 
@@ -1367,36 +1373,50 @@ type
     entries : packed array[0..0] of tmethodnamerec;
   end;
 
-function tmethods.createmethodtable: pointer;
+function tmethods.createmethodtable(const ancestors: methodsarty): pointer;
 var
- int1,int2: integer;
+ int1,int2,int3: integer;
  po1: pmethodinfoty;
  po2: pmethodtableentryty;
  po3: pchar;
-
+ count1: integer;
+ ar1: methodsarty;
 begin
  releasemethodtable;
- if count > 0 then begin
-  int2:= count; //lenbyte
-  for int1:= 0 to count -1 do begin
-   int2:= int2 + length(pmethodinfoty(next)^.name);       //stringsize
+ ar1:= copy(ancestors);
+ additem(pointerarty(ar1),self);
+ count1:= 0;
+ for int1:= 0 to high(ar1) do begin
+  inc(count1,ar1[int1].count);
+ end;
+ if count1 > 0 then begin
+  int2:= count1; //lenbyte
+  for int3:= 0 to high(ar1) do begin
+   with ar1[int3] do begin
+    for int1:= 0 to count -1 do begin
+     int2:= int2 + length(pmethodinfoty(next)^.name);    //stringsize
+    end;
+   end;
   end;
-  int1:= sizeof(dword) + count * sizeof(tmethodnamerec); //tablesize
+  int1:= sizeof(dword) + count1 * sizeof(tmethodnamerec); //tablesize
   getmem(fmethodtable,int1+int2);
-  pdword(fmethodtable)^:= count;
+  pdword(fmethodtable)^:= count1;
   po2:= pmethodtableentryty(pchar(fmethodtable) + sizeof(dword));
   po3:= pchar(fmethodtable) + int1;   //stringtable
-  for int1:= 0 to count - 1 do begin
-   po1:= pmethodinfoty(next);
-   int2:= length(po1^.name);
-   po2^.name:= pshortstring(po3);
-   po3^:= char(int2); //namelen
-   inc(po3);
-   move(pointer(po1^.name)^,po3^,int2);
-   inc(po3,int2);
-   po2^.addr:= po1^.address;
-   inc(po1);
-   inc(po2);
+  for int3:= 0 to high(ar1) do begin
+   with ar1[int3] do begin
+    for int1:= 0 to count - 1 do begin
+     po1:= pmethodinfoty(next);
+     int2:= length(po1^.name);
+     po2^.name:= pshortstring(po3);
+     po3^:= char(int2); //namelen
+     inc(po3);
+     move(pointer(po1^.name)^,po3^,int2);
+     inc(po3,int2);
+     po2^.addr:= po1^.address;
+     inc(po2);
+    end;
+   end;
   end;
  end;
  result:= fmethodtable;
@@ -1417,31 +1437,46 @@ end;
  end;
  pmethodtableentryty = ^methodtableentryty;
 
-function tmethods.createmethodtable: pointer;
+function tmethods.createmethodtable(const ancestors: array of tmethods): pointer;
 var
- int1,int2: integer;
+ int1,int2,int3: integer;
  po1: pmethodinfoty;
  po2: pmethodtableentryty;
+ count1: integer;
+ ar1: methodsarty;
 
 begin
  releasemethodtable;
- if count > 0 then begin
+ ar1:= copy(ancestors);
+ additem(pointerarty(ar1),self);
+ count1:= 0;
+ for int1:= 0 to high(ar1) do begin
+  inc(count1,ar1[int1].count);
+ end;
+ if count1 > 0 then begin
   int2:= sizeof(word); //numentries
-  for int1:= 0 to count -1 do begin
-   int2:= int2 + length(pmethodinfoty(next)^.name);
+  for int3:= 0 to high(ar1) do begin
+   with ar1[int3] do begin
+    for int1:= 0 to count -1 do begin
+     int2:= int2 + length(pmethodinfoty(next)^.name);
+    end;
+   end;
   end;
-  getmem(fmethodtable,int2 + count * sizeof(methodtableentryfixty));
-  pword(fmethodtable)^:= count;
+  getmem(fmethodtable,int2 + count1 * sizeof(methodtableentryfixty));
+  pword(fmethodtable)^:= count1;
   po2:= pmethodtableentryty(pchar(fmethodtable) + sizeof(word));
-//  po1:= pmethodinfoty(fdatapo);
-  for int1:= 0 to count - 1 do begin
-   po1:= pmethodinfoty(next);
-   int2:= length(po1^.name);
-   po2^.len:= sizeof(methodtableentryfixty) + int2;
-   po2^.adr:= po1^.address;
-   po2^.name[0]:= char(int2);
-   move(po1^.name[1],po2^.name[1],int2);
-   inc(pchar(po2),po2^.len);
+  for int3:= 0 to high(ar1) do begin
+   with ar1[int3] do begin
+    for int1:= 0 to count - 1 do begin
+     po1:= pmethodinfoty(next);
+     int2:= length(po1^.name);
+     po2^.len:= sizeof(methodtableentryfixty) + int2;
+     po2^.adr:= po1^.address;
+     po2^.name[0]:= char(int2);
+     move(po1^.name[1],po2^.name[1],int2);
+     inc(pchar(po2),po2^.len);
+    end;
+   end;
   end;
  end;
  result:= fmethodtable;
@@ -1463,7 +1498,7 @@ begin
 end;
 
 function tmethods.findmethodbyname(const aname: string;
-                       const atype: ptypeinfo; out namefound: boolean): pmethodinfoty;
+                const atype: ptypeinfo; out namefound: boolean): pmethodinfoty;
 var
  int1: integer;
  po1: pmethodinfoty;
@@ -1743,6 +1778,11 @@ begin
  end;
 end;
 
+function tmodulelist.findownermodule(const acomponent: tcomponent): pmoduleinfoty;
+begin
+ result:= findmodulebyinstance(rootcomponent(acomponent));
+end;
+
 function tmodulelist.findmodulebyinstance(const ainstance: tcomponent): pmoduleinfoty;
 var
  int1: integer;
@@ -1866,7 +1906,7 @@ begin
     end;
     fdesigner.beginstreaming(po1);
     try
-     instance:= fdesigner.copycomponent(po1^.instance,nil);
+     instance:= fdesigner.copycomponent(po1^.instance,po1^.instance);
     finally
      fdesigner.endstreaming(po1);
     end;
@@ -1993,10 +2033,11 @@ var
 
 begin
  if acomponent is tcomponent then begin
-  comp:= tcomponent(acomponent);
-  while (comp.owner <> nil) and (comp.owner.owner <> nil) do begin
-   comp:= comp.owner; //top level compoent
-  end;
+  comp:= rootcomponent(tcomponent(acomponent));
+//  comp:= tcomponent(acomponent);
+//  while (comp.owner <> nil) and (comp.owner.owner <> nil) do begin
+//   comp:= comp.owner; //top level component
+//  end;
   po1:= datapo;
   for int1:= 0 to count - 1 do begin
    with tmoduleinfo(iobjectlink(po1^[int1]).getinstance) do begin
@@ -2016,14 +2057,6 @@ begin
     end;
    end;
   end;
-  {
-  while comp <> nil do begin
-   fdesigner.fdescendentinstancelist.modulemodified(comp,
-        fdesigner.fsubmodulelist.findancestor(comp));
-   fdesigner.fsubmodulelist.renewbackup(comp);
-   comp:= comp.owner;
-  end;
-  }
  end;
 end;
 
@@ -2366,7 +2399,7 @@ begin
  if asubmoduleinfopo <> nil then begin
   fsubmoduleinfopo:= nil; 
 //  component:= copycomponent(asubmoduleinfopo^.instance,asubmoduleinfopo^.instance);
-  component:= copycomponent(asubmoduleinfopo^.instance,nil);
+  component:= copycomponent(asubmoduleinfopo^.instance,asubmoduleinfopo^.instance);
   reader.root.insertcomponent(component);
   initinline(component);
   if (submodulecopy = 0) and 
@@ -2818,11 +2851,13 @@ procedure tdesigner.revert(const acomponent: tcomponent);
 var
  comp1: tcomponent;
  po1: pancestorinfoty;
- po2: pmoduleinfoty;
+ po2,po4: pmoduleinfoty;
+ po3: pointer;
  bo1: boolean;
  pos1: pointty;
 begin
- po2:= fmodules.findmodule(tmsecomponent(acomponent.owner));
+// po2:= fmodules.findmodule(tmsecomponent(acomponent.owner));
+ po2:= fmodules.findmodule(tmsecomponent(rootcomponent(acomponent)));
  if (csinline in acomponent.componentstate) and (acomponent.owner <> nil) and
           not (csancestor in acomponent.owner.componentstate) then begin
           //submodule
@@ -2844,6 +2879,9 @@ begin
   if csancestor in acomponent.componentstate then begin
    comp1:= findancestorcomponent(acomponent);
    if comp1 <> nil then begin
+//    po2:= fmodules.findownermodule(acomponent);
+    po4:= fmodules.findownermodule(comp1);
+    po3:= po4^.methods.createmethodtable(getancestormethods(po4));
     fdescendentinstancelist.beginstreaming;
     doswapmethodpointers(acomponent,false);
     doswapmethodpointers(comp1,false);
@@ -2851,10 +2889,10 @@ begin
      refreshancestor(acomponent,comp1,comp1,true,
       {$ifdef FPC}@{$endif}findancestor,
       {$ifdef FPC}@{$endif}findcomponentclass,
-      {$ifdef FPC}@{$endif}createcomponent);
-     docopymethods(comp1,acomponent,true);
-//      dorefreshmethods(acomponent,comp1,acomponent);
+      {$ifdef FPC}@{$endif}createcomponent,nil,po3,po3);
+//     docopymethods(comp1,acomponent,true);
     finally
+     po4^.methods.releasemethodtable;
      doswapmethodpointers(acomponent,true);
      doswapmethodpointers(comp1,true);
      fdescendentinstancelist.endstreaming;
@@ -2888,8 +2926,9 @@ begin
    end;
    *)
   end;
+  componentmodified(acomponent);
  end;
- componentmodified(acomponent);
+// componentmodified(po2^.instance);
 end;
 
 function tdesigner.getreferencingmodulenames(const amodule: pmoduleinfoty): stringarty;
@@ -2979,6 +3018,18 @@ begin
     break;
    end;
   end;
+ end;
+end;
+
+function tdesigner.isownedmethod(const root: tcomponent;
+                                          const method: tmethod): boolean;
+var
+ po1: pmoduleinfoty;
+begin
+ result:= false;
+ po1:= fmodules.findmodulebyinstance(root);
+ if po1 <> nil then begin
+  result:= po1^.methods.findmethod(method.data) <> nil;
  end;
 end;
 
@@ -3587,13 +3638,29 @@ begin
  end;
 end;  
 
+function tdesigner.getancestormethods(const amodule: pmoduleinfoty): methodsarty;
+var
+ comp1: tcomponent;
+begin
+ result:= nil;
+ comp1:= amodule^.instance;
+ while true do begin
+  comp1:= fdescendentinstancelist.findancestor(comp1);
+  if comp1 = nil then begin
+   break;
+  end;
+  additem(pointerarty(result),fmodules.findmodulebyinstance(comp1)^.methods);
+ end;
+end;
+
 procedure tdesigner.buildmethodtable(const amodule: pmoduleinfoty);
 begin
  if amodule <> nil then begin
   with amodule^ do begin
    if methodtableswapped = 0 then begin
     flookupmodule:= amodule;
-    methodtablebefore:= swapmethodtable(instance,methods.createmethodtable);
+    methodtablebefore:= swapmethodtable(instance,
+                      methods.createmethodtable(getancestormethods(amodule)));
    end;
    inc(methodtableswapped);
   end;

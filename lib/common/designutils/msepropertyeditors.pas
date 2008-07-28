@@ -1857,7 +1857,8 @@ begin
   method1:= fdesigner.getmethod(value,fmodule,
                   fprops[0].propinfo^.proptype{$ifndef FPC}^{$endif});
   if method1.data = nil then begin //method not found
-   if (method2.data <> nil) and not isselected then begin
+   if (method2.data <> nil) and not isselected and 
+                         fdesigner.isownedmethod(fmodule,method2)then begin
     fdesigner.changemethodname(method2,value,
          fprops[0].propinfo^.proptype{$ifndef FPC}^{$endif});
     method1:= method2;

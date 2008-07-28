@@ -2651,7 +2651,7 @@ var
 begin
  po1:= selectinheritedmodule(fdesigner.modules.findmodulebyinstance(module));
  if po1 <> nil then begin
-  comp:= fdesigner.copycomponent(po1^.instance,nil);
+  comp:= fdesigner.copycomponent(po1^.instance,po1^.instance);
   initinline(comp);
 //  checkinline(comp);
   comp.name:= po1^.instance.name;
