@@ -56,6 +56,7 @@ type
    ftextflags: textflagsty;
    fcolorselect: colorty;
    ffontcolorselect: colorty;
+   fcaption: msestring;
    procedure setoptions(const avalue: coloptionsty);
   protected
    fowner: tobject;
@@ -70,6 +71,7 @@ type
    property linecolor: colorty read flinecolor write flinecolor default cl_gray;
    property colorselect: colorty read fcolorselect write fcolorselect default cl_default;
    property fontcolorselect: colorty read ffontcolorselect write ffontcolorselect default cl_default;
+   property caption: msestring read fcaption write fcaption;
  end;
 
  dropdowncolclassty = class of tdropdowncol;
@@ -184,13 +186,10 @@ type
    function locate(const filter: msestring): boolean; virtual;
    procedure dorepeat(const sender: tobject);
    procedure initcols(const acols: tdropdowncols); virtual;
-//   procedure release; override;
-//   procedure componentevent(const event: tcomponentevent); override;
   public
    constructor create(const acontroller: tcustomdropdownlistcontroller;
                              acols: tdropdowncols); reintroduce;
    destructor destroy; override;
-//   function canclose(const newfocus: twidget): boolean; override;
    procedure show(awidth: integer; arowcount: integer;
                 var aitemindex: integer; afiltertext: msestring); reintroduce;
    property filtertext: msestring read ffiltertext write setfiltertext;
@@ -1334,7 +1333,6 @@ begin
   else begin
    color:= fcontroller.color;
   end;
-//  color:= cl_background;
   fdatacols.options:= fdatacols.options + [co_focusselect,co_readonly];
   font:= twidget1(aparent).getfont;
   frame.levelo:= 0;
@@ -1362,9 +1360,6 @@ begin
   fdatacols.count:= acols.count;
   int2:= acols.maxrowcount;
   for int1:= 0 to acols.count - 1 do begin  
-//   if acols[int1].count <> frowcount then begin
-//    error(gre_differentrowcount);
-//   end;
    col1:= acols[int1];
    col1.count:= int2;
    with tstringcol1(fdatacols[int1]) do begin
@@ -1383,7 +1378,15 @@ begin
      fontselect.color:= col1.ffontcolorselect;
     end;
    end;
+   if col1.caption <> '' then begin
+    fixrows.count:= 1;
+    with fixrows[-1] do begin
+     captions.count:= int1 + 1;
+     captions[int1].caption:= col1.caption;
+    end;
+   end;    
   end;
+  synctofontheight;
  end;
 end;
 
@@ -1478,6 +1481,11 @@ begin
  end
  else begin
   rect1.cy:= arowcount * ystep;
+ end;
+ if fixrows.count > 0 then begin
+  with fixrows[-1] do begin
+   rect1.cy:= rect1.cy + height + linewidth;
+  end;
  end;
  rect1.cy:= rect1.cy + fframe.paintframewidth.cy;
  widgetrect:= rect1;
