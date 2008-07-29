@@ -239,10 +239,10 @@ type
   private
    fvalue: tdatetime;
    fonchange: changedatetimeeventty;
-   fformat: string;
+   fformat: msestring;
    fkind: datetimekindty;
    procedure setvalue(const avalue: tdatetime);
-   procedure setformat(const avalue: string);
+   procedure setformat(const avalue: msestring);
    procedure setkind(const avalue: datetimekindty);
    procedure readvalue(reader: treader);
    procedure writevalue(writer: twriter);
@@ -254,7 +254,7 @@ type
    constructor create(aowner: tcomponent); override;
    property value: tdatetime read fvalue write setvalue;
   published
-   property format: string read fformat write setformat;
+   property format: msestring read fformat write setformat;
    property onchange: changedatetimeeventty read fonchange write fonchange;
    property kind: datetimekindty read fkind write setkind default dtk_date;
  end;
@@ -645,7 +645,7 @@ begin
  end;
 end;
 
-procedure tcustomdatetimedisp.setformat(const avalue: string);
+procedure tcustomdatetimedisp.setformat(const avalue: msestring);
 begin
  fformat := avalue;
  formatchanged;

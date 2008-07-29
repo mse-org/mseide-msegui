@@ -854,14 +854,14 @@ type
   private
    fonsetvalue: setdatetimeeventty;
    fvalue: tdatetime;
-   fformatdisp: string;
-   fformatedit: string;
+   fformatdisp: msestring;
+   fformatedit: msestring;
    fmin: tdatetime;
    fmax: tdatetime;
    fkind: datetimekindty;
    procedure setvalue(const Value: tdatetime);
-   procedure setformatdisp(const Value: string);
-   procedure setformatedit(const Value: string);
+   procedure setformatdisp(const Value: msestring);
+   procedure setformatedit(const Value: msestring);
    function getgridvalue(const index: integer): tdatetime;
    procedure setgridvalue(const index: integer; const Value: tdatetime);
    function getgridvalues: datetimearty;
@@ -894,8 +894,8 @@ type
    function isnull: boolean;
    property onsetvalue: setdatetimeeventty read fonsetvalue write fonsetvalue;
    property value: tdatetime read fvalue write setvalue stored false;
-   property formatedit: string read fformatedit write setformatedit;
-   property formatdisp: string read fformatdisp write setformatdisp;
+   property formatedit: msestring read fformatedit write setformatedit;
+   property formatdisp: msestring read fformatdisp write setformatdisp;
    property min: tdatetime read fmin write fmin;
    property max: tdatetime read fmax write fmax;
    property kind: datetimekindty read fkind write setkind default dtk_date;
@@ -3840,13 +3840,13 @@ begin
  valuechanged;
 end;
 
-procedure tcustomdatetimeedit.setformatdisp(const Value: string);
+procedure tcustomdatetimeedit.setformatdisp(const Value: msestring);
 begin
  fformatdisp := Value;
  formatchanged;
 end;
 
-procedure tcustomdatetimeedit.setformatedit(const Value: string);
+procedure tcustomdatetimeedit.setformatedit(const Value: msestring);
 begin
  fformatedit := Value;
  formatchanged;

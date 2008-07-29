@@ -22,6 +22,8 @@ const
 
 type
  numbasety = (nb_bin,nb_oct,nb_dec,nb_hex);
+ 
+function formatdatetimemse(formatstr: msestring; datetime: tdatetime): msestring;
 
 function formatfloatmse(const value: double; const format: msestring;
                          const dot: boolean = false): msestring;
@@ -97,8 +99,10 @@ function bcdtoint(inp: byte): integer;
 function inttobcd(inp: integer): byte;
 
 function stringtotime(const avalue: msestring): tdatetime;
-function timetostring(const avalue: tdatetime; const format: string = 't'): msestring;
-function datetimetostring(const avalue: tdatetime; const format: string = 'c'): msestring;
+function timetostring(const avalue: tdatetime; 
+                          const format: msestring = 't'): msestring;
+function datetimetostring(const avalue: tdatetime; 
+                          const format: msestring = 'c'): msestring;
 function stringtodatetime(const avalue: msestring): tdatetime;
 
 //function strtotime(ein: string; var resultat: tdatetime): boolean;
@@ -157,6 +161,217 @@ implementation
 
 uses
  sysconst,msedate,msereal,Math,msesys;
+
+//copied from FPC dati.inc
+function formatdatetimemse(formatstr: msestring; datetime: tdatetime): msestring;
+var
+   ResultLen: integer;
+   ResultBuffer: array[0..255] of msechar;
+   ResultCurrent: pmsechar;
+
+   procedure StoreStr(Str: pmsechar; Len: integer);
+   begin
+   if ResultLen + Len < SizeOf(ResultBuffer) div 2 then begin
+      Move(Str^, ResultCurrent^, Len*sizeof(msechar));
+      ResultCurrent := ResultCurrent + Len;
+      ResultLen := ResultLen + Len;
+      end ;
+   end ;
+
+   procedure StoreString(const Str: msestring);
+   var Len: integer;
+   begin
+   Len := Length(Str);
+   if ResultLen + Len < SizeOf(ResultBuffer) div 2 then begin // strmove not safe
+      Move( pointer(Str)^,ResultCurrent^,Len*sizeof(msechar));
+      ResultCurrent := ResultCurrent + Len;
+      ResultLen := ResultLen + Len;
+      end;
+   end;
+
+   procedure StoreInt(Value, Digits: integer);
+   var S: msestring; Len: integer;
+   begin
+   S := IntToStr(Value);
+   Len := Length(S);
+   if Len < Digits then begin
+      S := copy('0000', 1, Digits - Len) + S;
+      Len := Digits;
+      end ;
+   StoreStr(pmsechar(pointer(S)), Len);
+   end ;
+
+var
+   Year, Month, Day, DayOfWeek, Hour, Minute, Second, MilliSecond: word;
+
+   procedure StoreFormat(const FormatStr: msestring);
+   var
+      Token,lastformattoken: msechar;
+      FormatCurrent: pmsechar;
+      FormatEnd: pmsechar;
+      Count: integer;
+      Clock12: boolean;
+      P: pmsechar;
+      tmp:integer;
+
+   begin
+   FormatCurrent := Pmsechar(pointer(FormatStr));
+   FormatEnd := FormatCurrent + Length(FormatStr);
+   Clock12 := false;
+   P := FormatCurrent;
+   while P < FormatEnd do begin
+      Token := charUpperCase(P^);
+      if Token in ['"', ''''] then begin
+         P := P + 1;
+         while (P < FormatEnd) and (P^ <> Token) do
+            P := P + 1;
+         end
+      else if Token = 'A' then begin
+         if (mseStrLIComp(P, 'A/P', 3) = 0) or
+            (mseStrLIComp(P, 'AMPM', 4) = 0) or
+            (mseStrLIComp(P, 'AM/PM', 5) = 0) then begin
+            Clock12 := true;
+            break;
+            end ;
+         end ;
+      P := P + 1;
+      end ;
+   token:=#255;
+   lastformattoken:=' ';
+   while FormatCurrent < FormatEnd do
+     begin
+      Token := charUpperCase(FormatCurrent^);
+      Count := 1;
+      P := FormatCurrent + 1;
+         case Token of
+            '''', '"': begin
+               while (P < FormatEnd) and (p^ <> Token) do
+                  P := P + 1;
+               P := P + 1;
+               Count := P - FormatCurrent;
+               StoreStr(FormatCurrent + 1, Count - 2);
+               end ;
+            'A': begin
+               if mseStrLIComp(FormatCurrent, 'AMPM', 4) = 0 then begin
+                  Count := 4;
+                  if Hour < 12 then StoreString(TimeAMString)
+                  else StoreString(TimePMString);
+                  end
+               else if mseStrLIComp(FormatCurrent, 'AM/PM', 5) = 0 then begin
+                  Count := 5;
+                  if Hour < 12 then StoreStr('am', 2)
+                  else StoreStr('pm', 2);
+                  end
+               else if mseStrLIComp(FormatCurrent, 'A/P', 3) = 0 then begin
+                  Count := 3;
+                  if Hour < 12 then StoreStr('a', 1)
+                  else StoreStr('p', 1);
+                  end
+               else
+                 Raise EConvertError.Create('Illegal character in format string');
+               end ;
+            '/': StoreStr(@DateSeparator, 1);
+            ':': StoreStr(@TimeSeparator, 1);
+            ' ', 'C', 'D', 'H', 'M', 'N', 'S', 'T', 'Y','Z' :
+              begin
+                while (P < FormatEnd) and (charUpperCase(P^) = Token) do
+                  P := P + 1;
+                Count := P - FormatCurrent;
+                case Token of
+                   ' ': StoreStr(FormatCurrent, Count);
+                   'Y': begin
+                         if Count>2 then
+                           StoreInt(Year, 4)
+                         else
+                           StoreInt(Year mod 100, 2);
+                        end;
+                   'M': begin
+                         if lastformattoken='H' then
+                           begin
+                             if Count = 1 then
+                               StoreInt(Minute, 0)
+                             else
+                               StoreInt(Minute, 2);
+
+                           end
+                         else
+                           begin
+                             case Count of
+                                1: StoreInt(Month, 0);
+                                2: StoreInt(Month, 2);
+                                3: StoreString(ShortMonthNames[Month]);
+                                4: StoreString(LongMonthNames[Month]);
+                             end;
+                           end;
+                      end;
+                   'D': begin
+                         case Count of
+                            1: StoreInt(Day, 0);
+                            2: StoreInt(Day, 2);
+                            3: StoreString(ShortDayNames[DayOfWeek]);
+                            4: StoreString(LongDayNames[DayOfWeek]);
+                            5: StoreFormat(ShortDateFormat);
+                            6: StoreFormat(LongDateFormat);
+                         end ;
+                      end ;
+                   'H': begin
+                      if Clock12 then begin
+                         tmp:=hour mod 12;
+                         if tmp=0 then tmp:=12;
+                         if Count = 1 then StoreInt(tmp, 0)
+                         else StoreInt(tmp, 2);
+                         end
+                      else begin
+                         if Count = 1 then StoreInt(Hour, 0)
+                         else StoreInt(Hour, 2);
+                         end ;
+                      end ;
+                   'N': begin
+                      if Count = 1 then StoreInt(Minute, 0)
+                      else StoreInt(Minute, 2);
+                      end ;
+                   'S': begin
+                      if Count = 1 then StoreInt(Second, 0)
+                      else StoreInt(Second, 2);
+                      end ;
+                   'Z': begin
+                      if Count = 1 then StoreInt(MilliSecond, 0)
+                      else StoreInt(MilliSecond, 3);
+                      end ;
+                   'T': begin
+                      if Count = 1 then StoreFormat(ShortTimeFormat)
+                      else StoreFormat(LongTimeFormat);
+                      end ;
+                   'C':
+                     begin
+                       StoreFormat(ShortDateFormat);
+                       if (Hour<>0) or (Minute<>0) or (Second<>0) then
+                        begin
+                          StoreString(' ');
+                          StoreFormat(LongTimeFormat);
+                        end;
+                     end;
+                end;
+                lastformattoken:=token;
+              end;
+            else
+              StoreStr(@Token, 1);
+         end ;
+      FormatCurrent := FormatCurrent + Count;
+      end ;
+   end ;
+
+begin
+  DecodeDateFully(DateTime, Year, Month, Day, DayOfWeek);
+  DecodeTime(DateTime, Hour, Minute, Second, MilliSecond);
+  ResultLen := 0;
+  ResultCurrent := @ResultBuffer[0];
+  StoreFormat(FormatStr);
+//  ResultBuffer[ResultLen] := #0;
+//  result := StrPas(@ResultBuffer[0]);
+  setlength(result,resultlen);
+  move(resultbuffer,pointer(result)^,resultlen*sizeof(msechar));
+end ;
  
 //copied from FPC sysstr.inc
 //todo: optimize
@@ -935,32 +1150,32 @@ begin
  end;
 end;
 
-function timetostring(const avalue: tdatetime; const format: string = 't'): msestring;
+function timetostring(const avalue: tdatetime; const format: msestring = 't'): msestring;
 begin
  if isemptydatetime(avalue) then begin
   result:= '';
  end
  else begin
   if format = '' then begin
-   result:= formatdatetime('t',avalue);
+   result:= formatdatetimemse('t',avalue);
   end
   else begin
-   result:= formatdatetime(format,avalue);
+   result:= formatdatetimemse(format,avalue);
   end;
  end;
 end;
 
-function datetimetostring(const avalue: tdatetime; const format: string = 'c'): msestring;
+function datetimetostring(const avalue: tdatetime; const format: msestring = 'c'): msestring;
 begin
  if isemptydatetime(avalue) then begin
   result:= '';
  end
  else begin
   if format = '' then begin
-   result:= formatdatetime('c',avalue);
+   result:= formatdatetimemse('c',avalue);
   end
   else begin
-   result:= formatdatetime(format,avalue);
+   result:= formatdatetimemse(format,avalue);
   end;
  end;
 end;
