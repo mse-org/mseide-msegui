@@ -1437,7 +1437,7 @@ end;
  end;
  pmethodtableentryty = ^methodtableentryty;
 
-function tmethods.createmethodtable(const ancestors: array of tmethods): pointer;
+function tmethods.createmethodtable(const ancestors: methodsarty): pointer;
 var
  int1,int2,int3: integer;
  po1: pmethodinfoty;
