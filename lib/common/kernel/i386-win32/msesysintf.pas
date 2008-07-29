@@ -1780,10 +1780,17 @@ begin
  end;
 end;
 
+procedure initformatsettings;
+begin
+ thousandseparatormse:= thousandseparator;
+ decimalseparatormse:= decimalseparator;
+end;
+
 initialization
 {$ifdef FPC}
 // winwidestringalloc:= false;
  {$endif}
+ initformatsettings;
  doinit;
 //iswin95:= true;
 //iswin98:= true;
