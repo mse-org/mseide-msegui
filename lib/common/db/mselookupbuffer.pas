@@ -762,14 +762,14 @@ begin
   end
   else begin
    exclude(fstate,lbs_changed);
-   sendchangeevent;
-   if canevent(tmethod(fonchange)) then begin
-    inc(fupdating);
-    try
-     fonchange(self);
-    finally
-     dec(fupdating);
+   inc(fupdating);
+   try
+    sendchangeevent;
+    if canevent(tmethod(fonchange)) then begin
+      fonchange(self);
     end;
+   finally
+    dec(fupdating);
    end;
   end;
  end;
@@ -786,7 +786,7 @@ end;
 
 procedure tcustomlookupbuffer.asyncchanged;
 begin
- if not (lbs_changeeventposted in fstate) then begin
+ if not (lbs_changeeventposted in fstate) and (fupdating = 0) then begin
   include(fstate,lbs_changeeventposted);
   asyncevent(changeeventtag);
  end;
