@@ -128,6 +128,14 @@ type
    property error: syserrorty read geterror;
  end;
 
+const
+ defaultdecimalseparator = '.';
+ defaultthousandseparator = ',';
+
+var
+ thousandseparatormse: msechar = defaultdecimalseparator;
+ decimalseparatormse: msechar = defaultthousandseparator;
+ 
 procedure syserror(const error: syserrorty; const text: string = ''); overload;
 procedure syserror(const error: syserrorty;
                   const sender: tobject; text: string = ''); overload;

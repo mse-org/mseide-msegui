@@ -2,10 +2,10 @@ unit msesetlocale;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- libc;
+ libc,cwstring;
 implementation
 uses
- sysutils,msestrings;
+ sysutils,msestrings,msesys;
  
 function getlocstr(const id: integer; const defaultvalue: string): string;
 var
@@ -106,7 +106,8 @@ var
  int1: integer;
  ch1,ch2,ch3: char;
  str1,str2: string;
-const
+ mstr1: msestring;
+
  currfo: array[0..1,0..1] of byte = ((1,3),(0,2));
            //[p_cs_precedes,p_sep_by_space]
  negcurrfo: array[0..1,0..1,0..4] of byte =
@@ -115,9 +116,28 @@ const
 {$endif}
 begin
 {$ifdef FPC}
+ mstr1:= getlocstr(decimal_point,defaultdecimalseparator);
+ if mstr1 <> '' then begin
+  decimalseparatormse:= char(ord(mstr1[1]));
+ end
+ else begin
+  decimalseparatormse:= defaultdecimalseparator;
+ end;
+ decimalseparator:= decimalseparatormse;
+ mstr1:= getlocstr(thousands_sep,defaultthousandseparator);
+ if mstr1 <> '' then begin
+  thousandseparatormse:= mstr1[1];
+ end
+ else begin
+  thousandseparatormse:= defaultthousandseparator;
+ end;
+ thousandseparator:= thousandseparatormse;
+ 
  for int1:= 1 to 12 do begin
   shortmonthnames[int1]:= getlocstr(abmon_1 + int1 - 1,shortmonthnames[int1]);
+str1:= shortmonthnames[int1];
   longmonthnames[int1]:= getlocstr(mon_1 + int1 - 1,longmonthnames[int1]);
+str1:= longmonthnames[int1];
  end;
  for int1:= 1 to 7 do begin
   shortdaynames[int1]:= getlocstr(abday_1 + int1 - 1,shortdaynames[int1]);

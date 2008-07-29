@@ -5687,8 +5687,8 @@ begin
  if result then begin
   ximcallback.client_data:= nil;
   ximcallback.callback:= @imdestroyed;
+  xsetimvalues(im,pchar(xndestroycallback),@ximcallback,nil);
  end;
- xsetimvalues(im,pchar(xndestroycallback),@ximcallback,nil);
 end;
 
 function gui_init: guierrorty;

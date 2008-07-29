@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -156,7 +156,7 @@ const
 implementation
 
 uses
- sysconst,msedate,msereal,Math;
+ sysconst,msedate,msereal,Math,msesys;
  
 //copied from FPC sysstr.inc
 //todo: optimize
@@ -543,7 +543,8 @@ Var
                     Begin
                     If (DigitExponent Mod 3 = 0) And (DigitExponent>0) Then
                       Begin
-                      Buf[0] := widechar(ThousandSeparator);
+//                      Buf[0] := widechar(ThousandSeparator);
+                      Buf[0] := ThousandSeparatormse;
                       Inc(Buf);
                       End;
                     Dec(DigitExponent);
@@ -554,13 +555,15 @@ Var
               If (Digits[Dig]<>' ') Then
                 Begin
                 If (Digits[Dig]='.') Then
-                  Buf[0] := widechar(DecimalSeparator)
+                  Buf[0] := DecimalSeparatormse
+//                  Buf[0] := widechar(DecimalSeparator)
                 Else
                   Buf[0] := widechar(Digits[Dig]);
                 Inc(Buf);
                 If thousand And (DigitExponent Mod 3 = 0) And (DigitExponent > 0) Then
                   Begin
-                  Buf[0] := widechar(ThousandSeparator);
+//                  Buf[0] := widechar(ThousandSeparator);
+                  Buf[0] := ThousandSeparatormse;
                   Inc(Buf);
                   End;
                 End;
@@ -1183,7 +1186,8 @@ begin
  int1:= floattotextfmt(pmsechar(result),value,pmsechar(format));
  setlength(result,int1);
  if dot then begin
-  replacechar1(result,widechar(decimalseparator),widechar('.'));
+//  replacechar1(result,widechar(decimalseparator),widechar('.'));
+  replacechar1(result,decimalseparatormse,widechar('.'));
  end;
 end;
 
