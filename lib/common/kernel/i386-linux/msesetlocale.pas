@@ -2,7 +2,7 @@ unit msesetlocale;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- libc,cwstring,msesys;
+ libc,msesys;
  
 implementation
 uses

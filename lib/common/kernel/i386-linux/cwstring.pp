@@ -19,7 +19,7 @@ unit cwstring;
 
 interface
 uses
- sysutils;
+ sysutils,msesetlocale;
 type
  eiconv = class(econverterror)
  end;
