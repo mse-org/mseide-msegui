@@ -7045,7 +7045,7 @@ end;
 procedure tdbstringcols.setoptionsdb(const avalue: optionseditdbty);
 var
  int1: integer;
- mask: {$ifdef FPC}longword{$else}byte{$endif};
+ mask: {$ifdef FPC}longword{$else}word{$endif};
 begin
  if foptionsdb <> avalue then begin
   mask:= {$ifdef FPC}longword{$else}word{$endif}(avalue) xor
