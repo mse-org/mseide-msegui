@@ -170,6 +170,7 @@ begin
   if byte(ch1) < 127 then begin
    currencydecimals:= ord(ch1);
   end;
+  saveformatsettings;
  {$ifdef FPC}{$checkpointer default}{$endif}
  {$endif} 
  end;

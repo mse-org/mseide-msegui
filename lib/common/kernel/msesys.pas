@@ -209,6 +209,7 @@ function getexceptiontext(obj: tobject; addr: pointer; framecount: longint;
 threadvar
  mselasterror: integer;
 
+procedure saveformatsettings;
 procedure initdefaultformatsettings;
              //initialization order is wrong, FPC bug?
 implementation
@@ -429,6 +430,40 @@ begin
   end;
   defaultformatsettingsmse.TwoDigitYearCenturyWindow:= TwoDigitYearCenturyWindow;
  end;
+end;
+
+procedure saveformatsettings;
+var
+ int1: integer;
+begin
+ CurrencyFormat:= defaultformatsettingsmse.CurrencyFormat;
+ NegCurrFormat:= defaultformatsettingsmse.NegCurrFormat;
+ ThousandSeparator:= defaultformatsettingsmse.ThousandSeparator;
+ DecimalSeparator:= defaultformatsettingsmse.DecimalSeparator;
+ CurrencyDecimals:= defaultformatsettingsmse.CurrencyDecimals;
+ DateSeparator:= defaultformatsettingsmse.DateSeparator;
+ TimeSeparator:= defaultformatsettingsmse.TimeSeparator;
+ ListSeparator:= defaultformatsettingsmse.ListSeparator;
+ CurrencyString:= defaultformatsettingsmse.CurrencyString;
+ ShortDateFormat:= defaultformatsettingsmse.ShortDateFormat;
+ LongDateFormat:= defaultformatsettingsmse.LongDateFormat;
+ TimeAMString:= defaultformatsettingsmse.TimeAMString;
+ TimePMString:= defaultformatsettingsmse.TimePMString;
+ ShortTimeFormat:= defaultformatsettingsmse.ShortTimeFormat;
+ LongTimeFormat:= defaultformatsettingsmse.LongTimeFormat;
+ for int1:= low(tmonthnamearraymse) to high(tmonthnamearraymse) do begin
+  ShortMonthNames[int1]:= defaultformatsettingsmse.ShortMonthNames[int1];
+ end;
+ for int1:= low(tmonthnamearraymse) to high(tmonthnamearraymse) do begin
+  LongMonthNames[int1]:= defaultformatsettingsmse.LongMonthNames[int1];
+ end;
+ for int1:= low(tweeknamearraymse) to high(tweeknamearraymse) do begin
+  ShortDayNames[int1]:= defaultformatsettingsmse.ShortDayNames[int1];
+ end;
+ for int1:= low(tweeknamearraymse) to high(tweeknamearraymse) do begin
+  LongDayNames[int1]:= defaultformatsettingsmse.LongDayNames[int1];
+ end;
+ TwoDigitYearCenturyWindow:= defaultformatsettingsmse.TwoDigitYearCenturyWindow;
 end;
 
 {$ifdef FPC}
