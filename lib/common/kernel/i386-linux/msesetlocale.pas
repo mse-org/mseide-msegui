@@ -83,12 +83,12 @@ begin
  end;
 end;
 
-procedure findfirstchar(const value,chars: string; var result: char);
+procedure findfirstchar(const value,chars: msestring; var result: msechar);
 var
  int1: integer;
- po1: pchar;
+ po1: pmsechar;
 begin
- po1:= pchar(value);
+ po1:= pmsechar(value);
  while po1^ <> #0 do begin
   for int1:= 1 to length(chars) do begin
    if po1^ = chars[int1] then begin
@@ -115,69 +115,59 @@ var
            //[n_cs_precedes,n_sep_by_space,n_sign_posn]
 {$endif}
 begin
-{$ifdef FPC}
- mstr1:= getlocstr(decimal_point,defaultdecimalseparator);
- if mstr1 <> '' then begin
-  decimalseparatormse:= char(ord(mstr1[1]));
- end
- else begin
-  decimalseparatormse:= defaultdecimalseparator;
- end;
- decimalseparator:= decimalseparatormse;
- mstr1:= getlocstr(thousands_sep,defaultthousandseparator);
- if mstr1 <> '' then begin
-  thousandseparatormse:= mstr1[1];
- end
- else begin
-  thousandseparatormse:= defaultthousandseparator;
- end;
- thousandseparator:= thousandseparatormse;
- 
- for int1:= 1 to 12 do begin
-  shortmonthnames[int1]:= getlocstr(abmon_1 + int1 - 1,shortmonthnames[int1]);
-str1:= shortmonthnames[int1];
-  longmonthnames[int1]:= getlocstr(mon_1 + int1 - 1,longmonthnames[int1]);
-str1:= longmonthnames[int1];
- end;
- for int1:= 1 to 7 do begin
-  shortdaynames[int1]:= getlocstr(abday_1 + int1 - 1,shortdaynames[int1]);
-  longdaynames[int1]:= getlocstr(day_1 + int1 - 1,longdaynames[int1]);
- end;
- shortdateformat:= convertcformatstring(getlocstr(d_fmt,''),shortdateformat);
- str1:= getlocstr(d_t_fmt,'');
- str2:= getlocstr(t_fmt,''); 
- int1:= pos(str2,str1);
- if int1 > 0 then begin
-  str1:= trimright(copy(str1,1,int1-1));
- end;
- longdateformat:= convertcformatstring(str1,longdateformat);   
-// longdateformat:= convertcformatstring(getlocstr(d_t_fmt,''),longdateformat);   
- shorttimeformat:= convertcformatstring(getlocstr(t_fmt,''),shorttimeformat);
- longtimeformat:= convertcformatstring(getlocstr(t_fmt_ampm,''),longtimeformat);
- findfirstchar(shortdateformat,'./-',dateseparator);
- findfirstchar(shorttimeformat,':.',timeseparator);
- dateseparatormse:= dateseparator;
- timeseparatormse:= timeseparator;
- 
- timeamstring:= getlocstr(am_str,timeamstring);
- timepmstring:= getlocstr(pm_str,timepmstring);
- currencystring:= getlocstr(currency_symbol,currencystring);
-{$ifdef FPC}{$checkpointer off}{$endif}
- ch1:= nl_langinfo(p_cs_precedes)^;
- ch2:= nl_langinfo(p_sep_by_space)^;
- if (ch1 in [#0,#1]) and (ch2 in [#0,#1]) then begin
-  currencyformat:= currfo[ord(ch1),ord(ch2)];
-  ch3:= nl_langinfo(p_sign_posn)^;
-  if ord(ch3) in [0..4] then begin
-   negcurrformat:= negcurrfo[ord(ch1),ord(ch2),ord(ch3)];  
+ with defaultformatsettingsmse do begin
+ {$ifdef FPC}
+  mstr1:= getlocstr(decimal_point,decimalseparator);
+  if mstr1 <> '' then begin
+   decimalseparator:= mstr1[1];
   end;
+  mstr1:= getlocstr(thousands_sep,thousandseparator);
+  if mstr1 <> '' then begin
+   thousandseparator:= mstr1[1];
+  end;
+  
+  for int1:= 1 to 12 do begin
+   shortmonthnames[int1]:= getlocstr(abmon_1 + int1 - 1,shortmonthnames[int1]);
+   longmonthnames[int1]:= getlocstr(mon_1 + int1 - 1,longmonthnames[int1]);
+  end;
+  for int1:= 1 to 7 do begin
+   shortdaynames[int1]:= getlocstr(abday_1 + int1 - 1,shortdaynames[int1]);
+   longdaynames[int1]:= getlocstr(day_1 + int1 - 1,longdaynames[int1]);
+  end;
+  shortdateformat:= convertcformatstring(getlocstr(d_fmt,''),shortdateformat);
+  str1:= getlocstr(d_t_fmt,'');
+  str2:= getlocstr(t_fmt,''); 
+  int1:= pos(str2,str1);
+  if int1 > 0 then begin
+   str1:= trimright(copy(str1,1,int1-1));
+  end;
+  longdateformat:= convertcformatstring(str1,longdateformat);   
+ // longdateformat:= convertcformatstring(getlocstr(d_t_fmt,''),longdateformat);   
+  shorttimeformat:= convertcformatstring(getlocstr(t_fmt,''),shorttimeformat);
+  longtimeformat:= convertcformatstring(getlocstr(t_fmt_ampm,''),longtimeformat);
+  findfirstchar(shortdateformat,'./-',dateseparator);
+  findfirstchar(shorttimeformat,':.',timeseparator);
+  
+  timeamstring:= getlocstr(am_str,timeamstring);
+  timepmstring:= getlocstr(pm_str,timepmstring);
+  currencystring:= getlocstr(currency_symbol,currencystring);
+ {$ifdef FPC}{$checkpointer off}{$endif}
+  ch1:= nl_langinfo(p_cs_precedes)^;
+  ch2:= nl_langinfo(p_sep_by_space)^;
+  if (ch1 in [#0,#1]) and (ch2 in [#0,#1]) then begin
+   currencyformat:= currfo[ord(ch1),ord(ch2)];
+   ch3:= nl_langinfo(p_sign_posn)^;
+   if ord(ch3) in [0..4] then begin
+    negcurrformat:= negcurrfo[ord(ch1),ord(ch2),ord(ch3)];  
+   end;
+  end;
+  ch1:= nl_langinfo(frac_digits)^;
+  if byte(ch1) < 127 then begin
+   currencydecimals:= ord(ch1);
+  end;
+ {$ifdef FPC}{$checkpointer default}{$endif}
+ {$endif} 
  end;
- ch1:= nl_langinfo(frac_digits)^;
- if byte(ch1) < 127 then begin
-  currencydecimals:= ord(ch1);
- end;
-{$ifdef FPC}{$checkpointer default}{$endif}
-{$endif} 
 end;
 
 initialization
