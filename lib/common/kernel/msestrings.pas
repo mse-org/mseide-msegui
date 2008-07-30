@@ -3242,7 +3242,7 @@ begin
   po2:= pointer(upstr);
   for int1:= 0 to len - 1 do begin
    ch1:= po1^[int1];
-   if (ch1 <= 'a') and (ch1 <= 'z') then begin
+   if (ch1 >= 'a') and (ch1 <= 'z') then begin
     inc(ch1,ord('A')-ord('a'));
    end;
    wo1:= ord(ch1)-ord(po2^[int1]);

@@ -2,10 +2,11 @@ unit msesetlocale;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- libc,cwstring;
+ libc,cwstring,msesys;
+ 
 implementation
 uses
- sysutils,msestrings,msesys;
+ sysutils,msestrings;
  
 function getlocstr(const id: integer; const defaultvalue: string): string;
 var
@@ -115,6 +116,10 @@ var
            //[n_cs_precedes,n_sep_by_space,n_sign_posn]
 {$endif}
 begin
+ initdefaultformatsettings; 
+ //msesys initialization will be called after msesetlocale initialization.
+ //FPC bug?
+ 
  with defaultformatsettingsmse do begin
  {$ifdef FPC}
   mstr1:= getlocstr(decimal_point,decimalseparator);

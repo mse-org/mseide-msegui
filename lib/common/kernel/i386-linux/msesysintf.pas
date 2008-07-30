@@ -13,8 +13,10 @@ unit msesysintf; //i386-linux
 
 interface
 uses
- msesetlocale,{$ifdef FPC}cthreads,cwstring,{$endif}msetypes,msesys,libc,
+ msesys,msesetlocale,{$ifdef FPC}cthreads,cwstring,{$endif}msetypes,libc,
  msestrings,msestream,msesysbindings;
+var
+ thread1: threadty;
 
 {$ifdef msedebug}
 var                         //!!!!todo: link with correct location

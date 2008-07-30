@@ -209,6 +209,8 @@ function getexceptiontext(obj: tobject; addr: pointer; framecount: longint;
 threadvar
  mselasterror: integer;
 
+procedure initdefaultformatsettings;
+             //initialization order is wrong, FPC bug?
 implementation
 uses
  Classes,msestreaming,msesysintf,msedatalist,sysutils,mseglob,msesysutils;
@@ -389,38 +391,44 @@ begin
  result:= syserrorty(ferror);
 end;
 
+var
+ defaultformatset: boolean = false;
+ 
 procedure initdefaultformatsettings;
 var
  int1: integer;
 begin
- defaultformatsettingsmse.CurrencyFormat:= CurrencyFormat;
- defaultformatsettingsmse.NegCurrFormat:= NegCurrFormat;
- defaultformatsettingsmse.ThousandSeparator:= widechar(ThousandSeparator);
- defaultformatsettingsmse.DecimalSeparator:= widechar(DecimalSeparator);
- defaultformatsettingsmse.CurrencyDecimals:= CurrencyDecimals;
- defaultformatsettingsmse.DateSeparator:= widechar(DateSeparator);
- defaultformatsettingsmse.TimeSeparator:= widechar(TimeSeparator);
- defaultformatsettingsmse.ListSeparator:= widechar(ListSeparator);
- defaultformatsettingsmse.CurrencyString:= CurrencyString;
- defaultformatsettingsmse.ShortDateFormat:= ShortDateFormat;
- defaultformatsettingsmse.LongDateFormat:= LongDateFormat;
- defaultformatsettingsmse.TimeAMString:= TimeAMString;
- defaultformatsettingsmse.TimePMString:= TimePMString;
- defaultformatsettingsmse.ShortTimeFormat:= ShortTimeFormat;
- defaultformatsettingsmse.LongTimeFormat:= LongTimeFormat;
- for int1:= low(tmonthnamearraymse) to high(tmonthnamearraymse) do begin
-  defaultformatsettingsmse.ShortMonthNames[int1]:= ShortMonthNames[int1];
+ if not defaultformatset then begin
+  defaultformatset:= true;
+  defaultformatsettingsmse.CurrencyFormat:= CurrencyFormat;
+  defaultformatsettingsmse.NegCurrFormat:= NegCurrFormat;
+  defaultformatsettingsmse.ThousandSeparator:= widechar(ThousandSeparator);
+  defaultformatsettingsmse.DecimalSeparator:= widechar(DecimalSeparator);
+  defaultformatsettingsmse.CurrencyDecimals:= CurrencyDecimals;
+  defaultformatsettingsmse.DateSeparator:= widechar(DateSeparator);
+  defaultformatsettingsmse.TimeSeparator:= widechar(TimeSeparator);
+  defaultformatsettingsmse.ListSeparator:= widechar(ListSeparator);
+  defaultformatsettingsmse.CurrencyString:= CurrencyString;
+  defaultformatsettingsmse.ShortDateFormat:= ShortDateFormat;
+  defaultformatsettingsmse.LongDateFormat:= LongDateFormat;
+  defaultformatsettingsmse.TimeAMString:= TimeAMString;
+  defaultformatsettingsmse.TimePMString:= TimePMString;
+  defaultformatsettingsmse.ShortTimeFormat:= ShortTimeFormat;
+  defaultformatsettingsmse.LongTimeFormat:= LongTimeFormat;
+  for int1:= low(tmonthnamearraymse) to high(tmonthnamearraymse) do begin
+   defaultformatsettingsmse.ShortMonthNames[int1]:= ShortMonthNames[int1];
+  end;
+  for int1:= low(tmonthnamearraymse) to high(tmonthnamearraymse) do begin
+   defaultformatsettingsmse.LongMonthNames[int1]:= LongMonthNames[int1];
+  end;
+  for int1:= low(tweeknamearraymse) to high(tweeknamearraymse) do begin
+   defaultformatsettingsmse.ShortDayNames[int1]:= ShortDayNames[int1];
+  end;
+  for int1:= low(tweeknamearraymse) to high(tweeknamearraymse) do begin
+   defaultformatsettingsmse.LongDayNames[int1]:= LongDayNames[int1];
+  end;
+  defaultformatsettingsmse.TwoDigitYearCenturyWindow:= TwoDigitYearCenturyWindow;
  end;
- for int1:= low(tmonthnamearraymse) to high(tmonthnamearraymse) do begin
-  defaultformatsettingsmse.LongMonthNames[int1]:= LongMonthNames[int1];
- end;
- for int1:= low(tweeknamearraymse) to high(tweeknamearraymse) do begin
-  defaultformatsettingsmse.ShortDayNames[int1]:= ShortDayNames[int1];
- end;
- for int1:= low(tweeknamearraymse) to high(tweeknamearraymse) do begin
-  defaultformatsettingsmse.LongDayNames[int1]:= LongDayNames[int1];
- end;
- defaultformatsettingsmse.TwoDigitYearCenturyWindow:= TwoDigitYearCenturyWindow;
 end;
 
 {$ifdef FPC}

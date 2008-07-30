@@ -255,7 +255,7 @@ var
                 StoreStr(FormatCurrent + 1, Count - 2);
                 end ;
              'A': begin
-                if mseStrLIComp(FormatCurrent, 'AMPM', 4) = 0 then begin
+                if mseStrLIComp(FormatCurrent, pmsechar(widestring('AMPM')), 4) = 0 then begin
                    Count := 4;
                    if Hour < 12 then StoreString(TimeAMString)
                    else StoreString(TimePMString);
@@ -271,7 +271,7 @@ var
                    else StoreStr('p', 1);
                    end
                 else
-                  Raise EConvertError.Create('Illegal character in format string');
+//                  Raise EConvertError.Create('Illegal character in format string');
                 end ;
              '/': StoreStr(@DateSeparator, 1);
              ':': StoreStr(@TimeSeparator, 1);
