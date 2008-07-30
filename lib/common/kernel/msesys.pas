@@ -128,13 +128,58 @@ type
    property error: syserrorty read geterror;
  end;
 
-const
- defaultdecimalseparator = '.';
- defaultthousandseparator = ',';
+type
+  TMonthNameArraymse = array[1..12] of msestring;
+  TWeekNameArraymse = array[1..7] of msestring;
+
+  TFormatSettingsmse = record
+    CurrencyFormat: Byte;
+    NegCurrFormat: Byte;
+    ThousandSeparator: mseChar;
+    DecimalSeparator: mseChar;
+    CurrencyDecimals: Byte;
+    DateSeparator: mseChar;
+    TimeSeparator: mseChar;
+    ListSeparator: mseChar;
+    CurrencyString: msestring;
+    ShortDateFormat: msestring;
+    LongDateFormat: msestring;
+    TimeAMString: msestring;
+    TimePMString: msestring;
+    ShortTimeFormat: msestring;
+    LongTimeFormat: msestring;
+    ShortMonthNames: TMonthNameArraymse;
+    LongMonthNames: TMonthNameArraymse;
+    ShortDayNames: TWeekNameArraymse;
+    LongDayNames: TWeekNameArraymse;
+    TwoDigitYearCenturyWindow: Word;
+  end;
 
 var
- thousandseparatormse: msechar = defaultdecimalseparator;
- decimalseparatormse: msechar = defaultthousandseparator;
+  DefaultFormatSettingsmse : TFormatSettingsmse = (
+    CurrencyFormat: 1;
+    NegCurrFormat: 5;
+    ThousandSeparator: ',';
+    DecimalSeparator: '.';
+    CurrencyDecimals: 2;
+    DateSeparator: '-';
+    TimeSeparator: ':';
+    ListSeparator: ',';
+    CurrencyString: '$';
+    ShortDateFormat: 'd/m/y';
+    LongDateFormat: 'dd" "mmmm" "yyyy';
+    TimeAMString: 'AM';
+    TimePMString: 'PM';
+    ShortTimeFormat: 'hh:nn';
+    LongTimeFormat: 'hh:nn:ss';
+    ShortMonthNames: ('Jan','Feb','Mar','Apr','May','Jun', 
+                      'Jul','Aug','Sep','Oct','Nov','Dec');
+    LongMonthNames: ('January','February','March','April','May','June',
+                     'July','August','September','October','November','December');
+    ShortDayNames: ('Sun','Mon','Tue','Wed','Thu','Fri','Sat');
+    LongDayNames:  ('Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday');
+    TwoDigitYearCenturyWindow: 50;
+  );
  
 procedure syserror(const error: syserrorty; const text: string = ''); overload;
 procedure syserror(const error: syserrorty;
@@ -344,6 +389,40 @@ begin
  result:= syserrorty(ferror);
 end;
 
+procedure initdefaultformatsettings;
+var
+ int1: integer;
+begin
+ defaultformatsettingsmse.CurrencyFormat:= CurrencyFormat;
+ defaultformatsettingsmse.NegCurrFormat:= NegCurrFormat;
+ defaultformatsettingsmse.ThousandSeparator:= widechar(ThousandSeparator);
+ defaultformatsettingsmse.DecimalSeparator:= widechar(DecimalSeparator);
+ defaultformatsettingsmse.CurrencyDecimals:= CurrencyDecimals;
+ defaultformatsettingsmse.DateSeparator:= widechar(DateSeparator);
+ defaultformatsettingsmse.TimeSeparator:= widechar(TimeSeparator);
+ defaultformatsettingsmse.ListSeparator:= widechar(ListSeparator);
+ defaultformatsettingsmse.CurrencyString:= CurrencyString;
+ defaultformatsettingsmse.ShortDateFormat:= ShortDateFormat;
+ defaultformatsettingsmse.LongDateFormat:= LongDateFormat;
+ defaultformatsettingsmse.TimeAMString:= TimeAMString;
+ defaultformatsettingsmse.TimePMString:= TimePMString;
+ defaultformatsettingsmse.ShortTimeFormat:= ShortTimeFormat;
+ defaultformatsettingsmse.LongTimeFormat:= LongTimeFormat;
+ for int1:= low(tmonthnamearraymse) to high(tmonthnamearraymse) do begin
+  defaultformatsettingsmse.ShortMonthNames[int1]:= ShortMonthNames[int1];
+ end;
+ for int1:= low(tmonthnamearraymse) to high(tmonthnamearraymse) do begin
+  defaultformatsettingsmse.LongMonthNames[int1]:= LongMonthNames[int1];
+ end;
+ for int1:= low(tweeknamearraymse) to high(tweeknamearraymse) do begin
+  defaultformatsettingsmse.ShortDayNames[int1]:= ShortDayNames[int1];
+ end;
+ for int1:= low(tweeknamearraymse) to high(tweeknamearraymse) do begin
+  defaultformatsettingsmse.LongDayNames[int1]:= LongDayNames[int1];
+ end;
+ defaultformatsettingsmse.TwoDigitYearCenturyWindow:= TwoDigitYearCenturyWindow;
+end;
+
 {$ifdef FPC}
 
  {$ifopt S+}
@@ -435,9 +514,12 @@ end;
 
 initialization
  exceptproc:= @catchunhandledexcept;
- {$ifdef mse_debugexception}
+{$ifdef mse_debugexception}
  raiseproc:= @raisepro;
  raisemaxframecount:= 100;
- {$endif}
-{$endif} 
+{$endif}
+{$else}    //fpc
+initialization
+{$endif}   //delphi
+ initdefaultformatsettings;
 end.

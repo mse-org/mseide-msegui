@@ -156,6 +156,9 @@ str1:= longmonthnames[int1];
  longtimeformat:= convertcformatstring(getlocstr(t_fmt_ampm,''),longtimeformat);
  findfirstchar(shortdateformat,'./-',dateseparator);
  findfirstchar(shorttimeformat,':.',timeseparator);
+ dateseparatormse:= dateseparator;
+ timeseparatormse:= timeseparator;
+ 
  timeamstring:= getlocstr(am_str,timeamstring);
  timepmstring:= getlocstr(pm_str,timepmstring);
  currencystring:= getlocstr(currency_symbol,currencystring);

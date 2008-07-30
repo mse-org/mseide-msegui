@@ -1779,18 +1779,20 @@ begin
   freelibrary(libhandle);
  end;
 end;
-
+{
 procedure initformatsettings;
 begin
  thousandseparatormse:= thousandseparator;
  decimalseparatormse:= decimalseparator;
+ dateseparatormse:= dateseparator;
+ timeseparatormse:= timeseparator;
 end;
-
+}
 initialization
 {$ifdef FPC}
 // winwidestringalloc:= false;
  {$endif}
- initformatsettings;
+// initformatsettings;
  doinit;
 //iswin95:= true;
 //iswin98:= true;
