@@ -529,11 +529,21 @@ procedure tancestorlist.itemdestroyed(const sender: iobjectlink);
 var
  int1: integer;
  comp: tmsecomponent;
+ bo1: boolean;
 begin
  comp:= tmsecomponent(sender.getinstance);
  for int1:= count - 1 downto 0 do begin
   with pancestorinfoty(getitempo(int1))^ do begin
-   if (descendent = comp) or (ancestor = comp) then begin
+   bo1:= false;
+   if descendent = comp then begin
+    descendent:= nil;
+    bo1:= true;
+   end;
+   if ancestor = comp then begin
+    ancestor:= nil;
+    bo1:= true;
+   end;
+   if bo1 then begin
     delete(int1);
    end;
   end;
