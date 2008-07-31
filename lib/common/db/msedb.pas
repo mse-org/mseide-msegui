@@ -3846,10 +3846,11 @@ begin
  reader.readlistbegin;
  reader.readlistbegin;
  while not reader.endoflist do begin
-  if int1 <= high(fieldtypes) then begin
-   fieldtypes[int1]:= fieldclasstypety(getenumvalue(typeinfo(fieldclasstypety),
-                               reader.readident));    
+  if int1 > high(fieldtypes) then begin
+   break;
   end;
+  fieldtypes[int1]:= fieldclasstypety(getenumvalue(typeinfo(fieldclasstypety),
+                               reader.readident));    
   inc(int1);
  end;
  reader.readlistend;
