@@ -129,6 +129,22 @@ begin
   mstr1:= getlocstr(thousands_sep,thousandseparator);
   if mstr1 <> '' then begin
    thousandseparator:= mstr1[1];
+  end
+  else begin
+   mstr1:= getlocstr(mon_decimal_point,decimalseparator);
+   if mstr1 <> '' then begin
+    decimalseparator:= mstr1[1];
+    mstr1:= getlocstr(mon_thousands_sep,thousandseparator);
+    if mstr1 <> '' then begin
+     thousandseparator:= mstr1[1];
+    end
+    else begin
+     thousandseparator:= ' ';
+    end;
+   end
+   else begin
+    thousandseparator:= ' ';
+   end;   
   end;
   
   for int1:= 1 to 12 do begin
