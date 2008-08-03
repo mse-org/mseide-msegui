@@ -293,6 +293,7 @@ type
    property onrowsinserted;
    property onrowsdeleting;
    property onrowsdeleted;
+   property onscrollrows;
    property oncellevent;
    property onselectionchanged;
    property onsort;

@@ -165,10 +165,12 @@ type
   macrogroup: integer;
   groupcomments: msestringarty;
 
-  breakpointons: longboolarty;
-  breakpointlines: integerarty;
-  breakpointignore: integerarty;
   breakpointpaths: msestringarty;
+  breakpointlines: integerarty;
+  breakpointaddress: integerarty;
+  addressbreakpoints: longboolarty;
+  breakpointons: longboolarty;
+  breakpointignore: integerarty;
   breakpointconditions: msestringarty;
 
   stoponexception: boolean;

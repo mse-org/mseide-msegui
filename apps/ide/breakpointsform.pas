@@ -20,8 +20,9 @@ unit breakpointsform;
 
 interface
 uses
- mseforms,msewidgetgrid,msedataedits,msegdbutils,msetypes,msegrids,msegraphedits,
- msestat,msemenuwidgets,msemenus,msestrings;
+ mseforms,msewidgetgrid,msedataedits,msegdbutils,msetypes,msegrids,
+ msegraphedits,msestat,msemenuwidgets,msemenus,msestrings,mseedit,mseevent,
+ msegui,msegraphics;
 
 type
  bkptstatety = (bkpts_none,bkpts_normal,bkpts_disabled,bkpts_error);
@@ -46,6 +47,8 @@ type
    count: tintegeredit;
    gridpopup: tpopupmenu;
    flags: tintegeredit;
+   address: tintegeredit;
+   addressbkpt: tbooleanedit;
    procedure bkptsononchange(const sender: TObject);
    procedure bkptsononsetvalue(const sender: TObject; var avalue: boolean;
                                             var accept: Boolean);
@@ -67,14 +70,19 @@ type
    procedure ondataenterednewbkpt(const sender: tobject);
 
    procedure deleteallexecute(const sender: TObject);
+   procedure addressentered(const sender: TObject);
+   procedure adbefdrawcell(const sender: tcol; const canvas: tcanvas;
+                   var cellinfo: cellinfoty; var processed: Boolean);
   private
    fbreakpointsvalid: boolean;
    function infotolineinfo(const info: breakpointinfoty): bkptlineinfoty;
    function breakpointerror(const error: gdbresultty): boolean;
    procedure removeactbreakpoint;
    function findbreakpointrow(const anum: integer): integer;
+   procedure newbkpt(const addressbp: boolean);
+   procedure updaterow(const arow: integer);
   protected
-   procedure infotolist(const index: integer; const info: breakpointinfoty;
+   procedure infotolist(const index: integer; var info: breakpointinfoty;
                           const nobkpton: boolean);
    procedure listtoinfo(const index: integer; var info: breakpointinfoty);
    procedure changed;
@@ -97,6 +105,8 @@ type
    procedure showbreakpoint(const filepath: filenamety; const aline: integer; focus: boolean);
    function checkbreakpointcontinue(const stopinfo: stopinfoty): boolean;
                                 //set condition
+   function isactivebreakpoint(const addr: ptruint): boolean;
+   procedure toggleaddrbreakpoint(const addr: ptruint);
  end;
 
 var
@@ -106,7 +116,8 @@ implementation
 
 uses
  breakpointsform_mfm,msefileutils,sourceform,projectoptionsform,msedatalist,
- main,msewidgets,actionsmodule,watchpointsform,mseformatstr;
+ main,msewidgets,actionsmodule,watchpointsform,mseformatstr,msegraphutils,
+ disassform;
 
 { tbreakpointsfo }
 
@@ -119,6 +130,8 @@ begin
   updatevalue('on',breakpointons);
   updatevalue('path',breakpointpaths);
   updatevalue('line',breakpointlines);
+  updatevalue('address',breakpointaddress);
+  updatevalue('addbkpt',addressbreakpoints);
   updatevalue('ignore',breakpointignore);
   updatevalue('condition',breakpointconditions);
   if not iswriter then begin
@@ -127,6 +140,8 @@ begin
    bkpton.gridvalues:= breakpointons;
    path.gridvalues:= breakpointpaths;
    line.gridvalues:= breakpointlines;
+   address.gridvalues:= breakpointaddress;
+   addressbkpt.gridvalues:= addressbreakpoints;
 //   updatebreakpoints(true);
   end;
 //  updatestat(istatfile(bkptson));
@@ -138,15 +153,20 @@ begin
 end;
 
 procedure tbreakpointsfo.infotolist(const index: integer;
-  const info: breakpointinfoty; const nobkpton: boolean);
+  var info: breakpointinfoty; const nobkpton: boolean);
 var
  int1: integer;
  lineinfo: bkptlineinfoty;
  info1: breakpointinfoty;
 begin
+ if gdb.execloaded then begin
+  gdb.infobreakpoint(info);
+ end;
+ addressbkpt[index]:= info.addressbreakpoint;
  path[index]:= info.path;
  filename[index]:= msefileutils.filename(info.path);
  line[index]:= info.line;
+ address[index]:= info.address;
  bkptno[index]:= info.bkptno;
  if not nobkpton then begin
   bkpton[index]:= info.bkpton;
@@ -168,8 +188,10 @@ end;
 
 procedure tbreakpointsfo.listtoinfo(const index: integer; var info: breakpointinfoty);
 begin
+ info.addressbreakpoint:= addressbkpt[index];
  info.path:= path[index];
  info.line:= line[index];
+ info.address:= address[index];
  info.bkptno:= bkptno[index];
  info.bkpton:= bkpton[index] and bkptson.value;
  info.ignore:= ignore[index];
@@ -428,6 +450,48 @@ begin
  end;
 end;
 
+function tbreakpointsfo.isactivebreakpoint(const addr: ptruint): boolean;
+var
+ int1: integer;
+ po1: pptruintaty;
+ po2: plongboolaty;
+begin
+ result:= false;
+ po1:= address.griddata.datapo;
+ po2:= bkpton.griddata.datapo;
+ for int1:= 0 to grid.rowhigh do begin
+  if po2^[int1] and (po1^[int1] = addr) then begin
+   result:= true;
+   break;
+  end;
+ end;
+end;
+
+procedure tbreakpointsfo.toggleaddrbreakpoint(const addr: ptruint);
+var
+ int1: integer;
+ po1: pptruintaty;
+ info1: breakpointinfoty;
+begin
+ po1:= address.griddata.datapo;
+ for int1:= 0 to grid.rowhigh do begin
+  if po1^[int1] = addr then begin
+   if addressbkpt[int1] then begin
+    grid.deleterow(int1);
+   end
+   else begin
+    bkpton[int1]:= not bkpton[int1];
+    updaterow(int1);
+   end;
+   exit;
+  end;
+ end;
+ fillchar(info1,0,sizeof(info1));
+ info1.address:= addr;
+ info1.addressbreakpoint:= true;
+ addbreakpoint(info1);
+end;
+
 function tbreakpointsfo.updatebreakpointon(var info: breakpointinfoty): boolean;
 var
  int1: integer;
@@ -484,22 +548,37 @@ begin
  end;
 end;
 
-procedure tbreakpointsfo.ondataentered(const sender: tobject);
+procedure tbreakpointsfo.updaterow(const arow: integer);
 var
- int1: integer;
  info: breakpointinfoty;
 begin
- int1:= grid.row;
  fillchar(info,sizeof(info),0);
- listtoinfo(int1,info);
- infotolist(int1,info,true);
+ listtoinfo(arow,info);
+ infotolist(arow,info,true);
+ changed;
+end;
+
+procedure tbreakpointsfo.ondataentered(const sender: tobject);
+begin
+ updaterow(grid.row);
+end;
+
+procedure tbreakpointsfo.newbkpt(const addressbp: boolean);
+begin
+ addressbkpt.value:= addressbp;
+ insertbkpt(grid.row,true,true);
  changed;
 end;
 
 procedure tbreakpointsfo.ondataenterednewbkpt(const sender: tobject);
 begin
- insertbkpt(grid.row,true,true);
- changed;
+ newbkpt(false);
+end;
+
+procedure tbreakpointsfo.addressentered(const sender: TObject);
+begin
+ filename.value:= '';
+ newbkpt(true);
 end;
 
 procedure tbreakpointsfo.removeactbreakpoint;
@@ -559,12 +638,15 @@ begin
  fbreakpointsvalid:= false;
  with projectoptions do begin
   modified:= true;
+  addressbreakpoints:= addressbkpt.gridvalues;
   breakpointons:= bkpton.gridvalues;
   breakpointpaths:= path.gridvalues;
   breakpointlines:= line.gridvalues;
+  breakpointaddress:= address.gridvalues;
   breakpointignore:= ignore.gridvalues;
   breakpointconditions:= condition.gridvalues;
  end;
+ disassfo.invalidate;
 end;
 
 procedure tbreakpointsfo.refresh;
@@ -620,6 +702,17 @@ end;
 procedure tbreakpointsfo.clear;
 begin
  grid.clear;
+end;
+
+procedure tbreakpointsfo.adbefdrawcell(const sender: tcol;
+               const canvas: tcanvas; var cellinfo: cellinfoty;
+               var processed: Boolean);
+begin
+ with cellinfo do begin
+  if not addressbkpt[cell.row] then begin
+   color:= cl_active;
+  end;
+ end;
 end;
 
 end.

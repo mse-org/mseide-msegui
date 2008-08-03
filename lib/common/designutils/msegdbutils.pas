@@ -115,8 +115,10 @@ type
  end;
 }
  breakpointinfoty = record
-  line: integer;    //1. line = 0
+  addressbreakpoint: boolean;
+  line: integer;    //1. line = 1
   path: filenamety;
+  address: ptruint;
 //  filename: string;
   bkptno: integer;
   bkpton: boolean;
@@ -335,6 +337,8 @@ type
    function getsysregnum(const varname: string; out num: integer): boolean;
    function currentlang: string;
    function assignoperator: string;
+   function getbreakpointinfo(var atup: resultinfoty; var info: breakpointinfoty;
+                                 const full: boolean): boolean;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -366,6 +370,8 @@ type
    function breakenable(bkptnum: integer; value: boolean): gdbresultty; //bkptnum = 0 -> all
    function breakafter(bkptnum: integer; const passcount: integer): gdbresultty;
    function breakcondition(bkptnum: integer; const condition: string): gdbresultty;
+   function infobreakpoint(var info: breakpointinfoty): gdbresultty;
+              //updates info for breakpoint info.bkptnum
    function watchinsert(var info: watchpointinfoty): gdbresultty;
 
    function getstopinfo(const response: resultinfoarty;
@@ -395,10 +401,10 @@ type
                  var avalue: integer): boolean; overload;
    function getbooleanvalue(const response: resultinfoarty; const aname: string;
                  var avalue: boolean): boolean;
-   function getptrintvalue(const response: resultinfoarty; const aname: string;
-                 var avalue: ptrint): boolean; overload;
-   function getptrintvalue(const response: resultinfoty; const aname: string;
-                 var avalue: ptrint): boolean; overload;
+   function getptruintvalue(const response: resultinfoarty; const aname: string;
+                 var avalue: ptruint): boolean; overload;
+   function getptruintvalue(const response: resultinfoty; const aname: string;
+                 var avalue: ptruint): boolean; overload;
 
    function getarrayvalue(const response: resultinfoarty; const aname: string;
                  const hasitemnames: boolean;
@@ -482,7 +488,7 @@ type
    function listregisternames(out aresult: stringarty): gdbresultty;
    function listregistervalues(out aresult: registerinfoarty): gdbresultty;
    function listlines(const path: filenamety;
-                          out lines: integerarty; out addresses: ptrintarty): gdbresultty;
+                          out lines: integerarty; out addresses: ptruintarty): gdbresultty;
 
    function getsystemregister(const anumber: integer; out avalue: ptrint): gdbresultty;
    function setsystemregister(const anumber: integer; const avalue: ptrint): gdbresultty;
@@ -2043,7 +2049,12 @@ begin
  with info do begin
   interrupttarget;
   flogtext:= '';
-  str1:= filename(path)+':'+inttostr(line);
+  if addressbreakpoint then begin
+   str1:= '*'+hextocstr(address,8)
+  end
+  else begin
+   str1:= filename(path)+':'+inttostr(line);
+  end;
   result:= synccommand('-break-insert '+ str1);
   if (result = gdb_ok) or (result = gdb_message) then begin
    if (result = gdb_ok) and (flogtext <> '') or (result = gdb_message) then begin
@@ -2051,15 +2062,6 @@ begin
     result:= clicommand('break '+str1);
     inc(flastbreakpoint);
     bkptno:= flastbreakpoint;
-    {
-    ar1:= splitstring(fclivalues,' ');
-    if (high(ar1) > 0) and (ar1[0] = 'Breakpoint') then begin
-     try
-      bkptno:= strtoint(ar1[1]);
-     except
-     end;
-    end;
-    }
    end
    else begin
     bkptno:= getbkptid;
@@ -2158,12 +2160,35 @@ begin
  end;
 end;
 
-function tgdbmi.breaklist(var list: breakpointinfoarty; full: boolean): gdbresultty;
+function tgdbmi.getbreakpointinfo(var atup: resultinfoty;
+                                       var info: breakpointinfoty;
+                                             const full: boolean): boolean;
 var
  tup1: resultinfoarty;
+ filename: string;
+begin
+ result:= gettuplevalue(atup,tup1);
+ if result then begin
+  with info do begin
+   getintegervalue(tup1,'number',bkptno);
+   getintegervalue(tup1,'times',passcount);
+   if full then begin
+    getintegervalue(tup1,'line',line);
+//    getstringvalue(tup1,'file',filename);
+    getstringvalue(tup1,'fullname',filename);
+    path:= filename;
+    getbooleanvalue(tup1,'enabled',bkpton);
+    getptruintvalue(tup1,'addr',address);
+   end;
+  end;
+ end;
+end;
+
+function tgdbmi.breaklist(var list: breakpointinfoarty; full: boolean): gdbresultty;
+var
  ar1: resultinfoarty;
  int1: integer;
- filename: string;
+ tup1: resultinfoarty;
 begin
  result:= synccommand('-break-list');
  if result = gdb_ok then begin
@@ -2172,21 +2197,29 @@ begin
    if getarrayvalue(tup1,'body',true,ar1) then begin
     setlength(list,length(ar1));
     for int1:= 0 to high(ar1) do begin
-     if gettuplevalue(ar1[int1],tup1) then begin
-      with list[int1] do begin
-       getintegervalue(tup1,'number',bkptno);
-       getintegervalue(tup1,'times',passcount);
-       if full then begin
-        getintegervalue(tup1,'line',line);
-        dec(line);
-        getstringvalue(tup1,'file',filename);
-        path:= filename;
-        getbooleanvalue(tup1,'enabled',bkpton);
-       end;
-      end;
-     end;
+     getbreakpointinfo(ar1[int1],list[int1],full);
     end;
     result:= gdb_ok;
+   end;
+  end;
+ end;
+end;
+
+function tgdbmi.infobreakpoint(var info: breakpointinfoty): gdbresultty;
+var
+ ar1: resultinfoarty;
+ tup1: resultinfoarty;
+begin
+ result:= synccommand('-break-info '+inttostr(info.bkptno));
+ if result = gdb_ok then begin
+  result:= gdb_error;
+  if gettuplevalue(fsyncvalues,'BreakpointTable',tup1) then begin
+   if getarrayvalue(tup1,'body',true,ar1) then begin
+    if high(ar1) = 0 then begin
+     if getbreakpointinfo(ar1[0],info,true) then begin
+      result:= gdb_ok;
+     end;
+    end;
    end;
   end;
  end;
@@ -2275,8 +2308,8 @@ begin
  result:= getstringvalue(ar1,aname,avalue);
 end;
 
-function tgdbmi.getptrintvalue(const response: resultinfoarty; const aname: string;
-                 var avalue: ptrint): boolean;
+function tgdbmi.getptruintvalue(const response: resultinfoarty; const aname: string;
+                 var avalue: ptruint): boolean;
 var
  int1: integer;
 begin
@@ -2304,22 +2337,22 @@ end;
 function tgdbmi.getintegervalue(const response: resultinfoarty; const aname: string;
                  var avalue: integer): boolean;
 var
- ptrint1: ptrint;
+ ptruint1: ptruint;
 begin
- ptrint1:= avalue;
- result:= getptrintvalue(response,aname,ptrint1);
- avalue:= ptrint1;
+ ptruint1:= avalue;
+ result:= getptruintvalue(response,aname,ptruint1);
+ avalue:= ptruint1;
 end;
 
-function tgdbmi.getptrintvalue(const response: resultinfoty; const aname: string;
-                 var avalue: ptrint): boolean;
+function tgdbmi.getptruintvalue(const response: resultinfoty; const aname: string;
+                 var avalue: ptruint): boolean;
 
 var
  ar1: resultinfoarty;
 begin
  setlength(ar1,1);
  ar1[0]:= response;
- result:= getintegervalue(ar1,aname,avalue);
+ result:= getptruintvalue(ar1,aname,avalue);
 end;
 
 function tgdbmi.getbooleanvalue(const response: resultinfoarty; const aname: string;
@@ -2350,11 +2383,11 @@ end;
 function tgdbmi.getintegervalue(const response: resultinfoty; const aname: string;
                  var avalue: integer): boolean;
 var
- ptrint1: ptrint;
+ ptruint1: ptruint;
 begin
- ptrint1:= avalue;
- result:= getptrintvalue(response,aname,ptrint1);
- avalue:= ptrint1;
+ ptruint1:= avalue;
+ result:= getptruintvalue(response,aname,ptruint1);
+ avalue:= ptruint1;
 end;
 
 procedure setstringnum(var dataarray; const index: integer; const text: string);
@@ -3234,7 +3267,7 @@ begin
 end;
 
 function tgdbmi.listlines(const path: filenamety;
-                          out lines: integerarty; out addresses: ptrintarty): gdbresultty;
+                          out lines: integerarty; out addresses: ptruintarty): gdbresultty;
 var
  ar1,ar2: resultinfoarty;
  int1: integer;
@@ -3251,7 +3284,7 @@ begin
     if not gettuplevalue(ar1[int1],ar2) then begin
      exit;
     end;
-    if not getptrintvalue(ar2,'pc',addresses[int1]) then begin
+    if not getptruintvalue(ar2,'pc',addresses[int1]) then begin
      exit;
     end;
     if not getintegervalue(ar2,'line',lines[int1]) then begin

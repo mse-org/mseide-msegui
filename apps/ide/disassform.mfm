@@ -19,7 +19,7 @@ object disassfo: tdisassfo
   container.frame.dummy = 0
   dragdock.splitter_size = 0
   dragdock.caption = 'Assembler'
-  dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_propsize]
+  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_propsize]
   options = [fo_savepos, fo_savezorder, fo_savestate]
   statfile = mainfo.projectstatfile
   caption = 'Assembler'
@@ -76,7 +76,9 @@ object disassfo: tdisassfo
     datacols.items = <    
       item
         width = 76
+        onbeforedrawcell = befdrawcell
         options = [co_readonly, co_drawfocus, co_savestate, co_rowcolor]
+        oncellevent = addrcellevent
         optionsedit = [scoe_eatreturn]
       end    
       item
@@ -92,6 +94,7 @@ object disassfo: tdisassfo
       16777184
     )
     datarowheight = 16
+    onscrollrows = scrollrows
     reffontheight = 14
   end
 end

@@ -21,7 +21,7 @@ unit disassform;
 interface
 uses
  msegui,mseclasses,mseforms,msegdbutils,msegrids,msetypes,msestrings,
- mseevent;
+ mseevent,msegraphics;
 
 type
  tdisassfo = class(tdockform)
@@ -30,6 +30,10 @@ type
    procedure keydo(const sender: twidget; var info: keyeventinfoty);
    procedure deact(const sender: TObject);
    procedure act(const sender: TObject);
+   procedure befdrawcell(const sender: tcol; const canvas: tcanvas;
+                   var cellinfo: cellinfoty; var processed: Boolean);
+   procedure addrcellevent(const sender: TObject; var info: celleventinfoty);
+   procedure scrollrows(const sender: tcustomgrid; var step: Integer);
   private
    faddress: cardinal;
    ffirstaddress: cardinal;
@@ -39,6 +43,7 @@ type
    procedure swapshortcuts;
    procedure internalrefresh;
    procedure addlines(const aaddress: longword; const alinecount: integer);
+   procedure addpreviouslines(const asetrow: boolean);
   public
    gdb: tgdbmi;
    procedure refresh(const addr: ptrint);
@@ -53,7 +58,7 @@ implementation
 
 uses
  disassform_mfm,sourceform,sourcepage,mseformatstr,sysutils,msekeyboard,mseglob,
- actionsmodule;
+ actionsmodule,breakpointsform,msegraphutils,mseeditglob;
 
 { tdisassfo }
 
@@ -161,10 +166,42 @@ begin
  end;
 end;
 
-procedure tdisassfo.keydo(const sender: twidget; var info: keyeventinfoty);
+procedure tdisassfo.addpreviouslines(const asetrow: boolean);
 var
- rowcountbefore,rowbefore,activerowbefore: integer;
+ rowcountbefore,rowbefore,activerowbefore,firstvisiblerowbefore: integer;
  int1: integer;
+begin
+ with grid do begin
+  rowcountbefore:= rowcount;
+  firstvisiblerowbefore:= firstvisiblerow;
+  rowbefore:= row;
+  activerowbefore:= factiverow;
+  clear;
+  addlines((ffirstaddress and not $7)-$40,rowcountbefore+$48);
+  if asetrow then begin
+   row:= rowbefore + factiverow - activerowbefore;
+  end
+  else begin
+   showcell(makegridcoord(col,factiverow-activerowbefore),cep_top,true);
+  end;
+ end;
+end;
+ 
+procedure tdisassfo.scrollrows(const sender: tcustomgrid; var step: Integer);
+begin
+ if (step > 0) then begin
+  if sender.firstvisiblerow = 0 then begin
+   addpreviouslines(false);
+  end;
+ end
+ else begin
+  if sender.lastvisiblerow = sender.rowhigh then begin
+   addlines(flastaddress,grid.rowsperpage);
+  end;
+ end;
+end;
+
+procedure tdisassfo.keydo(const sender: twidget; var info: keyeventinfoty);
 begin
  if visible and gdb.cancommand then begin
   with grid,info do begin
@@ -174,12 +211,8 @@ begin
     end
     else begin
      if ((key = key_up) or (key = key_pageup)) and (row = 0) then begin
-      rowcountbefore:= rowcount;
-      rowbefore:= row;
-      activerowbefore:= factiverow;
-      clear;
-      addlines((ffirstaddress and not $7)-$40,rowcountbefore+$48);
-      row:= rowbefore + factiverow - activerowbefore;
+      addpreviouslines(true);
+      showcell(focusedcell,cep_top);
      end;
     end;
    end;
@@ -214,6 +247,29 @@ begin
  if not fshortcutsswapped then begin
   swapshortcuts;
   fshortcutsswapped:= true;
+ end;
+end;
+
+procedure tdisassfo.befdrawcell(const sender: tcol; const canvas: tcanvas;
+               var cellinfo: cellinfoty; var processed: Boolean);
+begin
+ with cellinfo do begin
+  if pmsestring(datapo)^ <> '' then begin
+   if breakpointsfo.isactivebreakpoint(strtohex(pmsestring(datapo)^)) then begin
+    color:= cl_ltred;
+   end;
+  end;
+ end;
+end;
+
+procedure tdisassfo.addrcellevent(const sender: TObject;
+               var info: celleventinfoty);
+begin
+ if iscellclick(info,[ccr_buttonpress]) then begin
+  with info do begin
+   breakpointsfo.toggleaddrbreakpoint(strtohex(self.grid[cell.col][cell.row]));
+   grid.invalidatecell(cell);
+  end;
  end;
 end;
 

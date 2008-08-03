@@ -80,6 +80,8 @@ type
  pdatetimearty = ^datetimearty;
  ptrintarty = array of ptrint;
  pptrintarty = ^ptrintarty;
+ ptruintarty = array of ptruint;
+ pptruintarty = ^ptruintarty;
  
  pdatetime = ^tdatetime;
 
@@ -104,8 +106,12 @@ type
  pintegeraty = ^integeraty;
  cardinalaty = array[0..0] of cardinal;
  pcardinalaty = ^cardinalaty;
+ longboolaty = array[0..0] of longbool;
+ plongboolaty = ^longboolaty;
  ptrintaty = array[0..0] of ptrint;
  pptrintaty = ^ptrintaty;
+ ptruintaty = array[0..0] of ptruint;
+ pptruintaty = ^ptruintaty;
 
  methodaty = array[0..0] of tmethod;
  pmethodaty = ^methodaty;

@@ -1201,7 +1201,9 @@ end;
 
  rowstatenumty = -1..126; //msb = row readonly flag for rowfontstate,
                           //reserved for rowcolorstate
- 
+
+ gridscrolleventty = procedure(const sender: tcustomgrid;
+                                     var step: integer) of object; 
  tcustomgrid = class(tpublishedwidget,iautoscrollframe,iobjectpicker,iscrollbar,
                     idragcontroller,istatfile)
   private
@@ -1251,6 +1253,8 @@ end;
    fmouserefpos: pointty;
 
    fwheelscrollheight: integer;
+   fonscrollrows: gridscrolleventty;
+
    procedure setframe(const avalue: tgridframe);
    function getframe: tgridframe;
    procedure setstatfile(const Value: tstatfile);
@@ -1554,7 +1558,7 @@ end;
                       const force: boolean = false); 
                //scrolls cell in view, force true -> if scrollbar clicked also
    procedure showlastrow;
-   procedure scrollrows(const step: integer);
+   procedure scrollrows(step: integer);
    procedure scrollleft;
    procedure scrollright;
    procedure scrollpageleft;
@@ -1592,6 +1596,9 @@ end;
                               //col,row = invalidaxis if none
    property col: integer read ffocusedcell.col write setcol;
    property row: integer read ffocusedcell.row write setrow;
+   property firstvisiblerow: integer read ffirstvisiblerow;
+   property lastvisiblerow: integer read flastvisiblerow;
+   
    property gridframewidth: integer read fgridframewidth 
                         write setgridframewidth default 0;
    property gridframecolor: colorty read fgridframecolor 
@@ -1625,6 +1632,7 @@ end;
               write fonrowdatachanged;
    property onrowsmoved: gridblockmovedeventty read fonrowsmoved
               write fonrowsmoved;
+   property onscrollrows: gridscrolleventty read fonscrollrows write fonscrollrows;
 
    property onrowsinserting: gridbeforeblockeventty read fonrowsinserting
               write fonrowsinserting;
@@ -1699,6 +1707,7 @@ end;
    property onrowsinserted;
    property onrowsdeleting;
    property onrowsdeleted;
+   property onscrollrows;
    property oncellevent;
    property onselectionchanged;
    property onsort;
@@ -1799,6 +1808,7 @@ end;
    property onrowsdeleting;
    property onrowsdeleted;
    property onrowcountchanged;
+   property onscrollrows;
    property oncellevent;
    property onselectionchanged;
    property onsort;
@@ -8360,8 +8370,11 @@ begin
  end;
 end;
 
-procedure tcustomgrid.scrollrows(const step: integer);
+procedure tcustomgrid.scrollrows(step: integer);
 begin
+ if canevent(tmethod(fonscrollrows)) then begin
+  fonscrollrows(self,step);
+ end;
  tgridframe(fframe).scrollpos:= addpoint(tgridframe(fframe).scrollpos,
        makepoint(0,ystep*step));
 end;

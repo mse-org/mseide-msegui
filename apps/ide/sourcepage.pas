@@ -413,7 +413,7 @@ end;
 procedure tsourcepage.updatedebuglines;
 var
  ar1: integerarty;
- ar2: ptrintarty;
+ ar2: ptruintarty;
  po1: pintegeraty;
  int1,int2: integer;
 begin
