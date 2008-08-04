@@ -102,6 +102,7 @@ type
    function getitemclass: modulelinkpropclassty; override;  
   public
    constructor create(const aowner: tcustommodulelink);
+   class function getitemclasstype: persistentclassty; override;
    function byname(const aname: string): trxlinkaction;
    property items[const index: integer]: trxlinkaction read getitems; default;
   published
@@ -130,6 +131,7 @@ type
   public
    constructor create(const aowner: tcustommodulelink);
    destructor destroy; override;
+   class function getitemclasstype: persistentclassty; override;
    function byname(const aname: string): ttxlinkaction;
    property items[const index: integer]: ttxlinkaction read getitems; default;
  end;
@@ -157,6 +159,7 @@ type
    function getitemclass: modulelinkpropclassty; override;  
   public
    constructor create(const aowner: tcustommodulelink);
+   class function getitemclasstype: persistentclassty; override;
    function byname(const aname: string): ttxlinkmodule;
    property items[const index: integer]: ttxlinkmodule read getitems; default;   
  end;
@@ -189,6 +192,7 @@ type
    function getitemclass: modulelinkpropclassty; override;  
   public
    constructor create(const aowner: tcustommodulelink);
+   class function getitemclasstype: persistentclassty; override;
    function byname(const aname: string): trxlinkmodule;
    property items[const index: integer]: trxlinkmodule read getitems; default;   
  end;
@@ -248,6 +252,7 @@ type
   protected
    function getitemclass: modulelinkpropclassty; override;  
   public
+   class function getitemclasstype: persistentclassty; override;
    function byname(const aname: string): tvaluelink;
    property items[const index: integer]: tvaluelink read getitems; default;   
  end;
@@ -436,6 +441,7 @@ type
    procedure setcols(const index: integer; const avalue: tifidatacol);
   public 
    constructor create(const aowner: ttxdatagrid);
+   class function getitemclasstype: persistentclassty; override;
    function colbyname(const aname: ansistring): tifidatacol;
    property cols[const index: integer]: tifidatacol read getcols write setcols;
                                                  default;
@@ -587,6 +593,11 @@ begin
  inherited create(aowner);
 end;
 
+class function trxlinkactions.getitemclasstype: persistentclassty;
+begin
+ result:= trxlinkaction;
+end;
+
 function trxlinkactions.getitems(const index: integer): trxlinkaction;
 begin
  result:= trxlinkaction(inherited getitems(index));
@@ -644,6 +655,11 @@ begin
  fdestroyhandler.destroy;
 end;
 
+class function ttxlinkactions.getitemclasstype: persistentclassty;
+begin
+ result:= ttxlinkaction;
+end;
+
 function ttxlinkactions.getitems(const index: integer): ttxlinkaction;
 begin
  result:= ttxlinkaction(inherited getitems(index));
@@ -664,6 +680,11 @@ end;
 constructor ttxlinkmodules.create(const aowner: tcustommodulelink);
 begin
  inherited create(aowner);
+end;
+
+class function ttxlinkmodules.getitemclasstype: persistentclassty;
+begin
+ result:= ttxlinkmodule;
 end;
 
 function ttxlinkmodules.getitems(const index: integer): ttxlinkmodule;
@@ -705,6 +726,11 @@ end;
 constructor trxlinkmodules.create(const aowner: tcustommodulelink);
 begin
  inherited create(aowner);
+end;
+
+class function trxlinkmodules.getitemclasstype: persistentclassty;
+begin
+ result:= trxlinkmodule;
 end;
 
 function trxlinkmodules.getitems(const index: integer): trxlinkmodule;
@@ -945,6 +971,11 @@ begin
 end;
 
 { tvaluelinks }
+
+class function tvaluelinks.getitemclasstype: persistentclassty;
+begin
+ result:= tvaluelink;
+end;
 
 function tvaluelinks.getitems(const index: integer): tvaluelink;
 begin
@@ -1667,6 +1698,11 @@ end;
 constructor tifidatacols.create(const aowner: ttxdatagrid);
 begin
  inherited create(aowner,tifidatacol);
+end;
+
+class function tifidatacols.getitemclasstype: persistentclassty;
+begin
+ result:= tifidatacol;
 end;
 
 function tifidatacols.getcols(const index: integer): tifidatacol;

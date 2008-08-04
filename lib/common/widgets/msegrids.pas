@@ -769,6 +769,7 @@ type
    procedure dosizechanged; override;
   public
    constructor create(const agridprop: tgridprop); reintroduce;
+   class function getitemclasstype: persistentclassty; override;
    property items[const index: integer]: tcolheader read getitems
                  write setitems; default;
  end;
@@ -1045,6 +1046,7 @@ end;
    function getcols(const index: integer): tdrawcol;
   public
    constructor create(aowner: tcustomgrid);
+   class function getitemclasstype: persistentclassty; override;
    property cols[const index: integer]: tdrawcol read getcols; default;
   published
    property focusrectdist;
@@ -1063,6 +1065,7 @@ end;
    function getcolclass: stringcolclassty; virtual;
   public
    constructor create(aowner: tcustomgrid);
+   class function getitemclasstype: persistentclassty; override;
    property cols[const index: integer]: tstringcol read getcols; default; //last!
   published
    property focusrectdist;
@@ -1083,6 +1086,7 @@ end;
    function colatpos(const x: integer): integer; //-cout..-1, 0 if invalid
   public
    constructor create(aowner: tcustomgrid);
+   class function getitemclasstype: persistentclassty; override;
    property cols[const index: integer]: tfixcol read getcols write setcols; default;
                //index -1..-count
   published
@@ -1110,6 +1114,7 @@ end;
    procedure dofontheightdelta(var delta: integer);
   public
    constructor create(aowner: tcustomgrid);
+   class function getitemclasstype: persistentclassty; override;
    procedure synctofontheight;
    property rows[const index: integer]: tfixrow read getrows write setrows; default;
                //index -1..-count
@@ -1180,6 +1185,7 @@ end;
    procedure createitem(const index: integer; var item: tpersistent); override;
   public
    constructor create(const aowner: tcustomgrid);
+   class function getitemclasstype: persistentclassty; override;
  end;
 
  cellinnerlevelty = (cil_all,cil_noline,cil_paint,cil_inner);
@@ -3143,6 +3149,11 @@ constructor tcolheaders.create(const agridprop: tgridprop);
 begin
  fgridprop:= agridprop;
  inherited create(self,tcolheader);
+end;
+
+class function tcolheaders.getitemclasstype: persistentclassty;
+begin
+ result:= tcolheader;
 end;
 
 function tcolheaders.getitems(const index: integer): tcolheader;
@@ -5965,6 +5976,11 @@ begin
  inherited create(aowner,tdrawcol);
 end;
 
+class function tdrawcols.getitemclasstype: persistentclassty;
+begin
+ result:= tdrawcol;
+end;
+
 function tdrawcols.getcols(const index: integer): tdrawcol;
 begin
  result:= tdrawcol(items[index]);
@@ -5978,6 +5994,11 @@ begin
  ftextflagsactive:= defaultactivecoltextflags;
  foptionsedit:= defaultstringcoleditoptions;
  inherited create(aowner,getcolclass);
+end;
+
+class function tstringcols.getitemclasstype: persistentclassty;
+begin
+ result:= tstringcol;
 end;
 
 function tstringcols.getcolclass: stringcolclassty;
@@ -6060,6 +6081,11 @@ begin
  flinecolor:= defaultfixlinecolor;
 end;
 
+class function tfixcols.getitemclasstype: persistentclassty;
+begin
+ result:= tfixcol;
+end;
+
 function tfixcols.getcols(const index: integer): tfixcol;
 begin
  result:= tfixcol(items[-index-1]);
@@ -6108,6 +6134,11 @@ begin
  freversedorder:= true;
  inherited create(aowner,tfixrow);
  flinecolor:= defaultfixlinecolor;
+end;
+
+class function tfixrows.getitemclasstype: persistentclassty;
+begin
+ result:= tfixrow;
 end;
 
 function tfixrows.getrows(const index: integer): tfixrow;
@@ -11693,6 +11724,11 @@ constructor trowfontarrayprop.create(const aowner: tcustomgrid);
 begin
  fgrid:= aowner;
  inherited create(nil);
+end;
+
+class function trowfontarrayprop.getitemclasstype: persistentclassty;
+begin
+ result:= tfont;
 end;
 
 procedure trowfontarrayprop.createitem(const index: integer; var item: tpersistent);

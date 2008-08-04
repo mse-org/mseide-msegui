@@ -13,7 +13,7 @@ unit msewidgetgrid;
 
 interface
 uses
- msegrids,msegui,msegraphutils,mseglob,mseguiglob,mseeditglob,Classes,msemenus,
+ mseclasses,msegrids,msegui,msegraphutils,mseglob,mseguiglob,mseeditglob,Classes,msemenus,
  msegraphics,mseevent,msedatalist,msetypes,msepointer,msestrings;
 
 type
@@ -157,6 +157,7 @@ type
    procedure updatedatastate; override;
   public
    constructor create(const aowner: tcustomwidgetgrid);
+   class function getitemclasstype: persistentclassty; override;
    procedure datasourcechanged;
    property cols[const index: integer]: twidgetcol read getcols; default;
  end;
@@ -1330,6 +1331,11 @@ end;
 constructor twidgetcols.create(const aowner: tcustomwidgetgrid);
 begin
  inherited create(aowner,twidgetcol);
+end;
+
+class function twidgetcols.getitemclasstype: persistentclassty;
+begin
+ result:= twidgetcol;
 end;
 
 procedure twidgetcols.datasourcechanged;

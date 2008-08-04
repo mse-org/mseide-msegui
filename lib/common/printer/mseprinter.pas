@@ -442,6 +442,8 @@ begin
  end;
 end;
 
+{ tprintertabulators }
+
 { tcustomprinter }
 
 constructor tcustomprinter.create(aowner: tcomponent);

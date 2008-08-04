@@ -240,10 +240,12 @@ type
    function displayname(const index: integer): msestring; virtual;
    procedure add(const item: tpersistent);
    function indexof(const aitem: tpersistent): integer; //-1 if not found
+   class function getitemclasstype: persistentclassty; virtual; abstract;
    property itemclasstype: virtualpersistentclassty read fitemclasstype;
    property items[const index: integer]: tpersistent read getitems; default;
  end;
-
+ persistentarraypropclassty = class of tpersistentarrayprop;
+ 
  ownedpersistentclassty = class of townedpersistent;
 
  townedpersistentarrayprop = class(tpersistentarrayprop)
@@ -254,7 +256,8 @@ type
    procedure internalcreate(const aowner: tobject;
                            aclasstype: virtualpersistentclassty);
   public
-   constructor create(const aowner: tobject; aclasstype: ownedpersistentclassty); virtual;
+   constructor create(const aowner: tobject; 
+                     aclasstype: ownedpersistentclassty); virtual;
  end;
 
  ownedeventpersistentclassty = class of townedeventpersistent;

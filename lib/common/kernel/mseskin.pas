@@ -111,6 +111,7 @@ type
  tskincolors = class(tpersistentarrayprop)
   public
    constructor create;
+   class function getitemclasstype: persistentclassty; override;
    procedure setcolors;
    procedure restorecolors;
  end;
@@ -137,6 +138,7 @@ type
  tskinfontaliass = class(tpersistentarrayprop)   
   public
    constructor create;
+   class function getitemclasstype: persistentclassty; override;
    procedure setfontalias;
  end;
  
@@ -518,6 +520,11 @@ begin
  inherited create(tskincolor);
 end;
 
+class function tskincolors.getitemclasstype: persistentclassty;
+begin
+ result:= tskincolor;
+end;
+
 procedure tskincolors.setcolors;
 var
  int1: integer;
@@ -546,6 +553,11 @@ end;
 constructor tskinfontaliass.create;
 begin
  inherited create(tskinfontalias);
+end;
+
+class function tskinfontaliass.getitemclasstype: persistentclassty;
+begin
+ result:= tskinfontalias;
 end;
 
 procedure tskinfontaliass.setfontalias;

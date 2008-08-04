@@ -1520,6 +1520,7 @@ type
    function getcolclass: stringcolclassty; override;
    procedure datasourcechanged;
   public
+   class function getitemclasstype: persistentclassty; override;
    property cols[const index: integer]: tdbstringcol read getcols; default; //last!
   published
    property optionsdb: optionseditdbty read foptionsdb write setoptionsdb default [];
@@ -7022,6 +7023,11 @@ end;
 { tdropdowndbstringcol }
 
 { tdbstringcols }
+
+class function tdbstringcols.getitemclasstype: persistentclassty;
+begin
+ result:= tdbstringcol;
+end;
 
 function tdbstringcols.getcols(const index: integer): tdbstringcol;
 begin

@@ -118,6 +118,7 @@ type
    constructor create(const aowner: tcustomtabbar; aclasstype: indexpersistentclassty);
                                          reintroduce;
    destructor destroy; override;
+   class function getitemclasstype: persistentclassty; override;
    procedure createface;
    procedure createfaceactive;
    procedure add(const item: ttab);
@@ -1030,6 +1031,11 @@ begin
  fface.free;
  ffaceactive.free;
  inherited;
+end;
+
+class function ttabs.getitemclasstype: persistentclassty;
+begin
+ result:= ttab;
 end;
 
 procedure ttabs.createface;

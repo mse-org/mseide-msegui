@@ -86,6 +86,7 @@ type
    class function getitemclass: tabulatoritemclassty; virtual;
   public
    constructor create; reintroduce;
+   class function getitemclasstype: persistentclassty; override;
    procedure assign(source: tpersistent); override;
    procedure add(const apos: real; const akind: tabulatorkindty);
    procedure setdefaulttabs(const awidth: real = 20; const acount: integer = 20;
@@ -1212,6 +1213,11 @@ constructor tcustomtabulators.create;
 begin
  fppmm:= defaultppmm;
  inherited create(self,getitemclass);
+end;
+
+class function tcustomtabulators.getitemclasstype: persistentclassty;
+begin
+ result:= getitemclass;
 end;
 
 procedure tcustomtabulators.assign(source: tpersistent);

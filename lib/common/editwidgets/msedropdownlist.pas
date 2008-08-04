@@ -95,6 +95,7 @@ type
    procedure checkrowindex(const aindex: integer);
   public
    constructor create(const aowner: tcustomdropdownlistcontroller); reintroduce;
+   class function getitemclasstype: persistentclassty; override;
    procedure beginupdate;
    procedure endupdate;
    procedure clear;
@@ -421,6 +422,11 @@ begin
  inherited create(aowner,nil);
  count:= 1;
 // items[0].options:= items[0].options + [co_fill];
+end;
+
+class function tdropdowncols.getitemclasstype: persistentclassty;
+begin
+ result:= tdropdowncol;
 end;
 
 function tdropdowncols.getcolclass: dropdowncolclassty;

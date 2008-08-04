@@ -43,6 +43,7 @@ type
    procedure receiveevent(const event: tobjectevent);
   public
    constructor create(const aowner: tmenuitem);
+   class function getitemclasstype: persistentclassty; override;
    procedure assign(source: tpersistent); override;
    procedure insert(const index: integer; const aitem: tmenuitem); overload;
       //aitem is owned
@@ -1373,6 +1374,11 @@ constructor tmenuitems.create(const aowner: tmenuitem);
 begin
  fowner:= aowner;
  inherited create(tmenuitem);
+end;
+
+class function tmenuitems.getitemclasstype: persistentclassty;
+begin
+ result:= tmenuitem;
 end;
 
 procedure tmenuitems.assign(source: tpersistent);

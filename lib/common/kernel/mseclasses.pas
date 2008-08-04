@@ -67,7 +67,7 @@ type
                                                var acancel: boolean) of object;
 
  persistentarty = array of tpersistent;
- pesistentclassty = class of tpersistent;
+ persistentclassty = class of tpersistent;
  
  componentarty = array of tcomponent;
  componentclassty = class of tcomponent;

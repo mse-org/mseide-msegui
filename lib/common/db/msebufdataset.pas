@@ -261,6 +261,7 @@ type
    function getitems(const index: integer): tindexfield;
   public
    constructor create(const aowner: tlocalindex); reintroduce;
+   class function getitemclasstype: persistentclassty; override;
    property items[const index: integer]: tindexfield read getitems; default;
  end;
 
@@ -344,6 +345,7 @@ type
    procedure setcount1(acount: integer; doinit: boolean); override;
  public
    constructor create(const aowner: tmsebufdataset); reintroduce;
+   class function getitemclasstype: persistentclassty; override;
    procedure move(const curindex,newindex: integer); override;
    property items[const index: integer]: tlocalindex read getitems; default;
    property activeindex: integer read getactiveindex write setactiveindex;
@@ -4615,6 +4617,11 @@ begin
  inherited create(aowner,tlocalindex);
 end;
 
+class function tlocalindexes.getitemclasstype: persistentclassty;
+begin
+ result:= tlocalindex;
+end;
+
 function tlocalindexes.getitems(const index: integer): tlocalindex;
 begin
  result:= tlocalindex(inherited items[index]);
@@ -5161,6 +5168,11 @@ end;
 constructor tindexfields.create(const aowner: tlocalindex);
 begin
  inherited create(aowner,tindexfield);
+end;
+
+class function tindexfields.getitemclasstype: persistentclassty;
+begin
+ result:= tindexfield;
 end;
 
 function tindexfields.getitems(const index: integer): tindexfield;

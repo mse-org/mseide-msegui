@@ -87,6 +87,7 @@ type
    function getitems(const index: integer): tshortcutaction;
   public
    constructor create(const aowner: tshortcutcontroller); reintroduce;
+   class function getitemclasstype: persistentclassty; override;
   public
    property items[const index: integer]: tshortcutaction read getitems;
                                                    default;
@@ -672,6 +673,11 @@ end;
 constructor tshortcutactions.create(const aowner: tshortcutcontroller);
 begin
  inherited create(aowner,tshortcutaction);
+end;
+
+class function tshortcutactions.getitemclasstype: persistentclassty;
+begin
+ result:= tshortcutaction;
 end;
 
 function tshortcutactions.getitems(const index: integer): tshortcutaction;

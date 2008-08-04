@@ -140,6 +140,7 @@ type
   public
    constructor create(const aowner: tcustomtoolbar); reintroduce;
    destructor destroy; override;
+   class function getitemclasstype: persistentclassty; override;
    procedure createface;
    procedure resetradioitems(const group: integer);
    function getcheckedradioitem(const group: integer): ttoolbutton;
@@ -547,6 +548,11 @@ destructor ttoolbuttons.destroy;
 begin
  inherited;
  fface.free;
+end;
+
+class function ttoolbuttons.getitemclasstype: persistentclassty;
+begin
+ result:= ttoolbutton;
 end;
 
 function ttoolbuttons.add: ttoolbutton;

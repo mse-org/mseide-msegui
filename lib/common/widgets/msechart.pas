@@ -96,6 +96,7 @@ type
    procedure checkgraphic;
   public
    constructor create(const aowner: tcustomchart); reintroduce;
+   class function getitemclasstype: persistentclassty; override;
    property items[const index: integer]: ttrace read getitems write setitems; default;
   published
  end;
@@ -224,6 +225,7 @@ type
  trecordertraces = class(tpersistentarrayprop)
   public
    constructor create;
+   class function getitemclasstype: persistentclassty; override;
  end;
   
  tchartrecorder = class(tcustomchart)
@@ -450,6 +452,11 @@ end;
 constructor ttraces.create(const aowner: tcustomchart);
 begin
  inherited create(aowner,ttrace);
+end;
+
+class function ttraces.getitemclasstype: persistentclassty;
+begin
+ result:= ttrace;
 end;
 
 procedure ttraces.change;
@@ -710,6 +717,11 @@ end;
 constructor trecordertraces.create;
 begin
  inherited create(trecordertrace);
+end;
+
+class function trecordertraces.getitemclasstype: persistentclassty;
+begin
+ result:= trecordertrace;
 end;
 
 { trecordertrace }

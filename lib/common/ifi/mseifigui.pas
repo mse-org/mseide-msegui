@@ -32,6 +32,7 @@ type
   protected
    function getitemclass: modulelinkpropclassty; override;  
   public
+   class function getitemclasstype: persistentclassty; override;
    function byname(const aname: string): tvaluewidgetlink;
    property items[const index: integer]: tvaluewidgetlink read getitems; default;   
  end;
@@ -223,6 +224,11 @@ begin
 end;
 
 { tvaluewidgetlinks }
+
+class function tvaluewidgetlinks.getitemclasstype: persistentclassty;
+begin
+ result:= tvaluewidgetlink;
+end;
 
 function tvaluewidgetlinks.getitems(const index: integer): tvaluewidgetlink;
 begin

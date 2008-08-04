@@ -615,6 +615,7 @@ type
    procedure createitem(const index: integer; var item: tpersistent); override;
   public
    constructor create(const aowner: tcustomdatabutton);
+   class function getitemclasstype: persistentclassty; override;
    property items[const index: integer]: tface read getitems; default;
  end;
  
@@ -2386,6 +2387,11 @@ constructor tvaluefacearrayprop.create(const aowner: tcustomdatabutton);
 begin
  fowner:= aowner;
  inherited create(nil);
+end;
+
+class function tvaluefacearrayprop.getitemclasstype: persistentclassty;
+begin
+ result:= tface;
 end;
 
 procedure tvaluefacearrayprop.createitem(const index: integer;

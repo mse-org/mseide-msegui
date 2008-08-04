@@ -727,6 +727,7 @@ type
    procedure defineproperties(filer: tfiler); override;
   public
    constructor create(const adataset: tdataset);
+   class function getitemclasstype: persistentclassty; override;
    procedure move(const curindex,newindex: integer); override;
    procedure updateorder;
    function getfieldnames: stringarty;
@@ -3822,6 +3823,11 @@ constructor tpersistentfields.create(const adataset: tdataset);
 begin
  fdataset:= adataset;
  inherited create(nil);
+end;
+
+class function tpersistentfields.getitemclasstype: persistentclassty;
+begin
+ result:= tfield;
 end;
 
 procedure tpersistentfields.createitem(const index: integer; 

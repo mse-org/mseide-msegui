@@ -249,6 +249,7 @@ type
   public
    constructor create(const aowner: tcustombuttonframe;
                     const buttonclass: framebuttonclassty);
+   class function getitemclasstype: persistentclassty; override;
    procedure updatewidgetstate;
    function wantmouseevent(const apos: pointty): boolean;
   public
@@ -805,6 +806,11 @@ constructor tframebuttons.create(const aowner: tcustombuttonframe;
                       const buttonclass: framebuttonclassty);
 begin
  inherited create(aowner,buttonclass{tframebutton});
+end;
+
+class function tframebuttons.getitemclasstype: persistentclassty;
+begin
+ result:= tframebutton;
 end;
 
 procedure tframebuttons.dosizechanged;

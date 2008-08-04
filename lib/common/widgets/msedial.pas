@@ -156,6 +156,7 @@ type
    procedure dosizechanged; override;
   public
    constructor create(const aowner: tcustomdialcontroller); reintroduce;
+   class function getitemclasstype: persistentclassty; override;
    procedure paint(const acanvas: tcanvas);
    property items[const index: integer]: tdialmarker read getitems; default;
  end;
@@ -182,6 +183,7 @@ type
    procedure dosizechanged; override;
   public
    constructor create(const aowner: tcustomdialcontroller); reintroduce;
+   class function getitemclasstype: persistentclassty; override;
    property items[const index: integer]: tdialtick read getitems; default;
  end;
  
@@ -666,6 +668,11 @@ begin
  inherited create(aowner,tdialmarker);
 end;
 
+class function tdialmarkers.getitemclasstype: persistentclassty;
+begin
+ result:= tdialmarker;
+end;
+
 function tdialmarkers.getitems(const aindex: integer): tdialmarker;
 begin
  result:= tdialmarker(inherited items[aindex]);
@@ -718,6 +725,11 @@ end;
 constructor tdialticks.create(const aowner: tcustomdialcontroller);
 begin
  inherited create(aowner,tdialtick);
+end;
+
+class function tdialticks.getitemclasstype: persistentclassty;
+begin
+ result:= tdialtick;
 end;
 
 function tdialticks.getitems(const aindex: integer): tdialtick;
