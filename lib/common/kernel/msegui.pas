@@ -1717,6 +1717,10 @@ type
    constructor create(const dest: ievent; const asize: sizety);
  end;
 
+ tguiapplication = class; 
+ waitidleeventty = procedure(const sender: tguiapplication; var again: boolean)
+                                      of object; 
+
  tguiapplication = class(tcustomapplication)
   private
    finiting: integer;
@@ -1749,7 +1753,7 @@ type
    fmodalwindowbeforewaitdialog: twindow;
    fonterminatebefore: threadcompeventty;
    fexecuteaction: notifyeventty;
-   fidleaction: notifyeventty;
+   fidleaction: waitidleeventty;
    feventlooping: integer;
    flastshiftstate: shiftstatesty;
    flastkey: keyty;
@@ -1813,7 +1817,7 @@ type
                    const caption: msestring = '';
                    const acancelaction: notifyeventty = nil;
                    const aexecuteaction: notifyeventty = nil;
-                   const aidleaction: notifyeventty = nil): boolean; override;
+                   const aidleaction: waitidleeventty = nil): boolean;
               //true if not canceled
    procedure terminatewait;
    procedure cancelwait;
@@ -14035,7 +14039,7 @@ procedure tguiapplication.dowaitidle1(var again: boolean);
 begin
  if fstate * [aps_waitok,aps_waitcanceled,aps_waitidlelock] = [] then begin
   include(fstate,aps_waitidlelock);
-  fidleaction(self);
+  fidleaction(self,again);
   if fstate * [aps_waitok,aps_waitcanceled] = [] then begin
    registeronidle({$ifdef FPC}@{$endif}dowaitidle1);
 //   again:= true;
@@ -14049,7 +14053,7 @@ function tguiapplication.waitdialog(const athread: tthreadcomp = nil;
                const caption: msestring = '';
                const acancelaction: notifyeventty = nil;
                const aexecuteaction: notifyeventty = nil;
-               const aidleaction: notifyeventty = nil): boolean;
+               const aidleaction: waitidleeventty = nil): boolean;
 var
  res1: modalresultty;
  wo1: longword;

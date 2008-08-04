@@ -1,5 +1,8 @@
 MSEide+MSEgui version history
 
+2008-08-04
+ tguiapplication.waitdialog aidleaction parameter is type waitidleeventty.
+ tthreadcomp.runwithwaitdialog moved to tguithreadcomp.
 2008-05-31
  optioneditty oe_returntaborder -> optionwidgetty ow_keyreturntaborder
  

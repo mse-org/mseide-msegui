@@ -195,9 +195,9 @@ type
                             //true if ok
    procedure createform(const aname: filenamety; const kind: formkindty);
    procedure removemodulemenuitem(const amodule: pmoduleinfoty);
-   procedure uploadexe(const sender: tobject);
+   procedure uploadexe(const sender: tguiapplication; var again: boolean);
    procedure uploadcancel(const sender: tobject);
-   procedure gdbserverexe(const sender: tobject);
+   procedure gdbserverexe(const sender: tguiapplication; var again: boolean);
    procedure gdbservercancel(const sender: tobject);
    function needsdownload: boolean;
   public
@@ -856,12 +856,16 @@ begin
  end;
 end;
 
-procedure tmainfo.gdbserverexe(const sender: tobject);
+procedure tmainfo.gdbserverexe(const sender: tguiapplication; var again: boolean);
 begin
  sys_sched_yield;
  if timeout(fgdbservertimeout) and 
      getprocessexitcode(fgdbserverprocid,fgdbserverexitcode,100000) then begin
-  application.terminatewait;
+  sender.terminatewait;
+ end
+ else begin
+  sender.idlesleep(100000);
+  again:= true;
  end;
 end;
 
@@ -977,11 +981,17 @@ begin
  {$endif}
 end;
 
-procedure tmainfo.uploadexe(const sender: tobject);
+procedure tmainfo.uploadexe(const sender: tguiapplication; var again: boolean);
+var
+ int1: integer;
 begin
  if not downloading then begin
-  application.terminatewait;
- end;
+  sender.terminatewait;
+ end
+ else begin
+  sender.idlesleep(100000);
+  again:= true;
+ end; 
 {
  if getprocessexitcode(fuploadprocid,fuploadexitcode,100000) then begin
   application.terminatewait;

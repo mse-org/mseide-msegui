@@ -226,11 +226,13 @@ type
    function checkoverload(const asleepus: integer = 100000): boolean;
               //true if never idle since last call,
               // unlocks application and calls sleep if not mainthread and asleepus >= 0
+{              
    function waitdialog(const athread: tthreadcomp = nil; const atext: msestring = '';
                    const caption: msestring = '';
                    const acancelaction: notifyeventty = nil;
                    const aexecuteaction: notifyeventty = nil;
-                   const aidleaction: notifyeventty = nil): boolean; virtual;
+                   const aidleaction: waitidleeventty = nil): boolean; virtual;
+}
    procedure handleexception(sender: tobject = nil; 
                                        const leadingtext: string = '');
    procedure showexception(e: exception; const leadingtext: string = '');
@@ -267,6 +269,8 @@ type
    procedure langchanged; virtual;
    procedure beginwait; virtual;
    procedure endwait; virtual;
+   procedure idlesleep(const asleepus: integer);
+                       //calls unlockall-relockall
    function candefocus: boolean; virtual;
    property terminated: boolean read getterminated write setterminated;
    property exceptioncount: longword read fexceptioncount;
@@ -1060,15 +1064,25 @@ begin
  //dummy
 end;
 
+procedure tcustomapplication.idlesleep(const asleepus: integer);
+var
+ int1: integer;
+begin
+ int1:= unlockall;
+ sleepus(asleepus);
+ relockall(int1);
+end;
+
+{
 function tcustomapplication.waitdialog(const athread: tthreadcomp = nil;
                const atext: msestring = ''; const caption: msestring = '';
                const acancelaction: notifyeventty = nil;
                const aexecuteaction: notifyeventty = nil;
-               const aidleaction: notifyeventty = nil): boolean;
+               const aidleaction: waitidleeventty = nil): boolean;
 begin
  result:= false; //dummy
 end;
-
+}
 procedure tcustomapplication.handleexception(sender: tobject = nil;
                               const leadingtext: string = '');
 begin
