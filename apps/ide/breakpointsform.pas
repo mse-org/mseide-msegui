@@ -158,10 +158,13 @@ var
  int1: integer;
  lineinfo: bkptlineinfoty;
  info1: breakpointinfoty;
+ bo1: boolean;
 begin
+ bo1:= info.bkpton;
  if gdb.execloaded then begin
   gdb.infobreakpoint(info);
  end;
+ info.bkpton:= bo1;
  addressbkpt[index]:= info.addressbreakpoint;
  path[index]:= info.path;
  filename[index]:= msefileutils.filename(info.path);
@@ -489,6 +492,7 @@ begin
  fillchar(info1,0,sizeof(info1));
  info1.address:= addr;
  info1.addressbreakpoint:= true;
+ info1.bkpton:= true;
  addbreakpoint(info1);
 end;
 
