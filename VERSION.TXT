@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+Version 1.8
+2008-08-04
 2008-05-31
  optioneditty oe_returntaborder -> optionwidgetty ow_keyreturntaborder
  
