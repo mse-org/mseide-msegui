@@ -438,12 +438,12 @@ var
 begin
  CurrencyFormat:= defaultformatsettingsmse.CurrencyFormat;
  NegCurrFormat:= defaultformatsettingsmse.NegCurrFormat;
- ThousandSeparator:= defaultformatsettingsmse.ThousandSeparator;
- DecimalSeparator:= defaultformatsettingsmse.DecimalSeparator;
+ ThousandSeparator:= char(defaultformatsettingsmse.ThousandSeparator);
+ DecimalSeparator:= char(defaultformatsettingsmse.DecimalSeparator);
  CurrencyDecimals:= defaultformatsettingsmse.CurrencyDecimals;
- DateSeparator:= defaultformatsettingsmse.DateSeparator;
- TimeSeparator:= defaultformatsettingsmse.TimeSeparator;
- ListSeparator:= defaultformatsettingsmse.ListSeparator;
+ DateSeparator:= char(defaultformatsettingsmse.DateSeparator);
+ TimeSeparator:= char(defaultformatsettingsmse.TimeSeparator);
+ ListSeparator:= char(defaultformatsettingsmse.ListSeparator);
  CurrencyString:= defaultformatsettingsmse.CurrencyString;
  ShortDateFormat:= defaultformatsettingsmse.ShortDateFormat;
  LongDateFormat:= defaultformatsettingsmse.LongDateFormat;
