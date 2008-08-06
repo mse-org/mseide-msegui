@@ -53,6 +53,10 @@ TSigActionEx = packed record
                end;
 function timestampms: cardinal;
 function sigactionex(SigNum: Integer; var Action: TSigActionex; OldAction: PSigAction): Integer;
+function m_sigprocmask(__how:longint; var SigSet : TSigSet;
+            var oldset: Tsigset):longint;cdecl;external clib name 'sigprocmask';
+function m_sigismember(var SigSet : TSigSet; SigNum : Longint):longint;cdecl;external clib name 'sigismember';
+
 
 procedure setcloexec(const fd: integer);
 

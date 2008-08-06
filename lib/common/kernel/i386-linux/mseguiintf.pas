@@ -15,8 +15,8 @@ unit mseguiintf; //i386-linux
 interface
 
 uses
- {$ifdef FPC}xlib{$else}Xlib{$endif},msetypes,msegui,msegraphics,msegraphutils,
- mseevent,msepointer,mseguiglob,msesys,
+ {$ifdef FPC}xlib{$else}Xlib{$endif},msetypes,mseapplication,msegui,msegraphics,
+ msegraphutils,mseevent,msepointer,mseguiglob,msesys,
  msethread{$ifdef FPC},x,xutil,dynlibs{$endif},libc,msesysintf,msestockobjects,
  msestrings,xft,xrender;
 
@@ -734,8 +734,10 @@ var
 
  sigtimerbefore: sighandler_t;
  sigtermbefore: sighandler_t;
+ sigchldbefore: sighandler_t;
  timerevent: boolean;
  terminated: boolean;
+ childevent: boolean;
 // cursorshape: cursorshapety;
  screencursor: cursor;
  im: xim;
@@ -2129,6 +2131,11 @@ end;
 procedure sigterminate(SigNum: Integer); cdecl;
 begin
  terminated:= true;
+end;
+
+procedure sigchild(SigNum: Integer); cdecl;
+begin
+ childevent:= true;
 end;
 
 function gui_postevent(event: tevent): guierrorty;
@@ -5202,8 +5209,6 @@ begin
    fd:= xconnectionnumber(appdisp);
    events:= pollin or pollpri;
   end;
-//  fd_zero(fdsetr);
-//  fd_set(xconnectionnumber(appdisp),fdsetr);
 {$ifdef with_sm}
   if hassm then begin
    if sminfo.fd > 0 then begin
@@ -5212,24 +5217,20 @@ begin
      events:= pollin or pollpri;
     end;
     inc(pollcount);
- //   fd_set(sminfo.fd,fdsetr);
    end;
   end;
 {$endif}
-  if not timerevent and not terminated then begin
+  if not timerevent and not terminated and not childevent then begin
    repeat
     if not application.unlock then begin
      guierror(gue_notlocked);
     end;
-//    fdsete:= fdsetr;
     int1:= poll(@pollinfo,pollcount,1000); 
      //wakeup clientmessages are sometimes missed with xcb ???
-//    int1:= select(fd_setsize,@fdsetr,nil,@fdsete,nil);
     application.lock;
    until (int1 <> -1) or timerevent or terminated;
  {$ifdef with_sm}
    if hassm then begin
-//   if (int1 > 0) and fd_isset(sminfo.fd,fdsetr) then begin
     if (int1 > 0) and (pollinfo[1].revents <> 0) then begin
      iceprocessmessages(sminfo.iceconnection,nil,int2);
      with sminfo do begin
@@ -5274,6 +5275,10 @@ begin
   if terminated then begin
    application.postevent(tevent.create(ek_terminate));
    terminated:= false;
+  end;
+  if childevent then begin
+   childevent:= false;
+   handlesigchld;
   end;
  end;
  result:= nil;
@@ -5390,7 +5395,6 @@ begin
   end;
   enternotify: begin
    with xev.xcrossing do begin
-//    result:= twindowevent.create(ek_enterwindow,xwindow);
     result:= tmouseenterevent.create(xwindow,
                 makepoint(x,y),xtoshiftstate(state,key_none,mb_none,false),
                  time*1000);
@@ -5459,7 +5463,6 @@ begin
      if xev.xtype = buttonpress then begin
       result:= tmouseevent.create(xwindow,false,mb_none,mw_up,
                 makepoint(x,y),shiftstate1,time*1000);
-//      result:= tkeyevent.create(xwindow,false,key_wheelup,key_wheelup,shiftstate1,chars);
      end;
     end
     else begin
@@ -5467,7 +5470,6 @@ begin
       if xev.xtype = buttonpress then begin
        result:= tmouseevent.create(xwindow,false,mb_none,mw_down,
                 makepoint(x,y),shiftstate1,time*1000);
-//       result:= tkeyevent.create(xwindow,false,key_wheeldown,key_wheeldown,shiftstate1,chars);
       end;
      end
      else begin
@@ -5492,15 +5494,11 @@ begin
   end;
   focusin,focusout: begin
    with xev.xfocus do begin
-//    aic:= getic(window);
     if xtype = focusin then begin
      eventkind:= ek_focusin;
-//     xseticvalues(aic,pchar(xnfocuswindow),window,nil);
-//     xseticfocus(aic);
     end
     else begin
      eventkind:= ek_focusout;
-//     xunseticfocus(aic);
     end;
     if mode <> notifypointer then begin
      result:= twindowevent.create(eventkind,window);
@@ -5532,7 +5530,6 @@ begin
       gui_getwindowrect(w,rect1); 
      end;
      result:= twindowrectevent.create(ek_configure,xwindow,rect1);
-//    result:= twindowrectevent.create(ek_configure,xwindow,makerect(x,y,width,height));
     end;
    end;
   end;
@@ -5704,6 +5701,7 @@ var
  po1: pchar;
  atomar: atomarty;
  rect1: rectty;
+ sigset1,sigset2: sigset_t;
 {$ifdef with_sm}
  smcb: smccallbacks;
  clientid: pchar;
@@ -5763,6 +5761,11 @@ begin
  timerevent:= false;
  sigtimerbefore:= signal(sigalrm,{$ifdef FPC}@{$endif}sigtimer);
  sigtermbefore:= signal(sigterm,{$ifdef FPC}@{$endif}sigterminate);
+ sigchldbefore:= signal(sigchld,{$ifdef FPC}@{$endif}sigchild);
+ sigemptyset(sigset1);
+ sigaddset(sigset1,sigchld);
+ m_sigprocmask(sig_unblock,sigset1,sigset2); 
+ 
  appdisp:= xopendisplay(nil);
  if appdisp = nil then begin
   goto error;

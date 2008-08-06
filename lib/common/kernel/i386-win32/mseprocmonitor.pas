@@ -14,13 +14,6 @@ uses
  msesys,mseevent;
 {$include ../mseprocmonitor.inc}
 
-function pro_listentoprocess(const prochandle: prochandlety;
-                             const dest: ievent; const data: pointer): boolean;
-             //false on error, limited to 63 items on windows
-procedure pro_unlistentoprocess(const prochandle: prochandlety;
-                                     const dest: ievent);
-
-
 implementation
 uses 
  msethread,msetypes,windows,sysutils,msedatalist,mseapplication;
@@ -54,17 +47,17 @@ begin
  end;
 end;
 
-function pro_listentoprocess(const prochandle: prochandlety; const dest: ievent;
-                             const data: pointer): boolean;
+function pro_listentoprocess(const aprochandle: prochandlety; const adest: ievent;
+                             const adata: pointer): boolean;
 begin
  checkinit;
- result:= monitor.listentoprocess(prochandle,dest,data);
+ result:= monitor.listentoprocess(aprochandle,adest,adata);
 end;
 
-procedure pro_unlistentoprocess(const prochandle: prochandlety; const dest: ievent);
+procedure pro_unlistentoprocess(const aprochandle: prochandlety; const adest: ievent);
 begin
  if monitor <> nil then begin
-  monitor.unlistentoprocess(prochandle,dest);
+  monitor.unlistentoprocess(aprochandle,adest);
  end;
 end;
 

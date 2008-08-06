@@ -287,11 +287,14 @@ procedure registerapplicationclass(const aclass: applicationclassty);
 procedure freedesigncomponent(const acomponent: tcomponent);
 procedure designvalidaterename(const acomponent: tcomponent;
                                    const curname, newname: string);
+procedure handlesigchld;
 
 type
  validaterenameeventty = procedure(const acomponent: tcomponent;
                                 const curname, newname: string) of object;
-var //designer hooks
+var 
+ onhandlesigchld: procedure;
+       //designer hooks
  ondesignchanged: notifyeventty;
  onfreedesigncomponent: componenteventty;
  ondesignvalidaterename: validaterenameeventty;
@@ -311,6 +314,13 @@ type
 var
  appinst: tcustomapplication;
  appclass: applicationclassty;
+
+procedure handlesigchld;
+begin
+ if assigned(onhandlesigchld) then begin
+  onhandlesigchld;
+ end;
+end;
 
 procedure freedesigncomponent(const acomponent: tcomponent);
 begin
