@@ -32,7 +32,8 @@ type
                 ek_keypress,ek_keyrelease,ek_timer,ek_wakeup,
                 ek_release,ek_closeform,ek_childscaled,ek_resize,
                 ek_dropdown,ek_async,ek_execute,ek_component,ek_synchronize,
-                ek_dbedit,ek_dbupdaterowdata,ek_data,ek_objectdata,ek_mse,
+                ek_dbedit,ek_dbupdaterowdata,ek_data,ek_objectdata,ek_childproc,
+                ek_mse,
                 ek_user);
 const
  mouseregionevents = [ek_mousepark,ek_mouseenter,ek_mouseleave,
@@ -124,6 +125,15 @@ type
    destructor destroy; override;
  end;
 
+ tchildprocevent = class(tobjectevent)
+  public
+   prochandle: prochandlety;
+   execresult: integer;
+   data: pointer;
+   constructor create(const dest: ievent; const aprochandle: prochandlety;
+                      const aexecresult: integer; const adata: pointer);   
+ end;
+ 
  tstringobjectevent = class(tobjectevent)
   private
   public
@@ -311,6 +321,18 @@ begin
    get;
   end;
  end;
+end;
+
+{ tchildprocevent }
+
+constructor tchildprocevent.create(const dest: ievent;
+          const aprochandle: prochandlety; const aexecresult: integer;
+          const adata: pointer);
+begin
+ prochandle:= aprochandle;
+ execresult:= aexecresult;
+ data:= adata;
+ inherited create(ek_childproc,dest);
 end;
 
 end.

@@ -143,7 +143,7 @@ type
   platformdata: array[3..7] of cardinal;
  end;
 
-function sys_getpid: integer;
+function sys_getpid: procidty;
 begin
  result:= libc.getpid;
 end;

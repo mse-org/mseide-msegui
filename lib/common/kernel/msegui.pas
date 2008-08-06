@@ -1766,7 +1766,7 @@ type
    flastmousewheeltimestamp: cardinal;
 
    procedure invalidated;
-   function grabpointer(const id: winidty): boolean;
+   function grabpointer(const aid: winidty): boolean;
    function ungrabpointer: boolean;
    procedure setmousewidget(const widget: twidget);
    procedure setclientmousewidget(const widget: twidget);
@@ -1795,7 +1795,7 @@ type
    constructor create(aowner: tcomponent); override;
    procedure langchanged; override;
    procedure settimer(const us: integer); override;
-   function findwindow(id: winidty; out window: twindow): boolean;
+   function findwindow(aid: winidty; out window: twindow): boolean;
    procedure checkwindowrect(winid: winidty; var rect: rectty);
                //callback from win32 wm_sizing
    procedure initialize;
@@ -2127,7 +2127,7 @@ type
    ftimertick: boolean;
 
    procedure twindowdestroyed(const sender: twindow);
-   procedure windowdestroyed(id: winidty);
+   procedure windowdestroyed(aid: winidty);
    procedure setwindowfocus(winid: winidty);
    procedure unsetwindowfocus(winid: winidty);
    procedure registerwindow(window: twindow);
@@ -12184,16 +12184,16 @@ begin
  end;
 end;
 
-procedure tinternalapplication.windowdestroyed(id: winidty);
+procedure tinternalapplication.windowdestroyed(aid: winidty);
 var
  int1: integer;
  event : tevent;
 begin
- fonwiniddestroyedlist.doevent(id);
+ fonwiniddestroyedlist.doevent(aid);
  if not terminated then begin
   for int1:= 0 to getevents - 1 do begin
    event:= tevent(eventlist[int1]);
-   if (event is twindowevent) and (twindowevent(event).fwinid = id) then begin
+   if (event is twindowevent) and (twindowevent(event).fwinid = aid) then begin
    {
     case event.kind of
      ek_focusin: tcaret1(fcaret).restore;
@@ -12205,8 +12205,8 @@ begin
    end;
   end;
  end;
- fmouse.windowdestroyed(id);
- if id = fmousewinid then begin
+ fmouse.windowdestroyed(aid);
+ if aid = fmousewinid then begin
   fmousewinid:= 0;
  end;
 end;
@@ -13170,13 +13170,13 @@ begin
  end;
 end;
 
-function tguiapplication.grabpointer(const id: winidty): boolean;
+function tguiapplication.grabpointer(const aid: winidty): boolean;
 var
  int1: integer;
 begin
  for int1:= 0 to high(fwindows) do begin
   with fwindows[int1] do begin
-   if fwindow.id <> id then begin
+   if fwindow.id <> aid then begin
     exclude(fstate,tws_grab);
    end;
   end;
@@ -13184,7 +13184,7 @@ begin
  {$ifdef nograbpointer}
  result:= true;
  {$else}
- result:= gui_grabpointer(id) = gue_ok;
+ result:= gui_grabpointer(aid) = gue_ok;
  {$endif}
  if result then begin
   include(fstate,aps_mousecaptured);
@@ -13313,13 +13313,13 @@ begin
  result:= aps_active in fstate;
 end;
 
-function tguiapplication.findwindow(id: winidty; out window: twindow): boolean;
+function tguiapplication.findwindow(aid: winidty; out window: twindow): boolean;
 var
  int1: integer;
 begin
  result:= false;
  for int1:= 0 to high(fwindows) do begin
-  if fwindows[int1].fwindow.id = id then begin
+  if fwindows[int1].fwindow.id = aid then begin
    window:= fwindows[int1];
    result:= true;
    exit;

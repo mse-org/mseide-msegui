@@ -215,6 +215,7 @@ type
    {$endif}
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   function procid: procidty;
    procedure createdatamodule(instanceclass: msecomponentclassty; var reference);
    procedure run;
    function running: boolean; //true if eventloop entered
@@ -1205,6 +1206,11 @@ end;
 function tcustomapplication.candefocus: boolean;
 begin
  result:= true; //dummy
+end;
+
+function tcustomapplication.procid: procidty;
+begin
+ result:= sys_getpid;
 end;
 
 { tactivatorcontroller }

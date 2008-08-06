@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -16,9 +16,6 @@ interface
 uses
  {$ifdef mswindows}windows{$else}libc{$endif},
  msetypes,msestream,msepipestream,sysutils,msesysutils,msesys;
-
-const
- invalidprochandle = -1;
  
 type
  pipedescriptorty = record
@@ -26,10 +23,10 @@ type
   writedes: integer;
  end;
 
-function getprocessexitcode(prochandle: integer; out exitcode: integer;
+function getprocessexitcode(prochandle: prochandlety; out exitcode: integer;
                               const timeoutus: cardinal = 0): boolean;
                  //true if ok, close handle
-function waitforprocess(prochandle: integer): integer;
+function waitforprocess(prochandle: prochandlety): integer;
 
 function execmse(const commandline: string;
                     const inactive: boolean = true; //windows only
@@ -37,6 +34,14 @@ function execmse(const commandline: string;
                                //windows only
                 ): boolean;
 //starts program, true if OK
+
+function execmse4(const commandline: string;
+                    const inactive: boolean = true; //windows only
+                    const nostdhandle: boolean = false
+                               //windows only
+                ): prochandlety;
+//starts program, returns processhandle, execerror on error
+//don't forget closehandle on windows!
 
 function execmse1(const commandline: ansistring; topipe: pinteger = nil;
              frompipe: pinteger = nil;
@@ -49,7 +54,7 @@ function execmse1(const commandline: ansistring; topipe: pinteger = nil;
              tty: boolean = false;
              nostdhandle: boolean = false
                               //windows only
-                 ): integer;
+                 ): prochandlety;
 //starts program, returns processhandle, execerror on error
 //don't forget closehandle on windows!
 //creates pipes
@@ -64,7 +69,7 @@ function execmse2(const commandline: string; topipe: tpipewriter = nil;
              tty: boolean = false;
              nostdhandle: boolean = false
                               //windows only
-                 ): integer;
+                 ): prochandlety;
 //starts program, returns processhandle, execerror on error
 //don't forget closehandle on windows!
 //creates pipes
@@ -80,7 +85,7 @@ function execmse3(const commandline: string; topipe: pinteger = nil;
              tty: boolean = false;
              nostdhandle: boolean = false
                               //windows only
-                 ): integer;
+                 ): prochandlety;
 //starts program, returns processhandle, execerror on error
 //don't forget closehandle on windows!
 //uses existing file handles
@@ -162,8 +167,7 @@ type
 
 implementation
 uses 
- msesysintf,msestrings,msedatalist,
- {mseguiintf,}mseguiglob;
+ msesysintf,msestrings,msedatalist,mseguiglob,mseprocmonitor;
 
 function getpid: integer;
 begin
@@ -239,7 +243,7 @@ begin
 end;
 {$ifdef mswindows}
 
-function getprocessexitcode(prochandle: integer; out exitcode: integer;
+function getprocessexitcode(prochandle: prochandlety; out exitcode: integer;
                   const timeoutus: cardinal = 0): boolean;
                  //true if ok, close handle
 var
@@ -270,7 +274,7 @@ begin
  end;
 end;
 
-function waitforprocess(prochandle: integer): integer;
+function waitforprocess(prochandle: prochandlety): integer;
 begin
  if waitforsingleobject(prochandle,infinite) = wait_object_0 then begin
   getprocessexitcode(prochandle,result);
@@ -328,7 +332,7 @@ function execmse0(const commandline: string; topipe: pinteger = nil;
              tty: boolean = false;
              nostdhandle: boolean = false
                                //windows only
-             ): integer;
+             ): prochandlety;
 //startet programm, bringt processhandle, execerror wenn misslungen
 //closehandle nicht vergessen!
 
@@ -451,22 +455,38 @@ function execmse(const commandline: string;
                                //windows only
                            ): boolean;
 var
- prochandle: integer;
+ prochandle: prochandlety;
 begin
- result:= false;
- prochandle:= execmse1(commandline,nil,nil,nil,false,-1,inactive,
-                       nil,nil,false,nostdhandle);
- if prochandle <> invalidprochandle then begin
-  closehandle(prochandle);
-  result:= true;
+ result:= true;
+ try
+  try
+   prochandle:= execmse1(commandline,nil,nil,nil,false,-1,inactive,
+                         nil,nil,false,nostdhandle);
+  finally
+   if prochandle <> invalidprochandle then begin
+    closehandle(prochandle);
+   end;
+  end;
+  except
+   result:= false;
  end;
+end;
+
+function execmse4(const commandline: string;
+                    const inactive: boolean = true; //windows only
+                    const nostdhandle: boolean = false
+                               //windows only
+                ): prochandlety;
+begin
+ result:= execmse1(commandline,nil,nil,nil,false,-1,inactive,
+                       nil,nil,false,nostdhandle);
 end;
 
 function execwaitmse(const commandline: string;
                       const inactive: boolean = true): integer;
 //startet programm, wartet auf ende, bring exitcode, -1 wenn start nicht moeglich
 var
- prochandle: integer;
+ prochandle: prochandlety;
  bo1: boolean;
  dwo1: dword;
 begin
@@ -488,7 +508,7 @@ begin
  end;
 end;
 
-procedure killprocess(handle: integer);
+procedure killprocess(handle: prochandlety);
 begin
  windows.terminateprocess(handle,0);
  closehandle(handle);
@@ -504,7 +524,7 @@ end;
 {$endif}
 
 {$ifdef UNIX}
-function getprocessexitcode(prochandle: integer; out exitcode: integer;
+function getprocessexitcode(prochandle: prochandlety; out exitcode: integer;
                                const timeoutus: cardinal = 0): boolean;
                  //true if ok, close handle
 var
@@ -537,7 +557,7 @@ begin
  end;
 end;
 
-function waitforprocess(prochandle: integer): integer;
+function waitforprocess(prochandle: prochandlety): integer;
 var
  dwo1: cardinal;
  pid: integer;
@@ -575,7 +595,7 @@ function execmse0(const commandline: string; topipe: pinteger = nil;
              tty: boolean = false;
              nostdhandle: boolean = false
                                //windows only
-             ): integer;
+             ): prochandlety;
 const
  shell = shortstring('/bin/sh');
 var
@@ -776,7 +796,16 @@ begin
  end;
 end;
 
-procedure killprocess(handle: integer);
+function execmse4(const commandline: string;
+                    const inactive: boolean = true; //windows only
+                    const nostdhandle: boolean = false
+                               //windows only
+                ): prochandlety;
+begin
+ result:= execmse1(commandline);
+end;
+
+procedure killprocess(handle: prochandlety);
 var
  int1: integer;
 begin
@@ -801,7 +830,7 @@ begin
  end;
 end;
 
-function terminateprocess(handle: integer): integer;
+function terminateprocess(handle: prochandlety): integer;
            //bringt exitresult
 var
  int1: integer;
@@ -831,7 +860,7 @@ begin
  end;
 end;
 
-function getprocinfo(pid: integer): procinfoty;
+function getprocinfo(pid: prochandlety): procinfoty;
 var
  stream: ttextstream;
  str1: string;
@@ -895,7 +924,7 @@ begin
  end
 end;
 
-function getchildpid(pid: integer): integerarty;
+function getchildpid(pid: prochandlety): integerarty;
 var
  srec: tsearchrec;
  int1: integer;
@@ -918,7 +947,7 @@ begin
  end;
 end;
 
-function getinnerstpid(pid: integer): integer;
+function getinnerstpid(pid: prochandlety): integer;
 var
  intar1: integerarty;
  int1,int2: integer;
@@ -946,7 +975,7 @@ function execmse1(const commandline: ansistring; topipe: pinteger = nil;
              tty: boolean = false;
              nostdhandle: boolean = false
                               //windows only
-                 ): integer;
+                 ): prochandlety;
         //creates pipes
 begin
  if topipe <> nil then begin
@@ -974,7 +1003,7 @@ function execmse3(const commandline: string; topipe: pinteger = nil;
              tty: boolean = false;
              nostdhandle: boolean = false
                               //windows only
-                         ): integer;
+                         ): prochandlety;
     //uses existing file handles
 begin
  result:= execmse0(commandline,topipe,frompipe,errorpipe,sessionleader,
@@ -992,7 +1021,7 @@ function execmse2(const commandline: string; topipe: tpipewriter = nil;
              tty: boolean = false;
              nostdhandle: boolean = false
                                //windows only
-             ): integer;
+             ): prochandlety;
  //bringt procid
 var
  top,fromp,errp,fromwrite,errwrite: integer;

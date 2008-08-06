@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -21,6 +21,12 @@ type
  tlibhandle = thandle;
  {$endif}
  threadty = cardinal;
+ procidty = integer;
+ prochandlety = integer; //todo: 64bit, windows
+const
+ invalidprocid = -1;
+ invalidprochandle = -1;
+type
  internalthreadprocty = function(): integer of object;
 
  procitemty = record
