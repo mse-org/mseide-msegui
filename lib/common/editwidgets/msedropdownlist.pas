@@ -171,10 +171,10 @@ type
    procedure canceldropdown;
    procedure killrepeater;
    procedure startrepeater(up: boolean);
-   procedure setfiltertext(const Value: msestring); virtual;
    procedure itemselected(const index: integer; const akey: keyty);
   protected
    fcontroller: tcustomdropdownlistcontroller;
+   procedure setfiltertext(const Value: msestring); virtual;
    procedure updatewindowinfo(var info: windowinfoty); override;
    procedure createdatacol(const index: integer; out item: tdatacol); override;
    procedure dokeydown(var info: keyeventinfoty); override;
