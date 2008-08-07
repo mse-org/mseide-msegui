@@ -17,14 +17,16 @@ uses
 
 implementation
 uses
- libc,mseevent,msesysintf,msenogui;
+ libc,mseevent,msesysintf,mseapplication,msenogui;
 type
  tapplication1 = class(tnoguiapplication);
 var
  sigtimerbefore: sighandler_t;
  sigtermbefore: sighandler_t;
+ sigchldbefore: sighandler_t;
  timerevent: boolean;
  terminated: boolean;
+ childevent: boolean;
  sempo: psemty;
 
 procedure settimer1(us: cardinal);
@@ -48,6 +50,10 @@ procedure nogui_waitevent;
   if terminated then  begin
    timerevent:= false;
    application.postevent(tevent.create(ek_terminate));
+  end;
+  if childevent then begin
+   childevent:= false;
+   handlesigchld;
   end;
  end;
  
@@ -83,11 +89,23 @@ begin
  sem_post(linuxsemty(sempo^).sema);
 end;
 
+procedure sigchild(SigNum: Integer); cdecl;
+begin
+ childevent:= true;
+ sem_post(linuxsemty(sempo^).sema);
+end;
+
 procedure nogui_init(const asempo: psemty);
+var
+ sigset1,sigset2: sigset_t;
 begin
  sempo:= asempo;
  sigtimerbefore:= signal(sigalrm,{$ifdef FPC}@{$endif}sigtimer);
  sigtermbefore:= signal(sigterm,{$ifdef FPC}@{$endif}sigterminate);
+ sigchldbefore:= signal(sigchld,{$ifdef FPC}@{$endif}sigchild);
+ sigemptyset(sigset1);
+ sigaddset(sigset1,sigchld);
+ m_sigprocmask(sig_unblock,sigset1,sigset2); 
 end;
 
 procedure nogui_deinit;

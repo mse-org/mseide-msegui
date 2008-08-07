@@ -34,8 +34,9 @@ type
                                        const internal: boolean);
   public
    destructor destroy; override;
-   procedure listentoprocess(const aprochandle: prochandlety;
-                                 const adata: pointer = nil);
+   function listentoprocess(const aprochandle: prochandlety;
+                                 const adata: pointer = nil): boolean;
+          //does nothing and returns false if aprochandle = invalidprochandle
    procedure unlistentoprocess(const aprochandle: prochandlety);
   published
    property onchilddied: childdiedeventty read fonchilddied write fonchilddied;
@@ -57,15 +58,18 @@ begin
  inherited;
 end;
 
-procedure tprocessmonitor.listentoprocess(const aprochandle: prochandlety;
-               const adata: pointer);
+function tprocessmonitor.listentoprocess(const aprochandle: prochandlety;
+               const adata: pointer): boolean;
 begin
- setlength(finfos,high(finfos)+2);
- with finfos[high(finfos)] do begin
-  prochandle:= aprochandle;
-  data:= adata;
+ result:= aprochandle <> invalidprochandle;
+ if result then begin
+  setlength(finfos,high(finfos)+2);
+  with finfos[high(finfos)] do begin
+   prochandle:= aprochandle;
+   data:= adata;
+  end;
+  pro_listentoprocess(aprochandle,ievent(self),adata);
  end;
- pro_listentoprocess(aprochandle,ievent(self),adata);
 end;
 
 procedure tprocessmonitor.internalunlistentoprocess(
