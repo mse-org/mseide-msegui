@@ -46,6 +46,7 @@ type
                    ps_valuelist,ps_dialog,ps_sortlist,ps_owned,
                    ps_noadditems,ps_nodeleteitems,
                    ps_isordprop,ps_modified,ps_candefault,ps_component,ps_subprop,
+                   ps_selected,ps_canselect,ps_refreshall,
                    ps_local,  //do not display foreign components
                    ps_link);  //do not display selected components
  propertystatesty = set of propertystatety;
@@ -70,6 +71,10 @@ type
 
   function getmethodvalue(const index: integer = 0): tmethod;
   procedure setmethodvalue(const value: tmethod);
+  function getselected: boolean;
+  procedure setselected(const avalue: boolean);
+  property selected: boolean read getselected write setselected;
+  function getselectedpropinstances: objectarty;
  end;
 
  tpropertyeditor = class(tnullinterfacedobject)
@@ -77,6 +82,8 @@ type
    function getexpanded: boolean;
    procedure setexpanded(const Value: boolean);
    function getcount: integer;
+   function getselected: boolean;
+   procedure setselected(const avalue: boolean);
   protected
    fsortlevel: integer;
    ftypeinfo: ptypeinfo;
@@ -116,10 +123,10 @@ type
    function getmethodvalue(const index: integer = 0): tmethod;
    procedure setmethodvalue(const value: tmethod);
    function getparenteditor: tpropertyeditor;
+   function queryselectedpropinstances: objectarty;
 
    procedure modified; virtual;
    function getdefaultstate: propertystatesty; virtual;
-   procedure updatedefaultvalue; virtual;
   public
    constructor create(const adesigner: idesigner;
         const amodule: tmsecomponent; const acomponent: tcomponent;
@@ -127,6 +134,7 @@ type
             const aprops: propinstancearty; atypeinfo: ptypeinfo); virtual;
    destructor destroy; override;
    procedure setremote(intf: iremotepropertyeditor);
+   procedure updatedefaultvalue; virtual;
    function canrevert: boolean; virtual;
    procedure copyproperty(const asource: tobject); virtual;
 
@@ -152,6 +160,7 @@ type
    procedure edit; virtual;
    property count: integer read getcount;
    property expanded: boolean read getexpanded write setexpanded;
+   property selected: boolean read getselected write setselected;
    property module: tmsecomponent read fmodule;
    property component: tcomponent read fcomponent;
   end;
@@ -500,6 +509,7 @@ type
    procedure setstringvalue(const value: string);
    function getmsestringvalue(const index: integer = 0): msestring;
    procedure setmsestringvalue(const value: msestring);
+   function getselectedpropinstances: objectarty; virtual;
 
    function getdefaultstate: propertystatesty; override;
   public
@@ -525,9 +535,11 @@ type
  end;
 
  elementeditorclassty = class of tarrayelementeditor;
+ elementeditorarty = array of tarrayelementeditor;
   
  tarraypropertyeditor = class(tclasspropertyeditor)
   private
+   fsubprops: elementeditorarty;
    procedure doappend(const sender: tobject);
   protected
    function getdefaultstate: propertystatesty; override;
@@ -583,6 +595,7 @@ type
    procedure doinsert(const sender: tobject);
    procedure doappend(const sender: tobject);
    procedure dodelete(const sender: tobject);
+   function getselectedpropinstances: objectarty;
   public
    constructor create(aindex: integer; aparenteditor: tcollectionpropertyeditor;
             aeditorclass: propertyeditorclassty;
@@ -654,6 +667,8 @@ type
  end;
 }
  tclasselementeditor = class(tclasspropertyeditor)
+  protected
+   function getdefaultstate: propertystatesty; override;
   public
    function getvalue: msestring; override;
  end;
@@ -1239,6 +1254,27 @@ begin
  result:= gettypedata(ftypeinfo);
 end;
 
+function tpropertyeditor.queryselectedpropinstances: objectarty;
+var
+ editor1: tpropertyeditor;
+begin
+ result:= nil;
+ editor1:= fparenteditor;
+ while editor1 <> nil do begin
+  if (editor1.fremote <> nil) and (editor1.fremote.selected) then begin
+   result:= editor1.fremote.getselectedpropinstances;
+   break;
+  end;
+  if editor1 is tclasspropertyeditor then begin
+   break;
+  end;
+  editor1:= editor1.fparenteditor;
+ end;  
+ if result <> nil then begin
+  include(fstate,ps_refreshall);
+ end;
+end;
+
 function tpropertyeditor.getordvalue(const index: integer): integer;
 
 begin
@@ -1255,14 +1291,23 @@ end;
 procedure tpropertyeditor.setordvalue(const value: longword);
 var
  int1: integer;
+ ar1: objectarty;
 begin
  if fremote <> nil then begin
   fremote.setordvalue(value);
  end
  else begin
-  for int1:= 0 to high(fprops) do begin
-   with fprops[int1] do begin
-    setordprop(instance, propinfo, value);
+  ar1:= queryselectedpropinstances;
+  if ar1 = nil then begin
+   for int1:= 0 to high(fprops) do begin
+    with fprops[int1] do begin
+     setordprop(instance, propinfo, value);
+    end;
+   end;
+  end
+  else begin
+   for int1:= 0 to high(ar1) do begin
+    setordprop(ar1[int1],fprops[0].propinfo,value);
    end;
   end;
   updatedefaultvalue;
@@ -1300,14 +1345,23 @@ end;
 procedure tpropertyeditor.setint64value(const value: int64);
 var
  int1: integer;
+ ar1: objectarty;
 begin
  if fremote <> nil then begin
   fremote.setint64value(value);
  end
  else begin
-  for int1:= 0 to high(fprops) do begin
-   with fprops[int1] do begin
-    setint64prop(instance, propinfo, value);
+  ar1:= queryselectedpropinstances;
+  if ar1 = nil then begin
+   for int1:= 0 to high(fprops) do begin
+    with fprops[int1] do begin
+     setint64prop(instance, propinfo, value);
+    end;
+   end;
+  end
+  else begin
+   for int1:= 0 to high(ar1) do begin
+    setint64prop(ar1[int1],fprops[0].propinfo,value);
    end;
   end;
   updatedefaultvalue;
@@ -1333,16 +1387,27 @@ procedure tpropertyeditor.setbitvalue(const value: boolean; const bitindex: inte
 var
  int1: integer;
  wo1: longword;
+ ar1: objectarty;
 begin
  if fremote <> nil then begin
   fremote.setbitvalue(value,bitindex);
  end
  else begin
-  for int1:= 0 to high(fprops) do begin
-   with fprops[int1] do begin
-    wo1:= getordprop(instance,propinfo);
+  ar1:= queryselectedpropinstances;
+  if ar1 = nil then begin
+   for int1:= 0 to high(fprops) do begin
+    with fprops[int1] do begin
+     wo1:= getordprop(instance,propinfo);
+     updatebit(wo1,bitindex,value);
+     setordprop(instance,propinfo,wo1);
+    end;
+   end;
+  end
+  else begin
+   for int1:= 0 to high(ar1) do begin
+    wo1:= getordprop(ar1[int1],fprops[0].propinfo);
     updatebit(wo1,bitindex,value);
-    setordprop(instance,propinfo,wo1);
+    setordprop(ar1[int1],fprops[0].propinfo,wo1);
    end;
   end;
   fparenteditor.updatedefaultvalue;
@@ -1366,14 +1431,23 @@ end;
 procedure tpropertyeditor.setfloatvalue(const value: extended);
 var
  int1: integer;
+ ar1: objectarty;
 begin
  if fremote <> nil then begin
   fremote.setfloatvalue(value);
  end
  else begin
-  for int1:= 0 to high(fprops) do begin
-   with fprops[int1] do begin
-    SetfloatProp(Instance, PropInfo, Value);
+  ar1:= queryselectedpropinstances;
+  if ar1 = nil then begin
+   for int1:= 0 to high(fprops) do begin
+    with fprops[int1] do begin
+     SetfloatProp(Instance, PropInfo, Value);
+    end;
+   end;
+  end
+  else begin
+   for int1:= 0 to high(ar1) do begin
+    setfloatprop(ar1[int1],fprops[0].propinfo,value);
    end;
   end;
   modified;
@@ -1395,14 +1469,23 @@ end;
 procedure tpropertyeditor.setcurrencyvalue(const value: currency);
 var
  int1: integer;
+ ar1: objectarty;
 begin
  if fremote <> nil then begin
   fremote.setcurrencyvalue(value);
  end
  else begin
-  for int1:= 0 to high(fprops) do begin
-   with fprops[int1] do begin
-    setfloatprop(instance, propinfo, value);
+  ar1:= queryselectedpropinstances;
+  if ar1 = nil then begin
+   for int1:= 0 to high(fprops) do begin
+    with fprops[int1] do begin
+     setfloatprop(instance, propinfo, value);
+    end;
+   end;
+  end
+  else begin
+   for int1:= 0 to high(ar1) do begin
+    setfloatprop(ar1[int1],fprops[0].propinfo,value);
    end;
   end;
   modified;
@@ -1425,15 +1508,24 @@ procedure tpropertyeditor.setstringvalue(const value: string);
 var
  int1: integer;
  str1: string;
+ ar1: objectarty;
 begin
  if fremote <> nil then begin
   fremote.setstringvalue(value);
  end
  else begin
   str1:= encodemsestring(value);
-  for int1:= 0 to high(fprops) do begin
-   with fprops[int1] do begin
-    SetstrProp(Instance, PropInfo, str1);
+  ar1:= queryselectedpropinstances;
+  if ar1 = nil then begin
+   for int1:= 0 to high(fprops) do begin
+    with fprops[int1] do begin
+     SetstrProp(Instance, PropInfo, str1);
+    end;
+   end;
+  end
+  else begin
+   for int1:= 0 to high(ar1) do begin
+    SetstrProp(ar1[int1], fprops[0].propinfo, str1);
    end;
   end;
   modified;
@@ -1536,17 +1628,26 @@ procedure tpropertyeditor.setmsestringvalue(const value: msestring);
 var
  mstr1: msestring;
  int1: integer;
+ ar1: objectarty;
 begin
  if fremote <> nil then begin
   fremote.setmsestringvalue(value);
  end
  else begin
   mstr1:= encodemsestring(value);
-  for int1:= 0 to high(fprops) do begin
-   with fprops[int1] do begin
-    setwidestrprop(instance,propinfo,mstr1);  
+  ar1:= queryselectedpropinstances;
+  if ar1 = nil then begin
+   for int1:= 0 to high(fprops) do begin
+    with fprops[int1] do begin
+     setwidestrprop(instance,propinfo,mstr1);  
+    end;
    end;
-  end;
+  end
+  else begin
+   for int1:= 0 to high(ar1) do begin
+    setwidestrprop(ar1[int1],fprops[0].propinfo,mstr1);  
+   end;
+  end;    
   modified;
  end;
 end;
@@ -1566,14 +1667,23 @@ end;
 procedure tpropertyeditor.setmethodvalue(const value: tmethod);
 var
  int1: integer;
+ ar1: objectarty;
 begin
  if fremote <> nil then begin
   fremote.setmethodvalue(value);
  end
  else begin
-  for int1:= 0 to high(fprops) do begin
-   with fprops[int1] do begin
-    SetmethodProp(Instance, PropInfo, Value);
+  ar1:= queryselectedpropinstances;
+  if ar1 = nil then begin
+   for int1:= 0 to high(fprops) do begin
+    with fprops[int1] do begin
+     SetmethodProp(Instance, PropInfo, Value);
+    end;
+   end;
+  end
+  else begin
+   for int1:= 0 to high(ar1) do begin
+    setmethodprop(ar1[int1],fprops[0].propinfo,value);
    end;
   end;
   modified;
@@ -1618,6 +1728,7 @@ end;
 procedure tpropertyeditor.modified;
 begin
  fobjectinspector.propertymodified(self);
+ exclude(fstate,ps_refreshall);
 end;
 
 function tpropertyeditor.subproperties: propertyeditorarty;
@@ -1683,6 +1794,21 @@ end;
 function tpropertyeditor.propertyname: msestring;
 begin
  result:= fname;
+end;
+
+function tpropertyeditor.getselected: boolean;
+begin
+ result:= ps_selected in fstate;
+end;
+
+procedure tpropertyeditor.setselected(const avalue: boolean);
+begin
+ if avalue and (ps_canselect in fstate) then begin
+  include(fstate,ps_selected);
+ end
+ else begin
+  exclude(fstate,ps_selected);
+ end;
 end;
 
 { tordinalpropertyeditor }
@@ -2628,11 +2754,12 @@ begin
  setlength(result,int2);
  prop:= tarrayprop(getordvalue);
  if prop <> nil then begin
-  setlength(result,int2+prop.count);
-  for int1:= int2 to high(result) do begin
-   result[int1]:= getelementeditorclass.create(int1-int2,self,geteditorclass,
+  setlength(fsubprops,prop.count);
+  for int1:= 0 to high(fsubprops) do begin
+   fsubprops[int1]:= getelementeditorclass.create(int1,self,geteditorclass,
           fdesigner,fobjectinspector,fprops,ftypeinfo);
   end;
+  stackarray(pointerarty(fsubprops),pointerarty(result));
  end
  else begin
   setlength(result,0);
@@ -2950,6 +3077,23 @@ begin
  result:= false;
 end;
 
+function tarrayelementeditor.getselectedpropinstances: objectarty;
+var
+ int1,int2: integer;
+begin
+ with tarraypropertyeditor(fparenteditor) do begin
+  setlength(result,length(fsubprops));
+  int2:= 0;
+  for int1:= 0 to high(fsubprops) do begin
+   if fsubprops[int1].selected then begin
+    result[int2]:= tobject(fsubprops[int1].feditor.getordvalue);
+    inc(int2);
+   end;
+  end;
+  setlength(result,int2);
+ end;
+end;
+
 { tpersistentarraypropertyeditor }
 
 function tpersistentarraypropertyeditor.geteditorclass: propertyeditorclassty;
@@ -3106,6 +3250,11 @@ end;
 }
 { tlclasselementeditor }
 
+function tclasselementeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate + [ps_canselect];
+end;
+
 function tclasselementeditor.getvalue: msestring;
 var
  obj1: tobject;
@@ -3255,6 +3404,11 @@ begin
     [{$ifdef FPC}@{$endif}doinsert,
     {$ifdef FPC}@{$endif}doappend,{$ifdef FPC}@{$endif}dodelete]);
  inherited;
+end;
+
+function tcollectionitemeditor.getselectedpropinstances: objectarty;
+begin
+ result:= nil;
 end;
 
 { tcollectionpropertyeditor }

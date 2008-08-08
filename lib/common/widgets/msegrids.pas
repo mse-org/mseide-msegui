@@ -360,7 +360,8 @@ type
   rowrange: cellaxisrangety;
  end;
 
- colstatety = (cos_fix,cos_selected,cos_noinvalidate,cos_edited,cos_readonlyupdating);
+ colstatety = (cos_fix,cos_selected,cos_noinvalidate,cos_edited,
+               cos_readonlyupdating,cos_selectionchanged);
  colstatesty = set of colstatety;
 
  tcolselectfont = class(tparentfont)
@@ -469,6 +470,7 @@ type
 
  showcolhinteventty = procedure(const sender: tdatacol; const arow: integer;
                            var info: hintinfoty) of object;
+ datacoleventty = procedure(const sender: tdatacol) of object;
 
  tdatacol = class(tcol)
   private
@@ -477,6 +479,8 @@ type
    foncellevent: celleventty;
    fonshowhint: showcolhinteventty;
    fselectedrow: integer; //-1 none, -2 more than one
+   fonselectionchanged: datacoleventty;
+   fselectlock: integer;
    procedure internaldoentercell(const cellbefore: gridcoordty;
                       var newcell: gridcoordty; const action: focuscellactionty);
    procedure internaldoexitcell(const cellbefore: gridcoordty;
@@ -490,15 +494,20 @@ type
    procedure setenabled(const avalue: boolean);
    function getreadonly: boolean;
    procedure setreadonly(const avalue: boolean);
+   function getselectedcells: integerarty;
+   procedure setselectedcells(const avalue: integerarty);
   protected
    fdata: tdatalist;
    fname: string;
    fonchange: notifyeventty;
+   procedure beginselect;
+   procedure endselect;
    function getdatapo(const arow: integer): pointer; override;
    procedure beforedragevent(var ainfo: draginfoty; const arow: integer;
                                      var processed: boolean); virtual;
    procedure afterdragevent(var ainfo: draginfoty; const arow: integer;
                                      var processed: boolean); virtual;
+   procedure doselectionchanged;
    procedure setselected(const row: integer; value: boolean); virtual;
    function getselected(const row: integer): boolean; override;
    procedure setoptions(const Value: coloptionsty); override;
@@ -537,8 +546,12 @@ type
    property datalist: tdatalist read fdata;
    procedure dostatread(const reader: tstatreader); override;
    procedure dostatwrite(const writer: tstatwriter); override;
+   procedure clearselection;
    property selected[const row: integer]: boolean read getselected write setselected;
              //row < 0 -> whole col
+   property selectedcells: integerarty read getselectedcells 
+                                                write setselectedcells;
+   function selectedcellcount: integer;
    property cellorigin: pointty read getcellorigin;    //org = grid.paintpos
    property visible: boolean read getvisible write setvisible;
    property enabled: boolean read getenabled write setenabled;
@@ -551,6 +564,8 @@ type
    property onchange: notifyeventty read fonchange write fonchange;
    property oncellevent: celleventty read foncellevent write foncellevent;
    property onshowhint: showcolhinteventty read fonshowhint write fonshowhint;
+   property onselectionchanged: datacoleventty read fonselectionchanged write
+                                          fonselectionchanged;
    property linecolor default defaultdatalinecolor;
  end;
 
@@ -1001,7 +1016,10 @@ end;
    procedure insertrow(const index: integer; const acount: integer = 1); override;
    procedure deleterow(const index: integer; const acount: integer = 1); override;
    procedure changeselectedrange(const start,oldend,newend: gridcoordty;
-             calldoselectcell: boolean); virtual; //implemented in tcustomlistview
+             calldoselectcell: boolean); virtual;
+   procedure beginselect;
+   procedure endselect;
+   procedure decselect;
    procedure sortfunc(sender: tcustomgrid;
                        const index1,index2: integer; var result: integer);
    procedure updatedatastate; virtual;
@@ -4321,6 +4339,84 @@ begin
  end;
 end;
 
+function tdatacol.getselectedcells: integerarty;
+const
+ capacitystep = 64;
+var
+ int1,int3: integer;
+begin
+ result:= nil;
+ with tdatacols(prop) do begin
+  if hasselection then begin          //todo: optimize
+   int3:= 0;
+   for int1:= 0 to frowstate.count - 1 do begin
+    if frowstate.getitempo(int1)^.selected <> 0 then begin
+     if SELF.selected[int1] then begin
+      if int3 >= length(result) then begin
+       setlength(result,length(result)*2 + capacitystep);
+      end;
+      result[int3]:= int1;
+      inc(int3);
+     end;
+    end;
+   end;
+   setlength(result,int3);
+  end;
+ end;
+end;
+
+procedure tdatacol.setselectedcells(const avalue: integerarty);
+              //todo: optimize
+var
+ int1: integer;
+begin
+ grid.beginupdate;
+ try
+  beginselect;
+  clearselection;
+  for int1:= 0 to high(avalue) do begin
+   setselected(avalue[int1],true);
+  end;
+  endselect;
+ finally
+  grid.endupdate;
+ end;
+end;
+
+procedure tdatacol.doselectionchanged;
+begin
+ if (fselectlock = 0) then begin
+  if assigned(fonselectionchanged) then begin
+   inc(fselectlock); //avoid recursion
+   try
+    fonselectionchanged(self);
+   finally
+    dec(fselectlock);
+   end;
+  end;
+ end
+ else begin
+  include(fstate,cos_selectionchanged);
+ end;
+ fgrid.internalselectionchanged;
+end;
+
+procedure tdatacol.beginselect;
+begin
+ inc(fselectlock);
+end;
+
+procedure tdatacol.endselect;
+begin
+ dec(fselectlock);
+ if fselectlock = 0 then begin
+  if cos_selectionchanged in fstate then begin
+   exclude(fstate,cos_selectionchanged);
+   doselectionchanged;
+  end;
+ end;
+end;
+
 procedure tdatacol.setselected(const row: integer; value: boolean);
 var
  po1: prowstatety;
@@ -4352,7 +4448,7 @@ begin
       end;
      end;
      cellchanged(row);
-     fgrid.internalselectionchanged;
+     doselectionchanged;
     end;
    end;
   end
@@ -4362,7 +4458,7 @@ begin
      include(fstate,cos_selected);
      fselectedrow:= -2;
      changed;
-     fgrid.internalselectionchanged;
+     doselectionchanged;
     end;
    end
    else begin
@@ -4383,11 +4479,30 @@ begin
       changed;
      end;
      fselectedrow:= -1;
-     fgrid.internalselectionchanged;
+     doselectionchanged;
     end;
    end;
   end;
  end;
+end;
+
+function tdatacol.selectedcellcount: integer;
+var
+ int1,int2: integer;
+begin
+ result:= 0;
+ if fselectedrow <> -1 then begin
+  for int1:= 0 to fgrid.rowhigh do begin
+   if selected[int1] then begin
+    inc(result);
+   end;
+  end;
+ end;
+end;
+
+procedure tdatacol.clearselection;
+begin
+ setselected(-1,false);
 end;
 
 procedure tdatacol.internaldoentercell(const cellbefore: gridcoordty;
@@ -5676,16 +5791,28 @@ begin
    mo1:= csm_deselect;
   end;
   for int1:= rect.col to rect.col + rect.colcount - 1 do begin
+   cols[int1].beginselect;   
    for int2:= rect.row to rect.row + rect.rowcount - 1 do begin
     fgrid.selectcell(makegridcoord(int1,int2),mo1{value,false});
+   end;
+  end;
+  for int1:= rect.col to rect.col + rect.colcount - 1 do begin
+   try
+    cols[int1].endselect;
+   except
+    application.handleexception;
    end;
   end;
  end
  else begin
   for int1:= rect.col to rect.col + rect.colcount - 1 do begin
+   cols[int1].beginselect;   
    for int2:= rect.row to rect.row + rect.rowcount - 1 do begin
     selected[makegridcoord(int1,int2)]:= value;
    end;
+  end;
+  for int1:= rect.col to rect.col + rect.colcount - 1 do begin
+   dec(cols[int1].fselectlock);
   end;
  end;
 end;
@@ -5762,7 +5889,7 @@ begin
     for int2:= 0 to count - 1 do begin
      if cols[int2].selected[int1] then begin
       if int3 >= length(result) then begin
-       setlength(result,length(result) + capacitystep);
+       setlength(result,length(result)*2 + capacitystep);
       end;
       cell.col:= int2;
       result[int3]:= cell;
@@ -5775,15 +5902,50 @@ begin
  end;
 end;
 
+procedure tdatacols.beginselect;
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fitems) do begin
+  tdatacol(fitems[int1]).beginselect;
+ end;
+end;
+
+procedure tdatacols.endselect;
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fitems) do begin
+  try
+   tdatacol(fitems[int1]).endselect;
+  except
+   application.handleexception;
+  end;
+ end;
+end;
+
+procedure tdatacols.decselect;
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fitems) do begin
+  with tdatacol(fitems[int1]) do begin
+   dec(fselectlock);
+  end;
+ end;
+end;
+
 procedure tdatacols.setselectedcells(const Value: gridcoordarty);
 var
  int1: integer;
 begin
  fgrid.beginupdate;
+ beginselect;
  clearselection;
  for int1:= 0 to high(value) do begin
   setselected(value[int1],true);
  end;
+ endselect;
  fgrid.endupdate;
 end;
 

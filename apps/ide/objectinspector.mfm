@@ -18,7 +18,7 @@ object objectinspectorfo: tobjectinspectorfo
   container.onchildscaled = objectinspectoronchildscaled
   dragdock.splitter_size = 0
   dragdock.caption = 'Objectinspector'
-  dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_propsize]
+  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_propsize]
   options = [fo_savepos, fo_savezorder, fo_savestate]
   statfile = mainfo.projectstatfile
   caption = 'Object Inspector'
@@ -72,7 +72,7 @@ object objectinspectorfo: tobjectinspectorfo
     anchors = [an_top, an_bottom]
     taborder = 1
     popupmenu = tpopupmenu1
-    optionsgrid = [og_colsizing, og_colmoving, og_focuscellonenter, og_colchangeontabkey]
+    optionsgrid = [og_colsizing, og_colmoving, og_focuscellonenter, og_colchangeontabkey, og_noresetselect]
     rowcolors.count = 1
     rowcolors.items = (
       16777202
@@ -119,9 +119,13 @@ object objectinspectorfo: tobjectinspectorfo
       item
         linecolor = -1610612731
         linecolorfix = -1610612733
+        colorselect = -1610612717
+        coloractive = -1879048185
         width = 90
-        options = [co_readonly, co_drawfocus, co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+        onbeforedrawcell = befdrawcell
+        options = [co_readonly, co_drawfocus, co_mouseselect, co_keyselect, co_multiselect, co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         onshowhint = col0onshowhint
+        onselectionchanged = selchanged
         widgetname = 'props'
       end    
       item
@@ -143,11 +147,11 @@ object objectinspectorfo: tobjectinspectorfo
     reffontheight = 14
     object props: ttreeitemedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      optionsskin = [osk_noskin]
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 90
       bounds_cy = 16
-      color = -1879048185
       frame.levelo = 0
       frame.colorclient = -2147483646
       frame.localprops = [frl_levelo, frl_colorclient]
@@ -221,7 +225,7 @@ object objectinspectorfo: tobjectinspectorfo
   end
   object tpopupmenu1: tpopupmenu
     onupdate = popupupdate
-    menu.submenu.count = 2
+    menu.submenu.count = 3
     menu.submenu.items = <    
       item
         caption = 'Collapse tree'
@@ -233,6 +237,12 @@ object objectinspectorfo: tobjectinspectorfo
         name = 'revert'
         state = [as_localcaption, as_localonexecute]
         onexecute = revertexe
+      end    
+      item
+        caption = 'Clear Selection'
+        name = 'clearselect'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = clearselect
       end>
     left = 112
     top = 80

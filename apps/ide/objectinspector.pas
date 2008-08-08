@@ -25,7 +25,7 @@ uses
  msepropertyeditors,mseglob,mseguiglob,
  msegui,mseedit,msedataedits,mselistbrowser,msedatanodes,
  msedesignintf,typinfo,msecomponenteditors,msesimplewidgets,msegraphutils,
- msemenus,mseevent,msedesigner,msetypes,msestrings,mselist;
+ msemenus,mseevent,msedesigner,msetypes,msestrings,mselist,msegraphics;
 
 type
  tobjectinspectorfo = class;
@@ -117,6 +117,10 @@ type
    procedure collapseexe(const sender: TObject);
    procedure popupupdate(const sender: tcustommenu);
    procedure revertexe(const sender: TObject);
+   procedure befdrawcell(const sender: tcol; const canvas: tcanvas;
+                   var cellinfo: cellinfoty; var processed: Boolean);
+   procedure selchanged(const sender: tdatacol);
+   procedure clearselect(const sender: TObject);
   private
    factmodule: tmsecomponent;
    factcomp: tcomponent;
@@ -154,6 +158,8 @@ type
    procedure clear;
    function reviseproperties(const aprops: propertyeditorarty): propertyeditorarty;
    procedure loaded; override;
+   procedure clearselectedprops(const aprop: tpropertyitem);
+               //clears editor selction of all nodes which are no siblings
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -222,13 +228,14 @@ var
 implementation
 uses
  objectinspector_mfm,msedatalist,sysutils,msearrayprops,
- msebitmap,msegraphics,msedrag,mseeditglob,msestockobjects,msedropdownlist,
+ msebitmap,msedrag,mseeditglob,msestockobjects,msedropdownlist,
  sourceupdate,sourceform,msekeyboard,main;
 
 const
  ado_rereadprops = 1;  //asyncevent codes
  ado_updatecomponentname = 2;
  objectinspectorcaption = 'Object Inspector';
+ selectcolor = cl_ltred;
 
 type
  defaultenumerationty = (null);
@@ -1043,6 +1050,7 @@ procedure tobjectinspectorfo.propertymodified(const sender: tpropertyeditor);
  var
  po1,po2: tpropertyvalue;
  int1,int2,int3: integer;
+ bo1: boolean;
 
 begin
  designer.begincomponentmodify;
@@ -1068,9 +1076,15 @@ begin
    end;
    if po1 <> nil then begin
     po1.updatestate;
+    bo1:= (ps_refreshall in sender.state);
     for int1:= 0 to grid.rowcount - 1 do begin
      po2:= tpropertyvalue(values[int1]);
-     if (po2 <> po1) and (ps_refresh in po2.feditor.state) then begin
+     if (po2 <> po1) and (bo1 or (ps_refresh in po2.feditor.state)) then begin
+      with tpropertyitem(props[int1]) do begin
+       if feditor <> nil then begin
+        feditor.updatedefaultvalue;
+       end;
+      end;
       po2.updatestate;
       updatedefaultstate(int1);
       int3:= props[int1].treelevel;
@@ -1660,6 +1674,8 @@ begin
   enabled:= (props.item <> nil) and (tpropertyitem(props.item).feditor <> nil) and
                              tpropertyitem(props.item).feditor.canrevert;
  end;
+ sender.menu.itembyname('clearselect').enabled:= 
+                             grid.datacols[0].selectedcellcount > 0;
 end;
 
 procedure tobjectinspectorfo.revertexe(const sender: TObject);
@@ -1674,6 +1690,70 @@ begin
    end;
 //  end;
  end;
+end;
+
+procedure tobjectinspectorfo.befdrawcell(const sender: tcol;
+               const canvas: tcanvas; var cellinfo: cellinfoty;
+               var processed: Boolean);
+var
+ editor1: tpropertyeditor;
+begin
+exit;
+ editor1:= tpropertyitem(cellinfo.datapo^).feditor;
+ if (editor1 <> nil) and editor1.selected then begin
+  cellinfo.color:= selectcolor;
+ end;
+end;
+
+procedure tobjectinspectorfo.clearselectedprops(const aprop: tpropertyitem);
+               //clears editor selction of all nodes which are no siblings
+ procedure doclear(const prop: tpropertyitem);
+ var
+  int1: integer;
+ begin
+  if (aprop = nil) or (prop.parent <> aprop.parent) then begin
+   prop.feditor.selected:= false;
+  end;
+  for int1:= 0 to prop.count-1 do begin
+   doclear(tpropertyitem(prop[int1]));
+  end;
+ end;
+var
+ int1: integer; 
+begin
+ for int1:= 0 to grid.rowhigh do begin
+  if props[int1].parent = nil then begin
+   doclear(tpropertyitem(props[int1]));
+  end;
+ end;
+ grid.datacols[0].invalidate;
+end;
+
+procedure tobjectinspectorfo.selchanged(const sender: tdatacol);
+var
+ ar1: integerarty;
+ int1: integer;
+begin
+ sender.grid.beginupdate;
+ ar1:= sender.selectedcells;
+ clearselectedprops(nil);
+ if props.item <> nil then begin
+  for int1:= 0 to high(ar1) do begin
+   tpropertyitem(props[ar1[int1]]).feditor.selected:= true;
+  end;
+  clearselectedprops(tpropertyitem(props.item));
+  for int1:= 0 to high(ar1) do begin
+   if not tpropertyitem(props[ar1[int1]]).feditor.selected then begin
+    sender.selected[ar1[int1]]:= false;
+   end;
+  end;
+ end;
+ sender.grid.endupdate;
+end;
+
+procedure tobjectinspectorfo.clearselect(const sender: TObject);
+begin
+ grid.datacols[0].clearselection;
 end;
 
 initialization
