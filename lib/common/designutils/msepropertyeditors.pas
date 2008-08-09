@@ -655,10 +655,6 @@ type
    function geteditorclass: propertyeditorclassty; override;
  end;
 
- tmenuelementeditor =  class(tclasspropertyeditor)
-  public
-   function getvalue: msestring; override;
- end;
 {
  tordinalelementeditor = class(tarrayelementeditor)
   public
@@ -669,6 +665,11 @@ type
  tclasselementeditor = class(tclasspropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
+  public
+   function getvalue: msestring; override;
+ end;
+
+ tmenuelementeditor =  class(tclasselementeditor)
   public
    function getvalue: msestring; override;
  end;
