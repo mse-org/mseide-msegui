@@ -931,6 +931,11 @@ begin
  with fposrect do begin
   repeat
    case factposition of
+    gd_none: begin
+     inc(int1);
+     rect1.x:= x + (cx - rect1.cx) div 2;
+     rect1.y:= y + (cy - rect1.cy) div 2;
+    end;
     gd_right: begin
      rect1.pos:= makepoint(x + cx, y);
      with rect1 do begin
