@@ -65,7 +65,7 @@ uses
 {$ifdef mswindows}
  windows,
 {$else}
- Libc,
+ mselibc,
 {$endif}
  msesysintf,msestrings;
 
@@ -95,13 +95,9 @@ end;
 
 function timestamp: cardinal;
 var
-{$ifdef FPC}
  t1: timeval;
-{$else}
- t1: ttimeval;
-{$endif}
 begin
- gettimeofday({$ifdef FPC}@{$endif}t1,ptimezone(nil));
+ gettimeofday(t1,ptimezone(nil));
  result:= t1.tv_sec * 1000000 + t1.tv_usec;
 end;
 

@@ -273,7 +273,8 @@ uses
  panelform,watchpointsform,threadsform,targetconsole,
  debuggerform,componentpaletteform,componentstore,
  messageform,msesettings,mseintegerenter
- {$ifdef linux} ,libc {$endif},mseprocutils
+ {$ifdef linux} ,mselibc {$endif},
+ mseprocutils
  {$ifdef mse_dumpunitgroups},dumpunitgroups{$endif};
 
 procedure handleerror(const e: exception; const text: string);

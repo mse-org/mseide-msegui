@@ -73,7 +73,7 @@ implementation
 uses
  mseapplication,
 {$ifdef UNIX}
- Libc;
+ mselibc;
 {$else}
  msesysutils;
 

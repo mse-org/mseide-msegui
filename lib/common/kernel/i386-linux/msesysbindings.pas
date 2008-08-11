@@ -11,7 +11,8 @@ unit msesysbindings;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- {$ifdef FPC}cthreads,cwstring,{$endif}libc;
+ {$ifdef FPC}cthreads,cwstring,{$endif}
+  mselibc;
 
 {$ifdef FPC}
 const
@@ -157,7 +158,6 @@ type
   threadslib = libpthreadmodulename;
   clib = libcmodulename;
 {$endif}
-
  
 function gettimeofday(__tv:Ptimeval; __tz:ptimezone):longint;cdecl;
                                            external clib name 'gettimeofday';

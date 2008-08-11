@@ -13,7 +13,8 @@ unit msesysintf; //i386-linux
 
 interface
 uses
- msesys,msesetlocale,{$ifdef FPC}cthreads,cwstring,{$endif}msetypes,libc,
+ msesys,msesetlocale,{$ifdef FPC}cthreads,cwstring,{$endif}msetypes,
+ mselibc,
  msestrings,msestream,msesysbindings;
 var
  thread1: threadty;
@@ -35,7 +36,6 @@ var
 {$include ../msesysintf.inc}
 
 type
-
  linuxsemty = record
 //  outoforder: boolean;
   destroyed: integer;
@@ -43,20 +43,9 @@ type
   platformdata: array[5..7] of cardinal;
  end;
 
-TSigActionHandlerEx = procedure(Signal: Integer; SignalInfo: PSigInfo; P: Pointer); cdecl;
-
-TSigActionEx = packed record
-                sa_sigaction: TSigActionHandlerEx;
-                sa_mask: __sigset_t;
-                sa_flags: Integer;
-                sa_restorer: TRestoreHandler;
-               end;
 function timestampms: cardinal;
-function sigactionex(SigNum: Integer; var Action: TSigActionex; OldAction: PSigAction): Integer;
-function m_sigprocmask(__how:longint; var SigSet : TSigSet;
-            var oldset: Tsigset):longint;cdecl;external clib name 'sigprocmask';
-function m_sigismember(var SigSet : TSigSet; SigNum : Longint):longint;cdecl;external clib name 'sigismember';
 
+function sigactionex(SigNum: Integer; var Action: TSigActionex; OldAction: PSigAction): Integer;
 
 procedure setcloexec(const fd: integer);
 
@@ -149,7 +138,7 @@ type
 
 function sys_getpid: procidty;
 begin
- result:= libc.getpid;
+ result:= mselibc.getpid;
 end;
 
 function sys_stdin: integer;
@@ -190,7 +179,7 @@ begin
     try
      stream.readln(str1);
      with result[int2] do begin
-      if libc.sscanf(pchar(str1),'%d (%*a[^)]) %*c %d',
+      if mselibc.sscanf(pchar(str1),'%d (%*a[^)]) %*c %d',
      {$ifdef FPC}[{$endif}@pid,@ppid{$ifdef FPC}]{$endif}) = 2 then begin
        inc(int2);
       end;
@@ -212,7 +201,7 @@ end;
 
 procedure sys_usleep(const us: cardinal);
 begin
- libc.usleep(us);
+ mselibc.usleep(us);
 end;
 
 function sys_getlasterror: Integer;
@@ -321,10 +310,10 @@ const
 function getfilerights(const rights: filerightsty): cardinal;
 const
  filerights: array[filerightty] of cardinal =
-               (libc.s_irusr,libc.s_iwusr,libc.s_ixusr,
-                libc.s_irgrp,libc.s_iwgrp,libc.s_ixgrp,
-                libc.s_iroth,libc.s_iwoth,libc.s_ixoth,
-                libc.s_isuid,libc.s_isgid,libc.s_isvtx);
+               (mselibc.s_irusr,mselibc.s_iwusr,mselibc.s_ixusr,
+                mselibc.s_irgrp,mselibc.s_iwgrp,mselibc.s_ixgrp,
+                mselibc.s_iroth,mselibc.s_iwoth,mselibc.s_ixoth,
+                mselibc.s_isuid,mselibc.s_isgid,mselibc.s_isvtx);
 var
  fr: filerightty;
 begin
@@ -341,7 +330,8 @@ var
  str1: string;
 begin
  str1:= path;
- if libc.__mkdir(pchar(str1),getfilerights(rights)) <> 0 then begin
+ if mselibc.__mkdir(pchar(str1),
+                 getfilerights(rights)) <> 0 then begin
 //  result:= sye_createdir;
  result:= syelasterror;
  end
@@ -372,7 +362,7 @@ begin
  str2:= path;
  sys_tosysfilepath(str2);
  str1:= str2;
- handle:= Integer(libc.open(PChar(str1), openmodes[openmode],
+ handle:= Integer(mselibc.open(PChar(str1), openmodes[openmode],
         {$ifdef FPC}[{$endif}getfilerights(rights){$ifdef FPC}]{$endif}));
  if handle >= 0 then begin
   setcloexec(handle);
@@ -385,7 +375,8 @@ end;
 
 function sys_closefile(const handle: integer): syserrorty;
 begin
- if (handle = invalidfilehandle) or (libc.__close(handle) = 0) then begin
+ if (handle = invalidfilehandle) or 
+   (mselibc.__close(handle) = 0) then begin
   result:= sye_ok;
  end
  else begin
@@ -407,7 +398,7 @@ end;
 
 function sys_read(fd:longint; buf:pointer; nbytes: dword): integer;
 begin
- result:= libc.__read(fd,buf^,nbytes);
+ result:= mselibc.__read(fd,buf^,nbytes);
 end;
 
 function sys_write(fd:longint; buf: pointer; nbytes: longword): integer;
@@ -416,7 +407,7 @@ var
 begin
  result:= nbytes;
  repeat
-  int1:= libc.__write(fd,buf^,nbytes);
+  int1:= mselibc.__write(fd,buf^,nbytes);
   if int1 = -1 then begin
    result:= int1;
    break;
@@ -429,7 +420,8 @@ end;
 function sys_errorout(const atext: string): syserrorty;
 begin
  if (length(atext) = 0) or
-   (libc.__write(2,pchar(atext)^,length(atext)) = length(atext)) then begin
+   (mselibc.__write(2,
+              pchar(atext)^,length(atext)) = length(atext)) then begin
   result:= sye_ok;
  end
  else begin
@@ -787,31 +779,27 @@ begin
  str1:= oldfile;
  str2:= newfile;
  result:= sye_copyfile;
- source:= libc.open(pchar(str1),o_rdonly);
+ source:= mselibc.open(pchar(str1),o_rdonly);
  if source <> -1 then begin
   if fstat(source,stat) = 0 then begin
-   dest:= libc.open(pchar(str2),
+   dest:= mselibc.open(pchar(str2),
    o_rdwr or o_creat or o_trunc,
    {$ifdef FPC}[{$endif}s_irusr or s_iwusr{$ifdef FPC}]{$endif});
    if dest <> -1 then begin
- // does not work on kernel 2.5+
- //    lwo1:= 0;
- //    if libc.syscall(nr_sendfile,
- //    {$ifdef FPC}[{$endif}dest,source,@lwo1,$ffffffff{$ifdef FPC}]{$endif}) <> -1 then begin
     getmem(po1,bufsize);
     lwo1:= 0; //compiler warning
     while true do begin
-     lwo1:= libc.__read(source,po1^,bufsize);
+     lwo1:= mselibc.__read(source,po1^,bufsize);
      if (lwo1 = 0) or (lwo1 = longword(-1)) then begin
       break;
      end;
-     if libc.__write(dest,po1^,lwo1) <> integer(lwo1) then begin
+     if mselibc.__write(dest,po1^,lwo1) <> integer(lwo1) then begin
       break;
      end;
     end;
     freemem(po1);
     if lwo1 = 0 then begin
-     if libc.fchmod(dest,stat.st_mode) = 0 then begin
+     if mselibc.fchmod(dest,stat.st_mode) = 0 then begin
       result:= sye_ok;
      end
      else begin
@@ -821,7 +809,7 @@ begin
     else begin
      result:= syelasterror;
     end;
-    libc.__close(dest);
+    mselibc.__close(dest);
    end
    else begin
     result:= syelasterror;
@@ -830,7 +818,7 @@ begin
   else begin
    result:= syelasterror;
   end;
-  libc.__close(source);
+  mselibc.__close(source);
  end
  else begin
   result:= syelasterror;
@@ -843,7 +831,7 @@ var
 begin
  str1:= oldname;
  str2:= newname;
- if libc.__rename(pchar(str1),pchar(str2)) = -1 then begin
+ if mselibc.__rename(pchar(str1),pchar(str2)) = -1 then begin
   result:= syelasterror;
  end
  else begin
@@ -856,7 +844,7 @@ var
  str1: string;
 begin
  str1:= filename;
- if libc.unlink(pchar(str1)) = -1 then begin
+ if mselibc.unlink(pchar(str1)) = -1 then begin
   result:= syelasterror;
  end
  else begin
@@ -940,7 +928,7 @@ var
  str1: string;
 begin
  str1:= dirname;
- if libc.__chdir(pchar(str1)) = 0 then begin
+ if mselibc.__chdir(pchar(str1)) = 0 then begin
   result:= sye_ok;
  end
  else begin

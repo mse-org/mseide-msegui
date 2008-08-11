@@ -18,7 +18,7 @@ uses
  windows,{$ifndef FPC}mmsystem,{$endif}
  {$endif}
  {$ifdef UNIX}
- Libc,
+ mselibc,
  {$endif}
  Classes;
 {$ifdef mswindows}

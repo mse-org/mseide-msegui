@@ -17,7 +17,7 @@ uses
 
 implementation
 uses
- libc,msefileutils,msesysintf,msesysutils,sysutils;
+ mselibc,msefileutils,msesysintf,msesysutils,sysutils;
  
 type
  datarecty = record
@@ -95,7 +95,7 @@ end;
 function soc_shutdown(const handle: integer;
                            const kind: socketshutdownkindty): syserrorty;
 begin
- if libc.shutdown(handle,ord(kind)) <> 0 then begin
+ if mselibc.shutdown(handle,ord(kind)) <> 0 then begin
   result:= syelasterror;
  end
  else begin
@@ -105,7 +105,7 @@ end;
 
 function soc_close(const handle: integer): syserrorty;
 begin
- if libc.__close(handle) = 0 then begin
+ if mselibc.__close(handle) = 0 then begin
   result:= sye_ok;
  end
  else begin
@@ -241,7 +241,7 @@ begin
    int2:= bind(handle,psockaddr(po1)^,int1);
    {$endif}
    if (int2 <> 0) and (sys_getlasterror = EADDRINUSE) then begin
-    libc.unlink(pchar(str1));
+    mselibc.unlink(pchar(str1));
     {$ifdef FPC}
     int2:= bind(handle,pointer(po1),int1);
     {$else}
@@ -363,11 +363,7 @@ begin
      end;
     end;
    end;
-   {$ifdef FPC}
    freeaddrinfo(po1);
-   {$else}
-   freeaddrinfo(paddressinfo(po1));
-   {$endif}
   end;
  end;
 end;

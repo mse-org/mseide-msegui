@@ -16,7 +16,7 @@ uses
  {$include ../mseprocmonitor.inc}
 implementation
 uses
- mseapplication,msedatalist,libc;
+ mseapplication,msedatalist,mselibc;
 type
  procinfoty = record
   prochandle: prochandlety;

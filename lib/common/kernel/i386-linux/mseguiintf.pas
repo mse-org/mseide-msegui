@@ -17,7 +17,8 @@ interface
 uses
  {$ifdef FPC}xlib{$else}Xlib{$endif},msetypes,mseapplication,msegui,msegraphics,
  msegraphutils,mseevent,msepointer,mseguiglob,msesys,
- msethread{$ifdef FPC},x,xutil,dynlibs{$endif},libc,msesysintf,msestockobjects,
+ msethread{$ifdef FPC},x,xutil,dynlibs{$endif},
+ mselibc,msesysintf,msestockobjects,
  msestrings,xft,xrender;
 
 {$ifdef FPC}
@@ -2168,7 +2169,7 @@ begin
  fillchar(timerval,sizeof(timerval),0);
  timerval.it_value.tv_sec:= us div 1000000;
  timerval.it_value.tv_usec:= us mod 1000000;
- if libc.setitimer(itimer_real,{$ifdef FPC}@{$endif}timerval,nil) = 0 then begin
+ if mselibc.setitimer(itimer_real,{$ifdef FPC}@{$endif}timerval,nil) = 0 then begin
   result:= gue_ok;
  end
  else begin

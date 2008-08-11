@@ -276,7 +276,7 @@ implementation
 uses
  msefileutils,msebits,{msegui,}mseformatstr,sysconst,msesysutils,msesysintf,
  msedatalist,mseclasses,
-        {$ifdef UNIX} libc,
+        {$ifdef UNIX} mselibc,
         {$else} windows,
         {$endif}
   rtlconsts;

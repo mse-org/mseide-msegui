@@ -121,7 +121,7 @@ uses
 {$ifdef mswindows}
  ,windows
 {$else}
- ,libc
+ ,mselibc
 {$endif}
  ;
 var

@@ -134,7 +134,7 @@ end;
 
 implementation
 uses
-  {$ifdef UNIX}libc, {$else}windows, {$endif}
+  {$ifdef UNIX}mselibc, {$else}windows, {$endif}
  mseapplication,msesysintf,sysutils,msesysutils;
 
 { tpipewriter }

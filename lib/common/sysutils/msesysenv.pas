@@ -217,7 +217,7 @@ function expandmacros(const value: msestring; const macros:macroinfoarty;
  
 implementation
 uses
- msesysutils,RTLConsts,msestream,msesys{$ifdef UNIX},libc{$endif};
+ msesysutils,RTLConsts,msestream,msesys{$ifdef UNIX},mselibc{$endif};
  
 function expandmacros(const value: msestring; const macros:macroinfoarty;
                  const caseinsensitive: boolean = true): msestring;

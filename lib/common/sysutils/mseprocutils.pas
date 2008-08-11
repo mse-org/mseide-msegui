@@ -14,7 +14,7 @@ unit mseprocutils;
 
 interface
 uses
- {$ifdef mswindows}windows{$else}libc{$endif},
+ {$ifdef mswindows}windows{$else}mselibc{$endif},
  msetypes,msestream,msepipestream,sysutils,msesysutils,msesys;
  
 type
@@ -575,13 +575,13 @@ end;
 function execwaitmse(const commandline: string;
                       const inactive: boolean = true): integer;
 begin
- result:= libc.{$ifdef FPC}__system{$else}system{$endif}(pchar(commandline));
+ result:= mselibc.{$ifdef FPC}__system{$else}system{$endif}(pchar(commandline));
 end;
 
 function pipe(out desc: pipedescriptorty; write: boolean): boolean;
             //returns errorcode, 0 if ok
 begin
- result:= libc.pipe(tpipedescriptors(desc)) = 0;
+ result:= mselibc.pipe(tpipedescriptors(desc)) = 0;
 end;
 
 function execmse0(const commandline: string; topipe: pinteger = nil;
@@ -626,7 +626,7 @@ var
   if tty then begin
    with pipehandles do begin
     if @pipehandles = @topipehandles then begin
-     if libc.pipe(pipehandles) <> 0 then execerr;
+     if mselibc.pipe(pipehandles) <> 0 then execerr;
      {
      writedes:= getpt;
      if writedes < 0 then execerr;
@@ -647,7 +647,7 @@ var
    end;
   end
   else begin
-   if libc.pipe(pipehandles) <> 0 then execerr;
+   if mselibc.pipe(pipehandles) <> 0 then execerr;
   end;
  end;
  
@@ -692,8 +692,8 @@ begin
    end;
   end;
  end;
- procid:= libc.vfork;
-// procid:= libc.fork;
+ procid:= mselibc.vfork;
+// procid:= mselibc.fork;
  if procid = -1 then execerr;
 
  if procid = 0 then begin   //child
@@ -709,27 +709,27 @@ begin
   if topipe <> nil then begin
    __close(topipehandles.writedes);
    if dup2(topipehandles.ReadDes,0) = -1 then begin
-    libc._exit(exit_failure);
+    mselibc._exit(exit_failure);
    end;
    __close(topipehandles.readdes);
   end;
   if frompipe <> nil then begin
    __close(frompipehandles.readdes);
    if dup2(frompipehandles.writeDes,1) = -1 then begin
-    libc._exit(exit_failure);
+    mselibc._exit(exit_failure);
    end;
   end;
   if errorpipe <> nil then begin
    if errorpipe <> frompipe then  begin
     __close(errorpipehandles.readdes);
     if dup2(errorpipehandles.writeDes,2) = -1 then begin
-     libc._exit(exit_failure);
+     mselibc._exit(exit_failure);
     end;
     __close(errorpipehandles.writedes);
    end
    else begin
     if dup2(frompipehandles.writeDes,2) = -1 then begin
-     libc._exit(exit_failure);
+     mselibc._exit(exit_failure);
     end;
    end
   end;
@@ -737,17 +737,17 @@ begin
    __close(frompipehandles.writedes);
   end;
   {$ifdef FPC}
-  libc.execl(shell,shell,['-c',pchar(commandline),nil]);
+  mselibc.execl(shell,shell,['-c',pchar(commandline),nil]);
   {$else}
   params[0]:= shell;
   params[1]:= pchar('-c');
   params[2]:= pchar(commandline);
   params[3]:= nil;
  {$warnings off}
-  libc.syscall(11,pchar(shell),@params,envp); //problems with kylix debugger
+  mselibc.syscall(11,pchar(shell),@params,envp); //problems with kylix debugger
  {$warnings on}
 {$endif}
-  libc._exit(exit_failure); //execl misslungen
+  mselibc._exit(exit_failure); //execl misslungen
 {$ifdef FPC}{$checkpointer default}{$endif}
  end
  else begin //parent
@@ -871,7 +871,7 @@ begin
   fillchar(result,sizeof(result),0);
   stream.readln(str1);
   with result do begin
-   libc.sscanf(pchar(str1),'%d (%a[^)]) %c %d %d %d %d %d %lu %lu '+
+   mselibc.sscanf(pchar(str1),'%d (%a[^)]) %c %d %d %d %d %d %lu %lu '+
     '%lu %lu %lu %lu %lu %ld %ld %ld %ld %ld %ld %lu %lu %ld %lu %lu %lu %lu %lu '+
     '%lu %lu %lu %lu %lu %lu %lu %lu %d %d',
     {$ifdef FPC}[{$endif}
@@ -917,7 +917,7 @@ begin
     {$ifdef FPC}]{$endif}
                    );
    comm:= string(commpo);
-   libc.free(commpo);
+   mselibc.free(commpo);
   end;
  finally
   stream.Free;

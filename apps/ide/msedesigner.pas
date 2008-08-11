@@ -458,7 +458,7 @@ function designer: tdesigner;
 implementation
 
 uses
- msestream,msefileutils,{$ifdef mswindows}windows{$else}libc{$endif},
+ msestream,msefileutils,{$ifdef mswindows}windows{$else}mselibc{$endif},
  designer_bmp,msesys,msewidgets,formdesigner,mseevent,objectinspector,
  msefiledialog,projectoptionsform,sourceupdate,sourceform,sourcepage,
  pascaldesignparser,msearrayprops,rtlconsts,

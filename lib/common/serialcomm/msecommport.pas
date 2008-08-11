@@ -14,7 +14,7 @@ unit msecommport;
 
 interface
 uses {$ifdef mswindows} windows,{$ifndef FPC} mmsystem,{$endif}
-     {$else} Libc,
+     {$else} mselibc,
      {$endif}
      Classes,msethread,mseguiglob,msecommtimer,mseevent,mseclasses,msesys,
      msestrings,msestat,msestatfile;
@@ -580,7 +580,7 @@ begin
   closehandle(hcomm);
  end;
  {$else}
- hcomm:= libc.open(PChar('/dev/'+commname[commnr]), o_rdwr or o_nonblock
+ hcomm:= mselibc.open(PChar('/dev/'+commname[commnr]), o_rdwr or o_nonblock
              {,FileAccessRights});
  if cardinal(hcomm) = invalidfilehandle then begin
   result:= false;
@@ -864,7 +864,7 @@ const           // fuer tdcb.flags
 begin       //open
  close;
  {$ifdef UNIX}
- fhandle:= libc.open(PChar('/dev/'+commname[fcommnr]), o_rdwr or o_nonblock
+ fhandle:= mselibc.open(PChar('/dev/'+commname[fcommnr]), o_rdwr or o_nonblock
              {,FileAccessRights});
  if integer(fhandle) >= 0 then begin
   msetcgetattr(fhandle,info);
