@@ -160,7 +160,7 @@ var
  info1: breakpointinfoty;
  bo1: boolean;
 begin
- if gdb.execloaded then begin
+ if gdb.execloaded and not gdb.running then begin
   gdb.infobreakpoint(info,info.addressbreakpoint);
                  //update adress or fileinfo
  end;
