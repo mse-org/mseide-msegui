@@ -160,11 +160,10 @@ var
  info1: breakpointinfoty;
  bo1: boolean;
 begin
- bo1:= info.bkpton;
  if gdb.execloaded then begin
-  gdb.infobreakpoint(info);
+  gdb.infobreakpoint(info,info.addressbreakpoint);
+                 //update adress or fileinfo
  end;
- info.bkpton:= bo1;
  addressbkpt[index]:= info.addressbreakpoint;
  path[index]:= info.path;
  filename[index]:= msefileutils.filename(info.path);

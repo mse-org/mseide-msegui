@@ -364,13 +364,14 @@ type
    function breakinsert(const funcname: string): integer; overload;
                 //returns bkpt id, -1 on error
    function breakinsert(const address: int64): integer; overload;
-   function breaklist(var list: breakpointinfoarty; full: boolean): gdbresultty;
-               //full = false -> only bkptno and passcount
+   function breaklist(var list: breakpointinfoarty; const full: boolean): gdbresultty;
+               //full = false -> only bkptno, address and passcount
    function breakdelete(bkptnum: integer): gdbresultty; //bkptnum = 0 -> all
    function breakenable(bkptnum: integer; value: boolean): gdbresultty; //bkptnum = 0 -> all
    function breakafter(bkptnum: integer; const passcount: integer): gdbresultty;
    function breakcondition(bkptnum: integer; const condition: string): gdbresultty;
-   function infobreakpoint(var info: breakpointinfoty): gdbresultty;
+   function infobreakpoint(var info: breakpointinfoty;
+                               const full: boolean = true): gdbresultty;
               //updates info for breakpoint info.bkptnum
    function watchinsert(var info: watchpointinfoty): gdbresultty;
 
@@ -2163,7 +2164,7 @@ end;
 
 function tgdbmi.getbreakpointinfo(var atup: resultinfoty;
                                        var info: breakpointinfoty;
-                                             const full: boolean): boolean;
+                                       const full: boolean): boolean;
 var
  tup1: resultinfoarty;
  filename: string;
@@ -2173,19 +2174,25 @@ begin
   with info do begin
    getintegervalue(tup1,'number',bkptno);
    getintegervalue(tup1,'times',passcount);
+   getptruintvalue(tup1,'addr',address);
    if full then begin
     getintegervalue(tup1,'line',line);
-//    getstringvalue(tup1,'file',filename);
+    filename:= '';
     getstringvalue(tup1,'fullname',filename);
-    path:= filename;
+    if filename = '' then begin
+     getstringvalue(tup1,'file',filename);
+    end;
+    if filename <> '' then begin
+     path:= filename;
+    end;
     getbooleanvalue(tup1,'enabled',bkpton);
-    getptruintvalue(tup1,'addr',address);
    end;
   end;
  end;
 end;
 
-function tgdbmi.breaklist(var list: breakpointinfoarty; full: boolean): gdbresultty;
+function tgdbmi.breaklist(var list: breakpointinfoarty;
+                                         const full: boolean): gdbresultty;
 var
  ar1: resultinfoarty;
  int1: integer;
@@ -2206,7 +2213,8 @@ begin
  end;
 end;
 
-function tgdbmi.infobreakpoint(var info: breakpointinfoty): gdbresultty;
+function tgdbmi.infobreakpoint(var info: breakpointinfoty;
+                                 const full: boolean = true): gdbresultty;
 var
  ar1: resultinfoarty;
  tup1: resultinfoarty;
@@ -2217,7 +2225,7 @@ begin
   if gettuplevalue(fsyncvalues,'BreakpointTable',tup1) then begin
    if getarrayvalue(tup1,'body',true,ar1) then begin
     if high(ar1) = 0 then begin
-     if getbreakpointinfo(ar1[0],info,true) then begin
+     if getbreakpointinfo(ar1[0],info,full) then begin
       result:= gdb_ok;
      end;
     end;
