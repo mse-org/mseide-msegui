@@ -218,11 +218,12 @@ begin
     else begin
      while int1 <> stop do begin
       po2:= dest.scanline[int1];
-      for int2:= 0 to rowbytelength - 1 do begin
+      for int2:= 0 to biwidth - 1 do begin
        po2^:= palette[po1^];
        inc(po2);
        inc(po1);
       end;
+      inc(po1,paddingcount);
       inc(int1,step);
      end;
     end;
