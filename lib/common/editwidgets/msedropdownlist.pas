@@ -309,7 +309,6 @@ type
  tcustomdropdownlistcontroller = class(tcustomdropdowncontroller,idropdownlistcontroller)
   private
    fdropdownrowcount: integer;
-   fdropdownitems: tdropdowncols;
    fwidth: integer;
    fvaluecol: integer;
    fdatarowlinewidth: integer;
@@ -321,6 +320,7 @@ type
    procedure setitemindex(const Value: integer);
    procedure setvaluecol(const avalue: integer);
   protected
+   fdropdownitems: tdropdowncols;
    fdropdownlist: tdropdownlist;
    fcols: tdropdowncols;
    procedure valuecolchanged; virtual;
