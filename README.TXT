@@ -51,8 +51,8 @@ If you wish to to compile the IDE:
 
 FPC 2.2.2
 *********
-patch_fpc_2_2_2 contains patched FPC files in order to fix FPC Mantis 11774 and 
-11855.
+patch_fpc_2_2_2 contains patched FPC files in order to fix FPC Mantis 11774, 
+11855, 11856.
 
 Debugging
 *********
