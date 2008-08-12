@@ -1,9 +1,9 @@
 MSEide+MSEgui Pascal Cross Platform GUI Development System.
  
-2008-05-24 Version 1.8rc1
+2008-08-12 Version 1.9 unstable
 Copyright (c) 1999-2008 by Martin Schreiber
 
-- Compiles with FPC 2.2.
+- Compiles with FPC 2.2.2
 - Tested on i386-linux SuSE 9.0,10.3 and i386-win32 98 and 2000.
 - Links to xlib and gdi32, no external widget library needed.
 - Internal character encoding is UCS2.
@@ -31,9 +31,9 @@ IDE is under GPL, library under modified LGPL like FPC-RTL.
 
 Installation:
 *************
-1. Download and install FPC 2.2, you can get it from 
+1. Download and install FPC 2.2.2, you can get it from 
    http://www.freepascal.org/download.var
-2. Download mseide_msegui_src_1_6.zip and mseide_bin_1_6.zip
+2. Download mseide_msegui_src_1_8.zip and mseide_bin_1_8.zip
    http://sourceforge.net/project/showfiles.php?group_id=165409
 3. Extract them to a directory of your choice ('yourdirectory') .
 4. Run 'yourdirectory/bin/i386-linux/mseide' on linux or 
@@ -49,19 +49,10 @@ If you wish to to compile the IDE:
 1. In 'Project'-'Open' select 'yourdirectory/msegui/apps/ide/mseide.prj'.
 2. 'Target'-'Continue'.
 
-Version 1.4 to 1.6
-******************
-The MSEgui base units have been refactored in order to implement a GUI
-independent tapplication class.
-It is possible that you need to add mseapplication, mseact, mseguiglob and 
-mseglob to uses.
-
-FPC 2.2
-*******
-In patch_fpc_2_2 is a patched db.pas file in order to read with 
-FPC 2.0.4 written form files with incompatible fielddefs property.
-- wstrings.inc, fixed buffer overflow in widestring delete
-  (FPC Mantis 10800).
+FPC 2.2.2
+*********
+patch_fpc_2_2_2 contains patched FPC files in order to fix FPC Mantis 11774 and 
+11855.
 
 Debugging
 *********
