@@ -22,7 +22,7 @@ uses
  msegraphutils,regkernel_bmp,msegraphics,msestrings,msepostscriptprinter,
  mseprinter,msetypes,msedatalist,msedatamodules,mseclasses,formdesigner,
  mseapplication,mseglob,mseguiglob,mseskin,msedesigner,typinfo,
- mseguithreadcomp,mseprocmonitorcomp;
+ mseguithreadcomp,mseprocmonitorcomp,imageselectorform;
 
 type
  twidget1 = class(twidget);
@@ -84,6 +84,15 @@ type
   public
  end;
  
+ timagenrpropertyeditor = class(tordinalpropertyeditor)
+  private
+   fintf: iimagelistinfo;
+  protected
+   function getdefaultstate: propertystatesty; override;
+  public
+   procedure edit; override;
+ end;
+ 
 const   
  datamoduleintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createmsedatamodule);
@@ -108,6 +117,7 @@ begin
  registerpropertyeditor(typeinfo(string),tfont,'name',tfontnamepropertyeditor);
  registerpropertyeditor(typeinfo(actionstatesty),nil,'',tshapestatespropertyeditor);
  registerpropertyeditor(typeinfo(shortcutty),nil,'',tshortcutpropertyeditor);
+ registerpropertyeditor(typeinfo(imagenrty),nil,'',timagenrpropertyeditor);
  registerpropertyeditor(typeinfo(tcollection),nil,'',tcollectionpropertyeditor);
  registerpropertyeditor(typeinfo(tmenuitems),nil,'',tmenuarraypropertyeditor);
 // registerpropertyeditor(typeinfo(tcustomframe),twidget,'frame',tframepropertyeditor);
@@ -271,6 +281,28 @@ end;
 function tsysshortcutelementeditor.name: msestring;
 begin
  result:= getenumname(typeinfo(sysshortcutty),findex);
+end;
+
+{ timagenrpropertyeditor }
+
+function timagenrpropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate;
+ if getcorbainterface(fprops[0].instance,typeinfo(iimagelistinfo),fintf) and 
+                     (fintf.getimagelist <> nil) then begin
+  result:= result + [ps_dialog];
+ end;
+end;
+
+procedure timagenrpropertyeditor.edit;
+var
+ int1: integer;
+begin
+ if fintf <> nil then begin
+  int1:= getordvalue;
+  timageselectorfo.create(nil,fintf.getimagelist,int1);
+  setordvalue(int1);
+ end;
 end;
 
 initialization

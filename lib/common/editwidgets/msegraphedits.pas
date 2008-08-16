@@ -619,7 +619,7 @@ type
    property items[const index: integer]: tface read getitems; default;
  end;
  
- tcustomdatabutton = class(tcustomintegergraphdataedit,iactionlink)
+ tcustomdatabutton = class(tcustomintegergraphdataedit,iactionlink,iimagelistinfo)
   private
    fonexecute: notifyeventty;
    fvaluefaces: tvaluefacearrayprop;
@@ -638,7 +638,7 @@ type
    function isimageliststored: Boolean;
    procedure setcaptiondist(const avalue: integer);
    procedure setcaptionpos(const avalue: captionposty);
-   procedure setimagenr(const avalue: integer);
+   procedure setimagenr(const avalue: imagenrty);
    function isimagenrstored: boolean;
    procedure setimageoffset(const avalue: integer);
    procedure setimagenums(const avalue: tintegerarrayprop);
@@ -705,7 +705,7 @@ type
                             default defaultshapecaptiondist;
    property imagelist: timagelist read getimagelist write setimagelist
                     stored isimageliststored;
-   property imagenr: integer read factioninfo.imagenr write setimagenr
+   property imagenr: imagenrty read factioninfo.imagenr write setimagenr
                             stored isimagenrstored default -1;
    property imagenrdisabled: integer read factioninfo.imagenrdisabled
                               write setimagenrdisabled
@@ -2695,7 +2695,7 @@ begin
  result:= isactionimageliststored(factioninfo);
 end;
 
-procedure tcustomdatabutton.setimagenr(const avalue: integer);
+procedure tcustomdatabutton.setimagenr(const avalue: imagenrty);
 begin
  fimagenr:= avalue;
  setactionimagenr(iactionlink(self),avalue);

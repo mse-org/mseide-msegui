@@ -4,10 +4,11 @@ interface
 uses
  classes,mseglob,mseguiglob,mseapplication,msestat,msemenus,msegui,msegraphics,
  msegraphutils,mseevent,mseclasses,mseforms,msedataedits,msedatanodes,mseedit,
- msegrids,mselistbrowser,msestrings,msetypes,msebitmap;
+ msegrids,mselistbrowser,msestrings,msetypes,msebitmap,msestatfile;
 type
  timageselectorfo = class(tmseform)
    lv: tlistview;
+   tstatfile1: tstatfile;
    procedure itemev(const sender: tcustomlistview; const index: Integer;
                    var info: celleventinfoty);
   private

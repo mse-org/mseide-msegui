@@ -1,6 +1,6 @@
 object imageselectorfo: timageselectorfo
-  bounds_x = 337
-  bounds_y = 266
+  bounds_x = 126
+  bounds_y = 231
   bounds_cx = 320
   bounds_cy = 244
   taborder = 1
@@ -11,7 +11,9 @@ object imageselectorfo: timageselectorfo
   container.bounds_cx = 320
   container.bounds_cy = 244
   container.frame.dummy = 0
-  options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder, fo_savestate]
+  options = [fo_screencentered, fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder, fo_savestate]
+  statfile = tstatfile1
+  caption = 'Image Selector'
   moduleclassname = 'tmseform'
   object lv: tlistview
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
@@ -26,5 +28,11 @@ object imageselectorfo: timageselectorfo
     itemlist.captionpos = cp_bottom
     onitemevent = itemev
     reffontheight = 14
+  end
+  object tstatfile1: tstatfile
+    filename = 'imageselector.sta'
+    options = [sfo_memory, sfo_activatorread, sfo_activatorwrite]
+    left = 72
+    top = 48
   end
 end

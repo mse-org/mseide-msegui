@@ -505,6 +505,7 @@ const
  programparametersstatname = 'programparametersfo.sta';
  settingsstatname =          'settingsfo.sta';
  printerstatname =           'printer.sta';
+ imageselectorstatname =     'imageselector.sta';
  siginfocount = 30;
  siginfos: array[0..siginfocount-1] of signalinfoty = (
   (num:  1; flags: [sfl_stop]; name: 'SIGHUP'; comment: 'Hangup'),
@@ -855,6 +856,7 @@ begin
   deletememorystatstream(setcreateorderstatname);
   deletememorystatstream(programparametersstatname);
   deletememorystatstream(printerstatname);
+  deletememorystatstream(imageselectorstatname);
   deletememorystatstream(stringlisteditorstatname);
   deletememorystatstream(texteditorstatname);
   deletememorystatstream(colordialogstatname);
@@ -1094,6 +1096,7 @@ begin
   updatememorystatstream('programparameters',programparametersstatname);
   updatememorystatstream('settings',settingsstatname);
   updatememorystatstream('printer',printerstatname);
+  updatememorystatstream('imageselector',imageselectorstatname);
   updatememorystatstream('stringlisteditor',stringlisteditorstatname);
   updatememorystatstream('texteditor',texteditorstatname);
   updatememorystatstream('colordialog',colordialogstatname);

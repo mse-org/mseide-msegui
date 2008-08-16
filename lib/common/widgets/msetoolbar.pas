@@ -23,12 +23,12 @@ type
 
  tcustomtoolbar = class;
 
- ttoolbutton = class(tindexpersistent,iactionlink)
+ ttoolbutton = class(tindexpersistent,iactionlink,iimagelistinfo)
   private
    finfo: actioninfoty;
    fonupdate: actioneventty;
    procedure setaction(const Value: tcustomaction);
-   procedure setimagenr(const Value: integer);
+   procedure setimagenr(const Value: imagenrty);
    procedure setcolorglyph(const avalue: colorty);
    function iscolorglyphstored: boolean;
    procedure setcolor(const avalue: colorty);
@@ -83,7 +83,7 @@ type
   published
    property imagelist: timagelist read getimagelist write setimagelist
                     stored isimageliststored;
-   property imagenr: integer read finfo.imagenr write setimagenr
+   property imagenr: imagenrty read finfo.imagenr write setimagenr
                             stored isimagenrstored default -1;
    property colorglyph: colorty read finfo.colorglyph write setcolorglyph 
                        stored iscolorglyphstored default cl_glyph;
@@ -366,7 +366,7 @@ begin
  result:= isactionshortcut1stored(finfo);
 end;
 
-procedure ttoolbutton.setimagenr(const Value: integer);
+procedure ttoolbutton.setimagenr(const Value: imagenrty);
 begin
  setactionimagenr(iactionlink(self),value);
 end;

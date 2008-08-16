@@ -77,7 +77,7 @@ type
   function getstate: actionstatesty;  
  end;
  
- tmenuitem = class(teventpersistent,iactionlink,imenuitem)
+ tmenuitem = class(teventpersistent,iactionlink,imenuitem,iimagelistinfo)
   private
    fparentmenu: tmenuitem;
    fonchange: menuitemeventty;
@@ -120,9 +120,9 @@ type
    function getimagelist: timagelist;
    procedure setimagelist(const avalue: timagelist);
    function isimageliststored: boolean;
-   procedure setimagenr(const avalue: integer);
+   procedure setimagenr(const avalue: imagenrty);
    function isimagenrstored: boolean;
-   procedure setimagenrdisabled(const avalue: integer);
+   procedure setimagenrdisabled(const avalue: imagenrty);
    function isimagenrdisabledstored: boolean;
    procedure setcolor(const avalue: colorty);
    function iscolorstored: boolean;
@@ -205,9 +205,9 @@ type
                      stored isgroupstored default 0;
    property imagelist: timagelist read getimagelist write setimagelist
                      stored isimageliststored;
-   property imagenr: integer read finfo.imagenr write setimagenr
+   property imagenr: imagenrty read finfo.imagenr write setimagenr
                             stored isimagenrstored default -1;
-   property imagenrdisabled: integer read finfo.imagenrdisabled 
+   property imagenrdisabled: imagenrty read finfo.imagenrdisabled 
                             write setimagenrdisabled
                             stored isimagenrdisabledstored default -2;
    property color: colorty read finfo.color write setcolor 
@@ -1137,7 +1137,7 @@ begin
  result:= isactionimageliststored(finfo);
 end;
 
-procedure tmenuitem.setimagenr(const avalue: integer);
+procedure tmenuitem.setimagenr(const avalue: imagenrty);
 begin
  setactionimagenr(iactionlink(self),avalue);
 end;
@@ -1147,7 +1147,7 @@ begin
  result:= isactionimagenrstored(finfo);
 end;
 
-procedure tmenuitem.setimagenrdisabled(const avalue: integer);
+procedure tmenuitem.setimagenrdisabled(const avalue: imagenrty);
 begin
  setactionimagenrdisabled(iactionlink(self),avalue);
 end;

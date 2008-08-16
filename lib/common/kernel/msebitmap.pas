@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -9,7 +9,7 @@
 }
 unit msebitmap;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 
 interface
 uses
@@ -22,7 +22,6 @@ const
  defaultimagelistsize: sizety = (cx: defaultimagelistwidth; cy: defaultimagelistheight);
 
 type
-
  imagebufferinfoty = record
   image: imagety;
   mask: imagety;
@@ -308,6 +307,12 @@ type
                  //last!
    property onchange: notifyeventty read fonchange write fonchange;
  end;
+
+ imagenrty = type integer; //for timagelist 
+ iimagelistinfo = interface(inullinterface)
+                  ['{CEF535C2-D1DC-438C-92FB-CAF2D6D69B02}']
+  function getimagelist: timagelist;
+ end; 
 
  tformatstream = class
   private

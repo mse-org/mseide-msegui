@@ -92,7 +92,7 @@ type
   shortcut: shortcutty;
   shortcut1: shortcutty;
   group: integer;
-  imagenr: integer;
+  imagenr: integer; //imagenrty;
   imagenrdisabled: integer; //-2 -> grayed
   colorglyph: colorty;
   color: colorty;

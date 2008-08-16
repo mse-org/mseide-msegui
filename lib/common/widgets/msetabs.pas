@@ -32,7 +32,7 @@ type
  tabstatety = (ts_invisible,ts_disabled,ts_active,ts_updating);
  tabstatesty = set of tabstatety;
 
- ttab = class(tindexpersistent)
+ ttab = class(tindexpersistent,iimagelistinfo)
   private
    fcaption: richstringty;
    fhint: msestring;
@@ -52,8 +52,9 @@ type
    function getactive: boolean;
    procedure setactive(const Value: boolean);
    procedure setimagelist(const avalue: timagelist);
-   procedure setimagenr(const avalue: integer);
-   procedure setimagenrdisabled(const avalue: integer);
+   procedure setimagenr(const avalue: imagenrty);
+   procedure setimagenrdisabled(const avalue: imagenrty);
+   function getimagelist: timagelist;
   protected
    ftag: integer;
    procedure execute(const tag: integer; const info: mouseeventinfoty);
@@ -72,8 +73,8 @@ type
    property coloractive: colorty read fcoloractive
                  write setcoloractive default cl_default;
    property imagelist: timagelist read fimagelist write setimagelist;
-   property imagenr: integer read fimagenr write setimagenr default -1;
-   property imagenrdisabled: integer read fimagenrdisabled 
+   property imagenr: imagenrty read fimagenr write setimagenr default -1;
+   property imagenrdisabled: imagenrty read fimagenrdisabled 
                                            write setimagenrdisabled default -2;
                 //-2 -> same as imagenr
    property tag: integer read ftag write ftag default 0;
@@ -276,7 +277,7 @@ type
   procedure dodeselect;
  end;
 
- ttabpage = class(tscrollingwidget,itabpage)
+ ttabpage = class(tscrollingwidget,itabpage,iimagelistinfo)
   private
    ftabwidget: tcustomtabwidget;
    fcaption: msestring;
@@ -303,9 +304,9 @@ type
    function getimagelist: timagelist;
    procedure setimagelist(const avalue: timagelist);
    function getimagenr: integer;
-   procedure setimagenr(const avalue: integer);
+   procedure setimagenr(const avalue: imagenrty);
    function getimagenrdisabled: integer;
-   procedure setimagenrdisabled(const avalue: integer);
+   procedure setimagenrdisabled(const avalue: imagenrty);
    function getinvisible: boolean;
    procedure setinvisible(const avalue: boolean);
   protected
@@ -334,8 +335,8 @@ type
    property coloractivetab: colorty read getcoloractivetab
                   write setcoloractivetab default cl_default;
    property imagelist: timagelist read getimagelist write setimagelist;
-   property imagenr: integer read getimagenr write setimagenr default -1;
-   property imagenrdisabled: integer read getimagenrdisabled 
+   property imagenr: imagenrty read getimagenr write setimagenr default -1;
+   property imagenrdisabled: imagenrty read getimagenrdisabled 
                                            write setimagenrdisabled default -2;
                 //-2 -> same as imagenr
    property optionswidget default defaulttaboptionswidget;
@@ -349,7 +350,7 @@ type
    property optionsskin default defaulttabpageskinoptions;
  end;
 
- ttabform = class(tmseform,itabpage)
+ ttabform = class(tmseform,itabpage,iimagelistinfo)
   private
    ftabwidget: tcustomtabwidget;
    fimagelist: timagelist;
@@ -375,9 +376,7 @@ type
    function getimagelist: timagelist;
    procedure setimagelist(const avalue: timagelist);
    function getimagenr: integer;
-   procedure setimagenr(const avalue: integer);
-//   function getimagenractive: integer;
-//   procedure setimagenractive(const avalue: integer);
+   procedure setimagenr(const avalue: imagenrty);
    function getimagenrdisabled: integer;
    procedure setimagenrdisabled(const avalue: integer);
    function getinvisible: boolean;
@@ -402,7 +401,7 @@ type
                   write setcoloractivetab default cl_active;
    property tabhint: msestring read gettabhint write settabhint;
    property imagelist: timagelist read getimagelist write setimagelist;
-   property imagenr: integer read getimagenr write setimagenr default -1;
+   property imagenr: imagenrty read getimagenr write setimagenr default -1;
 //   property imagenractive: integer read getimagenractive 
 //                                           write setimagenractive default -2;
    property imagenrdisabled: integer read getimagenrdisabled 
@@ -970,23 +969,15 @@ begin
  end;
 end;
 
-procedure ttab.setimagenr(const avalue: integer);
+procedure ttab.setimagenr(const avalue: imagenrty);
 begin
  if fimagenr <> avalue then begin
   fimagenr:= avalue;
   changed;
  end;
 end;
-{
-procedure ttab.setimagenractive(const avalue: integer);
-begin
- if fimagenractive <> avalue then begin
-  fimagenractive:= avalue;
-  changed;
- end;
-end;
-}
-procedure ttab.setimagenrdisabled(const avalue: integer);
+
+procedure ttab.setimagenrdisabled(const avalue: imagenrty);
 begin
  if fimagenrdisabled <> avalue then begin
   fimagenrdisabled:= avalue;
@@ -1008,6 +999,11 @@ begin
    end;
   end;
  end;
+end;
+
+function ttab.getimagelist: timagelist;
+begin
+ result:= fimagelist;
 end;
 
 { ttabs }
@@ -1987,7 +1983,7 @@ begin
  result:= fimagenr;
 end;
 
-procedure ttabpage.setimagenr(const avalue: integer);
+procedure ttabpage.setimagenr(const avalue: imagenrty);
 begin
  if fimagenr <> avalue then begin
   fimagenr:= avalue;
@@ -2013,7 +2009,7 @@ begin
  result:= fimagenrdisabled;
 end;
 
-procedure ttabpage.setimagenrdisabled(const avalue: integer);
+procedure ttabpage.setimagenrdisabled(const avalue: imagenrty);
 begin
  if fimagenrdisabled <> avalue then begin
   fimagenrdisabled:= avalue;
@@ -2194,7 +2190,7 @@ begin
  result:= fimagenr;
 end;
 
-procedure ttabform.setimagenr(const avalue: integer);
+procedure ttabform.setimagenr(const avalue: imagenrty);
 begin
  if fimagenr <> avalue then begin
   fimagenr:= avalue;

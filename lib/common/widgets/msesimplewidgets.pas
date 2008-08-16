@@ -83,7 +83,7 @@ type
 
  end;
 
- tcustombutton = class(tactionsimplebutton,iactionlink)
+ tcustombutton = class(tactionsimplebutton,iactionlink,iimagelistinfo)
   private
    fmodalresult: modalresultty;
    factioninfo: actioninfoty;
@@ -103,7 +103,7 @@ type
    function getimagelist: timagelist;
    procedure setimagelist(const Value: timagelist);
    function isimageliststored: Boolean;
-   procedure setimagenr(const Value: integer);
+   procedure setimagenr(const Value: imagenrty);
    function isimagenrstored: boolean;
    procedure setimagenrdisabled(const avalue: integer);
    function isimagenrdisabledstored: Boolean;
@@ -163,7 +163,7 @@ type
                             default defaultshapecaptiondist;
    property imagelist: timagelist read getimagelist write setimagelist
                     stored isimageliststored;
-   property imagenr: integer read factioninfo.imagenr write setimagenr
+   property imagenr: imagenrty read factioninfo.imagenr write setimagenr
                             stored isimagenrstored default -1;
    property imagenrdisabled: integer read factioninfo.imagenrdisabled
                               write setimagenrdisabled
@@ -677,7 +677,7 @@ begin
  result:= isactionimageliststored(factioninfo);
 end;
 
-procedure tcustombutton.setimagenr(const Value: integer);
+procedure tcustombutton.setimagenr(const Value: imagenrty);
 begin
  setactionimagenr(iactionlink(self),Value);
 end;

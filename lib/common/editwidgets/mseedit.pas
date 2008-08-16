@@ -155,7 +155,7 @@ type
 
  tcustombuttonframe = class;
  
- tframebutton = class(townedeventpersistent,iframe)
+ tframebutton = class(townedeventpersistent,iframe,iimagelistinfo)
   private
    fbuttonwidth: integer;
    foptions: framebuttonoptionsty;
@@ -172,7 +172,7 @@ type
    procedure setcolor(const avalue: colorty);
    procedure setcolorglyph(const avalue: colorty);
    procedure setimagelist(const Value: timagelist);
-   procedure setimagenr(const Value: integer);
+   procedure setimagenr(const Value: imagenrty);
    function getface: tface;
    procedure setface(const avalue: tface);
    function getframe: tframe;
@@ -191,12 +191,7 @@ type
                                const noclip: boolean = false);
    function getwidget: twidget;
    function getframestateflags: framestateflagsty; virtual;
-{   
-   function getframedisabled: boolean; virtual;
-   function getframeclicked: boolean; virtual;
-   function getframemouse: boolean; virtual;
-   function getframeactive: boolean; virtual;
-   }
+   function getimagelist: timagelist;
   protected
    fframerect: rectty;
    finfo: shapeinfoty;
@@ -222,7 +217,7 @@ type
    property face: tface read getface write setface;
    property frame: tframe read getframe write setframe;
    property imagelist: timagelist read finfo.imagelist write setimagelist;
-   property imagenr: integer read finfo.imagenr write setimagenr default -1;
+   property imagenr: imagenrty read finfo.imagenr write setimagenr default -1;
    property options: framebuttonoptionsty read foptions write setoptions
                                             default [];
    property onexecute: notifyeventty read fonexecute write fonexecute;
@@ -605,7 +600,7 @@ begin
  changed;
 end;
 
-procedure tframebutton.setimagenr(const Value: integer);
+procedure tframebutton.setimagenr(const Value: imagenrty);
 begin
  if finfo.imagenr <> value then begin
   finfo.imagenr := Value;
@@ -756,27 +751,12 @@ begin
              ss_mouse in state,ss_clicked in state);
  end;
 end;
-{
-function tframebutton.getframedisabled: boolean;
+
+function tframebutton.getimagelist: timagelist;
 begin
- result:= ss_disabled in finfo.state;
+ result:= finfo.imagelist;
 end;
 
-function tframebutton.getframeclicked: boolean;
-begin
- result:= ss_clicked in finfo.state;
-end;
-
-function tframebutton.getframemouse: boolean;
-begin
- result:= ss_mouse in finfo.state;
-end;
-
-function tframebutton.getframeactive: boolean;
-begin
- result:= getwidget.active;
-end;
-}
 { tstockglyphframebutton}
 
 constructor tstockglyphframebutton.create(aowner: tobject);

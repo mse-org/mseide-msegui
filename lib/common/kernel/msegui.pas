@@ -215,12 +215,6 @@ type
   function getwidget: twidget;
   function getwidgetrect: rectty;
   function getframestateflags: framestateflagsty;
-  {
-  function getframedisabled: boolean;
-  function getframeclicked: boolean;
-  function getframemouse: boolean;
-  function getframeactive: boolean;
-  }
  end;
 
  icaptionframe = interface(iframe)
@@ -237,8 +231,6 @@ type
   levelo: integer;
   leveli: integer;
   framewidth: integer;
-//  extraspace: integer;
-//  imagedist: integer;
   colorframe: colorty;
   colorframeactive: colorty;
   framecolors:framecolorinfoty;
@@ -264,7 +256,7 @@ type
 
  tframecomp = class;
 
- tcustomframe = class(toptionalpersistent)
+ tcustomframe = class(toptionalpersistent,iimagelistinfo)
   private
    ftemplate: tframecomp;
    flocalprops: framelocalpropsty;
@@ -302,6 +294,7 @@ type
    function isfitopstored: boolean;
    
    procedure setframeimage_list(const avalue: timagelist);
+   function getimagelist: timagelist;
    function isframeimage_liststored: boolean;
    procedure setframeimage_left(const avalue: integer);
    function isframeimage_leftstored: boolean;
@@ -312,19 +305,19 @@ type
    procedure setframeimage_bottom(const avalue: integer);
    function isframeimage_bottomstored: boolean;
    
-   procedure setframeimage_offset(const avalue: integer);
+   procedure setframeimage_offset(const avalue: imagenrty);
    function isframeimage_offsetstored: boolean;
-   procedure setframeimage_offsetdisabled(const avalue: integer);
+   procedure setframeimage_offsetdisabled(const avalue: imagenrty);
    function isframeimage_offsetdisabledstored: boolean;
-   procedure setframeimage_offsetmouse(const avalue: integer);
+   procedure setframeimage_offsetmouse(const avalue: imagenrty);
    function isframeimage_offsetmousestored: boolean;
-   procedure setframeimage_offsetclicked(const avalue: integer);
+   procedure setframeimage_offsetclicked(const avalue: imagenrty);
    function isframeimage_offsetclickedstored: boolean;
-   procedure setframeimage_offsetactive(const avalue: integer);
+   procedure setframeimage_offsetactive(const avalue: imagenrty);
    function isframeimage_offsetactivestored: boolean;
-   procedure setframeimage_offsetactivemouse(const avalue: integer);
+   procedure setframeimage_offsetactivemouse(const avalue: imagenrty);
    function isframeimage_offsetactivemousestored: boolean;
-   procedure setframeimage_offsetactiveclicked(const avalue: integer);
+   procedure setframeimage_offsetactiveclicked(const avalue: imagenrty);
    function isframeimage_offsetactiveclickedstored: boolean;
 
    procedure setoptionsskin(const avalue: frameskinoptionsty);
@@ -452,24 +445,24 @@ type
    property frameimage_bottom: integer read fi.frameimage_bottom
                     write setframeimage_bottom stored isframeimage_bottomstored;
                     //added to imagelist size.
-   property frameimage_offset: integer read fi.frameimage_offset
+   property frameimage_offset: imagenrty read fi.frameimage_offset
                     write setframeimage_offset stored isframeimage_offsetstored;
-   property frameimage_offsetdisabled: integer read fi.frameimage_offsetdisabled 
+   property frameimage_offsetdisabled: imagenrty read fi.frameimage_offsetdisabled 
                     write setframeimage_offsetdisabled 
                     stored isframeimage_offsetdisabledstored;
-   property frameimage_offsetmouse: integer read fi.frameimage_offsetmouse 
+   property frameimage_offsetmouse: imagenrty read fi.frameimage_offsetmouse 
                     write setframeimage_offsetmouse 
                     stored isframeimage_offsetmousestored;
-   property frameimage_offsetclicked: integer read fi.frameimage_offsetclicked
+   property frameimage_offsetclicked: imagenrty read fi.frameimage_offsetclicked
                     write setframeimage_offsetclicked 
                     stored isframeimage_offsetclickedstored;
-   property frameimage_offsetactive: integer read fi.frameimage_offsetactive
+   property frameimage_offsetactive: imagenrty read fi.frameimage_offsetactive
                     write setframeimage_offsetactive
                     stored isframeimage_offsetactivestored;
-   property frameimage_offsetactivemouse: integer read fi.frameimage_offsetactivemouse
+   property frameimage_offsetactivemouse: imagenrty read fi.frameimage_offsetactivemouse
                     write setframeimage_offsetactivemouse
                     stored isframeimage_offsetactivemousestored;
-   property frameimage_offsetactiveclicked: integer read fi.frameimage_offsetactiveclicked
+   property frameimage_offsetactiveclicked: imagenrty read fi.frameimage_offsetactiveclicked
                     write setframeimage_offsetactiveclicked
                     stored isframeimage_offsetactiveclickedstored;
 
@@ -3301,6 +3294,11 @@ begin
  end;
 end;
 
+function tcustomframe.getimagelist: timagelist;
+begin
+ result:= fi.frameimage_list;
+end;
+
 procedure tcustomframe.setframeimage_left(const avalue: integer);
 begin
  include(flocalprops,frl_frameimageleft);
@@ -3337,7 +3335,7 @@ begin
  end;
 end;
 
-procedure tcustomframe.setframeimage_offset(const avalue: integer);
+procedure tcustomframe.setframeimage_offset(const avalue: imagenrty);
 begin
  include(flocalprops,frl_frameimageoffset);
  if fi.frameimage_offset <> avalue then begin
@@ -3346,7 +3344,7 @@ begin
  end;
 end;
 
-procedure tcustomframe.setframeimage_offsetdisabled(const avalue: integer);
+procedure tcustomframe.setframeimage_offsetdisabled(const avalue: imagenrty);
 begin
  include(flocalprops,frl_frameimageoffsetdisabled);
  if fi.frameimage_offsetdisabled <> avalue then begin
@@ -3355,7 +3353,7 @@ begin
  end;
 end;
 
-procedure tcustomframe.setframeimage_offsetmouse(const avalue: integer);
+procedure tcustomframe.setframeimage_offsetmouse(const avalue: imagenrty);
 begin
  include(flocalprops,frl_frameimageoffsetmouse);
  if fi.frameimage_offsetmouse <> avalue then begin
@@ -3364,7 +3362,7 @@ begin
  end;
 end;
 
-procedure tcustomframe.setframeimage_offsetclicked(const avalue: integer);
+procedure tcustomframe.setframeimage_offsetclicked(const avalue: imagenrty);
 begin
  include(flocalprops,frl_frameimageoffsetclicked);
  if fi.frameimage_offsetclicked <> avalue then begin
@@ -3373,7 +3371,7 @@ begin
  end;
 end;
 
-procedure tcustomframe.setframeimage_offsetactive(const avalue: integer);
+procedure tcustomframe.setframeimage_offsetactive(const avalue: imagenrty);
 begin
  include(flocalprops,frl_frameimageoffsetactive);
  if fi.frameimage_offsetactive <> avalue then begin
@@ -3382,7 +3380,7 @@ begin
  end;
 end;
 
-procedure tcustomframe.setframeimage_offsetactivemouse(const avalue: integer);
+procedure tcustomframe.setframeimage_offsetactivemouse(const avalue: imagenrty);
 begin
  include(flocalprops,frl_frameimageoffsetactivemouse);
  if fi.frameimage_offsetactivemouse <> avalue then begin
@@ -3391,7 +3389,7 @@ begin
  end;
 end;
 
-procedure tcustomframe.setframeimage_offsetactiveclicked(const avalue: integer);
+procedure tcustomframe.setframeimage_offsetactiveclicked(const avalue: imagenrty);
 begin
  include(flocalprops,frl_frameimageoffsetactiveclicked);
  if fi.frameimage_offsetactiveclicked <> avalue then begin
