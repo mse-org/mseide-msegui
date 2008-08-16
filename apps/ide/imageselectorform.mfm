@@ -1,0 +1,30 @@
+object imageselectorfo: timageselectorfo
+  bounds_x = 337
+  bounds_y = 266
+  bounds_cx = 320
+  bounds_cy = 244
+  taborder = 1
+  visible = False
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_mousewheel, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
+  container.bounds_cx = 320
+  container.bounds_cy = 244
+  container.frame.dummy = 0
+  options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder, fo_savestate]
+  moduleclassname = 'tmseform'
+  object lv: tlistview
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 0
+    bounds_y = 0
+    bounds_cx = 320
+    bounds_cy = 244
+    frame.dummy = 0
+    anchors = []
+    cellheight = 16
+    options = [lvo_readonly, lvo_horz, lvo_drawfocus, lvo_leftbuttonfocusonly, lvo_focusselect, lvo_mouseselect]
+    itemlist.captionpos = cp_bottom
+    onitemevent = itemev
+    reffontheight = 14
+  end
+end
