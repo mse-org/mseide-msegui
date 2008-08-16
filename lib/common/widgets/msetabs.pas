@@ -41,8 +41,8 @@ type
    fcoloractive: colorty;
    fident: integer;
    fimagelist: timagelist;
-   fimagenr: integer;
-   fimagenrdisabled: integer;
+   fimagenr: imagenrty;
+   fimagenrdisabled: imagenrty;
    function getcaption: captionty;
    procedure setcaption(const Value: captionty);
    procedure changed;
@@ -74,7 +74,7 @@ type
                  write setcoloractive default cl_default;
    property imagelist: timagelist read fimagelist write setimagelist;
    property imagenr: imagenrty read fimagenr write setimagenr default -1;
-   property imagenrdisabled: imagenrty read fimagenrdisabled 
+   property imagenrdisabled: imagenrty read fimagenrdisabled
                                            write setimagenrdisabled default -2;
                 //-2 -> same as imagenr
    property tag: integer read ftag write ftag default 0;
@@ -270,8 +270,8 @@ type
   function getcolortab: colorty;
   function getcoloractivetab: colorty;
   function getimagelist: timagelist;
-  function getimagenr: integer;
-  function getimagenrdisabled: integer;
+  function getimagenr: imagenrty;
+  function getimagenrdisabled: imagenrty;
   function getinvisible: boolean;
   procedure doselect;
   procedure dodeselect;
@@ -303,9 +303,9 @@ type
    procedure settabindex(const avalue: integer);
    function getimagelist: timagelist;
    procedure setimagelist(const avalue: timagelist);
-   function getimagenr: integer;
+   function getimagenr: imagenrty;
    procedure setimagenr(const avalue: imagenrty);
-   function getimagenrdisabled: integer;
+   function getimagenrdisabled: imagenrty;
    procedure setimagenrdisabled(const avalue: imagenrty);
    function getinvisible: boolean;
    procedure setinvisible(const avalue: boolean);
@@ -375,10 +375,10 @@ type
    procedure settabhint(const avalue: msestring);
    function getimagelist: timagelist;
    procedure setimagelist(const avalue: timagelist);
-   function getimagenr: integer;
+   function getimagenr: imagenrty;
    procedure setimagenr(const avalue: imagenrty);
-   function getimagenrdisabled: integer;
-   procedure setimagenrdisabled(const avalue: integer);
+   function getimagenrdisabled: imagenrty;
+   procedure setimagenrdisabled(const avalue: imagenrty);
    function getinvisible: boolean;
    procedure setinvisible(const avalue: boolean);
   protected
@@ -404,7 +404,7 @@ type
    property imagenr: imagenrty read getimagenr write setimagenr default -1;
 //   property imagenractive: integer read getimagenractive 
 //                                           write setimagenractive default -2;
-   property imagenrdisabled: integer read getimagenrdisabled 
+   property imagenrdisabled: imagenrty read getimagenrdisabled
                                            write setimagenrdisabled default -2;
                 //-2 -> same as imagenr
    property onselect: notifyeventty read fonselect write fonselect;
@@ -1978,7 +1978,7 @@ begin
  end;
 end;
 
-function ttabpage.getimagenr: integer;
+function ttabpage.getimagenr: imagenrty;
 begin
  result:= fimagenr;
 end;
@@ -2004,7 +2004,7 @@ begin
  end;
 end;
 }
-function ttabpage.getimagenrdisabled: integer;
+function ttabpage.getimagenrdisabled: imagenrty;
 begin
  result:= fimagenrdisabled;
 end;
@@ -2185,7 +2185,7 @@ begin
  end;
 end;
 
-function ttabform.getimagenr: integer;
+function ttabform.getimagenr: imagenrty;
 begin
  result:= fimagenr;
 end;
@@ -2211,12 +2211,12 @@ begin
  end;
 end;
 }
-function ttabform.getimagenrdisabled: integer;
+function ttabform.getimagenrdisabled: imagenrty;
 begin
  result:= fimagenrdisabled;
 end;
 
-procedure ttabform.setimagenrdisabled(const avalue: integer);
+procedure ttabform.setimagenrdisabled(const avalue: imagenrty);
 begin
  if fimagenrdisabled <> avalue then begin
   fimagenrdisabled:= avalue;

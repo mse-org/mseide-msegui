@@ -92,8 +92,8 @@ type
   shortcut: shortcutty;
   shortcut1: shortcutty;
   group: integer;
-  imagenr: integer; //imagenrty;
-  imagenrdisabled: integer; //-2 -> grayed
+  imagenr: imagenrty; //imagenrty;
+  imagenrdisabled: imagenrty; //-2 -> grayed
   colorglyph: colorty;
   color: colorty;
   imagecheckedoffset: integer;
@@ -127,8 +127,8 @@ type
    function getcaption: captionty;
    procedure setcaption(const Value: captionty);
    procedure setonexecute(const Value: notifyeventty);
-   procedure setimagenr(const Value: integer);
-   procedure setimagenrdisabled(const avalue: integer);
+   procedure setimagenr(const Value: imagenrty);
+   procedure setimagenrdisabled(const avalue: imagenrty);
    procedure setcolorglyph(const avalue: colorty);
    procedure setcolor(const avalue: colorty);
    procedure setimagecheckedoffset(const Value: integer);
@@ -175,8 +175,8 @@ type
    property enabled: boolean read getenabled write setenabled;
    property checked: boolean read getchecked write setchecked;
    property group: integer read getgroup write setgroup default 0;
-   property imagenr: integer read finfo.imagenr write setimagenr default -1;
-   property imagenrdisabled: integer read finfo.imagenrdisabled 
+   property imagenr: imagenrty read finfo.imagenr write setimagenr default -1;
+   property imagenrdisabled: imagenrty read finfo.imagenrdisabled
                       write setimagenrdisabled default -2;
    property colorglyph: colorty read finfo.colorglyph write setcolorglyph default cl_glyph;
    property color: colorty read finfo.color write setcolor default cl_default;
@@ -810,13 +810,13 @@ begin
  result:= finfo.imagenr;
 end;
 }
-procedure tcustomaction.setimagenr(const Value: integer);
+procedure tcustomaction.setimagenr(const Value: imagenrty);
 begin
  finfo.imagenr:= value;
  changed;
 end;
 
-procedure tcustomaction.setimagenrdisabled(const avalue: integer);
+procedure tcustomaction.setimagenrdisabled(const avalue: imagenrty);
 begin
  finfo.imagenrdisabled:= avalue;
  changed;

@@ -41,7 +41,7 @@ type
   color: colorty;
   coloractive: colorty;
   colorglyph: colorty;
-  imagenr: integer;
+  imagenr: imagenrty;
   imagenrdisabled: integer;       //-2 -> grayed
   imagecheckedoffset: integer;
   imagelist: timagelist;

@@ -22,6 +22,7 @@ const
  blueshift = 0;
  
 type
+ imagenrty = type integer; //for timagelist
  pixelty = cardinal;
 
  colorty = type longword;

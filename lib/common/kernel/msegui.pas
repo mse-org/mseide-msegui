@@ -241,16 +241,16 @@ type
   frameimage_top: integer;
   frameimage_right: integer;
   frameimage_bottom: integer;
-  frameimage_offset: integer;
-  frameimage_offsetdisabled: integer;
-  frameimage_offsetmouse: integer;
-  frameimage_offsetclicked: integer;
-  frameimage_offsetactive: integer;
-  frameimage_offsetactivemouse: integer;
-  frameimage_offsetactiveclicked: integer;
+  frameimage_offset: imagenrty;
+  frameimage_offsetdisabled: imagenrty;
+  frameimage_offsetmouse: imagenrty;
+  frameimage_offsetclicked: imagenrty;
+  frameimage_offsetactive: imagenrty;
+  frameimage_offsetactivemouse: imagenrty;
+  frameimage_offsetactiveclicked: imagenrty;
 
   frameimage_list: timagelist; //last!
-  
+
   optionsskin: frameskinoptionsty;
  end;
 
@@ -448,7 +448,7 @@ type
    property frameimage_offset: imagenrty read fi.frameimage_offset
                     write setframeimage_offset stored isframeimage_offsetstored;
    property frameimage_offsetdisabled: imagenrty read fi.frameimage_offsetdisabled 
-                    write setframeimage_offsetdisabled 
+                    write setframeimage_offsetdisabled
                     stored isframeimage_offsetdisabledstored;
    property frameimage_offsetmouse: imagenrty read fi.frameimage_offsetmouse 
                     write setframeimage_offsetmouse 
@@ -511,7 +511,7 @@ type
    property template;
  end;
 
- tframetemplate = class(tpersistenttemplate)
+ tframetemplate = class(tpersistenttemplate,iimagelistinfo)
   private
    procedure setcolorclient(const Value: colorty);
    procedure setcolorframe(const Value: colorty);
@@ -536,18 +536,19 @@ type
    procedure setlevelo(const Value: integer);
 
    procedure setframeimage_list(const avalue: timagelist);
+   function getimagelist: timagelist;
    procedure setframeimage_left(const avalue: integer);
    procedure setframeimage_top(const avalue: integer);
    procedure setframeimage_right(const avalue: integer);
    procedure setframeimage_bottom(const avalue: integer);
-   procedure setframeimage_offset(const avalue: integer);
-   procedure setframeimage_offsetdisabled(const avalue: integer);
-   procedure setframeimage_offsetmouse(const avalue: integer);
-   procedure setframeimage_offsetclicked(const avalue: integer);
-   procedure setframeimage_offsetactive(const avalue: integer);
-   procedure setframeimage_offsetactivemouse(const avalue: integer);
-   procedure setframeimage_offsetactiveclicked(const avalue: integer);
-   
+   procedure setframeimage_offset(const avalue: imagenrty);
+   procedure setframeimage_offsetdisabled(const avalue: imagenrty);
+   procedure setframeimage_offsetmouse(const avalue: imagenrty);
+   procedure setframeimage_offsetclicked(const avalue: imagenrty);
+   procedure setframeimage_offsetactive(const avalue: imagenrty);
+   procedure setframeimage_offsetactivemouse(const avalue: imagenrty);
+   procedure setframeimage_offsetactiveclicked(const avalue: imagenrty);
+
    procedure setoptionsskin(const avalue: frameskinoptionsty);
   protected
    fi: frameinfoty;
@@ -599,20 +600,20 @@ type
    property frameimage_bottom: integer read fi.frameimage_bottom
                     write setframeimage_bottom;
                     //added to imagelist size.
-   property frameimage_offset: integer read fi.frameimage_offset
+   property frameimage_offset: imagenrty read fi.frameimage_offset
                      write setframeimage_offset;
-   property frameimage_offsetdisabled: integer read fi.frameimage_offsetdisabled 
+   property frameimage_offsetdisabled: imagenrty read fi.frameimage_offsetdisabled
                      write setframeimage_offsetdisabled;
-   property frameimage_offsetmouse: integer read fi.frameimage_offsetmouse 
+   property frameimage_offsetmouse: imagenrty read fi.frameimage_offsetmouse
                      write setframeimage_offsetmouse;
-   property frameimage_offsetclicked: integer read fi.frameimage_offsetclicked
+   property frameimage_offsetclicked: imagenrty read fi.frameimage_offsetclicked
                      write setframeimage_offsetclicked;
-   property frameimage_offsetactive: integer read fi.frameimage_offsetactive
+   property frameimage_offsetactive: imagenrty read fi.frameimage_offsetactive
                      write setframeimage_offsetactive;
-   property frameimage_offsetactivemouse: integer 
+   property frameimage_offsetactivemouse: imagenrty
                      read fi.frameimage_offsetactivemouse
                      write setframeimage_offsetactivemouse;
-   property frameimage_offsetactiveclicked: integer 
+   property frameimage_offsetactiveclicked: imagenrty
                      read fi.frameimage_offsetactiveclicked
                      write setframeimage_offsetactiveclicked;
 
@@ -4069,6 +4070,11 @@ begin
  changed;
 end;
 
+function tframetemplate.getimagelist: timagelist;
+begin
+ result:= fi.frameimage_list;
+end;
+
 procedure tframetemplate.setframeimage_left(const avalue: integer);
 begin
  fi.frameimage_left:= avalue;
@@ -4093,43 +4099,43 @@ begin
  changed;
 end;
 
-procedure tframetemplate.setframeimage_offset(const avalue: integer);
+procedure tframetemplate.setframeimage_offset(const avalue: imagenrty);
 begin
  fi.frameimage_offset:= avalue;
  changed;
 end;
 
-procedure tframetemplate.setframeimage_offsetdisabled(const avalue: integer);
+procedure tframetemplate.setframeimage_offsetdisabled(const avalue: imagenrty);
 begin
  fi.frameimage_offsetdisabled:= avalue;
  changed;
 end;
 
-procedure tframetemplate.setframeimage_offsetmouse(const avalue: integer);
+procedure tframetemplate.setframeimage_offsetmouse(const avalue: imagenrty);
 begin
  fi.frameimage_offsetmouse:= avalue;
  changed;
 end;
 
-procedure tframetemplate.setframeimage_offsetclicked(const avalue: integer);
+procedure tframetemplate.setframeimage_offsetclicked(const avalue: imagenrty);
 begin
  fi.frameimage_offsetclicked:= avalue;
  changed;
 end;
 
-procedure tframetemplate.setframeimage_offsetactive(const avalue: integer);
+procedure tframetemplate.setframeimage_offsetactive(const avalue: imagenrty);
 begin
  fi.frameimage_offsetactive:= avalue;
  changed;
 end;
 
-procedure tframetemplate.setframeimage_offsetactivemouse(const avalue: integer);
+procedure tframetemplate.setframeimage_offsetactivemouse(const avalue: imagenrty);
 begin
  fi.frameimage_offsetactivemouse:= avalue;
  changed;
 end;
 
-procedure tframetemplate.setframeimage_offsetactiveclicked(const avalue: integer);
+procedure tframetemplate.setframeimage_offsetactiveclicked(const avalue: imagenrty);
 begin
  fi.frameimage_offsetactiveclicked:= avalue;
  changed;

@@ -105,7 +105,7 @@ type
    function isimageliststored: Boolean;
    procedure setimagenr(const Value: imagenrty);
    function isimagenrstored: boolean;
-   procedure setimagenrdisabled(const avalue: integer);
+   procedure setimagenrdisabled(const avalue: imagenrty);
    function isimagenrdisabledstored: Boolean;
    procedure setcolorglyph(const avalue: colorty);
    function iscolorglyphstored: boolean;
@@ -165,7 +165,7 @@ type
                     stored isimageliststored;
    property imagenr: imagenrty read factioninfo.imagenr write setimagenr
                             stored isimagenrstored default -1;
-   property imagenrdisabled: integer read factioninfo.imagenrdisabled
+   property imagenrdisabled: imagenrty read factioninfo.imagenrdisabled
                               write setimagenrdisabled
                             stored isimagenrdisabledstored default -2;
    property imagedist: integer read finfo.imagedist write setimagedist;
@@ -687,7 +687,7 @@ begin
  result:= isactionimagenrstored(factioninfo);
 end;
 
-procedure tcustombutton.setimagenrdisabled(const avalue: integer);
+procedure tcustombutton.setimagenrdisabled(const avalue: imagenrty);
 begin
  setactionimagenrdisabled(iactionlink(self),avalue);
 end;

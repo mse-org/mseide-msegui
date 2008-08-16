@@ -642,7 +642,7 @@ type
    function isimagenrstored: boolean;
    procedure setimageoffset(const avalue: integer);
    procedure setimagenums(const avalue: tintegerarrayprop);
-   procedure setimagenrdisabled(const avalue: integer);
+   procedure setimagenrdisabled(const avalue: imagenrty);
    function isimagenrdisabledstored: Boolean;
    procedure setimageoffsetdisabled(const avalue: integer);
    procedure setimagedist(const avalue: integer);
@@ -707,7 +707,7 @@ type
                     stored isimageliststored;
    property imagenr: imagenrty read factioninfo.imagenr write setimagenr
                             stored isimagenrstored default -1;
-   property imagenrdisabled: integer read factioninfo.imagenrdisabled
+   property imagenrdisabled: imagenrty read factioninfo.imagenrdisabled
                               write setimagenrdisabled
                             stored isimagenrdisabledstored default -2;
                       //-1 = none, -2 = grayed, -3 = imageoffsetdisabled
@@ -2706,7 +2706,7 @@ begin
  result:= isactionimagenrstored(factioninfo);
 end;
 
-procedure tcustomdatabutton.setimagenrdisabled(const avalue: integer);
+procedure tcustomdatabutton.setimagenrdisabled(const avalue: imagenrty);
 begin
  fimagenrdisabled:= avalue;
  setactionimagenrdisabled(iactionlink(self),avalue);

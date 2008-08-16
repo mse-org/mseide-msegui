@@ -36,7 +36,6 @@ type
    falignment: alignmentsty;
    ftransparency: colorty;
    fnochange: integer;
-//   procedure setmonochrome(const Value: boolean);
    function getscanline(index: integer): pointer;
    procedure checkimage;
    procedure getimage;
@@ -293,22 +292,21 @@ type
    property bitmap: tmaskedbitmap read fbitmap write setbitmap;
 
   published
-   property monochrome: boolean read getmonochrome 
+   property monochrome: boolean read getmonochrome
                 write setmonochrome default false;
-   property width: integer read fsize.cx 
+   property width: integer read fsize.cx
                  write setwidth default defaultimagelistwidth;
-   property height: integer read fsize.cy 
+   property height: integer read fsize.cy
                    write setheight default defaultimagelistheight;
    property masked: boolean read getmasked write setmasked default true;
    property colormask: boolean read getcolormask write setcolormask default false;
-   property transparentcolor: colorty read gettransparentcolor 
+   property transparentcolor: colorty read gettransparentcolor
                          write settransparentcolor default cl_none;
    property count: integer read fcount write setcount default 0;
                  //last!
    property onchange: notifyeventty read fonchange write fonchange;
  end;
 
- imagenrty = type integer; //for timagelist 
  iimagelistinfo = interface(inullinterface)
                   ['{CEF535C2-D1DC-438C-92FB-CAF2D6D69B02}']
   function getimagelist: timagelist;
