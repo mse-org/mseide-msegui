@@ -1456,6 +1456,7 @@ type
    property onrowsdeleting;
    property onrowsdeleted;
    property oncellevent;
+   property onsortchanged;
    property drag;
  end;
 
@@ -1666,8 +1667,6 @@ type
    property datalink;
    property fixcols;
    property fixrows;
-//   property rowcount;
-//   property rowcountmax;
    property gridframecolor;
    property gridframewidth;
    property rowcolors;
@@ -1696,7 +1695,7 @@ type
    property onrowsdeleted;
    property onrowcountchanged;
    property oncellevent;
-   property onsort;
+   property onsortchanged;
    property drag;
  end;
 

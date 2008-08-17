@@ -298,6 +298,7 @@ type
    property oncellevent;
    property onselectionchanged;
    property onsort;
+   property onsortchanged;
    property drag;
  end;
 
