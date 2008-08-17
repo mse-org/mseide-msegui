@@ -14,11 +14,11 @@ unit msegrids;
 interface
 uses
  {$ifdef FPC}classes,sysutils{$else}Classes,SysUtils{$endif},mseclasses,msegui,
- msegraphics,msetypes,msestrings,msegraphutils,
+ msegraphics,msetypes,msestrings,msegraphutils,msebitmap,
  msescrollbar,msearrayprops,mseglob,mseguiglob,
  msedatalist,msedrawtext,msewidgets,mseevent,mseinplaceedit,mseeditglob,
  mseobjectpicker,msepointer,msetimer,msebits,msestat,msestatfile,msekeyboard,
- msestream,msedrag,msemenus,msepipestream;
+ msestream,msedrag,msemenus,msepipestream,mseshapes;
 
 type
          //     listvievoptionty from mselistbrowser
@@ -296,12 +296,6 @@ type
    procedure invalidaterect(const rect: rectty; const org: originty = org_client;
                                   const noclip: boolean = false);
    function getframestateflags: framestateflagsty;
-   {
-   function getframedisabled: boolean;
-   function getframeclicked: boolean;
-   function getframemouse: boolean;
-   function getframeactive: boolean;
-   }
    //iface
    function translatecolor(const acolor: colorty): colorty;
 
@@ -696,10 +690,11 @@ type
  cellmergeflagty = (cmf_h,cmf_v,cmf_rline);
  cellmergeflagsty = set of cellmergeflagty;
  
- tcolheader = class(tindexpersistent,iframe,iface)
+ tcolheader = class(tindexpersistent,iframe,iface,iimagelistinfo)
   private
-   fcaption: msestring;
-   ftextflags: textflagsty;
+   finfo: captioninfoty;
+   //fcaption: msestring;
+//   ftextflags: textflagsty;
    ffont: tcolheaderfont;
    fcolor: colorty;
    fhint: msestring;
@@ -711,8 +706,9 @@ type
    fmergedcy: integer;
    fmergedy: integer;
    frefcell: gridcoordty;
+//   fimagenr: imagenrty;
    procedure setcaption(const avalue: msestring);
-   procedure settextflags(const Value: textflagsty);
+   procedure settextflags(const avalue: textflagsty);
    function getfont: tcolheaderfont;
    procedure setfont(const Value: tcolheaderfont);
    function isfontstored: Boolean;
@@ -726,12 +722,19 @@ type
    procedure setcolor(const avalue: colorty);
    procedure setmergecols(const avalue: integer);
    procedure setmergerows(const avalue: integer);
+   procedure setimagelist(const avalue: timagelist);
+   procedure setimagenr(const avalue: imagenrty);
+   procedure setcolorglyph(const avalue: colorty);
+   procedure setcaptionpos(const avalue: captionposty);
+   procedure setimagedist(const avalue: integer);
+   procedure setcaptiondist(const avalue: integer);
   protected
    fgrid: tcustomgrid;
    fframe: tfixcellframe;
    fface: tfixcellface;
    procedure changed;
    procedure fontchanged(const sender: tobject);
+   procedure drawcell(const acanvas: tcanvas; const adest: rectty);
 
     //iframe
    function getwidget: twidget;
@@ -750,7 +753,8 @@ type
    function getframestateflags: framestateflagsty;
    //iface
    function translatecolor(const acolor: colorty): colorty;
-   
+   //iimagelistinfo
+   function getimagelist: timagelist;   
   public
    constructor create(const aowner: tobject;
          const aprop: tindexpersistentarrayprop); override;
@@ -761,20 +765,33 @@ type
    property mergedy: integer read fmergedy;
   published
    property color: colorty read fcolor write setcolor default cl_parent;
-   property caption: msestring read fcaption write setcaption;
-   property textflags: textflagsty read ftextflags write settextflags default defaultcolheadertextflags;
+   property caption: msestring read finfo.caption.text write setcaption;
+   property textflags: textflagsty read finfo.textflags write settextflags
+                                             default defaultcolheadertextflags;
    property font: tcolheaderfont read getfont write setfont stored isfontstored;
    property frame: tfixcellframe read getframe write setframe;
    property face: tfixcellface read getface write setface;
    property mergecols: integer read fmergecols write setmergecols default 0;
    property mergerows: integer read fmergerows write setmergerows default 0;
    property hint: msestring read fhint write fhint;
+   property imagelist: timagelist read finfo.imagelist write setimagelist;
+   property imagenr: imagenrty read finfo.imagenr write setimagenr default -1;
+   property imagedist: integer read finfo.imagedist write setimagedist
+                                            default 0;
+   property captiondist: integer read finfo.captiondist write setcaptiondist
+                                     default defaultshapecaptiondist;
+   property captionpos: captionposty read finfo.captionpos write setcaptionpos 
+                                                     default cp_right;
+   property colorglyph: colorty read finfo.colorglyph
+                   write setcolorglyph default cl_glyph;
+                   //cl_none -> no no glyph
  end;
 
  tcolheaders = class(tindexpersistentarrayprop)
   private
    fgridprop: tgridprop;
    ffixcol: boolean;
+//   fimagelist: timagelist;
    function getitems(const index: integer): tcolheader;
    procedure setitems(const index: integer; const Value: tcolheader);
   protected
@@ -1859,7 +1876,7 @@ function cellkeypress(const info: celleventinfoty): keyty;
 
 implementation
 uses
- mseguiintf,mseshapes,msestockobjects,mseact,mseactions,rtlconsts;
+ mseguiintf,msestockobjects,mseact,mseactions,rtlconsts;
 type
  tframe1 = class(tcustomframe);
  tdatalist1 = class(tdatalist);
@@ -2900,7 +2917,13 @@ end;
 constructor tcolheader.create(const aowner: tobject;
          const aprop: tindexpersistentarrayprop);
 begin
- ftextflags:= defaultcolheadertextflags;
+ initcaptioninfo(finfo);
+ with finfo do begin
+  imagenr:= -1;
+  colorglyph:= cl_glyph;
+  captionpos:= cp_right;
+ end;
+ finfo.textflags:= defaultcolheadertextflags;
  fcolor:= cl_parent;
  inherited;
  fgrid:= tcolheaders(fowner).fgridprop.fgrid;
@@ -2957,6 +2980,15 @@ begin
  changed;
 end;
 
+procedure tcolheader.drawcell(const acanvas: tcanvas; const adest: rectty);
+begin
+ with finfo do begin
+  font:= getfont;
+  dim:= adest;
+  drawcaption(acanvas,finfo);
+ end;
+end;
+
  //iframe
 function tcolheader.getwidget: twidget;
 begin
@@ -2973,12 +3005,7 @@ begin
  result:= nullrect;
 // result:= fcellrect;
 end;
-{
-procedure tcolheader.setwidgetrect(const rect: rectty);
-begin
-// twidget1(getwidget).setwidgetrect(rect);
-end;
-}
+
 procedure tcolheader.setstaticframe(value: boolean);
 begin
 // twidget1(getwidget).setstaticframe(value);
@@ -3028,27 +3055,7 @@ begin
  changed;
 // getwidget.invalidaterect(rect,org);
 end;
-{
-function tcolheader.getframefont: tfont;
-begin
- result:= twidget1(getwidget).getfont;
-end;
 
-function tcolheader.getcanvas(aorigin: originty = org_client): tcanvas;
-begin
- result:= getwidget.getcanvas(aorigin);
-end;
-
-function tcolheader.canfocus: boolean;
-begin
- result:= getwidget.canfocus;
-end;
-
-function tcolheader.setfocus(aactivate: boolean = true): boolean;
-begin
- result:= getwidget.setfocus(aactivate);
-end;
-}
 //iface
 function tcolheader.translatecolor(const acolor: colorty): colorty;
 begin
@@ -3057,14 +3064,14 @@ end;
 
 procedure tcolheader.setcaption(const avalue: msestring);
 begin
- fcaption:= avalue;
+ finfo.caption.text:= avalue;
  changed;
 end;
 
-procedure tcolheader.settextflags(const Value: textflagsty);
+procedure tcolheader.settextflags(const avalue: textflagsty);
 begin
- if ftextflags <> value then begin
-  ftextflags := Value;
+ if finfo.textflags <> avalue then begin
+  finfo.textflags:= checktextflags(finfo.textflags,avalue);
   changed;
  end;
 end;
@@ -3138,6 +3145,57 @@ end;
 function tcolheader.getframestateflags: framestateflagsty;
 begin
  result:= [];
+end;
+
+procedure tcolheader.setimagenr(const avalue: imagenrty);
+begin
+ if finfo.imagenr <> avalue then begin
+  finfo.imagenr:= avalue;
+  changed;
+ end;
+end;
+
+procedure tcolheader.setcolorglyph(const avalue: colorty);
+begin
+ if finfo.colorglyph <> avalue then begin
+  finfo.colorglyph:= avalue;
+  changed;
+ end;
+end;
+
+procedure tcolheader.setcaptionpos(const avalue: captionposty);
+begin
+ if finfo.captionpos <> avalue then begin
+  finfo.captionpos:= simplecaptionpos[avalue];
+  changed;
+ end;
+end;
+
+procedure tcolheader.setimagedist(const avalue: integer);
+begin
+ if finfo.imagedist <> avalue then begin
+  finfo.imagedist:= avalue;
+  changed;
+ end;
+end;
+
+procedure tcolheader.setcaptiondist(const avalue: integer);
+begin
+ if finfo.captiondist <> avalue then begin
+  finfo.captiondist:= avalue;
+  changed;
+ end;
+end;
+
+function tcolheader.getimagelist: timagelist;
+begin
+ result:= finfo.imagelist;
+end;
+
+procedure tcolheader.setimagelist(const avalue: timagelist);
+begin
+ setlinkedvar(avalue,finfo.imagelist);
+ changed;
 end;
 
 {
@@ -3505,9 +3563,10 @@ begin
   canvas.intersectcliprect(makerect(nullpoint,fcellrect.size));
   drawcellbackground(canvas,frame1,face1);
   if (int1 >= 0) and (int1 < headers1.count) then begin
-   with tcolheader(headers1.fitems[int1]) do begin
-    drawtext(canvas,caption,ftextinfo.dest,textflags,getfont);
-   end;
+   tcolheader(headers1.fitems[int1]).drawcell(canvas,ftextinfo.dest);
+//   with tcolheader(headers1.fitems[int1]) do begin
+//    drawtext(canvas,caption,ftextinfo.dest,textflags,getfont);
+//   end;
   end
   else begin
    if (fnumstep <> 0) and (cell.col >= 0) then begin
@@ -10553,7 +10612,7 @@ var
 begin
  statebefore:= tgridframe(fframe).fstate;
  scrollheightbefore:= 
-  tcustomscrollbar1(tgridframe(fframe).fvert).fdrawinfo.areas[sbbu_move].dim.cy;
+  tcustomscrollbar1(tgridframe(fframe).fvert).fdrawinfo.areas[sbbu_move].ca.dim.cy;
  noinvalidatebefore:= fnoinvalidate;
  updatingbefore:= fupdating;
  beginupdate;
@@ -10592,8 +10651,9 @@ begin
    invalidatewidget;
   end
   else begin
-   if tcustomscrollbar1(tgridframe(fframe).fvert).fdrawinfo.areas[sbbu_move].dim.cy <> 
-                    scrollheightbefore then begin
+   if tcustomscrollbar1(tgridframe(fframe).fvert).
+             fdrawinfo.areas[sbbu_move].ca.dim.cy <> 
+                                        scrollheightbefore then begin
     tcustomscrollbar1(tgridframe(fframe).fvert).invalidate;
    end;
   end;

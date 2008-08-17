@@ -632,7 +632,7 @@ procedure calctablayout(var layout: tabbarlayoutinfoty;
                      const canvas: tcanvas);
  procedure docommon(const tab: ttab; var cell: shapeinfoty; var textrect: rectty);
  begin
-  with tab,cell do begin
+  with tab,cell,ca do begin
    caption:= fcaption;
    imagedist:= layout.tabs.fimagedist;
    captionpos:= layout.tabs.fcaptionpos;
@@ -666,7 +666,7 @@ begin
    aval:= dim.y;
    endval:= dim.y + dim.cy;
    for int1:= 0 to high(cells) do begin
-    with tabs[int1],cells[int1] do begin
+    with tabs[int1],cells[int1],ca do begin
      dim.y:= aval;
      rect1:= textrect(canvas,fcaption,makerect(layout.dim.x,aval,layout.dim.cx,bigint));
      docommon(tabs[int1],cells[int1],rect1);
@@ -702,7 +702,7 @@ begin
    aval:= dim.x;
    endval:= dim.x + dim.cx;
    for int1:= 0 to high(cells) do begin
-    with tabs[int1],cells[int1] do begin
+    with tabs[int1],cells[int1],ca do begin
      dim.x:= aval;
      rect1:= textrect(canvas,fcaption,makerect(aval,layout.dim.y,bigint,layout.dim.cy));
      docommon(tabs[int1],cells[int1],rect1);
@@ -733,7 +733,7 @@ begin
   end;
   bo1:= not twidget(tabs.fowner).isenabled;
   for int1:= 0 to high(cells) do begin
-   with tabs[int1],cells[int1] do begin
+   with tabs[int1],cells[int1],ca do begin
     state:= state + options * [ss_vert,ss_opposite];
     if ts_active in fstate then begin
      if fcoloractive = cl_default then begin
@@ -785,7 +785,7 @@ begin
    down:= 0;
    if ss_vert in options then begin
     for int1:= firsttab - 1 downto 0 do begin
-     with cells[int1] do begin
+     with cells[int1].ca do begin
       dec(pagedown);
       if not (ts_invisible in tabs[int1].fstate) then begin
        inc(aval,dim.cy);
@@ -802,7 +802,7 @@ begin
      end;
     end;
     for int1:= high(cells) downto 0 do begin
-     with cells[int1] do begin
+     with cells[int1].ca do begin
       inc(pagelast);
       if not (ts_invisible in tabs[int1].fstate) then begin
        inc(endval,dim.cy);
@@ -818,7 +818,7 @@ begin
    end
    else begin
     for int1:= firsttab - 1 downto 0 do begin
-     with cells[int1] do begin
+     with cells[int1].ca do begin
       dec(pagedown);
       if not (ts_invisible in tabs[int1].fstate) then begin
        inc(aval,dim.cx);
@@ -835,7 +835,7 @@ begin
      end;
     end;
     for int1:= high(cells) downto 0 do begin
-     with cells[int1] do begin
+     with cells[int1].ca do begin
       inc(pagelast);
       if not (ts_invisible in tabs[int1].fstate) then begin
        inc(endval,dim.cx);
@@ -1368,7 +1368,7 @@ begin
        if ss_vert in options then begin
         for int1:= activetab downto 0 do begin
          if not (ts_invisible in tabs[int1].fstate) then begin
-          inc(int2,cells[int1].dim.cy);
+          inc(int2,cells[int1].ca.dim.cy);
           if int2 >= dim.cy then begin
            break;
           end;
@@ -1379,7 +1379,7 @@ begin
        else begin
         for int1:= activetab downto 0 do begin
          if not (ts_invisible in tabs[int1].fstate) then begin
-          inc(int2,cells[int1].dim.cx);
+          inc(int2,cells[int1].ca.dim.cx);
           if int2 >= dim.cx then begin
            break;
           end;
@@ -1751,7 +1751,7 @@ end;
 
 function tcustomtabbar.gethintpos(const aindex: integer): rectty;
 begin
- result:= flayoutinfo.cells[aindex].dim;
+ result:= flayoutinfo.cells[aindex].ca.dim;
  inc(result.cy,12);
 end;
 

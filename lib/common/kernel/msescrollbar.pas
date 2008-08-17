@@ -218,7 +218,7 @@ type
    property colorpattern: colorty read fcolorpattern 
                    write setcolorpattern default cl_white;
                    //cl_none -> no pattern
-   property colorglyph: colorty read fdrawinfo.areas[sbbu_down].colorglyph
+   property colorglyph: colorty read fdrawinfo.areas[sbbu_down].ca.colorglyph
                    write setcolorglyph default cl_glyph;
                    //cl_none -> no no glyph
  end;
@@ -271,8 +271,8 @@ begin
  forg:= org;
  fcolor:= cl_default;
  fcolorpattern:= cl_white;
- fdrawinfo.areas[sbbu_down].colorglyph:= cl_glyph;
- fdrawinfo.areas[sbbu_up].colorglyph:= cl_glyph;
+ fdrawinfo.areas[sbbu_down].ca.colorglyph:= cl_glyph;
+ fdrawinfo.areas[sbbu_up].ca.colorglyph:= cl_glyph;
  fclickedarea:= scrollbarareaty(-1);
  fbuttonminlength:= defaultbuttonminlength;
  fwidth:= defaultscrollbarwidth;
@@ -318,8 +318,8 @@ var
 begin
  with fdim,fdrawinfo do begin
   minblen:= fbuttonminlength;
-  areas[sbbu_up].imagelist:= stockobjects.glyphs;
-  areas[sbbu_down].imagelist:= stockobjects.glyphs;
+  areas[sbbu_up].ca.imagelist:= stockobjects.glyphs;
+  areas[sbbu_down].ca.imagelist:= stockobjects.glyphs;
   if fdirection in [gd_right,gd_left] then begin
    width1:= cy;
   end
@@ -345,18 +345,18 @@ begin
    scrollrect.cx:= scrolllength;
    scrollrect.cy:= width1;
    for bu1:= low(scrollbarareaty) to high(scrollbarareaty) do begin
-    areas[bu1].dim.y:= y;
-    areas[bu1].dim.cy:= width1;
+    areas[bu1].ca.dim.y:= y;
+    areas[bu1].ca.dim.cy:= width1;
    end;
-   areas[sbbu_down].dim.cx:= endblen;
-   areas[sbbu_up].dim.cx:= endblen;
+   areas[sbbu_down].ca.dim.cx:= endblen;
+   areas[sbbu_up].ca.dim.cx:= endblen;
    if fdirection = gd_right then begin
-    areas[sbbu_up].imagenr:= ord(stg_arrowrightsmall);
-    areas[sbbu_down].imagenr:= ord(stg_arrowleftsmall);
+    areas[sbbu_up].ca.imagenr:= ord(stg_arrowrightsmall);
+    areas[sbbu_down].ca.imagenr:= ord(stg_arrowleftsmall);
    end
    else begin
-    areas[sbbu_down].imagenr:= ord(stg_arrowrightsmall);
-    areas[sbbu_up].imagenr:= ord(stg_arrowleftsmall);
+    areas[sbbu_down].ca.imagenr:= ord(stg_arrowrightsmall);
+    areas[sbbu_up].ca.imagenr:= ord(stg_arrowleftsmall);
    end;
   end
   else begin
@@ -366,18 +366,18 @@ begin
    scrollrect.cx:= width1;
    scrollrect.cy:= scrolllength;
    for bu1:= low(scrollbarareaty) to high(scrollbarareaty) do begin
-    areas[bu1].dim.x:= x;
-    areas[bu1].dim.cx:= width1;
+    areas[bu1].ca.dim.x:= x;
+    areas[bu1].ca.dim.cx:= width1;
    end;
-   areas[sbbu_down].dim.cy:= endblen;
-   areas[sbbu_up].dim.cy:= endblen;
+   areas[sbbu_down].ca.dim.cy:= endblen;
+   areas[sbbu_up].ca.dim.cy:= endblen;
    if fdirection = gd_down then begin
-    areas[sbbu_up].imagenr:= ord(stg_arrowdownsmall);
-    areas[sbbu_down].imagenr:= ord(stg_arrowupsmall);
+    areas[sbbu_up].ca.imagenr:= ord(stg_arrowdownsmall);
+    areas[sbbu_down].ca.imagenr:= ord(stg_arrowupsmall);
    end
    else begin
-    areas[sbbu_down].imagenr:= ord(stg_arrowdownsmall);
-    areas[sbbu_up].imagenr:= ord(stg_arrowupsmall);
+    areas[sbbu_down].ca.imagenr:= ord(stg_arrowdownsmall);
+    areas[sbbu_up].ca.imagenr:= ord(stg_arrowupsmall);
    end;
   end;
   if fbuttonlength < 0 then begin
@@ -395,65 +395,75 @@ begin
    buttonlength1:= minblen;
   end;
   if fdirection in [gd_right,gd_left] then begin
-   areas[sbbu_move].dim.cx:= buttonlength1;
+   areas[sbbu_move].ca.dim.cx:= buttonlength1;
   end
   else begin
-   areas[sbbu_move].dim.cy:= buttonlength1;
+   areas[sbbu_move].ca.dim.cy:= buttonlength1;
   end;
   fscrollrange:= scrolllength - buttonlength1;
   case fdirection of
    gd_right: begin
-    areas[sbbu_down].dim.x:= x;
-    areas[sbbu_up].dim.x:= x + cx - endblen;
-    areas[sbbu_move].dim.x:= x + endblen + round(fvalue * fscrollrange);
-    areas[sba_start].dim.x:= x + endblen;
-    areas[sba_start].dim.cx:= areas[sbbu_move].dim.x - areas[sba_start].dim.x;
-    areas[sba_end].dim.x:= areas[sbbu_move].dim.x + areas[sbbu_move].dim.cx;
-    areas[sba_end].dim.cx:= areas[sbbu_up].dim.x - areas[sba_end].dim.x;
+    areas[sbbu_down].ca.dim.x:= x;
+    areas[sbbu_up].ca.dim.x:= x + cx - endblen;
+    areas[sbbu_move].ca.dim.x:= x + endblen + round(fvalue * fscrollrange);
+    areas[sba_start].ca.dim.x:= x + endblen;
+    areas[sba_start].ca.dim.cx:= areas[sbbu_move].ca.dim.x - 
+                                       areas[sba_start].ca.dim.x;
+    areas[sba_end].ca.dim.x:= areas[sbbu_move].ca.dim.x +
+                                       areas[sbbu_move].ca.dim.cx;
+    areas[sba_end].ca.dim.cx:= areas[sbbu_up].ca.dim.x - areas[sba_end].ca.dim.x;
    end;
    gd_left: begin
-    areas[sbbu_up].dim.x:= x;
-    areas[sbbu_down].dim.x:= x + cx - endblen;
-    areas[sbbu_move].dim.x:= x + cx - (endblen + round(fvalue * fscrollrange)) - 
+    areas[sbbu_up].ca.dim.x:= x;
+    areas[sbbu_down].ca.dim.x:= x + cx - endblen;
+    areas[sbbu_move].ca.dim.x:= x + cx - (endblen + round(fvalue * fscrollrange)) - 
                           buttonlength1;
-    areas[sba_start].dim.x:= areas[sbbu_move].dim.x + areas[sbbu_move].dim.cx;
-    areas[sba_start].dim.cx:= areas[sbbu_down].dim.x - areas[sba_start].dim.x;
-    areas[sba_end].dim.x:= x + endblen;
-    areas[sba_end].dim.cx:= areas[sbbu_move].dim.x - areas[sba_end].dim.x;
+    areas[sba_start].ca.dim.x:= areas[sbbu_move].ca.dim.x + 
+                                      areas[sbbu_move].ca.dim.cx;
+    areas[sba_start].ca.dim.cx:= areas[sbbu_down].ca.dim.x -
+                                      areas[sba_start].ca.dim.x;
+    areas[sba_end].ca.dim.x:= x + endblen;
+    areas[sba_end].ca.dim.cx:= areas[sbbu_move].ca.dim.x - 
+                                      areas[sba_end].ca.dim.x;
    end;
    gd_down: begin
-    areas[sbbu_down].dim.y:= y;
-    areas[sbbu_up].dim.y:= y + cy - endblen;
-    areas[sbbu_move].dim.y:= y + endblen + round(fvalue * fscrollrange);
-    areas[sba_start].dim.y:= y + endblen;
-    areas[sba_start].dim.cy:= areas[sbbu_move].dim.y - areas[sba_start].dim.y;
-    areas[sba_end].dim.y:= areas[sbbu_move].dim.y + areas[sbbu_move].dim.cy;
-    areas[sba_end].dim.cy:= areas[sbbu_up].dim.y - areas[sba_end].dim.y;
+    areas[sbbu_down].ca.dim.y:= y;
+    areas[sbbu_up].ca.dim.y:= y + cy - endblen;
+    areas[sbbu_move].ca.dim.y:= y + endblen + round(fvalue * fscrollrange);
+    areas[sba_start].ca.dim.y:= y + endblen;
+    areas[sba_start].ca.dim.cy:= areas[sbbu_move].ca.dim.y - 
+                                                 areas[sba_start].ca.dim.y;
+    areas[sba_end].ca.dim.y:= areas[sbbu_move].ca.dim.y + 
+                                                 areas[sbbu_move].ca.dim.cy;
+    areas[sba_end].ca.dim.cy:= areas[sbbu_up].ca.dim.y - areas[sba_end].ca.dim.y;
    end;
    gd_up: begin
-    areas[sbbu_up].dim.y:= y;
-    areas[sbbu_down].dim.y:= y + cy - endblen;
-    areas[sbbu_move].dim.y:= y + cy - (endblen + round(fvalue * fscrollrange)) - 
+    areas[sbbu_up].ca.dim.y:= y;
+    areas[sbbu_down].ca.dim.y:= y + cy - endblen;
+    areas[sbbu_move].ca.dim.y:= y + cy - (endblen + round(fvalue * fscrollrange)) - 
                           buttonlength1;
-    areas[sba_start].dim.y:= areas[sbbu_move].dim.y + areas[sbbu_move].dim.cy;
-    areas[sba_start].dim.cy:=  areas[sbbu_down].dim.y - areas[sba_start].dim.y;
-    areas[sba_end].dim.y:= y + endblen;
-    areas[sba_end].dim.cy:= areas[sbbu_move].dim.y - areas[sba_end].dim.y;
+    areas[sba_start].ca.dim.y:= areas[sbbu_move].ca.dim.y + 
+                                             areas[sbbu_move].ca.dim.cy;
+    areas[sba_start].ca.dim.cy:=  areas[sbbu_down].ca.dim.y - 
+                                             areas[sba_start].ca.dim.y;
+    areas[sba_end].ca.dim.y:= y + endblen;
+    areas[sba_end].ca.dim.cy:= areas[sbbu_move].ca.dim.y - 
+                                                    areas[sba_end].ca.dim.y;
    end;
   end;
-  buttonareas[bbu_down]:= areas[sbbu_down].dim;
+  buttonareas[bbu_down]:= areas[sbbu_down].ca.dim;
   if fframeendbutton1 <> nil then begin
-   deflaterect1(areas[sbbu_down].dim,fframeendbutton1.innerframe);
+   deflaterect1(areas[sbbu_down].ca.dim,fframeendbutton1.innerframe);
   end;
   frameskinoptionstoshapestate(fframeendbutton1,areas[sbbu_down].state);
-  buttonareas[bbu_move]:= areas[sbbu_move].dim;
+  buttonareas[bbu_move]:= areas[sbbu_move].ca.dim;
   if fframebutton <> nil then begin
-   deflaterect1(areas[sbbu_move].dim,fframebutton.innerframe);
+   deflaterect1(areas[sbbu_move].ca.dim,fframebutton.innerframe);
   end;
   frameskinoptionstoshapestate(fframebutton,areas[sbbu_move].state);
-  buttonareas[bbu_up]:= areas[sbbu_up].dim;
+  buttonareas[bbu_up]:= areas[sbbu_up].ca.dim;
   if fframeendbutton2 <> nil then begin
-   deflaterect1(areas[sbbu_up].dim,fframeendbutton2.innerframe);
+   deflaterect1(areas[sbbu_up].ca.dim,fframeendbutton2.innerframe);
   end;
   frameskinoptionstoshapestate(fframeendbutton2,areas[sbbu_up].state);
   {
@@ -471,7 +481,7 @@ var
 begin
  result:= scrollbarareaty(-1);
  for ar1:= low(scrollbarareaty) to high(scrollbarareaty) do begin
-  if pointinrect(point,fdrawinfo.areas[ar1].dim) then begin
+  if pointinrect(point,fdrawinfo.areas[ar1].ca.dim) then begin
    result:= ar1;
    break;
   end;
@@ -503,7 +513,7 @@ begin
    fintf.invalidaterect(fdrawinfo.buttonareas[buttonareaty(fclickedarea)],forg);  
   end
   else begin
-   fintf.invalidaterect(fdrawinfo.areas[fclickedarea].dim,forg);
+   fintf.invalidaterect(fdrawinfo.areas[fclickedarea].ca.dim,forg);
   end;
  end;
 end;
@@ -580,9 +590,9 @@ end;
 
 procedure tcustomscrollbar.setcolorglyph(const avalue: colorty);
 begin
- if fdrawinfo.areas[sbbu_down].colorglyph <> avalue then begin
-  fdrawinfo.areas[sbbu_down].colorglyph:= avalue;
-  fdrawinfo.areas[sbbu_up].colorglyph:= avalue;
+ if fdrawinfo.areas[sbbu_down].ca.colorglyph <> avalue then begin
+  fdrawinfo.areas[sbbu_down].ca.colorglyph:= avalue;
+  fdrawinfo.areas[sbbu_up].ca.colorglyph:= avalue;
   invalidate;
  end;
 end;
@@ -682,14 +692,14 @@ begin
    else begin
     color:= fcolorpattern;
    end;
-   fillrect(areas[sba_start].dim,cl_brushcanvas);
+   fillrect(areas[sba_start].ca.dim,cl_brushcanvas);
    if fclickedarea = sba_end then begin
     color:= cl_black;
    end
    else begin
     color:= fcolorpattern;
    end;
-   fillrect(areas[sba_end].dim,cl_brushcanvas);
+   fillrect(areas[sba_end].ca.dim,cl_brushcanvas);
   end;
   restore;
  end;
@@ -926,16 +936,13 @@ begin
        fpickpos:= info.pos;
        with fdrawinfo.buttonareas[bbu_move] do begin
         case fdirection of
-         gd_right: fpickoffset:= x - info.pos.x - fdrawinfo.areas[sba_start].dim.x;
-         gd_up: fpickoffset:= fdrawinfo.areas[sba_start].dim.cy + info.pos.y;
-         gd_left: fpickoffset:= fdrawinfo.areas[sba_start].dim.cx + info.pos.x;
-         gd_down: fpickoffset:= y - info.pos.y - fdrawinfo.areas[sba_start].dim.y;
-{        
-         gd_right: fpickoffset:= x - info.pos.x - fdrawinfo.areas[sba_start].dim.x;
-         gd_up: fpickoffset:= fdrawinfo.areas[sba_start].dim.cy + info.pos.y;
-         gd_left: fpickoffset:= fdrawinfo.areas[sba_start].dim.cx + info.pos.x;
-         gd_down: fpickoffset:= y - info.pos.y - fdrawinfo.areas[sba_start].dim.y;
-}
+         gd_right: fpickoffset:= x - info.pos.x - 
+                               fdrawinfo.areas[sba_start].ca.dim.x;
+         gd_up: fpickoffset:= fdrawinfo.areas[sba_start].ca.dim.cy + info.pos.y;
+         gd_left: fpickoffset:= fdrawinfo.areas[sba_start].ca.dim.cx + 
+                                                         info.pos.x;
+         gd_down: fpickoffset:= y - info.pos.y - 
+                                        fdrawinfo.areas[sba_start].ca.dim.y;
         end;
        end;
       end;

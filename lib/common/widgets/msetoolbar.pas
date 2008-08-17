@@ -963,7 +963,7 @@ begin
            break;
           end;
          end;
-         dim:= rect1;
+         ca.dim:= rect1;
          if vert then begin
           inc(rect1.y,rect1.cy);
          end
@@ -1068,12 +1068,12 @@ begin
          ((ss_checkbox in state) xor (mao_checkbox in button1.options)) or
          ((ss_radiobutton in state) xor (mao_radiobutton in button1.options));
      actionstatestoshapestates(button1.finfo,state);
-     imagenr:= buttons[int1].finfo.imagenr;
-     colorglyph:= buttons[int1].finfo.colorglyph;
+     ca.imagenr:= buttons[int1].finfo.imagenr;
+     ca.colorglyph:= buttons[int1].finfo.colorglyph;
      color:= buttons[int1].finfo.color;
-     imagelist:= timagelist(buttons[int1].finfo.imagelist);
+     ca.imagelist:= timagelist(buttons[int1].finfo.imagelist);
      doexecute:= {$ifdef FPC}@{$endif}buttons[int1].doexecute;
-     invalidaterect(dim);
+     invalidaterect(ca.dim);
      if bo1 then begin
       updatelayout;
      end;
@@ -1159,7 +1159,7 @@ end;
 
 function tcustomtoolbar.gethintpos(const aindex: integer): rectty;
 begin
- result:= flayout.cells[aindex].dim;
+ result:= flayout.cells[aindex].ca.dim;
  inc(result.cy,12);
 end;
 

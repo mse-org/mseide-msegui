@@ -699,9 +699,9 @@ type
    property font: twidgetfont read getfont write setfont stored isfontstored;
    property action: tcustomaction read factioninfo.action write setaction;
    property caption: captionty read factioninfo.captiontext write setcaption stored iscaptionstored;
-   property captionpos: captionposty read finfo.captionpos write setcaptionpos
+   property captionpos: captionposty read finfo.ca.captionpos write setcaptionpos
                               default cp_center;
-   property captiondist: integer read finfo.captiondist write setcaptiondist
+   property captiondist: integer read finfo.ca.captiondist write setcaptiondist
                             default defaultshapecaptiondist;
    property imagelist: timagelist read getimagelist write setimagelist
                     stored isimageliststored;
@@ -711,7 +711,7 @@ type
                               write setimagenrdisabled
                             stored isimagenrdisabledstored default -2;
                       //-1 = none, -2 = grayed, -3 = imageoffsetdisabled
-   property imagedist: integer read finfo.imagedist write setimagedist;
+   property imagedist: integer read finfo.ca.imagedist write setimagedist;
    property colorglyph: colorty read factioninfo.colorglyph write setcolorglyph
                       stored iscolorglyphstored default cl_glyph;
    property shortcut: shortcutty read factioninfo.shortcut write setshortcut
@@ -2422,9 +2422,9 @@ begin
  fvaluefaces:= tvaluefacearrayprop.create(self);
  optionswidget:= defaultoptionswidget - [ow_mousefocus];
  initshapeinfo(finfo);
- finfo.dim:= innerclientrect;
+ finfo.ca.dim:= innerclientrect;
  finfo.color:= cl_transparent;
- finfo.colorglyph:= cl_black;
+ finfo.ca.colorglyph:= cl_black;
  finfo.state:= finfo.state + [ss_showfocusrect,ss_showdefaultrect];
  include(fwidgetstate1,ws1_nodesignframe);
  size:= makesize(defaultbuttonwidth,defaultbuttonheight);
@@ -2458,7 +2458,7 @@ begin
  else begin
   include(fwidgetstate1,ws1_nodesignframe);
  end;
- finfo.dim:= innerclientrect;
+ finfo.ca.dim:= innerclientrect;
 end;
 
 function tcustomdatabutton.getframestateflags: framestateflagsty;
@@ -2515,7 +2515,7 @@ begin
  if (info.shiftstate = []) and (bo_executeonkey in foptions) then begin
   if (info.key = key_space) then begin
    include(finfo.state,ss_clicked);
-   invalidaterect(finfo.dim);
+   invalidaterect(finfo.ca.dim);
   end
   else begin
    if isenterkey(self,info.key) then begin
@@ -2530,7 +2530,7 @@ procedure tcustomdatabutton.dokeyup(var info: keyeventinfoty);
 begin
  if (info.key = key_space) and (ss_clicked in finfo.state) then begin
   exclude(finfo.state,ss_clicked);
-  invalidaterect(finfo.dim);
+  invalidaterect(finfo.ca.dim);
  end;
  inherited;
 end;
@@ -2553,7 +2553,7 @@ end;
 
 procedure tcustomdatabutton.setactualimagenr(const avalue: integer);
 begin
- with finfo do begin 
+ with finfo,ca do begin 
   if (avalue >= 0) and (avalue < fimagenums.count) then begin
    imagenr:= fimagenums[avalue];
   end
@@ -2596,13 +2596,13 @@ var
  statebefore: shapestatesty;
  dimbefore: rectty;
 begin
- finfo.colorglyph:= acolorglyph;
+ finfo.ca.colorglyph:= acolorglyph;
  finfo.imagenrdisabled:= fimagenrdisabled;
  if (@avalue <> nil) then begin
   finfo.face:= actualface(integer(avalue));
   statebefore:= finfo.state;
-  dimbefore:= finfo.dim;
-  finfo.dim:= arect;
+  dimbefore:= finfo.ca.dim;
+  finfo.ca.dim:= arect;
   finfo.state:= finfo.state - [ss_focused,ss_clicked,ss_mouse];
   with pcellinfoty(canvas.drawinfopo)^ do begin
    if ismousecell and (bo_executeonclick in foptions) and 
@@ -2616,7 +2616,7 @@ begin
   setactualimagenr(integer(avalue));
   drawbutton(canvas,finfo);
   finfo.state:= statebefore;
-  finfo.dim:= dimbefore;
+  finfo.ca.dim:= dimbefore;
  end
  else begin
   finfo.face:= actualface(fvalue);
@@ -2664,8 +2664,8 @@ end;
 
 procedure tcustomdatabutton.setcaptiondist(const avalue: integer);
 begin
- if avalue <> finfo.captiondist then begin
-  finfo.captiondist:= avalue;
+ if avalue <> finfo.ca.captiondist then begin
+  finfo.ca.captiondist:= avalue;
   formatchanged;
   checkautosize;
  end;
@@ -2673,8 +2673,8 @@ end;
 
 procedure tcustomdatabutton.setcaptionpos(const avalue: captionposty);
 begin
- if avalue <> finfo.captionpos then begin
-  finfo.captionpos:= avalue;
+ if avalue <> finfo.ca.captionpos then begin
+  finfo.ca.captionpos:= avalue;
   formatchanged;
   checkautosize;
  end;
@@ -2731,7 +2731,7 @@ end;
 function tcustomdatabutton.checkfocusshortcut(var info: keyeventinfoty): boolean;
 begin
  result:= inherited checkfocusshortcut(info) or 
-         mserichstring.checkshortcut(info,finfo.caption,true);
+         mserichstring.checkshortcut(info,finfo.ca.caption,true);
 end;
 
 procedure tcustomdatabutton.togglevalue;
@@ -2790,8 +2790,8 @@ end;
 
 procedure tcustomdatabutton.setimagedist(const avalue: integer);
 begin
- if avalue <> finfo.imagedist then begin
-  finfo.imagedist:= avalue;
+ if avalue <> finfo.ca.imagedist then begin
+  finfo.ca.imagedist:= avalue;
   formatchanged;
   checkautosize;
  end;

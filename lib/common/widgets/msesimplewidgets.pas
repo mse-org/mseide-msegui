@@ -157,9 +157,9 @@ type
                                 default mr_none;
    property action: tcustomaction read factioninfo.action write setaction;   
    property caption: captionty read getcaption write setcaption stored iscaptionstored;
-   property captionpos: captionposty read finfo.captionpos write setcaptionpos
+   property captionpos: captionposty read finfo.ca.captionpos write setcaptionpos
                               default cp_center;
-   property captiondist: integer read finfo.captiondist write setcaptiondist
+   property captiondist: integer read finfo.ca.captiondist write setcaptiondist
                             default defaultshapecaptiondist;
    property imagelist: timagelist read getimagelist write setimagelist
                     stored isimageliststored;
@@ -168,7 +168,7 @@ type
    property imagenrdisabled: imagenrty read factioninfo.imagenrdisabled
                               write setimagenrdisabled
                             stored isimagenrdisabledstored default -2;
-   property imagedist: integer read finfo.imagedist write setimagedist;
+   property imagedist: integer read finfo.ca.imagedist write setimagedist;
    property colorglyph: colorty read factioninfo.colorglyph write setcolorglyph
                       stored iscolorglyphstored default cl_glyph;
    property shortcut: shortcutty read factioninfo.shortcut write setshortcut
@@ -545,7 +545,7 @@ end;
 
 procedure tcustombutton.dopaint(const canvas: tcanvas);
 begin
- finfo.font:= getfont;
+ finfo.ca.font:= getfont;
  inherited;
 end;
 
@@ -783,14 +783,14 @@ end;
 
 procedure tcustombutton.setcaptionpos(const avalue: captionposty);
 begin
- if avalue <> finfo.captionpos then begin
+ if avalue <> finfo.ca.captionpos then begin
   if avalue in [cp_left,cp_right,cp_top,cp_bottom,
                 cp_leftcenter,cp_rightcenter,
                 cp_topcenter,cp_bottomcenter] then begin
-   finfo.captionpos:= avalue;
+   finfo.ca.captionpos:= avalue;
   end
   else begin
-   finfo.captionpos:= cp_center;
+   finfo.ca.captionpos:= cp_center;
   end;
   checkautosize;
   invalidate;
@@ -799,16 +799,16 @@ end;
 
 procedure tcustombutton.setcaptiondist(const avalue: integer);
 begin
- if avalue <> finfo.captiondist then begin
-  finfo.captiondist:= avalue;
+ if avalue <> finfo.ca.captiondist then begin
+  finfo.ca.captiondist:= avalue;
   checkautosize;
  end;
 end;
 
 procedure tcustombutton.setimagedist(const avalue: integer);
 begin
- if avalue <> finfo.imagedist then begin
-  finfo.imagedist:= avalue;
+ if avalue <> finfo.ca.imagedist then begin
+  finfo.ca.imagedist:= avalue;
   checkautosize;
  end;
 end;
@@ -909,12 +909,12 @@ procedure tcustombutton.getautopaintsize(var asize: sizety);
 var
  int1: integer;
 begin
- asize:= textrect(getcanvas,finfo.caption,[],font).size;
+ asize:= textrect(getcanvas,finfo.ca.caption,[],font).size;
  if captionpos in [cp_top,cp_bottom,cp_topcenter,cp_bottomcenter] then begin
-  inc(asize.cy,finfo.captiondist);
+  inc(asize.cy,finfo.ca.captiondist);
  end
  else begin  
-  inc(asize.cx,finfo.captiondist);
+  inc(asize.cx,finfo.ca.captiondist);
  end;
  if imagelist <> nil then begin
   with imagelist do begin
@@ -922,7 +922,7 @@ begin
     if width > asize.cx then begin
      asize.cx:= width;
     end;
-    inc(asize.cy,finfo.imagedist+height);
+    inc(asize.cy,finfo.ca.imagedist+height);
    end
    else begin
     int1:= height {+ imagedisttop+imagedistbottom};
@@ -937,7 +937,7 @@ begin
       asize.cx:= width;
      end;
     end;
-    inc(asize.cx,finfo.imagedist);
+    inc(asize.cx,finfo.ca.imagedist);
    end;
   end;
  end;
@@ -977,7 +977,7 @@ procedure tcustombutton.objectevent(const sender: tobject;
                const event: objecteventty);
 begin
  inherited;
- if (event = oe_changed) and (sender = finfo.imagelist) then begin
+ if (event = oe_changed) and (sender = finfo.ca.imagelist) then begin
   actionchanged;
  end;
 end;

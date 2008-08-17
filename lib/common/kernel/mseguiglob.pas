@@ -45,6 +45,28 @@ const
 // keybuttonshiftstatesmask: shiftstatesty = [ss_shift,ss_alt,ss_ctrl,
 //                   ss_left,ss_right,ss_middle,ss_double];
 
+const
+ swapcaptionpos: array[captionposty] of captionposty =
+ (//cp_center,cp_rightbottom,cp_right,cp_rightcenter,cp_righttop,
+    cp_center,cp_leftbottom,cp_left,cp_leftcenter,cp_lefttop,
+  //cp_topright,cp_top,cp_topcenter,cp_topleft,
+    cp_bottomright,cp_bottom,cp_bottomcenter,cp_bottomleft,
+  //cp_lefttop,cp_left,cp_leftcenter,cp_leftbottom,
+    cp_righttop,cp_right,cp_rightcenter,cp_rightbottom,
+  //cp_bottomleft,cp_bottom,cp_bottomcenter,cp_bottomright
+    cp_topleft,cp_top,cp_topcenter,cp_topright
+ );
+ simplecaptionpos: array[captionposty] of captionposty =
+ (//cp_center,cp_rightbottom,cp_right,cp_rightcenter,cp_righttop,
+    cp_center,cp_right,cp_right,cp_right,cp_right,
+  //cp_topright,cp_top,cp_topcenter,cp_topleft,
+    cp_top,cp_top,cp_top,cp_top,
+  //cp_lefttop,cp_left,cp_leftcenter,cp_leftbottom,
+    cp_left,cp_left,cp_left,cp_left,
+  //cp_bottomleft,cp_bottom,cp_bottomcenter,cp_bottomright
+    cp_bottom,cp_bottom,cp_bottom,cp_bottom
+ );
+
 type
  guierrorty = (gue_ok,gue_error,
                gue_alreadyregistered,gue_notregistered,

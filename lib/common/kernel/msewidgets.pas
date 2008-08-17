@@ -869,7 +869,7 @@ type
    constructor create(aowner: tcomponent); override;
    property options: buttonoptionsty read foptions write setoptions
                  default defaultbuttonoptions;
-   property colorglyph: colorty read finfo.colorglyph write setcolorglyph
+   property colorglyph: colorty read finfo.ca.colorglyph write setcolorglyph
                     default cl_black;
    property focusrectdist: integer read finfo.focusrectdist 
                 write finfo.focusrectdist default defaultshapefocusrectdist;
@@ -1304,11 +1304,11 @@ begin
      parentwidget:= widget;
      if buttons[int1] in noshortcut then begin
       captiontorichstring(stockobjects.modalresulttextnoshortcut[buttons[int1]],
-                                 finfo.caption);
+                                 finfo.ca.caption);
      end
      else begin
       captiontorichstring(stockobjects.modalresulttext[buttons[int1]],
-                              finfo.caption);
+                              finfo.ca.caption);
      end;
      if int1 <= high(actions) then begin
       onexecute:= actions[int1];
@@ -1467,9 +1467,9 @@ begin
  inherited;
  optionswidget:= defaultoptionswidget - [ow_mousefocus];
  initshapeinfo(finfo);
- finfo.dim:= innerclientrect;
+ finfo.ca.dim:= innerclientrect;
  finfo.color:= cl_transparent;
- finfo.colorglyph:= cl_black;
+ finfo.ca.colorglyph:= cl_black;
  finfo.doexecute:= {$ifdef FPC}@{$endif}doshapeexecute;
  finfo.state:= finfo.state+[ss_showfocusrect,ss_showdefaultrect];
 end;
@@ -1488,7 +1488,7 @@ end;
 procedure tactionsimplebutton.clientrectchanged;
 begin
  inherited;
- finfo.dim:= innerclientrect;
+ finfo.ca.dim:= innerclientrect;
  frameskinoptionstoshapestate(fframe,finfo.state);
  if ss_flat in finfo.state then begin
   exclude(fwidgetstate1,ws1_nodesignframe);
@@ -1548,7 +1548,7 @@ begin
   if (shiftstate = []) and (bo_executeonkey in foptions) then begin
    if (key = key_space) then begin
     include(finfo.state,ss_clicked);
-    invalidateframestaterect(finfo.dim,fframe);
+    invalidateframestaterect(finfo.ca.dim,fframe);
    end
    else begin
     if isenterkey(self,key) or (key = key_period) then begin
@@ -1565,7 +1565,7 @@ begin
  inherited;
  if (info.key = key_space) and (ss_clicked in finfo.state) then begin
   exclude(finfo.state,ss_clicked);
-  invalidateframestaterect(finfo.dim,fframe);
+  invalidateframestaterect(finfo.ca.dim,fframe);
   if (info.shiftstate = []) and (bo_executeonkey in foptions) then begin
    include(info.eventstate,es_processed);
    internalexecute;
@@ -1581,8 +1581,8 @@ end;
 
 procedure tactionsimplebutton.setcolorglyph(const value: colorty);
 begin
- if finfo.colorglyph <> value then begin
-  finfo.colorglyph := value;
+ if finfo.ca.colorglyph <> value then begin
+  finfo.ca.colorglyph := value;
   invalidate;
  end;
 end;
@@ -1638,7 +1638,7 @@ end;
 
 procedure tmessagebutton.doshortcut(var info: keyeventinfoty; const sender: twidget);
 begin
- if checkshortcut(info,finfo.caption,bo_altshortcut in options) then begin
+ if checkshortcut(info,finfo.ca.caption,bo_altshortcut in options) then begin
   include(info.eventstate,es_processed);
   internalexecute;
  end
@@ -2704,7 +2704,8 @@ begin
  clickedbutton:= -1;
  for int1:= 0 to high(fbuttons) do begin
   if updatemouseshapestate(fbuttons[int1],info,nil,nil) then begin
-   icaptionframe(fintf).getwidget.invalidaterect(fbuttons[int1].dim,org_widget);
+   icaptionframe(fintf).getwidget.invalidaterect(
+                                 fbuttons[int1].ca.dim,org_widget);
    if info.eventkind in [ek_buttonpress,ek_buttonrelease] then begin
     include(info.eventstate,es_processed);
    end;
@@ -2923,8 +2924,8 @@ var
    if (button in fforcevisiblebuttons) or
         not (button in fforceinvisiblebuttons) and (button in fneededbuttons) then begin
     inc(buttoncount);
-    dim.x:= ax;
-    dim.y:= ay;
+    ca.dim.x:= ax;
+    ca.dim.y:= ay;
     if vert then begin
      inc(ay,acy);
     end
@@ -3028,19 +3029,19 @@ begin             //updatelayout
   end;
   for int1:= 0 to high(fbuttons) do begin
    with fbuttons[int1] do begin
-    imagelist:= stockobjects.glyphs;
+    ca.imagelist:= stockobjects.glyphs;
     if sfs_spinedit in fstepstate then begin
-     imagenr:= ord(imagesedit[stepkindty(int1)]);
+     ca.imagenr:= ord(imagesedit[stepkindty(int1)]);
     end
     else begin
-     imagenr:= ord(images[stepkindty(int1)]);
+     ca.imagenr:= ord(images[stepkindty(int1)]);
     end;
     imagenrdisabled:= -2;
     color:= color1;
     tag:= int1;
     doexecute:= {$ifdef FPC}@{$endif}execute;
-    dim.cx:= acx;
-    dim.cy:= acy;
+    ca.dim.cx:= acx;
+    ca.dim.cy:= acy;
    end;
   end;
   fdim.x:= ax;

@@ -213,11 +213,11 @@ type
   published
    property width: integer read fbuttonwidth write setbuttonwidth default 0;
    property color: colorty read finfo.color write setcolor default cl_parent;
-   property colorglyph: colorty read finfo.colorglyph write setcolorglyph default cl_glyph;
+   property colorglyph: colorty read finfo.ca.colorglyph write setcolorglyph default cl_glyph;
    property face: tface read getface write setface;
    property frame: tframe read getframe write setframe;
-   property imagelist: timagelist read finfo.imagelist write setimagelist;
-   property imagenr: imagenrty read finfo.imagenr write setimagenr default -1;
+   property imagelist: timagelist read finfo.ca.imagelist write setimagelist;
+   property imagenr: imagenrty read finfo.ca.imagenr write setimagenr default -1;
    property options: framebuttonoptionsty read foptions write setoptions
                                             default [];
    property onexecute: notifyeventty read fonexecute write fonexecute;
@@ -230,7 +230,7 @@ type
   public
    constructor create(aowner: tobject); override;
   published
-   property imagelist read finfo.imagelist write setimagelist stored isimageliststored;
+   property imagelist read finfo.ca.imagelist write setimagelist stored isimageliststored;
  end;
 
  framebuttonclassty = class of tframebutton;
@@ -455,8 +455,8 @@ end;
 constructor tframebutton.create(aowner: tobject);
 begin
  finfo.color:= cl_parent;
- finfo.colorglyph:= cl_glyph;
- finfo.imagenr:= -1;
+ finfo.ca.colorglyph:= cl_glyph;
+ finfo.ca.imagenr:= -1;
  finfo.imagenrdisabled:= -2;
  include(finfo.state,ss_widgetorg);
  inherited;
@@ -555,8 +555,8 @@ end;
 
 procedure tframebutton.setcolorglyph(const avalue: colorty);
 begin
- if finfo.colorglyph <> avalue then begin
-  finfo.colorglyph := avalue;
+ if finfo.ca.colorglyph <> avalue then begin
+  finfo.ca.colorglyph := avalue;
   changed;
  end;
 end;
@@ -596,14 +596,14 @@ end;
 
 procedure tframebutton.setimagelist(const Value: timagelist);
 begin
- setlinkedcomponent(iobjectlink(self),value,tmsecomponent(finfo.imagelist));
+ setlinkedcomponent(iobjectlink(self),value,tmsecomponent(finfo.ca.imagelist));
  changed;
 end;
 
 procedure tframebutton.setimagenr(const Value: imagenrty);
 begin
- if finfo.imagenr <> value then begin
-  finfo.imagenr := Value;
+ if finfo.ca.imagenr <> value then begin
+  finfo.ca.imagenr := Value;
   changed;
  end;
 end;
@@ -754,7 +754,7 @@ end;
 
 function tframebutton.getimagelist: timagelist;
 begin
- result:= finfo.imagelist;
+ result:= finfo.ca.imagelist;
 end;
 
 { tstockglyphframebutton}
@@ -762,12 +762,12 @@ end;
 constructor tstockglyphframebutton.create(aowner: tobject);
 begin
  inherited;
- finfo.imagelist:= stockobjects.glyphs;
+ finfo.ca.imagelist:= stockobjects.glyphs;
 end;
 
 function tstockglyphframebutton.isimageliststored: boolean;
 begin
- result:= finfo.imagelist <> stockobjects.glyphs;
+ result:= finfo.ca.imagelist <> stockobjects.glyphs;
 end;
 
 procedure tstockglyphframebutton.setimagelist(const Value: timagelist);
@@ -918,10 +918,10 @@ begin
      inc(aframe.right,cx);
     end;
     if fframe <> nil then begin
-     finfo.dim:= deflaterect(fframerect,fframe.innerframe);
+     finfo.ca.dim:= deflaterect(fframerect,fframe.innerframe);
     end
     else begin
-     finfo.dim:= fframerect;
+     finfo.ca.dim:= fframerect;
     end;
    end;
   end;

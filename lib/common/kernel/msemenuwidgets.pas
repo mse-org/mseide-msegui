@@ -257,7 +257,7 @@ begin
  with layout do begin
   addpoint1(sizerect.pos,dist);
   for int1:= 0 to high(cells) do begin
-   with cells[int1].buttoninfo.dim.pos do begin
+   with cells[int1].buttoninfo.ca.dim.pos do begin
     x:= x + dist.x;
     y:= y + dist.y;
    end;
@@ -396,7 +396,7 @@ begin
    with cells[int1] do begin
     fontinactive:= item1.font;
     fontactive:= item1.fontactive;
-    with buttoninfo do begin
+    with buttoninfo,ca do begin
      captiondist:= defaultshapecaptiondist;
      imagedist:= imagedi;
      imagelist:= timagelist(item1.finfo.imagelist);
@@ -548,15 +548,12 @@ begin
      amax:= maxsize;
     end;
     if commonwidth then begin
-//     ax:= framehalfwidth;
      ax:= frame.left;
-//     textwidth:= textwidth + 4;
     end;
     for int1:= 0 to count - 1 do begin
-     with cells[int1].buttoninfo do begin
+     with cells[int1].buttoninfo,ca do begin
       if not (ss_invisible in state) then begin
        if commonwidth then begin
-//        tabpos:= tabpos + tabpos1;
         dim.x:= ax;
         if not (ss_separator in state) then begin
          dim.cx:= textwidth;
@@ -595,7 +592,7 @@ begin
     end;
     maxheight:= 0;
     for int1:= 0 to count - 1 do begin
-     with cells[int1].buttoninfo,dim do begin
+     with cells[int1].buttoninfo,ca,dim do begin
       tabpos:= tabpos + tabpos1;
       y:= y + shift;
       int2:= y + cy  + frameheight;
@@ -622,7 +619,7 @@ begin
    sizerect.size:= nullsize;
   end;
   for int1:= 0 to count - 1 do begin
-   with cells[int1],buttoninfo do begin
+   with cells[int1],buttoninfo,ca do begin
     dimouter:= inflaterect(dim,frame);
     imagedisttop:= imageditop;
     imagedistbottom:= imagedibottom;
@@ -641,7 +638,7 @@ begin
    for int1:= 0 to high(cells) do begin
     with cells[int1].buttoninfo do begin
      if (state * [ss_disabled,ss_invisible,ss_separator] = []) and
-                pointinrect(pos,dim) then begin
+                pointinrect(pos,ca.dim) then begin
       result:= int1;
       break;
      end;
@@ -676,27 +673,27 @@ begin
    with cells[int1],buttoninfo do begin
     if int1 = activeitem then begin
      if itemframetemplateactive <> nil then begin
-      itemframetemplateactive.paintbackground(canvas,dim);
+      itemframetemplateactive.paintbackground(canvas,ca.dim);
      end;
      face:= itemfaceactive;
-     font:= fontactive;
+     ca.font:= fontactive;
      include(state,ss_active);
      drawmenubutton(canvas,buttoninfo,po2);
      if itemframetemplateactive <> nil then begin
-      itemframetemplateactive.paintoverlay(canvas,dim,
+      itemframetemplateactive.paintoverlay(canvas,ca.dim,
             combineframestateflags(false,true,ss_clicked in state,false));
      end;
     end
     else begin
      if itemframetemplate <> nil then begin
-      itemframetemplate.paintbackground(canvas,dim);
+      itemframetemplate.paintbackground(canvas,ca.dim);
      end;
      face:= itemface;
-     font:= fontinactive;
+     ca.font:= fontinactive;
      exclude(state,ss_active);
      drawmenubutton(canvas,buttoninfo,po1);
      if itemframetemplate <> nil then begin
-          itemframetemplate.paintoverlay(canvas,dim,
+          itemframetemplate.paintoverlay(canvas,ca.dim,
                  combineframestateflags(ss_disabled in state,false,
                  ss_clicked in state,false));
      end;
@@ -760,7 +757,7 @@ function checkshortcut(const layout: menulayoutinfoty; var info: keyeventinfoty;
   repeat
    with layout.cells[actualindex].buttoninfo do begin
     if (state * [ss_disabled,ss_invisible] = []) and
-            mserichstring.checkshortcut(info,caption,false) then begin
+            mserichstring.checkshortcut(info,ca.caption,false) then begin
      result:= actualindex;
      include(info.eventstate,es_processed);
      break;
@@ -1208,7 +1205,7 @@ begin
                                 fwindow);
       fnextpopup.fprevpopup:= self;
       nextpopupshowing;
-      fnextpopup.showmenu(makerect(translatetoscreen(dim.pos),dim.size),
+      fnextpopup.showmenu(makerect(translatetoscreen(ca.dim.pos),ca.dim.size),
                popupdirection,false);
       fnextpopup.beginkeymode;
      end;

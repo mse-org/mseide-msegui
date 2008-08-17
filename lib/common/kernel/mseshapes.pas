@@ -14,7 +14,7 @@ unit mseshapes;
 interface
 uses
  msegraphics,msegraphutils,mseguiglob,msegui,mseevent,mserichstring,msebitmap,
- msetypes,mseact,msestrings;
+ msetypes,mseact,msestrings,msedrawtext;
 
 const
  menuarrowwidth = 8;
@@ -28,26 +28,32 @@ const
 type
  tagmouseprocty = procedure (const tag: integer; const info: mouseeventinfoty) of object;
 
- shapeinfoty = record
+ captioninfoty = record
   dim: rectty;
-  focusrectdist: integer;
-  state: shapestatesty;
   caption: richstringty;
+  font: tfont;
+  textflags: textflagsty;
   captionpos: captionposty;
   captiondist: integer;
-  tabpos: integer;
-  font: tfont;
-  group: integer;
-  color: colorty;
-  coloractive: colorty;
-  colorglyph: colorty;
   imagenr: imagenrty;
-  imagenrdisabled: integer;       //-2 -> grayed
-  imagecheckedoffset: integer;
+  colorglyph: colorty;
   imagelist: timagelist;
   imagedist: integer;
   imagedisttop: integer;
   imagedistbottom: integer;
+ end;
+ 
+
+ shapeinfoty = record
+  ca: captioninfoty;
+  focusrectdist: integer;
+  state: shapestatesty;
+  tabpos: integer;
+  group: integer;
+  color: colorty;
+  coloractive: colorty;
+  imagenrdisabled: integer;       //-2 -> grayed
+  imagecheckedoffset: integer;
   face: tcustomface;
   tag: integer;
   doexecute: tagmouseprocty;
@@ -63,9 +69,9 @@ type
 procedure draw3dframe(const canvas: tcanvas; const arect: rectty; level: integer;
                                  colorinfo: framecolorinfoty);
 procedure drawfocusrect(const canvas: tcanvas; const arect: rectty);
-procedure drawtoolbutton(const canvas: tcanvas; const info: shapeinfoty);
+procedure drawtoolbutton(const canvas: tcanvas; var info: shapeinfoty);
 procedure drawbutton(const canvas: tcanvas; const info: shapeinfoty);
-procedure drawmenubutton(const canvas: tcanvas; const info: shapeinfoty;
+procedure drawmenubutton(const canvas: tcanvas; var info: shapeinfoty;
                            const innerframe: pframety = nil);
 procedure drawtab(const canvas: tcanvas; const info: shapeinfoty;
                                const innerframe: pframety = nil);
@@ -100,12 +106,15 @@ procedure checkbuttonhint(const awidget: twidget; info: mouseeventinfoty;
      const getbuttonhint: getbuttonhintty; 
      const gethintpos: getbuttonhintposty);
 
+procedure drawcaption(const acanvas: tcanvas; const ainfo: captioninfoty);
+procedure initcaptioninfo(var ainfo: captioninfoty);
+
 var
  animatemouseenter: boolean = true;
  
 implementation
 uses
- classes,msedrawtext,msestockobjects,msebits,sysutils;
+ classes,msestockobjects,msebits,sysutils;
 type
  twidget1 = class(twidget);
  tframe1 = class(tcustomframe);
@@ -194,11 +203,11 @@ procedure actioninfotoshapeinfo(var actioninfo: actioninfoty;
 begin
  with actioninfo do begin
   actionstatestoshapestates(actioninfo,shapeinfo.state);
-  shapeinfo.caption:= caption1;
-  shapeinfo.imagelist:= timagelist(imagelist);
-  shapeinfo.imagenr:= imagenr;
+  shapeinfo.ca.caption:= caption1;
+  shapeinfo.ca.imagelist:= timagelist(imagelist);
+  shapeinfo.ca.imagenr:= imagenr;
   shapeinfo.imagenrdisabled:= imagenrdisabled;
-  shapeinfo.colorglyph:= colorglyph;
+  shapeinfo.ca.colorglyph:= colorglyph;
   shapeinfo.color:= color;
   shapeinfo.imagecheckedoffset:= imagecheckedoffset;
   shapeinfo.group:= group;
@@ -225,11 +234,18 @@ begin
   end;
  end;
 end;
+
+procedure initcaptioninfo(var ainfo: captioninfoty);
+begin
+ with ainfo do begin
+  captiondist:= defaultshapecaptiondist;
+ end;
+end;
  
 procedure initshapeinfo(var ainfo: shapeinfoty);
 begin
  with ainfo do begin
-  captiondist:= defaultshapecaptiondist;
+  initcaptioninfo(ainfo.ca);
   focusrectdist:= defaultshapefocusrectdist;
  end;
 end;
@@ -239,7 +255,7 @@ procedure setchecked(var info: shapeinfoty; const value: boolean;
 begin
  with info do begin
   if value xor (ss_checked in state) then begin
-   widget.invalidaterect(dim);
+   widget.invalidaterect(ca.dim);
    updatebit({$ifdef FPC}longword{$else}longword{$endif}(info.state),ord(ss_checked),value);
   end;
  end;
@@ -260,7 +276,7 @@ begin
   updatebit(cardinal(state),ord(ss_focused),widget.active);
   result:= state <> statebefore;
   if result then begin
-   rect1:= dim;
+   rect1:= ca.dim;
    if (aframe <> nil) and tframe1(aframe).needsactiveinvalidate then begin
     inflaterect1(rect1,aframe.innerframe);
    end;
@@ -318,7 +334,7 @@ begin
       end;
      end;
      ek_mousemove,ek_mousepark: begin
-      if pointinrect(pos,dim) then begin
+      if pointinrect(pos,ca.dim) then begin
        state:= state + [ss_mouse];
        if (ss_left in shiftstate) and
          (state * [ss_disabled,ss_moveclick] = [ss_moveclick]) then begin
@@ -357,7 +373,7 @@ begin
         state:= state - [ss_clicked];
         result:= true; //state can be invalid after execute
         if widget <> nil then begin //info can be invalid after execute
-         widget.invalidaterect(dim);
+         widget.invalidaterect(ca.dim);
         end;
         doexecute(tag,mouseevent);
         exit;
@@ -371,7 +387,7 @@ begin
       if canclick and (button = mb_left) and 
       (not(ss_disabled in state) or 
              (widget <> nil) and (csdesigning in widget.componentstate)) 
-             and pointinrect(pos,dim) then begin
+             and pointinrect(pos,ca.dim) then begin
        state:= state + [ss_clicked];
        updateshapemoveclick(infoarpo,true);
       end;
@@ -385,10 +401,10 @@ begin
   result:= result or (state <> statebefore);
   if result and (widget <> nil) then begin
    if (aframe <> nil) and tframe1(aframe).needsmouseinvalidate then begin
-    widget.invalidaterect(inflaterect(dim,aframe.innerframe));
+    widget.invalidaterect(inflaterect(ca.dim,aframe.innerframe));
    end
    else begin
-    widget.invalidaterect(dim);
+    widget.invalidaterect(ca.dim);
    end;
   end;
  end;
@@ -429,7 +445,7 @@ begin
  result:= -1;
  for int1:= 0 to high(infoar) do begin
   with infoar[int1] do begin
-   if (state * rejectstates = []) and pointinrect(apos,dim) then begin
+   if (state * rejectstates = []) and pointinrect(apos,ca.dim) then begin
     result:= int1;
     break;
    end;
@@ -620,7 +636,7 @@ begin
  result:= false;
  with canvas,info do begin
   if ss_separator in state then begin
-   draw3dframe(canvas,dim,-1,defaultframecolors);
+   draw3dframe(canvas,ca.dim,-1,defaultframecolors);
   end
   else begin
    if ss_flat in state then begin
@@ -639,7 +655,7 @@ begin
      level:= -1;
     end;
    end;
-   clientrect:= dim;
+   clientrect:= ca.dim;
    if (state * [ss_focused,ss_showdefaultrect] = [ss_focused,ss_showdefaultrect]) or
           (state * [ss_disabled,ss_default] = [ss_default]) then begin
     canvas.drawframe(clientrect,-1,cl_black);
@@ -664,8 +680,81 @@ begin
  end;
 end;
 
+function adjustimagerect(const info: captioninfoty; var arect: rectty;
+                              out aalign: alignmentsty): rectty;
+var
+ pos: captionposty;
+ int1,int2: integer; 
+begin
+ result:= arect;
+ with info do begin
+  case captionpos of
+   cp_right,cp_rightcenter: begin
+    pos:= cp_left;
+   end;
+   cp_left,cp_leftcenter: begin
+    pos:= cp_right;
+   end;
+   cp_top,cp_topcenter: begin
+    pos:= cp_bottom;
+   end;
+   cp_bottom,cp_bottomcenter: begin
+    pos:= cp_top;
+   end
+   else begin
+    pos:= cp_center;
+   end;
+  end;
+  if not (pos in [cp_top,cp_bottom]) then begin
+   inc(result.y,imagedisttop + 
+    (result.cy - imagedisttop - imagedistbottom - imagelist.height) div 2);
+   result.cy:= imagelist.height;
+  end;
+  case pos of
+   cp_right: begin
+    aalign:= [al_right{,al_ycentered}];
+    dec(result.cx,imagedist);
+   end;
+   cp_left: begin
+    aalign:= [{al_ycentered}];
+    inc(result.x,imagedist);
+    dec(result.cx,imagedist);
+   end;
+   cp_bottom: begin
+    aalign:= [al_xcentered,al_bottom];
+    dec(result.cy,imagedist+imagedistbottom);
+   end;
+   cp_top: begin
+    aalign:= [al_xcentered];
+    inc(result.y,imagedist+imagedistbottom);
+   end;
+   else begin
+    aalign:= [al_xcentered{,al_ycentered}];
+   end;
+  end;
+  int1:= imagelist.width + imagedist;
+  int2:= imagelist.height + imagedist;
+  case pos of
+   cp_right: begin
+    dec(arect.cx,int1);
+   end;
+   cp_left: begin
+    inc(arect.x,int1);
+    dec(arect.cx,int1);
+   end;
+   cp_top: begin
+    inc(arect.y,int2);
+    dec(arect.cy,int2);
+   end;
+   cp_bottom: begin
+    dec(arect.cy,int2);
+   end;
+  end;
+ end;
+end;
+
 function drawbuttonimage(const canvas: tcanvas; const info: shapeinfoty;
-              var arect: rectty; const pos: captionposty): boolean;
+              var arect: rectty): boolean;
 var
  align1: alignmentsty;
  rect1: rectty;
@@ -673,57 +762,31 @@ var
  reg1: regionty;
 begin
  with canvas,info do begin
-  if (imagelist <> nil) then begin
+  if (ca.imagelist <> nil) then begin
    reg1:= canvas.copyclipregion;
    canvas.intersectcliprect(arect);
    result:= true;
-   rect1:= arect;
-   if not (pos in [cp_top,cp_bottom]) then begin
-    inc(rect1.y,imagedisttop + 
-     (rect1.cy - imagedisttop - imagedistbottom - imagelist.height) div 2);
-    rect1.cy:= imagelist.height;
-   end;
-   case pos of
-    cp_right: begin
-     align1:= [al_right{,al_ycentered}];
-     dec(rect1.cx,imagedist);
-    end;
-    cp_left: begin
-     align1:= [{al_ycentered}];
-     inc(rect1.x,imagedist);
-     dec(rect1.cx,imagedist);
-    end;
-    cp_bottom: begin
-     align1:= [al_xcentered,al_bottom];
-     dec(rect1.cy,imagedist+imagedistbottom);
-    end;
-    cp_top: begin
-     align1:= [al_xcentered];
-     inc(rect1.y,imagedist+imagedistbottom);
-    end;
-    else begin
-     align1:= [al_xcentered{,al_ycentered}];
-    end;
-   end;
+   rect1:= adjustimagerect(info.ca,arect,align1);
    if ss_disabled in state then begin
     int1:= imagenrdisabled;
     if int1 = -2 then begin
-     int1:= imagenr;
+     int1:= ca.imagenr;
      include(align1,al_grayed);
     end;
    end
    else begin
-    int1:= imagenr;
+    int1:= ca.imagenr;
    end;
    if (ss_checked in state) and (int1 >= 0) then begin
     inc(int1,imagecheckedoffset);
    end;
-   if colorglyph <> cl_none then begin
-    imagelist.paint(canvas,int1,rect1,align1,colorglyph);
+   if ca.colorglyph <> cl_none then begin
+    ca.imagelist.paint(canvas,int1,rect1,align1,ca.colorglyph);
    end;
    canvas.clipregion:= reg1;
-   int1:= imagelist.width + imagedist;
-   int2:= imagelist.height + imagedist;
+   {
+   int1:= ca.imagelist.width + ca.imagedist;
+   int2:= ca.imagelist.height + ca.imagedist;
    case pos of
     cp_right: begin
      dec(arect.cx,int1);
@@ -740,6 +803,7 @@ begin
      dec(arect.cy,int2);
     end;
    end;
+   }
   end
   else begin
    result:= false;
@@ -756,30 +820,30 @@ var
 begin
  with canvas,info do begin
   tab1:= nil;
-  if caption.text <> '' then begin
+  if ca.caption.text <> '' then begin
    rect1:= arect;
    case pos of
     cp_left,cp_leftcenter: begin
      textflags:= [tf_ycentered,tf_clipi];
-     inc(rect1.x,captiondist);
-     dec(rect1.cx,captiondist);
-     if countchars(caption.text,msechar(c_tab)) = 1 then begin
+     inc(rect1.x,ca.captiondist);
+     dec(rect1.cx,ca.captiondist);
+     if countchars(ca.caption.text,msechar(c_tab)) = 1 then begin
       tab1:= buttontab;
       tab1[0].pos:= info.tabpos / defaultppmm;
      end;
     end;
     cp_right,cp_rightcenter: begin
      textflags:= [tf_ycentered,tf_right,tf_clipi];
-     dec(rect1.cx,captiondist);
+     dec(rect1.cx,ca.captiondist);
     end;
     cp_top,cp_topcenter: begin
      textflags:= [tf_xcentered,tf_clipi];
-     inc(rect1.y,captiondist);
-     dec(rect1.cy,captiondist);
+     inc(rect1.y,ca.captiondist);
+     dec(rect1.cy,ca.captiondist);
     end;
     cp_bottom,cp_bottomcenter: begin
      textflags:= [tf_xcentered,tf_bottom,tf_clipi];
-     dec(rect1.cy,captiondist);
+     dec(rect1.cy,ca.captiondist);
     end;
     else begin
      textflags:= [tf_ycentered,tf_xcentered,tf_clipi];
@@ -801,49 +865,34 @@ begin
    if outerrect <> nil then begin
     exclude(textflags,tf_clipi);
     include(textflags,tf_clipo);
-    drawtext(canvas,caption,rect1,outerrect^,textflags,font,tab1);
+    drawtext(canvas,ca.caption,rect1,outerrect^,textflags,font,tab1);
    end
    else begin
-    drawtext(canvas,caption,rect1,arect,textflags,font,tab1);
+    drawtext(canvas,ca.caption,rect1,arect,textflags,font,tab1);
    end;
   end;
  end;
 end;
-
+ 
 procedure drawbutton(const canvas: tcanvas; const info: shapeinfoty);
 var
  rect1,rect2: rectty;
  pos: captionposty;
 begin
- if not (ss_invisible in info.state) and drawbuttonframe(canvas,info,rect1) then begin
+ if not (ss_invisible in info.state) and 
+                        drawbuttonframe(canvas,info,rect1) then begin
   rect2:= rect1;
-  case info.captionpos of
-   cp_right,cp_rightcenter: begin
-    pos:= cp_left;
-   end;
-   cp_left,cp_leftcenter: begin
-    pos:= cp_right;
-   end;
-   cp_top,cp_topcenter: begin
-    pos:= cp_bottom;
-   end;
-   cp_bottom,cp_bottomcenter: begin
-    pos:= cp_top;
-   end
-   else begin
-    pos:= cp_center;
-   end;
-  end;
-  drawbuttonimage(canvas,info,rect1,pos);
+  drawbuttonimage(canvas,info,rect1);
   with canvas,info do begin
    if state * [ss_focused,ss_showfocusrect] = [ss_focused,ss_showfocusrect] then begin
     drawfocusrect(canvas,inflaterect(rect2,-focusrectdist));
    end;
-   if imagelist = nil then begin
-    pos:= captionpos;
+   {
+   if ca.imagelist = nil then begin
+    pos:= ca.captionpos;
    end
    else begin
-    case info.captionpos of
+    case info.ca.captionpos of
      cp_rightcenter: begin
       pos:= cp_leftcenter;
      end;
@@ -858,17 +907,53 @@ begin
      end;
     end;
    end;
-   drawbuttoncaption(canvas,info,rect1,pos,nil);
+   }
+   drawbuttoncaption(canvas,info,rect1,
+                           swapcaptionpos[info.ca.captionpos],nil);
   end;
  end;
 end;
 
-procedure drawtoolbutton(const canvas: tcanvas; const info: shapeinfoty);
+procedure drawcaption(const acanvas: tcanvas; const ainfo: captioninfoty);
+var
+ rect1,rect2: rectty;
+ align1: alignmentsty;
+begin
+ with ainfo do begin
+  rect2:= ainfo.dim;
+  if ainfo.imagelist <> nil then begin
+   rect1:= adjustimagerect(ainfo,rect2,align1);
+   if colorglyph <> cl_none then begin
+    imagelist.paint(acanvas,imagenr,rect1,align1,colorglyph);
+   end;
+  end;
+  case captionpos of
+   cp_right,cp_rightcenter: begin
+    inc(rect2.x,captiondist);
+    dec(rect2.cx,captiondist);
+   end;
+   cp_left,cp_leftcenter: begin
+    dec(rect2.cx,captiondist);
+   end;
+   cp_bottom,cp_bottomcenter: begin
+    inc(rect2.y,captiondist);
+    dec(rect2.cy,captiondist);
+   end;
+   cp_top,cp_topcenter: begin
+    dec(rect2.cy,captiondist);
+   end;
+  end;
+  drawtext(acanvas,caption,rect2,textflags,font);
+ end;
+end;
+
+procedure drawtoolbutton(const canvas: tcanvas; var info: shapeinfoty);
 var
  rect1: rectty;
 begin
  if not (ss_invisible in info.state) and drawbuttonframe(canvas,info,rect1) then begin
-  drawbuttonimage(canvas,info,rect1,cp_center);
+  info.ca.captionpos:= cp_center;
+  drawbuttonimage(canvas,info,rect1{,cp_center});
  end;
 end;
 
@@ -904,7 +989,7 @@ begin
    else begin
     int1:= ord(stg_checked);
    end;
-   stockobjects.glyphs.paint(canvas,int1,rect1,align1,info.colorglyph);
+   stockobjects.glyphs.paint(canvas,int1,rect1,align1,info.ca.colorglyph);
   end;
  end;
 end;
@@ -937,17 +1022,19 @@ begin
   cy:= rect.cy;
  end;
  stockobjects.glyphs.paint(canvas,ord(glyph1),rect1,alignment,
-                                 info.colorglyph);
+                                 info.ca.colorglyph);
  dec(rect.cx,int1);
 end;
 
-procedure drawmenubutton(const canvas: tcanvas; const info: shapeinfoty;
+procedure drawmenubutton(const canvas: tcanvas; var info: shapeinfoty;
                   const innerframe: pframety = nil);
 var
  rect1: rectty;
 begin
- if not (ss_invisible in info.state) and drawbuttonframe(canvas,info,rect1) then begin
-  drawbuttonimage(canvas,info,rect1,cp_left);
+ if not (ss_invisible in info.state) and 
+              drawbuttonframe(canvas,info,rect1) then begin
+  info.ca.captionpos:= cp_right;
+  drawbuttonimage(canvas,info,rect1{,cp_left});
   if (ss_menuarrow in info.state) then begin
 //  if (ss_submenu in info.state)  then begin
    drawmenuarrow(canvas,info,rect1);
@@ -971,7 +1058,7 @@ begin
  with canvas,info do begin
   if not (ss_invisible in state) and 
                       drawbuttonframe(canvas,info,rect1) then begin
-   if captionpos = cp_left then begin
+   if ca.captionpos = cp_left then begin
     pos1:= cp_right;
     pos2:= cp_left;
    end
@@ -979,7 +1066,7 @@ begin
     pos1:= cp_left;
     pos2:= cp_right;
    end;
-   drawbuttonimage(canvas,info,rect1,pos1);
+   drawbuttonimage(canvas,info,rect1{,pos1});
    drawbuttoncheckbox(canvas,info,rect1,pos2);
    rect2:= rect1; //outerframe
    if innerframe <> nil then begin
@@ -1000,21 +1087,23 @@ begin
   end;
   if ss_vert in state then begin
    if ss_opposite in state then begin
-    int1:= dim.x;
+    int1:= ca.dim.x;
    end
    else begin
-    int1:= dim.x+dim.cx-1;
+    int1:= ca.dim.x+ca.dim.cx-1;
    end;
-   canvas.drawline(makepoint(int1,dim.y),makepoint(int1,dim.y+dim.cy-1),color1);
+   canvas.drawline(makepoint(int1,ca.dim.y),
+                       makepoint(int1,ca.dim.y+ca.dim.cy-1),color1);
   end
   else begin
    if ss_opposite in state then begin
-    int1:= dim.y;
+    int1:= ca.dim.y;
    end
    else begin
-    int1:= dim.y+dim.cy-1;
+    int1:= ca.dim.y+ca.dim.cy-1;
    end;
-   canvas.drawline(makepoint(dim.x,int1),makepoint(dim.x+dim.cx-1,int1),color1);
+   canvas.drawline(makepoint(ca.dim.x,int1),
+                        makepoint(ca.dim.x+ca.dim.cx-1,int1),color1);
   end;
  end;
 end;

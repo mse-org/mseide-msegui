@@ -1668,7 +1668,7 @@ end;
 constructor tdropdownbutton.create(aowner: tobject);
 begin
  inherited;
- finfo.imagenr:= ord(stg_arrowdownsmall);
+ finfo.ca.imagenr:= ord(stg_arrowdownsmall);
 end;
 
 end.
