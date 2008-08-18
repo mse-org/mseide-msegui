@@ -3584,6 +3584,7 @@ begin
   vk_separator: result:= key_comma;
   vk_subtract: result:= key_minus;
   vk_decimal: result:= key_period;
+  vk_multiply: result:= key_multiply;
   vk_divide: result:= key_slash;
   vk_f1..vk_f24: result:= keyty(cardinal(key_f1) + key - vk_f1);
   vk_numlock: result:= key_numlock;

@@ -3216,7 +3216,7 @@ end;
 
 procedure tcolheader.setimagelist(const avalue: timagelist);
 begin
- setlinkedvar(avalue,finfo.imagelist);
+ setlinkedvar(avalue,tmsecomponent(finfo.imagelist));
  changed;
 end;
 
