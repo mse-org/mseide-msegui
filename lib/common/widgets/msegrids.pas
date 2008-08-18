@@ -1558,7 +1558,8 @@ end;
    procedure firstrow(const action: focuscellactionty = fca_focusin); virtual;
 
    procedure colstep(const action: focuscellactionty; step: integer;
-                          const rowchange: boolean); virtual;
+                           const rowchange: boolean;
+                           const nocolrotate: boolean); virtual;
                  //step > 0 -> right, step < 0 left
 
    function isdatacell(const coord: gridcoordty): boolean;
@@ -4729,7 +4730,7 @@ begin
  end;
  if (co_disabled in optionsplusdelta) and 
                               (fgrid.ffocusedcell.col = colindex) then begin
-  fgrid.colstep(fca_focusin,1,false);
+  fgrid.colstep(fca_focusin,1,false,false);
  end;
 end;
 
@@ -9301,7 +9302,7 @@ begin
 end;
 
 procedure tcustomgrid.colstep(const action: focuscellactionty; step: integer;
-                 const rowchange: boolean);
+                 const rowchange: boolean; const nocolrotate: boolean);
 var
  int1: integer;
  arow: integer;
@@ -9336,6 +9337,9 @@ begin
    if step > 0 then begin
     inc(int1);
     if int1 >= fdatacols.count then begin
+     if nocolrotate then begin
+      exit;
+     end;
      int1:= 0;
      if rowchange then begin
       inc(arow);
@@ -9348,6 +9352,9 @@ begin
    else begin
     dec(int1);
     if int1 < 0 then begin
+     if nocolrotate then begin
+      exit;
+     end;
      int1:=  fdatacols.count - 1;
      if rowchange then begin
       dec(arow);
@@ -9360,85 +9367,23 @@ begin
   until int1 = ffocusedcell.col; //none found
  end;
 end;
-{
-procedure tcustomgrid.colleft(action: focuscellactionty);
-var
- int1: integer;
-begin
- if ffocusedcell.col > 0 then begin
-  int1:= ffocusedcell.col - 1;
- end
- else begin
-  int1:= fdatacols.count - 1;
- end;
- if int1 >= 0 then begin
-  focuscell(makegridcoord(int1,ffocusedcell.row),action);
- end;
-end;
 
-procedure tcustomgrid.colright(action: focuscellactionty);
-var
- int1: integer;
-begin
- if ffocusedcell.col < fdatacols.count - 1 then begin
-  int1:= ffocusedcell.col + 1;
- end
- else begin
-  int1:= 0;
- end;
- if int1 < fdatacols.count then begin
-  focuscell(makegridcoord(int1,ffocusedcell.row),action);
- end;
-end;
-}
 procedure tcustomgrid.domousewheelevent(var info: mousewheeleventinfoty);
 begin
  frame.domousewheelevent(info);
  inherited;
 end;
 
-{
-procedure tcustomgrid.domousewheelevent(var info: mousewheeleventinfoty);
-var
- action: focuscellactionty;
-begin
- with info do begin
-  if not (es_processed in eventstate) then begin
-   if ss_shift in shiftstate then begin
-    action:= fca_focusinshift;
-   end
-   else begin
-    action:= fca_focusin;
-   end;
-   include(eventstate,es_processed);
-   case wheel of
-    mw_up: begin
-     if gs_isdb in fstate then begin
-      pageup(action);
-     end
-     else begin
-      scrollrows(rowsperpage-1);
-     end;
-    end;
-    mw_down: begin
-     if gs_isdb in fstate then begin
-      pagedown(action);
-     end
-     else begin
-      scrollrows(-rowsperpage+1);
-     end;
-    end;
-   end;
-  end;
- end;
-end;
-}
 procedure tcustomgrid.dokeydown(var info: keyeventinfoty);
 var
  action: focuscellactionty;
  focusbefore: gridcoordty;
  mo1: cellselectmodety;
  celleventinfo: celleventinfoty;
+ cellbefore: gridcoordty;
+ bo1: boolean;
+label
+ checkwidgetexit;
 begin
  if canevent(tmethod(fonkeydown)) then begin
   fonkeydown(self,info);
@@ -9454,6 +9399,9 @@ begin
     docellevent(celleventinfo);
    end;
   end;
+  cellbefore:= focusedcell;
+  bo1:= (ow_arrowfocusout in optionswidget) and (info.shiftstate = []);
+                //exit widget
   if info.shiftstate - [ss_shift,ss_ctrl] = [] then begin
    if not (es_processed in info.eventstate) then begin
     if ss_shift in info.shiftstate then begin
@@ -9480,6 +9428,7 @@ begin
       end
       else begin
        rowup(action);
+       goto checkwidgetexit;
       end;
      end;
      key_down: begin
@@ -9497,6 +9446,7 @@ begin
       end
       else begin
        rowdown(action);
+       goto checkwidgetexit;
       end;
      end;
      key_pageup: begin
@@ -9537,7 +9487,7 @@ begin
      key_return,key_enter: begin
       if (og_colchangeonreturnkey in foptionsgrid) and 
                  (info.shiftstate = []) then begin
-       colstep(fca_focusin,1,true);
+       colstep(fca_focusin,1,true,false);
       end
       else begin
        exclude(info.eventstate,es_processed);
@@ -9553,10 +9503,10 @@ begin
         if docheckcellvalue then begin
          action:= fca_focusin;
          if info.shiftstate = [ss_shift] then begin
-          colstep(action,-1,true);
+          colstep(action,-1,true,false);
          end
          else begin
-          colstep(action,1,true);
+          colstep(action,1,true,false);
          end;
         end;
        end
@@ -9578,7 +9528,8 @@ begin
        exit;
       end
       else begin
-       colstep(action,-1,false);
+       colstep(action,-1,false,bo1);
+       goto checkwidgetexit;
       end;
      end;
      key_right: begin
@@ -9594,7 +9545,8 @@ begin
        exit;
       end
       else begin
-       colstep(action,1,false);
+       colstep(action,1,false,bo1);
+       goto checkwidgetexit;
       end;
      end;
      else begin
@@ -9668,6 +9620,15 @@ begin
   end;
   if not (es_processed in info.eventstate) then begin
    inherited;
+  end;
+ end;
+ exit;
+ 
+checkwidgetexit:
+ if bo1 and  (row = cellbefore.row) and (col = cellbefore.col) then begin
+  exclude(info.eventstate,es_processed);
+  if es_child in info.eventstate then begin
+   dokeydownaftershortcut(info);
   end;
  end;
 end;
@@ -10300,7 +10261,7 @@ begin
    if gs_scrollleft in fstate then begin
     if bo1 then begin
      if ffocusedcell.col > 0 then begin
-      colstep(frepeataction,-1,false);
+      colstep(frepeataction,-1,false,false);
      end;
     end
     else begin
@@ -10311,7 +10272,7 @@ begin
     if gs_scrollright in fstate then begin
      if bo1 then begin
       if ffocusedcell.col < fdatacols.count - 1 then begin
-       colstep(frepeataction,1,false);
+       colstep(frepeataction,1,false,false);
       end;
      end
      else begin
@@ -11755,7 +11716,7 @@ begin
      end;
      if bo1 and (og_colchangeonreturnkey in fgrid.optionsgrid) then begin
       info.action:= ea_none;
-      fgrid.colstep(fca_focusin,1,true);
+      fgrid.colstep(fca_focusin,1,true,false);
      end;
     end;
     ea_undo: begin
