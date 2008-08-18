@@ -40,40 +40,47 @@ object msepopupcalendarfo: tpopupcalendarfo
     anchors = [an_left, an_top, an_right]
     taborder = 6
     datacols.count = 7
+    datacols.coloractive = -1879048185
     datacols.width = 32
     datacols.options = [co_readonly, co_drawfocus, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
     datacols.items = <    
       item
+        coloractive = -1879048185
         width = 32
         options = [co_readonly, co_drawfocus, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         focusrectdist = 1
         ondrawcell = drawcell
       end    
       item
+        coloractive = -1879048185
         width = 32
         options = [co_readonly, co_drawfocus, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         focusrectdist = 1
         ondrawcell = drawcell
       end    
       item
+        coloractive = -1879048185
         width = 32
         options = [co_readonly, co_drawfocus, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         focusrectdist = 1
         ondrawcell = drawcell
       end    
       item
+        coloractive = -1879048185
         width = 32
         options = [co_readonly, co_drawfocus, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         focusrectdist = 1
         ondrawcell = drawcell
       end    
       item
+        coloractive = -1879048185
         width = 32
         options = [co_readonly, co_drawfocus, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         focusrectdist = 1
         ondrawcell = drawcell
       end    
       item
+        coloractive = -1879048185
         width = 32
         options = [co_readonly, co_drawfocus, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         focusrectdist = 1
@@ -81,13 +88,14 @@ object msepopupcalendarfo: tpopupcalendarfo
       end    
       item
         linewidth = 0
+        coloractive = -1879048185
         width = 32
         options = [co_readonly, co_drawfocus, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         focusrectdist = 1
         ondrawcell = drawcell
         font.color = -1610612729
         font.name = 'stf_default'
-        font.xscale = 1.00000000000000000
+        font.xscale =  1.0000000000000000E+0000
         font.dummy = 0
       end>
     fixrows.count = 1
@@ -115,7 +123,7 @@ object msepopupcalendarfo: tpopupcalendarfo
     gridframecolor = -2147483645
     datarowheight = 21
     oncellevent = cellevent
-    reffontheight = 14
+    reffontheight = 15
   end
   object monthdisp: tdatetimedisp
     optionswidget = [ow_mousewheel, ow_destroywidgets, ow_fontglyphheight]
@@ -127,7 +135,7 @@ object msepopupcalendarfo: tpopupcalendarfo
     taborder = 5
     textflags = [tf_xcentered, tf_right, tf_ycentered]
     format = 'mmmm'
-    reffontheight = 14
+    reffontheight = 15
   end
   object yeardisp: tdatetimedisp
     optionswidget = [ow_mousewheel, ow_destroywidgets, ow_fontglyphheight]
@@ -139,7 +147,7 @@ object msepopupcalendarfo: tpopupcalendarfo
     taborder = 4
     textflags = [tf_xcentered, tf_right, tf_ycentered]
     format = 'yyyy'
-    reffontheight = 14
+    reffontheight = 15
   end
   object tstockglyphbutton1: tstockglyphbutton
     optionswidget = [ow_mousewheel, ow_destroywidgets, ow_autoscale]
