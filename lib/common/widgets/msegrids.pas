@@ -8042,7 +8042,8 @@ begin
    po1:= cellrect(cellinfo.cell).pos;
    try
     subpoint1(info.pos,po1);
-    if (eventkind = cek_buttonrelease) and (cell.row < 0) then begin
+    if (eventkind = cek_buttonrelease) and (cell.row < 0) and 
+                                  (cell.row <> invalidaxis) then begin
      fixrows[cell.row].buttoncellevent(cellinfopo^);
      if es_processed in mouseeventinfopo^.eventstate then begin
       docellevent(cellinfopo^);
