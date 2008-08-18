@@ -2149,6 +2149,7 @@ procedure tcustommemoedit.dokeydown(var info: keyeventinfoty);
 var
  int1,int2: integer;
  rect1: rectty;
+ indexbefore: integer;
 begin
  if not (es_processed in info.eventstate) then begin
   if info.shiftstate - [ss_shift] = [] then begin
@@ -2182,6 +2183,7 @@ begin
      if int1 >= rect1.y + rect1.cy then begin
       int1:= rect1.y + rect1.cy - 1;
      end;
+     indexbefore:= curindex;
      moveindex(mousepostotextindex(makepoint(fxpos,int1)),
                       ss_shift in info.shiftstate);
      if ss_shift in info.shiftstate then begin
@@ -2189,6 +2191,11 @@ begin
      end;
      if fxpos < int2 then begin
       fxpos:= int2;
+     end;
+     if (oe_exitoncursor in foptionsedit) and (indexbefore = curindex) and
+             (info.shiftstate = []) and
+             ((info.key = key_down) or (info.key = key_up)) then begin
+      exclude(info.eventstate,es_processed);
      end;
     end;
    end;
