@@ -886,7 +886,8 @@ type
 
  widgetalignmodety = (wam_none,wam_start,wam_center,wam_end);
  widgetclassty = class of twidget;
- 
+ navigrequesteventty = procedure(const sender: twidget;
+                                var ainfo: naviginfoty) of object; 
  twidget = class(tactcomponent,iscrollframe,iface)
   private
    fwidgetregion: regionty;
@@ -900,6 +901,7 @@ type
    fsetwidgetrectcount: integer; //for recursive setpos
 
    foptionsskin: optionsskinty;
+   fonnavigrequest: navigrequesteventty;
    procedure invalidateparentminclientsize;
    function minclientsize: sizety;
    function getwidgets(const index: integer): twidget;
@@ -1025,12 +1027,6 @@ type
    function getcomponentstate: tcomponentstate;
 
    function getframestateflags: framestateflagsty; virtual;
-{   
-   function getframedisabled: boolean; virtual;
-   function getframeclicked: boolean; virtual;
-   function getframemouse: boolean; virtual;
-   function getframeactive: boolean; virtual;
-}  
    //igridcomp,itabwidget
    function getwidget: twidget;
 
@@ -1463,6 +1459,8 @@ type
    property hint: msestring read gethint write sethint stored ishintstored;
    property zorder: integer read getzorder write setzorder;
   published
+   property onnavigrequest: navigrequesteventty read fonnavigrequest
+                                                   write fonnavigrequest;
    property onbeforeupdateskin;
    property onafterupdateskin;
  end;
@@ -8336,6 +8334,9 @@ begin
     end;
    end;
   end;
+ end;
+ if canevent(tmethod(fonnavigrequest)) then begin
+  fonnavigrequest(self,info);
  end;
 end;
 
