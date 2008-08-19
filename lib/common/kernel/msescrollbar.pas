@@ -1310,27 +1310,7 @@ begin
        ss_mouse in state, ss_clicked in state); 
  end;
 end;
-{
-function tcustomscrollbar.getframeclicked: boolean;
-begin
- result:= ss_clicked in fdrawinfo.areas[fpaintedbutton].state; 
-end;
 
-function tcustomscrollbar.getframemouse: boolean;
-begin
- result:= ss_mouse in fdrawinfo.areas[fpaintedbutton].state;
-end;
-
-function tcustomscrollbar.getframeactive: boolean;
-begin
- result:= fintf.getwidget.active;
-end;
-
-function tcustomscrollbar.getframedisabled: boolean;
-begin
- result:= not fintf.getwidget.isenabled;
-end;
-}
 procedure tcustomscrollbar.activechanged;
 begin
  if (fframeendbutton1 <> nil) or (fframebutton <> nil) or 

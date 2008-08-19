@@ -2209,7 +2209,7 @@ end;
 procedure tcustommemoedit.domousewheelevent(var info: mousewheeleventinfoty);
 begin
  if fframe <> nil then begin
-  frame.domousewheelevent(info);
+  frame.domousewheelevent(info,false);
  end;
  inherited;
 end;

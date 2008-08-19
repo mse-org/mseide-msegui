@@ -7254,15 +7254,13 @@ end;
 
 function tcustomgrid.wheelheight: integer;
 begin
- result:= rowsperpage-1;
- if fwheelscrollheight >= 0 then begin
-  if fwheelscrollheight = 0 then begin
-   result:= application.mousewheelacceleration(1);
-  end
-  else begin
-   if fwheelscrollheight < result then begin
-    result:= fwheelscrollheight;
-   end;
+ if fwheelscrollheight <= 0 then begin
+  result:= application.mousewheelacceleration(1);
+ end
+ else begin
+  result:= rowsperpage - 1;
+  if fwheelscrollheight < result then begin
+   result:= fwheelscrollheight;
   end;
  end;
 end;
@@ -9379,7 +9377,7 @@ end;
 
 procedure tcustomgrid.domousewheelevent(var info: mousewheeleventinfoty);
 begin
- frame.domousewheelevent(info);
+ frame.domousewheelevent(info,fwheelscrollheight = -1);
  inherited;
 end;
 

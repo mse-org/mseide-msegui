@@ -209,7 +209,8 @@ type
    procedure updatemousestate(const sender: twidget; const apos: pointty); override;
    procedure paintoverlay(const canvas: tcanvas; const arect: rectty); override;
    procedure mouseevent(var info: mouseeventinfoty); virtual;
-   procedure domousewheelevent(var info: mousewheeleventinfoty); virtual;
+   procedure domousewheelevent(var info: mousewheeleventinfoty;
+                                   const pagingreversed: boolean); virtual;
    property state: framestatesty read fstate;
    property sbhorz: tcustomscrollbar read getsbhorz write setsbhorz;
    property sbvert: tcustomscrollbar read getsbvert write setsbvert;
@@ -2377,7 +2378,8 @@ begin
  end;
 end;
 
-procedure tcustomscrollframe.domousewheelevent(var info: mousewheeleventinfoty);
+procedure tcustomscrollframe.domousewheelevent(var info: mousewheeleventinfoty;
+                                const pagingreversed: boolean);
 var
  scrollbar: tcustomscrollbar;
 begin
@@ -2398,7 +2400,7 @@ begin
     include(eventstate,es_processed);
     case wheel of
      mw_up: begin
-      if ss_ctrl in info.shiftstate then begin
+      if (ss_ctrl in info.shiftstate) xor pagingreversed then begin
        scrollbar.pagedown;
       end
       else begin
@@ -2406,7 +2408,7 @@ begin
       end;
      end;
      mw_down: begin
-      if ss_ctrl in info.shiftstate then begin
+      if (ss_ctrl in info.shiftstate) xor pagingreversed then begin
        scrollbar.pageup;
       end
       else begin
@@ -4060,7 +4062,7 @@ end;
 
 procedure tscrollingwidget.domousewheelevent(var info: mousewheeleventinfoty);
 begin
- tscrollframe(fframe).domousewheelevent(info);
+ tscrollframe(fframe).domousewheelevent(info,false);
  inherited;
 end;
 

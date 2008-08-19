@@ -1508,7 +1508,7 @@ end;
 
 procedure tscrollbox.domousewheelevent(var info: mousewheeleventinfoty);
 begin
- tscrollframe(fframe).domousewheelevent(info);
+ tscrollframe(fframe).domousewheelevent(info,false);
  inherited;
 end;
 
