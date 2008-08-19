@@ -1757,7 +1757,9 @@ type
    fmousewheelfrequmax: real;
    fmousewheeldeltamin: real;
    fmousewheeldeltamax: real;
+   fmousewheelaccelerationmax: real;
    flastmousewheeltimestamp: cardinal;
+   flastmousewheeltimestampbefore: cardinal;
 
    procedure invalidated;
    function grabpointer(const aid: winidty): boolean;
@@ -1899,7 +1901,9 @@ type
    procedure delayedmouseshift(const ashift: pointty);
    procedure calcmousewheeldelta(var info: mousewheeleventinfoty;
                const fmin,fmax,deltamin,deltamax: real);  
-
+   function mousewheelacceleration(const avalue: real): real; overload;
+   function mousewheelacceleration(const avalue: integer): integer; overload;
+   
    property lastshiftstate: shiftstatesty read flastshiftstate;
    property lastkey: keyty read flastkey;
    property lastbutton: mousebuttonty read flastbutton;
@@ -1923,6 +1927,8 @@ type
    property mousewhweelfrequmax: real read fmousewheelfrequmax write fmousewheelfrequmax;
    property mousewhweeldeltamin: real read fmousewheeldeltamin write fmousewheeldeltamin;
    property mousewhweeldeltamax: real read fmousewheeldeltamax write fmousewheeldeltamax;
+   property mousewhweelaccelerationmax: real read fmousewheelaccelerationmax 
+                                  write fmousewheelaccelerationmax;
  end;
 
 function translatewidgetpoint(const point: pointty;
@@ -11922,6 +11928,7 @@ begin
      calcmousewheeldelta(info.wheel,fmousewheelfrequmin,fmousewheelfrequmax,
                          fmousewheeldeltamin,fmousewheeldeltamax);
      if ftimestamp <> 0 then begin
+      flastmousewheeltimestampbefore:= flastmousewheeltimestamp;
       flastmousewheeltimestamp:= ftimestamp;
      end;
     end
@@ -13061,6 +13068,7 @@ begin
  fmousewheelfrequmax:= 100;
  fmousewheeldeltamin:= 0.05;
  fmousewheeldeltamax:= 30;
+ fmousewheelaccelerationmax:= 30;
  inherited;
 end;
 
@@ -13972,36 +13980,24 @@ begin
   info.delta:= - info.delta;
  end;
 end;
-{
-procedure tguiapplication.calcmousewheeldelta(var info: mousewheeleventinfoty;
-               const fmin,fmax,deltamin,deltamax: real);  
+
+function tguiapplication.mousewheelacceleration(const avalue: real): real;
 var
- lndmin,lndmax: real;
- frequ: real;
+ info: mousewheeleventinfoty;
 begin
- if (flastmousewheeltimestamp <> 0) and 
-                  (flastmousewheeltimestamp <> info.timestamp) then begin
-  frequ:= 1000000/(info.timestamp-flastmousewheeltimestamp); //Hz
-  if frequ > fmax then begin
-   frequ:= fmax;
-  end;
-  if frequ < fmin then begin
-   frequ:= fmin;
-  end;
-  lndmin:= ln(deltamin);
-  lndmax:= ln(deltamax);
-  info.delta:= exp(
-                   ((lndmin-lndmax)*frequ+(lndmax*fmin - lndmin*fmax))/
-                                  (fmin-fmax));
- end
- else begin
-  info.delta:= deltamin;
- end;
- if info.wheel = mw_down then begin
-  info.delta:= - info.delta;
- end;
+ info.timestamp:= flastmousewheeltimestamp + flastmousewheeltimestamp -
+                     flastmousewheeltimestampbefore;
+ info.wheel:= mw_up;
+ calcmousewheeldelta(info,fmousewheelfrequmin,fmousewheelfrequmax,1,
+                      fmousewheelaccelerationmax);
+ result:= avalue * info.delta;
 end;
-}
+
+function tguiapplication.mousewheelacceleration(const avalue: integer): integer;
+begin
+ result:= round(mousewheelacceleration(real(avalue)));
+end;
+
 procedure tguiapplication.invalidate;
 var
  int1: integer;

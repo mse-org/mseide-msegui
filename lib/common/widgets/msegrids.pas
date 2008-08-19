@@ -55,6 +55,7 @@ const
  rowstatemask = $7f;
  defaultgridskinoptions = [osk_framebuttononly];
  sortglyphwidth = 11;
+ defaultwheelscrollheight = 0;
  
 type
  optiongridty = (og_colsizing,og_colmoving,og_keycolmoving,
@@ -1719,7 +1720,7 @@ end;
    property font: twidgetfont read getfont write setfont stored isfontstored;
    property onkeydown: keyeventty read fonkeydown write fonkeydown;
    property wheelscrollheight: integer read fwheelscrollheight write
-                    fwheelscrollheight;
+                    fwheelscrollheight default defaultwheelscrollheight;
  end;
 
  tcellgrid = class(tcustomgrid)
@@ -6553,6 +6554,7 @@ constructor tcustomgrid.create(aowner: tcomponent);
 begin
  include(fstate,gs_updatelocked);
  fmouseeventcol:= -1;
+ fwheelscrollheight:= defaultwheelscrollheight;
  frowcountmax:= bigint;
  frowcolors:= tcolorarrayprop.Create;
  frowfonts:= trowfontarrayprop.Create(self);
@@ -7253,8 +7255,15 @@ end;
 function tcustomgrid.wheelheight: integer;
 begin
  result:= rowsperpage-1;
- if (fwheelscrollheight > 0) and (fwheelscrollheight < result) then begin
-  result:= fwheelscrollheight;
+ if fwheelscrollheight >= 0 then begin
+  if fwheelscrollheight = 0 then begin
+   result:= application.mousewheelacceleration(1);
+  end
+  else begin
+   if fwheelscrollheight < result then begin
+    result:= fwheelscrollheight;
+   end;
+  end;
  end;
 end;
 

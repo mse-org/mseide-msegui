@@ -1056,7 +1056,7 @@ end;
 procedure tcustomscrollbar.wheeldown;
 begin
  if sbo_moveauto in foptions then begin
-  value:= fvalue - pagesize;
+  value:= fvalue - application.mousewheelacceleration(stepsize);
  end;
  fintf.scrollevent(self,sbe_wheeldown);
 end;
@@ -1064,7 +1064,7 @@ end;
 procedure tcustomscrollbar.wheelup;
 begin
  if sbo_moveauto in foptions then begin
-  value:= fvalue + pagesize;
+  value:= fvalue + application.mousewheelacceleration(stepsize);
  end;
  fintf.scrollevent(self,sbe_wheelup);
 end;

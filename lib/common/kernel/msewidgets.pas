@@ -2398,10 +2398,20 @@ begin
     include(eventstate,es_processed);
     case wheel of
      mw_up: begin
-      scrollbar.wheeldown;
+      if ss_ctrl in info.shiftstate then begin
+       scrollbar.pagedown;
+      end
+      else begin
+       scrollbar.wheeldown;
+      end;
      end;
      mw_down: begin
-      scrollbar.wheelup;
+      if ss_ctrl in info.shiftstate then begin
+       scrollbar.pageup;
+      end
+      else begin
+       scrollbar.wheelup;
+      end;
      end;
     end;
    end;
