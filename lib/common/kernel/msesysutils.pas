@@ -54,7 +54,7 @@ function laterorsame(ref,act: cardinal): boolean;
 
 procedure sleepus(const us: cardinal);
 procedure waitus(us: integer);
-function timestamp: cardinal; //us
+function timestamp: cardinal; //us, 0 never reported
 function timestep(us: cardinal): longword;   //bringt aktzeit + us
 function timeout(time: longword): boolean;
 
@@ -99,6 +99,9 @@ var
 begin
  gettimeofday(t1,ptimezone(nil));
  result:= t1.tv_sec * 1000000 + t1.tv_usec;
+ if result = 0 then begin
+  result:= 1;
+ end;
 end;
 
 procedure waitus(us: integer);
@@ -117,6 +120,9 @@ end;
 function timestamp: cardinal;
 begin
  result:= gettickcount * 1000;
+ if result = 0 then begin
+  result:= 1;
+ end;
 end;
 
 procedure waitperformancecounter(time: int64);

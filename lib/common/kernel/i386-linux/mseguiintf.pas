@@ -5198,7 +5198,10 @@ var
  bo1: boolean;
  rect1: rectty;
  aic: xic;
-   
+
+label
+ eventrestart;
+    
 begin
  while true do begin
   if gui_hasevent then begin
@@ -5286,7 +5289,9 @@ begin
  if not gui_hasevent then begin
   exit;
  end;
+
  xnextevent(appdisp,@xev);
+eventrestart:
  if longint(xfilterevent(@xev,none)) <> 0 then begin
   exit;
  end;
@@ -5442,17 +5447,25 @@ begin
     shiftstate1:= xtoshiftstate(state,key1,mb_none,false);
     key2:= getkeynomod(xev.xkey);
     result:= tkeyevent.create(xwindow,false,key1,key2,
-                                    shiftstate1,chars);
+                                    shiftstate1,chars,time*1000);
    end;
   end;
   keyrelease: begin
    with xev.xkey do begin
     lasteventtime:= time;
+    int1:= keycode;
     xlookupstring(@xev.xkey,nil,0,@akey,nil);
     key1:= xkeytokey(akey);
     key2:= getkeynomod(xev.xkey);
     shiftstate1:= xtoshiftstate(state,key1,mb_none,true);
-    result:= tkeyevent.create(xwindow,true,key1,key2,shiftstate1,'');
+    if xchecktypedevent(appdisp,keypress,@xev) then begin
+     if (time <> lasteventtime) or (keycode <> int1) then begin
+      result:= tkeyevent.create(xwindow,true,key1,key2,shiftstate1,'',time*1000);
+                  //no auto repeat key
+     end;
+     goto eventrestart; 
+    end;
+    result:= tkeyevent.create(xwindow,true,key1,key2,shiftstate1,'',time*1000);
    end;
   end;
   buttonpress,buttonrelease: begin

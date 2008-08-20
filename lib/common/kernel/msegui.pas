@@ -1676,7 +1676,7 @@ type
    fwheel: mousewheelty;
    fshiftstate: shiftstatesty;
    freflected: boolean;
-   property timestamp: cardinal read ftimestamp; //0 -> invalid
+   property timestamp: cardinal read ftimestamp; //usec, 0 -> invalid
    constructor create(const winid: winidty; const release: boolean;
                       const button: mousebuttonty; const wheel: mousewheelty;
                       const pos: pointty; const shiftstate: shiftstatesty;
@@ -1692,6 +1692,7 @@ type
  
  tkeyevent = class(twindowevent)
   private
+   ftimestamp: cardinal;
   public
    fkey: keyty;
    fkeynomod: keyty;
@@ -1700,7 +1701,8 @@ type
    fshiftstate: shiftstatesty;
    constructor create(const winid: winidty; const release: boolean;
                   const key,keynomod: keyty; const shiftstate: shiftstatesty;
-                  const chars: msestring);
+                  const chars: msestring; const atimestamp: cardinal);
+   property timestamp: cardinal read ftimestamp; //usec
  end;
 
  tresizeevent = class(tobjectevent)
@@ -11554,7 +11556,7 @@ procedure twindow.postkeyevent(const akey: keyty;
        const achars: msestring = '');
 begin
  application.postevent(tkeyevent.create(winid,release,akey,akey,
-             ashiftstate,achars));
+             ashiftstate,achars,timestamp));
 end;
 
 procedure twindow.beginmoving;
@@ -11697,7 +11699,7 @@ end;
 
 constructor tkeyevent.create(const winid: winidty; const release: boolean;
                   const key,keynomod: keyty; const shiftstate: shiftstatesty;
-                  const chars: msestring);
+                  const chars: msestring; const atimestamp: cardinal);
 var
  eventkind1: eventkindty;
 begin
@@ -11712,6 +11714,7 @@ begin
  fkey:= key;
  fchars:= chars;
  fshiftstate:= shiftstate;
+ ftimestamp:= atimestamp;
 end;
 
 { tinternalapplication }
@@ -12112,6 +12115,7 @@ begin
    fillchar(info,sizeof(info),0);
    with info do begin
     eventkind:= fkind;
+    timestamp:= event.timestamp;
     key:= fkey;
     keynomod:= fkeynomod;
     case key of

@@ -1708,7 +1708,7 @@ object projectoptionsfo: tprojectoptionsfo
         object tlayouter6: tlayouter
           bounds_x = 0
           bounds_y = 104
-          bounds_cx = 664
+          bounds_cx = 614
           bounds_cy = 39
           frame.framei_left = 1
           frame.framei_right = 3
@@ -1727,7 +1727,7 @@ object projectoptionsfo: tprojectoptionsfo
             optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
             bounds_x = 1
             bounds_y = 0
-            bounds_cx = 660
+            bounds_cx = 610
             bounds_cy = 39
             frame.caption = 'Debug &target (empty = make targetfile)'
             frame.captionoffset = 3
@@ -1962,7 +1962,7 @@ object projectoptionsfo: tprojectoptionsfo
           value = True
         end
         object checkmethods: tbooleanedit
-          bounds_x = 258
+          bounds_x = 257
           bounds_y = 134
           bounds_cx = 162
           bounds_cy = 17

@@ -79,6 +79,7 @@ type
   chars: msestring;
   shiftstate: shiftstatesty;
   eventstate: eventstatesty;
+  timestamp: cardinal; //usec
  end;
  pkeyeventinfoty = ^keyeventinfoty;
 

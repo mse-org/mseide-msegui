@@ -3929,7 +3929,7 @@ begin
     charbuffer:= charbuffer + ucs4tostring(wparam);
    end;
    eventlist.add(tkeyevent.create(ahwnd,false,key_none,key_none,shiftstate,
-                                    charbuffer));
+                                    charbuffer,timestamp));
    charbuffer:= '';
   end;
   wm_close: begin
@@ -4077,7 +4077,7 @@ begin
     escapepressed:= true;
    end;
    eventlist.add(tkeyevent.create(ahwnd,false,key1,key1,shiftstate,
-                                    charbuffer));
+                                    charbuffer,timestamp));
    charbuffer:= '';
 //   result:= 0;  //evaluaze alt F4
 //   exit;
@@ -4087,10 +4087,10 @@ begin
    key1:= winkeytokey(wparam,shiftstate);
    if charbuffer <> '' then begin
     eventlist.add(tkeyevent.create(ahwnd,false,key_none,key_none,shiftstate,
-                                    charbuffer));
+                                    charbuffer,timestamp));
     charbuffer:= '';
    end;
-   eventlist.add(tkeyevent.create(ahwnd,true,key1,key1,shiftstate,''));
+   eventlist.add(tkeyevent.create(ahwnd,true,key1,key1,shiftstate,'',timestamp));
   end;
  end;
  if iswin95 then begin
