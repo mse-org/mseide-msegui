@@ -1447,7 +1447,7 @@ begin
    end;
    int3:= rect1.y+rect1.cy-1;
    if int1 >= 0 then begin
-    with cells[int1] do begin
+    with cells[int1],ca do begin
      canvas.drawline(makepoint(int2,dim.y+dim.cy),makepoint(int2,int3),color1);
     end;
    end
@@ -1466,7 +1466,7 @@ begin
    end;
    int3:= rect1.x+rect1.cx-1;
    if int1 >= 0 then begin
-    with cells[int1] do begin
+    with cells[int1],ca do begin
      canvas.drawline(makepoint(dim.x+dim.cx,int2),makepoint(int3,int2),color1);
     end;
    end
