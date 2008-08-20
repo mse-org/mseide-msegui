@@ -14000,7 +14000,7 @@ end;
 
 function tguiapplication.mousewheelacceleration(const avalue: integer): integer;
 begin
- result:= round(mousewheelacceleration(real(avalue)));
+ result:= round(mousewheelacceleration(avalue*1.0));
 end;
 
 procedure tguiapplication.invalidate;
