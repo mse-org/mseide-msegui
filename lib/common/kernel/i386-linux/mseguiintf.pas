@@ -5458,12 +5458,13 @@ eventrestart:
     key1:= xkeytokey(akey);
     key2:= getkeynomod(xev.xkey);
     shiftstate1:= xtoshiftstate(state,key1,mb_none,true);
-    if xchecktypedevent(appdisp,keypress,@xev) then begin
-     xputbackevent(appdisp,@xev);
-     if (time = lasteventtime) and (keycode = int1) then begin
-      goto eventrestart;  //auto repeat key, don't send
+    if xpending(appdisp) > 0 then begin
+     xpeekevent(appdisp,@xev);
+     if (xev.xtype = keypress) and (time - lasteventtime < 10) and 
+                                                   (keycode = int1) then begin
+       goto eventrestart;  //auto repeat key, don't send
+      end;
      end;
-    end;
     result:= tkeyevent.create(xwindow,true,key1,key2,shiftstate1,'',time*1000);
    end;
   end;
