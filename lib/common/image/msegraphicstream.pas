@@ -212,8 +212,12 @@ begin
  end;
  with formats[int2] do begin
   formatlabel:= aformatlabel;
-  readproc:= areadproc;
-  writeproc:= awriteproc;
+  if areadproc <> nil then begin
+   readproc:= areadproc;
+  end;
+  if awriteproc <> nil then begin
+   writeproc:= awriteproc;
+  end;
   filtername:= afiltername;
   setlength(filemask,length(afilemask));
   for int1:= 0 to high(filemask) do begin
