@@ -82,7 +82,7 @@ function updatemouseshapestate(var info: shapeinfoty;
                  const canclick: boolean = true): boolean; overload;
 function updatemouseshapestate(var infos: shapeinfoarty;
                  const mouseevent: mouseeventinfoty;
-                 const widget: twidget): boolean; overload;
+                 const widget: twidget; var focuseditem: integer): boolean; overload;
          //true on change, calls widget.invalidaterect
 function getmouseshape(const infos: shapeinfoarty): integer;
          //returns shape index under mouse, -1 if none
@@ -263,7 +263,6 @@ end;
 
 function updatewidgetshapestate(var info: shapeinfoty; const widget: twidget;
             const adisabled: boolean = false;
-//            const ainvisible: boolean = false;
             const aframe: tcustomframe = nil): boolean;
 var
  statebefore: shapestatesty;
@@ -271,7 +270,6 @@ var
 begin
  with info do begin
   statebefore:= state;
-//  updatebit(cardinal(state),ord(ss_invisible),not widget.visible or ainvisible);
   updatebit(cardinal(state),ord(ss_disabled),not widget.isenabled or adisabled);
   updatebit(cardinal(state),ord(ss_focused),widget.active);
   result:= state <> statebefore;
@@ -371,7 +369,7 @@ begin
        if (eventkind = ek_buttonrelease) and (ss_clicked in state) and
             assigned(doexecute) then begin
         state:= state - [ss_clicked];
-        result:= true; //state can be invalid after execute
+        result:= true;              //state can be invalid after execute
         if widget <> nil then begin //info can be invalid after execute
          widget.invalidaterect(ca.dim);
         end;
@@ -412,7 +410,7 @@ end;
 
 function updatemouseshapestate(var infos: shapeinfoarty;
                  const mouseevent: mouseeventinfoty;
-                 const widget: twidget): boolean;
+                 const widget: twidget; var focuseditem: integer): boolean;
 var
  int1,int2: integer;
 begin
@@ -420,6 +418,14 @@ begin
  for int1:= 0 to high(infos) do begin
   result:= updatemouseshapestate(infos[int1],mouseevent,widget,
                                                  nil,@infos) or result;
+  if ss_mouse in infos[int1].state then begin
+   if focuseditem <> int1 then begin
+    if (focuseditem >= 0) and (focuseditem <= high(infos)) then begin
+     widget.invalidaterect(infos[focuseditem].ca.dim);
+    end;
+    focuseditem:= int1;
+   end;
+  end;
  end;
 end;
 
@@ -647,11 +653,14 @@ begin
    end;
    if not (ss_noanimation in state) then begin
     if (ss_mouse in state) and not (ss_disabled in state) and 
-            (animatemouseenter or (ss_flat in state)) then begin
+       (animatemouseenter or (ss_flat in state)) or
+       (state * [ss_focused,ss_focusanimation] = 
+                                   [ss_focused,ss_focusanimation]) then begin
      inc(level);
     end;
     if (ss_clicked in state) or
-         (state * [ss_checked,ss_checkbutton] = [ss_checked,ss_checkbutton])  then begin
+         (state * [ss_checked,ss_checkbutton] = 
+                                   [ss_checked,ss_checkbutton])  then begin
      level:= -1;
     end;
    end;
@@ -887,27 +896,6 @@ begin
    if state * [ss_focused,ss_showfocusrect] = [ss_focused,ss_showfocusrect] then begin
     drawfocusrect(canvas,inflaterect(rect2,-focusrectdist));
    end;
-   {
-   if ca.imagelist = nil then begin
-    pos:= ca.captionpos;
-   end
-   else begin
-    case info.ca.captionpos of
-     cp_rightcenter: begin
-      pos:= cp_leftcenter;
-     end;
-     cp_leftcenter: begin
-      pos:= cp_rightcenter;
-     end;
-     cp_topcenter: begin
-      pos:= cp_bottomcenter;
-     end;
-     cp_bottomcenter: begin
-      pos:= cp_topcenter;
-     end;
-    end;
-   end;
-   }
    drawbuttoncaption(canvas,info,rect1,
                            swapcaptionpos[info.ca.captionpos],nil);
   end;
@@ -1066,8 +1054,12 @@ begin
     pos1:= cp_left;
     pos2:= cp_right;
    end;
+   rect2:= rect1;
    drawbuttonimage(canvas,info,rect1{,pos1});
    drawbuttoncheckbox(canvas,info,rect1,pos2);
+   if state * [ss_focused,ss_showfocusrect] = [ss_focused,ss_showfocusrect] then begin
+    drawfocusrect(canvas,inflaterect(rect2,-focusrectdist));
+   end;
    rect2:= rect1; //outerframe
    if innerframe <> nil then begin
     deflaterect1(rect1,innerframe^);

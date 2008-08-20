@@ -5290,8 +5290,8 @@ begin
   exit;
  end;
 
- xnextevent(appdisp,@xev);
 eventrestart:
+ xnextevent(appdisp,@xev);
  if longint(xfilterevent(@xev,none)) <> 0 then begin
   exit;
  end;
@@ -5459,11 +5459,10 @@ eventrestart:
     key2:= getkeynomod(xev.xkey);
     shiftstate1:= xtoshiftstate(state,key1,mb_none,true);
     if xchecktypedevent(appdisp,keypress,@xev) then begin
-     if (time <> lasteventtime) or (keycode <> int1) then begin
-      result:= tkeyevent.create(xwindow,true,key1,key2,shiftstate1,'',time*1000);
-                  //no auto repeat key
+     xputbackevent(appdisp,@xev);
+     if (time = lasteventtime) and (keycode = int1) then begin
+      goto eventrestart;  //auto repeat key, don't send
      end;
-     goto eventrestart; 
     end;
     result:= tkeyevent.create(xwindow,true,key1,key2,shiftstate1,'',time*1000);
    end;

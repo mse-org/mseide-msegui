@@ -90,12 +90,12 @@ type
                   ws_isvisible
                  );
  widgetstatesty = set of widgetstatety;
- widgetstate1ty = ({ws1_releasing,}ws1_childscaled,ws1_fontheightlock,
+ widgetstate1ty = (ws1_childscaled,ws1_fontheightlock,
                    ws1_widgetregionvalid,ws1_rootvalid,
                    ws1_anchorsizing,ws1_parentclientsizeinited,
                    ws1_parentupdating, //set while setparentwidget
-                   ws1_isstreamed,//used by ttabwidget
-                   ws1_scaled, //used in tcustomscalingwidget
+                   ws1_isstreamed,     //used by ttabwidget
+                   ws1_scaled,         //used in tcustomscalingwidget
                    ws1_noclipchildren,
                    ws1_nodesignvisible,ws1_nodesignframe,ws1_nodesignhandles,
                    ws1_nodesigndelete,ws1_designactive,
@@ -6328,8 +6328,7 @@ end;
 
 function twidget.needsfocuspaint: boolean;
 begin
- result:= {not (ow_nofocusrect in foptionswidget) and} (fframe <> nil) and 
-                fframe.needsfocuspaint;
+ result:= (fframe <> nil) and fframe.needsfocuspaint;
 end;
 
 function twidget.getshowhint: boolean;
@@ -6354,8 +6353,6 @@ end;
 procedure twidget.doafterpaint(const canvas: tcanvas);
 begin
  if fframe <> nil then begin
-//  fframe.paintoverlay(canvas,makerect(nullpoint,fwidgetrect.size));
-//  fframe.afterpaint(canvas);
   if needsfocuspaint and (fwidgetstate * [ws_focused,ws_active] =
                 [ws_focused,ws_active]) then begin
    fframe.dopaintfocusrect(canvas,makerect(nullpoint,fwidgetrect.size));

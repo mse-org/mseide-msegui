@@ -167,6 +167,7 @@ type
   cells: shapeinfoarty;
   stepinfo: framestepinfoty;
 //  maxbuttons: integer;
+  focusedbutton: integer;
   lines: integer;
   buttonsize: sizety;
   defaultsize: sizety;
@@ -1182,7 +1183,7 @@ begin
  if not (csdesigning in componentstate) or 
                             (ws1_designactive in fwidgetstate1) then begin
   with flayout do begin
-   if updatemouseshapestate(cells,info,self) then begin
+   if updatemouseshapestate(cells,info,self,flayout.focusedbutton) then begin
    end;
    checkbuttonhint(self,info,fhintedbutton,flayout.cells,
           {$ifdef FPC}@{$endif}getbuttonhint,{$ifdef FPC}@{$endif}gethintpos);

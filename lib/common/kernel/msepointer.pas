@@ -29,8 +29,8 @@ type
              cr_res0,cr_res1,cr_res2,cr_res3,cr_res4,cr_res5,cr_res6,cr_res7,
              cr_user);
 
- sizingkindty = (sk_none,sk_right,sk_topright,sk_top,sk_topleft,
-                     sk_left,sk_bottomleft,sk_bottom,sk_bottomright);
+ sizingkindty = (sik_none,sik_right,sik_topright,sik_top,sik_topleft,
+                     sik_left,sik_bottomleft,sik_bottom,sik_bottomright);
 const
  sizingcursors: array[sizingkindty] of cursorshapety = 
    (cr_default,cr_sizehor,cr_toprightcorner,cr_sizever,cr_topleftcorner,
@@ -140,7 +140,7 @@ function calcsizingkind(const apos: pointty; const arect: rectty;
 var
  margin2,distright,disttop,distleft,distbottom: integer;
 begin
- result:= sk_none;
+ result:= sik_none;
  distright:= abs(apos.x - (arect.x+arect.cx));
  disttop:= abs(apos.y - (arect.y));
  distleft:= abs(apos.x - (arect.x));
@@ -148,56 +148,56 @@ begin
  margin2:= 2 * margin;
  if disttop < margin then begin
   if distleft < margin2 then begin
-   result:= sk_topleft;
+   result:= sik_topleft;
   end
   else begin
    if distright < margin2 then begin
-    result:= sk_topright;
+    result:= sik_topright;
    end
    else begin
-    result:= sk_top;
+    result:= sik_top;
    end;
   end;
  end
  else begin
   if distbottom < margin then begin
    if distleft < margin2 then begin
-    result:= sk_bottomleft;
+    result:= sik_bottomleft;
    end
    else begin
     if distright < margin2 then begin
-     result:= sk_bottomright;
+     result:= sik_bottomright;
     end
     else begin
-     result:= sk_bottom;
+     result:= sik_bottom;
     end;
    end;
   end
   else begin
    if distleft < margin then begin
     if disttop < margin2 then begin
-     result:= sk_topleft;
+     result:= sik_topleft;
     end
     else begin
      if distbottom < margin2 then begin
-      result:= sk_bottomleft;
+      result:= sik_bottomleft;
      end
      else begin
-      result:= sk_left;
+      result:= sik_left;
      end;
     end
    end
    else  begin
     if distright < margin then begin
      if disttop < margin2 then begin
-      result:= sk_topright;
+      result:= sik_topright;
      end
      else begin
       if distbottom < margin2 then begin
-       result:= sk_bottomright;
+       result:= sik_bottomright;
       end
       else begin
-       result:= sk_right;
+       result:= sik_right;
       end;
      end;
     end;
@@ -259,14 +259,14 @@ function adjustsizingrect(const arect: rectty; const kind: sizingkindty;
 begin
  result:= arect;
  case kind of
-  sk_right: adjustright;
-  sk_topright: begin adjusttop; adjustright end;
-  sk_top: adjusttop;
-  sk_topleft: begin adjusttop; adjustleft end;
-  sk_left: adjustleft;
-  sk_bottomleft: begin adjustbottom; adjustleft end;
-  sk_bottom: adjustbottom;
-  sk_bottomright: begin adjustbottom; adjustright end;  
+  sik_right: adjustright;
+  sik_topright: begin adjusttop; adjustright end;
+  sik_top: adjusttop;
+  sik_topleft: begin adjusttop; adjustleft end;
+  sik_left: adjustleft;
+  sik_bottomleft: begin adjustbottom; adjustleft end;
+  sik_bottom: adjustbottom;
+  sik_bottomright: begin adjustbottom; adjustright end;  
  end;
 end;
 

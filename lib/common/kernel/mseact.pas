@@ -28,7 +28,7 @@ type
                  ss_clicked,ss_mouse,ss_moveclick,ss_focused,ss_active,
                  ss_horz,ss_vert,ss_opposite,
                  ss_widgetorg,ss_showfocusrect,ss_showdefaultrect,
-                 ss_flat,ss_noanimation,
+                 ss_flat,ss_noanimation,ss_focusanimation,
                  ss_checkbutton,
                  {ss_submenu,}ss_menuarrow);
  shapestatesty = set of shapestatety;

@@ -154,6 +154,7 @@ type
   tabs: ttabs;
   dim: rectty;
   activetab: integer;
+  focusedtab: integer;
   cells: shapeinfoarty;
   firsttab: integer;
   lasttab: integer;
@@ -197,10 +198,14 @@ type
    procedure loaded; override;
    procedure dopaint(const canvas: tcanvas); override;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
+   procedure statechanged; override;
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
    procedure clientrectchanged; override;
    procedure dofontheightdelta(var delta: integer); override;
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
+   procedure dokeydown(var info: keyeventinfoty); override;
+   function upstep(const norotate: boolean): boolean;
+   function downstep(const norotate: boolean): boolean;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -355,7 +360,6 @@ type
    ftabwidget: tcustomtabwidget;
    fimagelist: timagelist;
    fimagenr: integer;
-//   fimagenractive: integer;
    fimagenrdisabled: integer;
    fcolortab,fcoloractivetab: colorty;
    ftabhint: msestring;
@@ -402,8 +406,6 @@ type
    property tabhint: msestring read gettabhint write settabhint;
    property imagelist: timagelist read getimagelist write setimagelist;
    property imagenr: imagenrty read getimagenr write setimagenr default -1;
-//   property imagenractive: integer read getimagenractive 
-//                                           write setimagenractive default -2;
    property imagenrdisabled: imagenrty read getimagenrdisabled
                                            write setimagenrdisabled default -2;
                 //-2 -> same as imagenr
@@ -473,6 +475,8 @@ type
    procedure settab_captionframe_bottom(const avalue: integer);
    function gettab_imagedist: integer;
    procedure settab_imagedist(const avalue: integer);
+   function gettab_optionswidget: optionswidgetty;
+   procedure settab_optionswidget(const avalue: optionswidgetty);
   protected
    fpopuptab: integer;
    procedure internaladd(const page: itabpage; aindex: integer);
@@ -565,6 +569,8 @@ type
                             default defaulttabsizemin;
    property tab_sizemax: integer read ftab_sizemax write settab_sizemax
                             default defaulttabsizemax;
+   property tab_optionswidget: optionswidgetty read gettab_optionswidget
+                 write settab_optionswidget default defaultoptionswidgetnofocus;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
  end;
@@ -617,6 +623,7 @@ type
    property tab_size;
    property tab_sizemin;
    property tab_sizemax;
+   property tab_optionswidget;
    property statfile;
    property statvarname;
  end;
@@ -629,7 +636,7 @@ type
  twidget1 = class(twidget);
 
 procedure calctablayout(var layout: tabbarlayoutinfoty;
-                     const canvas: tcanvas);
+                     const canvas: tcanvas; const focused: boolean);
  procedure docommon(const tab: ttab; var cell: shapeinfoty; var textrect: rectty);
  begin
   with tab,cell,ca do begin
@@ -734,8 +741,12 @@ begin
   bo1:= not twidget(tabs.fowner).isenabled;
   for int1:= 0 to high(cells) do begin
    with tabs[int1],cells[int1],ca do begin
-    state:= state + options * [ss_vert,ss_opposite];
+    state:= (state + [ss_showfocusrect] + options * [ss_vert,ss_opposite]) - 
+                                                      [ss_focused];
     if ts_active in fstate then begin
+     if focused then begin
+      state:= state + [ss_focused];
+     end;
      if fcoloractive = cl_default then begin
       color:= tabs.fcoloractive;
      end
@@ -743,7 +754,6 @@ begin
       color:= fcoloractive;
      end;
      face:= tabs.ffaceactive;
-////////////     state:= state + [ss_checked,ss_radiobutton];
     end
     else begin
      if fcolor = cl_default then begin
@@ -753,7 +763,6 @@ begin
       color:= fcolor;
      end;
      face:= tabs.face;
-/////////////     state:= state + [ss_radiobutton];
     end;
     if bo1 or (ts_disabled in fstate) then begin
      include(state,ss_disabled);
@@ -1264,7 +1273,7 @@ begin
   if tabo_opposite in foptions then begin
    include(options,ss_opposite);
   end;
-  calctablayout(flayoutinfo,getcanvas);
+  calctablayout(flayoutinfo,getcanvas,focused);
   if tabo_vertical in foptions then begin
    frame.buttonpos:= sbp_top;
    frame.buttonslast:= ((tabo_opposite in foptions) xor
@@ -1428,6 +1437,7 @@ var
  int1,int2,int3: integer;
  color1: colorty;
  rect1: rectty;
+ bo1: boolean;
 begin
  inherited;
  with flayoutinfo do begin
@@ -1525,8 +1535,8 @@ begin
   fonclientmouseevent(self,info);
  end;
  inherited;
- if updatemouseshapestate(flayoutinfo.cells,info,self) then begin
-//  invalidate;
+ if updatemouseshapestate(flayoutinfo.cells,info,self,
+                            flayoutinfo.focusedtab) then begin
   include(info.eventstate,es_processed);
  end;
  if not (csdesigning in componentstate) or 
@@ -1534,6 +1544,16 @@ begin
   with flayoutinfo do begin
    checkbuttonhint(self,info,fhintedbutton,cells,{$ifdef FPC}@{$endif}getbuttonhint,
                            {$ifdef FPC}@{$endif}gethintpos);
+  end;
+ end;
+end;
+
+procedure tcustomtabbar.statechanged;
+begin
+ inherited;
+ with flayoutinfo do begin
+  if (activetab >= 0) and (activetab <= high(cells)) then begin
+   updatewidgetshapestate(flayoutinfo.cells[activetab],self,false,fframe);
   end;
  end;
 end;
@@ -1772,6 +1792,91 @@ class function tcustomtabbar.classskininfo: skininfoty;
 begin
  result:= inherited classskininfo;
  result.objectkind:= sok_tabbar;
+end;
+
+function tcustomtabbar.upstep(const norotate: boolean): boolean;
+var
+ int1: integer;
+begin
+ result:= false;
+ with flayoutinfo do begin
+  for int1:= activetab + 1 to high(cells) do begin
+   if tabs[int1].state * [ts_invisible,ts_disabled] = [] then begin
+    result:= true;
+    self.activetab:= int1;
+    exit;
+   end;
+  end;
+  if not norotate then begin
+   for int1:= 0 to activetab - 1 do begin
+    if tabs[int1].state * [ts_invisible,ts_disabled] = [] then begin
+     result:= true;
+     self.activetab:= int1;
+     exit;
+    end;
+   end;
+  end;
+ end;
+end;
+
+function tcustomtabbar.downstep(const norotate: boolean): boolean;
+var
+ int1: integer;
+begin
+ result:= false;
+ with flayoutinfo do begin
+  for int1:= activetab -1 downto 0 do begin
+   if tabs[int1].state * [ts_invisible,ts_disabled] = [] then begin
+    result:= true;
+    self.activetab:= int1;
+    exit;
+   end;
+  end;
+  if not norotate then begin
+   for int1:= high(cells) downto activetab + 1 do begin
+    if tabs[int1].state * [ts_invisible,ts_disabled] = [] then begin
+     result:= true;
+     self.activetab:= int1;
+     exit;
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure tcustomtabbar.dokeydown(var info: keyeventinfoty);
+var
+ bo1: boolean;
+begin
+ if not (es_processed in info.eventstate) then begin
+  bo1:= false;
+  if ss_vert in flayoutinfo.options then begin
+   case info.key of 
+    key_down: begin
+     bo1:= upstep(ow_arrowfocusout in optionswidget);
+    end;
+    key_up: begin
+     bo1:= downstep(ow_arrowfocusout in optionswidget);
+    end;
+   end;
+  end
+  else begin
+   case info.key of 
+    key_right: begin
+     bo1:= upstep(ow_arrowfocusout in optionswidget);
+    end;
+    key_left: begin
+     bo1:= downstep(ow_arrowfocusout in optionswidget);
+    end;
+   end;
+  end;
+  if bo1 then begin
+   include(info.eventstate,es_processed);
+  end
+  else begin
+   inherited;
+  end;
+ end;
 end;
 
 { ttabbar }
@@ -2313,7 +2418,6 @@ begin
     coloractive:= sender.getcoloractivetab;
     imagelist:= sender.getimagelist;
     imagenr:= sender.getimagenr;
-//    imagenractive:= sender.getimagenractive;
     imagenrdisabled:= sender.getimagenrdisabled;
     bo1:= not (csdesigning in componentstate) and sender.getinvisible;
 
@@ -2587,6 +2691,7 @@ end;
 procedure tcustomtabwidget.setactivepageindex(Value: integer);
 var
  int1: integer;
+ parenttabfocus: boolean;
 begin
  if value <> factivepageindex then begin
   if csloading in componentstate then begin
@@ -2599,49 +2704,58 @@ begin
   else begin
    value:= -1;
   end;
-  if factivepageindex >= 0 then begin
-   if not canparentclose(items[factivepageindex]) then begin
-    ftabs.tabs[factivepageindex].active:= true;
-    exit;
-   end;
-   int1:= factivepageindex;
-   factivepageindex:= -1;
-   if not (csloading in componentstate) then begin
-    tpagetab(ftabs.tabs[int1]).fpageintf.dodeselect;
-    if (factivepageindex <> -1) then begin
+  
+  parenttabfocus:= ow_parenttabfocus in foptionswidget;
+  exclude(foptionswidget,ow_parenttabfocus);
+  try
+   if factivepageindex >= 0 then begin
+    if not canparentclose(items[factivepageindex]) then begin
+     ftabs.tabs[factivepageindex].active:= true;
      exit;
     end;
-   end;
-   items[int1].visible:= false;
-   if (factivepageindex <> -1) or items[int1].visible then begin
-    exit;
-   end;
-   ftabs.tabs[int1].active:= false; //if items[int1] was already invisible
-  end;
-  factivepageindex := Value;
-  if value >= 0 then begin
-   defaultfocuschild:= items[value];
-   if not (csloading in componentstate) then begin
-    tpagetab(ftabs.tabs[value]).fpageintf.doselect;
-    if factivepageindex <> value then begin
+    int1:= factivepageindex;
+    factivepageindex:= -1;
+    if not (csloading in componentstate) then begin
+     tpagetab(ftabs.tabs[int1]).fpageintf.dodeselect;
+     if (factivepageindex <> -1) then begin
+      exit;
+     end;
+    end;
+    items[int1].visible:= false;
+    if (factivepageindex <> -1) or items[int1].visible then begin
      exit;
     end;
+    ftabs.tabs[int1].active:= false; //if items[int1] was already invisible
    end;
-   with items[value] do begin
-    bringtofront; //needed in design mode where all widgets are visible
-    visible:= true;
-    if self.entered and canfocus then begin
-     setfocus(false);
-    end;
-   end;
-  end
-  else begin
-   defaultfocuschild:= nil;
-  end;
-  if (value = factivepageindex) then begin
-   doactivepagechanged;
+   factivepageindex := Value;
    if value >= 0 then begin
-    ftabs.tabs[value].active:= true
+    defaultfocuschild:= items[value];
+    if not (csloading in componentstate) then begin
+     tpagetab(ftabs.tabs[value]).fpageintf.doselect;
+     if factivepageindex <> value then begin
+      exit;
+     end;
+    end;
+    with items[value] do begin
+     bringtofront; //needed in design mode where all widgets are visible
+     visible:= true;
+     if self.entered and canfocus and not ftabs.focused then begin
+      setfocus(false);
+     end;
+    end;
+   end
+   else begin
+    defaultfocuschild:= nil;
+   end;
+   if (value = factivepageindex) then begin
+    doactivepagechanged;
+    if value >= 0 then begin
+     ftabs.tabs[value].active:= true
+    end;
+   end;
+  finally
+   if parenttabfocus then begin
+    include(foptionswidget,ow_parenttabfocus);
    end;
   end;
  end;
@@ -3249,6 +3363,16 @@ begin
   end;
  end;
  inherited;
+end;
+
+function tcustomtabwidget.gettab_optionswidget: optionswidgetty;
+begin
+ result:= ftabs.optionswidget;
+end;
+
+procedure tcustomtabwidget.settab_optionswidget(const avalue: optionswidgetty);
+begin
+ ftabs.optionswidget:= avalue;
 end;
 
 { tpagetab }
