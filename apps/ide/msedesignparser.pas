@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 2008 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2008 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,24 +14,14 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 }
-unit cdesignparser;
-{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+unit msedesignparser;
+{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- mseparser,msedesignparser;
+ mseglob;
 type
- tcdesignparser = class(tcparser,idesignparser)
-  public
-   procedure parse; override;  
+ idesignparser = interface(inullinterface)
  end;
-
+ 
 implementation
-
-{ tcdesignparser }
-
-procedure tcdesignparser.parse;
-begin
- inherited;
-end;
-
 end.

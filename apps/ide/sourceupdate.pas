@@ -1392,16 +1392,16 @@ begin                        //completeclass
             typetext:= getidentpath(parser);
             getter:= '';
             setter:= '';
-            if checkpropertyident(id_read) then begin
+            if checkpropertyident(pid_read) then begin
              getter:= getorigname;
-             if checkpropertyident(id_write) then begin
+             if checkpropertyident(pid_write) then begin
               setter:= getorigname;
              end;
             end
             else begin
-             if checkpropertyident(id_write) then begin
+             if checkpropertyident(pid_write) then begin
               setter:= getorigname;
-              if checkpropertyident(id_read) then begin
+              if checkpropertyident(pid_read) then begin
                getter:= getorigname;
               end;
              end;
@@ -1610,7 +1610,7 @@ begin
       end;
      end
      else begin
-      if ident1 = integer(id_function) then begin
+      if ident1 = integer(pid_function) then begin
        if parser.parseprocedureheader(pascalidentty(ident1),@procinfo) then begin
         result:= splitidentpath(
               procinfo.params.params[high(procinfo.params.params)].typename);

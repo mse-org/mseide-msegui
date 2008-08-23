@@ -280,28 +280,28 @@ type
  end;
 
 type
- pascalidentty = (id_invalid = -1,
-  id_and=0,id_array,id_as,id_asm,id_begin,id_case,id_class,id_const,id_constructor,
-  id_destructor,id_dispinterface,id_div,id_do,id_downto,id_else,id_end,id_except,
-  id_exports,id_file,id_finalization,id_finally,id_for,id_function,id_goto,id_if,
-  id_implementation,id_in,id_initialization,id_inline,id_interface,
-  id_is,id_label,id_library,id_mod,id_nil,id_not,id_object,id_of,id_or,id_out,
-  id_overload,
-  id_packed,id_procedure,id_program,id_property,id_raise,id_record,id_repeat,
-  id_resourcestring,id_set,id_shl,id_shr,id_then,id_threadvar,id_to,
-  id_try,id_type,id_unit,id_until,id_uses,id_var,id_while,id_with,id_xor,
+ pascalidentty = (pid_invalid = -1,
+  pid_and=0,pid_array,pid_as,pid_asm,pid_begin,pid_case,pid_class,pid_const,pid_constructor,
+  pid_destructor,pid_dispinterface,pid_div,pid_do,pid_downto,pid_else,pid_end,pid_except,
+  pid_exports,pid_file,pid_finalization,pid_finally,pid_for,pid_function,pid_goto,pid_if,
+  pid_implementation,pid_in,pid_initialization,pid_inline,pid_interface,
+  pid_is,pid_label,pid_library,pid_mod,pid_nil,pid_not,pid_object,pid_of,pid_or,pid_out,
+  pid_overload,
+  pid_packed,pid_procedure,pid_program,pid_property,pid_raise,pid_record,pid_repeat,
+  pid_resourcestring,pid_set,pid_shl,pid_shr,pid_then,pid_threadvar,pid_to,
+  pid_try,pid_type,pid_unit,pid_until,pid_uses,pid_var,pid_while,pid_with,pid_xor,
 
-  id_abstract,id_inherited,id_override,id_reintroduce,id_virtual,
-  id_private,id_protected,id_public,id_published,id_automated,
+  pid_abstract,pid_inherited,pid_override,pid_reintroduce,pid_virtual,
+  pid_private,pid_protected,pid_public,pid_published,pid_automated,
   
-  id_read,id_write,id_stored,id_default,id_nodefault);
+  pid_read,pid_write,pid_stored,pid_default,pid_nodefault);
   
  const
- firstpascalident = id_and;
- lastpascalnormalident = integer(id_xor);
- lastpascalclassident = integer(id_automated);
- lastpascalpropertyident = integer(id_nodefault);
- lastpascalident = id_nodefault;
+ firstpascalident = pid_and;
+ lastpascalnormalident = integer(pid_xor);
+ lastpascalclassident = integer(pid_automated);
+ lastpascalpropertyident = integer(pid_nodefault);
+ lastpascalident = pid_nodefault;
 
  pascalidents: array[firstpascalident..lastpascalident] of string = (
   'and','array','as','asm','begin','case','class','const','constructor',
@@ -2083,11 +2083,11 @@ begin
  result:= '';
  while not eof do begin
   ident:= pascalidentty(getident);
-  if (ident = id_unit) or (ident = id_program) then begin
+  if (ident = pid_unit) or (ident = pid_program) then begin
    result:= getname;
   end;
-  if (ident = id_const) or (ident = id_resourcestring) then begin
-   resourceflag:= ident = id_resourcestring;
+  if (ident = pid_const) or (ident = pid_resourcestring) then begin
+   resourceflag:= ident = pid_resourcestring;
    repeat
     mark;
     if getident >= 0 then begin

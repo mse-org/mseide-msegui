@@ -20,7 +20,8 @@ unit pascaldesignparser;
 
 interface
 uses
- classes,mseparser,typinfo,msetypes,mselist,msestrings,mseclasses;
+ classes,mseparser,typinfo,msetypes,mselist,msestrings,mseclasses,
+ msedesignparser;
 
 type
 
@@ -387,7 +388,7 @@ type
    includestatements: includestatementarty;
   end;
 
-  tpascaldesignparser = class(tpascalparser)
+  tpascaldesignparser = class(tpascalparser,idesignparser)
    private
     funitinfopo: punitinfoty;
     fimplementation: boolean;
@@ -511,7 +512,7 @@ begin
       end
       else begin
        if adef^.kind = syk_classdef then begin
-        if checkoperator('=') and checkident(ord(id_class)) and checkoperator('(') then begin
+        if checkoperator('=') and checkident(ord(pid_class)) and checkoperator('(') then begin
          scope.addidents(parser);
         end;
        end;
@@ -1151,9 +1152,9 @@ begin
     defaultstr:= '';
     int1:= getident;
     case pascalidentty(int1) of
-     id_const: paraflags:= [pfconst];
-     id_var: paraflags:= [pfvar];
-     id_out: paraflags:= [pfout];
+     pid_const: paraflags:= [pfconst];
+     pid_var: paraflags:= [pfvar];
+     pid_out: paraflags:= [pfout];
      else paraflags:= [];
     end;
     if (paraflags = []) and (int1 >= 0) then begin
@@ -1164,10 +1165,10 @@ begin
      putparams(''); //untyped
     end
     else begin
-     if checkident(ord(id_array)) then begin
+     if checkident(ord(pid_array)) then begin
       include(paraflags,pfarray);
-      checkident(ord(id_of));
-      if checkident(ord(id_const)) then begin
+      checkident(ord(pid_of));
+      if checkident(ord(pid_const)) then begin
        str1:= 'TVarRec';
       end
       else begin
@@ -1228,9 +1229,9 @@ begin
   skipwhitespace;
   intstartpos:= sourcepos;
   case atoken of
-   id_function: params.kind:= mkfunction;
-   id_constructor: params.kind:= mkconstructor;
-   id_destructor: params.kind:= mkdestructor;
+   pid_function: params.kind:= mkfunction;
+   pid_constructor: params.kind:= mkconstructor;
+   pid_destructor: params.kind:= mkdestructor;
    else params.kind:= mkprocedure;
   end;
   name:= getorigname;
@@ -1258,12 +1259,12 @@ begin
   if result then begin
    while true do begin
     case pascalidentty(getclassident) of
-     id_abstract: include(po1^.params.flags,mef_abstract);
-     id_inherited: include(po1^.params.flags,mef_inherited);
-     id_overload: include(po1^.params.flags,mef_overload);
-     id_override: include(po1^.params.flags,mef_override);
-     id_virtual: include(po1^.params.flags,mef_virtual);
-     id_invalid: break;
+     pid_abstract: include(po1^.params.flags,mef_abstract);
+     pid_inherited: include(po1^.params.flags,mef_inherited);
+     pid_overload: include(po1^.params.flags,mef_overload);
+     pid_override: include(po1^.params.flags,mef_override);
+     pid_virtual: include(po1^.params.flags,mef_virtual);
+     pid_invalid: break;
     else
      lasttoken;
      break;
@@ -1291,10 +1292,10 @@ var
  ar1: paraminfoarty;
 begin
  case atoken of
-  id_procedure: begin
+  pid_procedure: begin
    result:= parseprocparams(mkprocedure,ar1);
   end;
-  id_function: begin
+  pid_function: begin
    result:= parseprocparams(mkfunction,ar1);
   end
   else begin
@@ -1321,15 +1322,15 @@ var
  ident1: pascalidentty;
 begin
  result:= getorignamenoident(value) and checkoperator('=') and
-      checkident(integer(id_interface));
+      checkident(integer(pid_interface));
  if result then begin
   while not eof do begin
    ident1:= pascalidentty(getident);
    case ident1 of
-    id_end,id_implementation: begin
+    pid_end,pid_implementation: begin
      break;
     end;
-    id_procedure,id_function: begin
+    pid_procedure,pid_function: begin
      skipprocedureheader(ident1);
     end;
     else begin
@@ -1359,13 +1360,13 @@ begin
  ar1:= nil; //compiler warning
  token1:= acttoken;
  result:= getorignamenoident(value) and checkoperator('=') and 
-                  checkident(integer(id_class));
+                  checkident(integer(pid_class));
  if result then begin
   if checkoperator(';') then begin
    lasttoken;           //forward declaration
   end
   else begin
-   if checkident(integer(id_of)) then begin
+   if checkident(integer(pid_of)) then begin
     result:= false;     //type of class
     exit;
    end;
@@ -1395,15 +1396,15 @@ begin
      while not eof do begin
       ident1:= getclassident;
       case ident1 of
-       id_end,id_private,id_protected,id_public,id_published,id_automated,
-           id_implementation: begin
+       pid_end,pid_private,pid_protected,pid_public,pid_published,pid_automated,
+           pid_implementation: begin
         if isemptysourcepos(managedend) then begin
          managedend:= lasttokenpos;
         end;
         if isemptysourcepos(procedurestart) then begin
          procedurestart:= managedend;
         end;
-        if (ident1 = id_private) then begin
+        if (ident1 = pid_private) then begin
          if isemptysourcepos(privatestart) then begin
           privatestart:= sourcepos;
          end;
@@ -1417,11 +1418,11 @@ begin
           end;
          end;
         end;
-        if ident1 = id_end then begin
+        if ident1 = pid_end then begin
          break;
         end;
        end;
-       id_procedure,id_function,id_constructor,id_destructor: begin
+       pid_procedure,pid_function,pid_constructor,pid_destructor: begin
         if isemptysourcepos(privatefieldend) and 
                      not isemptysourcepos(privatestart) and 
                      isemptysourcepos(privateend) then begin
@@ -1434,7 +1435,7 @@ begin
         ar1:= getorignamelist;
 //        if getorigname(lstr1) then begin
         if high(ar1) >= 0 then begin
-         if isemptysourcepos(managedend) and (ident1 <> id_property) then begin
+         if isemptysourcepos(managedend) and (ident1 <> pid_property) then begin
           pc:= componentlist.newitem; //managed component
           bo1:= false;
           with pc^ do begin
@@ -1472,7 +1473,7 @@ begin
           end;         
          end
          else begin
-          if ident1 = id_property then begin
+          if ident1 = pid_property then begin
            if checkoperator('[') then begin
             while not eof and not checkoperator(']') do begin
              nexttoken;
@@ -1485,7 +1486,7 @@ begin
            end;
            pd:= funitinfopo^.deflist.add(lstringtostring(ar1[0]),
                       syk_vardef,pos1,sourcepos);
-           if ident1 = id_property then begin
+           if ident1 = pid_property then begin
             pd^.varflags:= [vf_property];
            end;
            for int1:= 1 to high(ar1) do begin
@@ -1531,10 +1532,10 @@ begin
  while not eof and (blocklevel > 0) do begin
   ident1:= pascalidentty(getident);
   case ident1 of
-   id_end: begin
+   pid_end: begin
     dec(blocklevel)
    end;
-   id_begin,id_record: begin
+   pid_begin,pid_record: begin
     inc(blocklevel)
    end;
   end;
@@ -1550,12 +1551,12 @@ begin
   skipwhitespace;
   ident1:= pascalidentty(getident);
   case ident1 of
-   id_type,id_const,id_var,id_implementation,id_function,id_procedure,
-                    id_constructor,id_destructor,id_begin: begin
+   pid_type,pid_const,pid_var,pid_implementation,pid_function,pid_procedure,
+                    pid_constructor,pid_destructor,pid_begin: begin
     lasttoken;
     break;
    end;
-   id_label: begin
+   pid_label: begin
    end;
    else begin
     nexttoken;
@@ -1575,18 +1576,18 @@ begin
   statementstart:= acttoken;
   ident1:= pascalidentty(getident);
   case ident1 of
-   id_label,id_const,id_var,id_implementation,id_function,id_procedure,
-                    id_constructor,id_destructor,id_begin: begin
+   pid_label,pid_const,pid_var,pid_implementation,pid_function,pid_procedure,
+                    pid_constructor,pid_destructor,pid_begin: begin
     lasttoken;
     break;
    end;
-   id_type: begin
+   pid_type: begin
    end;
    else begin
-    if (ident1 = id_invalid) and getorigname(lstr1) and checkoperator('=') then begin
+    if (ident1 = pid_invalid) and getorigname(lstr1) and checkoperator('=') then begin
      ident1:= pascalidentty(getident);
      case ident1 of
-      id_interface: begin
+      pid_interface: begin
        mark;
        acttoken:= statementstart;
        if parseinterfacetype then begin
@@ -1596,7 +1597,7 @@ begin
         back;
        end;
       end;
-      id_class: begin
+      pid_class: begin
        mark;
        acttoken:= statementstart;
        if parseclasstype then begin
@@ -1606,12 +1607,12 @@ begin
         back;
        end;
       end;
-      id_record: begin
+      pid_record: begin
        parserecord;
        funitinfopo^.deflist.add(lstringtostring(lstr1),syk_typedef,
                   getsourcepos(statementstart),sourcepos);
       end;
-      id_procedure,id_function: begin
+      pid_procedure,pid_function: begin
        skipprocedureparams(ident1);
       end;
       else begin
@@ -1677,7 +1678,7 @@ begin
  ar1:= nil; //compiler warning
  while not eof do begin
   ident1:= getident;
-  if (ident1 >= 0) and (ident1 <> ord(id_threadvar)) then begin
+  if (ident1 >= 0) and (ident1 <> ord(pid_threadvar)) then begin
    lasttoken;
    break;
   end;
@@ -1758,10 +1759,10 @@ begin
  while not eof and (blocklevel >= 0) do begin
   if getident(aident) then begin
    case pascalidentty(aident) of
-    id_begin,id_try,id_case: begin
+    pid_begin,pid_try,pid_case: begin
      inc(blocklevel);
     end;
-    id_end: begin
+    pid_end: begin
      dec(blocklevel);
     end;
    end;
@@ -1870,25 +1871,25 @@ var
      while not eof do begin
       if getident(aident) then begin
        case pascalidentty(aident) of
-        id_var: begin
+        pid_var: begin
          parsevar;
         end;
-        id_const: begin
+        pid_const: begin
          parseconst;
         end;
-        id_type: begin
+        pid_type: begin
          parsetype;
         end;
-        id_label: begin
+        pid_label: begin
          parselabel;
         end;
-        id_procedure: begin
+        pid_procedure: begin
          parseprocedure(mkprocedure);
         end;
-        id_function: begin
+        pid_function: begin
          parseprocedure(mkfunction);
         end;
-        id_begin: begin
+        pid_begin: begin
          parseprocedurebody;
          break;
         end;
@@ -1938,25 +1939,25 @@ begin
  while not eof do begin
   if getident(aident) then begin;
    case pascalidentty(aident) of
-    id_procedure: begin
+    pid_procedure: begin
      parseprocedure(mkprocedure);
     end;
-    id_function: begin
+    pid_function: begin
      parseprocedure(mkfunction);
     end;
-    id_constructor: begin
+    pid_constructor: begin
      parseprocedure(mkconstructor);
     end;
-    id_destructor: begin
+    pid_destructor: begin
      parseprocedure(mkdestructor);
     end;
-    id_type: begin
+    pid_type: begin
      parsetype;
     end;
-    id_var: begin
+    pid_var: begin
      parsevar;
     end;
-    id_uses: begin
+    pid_uses: begin
      with funitinfopo^.implementationuses do begin
       fstartpos:= sourcepos;
       add(getorignamelist);
@@ -1966,20 +1967,20 @@ begin
      checknewline;
      funitinfopo^.implementationbodystart:= sourcepos;
     end;
-    id_begin: begin
+    pid_begin: begin
      if funitinfopo^.isprogram then begin
       parseprocedurebody;
      end;
     end;
-    id_initialization: begin
+    pid_initialization: begin
      checkend;
      funitinfopo^.initializationstart:= nexttokenornewlinepos;
     end;
-    id_finalization: begin
+    pid_finalization: begin
      checkend;
      funitinfopo^.finalizationstart:= nexttokenornewlinepos;
     end;
-    id_end: begin
+    pid_end: begin
      if checkoperator('.') then begin
       lasttoken;
       checkend;
@@ -2034,8 +2035,8 @@ begin
   includestatements:= nil;
 
   int1:= getident;
-  isprogram:= pascalidentty(int1) = id_program;
-  if isprogram or (pascalidentty(int1) = id_unit) then begin
+  isprogram:= pascalidentty(int1) = pid_program;
+  if isprogram or (pascalidentty(int1) = pid_unit) then begin
    origunitname:= getorigname;
    unitname:= uppercase(origunitname);
   end;
@@ -2048,16 +2049,16 @@ begin
     pos1:= sourcepos;
     int1:= getident;
     case pascalidentty(int1) of
-     id_type: begin
+     pid_type: begin
       parsetype;
      end;
-     id_const: begin
+     pid_const: begin
       parseconst;
      end;
-     id_var: begin
+     pid_var: begin
       parsevar;
      end;
-     id_procedure,id_function: begin
+     pid_procedure,pid_function: begin
       po1:= procedurelist.newitem;
       if parseprocedureheader(pascalidentty(int1),po1) then begin
        deflist.add(pos1,sourcepos,po1);
@@ -2066,17 +2067,17 @@ begin
        procedurelist.deletelast;
       end;
      end;
-     id_interface: begin
+     pid_interface: begin
       finterface:= true;
      end;
-     id_uses: begin
+     pid_uses: begin
       with funitinfopo^.interfaceuses do begin
        fstartpos:= sourcepos;
        add(getorignamelist);
        fendpos:= sourcepos;
       end;
      end;
-     id_implementation: begin
+     pid_implementation: begin
       if not finterfaceonly then begin
        parseimplementation;
       end;
