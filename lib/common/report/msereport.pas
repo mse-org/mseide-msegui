@@ -923,6 +923,7 @@ type
    property onbeforerender;
    property onpaint;
    property onafterpaint;
+   property onafterrender;
  end;
  
  bandareastatety = (bas_inited,bas_backgroundrendered,bas_areafull,
