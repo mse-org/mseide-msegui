@@ -4062,8 +4062,10 @@ end;
 
 procedure tscrollingwidget.domousewheelevent(var info: mousewheeleventinfoty);
 begin
- tscrollframe(fframe).domousewheelevent(info,false);
  inherited;
+ if not (es_processed in info.eventstate) then begin
+  tscrollframe(fframe).domousewheelevent(info,false);
+ end;
 end;
 
 procedure tscrollingwidget.doscroll(const dist: pointty);

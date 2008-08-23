@@ -53,6 +53,12 @@ type
    property colorbackground: colorty read fcolorbackground //for monochrome bitmaps
                   write setcolorbackground default cl_white;
    property optionswidget default defaultoptionswidgetnofocus;
+   property onmouseevent;
+   property onclientmouseevent;
+   property onchildmouseevent;
+   property onmousewheelevent;
+   property onkeydown;
+   property onkeyup;
  end;
 
 implementation
