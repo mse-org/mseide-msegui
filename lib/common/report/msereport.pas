@@ -3497,7 +3497,7 @@ end;
 procedure tcustomrecordband.loaded;
 begin
  inherited;
- if csdesigning in componentstate then begin
+ if (csdesigning in componentstate) and (fobjectpicker = nil) then begin
   fobjectpicker:= tobjectpicker.create(iobjectpicker(self));
  end;
 end;
