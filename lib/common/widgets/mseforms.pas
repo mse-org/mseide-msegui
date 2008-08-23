@@ -58,6 +58,7 @@ type
    property onchildmouseevent;
    property onmouseevent;
    property onclientmouseevent;
+   property onmousewheelevent;
    property onbeforepaint;
    property onpaint;
    property onafterpaint;
@@ -265,6 +266,7 @@ type
    property onmouseevent;
    property onclientmouseevent;
    property onchildmouseevent;
+   property onmousewheelevent;
    property onkeydown;
    property onkeyup;
    property onshortcut;
@@ -370,6 +372,7 @@ type
    property onmouseevent;
    property onclientmouseevent;
    property onchildmouseevent;
+   property onmousewheelevent;
    property onkeydown;
    property onkeyup;
    property onshortcut;
