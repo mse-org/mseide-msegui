@@ -7,7 +7,7 @@ uses
  msetexteditor,mseglob,mseguiglob,msegui,msewidgets,uPSComponent,
  uPSComponent_Default,
  psimportmsegui,formdesigner,sourceupdate,mseparser,pascaldesignparser,
- msedesigner,mserichstring,mseclasses;
+ msedesigner,mserichstring,mseclasses,msedesignparser;
 type
  tpascaleditor = class(ttextstringspropertyeditor)
   protected

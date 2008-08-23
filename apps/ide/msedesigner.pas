@@ -462,7 +462,7 @@ uses
  designer_bmp,msesys,msewidgets,formdesigner,mseevent,objectinspector,
  msefiledialog,projectoptionsform,sourceupdate,sourceform,sourcepage,
  pascaldesignparser,msearrayprops,rtlconsts,
- msesimplewidgets;
+ msesimplewidgets,msedesignparser;
 
 type
  tcomponent1 = class(tcomponent);

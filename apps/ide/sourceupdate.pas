@@ -22,7 +22,7 @@ interface
 uses
  msedesigner,mseclasses,msedesignintf,classes,typinfo,
  msetypes,msestrings,pascaldesignparser,cdesignparser,
- msestream,mseparser,msesyntaxedit,mselist,msehash;
+ msestream,mseparser,msesyntaxedit,mselist,msehash,msedesignparser;
 
 type
  tunitinfoty = class
@@ -335,11 +335,11 @@ begin
   aunit:= updatemodule(amodule);
   if aunit <> nil then begin
    with aunit^ do begin
-    start:= implementationbodystart;
+    start:= p.implementationbodystart;
     if isemptysourcepos(start) then begin
-     start:= implementationstart;
+     start:= p.implementationstart;
     end;
-    stop:= implementationend;
+    stop:= p.implementationend;
     if not isemptysourcepos(start) then begin
      adest:= gettext(aunit,start,stop);
      result:= true;
@@ -519,10 +519,10 @@ end;
 constructor tunitinfoty.create;
 begin
  with info do begin
-  procedurelist:= tprocedureinfolist.create;
-  classinfolist:= tclassinfolist.create;
-  interfaceuses:= tusesinfolist.create(false);
-  implementationuses:= tusesinfolist.create(true);
+  p.procedurelist:= tprocedureinfolist.create;
+  p.classinfolist:= tclassinfolist.create;
+  p.interfaceuses:= tusesinfolist.create(false);
+  p.implementationuses:= tusesinfolist.create(true);
 //  identuselist:= tidentuselist.create;
   deflist:= trootdeflist.create(@info);
  end;
@@ -531,10 +531,10 @@ end;
 destructor tunitinfoty.destroy;
 begin
  with info do begin
-  procedurelist.Free;
-  classinfolist.Free;
-  interfaceuses.Free;
-  implementationuses.Free;
+  p.procedurelist.Free;
+  p.classinfolist.Free;
+  p.interfaceuses.Free;
+  p.implementationuses.Free;
   itemlist.free;
 //  identuselist.free;
   deflist.Free;
@@ -724,8 +724,8 @@ begin
  with infopo^ do begin
   if itemlist = nil then begin
    itemlist:= tsourceitemlist.create;
-   interfaceuses.getsourceitems(itemlist);
-   implementationuses.getsourceitems(itemlist);
+   p.interfaceuses.getsourceitems(itemlist);
+   p.implementationuses.getsourceitems(itemlist);
 //   identuselist.getsourceitems(itemlist);
 //   int1:= length(includestatements);
    for int1:= 0 to high(includestatements) do begin
@@ -925,12 +925,13 @@ begin
       syk_classdef: begin
        setlength(result,high(result) + 2);
        result[high(result)]:= scopes[int1].rootlist.unitinfopo^.
-          classinfolist[scopes[int1].definfopo^.classindex]^.procedurelist[defs[int1]^.procindex];
+          p.classinfolist[scopes[int1].definfopo^.classindex]^.
+                                        procedurelist[defs[int1]^.procindex];
       end;
       syk_root: begin
        setlength(result,high(result) + 2);
        result[high(result)]:= trootdeflist(scopes[int1]).rootlist.unitinfopo^.
-          procedurelist[defs[int1]^.procindex];
+          p.procedurelist[defs[int1]^.procindex];
       end;
      end;
     end;
@@ -1039,7 +1040,7 @@ begin
   if moduleinfo <> nil then begin
    unitinfo:= updateformunit(moduleinfo^.filename,false);
    if unitinfo <> nil then begin
-    classinfo1:= unitinfo^.classinfolist.finditembyname(
+    classinfo1:= unitinfo^.p.classinfolist.finditembyname(
             moduleinfo^.moduleclassname,true);
     if classinfo1 <> nil then begin
      procedureinfo:= classinfo1^.procedurelist.finditembyname(methodinfo^.name);
@@ -1234,12 +1235,12 @@ begin
  if isemptysourcepos(pos1) then begin
   pos1:= classinfopo^.procimpend;
   if isemptysourcepos(pos1) then begin
-   pos1:= unitinfopo^.implementationend;
+   pos1:= unitinfopo^.p.implementationend;
    bo1:= true;
   end;
  end;
  if pos1.filenum <> unitinfopo^.unitend.filenum then begin
-  pos1:= unitinfopo^.implementationend;
+  pos1:= unitinfopo^.p.implementationend;
   if pos1.filenum <> unitinfopo^.unitend.filenum then begin
    pos1:= unitinfopo^.unitend;
   end;
@@ -1361,7 +1362,7 @@ begin                        //completeclass
    end;
    if (scope <> nil) and (scope.kind = syk_classdef) then begin
     classindex1:= scope.definfopo^.classindex;
-    cpo:= infopo^.classinfolist[classindex1];
+    cpo:= infopo^.p.classinfolist[classindex1];
    end
   end;
   if cpo <> nil then begin
@@ -1458,14 +1459,14 @@ begin                        //completeclass
     end;
    end;
    newimp:= false;
-   cpo:= infopo^.classinfolist[classindex1]; //cpo is invalid after updateunit
+   cpo:= infopo^.p.classinfolist[classindex1]; //cpo is invalid after updateunit
    with cpo^ do begin                     
     if isemptysourcepos(procimpstart) then begin
      newimp:= true;
-     replacetext(infopo,infopo^.implementationend,infopo^.implementationend,
+     replacetext(infopo,infopo^.p.implementationend,infopo^.p.implementationend,
       '{ '+name+' }'+lineend);
      result:= true;
-     procimpstart:= infopo^.implementationend;
+     procimpstart:= infopo^.p.implementationend;
      inc(procimpstart.pos.row,1);
      procimpstart.pos.col:= 0;
      procimpend:= procimpstart;
@@ -1678,6 +1679,9 @@ begin
  designnotifications.registernotification(idesignnotification(self));
  funitinfolist:= tunitinfolist.create;
  ffilenamelist:= tfilenamelist.create;
+ msedesignparser.updateunitinterface:= {$ifdef FPC}@{$endif}updateunitinterface;
+ msedesignparser.gettype:= {$ifdef FPC}@{$endif}gettype;
+ msedesignparser.resetunitsearched:= {$ifdef FPC}@{$endif}resetunitsearched;
 end;
 
 destructor tsourceupdater.destroy;
@@ -1838,7 +1842,7 @@ begin
    str1:= '   ' + aitem.Name + ': ' + classna+';' + lineend;
    replacetext(po1,pos1,pos1,str1);
   end;
-  with po1^.interfaceuses do begin
+  with po1^.p.interfaceuses do begin
    if (unitna <> '') then begin
     if (startpos.filenum = endpos.filenum) and 
            not isemptysourcepos(startpos) then begin
@@ -1973,8 +1977,8 @@ begin
    finally
     infile.Free;
    end;
-   parser:= tpascaldesignparser.create(infopo,{$ifdef FPC}@{$endif}getincludefile,
-               interfaceonly);
+   parser:= tpascaldesignparser.create(infopo,designer.designfiles,
+               {$ifdef FPC}@{$endif}getincludefile,interfaceonly);
    try
     parser.includefiledirs:= projectoptions.texp.sourcedirs;
     ar1:= nil;

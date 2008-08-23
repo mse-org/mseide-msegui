@@ -18,20 +18,80 @@ unit cdesignparser;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- mseparser,msedesignparser;
+ mseparser,msedesignparser,mselist,msestrings;
+ 
 type
+
  tcdesignparser = class(tcparser,idesignparser)
+  private
+   funitinfopo: punitinfoty;
+   fimplementation: boolean;
+   finterface: boolean;
+   finterfaceonly: boolean;
+   fnoautoparse: boolean;
+  protected
+   procedure parsefunction(const atype,aname: lstringty);
   public
+   constructor create(unitinfopo: punitinfoty;
+              const afilelist: tmseindexednamelist;
+              const getincludefile: getincludefileeventty;
+              const ainterfaceonly: boolean); overload;
+   constructor create(unitinfopo: punitinfoty;
+              const afilelist: tmseindexednamelist;
+              const getincludefile: getincludefileeventty;
+              const ainterfaceonly: boolean; const atext: ansistring); overload;
    procedure parse; override;  
  end;
 
 implementation
-
+//uses
+// msedesigner;
+ 
 { tcdesignparser }
 
+constructor tcdesignparser.create(unitinfopo: punitinfoty;
+               const afilelist: tmseindexednamelist;
+               const getincludefile: getincludefileeventty;
+               const ainterfaceonly: boolean);
+begin
+ finterfaceonly:= ainterfaceonly;
+ inherited create(afilelist);
+ funitinfopo:= unitinfopo;
+ funitinfopo^.interfacecompiled:= false;
+ funitinfopo^.implementationcompiled:= false;
+ ongetincludefile:= getincludefile;
+end;
+
+constructor tcdesignparser.create(unitinfopo: punitinfoty;
+              const afilelist: tmseindexednamelist;
+              const getincludefile: getincludefileeventty;
+              const ainterfaceonly: boolean; const atext: ansistring); overload;
+begin
+ create(unitinfopo,afilelist,getincludefile,ainterfaceonly);
+ create(afilelist,atext);
+end;
+
+procedure tcdesignparser.parsefunction(const atype: lstringty;
+               const aname: lstringty);
+begin
+end;
+
 procedure tcdesignparser.parse;
+var
+ lstr1,lstr2: lstringty;
+ ch1: char;
 begin
  inherited;
+ while not eof do begin
+  if getorigname(lstr1) and getorigname(lstr2) then begin
+   ch1:= getoperator;
+   case ch1 of 
+    '(': begin
+     parsefunction(lstr1,lstr2);
+    end;
+   end;
+  end;
+ end;
 end;
 
 end.
