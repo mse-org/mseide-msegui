@@ -217,6 +217,7 @@ type
    procedure setpos(const avalue: real); override;
    function xlineoffset: integer;
    procedure dobeforenextrecord(const adatasource: tdatasource);
+   procedure scale(const ascale: real);
   public 
    constructor create(aowner: tobject); override;
    destructor destroy; override;
@@ -367,6 +368,7 @@ type
    procedure setcount1(acount: integer; doinit: boolean); override;
    procedure dobeforenextrecord(const adatasource: tdatasource);
    procedure initsums;
+   procedure scale(const ascale: real);
   public
    constructor create(const aowner: tcustomrecordband);
    procedure resetsums(const skipcurrent: boolean);
@@ -467,6 +469,7 @@ type
   procedure adddatasets(var adatasets: datasetarty);
   procedure init;
   procedure resetzebra;
+  procedure setppmm(const avalue: real);
  end;
  ireportclientarty = array of ireportclient;
  
@@ -497,6 +500,7 @@ type
   function repprintstarttime: tdatetime;
   function getreppage: tcustomreportpage;
   procedure resetzebra;
+  function getppmm: real;
  end;
 
  trecordbanddatalink = class(tmsedatalink)
@@ -565,6 +569,7 @@ type
    procedure adddatasets(var adatasets: datasetarty);
    procedure init;
    procedure resetzebra;
+   procedure setppmm(const avalue: real);
   published
    property optionsrep: bandoptionshowsty read foptionsrep 
                                         write setoptionsrep default [];
@@ -670,6 +675,8 @@ type
    function lastbandheight: integer; virtual;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure loaded; override;
+
+   procedure setppmm(const avalue: real);
       //iobjectpicker
    function getcursorshape(const apos: pointty; const ashiftstate: shiftstatesty; 
                                      var ashape: cursorshapety): boolean;
@@ -683,6 +690,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure scale(const ascale: real); override;
    procedure beginupdate;
    procedure endupdate;
    function remainingbands: integer;
@@ -879,6 +887,7 @@ type
    procedure dobeforenextrecord(const adatasource: tdatasource); override;
    procedure dosyncnextrecord; override;
   protected
+   function getppmm: real;
    procedure setparentwidget(const avalue: twidget); override;   
    procedure registerchildwidget(const child: twidget); override;
    procedure unregisterchildwidget(const child: twidget); override;
@@ -975,7 +984,9 @@ type
    procedure dobeforenextrecord(const adatasource: tdatasource);
    procedure dosyncnextrecord;
    function checkareafull(ay: integer): boolean;
+   procedure setppmm(const avalue: real);
            //ibandparent
+   function getppmm: real;
    procedure registerclient(const aclient: ireportclient);
    procedure unregisterclient(const aclient: ireportclient);
    function beginband(const acanvas: tcanvas;
@@ -1354,6 +1365,7 @@ type
           //true if empty
 
               //ibandparent
+   function getppmm: real;
    procedure registerclient(const aclient: ireportclient);
    procedure unregisterclient(const aclient: ireportclient);
    function beginband(const acanvas: tcanvas;
@@ -2384,6 +2396,13 @@ begin
  end;
 end;
 
+procedure treptabulatoritem.scale(const ascale: real);
+begin
+ if ffont <> nil then begin
+  ffont.scale(ascale);
+ end;
+end;
+
 { treptabulators }
 
 constructor treptabulators.create(const aowner: tcustomrecordband);
@@ -3222,6 +3241,15 @@ begin
  end;
 end;
 
+procedure treptabulators.scale(const ascale: real);
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fitems) do begin
+  treptabulatoritem(fitems[int1]).scale(ascale);
+ end;
+end;
+
 procedure setbandoptionsshow(const avalue: bandoptionshowsty;
                                            var foptions: bandoptionshowsty);
 const
@@ -3376,7 +3404,8 @@ begin
 endlab:
 end;
  
-procedure updateparentintf(const sender: ireportclient; var fparentintf: ibandparent);
+procedure updateparentintf(const sender: ireportclient;
+                                 var fparentintf: ibandparent);
 var
  widget1: twidget;
 begin
@@ -3392,6 +3421,7 @@ begin
    end; 
    if fparentintf <> nil then begin
     fparentintf.registerclient(sender);
+    sender.setppmm(fparentintf.getppmm);
    end;
   end
   else begin
@@ -3465,6 +3495,11 @@ begin
 end;
 
 procedure trepspacer.resetzebra;
+begin
+ //dummy
+end;
+
+procedure trepspacer.setppmm(const avalue: real);
 begin
  //dummy
 end;
@@ -4302,6 +4337,25 @@ begin
  inherited;
 end;
 
+procedure tcustomrecordband.setppmm(const avalue: real);
+var
+ int1: integer;
+begin
+ ftabs.ppmm:= avalue;
+ for int1:= 0 to high(fareas) do begin
+  fareas[int1].setppmm(avalue);
+ end;
+ for int1:= 0 to high(frecbands) do begin
+  frecbands[int1].setppmm(avalue);
+ end;
+end;
+
+procedure tcustomrecordband.scale(const ascale: real);
+begin
+ inherited;
+ ftabs.scale(ascale);
+end;
+
 { tcustombandgroup }
 
 procedure tcustombandgroup.registerchildwidget(const child: twidget);
@@ -4623,6 +4677,11 @@ begin
  for int1:= 0 to high(frecbands) do begin
   frecbands[int1].initpage;
  end;
+end;
+
+function tcustombandgroup.getppmm: real;
+begin
+ result:= ftabs.ppmm;
 end;
 
 { tbasebandarea }
@@ -4972,6 +5031,15 @@ begin
  end;
 end;
 
+procedure tbasebandarea.setppmm(const avalue: real);
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fareabands) do begin
+  fareabands[int1].setppmm(avalue);
+ end;
+end;
+
 procedure tbasebandarea.dosyncnextrecord;
 var
  int1: integer;
@@ -5001,6 +5069,16 @@ begin
  beginrender(true);
  if freportpage <> nil then begin
   freportpage.recordchanged;
+ end;
+end;
+
+function tbasebandarea.getppmm: real;
+begin
+ if freportpage <> nil then begin
+  result:= freportpage.ppmm;
+ end
+ else begin
+  result:= defaultppmm;
  end;
 end;
 
@@ -5437,6 +5515,12 @@ begin
  if avalue <> fppmm then begin
   rea1:= avalue/fppmm;
   fppmm:= avalue;
+  for int1:= 0 to high(fclients) do begin
+   fclients[int1].setppmm(avalue);
+  end;
+  for int1:= 0 to high(fareas) do begin
+   fareas[int1].setppmm(avalue);
+  end;
   if not (csloading in componentstate) then begin
    scale(rea1);
   end;
@@ -5671,6 +5755,11 @@ begin
  result:= trepwidgetfont;
 end;
 
+function tcustomreportpage.getppmm: real;
+begin
+ result:= fppmm;
+end;
+
  {tcustomreport}
  
 constructor tcustomreport.create(aowner: tcomponent);
@@ -5744,9 +5833,9 @@ begin
    raise exception.create('Invalid value');
   end;
   if (ffont <> nil) and (fppmm > 0) then begin
-   include(fwidgetstate1,ws1_fontheightlock);
+   include(fwidgetstate1,ws1_scaling);
    ffont.scale(avalue/fppmm);
-   exclude(fwidgetstate1,ws1_fontheightlock);
+   exclude(fwidgetstate1,ws1_scaling);
   end;
   fppmm:= avalue;
   for int1:= 0 to high(freppages) do begin

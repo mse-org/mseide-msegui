@@ -90,7 +90,7 @@ type
                   ws_isvisible
                  );
  widgetstatesty = set of widgetstatety;
- widgetstate1ty = (ws1_childscaled,ws1_fontheightlock,
+ widgetstate1ty = (ws1_childscaled,{ws1_fontheightlock,}ws1_scaling,
                    ws1_widgetregionvalid,ws1_rootvalid,
                    ws1_anchorsizing,ws1_parentclientsizeinited,
                    ws1_parentupdating, //set while setparentwidget
@@ -6138,7 +6138,8 @@ var
 
 begin
  if not (csloading in componentstate) and (fparentwidget <> nil) and
-                        not (ws1_anchorsizing in fwidgetstate1) then begin
+        not (ws1_anchorsizing in fwidgetstate1) and 
+        not (ws1_scaling in fparentwidget.fwidgetstate1) then begin
   int1:= 0; //loopcount
   repeat
 //   size1:= agetsize;
@@ -9410,7 +9411,7 @@ end;
 
 procedure twidget.dofontchanged(const sender: tobject);
 begin
- if not (ws1_fontheightlock in fwidgetstate1) then begin
+ if not (ws1_scaling in fwidgetstate1) then begin
   fontchanged;
  end;
 end;
@@ -9465,7 +9466,7 @@ begin
   else begin
    ffontheight:= getfont.lineheight;
   end; 
-  if (int1 <> 0) and not (ws1_fontheightlock in fwidgetstate1) then begin
+  if (int1 <> 0) and not (ws1_scaling in fwidgetstate1) then begin
    int1:= ffontheight - int1;
    if int1 <> 0 then begin
     dofontheightdelta(int1);
@@ -10071,7 +10072,7 @@ var
  int1: integer;
  rect1: rectty;
 begin
- include(fwidgetstate1,ws1_fontheightlock);
+ include(fwidgetstate1,ws1_scaling);
  try
   rect1:= fwidgetrect;
   if fframe <> nil then begin
@@ -10099,7 +10100,7 @@ begin
   end;
   widgetrect:= rect1;
  finally
-  exclude(fwidgetstate1,ws1_fontheightlock);
+  exclude(fwidgetstate1,ws1_scaling);
  end;
 end;
 
