@@ -24,15 +24,25 @@ type
  fpreaderclassty = class of tfpcustomimagereader;
  
  tmsefpmemoryimage = class(tfpmemoryimage)
+  private
+   fhasalpha: boolean;
+   fmonoalpha: boolean;
   public
+   procedure assign(source: tpersistent); override;
    procedure assignto(dest: tpersistent); override;
+   procedure writetostream(const dest: tstream; 
+                   const awriter: tfpcustomimagewriter);
+                             //owns the writer
+   property hasalpha: boolean read fhasalpha;
+   property monoalpha: boolean read fmonoalpha;
  end;  
 {$endif}
 
  readgraphicprocty = function(const source: tstream; const index: integer; 
                                const dest: tobject): boolean;
- writegraphicprocty = function(const dest: tstream;
-                               const source: tobject): boolean;
+ writegraphicprocty = procedure(const dest: tstream;
+                               const source: tobject;
+                               const params: array of const);
 
 procedure readgraphic(const source: tstream; const dest: tbitmap;
                            const aformatname: string = '';
@@ -46,10 +56,13 @@ procedure readgraphic(const source: tstream; const dest: timagelist); overload;
                            //only for ico format
                            
 procedure writegraphic(const dest: tstream; const source: tbitmap;
-                           const aformatname: string); overload;
+                           const aformatname: string;
+                           const params: array of const); overload;
 procedure writegraphic(const dest: tstream; const source: tmaskedbitmap;
-                           const aformatname: string); overload;
+                           const aformatname: string;
+                           const params: array of const); overload;
 procedure writegraphic(const dest: tstream; const source: timagelist); overload;
+                           //for ico
 
 procedure registergraphicformat(const aformatlabel: string;
                            const areadproc: readgraphicprocty;
@@ -276,7 +289,7 @@ begin
 end;
 
 procedure writegraphic1(const dest: tstream; const asource: tobject;
-                            const aformatlabel: string);
+                 const aformatlabel: string; const params: array of const);
 var
  int1,int2: integer;
 begin
@@ -295,7 +308,7 @@ begin
   formaterror(stockobjects.captions[sc_graphic_format_not_supported],aformatlabel);
  end;
  with formats[int2] do begin
-  writeproc(dest,asource);
+  writeproc(dest,asource,params);
  end;
 end;
 
@@ -322,23 +335,24 @@ begin
 end;
                            
 procedure writegraphic(const dest: tstream; const source: tbitmap;
-                           const aformatname: string); overload;
-                           //index = select image in ico format
+                           const aformatname: string;
+                           const params: array of const); overload;
 begin
- writegraphic1(dest,source,aformatname);
+ writegraphic1(dest,source,aformatname,params);
 end;
 
 procedure writegraphic(const dest: tstream; const source: tmaskedbitmap;
-                           const aformatname: string); overload;
-                           //index = select image in ico format
+                           const aformatname: string;
+                           const params: array of const); overload;
+                           
 begin
- writegraphic1(dest,source,aformatname);
+ writegraphic1(dest,source,aformatname,params);
 end;
 
 procedure writegraphic(const dest: tstream; const source: timagelist); overload;
                            //index = select image in ico format
 begin
- writegraphic1(dest,source,'ico');
+ writegraphic1(dest,source,'ico',[]);
 end;
 
 {$ifdef FPC}
@@ -376,10 +390,204 @@ end;
 
 { tmsefpmemoryimage }
 
+procedure tmsefpmemoryimage.writetostream(const dest: tstream; 
+                   const awriter: tfpcustomimagewriter);
+                             //owns the writer
+begin
+ try
+  savetostream(dest,awriter);
+ finally
+  awriter.free;
+ end;
+end;
+
+procedure tmsefpmemoryimage.assign(source: tpersistent);
+var
+ col1,col2,col3: tfpcolor;
+ po1,po3: plongword;
+ po2,po4: prgbtriplety;
+ int1,int2,int3: integer;
+ lwo1: longword;
+ masked1: boolean;
+ colormask1: boolean;
+begin
+ if source is tbitmap then begin
+  masked1:= source is tmaskedbitmap;
+  if masked1 then begin
+   with tmaskedbitmap(source) do begin
+    masked1:= masked;
+    colormask1:= colormask;
+    fmonoalpha:= not colormask1;
+   end;
+  end;
+  fhasalpha:= masked1;
+  with tbitmap(source) do begin
+   col1.red:= 0;
+   col1.green:= 0;
+   col1.blue:= 0;
+   col1.alpha:= 0;
+   col2.red:= $ffff;
+   col2.green:= $ffff;
+   col2.blue:= $ffff;
+   col2.alpha:= 0;
+   col3.alpha:= 0;
+   if monochrome then begin                //mono
+    usepalette:= true;
+    self.setsize(size.cx,size.cy);
+    if masked1 then begin
+     if colormask1 then begin              //mono colormask
+      for int1:= 0 to height - 1 do begin
+       po1:= scanline[int1];
+       po4:= tmaskedbitmap(source).mask.scanline[int1];
+       int2:= 0;
+       lwo1:= $00000001;
+       for int2:= 0 to width-1 do begin
+        if po1^ and lwo1 <> 0 then begin
+         col1.alpha:= (word(po4^.red)+word(po4^.green)+word(po4^.blue)) div 3;
+         col1.alpha:= col1.alpha + col1.alpha shl 8;
+         colors[int1,int2]:= col1;
+        end
+        else begin
+         col2.alpha:= (word(po4^.red)+word(po4^.green)+word(po4^.blue)) div 3;
+         col2.alpha:= col1.alpha + col1.alpha shl 8;
+         colors[int2,int1]:= col2;
+        end;
+        lwo1:= lwo1 shl 1;
+        if lwo1 = 0 then begin
+         inc(po1);
+         lwo1:= $00000001;
+        end;
+        inc(po4);
+       end;
+      end;
+     end
+     else begin                          //mono monomask
+      for int1:= 0 to height - 1 do begin
+       po3:= tmaskedbitmap(source).mask.scanline[int1];
+       po1:= scanline[int1];
+       int2:= 0;
+       lwo1:= $00000001;
+       for int2:= 0 to width-1 do begin
+        if po1^ and lwo1 <> 0 then begin
+         if po3^ and lwo1 <> 0 then begin
+          col1.alpha:= $ffff;
+         end
+         else begin
+          col1.alpha:= $0000;
+         end;
+         colors[int1,int2]:= col1;
+        end
+        else begin
+         if po3^ and lwo1 <> 0 then begin
+          col2.alpha:= $ffff;
+         end
+         else begin
+          col2.alpha:= $0000;
+         end;
+         colors[int2,int1]:= col2;
+        end;
+        lwo1:= lwo1 shl 1;
+        if lwo1 = 0 then begin
+         inc(po1);
+         inc(po3);
+         lwo1:= $00000001;
+        end;
+       end;
+      end;
+     end;
+    end
+    else begin                        //mono unmasked
+     for int1:= 0 to height - 1 do begin
+      po1:= scanline[int1];
+      int2:= 0;
+      lwo1:= $00000001;
+      for int2:= 0 to width-1 do begin
+       if po1^ and lwo1 <> 0 then begin
+        colors[int1,int2]:= col1;
+       end
+       else begin
+        colors[int2,int1]:= col2;
+       end;
+       lwo1:= lwo1 shl 1;
+       if lwo1 = 0 then begin
+        inc(po1);
+        lwo1:= $00000001;
+       end;
+      end;
+     end;
+    end;
+   end
+   else begin                       //color
+    usepalette:= false;
+    self.setsize(size.cx,size.cy);
+    if masked1 then begin
+     if colormask1 then begin       //color colormask
+      for int1:= 0 to height - 1 do begin
+       po4:= tmaskedbitmap(source).mask.scanline[int1];
+       po2:= scanline[int1];
+       for int2:= 0 to width - 1 do begin
+        col3.red:= word(po2^.red)+(word(po2^.red) shl word(8));
+        col3.green:= word(po2^.green)+(word(po2^.green) shl word(8));
+        col3.blue:= word(po2^.blue)+(word(po2^.blue) shl word(8));
+        col3.alpha:= (word(po4^.red)+word(po4^.green)+word(po4^.blue)) div 3;
+        col3.alpha:= col3.alpha + col3.alpha shl 8;
+        colors[int2,int1]:= col3;
+        inc(po2);
+        inc(po4);
+       end;
+      end
+     end
+     else begin                  //color monomask
+      for int1:= 0 to height - 1 do begin
+       po1:= tmaskedbitmap(source).mask.scanline[int1];
+       int2:= 0;
+       lwo1:= $00000001;
+       po2:= scanline[int1];
+       for int2:= 0 to width - 1 do begin
+        col3.red:= word(po2^.red)+(word(po2^.red) shl word(8));
+        col3.green:= word(po2^.green)+(word(po2^.green) shl word(8));
+        col3.blue:= word(po2^.blue)+(word(po2^.blue) shl word(8));
+        if po1^ and lwo1 <> 0 then begin
+         col3.alpha:= $ffff;
+        end
+        else begin
+         col3.alpha:= $0000;
+        end;
+        colors[int2,int1]:= col3;
+        inc(po2);
+        lwo1:= lwo1 shl 1;
+        if lwo1 = 0 then begin
+         inc(po1);
+         lwo1:= $00000001;
+        end;
+       end;
+      end;
+     end;
+    end
+    else begin                 //color unmasked
+     for int1:= 0 to height - 1 do begin
+      po2:= scanline[int1];
+      for int2:= 0 to width - 1 do begin
+       col3.red:= word(po2^.red)+(word(po2^.red) shl word(8));
+       col3.green:= word(po2^.green)+(word(po2^.green) shl word(8));
+       col3.blue:= word(po2^.blue)+(word(po2^.blue) shl word(8));
+       colors[int2,int1]:= col3;
+       inc(po2);
+      end;
+     end;
+    end;
+   end;
+  end;
+ end
+ else begin
+  inherited;
+ end;
+end;
+
 procedure tmsefpmemoryimage.assignto(dest: tpersistent);
 
 var
- coloralpha: boolean;
+ coloralpha1: boolean;
  
  function getmask(ashift: word): boolean;
  var
@@ -406,7 +614,7 @@ var
     end;
    end;
   end;
-  coloralpha:= bo1;
+  coloralpha1:= bo1;
   result:= bo2;
  end;
   
@@ -414,15 +622,14 @@ var
  int1,int2: integer;
  po1: prgbtripleaty;
  col1: tfpcolor;
- hasalpha: boolean;
  by1: byte;
  col2: colorty;
- 
+ bo1: boolean;
 begin
  if dest is tbitmap then begin
   with tbitmap(dest) do begin
    size:= makesize(self.width,self.height);
-   hasalpha:= false;
+   bo1:= false;
 {$ifdef FPC}{$checkpointer off}{$endif} 
 //scanline is not in heap on win32
    for int1:= 0 to height - 1 do begin
@@ -434,10 +641,12 @@ begin
       green:= col1.green shr 8;      
       blue:= col1.blue shr 8;      
       res:= 0;
-      hasalpha:= hasalpha or (col1.alpha < $ff00);
+      bo1:= bo1 or (col1.alpha < $ff00);
      end;
     end;
    end;
+   fhasalpha:= bo1;
+   fmonoalpha:= false;
    if dest is tmaskedbitmap then begin
     with tmaskedbitmap(dest) do begin
      if hasalpha then begin
@@ -448,7 +657,8 @@ begin
       end;
       col2:= maskcolorbackground;
       maskcolorbackground:= 0;
-      colormask:= coloralpha;
+      colormask:= coloralpha1;
+      fmonoalpha:= not coloralpha1;
       maskcolorbackground:= col2;
      end
      else begin
