@@ -6138,61 +6138,65 @@ var
 
 begin
  if not (csloading in componentstate) and (fparentwidget <> nil) and
-        not (ws1_anchorsizing in fwidgetstate1) and 
-        not (ws1_scaling in fparentwidget.fwidgetstate1) then begin
-  int1:= 0; //loopcount
-  repeat
-//   size1:= agetsize;
-   size1:= fparentwidget.minclientsize;
-   rect1:= fwidgetrect;
-   delta:= subsize(size1,fparentclientsize);
-   anch:= fanchors * [an_left,an_right];
-   if anch <> [an_left] then begin
-    if (anch = [an_left,an_right]) then begin
-     inc(rect1.cx,delta.cx);
-    end
-    else begin
-     if anch = [an_right] then begin
-      inc(rect1.x,delta.cx);
+        not (ws1_anchorsizing in fwidgetstate1) then begin
+  if ws1_scaling in fparentwidget.fwidgetstate1 then begin
+   fparentclientsize:= fparentwidget.minclientsize;
+  end
+  else begin
+   int1:= 0; //loopcount
+   repeat
+ //   size1:= agetsize;
+    size1:= fparentwidget.minclientsize;
+    rect1:= fwidgetrect;
+    delta:= subsize(size1,fparentclientsize);
+    anch:= fanchors * [an_left,an_right];
+    if anch <> [an_left] then begin
+     if (anch = [an_left,an_right]) then begin
+      inc(rect1.cx,delta.cx);
      end
      else begin
-      if anch = [] then begin
-       if fparentwidget <> nil then begin
-        rect1.x:= fparentwidget.clientwidgetpos.x;
-        rect1.cx:= fparentwidget.clientsize.cx;
+      if anch = [an_right] then begin
+       inc(rect1.x,delta.cx);
+      end
+      else begin
+       if anch = [] then begin
+        if fparentwidget <> nil then begin
+         rect1.x:= fparentwidget.clientwidgetpos.x;
+         rect1.cx:= fparentwidget.clientsize.cx;
+        end;
        end;
       end;
      end;
     end;
-   end;
-   anch:= fanchors * [an_top,an_bottom];
-   if anch <> [an_top] then begin
-    if (anch = [an_top,an_bottom]) then begin
-     inc(rect1.cy,delta.cy);
-    end
-    else begin
-     if anch = [an_bottom] then begin
-      inc(rect1.y,delta.cy);
+    anch:= fanchors * [an_top,an_bottom];
+    if anch <> [an_top] then begin
+     if (anch = [an_top,an_bottom]) then begin
+      inc(rect1.cy,delta.cy);
      end
      else begin
-      if anch = [] then begin
-       if fparentwidget <> nil then begin
-        rect1.y:= fparentwidget.clientwidgetpos.y;
-        rect1.cy:= fparentwidget.clientsize.cy;
+      if anch = [an_bottom] then begin
+       inc(rect1.y,delta.cy);
+      end
+      else begin
+       if anch = [] then begin
+        if fparentwidget <> nil then begin
+         rect1.y:= fparentwidget.clientwidgetpos.y;
+         rect1.cy:= fparentwidget.clientsize.cy;
+        end;
        end;
       end;
      end;
     end;
-   end;
-   fparentclientsize:= size1;
-   include(fwidgetstate1, ws1_anchorsizing);
-   try
-    setwidgetrect(rect1);
-   finally
-    exclude(fwidgetstate1, ws1_anchorsizing);
-   end;
-   inc(int1);
-  until sizeisequal(size1,fparentwidget.minclientsize) or (int1 > 5);
+    fparentclientsize:= size1;
+    include(fwidgetstate1, ws1_anchorsizing);
+    try
+     setwidgetrect(rect1);
+    finally
+     exclude(fwidgetstate1, ws1_anchorsizing);
+    end;
+    inc(int1);
+   until sizeisequal(size1,fparentwidget.minclientsize) or (int1 > 5);
+  end;
  end;
 end;
 
