@@ -30,7 +30,12 @@ type
    finterfaceonly: boolean;
    fnoautoparse: boolean;
   protected
-   procedure parsefunction(const atype,aname: lstringty);
+   function parsefunction: boolean;
+   function parsefunctionparams: boolean;
+   function parseblock: boolean;
+   function parsetypedef: boolean;
+   function parsevardef: boolean;
+   function parsestatement: boolean;
   public
    constructor create(unitinfopo: punitinfoty;
               const afilelist: tmseindexednamelist;
@@ -71,26 +76,108 @@ begin
  create(afilelist,atext);
 end;
 
-procedure tcdesignparser.parsefunction(const atype: lstringty;
-               const aname: lstringty);
+function tcdesignparser.parsetypedef: boolean;
 begin
+ result:= false;
 end;
 
-procedure tcdesignparser.parse;
+function tcdesignparser.parsevardef: boolean;
+begin
+ result:= false;
+end;
+
+function tcdesignparser.parsefunctionparams: boolean;
+begin
+ result:= false;
+ mark;
+ if checkoperator('(') then begin
+  result:= findoperator(')');
+ end;
+ if result then begin
+  pop;
+ end
+ else begin
+  back;
+ end;
+end;
+
+function tcdesignparser.parseblock: boolean;
+var
+ ch1: char;
+begin
+ result:= true;
+ mark;
+ if checkoperator('{') then begin
+  while not eof do begin
+   ch1:= getoperator;
+   case ch1 of
+    '}': begin
+     break;
+    end;
+    '{': begin
+     parseblock();
+    end;
+    else begin
+     parsestatement;
+    end;
+   end;
+  end;
+ end;
+ if result then begin
+  pop;
+ end
+ else begin
+  back;
+ end;
+end;
+
+function tcdesignparser.parsefunction: boolean;
 var
  lstr1,lstr2: lstringty;
  ch1: char;
 begin
- inherited;
- while not eof do begin
-  if getorigname(lstr1) and getorigname(lstr2) then begin
-   ch1:= getoperator;
-   case ch1 of 
-    '(': begin
-     parsefunction(lstr1,lstr2);
+ result:= false;
+ mark;
+ if getorigname(lstr1) and getorigname(lstr2) then begin
+  if parsefunctionparams then begin
+   if checkoperator(';') then begin
+    result:= true;  //header
+   end
+   else begin
+    if testoperator('{') then begin
+     if parseblock then begin
+      result:= true;
+     end;
     end;
+   end;    
+  end;
+ end;
+ if result then begin
+  pop;
+ end
+ else begin
+  back;
+ end;
+end;
+
+function tcdesignparser.parsestatement: boolean;
+begin
+ result:= true;
+// case 
+ if not parsefunction then begin
+  if not parsetypedef then begin
+   if not parsevardef then begin
+    skipstatement;
    end;
   end;
+ end;
+end;
+
+procedure tcdesignparser.parse;
+begin
+ inherited;
+ while not eof do begin
+  parsestatement;
  end;
 end;
 

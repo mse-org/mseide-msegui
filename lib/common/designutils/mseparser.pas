@@ -297,11 +297,11 @@ type
   pid_read,pid_write,pid_stored,pid_default,pid_nodefault);
   
  const
- firstpascalident = pid_and;
- lastpascalnormalident = integer(pid_xor);
- lastpascalclassident = integer(pid_automated);
- lastpascalpropertyident = integer(pid_nodefault);
- lastpascalident = pid_nodefault;
+  firstpascalident = pid_and;
+  lastpascalnormalident = integer(pid_xor);
+  lastpascalclassident = integer(pid_automated);
+  lastpascalpropertyident = integer(pid_nodefault);
+  lastpascalident = pid_nodefault;
 
  pascalidents: array[firstpascalident..lastpascalident] of string = (
   'and','array','as','asm','begin','case','class','const','constructor',
@@ -356,6 +356,28 @@ type
    property startdefines: stringarty read fstartdefines write fstartdefines;
  end;
 
+ cidentty = (cid_invalid = 1,
+  cid_break,cid_case,cid_continue,cid_default,
+  cid_do,cid_else,cid_entry,cid_for,cid_goto,cid_if,cid_return,
+  cid_sizeof,
+  cid_switch,cid_while,
+  cid_auto,cid_char,cid_const,cid_double,cid_enum,cid_extern,cid_float,
+  cid_int,cid_long,cid_register,cid_short,cid_signed,cid_static,
+  cid_struct,cid_typedef,cid_union,cid_unsigned,cid_volatile);
+ const
+  firstcident = cid_break;
+  lastcident = cid_volatile;
+  cidents: array[firstcident..lastcident] of string = (
+   'break','case','continue','default',
+   'do','else','entry','for','goto','if','return',
+   'sizeof',
+   'switch','while',
+   'auto','char','const','double','enum','extern','float',
+   'int','long','register','short','signed','static',
+   'struct','typedef','union','unsigned','volatile'
+  );
+  
+ type             
  tcparser = class(tparser)
   protected
    function getscannerclass: scannerclassty; override;
@@ -365,6 +387,7 @@ type
    function getvaluestring(var value: string): valuekindty; override;
    function skipcomment: boolean; override; //does not skip whitespace
    function getcstring(var value: string): boolean;
+   function skipstatement: boolean;
  end;
 
  constinfoty = record
@@ -1140,7 +1163,7 @@ end;
 function tparser.findoperator(aoperator: char): boolean;
 begin
  result:= false;
- while (fto^.kind <> tk_fileend1) do begin
+ while (fto^.kind <> tk_fileend1) or exitinclude do begin
   if (fto^.kind = tk_operator) and (fto^.op = aoperator) then begin
    nexttoken;
    result:= true;
@@ -2052,6 +2075,11 @@ begin
    end;
   end;
  end;
+end;
+
+function tcparser.skipstatement: boolean;
+begin
+ result:= findoperator(';');
 end;
 
 { tconstparser }
