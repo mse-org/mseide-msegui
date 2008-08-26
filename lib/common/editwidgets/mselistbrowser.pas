@@ -56,6 +56,7 @@ type
 
  tlistedititem = class(tlistitem)
  end;
+ listedititemclassty = class of tlistedititem;
 
  ttreeitemeditlist = class;
  ttreelistedititem = class;
@@ -118,7 +119,8 @@ type
    constructor create(const alistview: tcustomlistview);
    property listview: tcustomlistview read flistview;
   published
-   property oncreateitem: createlistitemeventty read getoncreateitem write setoncreateitem;
+   property oncreateitem: createlistitemeventty read getoncreateitem 
+                                          write setoncreateitem;
    property options;
    property captionpos;
    property imnr_base;
@@ -356,7 +358,11 @@ type
   private
    procedure setoncreateitem(const value: createlistitemeventty);
    function getoncreateitem: createlistitemeventty;
+   function getitemclass: listedititemclassty;
+   procedure setitemclass(const avalue: listedititemclassty);
   protected
+  public
+   property itemclass: listedititemclassty read getitemclass write setitemclass;
   published
    property imnr_base;
    property imnr_expanded;
@@ -371,7 +377,8 @@ type
    property captionpos;
    property options;
    property onitemnotification;
-   property oncreateitem: createlistitemeventty read getoncreateitem write setoncreateitem;
+   property oncreateitem: createlistitemeventty read getoncreateitem 
+                                                    write setoncreateitem;
    property onstatreaditem;
  end;
 
@@ -577,6 +584,8 @@ type
    procedure setonstatreaditem(const avalue: statreadtreeitemeventty);
    function getitems(const index: integer): ttreelistedititem;
    procedure setitems(const index: integer; const avalue: ttreelistedititem);
+   function getitemclass: treelistedititemclassty;
+   procedure setitemclass(const avalue: treelistedititemclassty);
   protected
    procedure freedata(var data); override;
    procedure docreateobject(var instance: tobject); override;
@@ -601,14 +610,16 @@ type
    procedure add(const anode: ttreelistedititem); overload;
                  //adds toplevel node
    procedure add(const anodes: treelistedititemarty); overload;
+   procedure add(const acount: integer; 
+               const aitemclass: treelistedititemclassty = nil); overload;
    function toplevelnodes: treelistedititemarty;
    procedure expandall;
    procedure collapseall;
    procedure moverow(const source,dest: integer);
     //source and dest must belong to the same parent, ignored otherwise
+   property itemclass: treelistedititemclassty read getitemclass write setitemclass;
    property items[const index: integer]: ttreelistedititem read getitems 
                                           write setitems; default;
-
   published
    property imnr_base;
    property imnr_expanded;
@@ -1971,6 +1982,7 @@ begin
  fcolorglyph:= cl_black;
  fowner:= owner;
  inherited create(intf);
+ fitemclass:= tlistedititem;
 end;
 
 procedure tcustomitemeditlist.setcolorglyph(const Value: colorty);
@@ -2078,6 +2090,16 @@ begin
 end;
 
 { titemeditlist}
+
+function titemeditlist.getitemclass: listedititemclassty;
+begin
+ result:= listedititemclassty(fitemclass);
+end;
+
+procedure titemeditlist.setitemclass(const avalue: listedititemclassty);
+begin
+ fitemclass:= avalue;
+end;
 
 function titemeditlist.getoncreateitem: createlistitemeventty;
 begin
@@ -2934,7 +2956,7 @@ end;
 
 procedure ttreeitemeditlist.createitem(var item: tlistitem);
 begin
- item:= ttreelistedititem.create(self);
+ item:= treelistedititemclassty(fitemclass).create(self);
 end;
 
 procedure ttreeitemeditlist.docreateobject(var instance: tobject);
@@ -3105,8 +3127,28 @@ procedure ttreeitemeditlist.add(const anodes: treelistedititemarty);
 var
  int1: integer;
 begin
- for int1:= 0 to high(anodes) do begin
-  add(anodes[int1]);
+ beginupdate;
+ try
+  for int1:= 0 to high(anodes) do begin
+   add(anodes[int1]);
+  end;
+ finally
+  endupdate;
+ end;
+end;
+
+procedure ttreeitemeditlist.add(const acount: integer; 
+               const aitemclass: treelistedititemclassty = nil);
+var
+ int1: integer;
+begin
+ beginupdate;
+ try
+  for int1:= 0 to acount - 1 do begin
+   add(aitemclass.create);
+  end;
+ finally
+  endupdate;
  end;
 end;
 
@@ -3321,7 +3363,9 @@ begin
   if (ils_subnodecountinvalid in fstate) then begin
    exclude(fstate,ils_subnodecountinvalid);
    ar1:= toplevelnodes;
+   include(fstate,ils_subnodecountupdating);
    fowner.fgridintf.getcol.grid.rowcount:= 0;
+   clear;
    exclude(fstate,ils_subnodecountupdating);
    add(ar1);
   end
@@ -3467,6 +3511,16 @@ procedure ttreeitemeditlist.setitems(const index: integer;
                const avalue: ttreelistedititem);
 begin
  inherited setitems(index,avalue);
+end;
+
+function ttreeitemeditlist.getitemclass: treelistedititemclassty;
+begin
+ result:= treelistedititemclassty(fitemclass);
+end;
+
+procedure ttreeitemeditlist.setitemclass(const avalue: treelistedititemclassty);
+begin
+ fitemclass:= avalue;
 end;
 
 { trecordfieldedit }

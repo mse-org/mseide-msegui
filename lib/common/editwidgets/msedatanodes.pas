@@ -985,7 +985,7 @@ end;
 
 procedure tcustomitemlist.createitem(var item: tlistitem);
 begin
- item:= tlistitem.create(self);
+ item:= listitemclassty(fitemclass).create(self);
 end;
 
 procedure tcustomitemlist.statreaditem(const reader: tstatreader;

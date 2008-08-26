@@ -29,6 +29,7 @@ type
    finterface: boolean;
    finterfaceonly: boolean;
    fnoautoparse: boolean;
+   ffunctionlevel: integer;
   protected
    function parsefunction: boolean;
    function parsefunctionparams: boolean;
@@ -46,6 +47,7 @@ type
               const getincludefile: getincludefileeventty;
               const ainterfaceonly: boolean; const atext: ansistring); overload;
    procedure parse; override;  
+   procedure clear; override;
  end;
 
 implementation
@@ -136,6 +138,7 @@ var
  lstr1,lstr2: lstringty;
  ch1: char;
 begin
+ inc(ffunctionlevel);
  result:= false;
  mark;
  if getorigname(lstr1) and getorigname(lstr2) then begin
@@ -158,18 +161,51 @@ begin
  else begin
   back;
  end;
+ dec(ffunctionlevel);
 end;
 
 function tcdesignparser.parsestatement: boolean;
+var
+ lstr1,lstr2: lstringty;
+ ch1: char;
+ bo1: boolean;
 begin
  result:= true;
-// case 
- if not parsefunction then begin
-  if not parsetypedef then begin
-   if not parsevardef then begin
-    skipstatement;
+ bo1:= ffunctionlevel = 0;
+ mark;
+ if not bo1 and checknamenoident then begin
+  repeat
+   ch1:= getoperator;
+   case ch1 of
+    '(': begin
+     findclosingbracket; //function call
+    end;
+    '=': begin
+     skipstatement;      //assignment
+     break;
+    end;
+    ';': begin
+     break;
+    end;
+    else begin
+     bo1:= true;
+     break;
+    end;
+   end;
+  until ch1 = #0;
+ end;
+ if bo1 then begin
+  back;
+  if not parsefunction then begin
+   if not parsetypedef then begin
+    if not parsevardef then begin
+     skipstatement;
+    end;
    end;
   end;
+ end
+ else begin
+  pop;
  end;
 end;
 
@@ -179,6 +215,12 @@ begin
  while not eof do begin
   parsestatement;
  end;
+end;
+
+procedure tcdesignparser.clear;
+begin
+ inherited;
+ ffunctionlevel:= 0;
 end;
 
 end.

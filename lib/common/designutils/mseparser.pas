@@ -227,18 +227,20 @@ type
                                      const anames: array of string): integer;
 
    function getoperator: char;                   //#0 if none
+   function getnextoperator: char;
    function testoperator(op: char): boolean;
    function checkoperator(op: char): boolean;
    function checknextoperator(aoperator: char): boolean; //true if ok
-   function findoperator(aoperator: char): boolean;   //false if not found
+   function findoperator(aoperator: char): boolean;      //false if not found
+   function findclosingbracket: boolean;                 //false if not found;
    function getvaluestring(var value: string): valuekindty; virtual;
-   function getnamelist: lstringarty; //names separated by ','
-   function getorignamelist: lstringarty; //names separated by ','
+   function getnamelist: lstringarty;                    //names separated by ','
+   function getorignamelist: lstringarty;                //names separated by ','
 
    function skipcomment: boolean; virtual; //does not skip whitespace
    function checknewline: boolean;
-   function nextline: boolean;       //false if fileend
-   function skipwhitespace: boolean; //and comments, false if no whitespaces
+   function nextline: boolean;             //false if fileend
+   function skipwhitespace: boolean;       //and comments, false if no whitespaces
    function skipwhitespaceonly: boolean;
 
    property eof: boolean read feof;
@@ -361,6 +363,7 @@ type
   cid_do,cid_else,cid_entry,cid_for,cid_goto,cid_if,cid_return,
   cid_sizeof,
   cid_switch,cid_while,
+
   cid_auto,cid_char,cid_const,cid_double,cid_enum,cid_extern,cid_float,
   cid_int,cid_long,cid_register,cid_short,cid_signed,cid_static,
   cid_struct,cid_typedef,cid_union,cid_unsigned,cid_volatile);
@@ -372,6 +375,7 @@ type
    'do','else','entry','for','goto','if','return',
    'sizeof',
    'switch','while',
+
    'auto','char','const','double','enum','extern','float',
    'int','long','register','short','signed','static',
    'struct','typedef','union','unsigned','volatile'
@@ -1173,6 +1177,77 @@ begin
  end;
 end;
 
+function tparser.getnextoperator: char;
+begin
+ result:= #0;
+ while (fto^.kind <> tk_fileend1) or exitinclude do begin
+  if (fto^.kind = tk_operator) then begin
+   result:= fto^.op;
+   nexttoken;
+   break;
+  end;
+  nexttoken;
+ end;
+end;
+
+function tparser.getoperator: char;
+begin
+ skipwhitespace;
+ if fto^.kind = tk_operator then begin
+  result:= fto^.op;
+  nexttoken;
+ end
+ else begin
+  result:= #0;
+ end;
+end;
+
+function tparser.testoperator(op: char): boolean;
+begin
+ skipwhitespace;
+ if fto^.kind = tk_operator then begin
+  result:= fto^.op = op;
+ end
+ else begin
+  result:= false;
+ end;
+end;
+
+function tparser.checkoperator(op: char): boolean;
+var
+ ch1: char;
+begin
+ ch1:= getoperator;
+ result:= op = ch1;
+ if not result and (ch1 <> #0) then begin
+  lasttoken;
+ end;
+end;
+
+function tparser.findclosingbracket: boolean; //false if not found;
+var
+ int1: integer;
+ ch1: char;
+begin
+ result:= false;
+ int1:= 1;
+ repeat
+  ch1:= getnextoperator;
+  case ch1 of
+   ')': begin
+    dec(int1);
+    if int1 = 0 then begin
+     result:= true;
+     break;
+    end;
+   end;
+   '(': begin
+    inc(int1);
+   end;
+  end;
+ until ch1 = #0;
+end;
+
 function tparser.isfirstnonwhitetoken: boolean;
 var
  po1,po2: ptokenty;
@@ -1391,49 +1466,6 @@ begin
  else begin
   value:= emptylstring;
   result:= false;
-  lasttoken;
- end;
-end;
-{
-function tparser.getorigstring(maxcount: integer = bigint): string;
-begin
- result:= '';
- while (maxcount > 0) and not(fto^.kind in [tk_fileend,tk_newline,tk_whitespace]) do begin
-  result:= result + getorigtoken;
-  dec(maxcount);
- end;
-end;
-}
-function tparser.getoperator: char;
-begin
- skipwhitespace;
- if fto^.kind = tk_operator then begin
-  result:= fto^.op;
-  nexttoken;
- end
- else begin
-  result:= #0;
- end;
-end;
-
-function tparser.testoperator(op: char): boolean;
-begin
- skipwhitespace;
- if fto^.kind = tk_operator then begin
-  result:= fto^.op = op;
- end
- else begin
-  result:= false;
- end;
-end;
-
-function tparser.checkoperator(op: char): boolean;
-var
- ch1: char;
-begin
- ch1:= getoperator;
- result:= op = ch1;
- if not result and (ch1 <> #0) then begin
   lasttoken;
  end;
 end;
@@ -2078,8 +2110,29 @@ begin
 end;
 
 function tcparser.skipstatement: boolean;
+var
+ int1: integer;
+ ch1: char;
 begin
- result:= findoperator(';');
+ result:= false;
+ int1:= 0;
+ repeat
+  ch1:= getnextoperator;
+  case ch1 of
+   '(': begin
+    inc(int1);
+   end;
+   ')': begin
+    dec(int1);
+   end;
+   ';': begin
+    if int1 <= 0 then begin
+     result:= true;
+     break;
+    end;
+   end;
+  end;
+ until ch1 = #0;
 end;
 
 { tconstparser }
