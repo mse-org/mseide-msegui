@@ -265,8 +265,6 @@ type
    showconsole: tbooleanedit;
    stoponexception: tbooleanedit;
    activateonbreak: tbooleanedit;
-   tlayouter6: tlayouter;
-   debugtarget: tfilenameedit;
    makepage: ttabpage;
    tspacer2: tspacer;
    defaultmake: tenumedit;
@@ -408,6 +406,7 @@ type
    startupbkpt: tintegeredit;
    startupbkpton: tbooleanedit;
    valuehints: tbooleanedit;
+   debugtarget: tfilenameedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -1820,19 +1819,20 @@ begin
  aligny(wam_center,[mainfile,targetfile,targpref]);
  aligny(wam_center,[makecommand,makedir]);
  aligny(wam_center,[messageoutputfile,copymessages]);
+ placexorder(defaultmake.bounds_x,[10-defaultmake.frame.outerframe.right,10],
+             [defaultmake,showcommandline,checkmethods]);
  int1:= aligny(wam_center,[defaultmake,showcommandline]);
  with checkmethods do begin
   bounds_y:= int1 - bounds_cy - 2;
  end;
- checkmethods.bounds_y:= checkmethods.bounds_y;
  with closemessages do begin
-  bounds_y:= int1;
+  pos:= makepoint(checkmethods.bounds_x,int1);
  end;
 end;
 
 procedure tprojectoptionsfo.debuggeronchildscaled(const sender: TObject);
 begin
-// placeyorder(sourcedirgrid.bounds_y,0,[sourcedirgrid,debuggersplitter,signalgrid],0);
+ placeyorder(0,[0,0,10],[debugcommand,debugoptions,debugtarget,tlayouter1]);
 end;
 
 procedure tprojectoptionsfo.macronchildscaled(const sender: TObject);
@@ -1938,6 +1938,7 @@ procedure tprojectoptionsfo.copymessagechanged(const sender: TObject);
 begin
  messageoutputfile.enabled:= copymessages.value;
 end;
+
 {
 procedure tprojectoptionsfo.befla(const sender: tlayouter);
 begin

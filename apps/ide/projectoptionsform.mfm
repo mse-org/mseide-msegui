@@ -2,15 +2,15 @@ object projectoptionsfo: tprojectoptionsfo
   optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton]
   bounds_x = 56
   bounds_y = 119
-  bounds_cx = 616
-  bounds_cy = 576
+  bounds_cx = 669
+  bounds_cy = 571
   taborder = 1
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
   container.bounds_x = 0
   container.bounds_y = 0
-  container.bounds_cx = 616
-  container.bounds_cy = 576
+  container.bounds_cx = 669
+  container.bounds_cy = 571
   container.frame.framei_bottom = 0
   container.frame.localprops = [frl_fibottom, frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
   container.frame.sbhorz.options = [sbo_moveauto, sbo_showauto]
@@ -24,16 +24,16 @@ object projectoptionsfo: tprojectoptionsfo
   object tlayouter9: tlayouter
     bounds_x = 0
     bounds_y = 0
-    bounds_cx = 616
-    bounds_cy = 576
+    bounds_cx = 669
+    bounds_cy = 571
     anchors = []
     optionslayout = [lao_placey]
     place_maxdist = 0
     place_options = [plo_endmargin]
     object tlayouter8: tlayouter
       bounds_x = 0
-      bounds_y = 544
-      bounds_cx = 616
+      bounds_y = 539
+      bounds_cx = 669
       bounds_cy = 32
       frame.framei_top = 5
       frame.framei_bottom = 5
@@ -50,7 +50,7 @@ object projectoptionsfo: tprojectoptionsfo
       place_options = [plo_propmargin, plo_syncmaxautosize]
       object cancel: tbutton
         optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-        bounds_x = 559
+        bounds_x = 612
         bounds_y = 6
         bounds_cx = 52
         bounds_cy = 21
@@ -61,7 +61,7 @@ object projectoptionsfo: tprojectoptionsfo
       end
       object ok: tbutton
         optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-        bounds_x = 502
+        bounds_x = 555
         bounds_y = 6
         bounds_cx = 52
         bounds_cy = 21
@@ -76,15 +76,15 @@ object projectoptionsfo: tprojectoptionsfo
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight]
       bounds_x = 0
       bounds_y = 0
-      bounds_cx = 616
-      bounds_cy = 544
+      bounds_cx = 669
+      bounds_cy = 539
       frame.levelo = -1
       frame.captionoffset = 3
       frame.localprops = [frl_levelo]
       frame.dummy = 0
       anchors = [an_top, an_bottom]
       taborder = 1
-      activepageindex = 2
+      activepageindex = 1
       tab_frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
       tab_frame.dummy = 0
       tab_size = 19
@@ -94,8 +94,8 @@ object projectoptionsfo: tprojectoptionsfo
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_fontglyphheight]
         bounds_x = 1
         bounds_y = 20
-        bounds_cx = 614
-        bounds_cy = 523
+        bounds_cx = 667
+        bounds_cy = 518
         frame.framei_bottom = 0
         frame.localprops = [frl_fibottom, frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.dummy = 0
@@ -106,7 +106,7 @@ object projectoptionsfo: tprojectoptionsfo
         object tlayouter13: tlayouter
           bounds_x = 0
           bounds_y = 89
-          bounds_cx = 614
+          bounds_cx = 667
           bounds_cy = 215
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
           frame.dummy = 0
@@ -123,7 +123,7 @@ object projectoptionsfo: tprojectoptionsfo
             optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight]
             bounds_x = 6
             bounds_y = 123
-            bounds_cx = 601
+            bounds_cx = 654
             bounds_cy = 92
             frame.caption = 'Test'
             frame.captionpos = cp_topright
@@ -147,7 +147,7 @@ object projectoptionsfo: tprojectoptionsfo
             datacols.options = [co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
             datacols.items = <            
               item
-                width = 596
+                width = 649
                 options = [co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
                 widgetname = 'fontdisp'
                 data = (
@@ -166,7 +166,7 @@ object projectoptionsfo: tprojectoptionsfo
               optionsskin = [osk_framebuttononly]
               bounds_x = 0
               bounds_y = 0
-              bounds_cx = 596
+              bounds_cx = 649
               bounds_cy = 17
               taborder = 1
               visible = False
@@ -180,7 +180,7 @@ object projectoptionsfo: tprojectoptionsfo
           object tlayouter12: tlayouter
             bounds_x = 0
             bounds_y = 82
-            bounds_cx = 614
+            bounds_cx = 667
             bounds_cy = 39
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
             frame.dummy = 0
@@ -307,7 +307,7 @@ object projectoptionsfo: tprojectoptionsfo
           object tlayouter11: tlayouter
             bounds_x = 0
             bounds_y = 41
-            bounds_cx = 614
+            bounds_cx = 667
             bounds_cy = 39
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
             frame.dummy = 0
@@ -408,7 +408,7 @@ object projectoptionsfo: tprojectoptionsfo
           object tlayouter10: tlayouter
             bounds_x = 0
             bounds_y = 0
-            bounds_cx = 614
+            bounds_cx = 667
             bounds_cy = 39
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
             frame.dummy = 0
@@ -517,7 +517,7 @@ object projectoptionsfo: tprojectoptionsfo
           optionswidget = [ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
           bounds_x = 7
           bounds_y = 11
-          bounds_cx = 600
+          bounds_cx = 653
           bounds_cy = 74
           frame.caption = 'Form Designer'
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
@@ -642,8 +642,8 @@ object projectoptionsfo: tprojectoptionsfo
         object ttabwidget2: ttabwidget
           bounds_x = 0
           bounds_y = 306
-          bounds_cx = 614
-          bounds_cy = 217
+          bounds_cx = 667
+          bounds_cy = 212
           bounds_cymin = 84
           anchors = [an_top, an_bottom]
           taborder = 7
@@ -657,8 +657,8 @@ object projectoptionsfo: tprojectoptionsfo
           object ttabpage13: ttabpage
             bounds_x = 0
             bounds_y = 19
-            bounds_cx = 614
-            bounds_cy = 198
+            bounds_cx = 667
+            bounds_cy = 193
             frame.framei_bottom = 0
             frame.localprops = [frl_fibottom, frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.dummy = 0
@@ -670,7 +670,7 @@ object projectoptionsfo: tprojectoptionsfo
             object tspacer3: tspacer
               bounds_x = 0
               bounds_y = -252
-              bounds_cx = 614
+              bounds_cx = 667
               bounds_cy = 434
               anchors = [an_top]
               taborder = 1
@@ -679,8 +679,8 @@ object projectoptionsfo: tprojectoptionsfo
               optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
               bounds_x = 0
               bounds_y = 0
-              bounds_cx = 614
-              bounds_cy = 198
+              bounds_cx = 667
+              bounds_cy = 193
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.dummy = 0
               anchors = []
@@ -693,7 +693,7 @@ object projectoptionsfo: tprojectoptionsfo
                   options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
                 end              
                 item
-                  width = 468
+                  width = 521
                   options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
                 end>
               fixcols.count = 1
@@ -723,8 +723,8 @@ object projectoptionsfo: tprojectoptionsfo
           object ttabpage14: ttabpage
             bounds_x = 0
             bounds_y = 19
-            bounds_cx = 614
-            bounds_cy = 198
+            bounds_cx = 667
+            bounds_cy = 193
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.dummy = 0
             anchors = [an_left, an_top, an_right, an_bottom]
@@ -735,8 +735,8 @@ object projectoptionsfo: tprojectoptionsfo
               optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
               bounds_x = 0
               bounds_y = 0
-              bounds_cx = 614
-              bounds_cy = 198
+              bounds_cx = 667
+              bounds_cy = 193
               bounds_cymin = 60
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.dummy = 0
@@ -753,7 +753,7 @@ object projectoptionsfo: tprojectoptionsfo
                   )
                 end              
                 item
-                  width = 361
+                  width = 414
                   options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste]
                   datalist.data = (
                     '"*.pas" "*.pp" "*.inc"'
@@ -792,22 +792,24 @@ object projectoptionsfo: tprojectoptionsfo
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
         bounds_x = 1
         bounds_y = 20
-        bounds_cx = 614
-        bounds_cy = 523
+        bounds_cx = 667
+        bounds_cy = 518
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.sbhorz.options = [sbo_moveauto, sbo_showauto]
         frame.sbvert.options = [sbo_moveauto, sbo_showauto]
         frame.dummy = 0
         anchors = [an_left, an_top, an_right, an_bottom]
         taborder = 4
+        visible = True
         caption = '&Debugger'
         onchildscaled = debuggeronchildscaled
         object debugcommand: tfilenameedit
           optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
           bounds_x = 1
           bounds_y = 12
-          bounds_cx = 662
+          bounds_cx = 665
           bounds_cy = 39
+          frame.options = [cfo_fixtop]
           frame.caption = '&Debug command'
           frame.captionoffset = 3
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
@@ -829,8 +831,9 @@ object projectoptionsfo: tprojectoptionsfo
         object debugoptions: tstringedit
           bounds_x = 1
           bounds_y = 57
-          bounds_cx = 662
+          bounds_cx = 665
           bounds_cy = 39
+          frame.options = [cfo_fixtop]
           frame.caption = 'Debug &options'
           frame.captionoffset = 3
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
@@ -850,12 +853,12 @@ object projectoptionsfo: tprojectoptionsfo
         object ttabwidget1: ttabwidget
           optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_fontglyphheight]
           bounds_x = 0
-          bounds_y = 187
-          bounds_cx = 664
-          bounds_cy = 306
+          bounds_y = 223
+          bounds_cx = 667
+          bounds_cy = 294
           anchors = [an_left, an_top, an_right, an_bottom]
-          taborder = 4
-          activepageindex = 2
+          taborder = 3
+          activepageindex = 4
           tab_frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
           tab_frame.dummy = 0
           tab_face.localprops = [fal_frameimageoffset]
@@ -866,8 +869,8 @@ object projectoptionsfo: tprojectoptionsfo
           object ttabpage6: ttabpage
             bounds_x = 0
             bounds_y = 19
-            bounds_cx = 664
-            bounds_cy = 287
+            bounds_cx = 667
+            bounds_cy = 275
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.dummy = 0
             anchors = [an_left, an_top, an_right, an_bottom]
@@ -878,8 +881,8 @@ object projectoptionsfo: tprojectoptionsfo
               optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
               bounds_x = 0
               bounds_y = 0
-              bounds_cx = 664
-              bounds_cy = 287
+              bounds_cx = 667
+              bounds_cy = 275
               bounds_cymin = 40
               frame.captionoffset = 3
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
@@ -891,7 +894,7 @@ object projectoptionsfo: tprojectoptionsfo
               datacols.items = <              
                 item
                   linecolorfix = -1610612733
-                  width = 659
+                  width = 662
                   options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savevalue, co_cancopy, co_canpaste]
                   onshowhint = colonshowhint
                   widgetname = 'sourcedirs'
@@ -903,7 +906,7 @@ object projectoptionsfo: tprojectoptionsfo
                 optionsskin = [osk_framebuttononly]
                 bounds_x = 0
                 bounds_y = 0
-                bounds_cx = 659
+                bounds_cx = 662
                 bounds_cy = 17
                 frame.levelo = 0
                 frame.colorclient = -2147483646
@@ -926,8 +929,8 @@ object projectoptionsfo: tprojectoptionsfo
           object ttabpage9: ttabpage
             bounds_x = 0
             bounds_y = 19
-            bounds_cx = 664
-            bounds_cy = 287
+            bounds_cx = 667
+            bounds_cy = 275
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.dummy = 0
             anchors = [an_left, an_top, an_right, an_bottom]
@@ -938,8 +941,8 @@ object projectoptionsfo: tprojectoptionsfo
               optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
               bounds_x = 0
               bounds_y = 0
-              bounds_cx = 664
-              bounds_cy = 287
+              bounds_cx = 667
+              bounds_cy = 275
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.dummy = 0
               anchors = []
@@ -965,7 +968,7 @@ object projectoptionsfo: tprojectoptionsfo
                   widgetname = 'defon'
                 end              
                 item
-                  width = 636
+                  width = 639
                   options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
                   onshowhint = colonshowhint
                   widgetname = 'def'
@@ -992,7 +995,7 @@ object projectoptionsfo: tprojectoptionsfo
                 optionsskin = [osk_framebuttononly]
                 bounds_x = 23
                 bounds_y = 0
-                bounds_cx = 636
+                bounds_cx = 639
                 bounds_cy = 17
                 frame.levelo = 0
                 frame.colorclient = -2147483645
@@ -1007,21 +1010,20 @@ object projectoptionsfo: tprojectoptionsfo
           object ttabpage7: ttabpage
             bounds_x = 0
             bounds_y = 19
-            bounds_cx = 664
-            bounds_cy = 287
+            bounds_cx = 667
+            bounds_cy = 275
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.dummy = 0
             anchors = [an_left, an_top, an_right, an_bottom]
             taborder = 3
-            visible = True
             caption = '&Signals'
             reffontheight = 15
             object signalgrid: twidgetgrid
               optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
               bounds_x = 0
               bounds_y = 0
-              bounds_cx = 664
-              bounds_cy = 287
+              bounds_cx = 667
+              bounds_cy = 275
               bounds_cymin = 40
               frame.captionoffset = 3
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
@@ -1074,7 +1076,7 @@ object projectoptionsfo: tprojectoptionsfo
                   widgetname = 'signumto'
                 end              
                 item
-                  width = 491
+                  width = 494
                   options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_nosort]
                   widgetname = 'signame'
                 end>
@@ -1132,7 +1134,7 @@ object projectoptionsfo: tprojectoptionsfo
                 optionsskin = [osk_framebuttononly]
                 bounds_x = 168
                 bounds_y = 0
-                bounds_cx = 491
+                bounds_cx = 494
                 bounds_cy = 17
                 frame.levelo = 0
                 frame.colorclient = -2147483645
@@ -1158,8 +1160,8 @@ object projectoptionsfo: tprojectoptionsfo
           object ttabpage8: ttabpage
             bounds_x = 0
             bounds_y = 19
-            bounds_cx = 664
-            bounds_cy = 287
+            bounds_cx = 667
+            bounds_cy = 275
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.dummy = 0
             anchors = [an_left, an_top, an_right, an_bottom]
@@ -1170,8 +1172,8 @@ object projectoptionsfo: tprojectoptionsfo
               optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
               bounds_x = 0
               bounds_y = 0
-              bounds_cx = 664
-              bounds_cy = 287
+              bounds_cx = 667
+              bounds_cy = 275
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.dummy = 0
               anchors = []
@@ -1197,7 +1199,7 @@ object projectoptionsfo: tprojectoptionsfo
                   widgetname = 'exceptignore'
                 end              
                 item
-                  width = 611
+                  width = 614
                   options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
                   widgetname = 'exceptclassnames'
                 end>
@@ -1222,7 +1224,7 @@ object projectoptionsfo: tprojectoptionsfo
                 optionsskin = [osk_framebuttononly]
                 bounds_x = 48
                 bounds_y = 0
-                bounds_cx = 611
+                bounds_cx = 614
                 bounds_cy = 17
                 frame.levelo = 0
                 frame.colorclient = -2147483645
@@ -1238,18 +1240,19 @@ object projectoptionsfo: tprojectoptionsfo
           object ttabpage16: ttabpage
             bounds_x = 0
             bounds_y = 19
-            bounds_cx = 664
-            bounds_cy = 287
+            bounds_cx = 667
+            bounds_cy = 275
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
             frame.dummy = 0
             anchors = [an_left, an_top, an_right, an_bottom]
             taborder = 5
+            visible = True
             caption = 'E&mbedded'
             reffontheight = 15
             object remoteconnection: tstringedit
               bounds_x = 1
               bounds_y = 78
-              bounds_cx = 662
+              bounds_cx = 665
               bounds_cy = 39
               frame.caption = 'Connection'
               frame.captionoffset = 3
@@ -1266,10 +1269,231 @@ object projectoptionsfo: tprojectoptionsfo
               onshowhint = hintexpandedmacros
               reffontheight = 15
             end
+            object tlayouter4: tlayouter
+              bounds_x = 0
+              bounds_y = 159
+              bounds_cx = 667
+              bounds_cy = 39
+              frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
+              frame.dummy = 0
+              anchors = [an_top]
+              taborder = 2
+              optionsscale = [osc_expandy, osc_shrinky]
+              linkbottom = tlayouter5
+              dist_top = 3
+              optionslayout = [lao_aligny]
+              align_glue = wam_start
+              object gdbbeforeload: tfilenameedit
+                bounds_x = 1
+                bounds_y = 0
+                bounds_cx = 318
+                bounds_cy = 39
+                frame.caption = 'Before load gdb script'
+                frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
+                frame.button.imagenr = 17
+                frame.dummy = 0
+                frame.outerframe = (
+                  0
+                  18
+                  0
+                  0
+                )
+                onshowhint = hintexpandedmacros
+                textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
+                controller.filterlist.data = (
+                  (
+                    'gdb Scripts'
+                    '*.gdb'
+                  )
+                )
+                controller.options = [fdo_checkexist, fdo_savelastdir]
+                reffontheight = 15
+              end
+              object tsplitter7: tsplitter
+                bounds_x = 319
+                bounds_y = 18
+                bounds_cx = 3
+                bounds_cy = 20
+                taborder = 1
+                visible = False
+                options = [spo_hprop, spo_dockleft, spo_docktop, spo_dockright, spo_dockbottom]
+                linkleft = gdbbeforeload
+                linkright = gdbafterload
+              end
+              object gdbafterload: tfilenameedit
+                bounds_x = 322
+                bounds_y = 0
+                bounds_cx = 344
+                bounds_cy = 39
+                frame.caption = 'After load gdb script'
+                frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
+                frame.button.imagenr = 17
+                frame.dummy = 0
+                frame.outerframe = (
+                  0
+                  18
+                  0
+                  0
+                )
+                anchors = [an_left, an_top, an_right]
+                taborder = 2
+                onshowhint = hintexpandedmacros
+                textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
+                controller.filterlist.data = (
+                  (
+                    'gdb Scripts'
+                    '*.gdb'
+                  )
+                )
+                controller.options = [fdo_checkexist, fdo_savelastdir]
+                reffontheight = 15
+              end
+            end
+            object tlayouter5: tlayouter
+              bounds_x = 0
+              bounds_y = 198
+              bounds_cx = 667
+              bounds_cy = 39
+              frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
+              frame.dummy = 0
+              anchors = [an_top]
+              taborder = 3
+              optionsscale = [osc_expandy, osc_shrinky]
+              dist_top = 3
+              optionslayout = [lao_aligny]
+              align_glue = wam_start
+              object gdbbeforerun: tfilenameedit
+                bounds_x = 1
+                bounds_y = 0
+                bounds_cx = 318
+                bounds_cy = 39
+                frame.caption = 'Before run gdb script'
+                frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
+                frame.button.imagenr = 17
+                frame.dummy = 0
+                frame.outerframe = (
+                  0
+                  18
+                  0
+                  0
+                )
+                onshowhint = hintexpandedmacros
+                textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
+                controller.filterlist.data = (
+                  (
+                    'gdb Scripts'
+                    '*.gdb'
+                  )
+                )
+                controller.options = [fdo_checkexist, fdo_savelastdir]
+                reffontheight = 15
+              end
+              object tsplitter8: tsplitter
+                bounds_x = 319
+                bounds_y = 18
+                bounds_cx = 3
+                bounds_cy = 20
+                taborder = 1
+                visible = False
+                options = [spo_hprop, spo_dockleft, spo_docktop, spo_dockright, spo_dockbottom]
+                linkleft = gdbbeforerun
+              end
+            end
+            object tlayouter14: tlayouter
+              bounds_x = 0
+              bounds_y = 39
+              bounds_cx = 667
+              bounds_cy = 39
+              frame.dummy = 0
+              anchors = [an_top]
+              taborder = 4
+              optionsscale = [osc_expandy, osc_shrinky]
+              linktop = uploadcommand
+              linkbottom = remoteconnection
+              optionslayout = [lao_aligny]
+              object gdbservercommand: tfilenameedit
+                optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+                bounds_x = 1
+                bounds_y = 0
+                bounds_cx = 608
+                bounds_cy = 39
+                frame.options = [cfo_fixtop]
+                frame.caption = 'Start gdb server command'
+                frame.captionoffset = 3
+                frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
+                frame.button.imagenr = 17
+                frame.dummy = 0
+                frame.outerframe = (
+                  0
+                  18
+                  0
+                  0
+                )
+                anchors = [an_left, an_top, an_right]
+                onshowhint = hintexpandedmacros
+                textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
+                controller.lastdir = '/home/mse/packs/standard/svn/mse/trunk/apps/ide'
+                controller.options = []
+                controller.historymaxcount = 0
+                reffontheight = 15
+              end
+              object gdbserverwait: trealedit
+                bounds_x = 612
+                bounds_y = 0
+                bounds_cx = 54
+                bounds_cy = 39
+                frame.caption = 'Wait'
+                frame.dummy = 0
+                frame.outerframe = (
+                  0
+                  18
+                  0
+                  0
+                )
+                anchors = [an_top, an_right]
+                taborder = 1
+                formatedit = '0.#'
+                formatdisp = '0.#sec'
+                reffontheight = 15
+                val =  0.0000000000000000E+0000
+                mi =  0.0000000000000000E+0000
+                ma =  1.0000000000000000E+0001
+              end
+            end
+            object uploadcommand: tfilenameedit
+              optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+              bounds_x = 1
+              bounds_y = 0
+              bounds_cx = 665
+              bounds_cy = 39
+              frame.options = [cfo_fixtop]
+              frame.caption = 'Download command'
+              frame.captionoffset = 3
+              frame.font.name = 'stf_default'
+              frame.font.xscale =  1.0000000000000000E+0000
+              frame.font.dummy = 0
+              frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
+              frame.button.imagenr = 17
+              frame.dummy = 0
+              frame.outerframe = (
+                0
+                18
+                0
+                0
+              )
+              anchors = [an_left, an_top, an_right]
+              taborder = 5
+              onshowhint = hintexpandedmacros
+              textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
+              controller.lastdir = '/home/mse/packs/standard/svn/mse/trunk/apps/ide'
+              controller.options = []
+              controller.historymaxcount = 0
+              reffontheight = 15
+            end
             object tlayouter3: tlayouter
               bounds_x = 0
               bounds_y = 120
-              bounds_cx = 664
+              bounds_cx = 667
               bounds_cy = 39
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
               frame.dummy = 0
@@ -1277,6 +1501,7 @@ object projectoptionsfo: tprojectoptionsfo
               taborder = 1
               optionsscale = [osc_expandy, osc_shrinky]
               linktop = remoteconnection
+              linkbottom = tlayouter4
               dist_top = 3
               optionslayout = [lao_placex, lao_aligny]
               align_glue = wam_start
@@ -1287,6 +1512,7 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_y = 0
                 bounds_cx = 84
                 bounds_cy = 39
+                frame.options = [cfo_fixtop]
                 frame.caption = 'Processor'
                 frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
                 frame.dummy = 0
@@ -1366,6 +1592,7 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_y = 0
                 bounds_cx = 100
                 bounds_cy = 39
+                frame.options = [cfo_fixtop]
                 frame.caption = 'Startup BKPT'
                 frame.dummy = 0
                 frame.outerframe = (
@@ -1387,238 +1614,19 @@ object projectoptionsfo: tprojectoptionsfo
                 onchange = downloadchange
               end
             end
-            object tlayouter4: tlayouter
-              bounds_x = 0
-              bounds_y = 162
-              bounds_cx = 664
-              bounds_cy = 39
-              frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
-              frame.dummy = 0
-              anchors = [an_top]
-              taborder = 2
-              optionsscale = [osc_expandy, osc_shrinky]
-              linktop = tlayouter3
-              dist_top = 3
-              optionslayout = [lao_aligny]
-              align_glue = wam_start
-              object gdbbeforeload: tfilenameedit
-                bounds_x = 1
-                bounds_y = 0
-                bounds_cx = 318
-                bounds_cy = 39
-                frame.caption = 'Before load gdb script'
-                frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
-                frame.button.imagenr = 17
-                frame.dummy = 0
-                frame.outerframe = (
-                  0
-                  18
-                  0
-                  0
-                )
-                onshowhint = hintexpandedmacros
-                textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
-                controller.filterlist.data = (
-                  (
-                    'gdb Scripts'
-                    '*.gdb'
-                  )
-                )
-                controller.options = [fdo_checkexist, fdo_savelastdir]
-                reffontheight = 15
-              end
-              object tsplitter7: tsplitter
-                bounds_x = 319
-                bounds_y = 18
-                bounds_cx = 3
-                bounds_cy = 20
-                taborder = 1
-                visible = False
-                options = [spo_hprop, spo_dockleft, spo_docktop, spo_dockright, spo_dockbottom]
-                linkleft = gdbbeforeload
-                linkright = gdbafterload
-              end
-              object gdbafterload: tfilenameedit
-                bounds_x = 322
-                bounds_y = 0
-                bounds_cx = 341
-                bounds_cy = 39
-                frame.caption = 'After load gdb script'
-                frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
-                frame.button.imagenr = 17
-                frame.dummy = 0
-                frame.outerframe = (
-                  0
-                  18
-                  0
-                  0
-                )
-                anchors = [an_left, an_top, an_right]
-                taborder = 2
-                onshowhint = hintexpandedmacros
-                textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
-                controller.filterlist.data = (
-                  (
-                    'gdb Scripts'
-                    '*.gdb'
-                  )
-                )
-                controller.options = [fdo_checkexist, fdo_savelastdir]
-                reffontheight = 15
-              end
-            end
-            object tlayouter5: tlayouter
-              bounds_x = 0
-              bounds_y = 204
-              bounds_cx = 664
-              bounds_cy = 39
-              frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
-              frame.dummy = 0
-              anchors = [an_top]
-              taborder = 3
-              optionsscale = [osc_expandy, osc_shrinky]
-              linktop = tlayouter4
-              dist_top = 3
-              optionslayout = [lao_aligny]
-              align_glue = wam_start
-              object gdbbeforerun: tfilenameedit
-                bounds_x = 1
-                bounds_y = 0
-                bounds_cx = 318
-                bounds_cy = 39
-                frame.caption = 'Before run gdb script'
-                frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
-                frame.button.imagenr = 17
-                frame.dummy = 0
-                frame.outerframe = (
-                  0
-                  18
-                  0
-                  0
-                )
-                onshowhint = hintexpandedmacros
-                textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
-                controller.filterlist.data = (
-                  (
-                    'gdb Scripts'
-                    '*.gdb'
-                  )
-                )
-                controller.options = [fdo_checkexist, fdo_savelastdir]
-                reffontheight = 15
-              end
-              object tsplitter8: tsplitter
-                bounds_x = 319
-                bounds_y = 18
-                bounds_cx = 3
-                bounds_cy = 20
-                taborder = 1
-                visible = False
-                options = [spo_hprop, spo_dockleft, spo_docktop, spo_dockright, spo_dockbottom]
-                linkleft = gdbbeforerun
-              end
-            end
-            object tlayouter14: tlayouter
-              bounds_x = 0
-              bounds_y = 39
-              bounds_cx = 664
-              bounds_cy = 39
-              frame.dummy = 0
-              anchors = [an_top]
-              taborder = 4
-              optionsscale = [osc_expandy, osc_shrinky]
-              linktop = uploadcommand
-              linkbottom = remoteconnection
-              optionslayout = [lao_aligny]
-              object gdbservercommand: tfilenameedit
-                optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-                bounds_x = 1
-                bounds_y = 0
-                bounds_cx = 605
-                bounds_cy = 39
-                frame.caption = 'Start gdb server command'
-                frame.captionoffset = 3
-                frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
-                frame.button.imagenr = 17
-                frame.dummy = 0
-                frame.outerframe = (
-                  0
-                  18
-                  0
-                  0
-                )
-                anchors = [an_left, an_top, an_right]
-                onshowhint = hintexpandedmacros
-                textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
-                controller.lastdir = '/home/mse/packs/standard/svn/mse/trunk/apps/ide'
-                controller.options = []
-                controller.historymaxcount = 0
-                reffontheight = 15
-              end
-              object gdbserverwait: trealedit
-                bounds_x = 609
-                bounds_y = 0
-                bounds_cx = 54
-                bounds_cy = 39
-                frame.caption = 'Wait'
-                frame.dummy = 0
-                frame.outerframe = (
-                  0
-                  18
-                  0
-                  0
-                )
-                anchors = [an_top, an_right]
-                taborder = 1
-                formatedit = '0.#'
-                formatdisp = '0.#sec'
-                reffontheight = 15
-                val =  0.0000000000000000E+0000
-                mi =  0.0000000000000000E+0000
-                ma =  1.0000000000000000E+0001
-              end
-            end
-            object uploadcommand: tfilenameedit
-              optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-              bounds_x = 1
-              bounds_y = 0
-              bounds_cx = 662
-              bounds_cy = 39
-              frame.options = [cfo_fixtop]
-              frame.caption = 'Download command'
-              frame.captionoffset = 3
-              frame.font.name = 'stf_default'
-              frame.font.xscale =  1.0000000000000000E+0000
-              frame.font.dummy = 0
-              frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
-              frame.button.imagenr = 17
-              frame.dummy = 0
-              frame.outerframe = (
-                0
-                18
-                0
-                0
-              )
-              anchors = [an_left, an_top, an_right]
-              taborder = 5
-              onshowhint = hintexpandedmacros
-              textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
-              controller.lastdir = '/home/mse/packs/standard/svn/mse/trunk/apps/ide'
-              controller.options = []
-              controller.historymaxcount = 0
-              reffontheight = 15
-            end
           end
         end
         object tlayouter1: tlayouter
           bounds_x = 7
-          bounds_y = 156
+          bounds_y = 196
           bounds_cx = 655
           bounds_cy = 17
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
           frame.dummy = 0
-          taborder = 3
+          taborder = 2
           optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
+          linkbottom = ttabwidget1
+          dist_bottom = 10
           optionslayout = [lao_placex, lao_aligny]
           align_glue = wam_start
           place_mindist = 10
@@ -1705,62 +1713,44 @@ object projectoptionsfo: tprojectoptionsfo
             taborder = 4
           end
         end
-        object tlayouter6: tlayouter
-          bounds_x = 0
+        object debugtarget: tfilenameedit
+          optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+          bounds_x = 1
           bounds_y = 104
-          bounds_cx = 614
+          bounds_cx = 663
           bounds_cy = 39
-          frame.framei_left = 1
-          frame.framei_right = 3
-          frame.localprops = [frl_fileft, frl_firight]
+          frame.options = [cfo_fixtop]
+          frame.caption = 'Debug &target (empty = make targetfile)'
+          frame.captionoffset = 3
+          frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
+          frame.button.imagenr = 17
           frame.dummy = 0
-          anchors = [an_top]
-          taborder = 2
-          optionsscale = [osc_expandy, osc_shrinky]
-          optionslayout = [lao_placex, lao_aligny]
-          align_glue = wam_start
-          place_mindist = 10
-          place_maxdist = 10
-          place_mode = wam_end
-          place_options = [plo_endmargin]
-          object debugtarget: tfilenameedit
-            optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-            bounds_x = 1
-            bounds_y = 0
-            bounds_cx = 610
-            bounds_cy = 39
-            frame.caption = 'Debug &target (empty = make targetfile)'
-            frame.captionoffset = 3
-            frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
-            frame.button.imagenr = 17
-            frame.dummy = 0
-            frame.outerframe = (
-              0
-              18
-              0
-              0
-            )
-            anchors = [an_left, an_top, an_right]
-            onshowhint = hintexpandedmacros
-            controller.lastdir = '/home/mse/packs/standard/svn/mse/trunk/apps/ide'
-            controller.options = []
-            controller.historymaxcount = 0
-            controller.ongetfilename = expandfilename
-            reffontheight = 15
-          end
+          frame.outerframe = (
+            0
+            18
+            0
+            0
+          )
+          anchors = [an_left, an_top, an_right]
+          taborder = 4
+          onshowhint = hintexpandedmacros
+          controller.lastdir = '/home/mse/packs/standard/svn/mse/trunk/apps/ide'
+          controller.options = []
+          controller.historymaxcount = 0
+          controller.ongetfilename = expandfilename
+          reffontheight = 15
         end
       end
       object makepage: ttabpage
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousewheel, ow_destroywidgets]
         bounds_x = 1
         bounds_y = 20
-        bounds_cx = 614
-        bounds_cy = 523
+        bounds_cx = 667
+        bounds_cy = 518
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.dummy = 0
         anchors = [an_top, an_bottom]
         taborder = 6
-        visible = True
         caption = '&Make'
         onchildscaled = makepageonchildscaled
         object tspacer2: tspacer
@@ -1889,10 +1879,10 @@ object projectoptionsfo: tprojectoptionsfo
           reffontheight = 15
         end
         object showcommandline: tbutton
-          optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+          optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale, ow_autosize]
           bounds_x = 109
           bounds_y = 140
-          bounds_cx = 138
+          bounds_cx = 134
           bounds_cy = 21
           color = -2147483645
           taborder = 7
@@ -1981,8 +1971,8 @@ object projectoptionsfo: tprojectoptionsfo
         object makegroupbox: ttabwidget
           bounds_x = 0
           bounds_y = 187
-          bounds_cx = 614
-          bounds_cy = 336
+          bounds_cx = 667
+          bounds_cy = 331
           anchors = [an_top, an_bottom]
           taborder = 11
           activepageindex = 0
@@ -1996,8 +1986,8 @@ object projectoptionsfo: tprojectoptionsfo
           object ttabpage12: ttabpage
             bounds_x = 0
             bounds_y = 19
-            bounds_cx = 614
-            bounds_cy = 317
+            bounds_cx = 667
+            bounds_cy = 312
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.dummy = 0
             face.localprops = [fal_frameimageoffset]
@@ -2011,8 +2001,8 @@ object projectoptionsfo: tprojectoptionsfo
               optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
               bounds_x = 0
               bounds_y = 0
-              bounds_cx = 614
-              bounds_cy = 317
+              bounds_cx = 667
+              bounds_cy = 312
               bounds_cymin = 40
               frame.captionoffset = 3
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
@@ -2087,7 +2077,7 @@ object projectoptionsfo: tprojectoptionsfo
                   widgetname = 'make4on'
                 end              
                 item
-                  width = 525
+                  width = 578
                   options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
                   onshowhint = colonshowhint
                   widgetname = 'makeoptions'
@@ -2165,7 +2155,7 @@ object projectoptionsfo: tprojectoptionsfo
                 optionsskin = [osk_framebuttononly]
                 bounds_x = 84
                 bounds_y = 0
-                bounds_cx = 525
+                bounds_cx = 578
                 bounds_cy = 17
                 taborder = 7
                 onshowhint = hintexpandedmacros
@@ -2178,8 +2168,8 @@ object projectoptionsfo: tprojectoptionsfo
           object ttabpage11: ttabpage
             bounds_x = 0
             bounds_y = 19
-            bounds_cx = 614
-            bounds_cy = 317
+            bounds_cx = 667
+            bounds_cy = 312
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.dummy = 0
             anchors = [an_left, an_top, an_right, an_bottom]
@@ -2190,8 +2180,8 @@ object projectoptionsfo: tprojectoptionsfo
               optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
               bounds_x = 0
               bounds_y = 48
-              bounds_cx = 614
-              bounds_cy = 269
+              bounds_cx = 667
+              bounds_cy = 264
               bounds_cymin = 40
               frame.caption = 'Unit, include and library &directories'
               frame.captionoffset = 3
@@ -2317,7 +2307,7 @@ object projectoptionsfo: tprojectoptionsfo
                 end              
                 item
                   linecolorfix = -1610612733
-                  width = 468
+                  width = 521
                   options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste]
                   onshowhint = colonshowhint
                   widgetname = 'unitdirs'
@@ -2443,7 +2433,7 @@ object projectoptionsfo: tprojectoptionsfo
                 optionsskin = [osk_framebuttononly]
                 bounds_x = 141
                 bounds_y = 0
-                bounds_cx = 468
+                bounds_cx = 521
                 bounds_cy = 17
                 frame.levelo = 0
                 frame.colorclient = -2147483646
@@ -2543,7 +2533,7 @@ object projectoptionsfo: tprojectoptionsfo
         object targpref: tstringedit
           bounds_x = 506
           bounds_y = 1
-          bounds_cx = 107
+          bounds_cx = 160
           bounds_cy = 39
           frame.caption = 'Targ pref (-o)'
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
@@ -2643,8 +2633,8 @@ object projectoptionsfo: tprojectoptionsfo
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
         bounds_x = 1
         bounds_y = 20
-        bounds_cx = 614
-        bounds_cy = 523
+        bounds_cx = 667
+        bounds_cy = 518
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.dummy = 0
         anchors = [an_left, an_top, an_right, an_bottom]
@@ -2655,8 +2645,8 @@ object projectoptionsfo: tprojectoptionsfo
           optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
           bounds_x = 0
           bounds_y = 124
-          bounds_cx = 614
-          bounds_cy = 400
+          bounds_cx = 667
+          bounds_cy = 395
           bounds_cymin = 40
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.dummy = 0
@@ -2734,7 +2724,7 @@ object projectoptionsfo: tprojectoptionsfo
               widgetname = 'macronames'
             end          
             item
-              width = 378
+              width = 431
               options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste]
               widgetname = 'macrovalues'
             end>
@@ -2830,7 +2820,7 @@ object projectoptionsfo: tprojectoptionsfo
             optionsskin = [osk_framebuttononly]
             bounds_x = 231
             bounds_y = 0
-            bounds_cx = 378
+            bounds_cx = 431
             bounds_cy = 17
             taborder = 8
             visible = False
@@ -2842,13 +2832,11 @@ object projectoptionsfo: tprojectoptionsfo
           optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
           bounds_x = 0
           bounds_y = -1
-          bounds_cx = 614
+          bounds_cx = 667
           bounds_cy = 122
           bounds_cymin = 40
           frame.caption = 'Active group'
           frame.captionoffset = 3
-          frame.font.xscale =  1.0000000000000000E+0000
-          frame.font.dummy = 0
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.dummy = 0
           frame.outerframe = (
@@ -2886,7 +2874,7 @@ object projectoptionsfo: tprojectoptionsfo
               )
             end          
             item
-              width = 565
+              width = 618
               options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
               widgetname = 'groupcomment'
               data = (
@@ -2920,7 +2908,7 @@ object projectoptionsfo: tprojectoptionsfo
             optionsskin = [osk_framebuttononly]
             bounds_x = 15
             bounds_y = 0
-            bounds_cx = 565
+            bounds_cx = 618
             bounds_cy = 17
             taborder = 2
             visible = False
@@ -2931,7 +2919,7 @@ object projectoptionsfo: tprojectoptionsfo
         object macrosplitter: tsplitter
           bounds_x = 0
           bounds_y = 121
-          bounds_cx = 614
+          bounds_cx = 667
           bounds_cy = 3
           anchors = [an_top]
           taborder = 2
@@ -2945,19 +2933,19 @@ object projectoptionsfo: tprojectoptionsfo
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
         bounds_x = 1
         bounds_y = 20
-        bounds_cx = 614
-        bounds_cy = 523
+        bounds_cx = 667
+        bounds_cy = 518
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.dummy = 0
         anchors = [an_left, an_top, an_right, an_bottom]
         taborder = 2
         caption = '&Font Alias'
         object fontaliasgrid: twidgetgrid
-          optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight]
+          optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
           bounds_x = 0
           bounds_y = 0
-          bounds_cx = 614
-          bounds_cy = 523
+          bounds_cx = 667
+          bounds_cy = 518
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.dummy = 0
           anchors = []
@@ -2985,7 +2973,7 @@ object projectoptionsfo: tprojectoptionsfo
               widgetname = 'fontalias'
             end          
             item
-              width = 463
+              width = 516
               options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
               widgetname = 'fontname'
             end          
@@ -3012,7 +3000,7 @@ object projectoptionsfo: tprojectoptionsfo
             optionsskin = [osk_framebuttononly]
             bounds_x = 99
             bounds_y = 0
-            bounds_cx = 463
+            bounds_cx = 516
             bounds_cy = 17
             taborder = 2
             onshowhint = hintexpandedmacros
@@ -3022,7 +3010,7 @@ object projectoptionsfo: tprojectoptionsfo
           object fontheight: tintegeredit
             optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
             optionsskin = [osk_framebuttononly]
-            bounds_x = 563
+            bounds_x = 616
             bounds_y = 0
             bounds_cx = 46
             bounds_cy = 17
@@ -3035,8 +3023,8 @@ object projectoptionsfo: tprojectoptionsfo
       object ttabpage10: ttabpage
         bounds_x = 1
         bounds_y = 20
-        bounds_cx = 614
-        bounds_cy = 523
+        bounds_cx = 667
+        bounds_cy = 518
         frame.framei_bottom = 0
         frame.localprops = [frl_fibottom, frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.dummy = 0
@@ -3046,8 +3034,8 @@ object projectoptionsfo: tprojectoptionsfo
         reffontheight = 15
         object tlayouter7: tlayouter
           bounds_x = 0
-          bounds_y = 1006
-          bounds_cx = 614
+          bounds_y = 1001
+          bounds_cx = 667
           bounds_cy = 42
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
           frame.dummy = 0
@@ -3072,8 +3060,8 @@ object projectoptionsfo: tprojectoptionsfo
           optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
           bounds_x = 0
           bounds_y = 0
-          bounds_cx = 614
-          bounds_cy = 523
+          bounds_cx = 667
+          bounds_cy = 518
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.dummy = 0
           anchors = []
@@ -3148,7 +3136,7 @@ object projectoptionsfo: tprojectoptionsfo
               )
             end          
             item
-              width = 407
+              width = 460
               options = [co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
               widthmin = 100
               widgetname = 'usercolorcomment'
@@ -3216,7 +3204,7 @@ object projectoptionsfo: tprojectoptionsfo
             optionsskin = [osk_framebuttononly]
             bounds_x = 121
             bounds_y = 0
-            bounds_cx = 407
+            bounds_cx = 460
             bounds_cy = 17
             frame.levelo = 0
             frame.colorclient = -2147483645
@@ -3231,8 +3219,8 @@ object projectoptionsfo: tprojectoptionsfo
       object ttabpage2: ttabpage
         bounds_x = 1
         bounds_y = 20
-        bounds_cx = 614
-        bounds_cy = 523
+        bounds_cx = 667
+        bounds_cy = 518
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.dummy = 0
         anchors = [an_left, an_top, an_right, an_bottom]
@@ -3242,8 +3230,8 @@ object projectoptionsfo: tprojectoptionsfo
         object newfile: ttabwidget
           bounds_x = 0
           bounds_y = 0
-          bounds_cx = 614
-          bounds_cy = 523
+          bounds_cx = 667
+          bounds_cy = 518
           anchors = []
           activepageindex = 0
           tab_frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
@@ -3254,8 +3242,8 @@ object projectoptionsfo: tprojectoptionsfo
           object ttabpage3: ttabpage
             bounds_x = 0
             bounds_y = 19
-            bounds_cx = 614
-            bounds_cy = 504
+            bounds_cx = 667
+            bounds_cy = 499
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.dummy = 0
             anchors = [an_left, an_top, an_right, an_bottom]
@@ -3267,8 +3255,8 @@ object projectoptionsfo: tprojectoptionsfo
               optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
               bounds_x = 0
               bounds_y = 0
-              bounds_cx = 614
-              bounds_cy = 504
+              bounds_cx = 667
+              bounds_cy = 499
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.dummy = 0
               anchors = []
@@ -3309,13 +3297,13 @@ object projectoptionsfo: tprojectoptionsfo
                   widgetname = 'expandprojectfilemacros'
                 end              
                 item
-                  width = 306
+                  width = 334
                   options = [co_mouseselect, co_keyselect, co_proportional, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste]
                   onshowhint = colonshowhint
                   widgetname = 'newprojectfiles'
                 end              
                 item
-                  width = 264
+                  width = 289
                   options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
                   onshowhint = colonshowhint
                   widgetname = 'newprojectfilesdest'
@@ -3354,7 +3342,7 @@ object projectoptionsfo: tprojectoptionsfo
                 optionsskin = [osk_framebuttononly]
                 bounds_x = 38
                 bounds_y = 0
-                bounds_cx = 306
+                bounds_cx = 334
                 bounds_cy = 17
                 frame.levelo = 0
                 frame.colorclient = -2147483645
@@ -3370,9 +3358,9 @@ object projectoptionsfo: tprojectoptionsfo
               object newprojectfilesdest: tstringedit
                 optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
                 optionsskin = [osk_framebuttononly]
-                bounds_x = 345
+                bounds_x = 373
                 bounds_y = 0
-                bounds_cx = 264
+                bounds_cx = 289
                 bounds_cy = 17
                 frame.levelo = 0
                 frame.colorclient = -2147483645
@@ -3389,8 +3377,8 @@ object projectoptionsfo: tprojectoptionsfo
           object ttabpage4: ttabpage
             bounds_x = 0
             bounds_y = 19
-            bounds_cx = 614
-            bounds_cy = 504
+            bounds_cx = 667
+            bounds_cy = 499
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.dummy = 0
             anchors = [an_left, an_top, an_right, an_bottom]
@@ -3400,7 +3388,7 @@ object projectoptionsfo: tprojectoptionsfo
             object newprogf: tfilenameedit
               bounds_x = 0
               bounds_y = 21
-              bounds_cx = 614
+              bounds_cx = 667
               bounds_cy = 39
               frame.caption = 'Program'
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
@@ -3421,7 +3409,7 @@ object projectoptionsfo: tprojectoptionsfo
             object newunitf: tfilenameedit
               bounds_x = 0
               bounds_y = 77
-              bounds_cx = 614
+              bounds_cx = 667
               bounds_cy = 39
               frame.caption = 'Unit'
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
@@ -3442,8 +3430,8 @@ object projectoptionsfo: tprojectoptionsfo
           object ttabpage5: ttabpage
             bounds_x = 0
             bounds_y = 19
-            bounds_cx = 614
-            bounds_cy = 504
+            bounds_cx = 667
+            bounds_cy = 499
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.dummy = 0
             anchors = [an_left, an_top, an_right, an_bottom]
@@ -3454,7 +3442,7 @@ object projectoptionsfo: tprojectoptionsfo
             object mainfosource: tfilenameedit
               bounds_x = 0
               bounds_y = 5
-              bounds_cx = 614
+              bounds_cx = 667
               bounds_cy = 39
               frame.caption = 'Mainform source (*.pas)'
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
@@ -3481,7 +3469,7 @@ object projectoptionsfo: tprojectoptionsfo
             object mainfoform: tfilenameedit
               bounds_x = 0
               bounds_y = 37
-              bounds_cx = 614
+              bounds_cx = 667
               bounds_cy = 39
               frame.caption = 'Mainform form (*.mfm)'
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
@@ -3509,7 +3497,7 @@ object projectoptionsfo: tprojectoptionsfo
             object simplefosource: tfilenameedit
               bounds_x = 0
               bounds_y = 69
-              bounds_cx = 614
+              bounds_cx = 667
               bounds_cy = 39
               frame.caption = 'Simple Form source (*.pas)'
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
@@ -3537,7 +3525,7 @@ object projectoptionsfo: tprojectoptionsfo
             object simplefoform: tfilenameedit
               bounds_x = 0
               bounds_y = 101
-              bounds_cx = 614
+              bounds_cx = 667
               bounds_cy = 39
               frame.caption = 'Simple Form form (*.mfm)'
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
@@ -3565,7 +3553,7 @@ object projectoptionsfo: tprojectoptionsfo
             object dockingfosource: tfilenameedit
               bounds_x = 0
               bounds_y = 133
-              bounds_cx = 614
+              bounds_cx = 667
               bounds_cy = 39
               frame.caption = 'Docking Form source (*.pas)'
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
@@ -3593,7 +3581,7 @@ object projectoptionsfo: tprojectoptionsfo
             object dockingfoform: tfilenameedit
               bounds_x = 0
               bounds_y = 165
-              bounds_cx = 614
+              bounds_cx = 667
               bounds_cy = 39
               frame.caption = 'Docking Form form (*.mfm)'
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
@@ -3621,7 +3609,7 @@ object projectoptionsfo: tprojectoptionsfo
             object datamodsource: tfilenameedit
               bounds_x = 0
               bounds_y = 197
-              bounds_cx = 614
+              bounds_cx = 667
               bounds_cy = 39
               frame.caption = 'Datamodule source (*.pas)'
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
@@ -3649,7 +3637,7 @@ object projectoptionsfo: tprojectoptionsfo
             object datamodform: tfilenameedit
               bounds_x = 0
               bounds_y = 229
-              bounds_cx = 614
+              bounds_cx = 667
               bounds_cy = 39
               frame.caption = 'Datamodule form (*.mfm)'
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
@@ -3677,7 +3665,7 @@ object projectoptionsfo: tprojectoptionsfo
             object subfosource: tfilenameedit
               bounds_x = 0
               bounds_y = 261
-              bounds_cx = 614
+              bounds_cx = 667
               bounds_cy = 39
               frame.caption = 'Subform source (*.pas)'
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
@@ -3705,7 +3693,7 @@ object projectoptionsfo: tprojectoptionsfo
             object subfoform: tfilenameedit
               bounds_x = 0
               bounds_y = 293
-              bounds_cx = 614
+              bounds_cx = 667
               bounds_cy = 39
               frame.caption = 'Subform form (*.mfm)'
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
@@ -3733,7 +3721,7 @@ object projectoptionsfo: tprojectoptionsfo
             object reportsource: tfilenameedit
               bounds_x = 0
               bounds_y = 325
-              bounds_cx = 614
+              bounds_cx = 667
               bounds_cy = 39
               frame.caption = 'Report source (*.pas)'
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
@@ -3761,7 +3749,7 @@ object projectoptionsfo: tprojectoptionsfo
             object reportform: tfilenameedit
               bounds_x = 0
               bounds_y = 357
-              bounds_cx = 614
+              bounds_cx = 667
               bounds_cy = 39
               frame.caption = 'Report form (*.mfm)'
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
@@ -3789,7 +3777,7 @@ object projectoptionsfo: tprojectoptionsfo
             object inheritedsource: tfilenameedit
               bounds_x = 0
               bounds_y = 389
-              bounds_cx = 614
+              bounds_cx = 667
               bounds_cy = 39
               frame.caption = 'Iherited Form source (*.pas)'
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
@@ -3817,7 +3805,7 @@ object projectoptionsfo: tprojectoptionsfo
             object inheritedform: tfilenameedit
               bounds_x = 0
               bounds_y = 421
-              bounds_cx = 614
+              bounds_cx = 667
               bounds_cy = 39
               frame.caption = 'Inherited Form form (*.mfm)'
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
@@ -3848,8 +3836,8 @@ object projectoptionsfo: tprojectoptionsfo
       object ttabpage15: ttabpage
         bounds_x = 1
         bounds_y = 20
-        bounds_cx = 614
-        bounds_cy = 523
+        bounds_cx = 667
+        bounds_cy = 518
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.dummy = 0
         anchors = [an_left, an_top, an_right, an_bottom]
@@ -3860,8 +3848,8 @@ object projectoptionsfo: tprojectoptionsfo
           optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
           bounds_x = 0
           bounds_y = 0
-          bounds_cx = 614
-          bounds_cy = 523
+          bounds_cx = 667
+          bounds_cy = 518
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.dummy = 0
           anchors = []
@@ -3926,17 +3914,17 @@ object projectoptionsfo: tprojectoptionsfo
               widgetname = 'toolhide'
             end          
             item
-              width = 104
+              width = 113
               options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
               widgetname = 'toolmenu'
             end          
             item
-              width = 204
+              width = 227
               options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
               widgetname = 'toolfile'
             end          
             item
-              width = 238
+              width = 259
               options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
               widgetname = 'toolparam'
             end>
@@ -3989,7 +3977,7 @@ object projectoptionsfo: tprojectoptionsfo
             optionsskin = [osk_framebuttononly]
             bounds_x = 42
             bounds_y = 0
-            bounds_cx = 104
+            bounds_cx = 113
             bounds_cy = 17
             frame.levelo = 0
             frame.colorclient = -2147483645
@@ -4003,9 +3991,9 @@ object projectoptionsfo: tprojectoptionsfo
           object toolfile: tfilenameedit
             optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
             optionsskin = [osk_framebuttononly]
-            bounds_x = 147
+            bounds_x = 156
             bounds_y = 0
-            bounds_cx = 204
+            bounds_cx = 227
             bounds_cy = 17
             frame.levelo = 0
             frame.colorclient = -2147483645
@@ -4022,9 +4010,9 @@ object projectoptionsfo: tprojectoptionsfo
           object toolparam: tstringedit
             optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
             optionsskin = [osk_framebuttononly]
-            bounds_x = 352
+            bounds_x = 384
             bounds_y = 0
-            bounds_cx = 238
+            bounds_cx = 259
             bounds_cy = 17
             frame.levelo = 0
             frame.colorclient = -2147483645
