@@ -877,7 +877,7 @@ begin
     drawtext(canvas,ca.caption,rect1,outerrect^,textflags,font,tab1);
    end
    else begin
-    drawtext(canvas,ca.caption,rect1,arect,textflags,font,tab1);
+    drawtext(canvas,ca.caption,rect1,arect,textflags,ca.font,tab1);
    end;
   end;
  end;
