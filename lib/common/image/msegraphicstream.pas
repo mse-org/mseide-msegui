@@ -225,10 +225,10 @@ begin
  end;
  with formats[int2] do begin
   formatlabel:= aformatlabel;
-  if areadproc <> nil then begin
+  if {$ifndef FPC}@{$endif}areadproc <> nil then begin
    readproc:= areadproc;
   end;
-  if awriteproc <> nil then begin
+  if {$ifndef FPC}@{$endif}awriteproc <> nil then begin
    writeproc:= awriteproc;
   end;
   filtername:= afiltername;

@@ -424,7 +424,7 @@ var
 implementation
 uses
  {sourceupdate,}sysutils;
-{$goto on}
+{$ifdef FPC}{$goto on}{$endif}
  
 procedure initcompinfo(var info: unitinfoty);
 begin

@@ -13,7 +13,7 @@ unit mseparser;
 
 interface
 uses
- Classes,msetypes,msestrings,msestream,mselist,msehash;
+ Classes,msetypes,msestrings,msestream,mselist,msehash,mseglob;
 
 const
  maxincludelevel = 32;
@@ -155,7 +155,7 @@ type
                   const scanner: tscanner) of object;
  scannerclassty = class of tscanner;
 
- tparser = class
+ tparser = class (tnullinterfacedobject)
   private
    fcasesensitive: boolean;
    fscanner: tscanner;

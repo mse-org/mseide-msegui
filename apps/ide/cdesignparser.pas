@@ -72,7 +72,7 @@ end;
 constructor tcdesignparser.create(unitinfopo: punitinfoty;
               const afilelist: tmseindexednamelist;
               const getincludefile: getincludefileeventty;
-              const ainterfaceonly: boolean; const atext: ansistring); overload;
+              const ainterfaceonly: boolean; const atext: ansistring);
 begin
  create(unitinfopo,afilelist,getincludefile,ainterfaceonly);
  create(afilelist,atext);
