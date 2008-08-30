@@ -1683,6 +1683,9 @@ begin
   amenu.foptions:= items.foptions;
   amenu.assigntemplate(items);
   amenu.fmenu.ffont:= items.fmenu.ffont;
+  amenu.fmenu.ffontactive:= items.fmenu.ffontactive;
+  amenu.fmenu.color:= items.fmenu.color;
+  amenu.fmenu.coloractive:= items.fmenu.coloractive;
  end;
 end;
 
