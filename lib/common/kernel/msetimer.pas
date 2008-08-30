@@ -84,7 +84,6 @@ type
 var
  first: ptimerinfoty;
  mutex: mutexty;
- rewaked: boolean;
 
 procedure extract(po: ptimerinfoty);
           //mutex has to be locked
@@ -166,12 +165,12 @@ var
  int1: integer;
 begin
  int1:= first^.nexttime-reftime;
- if int1 < 1000 then begin
-  application.postevent(tevent.create(ek_timer));
- end
- else begin
+// if int1 < 1000 then begin
+//  application.postevent(tevent.create(ek_timer));
+// end
+// else begin
   application.settimer(int1);
- end;
+// end;
 end;
 
 procedure settimertick(ainterval: integer; aontimer: objectprocty);
@@ -200,23 +199,35 @@ begin
  end
  else begin
   if later(first^.nexttime,time) then begin
-   rewaked:= true;
    application.postevent(tevent.create(ek_timer)); //timerevent is ev. lost
   end;
  end;
  sys_mutexunlock(mutex);
 end;
 
+var
+ timebefore: cardinal;
+ 
 procedure tick(sender: tobject);
 var
  time: cardinal;
+ ca1: cardinal;
  po,po2: ptimerinfoty;
  ontimer: objectprocty;
+ int1: integer;
 begin
  sys_mutexlock(mutex);
- rewaked:= false;
  if first <> nil then begin
   time:= sys_gettimeus;
+  ca1:= time-timebefore;
+  timebefore:= time;
+  if integer(ca1) < 0 then begin              //clock has been changed
+   po:= first;
+   while po <> nil do begin
+    po^.nexttime:= po^.nexttime + ca1;        //shift timeouts
+    po:= po^.nextpo;
+   end;
+  end;
   po:= first;
   while (po <> nil) and laterorsame(po^.nexttime,time) do begin
    extract(po);
@@ -225,18 +236,29 @@ begin
    if (po^.interval = 0) or not assigned(ontimer) then begin
                   //single shot or killed, remove item
     dispose(po);
+    if assigned(ontimer) then begin
+     try
+      ontimer;
+     except
+      application.handleexception(sender);
+     end;
+    end;
    end
    else begin
+    int1:= 0;
     repeat
+     inc(int1);
      inc(po^.nexttime,po^.interval)
     until later(time,po^.nexttime);
     insert(po);
-   end;
-   if assigned(ontimer) then begin
-    try
-     ontimer;
-    except
-     application.handleexception(sender);
+    for int1:= int1 - 1 downto 0 do begin
+     if assigned(po^.ontimer) then begin
+      try
+       po^.ontimer;
+      except
+       application.handleexception(sender);
+      end;
+     end;
     end;
    end;
    po:= po2;
@@ -406,4 +428,6 @@ begin
  ftimer.ontimer:= value;
 end;
 
+initialization
+ timebefore:= sys_gettimeus;
 end.
