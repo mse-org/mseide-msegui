@@ -14,7 +14,7 @@ uses
  msestrings;
  
 type
- floatstringmodety = (fsm_default,fsm_fix,fsm_sci,fsm_engfix,fsm_engfloat);
+ floatstringmodety = (fsm_default,fsm_fix,fsm_sci,fsm_engfix,fsm_engflo);
  
 function doubletostring(value: double; precision: byte;
       mode: floatstringmodety = fsm_default;
@@ -38,10 +38,10 @@ begin
   result:= 1;
   exit;
  end;
- do1:= 1;
  if int2 > $1ff then begin
   raise exception.create('Exponent overflow');
  end;
+ do1:= 1;
  int3:= 1;
  for int1:= 0 to 8 do begin
   if int2 and int3 <> 0 then begin
@@ -273,9 +273,9 @@ begin
    end;                                      //exp format ^^^
       
    lastindex:= intdigits + precision;        //fix format
-   int1:= maxdigits;
+   int1:= maxdigits - 1;
    if defaultmode then begin
-    int1:= defaultprecision;
+    int1:= defaultprecision - 1;
    end;
    if lastindex > int1 then begin
     precision:= precision - lastindex + int1;
@@ -301,7 +301,7 @@ begin
      checkcarry(int1,buffer);
      do1:= frac(do1)*10;       
     end;
-    do1:= do1 - 5 + exps[lastindex] / system.exp(52*ln(2));
+    do1:= do1 - 5 + exps[lastindex] / system.exp(51*ln(2)); //round up lsb
     if (do1 > 0) then begin
      inc(buffer[lastindex]);
      checkcarry(lastindex,buffer);

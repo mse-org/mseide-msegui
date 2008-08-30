@@ -1054,11 +1054,14 @@ begin
    self.finfo.action:= action1;
    self.action:= finfo.action;
    self.submenu:= fsubmenu;
+   self.fcoloractive:= fcoloractive;
    if self.fowner.ftransient then begin
     self.ffont:= font;
+    self.ffontactive:= fontactive;
    end
    else begin
     self.font:= font;
+    self.fontactive:= fontactive;
    end;
   end;
  end;
