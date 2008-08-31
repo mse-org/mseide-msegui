@@ -15,7 +15,7 @@ uses
  
 implementation
 uses
- sysutils,msestrings;
+ cwstring,sysutils,msestrings;
  
 function getlocstr(const id: integer; const defaultvalue: string): string;
 var
@@ -109,7 +109,7 @@ begin
   inc(po1);
  end;
 end;
-
+var testvar: msestring;
 procedure initformatsettings;
 {$ifdef FPC}
 var
@@ -158,6 +158,7 @@ begin
   
   for int1:= 1 to 12 do begin
    shortmonthnames[int1]:= getlocstr(abmon_1 + int1 - 1,shortmonthnames[int1]);
+testvar:= shortmonthnames[int1];
    longmonthnames[int1]:= getlocstr(mon_1 + int1 - 1,longmonthnames[int1]);
   end;
   for int1:= 1 to 7 do begin

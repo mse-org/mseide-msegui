@@ -19,7 +19,7 @@ unit cwstring;
 
 interface
 uses
- sysutils,msesetlocale;
+ sysutils,msesetlocale,mselibc;
 type
  eiconv = class(econverterror)
  end;
@@ -434,6 +434,7 @@ end;
 
 
 initialization
+ setlocale(LC_ALL,'');
   SetCWideStringManager;
   { init conversion tables }
   iconv_wide2ansi:=iconv_open(nl_langinfo(CODESET),unicode_encoding);
