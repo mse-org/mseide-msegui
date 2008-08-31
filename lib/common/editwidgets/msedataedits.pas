@@ -3831,7 +3831,7 @@ constructor tcustomdatetimeedit.create(aowner: tcomponent);
 begin
  fvalue:= emptydatetime;
  fmin:= emptydatetime;
- fmax:= 365000.99999;
+ fmax:= 401768.99999; //2999-12-31
  inherited;
 end;
 

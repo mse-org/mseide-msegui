@@ -3821,13 +3821,110 @@ begin
 end;
 
 function tdatetimepropertyeditor.getvalue: msestring;
+var
+ rea1: real;
 begin
- result:= datetimetostring(getfloatvalue,'dddddd t');
+// result:= datetimetostring(getfloatvalue,'dddddd t');
+ rea1:= getfloatvalue;
+ if isemptydatetime(rea1) then  begin
+  result:= '';
+ end
+ else begin
+  if trunc(rea1) = 0 then begin
+   result:= datetimetostring(getfloatvalue,'hh:nn:ss');
+  end
+  else begin
+   if frac(rea1) = 0 then begin
+    result:= datetimetostring(getfloatvalue,'yyyy-mm-dd');
+   end
+   else begin
+    result:= datetimetostring(getfloatvalue,'yyyy-mm-dd hh:nn:ss');
+   end;
+  end;
+ end;
 end;
 
 procedure tdatetimepropertyeditor.setvalue(const value: msestring);
+
+ function encdate(const str: msestring): real;
+ var
+  ar2: msestringarty;
+  year,month,day: word;
+ begin
+  result:= 0;
+  ar2:= splitstring(str,'-');
+  if high(ar2) >= 0 then begin
+   year:= strtoint(ar2[0]);
+   month:= 1;
+   day:= 1;
+   if high(ar2) > 0 then begin
+    month:= strtoint(ar2[1]);
+    if high(ar2) > 1 then begin
+     day:= strtoint(ar2[2]);
+    end;
+   end;
+  end
+  else begin
+   raise exception.create('Empty date.');
+  end;
+  result:= encodedate(year,month,day);
+ end;
+
+ function enctime(const str: msestring): real;
+ var
+  ar2: msestringarty;
+  hour,minute,second: word;
+ begin
+  result:= 0;
+  ar2:= splitstring(str,':',true);
+  if high(ar2) >= 0 then begin
+   hour:= strtoint(ar2[0]);
+   minute:= 0;
+   second:= 0;
+   if high(ar2) > 0 then begin
+    minute:= strtoint(ar2[1]);
+    if high(ar2) > 1 then begin
+     second:= strtoint(ar2[2]);
+    end;
+   end;
+   result:= encodetime(hour,minute,second,0);
+  end
+  else begin
+   raise exception.create('Empty time.');
+  end;
+ end;
+ 
+var
+ rea1,rea2: real;
+ ar1: msestringarty;
+  
 begin
- setfloatvalue(stringtodatetime(value));
+ if value = '' then begin
+  rea1:= emptydatetime;
+ end
+ else begin
+  if value = ' ' then begin
+   rea1:= now;
+  end
+  else begin
+   rea1:= 0;
+   rea2:= 0;
+   ar1:= splitstring(value,' ',true);
+   if high(ar1) > 0 then begin
+    rea1:= encdate(ar1[0]);
+    rea2:= enctime(ar1[1]);
+   end
+   else begin
+    try
+     rea1:= encdate(ar1[0]);
+    except       
+     rea1:= enctime(ar1[0]);
+    end;
+   end;
+   rea1:= rea1 + rea2;
+  end;
+ end;
+ setfloatvalue(rea1);
 end;
 
 { tshortcutpropertyeditor }
