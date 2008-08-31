@@ -5170,6 +5170,9 @@ begin
  {$ifdef fpc} {$checkpointer default} {$endif}
 end;
 
+var
+ timeoutcount: integer; //for safety timertick
+ 
 function gui_getevent: tevent;
 
 var
@@ -5231,6 +5234,13 @@ begin
     end;
     int1:= poll(@pollinfo,pollcount,1000); 
      //wakeup clientmessages are sometimes missed with xcb ???
+    if int1 = 0 then begin  //timeout
+     inc(timeoutcount);
+     if timeoutcount mod 10 = 0 then begin
+      timerevent:= true; //all 10 seconds without messages 
+                         //in case of lost timer alarm
+     end;
+    end;
     application.lock;
    until (int1 <> -1) or timerevent or terminated;
  {$ifdef with_sm}

@@ -12498,10 +12498,10 @@ begin       //eventloop
         include(fstate,aps_activewindowchecked);
         checkactivewindow;
        end;
-       if ftimertick then begin
+//       if ftimertick then begin
         ftimertick:= false;
-        msetimer.tick(self);
-       end;
+        msetimer.tick(self);    //tick called in every idle
+//       end;
       except
        handleexception(self);
       end;
