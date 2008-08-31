@@ -254,6 +254,12 @@ type
   optionsskin: frameskinoptionsty;
  end;
 
+ widgetatposinfoty = record
+  pos: pointty;
+  mouseeventinfopo: pmouseeventinfoty;
+  parentstate,childstate: widgetstatesty
+ end;
+
  tframecomp = class;
 
  tcustomframe = class(toptionalpersistent,iimagelistinfo)
@@ -358,7 +364,8 @@ type
    procedure parentfontchanged; virtual;
    procedure dopaintfocusrect(const canvas: tcanvas; const rect: rectty); virtual;
    procedure updatewidgetstate; virtual;
-   procedure updatemousestate(const sender: twidget; const apos: pointty); virtual;
+   procedure updatemousestate(const sender: twidget;
+                                       const info: mouseeventinfoty); virtual;
    function needsactiveinvalidate: boolean;
    function needsmouseinvalidate: boolean;
    procedure activechanged; virtual;
@@ -814,11 +821,6 @@ type
  pointeventty = procedure(const sender: twidget; const point: pointty) of object;
  widgeteventty = procedure(const sender: tobject; const awidget: twidget) of object;
 
- widgetatposinfoty = record
-  pos: pointty;
-  parentstate,childstate: widgetstatesty
- end;
-
  widgetarty = array of twidget;
 
  twindow = class;
@@ -1057,7 +1059,7 @@ type
    procedure doendread; override;
    procedure loaded; override;
 
-   procedure updatemousestate(const apos: pointty); virtual;
+   procedure updatemousestate(const info: mouseeventinfoty); virtual;
                                    //updates fstate about mouseposition
    procedure setclientclick; //grabs mouse and sets clickflags
 
@@ -2817,21 +2819,13 @@ begin
  inherited;
 end;
 
-{
-procedure tcustomframe.excludeopaque(const canvas: tcanvas);
-begin
- if fcolorclient <> cl_transparent then begin
-  canvas.subcliprect(fpaintrect);
- end;
-end;
-  }
 procedure tcustomframe.updatemousestate(const sender: twidget;
-                 const apos: pointty);
+                 const info: mouseeventinfoty);
 begin
  checkstate;
  with sender do begin
   if not (ow_mousetransparent in foptionswidget) and
-                       pointinrect(apos,fpaintrect) then begin
+                       pointinrect(info.pos,fpaintrect) then begin
    fwidgetstate:= fwidgetstate + [ws_mouseinclient,ws_wantmousemove,
                            ws_wantmousebutton,ws_wantmousefocus];
   end
@@ -2839,14 +2833,6 @@ begin
    fwidgetstate:= fwidgetstate - [ws_mouseinclient,ws_wantmousemove,
                            ws_wantmousebutton,ws_wantmousefocus];
   end;
-  {
-  if ow_mousewheel in foptionswidget then begin
-   include(fwidgetstate,ws_wantmousewheel);
-  end
-  else begin
-   exclude(fwidgetstate,ws_wantmousewheel);
-  end;
-  }
  end;
 end;
 
@@ -7094,6 +7080,7 @@ function twidget.widgetatpos(var info: widgetatposinfoty): twidget;
 var
  int1: integer;
  astate: widgetstatesty;
+ ainfo: mouseeventinfoty;
 begin
  result:= nil;
  with info do begin
@@ -7102,7 +7089,14 @@ begin
    exit;
   end
   else begin
-   updatemousestate(info.pos);
+   if info.mouseeventinfopo = nil then begin
+    fillchar(ainfo,0,sizeof(ainfo));
+    ainfo.pos:= info.pos;
+    updatemousestate(ainfo);
+   end
+   else begin
+    updatemousestate(info.mouseeventinfopo^);
+   end;
    astate:= fwidgetstate;
    if isvisible then begin
     include(astate,ws_visible);
@@ -7119,8 +7113,14 @@ begin
    for int1:= widgetcount - 1 downto 0 do begin
     with widgets[int1] do begin
      subpoint1(info.pos,fwidgetrect.pos);
+     if info.mouseeventinfopo <> nil then begin
+      info.mouseeventinfopo^.pos:= info.pos;
+     end;
      result:= widgetatpos(info);
      addpoint1(info.pos,fwidgetrect.pos);
+     if info.mouseeventinfopo <> nil then begin
+      info.mouseeventinfopo^.pos:= info.pos;
+     end;
      if result <> nil then begin
       exit;
      end;
@@ -7227,6 +7227,7 @@ begin
  fillchar(findinfo,sizeof(findinfo),0);
  with findinfo do begin
   pos:= info.pos;
+  mouseeventinfopo:= @info;
   parentstate:= [ws_enabled,ws_isvisible];
   case info.eventkind of
    ek_buttonpress,ek_buttonrelease: begin
@@ -7243,14 +7244,14 @@ begin
  result:= widgetatpos(findinfo);
 end;
 
-procedure twidget.updatemousestate(const apos: pointty);
+procedure twidget.updatemousestate(const info: mouseeventinfoty);
 begin
  if fframe <> nil then begin
-  fframe.updatemousestate(self,apos);
+  fframe.updatemousestate(self,info);
  end
  else begin
-  if (apos.x >= 0) and (apos.x < fwidgetrect.cx) and
-           (apos.y >= 0) and (apos.y < fwidgetrect.cy) and
+  if (info.pos.x >= 0) and (info.pos.x < fwidgetrect.cx) and
+           (info.pos.y >= 0) and (info.pos.y < fwidgetrect.cy) and
             not (ow_mousetransparent in foptionswidget) then begin
    fwidgetstate:= fwidgetstate +
       [ws_mouseinclient,ws_wantmousebutton,ws_wantmousemove,ws_wantmousefocus];
@@ -7259,14 +7260,6 @@ begin
    fwidgetstate:= fwidgetstate -
       [ws_mouseinclient,ws_wantmousebutton,ws_wantmousemove,ws_wantmousefocus];
   end;
-  {
-  if ow_mousewheel in foptionswidget then begin
-   include(fwidgetstate,ws_wantmousewheel);
-  end
-  else begin
-   exclude(fwidgetstate,ws_wantmousewheel);
-  end;
-  }
  end;
 end;
 
@@ -7287,7 +7280,7 @@ function twidget.isclientmouseevent(var info: mouseeventinfoty): boolean;
 begin
  with info do begin
   if not (es_processed in eventstate) or (info.eventkind = ek_mousemove) then begin
-   updatemousestate(pos);
+   updatemousestate(info);
    if [ws_mouseinclient,ws_clientmousecaptured] * fwidgetstate <> [] then begin
     if (appinst.fclientmousewidget <> self) and not (es_child in eventstate) then begin
                        //call updaterootwidget
@@ -7393,7 +7386,7 @@ begin
       clientmouseevent(info);
       clientoffset:= getclientoffset;
      end;
-     if not ({es_processed}es_nofocus in info.eventstate) and not focused and
+     if not (es_nofocus in info.eventstate) and not focused and
                       (ws_wantmousefocus in fwidgetstate)and
        (ow_mousefocus in foptionswidget) and canfocus then begin
       setfocus;

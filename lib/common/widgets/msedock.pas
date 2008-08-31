@@ -382,7 +382,7 @@ type
                                      const acontroller: tdockcontroller);
    destructor destroy; override;
    procedure updatemousestate(const sender: twidget;
-                                                const apos: pointty); override;
+                                  const info: mouseeventinfoty); override;
    procedure mouseevent(var info: mouseeventinfoty);
    procedure paintoverlay(const canvas: tcanvas; const arect: rectty); override;
    property buttonrects[const index:  dockbuttonrectty]: rectty 
@@ -3492,10 +3492,10 @@ begin
 end;
 
 procedure tgripframe.updatemousestate(const sender: twidget;
-               const apos: pointty);
+               const info: mouseeventinfoty);
 begin
  inherited;
- if pointinrect(apos,fgriprect) or (fcontroller.canmdisize) then begin
+ if pointinrect(info.pos,fgriprect) or (fcontroller.canmdisize) then begin
   with twidget1(sender) do begin
    fwidgetstate:= fwidgetstate + [ws_wantmousemove,ws_wantmousebutton];
   end;

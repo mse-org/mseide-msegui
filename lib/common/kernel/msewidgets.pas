@@ -75,7 +75,8 @@ type
    procedure paintoverlay(const canvas: tcanvas; const arect: rectty); override;
    procedure scale(const ascale: real); override;
    procedure createfont;
-   procedure updatemousestate(const sender: twidget; const apos: pointty); override;
+   procedure updatemousestate(const sender: twidget;
+                               const info: mouseeventinfoty); override;
    function pointincaption(const point: pointty): boolean; override;
                 //origin = widgetrect
    procedure checkwidgetsize(var asize: sizety); override;
@@ -206,7 +207,8 @@ type
    destructor destroy; override;
    procedure checktemplate(const sender: tobject); override;
                  //true if match
-   procedure updatemousestate(const sender: twidget; const apos: pointty); override;
+   procedure updatemousestate(const sender: twidget; 
+                              const info: mouseeventinfoty); override;
    procedure paintoverlay(const canvas: tcanvas; const arect: rectty); override;
    procedure mouseevent(var info: mouseeventinfoty); virtual;
    procedure domousewheelevent(var info: mousewheeleventinfoty;
@@ -278,12 +280,19 @@ type
   function getscrollsize: sizety;
  end;
 
+ optionscrollty = (oscr_drag,oscr_key);
+ optionsscrollty = set of optionscrollty;
+ 
  tcustomscrollboxframe = class(tcustomscrollframe,iscrollbox)
   private
    fscrolling: integer;
    fclientheight: integer;
    fclientwidth: integer;
    fowner: twidget;
+   foptionsscroll: optionsscrollty;
+   fdragging: boolean;
+   fpickpos: pointty;
+   fpickref: pointty;
    procedure clientrecttoscrollbar(const rect: rectty);
    procedure scrollpostoclientpos(var aclientrect: rectty);
    procedure setclientheigth(const Value: integer);
@@ -295,11 +304,16 @@ type
    procedure setsbvert(const avalue: tscrollboxscrollbar);
    function getsbvert: tscrollboxscrollbar;
   protected
+   function isdragstart(const sender: twidget; 
+                                  const info: mouseeventinfoty): boolean;
    procedure initinnerframe; virtual;
    function getscrollbarclass(vert: boolean): framescrollbarclassty; override;
    procedure updatevisiblescrollbars; override;
    procedure scrollevent(sender: tcustomscrollbar; event: scrolleventty); virtual;
-   //iscrollbar
+   procedure dokeydown(var info: keyeventinfoty); override;
+   procedure updatemousestate(const sender: twidget;
+                               const info: mouseeventinfoty); override;
+  //iscrollbar
    function translatecolor(const acolor: colorty): colorty;
    procedure invalidaterect(const rect: rectty; const org: originty;
                               const noclip: boolean = false);
@@ -307,9 +321,13 @@ type
    function getscrollsize: sizety;
   public
    constructor create(const intf: iscrollframe; const owner: twidget);
+   procedure childmouseevent(const sender: twidget;
+                                             var info: mouseeventinfoty);
    procedure updateclientrect; override;
    procedure showrect(const arect: rectty; const bottomright: boolean); 
                            //origin paintpos
+   property optionsscroll: optionsscrollty read foptionsscroll 
+                                                     write foptionsscroll;
    property clientwidth: integer read fclientwidth write setclientwidth default 0;
    property clientheight: integer read fclientheight write setclientheigth default 0;
    property framei_left default 2;
@@ -322,6 +340,7 @@ type
 
  tscrollboxframe = class(tcustomscrollboxframe)
   published
+   property optionsscroll;
    property clientwidth;
    property clientheight;
    property levelo;
@@ -430,7 +449,8 @@ type
   public
    constructor create(const intf: icaptionframe; const stepintf: istepbar);
    destructor destroy; override;
-   procedure updatemousestate(const sender: twidget; const apos: pointty); override;
+   procedure updatemousestate(const sender: twidget; 
+                                   const info: mouseeventinfoty); override;
    procedure mouseevent(var info: mouseeventinfoty); virtual;
    procedure domousewheelevent(var info: mousewheeleventinfoty); virtual;
    procedure paintoverlay(const canvas: tcanvas; const arect: rectty); override;
@@ -768,6 +788,8 @@ type
    procedure internalcreateframe; override;
    procedure doscroll(const dist: pointty); override;
    procedure mouseevent(var info: mouseeventinfoty); override;
+   procedure childmouseevent(const sender: twidget;
+                              var info: mouseeventinfoty); override;
    procedure domousewheelevent(var info: mousewheeleventinfoty); override;
    procedure writestate(writer: twriter); override;
    procedure internalcreateface; override;
@@ -964,7 +986,8 @@ procedure buttonoptionstoshapestate(avalue: buttonoptionsty;
 implementation
 
 uses
- msebits,mseguiintf,msestockobjects,msekeyboard,sysutils,msemenuwidgets,mseactions;
+ msebits,mseguiintf,msestockobjects,msekeyboard,sysutils,msemenuwidgets,mseactions,
+ msepointer;
 
 const
  captionmargin = 1; //distance focusrect to caption in tcaptionframe
@@ -2292,10 +2315,10 @@ begin
 end;
 
 procedure tcustomcaptionframe.updatemousestate(const sender: twidget;
-        const apos: pointty);
+        const info: mouseeventinfoty);
 begin
  inherited;
- if pointincaption(apos) then begin
+ if pointincaption(info.pos) then begin
   with twidget1(sender) do begin
    include(fwidgetstate,ws_wantmousebutton);    //for twidget.iswidgetclick
    if fs_captionfocus in fstate then begin
@@ -2385,15 +2408,25 @@ var
 begin
  with info do begin
   if not (es_processed in eventstate) then begin
-   if (fs_sbverton in fstate) then begin
+   scrollbar:= nil;
+   if pointinrect(info.pos,sbvert.dim) then begin
     scrollbar:= sbvert;
    end
    else begin
-    if fs_sbhorzon in fstate then begin
+    if pointinrect(info.pos,sbhorz.dim) then begin
      scrollbar:= sbhorz;
     end
     else begin
-     scrollbar:= nil;
+     if (fs_sbverton in fstate) then begin
+      scrollbar:= sbvert;
+     end
+     else begin
+      if fs_sbhorzon in fstate then begin
+       scrollbar:= sbhorz;
+      end
+      else begin
+      end;
+     end;
     end;
    end;
    if scrollbar <> nil then begin
@@ -2434,11 +2467,11 @@ begin
 end;
 
 procedure tcustomscrollframe.updatemousestate(const sender: twidget;
-         const apos: pointty);
+         const info: mouseeventinfoty);
 begin
  inherited;
- if (fs_sbverton in fstate) and fvert.wantmouseevent(apos) or
-    (fs_sbhorzon in fstate) and fhorz.wantmouseevent(apos) then begin
+ if (fs_sbverton in fstate) and fvert.wantmouseevent(info.pos) or
+    (fs_sbhorzon in fstate) and fhorz.wantmouseevent(info.pos) then begin
   with twidget1(sender) do begin
    fwidgetstate:= (fwidgetstate - [ws_mouseinclient]) +
                       [ws_wantmousebutton,ws_wantmousemove];
@@ -3095,10 +3128,10 @@ begin
 end;
 
 procedure tcustomstepframe.updatemousestate(const sender: twidget;
-                      const apos: pointty);
+                      const info: mouseeventinfoty);
 begin
  inherited;
- if pointinrect(apos,fdim) then begin
+ if pointinrect(info.pos,fdim) then begin
   with twidget1(sender) do begin
    fwidgetstate:= fwidgetstate + [ws_wantmousebutton,ws_wantmousemove];
   end;
@@ -3329,6 +3362,57 @@ begin
  end;
 end;
 
+procedure tcustomscrollboxframe.dokeydown(var info: keyeventinfoty);
+begin
+ with info do begin
+  if (oscr_key in foptionsscroll) and not (es_processed in info.eventstate) and 
+           (((shiftstate * shiftstatesmask) - [ss_ctrl]) = []) then begin
+   include(eventstate,es_processed); 
+   case key of
+    key_pageup: begin
+     if ss_ctrl in shiftstate then begin
+      fvert.value:= 0;
+     end
+     else begin
+      fvert.pagedown;
+     end;
+    end;
+    key_pagedown: begin
+     if ss_ctrl in shiftstate then begin
+      fvert.value:= 1;
+     end
+     else begin
+      fvert.pageup;
+     end;
+    end;
+    else begin
+     exclude(eventstate,es_processed);
+    end;
+   end;
+   if ss_ctrl in shiftstate then begin
+    include(eventstate,es_processed); 
+    case key of
+     key_right: begin
+      fhorz.stepup;
+     end;
+     key_left: begin
+      fhorz.stepdown;
+     end;
+     key_down: begin
+      fvert.stepup;
+     end;
+     key_up: begin
+      fvert.stepdown;
+     end;
+     else begin
+      exclude(eventstate,es_processed);
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
 function tcustomscrollboxframe.translatecolor(const acolor: colorty): colorty;
 begin
  result:= fowner.translatecolor(acolor);
@@ -3462,6 +3546,72 @@ end;
 function tcustomscrollboxframe.getsbvert: tscrollboxscrollbar;
 begin
  result:= tscrollboxscrollbar(inherited sbvert);
+end;
+
+procedure tcustomscrollboxframe.updatemousestate(const sender: twidget;
+               const info: mouseeventinfoty);
+begin
+ inherited;
+ with twidget1(sender) do begin
+  if fdragging then begin
+   fwidgetstate:= fwidgetstate + [ws_wantmousemove,ws_wantmousebutton];
+  end
+  else begin
+   if (oscr_drag in foptionsscroll) and isdragstart(sender,info) then begin
+    include(fwidgetstate,ws_wantmousebutton);  
+   end;
+  end;  
+ end;
+end;
+
+procedure tcustomscrollboxframe.childmouseevent(const sender: twidget;
+                                var info: mouseeventinfoty);
+var
+ po1: pointty;
+begin
+ with info do begin
+  if not (es_processed in eventstate) then begin
+   po1:= translatewidgetpoint(pos,sender,fowner);
+   if fdragging then begin
+    case eventkind of
+     ek_mouseleave,ek_buttonrelease: begin
+      application.cursorshape:= cr_default;
+      fowner.releasemouse;
+      fdragging:= false;
+      include(eventstate,es_processed);
+     end;
+     ek_mousemove: begin
+      showrect(makerect(subpoint(subpoint(fpickpos,po1),fpickref),
+                             fclientrect.size),false);
+      include(eventstate,es_processed);
+    end;
+    end;
+   end
+   else begin
+    if isdragstart(sender,info) then begin
+     fowner.capturemouse;
+     fpickpos:= po1;
+     fpickref:= fclientrect.pos;
+     application.cursorshape:= cr_sizeall;
+     fdragging:= true;
+     include(eventstate,es_processed);
+    end;
+   end;
+  end;
+ end;
+end;
+
+
+function tcustomscrollboxframe.isdragstart(const sender: twidget;
+                             const info: mouseeventinfoty): boolean;
+begin
+ with info do begin
+  result:= (oscr_drag in foptionsscroll) and 
+            (eventkind = ek_buttonpress) and (shiftstate = [ss_middle]) and
+             pointinrect(translatewidgetpoint(pos,sender,fowner),fpaintrect) and 
+               ((fclientrect.cx <> fpaintrect.cx) or 
+                     (fclientrect.cx <> fpaintrect.cx));
+ end;                    
 end;
 
 { tcustomautoscrollframe }
@@ -4056,8 +4206,21 @@ end;
 
 procedure tscrollingwidget.mouseevent(var info: mouseeventinfoty);
 begin
- tscrollframe(fframe).mouseevent(info);
  inherited;
+ if not (es_processed in info.eventstate) then begin
+  tscrollframe(fframe).mouseevent(info);
+ end;
+end;
+
+procedure tscrollingwidget.childmouseevent(const sender: twidget;
+                              var info: mouseeventinfoty);
+var
+ po1: pointty; 
+begin
+ frame.childmouseevent(sender,info);
+ if not (es_processed in info.eventstate) then begin
+  inherited;
+ end;
 end;
 
 procedure tscrollingwidget.domousewheelevent(var info: mousewheeleventinfoty);

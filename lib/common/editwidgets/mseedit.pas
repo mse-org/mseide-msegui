@@ -267,7 +267,8 @@ type
                                                    reintroduce; virtual;
    destructor destroy; override;
    function buttonframe: framety;
-   procedure updatemousestate(const sender: twidget; const apos: pointty); override;
+   procedure updatemousestate(const sender: twidget;
+                                 const info: mouseeventinfoty); override;
    procedure updatewidgetstate; override;
    procedure paintoverlay(const canvas: tcanvas; const arect: rectty); override;
    procedure mouseevent(var info: mouseeventinfoty);
@@ -990,10 +991,10 @@ begin
 end;
 
 procedure tcustombuttonframe.updatemousestate(const sender: twidget;
-               const apos: pointty);
+                             const info: mouseeventinfoty);
 begin
  inherited;
- if fbuttons.wantmouseevent(apos) then begin
+ if fbuttons.wantmouseevent(info.pos) then begin
   with twidget1(sender) do begin
    fwidgetstate:= fwidgetstate + [ws_wantmousebutton,ws_wantmousemove];
   end;

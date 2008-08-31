@@ -407,6 +407,8 @@ type
    procedure internalcreateframe; override;
    procedure widgetregionchanged(const sender: twidget); override;
    procedure mouseevent(var info: mouseeventinfoty); override;
+   procedure childmouseevent(const sender: twidget;
+                              var info: mouseeventinfoty); override;
    procedure domousewheelevent(var info: mousewheeleventinfoty); override;
    procedure doscroll(const dist: pointty); override;
   public
@@ -1502,8 +1504,21 @@ end;
 
 procedure tscrollbox.mouseevent(var info: mouseeventinfoty);
 begin
- tscrollframe(fframe).mouseevent(info);
  inherited;
+ if not (es_processed in info .eventstate) then begin
+  tscrollframe(fframe).mouseevent(info);
+ end;
+end;
+
+procedure tscrollbox.childmouseevent(const sender: twidget;
+                              var info: mouseeventinfoty);
+var
+ po1: pointty; 
+begin
+ frame.childmouseevent(sender,info);
+ if not (es_processed in info.eventstate) then begin
+  inherited;
+ end;
 end;
 
 procedure tscrollbox.domousewheelevent(var info: mousewheeleventinfoty);

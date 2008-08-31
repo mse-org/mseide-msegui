@@ -20,7 +20,6 @@ type
  timageframe = class(tscrollboxframe)
   protected
    procedure initinnerframe; override;
-   procedure dokeydown(var info: keyeventinfoty); override;
   published
    property framei_left default 0;
    property framei_top default 0;
@@ -164,57 +163,6 @@ end;
 procedure timageframe.initinnerframe;
 begin
  //dummy
-end;
-
-procedure timageframe.dokeydown(var info: keyeventinfoty);
-begin
- with info do begin
-  if not (es_processed in info.eventstate) and 
-           (((shiftstate * shiftstatesmask) - [ss_ctrl]) = []) then begin
-   include(eventstate,es_processed); 
-   case key of
-    key_pageup: begin
-     if ss_ctrl in shiftstate then begin
-      fvert.value:= 0;
-     end
-     else begin
-      fvert.pagedown;
-     end;
-    end;
-    key_pagedown: begin
-     if ss_ctrl in shiftstate then begin
-      fvert.value:= 1;
-     end
-     else begin
-      fvert.pageup;
-     end;
-    end;
-    else begin
-     exclude(eventstate,es_processed);
-    end;
-   end;
-   if ss_ctrl in shiftstate then begin
-    include(eventstate,es_processed); 
-    case key of
-     key_right: begin
-      fhorz.stepup;
-     end;
-     key_left: begin
-      fhorz.stepdown;
-     end;
-     key_down: begin
-      fvert.stepup;
-     end;
-     key_up: begin
-      fvert.stepdown;
-     end;
-     else begin
-      exclude(eventstate,es_processed);
-     end;
-    end;
-   end;
-  end;
- end;
 end;
 
 initialization
