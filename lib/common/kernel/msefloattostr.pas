@@ -16,9 +16,12 @@ uses
 type
  floatstringmodety = (fsm_default,fsm_fix,fsm_sci,fsm_engfix,fsm_engflo);
  
-function doubletostring(value: double; precision: byte;
+function doubletostring(value: double; precision: integer;
       mode: floatstringmodety = fsm_default;
       decimalsep: msechar = '.'; thousandsep: msechar = #0): msestring;
+               //precision <= 0 -> remove trailing 0
+               //precision = 0 in fsm_default mode = maximal precision
+               
 function intexp10(aexp: integer): double;
 
 implementation
@@ -57,7 +60,7 @@ begin
  end;
 end;
 
-function doubletostring(value: double; precision: byte;
+function doubletostring(value: double; precision: integer;
       mode: floatstringmodety = fsm_default;
       decimalsep: msechar = '.'; thousandsep: msechar = #0): msestring;
   //format double:
@@ -108,8 +111,10 @@ var
  lastindex,intdigits,leadingzeros,space,thousandsepcount: integer;
  po1: pmsechar;
  mode1: floatstringmodety;
+ preci: integer;
  
 begin
+ preci:= abs(precision);
  with doublerecty(value) do begin
   neg:= by7 and $80 <> 0;
   by7:= by7 and $7f; //remove sign
@@ -140,16 +145,16 @@ begin
   end
   else begin
    if exp = 0 then begin                       // value = 0
-    if precision >= maxdigits then begin
-     precision:= maxdigits;
+    if preci >= maxdigits then begin
+     preci:= maxdigits;
     end;
     case mode of
-     fsm_sci,fsm_engfix,fsm_engfloat: begin
-      if precision = 0 then begin
+     fsm_sci,fsm_engfix,fsm_engflo: begin
+      if preci = 0 then begin
        result:= '0e+000';
        exit;
       end;
-      int2:= precision+6;
+      int2:= preci+6;
       setlength(result,int2+1);
       for int1:= 0 to int2 do begin
        pmsecharaty(result)^[int1]:= '0';
@@ -158,12 +163,12 @@ begin
       pmsecharaty(result)^[int2-3]:= '+';
      end;
      else begin          //fix format
-      if (precision = 0) or defaultmode then begin
+      if (preci = 0) or defaultmode then begin
        result:= '0';
        exit;
       end
       else begin
-       int2:= precision+1;
+       int2:= preci+1;
        setlength(result,int2+1);
        for int1:= 0 to int2 do begin
         pmsecharaty(result)^[int1]:= '0';
@@ -179,7 +184,7 @@ begin
    do1:= exp*exp2to10;
    intdigits:= trunc(do1);
    if defaultmode then begin
-    precision:= maxdigits;
+    preci:= maxdigits;
     if (value < 1e-6) or (value >= 1e15) then begin
      mode:= fsm_sci;
     end;
@@ -190,7 +195,7 @@ begin
      dec(intdigits);      //trunk -> floor
     end;
     int3:= intdigits;
-    if (mode = fsm_engfloat) then begin
+    if (mode = fsm_engflo) then begin
      do1:= value / intexp10(intdigits);
      if do1 >= exps[1] then begin
       inc(intdigits);     //correct overflow for precision correction
@@ -240,19 +245,23 @@ begin
     if neg then begin
      do1:= -do1;
     end;      
-    if mode = fsm_engfloat then begin
-     precision:= precision - intdigits + int3;
-     if shortint(precision) < 0 then begin
-      precision:= 0;
+    if mode = fsm_engflo then begin
+     preci:= preci - intdigits + int3;
+     if shortint(preci) < 0 then begin
+      preci:= 0;
      end;
     end;
-    if defaultmode then begin
+    if defaultmode and (precision = 0) then begin
      mode1:= fsm_default;
     end
     else begin
      mode1:= fsm_fix;
     end;
-    result:= doubletostring(do1,precision,mode1,decimalsep);
+    int1:= preci;
+    if (precision < 0) or defaultmode and (precision = 0) then begin
+     int1:= -int1;
+    end;
+    result:= doubletostring(do1,int1,mode1,decimalsep); //get mantissa digits
     int2:= length(result)+5;
     setlength(result,int2);
     po1:= pmsechar(pointer(result))+int2;
@@ -272,13 +281,16 @@ begin
     exit;
    end;                                      //exp format ^^^
       
-   lastindex:= intdigits + precision;        //fix format
+   lastindex:= intdigits + preci;        //fix format
    int1:= maxdigits - 1;
    if defaultmode then begin
     int1:= defaultprecision - 1;
    end;
    if lastindex > int1 then begin
-    precision:= precision - lastindex + int1;
+    preci:= preci - lastindex + int1;
+    if preci < 0 then begin
+     raise exception.create('Digits overflow.');
+    end;
     lastindex:= int1;
    end;
    inc(lastindex);
@@ -289,10 +301,6 @@ begin
    else begin
     do1:= value/exps[intdigits];        //value 0.1..10
    end;
-//    if do1 < exps[1] then begin          //< 10
-//     do1:= do1 * exps[1];                //value 1..10
-//     dec(lastindex);
-//    end;
 
    if lastindex >= 1 then begin         //calculate numbers
     for int1:= 1 to lastindex do begin
@@ -306,16 +314,16 @@ begin
      inc(buffer[lastindex]);
      checkcarry(lastindex,buffer);
     end;
-    if defaultmode then begin
-     int2:= lastindex - precision + 1; //remove trayling zeros
+    if  (precision < 0) and defaultmode or (precision = 0) then begin
+     int2:= lastindex - preci + 1; //remove trayling zeros
      for int1:= lastindex downto int2 do begin
       if (buffer[int1] <> '0') then begin
-       precision:= precision - lastindex + int1;
+       preci:= preci - lastindex + int1;
        lastindex:= int1;
        break;
       end;
       if int1 = int2 then begin
-       precision:= 0;
+       preci:= 0;
        lastindex:= int1-1;
       end;
      end;
@@ -329,12 +337,12 @@ begin
    if neg then begin
     inc(space);                      //add space for sign
    end;
-   if precision > 0 then begin
+   if preci > 0 then begin
     inc(space);                      //add space for decimal separator
    end;
 
    if exp < 0 then begin             //<1, no int
-    space:= space + precision;        
+    space:= space + preci;        
     setlength(result,space+1);       //add space for leading zero
     po1:= pmsechar(pointer(result))+space;
     if lastindex > space then begin
@@ -348,8 +356,8 @@ begin
      po1^:= '0';                    //fill rest with '0'
      dec(po1);
     end;
-    if precision > 0 then begin
-     inc(po1,space - precision + 1); //decimal separator
+    if preci > 0 then begin
+     inc(po1,space - preci + 1); //decimal separator
      (po1-1)^:= po1^;                //move possible carry
      po1^:= decimalsep;
     end;
@@ -361,20 +369,20 @@ begin
     end;
     thousandsepcount:= 0;
     if thousandsep <> #0 then begin
-     thousandsepcount:= (lastindex-leadingzeros-precision) div 3;
+     thousandsepcount:= (lastindex-leadingzeros-preci) div 3;
      space:= space + thousandsepcount;
     end;
     space:= space + lastindex - leadingzeros;
     setlength(result,space+1);
     po1:= pmsechar(pointer(result)) + space;
-    if precision > 0 then begin
-     for int3:= lastindex downto lastindex - precision + 1 do begin
+    if preci > 0 then begin
+     for int3:= lastindex downto lastindex - preci + 1 do begin
       po1^:= buffer[int3];         //fract
       dec(po1);
      end;
      po1^:= decimalsep;
      dec(po1);
-     for int3:= lastindex - precision downto leadingzeros do begin
+     for int3:= lastindex - preci downto leadingzeros do begin
       po1^:= buffer[int3];         //int
       dec(po1);
      end;
@@ -387,13 +395,13 @@ begin
     end;
     if thousandsepcount > 0 then begin
      int3:= space-lastindex+leadingzeros; //first int char
-     int4:= space - precision;            //last int char
-     if precision > 0 then begin
+     int4:= space - preci;            //last int char
+     if preci > 0 then begin
       dec(int3);                          //thousand separator 
       dec(int4);              
      end;
      po1:= pmsechar(pointer(result)) + int3 - thousandsepcount;
-     for int3:= int3 to space - precision - 3 do begin
+     for int3:= int3 to space - preci - 3 do begin
       po1^:= pmsecharaty(result)^[int3];
       inc(po1);
       if (int3 - int4) mod 3 = 0 then begin
