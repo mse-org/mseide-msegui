@@ -35,7 +35,7 @@ function mulrealty(const a,b: realty): realty; //result = a * b
 
 implementation
 uses
- sysutils;
+ sysutils,msesys;
 
 const
 {$ifdef FPC_DOUBLE_HILO_SWAPPED}
@@ -146,7 +146,7 @@ begin
   result:= emptyrealstring;
  end
  else begin
-  result:= formatfloatmse(val,format);
+  result:= formatfloatmse(val,format,defaultformatsettingsmse);
  end;
 end;
 

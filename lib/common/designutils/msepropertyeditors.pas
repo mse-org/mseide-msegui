@@ -19,7 +19,8 @@ uses
 
 const
  bmpfiledialogstatname = 'bmpfile.sta';
- 
+ numcharchar = msechar('[');
+  
 type
 
  tpropertyeditor = class;
@@ -1544,13 +1545,13 @@ begin
   po1:= pointer(result);
   for int1:= 1 to length(avalue) do begin
    case avalue[int1] of
-    c_tab: begin po1^:= '#'; inc(po1); po1^:= 't'; end;
-    c_linefeed: begin po1^:= '#'; inc(po1); po1^:= 'n'; end;
-    c_return: begin po1^:= '#'; inc(po1); po1^:= 'r'; end;
-    '#': begin po1^:= '#'; inc(po1); po1^:= '#'; end;
+    c_tab: begin po1^:= numcharchar; inc(po1); po1^:= 't'; end;
+    c_linefeed: begin po1^:= numcharchar; inc(po1); po1^:= 'n'; end;
+    c_return: begin po1^:= numcharchar; inc(po1); po1^:= 'r'; end;
+    numcharchar: begin po1^:= numcharchar; inc(po1); po1^:= numcharchar; end;
     else begin
      if avalue[int1] < widechar(32) then begin
-      mstr1:= '#'+inttostr(ord(avalue[int1]));
+      mstr1:= numcharchar+inttostr(ord(avalue[int1]));
       if (avalue[int1+1] >= '0') and (avalue[int1+1] <= '9') or 
                      (avalue[int1+1] = ' ') then begin
        mstr1:= mstr1 + ' ';
@@ -1580,9 +1581,9 @@ begin
   po1:= pointer(result);
   int1:= 1;
   while int1 <= length(avalue) do begin
-   if (avalue[int1] = '#') and (int1 < length(avalue)+1) then begin
+   if (avalue[int1] = numcharchar) and (int1 < length(avalue)+1) then begin
     case avalue[int1+1] of
-     '#': po1^:= '#';
+     numcharchar: po1^:= numcharchar;
      't': po1^:= c_tab;
      'n': po1^:= c_linefeed;
      'r': po1^:= c_return;
@@ -1597,7 +1598,7 @@ begin
       end;
       int1:= int2-2;
      end;
-     else begin po1^:= '#'; dec(int1); end;
+     else begin po1^:= numcharchar; dec(int1); end;
     end;
     inc(int1,2);
    end

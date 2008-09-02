@@ -12,9 +12,13 @@ unit msefloattostr;
 interface
 uses
  msestrings;
+
+const
+ expochar = msechar('E');
  
 type
- floatstringmodety = (fsm_default,fsm_fix,fsm_sci,fsm_engfix,fsm_engflo);
+ floatstringmodety = (fsm_default,fsm_fix,fsm_sci,fsm_engfix,fsm_engflo,
+                      fsm_engsymfix,fsm_engsymflo);
  
 function doubletostring(value: double; precision: integer;
       mode: floatstringmodety = fsm_default;
@@ -31,6 +35,21 @@ uses
 const
  binexps: array[0..8] of double = (1e1,1e2,1e4,1e8,1e16,1e32,1e64,1e128,1e256);
 
+type
+ expsymty = 
+ //    -8         -7         -6         -5      -4       -3        -2        -1        0
+  (exs_yocto=-8,exs_zepto,exs_atto,exs_femto,exs_pico,exs_nano,exs_micro,exs_milli,
+//    0
+   exs_none,
+//    1        2       3        4        5        6       7           8
+   exs_kilo,exs_mega,exs_giga,exs_tera,exs_peta,exs_exa,exs_zetta,exs_yotta);
+   
+const
+ expsyms: array[expsymty] of msechar = 
+       ('y','z','a','f','p','n','u','m',
+        ' ',
+        'k','M','G','T','P','E','Z','Y');
+        
 function intexp10(aexp: integer): double;
 var
  do1: double;
@@ -59,13 +78,17 @@ begin
   result:= do1;
  end;
 end;
-
+var testvar: double;
 function doubletostring(value: double; precision: integer;
       mode: floatstringmodety = fsm_default;
       decimalsep: msechar = '.'; thousandsep: msechar = #0): msestring;
   //format double:
   // 1  11  52
   //|s| e | f | 
+
+const
+ maxdigits = 17;
+ defaultprecision = maxdigits-2;
 
 type
  doublerecty = packed record       //little endian
@@ -76,7 +99,18 @@ type
    3: (qwo0: qword);
  end;
  bufferty =  array[0..30] of msechar;
- 
+
+ function getfixoverflowvalue: msestring;
+ var
+  int1: integer;
+ begin
+  int1:= defaultprecision-1;
+  if precision < 0 then begin
+   int1:= -int1;
+  end;
+  result:= doubletostring(value,int1,fsm_sci,decimalsep,thousandsep);
+ end;
+  
  procedure checkcarry(start: byte; var dest: bufferty);
  var
   int1: integer;
@@ -91,11 +125,13 @@ type
  end;
 
 const
+ lsbrounding = exp(51*ln(2));
+ expo0max = 1-1/lsbrounding;
+ expo1max = 10-10/lsbrounding;
+ expo3max = 1000-1000/lsbrounding;
  expmask = $7ff0;             //for wo3
  halfexp = (1023-1) shl 4;    //value >= 0.5 for wo3
  exp2to10 = ln(2)/ln(10);
- maxdigits = 17;
- defaultprecision = maxdigits-2;
  exps: array[0..maxdigits] of double = 
  (1e0,1e1,1e2,1e3,1e4,1e5,1e6,1e7,1e8,1e9,1e10,1e11,1e12,1e13,1e14,1e15,1e16,1e17);
  
@@ -114,6 +150,9 @@ var
  preci: integer;
  
 begin
+testvar:= expo0max;
+testvar:= expo1max;
+testvar:= expo3max;
  preci:= abs(precision);
  with doublerecty(value) do begin
   neg:= by7 and $80 <> 0;
@@ -149,18 +188,33 @@ begin
      preci:= maxdigits;
     end;
     case mode of
-     fsm_sci,fsm_engfix,fsm_engflo: begin
+     fsm_sci,fsm_engfix,fsm_engflo,fsm_engsymfix,fsm_engsymflo: begin
       if preci = 0 then begin
-       result:= '0e+000';
+       if mode in [fsm_engsymfix,fsm_engsymflo] then begin
+        result:= '0 ';
+       end
+       else begin
+        result:= '0e+000';
+       end;
        exit;
       end;
-      int2:= preci+6;
+      if mode in [fsm_engsymfix,fsm_engsymflo] then begin
+       int2:= preci+2;
+      end
+      else begin
+       int2:= preci+6;
+      end;
       setlength(result,int2+1);
       for int1:= 0 to int2 do begin
        pmsecharaty(result)^[int1]:= '0';
       end;
-      pmsecharaty(result)^[int2-4]:= 'e';
-      pmsecharaty(result)^[int2-3]:= '+';
+      if mode in [fsm_engsymfix,fsm_engsymflo] then begin
+       pmsecharaty(result)^[int2]:= ' ';
+      end
+      else begin
+       pmsecharaty(result)^[int2-4]:= expochar;
+       pmsecharaty(result)^[int2-3]:= '+';
+      end;
      end;
      else begin          //fix format
       if (preci = 0) or defaultmode then begin
@@ -195,9 +249,9 @@ begin
      dec(intdigits);      //trunk -> floor
     end;
     int3:= intdigits;
-    if (mode = fsm_engflo) then begin
+    if (mode = fsm_engflo) or (mode = fsm_engsymflo) then begin
      do1:= value / intexp10(intdigits);
-     if do1 >= exps[1] then begin
+     if do1 >= expo1max then begin
       inc(intdigits);     //correct overflow for precision correction
      end;
     end;
@@ -219,7 +273,7 @@ begin
      do1:= value/do1;
     end;
     if (mode < fsm_engfix) then begin //fsm_sci
-     if (do1 >= exps[1]) then begin
+     if (do1 >= expo1max) then begin
       do1:= do1 / exps[1];
       inc(int3);
      end
@@ -230,8 +284,8 @@ begin
       end
      end;
     end
-    else begin
-     if (do1 >= exps[3]) then begin
+    else begin              //fsm_engfix,fsm_engflo,fsm_engsyfix,fsm_engsyflo
+     if (do1 >= expo3max) then begin
       do1:= do1 / exps[3];
       inc(int3,3);
      end
@@ -245,9 +299,9 @@ begin
     if neg then begin
      do1:= -do1;
     end;      
-    if mode = fsm_engflo then begin
+    if (mode = fsm_engflo) or (mode = fsm_engsymflo) then begin
      preci:= preci - intdigits + int3;
-     if shortint(preci) < 0 then begin
+     if preci < 0 then begin
       preci:= 0;
      end;
     end;
@@ -262,34 +316,49 @@ begin
      int1:= -int1;
     end;
     result:= doubletostring(do1,int1,mode1,decimalsep); //get mantissa digits
-    int2:= length(result)+5;
-    setlength(result,int2);
-    po1:= pmsechar(pointer(result))+int2;
-    if int3 < 0 then begin
-     (po1-4)^:= '-';
+    int1:= int3 div 3;
+    if (mode >= fsm_engsymfix) and (int1 >= ord(low(expsymty))) and 
+                                        (int1 <= ord(high(expsymty))) then begin
+     int2:= length(result)+1;
+     setlength(result,int2);
+     (pmsechar(pointer(result))+int2-1)^:= expsyms[expsymty(int1)]; 
+                                                  //exponent symbol
     end
     else begin
-     (po1-4)^:= '+';
+     int2:= length(result)+5;
+     setlength(result,int2);
+     po1:= pmsechar(pointer(result))+int2;
+     if int3 < 0 then begin
+      (po1-4)^:= '-';
+     end
+     else begin
+      (po1-4)^:= '+';
+     end;
+     int3:= abs(int3);
+     for int1:= 0 to 2 do begin
+      dec(po1);
+      po1^:= msechar(ord('0')+(int3 mod 10));
+      int3:= int3 div 10;
+     end;      
+     (po1-2)^:= expochar;
     end;
-    int3:= abs(int3);
-    for int1:= 0 to 2 do begin
-     dec(po1);
-     po1^:= msechar(ord('0')+(int3 mod 10));
-     int3:= int3 div 10;
-    end;      
-    (po1-2)^:= 'e';
     exit;
    end;                                      //exp format ^^^
-      
-   lastindex:= intdigits + preci;        //fix format
+
+   if value > 999999999999999 then begin
+    result:= getfixoverflowvalue;
+    exit;
+   end;
+   lastindex:= intdigits + preci;           //fix format
    int1:= maxdigits - 1;
    if defaultmode then begin
     int1:= defaultprecision - 1;
    end;
    if lastindex > int1 then begin
     preci:= preci - lastindex + int1;
-    if preci < 0 then begin
-     raise exception.create('Digits overflow.');
+    if (preci < 0) then begin
+     result:= getfixoverflowvalue;
+     exit;
     end;
     lastindex:= int1;
    end;
@@ -301,6 +370,10 @@ begin
    else begin
     do1:= value/exps[intdigits];        //value 0.1..10
    end;
+   
+   if (exp = -1) and (do1 >= expo0max) then begin
+    exp:= 0;                            //fix for no int test
+   end;
 
    if lastindex >= 1 then begin         //calculate numbers
     for int1:= 1 to lastindex do begin
@@ -309,7 +382,7 @@ begin
      checkcarry(int1,buffer);
      do1:= frac(do1)*10;       
     end;
-    do1:= do1 - 5 + exps[lastindex] / system.exp(51*ln(2)); //round up lsb
+    do1:= do1 - 5 + exps[lastindex] / lsbrounding; //round up lsb
     if (do1 > 0) then begin
      inc(buffer[lastindex]);
      checkcarry(lastindex,buffer);

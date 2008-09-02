@@ -19,6 +19,8 @@ const
  noformatsettings = 15;    //rtlversion
  fc_keinplatzchar = '*';
  nullen = '000000000000000000000000000000';
+ msenullen = msestring('000000000000000000000000000000');
+ msespace = msestring('                              ');
 
 type
  numbasety = (nb_bin,nb_oct,nb_dec,nb_hex);
@@ -26,9 +28,61 @@ type
 function formatdatetimemse(const formatstr: msestring; const datetime: tdatetime;
                                const formatsettings: tformatsettingsmse): msestring;
 
-function formatfloatmse(const value: double; const format: msestring;
-                         const dot: boolean = false): msestring;
-                      //if dot -> always '.' as decimal separator
+function formatfloatmse(const value: double; const format: msestring; 
+                         const formatsettings: tformatsettingsmse;
+                         const dot: boolean = false): msestring; overload;
+   //dot = true -> always '.' as decimal separator
+   //formatstring:
+   // ' and " qoted text as is
+   //
+   // + 0 or number digit
+   //  + show defaultformatsettingsmse.decimalseparator
+   // ||+ defaultformatsettingsmse.decimalseparator or '.' if dot = true
+   // ||| removed if there are no fract digits
+   // |||+ 0 or number digit
+   // 0,.0
+   //
+   // + space or number digit
+   // | + removed or number digit
+   // #.#
+   //
+   //    + scientific notation with 'e'
+   //    |+ remove '+' from positive exponent
+   //    ||+++ 0 or exponent digit
+   // 0.0e-000
+   //
+   //     + show '+' of positive exponent
+   // 0.0e+
+   //
+   //    + scientific notation with 'E'
+   // 0.0E
+   //
+   //    + engeneering notation with 'e', exponent = n*3
+   //    |++ fract digits
+   // 0.0f00
+   //
+   //     +++++ mantissa - 1 digits
+   // 0.0f#####
+   //
+   //    + engeneering notation with 'E', exponent = n*3
+   // 0.0F
+   //
+   //    + engeneering notation with metric system prefixes, exponent = n*3
+   // 0.0g   
+   //
+   //    + engeneering notation with metric system prefixes, exponent = n*3
+   // 0.0G   
+   //
+   // examples for value = 12345.678
+   // '0.0'    ->  '12345.7'
+   // '0.000e   ->  '1.235e4'
+   // '0.000f   ->  '12.346e3'
+   // '0.000g   ->  '12.346k'
+   // '0.###f   ->  '12.35e3'
+
+function formatfloatmse(const value: double; const format: msestring; 
+                         const dot: boolean = false): msestring; overload;
+   
 function realtostr(const value: double): string;     //immer'.' als separator
 function strtoreal(const s: string): double;   //immer'.' als separator
 
@@ -123,6 +177,7 @@ function cstringtostringvar(var inp: pchar): string;
 function stringtocstring(const inp: msestring): string;
 function stringtopascalstring(const value: msestring): string;
 function pascalstringtostring(const value: string): msestring;
+                                    //increments inputpointer
 
 //{$ifdef FPC}
  {$undef withformatsettings}
@@ -161,7 +216,7 @@ const
 implementation
 
 uses
- sysconst,msedate,msereal,Math;
+ sysconst,msedate,msereal,Math,msefloattostr;
  
 //copied from FPC dati.inc todo: use threadsave formatsettings
 function formatdatetimemse(const formatstr: msestring; const datetime: tdatetime;
@@ -376,7 +431,8 @@ begin
   setlength(result,resultlen);
   move(resultbuffer,pointer(result)^,resultlen*sizeof(msechar));
 end ;
- 
+
+(* 
 //copied from FPC sysstr.inc
 //todo: optimize, use threadsave formatsettings
 
@@ -885,6 +941,7 @@ begin
              //convert to widestring
  end;
 end;
+*)
 
 function cstringtostringvar(var inp: pchar): string;
 
@@ -1122,10 +1179,6 @@ begin
      if po2^ = '''' then begin //'abcd'?
       po1^:= '''';             //'abcd''
       inc(po1);                
-//      inc(po2);
-//      if po2^ = '''' then begin
-//       inc(po2);
-//      end;
      end;
     end
     else begin
@@ -1202,185 +1255,7 @@ begin
   end;
  end;
 end;
-(*
-function strtodat(ein: string; var resultat: tdatetime): boolean;
- //true bei fehler
-{wandelt string in datum year = 0 -> leer, bereich 1950..2049}
 
-var
- int1: integer;
- io: boolean;
- str1,str2,str3: string[10];
- erstpunkt,zweitpunkt: integer;
- jahr,monat,tag,year,month,day: word;
- res: tdatetime;
-
-begin
- result:= false;
- res:= 0.0;
- decodedate(sysutils.date,jahr,monat,tag);
- year:= 0;
- month:= 0;
- day:= 0;
- if ein <> '' then begin
-  ein:= trim(ein);
-  if ein = '' then begin
-   res:= int(sysutils.Now);
-  end
-  else begin
-  {
-   if ein = d_leerzeichen then begin
-    res:= frissdate
-   end
-   else begin
-   }
-    erstpunkt:= pos('.',ein);
-    if erstpunkt <> 0 then begin
-     zweitpunkt:= pos('.',copy(ein,erstpunkt+1,20));
-     if zweitpunkt <> 0 then
-      zweitpunkt:= zweitpunkt + erstpunkt;
-     end
-    else
-     zweitpunkt:= 0;
-    str1:= '';
-    str2:= '';
-    str3:= '';
-    if erstpunkt <> 0 then begin
-     str1:= trim(copy(ein,1,erstpunkt-1));
-     if zweitpunkt <> 0 then begin
-      str2:= trim(copy(ein,erstpunkt+1,zweitpunkt-erstpunkt-1));
-      str3:= trim(copy(ein,zweitpunkt+1,20));
-     end
-     else
-      str2:= trim(copy(ein,erstpunkt+1,20));
-    end
-    else
-     str1:= trim(ein);
-    io:= true;
-    if str1 <> '' then begin
-     val(str1,tag,int1);
-     io:= io and (int1 = 0);
-    end;
-    if str2 <> '' then begin
-     val(str2,monat,int1);
-     io:= io and (int1 = 0);
-    end;
-    if str3 <> '' then begin
-     val(str3,jahr,int1);
-     io:= io and (int1 = 0);
-    end;
-    if jahr < 100 then begin
-     if (jahr >= 50) then
-      jahr:= jahr + 1900
-     else
-      jahr:= jahr + 2000;
-    end;
-    if (io and {(jahr >= 1900) and (jahr <= 2100) and} (monat > 0)
-      and (monat <= 12) and (tag >= 1) and (tag <= maxdays(jahr,monat))) then begin
-       year:= jahr;
-       month:= monat;
-       day:= tag;
-    end
-    else begin
-     result:= true;{ungueltig}
-    end;
-    if not result then begin
-     res:= encodedate(year,month,day);
-    end;
-//   end;
-  end;
- end
- else begin
-  res:= emptydatetime;
- end;
- if not result then begin
-  resultat:= res;
- end;
-end;
-
-function strtotime(ein: string; var resultat: tdatetime): boolean;
- //true bei fehler
-{wandelt string in zeit, 0.0 -> leer,
-                         friss -> 0.000001 ca. 1/10 sek, 0:0:0 -> 0.000002,}
-var
- int1: integer;
- io: boolean;
- str1,str2,str3: string[10];
- erstpunkt,zweitpunkt: integer;
- stunde,minute,sekunde: word;
-// wo1: word;
-begin
- result:= false;
- stunde:= 0;
- minute:= 0;
- sekunde:= 0;
- if ein <> '' then begin
-  ein:= trim(ein);
-  if ein = '' then begin
-   resultat:= frac(sysutils.now);
-  end         //aktuelle zeit
-  else begin
-  {
-   if ein = d_leerzeichen then begin
-    resultat:= frisstime;
-    result:= true;
-    exit;
-   end
-   else begin
-   }
-    erstpunkt:= pos(':',ein);
-    if erstpunkt <> 0 then begin
-     zweitpunkt:= pos(':',copy(ein,erstpunkt+1,20));
-     if zweitpunkt <> 0 then
-      zweitpunkt:= zweitpunkt + erstpunkt;
-     end
-    else
-     zweitpunkt:= 0;
-    str1:= '';
-    str2:= '';
-    str3:= '';
-    if erstpunkt <> 0 then begin
-     str1:= trim(copy(ein,1,erstpunkt-1));
-     if zweitpunkt <> 0 then begin
-      str2:= trim(copy(ein,erstpunkt+1,zweitpunkt-erstpunkt-1));
-      str3:= trim(copy(ein,zweitpunkt+1,20));
-     end
-     else
-      str2:= trim(copy(ein,erstpunkt+1,20));
-    end
-    else
-     str1:= trim(ein);
-    io:= true;
-    if str1 <> '' then begin
-     val(str1,stunde,int1);
-     io:= io and (int1 = 0);
-    end;
-    if str2 <> '' then begin
-     val(str2,minute,int1);
-     io:= io and (int1 = 0);
-    end;
-    if str3 <> '' then begin
-     val(str3,sekunde,int1);
-     io:= io and (int1 = 0);
-    end;
-    if io and (stunde < 24) and (minute < 60) and (sekunde < 60) then begin
-     resultat:= encodetime(stunde,minute,sekunde,0);
-     if resultat = 0 then begin
-      resultat:= nulltime;
-     end;
-    end
-    else begin
-     result:= true;
-    end;
-   end;
-//  end;
- end
- else begin
-  resultat:= emptytime; //leere zeit
-  exit;
- end;
-end;
-*)
 function timemse(const value: tdatetime): tdatetime;
   //bringt timeanteil im mseformat
 begin
@@ -1401,6 +1276,337 @@ begin
 end;
 
 function formatfloatmse(const value: double; const format: msestring;
+                              const formatsettings: tformatsettingsmse;
+                              const dot: boolean = false): msestring;
+
+var
+ po1,po2: pmsechar;
+ expsign,noexpsign: boolean;
+
+ procedure quote;
+ begin
+  case po2^ of
+   '''': begin                    //'quoted string
+    inc(po2);
+    while po2^ <> #0 do begin
+     if po2^ = '''' then begin
+      inc(po2);
+      if po2^ <> '''' then begin
+       break;
+      end;
+     end;
+     po1^:= po2^;
+     inc(po1);
+     inc(po2);
+    end; 
+   end;
+   '"': begin                    //"quoted string
+    inc(po2);
+    while po2^ <> #0 do begin
+     if po2^ = '"' then begin
+      inc(po2);
+      if po2^ <> '"' then begin
+       break;
+      end;
+     end;
+     po1^:= po2^;
+     inc(po1);
+     inc(po2);
+    end; 
+   end;
+  end;
+ end;
+ 
+ procedure checkexp;
+ begin
+  if (po2+1)^ = '+' then begin
+   expsign:= true;
+   inc(po2);
+  end
+  else begin
+   if (po2+1)^ = '-' then begin
+    noexpsign:= true;
+    inc(po2);
+   end;
+  end;
+ end;
+   
+var
+ int1,int2,int3: integer;
+ decimalsep,thousandsep: msechar;
+ mch1: msechar;
+ intopt,intmust,fracmust,fracopt,expopt,expmust: integer;
+ decifound,thousandfound,numberprinted,expofound,engfound,engsymfound: boolean;
+ mstr1: msestring;
+ format1: msestring;
+ mantissaend: integer;
+ ar1: array[0..2] of integer;    //indexes positive, negative, zero
+ expchar: msechar;
+ 
+begin
+ if dot then begin
+  decimalsep:= '.';
+ end
+ else begin
+  decimalsep:= defaultformatsettingsmse.decimalseparator;
+ end;
+ expchar:= 'E';
+ setlength(result,length(format)+50); //max
+ numberprinted:= false;
+ po1:= pmsechar(result);
+ po2:= pmsechar(format);
+ int1:= 0;                            //arrayindex
+ while po2^ <> #0 do begin
+  quote;
+  if po2^ = ';' then begin
+   ar1[int1]:= po2 - pmsechar(pointer(format));
+   inc(int1);
+   if int1 = 3 then begin
+    break;
+   end;
+  end;
+  inc(po2);
+ end;
+ if int1 < 3 then begin
+  ar1[int1]:= length(format);
+ end;  
+ if (value = 0) and (int1 >= 2) then begin
+  setlength(format1,ar1[2]-ar1[1]-1);
+  move((pmsechar(pointer(format))+ar1[1]+1)^,pmsechar(pointer(format1))^,
+                             (ar1[2]-ar1[1]-1)*sizeof(msechar));
+  po2:= pmsechar(format1);
+ end
+ else begin
+  if (value < 0) and (int1 >= 1) then begin
+   setlength(format1,ar1[1]-ar1[0]-1);
+   move((pmsechar(pointer(format))+ar1[0]+1)^,pmsechar(pointer(format1))^,
+                              (ar1[1]-ar1[0]-1)*sizeof(msechar));
+   po2:= pmsechar(format1);     
+  end
+  else begin
+   setlength(format1,ar1[0]);
+   move((pmsechar(pointer(format)))^,pmsechar(pointer(format1))^,
+                              (ar1[0])*sizeof(msechar));
+   po2:= pmsechar(format1);     
+  end;
+ end;
+ if format1 = '' then begin
+  result:= doubletostring(value,0,fsm_default,decimalsep);
+ end
+ else begin 
+  po1:= pmsechar(result);
+  while po2^ <> #0 do begin
+   quote;
+   case po2^ of
+    #0: begin    //was terminating quote
+    end;
+    '.','0','#': begin
+     intopt:= 0;
+     intmust:= 0;
+     fracopt:= 0;
+     fracmust:= 0;
+     expopt:= 0;
+     expmust:= 0;
+     decifound:= false;
+     thousandfound:= false;
+     expofound:= false;
+     engfound:= false;
+     engsymfound:= false;
+     expsign:= false;
+     noexpsign:= false;
+     while po2^ <> #0 do begin
+      case po2^ of
+       '.': begin
+        decifound:= true;
+       end;
+       ',': begin
+        thousandfound:= true;
+       end;
+       'e','E': begin
+        expofound:= true;
+        expchar:= po2^;
+        checkexp;
+       end;
+       'f','F': begin
+        engfound:= true;
+        expchar:= msechar(ord(po2^)-1);
+        checkexp;
+       end;
+       'g','G': begin
+        engsymfound:= true;
+        engfound:= true;
+        expchar:= msechar(ord(po2^)-2);
+        checkexp;
+       end;
+       '0': begin
+        if expofound or engfound then begin
+         inc(expmust);
+        end
+        else begin
+         if decifound then begin
+          inc(fracmust);
+         end
+         else begin
+          inc(intmust);
+         end;
+        end;
+       end;
+       '#': begin
+        if expofound or engfound then begin
+         inc(expopt);
+        end
+        else begin
+         if decifound then begin
+          inc(fracopt);
+         end
+         else begin
+          inc(intopt);
+         end;
+        end;
+       end
+       else begin
+        break;
+       end;
+      end;
+      inc(po2);
+     end;
+     if not numberprinted then begin
+      numberprinted:= true;
+      if thousandfound then begin
+       thousandsep:= defaultformatsettingsmse.thousandseparator;
+      end
+      else begin
+       thousandsep:= #0;
+      end;
+      if expofound then begin
+       mstr1:= doubletostring(value,fracmust+fracopt,fsm_sci,decimalsep,
+                                                                thousandsep);
+      end
+      else begin
+       if engfound then begin
+        if engsymfound then begin
+         int1:= ord(fsm_engsymfix) - ord(fsm_engfix);
+        end
+        else begin
+         int1:= 0;
+        end;
+        if fracmust = 0 then begin
+         fracmust:= fracopt;
+         fracopt:= 0;
+         mstr1:= doubletostring(value,fracmust,
+            floatstringmodety(ord(fsm_engflo)+int1),decimalsep,thousandsep);
+        end
+        else begin
+         mstr1:= doubletostring(value,fracmust+fracopt,
+            floatstringmodety(ord(fsm_engfix)+int1),decimalsep,thousandsep);
+        end;
+       end
+       else begin
+        if intopt+intmust+fracmust+fracopt = 0 then begin
+         mstr1:= doubletostring(value,0,fsm_default,decimalsep,thousandsep);
+        end
+        else begin
+         mstr1:= doubletostring(value,fracmust+fracopt,fsm_fix,
+                                                        decimalsep,thousandsep);
+        end;
+       end;       
+      end;
+      if expofound or engfound then begin     //format exponent
+       if (length(mstr1) > 5) and (mstr1[length(mstr1)-4] = expochar) then begin
+        if {noexpsign or} not expsign then begin   
+         int1:= length(mstr1)-3;
+         if mstr1[int1] = '+' then begin
+          delete(mstr1,int1,1);                //remove exp sign
+         end;
+        end;
+        expmust:= expmust+expopt;
+        if expmust = 0 then begin
+         expmust:= 1;
+        end;
+        int2:= length(mstr1)-expmust+1; //last zero
+        int3:= length(mstr1)-2;         //firstzero
+        for int1:= int3 to int2 do begin
+         if mstr1[int1] <> '0' then begin
+          int2:= int1;
+          break;
+         end;
+        end;
+        delete(mstr1,int3,int2-int3); //remove leading zeros      end;      
+       end;
+      end;
+      
+      int1:= findlastchar(mstr1,decimalsep)-1;  //format mantissa
+      if int1 <= 0 then begin
+       int1:= length(mstr1);
+      end;
+      int2:= 1;
+      if mstr1[1] = '-' then begin
+       inc(int2);                   //firstnumber
+      end;
+      if (intmust = 0) and (mstr1[int2] = '0') then begin
+       delete(mstr1,int2,1);     //remove first 0
+       dec(int1);
+      end;
+      int3:= intmust - int1 + int2 - 1;
+      if int3 > 0 then begin
+       insert(copy(msenullen,1,int3),mstr1,int2); //insert zeros
+       inc(int1,int3);
+      end;
+      int3:= intmust + intopt - int1 + int2 - 1;
+      if int3 > 0 then begin
+       insert(copy(msespace,1,int3),mstr1,1);  //insert spaces
+       inc(int1,int3);
+      end;
+      int2:= int1 + fracmust+1;
+      mantissaend:= findchar(mstr1,expochar);     //ok for exa
+      if (mantissaend > 0) and (mantissaend < length(mstr1)) then begin
+                                             //not exa
+       mstr1[mantissaend]:= expchar;
+      end
+      else begin
+       if (mantissaend = 0) and engsymfound then begin
+        mantissaend:= length(mstr1);
+       end;
+      end;
+      dec(mantissaend);
+      if mantissaend <= 0 then begin
+       mantissaend:= length(mstr1);
+      end;
+      for int3:= mantissaend downto int2 do begin
+       if (mstr1[int3] <> '0') then begin      //remove traling zeros   
+        int2:= int3;
+        break;
+       end;
+      end;
+      if int2 < length(mstr1) then begin
+       if mstr1[int2] = decimalsep then begin
+        dec(int2);
+       end;
+       delete(mstr1,int2+1,mantissaend-int2);
+      end;
+      move(pointer(mstr1)^,po1^,length(mstr1)*sizeof(msechar));
+      inc(po1,length(mstr1));
+     end;
+    end
+    else begin
+     po1^:= po2^;
+     inc(po1);
+     inc(po2);
+    end;
+   end;
+  end;
+  setlength(result,po1-pmsechar(result));
+ end;
+end;
+
+function formatfloatmse(const value: double; const format: msestring; 
+                         const dot: boolean = false): msestring; overload;
+begin
+ result:= formatfloatmse(value,format,defaultformatsettingsmse,dot);
+end;
+
+{
+function formatfloatmse(const value: double; const format: msestring;
                                  const dot: boolean = false): msestring;
 var
  int1: integer;
@@ -1414,7 +1620,7 @@ begin
   replacechar1(result,defaultformatsettingsmse.decimalseparator,widechar('.'));
  end;
 end;
-
+}
 function realToStr(const value: double): string;     //immer'.' als separator
 begin
  {$ifdef withformatsettings}
