@@ -33,10 +33,11 @@ function formatfloatmse(const value: double; const format: msestring;
                          const dot: boolean = false): msestring; overload;
    //dot = true -> always '.' as decimal separator
    //formatstring:
+   // formats for positive, negative and zero value can be separated by ;
    // ' and " qoted text as is
    //
    // + 0 or number digit
-   //  + show defaultformatsettingsmse.decimalseparator
+   // |+ show defaultformatsettingsmse.thousandseparator
    // ||+ defaultformatsettingsmse.decimalseparator or '.' if dot = true
    // ||| removed if there are no fract digits
    // |||+ 0 or number digit
