@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+2008-09-02
+ '[' is special char instead of '#' in string propertyediter.
 2008-08-04
  tguiapplication.waitdialog aidleaction parameter is type waitidleeventty.
  tthreadcomp.runwithwaitdialog moved to tguithreadcomp.
