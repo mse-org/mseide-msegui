@@ -19,6 +19,13 @@ const
 type
  floatstringmodety = (fsm_default,fsm_fix,fsm_sci,fsm_engfix,fsm_engflo,
                       fsm_engsymfix,fsm_engsymflo);
+ doublerecty = packed record       //little endian
+  case integer of
+   0: (by0,by1,by2,by3,by4,by5,by6,by7: byte);
+   1: (wo0,wo1,wo2,wo3: word);
+   2: (lwo0,lwo1: longword);
+   3: (qwo0: qword);
+ end;
  
 function doubletostring(value: double; precision: integer;
       mode: floatstringmodety = fsm_default;
@@ -78,7 +85,7 @@ begin
   result:= do1;
  end;
 end;
-var testvar: double;
+
 function doubletostring(value: double; precision: integer;
       mode: floatstringmodety = fsm_default;
       decimalsep: msechar = '.'; thousandsep: msechar = #0): msestring;
@@ -91,23 +98,21 @@ const
  defaultprecision = maxdigits-2;
 
 type
- doublerecty = packed record       //little endian
-  case integer of
-   0: (by0,by1,by2,by3,by4,by5,by6,by7: byte);
-   1: (wo0,wo1,wo2,wo3: word);
-   2: (lwo0,lwo1: longword);
-   3: (qwo0: qword);
- end;
  bufferty =  array[0..30] of msechar;
 
  function getfixoverflowvalue: msestring;
  var
   int1: integer;
  begin
-  int1:= defaultprecision-1;
-  if precision < 0 then begin
-   int1:= -int1;
-  end;
+//  if precision = 0 then begin
+   int1:= defaultprecision-1;
+   if precision < 0 then begin
+    int1:= -int1;
+   end;
+//  end
+//  else begin
+//   int1:= precision;
+//  end;
   result:= doubletostring(value,int1,fsm_sci,decimalsep,thousandsep);
  end;
   
@@ -150,9 +155,6 @@ var
  preci: integer;
  
 begin
-testvar:= expo0max;
-testvar:= expo1max;
-testvar:= expo3max;
  preci:= abs(precision);
  with doublerecty(value) do begin
   neg:= by7 and $80 <> 0;
@@ -194,7 +196,7 @@ testvar:= expo3max;
         result:= '0 ';
        end
        else begin
-        result:= '0e+000';
+        result:= '0E+000';
        end;
        exit;
       end;
@@ -238,7 +240,9 @@ testvar:= expo3max;
    do1:= exp*exp2to10;
    intdigits:= trunc(do1);
    if defaultmode then begin
-    preci:= maxdigits;
+    if preci = 0 then begin
+     preci:= maxdigits;
+    end;
     if (value < 1e-6) or (value >= 1e15) then begin
      mode:= fsm_sci;
     end;
@@ -249,7 +253,7 @@ testvar:= expo3max;
      dec(intdigits);      //trunk -> floor
     end;
     int3:= intdigits;
-    if (mode = fsm_engflo) or (mode = fsm_engsymflo) then begin
+    if mode in [fsm_engflo,fsm_engsymflo] then begin
      do1:= value / intexp10(intdigits);
      if do1 >= expo1max then begin
       inc(intdigits);     //correct overflow for precision correction
@@ -299,7 +303,10 @@ testvar:= expo3max;
     if neg then begin
      do1:= -do1;
     end;      
-    if (mode = fsm_engflo) or (mode = fsm_engsymflo) then begin
+    if mode in [fsm_engflo,fsm_engsymflo] then begin
+     if (intdigits = 0) and (int3 < 0)then begin
+      dec(intdigits);   //trunc -> floor
+     end;
      preci:= preci - intdigits + int3;
      if preci < 0 then begin
       preci:= 0;
@@ -387,7 +394,7 @@ testvar:= expo3max;
      inc(buffer[lastindex]);
      checkcarry(lastindex,buffer);
     end;
-    if  (precision < 0) and defaultmode or (precision = 0) then begin
+    if  (precision < 0) or (defaultmode and (precision = 0)) then begin
      int2:= lastindex - preci + 1; //remove trayling zeros
      for int1:= lastindex downto int2 do begin
       if (buffer[int1] <> '0') then begin
