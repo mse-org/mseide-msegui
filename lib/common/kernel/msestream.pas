@@ -484,7 +484,7 @@ var
  seps: msestring;
 begin
  first:= true;
- seps:= msestring(quotechar) + separator;
+ seps:= msechar(c_return) + msechar(c_linefeed) + msestring(quotechar) + separator;
  result:= '';
  for int1:= 0 to high(fields) do begin
   mstr1:= '';
@@ -504,6 +504,7 @@ begin
     vtInt64:      mstr1:= inttostr(VInt64^);
    end;
   end;
+//  escapechars(mstr1);
   if (mstr1 <> '') and (quotechar <> #0) then begin
    if forcequote or (findchars(mstr1,seps) <> 0) then begin
     mstr1:= quotestring(mstr1,quotechar);
@@ -613,6 +614,7 @@ begin
   if int1 > high(ar1) then begin
    break;
   end;
+//  unescapechars(ar1[int1]);
   if fields[int1] <> nil then begin
    case types[int1+1] of
     ' ': begin
@@ -1471,10 +1473,19 @@ function ttextdatastream.readrecord(fields: array of pointer; types: string): bo
                 // S -> msestring
                 // r -> real
 var
- str1: msestring;
+ mstr1,mstr2: msestring;
 begin
- readln(str1);
- result:= decoderecord(str1,fields,types,fquotechar,fseparator);
+ readln(mstr1);
+ if odd(countchars(mstr1,fquotechar)) then begin
+  while not eof do begin
+   readln(mstr2);
+   mstr1:= mstr1+lineend+mstr2;
+   if odd(countchars(mstr2,fquotechar)) then begin
+    break;
+   end;
+  end;
+ end;
+ result:= decoderecord(mstr1,fields,types,fquotechar,fseparator);
 end;
 
 { tcryptfilestream }

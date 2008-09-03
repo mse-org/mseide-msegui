@@ -21,7 +21,8 @@ interface
 uses
  mseforms,msefiledialog,msestat,msestatfile,msesimplewidgets,msegrids,msewidgetgrid,
  mselistbrowser,msedataedits,typinfo,msedatanodes,msegraphedits,msestream,mseglob,
- msemenus,classes,msetypes,msestrings,msethreadcomp,mseguiglob,msegui,mseresourceparser;
+ msemenus,classes,msetypes,msestrings,msethreadcomp,mseguiglob,msegui,mseresourceparser,
+ msedialog,msememodialog;
 
 const
  drcext = '_DRC.rc';
@@ -49,8 +50,8 @@ type
    threadcomp: tthreadcomp;
    typedisp: tenumtypeedit;
    donottranslate: tbooleanedit;
-   comment: tstringedit;
-   value: tstringedit;
+   comment: tmemodialogedit;
+   value: tmemodialogedit;
    scan: tbutton;
    mainmenu1: tmainmenu;
    projectfiledialog: tfiledialog;
@@ -204,7 +205,7 @@ begin
     comment[aindex]:= info.comment;
     value[aindex]:= valuetext;
     for int1:= 0 to grid.datacols.count - variantshift - 1 do begin
-     with tstringedit(grid.datacols[int1+variantshift].editwidget) do begin
+     with tmemodialogedit(grid.datacols[int1+variantshift].editwidget) do begin
       if high(info.variants) >= int1 then begin
        gridvalue[aindex]:= info.variants[int1];
       end
@@ -293,7 +294,7 @@ var
  int1: integer;
  item: ttreelistedititem;
  ar1: msestringarty;
- edit1: tstringedit;
+ edit1: tmemodialogedit;
 begin
  ar1:= getcolumnheaders;
 // grid.datacols.count:= variantshift;
@@ -302,11 +303,12 @@ begin
  for int1:= variantshift to high(ar1) do begin
   grid.fixrows[-1].captions[int1].caption:= getcolumnheaders[int1];
   if grid.datacols[int1].editwidget = nil then begin
-   edit1:= tstringedit.create(self);
+   edit1:= tmemodialogedit.create(self);
    edit1.initgridwidget;
    edit1.onsetvalue:= {$ifdef FPC}@{$endif}variantonsetvalue;
    edit1.Tag:= int1 - variantshift;
-   edit1.optionsedit:= edit1.optionsedit - [oe_savevalue];
+   edit1.optionsedit:= (edit1.optionsedit - [oe_savevalue]) + 
+                                                 [oe_hintclippedtext];
    grid.datacols[int1].editwidget:= edit1;
   end;
  end;

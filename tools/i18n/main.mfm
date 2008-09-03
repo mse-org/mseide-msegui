@@ -7,9 +7,9 @@ object mainfo: tmainfo
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_mousewheel, ow_destroywidgets, ow_autoscale]
   container.bounds_x = 0
-  container.bounds_y = 20
+  container.bounds_y = 21
   container.bounds_cx = 624
-  container.bounds_cy = 370
+  container.bounds_cy = 369
   container.frame.levelo = 1
   container.frame.localprops = [frl_levelo]
   container.frame.sbhorz.facebutton.template = concavex
@@ -65,7 +65,7 @@ object mainfo: tmainfo
       item
         face.template = convexx
         face.dummy = 0
-        height = 16
+        height = 17
         captions.count = 5
         captions.items = <        
           item
@@ -111,15 +111,15 @@ object mainfo: tmainfo
         options = [co_readonly, co_proportional, co_savestate]
         widgetname = 'value'
       end>
-    datarowheight = 16
+    datarowheight = 17
     statfile = projectfo.projectstat
-    reffontheight = 14
+    reffontheight = 15
     object tree: ttreeitemedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 210
-      bounds_cy = 16
+      bounds_cy = 17
       color = -1879048185
       frame.levelo = 0
       frame.colorclient = -2147483646
@@ -130,14 +130,14 @@ object mainfo: tmainfo
       optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_exitoncursor, oe_savestate]
       onupdaterowvalues = treeonupdaterowvalues
       options = [teo_treecolnavig]
-      reffontheight = 14
+      reffontheight = 15
     end
     object typedisp: tenumtypeedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
       bounds_x = 211
       bounds_y = 0
       bounds_cx = 50
-      bounds_cy = 16
+      bounds_cy = 17
       color = -1879048185
       frame.levelo = 0
       frame.colorclient = -2147483646
@@ -153,14 +153,14 @@ object mainfo: tmainfo
         item
         end>
       oninit = typedisponinit
-      reffontheight = 14
+      reffontheight = 15
     end
     object donottranslate: tbooleanedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
       bounds_x = 262
       bounds_y = 0
       bounds_cx = 19
-      bounds_cy = 16
+      bounds_cy = 17
       color = -2147483646
       frame.levelo = 0
       frame.localprops = [frl_levelo]
@@ -170,54 +170,57 @@ object mainfo: tmainfo
       visible = False
       onsetvalue = donottranslateonsetvalue
     end
-    object comment: tstringedit
+    object comment: tmemodialogedit
       bounds_x = 282
       bounds_y = 0
       bounds_cx = 133
-      bounds_cy = 16
+      bounds_cy = 17
       frame.levelo = 0
       frame.colorclient = -2147483646
       frame.localprops = [frl_levelo, frl_colorclient]
+      frame.button.imagenr = 17
       frame.dummy = 0
       taborder = 4
       visible = False
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savestate]
       font.height = 12
       font.name = 'stf_default'
       font.xscale =  1.0000000000000000E+0000
       font.dummy = 0
       onsetvalue = commentonsetvalue
-      reffontheight = 14
+      reffontheight = 15
     end
-    object value: tstringedit
+    object value: tmemodialogedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
       bounds_x = 416
       bounds_y = 0
       bounds_cx = 110
-      bounds_cy = 16
+      bounds_cy = 17
       color = -1879048185
       frame.levelo = 0
       frame.colorclient = -2147483646
       frame.localprops = [frl_levelo, frl_colorclient]
+      frame.button.imagenr = 17
+      frame.button.options = [fbo_invisible, fbo_disabled]
       frame.dummy = 0
       taborder = 5
       visible = False
-      optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_exitoncursor, oe_savestate]
-      reffontheight = 14
+      optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_exitoncursor, oe_hintclippedtext, oe_savestate]
+      reffontheight = 15
     end
   end
   object flat: tbooleanedit
     bounds_x = 9
-    bounds_y = 5
-    bounds_cx = 32
-    bounds_cy = 16
+    bounds_y = 4
+    bounds_cx = 36
+    bounds_cy = 17
     color = -2147483645
     frame.caption = 'flat'
     frame.dummy = 0
     frame.outerframe = (
       0
-      1
-      19
+      2
+      23
       2
     )
     taborder = 1
@@ -227,16 +230,16 @@ object mainfo: tmainfo
   end
   object stringonly: tbooleanedit
     bounds_x = 57
-    bounds_y = 5
-    bounds_cx = 72
-    bounds_cy = 16
+    bounds_y = 4
+    bounds_cx = 81
+    bounds_cy = 17
     color = -2147483645
     frame.caption = 'string only'
     frame.dummy = 0
     frame.outerframe = (
       0
-      1
-      59
+      2
+      68
       2
     )
     taborder = 2
@@ -245,16 +248,16 @@ object mainfo: tmainfo
   end
   object nont: tbooleanedit
     bounds_x = 153
-    bounds_y = 5
-    bounds_cx = 49
-    bounds_cy = 16
+    bounds_y = 4
+    bounds_cx = 52
+    bounds_cy = 17
     color = -2147483645
     frame.caption = 'no NT'
     frame.dummy = 0
     frame.outerframe = (
       0
-      1
-      36
+      2
+      39
       2
     )
     taborder = 3
@@ -264,16 +267,16 @@ object mainfo: tmainfo
   end
   object ntonly: tbooleanedit
     bounds_x = 233
-    bounds_y = 5
-    bounds_cx = 57
-    bounds_cy = 16
+    bounds_y = 4
+    bounds_cx = 61
+    bounds_cy = 17
     color = -2147483645
     frame.caption = 'NT only'
     frame.dummy = 0
     frame.outerframe = (
       0
-      1
-      44
+      2
+      48
       2
     )
     taborder = 4
