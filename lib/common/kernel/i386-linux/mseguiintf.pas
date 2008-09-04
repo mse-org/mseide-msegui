@@ -48,6 +48,232 @@ var
 {$endif}
 
 const
+ //from keysymdef.h
+ XK_BackSpace =     $FF08; //* back space, back char */
+ XK_Tab =           $FF09;
+ XK_Linefeed =      $FF0A; //* Linefeed, LF */
+ XK_Clear =         $FF0B;
+ XK_Return =        $FF0D; //* Return, enter */
+ XK_Pause =         $FF13; //* Pause, hold */
+ XK_Scroll_Lock =   $FF14;
+ XK_Sys_Req =       $FF15;
+ XK_Escape =        $FF1B;
+ XK_Delete =        $FFFF; //* Delete, rubout */
+
+//* Cursor control & motion */
+ XK_Home =          $FF50;
+ XK_Left =          $FF51; //* Move left, left arrow */
+ XK_Up =            $FF52; //* Move up, up arrow */
+ XK_Right =         $FF53; //* Move right, right arrow */
+ XK_Down =          $FF54; //* Move down, down arrow */
+ XK_Prior =         $FF55; //* Prior, previous */
+ XK_Page_Up =       $FF55;
+ XK_Next =          $FF56; //* Next */
+ XK_Page_Down =     $FF56;
+ XK_End =           $FF57; //* EOL */
+ XK_Begin =         $FF58; //* BOL */
+
+//* Misc Functions */
+ XK_Select =        $FF60; //* Select, mark */
+ XK_Print =         $FF61;
+ XK_Execute =       $FF62; //* Execute, run, do */
+ XK_Insert =        $FF63; //* Insert, insert here */
+ XK_Undo =          $FF65; //* Undo, oops */
+ XK_Redo =          $FF66; //* redo, again */
+ XK_Menu =          $FF67;
+ XK_Find =          $FF68; //* Find, search */
+ XK_Cancel =        $FF69; //* Cancel, stop, abort, exit */
+ XK_Help =          $FF6A; //* Help */
+ XK_Break =         $FF6B;
+ XK_Mode_switch =   $FF7E; //* Character set switch */
+ XK_script_switch = $FF7E; //* Alias for mode_switch */
+ XK_Num_Lock =      $FF7F;
+
+//* Keypad Functions, keypad numbers cleverly chosen to map to ascii */
+ XK_KP_Space =      $FF80; //* space */
+ XK_KP_Tab =        $FF89;
+ XK_KP_Enter =      $FF8D; //* enter */
+ XK_KP_F1 =         $FF91; //* PF1, KP_A, ... */
+ XK_KP_F2 =         $FF92;
+ XK_KP_F3 =         $FF93;
+ XK_KP_F4 =         $FF94;
+ XK_KP_Home =       $FF95;
+ XK_KP_Left =       $FF96;
+ XK_KP_Up =         $FF97;
+ XK_KP_Right =      $FF98;
+ XK_KP_Down =       $FF99;
+ XK_KP_Prior =      $FF9A;
+ XK_KP_Page_Up =    $FF9A;
+ XK_KP_Next =       $FF9B;
+ XK_KP_Page_Down =  $FF9B;
+ XK_KP_End =        $FF9C;
+ XK_KP_Begin =      $FF9D;
+ XK_KP_Insert =     $FF9E;
+ XK_KP_Delete =     $FF9F;
+ XK_KP_Equal =      $FFBD; //* equals */
+ XK_KP_Multiply =   $FFAA;
+ XK_KP_Add =        $FFAB;
+ XK_KP_Separator =  $FFAC; //* separator, often comma */
+ XK_KP_Subtract =   $FFAD;
+ XK_KP_Decimal =    $FFAE;
+ XK_KP_Divide =     $FFAF;
+
+ XK_KP_0 =          $FFB0;
+ XK_KP_1 =          $FFB1;
+ XK_KP_2 =          $FFB2;
+ XK_KP_3 =          $FFB3;
+ XK_KP_4 =          $FFB4;
+ XK_KP_5 =          $FFB5;
+ XK_KP_6 =          $FFB6;
+ XK_KP_7 =          $FFB7;
+ XK_KP_8 =          $FFB8;
+ XK_KP_9 =          $FFB9;
+
+ XK_F1 =            $FFBE;
+ XK_F35 =           $FFE0;
+
+//* Modifiers */
+ XK_Shift_L =       $FFE1; //* Left shift */
+ XK_Shift_R =       $FFE2; //* Right shift */
+ XK_Control_L =     $FFE3; //* Left control */
+ XK_Control_R =     $FFE4; //* Right control */
+ XK_Caps_Lock =     $FFE5; //* Caps lock */
+ XK_Shift_Lock =    $FFE6; //* Shift lock */
+
+ XK_Meta_L =        $FFE7; //* Left meta */
+ XK_Meta_R =        $FFE8; //* Right meta */
+ XK_Alt_L =         $FFE9; //* Left alt */
+ XK_Alt_R =         $FFEA; //* Right alt */
+ XK_Super_L =       $FFEB; //* Left super */
+ XK_Super_R =       $FFEC; //* Right super */
+ XK_Hyper_L =       $FFED; //* Left hyper */
+ XK_Hyper_R =       $FFEE; //* Right hyper */
+
+ //ISO 9995 Function and Modifier Keys
+ //Byte 3 = 0xFE
+
+ XK_ISO_Lock =                    $FE01;
+ XK_ISO_Level2_Latch =            $FE02;
+ XK_ISO_Level3_Shift =            $FE03;
+ XK_ISO_Level3_Latch =            $FE04;
+ XK_ISO_Level3_Lock =             $FE05;
+ XK_ISO_Level5_Shift =            $FE11;
+ XK_ISO_Level5_Latch =            $FE12;
+ XK_ISO_Level5_Lock =             $FE13;
+ XK_ISO_Group_Shift =             $FF7E;
+ XK_ISO_Group_Latch =             $FE06;
+ XK_ISO_Group_Lock =              $FE07;
+ XK_ISO_Next_Group =              $FE08;
+ XK_ISO_Next_Group_Lock =         $FE09;
+ XK_ISO_Prev_Group =              $FE0A;
+ XK_ISO_Prev_Group_Lock =         $FE0B;
+ XK_ISO_First_Group =             $FE0C;
+ XK_ISO_First_Group_Lock =        $FE0D;
+ XK_ISO_Last_Group =              $FE0E;
+ XK_ISO_Last_Group_Lock =         $FE0F;
+
+ XK_ISO_Left_Tab =                $FE20;
+ XK_ISO_Move_Line_Up =            $FE21;
+ XK_ISO_Move_Line_Down =          $FE22;
+ XK_ISO_Partial_Line_Up =         $FE23;
+ XK_ISO_Partial_Line_Down =       $FE24;
+ XK_ISO_Partial_Space_Left =      $FE25;
+ XK_ISO_Partial_Space_Right =     $FE26;
+ XK_ISO_Set_Margin_Left =         $FE27;
+ XK_ISO_Set_Margin_Right =        $FE28;
+ XK_ISO_Release_Margin_Left =     $FE29;
+ XK_ISO_Release_Margin_Right =    $FE2A;
+ XK_ISO_Release_Both_Margins =    $FE2B;
+ XK_ISO_Fast_Cursor_Left =        $FE2C;
+ XK_ISO_Fast_Cursor_Right =       $FE2D;
+ XK_ISO_Fast_Cursor_Up =          $FE2E;
+ XK_ISO_Fast_Cursor_Down =        $FE2F;
+ XK_ISO_Continuous_Underline =    $FE30;
+ XK_ISO_Discontinuous_Underline = $FE31;
+ XK_ISO_Emphasize =               $FE32;
+ XK_ISO_Center_Object =           $FE33;
+ XK_ISO_Enter =                   $FE34;
+
+ //from cursorfont.h
+ XC_num_glyphs =         154;
+ XC_X_cursor =             0;
+ XC_arrow =                2;
+ XC_based_arrow_down =     4;
+ XC_based_arrow_up =       6;
+ XC_boat =                 8;
+ XC_bogosity =            10;
+ XC_bottom_left_corner =  12;
+ XC_bottom_right_corner = 14;
+ XC_bottom_side =         16;
+ XC_bottom_tee =          18;
+ XC_box_spiral =          20;
+ XC_center_ptr =          22;
+ XC_circle =              24;
+ XC_clock =               26;
+ XC_coffee_mug =          28;
+ XC_cross =               30;
+ XC_cross_reverse =       32;
+ XC_crosshair =           34;
+ XC_diamond_cross =       36;
+ XC_dot =                 38;
+ XC_dotbox =              40;
+ XC_double_arrow =        42;
+ XC_draft_large =         44;
+ XC_draft_small =         46;
+ XC_draped_box =          48;
+ XC_exchange =            50;
+ XC_fleur =               52;
+ XC_gobbler =             54;
+ XC_gumby =               56;
+ XC_hand1 =               58;
+ XC_hand2 =               60;
+ XC_heart =               62;
+ XC_icon =                64;
+ XC_iron_cross =          66;
+ XC_left_ptr =            68;
+ XC_left_side =           70;
+ XC_left_tee =            72;
+ XC_leftbutton =          74;
+ XC_ll_angle =            76;
+ XC_lr_angle =            78;
+ XC_man =                 80;
+ XC_middlebutton =        82;
+ XC_mouse =               84;
+ XC_pencil =              86;
+ XC_pirate =              88;
+ XC_plus =                90;
+ XC_question_arrow =      92;
+ XC_right_ptr =           94;
+ XC_right_side =          96;
+ XC_right_tee =           98;
+ XC_rightbutton =        100;
+ XC_rtl_logo =           102;
+ XC_sailboat =           104;
+ XC_sb_down_arrow =      106;
+ XC_sb_h_double_arrow =  108;
+ XC_sb_left_arrow =      110;
+ XC_sb_right_arrow =     112;
+ XC_sb_up_arrow =        114;
+ XC_sb_v_double_arrow =  116;
+ XC_shuttle =            118;
+ XC_sizing =             120;
+ XC_spider =             122;
+ XC_spraycan =           124;
+ XC_star =               126;
+ XC_target =             128;
+ XC_tcross =             130;
+ XC_top_left_arrow =     132;
+ XC_top_left_corner =    134;
+ XC_top_right_corner =   136;
+ XC_top_side =           138;
+ XC_top_tee =            140;
+ XC_trek =               142;
+ XC_ul_angle =           144;
+ XC_umbrella =           146;
+ XC_ur_angle =           148;
+ XC_watch =              150;
+ XC_xterm =              152;
+
  {$ifdef FPC}
 // threadslib = 'pthread';
  Xlibmodulename = 'X11';
@@ -417,211 +643,6 @@ type
 const
  mouseeventmask = buttonpressmask or buttonreleasemask or pointermotionmask;
 
- //from keysymdef.h
- XK_BackSpace =     $FF08; //* back space, back char */
- XK_Tab =           $FF09;
- XK_Linefeed =      $FF0A; //* Linefeed, LF */
- XK_Clear =         $FF0B;
- XK_Return =        $FF0D; //* Return, enter */
- XK_Pause =         $FF13; //* Pause, hold */
- XK_Scroll_Lock =   $FF14;
- XK_Sys_Req =       $FF15;
- XK_Escape =        $FF1B;
- XK_Delete =        $FFFF; //* Delete, rubout */
-
-//* Cursor control & motion */
- XK_Home =          $FF50;
- XK_Left =          $FF51; //* Move left, left arrow */
- XK_Up =            $FF52; //* Move up, up arrow */
- XK_Right =         $FF53; //* Move right, right arrow */
- XK_Down =          $FF54; //* Move down, down arrow */
- XK_Prior =         $FF55; //* Prior, previous */
- XK_Page_Up =       $FF55;
- XK_Next =          $FF56; //* Next */
- XK_Page_Down =     $FF56;
- XK_End =           $FF57; //* EOL */
- XK_Begin =         $FF58; //* BOL */
-
-//* Misc Functions */
- XK_Select =        $FF60; //* Select, mark */
- XK_Print =         $FF61;
- XK_Execute =       $FF62; //* Execute, run, do */
- XK_Insert =        $FF63; //* Insert, insert here */
- XK_Undo =          $FF65; //* Undo, oops */
- XK_Redo =          $FF66; //* redo, again */
- XK_Menu =          $FF67;
- XK_Find =          $FF68; //* Find, search */
- XK_Cancel =        $FF69; //* Cancel, stop, abort, exit */
- XK_Help =          $FF6A; //* Help */
- XK_Break =         $FF6B;
- XK_Mode_switch =   $FF7E; //* Character set switch */
- XK_script_switch = $FF7E; //* Alias for mode_switch */
- XK_Num_Lock =      $FF7F;
-
-//* Keypad Functions, keypad numbers cleverly chosen to map to ascii */
- XK_KP_Space =      $FF80; //* space */
- XK_KP_Tab =        $FF89;
- XK_KP_Enter =      $FF8D; //* enter */
- XK_KP_F1 =         $FF91; //* PF1, KP_A, ... */
- XK_KP_F2 =         $FF92;
- XK_KP_F3 =         $FF93;
- XK_KP_F4 =         $FF94;
- XK_KP_Home =       $FF95;
- XK_KP_Left =       $FF96;
- XK_KP_Up =         $FF97;
- XK_KP_Right =      $FF98;
- XK_KP_Down =       $FF99;
- XK_KP_Prior =      $FF9A;
- XK_KP_Page_Up =    $FF9A;
- XK_KP_Next =       $FF9B;
- XK_KP_Page_Down =  $FF9B;
- XK_KP_End =        $FF9C;
- XK_KP_Begin =      $FF9D;
- XK_KP_Insert =     $FF9E;
- XK_KP_Delete =     $FF9F;
- XK_KP_Equal =      $FFBD; //* equals */
- XK_KP_Multiply =   $FFAA;
- XK_KP_Add =        $FFAB;
- XK_KP_Separator =  $FFAC; //* separator, often comma */
- XK_KP_Subtract =   $FFAD;
- XK_KP_Decimal =    $FFAE;
- XK_KP_Divide =     $FFAF;
-
- XK_KP_0 =          $FFB0;
- XK_KP_1 =          $FFB1;
- XK_KP_2 =          $FFB2;
- XK_KP_3 =          $FFB3;
- XK_KP_4 =          $FFB4;
- XK_KP_5 =          $FFB5;
- XK_KP_6 =          $FFB6;
- XK_KP_7 =          $FFB7;
- XK_KP_8 =          $FFB8;
- XK_KP_9 =          $FFB9;
-
- XK_F1 =            $FFBE;
- XK_F35 =           $FFE0;
-
-//* Modifiers */
- XK_Shift_L =       $FFE1; //* Left shift */
- XK_Shift_R =       $FFE2; //* Right shift */
- XK_Control_L =     $FFE3; //* Left control */
- XK_Control_R =     $FFE4; //* Right control */
- XK_Caps_Lock =     $FFE5; //* Caps lock */
- XK_Shift_Lock =    $FFE6; //* Shift lock */
-
- XK_Meta_L =        $FFE7; //* Left meta */
- XK_Meta_R =        $FFE8; //* Right meta */
- XK_Alt_L =         $FFE9; //* Left alt */
- XK_Alt_R =         $FFEA; //* Right alt */
- XK_Super_L =       $FFEB; //* Left super */
- XK_Super_R =       $FFEC; //* Right super */
- XK_Hyper_L =       $FFED; //* Left hyper */
- XK_Hyper_R =       $FFEE; //* Right hyper */
-
- //ISO 9995 Function and Modifier Keys
- //Byte 3 = 0xFE
-
- XK_ISO_Left_Tab =                $FE20;
- XK_ISO_Move_Line_Up =            $FE21;
- XK_ISO_Move_Line_Down =          $FE22;
- XK_ISO_Partial_Line_Up =         $FE23;
- XK_ISO_Partial_Line_Down =       $FE24;
- XK_ISO_Partial_Space_Left =      $FE25;
- XK_ISO_Partial_Space_Right =     $FE26;
- XK_ISO_Set_Margin_Left =         $FE27;
- XK_ISO_Set_Margin_Right =        $FE28;
- XK_ISO_Release_Margin_Left =     $FE29;
- XK_ISO_Release_Margin_Right =    $FE2A;
- XK_ISO_Release_Both_Margins =    $FE2B;
- XK_ISO_Fast_Cursor_Left =        $FE2C;
- XK_ISO_Fast_Cursor_Right =       $FE2D;
- XK_ISO_Fast_Cursor_Up =          $FE2E;
- XK_ISO_Fast_Cursor_Down =        $FE2F;
- XK_ISO_Continuous_Underline =    $FE30;
- XK_ISO_Discontinuous_Underline = $FE31;
- XK_ISO_Emphasize =               $FE32;
- XK_ISO_Center_Object =           $FE33;
- XK_ISO_Enter =                   $FE34;
-
- //from cursorfont.h
- XC_num_glyphs =         154;
- XC_X_cursor =             0;
- XC_arrow =                2;
- XC_based_arrow_down =     4;
- XC_based_arrow_up =       6;
- XC_boat =                 8;
- XC_bogosity =            10;
- XC_bottom_left_corner =  12;
- XC_bottom_right_corner = 14;
- XC_bottom_side =         16;
- XC_bottom_tee =          18;
- XC_box_spiral =          20;
- XC_center_ptr =          22;
- XC_circle =              24;
- XC_clock =               26;
- XC_coffee_mug =          28;
- XC_cross =               30;
- XC_cross_reverse =       32;
- XC_crosshair =           34;
- XC_diamond_cross =       36;
- XC_dot =                 38;
- XC_dotbox =              40;
- XC_double_arrow =        42;
- XC_draft_large =         44;
- XC_draft_small =         46;
- XC_draped_box =          48;
- XC_exchange =            50;
- XC_fleur =               52;
- XC_gobbler =             54;
- XC_gumby =               56;
- XC_hand1 =               58;
- XC_hand2 =               60;
- XC_heart =               62;
- XC_icon =                64;
- XC_iron_cross =          66;
- XC_left_ptr =            68;
- XC_left_side =           70;
- XC_left_tee =            72;
- XC_leftbutton =          74;
- XC_ll_angle =            76;
- XC_lr_angle =            78;
- XC_man =                 80;
- XC_middlebutton =        82;
- XC_mouse =               84;
- XC_pencil =              86;
- XC_pirate =              88;
- XC_plus =                90;
- XC_question_arrow =      92;
- XC_right_ptr =           94;
- XC_right_side =          96;
- XC_right_tee =           98;
- XC_rightbutton =        100;
- XC_rtl_logo =           102;
- XC_sailboat =           104;
- XC_sb_down_arrow =      106;
- XC_sb_h_double_arrow =  108;
- XC_sb_left_arrow =      110;
- XC_sb_right_arrow =     112;
- XC_sb_up_arrow =        114;
- XC_sb_v_double_arrow =  116;
- XC_shuttle =            118;
- XC_sizing =             120;
- XC_spider =             122;
- XC_spraycan =           124;
- XC_star =               126;
- XC_target =             128;
- XC_tcross =             130;
- XC_top_left_arrow =     132;
- XC_top_left_corner =    134;
- XC_top_right_corner =   136;
- XC_top_side =           138;
- XC_top_tee =            140;
- XC_trek =               142;
- XC_ul_angle =           144;
- XC_umbrella =           146;
- XC_ur_angle =           148;
- XC_watch =              150;
- XC_xterm =              152;
 
  {
  cursorshapety = (cr_default,
