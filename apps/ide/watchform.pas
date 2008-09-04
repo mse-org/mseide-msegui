@@ -63,7 +63,7 @@ var
 implementation
 uses
  watchform_mfm,main,msewidgets,projectoptionsform,actionsmodule,msegraphutils,
- mseguiglob,mseformatstr,msebits,sysutils,watchpointsform;
+ mseguiglob,mseformatstr,msebits,sysutils,watchpointsform,memoryform;
 type
  numformatty = (nf_default,nf_bin,nf_decs,nf_decu,nf_hex);
  numsizety = (ns_default,ns_8,ns_16,ns_32);
@@ -184,6 +184,7 @@ begin
  for int1:= 0 to grid.rowcount -1 do begin
   refreshitem(int1);
  end;
+ memoryfo.refresh;
 end;
 
 procedure twatchfo.expresultonsetvalue(const sender: tobject; 

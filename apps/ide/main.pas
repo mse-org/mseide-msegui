@@ -121,6 +121,7 @@ type
    procedure saveprojectcopyexecute(const sender: TObject);
    procedure newprojectfromprogramexe(const sender: TObject);
    procedure newemptyprojectexe(const sender: TObject);
+   procedure viewmemoryonexecute(const sender: TObject);
   private
    fstartcommand: startcommandty;
    fnoremakecheck: boolean;
@@ -253,7 +254,7 @@ procedure handleerror(const e: exception; const text: string);
 
 implementation
 uses
- mseparser,msesysintf,
+ mseparser,msesysintf,memoryform,
  regwidgets,regeditwidgets,regkernel,regdialogs,regprinter,
  {$ifdef FPC}{$ifndef mse_withoutdb}regdb,regreport,{$endif}{$endif}
  {$ifdef mse_with_ifi}regifi,{$endif}
@@ -1183,6 +1184,11 @@ end;
 procedure tmainfo.viewassembleronexecute(const sender: TObject);
 begin
  disassfo.activate;
+end;
+
+procedure tmainfo.viewmemoryonexecute(const sender: TObject);
+begin
+ memoryfo.activate;
 end;
 
 procedure tmainfo.viewcpuonexecute(const sender: TObject);

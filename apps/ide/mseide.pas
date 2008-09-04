@@ -28,7 +28,8 @@ uses
   msegui,msegraphics,actionsmodule,sourceform,debuggerform,
   componentpaletteform,componentstore,
   messageform,watchform,objectinspector,breakpointsform,watchpointsform,
-  stackform,projecttreeform,findinfileform,cpuform,disassform,threadsform,
+  stackform,projecttreeform,findinfileform,cpuform,disassform,memoryform,
+  threadsform,
   targetconsole,main,mseguiintf,msestockobjects,regunitgroups,guitemplates,
   msegraphutils;
 begin
@@ -50,6 +51,7 @@ begin
  application.createform(tfindinfilefo, findinfilefo);
 // application.createform(tcpufo, cpufo);
  application.createform(tdisassfo, disassfo);
+ application.createform(tmemoryfo, memoryfo);
  application.createform(tthreadsfo, threadsfo);
  application.createform(ttargetconsolefo,targetconsolefo);
  application.createform(tmainfo, mainfo);
