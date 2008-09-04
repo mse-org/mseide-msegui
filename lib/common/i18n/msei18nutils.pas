@@ -7,7 +7,7 @@ unit msei18nutils;
 
 interface
 uses
- msei18nglob;
+ msei18nglob,msefileutils;
 //todo: optimize resourcestring loading
 //      wide resourcestrings
 
@@ -28,7 +28,7 @@ procedure unregisterresourcestrings(datapo: pointer); cdecl;
 implementation
 uses
  {$ifdef FPC}dynlibs,{$ifdef UNIX}dl,{$endif}{$endif}sysutils,mseclasses,
-                           mselist,msestrings,mseapplication;
+                           mselist,msestrings,mseapplication,msesysintf;
  
 type
  resourcestringinfoty = record
@@ -202,12 +202,18 @@ begin
    langlibhandle:= 0;
   end;
   if aname <> '' then begin
-   {$ifdef mswindows}
+  {$ifdef mswindows}
    aname:= aname+'.dll';
-   {$else}
+  {$else}
    aname:= 'lib'+aname+'.so';
-   {$endif}
+  {$endif}
    langlibhandle:= loadlibrary({$ifndef FPC}pchar({$endif}aname{$ifndef FPC}){$endif});
+  {$ifdef UNIX}
+   if langlibhandle = 0 then begin
+    langlibhandle:= loadlibrary({$ifndef FPC}pchar({$endif}
+               filedir(sys_getapplicationpath)+aname{$ifndef FPC}){$endif});
+   end;
+  {$endif}
    if langlibhandle <> 0 then begin
     {$ifdef FPC}pointer({$endif}reglang{$ifdef FPC}){$endif}:=
                   getprocaddress(langlibhandle,registerlangname);
