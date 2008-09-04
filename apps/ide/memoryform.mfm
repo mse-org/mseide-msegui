@@ -1,0 +1,324 @@
+object memoryfo: tmemoryfo
+  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  bounds_x = 100
+  bounds_y = 100
+  bounds_cx = 445
+  bounds_cy = 354
+  taborder = 1
+  visible = False
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
+  container.bounds_cx = 445
+  container.bounds_cy = 354
+  container.frame.dummy = 0
+  caption = 'Memory, not finished!'
+  moduleclassname = 'tdockform'
+  object grid: tstringgrid
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 0
+    bounds_y = 40
+    bounds_cx = 445
+    bounds_cy = 314
+    frame.dummy = 0
+    anchors = [an_top, an_bottom]
+    datacols.count = 16
+    datacols.width = 20
+    datacols.options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+    datacols.items = <    
+      item
+        width = 20
+        options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        datalist.data = (
+          0
+          0
+          0
+          0
+          0
+        )
+      end    
+      item
+        width = 20
+        options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        datalist.data = (
+          0
+          0
+          0
+          0
+          0
+        )
+      end    
+      item
+        width = 20
+        options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        datalist.data = (
+          0
+          0
+          0
+          0
+          0
+        )
+      end    
+      item
+        width = 20
+        options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        datalist.data = (
+          0
+          0
+          0
+          0
+          0
+        )
+      end    
+      item
+        width = 20
+        options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        datalist.data = (
+          0
+          0
+          0
+          0
+          0
+        )
+      end    
+      item
+        width = 20
+        options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        datalist.data = (
+          0
+          0
+          0
+          0
+          0
+        )
+      end    
+      item
+        width = 20
+        options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        datalist.data = (
+          0
+          0
+          0
+          0
+          0
+        )
+      end    
+      item
+        width = 20
+        options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        datalist.data = (
+          0
+          0
+          0
+          0
+          0
+        )
+      end    
+      item
+        width = 20
+        options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        datalist.data = (
+          0
+          0
+          0
+          0
+          0
+        )
+      end    
+      item
+        width = 20
+        options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        datalist.data = (
+          0
+          0
+          0
+          0
+          0
+        )
+      end    
+      item
+        width = 20
+        options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        datalist.data = (
+          0
+          0
+          0
+          0
+          0
+        )
+      end    
+      item
+        width = 20
+        options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        datalist.data = (
+          0
+          0
+          0
+          0
+          0
+        )
+      end    
+      item
+        width = 20
+        options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        datalist.data = (
+          0
+          0
+          0
+          0
+          0
+        )
+      end    
+      item
+        width = 20
+        options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        datalist.data = (
+          0
+          0
+          0
+          0
+          0
+        )
+      end    
+      item
+        width = 20
+        options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        datalist.data = (
+          0
+          0
+          0
+          0
+          0
+        )
+      end    
+      item
+        width = 20
+        options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        datalist.data = (
+          0
+          0
+          0
+          0
+          0
+        )
+      end>
+    fixcols.count = 1
+    fixcols.items = <    
+      item
+        width = 71
+        onafterdrawcell = drawfixcol
+      end>
+    fixrows.count = 1
+    fixrows.items = <    
+      item
+        height = 17
+        captions.count = 16
+        captions.items = <        
+          item
+            caption = '0'
+          end        
+          item
+            caption = '1'
+          end        
+          item
+            caption = '2'
+          end        
+          item
+            caption = '3'
+          end        
+          item
+            caption = '4'
+          end        
+          item
+            caption = '5'
+          end        
+          item
+            caption = '6'
+          end        
+          item
+            caption = '7'
+          end        
+          item
+            caption = '8'
+          end        
+          item
+            caption = '9'
+          end        
+          item
+            caption = 'A'
+          end        
+          item
+            caption = 'B'
+          end        
+          item
+            caption = 'C'
+          end        
+          item
+            caption = 'D'
+          end        
+          item
+            caption = 'E'
+          end        
+          item
+            caption = 'F'
+          end>
+      end>
+    rowcount = 5
+    datarowheight = 17
+    reffontheight = 15
+  end
+  object add: tintegeredit
+    bounds_x = 8
+    bounds_y = 8
+    bounds_cx = 111
+    bounds_cy = 21
+    frame.caption = 'Add'
+    frame.captionpos = cp_right
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      0
+      27
+      0
+    )
+    taborder = 1
+    ondataentered = adent
+    base = nb_hex
+    reffontheight = 15
+  end
+  object cnt: tintegeredit
+    bounds_x = 128
+    bounds_y = 8
+    bounds_cx = 108
+    bounds_cy = 21
+    frame.caption = 'Cnt'
+    frame.captionpos = cp_right
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      0
+      24
+      0
+    )
+    taborder = 2
+    ondataentered = adent
+    base = nb_hex
+    reffontheight = 15
+  end
+  object memon: tbooleanedit
+    bounds_x = 256
+    bounds_y = 14
+    bounds_cx = 84
+    bounds_cy = 17
+    frame.caption = 'Memory on'
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      2
+      71
+      2
+    )
+    taborder = 3
+    ondataentered = adent
+  end
+end
