@@ -374,14 +374,14 @@ type
 //   fparent: tsetpropertyeditor;
    findex: integer;
    function getdefaultstate: propertystatesty; override;
-   procedure updatedefaultvalue; override;
   public
    constructor create(const adesigner: idesigner;
         const amodule: tmsecomponent; const acomponent: tcomponent;
             const aobjectinspector: iobjectinspector;
             const aprops: propinstancearty; atypeinfo: ptypeinfo;
             const aparent: tsetpropertyeditor; const aindex: integer);
-                             reintroduce; virtual;  
+                             reintroduce; virtual;
+   procedure updatedefaultvalue; override;
    function canrevert: boolean; override;
    function allequal: boolean; override;
    function propertyname: msestring; override;
@@ -575,8 +575,8 @@ type
  tconstarraypropertyeditor = class(tarraypropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
-   function allequal: boolean; override;
   public
+   function allequal: boolean; override;
    function getvalue: msestring; override;
    function name: msestring; override;
    procedure setvalue(const value: msestring); override;
@@ -3853,7 +3853,7 @@ procedure tdatetimepropertyeditor.setvalue(const value: msestring);
   year,month,day: word;
  begin
   result:= 0;
-  ar2:= splitstring(str,'-');
+  ar2:= splitstring(str,msechar('-'));
   if high(ar2) >= 0 then begin
    year:= strtoint(ar2[0]);
    month:= 1;
@@ -3877,7 +3877,7 @@ procedure tdatetimepropertyeditor.setvalue(const value: msestring);
   hour,minute,second: word;
  begin
   result:= 0;
-  ar2:= splitstring(str,':',true);
+  ar2:= splitstring(str,msechar(':'),true);
   if high(ar2) >= 0 then begin
    hour:= strtoint(ar2[0]);
    minute:= 0;
@@ -3910,7 +3910,7 @@ begin
   else begin
    rea1:= 0;
    rea2:= 0;
-   ar1:= splitstring(value,' ',true);
+   ar1:= splitstring(value,msechar(' '),true);
    if high(ar1) > 0 then begin
     rea1:= encdate(ar1[0]);
     rea2:= enctime(ar1[1]);

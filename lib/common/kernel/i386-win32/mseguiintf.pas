@@ -3526,6 +3526,9 @@ begin
  if keys and mk_shift <> 0 then begin
   include(result,ss_shift);
  end;
+ if getkeystate(vk_menu) < 0 then begin
+  include(result,ss_alt);
+ end;
 end;
 
 function winmousepostopoint(pos: cardinal): pointty;
@@ -3607,6 +3610,15 @@ begin
  end;
  if getkeystate(vk_control) < 0 then begin
   include(result,ss_ctrl);
+ end;
+ if getkeystate(vk_lbutton) < 0 then begin
+  include(result,ss_left);
+ end;
+ if getkeystate(vk_mbutton) < 0 then begin
+  include(result,ss_middle);
+ end;
+ if getkeystate(vk_rbutton) < 0 then begin
+  include(result,ss_right);
  end;
 end;
 
