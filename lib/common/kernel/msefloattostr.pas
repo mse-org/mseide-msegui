@@ -19,6 +19,9 @@ const
 type
  floatstringmodety = (fsm_default,fsm_fix,fsm_sci,fsm_engfix,fsm_engflo,
                       fsm_engsymfix,fsm_engsymflo);
+ {$ifndef FPC}
+ qword = int64;
+ {$endif}
  doublerecty = packed record       //little endian
   case integer of
    0: (by0,by1,by2,by3,by4,by5,by6,by7: byte);
@@ -26,7 +29,7 @@ type
    2: (lwo0,lwo1: longword);
    3: (qwo0: qword);
  end;
- 
+
 function doubletostring(value: double; precision: integer;
       mode: floatstringmodety = fsm_default;
       decimalsep: msechar = '.'; thousandsep: msechar = #0): msestring;
@@ -130,16 +133,24 @@ type
  end;
 
 const
+{$ifndef FPC}
+ lsbrounding = 2.2517998136852482e015;
+{$else}
  lsbrounding = exp(51*ln(2));
+{$endif}
  expo0max = 1-1/lsbrounding;
  expo1max = 10-10/lsbrounding;
  expo3max = 1000-1000/lsbrounding;
  expmask = $7ff0;             //for wo3
  halfexp = (1023-1) shl 4;    //value >= 0.5 for wo3
+{$ifndef FPC}
+ exp2to10 = 0.30102999566398121;
+{$else}
  exp2to10 = ln(2)/ln(10);
- exps: array[0..maxdigits] of double = 
+{$endif}
+ exps: array[0..maxdigits] of double =
  (1e0,1e1,1e2,1e3,1e4,1e5,1e6,1e7,1e8,1e9,1e10,1e11,1e12,1e13,1e14,1e15,1e16,1e17);
- 
+
 var
  buffer: bufferty;
  neg: boolean;
@@ -159,7 +170,11 @@ begin
  with doublerecty(value) do begin
   neg:= by7 and $80 <> 0;
   by7:= by7 and $7f; //remove sign
+ {$ifndef FPC}
+  exp:= (wo3 and $7ff0) shr 4;
+ {$else}
   exp:= (wo3 and %0111111111110000) shr 4;
+ {$endif}
   nan:= false;
   inf:= false;
   if exp = 2047 then begin

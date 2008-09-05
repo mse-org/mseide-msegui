@@ -484,7 +484,7 @@ var
  seps: msestring;
 begin
  first:= true;
- seps:= msechar(c_return) + msechar(c_linefeed) + msestring(quotechar) + separator;
+ seps:= msechar(c_return) + msestring(c_linefeed) + msestring(quotechar) + separator;
  result:= '';
  for int1:= 0 to high(fields) do begin
   mstr1:= '';
