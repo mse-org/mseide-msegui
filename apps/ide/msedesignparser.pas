@@ -506,7 +506,7 @@ begin
        inc(po1,sizeof({$ifdef FPC}byte{$else}tparamflags{$endif}));
        name:= getshortstring(po1);
        typename:= getshortstring(po1);
-       if typename = 'WideString' then begin
+       if (typename = 'WideString') or (typename = 'UnicodeString') then begin
         typename:= 'msestring';
        end
        else begin

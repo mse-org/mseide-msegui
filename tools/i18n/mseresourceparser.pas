@@ -26,9 +26,9 @@ type
  propinfoty = record
   name: string;
   stringvalue: string;
-  widestringvalue: widestring;
+  widestringvalue: msestring;
   donottranslate: boolean;
-  comment: widestring;
+  comment: msestring;
   variants: msestringarty;
   case valuetype: tvaluetype of
    vastring,valstring,vautf8string,vawstring:
@@ -59,7 +59,7 @@ type
    procedure clear; override;
    function newnode: tpropinfonode;
    function rootstring(separator: char = '.'; withrootnode: boolean = false): string;
-   function valuetext: widestring;
+   function valuetext: msestring;
    procedure transferlang(lang: integer);
    procedure deletelang(lang: integer);
    procedure initlang(acount: integer);
@@ -133,7 +133,7 @@ begin
  add(result);
 end;
 
-function tpropinfonode.valuetext: widestring;
+function tpropinfonode.valuetext: msestring;
 begin
  case info.valuetype of
   vaint8,vaint16,vaint32: begin

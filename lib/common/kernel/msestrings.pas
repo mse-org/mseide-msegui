@@ -15,8 +15,10 @@ interface
 uses
  classes,{msegraphutils,}msetypes{$ifdef FPC},strings{$endif};
 {$ifdef FPC}
- {$ifdef FPC_WINLIKEWIDESTRING}
-  {$define msestringsarenotrefcounted}
+ {$ifndef mse_unicodestring}
+  {$ifdef FPC_WINLIKEWIDESTRING}
+   {$define msestringsarenotrefcounted}
+  {$endif}
  {$endif}
 {$else}
  {$ifdef mswindows}
@@ -25,9 +27,15 @@ uses
 {$endif}
 
 type
+ {$ifdef mse_unicodestring}
+ msestring = unicodestring;
+ msechar = unicodechar;
+ pmsechar = punicodechar;
+ {$else}
  msestring = widestring;
  msechar = widechar;
  pmsechar = pwidechar;
+ {$endif}
  stringposty = (sp_left,sp_center,sp_right);
 
 const

@@ -311,7 +311,7 @@ var
                 StoreStr(FormatCurrent + 1, Count - 2);
                 end ;
              'A': begin
-                if mseStrLIComp(FormatCurrent, pmsechar(widestring('AMPM')), 4) = 0 then begin
+                if mseStrLIComp(FormatCurrent, pmsechar(msestring('AMPM')), 4) = 0 then begin
                    Count := 4;
                    if Hour < 12 then StoreString(TimeAMString)
                    else StoreString(TimePMString);
@@ -939,7 +939,7 @@ begin
  end;
  for int1:= result - 1 downto 0 do begin
   pmsecharaty(buffer)^[int1]:= widechar(pcharaty(buffer)^[int1]);
-             //convert to widestring
+             //convert to msestring
  end;
 end;
 *)
@@ -1401,7 +1401,7 @@ begin
    case po2^ of
     #0: begin    //was terminating quote
     end;
-    '.','0','#': begin
+    ',','.','0','#': begin
      intopt:= 0;
      intmust:= 0;
      fracopt:= 0;

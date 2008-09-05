@@ -473,7 +473,7 @@ procedure tmainfo.writerecord(const sender: ttreenode);
 var
  rec: varrecarty;
  str1,str2: string;
- mstr3: widestring;
+ mstr3: msestring;
  int1: integer;
 begin
  rec:= nil; //compilerwarning
@@ -506,7 +506,7 @@ begin
 end;
 
 procedure tmainfo.variantonsetvalue(const sender: tobject;
-             var avalue: widestring; var accept: boolean);
+             var avalue: msestring; var accept: boolean);
 begin
  with tpropinfoitem(tree.item).node.info,twidget(sender) do begin
   if high(variants) < tag then begin
@@ -537,7 +537,7 @@ procedure tmainfo.doread(stream: ttextdatastream; aencoding: charencodingty);
 var
  aname: string;
  notranslate: boolean;
- acomment: widestring;
+ acomment: msestring;
  node: tpropinfonode;
  str1: string;
  ar1: stringarty;

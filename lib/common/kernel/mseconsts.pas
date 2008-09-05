@@ -15,7 +15,7 @@ uses
  msestockobjects,mseglob,msestrings,mseapplication,msetypes;
  
 type
- stockcaptionaty = array[stockcaptionty] of widestring;
+ stockcaptionaty = array[stockcaptionty] of msestring;
  pstockcaptionaty = ^stockcaptionaty;
  defaultmodalresulttextty = array[modalresultty] of msestring;
  pdefaultmodalresulttextty = ^defaultmodalresulttextty;
@@ -26,7 +26,7 @@ const
 
  function modalresulttext(const index: modalresultty): msestring;
  function modalresulttextnoshortcut(const index: modalresultty): msestring;
- function stockcaptions(const index: stockcaptionty): widestring;
+ function stockcaptions(const index: stockcaptionty): msestring;
  function uc(const index: integer): msestring; //get user caption
 
  procedure registeruserlangconsts(name: string;
@@ -327,7 +327,7 @@ begin
  result:= lang.modalresulttextnoshortcut^[index];
 end;
 
-function stockcaptions(const index: stockcaptionty): widestring;
+function stockcaptions(const index: stockcaptionty): msestring;
 begin
  checklang;
  result:= lang.stockcaption^[index];

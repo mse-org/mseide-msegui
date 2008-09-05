@@ -12,8 +12,8 @@ unit mseucs2toru;
 
 interface
 
-function ucs2to866(const avalue: widechar): char;
-function ucs2to866(const avalue: widestring): ansistring;
+function ucs2to866(const avalue: msechar): char;
+function ucs2to866(const avalue: msestring): ansistring;
 
 implementation
 

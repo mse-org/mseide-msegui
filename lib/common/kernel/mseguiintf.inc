@@ -74,7 +74,7 @@ function gui_getworkarea(id: winidty): rectty;
 function gui_getwindowsize(id: winidty): windowsizety;
 function gui_windowvisible(id: winidty): boolean;
 function gui_setwindowstate(id: winidty; size: windowsizety; visible: boolean): guierrorty;
-function gui_setwindowcaption(id: winidty; const caption: widestring): guierrorty;
+function gui_setwindowcaption(id: winidty; const caption: msestring): guierrorty;
 function gui_setwindowicon(id: winidty; const icon,mask: pixmapty): guierrorty;
 function gui_setapplicationicon(const icon,mask: pixmapty): guierrorty;
 function gui_pidtowinid(const pids: integerarty): winidty;
@@ -125,6 +125,6 @@ procedure gui_freeimagemem(data: pcardinalaty);
 //procedure gui_copyarea(var drawinfo: drawinfoty);
 
 procedure gui_beep;
-function gui_copytoclipboard(const value: widestring): guierrorty;
-function gui_pastefromclipboard(out value: widestring): guierrorty;
+function gui_copytoclipboard(const value: msestring): guierrorty;
+function gui_pastefromclipboard(out value: msestring): guierrorty;
 function gui_canpastefromclipboard: boolean;

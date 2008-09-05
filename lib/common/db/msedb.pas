@@ -4022,11 +4022,11 @@ begin
  //    vtInterface:
      vtWideString: begin
       if (field1 is tmsestringfield) then begin
-       tmsestringfield(field1).asmsestring:= widestring(vwidestring);
+       tmsestringfield(field1).asmsestring:= msestring(vwidestring);
       end
       else begin 
        if (field1 is tmsememofield) then begin
-        tmsememofield(field1).asmsestring:= widestring(vwidestring);
+        tmsememofield(field1).asmsestring:= msestring(vwidestring);
        end
        else begin
         field1.asstring:= widestring(vwidestring);

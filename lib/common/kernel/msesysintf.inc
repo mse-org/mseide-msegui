@@ -61,7 +61,7 @@ function sys_getapplicationpath: filenamety;
 function sys_getcommandlinearguments: stringarty;
 
 function sys_filesystemiscaseinsensitive: boolean;
-function sys_tosysfilepath(var path: widestring): syserrorty;
+function sys_tosysfilepath(var path: filenamety): syserrorty;
 
   //all filenames below are in mseformat!
 function sys_getcurrentdir: filenamety;
@@ -70,7 +70,7 @@ function sys_setcurrentdir(const dirname: filenamety): syserrorty;
 function sys_copyfile(const oldfile,newfile: filenamety): syserrorty;
 function sys_deletefile(const filename: filenamety): syserrorty;
 function sys_renamefile(const oldname,newname: filenamety): syserrorty;
-function sys_createdir(const path: widestring;
+function sys_createdir(const path: msestring;
                   const rights: filerightsty): syserrorty;
 
 function sys_openfile(const path: filenamety; const openmode: fileopenmodety;

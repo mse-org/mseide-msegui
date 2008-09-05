@@ -382,7 +382,7 @@ type
                    write setvalue default pao_portrait;
  end;
  
-function stringtopages(const avalue: widestring): pagerangearty;
+function stringtopages(const avalue: msestring): pagerangearty;
                   //one based, example: '1-5,7,9,11-13'
 
 implementation
@@ -393,7 +393,7 @@ type
  tfont1 = class(tfont);
  tcanvas1 = class(tcanvas);
  
-function stringtopages(const avalue: widestring): pagerangearty;
+function stringtopages(const avalue: msestring): pagerangearty;
 var
  ar1,ar2: msestringarty;
  int1,int2: integer;

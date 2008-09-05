@@ -497,10 +497,10 @@ begin
     vtString:     mstr1:= VString^;
     vtWideChar:   mstr1:= VWideChar;
     vtPChar:      mstr1:= string(VPChar);
-    vtPWideChar:  mstr1:= widestring(VPWideChar);
+    vtPWideChar:  mstr1:= msestring(VPWideChar);
     vtAnsiString: mstr1:= ansistring(VAnsiString);
     vtCurrency:   mstr1:= realtostr(VCurrency^);
-    vtWideString: mstr1:= widestring(VWideString);
+    vtWideString: mstr1:= msestring(VWideString);
     vtInt64:      mstr1:= inttostr(VInt64^);
    end;
   end;
@@ -540,7 +540,7 @@ begin
    vtPWideChar:  ppwidechar(dest[int1])^:= source[int1].VPwideChar;
    vtAnsiString: pansistring(dest[int1])^:= ansistring(source[int1].VAnsiString);
    vtCurrency:   pcurrency(dest[int1])^:= source[int1].Vcurrency^;
-   vtwidestring: pwidestring(dest[int1])^:= widestring(source[int1].VwideString);
+   vtwidestring: pmsestring(dest[int1])^:= msestring(source[int1].VwideString);
    vtInt64:      pint64(dest[int1])^:= source[int1].Vint64^;
   end;
  end;
