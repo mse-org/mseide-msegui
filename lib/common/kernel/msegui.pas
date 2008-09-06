@@ -10917,6 +10917,11 @@ begin
  }
  if info.mouse.eventkind = ek_mousewheel then begin
   capture:= fowner.mouseeventwidget(info.mouse);
+  if (capture = nil) and (ftransientfor <> nil) then begin
+   subpoint1(info.mouse.pos,subpoint(ftransientfor.fowner.pos,fowner.pos));
+   ftransientfor.dispatchmouseevent(info,capture);
+   exit;
+  end;
  end
  else begin
   checkmousewidget(info.mouse,capture);

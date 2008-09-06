@@ -188,6 +188,13 @@ type
  
  framescrollbarclassty = class of tcustomscrollbar;
 
+ optionscrollty = (oscr_drag,oscr_key,oscr_mousewheel);
+ optionsscrollty = set of optionscrollty;
+
+const
+ defaultoptionsscroll = [oscr_mousewheel];
+ 
+type
  tcustomscrollframe = class(tcustomcaptionframe)
   private
    procedure setsbhorz(const Value: tcustomscrollbar);
@@ -196,6 +203,7 @@ type
    function getsbvert: tcustomscrollbar;
   protected
    fhorz,fvert: tcustomscrollbar;
+   foptionsscroll: optionsscrollty;
    procedure updatestate; override;
    procedure updatevisiblescrollbars; virtual;
    procedure updaterects; override;
@@ -213,6 +221,8 @@ type
    procedure mouseevent(var info: mouseeventinfoty); virtual;
    procedure domousewheelevent(var info: mousewheeleventinfoty;
                                    const pagingreversed: boolean); virtual;
+   property optionsscroll: optionsscrollty read foptionsscroll 
+                             write foptionsscroll default defaultoptionsscroll;
    property state: framestatesty read fstate;
    property sbhorz: tcustomscrollbar read getsbhorz write setsbhorz;
    property sbvert: tcustomscrollbar read getsbvert write setsbvert;
@@ -280,16 +290,13 @@ type
   function getscrollsize: sizety;
  end;
 
- optionscrollty = (oscr_drag,oscr_key);
- optionsscrollty = set of optionscrollty;
- 
+type 
  tcustomscrollboxframe = class(tcustomscrollframe,iscrollbox)
   private
    fscrolling: integer;
    fclientheight: integer;
    fclientwidth: integer;
    fowner: twidget;
-   foptionsscroll: optionsscrollty;
    fdragging: boolean;
    fpickpos: pointty;
    fpickref: pointty;
@@ -326,8 +333,6 @@ type
    procedure updateclientrect; override;
    procedure showrect(const arect: rectty; const bottomright: boolean); 
                            //origin paintpos
-   property optionsscroll: optionsscrollty read foptionsscroll 
-                                                     write foptionsscroll;
    property clientwidth: integer read fclientwidth write setclientwidth default 0;
    property clientheight: integer read fclientheight write setclientheigth default 0;
    property framei_left default 2;
@@ -2350,6 +2355,7 @@ constructor tcustomscrollframe.create(const intf: iscrollframe;
                                                 const scrollintf: iscrollbar);
 begin
  intf.setstaticframe(true);
+ foptionsscroll:= defaultoptionsscroll;
  inherited create(intf);
  fhorz:= getscrollbarclass(false).create(scrollintf,org_widget,
              {$ifdef FPC}@{$endif}updatestate);
@@ -2417,14 +2423,16 @@ begin
      scrollbar:= sbhorz;
     end
     else begin
-     if (fs_sbverton in fstate) then begin
-      scrollbar:= sbvert;
-     end
-     else begin
-      if fs_sbhorzon in fstate then begin
-       scrollbar:= sbhorz;
+     if oscr_mousewheel in foptionsscroll then begin
+      if (fs_sbverton in fstate) then begin
+       scrollbar:= sbvert;
       end
       else begin
+       if fs_sbhorzon in fstate then begin
+        scrollbar:= sbhorz;
+       end
+       else begin
+       end;
       end;
      end;
     end;

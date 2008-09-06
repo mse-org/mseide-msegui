@@ -290,6 +290,7 @@ type
    fdropdown: tcustomdropdowncontroller;
    procedure internalcreateframe; override;
    procedure dokeydown(var info: keyeventinfoty); override;
+   procedure domousewheelevent(var info: mousewheeleventinfoty); override;
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure editnotification(var info: editnotificationinfoty); override;
    function createdropdowncontroller: tcustomdropdowncontroller; virtual;
@@ -924,6 +925,7 @@ type
    function getcellframe: framety; override;
    procedure internalcreateframe; override;
    procedure dokeydown(var info: keyeventinfoty); override;
+   procedure domousewheelevent(var info: mousewheeleventinfoty); override;
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure editnotification(var info: editnotificationinfoty); override;
    procedure updatereadonlystate; override;
@@ -2356,6 +2358,14 @@ end;
 procedure tcustomdropdownedit.dokeydown(var info: keyeventinfoty);
 begin
  fdropdown.dokeydown(info);
+ if not (es_processed in info.eventstate) then begin
+  inherited;
+ end;
+end;
+
+procedure tcustomdropdownedit.domousewheelevent(var info: mousewheeleventinfoty);
+begin
+ fdropdown.domousewheelevent(info);
  if not (es_processed in info.eventstate) then begin
   inherited;
  end;
@@ -4146,6 +4156,15 @@ end;
 procedure tcustomcalendardatetimeedit.dokeydown(var info: keyeventinfoty);
 begin
  fdropdown.dokeydown(info);
+ if not (es_processed in info.eventstate) then begin
+  inherited;
+ end;
+end;
+
+procedure tcustomcalendardatetimeedit.domousewheelevent(
+                                  var info: mousewheeleventinfoty);
+begin
+ fdropdown.domousewheelevent(info);
  if not (es_processed in info.eventstate) then begin
   inherited;
  end;

@@ -270,6 +270,7 @@ type
    procedure dropdownactivated;
    procedure dropdowndeactivated;
    procedure dokeydown(var info: keyeventinfoty);
+   procedure domousewheelevent(var info: mousewheeleventinfoty);
    procedure editnotification(var info: editnotificationinfoty); virtual;
    function dataselected: boolean;
    procedure updatereadonlystate;
@@ -797,6 +798,25 @@ begin
    exclude(eventstate,es_processed);
    dropdown;
    include(eventstate,es_processed);
+  end;
+ end;
+end;
+
+procedure tcustomdropdowncontroller.domousewheelevent(
+                              var info: mousewheeleventinfoty);
+begin
+ with info do begin
+  if not (es_processed in info.eventstate) then begin
+   if (wheel = mw_down) and fintf.getwidget.active then begin
+    dropdown;
+    include(info.eventstate,es_processed);
+   end
+   else begin
+    if (wheel = mw_up) and (getdropdownwidget <> nil) then begin
+     canceldropdown;
+     include(info.eventstate,es_processed);
+    end;
+   end;
   end;
  end;
 end;
