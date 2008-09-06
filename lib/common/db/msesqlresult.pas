@@ -254,6 +254,7 @@ type
    function isutf8: boolean;
    procedure next;
    procedure refresh;
+   function rowsaffected: integer; //-1 if not supported
    function rowsreturned: integer; //-1 if not supported
 //   procedure asvariant(out avalue: variant); overload; //internal compiler error
    function asvariant: variant; 
@@ -1220,6 +1221,16 @@ function tsqlresult.rowsreturned: integer;
 begin
  if active then begin
   result:= fcursor.frowsreturned;
+ end
+ else begin
+  result:= -1
+ end;
+end;
+
+function tsqlresult.rowsaffected: integer;
+begin
+ if active then begin
+  result:= fcursor.frowsaffected;
  end
  else begin
   result:= -1
