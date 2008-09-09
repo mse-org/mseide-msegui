@@ -506,6 +506,9 @@ begin
       move(po1^,value[1],length(value)*2);
       result:= gue_ok;
       setlength(value,length(pwidechar(value)));
+      if (value <> '') and (value[length(value)] = #$0d) then begin
+       setlength(value,length(value)-1);
+      end;
      end;
     end;
     globalunlock(data);
