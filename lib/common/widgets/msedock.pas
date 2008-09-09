@@ -2039,10 +2039,13 @@ begin
    bo1:= reader.readboolean('visible',bo1);
    if (parentwidget <> nil) then begin
     if not parentwidget.getcorbainterface(typeinfo(idocktarget),intf1)then begin
-     rect1:= clipinrect(rect1,parentwidget.paintrect);
+     rect1:= clipinrect(rect1,parentwidget.paintrect); //shift into widget
     end;
+    widgetrect:= rect1;
+   end
+   else begin
+    setclippedwidgetrect(rect1); //shift into screen
    end;
-   setclippedwidgetrect(rect1);
    visible:= bo1;
   end;
   if (parentwidget = nil) and (od_savezorder in foptionsdock) then  begin
