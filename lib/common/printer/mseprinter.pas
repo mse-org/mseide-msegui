@@ -108,6 +108,14 @@ type
    procedure setpa_frametop(const avalue: real);
    procedure setpa_frameright(const avalue: real);
    procedure setpa_framebottom(const avalue: real);
+   procedure writepa_frameleft(writer: twriter);
+   procedure writepa_frametop(writer: twriter);
+   procedure writepa_frameright(writer: twriter);
+   procedure writepa_framebottom(writer: twriter);
+   procedure readpa_frameleft(reader: treader);
+   procedure readpa_frametop(reader: treader);
+   procedure readpa_frameright(reader: treader);
+   procedure readpa_framebottom(reader: treader);
 //   function getcolorspace: colorspacety;
 //   procedure setcolorspace(const avalue: colorspacety);
    procedure setstatfile(const avalue: tstatfile);
@@ -121,6 +129,7 @@ type
    fcanvas: tprintercanvas;
    procedure loaded; override;
    function getwindowsize: sizety;
+   procedure defineproperties(filer: tfiler); override;
    
    //istatfile
    procedure dostatread(const reader: tstatreader); virtual;
@@ -144,10 +153,14 @@ type
    property pa_size: stdpagesizety read fpa_size write setpa_size nodefault;
    property pa_orientation: pageorientationty read fpa_orientation write setpa_orientation;
   
-   property pa_frameleft: real read fpa_frameleft write setpa_frameleft; //mm, default 10
-   property pa_frametop: real read fpa_frametop write setpa_frametop;    //mm, default 10
-   property pa_frameright: real read fpa_frameright write setpa_frameright;  //mm, default 10
-   property pa_framebottom: real read fpa_framebottom write setpa_framebottom; //mm, default 10
+   property pa_frameleft: real read fpa_frameleft write setpa_frameleft stored false;
+                                     //mm, default 10
+   property pa_frametop: real read fpa_frametop write setpa_frametop stored false;
+                                     //mm, default 10
+   property pa_frameright: real read fpa_frameright write setpa_frameright stored false;
+                                     //mm, default 10
+   property pa_framebottom: real read fpa_framebottom write setpa_framebottom 
+                                      stored false; //mm, default 10
    property tabulators: tprintertabulators read ftabulators write settabulators;
 //   property ppmm: real read fppmm write setppmm; //pixel per mm, default 10
 //   property colorspace: colorspacety read getcolorspace write setcolorspace;
@@ -651,6 +664,71 @@ end;
 procedure tcustomprinter.endprint;
 begin
  //dummy
+end;
+
+procedure tcustomprinter.writepa_frameleft(writer: twriter);
+begin
+ writer.writefloat(fpa_frameleft);
+end;
+
+procedure tcustomprinter.writepa_frametop(writer: twriter);
+begin
+ writer.writefloat(fpa_frametop);
+end;
+
+procedure tcustomprinter.writepa_frameright(writer: twriter);
+begin
+ writer.writefloat(fpa_frameright);
+end;
+
+procedure tcustomprinter.writepa_framebottom(writer: twriter);
+begin
+ writer.writefloat(fpa_framebottom);
+end;
+
+procedure tcustomprinter.readpa_frameleft(reader: treader);
+begin
+ fpa_frameleft:= reader.readfloat;
+end;
+
+procedure tcustomprinter.readpa_frametop(reader: treader);
+begin
+ fpa_frametop:= reader.readfloat;
+end;
+
+procedure tcustomprinter.readpa_frameright(reader: treader);
+begin
+ fpa_frameright:= reader.readfloat;
+end;
+
+procedure tcustomprinter.readpa_framebottom(reader: treader);
+begin
+ fpa_framebottom:= reader.readfloat;
+end;
+
+procedure tcustomprinter.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('pa_frameleft',{$ifdef FPC}@{$endif}readpa_frameleft,
+       {$ifdef FPC}@{$endif}writepa_frameleft,
+       (filer.ancestor = nil) and (fpa_frameleft <> defaultframe) or 
+       (filer.ancestor <> nil) and 
+                    (tcustomprinter(filer.ancestor).fpa_frameleft <> fpa_frameleft));
+ filer.defineproperty('pa_frametop',{$ifdef FPC}@{$endif}readpa_frametop,
+       {$ifdef FPC}@{$endif}writepa_frametop,
+       (filer.ancestor = nil) and (fpa_frametop <> defaultframe) or 
+       (filer.ancestor <> nil) and 
+       (tcustomprinter(filer.ancestor).fpa_frametop <> fpa_frametop));
+ filer.defineproperty('pa_frameright',{$ifdef FPC}@{$endif}readpa_frameright,
+       {$ifdef FPC}@{$endif}writepa_frameright,
+       (filer.ancestor = nil) and (fpa_frameright <> defaultframe) or 
+       (filer.ancestor <> nil) and 
+       (tcustomprinter(filer.ancestor).fpa_frameright <> fpa_frameright));
+ filer.defineproperty('pa_framebottom',{$ifdef FPC}@{$endif}readpa_framebottom,
+       {$ifdef FPC}@{$endif}writepa_framebottom,
+       (filer.ancestor = nil) and (fpa_framebottom <> defaultframe) or 
+       (filer.ancestor <> nil) and 
+       (tcustomprinter(filer.ancestor).fpa_framebottom <> fpa_framebottom));
 end;
 
 { tcustomprintercanvas }

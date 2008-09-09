@@ -249,8 +249,7 @@ begin
  end;
 end;
 
-function getprocaddresses(const libnames: array of string; const anames: array of string; 
-                             const adest: array of ppointer): tlibhandle; overload;
+function loadlib(const libnames: array of string): tlibhandle;
 var
  int1: integer;
  str1: string;
@@ -273,6 +272,12 @@ begin
   end;
   raise exception.create('Library '+str1+'not found.');
  end;
+end;
+
+function getprocaddresses(const libnames: array of string; const anames: array of string; 
+                             const adest: array of ppointer): tlibhandle; overload;
+begin
+ result:= loadlib(libnames);
  getprocaddresses(result,anames,adest);
 end;
 
