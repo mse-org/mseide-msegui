@@ -131,7 +131,7 @@ function psrealtostr(const avalue: real): string;
 implementation
 uses
  msegui,mseguiglob,msesys,sysutils,msedatalist,mseformatstr,mseunicodeps,
- mseguiintf,msebits;
+ mseguiintf,msebits,msefloattostr;
 type
  tsimplebitmap1 = class(tsimplebitmap); 
 var
@@ -657,8 +657,9 @@ const
 
 function psrealtostr(const avalue: real): string;
 begin
- result:= replacechar(formatfloat('0.###',avalue),decimalseparator,'.');
+// result:= replacechar(formatfloat('0.###',avalue),decimalseparator,'.');
           //todo: optimize
+ result:= doubletostring(avalue,-3,fsm_default,'.',#0);
 // result:= formatfloatmse(avalue,'0.000');
 end;
 
