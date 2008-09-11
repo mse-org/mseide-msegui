@@ -26,7 +26,7 @@ type
  propinfoty = record
   name: string;
   stringvalue: string;
-  widestringvalue: msestring;
+  msestringvalue: msestring;
   donottranslate: boolean;
   comment: msestring;
   variants: msestringarty;
@@ -150,7 +150,7 @@ begin
    result:= info.stringvalue;
   end;
   vastring,valstring,vawstring,vautf8string: begin
-   result:= info.widestringvalue;
+   result:= info.msestringvalue;
   end;
   else begin
    result:= '';
@@ -302,7 +302,11 @@ var
 //        stringvalue:= readstring;
 //       end;
        vastring,valstring,vaWString,vautf8string: begin
-        widestringvalue:= readwidestring;
+        {$ifdef mse_unicodestring}
+        msestringvalue:= readunicodestring;
+        {$else}
+        msestringvalue:= readwidestring;
+        {$endif}
        end;
        vaSet: begin
         readvalue;
@@ -480,14 +484,18 @@ var
         writeident(stringvalue);
        end;
        vaString,vaLString,vaWString,vautf8string: begin
-        writewidestring(widestringvalue);
+       {$ifdef mse_unicodestring}
+        writeunicodestring(msestringvalue);
+        {$else}
+        writewidestring(msestringvalue);
+        {$endif}
        end;
        (*
        vaString,vaLString:  begin
         writestring(stringvalue);
        end;
        vaWString{$ifndef FPC},vautf8string{$endif}: begin
-        writewidestring(widestringvalue);
+        writewidestring(msestringvalue);
        end;
        *)
        vaSet: begin
@@ -652,7 +660,7 @@ begin
 //     str1:= stringtopascalstring(stringvalue);
 //    end;
     vastring,valstring,vaWString,vautf8string: begin
-     str1:= stringtopascalstring(widestringvalue);
+     str1:= stringtopascalstring(msestringvalue);
     end;
     else begin
      str1:= '';
@@ -703,7 +711,7 @@ begin
 //     str1:= stringtocstring(stringvalue);
 //    end;
     vastring,valstring,vaWString,vautf8string: begin
-     str1:= stringtocstring(widestringvalue);
+     str1:= stringtocstring(msestringvalue);
     end;
     else begin
      str1:= '';
@@ -739,8 +747,8 @@ begin
      node2:= tpropinfonode(node2.fparent);
     until (node2.fparent = nil) or (node2.parent.parent = nil);
     outstream.writeln('');
-    outstream.writeln('# hash value = '+inttostr(hash(widestringvalue)));
-    outstream.writeln(str1+'='+stringtopascalstring(widestringvalue));
+    outstream.writeln('# hash value = '+inttostr(hash(msestringvalue)));
+    outstream.writeln(str1+'='+stringtopascalstring(msestringvalue));
    end
    else begin
     writefpcresourcestrings(outstream,node1);
@@ -764,7 +772,7 @@ begin
 //     stringvalue:= variants[alang];
 //    end;
     vastring,valstring,vaWString,vautf8string: begin
-     widestringvalue:= variants[alang];
+     msestringvalue:= variants[alang];
     end;
     vaint8,vaint16,vaint32: begin
      if variants[alang] <> '' then begin
@@ -822,7 +830,7 @@ begin
    vastring,valstring,vaWString,vautf8string: begin
     setlength(variants,alang);
     for int1:= 0 to alang - 1 do begin
-     variants[int1]:= widestringvalue;
+     variants[int1]:= msestringvalue;
     end;
    end;
   end;

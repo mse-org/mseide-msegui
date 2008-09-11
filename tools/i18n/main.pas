@@ -352,7 +352,7 @@ begin
     if resource then begin
      node1:= tpropinfonode.Create;
      node1.info.name:= name;
-     node1.info.widestringvalue:= value;
+     node1.info.msestringvalue:= value;
      node1.info.valuetype:= valuetype;
      node1.info.coffset:= offset;
      node1.info.clen:= len;
@@ -429,7 +429,7 @@ begin
       end;
       node2:= tpropinfonode.Create;
       node2.info.name:= name;
-      node2.info.widestringvalue:= value;
+      node2.info.msestringvalue:= value;
       node2.info.valuetype:= valuetype;
       node2.info.coffset:= offset;
       node2.info.clen:= len;

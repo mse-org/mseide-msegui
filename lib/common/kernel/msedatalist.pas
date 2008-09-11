@@ -4272,9 +4272,9 @@ procedure tansistringdatalist.compare(const l, r; var result: integer);
 begin
  result:= comparestr(ansistring(l),ansistring(r));
 end;
-
-{$ifdef FPC} {$define fpcbug4519} {$endif}
 {$define fpcbug4519read}
+(*
+{$ifdef FPC} {$define fpcbug4519} {$endif}
 
 {$ifdef fpcbug4519}
 type
@@ -4302,9 +4302,9 @@ begin
 end;
 
 {$endif}
+*)
 
 {$ifdef fpcbug4519read}
-
 function readstring4519(const reader: treader): string;
 begin
  if reader.nextvalue = vaint8 then begin
@@ -4323,10 +4323,13 @@ begin
   result:= '';
  end
  else begin
+ {$ifdef mse_unicodestring}
+  result:= reader.readunicodestring;
+ {$else}
   result:= reader.readwidestring;
+ {$endif}
  end;
 end;
-
 {$endif}
 
 procedure tansistringdatalist.readitem(const reader: treader; var value);
@@ -4340,11 +4343,11 @@ end;
 
 procedure tansistringdatalist.writeitem(const writer: twriter; var value);
 begin
- {$ifdef fpcbug4519}
- WriteString4519(writer,string(value));
- {$else}
+// {$ifdef fpcbug4519}
+// WriteString4519(writer,string(value));
+// {$else}
  writer.WriteString(string(value));
- {$endif}
+// {$endif}
 end;
 {
 function tansistringdatalist.Getasvarrec(index: integer): tvarrec;
@@ -4643,20 +4646,28 @@ end;
 
 procedure tpoorstringdatalist.readitem(const reader: treader; var value);
 begin
- {$ifdef fpcbug4519read}
+{$ifdef fpcbug4519read}
  msestring(value):= readwidestring4519(reader);
+{$else}
+ {$ifdef mse_unicodestring}
+ msestring(value):= reader.ReadunicodeString;
  {$else}
  msestring(value):= reader.ReadwideString;
  {$endif}
+{$endif}
 end;
 
 procedure tpoorstringdatalist.writeitem(const writer: twriter; var value);
 begin
- {$ifdef fpcbug4519}
- writewidestring4519(writer,msestring(value));
+// {$ifdef fpcbug4519}
+// writewidestring4519(writer,msestring(value));
+// {$else}
+ {$ifdef mse_unicodestring}
+ writer.writeunicodestring(msestring(value));
  {$else}
  writer.WritewideString(msestring(value));
  {$endif}
+// {$endif}
 end;
 
 procedure tpoorstringdatalist.loadfromstream(const stream: ttextstream);
@@ -5195,9 +5206,14 @@ begin
   doublemsestringty(value).a:= readwidestring4519(reader); 
   doublemsestringty(value).b:= readwidestring4519(reader);
  {$else}
+  {$ifdef mse_unicodestring}
+  doublemsestringty(value).a:= readunicodestring; 
+  doublemsestringty(value).b:= readunicodestring;
+  {$else}
   doublemsestringty(value).a:= readwidestring; 
   doublemsestringty(value).b:= readwidestring;
   {$endif}
+ {$endif}
   readlistend;
  end;
 end;
@@ -5206,13 +5222,18 @@ procedure tdoublemsestringdatalist.writeitem(const writer: twriter; var value);
 begin
  with writer do begin
   writelistbegin;
- {$ifdef fpcbug4519}
-  writewidestring4519(writer,doublemsestringty(value).a);
-  writewidestring4519(writer,doublemsestringty(value).b);
+// {$ifdef fpcbug4519}
+//  writewidestring4519(writer,doublemsestringty(value).a);
+//  writewidestring4519(writer,doublemsestringty(value).b);
+// {$else}
+ {$ifdef mse_unicodestring}
+  writeunicodestring(doublemsestringty(value).a);
+  writeunicodestring(doublemsestringty(value).b);
  {$else}
   writewidestring(doublemsestringty(value).a);
   writewidestring(doublemsestringty(value).b);
  {$endif}
+// {$endif}
   writelistend;
  end;
 end;
