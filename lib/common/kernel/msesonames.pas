@@ -14,7 +14,7 @@ uses
  msestrings;
 const
 {$ifdef mswindows}
- sqlite3libarray[0..0] of filenamety = ('sqlite3.dll');  
+ sqlite3lib: array[0..0] of filenamety = ('sqlite3.dll');  
  sslnames: array[0..1] of filenamety = ('ssleay32.dll','libssl32.dll');
  sslutilnames: array[0..0] of filenamety = ('libeay32.dll');
  fbembedlib: array[0..0] of filenamety = ('fbembed.dll');
@@ -34,25 +34,6 @@ const
  fbcgdslib: array[0..2] of filenamety = ('libfbclient.so','libfbclient.so',
                                          'libgds.so');
 {$endif}
-{$IFDEF Unix}
-  {$DEFINE extdecl:=cdecl}
-  const
-    gdslib = 'libgds.so';
-    fbclib = 'libfbclient.so';
-{$ENDIF}
-{$IFDEF Win32}
-  {$DEFINE extdecl:=stdcall}
-  const
-    gdslib = 'gds32.dll';
-    fbclib = 'fbclient.dll';
-    fbembedlib = 'fbembed.dll';
-{$ENDIF}
-{$IFDEF Wince}
-  {$DEFINE extdecl:=stdcall}
-  const
-    gdslib = 'gds32.dll';
-    fbclib = 'fbclient.dll';
-{$ENDIF}
 
 implementation
 end.
