@@ -1300,8 +1300,8 @@ end;
 procedure tsourcepage.checkbrackets;
 var
  mch1: msechar;
- br1: bracketkindty;
- open: boolean;
+ br1,br2: bracketkindty;
+ open,open2: boolean;
  pt1,pt2: gridcoordty;
  ar1: gridcoordarty;
 begin
@@ -1311,7 +1311,15 @@ begin
   pt1:= editpos;
   mch1:= charatpos(pt1);
   br1:= checkbracketkind(mch1,open);
-  if br1 <> bki_none then begin
+  if (br1 <> bki_none) and (pt1.col > 0) then begin
+   dec(pt1.col);
+   br2:= checkbracketkind(charatpos(pt1),open2);
+   if (br1 = bki_none) or (open <> open2) then begin
+    inc(pt1.col);
+   end
+   else begin
+    br1:= br2;
+   end;
    pt2:= matchbracket(pt1,br1,open);
   end
   else begin
