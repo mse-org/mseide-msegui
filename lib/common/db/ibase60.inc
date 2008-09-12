@@ -16,25 +16,32 @@ Var
 
 {$IFDEF Unix}
   {$DEFINE extdecl:=cdecl}
+{
   const
     gdslib = 'libgds.so';
     fbclib = 'libfbclient.so';
     fbembedlib = 'libfbembed.so';
+}
 {$ENDIF}
 {$IFDEF Win32}
   {$DEFINE extdecl:=stdcall}
+{
   const
     gdslib = 'gds32.dll';
     fbclib = 'fbclient.dll';
     fbembedlib = 'fbembed.dll';
+}
 {$ENDIF}
 {$IFDEF Wince}
   {$DEFINE extdecl:=stdcall}
+{
   const
     gdslib = 'gds32.dll';
     fbclib = 'fbclient.dll';
     fbembedlib = 'fbembed.dll';
+}
 {$ENDIF}
+
 
 type
   {  Unsigned types }
@@ -2466,7 +2473,9 @@ var IBaseLibraryHandle : TLibHandle;
 {$ENDIF}
 
 implementation
-
+uses
+ msestrings,msesys,msesonames;
+ 
 {$IFDEF LinkDynamically}
 
 ResourceString
@@ -2479,18 +2488,24 @@ var
   RefCount : integer;
   LoadedLibrary : String;
 
-Function TryInitialiseIBase60(Const LibraryName : String) : Boolean;
+Function TryInitialiseIBase60(Const LibraryNames: array of filenamety) : Boolean;
+var
+ mstr1: filenamety;
 begin
  Result:=True;
  if (RefCount = 0) then begin
-  IBaseLibraryHandle:= LoadLibrary(LibraryName);
+  try
+   IBaseLibraryHandle:= LoadLib(LibraryNames,mstr1);
+  except
+   IBaseLibraryHandle:= nilhandle
+  end;
   if IBaseLibraryHandle = nilhandle then begin
    result:= false;
    exit;
   end;
 //  inc(RefCount);
   refcount:= 2; //releasing the library is unsafe!
-  LoadedLibrary:=LibraryName;
+  LoadedLibrary:= mstr1;
   pointer(isc_attach_database) := GetProcedureAddress(IBaseLibraryHandle,'isc_attach_database');
   pointer(isc_array_gen_sdl) := GetProcedureAddress(IBaseLibraryHandle,'isc_array_gen_sdl');
   pointer(isc_array_get_slice) := GetProcedureAddress(IBaseLibraryHandle,'isc_array_get_slice');
@@ -2668,7 +2683,7 @@ begin
  else begin
 //    If (LoadedLibrary<>LibraryName) then
 //      Raise EInoutError.CreateFmt(SErrAlreadyLoaded,[LoadedLibrary]);
-  if (loadedlibrary = libraryname) then begin
+  if (loadedlibrary = mstr1) then begin
    inc(RefCount);     //mse 2006-11-23
   end;
  end;  
@@ -2686,24 +2701,26 @@ begin
  If UseEmbeddedFirebird then begin
   If Not TryInitialiseIBase60(fbembedlib) then begin
    checkloaded;
-   Raise EInOutError.CreateFmt(SErrEmbeddedFailed,[fbembedlib]);
+   Raise EInOutError.CreateFmt(SErrEmbeddedFailed,[quotelibnames(fbembedlib)]);
   end;
  end
  else begin
-  If (Not TryInitialiseIBase60(fbclib)) and
-       (Not TryInitialiseIBase60(gdslib)) then begin
+  If (Not TryInitialiseIBase60(fbcgdslib)) 
+//         and
+//       (Not TryInitialiseIBase60(gdslib)) 
+                                            then begin
    checkloaded;
-   Raise EInOutError.CreateFmt(SErrDefaultsFailed,[gdslib,fbclib]);
+   Raise EInOutError.CreateFmt(SErrDefaultsFailed,[quotelibnames(fbcgdslib)]);
   end;
  end;    
 end;
 
-Procedure InitialiseIBase60(Const LibraryName : String);
+Procedure InitialiseIBase60(Const LibraryNames : array of filenamety);
 
 begin
- If Not TryInitialiseIbase60(LibraryName) then begin
+ If Not TryInitialiseIbase60(LibraryNames) then begin
   checkloaded;
-  Raise EInOutError.CreateFmt(SErrLoadFailed,[LibraryName]);
+  Raise EInOutError.CreateFmt(SErrLoadFailed,[quotelibnames(LibraryNames)]);
  end;
 end;
 

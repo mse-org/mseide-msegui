@@ -8,7 +8,9 @@
 unit sqlite3dyn;
 
 interface
-
+uses
+ msesonames;
+ 
 {
   Automatically converted by H2Pas 0.99.16 from sqlite3.h
   The following command line parameters were used:
@@ -25,11 +27,14 @@ procedure releasesqlite3;
 
 {$PACKRECORDS C}
 const
+(*
 {$ifdef mswindows}
  sqlite3lib = 'sqlite3.dll';
 {$else}
  sqlite3lib = 'libsqlite3.so';
 {$endif}
+ moved to msesonames
+*)
 //  External_library='sqlite3';
 
   SQLITE_INTEGER = 1;   
@@ -378,16 +383,18 @@ var
 
 implementation
 uses
- sysutils,dynlibs,msesys;
+ sysutils,dynlibs,msesys,msestrings;
 var
  sqlite3libraryhandle: tlibhandle;
  refcount: integer;
   
-function tryinitialisesqlite3(const alibname: string): boolean;
+function tryinitialisesqlite3(const alibnames: array of filenamety): boolean;
+var
+ mstr1: filenamety;
 begin
  result:= true;
  if refcount = 0 then begin
-  sqlite3libraryhandle:= loadlibrary(alibname);
+  sqlite3libraryhandle:= loadlib(alibnames,mstr1);
   if sqlite3libraryhandle = nilhandle then begin
    result:= false;
    exit;
@@ -590,7 +597,7 @@ begin
      ]);
   except
    on e: exception do begin
-    e.message:= 'Library "'+alibname+'": '+e.message;
+    e.message:= 'Library "'+mstr1+'": '+e.message;
     result:= false;
     if unloadlibrary(sqlite3libraryhandle) then begin
      sqlite3libraryhandle:= nilhandle;
@@ -605,8 +612,8 @@ end;
 procedure initialisesqlite3;
 begin
  if not tryinitialisesqlite3(sqlite3lib) then begin
-  raise exception.create('Can not load SQLite3 library "'+sqlite3lib+
-             '". Check your installation."');
+  raise exception.create('Can not load SQLite3 library '+
+                quotelibnames(sqlite3lib)+'. Check your installation."');
  end;
 end;
 

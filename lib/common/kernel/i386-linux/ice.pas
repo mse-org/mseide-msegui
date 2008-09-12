@@ -2,8 +2,6 @@
 unit ice;
 interface
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
-  const
-    External_library='libICE.so';
 
 {$IFDEF FPC}
 {$PACKRECORDS C}
@@ -125,11 +123,11 @@ function geticelib: boolean;
 
 implementation
 uses
- msesys;
+ msesys,msesonames;
  
 function geticelib: boolean;
 begin
- result:= checkprocaddresses([external_library],
+ result:= checkprocaddresses(icenames,
  [
  'IceConnectionNumber',                          //0
  'IceAddConnectionWatch',                        //1

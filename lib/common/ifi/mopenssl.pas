@@ -13,6 +13,9 @@ unit mopenssl;
 
 interface
 
+uses
+ msesonames;
+(*
 const
  {$IFDEF mswindows}
  sslnames: array[0..1] of string = ('ssleay32.dll','libssl32.dll');
@@ -20,7 +23,8 @@ const
  {$ELSE}
  sslnames: array[0..0] of string = ('libssl.so');
  sslutilnames: array[0..0] of string = ('libcrypto.so');  
- {$ENDIF}
+ {$ENDIF} moved to msesonames
+*)
 
 type
   SslPtr = Pointer;

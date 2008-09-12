@@ -200,14 +200,20 @@ function getcommandlinearguments: stringarty;
 function getcommandlineargument(const index: integer): string;
 procedure deletecommandlineargument(const index: integer);
                 //index 1..argumentcount-1, no action otherwise
-procedure getprocaddresses(const lib: tlibhandle; const anames: array of string;
+
+function loadlib(const libnames: array of filenamety; 
+                                      out libname: filenamety): tlibhandle;
+procedure getprocaddresses(const lib: tlibhandle;
+                             const anames: array of string;
                              const adest: array of ppointer); overload;
-function getprocaddresses(const libnames: array of string; 
+function getprocaddresses(const libnames: array of filenamety; 
                              const anames: array of string; 
                              const adest: array of ppointer): tlibhandle; overload;
-function checkprocaddresses(const libnames: array of string; 
+function checkprocaddresses(const libnames: array of filenamety; 
                              const anames: array of string; 
                              const adest: array of ppointer): boolean;
+function quotelibnames(const libnames: array of filenamety): msestring;
+
 {$ifdef FPC}
 function getexceptiontext(obj: tobject; addr: pointer; framecount: longint;
                                      frames: ppointer): msestring;
@@ -229,7 +235,8 @@ Procedure CatchUnhandledException (Obj : TObject; Addr: Pointer;
  {$endif}
 {$endif}
 
-procedure getprocaddresses(const lib: tlibhandle; const anames: array of string; 
+procedure getprocaddresses(const lib: tlibhandle; 
+                             const anames: array of string; 
                              const adest: array of ppointer);
 var
  int1: integer;
@@ -249,12 +256,13 @@ begin
  end;
 end;
 
-function loadlib(const libnames: array of string): tlibhandle;
+function loadlib(const libnames: array of filenamety;
+                           out libname: filenamety): tlibhandle;
 var
  int1: integer;
- str1: string;
 begin
  result:= 0;
+ libname:= '';
  for int1:= 0 to high(libnames) do begin
  {$ifdef FPC}
   result:= loadlibrary(libnames[int1]);
@@ -262,26 +270,26 @@ begin
   result:= loadlibrary(pansichar(libnames[int1]));
  {$endif}
   if result <> 0 then begin
+   libname:= libnames[int1];
    break;
   end;
  end;
  if result = 0 then begin
-  str1:= '';
-  for int1:= 0 to high(libnames) do begin
-   str1:= str1+'"'+libnames[int1]+'" ';
-  end;
-  raise exception.create('Library '+str1+'not found.');
+  raise exception.create('Library '+quotelibnames(libnames)+' not found.');
  end;
 end;
 
-function getprocaddresses(const libnames: array of string; const anames: array of string; 
+function getprocaddresses(const libnames: array of filenamety;
+                             const anames: array of string; 
                              const adest: array of ppointer): tlibhandle; overload;
+var
+ mstr1: filenamety;
 begin
- result:= loadlib(libnames);
+ result:= loadlib(libnames,mstr1);
  getprocaddresses(result,anames,adest);
 end;
 
-function checkprocaddresses(const libnames: array of string; 
+function checkprocaddresses(const libnames: array of filenamety; 
                              const anames: array of string; 
                              const adest: array of ppointer): boolean;
 begin
@@ -290,6 +298,19 @@ begin
   getprocaddresses(libnames,anames,adest);
  except
   result:= false;
+ end;
+end;
+
+function quotelibnames(const libnames: array of filenamety): msestring;
+var 
+ int1: integer;
+begin
+ result:= '';
+ for int1:= 0 to high(libnames) do begin
+  result:= result+'"'+libnames[int1]+'",';
+ end;  
+ if length(result) > 0 then begin
+  setlength(result,length(result)-1);
  end;
 end;
 

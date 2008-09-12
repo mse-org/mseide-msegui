@@ -2,8 +2,6 @@
 unit sm;
 interface
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
-  const
-    External_library='libSM.so';
 
 {$IFDEF FPC}
 {$PACKRECORDS C}
@@ -172,11 +170,11 @@ function getsmlib: boolean;
               
 implementation
 uses
- msesys;
+ msesys,msesonames;
 
 function getsmlib: boolean;
 begin
- result:= checkprocaddresses([external_library],
+ result:= checkprocaddresses(smnames,
  [
  'SmcOpenConnection',                         //0
  'SmcCloseConnection',                        //1

@@ -479,7 +479,7 @@ implementation
 
 uses
  msebits,msekeyboard,sysutils,msesysutils,msefileutils,msedatalist
- {$ifdef with_sm},sm,ice{$endif};
+ {$ifdef with_sm},sm,ice{$endif},msesonames;
 
 const
  highresfontshift = 6;  //64
@@ -3054,7 +3054,7 @@ begin
 {$ifndef staticxft}
  result:= false;
  try
-  getprocaddresses(['libfontconfig.so','libfontconfig.so.1'],
+  getprocaddresses(fontconfignames,
      [
      'FcPatternDestroy',         //0
      'FcFontSetDestroy',         //1
@@ -3115,7 +3115,7 @@ begin
      {$ifndef FPC}@{$endif}@FcPatternAddLangSet,       //26
      {$ifndef FPC}@{$endif}@FcPatternGetString         //27
      ]);
-  getprocaddresses(['libXft.so','libXft.so.2'],[
+  getprocaddresses(xftnames,[
     'XftDrawDestroy',            //0
     'XftDrawSetClipRectangles',  //1
     'XftDrawCreate',             //2 
@@ -3192,7 +3192,7 @@ function getxrenderlib: boolean;
 begin
  result:= false;
  try
-  getprocaddresses(['libXrender.so','libXrender.so.1'],[
+  getprocaddresses(xrendernames,[
     'XRenderSetPictureClipRectangles',  //0
     'XRenderCreatePicture',             //1
     'XRenderFillRectangle',             //2
