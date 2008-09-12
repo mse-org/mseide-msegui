@@ -1314,7 +1314,7 @@ begin
   if (br1 <> bki_none) and (pt1.col > 0) then begin
    dec(pt1.col);
    br2:= checkbracketkind(charatpos(pt1),open2);
-   if (br1 = bki_none) or (open <> open2) then begin
+   if (br2 = bki_none) or (open <> open2) then begin
     inc(pt1.col);
    end
    else begin
