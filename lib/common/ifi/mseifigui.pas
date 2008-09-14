@@ -168,6 +168,11 @@ begin
      tkWString: begin
       setwidestrprop(fwidget,aproperty,asmsestring);
      end;
+    {$ifdef mse_unicodestring}
+     tkUString: begin
+      setunicodestrprop(fwidget,aproperty,asmsestring);
+     end;
+    {$endif}
      tkSString,tkLString,tkAString: begin
       setstrprop(fwidget,aproperty,asstring);
      end;
@@ -189,6 +194,11 @@ begin
    tkFloat: begin
     sendvalue(aproperty^.name,double(getfloatprop(fwidget,aproperty)));
    end;
+  {$ifdef mse_unicodestring}
+   tkUString: begin
+    sendvalue(aproperty^.name,getunicodestrprop(fwidget,aproperty));
+   end;
+  {$endif}
    tkWString: begin
     sendvalue(aproperty^.name,getwidestrprop(fwidget,aproperty));
    end;
