@@ -151,7 +151,7 @@ uses
  main,make,actionsmodule_mfm,msemenus,sourceform,msedesigner,msetypes,msefiledialog,
  projectoptionsform,findinfileform,breakpointsform,watchform,selecteditpageform,
  msewidgets,disassform,printform,msegdbutils,mseintegerenter,msesettings,
- mseguiglob,componentstore;
+ mseguiglob,componentstore,cpuform;
 
 procedure configureide;
 begin
@@ -402,6 +402,7 @@ procedure tactionsmo.continueactonexecute(const sender: tobject);
 begin
  with mainfo do begin
   if checkremake(sc_continue) then begin
+   cpufo.beforecontinue;
    gdb.continue;
   end;
  end;

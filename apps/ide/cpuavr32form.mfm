@@ -1,10 +1,10 @@
 inherited cpuavr32fo: tcpuavr32fo
   bounds_x = 174
   bounds_y = 158
-  bounds_cx = 284
-  bounds_cy = 249
-  container.bounds_cx = 274
-  container.bounds_cy = 249
+  bounds_cx = 267
+  bounds_cy = 257
+  container.bounds_cx = 257
+  container.bounds_cy = 257
   icon.image = {
     00000000020000001800000018000000C0020000000000000000000000000000
     0000000000000000000000000000000000000000804CF09180808016804CF002
@@ -30,14 +30,14 @@ inherited cpuavr32fo: tcpuavr32fo
     00040001101010010004000178787801E0E0E003A0A4A0010000000550545001
     E0E0E001F8FCF801804CF00280808001E0E0E005D0D0D001B8B8B801D0D4D001
     E0E0E00CF8FCF801804CF002F8FCF816804CF0610000000800000008000000BF
-    000000080000000000000008FEFF7F03FEFF7FC0FEFF7F00FEFF7F08FEFF7FBF
-    FEFF7F08FEFF7F08FEFF7F08FEFF7FBFFEFF7F08FEFF7F00FEFF7F03FEFF7F40
+    000000080000000000000008FEFF7F01FEFF7FC0FEFF7F00FEFF7F08FEFF7FBF
+    FEFF7F08FEFF7F08FEFF7F08FEFF7FBFFEFF7F08FEFF7F00FEFF7F01FEFF7F40
     FEFF7F0000000000000000BF0000000000000008
   }
   left = 2
   moduleclassname = 'tcpufo'
   inherited on: tbooleanedit
-    bounds_x = 127
+    bounds_x = 184
     bounds_y = 204
   end
   object tlayouter1: tlayouter[1]
@@ -48,15 +48,15 @@ inherited cpuavr32fo: tcpuavr32fo
     frame.dummy = 0
     taborder = 22
     optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
+    font.name = 'stf_default'
+    font.xscale =  1.0000000000000000E+0000
+    font.dummy = 0
     linkright = tlayouter2
     linkbottom = exceptstack
     dist_right = 3
     dist_bottom = 5
     optionslayout = [lao_placey]
     place_maxdist = 0
-    font.name = 'stf_default'
-    font.xscale =  1.0000000000000000E+0000
-    font.dummy = 0
     object r1: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
       bounds_x = 0
@@ -317,13 +317,14 @@ inherited cpuavr32fo: tcpuavr32fo
     frame.dummy = 0
     taborder = 23
     optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
+    font.name = 'stf_default'
+    font.xscale =  1.0000000000000000E+0000
+    font.dummy = 0
     linkbottom = on
     dist_bottom = 3
     optionslayout = [lao_placey]
     place_maxdist = 0
-    font.name = 'stf_default'
-    font.xscale =  1.0000000000000000E+0000
-    font.dummy = 0
+    onafterlayout = afterla
     object r6: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
       bounds_x = 0
@@ -813,7 +814,7 @@ inherited cpuavr32fo: tcpuavr32fo
     taborder = 16
     onsetvalue = flagssetvalue
   end
-  object tbooleanedit13: tbooleanedit[15]
+  object gm: tbooleanedit[15]
     Tag = 16
     bounds_x = 137
     bounds_y = 0
@@ -1016,9 +1017,26 @@ inherited cpuavr32fo: tcpuavr32fo
     bounds_y = 227
     bounds_cx = 128
     bounds_cy = 21
-    taborder = 24
+    taborder = 25
     state = [as_disabled, as_localdisabled, as_localcaption, as_localonexecute]
     caption = 'Check Exceptstack'
     onexecute = checkexcept
+  end
+  object irqoff: tbooleanedit[25]
+    bounds_x = 121
+    bounds_y = 204
+    bounds_cx = 52
+    bounds_cy = 17
+    frame.caption = 'IRQoff'
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      2
+      39
+      2
+    )
+    taborder = 24
+    hint = 'Set global interrupt mask while stepping'
+    onsetvalue = irqoffset
   end
 end

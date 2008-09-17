@@ -40,7 +40,8 @@ type
    procedure doflagonchange(const sender: TObject);
    function internalrefresh: boolean; virtual;
   public
-   procedure refresh;
+   procedure refresh; virtual;
+   procedure beforecontinue; virtual;
   end;
 
 var
@@ -224,6 +225,11 @@ begin
    end;
   end;
  end;
+end;
+
+procedure tcpufo.beforecontinue;
+begin
+ //dummy
 end;
 
 end.

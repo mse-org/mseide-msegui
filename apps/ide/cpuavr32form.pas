@@ -38,7 +38,7 @@ type
    tbooleanedit10: tbooleanedit;
    tbooleanedit11: tbooleanedit;
    tbooleanedit12: tbooleanedit;
-   tbooleanedit13: tbooleanedit;
+   gm: tbooleanedit;
    tbooleanedit14: tbooleanedit;
    tbooleanedit15: tbooleanedit;
    tbooleanedit20: tbooleanedit;
@@ -48,6 +48,7 @@ type
    tbooleanedit16: tbooleanedit;
    sr: tintegeredit;
    exceptstack: tbutton;
+   irqoff: tbooleanedit;
    procedure regsetvalue(const sender: TObject; var avalue: Integer;
                    var accept: Boolean);
    procedure flagssetvalue(const sender: TObject; var avalue: Boolean;
@@ -55,8 +56,18 @@ type
    procedure flagonchange(const sender: TObject);
    function internalrefresh: boolean; override;
    procedure checkexcept(const sender: TObject);
+   procedure irqoffset(const sender: TObject; var avalue: Boolean;
+                   var accept: Boolean);
+   procedure afterla(const sender: tlayouter);
+  private
+   fgmbefore: boolean;
+  protected
+   procedure doirqoff;
+   procedure irqrestore;
   public
    constructor create(aowner: tcomponent); override;
+   procedure refresh; override;
+   procedure beforecontinue; override;
  end;
  
 implementation
@@ -64,6 +75,7 @@ uses
  cpuavr32form_mfm,main,msegdbutils,sourceform,mseformatstr,sysutils;
 const
  modebits =   $01c00000;
+ gmmask =     $00010000;
  exceptmode = $00800000; //irq level 0
 { tcpuavr32fo }
  
@@ -158,6 +170,60 @@ begin
   end;
   showmessage(mstr2,'Exception return');
  end;
+end;
+
+procedure tcpuavr32fo.doirqoff;
+begin
+ fgmbefore:= gm.value;
+ if not gm.value then begin
+  gm.value:= true;
+  gm.checkvalue;
+ end;
+end;
+
+procedure tcpuavr32fo.irqrestore;
+begin
+ if gm.value <> fgmbefore then begin
+  gm.value:= fgmbefore;
+  gm.checkvalue;
+ end;
+end;
+
+procedure tcpuavr32fo.refresh;
+begin
+ if irqoff.value and mainfo.gdb.cancommand then begin
+  inherited;
+  doirqoff;
+ end
+ else begin
+  inherited;
+ end;
+end;
+
+procedure tcpuavr32fo.beforecontinue;
+begin
+ if irqoff.value and mainfo.gdb.cancommand then begin
+  irqrestore;
+ end;
+ inherited;
+end;
+
+procedure tcpuavr32fo.irqoffset(const sender: TObject; var avalue: Boolean;
+               var accept: Boolean);
+begin
+ if mainfo.gdb.cancommand then begin
+  if avalue then begin
+   doirqoff;
+  end
+  else begin
+   irqrestore;
+  end;
+ end;
+end;
+
+procedure tcpuavr32fo.afterla(const sender: tlayouter);
+begin
+ aligny(wam_center,[on,irqoff]);
 end;
 
 end.
