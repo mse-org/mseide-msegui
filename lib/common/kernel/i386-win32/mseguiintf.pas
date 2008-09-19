@@ -4317,15 +4317,19 @@ begin
   windowstyleex:= 0;
   if wo_popup in options then begin
    windowstyle:= ws_popup;
-   windowstyleex:= 0{ws_ex_topmost};
+//   windowstyleex:= 0{ws_ex_topmost};
   end
   else begin
    if wo_message in options then begin
     windowstyle:= ws_overlappedwindow;
-    windowstyleex:= ws_ex_toolwindow;
+    windowstyleex:= windowstyleex or ws_ex_toolwindow;
+//    showwindow(applicationwindow,sw_hide); does not work
    end
    else begin
     windowstyle:= ws_overlappedwindow;
+    if wo_taskbar in options then begin
+     windowstyleex:= windowstyleex or ws_ex_appwindow;
+    end;
    end;
   end;
   if pos = wp_default then begin

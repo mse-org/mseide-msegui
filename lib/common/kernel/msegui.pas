@@ -826,6 +826,7 @@ type
  twindow = class;
 
  windowoptionty = (wo_popup,wo_message,wo_buttonendmodal,wo_groupleader,
+                   wo_taskbar, //win32 only
                    wo_windowcentermessage); //showmessage centered in window
  windowoptionsty = set of windowoptionty;
 
