@@ -2442,6 +2442,9 @@ var
  visiblemask: linevisiblesty;
  
  procedure checkinit(const ainfo: tablineinfoty);
+ var
+  rect1: rectty;
+  reppage1: tcustomreportpage;
  begin
   if not bo1 then begin
    bo1:= true;
@@ -2449,6 +2452,18 @@ var
    acanvas.move(makepoint(adest.x,0));
    acanvas.addcliprect(inflaterect(makerect(nullpoint,fband.size),1000));
                    //allow line drawing everywhere
+   if not fband.rendering then begin
+    reppage1:= fband.reppage;
+    if reppage1 <> nil then begin
+     rect1:= reppage1.clippedpaintrect;
+     translateclientpoint1(rect1.pos,reppage1,fband);
+    end
+    else begin
+     rect1:= fband.paintsizerect;
+    end;
+    rect1.x:= rect1.x - adest.x;
+    acanvas.intersectcliprect(rect1); //limit line drawing area
+   end;
   end;
   with ainfo do begin
    acanvas.linewidthmm:= widthmm;

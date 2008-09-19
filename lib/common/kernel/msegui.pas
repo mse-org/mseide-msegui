@@ -1387,6 +1387,7 @@ type
    procedure setanchordwidgetsize(const asize: sizety);
                 //checks bottom-right anchors
    function widgetsizerect: rectty;          //pos = nullpoint
+   function paintsizerect: rectty;           //pos = nullpoint
    function clientrect: rectty;              //origin = paintrect.pos
    procedure changeclientsize(const delta: sizety); //asynchronous
    property clientsize: sizety read getclientsize write setclientsize;
@@ -6851,6 +6852,12 @@ function twidget.widgetsizerect: rectty;          //pos = nullpoint
 begin
  result.pos:= nullpoint;
  result.size:= fwidgetrect.size;
+end;
+
+function twidget.paintsizerect: rectty;          //pos = nullpoint
+begin
+ result.pos:= nullpoint;
+ result.size:= paintsize;
 end;
 
 function twidget.clientrect: rectty;
