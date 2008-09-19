@@ -980,7 +980,9 @@ end;
 function gui_minimizeapplication: guierrorty;
 begin
  result:= gue_ok;
- showwindow(applicationwindow,sw_minimize);
+ if iswindowvisible(applicationwindow) then begin
+  showwindow(applicationwindow,sw_minimize);
+ end;
 end;
 
 const
@@ -4323,12 +4325,12 @@ begin
    if wo_message in options then begin
     windowstyle:= ws_overlappedwindow;
     windowstyleex:= windowstyleex or ws_ex_toolwindow;
-//    showwindow(applicationwindow,sw_hide); does not work
    end
    else begin
     windowstyle:= ws_overlappedwindow;
     if wo_taskbar in options then begin
      windowstyleex:= windowstyleex or ws_ex_appwindow;
+     showwindow(applicationwindow,sw_hide);
     end;
    end;
   end;
