@@ -58,7 +58,9 @@ begin
  if (aframenr >= 0) and (aframenr <= high(frameinfo)) then begin
   grid.row:= aframenr;
   with frameinfo[aframenr] do begin
-   result:= sourcefo.showsourceline(objpath(filename),line-1,0,true) <> nil;
+   if filename <> '' then begin
+    result:= sourcefo.showsourceline(objpath(filename),line-1,0,true) <> nil;
+   end;
   end;
  end
  else begin

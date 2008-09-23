@@ -557,7 +557,10 @@ end;
 
 function objpath(const aname: filenamety): filenamety;
 begin
- result:= filepath(projectoptions.texp.makedir,aname);
+ result:= '';
+ if aname <> '' then begin
+  result:= filepath(projectoptions.texp.makedir,aname);
+ end;
 end;
 
 function getprojectmacros: macroinfoarty;
