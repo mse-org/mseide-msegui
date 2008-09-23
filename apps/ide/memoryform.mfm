@@ -22,6 +22,9 @@ object memoryfo: tmemoryfo
     bounds_cy = 314
     frame.dummy = 0
     anchors = [an_top, an_bottom]
+    font.name = 'stf_fixed'
+    font.xscale =  1.0000000000000000E+0000
+    font.dummy = 0
     datacols.count = 16
     datacols.width = 20
     datacols.options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
@@ -30,176 +33,176 @@ object memoryfo: tmemoryfo
         width = 20
         options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         datalist.data = (
-          0
-          0
-          0
-          0
-          0
+          ''
+          ''
+          ''
+          ''
+          ''
         )
       end    
       item
         width = 20
         options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         datalist.data = (
-          0
-          0
-          0
-          0
-          0
+          ''
+          ''
+          ''
+          ''
+          ''
         )
       end    
       item
         width = 20
         options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         datalist.data = (
-          0
-          0
-          0
-          0
-          0
+          ''
+          ''
+          ''
+          ''
+          ''
         )
       end    
       item
         width = 20
         options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         datalist.data = (
-          0
-          0
-          0
-          0
-          0
+          ''
+          ''
+          ''
+          ''
+          ''
         )
       end    
       item
         width = 20
         options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         datalist.data = (
-          0
-          0
-          0
-          0
-          0
+          ''
+          ''
+          ''
+          ''
+          ''
         )
       end    
       item
         width = 20
         options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         datalist.data = (
-          0
-          0
-          0
-          0
-          0
+          ''
+          ''
+          ''
+          ''
+          ''
         )
       end    
       item
         width = 20
         options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         datalist.data = (
-          0
-          0
-          0
-          0
-          0
+          ''
+          ''
+          ''
+          ''
+          ''
         )
       end    
       item
         width = 20
         options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         datalist.data = (
-          0
-          0
-          0
-          0
-          0
+          ''
+          ''
+          ''
+          ''
+          ''
         )
       end    
       item
         width = 20
         options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         datalist.data = (
-          0
-          0
-          0
-          0
-          0
+          ''
+          ''
+          ''
+          ''
+          ''
         )
       end    
       item
         width = 20
         options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         datalist.data = (
-          0
-          0
-          0
-          0
-          0
+          ''
+          ''
+          ''
+          ''
+          ''
         )
       end    
       item
         width = 20
         options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         datalist.data = (
-          0
-          0
-          0
-          0
-          0
+          ''
+          ''
+          ''
+          ''
+          ''
         )
       end    
       item
         width = 20
         options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         datalist.data = (
-          0
-          0
-          0
-          0
-          0
+          ''
+          ''
+          ''
+          ''
+          ''
         )
       end    
       item
         width = 20
         options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         datalist.data = (
-          0
-          0
-          0
-          0
-          0
+          ''
+          ''
+          ''
+          ''
+          ''
         )
       end    
       item
         width = 20
         options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         datalist.data = (
-          0
-          0
-          0
-          0
-          0
+          ''
+          ''
+          ''
+          ''
+          ''
         )
       end    
       item
         width = 20
         options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         datalist.data = (
-          0
-          0
-          0
-          0
-          0
+          ''
+          ''
+          ''
+          ''
+          ''
         )
       end    
       item
         width = 20
         options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         datalist.data = (
-          0
-          0
-          0
-          0
-          0
+          ''
+          ''
+          ''
+          ''
+          ''
         )
       end>
     fixcols.count = 1
@@ -284,6 +287,7 @@ object memoryfo: tmemoryfo
     taborder = 1
     ondataentered = adent
     base = nb_hex
+    max = -1
     reffontheight = 15
   end
   object cnt: tintegeredit
@@ -306,8 +310,8 @@ object memoryfo: tmemoryfo
     reffontheight = 15
   end
   object memon: tbooleanedit
-    bounds_x = 256
-    bounds_y = 14
+    bounds_x = 352
+    bounds_y = 10
     bounds_cx = 84
     bounds_cy = 17
     frame.caption = 'Memory on'
@@ -320,5 +324,35 @@ object memoryfo: tmemoryfo
     )
     taborder = 3
     ondataentered = adent
+  end
+  object bitwidth: tenumedit
+    bounds_x = 248
+    bounds_y = 8
+    bounds_cx = 90
+    bounds_cy = 21
+    frame.caption = 'Width'
+    frame.captionpos = cp_right
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      0
+      38
+      0
+    )
+    taborder = 4
+    textflags = [tf_xcentered, tf_ycentered, tf_noselect]
+    ondataentered = updatelayout
+    value = 0
+    dropdown.cols.count = 1
+    dropdown.cols.items = <    
+      item
+        data = (
+          '8'
+          '16'
+          '32'
+        )
+      end>
+    dropdown.itemindex = 0
+    reffontheight = 15
   end
 end
