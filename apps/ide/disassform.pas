@@ -146,7 +146,7 @@ end;
 
 procedure tdisassfo.internalrefresh;
 begin
- if visible and gdb.cancommand then begin
+ if isvisible and gdb.cancommand then begin
   grid.rowcount:= 0;
   addlines(faddress,grid.rowsperpage);
  end;

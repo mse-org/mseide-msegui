@@ -72,7 +72,9 @@ type
  
 implementation
 uses
- cpuavr32form_mfm,main,msegdbutils,sourceform,mseformatstr,sysutils;
+ cpuavr32form_mfm,main,msegdbutils,sourceform,mseformatstr,sysutils,
+ disassform;
+ 
 const
  modebits =   $01c00000;
  gmmask =     $00010000;
@@ -140,35 +142,62 @@ begin
 end;
 
 procedure tcpuavr32fo.checkexcept(const sender: TObject);
-var
- lwo1: longword;
- filename: filenamety;
- line: integer;
- start,stop: cardinal;
- mstr1,mstr2: msestring;
- bo1: boolean;
- str1: string;
-begin
- with mainfo.gdb do begin
-  if readmemorylongword(sp.value+4,lwo1) = gdb_ok then begin
-//   selectstackpointer(sp.value-8*4);
-   mstr2:= '';
-   bo1:= infoline(lwo1,filename,line,start,stop) = gdb_ok;
+
+ procedure locateframe(const address: longword);
+ var
+  bo1: boolean;
+  filename: filenamety;
+  line: integer;
+  start,stop: cardinal;
+  str1: string;
+  mstr1: msestring;
+ begin
+  disassfo.refresh(address);
+  mstr1:= '';
+  with mainfo.gdb do begin
+   bo1:= infoline(address,filename,line,start,stop) = gdb_ok;
    if bo1 then begin
-    if sourcefo.showsourceline(filename,line-1,0,true) <> nil then begin
+    if sourcefo.showsourceline(filename,line-1,0,false) <> nil then begin
      exit;
     end;
-    mstr2:= filename+':'+inttostr(line);
+    mstr1:= filename+':'+inttostr(line);
    end;
-   str1:= hextostr(lwo1,8);
+   str1:= hextostr(address,8);
    if infosymbol('*0x'+str1,mstr1) = gdb_ok then begin
-    mstr2:= mstr2+lineend+mstr1;
+    mstr1:= mstr1+lineend+mstr1;
    end
    else begin
-    mstr2:= mstr2+lineend+'Return address: '+str1;
+    mstr1:= mstr1+lineend+'Return address: '+str1;
    end;
   end;
-  showmessage(mstr2,'Exception return');
+  showmessage(mstr1,'Exception return');
+ end;
+
+var
+ lwo1,lwo2,lwo3,lwo4,framead: longword;
+begin
+ with mainfo.gdb do begin
+  if (getframeaddress(framead) = gdb_ok) then begin
+   if readmemorylongword(framead+4,lwo1) = gdb_ok then begin
+                                 //pc
+//   setregistervalue('pc',lwo1);
+    if readmemorylongword(framead,lwo2) = gdb_ok then begin
+                                  //sr
+     lwo4:= sr.value;             //backup
+     if setsystemregister(0,lwo2) = gdb_ok then begin
+                                  //for sp_app access
+ //     if getregistervalue('sp',longint(lwo3)) = gdb_ok then begin
+      if (getregistervalue('sp',longint(lwo3)) = gdb_ok) then begin
+       if selectstackpointer(lwo3) = gdb_ok then begin
+        mainfo.refreshframe;       
+       end;
+      end;
+     end;
+     setsystemregister(0,lwo4); //restore
+    end;
+   end;
+   locateframe(lwo1);
+  end;
  end;
 end;
 

@@ -2,36 +2,59 @@ object memoryfo: tmemoryfo
   optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
   bounds_x = 100
   bounds_y = 100
-  bounds_cx = 445
+  bounds_cx = 453
   bounds_cy = 354
+  frame.grip_size = 10
+  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton, go_backgroundbutton]
+  frame.dummy = 0
   taborder = 1
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
   container.bounds_x = 0
   container.bounds_y = 0
-  container.bounds_cx = 445
+  container.bounds_cx = 443
   container.bounds_cy = 354
   container.frame.dummy = 0
-  caption = 'Memory, not finished!'
+  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_cansize, od_canfloat, od_candock, od_proportional, od_propsize]
+  statfile = mainfo.projectstatfile
+  caption = 'Memory'
+  onshow = formshow
   moduleclassname = 'tdockform'
   object grid: tstringgrid
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 40
-    bounds_cx = 445
+    bounds_cx = 443
     bounds_cy = 314
     frame.dummy = 0
     anchors = [an_top, an_bottom]
+    taborder = 4
     font.name = 'stf_fixed'
     font.xscale =  1.0000000000000000E+0000
     font.dummy = 0
     datacols.count = 16
     datacols.width = 20
-    datacols.options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+    datacols.textflags = [tf_xcentered, tf_ycentered, tf_noselect]
+    datacols.optionsedit = [scoe_undoonesc, scoe_forcereturncheckvalue, scoe_eatreturn, scoe_autoselect, scoe_autoselectonfirstclick]
     datacols.items = <    
       item
         width = 20
-        options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        textflags = [tf_xcentered, tf_ycentered, tf_noselect]
+        optionsedit = [scoe_undoonesc, scoe_forcereturncheckvalue, scoe_eatreturn, scoe_autoselect, scoe_autoselectonfirstclick]
+        datalist.data = (
+          ''
+          ''
+          ''
+          ''
+          ''
+        )
+        onsetvalue = cellsetvalue
+        ondataentered = adent
+      end    
+      item
+        width = 20
+        textflags = [tf_xcentered, tf_ycentered, tf_noselect]
+        optionsedit = [scoe_undoonesc, scoe_forcereturncheckvalue, scoe_eatreturn, scoe_autoselect, scoe_autoselectonfirstclick]
         datalist.data = (
           ''
           ''
@@ -42,7 +65,8 @@ object memoryfo: tmemoryfo
       end    
       item
         width = 20
-        options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        textflags = [tf_xcentered, tf_ycentered, tf_noselect]
+        optionsedit = [scoe_undoonesc, scoe_forcereturncheckvalue, scoe_eatreturn, scoe_autoselect, scoe_autoselectonfirstclick]
         datalist.data = (
           ''
           ''
@@ -53,7 +77,8 @@ object memoryfo: tmemoryfo
       end    
       item
         width = 20
-        options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        textflags = [tf_xcentered, tf_ycentered, tf_noselect]
+        optionsedit = [scoe_undoonesc, scoe_forcereturncheckvalue, scoe_eatreturn, scoe_autoselect, scoe_autoselectonfirstclick]
         datalist.data = (
           ''
           ''
@@ -64,7 +89,8 @@ object memoryfo: tmemoryfo
       end    
       item
         width = 20
-        options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        textflags = [tf_xcentered, tf_ycentered, tf_noselect]
+        optionsedit = [scoe_undoonesc, scoe_forcereturncheckvalue, scoe_eatreturn, scoe_autoselect, scoe_autoselectonfirstclick]
         datalist.data = (
           ''
           ''
@@ -75,7 +101,8 @@ object memoryfo: tmemoryfo
       end    
       item
         width = 20
-        options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        textflags = [tf_xcentered, tf_ycentered, tf_noselect]
+        optionsedit = [scoe_undoonesc, scoe_forcereturncheckvalue, scoe_eatreturn, scoe_autoselect, scoe_autoselectonfirstclick]
         datalist.data = (
           ''
           ''
@@ -86,7 +113,8 @@ object memoryfo: tmemoryfo
       end    
       item
         width = 20
-        options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        textflags = [tf_xcentered, tf_ycentered, tf_noselect]
+        optionsedit = [scoe_undoonesc, scoe_forcereturncheckvalue, scoe_eatreturn, scoe_autoselect, scoe_autoselectonfirstclick]
         datalist.data = (
           ''
           ''
@@ -97,7 +125,8 @@ object memoryfo: tmemoryfo
       end    
       item
         width = 20
-        options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        textflags = [tf_xcentered, tf_ycentered, tf_noselect]
+        optionsedit = [scoe_undoonesc, scoe_forcereturncheckvalue, scoe_eatreturn, scoe_autoselect, scoe_autoselectonfirstclick]
         datalist.data = (
           ''
           ''
@@ -108,7 +137,8 @@ object memoryfo: tmemoryfo
       end    
       item
         width = 20
-        options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        textflags = [tf_xcentered, tf_ycentered, tf_noselect]
+        optionsedit = [scoe_undoonesc, scoe_forcereturncheckvalue, scoe_eatreturn, scoe_autoselect, scoe_autoselectonfirstclick]
         datalist.data = (
           ''
           ''
@@ -119,7 +149,8 @@ object memoryfo: tmemoryfo
       end    
       item
         width = 20
-        options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        textflags = [tf_xcentered, tf_ycentered, tf_noselect]
+        optionsedit = [scoe_undoonesc, scoe_forcereturncheckvalue, scoe_eatreturn, scoe_autoselect, scoe_autoselectonfirstclick]
         datalist.data = (
           ''
           ''
@@ -130,7 +161,8 @@ object memoryfo: tmemoryfo
       end    
       item
         width = 20
-        options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        textflags = [tf_xcentered, tf_ycentered, tf_noselect]
+        optionsedit = [scoe_undoonesc, scoe_forcereturncheckvalue, scoe_eatreturn, scoe_autoselect, scoe_autoselectonfirstclick]
         datalist.data = (
           ''
           ''
@@ -141,7 +173,8 @@ object memoryfo: tmemoryfo
       end    
       item
         width = 20
-        options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        textflags = [tf_xcentered, tf_ycentered, tf_noselect]
+        optionsedit = [scoe_undoonesc, scoe_forcereturncheckvalue, scoe_eatreturn, scoe_autoselect, scoe_autoselectonfirstclick]
         datalist.data = (
           ''
           ''
@@ -152,7 +185,8 @@ object memoryfo: tmemoryfo
       end    
       item
         width = 20
-        options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        textflags = [tf_xcentered, tf_ycentered, tf_noselect]
+        optionsedit = [scoe_undoonesc, scoe_forcereturncheckvalue, scoe_eatreturn, scoe_autoselect, scoe_autoselectonfirstclick]
         datalist.data = (
           ''
           ''
@@ -163,7 +197,8 @@ object memoryfo: tmemoryfo
       end    
       item
         width = 20
-        options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        textflags = [tf_xcentered, tf_ycentered, tf_noselect]
+        optionsedit = [scoe_undoonesc, scoe_forcereturncheckvalue, scoe_eatreturn, scoe_autoselect, scoe_autoselectonfirstclick]
         datalist.data = (
           ''
           ''
@@ -174,7 +209,8 @@ object memoryfo: tmemoryfo
       end    
       item
         width = 20
-        options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        textflags = [tf_xcentered, tf_ycentered, tf_noselect]
+        optionsedit = [scoe_undoonesc, scoe_forcereturncheckvalue, scoe_eatreturn, scoe_autoselect, scoe_autoselectonfirstclick]
         datalist.data = (
           ''
           ''
@@ -185,18 +221,8 @@ object memoryfo: tmemoryfo
       end    
       item
         width = 20
-        options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
-        datalist.data = (
-          ''
-          ''
-          ''
-          ''
-          ''
-        )
-      end    
-      item
-        width = 20
-        options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        textflags = [tf_xcentered, tf_ycentered, tf_noselect]
+        optionsedit = [scoe_undoonesc, scoe_forcereturncheckvalue, scoe_eatreturn, scoe_autoselect, scoe_autoselectonfirstclick]
         datalist.data = (
           ''
           ''
@@ -284,7 +310,6 @@ object memoryfo: tmemoryfo
       27
       0
     )
-    taborder = 1
     ondataentered = adent
     base = nb_hex
     max = -1
@@ -304,7 +329,7 @@ object memoryfo: tmemoryfo
       24
       0
     )
-    taborder = 2
+    taborder = 1
     ondataentered = adent
     base = nb_hex
     reffontheight = 15
@@ -339,7 +364,7 @@ object memoryfo: tmemoryfo
       38
       0
     )
-    taborder = 4
+    taborder = 2
     textflags = [tf_xcentered, tf_ycentered, tf_noselect]
     ondataentered = updatelayout
     value = 0

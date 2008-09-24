@@ -5,7 +5,7 @@ object cpufo: tcpufo
   bounds_cx = 387
   bounds_cy = 207
   frame.grip_size = 10
-  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
+  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton, go_backgroundbutton]
   frame.dummy = 0
   taborder = 1
   visible = False
@@ -17,7 +17,7 @@ object cpufo: tcpufo
   container.frame.dummy = 0
   dragdock.splitter_size = 0
   dragdock.caption = 'CPU'
-  dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_propsize]
+  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_propsize]
   options = [fo_savepos, fo_savezorder, fo_savestate]
   statfile = mainfo.projectstatfile
   caption = 'CPU'
@@ -57,15 +57,15 @@ object cpufo: tcpufo
   object on: tbooleanedit
     Tag = -1
     bounds_x = 7
-    bounds_y = 9
-    bounds_cx = 59
-    bounds_cy = 16
+    bounds_y = 8
+    bounds_cx = 61
+    bounds_cy = 17
     frame.caption = 'CPU on'
     frame.dummy = 0
     frame.outerframe = (
       0
-      1
-      46
+      2
+      48
       2
     )
     onchange = ononchange

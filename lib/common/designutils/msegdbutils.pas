@@ -468,6 +468,9 @@ type
    function readmemoryword(const address: ptrint; out aresult: word): gdbresultty;
    function readmemorylongword(const address: ptrint; out aresult: longword): gdbresultty;
    function readmemorypointer(const address: ptrint; out aresult: ptrint): gdbresultty;
+   function writememorybyte(const address: ptrint; const avalue: byte): gdbresultty;
+   function writememoryword(const address: ptrint; const avalue: word): gdbresultty;
+   function writememorylongword(const address: ptrint; const avalue: longword): gdbresultty;
 
    function readpascalvariable(const varname: string; out aresult: msestring): gdbresultty;
    function writepascalvariable(const varname: string; const value: string;
@@ -486,6 +489,7 @@ type
 
    function getpc(out addr: ptrint): gdbresultty;
    function getregistervalue(const aname: string; out avalue: ptrint): gdbresultty;
+   function setregistervalue(const aname: string; const avalue: ptrint): gdbresultty;
    function listregisternames(out aresult: stringarty): gdbresultty;
    function listregistervalues(out aresult: registerinfoarty): gdbresultty;
    function listlines(const path: filenamety;
@@ -505,6 +509,7 @@ type
    function disassemble(out aresult: disassarty; const filename: filenamety;
                  const line: integer; const count: integer): gdbresultty; overload;
    function disassemble(out aresult: disassarty; const start,stop: cardinal): gdbresultty; overload;
+   function getframeaddress(out address: ptruint): gdbresultty;
 
    property guiintf: boolean read fguiintf write fguiintf default true;
    property execloaded: boolean read getexecloaded;
@@ -3071,6 +3076,51 @@ begin //todo: endianess
  end;
 end;
 
+function tgdbmi.writememorybyte(const address: ptrint;
+                                             const avalue: byte): gdbresultty;
+var
+ str1,str2,str3: ansistring;
+begin
+ str2:= hextocstr(address,8);
+ str3:= hextocstr(avalue,2);
+ if currentlang = 'pascal' then begin
+  result:= evaluateexpression('pbyte('+str2+')^:='+str3,str1);
+ end
+ else begin
+  result:= evaluateexpression('*((unsigned char*)'+str2+')='+str3,str1);
+ end;
+end;
+
+function tgdbmi.writememoryword(const address: ptrint; 
+                                            const avalue: word): gdbresultty;
+var
+ str1,str2,str3: ansistring;
+begin
+ str2:= hextocstr(address,8);
+ str3:= hextocstr(avalue,4);
+ if currentlang = 'pascal' then begin
+  result:= evaluateexpression('pword('+str2+')^:='+str3,str1);
+ end
+ else begin
+  result:= evaluateexpression('*((unsigned short*)'+str2+')='+str3,str1);
+ end;
+end;
+
+function tgdbmi.writememorylongword(const address: ptrint;
+                                            const avalue: longword): gdbresultty;
+var
+ str1,str2,str3: ansistring;
+begin
+ str2:= hextocstr(address,8);
+ str3:= hextocstr(avalue,8);
+ if currentlang = 'pascal' then begin
+  result:= evaluateexpression('plongword('+str2+')^:='+str3,str1);
+ end
+ else begin
+  result:= evaluateexpression('*((unsigned long*)'+str2+')='+str3,str1);
+ end;
+end;
+
 function tgdbmi.infoline(const filename: filenamety; const line: integer;
                          out start,stop: cardinal): gdbresultty;
 var
@@ -3215,6 +3265,31 @@ begin
  result:= internaldisassemble(aresult,str1,true);
 end;
 
+function tgdbmi.getframeaddress(out address: ptruint): gdbresultty;
+var
+ str1: ansistring;
+ ar1: stringarty;
+ int1: integer;
+begin
+ result:= getcliresultstring('info frame',str1);
+ if result = gdb_ok then begin
+  result:= gdb_dataerror;
+  ar1:= splitstring(str1,' ',true);
+  for int1:= 0 to high(ar1)- 2 do begin
+   if (ar1[int1] = 'frame') and (ar1[int1+1] = 'at') then begin
+    try
+     setlength(ar1[int1+2],length(ar1[int1+2])-1); //remove ':'
+     address:= strtoptrint(ar1[int1+2]);
+    except
+     exit;
+    end;
+    break;
+   end;
+  end;
+  result:= gdb_ok;
+ end;
+end;
+
 function tgdbmi.getregistervalue(const aname: string; out avalue: ptrint): gdbresultty;
 var
  str1: string;
@@ -3227,6 +3302,15 @@ begin
    result:= gdb_dataerror;
   end;
  end;
+end;
+
+function tgdbmi.setregistervalue(const aname: string;
+                                         const avalue: ptrint): gdbresultty;
+var
+ str1: ansistring;
+begin
+ result:= writepascalvariable(
+        '$'+aname,inttostr(avalue),str1);
 end;
 
 function tgdbmi.getpc(out addr: ptrint): gdbresultty;

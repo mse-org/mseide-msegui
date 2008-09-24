@@ -17,6 +17,9 @@ type
    procedure drawfixcol(const sender: tcol; const canvas: tcanvas;
                    const cellinfo: cellinfoty);
    procedure updatelayout(const sender: TObject);
+   procedure formshow(const sender: TObject);
+   procedure cellsetvalue(const sender: TObject; var avalue: msestring;
+                   var accept: Boolean);
   private
    firstadd: ptrint;
   public
@@ -26,7 +29,7 @@ var
  memoryfo: tmemoryfo;
 implementation
 uses
- memoryform_mfm,mseformatstr,msedrawtext,main;
+ memoryform_mfm,mseformatstr,msedrawtext,main,msegdbutils,msewidgets;
  
 type
  bitwidthty = (bw_8,bw_16,bw_32); 
@@ -44,7 +47,7 @@ var
  words: wordarty;
  longwords: longwordarty;
 begin
- if memon.value then begin
+ if memon.value and isvisible then begin
   firstadd:= add.value and $fffffff0;
   linecount:= ((add.value + cnt.value + $f)-firstadd) div $10;
   if linecount > 1000 then begin
@@ -127,6 +130,8 @@ begin
    grid.datacols.count:= 16;
    for int1:= 0 to 15 do begin
     grid.fixrows[-1].captions[int1].caption:= charhex[int1];
+//    grid.datacols[int1].ondataentered:= {$ifdef FPC}@{$endif}celldataentered;
+    grid.datacols[int1].onsetvalue:= {$ifdef FPC}@{$endif}cellsetvalue;
    end;
   end;
   bw_16: begin
@@ -134,6 +139,8 @@ begin
    grid.datacols.count:= 8;
    for int1:= 0 to 7 do begin
     grid.fixrows[-1].captions[int1].caption:= charhex[int1*2];
+//    grid.datacols[int1].ondataentered:= {$ifdef FPC}@{$endif}celldataentered;
+    grid.datacols[int1].onsetvalue:= {$ifdef FPC}@{$endif}cellsetvalue;
    end;
    add.value:= add.value and not 3;
   end;
@@ -142,6 +149,8 @@ begin
    grid.datacols.count:= 4;
    for int1:= 0 to 3 do begin
     grid.fixrows[-1].captions[int1].caption:= charhex[int1*4];
+//    grid.datacols[int1].ondataentered:= {$ifdef FPC}@{$endif}celldataentered;
+    grid.datacols[int1].onsetvalue:= {$ifdef FPC}@{$endif}cellsetvalue;
    end;
    add.value:= add.value and not 7;
   end;
@@ -150,6 +159,41 @@ begin
  grid.datacols.width:= int1+4;
  grid.fixcols[-1].width:= getcanvas.getstringwidth('WWWWWWWW',grid.font)+4;
  refresh; 
+end;
+
+procedure tmemoryfo.formshow(const sender: TObject);
+begin
+ refresh;
+end;
+
+procedure tmemoryfo.cellsetvalue(const sender: TObject; var avalue: msestring;
+               var accept: Boolean);
+var
+ val: longword;
+ str1: ansistring;
+ res: gdbresultty;
+begin
+ if mainfo.gdb.cancommand then begin
+  accept:= false;
+  val:= strtohex(avalue);
+  res:= gdb_error;
+  case bitwidthty(bitwidth.value) of
+   bw_8: begin
+    res:= mainfo.gdb.writememorybyte(firstadd+grid.row*16+grid.col,val);
+   end;
+   bw_16: begin
+    res:= mainfo.gdb.writememoryword(firstadd+grid.row*16+grid.col*2,val);
+   end;
+   bw_32: begin
+    res:= mainfo.gdb.writememorylongword(firstadd+grid.row*16+grid.col*4,val);
+   end;
+  end;
+  if res <> gdb_ok then begin
+   str1:= mainfo.gdb.errormessage;
+   showerror(str1);
+  end;
+  refresh;
+ end;
 end;
 
 end.
