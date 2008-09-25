@@ -617,12 +617,24 @@ end;
 
 procedure tstatreader.checkintegerrange(var value: integer; const min,max: integer);
 begin
- if value > max then begin
-  value:= max;
+ if max < min then begin  //unsigned
+  if cardinal(value) > cardinal(max) then begin
+   value:= max;
+  end
+  else begin
+   if cardinal(value) < cardinal(min) then begin
+    value:= min;
+   end;
+  end;
  end
  else begin
-  if value < min then begin
-   value:= min;
+  if value > max then begin
+   value:= max;
+  end
+  else begin
+   if value < min then begin
+    value:= min;
+   end;
   end;
  end;
 end;

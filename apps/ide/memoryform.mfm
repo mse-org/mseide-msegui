@@ -310,6 +310,7 @@ object memoryfo: tmemoryfo
       27
       0
     )
+    statfile = mainfo.projectstatfile
     ondataentered = adent
     base = nb_hex
     max = -1
@@ -330,6 +331,7 @@ object memoryfo: tmemoryfo
       0
     )
     taborder = 1
+    statfile = mainfo.projectstatfile
     ondataentered = adent
     base = nb_hex
     reffontheight = 15
@@ -348,6 +350,7 @@ object memoryfo: tmemoryfo
       2
     )
     taborder = 3
+    statfile = mainfo.projectstatfile
     ondataentered = adent
   end
   object bitwidth: tenumedit
@@ -365,6 +368,7 @@ object memoryfo: tmemoryfo
       0
     )
     taborder = 2
+    statfile = mainfo.projectstatfile
     textflags = [tf_xcentered, tf_ycentered, tf_noselect]
     ondataentered = updatelayout
     value = 0
