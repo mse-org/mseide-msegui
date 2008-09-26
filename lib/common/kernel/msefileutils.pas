@@ -140,6 +140,9 @@ function searchfile(const afilename: filenamety;
             const adirname: filenamety): filenamety; overload;
            //afilename must be simple filename and can have wildchars ('?','*'),
            //adirname can have wildchars
+function dirhasentries(const adirname: filenamety;
+                         const ainclude: fileattributesty = [fa_all];
+                         const aexclude: fileattributesty = []): boolean;
 
 function findfile(const filename: filenamety; const dirnames: array of filenamety;
                              var path: filenamety): boolean; overload;
@@ -645,6 +648,32 @@ begin
    end;
    sys_closedirstream(dirstream);
   end;
+ end;
+end;
+
+function dirhasentries(const adirname: filenamety;
+                         const ainclude: fileattributesty = [fa_all];
+                         const aexclude: fileattributesty = []): boolean;
+var
+ dirstream: dirstreamty;
+ fileinfo: fileinfoty;
+begin
+ result:= false;
+ fillchar(dirstream,sizeof(dirstream),0);
+ with dirstream do begin
+  dirname:= filepath(adirname,fk_file);
+  include:= ainclude;
+  exclude:= aexclude;
+  if sys_opendirstream(dirstream) <> sye_ok then begin
+   exit;
+  end;
+  while sys_readdirstream(dirstream,fileinfo) do begin
+   if (fileinfo.name <> '.') and (fileinfo.name <> '..') then begin
+    result:= true;
+    break;
+   end;
+  end;
+  sys_closedirstream(dirstream);
  end;
 end;
 

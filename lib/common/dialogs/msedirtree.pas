@@ -26,7 +26,8 @@ type
   public
    constructor create(const aowner: tcustomitemlist = nil;
               const aparent: ttreelistitem = nil); override;
-   procedure setentries(const list: tcustomfiledatalist);
+   procedure setentries(const list: tcustomfiledatalist;
+                        const showhidden: boolean);
    function findsubdir(const aname: filenamety): tdirlistitem;
    function getpath: filenamety;
  end;
@@ -91,22 +92,39 @@ begin
  updatefileinfo(self,finfo,true);
 end;
 
-procedure tdirlistitem.setentries(const list: tcustomfiledatalist);
+procedure tdirlistitem.setentries(const list: tcustomfiledatalist;
+                                  const showhidden: boolean);
 var
  po1: pfileinfoty;
  ar1: treelistedititemarty;
  int1: integer;
  item1: tdirlistitem;
+ dirstream: dirstreamty;
+ excl: fileattributesty;
 begin
  clear;
  if list <> nil then begin
   po1:= list.datapo;
+  if showhidden then begin
+   excl:= [];
+  end
+  else begin
+   excl:= [fa_hidden];
+  end;
   setlength(ar1,list.count);
   for int1:= 0 to list.count - 1 do begin
    item1:= tdirlistitem.create;
    ar1[int1]:= item1;
    item1.finfo:= po1^;
    item1.updateinfo;
+   if item1.finfo.extinfo1.filetype = ft_dir then begin
+    if dirhasentries(getpath+'/'+item1.finfo.name,[fa_dir],excl) then begin
+     include(item1.fstate,ns_subitems);
+    end
+    else begin
+     exclude(item1.fstate,ns_subitems);
+    end;
+   end;
    inc(po1);
   end;
   add(ar1);
@@ -143,7 +161,7 @@ begin
    exclude:= [fa_hidden];
   end;
   list.adddirectory(aitem.getpath,fil_name,nil,[fa_dir],exclude);
-  aitem.setentries(list);
+  aitem.setentries(list,showhiddenfiles);
  finally
   list.free;
  end;
