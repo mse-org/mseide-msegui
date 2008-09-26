@@ -4,15 +4,16 @@ interface
 uses
  mseglob,mseguiglob,mseapplication,msestat,msemenus,msegui,msegraphics,
  msegraphutils,mseevent,mseclasses,mseforms,msedock,msegrids,msestrings,
- msetypes,msedataedits,mseedit,msegraphedits;
+ msetypes,msedataedits,mseedit,msegraphedits,msesplitter;
 
 type
  tmemoryfo = class(tdockform)
    grid: tstringgrid;
-   add: tintegeredit;
-   cnt: tintegeredit;
+   tlayouter1: tlayouter;
    memon: tbooleanedit;
    bitwidth: tenumedit;
+   cnt: tintegeredit;
+   add: tintegeredit;
    procedure adent(const sender: TObject);
    procedure drawfixcol(const sender: tcol; const canvas: tcanvas;
                    const cellinfo: cellinfoty);
