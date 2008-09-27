@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -95,7 +95,8 @@ type
                        fdo_directory,fdo_file,
                        fdo_absolute,fdo_relative,fdo_quotesingle,
                        fdo_link, //links lastdir of controllers with same group
-                       fdo_checkexist,fdo_acceptempty,fdo_chdir,fdo_savelastdir);
+                       fdo_checkexist,fdo_acceptempty,fdo_chdir,fdo_savelastdir,
+                       fdo_checksubdir);
  filedialogoptionsty = set of filedialogoptionty;
 const
  defaultfiledialogoptions = [fdo_savelastdir];
@@ -266,15 +267,31 @@ type
    property onsetvalue;
    property controller;
  end; 
+
+ dirdropdowneditoptionty = (ddeo_showhiddenfiles,ddeo_checksubdir);
+ dirdropdowneditoptionsty = set of dirdropdowneditoptionty;
  
  tdirdropdownedit = class(tdropdownwidgetedit)
+  private
+   foptions: dirdropdowneditoptionsty;
+   function getshowhiddenfiles: boolean;
+   procedure setshowhiddenfiles(const avalue: boolean);
+   function getchecksubdir: boolean;
+   procedure setchecksubdir(const avalue: boolean);
   protected
    procedure createdropdownwidget(const atext: msestring;
                                      out awidget: twidget); override;
    function getdropdowntext(const awidget: twidget): msestring; override;
    procedure pathchanged(const sender: tobject);
    procedure doafterclosedropdown; override;
+  public
+   property showhiddenfiles: boolean read getshowhiddenfiles 
+                                               write setshowhiddenfiles;
+   property checksubdir: boolean read getchecksubdir 
+                                               write setchecksubdir;
   published
+   property options: dirdropdowneditoptionsty read foptions 
+                                              write foptions default [];
  end;
 
  tfiledialogfo = class(tmseform)
@@ -431,6 +448,7 @@ var
  int1: integer;
 begin
  with dialog do begin
+  dialog.dir.checksubdir:= fdo_checksubdir in aoptions;
   dialogoptions:= aoptions;
   defaultext:= adefaultext;
   caption:= acaption;
@@ -1178,6 +1196,7 @@ end;
 procedure tfiledialogfo.showhiddenonsetvalue(const sender: TObject; 
          var avalue: Boolean; var accept: Boolean);
 begin
+ dir.showhiddenfiles:= avalue;
  if avalue then begin
   listview.excludeattrib:= listview.excludeattrib - [fa_hidden];
  end
@@ -1763,6 +1782,8 @@ procedure tdirdropdownedit.createdropdownwidget(const atext: msestring;
 begin
  awidget:= tdirtreefo.create(nil);
  with tdirtreefo(awidget) do begin
+  showhiddenfiles:= ddeo_showhiddenfiles in foptions;
+  checksubdir:= ddeo_checksubdir in foptions;
   path:= atext;
   onpathchanged:= {$ifdef FPC}@{$endif}pathchanged;
   text:= path;
@@ -1785,6 +1806,36 @@ end;
 procedure tdirdropdownedit.pathchanged(const sender: tobject);
 begin
  text:= tdirtreefo(sender).path;
+end;
+
+function tdirdropdownedit.getshowhiddenfiles: boolean;
+begin
+ result:= ddeo_showhiddenfiles in foptions;
+end;
+
+procedure tdirdropdownedit.setshowhiddenfiles(const avalue: boolean);
+begin
+ if avalue then begin
+  include(foptions,ddeo_showhiddenfiles)
+ end
+ else begin
+  exclude(foptions,ddeo_showhiddenfiles)
+ end;
+end;
+
+function tdirdropdownedit.getchecksubdir: boolean;
+begin
+ result:= ddeo_checksubdir in foptions;
+end;
+
+procedure tdirdropdownedit.setchecksubdir(const avalue: boolean);
+begin
+ if avalue then begin
+  include(foptions,ddeo_checksubdir)
+ end
+ else begin
+  exclude(foptions,ddeo_checksubdir)
+ end;
 end;
 
 end.

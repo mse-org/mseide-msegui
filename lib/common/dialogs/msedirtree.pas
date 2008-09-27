@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -27,7 +27,7 @@ type
    constructor create(const aowner: tcustomitemlist = nil;
               const aparent: ttreelistitem = nil); override;
    procedure setentries(const list: tcustomfiledatalist;
-                        const showhidden: boolean);
+                        const checksubdirectories,showhidden: boolean);
    function findsubdir(const aname: filenamety): tdirlistitem;
    function getpath: filenamety;
  end;
@@ -46,12 +46,15 @@ type
    fcasesensitive: boolean;
 //   fpath: filenamety;
    fonpathchanged: notifyeventty;
+   fchecksubdir: boolean;
    procedure setpath(const Value: filenamety);
    function getpath: filenamety;
    procedure adddir(const aitem: tdirlistitem);
   public
    property casesensitive: boolean read fcasesensitive write fcasesensitive;
    property showhiddenfiles: boolean read fshowhiddenfiles write fshowhiddenfiles;
+   property checksubdir: boolean read fchecksubdir 
+                               write fchecksubdir;
    property path: filenamety read getpath write setpath;
    property onpathchanged: notifyeventty read fonpathchanged write fonpathchanged;
  end;
@@ -93,7 +96,7 @@ begin
 end;
 
 procedure tdirlistitem.setentries(const list: tcustomfiledatalist;
-                                  const showhidden: boolean);
+                     const checksubdirectories,showhidden: boolean);
 var
  po1: pfileinfoty;
  ar1: treelistedititemarty;
@@ -117,7 +120,7 @@ begin
    ar1[int1]:= item1;
    item1.finfo:= po1^;
    item1.updateinfo;
-   if item1.finfo.extinfo1.filetype = ft_dir then begin
+   if checksubdirectories and (item1.finfo.extinfo1.filetype = ft_dir) then begin
     if dirhasentries(getpath+'/'+item1.finfo.name,[fa_dir],excl) then begin
      include(item1.fstate,ns_subitems);
     end
@@ -161,7 +164,7 @@ begin
    exclude:= [fa_hidden];
   end;
   list.adddirectory(aitem.getpath,fil_name,nil,[fa_dir],exclude);
-  aitem.setentries(list,showhiddenfiles);
+  aitem.setentries(list,checksubdir,showhiddenfiles);
  finally
   list.free;
  end;
