@@ -16,7 +16,7 @@ uses
  mseclasses,msebitmap,msegui,msedatamodules;
 
 type
- filedialogiconty = (fdi_dir,fdi_diropen,fdi_file);
+ filedialogiconty = (fdi_dir,fdi_diropen,fdi_file,fdi_direntry);
  tfiledialogres = class(tmsedatamodule)
   images: timagelist;
  public

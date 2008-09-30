@@ -35,7 +35,7 @@ type
                      lvo_casesensitive,lvo_savevalue,lvo_hintclippedtext
                      );
  listviewoptionsty = set of listviewoptionty;
- filelistviewoptionty = (flvo_nodirselect,flvo_nofileselect);
+ filelistviewoptionty = (flvo_nodirselect,flvo_nofileselect,flvo_checksubdir);
  filelistviewoptionsty = set of filelistviewoptionty;
 
 const

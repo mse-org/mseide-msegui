@@ -109,7 +109,7 @@ type
   group: cardinal;
  end;
 
- fileinfostatety = (fis_extinfo1valid,fis_extinfo2valid,fis_diropen);
+ fileinfostatety = (fis_extinfo1valid,fis_extinfo2valid,fis_diropen,fis_hasentry);
  fileinfostatesty = set of fileinfostatety;
 
  fileinfoty = record

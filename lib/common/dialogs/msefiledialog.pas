@@ -59,6 +59,8 @@ type
    procedure setmask(const value: filenamety);
    function getselectednames: filenamearty;
    procedure setselectednames(const avalue: filenamearty);
+   function getchecksubdir: boolean;
+   procedure setchecksubdir(const avalue: boolean);
   protected
    procedure setoptions(const Value: listviewoptionsty); override;
    procedure docellevent(var info: celleventinfoty); override;
@@ -78,6 +80,7 @@ type
    property path: filenamety read getpath write setpath;
                   //calls readlist
    property selectednames: filenamearty read getselectednames write setselectednames;
+   property  checksubdir: boolean read getchecksubdir write setchecksubdir;
   published
    property optionsfile: filelistviewoptionsty read foptionsfile write foptionsfile
                   default defaultfilelistviewoptions;
@@ -380,7 +383,7 @@ function filedialog(var afilename: filenamety;
 procedure getfileicon(const info: fileinfoty; var imagelist: timagelist;
                             out imagenr: integer);
 procedure updatefileinfo(const item: tlistitem; const info: fileinfoty;
-                   withicon: boolean);
+                   const withicon: boolean);
 
 implementation
 uses
@@ -388,7 +391,8 @@ uses
  msestringenter,msedirtree,msefiledialogres,msekeyboard,
  msestockobjects;
 
-procedure getfileicon(const info: fileinfoty; var imagelist: timagelist; out imagenr: integer);
+procedure getfileicon(const info: fileinfoty; var imagelist: timagelist;
+                      out imagenr: integer);
 begin
  with info do begin
 //  imagelist:= nil;
@@ -400,7 +404,12 @@ begin
       filedialogres.getfileicon(fdi_diropen,imagelist,imagenr);
      end
      else begin
-      filedialogres.getfileicon(fdi_dir,imagelist,imagenr);
+      if fis_hasentry in state then begin
+       filedialogres.getfileicon(fdi_direntry,imagelist,imagenr);
+      end
+      else begin
+       filedialogres.getfileicon(fdi_dir,imagelist,imagenr);
+      end;
      end;
     end;
     ft_reg,ft_lnk: begin
@@ -412,7 +421,7 @@ begin
 end;
 
 procedure updatefileinfo(const item: tlistitem; const info: fileinfoty;
-                withicon: boolean);
+                const withicon: boolean);
 var
  aimagelist: timagelist;
  aimagenr: integer;
@@ -448,7 +457,8 @@ var
  int1: integer;
 begin
  with dialog do begin
-  dialog.dir.checksubdir:= fdo_checksubdir in aoptions;
+  dir.checksubdir:= fdo_checksubdir in aoptions;
+  listview.checksubdir:= fdo_checksubdir in aoptions;
   dialogoptions:= aoptions;
   defaultext:= adefaultext;
   caption:= acaption;
@@ -700,6 +710,7 @@ var
  po2: pfileinfoty;
  imlist1: timagelist;
  imnr1: integer;
+ bo1: boolean;
 begin
  options:= options - [lvo_focusselect];
  ffocusmoved:= false;
@@ -711,7 +722,12 @@ begin
    self.fitemlist.count:= count;
    po1:= pfilelistitem(self.fitemlist.datapo);
    po2:= pfileinfoty(datapo);
+   bo1:= checksubdir;
    for int1:= 0 to count - 1 do begin
+    if bo1 and (po2^.extinfo1.filetype = ft_dir) and
+      dirhasentries(path+'/'+po2^.name,includeattrib,excludeattrib) then begin
+     include(po2^.state,fis_hasentry);
+    end;
     updatefileinfo(po1^,po2^,true);
     if assigned(fongetfileicon) then begin
      imlist1:= po1^.imagelist;
@@ -887,6 +903,21 @@ begin
   ffilecount:= 0;
  end;
  result:= ffilecount;
+end;
+
+function tfilelistview.getchecksubdir: boolean;
+begin
+ result:= flvo_checksubdir in foptionsfile;
+end;
+
+procedure tfilelistview.setchecksubdir(const avalue: boolean);
+begin
+ if avalue then begin
+  include(foptionsfile,flvo_checksubdir);
+ end
+ else begin
+  exclude(foptionsfile,flvo_checksubdir);
+ end;
 end;
 
 { tfilelistitem }
