@@ -22,19 +22,20 @@ uses
 const
  defaultactionstates = [];
 type
- shapestatety = (ss_disabled,ss_invisible,ss_checked,ss_default, //actionstatesty
-                 ss_separator,ss_checkbox,ss_radiobutton,        //menuactionoptionty
+ shapestatety = (shs_disabled,shs_invisible,shs_checked,shs_default, //actionstatesty
+                 shs_separator,shs_checkbox,shs_radiobutton,        //menuactionoptionty
 
-                 ss_clicked,ss_mouse,ss_moveclick,ss_focused,ss_active,
-                 ss_horz,ss_vert,ss_opposite,
-                 ss_widgetorg,ss_showfocusrect,ss_showdefaultrect,
-                 ss_flat,ss_noanimation,ss_focusanimation,
-                 ss_checkbutton,
-                 {ss_submenu,}ss_menuarrow);
+                 shs_clicked,shs_mouse,shs_moveclick,shs_focused,shs_active,
+                 shs_horz,shs_vert,shs_opposite,
+                 shs_widgetorg,shs_showfocusrect,shs_showdefaultrect,
+                 shs_flat,shs_noanimation,shs_nomouseanimation,
+                 shs_noclickanimation,shs_nofocusanimation,shs_focusanimation,
+                 shs_checkbutton,
+                 {ss_submenu,}shs_menuarrow);
  shapestatesty = set of shapestatety;
 
- actionstatety = (as_disabled = ord(ss_disabled),as_invisible=ord(ss_invisible),
-                  as_checked=ord(ss_checked),as_default=ord(ss_default),
+ actionstatety = (as_disabled = ord(shs_disabled),as_invisible=ord(shs_invisible),
+                  as_checked=ord(shs_checked),as_default=ord(shs_default),
 //                  as_checkbox=ord(ss_checkbox),as_radiobutton=ord(ss_radiobutton),
                   {as_shortcutcaption,}
                   as_localdisabled,as_localinvisible,as_localchecked,as_localdefault,
@@ -60,7 +61,7 @@ const
  actionshapestates: actionstatesty = actionshapestatesconst;
  actionoptionshapestates: menuactionoptionsty = 
                                 [mao_separator,mao_checkbox,mao_radiobutton];
- actionoptionshapelshift = ord(ss_separator);
+ actionoptionshapelshift = ord(shs_separator);
 
  localactionstates: actionstatesty =
             [as_localdisabled,as_localinvisible,as_localchecked,as_localdefault,

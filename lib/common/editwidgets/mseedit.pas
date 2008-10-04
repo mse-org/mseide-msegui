@@ -63,6 +63,15 @@ type
    property frameimage_offsetactivemouse;
    property frameimage_offsetactiveclicked;
 
+   property frameface_list;
+   property frameface_offset;
+   property frameface_offsetdisabled;
+   property frameface_offsetmouse;
+   property frameface_offsetclicked;
+   property frameface_offsetactive;
+   property frameface_offsetactivemouse;
+   property frameface_offsetactiveclicked;
+
    property colorclient default cl_foreground;
    property caption;
    property captionpos;
@@ -150,7 +159,8 @@ type
  end;
  buttoneventty = procedure(const sender: tobject; var action: buttonactionty;
                        const buttonindex: integer) of object;
- framebuttonoptionty = (fbo_left,fbo_invisible,fbo_disabled,fbo_flat,fbo_noanim);
+ framebuttonoptionty = (fbo_left,fbo_invisible,fbo_disabled,fbo_flat,
+             fbo_noanim,fbo_nomouseanim,fbo_noclickanim,fbo_nofocusanim);
  framebuttonoptionsty = set of framebuttonoptionty;
 
  tcustombuttonframe = class;
@@ -459,7 +469,7 @@ begin
  finfo.ca.colorglyph:= cl_glyph;
  finfo.ca.imagenr:= -1;
  finfo.imagenrdisabled:= -2;
- include(finfo.state,ss_widgetorg);
+ include(finfo.state,shs_widgetorg);
  inherited;
 end;
 
@@ -484,10 +494,16 @@ var
 begin
  statebefore:= finfo.state;
  foptions:= Value;
- updatebit(cardinal(finfo.state),ord(ss_invisible),fbo_invisible in value);
- updatebit(cardinal(finfo.state),ord(ss_disabled),fbo_disabled in value);
- updatebit(cardinal(finfo.state),ord(ss_flat),fbo_flat in value);
- updatebit(cardinal(finfo.state),ord(ss_noanimation),fbo_noanim in value);
+ updatebit(cardinal(finfo.state),ord(shs_invisible),fbo_invisible in value);
+ updatebit(cardinal(finfo.state),ord(shs_disabled),fbo_disabled in value);
+ updatebit(cardinal(finfo.state),ord(shs_flat),fbo_flat in value);
+ updatebit(cardinal(finfo.state),ord(shs_noanimation),fbo_noanim in value);
+ updatebit(cardinal(finfo.state),ord(shs_nomouseanimation),
+                                                  fbo_nomouseanim in value);
+ updatebit(cardinal(finfo.state),ord(shs_noclickanimation),
+                                                  fbo_noclickanim in value);
+ updatebit(cardinal(finfo.state),ord(shs_nofocusanimation),
+                                                  fbo_nofocusanim in value);
  if statebefore <> finfo.state then begin
   changed;
  end;
@@ -569,11 +585,11 @@ var
  action: buttonactionty;
 begin
  with finfo do begin
-  bo1:= ss_clicked in state;
+  bo1:= shs_clicked in state;
   if updatemouseshapestate(finfo,info,nil,nil) then begin
    invalidate;
   end;
-  if ss_clicked in state then begin
+  if shs_clicked in state then begin
    if not bo1 then begin
     action:= ba_buttonpress;
     buttonintf.buttonaction(action,index);
@@ -748,8 +764,8 @@ end;
 function tframebutton.getframestateflags: framestateflagsty;
 begin
  with finfo do begin
-  result:= combineframestateflags(ss_disabled in state,getwidget.active,
-             ss_mouse in state,ss_clicked in state);
+  result:= combineframestateflags(shs_disabled in state,getwidget.active,
+             shs_mouse in state,shs_clicked in state);
  end;
 end;
 
@@ -848,7 +864,7 @@ begin
  for int1:= 0 to high(fitems) do begin
   with tframebutton(fitems[int1]) do begin
    frameskinoptionstoshapestate(fframe,finfo.state);
-   finfo.state:= finfo.state - [ss_showfocusrect,ss_showdefaultrect];
+   finfo.state:= finfo.state - [shs_showfocusrect,shs_showdefaultrect];
   end;
  end;
 end;
@@ -881,7 +897,7 @@ begin
  result:= nullframe;
  for int1:= 0 to fbuttons.count - 1 do begin
   with fbuttons[int1],finfo do begin
-   if not (ss_invisible in state) then begin
+   if not (shs_invisible in state) then begin
     if fbo_left in foptions then begin
      inc(result.left,fframerect.cx);
     end
@@ -900,7 +916,7 @@ begin
  inherited;
  for int1:= 0 to fbuttons.count-1 do begin
   with fbuttons[int1],finfo,fframerect do begin
-   if not (ss_invisible in state) then begin
+   if not (shs_invisible in state) then begin
     cy:= fintf.getwidgetrect.cy - frameframewidth.cy;
     if fbuttonwidth = 0 then begin
      cx:= cy;

@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+2008-10-04
+ shapestatety ss_* -> shs_* in in order to distinguish from shiftstate.
 2008-09-02
  '[' is special char instead of '#' in string propertyediter.
 2008-08-04

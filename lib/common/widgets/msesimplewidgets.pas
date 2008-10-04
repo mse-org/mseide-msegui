@@ -451,6 +451,15 @@ type
    property frameimage_offsetactive;
    property frameimage_offsetactivemouse;
    property frameimage_offsetactiveclicked;
+
+   property frameface_list;
+   property frameface_offset;
+   property frameface_offsetdisabled;
+   property frameface_offsetmouse;
+   property frameface_offsetclicked;
+   property frameface_offsetactive;
+   property frameface_offsetactivemouse;
+   property frameface_offsetactiveclicked;
    
    property optionsskin;
 
@@ -565,10 +574,10 @@ begin
   if not (csdesigning in componentstate) and 
     (checkshortcutcode(factioninfo.shortcut,info) or
      checkshortcutcode(factioninfo.shortcut1,info) or
-    (bo_executeonshortcut in options) and not (ss_disabled in finfo.state) and
+    (bo_executeonshortcut in options) and not (shs_disabled in finfo.state) and
            mserichstring.checkshortcut(info,factioninfo.caption1,
            bo_altshortcut in options) or
-    (finfo.state * [ss_invisible,ss_disabled,ss_default] = [ss_default]) and
+    (finfo.state * [shs_invisible,shs_disabled,shs_default] = [shs_default]) and
        ((info.key = key_return) or 
         (info.key = key_enter) and (bo_executedefaultonenterkey in options)) and
        (info.shiftstate = [])
@@ -609,7 +618,7 @@ begin
  inherited setcolor(finfo.color); 
  finfo.color:= cl_transparent;
 // if csdesigning in componentstate then begin
-  exclude(finfo.state,ss_invisible);
+  exclude(finfo.state,shs_invisible);
 // end;
  checkautosize;
 end;
@@ -873,8 +882,8 @@ begin
    widget1:= fparentwidget.widgets[int1];
    if widget1 is tcustombutton then begin
     with tcustombutton(widget1) do begin
-     if ss_default in finfo.state then begin
-      exclude(finfo.state,ss_default);
+     if shs_default in finfo.state then begin
+      exclude(finfo.state,shs_default);
       invalidate;
      end;
     end;
@@ -895,8 +904,8 @@ begin
    if widget1 is tcustombutton then begin
     with tcustombutton(widget1) do begin
      if as_default in factioninfo.state then begin
-      if not (ss_default in finfo.state) then begin
-       include(finfo.state,ss_default);
+      if not (shs_default in finfo.state) then begin
+       include(finfo.state,shs_default);
        invalidateframestate;
       end;
      end;

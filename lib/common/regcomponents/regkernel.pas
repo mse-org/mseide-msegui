@@ -103,7 +103,7 @@ begin
                              ttimer,tthreadcomp,tpipereadercomp,tprocessmonitor]);
  registercomponenttabhints(['NoGui'],['Components without GUI Dependence']);
  registercomponents('Gui',[tmainmenu,tpopupmenu,
-                    tfacecomp,tframecomp,tskincontroller,
+                    tfacecomp,tfacelist,tframecomp,tskincontroller,
                     tbitmapcomp,timagelist,tshortcutcontroller,
                     taction,tguithreadcomp]);
  registercomponenttabhints(['Gui'],['Non visual Components with GUI Dependence']);
@@ -118,6 +118,7 @@ begin
  registerpropertyeditor(typeinfo(actionstatesty),nil,'',tshapestatespropertyeditor);
  registerpropertyeditor(typeinfo(shortcutty),nil,'',tshortcutpropertyeditor);
  registerpropertyeditor(typeinfo(imagenrty),nil,'',timagenrpropertyeditor);
+ registerpropertyeditor(typeinfo(facenrty),nil,'',tordinalpropertyeditor);
  registerpropertyeditor(typeinfo(tcollection),nil,'',tcollectionpropertyeditor);
  registerpropertyeditor(typeinfo(tmenuitems),nil,'',tmenuarraypropertyeditor);
 // registerpropertyeditor(typeinfo(tcustomframe),twidget,'frame',tframepropertyeditor);

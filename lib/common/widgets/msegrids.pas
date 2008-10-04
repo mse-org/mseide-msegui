@@ -299,6 +299,10 @@ type
                                   const noclip: boolean = false);
    function getframestateflags: framestateflagsty;
    //iface
+   function getclientrect: rectty;
+   procedure setlinkedvar(const source: tmsecomponent; var dest: tmsecomponent;
+               const linkintf: iobjectlink = nil);
+   procedure widgetregioninvalid;
    function translatecolor(const acolor: colorty): colorty;
 
    procedure fontchanged(const sender: tobject); virtual;
@@ -751,6 +755,10 @@ type
                               const noclip: boolean = false);
    function getframestateflags: framestateflagsty;
    //iface
+   function getclientrect: rectty;
+   procedure setlinkedvar(const source: tmsecomponent; var dest: tmsecomponent;
+              const linkintf: iobjectlink = nil);
+   procedure widgetregioninvalid;
    function translatecolor(const acolor: colorty): colorty;
    //iimagelistinfo
    function getimagelist: timagelist;   
@@ -1214,6 +1222,15 @@ end;
    property frameimage_offsetactive;
    property frameimage_offsetactivemouse;
    property frameimage_offsetactiveclicked;
+
+   property frameface_list;
+   property frameface_offset;
+   property frameface_offsetdisabled;
+   property frameface_offsetmouse;
+   property frameface_offsetclicked;
+   property frameface_offsetactive;
+   property frameface_offsetactivemouse;
+   property frameface_offsetactiveclicked;
    
    property optionsskin;
 
@@ -2205,6 +2222,22 @@ begin
  result:= fgrid;
 end;
 
+function tgridprop.getclientrect: rectty;
+begin
+ result:= fgrid.clientrect;
+end;
+
+procedure tgridprop.setlinkedvar(const source: tmsecomponent;
+               var dest: tmsecomponent; const linkintf: iobjectlink = nil);
+begin
+ fgrid.setlinkedvar(source,dest,linkintf);
+end;
+
+procedure tgridprop.widgetregioninvalid;
+begin
+ fgrid.widgetregioninvalid;
+end;
+
 procedure tgridprop.setframeinstance(instance: tcustomframe);
 begin
  fframe:= tcellframe(instance);
@@ -3017,6 +3050,22 @@ end;
 function tcolheader.getwidget: twidget;
 begin
  result:= fgrid;
+end;
+
+function tcolheader.getclientrect: rectty;
+begin
+ result:= fgrid.clientrect;
+end;
+
+procedure tcolheader.setlinkedvar(const source: tmsecomponent;
+               var dest: tmsecomponent; const linkintf: iobjectlink = nil);
+begin
+ fgrid.setlinkedvar(source,dest,linkintf);
+end;
+
+procedure tcolheader.widgetregioninvalid;
+begin
+ fgrid.widgetregioninvalid;
 end;
 
 procedure tcolheader.setframeinstance(instance: tcustomframe);

@@ -320,6 +320,9 @@ var
  parentcolor: colorty;
  parentcoloractive: colorty;
  noanim1: boolean;
+ nomouseanim1: boolean;
+ noclickanim1: boolean;
+ nofocusanim1: boolean;
  
 begin
  ar1:= nil; //compiler warning
@@ -365,6 +368,9 @@ begin
     imageditop:= fimagedisttop;
     imagedibottom:= fimagedistbottom;
     noanim1:= fso_noanim in optionsskin;
+    nomouseanim1:= fso_nomouseanim in optionsskin;
+    noclickanim1:= fso_noclickanim in optionsskin;
+    nofocusanim1:= fso_nofocusanim in optionsskin;
    end;
   end
   else begin
@@ -374,6 +380,9 @@ begin
    imageditop:= 0;
    imagedibottom:= 0;
    noanim1:= false;
+   nomouseanim1:= false;
+   noclickanim1:= false;
+   nofocusanim1:= false;
   end; 
   framewidth:= frame.left + frame.right + extrasp;
   frameheight:= frame.top + frame.bottom + extrasp;
@@ -417,10 +426,10 @@ begin
       tabpos:= 0;
      end;
      if mlo_horz in layout.options then begin
-      include(state,ss_horz);
+      include(state,shs_horz);
      end
      else begin
-      exclude(state,ss_horz);
+      exclude(state,shs_horz);
      end;
      tabpos:= tabpos - frame1.right - frame1.left;
      if high(ar1) > 0 then begin
@@ -430,7 +439,7 @@ begin
       ashortcutwidth:= 0;
      end;
      if needsmenuarrow and (item1.count > 0) then begin
-      include(state,ss_menuarrow);
+      include(state,shs_menuarrow);
       if mlo_horz in layout.options then begin
        if (ashortcutwidth = 0) or commonwidth then begin
         dec(tabpos,menuarrowwidthhorz);
@@ -442,7 +451,7 @@ begin
       end;
      end
      else begin
-      exclude(state,ss_menuarrow);
+      exclude(state,shs_menuarrow);
      end;
      if ashortcutwidth > shortcutwidth then begin
       shortcutwidth:= ashortcutwidth;
@@ -469,24 +478,22 @@ begin
        coloractive:= item1.coloractive;
       end;
      end;
-     include(state,ss_flat);
-     if noanim1 then begin
-      include(state,ss_noanimation) 
-     end
-     else begin
-      exclude(state,ss_noanimation);
-     end;
+     include(state,shs_flat);
+     updatebit(cardinal(state),ord(shs_noanimation),noanim1);
+     updatebit(cardinal(state),ord(shs_nomouseanimation),nomouseanim1);
+     updatebit(cardinal(state),ord(shs_noclickanimation),noclickanim1);
+     updatebit(cardinal(state),ord(shs_nofocusanimation),nofocusanim1);
     
-     if not (ss_invisible in state) then begin
-      hassubmenu:= hassubmenu or (ss_menuarrow in state);
-      hascheckbox:= hascheckbox or ([ss_checkbox,ss_radiobutton] * state <> []);
+     if not (shs_invisible in state) then begin
+      hassubmenu:= hassubmenu or (shs_menuarrow in state);
+      hascheckbox:= hascheckbox or ([shs_checkbox,shs_radiobutton] * state <> []);
       with dim do begin
        if mlo_horz in layout.options then begin                //horizonzal
-        if ss_separator in state then begin
+        if shs_separator in state then begin
          cx:= 2;
         end
         else begin
-         if [ss_checkbox,ss_radiobutton] * state <> [] then begin
+         if [shs_checkbox,shs_radiobutton] * state <> [] then begin
           inc(atextsize.cx,menucheckboxwidth);
           dec(tabpos,menucheckboxwidth);
          end;
@@ -508,7 +515,7 @@ begin
        end
        else begin                                              //vertical
         y:= ay;
-        if ss_separator in state then begin
+        if shs_separator in state then begin
          cy:= 2;
         end
         else begin
@@ -552,10 +559,10 @@ begin
     end;
     for int1:= 0 to count - 1 do begin
      with cells[int1].buttoninfo,ca do begin
-      if not (ss_invisible in state) then begin
+      if not (shs_invisible in state) then begin
        if commonwidth then begin
         dim.x:= ax;
-        if not (ss_separator in state) then begin
+        if not (shs_separator in state) then begin
          dim.cx:= textwidth;
         end;
         ax:= ax + dim.cx + framewidth;
@@ -637,7 +644,7 @@ begin
    result:= -2;
    for int1:= 0 to high(cells) do begin
     with cells[int1].buttoninfo do begin
-     if (state * [ss_disabled,ss_invisible,ss_separator] = []) and
+     if (state * [shs_disabled,shs_invisible,shs_separator] = []) and
                 pointinrect(pos,ca.dim) then begin
       result:= int1;
       break;
@@ -677,11 +684,11 @@ begin
      end;
      face:= itemfaceactive;
      ca.font:= fontactive;
-     include(state,ss_active);
+     state:= state + [shs_focused,shs_active,shs_focusanimation];
      drawmenubutton(canvas,buttoninfo,po2);
      if itemframetemplateactive <> nil then begin
       itemframetemplateactive.paintoverlay(canvas,ca.dim,
-            combineframestateflags(false,true,ss_clicked in state,false));
+            combineframestateflags(false,true,shs_clicked in state,false));
      end;
     end
     else begin
@@ -690,12 +697,12 @@ begin
      end;
      face:= itemface;
      ca.font:= fontinactive;
-     exclude(state,ss_active);
+     state:= state - [shs_focused,shs_active,shs_focusanimation];
      drawmenubutton(canvas,buttoninfo,po1);
      if itemframetemplate <> nil then begin
           itemframetemplate.paintoverlay(canvas,ca.dim,
-                 combineframestateflags(ss_disabled in state,false,
-                 ss_clicked in state,false));
+                 combineframestateflags(shs_disabled in state,false,
+                 shs_clicked in state,false));
      end;
     end;
    end;
@@ -756,7 +763,7 @@ function checkshortcut(const layout: menulayoutinfoty; var info: keyeventinfoty;
   int1:= actualindex;
   repeat
    with layout.cells[actualindex].buttoninfo do begin
-    if (state * [ss_disabled,ss_invisible] = []) and
+    if (state * [shs_disabled,shs_invisible] = []) and
             mserichstring.checkshortcut(info,ca.caption,false) then begin
      result:= actualindex;
      include(info.eventstate,es_processed);
@@ -1098,9 +1105,12 @@ begin
      internalsetactiveitem(getcellatpos(flayout,
       subpoint(pos,paintpos)),
                        ss_left in info.shiftstate,false);
-     if (int1 <> flayout.activeitem) and (activeitem >= 0) and 
-               tmenuitem1(menu.items[activeitem]).canshowhint then begin
-      application.restarthint(self);
+     if activeitem >= 0 then begin
+      include(cells[activeitem].buttoninfo.state,shs_mouse);
+      if (int1 <> flayout.activeitem) and 
+                tmenuitem1(menu.items[activeitem]).canshowhint then begin
+       application.restarthint(self);
+      end;
      end;
     end
     else begin
@@ -1125,7 +1135,7 @@ begin
       exit;
      end;
      with cells[activeitem],buttoninfo do begin
-      include(state,ss_clicked);
+      include(state,shs_clicked);
       invalidaterect(dimouter);
      end;
     end;
@@ -1133,14 +1143,14 @@ begin
    ek_buttonrelease: begin
     if (activeitem >= 0) and (button = mb_left) then begin
      with cells[activeitem],buttoninfo do begin
-      bo1:= ss_clicked in state;
-      exclude(state,ss_clicked);
+      bo1:= shs_clicked in state;
+      exclude(state,shs_clicked);
       invalidaterect(dimouter);
       if bo1 then begin
        include(info.eventstate,es_processed);
        int1:= activeitem;
        selectmenu(false);
-       include(state,ss_mouse);
+       include(state,shs_mouse);
        if (activeitem < 0) and (application.mousecapturewidget = nil) and 
                  (int1 <= high(cells)) then begin
         activeitem:= int1; //restore mouseactivating
@@ -1157,7 +1167,7 @@ begin
      if activeitem >= 0 then begin
       subpoint1(info.pos,clientpos);
       updatemouseshapestate(cells[activeitem].buttoninfo,info,self,nil);
-      include (cells[activeitem].buttoninfo.state,ss_mouse);
+//      include (cells[activeitem].buttoninfo.state,shs_mouse);
      end;
     end;
    end;
@@ -1184,7 +1194,7 @@ begin
      fnextpopup.release;
     end;
     with cells[activeitem],buttoninfo do begin
-     state:= state - [ss_clicked,ss_mouse];
+     state:= state - [shs_clicked,shs_mouse,shs_active,shs_focused];
      invalidaterect(dimouter);
     end;
    end;
@@ -1194,9 +1204,10 @@ begin
      activeitem:= nextmenuitem(flayout);
     end;
     with cells[activeitem],buttoninfo do begin
-     state:= state + [ss_mouse];
+     state:= state + [shs_focused];
+//     state:= state + [shs_mouse];
      if aclicked then begin
-      include(state,ss_clicked);
+      include(state,shs_clicked);
      end;
      invalidaterect(dimouter);
      if not (mlo_childreninactive in options) and

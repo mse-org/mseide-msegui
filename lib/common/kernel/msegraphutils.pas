@@ -23,6 +23,7 @@ const
  
 type
  imagenrty = type integer; //for timagelist
+ facenrty = type integer;  //for tfacelist
  pixelty = cardinal;
 
  colorty = type longword;

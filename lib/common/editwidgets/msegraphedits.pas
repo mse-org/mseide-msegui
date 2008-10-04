@@ -61,6 +61,15 @@ type
    property frameimage_offsetactivemouse;
    property frameimage_offsetactiveclicked;
 
+   property frameface_list;
+   property frameface_offset;
+   property frameface_offsetdisabled;
+   property frameface_offsetmouse;
+   property frameface_offsetclicked;
+   property frameface_offsetactive;
+   property frameface_offsetactivemouse;
+   property frameface_offsetactiveclicked;
+
    property colorclient default cl_foreground;
    property caption;
    property captionpos default cp_right;
@@ -236,8 +245,14 @@ type
    procedure setface(const avalue: tface);
   protected
    //iface
-   function getwidget: twidget;
+   procedure invalidate;
    function translatecolor(const acolor: colorty): colorty;
+   function getclientrect: rectty;
+   procedure setlinkedvar(const source: tmsecomponent; var dest: tmsecomponent;
+               const linkintf: iobjectlink = nil);
+   function getcomponentstate: tcomponentstate;
+   procedure widgetregioninvalid;
+//   function getwidget: twidget;
   public
    constructor create(intf: iscrollbar; org: originty = org_client;
               ondimchanged: objectprocty = nil); override;
@@ -894,12 +909,12 @@ procedure tsliderscrollbar.setface(const avalue: tface);
 begin
  fface.assign(avalue);
 end;
-
+{
 function tsliderscrollbar.getwidget: twidget;
 begin
  result:= fintf.getwidget;
 end;
-
+}
 function tsliderscrollbar.translatecolor(const acolor: colorty): colorty;
 begin
  result:= fintf.translatecolor(acolor);
@@ -910,6 +925,32 @@ procedure tsliderscrollbar.paint(const canvas: tcanvas;
 begin
  fface.paint(canvas,fdrawinfo.scrollrect);
  inherited;
+end;
+
+procedure tsliderscrollbar.invalidate;
+begin
+ fintf.getwidget.invalidate;
+end;
+
+function tsliderscrollbar.getclientrect: rectty;
+begin
+ result:= fintf.getwidget.clientrect;
+end;
+
+procedure tsliderscrollbar.setlinkedvar(const source: tmsecomponent;
+               var dest: tmsecomponent; const linkintf: iobjectlink = nil);
+begin
+ twidget1(fintf.getwidget).setlinkedvar(source,dest,linkintf);
+end;
+
+function tsliderscrollbar.getcomponentstate: tcomponentstate;
+begin
+ result:= fintf.getwidget.componentstate;
+end;
+
+procedure tsliderscrollbar.widgetregioninvalid;
+begin
+ twidget1(fintf.getwidget).widgetregioninvalid;
 end;
 
 { tcustomrealgraphdataedit }
@@ -2425,7 +2466,7 @@ begin
  finfo.ca.dim:= innerclientrect;
  finfo.color:= cl_transparent;
  finfo.ca.colorglyph:= cl_black;
- finfo.state:= finfo.state + [ss_showfocusrect,ss_showdefaultrect];
+ finfo.state:= finfo.state + [shs_showfocusrect,shs_showdefaultrect];
  include(fwidgetstate1,ws1_nodesignframe);
  size:= makesize(defaultbuttonwidth,defaultbuttonheight);
 end;
@@ -2452,7 +2493,7 @@ procedure tcustomdatabutton.clientrectchanged;
 begin
  inherited;
  frameskinoptionstoshapestate(fframe,finfo.state);
- if ss_flat in finfo.state then begin
+ if shs_flat in finfo.state then begin
   exclude(fwidgetstate1,ws1_nodesignframe);
  end
  else begin
@@ -2464,9 +2505,10 @@ end;
 function tcustomdatabutton.getframestateflags: framestateflagsty;
 begin
  with finfo do begin
-  result:= combineframestateflags(not isenabled,not (bo_nodefaultframeactive in foptions) and 
-                           (ss_default in finfo.state) or active,
-              ss_mouse in state,ss_clicked in state);
+  result:= combineframestateflags(not isenabled,
+              not (bo_nodefaultframeactive in foptions) and 
+                           (shs_default in finfo.state) or active,
+              shs_mouse in state,shs_clicked in state);
  end;
 end;
 {
@@ -2514,7 +2556,7 @@ begin
  inherited;
  if (info.shiftstate = []) and (bo_executeonkey in foptions) then begin
   if (info.key = key_space) then begin
-   include(finfo.state,ss_clicked);
+   include(finfo.state,shs_clicked);
    invalidaterect(finfo.ca.dim);
   end
   else begin
@@ -2528,8 +2570,8 @@ end;
 
 procedure tcustomdatabutton.dokeyup(var info: keyeventinfoty);
 begin
- if (info.key = key_space) and (ss_clicked in finfo.state) then begin
-  exclude(finfo.state,ss_clicked);
+ if (info.key = key_space) and (shs_clicked in finfo.state) then begin
+  exclude(finfo.state,shs_clicked);
   invalidaterect(finfo.ca.dim);
  end;
  inherited;
@@ -2560,7 +2602,7 @@ begin
   else begin
    imagenr:= fimagenr;
   end;
-  if ss_disabled in finfo.state then begin
+  if shs_disabled in finfo.state then begin
    if fimagenrdisabled = -3 then begin
     if imagenr >= 0 then begin
      imagenrdisabled:= imagenr + fimageoffsetdisabled;
@@ -2603,14 +2645,14 @@ begin
   statebefore:= finfo.state;
   dimbefore:= finfo.ca.dim;
   finfo.ca.dim:= arect;
-  finfo.state:= finfo.state - [ss_focused,ss_clicked,ss_mouse];
+  finfo.state:= finfo.state - [shs_focused,shs_clicked,shs_mouse];
   with pcellinfoty(canvas.drawinfopo)^ do begin
    if ismousecell and (bo_executeonclick in foptions) and 
                                    enabled and not readonly then begin
-    include(finfo.state,ss_mouse);
+    include(finfo.state,shs_mouse);
    end;
    if cell.row = fclickedrow then begin
-    include(finfo.state,ss_clicked);
+    include(finfo.state,shs_clicked);
    end;
   end;
   setactualimagenr(integer(avalue));
@@ -2725,7 +2767,7 @@ end;
 procedure tcustomdatabutton.setgridintf(const intf: iwidgetgrid);
 begin
  inherited;
- exclude(finfo.state,ss_showdefaultrect);
+ exclude(finfo.state,shs_showdefaultrect);
 end;
 
 function tcustomdatabutton.checkfocusshortcut(var info: keyeventinfoty): boolean;
@@ -2830,7 +2872,7 @@ procedure tcustomdatabutton.actionchanged;
 begin
  actioninfotoshapeinfo(self,factioninfo,finfo);
 // if csdesigning in componentstate then begin
-  exclude(finfo.state,ss_invisible);
+  exclude(finfo.state,shs_invisible);
 // end;
  formatchanged;
  checkautosize;

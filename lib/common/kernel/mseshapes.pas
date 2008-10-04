@@ -91,7 +91,7 @@ function updatewidgetshapestate(var info: shapeinfoty; const widget: twidget;
 //                    const ainvisible: boolean = false;
                     const aframe: tcustomframe = nil): boolean;
 function findshapeatpos(const infoar: shapeinfoarty; const apos: pointty;
-               const rejectstates: shapestatesty = [ss_disabled,ss_invisible]): integer;
+               const rejectstates: shapestatesty = [shs_disabled,shs_invisible]): integer;
 procedure initshapeinfo(var ainfo: shapeinfoty);
 
 procedure actioninfotoshapeinfo(var actioninfo: actioninfoty;
@@ -109,8 +109,8 @@ procedure checkbuttonhint(const awidget: twidget; info: mouseeventinfoty;
 procedure drawcaption(const acanvas: tcanvas; const ainfo: captioninfoty);
 procedure initcaptioninfo(var ainfo: captioninfoty);
 
-var
- animatemouseenter: boolean = true;
+//var
+// animatemouseenter: boolean = true;
  
 implementation
 uses
@@ -125,16 +125,23 @@ procedure frameskinoptionstoshapestate(const aframe: tcustomframe;
                                     var dest: shapestatesty);
 begin
  if aframe <> nil then begin
-  updatebit(longword(dest),ord(ss_flat),fso_flat in aframe.optionsskin);
-  updatebit(longword(dest),ord(ss_noanimation),fso_noanim in aframe.optionsskin);
-  updatebit(longword(dest),ord(ss_showfocusrect),
+  updatebit(longword(dest),ord(shs_flat),fso_flat in aframe.optionsskin);
+  updatebit(longword(dest),ord(shs_noanimation),fso_noanim in aframe.optionsskin);
+  updatebit(longword(dest),ord(shs_nomouseanimation),
+                                    fso_nomouseanim in aframe.optionsskin);
+  updatebit(longword(dest),ord(shs_noclickanimation),
+                                    fso_noclickanim in aframe.optionsskin);
+  updatebit(longword(dest),ord(shs_nofocusanimation),
+                                    fso_nofocusanim in aframe.optionsskin);
+  updatebit(longword(dest),ord(shs_showfocusrect),
                               not(fso_nofocusrect in aframe.optionsskin));
-  updatebit(longword(dest),ord(ss_showdefaultrect),
+  updatebit(longword(dest),ord(shs_showdefaultrect),
                               not (fso_nodefaultrect in aframe.optionsskin));
  end
  else begin
-  dest:= (dest - [ss_flat,ss_noanimation]) + 
-                              [ss_showfocusrect,ss_showdefaultrect];
+//  dest:= (dest - [shs_flat,shs_noanimation,shs_nomouseanimation,
+//                  shs_noclickanimation,shs_nofocusanimation]) + 
+//                  [shs_showfocusrect,shs_showdefaultrect];
  end; 
 end;
 
@@ -172,7 +179,7 @@ begin
     if twidget1(awidget).getshowhint and ((info.eventkind = ek_mousepark) or 
                (hintedbutton >= 0))
                 {(application.activehintedwidget = awidget)} then begin
-     if cells[int1].state * [ss_separator,ss_clicked] = [] then begin
+     if cells[int1].state * [shs_separator,shs_clicked] = [] then begin
       hintedbutton:= int1;
       mstr1:= getbuttonhint(int1);
       if (mstr1 <> '') and application.active then begin
@@ -254,9 +261,10 @@ procedure setchecked(var info: shapeinfoty; const value: boolean;
                       const widget: twidget);
 begin
  with info do begin
-  if value xor (ss_checked in state) then begin
+  if value xor (shs_checked in state) then begin
    widget.invalidaterect(ca.dim);
-   updatebit({$ifdef FPC}longword{$else}longword{$endif}(info.state),ord(ss_checked),value);
+   updatebit({$ifdef FPC}longword{$else}longword{$endif}(info.state),
+                           ord(shs_checked),value);
   end;
  end;
 end;
@@ -270,15 +278,15 @@ var
 begin
  with info do begin
   statebefore:= state;
-  updatebit(cardinal(state),ord(ss_disabled),not widget.isenabled or adisabled);
-  updatebit(cardinal(state),ord(ss_focused),widget.active);
+  updatebit(cardinal(state),ord(shs_disabled),not widget.isenabled or adisabled);
+  updatebit(cardinal(state),ord(shs_focused),widget.active);
   result:= state <> statebefore;
   if result then begin
    rect1:= ca.dim;
    if (aframe <> nil) and tframe1(aframe).needsactiveinvalidate then begin
     inflaterect1(rect1,aframe.innerframe);
    end;
-   if ss_widgetorg in state then begin
+   if shs_widgetorg in state then begin
     widget.invalidaterect(rect1,org_widget);
    end
    else begin
@@ -295,7 +303,7 @@ begin
  if infoarpo <> nil then begin
   for int1:= 0 to high(infoarpo^) do begin
    updatebit({$ifdef FPC}longword{$else}longword{$endif}(infoarpo^[int1].state),
-        ord(ss_moveclick),value);
+        ord(shs_moveclick),value);
   end;
  end;
 end;
@@ -319,38 +327,41 @@ begin
  with info,mouseevent do begin
   statebefore:= state;
   if es_drag in eventstate then begin
-   state:= state - [ss_mouse,ss_clicked];
+   state:= state - [shs_mouse,shs_clicked];
    updateshapemoveclick(infoarpo,false);
   end
   else begin
-   if not (ss_invisible in state) and bo1 then begin
+   if not (shs_invisible in state) and bo1 then begin
     case eventkind of
      ek_clientmouseleave,ek_mouseleave: begin
-      if (eventkind = ek_mouseleave) or not (ss_widgetorg in state) then begin
-       state:= state - [ss_mouse,ss_clicked];
+      if (eventkind = ek_mouseleave) or not (shs_widgetorg in state) then begin
+       state:= state - [shs_mouse,shs_clicked];
        updateshapemoveclick(infoarpo,false);
       end;
      end;
      ek_mousemove,ek_mousepark: begin
       if pointinrect(pos,ca.dim) then begin
-       state:= state + [ss_mouse];
+       state:= state + [shs_mouse];
        if (ss_left in shiftstate) and
-         (state * [ss_disabled,ss_moveclick] = [ss_moveclick]) then begin
-        state:= state + [ss_clicked];
+         (state * [shs_disabled,shs_moveclick] = [shs_moveclick]) then begin
+        state:= state + [shs_clicked];
        end;
       end
       else begin
-       state:= state - [ss_mouse,ss_clicked];
+       state:= state - [shs_mouse,shs_clicked];
       end;
      end;
      ek_buttonrelease: begin
       if button = mb_left then begin
        updateshapemoveclick(infoarpo,false);
-       if state * [ss_clicked,ss_checkbox,ss_radiobutton] = [ss_clicked,ss_checkbox] then begin
-        setchecked(info,not (ss_checked in state),widget);
+       if state * [shs_clicked,shs_checkbox,shs_radiobutton] = 
+                                     [shs_clicked,shs_checkbox] then begin
+        setchecked(info,not (shs_checked in state),widget);
        end;
-       if state * [ss_clicked,ss_radiobutton] = [ss_clicked,ss_radiobutton] then begin
-        if [ss_checked,ss_checkbox] * state = [ss_checked,ss_checkbox] then begin
+       if state * [shs_clicked,shs_radiobutton] = 
+                              [shs_clicked,shs_radiobutton] then begin
+        if [shs_checked,shs_checkbox] * state = 
+                              [shs_checked,shs_checkbox] then begin
          setchecked(info,false,widget);
         end
         else begin
@@ -358,7 +369,7 @@ begin
           for int1:= 0 to high(infoarpo^) do begin
            po1:= @infoarpo^[int1];
            if (po1 <> @info) and (po1^.group = info.group) and
-                          (ss_radiobutton in po1^.state) then begin
+                          (shs_radiobutton in po1^.state) then begin
             setchecked(po1^,false,widget);
            end;
           end;
@@ -366,9 +377,9 @@ begin
          end;
         end;
        end;
-       if (eventkind = ek_buttonrelease) and (ss_clicked in state) and
+       if (eventkind = ek_buttonrelease) and (shs_clicked in state) and
             assigned(doexecute) then begin
-        state:= state - [ss_clicked];
+        state:= state - [shs_clicked];
         result:= true;              //state can be invalid after execute
         if widget <> nil then begin //info can be invalid after execute
          widget.invalidaterect(ca.dim);
@@ -377,23 +388,23 @@ begin
         exit;
        end
        else begin
-        state:= state - [ss_clicked];
+        state:= state - [shs_clicked];
        end;
       end;
      end;
      ek_buttonpress: begin
       if canclick and (button = mb_left) and 
-      (not(ss_disabled in state) or 
+      (not(shs_disabled in state) or 
              (widget <> nil) and (csdesigning in widget.componentstate)) 
              and pointinrect(pos,ca.dim) then begin
-       state:= state + [ss_clicked];
+       state:= state + [shs_clicked];
        updateshapemoveclick(infoarpo,true);
       end;
      end;
     end;
    end
    else begin
-    state:= state - [ss_mouse,ss_clicked];
+    state:= state - [shs_mouse,shs_clicked];
    end;
   end;
   result:= result or (state <> statebefore);
@@ -418,7 +429,7 @@ begin
  for int1:= 0 to high(infos) do begin
   result:= updatemouseshapestate(infos[int1],mouseevent,widget,
                                                  nil,@infos) or result;
-  if ss_mouse in infos[int1].state then begin
+  if shs_mouse in infos[int1].state then begin
    if focuseditem <> int1 then begin
     if (focuseditem >= 0) and (focuseditem <= high(infos)) then begin
      widget.invalidaterect(infos[focuseditem].ca.dim);
@@ -436,7 +447,7 @@ var
 begin
  result:= -1;
  for int1:= 0 to high(infos) do begin
-  if ss_mouse in infos[int1].state then begin
+  if shs_mouse in infos[int1].state then begin
    result:= int1;
    break;
   end;
@@ -444,7 +455,8 @@ begin
 end;
 
 function findshapeatpos(const infoar: shapeinfoarty; const apos: pointty;
-               const rejectstates: shapestatesty = [ss_disabled,ss_invisible]): integer;
+               const rejectstates: shapestatesty = 
+                                   [shs_disabled,shs_invisible]): integer;
 var
  int1: integer;
 begin
@@ -641,32 +653,33 @@ var
 begin
  result:= false;
  with canvas,info do begin
-  if ss_separator in state then begin
+  if shs_separator in state then begin
    draw3dframe(canvas,ca.dim,-1,defaultframecolors);
   end
   else begin
-   if ss_flat in state then begin
+   if shs_flat in state then begin
     level:= 0;
    end
    else begin
     level:= 1;
    end;
-   if not (ss_noanimation in state) then begin
-    if (ss_mouse in state) and not (ss_disabled in state) and 
-       (animatemouseenter or (ss_flat in state)) or
-       (state * [ss_focused,ss_focusanimation] = 
-                                   [ss_focused,ss_focusanimation]) then begin
+   if not (shs_noanimation in state) then begin
+    if not (shs_nomouseanimation in state) and
+                     (shs_mouse in state) and not (shs_disabled in state) or
+           (state * [shs_nofocusanimation,shs_focused,shs_focusanimation] = 
+                                   [shs_focused,shs_focusanimation]) then begin
      inc(level);
     end;
-    if (ss_clicked in state) or
-         (state * [ss_checked,ss_checkbutton] = 
-                                   [ss_checked,ss_checkbutton])  then begin
+    if not (shs_noclickanimation in state) and (shs_clicked in state) or
+         (state * [shs_checked,shs_checkbutton] = 
+                                   [shs_checked,shs_checkbutton])  then begin
      level:= -1;
     end;
    end;
    clientrect:= ca.dim;
-   if (state * [ss_focused,ss_showdefaultrect] = [ss_focused,ss_showdefaultrect]) or
-          (state * [ss_disabled,ss_default] = [ss_default]) then begin
+   if (state * [shs_focused,shs_showdefaultrect] = 
+                           [shs_focused,shs_showdefaultrect]) or
+          (state * [shs_disabled,shs_default] = [shs_default]) then begin
     canvas.drawframe(clientrect,-1,cl_black);
     inflaterect1(clientrect,-1);
    end;
@@ -675,7 +688,7 @@ begin
    if (clientrect.cx > 0) and (clientrect.cy > 0) then begin
     result:= true;
     col1:= color;
-    if ss_active in state then begin
+    if shs_active in state then begin
      col1:= coloractive;
     end;
     if col1 <> cl_transparent then begin
@@ -776,7 +789,7 @@ begin
    canvas.intersectcliprect(arect);
    result:= true;
    rect1:= adjustimagerect(info.ca,arect,align1);
-   if ss_disabled in state then begin
+   if shs_disabled in state then begin
     int1:= imagenrdisabled;
     if int1 = -2 then begin
      int1:= ca.imagenr;
@@ -786,7 +799,7 @@ begin
    else begin
     int1:= ca.imagenr;
    end;
-   if (ss_checked in state) and (int1 >= 0) then begin
+   if (shs_checked in state) and (int1 >= 0) then begin
     inc(int1,imagecheckedoffset);
    end;
    if ca.colorglyph <> cl_none then begin
@@ -868,7 +881,7 @@ begin
      exclude(textflags,tf_bottom);
     end;
    end;
-   if ss_disabled in state then begin
+   if shs_disabled in state then begin
     include(textflags,tf_grayed);
    end;
    if outerrect <> nil then begin
@@ -888,12 +901,13 @@ var
  rect1,rect2: rectty;
  pos: captionposty;
 begin
- if not (ss_invisible in info.state) and 
+ if not (shs_invisible in info.state) and 
                         drawbuttonframe(canvas,info,rect1) then begin
   rect2:= rect1;
   drawbuttonimage(canvas,info,rect1);
   with canvas,info do begin
-   if state * [ss_focused,ss_showfocusrect] = [ss_focused,ss_showfocusrect] then begin
+   if state * [shs_focused,shs_showfocusrect] = 
+                   [shs_focused,shs_showfocusrect] then begin
     drawfocusrect(canvas,inflaterect(rect2,-focusrectdist));
    end;
    drawbuttoncaption(canvas,info,rect1,
@@ -939,7 +953,8 @@ procedure drawtoolbutton(const canvas: tcanvas; var info: shapeinfoty);
 var
  rect1: rectty;
 begin
- if not (ss_invisible in info.state) and drawbuttonframe(canvas,info,rect1) then begin
+ if not (shs_invisible in info.state) and 
+                      drawbuttonframe(canvas,info,rect1) then begin
   info.ca.captionpos:= cp_center;
   drawbuttonimage(canvas,info,rect1{,cp_center});
  end;
@@ -952,7 +967,7 @@ var
  align1: alignmentsty;
  int1: integer;
 begin
- result:= [ss_checkbox,ss_radiobutton] * info.state <> [];
+ result:= [shs_checkbox,shs_radiobutton] * info.state <> [];
  if result then begin
   rect1:= arect;
   rect1.cx:= menucheckboxwidth;
@@ -964,14 +979,14 @@ begin
    inc(arect.x,menucheckboxwidth);
   end;
   dec(arect.cx,menucheckboxwidth);
-  if ss_checked in info.state then begin
-   if ss_disabled in info.state then begin
+  if shs_checked in info.state then begin
+   if shs_disabled in info.state then begin
     align1:= [al_xcentered,al_ycentered,al_grayed];
    end
    else begin
     align1:= [al_xcentered,al_ycentered];
    end;
-   if ss_radiobutton in info.state then begin
+   if shs_radiobutton in info.state then begin
     int1:= ord(stg_checkedradio);
    end
    else begin
@@ -991,7 +1006,7 @@ var
  rect1: rectty;
 begin
  glyph1:= stg_arrowrightsmall;
- if ss_horz in info.state then begin
+ if shs_horz in info.state then begin
   glyph1:= stg_arrowdownsmall;
   int1:= menuarrowwidthhorz;
  end
@@ -999,7 +1014,7 @@ begin
   int1:= menuarrowwidth;
  end;
  alignment:= [al_xcentered,al_ycentered];
- if ss_disabled in info.state then begin
+ if shs_disabled in info.state then begin
   include(alignment,al_grayed);
   inc(int1);
  end;
@@ -1019,11 +1034,11 @@ procedure drawmenubutton(const canvas: tcanvas; var info: shapeinfoty;
 var
  rect1: rectty;
 begin
- if not (ss_invisible in info.state) and 
+ if not (shs_invisible in info.state) and 
               drawbuttonframe(canvas,info,rect1) then begin
   info.ca.captionpos:= cp_right;
   drawbuttonimage(canvas,info,rect1{,cp_left});
-  if (ss_menuarrow in info.state) then begin
+  if (shs_menuarrow in info.state) then begin
 //  if (ss_submenu in info.state)  then begin
    drawmenuarrow(canvas,info,rect1);
   end;
@@ -1044,7 +1059,7 @@ var
  pos1,pos2: captionposty;
 begin
  with canvas,info do begin
-  if not (ss_invisible in state) and 
+  if not (shs_invisible in state) and 
                       drawbuttonframe(canvas,info,rect1) then begin
    if ca.captionpos = cp_left then begin
     pos1:= cp_right;
@@ -1057,7 +1072,8 @@ begin
    rect2:= rect1;
    drawbuttonimage(canvas,info,rect1{,pos1});
    drawbuttoncheckbox(canvas,info,rect1,pos2);
-   if state * [ss_focused,ss_showfocusrect] = [ss_focused,ss_showfocusrect] then begin
+   if state * [shs_focused,shs_showfocusrect] = 
+                         [shs_focused,shs_showfocusrect] then begin
     drawfocusrect(canvas,inflaterect(rect2,-focusrectdist));
    end;
    rect2:= rect1; //outerframe
@@ -1066,8 +1082,8 @@ begin
    end;
    drawbuttoncaption(canvas,info,rect1,pos1,@rect2);
   end;
-  if not (ss_checked in state) then begin
-   if ss_opposite in state then begin
+  if not (shs_checked in state) then begin
+   if shs_opposite in state then begin
     color1:= defaultframecolors.shadow.color;
    end
    else begin
@@ -1077,8 +1093,8 @@ begin
   else begin
    color1:= color;
   end;
-  if ss_vert in state then begin
-   if ss_opposite in state then begin
+  if shs_vert in state then begin
+   if shs_opposite in state then begin
     int1:= ca.dim.x;
    end
    else begin
@@ -1088,7 +1104,7 @@ begin
                        makepoint(int1,ca.dim.y+ca.dim.cy-1),color1);
   end
   else begin
-   if ss_opposite in state then begin
+   if shs_opposite in state then begin
     int1:= ca.dim.y;
    end
    else begin

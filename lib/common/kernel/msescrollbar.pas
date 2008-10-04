@@ -657,7 +657,7 @@ begin
    if acolor <> cl_none then begin
     with areas[fpaintedbutton] do begin
      statebefore:= state;
-     state:= state - [ss_mouse,ss_clicked];     
+     state:= state - [shs_mouse,shs_clicked];     
     end; 
    end;
    drawtoolbutton(canvas,areas[fpaintedbutton]);
@@ -833,7 +833,7 @@ procedure tcustomscrollbar.mouseevent(var info: mouseeventinfoty);
   end;
   freeandnil(frepeater);
   if clickedareaisvalid then begin
-   exclude(fdrawinfo.areas[fclickedarea].state,ss_clicked);
+   exclude(fdrawinfo.areas[fclickedarea].state,shs_clicked);
    invalidateclickedarea;
   end;
   if (fclickedarea = sbbu_move) and not cancel then begin
@@ -869,14 +869,14 @@ procedure tcustomscrollbar.mouseevent(var info: mouseeventinfoty);
   for ar2:= firstbutton to lastbutton do begin
    with fdrawinfo,areas[ar2] do begin
     if (ar2 = ar1) then begin
-     if not (ss_mouse in state) then begin
-      include(state,ss_mouse);
+     if not (shs_mouse in state) then begin
+      include(state,shs_mouse);
       fintf.invalidaterect(buttonareas[buttonareaty(ar2)],forg);
      end;
     end
     else begin
-     if ss_mouse in state then begin
-      exclude(state,ss_mouse);
+     if shs_mouse in state then begin
+      exclude(state,shs_mouse);
       fintf.invalidaterect(buttonareas[buttonareaty(ar2)],forg);
      end;
     end;
@@ -918,7 +918,7 @@ begin
                           not (es_reflected in info.eventstate)) then begin
      fclickedarea:= ar1;
      if clickedareaisvalid then begin
-      include(fdrawinfo.areas[fclickedarea].state,ss_clicked);
+      include(fdrawinfo.areas[fclickedarea].state,shs_clicked);
       with fintf.getwidget do begin
        if not mousecaptured then begin
         capturemouse(true);
@@ -1110,7 +1110,7 @@ end;
 procedure tcustomscrollbar.enter;
 begin
  with fdrawinfo,areas[sbbu_move] do begin
-  include(state,ss_focused);
+  include(state,shs_focused);
   fintf.invalidaterect(buttonareas[bbu_move],forg);
  end;
 end;
@@ -1118,7 +1118,7 @@ end;
 procedure tcustomscrollbar.exit;
 begin
  with fdrawinfo,areas[sbbu_move] do begin
-  exclude(fdrawinfo.areas[sbbu_move].state,ss_focused);
+  exclude(fdrawinfo.areas[sbbu_move].state,shs_focused);
   fintf.invalidaterect(buttonareas[bbu_move],forg);
  end;
 end;
@@ -1307,7 +1307,7 @@ function tcustomscrollbar.getframestateflags: framestateflagsty;
 begin
  with fdrawinfo.areas[fpaintedbutton],fintf.getwidget do begin
   result:= combineframestateflags(not isenabled,active,
-       ss_mouse in state, ss_clicked in state); 
+       shs_mouse in state, shs_clicked in state); 
  end;
 end;
 

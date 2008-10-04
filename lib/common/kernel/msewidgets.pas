@@ -124,6 +124,15 @@ type
    property frameimage_offsetactive;
    property frameimage_offsetactivemouse;
    property frameimage_offsetactiveclicked;
+
+   property frameface_list;
+   property frameface_offset;
+   property frameface_offsetdisabled;
+   property frameface_offsetmouse;
+   property frameface_offsetclicked;
+   property frameface_offsetactive;
+   property frameface_offsetactivemouse;
+   property frameface_offsetactiveclicked;
    
    property optionsskin;
 
@@ -266,6 +275,15 @@ type
    property frameimage_offsetactive;
    property frameimage_offsetactivemouse;
    property frameimage_offsetactiveclicked;
+
+   property frameface_list;
+   property frameface_offset;
+   property frameface_offsetdisabled;
+   property frameface_offsetmouse;
+   property frameface_offsetclicked;
+   property frameface_offsetactive;
+   property frameface_offsetactivemouse;
+   property frameface_offsetactiveclicked;
    
    property optionsskin;
 
@@ -377,6 +395,15 @@ type
    property frameimage_offsetactive;
    property frameimage_offsetactivemouse;
    property frameimage_offsetactiveclicked;
+
+   property frameface_list;
+   property frameface_offset;
+   property frameface_offsetdisabled;
+   property frameface_offsetmouse;
+   property frameface_offsetclicked;
+   property frameface_offsetactive;
+   property frameface_offsetactivemouse;
+   property frameface_offsetactiveclicked;
    
    property optionsskin;
 
@@ -509,6 +536,15 @@ type
    property frameimage_offsetactive;
    property frameimage_offsetactivemouse;
    property frameimage_offsetactiveclicked;
+
+   property frameface_list;
+   property frameface_offset;
+   property frameface_offsetdisabled;
+   property frameface_offsetmouse;
+   property frameface_offsetclicked;
+   property frameface_offsetactive;
+   property frameface_offsetactivemouse;
+   property frameface_offsetactiveclicked;
    
    property optionsskin;
  
@@ -1500,7 +1536,7 @@ begin
  finfo.color:= cl_transparent;
  finfo.ca.colorglyph:= cl_black;
  finfo.doexecute:= {$ifdef FPC}@{$endif}doshapeexecute;
- finfo.state:= finfo.state+[ss_showfocusrect,ss_showdefaultrect];
+ finfo.state:= finfo.state+[shs_showfocusrect,shs_showdefaultrect];
 end;
 {
 procedure tactionsimplebutton.setoptionswidget(const avalue: optionswidgetty);
@@ -1519,7 +1555,7 @@ begin
  inherited;
  finfo.ca.dim:= innerclientrect;
  frameskinoptionstoshapestate(fframe,finfo.state);
- if ss_flat in finfo.state then begin
+ if shs_flat in finfo.state then begin
   exclude(fwidgetstate1,ws1_nodesignframe);
  end
  else begin
@@ -1576,7 +1612,7 @@ begin
  with info do begin
   if (shiftstate = []) and (bo_executeonkey in foptions) then begin
    if (key = key_space) then begin
-    include(finfo.state,ss_clicked);
+    include(finfo.state,shs_clicked);
     invalidateframestaterect(finfo.ca.dim,fframe);
    end
    else begin
@@ -1592,8 +1628,8 @@ end;
 procedure tactionsimplebutton.dokeyup(var info: keyeventinfoty);
 begin
  inherited;
- if (info.key = key_space) and (ss_clicked in finfo.state) then begin
-  exclude(finfo.state,ss_clicked);
+ if (info.key = key_space) and (shs_clicked in finfo.state) then begin
+  exclude(finfo.state,shs_clicked);
   invalidateframestaterect(finfo.ca.dim,fframe);
   if (info.shiftstate = []) and (bo_executeonkey in foptions) then begin
    include(info.eventstate,es_processed);
@@ -1635,8 +1671,8 @@ function tactionsimplebutton.getframestateflags: framestateflagsty;
 begin
  result:= combineframestateflags(not isenabled,
                      not (bo_nodefaultframeactive in foptions) and 
-                           (ss_default in finfo.state) or active,
-                     ss_mouse in finfo.state,ss_clicked in finfo.state);
+                           (shs_default in finfo.state) or active,
+                     shs_mouse in finfo.state,shs_clicked in finfo.state);
 end;
 {
 function tactionsimplebutton.getframeclicked: boolean;
@@ -2763,7 +2799,7 @@ begin
     include(info.eventstate,es_processed);
    end;
   end;
-  if ss_clicked in fbuttons[int1].state then begin
+  if shs_clicked in fbuttons[int1].state then begin
    clickedbutton:= int1;
   end;
  end;
@@ -2969,10 +3005,10 @@ var
  begin
   with fbuttons[ord(button)] do begin
    if button in fdisabledbuttons then begin
-    include(state,ss_disabled);
+    include(state,shs_disabled);
    end
    else begin
-    exclude(state,ss_disabled);
+    exclude(state,shs_disabled);
    end;
    if (button in fforcevisiblebuttons) or
         not (button in fforceinvisiblebuttons) and (button in fneededbuttons) then begin
@@ -3015,10 +3051,10 @@ begin             //updatelayout
   if (akind in fforcevisiblebuttons) or
         not (akind in fforceinvisiblebuttons) and (akind in fneededbuttons) then begin
    inc(buttoncount);
-   exclude(fbuttons[ord(akind)].state,ss_invisible);
+   exclude(fbuttons[ord(akind)].state,shs_invisible);
   end
   else begin
-   include(fbuttons[ord(akind)].state,ss_invisible);
+   include(fbuttons[ord(akind)].state,shs_invisible);
   end;
  end;
  if buttoncount = 0 then begin
@@ -4183,7 +4219,7 @@ end;
 
 procedure tscrollface.paint(const canvas: tcanvas; const rect: rectty);
 begin
- inherited paint(canvas,fintf.getwidget.clientrect);
+ inherited paint(canvas,fintf.getclientrect);
 end;
 
 { tscrollingwidget }

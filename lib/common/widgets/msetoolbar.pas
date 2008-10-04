@@ -918,9 +918,9 @@ begin
        with cells[int1] do begin
         color:= cl_parent;
         actioninfotoshapeinfo(buttons[int1].finfo,cells[int1]);
-        include(state,ss_flat);
-        if state * [ss_checkbox,ss_radiobutton] <> [] then begin
-         include(state,ss_checkbutton);
+        include(state,shs_flat);
+        if state * [shs_checkbox,shs_radiobutton] <> [] then begin
+         include(state,shs_checkbutton);
         end;
         doexecute:= {$ifdef FPC}@{$endif}buttons[int1].doexecute;
         if not (as_invisible in buttons[int1].state) then begin
@@ -973,7 +973,7 @@ begin
          end;
         end
         else begin
-         include(state,ss_invisible);
+         include(state,shs_invisible);
         end;
        end;
       end;
@@ -1064,10 +1064,10 @@ begin
    end;
    if button1 = sender then begin
     with cells[int1] do begin
-     bo1:= (ss_invisible in state) xor (as_invisible in button1.finfo.state) or 
-         ((ss_separator in state) xor (mao_separator in button1.options)) or
-         ((ss_checkbox in state) xor (mao_checkbox in button1.options)) or
-         ((ss_radiobutton in state) xor (mao_radiobutton in button1.options));
+     bo1:= (shs_invisible in state) xor (as_invisible in button1.finfo.state) or 
+         ((shs_separator in state) xor (mao_separator in button1.options)) or
+         ((shs_checkbox in state) xor (mao_checkbox in button1.options)) or
+         ((shs_radiobutton in state) xor (mao_radiobutton in button1.options));
      actionstatestoshapestates(button1.finfo,state);
      ca.imagenr:= buttons[int1].finfo.imagenr;
      ca.colorglyph:= buttons[int1].finfo.colorglyph;
@@ -1226,10 +1226,10 @@ var
 begin
  begin
   if enabledonly then begin
-   int1:= findshapeatpos(flayout.cells,apos,[ss_invisible,ss_disabled]);
+   int1:= findshapeatpos(flayout.cells,apos,[shs_invisible,shs_disabled]);
   end
   else begin
-   int1:= findshapeatpos(flayout.cells,apos,[ss_invisible]);
+   int1:= findshapeatpos(flayout.cells,apos,[shs_invisible]);
   end;
   if int1 >= 0 then begin
    result:= flayout.buttons[int1];

@@ -362,9 +362,15 @@ type
    function calcsizingrect(const akind: sizingkindty;
                                 const offset: pointty): rectty;
    //iface
-   function getwidget: twidget;
+   function getclientrect: rectty;
+   procedure invalidate;
    function translatecolor(const acolor: colorty): colorty;
+   procedure setlinkedvar(const source: tmsecomponent; var dest: tmsecomponent;
+              const linkintf: iobjectlink = nil);
+   function getcomponentstate: tcomponentstate;
+   procedure widgetregioninvalid;
    //iobjectpicker
+   function getwidget: twidget;
    function getcursorshape(const pos: pointty; const shiftstate: shiftstatesty; 
                                      var shape: cursorshapety): boolean;
                    //true if found
@@ -3492,6 +3498,32 @@ end;
 function tgripframe.getwidget: twidget;
 begin
  result:= fcontroller.fintf.getwidget;
+end;
+
+function tgripframe.getclientrect: rectty;
+begin
+ fcontroller.fintf.getwidget.clientrect;
+end;
+
+procedure tgripframe.invalidate;
+begin
+ fcontroller.fintf.getwidget.invalidate;
+end;
+
+procedure tgripframe.setlinkedvar(const source: tmsecomponent;
+               var dest: tmsecomponent; const linkintf: iobjectlink = nil);
+begin
+ twidget1(fcontroller.fintf).setlinkedvar(source,dest,linkintf);
+end;
+
+function tgripframe.getcomponentstate: tcomponentstate;
+begin
+ result:= fcontroller.fintf.getwidget.componentstate;
+end;
+
+procedure tgripframe.widgetregioninvalid;
+begin
+ twidget1(fcontroller.fintf.getwidget).widgetregioninvalid;
 end;
 
 procedure tgripframe.updatemousestate(const sender: twidget;

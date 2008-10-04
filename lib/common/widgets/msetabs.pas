@@ -669,7 +669,7 @@ begin
   lasttab:= -1;
   cxinflate:= tabs.fcaptionframe.left + tabs.fcaptionframe.right + 2;
   cyinflate:= tabs.fcaptionframe.top + tabs.fcaptionframe.bottom + 2;
-  if ss_vert in options then begin
+  if shs_vert in options then begin
    aval:= dim.y;
    endval:= dim.y + dim.cy;
    for int1:= 0 to high(cells) do begin
@@ -682,7 +682,7 @@ begin
       dim.cy:= imagelist.height;
      end;
      if (ts_invisible in fstate) or (int1 < firsttab) or (aval >= endval) then begin
-      include(state,ss_invisible);
+      include(state,shs_invisible);
      end
      else begin
       inc(aval,dim.cy);
@@ -691,7 +691,7 @@ begin
       end;
      end;
      if ts_active in fstate then begin
-      if ss_opposite in options then begin
+      if shs_opposite in options then begin
        dim.x:= -1;
       end
       else begin
@@ -715,7 +715,7 @@ begin
      docommon(tabs[int1],cells[int1],rect1);
      dim.cx:= rect1.cx + cxinflate;
      if (ts_invisible in fstate) or (int1 < firsttab) or (aval >= endval) then begin
-      include(state,ss_invisible);
+      include(state,shs_invisible);
      end
      else begin
       inc(aval,dim.cx);
@@ -724,7 +724,7 @@ begin
       end;
      end;
      if ts_active in fstate then begin
-      if ss_opposite in options then begin
+      if shs_opposite in options then begin
        dim.y:= -1;
       end
       else begin
@@ -741,11 +741,11 @@ begin
   bo1:= not twidget(tabs.fowner).isenabled;
   for int1:= 0 to high(cells) do begin
    with tabs[int1],cells[int1],ca do begin
-    state:= (state + [ss_showfocusrect] + options * [ss_vert,ss_opposite]) - 
-                                                      [ss_focused];
+    state:= (state + [shs_showfocusrect] + options * [shs_vert,shs_opposite]) - 
+                                                      [shs_focused];
     if ts_active in fstate then begin
      if focused then begin
-      state:= state + [ss_focused];
+      state:= state + [shs_focused];
      end;
      if fcoloractive = cl_default then begin
       color:= tabs.fcoloractive;
@@ -765,7 +765,7 @@ begin
      face:= tabs.face;
     end;
     if bo1 or (ts_disabled in fstate) then begin
-     include(state,ss_disabled);
+     include(state,shs_disabled);
     end;
     doexecute:= {$ifdef FPC}@{$endif}execute;
    end;
@@ -773,7 +773,7 @@ begin
   with stepinfo do begin
    up:= 0;
    for int1:= firsttab to high(cells) do begin
-    if not (ss_invisible in cells[int1].state) and (up = 0) then begin
+    if not (shs_invisible in cells[int1].state) and (up = 0) then begin
      up:= int1-firsttab;
      break;
     end;
@@ -792,7 +792,7 @@ begin
    pagelast:= 0;
    endval:= 0;
    down:= 0;
-   if ss_vert in options then begin
+   if shs_vert in options then begin
     for int1:= firsttab - 1 downto 0 do begin
      with cells[int1].ca do begin
       dec(pagedown);
@@ -1268,10 +1268,10 @@ begin
   dim:= innerclientrect;
   options:= [];
   if tabo_vertical in foptions then begin
-   include(options,ss_vert);
+   include(options,shs_vert);
   end;
   if tabo_opposite in foptions then begin
-   include(options,ss_opposite);
+   include(options,shs_opposite);
   end;
   calctablayout(flayoutinfo,getcanvas,focused);
   if tabo_vertical in foptions then begin
@@ -1374,7 +1374,7 @@ begin
       if activetab >= firsttab + stepinfo.pageup then begin
        firsttab:= activetab + 1;
        int2:= 0;
-       if ss_vert in options then begin
+       if shs_vert in options then begin
         for int1:= activetab downto 0 do begin
          if not (ts_invisible in tabs[int1].fstate) then begin
           inc(int2,cells[int1].ca.dim.cy);
@@ -1416,7 +1416,7 @@ begin
   movetab(sender.findex,0);
  end;
  sender.active:= true;
- include(flayoutinfo.cells[sender.index].state,ss_mouse);
+ include(flayoutinfo.cells[sender.index].state,shs_mouse);
 end;
 
 procedure tcustomtabbar.tabschanged(const sender: tarrayprop;
@@ -1446,8 +1446,8 @@ begin
   end;
   int1:= high(cells);
   rect1:= innerclientrect;
-  if ss_vert in options then begin
-   if ss_opposite in options then begin
+  if shs_vert in options then begin
+   if shs_opposite in options then begin
     int2:= rect1.x;
     color1:= defaultframecolors.shadow.color;
    end
@@ -1466,7 +1466,7 @@ begin
    end;
   end
   else begin
-   if ss_opposite in options then begin
+   if shs_opposite in options then begin
     int2:= rect1.y;
     color1:= defaultframecolors.shadow.color;
    end
@@ -1646,10 +1646,10 @@ function tcustomtabbar.tabatpos(const apos: pointty; const enabledonly: boolean 
 begin
  begin
   if enabledonly then begin
-   result:= findshapeatpos(flayoutinfo.cells,apos,[ss_invisible,ss_disabled]);
+   result:= findshapeatpos(flayoutinfo.cells,apos,[shs_invisible,shs_disabled]);
   end
   else begin
-   result:= findshapeatpos(flayoutinfo.cells,apos,[ss_invisible]);
+   result:= findshapeatpos(flayoutinfo.cells,apos,[shs_invisible]);
   end;
  end;
 end;
@@ -1850,7 +1850,7 @@ var
 begin
  if not (es_processed in info.eventstate) then begin
   bo1:= false;
-  if ss_vert in flayoutinfo.options then begin
+  if shs_vert in flayoutinfo.options then begin
    case info.key of 
     key_down: begin
      bo1:= upstep(ow_arrowfocusout in optionswidget);
