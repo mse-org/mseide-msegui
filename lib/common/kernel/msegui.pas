@@ -256,7 +256,27 @@ type
   activemouse: integer;
   activeclicked: integer;
  end;
-   
+
+ frameimageoffsetsty = record
+  offset: imagenrty;
+  disabled: imagenrty;
+  mouse: imagenrty;
+  clicked: imagenrty;
+  active: imagenrty;
+  activemouse: imagenrty;
+  activeclicked: imagenrty;
+ end;
+
+ framefaceoffsetsty = record
+  offset: facenrty;
+  disabled: facenrty;
+  mouse: facenrty;
+  clicked: facenrty;
+  active: facenrty;
+  activemouse: facenrty;
+  activeclicked: facenrty;
+ end;
+
  frameinfoty = record
   levelo: integer;
   leveli: integer;
@@ -271,10 +291,10 @@ type
   frameimage_top: integer;
   frameimage_right: integer;
   frameimage_bottom: integer;
-  frameimage_offsets: frameoffsetsty;
+  frameimage_offsets: frameimageoffsetsty;
   frameimage_list: timagelist; //last!
 
-  frameface_offsets: frameoffsetsty;
+  frameface_offsets: framefaceoffsetsty;
   frameface_list: tfacelist; //last!
 
   optionsskin: frameskinoptionsty;
@@ -325,7 +345,7 @@ type
    function isfirightstored: boolean;
    procedure setframei_top(const Value: integer);
    function isfitopstored: boolean;
-   
+
    procedure setframeimage_list(const avalue: timagelist);
    function getimagelist: timagelist;
    function isframeimage_liststored: boolean;
@@ -3084,7 +3104,8 @@ begin
   canvas.fillrect(rect1,fi.colorclient);
  end;
  if fi.frameface_list <> nil then begin
-  faceoffs:= calcframestateoffs(fintf.getframestateflags,fi.frameface_offsets);
+  faceoffs:= calcframestateoffs(fintf.getframestateflags,
+                                  frameoffsetsty(fi.frameface_offsets));
   if (faceoffs >= 0) and (faceoffs < fi.frameface_list.list.count) then begin
    fi.frameface_list.list[faceoffs].paint(canvas,rect1);
   end;
@@ -3121,7 +3142,7 @@ begin
   draw3dframe(canvas,rect1,afi.leveli,afi.framecolors);
  end;
  if afi.frameimage_list <> nil then begin
-  imageoffs:= calcframestateoffs(astate,afi.frameimage_offsets);
+  imageoffs:= calcframestateoffs(astate,frameoffsetsty(afi.frameimage_offsets));
   if imageoffs >= 0 then begin
    afi.frameimage_list.paint(canvas,imageoffs,rect2.pos);
    afi.frameimage_list.paint(canvas,imageoffs+1,
