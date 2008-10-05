@@ -1200,10 +1200,10 @@ begin
      int2:= fielddef1.size;
     end;
     tmsestringfield1(field1).setismsestring(@getmsestringdata,
-                                                  @setmsestringdata,int2);
+                                                  @setmsestringdata,int2,false);
    end
    else begin
-    tmsestringfield1(field1).setismsestring(nil,nil,int2);
+    tmsestringfield1(field1).setismsestring(nil,nil,int2,false);
    end;
   end
   else begin

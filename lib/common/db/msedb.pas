@@ -28,7 +28,7 @@ type
  datasetarty = array of tdataset;
 const
  charfields = [ftstring,ftfixedchar];
- textfields = [ftstring,ftfixedchar,ftwidestring,ftmemo];
+ textfields = [ftstring,ftfixedchar,ftwidestring,ftfixedwidechar,ftmemo];
  memofields = textfields+[ftmemo];
  integerfields = [ftsmallint,ftinteger,ftword,ftlargeint,ftbcd];
  booleanfields = [ftboolean,ftstring,ftfixedchar]+integerfields-[ftbcd];
@@ -36,6 +36,7 @@ const
  datetimefields = [ftdate,fttime,ftdatetime];
  stringfields = textfields + integerfields + booleanfields +
                 realfields + datetimefields;
+ widestringfields = [ftwidestring,ftfixedwidechar];
  blobfields = [ftblob,ftmemo,ftgraphic{,ftstring}];
  defaultproviderflags = [pfInUpdate,pfInWhere];
 
@@ -150,6 +151,7 @@ type
    ftagpo: pointer;
    fvaluebuffer: msestring;
    fvalidating: boolean;
+   fisftwidestring: boolean;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
    //ifieldcomponent
@@ -161,8 +163,9 @@ type
    procedure setaswidestring(const avalue: widestring); override;
   {$endif}
    procedure setismsestring(const getter: getmsestringdataty;
-                                             const setter: setmsestringdataty;
-                                             const acharacterlength: integer);
+                            const setter: setmsestringdataty;
+                            const acharacterlength: integer;
+                            const aisftwidestring: boolean);
    function HasParent: Boolean; override;
    function GetDataSize: Word; override;
    function GetAsString: string; override;
@@ -179,6 +182,7 @@ type
    function oldmsestring(out aisnull: boolean): msestring;
    property characterlength: integer read fcharacterlength;
    property tagpo: pointer read ftagpo write ftagpo;
+   property isftwidestring: boolean read fisftwidestring;
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
@@ -995,14 +999,14 @@ const
     //ftParadoxOle, ftDBaseOle, ftTypedBinary, ftCursor, ftFixedChar,
       ft_unknown,ft_unknown,ft_unknown,ft_unknown,ft_string,
     //ftWideString, ftLargeint, ftADT, ftArray, ftReference,
-      ft_unknown,ft_largeint,ft_unknown,ft_unknown,ft_unknown,
+      ft_string,ft_largeint,ft_unknown,ft_unknown,ft_unknown,
     //ftDataSet, ftOraBlob, ftOraClob, ftVariant, ftInterface,
       ft_unknown,ft_unknown,ft_unknown,ft_unknown,ft_unknown,
     //ftIDispatch, ftGuid, ftTimeStamp, ftFMTBcd
       ft_unknown,ft_unknown,ft_unknown,ft_unknown
       {$ifdef mse_FPC_2_2}
     //ftFixedWideChar,ftWideMemo
-      ,ft_unknown,    ft_unknown 
+      ,ft_string,    ft_string 
       {$endif}
       );
 
@@ -1011,7 +1015,7 @@ const
  blobfcomp = [ftblob,ftgraphic,ftmemo];
  memofcomp = [ftmemo];
  longintfcomp = [ftboolean,ftsmallint,ftinteger,ftword];
- stringfcomp = [ftstring,ftfixedchar];
+ stringfcomp = [ftstring,ftfixedchar,ftwidestring,ftfixedwidechar,ftwidememo];
  booleanfcomp = [ftboolean,ftsmallint,ftinteger,ftword];
       
  fieldcompatibility: array[tfieldtype] of fieldtypesty = (
@@ -1028,14 +1032,14 @@ const
     //ftParadoxOle, ftDBaseOle, ftTypedBinary,     ftCursor, tFixedChar,
       [ftParadoxOle],[ftDBaseOle],[ftTypedBinary],[ftCursor],stringfcomp,
     //ftWideString, ftLargeint, ftADT, ftArray, ftReference,
-     [ftWideString],[ftLargeint],[ftADT],[ftArray],[ftReference],
+     stringfcomp,[ftLargeint],[ftADT],[ftArray],[ftReference],
     //ftDataSet, ftOraBlob, ftOraClob, ftVariant, ftInterface,
       [ftDataSet],[ftOraBlob],[ftOraClob],[ftVariant],[ftInterface],
     //ftIDispatch, ftGuid, ftTimeStamp, ftFMTBcd);
       [ftIDispatch],[ftGuid],[ftTimeStamp],[ftFMTBcd]
     {$ifdef mse_FPC_2_2}
     //ftFixedWideChar,ftWideMemo
-      ,[ftfixedwidechar],[ftwidememo]   
+      ,stringfcomp,stringfcomp   
     {$endif}
       );
 
@@ -1998,12 +2002,14 @@ begin
 end;
 }
 procedure tmsestringfield.setismsestring(const getter: getmsestringdataty;
-           const setter: setmsestringdataty; const acharacterlength: integer);
+           const setter: setmsestringdataty; const acharacterlength: integer;
+           const aisftwidestring: boolean);
 begin
  fcharacterlength:= acharacterlength;
  size:= acharacterlength;
  fgetmsestringdata:= getter;
  fsetmsestringdata:= setter;
+ fisftwidestring:= aisftwidestring;
 end;
 
 function tmsestringfield.GetDataSize: Word;

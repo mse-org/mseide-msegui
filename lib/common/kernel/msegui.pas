@@ -576,7 +576,7 @@ type
 
 
    property optionsskin: frameskinoptionsty read fi.optionsskin 
-                    write setoptionsskin stored isoptionsskinstored;
+                    write setoptionsskin stored isoptionsskinstored default [];
    property colorclient: colorty read fi.colorclient write setcolorclient
                      stored iscolorclientstored default cl_transparent;
    property localprops: framelocalpropsty read flocalprops write setlocalprops default []; 

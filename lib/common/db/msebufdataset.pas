@@ -21,6 +21,7 @@ unit msebufdataset;
 {$ifdef VER2_1_5} {$define mse_FPC_2_2} {$endif}
 {$ifdef VER2_2} {$define mse_FPC_2_2} {$endif}
 {$ifdef VER2_3} {$define mse_FPC_2_2} {$endif}
+{$ifdef VER2_4} {$define mse_FPC_2_2} {$endif}
 {$ifdef FPC}{$mode objfpc}{$h+}{$GOTO ON}{$interfaces corba}{$endif}
 
 interface 
@@ -483,6 +484,7 @@ type
   protected
    fbrecordcount: integer;
    ffieldinfos: fieldinfoarty;
+   ffieldorder: integerarty;
    factindexpo: pindexty;    
    fbstate: bufdatasetstatesty;
    fallpacketsfetched : boolean;
@@ -1880,7 +1882,7 @@ function tmsebufdataset.getfieldsize(const datatype: tfieldtype;
 begin
  isstring:= false;
  case datatype of
-  ftstring,ftfixedchar: begin
+  ftstring,ftfixedchar,ftwidestring,ftfixedwidechar: begin
    isstring:= true;
    result:= sizeof(msestring);
   end;
@@ -1911,7 +1913,7 @@ begin
  pointer(buffer.blobinfo):= nil;
  fillchar(buffer.fielddata.nullmask,fnullmasksize,$ff);
  for int1:= 0 to fields.count-1 do begin
-  field1:= fields[int1];
+  field1:= fields[ffieldorder[int1]]; //ODBC needs ordered loadfield
   fno:= field1.fieldno-1;
   with ffieldinfos[fno] do begin
    case field1.fieldkind of
@@ -1931,15 +1933,21 @@ begin
        end;
        setlength(str1,int2);
        po2:= pointer(@buffer) + offset;
-       try
-        if bs_utf8 in fbstate then begin
-         po2^:= utf8tostring(str1);
-        end
-        else begin
-         po2^:= msestring(str1);
+       if fieldtype = ftwidestring then begin
+        setlength(po2^,int2 div 2);
+        move(pointer(str1)^,pointer(po2^)^,int2);
+       end
+       else begin
+        try
+         if bs_utf8 in fbstate then begin
+          po2^:= utf8tostring(str1);
+         end
+         else begin
+          po2^:= msestring(str1);
+         end;
+        except
+         po2^:= converrorstring;
         end;
-       except
-        po2^:= converrorstring;
        end;
        if (dbfieldsize <> 0) and (length(po2^) > dbfieldsize)  then begin
         setlength(po2^,dbfieldsize);
@@ -2681,6 +2689,11 @@ begin
  fbstate:= fbstate - [bs_editing,bs_append];
 end;
 
+function comparefieldnum(const l,r): integer;
+begin
+ result:= tfield(l).fieldno - tfield(r).fieldno;
+end;
+
 procedure tmsebufdataset.calcrecordsize;
 
  procedure addfield(const aindex: integer; const datatype: tfieldtype;
@@ -2708,6 +2721,7 @@ procedure tmsebufdataset.calcrecordsize;
 var 
  int1,int2: integer;
  field1: tfield;
+ ar1: fieldarty;
 begin
  fcalcfieldcount:= 0;
  finternalcalcfieldcount:= 0;
@@ -2759,8 +2773,10 @@ begin
  inc(fcalcrecordsize,fcalcnullmasksize);
  alignfieldpos(fcalcrecordsize);
  int2:= 0;
+ setlength(ar1,fields.count);
  for int1:= fields.count - 1 downto 0 do begin
   field1:= fields[int1];
+  ar1[int1]:= field1;
   with field1 do begin
    if fieldkind in dsbuffieldkinds then begin
     tfieldcracker(field1).ffieldno:= -1 - int2;
@@ -2775,6 +2791,9 @@ begin
    end;
   end;
  end; 
+ quicksortarray(ar1,@comparefieldnum,sizeof(ar1[0]),
+                length(ar1),false,ffieldorder);
+   //MS SQL ODBC needs ordered load field
 end;
 
 function tmsebufdataset.getrecordsize : word;
@@ -3567,13 +3586,16 @@ begin
     if (characterlength <> 0) and (length(mstr1) > characterlength)  then begin
      setlength(mstr1,characterlength);
     end;
-    if bs_utf8 in fbstate then begin
-//     dest.asstring:= stringtoutf8(copy(asmsestring,1,size));
-     dest.asstring:= stringtoutf8(mstr1);
+    if isftwidestring then begin
+     dest.aswidestring:= mstr1;
     end
     else begin
-//     dest.asstring:= copy(asmsestring,1,size);
-     dest.asstring:= mstr1;
+     if bs_utf8 in fbstate then begin
+      dest.asstring:= stringtoutf8(mstr1);
+     end
+     else begin
+      dest.asstring:= mstr1;
+     end;
     end;
     if fixedchar then begin
      dest.datatype:= ftfixedchar;
@@ -3661,10 +3683,11 @@ begin
      int2:= fielddef1.size;
     end;
     tmsestringfield1(field1).setismsestring(@getmsestringdata,
-                                                  @setmsestringdata,int2);
+         @setmsestringdata,int2,(fielddef1 <> nil) and 
+                        (fielddef1.datatype in widestringfields));
    end
    else begin
-    tmsestringfield1(field1).setismsestring(nil,nil,int2);
+    tmsestringfield1(field1).setismsestring(nil,nil,int2,false);
    end;
   end
   else begin

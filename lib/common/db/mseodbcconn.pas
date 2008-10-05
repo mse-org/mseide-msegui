@@ -11,7 +11,7 @@ unit mseodbcconn;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- db,classes,modbcconn,msestrings,msedb,msedatabase;
+ db,classes,modbcconn,msestrings,msedb,msedatabase,msqldb;
 type
  tmseodbcconnection = class(todbcconnection,idbcontroller)
   private
@@ -21,6 +21,8 @@ type
    function getconnected: boolean;
    procedure setconnected(const avalue: boolean);
   protected
+   function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
+                         const acursor: tsqlcursor): TStream; override;
   public
   published
    property DatabaseName: filenamety read getdatabasename write setdatabasename;
@@ -29,7 +31,7 @@ type
  
 implementation
 uses
- msefileutils;
+ msefileutils,msesqldb,msebufdataset;
  
 { tmseodbcconnection }
 
@@ -60,5 +62,17 @@ begin
   inherited connected:= avalue;
  end;
 end;
+
+function tmseodbcconnection.CreateBlobStream(const Field: TField;
+               const Mode: TBlobStreamMode; const acursor: tsqlcursor): TStream;
+begin
+ if (mode = bmwrite) and (field.dataset is tmsesqlquery) then begin
+  result:= tmsebufdataset(field.dataset).createblobbuffer(field);
+ end
+ else begin
+  result:= inherited createblobstream(field,mode,acursor);
+ end;
+end;
+
 
 end.
