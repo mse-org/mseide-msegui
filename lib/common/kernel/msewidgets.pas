@@ -143,6 +143,7 @@ type
    property captionoffset;
    property font;
    property localprops;  //before template
+   property localprops1; //before template
    property template;
  end;
 
@@ -296,6 +297,7 @@ type
    property captionoffset;
    property font;
    property localprops; //before template
+   property localprops1; //before template
    property template;
  end;
 
@@ -413,6 +415,7 @@ type
    property captionoffset;
    property font;
    property localprops; //before template
+   property localprops1; //before template
    property template;
    property sbhorz;
    property sbvert;
@@ -552,6 +555,7 @@ type
    property captionpos;
    property font;
    property localprops; //before template
+   property localprops1; //before template
    property template;
    property disabledbuttons;
    property buttonsvisible;

@@ -475,6 +475,7 @@ type
    property buttonsinvisible;
    property buttonsvisible;
    property localprops;
+   property localprops1; //before template
    property template;
  end;
 

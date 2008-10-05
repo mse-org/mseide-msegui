@@ -1245,6 +1245,7 @@ end;
 //   property captionnoclip;
    property font;
    property localprops; //before template
+   property localprops1; //before template
    property template;
  end;
 

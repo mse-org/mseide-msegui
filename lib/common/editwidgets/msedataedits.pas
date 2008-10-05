@@ -814,6 +814,7 @@ type
    property captionpos;
    property font;
    property localprops; //before template
+   property localprops1; //before template
    property template;
 //   property disabledbuttons;
    property buttonsvisible read fforcevisiblebuttons write setbuttonsvisible 

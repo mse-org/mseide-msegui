@@ -115,6 +115,7 @@ type
 
     // Internal utility functions
     function CreateConnectionString:string;
+    function getblobdatasize: integer; override;
   public
     property Environment:TODBCEnvironment read FEnvironment;
   published
@@ -270,6 +271,11 @@ begin
     else
       Result:=Result + EscapeParamValue(Copy(Param,1,EqualSignPos-1))+'='+EscapeParamValue(Copy(Param,EqualSignPos+1,MaxInt))+';';
   end;
+end;
+
+function TODBCConnection.getblobdatasize: integer;
+begin
+ result:= sizeof(integer);
 end;
 
 procedure TODBCConnection.SetParameters(ODBCCursor: TODBCCursor; AParams: TmseParams);
