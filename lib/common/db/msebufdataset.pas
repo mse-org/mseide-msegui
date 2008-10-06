@@ -1882,7 +1882,7 @@ function tmsebufdataset.getfieldsize(const datatype: tfieldtype;
 begin
  isstring:= false;
  case datatype of
-  ftstring,ftfixedchar,ftwidestring,ftfixedwidechar: begin
+  ftstring,ftfixedchar,ftwidestring,ftfixedwidechar,ftwidememo: begin
    isstring:= true;
    result:= sizeof(msestring);
   end;
@@ -1933,7 +1933,7 @@ begin
        end;
        setlength(str1,int2);
        po2:= pointer(@buffer) + offset;
-       if fieldtype = ftwidestring then begin
+       if fieldtype in widecharfields then begin
         setlength(po2^,int2 div 2);
         move(pointer(str1)^,pointer(po2^)^,int2);
        end

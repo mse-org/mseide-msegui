@@ -28,6 +28,7 @@ type
  datasetarty = array of tdataset;
 const
  charfields = [ftstring,ftfixedchar];
+ widecharfields = [ftwidestring,ftfixedwidechar,ftwidememo];
  textfields = [ftstring,ftfixedchar,ftwidestring,ftfixedwidechar,ftmemo];
  memofields = textfields+[ftmemo];
  integerfields = [ftsmallint,ftinteger,ftword,ftlargeint,ftbcd];
@@ -36,7 +37,7 @@ const
  datetimefields = [ftdate,fttime,ftdatetime];
  stringfields = textfields + integerfields + booleanfields +
                 realfields + datetimefields;
- widestringfields = [ftwidestring,ftfixedwidechar];
+ widestringfields = [ftwidestring,ftfixedwidechar,ftwidememo];
  blobfields = [ftblob,ftmemo,ftgraphic{,ftstring}];
  defaultproviderflags = [pfInUpdate,pfInWhere];
 
@@ -1089,12 +1090,19 @@ uses
 
 var
  msefieldtypeclasses: array[fieldclasstypety] of fieldclassty = 
+         // ft_unknown, ft_string,       ft_numeric,
           (tmsefield,tmsestringfield,tmsenumericfield,
+         //  ft_longint,         ft_largeint,    ft_smallint,
            tmselongintfield,tmselargeintfield,tmsesmallintfield,
+         //    ft_word,     ft_autoinc,       ft_float,      ft_currency,
            tmsewordfield,tmseautoincfield,tmsefloatfield,tmsecurrencyfield,
+         //   ft_boolean,
            tmsebooleanfield,
+         //   ft_datetime,      ft_date,      ft_time,
            tmsedatetimefield,tmsedatefield,tmsetimefield,
+         //  ft_binary,       ft_bytes,       ft_varbytes,
            tmsebinaryfield,tmsebytesfield,tmsevarbytesfield,
+         //   ft_bcd,     ft_blob,      ft_memo,       ft_graphic);
            tmsebcdfield,tmseblobfield,tmsememofield,nil{tmsegraphicfield});
            
 type

@@ -34,7 +34,9 @@ type
     FQuery:string;        // last prepared query, with :ParamName converted to ?
     FParamIndex:TParamBinding; // maps the i-th parameter in the query to the TParams passed to PrepareStatement
     FParamBuf:array of pointer; // buffers that can be used to bind the i-th parameter in the query
-    FBlobStreams:TList;   // list of Blob TMemoryStreams stored in field buffers (we need this currently as we can't hook into the freeing of TBufDataset buffers)
+//    FBlobStreams:TList;   // list of Blob TMemoryStreams stored in field buffers (we need this currently as we can't hook into the freeing of TBufDataset buffers)
+    fcurrentblobbuffer: ansistring;
+    procedure close; override;
   public
     constructor Create(const aowner: icursorclient; const aname: ansistring;
                                       const Connection:TODBCConnection);
@@ -847,6 +849,7 @@ begin
  // Note: optionally we can implement the use of SQLBindCol later for even more speed
  // TODO: finish this
 
+ res:= 0; //ok
  fno:= fieldnum+1;
  bufsize1:= bufsize;
  if buffer = nil then begin
@@ -927,43 +930,71 @@ begin
     Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_BINARY, buffer1,
                                         bufsize1{aField.Size}, @StrLenOrInd);
   end;
-  ftBlob,ftMemo: begin      // BLOBs   
+  ftBlob,ftMemo,ftwidememo: begin      // BLOBs   
            // Try to discover BLOB data length
-   Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_BINARY, buffer1, 0,
-                                        @StrLenOrInd);
-   ODBCCheckResult(Res, SQL_HANDLE_STMT, ODBCCursor.FSTMTHandle,
-    'Could not get field data for field ''%s'' (index %d).',
-   [odbccursor.ffieldNames[fieldnum], fno]);
-   // Read the data if not NULL
-   if (StrLenOrInd<>SQL_NULL_DATA) and (buffer <> nil) then begin
-    // Determine size of buffer to use
-    if StrLenOrInd<>SQL_NO_TOTAL then begin
-     BlobBufferSize:= StrLenOrInd;
-    end
-    else begin
-     BlobBufferSize:=DEFAULT_BLOB_BUFFER_SIZE;
+   if odbccursor.fcurrentblobbuffer = '' then begin
+    Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_BINARY, buffer1, 0,
+                                         @StrLenOrInd);
+    ODBCCheckResult(Res, SQL_HANDLE_STMT, ODBCCursor.FSTMTHandle,
+     'Could not get field data for field ''%s'' (index %d).',
+    [odbccursor.ffieldNames[fieldnum], fno]);
+    if StrLenOrInd = 0 then begin
+     strlenorind:= sql_null_data; //length 0 -> NULL
     end;
-    if BlobBufferSize>0 then begin
-     int1:= 0; //write index
-     repeat
-      setlength(str1,int1+blobbuffersize);
-      Res:= SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_BINARY,
-                      pointer(str1)+int1, BlobBufferSize, @StrLenOrInd);
-      ODBCCheckResult(Res, SQL_HANDLE_STMT, ODBCCursor.FSTMTHandle,
-       'Could not get field data for field ''%s'' (index %d).',
-       [odbccursor.ffieldNames[fieldnum], fno]);
-      if (StrLenOrInd=SQL_NO_TOTAL) or (StrLenOrInd>BlobBufferSize) then begin
-       BytesRead:= BlobBufferSize;
-      end
-      else begin
-       BytesRead:= StrLenOrInd;
+    // Read the data if not NULL
+    if (StrLenOrInd<>SQL_NULL_DATA) and (buffer <> nil) then begin
+     // Determine size of buffer to use
+     if StrLenOrInd<>SQL_NO_TOTAL then begin
+      BlobBufferSize:= StrLenOrInd;
+     end
+     else begin
+      BlobBufferSize:=DEFAULT_BLOB_BUFFER_SIZE;
+     end;
+     if BlobBufferSize>0 then begin
+      int1:= 0; //write index
+      repeat
+       setlength(str1,int1+blobbuffersize);
+       Res:= SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_BINARY,
+                       pointer(str1)+int1, BlobBufferSize, @StrLenOrInd);
+       ODBCCheckResult(Res, SQL_HANDLE_STMT, ODBCCursor.FSTMTHandle,
+        'Could not get field data for field ''%s'' (index %d).',
+        [odbccursor.ffieldNames[fieldnum], fno]);
+       if (StrLenOrInd=SQL_NO_TOTAL) or (StrLenOrInd>BlobBufferSize) then begin
+        BytesRead:= BlobBufferSize;
+       end
+       else begin
+        BytesRead:= StrLenOrInd;
+       end;
+       inc(int1,bytesread);              
+      until Res = SQL_SUCCESS;
+      setlength(str1,int1);
+     end;
+     if datatype = ftwidememo then begin
+      bufsize1:= length(str1);
+      odbccursor.fcurrentblobbuffer:= str1;
+      bufsize1:= -bufsize1;
+     end
+     else begin
+      int1:= cursor.addblobdata(str1);
+      move(int1,buffer^,sizeof(int1));  //save id
+     end;
+    end;
+   end
+   else begin
+    strlenorind:= sql_null_data; //invalid
+    if datatype = ftwidememo then begin
+     bufsize1:= length(odbccursor.fcurrentblobbuffer);
+     if bufsize1 <= bufsize then begin
+      strlenorind:= 0;
+      if buffer <> nil then begin
+       move(pointer(odbccursor.fcurrentblobbuffer)^,buffer^,bufsize1);
       end;
-      inc(int1,bytesread);              
-     until Res = SQL_SUCCESS;
-     setlength(str1,int1);
+     end
+     else begin
+      bufsize1:= 0; //data lost
+     end;
+     odbccursor.fcurrentblobbuffer:= '';
     end;
-    int1:= cursor.addblobdata(str1);
-    move(int1,buffer^,sizeof(int1));  //save id
    end;
   end;      
   else begin  // TODO: Loading of other field types
@@ -1000,12 +1031,12 @@ var
   i: integer;
 begin
   ODBCCursor:=cursor as TODBCCursor;
-  
+{  
   // Free TMemoryStreams in cursor.FBlobStreams and clear it
   for i:=0 to ODBCCursor.FBlobStreams.Count-1 do
     TObject(ODBCCursor.FBlobStreams[i]).Free;
   ODBCCursor.FBlobStreams.Clear;
-
+}
   ODBCCheckResult(
     SQLFreeStmt(ODBCCursor.FSTMTHandle, SQL_CLOSE),
     SQL_HANDLE_STMT, ODBCCursor.FSTMTHandle, 'Could not close ODBC statement cursor.'
@@ -1086,7 +1117,10 @@ begin
                                       // is a blob
       SQL_WCHAR:         begin FieldType:=ftWideString; FieldSize:=ColumnSize{+1}; end;
       SQL_WVARCHAR:      begin FieldType:=ftWideString; FieldSize:=ColumnSize{+1}; end;
-//      SQL_WLONGVARCHAR:  begin FieldType:=ftwidestring; FieldSize:=0; end; // is a blob
+      SQL_WLONGVARCHAR:  begin 
+       FieldType:= ftwidememo; //for tmsestringfield
+       FieldSize:= 0;
+      end; // is a blob
       SQL_NUMERIC,SQL_DECIMAL:
       begin 
        FieldType:= ftFloat;
@@ -1428,7 +1462,7 @@ begin
   );
   
   // allocate FBlobStreams
-  FBlobStreams:=TList.Create;
+//  FBlobStreams:=TList.Create;
 end;
 
 destructor TODBCCursor.Destroy;
@@ -1437,7 +1471,7 @@ var
 begin
   inherited Destroy;
   
-  FBlobStreams.Free;
+//  FBlobStreams.Free;
 
   if pointer(FSTMTHandle) <> pointer(SQL_INVALID_HANDLE) then
   begin
@@ -1447,6 +1481,12 @@ begin
       ODBCCheckResult(Res,SQL_HANDLE_STMT, FSTMTHandle,
        'Could not free ODBC Statement handle.');
   end;
+end;
+
+procedure TODBCCursor.close;
+begin
+ fcurrentblobbuffer:= '';
+ inherited;
 end;
 
 { finalization }
