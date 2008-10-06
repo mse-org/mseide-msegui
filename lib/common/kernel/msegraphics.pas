@@ -836,7 +836,7 @@ const
                 cs_fonthandle,cs_font,cs_fontcolor,cs_fontcolorbackground,
                 cs_fontcolorshadow,
                 cs_brush,cs_brushorigin] + linecanvasstates;
-
+var
  defaultframecolors: framecolorinfoty =
   (light: (color: cl_light; effectcolor: cl_highlight; effectwidth: 1);
    shadow: (color: cl_shadow; effectcolor: cl_dkshadow; effectwidth: 1);

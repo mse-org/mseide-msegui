@@ -109,11 +109,27 @@ type
  end;
  
  tskincolors = class(tpersistentarrayprop)
+  private
+   fframecolors: framecolorinfoty;
+   fframecolorsbefore: framecolorinfoty;
   public
    constructor create;
    class function getitemclasstype: persistentclassty; override;
    procedure setcolors;
    procedure restorecolors;
+  published
+   property colordkshadow: colorty read fframecolors.shadow.effectcolor
+              write fframecolors.shadow.effectcolor default cl_default;
+   property colorshadow: colorty read fframecolors.shadow.color
+              write fframecolors.shadow.color default cl_default;
+   property colorlight: colorty read fframecolors.light.color
+              write fframecolors.light.color default cl_default;
+   property colorhighlight: colorty read fframecolors.light.effectcolor
+              write fframecolors.light.effectcolor default cl_default;
+   property colordkwidth: integer read fframecolors.shadow.effectwidth
+              write fframecolors.shadow.effectwidth default -1;
+   property colorhlwidth: integer read fframecolors.light.effectwidth
+              write fframecolors.light.effectwidth default -1;
  end;
 
  tskinfontalias = class(tvirtualpersistent)
@@ -517,6 +533,14 @@ end;
 
 constructor tskincolors.create;
 begin
+ with fframecolors do begin
+  light.color:= cl_default;
+  light.effectcolor:= cl_default;
+  light.effectwidth:= -1;
+  shadow.color:= cl_default;
+  shadow.effectcolor:= cl_default;
+  shadow.effectwidth:= -1;
+ end;
  inherited create(tskincolor);
 end;
 
@@ -535,6 +559,29 @@ begin
    setcolormapvalue(fcolor,frgb);
   end;
  end;
+ fframecolorsbefore:= defaultframecolors;
+ with fframecolors.light do begin
+  if color <> cl_default then begin
+   defaultframecolors.light.color:= color;
+  end;
+  if effectcolor <> cl_default then begin
+   defaultframecolors.light.effectcolor:= effectcolor;
+  end;
+  if effectwidth <> -1 then begin
+   defaultframecolors.light.effectwidth:= effectwidth;
+  end;
+ end;
+ with fframecolors.shadow do begin
+  if color <> cl_default then begin
+   defaultframecolors.shadow.color:= color;
+  end;
+  if effectcolor <> cl_default then begin
+   defaultframecolors.shadow.effectcolor:= effectcolor;
+  end;
+  if effectwidth <> -1 then begin
+   defaultframecolors.shadow.effectwidth:= effectwidth;
+  end;
+ end
 end;
 
 procedure tskincolors.restorecolors;
@@ -546,6 +593,7 @@ begin
    setcolormapvalue(fcolor,frgbbefore);
   end;
  end;
+ defaultframecolors:= fframecolorsbefore;
 end;
 
 { tskinfontaliass }
