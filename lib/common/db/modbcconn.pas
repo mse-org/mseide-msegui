@@ -719,7 +719,7 @@ var
   ODBCCursor:TODBCCursor;
   str1: string;
 begin
-  ODBCCursor:=cursor as TODBCCursor;
+  ODBCCursor:= TODBCCursor(cursor);
 
   // Parameter handling
   // Note: We can only pass ? parameters to ODBC, so we should convert named parameters like :MyID
@@ -740,11 +740,15 @@ begin
   );
 
   ODBCCursor.FQuery:= str1;
+  ODBCCursor.fprepared:= true;
 end;
 
 procedure TODBCConnection.UnPrepareStatement(cursor: TSQLCursor);
 begin
-  // not necessary in ODBC
+ with todbccursor(cursor) do begin
+  FQuery:= '';
+  fprepared:= false;
+ end;
 end;
 
 function TODBCConnection.GetTransactionHandle(trans: TSQLHandle): pointer;
@@ -782,15 +786,16 @@ procedure TODBCConnection.Execute(const cursor: TSQLCursor;
       const ATransaction: TSQLTransaction; const AParams: TmseParams);
 var
   ODBCCursor:TODBCCursor;
+  Res: SQLRETURN;
 begin
-  ODBCCursor:=cursor as TODBCCursor;
+  ODBCCursor:= TODBCCursor(cursor);
 
   // set parameters
     if Assigned(APArams) and (AParams.count > 0) then SetParameters(ODBCCursor, AParams);
 
   // execute the statement
-  ODBCCheckResult(
-    SQLExecute(ODBCCursor.FSTMTHandle),
+  res:= SQLExecute(ODBCCursor.FSTMTHandle);
+  ODBCCheckResult(res,
     SQL_HANDLE_STMT, ODBCCursor.FSTMTHandle, 'Could not execute statement.'
   );
 
@@ -803,7 +808,7 @@ var
   ODBCCursor:TODBCCursor;
   Res:SQLRETURN;
 begin
-  ODBCCursor:=cursor as TODBCCursor;
+  ODBCCursor:= TODBCCursor(cursor);
 
   // fetch new row
   Res:=SQLFetch(ODBCCursor.FSTMTHandle);
@@ -1485,6 +1490,10 @@ end;
 
 procedure TODBCCursor.close;
 begin
+ sqlclosecursor(fstmthandle);
+// ODBCCheckResult(sqlclosecursor(fstmthandle),SQL_HANDLE_STMT, FSTMTHandle,
+//                         'Could not close Cursor'); 
+                  //there is possible no cursor -> no errorcheck
  fcurrentblobbuffer:= '';
  inherited;
 end;
