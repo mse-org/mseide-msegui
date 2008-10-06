@@ -568,7 +568,7 @@ begin
      bindnum(i,SQL_C_TYPE_TIMESTAMP,SQL_TYPE_TIMESTAMP,buf);
     end;
    end;
-   ftString: begin
+   ftString,ftblob: begin
     if isnull then begin
      bindnull(i,SQL_C_CHAR,SQL_CHAR);
     end
