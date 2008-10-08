@@ -3452,7 +3452,12 @@ begin
    aparam.asstring:= str1;
   end
   else begin
-   aparam.asblob:= str1;
+   if afield.datatype = ftmemo then begin
+    aparam.asmemo:= str1;
+   end
+   else begin
+    aparam.asblob:= str1;
+   end;
   end;
  end
  else begin

@@ -420,7 +420,8 @@ end;
 procedure TODBCConnection.setupblobdata(const afield: tfield; 
                       const acursor: tsqlcursor; const aparam: tparam);
 begin
- acursor.blobfieldtoparam(afield,aparam,afield.datatype = ftmemo);
+// acursor.blobfieldtoparam(afield,aparam,afield.datatype = ftmemo);
+ acursor.blobfieldtoparam(afield,aparam,false);
 end;
 
 function TODBCConnection.getblobdatasize: integer;
@@ -570,7 +571,7 @@ begin
       bindnum(i,SQL_C_TYPE_TIMESTAMP,SQL_TYPE_TIMESTAMP,buf);
      end;
     end;
-    ftblob: begin
+    ftblob,ftmemo: begin
      if isnull then begin
       bindnull(i,SQL_C_CHAR,SQL_CHAR);
      end
@@ -579,7 +580,12 @@ begin
       StrLen:= Length(StrVal);
       Buf:= GetMem(StrLen+sizeof(sqlinteger));
       Move(StrVal[1],(buf+sizeof(sqlinteger))^,StrLen);
-      bindstr(i,SQL_C_BINARY,SQL_LONGVARBINARY,buf,strlen,strlen)
+      if datatype1 = ftmemo then begin
+       bindstr(i,SQL_C_CHAR,SQL_LONGVARCHAR,buf,strlen,strlen)
+      end
+      else begin
+       bindstr(i,SQL_C_BINARY,SQL_LONGVARBINARY,buf,strlen,strlen)
+      end;
      end;
     end;
     ftstring: begin
