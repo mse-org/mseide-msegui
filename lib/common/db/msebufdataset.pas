@@ -2392,6 +2392,7 @@ begin
      end;
 //     pointer(bookmark.recordpo^.header.blobinfo):= 
 //         pointer(fnewvaluebuffer^.header.blobinfo); //update deleted blobs
+        //????
     end;
    except
     on E: EDatabaseError do begin

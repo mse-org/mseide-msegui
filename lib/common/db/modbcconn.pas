@@ -505,7 +505,8 @@ var
   wideStrVal: msestring;
   doubleval: double;
   StrLen,buflen: SQLINTEGER;
-  isnull: boolean;
+  isnull1: boolean;
+  datatype1: tfieldtype;
 
 begin
   // Note: it is assumed that AParams is the same as the one passed to PrepareStatement, in the sense that
@@ -525,83 +526,97 @@ begin
    raise EODBCException.CreateFmt(
      'Parameter %d in query does not have a matching parameter set',[i]);
   end;
-  isnull:= AParams[ParamIndex].isnull;
-  case AParams[ParamIndex].DataType of
-   ftInteger,ftboolean,ftword,ftsmallint: begin
-    if isnull then begin
-     bindnull(i,SQL_C_LONG,SQL_INTEGER);
-    end
-    else begin
-     Buf:= GetMem(sizeof(longint));
-     plongint(buf)^:= AParams[ParamIndex].AsInteger;
-     bindnum(i,SQL_C_LONG,SQL_INTEGER,buf);
+  with AParams[ParamIndex] do begin
+   isnull1:= isnull;
+   datatype1:= datatype;
+   case datatype1 of
+    ftInteger,ftboolean,ftword,ftsmallint: begin
+     if isnull then begin
+      bindnull(i,SQL_C_LONG,SQL_INTEGER);
+     end
+     else begin
+      Buf:= GetMem(sizeof(longint));
+      plongint(buf)^:= AsInteger;
+      bindnum(i,SQL_C_LONG,SQL_INTEGER,buf);
+     end;
     end;
-   end;
-   ftlargeint: begin
-    if isnull then begin
-     bindnull(i,SQL_C_SBIGINT,SQL_BIGINT);
-    end
-    else begin
-     Buf:= GetMem(sizeof(int64));
-     pint64(buf)^:= AParams[ParamIndex].Aslargeint;
-     bindnum(i,SQL_C_SBIGINT,SQL_BIGINT,buf);
+    ftlargeint: begin
+     if isnull then begin
+      bindnull(i,SQL_C_SBIGINT,SQL_BIGINT);
+     end
+     else begin
+      Buf:= GetMem(sizeof(int64));
+      pint64(buf)^:= Aslargeint;
+      bindnum(i,SQL_C_SBIGINT,SQL_BIGINT,buf);
+     end;
     end;
-   end;
-   ftfloat: begin
-    if isnull then begin
-     bindnull(i,SQL_C_CHAR,SQL_CHAR);
-    end
-    else begin
-     Buf:= GetMem(sizeof(double));
-     pdouble(buf)^:= AParams[ParamIndex].Asfloat;
-     bindnum(i,SQL_C_DOUBLE,SQL_DOUBLE,buf);
+    ftfloat: begin
+     if isnull then begin
+      bindnull(i,SQL_C_CHAR,SQL_CHAR);
+     end
+     else begin
+      Buf:= GetMem(sizeof(double));
+      pdouble(buf)^:= Asfloat;
+      bindnum(i,SQL_C_DOUBLE,SQL_DOUBLE,buf);
+     end;
     end;
-   end;
-   fttime,ftdate,ftdatetime: begin
-    if isnull then begin
-     bindnull(i,SQL_C_TYPE_TIMESTAMP,SQL_TYPE_TIMESTAMP);
-    end
-    else begin
-     Buf:= GetMem(sizeof(sql_timestamp_struct));
-     datetime2timestampstruct(psql_timestamp_struct(buf)^,
-                                   AParams[ParamIndex].Asdatetime);
-     bindnum(i,SQL_C_TYPE_TIMESTAMP,SQL_TYPE_TIMESTAMP,buf);
+    fttime,ftdate,ftdatetime: begin
+     if isnull then begin
+      bindnull(i,SQL_C_TYPE_TIMESTAMP,SQL_TYPE_TIMESTAMP);
+     end
+     else begin
+      Buf:= GetMem(sizeof(sql_timestamp_struct));
+      datetime2timestampstruct(psql_timestamp_struct(buf)^,Asdatetime);
+      bindnum(i,SQL_C_TYPE_TIMESTAMP,SQL_TYPE_TIMESTAMP,buf);
+     end;
     end;
-   end;
-   ftString,ftblob: begin
-    if isnull then begin
-     bindnull(i,SQL_C_CHAR,SQL_CHAR);
-    end
-    else begin
-     StrVal:=AParams.AsdbString(paramindex);
-     StrLen:= Length(StrVal);
-     Buf:= GetMem(StrLen+sizeof(sqlinteger));
-     Move(StrVal[1],(buf+sizeof(sqlinteger))^,StrLen);
-     bindstr(i,SQL_C_CHAR,SQL_CHAR,buf,strlen,strlen)
+    ftblob: begin
+     if isnull then begin
+      bindnull(i,SQL_C_CHAR,SQL_CHAR);
+     end
+     else begin
+      StrVal:= asstring;
+      StrLen:= Length(StrVal);
+      Buf:= GetMem(StrLen+sizeof(sqlinteger));
+      Move(StrVal[1],(buf+sizeof(sqlinteger))^,StrLen);
+      bindstr(i,SQL_C_BINARY,SQL_LONGVARBINARY,buf,strlen,strlen)
+     end;
     end;
-   end;
-   ftwidestring: begin
-    if isnull then begin
-     bindnull(i,SQL_C_WCHAR,SQL_WCHAR);
-    end
-    else begin
-     widestrval:= aparams[paramindex].aswidestring;
-     strlen:= length(widestrval);
-     buflen:= strlen*sizeof(msechar);
-     buf:= getmem(buflen+sizeof(sqlinteger));
-     move(widestrval[1],(buf+sizeof(sqlinteger))^,buflen);
-     bindstr(i,SQL_C_WCHAR,SQL_WCHAR,buf,strlen,buflen);
-//     bindstr(i,SQL_C_WCHAR,SQL_WCHAR,buf,buflen,buflen);
+    ftstring: begin
+     if isnull then begin
+      bindnull(i,SQL_C_CHAR,SQL_CHAR);
+     end
+     else begin
+      StrVal:= AParams.AsdbString(paramindex);
+      StrLen:= Length(StrVal);
+      Buf:= GetMem(StrLen+sizeof(sqlinteger));
+      Move(StrVal[1],(buf+sizeof(sqlinteger))^,StrLen);
+      bindstr(i,SQL_C_CHAR,SQL_CHAR,buf,strlen,strlen)
+     end;
     end;
-   end;
-   else begin
-    if isnull then begin
-     bindnull(i,SQL_C_CHAR,SQL_CHAR); //dummy
-    end
+    ftwidestring: begin
+     if isnull then begin
+      bindnull(i,SQL_C_WCHAR,SQL_WCHAR);
+     end
+     else begin
+      widestrval:= aparams[paramindex].aswidestring;
+      strlen:= length(widestrval);
+      buflen:= strlen*sizeof(msechar);
+      buf:= getmem(buflen+sizeof(sqlinteger));
+      move(widestrval[1],(buf+sizeof(sqlinteger))^,buflen);
+      bindstr(i,SQL_C_WCHAR,SQL_WCHAR,buf,strlen,buflen);
+ //     bindstr(i,SQL_C_WCHAR,SQL_WCHAR,buf,buflen,buflen);
+     end;
+    end;
     else begin
-     raise EDataBaseError.CreateFmt(
-      'Parameter %d is of type %s, which not supported yet',
-      [ParamIndex, Fieldtypenames[AParams[ParamIndex].DataType]]);      
+     if isnull then begin
+      bindnull(i,SQL_C_CHAR,SQL_CHAR); //dummy
+     end
+     else begin
+      raise EDataBaseError.CreateFmt(
+       'Parameter %d is of type %s, which not supported yet',
+       [ParamIndex, Fieldtypenames[AParams[ParamIndex].DataType]]);      
+     end;
     end;
    end;
   end;
