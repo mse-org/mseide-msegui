@@ -2523,8 +2523,10 @@ var
  tel,fieldc: integer;
  f: TField;
  s: string;
- IndexFields: TStrings;
+ ar1: stringarty;
+ IndexFields: stringarty;
  str1: string;
+ int1: integer;
  
 begin
  if database <> nil then begin
@@ -2534,6 +2536,23 @@ begin
   try
    Prepare;
    if FCursor.FStatementType in datareturningtypes then begin
+    indexfields:= nil;
+    if FUpdateable then begin
+     if FusePrimaryKeyAsKey then begin
+      UpdateIndexDefs;  //must be before execute because 
+                        //of MS SQL ODBC one statement per connection limitation
+      for tel := 0 to indexdefs.count-1 do  begin
+       if ixPrimary in indexdefs[tel].options then begin
+//         IndexFields := TStringList.Create;
+//         ExtractStrings([';'],[' '],pchar(indexdefs[tel].fields),IndexFields);
+        ar1:= nil;
+        splitstringquoted(indexdefs[tel].fields,ar1,'"',';');
+        stackarray(ar1,indexfields);
+       end;
+      end;
+     end;
+    end;
+
     if aexecute then begin
      if fbeforeexecute <> nil then begin
       fbeforeexecute.execute(database,tsqltransaction(transaction));
@@ -2544,23 +2563,10 @@ begin
     if DefaultFields then begin
      CreateFields;
     end;
-    if FUpdateable then begin
-     if FusePrimaryKeyAsKey then begin
-      UpdateIndexDefs;
-      for tel := 0 to indexdefs.count-1 do  begin
-       if ixPrimary in indexdefs[tel].options then begin
-  // Todo: If there is more then one field in the key, that must be parsed
-        IndexFields := TStringList.Create;
-        ExtractStrings([';'],[' '],pchar(indexdefs[tel].fields),IndexFields);
-        for fieldc := 0 to IndexFields.Count-1 do begin
-         F := Findfield(IndexFields[fieldc]);
-         if F <> nil then begin
-          F.ProviderFlags := F.ProviderFlags + [pfInKey];
-         end;
-        end;
-        IndexFields.Free;
-       end;
-      end;
+    for int1:= 0 to high(indexfields) do begin
+     F := Findfield(IndexFields[int1]);
+     if F <> nil then begin
+      F.ProviderFlags := F.ProviderFlags + [pfInKey];
      end;
     end;
     if database <> nil then begin

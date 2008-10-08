@@ -1263,7 +1263,8 @@ const
   DEFAULT_NAME_LEN = 255;
 begin
 
- exit; /////////// does not work
+// exit; /////////// does not work with MS SQL because of one statement 
+         //per connection limitation
  
   // allocate statement handle
   StmtHandle := SQL_NULL_HANDLE;
