@@ -161,7 +161,7 @@ type
                      frl_fileft,frl_fitop,frl_firight,frl_fibottom,
                      frl_frameimagelist,frl_frameimageleft,frl_frameimagetop,
                      frl_frameimageright,frl_frameimagebottom,
-                     frl_frameimageoffset,
+                     frl_frameimageoffset,frl_frameimageoffset1,
                      frl_frameimageoffsetdisabled,frl_frameimageoffsetmouse,
                      frl_frameimageoffsetclicked,frl_frameimageoffsetactive,
                      frl_frameimageoffsetactivemouse,
@@ -172,7 +172,7 @@ type
  framelocalpropsty = set of framelocalpropty;
 
  framelocalprop1ty = (frl1_framefacelist,
-                      frl1_framefaceoffset,
+                      frl1_framefaceoffset,frl1_framefaceoffset1,
                       frl1_framefaceoffsetdisabled,frl1_framefaceoffsetmouse,
                       frl1_framefaceoffsetclicked,frl1_framefaceoffsetactive,
                       frl1_framefaceoffsetactivemouse,
@@ -180,7 +180,7 @@ type
                      );
  framelocalprops1ty = set of framelocalprop1ty;
 
- framestateflagty = (fsf_disabled,fsf_active,fsf_mouse,fsf_clicked);
+ framestateflagty = (fsf_offset1,fsf_disabled,fsf_active,fsf_mouse,fsf_clicked);
  framestateflagsty = set of framestateflagty;
  
 const
@@ -249,6 +249,7 @@ type
 
  frameoffsetsty = record
   offset: integer;
+  offset1: integer; 
   disabled: integer;
   mouse: integer;
   clicked: integer;
@@ -259,6 +260,7 @@ type
 
  frameimageoffsetsty = record
   offset: imagenrty;
+  offset1: imagenrty; 
   disabled: imagenrty;
   mouse: imagenrty;
   clicked: imagenrty;
@@ -269,6 +271,7 @@ type
 
  framefaceoffsetsty = record
   offset: facenrty;
+  offset1: facenrty; 
   disabled: facenrty;
   mouse: facenrty;
   clicked: facenrty;
@@ -360,6 +363,8 @@ type
    
    procedure setframeimage_offset(const avalue: imagenrty);
    function isframeimage_offsetstored: boolean;
+   procedure setframeimage_offset1(const avalue: imagenrty);
+   function isframeimage_offset1stored: boolean;
    procedure setframeimage_offsetdisabled(const avalue: imagenrty);
    function isframeimage_offsetdisabledstored: boolean;
    procedure setframeimage_offsetmouse(const avalue: imagenrty);
@@ -377,6 +382,8 @@ type
    function isframeface_liststored: boolean;
    procedure setframeface_offset(const avalue: facenrty);
    function isframeface_offsetstored: boolean;
+   procedure setframeface_offset1(const avalue: facenrty);
+   function isframeface_offset1stored: boolean;
    procedure setframeface_offsetdisabled(const avalue: facenrty);
    function isframeface_offsetdisabledstored: boolean;
    procedure setframeface_offsetmouse(const avalue: facenrty);
@@ -519,6 +526,9 @@ type
                     //added to imagelist size.
    property frameimage_offset: imagenrty read fi.frameimage_offsets.offset
                     write setframeimage_offset stored isframeimage_offsetstored;
+   property frameimage_offset1: imagenrty read fi.frameimage_offsets.offset1
+                    write setframeimage_offset1 stored isframeimage_offset1stored;
+                             //used for default button
    property frameimage_offsetdisabled: imagenrty 
                     read fi.frameimage_offsets.disabled 
                     write setframeimage_offsetdisabled
@@ -549,6 +559,10 @@ type
    property frameface_offset: facenrty 
                     read fi.frameface_offsets.offset
                     write setframeface_offset stored isframeface_offsetstored;
+   property frameface_offset1: facenrty 
+                    read fi.frameface_offsets.offset1
+                    write setframeface_offset1 stored isframeface_offset1stored;
+                                   //used for default button
    property frameface_offsetdisabled: facenrty 
                     read fi.frameface_offsets.disabled 
                     write setframeface_offsetdisabled
@@ -573,7 +587,6 @@ type
                     read fi.frameface_offsets.activeclicked
                     write setframeface_offsetactiveclicked
                     stored isframeface_offsetactiveclickedstored;
-
 
    property optionsskin: frameskinoptionsty read fi.optionsskin 
                     write setoptionsskin stored isoptionsskinstored default [];
@@ -601,6 +614,7 @@ type
    property frameimage_top;
    property frameimage_bottom;
    property frameimage_offset;
+   property frameimage_offset1;
    property frameimage_offsetdisabled;
    property frameimage_offsetmouse;
    property frameimage_offsetclicked;
@@ -610,6 +624,7 @@ type
 
    property frameface_list;
    property frameface_offset;
+   property frameface_offset1;
    property frameface_offsetdisabled;
    property frameface_offsetmouse;
    property frameface_offsetclicked;
@@ -662,6 +677,7 @@ type
    procedure setframeimage_right(const avalue: integer);
    procedure setframeimage_bottom(const avalue: integer);
    procedure setframeimage_offset(const avalue: imagenrty);
+   procedure setframeimage_offset1(const avalue: imagenrty);
    procedure setframeimage_offsetdisabled(const avalue: imagenrty);
    procedure setframeimage_offsetmouse(const avalue: imagenrty);
    procedure setframeimage_offsetclicked(const avalue: imagenrty);
@@ -671,6 +687,7 @@ type
 
    procedure setframeface_list(const avalue: tfacelist);
    procedure setframeface_offset(const avalue: facenrty);
+   procedure setframeface_offset1(const avalue: facenrty);
    procedure setframeface_offsetdisabled(const avalue: facenrty);
    procedure setframeface_offsetmouse(const avalue: facenrty);
    procedure setframeface_offsetclicked(const avalue: facenrty);
@@ -732,6 +749,9 @@ type
    property frameimage_offset: imagenrty 
                      read fi.frameimage_offsets.offset
                      write setframeimage_offset;
+   property frameimage_offset1: imagenrty 
+                     read fi.frameimage_offsets.offset1
+                     write setframeimage_offset1;
    property frameimage_offsetdisabled: imagenrty 
                      read fi.frameimage_offsets.disabled
                      write setframeimage_offsetdisabled;
@@ -756,6 +776,9 @@ type
    property frameface_offset: facenrty 
                      read fi.frameface_offsets.offset
                      write setframeface_offset;
+   property frameface_offset1: facenrty 
+                     read fi.frameface_offsets.offset1
+                     write setframeface_offset1;
    property frameface_offsetdisabled: facenrty 
                      read fi.frameface_offsets.disabled
                      write setframeface_offsetdisabled;
@@ -3063,6 +3086,9 @@ function calcframestateoffs(const astate: framestateflagsty;
 begin
  with offsets do begin
   result:= offset;
+  if fsf_offset1 in astate then begin
+   result:= result + offset1;
+  end;
   if fsf_disabled in astate then begin
    result:= result + disabled;
   end
@@ -3552,6 +3578,15 @@ begin
  end;
 end;
 
+procedure tcustomframe.setframeimage_offset1(const avalue: imagenrty);
+begin
+ include(flocalprops,frl_frameimageoffset1);
+ if fi.frameimage_offsets.offset1 <> avalue then begin
+  fi.frameimage_offsets.offset1:= avalue;
+  internalupdatestate;
+ end;
+end;
+
 procedure tcustomframe.setframeimage_offsetdisabled(const avalue: imagenrty);
 begin
  include(flocalprops,frl_frameimageoffsetdisabled);
@@ -3620,6 +3655,15 @@ begin
  include(flocalprops1,frl1_framefaceoffset);
  if fi.frameface_offsets.offset <> avalue then begin
   fi.frameface_offsets.offset:= avalue;
+  internalupdatestate;
+ end;
+end;
+
+procedure tcustomframe.setframeface_offset1(const avalue: facenrty);
+begin
+ include(flocalprops1,frl1_framefaceoffset1);
+ if fi.frameface_offsets.offset1 <> avalue then begin
+  fi.frameface_offsets.offset1:= avalue;
   internalupdatestate;
  end;
 end;
@@ -4152,6 +4196,11 @@ begin
  result:= (ftemplate = nil) or (frl_frameimageoffset in flocalprops);
 end;
 
+function tcustomframe.isframeimage_offset1stored: boolean;
+begin
+ result:= (ftemplate = nil) or (frl_frameimageoffset1 in flocalprops);
+end;
+
 function tcustomframe.isframeimage_offsetdisabledstored: boolean;
 begin
  result:= (ftemplate = nil) or (frl_frameimageoffsetdisabled in flocalprops);
@@ -4190,6 +4239,11 @@ end;
 function tcustomframe.isframeface_offsetstored: boolean;
 begin
  result:= (ftemplate = nil) or (frl1_framefaceoffset in flocalprops1);
+end;
+
+function tcustomframe.isframeface_offset1stored: boolean;
+begin
+ result:= (ftemplate = nil) or (frl1_framefaceoffset1 in flocalprops1);
 end;
 
 function tcustomframe.isframeface_offsetdisabledstored: boolean;
@@ -4456,6 +4510,12 @@ begin
  changed;
 end;
 
+procedure tframetemplate.setframeimage_offset1(const avalue: imagenrty);
+begin
+ fi.frameimage_offsets.offset1:= avalue;
+ changed;
+end;
+
 procedure tframetemplate.setframeimage_offsetdisabled(const avalue: imagenrty);
 begin
  fi.frameimage_offsets.disabled:= avalue;
@@ -4501,6 +4561,12 @@ end;
 procedure tframetemplate.setframeface_offset(const avalue: facenrty);
 begin
  fi.frameface_offsets.offset:= avalue;
+ changed;
+end;
+
+procedure tframetemplate.setframeface_offset1(const avalue: facenrty);
+begin
+ fi.frameface_offsets.offset1:= avalue;
  changed;
 end;
 

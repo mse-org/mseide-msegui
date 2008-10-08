@@ -118,6 +118,7 @@ type
    property frameimage_right;
    property frameimage_bottom;
    property frameimage_offset;
+   property frameimage_offset1;
    property frameimage_offsetdisabled;
    property frameimage_offsetmouse;
    property frameimage_offsetclicked;
@@ -127,6 +128,7 @@ type
 
    property frameface_list;
    property frameface_offset;
+   property frameface_offset1;
    property frameface_offsetdisabled;
    property frameface_offsetmouse;
    property frameface_offsetclicked;
@@ -270,6 +272,7 @@ type
    property frameimage_right;
    property frameimage_bottom;
    property frameimage_offset;
+   property frameimage_offset1;
    property frameimage_offsetdisabled;
    property frameimage_offsetmouse;
    property frameimage_offsetclicked;
@@ -279,6 +282,7 @@ type
 
    property frameface_list;
    property frameface_offset;
+   property frameface_offset1;
    property frameface_offsetdisabled;
    property frameface_offsetmouse;
    property frameface_offsetclicked;
@@ -391,6 +395,7 @@ type
    property frameimage_right;
    property frameimage_bottom;
    property frameimage_offset;
+   property frameimage_offset1;
    property frameimage_offsetdisabled;
    property frameimage_offsetmouse;
    property frameimage_offsetclicked;
@@ -400,6 +405,7 @@ type
 
    property frameface_list;
    property frameface_offset;
+   property frameface_offset1;
    property frameface_offsetdisabled;
    property frameface_offsetmouse;
    property frameface_offsetclicked;
@@ -533,6 +539,7 @@ type
    property frameimage_right;
    property frameimage_bottom;
    property frameimage_offset;
+   property frameimage_offset1;
    property frameimage_offsetdisabled;
    property frameimage_offsetmouse;
    property frameimage_offsetclicked;
@@ -542,6 +549,7 @@ type
 
    property frameface_list;
    property frameface_offset;
+   property frameface_offset1;
    property frameface_offsetdisabled;
    property frameface_offsetmouse;
    property frameface_offsetclicked;
@@ -1673,10 +1681,12 @@ end;
 
 function tactionsimplebutton.getframestateflags: framestateflagsty;
 begin
- result:= combineframestateflags(not isenabled,
-                     not (bo_nodefaultframeactive in foptions) and 
-                           (shs_default in finfo.state) or active,
+ result:= combineframestateflags(not isenabled,active,
                      shs_mouse in finfo.state,shs_clicked in finfo.state);
+ if not (bo_nodefaultframeactive in foptions) and 
+               ((shs_default in finfo.state) or focused) then begin
+  include(result,fsf_offset1);
+ end;
 end;
 {
 function tactionsimplebutton.getframeclicked: boolean;

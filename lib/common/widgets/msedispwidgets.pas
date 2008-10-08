@@ -66,6 +66,7 @@ type
    property frameimage_right;
    property frameimage_bottom;
    property frameimage_offset;
+   property frameimage_offset1;
    property frameimage_offsetdisabled;
    property frameimage_offsetmouse;
    property frameimage_offsetclicked;
@@ -75,6 +76,7 @@ type
 
    property frameface_list;
    property frameface_offset;
+   property frameface_offset1;
    property frameface_offsetdisabled;
    property frameface_offsetmouse;
    property frameface_offsetclicked;
