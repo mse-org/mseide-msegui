@@ -157,7 +157,7 @@ procedure tcpuavr32fo.checkexcept(const sender: TObject);
   with mainfo.gdb do begin
    bo1:= infoline(address,filename,line,start,stop) = gdb_ok;
    if bo1 then begin
-    if sourcefo.showsourceline(filename,line-1,0,false) <> nil then begin
+    if sourcefo.showsourceline(filename,line-1,0,true) <> nil then begin
      exit;
     end;
     mstr1:= filename+':'+inttostr(line);
