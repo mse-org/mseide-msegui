@@ -34,7 +34,8 @@ type
    function getbutton: tframebutton;
    procedure setbutton(const avalue: tframebutton);
   public
-   constructor create(const intf: icaptionframe; const buttonintf: ibutton);
+   constructor create(const intf: icaptionframe;
+                       const buttonintf: ibutton); reintroduce;
   published
    property button: tframebutton read getbutton write setbutton;
  end;

@@ -3820,12 +3820,12 @@ end;
 
 function tcustomrealspinedit.getframe: tspineditframe;
 begin
- result:= tspineditframe(inherited frame);
+ result:= tspineditframe(pointer(inherited frame));
 end;
 
 procedure tcustomrealspinedit.setframe(const avalue: tspineditframe);
 begin
- inherited frame:= tcaptionframe(avalue);
+ inherited frame:= tcaptionframe(pointer(avalue));
 end;
 
 procedure tcustomrealspinedit.domousewheelevent(var info: mousewheeleventinfoty);

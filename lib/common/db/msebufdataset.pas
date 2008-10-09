@@ -602,7 +602,7 @@ type
    procedure applyrecupdate(updatekind : tupdatekind); virtual;
    procedure setonupdateerror(const avalue: updateerroreventty);
    property actindex: integer read factindex write setactindex;
-   function findrecord(arecordpo: pintrecordty): integer;
+   function findrecord(arecordpo: pintrecordty): integer; reintroduce;
                          //returns index, -1 if not found
    procedure dofilterrecord(var acceptable: boolean); virtual;
    procedure dobeforeapplyupdate; virtual;

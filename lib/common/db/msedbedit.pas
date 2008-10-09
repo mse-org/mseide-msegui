@@ -812,7 +812,7 @@ type
    //idbeditfieldlink
    function getgriddatasource: tdatasource;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
-   function checkvalue(const quiet: boolean = false): boolean;
+   function checkvalue(const quiet: boolean = false): boolean; reintroduce;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;

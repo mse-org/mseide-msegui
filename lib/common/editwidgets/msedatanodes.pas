@@ -243,7 +243,7 @@ type
   function getfieldtext(const fieldindex: integer): msestring;
   procedure setfieldtext(const fieldindex: integer; var avalue: msestring);
  end;
-
+ 
  trecordfielditem = class(ttreelistitem)
   private
    ffieldindex: integer;
@@ -251,7 +251,7 @@ type
   protected
   public
    constructor create(const intf: irecordfield; const afieldindex: integer;
-                      const acaption: msestring);
+                      const acaption: msestring); reintroduce;
    function getvaluetext: msestring; override;
    procedure setvaluetext(var avalue: msestring); override;
 //   property valuetext: msestring read getvaluetext write setvaluetext;

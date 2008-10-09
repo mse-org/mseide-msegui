@@ -368,7 +368,7 @@ const
 type
  tbarface = class(tface)
   public
-   constructor create(const intf: iface);
+   constructor create(const intf: iface); reintroduce;
  end;
 
  tcustomprogressbar = class;

@@ -886,7 +886,7 @@ type
    procedure dopaint(const canvas: tcanvas); override;
   public
    constructor create(aowner: tcomponent; transientfor: twindow;
-                             var info: hintinfoty);
+                             var info: hintinfoty); reintroduce;
    destructor destroy; override;
  end;
 
@@ -4254,12 +4254,12 @@ end;
 
 function tscrollingwidget.getframe: tscrollboxframe;
 begin
- result:= tscrollboxframe(inherited getframe);
+ result:= tscrollboxframe(pointer(inherited getframe));
 end;
 
 procedure tscrollingwidget.setframe(const Value: tscrollboxframe);
 begin
- inherited setframe(tcaptionframe(value));
+ inherited setframe(tcaptionframe(pointer(value)));
 end;
 
 procedure tscrollingwidget.mouseevent(var info: mouseeventinfoty);
@@ -4425,12 +4425,12 @@ end;
 
 function tscrollbarwidget.getframe: tscrollframe;
 begin
- result:= tscrollframe(inherited getframe);
+ result:= tscrollframe(pointer(inherited getframe));
 end;
 
 procedure tscrollbarwidget.setframe(const Value: tscrollframe);
 begin
- inherited setframe(tcaptionframe(value));
+ inherited setframe(tcaptionframe(pointer(value)));
 end;
 
 procedure tscrollbarwidget.scrollevent(sender: tcustomscrollbar;

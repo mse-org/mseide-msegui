@@ -150,7 +150,7 @@ type
    procedure settransaction(const avalue : tsqltransaction);
    procedure settransactionwrite(const avalue: tsqltransaction);
    procedure GetDBInfo(const SchemaType : TSchemaType; const SchemaObjectName, ReturnField : string; List: TStrings);
-   function getconnected: boolean;
+//   function getconnected: boolean;
    procedure setafteconnect(const avalue: tmsesqlscript);
    procedure setbeforedisconnect(const avalue: tmsesqlscript);
 //   procedure closeds;
@@ -1343,12 +1343,12 @@ begin
   end;
  end;
 end;
-
+{
 function tcustomsqlconnection.getconnected: boolean;
 begin
  result:= inherited connected;
 end;
-
+}
 procedure tcustomsqlconnection.doafterinternalconnect;
 begin
  inherited;
@@ -1529,6 +1529,7 @@ end;
 function tcustomsqlconnection.getinsertid: int64;
 begin
  databaseerror('Connection has no insert ID''s.');
+ result:= 0; //compiler warning
 end;
 {
 procedure tcustomsqlconnection.closeds;
@@ -1639,6 +1640,7 @@ function tcustomsqlconnection.fetchblob(const cursor: tsqlcursor;
                const fieldnum: integer): ansistring;
 begin
  raise edatabaseerror.create(name+': fetchblob not supported.');
+ result:= ''; //compiler warning
 end;
 
 function tcustomsqlconnection.todbstring(const avalue: msestring): string;

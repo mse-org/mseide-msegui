@@ -56,7 +56,7 @@ type
    procedure mousewheelevent(var info: mousewheeleventinfoty); override;
   public
    constructor create(const aowner: tcomponent;
-                                  const acontroller: tcalendarcontroller);
+                       const acontroller: tcalendarcontroller); reintroduce;
    property value: tdatetime read fvalue write setvalue;
  end;
 

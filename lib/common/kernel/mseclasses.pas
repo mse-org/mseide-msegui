@@ -332,7 +332,8 @@ type
   public
    destructor destroy; override;
    procedure updateskin(const recursive: boolean = false);
-   function loading: boolean;
+   function loading: boolean; reintroduce;
+       //this hides FPC tcomponent.loading which is not Delphi compatible
    {$ifdef FPC}
    procedure setinline(value: boolean);
    procedure setancestor(value: boolean);
@@ -2695,7 +2696,7 @@ begin
  typedata1:= gettypedata(aintf);
  {$ifdef FPC}
  intf1:= aobject.getinterfaceentrybystr(pshortstring(
-        @typedata1^.rawintfunit+length(typedata1^.rawintfunit)+1)^);
+        ptruint(@typedata1^.rawintfunit)+length(typedata1^.rawintfunit)+1)^);
  {$else}
  intf1:= aobject.getinterfaceentry(typedata1^.guid);
  {$endif}

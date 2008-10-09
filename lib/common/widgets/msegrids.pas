@@ -2418,7 +2418,7 @@ begin
   result:= ffont;
  end
  else begin
-  result:= tgridpropfont(fgrid.getfont);
+  result:= tgridpropfont(pointer(fgrid.getfont));
  end;
 end;
 
@@ -2926,7 +2926,7 @@ begin
   result:= ffontselect;
  end
  else begin
-  result:= tcolselectfont(getfont);
+  result:= tcolselectfont(pointer(getfont));
  end;
 end;
 
@@ -3009,7 +3009,7 @@ begin
   result:= ffont;
  end
  else begin
-  result:= tcolheaderfont(tcolheaders(fowner).fgridprop.getfont);
+  result:= tcolheaderfont(pointer(tcolheaders(fowner).fgridprop.getfont));
  end;
 end;
 

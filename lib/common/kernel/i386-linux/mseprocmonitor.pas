@@ -38,6 +38,7 @@ begin
   data:= adata;
  end;
  application.unlock;
+ result:= true;
 end;
 
 procedure pro_unlistentoprocess(const aprochandle: prochandlety;

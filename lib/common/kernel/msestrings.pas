@@ -3912,13 +3912,12 @@ begin
  position:= size;
  writebuffer(ch1,sizeof(ch1));
  data:= ''; //decref
- pointer(data):= pointer(ptrint(memory) + sizeof(stringheaderty));
+ pointer(data):= pointer(ptruint(memory) + sizeof(stringheaderty));
  setpointer(nil,0);
 // destroy;            //destroy does not free memory???
  free;
 end;
 
 end.
-
 
 

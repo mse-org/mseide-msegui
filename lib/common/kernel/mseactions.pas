@@ -139,7 +139,7 @@ type
    procedure setsysshortcuts(const avalue: tsysshortcuts);
    procedure setsysshortcuts1(const avalue: tsysshortcuts);
   protected
-   procedure updateaction(const aaction: taction);
+   procedure updateaction(const aaction: taction); reintroduce;
    //istatfile
    procedure dostatread(const reader: tstatreader); virtual;
    procedure dostatwrite(const writer: tstatwriter); virtual;

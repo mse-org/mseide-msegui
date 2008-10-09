@@ -148,7 +148,7 @@ var
 begin
  lock;
  for int1:= high(fcallbacks) downto 0 do begin
-  if (fcallbacks[int1] = dest) and (fhandles[int1+1] = prochandle) then begin
+  if (fcallbacks[int1] = dest) and (fhandles[int1+1] = cardinal(prochandle)) then begin
    deleteitem(pointerarty(fcallbacks),int1);
    deleteitem(fhandles,typeinfo(handlearty),int1+1);
    deleteitem(fdata,int1);

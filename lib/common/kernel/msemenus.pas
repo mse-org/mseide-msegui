@@ -1212,7 +1212,7 @@ begin
    result:= fparentmenu.getfont;
   end
   else begin
-   result:= tmenufont(stockobjects.fonts[stf_menu]);
+   result:= tmenufont(pointer(stockobjects.fonts[stf_menu]));
   end;
  end;
 end;
@@ -1225,13 +1225,13 @@ begin
   result:= ffontactive;
  end
  else begin
-  result:= tmenufontactive(ffont);
+  result:= tmenufontactive(pointer(ffont));
   if result = nil then begin
    if fparentmenu <> nil then begin
     result:= fparentmenu.getfontactive;
    end
    else begin
-    result:= tmenufontactive(stockobjects.fonts[stf_menu]);
+    result:= tmenufontactive(pointer(stockobjects.fonts[stf_menu]));
    end;
   end;
  end;

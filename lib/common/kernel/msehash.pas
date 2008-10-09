@@ -455,13 +455,13 @@ end;
 procedure thashedstrings.add(const keys: array of string;
                  startindex:  pointer = pointer($00000001));
 var
- int1: integer;
+ ca1: cardinal;
 begin
  if cardinal(length(keys)) + cardinal(startindex) <= cardinal(length(keys)) then begin
-  raise exception.create('nil not alowed.');
+  raise exception.create('nil not allowed.');
  end;
- for int1:= 0 to high(keys) do begin
-  add(keys[int1],pointer(int1+integer(startindex)));
+ for ca1:= 0 to high(keys) do begin
+  add(keys[ca1],pointer(ca1+cardinal(startindex)));
  end;
 end;
 
@@ -672,13 +672,13 @@ end;
 procedure thashedmsestrings.add(const keys: array of msestring;
                   startindex:  pointer = pointer($00000001));
 var
- int1: integer;
+ ca1: cardinal;
 begin
  if cardinal(length(keys)) + cardinal(startindex) <= cardinal(length(keys)) then begin
   raise exception.create('nil not alowed.');
  end;
- for int1:= 0 to high(keys) do begin
-  add(keys[int1],pointer(int1+integer(startindex)));
+ for ca1:= 0 to high(keys) do begin
+  add(keys[ca1],pointer(ca1+cardinal(startindex)));
  end;
 end;
 
