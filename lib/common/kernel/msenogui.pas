@@ -27,7 +27,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   procedure showexception(e: exception; const leadingtext: string = '');
+   procedure showexception(e: exception; const leadingtext: msestring = '');
                                   override;
    procedure errormessage(const amessage: msestring); override;
    procedure settimer(const us: integer); override;
@@ -73,7 +73,7 @@ begin
 end;
 
 procedure tnoguiapplication.showexception(e: exception;
-               const leadingtext: string = '');
+               const leadingtext: msestring = '');
 begin
  writestderr('EXCEPTION:');
  writestderr(leadingtext+e.message,true);

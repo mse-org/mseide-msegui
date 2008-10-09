@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+2008-10-09
+ New parameters leadingtext and handled in exceptioneventty.
 2008-10-04
  shapestatety ss_* -> shs_* in in order to distinguish from shiftstate.
 2008-09-02

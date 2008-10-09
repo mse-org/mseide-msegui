@@ -141,8 +141,9 @@ type
    property activator: tactivator read factivator write setactivator;
  end;
  
-
- exceptioneventty = procedure (sender: tobject; e: exception) of object;
+ exceptioneventty = procedure (const sender: tobject; const e: exception;
+                               const leadingtext: msestring; var handled: boolean) of object;
+                               
  terminatequeryeventty = procedure (var terminate: boolean) of object;
  idleeventty = procedure (var again: boolean) of object;
  
@@ -235,8 +236,8 @@ type
                    const aidleaction: waitidleeventty = nil): boolean; virtual;
 }
    procedure handleexception(sender: tobject = nil; 
-                                       const leadingtext: string = '');
-   procedure showexception(e: exception; const leadingtext: string = '');
+                                       const leadingtext: msestring = '');
+   procedure showexception(e: exception; const leadingtext: msestring = '');
                                   virtual; abstract;
    procedure errormessage(const amessage: msestring); virtual; abstract;
    procedure registeronterminated(const method: notifyeventty);
@@ -1095,7 +1096,9 @@ begin
 end;
 }
 procedure tcustomapplication.handleexception(sender: tobject = nil;
-                              const leadingtext: string = '');
+                              const leadingtext: msestring = '');
+var
+ handled: boolean;
 begin
  if fexceptionactive = 0 then begin //do not handle subsequent exceptions
   if exceptobject is exception then begin
@@ -1103,10 +1106,11 @@ begin
    try
     if not (exceptobject is eabort) then begin
      inc(fexceptioncount);
+     handled:= false;
      if assigned(fonexception) then begin
-      fonexception(sender, exception(exceptobject))
-     end
-     else begin
+      fonexception(sender,exception(exceptobject),leadingtext,handled);
+     end;
+     if not handled then begin
       showexception(exception(exceptobject),leadingtext);
      end;
     end

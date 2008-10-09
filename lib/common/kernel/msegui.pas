@@ -2035,8 +2035,8 @@ type
    function waitcanceled: boolean;
    function waitterminated: boolean;   
 
-   procedure showexception(e: exception; const leadingtext: string = ''); override;
-   procedure showasyncexception(e: exception; const leadingtext: string = '');
+   procedure showexception(e: exception; const leadingtext: msestring = ''); override;
+   procedure showasyncexception(e: exception; const leadingtext: msestring = '');
                 //messege posted in queue
    procedure errormessage(const amessage: msestring); override;
    procedure inithintinfo(var info: hintinfoty; const ahintedwidget: twidget);
@@ -13850,25 +13850,25 @@ begin
 end;
 
 procedure tguiapplication.showasyncexception(e: exception; 
-                                  const leadingtext: string = '');
+                                  const leadingtext: msestring = '');
 var
- str1: ansistring;
+ mstr1: msestring;
 begin
- str1:= leadingtext + e.Message;
- postevent(tasyncmessageevent.create(str1,'Exception'));
+ mstr1:= leadingtext + e.Message;
+ postevent(tasyncmessageevent.create(mstr1,'Exception'));
 end;
 
 procedure tguiapplication.showexception(e: exception; 
-                                  const leadingtext: string = '');
+                                  const leadingtext: msestring = '');
 var
- str1: ansistring;
+ mstr1: msestring;
 begin
  if not ismainthread then begin
   showasyncexception(e,leadingtext);
  end
  else begin
-  str1:= leadingtext + e.Message;
-  showmessage(str1,'Exception'{$ifdef FPC},0,lineend+
+  mstr1:= leadingtext + e.Message;
+  showmessage(mstr1,'Exception'{$ifdef FPC},0,lineend+
               getexceptiontext(exceptobject,
                             exceptaddr,exceptframecount,exceptframes){$endif});
  end;
