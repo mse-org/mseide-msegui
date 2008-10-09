@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2008 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@ type
   directory: filenamety;
   filemask: msestring;
   resultlist: ttextedit;
+  source: filesourcety;
  end;
 
  tfindinfilefo = class(tdockform)

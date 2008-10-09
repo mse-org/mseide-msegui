@@ -115,6 +115,12 @@ begin
   directory:= dir.value;
   filemask:= mask.value;
   updatebit({$ifdef FPC}longword{$else}byte{$endif}(options),ord(fifo_subdirs),subdirs.value);
+  if inopenfiles.value then begin
+   source:= fs_inopenfiles;
+  end
+  else begin
+   source:= fs_indirectories;
+  end;
  end;
 end;
 
@@ -130,6 +136,12 @@ begin
   dir.value:= directory;
   mask.value:= filemask;
   subdirs.value:= fifo_subdirs in options;
+  if source = fs_inopenfiles then begin
+   inopenfiles.value:= true;
+  end
+  else begin
+   indirectories.value:= true;
+  end;
  end;
 end;
 
@@ -145,6 +157,9 @@ procedure tfindinfiledialogfo.chaindirectories(const sender: TObject);
 begin
  if indirectories.value then begin
   inopenfiles.value:= false;
+  dir.enabled:= true;
+  mask.enabled:= true;
+  subdirs.enabled:= true;
  end;
 end;
 
@@ -152,6 +167,9 @@ procedure tfindinfiledialogfo.chainopenfiles(const sender: TObject);
 begin
  if inopenfiles.value then begin
   indirectories.value:= false;
+  dir.enabled:= false;
+  mask.enabled:= false;
+  subdirs.enabled:= false;
  end;
 end;
 

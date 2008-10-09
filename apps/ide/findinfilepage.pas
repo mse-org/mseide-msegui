@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2008 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -58,7 +58,8 @@ type
 implementation
 uses
  findinfilepage_mfm,sourcepage,sourceform,mseeditglob,sysutils,mserichstring,
- msegraphics,msestream,msefileutils,msesys,findinfiledialogform,msegraphutils;
+ msegraphics,msestream,msefileutils,msesys,findinfiledialogform,msegraphutils,
+ projectoptionsform;
  
 { tfindinfilepagefo}
  
@@ -144,12 +145,34 @@ end;
 
 procedure tfindinfilepagefo.threadonexecute(const sender: tthreadcomp);
 
+ procedure searchstream(const stream: ttextstream; const afilename: filenamety);
+ var
+  str1: string;
+ begin
+//        stream.buflen:= 1024;
+  if projectoptions.encoding <> 0 then begin
+   stream.encoding:= ce_utf8n;
+  end;
+  with sender,tfindinfilepagefo(datapo),finfo do begin
+   stream.buflen:= 4096;
+   with stream do begin
+    msesearchtext:= findinfo.text;
+    searchoptions:= findinfo.options;
+    startfile(afilename);
+    while searchnext and not terminated do begin
+     Position:= searchlinestartpos;
+     readln(str1);
+     addfoundline(str1,searchlinenumber,searchfoundpos-searchlinestartpos);
+    end;
+   end;
+  end;
+ end;
+
  procedure searchdirectory(const dir: filenamety);
  var
-  stream: ttextstream;
+  stream1: ttextstream;
   filelist: tfiledatalist;
   int1: integer;
-  str1: string;
  begin
   with sender,tfindinfilepagefo(datapo),finfo do begin
    filelist:= tfiledatalist.create;
@@ -174,22 +197,11 @@ procedure tfindinfilepagefo.threadonexecute(const sender: tthreadcomp);
      end;
      with filelist[int1] do begin
       try
-       stream:= ttextstream.create(dir+'/'+name,fm_read);
+       stream1:= ttextstream.create(dir+'/'+name,fm_read);
        try
-//        stream.buflen:= 1024;
-        stream.buflen:= 4096;
-        with stream do begin
-         msesearchtext:= findinfo.text;
-         searchoptions:= findinfo.options;
-         startfile(filename);
-         while searchnext and not terminated do begin
-          Position:= searchlinestartpos;
-          readln(str1);
-          addfoundline(str1,searchlinenumber,searchfoundpos-searchlinestartpos);
-         end;
-        end;
+        searchstream(stream1,stream1.filename);
        finally
-        stream.free;
+        stream1.free;
        end;
       except
       end;
@@ -201,8 +213,52 @@ procedure tfindinfilepagefo.threadonexecute(const sender: tthreadcomp);
   end;
  end; //searchdirectory
 
+var
+ int1: integer;
+ stream1: ttextstream;
+ bo1: boolean;
+  
 begin
- searchdirectory(filepath(tfindinfilepagefo(sender.datapo).finfo.directory,fk_file));
+ if finfo.source = fs_inopenfiles then begin
+  int1:= 0;
+  with sender,tfindinfilepagefo(datapo),finfo do begin
+   while not terminated do begin
+    bo1:= false;
+    application.lock;
+    try
+     if int1 < sourcefo.count then begin
+      with sourcefo.items[int1] do begin
+       if fileloaded then begin
+        stream1:= ttextstream.create; //memorystream
+        edit.savetostream(stream1,false);        
+       end
+       else begin
+        stream1:= ttextstream.create(filepath);
+       end;
+       application.unlock;
+       bo1:= true;
+       try
+        searchstream(stream1,filepath);
+       finally
+        stream1.free;
+       end;
+      end;
+     end
+     else begin
+      break;
+     end;
+    finally
+     if not bo1 then begin
+      application.unlock;
+     end;
+    end;
+    inc(int1);
+   end;
+  end;
+ end
+ else begin
+  searchdirectory(filepath(tfindinfilepagefo(sender.datapo).finfo.directory,fk_file));
+ end;
 end;
 
 procedure tfindinfilepagefo.threadonstart(const sender: tthreadcomp);

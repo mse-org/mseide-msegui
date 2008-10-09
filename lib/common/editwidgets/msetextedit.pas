@@ -160,7 +160,7 @@ type
                                   restorestate: boolean = false);
    procedure loadfromfile(const afilename: filenamety;
                                   restorestate: boolean = false); virtual;
-   procedure savetostream(const stream: ttextstream);
+   procedure savetostream(const stream: ttextstream; const resetmodified: boolean);
    procedure savetofile(const afilename: filenamety = '');
                        //afilename = '' -> actual filename
    procedure beginupdate;
@@ -644,10 +644,14 @@ begin
  end;
 end;
 
-procedure tcustomtextedit.savetostream(const stream: ttextstream);
+procedure tcustomtextedit.savetostream(const stream: ttextstream;
+                                const resetmodified: boolean);
 begin
+ stream.encoding:= fencoding;
  flines.savetostream(stream);
- modified:= false;
+ if resetmodified then begin
+  modified:= false;
+ end;
 end;
 
 procedure tcustomtextedit.savetofile(const afilename: filenamety = ''); //afilename = '' -> actual filename
@@ -662,9 +666,9 @@ begin
   str1:= afilename;
  end;
  stream:= ttextstream.Create(str1,fm_create);
- stream.encoding:= fencoding;
+// stream.encoding:= fencoding;
  try
-  savetostream(stream);
+  savetostream(stream,true);
   setfilename(str1);
  finally
   stream.Free;
