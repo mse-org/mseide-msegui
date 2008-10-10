@@ -330,7 +330,8 @@ function getcomponentpos(const component: tcomponent): pointty;
 
 implementation
 uses
- msesysutils,msestream,msewidgets,msedatalist,rtlconsts,msedesigner;
+ msesysutils,msestream,msewidgets,msedatalist,rtlconsts,msedesigner,
+ msetabs;
 type
 
  {$ifdef FPC}
@@ -710,12 +711,22 @@ end;
 function tdesignerselections.Add(const Item: Tcomponent): Integer;
 var
  info: selectedinfoty;
+ widget1: twidget;
 begin
  result:= indexof(item);
  if result < 0 then begin
   fillchar(info,sizeof(info),0);
   info.instance:= item;
   result:= inherited add(info);
+  if item is twidget then begin
+   widget1:= twidget(item);
+   while widget1 <> nil do begin
+    if (widget1 is ttabpage) then begin
+     ttabpage(widget1).isactivepage:= true;
+    end;
+    widget1:= widget1.parentwidget;
+   end;
+  end;
   change;
  end;
 end;

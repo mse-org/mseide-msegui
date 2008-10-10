@@ -325,12 +325,14 @@ type
    procedure loaded; override;
    procedure objectevent(const sender: tobject;
                                      const event: objecteventty); override;
+   function getisactivepage: boolean;
+   procedure setisactivepage(const avalue: boolean);
   public
    constructor create(aowner: tcomponent); override;
    procedure initnewcomponent(const ascale: real); override;
-   function isactivepage: boolean;
    property tabwidget: tcustomtabwidget read ftabwidget;
    property tabindex: integer read gettabindex write settabindex;
+   property isactivepage: boolean read getisactivepage write setisactivepage;
   published
    property invisible: boolean read getinvisible write setinvisible;
    property caption: captionty read getcaption write setcaption;
@@ -2034,9 +2036,16 @@ begin
  end;
 end;
 
-function ttabpage.isactivepage: boolean;
+function ttabpage.getisactivepage: boolean;
 begin
  result:= (ftabwidget <> nil) and (ftabwidget.activepage = self);
+end;
+
+procedure ttabpage.setisactivepage(const avalue: boolean);
+begin
+ if ftabwidget <> nil then begin
+  ftabwidget.activepage:= self;
+ end;
 end;
 
 function ttabpage.gettabindex: integer;
