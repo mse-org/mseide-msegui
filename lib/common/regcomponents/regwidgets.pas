@@ -38,7 +38,8 @@ uses
  sysutils,classes,msesimplewidgets,msegrids,msemenus,mseimage,msedispwidgets,
  msetoolbar,msetabs,msedesignintf,regwidgets_bmp,mselistbrowser,
  msesplitter,msedock,mseforms,mseclasses,typinfo,msearrayprops,msewidgets,
- msegui,formdesigner,msedial,msemenuwidgets,msewindowwidget,msechart
+ msegui,formdesigner,msedial,msemenuwidgets,msewindowwidget,msechart,
+ msepolygon
  {$ifdef FPC},mseopenglwidget{$endif};
  
 type
@@ -98,7 +99,7 @@ procedure Register;
 begin
  registercomponents('Widget',[tsimplewidget,teventwidget,tbutton,trichbutton,tstockglyphbutton,
   tdrawgrid,tstringgrid,tlistview,
-  tlabel,tpaintbox,timage,
+  tlabel,tpaintbox,timage,tpolygon,
   tintegerdisp,trealdisp,tdatetimedisp,tstringdisp,tbytestringdisp,tbooleandisp,
   tgroupbox,tscrollbox,tstepbox,tdockpanel,tdockhandle,tmseformwidget,
   tdockformwidget,tmainmenuwidget,

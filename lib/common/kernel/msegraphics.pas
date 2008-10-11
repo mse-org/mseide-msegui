@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -641,12 +641,17 @@ type
                       const linecolor: colorty = cl_none); overload;
    procedure fillellipse(const def: rectty; const acolor: colorty = cl_default;
                         const linecolor: colorty = cl_none); overload;
+                             //def.pos = center, def.cx = width, def.cy = height
    procedure fillarcchord(const def: rectty; const startang,extentang: real; 
                               const acolor: colorty = cl_default;
                               const linecolor: colorty = cl_none);
+                             //def.pos = center, def.cx = width, def.cy = height
+                             //startang,extentang in radiant (2*pi = 360deg CCW)
    procedure fillarcpieslice(const def: rectty; const startang,extentang: real; 
                             const acolor: colorty = cl_default;
                             const linecolor: colorty = cl_none);
+                             //def.pos = center, def.cx = width, def.cy = height
+                             //startang,extentang in radiant (2*pi = 360deg CCW)
    procedure fillpolygon(const apoints: array of pointty; 
                          const acolor: colorty = cl_default;
                          const linecolor: colorty = cl_none); overload;
