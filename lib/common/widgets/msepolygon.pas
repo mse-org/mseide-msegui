@@ -26,6 +26,8 @@ type
   vertex: pointarty;
   color: colorty;
   colorline: colorty;
+  linewidthmm: real;
+  joinstyle: joinstylety;
  end;
  
  projvectty = array[0..1] of real;
@@ -40,6 +42,8 @@ type
    procedure setpoly_color(const avalue: colorty);
    procedure setpoly_colorline(const avalue: colorty);
    procedure setpoly_rotation(const avalue: real);
+   procedure setpoly_linewidthmm(const avalue: real);
+   procedure setpoly_joinstyle(const avalue: joinstylety);
   protected
    fstate: polygonstatesty;
    procedure change;
@@ -55,13 +59,17 @@ type
    property poly_edgeradiusmm: real read finfo.edgeradiusmm 
                          write setpoly_edgeradiusmm;
    property poly_edgeradiusvertexcount: integer read finfo.edgeradiusvertexcount
-                         write setpoly_edgeradiusvertexcount;
+                         write setpoly_edgeradiusvertexcount default 2;
    property poly_rotation: real read finfo.rotation write setpoly_rotation;
                                  //0..1 -> 0..360° CCW
    property poly_color: colorty read finfo.color write setpoly_color 
                                                           default cl_white;
    property poly_colorline: colorty read finfo.colorline write setpoly_colorline 
                                                           default cl_black;
+   property poly_linewidthmm: real read finfo.linewidthmm 
+                                                    write setpoly_linewidthmm;
+   property poly_joinstyle: joinstylety read finfo.joinstyle
+                               write setpoly_joinstyle default js_miter;
  end;
 
 const
@@ -286,6 +294,8 @@ begin
  with finfo do begin
   color:= cl_white;
   colorline:= cl_black;
+  joinstyle:= js_miter;
+  edgeradiusvertexcount:= 2;
  end;
  inherited;
 end;
@@ -303,6 +313,9 @@ begin
  inherited;
  checkgeometry(canvas.ppmm);
  with finfo do begin
+  canvas.save;
+  canvas.linewidthmm:= linewidthmm;
+  canvas.joinstyle:= joinstyle;
   case edgecount of
    0: begin
     rect1.pos:= vertex[0];
@@ -316,6 +329,7 @@ begin
     canvas.fillpolygon(vertex,color,colorline);
    end;
   end;
+  canvas.restore;
  end;
 end;
 
@@ -355,6 +369,22 @@ procedure tpolygon.setpoly_colorline(const avalue: colorty);
 begin
  if avalue <> finfo.colorline then begin
   finfo.colorline:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tpolygon.setpoly_linewidthmm(const avalue: real);
+begin
+ if avalue <> finfo.linewidthmm then begin
+  finfo.linewidthmm:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tpolygon.setpoly_joinstyle(const avalue: joinstylety);
+begin
+ if avalue <> finfo.joinstyle then begin
+  finfo.joinstyle:= avalue;
   invalidate;
  end;
 end;
