@@ -18,7 +18,10 @@ type
  polygonstatesty = set of polygonstatety;
  
  polygoninfoty = record
+  ppmm: real;
   edgecount: integer;
+  edgeradiusmm: real;
+  edgeradiusvertexcount: integer;
   rotation: real; 
   vertex: pointarty;
   color: colorty;
@@ -32,6 +35,8 @@ type
   private
    finfo: polygoninfoty;
    procedure setpoly_edgecount(const avalue: integer);
+   procedure setpoly_edgeradiusmm(const avalue: real);
+   procedure setpoly_edgeradiusvertexcount(const avalue: integer);
    procedure setpoly_color(const avalue: colorty);
    procedure setpoly_colorline(const avalue: colorty);
    procedure setpoly_rotation(const avalue: real);
@@ -39,7 +44,7 @@ type
    fstate: polygonstatesty;
    procedure change;
    procedure dopaint(const canvas: tcanvas); override;
-   procedure checkgeometry;
+   procedure checkgeometry(const appmm: real);
    procedure clientrectchanged; override;
   public
    constructor create(aowner: tcomponent); override;
@@ -47,6 +52,10 @@ type
    property poly_edgecount: integer read finfo.edgecount 
                                   write setpoly_edgecount default 0;
                                  //0 -> circle                    
+   property poly_edgeradiusmm: real read finfo.edgeradiusmm 
+                         write setpoly_edgeradiusmm;
+   property poly_edgeradiusvertexcount: integer read finfo.edgeradiusvertexcount
+                         write setpoly_edgeradiusvertexcount;
    property poly_rotation: real read finfo.rotation write setpoly_rotation;
                                  //0..1 -> 0..360° CCW
    property poly_color: colorty read finfo.color write setpoly_color 
@@ -57,6 +66,12 @@ type
 
 const
  unityprojmatrix: projmatrixty = ((1,0),(0,1),(0,0));
+
+function movepoint(const start: complexty; const angle: real;
+                             const dist: real): complexty;
+function angle(const start, stop: complexty): real;
+function halfangle(a,b: real): real;
+function arcangle(a,b: real): real;
 
 procedure projtranslate(var matrix: projmatrixty; const tx,ty: real);
 procedure projscale(var matrix: projmatrixty; const sx,sy: real);
@@ -72,6 +87,8 @@ implementation
 
 const
  pi2 = 2*pi;
+ pid2 = pi/2;
+ pi3d2 = 3*pi/2;
  
 procedure realtointpoints(const source: complexarty; out dest: pointarty);
 var
@@ -175,6 +192,93 @@ begin
  dest[2,1]:= o21;
 end;
 
+function movepoint(const start: complexty; const angle: real;
+                             const dist: real): complexty;
+begin
+ result.re:= start.re + cos(angle) * dist;
+ result.im:= start.im + sin(angle) * dist;
+end;
+
+function angle(const start, stop: complexty): real;
+var
+ dx,dy: real;
+begin
+ dx:= stop.re - start.re;
+ dy:= stop.im - start.im;
+ if abs(dx) > abs(dy) then begin
+  result:= arctan(dy/dx);
+  if dx < 0 then begin
+   result:= result + pi;
+  end;
+ end
+ else begin
+  result:= pid2 - arctan(dx/dy);
+  if dy < 0 then begin
+   result:= result + pi;
+  end;
+ end;
+ if result < 0 then begin
+  result:= result+pi2;
+ end;
+end;
+
+procedure normalizeangle(var angle: real);
+begin
+ angle:= angle-int(angle/pi2)*pi2; //0..2pi
+ if angle < 0 then begin
+  angle:= angle + pi2;
+ end;
+end;
+
+procedure normalizeanglehalf(var angle: real);
+begin
+ angle:= angle-int(angle/pi2)*pi2; //0..2pi
+ if angle > pi then begin
+  angle:= angle - pi2;
+ end;
+end;
+
+function halfangle(a,b: real): real;
+begin
+ normalizeangle(a);
+ normalizeangle(b);
+ result:= (a + b)/2;
+ if b < a then begin
+  result:= result - pi;
+  if result < 0 then begin
+   result:= result + pi2;
+  end;
+ end;
+end;
+
+function arcangle(a,b: real): real;
+begin
+ normalizeangle(a);
+ normalizeangle(b);
+ result:= b - a;
+ if result < 0 then begin
+  result:= result + pi2;
+ end;
+end;
+
+procedure arc(const center: complexty; const radius: real;
+                      const startang, endang: real; const vertexcount: integer;
+                      const dest: pcomplexaty);
+var
+ step: real;
+ int1: integer;
+ rea1: real;
+begin
+ if vertexcount >= 2 then begin
+  step:= arcangle(startang,endang)/(vertexcount-1);
+  for int1:= 0 to vertexcount - 1 do begin
+   rea1:= int1*step + startang;
+   dest^[int1].re:= radius * cos(rea1) + center.re;
+   dest^[int1].im:= radius * sin(rea1) + center.im;
+  end;
+ end;
+end;
+
 { tpolygon }
 
 constructor tpolygon.create(aowner: tcomponent);
@@ -197,7 +301,7 @@ var
  rect1: rectty;
 begin
  inherited;
- checkgeometry;
+ checkgeometry(canvas.ppmm);
  with finfo do begin
   case edgecount of
    0: begin
@@ -223,6 +327,38 @@ begin
  end;
 end;
 
+procedure tpolygon.setpoly_edgeradiusmm(const avalue: real);
+begin
+ if finfo.edgeradiusmm <> avalue then begin
+  finfo.edgeradiusmm:= avalue;
+  change;
+ end;
+end;
+
+procedure tpolygon.setpoly_edgeradiusvertexcount(const avalue: integer);
+begin
+ if finfo.edgeradiusvertexcount <> avalue then begin
+  finfo.edgeradiusvertexcount:= avalue;
+  change;
+ end;
+end;
+
+procedure tpolygon.setpoly_color(const avalue: colorty);
+begin
+ if avalue <> finfo.color then begin
+  finfo.color:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tpolygon.setpoly_colorline(const avalue: colorty);
+begin
+ if avalue <> finfo.colorline then begin
+  finfo.colorline:= avalue;
+  invalidate;
+ end;
+end;
+
 procedure tpolygon.setpoly_rotation(const avalue: real);
 begin
  if finfo.rotation <> avalue then begin
@@ -231,19 +367,23 @@ begin
  end;
 end;
 
-procedure tpolygon.checkgeometry;
+procedure tpolygon.checkgeometry(const appmm: real);
 var
  rect1: rectty;
- ar1: complexarty;
- rea1,rea2: real;
+ ar1,ar2: complexarty;
+ rea1,rea2,rea3: real;
  int1: integer;
  ma: projmatrixty;
  minx,miny,maxx,maxy: real;
  si,co: real;
+ ptpo1,ptpo2,ptpo3: pcomplexty;
+ ang1,ang2: real;
+ pt1: complexty;
  
 begin
- if not (pos_geometryvalid in fstate) then begin
+ if not (pos_geometryvalid in fstate) or (finfo.ppmm <> appmm) then begin
   include(fstate,pos_geometryvalid);
+  finfo.ppmm:= appmm;
   rect1:= innerclientrect;
   dec(rect1.cx);
   dec(rect1.cy);
@@ -286,13 +426,14 @@ begin
     else begin
      setlength(ar1,edgecount);
      rea1:= 2*pi/(edgecount);
+     rea2:= (pid2+rea1/2); 
      for int1:= 0 to high(ar1) do begin
-      rea2:= int1*rea1;
-      ar1[int1].im:= -cos(rea2);          //start at top corner
-      ar1[int1].re:= -sin(rea2);
+      rea3:= int1*rea1+rea2; //edge at bottom
+      ar1[int1].im:= sin(rea3);          
+      ar1[int1].re:= cos(rea3);
      end;
      ma:= unityprojmatrix;
-     projrotate(ma,rotation*pi2);
+     projrotate(ma,rotation*pi2); 
      project(ma,ar1);
      minx:= 0;
      miny:= 0;
@@ -321,26 +462,36 @@ begin
      projscale(ma,rect1.cx,rect1.cy);                 //scale to destination rect
      projtranslate(ma,rect1.x,rect1.y);               //move to destrect
      project(ma,ar1);
-     realtointpoints(ar1,vertex);
+     if (edgeradiusmm <> 0) and (edgeradiusvertexcount >= 2) then begin
+      setlength(ar2,length(ar1)*edgeradiusvertexcount);
+      rea1:= edgeradiusmm*ppmm;    //radius in pixel
+      for int1:= 0 to high(ar1) do begin
+       ptpo1:= @ar1[int1];
+       ptpo2:= @ar1[(int1+1) mod edgecount];
+       ptpo3:= @ar1[(int1+2) mod edgecount];
+       ang1:= angle(ptpo2^,ptpo1^);
+       ang2:= angle(ptpo2^,ptpo3^);
+       rea2:= halfangle(ang2,ang1); //angle of center -> vertex, center -> tangent
+       rea3:= arcangle(ang2,ang1)/2;
+       pt1:= movepoint(ptpo2^,rea2,rea1/sin(rea3));  
+       arc(pt1,rea1,ang1+pid2,ang2-pid2,edgeradiusvertexcount,
+                                            @ar2[int1*edgeradiusvertexcount]);
+                                    //center of circle
+//       ar2[int1*2]:= movepoint(pt1,ang1+pid2,rea1);    //tangent
+//       ar2[int1*2+1]:= movepoint(pt1,ang2-pid2,rea1);  //tangent
+//       ar2[int1*2]:= ptpo2^;
+//       ar2[int1*2+1]:= ptpo2^;
+//       ar2[int1*2+1]:= pt1;
+      end;
+     end
+     else begin
+      ar2:= ar1;
+     end;
+     realtointpoints(ar2,vertex);
+     removeduplicatedpoints(vertex);
     end;
    end;
   end;
- end;
-end;
-
-procedure tpolygon.setpoly_color(const avalue: colorty);
-begin
- if avalue <> finfo.color then begin
-  finfo.color:= avalue;
-  invalidate;
- end;
-end;
-
-procedure tpolygon.setpoly_colorline(const avalue: colorty);
-begin
- if avalue <> finfo.colorline then begin
-  finfo.colorline:= avalue;
-  invalidate;
  end;
 end;
 
@@ -349,6 +500,5 @@ begin
  change;
  inherited;
 end;
-
 
 end.

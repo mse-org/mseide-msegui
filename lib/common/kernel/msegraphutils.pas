@@ -408,6 +408,8 @@ procedure vectortoline(const vector: graphicvectorty; out a,b: pointty);
 function rotatedirection(const olddest,newvalue,
                             oldvalue: graphicdirectionty): graphicdirectionty;
 
+procedure removeduplicatedpoints(var vect: pointarty);
+
 implementation
 uses
  mseglob,SysUtils,mseformatstr,classes,msestreaming;
@@ -433,6 +435,26 @@ const
    'Invalid index',
    'Not implemented'
  );
+
+procedure removeduplicatedpoints(var vect: pointarty);
+var
+ ar1: pointarty;
+ int1,int2: integer;
+begin
+ if vect <> nil then begin
+  setlength(ar1,length(vect));
+  int2:= 0;
+  ar1[0]:= vect[0];
+  for int1:= 1 to high(vect) do begin
+   if (ar1[int2].x <> vect[int1].x) or (ar1[int2].y <> vect[int1].y) then begin
+    inc(int2);
+    ar1[int2]:= vect[int1];
+   end;
+  end;
+  setlength(ar1,int2+1);
+  vect:= ar1;
+ end;
+end;
 
 function stringtocolor(value: string): colorty;
 var

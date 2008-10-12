@@ -114,7 +114,9 @@ type
  pptrintaty = ^ptrintaty;
  ptruintaty = array[0..0] of ptruint;
  pptruintaty = ^ptruintaty;
-
+ complexaty = array[0..0] of complexty;
+ pcomplexaty = ^complexaty;
+ 
  methodaty = array[0..0] of tmethod;
  pmethodaty = ^methodaty;
  stringaty = array[0..0] of string;
@@ -160,7 +162,9 @@ type
    )
  end;
 
-
+const
+ nullcomplex: complexty = (re: 0; im: 0);
+ 
 function mergevarrec(a,b: array of const): varrecarty;
 function issamemethod(const method1,method2: tmethod): boolean;
 function isemptydatetime(const avalue: tdatetime): boolean;
