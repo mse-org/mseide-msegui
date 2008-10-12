@@ -11,7 +11,8 @@ unit msepolygon;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msewidgets,msegraphutils,msegraphics,classes,msetypes,msebitmap;
+ msewidgets,msegraphutils,msegraphics,classes,msetypes,msebitmap,
+ msesimplewidgets;
  
 type
  polygonstatety = (pos_geometryvalid);
@@ -34,7 +35,7 @@ type
  projvectty = array[0..1] of real;
  projmatrixty = array[0..2] of projvectty; //[row][col]
  
- tpolygon = class(tpublishedwidget)
+ tpolygon = class(tpaintbox)
   private
    finfo: polygoninfoty;
    procedure setpoly_edgecount(const avalue: integer);
