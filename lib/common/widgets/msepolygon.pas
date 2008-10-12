@@ -11,7 +11,7 @@ unit msepolygon;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msewidgets,msegraphutils,msegraphics,classes,msetypes;
+ msewidgets,msegraphutils,msegraphics,classes,msetypes,msebitmap;
  
 type
  polygonstatety = (pos_geometryvalid);
@@ -28,6 +28,7 @@ type
   colorline: colorty;
   linewidthmm: real;
   joinstyle: joinstylety;
+  brush: tmaskedbitmap;
  end;
  
  projvectty = array[0..1] of real;
@@ -44,14 +45,17 @@ type
    procedure setpoly_rotation(const avalue: real);
    procedure setpoly_linewidthmm(const avalue: real);
    procedure setpoly_joinstyle(const avalue: joinstylety);
+   procedure setpoly_brush(const avalue: tmaskedbitmap);
   protected
    fstate: polygonstatesty;
    procedure change;
    procedure dopaint(const canvas: tcanvas); override;
    procedure checkgeometry(const appmm: real);
    procedure clientrectchanged; override;
+   procedure bitmapchanged(const sender: tobject);
   public
    constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
   published
    property poly_edgecount: integer read finfo.edgecount 
                                   write setpoly_edgecount default 0;
@@ -70,6 +74,7 @@ type
                                                     write setpoly_linewidthmm;
    property poly_joinstyle: joinstylety read finfo.joinstyle
                                write setpoly_joinstyle default js_miter;
+   property poly_brush: tmaskedbitmap read finfo.brush write setpoly_brush;
  end;
 
 const
@@ -296,8 +301,16 @@ begin
   colorline:= cl_black;
   joinstyle:= js_miter;
   edgeradiusvertexcount:= 2;
+  brush:= tmaskedbitmap.create(false);
+  brush.onchange:= {$ifdef FPC}@{$endif}bitmapchanged;
  end;
  inherited;
+end;
+
+destructor tpolygon.destroy;
+begin
+ inherited;
+ finfo.brush.free;
 end;
 
 procedure tpolygon.change;
@@ -316,6 +329,9 @@ begin
   canvas.save;
   canvas.linewidthmm:= linewidthmm;
   canvas.joinstyle:= joinstyle;
+  if color = cl_brush then begin
+   canvas.brush:= brush;
+  end;
   case edgecount of
    0: begin
     rect1.pos:= vertex[0];
@@ -529,6 +545,16 @@ procedure tpolygon.clientrectchanged;
 begin
  change;
  inherited;
+end;
+
+procedure tpolygon.setpoly_brush(const avalue: tmaskedbitmap);
+begin
+ finfo.brush.assign(avalue);
+end;
+
+procedure tpolygon.bitmapchanged(const sender: tobject);
+begin
+ invalidate;
 end;
 
 end.
