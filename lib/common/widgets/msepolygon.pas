@@ -27,6 +27,8 @@ type
   vertex: pointarty;
   color: colorty;
   colorline: colorty;
+  colorlinegap: colorty;
+  dashes: ansistring;
   linewidthmm: real;
   joinstyle: joinstylety;
   brush: tmaskedbitmap;
@@ -43,6 +45,8 @@ type
    procedure setpoly_edgeradiusvertexcount(const avalue: integer);
    procedure setpoly_color(const avalue: colorty);
    procedure setpoly_colorline(const avalue: colorty);
+   procedure setpoly_colorlinegap(const avalue: colorty);
+   procedure setpoly_dashes(const avalue: ansistring);
    procedure setpoly_rotation(const avalue: real);
    procedure setpoly_linewidthmm(const avalue: real);
    procedure setpoly_joinstyle(const avalue: joinstylety);
@@ -71,8 +75,11 @@ type
                                                           default cl_white;
    property poly_colorline: colorty read finfo.colorline write setpoly_colorline 
                                                           default cl_black;
+   property poly_colorlinegap: colorty read finfo.colorlinegap
+                     write setpoly_colorlinegap default cl_transparent;
    property poly_linewidthmm: real read finfo.linewidthmm 
                                                     write setpoly_linewidthmm;
+   property poly_dashes: ansistring read finfo.dashes write setpoly_dashes;
    property poly_joinstyle: joinstylety read finfo.joinstyle
                                write setpoly_joinstyle default js_miter;
    property poly_brush: tmaskedbitmap read finfo.brush write setpoly_brush;
@@ -300,6 +307,7 @@ begin
  with finfo do begin
   color:= cl_white;
   colorline:= cl_black;
+  colorlinegap:= cl_transparent;
   joinstyle:= js_miter;
   edgeradiusvertexcount:= 2;
   brush:= tmaskedbitmap.create(false);
@@ -329,6 +337,8 @@ begin
  with finfo do begin
   canvas.save;
   canvas.linewidthmm:= linewidthmm;
+  canvas.dashes:= dashes;
+  canvas.colorbackground:= colorlinegap;
   canvas.joinstyle:= joinstyle;
   if color = cl_brush then begin
    canvas.brush:= brush;
@@ -390,11 +400,25 @@ begin
  end;
 end;
 
+procedure tpolygon.setpoly_colorlinegap(const avalue: colorty);
+begin
+ if avalue <> finfo.colorlinegap then begin
+  finfo.colorlinegap:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tpolygon.setpoly_dashes(const avalue: ansistring);
+begin
+ finfo.dashes:= avalue;
+ invalidate;
+end;
+
 procedure tpolygon.setpoly_linewidthmm(const avalue: real);
 begin
  if avalue <> finfo.linewidthmm then begin
   finfo.linewidthmm:= avalue;
-  invalidate;
+  change;
  end;
 end;
 
@@ -419,7 +443,7 @@ var
  rect1: rectty;
  ar1,ar2: complexarty;
  rea1,rea2,rea3: real;
- int1: integer;
+ int1,int2: integer;
  ma: projmatrixty;
  minx,miny,maxx,maxy: real;
  si,co: real;
@@ -430,11 +454,19 @@ var
 begin
  if not (pos_geometryvalid in fstate) or (finfo.ppmm <> appmm) then begin
   include(fstate,pos_geometryvalid);
-  finfo.ppmm:= appmm;
   rect1:= innerclientrect;
-  dec(rect1.cx);
-  dec(rect1.cy);
   with finfo do begin
+   ppmm:= appmm;
+   int1:= round(linewidthmm*appmm/2);
+   if int1 = 0 then begin
+    int1:= 1;
+   end;
+   int2:= 2*int1-1;
+   dec(rect1.cx,int2);
+   dec(rect1.cy,int2);
+   dec(int1);
+   inc(rect1.x,int1);
+   inc(rect1.y,int1);
    case edgecount of
     0: begin
      setlength(vertex,2);

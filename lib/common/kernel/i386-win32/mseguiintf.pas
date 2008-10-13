@@ -274,7 +274,7 @@ type
              gcf_selectforegroundbrush,gcf_selectbackgroundbrush,
              gcf_foregroundpenvalid,
              gcf_selectforegroundpen,gcf_selectnullpen,gcf_selectnullbrush,
-             gcf_ispatternpen,
+             gcf_ispatternpen,gcf_isopaquedashpen,
                           gcf_last = 31);
             //-> cardinal
  gcflagsty = set of gcflagty;
@@ -293,10 +293,11 @@ type
   gccliporigin: pointty;
   selectedpen: hpen;
   selectedbrush: hbrush;
+  secondpen: hpen;
   {$ifndef FPC}
-  local: array[20..23] of cardinal;
+  local: array[21..23] of cardinal;
   {$else}
-  local: array[22..23] of cardinal;
+  local: array[23..23] of cardinal;
   {$endif}
  end;
 
@@ -2121,10 +2122,19 @@ procedure checkgc2(var gc: gcty);
          //second pass for transparent patternpen
 begin
  with gc,win32gcty(platformdata) do begin
-  setbkcolor(handle,$000000);
-  settextcolor(handle,foregroundcol);
-  setrop2(handle,secondrasterops2[rop]);
-  exclude(flags,gcf_rasterop);
+  if gcf_isopaquedashpen in flags then begin
+   selectobject(handle,secondpen);
+   deleteobject(selectedpen);
+   selectedpen:= secondpen;
+   foregroundpen:= secondpen;
+   exclude(flags,gcf_foregroundpenvalid);
+  end
+  else begin
+   setbkcolor(handle,$000000);
+   settextcolor(handle,foregroundcol);
+   setrop2(handle,secondrasterops2[rop]);
+   exclude(flags,gcf_rasterop);
+  end;
  end;
 end;
 
@@ -2143,6 +2153,7 @@ var
 begin
  result:= false;
  with gc,win32gcty(platformdata) do begin
+  exclude(flags,gcf_isopaquedashpen);
   if (df_brush in drawingflags) xor (gcf_ispatternpen in flags) then begin
    exclude(flags,gcf_foregroundpenvalid);
   end;
@@ -2206,6 +2217,10 @@ begin
     po1:= nil;
     dashlen:= length(dashes);
     if dashlen > 0 then begin
+     if df_opaque in drawingflags then begin
+      include(flags,gcf_isopaquedashpen);
+      result:= true;
+     end;
      if iswin95 then begin
       astyle:= ps_dot;
      end
@@ -2254,6 +2269,16 @@ begin
     end;
     foregroundpen:= extcreatepen(astyle,awidth,brushinfo,
                     dashlen,po1);
+    if gcf_isopaquedashpen in flags then begin
+     secondpen:= foregroundpen;
+     with brushinfo do begin
+      lbStyle:= bs_solid;
+      lbColor:= backgroundcol;
+     end;
+     foregroundpen:= extcreatepen(astyle and 
+         not(ps_userstyle or ps_dot or ps_alternate),awidth,brushinfo,
+                    0,nil);         
+    end;
    end;
   end;
   if gcf_selectbackgroundbrush in aflags then begin
