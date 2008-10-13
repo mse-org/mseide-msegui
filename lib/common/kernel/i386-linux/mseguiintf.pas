@@ -3371,6 +3371,8 @@ begin
     if int1 <> 0 then begin
      if dashes[int1] = #0 then begin
       dec(int1);
+     end;
+     if df_opaque in drawingflags then begin
       xvalues.line_style:= linedoubledash;
      end
      else begin

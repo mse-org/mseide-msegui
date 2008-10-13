@@ -1290,7 +1290,8 @@ end;
 
 function tpostscriptcanvas.strokestr: string;
 begin
- if (length(dashes) > 0) and (dashes[length(dashes)] = #0) then begin
+ if (length(dashes) > 0) and (df_opaque in fdrawinfo.gc.drawingflags) then begin 
+                                    //(dashes[length(dashes)] = #0) then begin
   result:= 'gsave [] 0 setdash ' + setcolorstring(fdrawinfo.acolorbackground) +
            ' stroke grestore stroke'; //draw background 
  end
