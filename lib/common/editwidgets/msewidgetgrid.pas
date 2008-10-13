@@ -13,7 +13,8 @@ unit msewidgetgrid;
 
 interface
 uses
- mseclasses,msegrids,msegui,msegraphutils,mseglob,mseguiglob,mseeditglob,Classes,msemenus,
+ mseclasses,msegrids,msegui,msegraphutils,mseglob,mseguiglob,mseeditglob,
+ Classes,msemenus,
  msegraphics,mseevent,msedatalist,msetypes,msepointer,msestrings;
 
 type
@@ -1124,6 +1125,8 @@ begin
 end;
 
 procedure twidgetcol.drawcell(const canvas: tcanvas);
+var
+ face1: tcustomface;
 begin
  with cellinfoty(canvas.drawinfopo^) do begin
   if (fdata <> nil) then begin
@@ -1142,6 +1145,12 @@ begin
  end;
  inherited;
  if fintf <> nil then begin
+  if (fface = nil) then begin
+   face1:= fintf.getwidget.face;
+   if face1 <> nil then begin
+    face1.paint(canvas,cellinfoty(canvas.drawinfopo^).rect);
+   end;
+  end;
   fintf.drawcell(canvas);
  end;
 end;

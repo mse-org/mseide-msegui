@@ -217,6 +217,8 @@ type
                 const ainfo: skininfoty); virtual;
    procedure handlesimplebutton(const sender: twidget;
                 const ainfo: skininfoty); virtual;
+   procedure handledatabutton(const sender: twidget;
+                const ainfo: skininfoty); virtual;
    procedure handleuserobject(const sender: tobject;
                 const ainfo: skininfoty); virtual;
    procedure handletabbar(const sender: tcustomtabbar;
@@ -258,6 +260,7 @@ type
    fgroupbox: groupboxskininfoty;
    fgrid: gridskininfoty;
    fbutton: buttonskininfoty;
+   fdatabutton: buttonskininfoty;
    fframebutton: framebuttonskininfoty;
    fcontainer: containerskininfoty;
    fwidget_color: colorty;
@@ -295,6 +298,12 @@ type
    procedure setbutton_frame(const avalue: tframecomp);
    function getbutton_font: toptionalfont;
    procedure setbutton_font(const avalue: toptionalfont);
+
+   procedure setdatabutton_face(const avalue: tfacecomp);
+   procedure setdatabutton_frame(const avalue: tframecomp);
+   function getdatabutton_font: toptionalfont;
+   procedure setdatabutton_font(const avalue: toptionalfont);
+
    procedure setframebutton_face(const avalue: tfacecomp);
    procedure setframebutton_frame(const avalue: tframecomp);
 
@@ -348,6 +357,8 @@ type
                                   const ainfo: skininfoty); override;
    procedure handlesimplebutton(const sender: twidget; 
                                   const ainfo: skininfoty); override;
+   procedure handledatabutton(const sender: twidget; 
+                                  const ainfo: skininfoty); override;
    procedure handletabbar(const sender: tcustomtabbar;
                                   const ainfo: skininfoty); override;
    procedure handletoolbar(const sender: tcustomtoolbar;
@@ -368,6 +379,7 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure createbutton_font;
+   procedure createdatabutton_font;
   published
    property sb_horz_facebutton: tfacecomp read fsb_horz.facebu 
                         write setsb_horz_facebutton;
@@ -430,6 +442,13 @@ type
    property button_face: tfacecomp read fbutton.wi.fa write setbutton_face;
    property button_frame: tframecomp read fbutton.wi.fra write setbutton_frame;
    property button_font: toptionalfont read getbutton_font write setbutton_font;
+
+   property databutton_face: tfacecomp read fdatabutton.wi.fa 
+                                              write setdatabutton_face;
+   property databutton_frame: tframecomp read fdatabutton.wi.fra 
+                                              write setdatabutton_frame;
+   property databutton_font: toptionalfont read getdatabutton_font 
+                                              write setdatabutton_font;
 
    property framebutton_face: tfacecomp read fframebutton.fa 
                                               write setframebutton_face;
@@ -727,6 +746,9 @@ begin
     end;
     sok_simplebutton: begin
      handlesimplebutton(tactionsimplebutton(instance),ainfo);
+    end;
+    sok_databutton: begin
+     handledatabutton(tactionsimplebutton(instance),ainfo);
     end;
     sok_tabbar: begin
      handletabbar(tcustomtabbar(instance),ainfo);
@@ -1081,6 +1103,12 @@ begin
  //dummy
 end;
 
+procedure tcustomskincontroller.handledatabutton(const sender: twidget;
+               const ainfo: skininfoty);
+begin
+ //dummy
+end;
+
 procedure tcustomskincontroller.handleuserobject(const sender: tobject;
                const ainfo: skininfoty);
 begin
@@ -1301,6 +1329,16 @@ begin
  setlinkedvar(avalue,tmsecomponent(fbutton.wi.fra));
 end;
 
+procedure tskincontroller.setdatabutton_face(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fdatabutton.wi.fa));
+end;
+
+procedure tskincontroller.setdatabutton_frame(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fdatabutton.wi.fra));
+end;
+
 procedure tskincontroller.setframebutton_face(const avalue: tfacecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(fframebutton.fa));
@@ -1493,6 +1531,13 @@ begin
  setwidgetfont(sender,fbutton.font);
 end;
 
+procedure tskincontroller.handledatabutton(const sender: twidget;
+               const ainfo: skininfoty);
+begin
+ setwidgetskin(sender,fdatabutton.wi);
+ setwidgetfont(sender,fdatabutton.font);
+end;
+
 procedure tskincontroller.handlecontainer(const sender: twidget;
                const ainfo: skininfoty);
 begin
@@ -1516,6 +1561,24 @@ function tskincontroller.getbutton_font: toptionalfont;
 begin
  getoptionalobject(fbutton.font,{$ifdef FPC}@{$endif}createbutton_font);
  result:= fbutton.font;
+end;
+
+procedure tskincontroller.createdatabutton_font;
+begin
+ if fdatabutton.font = nil then begin
+  fdatabutton.font:= toptionalfont.create;
+ end;
+end;
+
+procedure tskincontroller.setdatabutton_font(const avalue: toptionalfont);
+begin
+ setoptionalobject(avalue,fdatabutton.font,{$ifdef FPC}@{$endif}createbutton_font);
+end;
+
+function tskincontroller.getdatabutton_font: toptionalfont;
+begin
+ getoptionalobject(fdatabutton.font,{$ifdef FPC}@{$endif}createbutton_font);
+ result:= fdatabutton.font;
 end;
 
 procedure tskincontroller.handletabbar(const sender: tcustomtabbar;

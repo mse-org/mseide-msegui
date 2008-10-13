@@ -256,7 +256,8 @@ type
  skinoptionty = (sko_container);
  skinoptionsty = set of skinoptionty;
  
- skinobjectkindty = (sok_component,sok_widget,sok_groupbox,sok_simplebutton,
+ skinobjectkindty = (sok_component,sok_widget,sok_groupbox,
+                     sok_simplebutton,sok_databutton,
                      sok_tabbar,sok_toolbar,
                      sok_edit,sok_dataedit,sok_booleanedit,
                      sok_grid,

@@ -75,7 +75,7 @@ object watchfo: twatchfo
     fixrows.count = 1
     fixrows.items = <    
       item
-        height = 16
+        height = 17
         captions.count = 6
         captions.items = <        
           item
@@ -135,14 +135,14 @@ object watchfo: twatchfo
         options = [co_invisible, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         widgetname = 'sizecode'
       end>
-    datarowheight = 16
+    datarowheight = 17
     statfile = mainfo.projectstatfile
-    reffontheight = 14
+    reffontheight = 15
     object watchon: tbooleanedit
       optionsskin = [osk_framebuttononly]
       bounds_x = 0
       bounds_y = 0
-      bounds_cy = 16
+      bounds_cy = 17
       taborder = 1
       statfile = mainfo.projectstatfile
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
@@ -157,13 +157,13 @@ object watchfo: twatchfo
       bounds_x = 14
       bounds_y = 0
       bounds_cx = 152
-      bounds_cy = 16
+      bounds_cy = 17
       taborder = 2
       visible = False
       statfile = mainfo.projectstatfile
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_forcereturncheckvalue, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
       ondataentered = expressionondataentered
-      reffontheight = 14
+      reffontheight = 15
     end
     object expresult: tstringedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_autoscale]
@@ -171,7 +171,7 @@ object watchfo: twatchfo
       bounds_x = 167
       bounds_y = 0
       bounds_cx = 82
-      bounds_cy = 16
+      bounds_cy = 17
       taborder = 3
       visible = False
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
@@ -179,11 +179,11 @@ object watchfo: twatchfo
     end
     object formatcode: tdatabutton
       optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
-      optionsskin = [osk_framebuttononly]
       bounds_x = 250
       bounds_y = 0
       bounds_cx = 12
-      bounds_cy = 16
+      bounds_cy = 17
+      color = -1610612725
       frame.optionsskin = [fso_nofocusrect, fso_nodefaultrect]
       frame.localprops = [frl_optionsskin]
       frame.dummy = 0
@@ -210,28 +210,28 @@ object watchfo: twatchfo
       bounds_x = 263
       bounds_y = 0
       bounds_cx = 13
-      bounds_cy = 16
+      bounds_cy = 17
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
       frame.dummy = 0
       taborder = 5
       visible = False
-      reffontheight = 14
+      reffontheight = 15
     end
   end
   object watcheson: tbooleanedit
     bounds_x = 8
-    bounds_y = 4
-    bounds_cx = 81
-    bounds_cy = 16
+    bounds_y = 3
+    bounds_cx = 90
+    bounds_cy = 17
     frame.caption = 'Watches on'
     frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
     frame.dummy = 0
     frame.outerframe = (
       0
-      1
-      68
+      2
+      77
       2
     )
     statfile = mainfo.projectstatfile

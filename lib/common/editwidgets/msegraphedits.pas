@@ -706,6 +706,8 @@ type
    function checkfocusshortcut(var info: keyeventinfoty): boolean; override;
    procedure setactualimagenr(const avalue: integer);
    procedure setoptions(const avalue: buttonoptionsty); override;
+
+   class function classskininfo: skininfoty; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -2481,6 +2483,12 @@ begin
  inherited;
 end;
 
+class function tcustomdatabutton.classskininfo: skininfoty;
+begin
+ result:= inherited classskininfo;
+ result.objectkind:= sok_databutton;
+end;
+
 procedure tcustomdatabutton.synctofontheight;
 begin
  inherited;
@@ -2874,6 +2882,8 @@ end;
 procedure tcustomdatabutton.actionchanged;
 begin
  actioninfotoshapeinfo(self,factioninfo,finfo);
+ inherited setcolor(finfo.color); 
+ finfo.color:= cl_transparent;
 // if csdesigning in componentstate then begin
   exclude(finfo.state,shs_invisible);
 // end;
