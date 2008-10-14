@@ -33,6 +33,7 @@ type
   linewidthmm: real;
   joinstyle: joinstylety;
   brush: tmaskedbitmap;
+  brushoffset: pointty;
  end;
  
  projvectty = array[0..1] of real;
@@ -52,6 +53,8 @@ type
    procedure setpoly_linewidthmm(const avalue: real);
    procedure setpoly_joinstyle(const avalue: joinstylety);
    procedure setpoly_brush(const avalue: tmaskedbitmap);
+   procedure setpoly_brushoffset_x(const avalue: integer);
+   procedure setpoly_brushoffset_y(const avalue: integer);
   protected
    fstate: polygonstatesty;
    procedure change;
@@ -84,6 +87,10 @@ type
    property poly_joinstyle: joinstylety read finfo.joinstyle
                                write setpoly_joinstyle default js_miter;
    property poly_brush: tmaskedbitmap read finfo.brush write setpoly_brush;
+   property poly_brushoffset_x: integer read finfo.brushoffset.x write
+                        setpoly_brushoffset_x;
+   property poly_brushoffset_y: integer read finfo.brushoffset.y write
+                        setpoly_brushoffset_y;
  end;
 
 const
@@ -344,7 +351,7 @@ begin
   canvas.joinstyle:= joinstyle;
   if (color = cl_brush) and brush.hasimage then begin
    canvas.brush:= brush.bitmap;
-   canvas.adjustbrushorigin(brush.alignment,dim);
+   canvas.adjustbrushorigin(brush.alignment,moverect(dim,brushoffset));
   end;
   case edgecount of
    0: begin
@@ -592,6 +599,22 @@ end;
 procedure tpolygon.bitmapchanged(const sender: tobject);
 begin
  invalidate;
+end;
+
+procedure tpolygon.setpoly_brushoffset_x(const avalue: integer);
+begin
+ if avalue <> finfo.brushoffset.x then begin
+  finfo.brushoffset.x:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tpolygon.setpoly_brushoffset_y(const avalue: integer);
+begin
+ if avalue <> finfo.brushoffset.y then begin
+  finfo.brushoffset.y:= avalue;
+  invalidate;
+ end;
 end;
 
 end.

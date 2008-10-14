@@ -727,7 +727,8 @@ type
    property font: tfont read ffont write setfont;
    property brush: tsimplebitmap read getbrush write setbrush;
    property brushorigin: pointty read getbrushorigin write setbrushorigin;
-   procedure adjustbrushorigin(const alignment: alignmentsty; const arect: rectty);
+   procedure adjustbrushorigin(const alignment: alignmentsty; 
+                                                   const arect: rectty);
 
    property linewidth: integer read getlinewidth write setlinewidth default 0;
    property linewidthmm: real read getlinewidthmm write setlinewidthmm;
