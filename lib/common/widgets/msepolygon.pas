@@ -19,6 +19,7 @@ type
  polygonstatesty = set of polygonstatety;
  
  polygoninfoty = record
+  dim: rectty;
   ppmm: real;
   edgecount: integer;
   edgeradiusmm: real;
@@ -327,7 +328,7 @@ begin
  exclude(fstate,pos_geometryvalid);
  invalidate;
 end;
-
+var testvar: tsimplebitmap;
 procedure tpolygon.dopaint(const canvas: tcanvas);
 var
  rect1: rectty;
@@ -335,13 +336,15 @@ begin
  inherited;
  checkgeometry(canvas.ppmm);
  with finfo do begin
+  testvar:= canvas.brush;
   canvas.save;
   canvas.linewidthmm:= linewidthmm;
   canvas.dashes:= dashes;
   canvas.colorbackground:= colorlinegap;
   canvas.joinstyle:= joinstyle;
-  if color = cl_brush then begin
-   canvas.brush:= brush;
+  if (color = cl_brush) and brush.hasimage then begin
+   canvas.brush:= brush.bitmap;
+   canvas.adjustbrushorigin(brush.alignment,dim);
   end;
   case edgecount of
    0: begin
@@ -357,6 +360,7 @@ begin
    end;
   end;
   canvas.restore;
+  testvar:= canvas.brush;
  end;
 end;
 
@@ -440,7 +444,7 @@ end;
 
 procedure tpolygon.checkgeometry(const appmm: real);
 var
- rect1: rectty;
+// rect1: rectty;
  ar1,ar2: complexarty;
  rea1,rea2,rea3: real;
  int1,int2: integer;
@@ -454,23 +458,23 @@ var
 begin
  if not (pos_geometryvalid in fstate) or (finfo.ppmm <> appmm) then begin
   include(fstate,pos_geometryvalid);
-  rect1:= innerclientrect;
   with finfo do begin
+   dim:= innerclientrect;
    ppmm:= appmm;
    int1:= round(linewidthmm*appmm/2);
    if int1 = 0 then begin
     int1:= 1;
    end;
    int2:= 2*int1-1;
-   dec(rect1.cx,int2);
-   dec(rect1.cy,int2);
+   dec(dim.cx,int2);
+   dec(dim.cy,int2);
    dec(int1);
-   inc(rect1.x,int1);
-   inc(rect1.y,int1);
+   inc(dim.x,int1);
+   inc(dim.y,int1);
    case edgecount of
     0: begin
      setlength(vertex,2);
-     with rect1 do begin
+     with dim do begin
       vertex[0].x:= x + cx div 2;  //center
       vertex[0].y:= y + cy div 2;
       vertex[1].x:= cx;           //size
@@ -497,8 +501,8 @@ begin
      end;
      ma:= unityprojmatrix;
      projtranslate(ma,1,1);
-     projscale(ma,rect1.cx/2,rect1.cy/2);                 //scale to destination rect
-     projtranslate(ma,rect1.x,rect1.y);               //move to destrect
+     projscale(ma,dim.cx/2,dim.cy/2);                 //scale to destination rect
+     projtranslate(ma,dim.x,dim.y);               //move to destrect
      project(ma,ar1);
      realtointpoints(ar1,vertex);
     end;
@@ -538,8 +542,8 @@ begin
      projtranslate(ma,-(minx+maxx)/2,-(miny+maxy)/2); //center polygon
      projscale(ma,1/(maxx-minx),1/(maxy-miny));       //norm to 1
      projtranslate(ma,0.5,0.5);                       //move to first quadrant
-     projscale(ma,rect1.cx,rect1.cy);                 //scale to destination rect
-     projtranslate(ma,rect1.x,rect1.y);               //move to destrect
+     projscale(ma,dim.cx,dim.cy);                 //scale to destination rect
+     projtranslate(ma,dim.x,dim.y);               //move to destrect
      project(ma,ar1);
      if (edgeradiusmm <> 0) and (edgeradiusvertexcount >= 2) then begin
       setlength(ar2,length(ar1)*edgeradiusvertexcount);

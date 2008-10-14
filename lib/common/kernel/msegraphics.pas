@@ -727,6 +727,7 @@ type
    property font: tfont read ffont write setfont;
    property brush: tsimplebitmap read getbrush write setbrush;
    property brushorigin: pointty read getbrushorigin write setbrushorigin;
+   procedure adjustbrushorigin(const alignment: alignmentsty; const arect: rectty);
 
    property linewidth: integer read getlinewidth write setlinewidth default 0;
    property linewidthmm: real read getlinewidthmm write setlinewidthmm;
@@ -4667,6 +4668,43 @@ end;
 function tcanvas.getbrushorigin: pointty;
 begin
  result:= fvaluepo^.brushorigin;
+end;
+
+procedure tcanvas.adjustbrushorigin(const alignment: alignmentsty;
+                   const arect: rectty);
+var
+ siz1: sizety;
+ pt1: pointty;
+begin
+ if fvaluepo^.brush <> nil then begin
+  siz1:= fvaluepo^.brush.size;
+ end
+ else begin
+  siz1:= nullsize;
+ end;
+ if al_right in alignment then begin
+  pt1.x:= arect.x + arect.cx - siz1.cx;
+ end
+ else begin
+  if al_xcentered in alignment then begin
+   pt1.x:= arect.x + (arect.cx - siz1.cx) div 2;
+  end
+  else begin
+   pt1.x:= arect.x;
+  end;
+ end;
+ if al_bottom in alignment then begin
+  pt1.y:= arect.y + arect.cy - siz1.cy;
+ end
+ else begin
+  if al_ycentered in alignment then begin
+   pt1.y:= arect.y + (arect.cy - siz1.cy) div 2;
+  end
+  else begin
+   pt1.y:= arect.y;
+  end;
+ end;
+ brushorigin:= pt1;
 end;
 
 procedure tcanvas.setbrushorigin(const Value: pointty);

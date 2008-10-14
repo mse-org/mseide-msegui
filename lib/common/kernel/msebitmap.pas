@@ -188,6 +188,7 @@ type
    class procedure freeimageinfo(var ainfo: imagebufferinfoty);
    procedure loadfromimagebuffer(const abuffer: imagebufferinfoty);
    procedure savetoimagebuffer(out abuffer: imagebufferinfoty);
+   function bitmap: tmaskedbitmap; //self if source = nil
    
    procedure initmask;
    procedure stretch(const dest: tmaskedbitmap);
@@ -848,13 +849,27 @@ end;
 
 procedure tbitmap.setalignment(const Value: alignmentsty);
 const
- mask: alignmentsty = [al_intpol,al_or,al_and];
+ mask1: alignmentsty = [al_intpol,al_or,al_and];
+ mask2: alignmentsty = [al_xcentered,al_right];
+ mask3: alignmentsty = [al_ycentered,al_bottom];
+var
+ value1,value2,value3: alignmentsty;
 begin
  if falignment <> value then begin
-  falignment:= alignmentsty(setsinglebit(
+  value1:= alignmentsty(setsinglebit(
                           {$ifdef FPC}longword{$else}word{$endif}(value),
                           {$ifdef FPC}longword{$else}word{$endif}(falignment),
-                          {$ifdef FPC}longword{$else}word{$endif}(mask)));
+                          {$ifdef FPC}longword{$else}word{$endif}(mask1)));
+  value2:= alignmentsty(setsinglebit(
+                          {$ifdef FPC}longword{$else}word{$endif}(value),
+                          {$ifdef FPC}longword{$else}word{$endif}(falignment),
+                          {$ifdef FPC}longword{$else}word{$endif}(mask2)));
+  value3:= alignmentsty(setsinglebit(
+                          {$ifdef FPC}longword{$else}word{$endif}(value),
+                          {$ifdef FPC}longword{$else}word{$endif}(falignment),
+                          {$ifdef FPC}longword{$else}word{$endif}(mask3)));
+  falignment:= (value - (mask1+mask2+mask3))+
+                              (value1*mask1)+(value2*mask2)+(value3*mask3);
   change;
  end;
 end;
@@ -1786,6 +1801,16 @@ begin
  end
  else begin
   fillchar(abuffer.mask,sizeof(abuffer.mask),0);
+ end;
+end;
+
+function tmaskedbitmap.bitmap: tmaskedbitmap;
+begin
+ if fsource = nil then begin
+  result:= self;
+ end
+ else begin
+  result:= fsource.bitmap;
  end;
 end;
 
