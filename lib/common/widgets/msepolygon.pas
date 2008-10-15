@@ -350,7 +350,7 @@ begin
   canvas.joinstyle:= joinstyle;
   if (color = cl_brush) and brush.hasimage then begin
    canvas.brush:= brush.bitmap;
-   canvas.adjustbrushorigin(brush.alignment,moverect(dim,brushoffset));
+   canvas.adjustbrushorigin(moverect(dim,brushoffset),brush.alignment);
   end;
   case edgecount of
    0: begin
