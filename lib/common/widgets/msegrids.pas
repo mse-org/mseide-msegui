@@ -1401,6 +1401,9 @@ end;
    fscrollrect: rectty;
    finnerdatarect,fdatarect,fdatarectx,fdatarecty: rectty;
           //origin = clientrect.pos
+   frootbrushorigin: pointty;
+   fbrushorigin: pointty;
+          //origin windowpos
    ffirstnohscroll: integer;
    fdragcontroller: tdragcontroller;
    fobjectpicker: tobjectpicker;
@@ -2341,6 +2344,7 @@ begin
  if aframe <> nil then begin
   aframe.paintbackground(acanvas,makerect(nullpoint,fcellrect.size));
  end;
+ acanvas.rootbrushorigin:= fgrid.fbrushorigin;
  if aface <> nil then begin
   aface.paint(acanvas,makerect(nullpoint,fcellinfo.rect.size));
  end;
@@ -2678,6 +2682,10 @@ begin
   canbeforedrawcell:= fgrid.canevent(tmethod(fonbeforedrawcell));
   canafterdrawcell:= fgrid.canevent(tmethod(fonafterdrawcell));
   with info do begin
+   fgrid.fbrushorigin.x:= fgrid.frootbrushorigin.x;
+   if not (co_nohscroll in foptions) then begin
+    fgrid.fbrushorigin.x:= fgrid.fbrushorigin.x + fgrid.fscrollrect.x;
+   end;
    fcellinfo.font:= nil;
    bo1:= (fcellinfo.cell.col = fgrid.ffocusedcell.col) and
        (gs_cellentered in fgrid.fstate);
@@ -7005,6 +7013,11 @@ begin
   saveindex:= acanvas.save;
  end;
  acanvas.move(pointty(tframe1(fframe).fi.innerframe.topleft));
+ frootbrushorigin:= clientwidgetpos;
+ frootbrushorigin.x:= frootbrushorigin.x + finnerdatarect.x + rootpos.x;
+ frootbrushorigin.y:= frootbrushorigin.y + finnerdatarect.y + rootpos.y;
+ fbrushorigin.x:= frootbrushorigin.x;
+ fbrushorigin.y:= frootbrushorigin.y + fscrollrect.y;
  rect1:= acanvas.clipbox;
  if (rect1.cx > 0) or (rect1.cy > 0) then begin
   with arowinfo do begin
@@ -7097,12 +7110,12 @@ begin
      acanvas.intersectcliprect(adatarect);
      if not acanvas.clipregionisempty then begin //draw horz lines datacols
       int2:= ffixcols.ffirstsize + datacols.ftotsize +
-                     fscrollrect.x + ffirstnohscroll{ - 1};
+                     {fscrollrect.x +} ffirstnohscroll{ - 1};
       if ffirstnohscroll > 0 then begin
        int3:= ffixcols.ffirstsize;
       end
       else begin
-       int3:= fscrollrect.x + ffixcols.ffirstsize;
+       int3:= {fscrollrect.x + }ffixcols.ffirstsize;
       end;
       if int2 > paintrect.cx then begin
        int2:= paintrect.cx;

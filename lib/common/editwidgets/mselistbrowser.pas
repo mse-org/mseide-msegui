@@ -661,59 +661,19 @@ type
    function getoptionsedit: optionseditty; override;
  end;
  
-(*                    
- ttreeitemdragcontroller = class(tcustomdragcontroller)
-{
-   private
-   fonbefore,fonafter: drageventsty;
-   function dodragevent(const events: drageventsty; var info: draginfoty): boolean;
-}
-  private
-   fowner: ttreeitemedit;
-   fondragbegin: treeitemdragbegineventty;
-  protected
-   function beforedragevent(var info: draginfoty): boolean; override;
-    //true if processed
-   function afterdragevent(var info: draginfoty): boolean; override;
-    //true if processed
-  public
-   constructor create(const aowner: ttreeitemedit);
-  published
-   property ondragbegin: treeitemdragbegineventty read fondragbegin 
-                                          write fondragbegin;
-{
-  published
-   property onbeforedragbegin: drageventty read fonbefore.dragbegin 
-                                  write fonbefore.dragbegin;
-   property onbeforedragover: dragovereventty read fonbefore.dragover 
-                                  write fonbefore.dragover;
-   property onbeforedragdrop: drageventty read fonbefore.dragdrop 
-                                  write fonbefore.dragdrop;
-   property onafterdragbegin: drageventty read fonafter.dragbegin 
-                                  write fonafter.dragbegin;
-   property onafterdragover: dragovereventty read fonafter.dragover 
-                                  write fonafter.dragover;
-   property onafterdragdrop: drageventty read fonafter.dragdrop 
-                                  write fonafter.dragdrop;
-}
- end;
- *)
  ttreeitemedit = class(titemedit,idragcontroller)
   private
    foptions: treeitemeditoptionsty;
    foncheckrowmove: checkmoveeventty;
    ffieldedit: trecordfieldedit;
-//   fdragcontroller: ttreeitemdragcontroller;
    function getitemlist: ttreeitemeditlist;
    procedure setitemlist(const Value: ttreeitemeditlist);
    function getitems(const index: integer): ttreelistitem;
    procedure setitems(const index: integer; const Value: ttreelistitem);
    procedure expandedchanged(const avalue: boolean);
    procedure setfieldedit(const avalue: trecordfieldedit);
-//   procedure setdrag(const avalue: ttreeitemdragcontroller);
   protected
    procedure clientmouseevent(var info: mouseeventinfoty); override;
-//   procedure dragevent(var info: draginfoty); override;
    procedure doitembuttonpress(var info: mouseeventinfoty); override;
    procedure setfiltertext(const value: msestring); override;
    function getkeystring1(const aindex: integer): msestring;
@@ -740,7 +700,6 @@ type
    property itemlist: ttreeitemeditlist read getitemlist write setitemlist;
    property fieldedit: trecordfieldedit read ffieldedit write setfieldedit;
    property options: treeitemeditoptionsty read foptions write foptions default [];
-//   property drag: ttreeitemdragcontroller read fdragcontroller write setdrag;
    property oncheckrowmove: checkmoveeventty read foncheckrowmove write foncheckrowmove;
    property cursor default cr_default;
  end;
@@ -2372,6 +2331,9 @@ procedure titemedit.dopaint(const acanvas: tcanvas);
 begin
  inherited;
  if fvalue <> nil then begin
+  if fgridintf <> nil then begin
+   acanvas.rootbrushorigin:= fgridintf.getbrushorigin;
+  end;
   with tlistitem1(fvalue) do begin
    drawimage(acanvas);
    if feditor.lasttextclipped then begin

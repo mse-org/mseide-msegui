@@ -33,7 +33,8 @@ type
 
  gckindty = (gck_screen,gck_pixmap,gck_printer);
  
- alignmentty = (al_xcentered,al_right,al_ycentered,al_bottom,al_grayed,
+ alignmentty = (al_left,al_xcentered,al_right,al_top,al_ycentered,al_bottom,
+                al_grayed,
                 al_stretchx,al_stretchy,al_fit,al_tiled,
                 al_intpol,al_or,al_and);
  alignmentsty = set of alignmentty;
@@ -523,6 +524,8 @@ type
    procedure setbrush(const Value: tsimplebitmap);
    function getbrushorigin: pointty;
    procedure setbrushorigin(const Value: pointty);
+   function getrootbrushorigin: pointty;
+   procedure setrootbrushorigin(const Value: pointty);
    function getcolorbackground: colorty;
    procedure setcolorbackground(const Value: colorty);
    function getrasterop: rasteropty;
@@ -727,8 +730,10 @@ type
    property font: tfont read ffont write setfont;
    property brush: tsimplebitmap read getbrush write setbrush;
    property brushorigin: pointty read getbrushorigin write setbrushorigin;
-   procedure adjustbrushorigin(const alignment: alignmentsty; 
-                                                   const arect: rectty);
+   property rootbrushorigin: pointty read getrootbrushorigin write setrootbrushorigin;
+                   //origin = paintdevice top left
+   procedure adjustbrushorigin(const arect: rectty; 
+                                               const alignment: alignmentsty);
 
    property linewidth: integer read getlinewidth write setlinewidth default 0;
    property linewidthmm: real read getlinewidthmm write setlinewidthmm;
@@ -2933,7 +2938,8 @@ begin
    if (df_brush in drawingflags) and not (cs_brushorigin in fstate) then begin
     include(fstate,cs_brushorigin);
     include(values.mask,gvm_brushorigin);
-    values.brushorigin:= addpoint(fvaluepo^.brushorigin,fvaluepo^.origin);
+//    values.brushorigin:= addpoint(fvaluepo^.brushorigin,fvaluepo^.origin);
+    values.brushorigin:= fvaluepo^.brushorigin;
    end;
    if acolorforeground <> gccolorforeground then begin
     if df_brush in drawingflags then begin
@@ -4668,11 +4674,32 @@ end;
 
 function tcanvas.getbrushorigin: pointty;
 begin
- result:= fvaluepo^.brushorigin;
+ result.x:= fvaluepo^.brushorigin.x-fvaluepo^.origin.x;
+ result.y:= fvaluepo^.brushorigin.y-fvaluepo^.origin.y;
 end;
 
-procedure tcanvas.adjustbrushorigin(const alignment: alignmentsty;
-                   const arect: rectty);
+procedure tcanvas.setbrushorigin(const Value: pointty);
+begin
+ fvaluepo^.brushorigin.x:= value.x+fvaluepo^.origin.x;
+ fvaluepo^.brushorigin.y:= value.y+fvaluepo^.origin.y;
+ valuechanged(cs_brushorigin);
+end;
+
+function tcanvas.getrootbrushorigin: pointty;
+begin
+ result.x:= fvaluepo^.brushorigin.x-fcliporigin.x;
+ result.y:= fvaluepo^.brushorigin.y-fcliporigin.y;
+end;
+
+procedure tcanvas.setrootbrushorigin(const Value: pointty);
+begin
+ fvaluepo^.brushorigin.x:= value.x+fcliporigin.x;
+ fvaluepo^.brushorigin.y:= value.y+fcliporigin.y;
+ valuechanged(cs_brushorigin);
+end;
+
+procedure tcanvas.adjustbrushorigin(const arect: rectty; 
+                                            const alignment: alignmentsty);
 var
  siz1: sizety;
  pt1: pointty;
@@ -4683,37 +4710,35 @@ begin
  else begin
   siz1:= nullsize;
  end;
- if al_right in alignment then begin
-  pt1.x:= arect.x + arect.cx - siz1.cx;
+ pt1.x:= -fvaluepo^.origin.x;
+ pt1.y:= -fvaluepo^.origin.y;
+ if al_left in alignment then begin
+  pt1.x:= arect.x;
  end
  else begin
   if al_xcentered in alignment then begin
    pt1.x:= arect.x + (arect.cx - siz1.cx) div 2;
   end
   else begin
-   pt1.x:= arect.x;
+   if al_right in alignment then begin
+    pt1.x:= arect.x + arect.cx - siz1.cx;
+   end;
   end;
  end;
- if al_bottom in alignment then begin
-  pt1.y:= arect.y + arect.cy - siz1.cy;
+ if al_top in alignment then begin
+  pt1.y:= arect.y;
  end
  else begin
   if al_ycentered in alignment then begin
    pt1.y:= arect.y + (arect.cy - siz1.cy) div 2;
   end
   else begin
-   pt1.y:= arect.y;
+   if al_bottom in alignment then begin
+    pt1.y:= arect.y + arect.cy - siz1.cy;
+   end;
   end;
  end;
  brushorigin:= pt1;
-end;
-
-procedure tcanvas.setbrushorigin(const Value: pointty);
-begin
- if not pointisequal(fvaluepo^.brushorigin,value) then begin
-  fvaluepo^.brushorigin:= value;
-  valuechanged(cs_brushorigin);
- end;
 end;
 
 function tcanvas.active: boolean;

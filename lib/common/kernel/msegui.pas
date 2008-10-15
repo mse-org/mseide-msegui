@@ -1599,6 +1599,8 @@ type
                 //checks bottom-right anchors
    function widgetsizerect: rectty;          //pos = nullpoint
    function paintsizerect: rectty;           //pos = nullpoint
+   function clientsizerect: rectty;          //pos = nullpoint
+   function containerclientsizerect: rectty; //pos = nullpoint
    property clientrect: rectty read getclientrect; //origin = paintrect.pos
    procedure changeclientsize(const delta: sizety); //asynchronous
    property clientsize: sizety read getclientsize write setclientsize;
@@ -3139,6 +3141,7 @@ begin
  end;
  canvas.intersectcliprect(rect1);
  canvas.move(addpoint(fpaintrect.pos,fclientrect.pos));
+ canvas.brushorigin:= nullpoint;
 end;
 
 class procedure tcustomframe.drawframe(const canvas: tcanvas; 
@@ -6930,6 +6933,7 @@ begin
  end;
  canvas.save;
  if not (ws_nopaint in fwidgetstate) then begin
+  canvas.brushorigin:= nullpoint;
   actcolor:= actualcolor;
   saveindex:= canvas.save;
   dobeforepaint(canvas);
@@ -7393,6 +7397,18 @@ function twidget.paintsizerect: rectty;          //pos = nullpoint
 begin
  result.pos:= nullpoint;
  result.size:= paintsize;
+end;
+
+function twidget.clientsizerect: rectty;          //pos = nullpoint
+begin
+ result.pos:= nullpoint;
+ result.size:= clientsize;
+end;
+
+function twidget.containerclientsizerect: rectty;          //pos = nullpoint
+begin
+ result.pos:= nullpoint;
+ result.size:= container.clientsize;
 end;
 
 function twidget.getclientrect: rectty;

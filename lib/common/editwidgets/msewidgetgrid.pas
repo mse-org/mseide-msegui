@@ -24,6 +24,7 @@ type
  
  iwidgetgrid = interface(inullinterface)
   function getgrid: tcustomwidgetgrid;
+  function getbrushorigin: pointty;
   function getcol: twidgetcol;
   procedure getdata(index: integer; var dest);
   procedure setdata(index: integer; const source; const noinvalidate: boolean = false);
@@ -85,6 +86,7 @@ type
   protected
     //iwidgetgrid
    function getgrid: tcustomwidgetgrid;
+   function getbrushorigin: pointty;
    function getcol: twidgetcol;
    procedure getdata(aindex: integer; var dest);
    procedure setdata(aindex: integer; const source; const noinvalidate: boolean = false);
@@ -1318,6 +1320,11 @@ end;
 function twidgetcol.getgrid: tcustomwidgetgrid;
 begin
  result:= tcustomwidgetgrid(fgrid);
+end;
+
+function twidgetcol.getbrushorigin: pointty;
+begin
+ result:= tcustomwidgetgrid(fgrid).fbrushorigin;
 end;
 
 procedure twidgetcol.beforedragevent(var ainfo: draginfoty; const arow: integer;

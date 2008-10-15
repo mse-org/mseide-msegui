@@ -1580,6 +1580,7 @@ type
    function getdatacols: tdbstringcols;
    procedure setdatacols(const avalue: tdbstringcols);
       //iwidgetgrid (dummy)
+   function getbrushorigin: pointty;
    function getcol: twidgetcol;
    procedure getdata(index: integer; var dest);
    procedure setdata(index: integer; const source; const noinvalidate: boolean = false);
@@ -7180,6 +7181,11 @@ begin
 end;
 
 //iwidgetgrid (dummy)
+
+function tcustomdbstringgrid.getbrushorigin: pointty;
+begin
+ result:= nullpoint;
+end;
 
 function tcustomdbstringgrid.getcol: twidgetcol;
 begin

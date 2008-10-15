@@ -850,8 +850,8 @@ end;
 procedure tbitmap.setalignment(const Value: alignmentsty);
 const
  mask1: alignmentsty = [al_intpol,al_or,al_and];
- mask2: alignmentsty = [al_xcentered,al_right];
- mask3: alignmentsty = [al_ycentered,al_bottom];
+ mask2: alignmentsty = [al_left,al_xcentered,al_right];
+ mask3: alignmentsty = [al_top,al_ycentered,al_bottom];
 var
  value1,value2,value3: alignmentsty;
 begin
@@ -898,15 +898,19 @@ begin
  end;
  if al_xcentered in alignment then begin
   newdest.x:= dest.x + (dest.cx - source.cx) div 2
- end;
- if al_right in alignment then begin
-  newdest.x:= dest.x + dest.cx - source.cx;
+ end
+ else begin
+  if al_right in alignment then begin
+   newdest.x:= dest.x + dest.cx - source.cx;
+  end;
  end;
  if al_ycentered in alignment then begin
   newdest.y:= dest.y + (dest.cy - source.cy) div 2
- end;
- if al_bottom in alignment then begin
-  newdest.y:= dest.y + dest.cy - source.cy;
+ end
+ else begin
+  if al_bottom in alignment then begin
+   newdest.y:= dest.y + dest.cy - source.cy;
+  end;
  end;
  tileorigin:= newdest.pos;
  if al_tiled in alignment then begin
