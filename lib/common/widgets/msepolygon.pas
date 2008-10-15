@@ -335,7 +335,7 @@ begin
  exclude(fstate,pos_geometryvalid);
  invalidate;
 end;
-var testvar: tsimplebitmap;
+
 procedure tpolygon.dopaint(const canvas: tcanvas);
 var
  rect1: rectty;
@@ -343,7 +343,6 @@ begin
  inherited;
  checkgeometry(canvas.ppmm);
  with finfo do begin
-  testvar:= canvas.brush;
   canvas.save;
   canvas.linewidthmm:= linewidthmm;
   canvas.dashes:= dashes;
@@ -367,7 +366,6 @@ begin
    end;
   end;
   canvas.restore;
-  testvar:= canvas.brush;
  end;
 end;
 
