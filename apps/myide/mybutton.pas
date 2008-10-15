@@ -40,7 +40,7 @@ end;
 procedure tmybutton.checkcolor;
 begin
  with finfo do begin
-  if ss_clicked in state then begin
+  if shs_clicked in state then begin
    color:= fcolorclicked;
   end
   else begin
