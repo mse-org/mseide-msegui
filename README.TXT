@@ -1,10 +1,10 @@
 MSEide+MSEgui Pascal Cross Platform GUI Development System.
  
-2008-08-12 Version 1.9 unstable
+2008-10-15 Version 2.0beta1
 Copyright (c) 1999-2008 by Martin Schreiber
 
 - Compiles with FPC 2.2.2
-- Tested on i386-linux SuSE 9.0,10.3 and i386-win32 98 and 2000.
+- Tested on i386-linux SuSE 9.0,10.3,11.0 and i386-win32 98 and 2000.
 - Links to xlib and gdi32, no external widget library needed.
 - Internal character encoding is UCS2.
 - Uses anti aliased fonts on Linux (Xft).
@@ -33,7 +33,7 @@ Installation:
 *************
 1. Download and install FPC 2.2.2, you can get it from 
    http://www.freepascal.org/download.var
-2. Download mseide_msegui_src_1_8.zip and mseide_bin_1_8.zip
+2. Download mseide_msegui_src_2_0beta1.zip and mseide_bin_2_0beta1.zip
    http://sourceforge.net/project/showfiles.php?group_id=165409
 3. Extract them to a directory of your choice ('yourdirectory') .
 4. Run 'yourdirectory/bin/i386-linux/mseide' on linux or 
@@ -60,8 +60,8 @@ Breakpoints don't work on win32 in units compiled with -CX
 (create smartlinked units).
 String and dynamic array variables of units compiled with 
 -gv (Valgrind debug info) are displayed incorrect.
-gdb 6.5 has bugs with threads and forking on linux. Please update to gdb 6.6.
-FPC 2.2 projects must be compiled with -O- (no optimization) for debugging.
+gdb 6.5 has bugs with threads and forking on linux. Please update to gdb 6.6+.
+FPC 2.2+ projects must be compiled with -O- (no optimization) for debugging.
 
 Popup widgets behind the forms
 ******************************

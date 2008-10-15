@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+Version 2.0beta1
+2008-10-15
 2008-10-09
  New parameters leadingtext and handled in exceptioneventty.
 2008-10-04
