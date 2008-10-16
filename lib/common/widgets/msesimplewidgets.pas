@@ -119,6 +119,7 @@ type
    procedure setshortcut1(const avalue: shortcutty);
    function isshortcut1stored: boolean;
   protected
+   procedure fontchanged; override;
    procedure setcolor(const avalue: colorty); override;
    //iactionlink
    function getactioninfopo: pactioninfoty;
@@ -623,6 +624,12 @@ begin
 // if csdesigning in componentstate then begin
   exclude(finfo.state,shs_invisible);
 // end;
+ checkautosize;
+end;
+
+procedure tcustombutton.fontchanged;
+begin
+ inherited;
  checkautosize;
 end;
 
