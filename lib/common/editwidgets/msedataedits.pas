@@ -20,6 +20,9 @@ uses
  mseformatstr,typinfo,msemenus,
  msescrollbar,msewidgets,msepopupcalendar,msekeyboard;
 
+const
+ emptyinteger = minint;
+ 
 type
  tdataedit = class;
  
@@ -687,6 +690,7 @@ type
  tcustomrealedit = class(tnumedit)
   private
    fonsetvalue: setrealeventty;
+   fonsetintvalue: setintegereventty;
    fvalue: realty;
    fformatdisp: msestring;
    fformatedit: msestring;
@@ -703,10 +707,14 @@ type
    procedure readmax(reader: treader);
    procedure writemax(writer: twriter);
    function getgridvalue(const index: integer): realty;
-   procedure setgridvalue(const index: integer; const Value: realty);
+   function getgridintvalue(const index: integer): integer;
+   procedure setgridvalue(const index: integer; const avalue: realty);
+   procedure setgridintvalue(const index: integer; const avalue: integer);
    function getgridvalues: realarty;
-   procedure setgridvalues(const Value: realarty);
-   procedure setvaluescale(const Value: real);
+   function getgridintvalues: integerarty;
+   procedure setgridvalues(const avalue: realarty);
+   procedure setgridintvalues(const avalue: integerarty);
+   procedure setvaluescale(const avalue: real);
    function getasinteger: integer;
    procedure setasinteger(const avalue: integer);
    function getascurrency: currency;
@@ -730,8 +738,12 @@ type
    procedure assigncol(const value: trealdatalist);
    function isnull: boolean;
    property asinteger: integer read getasinteger write setasinteger;
+                    //returns minint for empty value
    property ascurrency: currency read getascurrency write setascurrency;
    property onsetvalue: setrealeventty read fonsetvalue write fonsetvalue;
+   property onsetintvalue: setintegereventty read fonsetintvalue 
+                                  write fonsetintvalue;
+                    //overrides onsetvalue
    property value: realty read fvalue write setvalue stored false;
    property formatedit: msestring read fformatedit write setformatedit;
    property formatdisp: msestring read fformatdisp write setformatdisp;
@@ -740,7 +752,11 @@ type
    property max: realty read fmax write fmax stored false;
    property gridvalue[const index: integer]: realty
         read getgridvalue write setgridvalue; default;
+   property gridintvalue[const index: integer]: integer
+        read getgridintvalue write setgridintvalue;
    property gridvalues: realarty read getgridvalues write setgridvalues;
+   property gridintvalues: integerarty read getgridintvalues 
+                                                 write setgridintvalues;
   published
    property optionswidget default defaulteditwidgetoptions + [ow_mousewheel]; //first!
  end;
@@ -748,6 +764,7 @@ type
  trealedit = class(tcustomrealedit)
   published
    property onsetvalue;
+   property onsetintvalue;
    property value stored false;
    property formatedit;
    property formatdisp;
@@ -966,7 +983,10 @@ type
    property kind;
    property dropdown;
  end;
- 
+
+function realtytoint(const avalue: realty): integer;
+function inttorealty(const avalue: integer): realty; 
+
 implementation
 uses
  sysutils,msereal,msebits,msepointer,msestreaming,msestockobjects;
@@ -981,6 +1001,26 @@ type
  tdropdowncols1 = class(tdropdowncols);
  tcustomframe1 = class(tcustomframe);
  tcustomgrid1 = class(tcustomgrid);
+
+function realtytoint(const avalue: realty): integer;
+begin
+ if isemptyreal(avalue) then begin
+  result:= emptyinteger;
+ end
+ else begin
+  result:= round(avalue);
+ end;
+end;
+
+function inttorealty(const avalue: integer): realty; 
+begin
+ if avalue = emptyinteger then begin
+  result:= emptyreal;
+ end
+ else begin
+  result:= avalue;
+ end;
+end;
 
 { tdataedit }
 
@@ -3508,6 +3548,7 @@ procedure tcustomrealedit.texttovalue(var accept: boolean; const quiet: boolean)
 var
  rea1,rea2: realty;
  str1: msestring;
+ int1: integer;
 begin
  rea1:= gettextvalue(accept,quiet);
  if accept then begin
@@ -3527,8 +3568,17 @@ begin
    end;
   end;
   if accept then begin
-   if not quiet and canevent(tmethod(fonsetvalue)) then begin
-    fonsetvalue(self,rea1,accept);
+   if not quiet then begin
+    if canevent(tmethod(fonsetintvalue)) then begin
+     int1:= realtytoint(rea1);
+     fonsetintvalue(self,int1,accept);
+     rea1:= inttorealty(int1);
+    end
+    else begin
+     if canevent(tmethod(fonsetvalue)) then begin
+      fonsetvalue(self,rea1,accept);
+     end;
+    end;
    end;
    if accept then begin
     value:= rea1;
@@ -3643,10 +3693,27 @@ begin
  internalgetgridvalue(index,result);
 end;
 
-procedure tcustomrealedit.setgridvalue(const index: integer;
-  const Value: realty);
+function tcustomrealedit.getgridintvalue(const index: integer): integer;
+var
+ rea1: realty;
 begin
- internalsetgridvalue(index,value);
+ internalgetgridvalue(index,rea1);
+ result:= realtytoint(rea1);
+end;
+
+procedure tcustomrealedit.setgridvalue(const index: integer;
+                                          const avalue: realty);
+begin
+ internalsetgridvalue(index,avalue);
+end;
+
+procedure tcustomrealedit.setgridintvalue(const index: integer;
+                                           const avalue: integer);
+var
+ rea1: realty;
+begin
+ rea1:= inttorealty(avalue); //avoid FPC crash
+ internalsetgridvalue(index,rea1);
 end;
 
 function tcustomrealedit.getgridvalues: realarty;
@@ -3654,15 +3721,39 @@ begin
  result:= trealdatalist(fgridintf.getcol.datalist).asarray;
 end;
 
-procedure tcustomrealedit.setgridvalues(const Value: realarty);
+function tcustomrealedit.getgridintvalues: integerarty;
+var
+ ar1: realarty;
+ int1: integer;
 begin
- trealdatalist(fgridintf.getcol.datalist).asarray:= value;
+ ar1:= trealdatalist(fgridintf.getcol.datalist).asarray;
+ setlength(result,length(ar1));
+ for int1:= 0 to high(ar1) do begin
+  result[int1]:= realtytoint(ar1[int1]);
+ end;
 end;
 
-procedure tcustomrealedit.setvaluescale(const Value: real);
+procedure tcustomrealedit.setgridvalues(const avalue: realarty);
 begin
- if fvaluescale <> value then begin
-  fvaluescale:= Value;
+ trealdatalist(fgridintf.getcol.datalist).asarray:= avalue;
+end;
+
+procedure tcustomrealedit.setgridintvalues(const avalue: integerarty);
+var
+ ar1: realarty;
+ int1: integer;
+begin
+ setlength(ar1,length(avalue));
+ for int1:= 0 to high(ar1) do begin
+  ar1[int1]:= inttorealty(avalue[int1]);
+ end;
+ trealdatalist(fgridintf.getcol.datalist).asarray:= ar1;
+end;
+
+procedure tcustomrealedit.setvaluescale(const avalue: real);
+begin
+ if fvaluescale <> avalue then begin
+  fvaluescale:= avalue;
   valuetotext;
  end;
 end;
@@ -3679,17 +3770,12 @@ end;
 
 function tcustomrealedit.getasinteger: integer;
 begin
- if isnull then begin
-  result:= 0;
- end
- else begin
-  result:= round(value);
- end;
+ result:= realtytoint(value);
 end;
 
 procedure tcustomrealedit.setasinteger(const avalue: integer);
 begin
- value:= avalue;
+ value:= inttorealty(avalue);
 end;
 
 function tcustomrealedit.getascurrency: currency;

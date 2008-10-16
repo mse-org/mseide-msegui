@@ -692,6 +692,7 @@ type
    property formatdisp;
    property valuescale;
    property onsetvalue;
+   property onsetintvalue;
  end;
 
  tdbrealspinedit = class(tcustomrealspinedit,idbeditfieldlink,idbeditinfo,ireccontrol)

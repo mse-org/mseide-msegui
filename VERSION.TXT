@@ -1,5 +1,8 @@
 MSEide+MSEgui version history
 
+2008-10-16
+ tcustomrealedit.asinteger returns minint for empy value.
+ 
 Version 2.0beta1
 2008-10-15
 2008-10-09
