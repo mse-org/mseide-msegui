@@ -353,11 +353,6 @@ begin
  checkgdiprint;
 end;
 
-procedure tcustomgdiprinter.startdoc;
-begin
- checkgdiprint;
-end;
-
 function defaultprinter: msestring;
 begin
  checkgdiprint;
@@ -374,7 +369,7 @@ begin
  checkgdiprint;
 end;
 
-procedure tcustomgdiprinter.creategc(var agc: gcty; aname: msestring);
+procedure tcustomgdiprinter.creategc(var agc: gcty; const aname: msestring);
 begin
  checkgdiprint;
 end;
