@@ -1444,11 +1444,14 @@ end;
 procedure tdesignwindow.selectchildexec(const sender: tobject);
 var
  ar1: msestringarty;
+ comp1: tcomponent;
 begin
  with tmenuitem(sender) do begin
   ar1:= splitstring(caption,widechar(' '));
-  fselections.clear;
-  fselections.add(fselectwidget.findlogicalchild(ar1[0]));
+  comp1:= fselectwidget.findlogicalchild(ar1[0]);
+  if comp1 <> nil then begin
+   selectcomponent(comp1,sm_select);
+  end;
  end;
 end;
 
