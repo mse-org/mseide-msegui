@@ -29,6 +29,10 @@ const
  screenrefprintername = 'ScreeN';
   
 type
+ {$ifndef mswindows}
+ henhmetafile = cardinal;
+ {$endif}
+ 
  tgdiprintcanvas = class(tprintercanvas)
   protected
    procedure beginpage; override;
@@ -66,7 +70,7 @@ type
                   //'' -> default printer
  end;
  
-{$ifdef mswindows}
+//{$ifdef mswindows}
 
  twmfprintcanvas = class(tgdiprintcanvas)
   private
@@ -101,7 +105,7 @@ type
                   //'' -> defaultprinter, 'ScreeN' -> default dc
  end;
 
-{$endif}
+//{$endif}
  
 function defaultprinter: msestring;
  
@@ -480,6 +484,34 @@ begin
  result:= (ffilehandle <> 0) or inherited didprint;
 end;
 
+{$else} //mswindows
+
+constructor twmfprintcanvas.create(const user: tcustomprinter;
+               const intf: icanvas);
+begin
+ include(fstate,cs_metafile);
+ inherited;
+end;
+
+procedure twmfprintcanvas.linktopaintdevice(apaintdevice: paintdevicety;
+               const gc: gcty;{ const size: sizety;} const cliporigin: pointty);
+begin
+ checkgdiprint;
+end;
+
+function twmfprintcanvas.getenhmetafile: henhmetafile;
+begin
+ checkgdiprint;
+ result:= 0;
+end;
+
+function twmfprintcanvas.didprint: boolean;
+begin
+ checkgdiprint;
+ result:= false;
+end;
+{$endif} //not mswindows
+
 { twmfprinter }
 
 constructor twmfprinter.create(aowner: tcomponent);
@@ -490,10 +522,40 @@ begin
  inherited;
 end;
 
+function twmfprinter.getcanvas: twmfprintcanvas;
+begin
+ result:= twmfprintcanvas(fcanvas);
+end;
+
+procedure twmfprinter.setcanvas(const avalue: twmfprintcanvas);
+begin
+ fcanvas.assign(avalue);
+end;
+
+function twmfprinter.getwindowsize: sizety;
+begin
+ result.cx:= round(pa_width*fcanvas.ppmm);
+ result.cy:= round(pa_height*fcanvas.ppmm);
+end;
+
+procedure twmfprinter.initdevicecaps(const agc: gcty);
+begin
+ inherited;
+ fpoffsetx:= 0;
+ fpoffsety:= 0;
+ exit;
+ fppinchx:= fppinchx * fcanvas.ppmm/mmtoinch; //paint device is virtual screen
+ fppinchy:= fppinchx;
+ fpoffsetx:= 0;
+ fpoffsety:= 0;
+end;
+
 function twmfprinter.actprintername: msestring;
 begin
  result:= fprintername;
 end;
+
+{$ifdef mswindows}
 
 procedure twmfprinter.creategc(var agc: gcty; const aname: msestring);
 var
@@ -548,7 +610,15 @@ begin
  fpoffsety:= 0;
 end;
 
-{$endif} //mswindows
+{$else} //mswindows
+
+procedure twmfprinter.creategc(var agc: gcty; const aname: msestring);
+begin
+ checkgdiprint;
+end;
+
+
+{$endif} //not mswindows
 
 initialization
  doinit;
