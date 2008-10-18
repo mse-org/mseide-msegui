@@ -582,34 +582,6 @@ begin
  end;
 end;
 
-function twmfprinter.getcanvas: twmfprintcanvas;
-begin
- result:= twmfprintcanvas(fcanvas);
-end;
-
-procedure twmfprinter.setcanvas(const avalue: twmfprintcanvas);
-begin
- fcanvas.assign(avalue);
-end;
-
-function twmfprinter.getwindowsize: sizety;
-begin
- result.cx:= round(pa_width*fcanvas.ppmm);
- result.cy:= round(pa_height*fcanvas.ppmm);
-end;
-
-procedure twmfprinter.initdevicecaps(const agc: gcty);
-begin
- inherited;
- fpoffsetx:= 0;
- fpoffsety:= 0;
- exit;
- fppinchx:= fppinchx * fcanvas.ppmm/mmtoinch; //paint device is virtual screen
- fppinchy:= fppinchx;
- fpoffsetx:= 0;
- fpoffsety:= 0;
-end;
-
 {$else} //mswindows
 
 procedure twmfprinter.creategc(var agc: gcty; const aname: msestring);
