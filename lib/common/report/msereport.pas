@@ -1578,7 +1578,7 @@ type
                         const onafterrender: reporteventty = nil); overload;
    procedure render(const aprinter: tstreamprinter; const astream: ttextstream;
                         const onafterrender: reporteventty = nil); overload;
-   procedure render(const aprinter: tgdiprinter;
+   procedure render(const aprinter: tcustomgdiprinter;
                            const onafterrender: reporteventty = nil); overload;
    procedure waitfor;         //returns before calling of onafterrender
    function prepass: boolean; //true if in prepass render state
@@ -5221,12 +5221,14 @@ var
           (bo2 and (bo_oddpage in foptions) or 
            not bo2 and (bo_evenpage in foptions)); //has data
    bo4:= not(bo4 or ((bo_once in foptions) and not (rbs_showed in fstate)));
-                //empty
-  
+                //empty  
    render(acanvas,bo4);
    bo1:= bo1 and bo4;
   end;
  end;
+
+var
+ orient1: pageorientationty;
 
 begin
  if not (rpps_inited in fstate) then begin
@@ -5255,6 +5257,15 @@ begin
   end;
   exclude(fstate,rpps_backgroundrendered);
   acanvas.reset;
+  if acanvas is tprintercanvas then begin
+   if fprintorientation = rpo_default then begin
+    orient1:= freport.fdefaultprintorientation;
+   end
+   else begin
+    orient1:= pageorientationty(pred(fprintorientation));
+   end;
+   tprintercanvas(acanvas).printorientation:= orient1;
+  end;
   acanvas.intersectcliprect(makerect(nullpoint,fwidgetrect.size));
   updatevisible;
   bo1:= (not fdatalink.active or fdatalink.dataset.eof) and
@@ -5381,13 +5392,14 @@ begin
 end;
 
 procedure tcustomreportpage.renderbackground(const acanvas: tcanvas);
-var
- orient1: pageorientationty;
+//var
+// orient1: pageorientationty;
 begin
  if (freport.fpagenum <> 0) and not (rs_dummypage in freport.fstate) then begin
   freport.nextpage(acanvas);
  end;
  exclude(freport.fstate,rs_dummypage);
+{ moved to render
  if acanvas is tprintercanvas then begin
   if fprintorientation = rpo_default then begin
    orient1:= freport.fdefaultprintorientation;
@@ -5397,6 +5409,7 @@ begin
   end;
   tprintercanvas(acanvas).printorientation:= orient1;
  end;
+}
  acanvas.origin:= pos;
  inherited paint(acanvas);
  include(fstate,rpps_backgroundrendered);
@@ -6005,8 +6018,8 @@ begin
       end;
      end;
      if rs_endpass in fstate then begin
-      if fprinter is tgdiprinter then begin
-       with tgdiprinter(fprinter) do begin
+      if fprinter is tcustomgdiprinter then begin
+       with tcustomgdiprinter(fprinter) do begin
         beginprint(false);
        end;
       end
@@ -6024,8 +6037,8 @@ begin
       end;
      end
      else begin
-      if fprinter is tgdiprinter then begin
-       with tgdiprinter(fprinter) do begin
+      if fprinter is tcustomgdiprinter then begin
+       with tcustomgdiprinter(fprinter) do begin
         beginprint(true);
        end;
       end
@@ -6226,7 +6239,7 @@ begin
  internalrender(aprinter.canvas,aprinter,'',astream,astream = nil,onafterrender);
 end;
 
-procedure tcustomreport.render(const aprinter: tgdiprinter;
+procedure tcustomreport.render(const aprinter: tcustomgdiprinter;
                                    const onafterrender: reporteventty = nil);
 begin
  internalrender(aprinter.canvas,aprinter,'',nil,true,onafterrender);

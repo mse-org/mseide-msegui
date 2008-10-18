@@ -31,7 +31,7 @@ type
  regionty = cardinal;
  pixmapty = cardinal;
 
- gckindty = (gck_screen,gck_pixmap,gck_printer);
+ gckindty = (gck_screen,gck_pixmap,gck_printer,gck_metafile);
  
  alignmentty = (al_left,al_xcentered,al_right,al_top,al_ycentered,al_bottom,
                 al_grayed,
@@ -111,7 +111,7 @@ type
    cs_dashes,cs_linewidth,cs_capstyle,cs_joinstyle,
    cs_fonthandle,cs_font,cs_fontcolor,cs_fontcolorbackground,cs_fontcolorshadow,
    cs_rasterop,cs_brush,cs_brushorigin,
-   cs_painted,cs_internaldrawtext,cs_inactive,cs_pagestarted{,cs_monochrome});
+   cs_painted,cs_internaldrawtext,cs_inactive,cs_pagestarted,cs_metafile{,cs_monochrome});
  canvasstatesty = set of canvasstatety;
 
 const
@@ -171,8 +171,11 @@ type
 
  gcty = record
   handle: cardinal;
+  refgc: cardinal; //for windowsmetafile
   drawingflags: drawingflagsty;
   cliporigin: pointty;
+  size: sizety;
+  ppmm: real;
   platformdata: array[0..23] of cardinal; //platform dependent
  end;
  gcpoty = ^gcty;
@@ -503,7 +506,7 @@ type
    gccolorbackground,gccolorforeground: colorty;
    fdefaultfont: fontnumty;
    fcliporigin: pointty;
-   fppmm: real;
+//   fppmm: real;
    procedure adjustrectar(po: prectty; count: integer);
    procedure readjustrectar(po: prectty; count: integer);
    procedure error(nr: gdierrorty; const text: string);
@@ -545,7 +548,7 @@ type
    procedure setlinewidthmm(const avalue: real);
   protected
    fstate: canvasstatesty;
-   fsize: sizety;
+//   fsize: sizety;
    fvaluepo: canvasvaluespoty;
    fdrawinfo: drawinfoty;
    fgdifuncs: pgdifunctionaty;
@@ -562,6 +565,7 @@ type
    procedure checkrect(const rect: rectty);
    procedure checkgcstate(state: canvasstatesty); virtual;
    procedure checkregionstate;  //copies region if necessary
+   function defaultcliprect: rectty; virtual;
    procedure gdi(const func: gdifuncty);
    procedure init;
    procedure internalcopyarea(asource: tcanvas; const asourcerect: rectty;
@@ -586,8 +590,8 @@ type
    drawinfopo: pointer; //used to transport additional drawing information
    constructor create(const user: tobject; const intf: icanvas);
    destructor destroy; override;
-   procedure linktopaintdevice(paintdevice: paintdevicety; const gc: gcty;
-                const size: sizety; const cliporigin: pointty);
+   procedure linktopaintdevice(apaintdevice: paintdevicety; const gc: gcty;
+                {const size: sizety;} const cliporigin: pointty); virtual;
          //calls reset, resets cliporigin, canvas owns the gc!
    procedure initflags(const dest: tcanvas); virtual;
    procedure unlink; //frees gc
@@ -747,7 +751,7 @@ type
 
    property paintdevice: paintdevicety read fdrawinfo.paintdevice;
    property gchandle: cardinal read getgchandle;
-   property ppmm: real read fppmm write setppmm; 
+   property ppmm: real read fdrawinfo.gc.ppmm write setppmm; 
                    //used for linewidth mm, value not saved/restored
  end;
 
@@ -1731,6 +1735,7 @@ begin
  if fcanvas <> nil then begin
   fillchar(gc,sizeof(gcty),0);
   gc.drawingflags:= [df_canvasispixmap];
+  gc.size:= fsize;
   if pms_monochrome in fstate then begin
    include(gc.drawingflags,df_canvasismonochrome);
   end;
@@ -1738,7 +1743,7 @@ begin
   err:= gui_creategc(fhandle,gck_pixmap,gc);
   gdi_unlock;
   guierror(err,self);
-  fcanvas.linktopaintdevice(fhandle,gc,fsize,fdefaultcliporigin);
+  fcanvas.linktopaintdevice(fhandle,gc{,fsize},fdefaultcliporigin);
  end;
 end;
 
@@ -2491,7 +2496,7 @@ begin
  err:= gui_creategc(0,gck_screen,gc);
  gdi_unlock;
  guierror(err,self);
- sender.linktopaintdevice(0,gc,nullsize,nullpoint);
+ sender.linktopaintdevice(0,gc,{nullsize,}nullpoint);
 end;
 
 function tfont.getmonochrome: boolean;
@@ -2689,16 +2694,20 @@ begin
  //dummy
 end;
 
-procedure tcanvas.linktopaintdevice(paintdevice: paintdevicety;
-               const gc: gcty; const size: sizety; const cliporigin: pointty);
+procedure tcanvas.linktopaintdevice(apaintdevice: paintdevicety;
+               const gc: gcty; {const size: sizety;} const cliporigin: pointty);
+var
+ rea1: real;
 begin
  resetpaintedflag;
  if (fdrawinfo.gc.handle <> 0) then begin
   gdi(gdi_destroygc);
  end;
- fdrawinfo.paintdevice:= paintdevice;
+ fdrawinfo.paintdevice:= apaintdevice;
+ rea1:= fdrawinfo.gc.ppmm;
  fdrawinfo.gc:= gc;
- fsize:= size;
+ fdrawinfo.gc.ppmm:= rea1;
+// fdrawinfo.gc.size:= size;
  updatecliporigin(cliporigin);
  if gc.handle <> 0 then begin
   gdi(gdi_setcliporigin);
@@ -2718,7 +2727,7 @@ end;
 procedure tcanvas.unlink;
 begin
  reset;
- linktopaintdevice(0,nullgc,nullsize,nullpoint);
+ linktopaintdevice(0,nullgc,{nullsize,}nullpoint);
 end;
 
 procedure tcanvas.initdrawinfo(var adrawinfo: drawinfoty);
@@ -2755,7 +2764,7 @@ procedure tcanvas.init;
  end;
 
 begin
- fppmm:= defaultppmm;
+ fdrawinfo.gc.ppmm:= defaultppmm;
  restore(0); 
 // reset;
  initvalues(fvaluestack.stack[0]);
@@ -4185,14 +4194,15 @@ end;
 
 function tcanvas.getlinewidthmm: real;
 begin
- result:= fvaluepo^.lineinfo.width / (fppmm * (1 shl linewidthshift));
+ result:= fvaluepo^.lineinfo.width / 
+                        (fdrawinfo.gc.ppmm * (1 shl linewidthshift));
 end;
 
 procedure tcanvas.setlinewidthmm(const avalue: real);
 var
  int1: integer;
 begin
- int1:= round(avalue * (1 shl linewidthshift) * fppmm);
+ int1:= round(avalue * (1 shl linewidthshift) * fdrawinfo.gc.ppmm);
  if fvaluepo^.lineinfo.width <> int1 then begin
   fvaluepo^.lineinfo.width:= int1;
   valuechanged(cs_linewidth);
@@ -4242,12 +4252,17 @@ begin
  valuechanged(cs_joinstyle);
 end;
 
+function tcanvas.defaultcliprect: rectty;
+begin
+ result:= makerect(nullpoint,fdrawinfo.gc.size);
+end;
+
 procedure tcanvas.checkregionstate;
 begin
  with fvaluepo^ do begin
   if clipregion = 0 then begin
    checkgcstate([cs_gc]); //fsize must be valid
-   clipregion:= createregion(makerect(nullpoint,fsize));
+   clipregion:= createregion(defaultcliprect);
   end
   else begin
    if not (cs_regioncopy in changed) then begin
@@ -4774,7 +4789,7 @@ begin
  if avalue < 0.1 then begin
   avalue:= 0.1;
  end;
- fppmm:= avalue; 
+ fdrawinfo.gc.ppmm:= avalue; 
 end;
 
 procedure tcanvas.internaldrawtext(var info);

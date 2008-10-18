@@ -128,7 +128,7 @@ type
   protected
    fcanvas: tprintercanvas;
    procedure loaded; override;
-   function getwindowsize: sizety;
+   function getwindowsize: sizety; virtual;
    procedure defineproperties(filer: tfiler); override;
    
    //istatfile
@@ -260,6 +260,7 @@ type
    procedure initprinting(const apreamble: string = '');
    procedure checkgcstate(state: canvasstatesty); override;
    procedure setppmm(avalue: real); override;
+   function defaultcliprect: rectty; override;
    procedure updatescale; virtual;
    procedure updateframe;
    procedure beginpage; virtual;
@@ -658,7 +659,7 @@ end;
 
 function tcustomprinter.getsize: sizety;
 begin
- result:= fcanvas.fsize;
+ result:= fcanvas.fdrawinfo.gc.size;
 end;
 
 procedure tcustomprinter.endprint;
@@ -761,6 +762,21 @@ begin
  reset;
 end;
 
+function tcustomprintercanvas.defaultcliprect: rectty;
+begin
+ result.pos:= nullpoint;
+ result.size:= fdrawinfo.gc.size;
+ with result do begin
+  if cx > cy then begin 
+      //quadratic because of cliprectinit with later orientation switch
+   cy:= cx;
+  end
+  else begin
+   cx:= cy;             
+  end;
+ end;  
+end;
+
 procedure tcustomprintercanvas.updatescale;
 begin
  if not (csloading in fprinter.componentstate) then begin
@@ -771,14 +787,14 @@ begin
    fgcscale:= mmtoprintscale/ppmm; //map to printerunits
 
    if fprintorientation = pao_landscape then begin
-    fsize.cx:= round(fpa_height * ppmm);
-    fsize.cy:= round(fpa_width * ppmm);
+    fdrawinfo.gc.size.cx:= round(fpa_height * ppmm);
+    fdrawinfo.gc.size.cy:= round(fpa_width * ppmm);
     fgcoffsetx:= mmtoprintscale * fpa_frameleft;
     fgcoffsety:= - fpa_frametop*mmtoprintscale;
    end
    else begin
-    fsize.cx:= round(fpa_width * ppmm);
-    fsize.cy:= round(fpa_height * ppmm);
+    fdrawinfo.gc.size.cx:= round(fpa_width * ppmm);
+    fdrawinfo.gc.size.cy:= round(fpa_height * ppmm);
     fgcoffsetx:= mmtoprintscale * fpa_frameleft;
     fgcoffsety:= (fpa_height-fpa_frametop)*mmtoprintscale;
    end;
@@ -786,27 +802,24 @@ begin
    if fprintorientation = pao_landscape then begin
     fboundingbox.left:= round(fpa_frametop*mmtoprintscale);
     fboundingbox.bottom:= round(fpa_frameleft*mmtoprintscale);
-    fboundingbox.right:= round((fsize.cy/ppmm-fpa_framebottom)*mmtoprintscale);
-    fboundingbox.top:= round((fsize.cx/ppmm-fpa_frameright)*mmtoprintscale);
+    fboundingbox.right:= round((fdrawinfo.gc.size.cy/ppmm-fpa_framebottom)*
+                                                               mmtoprintscale);
+    fboundingbox.top:= round((fdrawinfo.gc.size.cx/ppmm-fpa_frameright)*
+                                                               mmtoprintscale);
    end
    else begin
     fboundingbox.left:= round(fpa_frameleft*mmtoprintscale);
     fboundingbox.bottom:= round(fpa_framebottom*mmtoprintscale);
-    fboundingbox.right:= round((fsize.cx/ppmm-fpa_frameright)*mmtoprintscale);
-    fboundingbox.top:= round((fsize.cy/ppmm-fpa_frametop)*mmtoprintscale);
+    fboundingbox.right:= round((fdrawinfo.gc.size.cx/ppmm-fpa_frameright)*
+                                                               mmtoprintscale);
+    fboundingbox.top:= round((fdrawinfo.gc.size.cy/ppmm-fpa_frametop)*
+                                                               mmtoprintscale);
    end;
-   fclientsize.cx:= fsize.cx - round((fpa_frameleft+fpa_frameright)*ppmm);
-   fclientsize.cy:= fsize.cy - round((fpa_frametop+fpa_framebottom)*ppmm);
+   fclientsize.cx:= fdrawinfo.gc.size.cx - round((fpa_frameleft+fpa_frameright)*
+                                                               ppmm);
+   fclientsize.cy:= fdrawinfo.gc.size.cy - round((fpa_frametop+fpa_framebottom)*
+                                                               ppmm);
   end;
-  with fsize do begin
-   if cx > cy then begin 
-       //quadratic because of cliprectinit with later orientation switch
-    cy:= cx;
-   end
-   else begin
-    cx:= cy;             
-   end;
-  end;  
  end;
 end;
 

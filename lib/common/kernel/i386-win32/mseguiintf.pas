@@ -1151,15 +1151,12 @@ end;
 
 function gui_creategc(paintdevice: paintdevicety; const akind: gckindty; 
               var gc: gcty; const aprintername: msestring = ''): guierrorty;
+var
+ wrect1: trect;
 begin
- if akind = gck_printer then begin
-  result:= gue_createprintergc;
- end
- else begin
-  result:= gue_creategc;
- end;
  case akind of
   gck_pixmap: begin
+   result:= gue_creategc;
    gc.handle:= createcompatibledc(0);
    if gc.handle <> 0 then begin
     selectobject(gc.handle,paintdevice);
@@ -1167,10 +1164,27 @@ begin
    end;
   end;
   gck_printer: begin
+   result:= gue_createprintergc;
    gc.handle:= createdc('WINSPOOL',pansichar(ansistring(aprintername)),nil,nil);
    setmapperflags(gc.handle,1); //match font-device aspectratio
   end;
+  gck_metafile: begin
+   result:= gue_createmetafilegc;
+   wrect1.left:= 0;
+   wrect1.top:= 0;
+   wrect1.right:= round((gc.size.cx*100)/gc.ppmm);
+   wrect1.bottom:= round((gc.size.cy*100)/gc.ppmm);
+   if aprintername = '' then begin
+    gc.handle:= createenhmetafilew(gc.refgc,nil,@wrect1,nil); //memory
+   end
+   else begin
+    gc.handle:= createenhmetafilew(gc.refgc,pmsechar(aprintername),@wrect1,nil); 
+                                                   //file
+   end;
+   setmapperflags(gc.handle,1); //match font-device aspectratio
+  end;
   else begin
+   result:= gue_creategc;
    gc.handle:= getdc(paintdevice);
   end;
  end;
@@ -1194,15 +1208,22 @@ begin
 {$ifdef mse_debuggdi}
   dec(gccount);
 {$endif}
-  if kind in [gck_pixmap,gck_printer] then begin
-//   bmp1:= createcompatiblebitmap(handle,0,0);
-//   bmp2:= selectobject(handle,bmp1); //select actual bitmap out of dc
-                                     //really needed?
-   deletedc(handle);
-//   deleteobject(bmp1);
-  end
-  else begin
-   releasedc(paintdevice,handle);
+  if handle <> 0 then begin
+   case kind of
+    gck_pixmap,gck_printer: begin
+ //   bmp1:= createcompatiblebitmap(handle,0,0);
+ //   bmp2:= selectobject(handle,bmp1); //select actual bitmap out of dc
+                                      //really needed?
+    deletedc(handle);
+ //   deleteobject(bmp1);
+    end;
+    gck_metafile: begin
+     deleteenhmetafile(closeenhmetafile(handle));
+    end
+    else begin
+     releasedc(paintdevice,handle);
+    end;
+   end;
   end;
   if backgroundbrush <> 0 then begin
    deleteobject(backgroundbrush);

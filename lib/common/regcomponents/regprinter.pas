@@ -7,7 +7,8 @@ uses
  
 procedure Register;
 begin
- registercomponents('Gui',[tpostscriptprinter,tgdiprinter]);
+ registercomponents('Gui',[tpostscriptprinter
+    {$ifdef mswindows},tgdiprinter,twmfprinter{$endif}]);
 end;
 
 initialization

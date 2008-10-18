@@ -951,6 +951,7 @@ type
    procedure createitem(const index: integer; var item: tpersistent); override;
   public
    constructor create(const aintf: iface); reintroduce;
+   class function getitemclasstype: persistentclassty; override;
 //   class function getitemclasstype: persistentclassty; override;
    property items[const index: integer]: tface read getitems; default;
  end;
@@ -5419,6 +5420,11 @@ procedure tfacearrayprop.createitem(const index: integer;
                var item: tpersistent);
 begin
  item:= tface.create(fintf);
+end;
+
+class function tfacearrayprop.getitemclasstype: persistentclassty;
+begin
+ result:= tface;
 end;
 
 { tfacelist }
@@ -10924,11 +10930,12 @@ begin
   fstate:= fstate - [tws_posvalid,tws_sizevalid];
   fillchar(gc,sizeof(gcty),0);
   guierror(gui_creategc(fwindow.id,gck_screen,gc),self);
-  fcanvas.linktopaintdevice(fwindow.id,gc,fowner.fwidgetrect.size,nullpoint);
-  finalize(gc);
-  fillchar(gc,sizeof(gcty),0);
+  gc.size:= fowner.fwidgetrect.size;
+  fcanvas.linktopaintdevice(fwindow.id,gc{,fowner.fwidgetrect.size},nullpoint);
+//  finalize(gc);
+//  fillchar(gc,sizeof(gcty),0);
   guierror(gui_creategc(fwindow.id,gck_screen,gc),self);
-  fasynccanvas.linktopaintdevice(fwindow.id,gc,fowner.fwidgetrect.size,nullpoint);
+  fasynccanvas.linktopaintdevice(fwindow.id,gc,{fowner.fwidgetrect.size,}nullpoint);
   if appinst <> nil then begin
    tinternalapplication(application).registerwindow(self);
   end;
@@ -11281,6 +11288,7 @@ begin
      end;
     end;
     if bo1 and bo2 then begin
+     window1:= nil; //compiler warning
      activate;
      with appinst do begin
       if fgroupzorder <> nil then begin
