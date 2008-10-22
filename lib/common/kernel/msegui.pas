@@ -8611,7 +8611,7 @@ begin
  if showing then begin
   if bo1 and not (csdestroying in componentstate) then begin 
    updateroot;
-   window.invalidaterect(makerect(frootpos,fwidgetrect.size));
+   window.invalidaterect(makerect(frootpos,fwidgetrect.size),self);
            //invalidate old position and size
   end;
   exclude(fwidgetstate,ws_visible);
