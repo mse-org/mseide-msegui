@@ -459,7 +459,7 @@ begin
  end;
 end;
 
-function decode(const value: msestring; const encoding: charencodingty = ce_utf8n): string;
+function decode(const value: string; const encoding: charencodingty = ce_utf8n): string;
 begin
  case encoding  of
   ce_ascii: begin
