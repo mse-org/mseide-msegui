@@ -114,6 +114,8 @@ var
       if not checkoperator(':') then begin
        exit;
       end;
+      while checkoperator('^') do begin
+      end;
       scope.addidents(parser);
      end;
      checkoperator(';');
