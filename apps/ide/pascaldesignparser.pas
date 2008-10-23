@@ -111,6 +111,7 @@ var
       parsecase;
      end
      else begin
+      skipnamelist;
       if not checkoperator(':') then begin
        exit;
       end;
@@ -147,6 +148,7 @@ var
        parsecase;
       end
       else begin
+       skipnamelist;
        if checkoperator(':') then begin
         parsetypedef;
        end

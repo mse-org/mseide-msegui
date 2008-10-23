@@ -214,6 +214,7 @@ type
                                              //false if none
    function getnameorident(out aident: integer): boolean; overload;
                       //false if none, -1 if name or none
+   function getnameorident: boolean; overload;
    function getfirstident: integer; //-1 if none or not first token in line
    function checkident(const ident: integer): boolean; //true if ok
    function testident(const ident: integer): boolean;
@@ -247,7 +248,7 @@ type
    function nextline: boolean;             //false if fileend
    function skipwhitespace: boolean;       //and comments, false if no whitespaces
    function skipwhitespaceonly: boolean;
-   function skipnamelist: boolean; //skips {<name>,} false if no name found
+   function skipnamelist: boolean; //skips [,]{<name>,} false if no name found
    property eof: boolean read feof;
    function isfirstnonwhitetoken: boolean;
    {$ifndef nohash}
@@ -1301,11 +1302,12 @@ begin
 end;
 
 function tparser.skipnamelist: boolean; 
- //skips {<name>,} false if no name found
+ //skips [,]{<name>,} false if no name found
 begin
  result:= false;
+ checkoperator(',');
  while true do begin
-  if getident = -1 then begin
+  if not getnameorident then begin
    break;
   end;
   result:= true;
@@ -1379,6 +1381,16 @@ begin
  result:= aident >= 0;
  if not result and (fto^.kind = tk_name) then begin
   result:= true;
+  nexttoken;
+ end;
+end;
+
+function tparser.getnameorident: boolean;
+                      //false if none, -1 if name or none
+begin
+ skipwhitespace;
+ result:= fto^.kind = tk_name;
+ if result then begin
   nexttoken;
  end;
 end;
