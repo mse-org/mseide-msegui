@@ -79,8 +79,92 @@ type
 procedure parsedef(const adef: pdefinfoty; out atext: string; out scope: tdeflist);
 var
  parser: tpascalparser;
+
+ procedure parsecase;
+ var
+  ident1: pascalidentty;
+ begin
+  with parser do begin
+   if not checkname then begin
+    exit;
+   end;
+   if checkoperator(':') then begin
+    if not checkname then begin
+     exit;
+    end;
+   end;
+   if pascalidentty(getident) <> pid_of then begin
+    exit;
+   end;
+   repeat
+    if not findoperator(':') then begin
+     exit;
+    end;
+    if not checkoperator('(') then begin
+     exit;
+    end;
+    while not checkoperator(')') and not eof do begin
+     if not getnameorident(longint(ident1)) then begin
+      exit;
+     end;
+     if ident1 = pid_case then begin
+      parsecase;
+     end
+     else begin
+      if not checkoperator(':') then begin
+       exit;
+      end;
+      scope.addidents(parser);
+     end;
+     checkoperator(';');
+    end;
+    checkoperator(';');
+   until eof or testident(ord(pid_end));
+  end;
+ end;
+ 
+ procedure parsetypedef;
+ var
+  ident1: pascalidentty;
+ begin
+  with parser do begin
+   while checkoperator('^') do begin
+   end;
+   ident1:= pascalidentty(getident);
+   case ident1 of
+    pid_case: begin
+     parsecase;
+    end;
+    pid_record: begin
+     repeat
+      if not getnameorident(longint(ident1)) then begin
+       nexttoken;
+       break;
+      end;
+      if ident1 = pid_case then begin
+       parsecase;
+      end
+      else begin
+       if checkoperator(':') then begin
+        parsetypedef;
+       end
+       else begin
+        nexttoken;
+        break;
+       end;
+      end;
+     until eof or checkident(ord(pid_end));
+    end;
+    else begin
+     scope.addidents(parser);
+    end;
+   end;
+   checkoperator(';');
+  end;
+ end;
+ 
+var
  bo1: boolean;
-// ident1: integer;
 begin
  scope:= tdeflist.create(adef^.kind);
  atext:= sourceupdater.getdefinfotext(adef);
@@ -116,17 +200,24 @@ begin
     else begin
 //     ident1:= getident;
      if checknamenoident then begin
-      if adef^.kind = syk_vardef then begin
-       bo1:= true;
-       while bo1 and checkoperator(',') do begin
-        bo1:= checknamenoident;
+      case adef^.kind of
+       syk_typedef: begin
+        if checkoperator('=') then begin
+         parsetypedef;
+        end;
        end;
-       if bo1 and checkoperator(':') then begin
-        scope.addidents(parser);
+       syk_vardef: begin
+        bo1:= true;
+        while bo1 and checkoperator(',') do begin
+         bo1:= checknamenoident;
+        end;
+        if bo1 and checkoperator(':') then begin
+         while checkoperator('^') do begin
+         end;
+         scope.addidents(parser);
+        end;
        end;
-      end
-      else begin
-       if adef^.kind = syk_classdef then begin
+       syk_classdef: begin
         if checkoperator('=') and checkident(ord(pid_class)) and checkoperator('(') then begin
          scope.addidents(parser);
         end;

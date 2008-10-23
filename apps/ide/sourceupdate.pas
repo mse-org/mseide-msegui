@@ -786,7 +786,7 @@ function tsourceupdater.getdefinfotext(const adef: pdefinfoty): string;
 var
  item1: sourceitemty;
 begin
- if adef^.kind in [syk_vardef,syk_classdef,syk_procdef,syk_procimp,
+ if adef^.kind in [syk_typedef,syk_vardef,syk_classdef,syk_procdef,syk_procimp,
                          syk_classprocimp] then begin
   item1.filename:= adef^.pos.filename;
   item1.startoffset:= adef^.pos.offset;
@@ -849,7 +849,8 @@ begin
     getidents(po1,sourcefo.gettextstream(designer.designfiles.getname(
                               po1^.pos.filename),false));
    end;
-   syk_vardef,syk_classdef,syk_procdef,syk_classprocimp,syk_procimp: begin
+   syk_typedef,syk_vardef,syk_classdef,syk_procdef,syk_classprocimp,
+                         syk_procimp: begin
     parsedef(po1,str1,list1);
     pos1.line:= apos.line - po1^.pos.line;
     if pos1.line = 0 then begin

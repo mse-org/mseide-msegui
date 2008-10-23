@@ -364,10 +364,22 @@ type
 
   includestatementarty = array of includestatementty;
 
+  functionheaderinfoty = record
+   b: browserlistitemty;
+  end;
+
+  functioninfoty = record
+   b: browserlistitemty;
+  end;
+  
   tfunctionheaders= class(tbrowserlist)
+   public
+    constructor create;
   end;
   
   tfunctions = class(tbrowserlist)
+   public
+    constructor create;
   end;
   
   cunitinfoty = record
@@ -1718,6 +1730,20 @@ end;
 function trootdeflist.getname: string;
 begin
  result:= funitinfopo^.unitname;
+end;
+
+{ tfunctionheaders }
+
+constructor tfunctionheaders.create;
+begin
+ inherited create(sizeof(functionheaderinfoty));
+end;
+
+{ tfunctions }
+
+constructor tfunctions.create;
+begin
+ inherited create(sizeof(functioninfoty));
 end;
 
 end.

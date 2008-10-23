@@ -210,18 +210,23 @@ type
    function getlastorigtext(const start: pchar): string;
                    //returns text from start to lasttoken
    function getident: integer; overload;     //-1 if none
-   function getident(var aident: integer): boolean; overload;
+   function getident(out aident: integer): boolean; overload;
                                              //false if none
+   function getnameorident(out aident: integer): boolean; overload;
+                      //false if none, -1 if name or none
    function getfirstident: integer; //-1 if none or not first token in line
    function checkident(const ident: integer): boolean; //true if ok
+   function testident(const ident: integer): boolean;
+                       //skips whitespace, true if ident found
    function checknamenoident: boolean;
+   function checkname: boolean;
    function getname(out value: lstringty): boolean; overload;
    function getorigname(out value: lstringty): boolean; overload;
    function getname: string; overload;           //'' if none
    function getorigname: string; overload;           //'' if none
    function getnamenoident(out value: lstringty): boolean;
    function getorignamenoident(out value: lstringty): boolean;
-
+   
    function testname(const atoken: tokenty; const aname: string): boolean;
    function testnames(const atoken: tokenty; 
                                      const anames: array of string): integer;
@@ -234,15 +239,15 @@ type
    function findoperator(aoperator: char): boolean;      //false if not found
    function findclosingbracket: boolean;                 //false if not found;
    function getvaluestring(var value: string): valuekindty; virtual;
-   function getnamelist: lstringarty;                    //names separated by ','
-   function getorignamelist: lstringarty;                //names separated by ','
+   function getnamelist: lstringarty;          //names separated by ','
+   function getorignamelist: lstringarty;      //names separated by ','
 
    function skipcomment: boolean; virtual; //does not skip whitespace
    function checknewline: boolean;
    function nextline: boolean;             //false if fileend
    function skipwhitespace: boolean;       //and comments, false if no whitespaces
    function skipwhitespaceonly: boolean;
-
+   function skipnamelist: boolean; //skips {<name>,} false if no name found
    property eof: boolean read feof;
    function isfirstnonwhitetoken: boolean;
    {$ifndef nohash}
@@ -1295,6 +1300,21 @@ begin
  end;
 end;
 
+function tparser.skipnamelist: boolean; 
+ //skips {<name>,} false if no name found
+begin
+ result:= false;
+ while true do begin
+  if getident = -1 then begin
+   break;
+  end;
+  result:= true;
+  if not checkoperator(',') then begin
+   break;
+  end;
+ end;
+end;
+
 function tparser.getident: integer;
 var
  by1: byte;
@@ -1345,11 +1365,22 @@ begin
  end;
 end;
 
-function tparser.getident(var aident: integer): boolean;
+function tparser.getident(out aident: integer): boolean;
                                              //false if none
 begin
  aident:= getident();
  result:= aident >= 0;
+end;
+
+function tparser.getnameorident(out aident: integer): boolean;
+                      //false if none, -1 if name or none
+begin
+ aident:= getident;
+ result:= aident >= 0;
+ if not result and (fto^.kind = tk_name) then begin
+  result:= true;
+  nexttoken;
+ end;
 end;
 
 function tparser.getfirstident: integer; //-1 if none or not first token in line
@@ -1395,9 +1426,27 @@ begin
  end;
 end;
 
+function tparser.testident(const ident: integer): boolean;
+                       //skips whitespace, true if ident found
+begin
+ result:= getident = ident;
+ if result then begin
+  lasttoken;
+ end;
+end;
+
 function tparser.checknamenoident: boolean;
 begin
  result:= (getident = -1) and (fto^.kind = tk_name);
+ if result then begin
+  nexttoken;
+ end;
+end;
+
+function tparser.checkname: boolean;
+begin
+ skipwhitespace;
+ result:= fto^.kind = tk_name;
  if result then begin
   nexttoken;
  end;
