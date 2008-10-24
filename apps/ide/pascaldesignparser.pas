@@ -80,6 +80,23 @@ procedure parsedef(const adef: pdefinfoty; out atext: string; out scope: tdeflis
 var
  parser: tpascalparser;
 
+ procedure doaddidents;
+ begin
+  with parser do begin
+   while checkoperator('^') do begin
+   end;
+   if checkident(ord(pid_array)) then begin
+    if checkoperator('[') then begin
+     findoperator(']');
+    end;
+    checkident(ord(pid_of));
+    while checkoperator('^') do begin
+    end;
+   end;
+   scope.addidents(parser);
+  end;
+ end;
+ 
  procedure parsecase;
  var
   ident1: pascalidentty;
@@ -115,9 +132,7 @@ var
       if not checkoperator(':') then begin
        exit;
       end;
-      while checkoperator('^') do begin
-      end;
-      scope.addidents(parser);
+      doaddidents;
      end;
      checkoperator(';');
     end;
@@ -160,7 +175,8 @@ var
      until eof or checkident(ord(pid_end));
     end;
     else begin
-     scope.addidents(parser);
+     lasttoken;
+     doaddidents;
     end;
    end;
    checkoperator(';');
@@ -188,7 +204,7 @@ begin
        while not eof and not checkoperator(':') do begin
         nexttoken;
        end;
-       scope.addidents(parser);
+       doaddidents;
        while not eof and not checkoperator(';') do begin
         if checkoperator(')') then begin
          break;
@@ -198,7 +214,7 @@ begin
       until eof;
      end;
      if checkoperator(':') then begin
-      scope.addidents(parser);
+      doaddidents;
      end;       
     end
     else begin
@@ -216,14 +232,12 @@ begin
          bo1:= checknamenoident;
         end;
         if bo1 and checkoperator(':') then begin
-         while checkoperator('^') do begin
-         end;
-         scope.addidents(parser);
+         doaddidents;
         end;
        end;
        syk_classdef: begin
         if checkoperator('=') and checkident(ord(pid_class)) and checkoperator('(') then begin
-         scope.addidents(parser);
+         doaddidents;
         end;
        end;
       end;
