@@ -61,8 +61,9 @@ type
                       tss_nosigio,tss_unblocked);
  textstreamstatesty = set of textstreamstatety;
 
- charencodingty = (ce_ansi,ce_utf8n,ce_ascii);  //ce_ascii -> 7Bit,
-                                                //string and msestrings -> pascalstrings
+ charencodingty = (ce_locale,ce_utf8n,ce_ascii,ce_iso8859_1);
+                         //ce_ascii -> 7Bit,
+                         //string and msestrings -> pascalstrings
 
  ttextstream = class(tmsefilestream)
   private
@@ -168,7 +169,7 @@ type
 
    property notopen: boolean read getnotopen;
    property eof: boolean read geteof;
-   property encoding: charencodingty read fencoding write fencoding default ce_ansi;
+   property encoding: charencodingty read fencoding write fencoding default ce_locale;
    property buflen: integer read fbuflen write setbuflen default defaultbuflen;
 
  end;
@@ -452,8 +453,11 @@ begin
   end;
   ce_utf8n: begin
    result:= stringtoutf8(value);
-  end
-  else begin //ce_ansi or current locale
+  end;
+  ce_iso8859_1: begin
+   result:= stringtolatin1(value);
+  end;
+  else begin //ce_locale
    result:= value;
   end;
  end;
@@ -467,7 +471,10 @@ begin
   end;
   ce_utf8n: begin
    result:= utf8tostring(value);
-  end
+  end;
+  ce_iso8859_1: begin
+   result:= latin1tostring(value);
+  end;
   else begin //ce_ansi or current locale
    result:= value;
   end;
@@ -1056,6 +1063,7 @@ end;
 function ttextstream.decode(const value: string): msestring;
 begin
  result:= msestream.decode(value,fencoding);
+{
  case fencoding  of
   ce_ascii: begin
    result:= pascalstringtostring(value);
@@ -1067,6 +1075,7 @@ begin
    result:= value;
   end;
  end;
+}
 end;
 
 procedure ttextstream.write(const value: string);

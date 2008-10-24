@@ -1120,11 +1120,16 @@ begin
    edit.tabulators.defaultdist:= int1 * tabstops / edit.tabulators.ppmm;
 //   edit.tabulators.setdefaulttabs(int1 * tabstops / edit.tabulators.ppmm);
    edit.autoindent:= autoindent;
-   if encoding = 1 then begin
-    edit.encoding:= ce_utf8n;
-   end
-   else begin
-    edit.encoding:= ce_ansi;
+   case encoding of
+    1: begin
+     edit.encoding:= ce_utf8n;
+    end;
+    2: begin
+     edit.encoding:= ce_iso8859_1;
+    end;
+    else begin
+     edit.encoding:= ce_locale;
+    end;
    end;
    grid.wheelscrollheight:= scrollheight;
   end;

@@ -400,6 +400,7 @@ function concatstrings(const source: stringarty;
 
 function parsecommandline(const s: pchar): stringarty;
 
+           //no surrogate pair handling!
 function stringtoutf8(const value: msestring): utf8string;
 function utf8tostring(const value: pchar): msestring; overload;
 function utf8tostring(const value: utf8string): msestring; overload;
@@ -539,6 +540,8 @@ begin
  end;
 end;
 
+//no surrogate pair handling!
+
 function stringtoutf8(const value: msestring): utf8string;
 var
  int1: integer;
@@ -598,7 +601,8 @@ begin
    end
    else begin
     if (by1 < $f0) and (int1 < int2) then begin //3byte
-     po1^:= msechar((by1 shl word(12)) or ((byte(value[int1]) and $3f) shl word(6)) or
+     po1^:= msechar((by1 shl word(12)) or 
+            ((byte(value[int1]) and $3f) shl word(6)) or
             byte(value[int1+1]) and $3f);
      inc(int1,2);
     end
@@ -672,8 +676,9 @@ var
  int1: integer;
 begin
  setlength(result,length(value));
- for int1:= 1 to length(result) do begin
-  result[int1]:= char(value[int1]);
+ for int1:= 0 to length(result)-1 do begin
+  (pchar(pointer(result))+int1)^:= 
+                  char(word((pmsechar(pointer(value))+int1)^));
  end;
 end;
 
@@ -682,8 +687,9 @@ var
  int1: integer;
 begin
  setlength(result,length(value));
- for int1:= 1 to length(result) do begin
-  result[int1]:= widechar(value[int1]);
+ for int1:= 0 to length(result)-1 do begin
+  (pmsechar(pointer(result))+int1)^:= 
+          widechar(byte((pchar(pointer(value))+int1)^));
  end;
 end;
 
@@ -691,12 +697,13 @@ function ucs4tostring(const achar: dword): msestring;
 begin
  if achar < $10000 then begin
   setlength(result,1);
-  result[1]:= msechar(achar);
+  pmsechar(pointer(result))^:= msechar(achar);
  end
  else begin
   setlength(result,2);
-  result[1]:= msechar(word((achar shr 10) and $3ff or $d800));
-  result[2]:= msechar(word(achar) and $3ff or $dc00);
+  pmsechar(pointer(result))^:= 
+                        msechar(word((achar shr 10) and $3ff or $d800));
+  (pmsechar(pointer(result))+1)^:= msechar(word(achar) and $3ff or $dc00);
  end;
 end;
 

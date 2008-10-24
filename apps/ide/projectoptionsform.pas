@@ -1861,12 +1861,7 @@ procedure tprojectoptionsfo.encodingsetvalue(const sender: TObject;
 var
  mstr1: msestring;
 begin
- if avalue = 0 then begin
-  mstr1:= 'Locale';
- end
- else begin
-  mstr1:= 'utf8';
- end;
+ mstr1:= encoding.dropdown.valuelist[avalue];
  accept:= askyesno('Wrong encoding can damage your source files.'+lineend+
              'Do you wish to set encoding to '+mstr1+'?','*** WARNING ***');
 end;
