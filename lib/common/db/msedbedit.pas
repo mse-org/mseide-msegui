@@ -1044,6 +1044,7 @@ type
   public
    constructor create(const aowner: tdbdropdownlistcontroller);
    function getlookuptext(const key: integer): msestring; overload;
+   function getlookuptext(const key: int64): msestring; overload;
    function getlookuptext(const key: msestring): msestring; overload;
    property valuefield: tfield read fvaluefield;
    property valuefieldName: string read fvaluefieldname write setvaluefieldname;
@@ -5011,6 +5012,26 @@ begin
 end;
 
 function tdropdowndatalink.getlookuptext(const key: integer): msestring;
+var
+ str1: string;
+begin
+ result:= '';
+ if active and (fdscontroller <> nil) and 
+        (fvaluefield <> nil) and (ftextfield <> nil) then begin
+  dataset.disablecontrols;
+  try
+   str1:= dataset.bookmark;
+   if fdscontroller.locate(key,fvaluefield,[]) = loc_ok then begin
+    result:= getasmsestring(ftextfield,utf8);
+   end;
+   dataset.bookmark:= str1;
+  finally
+   dataset.enablecontrols;
+  end;
+ end;
+end;
+
+function tdropdowndatalink.getlookuptext(const key: int64): msestring;
 var
  str1: string;
 begin

@@ -50,6 +50,12 @@ type
  end;
  integerindexinfoarty = array of integerindexinfoty;
  
+ int64indexinfoty = record
+  index: integerarty;
+  data: int64arty;
+ end;
+ int64indexinfoarty = array of int64indexinfoty;
+ 
  floatindexinfoty = record
   index: integerarty;
   data: realarty;
@@ -78,12 +84,15 @@ type
    ftextdata: stringindexinfoarty;
    fintegerdata: integerindexinfoarty;
    ffloatdata: floatindexinfoarty;
+   fint64data: int64indexinfoarty;
    function getfieldcounttext: integer; virtual;
    function getfieldcountinteger: integer; virtual;
    function getfieldcountfloat: integer; virtual;
+   function getfieldcountint64: integer; virtual;
    procedure setfieldcounttext(const avalue: integer); virtual;
    procedure setfieldcountinteger(const avalue: integer); virtual;
    procedure setfieldcountfloat(const avalue: integer); virtual;
+   procedure setfieldcountint64(const avalue: integer); virtual;
    procedure invalidatebuffer;
    procedure readonlyprop;
    procedure changed;
@@ -95,6 +104,7 @@ type
                      const index: integerarty; var aindex: integer): boolean;
    procedure checkindexar(var aitem: integerindexinfoty); overload;
    procedure checkindexar(var aitem: floatindexinfoty); overload;
+   procedure checkindexar(var aitem: int64indexinfoty); overload;
    procedure checkindexar(var aitem: stringindexinfoty;
                        const caseinsensitive: boolean); overload;
    procedure checkarrayindex(const value; const index: integer);
@@ -114,6 +124,9 @@ type
    function find(const fieldno: integer; const avalue: realty;
                  out aindex: integer; const filter: lbfiltereventty = nil): boolean; overload;
               //logical index, true if found else next bigger
+   function find(const fieldno: integer; const avalue: int64;
+                 out aindex: integer; const filter: lbfiltereventty = nil): boolean; overload;
+              //logical index, true if found else next bigger
    function find(const fieldno: integer; const avalue: msestring;
                  out aindex: integer;
                  const caseinsensitive: boolean;
@@ -124,6 +137,9 @@ type
          out aindex: integer; const filter: lbfiltereventty = nil): boolean; overload;
               //physical index, true if found else next bigger
    function findphys(const fieldno: integer; const avalue: realty;
+                 out aindex: integer; const filter: lbfiltereventty = nil): boolean; overload;
+              //physical index, true if found else next bigger
+   function findphys(const fieldno: integer; const avalue: int64;
                  out aindex: integer; const filter: lbfiltereventty = nil): boolean; overload;
               //physical index, true if found else next bigger
    function findphys(const fieldno: integer; const avalue: msestring;
@@ -149,6 +165,15 @@ type
               //logical -> physical index
    function floatindexar(const fieldno: integer): integerarty;
    function floatar(const fieldno: integer): realarty;
+
+   function int64valuephys(const fieldno,aindex: integer): int64;
+              //physical index
+   function int64valuelog(const fieldno,aindex: integer): int64;
+              //logical index
+   function int64index(const fieldno,aindex: integer): integer;
+              //logical -> physical index
+   function int64indexar(const fieldno: integer): integerarty;
+   function int64ar(const fieldno: integer): int64arty;
    
    function textvaluephys(const fieldno,aindex: integer): msestring;
               //physical index
@@ -163,13 +188,28 @@ type
    function textar(const fieldno: integer): msestringarty;
    
    function lookupinteger(const integerkeyfieldno,integerfieldno,
-                                keyvalue: integer): integer; overload;
+                                     keyvalue: integer): integer; overload;
+                           //0 if not found
+   function lookupinteger(const int64keyfieldno,integerfieldno: integer;
+                               const keyvalue: int64): integer; overload;
                            //0 if not found
    function lookupinteger(const stringkeyfieldno,integerfieldno: integer;
                          const keyvalue: msestring): integer; overload;
                            //0 if not found
+   function lookupint64(const integerkeyfieldno,int64fieldno,
+                                     keyvalue: integer): int64; overload;
+                           //0 if not found
+   function lookupint64(const int64keyfieldno,int64fieldno: integer;
+                               const keyvalue: int64): int64; overload;
+                           //0 if not found
+   function lookupint64(const stringkeyfieldno,int64fieldno: integer;
+                         const keyvalue: msestring): int64; overload;
+                           //0 if not found
    function lookuptext(const integerkeyfieldno,textfieldno,
                                 keyvalue: integer): msestring; overload;
+                           //'' if not found
+   function lookuptext(const int64keyfieldno,textfieldno: integer;
+                               const keyvalue: int64): msestring; overload;
                            //'' if not found
    function lookuptext(const stringkeyfieldno,textfieldno: integer;
                       const keyvalue: msestring): msestring; overload;
@@ -177,8 +217,11 @@ type
    function lookupfloat(const integerkeyfieldno,floatfieldno,
                                 keyvalue: integer): realty; overload;
                            //emptyreal if not found
+   function lookupfloat(const int64keyfieldno,floatfieldno: integer;
+                                const keyvalue: int64): realty; overload;
+                           //emptyreal if not found
    function lookupfloat(const stringkeyfieldno,floatfieldno: integer;
-                                keyvalue: msestring): realty; overload;
+                              const keyvalue: msestring): realty; overload;
                            //emptyreal if not found
                            
    function count: integer; virtual;
@@ -188,10 +231,14 @@ type
                                         write setfieldcountfloat;
    property fieldcountinteger: integer read getfieldcountinteger 
                                         write setfieldcountinteger;
+   property fieldcountint64: integer read getfieldcountinteger 
+                                        write setfieldcountinteger;
    property integervalue[const fieldno,aindex: integer]: integer 
                                    read integervaluephys;
    property floatvalue[const fieldno,aindex: integer]: realty 
                                    read floatvaluephys;
+   property int64value[const fieldno,aindex: integer]: int64 
+                                   read int64valuephys;
    property textvalue[const fieldno,aindex: integer]: msestring 
                                    read textvaluephys;
    property onchange: notifyeventty read fonchange write fonchange;
@@ -201,13 +248,16 @@ type
   public
    procedure addrow(const integervalues: array of integer;
                     const textvalues: array of msestring;
-                    const floatvalues: array of realty);
+                    const floatvalues: array of realty;
+                    const int64values: array of int64);
    procedure addrows(const integervalues: array of integerarty;
                     const textvalues: array of msestringarty;
-                    const floatvalues: array of realarty);
+                    const floatvalues: array of realarty;
+                    const int64values: array of int64arty);
   published
    property fieldcounttext;
    property fieldcountinteger;
+   property fieldcountint64;
    property fieldcountfloat;
    property onchange;
  end;
@@ -218,6 +268,7 @@ type
    procedure setfieldcounttext(const avalue: integer); override;
    procedure setfieldcountinteger(const avalue: integer); override;
    procedure setfieldcountfloat(const avalue: integer); override;
+   procedure setfieldcountint64(const avalue: integer); override;
    procedure fieldschanged(const sender: tarrayprop; const index: integer);
   public
    function count: integer; override;
@@ -232,17 +283,21 @@ type
    ftextfields: tdbfieldnamearrayprop;
    fintegerfields: tdbfieldnamearrayprop;
    ffloatfields: tdbfieldnamearrayprop;
+   fint64fields: tdbfieldnamearrayprop;
    foptionsdb: lbdboptionsty;
    function getdatasource: tdatasource;
    procedure setdatasource(const avalue: tdatasource);
    procedure settextfields(const avalue: tdbfieldnamearrayprop);
    procedure setintegerfields(const avalue: tdbfieldnamearrayprop);
    procedure setfloatfields(const avalue: tdbfieldnamearrayprop);
-   procedure getfields(out aintegerfields,atextfields,afloatfields: fieldarty);
+   procedure setint64fields(const avalue: tdbfieldnamearrayprop);
+   procedure getfields(out aintegerfields,atextfields,afloatfields,
+                                                   aint64fields: fieldarty);
   protected
    function getfieldcounttext: integer; override;
    function getfieldcountinteger: integer; override;
    function getfieldcountfloat: integer; override;
+   function getfieldcountint64: integer; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -251,6 +306,7 @@ type
    property textfields: tdbfieldnamearrayprop read ftextfields write settextfields;
    property integerfields: tdbfieldnamearrayprop read fintegerfields write setintegerfields;
    property floatfields: tdbfieldnamearrayprop read ffloatfields write setfloatfields;
+   property int64fields: tdbfieldnamearrayprop read fint64fields write setint64fields;
    property optionsdb: lbdboptionsty read foptionsdb write foptionsdb default [];
  end;
    
@@ -264,6 +320,7 @@ type
    property datasource;
    property textfields;
    property integerfields;
+   property int64fields;
    property floatfields;
    property optionsdb;
  end;
@@ -325,6 +382,12 @@ begin
  end;
  for int1:= 0 to high(ffloatdata) do begin
   with ffloatdata[int1] do begin
+   index:= nil;
+   data:= nil;
+  end;
+ end;
+ for int1:= 0 to high(fint64data) do begin
+  with fint64data[int1] do begin
    index:= nil;
    data:= nil;
   end;
@@ -451,12 +514,37 @@ end;
 function tcustomlookupbuffer.find(const fieldno: integer; const avalue: realty;
            out aindex: integer; const filter: lbfiltereventty = nil): boolean;
 begin
-// checkbuffer;
  checkarrayindex(ffloatdata,fieldno);
  checkindexar(ffloatdata[fieldno]);
  with ffloatdata[fieldno] do begin
   result:= internalfind(avalue,index,data,sizeof(realty),
                         @comparerealty,filter,aindex);
+ end;
+end;
+
+procedure tcustomlookupbuffer.checkindexar(var aitem: int64indexinfoty);
+begin
+ with aitem do begin
+  if (index = nil) and (data <> nil) then begin
+   application.beginwait;
+   try
+    quicksortarray(data,@compareint64,sizeof(int64),length(data),
+                      false,index);
+   finally
+    application.endwait;
+   end;
+  end;
+ end;
+end;
+
+function tcustomlookupbuffer.find(const fieldno: integer; const avalue: int64;
+           out aindex: integer; const filter: lbfiltereventty = nil): boolean;
+begin
+ checkarrayindex(fint64data,fieldno);
+ checkindexar(fint64data[fieldno]);
+ with fint64data[fieldno] do begin
+  result:= internalfind(avalue,index,data,sizeof(int64),
+                        @compareint64,filter,aindex);
  end;
 end;
 
@@ -534,6 +622,21 @@ begin
  result:= find(fieldno,avalue,int1,filter);
  if result then begin
   aindex:= floatindex(fieldno,int1);
+ end
+ else begin
+  aindex:= -1;
+ end;
+end;
+
+function tcustomlookupbuffer.findphys(const fieldno: integer; const avalue: int64;
+                 out aindex: integer; const filter: lbfiltereventty = nil): boolean; overload;
+              //physical index, true if found else next bigger
+var
+ int1: integer;
+begin
+ result:= find(fieldno,avalue,int1,filter);
+ if result then begin
+  aindex:= int64index(fieldno,int1);
  end
  else begin
   aindex:= -1;
@@ -640,6 +743,44 @@ begin
  result:= ffloatdata[fieldno].data;
 end;
 
+function tcustomlookupbuffer.int64valuephys(const fieldno,aindex: integer): int64;
+begin
+ checkarrayindex(fint64data,fieldno);
+ checkindex(aindex);
+ result:= fint64data[fieldno].data[aindex];
+end;
+
+function tcustomlookupbuffer.int64valuelog(const fieldno,aindex: integer): int64;
+begin
+ checkarrayindex(fint64data,fieldno);
+ checkindexar(fint64data[fieldno]);
+ checkindex(aindex);
+ with fint64data[fieldno] do begin
+  result:= data[index[aindex]];
+ end;
+end;
+
+function tcustomlookupbuffer.int64index(const fieldno,aindex: integer): integer;
+begin
+ checkarrayindex(fint64data,fieldno);
+ checkindexar(fint64data[fieldno]);
+ checkindex(aindex);
+ result:= fint64data[fieldno].index[aindex];
+end;
+
+function tcustomlookupbuffer.int64indexar(const fieldno: integer): integerarty;
+begin
+ checkarrayindex(fint64data,fieldno);
+ checkindexar(fint64data[fieldno]);
+ result:= fint64data[fieldno].index;
+end;
+
+function tcustomlookupbuffer.int64ar(const fieldno: integer): int64arty;
+begin
+ checkarrayindex(fint64data,fieldno);
+ result:= fint64data[fieldno].data;
+end;
+
 function tcustomlookupbuffer.textvaluephys(const fieldno,aindex: integer): msestring;
 begin
  checkarrayindex(ftextdata,fieldno);
@@ -730,10 +871,21 @@ begin
  result:= length(ffloatdata);
 end;
 
+function tcustomlookupbuffer.getfieldcountint64: integer;
+begin
+ result:= length(fint64data);
+end;
+
 procedure tcustomlookupbuffer.setfieldcountfloat(const avalue: integer);
 begin
  clearbuffer;
  setlength(ffloatdata,avalue);
+end;
+
+procedure tcustomlookupbuffer.setfieldcountint64(const avalue: integer);
+begin
+ clearbuffer;
+ setlength(fint64data,avalue);
 end;
 
 procedure tcustomlookupbuffer.readonlyprop;
@@ -816,6 +968,12 @@ begin
     index:= nil;
    end;
   end;
+  for int1:= 0 to high(fint64data) do begin
+   with fint64data[int1] do begin
+    setlength(data,avalue);
+    index:= nil;
+   end;
+  end;
   fcount:= avalue;
   exclude(fstate,lbs_buffervalid);
  end;
@@ -843,6 +1001,20 @@ begin
  end;
 end;
 
+function tcustomlookupbuffer.lookupinteger(const int64keyfieldno,
+                   integerfieldno: integer; const keyvalue: int64): integer;
+                           //0 if not found
+var
+ int1: integer;
+begin
+ if findphys(int64keyfieldno,keyvalue,int1) then begin
+  result:= integervaluephys(integerfieldno,int1);
+ end
+ else begin
+  result:= 0;
+ end;
+end;
+
 function tcustomlookupbuffer.lookupinteger(const stringkeyfieldno: integer;
                const integerfieldno: integer;
                const keyvalue: msestring): integer;
@@ -857,12 +1029,67 @@ begin
  end;
 end;
 
+function tcustomlookupbuffer.lookupint64(const integerkeyfieldno,int64fieldno,
+                                keyvalue: integer): int64;
+                           //0 if not found
+var
+ int1: integer;
+begin
+ if findphys(integerkeyfieldno,keyvalue,int1) then begin
+  result:= int64valuephys(int64fieldno,int1);
+ end
+ else begin
+  result:= 0;
+ end;
+end;
+
+function tcustomlookupbuffer.lookupint64(const int64keyfieldno,
+                   int64fieldno: integer; const keyvalue: int64): int64;
+                           //0 if not found
+var
+ int1: integer;
+begin
+ if findphys(int64keyfieldno,keyvalue,int1) then begin
+  result:= int64valuephys(int64fieldno,int1);
+ end
+ else begin
+  result:= 0;
+ end;
+end;
+
+function tcustomlookupbuffer.lookupint64(const stringkeyfieldno,
+                        int64fieldno: integer;
+                        const keyvalue: msestring): int64;
+var
+ int1: integer;
+begin
+ if findphys(stringkeyfieldno,keyvalue,int1,false) then begin
+  result:= int64valuephys(int64fieldno,int1);
+ end
+ else begin
+  result:= 0;
+ end;
+end;
+
 function tcustomlookupbuffer.lookuptext(const integerkeyfieldno: integer;
                const textfieldno: integer; const keyvalue: integer): msestring;
 var
  int1: integer;
 begin
  if findphys(integerkeyfieldno,keyvalue,int1) then begin
+  result:= textvaluephys(textfieldno,int1);
+ end
+ else begin
+  result:= '';
+ end;
+end;
+
+function tcustomlookupbuffer.lookuptext(const int64keyfieldno: integer;
+               const textfieldno: integer; const keyvalue: int64): msestring;
+var
+ int1: integer;
+begin
+ if findphys(int64keyfieldno,keyvalue,int1) then begin
   result:= textvaluephys(textfieldno,int1);
  end
  else begin
@@ -897,9 +1124,21 @@ begin
  end;
 end;
 
+function tcustomlookupbuffer.lookupfloat(const int64keyfieldno: integer;
+               const floatfieldno: integer; const keyvalue: int64): realty;
+var
+ int1: integer;
+begin
+ if findphys(int64keyfieldno,keyvalue,int1) then begin
+  result:= floatvaluephys(floatfieldno,int1);
+ end
+ else begin
+  result:= emptyreal;
+ end;
+end;
 
-function tcustomlookupbuffer.lookupfloat(const stringkeyfieldno: integer;
-               const floatfieldno: integer; keyvalue: msestring): realty;
+function tcustomlookupbuffer.lookupfloat(const stringkeyfieldno,
+                      floatfieldno: integer; const keyvalue: msestring): realty;
 var
  int1: integer;
 begin
@@ -922,7 +1161,8 @@ end;
 
 procedure tlookupbuffer.addrow(const integervalues: array of integer;
               const textvalues: array of msestring;
-              const floatvalues: array of realty);
+              const floatvalues: array of realty;
+              const int64values: array of int64);
 var
  int1: integer;
 begin
@@ -945,12 +1185,19 @@ begin
   end;
   ffloatdata[int1].data[fcount-1]:= floatvalues[int1];
  end;
+ for int1:= 0 to high(int64values) do begin
+  if int1 > high(fint64data) then begin
+   break;
+  end;
+  fint64data[int1].data[fcount-1]:= int64values[int1];
+ end;
  changed;
 end;
 
 procedure tlookupbuffer.addrows(const integervalues: array of integerarty;
               const textvalues: array of msestringarty;
-              const floatvalues: array of realarty);
+              const floatvalues: array of realarty;
+              const int64values: array of int64arty);
 var
  int1,int2,int3,countbefore: integer;
 begin
@@ -968,6 +1215,11 @@ begin
  for int1:= 0 to high(floatvalues) do begin
   if high(floatvalues[int1]) < int2 then begin
    int2:= high(floatvalues[int1]);
+  end;
+ end;
+ for int1:= 0 to high(int64values) do begin
+  if high(int64values[int1]) < int2 then begin
+   int2:= high(int64values[int1]);
   end;
  end;
  countbefore:= fcount;
@@ -996,6 +1248,14 @@ begin
    ffloatdata[int1].data[int3+countbefore]:= floatvalues[int1][int3];
   end;
  end;
+ for int1:= 0 to high(int64values) do begin
+  if int1 > high(fint64data) then begin
+   break;
+  end;
+  for int3:= 0 to int2 do begin
+   fint64data[int1].data[int3+countbefore]:= int64values[int1][int3];
+  end;
+ end;
 end;
 
 { tdatalokupbuffer }
@@ -1014,6 +1274,11 @@ begin
 end;
 
 procedure tdatalookupbuffer.setfieldcountfloat(const avalue: integer);
+begin
+ readonlyprop;
+end;
+
+procedure tdatalookupbuffer.setfieldcountint64(const avalue: integer);
 begin
  readonlyprop;
 end;
@@ -1058,9 +1323,12 @@ begin
                   {$ifdef FPC}@{$endif}getdatasource);
  ffloatfields:= tdbfieldnamearrayprop.create(msedb.realfields + msedb.datetimefields,
                       {$ifdef FPC}@{$endif}getdatasource);
+ fint64fields:= tdbfieldnamearrayprop.create([ftlargeint],
+                      {$ifdef FPC}@{$endif}getdatasource);
  fintegerfields.onchange:= @fieldschanged;
  ftextfields.onchange:= @fieldschanged;
  ffloatfields.onchange:= @fieldschanged;
+ fint64fields.onchange:= @fieldschanged;
  inherited;
 end;
 
@@ -1071,6 +1339,7 @@ begin
  fintegerfields.free;
  ftextfields.free;
  ffloatfields.free;
+ fint64fields.free;
 end;
 
 function tcustomdblookupbuffer.getdatasource: tdatasource;
@@ -1093,6 +1362,11 @@ begin
  ffloatfields.assign(avalue);
 end;
 
+procedure tcustomdblookupbuffer.setint64fields(const avalue: tdbfieldnamearrayprop);
+begin
+ fint64fields.assign(avalue);
+end;
+
 procedure tcustomdblookupbuffer.settextfields(const avalue: tdbfieldnamearrayprop);
 begin
  ftextfields.assign(avalue);
@@ -1103,6 +1377,7 @@ begin
  setlength(fintegerdata,fintegerfields.count);
  setlength(ftextdata,ftextfields.count);
  setlength(ffloatdata,ffloatfields.count);
+ setlength(fint64data,fint64fields.count);
  inherited;
 end;
 
@@ -1121,9 +1396,13 @@ begin
  result:= floatfields.count;
 end;
 
+function tcustomdblookupbuffer.getfieldcountint64: integer;
+begin
+ result:= int64fields.count;
+end;
 
 procedure tcustomdblookupbuffer.getfields(out aintegerfields,atextfields,
-        afloatfields: fieldarty);
+        afloatfields,aint64fields: fieldarty);
 var
  int1: integer;
 begin
@@ -1139,6 +1418,10 @@ begin
   setlength(afloatfields,ffloatfields.count);
   for int1:= 0 to high(afloatfields) do begin
    afloatfields[int1]:= fieldbyname(ffloatfields[int1]);
+  end;
+  setlength(aint64fields,fint64fields.count);
+  for int1:= 0 to high(aint64fields) do begin
+   aint64fields[int1]:= fieldbyname(fint64fields[int1]);
   end;
  end;
 end;
@@ -1201,6 +1484,7 @@ var
  textf: array of tfield;
  integerf: array of tfield;
  realf: array of tfield;
+ int64f: array of tfield;
  datas: tdataset;
  utf8: boolean;
  bo1: boolean;
@@ -1230,7 +1514,7 @@ begin
       statebefore:= datas.state;
       eofbefore:= datas.eof;
       try
-       getfields(integerf,textf,realf);
+       getfields(integerf,textf,realf,int64f);
        setlength(ismsestringfield,length(textf));
        for int1:= high(ismsestringfield) downto 0 do begin
         ismsestringfield[int1]:= textf[int1] is tmsestringfield;
@@ -1248,6 +1532,9 @@ begin
           for int4:= 0 to high(fintegerdata) do begin
            setlength(fintegerdata[int4].data,int3);
           end;
+          for int4:= 0 to high(fint64data) do begin
+           setlength(fint64data[int4].data,int3);
+          end;
           for int4:= 0 to high(ffloatdata) do begin
            setlength(ffloatdata[int4].data,int3);
           end;
@@ -1255,6 +1542,11 @@ begin
          for int4:= 0 to high(integerf) do begin
           if integerf[int4] <> nil then begin
            fintegerdata[int4].data[int1]:= integerf[int4].asinteger;
+          end;
+         end;
+         for int4:= 0 to high(int64f) do begin
+          if int64f[int4] <> nil then begin
+           fint64data[int4].data[int1]:= int64f[int4].aslargeint;
           end;
          end;
          for int4:= 0 to high(realf) do begin
@@ -1358,6 +1650,7 @@ var
  textf: array of tfield;
  integerf: array of tfield;
  realf: array of tfield;
+ int64f: array of tfield;
  ar3: stringarty;
  int1,int2: integer;
  utf8: boolean;
@@ -1367,7 +1660,7 @@ begin
   clearbuffer;
   if fdatalink.active then begin
    utf8:= fdatalink.utf8;
-   getfields(integerf,textf,realf);
+   getfields(integerf,textf,realf,int64f);
    for int1:= 0 to high(integerf) do begin
     if not integerf[int1].isnull then begin
      ar3:= breaklines(integerf[int1].asstring);
@@ -1379,10 +1672,19 @@ begin
    end;
    for int1:= 0 to high(realf) do begin
     if not realf[int1].isnull then begin
-     ar3:= breaklines(integerf[int1].asstring);
+     ar3:= breaklines(realf[int1].asstring);
      setlength(ffloatdata[int1].data,length(ar3));
      for int2:= 0 to high(ar3) do begin
       ffloatdata[int1].data[int2]:= strtorealty(ar3[int2]);
+     end;
+    end;
+   end;
+   for int1:= 0 to high(int64f) do begin
+    if not int64f[int1].isnull then begin
+     ar3:= breaklines(int64f[int1].asstring);
+     setlength(fint64data[int1].data,length(ar3));
+     for int2:= 0 to high(ar3) do begin
+      fint64data[int1].data[int2]:= strtoint64(ar3[int2]);
      end;
     end;
    end;
@@ -1398,6 +1700,11 @@ begin
    for int1:= 0 to high(fintegerdata) do begin
     if high(fintegerdata[int1].data) < int2 then begin
      int2:= high(fintegerdata[int1].data);
+    end;
+   end;
+   for int1:= 0 to high(fint64data) do begin
+    if high(fint64data[int1].data) < int2 then begin
+     int2:= high(fint64data[int1].data);
     end;
    end;
    for int1:= 0 to high(ffloatdata) do begin

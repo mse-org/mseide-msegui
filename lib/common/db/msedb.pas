@@ -657,6 +657,7 @@ type
    ffield: tfield;
    ffieldname: string;
    fismsestring: boolean;
+   fislargeint: boolean;
    fisstringfield: boolean;
    procedure setfieldname(const Value: string);
    function getasmsestring: msestring;
@@ -690,6 +691,7 @@ type
    function fieldactive: boolean;
    property field: tfield read ffield;
    property fieldname: string read ffieldname write setfieldname;
+   property islargeint: boolean read fislargeint;
    property ismsestring: boolean read fismsestring;
    property isstringfield: boolean read fisstringfield;
    
@@ -830,6 +832,9 @@ type
    function getfieldar(const afieldkinds: tfieldkinds = allfieldkinds): fieldarty;
    function filtereditkind: filtereditkindty;
    function locate(const key: integer; const field: tfield;
+                       const options: locateoptionsty = []): locateresultty;
+                       overload;
+   function locate(const key: int64; const field: tfield;
                        const options: locateoptionsty = []): locateresultty;
                        overload;
    function locate(const key: msestring; const field: tfield; 
@@ -1688,6 +1693,52 @@ begin
    if not (loo_nobackward in options) then begin
     while true do begin
      if field.asinteger = key then begin
+      result:= loc_ok;
+      exit;
+     end;
+     if bof then begin
+      break;
+     end;
+     prior;
+    end;
+   end;
+  finally
+   try
+    if result <> loc_ok then begin
+     bookmark:= bm;
+    end;
+   finally
+    enablecontrols;
+   end;
+  end;
+ end;
+end;
+
+function locaterecord(const adataset: tdataset; const key: int64;
+                       const field: tfield;
+                       const options: locateoptionsty = []): locateresultty;
+var
+ bm: string;
+begin
+ with adataset do begin
+  checkbrowsemode;
+  result:= loc_notfound;
+  bm:= bookmark;
+  disablecontrols;
+  try
+   if not (loo_noforeward in options) then begin
+    while not eof do begin
+     if field.aslargeint = key then begin
+      result:= loc_ok;
+      exit;
+     end;
+     next;
+    end;
+   end;
+   bookmark:= bm;
+   if not (loo_nobackward in options) then begin
+    while true do begin
+     if field.aslargeint = key then begin
       result:= loc_ok;
       exit;
      end;
@@ -3602,6 +3653,7 @@ begin
  if ffield <> value then begin
   ffield := value;
   fismsestring:= (ffield <> nil) and (ffield is tmsestringfield);
+  fislargeint:= (ffield <> nil) and (ffield.datatype = ftlargeint);
   fisstringfield:= (ffield <> nil) and (ffield.datatype in textfields);
   editingchanged;
   recordchanged(nil);
@@ -3998,6 +4050,12 @@ begin
 end;
 
 function tdscontroller.locate(const key: integer; const field: tfield;
+                              const options: locateoptionsty = []): locateresultty;
+begin
+ result:= locaterecord(tdataset(fowner),key,field,options);
+end;
+
+function tdscontroller.locate(const key: int64; const field: tfield;
                               const options: locateoptionsty = []): locateresultty;
 begin
  result:= locaterecord(tdataset(fowner),key,field,options);

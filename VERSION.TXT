@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+2008-10-25
+ int64 parameter for tlookupbuffer.addrow and tlookupbuffer.addrows.
 2008-10-16
  tcustomrealedit.asinteger returns minint for empy value.
  

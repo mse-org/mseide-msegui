@@ -38,7 +38,7 @@ const
  defaultrepfontcolor = cl_black;
   
 type
- lookupkindty = (lk_text,lk_integer,lk_float,lk_date,lk_time,lk_datetime);
+ lookupkindty = (lk_text,lk_integer,lk_int64,lk_float,lk_date,lk_time,lk_datetime);
  linevisiblety = (lv_topofpage,lv_nottopofpage,
                   lv_firstofpage,lv_normal,lv_lastofpage,
                   lv_firstofgroup,lv_lastofgroup,
@@ -1965,72 +1965,106 @@ begin
 end;
 
 function treptabulatoritem.getdisptext: richstringty;
+
+ procedure dofloat(const avalue: realty);
+ begin
+  case flookupkind of
+   lk_float: begin
+    result.text:= realtytostr(avalue,fformat);
+   end;
+   lk_time: begin
+    result.text:= mseformatstr.timetostring(avalue,fformat);
+   end;
+   lk_date: begin
+    result.text:= mseformatstr.datetostring(avalue,fformat);
+   end;
+   lk_datetime: begin
+    result.text:= mseformatstr.datetimetostring(avalue,fformat);
+   end;
+  end;
+ end;
+
 var
  ikey: integer;
+ i64key: integer;
  skey: msestring;
  int1: integer;
- rea1: realty; 
+ int641: int64;
+ 
 begin
  if fdatalink.fieldactive then begin
   result.format:= nil;
   if flookupbuffer <> nil then begin
    try
     result.text:= '';
-    if fdatalink.ismsestring then begin
-     skey:= tmsestringfield(fdatalink.field).asmsestring;
+    if fdatalink.islargeint then begin
+     i64key:= fdatalink.field.aslargeint;
      case flookupkind of
       lk_text: begin
        result.text:= fformat + flookupbuffer.lookuptext(flookupkeyfieldno,
-                    flookupvaluefieldno,skey);
+                    flookupvaluefieldno,i64key);
       end;
       lk_integer: begin
        int1:= flookupbuffer.lookupinteger(flookupkeyfieldno,
-                    flookupvaluefieldno,skey);
+                    flookupvaluefieldno,i64key);
        result.text:= realtytostr(int1,fformat);
       end;
-      lk_float: begin
-       rea1:= flookupbuffer.lookupfloat(flookupkeyfieldno,
-                    flookupvaluefieldno,skey);
-       result.text:= realtytostr(rea1,fformat)
+      lk_int64: begin
+       int641:= flookupbuffer.lookupint64(flookupkeyfieldno,
+                    flookupvaluefieldno,i64key);
+       result.text:= realtytostr(int641,fformat);
       end;
-      lk_date,lk_datetime: begin
-       rea1:= flookupbuffer.lookupfloat(flookupkeyfieldno,
-                    flookupvaluefieldno,skey);
-       result.text:= mseformatstr.datetimetostring(rea1,fformat);
-      end;
-      lk_time: begin
-       rea1:= flookupbuffer.lookupfloat(flookupkeyfieldno,
-                    flookupvaluefieldno,skey);
-       result.text:= mseformatstr.timetostring(rea1,fformat);
+      lk_float,lk_time,lk_date,lk_datetime: begin
+       dofloat(flookupbuffer.lookupfloat(flookupkeyfieldno,
+                    flookupvaluefieldno,i64key));
       end;
      end;
     end
     else begin
-     ikey:= fdatalink.field.asinteger;
-     case flookupkind of
-      lk_text: begin
-       result.text:= fformat + flookupbuffer.lookuptext(flookupkeyfieldno,
-                    flookupvaluefieldno,ikey);
+     if fdatalink.ismsestring then begin
+      skey:= tmsestringfield(fdatalink.field).asmsestring;
+      case flookupkind of
+       lk_text: begin
+        result.text:= fformat + flookupbuffer.lookuptext(flookupkeyfieldno,
+                     flookupvaluefieldno,skey);
+       end;
+       lk_integer: begin
+        int1:= flookupbuffer.lookupinteger(flookupkeyfieldno,
+                     flookupvaluefieldno,skey);
+        result.text:= realtytostr(int1,fformat);
+       end;
+       lk_int64: begin
+        int641:= flookupbuffer.lookupint64(flookupkeyfieldno,
+                     flookupvaluefieldno,skey);
+        result.text:= realtytostr(int641,fformat);
+       end;
+       lk_float,lk_time,lk_date,lk_datetime: begin
+        dofloat(flookupbuffer.lookupfloat(flookupkeyfieldno,
+                     flookupvaluefieldno,skey));
+       end;
       end;
-      lk_integer: begin
-       int1:= flookupbuffer.lookupinteger(flookupkeyfieldno,
-                    flookupvaluefieldno,ikey);
-       result.text:= realtytostr(int1,fformat);
-      end;
-      lk_float: begin
-       rea1:= flookupbuffer.lookupfloat(flookupkeyfieldno,
-                    flookupvaluefieldno,ikey);
-       result.text:= realtytostr(rea1,fformat)
-      end;
-      lk_date,lk_datetime: begin
-       rea1:= flookupbuffer.lookupfloat(flookupkeyfieldno,
-                    flookupvaluefieldno,ikey);
-       result.text:= mseformatstr.datetimetostring(rea1,fformat);
-      end;
-      lk_time: begin
-       rea1:= flookupbuffer.lookupfloat(flookupkeyfieldno,
-                    flookupvaluefieldno,ikey);
-       result.text:= mseformatstr.timetostring(rea1,fformat);
+     end
+     else begin
+      ikey:= fdatalink.field.asinteger;
+      case flookupkind of
+       lk_text: begin
+        result.text:= fformat + flookupbuffer.lookuptext(flookupkeyfieldno,
+                     flookupvaluefieldno,ikey);
+       end;
+       lk_integer: begin
+        int1:= flookupbuffer.lookupinteger(flookupkeyfieldno,
+                     flookupvaluefieldno,ikey);
+        result.text:= realtytostr(int1,fformat);
+       end;
+       lk_int64: begin
+        int641:= flookupbuffer.lookupint64(flookupkeyfieldno,
+                     flookupvaluefieldno,ikey);
+        result.text:= realtytostr(int641,fformat);
+       end;
+       lk_float,lk_time,lk_date,lk_datetime: begin
+        dofloat(flookupbuffer.lookupfloat(flookupkeyfieldno,
+                     flookupvaluefieldno,ikey));
+       end;
       end;
      end;
     end;

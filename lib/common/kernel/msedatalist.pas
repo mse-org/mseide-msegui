@@ -629,6 +629,7 @@ procedure checkarrayindex(const value; const index: integer);
 
 function comparepointer(const l,r): integer;
 function compareinteger(const l,r): integer;
+function compareint64(const l,r): integer;
 function comparerealty(const l,r): integer;
 function compareasciistring(const l,r): integer;
 function compareiasciistring(const l,r): integer;
@@ -1520,6 +1521,11 @@ end;
 function compareinteger(const l,r): integer;
 begin
  result:= integer(l) - integer(r);
+end;
+
+function compareint64(const l,r): integer;
+begin
+ result:= int64(l) - int64(r);
 end;
 
 procedure doquicksortarray(var info: sortinfoty; l, r: Integer);
