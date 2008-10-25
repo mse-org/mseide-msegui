@@ -10930,7 +10930,7 @@ begin
   fstate:= fstate - [tws_posvalid,tws_sizevalid];
   fillchar(gc,sizeof(gcty),0);
   guierror(gui_creategc(fwindow.id,gck_screen,gc),self);
-  gc.size:= fowner.fwidgetrect.size;
+  gc.paintdevicesize:= fowner.fwidgetrect.size;
   fcanvas.linktopaintdevice(fwindow.id,gc{,fowner.fwidgetrect.size},nullpoint);
 //  finalize(gc);
 //  fillchar(gc,sizeof(gcty),0);

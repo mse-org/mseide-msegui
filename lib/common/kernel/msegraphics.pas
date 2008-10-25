@@ -174,7 +174,7 @@ type
   refgc: cardinal; //for windowsmetafile
   drawingflags: drawingflagsty;
   cliporigin: pointty;
-  size: sizety;
+  paintdevicesize: sizety;
   ppmm: real;
   platformdata: array[0..23] of cardinal; //platform dependent
  end;
@@ -1735,7 +1735,7 @@ begin
  if fcanvas <> nil then begin
   fillchar(gc,sizeof(gcty),0);
   gc.drawingflags:= [df_canvasispixmap];
-  gc.size:= fsize;
+  gc.paintdevicesize:= fsize;
   if pms_monochrome in fstate then begin
    include(gc.drawingflags,df_canvasismonochrome);
   end;
@@ -4254,7 +4254,7 @@ end;
 
 function tcanvas.defaultcliprect: rectty;
 begin
- result:= makerect(nullpoint,fdrawinfo.gc.size);
+ result:= makerect(nullpoint,fdrawinfo.gc.paintdevicesize);
 end;
 
 procedure tcanvas.checkregionstate;

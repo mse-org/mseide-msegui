@@ -2077,7 +2077,7 @@ begin
   fillchar(gc1,sizeof(gc1),0);
   gc1.handle:= cardinal(invalidgchandle);
   gc1.drawingflags:= [df_highresfont];
-  gc1.size:= getwindowsize;
+  gc1.paintdevicesize:= getwindowsize;
   linktopaintdevice(ptrint(self),gc1,{getwindowsize,}nullpoint);
  end;
 end;

@@ -659,7 +659,7 @@ end;
 
 function tcustomprinter.getsize: sizety;
 begin
- result:= fcanvas.fdrawinfo.gc.size;
+ result:= fcanvas.fdrawinfo.gc.paintdevicesize;
 end;
 
 procedure tcustomprinter.endprint;
@@ -765,7 +765,7 @@ end;
 function tcustomprintercanvas.defaultcliprect: rectty;
 begin
  result.pos:= nullpoint;
- result.size:= fdrawinfo.gc.size;
+ result.size:= fdrawinfo.gc.paintdevicesize;
  with result do begin
   if cx > cy then begin 
       //quadratic because of cliprectinit with later orientation switch
@@ -787,14 +787,14 @@ begin
    fgcscale:= mmtoprintscale/ppmm; //map to printerunits
 
    if fprintorientation = pao_landscape then begin
-    fdrawinfo.gc.size.cx:= round(fpa_height * ppmm);
-    fdrawinfo.gc.size.cy:= round(fpa_width * ppmm);
+    fdrawinfo.gc.paintdevicesize.cx:= round(fpa_height * ppmm);
+    fdrawinfo.gc.paintdevicesize.cy:= round(fpa_width * ppmm);
     fgcoffsetx:= mmtoprintscale * fpa_frameleft;
     fgcoffsety:= - fpa_frametop*mmtoprintscale;
    end
    else begin
-    fdrawinfo.gc.size.cx:= round(fpa_width * ppmm);
-    fdrawinfo.gc.size.cy:= round(fpa_height * ppmm);
+    fdrawinfo.gc.paintdevicesize.cx:= round(fpa_width * ppmm);
+    fdrawinfo.gc.paintdevicesize.cy:= round(fpa_height * ppmm);
     fgcoffsetx:= mmtoprintscale * fpa_frameleft;
     fgcoffsety:= (fpa_height-fpa_frametop)*mmtoprintscale;
    end;
@@ -802,22 +802,22 @@ begin
    if fprintorientation = pao_landscape then begin
     fboundingbox.left:= round(fpa_frametop*mmtoprintscale);
     fboundingbox.bottom:= round(fpa_frameleft*mmtoprintscale);
-    fboundingbox.right:= round((fdrawinfo.gc.size.cy/ppmm-fpa_framebottom)*
+    fboundingbox.right:= round((fdrawinfo.gc.paintdevicesize.cy/ppmm-fpa_framebottom)*
                                                                mmtoprintscale);
-    fboundingbox.top:= round((fdrawinfo.gc.size.cx/ppmm-fpa_frameright)*
+    fboundingbox.top:= round((fdrawinfo.gc.paintdevicesize.cx/ppmm-fpa_frameright)*
                                                                mmtoprintscale);
    end
    else begin
     fboundingbox.left:= round(fpa_frameleft*mmtoprintscale);
     fboundingbox.bottom:= round(fpa_framebottom*mmtoprintscale);
-    fboundingbox.right:= round((fdrawinfo.gc.size.cx/ppmm-fpa_frameright)*
+    fboundingbox.right:= round((fdrawinfo.gc.paintdevicesize.cx/ppmm-fpa_frameright)*
                                                                mmtoprintscale);
-    fboundingbox.top:= round((fdrawinfo.gc.size.cy/ppmm-fpa_frametop)*
+    fboundingbox.top:= round((fdrawinfo.gc.paintdevicesize.cy/ppmm-fpa_frametop)*
                                                                mmtoprintscale);
    end;
-   fclientsize.cx:= fdrawinfo.gc.size.cx - round((fpa_frameleft+fpa_frameright)*
+   fclientsize.cx:= fdrawinfo.gc.paintdevicesize.cx - round((fpa_frameleft+fpa_frameright)*
                                                                ppmm);
-   fclientsize.cy:= fdrawinfo.gc.size.cy - round((fpa_frametop+fpa_framebottom)*
+   fclientsize.cy:= fdrawinfo.gc.paintdevicesize.cy - round((fpa_frametop+fpa_framebottom)*
                                                                ppmm);
   end;
  end;
