@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -155,6 +155,9 @@ type
                   const scanner: tscanner) of object;
  scannerclassty = class of tscanner;
 
+ tdefineslist = class(thashedstrings);
+ defstatety = (def_none,def_skip);
+
  tparser = class (tnullinterfacedobject)
   private
    fcasesensitive: boolean;
@@ -178,7 +181,12 @@ type
    procedure enterinclude(anum: cardinal);
    function exitinclude: boolean;
               //false if root
-  protected
+   fdefines: tdefineslist;
+   fdefstate: defstatety;
+   fdefstates: integerarty;
+   fdefstatecount: integer;
+   fstartdefines: stringarty;
+ protected
    fscanners: scannerarty;
    fsyntaxerrorcount: integer;
    fto: ptokenty;
@@ -285,6 +293,7 @@ type
                           write fongetincludefile;
    property includefiledirs: filenamearty read fincludefiledirs 
                           write fincludefiledirs;
+   property startdefines: stringarty read fstartdefines write fstartdefines;
  end;
 
 type
@@ -328,20 +337,11 @@ type
   'read','write','stored','default','nodefault');
 
 type
- tdefineslist = class(thashedstrings);
- defstatety = (def_none,def_skip);
  
  tpascalparser = class(tparser)
-  private
-   fdefines: tdefineslist;
-   fdefstate: defstatety;
-   fdefstates: integerarty;
-   fdefstatecount: integer;
-   fstartdefines: stringarty;
   protected
-   function getscannerclass: scannerclassty; override;
-   
-
+   fnoautoparse: boolean;
+   function getscannerclass: scannerclassty; override;  
   public
    constructor create(const afilelist: tmseindexednamelist); override;
    destructor destroy; override;
@@ -361,7 +361,6 @@ type
    function checkclassident(const ident: pascalidentty): boolean; //true if ok
    function getpropertyident: pascalidentty;      //-1 if none
    function checkpropertyident(const ident: pascalidentty): boolean; //true if ok
-   property startdefines: stringarty read fstartdefines write fstartdefines;
  end;
 
  cidentty = (cid_invalid = 1,
@@ -675,6 +674,7 @@ end;
 
 constructor tparser.create(const afilelist: tmseindexednamelist);
 begin
+ fdefines:= tdefineslist.create;
  ffilelist:= afilelist;
  flastvalidident:= bigint;
  setlength(fincludefiledirs,1);
@@ -700,6 +700,7 @@ begin
  if fownsscanner then begin
   fscanner.Free;
  end;
+ fdefines.free;
 end;
 
 procedure tparser.reset;
@@ -2003,14 +2004,12 @@ end;
 
 constructor tpascalparser.create(const afilelist: tmseindexednamelist);
 begin
- fdefines:= tdefineslist.create;
  inherited;
  flastvalidident:= lastpascalnormalident;
 end;
 
 destructor tpascalparser.destroy;
 begin
- fdefines.free;
  inherited;
 end;
 

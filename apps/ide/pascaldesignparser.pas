@@ -31,7 +31,6 @@ type
     fimplementation: boolean;
     finterface: boolean;
     finterfaceonly: boolean;
-    fnoautoparse: boolean;
    protected
     function skipexpression: boolean;
     procedure parsetype;
@@ -67,7 +66,7 @@ function findclassinfobyinstance(const ainstance: tmsecomponent;
                                  const infopo: punitinfoty): pclassinfoty;
 function isemptysourcepos(const apos: sourceposty): boolean;
 function isinrowrange(const apos,startpos,endpos: sourceposty): boolean;
-procedure parsedef(const adef: pdefinfoty; out atext: string; out scope: tdeflist);
+procedure parsepascaldef(const adef: pdefinfoty; out atext: string; out scope: tdeflist);
 
 implementation
 uses
@@ -76,7 +75,7 @@ type
  tdeflist1 = class(tdeflist);
  tusesinfolist1 = class(tusesinfolist);
  
-procedure parsedef(const adef: pdefinfoty; out atext: string; out scope: tdeflist);
+procedure parsepascaldef(const adef: pdefinfoty; out atext: string; out scope: tdeflist);
 var
  parser: tpascalparser;
 
@@ -1294,18 +1293,7 @@ begin
     end;
    end;
   end;
-  interfacecompiled:= true;
-  if isprogram or not finterfaceonly then begin
-   implementationcompiled:= true;
-  end;
-  sourceend:= sourcepos;
-  setlength(sourcefiles,length(fscanners));
-  for int1:= 0 to high(fscanners) do begin
-   sourcefiles[int1].filename:= fscanners[int1].filename;
-   sourcefiles[int1].startline:= fscanners[int1].startline;
-   sourcefiles[int1].count:= fscanners[int1].count;
-   sourcefiles[int1].includecount:= fscanners[int1].includecount;
-  end;
+  afterparse(self,funitinfopo^,isprogram or not finterfaceonly);
  end;
 end;
 

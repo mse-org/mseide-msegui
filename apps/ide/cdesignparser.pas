@@ -42,17 +42,25 @@ type
               const afilelist: tmseindexednamelist;
               const getincludefile: getincludefileeventty;
               const ainterfaceonly: boolean); overload;
-   constructor create(unitinfopo: punitinfoty;
-              const afilelist: tmseindexednamelist;
-              const getincludefile: getincludefileeventty;
-              const ainterfaceonly: boolean; const atext: ansistring); overload;
+   constructor create(const afilelist: tmseindexednamelist; 
+                 const atext: string); overload;
    procedure parse; override;  
    procedure clear; override;
  end;
+ 
+procedure parsecdef(const adef: pdefinfoty; out atext: string; out scope: tdeflist);
 
 implementation
-//uses
-// msedesigner;
+uses
+ sourceupdate;
+
+procedure parsecdef(const adef: pdefinfoty; out atext: string; out scope: tdeflist);
+begin
+ scope:= tdeflist.create(adef^.kind);
+ atext:= sourceupdater.getdefinfotext(adef);
+ if atext <> '' then begin
+ end;
+end;
  
 { tcdesignparser }
 
@@ -69,6 +77,14 @@ begin
  ongetincludefile:= getincludefile;
 end;
 
+constructor tcdesignparser.create(const afilelist: tmseindexednamelist; 
+                 const atext: string);
+begin
+ fnoautoparse:= true;
+ inherited create(afilelist,atext);
+end;
+
+{
 constructor tcdesignparser.create(unitinfopo: punitinfoty;
               const afilelist: tmseindexednamelist;
               const getincludefile: getincludefileeventty;
@@ -77,7 +93,7 @@ begin
  create(unitinfopo,afilelist,getincludefile,ainterfaceonly);
  create(afilelist,atext);
 end;
-
+}
 function tcdesignparser.parsetypedef: boolean;
 begin
  result:= false;
@@ -137,22 +153,33 @@ function tcdesignparser.parsefunction: boolean;
 var
  lstr1,lstr2: lstringty;
  ch1: char;
+ pos1: sourceposty;
+ po1: pfunctioninfoty;
 begin
  inc(ffunctionlevel);
  result:= false;
  mark;
- if getorigname(lstr1) and getorigname(lstr2) then begin
-  if parsefunctionparams then begin
-   if checkoperator(';') then begin
-    result:= true;  //header
-   end
-   else begin
-    if testoperator('{') then begin
-     if parseblock then begin
-      result:= true;
+ pos1:= sourcepos;
+ with funitinfopo^ do begin
+  if getorigname(lstr1) and getorigname(lstr2) then begin
+   if parsefunctionparams then begin
+    if checkoperator(';') then begin
+     result:= true;  //header
+    end
+    else begin
+     if testoperator('{') then begin
+      po1:= c.functions.newitem;
+      if parseblock then begin
+       result:= true;
+       po1^.name:= lstringtostring(lstr2);
+       deflist.add(pos1,sourcepos,po1);
+      end;
+      if not result then begin
+       c.functions.deletelast;
+      end;
      end;
-    end;
-   end;    
+    end;    
+   end;
   end;
  end;
  if result then begin
@@ -212,9 +239,14 @@ end;
 procedure tcdesignparser.parse;
 begin
  inherited;
+ if fnoautoparse then begin
+  exit;
+ end;
+ initcompinfo(funitinfopo^);
  while not eof do begin
   parsestatement;
  end;
+ afterparse(self,funitinfopo^,true);
 end;
 
 procedure tcdesignparser.clear;

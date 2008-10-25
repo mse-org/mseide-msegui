@@ -24,15 +24,9 @@ uses
  msetypes,msestrings,pascaldesignparser,cdesignparser,
  msestream,mseparser,msesyntaxedit,mselist,msehash,msedesignparser;
 
-type
- tunitinfoty = class
-  public
-   info: unitinfoty;
-   constructor create;
-   destructor destroy; override;
-   function infopo: punitinfoty;
- end;
- unitinfoaty = array[0..0] of tunitinfoty;
+type 
+ 
+ unitinfoaty = array[0..0] of tunitinfo;
  punitinfoaty = ^unitinfoaty;
  unitinfopoarty = array of punitinfoty;
 
@@ -60,7 +54,7 @@ type
    destructor destroy; override;
    procedure clear; override;
    function datapo: punitinfoaty; reintroduce;
-   function newitem: punitinfoty;
+   function newitem(const lang: proglangty): punitinfoty;
    property itempo[const index: integer]: punitinfoty read getitempo; default;
    function finditembyformfilename(const afilename: filenamety): punitinfoty;
    function finditembysourcefilename(const afilename: filenamety;
@@ -116,6 +110,10 @@ type
    procedure aftermake(const adesigner: idesigner; const exitcode: integer);
 
    procedure getincludefile(const sender: tparser; const scanner: tscanner);
+   procedure updatepascalunit(const infopo: punitinfoty;
+                          const interfaceonly: boolean); overload;
+   procedure updatecunit(const infopo: punitinfoty;
+                          const interfaceonly: boolean); overload;
    procedure updateunit(const infopo: punitinfoty;
                           const interfaceonly: boolean); overload;
    function composeproceduretext(const name: string; const info: methodparaminfoty;
@@ -230,6 +228,19 @@ implementation
 uses
  sysutils,msesys,msefileutils,sourceform,sourcepage,projectoptionsform,
  msegui,msedatalist;
+
+function findprogramlanguage(const afilename: filenamety): proglangty;
+var
+ mstr1: msestring;
+begin
+ mstr1:= mseuppercase(fileext(afilename));
+ if (mstr1 = 'C') or (mstr1 = 'H') then begin
+  result:= pl_c;
+ end
+ else begin
+  result:= pl_pascal;
+ end;
+end;
 
 function limitlinelength(const atext: msestring; const maxlength: integer;
                const breakchars: msestring; const indent: integer;
@@ -514,39 +525,6 @@ begin
  end;
 end;
 
-{ tunitinfoty }
-
-constructor tunitinfoty.create;
-begin
- with info do begin
-  p.procedurelist:= tprocedureinfolist.create;
-  p.classinfolist:= tclassinfolist.create;
-  p.interfaceuses:= tusesinfolist.create(false);
-  p.implementationuses:= tusesinfolist.create(true);
-//  identuselist:= tidentuselist.create;
-  deflist:= trootdeflist.create(@info);
- end;
-end;
-
-destructor tunitinfoty.destroy;
-begin
- with info do begin
-  p.procedurelist.Free;
-  p.classinfolist.Free;
-  p.interfaceuses.Free;
-  p.implementationuses.Free;
-  itemlist.free;
-//  identuselist.free;
-  deflist.Free;
- end;
- inherited;
-end;
-
-function tunitinfoty.infopo: punitinfoty;
-begin
- result:= @info;
-end;
-
 { tunitinfolist }
 
 constructor tunitinfolist.create;
@@ -572,19 +550,28 @@ begin
  result:= punitinfoaty(inherited datapo);
 end;
 
-function tunitinfolist.newitem: punitinfoty;
+function tunitinfolist.newitem(const lang: proglangty): punitinfoty;
 var
- aitem: tunitinfoty;
+ aitem: tunitinfo;
 begin
- aitem:= tunitinfoty.create;
+ case lang of
+  pl_pascal: begin
+   aitem:= tpascalunitinfo.create;
+  end;
+  pl_c: begin
+   aitem:= tcunitinfo.create;
+  end;
+  else begin
+   aitem:= tunitinfo.create;
+  end;
+ end;
  add(aitem);
  result:= aitem.infopo;
 end;
 
 function tunitinfolist.getitempo(const index: integer): punitinfoty;
 begin
- result:= @tunitinfoty(items[index]).info;
-// result:= punitinfoty(inherited getitempo(index));
+ result:= @tunitinfo(items[index]).info;
 end;
 
 function tunitinfolist.finditembyformfilename(const afilename: filenamety): punitinfoty;
@@ -601,23 +588,7 @@ begin
   end;
  end;
 end;
-{
-function tunitinfolist.finditembyformfilename(const afilename: filenamety): punitinfoty;
-var
- po1: punitinfoty;
- int1: integer;
-begin
- result:= nil;
- po1:= datapo;
- for int1:= 0 to fcount - 1 do begin
-  if issamefilename(afilename,po1^.formfilename) then begin
-   result:= po1;
-   break;
-  end;
-  inc(po1);
- end;
-end;
-}
+
 function tunitinfolist.finditembysourcefilename(const afilename: filenamety;
                     var filenum: integer): punitinfoty;
 var
@@ -724,14 +695,18 @@ begin
  with infopo^ do begin
   if itemlist = nil then begin
    itemlist:= tsourceitemlist.create;
-   p.interfaceuses.getsourceitems(itemlist);
-   p.implementationuses.getsourceitems(itemlist);
-//   identuselist.getsourceitems(itemlist);
-//   int1:= length(includestatements);
-   for int1:= 0 to high(includestatements) do begin
-    with includestatements[int1] do begin
-     with itemlist.newitem(startpos,endpos,sik_include)^ do begin
-      index:= int1;
+   case proglang of
+    pl_c: begin
+    end;
+    else begin
+     p.interfaceuses.getsourceitems(itemlist);
+     p.implementationuses.getsourceitems(itemlist);
+     for int1:= 0 to high(includestatements) do begin
+      with includestatements[int1] do begin
+       with itemlist.newitem(startpos,endpos,sik_include)^ do begin
+        index:= int1;
+       end;
+      end;
      end;
     end;
    end;
@@ -851,7 +826,14 @@ begin
    end;
    syk_typedef,syk_vardef,syk_classdef,syk_procdef,syk_classprocimp,
                          syk_procimp: begin
-    parsedef(po1,str1,list1);
+    case infopo^.proglang of
+     pl_c: begin
+      parsecdef(po1,str1,list1);
+     end
+     else begin
+      parsepascaldef(po1,str1,list1);
+     end;
+    end;
     pos1.line:= apos.line - po1^.pos.line;
     if pos1.line = 0 then begin
      pos1.pos.col:= apos.pos.col - po1^.pos.pos.col;
@@ -1952,7 +1934,7 @@ begin
  end;
 end;
 
-procedure tsourceupdater.updateunit(const infopo: punitinfoty; 
+procedure tsourceupdater.updatepascalunit(const infopo: punitinfoty; 
                                              const interfaceonly: boolean);
 var
  scanner: tpascalscanner;
@@ -1963,11 +1945,13 @@ var
  ar3: msestringarty;
 begin
  ar3:= nil; //compiler warning
+ {
  if not infopo^.interfacecompiled or
        not infopo^.implementationcompiled and not interfaceonly then begin
   if infopo^.unitname <> '' then begin
    funitinfolist.fnamelist.delete(infopo^.unitname);
   end;
+  }
   scanner:= tpascalscanner.Create;
   application.beginwait;
   try
@@ -1998,15 +1982,90 @@ begin
     setlength(ar1,int3);
     parser.startdefines:= ar1;
     parser.scanner:= scanner;
+    {
     if infopo^.unitname <> '' then begin
      funitinfolist.fnamelist.add(infopo^.unitname,infopo);
     end;
+    }
    finally
     parser.Free;
    end;
   finally
    scanner.Free;
    application.endwait;
+  end;
+// end;
+end;
+
+procedure tsourceupdater.updatecunit(const infopo: punitinfoty; 
+                                             const interfaceonly: boolean);
+var
+ scanner: tcscanner;
+ parser: tcdesignparser;
+ infile: ttextstream;
+ int1,int2,int3: integer;
+ ar1: stringarty;
+ ar3: msestringarty;
+begin
+ ar3:= nil; //compiler warning
+  scanner:= tcscanner.Create;
+  application.beginwait;
+  try
+   infile:= sourcefo.gettextstream(infopo^.sourcefilename,false);
+   scanner.setfilename(infopo^.sourcefilename,designer.designfiles);
+   try
+    scanner.source:= infile.readdatastring;
+   finally
+    infile.Free;
+   end;
+   parser:= tcdesignparser.create(infopo,designer.designfiles,
+               {$ifdef FPC}@{$endif}getincludefile,interfaceonly);
+   try
+    parser.includefiledirs:= projectoptions.texp.sourcedirs;
+    ar1:= nil;
+    int3:= 0;
+    for int1:= 0 to high(projectoptions.texp.defines) do begin
+     if int1 > high(projectoptions.defineson) then begin
+      break;
+     end;
+     if projectoptions.defineson[int1] then begin
+      ar3:= splitstring(projectoptions.texp.defines[int1],msechar(' '));
+      for int2:= 0 to high(ar3) do begin
+       additem(ar1,string(ar3[int2]),int3);
+      end;
+     end;
+    end;
+    setlength(ar1,int3);
+    parser.startdefines:= ar1;
+    parser.scanner:= scanner;
+   finally
+    parser.Free;
+   end;
+  finally
+   scanner.Free;
+   application.endwait;
+  end;
+// end;
+end;
+
+procedure tsourceupdater.updateunit(const infopo: punitinfoty; 
+                                             const interfaceonly: boolean);
+begin
+ if not infopo^.interfacecompiled or
+       not infopo^.implementationcompiled and not interfaceonly then begin
+  if infopo^.unitname <> '' then begin
+   funitinfolist.fnamelist.delete(infopo^.unitname);
+  end;
+  case infopo^.proglang of
+   pl_c: begin
+    updatecunit(infopo,interfaceonly);
+   end
+   else begin
+    updatepascalunit(infopo,interfaceonly);
+   end;
+  end;
+  if infopo^.unitname <> '' then begin
+   funitinfolist.fnamelist.add(infopo^.unitname,infopo);
   end;
  end;
 end;
@@ -2027,7 +2086,7 @@ function tsourceupdater.updateformunit(const aformfilename: filenamety;
 begin
  result:= funitinfolist.finditembyformfilename(aformfilename);
  if result = nil then begin
-  result:= funitinfolist.newitem;
+  result:= funitinfolist.newitem(pl_pascal);
   with result^ do begin
    formfilename:= aformfilename;
    sourcefilename:= replacefileext(aformfilename,'pas');
@@ -2058,7 +2117,7 @@ function tsourceupdater.updatesourceunit(const asourcefilename: filenamety;
 begin
  result:= funitinfolist.finditembysourcefilename(asourcefilename,filenum);
  if result = nil then begin
-  result:= funitinfolist.newitem;
+  result:= funitinfolist.newitem(findprogramlanguage(asourcefilename));
   with result^ do begin
    formfilename:= replacefileext(asourcefilename,'mfm');
    sourcefilename:= asourcefilename;

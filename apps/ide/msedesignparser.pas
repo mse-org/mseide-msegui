@@ -206,6 +206,19 @@ type
     function getunitdeflist(const aunitname: string): trootdeflist; overload;
     property unitnames[const index: integer]: string read getunitnames;
   end;
+  
+// c parser
+
+  functionheaderinfoty = record
+   b: browserlistitemty;
+  end;
+  pfunctionheaderinfoty = ^functionheaderinfoty;
+
+  functioninfoty = record
+   b: browserlistitemty;
+   name: ansistring;
+  end;
+  pfunctioninfoty = ^functioninfoty;
 
   identuseinfoty = record
    b: browserlistitemty;
@@ -347,6 +360,8 @@ type
                       const astart,astop: sourceposty): pdefinfoty; overload;
     function add(const apos,astop: sourceposty; 
                       const aprocinfo: pprocedureinfoty): pdefinfoty; overload;
+    function add(const apos,astop: sourceposty; 
+                      const afunctioninfo: pfunctioninfoty): pdefinfoty; overload;
     procedure deletenode;
     function finddef(const anamepath: stringarty; var scopes: deflistarty;
                var defs: definfopoarty;
@@ -364,29 +379,30 @@ type
 
   includestatementarty = array of includestatementty;
 
-  functionheaderinfoty = record
-   b: browserlistitemty;
-  end;
-
-  functioninfoty = record
-   b: browserlistitemty;
-  end;
-  
   tfunctionheaders= class(tbrowserlist)
+   private
+    function getitempo(const index: integer): pfunctionheaderinfoty;
    public
     constructor create;
+    property items[const index: integer]: pfunctionheaderinfoty
+                                                read getitempo; default;
   end;
   
   tfunctions = class(tbrowserlist)
+   private
+    function getitempo(const index: integer): pfunctioninfoty;
+   protected
+    procedure finalizerecord(var item); override;
    public
     constructor create;
+    property items[const index: integer]: pfunctioninfoty 
+                                                 read getitempo; default;
   end;
   
   cunitinfoty = record
    functionheaders: tfunctionheaders;
    functions: tfunctions;
-  end;
- 
+  end; 
 
   pascalunitinfoty = record
    procedurelist: tprocedureinfolist;
@@ -422,11 +438,33 @@ type
      (c: cunitinfoty);
   end;
 
+ tunitinfo = class
+  public
+   info: unitinfoty;
+   constructor create;
+   destructor destroy; override;
+   function infopo: punitinfoty;
+ end;
+ 
+ tpascalunitinfo = class(tunitinfo)
+  public
+   constructor create;
+   destructor destroy; override;
+ end;
+
+ tcunitinfo = class(tunitinfo)
+  public
+   constructor create;
+   destructor destroy; override;
+ end;
+
 function parametersmatch(const a: ptypeinfo; const b: methodparaminfoty): boolean;
 procedure getmethodparaminfo(const atype: ptypeinfo; var info: methodparaminfoty);
 function splitidentpath(const atext: string): stringarty;
 function mangleprocparams(const aparams: methodparaminfoty): string;
 procedure initcompinfo(var info: unitinfoty);
+procedure afterparse(const sender: tparser; var unitinfo: unitinfoty;
+                        const aimplementationcompiled: boolean);
 
 var
  updateunitinterface: function(const unitname: string): punitinfoty of object;
@@ -437,31 +475,58 @@ implementation
 uses
  {sourceupdate,}sysutils;
 {$ifdef FPC}{$goto on}{$endif}
- 
+type
+ tparser1 = class(tparser);
+  
 procedure initcompinfo(var info: unitinfoty);
 begin
  with info do begin
+  case proglang of
+   pl_pascal: begin
+    p.procedurelist.clear;
+    p.classinfolist.clear;
+    p.interfaceuses.clear;
+    p.implementationuses.clear;
+    p.implementationstart.filenum:= 0;
+    p.implementationend.filenum:= 0;
+    p.initializationstart.filenum:= 0;
+    p.finalizationstart.filenum:= 0;
+   end;
+   pl_c: begin
+    c.functionheaders.clear;   
+    c.functions.clear;   
+   end;
+  end;
   interfacecompiled:= false;
   implementationcompiled:= false;
   isprogram:= false;
   freeandnil(itemlist);
   deflist.clear;
-  p.procedurelist.clear;
-  p.classinfolist.clear;
-  p.interfaceuses.clear;
-  p.implementationuses.clear;
   unitname:= '';
   origunitname:= '';
-//  formfilename: filenamety;
-//   sourcefilename: filenamety;
-  p.implementationstart.filenum:= 0;
-  p.implementationend.filenum:= 0;
   unitend.filenum:= 0;
-  p.initializationstart.filenum:= 0;
-  p.finalizationstart.filenum:= 0;
   sourceend.filenum:= 0;
   sourcefiles:= nil;
   includestatements:= nil;
+ end;
+end;
+
+procedure afterparse(const sender: tparser; var unitinfo: unitinfoty;
+                        const aimplementationcompiled: boolean);
+var
+ int1: integer;
+begin
+ with tparser1(sender),unitinfo do begin
+  interfacecompiled:= true;
+  implementationcompiled:= aimplementationcompiled;
+  sourceend:= sourcepos;
+  setlength(sourcefiles,length(fscanners));
+  for int1:= 0 to high(fscanners) do begin
+   sourcefiles[int1].filename:= fscanners[int1].filename;
+   sourcefiles[int1].startline:= fscanners[int1].startline;
+   sourcefiles[int1].count:= fscanners[int1].count;
+   sourcefiles[int1].includecount:= fscanners[int1].includecount;
+  end;
  end;
 end;
 
@@ -1617,6 +1682,13 @@ begin
  result^.procindex:= aprocinfo^.b.index;
 end;
 
+function trootdeflist.add(const apos,astop: sourceposty; 
+         const afunctioninfo: pfunctioninfoty): pdefinfoty;
+begin
+ result:= factnode.add(afunctioninfo^.name,syk_procdef,apos,astop);
+ result^.procindex:= afunctioninfo^.b.index;
+end;
+
 function trootdeflist.finddef(const anamepath: stringarty; var scopes: deflistarty;
                var defs: definfopoarty;
                const first: boolean; // break if first found
@@ -1739,11 +1811,95 @@ begin
  inherited create(sizeof(functionheaderinfoty));
 end;
 
+function tfunctionheaders.getitempo(const index: integer): pfunctionheaderinfoty;
+begin
+ result:= pfunctionheaderinfoty(inherited getitempo(index));
+end;
+
 { tfunctions }
 
 constructor tfunctions.create;
 begin
- inherited create(sizeof(functioninfoty));
+ inherited create(sizeof(functioninfoty),[rels_needsfinalize]);
+end;
+
+function tfunctions.getitempo(const index: integer): pfunctioninfoty;
+begin
+ result:= pfunctioninfoty(inherited getitempo(index));
+end;
+
+procedure tfunctions.finalizerecord(var item);
+begin
+ finalize(functioninfoty(item));
+end;
+
+{ tunitinfo }
+
+function tunitinfo.infopo: punitinfoty;
+begin
+ result:= @info;
+end;
+
+constructor tunitinfo.create;
+begin
+ with info do begin
+  deflist:= trootdeflist.create(@info);
+ end;
+end;
+
+destructor tunitinfo.destroy;
+begin
+ with info do begin
+  itemlist.free;
+  deflist.Free;
+ end;
+ inherited;
+end;
+
+{ tpascalunitinfo }
+
+constructor tpascalunitinfo.create;
+begin
+ inherited;
+ with info do begin
+  proglang:= pl_pascal;
+  p.procedurelist:= tprocedureinfolist.create;
+  p.classinfolist:= tclassinfolist.create;
+  p.interfaceuses:= tusesinfolist.create(false);
+  p.implementationuses:= tusesinfolist.create(true);
+ end;
+end;
+
+destructor tpascalunitinfo.destroy;
+begin
+ with info do begin
+  p.procedurelist.Free;
+  p.classinfolist.Free;
+  p.interfaceuses.Free;
+  p.implementationuses.Free;
+ end;
+ inherited;
+end;
+
+{ tcunitinfo }
+
+constructor tcunitinfo.create;
+begin
+ inherited;
+ with info do begin
+  proglang:= pl_c;
+  c.functionheaders:= tfunctionheaders.create;
+  c.functions:= tfunctions.create;
+ end;
+end;
+
+destructor tcunitinfo.destroy;
+begin
+ with info do begin
+  c.functionheaders.free;
+  c.functions.free;
+ end;
+ inherited;
 end;
 
 end.
