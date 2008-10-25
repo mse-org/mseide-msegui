@@ -1172,8 +1172,8 @@ begin
    result:= gue_createmetafilegc;
    wrect1.left:= 0;
    wrect1.top:= 0;
-   wrect1.right:= round((gc.size.cx*100)/gc.ppmm);
-   wrect1.bottom:= round((gc.size.cy*100)/gc.ppmm);
+   wrect1.right:= round((gc.paintdevicesize.cx*100)/gc.ppmm);
+   wrect1.bottom:= round((gc.paintdevicesize.cy*100)/gc.ppmm);
    if aprintername = '' then begin
     gc.handle:= createenhmetafilew(gc.refgc,nil,@wrect1,nil); //memory
    end

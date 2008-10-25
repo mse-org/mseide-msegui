@@ -121,7 +121,7 @@ var
      exit;
     end;
     while not checkoperator(')') and not eof do begin
-     if not getnameorident(longint(ident1)) then begin
+     if not getnameorident(pinteger(@ident1)^) then begin
       exit;
      end;
      if ident1 = pid_case then begin
@@ -155,7 +155,7 @@ var
     end;
     pid_record: begin
      repeat
-      if not getnameorident(longint(ident1)) then begin
+      if not getnameorident(pinteger(@ident1)^) then begin
        nexttoken;
        break;
       end;

@@ -296,7 +296,7 @@ begin
  with tgdiprintcanvas(sender) do begin
   exclude(fstate,cs_pagestarted);
   fillchar(gc1,sizeof(gc1),0);
-  gc1.size:= getwindowsize;
+  gc1.paintdevicesize:= getwindowsize;
   gc1.ppmm:= ppmm; 
   include(gc1.drawingflags,df_highresfont);
   creategc(gc1,mstr1);
