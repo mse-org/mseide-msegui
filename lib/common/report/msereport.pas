@@ -1966,8 +1966,8 @@ end;
 
 function treptabulatoritem.getdisptext: richstringty;
 var
- key: integer;
- mstr1: msestring;
+ ikey: integer;
+ skey: msestring;
  int1: integer;
  rea1: realty; 
 begin
@@ -1976,32 +1976,62 @@ begin
   if flookupbuffer <> nil then begin
    try
     result.text:= '';
-    key:= fdatalink.field.asinteger;
-    case flookupkind of
-     lk_text: begin
-      result.text:= fformat + flookupbuffer.lookuptext(flookupkeyfieldno,
-                   flookupvaluefieldno,key);
+    if fdatalink.ismsestring then begin
+     skey:= tmsestringfield(fdatalink.field).asmsestring;
+     case flookupkind of
+      lk_text: begin
+       result.text:= fformat + flookupbuffer.lookuptext(flookupkeyfieldno,
+                    flookupvaluefieldno,skey);
+      end;
+      lk_integer: begin
+       int1:= flookupbuffer.lookupinteger(flookupkeyfieldno,
+                    flookupvaluefieldno,skey);
+       result.text:= realtytostr(int1,fformat);
+      end;
+      lk_float: begin
+       rea1:= flookupbuffer.lookupfloat(flookupkeyfieldno,
+                    flookupvaluefieldno,skey);
+       result.text:= realtytostr(rea1,fformat)
+      end;
+      lk_date,lk_datetime: begin
+       rea1:= flookupbuffer.lookupfloat(flookupkeyfieldno,
+                    flookupvaluefieldno,skey);
+       result.text:= mseformatstr.datetimetostring(rea1,fformat);
+      end;
+      lk_time: begin
+       rea1:= flookupbuffer.lookupfloat(flookupkeyfieldno,
+                    flookupvaluefieldno,skey);
+       result.text:= mseformatstr.timetostring(rea1,fformat);
+      end;
      end;
-     lk_integer: begin
-      int1:= flookupbuffer.lookupinteger(flookupkeyfieldno,
-                   flookupvaluefieldno,key);
-//      result.text:= inttostr(int1);
-      result.text:= realtytostr(int1,fformat);
-     end;
-     lk_float: begin
-      rea1:= flookupbuffer.lookupfloat(flookupkeyfieldno,
-                   flookupvaluefieldno,key);
-      result.text:= realtytostr(rea1,fformat)
-     end;
-     lk_date,lk_datetime: begin
-      rea1:= flookupbuffer.lookupfloat(flookupkeyfieldno,
-                   flookupvaluefieldno,key);
-      result.text:= mseformatstr.datetimetostring(rea1,fformat);
-     end;
-     lk_time: begin
-      rea1:= flookupbuffer.lookupfloat(flookupkeyfieldno,
-                   flookupvaluefieldno,key);
-      result.text:= mseformatstr.timetostring(rea1,fformat);
+    end
+    else begin
+     ikey:= fdatalink.field.asinteger;
+     case flookupkind of
+      lk_text: begin
+       result.text:= fformat + flookupbuffer.lookuptext(flookupkeyfieldno,
+                    flookupvaluefieldno,ikey);
+      end;
+      lk_integer: begin
+       int1:= flookupbuffer.lookupinteger(flookupkeyfieldno,
+                    flookupvaluefieldno,ikey);
+       result.text:= realtytostr(int1,fformat);
+      end;
+      lk_float: begin
+       rea1:= flookupbuffer.lookupfloat(flookupkeyfieldno,
+                    flookupvaluefieldno,ikey);
+       result.text:= realtytostr(rea1,fformat)
+      end;
+      lk_date,lk_datetime: begin
+       rea1:= flookupbuffer.lookupfloat(flookupkeyfieldno,
+                    flookupvaluefieldno,ikey);
+       result.text:= mseformatstr.datetimetostring(rea1,fformat);
+      end;
+      lk_time: begin
+       rea1:= flookupbuffer.lookupfloat(flookupkeyfieldno,
+                    flookupvaluefieldno,ikey);
+       result.text:= mseformatstr.timetostring(rea1,fformat);
+      end;
      end;
     end;
    except
@@ -4287,7 +4317,7 @@ procedure tcustomrecordband.paintxorpic(const acanvas: tcanvas;
                const apos: pointty; const aoffset: pointty;
                const aobjects: integerarty);
 begin
- acanvas.fillxorrect(makerect(aoffset.x+ftabs.linepos[aobjects[0]],0,
+ acanvas.fillxorrect(makerect(innerclientpos.x+aoffset.x+ftabs.linepos[aobjects[0]],0,
                                1,clientheight));
 end;
 

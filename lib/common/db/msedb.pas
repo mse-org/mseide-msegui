@@ -659,10 +659,10 @@ type
    fismsestring: boolean;
    fisstringfield: boolean;
    procedure setfieldname(const Value: string);
-   procedure updatefield;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
    procedure checkfield;
+   procedure updatefield;
    function GetAsBoolean: Boolean;
    procedure SetAsBoolean(const avalue: Boolean);
    function GetAsCurrency: Currency;
@@ -690,6 +690,7 @@ type
    function fieldactive: boolean;
    property field: tfield read ffield;
    property fieldname: string read ffieldname write setfieldname;
+   property ismsestring: boolean read fismsestring;
    property isstringfield: boolean read fisstringfield;
    
    property AsBoolean: Boolean read GetAsBoolean write SetAsBoolean;
