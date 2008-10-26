@@ -231,8 +231,8 @@ type
                                         write setfieldcountfloat;
    property fieldcountinteger: integer read getfieldcountinteger 
                                         write setfieldcountinteger;
-   property fieldcountint64: integer read getfieldcountinteger 
-                                        write setfieldcountinteger;
+   property fieldcountint64: integer read getfieldcountint64 
+                                        write setfieldcountint64;
    property integervalue[const fieldno,aindex: integer]: integer 
                                    read integervaluephys;
    property floatvalue[const fieldno,aindex: integer]: realty 
@@ -1584,6 +1584,9 @@ begin
        finally
         for int4:= 0 to high(fintegerdata) do begin
          setlength(fintegerdata[int4].data,int1);
+        end;
+        for int4:= 0 to high(fint64data) do begin
+         setlength(fint64data[int4].data,int1);
         end;
         for int4:= 0 to high(ftextdata) do begin
          setlength(ftextdata[int4].data,int1);

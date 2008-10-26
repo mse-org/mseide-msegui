@@ -261,6 +261,17 @@ type
    function empty(const index: integer): boolean; override;   //true wenn leer
  end;
 
+ tenum64datalist = class(tint64datalist)
+  private
+   fgetdefault: getint64eventty;
+   fdefaultval: int64;
+  protected
+   function getdefault: pointer; override;
+  public
+   constructor create(agetdefault: getint64eventty); reintroduce;
+   function empty(const index: integer): boolean; override;   //true wenn leer
+ end;
+
  tcomplexdatalist = class;
 
  trealdatalist = class(tdatalist)
@@ -3583,6 +3594,25 @@ begin
 end;
 
 function tenumdatalist.getdefault: pointer;
+begin
+ fdefaultval:= fgetdefault();
+ result:= @fdefaultval;
+end;
+
+{ tenum64datalist }
+
+constructor tenum64datalist.create(agetdefault: getint64eventty);
+begin
+ inherited create;
+ fgetdefault:= agetdefault;
+end;
+
+function tenum64datalist.empty(const index: integer): boolean;
+begin
+ result:= int64(getitempo(index)^) = fgetdefault();
+end;
+
+function tenum64datalist.getdefault: pointer;
 begin
  fdefaultval:= fgetdefault();
  result:= @fdefaultval;

@@ -46,6 +46,7 @@ type
                             const avalue: realty) of object;
 
  getintegereventty = function :integer of object;
+ getint64eventty = function :int64 of object;
  
  updateint64eventty = procedure(const sender: tobject; var avalue: int64) of object;
  

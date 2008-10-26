@@ -1850,6 +1850,22 @@ type
   published
    property dropdown: tlbdropdownlistcontroller read getdropdown write setdropdown;
  end;
+
+ tenum64editlb = class(tcustomdropdownlistedit,ilbdropdownlist)
+  private
+   function getdropdown: tlbdropdownlistcontroller;
+   procedure setdropdown(const avalue: tlbdropdownlistcontroller);
+  protected
+   fvalue1: int64;
+  protected
+   function createdropdowncontroller: tcustomdropdowncontroller; override;
+   function datatotext(const data): msestring; override;
+          //ilbdropdownlist
+   procedure recordselected(const arecordnum: integer; const akey: keyty);
+  published
+   property dropdown: tlbdropdownlistcontroller read getdropdown write setdropdown;
+   property value: int64 read fvalue1 write fvalue1;
+ end;
  
  tdbkeystringeditlb = class(tdbkeystringedit,ilbdropdownlist)
   private
@@ -7895,6 +7911,77 @@ begin
            flookupbuffer.find(int4,int1,int2) then begin
    result:= flookupbuffer.textvaluephys(int3,
                  flookupbuffer.integerindex(int4,int2));
+  end
+  else begin
+   result:= '';
+  end;
+ end;
+end;
+
+{ tenum64editlb }
+
+function tenum64editlb.getdropdown: tlbdropdownlistcontroller;
+begin
+ result:= tlbdropdownlistcontroller(fdropdown);
+end;
+
+procedure tenum64editlb.setdropdown(const avalue: tlbdropdownlistcontroller);
+begin
+ fdropdown.assign(avalue);
+end;
+
+function tenum64editlb.createdropdowncontroller: tcustomdropdowncontroller;
+begin
+ result:= tlbdropdownlistcontroller.create(ilbdropdownlist(self));
+end;
+
+procedure tenum64editlb.recordselected(const arecordnum: integer; const akey: keyty);
+var
+ bo1: boolean;
+begin
+ if arecordnum >= 0 then begin
+  with tlbdropdownlistcontroller(fdropdown) do begin
+   text:= flookupbuffer.textvaluephys(cols[0].ffieldno,arecordnum);
+   tdropdowncols1(fcols).fkeyvalue64:= 
+            flookupbuffer.int64valuephys(fkeyfieldno,arecordnum);
+  end; 
+  bo1:= checkvalue;
+ end
+ else begin
+  if arecordnum = -2 then begin //empty row selected
+   bo1:= checkvalue; 
+  end
+  else begin
+   feditor.undo;
+  end;
+ end;
+ if bo1 and (akey = key_tab) then begin
+  window.postkeyevent(akey);
+ end;
+end;
+var testvar: integer;
+function tenum64editlb.datatotext(const data): msestring;
+var
+ lint1: int64;
+ int2,int3,int4: integer;
+begin
+ if @data = nil then begin
+  lint1:= value;  
+ end
+ else begin
+  lint1:= int64(data);
+ end;
+ with tlbdropdownlistcontroller(fdropdown) do begin
+  int3:= cols[valuecol].ffieldno;
+  int4:= fkeyfieldno;
+ end;
+ with dropdown do begin
+  if (flookupbuffer <> nil) and (int3 < flookupbuffer.fieldcounttext) and
+           (int4 < flookupbuffer.fieldcountint64) and
+           flookupbuffer.find(int4,lint1,int2) then begin
+testvar:= flookupbuffer.count;
+   result:= flookupbuffer.textvaluephys(int3,
+                 flookupbuffer.int64index(int4,int2));
   end
   else begin
    result:= '';

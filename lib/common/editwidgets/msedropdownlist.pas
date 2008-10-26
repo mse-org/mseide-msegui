@@ -84,6 +84,7 @@ type
    procedure setrowcount(const avalue: integer);
   protected
    fitemindex: integer;
+   fkeyvalue64: integer;
    fkeyvalue: msestring;
    procedure setcount1(acount: integer; doinit: boolean); override;
    procedure createitem(const index: integer; var item: tpersistent); override;
