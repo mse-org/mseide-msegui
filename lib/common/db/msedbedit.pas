@@ -18,7 +18,7 @@ uses
  msewidgetgrid,msedatalist,msetypes,msegrids,msegraphics,mseevent,msekeyboard,
  msegraphedits,msestrings,{sqldb,}msegraphutils,mselist,msedropdownlist,
  msescrollbar,msedataedits,msewidgets,msearrayprops,msedb,mselookupbuffer,
- msedialog,mseinplaceedit,msemenus,mseedit;
+ msedialog,mseinplaceedit,msemenus,mseedit,msestat;
 
 type
 
@@ -1847,6 +1847,7 @@ type
    function datatotext(const data): msestring; override;
           //ilbdropdownlist
    procedure recordselected(const arecordnum: integer; const akey: keyty);
+  public
   published
    property dropdown: tlbdropdownlistcontroller read getdropdown write setdropdown;
  end;
@@ -1855,16 +1856,41 @@ type
   private
    function getdropdown: tlbdropdownlistcontroller;
    procedure setdropdown(const avalue: tlbdropdownlistcontroller);
+   function getgridvalue(const index: integer): int64;
+   procedure setgridvalue(const index: integer; aValue: int64);
+   function getgridvalues: int64arty;
+   procedure setgridvalues(const avalue: int64arty);
+   procedure setvalue(const avalue: int64);
+   fonsetvalue1: setint64eventty;
   protected
    fvalue1: int64;
-  protected
+   fvaluedefault: int64;
+   
+   function getdefaultvalue: pointer; override;
+   procedure texttovalue(var accept: boolean; const quiet: boolean); override;
+   procedure texttodata(const atext: msestring; var data); override;
+   procedure valuetogrid(const arow: integer); override;
+   procedure gridtovalue(const arow: integer); override;
+   procedure readstatvalue(const reader: tstatreader); override;
+   procedure writestatvalue(const writer: tstatwriter); override;
+
+   function createdatalist(const sender: twidgetcol): tdatalist; override;
+   function getdatatyp: datatypty; override;
+
    function createdropdowncontroller: tcustomdropdowncontroller; override;
    function datatotext(const data): msestring; override;
           //ilbdropdownlist
    procedure recordselected(const arecordnum: integer; const akey: keyty);
+  public
+   constructor create(aowner: tcomponent); override;
+   property gridvalue[const index: integer]: int64
+        read getgridvalue write setgridvalue; default;
+   property gridvalues: int64arty read getgridvalues write setgridvalues;
   published
    property dropdown: tlbdropdownlistcontroller read getdropdown write setdropdown;
-   property value: int64 read fvalue1 write fvalue1;
+   property value: int64 read fvalue1 write setvalue default -1;
+   property valuedefault: int64 read fvaluedefault write fvaluedefault default -1;
+   property onsetvalue: setint64eventty read fonsetvalue1 write fonsetvalue1;
  end;
  
  tdbkeystringeditlb = class(tdbkeystringedit,ilbdropdownlist)
@@ -7920,6 +7946,13 @@ end;
 
 { tenum64editlb }
 
+constructor tenum64editlb.create(aowner: tcomponent);
+begin
+ fvalue1:= -1;
+ fvaluedefault:= -1;
+ inherited;
+end;
+
 function tenum64editlb.getdropdown: tlbdropdownlistcontroller;
 begin
  result:= tlbdropdownlistcontroller(fdropdown);
@@ -7959,7 +7992,7 @@ begin
   window.postkeyevent(akey);
  end;
 end;
-var testvar: integer;
+
 function tenum64editlb.datatotext(const data): msestring;
 var
  lint1: int64;
@@ -7979,7 +8012,6 @@ begin
   if (flookupbuffer <> nil) and (int3 < flookupbuffer.fieldcounttext) and
            (int4 < flookupbuffer.fieldcountint64) and
            flookupbuffer.find(int4,lint1,int2) then begin
-testvar:= flookupbuffer.count;
    result:= flookupbuffer.textvaluephys(int3,
                  flookupbuffer.int64index(int4,int2));
   end
@@ -7987,6 +8019,100 @@ testvar:= flookupbuffer.count;
    result:= '';
   end;
  end;
+end;
+
+function tenum64editlb.createdatalist(const sender: twidgetcol): tdatalist;
+begin
+ result:= tgridenum64datalist.create(sender);
+end;
+
+function tenum64editlb.getdatatyp: datatypty;
+begin
+ result:= dl_int64;
+end;
+
+function tenum64editlb.getgridvalue(const index: integer): int64;
+begin
+ internalgetgridvalue(index,result);
+end;
+
+procedure tenum64editlb.setgridvalue(const index: integer; aValue: int64);
+begin
+ internalsetgridvalue(index,avalue);
+end;
+
+function tenum64editlb.getgridvalues: int64arty;
+begin
+ result:= tint64datalist(fgridintf.getcol.datalist).asarray;
+end;
+
+procedure tenum64editlb.setgridvalues(const avalue: int64arty);
+begin
+ tint64datalist(fgridintf.getcol.datalist).asarray:= avalue;
+end;
+
+procedure tenum64editlb.setvalue(const avalue: int64);
+begin
+ tdropdowncols1(tlbdropdownlistcontroller(fdropdown).cols).fkeyvalue64:= 
+                         avalue;
+ fvalue1:= avalue;
+ valuechanged;
+end;
+
+function tenum64editlb.getdefaultvalue: pointer;
+begin
+ result:= @fvaluedefault;
+end;
+
+procedure tenum64editlb.texttovalue(var accept: boolean; const quiet: boolean);
+var
+ lint1: int64;
+begin
+ if trim(text) = '' then begin
+  lint1:= valuedefault;
+ end
+ else begin
+  lint1:= tdropdowncols1(tlbdropdownlistcontroller(fdropdown).cols).fkeyvalue64;
+ end;
+ if accept then begin
+  if not quiet and canevent(tmethod(fonsetvalue1)) then begin
+   fonsetvalue1(self,lint1,accept);
+  end;
+  if accept then begin
+   value:= lint1;
+  end;
+ end;
+end;
+
+procedure tenum64editlb.texttodata(const atext: msestring; var data);
+begin
+ //not supported
+end;
+
+procedure tenum64editlb.valuetogrid(const arow: integer);
+begin
+ fgridintf.setdata(arow,fvalue1);
+end;
+
+procedure tenum64editlb.gridtovalue(const arow: integer);
+begin
+ fgridintf.getdata(arow,fvalue1);
+ valuetotext;
+end;
+
+procedure tenum64editlb.readstatvalue(const reader: tstatreader);
+begin
+ if fgridintf <> nil then begin
+  fgridintf.getcol.dostatread(reader);
+ end
+ else begin
+  value:= reader.readint64(valuevarname,value);
+ end;
+end;
+
+procedure tenum64editlb.writestatvalue(const writer: tstatwriter);
+begin
+ writer.writeint64(valuevarname,value);
 end;
 
 { tdbkeystringeditlb }

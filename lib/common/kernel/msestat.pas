@@ -18,7 +18,6 @@ uses
 
 const
  defaultstatfilename = 'status.sta';
-
 type
  tstatreader = class;
  tstatwriter = class;
@@ -99,6 +98,7 @@ type
    fliststart: integerarty;
    procedure checkrealrange(var value: realty; const min,max: realty);
    procedure checkintegerrange(var value: integer; const min,max: integer);
+   procedure checkint64range(var value: int64; const min,max: int64);
   protected
    procedure readdata;
    function findvar(const name: msestring; var value: msestring): boolean; //true if ok
@@ -115,6 +115,8 @@ type
    function readword(const name: msestring; const default: word = 0): word;
    function readinteger(const name: msestring; const default: integer = 0;
                const min: integer = -(maxint)-1; const max: integer = maxint): integer;
+   function readint64(const name: msestring; const default: int64 = 0;
+               const min: integer = -(maxint64)-1; const max: int64 = maxint64): int64;
    function readreal(const name: msestring; const default: real = 0;
                const min: real = -bigreal; const max: real = bigreal): realty;
    function readstring(const name: msestring; const default: string): string;
@@ -159,6 +161,7 @@ type
    procedure writebyte(const name: msestring; const value: byte);
    procedure writeword(const name: msestring; const value: word);
    procedure writeinteger(const name: msestring; const value: integer);
+   procedure writeint64(const name: msestring; const value: int64);
    procedure writereal(const name: msestring; const value: real);
    procedure writestring(const name: msestring; const value: string);
    procedure writemsestring(const name: msestring; const value: msestring);
@@ -639,6 +642,30 @@ begin
  end;
 end;
 
+procedure tstatreader.checkint64range(var value: int64; const min,max: int64);
+begin
+ if max < min then begin  //unsigned
+  if qword(value) > qword(max) then begin
+   value:= max;
+  end
+  else begin
+   if qword(value) < qword(min) then begin
+    value:= min;
+   end;
+  end;
+ end
+ else begin
+  if value > max then begin
+   value:= max;
+  end
+  else begin
+   if value < min then begin
+    value:= min;
+   end;
+  end;
+ end;
+end;
+
 function tstatreader.readinteger(const name: msestring; const default: integer = 0;
                const min: integer = -(maxint)-1; const max: integer = maxint): integer;
 var
@@ -651,6 +678,24 @@ begin
   try
    result:= strtoint(str1);
    checkintegerrange(result,min,max);
+  except
+   result:= default;
+  end;
+ end;
+end;
+
+function tstatreader.readint64(const name: msestring; const default: int64 = 0;
+               const min: integer = -(maxint64)-1; const max: int64 = maxint64): int64;
+var
+ str1: msestring;
+begin
+ if not findvar(name,str1) then begin
+  result:= default;
+ end
+ else begin
+  try
+   result:= strtoint64(str1);
+   checkint64range(result,min,max);
   except
    result:= default;
   end;
@@ -1074,6 +1119,11 @@ begin
 end;
 
 procedure tstatwriter.writeinteger(const name: msestring; const value: integer);
+begin
+ writeval(name,inttostr(value));
+end;
+
+procedure tstatwriter.writeint64(const name: msestring; const value: int64);
 begin
  writeval(name,inttostr(value));
 end;

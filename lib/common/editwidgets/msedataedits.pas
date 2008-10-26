@@ -22,6 +22,7 @@ uses
 
 const
  emptyinteger = minint;
+ valuevarname = 'value';
  
 type
  tdataedit = class;
@@ -991,8 +992,6 @@ implementation
 uses
  sysutils,msereal,msebits,msepointer,msestreaming,msestockobjects;
 
-const
- valuevarname = 'value';
 type
  tdatalist1 = class(tdatalist);
  twidget1 = class(twidget);

@@ -43,6 +43,7 @@ const
 // emptytime = 0.0;
 // nulltime = 1.0;        //fuer tdateeditmse
 // emptydate = 0.0;
+ maxint64 = $7fffffffffffffff;
  minint = low(integer);
  bigint = maxint div 2;
  nullmethod: tmethod = (code: nil; data: nil);

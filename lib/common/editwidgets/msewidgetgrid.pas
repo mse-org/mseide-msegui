@@ -350,6 +350,15 @@ type
    constructor create(owner: twidgetcol); reintroduce;
  end;
 
+ tgridenum64datalist = class(tenum64datalist)
+  private
+   fowner: twidgetcol;
+  protected
+   function getdefaultenum: int64;
+  public
+   constructor create(owner: twidgetcol); reintroduce;
+ end;
+
  tgridrealdatalist = class(trealdatalist)
   private
    fowner: twidgetcol;
@@ -501,6 +510,19 @@ end;
 function tgridenumdatalist.getdefaultenum: integer;
 begin
  result:= integer(fowner.fintf.getdefaultvalue^);
+end;
+
+{ tgridenum64datalist }
+
+constructor tgridenum64datalist.create(owner: twidgetcol);
+begin
+ fowner:= owner;
+ inherited create({$ifdef FPC}@{$endif}getdefaultenum);
+end;
+
+function tgridenum64datalist.getdefaultenum: int64;
+begin
+ result:= int64(fowner.fintf.getdefaultvalue^);
 end;
 
 { tgridrealdatalist }
