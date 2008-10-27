@@ -233,11 +233,13 @@ begin
       ]);
  registercomponenttabhints(['DB'],['Database Components']);
  registercomponents('DBe',[tdbwidgetgrid,
-      tenumeditdb,tkeystringeditdb,tenumeditlb,tenum64editlb,tkeystringeditlb,
+      tenumeditdb,tenum64editdb,tkeystringeditdb,tenumeditlb,tenum64editlb,
+      tkeystringeditlb,
       tdbmemoedit,tdbstringedit,tdbdropdownlistedit,tdbdialogstringedit,
       tdbbooleantextedit,
       tdbkeystringedit,tdbkeystringeditdb,tdbkeystringeditlb,
-      tdbintegeredit,tdbenumedit,tdbenumeditdb,tdbenumeditlb,
+      tdbintegeredit,tdbenumedit,tdbenumeditdb,tdbenum64editdb,
+      tdbenumeditlb,tdbenum64editlb,
       tdbdataicon,tdbdataimage,tdbdatabutton,tdbrealedit,tdbrealspinedit,
       tdbprogressbar,tdbslider,
       tdbdatetimeedit,

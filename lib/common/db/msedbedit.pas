@@ -944,7 +944,6 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-//   function checkvalue(const quiet: boolean = false): boolean; override;
    property datalink: teditwidgetdatalink read fdatalink;
    property datafield: string read getdatafield write setdatafield;
    property datasource: tdatasource read getdatasource write setdatasource;
@@ -1083,6 +1082,7 @@ type
    fansistringbuffer: ansistring;
    fstringbuffer: msestring;
    fintegerbuffer: integer;
+   fint64buffer: int64;
    frealtybuffer: realty;
    fgridinvalidated: boolean;
    foptions: griddatalinkoptionsty;
@@ -1153,6 +1153,7 @@ type
    function getdisplaystringbuffer(const afield: tfield; const row: integer): pointer;
    function getbooleanbuffer(const afield: tfield; const row: integer): pointer;
    function getintegerbuffer(const afield: tfield; const row: integer): pointer;
+   function getint64buffer(const afield: tfield; const row: integer): pointer;
    function getrealtybuffer(const afield: tfield; const row: integer): pointer;
    function getdatetimebuffer(const afield: tfield; const row: integer): pointer;
 
@@ -1852,10 +1853,8 @@ type
    property dropdown: tlbdropdownlistcontroller read getdropdown write setdropdown;
  end;
 
- tenum64editlb = class(tcustomdropdownlistedit,ilbdropdownlist)
+ tcustomenum64edit = class(tcustomdropdownlistedit)
   private
-   function getdropdown: tlbdropdownlistcontroller;
-   procedure setdropdown(const avalue: tlbdropdownlistcontroller);
    function getgridvalue(const index: integer): int64;
    procedure setgridvalue(const index: integer; aValue: int64);
    function getgridvalues: int64arty;
@@ -1877,20 +1876,132 @@ type
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatyp: datatypty; override;
 
-   function createdropdowncontroller: tcustomdropdowncontroller; override;
-   function datatotext(const data): msestring; override;
-          //ilbdropdownlist
-   procedure recordselected(const arecordnum: integer; const akey: keyty);
   public
    constructor create(aowner: tcomponent); override;
    property gridvalue[const index: integer]: int64
         read getgridvalue write setgridvalue; default;
    property gridvalues: int64arty read getgridvalues write setgridvalues;
-  published
-   property dropdown: tlbdropdownlistcontroller read getdropdown write setdropdown;
    property value: int64 read fvalue1 write setvalue default -1;
    property valuedefault: int64 read fvaluedefault write fvaluedefault default -1;
    property onsetvalue: setint64eventty read fonsetvalue1 write fonsetvalue1;
+ end;
+
+ tcustomenum64editlb = class(tcustomenum64edit,ilbdropdownlist)
+  private
+   function getdropdown: tlbdropdownlistcontroller;
+   procedure setdropdown(const avalue: tlbdropdownlistcontroller);
+  protected
+   function createdropdowncontroller: tcustomdropdowncontroller; override;
+   function datatotext(const data): msestring; override;
+          //ilbdropdownlist
+   procedure recordselected(const arecordnum: integer; const akey: keyty);
+  public
+   property dropdown: tlbdropdownlistcontroller read getdropdown write setdropdown;
+ end;
+
+ tenum64editlb = class(tcustomenum64editlb)
+  published
+   property dropdown;
+   property value;
+   property valuedefault;
+   property onsetvalue;
+ end;
+ 
+ tdbenum64editlb = class(tcustomenum64editlb,idbeditfieldlink,idbeditinfo,ireccontrol)
+  private
+   fdatalink: teditwidgetdatalink;
+   function getdatafield: string;
+   procedure setdatafield(const avalue: string);
+   function getdatasource: tdatasource; overload;
+   function getdatasource(const aindex: integer): tdatasource; overload;
+   procedure setdatasource(const avalue: tdatasource);
+  protected
+
+   function nullcheckneeded(const newfocus: twidget): boolean; override;
+   procedure griddatasourcechanged; override;
+   function getgriddatasource: tdatasource;
+   function createdatalist(const sender: twidgetcol): tdatalist; override;
+   procedure modified; override;
+   function getoptionsedit: optionseditty; override;
+   procedure dochange; override;
+
+   function getrowdatapo(const info: cellinfoty): pointer; override;
+   //idbeditfieldlink
+   procedure valuetofield; virtual;
+   procedure fieldtovalue; virtual;
+   //idbeditinfo
+   procedure getfieldtypes(out propertynames: stringarty;
+                          out fieldtypes: fieldtypesarty); virtual;
+   //ireccontrol
+   procedure recchanged;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+   property datalink: teditwidgetdatalink read fdatalink;
+  published
+   property datafield: string read getdatafield write setdatafield;
+   property datasource: tdatasource read getdatasource write setdatasource;
+   property dropdown;
+   property onsetvalue;
+ end;
+ 
+ tcustomenum64editdb = class(tcustomenum64edit,idbdropdownlist)
+  private
+   function getdropdown: tdbdropdownlistcontroller;
+   procedure setdropdown(const avalue: tdbdropdownlistcontroller);
+  protected
+   function createdropdowncontroller: tcustomdropdowncontroller; override;
+   function datatotext(const data): msestring; override;
+          //ilbdropdownlist
+   procedure recordselected(const arecordnum: integer; const akey: keyty);
+  public
+   property dropdown: tdbdropdownlistcontroller read getdropdown write setdropdown;
+ end;
+
+ tenum64editdb = class(tcustomenum64editdb)
+  published
+   property dropdown;
+   property value;
+   property valuedefault;
+   property onsetvalue;
+ end;
+ 
+ tdbenum64editdb = class(tcustomenum64editdb,idbeditfieldlink,idbeditinfo,ireccontrol)
+  private
+   fdatalink: teditwidgetdatalink;
+   function getdatafield: string;
+   procedure setdatafield(const avalue: string);
+   function getdatasource: tdatasource; overload;
+   function getdatasource(const aindex: integer): tdatasource; overload;
+   procedure setdatasource(const avalue: tdatasource);
+  protected
+
+   function nullcheckneeded(const newfocus: twidget): boolean; override;
+   procedure griddatasourcechanged; override;
+   function getgriddatasource: tdatasource;
+   function createdatalist(const sender: twidgetcol): tdatalist; override;
+   procedure modified; override;
+   function getoptionsedit: optionseditty; override;
+   procedure dochange; override;
+
+   function getrowdatapo(const info: cellinfoty): pointer; override;
+   //idbeditfieldlink
+   procedure valuetofield; virtual;
+   procedure fieldtovalue; virtual;
+   //idbeditinfo
+   procedure getfieldtypes(out propertynames: stringarty;
+                          out fieldtypes: fieldtypesarty); virtual;
+   //ireccontrol
+   procedure recchanged;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+   property datalink: teditwidgetdatalink read fdatalink;
+  published
+   property datafield: string read getdatafield write setdatafield;
+   property datasource: tdatasource read getdatasource write setdatasource;
+   property dropdown;
+   property onsetvalue;
  end;
  
  tdbkeystringeditlb = class(tdbkeystringedit,ilbdropdownlist)
@@ -5937,6 +6048,23 @@ begin
  end;
 end;
 
+function tgriddatalink.getint64buffer(const afield: tfield;
+                     const row: integer): pointer;
+var
+ int1: integer;
+begin
+ result:= nil;
+ if (afield <> nil) and hasdata then begin
+  int1:= activerecord;
+  activerecord:= row;
+  if not afield.isnull then begin
+   result:= @fint64buffer;
+   fint64buffer:= afield.aslargeint;
+  end;
+  activerecord:= int1;
+ end;
+end;
+
 function tgriddatalink.getrealtybuffer(const afield: tfield; 
                                              const row: integer): pointer;
 var
@@ -7944,31 +8072,127 @@ begin
  end;
 end;
 
-{ tenum64editlb }
+{ tcustomenum64edit }
 
-constructor tenum64editlb.create(aowner: tcomponent);
+constructor tcustomenum64edit.create(aowner: tcomponent);
 begin
  fvalue1:= -1;
  fvaluedefault:= -1;
  inherited;
 end;
 
-function tenum64editlb.getdropdown: tlbdropdownlistcontroller;
+function tcustomenum64edit.createdatalist(const sender: twidgetcol): tdatalist;
+begin
+ result:= tgridenum64datalist.create(sender);
+end;
+
+function tcustomenum64edit.getdatatyp: datatypty;
+begin
+ result:= dl_int64;
+end;
+
+function tcustomenum64edit.getgridvalue(const index: integer): int64;
+begin
+ internalgetgridvalue(index,result);
+end;
+
+procedure tcustomenum64edit.setgridvalue(const index: integer; aValue: int64);
+begin
+ internalsetgridvalue(index,avalue);
+end;
+
+function tcustomenum64edit.getgridvalues: int64arty;
+begin
+ result:= tint64datalist(fgridintf.getcol.datalist).asarray;
+end;
+
+procedure tcustomenum64edit.setgridvalues(const avalue: int64arty);
+begin
+ tint64datalist(fgridintf.getcol.datalist).asarray:= avalue;
+end;
+
+procedure tcustomenum64edit.setvalue(const avalue: int64);
+begin
+ tdropdowncols1(tlbdropdownlistcontroller(fdropdown).cols).fkeyvalue64:= 
+                         avalue;
+ fvalue1:= avalue;
+ valuechanged;
+end;
+
+function tcustomenum64edit.getdefaultvalue: pointer;
+begin
+ result:= @fvaluedefault;
+end;
+
+procedure tcustomenum64edit.texttovalue(var accept: boolean; const quiet: boolean);
+var
+ lint1: int64;
+begin
+ if trim(text) = '' then begin
+  lint1:= valuedefault;
+ end
+ else begin
+  lint1:= tdropdowncols1(tlbdropdownlistcontroller(fdropdown).cols).fkeyvalue64;
+ end;
+ if accept then begin
+  if not quiet and canevent(tmethod(fonsetvalue1)) then begin
+   fonsetvalue1(self,lint1,accept);
+  end;
+  if accept then begin
+   value:= lint1;
+  end;
+ end;
+end;
+
+procedure tcustomenum64edit.texttodata(const atext: msestring; var data);
+begin
+ //not supported
+end;
+
+procedure tcustomenum64edit.valuetogrid(const arow: integer);
+begin
+ fgridintf.setdata(arow,fvalue1);
+end;
+
+procedure tcustomenum64edit.gridtovalue(const arow: integer);
+begin
+ fgridintf.getdata(arow,fvalue1);
+ valuetotext;
+end;
+
+procedure tcustomenum64edit.readstatvalue(const reader: tstatreader);
+begin
+ if fgridintf <> nil then begin
+  fgridintf.getcol.dostatread(reader);
+ end
+ else begin
+  value:= reader.readint64(valuevarname,value);
+ end;
+end;
+
+procedure tcustomenum64edit.writestatvalue(const writer: tstatwriter);
+begin
+ writer.writeint64(valuevarname,value);
+end;
+
+ { tcustomenum64editlb }
+ 
+function tcustomenum64editlb.getdropdown: tlbdropdownlistcontroller;
 begin
  result:= tlbdropdownlistcontroller(fdropdown);
 end;
 
-procedure tenum64editlb.setdropdown(const avalue: tlbdropdownlistcontroller);
+procedure tcustomenum64editlb.setdropdown(const avalue: tlbdropdownlistcontroller);
 begin
  fdropdown.assign(avalue);
 end;
 
-function tenum64editlb.createdropdowncontroller: tcustomdropdowncontroller;
+function tcustomenum64editlb.createdropdowncontroller: tcustomdropdowncontroller;
 begin
  result:= tlbdropdownlistcontroller.create(ilbdropdownlist(self));
 end;
 
-procedure tenum64editlb.recordselected(const arecordnum: integer; const akey: keyty);
+procedure tcustomenum64editlb.recordselected(const arecordnum: integer; const akey: keyty);
 var
  bo1: boolean;
 begin
@@ -7993,7 +8217,7 @@ begin
  end;
 end;
 
-function tenum64editlb.datatotext(const data): msestring;
+function tcustomenum64editlb.datatotext(const data): msestring;
 var
  lint1: int64;
  int2,int3,int4: integer;
@@ -8007,8 +8231,6 @@ begin
  with tlbdropdownlistcontroller(fdropdown) do begin
   int3:= cols[valuecol].ffieldno;
   int4:= fkeyfieldno;
- end;
- with dropdown do begin
   if (flookupbuffer <> nil) and (int3 < flookupbuffer.fieldcounttext) and
            (int4 < flookupbuffer.fieldcountint64) and
            flookupbuffer.find(int4,lint1,int2) then begin
@@ -8021,98 +8243,331 @@ begin
  end;
 end;
 
-function tenum64editlb.createdatalist(const sender: twidgetcol): tdatalist;
+ { tcustomenum64editdb }
+ 
+function tcustomenum64editdb.getdropdown: tdbdropdownlistcontroller;
 begin
- result:= tgridenum64datalist.create(sender);
+ result:= tdbdropdownlistcontroller(fdropdown);
 end;
 
-function tenum64editlb.getdatatyp: datatypty;
+procedure tcustomenum64editdb.setdropdown(const avalue: tdbdropdownlistcontroller);
 begin
- result:= dl_int64;
+ fdropdown.assign(avalue);
 end;
 
-function tenum64editlb.getgridvalue(const index: integer): int64;
+function tcustomenum64editdb.createdropdowncontroller: tcustomdropdowncontroller;
 begin
- internalgetgridvalue(index,result);
+ result:= tdbdropdownlistcontroller.create(idbdropdownlist(self),false);
 end;
 
-procedure tenum64editlb.setgridvalue(const index: integer; aValue: int64);
-begin
- internalsetgridvalue(index,avalue);
-end;
-
-function tenum64editlb.getgridvalues: int64arty;
-begin
- result:= tint64datalist(fgridintf.getcol.datalist).asarray;
-end;
-
-procedure tenum64editlb.setgridvalues(const avalue: int64arty);
-begin
- tint64datalist(fgridintf.getcol.datalist).asarray:= avalue;
-end;
-
-procedure tenum64editlb.setvalue(const avalue: int64);
-begin
- tdropdowncols1(tlbdropdownlistcontroller(fdropdown).cols).fkeyvalue64:= 
-                         avalue;
- fvalue1:= avalue;
- valuechanged;
-end;
-
-function tenum64editlb.getdefaultvalue: pointer;
-begin
- result:= @fvaluedefault;
-end;
-
-procedure tenum64editlb.texttovalue(var accept: boolean; const quiet: boolean);
+procedure tcustomenum64editdb.recordselected(const arecordnum: integer; const akey: keyty);
 var
- lint1: int64;
+ bo1: boolean;
 begin
- if trim(text) = '' then begin
-  lint1:= valuedefault;
+ bo1:= false;
+ if arecordnum >= 0 then begin
+  with tdbdropdownlistcontroller(fdropdown) do begin
+   text:= getasmsestring(fdatalink.textfield,fdatalink.utf8);
+   tdropdowncols1(fcols).fkeyvalue64:= fdatalink.valuefield.aslargeint
+  end; 
+  bo1:= checkvalue;
  end
  else begin
-  lint1:= tdropdowncols1(tlbdropdownlistcontroller(fdropdown).cols).fkeyvalue64;
- end;
- if accept then begin
-  if not quiet and canevent(tmethod(fonsetvalue1)) then begin
-   fonsetvalue1(self,lint1,accept);
-  end;
-  if accept then begin
-   value:= lint1;
+  if arecordnum = -2 then begin
+   bo1:= checkvalue; 
+  end
+  else begin
+   feditor.undo;
   end;
  end;
+ if bo1 and (akey = key_tab) then begin
+  window.postkeyevent(akey);
+ end;
 end;
 
-procedure tenum64editlb.texttodata(const atext: msestring; var data);
+function tcustomenum64editdb.datatotext(const data): msestring;
+var
+ lint1: integer;
 begin
- //not supported
-end;
-
-procedure tenum64editlb.valuetogrid(const arow: integer);
-begin
- fgridintf.setdata(arow,fvalue1);
-end;
-
-procedure tenum64editlb.gridtovalue(const arow: integer);
-begin
- fgridintf.getdata(arow,fvalue1);
- valuetotext;
-end;
-
-procedure tenum64editlb.readstatvalue(const reader: tstatreader);
-begin
- if fgridintf <> nil then begin
-  fgridintf.getcol.dostatread(reader);
+ if @data = nil then begin
+  lint1:= value;  
  end
  else begin
-  value:= reader.readint64(valuevarname,value);
+  lint1:= int64(data);
+ end;
+ result:= tdbdropdownlistcontroller(fdropdown).fdatalink.getlookuptext(lint1);
+end;
+
+{ tdbenum64editlb }
+
+constructor tdbenum64editlb.create(aowner: tcomponent);
+begin
+// fisdb:= true;
+ fdatalink:= teditwidgetdatalink.create(idbeditfieldlink(self));
+ inherited;
+end;
+
+destructor tdbenum64editlb.destroy;
+begin
+ inherited;
+ fdatalink.free;
+end;
+
+function tdbenum64editlb.getdatafield: string;
+begin
+ result:= fdatalink.fieldname;
+end;
+
+procedure tdbenum64editlb.setdatafield(const avalue: string);
+begin
+ fdatalink.fieldname:= avalue;
+end;
+
+function tdbenum64editlb.getdatasource: tdatasource;
+begin
+ result:= fdatalink.datasource;
+end;
+
+procedure tdbenum64editlb.setdatasource(const avalue: tdatasource);
+begin
+ fdatalink.setwidgetdatasource(avalue);
+end;
+
+procedure tdbenum64editlb.modified;
+begin
+ fdatalink.modified;
+ inherited;
+end;
+
+function tdbenum64editlb.getoptionsedit: optionseditty;
+begin
+ result:= inherited getoptionsedit;
+ fdatalink.updateoptionsedit(result);
+ frame.readonly:= oe_readonly in result;
+end;
+
+procedure tdbenum64editlb.valuetofield;
+begin
+ if value = -1 then begin
+  fdatalink.field.clear;
+ end
+ else begin
+  fdatalink.field.aslargeint:= value;
  end;
 end;
 
-procedure tenum64editlb.writestatvalue(const writer: tstatwriter);
+procedure tdbenum64editlb.fieldtovalue;
 begin
- writer.writeint64(valuevarname,value);
+ if fdatalink.field.isnull then begin
+  value:= fvaluedefault;
+ end
+ else begin
+  value:= fdatalink.field.aslargeint;
+ end;
+end;
+
+function tdbenum64editlb.getrowdatapo(const info: cellinfoty): pointer;
+begin
+ with info do begin
+  if griddatalink <> nil then begin
+   result:= tgriddatalink(griddatalink).
+                    getint64buffer(fdatalink.field,cell.row);
+   if result = nil then begin
+    result:= @fvaluedefault;
+   end;
+  end
+  else begin
+   result:= @fvaluedefault;
+//   result:= nil;
+  end;
+ end;
+end;
+
+function tdbenum64editlb.createdatalist(const sender: twidgetcol): tdatalist;
+begin
+ result:= nil;
+end;
+
+procedure tdbenum64editlb.griddatasourcechanged;
+begin
+ fdatalink.griddatasourcechanged;
+end;
+
+function tdbenum64editlb.getgriddatasource: tdatasource;
+begin
+ result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datasource;
+end;
+
+procedure tdbenum64editlb.getfieldtypes(out propertynames: stringarty; 
+                    out fieldtypes: fieldtypesarty);
+begin
+ propertynames:= nil;
+ setlength(fieldtypes,1);
+ fieldtypes[0]:= integerfields;
+end;
+
+function tdbenum64editlb.nullcheckneeded(const newfocus: twidget): boolean;
+begin
+ result:= inherited nullcheckneeded(newfocus) and fdatalink.nullcheckneeded;
+end;
+
+function tdbenum64editlb.getdatasource(const aindex: integer): tdatasource;
+begin
+ result:= datasource;
+end;
+
+procedure tdbenum64editlb.recchanged;
+begin
+ fdatalink.recordchanged(nil);
+end;
+
+{
+function tdbenum64editlb.checkvalue(const quiet: boolean = false): boolean;
+begin
+ result:= inherited checkvalue(quiet) and fdatalink.dataentered;
+end;
+}
+
+procedure tdbenum64editlb.dochange;
+begin
+ fdatalink.dataentered;
+ inherited;
+end;
+
+{ tdbenum64editdb }
+
+constructor tdbenum64editdb.create(aowner: tcomponent);
+begin
+// fisdb:= true;
+ fdatalink:= teditwidgetdatalink.create(idbeditfieldlink(self));
+ inherited;
+end;
+
+destructor tdbenum64editdb.destroy;
+begin
+ inherited;
+ fdatalink.free;
+end;
+
+function tdbenum64editdb.getdatafield: string;
+begin
+ result:= fdatalink.fieldname;
+end;
+
+procedure tdbenum64editdb.setdatafield(const avalue: string);
+begin
+ fdatalink.fieldname:= avalue;
+end;
+
+function tdbenum64editdb.getdatasource: tdatasource;
+begin
+ result:= fdatalink.datasource;
+end;
+
+procedure tdbenum64editdb.setdatasource(const avalue: tdatasource);
+begin
+ fdatalink.setwidgetdatasource(avalue);
+end;
+
+procedure tdbenum64editdb.modified;
+begin
+ fdatalink.modified;
+ inherited;
+end;
+
+function tdbenum64editdb.getoptionsedit: optionseditty;
+begin
+ result:= inherited getoptionsedit;
+ fdatalink.updateoptionsedit(result);
+ frame.readonly:= oe_readonly in result;
+end;
+
+procedure tdbenum64editdb.valuetofield;
+begin
+ if value = -1 then begin
+  fdatalink.field.clear;
+ end
+ else begin
+  fdatalink.field.aslargeint:= value;
+ end;
+end;
+
+procedure tdbenum64editdb.fieldtovalue;
+begin
+ if fdatalink.field.isnull then begin
+  value:= fvaluedefault;
+ end
+ else begin
+  value:= fdatalink.field.aslargeint;
+ end;
+end;
+
+function tdbenum64editdb.getrowdatapo(const info: cellinfoty): pointer;
+begin
+ with info do begin
+  if griddatalink <> nil then begin
+   result:= tgriddatalink(griddatalink).
+                    getint64buffer(fdatalink.field,cell.row);
+   if result = nil then begin
+    result:= @fvaluedefault;
+   end;
+  end
+  else begin
+   result:= @fvaluedefault;
+//   result:= nil;
+  end;
+ end;
+end;
+
+function tdbenum64editdb.createdatalist(const sender: twidgetcol): tdatalist;
+begin
+ result:= nil;
+end;
+
+procedure tdbenum64editdb.griddatasourcechanged;
+begin
+ fdatalink.griddatasourcechanged;
+end;
+
+function tdbenum64editdb.getgriddatasource: tdatasource;
+begin
+ result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datasource;
+end;
+
+procedure tdbenum64editdb.getfieldtypes(out propertynames: stringarty; 
+                    out fieldtypes: fieldtypesarty);
+begin
+ propertynames:= nil;
+ setlength(fieldtypes,1);
+ fieldtypes[0]:= integerfields;
+end;
+
+function tdbenum64editdb.nullcheckneeded(const newfocus: twidget): boolean;
+begin
+ result:= inherited nullcheckneeded(newfocus) and fdatalink.nullcheckneeded;
+end;
+
+function tdbenum64editdb.getdatasource(const aindex: integer): tdatasource;
+begin
+ result:= datasource;
+end;
+
+procedure tdbenum64editdb.recchanged;
+begin
+ fdatalink.recordchanged(nil);
+end;
+
+{
+function tdbenum64editdb.checkvalue(const quiet: boolean = false): boolean;
+begin
+ result:= inherited checkvalue(quiet) and fdatalink.dataentered;
+end;
+}
+
+procedure tdbenum64editdb.dochange;
+begin
+ fdatalink.dataentered;
+ inherited;
 end;
 
 { tdbkeystringeditlb }
