@@ -695,19 +695,19 @@ begin
  with infopo^ do begin
   if itemlist = nil then begin
    itemlist:= tsourceitemlist.create;
+   for int1:= 0 to high(includestatements) do begin
+    with includestatements[int1] do begin
+     with itemlist.newitem(startpos,endpos,sik_include)^ do begin
+      index:= int1;
+     end;
+    end;
+   end;
    case proglang of
     pl_c: begin
     end;
     else begin
      p.interfaceuses.getsourceitems(itemlist);
      p.implementationuses.getsourceitems(itemlist);
-     for int1:= 0 to high(includestatements) do begin
-      with includestatements[int1] do begin
-       with itemlist.newitem(startpos,endpos,sik_include)^ do begin
-        index:= int1;
-       end;
-      end;
-     end;
     end;
    end;
   end;
