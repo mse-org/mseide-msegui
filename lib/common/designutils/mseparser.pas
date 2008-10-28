@@ -2159,6 +2159,7 @@ var
  bo1: boolean;
  str1: ansistring;
  anum: integer;
+ po1: pchar;
 begin
  result:= false;
  if fincomment = 0 then begin
@@ -2175,6 +2176,21 @@ begin
    if bo1 then begin 
     nexttoken;
     bo1:= getcstring(str1);
+    if not bo1 and checkoperator('<') then begin
+     po1:= fto^.value.po;
+     mark;
+     bo1:= findoperator('>');
+     if bo1 then begin
+      pop;
+      str1:= getorigtext(po1);
+      if str1 <> '' then begin
+       setlength(str1,length(str1)-1);
+      end;
+     end
+     else begin
+      back;
+     end;
+    end;
    end;
    while not ((fto^.kind = tk_newline) or (fto^.kind = tk_fileend1)) do begin
     nexttoken;
