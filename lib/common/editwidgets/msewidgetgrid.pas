@@ -2539,7 +2539,11 @@ procedure tcustomwidgetgrid.docellevent(var info: celleventinfoty);
 var
  int1: integer;
 begin
- if (info.eventkind = cek_focusedcellchanged) and (info.cellbefore.row <> info.newcell.row) then begin
+ if (info.cellbefore.row <> info.newcell.row) and 
+         ((info.eventkind = cek_enter) or 
+                (info.eventkind = cek_focusedcellchanged) and 
+                 (info.newcell.col = invalidaxis)) then begin
+                      //there was no cek_enter
   for int1:= 0 to fdatacols.count - 1 do begin
    with twidgetcols(fdatacols)[int1] do begin
     if fintf <> nil then begin

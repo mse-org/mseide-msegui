@@ -465,6 +465,8 @@ function mangleprocparams(const aparams: methodparaminfoty): string;
 procedure initcompinfo(var info: unitinfoty);
 procedure afterparse(const sender: tparser; var unitinfo: unitinfoty;
                         const aimplementationcompiled: boolean);
+procedure addincludefile(var info: unitinfoty; const afilename: filenamety;
+                           const astatementstart, astatementend: sourceposty);
 
 var
  updateunitinterface: function(const unitname: string): punitinfoty of object;
@@ -477,6 +479,19 @@ uses
 {$ifdef FPC}{$goto on}{$endif}
 type
  tparser1 = class(tparser);
+
+procedure addincludefile(var info: unitinfoty; const afilename: filenamety;
+                           const astatementstart, astatementend: sourceposty);
+begin
+ with info do begin
+  setlength(includestatements,high(includestatements)+2);
+  with includestatements[high(includestatements)] do begin
+   filename:= afilename;
+   startpos:= astatementstart;
+   endpos:= astatementend;
+  end;
+ end;
+end;
   
 procedure initcompinfo(var info: unitinfoty);
 begin
@@ -1743,25 +1758,27 @@ begin
     allreadysearched:= true;
    end;
    result:= inherited finddef(anamepath,scopes,defs,first,level,afindkind,maxcount);
-   if (not result or not first) and (level in [dsl_normal,dsl_parent,dsl_parentclass]) then begin
-    for int1:= funitinfopo^.p.implementationuses.count - 1 downto 0 do begin
-     result:= unitsearch(funitinfopo^.p.implementationuses.getunitdeflist(int1)) or result;
-     if result and first then begin
-      flastunitindex:= -int1;
-      exit;
+   if funitinfopo^.proglang = pl_pascal then begin
+    if (not result or not first) and (level in [dsl_normal,dsl_parent,dsl_parentclass]) then begin
+     for int1:= funitinfopo^.p.implementationuses.count - 1 downto 0 do begin
+      result:= unitsearch(funitinfopo^.p.implementationuses.getunitdeflist(int1)) or result;
+      if result and first then begin
+       flastunitindex:= -int1;
+       exit;
+      end;
      end;
-    end;
-    for int1:= funitinfopo^.p.interfaceuses.count - 1 downto 0 do begin
-     result:= unitsearch(funitinfopo^.p.interfaceuses.getunitdeflist(int1)) or result;
-     if result and first then begin
-      flastunitindex:= int1+1;
-      exit;
+     for int1:= funitinfopo^.p.interfaceuses.count - 1 downto 0 do begin
+      result:= unitsearch(funitinfopo^.p.interfaceuses.getunitdeflist(int1)) or result;
+      if result and first then begin
+       flastunitindex:= int1+1;
+       exit;
+      end;
      end;
-    end;
-    po1:= {sourceupdater.}updateunitinterface('system');
-    if po1 <> nil then begin
-     result:= po1^.deflist.finddef(anamepath,scopes,defs,first,
-                     dsl_unitsearch,afindkind,maxcount) or result;
+     po1:= {sourceupdater.}updateunitinterface('system');
+     if po1 <> nil then begin
+      result:= po1^.deflist.finddef(anamepath,scopes,defs,first,
+                      dsl_unitsearch,afindkind,maxcount) or result;
+     end;
     end;
    end;
   end;

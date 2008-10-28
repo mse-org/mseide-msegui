@@ -285,6 +285,8 @@ type
    function includefile(const filename: filenamety;
               const statementstart,statementend: sourceposty): integer;
      //-1 on error, scanner index otherwise
+   procedure callincludefile(const filename: filenamety; 
+                       const startpos: sourceposty; const anum: integer);
    function origoffset: integer;
    property scanner: tscanner read getscanner write setscanner;
    property recursivecomment: boolean read frecursivecomment 
@@ -785,6 +787,24 @@ begin
     ascanner.Free;
    end;
   end;
+ end;
+end;
+
+procedure tparser.callincludefile(const filename: filenamety; 
+                       const startpos: sourceposty; const anum: integer);
+var
+ int1,int2: integer;
+begin
+ int2:= includefile(filename,startpos,sourcepos);
+ if int2 >= 0 then begin
+  for int1:= anum + 1 to ftokennum - 1 do begin
+   fscanner.ftokens[int1].kind:= tk_whitespace;
+  end;
+  with fscanner.ftokens[anum] do begin
+   kind:= tk_include;
+   filenr:= int2;
+  end;
+  enterinclude(int2);
  end;
 end;
 
@@ -1826,17 +1846,7 @@ begin
         endpos:= sourcepos;
        end;
        if filename <> '' then begin
-        int2:= includefile(filename,startpos,sourcepos);
-        if int2 >= 0 then begin
-         for int1:= anum + 1 to ftokennum - 1 do begin
-          fscanner.ftokens[int1].kind:= tk_whitespace;
-         end;
-         with fscanner.ftokens[anum] do begin
-          kind:= tk_include;
-          filenr:= int2;
-         end;
-         enterinclude(int2);
-        end;
+        callincludefile(filename,startpos,anum);
        end;
       end;
       cskw_define: begin

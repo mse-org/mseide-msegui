@@ -37,6 +37,8 @@ type
    function parsetypedef: boolean;
    function parsevardef: boolean;
    function parsestatement: boolean;
+   function dogetincludefile(const afilename: filenamety;
+                     const astatementstart,astatementend: sourceposty): tscanner; override;
   public
    constructor create(unitinfopo: punitinfoty;
               const afilelist: tmseindexednamelist;
@@ -52,13 +54,75 @@ procedure parsecdef(const adef: pdefinfoty; out atext: string; out scope: tdefli
 
 implementation
 uses
- sourceupdate;
+ sourceupdate,msedesigner;
 
 procedure parsecdef(const adef: pdefinfoty; out atext: string; out scope: tdeflist);
+ //add used identifiers
+var
+ parser: tcparser;
+
+ procedure doaddidents;
+ begin
+  with parser do begin
+   while checkoperator('*') do begin
+   end;
+   scope.addidents(parser);
+   if checkoperator('[') then begin
+    findoperator(']');
+   end;
+   while checkoperator('*') do begin
+   end;
+   scope.addidents(parser);
+  end;
+ end;
+ 
+ procedure dofunctionparameters;
+ begin
+  with parser do begin
+   while not eof do begin
+    doaddidents; //type, parameter
+    if checkoperator(')') then begin
+     break;
+    end;
+    if not checkoperator(';') then begin
+     nexttoken;
+    end;
+   end;
+  end;
+ end;
+ 
 begin
  scope:= tdeflist.create(adef^.kind);
  atext:= sourceupdater.getdefinfotext(adef);
  if atext <> '' then begin
+  parser:= tcparser.create(designer.designfiles,atext);
+  try
+   with parser do begin
+    doaddidents; //type, function name
+    if checkoperator('(') then begin
+     dofunctionparameters;
+    end;
+    if checkoperator('{') then begin
+     repeat
+      doaddidents;
+      if checkoperator('=') then begin //assignment
+       doaddidents;
+       checkoperator(';');
+      end
+      else begin
+       if checkoperator('(') then begin
+        dofunctionparameters;
+       end
+       else begin
+        nexttoken;
+       end;
+      end;
+     until eof or checkoperator('}');
+    end;
+   end;
+  finally
+   parser.free;
+  end;
  end;
 end;
  
@@ -124,6 +188,7 @@ var
  ch1: char;
 begin
  result:= true;
+ skipwhitespace;
  mark;
  if checkoperator('{') then begin
   while not eof do begin
@@ -158,6 +223,7 @@ var
 begin
  inc(ffunctionlevel);
  result:= false;
+ skipwhitespace;
  mark;
  pos1:= sourcepos;
  with funitinfopo^ do begin
@@ -253,6 +319,16 @@ procedure tcdesignparser.clear;
 begin
  inherited;
  ffunctionlevel:= 0;
+end;
+
+function tcdesignparser.dogetincludefile(const afilename: filenamety;
+               const astatementstart: sourceposty;
+               const astatementend: sourceposty): tscanner;
+begin
+ result:= inherited dogetincludefile(afilename,astatementstart,astatementend);
+ if result <> nil then begin
+  addincludefile(funitinfopo^,afilename,astatementstart,astatementend);
+ end;
 end;
 
 end.

@@ -1298,18 +1298,11 @@ begin
 end;
 
 function tpascaldesignparser.dogetincludefile(const afilename: filenamety;
-  const astatementstart, astatementend: sourceposty): tscanner;
+                   const astatementstart, astatementend: sourceposty): tscanner;
 begin
  result:= inherited dogetincludefile(afilename,astatementstart,astatementend);
  if result <> nil then begin
-  with funitinfopo^ do begin
-   setlength(includestatements,high(includestatements)+2);
-   with includestatements[high(includestatements)] do begin
-    filename:= afilename;
-    startpos:= astatementstart;
-    endpos:= astatementend;
-   end;
-  end;
+  addincludefile(funitinfopo^,afilename,astatementstart,astatementend);
  end;
 end;
 
