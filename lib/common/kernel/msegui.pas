@@ -1335,6 +1335,7 @@ type
    procedure dofocuschanged(const oldwidget,newwidget: twidget); virtual;
    procedure domousewheelevent(var info: mousewheeleventinfoty); virtual;
 
+   function wantmousefocus(const info: mouseeventinfoty): boolean;
    procedure reflectmouseevent(var info: mouseeventinfoty);
                                   //posts mousevent to window under mouse
    procedure mouseevent(var info: mouseeventinfoty); virtual;
@@ -7866,6 +7867,13 @@ begin
  end;
 end;
 
+function twidget.wantmousefocus(const info: mouseeventinfoty): boolean;
+begin
+ result:= not (es_nofocus in info.eventstate) and not focused and
+                      (ws_wantmousefocus in fwidgetstate)and
+       (ow_mousefocus in foptionswidget) and canfocus
+end;
+       
 procedure twidget.mouseevent(var info: mouseeventinfoty);
 var
  clientoffset: pointty;
@@ -7959,9 +7967,7 @@ begin
       clientmouseevent(info);
       clientoffset:= getclientoffset;
      end;
-     if not (es_nofocus in info.eventstate) and not focused and
-                      (ws_wantmousefocus in fwidgetstate)and
-       (ow_mousefocus in foptionswidget) and canfocus then begin
+     if wantmousefocus(info) then begin
       setfocus;
      end;
     end;

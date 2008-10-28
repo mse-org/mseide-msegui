@@ -4648,7 +4648,7 @@ end;
 procedure tdatacol.internaldoentercell(const cellbefore: gridcoordty;
                 var newcell: gridcoordty; const action: focuscellactionty);
 begin
- if not (gs_cellentered in fgrid.fstate) then begin
+ if not (gs_cellentered in fgrid.fstate) or (action = fca_entergrid) then begin
   include(fgrid.fstate,gs_cellentered);
   dofocusedcellchanged(true,cellbefore,newcell,action);
  end;

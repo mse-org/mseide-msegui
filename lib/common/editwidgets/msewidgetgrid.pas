@@ -205,6 +205,7 @@ type
    fwidgetdummy: tdummywidget;
    fmousefocusedcell: gridcoordty;
    fmouseactivewidget: twidget;
+   fmouseinfopo: pmouseeventinfoty;
    function getdatacols: twidgetcols;
    procedure setdatacols(const avalue: twidgetcols);
    function checkreflectmouseevent(var info: mouseeventinfoty;
@@ -843,21 +844,24 @@ begin
    end;
   end
   else begin
-   if fintf <> nil then begin
+   if (fintf <> nil) then begin
     updatewidgetrect;
     inherited;
-    widget1:= fintf.getwidget;
-    with widget1 do begin
-     visible:= true;
-     if {(selectaction in [fca_focusin,fca_entergrid,fca_focusinshift]) and}
-        canfocus and tcustomwidgetgrid(fgrid).entered and 
-          not (tcustomwidgetgrid(fgrid).fcontainer1.entered or 
-               tcustomwidgetgrid(fgrid).fcontainer3.entered) then begin
-      setfocus(fgrid.active);
+    if fgrid.entered or (tcustomwidgetgrid(fgrid).fmouseinfopo <> nil) and 
+              tcustomwidgetgrid(fgrid).wantmousefocus(fmouseinfopo^) then begin
+     widget1:= fintf.getwidget;
+     with widget1 do begin
+      visible:= true;
+      if {(selectaction in [fca_focusin,fca_entergrid,fca_focusinshift]) and}
+         canfocus and tcustomwidgetgrid(fgrid).entered and 
+           not (tcustomwidgetgrid(fgrid).fcontainer1.entered or 
+                tcustomwidgetgrid(fgrid).fcontainer3.entered) then begin
+       setfocus(fgrid.active);
+      end;
      end;
-    end;
-    if ffocuscount = focuscount then begin
-     factivewidget:= widget1;
+     if ffocuscount = focuscount then begin
+      factivewidget:= widget1;
+     end;
     end;
    end
    else begin
@@ -1248,12 +1252,22 @@ end;
 
 procedure twidgetcol.drawfocusedcell(const acanvas: tcanvas);
 begin
- //no paint
+ with tcustomwidgetgrid(fgrid) do begin
+  if (factivewidget = nil) or not factivewidget.visible then begin
+   inherited;
+  end;
+ end;
+ //else no paint
 end;
 
 procedure twidgetcol.drawfocus(const acanvas: tcanvas);
 begin
- //no paint, done in widgetpainted
+ with tcustomwidgetgrid(fgrid) do begin
+  if (factivewidget = nil) or not factivewidget.visible then begin
+   inherited;
+  end;
+ end;
+ //else no paint, done in widgetpainted
 end;
 
 procedure twidgetcol.sortcompare(const index1, index2: integer;
@@ -2301,7 +2315,12 @@ end;
 
 procedure tcustomwidgetgrid.clientmouseevent(var info: mouseeventinfoty);
 begin
- inherited;
+ fmouseinfopo:= @info;
+ try
+  inherited;
+ finally;
+  fmouseinfopo:= @info;
+ end;
  if (info.eventkind = ek_buttonpress) and 
                     (factivewidget <> nil) and entered then begin
   include(info.eventstate,es_nofocus); //do not set focus to grid
@@ -2520,7 +2539,7 @@ procedure tcustomwidgetgrid.docellevent(var info: celleventinfoty);
 var
  int1: integer;
 begin
- if (info.eventkind = cek_enter) and (info.cellbefore.row <> info.newcell.row) then begin
+ if (info.eventkind = cek_focusedcellchanged) and (info.cellbefore.row <> info.newcell.row) then begin
   for int1:= 0 to fdatacols.count - 1 do begin
    with twidgetcols(fdatacols)[int1] do begin
     if fintf <> nil then begin
