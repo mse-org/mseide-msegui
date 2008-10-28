@@ -228,7 +228,8 @@ type
    function testident(const ident: integer): boolean;
                        //skips whitespace, true if ident found
    function checknamenoident: boolean;
-   function checkname: boolean;
+   function checkname: boolean; overload;
+   function checkname(const aname: ansistring): boolean; overload;
    function getname(out value: lstringty): boolean; overload;
    function getorigname(out value: lstringty): boolean; overload;
    function getname: string; overload;           //'' if none
@@ -391,6 +392,7 @@ type
  type             
  tcparser = class(tparser)
   protected
+   fincomment: integer;
    function getscannerclass: scannerclassty; override;
   public
    constructor create(const afilelist: tmseindexednamelist); override;
@@ -1310,6 +1312,9 @@ begin
     break;
    end;
   end;
+  if fto^.kind = tk_fileend1 then begin
+   nexttoken; //exit include file
+  end;
  until not ((fto^.kind = tk_whitespace) or (fto^.kind = tk_newline));
 end;
 
@@ -1480,6 +1485,15 @@ function tparser.checkname: boolean;
 begin
  skipwhitespace;
  result:= fto^.kind = tk_name;
+ if result then begin
+  nexttoken;
+ end;
+end;
+
+function tparser.checkname(const aname: ansistring): boolean;
+begin
+ skipwhitespace;
+ result:= (fto^.kind = tk_name) and issamelstring(fto^.value,aname,fcasesensitive);
  if result then begin
   nexttoken;
  end;
@@ -2141,41 +2155,64 @@ end;
 function tcparser.skipcomment: boolean;
 var
  int1: integer;
+ startpos: sourceposty;
+ bo1: boolean;
+ str1: ansistring;
+ anum: integer;
 begin
  result:= false;
- if (fto^.kind = tk_operator) and
-         ((fto^.op = '/') and checknextoperator('/') or
-          (fto^.op = '#') and isfirstnonwhitetoken) then begin
-  result:= true;
-  while not ((fto^.kind = tk_newline) or (fto^.kind = tk_fileend1)) do begin
-   nexttoken;
-  end;
- end
- else begin
-  if (fto^.kind = tk_operator) and (fto^.op = '/') and checknextoperator('*') then begin
-   result:= true;
-   int1:= 1;
-   while (int1 > 0) and (fto^.kind <> tk_fileend1) do begin
-    if (fto^.kind = tk_operator) then begin
-     if fto^.op = '*' then begin
-      if checknextoperator('/') then begin
-       dec(int1);
-      end;
-     end
-     else begin
-      if (fto^.op = '/') and frecursivecomment then begin
-       if checknextoperator('*') then begin
-        inc(int1);
+ if fincomment = 0 then begin
+  inc(fincomment);
+  if (fto^.kind = tk_operator) and
+          ((fto^.op = '/') and checknextoperator('/') or
+           (fto^.op = '#') and isfirstnonwhitetoken) then begin
+   anum:= ftokennum;
+   bo1:= (fto^.op = '#');
+   if bo1 then begin
+    nexttoken;
+    bo1:= (fto^.kind = tk_name) and issamelstring(fto^.value,'INCLUDE',fcasesensitive);
+   end;
+   if bo1 then begin 
+    nexttoken;
+    bo1:= getcstring(str1);
+   end;
+   while not ((fto^.kind = tk_newline) or (fto^.kind = tk_fileend1)) do begin
+    nexttoken;
+   end;
+   if bo1 then begin
+    callincludefile(cstringtostring(str1),startpos,anum);
+   end
+   else begin
+    result:= true;
+   end;
+  end
+  else begin
+   if (fto^.kind = tk_operator) and (fto^.op = '/') and checknextoperator('*') then begin
+    result:= true;
+    int1:= 1;
+    while (int1 > 0) and (fto^.kind <> tk_fileend1) do begin
+     if (fto^.kind = tk_operator) then begin
+      if fto^.op = '*' then begin
+       if checknextoperator('/') then begin
+        dec(int1);
+       end;
+      end
+      else begin
+       if (fto^.op = '/') and frecursivecomment then begin
+        if checknextoperator('*') then begin
+         inc(int1);
+        end;
        end;
       end;
      end;
+     nexttoken;
     end;
-    nexttoken;
-   end;
-   if int1 > 0 then begin
-    syntaxerror;
+    if int1 > 0 then begin
+     syntaxerror;
+    end;
    end;
   end;
+  dec(fincomment);
  end;
 end;
 
