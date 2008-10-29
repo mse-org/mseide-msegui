@@ -352,7 +352,6 @@ type
    procedure initidents; override;
    function getvaluestring(var value: string): valuekindty; override;
    function skipcomment: boolean; override; //does not skip whitespace
-//   procedure decodecompilerswitch(const tokens: tokensequencety);
    procedure parsecompilerswitch;
    function getpascalstring(var value: string): boolean; //true if ok
    function concatpascalstring(var value: string): boolean; 
@@ -366,8 +365,8 @@ type
    function checkpropertyident(const ident: pascalidentty): boolean; //true if ok
  end;
 
- cidentty = (cid_invalid = 1,
-  cid_break,cid_case,cid_continue,cid_default,
+ cidentty = (cid_invalid = -1,
+  cid_break = 0,cid_case,cid_continue,cid_default,
   cid_do,cid_else,cid_entry,cid_for,cid_goto,cid_if,cid_return,
   cid_sizeof,
   cid_switch,cid_while,
@@ -394,6 +393,7 @@ type
   protected
    fincomment: integer;
    function getscannerclass: scannerclassty; override;
+   procedure parsepreprocdef;
   public
    constructor create(const afilelist: tmseindexednamelist); override;
    procedure initidents; override;
@@ -1738,19 +1738,14 @@ procedure tparser.initidents;
 begin
  setidents([]);
 end;
-{
-function tparser.noteof: boolean;
-begin
- result:= not ((fto^.kind = tk_fileend1) and  (ffilestack = nil));
-end;
-}
+
 { tpascalparser }
 
 type
- cskwordty = (cskw_i,cskw_include,cskw_define,cskw_undef,cskw_ifdef,cskw_ifndef,
-              cskw_else,cskw_endif);
+ pskwordty = (pskw_i,pskw_include,pskw_define,pskw_undef,pskw_ifdef,pskw_ifndef,
+              pskw_else,pskw_endif);
 const
- cskwords: array[cskwordty] of string = 
+ pskwords: array[pskwordty] of string = 
                   ('I','INCLUDE','DEFINE','UNDEF','IFDEF','IFNDEF',
                    'ELSE','ENDIF');
                   
@@ -1783,18 +1778,18 @@ var
  lstr1: lstringty;
 begin
  anum:= ftokennum;
- int1:= testnames(fto^,cskwords);
+ int1:= testnames(fto^,pskwords);
  if int1 >= 0 then begin
   if int1 > 1 then begin
    nexttoken;
   end;
-  case cskwordty(int1) of
-   cskw_ifdef,cskw_ifndef: begin
+  case pskwordty(int1) of
+   pskw_ifdef,pskw_ifndef: begin
     additem(fdefstates,integer(fdefstate),fdefstatecount);
     if fdefstate <> def_skip then begin
      if not (getname(lstr1) and 
                        ((fdefines.find(lstr1) <> nil) xor 
-                        (cskwordty(int1) = cskw_ifndef))) then begin
+                        (pskwordty(int1) = pskw_ifndef))) then begin
       fdefstate:= def_skip;
       skiprest;
       skipskip;
@@ -1807,7 +1802,7 @@ begin
      skiprest;
     end;
    end;
-   cskw_else: begin
+   pskw_else: begin
     skiprest;
     if fdefstate = def_skip then begin
      if (fdefstatecount = 0) or 
@@ -1822,7 +1817,7 @@ begin
      end;
     end;
    end;
-   cskw_endif: begin
+   pskw_endif: begin
     if fdefstatecount > 0 then begin
      dec(fdefstatecount);
      fdefstate:= defstatety(fdefstates[fdefstatecount]);
@@ -1831,8 +1826,8 @@ begin
    end;
    else begin
     if fdefstate <> def_skip then begin 
-     case cskwordty(int1) of
-      cskw_i,cskw_include: begin
+     case pskwordty(int1) of
+      pskw_i,pskw_include: begin
        startpos:= sourcepos;
        nexttoken;
        if checkoperator('''') then begin
@@ -1863,13 +1858,13 @@ begin
         callincludefile(filename,startpos,anum);
        end;
       end;
-      cskw_define: begin
+      pskw_define: begin
        str1:= getname;
        if str1 <> '' then begin
         fdefines.add(str1);
        end;
       end;
-      cskw_undef: begin
+      pskw_undef: begin
        if getname(lstr1) then begin
         fdefines.delete(lstr1);
        end;
@@ -2080,6 +2075,13 @@ begin
 end;
 
 { tcparser }
+type
+ cskwordty = (cskw_if,cskw_include,cskw_define,cskw_undef,cskw_ifdef,cskw_ifndef,
+              cskw_else,cskw_endif);
+const
+ cskwords: array[cskwordty] of string = 
+                  ('if','include','define','undef','ifdef','ifndef',
+                   'else','endif');
 
 constructor tcparser.create(const afilelist: tmseindexednamelist);
 begin
@@ -2152,14 +2154,130 @@ begin
  end;
 end;
 
+procedure tcparser.parsepreprocdef;
+
+ procedure skiprest;
+ begin
+  while not ((fto^.kind = tk_newline) or (fto^.kind = tk_fileend1)) do begin
+                               //skip rest of line
+   nexttoken;
+  end;
+ end;
+ 
+ procedure skipskip;
+ begin
+  repeat
+   if not skipcomment then begin
+    nexttoken;
+   end;
+  until (fto^.kind = tk_fileend1) or (fdefstate <> def_skip);
+ end;
+
+var
+ startpos: sourceposty;
+ anum: integer;
+ int1: integer;
+ bo1: boolean;
+ str1: string;
+ po1: pchar;
+ lstr1: lstringty;
+begin
+ startpos:= sourcepos;
+ anum:= ftokennum;
+ nexttoken;
+ int1:= testnames(fto^,cskwords);
+ if int1 >= 0 then begin
+  nexttoken;
+ end;
+ case cskwordty(int1) of
+  cskw_ifdef,cskw_ifndef: begin
+   additem(fdefstates,integer(fdefstate),fdefstatecount);
+   if fdefstate <> def_skip then begin
+    if not (getname(lstr1) and 
+                      ((fdefines.find(lstr1) <> nil) xor 
+                       (cskwordty(int1) = cskw_ifndef))) then begin
+     fdefstate:= def_skip;
+     skiprest;
+     skipskip;
+     exit; //no skip rest
+    end
+   end
+  end;
+  cskw_else: begin
+   skiprest;
+   if fdefstate = def_skip then begin
+    if (fdefstatecount = 0) or 
+            (defstatety(fdefstates[fdefstatecount-1]) <> def_skip) then begin
+     fdefstate:= def_none;
+    end;
+   end
+   else begin
+    if fdefstatecount > 0 then begin
+     fdefstate:= def_skip;
+     skipskip;
+     exit;
+    end;
+   end;
+   exit; //no skiprest
+  end;
+  cskw_endif: begin
+   if fdefstatecount > 0 then begin
+    dec(fdefstatecount);
+    fdefstate:= defstatety(fdefstates[fdefstatecount]);
+   end;
+  end;
+  else begin
+   if fdefstate <> def_skip then begin
+    case cskwordty(int1) of
+     cskw_include: begin
+      bo1:= getcstring(str1);
+      if not bo1 and checkoperator('<') then begin
+       po1:= fto^.value.po;
+       mark;
+       bo1:= findoperator('>');
+       if bo1 then begin
+        pop;
+        str1:= getorigtext(po1);
+        if str1 <> '' then begin
+         setlength(str1,length(str1)-1);
+        end;
+       end
+       else begin
+        back;
+       end;
+      end
+      else begin
+       str1:= cstringtostring(str1);
+      end;
+      skiprest;
+      if bo1 then begin
+       callincludefile(str1,startpos,anum);
+       exit; //no skip of rest of line
+      end
+     end;
+     cskw_define: begin
+      str1:= getname;
+      if str1 <> '' then begin
+       fdefines.add(str1);
+      end;
+     end;
+     cskw_undef: begin
+      if getname(lstr1) then begin
+       fdefines.delete(lstr1);
+      end;
+     end;
+    end;
+   end;   
+  end;
+ end;
+ skiprest;
+end;
+
 function tcparser.skipcomment: boolean;
 var
  int1: integer;
- startpos: sourceposty;
  bo1: boolean;
  str1: ansistring;
- anum: integer;
- po1: pchar;
 begin
  result:= false;
  if fincomment = 0 then begin
@@ -2167,38 +2285,13 @@ begin
   if (fto^.kind = tk_operator) and
           ((fto^.op = '/') and checknextoperator('/') or
            (fto^.op = '#') and isfirstnonwhitetoken) then begin
-   anum:= ftokennum;
-   bo1:= (fto^.op = '#');
-   if bo1 then begin
-    nexttoken;
-    bo1:= (fto^.kind = tk_name) and issamelstring(fto^.value,'INCLUDE',fcasesensitive);
-   end;
-   if bo1 then begin 
-    nexttoken;
-    bo1:= getcstring(str1);
-    if not bo1 and checkoperator('<') then begin
-     po1:= fto^.value.po;
-     mark;
-     bo1:= findoperator('>');
-     if bo1 then begin
-      pop;
-      str1:= getorigtext(po1);
-      if str1 <> '' then begin
-       setlength(str1,length(str1)-1);
-      end;
-     end
-     else begin
-      back;
-     end;
-    end;
-   end;
-   while not ((fto^.kind = tk_newline) or (fto^.kind = tk_fileend1)) do begin
-    nexttoken;
-   end;
-   if bo1 then begin
-    callincludefile(cstringtostring(str1),startpos,anum);
+   if fto^.op = '#' then begin
+    parsepreprocdef;
    end
    else begin
+    while not ((fto^.kind = tk_newline) or (fto^.kind = tk_fileend1)) do begin
+     nexttoken;
+    end;
     result:= true;
    end;
   end

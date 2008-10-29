@@ -185,7 +185,7 @@ var
 var
  bo1: boolean;
 begin
- scope:= tdeflist.create(adef^.kind);
+ scope:= tdeflist.create(adef^.kind,false);
  atext:= sourceupdater.getdefinfotext(adef);
  if atext <> '' then begin
   parser:= tpascalparser.create(designer.designfiles,atext);

@@ -31,6 +31,7 @@ type
    fnoautoparse: boolean;
    ffunctionlevel: integer;
   protected
+   procedure initidents; override;
    function parsefunction: boolean;
    function parsefunctionparams: boolean;
    function parseblock: boolean;
@@ -92,7 +93,7 @@ var
  end;
  
 begin
- scope:= tdeflist.create(adef^.kind);
+ scope:= tdeflist.create(adef^.kind,true);
  atext:= sourceupdater.getdefinfotext(adef);
  if atext <> '' then begin
   parser:= tcparser.create(designer.designfiles,atext);
@@ -217,9 +218,11 @@ end;
 function tcdesignparser.parsefunction: boolean;
 var
  lstr1,lstr2: lstringty;
+ str1: string;
  ch1: char;
  pos1: sourceposty;
  po1: pfunctioninfoty;
+ po2: pfunctionheaderinfoty;
 begin
  inc(ffunctionlevel);
  result:= false;
@@ -229,20 +232,25 @@ begin
  with funitinfopo^ do begin
   if getorigname(lstr1) and getorigname(lstr2) then begin
    if parsefunctionparams then begin
-    if checkoperator(';') then begin
+    if (ffunctionlevel = 1) and testoperator(';') then begin
+     po2:= c.functionheaders.newitem;
+     po2^.name:= lstringtostring(lstr2);
+     deflist.add(pos1,sourcepos,po2);
+     nexttoken;
      result:= true;  //header
     end
     else begin
      if testoperator('{') then begin
-      po1:= c.functions.newitem;
-      if parseblock then begin
-       result:= true;
-       po1^.name:= lstringtostring(lstr2);
-       deflist.add(pos1,sourcepos,po1);
-      end;
-      if not result then begin
-       c.functions.deletelast;
-      end;
+      result:= true;
+      str1:= lstringtostring(lstr2);
+      if ffunctionlevel = 1 then begin
+       po1:= c.functions.newitem;
+       po1^.name:= str1;
+      end;      
+      deflist.beginnode(str1,syk_procimp,pos1,sourcepos);
+                          //new scope
+      parseblock;
+      deflist.endnode(sourcepos);
      end;
     end;    
    end;
@@ -262,30 +270,40 @@ var
  lstr1,lstr2: lstringty;
  ch1: char;
  bo1: boolean;
+ pos1: sourceposty;
 begin
  result:= true;
  bo1:= ffunctionlevel = 0;
  mark;
- if not bo1 and checknamenoident then begin
+ if not bo1 then begin //in function body
   repeat
-   ch1:= getoperator;
-   case ch1 of
-    '(': begin
-     findclosingbracket; //function call
+  until getident = -1; //remove keywords
+  pos1:= sourcepos;
+  if getnamenoident(lstr1) then begin
+   repeat
+    ch1:= getoperator;
+    case ch1 of
+     '(': begin
+      funitinfopo^.deflist.actnode.addident(pos1,lstr1.len);
+      findclosingbracket; //function call
+     end;
+     '=': begin
+      skipstatement;      //assignment
+      break;
+     end;
+     ';': begin
+      break;
+     end;
+     else begin
+      bo1:= true;
+      break;
+     end;
     end;
-    '=': begin
-     skipstatement;      //assignment
-     break;
-    end;
-    ';': begin
-     break;
-    end;
-    else begin
-     bo1:= true;
-     break;
-    end;
-   end;
-  until ch1 = #0;
+   until ch1 = #0;
+  end
+  else begin
+   bo1:= true;
+  end;
  end;
  if bo1 then begin
   back;
@@ -329,6 +347,11 @@ begin
  if result <> nil then begin
   addincludefile(funitinfopo^,afilename,astatementstart,astatementend);
  end;
+end;
+
+procedure tcdesignparser.initidents;
+begin
+ setidents(cidents);
 end;
 
 end.

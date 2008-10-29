@@ -211,6 +211,7 @@ type
 
   functionheaderinfoty = record
    b: browserlistitemty;
+   name: ansistring;
   end;
   pfunctionheaderinfoty = ^functionheaderinfoty;
 
@@ -286,6 +287,7 @@ type
     finfos: definfoarty;
     fstart,fstop: sourceposty;
     fkind: symbolkindty;
+    fcasesensitive: boolean;
     procedure comp(const l,r; out result: integer);
     procedure compnopars(const l,r; out result: integer);
     procedure compsubstr(const l,r; out result: integer);
@@ -304,10 +306,11 @@ type
     function add(const akind: symbolkindty; const apos,astop: sourceposty): pdefinfoty; overload;
                      //statment
    public
-    constructor create(const akind: symbolkindty);
+    constructor create(const akind: symbolkindty; const acasesensitive: boolean);
     procedure clear; override;
     procedure startident(const aparser: tparser);
-    procedure addident(const aparser: tparser);
+    procedure addident(const aparser: tparser); overload;
+    procedure addident(const apos: sourceposty; const alen: integer); overload;
     procedure addemptyident(const aparser: tparser);
     procedure endident(const aparser: tparser); overload;
     procedure endident(const aparser: tparser; const endpos: sourceposty); overload;
@@ -362,6 +365,8 @@ type
                       const aprocinfo: pprocedureinfoty): pdefinfoty; overload;
     function add(const apos,astop: sourceposty; 
                       const afunctioninfo: pfunctioninfoty): pdefinfoty; overload;
+    function add(const apos,astop: sourceposty; 
+                      const afunctionheaderinfo: pfunctionheaderinfoty): pdefinfoty; overload;
     procedure deletenode;
     function finddef(const anamepath: stringarty; var scopes: deflistarty;
                var defs: definfopoarty;
@@ -379,9 +384,11 @@ type
 
   includestatementarty = array of includestatementty;
 
-  tfunctionheaders= class(tbrowserlist)
+  tfunctionheaders = class(tbrowserlist)
    private
     function getitempo(const index: integer): pfunctionheaderinfoty;
+   protected
+    procedure finalizerecord(var item); override;
    public
     constructor create;
     property items[const index: integer]: pfunctionheaderinfoty
@@ -1068,8 +1075,10 @@ end;
 }
 { tdeflist }
 
-constructor tdeflist.create(const akind: symbolkindty);
+constructor tdeflist.create(const akind: symbolkindty;
+                                              const acasesensitive: boolean);
 begin
+ fcasesensitive:= acasesensitive;
  fkind:= akind;
  inherited create(sizeof(defnamety),[rels_needsfinalize]);
 end;
@@ -1096,7 +1105,12 @@ var
  po1: pdefnamety;
 begin
  po1:= newitem;
- po1^.name:= struppercase(aname);
+ if fcasesensitive then begin
+  po1^.name:= aname;
+ end
+ else begin
+  po1^.name:= struppercase(aname);
+ end;
  po1^.id:= incinfocount;
  result:= @finfos[po1^.id];
  with result^ do begin
@@ -1142,6 +1156,15 @@ begin
   inc(stop1.pos.col,identlen);
  end;
  aparser.nexttoken
+end;
+
+procedure tdeflist.addident(const apos: sourceposty; const alen: integer);
+begin
+ with add(syk_identuse,apos,emptysourcepos)^ do begin
+  identlen:= alen;
+  stop1:= pos;
+  inc(stop1.pos.col,identlen);
+ end;
 end;
 
 procedure tdeflist.addemptyident(const aparser: tparser);
@@ -1542,7 +1565,12 @@ label
  exit1;
 begin
  result:= nil;
- str1:= struppercase(aname);
+ if fcasesensitive then begin
+  str1:= aname;
+ end
+ else begin
+  str1:= struppercase(aname);
+ end;
  sorted:= true;
  if akind = syk_nopars then begin
   fcompareproc:= {$ifdef FPC}@{$endif}compnopars;
@@ -1579,7 +1607,12 @@ var
  po1: pdefinfoty;
 begin
  result:= nil;
- str1:= struppercase(aname);
+ if fcasesensitive then begin
+  str1:= aname;
+ end
+ else begin
+  str1:= struppercase(aname);
+ end;
  sorted:= true;
  if akind = syk_nopars then begin
   fcompareproc:= {$ifdef FPC}@{$endif}compnopars;
@@ -1623,7 +1656,7 @@ constructor trootdeflist.create(const aunitinfopo: punitinfoty);
 begin
  funitinfopo:= aunitinfopo;
  factnode:= self;
- inherited create(syk_root);
+ inherited create(syk_root,funitinfopo^.proglang = pl_c);
 end;
 
 procedure trootdeflist.clear;
@@ -1637,7 +1670,7 @@ function trootdeflist.beginnode(const aname: string; const akind: symbolkindty;
 begin
  result:= factnode.add(aname,akind,apos,astop);
  with result^ do begin
-  deflist:= tdeflist.create(akind);
+  deflist:= tdeflist.create(akind,fcasesensitive);
   deflist.fparent:= factnode;
   deflist.fparentid:= factnode.count - 1;
   deflist.fparentscope:= factnode;
@@ -1700,8 +1733,15 @@ end;
 function trootdeflist.add(const apos,astop: sourceposty; 
          const afunctioninfo: pfunctioninfoty): pdefinfoty;
 begin
- result:= factnode.add(afunctioninfo^.name,syk_procdef,apos,astop);
+ result:= factnode.add(afunctioninfo^.name,syk_procimp,apos,astop);
  result^.procindex:= afunctioninfo^.b.index;
+end;
+
+function trootdeflist.add(const apos,astop: sourceposty; 
+         const afunctionheaderinfo: pfunctionheaderinfoty): pdefinfoty;
+begin
+ result:= factnode.add(afunctionheaderinfo^.name,syk_procdef,apos,astop);
+ result^.procindex:= afunctionheaderinfo^.b.index;
 end;
 
 function trootdeflist.finddef(const anamepath: stringarty; var scopes: deflistarty;
@@ -1825,12 +1865,17 @@ end;
 
 constructor tfunctionheaders.create;
 begin
- inherited create(sizeof(functionheaderinfoty));
+ inherited create(sizeof(functionheaderinfoty),[rels_needsfinalize]);
 end;
 
 function tfunctionheaders.getitempo(const index: integer): pfunctionheaderinfoty;
 begin
  result:= pfunctionheaderinfoty(inherited getitempo(index));
+end;
+
+procedure tfunctionheaders.finalizerecord(var item);
+begin
+ finalize(functionheaderinfoty(item));
 end;
 
 { tfunctions }
@@ -1902,12 +1947,12 @@ end;
 
 constructor tcunitinfo.create;
 begin
- inherited;
  with info do begin
   proglang:= pl_c;
   c.functionheaders:= tfunctionheaders.create;
   c.functions:= tfunctions.create;
  end;
+ inherited;
 end;
 
 destructor tcunitinfo.destroy;
