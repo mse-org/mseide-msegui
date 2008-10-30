@@ -230,6 +230,7 @@ begin
  mark;
  pos1:= sourcepos;
  with funitinfopo^ do begin
+  skipidents;
   if getorigname(lstr1) and getorigname(lstr2) then begin
    if parsefunctionparams then begin
     if (ffunctionlevel = 1) and testoperator(';') then begin
@@ -244,8 +245,7 @@ begin
       result:= true;
       str1:= lstringtostring(lstr2);
       if ffunctionlevel = 1 then begin
-       po1:= c.functions.newitem;
-       po1^.name:= str1;
+       c.functions.add(str1,pos1,sourcepos);
       end;      
       deflist.beginnode(str1,syk_procimp,pos1,sourcepos);
                           //new scope
@@ -274,10 +274,10 @@ var
 begin
  result:= true;
  bo1:= ffunctionlevel = 0;
+ skipwhitespace;
  mark;
  if not bo1 then begin //in function body
-  repeat
-  until getident = -1; //remove keywords
+  skipidents;          //remove keywords
   pos1:= sourcepos;
   if getnamenoident(lstr1) then begin
    repeat
@@ -302,7 +302,12 @@ begin
    until ch1 = #0;
   end
   else begin
-   bo1:= true;
+   if checkoperator('{') then begin
+    parseblock;
+   end
+   else begin
+    bo1:= true;
+   end;
   end;
  end;
  if bo1 then begin

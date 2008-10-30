@@ -258,6 +258,7 @@ type
    function skipwhitespace: boolean;       //and comments, false if no whitespaces
    function skipwhitespaceonly: boolean;
    function skipnamelist: boolean; //skips [,]{<name>,} false if no name found
+   function skipidents: boolean;
    property eof: boolean read feof;
    function isfirstnonwhitetoken: boolean;
    {$ifndef nohash}
@@ -1210,6 +1211,7 @@ function tparser.getnextoperator: char;
 begin
  result:= #0;
  while (fto^.kind <> tk_fileend1) or exitinclude do begin
+  skipwhitespace;
   if (fto^.kind = tk_operator) then begin
    result:= fto^.op;
    nexttoken;
@@ -1308,8 +1310,11 @@ begin
   end;
   while skipcomment do begin
    result:= true;
+   while (fto^.kind = tk_whitespace) or (fto^.kind = tk_newline) do begin
+    nexttoken;
+   end;
    if fto^.kind = tk_fileend1 then begin
-    break;
+    nexttoken; //exit include file
    end;
   end;
   if fto^.kind = tk_fileend1 then begin
@@ -1340,6 +1345,13 @@ begin
   if not checkoperator(',') then begin
    break;
   end;
+ end;
+end;
+
+function tparser.skipidents: boolean;
+begin
+ result:= false;
+ while getident >= 0 do begin
  end;
 end;
 
@@ -2170,7 +2182,7 @@ procedure tcparser.parsepreprocdef;
    if not skipcomment then begin
     nexttoken;
    end;
-  until (fto^.kind = tk_fileend1) or (fdefstate <> def_skip);
+  until (fdefstate <> def_skip) or eof;
  end;
 
 var
@@ -2252,6 +2264,7 @@ begin
       skiprest;
       if bo1 then begin
        callincludefile(str1,startpos,anum);
+       skipcomment;
        exit; //no skip of rest of line
       end
      end;
@@ -2286,7 +2299,10 @@ begin
           ((fto^.op = '/') and checknextoperator('/') or
            (fto^.op = '#') and isfirstnonwhitetoken) then begin
    if fto^.op = '#' then begin
+    result:= true;
+    dec(fincomment);
     parsepreprocdef;
+    inc(fincomment);
    end
    else begin
     while not ((fto^.kind = tk_newline) or (fto^.kind = tk_fileend1)) do begin
@@ -2335,6 +2351,13 @@ begin
  repeat
   ch1:= getnextoperator;
   case ch1 of
+   ';','{','}': begin
+    result:= true;
+    break;
+   end;
+  end;
+  {
+  case ch1 of
    '(': begin
     inc(int1);
    end;
@@ -2348,6 +2371,7 @@ begin
     end;
    end;
   end;
+  }
  until ch1 = #0;
 end;
 

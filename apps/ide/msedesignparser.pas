@@ -216,8 +216,9 @@ type
   pfunctionheaderinfoty = ^functionheaderinfoty;
 
   functioninfoty = record
-   b: browserlistitemty;
+//   b: browserlistitemty;
    name: ansistring;
+   start,stop: sourceposty;
   end;
   pfunctioninfoty = ^functioninfoty;
 
@@ -395,13 +396,17 @@ type
                                                 read getitempo; default;
   end;
   
-  tfunctions = class(tbrowserlist)
+  tfunctions = class(torderedrecordlist)
    private
     function getitempo(const index: integer): pfunctioninfoty;
+    procedure comp(const left,right; out res: integer);
    protected
     procedure finalizerecord(var item); override;
+    function getcompareproc: compareprocty; override;
    public
     constructor create;
+    procedure add(const aname: ansistring; const astart,astop: sourceposty);
+    function find(const name: ansistring): pfunctioninfoty;
     property items[const index: integer]: pfunctioninfoty 
                                                  read getitempo; default;
   end;
@@ -1734,7 +1739,8 @@ function trootdeflist.add(const apos,astop: sourceposty;
          const afunctioninfo: pfunctioninfoty): pdefinfoty;
 begin
  result:= factnode.add(afunctioninfo^.name,syk_procimp,apos,astop);
- result^.procindex:= afunctioninfo^.b.index;
+ result^.procindex:= -1; //functioninfoty is no browseritem
+// result^.procindex:= afunctioninfo^.b.index;
 end;
 
 function trootdeflist.add(const apos,astop: sourceposty; 
@@ -1893,6 +1899,37 @@ end;
 procedure tfunctions.finalizerecord(var item);
 begin
  finalize(functioninfoty(item));
+end;
+
+procedure tfunctions.add(const aname: ansistring; const astart,astop: sourceposty);
+begin
+ with pfunctioninfoty(newitem)^ do begin
+  name:= aname;
+  start:= astart;
+  stop:= astop;
+ end;
+end;
+
+procedure tfunctions.comp(const left; const right; out res: integer);
+begin
+ res:= stringcomp(ansistring(left),ansistring(right));
+end;
+
+function tfunctions.getcompareproc: compareprocty;
+begin
+ result:= {$ifdef FPC}@{$endif}comp;
+end;
+
+function tfunctions.find(const name: ansistring): pfunctioninfoty;
+var
+ info: functioninfoty;
+ int1: integer;
+begin
+ result:= nil;
+ info.name:= name;
+ if internalfind(info,int1) then begin
+  result:= items[int1];
+ end;
 end;
 
 { tunitinfo }

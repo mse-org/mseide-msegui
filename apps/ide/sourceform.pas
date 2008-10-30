@@ -138,7 +138,7 @@ type
    function gdbpage: tsourcepage;
    function modified: boolean;
    function newfiletag: cardinal;
-   property items[const index: integer]: tsourcepage read getitems;
+   property items[const index: integer]: tsourcepage read getitems; default;
    property naviglist: tnaviglist read fnaviglist;
    function findbookmark(const bookmarknum: integer): boolean;
    procedure setbookmark(const apage: tsourcepage; const arow: integer;

@@ -184,6 +184,9 @@ type
    function parsemodule(const amodule: tmsecomponent): pclassinfoty;
    function findunitfile(const unitname: msestring): msestring;
    function findmethodpos(const amethod: tmethod; const imp: boolean = false): sourceposty;
+   function findcfunctionimplementation(const aname: ansistring;
+                      out headerstart,headerstop: sourceposty): boolean;
+                          //true if found
 
    function composeproceduretext(const infopo: pprocedureinfoty;
                      const withdefault: boolean): string; overload;
@@ -1073,6 +1076,10 @@ begin
     end
     else begin
      po2:= scope.find(po1^.name,syk_procimp);
+     if (po2 = nil) and (infopo^.proglang = pl_c) then begin
+      result:= findcfunctionimplementation(po1^.name,headerstart,
+                                                        headerstop);
+     end;
     end;
    end
    else begin
@@ -2167,6 +2174,34 @@ procedure tsourceupdater.beforefilesave(const adesigner: idesigner;
                const afilename: filenamety);
 begin
  //dummy
+end;
+
+function tsourceupdater.findcfunctionimplementation(const aname: ansistring;
+               out headerstart: sourceposty;
+               out headerstop: sourceposty): boolean;
+var
+ int1: integer;
+ po2: punitinfoty;
+ po3: pfunctioninfoty;
+ int2: integer;
+ mstr1: filenamety;
+begin
+ result:= false;
+ for int1:= 0 to sourcefo.count - 1 do begin
+  mstr1:= sourcefo[int1].filepath;
+  if mseuppercase(fileext(mstr1)) = 'C' then begin
+   po2:= updatesourceunit(mstr1,int2,false);
+   if po2^.proglang = pl_c then begin
+    po3:= po2^.c.functions.find(aname);
+    if po3 <> nil then begin
+     headerstart:= po3^.start;
+     headerstop:= po3^.stop;
+     result:= true;
+     break;
+    end;
+   end;
+  end;
+ end;
 end;
 
 end.
