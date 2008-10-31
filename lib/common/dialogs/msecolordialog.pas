@@ -53,7 +53,7 @@ type
    fupdating: boolean;
  end;
  
- setcoloreventty = procedure(const sender: tobject; var avalue: colorty; 
+ setcoloreventty = procedure(const sender: tobject; var avalue: colorty;
                           var accept: boolean) of object;               
 
  tellipsedropdownbuttonframe = class(tdropdownbuttonframe)
@@ -79,22 +79,26 @@ type
    procedure setonsetvalue(const avalue: setcoloreventty);
    function getframe: tellipsedropdownbuttonframe;
    procedure setframe(const avalue: tellipsedropdownbuttonframe);
+   function getgridvalues(const index: integer): colorty;
+   procedure setgridvalues(const index: integer; const avalue: colorty);
   protected
    function internaldatatotext(
                  const avalue: integer): msestring; virtual;
    function datatotext(const data): msestring; override;
    function createdropdowncontroller: tcustomdropdowncontroller; override;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
-   procedure buttonaction(var action: buttonactionty; 
+   procedure buttonaction(var action: buttonactionty;
                     const buttonindex: integer); override;
   public
    constructor create(aowner: tcomponent); override;
    property value: colorty read getvalue write setvalue default cl_none;
-   property valuedefault: colorty read getvaluedefault 
+   property valuedefault: colorty read getvaluedefault
                      write setvaluedefault default cl_none;
    property dropdown;
    property onsetvalue: setcoloreventty read getonsetvalue write setonsetvalue;
    property frame: tellipsedropdownbuttonframe read getframe write setframe;
+   property gridvalue[const index: integer]: colorty
+        read getgridvalues write setgridvalues; default;
  end;
 
  tcoloredit = class(tcustomcoloredit)
@@ -341,7 +345,18 @@ end;
 
 procedure tcustomcoloredit.setframe(const avalue: tellipsedropdownbuttonframe);
 begin
-  inherited frame:= avalue;
+ inherited frame:= avalue;
+end;
+
+function tcustomcoloredit.getgridvalues(const index: integer): colorty;
+begin
+ result:= inherited gridvalues[index];
+end;
+
+procedure tcustomcoloredit.setgridvalues(const index: integer;
+                                               const avalue: colorty);
+begin
+ inherited gridvalues[index]:= avalue; 
 end;
 
 { tcolordialogfo }

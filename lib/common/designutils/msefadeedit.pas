@@ -49,13 +49,15 @@ type
 
  tfadecoloreditor = class(tcolorarraypropertyeditor)
   protected
-   function getdefaultstate: propertystatesty; override;  
-   procedure edit; override; 
+   function getdefaultstate: propertystatesty; override;
+  public
+   procedure edit; override;
  end;
- 
+
  tfadeposeditor = class(trealarraypropertyeditor)
   protected
-   function getdefaultstate: propertystatesty; override;   
+   function getdefaultstate: propertystatesty; override;
+  public
    procedure edit; override; 
  end;
  

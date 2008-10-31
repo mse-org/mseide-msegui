@@ -175,17 +175,17 @@ type
    fongetincludefile: getincludefileeventty;
    feof: boolean;
    ffilelist: tmseindexednamelist;
-   function getacttoken: tokenidty;
-   procedure setacttokennum(anum: cardinal);
-   procedure setacttoken(const atoken: tokenidty);
-   procedure enterinclude(anum: cardinal);
-   function exitinclude: boolean;
               //false if root
    fdefines: tdefineslist;
    fdefstate: defstatety;
    fdefstates: integerarty;
    fdefstatecount: integer;
    fstartdefines: stringarty;
+   function getacttoken: tokenidty;
+   procedure setacttokennum(anum: cardinal);
+   procedure setacttoken(const atoken: tokenidty);
+   procedure enterinclude(anum: cardinal);
+   function exitinclude: boolean;
  protected
    fscanners: scannerarty;
    fsyntaxerrorcount: integer;

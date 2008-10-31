@@ -116,7 +116,7 @@ type
    function readinteger(const name: msestring; const default: integer = 0;
                const min: integer = -(maxint)-1; const max: integer = maxint): integer;
    function readint64(const name: msestring; const default: int64 = 0;
-               const min: integer = -(maxint64)-1; const max: int64 = maxint64): int64;
+               const min: int64 = -(maxint64)-1; const max: int64 = maxint64): int64;
    function readreal(const name: msestring; const default: real = 0;
                const min: real = -bigreal; const max: real = bigreal): realty;
    function readstring(const name: msestring; const default: string): string;
@@ -645,6 +645,7 @@ end;
 procedure tstatreader.checkint64range(var value: int64; const min,max: int64);
 begin
  if max < min then begin  //unsigned
+ {$ifdef FPC}
   if qword(value) > qword(max) then begin
    value:= max;
   end
@@ -653,6 +654,9 @@ begin
     value:= min;
    end;
   end;
+  {$else}
+   //delphi has no unsigned 64 bit type
+  {$endif}
  end
  else begin
   if value > max then begin
@@ -685,7 +689,7 @@ begin
 end;
 
 function tstatreader.readint64(const name: msestring; const default: int64 = 0;
-               const min: integer = -(maxint64)-1; const max: int64 = maxint64): int64;
+               const min: int64 = -(maxint64)-1; const max: int64 = maxint64): int64;
 var
  str1: msestring;
 begin
