@@ -886,6 +886,8 @@ procedure gdierrorlocked(error: gdierrorty; sender: tobject; text: string = '');
 function colortorgb(color: colorty): rgbtriplety;
 function colortopixel(color: colorty): pixelty;
 function rgbtocolor(const red,green,blue: integer): colorty;
+function blendcolor(const weight: real; const a,b: colorty): colorty;
+                       //0..1
 
 procedure setcolormapvalue(index: colorty; const red,green,blue: integer); overload;
                     //RGB values 0..255
@@ -1383,6 +1385,19 @@ end;
 function rgbtocolor(const red,green,blue: integer): colorty;
 begin
  result:= (blue and $ff) or ((green and $ff) shl 8) or ((red and $ff) shl 16);
+end;
+
+function blendcolor(const weight: real; const a,b: colorty): colorty;
+var
+ by1: byte;
+ ca,cb: rgbtriplety;
+begin
+ ca:= colortorgb(a);
+ cb:= colortorgb(b);
+ rgbtriplety(result).red:= ca.red + round((cb.red - ca.red)*weight);
+ rgbtriplety(result).green:= ca.green + round((cb.green - ca.green)*weight);
+ rgbtriplety(result).blue:= ca.blue + round((cb.blue - ca.blue)*weight);
+ rgbtriplety(result).res:= 0;
 end;
 
 function initcolormap: boolean;

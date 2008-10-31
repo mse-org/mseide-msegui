@@ -704,6 +704,8 @@ procedure orderarray(const sourceorderlist: integerarty; var sortlist; size: int
 procedure orderarray(const sourceorderlist: integerarty; 
                              var sortlist: pointerarty); overload;
 procedure orderarray(const sourceorderlist: integerarty; 
+                             var sortlist: integerarty); overload;
+procedure orderarray(const sourceorderlist: integerarty; 
                              var sortlist: msestringarty); overload;
 procedure orderarray(const sourceorderlist: integerarty; 
                              var sortlist: stringarty); overload;
@@ -713,6 +715,8 @@ procedure reorderarray(const destorderlist: integerarty;
          //sortlist = array of type
 procedure reorderarray(const destorderlist: integerarty; 
                              var sortlist: pointerarty); overload;
+procedure reorderarray(const destorderlist: integerarty; 
+                             var sortlist: integerarty); overload;
 procedure reorderarray(const destorderlist: integerarty; 
                              var sortlist: msestringarty); overload;
 procedure reorderarray(const destorderlist: integerarty; 
@@ -1705,6 +1709,20 @@ begin
  end;
 end;
 
+procedure orderarray(const sourceorderlist: integerarty;
+                                   var sortlist: integerarty);
+var
+ po2: pchar;
+ int1: integer;
+begin
+ if initorderbuffer(sortlist,sizeof(integer),false,po2) then begin
+  for int1:= 0 to high(sourceorderlist) do begin
+   integerarty(pointer(po2))[int1]:= sortlist[sourceorderlist[int1]];
+  end;
+  storebuffer(po2,sortlist);
+ end;
+end;
+
 procedure reorderarray(const destorderlist: integerarty; var sortlist: pointerarty);
 var
  po2: pchar;
@@ -1713,6 +1731,20 @@ begin
  if initorderbuffer(sortlist,sizeof(pointer),false,po2) then begin
   for int1:= 0 to high(destorderlist) do begin
    pointerarty(pointer(po2))[destorderlist[int1]]:= sortlist[int1];
+  end;
+  storebuffer(po2,sortlist);
+ end;
+end;
+
+procedure reorderarray(const destorderlist: integerarty;
+                                              var sortlist: integerarty);
+var
+ po2: pchar;
+ int1: integer;
+begin
+ if initorderbuffer(sortlist,sizeof(integer),false,po2) then begin
+  for int1:= 0 to high(destorderlist) do begin
+   integerarty(pointer(po2))[destorderlist[int1]]:= sortlist[int1];
   end;
   storebuffer(po2,sortlist);
  end;

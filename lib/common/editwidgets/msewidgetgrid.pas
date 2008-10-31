@@ -243,6 +243,7 @@ type
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure doexit; override;
    procedure checkrowreadonlystate; override;
+   procedure updaterowdata; override;
 
    function getcontainer: twidget; override;
    function getchildwidgets(const index: integer): twidget; override;
@@ -1288,7 +1289,7 @@ end;
 procedure twidgetcol.itemchanged(sender: tdatalist; aindex: integer);
 begin
  inherited;
- if fintf <> nil then begin
+ if {(tcustomwidgetgrid(fgrid).fupdating = 0) and} (fintf <> nil) then begin
   fintf.gridvaluechanged(aindex);
  end;
 end;
@@ -2479,13 +2480,7 @@ begin
     end;
    finally
     try
-     for int1:= 0 to datacols.count - 1 do begin
-      with twidgetcol(fdatacols[int1]) do begin
-       if fintf <> nil then begin
-        fintf.gridtovalue(-1); //restore grid value
-       end;
-      end;
-     end;
+     updaterowdata;
     finally
      endupdate;
     end;
@@ -2605,6 +2600,19 @@ begin
     include(fstate,cos_readonlyupdating);
     fintf.setreadonly(isreadonly);
     exclude(fstate,cos_readonlyupdating);
+   end;
+  end;
+ end;
+end;
+
+procedure tcustomwidgetgrid.updaterowdata;
+var
+ int1: integer;
+begin
+ for int1:= 0 to datacols.count - 1 do begin
+  with twidgetcol(fdatacols[int1]) do begin
+   if fintf <> nil then begin
+    fintf.gridtovalue(-1); //restore grid value
    end;
   end;
  end;

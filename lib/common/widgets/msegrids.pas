@@ -1291,7 +1291,6 @@ end;
    fystep: integer;
    ffirstvisiblerow: integer;
    flastvisiblerow: integer;
-   fupdating: integer;
    flayoutupdating: integer;
    fnullchecking: integer;
    frowdatachanging: integer;
@@ -1378,6 +1377,7 @@ end;
    function getrowreadonlystate(const index: integer): boolean;
    procedure setrowreadonlystate(const index: integer; const avalue: boolean);
   protected
+   fupdating: integer;
    ffocuscount: integer;
    fcellvaluechecking: integer;
    fpropcolwidthref: integer;
@@ -1491,7 +1491,8 @@ end;
    function internalsort(sortfunc: gridsorteventty; 
                                  var refindex: integer): boolean;
                               //true if moved
-
+   procedure updaterowdata; virtual;
+   
    procedure objectevent(const sender: tobject; 
                                  const event: objecteventty); override;
    procedure loaded; override;
@@ -11094,7 +11095,16 @@ begin
     if bo1 then begin
      list.add(int1);
     end;
-    fdatacols.rearange(list);
+    for int1:= 0 to fdatacols.count - 1 do begin
+     include(tdatacol(fdatacols.fitems[int1]).fstate,cos_noinvalidate);
+    end;
+    try
+     fdatacols.rearange(list);
+    finally
+     for int1:= 0 to fdatacols.count - 1 do begin
+      exclude(tdatacol(fdatacols.fitems[int1]).fstate,cos_noinvalidate);
+     end;
+    end;
     ffixcols.rearange(list);
     if refindex >= 0 then begin
      for int1:= 0 to list.count-1 do begin   //neue position bestimmen
@@ -11127,7 +11137,13 @@ begin
    else begin
     internalsort({$ifdef FPC}@{$endif}fdatacols.sortfunc,int1);
    end;
-   ffocusedcell.row:= int1;
+   if int1 <> ffocusedcell.row then begin
+    if factiverow = ffocusedcell.row then begin
+     factiverow:= int1;
+    end;
+    ffocusedcell.row:= int1;
+//    updaterowdata; //for twidgetgrid
+   end;
    include(fstate,gs_sortvalid);
    layoutchanged;
   finally
@@ -11453,6 +11469,11 @@ begin
  else begin
   result:= inherited getdragrect(apos);
  end;
+end;
+
+procedure tcustomgrid.updaterowdata;
+begin
+ //dummy
 end;
 
 { tdrawgrid }

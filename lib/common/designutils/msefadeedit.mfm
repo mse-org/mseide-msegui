@@ -1,0 +1,161 @@
+object fadeeditfo: tfadeeditfo
+  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  bounds_x = 160
+  bounds_y = 221
+  bounds_cx = 408
+  bounds_cy = 280
+  taborder = 1
+  visible = False
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
+  container.bounds_cx = 408
+  container.bounds_cy = 280
+  container.frame.dummy = 0
+  options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
+  statfile = tstatfile1
+  caption = 'Fade edit'
+  oncreate = createev
+  moduleclassname = 'tmseform'
+  object posedit: tpickwidget
+    optionswidget = [ow_destroywidgets, ow_autoscale]
+    bounds_x = 8
+    bounds_y = 8
+    bounds_cx = 394
+    bounds_cy = 50
+    frame.leveli = -1
+    frame.framei_bottom = 2
+    frame.localprops = [frl_leveli, frl_fibottom]
+    frame.dummy = 0
+    anchors = [an_left, an_top, an_right]
+    taborder = 2
+    onclientmouseevent = mouseev
+    onpaint = pospaintev
+    onresize = resizeev
+    ongetcursorshape = getcursorshapeev
+    ongetpickobjects = getpickobjectev
+    onendpickmove = endpickev
+    onpaintxorpic = paintxotev
+    object fadedisp: tsimplewidget
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+      bounds_x = 1
+      bounds_y = 0
+      bounds_cx = 392
+      bounds_cy = 40
+      color = -1610612731
+      face.dummy = 0
+      anchors = [an_top]
+      visible = True
+    end
+  end
+  object grid: twidgetgrid
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 8
+    bounds_y = 64
+    bounds_cx = 321
+    bounds_cy = 178
+    frame.dummy = 0
+    anchors = [an_left, an_top, an_right, an_bottom]
+    taborder = 1
+    optionsgrid = [og_rowdeleting, og_focuscellonenter, og_sorted, og_colchangeontabkey, og_autopopup, og_mousescrollcol]
+    datacols.count = 2
+    datacols.items = <    
+      item
+        width = 63
+        widgetname = 'posed'
+      end    
+      item
+        width = 252
+        options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_nosort, co_mousescrollrow]
+        widthmin = 63
+        widgetname = 'colored'
+      end>
+    datarowheight = 16
+    onrowsdeleted = rowdeleteev
+    reffontheight = 14
+    object posed: trealedit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight]
+      optionsskin = [osk_framebuttononly]
+      bounds_x = 0
+      bounds_y = 0
+      bounds_cx = 63
+      bounds_cy = 16
+      frame.levelo = 0
+      frame.colorclient = -2147483645
+      frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+      frame.dummy = 0
+      taborder = 1
+      visible = False
+      ondataentered = dataenteterev
+      formatedit = '0.000'
+      formatdisp = '0.000'
+      reffontheight = 14
+      mi =  0.0000000000000000E+0000
+      ma =  1.0000000000000000E+0000
+    end
+    object colored: tcoloredit
+      optionsskin = [osk_framebuttononly]
+      bounds_x = 64
+      bounds_y = 0
+      bounds_cx = 252
+      bounds_cy = 16
+      frame.levelo = 0
+      frame.colorclient = -2147483645
+      frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+      frame.button.color = -1879048187
+      frame.buttonellipse.color = -1879048187
+      frame.buttonellipse.imagenr = 17
+      frame.dummy = 0
+      taborder = 2
+      visible = False
+      ondataentered = dataenteterev
+      valuedefault = -1879048189
+      dropdown.options = [deo_autodropdown, deo_keydropdown]
+      reffontheight = 14
+    end
+  end
+  object fadevert: tsimplewidget
+    optionswidget = [ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+    bounds_x = 336
+    bounds_y = 64
+    bounds_cx = 66
+    bounds_cy = 178
+    color = -1610612731
+    frame.leveli = -1
+    frame.localprops = [frl_leveli]
+    frame.dummy = 0
+    face.fade_direction = gd_down
+    face.localprops = [fal_fadirection]
+    face.dummy = 0
+    anchors = [an_top, an_right, an_bottom]
+    taborder = 3
+    visible = True
+  end
+  object tbutton1: tbutton
+    bounds_x = 263
+    bounds_y = 248
+    bounds_cx = 66
+    bounds_cy = 28
+    anchors = [an_right, an_bottom]
+    taborder = 4
+    state = [as_default, as_localdefault, as_localcaption]
+    caption = 'OK'
+    modalresult = mr_ok
+  end
+  object tbutton2: tbutton
+    bounds_x = 337
+    bounds_y = 248
+    bounds_cx = 65
+    bounds_cy = 28
+    anchors = [an_right, an_bottom]
+    state = [as_localcaption]
+    caption = 'Cancel'
+    modalresult = mr_canclose
+  end
+  object tstatfile1: tstatfile
+    filename = 'fadeeditor.sta'
+    options = [sfo_memory, sfo_activatorread, sfo_activatorwrite]
+    left = 96
+    top = 136
+  end
+end

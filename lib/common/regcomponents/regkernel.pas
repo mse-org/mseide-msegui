@@ -22,7 +22,8 @@ uses
  msegraphutils,regkernel_bmp,msegraphics,msestrings,msepostscriptprinter,
  mseprinter,msetypes,msedatalist,msedatamodules,mseclasses,formdesigner,
  mseapplication,mseglob,mseguiglob,mseskin,msedesigner,typinfo,
- mseguithreadcomp,mseprocmonitorcomp,imageselectorform;
+ mseguithreadcomp,mseprocmonitorcomp,imageselectorform,msefadeedit,
+ msearrayprops;
 
 type
  twidget1 = class(twidget);
@@ -113,6 +114,10 @@ begin
  registerpropertyeditor(typeinfo(tcustomaction),nil,'',tactionpropertyeditor);
  registerpropertyeditor(typeinfo(tshortcutactions),nil,'',
                            tshortcutactionspropertyeditor);
+ registerpropertyeditor(typeinfo(tcolorarrayprop),tcustomface,'fade_color',
+                                    tfadecoloreditor);
+ registerpropertyeditor(typeinfo(trealarrayprop),tcustomface,'fade_pos',
+                                    tfadeposeditor);
  registerpropertyeditor(typeinfo(tsysshortcuts),nil,'',tsysshortcutspropertyeditor);
  registerpropertyeditor(typeinfo(string),tfont,'name',tfontnamepropertyeditor);
  registerpropertyeditor(typeinfo(actionstatesty),nil,'',tshapestatespropertyeditor);

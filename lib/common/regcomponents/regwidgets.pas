@@ -39,7 +39,7 @@ uses
  msetoolbar,msetabs,msedesignintf,regwidgets_bmp,mselistbrowser,
  msesplitter,msedock,mseforms,mseclasses,typinfo,msearrayprops,msewidgets,
  msegui,formdesigner,msedial,msemenuwidgets,msewindowwidget,msechart,
- msepolygon
+ msepolygon,msepickwidget
  {$ifdef FPC},mseopenglwidget{$endif};
  
 type
@@ -99,7 +99,7 @@ procedure Register;
 begin
  registercomponents('Widget',[tsimplewidget,teventwidget,tbutton,trichbutton,tstockglyphbutton,
   tdrawgrid,tstringgrid,tlistview,
-  tlabel,tpaintbox,timage,tpolygon,
+  tlabel,tpaintbox,tpolygon,tpickwidget,timage,
   tintegerdisp,trealdisp,tdatetimedisp,tstringdisp,tbytestringdisp,tbooleandisp,
   tgroupbox,tscrollbox,tstepbox,tdockpanel,tdockhandle,tmseformwidget,
   tdockformwidget,tmainmenuwidget,

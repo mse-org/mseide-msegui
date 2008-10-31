@@ -36,7 +36,7 @@ type
   function getwidget: twidget;
   function getcursorshape(const apos: pointty; const ashiftstate: shiftstatesty; 
                                     var ashape: cursorshapety): boolean;
-   //true if found
+                            //true if object found
   procedure getpickobjects(const arect: rectty;  const ashiftstate: shiftstatesty;
                                     var objects: integerarty);
   procedure beginpickmove(const aobjects: integerarty);
