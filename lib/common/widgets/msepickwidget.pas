@@ -12,7 +12,7 @@ unit msepickwidget;
 interface
 uses
  classes,mseclasses,msesimplewidgets,mseobjectpicker,msegraphutils,msegui,
- mseguiglob,msepointer,msetypes,msegraphics,mseevent;
+ mseguiglob,msepointer,msetypes,msegraphics,mseevent,msemenus;
 
 // todo:
 // select rect

@@ -11,8 +11,8 @@ unit msepolygon;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msewidgets,msegraphutils,msegraphics,classes,msetypes,msebitmap,
- msesimplewidgets;
+ msegui,msewidgets,msegraphutils,msegraphics,classes,msetypes,msebitmap,
+ msesimplewidgets,msemenus,mseevent;
  
 type
  polygonstatety = (pos_geometryvalid);
