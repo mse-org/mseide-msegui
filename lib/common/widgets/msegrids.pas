@@ -1566,7 +1566,7 @@ end;
    procedure dragevent(var info: draginfoty); override;
 
    procedure beginupdate;
-   procedure endupdate;
+   procedure endupdate(const nosort: boolean = false);
    function calcminscrollsize: sizety; override;
    procedure layoutchanged;
    function cellclicked: boolean;
@@ -8377,7 +8377,7 @@ var
     end;
    end;
   finally
-   endupdate;
+   endupdate(true);
   end;
  end;
 
@@ -8426,9 +8426,13 @@ begin     //focuscell
  end;
  try
   if (fnocheckvalue = 0) and not (gs_rowremoving in fstate) then begin
+   int1:= ffocusedcell.row;
    if ((cell.row <> ffocusedcell.row) or (cell.col <> ffocusedcell.col)) and           
            not docheckcellvalue or (focuscount <> ffocuscount) then begin
     exit;
+   end;
+   if cell.row = int1 then begin
+    cell.row:= ffocusedcell.row;       //follow possible change by sort
    end;
    if (cell.row <> ffocusedcell.row) and (ffocusedcell.row >= 0) and 
             container.entered and
@@ -10739,7 +10743,7 @@ begin
  end;
 end;
 
-procedure tcustomgrid.endupdate;
+procedure tcustomgrid.endupdate(const nosort: boolean = false);
 var
  int1,int2: integer;
 begin
@@ -10759,7 +10763,9 @@ begin
     rowcount:= int2;
    end;
   end;
-  checksort;
+  if not nosort then begin
+   checksort;
+  end;
   checkinvalidate;
   if gs_rowdatachanged in fstate then begin
    rowdatachanged(makegridcoord(invalidaxis,0),frowcount);
