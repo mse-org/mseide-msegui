@@ -13,9 +13,9 @@ unit msegdiprint;
 // ***********************************************************
 //                            WARNING
 //
-// tgdiprinter and twmfprinter are depreciated, there are many
-// issues with win32 printing and metafiles,
-// please use tpostscriptprinter instead.
+// tgdiprinter and twmfprinter are not recommended for production use,
+// there are many issues with win32 printing and metafiles.
+// Please use tpostscriptprinter instead.
 //
 // ***********************************************************
 
