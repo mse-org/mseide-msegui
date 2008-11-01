@@ -59,19 +59,22 @@ object fadeeditfo: tfadeeditfo
     taborder = 1
     optionsgrid = [og_rowdeleting, og_focuscellonenter, og_sorted, og_colchangeontabkey, og_autopopup, og_mousescrollcol]
     datacols.count = 2
+    datacols.options = [co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
     datacols.items = <    
       item
         width = 63
+        options = [co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         widgetname = 'posed'
       end    
       item
         width = 252
-        options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_nosort, co_mousescrollrow]
+        options = [co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_nosort, co_mousescrollrow]
         widthmin = 63
         widgetname = 'colored'
       end>
     datarowheight = 16
     onrowsdeleted = rowdeleteev
+    oncellevent = gridcellev
     reffontheight = 14
     object posed: trealedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight]
@@ -86,6 +89,7 @@ object fadeeditfo: tfadeeditfo
       frame.dummy = 0
       taborder = 1
       visible = False
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
       ondataentered = dataenteterev
       formatedit = '0.000'
       formatdisp = '0.000'
@@ -108,6 +112,7 @@ object fadeeditfo: tfadeeditfo
       frame.dummy = 0
       taborder = 2
       visible = False
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
       ondataentered = dataenteterev
       valuedefault = -1879048189
       dropdown.options = [deo_autodropdown, deo_keydropdown]

@@ -350,13 +350,13 @@ end;
 
 function tcustomcoloredit.getgridvalues(const index: integer): colorty;
 begin
- result:= inherited gridvalues[index];
+ result:= inherited gridvalue[index];
 end;
 
 procedure tcustomcoloredit.setgridvalues(const index: integer;
                                                const avalue: colorty);
 begin
- inherited gridvalues[index]:= avalue; 
+ inherited gridvalue[index]:= avalue; 
 end;
 
 { tcolordialogfo }

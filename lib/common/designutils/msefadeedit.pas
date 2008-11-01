@@ -36,6 +36,7 @@ type
    procedure dataenteterev(const sender: TObject);
    procedure rowdeleteev(const sender: tcustomgrid; const aindex: Integer;
                    const acount: Integer);
+   procedure gridcellev(const sender: TObject; var info: celleventinfoty);
   private
    fnodepos: integerarty;
    fmarker: pointarty;
@@ -107,14 +108,13 @@ const
 procedure tfadeeditfo.mouseev(const sender: twidget; var info: mouseeventinfoty);
 var
  ar1: integerarty;
- int1: integer;
+ int1,int2: integer;
  rea1,rea2,rea3: realty;
  rect1: rectty;
 begin
  if (info.pos.y < fadedisp.height) and sender.isleftbuttondown(info) then begin
   additem(fnodepos,info.pos.x);
   sortarray(fnodepos,ar1);
-  orderarray(ar1,fnodepos);
   if grid.rowcount < 2 then begin
    int1:= grid.rowcount;
    grid.rowcount:= 2;
@@ -127,7 +127,13 @@ begin
     colored[1]:= cl_shadow;
    end;
   end;
-  int1:= ar1[high(ar1)] + 1; //grid row
+  int1:= 0;
+  for int2 := 0 to high(ar1) do begin
+   if ar1[int2] = high(ar1) then begin
+    int1:= int2 + 1; //grid row
+    break;
+   end;
+  end;
   grid.beginupdate;
   grid.insertrow(int1);
   rect1:= posedit.innerclientrect;
@@ -156,6 +162,7 @@ begin
   colored[int1]:= blendcolor(rea3,colored[int1-1],colored[int1+1]);
   grid.endupdate;
   change;
+  grid.setfocus;
  end;
 end;
 
@@ -211,7 +218,12 @@ var
 begin
  for int1:= 0 to high(fnodepos) do begin
   movemarker(fnodepos[int1]);
-  canvas.drawlines(fmarker,true,cl_black);
+  if int1 + 1 = grid.row then begin
+   canvas.drawlines(fmarker,true,cl_red);
+  end
+  else begin
+   canvas.drawlines(fmarker,true,cl_black);
+  end;
  end;
 end;
 
@@ -354,6 +366,16 @@ begin
   posed[0]:= 0;
  end;
  change;
+end;
+
+procedure tfadeeditfo.gridcellev(const sender: TObject;
+               var info: celleventinfoty);
+begin
+ with info do begin
+  if (eventkind = cek_enter) and (newcell.row <> cellbefore.row) then begin
+   posedit.invalidate; //redraw red marker
+  end;
+ end;
 end;
 
 { tfadecoloreditor }

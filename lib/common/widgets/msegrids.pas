@@ -11181,7 +11181,7 @@ end;
 
 procedure tcustomgrid.checksort;
 begin
- if not (gs_sortvalid in fstate) then begin
+ if not (gs_sortvalid in fstate) and (fupdating = 0) then begin
   sortchanged;
  end;
 end;
