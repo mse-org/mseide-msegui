@@ -57,29 +57,41 @@ object fadeeditfo: tfadeeditfo
     frame.dummy = 0
     anchors = [an_left, an_top, an_right, an_bottom]
     taborder = 1
-    optionsgrid = [og_rowdeleting, og_focuscellonenter, og_sorted, og_colchangeontabkey, og_autopopup, og_mousescrollcol]
-    datacols.count = 2
+    optionsgrid = [og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autoappend, og_sorted, og_colchangeontabkey, og_autopopup, og_mousescrollcol]
+    fixcols.count = 1
+    fixcols.items = <    
+      item
+        width = 22
+        numstep = 1
+      end>
+    datacols.count = 3
     datacols.options = [co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
     datacols.items = <    
+      item
+        width = 24
+        onbeforedrawcell = beforedrawev
+        options = [co_nofocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+      end    
       item
         width = 63
         options = [co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         widgetname = 'posed'
       end    
       item
-        width = 252
+        width = 204
         options = [co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_nosort, co_mousescrollrow]
         widthmin = 63
         widgetname = 'colored'
       end>
     datarowheight = 16
+    onrowsinserted = rowinsertev
     onrowsdeleted = rowdeleteev
     oncellevent = gridcellev
     reffontheight = 14
     object posed: trealedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight]
       optionsskin = [osk_framebuttononly]
-      bounds_x = 0
+      bounds_x = 25
       bounds_y = 0
       bounds_cx = 63
       bounds_cy = 16
@@ -99,9 +111,9 @@ object fadeeditfo: tfadeeditfo
     end
     object colored: tcoloredit
       optionsskin = [osk_framebuttononly]
-      bounds_x = 64
+      bounds_x = 89
       bounds_y = 0
-      bounds_cx = 252
+      bounds_cx = 204
       bounds_cy = 16
       frame.levelo = 0
       frame.colorclient = -2147483645

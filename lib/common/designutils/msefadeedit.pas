@@ -37,6 +37,10 @@ type
    procedure rowdeleteev(const sender: tcustomgrid; const aindex: Integer;
                    const acount: Integer);
    procedure gridcellev(const sender: TObject; var info: celleventinfoty);
+   procedure rowinsertev(const sender: tcustomgrid; const aindex: Integer;
+                   const acount: Integer);
+   procedure beforedrawev(const sender: tcol; const canvas: tcanvas;
+                   var cellinfo: cellinfoty; var processed: Boolean);
   private
    fnodepos: integerarty;
    fmarker: pointarty;
@@ -205,6 +209,10 @@ begin
  end
  else begin
   setlength(fnodepos,grid.rowcount - 2);
+ end;
+ if grid.rowcount > 0 then begin
+  posed[grid.rowhigh]:= 1;
+  posed[0]:= 0;
  end;
  for int1:= 1 to grid.rowcount - 2 do begin
   fnodepos[int1-1]:= rect1.x + round(posed[int1] * rect1.cx);
@@ -376,6 +384,38 @@ begin
    posedit.invalidate; //redraw red marker
   end;
  end;
+end;
+
+procedure tfadeeditfo.rowinsertev(const sender: tcustomgrid;
+               const aindex: Integer; const acount: Integer);
+begin
+ grid.beginupdate;
+ if aindex < grid.rowhigh then begin
+  if aindex = 0 then begin
+   colored[0]:= colored[1]; //pos = 0
+  end
+  else begin
+   colored[0]:= blendcolor(0.5,colored[aindex+1],colored[aindex]);
+   posed[0]:= (posed[aindex+1] + posed[aindex]) / 2;
+  end
+ end
+ else begin
+  colored[0]:= colored[grid.rowhigh];
+  if grid.rowhigh = 0 then begin
+   posed[0]:= 0;
+  end
+  else begin
+   posed[0]:= 1;
+  end;
+ end;
+ grid.endupdate;
+ change;
+end;
+
+procedure tfadeeditfo.beforedrawev(const sender: tcol; const canvas: tcanvas;
+               var cellinfo: cellinfoty; var processed: Boolean);
+begin
+ cellinfo.color:= colorty(colortorgb(colored[cellinfo.cell.row]));
 end;
 
 { tfadecoloreditor }

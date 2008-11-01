@@ -4819,8 +4819,10 @@ end;
 procedure tdatacol.sortcompare(const index1, index2: integer;
   var result: integer);
 begin
- with tdatalist1(fdata) do begin
-  tdatalist1(fdata).compare((fdatapo+index1*fsize)^,(fdatapo+index2*fsize)^,result);
+ if fdata <> nil then begin
+  with tdatalist1(fdata) do begin
+   tdatalist1(fdata).compare((fdatapo+index1*fsize)^,(fdatapo+index2*fsize)^,result);
+  end;
  end;
 end;
 
@@ -7268,7 +7270,7 @@ begin
    end;
    layoutchanged;
    if not (gs_isdb in fstate) and entered and
-            (bo1 and ((og_autoappend in foptionsgrid) or
+            (bo1 and ((og_autoappend in foptionsgrid) and (frowcount <> 0) or
              (frowcount = 0) and (og_autofirstrow in foptionsgrid))) then begin
     row:= frowcount;
    end;
@@ -8384,7 +8386,8 @@ var
  function isappend(const arow: integer): boolean;
  begin
   result:= not (gs_isdb in fstate) and 
-      ((og_autoappend in foptionsgrid) and (arow >= frowcount) or
+      ((og_autoappend in foptionsgrid) and (arow >= frowcount) and 
+                                                         (frowcount <> 0) or
        (arow = 0) and (frowcount = 0) and (og_autofirstrow in foptionsgrid));
  end;
 
