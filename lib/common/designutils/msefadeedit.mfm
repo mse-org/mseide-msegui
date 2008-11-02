@@ -35,7 +35,7 @@ object fadeeditfo: tfadeeditfo
     ongetcursorshape = getcursorshapeev
     ongetpickobjects = getpickobjectev
     onendpickmove = endpickev
-    onpaintxorpic = paintxotev
+    onpaintxorpic = paintxorev
     object fadedisp: tsimplewidget
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
       bounds_x = 1
@@ -57,7 +57,7 @@ object fadeeditfo: tfadeeditfo
     frame.dummy = 0
     anchors = [an_left, an_top, an_right, an_bottom]
     taborder = 1
-    optionsgrid = [og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autoappend, og_sorted, og_colchangeontabkey, og_autopopup, og_mousescrollcol]
+    optionsgrid = [og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autoappend, og_sorted, og_colchangeontabkey, og_rotaterow, og_autopopup, og_mousescrollcol]
     fixcols.count = 1
     fixcols.items = <    
       item
@@ -156,7 +156,7 @@ object fadeeditfo: tfadeeditfo
     anchors = [an_right, an_bottom]
     taborder = 4
     state = [as_default, as_localdefault, as_localcaption]
-    caption = 'OK'
+    caption = '&OK'
     modalresult = mr_ok
   end
   object tbutton2: tbutton
@@ -168,6 +168,23 @@ object fadeeditfo: tfadeeditfo
     state = [as_localcaption]
     caption = 'Cancel'
     modalresult = mr_canclose
+  end
+  object reverse: tbooleanedit
+    bounds_x = 24
+    bounds_y = 252
+    bounds_cx = 57
+    bounds_cy = 16
+    frame.caption = '&reverse'
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      1
+      44
+      2
+    )
+    anchors = [an_left, an_bottom]
+    taborder = 5
+    ondataentered = reverseenteredev
   end
   object tstatfile1: tstatfile
     filename = 'fadeeditor.sta'

@@ -5,7 +5,8 @@ uses
  mseglob,mseguiglob,mseapplication,msestat,msemenus,msegui,msegraphics,
  msegraphutils,mseevent,mseclasses,mseforms,msepickwidget,mseimage,msetypes,
  msepointer,msewidgets,msedataedits,mseedit,msegrids,msestrings,msewidgetgrid,
- msecolordialog,mseeditglob,msesimplewidgets,msepropertyeditors,msestatfile;
+ msecolordialog,mseeditglob,msesimplewidgets,msepropertyeditors,msestatfile,
+ msegraphedits;
 
 type
  tfadeeditfo = class(tmseform)
@@ -18,6 +19,7 @@ type
    tbutton1: tbutton;
    tbutton2: tbutton;
    tstatfile1: tstatfile;
+   reverse: tbooleanedit;
    procedure mouseev(const sender: twidget; var info: mouseeventinfoty);
    procedure pospaintev(const sender: twidget; const canvas: tcanvas);
    procedure createev(const sender: TObject);
@@ -27,7 +29,7 @@ type
    procedure getpickobjectev(const sender: tcustompickwidget;
                    const rect: rectty; const shiftstate: shiftstatesty;
                    var objects: integerarty);
-   procedure paintxotev(const sender: tcustompickwidget; const canvas: tcanvas;
+   procedure paintxorev(const sender: tcustompickwidget; const canvas: tcanvas;
                    const apos: pointty; const offset: pointty;
                    const objects: integerarty);
    procedure endpickev(const sender: tcustompickwidget; const apos: pointty;
@@ -41,10 +43,11 @@ type
                    const acount: Integer);
    procedure beforedrawev(const sender: tcol; const canvas: tcanvas;
                    var cellinfo: cellinfoty; var processed: Boolean);
+   procedure reverseenteredev(const sender: TObject);
   private
    fnodepos: integerarty;
    fmarker: pointarty;
-   procedure movemarker(const apos: integer);
+   procedure movemarker(apos: integer);
    function findmarker(const apos: pointty): integer; //-1 if not found    
    function limitmarkerpos(const index: integer;
                                       const aoffset: integer): integer;
@@ -81,6 +84,7 @@ begin
  form1:= tfadeeditfo.create(nil);
  try
   with tcustomface(tpropertyeditor1(aproperty).instance) do begin
+   form1.reverse.value:= fade_direction in [gd_left,gd_up];
    form1.grid.rowcount:= fade_pos.count;
    for int1:= 0 to form1.grid.rowhigh do begin
     form1.posed[int1]:= fade_pos[int1];
@@ -91,9 +95,30 @@ begin
   if form1.show(true) = mr_ok then begin
    with tpropertyeditor1(aproperty) do begin
     for int1:= 0 to count - 1 do begin
-     tcustomface(instance(int1)).fade_pos.assign(form1.fadedisp.face.fade_pos);
-     tcustomface(instance(int1)).fade_color.assign(
-                                     form1.fadedisp.face.fade_color);
+     with tcustomface(instance(int1)) do begin
+      if form1.reverse.value then begin
+       if fade_direction = gd_right then begin
+        fade_direction:= gd_left;
+       end
+       else begin
+        if fade_direction <> gd_left then begin
+         fade_direction:= gd_up;
+        end;
+       end;
+      end
+      else begin
+       if fade_direction = gd_left then begin
+        fade_direction:= gd_right;
+       end
+       else begin
+        if fade_direction <> gd_right then begin
+         fade_direction:= gd_down;
+        end;
+       end;
+      end;
+      fade_pos.assign(form1.fadedisp.face.fade_pos);
+      fade_color.assign(form1.fadedisp.face.fade_color);
+     end; 
     end;
     modified;
    end;
@@ -115,9 +140,16 @@ var
  int1,int2: integer;
  rea1,rea2,rea3: realty;
  rect1: rectty;
+ posx: integer;
 begin
  if (info.pos.y < fadedisp.height) and sender.isleftbuttondown(info) then begin
-  additem(fnodepos,info.pos.x);
+  if reverse.value then begin
+   posx:= posedit.paintsize.cx - info.pos.x;
+  end
+  else begin
+   posx:= info.pos.x;
+  end;
+  additem(fnodepos,posx);
   sortarray(fnodepos,ar1);
   if grid.rowcount < 2 then begin
    int1:= grid.rowcount;
@@ -139,13 +171,15 @@ begin
    end;
   end;
   grid.beginupdate;
+  grid.onrowsinserted:= nil;
   grid.insertrow(int1);
+  grid.onrowsinserted:= {$ifdef FPC}@{$endif}rowinsertev;
   rect1:= posedit.innerclientrect;
   if rect1.cx = 0 then begin
    rea1:= 0;
   end
   else begin
-   rea1:= (info.pos.x - rect1.x) / rect1.cx;
+   rea1:= (posx - rect1.x) / rect1.cx;
   end;
   if rea1 < posed[int1-1] then begin
    rea1:= posed[int1-1];
@@ -181,8 +215,11 @@ begin
  fmarker[2].y:= fmarker[0].y;
 end;
 
-procedure tfadeeditfo.movemarker(const apos: integer);
-begin
+procedure tfadeeditfo.movemarker(apos: integer);
+begin 
+ if reverse.value then begin
+  apos:= posedit.paintsize.cx - apos;
+ end;
  fmarker[0].x:= apos - markerhalfwidth;
  fmarker[1].x:= apos;
  fmarker[2].x:= apos + markerhalfwidth;
@@ -194,6 +231,14 @@ var
  rea1: real;
  rect1: rectty;
 begin
+ if reverse.value then begin
+  fadedisp.face.fade_direction:= gd_left;
+  fadevert.face.fade_direction:= gd_up;
+ end
+ else begin
+  fadedisp.face.fade_direction:= gd_right;
+  fadevert.face.fade_direction:= gd_down;
+ end;
  rect1:= posedit.innerclientrect;
  with fadedisp.face do begin
   fade_pos.count:= grid.rowcount;
@@ -270,13 +315,20 @@ function tfadeeditfo.findmarker(const apos: pointty): integer;
 var
  rect1: rectty;
  int1,int2,int3,int4: integer;
+ xpos: integer;
 begin
  result:= -1;
  rect1:= posedit.innerclientrect;
  int1:= rect1.y + rect1.cy;
  int4:= high(fnodepos);
+ if reverse.value then begin
+  xpos:= posedit.paintsize.cx - apos.x;
+ end
+ else begin
+  xpos:= apos.x;
+ end;
  if (apos.y < int1) and (apos.y >= int1 - markerheight) then begin
-  int2:= apos.x - markerhalfwidth;
+  int2:= xpos - markerhalfwidth;
   int3:= int2 + 2 * markerhalfwidth + 1;
   for int1:= 0 to int4 do begin
    if (fnodepos[int1] >= int2) and (fnodepos[int1] <= int3) and 
@@ -291,8 +343,14 @@ end;
 function tfadeeditfo.limitmarkerpos(const index: integer; const aoffset: integer): integer;
 var
  rect1: rectty;
+ 
 begin
- result:= fnodepos[index] + aoffset;
+ if reverse.value then begin
+  result:= fnodepos[index] - aoffset;
+ end
+ else begin
+  result:= fnodepos[index] + aoffset;
+ end;
  if (index > 0) and (result < fnodepos[index-1]) then begin
   result:= fnodepos[index-1];
  end
@@ -317,7 +375,7 @@ begin
  end;
 end;
 
-procedure tfadeeditfo.paintxotev(const sender: tcustompickwidget;
+procedure tfadeeditfo.paintxorev(const sender: tcustompickwidget;
                const canvas: tcanvas; const apos: pointty;
                const offset: pointty; const objects: integerarty);
 begin
@@ -334,14 +392,19 @@ var
  int1: integer;
  rect1: rectty;
  rea1: real;
+ offsetx: integer;
 begin
+ offsetx:= offset.x;
+ if reverse.value then begin
+  offsetx:= -offsetx;
+ end;
  rect1:= sender.innerclientrect;
  int1:= objects[0];
  if rect1.cx = 0 then begin
   rea1:= 0;
  end
  else begin
-  rea1:= (fnodepos[int1] - rect1.x + offset.x) / rect1.cx;
+  rea1:= (fnodepos[int1] - rect1.x + offsetx) / rect1.cx;
  end;
  if rea1 < posed[int1] then begin
   rea1:= posed[int1];
@@ -416,6 +479,11 @@ procedure tfadeeditfo.beforedrawev(const sender: tcol; const canvas: tcanvas;
                var cellinfo: cellinfoty; var processed: Boolean);
 begin
  cellinfo.color:= colorty(colortorgb(colored[cellinfo.cell.row]));
+end;
+
+procedure tfadeeditfo.reverseenteredev(const sender: TObject);
+begin
+ change;
 end;
 
 { tfadecoloreditor }
