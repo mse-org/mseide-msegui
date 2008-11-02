@@ -115,9 +115,13 @@ begin
  registerpropertyeditor(typeinfo(tshortcutactions),nil,'',
                            tshortcutactionspropertyeditor);
  registerpropertyeditor(typeinfo(tcolorarrayprop),tcustomface,'fade_color',
-                                    tfadecoloreditor);
+                                    tfacefadecoloreditor);
  registerpropertyeditor(typeinfo(trealarrayprop),tcustomface,'fade_pos',
-                                    tfadeposeditor);
+                                    tfacefadeposeditor);
+ registerpropertyeditor(typeinfo(tcolorarrayprop),tfacetemplate,'fade_color',
+                                    tfacetemplatefadecoloreditor);
+ registerpropertyeditor(typeinfo(trealarrayprop),tfacetemplate,'fade_pos',
+                                    tfacetemplatefadeposeditor);
  registerpropertyeditor(typeinfo(tsysshortcuts),nil,'',tsysshortcutspropertyeditor);
  registerpropertyeditor(typeinfo(string),tfont,'name',tfontnamepropertyeditor);
  registerpropertyeditor(typeinfo(actionstatesty),nil,'',tshapestatespropertyeditor);

@@ -55,14 +55,28 @@ type
    procedure change;
  end;
 
- tfadecoloreditor = class(tcolorarraypropertyeditor)
+ tfacefadecoloreditor = class(tcolorarraypropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
   public
    procedure edit; override;
  end;
 
- tfadeposeditor = class(trealarraypropertyeditor)
+ tfacefadeposeditor = class(trealarraypropertyeditor)
+  protected
+   function getdefaultstate: propertystatesty; override;
+  public
+   procedure edit; override; 
+ end;
+ 
+ tfacetemplatefadecoloreditor = class(tcolorarraypropertyeditor)
+  protected
+   function getdefaultstate: propertystatesty; override;
+  public
+   procedure edit; override;
+ end;
+
+ tfacetemplatefadeposeditor = class(trealarraypropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
   public
@@ -76,7 +90,7 @@ uses
 type
  tpropertyeditor1 = class(tpropertyeditor);
  
-procedure editfade(const aproperty: tpropertyeditor);
+procedure editfacefade(const aproperty: tpropertyeditor);
 var
  form1: tfadeeditfo;
  int1: integer;
@@ -128,6 +142,58 @@ begin
  end;
 end;
  
+procedure editfacetemplatefade(const aproperty: tpropertyeditor);
+var
+ form1: tfadeeditfo;
+ int1: integer;
+begin
+ form1:= tfadeeditfo.create(nil);
+ try
+  with tfacetemplate(tpropertyeditor1(aproperty).instance) do begin
+   form1.reverse.value:= fade_direction in [gd_left,gd_up];
+   form1.grid.rowcount:= fade_pos.count;
+   for int1:= 0 to form1.grid.rowhigh do begin
+    form1.posed[int1]:= fade_pos[int1];
+    form1.colored[int1]:= fade_color[int1];
+   end;
+   form1.change;
+  end;
+  if form1.show(true) = mr_ok then begin
+   with tpropertyeditor1(aproperty) do begin
+    for int1:= 0 to count - 1 do begin
+     with tfacetemplate(instance(int1)) do begin
+      if form1.reverse.value then begin
+       if fade_direction = gd_right then begin
+        fade_direction:= gd_left;
+       end
+       else begin
+        if fade_direction <> gd_left then begin
+         fade_direction:= gd_up;
+        end;
+       end;
+      end
+      else begin
+       if fade_direction = gd_left then begin
+        fade_direction:= gd_right;
+       end
+       else begin
+        if fade_direction <> gd_right then begin
+         fade_direction:= gd_down;
+        end;
+       end;
+      end;
+      fade_pos.assign(form1.fadedisp.face.fade_pos);
+      fade_color.assign(form1.fadedisp.face.fade_color);
+     end; 
+    end;
+    modified;
+   end;
+  end;
+ finally
+  form1.free;
+ end;
+end;
+
 { tfadeeditfo }
 
 const
@@ -486,28 +552,52 @@ begin
  change;
 end;
 
-{ tfadecoloreditor }
+{ tfacefadecoloreditor }
 
-function tfadecoloreditor.getdefaultstate: propertystatesty;
+function tfacefadecoloreditor.getdefaultstate: propertystatesty;
 begin
  result:= inherited getdefaultstate + [ps_dialog];
 end;
 
-procedure tfadecoloreditor.edit;
+procedure tfacefadecoloreditor.edit;
 begin
- editfade(self);
+ editfacefade(self);
 end;
 
-{ tfadeposeditor }
+{ tfacefadeposeditor }
 
-function tfadeposeditor.getdefaultstate: propertystatesty;
+function tfacefadeposeditor.getdefaultstate: propertystatesty;
 begin
  result:= inherited getdefaultstate + [ps_dialog];
 end;
 
-procedure tfadeposeditor.edit;
+procedure tfacefadeposeditor.edit;
 begin
- editfade(self);
+ editfacefade(self);
+end;
+
+{ tfacetemplatefadecoloreditor }
+
+function tfacetemplatefadecoloreditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate + [ps_dialog];
+end;
+
+procedure tfacetemplatefadecoloreditor.edit;
+begin
+ editfacetemplatefade(self);
+end;
+
+{ tfacetemplatefadeposeditor }
+
+function tfacetemplatefadeposeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate + [ps_dialog];
+end;
+
+procedure tfacetemplatefadeposeditor.edit;
+begin
+ editfacetemplatefade(self);
 end;
 
 end.

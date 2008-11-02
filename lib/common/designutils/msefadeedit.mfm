@@ -57,7 +57,7 @@ object fadeeditfo: tfadeeditfo
     frame.dummy = 0
     anchors = [an_left, an_top, an_right, an_bottom]
     taborder = 1
-    optionsgrid = [og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autoappend, og_sorted, og_colchangeontabkey, og_rotaterow, og_autopopup, og_mousescrollcol]
+    optionsgrid = [og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autoappend, og_sorted, og_colchangeontabkey, og_autopopup, og_mousescrollcol]
     fixcols.count = 1
     fixcols.items = <    
       item
