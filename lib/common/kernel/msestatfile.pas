@@ -434,6 +434,7 @@ var
  ar1: msestringarty;
 begin
  stream:= ttextstream.Create;
+ stream.encoding:= ce_utf8n;
  try
   writestat(stream);
   stream.position:= 0;

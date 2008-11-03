@@ -1406,15 +1406,15 @@ end;
 function ttextstream.readmsestrings: msestringarty;
 var
  int1: integer;
- str1: string;
+ mstr1: msestring;
 begin
  int1:= 0;
  result:= nil;
  while not eof do begin
-  if not readln(str1) and (str1 = '') then begin
+  if not readln(mstr1) and (mstr1 = '') then begin
    break;
   end;
-  additem(result,str1,int1);
+  additem(result,mstr1,int1);
  end;
  setlength(result,int1);
 end;
