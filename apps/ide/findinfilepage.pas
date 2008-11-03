@@ -150,9 +150,17 @@ procedure tfindinfilepagefo.threadonexecute(const sender: tthreadcomp);
   str1: string;
  begin
 //        stream.buflen:= 1024;
-  if projectoptions.encoding <> 0 then begin
-   stream.encoding:= ce_utf8n;
+  case projectoptions.encoding of
+   1: begin
+    stream.encoding:= ce_utf8n;
+   end;
+   2: begin
+    stream.encoding:= ce_iso8859_1;
+   end;   
   end;
+//  if projectoptions.encoding <> 0 then begin
+//   stream.encoding:= ce_utf8n;
+//  end;
   with sender,tfindinfilepagefo(datapo),finfo do begin
    stream.buflen:= 4096;
    with stream do begin

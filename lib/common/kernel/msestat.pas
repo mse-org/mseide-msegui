@@ -104,7 +104,8 @@ type
    function findvar(const name: msestring; var value: msestring): boolean; //true if ok
   public
    constructor create(const stream: ttextstream); overload;
-   constructor create(const filename: filenamety); overload;
+   constructor create(const filename: filenamety;
+                      const aencoding: charencodingty); overload;
    destructor destroy; override;
    function sections: msestringarty;
    function findsection(const name: msestring): boolean; //true if found
@@ -154,7 +155,8 @@ type
    procedure writelistval(const avalue: msestring);
   public
    constructor create(const stream: ttextstream); overload;
-   constructor create(const filename: filenamety); overload;
+   constructor create(const filename: filenamety; 
+                              const aencoding: charencodingty); overload;
  
    procedure writesection(const name: msestring);
    procedure writeboolean(const name: msestring; const value: boolean);
@@ -475,10 +477,15 @@ begin
  readdata;
 end;
 
-constructor tstatreader.create(const filename: filenamety);
+constructor tstatreader.create(const filename: filenamety;
+                               const aencoding: charencodingty);
+var
+ stream1: ttextstream;
 begin
  fownsstream:= true;
- create(ttextstream.Create(filename,fm_read));
+ stream1:= ttextstream.Create(filename,fm_read);
+ stream1.encoding:= aencoding;
+ create(stream1);
 end;
 
 destructor tstatreader.destroy;
@@ -1090,10 +1097,15 @@ begin
  inherited;
 end;
 
-constructor tstatwriter.create(const filename: filenamety);
+constructor tstatwriter.create(const filename: filenamety;
+                                       const aencoding: charencodingty);
+var
+ stream1: ttextstream;
 begin
  fownsstream:= true;
- create(ttextstream.Create(filename,fm_create));
+ stream1:= ttextstream.Create(filename,fm_create);
+ stream1.encoding:= aencoding;
+ create(stream1);
 end;
 
 procedure tstatwriter.writesection(const name: msestring);

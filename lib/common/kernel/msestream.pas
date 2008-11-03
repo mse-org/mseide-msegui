@@ -445,7 +445,8 @@ begin
  end;
 end;
 
-function encode(const value: msestring; const encoding: charencodingty = ce_utf8n): string;
+function encode(const value: msestring; 
+                           const encoding: charencodingty = ce_utf8n): string;
 begin
  case encoding  of
   ce_ascii: begin
@@ -463,7 +464,8 @@ begin
  end;
 end;
 
-function decode(const value: string; const encoding: charencodingty = ce_utf8n): string;
+function decode(const value: string; 
+                   const encoding: charencodingty = ce_utf8n): msestring;
 begin
  case encoding  of
   ce_ascii: begin
@@ -1102,7 +1104,7 @@ end;
 
 procedure ttextstream.writeln(const value: msestring);
 begin
- write(value+eor);
+ write(value+lineend);
 // writebuffer(eor,sizeof(eor));
 end;
 

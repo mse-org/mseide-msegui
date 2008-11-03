@@ -417,6 +417,7 @@ var
 begin
  ar1:= statreader.readarray(aname,msestringarty(nil));
  stream:= ttextstream.Create;
+ stream.encoding:= fencoding;
  try
   stream.writemsestrings(ar1);
   stream.Position:= 0;

@@ -736,13 +736,17 @@ begin
 end;
 
 function findfile(const filename: filenamety): boolean; overload;
+var
+ info: fileinfoty;
 begin
- result:= fileexists(tosysfilepath(unquotefilename(filename)));
+ result:= sys_getfileinfo(filename,info) and (info.extinfo1.filetype <> ft_dir);
 end;
 
 function finddir(const filename: filenamety): boolean; overload;
+var
+ info: fileinfoty;
 begin
- result:= directoryexists(tosysfilepath(unquotefilename(filename)));
+ result:= sys_getfileinfo(filename,info) and (info.extinfo1.filetype = ft_dir);
 end;
 
 function quotefilename(const name: filenamety): filenamety; overload;

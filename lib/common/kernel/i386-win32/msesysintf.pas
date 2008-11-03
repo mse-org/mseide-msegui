@@ -384,11 +384,9 @@ const
 var
  ca1: cardinal;
  str1: string;
- str2: msestring;
+ mstr2: msestring;
 
 begin
- str2:= winfilepath(path,'');
- str1:= str2;
  if not (fa_denyread in accessmode) then begin
   ca1:= file_share_read;
  end
@@ -399,13 +397,27 @@ begin
   ca1:= ca1 or file_share_write;
  end;
 
- if openmode = fm_Create then begin
-  handle:= CreateFile(PChar(str1),openmodes[openmode], //todo: rights -> securityattributes
-    ca1, nil, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+ mstr2:= winfilepath(path,'');
+ if iswin95 then begin
+  str1:= mstr2;
+  if openmode = fm_Create then begin
+   handle:= CreateFilea(PChar(str1),openmodes[openmode], //todo: rights -> securityattributes
+      ca1, nil, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+  end
+  else begin
+   handle:= CreateFilea(PChar(str1),openmodes[openmode],
+      ca1, nil, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+  end;
  end
  else begin
-  handle:= CreateFile(PChar(str1),openmodes[openmode],
-    ca1, nil, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+  if openmode = fm_Create then begin
+   handle:= CreateFilew(PmseChar(mstr2),openmodes[openmode], //todo: rights -> securityattributes
+      ca1, nil, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+  end
+  else begin
+   handle:= CreateFilew(PmseChar(mstr2),openmodes[openmode],
+      ca1, nil, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+  end;
  end;
  if handle = invalidfilehandle then begin
   result:= syelasterror;
@@ -442,25 +454,36 @@ function sys_copyfile(const oldfile,newfile: msestring): syserrorty;
 var
  str1,str2: string;
 begin
- str1:= winfilepath(oldfile,'');
- str2:= winfilepath(newfile,'');
- if windows.copyfile(pchar(str1),pchar(str2),false) then begin
-  result:= sye_ok;
+ if iswin95 then begin
+  str1:= winfilepath(oldfile,'');
+  str2:= winfilepath(newfile,'');
+  if windows.copyfilea(pchar(str1),pchar(str2),false) then begin
+   result:= sye_ok;
+  end
+  else begin
+   result:= syelasterror;
+  end;
  end
  else begin
-  result:= syelasterror;
+  if windows.copyfilew(pmsechar(winfilepath(oldfile,'')),
+                         pmsechar(winfilepath(newfile,'')),false) then begin
+   result:= sye_ok;
+  end
+  else begin
+   result:= syelasterror;
+  end;
  end;
 end;
 
 function sys_renamefile(const oldname,newname: filenamety): syserrorty;
 var
  str1,str2: string;
-begin
- str1:= winfilepath(oldname,'');
- str2:= winfilepath(newname,'');
+begin 
  if iswin95 then begin
-  if windows.copyfile(pchar(str1),pchar(str2),false) then begin
-   if windows.deletefile(pchar(str1)) then begin
+  str1:= winfilepath(oldname,'');
+  str2:= winfilepath(newname,'');
+  if windows.copyfilea(pchar(str1),pchar(str2),false) then begin
+   if windows.deletefilea(pchar(str1)) then begin
     result:= sye_ok;
    end
    else begin
@@ -472,7 +495,8 @@ begin
   end;
  end
  else begin
-  if windows.movefileex(pchar(str1),pchar(str2),movefile_replace_existing) then begin
+  if windows.movefileexw(pmsechar(winfilepath(oldname,'')),
+            pmsechar(winfilepath(newname,'')),movefile_replace_existing) then begin
    result:= sye_ok;
   end
   else begin
@@ -485,12 +509,22 @@ function sys_deletefile(const filename: filenamety): syserrorty;
 var
  str1: string;
 begin
- str1:= winfilepath(filename,'');
- if windows.deletefile(pchar(str1)) then begin
-  result:= sye_ok;
+ if iswin95 then begin
+  str1:= winfilepath(filename,'');
+  if windows.deletefilea(pchar(str1)) then begin
+   result:= sye_ok;
+  end
+  else begin
+   result:= syelasterror;
+  end;
  end
  else begin
-  result:= syelasterror;
+  if windows.deletefilew(pmsechar(winfilepath(filename,''))) then begin
+   result:= sye_ok;
+  end
+  else begin
+   result:= syelasterror;
+  end;
  end;
 end;
 

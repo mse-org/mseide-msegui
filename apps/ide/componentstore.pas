@@ -455,7 +455,7 @@ var
  reader1: tstatreader;
 begin
  with aitem do begin
-  reader1:= tstatreader.create(finfo.filepath);
+  reader1:= tstatreader.create(finfo.filepath,ce_utf8n);
   try
    reader1.setsection('store'); 
    aitem.dostatread(reader1);
@@ -474,7 +474,7 @@ begin
  fgroupfilename:= msefileutils.filepath(afilename);
  writer2:= nil;
  try
-  writer2:= tstatwriter.create(fgroupfilename);
+  writer2:= tstatwriter.create(fgroupfilename,ce_utf8n);
   with writer2,node do begin
    for int1:= 0 to itemlist.count - 1 do begin
     item1:= tstoredcomponent(items[int1]);
@@ -488,7 +488,7 @@ begin
     for int1:= 0 to high(far1) do begin
      with far1[int1] do begin
       if isstatechanged then begin
-       writer1:= tstatwriter.create(finfo.filepath);
+       writer1:= tstatwriter.create(finfo.filepath,ce_utf8n);
        try
         writer1.writesection('store'); 
         far1[int1].dostatwrite(writer1);
@@ -522,7 +522,7 @@ begin
  try
   fgroupfilename:= msefileutils.filepath(afilename);
   storedir1:= getstoredir;
-  reader2:= tstatreader.create(fgroupfilename);
+  reader2:= tstatreader.create(fgroupfilename,ce_utf8n);
   with reader2,node do begin
    setsection('componentstore');
    readrecordarray('stores',{$ifdef FPC}@{$endif}dosetstorescount,

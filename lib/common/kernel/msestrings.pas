@@ -1652,16 +1652,18 @@ end;
 function charstring(ch: char; count: integer): string; overload;
 begin
  setlength(result,count);
- for count:= count downto 1 do begin
-  result[count]:= ch;
+ for count:= count - 1 downto 0 do begin
+  (pchar(pointer(result)) + count)^:= ch;
+//  result[count]:= ch;
  end;
 end;
 
 function charstring(ch: msechar; count: integer): msestring; overload;
 begin
  setlength(result,count);
- for count:= count downto 1 do begin
-  result[count]:= ch;
+ for count:= count - 1 downto 0 do begin
+  (pmsechar(pointer(result)) + count)^:= ch;
+//  result[count]:= ch;
  end;
 end;
 {

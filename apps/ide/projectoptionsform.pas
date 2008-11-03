@@ -1625,7 +1625,7 @@ var
 begin
  result:= false;
  try
-  statreader:= tstatreader.create(filename);
+  statreader:= tstatreader.create(filename,ce_utf8n);
   try
    application.beginwait;
    updateprojectoptions(statreader,filename);
@@ -1650,7 +1650,7 @@ begin
  if filename = '' then begin
   filename:= projectoptions.projectfilename;
  end;
- statwriter:= tstatwriter.create(filename);
+ statwriter:= tstatwriter.create(filename,ce_utf8n);
  try
   updateprojectoptions(statwriter,filename);
 //  projectoptions.projectfilename:= filename;
