@@ -442,6 +442,7 @@ type
    function needsmouseinvalidate: boolean;
    procedure activechanged; virtual;
    function needsfocuspaint: boolean; virtual;
+   procedure checkminscrollsize(var asize: sizety); virtual;
    class procedure drawframe(const canvas: tcanvas; const rect2: rectty; 
            const afi: frameinfoty; const astate: framestateflagsty
            {const disabled,active,clicked,mouse: boolean});
@@ -4345,6 +4346,11 @@ begin
  //dummy
 end;
 
+procedure tcustomframe.checkminscrollsize(var asize: sizety);
+begin
+ //dummy
+end;
+
 { tframetemplate }
 
 constructor tframetemplate.create(const owner: tmsecomponent;
@@ -6634,6 +6640,9 @@ begin
     end;
    end;
   end;
+ end;
+ if fframe <> nil then begin
+  fframe.checkminscrollsize(result);
  end;
 end;
 

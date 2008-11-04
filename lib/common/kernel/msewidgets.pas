@@ -320,6 +320,8 @@ type
    fscrolling: integer;
    fclientheight: integer;
    fclientwidth: integer;
+   fclientheightmin: integer;
+   fclientwidthmin: integer;
    fowner: twidget;
    fdragging: boolean;
    fpickpos: pointty;
@@ -328,6 +330,8 @@ type
    procedure scrollpostoclientpos(var aclientrect: rectty);
    procedure setclientheigth(const Value: integer);
    procedure setclientwidth(const Value: integer);
+   procedure setclientheigthmin(const Value: integer);
+   procedure setclientwidthmin(const Value: integer);
    procedure calcclientrect(var aclientrect: rectty);
    function getwidget: twidget;
    procedure setsbhorz(const avalue: tscrollboxscrollbar);
@@ -335,6 +339,7 @@ type
    procedure setsbvert(const avalue: tscrollboxscrollbar);
    function getsbvert: tscrollboxscrollbar;
   protected
+   procedure checkminscrollsize(var asize: sizety); override;
    function isdragstart(const sender: twidget; 
                                   const info: mouseeventinfoty): boolean;
    procedure initinnerframe; virtual;
@@ -359,6 +364,8 @@ type
                            //origin paintpos
    property clientwidth: integer read fclientwidth write setclientwidth default 0;
    property clientheight: integer read fclientheight write setclientheigth default 0;
+   property clientwidthmin: integer read fclientwidthmin write setclientwidthmin default 0;
+   property clientheightmin: integer read fclientheightmin write setclientheigthmin default 0;
    property framei_left default 2;
    property framei_top default 2;
    property framei_right default 2;
@@ -372,6 +379,8 @@ type
    property optionsscroll;
    property clientwidth;
    property clientheight;
+   property clientwidthmin;
+   property clientheightmin;
    property levelo;
    property leveli;
    property framewidth;
@@ -3514,6 +3523,32 @@ begin
  end;
 end;
 
+procedure tcustomscrollboxframe.setclientheigthmin(const value: integer);
+begin
+ if fclientheightmin <> value then begin
+  if value < 0 then begin
+   fclientheightmin:= 0;
+  end
+  else begin
+   fclientheightmin:= value;
+  end;
+  fintf.clientrectchanged;
+ end;
+end;
+
+procedure tcustomscrollboxframe.setclientwidthmin(const value: integer);
+begin
+ if fclientwidthmin <> value then begin
+  if value < 0 then begin
+   fclientwidthmin:= 0;
+  end
+  else begin
+   fclientwidthmin:= value;
+  end;
+  fintf.clientrectchanged;
+ end;
+end;
+
 procedure tcustomscrollboxframe.showrect(const arect: rectty; 
                                      const bottomright: boolean);
 var
@@ -3670,6 +3705,17 @@ begin
                ((fclientrect.cx <> fpaintrect.cx) or 
                      (fclientrect.cx <> fpaintrect.cx));
  end;                    
+end;
+
+procedure tcustomscrollboxframe.checkminscrollsize(var asize: sizety);
+begin
+ inherited;
+ if (clientwidthmin > 0) and (clientwidthmin > asize.cx) then begin
+  asize.cx:= clientwidthmin;
+ end;
+ if (clientheightmin > 0) and (clientheightmin > asize.cy) then begin
+  asize.cy:= clientheightmin;
+ end;
 end;
 
 { tcustomautoscrollframe }
