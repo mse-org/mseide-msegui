@@ -6,7 +6,7 @@ uses
  msegraphutils,mseevent,mseclasses,mseforms,msepickwidget,mseimage,msetypes,
  msepointer,msewidgets,msedataedits,mseedit,msegrids,msestrings,msewidgetgrid,
  msecolordialog,mseeditglob,msesimplewidgets,msepropertyeditors,msestatfile,
- msegraphedits;
+ msegraphedits,msebitmap,msedatanodes,msefiledialog,mselistbrowser,msesys;
 
 type
  tfadeeditfo = class(tmseform)
@@ -18,8 +18,12 @@ type
    fadevert: tsimplewidget;
    tbutton1: tbutton;
    tbutton2: tbutton;
-   tstatfile1: tstatfile;
+   formstatfile: tstatfile;
    reverse: tbooleanedit;
+   tbutton3: tbutton;
+   tbutton4: tbutton;
+   filedialog: tfiledialog;
+   fadestatfile: tstatfile;
    procedure mouseev(const sender: twidget; var info: mouseeventinfoty);
    procedure pospaintev(const sender: twidget; const canvas: tcanvas);
    procedure createev(const sender: TObject);
@@ -44,6 +48,8 @@ type
    procedure beforedrawev(const sender: tcol; const canvas: tcanvas;
                    var cellinfo: cellinfoty; var processed: Boolean);
    procedure reverseenteredev(const sender: TObject);
+   procedure saveex(const sender: TObject);
+   procedure loadex(const sender: TObject);
   private
    fnodepos: integerarty;
    fmarker: pointarty;
@@ -550,6 +556,21 @@ end;
 procedure tfadeeditfo.reverseenteredev(const sender: TObject);
 begin
  change;
+end;
+
+procedure tfadeeditfo.saveex(const sender: TObject);
+begin
+ if filedialog.execute(fdk_save) = mr_ok then begin
+  fadestatfile.writestat(filedialog.controller.filename);
+ end;
+end;
+
+procedure tfadeeditfo.loadex(const sender: TObject);
+begin
+ if filedialog.execute(fdk_open) = mr_ok then begin
+  fadestatfile.readstat(filedialog.controller.filename);
+  change;
+ end;
 end;
 
 { tfacefadecoloreditor }

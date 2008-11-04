@@ -57,8 +57,10 @@ type
    constructor create(aowner: tcomponent); override;
    procedure initnewcomponent(const ascale: real); override;
    procedure readstat(stream: ttextstream = nil); overload;
+   procedure readstat(const afilename: filenamety); overload; //disk file
    procedure readstat(const aname: msestring; const statreader: tstatreader); overload;
    procedure writestat(const stream: ttextstream = nil); overload;
+   procedure writestat(const afilename: filenamety); overload; //disk file
    procedure writestat(const aname: msestring; const statwriter: tstatwriter); overload;
    procedure updatestat(const aname: msestring; const statfiler: tstatfiler);
   published
@@ -274,6 +276,32 @@ begin
   if stream = nil then begin
    stream1.Free;
   end;
+ end;
+end;
+
+procedure tstatfile.readstat(const afilename: filenamety);
+var
+ stream1: ttextstream;
+begin
+ stream1:= ttextstream.create(afilename,fm_read);
+ try
+  stream1.encoding:= fencoding; 
+  readstat(stream1);
+ finally
+  stream1.free;
+ end;
+end;
+
+procedure tstatfile.writestat(const afilename: filenamety);
+var
+ stream1: ttextstream;
+begin
+ stream1:= ttextstream.create(afilename,fm_create);
+ try
+  stream1.encoding:= fencoding; 
+  writestat(stream1);
+ finally
+  stream1.free;
  end;
 end;
 
