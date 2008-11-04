@@ -7071,8 +7071,9 @@ begin
  if not ((fface <> nil) and (fao_alphafadeall in fface.fi.options)) then begin
   updateroot;
   if ws_isvisible in fwidgetstate then begin
-   rect1.size:= fwidgetrect.size;
-   rect1.pos:= nullpoint;
+   rect1:= paintrect;
+//   rect1.size:= fwidgetrect.size;
+//   rect1.pos:= nullpoint;
    for int1:= 0 to widgetcount - 1 do begin
     widget:= twidget(fwidgets[int1]);
     if ws_opaque in widget.fwidgetstate then begin
