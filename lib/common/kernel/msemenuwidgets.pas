@@ -37,7 +37,7 @@ type
   options: menulayoutoptionsty;
   sizerect: rectty;
   cells: menucellinfoarty;
-  colorglyph: colorty;
+//  colorglyph: colorty;
   itemframetemplate: tframetemplate;
   itemface: tcustomface;
   itemframetemplateactive: tframetemplate;
@@ -238,7 +238,7 @@ end;
 
 procedure initlayoutinfo(const aowner: tmsecomponent;
         var info: menulayoutinfoty; const amenu: tmenuitem;
-        const aoptions: menulayoutoptionsty; const acolorglyph: colorty);
+        const aoptions: menulayoutoptionsty{; const acolorglyph: colorty});
 begin
  with info do begin
   cells:= nil;
@@ -246,7 +246,7 @@ begin
   tmsecomponent1(aowner).getobjectlinker.setlinkedvar(ievent(aowner),amenu,tlinkedpersistent(menu));
   activeitem:= -1;
   options:= aoptions;
-  colorglyph:= acolorglyph;
+//  colorglyph:= acolorglyph;
  end;
 end;
 
@@ -456,22 +456,22 @@ begin
      if ashortcutwidth > shortcutwidth then begin
       shortcutwidth:= ashortcutwidth;
      end;
-     colorglyph:= layout.colorglyph;
+     colorglyph:= item1.finfo.colorglyph; //layout.colorglyph;
      caption:= item1.finfo.caption1;
      imagenr:= item1.finfo.imagenr;
      imagenrdisabled:= item1.finfo.imagenrdisabled;
      actionstatestoshapestates(item1.finfo,state);
-     if item1.color = cl_default then begin
+     if (item1.color = cl_default) or (item1.color = cl_parent) then begin
       color:= parentcolor;
      end
      else begin
       color:= item1.color;
      end;
-     if item1.coloractive = cl_parent then begin
+     if (item1.coloractive = cl_default) or (item1.coloractive = cl_parent) then begin
       coloractive:= parentcoloractive;
      end
      else begin
-      if item1.coloractive = cl_default then begin
+      if item1.coloractive = cl_normal then begin
        coloractive:= color;
       end
       else begin
@@ -800,7 +800,7 @@ begin
  if finstancepo <> nil then begin
   instance^:= self;
  end;
- initlayoutinfo(self,flayout,amenu,[],cl_black);
+ initlayoutinfo(self,flayout,amenu,[]{,cl_black});
  inherited create(aowner,transientfor);
  optionswidget:= optionswidget - [ow_tabfocus,ow_arrowfocus,ow_mousefocus];
  internalcreateframe;

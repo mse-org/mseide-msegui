@@ -582,7 +582,7 @@ function isactioncolorglyphstored(const info: actioninfoty): boolean;
 begin
  with info do begin
   result:= (as_localcolorglyph in state) and
-         not ((action = nil) and (colorglyph = cl_glyph));
+         not ((action = nil) and (colorglyph = cl_default));
  end;
 end;
 
@@ -590,7 +590,7 @@ function isactioncolorstored(const info: actioninfoty): boolean;
 begin
  with info do begin
   result:= (as_localcolor in state) and
-         not ((action = nil) and (color = cl_transparent));
+         not ((action = nil) and (color = cl_default));
  end;
 end;
 

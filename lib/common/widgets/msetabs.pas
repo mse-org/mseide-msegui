@@ -21,6 +21,7 @@ uses
 
 const
  defaulttaboptionswidget = defaultoptionswidget + [ow_subfocus,ow_fontglyphheight];
+ defaulttaboptionsskin = defaultoptionsskin + [osk_colorcaptionframe];
  defaultcaptiondist = 1;
  defaultimagedist = 0;
  defaultcaptionpos = cp_right;
@@ -415,6 +416,7 @@ type
    property ondeselect: notifyeventty read fondeselect write fondeselect;
    property invisible: boolean read getinvisible write setinvisible;
    property visible default false;
+   property optionsskin;
  end;
 
  tpagetab = class(ttab)
@@ -580,7 +582,7 @@ type
  ttabwidget = class(tcustomtabwidget)
   published
    property optionswidget;
-   property optionsskin;
+   property optionsskin default defaulttaboptionsskin;
    property bounds_x;
    property bounds_y;
    property bounds_cx;
@@ -2377,6 +2379,7 @@ begin
  ftab_sizemax:= defaulttabsizemax;
  inherited;
  foptionswidget:= defaulttaboptionswidget;
+ optionsskin:= defaulttaboptionsskin;
  ftabs:= tcustomtabbar1.create(self);
  ftabs.fanchors:= [an_left,an_top,an_right];
  ftab_size:= ftabs.size.cy;

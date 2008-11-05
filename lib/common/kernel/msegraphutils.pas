@@ -67,7 +67,8 @@ const
  cl_brushcanvas =            cl_functional + 5;
  cl_none =                   cl_functional + 6; cl_nonenum = 6;
  cl_font =                   cl_functional + 7; //use color of current font
- cl_lastfunctional =         cl_functional + 8;
+ cl_normal =                 cl_functional + 8; //used in tmenitem.coloractive
+ cl_lastfunctional =         cl_functional + 9;
 
  cl_dkshadow =               cl_mapped + 0;
  cl_shadow =                 cl_mapped + 1;
@@ -162,7 +163,8 @@ const
     (name: 'cl_brush';  rgb:                 (blue: $00; green: $00; red: $00; res: $00)), //4
     (name: 'cl_brushcanvas'; rgb:            (blue: $00; green: $00; red: $00; res: $00)), //5
     (name: 'cl_none';  rgb:                  (blue: $00; green: $00; red: $00; res: $00)), //6
-    (name: 'cl_font';  rgb:                  (blue: $00; green: $00; red: $00; res: $00))  //7
+    (name: 'cl_font';  rgb:                  (blue: $00; green: $00; red: $00; res: $00)), //7
+    (name: 'cl_normal';  rgb:                (blue: $00; green: $00; red: $00; res: $00))  //8
 //    (name: 'cl_mask'; rgb:                   (blue: $00; green: $00; red: $00; res: $00))
 //    (name: 'cl_grayed'; rgb:                 (blue: $80; green: $80; red: $80; res: $00))
    );

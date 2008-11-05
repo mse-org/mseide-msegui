@@ -68,6 +68,10 @@ type
  optionswidgetty = set of optionwidgetty;
 
  optionskinty = (osk_skin,osk_noskin,osk_framebuttononly,osk_container,
+                 osk_colorcaptionframe, 
+                   //use widget_colorcaptinframe independent of caption
+                 osk_nocolorcaptionframe, 
+                   //don't use widget_colorcaptinframe independent of caption
                  osk_nopropleft,osk_noproptop,     //used by tlayouter
                  osk_nopropwidth,osk_nopropheight, //used by tlayouter
                  osk_nopropfont                    //used by tlayouter
@@ -10728,23 +10732,22 @@ end;
 
 procedure twidget.setoptionsskin(const avalue: optionsskinty);
 const
- mask: optionsskinty = [osk_skin,osk_noskin];
+ mask1: optionsskinty = [osk_skin,osk_noskin];
+ mask2: optionsskinty = [osk_colorcaptionframe,osk_nocolorcaptionframe];
 var
- valuebefore: optionsskinty;
+ opt1,opt2,valuebefore: optionsskinty;
 begin
  valuebefore:= foptionsskin;
- foptionsskin:= optionsskinty(setsinglebit(
+ opt1:= optionsskinty(setsinglebit(
                  {$ifdef FPC}longword{$else}word{$endif}(avalue),
                  {$ifdef FPC}longword{$else}word{$endif}(foptionsskin),
-                 {$ifdef FPC}longword{$else}word{$endif}(mask)));
- {
- if osk_noskin in avalue then begin
-  include(fmsecomponentstate,cs_noskin);
- end
- else begin
-  exclude(fmsecomponentstate,cs_noskin);
- end;
- }
+                 {$ifdef FPC}longword{$else}word{$endif}(mask1)));
+ opt2:= optionsskinty(setsinglebit(
+                 {$ifdef FPC}longword{$else}word{$endif}(avalue),
+                 {$ifdef FPC}longword{$else}word{$endif}(foptionsskin),
+                 {$ifdef FPC}longword{$else}word{$endif}(mask2)));
+ foptionsskin:= avalue - (mask1+mask2) + opt1*mask1 + opt2*mask2;
+ 
  if (optionsskinty({$ifdef FPC}longword{$else}word{$endif}(valuebefore) xor
                    {$ifdef FPC}longword{$else}word{$endif}(avalue)) * 
     [osk_nopropwidth,osk_nopropheight] <> []) and (fparentwidget <> nil) then begin

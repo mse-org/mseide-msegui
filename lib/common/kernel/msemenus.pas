@@ -126,6 +126,8 @@ type
    function isimagenrdisabledstored: boolean;
    procedure setcolor(const avalue: colorty);
    function iscolorstored: boolean;
+   procedure setcolorglyph(const avalue: colorty);
+   function iscolorglyphstored: boolean;
 
    function getfont: tmenufont;
    function getfontactive: tmenufontactive;
@@ -212,6 +214,9 @@ type
                             stored isimagenrdisabledstored default -2;
    property color: colorty read finfo.color write setcolor 
                           stored iscolorstored default cl_default;
+   property colorglyph: colorty read finfo.colorglyph write setcolorglyph 
+                          stored iscolorglyphstored default cl_default;
+                                //cl_default maps to cl_glyph
    property coloractive: colorty read fcoloractive write setcoloractive 
                           default cl_parent;
    property font: tmenufont read getfont write setfont stored isfontstored;
@@ -691,6 +696,7 @@ begin
  end;
  initactioninfo(finfo,defaultmenuactoptions);
  finfo.color:= cl_default;
+ finfo.colorglyph:= cl_default;
  fcoloractive:= cl_parent;
  inherited create;
 end;
@@ -1170,6 +1176,16 @@ begin
  result:= isactioncolorstored(finfo);
 end;
 
+procedure tmenuitem.setcolorglyph(const avalue: colorty);
+begin
+ setactioncolorglyph(iactionlink(self),avalue);
+end;
+
+function tmenuitem.iscolorglyphstored: Boolean;
+begin
+ result:= isactioncolorglyphstored(finfo);
+end;
+
 function tmenuitem.isfontstored: boolean;
 begin
  result:= ffont <> nil;
@@ -1294,7 +1310,7 @@ end;
 function tmenuitem.actualcolor: colorty;
 begin
  result:= finfo.color;
- if result = cl_default then begin
+ if (result = cl_default) or (result = cl_parent) then begin
   if fparentmenu = nil then begin
    result:= cl_transparent;
   end
@@ -1307,7 +1323,7 @@ end;
 function tmenuitem.actualcoloractive: colorty;
 begin
  result:= fcoloractive;
- if result = cl_parent then begin
+ if (result = cl_default) or (result = cl_parent) then begin
   if fparentmenu = nil then begin
    result:= actualcolor;
   end
@@ -1316,7 +1332,7 @@ begin
   end;
  end
  else begin
-  if result = cl_default then begin
+  if result = cl_normal then begin
    result:= actualcolor;
   end;
  end;

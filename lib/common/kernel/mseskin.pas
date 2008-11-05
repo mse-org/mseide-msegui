@@ -57,10 +57,13 @@ type
   datacols: gridpropskininfoty;
  end;  
  buttonskininfoty = record
+  co: colorty;
   wi: widgetskininfoty;
   font: toptionalfont;
  end;  
  framebuttonskininfoty = record
+  co: colorty;
+  coglyph: colorty;
   fa: tfacecomp;
   fra: tframecomp;
  end;
@@ -264,6 +267,7 @@ type
    fframebutton: framebuttonskininfoty;
    fcontainer: containerskininfoty;
    fwidget_color: colorty;
+   fwidget_colorcaptionframe: colorty;
    ftabbar: tabbarskininfoty;
    ftoolbar: toolbarskininfoty;
    fpopupmenu: menuskininfoty;
@@ -404,6 +408,9 @@ type
 
    property widget_color: colorty read fwidget_color 
                         write fwidget_color default cl_default;
+   property widget_colorcaptionframe: colorty read fwidget_colorcaptionframe 
+                        write fwidget_colorcaptionframe default cl_default;
+                        //overrides widget_color for widgets with frame caption
 
 //   property dataedit_color: colorty read fdataedit.color 
 //                        write fdataedit.color default cl_default;
@@ -438,11 +445,15 @@ type
                             write setgrid_datacols_face;
    property grid_datacols_frame: tframecomp read fgrid.datacols.frame
                             write setgrid_datacols_frame;
-
+   
+   property button_color: colorty read fbutton.co write fbutton.co
+                                                  default cl_default;
    property button_face: tfacecomp read fbutton.wi.fa write setbutton_face;
    property button_frame: tframecomp read fbutton.wi.fra write setbutton_frame;
    property button_font: toptionalfont read getbutton_font write setbutton_font;
 
+   property databutton_color: colorty read fdatabutton.co 
+                                  write fdatabutton.co default cl_default;
    property databutton_face: tfacecomp read fdatabutton.wi.fa 
                                               write setdatabutton_face;
    property databutton_frame: tframecomp read fdatabutton.wi.fra 
@@ -450,6 +461,10 @@ type
    property databutton_font: toptionalfont read getdatabutton_font 
                                               write setdatabutton_font;
 
+   property framebutton_color: colorty read fframebutton.co 
+                           write fframebutton.co default cl_default;
+   property framebutton_colorglyph: colorty read fframebutton.coglyph 
+                           write fframebutton.coglyph default cl_default;
    property framebutton_face: tfacecomp read fframebutton.fa 
                                               write setframebutton_face;
    property framebutton_frame: tframecomp read fframebutton.fra 
@@ -947,6 +962,12 @@ procedure tcustomskincontroller.setframebuttonskin(const instance: tframebutton;
                const ainfo: framebuttonskininfoty);
 begin
  with instance,ainfo do begin
+  if (co <> cl_default) and (color = cl_default) then begin
+   color:= co;
+  end;
+  if (coglyph <> cl_default) and (colorglyph = cl_default) then begin
+   colorglyph:= coglyph;
+  end;
   if (fa <> nil) and (face = nil) then begin
    createface;
    face.template:= fa;
@@ -1174,6 +1195,11 @@ end;
 constructor tskincontroller.create(aowner: tcomponent);
 begin
  fwidget_color:= cl_default;
+ fwidget_colorcaptionframe:= cl_default;
+ fbutton.co:= cl_default;
+ fdatabutton.co:= cl_default;
+ fframebutton.co:= cl_default;
+ fframebutton.coglyph:= cl_default;
  ftabbar.tahorz.color:= cl_default;
  ftabbar.tahorz.coloractive:= cl_default;
  ftabbar.tavert.color:= cl_default;
@@ -1514,7 +1540,15 @@ begin
    end;
   end; 
  end;
- setwidgetcolor(sender,fwidget_color);
+ if (osk_colorcaptionframe in sender.optionsskin) or 
+      not (osk_nocolorcaptionframe in sender.optionsskin) and
+        (twidget1(sender).fframe is tcustomcaptionframe) and 
+      (tcustomcaptionframe(twidget1(sender).fframe).caption <> '') then begin
+  setwidgetcolor(sender,fwidget_colorcaptionframe);
+ end
+ else begin
+  setwidgetcolor(sender,fwidget_color);
+ end;
 end;
 
 procedure tskincontroller.handlegroupbox(const sender: tgroupbox;
@@ -1527,6 +1561,7 @@ end;
 procedure tskincontroller.handlesimplebutton(const sender: twidget;
                const ainfo: skininfoty);
 begin
+ setwidgetcolor(sender,fbutton.co);
  setwidgetskin(sender,fbutton.wi);
  setwidgetfont(sender,fbutton.font);
 end;
@@ -1534,6 +1569,7 @@ end;
 procedure tskincontroller.handledatabutton(const sender: twidget;
                const ainfo: skininfoty);
 begin
+ setwidgetcolor(sender,fdatabutton.co);
  setwidgetskin(sender,fdatabutton.wi);
  setwidgetfont(sender,fdatabutton.font);
 end;

@@ -227,8 +227,10 @@ type
    property left: boolean read getleft write setleft default false;
   published
    property width: integer read fbuttonwidth write setbuttonwidth default 0;
-   property color: colorty read finfo.color write setcolor default cl_parent;
-   property colorglyph: colorty read finfo.ca.colorglyph write setcolorglyph default cl_glyph;
+   property color: colorty read finfo.color write setcolor default cl_default;
+   property colorglyph: colorty read finfo.ca.colorglyph 
+                             write setcolorglyph default cl_default;
+                                 //cl_default maps to cl_glyph
    property face: tface read getface write setface;
    property frame: tframe read getframe write setframe;
    property imagelist: timagelist read finfo.ca.imagelist write setimagelist;
@@ -470,8 +472,8 @@ end;
 
 constructor tframebutton.create(aowner: tobject);
 begin
- finfo.color:= cl_parent;
- finfo.ca.colorglyph:= cl_glyph;
+ finfo.color:= cl_default;
+ finfo.ca.colorglyph:= cl_default;
  finfo.ca.imagenr:= -1;
  finfo.imagenrdisabled:= -2;
  include(finfo.state,shs_widgetorg);
@@ -986,7 +988,7 @@ begin
      fframe.paintbackground(canvas,fframerect);
      canvas.restore;
     end;
-    if color = cl_parent then begin
+    if  (color = cl_default) or (color = cl_parent) then begin
      if color2 = cl_none then begin
       color2:= fintf.getwidget.parentcolor;
      end;

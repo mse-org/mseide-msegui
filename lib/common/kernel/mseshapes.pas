@@ -782,6 +782,7 @@ var
  rect1: rectty;
  int1,int2: integer;
  reg1: regionty;
+ co1: colorty;
 begin
  with canvas,info do begin
   if (ca.imagelist <> nil) then begin
@@ -803,7 +804,11 @@ begin
     inc(int1,imagecheckedoffset);
    end;
    if ca.colorglyph <> cl_none then begin
-    ca.imagelist.paint(canvas,int1,rect1,align1,ca.colorglyph);
+    co1:= ca.colorglyph;
+    if co1 = cl_default then begin
+     co1:= cl_glyph;
+    end;
+    ca.imagelist.paint(canvas,int1,rect1,align1,co1);
    end;
    canvas.clipregion:= reg1;
    {
