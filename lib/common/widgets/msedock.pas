@@ -120,7 +120,8 @@ type
                     dos_closebuttonclicked,dos_maximizebuttonclicked,
                     dos_normalizebuttonclicked,dos_minimizebuttonclicked,
                     dos_fixsizebuttonclicked,
-                    dos_topbuttonclicked,dos_backgroundbuttonclicked);
+                    dos_topbuttonclicked,dos_backgroundbuttonclicked,
+                    dos_moving);
  dockstatesty = set of dockstatety;
 
  splitdirty = (sd_none,sd_x,sd_y,sd_tabed);
@@ -146,6 +147,7 @@ type
    fsplitter_size: integer;
    fcursorbefore: cursorshapety;
    fsizeindex: integer;
+   fmoveindex: integer;
    fsizingrect: rectty;
    fsizeoffset: integer;
    fdockstate: dockstatesty;
@@ -207,6 +209,7 @@ type
   protected
    foptionsdock: optionsdockty;
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
+   function checkclickstate(const info: mouseeventinfoty): boolean; override;
    
    function doclose(const awidget: twidget): boolean;
    procedure setmdistate(const avalue: mdistatety); virtual;
@@ -2265,7 +2268,7 @@ var
  prop,fix: booleanarty;
  fixend: boolean;
 
- function checksizing: integer;
+ function checksizing(const move: boolean): integer;
  var
   int1,int2: integer;
   containerpaintrect: rectty;
@@ -2273,6 +2276,9 @@ var
  begin
   ar1:= nil; //compilerwarning
   result:= -1;
+  if move and not(od_nofit in optionsdock) then begin
+   exit;
+  end;
   ar1:= checksplit;
   lastitem:= high(ar1);
   if not fixend then begin
@@ -2290,13 +2296,19 @@ var
       setpickshape(cr_sizehor);
       fsizingrect.y:= containerpaintrect.y;
       fsizingrect.cy:= containerpaintrect.cy;
-      if fsplitter_size = 0 then begin
-       fsizingrect.x:= int2 - sizingtol;
-       fsizingrect.cx:= 2 * sizingtol;
+      if move then begin
+       fsizingrect.cx:= bounds_cx;
+       fsizingrect.x:= int2 - fsizingrect.cx;;       
       end
       else begin
-       fsizingrect.x:= int2;
-       fsizingrect.cx:= fsplitter_size;
+       if fsplitter_size = 0 then begin
+        fsizingrect.x:= int2 - sizingtol;
+        fsizingrect.cx:= 2 * sizingtol;
+       end
+       else begin
+        fsizingrect.x:= int2;
+        fsizingrect.cx:= fsplitter_size;
+       end;
       end;
       result:= int1;
       break;
@@ -2315,13 +2327,19 @@ var
       setpickshape(cr_sizever);
       fsizingrect.x:= containerpaintrect.x;
       fsizingrect.cx:= containerpaintrect.cx;
-      if fsplitter_size = 0 then begin
-       fsizingrect.y:= int2 - sizingtol;
-       fsizingrect.cy:= 2*sizingtol;
+      if move then begin
+       fsizingrect.cy:= bounds_cy;
+       fsizingrect.y:= int2 - fsizingrect.cy;;       
       end
       else begin
-       fsizingrect.y:= int2;
-       fsizingrect.cy:= fsplitter_size;
+       if fsplitter_size = 0 then begin
+        fsizingrect.y:= int2 - sizingtol;
+        fsizingrect.cy:= 2*sizingtol;
+       end
+       else begin
+        fsizingrect.y:= int2;
+        fsizingrect.cy:= fsplitter_size;
+       end;
       end;
       result:= int1;
       break;
@@ -2329,11 +2347,6 @@ var
     end;
    end;
   end;
-  {
-  if (result >= 0) and (ow_noautosizing in ar1[result].optionswidget) then begin
-   result:= -1;
-  end;
-  }
   if result < 0 then begin
    restorepickshape;
   end;
@@ -2342,18 +2355,21 @@ var
  procedure checksizeoffset(wpos,asize,amin: getwidgetintegerty);
  var
   start,stop: integer;
-  int1: integer;
+  int1,int2,int4: integer;
   rect1: rectty;
+  movestart: integer;
  begin
   ar1:= checksplit(propsize,fixsize,prop,fix,false);
   if fsizeindex <= high(ar1) then begin
    rect1:= idockcontroller(fintf).getplacementrect;
    with ar1[fsizeindex] do begin
     if {$ifndef FPC}@{$endif}asize = @wbounds_cx then begin
+     movestart:= rect1.x;
      start:= rect1.x - bounds_x - bounds_cx;
      stop:= start + rect1.cx;
     end
     else begin
+     movestart:= rect1.y;
      start:= rect1.y - bounds_y - bounds_cy;
      stop:= start + rect1.cy;
     end;
@@ -2379,8 +2395,40 @@ var
     stop:= stop - (high(ar1)-fsizeindex) * fsplitter_size;
    end
    else begin 
-    start:= start + wpos(ar1[fsizeindex]) + amin(ar1[fsizeindex]);
-    stop:= stop - fsplitter_size;
+    if dos_moving in fdockstate then begin
+     movestart:= movestart + fsplitter_size;
+     fmoveindex:= high(ar1);
+     int4:= fsizeoffset + wpos(ar1[fsizeindex]);
+     for int1:= 0 to high(ar1) do begin
+      int2:= wpos(ar1[int1]);
+      movestart:= movestart + int2 + fsplitter_size;      
+      if movestart > int4 then begin
+       fmoveindex:= int1;
+       break;
+      end;
+     end;       
+     fsizingrect:= rect1;
+     if {$ifndef FPC}@{$endif}asize = @wbounds_cx then begin
+      fsizingrect.x:= ar1[fmoveindex].bounds_x;
+      if movestart < int4 then begin 
+       inc(fmoveindex);
+       fsizingrect.x:= fsizingrect.x + ar1[fmoveindex].bounds_cx
+      end;
+      fsizingrect.cx:= ar1[fsizeindex].bounds_cx;
+     end
+     else begin
+      fsizingrect.y:= ar1[fmoveindex].bounds_y;
+      if movestart < int4 then begin 
+       inc(fmoveindex);
+       fsizingrect.y:= fsizingrect.y + ar1[fmoveindex].bounds_cy
+      end;
+      fsizingrect.cy:= ar1[fsizeindex].bounds_cy;
+     end;
+    end
+    else begin
+     start:= start + wpos(ar1[fsizeindex]) + amin(ar1[fsizeindex]);
+     stop:= stop - fsplitter_size;
+    end;
    end;
   end;
   if fsizeoffset < start then begin
@@ -2391,9 +2439,11 @@ var
   end;
  end;
 
- procedure calcdelta(getc: getwidgetintegerty; setc: setwidgetintegerty);
+ procedure calcdelta(getc: getwidgetintegerty; setc: setwidgetintegerty;
+                              setp: setwidgetintegerty);
  var
   int1,int2,int3: integer;
+  wi1: twidget;
  begin
   ar1:= checksplit(propsize,fixsize,prop,fix,false);
   if high(ar1) > 0 then begin
@@ -2424,17 +2474,54 @@ var
       end;
      end;
     end;
-    setc(ar1[fsizeindex],getc(ar1[fsizeindex]) + int2); //ev. rest
+    if dos_moving in fdockstate then begin
+     wi1:= ar1[fsizeindex];
+     deleteitem(pointerarty(ar1),fsizeindex);     
+     insertitem(pointerarty(ar1),fmoveindex,wi1);
+     int2:= 0;
+     for int1:= 0 to high(ar1) do begin
+      setp(ar1[int1],int2);
+      int2:= int2 + getc(ar1[int1]);
+     end;
+    end
+    else begin
+     setc(ar1[fsizeindex],getc(ar1[fsizeindex]) + int2); //ev. rest
+    end;
    finally
     exclude(fdockstate,dos_updating4);
    end;
   end;
  end;
 
+var
+ canvas1: tcanvas;
+ 
+ procedure drawxorpic;
+ var
+  rect1: rectty;
+ begin
+  if canvas1 = nil then begin
+   canvas1:= widget1.container.getcanvas(org_widget);
+  end;
+  if dos_moving in fdockstate then begin
+   canvas1.drawxorframe(fsizingrect,-2,stockobjects.bitmaps[stb_dens50]);
+  end
+  else begin
+   if fsplitdir = sd_x then begin
+    rect1:= moverect(fsizingrect,makepoint(fsizeoffset,0));
+   end
+   else begin
+    rect1:= moverect(fsizingrect,makepoint(0,fsizeoffset));
+   end;
+   canvas1.fillxorrect(rect1,stockobjects.bitmaps[stb_dens50]);
+  end;
+ end;
+ 
 begin
  inherited;
  with info do begin
   if (eventstate * [es_processed] = []) then begin
+   canvas1:= nil;
    fixend:= foptionsdock * [od_nofit] <> [];
    widget1:= twidget1(fintf.getwidget);
    po1:= translatewidgetpoint(addpoint(info.pos,widget1.clientwidgetpos),
@@ -2444,57 +2531,55 @@ begin
      if not (ds_clicked in fstate) then begin
       restorepickshape;
       fsizeindex:= -1;
+      exclude(fdockstate,dos_moving);
      end;
     end;
     ek_mousemove: begin
      if fsizeindex < 0 then begin
-      checksizing;
+      checksizing(dos_moving in fdockstate);
      end
      else begin
-      with widget1.container.getcanvas(org_widget) do begin
-       if fsplitdir = sd_x then begin
-        fillxorrect(moverect(fsizingrect,makepoint(fsizeoffset,0)),
-                 stockobjects.bitmaps[stb_dens50]);
-          //remove pic
-        fsizeoffset:= pos.x - fpickpos.x;
-        checksizeoffset({$ifdef FPC}@{$endif}wbounds_x,
-                        {$ifdef FPC}@{$endif}wbounds_cx,
-                        {$ifdef FPC}@{$endif}wbounds_cxmin);
-        fillxorrect(moverect(fsizingrect,makepoint(fsizeoffset,0)),
-                 stockobjects.bitmaps[stb_dens50]);
-          //draw pic
-       end;
-       if fsplitdir = sd_y then begin
-        fillxorrect(moverect(fsizingrect,makepoint(0,fsizeoffset)),
-                 stockobjects.bitmaps[stb_dens50]);
-          //remove pic
-        fsizeoffset:= pos.y - fpickpos.y;
-        checksizeoffset({$ifdef FPC}@{$endif}wbounds_y,
-                        {$ifdef FPC}@{$endif}wbounds_cy,
-                        {$ifdef FPC}@{$endif}wbounds_cymin);
-        fillxorrect(moverect(fsizingrect,makepoint(0,fsizeoffset)),
-                 stockobjects.bitmaps[stb_dens50]);
-          //draw pic
-       end;
+      if fsplitdir = sd_x then begin
+       drawxorpic;   //remove pic
+       fsizeoffset:= pos.x - fpickpos.x;
+       checksizeoffset({$ifdef FPC}@{$endif}wbounds_x,
+                       {$ifdef FPC}@{$endif}wbounds_cx,
+                       {$ifdef FPC}@{$endif}wbounds_cxmin);
+       drawxorpic;   //draw pic
+      end;
+      if fsplitdir = sd_y then begin
+       drawxorpic;  //remove pic
+       fsizeoffset:= pos.y - fpickpos.y;
+       checksizeoffset({$ifdef FPC}@{$endif}wbounds_y,
+                       {$ifdef FPC}@{$endif}wbounds_cy,
+                       {$ifdef FPC}@{$endif}wbounds_cymin);
+       drawxorpic;  //draw pic
       end;
      end;
     end;
     ek_buttonpress: begin
-     if shiftstate = [ss_left] then begin
-      fsizeindex:= checksizing;
+     fsizeoffset:= 0;
+     if shiftstate - [ss_left,ss_shift] = [] then begin
+      fsizeindex:= checksizing(ss_shift in shiftstate);
       if fsizeindex >= 0 then begin
-       widget1.container.getcanvas(org_widget).fillxorrect(fsizingrect,
-             stockobjects.bitmaps[stb_dens50]);
+       if (ss_shift in shiftstate) then begin
+        include(fdockstate,dos_moving);
+       end
+       else begin
+        exclude(fdockstate,dos_moving);
+       end;
+       drawxorpic;
       end;
-      fsizeoffset:= 0;
-      case checkbuttonarea(pos) of
-       dbr_close: include(fdockstate,dos_closebuttonclicked);
-       dbr_maximize: include(fdockstate,dos_maximizebuttonclicked);
-       dbr_normalize: include(fdockstate,dos_normalizebuttonclicked);
-       dbr_minimize: include(fdockstate,dos_minimizebuttonclicked);
-       dbr_fixsize: include(fdockstate,dos_fixsizebuttonclicked);
-       dbr_top: include(fdockstate,dos_topbuttonclicked);
-       dbr_background: include(fdockstate,dos_backgroundbuttonclicked);
+      if not (ss_shift in shiftstate) then begin
+       case checkbuttonarea(pos) of
+        dbr_close: include(fdockstate,dos_closebuttonclicked);
+        dbr_maximize: include(fdockstate,dos_maximizebuttonclicked);
+        dbr_normalize: include(fdockstate,dos_normalizebuttonclicked);
+        dbr_minimize: include(fdockstate,dos_minimizebuttonclicked);
+        dbr_fixsize: include(fdockstate,dos_fixsizebuttonclicked);
+        dbr_top: include(fdockstate,dos_topbuttonclicked);
+        dbr_background: include(fdockstate,dos_backgroundbuttonclicked);
+       end;
       end;
      end;
     end;
@@ -2514,11 +2599,13 @@ begin
       if high(ar1) > 0 then begin
        if fsplitdir = sd_x then begin
         calcdelta({$ifdef FPC}@{$endif}wbounds_cx,
-                  {$ifdef FPC}@{$endif}wsetbounds_cx);
+                  {$ifdef FPC}@{$endif}wsetbounds_cx,
+                  {$ifdef FPC}@{$endif}wsetbounds_x);
        end
        else begin
         calcdelta({$ifdef FPC}@{$endif}wbounds_cy,
-                  {$ifdef FPC}@{$endif}wsetbounds_cy);
+                  {$ifdef FPC}@{$endif}wsetbounds_cy,
+                  {$ifdef FPC}@{$endif}wsetbounds_y);
        end;
        sizechanged(true);
       end;
@@ -2565,7 +2652,7 @@ begin
         [dos_closebuttonclicked,dos_maximizebuttonclicked,
             dos_normalizebuttonclicked,dos_minimizebuttonclicked,
             dos_fixsizebuttonclicked,dos_topbuttonclicked,
-            dos_backgroundbuttonclicked];
+            dos_backgroundbuttonclicked,dos_moving];
     end;
    end;
   end;
@@ -3000,6 +3087,16 @@ function tdockcontroller.closeactivewidget: boolean;
                    //simulates mr_windowclosed for active widget, true if ok
 begin
  result:= doclose(activewidget);
+end;
+
+function tdockcontroller.checkclickstate(const info: mouseeventinfoty): boolean;
+begin
+ if od_nofit in foptionsdock then begin
+  result:= info.shiftstate - [ss_left,ss_shift] = [];
+ end
+ else begin
+  result:= info.shiftstate - [ss_left] = [];
+ end;
 end;
 
 { tgripframe }

@@ -84,6 +84,7 @@ type
    fdragobject: tdragobject;
    fstate: dragstatesty;
    fintf: idragcontroller;
+   function checkclickstate(const info: mouseeventinfoty): boolean; virtual;
   public
    constructor create(const aintf: idragcontroller); reintroduce;
    destructor destroy; override;
@@ -203,6 +204,12 @@ begin
  info.dragobjectpo:= @fdragobject;
 end;
 
+function tcustomdragcontroller.checkclickstate(
+                                   const info: mouseeventinfoty): boolean;
+begin
+ result:= info.shiftstate - [ss_left] = [];
+end;
+
 procedure tcustomdragcontroller.clientmouseevent(var info: mouseeventinfoty);
 var
  owner: twidget;
@@ -212,7 +219,7 @@ begin
  owner:= fintf.getwidget;
  case info.eventkind of
   ek_buttonpress: begin
-   if info.shiftstate = [ss_left] then begin
+   if checkclickstate(info) then begin
     fpickpos:= info.pos;
     fpickrect:= fintf.getdragrect(fpickpos);
     include(fstate,ds_clicked);
@@ -230,7 +237,7 @@ begin
    enddrag;
   end;
   ek_mousemove,ek_mousepark: begin
-   if (info.shiftstate = [ss_left]) then begin
+   if checkclickstate(info) then begin
     if (fstate * [ds_clicked,ds_beginchecked] = [ds_clicked]) and
       (fdragobject = nil) and not pointinrect(info.pos,fpickrect)
       {(distance(info.pos,fpickpos) > mindragdist)} then begin
