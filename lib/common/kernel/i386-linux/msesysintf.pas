@@ -44,6 +44,10 @@ type
  end;
 
 function timestampms: cardinal;
+function blocksignal(const signum: integer): boolean;
+              //true if blocked before
+function unblocksignal(const signum: integer): boolean;
+              //true if blocked before
 
 function sigactionex(SigNum: Integer; var Action: TSigActionex; OldAction: PSigAction): Integer;
 
@@ -54,7 +58,8 @@ uses
  sysutils,msesysutils,msefileutils{$ifdef FPC},dateutils{$else},DateUtils{$endif}
  {$ifdef mse_debug_mutex},mseapplication{$endif};
  
-function sigactionex(SigNum: Integer; var Action: TSigActionex; OldAction: PSigAction): Integer;
+function sigactionex(SigNum: Integer; var Action: TSigActionex;
+                              OldAction: PSigAction): Integer;
 begin
  action.sa_flags:= action.sa_flags or SA_SIGINFO;
  result:= sigaction(signum,@action,oldaction);
@@ -135,6 +140,28 @@ type
   dirpath: pointer;
   platformdata: array[3..7] of cardinal;
  end;
+
+function unblocksignal(const signum: integer): boolean;
+              //true if blocked before
+var
+ set1,set2: tsigset;
+begin
+ sigemptyset(set1);
+ sigaddset(set1,signum);
+ sigprocmask(sig_unblock,set1,set2);
+ result:= sigismember(set2,signum) <> 0;
+end;
+
+function blocksignal(const signum: integer): boolean;
+              //true if blocked before
+var
+ set1,set2: tsigset;
+begin
+ sigemptyset(set1);
+ sigaddset(set1,signum);
+ sigprocmask(sig_block,set1,set2);
+ result:= sigismember(set2,signum) <> 0;
+end;
 
 function sys_getpid: procidty;
 begin

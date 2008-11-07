@@ -1428,6 +1428,8 @@ const
 function signal(__sig:longint; __handler:__sighandler_t):__sighandler_t;cdecl;external clib name 'signal';
 function sigemptyset(var SigSet : TSigSet):longint;cdecl;external clib name 'sigemptyset';
 function sigaddset(var SigSet : TSigSet; SigNum : Longint):longint;cdecl;external clib name 'sigaddset';
+function sigismember(var SigSet : TSigSet; SigNum : Longint):longint;cdecl;external clib name 'sigismember';
+function sigprocmask(__how:longint; var SigSet : TSigSet; var oldset: Tsigset):longint;cdecl;external clib name 'sigprocmask';
 
 function kill(__pid:__pid_t; __sig:longint):longint;cdecl;external clib name 'kill';
 function getpt:longint;cdecl;external clib name 'getpt';

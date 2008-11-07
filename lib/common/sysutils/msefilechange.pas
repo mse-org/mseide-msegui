@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -140,6 +140,7 @@ var
  dirinfosig: integer;
 
 procedure DirChanged(SigNum : Integer; context: psiginfo; p: pointer); cdecl;
+          //kernel 2.6.25.18 does not return si_fd!
 begin
  if SigNum = dirinfosig then begin
   if fchangethread <> nil then begin
@@ -164,11 +165,13 @@ begin
   end;
   Flags:= notifyflags;
   if not((sigactionex(dirinfosig,action, nil) = 0) and
-    (fcntl(result, F_SETSIG, dirinfosig) = 0) and
+    (fcntl(result, F_SETSIG,dirinfosig) = 0) and
         (fcntl(result, F_NOTIFY, Flags) = 0)) then begin
    sys_closefile(result);  //es hat nicht geklappt
    result:= -1;
+   exit;
   end;
+  unblocksignal(dirinfosig);
  end;
 end;
 
