@@ -1430,6 +1430,7 @@ function sigemptyset(var SigSet : TSigSet):longint;cdecl;external clib name 'sig
 function sigaddset(var SigSet : TSigSet; SigNum : Longint):longint;cdecl;external clib name 'sigaddset';
 function sigismember(var SigSet : TSigSet; SigNum : Longint):longint;cdecl;external clib name 'sigismember';
 function sigprocmask(__how:longint; var SigSet : TSigSet; var oldset: Tsigset):longint;cdecl;external clib name 'sigprocmask';
+function pthread_sigmask(__how:longint; var __newmask:__sigset_t; var __oldmask:__sigset_t):longint;cdecl; external threadslib;
 
 function kill(__pid:__pid_t; __sig:longint):longint;cdecl;external clib name 'kill';
 function getpt:longint;cdecl;external clib name 'getpt';

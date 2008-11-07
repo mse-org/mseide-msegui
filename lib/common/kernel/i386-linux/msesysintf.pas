@@ -148,7 +148,7 @@ var
 begin
  sigemptyset(set1);
  sigaddset(set1,signum);
- sigprocmask(sig_unblock,set1,set2);
+ pthread_sigmask(sig_unblock,set1,set2);
  result:= sigismember(set2,signum) <> 0;
 end;
 
@@ -159,7 +159,7 @@ var
 begin
  sigemptyset(set1);
  sigaddset(set1,signum);
- sigprocmask(sig_block,set1,set2);
+ pthread_sigmask(sig_block,set1,set2);
  result:= sigismember(set2,signum) <> 0;
 end;
 
