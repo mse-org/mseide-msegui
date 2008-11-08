@@ -265,7 +265,7 @@ begin
      result:= false;
      break;
     end;
-    sys_sched_yield;
+    sys_schedyield;
    end;
   end
   else begin

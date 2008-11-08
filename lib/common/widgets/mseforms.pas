@@ -1541,9 +1541,9 @@ end;
 
 procedure tcustomdockform.updateoptions;
 begin
- updatebit({$ifdef FPC}longword{$else}word{$endif}(fdragdock.foptionsdock),
+ updatebit({$ifdef FPC}longword{$else}longword{$endif}(fdragdock.foptionsdock),
          ord(od_savepos),fo_savepos in foptions);
- updatebit({$ifdef FPC}longword{$else}word{$endif}(fdragdock.foptionsdock),
+ updatebit({$ifdef FPC}longword{$else}longword{$endif}(fdragdock.foptionsdock),
          ord(od_savezorder),fo_savezorder in foptions);
  inherited;
 end;

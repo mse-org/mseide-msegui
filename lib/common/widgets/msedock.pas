@@ -1021,13 +1021,13 @@ var
 begin
  splitdirbefore:= fsplitdir;
  val1:= optionsdockty(
-      setsinglebit({$ifdef FPC}longword{$else}word{$endif}(avalue),
-      {$ifdef FPC}longword{$else}word{$endif}(foptionsdock),
-                         {$ifdef FPC}longword{$else}word{$endif}(mask1)));
+      setsinglebit({$ifdef FPC}longword{$else}longword{$endif}(avalue),
+      {$ifdef FPC}longword{$else}longword{$endif}(foptionsdock),
+                         {$ifdef FPC}longword{$else}longword{$endif}(mask1)));
  val2:= optionsdockty(
-      setsinglebit({$ifdef FPC}longword{$else}word{$endif}(avalue),
-      {$ifdef FPC}longword{$else}word{$endif}(foptionsdock),
-                         {$ifdef FPC}longword{$else}word{$endif}(mask2)));
+      setsinglebit({$ifdef FPC}longword{$else}longword{$endif}(avalue),
+      {$ifdef FPC}longword{$else}longword{$endif}(foptionsdock),
+                         {$ifdef FPC}longword{$else}longword{$endif}(mask2)));
 // val3:= optionsdockty(
 //      setsinglebit({$ifdef FPC}longword{$else}word{$endif}(avalue),
 //      {$ifdef FPC}longword{$else}word{$endif}(foptionsdock),
@@ -1099,9 +1099,10 @@ end;
 
 procedure tdockcontroller.setuseroptions(const avalue: optionsdockty);
 begin
- optionsdock:= optionsdockty(replacebits({$ifdef FPC}longword{$else}word{$endif}(avalue),
-           {$ifdef FPC}longword{$else}word{$endif}(foptionsdock),
-           {$ifdef FPC}longword{$else}word{$endif}(useroptionsmask)));
+ optionsdock:= optionsdockty(replacebits(
+           {$ifdef FPC}longword{$else}longword{$endif}(avalue),
+           {$ifdef FPC}longword{$else}longword{$endif}(foptionsdock),
+           {$ifdef FPC}longword{$else}longword{$endif}(useroptionsmask)));
 end;
 
 procedure tdockcontroller.splitterchanged;
@@ -2100,9 +2101,9 @@ var
 begin
  fsplitdir:= splitdirty(reader.readinteger('splitdir',ord(fsplitdir),
                               0,ord(high(splitdirty))));
- useroptions:= optionsdockty({$ifdef FPC}longword{$else}word{$endif}(
+ useroptions:= optionsdockty({$ifdef FPC}longword{$else}longword{$endif}(
      reader.readinteger('useroptions',
-     integer({$ifdef FPC}longword{$else}word{$endif}(fuseroptions)))));
+     integer({$ifdef FPC}longword{$else}longword{$endif}(fuseroptions)))));
 // setoptionsdock(foptionsdock); //check valid values
  ftaborder:= reader.readarray('order',msestringarty(nil));
  factivetab:= reader.readinteger('activetab',0);
@@ -2173,7 +2174,8 @@ var
  int1: integer;
 begin
  writer.writeinteger('splitdir',ord(fsplitdir));
- writer.writeinteger('useroptions',{$ifdef FPC}longword{$else}word{$endif}(fuseroptions));
+ writer.writeinteger('useroptions',
+         {$ifdef FPC}longword{$else}longword{$endif}(fuseroptions));
  if ftabwidget <> nil then begin
   with tdocktabwidget(ftabwidget) do begin
    setlength(ar1,count);
@@ -2657,7 +2659,7 @@ begin
        dbr_fixsize: begin
         if (dos_fixsizebuttonclicked in fdockstate) then begin
          useroptions:= optionsdockty(
-          togglebit({$ifdef FPC}longword{$else}word{$endif}(fuseroptions),
+          togglebit({$ifdef FPC}longword{$else}longword{$endif}(fuseroptions),
           ord(od_fixsize)));
          widget1.invalidatewidget;
         end;
@@ -2665,7 +2667,7 @@ begin
        dbr_top: begin
         if (dos_topbuttonclicked in fdockstate) then begin
          useroptions:= optionsdockty(
-          togglebit({$ifdef FPC}longword{$else}word{$endif}(fuseroptions),
+          togglebit({$ifdef FPC}longword{$else}longword{$endif}(fuseroptions),
           ord(od_top)));
          widget1.invalidatewidget;
         end;
@@ -2673,7 +2675,7 @@ begin
        dbr_background: begin
         if (dos_backgroundbuttonclicked in fdockstate) then begin
          useroptions:= optionsdockty(
-          togglebit({$ifdef FPC}longword{$else}word{$endif}(fuseroptions),
+          togglebit({$ifdef FPC}longword{$else}longword{$endif}(fuseroptions),
           ord(od_background)));
          widget1.invalidatewidget;
         end;
