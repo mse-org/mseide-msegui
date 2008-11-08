@@ -860,7 +860,7 @@ end;
 
 procedure tmainfo.gdbserverexe(const sender: tguiapplication; var again: boolean);
 begin
- sys_sched_yield;
+ sys_schedyield;
  if timeout(fgdbservertimeout) and 
      getprocessexitcode(fgdbserverprocid,fgdbserverexitcode,100000) then begin
   sender.terminatewait;

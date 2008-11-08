@@ -1446,6 +1446,7 @@ procedure tgdbmi.gdbfrom(const sender: tpipereader);
 var
  str1,str2: string;
  bo1: boolean;
+ int1: integer;
 begin
  if fgdbfrom.eof then begin
   exit;
@@ -1457,13 +1458,19 @@ begin
   end
   else begin
    str1:= '';
+   int1:= 0;
    while true do begin
     bo1:= fgdbfrom.readuln(str2);
     str1:= str1 + str2;
-    if bo1 or (str2 = '') then begin
+    if str2 <> '' then begin
+     int1:= 0;
+    end;
+    if bo1 or (str1 = '') or (int1 > 10) then begin
      break;
     end;
-    sleep(0);
+    sys_schedyield;
+    inc(int1);
+    sleep(100); //try to get the lineend
    end;
   end;
   if bo1 then begin

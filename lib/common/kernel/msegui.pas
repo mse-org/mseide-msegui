@@ -1512,8 +1512,10 @@ type
                    const clientorigin: boolean = true): twidget; virtual;
    function gettaborderedwidgets: widgetarty;
    function getvisiblewidgets: widgetarty;
-   function getsortxchildren: widgetarty;
-   function getsortychildren: widgetarty;
+   function getsortxchildren(const banded: boolean = false): widgetarty;
+              //banded -> row,column order
+   function getsortychildren(const banded: boolean = false): widgetarty;
+              //banded -> column,row order
    function getlogicalchildren: widgetarty; virtual; //children of container
    procedure addlogicalchildren(var achildren: widgetarty);
    function findlogicalchild(const aname: ansistring): twidget;
@@ -2196,7 +2198,14 @@ procedure syncpaintheight(const awidgets: array of twidget;
 
 type
  getwidgetintegerty = function(const awidget: twidget): integer;
+ getwidgetbooleanty = function(const awidget: twidget): boolean;
  setwidgetintegerty = procedure(const awidget: twidget; const avalue: integer);
+ widgetaccessty = record
+  pos,size,stop,min,max,opos,osize,ostop,omin,omax: getwidgetintegerty;
+  setpos,setsize,setstop,setmin,setmax,
+           setopos,setosize,setostop,setomin,setomax: setwidgetintegerty;
+  anchstop,oanchstop: getwidgetbooleanty;
+ end;
 
 function wbounds_x(const awidget: twidget): integer;
 procedure wsetbounds_x(const awidget: twidget; const avalue: integer);
@@ -2206,6 +2215,13 @@ function wbounds_cx(const awidget: twidget): integer;
 procedure wsetbounds_cx(const awidget: twidget; const avalue: integer);
 function wbounds_cy(const awidget: twidget): integer;
 procedure wsetbounds_cy(const awidget: twidget; const avalue: integer);
+function wstopx(const awidget: twidget): integer;
+procedure wsetstopx(const awidget: twidget; const avalue: integer);
+function wstopy(const awidget: twidget): integer;
+procedure wsetstopy(const awidget: twidget; const avalue: integer);
+function wanchstopx(const awidget: twidget): boolean;
+function wanchstopy(const awidget: twidget): boolean;
+
 function wbounds_cxmin(const awidget: twidget): integer;
 procedure wsetbounds_cxmin(const awidget: twidget; const avalue: integer);
 function wbounds_cymin(const awidget: twidget): integer;
@@ -2215,6 +2231,56 @@ procedure wsetbounds_cxmax(const awidget: twidget; const avalue: integer);
 function wbounds_cymax(const awidget: twidget): integer;
 procedure wsetbounds_cymax(const awidget: twidget; const avalue: integer);
 
+const
+ widgetaccessx: widgetaccessty = (
+  pos: {$ifdef FPC}@{$endif}wbounds_x;
+  size: {$ifdef FPC}@{$endif}wbounds_cx;
+  stop: {$ifdef FPC}@{$endif}wstopx;
+  min: {$ifdef FPC}@{$endif}wbounds_cxmin;
+  max: {$ifdef FPC}@{$endif}wbounds_cxmax;
+  opos: {$ifdef FPC}@{$endif}wbounds_y;
+  osize: {$ifdef FPC}@{$endif}wbounds_cy;
+  ostop: {$ifdef FPC}@{$endif}wstopy;
+  omin: {$ifdef FPC}@{$endif}wbounds_cymin;
+  omax: {$ifdef FPC}@{$endif}wbounds_cymax;
+  setpos: {$ifdef FPC}@{$endif}wsetbounds_x;
+  setsize: {$ifdef FPC}@{$endif}wsetbounds_cx;
+  setstop: {$ifdef FPC}@{$endif}wsetstopx;
+  setmin: {$ifdef FPC}@{$endif}wsetbounds_cxmin;
+  setmax: {$ifdef FPC}@{$endif}wsetbounds_cxmax;
+  setopos: {$ifdef FPC}@{$endif}wsetbounds_y;
+  setosize: {$ifdef FPC}@{$endif}wsetbounds_cy;
+  setostop: {$ifdef FPC}@{$endif}wsetstopy;
+  setomin: {$ifdef FPC}@{$endif}wsetbounds_cymin;
+  setomax: {$ifdef FPC}@{$endif}wsetbounds_cymax;
+  anchstop: {$ifdef FPC}@{$endif}wanchstopx;
+  oanchstop: {$ifdef FPC}@{$endif}wanchstopy;
+ );
+ widgetaccessy: widgetaccessty = (
+  pos: {$ifdef FPC}@{$endif}wbounds_y;
+  size: {$ifdef FPC}@{$endif}wbounds_cy;
+  stop: {$ifdef FPC}@{$endif}wstopy;
+  min: {$ifdef FPC}@{$endif}wbounds_cymin;
+  max: {$ifdef FPC}@{$endif}wbounds_cymax;
+  opos: {$ifdef FPC}@{$endif}wbounds_x;
+  osize: {$ifdef FPC}@{$endif}wbounds_cx;
+  ostop: {$ifdef FPC}@{$endif}wstopx;
+  omin: {$ifdef FPC}@{$endif}wbounds_cxmin;
+  omax: {$ifdef FPC}@{$endif}wbounds_cxmax;
+  setpos: {$ifdef FPC}@{$endif}wsetbounds_y;
+  setsize: {$ifdef FPC}@{$endif}wsetbounds_cy;
+  setstop: {$ifdef FPC}@{$endif}wsetstopy;
+  setmin: {$ifdef FPC}@{$endif}wsetbounds_cymin;
+  setmax: {$ifdef FPC}@{$endif}wsetbounds_cymax;
+  setopos: {$ifdef FPC}@{$endif}wsetbounds_x;
+  setosize: {$ifdef FPC}@{$endif}wsetbounds_cx;
+  setostop: {$ifdef FPC}@{$endif}wsetstopx;
+  setomin: {$ifdef FPC}@{$endif}wsetbounds_cxmin;
+  setomax: {$ifdef FPC}@{$endif}wsetbounds_cxmax;
+  anchstop: {$ifdef FPC}@{$endif}wanchstopy;
+  oanchstop: {$ifdef FPC}@{$endif}wanchstopx;
+ );
+  
 function application: tguiapplication;
 function mousebuttontoshiftstate(button: mousebuttonty): shiftstatesty;
 function isenterkey(const awidget: twidget; const key: keyty): boolean;
@@ -2450,6 +2516,36 @@ end;
 procedure wsetbounds_cy(const awidget: twidget; const avalue: integer);
 begin
  awidget.bounds_cy:= avalue;
+end;
+
+function wstopx(const awidget: twidget): integer;
+begin
+ result:= awidget.bounds_x + awidget.bounds_cx;
+end;
+
+procedure wsetstopx(const awidget: twidget; const avalue: integer);
+begin
+ awidget.bounds_cx:= avalue - awidget.bounds_x;
+end;
+
+function wstopy(const awidget: twidget): integer;
+begin
+ result:= awidget.bounds_y + awidget.bounds_cy;
+end;
+
+procedure wsetstopy(const awidget: twidget; const avalue: integer);
+begin
+ awidget.bounds_cy:= avalue - awidget.bounds_y;
+end;
+
+function wanchstopx(const awidget: twidget): boolean;
+begin
+ result:= an_right in awidget.anchors;
+end;
+
+function wanchstopy(const awidget: twidget): boolean;
+begin
+ result:= an_bottom in awidget.anchors;
 end;
 
 function wbounds_cxmin(const awidget: twidget): integer;
@@ -7749,16 +7845,44 @@ begin
  end;
 end;
 
-function twidget.getsortxchildren: widgetarty;
+function compxbanded(const l,r): integer;
 begin
- result:= copy(container.fwidgets);
- sortwidgetsxorder(result);
+ result:= (twidget(l).fwidgetrect.y + twidget(l).fwidgetrect.cy) -
+                                    twidget(r).fwidgetrect.y - 1;
+ if result >= 0 then begin
+  result:= twidget(l).fwidgetrect.x - twidget(r).fwidgetrect.x;
+ end;
 end;
 
-function twidget.getsortychildren: widgetarty;
+function twidget.getsortxchildren(const banded: boolean = false): widgetarty;
 begin
  result:= copy(container.fwidgets);
- sortwidgetsyorder(result);
+ if banded then begin
+  sortarray(pointerarty(result),{$ifdef FPC}@{$endif}compxbanded);
+ end
+ else begin
+  sortwidgetsxorder(result);
+ end;
+end;
+
+function compybanded(const l,r): integer;
+begin
+ result:= (twidget(l).fwidgetrect.x + twidget(l).fwidgetrect.cx) -
+                                    twidget(r).fwidgetrect.x - 1;
+ if result >= 0 then begin
+  result:= twidget(l).fwidgetrect.y - twidget(r).fwidgetrect.y;
+ end;
+end;
+
+function twidget.getsortychildren(const banded: boolean = false): widgetarty;
+begin
+ result:= copy(container.fwidgets);
+ if banded then begin
+  sortarray(pointerarty(result),{$ifdef FPC}@{$endif}compybanded);
+ end
+ else begin
+  sortwidgetsyorder(result);
+ end;
 end;
 
 function twidget.widgetatpos(const pos: pointty; const state: widgetstatesty): twidget;
@@ -11207,7 +11331,7 @@ begin
     if (application.fmainwindow = self) and not appinst.terminated then begin
      bo1:= gui_grouphideminimizedwindows;
      gui_flushgdi;
-     sys_sched_yield;
+     sys_schedyield;
      exclude(fstate,tws_windowvisible);
      include(fstate,tws_grouphidden);
      include(fstate,tws_groupminimized);
@@ -13880,7 +14004,7 @@ end;
 procedure tguiapplication.processmessages;
 begin
  gui_flushgdi;
- sys_sched_yield;
+ sys_schedyield;
  inherited;
 end;
 

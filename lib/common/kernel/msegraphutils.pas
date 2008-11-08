@@ -325,6 +325,99 @@ type
    property error: gdierrorty read ferror1;
  end;
 
+type
+ getrectintegerty = function(const arect: rectty): integer;
+ setrectintegerty = procedure(var arect: rectty; const avalue: integer);
+ getintpointty = function(const value,ovalue: integer): pointty;
+ getintsizety = function(const value,ovalue: integer): sizety;
+ getpointintty = function(const apoint: pointty): integer;
+ getsizeintty = function(const asize: sizety): integer;
+ setpointintty = procedure(var apoint: pointty; const avalue: integer);
+ setsizeintty = procedure(var asize: sizety; const avalue: integer);
+ 
+ rectaccessty = record
+  pos,size,stop,opos,osize,ostop: getrectintegerty;
+  setpos,setsize,setopos,setosize: setrectintegerty;
+  makepos,makeopos: getintpointty;
+  makesize,makeosize: getintsizety;
+  pt,opt: getpointintty;
+  si,osi: getsizeintty;
+  setpt,setopt: setpointintty;
+  setsi,setosi: setsizeintty;
+ end;
+ 
+function rx(const arect: rectty): integer;
+function ry(const arect: rectty): integer;
+function rcx(const arect: rectty): integer;
+function rcy(const arect: rectty): integer;
+function rstopx(const arect: rectty): integer;
+function rstopy(const arect: rectty): integer;
+procedure rsetx(var arect: rectty; const avalue: integer);
+procedure rsety(var arect: rectty; const avalue: integer);
+procedure rsetcx(var arect: rectty; const avalue: integer);
+procedure rsetcy(var arect: rectty; const avalue: integer);
+function makesizex(const value,ovalue: integer): sizety;
+function makesizey(const value,ovalue: integer): sizety;
+function makeposx(const value,ovalue: integer): pointty;
+function makeposy(const value,ovalue: integer): pointty;
+function px(const apoint: pointty): integer;
+function py(const apoint: pointty): integer;
+function sx(const asize: sizety): integer;
+function sy(const asize: sizety): integer;
+procedure psetx(var apoint: pointty; const avalue: integer);
+procedure psety(var apoint: pointty; const avalue: integer);
+procedure ssetx(var asize: sizety; const avalue: integer);
+procedure ssety(var asize: sizety; const avalue: integer);
+
+const
+ rectaccessx: rectaccessty =  (
+   pos: {$ifdef FPC}@{$endif}rx;
+   size: {$ifdef FPC}@{$endif}rcx;
+   stop: {$ifdef FPC}@{$endif}rstopx;
+   opos: {$ifdef FPC}@{$endif}ry;
+   osize: {$ifdef FPC}@{$endif}rcy;
+   ostop: {$ifdef FPC}@{$endif}rstopy;
+   setpos: {$ifdef FPC}@{$endif}rsetx;
+   setsize: {$ifdef FPC}@{$endif}rsetcx;
+   setopos: {$ifdef FPC}@{$endif}rsety;
+   setosize: {$ifdef FPC}@{$endif}rsetcy;
+   makepos: {$ifdef FPC}@{$endif}makeposx;
+   makeopos: {$ifdef FPC}@{$endif}makeposy;
+   makesize: {$ifdef FPC}@{$endif}makesizex;
+   makeosize: {$ifdef FPC}@{$endif}makesizey;
+   pt: {$ifdef FPC}@{$endif}px;
+   opt: {$ifdef FPC}@{$endif}py;
+   si: {$ifdef FPC}@{$endif}sx;
+   osi: {$ifdef FPC}@{$endif}sy;
+   setpt: {$ifdef FPC}@{$endif}psetx;
+   setopt: {$ifdef FPC}@{$endif}psety;
+   setsi: {$ifdef FPC}@{$endif}ssetx;
+   setosi: {$ifdef FPC}@{$endif}ssety;
+ );
+ rectaccessy: rectaccessty =  (
+   pos: {$ifdef FPC}@{$endif}ry;
+   size: {$ifdef FPC}@{$endif}rcy;
+   stop: {$ifdef FPC}@{$endif}rstopy;
+   opos: {$ifdef FPC}@{$endif}rx;
+   osize: {$ifdef FPC}@{$endif}rcx;
+   ostop: {$ifdef FPC}@{$endif}rstopy;
+   setpos: {$ifdef FPC}@{$endif}rsety;
+   setsize: {$ifdef FPC}@{$endif}rsetcy;
+   setopos: {$ifdef FPC}@{$endif}rsetx;
+   setosize: {$ifdef FPC}@{$endif}rsetcx;
+   makepos: {$ifdef FPC}@{$endif}makeposy;
+   makeopos: {$ifdef FPC}@{$endif}makeposx;
+   makesize: {$ifdef FPC}@{$endif}makesizey;
+   makeosize: {$ifdef FPC}@{$endif}makesizex;
+   pt: {$ifdef FPC}@{$endif}py;
+   opt: {$ifdef FPC}@{$endif}px;
+   si: {$ifdef FPC}@{$endif}sy;
+   osi: {$ifdef FPC}@{$endif}sx;
+   setpt: {$ifdef FPC}@{$endif}psety;
+   setopt: {$ifdef FPC}@{$endif}psetx;
+   setsi: {$ifdef FPC}@{$endif}ssety;
+   setosi: {$ifdef FPC}@{$endif}ssetx;
+ );
 
 procedure gdierror(error: gdierrorty; const text: string = ''); overload;
 procedure gdierror(error: gdierrorty; sender: tobject; text: string = ''); overload;
@@ -1173,6 +1266,120 @@ function clipinrect(const rect: rectty; const boundsrect: rectty): rectty;
 begin
  result:= rect;
  clipinrect1(result,boundsrect);
+end;
+
+function rx(const arect: rectty): integer;
+begin
+ result:= arect.x;
+end;
+
+function ry(const arect: rectty): integer;
+begin
+ result:= arect.y;
+end;
+
+function rcx(const arect: rectty): integer;
+begin
+ result:= arect.cx;
+end;
+
+function rcy(const arect: rectty): integer;
+begin
+ result:= arect.cy;
+end;
+
+function rstopx(const arect: rectty): integer;
+begin
+ result:= arect.x + arect.cx;
+end;
+
+function rstopy(const arect: rectty): integer;
+begin
+ result:= arect.y + arect.cy;
+end;
+
+procedure rsetx(var arect: rectty; const avalue: integer);
+begin
+ arect.x:= avalue;
+end;
+
+procedure rsety(var arect: rectty; const avalue: integer);
+begin
+ arect.y:= avalue;
+end;
+
+procedure rsetcx(var arect: rectty; const avalue: integer);
+begin
+ arect.cx:= avalue;
+end;
+
+procedure rsetcy(var arect: rectty; const avalue: integer);
+begin
+ arect.cy:= avalue;
+end;
+
+function makesizex(const value,ovalue: integer): sizety;
+begin
+ result.cx:= value;
+ result.cy:= ovalue;
+end;
+
+function makesizey(const value,ovalue: integer): sizety;
+begin
+ result.cy:= value;
+ result.cx:= ovalue;
+end;
+
+function makeposx(const value,ovalue: integer): pointty;
+begin
+ result.x:= value;
+ result.y:= ovalue;
+end;
+
+function makeposy(const value,ovalue: integer): pointty;
+begin
+ result.y:= value;
+ result.x:= ovalue;
+end;
+
+function px(const apoint: pointty): integer;
+begin
+ result:= apoint.x;
+end;
+
+function py(const apoint: pointty): integer;
+begin
+ result:= apoint.y;
+end;
+
+function sx(const asize: sizety): integer;
+begin
+ result:= asize.cx;
+end;
+
+function sy(const asize: sizety): integer;
+begin
+ result:= asize.cy;
+end;
+
+procedure psetx(var apoint: pointty; const avalue: integer);
+begin
+ apoint.x:= avalue;
+end;
+
+procedure psety(var apoint: pointty; const avalue: integer);
+begin
+ apoint.y:= avalue;
+end;
+
+procedure ssetx(var asize: sizety; const avalue: integer);
+begin
+ asize.cx:= avalue;
+end;
+
+procedure ssety(var asize: sizety; const avalue: integer);
+begin
+ asize.cy:= avalue;
 end;
 
 procedure gdierror(error: gdierrorty; const text: string = ''); overload;

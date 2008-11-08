@@ -244,7 +244,7 @@ begin
  end;
 end;
 
-procedure sys_sched_yield;
+procedure sys_schedyield;
 begin
  sleep(0);
 end;

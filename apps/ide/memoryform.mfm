@@ -15,7 +15,7 @@ object memoryfo: tmemoryfo
   container.bounds_cx = 443
   container.bounds_cy = 354
   container.frame.dummy = 0
-  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_cansize, od_canfloat, od_candock, od_proportional, od_propsize]
+  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_cansize, od_canfloat, od_candock, od_propsize]
   options = [fo_savepos, fo_savezorder, fo_savestate]
   statfile = mainfo.projectstatfile
   caption = 'Memory'
@@ -58,9 +58,9 @@ object memoryfo: tmemoryfo
     00000002FFFFFF01C0C0C001FFFFFF0100000002C0C0C00100000001FF00FF02
     80808005C0C0C011FF00FF02C0C0C00100000001C0C0C00280808001FFFFFF01
     00000002C0C0C001FFFFFF03C0C0C001FFFFFF03C0C0C001FFFFFF03C0C0C001
-    FFFFFF01FF00FF1900000008FEFF7F08FEFF7FBFFEFF7F08FEFF7F00FEFF7F08
-    FEFF7F01FEFF7FC0FEFF7F00FEFF7F08FEFF7F00FEFF7F08FEFF7F08FEFF7F08
-    FEFF7FBFFEFF7F08FEFF7F00FEFF7F01FEFF7F08FEFF7F00FEFF7F00FEFF7FBF
+    FFFFFF01FF00FF1900000008FEFF7F09FEFF7FBFFEFF7F08FEFF7F00FEFF7F09
+    FEFF7F03FEFF7FC0FEFF7F00FEFF7F08FEFF7F00FEFF7F08FEFF7F09FEFF7F09
+    FEFF7FBFFEFF7F08FEFF7F00FEFF7F03FEFF7F09FEFF7F00FEFF7F00FEFF7FBF
     FEFF7F0000000008
   }
   onshow = formshow
@@ -399,6 +399,7 @@ object memoryfo: tmemoryfo
       bounds_cy = 20
       frame.caption = 'Width'
       frame.captionpos = cp_right
+      frame.button.color = -2147483646
       frame.dummy = 0
       frame.outerframe = (
         0

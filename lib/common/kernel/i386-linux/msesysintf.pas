@@ -221,7 +221,7 @@ begin
  setlength(result,int2);
 end;
 
-procedure sys_sched_yield;
+procedure sys_schedyield;
 begin
  sched_yield;
 end;

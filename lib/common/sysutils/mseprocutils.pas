@@ -547,7 +547,7 @@ begin
     if timeout(ca1) then begin
      break;
     end;
-    sys_sched_yield;
+    sys_schedyield;
 //    sleep(0);
    end;
   end

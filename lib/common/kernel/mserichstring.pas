@@ -621,6 +621,7 @@ begin
  if (aindex > 0) then begin
   delete(value.text,aindex,count);
   if length(value.format) > 0 then begin
+   setlength(value.format,length(value.format)); //unique
    needspack:= false;
    dec(aindex);
    for int1:= 0 to high(value.format) do begin
@@ -646,6 +647,7 @@ procedure formatinsertchars(var format: formatinfoarty; const aindex: integer;
 var
  int1: integer;
 begin
+ setlength(format,length(format)); //unique
  for int1:= 0 to high(format) do begin
   with format[int1] do begin
    if index >= aindex then begin

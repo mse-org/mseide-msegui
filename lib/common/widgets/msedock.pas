@@ -34,7 +34,8 @@ type
             od_dockparent,od_expandforfixsize,
             od_splitvert,od_splithorz,od_tabed,od_proportional,
             od_propsize,od_fixsize,od_top,od_background,
-            od_alignbegin,od_aligncenter,od_alignend,od_nofit);
+            od_alignbegin,od_aligncenter,od_alignend,
+            od_nofit,od_banded);
  optionsdockty = set of optiondockty;
 
  dockbuttonrectty = (dbr_none,dbr_handle,dbr_close,dbr_maximize,dbr_normalize,
@@ -134,6 +135,13 @@ type
  mdistatechangedeventty = procedure(const sender: twidget;
                              const oldvalue,newvalue: mdistatety) of object;
 
+ stripeinfoty = record
+  widgetindex: integer;
+  size: integer;
+ end;
+ 
+ stripeinfoarty = array of stripeinfoty;
+ 
  tdockcontroller = class(tdragcontroller)
   private
    foncalclayout: docklayouteventty;
@@ -178,6 +186,7 @@ type
    ftab_face: tfacecomp;
    ftab_facetab: tfacecomp;
    ftab_faceactivetab: tfacecomp;
+   fstripes: stripeinfoarty;
    procedure setdockhandle(const avalue: tdockhandle);
    procedure layoutchanged;
    function checksplit(const awidgets: widgetarty;
@@ -737,21 +746,23 @@ function tdockcontroller.checksplit(const awidgets: widgetarty;
               out propsize,varsize,fixsize,fixcount: integer;
               out isprop,isfix: booleanarty;
               const fixedareprop: boolean): widgetarty;
-   //calculate total widths/heights of elements
+   //calculate order and total widths/heights of elements
 var
  ar1: widgetarty;
  int1,int2: integer;
  intf1: idocktarget;
  opt1: optionsdockty;
  fixend: boolean;
+ banded: boolean;
 begin
+ banded:= (od_banded in foptionsdock) and (fsplitdir in [sd_x,sd_y]);
  if awidgets = nil then begin
   if (fsplitdir = sd_x) then begin
-   ar1:= fintf.getwidget.getsortxchildren;
+   ar1:= fintf.getwidget.getsortxchildren(banded);
   end
   else begin
    if (fsplitdir = sd_y) or (fsplitdir = sd_tabed) then begin
-    ar1:= fintf.getwidget.getsortychildren;
+    ar1:= fintf.getwidget.getsortychildren(banded);
    end
    else begin
     ar1:= nil;
@@ -897,7 +908,8 @@ begin
  end;
 end;
 
-procedure tdockcontroller.updategrip(const asplitdir: splitdirty; const awidget: twidget);
+procedure tdockcontroller.updategrip(const asplitdir: splitdirty;
+                                    const awidget: twidget);
 var
  frame1: tcustomframe;
  grippos1: captionposty;
@@ -916,7 +928,8 @@ begin
      end;
     end
     else begin
-     if (fsplitdir = sd_y) or (fsplitdir = sd_tabed) or (fsplitdir = sd_none) then begin
+     if (fsplitdir = sd_y) or (fsplitdir = sd_tabed) or 
+                                    (fsplitdir = sd_none) then begin
       if go_opposite in fgrip_options then begin
        fgrip_pos:= cp_left;
       end
@@ -935,52 +948,52 @@ end;
 
 procedure tdockcontroller.updatesplitterrects(const awidgets: widgetarty);
 var
- rect1: rectty;
- int1: integer;
- po1: pointty;
- splittercount: integer;
  fixend: boolean;
 
+ procedure calcsplitters(const r: rectaccessty; w: widgetaccessty);
+ var
+  rect1: rectty;
+  int1,int2: integer;
+  stripepos: integer;
+  stripeindex: integer;
+ begin
+  r.setsize(rect1,fsplitter_size);
+  stripepos:= r.opos(idockcontroller(fintf).getplacementrect);
+  stripeindex:= 0;
+  for int2:= 0 to high(fstripes) do begin
+   with fstripes[int2] do begin
+    r.setopos(rect1,stripepos);
+    r.setosize(rect1,size);
+    for int1:= stripeindex to widgetindex-1 do begin
+     r.setpos(rect1,w.stop(awidgets[int1]));
+     fsplitterrects[int1]:= rect1;
+    end;
+    stripepos:= stripepos + size;
+    stripeindex:= widgetindex;
+   end;
+  end;
+ end;
+
+var
+ po1: pointty;
+ int1: integer;
+ 
 begin
  for int1:= 0 to high(awidgets) do begin
   updategrip(fsplitdir,awidgets[int1]);
  end;
- if (fsplitter_size > 0) and ((fsplitter_color <> cl_none) or
-                  (fsplitter_grip <> stb_none)) and (high(awidgets) > 0) then begin
-  rect1:= idockcontroller(fintf).getplacementrect;
-  splittercount:= high(awidgets);
+ if (high(awidgets) >= 0) and (fsplitter_size > 0) and 
+     ((fsplitter_color <> cl_none) or (fsplitter_grip <> stb_none)) then begin
   fixend:= foptionsdock * [od_nofit] <> [];
-  if fixend then begin
-   setlength(fsplitterrects,length(awidgets));
+  setlength(fsplitterrects,length(awidgets));
+  if fsplitdir = sd_x then begin
+   calcsplitters(rectaccessx,widgetaccessx);
   end
   else begin
-   setlength(fsplitterrects,high(awidgets));
+   calcsplitters(rectaccessy,widgetaccessy);
   end;
-  if fsplitdir = sd_y then begin
-   rect1.cy:= fsplitter_size;
-   for int1:= 1 to high(awidgets) do begin
-    rect1.y:= awidgets[int1].bounds_y - fsplitter_size;
-    fsplitterrects[int1-1]:= rect1;
-   end;
-   if fixend then begin
-    with awidgets[high(awidgets)] do begin
-     rect1.y:= bounds_y + bounds_cy;
-    end;
-    fsplitterrects[high(fsplitterrects)]:= rect1;
-   end;
-  end;
-  if fsplitdir = sd_x then begin
-   rect1.cx:= fsplitter_size;
-   for int1:= 1 to high(awidgets) do begin
-    rect1.x:= awidgets[int1].bounds_x - fsplitter_size;
-    fsplitterrects[int1-1]:= rect1;
-   end;
-   if fixend then begin
-    with awidgets[high(awidgets)] do begin
-     rect1.x:= bounds_x + bounds_cx;
-    end;
-    fsplitterrects[high(fsplitterrects)]:= rect1;
-   end;
+  if not fixend then begin
+   setlength(fsplitterrects,high(fsplitterrects));
   end;
   po1:= fintf.getwidget.container.clientwidgetpos;
   for int1:= 0 to high(fsplitterrects) do begin
@@ -1021,7 +1034,9 @@ begin
 //                         {$ifdef FPC}longword{$else}word{$endif}(mask3)));
  foptionsdock:= (avalue - (mask1+mask2{+mask3})) + val1*mask1 + val2*mask2 {+ 
                                 val3*mask3};
- 
+ if not (od_nofit in foptionsdock) then begin
+  exclude(foptionsdock,od_banded);
+ end;
  fuseroptions:= foptionsdock;
  if not (od_splitvert in avalue) and (fsplitdir = sd_x) then begin
   fsplitdir:= sd_none;
@@ -1104,7 +1119,9 @@ var
  prop,fix: booleanarty;
  fixsize: integer;
  propsize: integer;
- rect1: rectty;        //placementrect
+ plrect: rectty;        //placementrect
+ banded: boolean;
+ opt1,opt2: optionsdockty;
  
  function calcscale(const aval: real): real;
  begin
@@ -1120,41 +1137,29 @@ var
   end;
  end;
 
- procedure calcsize(c,cmin,cmax: getwidgetintegerty);
+ procedure calcsize(r: rectaccessty; w: widgetaccessty);
  var
   int1: integer;
   rea1,rea2: real;
-  horz: boolean;
- begin
-  horz:= {$ifndef FPC}@{$endif}c = @wbounds_cx;
-  if horz then begin
-   rea1:= calcscale(rect1.cx);
-  end
-  else begin
-   rea1:= calcscale(rect1.cy);
-  end;
+ begin 
+  rea1:= calcscale(r.size(plrect));
   for int1:= 0 to high(ar1) do begin
-   ar2[int1]:= c(ar1[int1]);
+   ar2[int1]:= w.size(ar1[int1]);
    if prop[int1] then begin
     ar2[int1]:= ar2[int1] * rea1;
    end;
   end;
   rea2:= 0;
   for int1:= 0 to high(ar2) do begin
-   if (cmax(ar1[int1]) <> 0) and (ar2[int1] > cmax(ar1[int1])) then begin
-    ar2[int1]:= cmax(ar1[int1]);
+   if (w.max(ar1[int1]) <> 0) and (ar2[int1] > w.max(ar1[int1])) then begin
+    ar2[int1]:= w.max(ar1[int1]);
    end;
-   if ar2[int1] < cmin(ar1[int1]) then begin
-    ar2[int1]:= cmin(ar1[int1]);
+   if ar2[int1] < w.min(ar1[int1]) then begin
+    ar2[int1]:= w.min(ar1[int1]);
    end;
    rea2:= rea2 + ar2[int1]; //total size
   end;
-  if horz then begin
-   rea1:= rect1.cx;
-  end
-  else begin
-   rea1:= rect1.cy;
-  end;
+  rea1:= r.size(plrect);
   if foptionsdock * [od_nofit] = [] then begin
          //adjust sizes for fit      
    rea2:= rea1 - (rea2 + high(ar2) * fsplitter_size);
@@ -1162,7 +1167,7 @@ var
    if rea2 < 0 then begin
     for int1:= high(ar2) downto 0 do begin
      if not (fix[int1] and not scalefixedalso) and not prop[int1] then begin
-      rea1:= cmin(ar1[int1]);
+      rea1:= w.min(ar1[int1]);
       ar2[int1]:= ar2[int1] + rea2;
       if ar2[int1] < rea1 then begin
        rea2:= ar2[int1] - rea1;
@@ -1177,7 +1182,7 @@ var
    else begin
     for int1:= high(ar2) downto 0 do begin
      if not fix[int1] and not prop[int1] then begin
-      rea1:= cmax(ar1[int1]);
+      rea1:= w.max(ar1[int1]);
       ar2[int1]:= ar2[int1] + rea2;
       if (ar2[int1] > rea1) and (rea1 > 0) then begin
        rea2:= ar2[int1] - rea1;
@@ -1190,12 +1195,7 @@ var
     end;
    end;
   end;
-  if horz then begin
-   rea2:= rect1.x;
-  end
-  else begin
-   rea2:= rect1.y;
-  end;
+  rea2:= r.pos(plrect);
   ar2[0]:= ar2[0] + rea2 + fsplitter_size;
   for int1:= 1 to high(ar1) do begin        //calc pos vector
    ar2[int1]:= ar2[int1-1] + fsplitter_size + ar2[int1];
@@ -1203,15 +1203,152 @@ var
  end;
 
 var
- rect2: rectty; //placementrect backup
  minsize1: integer;
+ 
+ procedure calcpos(const r: rectaccessty;
+                   const w: widgetaccessty);
+ var  
+  stripeindex: integer;
+  
+  procedure calcstripeheight(const aindex: integer);
+  var
+   int2,int3,int4: integer;
+  begin
+   setlength(fstripes,high(fstripes)+2);
+   int3:= 0;
+   for int2:= stripeindex to aindex - 1 do begin
+    int4:= w.osize(ar1[int2]);
+    if opt1 = [] then begin
+     int4:= int4 + w.opos(ar1[int2]);
+    end;
+    if int4 > int3 then begin
+     int3:= int4;       //find biggest widget
+    end;
+   end;
+   with fstripes[high(fstripes)] do begin 
+    widgetindex:= aindex;
+    size:= int3;
+   end;
+   stripeindex:= aindex;
+  end;
+
+ var
+  rea2: real;
+  int1: integer;
+  rect1: prectty;
+  rect2: rectty;
+  ar3: rectarty;
+  int2: integer;
+  stripepos: integer;
+   
+ begin
+  rea2:= r.pos(plrect);
+  if not (od_nofit in foptionsdock) then begin
+   setlength(fstripes,1);
+   with fstripes[0] do begin
+    widgetindex:= length(ar1);
+    size:= r.osize(plrect);
+   end;
+   rect2:= plrect;
+   for int1:= 0 to high(ar1) do begin
+    r.setpos(rect2,round(rea2));
+    r.setsize(rect2,round(ar2[int1] - rea2) - fsplitter_size);
+    ar1[int1].widgetrect:= rect2;
+    rea2:= rea2 + w.size(ar1[int1]) + fsplitter_size;
+   end;
+   minsize1:= r.stop(rect2) - r.pos(plrect);
+  end
+  else begin
+   setlength(ar3,length(ar1));
+   stripeindex:= 0;
+   for int1:= 0 to high(ar1) do begin
+    rect1:= @ar3[int1];         //set size
+    rect1^:= plrect;
+    r.setpos(rect1^,round(rea2));
+    r.setsize(rect1^,round(ar2[int1] - rea2) - fsplitter_size);
+    if banded and (r.stop(rect1^) > r.stop(plrect)) then begin
+     calcstripeheight(int1);
+     r.setpos(rect1^,r.pos(plrect)); //restart
+     rea2:= r.pos(rect1^);
+    end;
+    rea2:= rea2 + r.size(rect1^) + fsplitter_size;
+   end;
+   calcstripeheight(length(ar1));
+   stripeindex:= 0;
+   stripepos:= r.opos(plrect);
+   for int2:= 0 to high(fstripes) do begin
+    with fstripes[int2] do begin
+     for int1:= stripeindex to widgetindex-1 do begin
+      rect1:= @ar3[int1];                      //set ortho size
+      r.setosize(rect1^,w.osize(ar1[int1]));
+      if opt1 = [od_aligncenter] then begin
+       r.setopos(rect1^,
+                stripepos + r.osize(rect1^) + (size-r.osize(rect1^)) div 2);
+      end
+      else begin
+       if opt1 = [od_alignend] then begin
+        r.setopos(rect1^,stripepos + r.osize(rect1^) + (size-r.osize(rect1^)));
+       end
+       else begin
+        if opt1 = [od_alignbegin] then begin
+         r.setopos(rect1^,stripepos);
+        end
+        else begin
+         r.setopos(rect1^,stripepos + r.osize(rect1^));
+        end;
+       end;
+      end; 
+      ar1[int1].widgetrect:= rect1^;
+     end;
+     stripepos:= stripepos + size;
+     stripeindex:= widgetindex;
+    end;
+   end;
+  end;
+ end;
+
+var
+ needsfixscale: boolean;
+ hasparent1: boolean;
+ 
+ procedure updateplacement(r: rectaccessty; w: widgetaccessty);
+ var
+  rect1: rectty;
+  widget1: twidget;
+  int1: integer;
+ begin
+  widget1:= fintf.getwidget;
+  rect1.pos:= plrect.pos;
+  rect1.size:= nullsize;         //update placementrect
+  int1:= minsize1 - r.size(plrect);
+  if (int1 > 0) then begin       //extend placementrect
+   if not scalefixedalso and 
+              not (od_expandforfixsize in foptionsdock) then begin
+    needsfixscale:= true;
+   end
+   else begin
+    if hasparent1 then begin
+     if not w.anchstop(widget1) then begin
+      w.setsize(widget1,w.size(widget1)+int1); //extend size
+     end
+     else begin
+      widget1.parentwidget.changeclientsize(r.makesize(int1,0));
+     end;
+    end;
+   end;
+  end
+  else begin
+   if opt2 = [] then begin      
+    w.setstop(ar1[high(ar1)],r.stop(plrect));
+   end;
+  end;
+ end;       
+          
+var
  int1: integer;
  widget1: twidget;
  rea2: real;
- hasparent1: boolean;
- needsfixscale: boolean;
  widget2: twidget;
- opt1,opt2: optionsdockty;
  
 begin
  widget2:= fintf.getwidget;
@@ -1219,17 +1356,18 @@ begin
  widget1:= widget2.container;
  if (widget1 <> nil) and 
         (widget1.ComponentState * [csloading,csdesigning] = []) then begin
-  rect1:= idockcontroller(fintf).getplacementrect;
+  banded:= od_banded in foptionsdock;
+  fstripes:= nil;
+  plrect:= idockcontroller(fintf).getplacementrect;
   if (fsplitdir = sd_x) or (fsplitdir = sd_y) then begin
    ar1:= nil; //compiler warning
-   if not sizeisequal(fsize,rect1.size) or force then begin
-    fsize:= rect1.size;
+   if not sizeisequal(fsize,plrect.size) or force then begin
+    fsize:= plrect.size;
     if fdockstate * [dos_updating1,dos_updating2,dos_updating4] <> [] then begin
      exclude(fdockstate,dos_layoutvalid);
     end
     else begin
      needsfixscale:= false;
-     rect2:= rect1;
      fdockstate:= fdockstate + [dos_layoutvalid,dos_updating2];
      try
       inc(frecalclevel);
@@ -1245,117 +1383,21 @@ begin
        opt1:= foptionsdock * [od_alignbegin,od_aligncenter,od_alignend];
        opt2:= foptionsdock * [od_nofit];
        if fsplitdir = sd_x then begin
-
-        calcsize({$ifdef FPC}@{$endif}wbounds_cx,
-                 {$ifdef FPC}@{$endif}wbounds_cxmin,
-                 {$ifdef FPC}@{$endif}wbounds_cxmax);                
-        rea2:= rect1.x;
-        for int1:= 0 to high(ar1) do begin
-         if opt1 <> [] then begin
-          rect1.cy:= ar1[int1].height;
-         end;
-         if opt1 = [od_aligncenter] then begin
-          rect1.y:= rect2.y + (rect2.cy - rect1.cy) div 2;        
-         end
-         else begin
-          if opt1 = [od_alignend] then begin
-           rect1.y:= rect2.y + (rect2.cy - rect1.cy);        
-          end;
-         end; 
-         rect1.x:= round(rea2);
-         rect1.cx:= round(ar2[int1] - rea2) - fsplitter_size;
-         with ar1[int1] do begin
-          widgetrect:= rect1;
-          rea2:= rea2 + bounds_cx + fsplitter_size;
-         end;
-        end;
-        minsize1:= rect1.x + rect1.cx - rect2.x;
+        calcsize(rectaccessx,widgetaccessx);
+        calcpos(rectaccessx,widgetaccessx);
        end;
-
        if fsplitdir = sd_y then begin
-
-        calcsize({$ifdef FPC}@{$endif}wbounds_cy,
-                 {$ifdef FPC}@{$endif}wbounds_cymin,
-                 {$ifdef FPC}@{$endif}wbounds_cymax);
-        rea2:= rect1.y;
-        for int1:= 0 to high(ar1) do begin
-         if opt1 <> [] then begin
-          rect1.cx:= ar1[int1].width;
-         end;
-         if opt1 = [od_aligncenter] then begin
-          rect1.x:= rect2.x + (rect2.cx - rect1.cx) div 2;        
-         end
-         else begin
-          if opt1 = [od_alignend] then begin
-           rect1.x:= rect2.x + (rect2.cx - rect1.cx);        
-          end;
-         end;
-         rect1.y:= round(rea2);
-         rect1.cy:= round(ar2[int1] - rea2) - fsplitter_size;
-         with ar1[int1] do begin
-          widgetrect:= rect1;
-          rea2:= rea2 + bounds_cy + fsplitter_size;
-         end;
-        end;
-        minsize1:= rect1.y + rect1.cy - rect2.y;
+        calcsize(rectaccessy,widgetaccessy);
+        calcpos(rectaccessy,widgetaccessy);
        end;
-       if opt1 = [] then begin
-        rect1.size:= nullsize;         //update placementrect
-        with fintf.getwidget do begin  
-         if fsplitdir = sd_x then begin
-          int1:= minsize1 - rect2.cx;
-          if (int1 > 0) then begin     //extend placementrect
-           if not scalefixedalso and 
-                      not (od_expandforfixsize in foptionsdock) then begin
-            needsfixscale:= true;
-           end
-           else begin
-            if hasparent1 then begin
-             if not (an_right in anchors) then begin
-              bounds_cx:= bounds_cx + int1;
-             end
-             else begin
-              parentwidget.changeclientsize(makesize(int1,0));
-             end;
-            end;
-           end;
-          end
-          else begin
-           if opt2 = [] then begin      
-            with ar1[high(ar1)] do begin //extend last widget
-             bounds_cx:= rect2.cx + rect2.x - bounds_x;
-            end;
-           end;
-          end;
-         end;
-         if fsplitdir = sd_y then begin
-          int1:= minsize1 - rect2.cy;
-          if int1 > 0 then begin         //extend placementrect
-           if not scalefixedalso and
-                        not (od_expandforfixsize in foptionsdock) then begin
-            needsfixscale:= true;
-           end
-           else begin
-            if hasparent1 then begin
-             if not (an_bottom in anchors) then begin
-              bounds_cy:= bounds_cy + int1;
-             end
-             else begin
-              parentwidget.changeclientsize(makesize(0,int1));
-             end;
-            end;
-           end;
-          end
-          else begin
-           if opt2 = [] then begin      
-            with ar1[high(ar1)] do begin   //extend last widget
-             bounds_cy:= rect2.cy + rect2.y - bounds_y;
-            end;
-           end;
-          end;
-         end;
+       if (opt1 = []) and (opt2 = []) then begin
+        if fsplitdir = sd_x then begin
+         updateplacement(rectaccessx,widgetaccessx);
+        end
+        else begin
+         updateplacement(rectaccessy,widgetaccessy);
         end;
-       end; //update placementrect
+       end;
       end;
      finally 
       fdockstate:= fdockstate - [dos_updating1,dos_updating2];
@@ -1624,9 +1666,9 @@ begin
    end;
   end;
  end;
- updatesplitterrects(ar1);
  exclude(fdockstate,dos_updating1);
  sizechanged(true);
+ updatesplitterrects(ar1);
  widget1:= fintf.getwidget;
  if widget1.canevent(tmethod(foncalclayout)) then begin
   foncalclayout(widget1,ar1);
@@ -2270,9 +2312,49 @@ var
 
  function checksizing(const move: boolean): integer;
  var
-  int1,int2: integer;
-  containerpaintrect: rectty;
   lastitem: integer;
+  containerpaintrect: rectty;
+ 
+  function updatesizingrect(r: rectaccessty; w: widgetaccessty): integer;
+  var
+   int1,int2: integer;
+   w1: twidget;
+   p1: integer;
+  begin
+   result:= -1;
+   for int1:= 0 to lastitem do begin
+    w1:= twidget1(ar1[int1]);
+    int2:= w.stop(w1);
+    p1:= r.pt(po1);
+    if (fsplitter_size = 0) and (p1 >= int2 - sizingtol) and
+                    (p1 < int2 + sizingtol) or
+       (fsplitter_size <> 0) and (p1 >= int2) and
+            (p1 < int2 + fsplitter_size) then begin
+     r.setopos(fsizingrect,r.opos(containerpaintrect));
+     r.setosize(fsizingrect,r.osize(containerpaintrect));
+     if move then begin
+      r.setsize(fsizingrect,w.size(w1));
+      r.setpos(fsizingrect,int2-r.size(fsizingrect));
+     end
+     else begin
+      if fsplitter_size = 0 then begin
+       r.setpos(fsizingrect,int2-sizingtol);
+       r.setsize(fsizingrect,2*sizingtol);
+      end
+      else begin
+       r.setpos(fsizingrect,int2);
+       r.setsize(fsizingrect,fsplitter_size);
+      end;
+     end;
+     result:= int1;
+     break;
+    end;
+   end;
+  end;
+  
+ var
+  int1,int2: integer;
+  
  begin
   ar1:= nil; //compilerwarning
   result:= -1;
@@ -2286,65 +2368,15 @@ var
   end;
   containerpaintrect:= idockcontroller(fintf).getplacementrect;
   if fsplitdir = sd_x then begin
-   for int1:= 0 to lastitem do begin
-    with twidget1(ar1[int1]) do begin
-     int2:= fwidgetrect.x + fwidgetrect.cx;
-     if (fsplitter_size = 0) and (po1.x >= int2 - sizingtol) and
-                     (po1.x < int2 + sizingtol) or
-        (fsplitter_size <> 0) and (po1.x >= int2) and
-             (po1.x < int2 + fsplitter_size) then begin
-      setpickshape(cr_sizehor);
-      fsizingrect.y:= containerpaintrect.y;
-      fsizingrect.cy:= containerpaintrect.cy;
-      if move then begin
-       fsizingrect.cx:= bounds_cx;
-       fsizingrect.x:= int2 - fsizingrect.cx;;       
-      end
-      else begin
-       if fsplitter_size = 0 then begin
-        fsizingrect.x:= int2 - sizingtol;
-        fsizingrect.cx:= 2 * sizingtol;
-       end
-       else begin
-        fsizingrect.x:= int2;
-        fsizingrect.cx:= fsplitter_size;
-       end;
-      end;
-      result:= int1;
-      break;
-     end;
-    end;
+   result:= updatesizingrect(rectaccessx,widgetaccessx);
+   if result >= 0 then begin
+    setpickshape(cr_sizehor);
    end;
   end;
   if fsplitdir = sd_y then begin
-   for int1:= 0 to lastitem do begin
-    with twidget1(ar1[int1]) do begin
-     int2:= fwidgetrect.y + fwidgetrect.cy;
-     if (fsplitter_size = 0) and (po1.y >= int2 - sizingtol) and
-             (po1.y < int2 + sizingtol) or
-        (fsplitter_size <> 0) and (po1.y >= int2) and
-             (po1.y < int2 + sizingtol) then begin
-      setpickshape(cr_sizever);
-      fsizingrect.x:= containerpaintrect.x;
-      fsizingrect.cx:= containerpaintrect.cx;
-      if move then begin
-       fsizingrect.cy:= bounds_cy;
-       fsizingrect.y:= int2 - fsizingrect.cy;;       
-      end
-      else begin
-       if fsplitter_size = 0 then begin
-        fsizingrect.y:= int2 - sizingtol;
-        fsizingrect.cy:= 2*sizingtol;
-       end
-       else begin
-        fsizingrect.y:= int2;
-        fsizingrect.cy:= fsplitter_size;
-       end;
-      end;
-      result:= int1;
-      break;
-     end;
-    end;
+   result:= updatesizingrect(rectaccessy,widgetaccessy);
+   if result >= 0 then begin
+    setpickshape(cr_sizever);
    end;
   end;
   if result < 0 then begin
