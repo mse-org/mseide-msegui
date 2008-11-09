@@ -1130,7 +1130,7 @@ begin
   updatesplitterrects(checksplit);
  end;
 end;
-
+var testvar: pointer;
 procedure tdockcontroller.sizechanged(force: boolean = false;
                                           scalefixedalso: boolean = false);
 var
@@ -1270,6 +1270,7 @@ var
   rea2:= fr^.pos(fplacementrect);
   if not nofit then begin
    setlength(fbands,1);
+testvar:= @fbands;
    with fbands[0] do begin
     first:= 0;
     last:= high(ar1);
@@ -1400,12 +1401,12 @@ begin
         (widget1.ComponentState * [csloading,csdesigning] = []) then begin
   nofit:= od_nofit in foptionsdock;
   banded:= od_banded in foptionsdock;
-  fbands:= nil;
   fplacementrect:= idockcontroller(fintf).getplacementrect;
   fbandstart:= fr^.opos(fplacementrect);
   if fsplitdir in [sd_x,sd_y] then begin
    ar1:= nil; //compiler warning
    if not sizeisequal(fsize,fplacementrect.size) or force then begin
+    fbands:= nil;
     fsize:= fplacementrect.size;
     if fdockstate * [dos_updating1,dos_updating2,dos_updating4] <> [] then begin
      exclude(fdockstate,dos_layoutvalid);
@@ -1452,6 +1453,7 @@ begin
    end;
   end
   else begin
+   fbands:= nil;
    if ismdi then begin
     case fmdistate of
      mds_normal: begin
