@@ -2206,7 +2206,8 @@ type
            setopos,setosize,setostop,setomin,setomax: setwidgetintegerty;
   anchstop,oanchstop: getwidgetbooleanty;
  end;
-
+ pwidgetaccessty = ^widgetaccessty;
+ 
 function wbounds_x(const awidget: twidget): integer;
 procedure wsetbounds_x(const awidget: twidget; const avalue: integer);
 function wbounds_y(const awidget: twidget): integer;
@@ -7850,11 +7851,17 @@ begin
  result:= (twidget(l).fwidgetrect.y + twidget(l).fwidgetrect.cy) -
                                     twidget(r).fwidgetrect.y - 1;
  if result >= 0 then begin
-  result:= twidget(l).fwidgetrect.x - twidget(r).fwidgetrect.x;
+  result:= -((twidget(r).fwidgetrect.y + twidget(r).fwidgetrect.cy) -
+                                    twidget(l).fwidgetrect.y - 1);
+  if result <= 0 then begin
+   result:= twidget(l).fwidgetrect.x - twidget(r).fwidgetrect.x;
+  end;
  end;
 end;
 
 function twidget.getsortxchildren(const banded: boolean = false): widgetarty;
+var
+ int1: integer;
 begin
  result:= copy(container.fwidgets);
  if banded then begin
@@ -7870,7 +7877,11 @@ begin
  result:= (twidget(l).fwidgetrect.x + twidget(l).fwidgetrect.cx) -
                                     twidget(r).fwidgetrect.x - 1;
  if result >= 0 then begin
-  result:= twidget(l).fwidgetrect.y - twidget(r).fwidgetrect.y;
+  result:= -((twidget(r).fwidgetrect.x + twidget(r).fwidgetrect.cx) -
+                                     twidget(l).fwidgetrect.x - 1);
+  if result <= 0 then begin
+   result:= twidget(l).fwidgetrect.y - twidget(r).fwidgetrect.y;
+  end;
  end;
 end;
 
@@ -9680,9 +9691,7 @@ begin
  if fparentwidget <> nil then begin
   po1:= subpoint(clientparentpos,fparentwidget.clientwidgetpos);
   addpoint1(info.pos,po1);
-//  addpoint1(info.pos,clientparentpos);
   fparentwidget.dragevent(info);
-//  subpoint1(info.pos,clientparentpos);
   subpoint1(info.pos,po1);
  end;
 end;
@@ -9915,14 +9924,12 @@ end;
 function twidget.hasparent: boolean;
 begin
  result:= getparentcomponent <> nil;
-// result:= fparentwidget <> nil;
 end;
 
 procedure twidget.setparentcomponent(value: tcomponent);
 begin
  if value is twidget then begin
   twidget(value).insertwidget(self,fwidgetrect.pos);
-//  parentwidget:= twidget(value);
  end;
 end;
 
@@ -9953,11 +9960,6 @@ begin
         (widget.owner<> nil) and (csinline in root.componentstate) and
            (issubcomponent(widget.owner,root) or //common owner
                issubcomponent(root,widget.owner))) then begin
-  {
-  if ((widget.owner = root) or (csinline in root.componentstate) and
-      not (csancestor in widget.componentstate) and
-       issubcomponent(widget.owner,root)) and (ws_iswidget in widget.fwidgetstate) then begin
-       }
    proc(widget);
   end;
  end;
@@ -10046,11 +10048,6 @@ begin
   if (ow_autosize in delta) and (ow_autosize in avalue) then begin
    checkautosize;
   end;
-  {
-  if ow_nofocusrect in delta then begin
-   invalidate;
-  end;
-  }
  end;
 end;
 
@@ -10077,7 +10074,6 @@ begin
  inherited;
  case event.kind of
   ek_activate: begin
-//   window.internalactivate(false);
    window.activate;
   end;
   ek_childscaled: begin
@@ -10121,7 +10117,7 @@ begin
 end;
 
 function twidget.getcaretcliprect: rectty;
- //origin = clientrect.pos
+                  //origin = clientrect.pos
 begin
  result:= makerect(nullpoint,clientsize);
 end;
@@ -10219,22 +10215,7 @@ begin
  filer.DefineProperty('reffontheight',{$ifdef FPC}@{$endif}readfontheight,
            {$ifdef FPC}@{$endif}writefontheight,bo1);
 end;
-{
-procedure twidget.writestate(writer: twriter);
-var
- face1: tcustomface;
-begin
- face1:= fface;
- if (fface <> nil) and (fface.ftemplate <> nil) then begin
-//  fface:= nil;
- end;
- try
-  inherited;
- finally
-  fface:= face1;
- end;
-end;
-}
+
 procedure twidget.parentfontchanged;
 begin
  if fframe <> nil then begin
@@ -10364,7 +10345,6 @@ procedure twidget.invalidateparentminclientsize;
 begin
  if fparentwidget <> nil then begin
   exclude(fparentwidget.fwidgetstate,ws_minclientsizevalid);
-//  fparentwidget.invalidateparentminclientsize;
  end;
 end;
 
@@ -10374,7 +10354,6 @@ begin
   fanchors := Value;
   if not (csloading in componentstate) then begin
    invalidateparentminclientsize;
-//  initparentclientrect;
    parentclientrectchanged;
   end;
  end;
@@ -10509,22 +10488,7 @@ begin
  end;
  invalidate;
 end;
-{
-function twidget.getinnerstframe: framety;
-begin
- if fframe <> nil then begin
-  with fframe do begin
-   result.left:= fouterframe.left + fpaintframe.left + fi.innerframe.left;
-   result.top:= fouterframe.top + fpaintframe.top + fi.innerframe.top;
-   result.right:= fouterframe.right + fpaintframe.right + fi.innerframe.right;
-   result.bottom:= fouterframe.bottom + fpaintframe.bottom + fi.innerframe.bottom;
-  end;
- end
- else begin
-  result:= nullframe;
- end;
-end;
-}
+
 function twidget.getcomponentstate: tcomponentstate;
 begin
  result:= componentstate;
@@ -10535,27 +10499,7 @@ begin
  result:= combineframestateflags(not isenabled,ws_active in fwidgetstate,
              ws_mouseinclient in fwidgetstate,ws_clicked in fwidgetstate);
 end;
-{
-function twidget.getframeclicked: boolean;
-begin
- result:= ws_clicked in widgetstate;
-end;
 
-function twidget.getframemouse: boolean;
-begin
- result:= ws_mouseinclient in widgetstate;
-end;
-
-function twidget.getframeactive: boolean;
-begin
- result:= ws_active in fwidgetstate;
-end;
-
-function twidget.getframedisabled: boolean;
-begin
- result:= not isenabled;
-end;
-}
 procedure twidget.setframeinstance(instance: tcustomframe);
 begin
  fframe:= instance;

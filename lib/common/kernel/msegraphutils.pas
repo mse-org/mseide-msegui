@@ -345,7 +345,8 @@ type
   setpt,setopt: setpointintty;
   setsi,setosi: setsizeintty;
  end;
- 
+ prectaccessty = ^rectaccessty;
+  
 function rx(const arect: rectty): integer;
 function ry(const arect: rectty): integer;
 function rcx(const arect: rectty): integer;
