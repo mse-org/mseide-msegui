@@ -261,6 +261,10 @@ type
    procedure dolayoutchanged;
    function findbandpos(const apos: integer; out aindex: integer;
                                      out arect: rectty): boolean;
+             //false if not found, band index and band rect
+   function findbandwidget(const apos: pointty; out aindex: integer;
+                                     out arect: rectty): boolean;
+             //false if not found. widget index and widget rect
    function findbandindex(const widgetindex: integer; out aindex: integer;
                                      out arect: rectty): boolean;
   public
@@ -1130,7 +1134,7 @@ begin
   updatesplitterrects(checksplit);
  end;
 end;
-var testvar: pointer;
+
 procedure tdockcontroller.sizechanged(force: boolean = false;
                                           scalefixedalso: boolean = false);
 var
@@ -1270,7 +1274,6 @@ var
   rea2:= fr^.pos(fplacementrect);
   if not nofit then begin
    setlength(fbands,1);
-testvar:= @fbands;
    with fbands[0] do begin
     first:= 0;
     last:= high(ar1);
@@ -1772,7 +1775,164 @@ var
   end;
  end;
 
-
+ procedure adjustdockrect;
+ var
+  nofit: boolean;
+  rect2: rectty;
+  pt1: pointty;
+ begin
+  with info,tdockdragobject(dragobjectpo^) do begin
+   nofit:= (od_nofit in optionsdock) and (fsplitdir in [sd_x,sd_y]);
+   if (fcheckeddockcontroller <> self) then begin
+    if fcheckeddockcontroller <> nil then begin
+     fcheckeddockcontroller.fasplitdir:= sd_none;
+    end;
+    fcheckeddockcontroller:= self;
+   end;
+   if fasplitdir = sd_none then begin
+    fasplitdir:= fsplitdir;
+   end;
+   if not widget.checkdescendent(widget1) and 
+      idockcontroller(fintf).checkdock(info) and
+                docheckdock(info) then begin
+    accept:= true;
+    rect1:= makerect(addpoint(pos,subpoint(widget1.screenpos,pickpos)),
+                  widget.size);
+    if not nofit then begin
+     size1:= widget1.clientsize;
+     with size1 do begin
+      x1:= cx div 8;
+      y1:= (cy * 7) div 8;
+     end;
+     if (od_splitvert in foptionsdock) and
+        (info.pos.x < x1) and (info.pos.y < y1) then begin
+      fasplitdir:= sd_x;
+     end
+     else begin
+      if (od_splithorz in foptionsdock) and
+         (info.pos.y > y1) and (info.pos.x > x1) then begin
+       fasplitdir:= sd_y;
+      end
+      else begin
+       if (od_tabed in foptionsdock) and
+          (info.pos.x > (size1.cx * 7) div 16) and 
+          (info.pos.x < (size1.cx * 9) div 16) and
+          (info.pos.y > (size1.cy * 7) div 16) and 
+          (info.pos.y < (size1.cy * 9) div 16) then begin
+        fasplitdir:= sd_tabed;
+       end;
+      end;
+     end;
+     size1:= container1.paintsize;
+     if (widget.anchors * [an_left,an_right] = []) and 
+                               (fsplitdir = sd_none) then begin
+      rect1.cx:= size1.cx;
+     end;
+     if (widget.anchors * [an_top,an_bottom] = []) and 
+                               (fsplitdir = sd_none) then begin
+      rect1.cy:= size1.cy;
+     end;
+     sd1:= fsplitdir;
+     fsplitdir:= fasplitdir;
+     count1:= length(checksplit);
+     fsplitdir:= sd1;
+     if (widget.parentwidget <> container1) and
+                 not widget1.checkdescendent(ftabwidget) then begin
+      inc(count1);
+     end;
+     findex:= count1-1;
+     case fasplitdir of
+      sd_x: begin
+       rect1.y:= container1.screenpos.y + container1.paintpos.y;
+       rect1.cy:= size1.cy;
+       rect1.cx:= size1.cx div (count1);
+       if rect1.cx > 0 then begin
+        findex:= (pos.x div rect1.cx);
+        rect1.x:=  findex * rect1.cx +
+                container1.screenpos.x + container1.paintpos.x;
+       end;
+       if count1 = 1 then begin
+        dec(rect1.cx,rect1.cx div 16);
+       end;
+      end;
+      sd_y: begin
+       rect1.x:= container1.screenpos.x + container1.paintpos.x;
+       rect1.cx:= size1.cx;
+       rect1.cy:= size1.cy div (count1);
+       if rect1.cy > 0 then begin
+        findex:= (pos.y div rect1.cy);
+        rect1.y:=  findex * rect1.cy +
+                container1.screenpos.y + container1.paintpos.y;
+       end;
+       if count1 = 1 then begin
+        int1:= rect1.cy div 16;
+        dec(rect1.cy,int1);
+        inc(rect1.y,int1);
+       end;
+      end;
+      sd_tabed: begin
+       int1:= size1.cy div 16;
+       int2:= size1.cx div 16;
+       if int2 < int1 then begin
+        int1:= int2;
+       end;
+       rect1:= inflaterect(fplacementrect
+               {idockcontroller(fintf).getplacementrect},-int1);
+       translatewidgetpoint1(rect1.pos,container1,nil);
+      end;
+     end;
+     if fasplitdir = sd_none then begin
+      subpoint1(rect1.pos,widget.paintpos);
+      if widget1 <> container1 then begin
+       addpoint1(rect1.pos,widget1.paintpos);
+      end;
+      setxorwidget(container1,clipinrect(rect1,
+        makerect(translatewidgetpoint(container1.clientwidgetpos,
+        container1,nil),container1.maxclientsize)));
+     end
+     else begin
+      setxorwidget(container1,clipinrect(rect1,
+        makerect(translatewidgetpoint(container1.paintpos,
+        container1,nil),size1)));
+     end;
+    end
+    else begin //nofit
+     pt1:= translateclientpoint(rect1.pos,nil,container1);
+     if findbandwidget(pt1,int1,rect2) then begin
+      fr^.setsize(rect2,fr^.size(rect1));
+      translateclientpoint1(rect2.pos,container1,nil);
+      setxorwidget(container1,rect2);
+     end;
+    end;
+    result:= true;
+   end;
+  end;
+ end;
+ 
+ procedure dockwidget;
+ begin
+  with info,tdockdragobject(dragobjectpo^) do begin
+   if container1 = fxorwidget then begin
+    with tdockdragobject(dragobjectpo^).fdock do begin
+     if fmdistate = mds_floating then begin
+      fmdistate:= mds_normal;
+     end
+     else begin
+      if fmdistate = mds_maximized then begin
+       fnormalrect:= widget1.widgetrect;
+       mdistate:= mds_normal;
+      end;
+     end;
+    end;
+    fsizes:= nil;
+    calclayout(tdockdragobject(dragobjectpo^),false);
+    updaterefsize;
+    dochilddock(widget);
+    result:= true;
+   end;
+  end;
+ end;
+ 
 begin
  widget1:= fintf.getwidget;
  container1:= widget1.container;
@@ -1808,141 +1968,13 @@ begin
      end
     end;
     dek_check: begin
-     if checkaccept then begin
-      with tdockdragobject(dragobjectpo^) do begin
-       if (fcheckeddockcontroller <> self) then begin
-        if fcheckeddockcontroller <> nil then begin
-         fcheckeddockcontroller.fasplitdir:= sd_none;
-        end;
-        fcheckeddockcontroller:= self;
-       end;
-       if fasplitdir = sd_none then begin
-        fasplitdir:= fsplitdir;
-       end;
-       if not widget.checkdescendent(widget1) and idockcontroller(fintf).checkdock(info) and
-                    docheckdock(info) then begin
-        accept:= true;
-        rect1:= makerect(addpoint(pos,subpoint(widget1.screenpos,pickpos)),
-                      widget.size);
-        size1:= widget1.clientsize;
-        with size1 do begin
-         x1:= cx div 8;
-         y1:= (cy * 7) div 8;
-        end;
-        if (od_splitvert in foptionsdock) and
-           (info.pos.x < x1) and (info.pos.y < y1) then begin
-         fasplitdir:= sd_x;
-        end
-        else begin
-         if (od_splithorz in foptionsdock) and
-            (info.pos.y > y1) and (info.pos.x > x1) then begin
-          fasplitdir:= sd_y;
-         end
-         else begin
-          if (od_tabed in foptionsdock) and
-             (info.pos.x > (size1.cx * 7) div 16) and (info.pos.x < (size1.cx * 9) div 16) and
-             (info.pos.y > (size1.cy * 7) div 16) and (info.pos.y < (size1.cy * 9) div 16) then begin
-           fasplitdir:= sd_tabed;
-          end;
-         end;
-        end;
-        size1:= container1.paintsize;
-        if (widget.anchors * [an_left,an_right] = []) and (fsplitdir = sd_none) then begin
-         rect1.cx:= size1.cx;
-        end;
-        if (widget.anchors * [an_top,an_bottom] = []) and (fsplitdir = sd_none) then begin
-         rect1.cy:= size1.cy;
-        end;
-        sd1:= fsplitdir;
-        fsplitdir:= fasplitdir;
-        count1:= length(checksplit);
-        fsplitdir:= sd1;
-        if (widget.parentwidget <> container1) and
-                    not widget1.checkdescendent(ftabwidget) then begin
-         inc(count1);
-        end;
-        findex:= count1-1;
-        case fasplitdir of
-         sd_x: begin
-          rect1.y:= container1.screenpos.y + container1.paintpos.y;
-          rect1.cy:= size1.cy;
-          rect1.cx:= size1.cx div (count1);
-          if rect1.cx > 0 then begin
-           findex:= (pos.x div rect1.cx);
-           rect1.x:=  findex * rect1.cx +
-                   container1.screenpos.x + container1.paintpos.x;
-          end;
-          if count1 = 1 then begin
-           dec(rect1.cx,rect1.cx div 16);
-          end;
-         end;
-         sd_y: begin
-          rect1.x:= container1.screenpos.x + container1.paintpos.x;
-          rect1.cx:= size1.cx;
-          rect1.cy:= size1.cy div (count1);
-          if rect1.cy > 0 then begin
-           findex:= (pos.y div rect1.cy);
-           rect1.y:=  findex * rect1.cy +
-                   container1.screenpos.y + container1.paintpos.y;
-          end;
-          if count1 = 1 then begin
-           int1:= rect1.cy div 16;
-           dec(rect1.cy,int1);
-           inc(rect1.y,int1);
-          end;
-         end;
-         sd_tabed: begin
-          int1:= size1.cy div 16;
-          int2:= size1.cx div 16;
-          if int2 < int1 then begin
-           int1:= int2;
-          end;
-          rect1:= inflaterect(fplacementrect
-                  {idockcontroller(fintf).getplacementrect},-int1);
-          translatewidgetpoint1(rect1.pos,container1,nil);
-         end;
-        end;
-        if fasplitdir = sd_none then begin
-         subpoint1(rect1.pos,widget.paintpos);
-         if widget1 <> container1 then begin
-          addpoint1(rect1.pos,widget1.paintpos);
-         end;
-         setxorwidget(container1,clipinrect(rect1,
-           makerect(translatewidgetpoint(container1.clientwidgetpos,
-           container1,nil),container1.maxclientsize)));
-        end
-        else begin
-         setxorwidget(container1,clipinrect(rect1,
-           makerect(translatewidgetpoint(container1.paintpos,
-           container1,nil),size1)));
-        end;
-        result:= true;
-       end;
-      end;
+     if checkaccept then begin        
+      adjustdockrect;
      end;
     end;
     dek_drop: begin
      if checkaccept then begin
-      with tdockdragobject(dragobjectpo^) do begin
-       if container1 = fxorwidget then begin
-        with tdockdragobject(dragobjectpo^).fdock do begin
-         if fmdistate = mds_floating then begin
-          fmdistate:= mds_normal;
-         end
-         else begin
-          if fmdistate = mds_maximized then begin
-           fnormalrect:= widget1.widgetrect;
-           mdistate:= mds_normal;
-          end;
-         end;
-        end;
-        fsizes:= nil;
-        calclayout(tdockdragobject(dragobjectpo^),false);
-        updaterefsize;
-        dochilddock(widget);
-        result:= true;
-       end;
-      end;
+      dockwidget;
      end;
     end;
    end;
@@ -2387,6 +2419,37 @@ begin
     break;
    end;
    int2:= int2 + size + fbandgap;
+  end;
+ end;
+end;
+
+function tdockcontroller.findbandwidget(const apos: pointty; out aindex: integer;
+                                     out arect: rectty): boolean;
+             //false if not found. widget index and widget rect
+var
+ ar1: widgetarty;
+ int1,int2,int3,int4,int5: integer;
+begin
+ result:= findbandpos(fr^.opt(apos),int4,arect);
+ if result then begin
+  ar1:= checksplit;
+  aindex:= -1;
+  if ar1 <> nil then begin
+   int3:= fr^.pos(arect);
+   int5:= fr^.pt(apos);
+   with fbands[int4] do begin
+    aindex:= last;
+    for int1:= first to last do begin
+     int2:= fw^.size(ar1[int1]) + fsplitter_size;
+     if int3 + int2 >= int5 then begin
+      aindex:= int1;
+      break;
+     end;
+     int3:= int3 + int2;
+    end;
+   end;
+   fr^.setpos(arect,int3);
+   fr^.setsize(arect,fw^.size(ar1[aindex]));
   end;
  end;
 end;
