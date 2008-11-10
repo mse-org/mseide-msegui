@@ -199,9 +199,11 @@ type
    procedure layoutchanged;
    function checksplit(const awidgets: widgetarty;
                  out propsize,varsize,fixsize,fixcount: integer;
-                 out isprop,isfix: booleanarty; const fixedareprop: boolean): widgetarty; overload;
+                 out isprop,isfix: booleanarty;
+                 const fixedareprop: boolean): widgetarty; overload;
    function checksplit(out propsize,fixsize: integer;
-                 out isprop,isfix: booleanarty; const fixedareprop: boolean): widgetarty; overload;
+                 out isprop,isfix: booleanarty;
+                 const fixedareprop: boolean): widgetarty; overload;
    function checksplit: widgetarty; overload;
    procedure setcaption(const Value: msestring);
    procedure setsplitter_size(const Value: integer);
@@ -267,6 +269,7 @@ type
              //false if not found. widget index and widget rect
    function findbandindex(const widgetindex: integer; out aindex: integer;
                                      out arect: rectty): boolean;
+   function nofit: boolean;
   public
    constructor create(aintf: idockcontroller);
    destructor destroy; override;
@@ -278,7 +281,8 @@ type
                                       var info: mouseeventinfoty);
    procedure dopaint(const acanvas: tcanvas); //canvasorigin = container.clientpos;
    procedure doactivate;
-   procedure sizechanged(force: boolean = false; scalefixedalso: boolean = false);
+   procedure sizechanged(force: boolean = false; scalefixedalso: boolean = false;
+                           const awidgets: widgetarty = nil);
    procedure poschanged;
    procedure widgetregionchanged(const sender: twidget);
    procedure beginclientrectchanged;
@@ -1136,14 +1140,14 @@ begin
 end;
 
 procedure tdockcontroller.sizechanged(force: boolean = false;
-                                          scalefixedalso: boolean = false);
+                                          scalefixedalso: boolean = false;
+                                          const awidgets: widgetarty = nil);
 var
  ar1: widgetarty;
  ar2: realarty;
  prop,fix: booleanarty;
  fixsize: integer;
  propsize: integer;
- nofit: boolean;
  banded: boolean;
  opt1: optionsdockty;
  
@@ -1383,7 +1387,7 @@ var
  end;       
           
 var
- int1: integer;
+ int1,int2: integer;
  widget1: twidget;
  rea2: real;
  widget2: twidget;
@@ -1402,7 +1406,7 @@ begin
  end;
  if (widget1 <> nil) and 
         (widget1.ComponentState * [csloading,csdesigning] = []) then begin
-  nofit:= od_nofit in foptionsdock;
+//  nofit:= od_nofit in foptionsdock;
   banded:= od_banded in foptionsdock;
   fplacementrect:= idockcontroller(fintf).getplacementrect;
   fbandstart:= fr^.opos(fplacementrect);
@@ -1419,7 +1423,11 @@ begin
      fdockstate:= fdockstate + [dos_layoutvalid,dos_updating2];
      try
       inc(frecalclevel);
-      ar1:= checksplit(propsize,fixsize,prop,fix,false);
+      ar1:= checksplit(awidgets,propsize,int1,fixsize,int2,prop,fix,false);
+writeln('++++++++++++');
+for int1:= 0 to high(ar1) do begin
+ writeln(ar1[int1].name);
+end;
       if high(ar1) >= 0 then begin
        setlength(ar2,length(ar1));
        if not (od_proportional in foptionsdock) then begin
@@ -1505,10 +1513,10 @@ end;
 procedure tdockcontroller.calclayout(const dragobject: tdockdragobject;
                                      const nonewplace: boolean);
 var
- rect1: rectty;
+ rect1,rect2: rectty;
  po1: pointty;
  ar1: widgetarty;
- int1: integer;
+ int1,int2: integer;
  step,pos: real;
  container1: twidget1;
  widget1,widget2: twidget;
@@ -1520,7 +1528,6 @@ var
  dirchanged: boolean;
  newwidget: boolean;
  controller1: tdockcontroller;
- 
 begin
  container1:= twidget1(fintf.getwidget.container);
  if container1.componentstate * [csdestroying,csdesigning] <> [] then begin
@@ -1620,6 +1627,17 @@ begin
      index:= length(ar1);
     end;
     insertitem(pointerarty(ar1),index,widget1);
+    if nofit then begin
+//     if not newwidget then begin
+      fr^.setosize(fsizingrect,fw^.osize(widget1));
+                 //don't change height
+//     end;
+     widget1.widgetrect:= fsizingrect;
+writeln('***********');
+for int1:= 0 to high(ar1) do begin
+ writeln(ar1[int1].name);
+end;
+    end;
    end;
    checksplit(ar1,propsize,varsize,fixsize,fixcount,prop,fix,false);
    if dirchanged or (propsize = 0) and newwidget then begin
@@ -1651,56 +1669,27 @@ begin
   end;
   case fsplitdir of
    sd_x,sd_y: begin
-    if not nonewplace then begin
+    if not nonewplace and not nofit then begin
      pos:= fr^.pos(rect1);
-//     pos:= rect1.y;
      for int1:= 0 to high(ar1) do begin
       fr^.setpos(rect1,round(pos));
-//      rect1.y:= round(pos);
       if prop[int1] then begin
        pos:= pos + step;
       end
       else begin
        pos:= pos + fw^.size(ar1[int1]);
-//       pos:= pos + ar1[int1].bounds_cy;
       end;
       if int1 = high(ar1) then begin
        fr^.setsize(rect1,fr^.pt(po1) - fr^.pos(rect1));
-//       rect1.cy:= po1.y - rect1.y;
       end
       else begin
        fr^.setsize(rect1,round(pos) - fr^.pos(rect1));
-//       rect1.cy:= round(pos)-rect1.y;
       end;
       ar1[int1].widgetrect:= rect1;
       pos:= pos + fsplitter_size;
      end;
     end;
    end;
-   {
-   sd_x: begin
-    if not nonewplace then begin
-     pos:= rect1.y;
-     for int1:= 0 to high(ar1) do begin
-      rect1.x:= round(pos);
-      if prop[int1] then begin
-       pos:= pos + step;
-      end
-      else begin
-       pos:= pos + ar1[int1].bounds_cx;
-      end;
-      if int1 = high(ar1) then begin
-       rect1.cx:= po1.x - rect1.x;
-      end
-      else begin
-       rect1.cx:= round(pos)-rect1.x;
-      end;
-      ar1[int1].widgetrect:= rect1;
-      pos:= pos + fsplitter_size;
-     end;
-    end;
-   end;
-   }
    sd_tabed: begin
     include(fdockstate,dos_updating5);
     try
@@ -1731,13 +1720,18 @@ begin
   end;
  end;
  exclude(fdockstate,dos_updating1);
- sizechanged(true);
+ sizechanged(true,false,ar1);
  updatesplitterrects(ar1);
  widget1:= fintf.getwidget;
  if widget1.canevent(tmethod(foncalclayout)) then begin
   foncalclayout(widget1,ar1);
  end;
  dolayoutchanged;
+end;
+
+function tdockcontroller.nofit: boolean;
+begin
+ result:= (od_nofit in foptionsdock) and (fsplitdir in [sd_x,sd_y]);
 end;
 
 function tdockcontroller.beforedragevent(var info: draginfoty): boolean;
@@ -1899,7 +1893,9 @@ var
     else begin //nofit
      pt1:= translateclientpoint(rect1.pos,nil,container1);
      if findbandwidget(pt1,int1,rect2) then begin
+      findex:= int1;
       fr^.setsize(rect2,fr^.size(rect1));
+      fsizingrect:= rect2;
       translateclientpoint1(rect2.pos,container1,nil);
       setxorwidget(container1,rect2);
      end;
@@ -1923,6 +1919,8 @@ var
        mdistate:= mds_normal;
       end;
      end;
+     translatewidgetpoint1(fsizingrect.pos,nil,container1); 
+            //used incalclayout
     end;
     fsizes:= nil;
     calclayout(tdockdragobject(dragobjectpo^),false);

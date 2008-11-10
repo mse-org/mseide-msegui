@@ -7845,9 +7845,11 @@ begin
   end;
  end;
 end;
-
+var testvar1,testvar2: twidget;
 function compxbanded(const l,r): integer;
 begin
+testvar1:= twidget(l);
+testvar2:= twidget(r);
  result:= (twidget(l).fwidgetrect.y + twidget(l).fwidgetrect.cy) -
                                     twidget(r).fwidgetrect.y - 1;
  if result >= 0 then begin
