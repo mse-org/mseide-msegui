@@ -1259,7 +1259,7 @@ var
   for int1:= 1 to high(ar1) do begin        //calc pos vector
    ar2[int1]:= ar2[int1-1] + fsplitter_size + ar2[int1];
   end;
- end;
+ end; //calcsize
 
 var
  minsize1: integer;
@@ -1286,7 +1286,7 @@ var
     size:= int3;
    end;
    bandindex:= aindex;
-  end;
+  end; //calcbandheight
 
  var
   rea1,rea2: real;
@@ -1296,7 +1296,17 @@ var
   ar3: rectarty;
   int2: integer;
   bandpos: integer;
-   
+  
+  procedure clipwidget;
+  var
+   int1: integer;
+  begin
+   int1:= fr^.stop(fplacementrect) - fsplitter_size;
+   if fr^.stop(rect1^) > int1 then begin
+    fr^.setstop(rect1^,int1);
+   end;
+  end; //clipwidget
+
  begin
   rea2:= fr^.pos(fplacementrect);
   if not nofit then begin
@@ -1326,14 +1336,19 @@ var
     fr^.setpos(rect1^,round(rea2));
     fr^.setsize(rect1^,round(ar2[int1] - rea2 - rea1) - fsplitter_size);
     if banded and 
-      (fr^.stop(rect1^) + fsplitter_size > fr^.stop(fplacementrect)) and 
-      (int1 > int2) then begin
-     calcbandheight(int1);
-     int2:= int1;       // minimal one widget in band
-     fr^.setpos(rect1^,fr^.pos(fplacementrect)); //restart
-     rea1:= rea1 + rea2;
-     rea2:= fr^.pos(rect1^);
-     rea1:= rea1 - rea2;
+      (fr^.stop(rect1^) + fsplitter_size > fr^.stop(fplacementrect)) then begin
+     if int1 > int2 then begin //next band
+      calcbandheight(int1);
+      int2:= int1;       // minimal one widget in band
+      fr^.setpos(rect1^,fr^.pos(fplacementrect)); //restart
+      clipwidget;
+      rea1:= rea1 + rea2;
+      rea2:= fr^.pos(rect1^);
+      rea1:= rea1 - rea2;
+     end
+     else begin  
+      clipwidget;
+     end;
     end;
     rea2:= rea2 + fr^.size(rect1^) + fsplitter_size;
    end;
@@ -1370,7 +1385,7 @@ var
     end;
    end;
   end;
- end;
+ end; //calcpos
 
 var
  needsfixscale: boolean;
@@ -1422,7 +1437,6 @@ begin
  checkdirection;
  if (widget1 <> nil) and 
         (widget1.ComponentState * [csloading,csdesigning] = []) then begin
-//  nofit:= od_nofit in foptionsdock;
   banded:= od_banded in foptionsdock;
   fplacementrect:= idockcontroller(fintf).getplacementrect;
   fbandstart:= fr^.opos(fplacementrect);

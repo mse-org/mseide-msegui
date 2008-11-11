@@ -337,7 +337,7 @@ type
  
  rectaccessty = record
   pos,size,stop,opos,osize,ostop: getrectintegerty;
-  setpos,setsize,setopos,setosize: setrectintegerty;
+  setpos,setsize,setstop,setopos,setosize,setostop: setrectintegerty;
   makepos,makeopos: getintpointty;
   makesize,makeosize: getintsizety;
   pt,opt: getpointintty;
@@ -357,6 +357,8 @@ procedure rsetx(var arect: rectty; const avalue: integer);
 procedure rsety(var arect: rectty; const avalue: integer);
 procedure rsetcx(var arect: rectty; const avalue: integer);
 procedure rsetcy(var arect: rectty; const avalue: integer);
+procedure rsetstopx(var arect: rectty; const avalue: integer);
+procedure rsetstopy(var arect: rectty; const avalue: integer);
 function makesizex(const value,ovalue: integer): sizety;
 function makesizey(const value,ovalue: integer): sizety;
 function makeposx(const value,ovalue: integer): pointty;
@@ -380,8 +382,10 @@ const
    ostop: {$ifdef FPC}@{$endif}rstopy;
    setpos: {$ifdef FPC}@{$endif}rsetx;
    setsize: {$ifdef FPC}@{$endif}rsetcx;
+   setstop: {$ifdef FPC}@{$endif}rsetstopx;
    setopos: {$ifdef FPC}@{$endif}rsety;
    setosize: {$ifdef FPC}@{$endif}rsetcy;
+   setostop: {$ifdef FPC}@{$endif}rsetstopy;
    makepos: {$ifdef FPC}@{$endif}makeposx;
    makeopos: {$ifdef FPC}@{$endif}makeposy;
    makesize: {$ifdef FPC}@{$endif}makesizex;
@@ -404,8 +408,10 @@ const
    ostop: {$ifdef FPC}@{$endif}rstopy;
    setpos: {$ifdef FPC}@{$endif}rsety;
    setsize: {$ifdef FPC}@{$endif}rsetcy;
+   setstop: {$ifdef FPC}@{$endif}rsetstopy;
    setopos: {$ifdef FPC}@{$endif}rsetx;
    setosize: {$ifdef FPC}@{$endif}rsetcx;
+   setostop: {$ifdef FPC}@{$endif}rsetstopx;
    makepos: {$ifdef FPC}@{$endif}makeposy;
    makeopos: {$ifdef FPC}@{$endif}makeposx;
    makesize: {$ifdef FPC}@{$endif}makesizey;
@@ -1317,6 +1323,16 @@ end;
 procedure rsetcy(var arect: rectty; const avalue: integer);
 begin
  arect.cy:= avalue;
+end;
+
+procedure rsetstopx(var arect: rectty; const avalue: integer);
+begin
+ arect.cx:= avalue - arect.x;
+end;
+
+procedure rsetstopy(var arect: rectty; const avalue: integer);
+begin
+ arect.cy:= avalue - arect.y;
 end;
 
 function makesizex(const value,ovalue: integer): sizety;
