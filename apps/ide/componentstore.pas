@@ -80,6 +80,8 @@ type
    compdesc: tmemodialogedit;
    storefiledialog: tfiledialog;
    groupfiledialog: tfiledialog;
+   addfileact: taction;
+   compfiledialog: tfiledialog;
    procedure docreate(const sender: TObject);
    procedure dopastecomponent(const sender: TObject);
    procedure dostatread(const sender: TObject; const reader: tstatreader);
@@ -123,6 +125,7 @@ type
    procedure nodeenter(const sender: TObject);
    procedure nodeexit(const sender: TObject);
    procedure doupdatecomponent(const sender: TObject);
+   procedure doaddfile(const sender: TObject);
   private
 //   frootnode: tstoredcomponent;
    far1: storedcomponentarty;
@@ -140,6 +143,7 @@ type
    procedure storechanged;
    procedure writestoregroup(const afilename: filenamety);
    procedure readstoregroup(const afilename: filenamety);
+   procedure pasteoradd(const apaste: boolean);
   public
    procedure updatestat(afiler: tstatfiler);
    function saveall(const quiet: boolean): modalresultty;
@@ -283,7 +287,7 @@ begin
  ainfo.filepath:= storefiledialog.controller.lastdir;
 end;
 
-procedure tcomponentstorefo.dopastecomponent(const sender: TObject);
+procedure tcomponentstorefo.pasteoradd(const apaste: boolean);
 var
  str1: ansistring;
  str2: msestring;
@@ -297,6 +301,7 @@ var
  compname1: string;
  node1: tstoredcomponent;
  statwriter1: tstatwriter;
+ dialogfo: tstoredcomponentinfodialogfo;
 begin
  statwriter1:= nil;
  stream1:= nil;
@@ -305,38 +310,60 @@ begin
  reader1:= nil;
  initcomponentinfo(info);
  try
-  if pastefromclipboard(str2) then begin  
-   str1:= str2;
-   stream1:= tstringcopystream.create(str1);
-   stream2:= ttextstream.create;
+  if apaste then begin
+   if not pastefromclipboard(str2) then begin
+    exit;
+   end;
+  end
+  else begin 
+   if compfiledialog.execute <> mr_ok then begin
+    exit;
+   end;
+   stream2:= ttextstream.create(compfiledialog.controller.filename,fm_read);
    try
-    objecttexttobinary(stream1,stream2);
-    stream2.position:= 0;
-    reader1:= treader.create(stream2,4096);
-    with info,treader1(reader1) do begin
-    {$ifdef FPC}
-     driver.beginrootcomponent;
-     driver.begincomponent(flags,int1,compclass,componentname);
-    {$else}
-     readsignature;
-     ReadPrefix(flags,int1);
-     compclass:= ReadStr;
-     componentname:= ReadStr;
-    {$endif}
-    end;    
-   except
-    exit;        //invalid
+    str2:= stream2.readdatastring;
+   finally
+    stream2.free;
    end;
-   info.compname:= info.compclass;
-   if tstoredcomponentinfodialogfo.create(info).show(true) = mr_ok then begin
-    stream3:= ttextstream.create(info.filepath,fm_create);
-    node1:= tstoredcomponent.create(false);
-    node1.info:= info;
-    node.item.add(node1);    
-    node1.statechanged;
-    stream3.writedatastring(str1);
-    storechanged;
+  end;
+   
+  str1:= str2;
+  stream1:= tstringcopystream.create(str1);
+  stream2:= ttextstream.create;
+  try
+   objecttexttobinary(stream1,stream2);
+   stream2.position:= 0;
+   reader1:= treader.create(stream2,4096);
+   with info,treader1(reader1) do begin
+   {$ifdef FPC}
+    driver.beginrootcomponent;
+    driver.begincomponent(flags,int1,compclass,componentname);
+   {$else}
+    readsignature;
+    ReadPrefix(flags,int1);
+    compclass:= ReadStr;
+    componentname:= ReadStr;
+   {$endif}
+   end;    
+  except
+   if not apaste then begin
+    showerror('Component read error.');
    end;
+   exit;        //invalid
+  end;
+  info.compname:= info.compclass;
+  dialogfo:= tstoredcomponentinfodialogfo.create(info);
+  if not apaste then begin
+   dialogfo.filepath.value:= compfiledialog.controller.filename;
+  end;
+  if dialogfo.show(true) = mr_ok then begin
+   stream3:= ttextstream.create(info.filepath,fm_create);
+   node1:= tstoredcomponent.create(false);
+   node1.info:= info;
+   node.item.add(node1);    
+   node1.statechanged;
+   stream3.writedatastring(str1);
+   storechanged;
   end;
  finally
   statwriter1.free;
@@ -345,6 +372,16 @@ begin
   stream2.free;
   stream3.free;
  end; 
+end;
+
+procedure tcomponentstorefo.dopastecomponent(const sender: TObject);
+begin
+ pasteoradd(true);
+end;
+
+procedure tcomponentstorefo.doaddfile(const sender: TObject);
+begin
+ pasteoradd(false);
 end;
 
 procedure tcomponentstorefo.doupdatecomponent(const sender: TObject);
