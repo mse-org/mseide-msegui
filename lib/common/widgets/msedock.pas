@@ -230,6 +230,7 @@ type
    foptionsdock: optionsdockty;
    fr: prectaccessty;
    fw: pwidgetaccessty;
+   procedure checkdirection;
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
    function checkclickstate(const info: mouseeventinfoty): boolean; override;
    
@@ -777,6 +778,7 @@ var
  dcont1: tdockcontroller;
  
 begin
+ checkdirection;
  banded:= (od_banded in foptionsdock) and (fsplitdir in [sd_x,sd_y]);
  if awidgets = nil then begin
   if (fsplitdir = sd_x) then begin
@@ -938,7 +940,7 @@ begin
 end;
 
 procedure tdockcontroller.updategrip(const asplitdir: splitdirty;
-                                    const awidget: twidget);
+                       const awidget: twidget);
 var
  frame1: tcustomframe;
  grippos1: captionposty;
@@ -948,7 +950,7 @@ begin
   with tgripframe(frame1) do begin
    grippos1:= fgrip_pos;
    if fgrip_options * [go_horz,go_vert] = [] then begin
-    if fsplitdir = sd_x then begin
+    if asplitdir = sd_x then begin
      if go_opposite in fgrip_options then begin
       fgrip_pos:= cp_bottom;
      end
@@ -957,8 +959,8 @@ begin
      end;
     end
     else begin
-     if (fsplitdir = sd_y) or (fsplitdir = sd_tabed) or 
-                                    (fsplitdir = sd_none) then begin
+     if (asplitdir = sd_y) or (asplitdir = sd_tabed) or 
+                                    (asplitdir = sd_none) then begin
       if go_opposite in fgrip_options then begin
        fgrip_pos:= cp_left;
       end
@@ -1003,10 +1005,19 @@ var
 var
  po1: pointty;
  int1: integer;
- 
+ sd1: splitdirty;
 begin
+ sd1:= fsplitdir;
+ if nofit then begin
+  if sd1 = sd_x then begin
+   sd1:= sd_y;
+  end
+  else begin
+   sd1:= sd_x;
+  end;
+ end;
  for int1:= 0 to high(awidgets) do begin
-  updategrip(fsplitdir,awidgets[int1]);
+  updategrip(sd1,awidgets[int1]);
  end;
  if (high(awidgets) >= 0) and (fsplitter_size > 0) and 
      ((fsplitter_color <> cl_none) or (fsplitter_grip <> stb_none)) then begin
@@ -1136,6 +1147,18 @@ procedure tdockcontroller.splitterchanged;
 begin
  if not (csloading in fintf.getwidget.ComponentState) then begin
   updatesplitterrects(checksplit);
+ end;
+end;
+
+procedure tdockcontroller.checkdirection;
+begin
+ if fsplitdir = sd_y then begin
+  fr:= @rectaccessy;
+  fw:= @widgetaccessy;
+ end
+ else begin
+  fr:= @rectaccessx;
+  fw:= @widgetaccessx;
  end;
 end;
 
@@ -1396,14 +1419,7 @@ begin
  widget2:= fintf.getwidget;
  hasparent1:= widget2.parentwidget <> nil;
  widget1:= widget2.container;
- if fsplitdir = sd_y then begin
-  fr:= @rectaccessy;
-  fw:= @widgetaccessy;
- end
- else begin
-  fr:= @rectaccessx;
-  fw:= @widgetaccessx;
- end;
+ checkdirection;
  if (widget1 <> nil) and 
         (widget1.ComponentState * [csloading,csdesigning] = []) then begin
 //  nofit:= od_nofit in foptionsdock;
@@ -1424,10 +1440,6 @@ begin
      try
       inc(frecalclevel);
       ar1:= checksplit(awidgets,propsize,int1,fixsize,int2,prop,fix,false);
-writeln('++++++++++++');
-for int1:= 0 to high(ar1) do begin
- writeln(ar1[int1].name);
-end;
       if high(ar1) >= 0 then begin
        setlength(ar2,length(ar1));
        if not (od_proportional in foptionsdock) then begin
@@ -1533,6 +1545,7 @@ begin
  if container1.componentstate * [csdestroying,csdesigning] <> [] then begin
   exit;
  end;
+ checkdirection;
  if (ftabwidget <> nil) and (fsplitdir = sd_tabed) then begin
   include(fdockstate,dos_updating5);
   int1:= 0;
@@ -1633,10 +1646,6 @@ begin
                  //don't change height
 //     end;
      widget1.widgetrect:= fsizingrect;
-writeln('***********');
-for int1:= 0 to high(ar1) do begin
- writeln(ar1[int1].name);
-end;
     end;
    end;
    checksplit(ar1,propsize,varsize,fixsize,fixcount,prop,fix,false);
@@ -1891,12 +1900,13 @@ var
      end;
     end
     else begin //nofit
-     pt1:= translateclientpoint(rect1.pos,nil,container1);
+//     pt1:= translateclientpoint(rect1.pos,nil,container1);
+     pt1:= addpoint(info.pos,widget1.paintpos);
      if findbandwidget(pt1,int1,rect2) then begin
       findex:= int1;
       fr^.setsize(rect2,fr^.size(rect1));
       fsizingrect:= rect2;
-      translateclientpoint1(rect2.pos,container1,nil);
+      translatewidgetpoint1(rect2.pos,container1,nil);
       setxorwidget(container1,rect2);
      end;
     end;
@@ -2437,7 +2447,7 @@ begin
    int5:= fr^.pt(apos);
    with fbands[int4] do begin
     aindex:= last;
-    for int1:= first to last do begin
+    for int1:= first to last - 1 do begin
      int2:= fw^.size(ar1[int1]) + fsplitter_size;
      if int3 + int2 >= int5 then begin
       aindex:= int1;
@@ -3725,6 +3735,7 @@ procedure tgripframe.updaterects;
 
 var
  bo1,bo2,bo3,designing: boolean;
+ parentcontroller: tdockcontroller;
   
 begin
  inherited;
@@ -3781,9 +3792,12 @@ begin
     initrect(dbr_minimize);
    end;
   end;
-  if bo1 and (bo3 and not fcontroller.istabed or designing) and 
-                             (go_fixsizebutton in fgrip_options) then begin
-   initrect(dbr_fixsize);
+  if bo1 and (go_fixsizebutton in fgrip_options) then begin
+   if designing or fcontroller.getparentcontroller(parentcontroller) and
+                   bo3 and not parentcontroller.nofit and 
+                  (parentcontroller.fsplitdir <> sd_tabed)  then begin
+    initrect(dbr_fixsize);
+   end;
   end;
   if bo2 then begin
    if go_topbutton in fgrip_options then begin
