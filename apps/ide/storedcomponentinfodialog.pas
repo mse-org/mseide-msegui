@@ -80,7 +80,7 @@ procedure tstoredcomponentinfodialogfo.checkfilename;
 begin
  if compname.value <> '' then begin
   filepath.value:= uniquefilename(filedir(filepath.value) +
-                 compname.value + '.cmp');
+                 replacechar(compname.value,' ','_') + '.cmp');
  end;
 end;
 
