@@ -31,17 +31,19 @@ type
    compdesc: tmemoedit;
    procedure doclosequery(const sender: tcustommseform;
                    var amodalresult: modalresultty);
-  public
-   constructor create(var ainfo: storedcomponentinfoty); reintroduce;
+   procedure namedataentered(const sender: TObject);
   private
    infopo: pstoredcomponentinfoty;
+  public
+   constructor create(var ainfo: storedcomponentinfoty); reintroduce;
+   procedure checkfilename;
  end;
 var
  storedcomponentinfodialogfo: tstoredcomponentinfodialogfo;
  
 implementation
 uses
- storedcomponentinfodialog_mfm;
+ storedcomponentinfodialog_mfm,msefileutils;
  
 { tstoredcomponentinfodialogfo }
 
@@ -66,6 +68,19 @@ begin
    compdesc:= self.compdesc.value;
    filepath:= self.filepath.value;
   end;
+ end;
+end;
+
+procedure tstoredcomponentinfodialogfo.namedataentered(const sender: TObject);
+begin
+ checkfilename;
+end;
+
+procedure tstoredcomponentinfodialogfo.checkfilename;
+begin
+ if compname.value <> '' then begin
+  filepath.value:= uniquefilename(filedir(filepath.value) +
+                 compname.value + '.cmp');
  end;
 end;
 

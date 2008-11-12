@@ -1042,6 +1042,7 @@ begin
         add(comp2);
        end;
       end;
+      removefixupreferences(comp1,'');
       if assigned(initproc) then begin
        for int1:= comp1.componentcount - 1 downto 0 do begin
         comp2:= comp1.components[int1]; 

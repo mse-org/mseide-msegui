@@ -145,10 +145,13 @@ function dirhasentries(const adirname: filenamety;
                          const aexclude: fileattributesty = []): boolean;
 
 function findfile(const filename: filenamety; const dirnames: array of filenamety;
-                             var path: filenamety): boolean; overload;
+                             out path: filenamety): boolean; overload;
             //true if found
 function findfile(const filename: filenamety): boolean; overload;
 function finddir(const filename: filenamety): boolean;
+function findfileordir(const filename: filenamety): boolean;
+function uniquefilename(const path: filenamety): filenamety;
+                             //adds numbers if necessary
 
 function isrootpath(const path: filenamety): boolean;
 function copyfile(const oldfile,newfile: filenamety; 
@@ -507,6 +510,16 @@ end;
 
 function searchfile(const filename: filenamety; dir: boolean = false): filenamety; overload;
            //returns rootpath if file exists, '' otherwise
+begin
+ result:= filepath(filename);
+ if not (dir and finddir(result) or not dir and findfile(result)) then begin
+  result:= '';
+ end;
+end;
+
+{
+function searchfile(const filename: filenamety; dir: boolean = false): filenamety; overload;
+           //returns rootpath if file exists, '' otherwise
 var
  str1: msestring;
 begin
@@ -529,6 +542,7 @@ begin
   end;
  end;
 end;
+}
 {
 function searchfile(const filename: filenamety; const dirnames: filenamearty): filenamety;
            //returns directory of last occurence in dirnames, '' if none
@@ -687,7 +701,9 @@ begin
  result:= '';
  file1:= trim(afilename);
  if (file1 <> '') and (high(adirnames) < 0) then begin
-  result:= searchfile(file1,'');
+//  result:= searchfile(file1,'');
+  splitfilepath(afilename,dir1,file1);
+  result:= searchfile(file1,dir1);
  end
  else begin
   for int1:= high(adirnames) downto 0 do begin
@@ -706,13 +722,19 @@ begin
 end;
 
 function findfile(const filename: filenamety; const dirnames: array of filenamety;
-                        var path: filenamety): boolean;
+                        out path: filenamety): boolean;
             //true if found
 var
  str1: filenamety;
 // ar1: filenamearty;
 begin
  if isrootpath(filename) then begin
+  path:= filepath(filename);
+  result:= findfile(path);
+  if not result then begin
+   path:= '';
+  end;
+ {
   str1:= unquotefilename(filename);
   tosysfilepath1(str1);
   result:= fileexists(str1);
@@ -722,6 +744,7 @@ begin
   else begin
    path:= '';
   end;
+ }
  end
  else begin
   path:= searchfile(filename,dirnames);
@@ -733,6 +756,13 @@ begin
    result:= false;
   end;
  end;
+end;
+
+function findfileordir(const filename: filenamety): boolean;
+var
+ info: fileinfoty;
+begin
+ result:= sys_getfileinfo(filename,info);
 end;
 
 function findfile(const filename: filenamety): boolean; overload;
@@ -1311,6 +1341,23 @@ begin
  result:= removefileext(path);
  if newext <> '' then begin
   result:= result + '.' + newext;
+ end;
+end;
+
+function uniquefilename(const path: filenamety): filenamety;
+                             //adds numbers if necessary
+var
+ int1: integer; 
+ dir,name,ext: filenamety;
+begin
+ result:= path;
+ if findfileordir(path) then begin
+  int1:= 1;
+  splitfilepath(path,dir,name,ext);
+  repeat
+   result:= dir+name+inttostr(int1)+ext;
+   inc(int1);
+  until not findfileordir(result);
  end;
 end;
 

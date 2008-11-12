@@ -65,6 +65,7 @@ object storedcomponentinfodialogfo: tstoredcomponentinfodialogfo
     )
     controller.defaultext = 'cmp'
     controller.options = [fdo_save, fdo_checkexist, fdo_savelastdir]
+    controller.captionsave = 'Component File'
     reffontheight = 14
   end
   object compname: tstringedit
@@ -82,6 +83,7 @@ object storedcomponentinfodialogfo: tstoredcomponentinfodialogfo
     )
     anchors = [an_left, an_top, an_right]
     taborder = 3
+    ondataentered = namedataentered
     reffontheight = 14
   end
   object compdesc: tmemoedit

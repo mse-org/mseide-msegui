@@ -353,7 +353,10 @@ begin
   end;
   info.compname:= info.compclass;
   dialogfo:= tstoredcomponentinfodialogfo.create(info);
-  if not apaste then begin
+  if apaste then begin
+   dialogfo.checkfilename;
+  end
+  else begin
    dialogfo.filepath.value:= compfiledialog.controller.filename;
   end;
   if dialogfo.show(true) = mr_ok then begin

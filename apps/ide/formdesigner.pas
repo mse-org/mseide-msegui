@@ -226,7 +226,6 @@ type
    function getcomponentrect1(const component: tcomponent): rectty;
    function componentatpos(const pos: pointty): tcomponent;
  
-   procedure sizechanged; override;
    procedure poschanged; override;
    procedure dispatchmouseevent(var info: moeventinfoty; capture: twidget); override;
    procedure dispatchkeyevent(const eventkind: eventkindty; var info: keyeventinfoty); override;
@@ -1471,7 +1470,8 @@ begin
   itembyname('cut').enabled:= bo2;
   itembyname('delete').enabled:= bo2;
   itembyname('undelete').enabled:= fdelobjs <> nil;
-  itembyname('paste').enabled:= true;
+  itembyname('paste').enabled:= (fselections.count = 1) and 
+                   ((form = nil) or (fselections[0] is twidget));
   itembyname('editcomp').enabled:= designer.componentcanedit;
   bo1:= not((fselections.count <> 1) or not(fselections.items[0] is twidget) or
            not fowner.checkdescendent(twidget(fselections.items[0])));
@@ -1620,7 +1620,6 @@ var
  rect1: rectty;
  selectmode: selectmodety;
  area1: areaty;
-// clipo: pointty;
  isinpaintrect: boolean;
  ss1: shiftstatesty;
  po1: pformselectedinfoty;
@@ -1640,8 +1639,6 @@ begin
  with info.mouse do begin
   ss1:= shiftstate * shiftstatesmask;
   isinpaintrect:= pointinrect(pos,tformdesignerfo(fowner).gridrect);
-//  clipo:= fowner.container.clientpos;
-//  subpoint1(pos,clipo);
   posbefore:= pos;
   if eventkind in [ek_buttonpress,ek_buttonrelease] then begin
    fmousepos:= pos;
@@ -1717,9 +1714,7 @@ begin
        not ((area1 = ar_component) and 
            not(fselections[int1] is twidget)) and 
        (factarea <> ar_componentmove) then begin
-//     addpoint1(pos,clipo);
      inherited;
-//     subpoint1(pos,clipo);
     end;
     pos:= posbefore;
     if bo1 then begin
@@ -1938,7 +1933,6 @@ begin
     end;
    end;
   end;
-//  addpoint1(pos,clipo);
  end;
 end;
 
@@ -1951,20 +1945,6 @@ begin
  end;
 end;
 
-procedure tdesignwindow.sizechanged;
-begin
- inherited;
- {
- if (form <> nil) then begin
-  if not sizeisequal(form.size,fowner.size) then begin
-   form.size:= fowner.size;
-   fowner.size:= form.size;
-   doModified;
-  end;
- end;
- }
-end;
-
 procedure tdesignwindow.poschanged;
 begin
  inherited;
@@ -1972,24 +1952,7 @@ begin
   doModified;
  end;
 end;
-{
-function tdesignwindow.insertoffset: pointty;
-begin
- if form = nil then begin
-  result:= fowner.clientpos;
- end
- else begin
-  result:= translateclientpoint(nullpoint,form.container,form);
-  addpoint1(result,form.paintpos);
- end;
-end;
 
-function tdesignwindow.gridoffset: pointty;
-begin
- result:= insertoffset;
-// addpoint1(result,scrollbox.clientpos);
-end;
-}
 function tdesignwindow.snaptogriddelta(const pos: pointty): pointty;
 begin
  if tformdesignerfo(fowner).snaptogrid then begin
