@@ -848,9 +848,10 @@ var
 begin
  comp1:= info^.descendent;
  isroot:= comp1 = module^.instance;
+ ancestorbefore:= nil; //compiler warning
+ ar1:= nil;            //compiler warning
  if isroot then begin
-  ar1:= getdescendentar(comp1); //restore after revert 
-  ancestorbefore:= nil;
+  ar1:= getdescendentar(comp1); //restore after revert
   po1:= fdesigner.fsubmodulelist.finddescendentinfo(comp1);
   if po1 <> nil then begin
    ancestorbefore:= po1^.ancestor;
@@ -861,7 +862,7 @@ begin
   ancestorclassname1:= fancestorclassname;
   actualclassname1:= factualclassname;
  end;
- 
+
  info^.descendent:= nil;
  if comp1 is twidget then begin
   with twidget1(comp1) do begin
@@ -881,8 +882,8 @@ begin
   froot:= comp1;
  end;
  delcomp(comp1);
+ decomp:= tdelcomp.create(nil);
  try
-  decomp:= tdelcomp.create(nil);
   decomp.fdelcomps:= fdelcomps;
   for int1:= high(fdelcomps) downto 0 do begin
    fdelcomps[int1].freenotification(decomp);
@@ -923,7 +924,7 @@ begin
  end;
  }
 // checkinline(comp2);
- fobjectlinker.link(comp2); 
+ fobjectlinker.link(comp2);
  if isroot then begin
   module^.instance:= comp2;
   if norootposition then begin
@@ -4161,8 +4162,8 @@ var
  int1: integer;
  comp1: tcomponent;
 begin
+ ar1:= nil; //compiler warning
  if loadingdesigner = nil then begin
-  ar1:= nil; //compiler warning
   po1:= findcomponentmodule(acomponent);
   if po1 <> nil then begin
    if newname = '' then begin

@@ -141,7 +141,7 @@ type
    procedure readstore(const aitem: tstoredcomponent);
    procedure checkchanged;
    procedure storechanged;
-   procedure writestoregroup(const afilename: filenamety);
+   function writestoregroup(const afilename: filenamety): modalresultty;
    procedure readstoregroup(const afilename: filenamety);
    procedure pasteoradd(const apaste: boolean);
   public
@@ -505,12 +505,15 @@ begin
  end;
 end;
 
-procedure tcomponentstorefo.writestoregroup(const afilename: filenamety);
+function tcomponentstorefo.writestoregroup(
+                                const afilename: filenamety): modalresultty;
 var
  item1: tstoredcomponent;
  int1: integer;
  writer1,writer2: tstatwriter;
 begin
+ result:= mr_ok;
+ fchanged:= false;
  fgroupfilename:= msefileutils.filepath(afilename);
  writer2:= nil;
  try
@@ -524,7 +527,7 @@ begin
    end;
    writesection('componentstore');
    writerecordarray('stores',length(far1),{$ifdef FPC}@{$endif}dogetstorerec);
-   try
+//   try
     for int1:= 0 to high(far1) do begin
      with far1[int1] do begin
       if isstatechanged then begin
@@ -538,15 +541,22 @@ begin
       end;
      end; 
     end;
-   except
-    application.handleexception(self);
-   end;
+//   except
+//    application.handleexception(self);
+//   end;
   end;
  except
+  on e: exception do begin
+   fchanged:= true;
+   result:= showmessage('Error while writing the storegroup.'+lineend+
+               e.message,'ERROR',[mr_cancel,mr_ignore]);
+   if result = mr_ignore then begin
+    result:= mr_ok;
+   end;
+  end;
  end;
  far1:= nil;
  writer2.free;
- fchanged:= false;
  checkchanged;
 end;
 
@@ -902,7 +912,7 @@ begin
 // if fchanged then begin
   if (fgroupfilename <> '') and
    (not fchanged or quiet or confirmsavechangedfile(fgroupfilename,result)) then begin
-   writestoregroup(fgroupfilename);
+   result:= writestoregroup(fgroupfilename);
   end;
 // end;
 end;
