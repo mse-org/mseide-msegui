@@ -73,7 +73,7 @@ end;
 
 procedure timagelisteditorfo.addonexecute(const sender: tobject);
 var
- bmp{,bmp1}: tmaskedbitmap;
+ bmp: tmaskedbitmap;
  ar1: filenamearty;
  int1: integer;
 begin
@@ -83,7 +83,6 @@ begin
  if filedialog.execute = mr_ok then begin
   unquotefilename(filedialog.controller.filename,ar1);
   bmp:= tmaskedbitmap.create(false);
-//  bmp1:= tmaskedbitmap.create(bmp.monochrome);
   try
    for int1:= 0 to high(ar1) do begin
     bmp.transparentcolor:= cl_none;
@@ -93,21 +92,13 @@ begin
      bmp.transparentcolor:= transparentcolor.value;
     end;
     bmp.masked:= masked.value;
-    imagelist.addimage(bmp,stretch.value);
-    {
-    if stretch.value then begin
-     bmp1.size:= imagelist.size;
-     bmp.stretch(bmp1);
-     imagelist.addimage(bmp1);
-    end
-    else begin    
-     imagelist.addimage(bmp);
+    if bmp.masked and bmp.colormask then begin
+     imagelist.colormask:= true;
     end;
-    }
+    imagelist.addimage(bmp,stretch.value);
    end;
   finally
    bmp.Free;
-//   bmp1.free;
   end;
  end;
 end;
