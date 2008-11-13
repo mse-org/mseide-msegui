@@ -35,7 +35,7 @@ uses
   msesysutils,
   msebitmap,
   mseclasses,
-  mseformdatatools,mseguiintf;
+  mseformdatatools,mseguiintf,mseformatpng,mseformatbmpico;
 
 type
  argty = (arg_dest,arg_names);
@@ -97,6 +97,6 @@ begin
    end;
   end;
  finally
-  gui_deinit;
+//  gui_deinit; stockdata finalize needs GDI
  end;
 end.

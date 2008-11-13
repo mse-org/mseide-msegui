@@ -449,6 +449,7 @@ constructor tcomponentclasslist.create;
 begin
  fimagelist:= timagelist.create(nil);
  fimagelist.size:= makesize(24,24);
+ fimagelist.colormask:= true;
  inherited create(sizeof(componentclassinfoty));
 end;
 
@@ -483,7 +484,7 @@ begin
   if fimagelist.count = 0 then begin
    bitmap.name:= 'TComponent';
    initmsecomponent(bitmap,nil);
-   bitmap.bitmap.automask;
+//   bitmap.bitmap.automask;
    fimagelist.addimage(bitmap.bitmap);
   end;
   with info do begin
@@ -493,9 +494,14 @@ begin
     icon:= 0;
     class1:= classtyp;
     while class1 <> nil do begin
+     bitmap.bitmap.clear;
+     bitmap.bitmap.colormask:= false;
      bitmap.name:= class1.classname;
      if initmsecomponent(bitmap,nil) then begin
-      bitmap.bitmap.automask;
+//      bitmap.bitmap.masked:= true;
+      if not bitmap.bitmap.colormask then begin
+       bitmap.bitmap.automask;
+      end;
       icon:= fimagelist.addimage(bitmap.bitmap);
       break;
      end;
