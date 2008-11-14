@@ -13,7 +13,7 @@ interface
 uses
  classes,mseclasses,msegui,msescrollbar,mseedit,msegraphics,msegraphutils,
  msetabs,msetoolbar,msedataedits,msemenus,msearrayprops,msegraphedits,msesimplewidgets,
- msegrids;
+ msegrids,msewidgets;
 type
  beforeskinupdateeventty = procedure(const sender: tobject; 
                 const ainfo: skininfoty; var handled: boolean) of object;
@@ -61,6 +61,11 @@ type
   wi: widgetskininfoty;
   font: toptionalfont;
  end;  
+ stepbuttonskininfoty = record
+  co: colorty;
+  fa: tfacecomp;
+  fra: tframecomp;
+ end; 
  framebuttonskininfoty = record
   co: colorty;
   coglyph: colorty;
@@ -207,6 +212,8 @@ type
    procedure setwidgetcolor(const instance: twidget; const acolor: colorty);
    procedure setscrollbarskin(const instance: tcustomscrollbar; 
                 const ainfo: scrollbarskininfoty);
+   procedure setstepbuttonskin(const instance: tcustomstepframe;
+                                          const ainfo: stepbuttonskininfoty);
    procedure setframebuttonskin(const instance: tframebutton;
                 const ainfo: framebuttonskininfoty);
    procedure settabsskin(const instance: tcustomtabbar;
@@ -268,6 +275,7 @@ type
    fgrid: gridskininfoty;
    fbutton: buttonskininfoty;
    fdatabutton: buttonskininfoty;
+   fstepbutton: stepbuttonskininfoty;
    fframebutton: framebuttonskininfoty;
    fcontainer: containerskininfoty;
    fwidget_color: colorty;
@@ -314,6 +322,9 @@ type
 
    procedure setframebutton_face(const avalue: tfacecomp);
    procedure setframebutton_frame(const avalue: tframecomp);
+
+   procedure setstepbutton_face(const avalue: tfacecomp);
+   procedure setstepbutton_frame(const avalue: tframecomp);
 
    procedure setdataedit_face(const avalue: tfacecomp);
    procedure setdataedit_frame(const avalue: tframecomp);
@@ -419,6 +430,13 @@ type
    property sb_vert_frameendbutton2: tframecomp read fsb_vert.frameendbu2 
                         write setsb_vert_frameendbutton2;
 
+   property stepbutton_color: colorty read fstepbutton.co 
+                        write fstepbutton.co default cl_default;
+   property stepbutton_frame: tframecomp read fstepbutton.fra 
+                        write setstepbutton_frame;
+   property stepbutton_face: tfacecomp read fstepbutton.fa 
+                        write setstepbutton_face;
+                        
    property widget_color: colorty read fwidget_color 
                         write fwidget_color default cl_default;
    property widget_colorcaptionframe: colorty read fwidget_colorcaptionframe 
@@ -589,7 +607,7 @@ type
   
 implementation
 uses
- msewidgets,msetabsglob,sysutils;
+ msetabsglob,sysutils;
 type
  twidget1 = class(twidget);
  tcustomframe1 = class(tcustomframe);
@@ -1004,6 +1022,26 @@ begin
  end;
 end;
 
+procedure tcustomskincontroller.setstepbuttonskin(
+                        const instance: tcustomstepframe;
+                        const ainfo: stepbuttonskininfoty);
+begin
+ with instance,ainfo do begin
+  if (colorbutton = cl_default) and 
+                (co <> cl_default) then begin
+   colorbutton:= co;
+  end;
+  if fra <> nil then begin
+   instance.createbuttonframe;
+   setframetemplate(fra,buttonframe);
+  end;
+  if fa <> nil then begin
+   instance.createbuttonface;
+   setfacetemplate(fa,buttonface);
+  end;
+ end;
+end;
+
 procedure tcustomskincontroller.setframebuttonskin(const instance: tframebutton;
                const ainfo: framebuttonskininfoty);
 begin
@@ -1242,6 +1280,7 @@ constructor tskincontroller.create(aowner: tcomponent);
 begin
  fwidget_color:= cl_default;
  fwidget_colorcaptionframe:= cl_default;
+ fstepbutton.co:= cl_default;
  fbutton.co:= cl_default;
  fdatabutton.co:= cl_default;
  fframebutton.co:= cl_default;
@@ -1421,6 +1460,16 @@ end;
 procedure tskincontroller.setframebutton_frame(const avalue: tframecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(fframebutton.fra));
+end;
+
+procedure tskincontroller.setstepbutton_face(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fstepbutton.fa));
+end;
+
+procedure tskincontroller.setstepbutton_frame(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fstepbutton.fra));
 end;
 
 procedure tskincontroller.settabbar_horz_face(const avalue: tfacecomp);
@@ -1625,7 +1674,12 @@ begin
       setframebuttonskin(buttons[int1],fframebutton);
      end;
     end;
-   end;
+   end
+   else begin
+    if sender.frame is tcustomstepframe then begin
+     setstepbuttonskin(tcustomstepframe(sender.frame),fstepbutton);
+    end;
+   end; 
   end; 
  end;
  if (osk_colorcaptionframe in sender.optionsskin) or 
@@ -1732,6 +1786,7 @@ begin
    settabsskin(sender,ftabbar.tahorz);
   end;
  end;
+ setstepbuttonskin(sender.frame,fstepbutton);
 end;
 
 procedure tskincontroller.handletoolbar(const sender: tcustomtoolbar;
@@ -1739,6 +1794,7 @@ procedure tskincontroller.handletoolbar(const sender: tcustomtoolbar;
 begin
  setwidgetface(sender,ftoolbar.face);
  setwidgetframetemplate(sender,ftoolbar.frame);
+ setstepbuttonskin(sender.frame,fstepbutton);
  if ftoolbar.buttonface <> nil then begin
   with sender.buttons do begin
    if face = nil then begin

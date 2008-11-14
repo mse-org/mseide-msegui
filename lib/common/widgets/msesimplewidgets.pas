@@ -471,6 +471,8 @@ type
    property captiondist;
    property captionoffset;
    property font;
+   property buttonface;
+   property buttonframe;
    property buttonsize;
    property buttonpos;
    property buttonslast;

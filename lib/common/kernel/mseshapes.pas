@@ -55,6 +55,7 @@ type
   imagenrdisabled: integer;       //-2 -> grayed
   imagecheckedoffset: integer;
   face: tcustomface;
+  frame: tcustomframe;
   tag: integer;
   doexecute: tagmouseprocty;
  end;
@@ -957,11 +958,26 @@ end;
 procedure drawtoolbutton(const canvas: tcanvas; var info: shapeinfoty);
 var
  rect1: rectty;
-begin
- if not (shs_invisible in info.state) and 
-                      drawbuttonframe(canvas,info,rect1) then begin
-  info.ca.captionpos:= cp_center;
-  drawbuttonimage(canvas,info,rect1{,cp_center});
+ frame1: framety;
+begin 
+ if not (shs_invisible in info.state) then begin
+  if info.frame <> nil then begin 
+   //todo: optimize, move settings to tcustomstepframe updatestate
+   canvas.save;
+   info.frame.paintbackground(canvas,info.ca.dim);
+   canvas.restore;   
+   frame1:= info.frame.innerframe;
+   deflaterect1(info.ca.dim,frame1);
+   frameskinoptionstoshapestate(info.frame,info.state);
+  end; 
+  if drawbuttonframe(canvas,info,rect1) then begin
+   info.ca.captionpos:= cp_center;
+   drawbuttonimage(canvas,info,rect1{,cp_center});
+  end;
+  if info.frame <> nil then begin
+   inflaterect1(info.ca.dim,frame1);
+   info.frame.paintoverlay(canvas,info.ca.dim);
+  end; 
  end;
 end;
 

@@ -837,6 +837,8 @@ type
    property localprops1; //before template
    property template;
 //   property disabledbuttons;
+   property buttonface;
+   property buttonframe;
    property buttonsvisible read fforcevisiblebuttons write setbuttonsvisible 
                                                     default [sk_up,sk_down];
 //   property buttonsinvisible default [];

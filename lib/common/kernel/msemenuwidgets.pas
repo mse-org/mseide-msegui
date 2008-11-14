@@ -306,7 +306,7 @@ var
  shift,regioncount: integer;
  amax: integer;
  frame1: framety;
- frame: framety;
+ frame2: framety;
  framewidth,frameheight: integer;
 // framehalfwidth: integer;
 // framewidth1: integer;
@@ -335,28 +335,28 @@ begin
                         (mo_mainarrow in owner.options);
 
   if itemframetemplateactive <> nil then begin
-   frame:= itemframetemplateactive.paintframe;
+   frame2:= itemframetemplateactive.paintframe;
 //   with tframetemplate1(itemframetemplateactive) do begin
 //    framehalfwidth:= (abs(levelo) + abs(leveli) + framewidth);
 //   end;
   end
   else begin
-   frame:= nullframe;
+   frame2:= nullframe;
   end;
   if itemframetemplate <> nil then begin
    with tframetemplate1(itemframetemplate) do begin
     frame1:= paintframe;
-    if frame1.left > frame.left then begin
-     frame.left:= frame1.left;
+    if frame1.left > frame2.left then begin
+     frame2.left:= frame1.left;
     end;
-    if frame1.top > frame.top then begin
-     frame.top:= frame1.top;
+    if frame1.top > frame2.top then begin
+     frame2.top:= frame1.top;
     end;
-    if frame1.right > frame.right then begin
-     frame.right:= frame1.right;
+    if frame1.right > frame2.right then begin
+     frame2.right:= frame1.right;
     end;
-    if frame1.bottom > frame.bottom then begin
-     frame.bottom:= frame1.bottom;
+    if frame1.bottom > frame2.bottom then begin
+     frame2.bottom:= frame1.bottom;
     end;
 //    int1:= (abs(levelo) + abs(leveli) + framewidth);
 //    if int1 > framehalfwidth then begin
@@ -384,16 +384,16 @@ begin
    noclickanim1:= false;
    nofocusanim1:= false;
   end; 
-  framewidth:= frame.left + frame.right + extrasp;
-  frameheight:= frame.top + frame.bottom + extrasp;
+  framewidth:= frame2.left + frame2.right + extrasp;
+  frameheight:= frame2.top + frame2.bottom + extrasp;
 //  framewidth1:= framehalfwidth * 2;
 //  framewidth1:= framewidth1 + extrasp;
   setlength(cells,count);
   maxheight:= 0;
 //  ay:= framehalfwidth;
 //  ax:= framehalfwidth;
-  ay:= frame.top;
-  ax:= frame.left;
+  ay:= frame2.top;
+  ax:= frame2.left;
   textwidth:= 0;
   shortcutwidth:= 0;
   hassubmenu:= false;
@@ -555,7 +555,7 @@ begin
      amax:= maxsize;
     end;
     if commonwidth then begin
-     ax:= frame.left;
+     ax:= frame2.left;
     end;
     for int1:= 0 to count - 1 do begin
      with cells[int1].buttoninfo,ca do begin
@@ -569,17 +569,17 @@ begin
        end;
        dim.x:= dim.x + shift;
        if (int1 > 0) and 
-               (dim.x + dim.cx + frame.right > amax) then begin
-        shift:= shift - dim.x + frame.left; 
-        dim.x:= frame.left;
+               (dim.x + dim.cx + frame2.right > amax) then begin
+        shift:= shift - dim.x + frame2.left; 
+        dim.x:= frame2.left;
         inc(regioncount);
        end;
-       dim.y:= frame.top + (maxheight+frameheight) * (regioncount - 1);
+       dim.y:= frame2.top + (maxheight+frameheight) * (regioncount - 1);
        dim.cy:= maxheight;
       end;
      end;
     end;
-    sizerect.cx:= ax - extrasp - frame.right;
+    sizerect.cx:= ax - extrasp - frame2.right;
     sizerect.cy:= regioncount * (maxheight + frameheight) - extrasp;
    end
    else begin                                              //vertical
@@ -589,7 +589,7 @@ begin
     else begin
      amax:= maxsize;
     end;
-    ax:= frame.left;
+    ax:= frame2.left;
     textwidth:= textwidth + 4;
     if hassubmenu then begin
      textwidth:= textwidth + menuarrowwidth;
@@ -604,8 +604,8 @@ begin
       y:= y + shift;
       int2:= y + cy  + frameheight;
       if (int1 > 0) and (int2 - extrasp > amax) then begin
-       shift:= shift - y + frame.top;
-       y:= frame.top;
+       shift:= shift - y + frame2.top;
+       y:= frame2.top;
        ax:= ax + textwidth + framewidth;
        inc(regioncount);
       end
@@ -619,7 +619,7 @@ begin
      end;
     end;
     sizerect.cx:=  regioncount * (textwidth  + framewidth) - extrasp;
-    sizerect.cy:= maxheight - frame.bottom - extrasp;
+    sizerect.cy:= maxheight - frame2.bottom - extrasp;
    end;
   end
   else begin
@@ -627,7 +627,7 @@ begin
   end;
   for int1:= 0 to count - 1 do begin
    with cells[int1],buttoninfo,ca do begin
-    dimouter:= inflaterect(dim,frame);
+    dimouter:= inflaterect(dim,frame2);
     imagedisttop:= imageditop;
     imagedistbottom:= imagedibottom;
    end;

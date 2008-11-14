@@ -460,7 +460,7 @@ type
  stepframestatety = (sfs_spinedit);
  stepframestatesty = set of stepframestatety;
  
- tcustomstepframe = class(tcustomcaptionframe)
+ tcustomstepframe = class(tcustomcaptionframe,iframe)
   private
    fstepintf: istepbar;
    fbuttonsize: integer;
@@ -475,6 +475,9 @@ type
    fmousewheel: boolean;
    frepeater: tsimpletimer;
    frepeatedbutton: integer;
+   fbuttonface: tface;
+   fbuttonframe: tframe;
+   factbuttonindex: integer;
    procedure setbuttonsize(const Value: integer);
    procedure setbuttonpos(const Value: stepbuttonposty);
    procedure setbuttonsinline(const value: boolean);
@@ -484,6 +487,10 @@ type
    procedure setbuttonsinvisible(const avalue: stepkindsty);
    procedure setbuttonsvisible(const avalue: stepkindsty);
    procedure setneededbuttons(const avalue: stepkindsty);
+   function getbuttonface: tface;
+   procedure setbuttonface(const avalue: tface);
+   function getbuttonframe: tframe;
+   procedure setbuttonframe(const avalue: tframe);
   protected
    fforceinvisiblebuttons: stepkindsty;
    fforcevisiblebuttons: stepkindsty;
@@ -496,20 +503,41 @@ type
    procedure updatelayout;
    procedure execute(const tag: integer; const info: mouseeventinfoty);
    property neededbuttons: stepkindsty read fneededbuttons write setneededbuttons;
+   //iframe
+   procedure setframeinstance(instance: tcustomframe);
+   procedure setstaticframe(value: boolean);
+   function getwidgetrect: rectty;
+   function getcomponentstate: tcomponentstate;
+   function getmsecomponentstate: msecomponentstatesty;
+   procedure scrollwidgets(const dist: pointty);
+   procedure clientrectchanged;
+   procedure invalidate;
+   procedure invalidatewidget;
+   procedure invalidaterect(const rect: rectty; const org: originty = org_client;
+                               const noclip: boolean = false);
+   function getwidget: twidget;
+   function getframestateflags: framestateflagsty; virtual;
   public
    constructor create(const intf: icaptionframe; const stepintf: istepbar);
    destructor destroy; override;
+   procedure createbuttonface;
+   procedure createbuttonframe;
+   
    procedure updatemousestate(const sender: twidget; 
                                    const info: mouseeventinfoty); override;
    procedure mouseevent(var info: mouseeventinfoty); virtual;
    procedure domousewheelevent(var info: mousewheeleventinfoty); virtual;
    procedure paintoverlay(const canvas: tcanvas; const arect: rectty); override;
+   procedure checktemplate(const sender: tobject); override;
    procedure updatebuttonstate(const first,delta,count: integer);
    function executestepevent(const event: stepkindty; const stepinfo: framestepinfoty;
                const aindex: integer): integer;
    property buttonsize: integer read fbuttonsize write setbuttonsize default defaultstepbuttonsize;
    property colorbutton: colorty read fcolorbutton write setcolorbutton default cl_default;
                                        //cl_default maps to widget color
+   property buttonface: tface read getbuttonface write setbuttonface;
+   property buttonframe: tframe read getbuttonframe write setbuttonframe;
+   
    property disabledbuttons: stepkindsty read fdisabledbuttons
               write setdisabledbuttons default [];
    property buttonsinvisible: stepkindsty read fforceinvisiblebuttons
@@ -576,6 +604,8 @@ type
    property localprops1; //before template
    property template;
    property disabledbuttons;
+   property buttonface;
+   property buttonframe;
    property buttonsvisible;
    property buttonsinvisible;
    property buttonsize;
@@ -2756,6 +2786,8 @@ destructor tcustomstepframe.destroy;
 begin
  killrepeater;
  inherited;
+ fbuttonface.free;
+ fbuttonframe.free;
 end;
 
 procedure tcustomstepframe.killrepeater;
@@ -2840,10 +2872,15 @@ end;
 procedure tcustomstepframe.paintoverlay(const canvas: tcanvas; const arect: rectty);
 var
  int1: integer;
+ po1: pshapeinfoty;
 begin
  inherited;
  for int1:= 0 to high(fbuttons) do begin
-  drawtoolbutton(canvas,fbuttons[int1]);
+  factbuttonindex:= int1; //widgetstateflags for button frame
+  po1:= @fbuttons[int1];
+  po1^.face:= fbuttonface;
+  po1^.frame:= fbuttonframe;
+  drawtoolbutton(canvas,po1^);
  end;
 end;
 
@@ -3225,6 +3262,146 @@ begin
    fstepintf.dostep(stepdirstep[fbuttonpos][info.wheel = mw_up]);
   end;
   include(info.eventstate,es_processed);
+ end;
+end;
+
+procedure tcustomstepframe.createbuttonface;
+begin
+ if fbuttonface = nil then begin
+  fbuttonface:= tface.create(iface(fintf.getwidget));
+ end;
+end;
+
+procedure tcustomstepframe.createbuttonframe;
+begin
+ if fbuttonframe = nil then begin
+  fbuttonframe:= tframe.create(iframe(self));
+ end;
+end;
+
+function tcustomstepframe.getbuttonface: tface;
+begin
+ fintf.getwidget.getoptionalobject(fbuttonface,
+                               {$ifdef FPC}@{$endif}createbuttonface);
+ result:= fbuttonface;
+end;
+
+procedure tcustomstepframe.setbuttonface(const avalue: tface);
+begin
+ fintf.getwidget.setoptionalobject(avalue,fbuttonface,
+                               {$ifdef FPC}@{$endif}createbuttonface);
+ fintf.invalidatewidget;
+end;
+
+function tcustomstepframe.getbuttonframe: tframe;
+begin
+ fintf.getwidget.getoptionalobject(fbuttonframe,
+                               {$ifdef FPC}@{$endif}createbuttonframe);
+ result:= fbuttonframe;
+end;
+
+procedure tcustomstepframe.setbuttonframe(const avalue: tframe);
+var
+ int1: integer;
+begin
+ fintf.getwidget.setoptionalobject(avalue,fbuttonframe,
+                               {$ifdef FPC}@{$endif}createbuttonframe);
+ if fbuttonframe = nil then begin
+  for int1:= 0 to high(fbuttons) do begin
+   with fbuttons[int1] do begin
+    state:= state - [shs_flat,shs_noanimation];
+   end;
+  end;
+ end;
+ fintf.invalidatewidget;
+end;
+
+procedure tcustomstepframe.checktemplate(const sender: tobject);
+begin
+ inherited;
+ if fbuttonface <> nil then begin
+  fbuttonface.checktemplate(sender);
+ end;
+ if fbuttonframe <> nil then begin
+  fbuttonframe.checktemplate(sender);
+ end;
+end;
+
+procedure tcustomstepframe.setframeinstance(instance: tcustomframe);
+begin
+ fbuttonframe:= tframe(instance);
+end;
+
+procedure tcustomstepframe.setstaticframe(value: boolean);
+begin
+ //dummy
+end;
+
+function tcustomstepframe.getwidgetrect: rectty;
+begin
+ result:= nullrect;
+end;
+
+function tcustomstepframe.getcomponentstate: tcomponentstate;
+begin
+ result:= fintf.getwidget.componentstate;
+end;
+
+function tcustomstepframe.getmsecomponentstate: msecomponentstatesty;
+begin
+ result:= fintf.getwidget.msecomponentstate;
+end;
+
+procedure tcustomstepframe.scrollwidgets(const dist: pointty);
+begin
+ //dummy
+end;
+
+procedure tcustomstepframe.clientrectchanged;
+begin
+ fintf.invalidatewidget;
+end;
+
+procedure tcustomstepframe.invalidate;
+begin
+ fintf.getwidget.invalidaterect(fdim,org_widget);
+end;
+
+procedure tcustomstepframe.invalidatewidget;
+begin
+ fintf.invalidatewidget;
+end;
+
+procedure tcustomstepframe.invalidaterect(const rect: rectty;
+               const org: originty = org_client; const noclip: boolean = false);
+begin
+ fintf.getwidget.invalidaterect(rect,org,noclip);
+end;
+
+function tcustomstepframe.getwidget: twidget;
+begin
+ result:= fintf.getwidget
+end;
+ 
+function tcustomstepframe.getframestateflags: framestateflagsty;
+var
+ state1: shapestatesty;
+begin
+ result:= [];
+ if factbuttonindex <= high(fbuttons) then begin
+  state1:= fbuttons[factbuttonindex].state;
+  if shs_disabled in state1 then begin
+   include(result,fsf_disabled);
+  end;
+  if shs_active in state1 then begin
+   include(result,fsf_active);
+  end;
+  if shs_mouse in state1 then begin
+   include(result,fsf_mouse);
+  end;
+  if shs_clicked in state1 then begin
+   include(result,fsf_clicked);
+  end;
  end;
 end;
 
