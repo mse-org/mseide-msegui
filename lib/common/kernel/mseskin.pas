@@ -76,8 +76,12 @@ type
  tabbarskininfoty = record
   wihorz: widgetskininfoty;
   wivert: widgetskininfoty;
+  wihorzopo: widgetskininfoty;
+  wivertopo: widgetskininfoty;
   tahorz: tabsskininfoty;
   tavert: tabsskininfoty;
+  tahorzopo: tabsskininfoty;
+  tavertopo: tabsskininfoty;
  end;
  menuskininfoty = record
   face: tfacecomp;
@@ -329,6 +333,15 @@ type
    procedure settabbar_vert_tab_face(const avalue: tfacecomp);
    procedure settabbar_vert_tab_faceactive(const avalue: tfacecomp);
 
+   procedure settabbar_horzopo_face(const avalue: tfacecomp);
+   procedure settabbar_horzopo_frame(const avalue: tframecomp);
+   procedure settabbar_horzopo_tab_face(const avalue: tfacecomp);
+   procedure settabbar_horzopo_tab_faceactive(const avalue: tfacecomp);
+   procedure settabbar_vertopo_face(const avalue: tfacecomp);
+   procedure settabbar_vertopo_frame(const avalue: tframecomp);
+   procedure settabbar_vertopo_tab_face(const avalue: tfacecomp);
+   procedure settabbar_vertopo_tab_faceactive(const avalue: tfacecomp);
+
    procedure settoolbar_face(const avalue: tfacecomp);
    procedure settoolbar_frame(const avalue: tframecomp);
    procedure settoolbar_buttonface(const avalue: tfacecomp);
@@ -470,8 +483,15 @@ type
    property framebutton_frame: tframecomp read fframebutton.fra 
                                               write setframebutton_frame;
 
-   property tabbar_horz_face: tfacecomp read ftabbar.wihorz.fa write settabbar_horz_face;
-   property tabbar_horz_frame: tframecomp read ftabbar.wihorz.fra write settabbar_horz_frame;
+   property tabbar_horz_face: tfacecomp read ftabbar.wihorz.fa 
+                                            write settabbar_horz_face;
+   property tabbar_horz_frame: tframecomp read ftabbar.wihorz.fra 
+                                            write settabbar_horz_frame;
+   property tabbar_horzopo_face: tfacecomp read ftabbar.wihorzopo.fa 
+                                            write settabbar_horzopo_face;
+   property tabbar_horzopo_frame: tframecomp read ftabbar.wihorzopo.fra 
+                                            write settabbar_horzopo_frame;
+
    property tabbar_horz_tab_color: colorty read ftabbar.tahorz.color 
                                write ftabbar.tahorz.color default cl_default;
    property tabbar_horz_tab_coloractive: colorty read ftabbar.tahorz.coloractive 
@@ -480,8 +500,22 @@ type
                                write settabbar_horz_tab_face;
    property tabbar_horz_tab_faceactive: tfacecomp read ftabbar.tahorz.faceactive
                                write settabbar_horz_tab_faceactive;
+   property tabbar_horzopo_tab_color: colorty read ftabbar.tahorzopo.color 
+                               write ftabbar.tahorzopo.color default cl_default;
+   property tabbar_horzopo_tab_coloractive: colorty read ftabbar.tahorzopo.coloractive 
+                               write ftabbar.tahorzopo.coloractive default cl_default;
+   property tabbar_horzopo_tab_face: tfacecomp read ftabbar.tahorzopo.face
+                               write settabbar_horzopo_tab_face;
+   property tabbar_horzopo_tab_faceactive: tfacecomp read ftabbar.tahorzopo.faceactive
+                               write settabbar_horzopo_tab_faceactive;
+
    property tabbar_vert_face: tfacecomp read ftabbar.wivert.fa write settabbar_vert_face;
    property tabbar_vert_frame: tframecomp read ftabbar.wivert.fra write settabbar_vert_frame;
+   property tabbar_vertopo_face: tfacecomp read ftabbar.wivertopo.fa
+                               write settabbar_vert_face;
+   property tabbar_vertopo_frame: tframecomp read ftabbar.wivertopo.fra
+                               write settabbar_vertopo_frame;
+
    property tabbar_vert_tab_color: colorty read ftabbar.tavert.color 
                                write ftabbar.tavert.color default cl_default;
    property tabbar_vert_tab_coloractive: colorty read ftabbar.tavert.coloractive 
@@ -1204,8 +1238,10 @@ begin
  ftabbar.tahorz.coloractive:= cl_default;
  ftabbar.tavert.color:= cl_default;
  ftabbar.tavert.coloractive:= cl_default;
-// fdataedit.color:= cl_default;
-// fbooleanedit.color:= cl_default;
+ ftabbar.tahorzopo.color:= cl_default;
+ ftabbar.tahorzopo.coloractive:= cl_default;
+ ftabbar.tavertopo.color:= cl_default;
+ ftabbar.tavertopo.coloractive:= cl_default;
  inherited;
 end;
 
@@ -1411,6 +1447,46 @@ begin
 end;
 
 procedure tskincontroller.settabbar_vert_tab_faceactive(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftabbar.tavert.faceactive));
+end;
+
+procedure tskincontroller.settabbar_horzopo_face(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftabbar.wihorz.fa));
+end;
+
+procedure tskincontroller.settabbar_horzopo_frame(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftabbar.wihorz.fra));
+end;
+
+procedure tskincontroller.settabbar_horzopo_tab_face(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftabbar.tahorz.face));
+end;
+
+procedure tskincontroller.settabbar_horzopo_tab_faceactive(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftabbar.tahorz.faceactive));
+end;
+
+procedure tskincontroller.settabbar_vertopo_face(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftabbar.wivert.fa));
+end;
+
+procedure tskincontroller.settabbar_vertopo_frame(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftabbar.wivert.fra));
+end;
+
+procedure tskincontroller.settabbar_vertopo_tab_face(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftabbar.tavert.face));
+end;
+
+procedure tskincontroller.settabbar_vertopo_tab_faceactive(const avalue: tfacecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(ftabbar.tavert.faceactive));
 end;
@@ -1621,12 +1697,28 @@ procedure tskincontroller.handletabbar(const sender: tcustomtabbar;
                const ainfo: skininfoty);
 begin
  if tabo_vertical in sender.options then begin
-  setwidgetskin(sender,ftabbar.wivert);
-  settabsskin(sender,ftabbar.tavert);
+  if tabo_opposite in sender.options then begin
+   setwidgetskin(sender,ftabbar.wivertopo);
+   setwidgetframetemplate(sender,ftabbar.wivertopo.fra);
+   settabsskin(sender,ftabbar.tavertopo);
+  end
+  else begin
+   setwidgetskin(sender,ftabbar.wivert);
+   setwidgetframetemplate(sender,ftabbar.wivert.fra);
+   settabsskin(sender,ftabbar.tavert);
+  end;
  end
  else begin
-  setwidgetskin(sender,ftabbar.wihorz);
-  settabsskin(sender,ftabbar.tahorz);
+  if tabo_opposite in sender.options then begin
+   setwidgetskin(sender,ftabbar.wihorzopo);
+   setwidgetframetemplate(sender,ftabbar.wihorzopo.fra);
+   settabsskin(sender,ftabbar.tahorzopo);
+  end
+  else begin
+   setwidgetskin(sender,ftabbar.wihorz);
+   setwidgetframetemplate(sender,ftabbar.wihorz.fra);
+   settabsskin(sender,ftabbar.tahorz);
+  end;
  end;
 end;
 

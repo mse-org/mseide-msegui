@@ -508,7 +508,8 @@ type
    function executestepevent(const event: stepkindty; const stepinfo: framestepinfoty;
                const aindex: integer): integer;
    property buttonsize: integer read fbuttonsize write setbuttonsize default defaultstepbuttonsize;
-   property colorbutton: colorty read fcolorbutton write setcolorbutton default cl_parent;
+   property colorbutton: colorty read fcolorbutton write setcolorbutton default cl_default;
+                                       //cl_default maps to widget color
    property disabledbuttons: stepkindsty read fdisabledbuttons
               write setdisabledbuttons default [];
    property buttonsinvisible: stepkindsty read fforceinvisiblebuttons
@@ -2744,7 +2745,7 @@ begin
  fstepintf:= stepintf;
  fbuttonsize:= defaultstepbuttonsize;
  fforceinvisiblebuttons:= [sk_first,sk_last];
- fcolorbutton:= cl_parent;
+ fcolorbutton:= cl_default;
  intf.setstaticframe(true);
  fmousewheel:= true;
  frepeatedbutton:= -1;
