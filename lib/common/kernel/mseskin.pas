@@ -509,10 +509,12 @@ type
    property tabbar_horzopo_tab_faceactive: tfacecomp read ftabbar.tahorzopo.faceactive
                                write settabbar_horzopo_tab_faceactive;
 
-   property tabbar_vert_face: tfacecomp read ftabbar.wivert.fa write settabbar_vert_face;
-   property tabbar_vert_frame: tframecomp read ftabbar.wivert.fra write settabbar_vert_frame;
-   property tabbar_vertopo_face: tfacecomp read ftabbar.wivertopo.fa
+   property tabbar_vert_face: tfacecomp read ftabbar.wivert.fa 
                                write settabbar_vert_face;
+   property tabbar_vert_frame: tframecomp read ftabbar.wivert.fra 
+                               write settabbar_vert_frame;
+   property tabbar_vertopo_face: tfacecomp read ftabbar.wivertopo.fa
+                               write settabbar_vertopo_face;
    property tabbar_vertopo_frame: tframecomp read ftabbar.wivertopo.fra
                                write settabbar_vertopo_frame;
 
@@ -524,6 +526,16 @@ type
                                write settabbar_vert_tab_face;
    property tabbar_vert_tab_faceactive: tfacecomp read ftabbar.tavert.faceactive
                                write settabbar_vert_tab_faceactive;
+   property tabbar_vertopo_tab_color: colorty read ftabbar.tavertopo.color 
+                         write ftabbar.tavertopo.color default cl_default;
+   property tabbar_vertopo_tab_coloractive: colorty 
+                         read ftabbar.tavertopo.coloractive 
+                         write ftabbar.tavertopo.coloractive default cl_default;
+   property tabbar_vertopo_tab_face: tfacecomp read ftabbar.tavertopo.face
+                         write settabbar_vertopo_tab_face;
+   property tabbar_vertopo_tab_faceactive: tfacecomp 
+                         read ftabbar.tavertopo.faceactive
+                         write settabbar_vertopo_tab_faceactive;
 
    property ttoolbar_face: tfacecomp read ftoolbar.face write settoolbar_face;
    property ttoolbar_frame: tframecomp read ftoolbar.frame write settoolbar_frame;
@@ -1453,42 +1465,42 @@ end;
 
 procedure tskincontroller.settabbar_horzopo_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftabbar.wihorz.fa));
+ setlinkedvar(avalue,tmsecomponent(ftabbar.wihorzopo.fa));
 end;
 
 procedure tskincontroller.settabbar_horzopo_frame(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftabbar.wihorz.fra));
+ setlinkedvar(avalue,tmsecomponent(ftabbar.wihorzopo.fra));
 end;
 
 procedure tskincontroller.settabbar_horzopo_tab_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftabbar.tahorz.face));
+ setlinkedvar(avalue,tmsecomponent(ftabbar.tahorzopo.face));
 end;
 
 procedure tskincontroller.settabbar_horzopo_tab_faceactive(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftabbar.tahorz.faceactive));
+ setlinkedvar(avalue,tmsecomponent(ftabbar.tahorzopo.faceactive));
 end;
 
 procedure tskincontroller.settabbar_vertopo_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftabbar.wivert.fa));
+ setlinkedvar(avalue,tmsecomponent(ftabbar.wivertopo.fa));
 end;
 
 procedure tskincontroller.settabbar_vertopo_frame(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftabbar.wivert.fra));
+ setlinkedvar(avalue,tmsecomponent(ftabbar.wivertopo.fra));
 end;
 
 procedure tskincontroller.settabbar_vertopo_tab_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftabbar.tavert.face));
+ setlinkedvar(avalue,tmsecomponent(ftabbar.tavertopo.face));
 end;
 
 procedure tskincontroller.settabbar_vertopo_tab_faceactive(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftabbar.tavert.faceactive));
+ setlinkedvar(avalue,tmsecomponent(ftabbar.tavertopo.faceactive));
 end;
 
 procedure tskincontroller.settoolbar_face(const avalue: tfacecomp);
