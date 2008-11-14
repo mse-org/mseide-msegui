@@ -9462,6 +9462,25 @@ var
  celleventinfo: celleventinfoty;
  cellbefore: gridcoordty;
  bo1: boolean;
+
+ procedure checkselection; 
+ begin
+  if (es_processed in info.eventstate) and (ffocusedcell.col >= 0) then begin
+   if co_keyselect in fdatacols[ffocusedcell.col].foptions then begin
+    if ss_shift in info.shiftstate then begin
+     if fstartanchor.col < 0 then begin
+      fstartanchor:= focusbefore;
+     end;
+     action:= fca_selectend;
+    end
+    else begin
+     action:= fca_focusin;
+    end;
+    focuscell(ffocusedcell,action);
+   end;
+  end;
+ end;
+  
 label
  checkwidgetexit;
 begin
@@ -9508,6 +9527,7 @@ begin
       end
       else begin
        rowup(action);
+       checkselection;
        goto checkwidgetexit;
       end;
      end;
@@ -9526,6 +9546,7 @@ begin
       end
       else begin
        rowdown(action);
+       checkselection;
        goto checkwidgetexit;
       end;
      end;
@@ -9609,6 +9630,7 @@ begin
       end
       else begin
        colstep(action,-1,false,bo1);
+       checkselection;
        goto checkwidgetexit;
       end;
      end;
@@ -9626,6 +9648,7 @@ begin
       end
       else begin
        colstep(action,1,false,bo1);
+       checkselection;
        goto checkwidgetexit;
       end;
      end;
@@ -9633,21 +9656,8 @@ begin
       exclude(info.eventstate,es_processed);
      end;
     end;
-    if (es_processed in info.eventstate) and (ffocusedcell.col >= 0) then begin
-     if co_keyselect in fdatacols[ffocusedcell.col].foptions then begin
-      if ss_shift in info.shiftstate then begin
-       if fstartanchor.col < 0 then begin
-        fstartanchor:= focusbefore;
-       end;
-       action:= fca_selectend;
-      end
-      else begin
-       action:= fca_focusin;
-      end;
-      focuscell(ffocusedcell,action);
-     end;
-    end;
    end;
+   checkselection;
    if not (es_processed in info.eventstate) and (ffocusedcell.col >= 0) then begin
     with fdatacols[ffocusedcell.col] do begin
      if (info.key = key_space) and
