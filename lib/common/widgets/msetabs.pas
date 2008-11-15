@@ -316,6 +316,7 @@ type
    function getinvisible: boolean;
    procedure setinvisible(const avalue: boolean);
   protected
+   class function classskininfo: skininfoty; override;
    procedure changed;
    procedure visiblechanged; override;
    procedure enabledchanged; override;
@@ -1935,6 +1936,12 @@ begin
  foptionswidget:= defaulttaboptionswidget;
  optionsskin:= defaulttabpageskinoptions;
  exclude(fwidgetstate,ws_visible);
+end;
+
+class function ttabpage.classskininfo: skininfoty;
+begin
+ result:= inherited classskininfo;
+ result.objectkind:= sok_tabpage;
 end;
 
 procedure ttabpage.loaded;

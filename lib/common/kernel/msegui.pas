@@ -67,9 +67,11 @@ type
                    );
  optionswidgetty = set of optionwidgetty;
 
- optionskinty = (osk_skin,osk_noskin,osk_framebuttononly,osk_container,
+ optionskinty = (osk_skin,osk_noskin,osk_framebuttononly,
+                 osk_noframe,osk_noface,
+                 osk_container,
                  osk_colorcaptionframe, 
-                   //use widget_colorcaptinframe independent of caption
+                   //use widget_colorcaptionframe independent of caption
                  osk_nocolorcaptionframe, 
                    //don't use widget_colorcaptinframe independent of caption
                  osk_nopropleft,osk_noproptop,     //used by tlayouter
