@@ -17,7 +17,7 @@ uses
  {$ifdef FPC}classes{$else}Classes{$endif},mseclasses,mserichstring,
  msetypes,mseglob,mseapplication,
  {msekeyboard,}mseevent,msestat,msestatfile,msestrings,
- msegraphutils;
+ msegraphutils,msebitmap;
 
 const
  defaultactionstates = [];
@@ -117,7 +117,7 @@ type
 
  actionoptionsty = set of actionoptionty;
 
- tcustomaction = class(tactcomponent,istatfile)
+ tcustomaction = class(tactcomponent,istatfile,iimagelistinfo)
   private
    fonupdate: actioneventty;
    fstatvarname: msestring;
@@ -165,6 +165,8 @@ type
    procedure statreading;
    procedure statread;
    function getstatvarname: msestring;
+   //iimagelistinfo
+   function getimagelist: timagelist;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -1154,6 +1156,11 @@ end;
 procedure tcustomaction.doafterunlink;
 begin
  //dummy
+end;
+
+function tcustomaction.getimagelist: timagelist;
+begin
+ result:= timagelist(finfo.imagelist);
 end;
 
 end.
