@@ -344,32 +344,56 @@ type
   __socklen_t = dword;
   TFileDescriptor = integer;
 
-   P_stat = ^_stat;
-   PStat = ^_stat;
-   _stat = packed record
-        st_dev : __dev_t;
-        __pad1 : word;
-        __align_pad1 : word;
-        st_ino : __ino_t;
-        st_mode : __mode_t;
-        st_nlink : __nlink_t;
-        st_uid : __uid_t;
-        st_gid : __gid_t;
-        st_rdev : __dev_t;
-        __pad2 : word;
-        __align_pad2 : word;
-        st_size : __off_t;
-        st_blksize : __blksize_t;
-        st_blocks : __blkcnt_t;
-        st_atime : __time_t;
-        __unused1 : dword;
-        st_mtime : __time_t;
-        __unused2 : dword;
-        st_ctime : __time_t;
-        __unused3 : dword;
-        __unused4 : dword;
-        __unused5 : dword;
-     end;
+ P_stat = ^_stat;
+ PStat = ^_stat;
+ _stat = packed record
+   st_dev : __dev_t;
+   __pad1 : word;
+   __align_pad1 : word;
+   st_ino : __ino_t;
+   st_mode : __mode_t;
+   st_nlink : __nlink_t;
+   st_uid : __uid_t;
+   st_gid : __gid_t;
+   st_rdev : __dev_t;
+   __pad2 : word;
+   __align_pad2 : word;
+   st_size : __off_t;
+   st_blksize : __blksize_t;
+   st_blocks : __blkcnt_t;
+   st_atime : __time_t;
+   st_atime_usec : longword;
+   st_mtime : __time_t;
+   st_mtime_usec: longword;
+   st_ctime : __time_t;
+   st_ctime_usec: longword;
+   __unused4 : dword;
+   __unused5 : dword;
+ end;
+
+   P_stat64 = ^_stat64;
+   Pstat64 = ^_stat64;
+   _stat64 = record
+    st_dev : __dev_t;
+    __pad1 : dword;
+    __st_ino : __ino_t;
+    st_mode : __mode_t;
+    st_nlink : __nlink_t;
+    st_uid : __uid_t;
+    st_gid : __gid_t;
+    st_rdev : __dev_t;
+    __pad2 : dword;
+    st_size : __off64_t;
+    st_blksize : __blksize_t;
+    st_blocks : __blkcnt64_t;
+    st_atime : __time_t;
+    st_atime_usec : longword;
+    st_mtime : __time_t;
+    st_mtime_usec: longword;
+    st_ctime : __time_t;
+    st_ctime_usec: longword;
+    st_ino : __ino64_t;
+   end;
 
   __fd_set = record
      fds_bits: packed array[0..(__FD_SETSIZE div __NFDBITS)-1] of __fd_mask;
@@ -1284,11 +1308,49 @@ const
  _STAT_VER_SVR4 = 2;
  _STAT_VER_LINUX = 3;
  _STAT_VER = _STAT_VER_LINUX;
- 
+   
+{$ifdef linux}
+function __fxstat(__ver:longint; __fildes:longint; __stat_buf:Pstat):longint;
+                             cdecl;external clib name '__fxstat';
+function __xstat(__ver:longint; __filename:Pchar; __stat_buf:Pstat):longint;
+                             cdecl;external clib name '__xstat';
+function __lxstat(__ver:longint; __filename:Pchar; __stat_buf:Pstat):longint;
+                             cdecl;external clib name '__lxstat';
+
+function __fxstat64(__ver:longint; __fildes:longint; __stat_buf:Pstat64):longint;
+                             cdecl;external clib name '__fxstat64';
+function __xstat64(__ver:longint; __filename:Pchar; __stat_buf:Pstat64):longint;
+                             cdecl;external clib name '__xstat64';
+function __lxstat64(__ver:longint; __filename:Pchar; __stat_buf:Pstat64):longint;
+                             cdecl;external clib name '__lxstat64';
+                                   
+function stat(__file:Pchar; __buf:Pstat):longint;
 function fstat(__fd:longint; __buf:Pstat):longint;
-function fstat(__fd:longint; var __buf:_stat):longint;
-function __fxstat(__ver:longint; __fildes:longint; __stat_buf:Pstat):longint;cdecl;external clib name '__fxstat';
-function __fxstat(__ver:longint; __fildes:longint; var __stat_buf: _stat):longint;cdecl;external clib name '__fxstat';
+
+function stat64(__file:Pchar; __buf:Pstat64):longint;
+function fstat64(__fd:longint; __buf:Pstat64):longint;
+
+function lstat(__file:Pchar; __buf:Pstat):longint;
+function lstat64(__file:Pchar; __buf:Pstat64):longint;
+{$else}
+function stat(__file:Pchar; __buf:Pstat):longint; cdecl;
+                                   external clib name '__stat';
+function fstat(__fd:longint; __buf:Pstat):longint; cdecl;
+                                   external clib name '__fstat';
+
+function stat64(__file:Pchar; __buf:Pstat64):longint; cdecl;
+                                   external clib name '__stat64';
+function fstat64(__fd:longint; __buf:Pstat64):longint; cdecl;
+                                   external clib name '__fstat64';
+
+function lstat(__file:Pchar; __buf:Pstat):longint; cdecl;
+                                   external clib name '__lstat';
+function lstat64(__file:Pchar; __buf:Pstat64):longint; cdecl;
+                                   external clib name '__lstat';
+{$endif}
+
+function S_ISDIR(mode : __mode_t) : boolean;
+
 function fchmod(__fd:longint; __mode:__mode_t):longint;cdecl;external clib name 'fchmod';
 function __rename(__old:Pchar; __new:Pchar):longint;cdecl;external clib name 'rename';
 function unlink(__name:Pchar):longint;cdecl;external clib name 'unlink';
@@ -1886,16 +1948,6 @@ function gai_strerror(__ecode:longint):Pchar;cdecl;external clib name 'gai_strer
 
 implementation
 
-function fstat(__fd:longint; __buf:Pstat):longint;
-begin
- __fxstat(_STAT_VER,__fd,__buf);
-end;
-
-function fstat(__fd:longint; var __buf:_stat):longint;
-begin
- __fxstat(_STAT_VER,__fd,__buf);
-end;
-
 Function WEXITSTATUS(Status: longint): longint;
 begin
   Result:=(Status and $FF00) shr 8;
@@ -1911,5 +1963,44 @@ function SA_LEN(const Buf): Cardinal; // Untyped buffer; this is *unsafe*.
 begin
   Result:=__libc_sa_len(PSockAddr(@Buf)^.sa_family);
 end;
+
+function S_ISDIR(mode: __mode_t) : boolean;
+begin
+ result:= mode and __S_IFDIR = __S_IFDIR;
+end;
+
+{$ifdef linux}
+
+function stat(__file:Pchar; __buf: Pstat): longint;
+begin
+ __xstat(_STAT_VER,__file,__buf);
+end;
+
+function fstat(__fd:longint; __buf: Pstat): longint;
+begin
+ __fxstat(_STAT_VER,__fd,__buf);
+end;
+
+function lstat(__file:Pchar; __buf: Pstat): longint;
+begin
+ __lxstat(_STAT_VER,__file,__buf);
+end;
+
+function stat64(__file:Pchar; __buf:Pstat64):longint;
+begin
+ __xstat64(_STAT_VER,__file,__buf);
+end;
+
+function fstat64(__fd:longint; __buf:Pstat64):longint;
+begin
+ __fxstat64(_STAT_VER,__fd,__buf);
+end;
+
+function lstat64(__file:Pchar; __buf:Pstat64):longint;
+begin
+ __lxstat64(_STAT_VER,__file,__buf);
+end;
+
+{$endif} //linux
 
 end.

@@ -132,6 +132,7 @@ type
    fstoredir: msestring;
    fchanged: boolean;
    fgroupfilename: filenamety;
+   function dosavegroupas: modalresultty;
    procedure initcomponentinfo(out ainfo: storedcomponentinfoty);
    function isnode: boolean;
    function iscomp: boolean;
@@ -142,7 +143,8 @@ type
    procedure checkchanged;
    procedure storechanged;
    function writestoregroup(const afilename: filenamety): modalresultty;
-   procedure readstoregroup(const afilename: filenamety);
+   function readstoregroup(const afilename: filenamety): boolean;
+                    //false if file not found
    procedure pasteoradd(const apaste: boolean);
   public
    procedure updatestat(afiler: tstatfiler);
@@ -560,7 +562,7 @@ begin
  checkchanged;
 end;
 
-procedure tcomponentstorefo.readstoregroup(const afilename: filenamety);
+function tcomponentstorefo.readstoregroup(const afilename: filenamety): boolean;
 var
  int1: integer;
  reader1,reader2: tstatreader;
@@ -569,38 +571,45 @@ var
 begin
  grid.clear;
  reader2:= nil;
- try
-  fgroupfilename:= msefileutils.filepath(afilename);
-  storedir1:= getstoredir;
-  reader2:= tstatreader.create(fgroupfilename,ce_utf8n);
-  with reader2,node do begin
-   setsection('componentstore');
-   readrecordarray('stores',{$ifdef FPC}@{$endif}dosetstorescount,
-                  {$ifdef FPC}@{$endif}dosetstorerec);
-   try
-    for int1:= 0 to high(far1) do begin
-     item1:= far1[int1];
-     if item1 <> nil then begin
-      with item1 do begin
-       if relocatepath(fstoredir,storedir1,finfo.filepath) then begin
-        readstore(item1);
+ result:= afilename <> '';
+ if result then begin
+  try
+   fgroupfilename:= msefileutils.filepath(afilename);
+   storedir1:= getstoredir;
+   reader2:= tstatreader.create(fgroupfilename,ce_utf8n);
+   with reader2,node do begin
+    setsection('componentstore');
+    readrecordarray('stores',{$ifdef FPC}@{$endif}dosetstorescount,
+                   {$ifdef FPC}@{$endif}dosetstorerec);
+    try
+     for int1:= 0 to high(far1) do begin
+      item1:= far1[int1];
+      if item1 <> nil then begin
+       with item1 do begin
+        if relocatepath(fstoredir,storedir1,finfo.filepath) then begin
+         readstore(item1);
+        end;
        end;
       end;
      end;
+    except
+     application.handleexception(self);
     end;
-   except
-    application.handleexception(self);
-   end;
-   for int1:= 0 to high(far1) do begin
-    if far1[int1] <> nil then begin
-     node.itemlist.add(far1[int1]);
+    for int1:= 0 to high(far1) do begin
+     if far1[int1] <> nil then begin
+      node.itemlist.add(far1[int1]);
+     end;
     end;
    end;
+  except
+   result:= false;
   end;
- except
+  far1:= nil;
+  reader2.free;
+ end
+ else begin
+  fgroupfilename:= '';
  end;
- far1:= nil;
- reader2.free;
  fchanged:= false;
  checkchanged;
 end;
@@ -621,7 +630,9 @@ begin
    storefiledialog.controller.filename:= fstoredir;
    groupfiledialog.controller.filename:= fstoredir;
    fgroupfilename:= readmsestring('filename',fstoredir+'default.stg');
-   readstoregroup(fgroupfilename);
+   if not readstoregroup(fgroupfilename) then begin
+    fgroupfilename:= '';
+   end;
   end;
  end;
 end;
@@ -719,6 +730,7 @@ begin
   end;
  end;
 end;
+
 //todo: check duplicates
 procedure tcomponentstorefo.newstoreex(const sender: TObject);
 var
@@ -889,7 +901,7 @@ end;
 
 procedure tcomponentstorefo.checkchanged;
 var
- mstr1: msestring;
+ mstr1,mstr2: msestring;
 begin
  if fchanged then begin
   mstr1:= '*';
@@ -897,7 +909,13 @@ begin
  else begin
   mstr1:= '';
  end;
- dragdock.caption:= mstr1+storecaption+' ('+filename(fgroupfilename)+')';
+ if fgroupfilename = '' then begin
+  mstr2:= '<new>';
+ end
+ else begin
+  mstr2:= filename(fgroupfilename);
+ end;
+ dragdock.caption:= mstr1+storecaption+' ('+mstr2+')';
 end;
 
 procedure tcomponentstorefo.storechanged;
@@ -909,12 +927,15 @@ end;
 function tcomponentstorefo.saveall(const quiet: boolean): modalresultty;
 begin
  result:= mr_none;
-// if fchanged then begin
-  if (fgroupfilename <> '') and
-   (not fchanged or quiet or confirmsavechangedfile(fgroupfilename,result)) then begin
+ if fchanged and 
+           (quiet or confirmsavechangedfile(fgroupfilename,result)) then begin
+  if fgroupfilename = '' then begin
+   result:= dosavegroupas;
+  end
+  else begin
    result:= writestoregroup(fgroupfilename);
   end;
-// end;
+ end;
 end;
 
 procedure tcomponentstorefo.opengroup(const sender: TObject);
@@ -940,19 +961,30 @@ end;
 procedure tcomponentstorefo.savegroup(const sender: TObject);
 begin
  if canclose(nil) then begin
-  writestoregroup(fgroupfilename);
+  if fgroupfilename = '' then begin
+   savegroupas(sender);
+  end
+  else begin
+   writestoregroup(fgroupfilename);
+  end;
+ end;
+end;
+
+function tcomponentstorefo.dosavegroupas: modalresultty;
+begin
+ with groupfiledialog,controller do begin
+  filename:= fgroupfilename;
+  result:= execute(fdk_save,'Save Component Store Group',[fdo_checkexist]);
+  if result = mr_ok then begin
+   result:= writestoregroup(filename);
+  end;
  end;
 end;
 
 procedure tcomponentstorefo.savegroupas(const sender: TObject);
 begin
  if canclose(nil) then begin
-  with groupfiledialog,controller do begin
-   filename:= fgroupfilename;
-   if execute(fdk_save,'',[fdo_checkexist]) = mr_ok then begin
-    writestoregroup(filename);
-   end;
-  end;
+  dosavegroupas;
  end;
 end;
 

@@ -66,28 +66,6 @@ begin
 end;
 
 
-type
-   tstatbuf64 = packed record
-        st_dev : __dev_t;
-        __pad1 : dword;
-        __st_ino : __ino_t;
-        st_mode : __mode_t;
-        st_nlink : __nlink_t;
-        st_uid : __uid_t;
-        st_gid : __gid_t;
-        st_rdev : __dev_t;
-        __pad2 : dword;
-        st_size : __off64_t;
-        st_blksize : __blksize_t;
-        st_blocks : __blkcnt64_t;
-        st_atime : __time_t;
-        st_atime_usec : dword;
-        st_mtime : __time_t;
-        st_mtime_usec : dword;
-        st_ctime : __time_t;
-        st_ctime_usec : dword;
-        st_ino : __ino64_t;
-     end;
 (*
   tstatbuf64 = packed record // Renamed due to conflict with stat64 function
     st_dev: __dev_t;                    { Device.  }
@@ -113,7 +91,7 @@ type
 *)
 
 const
- stat_ver_mse = 3;
+// stat_ver_mse = 3;
 
  path_max = 1024;
  filetypes: array[filetypety] of cardinal = (0,s_ifdir,s_ifblk,
@@ -384,7 +362,8 @@ function sys_openfile(const path: msestring; const openmode: fileopenmodety;
 var
  str1: string;
  str2: msestring;
-
+ stat1: _stat;
+ 
 begin
  str2:= path;
  sys_tosysfilepath(str2);
@@ -392,8 +371,22 @@ begin
  handle:= Integer(mselibc.open(PChar(str1), openmodes[openmode],
         {$ifdef FPC}[{$endif}getfilerights(rights){$ifdef FPC}]{$endif}));
  if handle >= 0 then begin
-  setcloexec(handle);
-  result:= sye_ok;
+  if fstat(handle,@stat1) = 0 then begin  
+   if s_isdir(stat1.st_mode) then begin
+    mselibc.__close(handle);
+    handle:= -1;
+    result:= sye_isdir;
+   end
+   else begin
+    setcloexec(handle);
+    result:= sye_ok;
+   end;    
+  end
+  else begin
+   mselibc.__close(handle);
+   handle:= -1;
+   result:= syelasterror;
+  end;
  end
  else begin
   result:= syelasterror;
@@ -799,7 +792,7 @@ const
 var
  str1,str2: string;
  source,dest: integer;
- stat: _stat;
+ stat: _stat64;
  lwo1: longword;
  po1: pointer;
 begin
@@ -808,7 +801,7 @@ begin
  result:= sye_copyfile;
  source:= mselibc.open(pchar(str1),o_rdonly);
  if source <> -1 then begin
-  if fstat(source,stat) = 0 then begin
+  if fstat64(source,@stat) = 0 then begin
    dest:= mselibc.open(pchar(str2),
    o_rdwr or o_creat or o_trunc,
    {$ifdef FPC}[{$endif}s_irusr or s_iwusr{$ifdef FPC}]{$endif});
@@ -878,9 +871,6 @@ begin
   result:= sye_ok;
  end;
 end;
-
-function xstat64(Ver: Integer; FileName: PChar; var StatBuffer: TStatBuf64): Integer; cdecl;
-                               external libcmodulename name '__xstat64';
 
 function getfiletype(value: cardinal): filetypety;
 var
@@ -1005,7 +995,7 @@ function sys_readdirstream(var stream: dirstreamty; var info: fileinfoty): boole
 var
  dirent: dirent64;
  po1: pdirent64;
- statbuffer: tstatbuf64;
+ statbuffer: _stat64;
  //stat1: tstatbuf;
  str1: string;
 begin
@@ -1020,8 +1010,8 @@ begin
       name:= str1;
       if checkfilename(info.name,mask,true) then begin
        if needsstat then begin
-        if xstat64(stat_ver_mse,pchar(string(dirpath)+str1),
-              statbuffer) = 0 then begin
+        if stat64(pchar(string(dirpath)+str1),
+              @statbuffer) = 0 then begin
          with extinfo1,extinfo2,statbuffer do begin
           filetype:= getfiletype(st_mode);
           attributes:= getfileattributes(st_mode);
@@ -1062,7 +1052,7 @@ begin
  end;
 end;
 
-procedure stattofileinfo(const statbuffer: tstatbuf64; var info: fileinfoty);
+procedure stattofileinfo(const statbuffer: _stat64; var info: fileinfoty);
 begin
  with info,extinfo1,extinfo2,statbuffer do begin
   filetype:= getfiletype(st_mode);
@@ -1087,12 +1077,12 @@ end;
 function sys_getfileinfo(const path: filenamety; var info: fileinfoty): boolean;
 var
  str1: filenamety;
- statbuffer: tstatbuf64;
+ statbuffer: _stat64;
 begin
  clearfileinfo(info);
  str1:= tosysfilepath(path);
  fillchar(statbuffer,sizeof(statbuffer),0);
- result:= xstat64(stat_ver_mse,pchar(string(str1)),statbuffer) = 0;
+ result:= stat64(pchar(string(str1)),@statbuffer) = 0;
  if result then begin
   stattofileinfo(statbuffer,info);
   splitfilepath(filepath(path),str1,info.name);
