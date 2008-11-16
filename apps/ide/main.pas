@@ -21,10 +21,10 @@ unit main;
 interface
 
 uses
- mseforms,msesimplewidgets,mseguiglob,msegui,msegdbutils,mseactions,msedispwidgets,
- msedataedits,msestat,msestatfile,msemenus,msebitmap,msetoolbar,msegrids,
- msefiledialog,msetypes,sourcepage,msetabs,msedesignintf,msedesigner,classes,
- mseclasses,msegraphutils,typinfo,msedock,sysutils,msesysenv,msestrings,
+ mseforms,msesimplewidgets,mseguiglob,msegui,msegdbutils,mseactions,
+ msedispwidgets,msedataedits,msestat,msestatfile,msemenus,msebitmap,msetoolbar,
+ msegrids,msefiledialog,msetypes,sourcepage,msetabs,msedesignintf,msedesigner,
+ classes,mseclasses,msegraphutils,typinfo,msedock,sysutils,msesysenv,msestrings,
  msepostscriptprinter,msegraphics,mseglob;
 const
  versiontext = '1.9 unstable';
@@ -59,6 +59,7 @@ type
    dummyimagelist: timagelist;
    vievmenuicons: timagelist;
 
+   viewmenu: tframecomp;
    procedure newprogramonexecute(const sender: TObject);
    procedure newunitonexecute(const sender: TObject);
    procedure newformonexecute(const sender: TObject);
