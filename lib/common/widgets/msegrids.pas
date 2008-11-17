@@ -1089,7 +1089,10 @@ end;
                //col < 0 and row < 0 -> whole grid, col < 0 -> whole col,
                //row = < 0 -> whole row
    procedure setselectedrange(const rect: gridrectty; const value: boolean;
-             const calldoselectcell: boolean = false); overload; virtual;
+             const calldoselectcell: boolean = false); overload;
+   procedure setselectedrange(const start,stop: gridcoordty;
+                    const value: boolean;
+                    const calldoselectcell: boolean = false); overload; virtual;
   published
    property sortcol: integer read fsortcol write setsortcol default -1;
                                       //-1 -> all
@@ -5897,12 +5900,18 @@ begin
  setselected(invalidcell,false);
 end;
 
-procedure tdatacols.setselectedrange(const rect: gridrectty; const value: boolean;
-                        const calldoselectcell: boolean = false);
+procedure tdatacols.setselectedrange(const start,stop: gridcoordty;
+                    const value: boolean;
+                    const calldoselectcell: boolean = false);
 var
  int1,int2: integer;
  mo1: cellselectmodety;
+ rect: gridrectty;
 begin
+ rect.pos:= start;
+ rect.colcount:= stop.col - start.col;
+ rect.rowcount:= stop.row - start.row;
+ normalizerect(rectty(rect)); 
  if calldoselectcell then begin
   if value then begin
    mo1:= csm_select;
@@ -5935,6 +5944,14 @@ begin
    dec(cols[int1].fselectlock);
   end;
  end;
+end;
+
+procedure tdatacols.setselectedrange(const rect: gridrectty; const value: boolean;
+                        const calldoselectcell: boolean = false);
+begin
+ setselectedrange(rect.pos,
+      makegridcoord(rect.col+rect.colcount,rect.row+rect.rowcount),
+      value,calldoselectcell);
 end;
 
 procedure tdatacols.changeselectedrange(const start,oldend,newend: gridcoordty;
@@ -8372,7 +8389,19 @@ var
        end;
       end
       else begin
-       fdatacols.setselectedrange(makegridrect(cells,celle),true,true);
+       if celle.col < cells.col then begin
+        dec(celle.col);
+       end
+       else begin
+        inc(celle.col);
+       end;
+       if celle.row < cells.row then begin
+        dec(celle.row);
+       end
+       else begin
+        inc(celle.row);
+       end;
+       fdatacols.setselectedrange(cells,celle,true,true);
       end;
      end;
      fendanchor:= cell;

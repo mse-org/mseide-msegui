@@ -71,6 +71,7 @@ function makegridcoord(col: integer; row: integer): gridcoordty;
 function makegridsize(colcount: integer; rowcount: integer): gridsizety;
 function makegridrect(const pos: gridcoordty; const size: gridsizety): gridrectty;  overload;
 function makegridrect(const start,stop: gridcoordty): gridrectty;  overload;
+                  //normalized rect, includes start and stop
 function gridcoordisequal(const a,b: gridcoordty): boolean;
 
 implementation

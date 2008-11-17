@@ -468,6 +468,8 @@ procedure inflaterect1(var rect: rectty; value: integer); overload;
 procedure inflaterect1(var rect: rectty; const frame: framety); overload;
 function deflaterect(const rect: rectty; const frame: framety): rectty;
 procedure deflaterect1(var rect: rectty; const frame: framety);
+procedure normalizerect1(var arect: rectty);
+function normalizerect(const arect: rectty): rectty;
 
 function addframe(const a,b: framety): framety;
 procedure addframe1(var dest: framety; const frame: framety);
@@ -966,6 +968,24 @@ begin
  dec(rect.cy,frame.top);
  dec(rect.cx,frame.right);
  dec(rect.cy,frame.bottom);
+end;
+
+procedure normalizerect1(var arect: rectty);
+begin
+ if arect.cx < 0 then begin
+  arect.x:= arect.x + arect.cx + 1;
+  arect.cx:= -arect.cx;
+ end;
+ if arect.cy < 0 then begin
+  arect.y:= arect.y + arect.cy + 1;
+  arect.cy:= -arect.cy;
+ end;
+end;
+
+function normalizerect(const arect: rectty): rectty;
+begin
+ result:= arect;
+ normalizerect1(result);
 end;
 
 function addframe(const a,b: framety): framety;

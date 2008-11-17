@@ -158,7 +158,7 @@ type
    procedure dostatwrite(const writer: tstatwriter); override;
   public
    constructor create(aowner: tcustomlistview);
-   procedure setselectedrange(const rect: gridrectty; const value: boolean;
+   procedure setselectedrange(const start,stop: gridcoordty; const value: boolean;
                          const calldoselectcell: boolean = false); overload; override;
  end;
 
@@ -968,25 +968,47 @@ begin
  end;
 end;
 
-procedure tlistcols.setselectedrange(const rect: gridrectty; const value: boolean;
+procedure tlistcols.setselectedrange(const start,stop: gridcoordty; const value: boolean;
                       const calldoselectcell: boolean = false);
 var
- int1,int2: integer;
+ int1,int2,int3: integer;
+ co1: gridcoordty;
 begin
+ co1:= stop;
+ if co1.col < start.col then begin
+  inc(co1.col);
+ end
+ else begin
+  if co1.col = start.col then begin
+   exit;
+  end;
+  dec(co1.col);
+ end;
+ if co1.row < start.row then begin
+  inc(co1.row);
+ end
+ else begin
+  if co1.row = start.row then begin
+   exit;
+  end;
+  dec(co1.row);
+ end;
  with tcustomlistview(fgrid) do begin
-  with rect do begin
-   int1:= celltoindex(rect.pos,true);
-   int2:= celltoindex(makegridcoord(col+colcount-1,row+rowcount-1),true);
+  int1:= celltoindex(start,true);
+  int2:= celltoindex(co1,true);
+  if int1 > int2 then begin //swap values
+   int3:= int1;
+   int1:= int2;
+   int2:= int3;
   end;
   if calldoselectcell and value then begin
    for int1:= int1 to int2 do begin
-    selectcell(indextocell(int1),csm_select{value,false});
+    selectcell(indextocell(int1),csm_select);
    end;
   end
   else begin
    for int1:= int1 to int2 do begin
     selected[indextocell(int1)]:= value;
-//    fitemlist[int1].selected:= value;
    end;
   end;
  end;
