@@ -4,18 +4,6 @@ object watchpointsfo: twatchpointsfo
   bounds_y = 368
   bounds_cx = 483
   bounds_cy = 210
-  frame.frameimage_left = 0
-  frame.frameimage_top = 0
-  frame.frameimage_right = 0
-  frame.frameimage_bottom = 0
-  frame.frameimage_offset = 0
-  frame.frameimage_offsetdisabled = 0
-  frame.frameimage_offsetmouse = 0
-  frame.frameimage_offsetclicked = 0
-  frame.frameimage_offsetactive = 0
-  frame.frameimage_offsetactivemouse = 0
-  frame.frameimage_offsetactiveclicked = 0
-  frame.optionsskin = []
   frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
@@ -27,49 +15,45 @@ object watchpointsfo: twatchpointsfo
   container.bounds_y = 0
   container.bounds_cx = 473
   container.bounds_cy = 210
-  container.frame.frameimage_left = 0
-  container.frame.frameimage_top = 0
-  container.frame.frameimage_right = 0
-  container.frame.frameimage_bottom = 0
-  container.frame.frameimage_offset = 0
-  container.frame.frameimage_offsetdisabled = 0
-  container.frame.frameimage_offsetmouse = 0
-  container.frame.frameimage_offsetclicked = 0
-  container.frame.frameimage_offsetactive = 0
-  container.frame.frameimage_offsetactivemouse = 0
-  container.frame.frameimage_offsetactiveclicked = 0
-  container.frame.optionsskin = []
   container.frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
   container.frame.dummy = 0
-  dragdock.tab_size = 0
   dragdock.caption = 'Watchpoints'
   dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_propsize]
   options = [fo_savepos, fo_savestate]
   statfile = mainfo.projectstatfile
   caption = 'Watchpoints'
   icon.transparentcolor = -2147483642
-  icon.options = [bmo_masked]
   icon.image = {
-    00000000020000001800000018000000D4010000000000000000000000000000
-    0000000000000000000000000000000000000000E0E0E050C8CCC80178787801
-    30343001080C0801000400011818180150505001C0C0C001E0E0E00FC8C8C801
-    080808010000000218181801181C18010000000208080801B0B4B001E0E0E00E
-    C0C0C001080C080170707001C8C8C801E0E0E002B8BCB8012024200100000001
-    30303001E0E0E00ED0D4D001C8C8C801E0E0E005989C980100000002D0D4D001
-    E0E0E00FC0C4E0016060F0011010F8026060F0019898B00100000002D0D0D001
-    E0E0E00E989CE8010000F8050000580100000001282C2801E0E0E00EC0C4E001
-    0000F80500008001000000029898B001E0E0E00E6060F0010000F80400008001
-    000000020000A8016060F001E0E0E00E1010F8010000F8030000980100000002
-    0000B0010000F8011010F801E0E0E00E1010F8010000F8030000100100000001
-    0000A0010000F8021010F801E0E0E00E6060F0010000F8020000D80100000002
-    0000F8036060F001E0E0E00EC0C4E0010000F8020000C8010000000100001001
-    0000F803C0C4E001E0E0E00F989CE8010000F8010000C8010000000100001001
-    0000F802989CE801E0E0E011C0C4E0016060F0011010F8026060F001C0C4E001
-    E0E0E02BA0A0A00100000002E0E0E015A0A0A00100000002E0E0E015A0A0A001
-    00000002E0E0E0530000000000000000000000BF00FF000880FF010080E70100
-    80C1030000FE030000FF010080FF010080FF010080FF010380FF010080FF0100
-    80FF01BF00FF0008007E000000000003001C0040001C0000001C000000000000
-    0000000000000000}
+    000000000000000018000000180000005C030000000000000000000000000000
+    0000000000000000000000000000000000000000D0D0D038C0C0C0015E5E5E01
+    323232011414140116161601353535015E5E5E01BEBEBE01D0D0D00F8D8D8D01
+    0D0D0D01000000060C0C0C0184848401D0D0D00DAFAFAF010909090100000001
+    19191901717192017777D6017676D401737394011A1A1B010000000104040401
+    A2A2A201D0D0D00C3A3A3A010000000105050C010606DD010000FF040606E901
+    090916010000000128282801D0D0D00BC9C9C901050507010000000100007701
+    0000FF0600008D010000000101010201C4C4C401D0D0D00AAEAEB3010A0A4501
+    00002A010000C5010000FF060000B10100000002A2A2A701CFCFCF01D0D0D009
+    6565E8010000FF0900007A0100000001000016013535B701C2C2C201CFCFCF01
+    D0D0D007CCCCD1010707FE010000FF080000C70100000B010000000100005F01
+    0303FA0181818601CDCDCD01D0D0D007A8A8D9010000FF080000D10100001101
+    00000001000031010000F1010000FF014E4E7F01ACACAC01CFCFCF01D0D0D006
+    7E7EE3010000FF070000CC010000120100000001000022010000E8010000FF02
+    39399E018D8D8D01CECECE01D0D0D0067E7EE3010000FF060000E20100000F01
+    0000000100001C010000DC010000FF0339399E0177777701CECECE01D0D0D006
+    A8A8D9010000FF060000560100000001000018010000DB010000FF044C4C7D01
+    68686801CDCDCD01D0D0D006CCCCD1010606FD010000FF040000FC0100000701
+    00000001000096010000FF040303FA015D5D620177777701CECECE01D0D0D007
+    6464E7010000FF040000D801000000020000D5010000FF042E2EB1015F5F5F01
+    8D8D8D01CECECE01D0D0D007CACAD0011E1EF1010000FF030000BE0100000802
+    0000ED010000FF031010E3015C5C620161616101ACACAC01CFCFCF01D0D0D008
+    ACACD5011717EA010000FF081010E3014F4F78015F5F5F0184848401CDCDCD01
+    D0D0D009CFCFCF01BDBDC3013535B8010303FA010000FF040303FA012E2EB101
+    5C5C62015F5F5F016C6C6C01C2C2C201CFCFCF01D0D0D00ACFCFCF01C2C2C201
+    818186012F2F4D0102020402353557015D5D62015F5F5F016060600184848401
+    C2C2C201CFCFCF01D0D0D00CCFCFCF01CECECE01666666010000000247474701
+    777777018D8D8D01ACACAC01CECECE01CFCFCF01D0D0D00F9090900133333302
+    9E9E9E01CECECE02CFCFCF01D0D0D037
+  }
   onshow = watchpointsonshow
   moduleclassname = 'tdockform'
   object grid: twidgetgrid
@@ -78,122 +62,88 @@ object watchpointsfo: twatchpointsfo
     bounds_y = 25
     bounds_cx = 473
     bounds_cy = 185
-    frame.frameimage_left = 0
-    frame.frameimage_top = 0
-    frame.frameimage_right = 0
-    frame.frameimage_bottom = 0
-    frame.frameimage_offset = 0
-    frame.frameimage_offsetdisabled = 0
-    frame.frameimage_offsetmouse = 0
-    frame.frameimage_offsetclicked = 0
-    frame.frameimage_offsetactive = 0
-    frame.frameimage_offsetactivemouse = 0
-    frame.frameimage_offsetactiveclicked = 0
-    frame.optionsskin = []
     frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
     frame.dummy = 0
     anchors = [an_top, an_bottom]
     taborder = 1
     popupmenu = gripopup
-    wheelscrollheight = 0
     optionsgrid = [og_colsizing, og_rowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_autopopup]
     fixrows.count = 1
-    fixrows.items = <
+    fixrows.items = <    
       item
-        tag = 0
-        height = 15
+        height = 16
         captions.count = 7
-        captions.items = <
+        captions.items = <        
           item
             caption = 'on'
-          end
+          end        
           item
             caption = 'Kind'
-          end
+          end        
           item
             caption = 'Expresssion'
-          end
+          end        
           item
-          end
+          end        
           item
             caption = 'Count'
-          end
+          end        
           item
             caption = 'Ignore'
-          end
+          end        
           item
             caption = 'Condition'
           end>
-        options = []
       end>
-    rowcount = 0
     datacols.count = 7
-    datacols.items = <
+    datacols.items = <    
       item
-        tag = 0
         width = 16
         options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         widgetname = 'wpton'
-      end
+      end    
       item
-        tag = 0
         width = 33
         options = [co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         widgetname = 'wptkind'
-      end
+      end    
       item
-        tag = 0
         width = 158
         options = [co_proportional, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         widgetname = 'wptexpression'
-      end
+      end    
       item
-        tag = 0
         width = 9
         options = [co_invisible, co_rowfont, co_rowcolor, co_zebracolor]
         widgetname = 'wptno'
-      end
+      end    
       item
         color = -1879048185
-        tag = 0
         width = 34
         options = [co_readonly, co_nofocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         widgetname = 'wptcount'
-      end
+      end    
       item
-        tag = 0
         width = 38
         options = [co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         widgetname = 'wptignore'
-      end
+      end    
       item
-        tag = 0
         width = 174
         options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         widgetname = 'wptcondition'
       end>
-    datarowheight = 15
+    datarowheight = 16
     statfile = mainfo.projectstatfile
     onrowsdeleting = deleterow
-    reffontheight = 13
+    reffontheight = 14
     object wpton: tbooleanedit
       optionsskin = [osk_framebuttononly]
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 16
-      bounds_cy = 15
+      bounds_cy = 16
       frame.levelo = 0
-      frame.frameimage_left = 0
-      frame.frameimage_top = 0
-      frame.frameimage_right = 0
-      frame.frameimage_bottom = 0
-      frame.frameimage_offset = 0
-      frame.frameimage_offsetdisabled = 0
-      frame.frameimage_offsetmouse = 0
-      frame.frameimage_offsetclicked = 0
-      frame.frameimage_offsetactive = 0
-      frame.frameimage_offsetactivemouse = 0
-      frame.frameimage_offsetactiveclicked = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_colorclient]
       frame.dummy = 0
@@ -208,21 +158,11 @@ object watchpointsfo: twatchpointsfo
       bounds_x = 17
       bounds_y = 0
       bounds_cx = 33
-      bounds_cy = 15
+      bounds_cy = 16
       frame.levelo = 0
-      frame.frameimage_left = 0
-      frame.frameimage_top = 0
-      frame.frameimage_right = 0
-      frame.frameimage_bottom = 0
-      frame.frameimage_offset = 0
-      frame.frameimage_offsetdisabled = 0
-      frame.frameimage_offsetmouse = 0
-      frame.frameimage_offsetclicked = 0
-      frame.frameimage_offsetactive = 0
-      frame.frameimage_offsetactivemouse = 0
-      frame.frameimage_offsetactiveclicked = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_colorclient]
+      frame.button.color = -2147483646
       frame.dummy = 0
       taborder = 2
       visible = False
@@ -233,15 +173,16 @@ object watchpointsfo: twatchpointsfo
       min = 0
       max = 2
       dropdown.cols.count = 1
-      dropdown.cols.items = <
+      dropdown.cols.items = <      
         item
           data = (
             'W'
             'R/W'
-            'R')
+            'R'
+          )
         end>
       dropdown.itemindex = 0
-      reffontheight = 13
+      reffontheight = 14
     end
     object wptexpression: tstringedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight]
@@ -249,26 +190,15 @@ object watchpointsfo: twatchpointsfo
       bounds_x = 51
       bounds_y = 0
       bounds_cx = 158
-      bounds_cy = 15
+      bounds_cy = 16
       frame.levelo = 0
-      frame.frameimage_left = 0
-      frame.frameimage_top = 0
-      frame.frameimage_right = 0
-      frame.frameimage_bottom = 0
-      frame.frameimage_offset = 0
-      frame.frameimage_offsetdisabled = 0
-      frame.frameimage_offsetmouse = 0
-      frame.frameimage_offsetclicked = 0
-      frame.frameimage_offsetactive = 0
-      frame.frameimage_offsetactivemouse = 0
-      frame.frameimage_offsetactiveclicked = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_colorclient]
       frame.dummy = 0
       taborder = 3
       visible = False
       ondataentered = wptondataentered
-      reffontheight = 13
+      reffontheight = 14
     end
     object wptno: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight]
@@ -276,26 +206,15 @@ object watchpointsfo: twatchpointsfo
       bounds_x = 210
       bounds_y = 0
       bounds_cx = 9
-      bounds_cy = 15
+      bounds_cy = 16
       frame.levelo = 0
-      frame.frameimage_left = 0
-      frame.frameimage_top = 0
-      frame.frameimage_right = 0
-      frame.frameimage_bottom = 0
-      frame.frameimage_offset = 0
-      frame.frameimage_offsetdisabled = 0
-      frame.frameimage_offsetmouse = 0
-      frame.frameimage_offsetclicked = 0
-      frame.frameimage_offsetactive = 0
-      frame.frameimage_offsetactivemouse = 0
-      frame.frameimage_offsetactiveclicked = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_colorclient]
       frame.dummy = 0
       taborder = 4
       visible = False
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
-      reffontheight = 13
+      reffontheight = 14
     end
     object wptcount: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight]
@@ -303,26 +222,15 @@ object watchpointsfo: twatchpointsfo
       bounds_x = 220
       bounds_y = 0
       bounds_cx = 34
-      bounds_cy = 15
+      bounds_cy = 16
       frame.levelo = 0
-      frame.frameimage_left = 0
-      frame.frameimage_top = 0
-      frame.frameimage_right = 0
-      frame.frameimage_bottom = 0
-      frame.frameimage_offset = 0
-      frame.frameimage_offsetdisabled = 0
-      frame.frameimage_offsetmouse = 0
-      frame.frameimage_offsetclicked = 0
-      frame.frameimage_offsetactive = 0
-      frame.frameimage_offsetactivemouse = 0
-      frame.frameimage_offsetactiveclicked = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_colorclient]
       frame.dummy = 0
       taborder = 5
       visible = False
       optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
-      reffontheight = 13
+      reffontheight = 14
     end
     object wptignore: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight]
@@ -330,26 +238,15 @@ object watchpointsfo: twatchpointsfo
       bounds_x = 255
       bounds_y = 0
       bounds_cx = 38
-      bounds_cy = 15
+      bounds_cy = 16
       frame.levelo = 0
-      frame.frameimage_left = 0
-      frame.frameimage_top = 0
-      frame.frameimage_right = 0
-      frame.frameimage_bottom = 0
-      frame.frameimage_offset = 0
-      frame.frameimage_offsetdisabled = 0
-      frame.frameimage_offsetmouse = 0
-      frame.frameimage_offsetclicked = 0
-      frame.frameimage_offsetactive = 0
-      frame.frameimage_offsetactivemouse = 0
-      frame.frameimage_offsetactiveclicked = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_colorclient]
       frame.dummy = 0
       taborder = 6
       visible = False
       ondataentered = wptondataentered
-      reffontheight = 13
+      reffontheight = 14
     end
     object wptcondition: tstringedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight]
@@ -357,26 +254,15 @@ object watchpointsfo: twatchpointsfo
       bounds_x = 294
       bounds_y = 0
       bounds_cx = 174
-      bounds_cy = 15
+      bounds_cy = 16
       frame.levelo = 0
-      frame.frameimage_left = 0
-      frame.frameimage_top = 0
-      frame.frameimage_right = 0
-      frame.frameimage_bottom = 0
-      frame.frameimage_offset = 0
-      frame.frameimage_offsetdisabled = 0
-      frame.frameimage_offsetmouse = 0
-      frame.frameimage_offsetclicked = 0
-      frame.frameimage_offsetactive = 0
-      frame.frameimage_offsetactivemouse = 0
-      frame.frameimage_offsetactiveclicked = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_colorclient]
       frame.dummy = 0
       taborder = 7
       visible = False
       ondataentered = wptondataentered
-      reffontheight = 13
+      reffontheight = 14
     end
   end
   object tlabel1: tlabel
@@ -386,20 +272,18 @@ object watchpointsfo: twatchpointsfo
     bounds_cx = 473
     bounds_cy = 23
     anchors = [an_top]
-    caption = 
-      'Hint: '#39'Count'#39', '#39'Ignore'#39' and '#39'Condition'#39' don'#39't work with win32 GD' +
-      'B.'
+    caption = 'Hint: ''Count'', ''Ignore'' and ''Condition'' don''t work with win32 GDB.'
   end
   object gripopup: tpopupmenu
     menu.submenu.count = 1
-    menu.submenu.items = <
+    menu.submenu.items = <    
       item
         caption = 'Delete all'
         state = [as_localcaption, as_localonexecute]
         onexecute = deleteallonexecute
       end>
     menu.name = 'gridpopup'
-    Left = 112
-    Top = 88
+    left = 112
+    top = 88
   end
 end

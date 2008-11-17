@@ -21,19 +21,27 @@ object breakpointsfo: tbreakpointsfo
   statfile = mainfo.projectstatfile
   caption = 'Breakpoints'
   icon.transparentcolor = -2147483642
-  icon.options = [bmo_masked]
   icon.image = {
-    00000000020000001800000018000000B4000000000000000000000000000000
-    0000000000000000000000000000000000000000E0E0E0B1C0C4E0016060F001
-    1010F8026060F001C0C4E001E0E0E011989CE8010000F806989CE801E0E0E00F
-    C0C4E0010000F808C0C4E001E0E0E00E6060F0010000F8086060F001E0E0E00E
-    1010F8010000F8081010F801E0E0E00E1010F8010000F8081010F801E0E0E00E
-    6060F0010000F8086060F001E0E0E00EC0C4E0010000F808C0C4E001E0E0E00F
-    989CE8010000F806989CE801E0E0E011C0C4E0016060F0011010F8026060F001
-    C0C4E001E0E0E0B1000000BF000000080000000000000002000000BF00000008
-    00000008007E000000FF00BF80FF010280FF010080FF010080FF01BF80FF0108
-    80FF010000FF0002007E0040000000000000000800000000000000BF00000008
-    0000000000000000
+    0000000000000000180000001800000034020000000000000000000000000000
+    0000000000000000000000000000000000000000D0D0D069CCCCD101A8A8D901
+    7E7EE302A8A8D901CCCCD101D0D0D010CBCBD1016565E8010707FE010000FF04
+    0606FD016464E701CACAD001D0D0D00DAFAFD8012424F7010000FF081E1EF101
+    ADADD601CFCFCF01D0D0D00ACBCBD1012424F7010000FF0A1717EA01BDBDC301
+    CFCFCF01D0D0D0096565E8010000FF0C3535B801C2C2C201CFCFCF01D0D0D007
+    CCCCD1010707FE010000FF0C0303FA0181818601CDCDCD01D0D0D007A8A8D901
+    0000FF0E4E4E7F01ACACAC01CFCFCF01D0D0D0067E7EE3010000FF0E39399E01
+    8D8D8D01CECECE01D0D0D0067E7EE3010000FF0E39399E0177777701CECECE01
+    D0D0D006A8A8D9010000FF0E4C4C7D0168686801CDCDCD01D0D0D006CCCCD101
+    0606FD010000FF0C0303FA015D5D620177777701CECECE01D0D0D0076464E701
+    0000FF0C2E2EB1015F5F5F018D8D8D01CECECE01D0D0D007CACAD0011E1EF101
+    0000FF0A1010E3015C5C620161616101ACACAC01CFCFCF01D0D0D008ACACD501
+    1717EA010000FF081010E3014F4F78015F5F5F0184848401CDCDCD01D0D0D009
+    CFCFCF01BDBDC3013535B8010303FA010000FF040303FA012E2EB1015C5C6201
+    5F5F5F016C6C6C01C2C2C201CFCFCF01D0D0D00ACFCFCF01C2C2C20181818601
+    4E4E7F0139399E024C4C7D015D5D62015F5F5F016060600184848401C2C2C201
+    CFCFCF01D0D0D00CCFCFCF01CECECE01ACACAC018D8D8D017777770168686801
+    777777018D8D8D01ACACAC01CECECE01CFCFCF01D0D0D00FCFCFCF01CECECE05
+    CFCFCF01D0D0D037
   }
   onshow = breakpointsonshow
   moduleclassname = 'tdockform'
@@ -51,7 +59,7 @@ object breakpointsfo: tbreakpointsfo
     fixrows.count = 1
     fixrows.items = <    
       item
-        height = 17
+        height = 16
         captions.count = 11
         captions.items = <        
           item
@@ -163,17 +171,17 @@ object breakpointsfo: tbreakpointsfo
         options = [co_invisible, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         widgetname = 'flags'
       end>
-    datarowheight = 17
+    datarowheight = 16
     onrowsdeleting = gridonrowsdeleting
     onrowsdeleted = gridonrowsdeleted
     oncellevent = gridoncellevent
-    reffontheight = 15
+    reffontheight = 14
     object bkpton: tbooleanedit
       optionsskin = [osk_framebuttononly]
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 16
-      bounds_cy = 17
+      bounds_cy = 16
       taborder = 1
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
       ondataentered = ondataentered
@@ -187,12 +195,12 @@ object breakpointsfo: tbreakpointsfo
       bounds_x = 17
       bounds_y = 0
       bounds_cx = 158
-      bounds_cy = 17
+      bounds_cy = 16
       taborder = 2
       visible = False
       ondataentered = ondataenterednewbkpt
       onsetvalue = filenameonsetvalue
-      reffontheight = 15
+      reffontheight = 14
     end
     object path: tstringedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
@@ -200,10 +208,10 @@ object breakpointsfo: tbreakpointsfo
       bounds_x = 176
       bounds_y = 0
       bounds_cx = 50
-      bounds_cy = 17
+      bounds_cy = 16
       taborder = 3
       visible = False
-      reffontheight = 15
+      reffontheight = 14
     end
     object line: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
@@ -211,13 +219,13 @@ object breakpointsfo: tbreakpointsfo
       bounds_x = 227
       bounds_y = 0
       bounds_cx = 50
-      bounds_cy = 17
+      bounds_cy = 16
       taborder = 4
       visible = False
       ondataentered = ondataenterednewbkpt
       onsetvalue = lineonsetvalue
       min = 1
-      reffontheight = 15
+      reffontheight = 14
     end
     object address: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
@@ -225,7 +233,7 @@ object breakpointsfo: tbreakpointsfo
       bounds_x = 278
       bounds_y = 0
       bounds_cx = 61
-      bounds_cy = 17
+      bounds_cy = 16
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
@@ -235,7 +243,7 @@ object breakpointsfo: tbreakpointsfo
       ondataentered = addressentered
       base = nb_hex
       max = -1
-      reffontheight = 15
+      reffontheight = 14
     end
     object addressbkpt: tbooleanedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
@@ -243,7 +251,7 @@ object breakpointsfo: tbreakpointsfo
       bounds_x = 340
       bounds_y = 0
       bounds_cx = 6
-      bounds_cy = 17
+      bounds_cy = 16
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
@@ -257,10 +265,10 @@ object breakpointsfo: tbreakpointsfo
       bounds_x = 347
       bounds_y = 0
       bounds_cx = 19
-      bounds_cy = 17
+      bounds_cy = 16
       taborder = 7
       visible = False
-      reffontheight = 15
+      reffontheight = 14
     end
     object count: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
@@ -268,11 +276,11 @@ object breakpointsfo: tbreakpointsfo
       bounds_x = 367
       bounds_y = 0
       bounds_cx = 31
-      bounds_cy = 17
+      bounds_cy = 16
       taborder = 8
       visible = False
       optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savevalue, oe_savestate]
-      reffontheight = 15
+      reffontheight = 14
     end
     object ignore: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
@@ -280,19 +288,19 @@ object breakpointsfo: tbreakpointsfo
       bounds_x = 399
       bounds_y = 0
       bounds_cx = 30
-      bounds_cy = 17
+      bounds_cy = 16
       taborder = 9
       visible = False
       ondataentered = ondataentered
       onsetvalue = ignoreonsetvalue
-      reffontheight = 15
+      reffontheight = 14
     end
     object conderr: tdataicon
       optionsskin = [osk_framebuttononly]
       bounds_x = 430
       bounds_y = 0
       bounds_cx = 7
-      bounds_cy = 17
+      bounds_cy = 16
       taborder = 10
       optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
       visible = False
@@ -305,13 +313,13 @@ object breakpointsfo: tbreakpointsfo
       bounds_x = 438
       bounds_y = 0
       bounds_cx = 200
-      bounds_cy = 17
+      bounds_cy = 16
       taborder = 11
       visible = False
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_trimright, oe_trimleft, oe_autopopupmenu, oe_savevalue, oe_savestate]
       ondataentered = ondataentered
       onsetvalue = conditiononsetvalue
-      reffontheight = 15
+      reffontheight = 14
     end
     object flags: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
@@ -319,23 +327,23 @@ object breakpointsfo: tbreakpointsfo
       bounds_x = 639
       bounds_y = 0
       bounds_cx = 50
-      bounds_cy = 17
+      bounds_cy = 16
       taborder = 12
       visible = False
-      reffontheight = 15
+      reffontheight = 14
     end
   end
   object bkptson: tbooleanedit
     bounds_x = 8
-    bounds_y = 3
-    bounds_cx = 111
-    bounds_cy = 17
+    bounds_y = 4
+    bounds_cx = 99
+    bounds_cy = 16
     frame.caption = 'Breakpoints on'
     frame.dummy = 0
     frame.outerframe = (
       0
-      2
-      98
+      1
+      86
       2
     )
     statfile = mainfo.projectstatfile

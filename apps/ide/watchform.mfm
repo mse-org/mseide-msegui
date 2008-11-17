@@ -26,31 +26,33 @@ object watchfo: twatchfo
   icon.transparentcolor = -2147483642
   icon.options = [bmo_masked]
   icon.image = {
-    000000000200000018000000180000007C020000000000000000000000000000
-    0000000000000000000000000000000000000000804CF09180808016804CF002
-    80808001E0E0E003D8DCD801A8A8A801888C8801A0A0A001D8DCD801E0E0E002
-    D8DCD801A8A8A801888C8801A0A0A001D8DCD801E0E0E005F8FCF801804CF002
-    80808001E0E0E003181C1801101410013034300108080801282C2801D0D4D001
-    E0E0E001181C1801101410013034300108080801282C2801D0D4D001E0E0E004
-    F8FCF801804CF00280808001E0E0E003888C8801D8DCD801E0E0E001B8BCB801
-    00000001888C8801E0E0E001888C8801D8DCD801E0E0E001B8BCB80100000001
-    888C8801E0E0E004F8FCF801804CF00280808001E0E0E006D0D0D00100040001
-    888C8801E0E0E004D0D0D00100040001888C8801E0E0E004F8FCF801804CF002
-    80808001E0E0E005D8D8D801383C380128282801D8D8D801E0E0E003D8D8D801
-    383C380128282801D8D8D801E0E0E004F8FCF801804CF00280808001E0E0E005
-    4044400128282801C8CCC801E0E0E0044044400128282801C8CCC801E0E0E005
-    F8FCF801804CF00280808001E0E0E004B0B4B00100000001C0C0C001E0E0E004
-    B0B4B00100000001C0C0C001E0E0E006F8FCF801804CF00280808001E0E0E004
-    A0A0A00100000001D8DCD801E0E0E004A0A0A00100000001D8DCD801E0E0E006
-    F8FCF801804CF00280808001E0E0E004C8CCC801A0A4A001D8DCD801E0E0E004
-    C8CCC801A0A4A001D8DCD801E0E0E006F8FCF801804CF00280808001E0E0E004
-    A8A8A80138383801D0D4D001E0E0E004A8A8A80138383801D0D4D001E0E0E006
-    F8FCF801804CF00280808001E0E0E0049094900100000001D0D0D001E0E0E004
-    9094900100000001D0D0D001E0E0E006F8FCF801804CF00280808001E0E0E014
-    F8FCF801804CF002F8FCF816804CF061000000BF000000080000000000000003
-    0000000000000008FEFF7F08FEFF7F00FEFF7FBFFEFF7F03FEFF7F00FEFF7F00
-    FEFF7FBFFEFF7F08FEFF7F00FEFF7F03FEFF7F40FEFF7F00FEFF7F08FEFF7F00
-    000000BF000000080000000000000000
+    00000000020000001800000018000000CC020000000000000000000000000000
+    0000000000000000000000000000000000000000D0D0D0607C7C7C19D9D9D916
+    FFFFFF017C7C7C01D9D9D903C8C8C801A1A1A101D9D9D905A6A6A601C2C2C201
+    D9D9D904D2D2D2019A9A9A01D9D9D904FFFFFF017C7C7C01D9D9D9024E4E4E01
+    0D0D0D011818180296969601D9D9D901B8B8B8011E1E1E01161616010E0E0E01
+    36363601D9D9D9026A6A6A010F0F0F011C1C1C011111110177777701D9D9D902
+    FFFFFF017C7C7C01D9D9D901B6B6B60108080801BFBFBF01D9D9D90152525201
+    30303001D9D9D9014F4F4F0139393901D9D9D901CCCCCC01121212018A8A8A01
+    D2D2D2010E0E0E0197979701D9D9D9017979790117171701D9D9D902FFFFFF01
+    7C7C7C01D9D9D9019C9C9C0169696901D9D9D9029F9F9F010E0E0E01D9D9D901
+    63636301A1A1A101D9D9D9023C3C3C0151515101B5B5B50156565601D9D9D902
+    D2D2D20102020201C2C2C201D9D9D901FFFFFF017C7C7C01D9D9D90533333301
+    3C3C3C01D9D9D904ABABAB010B0B0B0196969601D9D9D904535353011F1F1F01
+    D9D9D902FFFFFF017C7C7C01D9D9D9044E4E4E011A1A1A01CCCCCC01D9D9D903
+    C2C2C201131313015E5E5E01D9D9D904717171010E0E0E01B4B4B401D9D9D902
+    FFFFFF017C7C7C01D9D9D903B9B9B90109090901B9B9B901D9D9D9044F4F4F01
+    38383801D9D9D9050D0D0D0195959501D9D9D903FFFFFF017C7C7C01D9D9D903
+    8B8B8B0127272701D9D9D9053535350175757501D9D9D904BCBCBC0110101001
+    D9D9D904FFFFFF017C7C7C01D9D9D903D2D2D201C5C5C501D9D9D905C7C7C701
+    CFCFCF01D9D9D904D5D5D501C2C2C201D9D9D904FFFFFF017C7C7C01D9D9D903
+    6F6F6F0114141401D9D9D9051F1F1F015D5D5D01D9D9D9049C9C9C0100000001
+    D5D5D501D9D9D903FFFFFF017C7C7C01D9D9D903B9B9B90192929201D9D9D905
+    99999901B2B2B201D9D9D904C8C8C80186868601D9D9D904FFFFFF017C7C7C01
+    D9D9D916FFFFFF017C7C7C01D9D9D916FFFFFF017C7C7C01FFFFFF17D0D0D060
+    0000000800000008000000BF00000008FFFFFF00FFFFFF08FFFFFF02FFFFFFC0
+    FFFFFF00FFFFFF08FFFFFF00FFFFFF08FFFFFF08FFFFFF08FFFFFFBFFFFFFF08
+    FFFFFF00FFFFFF02FFFFFF08FFFFFF0000000000000000BF0000000000000008
   }
   moduleclassname = 'tdockform'
   object grid: twidgetgrid
@@ -75,7 +77,7 @@ object watchfo: twatchfo
     fixrows.count = 1
     fixrows.items = <    
       item
-        height = 17
+        height = 16
         captions.count = 6
         captions.items = <        
           item
@@ -135,14 +137,14 @@ object watchfo: twatchfo
         options = [co_invisible, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         widgetname = 'sizecode'
       end>
-    datarowheight = 17
+    datarowheight = 16
     statfile = mainfo.projectstatfile
-    reffontheight = 15
+    reffontheight = 14
     object watchon: tbooleanedit
       optionsskin = [osk_framebuttononly]
       bounds_x = 0
       bounds_y = 0
-      bounds_cy = 17
+      bounds_cy = 16
       taborder = 1
       statfile = mainfo.projectstatfile
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
@@ -157,13 +159,13 @@ object watchfo: twatchfo
       bounds_x = 14
       bounds_y = 0
       bounds_cx = 152
-      bounds_cy = 17
+      bounds_cy = 16
       taborder = 2
       visible = False
       statfile = mainfo.projectstatfile
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_forcereturncheckvalue, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
       ondataentered = expressionondataentered
-      reffontheight = 15
+      reffontheight = 14
     end
     object expresult: tstringedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_autoscale]
@@ -171,7 +173,7 @@ object watchfo: twatchfo
       bounds_x = 167
       bounds_y = 0
       bounds_cx = 82
-      bounds_cy = 17
+      bounds_cy = 16
       taborder = 3
       visible = False
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
@@ -182,8 +184,7 @@ object watchfo: twatchfo
       bounds_x = 250
       bounds_y = 0
       bounds_cx = 12
-      bounds_cy = 17
-      color = -1610612725
+      bounds_cy = 16
       frame.optionsskin = [fso_nofocusrect, fso_nodefaultrect]
       frame.localprops = [frl_optionsskin]
       frame.dummy = 0
@@ -210,28 +211,28 @@ object watchfo: twatchfo
       bounds_x = 263
       bounds_y = 0
       bounds_cx = 13
-      bounds_cy = 17
+      bounds_cy = 16
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
       frame.dummy = 0
       taborder = 5
       visible = False
-      reffontheight = 15
+      reffontheight = 14
     end
   end
   object watcheson: tbooleanedit
     bounds_x = 8
-    bounds_y = 3
-    bounds_cx = 90
-    bounds_cy = 17
+    bounds_y = 4
+    bounds_cx = 81
+    bounds_cy = 16
     frame.caption = 'Watches on'
     frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
     frame.dummy = 0
     frame.outerframe = (
       0
-      2
-      77
+      1
+      68
       2
     )
     statfile = mainfo.projectstatfile

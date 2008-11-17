@@ -7,33 +7,37 @@ inherited cpuarmfo: tcpuarmfo
   container.bounds_cy = 249
   statfile = nil
   icon.image = {
-    00000000020000001800000018000000C0020000000000000000000000000000
-    0000000000000000000000000000000000000000804CF09180808016804CF002
-    80808001E0E0E004D8DCD801A8A8A801888C8801B0B0B001E0E0E006C8C8C801
-    B0B0B001D0D0D001E0E0E003F8FCF801804CF00280808001E0E0E003D8DCD801
-    40404001080C0801383838010808080150505001D8DCD801E0E0E00290909001
-    1014100100000002888C8801E0E0E003F8FCF801804CF00280808001E0E0E003
-    787C7801080C0801C8C8C801E0E0E001B8BCB8010004000190909001E0E0E002
-    A8A8A80190909001B8BCB80100000001888C8801E0E0E003F8FCF801804CF002
-    80808001E0E0E003282C2801585C5801E0E0E0034848480140404001E0E0E005
-    00000001888C8801E0E0E003F8FCF801804CF00280808001E0E0E002D8DCD801
-    0004000188888801E0E0E0037070700118181801E0E0E00500000001888C8801
-    E0E0E003F8FCF801804CF00280808001E0E0E002D0D0D0010000000190949001
-    E0E0E0038080800108080801E0E0E00500000001888C8801E0E0E003F8FCF801
-    804CF00280808001E0E0E002D0D4D0010000000190949001E0E0E00380808001
-    08080801E0E0E00500000001888C8801E0E0E003F8FCF801804CF00280808001
-    E0E0E002D8DCD8010808080180808001E0E0E003686C6801181C1801E0E0E005
-    00000001888C8801E0E0E003F8FCF801804CF00280808001E0E0E00330343001
-    50505001E0E0E00338383801484C4801E0E0E00500000001888C8801E0E0E003
-    F8FCF801804CF00280808001E0E0E0039090900100040001A8ACA801E0E0E001
-    989C980100000001A0A4A001E0E0E002D0D4D001B8BCB8020000000178787801
-    B8BCB801C8C8C801E0E0E001F8FCF801804CF00280808001E0E0E00468686801
-    00040001101010010004000178787801E0E0E003A0A4A0010000000550545001
-    E0E0E001F8FCF801804CF00280808001E0E0E005D0D0D001B8B8B801D0D4D001
-    E0E0E00CF8FCF801804CF002F8FCF816804CF0610000000800000008000000BF
-    000000080000000000000008FEFF7F01FEFF7FC0FEFF7F00FEFF7F08FEFF7FBF
-    FEFF7F08FEFF7F08FEFF7F08FEFF7FBFFEFF7F08FEFF7F00FEFF7F01FEFF7F40
-    FEFF7F0000000000000000BF0000000000000008
+    000000000200000018000000180000003C030000000000000000000000000000
+    0000000000000000000000000000000000000000D0D0D0607C7C7C19D9D9D916
+    FFFFFF017C7C7C01D9D9D904BFBFBF01D9D9D906B1B1B101D9D9D905BCBCBC01
+    D9D9D904FFFFFF017C7C7C01D9D9D9027D7D7D01101010010707070128282801
+    CCCCCC01D9D9D9039797970105050501D9D9D9039C9C9C011717170107070701
+    18181801B8B8B801D9D9D902FFFFFF017C7C7C01D9D9D901CCCCCC0110101001
+    89898901C2C2C2012626260156565601D9D9D902808080010D0D0D0101010101
+    D9D9D9032222220161616101CFCFCF013C3C3C0136363601D9D9D902FFFFFF01
+    7C7C7C01D9D9D901868686011F1F1F01D9D9D902828282011C1C1C01D9D9D901
+    AEAEAE010B0B0B016F6F6F0101010101D9D9D902BBBBBB0109090901D5D5D501
+    D9D9D901B4B4B40106060601D9D9D902FFFFFF017C7C7C01D9D9D90169696901
+    35353501D9D9D902A8A8A8010D0D0D01D9D9D901CCCCCC01C5C5C501C8C8C801
+    01010101D9D9D902959595011A1A1A01D9D9D90303030301BFBFBF01D9D9D901
+    FFFFFF017C7C7C01D9D9D901525252013E3E3E01D9D9D902BBBBBB0103030301
+    D9D9D903C8C8C80101010101D9D9D9027979790122222201D9D9D9030A0A0A01
+    A7A7A701D9D9D901FFFFFF017C7C7C01D9D9D9015B5B5B0138383801D9D9D902
+    AEAEAE010B0B0B01D9D9D903C8C8C80101010101D9D9D902848484011D1D1D01
+    D9D9D90305050501BFBFBF01D9D9D901FFFFFF017C7C7C01D9D9D9016F6F6F01
+    28282801D9D9D902929292011A1A1A01D9D9D903C8C8C80101010101D9D9D902
+    9C9C9C0110101001D9D9D902C8C8C80104040401D9D9D902FFFFFF017C7C7C01
+    D9D9D901B9B9B9010A0A0A01BFBFBF01D9D9D901414141013F3F3F01D9D9D903
+    C8C8C80101010101D9D9D902D5D5D5010F0F0F019A9A9A01D9D9D90163636301
+    23232301D9D9D902FFFFFF017C7C7C01D9D9D902494949010909090123232301
+    0B0B0B01BFBFBF01D9D9D903C8C8C80101010101D9D9D9036B6B6B0105050501
+    2A2A2A01040404019B9B9B01D9D9D902FFFFFF017C7C7C01D9D9D9038D8D8D01
+    79797901CFCFCF01D9D9D904D5D5D50189898901D9D9D9049C9C9C0173737301
+    C2C2C201D9D9D903FFFFFF017C7C7C01D9D9D916FFFFFF017C7C7C01D9D9D916
+    FFFFFF017C7C7C01FFFFFF17D0D0D0600000000800000008000000BF00000008
+    FFFFFF00FFFFFF08FFFFFF02FFFFFFC0FFFFFF00FFFFFF08FFFFFF00FFFFFF08
+    FFFFFF08FFFFFF08FFFFFFBFFFFFFF08FFFFFF00FFFFFF02FFFFFF08FFFFFF00
+    00000000000000BF0000000000000008
   }
   moduleclassname = 'tcpufo'
   inherited on: tbooleanedit
@@ -43,7 +47,7 @@ inherited cpuarmfo: tcpuarmfo
   object tlayouter1: tlayouter[1]
     bounds_x = 0
     bounds_y = 33
-    bounds_cx = 111
+    bounds_cx = 110
     bounds_cy = 189
     frame.dummy = 0
     taborder = 1
@@ -56,7 +60,7 @@ inherited cpuarmfo: tcpuarmfo
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
       bounds_x = 0
       bounds_y = 21
-      bounds_cx = 109
+      bounds_cx = 107
       bounds_cy = 21
       frame.levelo = -1
       frame.colorclient = -1879048185
@@ -67,7 +71,7 @@ inherited cpuarmfo: tcpuarmfo
       frame.outerframe = (
         0
         0
-        16
+        14
         0
       )
       font.height = 14
@@ -83,7 +87,7 @@ inherited cpuarmfo: tcpuarmfo
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
       bounds_x = 0
       bounds_y = 0
-      bounds_cx = 109
+      bounds_cx = 107
       bounds_cy = 21
       frame.levelo = -1
       frame.colorclient = -1879048185
@@ -94,7 +98,7 @@ inherited cpuarmfo: tcpuarmfo
       frame.outerframe = (
         0
         0
-        16
+        14
         0
       )
       taborder = 1
@@ -111,7 +115,7 @@ inherited cpuarmfo: tcpuarmfo
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
       bounds_x = 0
       bounds_y = 84
-      bounds_cx = 109
+      bounds_cx = 107
       bounds_cy = 21
       frame.levelo = -1
       frame.colorclient = -1879048185
@@ -122,7 +126,7 @@ inherited cpuarmfo: tcpuarmfo
       frame.outerframe = (
         0
         0
-        16
+        14
         0
       )
       taborder = 2
@@ -139,7 +143,7 @@ inherited cpuarmfo: tcpuarmfo
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
       bounds_x = 0
       bounds_y = 63
-      bounds_cx = 109
+      bounds_cx = 107
       bounds_cy = 21
       frame.levelo = -1
       frame.colorclient = -1879048185
@@ -150,7 +154,7 @@ inherited cpuarmfo: tcpuarmfo
       frame.outerframe = (
         0
         0
-        16
+        14
         0
       )
       taborder = 3
@@ -167,7 +171,7 @@ inherited cpuarmfo: tcpuarmfo
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
       bounds_x = 0
       bounds_y = 42
-      bounds_cx = 109
+      bounds_cx = 107
       bounds_cy = 21
       frame.levelo = -1
       frame.colorclient = -1879048185
@@ -178,7 +182,7 @@ inherited cpuarmfo: tcpuarmfo
       frame.outerframe = (
         0
         0
-        16
+        14
         0
       )
       taborder = 4
@@ -195,7 +199,7 @@ inherited cpuarmfo: tcpuarmfo
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
       bounds_x = 0
       bounds_y = 105
-      bounds_cx = 109
+      bounds_cx = 107
       bounds_cy = 21
       frame.levelo = -1
       frame.colorclient = -1879048185
@@ -206,7 +210,7 @@ inherited cpuarmfo: tcpuarmfo
       frame.outerframe = (
         0
         0
-        16
+        14
         0
       )
       taborder = 5
@@ -223,7 +227,7 @@ inherited cpuarmfo: tcpuarmfo
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
       bounds_x = 0
       bounds_y = 126
-      bounds_cx = 111
+      bounds_cx = 110
       bounds_cy = 21
       frame.levelo = -1
       frame.colorclient = -1879048185
@@ -234,7 +238,7 @@ inherited cpuarmfo: tcpuarmfo
       frame.outerframe = (
         0
         0
-        18
+        17
         0
       )
       taborder = 6
@@ -251,7 +255,7 @@ inherited cpuarmfo: tcpuarmfo
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
       bounds_x = 0
       bounds_y = 147
-      bounds_cx = 104
+      bounds_cx = 103
       bounds_cy = 21
       frame.levelo = -1
       frame.colorclient = -1879048185
@@ -262,7 +266,7 @@ inherited cpuarmfo: tcpuarmfo
       frame.outerframe = (
         0
         0
-        11
+        10
         0
       )
       taborder = 7
@@ -279,7 +283,7 @@ inherited cpuarmfo: tcpuarmfo
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
       bounds_x = 0
       bounds_y = 168
-      bounds_cx = 111
+      bounds_cx = 109
       bounds_cy = 21
       frame.levelo = -1
       frame.colorclient = -1879048185
@@ -290,7 +294,7 @@ inherited cpuarmfo: tcpuarmfo
       frame.outerframe = (
         0
         0
-        18
+        16
         0
       )
       taborder = 8
@@ -305,9 +309,9 @@ inherited cpuarmfo: tcpuarmfo
     end
   end
   object tlayouter2: tlayouter[2]
-    bounds_x = 114
+    bounds_x = 113
     bounds_y = 33
-    bounds_cx = 123
+    bounds_cx = 120
     bounds_cy = 168
     frame.dummy = 0
     taborder = 2
@@ -320,7 +324,7 @@ inherited cpuarmfo: tcpuarmfo
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
       bounds_x = 0
       bounds_y = 0
-      bounds_cx = 109
+      bounds_cx = 107
       bounds_cy = 21
       frame.levelo = -1
       frame.colorclient = -1879048185
@@ -331,7 +335,7 @@ inherited cpuarmfo: tcpuarmfo
       frame.outerframe = (
         0
         0
-        16
+        14
         0
       )
       font.height = 14
@@ -347,7 +351,7 @@ inherited cpuarmfo: tcpuarmfo
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
       bounds_x = 0
       bounds_y = 21
-      bounds_cx = 109
+      bounds_cx = 107
       bounds_cy = 21
       frame.levelo = -1
       frame.colorclient = -1879048185
@@ -358,7 +362,7 @@ inherited cpuarmfo: tcpuarmfo
       frame.outerframe = (
         0
         0
-        16
+        14
         0
       )
       taborder = 1
@@ -375,7 +379,7 @@ inherited cpuarmfo: tcpuarmfo
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
       bounds_x = 0
       bounds_y = 42
-      bounds_cx = 109
+      bounds_cx = 107
       bounds_cy = 21
       frame.levelo = -1
       frame.colorclient = -1879048185
@@ -386,7 +390,7 @@ inherited cpuarmfo: tcpuarmfo
       frame.outerframe = (
         0
         0
-        16
+        14
         0
       )
       taborder = 2
@@ -403,7 +407,7 @@ inherited cpuarmfo: tcpuarmfo
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
       bounds_x = 0
       bounds_y = 105
-      bounds_cx = 117
+      bounds_cx = 114
       bounds_cy = 21
       frame.levelo = -1
       frame.colorclient = -1879048185
@@ -414,7 +418,7 @@ inherited cpuarmfo: tcpuarmfo
       frame.outerframe = (
         0
         0
-        24
+        21
         0
       )
       taborder = 3
@@ -431,7 +435,7 @@ inherited cpuarmfo: tcpuarmfo
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
       bounds_x = 0
       bounds_y = 84
-      bounds_cx = 117
+      bounds_cx = 114
       bounds_cy = 21
       frame.levelo = -1
       frame.colorclient = -1879048185
@@ -442,7 +446,7 @@ inherited cpuarmfo: tcpuarmfo
       frame.outerframe = (
         0
         0
-        24
+        21
         0
       )
       taborder = 4
@@ -459,7 +463,7 @@ inherited cpuarmfo: tcpuarmfo
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
       bounds_x = 0
       bounds_y = 63
-      bounds_cx = 109
+      bounds_cx = 107
       bounds_cy = 21
       frame.levelo = -1
       frame.colorclient = -1879048185
@@ -470,7 +474,7 @@ inherited cpuarmfo: tcpuarmfo
       frame.outerframe = (
         0
         0
-        16
+        14
         0
       )
       taborder = 5
@@ -487,7 +491,7 @@ inherited cpuarmfo: tcpuarmfo
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
       bounds_x = 0
       bounds_y = 126
-      bounds_cx = 115
+      bounds_cx = 113
       bounds_cy = 21
       frame.levelo = -1
       frame.colorclient = -1879048185
@@ -498,7 +502,7 @@ inherited cpuarmfo: tcpuarmfo
       frame.outerframe = (
         0
         0
-        22
+        20
         0
       )
       taborder = 6
@@ -515,7 +519,7 @@ inherited cpuarmfo: tcpuarmfo
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
       bounds_x = 0
       bounds_y = 147
-      bounds_cx = 123
+      bounds_cx = 120
       bounds_cy = 21
       frame.levelo = -1
       frame.colorclient = -1879048185
@@ -526,7 +530,7 @@ inherited cpuarmfo: tcpuarmfo
       frame.outerframe = (
         0
         0
-        30
+        27
         0
       )
       taborder = 7
@@ -544,9 +548,9 @@ inherited cpuarmfo: tcpuarmfo
   object c: tbooleanedit[3]
     Tag = 31
     bounds_x = 6
-    bounds_y = 0
+    bounds_y = 1
     bounds_cx = 11
-    bounds_cy = 29
+    bounds_cy = 28
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -556,7 +560,7 @@ inherited cpuarmfo: tcpuarmfo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
@@ -566,9 +570,9 @@ inherited cpuarmfo: tcpuarmfo
   object tbooleanedit2: tbooleanedit[4]
     Tag = 30
     bounds_x = 17
-    bounds_y = 0
+    bounds_y = 1
     bounds_cx = 11
-    bounds_cy = 29
+    bounds_cy = 28
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -578,7 +582,7 @@ inherited cpuarmfo: tcpuarmfo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
@@ -588,9 +592,9 @@ inherited cpuarmfo: tcpuarmfo
   object tbooleanedit3: tbooleanedit[5]
     Tag = 29
     bounds_x = 28
-    bounds_y = 0
+    bounds_y = 1
     bounds_cx = 11
-    bounds_cy = 29
+    bounds_cy = 28
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -600,7 +604,7 @@ inherited cpuarmfo: tcpuarmfo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
@@ -610,9 +614,9 @@ inherited cpuarmfo: tcpuarmfo
   object tbooleanedit4: tbooleanedit[6]
     Tag = 28
     bounds_x = 39
-    bounds_y = 0
+    bounds_y = 1
     bounds_cx = 11
-    bounds_cy = 29
+    bounds_cy = 28
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -622,7 +626,7 @@ inherited cpuarmfo: tcpuarmfo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
@@ -632,9 +636,9 @@ inherited cpuarmfo: tcpuarmfo
   object tbooleanedit5: tbooleanedit[7]
     Tag = 27
     bounds_x = 50
-    bounds_y = 0
+    bounds_y = 1
     bounds_cx = 11
-    bounds_cy = 29
+    bounds_cy = 28
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -644,7 +648,7 @@ inherited cpuarmfo: tcpuarmfo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
@@ -654,9 +658,9 @@ inherited cpuarmfo: tcpuarmfo
   object tbooleanedit6: tbooleanedit[8]
     Tag = 24
     bounds_x = 68
-    bounds_y = 0
+    bounds_y = 1
     bounds_cx = 11
-    bounds_cy = 29
+    bounds_cy = 28
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -666,7 +670,7 @@ inherited cpuarmfo: tcpuarmfo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
@@ -691,9 +695,9 @@ inherited cpuarmfo: tcpuarmfo
   object tbooleanedit8: tbooleanedit[10]
     Tag = 17
     bounds_x = 108
-    bounds_y = 0
+    bounds_y = 1
     bounds_cx = 11
-    bounds_cy = 29
+    bounds_cy = 28
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -703,7 +707,7 @@ inherited cpuarmfo: tcpuarmfo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
@@ -713,9 +717,9 @@ inherited cpuarmfo: tcpuarmfo
   object tbooleanedit9: tbooleanedit[11]
     Tag = 18
     bounds_x = 97
-    bounds_y = 0
+    bounds_y = 1
     bounds_cx = 11
-    bounds_cy = 29
+    bounds_cy = 28
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -725,7 +729,7 @@ inherited cpuarmfo: tcpuarmfo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
@@ -750,9 +754,9 @@ inherited cpuarmfo: tcpuarmfo
   object tbooleanedit11: tbooleanedit[13]
     Tag = 7
     bounds_x = 156
-    bounds_y = 0
+    bounds_y = 1
     bounds_cx = 11
-    bounds_cy = 29
+    bounds_cy = 28
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -762,7 +766,7 @@ inherited cpuarmfo: tcpuarmfo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
@@ -772,9 +776,9 @@ inherited cpuarmfo: tcpuarmfo
   object tbooleanedit12: tbooleanedit[14]
     Tag = 5
     bounds_x = 178
-    bounds_y = 0
+    bounds_y = 1
     bounds_cx = 11
-    bounds_cy = 29
+    bounds_cy = 28
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -784,7 +788,7 @@ inherited cpuarmfo: tcpuarmfo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
@@ -794,9 +798,9 @@ inherited cpuarmfo: tcpuarmfo
   object tbooleanedit13: tbooleanedit[15]
     Tag = 8
     bounds_x = 145
-    bounds_y = 0
+    bounds_y = 1
     bounds_cx = 11
-    bounds_cy = 29
+    bounds_cy = 28
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -806,7 +810,7 @@ inherited cpuarmfo: tcpuarmfo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
@@ -816,9 +820,9 @@ inherited cpuarmfo: tcpuarmfo
   object tbooleanedit14: tbooleanedit[16]
     Tag = 6
     bounds_x = 167
-    bounds_y = 0
+    bounds_y = 1
     bounds_cx = 11
-    bounds_cy = 29
+    bounds_cy = 28
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -828,7 +832,7 @@ inherited cpuarmfo: tcpuarmfo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
@@ -838,9 +842,9 @@ inherited cpuarmfo: tcpuarmfo
   object tbooleanedit15: tbooleanedit[17]
     Tag = 9
     bounds_x = 134
-    bounds_y = 0
+    bounds_y = 1
     bounds_cx = 11
-    bounds_cy = 29
+    bounds_cy = 28
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -850,7 +854,7 @@ inherited cpuarmfo: tcpuarmfo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
@@ -860,9 +864,9 @@ inherited cpuarmfo: tcpuarmfo
   object tbooleanedit20: tbooleanedit[18]
     Tag = 4
     bounds_x = 193
-    bounds_y = 0
-    bounds_cx = 12
-    bounds_cy = 29
+    bounds_y = 1
+    bounds_cx = 11
+    bounds_cy = 28
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -872,8 +876,8 @@ inherited cpuarmfo: tcpuarmfo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
-      1
+      17
+      0
       0
     )
     taborder = 18
@@ -882,9 +886,9 @@ inherited cpuarmfo: tcpuarmfo
   object tbooleanedit19: tbooleanedit[19]
     Tag = 3
     bounds_x = 204
-    bounds_y = 0
+    bounds_y = 1
     bounds_cx = 11
-    bounds_cy = 29
+    bounds_cy = 28
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -894,7 +898,7 @@ inherited cpuarmfo: tcpuarmfo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
@@ -904,9 +908,9 @@ inherited cpuarmfo: tcpuarmfo
   object tbooleanedit18: tbooleanedit[20]
     Tag = 2
     bounds_x = 215
-    bounds_y = 0
+    bounds_y = 1
     bounds_cx = 11
-    bounds_cy = 29
+    bounds_cy = 28
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -916,7 +920,7 @@ inherited cpuarmfo: tcpuarmfo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
@@ -926,9 +930,9 @@ inherited cpuarmfo: tcpuarmfo
   object tbooleanedit17: tbooleanedit[21]
     Tag = 1
     bounds_x = 226
-    bounds_y = 0
+    bounds_y = 1
     bounds_cx = 11
-    bounds_cy = 29
+    bounds_cy = 28
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -938,7 +942,7 @@ inherited cpuarmfo: tcpuarmfo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )

@@ -23,19 +23,40 @@ object objectinspectorfo: tobjectinspectorfo
   statfile = mainfo.projectstatfile
   caption = 'Object Inspector'
   icon.transparentcolor = -2147483642
-  icon.options = [bmo_masked]
   icon.image = {
-    00000000020000001800000018000000CC000000000000000000000000000000
-    0000000000000000000000000000000000000000C0C0C03400FCF804C0C0C013
-    00FCF806C0C0C01100FCF808C0C0C01000FCF808C0C0C01000FCF808C0C0C010
-    00FCF808C0C0C01100FCF806C0C0C0080000F801C0C0C00A00FCF804C0C0C008
-    0000F803C0C0C0150000F803C0C0C0140000F805C0C0C0120000F807C0C0C010
-    0000F809C0C0C00F0000F809C0C0C004F8000008C0C0C0020000F80BC0C0C003
-    F8000008C0C0C0020000F80BC0C0C003F8000008C0C0C010F8000008C0C0C010
-    F8000008C0C0C010F8000008C0C0C010F8000008C0C0C010F8000008C0C0C026
-    0000000000000000F00000BFF8010008FC030000FC030000FC030000FC030000
-    F8010200F00007000000070000800F0300C01F0000E03F0000E03FBFFCF37F08
-    FCF37F00FC030003FC030040FC030000FC030000FC030000FC03000000000000
+    00000000000000001800000018000000D8030000000000000000000000000000
+    0000000000000000000000000000000000000000D0D0D01CBED3D5019BDBE001
+    80DFE7018DDBE101B1D5D801D0D0D011CED1D10190DFE7015FEFFE0160F0FF01
+    57F0FF0144EFFF0128EEFF0159E3ED01C5D2D301D0D0D00F8CE2EA0174F1FF01
+    8AF1FF0190F2FF0183F1FF016AF0FF0148EFFF0122EEFF0134D9E601CECFCF01
+    D0D0D00DB3D7DA0170F1FF0196F2FF01B5F3FF01BFF3FF01ACF2FF0188F1FF01
+    60F0FF0136EFFF010DEEFF014EA6AD01CBCBCB01D0D0D00C90E0E8017CF1FF01
+    A9F2FF01D0F4FF01D0F8FF01C5F3FF0198F2FF016BF0FF013EEFFF0111EEFF01
+    28C0CB018A8A8A01D0D0D00C78E4EF0177F1FF01A2F2FF01C8F3FF01D0F5FF01
+    BBF3FF0193F2FF0168F0FF013BEFFF010FEEFF011CD5E3015E5E5E01C5C5C501
+    D0D0D003C9C9D101D0D0D00788DFE70163F0FF0186F1FF01A0F2FF01A8F2FF01
+    98F2FF017AF1FF0155F0FF012DEFFF010DEEFF0129BDC8015E5E5E01ADADAD01
+    D0D0D002A3A3DB015757EC01D0D0D007B0D6D90146EEFE0161F0FF0173F1FF01
+    78F1FF016EF0FF0157F0FF0139EFFF0116EEFF010DEEFF01419298015E5E5E01
+    AFAFAF01D0D0D0023434F4010707FE019494BB01CFCFCF01D0D0D00676DFE801
+    36EFFF0145EFFF0148EFFF0141EFFF012FEFFF0116EEFF010DEEFF0126C2CE01
+    5E5E5E02C6C6C601D0D0D0019191DF010404FF022323CF01A6A6A601D0D0D006
+    CFD0D00167C4CB011AE6F60118EEFF0112EEFF010DEEFF010EEBFC0133ABB401
+    5B6364015E5E5E018F8F8F01D0D0D001CECED1012424F8010404FF0353538D01
+    CCCCCC01D0D0D0078B9697014A8387013C9AA10147888D01576B6C015E5E5E02
+    7F7F7F01CDCDCD01D0D0D0017F7FE3010404FF041818DB019C9C9C01D0D0D008
+    B6B6B601858585016E6E6E016A6A6A0181818101A9A9A901D0D0D002C7C7D201
+    1818FA010404FF0546469701C8C8C801D0D0D003E1859101E8687808D9A9AF01
+    D0D0D0026C6CE7010404FF061111E7018F8F9301D0D0D003F23A5101FF002008
+    E2828E01D0D0D001BEBED4010F0FFD010404FF073B3BA201C2C2C201D0D0D002
+    F23A5101FF0020089B3B47016C6C6C015959EB010404FF080C0CF00181818D01
+    D0D0D002F23A5101FF0020089B3B47016B6B6E016E6EE6016A6AE8013D3DBB01
+    3131AF074E4E7B01BBBBBB01D0D0D001F23A5101FF0020089B3B47016C6C6C01
+    D0D0D001ABABAB015E5E5E097D7D7D01D0D0D001F23A5101FF0020089B3B4701
+    6C6C6C01D0D0D00DF23A5101FF0020089B3B47016C6C6C01D0D0D00DF23A5101
+    FF0020089B3B47016C6C6C01D0D0D00DF23A5101FF0020089B3B47016C6C6C01
+    D0D0D00DE1859101DD5D6D01AF2F3F077C4C52016C6C6C01D0D0D00EBBBBBB01
+    5E5E5E086C6C6C01D0D0D00C
   }
   oncreate = tmseformcreate
   oneventloopstart = objectinspectorfoonloaded
@@ -48,7 +69,8 @@ object objectinspectorfo: tobjectinspectorfo
     bounds_x = 0
     bounds_y = 1
     bounds_cx = 220
-    bounds_cy = 21
+    bounds_cy = 20
+    frame.button.color = -2147483646
     frame.dummy = 0
     anchors = [an_left, an_top, an_right]
     taborder = 2
@@ -59,7 +81,7 @@ object objectinspectorfo: tobjectinspectorfo
       item
       end>
     onbeforedropdown = compselectorbeforedropdown
-    reffontheight = 15
+    reffontheight = 14
   end
   object grid: twidgetgrid
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
@@ -137,21 +159,21 @@ object objectinspectorfo: tobjectinspectorfo
         widgetname = 'values'
       end>
     datarowlinecolor = -1610612731
-    datarowheight = 17
+    datarowheight = 16
     statfile = mainfo.projectstatfile
     onrowsdatachanged = gridrowsdatachanged
     oncellevent = gridcellevent
     drag.onbeforedragbegin = gridondragbegin
     drag.onbeforedragover = gridondragover
     drag.onbeforedragdrop = gridondragdrop
-    reffontheight = 15
+    reffontheight = 14
     object props: ttreeitemedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
       optionsskin = [osk_noskin]
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 90
-      bounds_cy = 17
+      bounds_cy = 16
       frame.levelo = 0
       frame.colorclient = -2147483646
       frame.localprops = [frl_levelo, frl_colorclient]
@@ -163,14 +185,14 @@ object objectinspectorfo: tobjectinspectorfo
       onupdaterowvalues = propupdaterowvalue
       options = [teo_treecolnavig, teo_keyrowmoving]
       oncheckrowmove = propsoncheckrowmove
-      reffontheight = 15
+      reffontheight = 14
     end
     object values: tmbdropdownitemedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight]
       bounds_x = 91
       bounds_y = 0
       bounds_cx = 148
-      bounds_cy = 17
+      bounds_cy = 16
       color = -1879048185
       frame.levelo = 0
       frame.colorclient = -2147483646
@@ -207,7 +229,7 @@ object objectinspectorfo: tobjectinspectorfo
         item
         end>
       onbeforedropdown = valuesbeforedropdown
-      reffontheight = 15
+      reffontheight = 14
     end
   end
   object compedit: tbutton
@@ -215,13 +237,13 @@ object objectinspectorfo: tobjectinspectorfo
     bounds_x = 223
     bounds_y = 2
     bounds_cx = 19
-    bounds_cy = 19
+    bounds_cy = 18
     anchors = [an_top, an_right]
     hint = 'Show component editor.'
     state = [as_disabled, as_localdisabled, as_localcaption, as_localhint, as_localonexecute]
     caption = 'ED'
     onexecute = compeditonexecute
-    reffontheight = 15
+    reffontheight = 14
   end
   object tpopupmenu1: tpopupmenu
     onupdate = popupupdate
