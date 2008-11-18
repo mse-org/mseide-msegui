@@ -1641,6 +1641,7 @@ var
  handle: integer;
  wstr1: filenamety;
  finddata: win32_find_dataw;
+ lwo1: longword;
 begin
  clearfileinfo(info);
  wstr1:= tosysfilepath(path);
@@ -1673,8 +1674,25 @@ begin
   findclose(handle);
   result:= true;
  end
- else begin
-  result:= false;
+ else begin   //possibly a drive name
+  if iswin95 then begin
+   lwo1:= getfileattributes(pchar(string(wstr1)));
+  end
+  else begin
+   lwo1:= getfileattributesw(pmsechar(wstr1));
+  end;
+  if lwo1 = $ffffffff then begin
+   result:= false;
+  end
+  else begin
+   if lwo1 and file_attribute_directory <> 0 then begin
+    info.extinfo1.filetype:= ft_dir;
+   end
+   else begin
+    info.extinfo1.filetype:= ft_reg;
+   end;
+   result:= true;
+  end;
  end;
 end;
 
