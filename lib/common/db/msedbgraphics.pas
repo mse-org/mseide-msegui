@@ -60,6 +60,10 @@ type
    destructor destroy; override;
    procedure loadbitmap(const abitmap: tmaskedbitmap;
                              aformat: string = '');
+   procedure storebitmap(const abitmap: tmaskedbitmap;
+              aformat: string = ''); overload;
+   procedure storebitmap(const abitmap: tmaskedbitmap;
+              aformat: string; const params: array of const); overload;
    procedure clearcache; override;
   published
    property format: string read fformat write fformat;
@@ -117,7 +121,7 @@ type
  
 implementation
 uses
- msestream,sysutils;
+ msestream,sysutils,msegraphicstream;
  
 type
  tsimplebitmap1 = class(tsimplebitmap);
@@ -327,6 +331,31 @@ begin
    abitmap.loadfromimagebuffer(n1.fimage);
   end;
  end;
+end;
+
+procedure tmsegraphicfield.storebitmap(const abitmap: tmaskedbitmap; 
+                         aformat: string; const params: array of const);
+var
+ stream1: tmsefilestream;
+begin
+ if aformat = '' then begin
+  aformat:= format;
+ end;
+ stream1:= tmsefilestream.create;
+ try
+  writegraphic(stream1,abitmap,aformat,params);
+  stream1.position:= 0;
+  loadfromstream(stream1);
+//  asstring:= stream1.readdatastring;
+ finally
+  stream1.free;
+ end;
+end;
+
+procedure tmsegraphicfield.storebitmap(const abitmap: tmaskedbitmap; 
+                         aformat: string = '');
+begin
+ storebitmap(abitmap,aformat,[]); 
 end;
 
 function tmsegraphicfield.getimagecachekb: integer;

@@ -1503,7 +1503,8 @@ end;
 
 procedure tgraphdataedit.gridtovalue(const row: integer);
 begin
- dochange;
+ invalidate;
+ //dochange;
 end;
 
 procedure tgraphdataedit.readstatoptions(const reader: tstatreader);
