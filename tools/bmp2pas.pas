@@ -35,7 +35,7 @@ uses
   msesysutils,
   msebitmap,
   mseclasses,
-  mseformdatatools,mseguiintf,mseformatpng,mseformatbmpico;
+  mseformdatatools,mseguiintf,mseformatpng,mseformatbmpico,msegraphutils;
 
 type
  argty = (arg_dest,arg_names);
@@ -79,7 +79,14 @@ begin
       end;
       writestdout(
       'Converting file "'+ar2[0]+'" componentname "'+bmps[int1].name+'".',true);
-      bmps[int1].bitmap.loadfromfile(ar2[0]);
+      with bmps[int1].bitmap do begin
+       loadfromfile(ar2[0]);
+       if fileext(ar2[0]) = 'png' then begin
+        transparentcolor:= cl_none;
+        colormask:= true;
+        masked:= true;
+       end;
+      end;
      end;
     end;
     str2:= removefileext(filename(str1));
