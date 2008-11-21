@@ -3719,7 +3719,7 @@ end;
 function tfielddatalink.msedisplaytext(const aformat: msestring = ''): msestring;
  function defaulttext: msestring;
  begin
-  if utf8 then begin
+  if utf8 and (ffield.datatype in textfields) then begin
    result:= utf8tostring(ffield.displaytext);
   end
   else begin

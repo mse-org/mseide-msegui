@@ -6001,7 +6001,7 @@ begin
      fstringbuffer:= tmsememofield(afield).asmsestring;
     end
     else begin
-     if utf8 then begin
+     if utf8 and (afield.datatype in textfields) then begin
       fstringbuffer:= utf8tostring(afield.displaytext);
      end
      else begin
