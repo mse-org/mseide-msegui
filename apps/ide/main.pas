@@ -25,7 +25,7 @@ uses
  msedispwidgets,msedataedits,msestat,msestatfile,msemenus,msebitmap,msetoolbar,
  msegrids,msefiledialog,msetypes,sourcepage,msetabs,msedesignintf,msedesigner,
  classes,mseclasses,msegraphutils,typinfo,msedock,sysutils,msesysenv,msestrings,
- msepostscriptprinter,msegraphics,mseglob;
+ msepostscriptprinter,msegraphics,mseglob,db,msedb;
 const
  versiontext = '1.9 unstable';
  idecaption = 'MSEide';
