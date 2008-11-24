@@ -1,7 +1,7 @@
 object formdesignerfo: tformdesignerfo
   optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
-  bounds_x = 17
-  bounds_y = 115
+  bounds_x = 196
+  bounds_y = 202
   bounds_cx = 287
   bounds_cy = 300
   taborder = 1

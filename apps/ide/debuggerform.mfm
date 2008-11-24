@@ -1,7 +1,7 @@
 object debuggerfo: tdebuggerfo
   optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
-  bounds_x = 122
-  bounds_y = 130
+  bounds_x = 116
+  bounds_y = 131
   bounds_cx = 441
   bounds_cy = 100
   frame.grip_size = 10
