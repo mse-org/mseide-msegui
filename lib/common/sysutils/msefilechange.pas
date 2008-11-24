@@ -156,8 +156,12 @@ function adddir(const sender: tdirchangethread; const name: filenamety): integer
 var
  flags: longword;
  action: tsigactionex;
+ str1: string;
 begin
- if sys_openfile(name,fm_read,[],[],result) = sye_ok then begin
+ str1:= name;
+ result:= mselibc.open(PChar(str1),o_rdonly);
+// if sys_openfile(name,fm_read,[],[],result) = sye_ok then begin
+ if result >= 0 then begin
   FillChar(action, SizeOf(action), 0);
   with action do begin
    sa_sigaction:= @DirChanged;

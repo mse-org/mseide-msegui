@@ -3384,25 +3384,8 @@ begin
 end;
  
 function tcustomstepframe.getframestateflags: framestateflagsty;
-var
- state1: shapestatesty;
 begin
- result:= [];
- if factbuttonindex <= high(fbuttons) then begin
-  state1:= fbuttons[factbuttonindex].state;
-  if shs_disabled in state1 then begin
-   include(result,fsf_disabled);
-  end;
-  if shs_active in state1 then begin
-   include(result,fsf_active);
-  end;
-  if shs_mouse in state1 then begin
-   include(result,fsf_mouse);
-  end;
-  if shs_clicked in state1 then begin
-   include(result,fsf_clicked);
-  end;
- end;
+ result:= shapestatetoframestate(factbuttonindex,fbuttons);
 end;
 
 { tscrollboxscrollbar }

@@ -79,6 +79,7 @@ type
  tabsskininfoty = record
   color: colorty;
   coloractive: colorty;
+  frame: tframecomp;
   face: tfacecomp;
   faceactive: tfacecomp;
  end;
@@ -177,6 +178,8 @@ type
    class function getitemclasstype: persistentclassty; override;
    procedure setfontalias;
  end;
+
+ createprocty = procedure of object;
  
 //todo: controller chain for custom components
 
@@ -197,8 +200,10 @@ type
    procedure dodeactivate; virtual;
    procedure loaded; override;
 
-   procedure setfacetemplate(const face: tfacecomp; const dest: tcustomface);   
-   procedure setframetemplate(const frame: tframecomp; const dest: tcustomframe);   
+   procedure setfacetemplate(const face: tfacecomp;
+                                        const dest: tcustomface);
+   procedure setframetemplate(const frame: tframecomp;
+                                        const dest: tcustomframe);
 
    procedure setwidgetface(const instance: twidget; const aface: tfacecomp);
 //   procedure setwidgetfacetemplate(const instance: twidget;
@@ -353,19 +358,23 @@ type
 
    procedure settabbar_horz_face(const avalue: tfacecomp);
    procedure settabbar_horz_frame(const avalue: tframecomp);
+   procedure settabbar_horz_tab_frame(const avalue: tframecomp);
    procedure settabbar_horz_tab_face(const avalue: tfacecomp);
    procedure settabbar_horz_tab_faceactive(const avalue: tfacecomp);
    procedure settabbar_vert_face(const avalue: tfacecomp);
    procedure settabbar_vert_frame(const avalue: tframecomp);
+   procedure settabbar_vert_tab_frame(const avalue: tframecomp);
    procedure settabbar_vert_tab_face(const avalue: tfacecomp);
    procedure settabbar_vert_tab_faceactive(const avalue: tfacecomp);
 
    procedure settabbar_horzopo_face(const avalue: tfacecomp);
    procedure settabbar_horzopo_frame(const avalue: tframecomp);
+   procedure settabbar_horzopo_tab_frame(const avalue: tframecomp);
    procedure settabbar_horzopo_tab_face(const avalue: tfacecomp);
    procedure settabbar_horzopo_tab_faceactive(const avalue: tfacecomp);
    procedure settabbar_vertopo_face(const avalue: tfacecomp);
    procedure settabbar_vertopo_frame(const avalue: tframecomp);
+   procedure settabbar_vertopo_tab_frame(const avalue: tframecomp);
    procedure settabbar_vertopo_tab_face(const avalue: tfacecomp);
    procedure settabbar_vertopo_tab_faceactive(const avalue: tfacecomp);
 
@@ -535,6 +544,8 @@ type
                                write ftabbar.tahorz.color default cl_default;
    property tabbar_horz_tab_coloractive: colorty read ftabbar.tahorz.coloractive 
                                write ftabbar.tahorz.coloractive default cl_default;
+   property tabbar_horz_tab_frame: tframecomp read ftabbar.tahorz.frame
+                               write settabbar_horz_tab_frame;
    property tabbar_horz_tab_face: tfacecomp read ftabbar.tahorz.face
                                write settabbar_horz_tab_face;
    property tabbar_horz_tab_faceactive: tfacecomp read ftabbar.tahorz.faceactive
@@ -543,6 +554,8 @@ type
                                write ftabbar.tahorzopo.color default cl_default;
    property tabbar_horzopo_tab_coloractive: colorty read ftabbar.tahorzopo.coloractive 
                                write ftabbar.tahorzopo.coloractive default cl_default;
+   property tabbar_horzopo_tab_frame: tframecomp read ftabbar.tahorzopo.frame
+                               write settabbar_horzopo_tab_frame;
    property tabbar_horzopo_tab_face: tfacecomp read ftabbar.tahorzopo.face
                                write settabbar_horzopo_tab_face;
    property tabbar_horzopo_tab_faceactive: tfacecomp read ftabbar.tahorzopo.faceactive
@@ -561,6 +574,8 @@ type
                                write ftabbar.tavert.color default cl_default;
    property tabbar_vert_tab_coloractive: colorty read ftabbar.tavert.coloractive 
                                write ftabbar.tavert.coloractive default cl_default;
+   property tabbar_vert_tab_frame: tframecomp read ftabbar.tavert.frame
+                               write settabbar_vert_tab_frame;
    property tabbar_vert_tab_face: tfacecomp read ftabbar.tavert.face
                                write settabbar_vert_tab_face;
    property tabbar_vert_tab_faceactive: tfacecomp read ftabbar.tavert.faceactive
@@ -570,6 +585,8 @@ type
    property tabbar_vertopo_tab_coloractive: colorty 
                          read ftabbar.tavertopo.coloractive 
                          write ftabbar.tavertopo.coloractive default cl_default;
+   property tabbar_vertopo_tab_frame: tframecomp read ftabbar.tavertopo.frame
+                               write settabbar_vertopo_tab_frame;
    property tabbar_vertopo_tab_face: tfacecomp read ftabbar.tavertopo.face
                          write settabbar_vertopo_tab_face;
    property tabbar_vertopo_tab_faceactive: tfacecomp 
@@ -1101,13 +1118,15 @@ begin
   if (coglyph <> cl_default) and (colorglyph = cl_default) then begin
    colorglyph:= coglyph;
   end;
-  if (fa <> nil) and (face = nil) then begin
+  if (fa <> nil) {and (face = nil)} then begin
    createface;
-   face.template:= fa;
+   setfacetemplate(fa,face);
+//   face.template:= fa;
   end;
-  if (fra <> nil) and (frame = nil) then begin
+  if (fra <> nil) {and (frame = nil)} then begin
    createframe;
-   frame.template:= fra;
+   setframetemplate(fra,frame);
+//   frame.template:= fra;
   end;
  end;
 end;
@@ -1116,25 +1135,30 @@ procedure tcustomskincontroller.setscrollbarskin(const instance: tcustomscrollba
                const ainfo: scrollbarskininfoty);
 begin
  with instance,ainfo do begin
-  if (facebu <> nil) and (facebutton = nil) then begin
+  if (facebu <> nil) {and (facebutton = nil)} then begin
    createfacebutton;
-   facebutton.template:= facebu;
+   setfacetemplate(facebu,facebutton);
+//   facebutton.template:= facebu;
   end;
-  if (faceendbu <> nil) and (faceendbutton = nil) then begin
+  if (faceendbu <> nil) {and (faceendbutton = nil)} then begin
    createfaceendbutton;
-   faceendbutton.template:= faceendbu;
+   setfacetemplate(faceendbu,faceendbutton);
+//   faceendbutton.template:= faceendbu;
   end;
-  if (framebu <> nil) and (framebutton = nil) then begin
+  if (framebu <> nil) {and (framebutton = nil)} then begin
    createframebutton;
-   framebutton.template:= framebu;
+   setframetemplate(framebu,framebutton);
+//   framebutton.template:= framebu;
   end;
-  if (frameendbu1 <> nil) and (frameendbutton1 = nil) then begin
+  if (frameendbu1 <> nil) {and (frameendbutton1 = nil)} then begin
    createframeendbutton1;
-   frameendbutton1.template:= frameendbu1;
+   setframetemplate(frameendbu1,frameendbutton1);
+//   frameendbutton1.template:= frameendbu1;
   end;
-  if (frameendbu2 <> nil) and (frameendbutton2 = nil) then begin
+  if (frameendbu2 <> nil) {and (frameendbutton2 = nil)} then begin
    createframeendbutton2;
-   frameendbutton2.template:= frameendbu2;
+   setframetemplate(frameendbu2,frameendbutton2);
+//   frameendbutton2.template:= frameendbu2;
   end;
  end;
 end;
@@ -1147,13 +1171,20 @@ begin
  with instance.tabs do begin
   beginupdate;
   try
-   if (face = nil) and (ainfo.face <> nil) then begin
-    createface;
-    face.template:= ainfo.face;
+   if {(frame = nil) and} (ainfo.frame <> nil) then begin
+    createframe;
+    setframetemplate(ainfo.frame,frame);
+//    frame.template:= ainfo.frame;
    end;
-   if (faceactive = nil) and (ainfo.faceactive <> nil) then begin
+   if {(face = nil) and} (ainfo.face <> nil) then begin
+    createface;
+    setfacetemplate(ainfo.face,face);
+//    face.template:= ainfo.face;
+   end;
+   if {(faceactive = nil) and} (ainfo.faceactive <> nil) then begin
     createfaceactive;
-    faceactive.template:= ainfo.faceactive;
+    setfacetemplate(ainfo.faceactive,faceactive);
+//    faceactive.template:= ainfo.faceactive;
    end;
    for int1:= 0 to count - 1 do begin
     with items[int1] do begin
@@ -1542,6 +1573,11 @@ begin
  setlinkedvar(avalue,tmsecomponent(ftabbar.tahorz.face));
 end;
 
+procedure tskincontroller.settabbar_horz_tab_frame(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftabbar.tahorz.frame));
+end;
+
 procedure tskincontroller.settabbar_horz_tab_faceactive(const avalue: tfacecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(ftabbar.tahorz.faceactive));
@@ -1560,6 +1596,11 @@ end;
 procedure tskincontroller.settabbar_vert_tab_face(const avalue: tfacecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(ftabbar.tavert.face));
+end;
+
+procedure tskincontroller.settabbar_vert_tab_frame(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftabbar.tavert.frame));
 end;
 
 procedure tskincontroller.settabbar_vert_tab_faceactive(const avalue: tfacecomp);
@@ -1582,6 +1623,11 @@ begin
  setlinkedvar(avalue,tmsecomponent(ftabbar.tahorzopo.face));
 end;
 
+procedure tskincontroller.settabbar_horzopo_tab_frame(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftabbar.tahorzopo.frame));
+end;
+
 procedure tskincontroller.settabbar_horzopo_tab_faceactive(const avalue: tfacecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(ftabbar.tahorzopo.faceactive));
@@ -1600,6 +1646,11 @@ end;
 procedure tskincontroller.settabbar_vertopo_tab_face(const avalue: tfacecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(ftabbar.tavertopo.face));
+end;
+
+procedure tskincontroller.settabbar_vertopo_tab_frame(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftabbar.tavertopo.frame));
 end;
 
 procedure tskincontroller.settabbar_vertopo_tab_faceactive(const avalue: tfacecomp);
@@ -1875,10 +1926,10 @@ begin
  setstepbuttonskin(sender.frame,fstepbutton);
  if ftoolbar.buttonface <> nil then begin
   with sender.buttons do begin
-   if face = nil then begin
+//   if face = nil then begin
     createface;
     setfacetemplate(ftoolbar.buttonface,face);
-   end;
+//   end;
   end;
  end;
 end;

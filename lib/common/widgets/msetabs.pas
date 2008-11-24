@@ -87,17 +87,19 @@ type
  createtabeventty = procedure(const sender: tcustomtabbar; const index: integer;
                          var tab: ttab) of object;
                           
- ttabs = class(tindexpersistentarrayprop)
+ ttabs = class(tindexpersistentarrayprop,iframe)
   private
    fcolor: colorty;
    fcoloractive: colorty;
    fcaptionpos: captionposty;
    fcaptionframe: framety;
    fimagedist: integer;
+   fframe: tframe;
    fface: tface;
    ffaceactive: tface;
    fhint: msestring;
    foncreatetab: createtabeventty;
+   factcellindex: integer;
    procedure setitems(const index: integer; const Value: ttab);
    function getitems(const index: integer): ttab; reintroduce;
    function getface: tface;
@@ -112,15 +114,32 @@ type
    procedure setcaptionframe_right(const avalue: integer);
    procedure setcaptionframe_bottom(const avalue: integer);
    procedure setimagedist(const avalue: integer);
+   function getframe: tframe;
+   procedure setframe(const avalue: tframe);
   protected
    procedure createitem(const index: integer; var item: tpersistent); override;
    procedure dosizechanged; override;
    procedure checktemplate(const sender: tobject);
+   //iframe
+   procedure setframeinstance(instance: tcustomframe);
+   procedure setstaticframe(value: boolean);
+   function getwidgetrect: rectty;
+   function getcomponentstate: tcomponentstate;
+   function getmsecomponentstate: msecomponentstatesty;
+   procedure scrollwidgets(const dist: pointty);
+   procedure clientrectchanged;
+   procedure invalidate;
+   procedure invalidatewidget;
+   procedure invalidaterect(const rect: rectty; const org: originty = org_client;
+                               const noclip: boolean = false);
+   function getwidget: twidget;
+   function getframestateflags: framestateflagsty; virtual;
   public
    constructor create(const aowner: tcustomtabbar; aclasstype: indexpersistentclassty);
                                          reintroduce;
    destructor destroy; override;
    class function getitemclasstype: persistentclassty; override;
+   procedure createframe;
    procedure createface;
    procedure createfaceactive;
    procedure add(const item: ttab);
@@ -146,6 +165,7 @@ type
                           setcaptionframe_bottom default defaultcaptiondist;
    property imagedist: integer read fimagedist write setimagedist 
                                                        default defaultimagedist;
+   property frame: tframe read getframe write setframe;
    property face: tface read getface write setface;
    property faceactive: tface read getfaceactive write setfaceactive;
    property hint: msestring read fhint write fhint;
@@ -664,6 +684,7 @@ var
  bo1: boolean;
  cxinflate: integer;
  cyinflate: integer;
+ frame1: framety;
 begin
  with layout do begin
   cells:= nil;
@@ -674,6 +695,17 @@ begin
   lasttab:= -1;
   cxinflate:= tabs.fcaptionframe.left + tabs.fcaptionframe.right + 2;
   cyinflate:= tabs.fcaptionframe.top + tabs.fcaptionframe.bottom + 2;
+  if tabs.fframe <> nil then begin
+   with tabs.fframe do begin
+    frame1:= paintframe;
+    cxinflate:= cxinflate + frame1.left + frame1.right;
+    cyinflate:= cyinflate + frame1.top + frame1.bottom;
+    if fso_flat in optionsskin then begin
+     cxinflate:= cxinflate - 2;
+     cyinflate:= cyinflate - 2;
+    end;
+   end;
+  end;
   if shs_vert in options then begin
    aval:= dim.y;
    endval:= dim.y + dim.cy;
@@ -749,6 +781,7 @@ begin
     state:= (state + [shs_showfocusrect] + options * [shs_vert,shs_opposite]) - 
                                                       [shs_focused];
     if ts_active in fstate then begin
+     include(state,shs_active);
      if focused then begin
       state:= state + [shs_focused];
      end;
@@ -758,9 +791,11 @@ begin
      else begin
       color:= fcoloractive;
      end;
+     coloractive:= color;
      face:= tabs.ffaceactive;
     end
     else begin
+     exclude(state,shs_active);
      if fcolor = cl_default then begin
       color:= tabs.fcolor;
      end
@@ -1224,6 +1259,9 @@ end;
 
 procedure ttabs.checktemplate(const sender: tobject);
 begin
+ if frame <> nil then begin
+  fframe.checktemplate(sender);
+ end;
  if fface <> nil then begin
   fface.checktemplate(sender);
  end;
@@ -1232,12 +1270,107 @@ begin
  end;
 end;
 
+// iframe
+
+procedure ttabs.setframeinstance(instance: tcustomframe);
+begin
+ fframe:= tframe(instance);
+end;
+
+procedure ttabs.setstaticframe(value: boolean);
+begin
+ //dummy
+end;
+
+function ttabs.getwidgetrect: rectty;
+begin
+ result:= nullrect;
+end;
+
+function ttabs.getcomponentstate: tcomponentstate;
+begin
+ result:= tcustomtabbar(fowner).componentstate;
+end;
+
+function ttabs.getmsecomponentstate: msecomponentstatesty;
+begin
+ result:= tcustomtabbar(fowner).msecomponentstate;
+end;
+
+procedure ttabs.scrollwidgets(const dist: pointty);
+begin
+ //dummy
+end;
+
+procedure ttabs.clientrectchanged;
+begin
+ tcustomtabbar(fowner).layoutchanged;
+end;
+
+procedure ttabs.invalidate;
+begin
+ tcustomtabbar(fowner).invalidate;
+end;
+
+procedure ttabs.invalidatewidget;
+begin
+ tcustomtabbar(fowner).invalidatewidget;
+end;
+
+procedure ttabs.invalidaterect(const rect: rectty;
+               const org: originty = org_client; const noclip: boolean = false);
+begin
+ tcustomtabbar(fowner).invalidaterect(rect,org,noclip);
+end;
+
+function ttabs.getwidget: twidget;
+begin
+ result:= tcustomtabbar(fowner);
+end;
+
+function ttabs.getframestateflags: framestateflagsty;
+begin
+ result:= shapestatetoframestate(factcellindex,
+                              tcustomtabbar(fowner).flayoutinfo.cells);
+end;
+
 procedure ttabs.dosizechanged;
 begin
  inherited;
  if (count > 0) and 
             not (csloading in tcustomtabbar(fowner).componentstate) then begin
   tcustomtabbar(fowner).updateskin;
+ end;
+end;
+
+function ttabs.getframe: tframe;
+begin
+ tcustomtabbar(fowner).getoptionalobject(fframe,
+                               {$ifdef FPC}@{$endif}createframe);
+ result:= fframe;
+end;
+
+procedure ttabs.setframe(const avalue: tframe);
+var int1: integer;
+begin
+ tcustomtabbar(fowner).setoptionalobject(avalue,fframe,
+                               {$ifdef FPC}@{$endif}createframe);
+ if fframe = nil then begin
+  with tcustomtabbar(fowner).flayoutinfo do begin
+   for int1:= 0 to high(cells) do begin
+    with cells[int1] do begin
+     state:= state - [shs_flat,shs_noanimation];
+    end;
+   end;
+  end;
+ end;
+ tcustomtabbar(fowner).invalidatewidget;
+end;
+
+procedure ttabs.createframe;
+begin
+ if fframe = nil then begin
+  fframe:= tframe.create(iframe(self));
  end;
 end;
 
@@ -1447,6 +1580,8 @@ begin
  inherited;
  with flayoutinfo do begin
   for int1:= firsttab to lasttab do begin
+   tabs.factcellindex:= int1;
+   cells[int1].frame:= tabs.fframe; //todo: move to layoutcalc
    drawtab(canvas,cells[int1],@tabs.fcaptionframe);
   end;
   int1:= high(cells);

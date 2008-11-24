@@ -74,7 +74,7 @@ procedure drawtoolbutton(const canvas: tcanvas; var info: shapeinfoty);
 procedure drawbutton(const canvas: tcanvas; const info: shapeinfoty);
 procedure drawmenubutton(const canvas: tcanvas; var info: shapeinfoty;
                            const innerframe: pframety = nil);
-procedure drawtab(const canvas: tcanvas; const info: shapeinfoty;
+procedure drawtab(const canvas: tcanvas; var info: shapeinfoty;
                                const innerframe: pframety = nil);
 function updatemouseshapestate(var info: shapeinfoty;
                  const mouseevent: mouseeventinfoty;
@@ -101,6 +101,8 @@ procedure actioninfotoshapeinfo(const sender: twidget; var actioninfo: actioninf
                                     var shapeinfo: shapeinfoty); overload;
 procedure frameskinoptionstoshapestate(const aframe: tcustomframe;
                                     var dest: shapestatesty);
+function shapestatetoframestate(const aindex: integer;
+          const ashapes: shapeinfoarty): framestateflagsty;
 
 procedure checkbuttonhint(const awidget: twidget; info: mouseeventinfoty;
     var hintedbutton: integer; const cells: shapeinfoarty;
@@ -472,6 +474,29 @@ begin
  end;
 end;
 
+function shapestatetoframestate(const aindex: integer;
+          const ashapes: shapeinfoarty): framestateflagsty;
+var
+ state1: shapestatesty;
+begin
+ result:= [];
+ if aindex <= high(ashapes) then begin
+  state1:= ashapes[aindex].state;
+  if shs_disabled in state1 then begin
+   include(result,fsf_disabled);
+  end;
+  if [shs_active{,shs_focused}] * state1 <> [] then begin
+   include(result,fsf_active);
+  end;
+  if shs_mouse in state1 then begin
+   include(result,fsf_mouse);
+  end;
+  if shs_clicked in state1 then begin
+   include(result,fsf_clicked);
+  end;
+ end;
+end;
+ 
 procedure draw3dframe(const canvas: tcanvas; const arect: rectty; level: integer;
                                  colorinfo: framecolorinfoty);
 
@@ -1071,37 +1096,52 @@ begin
  end;
 end;
 
-procedure drawtab(const canvas: tcanvas; const info: shapeinfoty; 
+procedure drawtab(const canvas: tcanvas; var info: shapeinfoty; 
                                    const innerframe: pframety = nil);
 var
  int1: integer;
  color1: colorty;
  rect1,rect2: rectty;
  pos1,pos2: captionposty;
+ frame1: framety;
 begin
  with canvas,info do begin
-  if not (shs_invisible in state) and 
-                      drawbuttonframe(canvas,info,rect1) then begin
-   if ca.captionpos = cp_left then begin
-    pos1:= cp_right;
-    pos2:= cp_left;
-   end
-   else begin
-    pos1:= cp_left;
-    pos2:= cp_right;
+  if not (shs_invisible in state) then begin
+   if info.frame <> nil then begin 
+    //todo: optimize, move settings to tcustomstepframe updatestate
+    canvas.save;
+    info.frame.paintbackground(canvas,info.ca.dim);
+    canvas.restore;   
+    frame1:= info.frame.paintframe;
+    deflaterect1(info.ca.dim,frame1);
+    frameskinoptionstoshapestate(info.frame,info.state);
+   end;     
+   if drawbuttonframe(canvas,info,rect1) then begin
+    if ca.captionpos = cp_left then begin
+     pos1:= cp_right;
+     pos2:= cp_left;
+    end
+    else begin
+     pos1:= cp_left;
+     pos2:= cp_right;
+    end;
+    rect2:= rect1;
+    drawbuttonimage(canvas,info,rect1{,pos1});
+    drawbuttoncheckbox(canvas,info,rect1,pos2);
+    if state * [shs_focused,shs_showfocusrect] = 
+                          [shs_focused,shs_showfocusrect] then begin
+     drawfocusrect(canvas,inflaterect(rect2,-focusrectdist));
+    end;
+    rect2:= rect1; //outerframe
+    if innerframe <> nil then begin
+     deflaterect1(rect1,innerframe^);
+    end;
+    drawbuttoncaption(canvas,info,rect1,pos1,@rect2);
    end;
-   rect2:= rect1;
-   drawbuttonimage(canvas,info,rect1{,pos1});
-   drawbuttoncheckbox(canvas,info,rect1,pos2);
-   if state * [shs_focused,shs_showfocusrect] = 
-                         [shs_focused,shs_showfocusrect] then begin
-    drawfocusrect(canvas,inflaterect(rect2,-focusrectdist));
-   end;
-   rect2:= rect1; //outerframe
-   if innerframe <> nil then begin
-    deflaterect1(rect1,innerframe^);
-   end;
-   drawbuttoncaption(canvas,info,rect1,pos1,@rect2);
+   if info.frame <> nil then begin
+    inflaterect1(info.ca.dim,frame1);
+    info.frame.paintoverlay(canvas,info.ca.dim);
+   end; 
   end;
   if not (shs_checked in state) then begin
    if shs_opposite in state then begin
