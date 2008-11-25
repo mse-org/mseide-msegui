@@ -1150,7 +1150,8 @@ type
    function getrowfieldisnull(const afield: tfield; const row: integer): boolean;
    function getansistringbuffer(const afield: tfield; const row: integer): pointer;
    function getstringbuffer(const afield: tfield; const row: integer): pointer;
-   function getdisplaystringbuffer(const afield: tfield; const row: integer): pointer;
+   function getdisplaystringbuffer(const afield: tfield; const row: integer{;
+                                       const aedit: boolean}): pointer;
    function getbooleanbuffer(const afield: tfield; const row: integer): pointer;
    function getintegerbuffer(const afield: tfield; const row: integer): pointer;
    function getint64buffer(const afield: tfield; const row: integer): pointer;
@@ -5970,7 +5971,7 @@ begin
     fstringbuffer:= tmsestringfield(afield).asmsestring;
    end
    else begin
-    if utf8 then begin
+    if utf8 and (afield.datatype in textfields) then begin
      fstringbuffer:= utf8tostring(afield.asstring);
     end
     else begin
@@ -5983,9 +5984,10 @@ begin
 end;
 
 function tgriddatalink.getdisplaystringbuffer(const afield: tfield;
-                      const row: integer): pointer;
+                      const row: integer{; const aedit: boolean}): pointer;
 var
  int1: integer;
+// str1: ansistring;
 begin
  result:= nil;
  if (afield <> nil) and hasdata then begin
@@ -6001,6 +6003,14 @@ begin
      fstringbuffer:= tmsememofield(afield).asmsestring;
     end
     else begin
+    {
+     if aedit then begin
+      str1:= afield.text;
+     end
+     else begin
+      str1:= afield.displaytext;
+     end;
+     }
      if utf8 and (afield.datatype in textfields) then begin
       fstringbuffer:= utf8tostring(afield.displaytext);
      end
@@ -7094,7 +7104,8 @@ var
  po1: pmsestring;
 begin
  po1:= pmsestring(tcustomdbstringgrid(fgrid).fdatalink.getdisplaystringbuffer(
-                           fdatalink.field,arow));
+                           fdatalink.field,arow{,(fgrid.row = arow) and 
+                           (fgrid.col = index) and fgrid.active}));
  if po1 = nil then begin
   result:= '';
  end
@@ -7185,7 +7196,7 @@ var
 begin
  int1:= tcustomdbstringgrid(fgrid).fdatalink.activerecord;
  if (int1 >= 0) and (int1 < fgrid.rowcount) then begin
-  items[int1]:= fdatalink.msedisplaytext;
+  items[int1]:= fdatalink.msedisplaytext('',true);
  end;
 end;
 
