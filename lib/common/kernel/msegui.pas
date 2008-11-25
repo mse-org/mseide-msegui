@@ -122,7 +122,7 @@ type
                  }
                  fs_drawfocusrect,fs_paintrectfocus,
                  fs_captionfocus,fs_captionhint,fs_rectsvalid,
-                 fs_widgetactive,fs_paintposinited);
+                 fs_widgetactive,fs_paintposinited,fs_needsmouseinvalidate);
  framestatesty = set of framestatety;
 
  hintflagty = (hfl_show,hfl_custom,{hfl_left,hfl_top,hfl_right,hfl_bottom,}
@@ -471,7 +471,7 @@ type
    function outerframe: framety;
    function paintframe: framety;     
    function innerframe: framety;     
-   function cellframe: framety; //innerframe without painframedelta
+   function cellframe: framety; //innerframe without paintframedelta
    function pointincaption(const point: pointty): boolean; virtual;
                                      //origin = widgetrect
    procedure initgridframe; virtual;
@@ -3169,11 +3169,13 @@ end;
 function tcustomframe.needsmouseinvalidate: boolean;
 begin
  with fi do begin
-  result:= (frameimage_list <> nil) and 
+  result:= (fs_needsmouseinvalidate in fstate) or
+    (frameimage_list <> nil) and 
     ((frameimage_offsetmouse <> 0) or 
-    (frameimage_offsetactivemouse <> 0) or
-    (frameimage_offsetactiveclicked <> 0) or
-    (frameimage_offsetclicked <> 0));
+     (frameimage_offsetactivemouse <> 0) or
+     (frameimage_offsetactiveclicked <> 0) or
+     (frameimage_offsetclicked <> 0)
+     );
  end;
 end;
 
@@ -9762,7 +9764,8 @@ begin
    inc(rect1.y,fframe.fpaintrect.y); //widget origin
   end;
   if (ow_noscroll in foptionswidget) {or not (ws_opaque in fwidgetstate)} or
-                                  (tws_painting in fwindow.fstate) then begin
+     (tws_painting in fwindow.fstate) or
+     (abs(dist.x) >= rect.cx) or (abs(dist.y) > rect1.cy) then begin
    invalidaterect(rect1,org_widget);
   end
   else begin

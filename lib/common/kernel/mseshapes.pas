@@ -83,7 +83,8 @@ function updatemouseshapestate(var info: shapeinfoty;
                  const canclick: boolean = true): boolean; overload;
 function updatemouseshapestate(var infos: shapeinfoarty;
                  const mouseevent: mouseeventinfoty;
-                 const widget: twidget; var focuseditem: integer): boolean; overload;
+                 const widget: twidget; var focuseditem: integer;
+                 const aframe: tcustomframe = nil): boolean; overload;
          //true on change, calls widget.invalidaterect
 function getmouseshape(const infos: shapeinfoarty): integer;
          //returns shape index under mouse, -1 if none
@@ -385,7 +386,13 @@ begin
         state:= state - [shs_clicked];
         result:= true;              //state can be invalid after execute
         if widget <> nil then begin //info can be invalid after execute
-         widget.invalidaterect(ca.dim);
+         if (aframe <> nil) and tframe1(aframe).needsmouseinvalidate then begin
+          widget.invalidaterect(inflaterect(ca.dim,aframe.innerframe));
+         end
+         else begin
+          widget.invalidaterect(ca.dim);
+         end;
+//         widget.invalidaterect(ca.dim);
         end;
         doexecute(tag,mouseevent);
         exit;
@@ -424,14 +431,15 @@ end;
 
 function updatemouseshapestate(var infos: shapeinfoarty;
                  const mouseevent: mouseeventinfoty;
-                 const widget: twidget; var focuseditem: integer): boolean;
+                 const widget: twidget; var focuseditem: integer;
+                 const aframe: tcustomframe = nil): boolean;
 var
  int1,int2: integer;
 begin
  result:= false;
  for int1:= 0 to high(infos) do begin
   result:= updatemouseshapestate(infos[int1],mouseevent,widget,
-                                                 nil,@infos) or result;
+                                                 aframe,@infos) or result;
   if shs_mouse in infos[int1].state then begin
    if focuseditem <> int1 then begin
     if (focuseditem >= 0) and (focuseditem <= high(infos)) then begin
@@ -1101,20 +1109,22 @@ procedure drawtab(const canvas: tcanvas; var info: shapeinfoty;
 var
  int1: integer;
  color1: colorty;
- rect1,rect2: rectty;
+ rect1,rect2,rect3: rectty;
  pos1,pos2: captionposty;
  frame1: framety;
 begin
  with canvas,info do begin
   if not (shs_invisible in state) then begin
-   if info.frame <> nil then begin 
+   if frame <> nil then begin 
     //todo: optimize, move settings to tcustomstepframe updatestate
+    rect3:= ca.dim;
+    inflaterect1(ca.dim,frame.framei);
     canvas.save;
-    info.frame.paintbackground(canvas,info.ca.dim);
+    frame.paintbackground(canvas,info.ca.dim);
     canvas.restore;   
-    frame1:= info.frame.paintframe;
-    deflaterect1(info.ca.dim,frame1);
-    frameskinoptionstoshapestate(info.frame,info.state);
+    frame1:= frame.paintframe;
+    deflaterect1(ca.dim,frame1);
+    frameskinoptionstoshapestate(frame,info.state);
    end;     
    if drawbuttonframe(canvas,info,rect1) then begin
     if ca.captionpos = cp_left then begin
@@ -1138,41 +1148,43 @@ begin
     end;
     drawbuttoncaption(canvas,info,rect1,pos1,@rect2);
    end;
-   if info.frame <> nil then begin
+   if frame <> nil then begin
     inflaterect1(info.ca.dim,frame1);
-    info.frame.paintoverlay(canvas,info.ca.dim);
+    frame.paintoverlay(canvas,info.ca.dim);
+    ca.dim:= rect3;
    end; 
   end;
-  if not (shs_checked in state) then begin
+  if not (shs_active in state) then begin
    if shs_opposite in state then begin
     color1:= defaultframecolors.shadow.color;
    end
    else begin
     color1:= defaultframecolors.light.effectcolor;
    end;
-  end
-  else begin
-   color1:= color;
-  end;
-  if shs_vert in state then begin
-   if shs_opposite in state then begin
-    int1:= ca.dim.x;
+//  end
+//  else begin
+//   color1:= color;
+//  end;
+   if shs_vert in state then begin
+    if shs_opposite in state then begin
+     int1:= ca.dim.x;
+    end
+    else begin
+     int1:= ca.dim.x+ca.dim.cx-1;
+    end;
+    canvas.drawline(makepoint(int1,ca.dim.y),
+                        makepoint(int1,ca.dim.y+ca.dim.cy-1),color1);
    end
    else begin
-    int1:= ca.dim.x+ca.dim.cx-1;
+    if shs_opposite in state then begin
+     int1:= ca.dim.y;
+    end
+    else begin
+     int1:= ca.dim.y+ca.dim.cy-1;
+    end;
+    canvas.drawline(makepoint(ca.dim.x,int1),
+                         makepoint(ca.dim.x+ca.dim.cx-1,int1),color1);
    end;
-   canvas.drawline(makepoint(int1,ca.dim.y),
-                       makepoint(int1,ca.dim.y+ca.dim.cy-1),color1);
-  end
-  else begin
-   if shs_opposite in state then begin
-    int1:= ca.dim.y;
-   end
-   else begin
-    int1:= ca.dim.y+ca.dim.cy-1;
-   end;
-   canvas.drawline(makepoint(ca.dim.x,int1),
-                        makepoint(ca.dim.x+ca.dim.cx-1,int1),color1);
   end;
  end;
 end;

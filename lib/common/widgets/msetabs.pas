@@ -24,6 +24,7 @@ const
  defaulttaboptionsskin = defaultoptionsskin + [osk_colorcaptionframe];
  defaultcaptiondist = 1;
  defaultimagedist = 0;
+ defaulttabshift = -100; //-> 1
  defaultcaptionpos = cp_right;
  defaulttabpageskinoptions = defaultcontainerskinoptions;
 
@@ -86,7 +87,12 @@ type
 
  createtabeventty = procedure(const sender: tcustomtabbar; const index: integer;
                          var tab: ttab) of object;
-                          
+
+ ttabframe = class(tframe)
+  public
+   constructor create(const intf: iframe);
+ end;
+                           
  ttabs = class(tindexpersistentarrayprop,iframe)
   private
    fcolor: colorty;
@@ -100,6 +106,8 @@ type
    fhint: msestring;
    foncreatetab: createtabeventty;
    factcellindex: integer;
+   ftabshift: integer;
+   fshift: integer;
    procedure setitems(const index: integer; const Value: ttab);
    function getitems(const index: integer): ttab; reintroduce;
    function getface: tface;
@@ -116,6 +124,7 @@ type
    procedure setimagedist(const avalue: integer);
    function getframe: tframe;
    procedure setframe(const avalue: tframe);
+   procedure setshift(const avalue: integer);
   protected
    procedure createitem(const index: integer; var item: tpersistent); override;
    procedure dosizechanged; override;
@@ -165,6 +174,8 @@ type
                           setcaptionframe_bottom default defaultcaptiondist;
    property imagedist: integer read fimagedist write setimagedist 
                                                        default defaultimagedist;
+   property shift: integer read fshift write setshift default defaulttabshift;
+                       //defaulttabshift (-100) -> 1
    property frame: tframe read getframe write setframe;
    property face: tface read getface write setface;
    property faceactive: tface read getfaceactive write setfaceactive;
@@ -697,7 +708,7 @@ begin
   cyinflate:= tabs.fcaptionframe.top + tabs.fcaptionframe.bottom + 2;
   if tabs.fframe <> nil then begin
    with tabs.fframe do begin
-    frame1:= paintframe;
+    frame1:= subframe(paintframe,framei);
     cxinflate:= cxinflate + frame1.left + frame1.right;
     cyinflate:= cyinflate + frame1.top + frame1.bottom;
     if fso_flat in optionsskin then begin
@@ -728,11 +739,9 @@ begin
       end;
      end;
      if ts_active in fstate then begin
+      dim.x:= tabs.ftabshift;
       if shs_opposite in options then begin
-       dim.x:= -1;
-      end
-      else begin
-       dim.x:= 1;
+       dim.x:= -dim.x;
       end;
      end
      else begin
@@ -761,11 +770,9 @@ begin
       end;
      end;
      if ts_active in fstate then begin
+      dim.y:= tabs.ftabshift;
       if shs_opposite in options then begin
-       dim.y:= -1;
-      end
-      else begin
-       dim.y:= 1;
+       dim.y:= -dim.y;
       end;
      end
      else begin
@@ -1055,6 +1062,14 @@ begin
  result:= fimagelist;
 end;
 
+{ ttabframe }
+
+constructor ttabframe.create(const intf: iframe);
+begin
+ inherited;
+ include(fstate,fs_needsmouseinvalidate);
+end;
+
 { ttabs }
 
 constructor ttabs.create(const aowner: tcustomtabbar;
@@ -1068,6 +1083,8 @@ begin
  fcaptionframe.right:= defaultcaptiondist;
  fcaptionframe.bottom:= defaultcaptiondist;
  fimagedist:= defaultimagedist;
+ fshift:= defaulttabshift;
+ ftabshift:= 1;
  inherited create(aowner,aclasstype);
 end;
 
@@ -1183,6 +1200,20 @@ procedure ttabs.setimagedist(const avalue: integer);
 begin
  if avalue <> fimagedist then begin
   fimagedist:= avalue;
+  tcustomtabbar(fowner).layoutchanged;
+ end;  
+end;
+
+procedure ttabs.setshift(const avalue: integer);
+begin
+ if avalue <> fshift then begin
+  fshift:= avalue;
+  if avalue = defaulttabshift then begin
+   ftabshift:= 1;
+  end
+  else begin
+   ftabshift:= avalue;
+  end;
   tcustomtabbar(fowner).layoutchanged;
  end;  
 end;
@@ -1364,13 +1395,14 @@ begin
    end;
   end;
  end;
- tcustomtabbar(fowner).invalidatewidget;
+ tcustomtabbar(fowner).layoutchanged;
+// tcustomtabbar(fowner).invalidatewidget;
 end;
 
 procedure ttabs.createframe;
 begin
  if fframe = nil then begin
-  fframe:= tframe.create(iframe(self));
+  fframe:= ttabframe.create(iframe(self));
  end;
 end;
 
@@ -1579,13 +1611,9 @@ var
 begin
  inherited;
  with flayoutinfo do begin
-  for int1:= firsttab to lasttab do begin
-   tabs.factcellindex:= int1;
-   cells[int1].frame:= tabs.fframe; //todo: move to layoutcalc
-   drawtab(canvas,cells[int1],@tabs.fcaptionframe);
-  end;
   int1:= high(cells);
   rect1:= innerclientrect;
+  canvas.intersectcliprect(rect1);
   if shs_vert in options then begin
    if shs_opposite in options then begin
     int2:= rect1.x;
@@ -1596,14 +1624,14 @@ begin
     color1:= defaultframecolors.light.effectcolor;
    end;
    int3:= rect1.y+rect1.cy-1;
-   if int1 >= 0 then begin
-    with cells[int1],ca do begin
-     canvas.drawline(makepoint(int2,dim.y+dim.cy),makepoint(int2,int3),color1);
-    end;
-   end
-   else begin
+//   if int1 >= 0 then begin
+//    with cells[int1],ca do begin
+//     canvas.drawline(makepoint(int2,dim.y+dim.cy),makepoint(int2,int3),color1);
+//    end;
+//   end
+//   else begin
     canvas.drawline(makepoint(int2,rect1.y),makepoint(int2,int3),color1);
-   end;
+//   end;
   end
   else begin
    if shs_opposite in options then begin
@@ -1615,14 +1643,19 @@ begin
     color1:= defaultframecolors.light.effectcolor;
    end;
    int3:= rect1.x+rect1.cx-1;
-   if int1 >= 0 then begin
-    with cells[int1],ca do begin
-     canvas.drawline(makepoint(dim.x+dim.cx,int2),makepoint(int3,int2),color1);
-    end;
-   end
-   else begin
+//   if int1 >= 0 then begin
+//    with cells[int1],ca do begin
+//     canvas.drawline(makepoint(dim.x+dim.cx,int2),makepoint(int3,int2),color1);
+//    end;
+//   end
+//   else begin
     canvas.drawline(makepoint(rect1.x,int2),makepoint(int3,int2),color1);
-   end;
+//   end;
+  end;
+  for int1:= firsttab to lasttab do begin
+   tabs.factcellindex:= int1;
+   cells[int1].frame:= tabs.fframe; //todo: move to layoutcalc
+   drawtab(canvas,cells[int1],@tabs.fcaptionframe);
   end;
  end;
 end;
@@ -1676,7 +1709,7 @@ begin
  end;
  inherited;
  if updatemouseshapestate(flayoutinfo.cells,info,self,
-                            flayoutinfo.focusedtab) then begin
+                            flayoutinfo.focusedtab,flayoutinfo.tabs.fframe) then begin
   include(info.eventstate,es_processed);
  end;
  if not (csdesigning in componentstate) or 

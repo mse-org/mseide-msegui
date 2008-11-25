@@ -82,6 +82,7 @@ type
   frame: tframecomp;
   face: tfacecomp;
   faceactive: tfacecomp;
+  shift: integer;
  end;
  tabbarskininfoty = record
   wihorz: widgetskininfoty;
@@ -535,11 +536,6 @@ type
                                             write settabbar_horz_face;
    property tabbar_horz_frame: tframecomp read ftabbar.wihorz.fra 
                                             write settabbar_horz_frame;
-   property tabbar_horzopo_face: tfacecomp read ftabbar.wihorzopo.fa 
-                                            write settabbar_horzopo_face;
-   property tabbar_horzopo_frame: tframecomp read ftabbar.wihorzopo.fra 
-                                            write settabbar_horzopo_frame;
-
    property tabbar_horz_tab_color: colorty read ftabbar.tahorz.color 
                                write ftabbar.tahorz.color default cl_default;
    property tabbar_horz_tab_coloractive: colorty read ftabbar.tahorz.coloractive 
@@ -550,6 +546,13 @@ type
                                write settabbar_horz_tab_face;
    property tabbar_horz_tab_faceactive: tfacecomp read ftabbar.tahorz.faceactive
                                write settabbar_horz_tab_faceactive;
+   property tabbar_horz_tab_shift: integer read ftabbar.tahorz.shift
+                               write ftabbar.tahorz.shift default defaulttabshift;
+
+   property tabbar_horzopo_face: tfacecomp read ftabbar.wihorzopo.fa 
+                                            write settabbar_horzopo_face;
+   property tabbar_horzopo_frame: tframecomp read ftabbar.wihorzopo.fra 
+                                            write settabbar_horzopo_frame;
    property tabbar_horzopo_tab_color: colorty read ftabbar.tahorzopo.color 
                                write ftabbar.tahorzopo.color default cl_default;
    property tabbar_horzopo_tab_coloractive: colorty read ftabbar.tahorzopo.coloractive 
@@ -560,16 +563,13 @@ type
                                write settabbar_horzopo_tab_face;
    property tabbar_horzopo_tab_faceactive: tfacecomp read ftabbar.tahorzopo.faceactive
                                write settabbar_horzopo_tab_faceactive;
+   property tabbar_horzopo_tab_shift: integer read ftabbar.tahorzopo.shift
+                               write ftabbar.tahorzopo.shift default defaulttabshift;
 
    property tabbar_vert_face: tfacecomp read ftabbar.wivert.fa 
                                write settabbar_vert_face;
    property tabbar_vert_frame: tframecomp read ftabbar.wivert.fra 
                                write settabbar_vert_frame;
-   property tabbar_vertopo_face: tfacecomp read ftabbar.wivertopo.fa
-                               write settabbar_vertopo_face;
-   property tabbar_vertopo_frame: tframecomp read ftabbar.wivertopo.fra
-                               write settabbar_vertopo_frame;
-
    property tabbar_vert_tab_color: colorty read ftabbar.tavert.color 
                                write ftabbar.tavert.color default cl_default;
    property tabbar_vert_tab_coloractive: colorty read ftabbar.tavert.coloractive 
@@ -580,6 +580,13 @@ type
                                write settabbar_vert_tab_face;
    property tabbar_vert_tab_faceactive: tfacecomp read ftabbar.tavert.faceactive
                                write settabbar_vert_tab_faceactive;
+   property tabbar_vert_tab_shift: integer read ftabbar.tavert.shift
+                               write ftabbar.tavert.shift default defaulttabshift;
+
+   property tabbar_vertopo_face: tfacecomp read ftabbar.wivertopo.fa
+                               write settabbar_vertopo_face;
+   property tabbar_vertopo_frame: tframecomp read ftabbar.wivertopo.fra
+                               write settabbar_vertopo_frame;
    property tabbar_vertopo_tab_color: colorty read ftabbar.tavertopo.color 
                          write ftabbar.tavertopo.color default cl_default;
    property tabbar_vertopo_tab_coloractive: colorty 
@@ -592,6 +599,8 @@ type
    property tabbar_vertopo_tab_faceactive: tfacecomp 
                          read ftabbar.tavertopo.faceactive
                          write settabbar_vertopo_tab_faceactive;
+   property tabbar_vertopo_tab_shift: integer read ftabbar.tavertopo.shift
+                               write ftabbar.tavertopo.shift default defaulttabshift;
 
    property toolbar_face: tfacecomp read ftoolbar.wi.fa write settoolbar_face;
    property toolbar_frame: tframecomp read ftoolbar.wi.fra write settoolbar_frame;
@@ -1171,6 +1180,9 @@ begin
  with instance.tabs do begin
   beginupdate;
   try
+   if (ainfo.shift <> defaulttabshift) and (shift = defaulttabshift) then begin
+    shift:= ainfo.shift;
+   end;
    if {(frame = nil) and} (ainfo.frame <> nil) then begin
     createframe;
     setframetemplate(ainfo.frame,frame);
@@ -1373,12 +1385,16 @@ begin
  fframebutton.coglyph:= cl_default;
  ftabbar.tahorz.color:= cl_default;
  ftabbar.tahorz.coloractive:= cl_default;
+ ftabbar.tahorz.shift:= defaulttabshift;
  ftabbar.tavert.color:= cl_default;
  ftabbar.tavert.coloractive:= cl_default;
+ ftabbar.tavert.shift:= defaulttabshift;
  ftabbar.tahorzopo.color:= cl_default;
  ftabbar.tahorzopo.coloractive:= cl_default;
+ ftabbar.tahorzopo.shift:= defaulttabshift;
  ftabbar.tavertopo.color:= cl_default;
  ftabbar.tavertopo.coloractive:= cl_default;
+ ftabbar.tavertopo.shift:= defaulttabshift;
  inherited;
 end;
 

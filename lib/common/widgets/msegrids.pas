@@ -8434,12 +8434,29 @@ begin     //focuscell
   if (cell.row > invalidaxis) and (cell.col > invalidaxis) then begin
    rect1:= cellrect(cell);
    with rect1 do begin
+    bo1:= (cell.row >= 0);
+    if bo1 then begin
+     int1:= fdatarect.x - x;
+     bo1:= (int1 > 0) and (int1 < fdatarect.cx);
+    end;
+    if not bo1 then begin
+     bo1:= (cell.col >= 0);
+     if bo1 then begin
+      int1:= fdatarect.y - y;
+      bo1:= (int1 > 0) and (int1 < fdatarect.cy);
+     end;
+    end;
+    if bo1 then begin
+     update; //scrolling needed, update pending paintings with old focused cell
+    end;
+{
     if (cell.row >= 0) and 
          ((x < fdatarect.x) or (x + cx > fdatarect.x + fdatarect.cx)) or
        (cell.col >= 0) and 
          ((y < fdatarect.y) or (y + cy > fdatarect.y + fdatarect.cy)) then begin
      update; //scrolling needed, update pending paintings with old focused cell
     end;
+}
    end;
   end;
  end;
