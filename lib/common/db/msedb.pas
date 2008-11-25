@@ -226,6 +226,7 @@ type
    procedure setasboolean(avalue: boolean); override;
    procedure setaslargeint(avalue: largeint); override;
    function getaslargeint: largeint; override;
+   procedure gettext(var thetext: string; adisplaytext: boolean); override;
   public
    procedure Clear; override;
    function assql: string;
@@ -250,6 +251,7 @@ type
    function HasParent: Boolean; override;
    function getasboolean: boolean; override;
    procedure setasboolean(avalue: boolean); override;
+   procedure gettext(var thetext: string; adisplaytext: boolean); override;
   public
    procedure Clear; override;
    function assql: string;
@@ -346,6 +348,7 @@ type
    function getasfloat: double; override;
    function getascurrency: currency; override;
    procedure setasfloat(avalue: double); override;
+   procedure gettext(var thetext: string; adisplaytext: boolean); override;
   public
    procedure Clear; override;
    function assql: string;
@@ -356,7 +359,8 @@ type
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
- tmsecurrencyfield = class(tcurrencyfield)
+ tmsecurrencyfield = class(tmsefloatfield)
+ (*
   private
    ftagpo: pointer;
    function getasmsestring: msestring;
@@ -368,7 +372,10 @@ type
   {$endif}
    function HasParent: Boolean; override;
    procedure setasfloat(avalue: double); override;
+   *)
   public
+   constructor create(aowner: tcomponent); override;
+   (*
    procedure Clear; override;
    function assql: string;
    function asoldsql: string;
@@ -377,6 +384,7 @@ type
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
+   *)
  end;
  tmsebooleanfield = class(tbooleanfield)
   private
@@ -529,6 +537,7 @@ type
   {$endif}
    function HasParent: Boolean; override;
    procedure setasfloat(avalue: double); override;
+   procedure gettext(var thetext: string; adisplaytext: boolean); override;
    class procedure checktypesize(avalue: longint); override;
    property tagpo: pointer read ftagpo write ftagpo;
   public
@@ -705,7 +714,8 @@ type
    property AsString: string read GetAsString write SetAsString;
    property AsVariant: variant read GetAsVariant write SetAsVariant;
    property asmsestring: msestring read getasmsestring write setasmsestring;
-   function msedisplaytext(const aformat: msestring = ''): msestring;
+   function msedisplaytext(const aformat: msestring = '';
+                                          const aedit: boolean = false): msestring;
  end;
  
  fieldarrayty = array of tfield;
@@ -1168,6 +1178,25 @@ type
   
  tdataset1 = class(tdataset);
 
+function getnumdisplaytext(const sender: tnumericfield; const avalue: double;
+                           const adisplaytext: boolean; const acurrency: boolean): string;
+var
+ str1: ansistring;
+begin
+ with sender do begin
+  if adisplaytext then begin
+   str1:= sender.displayformat;
+   if (str1 = '') and  acurrency then begin
+    str1:= 'c';
+   end;
+  end
+  else begin
+   str1:= editformat;
+  end;
+ end;
+ result:= formatfloatmse(avalue,str1);
+end;
+
 procedure varianttorealty(const value: variant; out dest: realty);
 begin
  if varisnull(value) then begin
@@ -1430,7 +1459,7 @@ begin
    ftdatetime: begin
     result:= encodesqldatetime(field.asdatetime);
    end;
-   ftfloat: begin
+   ftfloat,ftcurrency: begin
     result:= encodesqlfloat(field.asfloat);
    end;
    ftbcd: begin
@@ -1488,7 +1517,7 @@ begin
     ftdatetime: begin
      result:= encodesqldatetime(asdatetime);
     end;
-    ftfloat: begin
+    ftfloat,ftcurrency: begin
      result:= encodesqlfloat(asfloat);
     end;
     ftbcd: begin
@@ -1548,12 +1577,12 @@ begin
      ds1.settempstate(astate); 
      result:= (field.isnull xor isnull) or (bo1 <> field.asboolean);
     end; 
-    ftFloat,ftDate,ftTime,ftDateTime,ftTimeStamp,ftFMTBcd: begin
+    ftFloat,ftcurrency,ftDate,ftTime,ftDateTime,ftTimeStamp,ftFMTBcd: begin
      rea1:= field.asfloat;
      ds1.settempstate(astate); 
      result:= (field.isnull xor isnull) or (rea1 <> field.asfloat);
     end;
-    ftCurrency,ftBCD: begin
+    {ftCurrency,}ftBCD: begin
      cur1:= field.ascurrency;
      ds1.settempstate(astate); 
      result:= (field.isnull xor isnull) or (cur1 <> field.ascurrency);
@@ -2356,6 +2385,16 @@ begin
  result:= getaslongint;
 end;
 
+procedure tmselongintfield.gettext(var thetext: string; adisplaytext: boolean);
+var
+ int1: integer;
+begin
+ thetext:='';
+ if getdata(@int1) then begin
+  thetext:= getnumdisplaytext(self,int1,adisplaytext,false);
+ end;
+end;
+
 { tmselargeintfield }
 
 function tmselargeintfield.HasParent: Boolean;
@@ -2413,6 +2452,16 @@ end;
 function tmselargeintfield.asoldsql: string;
 begin
  result:= fieldtooldsql(self);
+end;
+
+procedure tmselargeintfield.gettext(var thetext: string; adisplaytext: boolean);
+var
+ int1: int64;
+begin
+ thetext:='';
+ if getdata(@int1) then begin
+  thetext:= getnumdisplaytext(self,int1,adisplaytext,false);
+ end;
 end;
 
 { tmsesmallintfield }
@@ -2669,8 +2718,25 @@ begin
  result:= fieldtooldsql(self);
 end;
 
+procedure tmsefloatfield.gettext(var thetext: string; adisplaytext: boolean);
+var
+ do1: double;
+begin
+ thetext:='';
+ if getdata(@do1) then begin
+  thetext:= getnumdisplaytext(self,do1,adisplaytext,currency);
+ end;
+end;
+
 { tmsecurrencyfield }
 
+constructor tmsecurrencyfield.create(aowner: tcomponent);
+begin
+ inherited;
+ setdatatype(ftcurrency);
+ currency:= true;
+end;
+(*
 function tmsecurrencyfield.HasParent: Boolean;
 begin
  result:= dataset <> nil;
@@ -2722,6 +2788,7 @@ begin
   inherited;
  end;
 end;
+*)
 
 { tmsebooleanfield }
 
@@ -3010,7 +3077,7 @@ begin
     else f:= 'c'
    end;
   end;
-  thetext:= formatdatetime(f,r);
+  thetext:= formatdatetimemse(msestring(f),r);
  end;
 end;
 
@@ -3325,6 +3392,16 @@ begin
  if (avalue < 0) or (avalue > 8) then begin
   databaseerrorfmt(sinvalidfieldsize,[avalue]);
  end; 
+end;
+
+procedure tmsebcdfield.gettext(var thetext: string; adisplaytext: boolean);
+var
+ cu1: system.currency;
+begin
+ thetext:='';
+ if getdata(@cu1) then begin
+  thetext:= getnumdisplaytext(self,cu1,adisplaytext,currency);
+ end;
 end;
 
 { tmseblobfield }
@@ -3716,14 +3793,20 @@ begin
  end;
 end;
 
-function tfielddatalink.msedisplaytext(const aformat: msestring = ''): msestring;
+function tfielddatalink.msedisplaytext(const aformat: msestring = '';
+                           const aedit: boolean = false): msestring;
  function defaulttext: msestring;
  begin
   if utf8 and (ffield.datatype in textfields) then begin
    result:= utf8tostring(ffield.displaytext);
   end
   else begin
-   result:= ffield.displaytext;
+   if aedit then begin
+    result:= ffield.text;
+   end
+   else begin
+    result:= ffield.displaytext;
+   end;
   end;
  end;
 begin
@@ -3743,7 +3826,7 @@ begin
        result:= formatfloatmse(ord(field.asboolean),aformat);       
       end;
       ftdate,fttime,ftdatetime: begin
-       result:= formatdatetime(aformat,field.asdatetime);
+       result:= formatdatetimemse(aformat,field.asdatetime);
       end;
       else begin
        result:= aformat + defaulttext;

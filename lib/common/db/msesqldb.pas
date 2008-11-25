@@ -819,7 +819,7 @@ begin
  if (field <> nil) and field.isnull and (dataset <> nil) and 
       ((dataset.modified) or 
                (fdscontroller <> nil) and fdscontroller.posting) then begin
-  if field.datatype in [ftlargeint,ftfloat,ftbcd] then begin
+  if field.datatype in [ftlargeint,ftfloat,ftcurrency,ftbcd] then begin
    field.aslargeint:= fowner.aslargeint;
   end
   else begin

@@ -26,7 +26,9 @@ type
  numbasety = (nb_bin,nb_oct,nb_dec,nb_hex);
  
 function formatdatetimemse(const formatstr: msestring; const datetime: tdatetime;
-                               const formatsettings: tformatsettingsmse): msestring;
+            const formatsettings: tformatsettingsmse): msestring; overload;
+function formatdatetimemse(const formatstr: msestring;
+                          const datetime: tdatetime): msestring; overload;
 
 function formatfloatmse(const value: double; const format: msestring; 
                          const formatsettings: tformatsettingsmse;
@@ -35,6 +37,7 @@ function formatfloatmse(const value: double; const format: msestring;
    //formatstring:
    // formats for positive, negative and zero value can be separated by ;
    // ' and " qoted text as is
+   // c -> currencyformat
    //
    // + 0 or number digit
    // |+ show defaultformatsettingsmse.thousandseparator
@@ -434,6 +437,12 @@ begin
   setlength(result,resultlen);
   move(resultbuffer,pointer(result)^,resultlen*sizeof(msechar));
 end ;
+
+function formatdatetimemse(const formatstr: msestring;
+                          const datetime: tdatetime): msestring;
+begin
+ result:= formatdatetimemse(formatstr,datetime,defaultformatsettingsmse);
+end;
 
 (* 
 //copied from FPC sysstr.inc
@@ -1357,11 +1366,106 @@ var
  expchar: msechar;
  
 begin
- if dot then begin
-  decimalsep:= '.';
- end
- else begin
-  decimalsep:= defaultformatsettingsmse.decimalseparator;
+ with formatsettings do begin
+  if dot then begin
+   decimalsep:= '.';
+  end
+  else begin
+   decimalsep:= decimalseparator;
+  end;
+  if format = 'c' then begin
+   if value < 0 then begin
+    case negcurrformat of
+     0: begin
+      result:= '('+currencystring;
+     end;
+     1: begin
+      result:= '-'+currencystring;
+     end;
+     2: begin
+      result:= currencystring+'-';
+     end;
+     3: begin
+      result:= currencystring;
+     end;
+     4,15: begin
+      result:= '(';
+     end;
+     5,8: begin
+      result:= '-';
+     end;
+     9: begin
+      result:= '-'+currencystring+' ';
+     end;
+     11: begin
+      result:= currencystring+' ';
+     end;
+     12: begin
+      result:= currencystring+' -';
+     end;
+     14: begin
+      result:= '('+currencystring+' ';
+     end;
+    end;
+   end
+   else begin
+    case currencyformat of
+     0: begin
+      result:= currencystring;
+     end;
+     2: begin
+      result:= currencystring + ' ';
+     end;
+    end;
+   end;
+   result:= result+doubletostring(abs(value),currencydecimals,
+                                fsm_fix,decimalsep,thousandseparator);
+   if value < 0 then begin
+    case negcurrformat of
+     0,14: begin
+      result:= result + ')';
+     end;
+     3,11: begin
+      result:= result + '-';
+     end;
+     4: begin
+      result:= result + currencystring + ')';
+     end;
+     5: begin
+      result:= result + currencystring;
+     end;
+     6: begin
+      result:= result + '-' + currencystring;
+     end;
+     7: begin
+      result:= result + currencystring + '-';
+     end;
+     8: begin
+      result:= result + ' ' + currencystring;
+     end;
+     10: begin
+      result:= result + ' ' + currencystring + '-';
+     end;
+     13: begin
+      result:= result + '- ' + currencystring;
+     end;
+     15: begin
+      result:= result + ' ' + currencystring + ')'
+     end;
+    end;
+   end
+   else begin
+    case currencyformat of
+     1: begin
+      result:= result + formatsettings.currencystring;
+     end;
+     3: begin
+      result:= result + ' ' + formatsettings.currencystring;
+     end;
+    end;
+   end;
+   exit;
+  end;
  end;
  expchar:= 'E';
  setlength(result,length(format)+50); //max
@@ -1486,7 +1590,7 @@ begin
      if not numberprinted then begin
       numberprinted:= true;
       if thousandfound then begin
-       thousandsep:= defaultformatsettingsmse.thousandseparator;
+       thousandsep:= formatsettings.thousandseparator;
       end
       else begin
        thousandsep:= #0;

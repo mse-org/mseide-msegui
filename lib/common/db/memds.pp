@@ -292,7 +292,7 @@ begin
  case dt1 of
   ftString:   result:=FieldDefs.Items[FieldNo-1].Size+1;
   ftBoolean:  result:=SizeOf(Wordbool{Boolean});
-  ftFloat:    result:=SizeOf(Double{Extended});
+  ftFloat,ftcurrency:    result:=SizeOf(Double{Extended});
   ftLargeInt: result:=SizeOf(int64);
   ftSmallInt: result:=SizeOf(SmallInt);
   ftInteger:  result:=SizeOf(Integer);
@@ -937,7 +937,7 @@ begin
               Case F1.DataType of
                 ftString   : F1.AsString:=F2.AsString;
                 ftBoolean  : F1.AsBoolean:=F2.AsBoolean;
-                ftFloat    : F1.AsFloat:=F2.AsFloat;
+                ftFloat,ftcurrency    : F1.AsFloat:=F2.AsFloat;
                 ftLargeInt : F1.AsInteger:=F2.AsInteger;
                 ftSmallInt : F1.AsInteger:=F2.AsInteger;
                 ftInteger  : F1.AsInteger:=F2.AsInteger;

@@ -469,7 +469,7 @@ begin
     ftlargeint: begin
      result:= encodeifidata(field.aslargeint,headersize);
     end;
-    ftfloat: begin
+    ftfloat,ftcurrency: begin
      result:= encodeifidata(field.asfloat,headersize);
     end;
     ftbcd: begin
@@ -857,7 +857,7 @@ begin
     ftlargeint: begin
      result:= encodeifidata(plargeint(pointer(recpo)+offset)^);
     end;
-    ftfloat: begin
+    ftfloat,ftcurrency: begin
      result:= encodeifidata(pdouble(pointer(recpo)+offset)^);
     end;
     ftbcd: begin
@@ -2148,7 +2148,7 @@ begin
       inc(adata,decodeifidata(pifidataty(adata),int641));
       plargeint(pointer(dest)+offset)^:= int641;
      end;
-     ftfloat: begin
+     ftfloat,ftcurrency: begin
       inc(adata,decodeifidata(pifidataty(adata),double1));
       pdouble(pointer(dest)+offset)^:= double1;
      end;

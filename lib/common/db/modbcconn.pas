@@ -551,7 +551,7 @@ begin
       bindnum(i,SQL_C_SBIGINT,SQL_BIGINT,buf);
      end;
     end;
-    ftfloat: begin
+    ftfloat,ftcurrency,ftbcd: begin
      if isnull then begin
       bindnull(i,SQL_C_CHAR,SQL_CHAR);
      end
@@ -868,6 +868,9 @@ var
   buffer1: pointer;
   bufsize1: integer;
   dummybuf: array [0..31] of byte;  
+  do1: double;
+  cu1: currency;
+  
 begin
  ODBCCursor:= TODBCCursor(cursor);
 
@@ -916,9 +919,15 @@ begin
     Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_SBIGINT, buffer1,
                  SizeOf(Largeint), @StrLenOrInd);
   end;
-  ftFloat: begin             // mapped to TFloatField
+  ftFloat,ftcurrency: begin             // mapped to TFloatField
     Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_DOUBLE, buffer1,
                  SizeOf(Double), @StrLenOrInd);
+  end;
+  ftbcd: begin             
+    Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_DOUBLE, @do1,
+                 SizeOf(Double), @StrLenOrInd);
+    cu1:= do1;
+    Move(cu1, buffer1^, SizeOf(cu1));
   end;
   ftTime: begin              // mapped to TTimeField
    Res:= SQLGetData(ODBCCursor.FSTMTHandle,fno,SQL_C_TYPE_TIME,

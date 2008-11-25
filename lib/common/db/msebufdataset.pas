@@ -34,7 +34,7 @@ const
  defaultpacketrecords = -1;
  integerindexfields = [ftsmallint,ftinteger,ftword,ftboolean];
  largeintindexfields = [ftlargeint];
- floatindexfields = [ftfloat,ftdatetime,ftdate,fttime];
+ floatindexfields = [ftfloat,{ftcurrency,}ftdatetime,ftdate,fttime];
  currencyindexfields = [ftcurrency,ftbcd];
  stringindexfields = [ftstring,ftfixedchar];
  indexfieldtypes =  integerindexfields+largeintindexfields+floatindexfields+

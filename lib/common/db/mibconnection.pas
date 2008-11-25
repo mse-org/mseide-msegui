@@ -1098,7 +1098,7 @@ begin
  //    Move(CurrBuff^,Buffer^,SQLDA^.SQLVar[x].SQLLen);
  //    PChar(Buffer + VarCharLen)^ := #0;
     end;
-    ftFloat: begin
+    ftFloat,ftcurrency: begin
      GetFloat(CurrBuff,Buffer,sqllen);
     end;
     ftBlob,ftmemo,ftgraphic: begin  // load the BlobIb in field's buffer

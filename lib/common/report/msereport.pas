@@ -2098,7 +2098,7 @@ begin
           ftlargeint: begin
            result.text:= realtytostr(sumaslargeint/int1,fformat);
           end;
-          ftfloat: begin
+          ftfloat,ftcurrency: begin
            result.text:= realtytostr(sumasfloat/int1,fformat);
           end;
           ftbcd: begin
@@ -2115,7 +2115,7 @@ begin
          ftlargeint: begin
           result.text:= realtytostr(sumaslargeint,fformat);
          end;
-         ftfloat: begin
+         ftfloat,ftcurrency: begin
           result.text:= realtytostr(sumasfloat,fformat);
          end;
          ftbcd: begin
@@ -2367,7 +2367,7 @@ begin
        ftlargeint: begin
         largeintvalue:= largeintvalue + aslargeint;
        end;
-       ftfloat: begin
+       ftfloat,ftcurrency: begin
         floatvalue:= floatvalue + asfloat;
        end;
        ftbcd: begin
@@ -3624,7 +3624,8 @@ end;
 
 procedure tcustomrecordband.dobeforerender(var empty: boolean);
 begin
- if fdatalink.active then begin
+ if not (not(rbs_showed in fstate) and (bo_once in foptions)) and 
+                                                   fdatalink.active then begin
   empty:= (rbs_finish in fstate) or fdatalink.dataset.eof;
  end;
  if canevent(tmethod(fonbeforerender)) then begin

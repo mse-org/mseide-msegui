@@ -737,7 +737,7 @@ begin
   aparams.isutf8:= autf8;
   for int1:= 0 to aparams.count - 1 do begin
    with aparams[int1] do begin
-    if not isnull and (datatype in [ftFloat,ftDate,ftTime,ftDateTime]) and
+    if not isnull and (datatype in [ftFloat,ftcurrency,ftDate,ftTime,ftDateTime]) and
                                isemptyreal(asfloat) then begin
      clear;
     end;

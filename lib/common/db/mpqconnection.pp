@@ -750,7 +750,7 @@ begin
    CurrBuff := pqgetvalue(res,CurTuple,x);
    result := true;
    case DataType of
-    ftInteger, ftSmallint, ftLargeInt,ftfloat: begin
+    ftInteger, ftSmallint, ftLargeInt,ftfloat,ftcurrency: begin
      case i of               // postgres returns big-endian numbers
       sizeof(int64) : pint64(buffer)^ := BEtoN(pint64(CurrBuff)^);
       sizeof(integer) : pinteger(buffer)^ := BEtoN(pinteger(CurrBuff)^);
