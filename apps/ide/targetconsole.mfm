@@ -19,7 +19,7 @@ object targetconsolefo: ttargetconsolefo
   dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_propsize]
   options = [fo_savepos, fo_savestate]
   statfile = mainfo.projectstatfile
-  caption = 'Target console'
+  caption = 'Target Console'
   icon.transparentcolor = -2147483642
   icon.image = {
     0000000000000000180000001800000074020000000000000000000000000000

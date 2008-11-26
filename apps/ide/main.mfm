@@ -465,14 +465,14 @@ object mainfo: tmainfo
             onexecute = viewassembleronexecute
           end        
           item
-            caption = 'Memory'
+            caption = 'Memor&y'
             state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
             imagelist = vievmenuicons
             imagenr = 17
             onexecute = viewmemoryonexecute
           end        
           item
-            caption = 'Console'
+            caption = '&Target Console'
             state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
             imagelist = vievmenuicons
             imagenr = 13
@@ -490,7 +490,7 @@ object mainfo: tmainfo
             onexecute = viewbreakpointsonexecute
           end        
           item
-            caption = 'Wa&tchpoints'
+            caption = 'Watchp&oints'
             state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
             imagelist = vievmenuicons
             imagenr = 7
