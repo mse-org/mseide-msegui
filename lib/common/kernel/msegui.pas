@@ -6501,15 +6501,17 @@ procedure twidget.initparentclientsize;
 var
  int1: integer;
 begin
- include(fwidgetstate1,ws1_parentclientsizeinited);
- if fparentwidget <> nil then begin
-  fparentclientsize:= fparentwidget.minclientsize;
- end
- else begin
-  fparentclientsize:= fwidgetrect.size;
- end;
- for int1:= 0 to high(fwidgets) do begin
-  fwidgets[int1].initparentclientsize;
+ if not (ws1_parentclientsizeinited in fwidgetstate1) then begin
+  include(fwidgetstate1,ws1_parentclientsizeinited);
+  if fparentwidget <> nil then begin
+   fparentclientsize:= fparentwidget.minclientsize;
+  end
+  else begin
+   fparentclientsize:= fwidgetrect.size;
+  end;
+  for int1:= 0 to high(fwidgets) do begin
+   fwidgets[int1].initparentclientsize;
+  end;
  end;
 end;
 
@@ -6518,6 +6520,7 @@ begin
  include(fwidgetstate,ws_loadedproc);
  try
   exclude(fwidgetstate1,ws1_widgetregionvalid);
+  initparentclientsize;
   inherited;
   doloaded;
   sortzorder;
@@ -6526,9 +6529,9 @@ begin
   if ffont <> nil then begin
    fontchanged;
   end;
-  if not (ws1_parentclientsizeinited in fwidgetstate1) then begin
-   initparentclientsize;
-  end;   
+//  if not (ws1_parentclientsizeinited in fwidgetstate1) then begin
+//   initparentclientsize;
+//  end;   
   sizechanged;
   poschanged;
   colorchanged;

@@ -146,7 +146,7 @@ tsqlite3connection is available without -dmse_with_sqlite. Field type mapping:
 | DATETIME           | REAL                | ftdatetime  | tdatetime   |
 | DATE               | REAL                | ftdate      | tdatetime   |
 | TIME               | REAL                | fttime      | tdatetime   |
-| NUMERIC[...]       | INTEGER 8           | ftbcd       | currency    |
+| NUMERIC[...]       | INTEGER 8 (*10'000) | ftbcd       | currency    |
 | VARCHAR[(n)]       | TEXT                | ftstring    | msestring   |
 | TEXT               | TEXT                | ftmemo      | utf8 string |
 | TEXT               | TEXT dso_stringmemo | ftstring    | msestring   |
