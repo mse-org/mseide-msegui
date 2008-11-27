@@ -29,6 +29,9 @@ type
  
  checkvalueeventty = procedure(const sender: tdataedit; const quiet: boolean;
                            var accept: boolean) of object;
+
+ gettexteventty = procedure(var atext: msestring; 
+                                       const aedit: boolean) of object;
  
  tdataedit = class(tcustomedit,igridwidget,istatfile,idragcontroller)
   private
@@ -39,6 +42,7 @@ type
    fvaluechecking: integer;
    fstatfile: tstatfile;
    fstatvarname: msestring;
+   fongettext: gettexteventty;
    procedure setstatfile(const Value: tstatfile);
    function getreadonly: boolean;
    procedure setreadonly(const avalue: boolean);
@@ -56,6 +60,7 @@ type
    procedure texttovalue(var accept: boolean; const quiet: boolean); virtual; abstract;
    procedure texttodata(const atext: msestring; var data); virtual;
              //used for clipboard paste in widgetgrid
+   procedure updatetext(var atext: msestring);
    function datatotext(const data): msestring; virtual; abstract;
    procedure valuetotext;
    procedure setenabled(const avalue: boolean); override;
@@ -148,6 +153,7 @@ type
    property ontextedited;
    property oncheckvalue: checkvalueeventty read foncheckvalue write foncheckvalue;
    property ondataentered: notifyeventty read fondataentered write fondataentered;
+   property ongettext: gettexteventty read fongettext write fongettext;
    property onkeydown;
    property onkeyup;
  end;
@@ -1814,6 +1820,13 @@ begin
  initfocus;
 end;
 
+procedure tdataedit.updatetext(var atext: msestring);
+begin
+ if canevent(tmethod(fongettext)) then begin
+  fongettext(atext,focused);
+ end;
+end;
+
 { tcustomstringedit }
 
 function tcustomstringedit.datatotext(const data): msestring;
@@ -1825,6 +1838,7 @@ begin
   result:= msestring(data);
  end;
  updatedisptext(result);
+ updatetext(result);
 end;
 
 procedure tcustomstringedit.texttodata(const atext: msestring; var data);
@@ -2349,6 +2363,7 @@ begin
   str1:= ansistring(data);
  end;
  result:= bytestrtostr(str1,nb_hex,true);
+ updatetext(result);
 end;
 
 procedure thexstringedit.valuetogrid(const arow: integer);
@@ -2871,6 +2886,7 @@ begin
  else begin
   result:= intvaluetostr(integer(data),fbase,fbitcount);
  end;
+ updatetext(result);
 end;
 
 function tcustomintegeredit.getgridvalue(const index: integer): integer;
@@ -3012,6 +3028,7 @@ begin
    result:= '';
   end;
  end;
+ updatetext(result);
 end;
 
 procedure tcustomkeystringedit.texttodata(const atext: msestring; var data);
@@ -3112,6 +3129,7 @@ begin
    result:= valuelist[int2];
   end;
  end;
+ updatetext(result);
 end;
 
 function tcustomenuedit.enumname(const avalue: integer): msestring;
@@ -3505,6 +3523,7 @@ begin
  else begin
   result:= realtytostr(rea1,fformatdisp);
  end;
+ updatetext(result);
 end;
 
 function tcustomrealedit.createdatalist(const sender: twidgetcol): tdatalist;
@@ -4094,6 +4113,7 @@ begin
    result:= mseformatstr.datetimetostring(dat1,fformatdisp);
   end;
  end;
+ updatetext(result);
 end;
 
 function tcustomdatetimeedit.createdatalist(const sender: twidgetcol): tdatalist;

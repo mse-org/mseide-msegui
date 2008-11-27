@@ -3424,6 +3424,7 @@ begin
  else begin
   result:= inherited datatotext(data);
  end;
+ updatetext(result);
 end;
 
 procedure tdbintegeredit.texttovalue(var accept: boolean; const quiet: boolean);
@@ -5655,6 +5656,7 @@ begin
   int1:= integer(data);
  end;
  result:= tdbdropdownlistcontroller(fdropdown).fdatalink.getlookuptext(int1);
+ updatetext(result);
 end;
 
 { tenumeditdb }
@@ -5710,6 +5712,7 @@ begin
   int1:= integer(data);
  end;
  result:= tdbdropdownlistcontroller(fdropdown).fdatalink.getlookuptext(int1);
+ updatetext(result);
 end;
 
 { tdbkeystringeditdb }
@@ -5767,6 +5770,7 @@ begin
   mstr1:= msestring(data);
  end;
  result:= tdbdropdownlistcontroller(fdropdown).fdatalink.getlookuptext(mstr1);
+ updatetext(result);
 end;
 
 { tkeystringeditdb }
@@ -5823,6 +5827,7 @@ begin
   mstr1:= msestring(data);
  end;
  result:= tdbdropdownlistcontroller(fdropdown).fdatalink.getlookuptext(mstr1);
+ updatetext(result);
 end;
 
 { tgriddatalink }
@@ -8012,6 +8017,7 @@ begin
    result:= '';
   end;
  end;
+ updatetext(result);
 end;
 
 { tenumeditlb }
@@ -8081,6 +8087,7 @@ begin
    result:= '';
   end;
  end;
+ updatetext(result);
 end;
 
 { tcustomenum64edit }
@@ -8252,6 +8259,7 @@ begin
    result:= '';
   end;
  end;
+ updatetext(result);
 end;
 
  { tcustomenum64editdb }
@@ -8307,6 +8315,7 @@ begin
   lint1:= int64(data);
  end;
  result:= tdbdropdownlistcontroller(fdropdown).fdatalink.getlookuptext(lint1);
+ updatetext(result);
 end;
 
 { tdbenum64editlb }
@@ -8651,6 +8660,7 @@ begin
    result:= '';
   end;
  end;
+ updatetext(result);
 end;
 
 { tkeystringeditlb }
@@ -8723,6 +8733,7 @@ begin
    result:= '';
   end;
  end;
+ updatetext(result);
 end;
 
 { tcopydropdownlist }

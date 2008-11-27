@@ -2245,6 +2245,7 @@ begin
  else begin
   result:= '';
  end;
+ updatetext(result);
 end;
 
 procedure titemedit.dosetvalue(var avalue: msestring; var accept: boolean);

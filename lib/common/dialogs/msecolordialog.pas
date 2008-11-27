@@ -286,6 +286,7 @@ begin
   int1:= integer(data);
  end;
  result:= internaldatatotext(int1);
+ updatetext(result);
 end;
 
 function tcustomcoloredit.getvalue: colorty;

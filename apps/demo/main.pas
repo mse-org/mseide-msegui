@@ -24,4 +24,5 @@ procedure tmainfo.exitonexecute(const sender: TObject);
 begin
  application.terminated:= true;
 end;
+
 end.
