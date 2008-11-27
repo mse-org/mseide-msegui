@@ -322,7 +322,8 @@ type
    property title: msestring read ftitle write ftitle;
                             //used as print job lable
    property clientsize: sizety read fclientsize;
-   property colorspace: colorspacety read fcolorspace write setcolorspace;
+   property colorspace: colorspacety read fcolorspace 
+                         write setcolorspace default cos_gray;
    property pagenumber: integer read fpagenumber;
    property pageskind: pageskindty read fpageskind write fpageskind; 
                    //null based

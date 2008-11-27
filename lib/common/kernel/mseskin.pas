@@ -277,7 +277,7 @@ type
    destructor destroy; override;
    procedure updateskin(const instance: tobject; const ainfo: skininfoty);
   published
-   property active: boolean read factive write setactive;
+   property active: boolean read factive write setactive default false;
    property onbeforeupdate: beforeskinupdateeventty read fonbeforeupdate
                                  write fonbeforeupdate;
    property onafterupdate: skinobjecteventty read fonafterupdate

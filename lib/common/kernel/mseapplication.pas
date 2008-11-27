@@ -107,7 +107,7 @@ type
                                   //hook for object inspector
    property options: activatoroptionsty read foptions write setoptions 
                     default defaultactivatoroptions;
-   property active: boolean read factive write setactive;
+   property active: boolean read factive write setactive default false;
    property onbeforeactivate: notifyeventty read fonbeforeactivate
                            write fonbeforeactivate;
    property onactivateerror: activateerroreventty read fonactivateerror 

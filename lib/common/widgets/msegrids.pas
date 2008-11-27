@@ -330,7 +330,7 @@ type
                                        default cl_default;
    property coloractive: colorty read fcoloractive write setcoloractive
                                        default cl_none;
-   property tag: integer read ftag write ftag;
+   property tag: integer read ftag write ftag default 0;
  end;
 
  gridpropclassty = class of tgridprop;
@@ -905,7 +905,8 @@ type
    property captionsfix: tfixcolheaders read fcaptionsfix write setcaptionsfix;
    property font;
    property linecolor default defaultfixlinecolor;
-   property options: fixrowoptionsty read foptionsfix write setoptionsfix;
+   property options: fixrowoptionsty read foptionsfix 
+                       write setoptionsfix default [];
    property onbeforedrawcell: beforefixdrawcelleventty read fonbeforedrawcell
                                 write fonbeforedrawcell;
    property onafterdrawcell: drawfixcelleventty read fonafterdrawcell
@@ -3541,7 +3542,8 @@ end;
 
 { tfixrow }
 
-constructor tfixrow.create(const agrid: tcustomgrid; const aowner: tgridarrayprop);
+constructor tfixrow.create(const agrid: tcustomgrid; 
+                                            const aowner: tgridarrayprop);
 begin
  ftextinfo.flags:= defaultfixcoltextflags;
  fcaptions:= tdatacolheaders.create(self);

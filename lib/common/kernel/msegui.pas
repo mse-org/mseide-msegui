@@ -292,7 +292,7 @@ type
   framewidth: integer;
   colorframe: colorty;
   colorframeactive: colorty;
-  framecolors:framecolorinfoty;
+  framecolors: framecolorinfoty;
   colorclient: colorty;
   innerframe: framety;
 
@@ -487,26 +487,26 @@ type
    property colorframe: colorty read fi.colorframe write setcolorframe
                      stored iscolorframestored default cl_transparent;
    property colorframeactive: colorty read fi.colorframeactive 
-                    write setcolorframeactive
+                     write setcolorframeactive
                      stored iscolorframeactivestored default cl_default;
 
    property colordkshadow: colorty read fi.framecolors.shadow.effectcolor
               write setcolordkshadow
                      stored iscolordkshadowstored default cl_default;
    property colorshadow: colorty read fi.framecolors.shadow.color
-              write setcolorshadow
+                     write setcolorshadow
                      stored iscolorshadowstored default cl_default;
    property colorlight: colorty read fi.framecolors.light.color
-              write setcolorlight
+                     write setcolorlight
                      stored iscolorlightstored default cl_default;
    property colorhighlight: colorty read fi.framecolors.light.effectcolor
-              write setcolorhighlight
+                     write setcolorhighlight
                      stored iscolorhighlightstored default cl_default;
    property colordkwidth: integer read fi.framecolors.shadow.effectwidth
-              write setcolordkwidth
+                     write setcolordkwidth
                      stored iscolordkwidthstored default -1;
    property colorhlwidth: integer read fi.framecolors.light.effectwidth
-              write setcolorhlwidth
+                     write setcolorhlwidth
                      stored iscolorhlwidthstored default -1;
    property framei: framety read fi.innerframe;
    property framei_left: integer read fi.innerframe.left write setframei_left
@@ -515,7 +515,8 @@ type
                      stored isfitopstored default 0;
    property framei_right: integer read fi.innerframe.right write setframei_right
                      stored isfirightstored default 0;
-   property framei_bottom: integer read fi.innerframe.bottom write setframei_bottom
+   property framei_bottom: integer read fi.innerframe.bottom
+                     write setframei_bottom
                      stored isfibottomstored default 0;
 
    property frameimage_list: timagelist read fi.frameimage_list 
@@ -523,84 +524,93 @@ type
      //imagenr 0 = topleft, 1 = left, 2 = bottomleft, 3 = bottom, 4 = bottomright
      //5 = right, 6 = topright, 7 = top
    property frameimage_left: integer read fi.frameimage_left
-                    write setframeimage_left stored isframeimage_leftstored;
+                    write setframeimage_left
+                    stored isframeimage_leftstored default 0;
    property frameimage_top: integer read fi.frameimage_top
-                    write setframeimage_top stored isframeimage_topstored;
+                    write setframeimage_top
+                    stored isframeimage_topstored default 0;
    property frameimage_right: integer read fi.frameimage_right
-                    write setframeimage_right stored isframeimage_rightstored;
+                    write setframeimage_right
+                    stored isframeimage_rightstored default 0;
    property frameimage_bottom: integer read fi.frameimage_bottom
-                    write setframeimage_bottom stored isframeimage_bottomstored;
+                    write setframeimage_bottom 
+                    stored isframeimage_bottomstored default 0;
                     //added to imagelist size.
    property frameimage_offset: imagenrty read fi.frameimage_offsets.offset
-                    write setframeimage_offset stored isframeimage_offsetstored;
+                    write setframeimage_offset 
+                    stored isframeimage_offsetstored default 0;
    property frameimage_offset1: imagenrty read fi.frameimage_offsets.offset1
-                    write setframeimage_offset1 stored isframeimage_offset1stored;
+                    write setframeimage_offset1 
+                    stored isframeimage_offset1stored default 0;
                              //used for default button
    property frameimage_offsetdisabled: imagenrty 
                     read fi.frameimage_offsets.disabled 
                     write setframeimage_offsetdisabled
-                    stored isframeimage_offsetdisabledstored;
+                    stored isframeimage_offsetdisabledstored default 0;
    property frameimage_offsetmouse: imagenrty 
                     read fi.frameimage_offsets.mouse 
                     write setframeimage_offsetmouse 
-                    stored isframeimage_offsetmousestored;
+                    stored isframeimage_offsetmousestored default 0;
    property frameimage_offsetclicked: imagenrty 
                     read fi.frameimage_offsets.clicked
                     write setframeimage_offsetclicked 
-                    stored isframeimage_offsetclickedstored;
+                    stored isframeimage_offsetclickedstored default 0;
    property frameimage_offsetactive: imagenrty
                     read fi.frameimage_offsets.active
                     write setframeimage_offsetactive
-                    stored isframeimage_offsetactivestored;
+                    stored isframeimage_offsetactivestored default 0;
    property frameimage_offsetactivemouse: imagenrty
                     read fi.frameimage_offsets.activemouse
                     write setframeimage_offsetactivemouse
-                    stored isframeimage_offsetactivemousestored;
+                    stored isframeimage_offsetactivemousestored default 0;
    property frameimage_offsetactiveclicked: imagenrty
                     read fi.frameimage_offsets.activeclicked
                     write setframeimage_offsetactiveclicked
-                    stored isframeimage_offsetactiveclickedstored;
+                    stored isframeimage_offsetactiveclickedstored default 0;
 
    property frameface_list: tfacelist read fi.frameface_list 
                     write setframeface_list stored isframeface_liststored;
-   property frameface_offset: facenrty 
-                    read fi.frameface_offsets.offset
-                    write setframeface_offset stored isframeface_offsetstored;
+   property frameface_offset: facenrty read fi.frameface_offsets.offset
+                    write setframeface_offset 
+                    stored isframeface_offsetstored default 0;
    property frameface_offset1: facenrty 
                     read fi.frameface_offsets.offset1
-                    write setframeface_offset1 stored isframeface_offset1stored;
+                    write setframeface_offset1
+                    stored isframeface_offset1stored default 0;
                                    //used for default button
    property frameface_offsetdisabled: facenrty 
                     read fi.frameface_offsets.disabled 
                     write setframeface_offsetdisabled
-                    stored isframeface_offsetdisabledstored;
+            stored isframeface_offsetdisabledstored default 0;
    property frameface_offsetmouse: facenrty 
                     read fi.frameface_offsets.mouse 
                     write setframeface_offsetmouse 
-                    stored isframeface_offsetmousestored;
+                    stored isframeface_offsetmousestored default 0;
    property frameface_offsetclicked: facenrty 
                     read fi.frameface_offsets.clicked
                     write setframeface_offsetclicked 
-                    stored isframeface_offsetclickedstored;
+                    stored isframeface_offsetclickedstored default 0;
    property frameface_offsetactive: facenrty 
                     read fi.frameface_offsets.active
                     write setframeface_offsetactive
-                    stored isframeface_offsetactivestored;
+                    stored isframeface_offsetactivestored default 0;
    property frameface_offsetactivemouse: facenrty 
                     read fi.frameface_offsets.activemouse
                     write setframeface_offsetactivemouse
-                    stored isframeface_offsetactivemousestored;
+                    stored isframeface_offsetactivemousestored default 0;
    property frameface_offsetactiveclicked: facenrty 
                     read fi.frameface_offsets.activeclicked
                     write setframeface_offsetactiveclicked
-                    stored isframeface_offsetactiveclickedstored;
+                    stored isframeface_offsetactiveclickedstored default 0;
 
    property optionsskin: frameskinoptionsty read fi.optionsskin 
                     write setoptionsskin stored isoptionsskinstored default [];
    property colorclient: colorty read fi.colorclient write setcolorclient
-                     stored iscolorclientstored default cl_transparent;
-   property localprops: framelocalpropsty read flocalprops write setlocalprops default []; 
-   property localprops1: framelocalprops1ty read flocalprops1 write setlocalprops1 default []; 
+                    stored iscolorclientstored default cl_transparent;
+   property localprops: framelocalpropsty read flocalprops 
+                    write setlocalprops default []; 
+   property localprops1: framelocalprops1ty read flocalprops1 
+                    write setlocalprops1 default []; 
    property template: tframecomp read ftemplate write settemplate;
  end;
 
@@ -745,65 +755,65 @@ type
      //imagenr 0 = topleft, 1 = left, 2 = bottomleft, 3 = bottom, 4 = bottomright
      //5 = right, 6 = topright, 7 = top
    property frameimage_left: integer read fi.frameimage_left
-                    write setframeimage_left;
+                    write setframeimage_left default 0;
    property frameimage_top: integer read fi.frameimage_top
-                    write setframeimage_top;
+                    write setframeimage_top default 0;
    property frameimage_right: integer read fi.frameimage_right
-                    write setframeimage_right;
+                    write setframeimage_right default 0;
    property frameimage_bottom: integer read fi.frameimage_bottom
-                    write setframeimage_bottom;
+                    write setframeimage_bottom default 0;
                     //added to imagelist size.
    property frameimage_offset: imagenrty 
                      read fi.frameimage_offsets.offset
-                     write setframeimage_offset;
+                     write setframeimage_offset default 0;
    property frameimage_offset1: imagenrty 
                      read fi.frameimage_offsets.offset1
-                     write setframeimage_offset1;
+                     write setframeimage_offset1 default 0;
    property frameimage_offsetdisabled: imagenrty 
                      read fi.frameimage_offsets.disabled
-                     write setframeimage_offsetdisabled;
+                     write setframeimage_offsetdisabled default 0;
    property frameimage_offsetmouse: imagenrty 
                      read fi.frameimage_offsets.mouse
-                     write setframeimage_offsetmouse;
+                     write setframeimage_offsetmouse default 0;
    property frameimage_offsetclicked: imagenrty 
                      read fi.frameimage_offsets.clicked
-                     write setframeimage_offsetclicked;
+                     write setframeimage_offsetclicked default 0;
    property frameimage_offsetactive: imagenrty 
                      read fi.frameimage_offsets.active
-                     write setframeimage_offsetactive;
+                     write setframeimage_offsetactive default 0;
    property frameimage_offsetactivemouse: imagenrty
                      read fi.frameimage_offsets.activemouse
-                     write setframeimage_offsetactivemouse;
+                     write setframeimage_offsetactivemouse default 0;
    property frameimage_offsetactiveclicked: imagenrty
                      read fi.frameimage_offsets.activeclicked
-                     write setframeimage_offsetactiveclicked;
+                     write setframeimage_offsetactiveclicked default 0;
 
    property frameface_list: tfacelist read fi.frameface_list
                      write setframeface_list;
    property frameface_offset: facenrty 
                      read fi.frameface_offsets.offset
-                     write setframeface_offset;
+                     write setframeface_offset default 0;
    property frameface_offset1: facenrty 
                      read fi.frameface_offsets.offset1
-                     write setframeface_offset1;
+                     write setframeface_offset1 default 0;
    property frameface_offsetdisabled: facenrty 
                      read fi.frameface_offsets.disabled
-                     write setframeface_offsetdisabled;
+                     write setframeface_offsetdisabled default 0;
    property frameface_offsetmouse: facenrty 
                      read fi.frameface_offsets.mouse
-                     write setframeface_offsetmouse;
+                     write setframeface_offsetmouse default 0;
    property frameface_offsetclicked: facenrty
                      read fi.frameface_offsets.clicked
-                     write setframeface_offsetclicked;
+                     write setframeface_offsetclicked default 0;
    property frameface_offsetactive: facenrty
                      read fi.frameface_offsets.active
-                     write setframeface_offsetactive;
+                     write setframeface_offsetactive default 0;
    property frameface_offsetactivemouse: facenrty
                      read fi.frameface_offsets.activemouse
-                     write setframeface_offsetactivemouse;
+                     write setframeface_offsetactivemouse default 0;
    property frameface_offsetactiveclicked: facenrty
                      read fi.frameface_offsets.activeclicked
-                     write setframeface_offsetactiveclicked;
+                     write setframeface_offsetactiveclicked default 0;
 
    property extraspace: integer read fextraspace
                         write setextraspace default 0;
@@ -920,18 +930,22 @@ type
    property fade_color: tcolorarrayprop read fi.fade_color write setfade_color
                     stored isfacolorstored;
    property fade_direction: graphicdirectionty read fi.fade_direction
-                write setfade_direction stored isfadirectionstored default gd_right ;
+                    write setfade_direction
+                    stored isfadirectionstored default gd_right ;
    property fade_transparency: colorty read fi.fade_transparency
-              write setfade_transparency stored isfatransparencystored default cl_none;
+                    write setfade_transparency 
+                    stored isfatransparencystored default cl_none;
 
    property frameimage_list: timagelist read fi.frameimage_list 
-                     write setframeimage_list stored isframeimage_liststored;
+                    write setframeimage_list stored isframeimage_liststored;
      //imagenr 0 = topleft, 1 = left, 2 = bottomleft, 3 = bottom, 4 = bottomright
      //5 = right, 6 = topright, 7 = top
    property frameimage_offset: integer read fi.frameimage_offset
-                     write setframeimage_offset stored isframeimage_offsetstored;
+                    write setframeimage_offset
+                    stored isframeimage_offsetstored default 0;
 
-   property localprops: facelocalpropsty read flocalprops write setlocalprops default []; 
+   property localprops: facelocalpropsty read flocalprops 
+                    write setlocalprops default []; 
                                    //before template
    property template: tfacecomp read ftemplate write settemplate;
  end;
@@ -1016,7 +1030,7 @@ type
      //imagenr 0 = topleft, 1 = left, 2 = bottomleft, 3 = bottom, 4 = bottomright
      //5 = right, 6 = topright, 7 = top
    property frameimage_offset: integer read fi.frameimage_offset
-                     write setframeimage_offset;
+                     write setframeimage_offset default 0;
  end;
 
  tfacecomp = class(ttemplatecontainer)
@@ -4279,112 +4293,134 @@ end;
 
 function tcustomframe.isframeimage_liststored: boolean;
 begin
- result:= (ftemplate = nil) or (frl_frameimagelist in flocalprops);
+ result:= (ftemplate = nil) and (fi.frameimage_list <> nil) or 
+               (frl_frameimagelist in flocalprops);
 end;
 
 function tcustomframe.isframeimage_leftstored: boolean;
 begin
- result:= (ftemplate = nil) or (frl_frameimageleft in flocalprops);
+ result:= (ftemplate = nil) and (fi.frameimage_left <> 0) or 
+               (frl_frameimageleft in flocalprops);
 end;
 
 function tcustomframe.isframeimage_rightstored: boolean;
 begin
- result:= (ftemplate = nil) or (frl_frameimageright in flocalprops);
+ result:= (ftemplate = nil) and (fi.frameimage_right <> 0) or 
+               (frl_frameimageright in flocalprops);
 end;
 
 function tcustomframe.isframeimage_topstored: boolean;
 begin
- result:= (ftemplate = nil) or (frl_frameimagetop in flocalprops);
+ result:= (ftemplate = nil)  and (fi.frameimage_top <> 0) or 
+               (frl_frameimagetop in flocalprops);
 end;
 
 function tcustomframe.isframeimage_bottomstored: boolean;
 begin
- result:= (ftemplate = nil) or (frl_frameimagebottom in flocalprops);
+ result:= (ftemplate = nil)  and (fi.frameimage_bottom <> 0) or
+               (frl_frameimagebottom in flocalprops);
 end;
 
 function tcustomframe.isframeimage_offsetstored: boolean;
 begin
- result:= (ftemplate = nil) or (frl_frameimageoffset in flocalprops);
+ result:= (ftemplate = nil)  and (fi.frameimage_offsets.offset <> 0) or 
+               (frl_frameimageoffset in flocalprops);
 end;
 
 function tcustomframe.isframeimage_offset1stored: boolean;
 begin
- result:= (ftemplate = nil) or (frl_frameimageoffset1 in flocalprops);
+ result:= (ftemplate = nil) and (fi.frameimage_offsets.offset1 <> 0) or 
+               (frl_frameimageoffset1 in flocalprops);
 end;
 
 function tcustomframe.isframeimage_offsetdisabledstored: boolean;
 begin
- result:= (ftemplate = nil) or (frl_frameimageoffsetdisabled in flocalprops);
+ result:= (ftemplate = nil)  and (fi.frameimage_offsets.disabled <> 0) or
+               (frl_frameimageoffsetdisabled in flocalprops);
 end;
 
 function tcustomframe.isframeimage_offsetmousestored: boolean;
 begin
- result:= (ftemplate = nil) or (frl_frameimageoffsetmouse in flocalprops);
+ result:= (ftemplate = nil)  and (fi.frameimage_offsets.mouse <> 0) or
+               (frl_frameimageoffsetmouse in flocalprops);
 end;
 
 function tcustomframe.isframeimage_offsetclickedstored: boolean;
 begin
- result:= (ftemplate = nil) or (frl_frameimageoffsetclicked in flocalprops);
+ result:= (ftemplate = nil)  and (fi.frameimage_offsets.clicked <> 0) or
+               (frl_frameimageoffsetclicked in flocalprops);
 end;
 
 function tcustomframe.isframeimage_offsetactivestored: boolean;
 begin
- result:= (ftemplate = nil) or (frl_frameimageoffsetactive in flocalprops);
+ result:= (ftemplate = nil) and (fi.frameimage_offsets.active <> 0) or 
+               (frl_frameimageoffsetactive in flocalprops);
 end;
 
 function tcustomframe.isframeimage_offsetactivemousestored: boolean;
 begin
- result:= (ftemplate = nil) or (frl_frameimageoffsetactivemouse in flocalprops);
+ result:= (ftemplate = nil) and (fi.frameimage_offsets.activemouse <> 0) or
+               (frl_frameimageoffsetactivemouse in flocalprops);
 end;
 
 function tcustomframe.isframeimage_offsetactiveclickedstored: boolean;
 begin
- result:= (ftemplate = nil) or (frl_frameimageoffsetactiveclicked in flocalprops);
+ result:= (ftemplate = nil) and (fi.frameimage_offsets.activeclicked <> 0) or
+               (frl_frameimageoffsetactiveclicked in flocalprops);
 end;
 
 function tcustomframe.isframeface_liststored: boolean;
 begin
- result:= (ftemplate = nil) or (frl1_framefacelist in flocalprops1);
+ result:= (ftemplate = nil) and (fi.frameface_list <> nil) or
+               (frl1_framefacelist in flocalprops1);
 end;
 
 function tcustomframe.isframeface_offsetstored: boolean;
 begin
- result:= (ftemplate = nil) or (frl1_framefaceoffset in flocalprops1);
+ result:= (ftemplate = nil) and (fi.frameface_offsets.offset <> 0) or
+               (frl1_framefaceoffset in flocalprops1);
 end;
 
 function tcustomframe.isframeface_offset1stored: boolean;
 begin
- result:= (ftemplate = nil) or (frl1_framefaceoffset1 in flocalprops1);
+ result:= (ftemplate = nil) and (fi.frameface_offsets.offset1 <> 0) or
+               (frl1_framefaceoffset1 in flocalprops1);
 end;
 
 function tcustomframe.isframeface_offsetdisabledstored: boolean;
 begin
- result:= (ftemplate = nil) or (frl1_framefaceoffsetdisabled in flocalprops1);
+ result:= (ftemplate = nil) and (fi.frameface_offsets.disabled <> 0) or
+               (frl1_framefaceoffsetdisabled in flocalprops1);
 end;
 
 function tcustomframe.isframeface_offsetmousestored: boolean;
 begin
- result:= (ftemplate = nil) or (frl1_framefaceoffsetmouse in flocalprops1);
+ result:= (ftemplate = nil) and (fi.frameface_offsets.mouse <> 0) or
+               (frl1_framefaceoffsetmouse in flocalprops1);
 end;
 
 function tcustomframe.isframeface_offsetclickedstored: boolean;
 begin
- result:= (ftemplate = nil) or (frl1_framefaceoffsetclicked in flocalprops1);
+ result:= (ftemplate = nil) and (fi.frameface_offsets.clicked <> 0) or 
+               (frl1_framefaceoffsetclicked in flocalprops1);
 end;
 
 function tcustomframe.isframeface_offsetactivestored: boolean;
 begin
- result:= (ftemplate = nil) or (frl1_framefaceoffsetactive in flocalprops1);
+ result:= (ftemplate = nil) and (fi.frameface_offsets.active <> 0) or
+               (frl1_framefaceoffsetactive in flocalprops1);
 end;
 
 function tcustomframe.isframeface_offsetactivemousestored: boolean;
 begin
- result:= (ftemplate = nil) or (frl1_framefaceoffsetactivemouse in flocalprops1);
+ result:= (ftemplate = nil) and (fi.frameface_offsets.activemouse <> 0) or
+               (frl1_framefaceoffsetactivemouse in flocalprops1);
 end;
 
 function tcustomframe.isframeface_offsetactiveclickedstored: boolean;
 begin
- result:= (ftemplate = nil) or (frl1_framefaceoffsetactiveclicked in flocalprops1);
+ result:= (ftemplate = nil) and (fi.frameface_offsets.activeclicked <> 0) or
+               (frl1_framefaceoffsetactiveclicked in flocalprops1);
 end;
 
 function tcustomframe.isoptionsskinstored: boolean;

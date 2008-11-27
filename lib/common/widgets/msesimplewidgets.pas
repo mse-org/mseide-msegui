@@ -169,7 +169,7 @@ type
    property imagenrdisabled: imagenrty read factioninfo.imagenrdisabled
                               write setimagenrdisabled
                             stored isimagenrdisabledstored default -2;
-   property imagedist: integer read finfo.ca.imagedist write setimagedist;
+   property imagedist: integer read finfo.ca.imagedist write setimagedist default 0;
    property colorglyph: colorty read factioninfo.colorglyph write setcolorglyph
                       stored iscolorglyphstored default cl_glyph;
    property shortcut: shortcutty read factioninfo.shortcut write setshortcut
@@ -181,7 +181,8 @@ type
    property autosize_cx: integer read fautosize_cx write setautosize_cx;
    property autosize_cy: integer read fautosize_cy write setautosize_cy;
   published
-   property state: actionstatesty read getstate write setstate stored isstatestored;
+   property state: actionstatesty read getstate write setstate
+            stored isstatestored  default [];
  end;
 
  tbutton = class(tcustombutton)
