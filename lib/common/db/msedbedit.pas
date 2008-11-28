@@ -3422,7 +3422,7 @@ begin
   result:= '';
  end
  else begin
-  result:= inherited datatotext(data);
+  result:= inherited internaldatatotext(data);
  end;
 end;
 
