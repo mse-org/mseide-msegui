@@ -1085,6 +1085,8 @@ function locaterecord(const adataset: tdataset; const key: integer;
 
 function encodesqlstring(const avalue: msestring): msestring;
 function encodesqlblob(const avalue: string): msestring;
+function encodesqlinteger(const avalue: integer): msestring;
+function encodesqllargeint(const avalue: int64): msestring;
 function encodesqldatetime(const avalue: tdatetime): msestring;
 function encodesqldate(const avalue: tdatetime): msestring;
 function encodesqltime(const avalue: tdatetime): msestring;
@@ -1380,6 +1382,16 @@ begin
   inc(po2);
  end;
  po1^:= '''';
+end;
+
+function encodesqlinteger(const avalue: integer): msestring;
+begin
+ result:= inttostr(avalue);
+end;
+
+function encodesqllargeint(const avalue: int64): msestring;
+begin
+ result:= inttostr(avalue);
 end;
 
 function encodesqldatetime(const avalue: tdatetime): msestring;

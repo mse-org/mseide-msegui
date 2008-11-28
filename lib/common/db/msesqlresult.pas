@@ -12,6 +12,7 @@ type
  
  tdbcol = class(tvirtualpersistent)
   private
+   function getassql1: msestring;
   protected
    fuppername: ansistring;
    ffieldname: ansistring;
@@ -32,6 +33,7 @@ type
    function getasinteger: longint; virtual;
    function getasstring: string; virtual;
    function getasmsestring: msestring; virtual;
+   function getassql: msestring; virtual;
    function getisnull: boolean; virtual;
    function loadfield(const buffer: pointer; var bufsize: integer): boolean; overload;
                 //false if null or inactive
@@ -54,6 +56,7 @@ type
    property asinteger: longint read getasinteger;
    property asstring: ansistring read getasstring;
    property asmsestring: msestring read getasmsestring;
+   property assql: msestring read getassql1;
    property isnull: boolean read getisnull;
    
  end;
@@ -64,6 +67,7 @@ type
   protected
    function getasstring: ansistring; override;
    function getvariantvar: variant; override;
+   function getassql: msestring; override;
   public
    property value: msestring read getasmsestring;
  end;
@@ -72,6 +76,7 @@ type
   private
   protected
    function getvariantvar: variant; override;
+   function getassql: msestring; override;
  end;
  
  tlongintdbcol = class(tnumericdbcol)
@@ -87,6 +92,7 @@ type
    function getaslargeint: largeint; override;
    function getasinteger: integer; override;
    function getvariantvar: variant; override;
+   function getassql: msestring; override;
   public
    property value: largeint read getaslargeint;
  end;
@@ -113,6 +119,7 @@ type
    function getasfloat: double; override;
    function getascurrency: currency; override;
    function getvariantvar: variant; override;
+   function getassql: msestring; override;
   public
    property value: double read getasfloat;
  end;
@@ -122,6 +129,7 @@ type
    function getascurrency: currency; override;
    function getasfloat: double; override;
    function getvariantvar: variant; override;
+   function getassql: msestring; override;
   public
    property value: currency read getascurrency;
  end;
@@ -130,6 +138,7 @@ type
   protected
    function getasboolean: boolean; override;
    function getvariantvar: variant; override;
+   function getassql: msestring; override;
   public
    property value: boolean read getasboolean;
  end;
@@ -138,6 +147,7 @@ type
   protected
    function getasdatetime: tdatetime; override;
    function getvariantvar: variant; override;
+   function getassql: msestring; override;
   public
    property value: tdatetime read getasdatetime;
  end;
@@ -154,6 +164,7 @@ type
   protected 
    function getasstring: ansistring; override;
    function getvariantvar: variant; override;
+   function getassql: msestring; override;
   public
    property value: ansistring read getasstring;
  end;
@@ -162,6 +173,7 @@ type
   private
   protected
    function getvariantvar: variant; override;
+   function getassql: msestring; override;
   public
    property value: msestring read getasmsestring;
  end;
@@ -558,6 +570,21 @@ begin
  end;
 end;
 
+function tdbcol.getassql: msestring;
+begin
+ raise accesserror('SQL');
+end;
+
+function tdbcol.getassql1: msestring;
+begin
+ if isnull then begin
+  result:= 'NULL';
+ end
+ else begin
+  result:= getassql;
+ end;
+end;
+
 function tdbcol.getisnull: boolean;
 var
  int1: integer;
@@ -617,6 +644,11 @@ begin
  result:= aslargeint;
 end;
 
+function tlargeintdbcol.getassql: msestring;
+begin
+ result:= encodesqllargeint(aslargeint);
+end;
+
 { tsmallintdbcol }
 
 function tsmallintdbcol.getasinteger: integer;
@@ -671,6 +703,11 @@ begin
  result:= asfloat;
 end;
 
+function tfloatdbcol.getassql: msestring;
+begin
+ result:= encodesqlfloat(asfloat);
+end;
+
 { tcurrencydbcol }
 
 function tcurrencydbcol.getascurrency: currency;
@@ -688,6 +725,11 @@ end;
 function tcurrencydbcol.getvariantvar: variant;
 begin
  result:= ascurrency;
+end;
+
+function tcurrencydbcol.getassql: msestring;
+begin
+ result:= encodesqlcurrency(ascurrency);
 end;
 
 { tbooleandbcol }
@@ -709,6 +751,11 @@ begin
  result:= asboolean;
 end;
 
+function tbooleandbcol.getassql: msestring;
+begin
+ result:= encodesqlboolean(asboolean);
+end;
+
 { tdatetimedbcol }
 
 function tdatetimedbcol.getasdatetime: tdatetime;
@@ -721,6 +768,11 @@ end;
 function tdatetimedbcol.getvariantvar: variant;
 begin
  result:= asdatetime;
+end;
+
+function tdatetimedbcol.getassql: msestring;
+begin
+ result:= encodesqldatetime(asdatetime);
 end;
 
 { tstringdbcol }
@@ -749,6 +801,11 @@ begin
  result:= asmsestring;
 end;
 
+function tstringdbcol.getassql: msestring;
+begin
+ result:= encodesqlstring(asmsestring);
+end;
+
 { tblobdbcol }
 
 function tblobdbcol.getasstring: ansistring;
@@ -766,6 +823,11 @@ end;
 function tblobdbcol.getvariantvar: variant;
 begin
  result:= asstring;
+end;
+
+function tblobdbcol.getassql: msestring;
+begin
+ result:= encodesqlblob(asstring);
 end;
 
 { tdbcols }
@@ -1533,11 +1595,21 @@ begin
  result:= asinteger;
 end;
 
+function tnumericdbcol.getassql: msestring;
+begin
+ result:= encodesqlinteger(asinteger);
+end;
+
 { tmemodbcol }
 
 function tmemodbcol.getvariantvar: variant;
 begin
  result:= asmsestring;
+end;
+
+function tmemodbcol.getassql: msestring;
+begin
+ result:= encodesqlstring(asmsestring);
 end;
 
 end.
