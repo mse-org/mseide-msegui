@@ -82,9 +82,9 @@ type
    function getgridvalues(const index: integer): colorty;
    procedure setgridvalues(const index: integer; const avalue: colorty);
   protected
-   function internaldatatotext(
+   function internaldatatotext1(
                  const avalue: integer): msestring; virtual;
-   function datatotext(const data): msestring; override;
+   function internaldatatotext(const data): msestring; override;
    function createdropdowncontroller: tcustomdropdowncontroller; override;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    procedure buttonaction(var action: buttonactionty;
@@ -227,6 +227,7 @@ procedure tcustomcoloredit.texttovalue(var accept: boolean; const quiet: boolean
 var
  co1: colorty;
  int1: integer;
+ mstr1: msestring;
 begin
  if trim(text) = '' then begin
   co1:= valuedefault;
@@ -238,7 +239,12 @@ begin
   end
   else begin
    try
-    co1:= strtointvalue(feditor.text,base);
+    mstr1:= feditor.text;
+    checktext(mstr1,accept);
+    if not accept then begin
+     exit;
+    end;
+    co1:= strtointvalue(mstr1,base);
    except
     accept:= false;
     formaterror(quiet);
@@ -270,12 +276,12 @@ begin
  end;
 end;
 
-function tcustomcoloredit.internaldatatotext(const avalue: integer): msestring;
+function tcustomcoloredit.internaldatatotext1(const avalue: integer): msestring;
 begin
  result:= colortostring(avalue);
 end;
 
-function tcustomcoloredit.datatotext(const data): msestring;
+function tcustomcoloredit.internaldatatotext(const data): msestring;
 var
  int1: integer;
 begin
@@ -285,8 +291,7 @@ begin
  else begin
   int1:= integer(data);
  end;
- result:= internaldatatotext(int1);
- updatetext(result);
+ result:= internaldatatotext1(int1);
 end;
 
 function tcustomcoloredit.getvalue: colorty;

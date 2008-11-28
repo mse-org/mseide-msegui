@@ -76,7 +76,7 @@ type
    procedure setdatasource(const avalue: tdatasource);
   protected
 
-   function internaldatatotext(
+   function internaldatatotext1(
                  const avalue: integer): msestring; override;
    function nullcheckneeded(const newfocus: twidget): boolean; override;
    procedure griddatasourcechanged; override;
@@ -385,13 +385,13 @@ begin
  fdatalink.recordchanged(nil);
 end;
 
-function tdbcoloredit.internaldatatotext(const avalue: integer): msestring;
+function tdbcoloredit.internaldatatotext1(const avalue: integer): msestring;
 begin
  if avalue = -1 then begin
   result:= '';
  end
  else begin
-  result:= inherited internaldatatotext(avalue);
+  result:= inherited internaldatatotext1(avalue);
  end;
 end;
 

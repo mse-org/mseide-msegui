@@ -420,7 +420,7 @@ type
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
 
-   function datatotext(const data): msestring; override;
+   function internaldatatotext(const data): msestring; override;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    procedure setnullvalue; override;
    function getrowdatapo(const info: cellinfoty): pointer; override;
@@ -1274,7 +1274,7 @@ type
   protected
    function createdropdowncontroller: tcustomdropdowncontroller; override;
    procedure recordselected(const arecordnum: integer; const akey: keyty);
-   function datatotext(const data): msestring; override;
+   function internaldatatotext(const data): msestring; override;
   published
    property dropdown: tdbdropdownlistcontroller read getdropdown write setdropdown;
  end;
@@ -1286,7 +1286,7 @@ type
   protected
    function createdropdowncontroller: tcustomdropdowncontroller; override;
    procedure recordselected(const arecordnum: integer; const akey: keyty);
-   function datatotext(const data): msestring; override;
+   function internaldatatotext(const data): msestring; override;
   published
    property dropdown: tdbdropdownlistcontroller read getdropdown write setdropdown;
  end;
@@ -1299,7 +1299,7 @@ type
   protected
    function createdropdowncontroller: tcustomdropdowncontroller; override;
    procedure recordselected(const arecordnum: integer; const akey: keyty);
-   function datatotext(const data): msestring; override;
+   function internaldatatotext(const data): msestring; override;
   published
    property dropdown: tdbdropdownlistcontroller read getdropdown write setdropdown;
  end;
@@ -1311,7 +1311,7 @@ type
   protected
    function createdropdowncontroller: tcustomdropdowncontroller; override;
    procedure recordselected(const arecordnum: integer; const akey: keyty);
-   function datatotext(const data): msestring; override;
+   function internaldatatotext(const data): msestring; override;
   published
    property dropdown: tdbdropdownlistcontroller read getdropdown write setdropdown;
  end;
@@ -1833,7 +1833,7 @@ type
    procedure setdropdown(const avalue: tlbdropdownlistcontroller);
   protected
    function createdropdowncontroller: tcustomdropdowncontroller; override;
-   function datatotext(const data): msestring; override;
+   function internaldatatotext(const data): msestring; override;
           //ilbdropdownlist
    procedure recordselected(const arecordnum: integer; const akey: keyty);
   published
@@ -1846,7 +1846,7 @@ type
    procedure setdropdown(const avalue: tlbdropdownlistcontroller);
   protected
    function createdropdowncontroller: tcustomdropdowncontroller; override;
-   function datatotext(const data): msestring; override;
+   function internaldatatotext(const data): msestring; override;
           //ilbdropdownlist
    procedure recordselected(const arecordnum: integer; const akey: keyty);
   public
@@ -1893,7 +1893,7 @@ type
    procedure setdropdown(const avalue: tlbdropdownlistcontroller);
   protected
    function createdropdowncontroller: tcustomdropdowncontroller; override;
-   function datatotext(const data): msestring; override;
+   function internaldatatotext(const data): msestring; override;
           //ilbdropdownlist
    procedure recordselected(const arecordnum: integer; const akey: keyty);
   public
@@ -1952,7 +1952,7 @@ type
    procedure setdropdown(const avalue: tdbdropdownlistcontroller);
   protected
    function createdropdowncontroller: tcustomdropdowncontroller; override;
-   function datatotext(const data): msestring; override;
+   function internaldatatotext(const data): msestring; override;
           //ilbdropdownlist
    procedure recordselected(const arecordnum: integer; const akey: keyty);
   public
@@ -2011,7 +2011,7 @@ type
    procedure setdropdown(const avalue: tlbdropdownlistcontroller);
   protected
    function createdropdowncontroller: tcustomdropdowncontroller; override;
-   function datatotext(const data): msestring; override;
+   function internaldatatotext(const data): msestring; override;
           //ilbdropdownlist
    procedure recordselected(const arecordnum: integer; const akey: keyty);
   published
@@ -2024,7 +2024,7 @@ type
    procedure setdropdown(const avalue: tlbdropdownlistcontroller);
   protected
    function createdropdowncontroller: tcustomdropdowncontroller; override;
-   function datatotext(const data): msestring; override;
+   function internaldatatotext(const data): msestring; override;
           //ilbdropdownlist
    procedure recordselected(const arecordnum: integer; const akey: keyty);
   published
@@ -3416,7 +3416,7 @@ begin
  fisnull:= true;
 end;
 
-function tdbintegeredit.datatotext(const data): msestring;
+function tdbintegeredit.internaldatatotext(const data): msestring;
 begin
  if (@data = nil) and fisnull then begin
   result:= '';
@@ -3424,7 +3424,6 @@ begin
  else begin
   result:= inherited datatotext(data);
  end;
- updatetext(result);
 end;
 
 procedure tdbintegeredit.texttovalue(var accept: boolean; const quiet: boolean);
@@ -5645,7 +5644,7 @@ begin
  end;
 end;
 
-function tdbenumeditdb.datatotext(const data): msestring;
+function tdbenumeditdb.internaldatatotext(const data): msestring;
 var
  int1: integer;
 begin
@@ -5656,7 +5655,6 @@ begin
   int1:= integer(data);
  end;
  result:= tdbdropdownlistcontroller(fdropdown).fdatalink.getlookuptext(int1);
- updatetext(result);
 end;
 
 { tenumeditdb }
@@ -5701,7 +5699,7 @@ begin
  end;
 end;
 
-function tenumeditdb.datatotext(const data): msestring;
+function tenumeditdb.internaldatatotext(const data): msestring;
 var
  int1: integer;
 begin
@@ -5712,7 +5710,6 @@ begin
   int1:= integer(data);
  end;
  result:= tdbdropdownlistcontroller(fdropdown).fdatalink.getlookuptext(int1);
- updatetext(result);
 end;
 
 { tdbkeystringeditdb }
@@ -5759,7 +5756,7 @@ begin
  end;
 end;
 
-function tdbkeystringeditdb.datatotext(const data): msestring;
+function tdbkeystringeditdb.internaldatatotext(const data): msestring;
 var
  mstr1: msestring;
 begin
@@ -5770,7 +5767,6 @@ begin
   mstr1:= msestring(data);
  end;
  result:= tdbdropdownlistcontroller(fdropdown).fdatalink.getlookuptext(mstr1);
- updatetext(result);
 end;
 
 { tkeystringeditdb }
@@ -5816,7 +5812,7 @@ begin
  end;
 end;
 
-function tkeystringeditdb.datatotext(const data): msestring;
+function tkeystringeditdb.internaldatatotext(const data): msestring;
 var
  mstr1: msestring;
 begin
@@ -5827,7 +5823,6 @@ begin
   mstr1:= msestring(data);
  end;
  result:= tdbdropdownlistcontroller(fdropdown).fdatalink.getlookuptext(mstr1);
- updatetext(result);
 end;
 
 { tgriddatalink }
@@ -7992,7 +7987,7 @@ begin
  end;
 end;
 
-function tdbenumeditlb.datatotext(const data): msestring;
+function tdbenumeditlb.internaldatatotext(const data): msestring;
 var
  int1,int2,int3,int4: integer;
 begin
@@ -8017,7 +8012,6 @@ begin
    result:= '';
   end;
  end;
- updatetext(result);
 end;
 
 { tenumeditlb }
@@ -8062,7 +8056,7 @@ begin
  end;
 end;
 
-function tenumeditlb.datatotext(const data): msestring;
+function tenumeditlb.internaldatatotext(const data): msestring;
 var
  int1,int2,int3,int4: integer;
 begin
@@ -8087,7 +8081,6 @@ begin
    result:= '';
   end;
  end;
- updatetext(result);
 end;
 
 { tcustomenum64edit }
@@ -8152,6 +8145,7 @@ begin
  else begin
   lint1:= tdropdowncols1(tlbdropdownlistcontroller(fdropdown).cols).fkeyvalue64;
  end;
+   //no checktext call
  if accept then begin
   if not quiet and canevent(tmethod(fonsetvalue1)) then begin
    fonsetvalue1(self,lint1,accept);
@@ -8235,7 +8229,7 @@ begin
  end;
 end;
 
-function tcustomenum64editlb.datatotext(const data): msestring;
+function tcustomenum64editlb.internaldatatotext(const data): msestring;
 var
  lint1: int64;
  int2,int3,int4: integer;
@@ -8259,7 +8253,6 @@ begin
    result:= '';
   end;
  end;
- updatetext(result);
 end;
 
  { tcustomenum64editdb }
@@ -8304,7 +8297,7 @@ begin
  end;
 end;
 
-function tcustomenum64editdb.datatotext(const data): msestring;
+function tcustomenum64editdb.internaldatatotext(const data): msestring;
 var
  lint1: integer;
 begin
@@ -8315,7 +8308,6 @@ begin
   lint1:= int64(data);
  end;
  result:= tdbdropdownlistcontroller(fdropdown).fdatalink.getlookuptext(lint1);
- updatetext(result);
 end;
 
 { tdbenum64editlb }
@@ -8634,7 +8626,7 @@ begin
  end;
 end;
 
-function tdbkeystringeditlb.datatotext(const data): msestring;
+function tdbkeystringeditlb.internaldatatotext(const data): msestring;
 var
  mstr1: msestring;
  int2,int3,int4: integer;
@@ -8660,7 +8652,6 @@ begin
    result:= '';
   end;
  end;
- updatetext(result);
 end;
 
 { tkeystringeditlb }
@@ -8707,7 +8698,7 @@ begin
  end;
 end;
 
-function tkeystringeditlb.datatotext(const data): msestring;
+function tkeystringeditlb.internaldatatotext(const data): msestring;
 var
  mstr1: msestring;
  int2,int3,int4: integer;
@@ -8733,7 +8724,6 @@ begin
    result:= '';
   end;
  end;
- updatetext(result);
 end;
 
 { tcopydropdownlist }

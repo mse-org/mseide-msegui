@@ -30,8 +30,10 @@ type
  checkvalueeventty = procedure(const sender: tdataedit; const quiet: boolean;
                            var accept: boolean) of object;
 
- gettexteventty = procedure(var atext: msestring; 
-                                       const aedit: boolean) of object;
+ gettexteventty = procedure(const sender: tdataedit; var atext: msestring;
+                               const aedit: boolean) of object;
+ settexteventty = procedure(const sender: tdataedit;
+                           var atext: msestring; var accept: boolean) of object;
  
  tdataedit = class(tcustomedit,igridwidget,istatfile,idragcontroller)
   private
@@ -43,6 +45,7 @@ type
    fstatfile: tstatfile;
    fstatvarname: msestring;
    fongettext: gettexteventty;
+   fonsettext: settexteventty;
    procedure setstatfile(const Value: tstatfile);
    function getreadonly: boolean;
    procedure setreadonly(const avalue: boolean);
@@ -57,11 +60,12 @@ type
    procedure editnotification(var info: editnotificationinfoty); override;
    procedure valuechanged; virtual;
    procedure modified; virtual; //for dbedits
+   procedure checktext(var atext: msestring; var accept: boolean);
    procedure texttovalue(var accept: boolean; const quiet: boolean); virtual; abstract;
    procedure texttodata(const atext: msestring; var data); virtual;
              //used for clipboard paste in widgetgrid
-   procedure updatetext(var atext: msestring);
-   function datatotext(const data): msestring; virtual; abstract;
+   function datatotext(const data): msestring;
+   function internaldatatotext(const data): msestring; virtual; abstract;
    procedure valuetotext;
    procedure setenabled(const avalue: boolean); override;
    procedure dodefocus; override;
@@ -154,6 +158,7 @@ type
    property oncheckvalue: checkvalueeventty read foncheckvalue write foncheckvalue;
    property ondataentered: notifyeventty read fondataentered write fondataentered;
    property ongettext: gettexteventty read fongettext write fongettext;
+   property onsettext: settexteventty read fonsettext write fonsettext;
    property onkeydown;
    property onkeyup;
  end;
@@ -173,7 +178,7 @@ type
 
    procedure dosetvalue(var avalue: msestring; var accept: boolean); virtual;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
-   function datatotext(const data): msestring; override;
+   function internaldatatotext(const data): msestring; override;
    procedure texttodata(const atext: msestring; var data); override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatyp: datatypty; override;
@@ -265,7 +270,7 @@ type
    fvalue: ansistring;
    procedure dosetvalue(var avalue: ansistring; var accept: boolean); virtual;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
-   function datatotext(const data): msestring; override;
+   function internaldatatotext(const data): msestring; override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatyp: datatypty; override;
    procedure valuetogrid(const arow: integer); override;
@@ -454,7 +459,7 @@ type
   protected
    fisnull: boolean; //used in tdbintegeredit
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
-   function datatotext(const data): msestring; override;
+   function internaldatatotext(const data): msestring; override;
    procedure texttodata(const atext: msestring; var data); override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatyp: datatypty; override;
@@ -513,7 +518,7 @@ type
    function createdropdowncontroller: tcustomdropdowncontroller; override;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    procedure setnullvalue; override; //for dbedits
-   function datatotext(const data): msestring; override;
+   function internaldatatotext(const data): msestring; override;
    procedure texttodata(const atext: msestring; var data); override;
    function getdefaultvalue: pointer; override;
    procedure valuetogrid(const arow: integer); override;
@@ -571,7 +576,7 @@ type
    function getdefaultvalue: pointer; override;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    procedure texttodata(const atext: msestring; var data); override;
-   function datatotext(const data): msestring; override;
+   function internaldatatotext(const data): msestring; override;
    procedure valuetogrid(const arow: integer); override;
    procedure gridtovalue(const arow: integer); override;
    procedure readstatvalue(const reader: tstatreader); override;
@@ -730,7 +735,7 @@ type
    fisdb: boolean;
    function gettextvalue(var accept: boolean; const quiet: boolean): realty; virtual;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
-   function datatotext(const data): msestring; override;
+   function internaldatatotext(const data): msestring; override;
    procedure texttodata(const atext: msestring; var data); override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatyp: datatypty; override;
@@ -916,7 +921,7 @@ type
   protected
    fisdb: boolean;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
-   function datatotext(const data): msestring; override;
+   function internaldatatotext(const data): msestring; override;
    procedure texttodata(const atext: msestring; var data); override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatyp: datatypty; override;
@@ -1452,6 +1457,13 @@ begin
  end;
 end;
 
+procedure tdataedit.checktext(var atext: msestring; var accept: boolean);
+begin
+ if canevent(tmethod(fonsettext)) then begin
+  fonsettext(self,atext,accept);
+ end;
+end;
+
 procedure tdataedit.texttodata(const atext: msestring; var data);
 begin
  //dummy
@@ -1567,10 +1579,19 @@ begin
 end;
 
 procedure tdataedit.drawcell(const canvas: tcanvas);
+var
+ mstr1: msestring;
 begin
  with cellinfoty(canvas.drawinfopo^) do begin
+  mstr1:= '';
   if datapo <> nil then begin
-   drawtext(canvas,datatotext(datapo^),innerrect,feditor.textflags);
+   mstr1:= internaldatatotext(datapo^);
+  end;
+  if canevent(tmethod(fongettext)) then begin
+   fongettext(self,mstr1,false);
+  end;
+  if mstr1 <> '' then begin
+   drawtext(canvas,mstr1,innerrect,feditor.textflags);
   end;
  end;
 end;
@@ -1820,16 +1841,17 @@ begin
  initfocus;
 end;
 
-procedure tdataedit.updatetext(var atext: msestring);
+function tdataedit.datatotext(const data): msestring;
 begin
+ result:= internaldatatotext(data);
  if canevent(tmethod(fongettext)) then begin
-  fongettext(atext,focused);
+  fongettext(self,result,focused);
  end;
 end;
 
 { tcustomstringedit }
 
-function tcustomstringedit.datatotext(const data): msestring;
+function tcustomstringedit.internaldatatotext(const data): msestring;
 begin
  if @data = nil then begin
   result:= fvalue;
@@ -1838,7 +1860,6 @@ begin
   result:= msestring(data);
  end;
  updatedisptext(result);
- updatetext(result);
 end;
 
 procedure tcustomstringedit.texttodata(const atext: msestring; var data);
@@ -1881,28 +1902,32 @@ end;
 
 procedure tcustomstringedit.texttovalue(var accept: boolean; const quiet: boolean);
 var
- str1: msestring;
+ mstr1: msestring;
 begin
- str1:= getvaluetext;
+ mstr1:= getvaluetext;
  if oe_trimleft in foptionsedit then begin
-  str1:= trimleft(str1);
+  mstr1:= trimleft(mstr1);
  end;
  if oe_trimright in foptionsedit then begin
-  str1:= trimright(str1);
+  mstr1:= trimright(mstr1);
  end;
  if oe_uppercase in foptionsedit then begin
-  str1:= mseuppercase(str1);
+  mstr1:= mseuppercase(mstr1);
  end
  else begin
   if oe_lowercase in foptionsedit then begin
-   str1:= mselowercase(str1);
+   mstr1:= mselowercase(mstr1);
   end;
  end;
+ checktext(mstr1,accept);
+ if not accept then begin
+  exit;
+ end;
  if not quiet then begin
-  dosetvalue(str1,accept);
+  dosetvalue(mstr1,accept);
  end;
  if accept then begin
-  value:= str1;
+  value:= mstr1;
  end;
 end;
 
@@ -2327,17 +2352,23 @@ end;
 
 procedure thexstringedit.dosetvalue(var avalue: ansistring; var accept: boolean);
 begin
- if canevent(tmethod(fonsetvalue)) then begin
+ if accept and canevent(tmethod(fonsetvalue)) then begin
   fonsetvalue(self,avalue,accept);
  end;
 end;
 
 procedure thexstringedit.texttovalue(var accept: boolean; const quiet: boolean);
 var
+ mstr1: msestring;
  str1: ansistring;
 begin
  try
-  str1:= strtobytestr(printableascii(feditor.text))
+  mstr1:= feditor.text;
+  checktext(mstr1,accept);
+  if not accept then begin
+   exit;
+  end;
+  str1:= strtobytestr(printableascii(mstr1))
  except
   formaterror(quiet);
   accept:= false
@@ -2352,7 +2383,7 @@ begin
  end;
 end;
 
-function thexstringedit.datatotext(const data): msestring;
+function thexstringedit.internaldatatotext(const data): msestring;
 var
  str1: ansistring;
 begin
@@ -2363,7 +2394,6 @@ begin
   str1:= ansistring(data);
  end;
  result:= bytestrtostr(str1,nb_hex,true);
- updatetext(result);
 end;
 
 procedure thexstringedit.valuetogrid(const arow: integer);
@@ -2777,13 +2807,19 @@ end;
 procedure tcustomintegeredit.texttovalue(var accept: boolean; const quiet: boolean);
 var
  int1: integer;
+ mstr1: msestring;
 begin
  if fisnull then begin
   int1:= 0;
  end
  else begin
   try
-   int1:= strtointvalue(feditor.text,fbase);
+   mstr1:= feditor.text;
+   checktext(mstr1,accept);
+   if not accept then begin
+    exit;
+   end;
+   int1:= strtointvalue(mstr1,fbase);
   except
    formaterror(quiet);
    accept:= false
@@ -2878,7 +2914,7 @@ begin
  end;
 end;
 
-function tcustomintegeredit.datatotext(const data): msestring;
+function tcustomintegeredit.internaldatatotext(const data): msestring;
 begin
  if @data = nil then begin
   result:= intvaluetostr(fvalue,fbase,fbitcount);
@@ -2886,7 +2922,6 @@ begin
  else begin
   result:= intvaluetostr(integer(data),fbase,fbitcount);
  end;
- updatetext(result);
 end;
 
 function tcustomintegeredit.getgridvalue(const index: integer): integer;
@@ -2990,6 +3025,10 @@ begin
    mstr1:= '';
   end;
  end;
+ checktext(mstr1,accept);
+ if not accept then begin
+  exit;
+ end;
  if not quiet and canevent(tmethod(fonsetvalue)) then begin
   fonsetvalue(self,mstr1,accept);
  end;
@@ -3006,7 +3045,7 @@ begin
  dropdown.itemindex:= -1;
 end;
 
-function tcustomkeystringedit.datatotext(const data): msestring;
+function tcustomkeystringedit.internaldatatotext(const data): msestring;
 var
  int1: integer;
 begin
@@ -3028,7 +3067,6 @@ begin
    result:= '';
   end;
  end;
- updatetext(result);
 end;
 
 procedure tcustomkeystringedit.texttodata(const atext: msestring; var data);
@@ -3104,7 +3142,7 @@ begin
  //not supported
 end;
 
-function tcustomenuedit.datatotext(const data): msestring;
+function tcustomenuedit.internaldatatotext(const data): msestring;
 var
  int1,int2: integer;
 begin
@@ -3129,7 +3167,6 @@ begin
    result:= valuelist[int2];
   end;
  end;
- updatetext(result);
 end;
 
 function tcustomenuedit.enumname(const avalue: integer): msestring;
@@ -3219,6 +3256,7 @@ end;
 procedure tcustomenuedit.texttovalue(var accept: boolean; const quiet: boolean);
 var
  int1: integer;
+ mstr1: msestring;
 begin
  if trim(text) = '' then begin
   int1:= -1;
@@ -3231,7 +3269,12 @@ begin
   else begin
    if not (deo_selectonly in fdropdown.options) then begin
     try
-     int1:= strtointvalue(feditor.text,fbase);
+     mstr1:= feditor.text;
+     checktext(mstr1,accept);
+     if not accept then begin
+      exit;
+     end;
+     int1:= strtointvalue(mstr1,fbase);
     except
      accept:= false;
      formaterror(quiet);
@@ -3504,7 +3547,7 @@ begin
  formatchanged;
 end;
 
-function tcustomrealedit.datatotext(const data): msestring;
+function tcustomrealedit.internaldatatotext(const data): msestring;
 var
  rea1: real;
 begin
@@ -3523,7 +3566,6 @@ begin
  else begin
   result:= realtytostr(rea1,fformatdisp);
  end;
- updatetext(result);
 end;
 
 function tcustomrealedit.createdatalist(const sender: twidgetcol): tdatalist;
@@ -3555,9 +3597,16 @@ end;
 
 function tcustomrealedit.gettextvalue(var accept: boolean; 
                                              const quiet: boolean): realty;
+var
+ mstr1: msestring;
 begin
  try
-  result:= strtorealty(feditor.text);
+  mstr1:= feditor.text;
+  checktext(mstr1,accept);
+  if not accept then begin
+   exit;
+  end;
+  result:= strtorealty(mstr1);
  except
   formaterror(quiet);
   accept:= false
@@ -4019,13 +4068,19 @@ procedure tcustomdatetimeedit.texttovalue(var accept: boolean;
                                                  const quiet: boolean);
 var
  dat1: tdatetime;
+ mstr1: msestring;
 begin
  try
+  mstr1:= feditor.text;
+  checktext(mstr1,accept);
+  if not accept then begin
+   exit;
+  end;
   if fkind = dtk_time then begin
-   dat1:= stringtotime(feditor.text);
+   dat1:= stringtotime(mstr1);
   end
   else begin
-   dat1:= stringtodatetime(feditor.text);
+   dat1:= stringtodatetime(mstr1);
   end;
  except
   formaterror(quiet);
@@ -4087,7 +4142,7 @@ begin
  tdatetime(data):= dat1;
 end;
 
-function tcustomdatetimeedit.datatotext(const data): msestring;
+function tcustomdatetimeedit.internaldatatotext(const data): msestring;
 var
  dat1: tdatetime;
 begin
@@ -4113,7 +4168,6 @@ begin
    result:= mseformatstr.datetimetostring(dat1,fformatdisp);
   end;
  end;
- updatetext(result);
 end;
 
 function tcustomdatetimeedit.createdatalist(const sender: twidgetcol): tdatalist;

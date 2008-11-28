@@ -430,7 +430,7 @@ type
    procedure drawcell(const canvas: tcanvas); override;
    procedure valuetogrid(const arow: integer); override;
    procedure gridtovalue(const arow: integer); override;
-   function datatotext(const data): msestring; override;
+   function internaldatatotext(const data): msestring; override;
    procedure dosetvalue(var avalue: msestring; var accept: boolean); virtual;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    procedure clientrectchanged; override;
@@ -2229,7 +2229,7 @@ begin
  end;
 end;
 
-function titemedit.datatotext(const data): msestring;
+function titemedit.internaldatatotext(const data): msestring;
 var
  po: plistitem;
 begin
@@ -2245,7 +2245,6 @@ begin
  else begin
   result:= '';
  end;
- updatetext(result);
 end;
 
 procedure titemedit.dosetvalue(var avalue: msestring; var accept: boolean);
@@ -2257,14 +2256,18 @@ end;
 
 procedure titemedit.texttovalue(var accept: boolean; const quiet: boolean);
 var
- str1: msestring;
+ mstr1: msestring;
 begin
- str1:= feditor.text;
+ mstr1:= feditor.text;
+ checktext(mstr1,accept);
+ if not accept then begin
+  exit;
+ end;
  if not quiet then begin
-  dosetvalue(str1,accept);
+  dosetvalue(mstr1,accept);
  end;
  if accept and (fvalue <> nil) then begin
-  fvalue.caption:= str1;
+  fvalue.caption:= mstr1;
  end;
 end;
 

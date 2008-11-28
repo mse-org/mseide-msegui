@@ -1677,7 +1677,7 @@ end;
    property datacols: tdatacols read fdatacols write setdatacols;
    property fixcols: tfixcols read ffixcols write setfixcols;
    property fixrows: tfixrows read ffixrows write setfixrows;
-   property rowcount: integer read frowcount write setrowcount;
+   property rowcount: integer read frowcount write setrowcount default 0;
    function rowhigh: integer; //rowcount - 1
    property rowcountmax: integer read frowcountmax
                          write setrowcountmax default bigint;
