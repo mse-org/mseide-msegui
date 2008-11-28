@@ -105,25 +105,32 @@ object msepopupcalendarfo: tpopupcalendarfo
         captions.count = 7
         captions.items = <        
           item
+            options = []
           end        
           item
+            options = []
           end        
           item
+            options = []
           end        
           item
+            options = []
           end        
           item
+            options = []
           end        
           item
+            options = []
           end        
           item
+            options = []
           end>
       end>
     rowcount = 6
     gridframecolor = -2147483645
     datarowheight = 21
     oncellevent = cellevent
-    reffontheight = 15
+    reffontheight = 14
   end
   object monthdisp: tdatetimedisp
     optionswidget = [ow_mousewheel, ow_destroywidgets, ow_fontglyphheight]
@@ -135,7 +142,7 @@ object msepopupcalendarfo: tpopupcalendarfo
     taborder = 5
     textflags = [tf_xcentered, tf_right, tf_ycentered]
     format = 'mmmm'
-    reffontheight = 15
+    reffontheight = 14
   end
   object yeardisp: tdatetimedisp
     optionswidget = [ow_mousewheel, ow_destroywidgets, ow_fontglyphheight]
@@ -147,7 +154,7 @@ object msepopupcalendarfo: tpopupcalendarfo
     taborder = 4
     textflags = [tf_xcentered, tf_right, tf_ycentered]
     format = 'yyyy'
-    reffontheight = 15
+    reffontheight = 14
   end
   object tstockglyphbutton1: tstockglyphbutton
     optionswidget = [ow_mousewheel, ow_destroywidgets, ow_autoscale]
@@ -158,6 +165,9 @@ object msepopupcalendarfo: tpopupcalendarfo
     taborder = 3
     state = [as_localimagelist, as_localimagenr, as_localonexecute]
     glyph = stg_arrowupsmall
+    autosize_cx = 0
+    autosize_cy = 0
+    options = [bo_executeonclick, bo_executeonkey, bo_executeonshortcut, bo_executedefaultonenterkey, bo_nocandefocus]
     onexecute = moup
   end
   object tstockglyphbutton2: tstockglyphbutton
@@ -169,6 +179,9 @@ object msepopupcalendarfo: tpopupcalendarfo
     taborder = 1
     state = [as_localimagelist, as_localimagenr, as_localonexecute]
     glyph = stg_arrowdownsmall
+    autosize_cx = 0
+    autosize_cy = 0
+    options = [bo_executeonclick, bo_executeonkey, bo_executeonshortcut, bo_executedefaultonenterkey, bo_nocandefocus]
     onexecute = modown
   end
   object buup: tstockglyphbutton
@@ -180,6 +193,9 @@ object msepopupcalendarfo: tpopupcalendarfo
     taborder = 2
     state = [as_localimagelist, as_localimagenr, as_localonexecute]
     glyph = stg_arrowupsmall
+    autosize_cx = 0
+    autosize_cy = 0
+    options = [bo_executeonclick, bo_executeonkey, bo_executeonshortcut, bo_executedefaultonenterkey, bo_nocandefocus]
     onexecute = yearup
   end
   object budo: tstockglyphbutton
@@ -190,6 +206,9 @@ object msepopupcalendarfo: tpopupcalendarfo
     bounds_cy = 11
     state = [as_localimagelist, as_localimagenr, as_localonexecute]
     glyph = stg_arrowdownsmall
+    autosize_cx = 0
+    autosize_cy = 0
+    options = [bo_executeonclick, bo_executeonkey, bo_executeonshortcut, bo_executedefaultonenterkey, bo_nocandefocus]
     onexecute = yeardown
   end
 end
