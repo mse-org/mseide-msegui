@@ -83,10 +83,10 @@ type
  psectionty = ^sectionty;
  sectionarty = array of sectionty;
 
- recsetcounteventty = procedure(const count: integer) of object;
- recsetcountevent1ty = procedure(const count: integer);
- recstoreeventty = procedure(const index: integer; const avalue: msestring) of object;
- recstoreevent1ty = procedure(const index: integer; const avalue: msestring);
+ recsetcounteventty = procedure(const acount: integer) of object;
+ recsetcountevent1ty = procedure(const acount: integer);
+ recstoreeventty = procedure(const aindex: integer; const avalue: msestring) of object;
+ recstoreevent1ty = procedure(const aindex: integer; const avalue: msestring);
 
  tstatreader = class(tstatfiler)
   private

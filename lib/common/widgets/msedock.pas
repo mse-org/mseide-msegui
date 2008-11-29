@@ -29,7 +29,7 @@ const
  defaultsplittersize = 3;
 
 type
- optiondockty = (od_savepos,od_savezorder,
+ optiondockty = (od_savepos,od_savezorder,od_savechildren,
             od_canmove,od_cansize,od_canfloat,od_candock,od_acceptsdock,
             od_dockparent,od_expandforfixsize,
             od_splitvert,od_splithorz,od_tabed,od_proportional,
@@ -42,7 +42,7 @@ type
                      dbr_minimize,dbr_fixsize,
                      dbr_top,dbr_background);
 const
- defaultoptionsdock = [od_savepos,od_savezorder];
+ defaultoptionsdock = [od_savepos,od_savezorder,od_savechildren];
  dbr_first = dbr_handle;
  dbr_last = dbr_background;
  defaulttaboptions= [tabo_dragdest,tabo_dragsource];
@@ -271,6 +271,10 @@ type
    function findbandindex(const widgetindex: integer; out aindex: integer;
                                      out arect: rectty): boolean;
    function nofit: boolean;
+   function writechild(const index: integer): msestring;
+   procedure readchildrencount(const acount: integer);
+   procedure readchild(const index: integer; const avalue: msestring);
+
   public
    constructor create(aintf: idockcontroller);
    destructor destroy; override;
@@ -332,7 +336,7 @@ type
    property caption: msestring read fcaption write setcaption;
    property optionsdock: optionsdockty read foptionsdock write setoptionsdock
                       default defaultoptionsdock;
-   property bandgap: integer read fbandgap write setbandgap;
+   property bandgap: integer read fbandgap write setbandgap default 0;
    
    property oncalclayout: docklayouteventty read foncalclayout write foncalclayout;
    property onlayoutchanged: dockcontrollereventty read fonlayoutchanged 
@@ -507,7 +511,7 @@ type
 implementation
 uses
  msedatalist,mseshapes,sysutils,msebits,msetabs,mseguiintf,msedrawtext,
- mseforms;
+ mseforms,msestream;
 
 type
  twidget1 = class(twidget);
@@ -2208,6 +2212,31 @@ begin
  end;
 end;
 
+procedure tdockcontroller.readchildrencount(const acount: integer);
+begin
+ //dummy;
+end;
+
+procedure tdockcontroller.readchild(const index: integer;
+               const avalue: msestring);
+var
+ na: ansistring;
+ rect1,rect2: rectty;
+ w1: twidget;
+begin
+ decoderecord(avalue,[@na,@rect1.x,@rect1.y,@rect1.cx,@rect1.cy],'siiii');
+ with fintf.getwidget do begin
+  w1:= findwidget(na);
+  if w1 <> nil then begin
+   rect2.pos:= nullpoint;
+   rect2.size:= application.screensize;
+   shiftinrect(rect1,rect2);
+   clipinrect(rect1,rect2);
+   w1.widgetrect:= rect1;
+  end;
+ end;
+end;
+
 procedure tdockcontroller.dostatread(const reader: tstatreader);
 var
  rect1: rectty;
@@ -2264,6 +2293,10 @@ begin
    end;
    visible:= bo1;
   end;
+  if od_savechildren in foptionsdock then begin
+   reader.readrecordarray('children',{$ifdef FPC}@{$endif}readchildrencount,
+             {$ifdef FPC}@{$endif}readchild);
+  end;
   if (parentwidget = nil) and (od_savezorder in foptionsdock) then  begin
    str1:= '~';
    str1:= reader.readstring('stackedunder',str1);
@@ -2282,7 +2315,15 @@ begin
  end;
 end;
 
-procedure tdockcontroller.dostatwrite(const writer: tstatwriter; const bounds: prectty = nil);
+function tdockcontroller.writechild(const index: integer): msestring;
+begin
+ with twidget1(fintf.getwidget).widgets[index] do begin
+  result:= encoderecord([name,bounds_x,bounds_y,bounds_cx,bounds_cy]);
+ end;
+end;
+
+procedure tdockcontroller.dostatwrite(const writer: tstatwriter;
+                                    const bounds: prectty = nil);
 var
  str1: string;
  window1: twindow;
@@ -2339,6 +2380,10 @@ begin
    writer.writeinteger('y',bounds_y);
    writer.writeinteger('cx',bounds_cx);
    writer.writeinteger('cy',bounds_cy);
+  end;
+  if od_savechildren in foptionsdock then begin
+   writer.writerecordarray('children',widgetcount,
+             {$ifdef FPC}@{$endif}writechild);
   end;
  end;
 end;

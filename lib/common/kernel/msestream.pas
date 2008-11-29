@@ -260,6 +260,13 @@ function decoderecord(const value: msestring;
                    const fields: array of pointer; const types: string;
                const quotechar: msechar = '"';
                const separator: msechar = ','): boolean; overload;
+                // types:
+                // b -> boolean
+                // i -> integer
+                // I -> int64
+                // s -> ansistring
+                // S -> msestring
+                // r -> real
                
 function readfiledatastring(const afilename: filenamety): string;
 procedure writefiledatastring(const afilename: filenamety; const adata: string);

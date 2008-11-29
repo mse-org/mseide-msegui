@@ -363,7 +363,8 @@ type
    property onresize: notifyeventty read fonresize write fonresize;
    property onmove: notifyeventty read fonmove write fonmove;
   published
-   property optionsscale: optionsscalety read foptionsscale write setoptionsscale;
+   property optionsscale: optionsscalety read foptionsscale write setoptionsscale
+                  default [];
    property onfontheightdelta: fontheightdeltaeventty read fonfontheightdelta
                      write fonfontheightdelta;
    property onchildscaled: notifyeventty read fonchildscaled write fonchildscaled;
