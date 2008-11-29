@@ -886,7 +886,7 @@ type
    property options: datasetoptionsty read foptions write setoptions 
                    default defaultdscontrolleroptions;
    property delayedapplycount: integer read fdelayedapplycount 
-                                       write setdelayedapplycount;
+                                       write setdelayedapplycount default 0;
                //0 -> no autoapply
  end;
  

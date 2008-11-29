@@ -27,7 +27,7 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
   published
-   property Active : boolean read getactive write setactive;
+   property Active : boolean read getactive write setactive default false;
    property controller: ttacontroller read fcontroller write setcontroller;
  end;
 

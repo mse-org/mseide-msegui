@@ -1585,8 +1585,8 @@ end;
 
 destructor tcustomstepbox.destroy;
 begin
- fdragcontroller.Free;
  inherited;
+ fdragcontroller.Free;
 end;
 
 procedure tcustomstepbox.internalcreateframe;

@@ -346,8 +346,8 @@ type
     property Handle: Pointer read GetHandle;
     procedure EndTransaction; override;
    published
-    property options: transactionoptionsty read foptions write foptions;
-    property Action : TCommitRollbackAction read FAction write FAction;
+    property options: transactionoptionsty read foptions write foptions default [];
+    property Action : TCommitRollbackAction read FAction write FAction default canone;
     property Database: tcustomsqlconnection read getdatabase write setdatabase1;
     property Params : TStringList read FParams write setparams;
     property oncommiterror: commiterroreventty read foncommiterror 

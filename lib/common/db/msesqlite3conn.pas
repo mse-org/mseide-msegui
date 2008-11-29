@@ -139,9 +139,9 @@ type
    property lasterrormessage: msestring read flasterrormessage;
   published
    property DatabaseName: filenamety read getdatabasename write setdatabasename;
-   property Connected: boolean read getconnected write setconnected;
+   property Connected: boolean read getconnected write setconnected default false;
    property controller: tdbcontroller read fcontroller write setcontroller;
-   property options: sqliteoptionsty read foptions write setoptions;
+   property options: sqliteoptionsty read foptions write setoptions default [];
    property busytimeoutms: integer read fbusytimeoutms 
                                         write setbusytimeoutms default 0;
 //    property Password;

@@ -197,12 +197,15 @@ type
   private
    fupdating: integer;
    factcomp: tcomponent;
+   fpasteowner: tcomponent;
+   fpasteroot: tcomponent;
    function Getitems(const index: integer): tcomponent;
    procedure Setitems(const index: integer; const Value: tcomponent);
    procedure dosetactcomp(component: tcomponent);
    procedure doadd(component: tcomponent);
    procedure findpastemethod(Reader: TReader;
            const aMethodName: string; var Address: Pointer; var Error: Boolean);
+   procedure referencepastename(reader: treader; var name: string);
   protected
    procedure dochanged; virtual;
    function getrecordsize: integer; virtual;
@@ -988,6 +991,20 @@ begin
  end;
 end;
 
+const
+ pastenametrailer = '_15dtz4u67sd3r';
+
+procedure tdesignerselections.referencepastename(reader: treader; var name: string);
+begin
+ if (reader.root = fpasteroot) and (fpasteroot.findcomponent(name) = nil) and
+        (fpasteowner.findcomponent(name+pastenametrailer) <> nil) then begin
+  name:= name + pastenametrailer; 
+            //this is dangerous, there could be a component with the same name 
+            //but another class type, no possibility found to access the 
+            //propertyinfo of the resolving items :-(
+ end;
+end;
+
 function tdesignerselections.pastefromobjecttext(const aobjecttext: string; 
          aowner,aparent: tcomponent; initproc: initcomponentprocty): integer;
                   //returns count of added components
@@ -1013,8 +1030,10 @@ begin
  end;
  countbefore:= count;
  try
+  fpasteowner:= aowner;
   textstream:= ttextstream.Create;
   comp1:= tcomponent.create(nil);
+  fpasteroot:= comp1;
   tcomponent1(comp1).SetDesigning(true{$ifndef FPC},false{$endif});
   lockfindglobalcomponent;
   RegisterFindGlobalComponentProc({$ifdef FPC}@{$endif}getglobalcomponent);
@@ -1033,6 +1052,7 @@ begin
      binstream.Position:= 0;
      reader:= treader.create(binstream,4096);
      try
+      reader.onreferencename:= {$ifdef FPC}@{$endif}referencepastename;
       reader.onfindmethod:= {$ifdef FPC}@{$endif}findpastemethod;
       reader.onancestornotfound:= {$ifdef FPC}@{$endif}designer.ancestornotfound;
       reader.onfindcomponentclass:= 
@@ -1040,8 +1060,24 @@ begin
       reader.oncreatecomponent:= {$ifdef FPC}@{$endif}designer.createcomponent;
       factcomp:= nil;
       begingloballoading;
-      reader.readrootcomponent(comp1);
-      for int1:= 0 to comp1.componentcount - 1 do begin
+      with getcomponentlist(comp1) do begin
+       for int1:= 0 to aowner.componentcount - 1 do begin
+        comp2:= aowner.components[int1];
+        comp2.name:= comp2.name + pastenametrailer; //avoid nameclash
+        add(comp2);
+       end;
+      end;
+      try
+       reader.readrootcomponent(comp1);
+      finally
+       for int1:= 0 to aowner.componentcount - 1 do begin
+        comp2:= aowner.components[int1];
+        comp2.name:= copy(comp2.name,1,length(comp2.name) - 
+                                             length(pastenametrailer));
+                                //restore original name
+       end;
+      end;
+      for int1:= aowner.componentcount to comp1.componentcount - 1 do begin
        comp2:= comp1.components[int1];
        designer.doswapmethodpointers(comp2,true);
        if comp2.getparentcomponent = nil then begin
@@ -1050,22 +1086,21 @@ begin
       end;
       removefixupreferences(comp1,'');
       if assigned(initproc) then begin
-       for int1:= comp1.componentcount - 1 downto 0 do begin
+       for int1:= comp1.componentcount - 1 downto aowner.componentcount do begin
         comp2:= comp1.components[int1]; 
         if comp2.getparentcomponent = nil then begin
          initproc(comp2,aparent);
         end;
        end;
       end;
+      if pastingmodulepo <> nil then begin
+       designer.checkmethodtypes(pastingmodulepo,false{,comp1});  
+      end;
       notifygloballoading;
      finally
       endgloballoading;
       reader.Free;
      end;
-    end;
-    if pastingmodulepo <> nil then begin
-     designer.checkmethodtypes(pastingmodulepo,false,comp1);  
-     //////////todo: quiet not working
     end;
    finally
     binstream.Free;
@@ -1074,6 +1109,7 @@ begin
    unlockfindglobalcomponent;
    unRegisterFindGlobalComponentProc({$ifdef FPC}@{$endif}getglobalcomponent);
    textstream.Free;
+   clearcomponentlist(comp1);
    comp1.Free;
   end;
  except

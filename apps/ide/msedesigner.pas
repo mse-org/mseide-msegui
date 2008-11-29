@@ -344,7 +344,7 @@ type
               out aancestormodule: pmoduleinfoty): boolean;
    function getreferencingmodulenames(const amodule: pmoduleinfoty): stringarty;
    function checkmethodtypes(const amodule: pmoduleinfoty;
-            const init: boolean; const quiet: tcomponent): boolean;
+            const init: boolean{; const quiet: tcomponent}): boolean;
                //does correct errors quiet for tmethod.data = quiet
    procedure doswapmethodpointers(const ainstance: tobject;
                         const ainit: boolean);
@@ -3260,7 +3260,7 @@ begin
 end;
 }
 function tdesigner.checkmethodtypes(const amodule: pmoduleinfoty;
-                      const init: boolean; const quiet: tcomponent): boolean;
+                      const init: boolean{; const quiet: tcomponent}): boolean;
                                       //false on cancel
 var
  classinf: pclassinfoty;
@@ -3281,8 +3281,8 @@ var
    case ar1[int1]^.proptype^.kind of
     tkmethod: begin
      method1:= getmethodprop(instance,ar1[int1]);
-     if (method1.data <> nil) and ((quiet = nil) or 
-                         (pointer(quiet) = method1.data)) then begin
+     if (method1.data <> nil) {and ((quiet = nil) or 
+                         (pointer(quiet) = method1.data))} then begin
 //      method1.data:= amodule^.instance;
       po1:= amodule^.methods.findmethod(method1.data);
       if po1 <> nil then begin
@@ -3293,25 +3293,25 @@ var
         po2:= classinf^.procedurelist.finditembyname(po1^.name);
         mr1:= mr_none;
         if po2 = nil then begin
-         if quiet <> nil then begin
-          mr1:= mr_yes;
-         end
-         else begin
+//         if quiet <> nil then begin
+//          mr1:= mr_yes;
+//         end
+//         else begin
           mr1:= askyesnocancel('Method '+amodule^.instance.name+'.'+po1^.name+' ('+
                  comp1.name+'.'+ar1[int1]^.name+') does not exist.'+lineend+
                  'Do you wish to delete the event?','WARNING');
-         end;
+//         end;
         end
         else begin
          if not parametersmatch(po1^.typeinfo,po2^.params) then begin
-          if quiet <> nil then begin
-           mr1:= mr_yes;
-          end
-          else begin
+//          if quiet <> nil then begin
+//           mr1:= mr_yes;
+//          end
+//          else begin
            mr1:= askyesnocancel('Method '+amodule^.instance.name+'.'+po1^.name+' ('+
                  comp1.name+'.'+ar1[int1]^.name+') has different parameters.'+lineend+
                  'Do you wish to delete the event?','WARNING');
-          end;
+//          end;
          end;
         end;
         if mr1 = mr_yes then begin
@@ -3319,10 +3319,10 @@ var
          modulechanged(amodule);
         end
         else begin
-         if quiet <> nil then begin
-          setmethodprop(instance,ar1[int1],method1);
+//         if quiet <> nil then begin
+//          setmethodprop(instance,ar1[int1],method1);
                    //refresh data pointer
-         end;
+//         end;
         end;
         result:= mr1 <> mr_cancel;
        end;
@@ -3596,7 +3596,7 @@ begin //loadformfile
        end;
        if result <> nil then begin
         result^.designform:= createdesignform(self,result);
-        checkmethodtypes(result,true,nil);
+        checkmethodtypes(result,true{,nil});
  //       showformdesigner(result);
         result^.modified:= false;
        end;
@@ -3735,7 +3735,7 @@ var
  
 begin
  if createdatafile and projectoptions.checkmethods 
-                       and not checkmethodtypes(modulepo,false,nil) then begin
+                       and not checkmethodtypes(modulepo,false{,nil}) then begin
   result:= false;
   exit;
  end;
@@ -3774,7 +3774,7 @@ begin
   po1:= modules[int1];
   with po1^ do begin
    if not modified and projectoptions.checkmethods then begin
-    if not checkmethodtypes(po1,false,nil) then begin
+    if not checkmethodtypes(po1,false{,nil}) then begin
      result:= mr_cancel;
      exit;
     end;

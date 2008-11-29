@@ -628,6 +628,11 @@ type
 var
  oninitskinobject: skinobjecteventty;
  
+function getcomponentlist(const acomponent: tcomponent): tlist;
+                    //uses tcomponentcracker;
+procedure clearcomponentlist(const acomponent: tcomponent);
+                    //uses tcomponentcracker;
+
 implementation
 uses
 {$ifdef debugobjectlink}
@@ -740,6 +745,21 @@ begin
   fmodules:= tmodulelist.create(false);
  end;
  result:= fmodules;
+end;
+
+function getcomponentlist(const acomponent: tcomponent): tlist;
+begin
+ with tcomponentcracker(acomponent) do begin
+  if fcomponents = nil then begin
+   fcomponents:= tlist.create;
+  end;
+  result:= fcomponents;
+ end;
+end;
+
+procedure clearcomponentlist(const acomponent: tcomponent);
+begin
+ freeandnil(tcomponentcracker(acomponent).fcomponents);
 end;
 
 function setloading(const acomponent: tcomponent; const avalue: boolean): boolean;
