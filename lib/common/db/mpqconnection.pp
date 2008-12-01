@@ -830,7 +830,7 @@ begin
      end;
     end;
     ftBoolean: begin
-     pchar(buffer)[0] := CurrBuff[0]
+     pwordbool(buffer)^:= CurrBuff[0] <> #0;
     end;
     else begin
       result := false;
