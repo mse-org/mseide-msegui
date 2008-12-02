@@ -126,8 +126,10 @@ type
    procedure setframe(const avalue: tframe);
    procedure setshift(const avalue: integer);
   protected
+   fskinupdating: integer;
    procedure createitem(const index: integer; var item: tpersistent); override;
-   procedure dosizechanged; override;
+   procedure dochange(const index: integer); override;
+//   procedure dosizechanged; override;
    procedure checktemplate(const sender: tobject);
    //iframe
    procedure setframeinstance(instance: tcustomframe);
@@ -493,6 +495,8 @@ type
    procedure settab_colortab(const avalue: colorty);
    function gettab_coloractivetab: colorty;
    procedure settab_coloractivetab(const avalue: colorty);
+   function gettab_frametab: tframe;
+   procedure settab_frametab(const avalue: tframe);
    function gettab_facetab: tface;
    procedure settab_facetab(const avalue: tface);
    function gettab_faceactivetab: tface;
@@ -511,6 +515,8 @@ type
    procedure settab_captionframe_bottom(const avalue: integer);
    function gettab_imagedist: integer;
    procedure settab_imagedist(const avalue: integer);
+   function gettab_shift: integer;
+   procedure settab_shift(const avalue: integer);
    function gettab_optionswidget: optionswidgetty;
    procedure settab_optionswidget(const avalue: optionswidgetty);
   protected
@@ -598,6 +604,10 @@ type
                           settab_captionframe_bottom default defaultcaptiondist;
    property tab_imagedist: integer read gettab_imagedist write settab_imagedist 
                                                        default defaultimagedist;
+   property tab_shift: integer read gettab_shift write settab_shift
+                                                      default defaulttabshift;
+                       //defaulttabshift (-100) -> 1
+   property tab_frametab: tframe read gettab_frametab write settab_frametab;
    property tab_facetab: tface read gettab_facetab write settab_facetab;
    property tab_faceactivetab: tface read gettab_faceactivetab write settab_faceactivetab;
    property tab_size: integer read ftab_size write settab_size;
@@ -652,8 +662,10 @@ type
    property tab_captionframe_right;
    property tab_captionframe_bottom;
    property tab_imagedist;
+   property tab_shift;
    property tab_colortab;
    property tab_coloractivetab;
+   property tab_frametab;
    property tab_facetab;
    property tab_faceactivetab;
    property tab_size;
@@ -1092,6 +1104,7 @@ destructor ttabs.destroy;
 begin
  fface.free;
  ffaceactive.free;
+ fframe.free;
  inherited;
 end;
 
@@ -1365,12 +1378,13 @@ begin
                               tcustomtabbar(fowner).flayoutinfo.cells);
 end;
 
-procedure ttabs.dosizechanged;
+procedure ttabs.dochange(const index: integer);
 begin
  inherited;
- if (count > 0) and 
+ if (index = -1) and (fskinupdating = 0) and (count > 0) and 
             not (csloading in tcustomtabbar(fowner).componentstate) then begin
-  tcustomtabbar(fowner).updateskin;
+  tcustomtabbar(fowner).updateskin; 
+        //could be a new item which needs skin setup
  end;
 end;
 
@@ -3399,6 +3413,16 @@ begin
  ftabs.tabs.coloractive:= avalue;
 end;
 
+function tcustomtabwidget.gettab_frametab: tframe;
+begin
+ result:= ftabs.tabs.frame;
+end;
+
+procedure tcustomtabwidget.settab_frametab(const avalue: tframe);
+begin
+ ftabs.tabs.frame:= avalue;
+end;
+
 function tcustomtabwidget.gettab_facetab: tface;
 begin
  result:= ftabs.tabs.face;
@@ -3477,6 +3501,16 @@ end;
 procedure tcustomtabwidget.settab_imagedist(const avalue: integer);
 begin
  ftabs.tabs.imagedist:= avalue;
+end;
+
+function tcustomtabwidget.gettab_shift: integer;
+begin
+ result:= ftabs.tabs.shift;
+end;
+
+procedure tcustomtabwidget.settab_shift(const avalue: integer);
+begin
+ ftabs.tabs.shift:= avalue;
 end;
 
 procedure tcustomtabwidget.createpagetab(const sender: tcustomtabbar;

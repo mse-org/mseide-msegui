@@ -661,6 +661,7 @@ uses
 type
  twidget1 = class(twidget);
  tcustomframe1 = class(tcustomframe);
+ ttabs1 = class(ttabs);
   
 { tskincolor }
 
@@ -1177,7 +1178,8 @@ procedure tcustomskincontroller.settabsskin(const instance: tcustomtabbar;
 var
  int1: integer;
 begin
- with instance.tabs do begin
+ with ttabs1(instance.tabs) do begin
+  inc(fskinupdating);
   beginupdate;
   try
    if (ainfo.shift <> defaulttabshift) and (shift = defaulttabshift) then begin
@@ -1211,6 +1213,7 @@ begin
    end;
   finally
    endupdate;
+   dec(fskinupdating);
   end;
  end;
 end;
