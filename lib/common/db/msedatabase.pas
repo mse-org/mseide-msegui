@@ -300,7 +300,7 @@ procedure dosetdatabase(const sender: idatabaseclient; const avalue: tmdatabase;
 begin
  if avalue <> dest then begin
   if sender.getactive then begin
-   raise edatabaseerror('Database client "'+sender.getname+'" is active.');
+   raise edatabaseerror.create('Database client "'+sender.getname+'" is active.');
   end;
   if dest <> nil then begin
    dest.unregisterdataset(sender);
@@ -319,7 +319,7 @@ procedure dosettransaction(const sender: itransactionclient;
 begin
  if avalue <> dest then begin
   if not awrite and sender.getactive then begin
-   raise edatabaseerror('Transaction client "'+sender.getname+'" is active.');
+   raise edatabaseerror.create('Transaction client "'+sender.getname+'" is active.');
   end;
   if dest <> nil then begin
    dest.unregisterdataset(sender,awrite);
