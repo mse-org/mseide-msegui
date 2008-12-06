@@ -2617,7 +2617,9 @@ begin
    transaction.active:= true;
   end;
   active:= true;
-  setrecno1(int1,true);
+  if recno <> int1 then begin
+   setrecno1(int1,true);
+  end;
  finally
   exclude(fbstate,bs_refreshing);
   if not active then begin
