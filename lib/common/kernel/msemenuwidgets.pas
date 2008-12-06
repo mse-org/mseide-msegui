@@ -362,7 +362,7 @@ begin
 //    if int1 > framehalfwidth then begin
 //     framehalfwidth:= int1;
 //    end;
-    frame1:= fi.innerframe;
+    frame1:= fi.ba.innerframe;
     extrasp:= fextraspace;
     imagedi:= fimagedist;
     imageditop:= fimagedisttop;
@@ -665,13 +665,13 @@ var
 begin
  with layout do begin
   if itemframetemplate <> nil then begin
-   po1:= @tframetemplate1(itemframetemplate).fi.innerframe;
+   po1:= @tframetemplate1(itemframetemplate).fi.ba.innerframe;
   end
   else begin
    po1:= nil;
   end; 
   if itemframetemplateactive <> nil then begin
-   po2:= @tframetemplate1(itemframetemplateactive).fi.innerframe;
+   po2:= @tframetemplate1(itemframetemplateactive).fi.ba.innerframe;
   end
   else begin
    po2:= nil;

@@ -47,7 +47,9 @@ type
    function getfont: tframefont;
    procedure setcaptionpos(const avalue: captionposty);
    procedure setcaptiondist(const Value: integer);
+   function iscaptiondiststored: boolean;
    procedure setcaptionoffset(const Value: integer);
+   function iscaptionoffsetstored: boolean;
    procedure readouterframe(reader: treader);
    procedure writeouterframe(writer: twriter);
    procedure readcaptionnoclip(reader: treader);
@@ -59,6 +61,7 @@ type
    fcaptiondist: integer;
    fcaptionoffset: integer;
    foptions: captionframeoptionsty;
+   procedure settemplateinfo(const ainfo: frameinfoty); override;
    procedure parentfontchanged; override;
    procedure fontcanvaschanged; override;
    procedure visiblechanged; override;
@@ -87,10 +90,12 @@ type
    property caption: msestring read getcaption write setcaption;
    property captionpos: captionposty read fcaptionpos
              write setcaptionpos default cp_topleft;
-   property captiondist: integer read fcaptiondist write setcaptiondist default 1;
+   property captiondist: integer read fcaptiondist write setcaptiondist 
+                                  stored iscaptiondiststored default 1;
    property captionoffset: integer read fcaptionoffset write setcaptionoffset 
-                                        default 0;
-   property font: tframefont read getfont write setfont stored isfontstored;
+                                  stored iscaptionoffsetstored default 0 ;
+   property font: tframefont read getfont 
+                        write setfont stored isfontstored;
  end;
 
  tcaptionframe = class(tcustomcaptionframe)
@@ -2147,18 +2152,30 @@ end;
 
 procedure tcustomcaptionframe.setcaptiondist(const Value: integer);
 begin
+ include(flocalprops1,frl1_captiondist);
  if fcaptiondist <> value then begin
   fcaptiondist := Value;
   internalupdatestate;
  end;
 end;
 
+function tcustomcaptionframe.iscaptiondiststored: boolean;
+begin
+ result:= (ftemplate = nil) or (frl1_captiondist in flocalprops1);
+end;
+
 procedure tcustomcaptionframe.setcaptionoffset(const Value: integer);
 begin
+ include(flocalprops1,frl1_captionoffset);
  if fcaptionoffset <> value then begin
   fcaptionoffset := Value;
   internalupdatestate;
  end;
+end;
+
+function tcustomcaptionframe.iscaptionoffsetstored: boolean;
+begin
+ result:= (ftemplate = nil) or (frl1_captionoffset in flocalprops1);
 end;
 
 procedure tcustomcaptionframe.setoptions(const avalue: captionframeoptionsty);
@@ -2437,6 +2454,21 @@ end;
 function tcustomcaptionframe.needsfocuspaint: boolean;
 begin
  result:= inherited needsfocuspaint and not (cfo_nofocusrect in foptions);
+end;
+
+procedure tcustomcaptionframe.settemplateinfo(const ainfo: frameinfoty);
+begin
+ if not (frl1_font in flocalprops1) and (ainfo.capt.font <> nil) then begin
+  createfont;
+  ffont.assign(ainfo.capt.font);
+  if not (frl1_captiondist in flocalprops1) then begin
+   fcaptiondist:= ainfo.capt.captiondist;
+  end;
+  if not (frl1_captionoffset in flocalprops1) then begin
+   fcaptionoffset:= ainfo.capt.captionoffset;
+  end;
+ end;
+ inherited;
 end;
 
 { tcustomscrollframe }

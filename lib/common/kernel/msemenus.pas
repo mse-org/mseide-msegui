@@ -272,6 +272,9 @@ type
    property execitem: tmenuitem write setexecitem;
    procedure assigntemplate(const source: tcustommenu);
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
+   function gettemplatefont(const sender: tmenuitem): tmenufont; virtual;
+   function gettemplatefontactive(
+                       const sender: tmenuitem): tmenufontactive; virtual;
   public
    constructor create(aowner: tcomponent); overload; override;
    constructor createtransient(const atransientfor: twidget;
@@ -355,6 +358,9 @@ type
    class function classskininfo: skininfoty; override;
    procedure doidle(var again: boolean);
    procedure menuchanged(const sender: tmenuitem);
+   function gettemplatefont(const sender: tmenuitem): tmenufont; override;
+   function gettemplatefontactive(
+                       const sender: tmenuitem): tmenufontactive; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -433,7 +439,7 @@ constructor tmenuframetemplate.create(const owner: tmsecomponent;
                    const onchange: notifyeventty);
 begin
  inherited;
- fi.levelo:= 1;
+ fi.ba.levelo:= 1;
 end;
 
 { tcustommenu }
@@ -665,6 +671,26 @@ begin
    fmenu.updatecaption;
   end;
   sendchangeevent;
+ end;
+end;
+
+function tcustommenu.gettemplatefont(const sender: tmenuitem): tmenufont;
+begin
+ result:= nil;
+ if itemframetemplate <> nil then begin
+  result:= tmenufont(itemframetemplate.template.font);
+ end;
+ if result = nil then begin
+  result:= tmenufont(pointer(stockobjects.fonts[stf_menu]));
+ end;
+end;
+
+function tcustommenu.gettemplatefontactive(
+                             const sender: tmenuitem): tmenufontactive;
+begin
+ result:= nil;
+ if itemframetemplateactive <> nil then begin
+  result:= tmenufontactive(pointer(itemframetemplateactive.template.font));
  end;
 end;
 
@@ -1224,11 +1250,11 @@ begin
   result:= ffont;
  end
  else begin
-  if fparentmenu <> nil then begin
+  if (fowner <> nil) then begin
+   result:= fowner.gettemplatefont(self);
+  end;
+  if (result = nil) and (fparentmenu <> nil) then begin
    result:= fparentmenu.getfont;
-  end
-  else begin
-   result:= tmenufont(pointer(stockobjects.fonts[stf_menu]));
   end;
  end;
 end;
@@ -1241,13 +1267,18 @@ begin
   result:= ffontactive;
  end
  else begin
-  result:= tmenufontactive(pointer(ffont));
+  if (fowner <> nil) then begin
+   result:= fowner.gettemplatefontactive(self);
+  end;
   if result = nil then begin
-   if fparentmenu <> nil then begin
-    result:= fparentmenu.getfontactive;
-   end
-   else begin
-    result:= tmenufontactive(pointer(stockobjects.fonts[stf_menu]));
+   result:= tmenufontactive(pointer(ffont));
+   if result = nil then begin
+    if fparentmenu <> nil then begin
+     result:= fparentmenu.getfontactive;
+    end
+    else begin
+     result:= tmenufontactive(pointer(stockobjects.fonts[stf_menu]));
+    end;
    end;
   end;
  end;
@@ -1777,6 +1808,37 @@ procedure tcustommainmenu.menuchanged(const sender: tmenuitem);
 begin
  if (fobjectlinker <> nil) and not (csloading in componentstate) then begin
   fobjectlinker.sendevent(oe_changed);
+ end;
+end;
+
+function tcustommainmenu.gettemplatefont(const sender: tmenuitem): tmenufont;
+begin
+ if (sender.fparentmenu <> nil) and (sender.fparentmenu <> fmenu) then begin 
+                            //in popup
+  result:= nil;
+  if popupitemframetemplate <> nil then begin
+   result:= tmenufont(popupitemframetemplate.template.font);
+  end;
+  if result = nil then begin
+   result:= tmenufont(pointer(stockobjects.fonts[stf_menu]));
+  end;
+ end
+ else begin
+  result:= inherited gettemplatefont(sender);
+ end;
+end;
+
+function tcustommainmenu.gettemplatefontactive(
+                                const sender: tmenuitem): tmenufontactive;
+begin
+ if sender.fparentmenu <> fmenu then begin //in popup
+  result:= nil;
+  if popupitemframetemplateactive <> nil then begin
+   result:= tmenufontactive(pointer(popupitemframetemplateactive.template.font));
+  end;
+ end
+ else begin
+  result:= inherited gettemplatefontactive(sender);
  end;
 end;
 
