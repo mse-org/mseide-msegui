@@ -4808,7 +4808,7 @@ end;
 function tframetemplate.getinfosize: integer;
 begin
 // result:= sizeof(fi.ba) - sizeof(fi.ba.frameface_list);
- result:= @fi.ba.frameface_list - @fi.ba; //copied by move
+ result:= ptruint(@fi.ba.frameface_list) - ptruint(@fi.ba); //copied by move
 end;
 
 function tframetemplate.getinfoad: pointer;

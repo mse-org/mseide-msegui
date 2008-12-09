@@ -565,7 +565,7 @@ var
  ca1: cardinal;
 begin
  result:= cl_none;
- if trystrtohex(value,result) then begin
+ if trystrtohex(value,longword(result)) then begin
   if cardinal(result) > $00ffffff then begin
    gdierror(gde_invalidcolor);
   end;
