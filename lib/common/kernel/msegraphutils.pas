@@ -565,12 +565,12 @@ var
  ca1: cardinal;
 begin
  result:= cl_none;
- try
-  result:= colorty(strtohex(value));
+ if trystrtohex(value,result) then begin
   if cardinal(result) > $00ffffff then begin
    gdierror(gde_invalidcolor);
   end;
- except
+ end
+ else begin
   value:= lowercase(value);
   for ca1:= 0 to mapcolorcounts[cm_namedrgb] - 1 do begin
    if defaultnamedrgb[ca1].name = value then begin

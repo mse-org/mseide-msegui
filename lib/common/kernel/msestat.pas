@@ -686,10 +686,10 @@ begin
   result:= default;
  end
  else begin
-  try
-   result:= strtoint(str1);
+  if trystrtoint(str1,result) then begin
    checkintegerrange(result,min,max);
-  except
+  end
+  else begin
    result:= default;
   end;
  end;
@@ -704,10 +704,10 @@ begin
   result:= default;
  end
  else begin
-  try
-   result:= strtoint64(str1);
+  if trystrtoint64(str1,result) then begin
    checkint64range(result,min,max);
-  except
+  end
+  else begin
    result:= default;
   end;
  end;

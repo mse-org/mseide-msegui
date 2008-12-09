@@ -114,14 +114,23 @@ function intvaluetostr(const value: integer; const base: numbasety = nb_dec;
 function trystrtoptrint(const inp: string; out value: ptrint): boolean;
 function strtoptrint(const inp: string): ptrint;
 
- //todo: no exceptions, 64bit
+ //todo: 64bit
+function trystrtobin(const inp: string; out value: longword): boolean;
 function strtobin(const inp: string): longword;
+function trystrtooct(const inp: string; out value: longword): boolean;
 function strtooct(const inp: string): longword;
+function trystrtodec(const inp: string; out value: longword): boolean;
 function strtodec(const inp: string): longword;
+function trystrtohex(const inp: string; out value: longword): boolean;
 function strtohex(const inp: string): longword;
-function strtointvalue(const inp: string): longword; overload;
+
+function trystrtointvalue(const inp: string;
+                            out value: longword): boolean; overload;
    //% prefix -> bin, & -> oct, # -> dez, $ -> hex 0x -> hex
-function strtointvalue(const text: msestring; base: numbasety): integer; overload;
+function strtointvalue(const inp: string): longword; overload;
+function trystrtointvalue(const text: msestring; base: numbasety;
+                            out value: longword): boolean; overload;
+function strtointvalue(const text: msestring; base: numbasety): longword; overload;
 
 
 function bytestrtostr(const inp: ansistring; base: numbasety; abstand: boolean): string;
@@ -2061,24 +2070,37 @@ begin
  end;
 end;
 
-function strtointvalue(const text: msestring; base: numbasety): integer;
+procedure formaterror(const value: string);
+begin
+ raise exception.Create('Invalid number '''+value+'''.');
+end;
+
+function trystrtointvalue(const text: msestring; base: numbasety;
+                     out value: longword): boolean;
 var
  str1: string;
 begin
  str1:= trim(text);
  case base of
   nb_bin: begin
-   result:= strtobin(str1);
+   result:= trystrtobin(str1,value);
   end;
   nb_oct: begin
-   result:= strtooct(str1);
+   result:= trystrtooct(str1,value);
   end;
   nb_hex: begin
-   result:= strtohex(str1);
+   result:= trystrtohex(str1,value);
   end
   else begin //nb_dec
-   result:= strtodec(str1);
+   result:= trystrtodec(str1,value);
   end;
+ end;
+end;
+
+function strtointvalue(const text: msestring; base: numbasety): longword;
+begin
+ if not trystrtointvalue(text,base,result) then begin
+  formaterror(text);
  end;
 end;
 
@@ -2101,136 +2123,161 @@ begin
  end;
 end;
 
-procedure formaterror(const value: string);
-begin
- raise exception.Create('Invalid number '''+value+'''.');
-end;
-
-function strtobin1(const inp: string): longword;
+function strtobin1(const inp: string; out value: longword): boolean;
    //wandelt 1..0-string in longword)
 var
  int1: integer;
  lwo1: longword;
 begin
- if length(inp) = 0 then begin
-  formaterror(inp);
- end;
- result:= 0;
- lwo1:= 1;
- for int1:= length(inp) downto 1 do begin
-  if inp[int1] = '1' then begin
-   result:= result + lwo1;
-  end
-  else begin
-   if inp[int1] <> '0' then begin
-    result:= strtoint(inp); //exception erzeugen
+ result:= false;
+ if inp <> '' then begin
+  value:= 0;
+  lwo1:= 1;
+  for int1:= length(inp) downto 1 do begin
+   if inp[int1] = '1' then begin
+    value:= value + lwo1;
+   end
+   else begin
+    if inp[int1] <> '0' then begin
+     exit;
+    end;
    end;
+   lwo1:= lwo1 shl 1;
   end;
-  lwo1:= lwo1 shl 1;
+  result:= true;
+ end;
+end;
+
+function trystrtobin(const inp: string; out value: longword): boolean;
+begin
+ result:= strtobin1(inp,value);
+ if not result then begin
+  result:= trystrtointvalue(inp,value);
  end;
 end;
 
 function strtobin(const inp: string): longword;
-   //wandelt 1..0-string in longword)
+   //wandelt 0..1-string in longword)
 begin
- try
-  result:= strtobin1(inp);
- except
-  result:= strtointvalue(inp);
+ if not trystrtobin(inp,result) then begin
+  formaterror(inp);
  end;
-end;
+end; 
 
-function strtooct1(const inp: string): longword;
+function strtooct1(const inp: string; out value: longword): boolean;
 var
  int1: integer;
  ca1: cardinal;
  ch1: char;
 begin
- if length(inp) = 0 then begin
-  formaterror(inp);
- end;
- result:= 0;
- ca1:= 0;
- for int1:= length(inp) downto 1 do begin
-  ch1:= inp[int1];
-  if (ch1 < '0') or (ch1 > '7') then begin
-   formaterror(inp);
-  end
-  else begin
-   result:= result + cardinal(((ord(ch1) - ord('0'))) shl ca1);
+ result:= false;
+ if inp <> '' then begin
+  value:= 0;
+  ca1:= 0;
+  for int1:= length(inp) downto 1 do begin
+   ch1:= inp[int1];
+   if (ch1 < '0') or (ch1 > '7') then begin
+    exit;
+   end;
+   value:= value + cardinal(((ord(ch1) - ord('0'))) shl ca1);
+   inc(ca1,3);
   end;
-  inc(ca1,3);
+  result:= true;
+ end;
+end;
+
+function trystrtooct(const inp: string; out value: longword): boolean;
+begin
+ result:= strtooct1(inp,value);
+ if not result then begin
+  result:= trystrtointvalue(inp,value);
  end;
 end;
 
 function strtooct(const inp: string): longword;
    //wandelt 1..0-string in longword)
 begin
- try
-  result:= strtooct1(inp);
- except
-  result:= strtointvalue(inp);
+ if not trystrtooct(inp,result) then begin
+  formaterror(inp);
  end;
 end;
 
-function strtodec1(const inp: string): longword;
+function strtodec1(const inp: string; out value: longword): boolean;
 begin
- if length(inp) = 0 then begin
-  formaterror(inp);
- end;
- result:= strtoint(inp);
+ result:= trystrtoint(inp,integer(value));
+end;
+
+function trystrtodec(const inp: string; out value: longword): boolean;
+begin
+ result:= strtodec1(inp,value);
+ if not result then begin
+  result:= trystrtointvalue(inp,value);
+ end; 
 end;
 
 function strtodec(const inp: string): longword;
-   //wandelt 1..0-string in longword)
+   //wandelt 0..9-string in longword)
 begin
- try
-  result:= strtodec1(inp);
- except
-  result:= strtointvalue(inp);
+ if not trystrtodec(inp,result) then begin
+  formaterror(inp);
  end;
 end;
 
-function strtohex1(const inp: string): longword;
+function strtohex1(const inp: string; out value: longword): boolean;
 begin
- if length(inp) = 0 then begin
-  formaterror(inp);
+ result:= trystrtoint('$'+inp,integer(value));
+end;
+
+function trystrtohex(const inp: string; out value: longword): boolean;
+begin
+ result:= strtohex1(inp,value);
+ if not result then begin
+  result:= trystrtointvalue(inp,value);
  end;
- result:= strtoint('$'+inp);
 end;
 
 function strtohex(const inp: string): longword;
 begin
- try
-  result:= strtohex1(inp);
- except
-  result:= strtointvalue(inp);
+ if not trystrtohex(inp,result) then begin
+  formaterror(inp);
+ end;
+end;
+
+function trystrtointvalue(const inp: string; out value: longword): boolean;
+var
+ lint1: int64;
+begin
+ result:= false;
+ if length(inp) > 0 then begin
+  case inp[1] of
+  '%': result:= strtobin1(copy(inp,2,length(inp)-1),value);
+  '&': result:= strtooct1(copy(inp,2,length(inp)-1),value);
+  '#': result:= strtodec1(copy(inp,2,length(inp)-1),value);
+  '$': result:= strtohex1(copy(inp,2,length(inp)-1),value);
+   else begin
+    if (length(inp) > 2) and
+           ((inp[2] = 'x') or (inp[2] = 'X')) and (inp[1] = '0') then begin
+     result:= strtohex1(copy(inp,3,length(inp)-2),value);
+    end
+    else begin
+     result:= trystrtoint64(inp,lint1);
+     if result then begin
+      value:= lint1;
+     end;
+    end;
+   end;
+  end;
  end;
 end;
 
 function strtointvalue(const inp: string): longword;
 begin
- if length(inp) > 0 then begin
-  case inp[1] of
-  '%': result:= strtobin1(copy(inp,2,length(inp)-1));
-  '&': result:= strtooct1(copy(inp,2,length(inp)-1));
-  '#': result:= strtoint(copy(inp,2,length(inp)-1));
-  '$': result:= strtohex1(copy(inp,2,length(inp)-1));
-   else begin
-    if (length(inp) > 2) and
-           ((inp[2] = 'x') or (inp[2] = 'X')) and (inp[1] = '0') then begin
-     result:= strtohex1(copy(inp,3,length(inp)-2));
-    end
-    else begin
-     result:= strtoint64(inp);
-    end;
-   end;
-  end;
- end
- else begin
-  result:= strtoint(inp);
+ if not trystrtointvalue(inp,result) then begin
+  formaterror(inp);
  end;
 end;
+
+//todo: 64bit
 
 function strtoptrint(const inp: string): ptrint;
 begin
@@ -2239,27 +2286,8 @@ end;
 
 function trystrtoptrint(const inp: string; out value: ptrint): boolean;
 begin
- try
-  value:= strtoptrint(inp);
-  result:= true;
- except
-  result:= false;
- end;
+ result:= trystrtointvalue(inp,longword(value));
 end;
-
-{
-function filename(inp: string): string;
- //bringt filenamen ohne pfad und extension
-begin
- result:= replaceext(extractfilename(inp),'');
-end;
-function replaceext(inp,ext: string): string;
- //ersetzt fileextension filenamen ohne pfad und extension
-
-begin
- result:= changefileext(inp,ext);
-end;
-}
 
 function inttostrlen(inp: integer; len: integer;
      rechtsbuendig: boolean = true; fillchar: char = ' '): ansistring;
@@ -2285,20 +2313,6 @@ begin
   end;
  end;
 end;
-
-{
-function replacetabs(const inp: string): string; //ersetzt tabs durch ' '
-var
- int1: integer;
-begin
- result:= inp;
- for int1:= 1 to length(result) do begin
-  if result[int1] = c_tab then begin
-   result[int1]:= ' ';
-  end;
- end;
-end;
-}
 
 {$ifdef withformatsettings}
 initialization
