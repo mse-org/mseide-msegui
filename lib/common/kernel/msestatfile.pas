@@ -125,7 +125,7 @@ begin
  ar2:= nil; //compiler warning
  if reader <> areader then begin
   if not (sfo_memory in foptions) then begin
-   filename:= reader.readstring('filename',ffilename);
+   filename:= reader.readmsestring('filename',ffilename);
   end
   else begin
    if sfo_savedata in foptions then begin
@@ -172,7 +172,7 @@ begin
  ar1:= nil;  //compiler warning
  if (writer <> awriter) then begin
   if not (sfo_memory in foptions) then begin
-   writer.writestring('filename',ffilename);
+   writer.writemsestring('filename',ffilename);
   end
   else begin
    if sfo_savedata in foptions then begin

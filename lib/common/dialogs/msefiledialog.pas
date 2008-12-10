@@ -1289,7 +1289,7 @@ procedure tfiledialogcontroller.readstatstate(const reader: tstatreader);
 begin
 // flastdir:= reader.readstring('lastdir',filedir(filename));
  if fdo_savelastdir in foptions then begin
-  flastdir:= reader.readstring('lastdir',flastdir);
+  flastdir:= reader.readmsestring('lastdir',flastdir);
  end;
  if fhistorymaxcount > 0 then begin
   fhistory:= reader.readarray('filehistory',fhistory);
