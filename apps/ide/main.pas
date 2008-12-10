@@ -221,7 +221,7 @@ type
                            nocheckclose: boolean = false): boolean;
    function openproject(const aname: filenamety;
                              const ascopy: boolean = false): boolean;
-   procedure saveproject(const aname: filenamety; const ascopy: boolean = false);
+   procedure saveproject(aname: filenamety; const ascopy: boolean = false);
 //   procedure makefinished(const exitcode: integer);
    procedure sourcechanged(const sender: tsourcepage);
    function opensource(const filekind: filekindty; const addtoproject: boolean;
@@ -2005,7 +2005,7 @@ begin
  end;
 end;
 
-procedure tmainfo.saveproject(const aname: filenamety;
+procedure tmainfo.saveproject(aname: filenamety;
                                    const ascopy: boolean = false);
 begin
  if aname <> '' then begin
