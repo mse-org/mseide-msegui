@@ -2241,13 +2241,14 @@ end;
 
 procedure tdatalist.clear;
 begin
- beginupdate;
+// beginupdate;
  inc(fdeleting);
  try
   clearbuffer;
+  change(-1);
  finally
   dec(fdeleting);
-  endupdate;
+//  endupdate;
  end;
 end;
 
