@@ -635,7 +635,7 @@ end;
 
 procedure tmainfo.refreshframe;
 var
- pc: ptrint;
+ pc: ptruint;
 begin
  cpufo.refresh;
  if gdb.getpc(pc) = gdb_ok then begin

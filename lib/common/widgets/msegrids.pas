@@ -9498,7 +9498,10 @@ end;
 
 procedure tcustomgrid.domousewheelevent(var info: mousewheeleventinfoty);
 begin
- frame.domousewheelevent(info,fwheelscrollheight = -1);
+ if not (es_transientfor in info.eventstate) or
+              not (gs_isdb in fstate) then begin
+  frame.domousewheelevent(info,fwheelscrollheight = -1);
+ end;
  inherited;
 end;
 

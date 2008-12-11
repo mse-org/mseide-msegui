@@ -424,7 +424,7 @@ function tbreakpointsfo.checkbreakpointcontinue(const stopinfo: stopinfoty): boo
 var
  int1: integer;
  str1,str2: string;
- ptrint1: ptrint;
+ ptrint1: ptruint;
  inf1: breakpointinfoty;
 begin
  result:= false;
@@ -440,7 +440,7 @@ begin
     else begin
      conderr[int1]:= -1;
      gdb.evaluateexpression(str1,str2);
-     if not (str2 = 'true') or trystrtoptrint(str2,ptrint1) and (ptrint1 <> 0) then begin
+     if not (str2 = 'true') or trystrtoptruint(str2,ptrint1) and (ptrint1 <> 0) then begin
       flags[int1]:= 2; //count has to be decremented
       result:= true;
      end;

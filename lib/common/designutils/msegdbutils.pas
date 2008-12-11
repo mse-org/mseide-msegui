@@ -262,7 +262,7 @@ type
    flogtext: string;
    flastbreakpoint: integer;
    fenvvars: doublestringarty;
-   ftargetdebugbegin,ftargetdebugend: ptrint;
+   ftargetdebugbegin,ftargetdebugend: ptruint;
    {$ifdef mswindows}
    fnewconsole: boolean;
    {$endif}
@@ -319,7 +319,7 @@ type
    function decodelist(const noname: boolean; const inp: string;
                             var value: resultinfoarty): boolean;
    function ispointervalue(const avalue: string;
-             out pointervalue: ptrint): boolean;
+             out pointervalue: ptruint): boolean;
    function matchpascalformat(const typeinfo: string; const value: string): msestring;
    function getpcharvar(address: cardinal): string;
    function getpmsecharvar(address: cardinal): msestring;
@@ -458,19 +458,19 @@ type
    function getthreadidlist(out idlist: integerarty): gdbresultty;
    function getthreadinfolist(out infolist: threadinfoarty): gdbresultty;
 
-   function readmemorybytes(const address: ptrint; const count: integer;
+   function readmemorybytes(const address: ptruint; const count: integer;
                  var aresult: bytearty): gdbresultty;
-   function readmemorywords(const address: ptrint; const count: integer;
+   function readmemorywords(const address: ptruint; const count: integer;
                  var aresult: wordarty): gdbresultty;
-   function readmemorylongwords(const address: ptrint; const count: integer;
+   function readmemorylongwords(const address: ptruint; const count: integer;
                  var aresult: longwordarty): gdbresultty;
-   function readmemorybyte(const address: ptrint; out aresult: byte): gdbresultty;
-   function readmemoryword(const address: ptrint; out aresult: word): gdbresultty;
-   function readmemorylongword(const address: ptrint; out aresult: longword): gdbresultty;
-   function readmemorypointer(const address: ptrint; out aresult: ptrint): gdbresultty;
-   function writememorybyte(const address: ptrint; const avalue: byte): gdbresultty;
-   function writememoryword(const address: ptrint; const avalue: word): gdbresultty;
-   function writememorylongword(const address: ptrint; const avalue: longword): gdbresultty;
+   function readmemorybyte(const address: ptruint; out aresult: byte): gdbresultty;
+   function readmemoryword(const address: ptruint; out aresult: word): gdbresultty;
+   function readmemorylongword(const address: ptruint; out aresult: longword): gdbresultty;
+   function readmemorypointer(const address: ptruint; out aresult: ptruint): gdbresultty;
+   function writememorybyte(const address: ptruint; const avalue: byte): gdbresultty;
+   function writememoryword(const address: ptruint; const avalue: word): gdbresultty;
+   function writememorylongword(const address: ptruint; const avalue: longword): gdbresultty;
 
    function readpascalvariable(const varname: string; out aresult: msestring): gdbresultty;
    function writepascalvariable(const varname: string; const value: string;
@@ -482,21 +482,21 @@ type
    function stacklistframes(out list: frameinfoarty; first: integer = 0;
                     last: integer = 100): gdbresultty;
    function selectstackframe(const aframe: integer): gdbresultty;
-   function selectstackpointer(const aframe: ptrint): gdbresultty;
+   function selectstackpointer(const aframe: ptruint): gdbresultty;
    function getsourcename(var path: filenamety; frame: integer = 0): gdbresultty;
    function getprocaddress(const procname: string;
-                        out aaddress: ptrint): gdbresultty;
+                        out aaddress: ptruint): gdbresultty;
 
-   function getpc(out addr: ptrint): gdbresultty;
-   function getregistervalue(const aname: string; out avalue: ptrint): gdbresultty;
-   function setregistervalue(const aname: string; const avalue: ptrint): gdbresultty;
+   function getpc(out addr: ptruint): gdbresultty;
+   function getregistervalue(const aname: string; out avalue: ptruint): gdbresultty;
+   function setregistervalue(const aname: string; const avalue: ptruint): gdbresultty;
    function listregisternames(out aresult: stringarty): gdbresultty;
    function listregistervalues(out aresult: registerinfoarty): gdbresultty;
    function listlines(const path: filenamety;
                           out lines: integerarty; out addresses: ptruintarty): gdbresultty;
 
-   function getsystemregister(const anumber: integer; out avalue: ptrint): gdbresultty;
-   function setsystemregister(const anumber: integer; const avalue: ptrint): gdbresultty;
+   function getsystemregister(const anumber: integer; out avalue: ptruint): gdbresultty;
+   function setsystemregister(const anumber: integer; const avalue: ptruint): gdbresultty;
                       //for avr32
    function infoline(const filename: filenamety; const line: integer;
                          out start,stop: cardinal): gdbresultty; overload;
@@ -1014,7 +1014,7 @@ end;
 function tgdbmi.getshortstring(const address: string; out avalue: string): boolean;
 var
  str1: string;
- int1: ptrint;
+ int1: ptruint;
  ar1: bytearty;
 begin
  avalue:= '';
@@ -2684,7 +2684,7 @@ begin
 end;
 
 function tgdbmi.getprocaddress(const procname: string;
-                           out aaddress: ptrint): gdbresultty;
+                           out aaddress: ptruint): gdbresultty;
 var
  str1: string;
  ar1: stringarty;
@@ -2702,10 +2702,8 @@ begin
     if str1[length(str1)] = '.' then begin
      setlength(str1,length(str1)-1);
     end;
-    try
-     aaddress:= strtoptrint(str1);
+    if trystrtoptruint(str1,aaddress) then begin
      result:= gdb_ok;
-    except
     end;
     break;
    end;
@@ -2986,13 +2984,13 @@ begin
  end;
 end;
 
-function tgdbmi.readmemorybytes(const address: ptrint; const count: integer;
+function tgdbmi.readmemorybytes(const address: ptruint; const count: integer;
                  var aresult: bytearty): gdbresultty;
 var
  ar1,ar2: resultinfoarty;
 begin
  aresult:= nil;
- result:= synccommand('-data-read-memory '+ ptrinttocstr(address) + ' u 1 1 ' + inttostr(count));
+ result:= synccommand('-data-read-memory '+ ptruinttocstr(address) + ' u 1 1 ' + inttostr(count));
  if result = gdb_ok then begin
   result:= gdb_dataerror;
   if getarrayvalue(fsyncvalues,'memory',false,ar1) then begin
@@ -3005,13 +3003,13 @@ begin
  end;
 end;
 
-function tgdbmi.readmemorywords(const address: ptrint; const count: integer;
+function tgdbmi.readmemorywords(const address: ptruint; const count: integer;
                  var aresult: wordarty): gdbresultty;
 var
  ar1,ar2: resultinfoarty;
 begin
  aresult:= nil;
- result:= synccommand('-data-read-memory '+ ptrinttocstr(address) + ' u 2 1 ' + inttostr(count));
+ result:= synccommand('-data-read-memory '+ ptruinttocstr(address) + ' u 2 1 ' + inttostr(count));
  if result = gdb_ok then begin
   result:= gdb_dataerror;
   if getarrayvalue(fsyncvalues,'memory',false,ar1) then begin
@@ -3024,13 +3022,13 @@ begin
  end;
 end;
 
-function tgdbmi.readmemorylongwords(const address: ptrint; const count: integer;
+function tgdbmi.readmemorylongwords(const address: ptruint; const count: integer;
                  var aresult: longwordarty): gdbresultty;
 var
  ar1,ar2: resultinfoarty;
 begin
  aresult:= nil;
- result:= synccommand('-data-read-memory '+ ptrinttocstr(address) + ' u 4 1 ' + inttostr(count));
+ result:= synccommand('-data-read-memory '+ ptruinttocstr(address) + ' u 4 1 ' + inttostr(count));
  if result = gdb_ok then begin
   result:= gdb_dataerror;
   if getarrayvalue(fsyncvalues,'memory',false,ar1) then begin
@@ -3043,7 +3041,7 @@ begin
  end;
 end;
 
-function tgdbmi.readmemorybyte(const address: ptrint; out aresult: byte): gdbresultty;
+function tgdbmi.readmemorybyte(const address: ptruint; out aresult: byte): gdbresultty;
 var
  ar1: bytearty;
 begin
@@ -3053,7 +3051,7 @@ begin
  end;
 end;
 
-function tgdbmi.readmemoryword(const address: ptrint; out aresult: word): gdbresultty;
+function tgdbmi.readmemoryword(const address: ptruint; out aresult: word): gdbresultty;
 var
  ar1: wordarty;
 begin
@@ -3063,7 +3061,7 @@ begin
  end;
 end;
 
-function tgdbmi.readmemorylongword(const address: ptrint; out aresult: longword): gdbresultty;
+function tgdbmi.readmemorylongword(const address: ptruint; out aresult: longword): gdbresultty;
 var
  ar1: longwordarty;
 begin
@@ -3073,17 +3071,17 @@ begin
  end;
 end;
 
-function tgdbmi.readmemorypointer(const address: ptrint; out aresult: ptrint): gdbresultty;
+function tgdbmi.readmemorypointer(const address: ptruint; out aresult: ptruint): gdbresultty;
 var
  ar1: bytearty;
 begin //todo: endianess
  result:= readmemorybytes(address,fpointersize,ar1);
  if result = gdb_ok then begin
-  aresult:= pptrint(pointer(ar1))^;
+  aresult:= pptruint(pointer(ar1))^;
  end;
 end;
 
-function tgdbmi.writememorybyte(const address: ptrint;
+function tgdbmi.writememorybyte(const address: ptruint;
                                              const avalue: byte): gdbresultty;
 var
  str1,str2,str3: ansistring;
@@ -3098,7 +3096,7 @@ begin
  end;
 end;
 
-function tgdbmi.writememoryword(const address: ptrint; 
+function tgdbmi.writememoryword(const address: ptruint; 
                                             const avalue: word): gdbresultty;
 var
  str1,str2,str3: ansistring;
@@ -3113,7 +3111,7 @@ begin
  end;
 end;
 
-function tgdbmi.writememorylongword(const address: ptrint;
+function tgdbmi.writememorylongword(const address: ptruint;
                                             const avalue: longword): gdbresultty;
 var
  str1,str2,str3: ansistring;
@@ -3247,7 +3245,7 @@ var
  str1: string;
  ar1: disassarty;
 begin
- str1:= '-data-disassemble -s '+ptrinttocstr(start)+' -e '+ptrinttocstr(stop);
+ str1:= '-data-disassemble -s '+ptruinttocstr(start)+' -e '+ptruinttocstr(stop);
  result:= internaldisassemble(ar1,str1,false);
  if result = gdb_ok then begin
   aresult:= ar1[0].asmlines;
@@ -3268,7 +3266,7 @@ function tgdbmi.disassemble(out aresult: disassarty; const start,stop: cardinal)
 var
  str1: string;
 begin
- str1:= '-data-disassemble -s '+ptrinttocstr(start)+' -e '+ptrinttocstr(stop);
+ str1:= '-data-disassemble -s '+ptruinttocstr(start)+' -e '+ptruinttocstr(stop);
  result:= internaldisassemble(aresult,str1,true);
 end;
 
@@ -3284,10 +3282,8 @@ begin
   ar1:= splitstring(str1,' ',true);
   for int1:= 0 to high(ar1)- 2 do begin
    if (ar1[int1] = 'frame') and (ar1[int1+1] = 'at') then begin
-    try
-     setlength(ar1[int1+2],length(ar1[int1+2])-1); //remove ':'
-     address:= strtoptrint(ar1[int1+2]);
-    except
+    setlength(ar1[int1+2],length(ar1[int1+2])-1); //remove ':'
+    if not trystrtoptruint(ar1[int1+2],address) then begin
      exit;
     end;
     break;
@@ -3297,22 +3293,20 @@ begin
  end;
 end;
 
-function tgdbmi.getregistervalue(const aname: string; out avalue: ptrint): gdbresultty;
+function tgdbmi.getregistervalue(const aname: string; out avalue: ptruint): gdbresultty;
 var
  str1: string;
 begin
  result:= evaluateexpression('$'+aname,str1);
  if result = gdb_ok then begin
-  try
-   avalue:= strtointvalue(str1);
-  except
+  if not trystrtointvalue(str1,avalue) then begin
    result:= gdb_dataerror;
   end;
  end;
 end;
 
 function tgdbmi.setregistervalue(const aname: string;
-                                         const avalue: ptrint): gdbresultty;
+                                         const avalue: ptruint): gdbresultty;
 var
  str1: ansistring;
 begin
@@ -3320,7 +3314,7 @@ begin
         '$'+aname,inttostr(avalue),str1);
 end;
 
-function tgdbmi.getpc(out addr: ptrint): gdbresultty;
+function tgdbmi.getpc(out addr: ptruint): gdbresultty;
 begin
  result:= getregistervalue('pc',addr);
 end;
@@ -3397,7 +3391,7 @@ begin
 end;
 
 function tgdbmi.getsystemregister(const anumber: integer;
-                                           out avalue: ptrint): gdbresultty;
+                                           out avalue: ptruint): gdbresultty;
                       //for avr32
 var
  str1: ansistring;
@@ -3409,17 +3403,15 @@ begin
   result:= gdb_dataerror;
   ar1:= splitstring(str1,'=',true);
   if high(ar1) = 1 then begin
-   try
-    avalue:= strtointvalue(trimright(ar1[1]));
+   if trystrtointvalue(trimright(ar1[1]),avalue) then begin
     result:= gdb_ok;
-   except
    end;
   end;
  end;
 end;
 
 function tgdbmi.setsystemregister(const anumber: integer;
-                                           const avalue: ptrint): gdbresultty;
+                                           const avalue: ptruint): gdbresultty;
                       //for avr32
 begin
  result:= synccommand('set sysreg '+inttostr(anumber)+'=0x'+hextostr(avalue,8));
@@ -3535,9 +3527,9 @@ begin
  end;
 end;
 
-function tgdbmi.ispointervalue(const avalue: string; out pointervalue: ptrint): boolean;
+function tgdbmi.ispointervalue(const avalue: string; out pointervalue: ptruint): boolean;
 begin
- result:= trystrtoptrint(avalue,pointervalue);
+ result:= trystrtoptruint(avalue,pointervalue);
 end;
 
 function tgdbmi.matchpascalformat(const typeinfo: string;
@@ -3549,7 +3541,7 @@ var
  ar1: stringarty;
  str1,str3: string;
  mstr1: msestring;
- ad1,ad2,ad3: ptrint;
+ ad1,ad2,ad3: ptruint;
  res1: gdbresultty;
  int1: integer;
 begin
@@ -3577,7 +3569,7 @@ begin
        else begin
         if readmemorypointer(ad2-4,ad3) = gdb_ok then begin
         //read arrayhigh
-         str3:= '^'+copy(str1,length(dynartoken)+1,bigint)+'('+ptrinttocstr(ad2)+')[';
+         str3:= '^'+copy(str1,length(dynartoken)+1,bigint)+'('+ptruinttocstr(ad2)+')[';
          result:= '(';
          if ad3 >= 0 then begin
           for int1:= 0 to ad3 do begin
@@ -3804,7 +3796,7 @@ function tgdbmi.getpascalvalue(const avalue: string): string;
 const
  ansistringtag = '(ANSISTRING)';
 var
- ca1: ptrint;
+ ca1: ptruint;
 begin
  if startsstr(ansistringtag,avalue) then begin
   if ispointervalue(copy(avalue,length(ansistringtag)+1,bigint),ca1) then begin
@@ -3872,7 +3864,7 @@ begin
  result:= synccommand('-stack-select-frame '+inttostr(aframe));
 end;
 
-function tgdbmi.selectstackpointer(const aframe: ptrint): gdbresultty;
+function tgdbmi.selectstackpointer(const aframe: ptruint): gdbresultty;
 begin
  result:= synccommand('frame '+hextocstr(aframe,8));
 end;

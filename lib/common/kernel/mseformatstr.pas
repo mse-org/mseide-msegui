@@ -106,13 +106,13 @@ function hextostr(inp: longword; digits: integer): string;
    //convert longword to hexstring, digits = nibble count
 function hextocstr(const inp: longword; stellen: integer): string;
    //convert longword to 0x..., digits = nibble count
-function ptrinttocstr(inp: ptrint): string;
-   //convert ptrint to 0x...
+function ptruinttocstr(inp: ptruint): string;
+   //convert ptruint to 0x...
 function intvaluetostr(const value: integer; const base: numbasety = nb_dec;
                           const bitcount: integer = 32): string;
 
-function trystrtoptrint(const inp: string; out value: ptrint): boolean;
-function strtoptrint(const inp: string): ptrint;
+function trystrtoptruint(const inp: string; out value: ptruint): boolean;
+function strtoptruint(const inp: string): ptruint;
 
  //todo: 64bit
 function trystrtobin(const inp: string; out value: longword): boolean;
@@ -2054,7 +2054,7 @@ begin
  result:= '0x' + hextostr(inp, stellen);
 end;
 
-function ptrinttocstr(inp: ptrint): string;
+function ptruinttocstr(inp: ptruint): string;
    //convert ptrint to 0x...
 var
  int1: integer;
@@ -2279,12 +2279,12 @@ end;
 
 //todo: 64bit
 
-function strtoptrint(const inp: string): ptrint;
+function strtoptruint(const inp: string): ptruint;
 begin
  result:= strtointvalue(inp);
 end;
 
-function trystrtoptrint(const inp: string; out value: ptrint): boolean;
+function trystrtoptruint(const inp: string; out value: ptruint): boolean;
 begin
  result:= trystrtointvalue(inp,longword(value));
 end;

@@ -117,7 +117,7 @@ end;
 
 function tcpuavr32fo.internalrefresh: boolean;
 var
- int1: ptrint;
+ int1: ptruint;
 begin
  result:= inherited internalrefresh;
  if result then begin
@@ -187,7 +187,7 @@ begin
      if setsystemregister(0,lwo2) = gdb_ok then begin
                                   //for sp_app access
  //     if getregistervalue('sp',longint(lwo3)) = gdb_ok then begin
-      if (getregistervalue('sp',longint(lwo3)) = gdb_ok) then begin
+      if (getregistervalue('sp',lwo3) = gdb_ok) then begin
        if selectstackpointer(lwo3) = gdb_ok then begin
         mainfo.refreshframe;       
        end;
