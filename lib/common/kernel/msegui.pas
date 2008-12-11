@@ -11711,11 +11711,6 @@ var
  int1: integer;
  po1: peventaty;
 begin
-{
- if info.eventkind in [ek_mouseenter,ek_mouseleave] then begin
-  exit;
- end;
- }
  if info.mouse.eventkind = ek_mousewheel then begin
   capture:= fowner.mouseeventwidget(info.mouse);
   if (capture = nil) and (ftransientfor <> nil) then begin
@@ -13926,10 +13921,10 @@ end;
 procedure tguiapplication.destroyforms;
 begin
  while componentcount > 0 do begin
-  components[0].free;  //destroy loaded forms
+  components[componentcount-1].free;  //destroy loaded forms
  end;
  while high(fwindows) >= 0 do begin
-  fwindows[0].fowner.free;
+  fwindows[high(fwindows)].fowner.free;
  end;
 end;
 
