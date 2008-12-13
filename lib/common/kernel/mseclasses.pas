@@ -569,7 +569,11 @@ procedure resetchangedmodules;
 procedure reloadchangedmodules;
 
 procedure reloadmsecomponent(Instance: tmsecomponent);
-function initmsecomponent(instance: tcomponent; rootancestor: tclass): boolean;
+function initmsecomponent(instance: tcomponent; rootancestor: tclass;
+                            out ancestorloaded: boolean): boolean;
+                          //true if root loaded
+function initmsecomponent1(instance: tcomponent; rootancestor: tclass): boolean;
+                          //true if root loaded
 function findancestorcomponent(const areader: treader; 
                  const componentname: string): tcomponent;
 procedure loadmsemodule(const instance: tmsecomponent; const rootancestor: tclass);
@@ -1412,9 +1416,11 @@ end;
 var
  moduleloadlevel: integer;
  
-function initmsecomponent(instance: tcomponent; rootancestor: tclass): boolean;
+function initmsecomponent(instance: tcomponent; rootancestor: tclass;
+                                 out ancestorloaded: boolean): boolean;
 var
- loadingstarted: boolean;
+ rootloaded: boolean;
+ 
  rootancestor1: tclass;
  
  procedure doload(const aclass: tclass);
@@ -1428,8 +1434,11 @@ var
     po1:= objectdatalist.find(aclass,'');
    end; 
    if (po1 <> nil) then begin
-    if not loadingstarted then begin
-     loadingstarted:= true;    
+    if aclass = instance.classtype then begin
+     rootloaded:= true;
+    end;
+    if not ancestorloaded then begin
+     ancestorloaded:= true;    
      inc(moduleloadlevel);
      if moduleloadlevel = 1 then begin
       begingloballoading;
@@ -1448,19 +1457,20 @@ begin
   else begin
    rootancestor1:= rootancestor;
   end;
-  loadingstarted:= false;
+  ancestorloaded:= false;
+  rootloaded:= false;
   try
    doload(instance.classtype);
    if finditem(pointerarty(fmodulestoregister),instance) >= 0 then begin
     modules.add(tmsecomponent(instance));
     globalfixupreferences;
    end;
-   if loadingstarted and (moduleloadlevel = 1) then begin
+   if ancestorloaded and (moduleloadlevel = 1) then begin
     moduleloadlevel:= 0;  //allow loading of forms in loaded procedure
     notifygloballoading;
    end;
   finally
-   if loadingstarted then begin
+   if ancestorloaded then begin
     if moduleloadlevel > 0 then begin
      dec(moduleloadlevel);
     end;
@@ -1470,11 +1480,19 @@ begin
    end;
    removeitem(pointerarty(fmodulestoregister),instance);
   end;
-  result:= loadingstarted;
+  result:= rootloaded;
  end
  else begin
   result:= false;
  end;
+end;
+
+function initmsecomponent1(instance: tcomponent; rootancestor: tclass): boolean;
+                          //true if root loaded
+var
+ bo1: boolean;
+begin
+ result:= initmsecomponent(instance,rootancestor,bo1);
 end;
 
 procedure reloadmsecomponent(Instance: tmsecomponent);
@@ -1559,10 +1577,16 @@ procedure loadmsemodule(const instance: tmsecomponent; const rootancestor: tclas
   end;
  end;
 }
+var
+ ancestorloaded: boolean;
+   
 begin
 //  doregister(instance.classtype);
-  if not initmsecomponent(instance,rootancestor) then begin
-   if not initinheritedcomponent(instance,rootancestor) then begin
+                 //try mse moduleloading
+  if not initmsecomponent(instance,rootancestor,ancestorloaded) then begin
+   if ancestorloaded or not 
+                       initinheritedcomponent(instance,rootancestor) then begin
+                 //try FPC module loading
     mseerror(mse_resnotfound,instance);
    end;
   end;
@@ -3487,7 +3511,7 @@ end;
 
 initialization
 {$ifdef FPC}
- registerinitcomponenthandler(tcomponent,@initmsecomponent);
+ registerinitcomponenthandler(tcomponent,@initmsecomponent1);
 {$endif}
  registerfindglobalcomponentproc({$ifdef FPC}@{$endif}findmodulebyname);
 finalization
