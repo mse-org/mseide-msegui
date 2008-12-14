@@ -486,7 +486,7 @@ begin
  try
   if fimagelist.count = 0 then begin
    bitmap.name:= 'TComponent';
-   initmsecomponent(bitmap,nil);
+   initmsecomponent1(bitmap,nil);
 //   bitmap.bitmap.automask;
    fimagelist.addimage(bitmap.bitmap);
   end;
@@ -500,7 +500,7 @@ begin
      bitmap.bitmap.clear;
      bitmap.bitmap.colormask:= false;
      bitmap.name:= class1.classname;
-     if initmsecomponent(bitmap,nil) then begin
+     if initmsecomponent1(bitmap,nil) then begin
 //      bitmap.bitmap.masked:= true;
       if not bitmap.bitmap.colormask then begin
        bitmap.bitmap.automask;

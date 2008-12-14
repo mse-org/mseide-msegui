@@ -3286,7 +3286,8 @@ const
 
 procedure tcustomstepframe.domousewheelevent(var info: mousewheeleventinfoty);
 begin
- if fmousewheel and (info.wheel <> mw_none) then begin
+ if fmousewheel and (info.wheel <> mw_none) and 
+                       not (es_transientfor in info.eventstate)then begin
   if sfs_spinedit in fstepstate then begin
    fstepintf.dostep(stepdirspin[info.wheel = mw_up]);
   end

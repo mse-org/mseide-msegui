@@ -3902,6 +3902,17 @@ end;
 
 function tcustomrealspinedit.gettextvalue(var accept: boolean;
                const quiet: boolean): realty;
+ function initvalue: realty;
+ begin
+  result:= 0;
+  if result < fmin then begin
+   result:= fmin;
+  end;
+  if result > fmax then begin
+   result:= fmax;
+  end;
+ end;
+ 
 label
  endlab,endlab1;
 begin
@@ -3915,10 +3926,11 @@ begin
   sk_up: begin
    result:= fvalue;
    if isemptyreal(fvalue) then begin
-    result:= fmin;
-    if isemptyreal(result) then begin
-     result:= 0;
-    end;
+    result:= initvalue;
+//    result:= fmin;
+//    if isemptyreal(result) then begin
+//     result:= 0;
+//    end;
     goto endlab;
    end;
    result:= result + fstep;
@@ -3926,10 +3938,11 @@ begin
   sk_down: begin
    result:= fvalue;
    if isemptyreal(fvalue) then begin
-    result:= fmax;
-    if isemptyreal(result) then begin
-     result:= 0;
-    end;
+    result:= initvalue;
+//    result:= fmax;
+//    if isemptyreal(result) then begin
+//     result:= 0;
+//    end;
     goto endlab;
    end;
    result:= result - fstep;
