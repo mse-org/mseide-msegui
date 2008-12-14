@@ -9,10 +9,22 @@
 }
 unit msedb;
 
-{$ifdef VER2_1_5} {$define mse_FPC_2_2} {$endif}
 {$ifdef VER2_2_0} {$define focuscontrolbug} {$endif}
-{$ifdef VER2_2} {$define mse_FPC_2_2} {$define hasaswidestring} {$endif}
-{$ifdef VER2_3} {$define mse_FPC_2_2} {$define hasaswidestring} {$endif}
+{$define mse_FPC_2_2}
+{$define hasaswidestring}
+{$define integergetdatasize}
+{$ifdef VER2_0_4}
+ {$undef mse_FPC_2_2}
+ {$undef hasaswidestring}
+ {$undef integergetdatasize}
+{$endif}
+{$ifdef VER2_2_0}
+ {$undef integergetdatasize}
+{$endif}
+{$ifdef VER2_2_2}
+ {$undef integergetdatasize}
+{$endif}
+
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 
 interface
@@ -168,7 +180,11 @@ type
                             const acharacterlength: integer;
                             const aisftwidestring: boolean);
    function HasParent: Boolean; override;
+   {$ifdef integergetdatasize}
+   function GetDataSize: integer; override;
+   {$else}
    function GetDataSize: Word; override;
+   {$endif}
    function GetAsString: string; override;
    function GetAsVariant: variant; override;
    procedure SetAsString(const AValue: string); override;
@@ -400,7 +416,11 @@ type
    procedure setaswidestring(const avalue: widestring); override;
   {$endif}
    function HasParent: Boolean; override;
+   {$ifdef integergetdatasize}
+   function GetDataSize: integer; override;
+   {$else}
    function GetDataSize: Word; override;
+   {$endif}
    function GetAsBoolean: Boolean; override;
    procedure SetAsBoolean(AValue: Boolean); override;
    function getasstring: string; override;
@@ -2113,7 +2133,11 @@ begin
  fisftwidestring:= aisftwidestring;
 end;
 
+{$ifdef integergetdatasize}
+function tmsestringfield.GetDataSize: integer;
+{$else}
 function tmsestringfield.GetDataSize: Word;
+{$endif}
 begin
  if assigned(fgetmsestringdata) then begin
   result:= sizeof(msestring);
@@ -2936,7 +2960,11 @@ begin
  end;
 end;
 
+{$ifdef integergetdatasize}
+function tmsebooleanfield.GetDataSize: integer;
+{$else}
 function tmsebooleanfield.GetDataSize: Word;
+{$endif}
 begin
  result:= sizeof(longbool);
 end;

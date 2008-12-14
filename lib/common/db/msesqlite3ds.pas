@@ -53,9 +53,9 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    function locate(const key: integer; const field: tfield;
-                   const options: locateoptionsty = []): locateresultty;
+                   const aoptions: locateoptionsty = []): locateresultty;
    function locate(const key: msestring; const field: tfield; 
-                 const options: locateoptionsty = []): locateresultty;
+                 const aoptions: locateoptionsty = []): locateresultty;
    procedure AppendRecord(const Values: array of const);
    procedure cancel; override;
    procedure post; override;
@@ -103,15 +103,15 @@ begin
 end;
 
 function tmsesqlite3dataset.locate(const key: integer; const field: tfield;
-                   const options: locateoptionsty = []): locateresultty;
+                   const aoptions: locateoptionsty = []): locateresultty;
 begin
- result:= fcontroller.locate(key,field,options);
+ result:= fcontroller.locate(key,field,aoptions);
 end;
 
 function tmsesqlite3dataset.locate(const key: msestring;
-        const field: tfield; const options: locateoptionsty = []): locateresultty;
+        const field: tfield; const aoptions: locateoptionsty = []): locateresultty;
 begin
- result:= fcontroller.locate(key,field,options);
+ result:= fcontroller.locate(key,field,aoptions);
 end;
 
 procedure tmsesqlite3dataset.AppendRecord(const Values: array of const);
