@@ -438,8 +438,10 @@ type
    function add(const value: tmsestringdatalist): integer; overload;
    function add(const value: msestring): integer; overload; virtual; abstract;
    function addchars(const value: msestring; 
-                            const processeditchars: boolean = true): integer;
-          //haengt zeichen an letzten eintrag an, bringt index
+                            const processeditchars: boolean = true;
+                            const maxchars: integer = 0): integer;
+          //adds characters to last row, returns index
+          //maxchars = 0 -> no limitation, inserts line breaks otherwise
    function indexof(const value: msestring): integer;
    function empty(const index: integer): boolean; override;   //true wenn leer
    function concatstring(const delim: msestring = '';
@@ -4511,7 +4513,88 @@ begin
 end;
 
 function tpoorstringdatalist.addchars(const value: msestring;
-                    const processeditchars: boolean = true): integer;		
+                    const processeditchars: boolean = true;
+                    const maxchars: integer = 0): integer;		
+var
+ int1,int2,int3,int4: integer;
+ ar1,ar2: msestringarty;
+ first: pmsestring;
+ mstr1: msestring; 
+begin
+ ar1:= nil; //compilerwarning
+ if value <> '' then begin
+  ar1:= breaklines(value);
+  if fcount = 0 then begin
+   count:= 1;
+  end;
+  int1:= fcount - 1;
+  int2:= int1;
+  checkindex(int1);
+  first:= pmsestring(fdatapo+int1*fsize);
+  if processeditchars then begin
+   mstr1:= first^;
+   addeditchars(ar1[0],mstr1,feditcharindex);
+   ar1[0]:= mstr1;
+   for int1:= 1 to high(ar1) do begin
+    mstr1:= '';
+    feditcharindex:= 0;
+    addeditchars(ar1[int1],mstr1,feditcharindex);
+    ar1[int1]:= mstr1;
+   end;
+  end
+  else begin
+   ar1[0]:=first^ + ar1[0];
+   for int1:= 1 to high(ar1) do begin
+    add(ar1[int1]);
+   end;
+  end;
+  if maxchars <> 0 then begin
+   int2:= 0;
+   for int1:= 0 to high(ar1) do begin        //calc new linecount
+    int2:= int2 + length(ar1[int1]) div maxchars + 1;
+   end;
+   if int2 <> length(ar1) then begin    //break lines
+    setlength(ar2,int2);
+    int2:= 0;
+    for int1:= 0 to high(ar1) do begin
+     int3:= length(ar1[int1]);
+     if int3 > maxchars then begin
+      int4:= 1;
+      while int4 <= int3 do begin
+       ar2[int2]:= copy(ar1[int1],int4,maxchars);
+       int4:= int4 + maxchars;
+       inc(int2);
+      end;
+     end
+     else begin
+      ar2[int2]:= ar1[int1];
+      inc(int2);
+     end;
+    end;  
+    ar1:= ar2;
+   end;
+  end;
+  if high(ar1) > 0 then begin
+   beginupdate;
+  end;
+  first^:= ar1[0];
+  for int1:= 1 to high(ar1) do begin
+   add(ar1[int1]);
+  end;
+  if high(ar1) > 0 then begin
+   endupdate;
+  end
+  else begin
+   change(fcount-1);
+  end;
+ end;
+ result:= fcount-1;
+end;
+
+{
+function tpoorstringdatalist.addchars(const value: msestring;
+                    const processeditchars: boolean = true;
+                    const maxchars: integer = 0): integer;		
 var
  int1,int2: integer;
  ar1: msestringarty;
@@ -4555,6 +4638,7 @@ begin
  end;
  result:= fcount-1;
 end;
+}
 
 (*
 function tpoorstringdatalist.addchars(const value: msestring;

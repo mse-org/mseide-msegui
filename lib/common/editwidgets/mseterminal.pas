@@ -36,6 +36,7 @@ type
    finputcolindex: integer;
    fonsendtext: sendtexteventty;
    foptions: terminaloptionsty;
+   fmaxchars: integer;
    function getinputfd: integer;
    procedure setinoutfd(const Value: integer);
    procedure setoptions(const avalue: terminaloptionsty);
@@ -66,6 +67,7 @@ type
   published
    property tabulators;
    property font;
+   property maxchars: integer read fmaxchars write fmaxchars default 0;
    property oninputpipebroken: notifyeventty read foninputpipebroken 
                                                    write foninputpipebroken;
    property onerrorpipebroken: notifyeventty read fonerrorpipebroken 
@@ -220,9 +222,9 @@ begin
  if fgridintf <> nil then begin
   if datalist.count > 0 then begin
    datalist[datalist.count-1]:= copy(datalist[datalist.count-1],1,
-          finputcolindex);
+          finputcolindex); //remove entered characters
   end;
-  datalist.addchars(avalue);
+  datalist.addchars(avalue,true,fmaxchars);
   updateeditpos;
  end;
 end;

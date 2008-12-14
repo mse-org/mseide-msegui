@@ -281,7 +281,7 @@ begin
   application.lock;
  end;
  with messagefo.messages do begin
-  datacols[0].readpipe(str1,true);
+  datacols[0].readpipe(str1,true,120);
   showlastrow;
  end;
  if fmessagefile <> nil then begin

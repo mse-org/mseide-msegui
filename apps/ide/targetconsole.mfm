@@ -80,6 +80,7 @@ object targetconsolefo: ttargetconsolefo
       bounds_cy = 16
       taborder = 1
       visible = False
+      maxchars = 120
       onsendtext = sendtext
       reffontheight = 14
     end

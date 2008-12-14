@@ -611,9 +611,11 @@ type
                          const aowner: tgridarrayprop); override;
    destructor destroy; override;
    procedure readpipe(const pipe: tpipereader; 
-                      const processeditchars: boolean = false); overload;
+                      const processeditchars: boolean = false;
+                      const maxchars: integer = 0); overload;
    procedure readpipe(const text: string; 
-                      const processeditchars: boolean = false); overload;
+                      const processeditchars: boolean = false;
+                      const maxchars: integer = 0); overload;
    property items[aindex: integer]: msestring read getitems write setitems; default;
    property textflags: textflagsty read ftextinfo.flags write settextflags
                           default defaultcoltextflags;
@@ -5126,19 +5128,21 @@ begin
 end;
 
 procedure tcustomstringcol.readpipe(const pipe: tpipereader;
-                            const processeditchars: boolean = false);
+                            const processeditchars: boolean = false;
+                            const maxchars: integer = 0);
 var
- str1: string;
- bo1: boolean;
- int1: integer;
+// str1: string;
+// bo1: boolean;
+// int1: integer;
  mstr1: msestring;
 begin
- if processeditchars then begin
+// if processeditchars then begin
   try
    mstr1:= pipe.readdatastring;
   except
   end;
-  datalist.addchars(mstr1);
+  datalist.addchars(mstr1,processeditchars,maxchars);
+{
  end
  else begin
   inc(fgrid.fnoshowcaretrect);
@@ -5167,14 +5171,20 @@ begin
    dec(fgrid.fnoshowcaretrect);
   end;
  end;
+}
 end;
 
-procedure tcustomstringcol.readpipe(const text: string; const processeditchars: boolean = false);
+procedure tcustomstringcol.readpipe(const text: string;
+              const processeditchars: boolean = false;
+              const maxchars: integer = 0);
 var
- ar1: msestringarty;
- int1: integer;
+// ar1: msestringarty;
+// int1: integer;
  mstr1: msestring;
 begin
+ mstr1:= text;
+ datalist.addchars(mstr1,processeditchars,maxchars);
+{
  ar1:= nil; //compiler warning
  if text <> '' then begin
   try
@@ -5182,7 +5192,7 @@ begin
   except
   end;
   if processeditchars then begin
-   datalist.addchars(mstr1);
+   datalist.addchars(mstr1,true,maxchars);
   end
   else begin
    ar1:= breaklines(mstr1);
@@ -5206,6 +5216,7 @@ begin
    end;
   end;
  end;
+ }
 end;
 
 function tcustomstringcol.getoptionsedit: optionseditty;
