@@ -142,6 +142,9 @@ type
  end;
 
  tmethodlist = class(trecordlist)
+  private
+   function getitems(index: integer): tmethod;
+   procedure setitems(index: integer; const avalue: tmethod);
   protected
    factitem: integer;
   public
@@ -150,6 +153,8 @@ type
    function add(const value: tmethod): integer;
           //creates no duplicates
    function remove(const value: tmethod): integer;
+   property items[index: integer]: tmethod read getitems
+                                          write setitems; default;
  end;
 
  tobjectqueue = class(tpointerqueue)
@@ -1180,6 +1185,18 @@ begin
    dec(factitem);
   end;
  end;
+end;
+
+function tmethodlist.getitems(index: integer): tmethod;
+begin
+ checkindex(index);
+ result:= pmethod(fdata+index*sizeof(tmethod))^;
+end;
+
+procedure tmethodlist.setitems(index: integer; const avalue: tmethod);
+begin
+ checkindex(index);
+ pmethod(fdata+index*sizeof(tmethod))^:= avalue;
 end;
 
 { tindexednamelist }
