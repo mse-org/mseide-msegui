@@ -23,6 +23,7 @@ type
   PtrInt = Longint;
   PPtrInt = ^PtrInt;
   PtrUInt = DWord;
+  PPtrUInt = ^PtrUInt;
   ValSInt = Longint;
   ValUInt = Cardinal;
  {$endif}
