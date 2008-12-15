@@ -27,6 +27,9 @@ type
   ValSInt = Longint;
   ValUInt = Cardinal;
  {$endif}
+ {$ifdef VER2_2_0}
+  PPtrUInt = ^PtrUInt;
+ {$endif}
  winidty = cardinal;
  winidarty = array of winidty;
  winidaty = array[0..0] of winidty;

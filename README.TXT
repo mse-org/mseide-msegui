@@ -1,6 +1,6 @@
 MSEide+MSEgui Pascal Cross Platform GUI Development System.
  
-2008-10-15 Version 2.0beta1
+2008-12-15 Version 2.0beta2
 Copyright (c) 1999-2008 by Martin Schreiber
 
 - Compiles with FPC 2.2.2
@@ -33,7 +33,7 @@ Installation:
 *************
 1. Download and install FPC 2.2.2, you can get it from 
    http://www.freepascal.org/download.var
-2. Download mseide_msegui_src_2_0beta1.zip and mseide_bin_2_0beta1.zip
+2. Download mseide_msegui_src_2_0beta2.zip and mseide_bin_2_0beta2.zip
    http://sourceforge.net/project/showfiles.php?group_id=165409
 3. Extract them to a directory of your choice ('yourdirectory') .
 4. Run 'yourdirectory/bin/i386-linux/mseide' on linux or 
