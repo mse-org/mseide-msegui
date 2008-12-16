@@ -108,7 +108,7 @@ makeoptions=4
  -l -Mobjfpc -Sh
  -gl -O-
  -B
- -OG2p3 -XX -Xs
+ -O2 -XX -Xs -CX
 makeoptionson=4
  63
  31
@@ -319,7 +319,7 @@ windowlayout=319
  activetab=0
  [messagefo]
  splitdir=0
- useroptions=12343
+ useroptions=49259
  parent=mainfo.panel1.container
  visible=0
  mdistate=0

@@ -325,6 +325,7 @@ type
    procedure writestate(writer: twriter); override;
    function getactualclassname: string;
    class function getmoduleclassname: string; virtual;
+   class function hasresource: boolean; virtual;
    procedure defineproperties(filer: tfiler); override;
    procedure componentevent(const event: tcomponentevent); virtual;
    procedure doasyncevent(var atag: integer); virtual;
@@ -569,11 +570,11 @@ procedure resetchangedmodules;
 procedure reloadchangedmodules;
 
 procedure reloadmsecomponent(Instance: tmsecomponent);
-function initmsecomponent(instance: tcomponent; rootancestor: tclass;
+function initmsecomponent(instance: tmsecomponent; rootancestor: tclass;
                             out ancestorloaded: boolean): boolean;
-                          //true if root loaded
+                          //true if root and all inherited classes loaded
 function initmsecomponent1(instance: tcomponent; rootancestor: tclass): boolean;
-                          //true if root loaded
+                          //true if root and all inherited classes loaded
 function findancestorcomponent(const areader: treader; 
                  const componentname: string): tcomponent;
 procedure loadmsemodule(const instance: tmsecomponent; const rootancestor: tclass);
@@ -1416,27 +1417,24 @@ end;
 var
  moduleloadlevel: integer;
  
-function initmsecomponent(instance: tcomponent; rootancestor: tclass;
+function initmsecomponent(instance: tmsecomponent; rootancestor: tclass;
                                  out ancestorloaded: boolean): boolean;
 var
- rootloaded: boolean;
+ allloaded: boolean;
  
  rootancestor1: tclass;
  
- procedure doload(const aclass: tclass);
+ procedure doload(const aclass: msecomponentclassty);
  var
   po1: pobjectdatainfoty;
  begin
-  if (aclass <> rootancestor1) and (aclass <> tcomponent) then begin
-   doload(aclass.classparent);
+  if (aclass <> rootancestor1) and (aclass <> tmsecomponent) then begin
+   doload(msecomponentclassty(aclass.classparent));
    po1:= objectdatalist.find(aclass,instance.name);
    if (po1 = nil) and (rootancestor <> nil) then begin
     po1:= objectdatalist.find(aclass,'');
    end; 
    if (po1 <> nil) then begin
-    if aclass = instance.classtype then begin
-     rootloaded:= true;
-    end;
     if not ancestorloaded then begin
      ancestorloaded:= true;    
      inc(moduleloadlevel);
@@ -1445,7 +1443,12 @@ var
      end;
     end;
     loadmodule(instance,po1,false);
-   end;     
+   end
+   else begin
+    if aclass.hasresource then begin
+     allloaded:= false;
+    end;
+   end;
   end;
  end;
  
@@ -1458,9 +1461,9 @@ begin
    rootancestor1:= rootancestor;
   end;
   ancestorloaded:= false;
-  rootloaded:= false;
+  allloaded:= true;
   try
-   doload(instance.classtype);
+   doload(msecomponentclassty(instance.classtype));
    if finditem(pointerarty(fmodulestoregister),instance) >= 0 then begin
     modules.add(tmsecomponent(instance));
     globalfixupreferences;
@@ -1480,7 +1483,7 @@ begin
    end;
    removeitem(pointerarty(fmodulestoregister),instance);
   end;
-  result:= rootloaded;
+  result:= allloaded;
  end
  else begin
   result:= false;
@@ -1492,7 +1495,12 @@ function initmsecomponent1(instance: tcomponent; rootancestor: tclass): boolean;
 var
  bo1: boolean;
 begin
- result:= initmsecomponent(instance,rootancestor,bo1);
+ if instance is tmsecomponent then begin
+  result:= initmsecomponent(tmsecomponent(instance),rootancestor,bo1);
+ end
+ else begin
+  result:= false;
+ end;
 end;
 
 procedure reloadmsecomponent(Instance: tmsecomponent);
@@ -2971,6 +2979,11 @@ begin
  result:= tmsecomponent.classname;
 end;
 
+class function tmsecomponent.hasresource: boolean;
+begin
+ result:= false;
+end;
+
 function setclassname(const instance: tobject;
                    const aclassname: pshortstring): pshortstring;
 var
@@ -3511,7 +3524,7 @@ end;
 
 initialization
 {$ifdef FPC}
- registerinitcomponenthandler(tcomponent,@initmsecomponent1);
+ registerinitcomponenthandler(tmsecomponent,@initmsecomponent1);
 {$endif}
  registerfindglobalcomponentproc({$ifdef FPC}@{$endif}findmodulebyname);
 finalization

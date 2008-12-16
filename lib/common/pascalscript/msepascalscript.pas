@@ -66,6 +66,7 @@ type
    procedure setps_plugins(const avalue: tpsplugins);
   protected
    class function getmoduleclassname: string; override;
+   class function hasresource: boolean; override;
    procedure readstate(reader: treader); override;
    procedure doafterload; override;
   public
@@ -295,6 +296,11 @@ end;
 class function tscriptform.getmoduleclassname: string;
 begin
  result:= 'tscriptform';
+end;
+
+class function tscriptform.hasresource: boolean;
+begin
+ result:= self <> tscriptform;
 end;
 
 function tscriptform.getps_script: tstrings;

@@ -430,6 +430,7 @@ type
    procedure loaded; override;
    procedure objectevent(const sender: tobject;
                                      const event: objecteventty); override;
+   class function hasresource: boolean; override;
   public
    constructor create(aowner: tcomponent); override;
    function isactivepage: boolean;
@@ -2557,6 +2558,11 @@ begin
   finvisible:= avalue;
   changed;
  end;
+end;
+
+class function ttabform.hasresource: boolean;
+begin
+ result:= self <> ttabform;
 end;
 
 { tcustomtabwidget }

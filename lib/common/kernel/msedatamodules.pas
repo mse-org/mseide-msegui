@@ -44,6 +44,7 @@ type
    procedure doterminatequery(var terminate: boolean);
    procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
    class function getmoduleclassname: string; override;
+   class function hasresource: boolean; override;
    procedure defineproperties(filer: tfiler); override;
    procedure doonloaded; virtual;
    procedure loaded; override;
@@ -166,6 +167,11 @@ begin
 // result:= tmsedatamodule.ClassName;
  //bug in dcc32: tmsedatamodule is replaced by self
  result:= 'tmsedatamodule';
+end;
+
+class function tmsedatamodule.hasresource: boolean;
+begin
+ result:= classtype <> tmsedatamodule;
 end;
 
 procedure tmsedatamodule.writesize(writer: twriter);

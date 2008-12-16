@@ -300,6 +300,7 @@ type
  tmseform = class(tmseformwidget)
   protected
    class function getmoduleclassname: string; override;
+   class function hasresource: boolean; override;
   public
    constructor create(aowner: tcomponent; load: boolean); override;
  end;
@@ -405,6 +406,7 @@ type
  tdockform = class(tdockformwidget)
   protected
    class function getmoduleclassname: string; override;
+   class function hasresource: boolean; override;
   public
    constructor create(aowner: tcomponent; load: boolean); override;
  end;
@@ -423,6 +425,7 @@ type
  tsubform = class(tpublishedwidget)
   protected
    class function getmoduleclassname: string; override;
+   class function hasresource: boolean; override;
    procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
   public
    constructor create(aowner: tcomponent); overload; override;
@@ -1476,6 +1479,11 @@ begin
  result:= 'tmseform';
 end;
 
+class function tmseform.hasresource: boolean;
+begin
+ result:= self <> tmseform;
+end;
+
 { tformdockcontroller }
 
 procedure tformdockcontroller.setoptionsdock(const avalue: optionsdockty);
@@ -1676,6 +1684,11 @@ begin
  result:= 'tdockform';
 end;
 
+class function tdockform.hasresource: boolean;
+begin
+ result:= self <> tdockform;
+end;
+
 { tsubform }
 
 constructor tsubform.create(aowner: tcomponent);
@@ -1700,6 +1713,11 @@ end;
 class function tsubform.getmoduleclassname: string;
 begin
  result:= 'tsubform';
+end;
+
+class function tsubform.hasresource: boolean;
+begin
+ result:= self <> tsubform;
 end;
 
 procedure tsubform.getchildren(proc: tgetchildproc; root: tcomponent);

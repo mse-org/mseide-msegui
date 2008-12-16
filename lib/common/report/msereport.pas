@@ -1638,6 +1638,7 @@ type
    procedure setstatfile(const avalue: tstatfile);
   protected
    class function getmoduleclassname: string; override;
+   class function hasresource: boolean; override;
   public
    constructor create(aowner: tcomponent); overload; override;
    constructor create(aowner: tcomponent; load: boolean); 
@@ -6636,6 +6637,11 @@ end;
 class function treport.getmoduleclassname: string;
 begin
  result:= 'treport';
+end;
+
+class function treport.hasresource: boolean;
+begin
+ result:= self <> treport;
 end;
 
 procedure treport.setstatfile(const avalue: tstatfile);
