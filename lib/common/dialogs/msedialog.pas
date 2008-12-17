@@ -22,6 +22,7 @@ type
  tdialogform = class(tmseform)
   protected
    procedure updatewindowinfo(var info: windowinfoty); override;
+   class function hasresource: boolean; override;
  end;
 
  tdialog = class(tmsecomponent)
@@ -98,6 +99,11 @@ procedure tdialogform.updatewindowinfo(var info: windowinfoty);
 begin
  inherited;
  info.options:= [wo_message];
+end;
+
+class function tdialogform.hasresource: boolean;
+begin
+ result:= false;
 end;
 
 { tellipsebuttonframe }

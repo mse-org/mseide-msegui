@@ -8562,10 +8562,10 @@ begin     //focuscell
     coord1:= invalidcell;
    end;
  
-   if cell.row >= 0 then begin
-    int1:= cell.row - ffocusedcell.row;
-    if int1 <> 0 then begin
-     checksort;
+   int1:= cell.row - ffocusedcell.row;
+   if int1 <> 0 then begin
+    checksort;
+    if cell.row >= 0 then begin
      if (cell.row >= 0) and (ffocusedcell.row >= 0) then begin
       cell.row:= ffocusedcell.row + int1;
       if cell.row < 0 then begin

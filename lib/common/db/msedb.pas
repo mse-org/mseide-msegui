@@ -146,6 +146,13 @@ type
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
+   property FieldKind default fkData;
+   property HasConstraints default false;
+   property Lookup default false;
+   property LookupCache default false;
+   property ReadOnly default false;
+   property Required default false;
+   
  end;
  
  tmsestringfield = class;
@@ -203,6 +210,12 @@ type
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
+   property FieldKind default fkData;
+   property HasConstraints default false;
+   property Lookup default false;
+   property LookupCache default false;
+   property ReadOnly default false;
+   property Required default false;
  end;
 
  tmsenumericfield = class(tnumericfield)
@@ -225,6 +238,12 @@ type
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
+   property FieldKind default fkData;
+   property HasConstraints default false;
+   property Lookup default false;
+   property LookupCache default false;
+   property ReadOnly default false;
+   property Required default false;
  end;
  tmselongintfield = class(tlongintfield)
   private
@@ -253,6 +272,12 @@ type
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
+   property FieldKind default fkData;
+   property HasConstraints default false;
+   property Lookup default false;
+   property LookupCache default false;
+   property ReadOnly default false;
+   property Required default false;
  end;
  tmselargeintfield = class(tlargeintfield)
   private
@@ -278,6 +303,12 @@ type
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
+   property FieldKind default fkData;
+   property HasConstraints default false;
+   property Lookup default false;
+   property LookupCache default false;
+   property ReadOnly default false;
+   property Required default false;
  end;
  tmsesmallintfield = class(tsmallintfield)
   private
@@ -303,6 +334,12 @@ type
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
+   property FieldKind default fkData;
+   property HasConstraints default false;
+   property Lookup default false;
+   property LookupCache default false;
+   property ReadOnly default false;
+   property Required default false;
  end;
  tmsewordfield = class(twordfield)
   private
@@ -328,6 +365,12 @@ type
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
+   property FieldKind default fkData;
+   property HasConstraints default false;
+   property Lookup default false;
+   property LookupCache default false;
+   property ReadOnly default false;
+   property Required default false;
  end;
  tmseautoincfield = class(tautoincfield)
   private
@@ -349,6 +392,12 @@ type
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
+   property FieldKind default fkData;
+   property HasConstraints default false;
+   property Lookup default false;
+   property LookupCache default false;
+   property ReadOnly default false;
+   property Required default false;
  end;
  tmsefloatfield = class(tfloatfield)
   private
@@ -374,6 +423,12 @@ type
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
+   property FieldKind default fkData;
+   property HasConstraints default false;
+   property Lookup default false;
+   property LookupCache default false;
+   property ReadOnly default false;
+   property Required default false;
  end;
  tmsecurrencyfield = class(tmsefloatfield)
  (*
@@ -440,6 +495,12 @@ type
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
    property displayvalues: msestring read fdisplayvalues write setdisplayvalues;
+   property FieldKind default fkData;
+   property HasConstraints default false;
+   property Lookup default false;
+   property LookupCache default false;
+   property ReadOnly default false;
+   property Required default false;
  end;
  
  datetimefieldoptionty = (dtfo_utc,dtfo_local); //DB time format
@@ -472,6 +533,12 @@ type
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
    property options: datetimefieldoptionsty read foptions write setoptions;
+   property FieldKind default fkData;
+   property HasConstraints default false;
+   property Lookup default false;
+   property LookupCache default false;
+   property ReadOnly default false;
+   property Required default false;
  end; 
  tmsedatefield = class(tmsedatetimefield)
   public
@@ -502,6 +569,12 @@ type
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
+   property FieldKind default fkData;
+   property HasConstraints default false;
+   property Lookup default false;
+   property LookupCache default false;
+   property ReadOnly default false;
+   property Required default false;
  end;
  tmsebytesfield = class(tbytesfield)
   private
@@ -523,6 +596,12 @@ type
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
+   property FieldKind default fkData;
+   property HasConstraints default false;
+   property Lookup default false;
+   property LookupCache default false;
+   property ReadOnly default false;
+   property Required default false;
  end;
  tmsevarbytesfield = class(tvarbytesfield)
   private
@@ -544,6 +623,12 @@ type
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
+   property FieldKind default fkData;
+   property HasConstraints default false;
+   property Lookup default false;
+   property LookupCache default false;
+   property ReadOnly default false;
+   property Required default false;
  end;
  tmsebcdfield = class(tbcdfield)
   private
@@ -569,6 +654,12 @@ type
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
+   property FieldKind default fkData;
+   property HasConstraints default false;
+   property Lookup default false;
+   property LookupCache default false;
+   property ReadOnly default false;
+   property Required default false;
  end;
  
  blobidty = record
@@ -631,6 +722,12 @@ type
    property ProviderFlags default defaultproviderflags;
    property cachekb: integer read getcachekb write setcachekb;
                 //cachesize in kilo bytes, 0 -> no cache
+   property FieldKind default fkData;
+   property HasConstraints default false;
+   property Lookup default false;
+   property LookupCache default false;
+   property ReadOnly default false;
+   property Required default false;
  end;
  tmsememofield = class(tmseblobfield,ifieldcomponent)
   private
@@ -656,6 +753,12 @@ type
    property Transliterate default True;
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
+   property FieldKind default fkData;
+   property HasConstraints default false;
+   property Lookup default false;
+   property LookupCache default false;
+   property ReadOnly default false;
+   property Required default false;
  end;
  
  tmsedatalink = class(tdatalink)
