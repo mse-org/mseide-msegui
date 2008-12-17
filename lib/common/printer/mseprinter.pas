@@ -360,7 +360,9 @@ type
    procedure printerchanged; virtual; abstract;
   protected
    procedure objectevent(const sender: tobject; 
-                   const event: objecteventty); override;
+                              const event: objecteventty); override;
+  public
+   constructor create(aowner: tcomponent); override;
   published
    property dropdown;
    property printer: tcustomprinter read fprinter write setprinter;
@@ -402,7 +404,7 @@ function stringtopages(const avalue: msestring): pagerangearty;
 
 implementation
 uses
- sysutils,mseprocutils,msepipestream,msesysintf;
+ sysutils,mseprocutils,msepipestream,msesysintf,msestockobjects,mseconsts;
  
 type
  tfont1 = class(tfont);
@@ -1308,6 +1310,12 @@ end;
 
 { tprintervalueselector }
 
+constructor tprintervalueselector.create(aowner: tcomponent);
+begin
+ inherited;
+ dropdown.cols.nostreaming:= true;
+end;
+
 procedure tprintervalueselector.setprinter(const avalue: tcustomprinter);
 begin
  setlinkedvar(avalue,tmsecomponent(fprinter));
@@ -1383,8 +1391,8 @@ end;
 constructor tpageorientationselector.create(aowner: tcomponent);
 begin
  inherited;
- addrow(['Portrait']);
- addrow(['Landscape']);
+ addrow([stockcaptions(sc_portrait)]);
+ addrow([stockcaptions(sc_landscape)]);
 end;
 
 function tpageorientationselector.getvalue: pageorientationty;
@@ -1410,8 +1418,8 @@ procedure tpageorientationselector.getdropdowninfo(var aenums: integerarty;
     const names: tdropdowncols);
 begin
  names.clear;
- names.addrow(['Portrait']);
- names.addrow(['Landscape']);
+ names.addrow([stockcaptions(sc_portrait)]);
+ names.addrow([stockcaptions(sc_landscape)]);
 end;
 
 procedure tpageorientationselector.dochange;

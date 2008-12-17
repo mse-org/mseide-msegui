@@ -122,7 +122,9 @@ const
   'Filter on',          //sc_filter_on
   'Search',             //sc_search
   'Insert',             //sc_insert
-  'Filter off'         //sc_filter_off
+  'Filter off',         //sc_filter_off
+  'Portrait',           //sc_portrait
+  'Landscape'           //sc_landscape
   );
     
 initialization

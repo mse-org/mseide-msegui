@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -33,7 +33,8 @@ type
  pdoublemsestringty = ^doublemsestringty;
  doublemsestringarty = array of doublemsestringty;
  dataprocty = procedure(var data) of object;
- internallistoptionty = (ilo_needsfree,ilo_needscopy,ilo_needsinit);
+ internallistoptionty = (ilo_needsfree,ilo_needscopy,ilo_needsinit,
+                         ilo_nostreaming);
  internallistoptionsty = set of internallistoptionty;
 
  tdatalist = class;
@@ -2899,19 +2900,22 @@ var
  po1: pchar;
 begin
  inherited;
- if filer.ancestor = nil then begin
-  bo1:= (fcount <> 0);
- end
- else begin
-  bo1:= tdatalist(filer.ancestor).fcount <> fcount;
-  if not bo1 and (filer is twriter) then begin
-   datapo; //normalize ring
-   po1:= tdatalist(filer.ancestor).datapo;
-   for int1:= 0 to fcount-1 do begin
-    compare((fdatapo+int1*fsize)^,(po1+int1*fsize)^,int2);
-    if int2 <> 0 then begin
-     bo1:= true;
-     break;
+ bo1:= not (ilo_nostreaming in finternaloptions);
+ if bo1 then begin
+  if filer.ancestor = nil then begin
+   bo1:= (fcount <> 0);
+  end
+  else begin
+   bo1:= tdatalist(filer.ancestor).fcount <> fcount;
+   if not bo1 and (filer is twriter) then begin
+    datapo; //normalize ring
+    po1:= tdatalist(filer.ancestor).datapo;
+    for int1:= 0 to fcount-1 do begin
+     compare((fdatapo+int1*fsize)^,(po1+int1*fsize)^,int2);
+     if int2 <> 0 then begin
+      bo1:= true;
+      break;
+     end;
     end;
    end;
   end;

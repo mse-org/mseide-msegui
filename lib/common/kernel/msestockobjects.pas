@@ -83,7 +83,8 @@ type
                     sc_first,sc_prior,sc_next,sc_last,
                     sc_append,sc_delete,sc_edit,sc_post,sc_cancel,sc_refresh,
                     sc_edit_filter,sc_edit_filter_min,sc_edit_filter_max,
-                    sc_filter_on,sc_search,sc_insert,sc_filter_off                    
+                    sc_filter_on,sc_search,sc_insert,sc_filter_off,
+                    sc_portrait,sc_landscape
                     );
  
  tstockobjects = class

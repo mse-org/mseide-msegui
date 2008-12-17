@@ -114,7 +114,9 @@ const
   'Filter ein',               //sc_filter_on
   'Suchen',                   //sc_search
   'Einfügen',                 //sc_insert
-  'Filter aus'                //sc_filter_off
+  'Filter aus',               //sc_filter_off
+  'Hochformat',               //sc_portrait
+  'Querformat'                //sc_landscape
 );
     
 initialization

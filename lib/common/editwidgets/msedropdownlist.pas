@@ -80,8 +80,11 @@ type
   private
    fupdating1: integer;
    fonitemchange: indexeventty;
+   fnostreaming: boolean;
+//   maxrowcount: integer;
    function getitems(const index: integer): tdropdowncol;
    procedure setrowcount(const avalue: integer);
+   procedure setnostreaming(const avalue: boolean);
   protected
    fitemindex: integer;
    fkeyvalue64: integer;
@@ -104,6 +107,8 @@ type
    procedure insertrow(const aindex: integer; const aitems: array of msestring);
    procedure deleterow(const aindex: integer);
    function getrow(const aindex: integer): msestringarty;
+   property nostreaming: boolean read fnostreaming 
+                                          write setnostreaming;
    property rowcount: integer read maxrowcount write setrowcount;
    property onitemchange: indexeventty read fonitemchange write fonitemchange;
    property items[const index: integer]: tdropdowncol read getitems; default;
@@ -441,9 +446,31 @@ begin
  item:= getcolclass.create(tcustomdropdownlistcontroller(fowner));
  with tdropdowncol(item) do begin
   onitemchange:= {$ifdef FPC}@{$endif}itemchanged;
+  if fnostreaming then begin
+   include(finternaloptions,ilo_nostreaming);
+  end;
 //  if index = 0 then begin
 //   foptions:= foptions + [co_fill];
 //  end;
+ end;
+end;
+
+procedure tdropdowncols.setnostreaming(const avalue: boolean);
+var
+ int1: integer;
+begin
+ if fnostreaming <> avalue then begin
+  fnostreaming:= avalue;
+  if avalue then begin
+   for int1:= 0 to count - 1 do begin
+    include(tdropdowncol(items[int1]).finternaloptions,ilo_nostreaming);
+   end;
+  end
+  else begin
+   for int1:= 0 to count - 1 do begin
+    exclude(tdropdowncol(items[int1]).finternaloptions,ilo_nostreaming);
+   end;
+  end;
  end;
 end;
 

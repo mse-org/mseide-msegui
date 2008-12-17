@@ -463,6 +463,7 @@ type
    procedure closequery(const sender: tcustommseform;
                        var amodalresult: modalresultty);
    procedure checkformkind;
+   function getdefaultstate: propertystatesty; override;
   public
    procedure edit; override;
    function getvalue: msestring; override;
@@ -474,6 +475,7 @@ type
   protected
    procedure closequery(const sender: tcustommseform;
                        var amodalresult: modalresultty);
+   function getdefaultstate: propertystatesty; override;
  end;
 
  tdoublemsestringdatalistpropertyeditor = class(tdialogclasspropertyeditor)
@@ -482,6 +484,7 @@ type
   protected
    procedure closequery(const sender: tcustommseform;
                        var amodalresult: modalresultty);
+   function getdefaultstate: propertystatesty; override;
  end;
 
 const
@@ -795,10 +798,23 @@ type
  twidget1 = class(twidget);
  tcustomcaptionframe1 = class(tcustomcaptionframe);
  tdesigner1 = class(tdesigner);
+ tdatalist1 = class(tdatalist);
 
 var
  fpropertyeditors: tpropertyeditors;
  ftextpropertyfont: tfont;
+
+procedure checkdatalistnostreaming(const sender: tpropertyeditor;
+                                var defaultstate: propertystatesty);
+var
+ datalist1: tdatalist1;
+begin
+ datalist1:= tdatalist1(sender.getordvalue);
+ if (datalist1 = nil) or 
+           (ilo_nostreaming in datalist1.finternaloptions) then begin
+  exclude(defaultstate,ps_dialog);
+ end;
+end;
 
 function textpropertyfont: tfont;
 begin
@@ -4373,6 +4389,12 @@ begin
  end;
 end;
 
+function tdatalistpropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate;
+ checkdatalistnostreaming(self,result);
+end;
+
 { tmsestringdatalistpropertyeditor }
 
 procedure tmsestringdatalistpropertyeditor.closequery(const sender: tcustommseform;
@@ -4417,6 +4439,12 @@ begin
  else begin
   result:= inherited getvalue;
  end;
+end;
+
+function tmsestringdatalistpropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate;
+ checkdatalistnostreaming(self,result);
 end;
 
 { tdoublemsestringdatalistpropertyeditor }
@@ -4470,6 +4498,12 @@ begin
  else begin
   result:= inherited getvalue;
  end;
+end;
+
+function tdoublemsestringdatalistpropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate;
+ checkdatalistnostreaming(self,result);
 end;
 
 { trecordpropertyeditor }

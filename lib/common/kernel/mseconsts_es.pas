@@ -117,7 +117,9 @@ const
   'Filtro activo',                     //sc_filter_on
   'Buscar',                            //sc_search
   'Insertar',                          //sc_insert
-  'Filtro apagado'                     //sc_filter_off
+  'Filtro apagado',                    //sc_filter_off
+  'Portrait',                          //sc_portrait
+  'Landscape'                          //sc_landscape
 );
     
 initialization

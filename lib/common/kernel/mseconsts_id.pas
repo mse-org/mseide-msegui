@@ -55,67 +55,69 @@ const
   );
 
  id_stockcaption: stockcaptionaty = (
-  '',                   //sc_none
-  'adalah salah',         //sc_is_invalid
-  'Format salah',       //sc_Format_error
-  'Nilai dibutuhkan',  //sc_Value_is_required
-  'Salah',              //sc_Error
-  'Min',                //sc_Min
-  'Max',                //sc_Max
-  'Range salah',        //sc_Range_error  
-  '&Batal',              //sc_Undo  ///
-  '&Salin',              //sc_Copy   // hotkeys
+  '',                      //sc_none
+  'adalah salah',          //sc_is_invalid
+  'Format salah',          //sc_Format_error
+  'Nilai dibutuhkan',      //sc_Value_is_required
+  'Salah',                 //sc_Error
+  'Min',                   //sc_Min
+  'Max',                   //sc_Max
+  'Range salah',           //sc_Range_error  
+  '&Batal',                //sc_Undo  ///
+  '&Salin',                //sc_Copy   // hotkeys
   'Po&tong',               //sc_Cut    //
-  '&Tempel',             //sc_Paste ///
-		'&Sisipkan Baris',								//sc_insert_row
-		'&Tambah Baris',								//sc_append_row
-		'&Hapus Baris',								//sc_delete_row
-  '&Direktori',               //sc_Dir               /// 
-  '&Naik',                //sc_Up                 //
-  'Dir &Baru',           //sc_New_dir            // hotkeys
-  '&Nama File',              //sc_Name               //
-  '&File tersembunyi', //sc_Show_hidden_files  //
-  '&Filter',            //sc_Filter            /// 
-  'Simpan',               //sc_save 
-  'Buka',               //sc_open
-  'Nama',                //sc_name1
-  'Buat Direktori Baru',//sc_create_new_directory
-  'File',               //sc_file
+  '&Tempel',               //sc_Paste ///
+  '&Sisipkan Baris',       //sc_insert_row
+  '&Tambah Baris',         //sc_append_row
+  '&Hapus Baris',          //sc_delete_row
+  '&Direktori',            //sc_Dir               /// 
+  '&Naik',                 //sc_Up                 //
+  'Dir &Baru',             //sc_New_dir            // hotkeys
+  '&Nama File',            //sc_Name               //
+  '&File tersembunyi',     //sc_Show_hidden_files  //
+  '&Filter',               //sc_Filter            /// 
+  'Simpan',                //sc_save 
+  'Buka',                  //sc_open
+  'Nama',                  //sc_name1
+  'Buat Direktori Baru',   //sc_create_new_directory
+  'File',                  //sc_file
   'sudah ada, akan ditimpa?', //sc_exists_overwrite
-  'PERINGATAN',               //sc_warningupper
+  'PERINGATAN',            //sc_warningupper
   'SALAH',                 //sc_errorupper
-  'tidak ada',        //sc_does_not_exist
+  'tidak ada',             //sc_does_not_exist
   'tidak dapat membaca direktori', //sc_can_not_read_directory
   'Format grafik tidak didukung', //sc_graphic_not_supported
-  'Format grafik salah', //sc_graphic_format_error
-  'MS Bitmap',          //sc_MS_Bitmap
-  'MS Icon',            //sc_MS_Icon
-  'JPEG Image',         //sc_JPEG_Image 
-  'PNG Image',          //sc_PNG_Image
-  'XPM Image',          //sc_XPM_Image
-  'PNM Image',          //sc_PNM_Image
-  'TARGA Image',        //sc_TARGA_image
+  'Format grafik salah',  //sc_graphic_format_error
+  'MS Bitmap',            //sc_MS_Bitmap
+  'MS Icon',              //sc_MS_Icon
+  'JPEG Image',           //sc_JPEG_Image 
+  'PNG Image',            //sc_PNG_Image
+  'XPM Image',            //sc_XPM_Image
+  'PNM Image',            //sc_PNM_Image
+  'TARGA Image',          //sc_TARGA_image
   'Semua',                //sc_All
-  'Konfirmasi',       //sc_Confirmation
-  'Hapus Rekaman?',     //sc_Delete_record
-  'Tutup',         //sc_close_page
-  'Awal',              //sc_first
+  'Konfirmasi',           //sc_Confirmation
+  'Hapus Rekaman?',       //sc_Delete_record
+  'Tutup',                //sc_close_page
+  'Awal',                 //sc_first
   'Sebelum',              //sc_prior
-  'Sesudah',               //sc_next
-  'Akhir',               //sc_last
-  'Tambah',             //sc_append
-  'Hapus',             //sc_delete
-  'Rubah',               //sc_edit
+  'Sesudah',              //sc_next
+  'Akhir',                //sc_last
+  'Tambah',               //sc_append
+  'Hapus',                //sc_delete
+  'Rubah',                //sc_edit
   'Simpan',               //sc_post
-  'Batal',             //sc_cancel
-  'Refresh',            //sc_refresh
-  'Rubah filter',        //sc_filter_filter
-  'Rubah filter minimum',//sc_edit_filter_min
-  'Rubah filter maximum',//sc_filter_edit_max
-  'Filter hidup',          //sc_filter_on
-  'Cari',             //sc_search
+  'Batal',                //sc_cancel
+  'Refresh',              //sc_refresh
+  'Rubah filter',         //sc_filter_filter
+  'Rubah filter minimum', //sc_edit_filter_min
+  'Rubah filter maximum', //sc_filter_edit_max
+  'Filter hidup',         //sc_filter_on
+  'Cari',                 //sc_search
   'Sisipkan',             //sc_insert
-  'Filter mati'         //sc_filter_off
+  'Filter mati',          //sc_filter_off
+  'Portrait',             //sc_portrait
+  'Landscape'             //sc_landscape
 );
     
 initialization
