@@ -118,8 +118,8 @@ const
   'Buscar',                            //sc_search
   'Insertar',                          //sc_insert
   'Filtro apagado',                    //sc_filter_off
-  'Portrait',                          //sc_portrait
-  'Landscape'                          //sc_landscape
+  'Portrait',                          //sc_portrait print orientation
+  'Landscape'                          //sc_landscape print orientation
 );
     
 initialization

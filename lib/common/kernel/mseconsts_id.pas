@@ -116,8 +116,8 @@ const
   'Cari',                 //sc_search
   'Sisipkan',             //sc_insert
   'Filter mati',          //sc_filter_off
-  'Portrait',             //sc_portrait
-  'Landscape'             //sc_landscape
+  'Portrait',             //sc_portrait print orientation
+  'Landscape'             //sc_landscape print orientation
 );
     
 initialization

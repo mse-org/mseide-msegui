@@ -115,8 +115,8 @@ const
   'Suchen',                   //sc_search
   'Einfügen',                 //sc_insert
   'Filter aus',               //sc_filter_off
-  'Hochformat',               //sc_portrait
-  'Querformat'                //sc_landscape
+  'Hochformat',               //sc_portrait print orientation
+  'Querformat'                //sc_landscape print orientation
 );
     
 initialization

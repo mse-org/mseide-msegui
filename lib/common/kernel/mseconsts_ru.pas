@@ -161,8 +161,8 @@ const
   'Search',             //sc_search
   'Insert',             //sc_insert
   'Filter off',         //sc_filter_off
-  'Portrait',           //sc_portrait
-  'Landscape'           //sc_landscape
+  'Portrait',           //sc_portrait print orientation
+  'Landscape'           //sc_landscape print orientation
   );
     
 initialization
