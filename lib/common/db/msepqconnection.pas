@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -45,7 +45,7 @@ type
    constructor create(aowner: tcomponent); override;
   published
    property DatabaseName: filenamety read getdatabasename write setdatabasename;
-   property Connected: boolean read getconnected write setconnected;
+   property Connected: boolean read getconnected write setconnected default false;
    property options: pqconnectionoptionsty read foptions write setoptions 
                                  default defaultpqconnectionoptionsty;
 end;

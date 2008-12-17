@@ -202,9 +202,10 @@ type
    property IsSQLBased: Boolean read FSQLBased;
    property datasets: idatabaseclientarty read fdatasets;
   published
-   property Connected: Boolean read FConnected write SetConnected;
+   property Connected: Boolean read FConnected write SetConnected default false;
    property DatabaseName: string read FDatabaseName write FDatabaseName;
-   property KeepConnection: Boolean read FKeepConnection write FKeepConnection;
+   property KeepConnection: Boolean read FKeepConnection 
+                              write FKeepConnection default false;
    property Params : TStrings read FParams Write setparams;
    property onbeforeconnect: databaseeventty read fonbeforeconnect 
                                    write fonbeforeconnect;  

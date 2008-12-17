@@ -141,7 +141,8 @@ type
   published
     Property FileName : String Read FFileName Write FFileName;
     property Filtered;
-    Property Active;
+    Property Active default false;
+    property AutocalcFields default false;
     Property FieldDefs;
     property BeforeOpen;
     property AfterOpen;

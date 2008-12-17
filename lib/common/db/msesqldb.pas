@@ -112,7 +112,7 @@ type
   published
    property FieldDefs;
    property controller: tdscontroller read fcontroller write setcontroller;
-   property Active: boolean read getactive write setactive1;
+   property Active: boolean read getactive write setactive1 default false;
    property onapplyrecupdate: applyrecupdateeventty read fonapplyrecupdate
                                   write setonapplyrecupdate;
    property afterapplyrecupdate: afterapplyrecupdateeventty read fafterapplyrecupdate 
@@ -122,7 +122,7 @@ type
    property IndexDefs : TIndexDefs read getindexdefs write setindexdefs;
                //must be writable because it is streamed
    property StatementType : TStatementType read getetstatementtype 
-                                  write setstatementtype;
+                                  write setstatementtype default stnone;
                //must be writable because it was streamed in FPC 2.0.4
  end;
 

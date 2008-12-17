@@ -190,8 +190,9 @@ type
     property lasterrormessage: msestring read flasterrormessage;
     property lastsqlcode: integer read flastsqlcode;
   published
-    property Dialect  : integer read FDialect write FDialect;
-    property options: ibconnectionoptionsty read foptions write foptions;
+    property Dialect  : integer read FDialect write FDialect default 0;
+    property options: ibconnectionoptionsty read foptions 
+                                           write foptions default [];
     property DatabaseName;
     property KeepConnection;
 //    property LoginPrompt;

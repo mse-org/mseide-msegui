@@ -66,7 +66,10 @@ type
   published
    property FileName: filenamety read ffilename write setfilename;
    property controller: tdscontroller read fcontroller write setcontroller;
-   property Active: boolean read getactive write setactive;
+   property Active: boolean read getactive write setactive default false;
+   property AutocalcFields default false;
+   property FileMustExist default true;
+   property Readonly default false;
  end;
  
  tmsesdfdataset = class(tsdfdataset,imselocate,idscontroller,igetdscontroller)
@@ -121,7 +124,11 @@ type
   published
    property FileName: filenamety read ffilename write setfilename;
    property controller: tdscontroller read fcontroller write setcontroller;
-   property Active: boolean read getactive write setactive;
+   property Active: boolean read getactive write setactive default false;
+   property AutocalcFields default false;
+   property FileMustExist default true;
+   property Readonly default false;
+   property FirstLineAsSchema default false;
  end;
  
 implementation

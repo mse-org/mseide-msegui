@@ -165,7 +165,7 @@ Type
    property lasterrormessage: msestring read flasterrormessage;
    property lastsqlcode: string read flastsqlcode;
   published
-    property Dialect  : integer read FDialect write FDialect;
+    property Dialect  : integer read FDialect write FDialect default 0;
     property port: cardinal read fport write fport default 0;
     property DatabaseName;
     property HostName;

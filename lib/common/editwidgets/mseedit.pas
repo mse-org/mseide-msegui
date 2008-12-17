@@ -372,7 +372,7 @@ type
    procedure readpwchar(reader: treader);
    procedure writepwchar(writer: twriter);
    procedure defineproperties(filer: tfiler); override;
-   property optionsdb: optionseditdbty read foptionsdb write foptionsdb;   
+   property optionsdb: optionseditdbty read foptionsdb write foptionsdb default [];   
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;

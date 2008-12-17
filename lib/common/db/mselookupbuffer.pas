@@ -226,13 +226,13 @@ type
                            
    function count: integer; virtual;
    property fieldcounttext: integer read getfieldcounttext
-                                        write setfieldcounttext;
+                                        write setfieldcounttext default 0;
    property fieldcountfloat: integer read getfieldcountfloat
-                                        write setfieldcountfloat;
+                                        write setfieldcountfloat default 0;
    property fieldcountinteger: integer read getfieldcountinteger 
-                                        write setfieldcountinteger;
+                                        write setfieldcountinteger default 0;
    property fieldcountint64: integer read getfieldcountint64 
-                                        write setfieldcountint64;
+                                        write setfieldcountint64 default 0;
    property integervalue[const fieldno,aindex: integer]: integer 
                                    read integervaluephys;
    property floatvalue[const fieldno,aindex: integer]: realty 

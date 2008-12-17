@@ -128,7 +128,7 @@ type
    function getdatabasename: filenamety;
    procedure setdatabasename(const avalue: filenamety);
   published
-   property options: databaseoptionsty read foptions write setoptions;
+   property options: databaseoptionsty read foptions write setoptions default [];
  end;
 
  tmsesqlscript = class;
@@ -440,7 +440,8 @@ type
    property database: tcustomsqlconnection read fdatabase write setdatabase1;
    property transaction: tsqltransaction read ftransaction write settransaction1;
                   //can be nil
-   property options: sqlstatementoptionsty read foptions write setoptions;
+   property options: sqlstatementoptionsty read foptions 
+                                 write setoptions default [];
    property onbeforeexecute: sqlstatementeventty read fonbeforeexecute 
                                                      write fonbeforeexecute;
    property onafterexecute: sqlstatementeventty read fonafterexecute 
@@ -475,7 +476,8 @@ type
    function rowsaffected: integer;
                   //-1 if not supported
   published
-   property statementtype : tstatementtype read fstatementtype write fstatementtype;
+   property statementtype : tstatementtype read fstatementtype 
+                 write fstatementtype default stnone;
  end;
   
 const
@@ -639,7 +641,7 @@ type
     property IndexDefs : TIndexDefs read GetIndexDefs;
     property UpdateMode : TUpdateMode read FUpdateMode write SetUpdateMode;
     property UsePrimaryKeyAsKey : boolean read FUsePrimaryKeyAsKey write SetUsePrimaryKeyAsKey;
-    property StatementType : TStatementType read GetStatementType;
+    property StatementType : TStatementType read GetStatementType default stnone;
     Property DataSource : TDatasource Read GetDataSource Write SetDatasource;
     property database: tcustomsqlconnection read getdatabase1 write setdatabase1;
     

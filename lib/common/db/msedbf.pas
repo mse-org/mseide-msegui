@@ -66,7 +66,9 @@ type
   published
    property FilePath: filenamety read ffilepath write setfilepath;
    property controller: tdscontroller read fcontroller write setcontroller;
-   property Active: boolean read getactive write setactive;
+   property Active: boolean read getactive write setactive default false;
+   property AutocalcFields default false;
+   property FilterOptions default [];
  end;
  
 implementation

@@ -692,6 +692,8 @@ type
                        read fbeforeendfilteredit write fbeforeendfilteredit;
    property afterendfilteredit: filterediteventty
                        read fafterendfilteredit write fafterendfilteredit;
+   property Active default false;
+   property AutocalcFields default false;
   end;
    
 function getfieldisnull(nullmask: pbyte; const x: integer): boolean;

@@ -289,8 +289,8 @@ type
    property database: tcustomsqlconnection read fdatabase write setdatabase1;
    property transaction: tsqltransaction read getsqltransaction 
                                       write setsqltransaction;
-   property active: boolean read getactive write setactive;
-   property options: sqlresultoptionsty read foptions write foptions;
+   property active: boolean read getactive write setactive default false;
+   property options: sqlresultoptionsty read foptions write foptions default [];
    property fielddefs: tsqlresultfielddefs read ffielddefs write setfielddefs;
  end;
  

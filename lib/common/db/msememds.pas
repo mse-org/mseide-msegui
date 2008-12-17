@@ -61,7 +61,7 @@ type
    property tagpo: pointer read ftagpo write ftagpo;
   published
    property controller: tdscontroller read fcontroller write setcontroller;
-   property Active: boolean read getactive write setactive;
+   property Active: boolean read getactive write setactive default false;
  end;
  
 implementation

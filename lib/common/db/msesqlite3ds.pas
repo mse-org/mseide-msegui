@@ -63,7 +63,12 @@ type
    property tagpo: pointer read ftagpo write ftagpo;
   published
    property controller: tdscontroller read fcontroller write setcontroller;
-   property Active: boolean read getactive write setactive;
+   property Active: boolean read getactive write setactive default false;
+   property AutocalcFields default false;
+   property AutoIncrementKey default false;
+   property Options default [];
+   property SaveOnClose default false;
+   property SaveOnRefetch default false;
  end;
  
 implementation
