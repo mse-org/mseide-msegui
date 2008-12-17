@@ -1342,6 +1342,7 @@ var
  pa1: stdpagesizety;
 begin
  setlength(aenums,ord(high(stdpagesizety)));
+ names.clear;
  for pa1:= stdpagesizety(1) to high(stdpagesizety) do begin
   with stdpagesizes[pa1] do begin
    names.addrow([name+' ('+formatfloat('0',width)+'*'+formatfloat('0',height)+' mm2)']); 
@@ -1408,6 +1409,7 @@ end;
 procedure tpageorientationselector.getdropdowninfo(var aenums: integerarty; 
     const names: tdropdowncols);
 begin
+ names.clear;
  names.addrow(['Portrait']);
  names.addrow(['Landscape']);
 end;
