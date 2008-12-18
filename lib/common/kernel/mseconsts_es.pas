@@ -113,13 +113,13 @@ const
   'Refrescar',                         //sc_refresh
   'Filtro edici'#243'n',               //sc_filter_filter
   'Filtro edici'#243'n m'#237'nimo',   //sc_edit_filter_min
-  'Filtro edici'#243'n m'#237'nimo',   //sc_filter_edit_max
+  'Filtro edici'#243'n m'#225'ximo',   //sc_filter_edit_max
   'Filtro activo',                     //sc_filter_on
   'Buscar',                            //sc_search
   'Insertar',                          //sc_insert
   'Filtro apagado',                    //sc_filter_off
-  'Portrait',                          //sc_portrait print orientation
-  'Landscape'                          //sc_landscape print orientation
+  'Vertical',                          //sc_portrait print orientation
+  'Apaisado'                           //sc_landscape print orientation
 );
     
 initialization
