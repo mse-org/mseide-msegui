@@ -729,6 +729,9 @@ type
        net_wm_state,
        net_wm_state_maximized_vert,net_wm_state_maximized_horz,
        //not needed below
+       net_wm_window_type,
+       net_wm_window_type_normal,
+       net_wm_window_type_dialog,
        net_wm_state_fullscreen,
        net_frame_extents,
        net_request_frame_extents,
@@ -736,17 +739,21 @@ type
        net_none);
  netwmstateoperationty = (nso_remove,nso_add,nso_toggle);
 const
+ needednetatom = net_wm_state_maximized_horz;
  netatomnames: array[netatomty] of string = 
       ('_NET_SUPPORTED','_NET_WORKAREA',
        '_NET_WM_STATE',
        '_NET_WM_STATE_MAXIMIZED_VERT','_NET_WM_STATE_MAXIMIZED_HORZ',
        //not needed below
+       '_NET_WM_WINDOW_TYPE',
+       '_NET_WM_WINDOW_TYPE_NORMAL',
+       '_NET_WM_WINDOW_TYPE_DIALOG',
        '_NET_WM_STATE_FULLSCREEN',
        '_NET_FRAME_EXTENTS', 
        '_NET_REQUEST_FRAME_EXTENTS',
        '_NET_WM_PID', 
        ''); 
- needednetatom = netatomty(ord(high(netatomty))-4);
+// needednetatom = netatomty(ord(high(netatomty))-4);
 var
  netatoms: array[netatomty] of atom;
  netsupported: boolean;
@@ -1019,6 +1026,11 @@ end;
 procedure setcardinalproperty(id: winidty; prop: atom; value: cardinal);
 begin
  xchangeproperty(appdisp,id,prop,cardinalatom,32,propmodereplace,@value,1);
+end;
+
+procedure setatomproperty(id: winidty; prop: atom; value: atom);
+begin
+ xchangeproperty(appdisp,id,prop,atomatom,32,propmodereplace,@value,1);
 end;
 
 function readlongproperty(id: winidty; name: atom; count: cardinal; var value): boolean;
@@ -2723,20 +2735,42 @@ function gui_setwindowgroup(id,group: winidty): guierrorty;
 var
  wmhints: pxwmhints;
 begin
-{$ifdef FPC}{$checkpointer off}{$endif}
- wmhints:= pxwmhints(xgetwmhints(appdisp,id));
- if wmhints = nil then begin
-  wmhints:= pxwmhints(xallocwmhints);
- end;
- with wmhints^ do begin
-  window_group:= group;
-  flags:= flags or windowgrouphint;
-  xsetwmhints(appdisp,id,wmhints);
- end;
- xfree(wmhints);
-{$ifdef FPC}{$checkpointer default}{$endif}
- setwinidproperty(id,wmclientleaderatom,group);
+// if id <> group then begin
+ {$ifdef FPC}{$checkpointer off}{$endif}
+  wmhints:= pxwmhints(xgetwmhints(appdisp,id));
+  if wmhints = nil then begin
+   wmhints:= pxwmhints(xallocwmhints);
+  end;
+  with wmhints^ do begin
+   window_group:= group;
+   flags:= flags or windowgrouphint;
+   xsetwmhints(appdisp,id,wmhints);
+  end;
+  xfree(wmhints);
+ {$ifdef FPC}{$checkpointer default}{$endif}
+  setwinidproperty(id,wmclientleaderatom,group);
+// end;
  result:= gue_ok;
+end;
+
+function setnetcardinal(const id: winidty; const aproperty: netatomty;
+                                         const avalue: cardinal): boolean;
+begin
+ result:= false;
+ if netatoms[aproperty] <> 0 then begin
+  setcardinalproperty(id,netatoms[aproperty],avalue);
+  result:= true;
+ end;
+end;
+
+function setnetatom(const id: winidty; const aproperty: netatomty;
+                                         const avalue: netatomty): boolean;
+begin
+ result:= false;
+ if (netatoms[aproperty] <> 0) and (netatoms[avalue] <> 0) then begin
+  setatomproperty(id,netatoms[aproperty],netatoms[avalue]);
+  result:= true;
+ end;
 end;
 
 function gui_createwindow(const rect: rectty; const options: internalwindowoptionsty;
@@ -2838,15 +2872,21 @@ begin
               integer(high(wmprotocolty))+1);
   setstringproperty(id,wmclassatom,
        filename(sys_getapplicationpath)+#0+application.applicationname);
-  if netatoms[net_wm_pid] <> 0 then begin
-   setcardinalproperty(id,netatoms[net_wm_pid],getpid);
-  end;
+  setnetcardinal(id,net_wm_pid,getpid);
   if (wo_popup in options.options) and (options.transientfor <> 0) then begin
    gui_raisewindow(options.transientfor);
      //transientforhint not used by overrideredirect
   end;
   if (wo_popup in options.options) then begin
    gui_raisewindow(id);
+  end
+  else begin
+   if wo_message in options.options then begin
+    setnetatom(id,net_wm_window_type,net_wm_window_type_dialog);
+   end
+   else begin
+    setnetatom(id,net_wm_window_type,net_wm_window_type_normal);
+   end;
   end;
  end;
 end;
