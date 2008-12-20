@@ -171,7 +171,7 @@ end;
 
 class function tmsedatamodule.hasresource: boolean;
 begin
- result:= classtype <> tmsedatamodule;
+ result:= self <> tmsedatamodule;
 end;
 
 procedure tmsedatamodule.writesize(writer: twriter);

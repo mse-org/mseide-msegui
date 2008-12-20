@@ -252,6 +252,8 @@ type
    procedure writestatstate(const writer: tstatwriter); override;
    procedure writestatoptions(const writer: tstatwriter); override;
    procedure valuechanged; override;
+   procedure updatecopytoclipboard(var atext: msestring); override;
+   procedure updatepastefromclipboard(var atext: msestring); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -287,6 +289,8 @@ type
    function getdropdowntext(const awidget: twidget): msestring; override;
    procedure pathchanged(const sender: tobject);
    procedure doafterclosedropdown; override;
+   procedure updatecopytoclipboard(var atext: msestring); override;
+   procedure updatepastefromclipboard(var atext: msestring); override;
   public
    property showhiddenfiles: boolean read getshowhiddenfiles 
                                                write setshowhiddenfiles;
@@ -332,6 +336,8 @@ type
                   var accept: Boolean);
    procedure formoncreate(const sender: TObject);
    procedure dirshowhint(const sender: TObject; var info: hintinfoty);
+   procedure copytolip(const sender: TObject; var avalue: msestring);
+   procedure pastefromclip(const sender: TObject; var avalue: msestring);
   private
     { Private declarations }
    fselectednames: filenamearty;
@@ -1259,6 +1265,17 @@ begin
  end;
 end;
 
+procedure tfiledialogfo.copytolip(const sender: TObject; var avalue: msestring);
+begin
+ tosysfilepath1(avalue);
+end;
+
+procedure tfiledialogfo.pastefromclip(const sender: TObject;
+               var avalue: msestring);
+begin
+ tomsefilepath1(avalue);
+end;
+
 { tfiledialogcontroller }
 
 constructor tfiledialogcontroller.create(const aowner: tmsecomponent = nil;
@@ -1806,6 +1823,18 @@ begin
  inherited;
 end;
 
+procedure tcustomfilenameedit.updatecopytoclipboard(var atext: msestring);
+begin
+ tosysfilepath1(atext);
+ inherited;
+end;
+
+procedure tcustomfilenameedit.updatepastefromclipboard(var atext: msestring);
+begin
+ tomsefilepath1(atext);
+ inherited;
+end;
+
 { tdirdropdownedit }
 
 procedure tdirdropdownedit.createdropdownwidget(const atext: msestring;
@@ -1867,6 +1896,18 @@ begin
  else begin
   exclude(foptions,ddeo_checksubdir)
  end;
+end;
+
+procedure tdirdropdownedit.updatecopytoclipboard(var atext: msestring);
+begin
+ tosysfilepath1(atext);
+ inherited;
+end;
+
+procedure tdirdropdownedit.updatepastefromclipboard(var atext: msestring);
+begin
+ tomsefilepath1(atext);
+ inherited;
 end;
 
 end.

@@ -585,6 +585,8 @@ type
    ftextflagsactive: textflagsty;
    fonsetvalue: setstringeventty;
    fondataentered: notifyeventty;
+   foncopytoclipboard: updatestringeventty;
+   fonpastefromclipboard: updatestringeventty;
    procedure settextflags(const avalue: textflagsty);
    function getdatalist: tmsestringdatalist;
    procedure setdatalist(const value: tmsestringdatalist);
@@ -627,6 +629,11 @@ type
    property datalist: tmsestringdatalist read getdatalist write setdatalist;
    property onsetvalue: setstringeventty read fonsetvalue write fonsetvalue;
    property ondataentered: notifyeventty read fondataentered write fondataentered;
+   property oncopytoclipboard: updatestringeventty read foncopytoclipboard 
+                  write foncopytoclipboard;
+   property onpastefromclipboard: updatestringeventty read fonpastefromclipboard 
+                  write fonpastefromclipboard;
+       
  end;
 
  tstringcol = class(tcustomstringcol)
@@ -640,6 +647,8 @@ type
    property fontselect;
    property onsetvalue;
    property ondataentered;
+   property oncopytoclipboard;
+   property onpastefromclipboard;
  end;
  
  stringcolclassty = class of tcustomstringcol;
@@ -1838,6 +1847,8 @@ end;
    function getoptionsedit: optionseditty; virtual;
    procedure editnotification(var info: editnotificationinfoty); virtual;
    function hasselection: boolean;
+   procedure updatecopytoclipboard(var atext: msestring);
+   procedure updatepastefromclipboard(var atext: msestring);
 
    procedure focusedcellchanged; override;
    procedure checkrowreadonlystate; override;
@@ -11982,13 +11993,32 @@ end;
 function tcustomstringgrid.getoptionsedit: optionseditty;
 begin
  result:= [oe_exitoncursor];
- with tstringcol(fdatacols[ffocusedcell.col]) do begin
+ with tcustomstringcol(fdatacols[ffocusedcell.col]) do begin
   if (ffocusedcell.col < 0) or isreadonly{(co_readonly in foptions)} then begin
    include(result,oe_readonly);
   end;
   stringcoltooptionsedit(foptionsedit,result);
  end;
 end;
+
+procedure tcustomstringgrid.updatecopytoclipboard(var atext: msestring);
+begin
+ with tcustomstringcol(fdatacols[ffocusedcell.col]) do begin
+  if canevent(tmethod(foncopytoclipboard)) then begin
+   foncopytoclipboard(self,atext);
+  end;
+ end;
+end;
+
+procedure tcustomstringgrid.updatepastefromclipboard(var atext: msestring);
+begin
+ with tcustomstringcol(fdatacols[ffocusedcell.col]) do begin
+  if canevent(tmethod(fonpastefromclipboard)) then begin
+   fonpastefromclipboard(self,atext);
+  end;
+ end;
+end;
+
 
 function tcustomstringgrid.hasselection: boolean;
 begin

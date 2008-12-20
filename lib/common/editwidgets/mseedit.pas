@@ -314,6 +314,8 @@ type
    ftextflagsactive: textflagsty;
    fonkeydown: keyeventty;
    fonkeyup: keyeventty;
+   foncopytoclipboard: updatestringeventty;
+   fonpastefromclipboard: updatestringeventty;
 {$ifdef mse_with_ifi}
    fifiserverintf: iifiserver;
    //iifiwidget
@@ -347,14 +349,18 @@ type
    procedure dragstarted; override;
 
    class function classskininfo: skininfoty; override;
-   function getoptionsedit: optionseditty; virtual;//iedit
+     //iedit
+   function getoptionsedit: optionseditty; virtual;
    function getoptionsdb: optionseditdbty;
    function hasselection: boolean; virtual;
    function cangridcopy: boolean; virtual;
    procedure setoptionsedit(const avalue: optionseditty); virtual;
    procedure updatereadonlystate; virtual;
    procedure editnotification(var info: editnotificationinfoty); virtual;
-     //interface to inplaceedit
+   procedure updatecopytoclipboard(var atext: msestring); virtual;
+   procedure updatepastefromclipboard(var atext: msestring); virtual;
+
+               //interface to inplaceedit
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure dokeyup(var info: keyeventinfoty); override;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
@@ -406,6 +412,10 @@ type
   published
    property optionswidget default defaulteditwidgetoptions; //first!
    property cursor default cr_ibeam;
+   property oncopytoclipboard: updatestringeventty read foncopytoclipboard 
+                  write foncopytoclipboard;
+   property onpastefromclipboard: updatestringeventty read fonpastefromclipboard 
+                  write fonpastefromclipboard;
  end;
 
  tedit = class(tcustomedit)
@@ -1139,6 +1149,20 @@ begin
   ea_textedited: begin
    dotextedited;
   end;
+ end;
+end;
+
+procedure tcustomedit.updatecopytoclipboard(var atext: msestring);
+begin
+ if canevent(tmethod(foncopytoclipboard)) then begin
+  foncopytoclipboard(self,atext);
+ end;
+end;
+
+procedure tcustomedit.updatepastefromclipboard(var atext: msestring);
+begin
+ if canevent(tmethod(fonpastefromclipboard)) then begin
+  fonpastefromclipboard(self,atext);
  end;
 end;
 

@@ -1514,6 +1514,8 @@ type
    property fontselect;
    property onsetvalue;
    property ondataentered;
+   property oncopytoclipboard;
+   property onpastefromclipboard;
   end;
 
  tdbstringcols = class(tstringcols)

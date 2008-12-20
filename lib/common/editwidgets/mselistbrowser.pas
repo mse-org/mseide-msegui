@@ -191,6 +191,8 @@ type
    fonitemsmoved: gridblockmovedeventty;
    ffiltertext: msestring;
    fcellframe: tcellframe;
+   foncopytoclipboard: updatestringeventty;
+   fonpastefromclipboard: updatestringeventty;
    procedure createcellframe;
    function getcellframe: tcellframe;
    procedure setcellframe(const avalue: tcellframe);
@@ -243,6 +245,8 @@ type
    function getoptionsedit: optionseditty;
    procedure editnotification(var info: editnotificationinfoty);
    function hasselection: boolean;
+   procedure updatecopytoclipboard(var atext: msestring); virtual;
+   procedure updatepastefromclipboard(var atext: msestring); virtual;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -296,6 +300,10 @@ type
                                 write setonselectionchanged;
    property onlayoutchanged: listvieweventty read getonlayoutchanged 
                                 write setonlayoutchanged;
+   property oncopytoclipboard: updatestringeventty read foncopytoclipboard 
+                  write foncopytoclipboard;
+   property onpastefromclipboard: updatestringeventty read fonpastefromclipboard 
+                  write fonpastefromclipboard;
  end;
 
  tlistview = class(tcustomlistview)
@@ -325,6 +333,8 @@ type
    property onitemevent;
    property drag;
    property onitemsmoved;
+   property oncopytoclipboard;
+   property onpastefromclipboard;
  end;
 
  titemedit = class;
@@ -1944,6 +1954,20 @@ end;
 function tcustomlistview.hasselection: boolean;
 begin
  result:= false;
+end;
+
+procedure tcustomlistview.updatecopytoclipboard(var atext: msestring);
+begin
+ if canevent(tmethod(foncopytoclipboard)) then begin
+  foncopytoclipboard(self,atext);
+ end;
+end;
+
+procedure tcustomlistview.updatepastefromclipboard(var atext: msestring);
+begin
+ if canevent(tmethod(fonpastefromclipboard)) then begin
+  fonpastefromclipboard(self,atext);
+ end;
 end;
 
 function tcustomlistview.getonlayoutchanged: listvieweventty;

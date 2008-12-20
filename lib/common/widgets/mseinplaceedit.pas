@@ -54,6 +54,8 @@ type
   function getoptionsedit: optionseditty;
   procedure editnotification(var info: editnotificationinfoty);
   function getwidget: twidget;
+  procedure updatecopytoclipboard(var atext: msestring);
+  procedure updatepastefromclipboard(var atext: msestring);
  end;
 
  inplaceeditstatety = (ies_focused,ies_poschanging,ies_firstclick,ies_istextedit,
@@ -1415,11 +1417,15 @@ begin
 end;
 
 function tinplaceedit.copytoclipboard: boolean;
+var
+ mstr1: msestring;
 begin
  result:= true;
  if checkaction(ea_copyselection) then begin
   if fsellength > 0 then begin
-   msewidgets.copytoclipboard(selectedtext);
+   mstr1:= selectedtext;
+   fintf.updatecopytoclipboard(mstr1);
+   msewidgets.copytoclipboard(mstr1);
   end
   else begin
    result:= false;
@@ -1443,6 +1449,7 @@ begin
  result:= true;
  if checkaction(info) then begin
   if msewidgets.pastefromclipboard(wstr1) then begin
+   fintf.updatepastefromclipboard(wstr1);
    deleteselection;
    int1:= fcurindex;
    inserttext(wstr1);
