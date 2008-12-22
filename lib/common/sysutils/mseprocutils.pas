@@ -92,7 +92,7 @@ function execmse3(const commandline: string; topipe: pinteger = nil;
 
 function execwaitmse(const commandline: string;
                       const inactive: boolean = true): integer;
-//runs programm, waits for program termination, retourns program exitcode
+//runs programm, waits for program termination, returns program exitcode
 //inactive true -> no console window (win32 only)
 
 procedure killprocess(handle: integer);

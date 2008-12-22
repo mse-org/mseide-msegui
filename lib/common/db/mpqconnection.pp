@@ -79,7 +79,9 @@ type
    function geteventinterval: integer;
    procedure seteventinterval(const avalue: integer);
    procedure closeconnection(var aconnection: ppgconn);
-   procedure openconnection(var aconnection: ppgconn);
+   function constructconnectstring: string;
+   procedure openconnection(const aconnectstring: ansistring;
+                                                  var aconnection: ppgconn);
    procedure begintrans(const aconnection: ppgconn);
   protected
    procedure checkerror(const aconnection: ppgconn; var ares: ppgresult;
@@ -120,8 +122,8 @@ type
    procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;
                                  const TableName : string); override;
    function GetSchemaInfoSQL(SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string) : string; override;
-   procedure dopqexec(const asql: string); overload;
-   procedure dopqexec(const asql: string; const aconnection: ppgconn); overload;
+   procedure dopqexec(const asql: ansistring); overload;
+   procedure dopqexec(const asql: ansistring; const aconnection: ppgconn); overload;
 
    function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
                       const acursor: tsqlcursor): TStream; override;
@@ -154,6 +156,7 @@ type
                               const fieldnum: integer): ansistring; override;
                               //null based
    function backendpid: int64; //0 if not connected
+   procedure createdatabase(const asql: ansistring);
    property eventcontroller: tdbeventcontroller read feventcontroller;
    property lasterrormessage: msestring read flasterrormessage;   
    property lastsqlcode: string read flastsqlcode;
@@ -294,7 +297,7 @@ begin
     ftransactionconnectionused:= true;
    end
    else begin
-    openconnection(fconn);
+    openconnection(fconnectstring,fconn);
    end;  
   end;
   begintrans(fconn);
@@ -326,12 +329,13 @@ begin
  begintrans(tpqtrans(trans).fconn);
 end;
 
-procedure TPQConnection.openconnection(var aconnection: ppgconn);
+procedure TPQConnection.openconnection(const aconnectstring: string;
+                                        var aconnection: ppgconn);
 var
  msg: ansistring;
 begin
- aconnection:= PQconnectdb(pchar(FConnectString));
- if (PQstatus(FHandle) = CONNECTION_BAD) then begin
+ aconnection:= PQconnectdb(pchar(aConnectString));
+ if (PQstatus(aconnection) = CONNECTION_BAD) then begin
   msg:= PQerrorMessage(aconnection);
   pqfinish(aconnection);
   aconnection:= nil;
@@ -339,6 +343,28 @@ begin
  end;
 end;
 
+function tpqconnection.constructconnectstring: ansistring;
+begin
+ result:= '';
+ if (UserName <> '') then begin
+  result := result + ' user=''' + UserName + '''';
+ end;
+ if (Password <> '') then begin
+  result:= result + ' password=''' + Password + '''';
+ end;
+ if (HostName <> '') then begin
+  result:= result + ' host=''' + HostName + '''';
+ end;
+ if (DatabaseName <> '') then begin
+  result:= result + ' dbname=''' + DatabaseName + '''';
+ end
+ else begin
+  result:= result + ' dbname=''' + 'postgres' + '''';
+ end;
+ if (Params.Text <> '') then begin
+  result:= result + ' '+Params.Text;
+ end;
+end;
 
 procedure TPQConnection.DoInternalConnect;
 var 
@@ -351,15 +377,8 @@ begin
 {$EndIf}
  ftransactionconnectionused:= false;
  inherited dointernalconnect;
-
- FConnectString := '';
- if (UserName <> '') then FConnectString := FConnectString + ' user=''' + UserName + '''';
- if (Password <> '') then FConnectString := FConnectString + ' password=''' + Password + '''';
- if (HostName <> '') then FConnectString := FConnectString + ' host=''' + HostName + '''';
- if (DatabaseName <> '') then FConnectString := FConnectString + ' dbname=''' + DatabaseName + '''';
- if (Params.Text <> '') then FConnectString := FConnectString + ' '+Params.Text;
-
- openconnection(fhandle);
+ fconnectstring:= constructconnectstring;
+ openconnection(fconnectstring,fhandle);
 // This does only work for pg>=8.0, so timestamps won't work with earlier versions of pg which are compiled with integer_datetimes on
  if pqparameterstatus <> nil then begin
   FIntegerDatetimes := pqparameterstatus(FHandle,'integer_datetimes') = 'on';
@@ -382,6 +401,24 @@ begin
 {$IfDef LinkDynamically}
  ReleasePostgres3;
 {$EndIf}
+end;
+
+procedure TPQConnection.createdatabase(const asql: ansistring);
+var
+ conn: ppgconn;
+begin
+{$IfDef LinkDynamically}
+ InitialisePostgres3;
+{$EndIf}
+ try
+  openconnection(constructconnectstring,conn);
+  dopqexec(asql,conn);
+  closeconnection(conn);
+ finally
+ {$IfDef LinkDynamically}
+  ReleasePostgres3;
+ {$EndIf}
+ end; 
 end;
 
 function TPQConnection.TranslateFldType(Type_Oid : integer) : TFieldType;
@@ -1059,7 +1096,7 @@ begin
  feventcontroller.eventinterval:= avalue;
 end;
 
-procedure tpqconnection.dopqexec(const asql: string; const aconnection: ppgconn);
+procedure tpqconnection.dopqexec(const asql: ansistring; const aconnection: ppgconn);
 var
  res: ppgresult;
 begin
@@ -1074,7 +1111,7 @@ begin
  end;
 end;
 
-procedure tpqconnection.dopqexec(const asql: string);
+procedure tpqconnection.dopqexec(const asql: ansistring);
 begin
  dopqexec(asql,fhandle);
 end;

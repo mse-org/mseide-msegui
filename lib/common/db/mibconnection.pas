@@ -11,7 +11,7 @@
 
  **********************************************************************}
  
-unit mIBConnection;
+unit mibconnection;
 {$ifdef VER2_1_5} {$define mse_FPC_2_2} {$endif}
 {$ifdef VER2_2} {$define mse_FPC_2_2} {$endif}
 
@@ -184,7 +184,7 @@ type
     function fetchblob(const cursor: tsqlcursor;
                               const fieldnum: integer): ansistring; override;
                               //null based
-    procedure createdatabase(const asql: string);
+    procedure createdatabase(const asql: ansistring);
     function version: fbversionty;
     property lasterror: statusvectorty read flasterror;
     property lasterrormessage: msestring read flasterrormessage;
@@ -1523,7 +1523,7 @@ begin
  result:= sizeof(isc_quad);
 end;
 
-procedure TIBConnection.createdatabase(const asql: string);
+procedure TIBConnection.createdatabase(const asql: ansistring);
 var
  dbha: isc_db_handle = nil;
  trha: isc_tr_handle = nil;

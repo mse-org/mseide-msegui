@@ -797,8 +797,8 @@ type
   public
    constructor create(aowner: tcomponent); override;
    property visible default false;
-   property optionswidget default defaultoptionstoplevelwidget;
   published
+   property optionswidget default defaultoptionstoplevelwidget;
    property optionsskin default defaultcontainerskinoptions;
  end;
 

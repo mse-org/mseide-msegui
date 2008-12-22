@@ -16,6 +16,9 @@ uses
  classes,msewidgets,mseshapes,msemenus,msegraphutils,msegraphics,msetypes,
  msegui,mseglob,mseguiglob,mseevent,mseclasses;
 
+const
+ defaultpopupmenuwidgetoptions = 
+      defaultoptionstoplevelwidget - [ow_tabfocus,ow_arrowfocus,ow_mousefocus];
 type
  menucellinfoty = record
   buttoninfo: shapeinfoty;
@@ -97,6 +100,8 @@ type
                               aactivate: boolean): tmenuitem;
                     //returns selected item, nil if none
    property activeitem: integer read flayout.activeitem write setactiveitem;
+  published
+   property optionswidget default defaultpopupmenuwidgetoptions;
  end;
 
  mainmenuwidgetoptionty = (mwo_vertical);
@@ -802,7 +807,7 @@ begin
  end;
  initlayoutinfo(self,flayout,amenu,[]{,cl_black});
  inherited create(aowner,transientfor);
- optionswidget:= optionswidget - [ow_tabfocus,ow_arrowfocus,ow_mousefocus];
+ optionswidget:= defaultpopupmenuwidgetoptions;
  internalcreateframe;
  if menucomp <> nil then begin
   assigntemplate(menucomp.template);
