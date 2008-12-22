@@ -36,6 +36,7 @@ object stringenterfo: tstringenterfo
     anchors = [an_left, an_top, an_right, an_bottom]
     taborder = 3
     caption = 'lab'
+    textflags = [tf_ycentered, tf_wordbreak]
     reffontheight = 14
   end
   object ok: tbutton
@@ -47,9 +48,10 @@ object stringenterfo: tstringenterfo
     anchors = [an_right, an_bottom]
     taborder = 1
     state = [as_default, as_localdefault, as_localcaption]
+    autosize_cx = 0
+    autosize_cy = 0
     caption = '&OK'
     modalresult = mr_ok
-    options = [bo_executeonclick, bo_executeonkey, bo_executeonshortcut, bo_executedefaultonenterkey]
     reffontheight = 14
   end
   object cancel: tbutton
@@ -61,6 +63,8 @@ object stringenterfo: tstringenterfo
     anchors = [an_right, an_bottom]
     taborder = 2
     state = [as_localcaption]
+    autosize_cx = 0
+    autosize_cy = 0
     caption = '&Cancel'
     modalresult = mr_cancel
     reffontheight = 14
