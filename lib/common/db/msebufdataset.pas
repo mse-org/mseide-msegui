@@ -2190,7 +2190,7 @@ end;
 
 procedure tmsebufdataset.fieldchanged(const field: tfield);
 begin
- if (field.fieldno > 0) and not 
+ if {(field.fieldno > 0) and} not 
                  (state in [dscalcfields,dsinternalcalc,{dsfilter,}dsnewvalue]) and
                  not (bs_recapplying in fbstate) then begin
   dataevent(defieldchange, ptrint(field));
