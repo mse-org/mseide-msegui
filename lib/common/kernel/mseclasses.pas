@@ -1485,7 +1485,7 @@ begin
    end;
    removeitem(pointerarty(fmodulestoregister),instance);
   end;
-  result:= allloaded;
+  result:= ancestorloaded and allloaded;
  end
  else begin
   result:= false;
