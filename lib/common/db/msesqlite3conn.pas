@@ -130,13 +130,14 @@ type
                                const TableName : string); override;
    function getprimarykeyfield(const atablename: string;
                                      const acursor: tsqlcursor): string; override;
-   procedure updateprimarykeyfield(const afield: tfield); override;
+   procedure updateprimarykeyfield(const afield: tfield;
+                                 const atransaction: tsqltransaction); override;
    procedure beginupdate; override;
    procedure endupdate; override;
   public
    constructor create(aowner: tcomponent); override;
    procedure updateutf8(var autf8: boolean); override;
-   function getinsertid: int64; override;
+   function getinsertid(const atransaction: tsqltransaction): int64; override;
    function fetchblob(const cursor: tsqlcursor;
                               const fieldnum: integer): ansistring; override;
                               //null based
@@ -981,14 +982,15 @@ begin
 end;
 }
 
-function tsqlite3connection.getinsertid: int64;
+function tsqlite3connection.getinsertid(const atransaction: tsqltransaction): int64;
 begin
  result:= sqlite3_last_insert_rowid(fhandle);
 end;
 
-procedure tsqlite3connection.updateprimarykeyfield(const afield: tfield);
+procedure tsqlite3connection.updateprimarykeyfield(const afield: tfield;
+                               const atransaction: tsqltransaction);
 begin
- afield.aslargeint:= getinsertid;
+ afield.aslargeint:= getinsertid(nil);
  {
  with tmsebufdataset1(afield.dataset) do begin
   setcurvalue(afield,getinsertid);

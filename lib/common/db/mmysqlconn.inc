@@ -137,7 +137,8 @@ Type
 
    function getprimarykeyfield(const atablename: string;
                                  const acursor: tsqlcursor): string; override;
-   procedure updateprimarykeyfield(const afield: tfield); override;
+   procedure updateprimarykeyfield(const afield: tfield;
+                const atransaction: tsqltransaction); override;
    function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
                          const acursor: tsqlcursor): TStream; override;
    function getblobdatasize: integer; override;
@@ -156,7 +157,7 @@ Type
    function fetchblob(const cursor: tsqlcursor;
                               const fieldnum: integer): ansistring; override;
                               //null based
-   function getinsertid: int64; override;
+   function getinsertid(const atransaction: tsqltransaction): int64; override;
    Property ServerInfo : String Read FServerInfo;
    Property HostInfo : String Read FHostInfo;
    property ClientInfo: string read GetClientInfo;
@@ -1018,14 +1019,15 @@ begin
  result:= tcursorname(acursor).fprimarykeyfieldname;
 end;
 
-function TConnectionName.getinsertid: int64;
+function TConnectionName.getinsertid(const atransaction: tsqltransaction): int64;
 begin
  result:= mysql_insert_id(fmysql);
 end;
 
-procedure TConnectionName.updateprimarykeyfield(const afield: tfield);
+procedure TConnectionName.updateprimarykeyfield(const afield: tfield;
+                                             const atransaction: tsqltransaction);
 begin
- afield.aslargeint:= getinsertid;
+ afield.aslargeint:= getinsertid(nil);
  {
  with tmsebufdataset1(afield.dataset) do begin
   setcurvalue(afield,getinsertid);

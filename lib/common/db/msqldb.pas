@@ -170,7 +170,8 @@ type
     function GetAsSQLText(const Field : TField) : string; overload; virtual;
     function GetAsSQLText(const Param : TParam) : string; overload; virtual;
     function GetHandle : pointer; virtual;
-    procedure updateprimarykeyfield(const afield: tfield); virtual;
+    procedure updateprimarykeyfield(const afield: tfield;
+                                   const atransaction: tsqltransaction); virtual;
 
     Function AllocateTransactionHandle : TSQLHandle; virtual; abstract;
 
@@ -194,7 +195,7 @@ type
     procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;
                                           const TableName : string); virtual;
     function getprimarykeyfield(const atablename: string;
-                      const acursor: tsqlcursor): string; virtual;
+                             const acursor: tsqlcursor): string; virtual;
     function GetSchemaInfoSQL(SchemaType : TSchemaType;
               SchemaObjectName, SchemaPattern : string) : string; virtual;
     function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
@@ -259,7 +260,7 @@ type
     procedure GetTableNames(List : TStrings; SystemTables : Boolean = false); virtual;
     procedure GetProcedureNames(List : TStrings); virtual;
     procedure GetFieldNames(const TableName : string; List :  TStrings); virtual;
-    function getinsertid: int64; virtual;
+    function getinsertid(const atransaction: tsqltransaction): int64; virtual;
     function fieldtosql(const afield: tfield): string;
     function fieldtooldsql(const afield: tfield): string;
     function paramtosql(const aparam: tparam): string;
@@ -345,6 +346,7 @@ type
     procedure StartTransaction; override;
     property Handle: Pointer read GetHandle;
     procedure EndTransaction; override;
+    property trans: tsqlhandle read ftrans;
    published
     property options: transactionoptionsty read foptions write foptions default [];
     property Action : TCommitRollbackAction read FAction write FAction default canone;
@@ -1504,7 +1506,8 @@ begin
  connected:= true;
 end;
 
-procedure tcustomsqlconnection.updateprimarykeyfield(const afield: tfield);
+procedure tcustomsqlconnection.updateprimarykeyfield(const afield: tfield;
+                      const atransaction: tsqltransaction);
 begin
  //dummy
 end;
@@ -1530,7 +1533,7 @@ begin
  result:= false;
 end;
 
-function tcustomsqlconnection.getinsertid: int64;
+function tcustomsqlconnection.getinsertid(const atransaction: tsqltransaction): int64;
 begin
  databaseerror('Connection has no insert ID''s.');
  result:= 0; //compiler warning
@@ -2938,7 +2941,8 @@ begin
    end;
    execsql;
    if (updatekind = ukinsert) and (self.fprimarykeyfield <> nil) then begin
-    tcustomsqlconnection(database).updateprimarykeyfield(self.fprimarykeyfield);
+    tcustomsqlconnection(database).updateprimarykeyfield(
+                   self.fprimarykeyfield,qry.transaction);
    end;
    if self.fupdaterowsaffected >= 0 then begin
     if fcursor.frowsaffected < 0 then begin

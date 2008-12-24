@@ -48,6 +48,7 @@ Type
     ParamReplaceString : String;
     MapDSRowToMSQLRow  : array of integer;
     fprimarykeyfieldname: string;
+    fconn: pmysql;
   end;
 
   tmysqlconnection = class (TSQLConnection,iblobconnection)
@@ -55,7 +56,7 @@ Type
    FDialect: integer;
    FHostInfo: String;
    FServerInfo: String;
-   FMySQL : PMySQL;
+   FMySQL1 : PMySQL;
 //   FDidConnect : Boolean;
    fport: cardinal;
    flasterror: integer;
@@ -70,7 +71,7 @@ Type
    procedure openconnection(var aconn: pmysql);
    procedure closeconnection(var aconnection: pmysql);
   protected
-    Procedure checkerror(const Msg: String);
+    Procedure checkerror(const Msg: String; const aconn: pmysql);
 
 //   function stringtosqltext(const afeildtype: tfieldtype; const avalue: string): string;
     function StrToStatementType(s : string) : TStatementType; override;
@@ -121,7 +122,8 @@ Type
 
    function getprimarykeyfield(const atablename: string;
                                  const acursor: tsqlcursor): string; override;
-   procedure updateprimarykeyfield(const afield: tfield); override;
+   procedure updateprimarykeyfield(const afield: tfield;
+                            const atransaction: tsqltransaction); override;
    function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
                          const acursor: tsqlcursor): TStream; override;
    function getblobdatasize: integer; override;
@@ -140,7 +142,7 @@ Type
    function fetchblob(const cursor: tsqlcursor;
                               const fieldnum: integer): ansistring; override;
                               //null based
-   function getinsertid: int64; override;
+   function getinsertid(const atransaction: tsqltransaction): int64; override;
    Property ServerInfo : String Read FServerInfo;
    Property HostInfo : String Read FHostInfo;
    property ClientInfo: string read GetClientInfo;
@@ -183,14 +185,14 @@ Resourcestring
   SErrNotversion41 = 'TMySQL41Connection can not work with the installed MySQL client version (%s).';
   SErrNotversion40 = 'TMySQL40Connection can not work with the installed MySQL client version (%s).';
 
-Procedure tmysqlconnection.checkerror(const Msg: String);
+Procedure tmysqlconnection.checkerror(const Msg: String; const aconn: pmysql);
 var
  str1: ansistring;
 begin
- str1:= Strpas(mysql_error(fmysql));
+ str1:= Strpas(mysql_error(aconn));
  flasterrormessage:= str1;
- flasterror:= mysql_errno(fmysql);
- flastsqlcode:= strpas(mysql_sqlstate(fmysql));
+ flasterror:= mysql_errno(aconn);
+ flastsqlcode:= strpas(mysql_sqlstate(aconn));
  raise emysqlerror.create(self,format(msg,[str1]),flasterrormessage,
                       flasterror,flastsqlcode);
 end;
@@ -225,7 +227,7 @@ end;
 function tmysqlconnection.GetServerStatus: String;
 begin
   CheckConnected;
-  Result := mysql_stat(FMYSQL);
+  Result := mysql_stat(FMYSQL1);
 end;
 
 procedure tmysqlconnection.ConnectMySQL(var HMySQL : PMySQL;H,U,P : pchar);
@@ -299,7 +301,7 @@ begin
  P:= Password;
  ConnectMySQL(aconn,pchar(H),pchar(U),pchar(P));
  if mysql_select_db(aconn,pchar(DatabaseName)) <> 0 then begin
-   checkerror(SErrDatabaseSelectFailed);
+   checkerror(SErrDatabaseSelectFailed,aconn);
  end;
 end;
 
@@ -337,9 +339,9 @@ begin
 {$ENDIF}
 *)
   inherited DoInternalConnect;
-  openconnection(fmysql);
-  FServerInfo := strpas(mysql_get_server_info(FMYSQL));
-  FHostInfo := strpas(mysql_get_host_info(FMYSQL));
+  openconnection(fmysql1);
+  FServerInfo := strpas(mysql_get_server_info(FMYSQL1));
+  FHostInfo := strpas(mysql_get_host_info(FMYSQL1));
 //  ConnectToServer;
 //  SelectDatabase;
 end;
@@ -347,19 +349,20 @@ end;
 procedure tmysqlconnection.DoInternalDisconnect;
 begin
  inherited DoInternalDisconnect;
- closeconnection(fmysql);
+ closeconnection(fmysql1);
  ReleaseMysql;
 end;
 
 function tmysqlconnection.GetHandle: pointer;
 begin
-  Result:=FMySQL;
+  Result:=FMySQL1;
 end;
 
 function tmysqlconnection.AllocateCursorHandle(const aowner: icursorclient;
                            const aname: ansistring): TSQLCursor;
 begin
   Result:= tmysqlcursor.Create(aowner,aname);
+  tmysqlcursor(result).fconn:= fmysql1; //can be overridden by transaction
 end;
 
 Procedure tmysqlconnection.DeAllocateCursorHandle(var cursor : TSQLCursor);
@@ -377,10 +380,10 @@ end;
 procedure tmysqlconnection.finalizetransaction(const atransaction: tsqlhandle);
 begin
  with tmysqltrans(atransaction) do begin
-  if (fconn <> fmysql) then begin
-   closeconnection(fmysql);
+  if (fconn <> fmysql1) then begin
+   closeconnection(fconn);
   end;
-  fmysql:= nil;
+  fconn:= nil;
  end;
 end;
 
@@ -389,6 +392,10 @@ procedure tmysqlconnection.preparestatement(const cursor: tsqlcursor;
                   const asql: msestring; const aparams : tmseparams);
 begin
  With tmysqlcursor(cursor) do begin
+  fconn:= tmysqltrans(atransaction).fconn;
+  if fconn = nil then begin
+   fconn:= fmysql1; // dummy transaction
+  end;
   FStatementm:= asql;
   if assigned(AParams) and (AParams.count > 0) then begin
     FStatementm:= AParams.ParseSQL(FStatementm,false,false,false,psSimulated,
@@ -450,18 +457,20 @@ begin
   else begin
    str1:= todbstring(c.fstatementm);
   end;
-  if mysql_query(FMySQL,Pchar(str1))<>0 then begin
-   checkerror(Format(SErrExecuting,[StrPas(mysql_error(FMySQL))]))
-  end
-  else begin
-   C.fRowsAffected := mysql_affected_rows(FMYSQL);
-   C.LastInsertID := mysql_insert_id(FMYSQL);
-   if C.FNeedData then begin
-    C.FRes:= mysql_store_result(FMySQL);
-    c.frowsreturned:= mysql_num_rows(c.fres);
+  with tmysqltrans(atransaction.trans) do begin
+   if mysql_query(fconn,Pchar(str1))<>0 then begin
+    checkerror(SErrExecuting,fconn);
    end
    else begin
-    c.frowsreturned:= 0;
+    C.fRowsAffected := mysql_affected_rows(fconn);
+    C.LastInsertID := mysql_insert_id(fconn);
+    if C.FNeedData then begin
+     C.FRes:= mysql_store_result(fconn);
+     c.frowsreturned:= mysql_num_rows(c.fres);
+    end
+    else begin
+     c.frowsreturned:= 0;
+    end;
    end;
   end;
 end;
@@ -540,9 +549,9 @@ var
 
 begin
  fielddefs.clear;
-  C:=(Cursor as tmysqlcursor);
+  C:= tmysqlcursor(cursor);
   If (C.FRes=Nil) then begin
-    checkerror(SErrNoQueryResult);
+    checkerror(SErrNoQueryResult,c.fconn);
   end;
   FC:=mysql_num_fields(C.FRes);
   SetLength(c.MapDSRowToMSQLRow,FC);
@@ -607,7 +616,7 @@ begin
  if C.Row=nil then
     begin
  //   Writeln('LoadFieldsFromBuffer: row=nil');
-    checkerror(SErrFetchingData);
+    checkerror(SErrFetchingData,c.fconn);
     end;
  Row:=C.Row;
  
@@ -958,7 +967,7 @@ begin
  with tmysqltrans(trans) do begin
   if fconn = nil then begin
    if not ftransactionconnectionused then begin
-    fconn:= self.fmysql;
+    fconn:= self.fmysql1;
     ftransactionconnectionused:= true;
    end
    else begin
@@ -1039,14 +1048,15 @@ begin
  result:= tmysqlcursor(acursor).fprimarykeyfieldname;
 end;
 
-function tmysqlconnection.getinsertid: int64;
+function tmysqlconnection.getinsertid(const atransaction: tsqltransaction): int64;
 begin
- result:= mysql_insert_id(fmysql);
+ result:= mysql_insert_id(tmysqltrans(atransaction.trans).fconn);
 end;
 
-procedure tmysqlconnection.updateprimarykeyfield(const afield: tfield);
+procedure tmysqlconnection.updateprimarykeyfield(const afield: tfield;
+                          const atransaction: tsqltransaction);
 begin
- afield.aslargeint:= getinsertid;
+ afield.aslargeint:= getinsertid(atransaction);
  {
  with tmsebufdataset1(afield.dataset) do begin
   setcurvalue(afield,getinsertid);
