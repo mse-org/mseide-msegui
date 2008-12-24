@@ -395,9 +395,10 @@ procedure tmysqlconnection.preparestatement(const cursor: tsqlcursor;
                   const asql: msestring; const aparams : tmseparams);
 begin
  With tmysqlcursor(cursor) do begin
-  fconn:= tmysqltrans(atransaction).fconn;
+  fconn:= tmysqltrans(atransaction.trans).fconn;
   if fconn = nil then begin
    fconn:= fmysql1; // dummy transaction
+   tmysqltrans(atransaction.trans).fconn:= fmysql1;
   end;
   FStatementm:= asql;
   if assigned(AParams) and (AParams.count > 0) then begin

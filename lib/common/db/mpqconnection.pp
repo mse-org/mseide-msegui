@@ -538,6 +538,9 @@ var
  str1: string;
 begin
  with (cursor as TPQCursor) do begin
+  if tpqtrans(atransaction.trans).fconn = nil then begin
+   tpqtrans(atransaction.trans).fconn:= fhandle; //fake transaction
+  end;
   FPrepared := False;
   nr:= inttostr(FCursorcount);
   inc(FCursorCount);
