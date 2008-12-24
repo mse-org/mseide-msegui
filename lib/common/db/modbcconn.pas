@@ -90,7 +90,7 @@ type
     // - Transaction handling
     function GetTransactionHandle(trans:TSQLHandle):pointer; override;
     function StartDBTransaction(const trans:TSQLHandle; 
-                 const AParams:string):boolean; override;
+                 const AParams: tstringlist):boolean; override;
     function Commit(trans:TSQLHandle):boolean; override;
     function Rollback(trans:TSQLHandle):boolean; override;
     procedure internalCommitRetaining(trans:TSQLHandle); override;
@@ -778,7 +778,7 @@ begin
 end;
 
 function TODBCConnection.StartDBTransaction(const trans: TSQLHandle; 
-                   const AParams:string): boolean;
+                   const AParams: tstringlist): boolean;
 begin
   // Tranactions not implemented yet
 end;

@@ -180,7 +180,7 @@ type
     function Commit(trans : TSQLHandle) : boolean; virtual; abstract;
     function RollBack(trans : TSQLHandle) : boolean; virtual; abstract;
     function StartdbTransaction(const trans : TSQLHandle;
-                     const aParams : string) : boolean; virtual; abstract;
+                     const aParams: tstringlist) : boolean; virtual; abstract;
     procedure internalcommitretaining(trans : tsqlhandle); virtual; abstract;
     procedure internalrollbackretaining(trans : tsqlhandle); virtual; abstract;
     
@@ -399,6 +399,7 @@ type
    fonafterexecute: sqlstatementeventty;
    fonerror: sqlstatementerroreventty;
    foptions: sqlstatementoptionsty;
+   fterm: msechar;
    procedure setsql(const avalue: tsqlstringlist);
    procedure setdatabase1(const avalue: tcustomsqlconnection);
    procedure setparams(const avalue: tmseparams);
@@ -437,6 +438,7 @@ type
   published
    property params : tmseparams read fparams write setparams;
    property sql: tsqlstringlist read fsql write setsql;
+   property term: msechar read fterm write fterm default ';';
    property database: tcustomsqlconnection read fdatabase write setdatabase1;
    property transaction: tsqltransaction read ftransaction write settransaction1;
                   //can be nil
@@ -1748,7 +1750,7 @@ begin
   FTrans:= Db.AllocateTransactionHandle;
  end;
  if (tao_fake in foptions) or 
-                 Db.StartdbTransaction(FTrans,FParams.CommaText) then begin
+                 Db.StartdbTransaction(FTrans,FParams) then begin
   OpenTrans;
  end;
  if checkcanevent(self,tmethod(fonafterstart)) then begin
@@ -3509,6 +3511,7 @@ constructor tcustomsqlstatement.create(aowner: tcomponent);
 begin
  fparams:= tmseparams.create(self);
  fsql:= tsqlstringlist.create;
+ fterm:= ';';
  fsql.onchange:= @dosqlchange;
  inherited;
 end;
@@ -3673,7 +3676,7 @@ end;
 
 { tmsesqlscript }
 
-function splitsql(const asql: msestring): msestringarty;
+function splitsql(const asql: msestring; const term: msechar = ';'): msestringarty;
 var
  po1,po2: pmsechar;
  
@@ -3689,26 +3692,30 @@ begin
  po1:= pmsechar(asql);
  po2:= po1;
  while true do begin            //todo: skip comments
-  case po1^ of
-   #0: begin
-    break;
-   end;
-   ';': begin
-    inc(po1);
-    addstatement;
-    po2:= po1;
-   end;
-   '''': begin
-    inc(po1);
-    while (po1^ <> '''') and (po1^ <> #0) do begin
+  if po1^ = term then begin
+   po1^:= ';';
+   inc(po1);
+   addstatement;
+   (po1-1)^:= term;
+   po2:= po1;
+  end
+  else begin
+   case po1^ of
+    #0: begin
+     break;
+    end;
+    '''': begin
+     inc(po1);
+     while (po1^ <> '''') and (po1^ <> #0) do begin
+      inc(po1);
+     end;
+     if po1^ = '''' then begin
+      inc(po1);
+     end;
+    end;
+    else begin
      inc(po1);
     end;
-    if po1^ = '''' then begin
-     inc(po1);
-    end;
-   end;
-   else begin
-    inc(po1);
    end;
   end;
  end;
@@ -3740,7 +3747,7 @@ begin
  try
   updateparams(fparams,isutf8(adatabase));
   str1:= fsql.text;
-  ar1:= splitsql(str1);
+  ar1:= splitsql(str1,fterm);
   if high(ar1) < 0 then begin
    databaseerror(serrnostatement,self);
   end;

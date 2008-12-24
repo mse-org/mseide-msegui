@@ -5,6 +5,7 @@ object replacedialogfo: treplacedialogfo
   bounds_cx = 421
   bounds_cy = 163
   taborder = 1
+  visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
   container.bounds_x = 0
   container.bounds_y = 0
@@ -21,6 +22,7 @@ object replacedialogfo: treplacedialogfo
     bounds_cx = 404
     bounds_cy = 37
     frame.caption = 'Text to &find'
+    frame.button.color = -2147483646
     frame.dummy = 0
     frame.outerframe = (
       0
@@ -42,6 +44,7 @@ object replacedialogfo: treplacedialogfo
     bounds_cx = 404
     bounds_cy = 37
     frame.caption = '&Replace with'
+    frame.button.color = -2147483646
     frame.dummy = 0
     frame.outerframe = (
       0
@@ -95,6 +98,8 @@ object replacedialogfo: treplacedialogfo
     bounds_cy = 20
     taborder = 6
     state = [as_localcaption]
+    autosize_cx = 0
+    autosize_cy = 0
     caption = '&Replace'
     modalresult = mr_ok
   end
@@ -105,6 +110,8 @@ object replacedialogfo: treplacedialogfo
     bounds_cy = 20
     taborder = 7
     state = [as_localcaption]
+    autosize_cx = 0
+    autosize_cy = 0
     caption = 'Replace &all'
     modalresult = mr_all
   end
@@ -131,6 +138,8 @@ object replacedialogfo: treplacedialogfo
     bounds_cy = 20
     taborder = 8
     state = [as_default, as_localdefault, as_localcaption]
+    autosize_cx = 0
+    autosize_cy = 0
     caption = '&Cancel'
     modalresult = mr_cancel
   end

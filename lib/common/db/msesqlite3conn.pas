@@ -40,6 +40,11 @@ uses
 type
  esqlite3error = class(econnectionerror)
  end;
+
+ tsqlitetrans = class(TSQLHandle)
+  protected
+   fparams: ansistring;
+ end;
  
  sqliteoptionty = (slo_transactions,slo_designtransactions);
  sqliteoptionsty = set of sqliteoptionty;
@@ -113,7 +118,7 @@ type
    function Commit(trans : TSQLHandle) : boolean; override;
    function RollBack(trans : TSQLHandle) : boolean; override;
    function StartdbTransaction(const trans : TSQLHandle; 
-                const aParams : string) : boolean; override;
+                const aParams: tstringlist) : boolean; override;
    procedure internalCommitRetaining(trans : TSQLHandle); override;
    procedure internalRollBackRetaining(trans : TSQLHandle); override;
    function getblobdatasize: integer; override;
@@ -264,7 +269,7 @@ end;
 
 function tsqlite3connection.AllocateTransactionHandle: TSQLHandle;
 begin
- result:= tsqlhandle.create;
+ result:= tsqlitetrans.create;
 end;
 
 function tsqlite3connection.AllocateCursorHandle(const aowner: icursorclient;
@@ -752,10 +757,13 @@ begin
 end;
 
 function tsqlite3connection.StartdbTransaction(const trans: TSQLHandle;
-               const aParams: string): boolean;
+               const aParams: tstringlist): boolean;
 begin
  if cantransaction then begin
-  execsql('BEGIN');
+  with tsqlitetrans(trans) do begin
+   fparams:= aparams.text;
+   execsql('BEGIN '+fparams);
+  end;
  end;
  result:= true;
 end;
@@ -764,7 +772,9 @@ procedure tsqlite3connection.internalCommitRetaining(trans: TSQLHandle);
 begin
  commit(trans);  
  if cantransaction then begin
-  execsql('BEGIN');
+  with tsqlitetrans(trans) do begin
+   execsql('BEGIN '+fparams);
+  end;
  end;
 end;
 
@@ -772,7 +782,9 @@ procedure tsqlite3connection.internalRollBackRetaining(trans: TSQLHandle);
 begin
  rollback(trans);
  if cantransaction then begin
-  execsql('BEGIN');
+  with tsqlitetrans(trans) do begin
+   execsql('BEGIN '+fparams);
+  end;
  end;
 end;
 

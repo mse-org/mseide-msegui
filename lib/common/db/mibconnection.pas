@@ -151,7 +151,7 @@ type
     function Commit(trans : TSQLHandle) : boolean; override;
     function RollBack(trans : TSQLHandle) : boolean; override;
     function StartdbTransaction(const trans : TSQLHandle;
-                       const AParams : string) : boolean; override;
+                       const AParams : tstringlist) : boolean; override;
     procedure internalCommitRetaining(trans : TSQLHandle); override;
     procedure internalRollBackRetaining(trans : TSQLHandle); override;
     procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;
@@ -326,7 +326,7 @@ end;
 
 function TIBConnection.GetTransactionHandle(trans : TSQLHandle): pointer;
 begin
-  Result := (trans as TIBtrans).TransactionHandle;
+ Result:= TIBtrans(trans).TransactionHandle;
 end;
 
 function TIBConnection.Commit(trans : TSQLHandle) : boolean;
@@ -351,56 +351,52 @@ begin
 end;
 
 function TIBConnection.StartDBTransaction(
-                const trans : TSQLHandle; const AParams : String) : boolean;
+                const trans : TSQLHandle; const AParams : tstringlist) : boolean;
 var
   DBHandle : pointer;
   tr       : TIBTrans;
   i        : integer;
   s        : string;
+  int1: integer;
 begin
   result := false;
 
   DBHandle := GetHandle;
   tr := trans as TIBtrans;
-  with tr do
-    begin
+  with tr do begin
     TPB := chr(isc_tpb_version3);
-
-    i := 1;
-    s := ExtractSubStr(AParams,i,stdWordDelims);
-    while s <> '' do
-      begin
-      if s='isc_tpb_write' then TPB := TPB + chr(isc_tpb_write)
-      else if s='isc_tpb_read' then TPB := TPB + chr(isc_tpb_read)
-      else if s='isc_tpb_consistency' then TPB := TPB + chr(isc_tpb_consistency)
-      else if s='isc_tpb_concurrency' then TPB := TPB + chr(isc_tpb_concurrency)
-      else if s='isc_tpb_read_committed' then TPB := TPB + chr(isc_tpb_read_committed)
-      else if s='isc_tpb_rec_version' then TPB := TPB + chr(isc_tpb_rec_version)
-      else if s='isc_tpb_no_rec_version' then TPB := TPB + chr(isc_tpb_no_rec_version)
-      else if s='isc_tpb_wait' then TPB := TPB + chr(isc_tpb_wait)
-      else if s='isc_tpb_nowait' then TPB := TPB + chr(isc_tpb_nowait)
-      else if s='isc_tpb_shared' then TPB := TPB + chr(isc_tpb_shared)
-      else if s='isc_tpb_protected' then TPB := TPB + chr(isc_tpb_protected)
-      else if s='isc_tpb_exclusive' then TPB := TPB + chr(isc_tpb_exclusive)
-      else if s='isc_tpb_lock_read' then TPB := TPB + chr(isc_tpb_lock_read)
-      else if s='isc_tpb_lock_write' then TPB := TPB + chr(isc_tpb_lock_write)
-      else if s='isc_tpb_verb_time' then TPB := TPB + chr(isc_tpb_verb_time)
-      else if s='isc_tpb_commit_time' then TPB := TPB + chr(isc_tpb_commit_time)
-      else if s='isc_tpb_ignore_limbo' then TPB := TPB + chr(isc_tpb_ignore_limbo)
-      else if s='isc_tpb_autocommit' then TPB := TPB + chr(isc_tpb_autocommit)
-      else if s='isc_tpb_restart_requests' then TPB := TPB + chr(isc_tpb_restart_requests)
-      else if s='isc_tpb_no_auto_undo' then TPB := TPB + chr(isc_tpb_no_auto_undo);
-      s := ExtractSubStr(AParams,i,stdWordDelims);
-
-      end;
-
-    TransactionHandle := nil;
-
-    if isc_start_transaction(@Status, @TransactionHandle, 1,
-       [@DBHandle, Length(TPB), @TPB[1]]) <> 0 then
-      CheckError('StartTransaction',Status)
-    else Result := True;
+    for int1:= 0 to aparams.count - 1 do begin
+     s:= trim(aparams[int1]);
+     if s='isc_tpb_write' then TPB := TPB + chr(isc_tpb_write)
+     else if s='isc_tpb_read' then TPB := TPB + chr(isc_tpb_read)
+     else if s='isc_tpb_consistency' then TPB := TPB + chr(isc_tpb_consistency)
+     else if s='isc_tpb_concurrency' then TPB := TPB + chr(isc_tpb_concurrency)
+     else if s='isc_tpb_read_committed' then TPB := TPB + chr(isc_tpb_read_committed)
+     else if s='isc_tpb_rec_version' then TPB := TPB + chr(isc_tpb_rec_version)
+     else if s='isc_tpb_no_rec_version' then TPB := TPB + chr(isc_tpb_no_rec_version)
+     else if s='isc_tpb_wait' then TPB := TPB + chr(isc_tpb_wait)
+     else if s='isc_tpb_nowait' then TPB := TPB + chr(isc_tpb_nowait)
+     else if s='isc_tpb_shared' then TPB := TPB + chr(isc_tpb_shared)
+     else if s='isc_tpb_protected' then TPB := TPB + chr(isc_tpb_protected)
+     else if s='isc_tpb_exclusive' then TPB := TPB + chr(isc_tpb_exclusive)
+     else if s='isc_tpb_lock_read' then TPB := TPB + chr(isc_tpb_lock_read)
+     else if s='isc_tpb_lock_write' then TPB := TPB + chr(isc_tpb_lock_write)
+     else if s='isc_tpb_verb_time' then TPB := TPB + chr(isc_tpb_verb_time)
+     else if s='isc_tpb_commit_time' then TPB := TPB + chr(isc_tpb_commit_time)
+     else if s='isc_tpb_ignore_limbo' then TPB := TPB + chr(isc_tpb_ignore_limbo)
+     else if s='isc_tpb_autocommit' then TPB := TPB + chr(isc_tpb_autocommit)
+     else if s='isc_tpb_restart_requests' then TPB := TPB + chr(isc_tpb_restart_requests)
+     else if s='isc_tpb_no_auto_undo' then TPB := TPB + chr(isc_tpb_no_auto_undo);
     end;
+    TransactionHandle := nil;
+    if isc_start_transaction(@Status, @TransactionHandle, 1,
+       [@DBHandle, Length(TPB), @TPB[1]]) <> 0 then begin
+     CheckError('StartTransaction',Status);
+    end
+    else begin
+     Result:= True;
+    end;
+  end;
 end;
 
 

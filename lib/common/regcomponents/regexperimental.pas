@@ -3,11 +3,11 @@ unit regexperimental;
 interface
 implementation
 uses
- msedesignintf;
+ msedesignintf,msemysqlconn;
  
 procedure Register;
 begin
-// registercomponents('Exp',[]);
+ registercomponents('Exp',[tmsemysqlconnection]);
  registercomponenttabhints(['Exp'],['Experimental Components']);
 end;
 initialization

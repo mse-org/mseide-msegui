@@ -43,7 +43,8 @@ type
  
   TPQTrans = Class(TSQLHandle)
    protected
-    fconn        : PPGConn;
+    fconn: PPGConn;
+    fparams: ansistring;
 //    ErrorOccured  : boolean;
    public
     property conn: ppgconn read fconn;
@@ -82,7 +83,7 @@ type
    function constructconnectstring: string;
    procedure openconnection(const aconnectstring: ansistring;
                                                   var aconnection: ppgconn);
-   procedure begintrans(const aconnection: ppgconn);
+   procedure begintrans(const aconnection: ppgconn; const aparams: ansistring);
   protected
    procedure checkerror(const aconnection: ppgconn; var ares: ppgresult;
                 const amessage: ansistring);
@@ -98,7 +99,7 @@ type
    Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); override;
    Function AllocateTransactionHandle : TSQLHandle; override;
 
-    procedure preparestatement(const cursor: tsqlcursor; 
+   procedure preparestatement(const cursor: tsqlcursor; 
                   const atransaction : tsqltransaction;
                   const asql: msestring; const aparams : tmseparams); override;
    procedure FreeFldBuffers(cursor : TSQLCursor); override;
@@ -117,7 +118,7 @@ type
    function Commit(trans : TSQLHandle) : boolean; override;
    procedure internalCommitRetaining(trans : TSQLHandle); override;
    function StartdbTransaction(const trans : TSQLHandle;
-                const AParams : string) : boolean; override;
+                const AParams: tstringlist) : boolean; override;
    procedure internalRollBackRetaining(trans : TSQLHandle); override;
    procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;
                                  const TableName : string); override;
@@ -282,13 +283,16 @@ begin
  checkerror(aconnection,res,amessage);
 end;
 
-procedure tpqconnection.begintrans(const aconnection: ppgconn);
+procedure tpqconnection.begintrans(const aconnection: ppgconn;
+                const aparams: ansistring);
 begin
- checkexec(aconnection,'BEGIN',sErrTransactionFailed);
+ checkexec(aconnection,'BEGIN '+aparams,sErrTransactionFailed);
 end;
 
 function TPQConnection.StartdbTransaction(const trans : TSQLHandle;
-               const AParams : string) : boolean;
+               const AParams: tstringlist) : boolean;
+var
+ int1: integer;
 begin
  with tpqtrans(trans) do begin
   if fconn = nil then begin
@@ -300,7 +304,16 @@ begin
     openconnection(fconnectstring,fconn);
    end;  
   end;
-  begintrans(fconn);
+  fparams:= '';  
+  if aparams <> nil then begin
+   for int1:= 0 to aparams.count - 1 do begin
+    fparams:= fparams + aparams[int1] + ','
+   end;
+   if aparams.count > 0 then begin
+    setlength(fparams,length(fparams)-1);
+   end;
+  end;
+  begintrans(fconn,fparams);
  end;
  result:= true;
 end;
@@ -319,14 +332,18 @@ end;
 
 procedure TPQConnection.internalRollBackRetaining(trans : TSQLHandle);
 begin
- checkexec(tpqtrans(trans).fconn,'ROLLBACK',SErrRollbackFailed);
- begintrans(tpqtrans(trans).fconn);
+ with tpqtrans(trans) do begin
+  checkexec(fconn,'ROLLBACK',SErrRollbackFailed);
+  begintrans(fconn,fparams);
+ end;
 end;
 
 procedure TPQConnection.internalCommitRetaining(trans : TSQLHandle);
 begin
- checkexec(tpqtrans(trans).fconn,'COMMIT',SErrCommitFailed);
- begintrans(tpqtrans(trans).fconn);
+ with tpqtrans(trans) do begin
+  checkexec(fconn,'COMMIT',SErrCommitFailed);
+  begintrans(fconn,fparams);
+ end;
 end;
 
 procedure TPQConnection.openconnection(const aconnectstring: string;
@@ -461,7 +478,7 @@ end;
 Function TPQConnection.AllocateTransactionHandle : TSQLHandle;
 
 begin
-  result := TPQTrans.create;
+ result:= TPQTrans.create;
 end;
 
 procedure tpqconnection.preparestatement(const cursor: tsqlcursor; 

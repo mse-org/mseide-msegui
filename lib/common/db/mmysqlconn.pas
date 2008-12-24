@@ -1,49 +1,25 @@
 {Modified 2006-2008 by Martin Schreiber}
 
+unit mmysqlconn;
+
 {$ifdef VER2_1_5} {$define mse_FPC_2_2} {$endif}
 {$ifdef VER2_2} {$define mse_FPC_2_2} {$endif}
 {$mode objfpc}{$H+}
 {$MACRO on}
 
+{$define mysql50} 
+
 interface
 
 uses
   Classes, SysUtils,msqldb,db,dynlibs,msestrings,msedb,
-{$IfDef mysql50}
-  mysql50dyn;
-  {$DEFINE TConnectionName:=TMySQL50Connection}
-  {$DEFINE TTransactionName:=TMySQL50Transaction}
-  {$DEFINE TCursorName:=TMySQL50Cursor}
-  {$define eerrorname:= emysql50error}
-{$ELSE}
-  {$IfDef mysql41}
-    mysql41dyn;
-    {$DEFINE TConnectionName:=TMySQL41Connection}
-    {$DEFINE TTransactionName:=TMySQL41Transaction}
-    {$DEFINE TCursorName:=TMySQL41Cursor}
-    {$define eerrorname:= emysql41error}
-  {$ELSE}
-    {$IFDEF mysql4} // temporary backwards compatibility for Lazarus
-      mysql40dyn;
-      {$DEFINE TConnectionName:=TMySQLConnection}
-      {$DEFINE TTransactionName:=TMySQLTransaction}
-      {$DEFINE TCursorName:=TMySQLCursor}
-      {$define eerrorname:= emysqlerror}
-    {$ELSE}
-      mysql40dyn;
-      {$DEFINE TConnectionName:=TMySQL40Connection}
-      {$DEFINE TTransactionName:=TMySQL40Transaction}
-      {$DEFINE TCursorName:=TMySQL40Cursor}
-      {$define eerrorname:= emysql40error}
-    {$EndIf}
-  {$EndIf}
-{$EndIf}
+  mysqldyn;
 
 Type
 
- tcursorname = class;
+ tmysqlcursor = class;
  
- eerrorname = class(econnectionerror)
+ emysqlerror = class(econnectionerror)
   private
    fsqlcode: string;
   public
@@ -52,11 +28,14 @@ Type
    property sqlcode: string read fsqlcode;
  end;
   
-  TTransactionName = Class(TSQLHandle)
-  protected
+  tmysqltrans = class(TSQLHandle)
+   protected
+    fconn: pmysql;
+   public
+    property conn: pmysql read fconn;
   end;
 
-  TCursorName = Class(TSQLCursor)
+  tmysqlcursor = class(TSQLCursor)
   protected
 //    FQMySQL : PMySQL;
     FRes: PMYSQL_RES;                   { Record pointer }
@@ -71,28 +50,32 @@ Type
     fprimarykeyfieldname: string;
   end;
 
-  TConnectionName = class (TSQLConnection,iblobconnection)
+  tmysqlconnection = class (TSQLConnection,iblobconnection)
   private
-    FDialect: integer;
-    FHostInfo: String;
-    FServerInfo: String;
-    FMySQL : PMySQL;
-    FDidConnect : Boolean;
+   FDialect: integer;
+   FHostInfo: String;
+   FServerInfo: String;
+   FMySQL : PMySQL;
+//   FDidConnect : Boolean;
    fport: cardinal;
    flasterror: integer;
    flasterrormessage: msestring;
    flastsqlcode: string;
-    function GetClientInfo: string;
-    function GetServerStatus: String;
-    procedure ConnectMySQL(var HMySQL : PMySQL;H,U,P : pchar);
-    procedure freeresultbuffer(const cursor: tcursorname);
+   ftransactionconnectionused: boolean;
+   function GetClientInfo: string;
+   function GetServerStatus: String;
+   procedure ConnectMySQL(var HMySQL : PMySQL;H,U,P : pchar);
+   procedure freeresultbuffer(const cursor: tmysqlcursor);
+   procedure begintrans(const aconnection: pmysql);
+   procedure openconnection(var aconn: pmysql);
+   procedure closeconnection(var aconnection: pmysql);
   protected
     Procedure checkerror(const Msg: String);
 
 //   function stringtosqltext(const afeildtype: tfieldtype; const avalue: string): string;
     function StrToStatementType(s : string) : TStatementType; override;
-    Procedure ConnectToServer; virtual;
-    Procedure SelectDatabase; virtual;
+//    Procedure ConnectToServer; virtual;
+//    Procedure SelectDatabase; virtual;
 //    function MySQLDataType(AType: enum_field_types; ASize, ADecimals: Integer; var NewType: TFieldType; var NewSize: Integer): Boolean;
     function MySQLDataType(const afield: mysql_field; var NewType: TFieldType; var NewSize: Integer): Boolean;
     function MySQLWriteData(const acursor: tsqlcursor; AType: enum_field_types;
@@ -110,6 +93,7 @@ Type
                            const aname: ansistring): TSQLCursor; override;
     Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); override;
     Function AllocateTransactionHandle : TSQLHandle; override;
+    procedure finalizetransaction(const atransaction: tsqlhandle); override; 
 
     procedure preparestatement(const cursor: tsqlcursor; 
                   const atransaction : tsqltransaction;
@@ -183,7 +167,7 @@ uses
 type
  tmsebufdataset1 = class(tmsebufdataset);
  
-{ TConnectionName }
+{ tmysqlconnection }
 
 Resourcestring
   SErrServerConnectFailed = 'Server connect failed.';
@@ -199,7 +183,7 @@ Resourcestring
   SErrNotversion41 = 'TMySQL41Connection can not work with the installed MySQL client version (%s).';
   SErrNotversion40 = 'TMySQL40Connection can not work with the installed MySQL client version (%s).';
 
-Procedure tconnectionname.checkerror(const Msg: String);
+Procedure tmysqlconnection.checkerror(const Msg: String);
 var
  str1: ansistring;
 begin
@@ -207,11 +191,11 @@ begin
  flasterrormessage:= str1;
  flasterror:= mysql_errno(fmysql);
  flastsqlcode:= strpas(mysql_sqlstate(fmysql));
- raise eerrorname.create(self,format(msg,[str1]),flasterrormessage,
+ raise emysqlerror.create(self,format(msg,[str1]),flasterrormessage,
                       flasterror,flastsqlcode);
 end;
 
-function TConnectionName.StrToStatementType(s : string) : TStatementType;
+function tmysqlconnection.StrToStatementType(s : string) : TStatementType;
 
 begin
   S:=Lowercase(s);
@@ -220,7 +204,7 @@ begin
 end;
 
 
-function TConnectionName.GetClientInfo: string;
+function tmysqlconnection.GetClientInfo: string;
 
 Var
   B : Boolean;
@@ -238,13 +222,13 @@ begin
   end;  
 end;
 
-function TConnectionName.GetServerStatus: String;
+function tmysqlconnection.GetServerStatus: String;
 begin
   CheckConnected;
   Result := mysql_stat(FMYSQL);
 end;
 
-procedure TConnectionName.ConnectMySQL(var HMySQL : PMySQL;H,U,P : pchar);
+procedure tmysqlconnection.ConnectMySQL(var HMySQL : PMySQL;H,U,P : pchar);
 
 begin
   HMySQL := mysql_init(HMySQL);
@@ -253,7 +237,7 @@ begin
     databaseerror(SErrServerConnectFailed,Self);
 end;
 {
-function tconnectionname.stringtosqltext(const afieldtype: tfieldtype;
+function tmysqlconnection.stringtosqltext(const afieldtype: tfieldtype;
                                                 const avalue: string): string;
 var 
  esc_str : pchar;
@@ -264,7 +248,7 @@ begin
  Freemem(esc_str);
 end;
 
-function TConnectionName.GetAsSQLText(Field : TField) : string;
+function tmysqlconnection.GetAsSQLText(Field : TField) : string;
 var 
  esc_str : pchar;
  str1: string;
@@ -282,7 +266,7 @@ begin
  end;
 end;
 
-function TConnectionName.GetAsSQLText(Param: TParam) : string;
+function tmysqlconnection.GetAsSQLText(Param: TParam) : string;
 var 
  esc_str : pchar;
  str1: string;
@@ -305,31 +289,40 @@ begin
 end;
 }
 
-procedure TConnectionName.ConnectToServer;
-
+procedure tmysqlconnection.openconnection(var aconn: pmysql);
 Var
   H,U,P : String;
 
 begin
-  H:=HostName;
-  U:=UserName;
-  P:=Password;
-  ConnectMySQL(FMySQL,pchar(H),pchar(U),pchar(P));
-  FServerInfo := strpas(mysql_get_server_info(FMYSQL));
-  FHostInfo := strpas(mysql_get_host_info(FMYSQL));
+ H:= HostName;
+ U:= UserName;
+ P:= Password;
+ ConnectMySQL(aconn,pchar(H),pchar(U),pchar(P));
+ if mysql_select_db(aconn,pchar(DatabaseName)) <> 0 then begin
+   checkerror(SErrDatabaseSelectFailed);
+ end;
 end;
 
-procedure TConnectionName.SelectDatabase;
+procedure tmysqlconnection.closeconnection(var aconnection: pmysql);
+begin
+ mysql_close(aconnection);
+ aconnection:= nil;
+end;
+
+{
+procedure tmysqlconnection.SelectDatabase;
 begin
   if mysql_select_db(FMySQL,pchar(DatabaseName))<>0 then
     checkerror(SErrDatabaseSelectFailed);
 end;
-
-procedure TConnectionName.DoInternalConnect;
+}
+procedure tmysqlconnection.DoInternalConnect;
 begin
-  FDidConnect:=(MySQLLibraryHandle=NilHandle);
-  if FDidConnect then
-    InitialiseMysql;
+ ftransactionconnectionused:= false;
+//  FDidConnect:=(MySQLLibraryHandle=NilHandle);
+//  if FDidConnect then
+ InitialiseMysql;
+(*
 {$IFDEF mysql50}
   if copy(strpas(mysql_get_client_info()),1,3)<>'5.0' then
     Raise EInOutError.CreateFmt(SErrNotversion50,[strpas(mysql_get_client_info())]);
@@ -342,48 +335,60 @@ begin
     Raise EInOutError.CreateFmt(SErrNotversion40,[strpas(mysql_get_client_info())]);
   {$ENDIF}
 {$ENDIF}
+*)
   inherited DoInternalConnect;
-  ConnectToServer;
-  SelectDatabase;
+  openconnection(fmysql);
+  FServerInfo := strpas(mysql_get_server_info(FMYSQL));
+  FHostInfo := strpas(mysql_get_host_info(FMYSQL));
+//  ConnectToServer;
+//  SelectDatabase;
 end;
 
-procedure TConnectionName.DoInternalDisconnect;
+procedure tmysqlconnection.DoInternalDisconnect;
 begin
-  inherited DoInternalDisconnect;
-  mysql_close(FMySQL);
-  FMySQL:=Nil;
-  if FDidConnect then
-    ReleaseMysql;
+ inherited DoInternalDisconnect;
+ closeconnection(fmysql);
+ ReleaseMysql;
 end;
 
-function TConnectionName.GetHandle: pointer;
+function tmysqlconnection.GetHandle: pointer;
 begin
   Result:=FMySQL;
 end;
 
-function TConnectionName.AllocateCursorHandle(const aowner: icursorclient;
+function tmysqlconnection.AllocateCursorHandle(const aowner: icursorclient;
                            const aname: ansistring): TSQLCursor;
 begin
-  Result:=TCursorName.Create(aowner,aname);
+  Result:= tmysqlcursor.Create(aowner,aname);
 end;
 
-Procedure TConnectionName.DeAllocateCursorHandle(var cursor : TSQLCursor);
+Procedure tmysqlconnection.DeAllocateCursorHandle(var cursor : TSQLCursor);
 
 begin
   FreeAndNil(cursor);
 end;
 
-function TConnectionName.AllocateTransactionHandle: TSQLHandle;
+function tmysqlconnection.AllocateTransactionHandle: TSQLHandle;
 begin
-//  Result:=TTransactionName.Create;
-  Result := nil;
+//  Result:=tmysqltransaction.Create;
+ Result:= tmysqltrans.create;
 end;
 
-procedure tconnectionname.preparestatement(const cursor: tsqlcursor; 
+procedure tmysqlconnection.finalizetransaction(const atransaction: tsqlhandle);
+begin
+ with tmysqltrans(atransaction) do begin
+  if (fconn <> fmysql) then begin
+   closeconnection(fmysql);
+  end;
+  fmysql:= nil;
+ end;
+end;
+
+procedure tmysqlconnection.preparestatement(const cursor: tsqlcursor; 
                   const atransaction : tsqltransaction;
                   const asql: msestring; const aparams : tmseparams);
 begin
- With TCursorName(cursor) do begin
+ With tmysqlcursor(cursor) do begin
   FStatementm:= asql;
   if assigned(AParams) and (AParams.count > 0) then begin
     FStatementm:= AParams.ParseSQL(FStatementm,false,false,false,psSimulated,
@@ -396,15 +401,15 @@ begin
  end;
 end;
 
-procedure TConnectionName.UnPrepareStatement(cursor: TSQLCursor);
+procedure tmysqlconnection.UnPrepareStatement(cursor: TSQLCursor);
 begin
- with tcursorname(cursor) do begin
+ with tmysqlcursor(cursor) do begin
   fstatementm:= '';
   fprepared:= false;
  end;
 end;
 
-procedure tconnectionname.freeresultbuffer(const cursor: tcursorname);
+procedure tmysqlconnection.freeresultbuffer(const cursor: tmysqlcursor);
 begin
  If (Cursor.FRes<>Nil) then begin
   Mysql_free_result(Cursor.FRes);
@@ -412,29 +417,29 @@ begin
  end;
 end;
 
-procedure TConnectionName.FreeFldBuffers(cursor: TSQLCursor);
+procedure tmysqlconnection.FreeFldBuffers(cursor: TSQLCursor);
 
 Var
-  C : TCursorName;
+  C : tmysqlcursor;
 
 begin
-  C:= TCursorName(cursor);
+  C:= tmysqlcursor(cursor);
   if c.FStatementType in datareturningtypes then
     c.FNeedData:=False;
   freeresultbuffer(c);
   SetLength(c.MapDSRowToMSQLRow,0);
 end;
 
-procedure TConnectionName.Execute(const  cursor: TSQLCursor;
+procedure tmysqlconnection.Execute(const  cursor: TSQLCursor;
                const atransaction: tSQLtransaction; const AParams : TmseParams);
 
 var
- C: TCursorName;
+ C: tmysqlcursor;
  i: integer;
  str1: ansistring;
  par1: tparam;
 begin
-  C:= TCursorName(cursor);
+  C:= tmysqlcursor(cursor);
   c.frowsaffected:= -1;
   c.frowsreturned:= -1;
   freeresultbuffer(c);
@@ -461,9 +466,9 @@ begin
   end;
 end;
 
-//function TConnectionName.MySQLDataType(AType: enum_field_types; ASize, ADecimals: Integer;
+//function tmysqlconnection.MySQLDataType(AType: enum_field_types; ASize, ADecimals: Integer;
 //   var NewType: TFieldType; var NewSize: Integer): Boolean;
-function TConnectionName.MySQLDataType(const afield: mysql_field; var NewType: TFieldType;
+function tmysqlconnection.MySQLDataType(const afield: mysql_field; var NewType: TFieldType;
                             var NewSize: Integer): Boolean;
 begin
   Result := True;
@@ -522,10 +527,10 @@ begin
  end;
 end;
 
-procedure TConnectionName.AddFieldDefs(const cursor: TSQLCursor;
+procedure tmysqlconnection.AddFieldDefs(const cursor: TSQLCursor;
                           const FieldDefs: TfieldDefs);
 var
- C: TCursorName;
+ C: tmysqlcursor;
  I,TF,FC: Integer;
  field: PMYSQL_FIELD;
  DFT: TFieldType;
@@ -535,7 +540,7 @@ var
 
 begin
  fielddefs.clear;
-  C:=(Cursor as TCursorName);
+  C:=(Cursor as tmysqlcursor);
   If (C.FRes=Nil) then begin
     checkerror(SErrNoQueryResult);
   end;
@@ -572,18 +577,18 @@ begin
   end;
 end;
 
-function TConnectionName.Fetch(cursor: TSQLCursor): boolean;
+function tmysqlconnection.Fetch(cursor: TSQLCursor): boolean;
 
 Var
-  C : TCursorName;
+  C : tmysqlcursor;
 
 begin
-  C:=Cursor as TCursorName;
+  C:=Cursor as tmysqlcursor;
   C.Row:=MySQL_Fetch_row(C.FRes);
   Result:=(C.Row<>Nil);
 end;
 
-function tconnectionname.loadfield(const cursor: tsqlcursor;
+function tmysqlconnection.loadfield(const cursor: tsqlcursor;
       const datatype: tfieldtype; const fieldnum: integer; //null based
       const buffer: pointer; var bufsize: integer): boolean;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
@@ -591,13 +596,13 @@ function tconnectionname.loadfield(const cursor: tsqlcursor;
 var
   field: PMYSQL_FIELD;
   row : MYSQL_ROW;
-  C : TCursorName;
+  C : tmysqlcursor;
   fno: integer;
   alen: integer;
 begin
 //  Writeln('LoadFieldsFromBuffer');
  result:= false;
- C:= tcursorname(Cursor);
+ C:= tmysqlcursor(Cursor);
  fno:= fieldnum;
  if C.Row=nil then
     begin
@@ -637,14 +642,14 @@ begin
  end;
 end;
 
-function TConnectionName.fetchblob(const cursor: tsqlcursor;
+function tmysqlconnection.fetchblob(const cursor: tsqlcursor;
                const fieldnum: integer): ansistring;
 var
  int1: integer;
  row1: MYSQL_ROW;
 begin
  result:= '';
- with tcursorname(cursor) do begin
+ with tmysqlcursor(cursor) do begin
   if row <> nil then begin
    int1:= MapDSRowToMSQLRow[fieldnum];
    row1:= row;
@@ -769,7 +774,7 @@ begin
   Result := Result + EncodeTime(EH, EN, ES, 0);;
 end;
 
-function TConnectionName.MySQLWriteData(const acursor: tsqlcursor; 
+function tmysqlconnection.MySQLWriteData(const acursor: tsqlcursor; 
                      AType: enum_field_types;ASize: Integer;
                      AFieldType: TFieldType;Source, Dest: PChar): Boolean;
 
@@ -882,7 +887,7 @@ begin
  end;
 end;
 
-procedure TConnectionName.UpdateIndexDefs(var IndexDefs : TIndexDefs;
+procedure tmysqlconnection.UpdateIndexDefs(var IndexDefs : TIndexDefs;
                      const TableName : string);
 var 
  qry: TSQLQuery;
@@ -928,38 +933,54 @@ begin
 end;
 
 
-function TConnectionName.GetTransactionHandle(trans: TSQLHandle): pointer;
+function tmysqlconnection.GetTransactionHandle(trans: TSQLHandle): pointer;
 begin
   Result:=Nil;
 end;
 
-function TConnectionName.Commit(trans: TSQLHandle): boolean;
+function tmysqlconnection.Commit(trans: TSQLHandle): boolean;
 begin
   // Do nothing.
 end;
 
-function TConnectionName.RollBack(trans: TSQLHandle): boolean;
+function tmysqlconnection.RollBack(trans: TSQLHandle): boolean;
 begin
   // Do nothing
 end;
 
-function TConnectionName.StartdbTransaction(const trans: TSQLHandle;
+procedure tmysqlconnection.begintrans(const aconnection: pmysql);
+begin
+end;
+
+function tmysqlconnection.StartdbTransaction(const trans: TSQLHandle;
               const AParams: tstringlist): boolean;
 begin
-  // Do nothing
+ with tmysqltrans(trans) do begin
+  if fconn = nil then begin
+   if not ftransactionconnectionused then begin
+    fconn:= self.fmysql;
+    ftransactionconnectionused:= true;
+   end
+   else begin
+    openconnection(fconn);
+   end;  
+  end;
+  begintrans(fconn);
+ end;
+ result:= true;
 end;
 
-procedure TConnectionName.internalCommitRetaining(trans: TSQLHandle);
+procedure tmysqlconnection.internalCommitRetaining(trans: TSQLHandle);
 begin
   // Do nothing
 end;
 
-procedure TConnectionName.internalRollBackRetaining(trans: TSQLHandle);
+procedure tmysqlconnection.internalRollBackRetaining(trans: TSQLHandle);
 begin
   // Do nothing
 end;
 
-function TConnectionName.CreateBlobStream(const Field: TField;
+function tmysqlconnection.CreateBlobStream(const Field: TField;
                const Mode: TBlobStreamMode; const acursor: tsqlcursor): TStream;
 var
  blobid: integer;
@@ -975,12 +996,12 @@ begin
  end;
 end;
 
-function TConnectionName.getblobdatasize: integer;
+function tmysqlconnection.getblobdatasize: integer;
 begin
  result:= sizeof(integer);
 end;
 
-procedure TConnectionName.writeblobdata(const atransaction: tsqltransaction;
+procedure tmysqlconnection.writeblobdata(const atransaction: tsqltransaction;
                const tablename: string; const acursor: tsqlcursor;
                const adata: pointer; const alength: integer;
                const afield: tfield; const aparam: tparam; out newid: string);
@@ -1001,29 +1022,29 @@ begin
  move(int1,newid[1],sizeof(int1));
 end;
 
-procedure TConnectionName.setupblobdata(const afield: tfield;
+procedure tmysqlconnection.setupblobdata(const afield: tfield;
                const acursor: tsqlcursor; const aparam: tparam);
 begin
  acursor.blobfieldtoparam(afield,aparam,afield.datatype = ftmemo);
 end;
 
-function TConnectionName.blobscached: boolean;
+function tmysqlconnection.blobscached: boolean;
 begin
  result:= true;
 end;
 
-function TConnectionName.getprimarykeyfield(const atablename: string;
+function tmysqlconnection.getprimarykeyfield(const atablename: string;
                         const acursor: tsqlcursor): string;
 begin
- result:= tcursorname(acursor).fprimarykeyfieldname;
+ result:= tmysqlcursor(acursor).fprimarykeyfieldname;
 end;
 
-function TConnectionName.getinsertid: int64;
+function tmysqlconnection.getinsertid: int64;
 begin
  result:= mysql_insert_id(fmysql);
 end;
 
-procedure TConnectionName.updateprimarykeyfield(const afield: tfield);
+procedure tmysqlconnection.updateprimarykeyfield(const afield: tfield);
 begin
  afield.aslargeint:= getinsertid;
  {
@@ -1033,14 +1054,14 @@ begin
  }
 end;
 
-function TConnectionName.identquotechar: ansistring;
+function tmysqlconnection.identquotechar: ansistring;
 begin
  result:= '`'; //needed for reserved words as fieldnames
 end;
 
-{ eerrorname }
+{ emysqlerror }
 
-constructor eerrorname.create(const asender: tcustomsqlconnection; 
+constructor emysqlerror.create(const asender: tcustomsqlconnection; 
          const amessage: ansistring; const aerrormessage: msestring;
          const aerror: integer; const asqlcode: string);
 begin
