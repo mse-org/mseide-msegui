@@ -67,7 +67,7 @@ Type
    function GetServerStatus: String;
    procedure ConnectMySQL(var HMySQL : PMySQL;H,U,P : pchar);
    procedure freeresultbuffer(const cursor: tmysqlcursor);
-   procedure begintrans(const aconnection: pmysql);
+   procedure begintrans(const aconnection: pmysql; const aparams: ansistring);
    procedure openconnection(var aconn: pmysql);
    procedure closeconnection(var aconnection: pmysql);
   protected
@@ -176,6 +176,9 @@ Resourcestring
   SErrDatabaseSelectFailed = 'failed to select database: %s';
   SErrDatabaseCreate = 'Failed to create database: %s';
   SErrDatabaseDrop = 'Failed to drop database: %s';
+  serrstarttransaction = 'Failed to start transaction: %s';
+  serrcommittransaction = 'Failed to commit transaction: %s';
+  serrrollbacktransaction = 'Failed to rollback transaction: %s';
   SErrNoData = 'No data for record';
   SErrExecuting = 'Error executing query: %s';
   SErrFetchingdata = 'Error fetching row data: %s';
@@ -941,24 +944,56 @@ begin
  end;
 end;
 
-
 function tmysqlconnection.GetTransactionHandle(trans: TSQLHandle): pointer;
 begin
-  Result:=Nil;
+  Result:= trans;
+end;
+
+procedure tmysqlconnection.begintrans(const aconnection: pmysql;
+                         const aparams: ansistring);
+var
+ str1: ansistring;
+begin
+ str1:= 'START TRANSACTION '+aparams;
+ if mysql_real_query(aconnection,pointer(str1),length(str1)) <> 0 then begin
+  checkerror(serrstarttransaction,aconnection);
+ end;
 end;
 
 function tmysqlconnection.Commit(trans: TSQLHandle): boolean;
 begin
-  // Do nothing.
+ with tmysqltrans(trans) do begin
+  if mysql_query(fconn,'COMMIT') <> 0 then begin
+   checkerror(serrcommittransaction,fconn);
+  end;
+ end;
 end;
 
 function tmysqlconnection.RollBack(trans: TSQLHandle): boolean;
 begin
-  // Do nothing
+ with tmysqltrans(trans) do begin
+  if mysql_query(fconn,'ROLLBACK') <> 0 then begin
+   checkerror(serrrollbacktransaction,fconn);
+  end;
+ end;
 end;
 
-procedure tmysqlconnection.begintrans(const aconnection: pmysql);
+procedure tmysqlconnection.internalCommitRetaining(trans: TSQLHandle);
 begin
+ with tmysqltrans(trans) do begin
+  if mysql_query(fconn,'COMMIT AND CHAIN') <> 0 then begin
+   checkerror(serrcommittransaction,fconn);
+  end;
+ end;
+end;
+
+procedure tmysqlconnection.internalRollBackRetaining(trans: TSQLHandle);
+begin
+ with tmysqltrans(trans) do begin
+  if mysql_query(fconn,'ROLLBAK AND CHAIN') <> 0 then begin
+   checkerror(serrrollbacktransaction,fconn);
+  end;
+ end;
 end;
 
 function tmysqlconnection.StartdbTransaction(const trans: TSQLHandle;
@@ -974,19 +1009,9 @@ begin
     openconnection(fconn);
    end;  
   end;
-  begintrans(fconn);
+  begintrans(fconn,aparams.text);
  end;
  result:= true;
-end;
-
-procedure tmysqlconnection.internalCommitRetaining(trans: TSQLHandle);
-begin
-  // Do nothing
-end;
-
-procedure tmysqlconnection.internalRollBackRetaining(trans: TSQLHandle);
-begin
-  // Do nothing
 end;
 
 function tmysqlconnection.CreateBlobStream(const Field: TField;
