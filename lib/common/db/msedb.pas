@@ -134,11 +134,14 @@ type
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
-   function HasParent: Boolean; override;
+   procedure readlookup(reader: treader); 
+         //workaround for breaking fix of FPC Mantis 12809
+   procedure defineproperties(filer: tfiler); override;
   {$ifdef hasaswidestring}
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
   {$endif}
+   function HasParent: Boolean; override;
   public
    procedure Clear; override;
    property asmsestring: msestring read getasmsestring write setasmsestring;
@@ -148,7 +151,7 @@ type
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
-   property Lookup default false;
+//   property Lookup default false;
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
@@ -178,6 +181,9 @@ type
    procedure setdsintf(const avalue: idsfieldcontroller);
    function getinstance: tfield;
   protected
+   procedure readlookup(reader: treader);
+         //workaround for breaking fix of FPC Mantis 12809
+   procedure defineproperties(filer: tfiler); override;
   {$ifdef hasaswidestring}
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
@@ -212,7 +218,7 @@ type
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
-   property Lookup default false;
+//   property Lookup default false;
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
@@ -224,6 +230,9 @@ type
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
+   procedure readlookup(reader: treader);
+         //workaround for breaking fix of FPC Mantis 12809
+   procedure defineproperties(filer: tfiler); override;
   {$ifdef hasaswidestring}
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
@@ -240,7 +249,7 @@ type
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
-   property Lookup default false;
+//   property Lookup default false;
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
@@ -252,6 +261,9 @@ type
    procedure setasmsestring(const avalue: msestring);
    procedure setasenum(const avalue: integer);
   protected
+   procedure readlookup(reader: treader);
+         //workaround for breaking fix of FPC Mantis 12809
+   procedure defineproperties(filer: tfiler); override;
   {$ifdef hasaswidestring}
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
@@ -274,7 +286,7 @@ type
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
-   property Lookup default false;
+//   property Lookup default false;
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
@@ -285,6 +297,9 @@ type
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
+   procedure readlookup(reader: treader);
+         //workaround for breaking fix of FPC Mantis 12809
+   procedure defineproperties(filer: tfiler); override;
   {$ifdef hasaswidestring}
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
@@ -305,7 +320,7 @@ type
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
-   property Lookup default false;
+//   property Lookup default false;
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
@@ -316,6 +331,9 @@ type
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
+   procedure readlookup(reader: treader);
+         //workaround for breaking fix of FPC Mantis 12809
+   procedure defineproperties(filer: tfiler); override;
   {$ifdef hasaswidestring}
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
@@ -336,7 +354,7 @@ type
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
-   property Lookup default false;
+//   property Lookup default false;
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
@@ -347,6 +365,9 @@ type
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
+   procedure readlookup(reader: treader);
+         //workaround for breaking fix of FPC Mantis 12809
+   procedure defineproperties(filer: tfiler); override;
   {$ifdef hasaswidestring}
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
@@ -367,7 +388,7 @@ type
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
-   property Lookup default false;
+//   property Lookup default false;
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
@@ -378,6 +399,9 @@ type
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
+   procedure readlookup(reader: treader);
+         //workaround for breaking fix of FPC Mantis 12809
+   procedure defineproperties(filer: tfiler); override;
   {$ifdef hasaswidestring}
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
@@ -394,7 +418,7 @@ type
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
-   property Lookup default false;
+//   property Lookup default false;
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
@@ -405,6 +429,9 @@ type
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
+   procedure readlookup(reader: treader);
+         //workaround for breaking fix of FPC Mantis 12809
+   procedure defineproperties(filer: tfiler); override;
   {$ifdef hasaswidestring}
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
@@ -425,7 +452,7 @@ type
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
-   property Lookup default false;
+//   property Lookup default false;
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
@@ -466,6 +493,9 @@ type
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
+   procedure readlookup(reader: treader);
+         //workaround for breaking fix of FPC Mantis 12809
+   procedure defineproperties(filer: tfiler); override;
   {$ifdef hasaswidestring}
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
@@ -497,7 +527,7 @@ type
    property displayvalues: msestring read fdisplayvalues write setdisplayvalues;
    property FieldKind default fkData;
    property HasConstraints default false;
-   property Lookup default false;
+//   property Lookup default false;
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
@@ -514,6 +544,9 @@ type
    procedure setasmsestring(const avalue: msestring);
    procedure setoptions(const avalue: datetimefieldoptionsty);
   protected
+   procedure readlookup(reader: treader);
+         //workaround for breaking fix of FPC Mantis 12809
+   procedure defineproperties(filer: tfiler); override;
   {$ifdef hasaswidestring}
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
@@ -535,7 +568,7 @@ type
    property options: datetimefieldoptionsty read foptions write setoptions;
    property FieldKind default fkData;
    property HasConstraints default false;
-   property Lookup default false;
+//   property Lookup default false;
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
@@ -555,6 +588,9 @@ type
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
+   procedure readlookup(reader: treader);
+         //workaround for breaking fix of FPC Mantis 12809
+   procedure defineproperties(filer: tfiler); override;
   {$ifdef hasaswidestring}
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
@@ -571,7 +607,7 @@ type
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
-   property Lookup default false;
+//   property Lookup default false;
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
@@ -582,6 +618,9 @@ type
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
+   procedure readlookup(reader: treader);
+         //workaround for breaking fix of FPC Mantis 12809
+   procedure defineproperties(filer: tfiler); override;
   {$ifdef hasaswidestring}
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
@@ -598,7 +637,7 @@ type
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
-   property Lookup default false;
+//   property Lookup default false;
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
@@ -609,6 +648,9 @@ type
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
+   procedure readlookup(reader: treader);
+         //workaround for breaking fix of FPC Mantis 12809
+   procedure defineproperties(filer: tfiler); override;
   {$ifdef hasaswidestring}
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
@@ -625,7 +667,7 @@ type
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
-   property Lookup default false;
+//   property Lookup default false;
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
@@ -636,6 +678,9 @@ type
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
+   procedure readlookup(reader: treader);
+         //workaround for breaking fix of FPC Mantis 12809
+   procedure defineproperties(filer: tfiler); override;
   {$ifdef hasaswidestring}
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
@@ -656,7 +701,7 @@ type
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
-   property Lookup default false;
+//   property Lookup default false;
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
@@ -699,6 +744,9 @@ type
    function getcachekb: integer;
   protected
    fgetblobid: getblobidfuncty;
+   procedure readlookup(reader: treader);
+         //workaround for breaking fix of FPC Mantis 12809
+   procedure defineproperties(filer: tfiler); override;
    procedure removecache(const aid: blobidty); virtual; overload;
    procedure removecache; overload;
    function HasParent: Boolean; override;
@@ -724,7 +772,7 @@ type
                 //cachesize in kilo bytes, 0 -> no cache
    property FieldKind default fkData;
    property HasConstraints default false;
-   property Lookup default false;
+//   property Lookup default false;
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
@@ -755,7 +803,7 @@ type
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
-   property Lookup default false;
+//   property Lookup default false;
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
@@ -2111,6 +2159,17 @@ begin
 end;
 {$endif}
 
+procedure tmsefield.readlookup(reader: treader);
+begin
+ reader.readboolean;
+end;
+
+procedure tmsefield.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('Lookup',@readlookup,nil,false);
+end;
+
 { tmsestringfield }
 
 destructor tmsestringfield.destroy;
@@ -2175,6 +2234,17 @@ begin
  else begin
   fieldsetmsestring(avalue,self,fdsintf);
  end;
+end;
+
+procedure tmsestringfield.readlookup(reader: treader);
+begin
+ reader.readboolean;
+end;
+
+procedure tmsestringfield.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('Lookup',@readlookup,nil,false);
 end;
 
 {$ifdef hasaswidestring}
@@ -2420,6 +2490,17 @@ begin
  result:= asstring;
 end;
 
+procedure tmsenumericfield.readlookup(reader: treader);
+begin
+ reader.readboolean;
+end;
+
+procedure tmsenumericfield.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('Lookup',@readlookup,nil,false);
+end;
+
 {$ifdef hasaswidestring}
 function tmsenumericfield.getaswidestring: widestring;
 begin
@@ -2462,6 +2543,17 @@ end;
 function tmselongintfield.getasmsestring: msestring;
 begin
  result:= asstring;
+end;
+
+procedure tmselongintfield.readlookup(reader: treader);
+begin
+ reader.readboolean;
+end;
+
+procedure tmselongintfield.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('Lookup',@readlookup,nil,false);
 end;
 
 {$ifdef hasaswidestring}
@@ -2556,6 +2648,17 @@ begin
  result:= asstring;
 end;
 
+procedure tmselargeintfield.readlookup(reader: treader);
+begin
+ reader.readboolean;
+end;
+
+procedure tmselargeintfield.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('Lookup',@readlookup,nil,false);
+end;
+
 {$ifdef hasaswidestring}
 function tmselargeintfield.getaswidestring: widestring;
 begin
@@ -2623,6 +2726,17 @@ end;
 function tmsesmallintfield.getasmsestring: msestring;
 begin
  result:= asstring;
+end;
+
+procedure tmsesmallintfield.readlookup(reader: treader);
+begin
+ reader.readboolean;
+end;
+
+procedure tmsesmallintfield.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('Lookup',@readlookup,nil,false);
 end;
 
 {$ifdef hasaswidestring}
@@ -2697,6 +2811,17 @@ begin
  result:= asstring;
 end;
 
+procedure tmsewordfield.readlookup(reader: treader);
+begin
+ reader.readboolean;
+end;
+
+procedure tmsewordfield.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('Lookup',@readlookup,nil,false);
+end;
+
 {$ifdef hasaswidestring}
 function tmsewordfield.getaswidestring: widestring;
 begin
@@ -2769,6 +2894,17 @@ begin
  result:= asstring;
 end;
 
+procedure tmseautoincfield.readlookup(reader: treader);
+begin
+ reader.readboolean;
+end;
+
+procedure tmseautoincfield.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('Lookup',@readlookup,nil,false);
+end;
+
 {$ifdef hasaswidestring}
 function tmseautoincfield.getaswidestring: widestring;
 begin
@@ -2811,6 +2947,17 @@ end;
 function tmsefloatfield.getasmsestring: msestring;
 begin
  result:= asstring;
+end;
+
+procedure tmsefloatfield.readlookup(reader: treader);
+begin
+ reader.readboolean;
+end;
+
+procedure tmsefloatfield.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('Lookup',@readlookup,nil,false);
 end;
 
 {$ifdef hasaswidestring}
@@ -2983,6 +3130,17 @@ begin
  end;
 end;
 
+procedure tmsebooleanfield.readlookup(reader: treader);
+begin
+ reader.readboolean;
+end;
+
+procedure tmsebooleanfield.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('Lookup',@readlookup,nil,false);
+end;
+
 {$ifdef hasaswidestring}
 function tmsebooleanfield.getaswidestring: widestring;
 begin
@@ -3132,6 +3290,17 @@ end;
 function tmsedatetimefield.getasmsestring: msestring;
 begin
  result:= asstring;
+end;
+
+procedure tmsedatetimefield.readlookup(reader: treader);
+begin
+ reader.readboolean;
+end;
+
+procedure tmsedatetimefield.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('Lookup',@readlookup,nil,false);
 end;
 
 {$ifdef hasaswidestring}
@@ -3366,6 +3535,17 @@ begin
  result:= asstring;
 end;
 
+procedure tmsebinaryfield.readlookup(reader: treader);
+begin
+ reader.readboolean;
+end;
+
+procedure tmsebinaryfield.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('Lookup',@readlookup,nil,false);
+end;
+
 {$ifdef hasaswidestring}
 function tmsebinaryfield.getaswidestring: widestring;
 begin
@@ -3408,6 +3588,17 @@ end;
 function tmsebytesfield.getasmsestring: msestring;
 begin
  result:= asstring;
+end;
+
+procedure tmsebytesfield.readlookup(reader: treader);
+begin
+ reader.readboolean;
+end;
+
+procedure tmsebytesfield.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('Lookup',@readlookup,nil,false);
 end;
 
 {$ifdef hasaswidestring}
@@ -3454,6 +3645,17 @@ begin
  result:= asstring;
 end;
 
+procedure tmsevarbytesfield.readlookup(reader: treader);
+begin
+ reader.readboolean;
+end;
+
+procedure tmsevarbytesfield.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('Lookup',@readlookup,nil,false);
+end;
+
 {$ifdef hasaswidestring}
 function tmsevarbytesfield.getaswidestring: widestring;
 begin
@@ -3496,6 +3698,17 @@ end;
 function tmsebcdfield.getasmsestring: msestring;
 begin
  result:= asstring;
+end;
+
+procedure tmsebcdfield.readlookup(reader: treader);
+begin
+ reader.readboolean;
+end;
+
+procedure tmsebcdfield.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('Lookup',@readlookup,nil,false);
 end;
 
 {$ifdef hasaswidestring}
@@ -3676,6 +3889,17 @@ begin
  else begin
   result:= inherited getasstring;
  end;
+end;
+
+procedure tmseblobfield.readlookup(reader: treader);
+begin
+ reader.readboolean;
+end;
+
+procedure tmseblobfield.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('Lookup',@readlookup,nil,false);
 end;
 
 procedure tmseblobfield.removecache(const aid: blobidty);
