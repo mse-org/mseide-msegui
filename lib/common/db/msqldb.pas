@@ -158,6 +158,7 @@ type
   protected
    FConnOptions: sqlconnoptionsty;
    fcontroller: tdbcontroller;
+   function connectionmessage(atext: pchar): msestring;
    procedure finalizetransaction(const atransaction: tsqlhandle); virtual; 
 //   procedure setconnected(const avalue: boolean);
    procedure notification(acomponent: tcomponent; operation: toperation); override;
@@ -1060,6 +1061,16 @@ destructor tcustomsqlconnection.destroy;
 begin
  inherited;
  fcontroller.free;
+end;
+
+function tcustomsqlconnection.connectionmessage(atext: pchar): msestring;
+begin
+ if dbo_utf8message in fcontroller.foptions then begin
+  result:= utf8tostring(atext);
+ end
+ else begin
+  result:= atext;
+ end;
 end;
 
 procedure tcustomsqlconnection.setinheritedconnected(const avalue: boolean);

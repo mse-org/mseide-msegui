@@ -22,7 +22,7 @@ uses
  mseapplication;
 
 type
- databaseoptionty = (dbo_utf8,dbo_noutf8);
+ databaseoptionty = (dbo_utf8,dbo_noutf8,dbo_utf8message);
  databaseoptionsty = set of databaseoptionty;
  
  tmdbdataset = class;
@@ -335,6 +335,24 @@ end;
 
 { tmdatabase }
 
+constructor tmdatabase.Create(AOwner: TComponent);
+begin
+ inherited create(aowner);
+ fparams:= tstringlist.create;
+ ftransactions:= tlist.create;
+end;
+
+destructor tmdatabase.Destroy;
+
+begin
+ connected:=false;
+ removedatasets;
+ removetransactions;
+ ftransactions.free;
+ fparams.free;
+ inherited destroy;
+end;
+
 procedure tmdatabase.doafterinternalconnect;
 begin
  fconnected:= true;
@@ -484,24 +502,6 @@ end;
 function tmdatabase.GetConnected: boolean;
 begin
   Result:= FConnected;
-end;
-
-constructor tmdatabase.Create(AOwner: TComponent);
-begin
- inherited create(aowner);
- fparams:= tstringlist.create;
- ftransactions:= tlist.create;
-end;
-
-destructor tmdatabase.Destroy;
-
-begin
- connected:=false;
- removedatasets;
- removetransactions;
- ftransactions.free;
- fparams.free;
- inherited destroy;
 end;
 
 procedure tmdatabase.CloseDataSets;

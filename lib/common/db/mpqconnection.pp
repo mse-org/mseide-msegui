@@ -253,17 +253,15 @@ procedure TPQConnection.checkerror(const aconnection: ppgconn;
          var ares: ppgresult; const amessage: ansistring);
 var
  err: integer;
- str1: ansistring;
  res: texecstatustype;
 begin
  res:= PQresultStatus(ares);
  if not(res in [PGRES_COMMAND_OK,PGRES_TUPLES_OK]) then begin
   flastsqlcode:= strpas(pqresulterrorfield(ares,ord(pg_diag_sqlstate)));
-  str1:= strpas(pqresulterrormessage(ares));
-  flasterrormessage:= str1;
+  flasterrormessage:= connectionmessage(pqresulterrormessage(ares));
   PQclear(ares);
   ares:= nil;
-  raise epqerror.create(self,amessage+' (PostgreSQL: '+str1 + ')',
+  raise epqerror.create(self,amessage+' (PostgreSQL: '+flasterrormessage+ ')',
                             flasterrormessage,flastsqlcode);
  end
  else begin
@@ -353,7 +351,7 @@ var
 begin
  aconnection:= PQconnectdb(pchar(aConnectString));
  if (PQstatus(aconnection) = CONNECTION_BAD) then begin
-  msg:= PQerrorMessage(aconnection);
+  msg:= connectionmessage(PQerrorMessage(aconnection));
   pqfinish(aconnection);
   aconnection:= nil;
   DatabaseError(sErrConnectionFailed + ' (PostgreSQL: ' + msg + ')',self);
@@ -578,7 +576,7 @@ begin
    if (PQresultStatus(res) <> PGRES_COMMAND_OK) then begin
      pqclear(res);
      DatabaseError(SErrPrepareFailed + ' (PostgreSQL: ' + 
-           PQerrorMessage(tr.fconn) + ')',self)
+           connectionmessage(PQerrorMessage(tr.fconn)) + ')',self)
    end;
    FPrepared := True;
   end
@@ -1124,7 +1122,7 @@ begin
  if pqresultstatus(res) <> pgres_command_ok then begin
   pqclear(res);
   databaseerror('PQExecerror'+ ' (postgresql: ' + 
-                        pqerrormessage(aconnection) + ')',self);
+                        connectionmessage(pqerrormessage(aconnection)) + ')',self);
  end
  else begin
   pqclear(res);
