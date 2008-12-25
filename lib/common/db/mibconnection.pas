@@ -283,7 +283,7 @@ procedure TIBConnection.CheckError(const ProcName : string;
 var
   buf: array [0..1024] of char;
   p: pointer;
-  Msg: string;
+  Msg: msestring;
   E: eiberror;
   
 begin
@@ -291,7 +291,7 @@ begin
   p:= @Status;
   msg:= procname;
   while isc_interprete(Buf, @p) > 0 do begin
-   Msg := Msg + LineEnding +' -' + StrPas(Buf);
+   Msg := Msg + lineend +' -' + connectionmessage(Buf);
   end;
   flasterror:= status;
   flasterrormessage:= msg;

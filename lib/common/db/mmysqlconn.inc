@@ -202,9 +202,9 @@ Resourcestring
 
 Procedure tconnectionname.checkerror(const Msg: String);
 var
- str1: ansistring;
+ str1: msestring;
 begin
- str1:= Strpas(mysql_error(fmysql));
+ str1:= connectionmessage(mysql_error(fmysql));
  flasterrormessage:= str1;
  flasterror:= mysql_errno(fmysql);
  flastsqlcode:= strpas(mysql_sqlstate(fmysql));
@@ -447,7 +447,8 @@ begin
    str1:= todbstring(c.fstatementm);
   end;
   if mysql_query(FMySQL,Pchar(str1))<>0 then begin
-   checkerror(Format(SErrExecuting,[StrPas(mysql_error(FMySQL))]))
+   checkerror(Format(SErrExecuting,[
+        ansistring(connectionmessage(mysql_error(FMySQL)))]))
   end
   else begin
    C.fRowsAffected := mysql_affected_rows(FMYSQL);

@@ -190,9 +190,9 @@ Resourcestring
 
 Procedure tmysqlconnection.checkerror(const Msg: String; const aconn: pmysql);
 var
- str1: ansistring;
+ str1: msestring;
 begin
- str1:= Strpas(mysql_error(aconn));
+ str1:= connectionmessage(mysql_error(aconn));
  flasterrormessage:= str1;
  flasterror:= mysql_errno(aconn);
  flastsqlcode:= strpas(mysql_sqlstate(aconn));
