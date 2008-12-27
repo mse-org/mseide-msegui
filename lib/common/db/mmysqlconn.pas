@@ -286,10 +286,13 @@ end;
 procedure tmysqlconnection.ConnectMySQL(var HMySQL : PMySQL;H,U,P : pchar);
 
 begin
-  HMySQL := mysql_init(HMySQL);
-  HMySQL:=mysql_real_connect(HMySQL,PChar(H),PChar(U),Pchar(P),Nil,fport,Nil,0);
-  If (HMySQL=Nil) then
-    databaseerror(SErrServerConnectFailed,Self);
+ mysqllock;
+ HMySQL := mysql_init(HMySQL);
+ mysqlunlock;
+ HMySQL:=mysql_real_connect(HMySQL,PChar(H),PChar(U),Pchar(P),Nil,fport,Nil,0);
+ If (HMySQL=Nil) then begin
+  databaseerror(SErrServerConnectFailed,Self);
+ end;
 end;
 {
 function tmysqlconnection.stringtosqltext(const afieldtype: tfieldtype;

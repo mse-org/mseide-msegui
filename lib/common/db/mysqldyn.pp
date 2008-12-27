@@ -1533,6 +1533,9 @@ var MysqlLibraryHandle : TLibHandle;
       mysql_stmt_insert_id: function (stmt:PMYSQL_STMT):my_ulonglong;extdecl;
       mysql_stmt_field_count: function (stmt:PMYSQL_STMT):cuint;extdecl;
 
+procedure mysqllock;
+procedure mysqlunlock;
+
 implementation
 uses
  msestrings,msesys,msesysintf,msesonames;
@@ -1752,7 +1755,7 @@ begin
      @mysql_stmt_insert_id,                //90
      @mysql_stmt_field_count               //91
     ]);
-    mysql_library_init(-1,nil,nil);
+//    mysql_library_init(-1,nil,nil);
    except
     on e: exception do begin
      e.message:= 'Library "'+mstr1+'": '+e.message;
@@ -1927,9 +1930,19 @@ begin
 end;
 *)
 
-procedure releasemysql;
+procedure mysqllock;
 begin
  sys_mutexlock(liblock);
+end;
+
+procedure mysqlunlock;
+begin
+ sys_mutexunlock(liblock);
+end;
+
+procedure releasemysql;
+begin
+ mysqllock;
  if refcount > 1 then begin
   dec(refcount);
  end
@@ -1940,7 +1953,7 @@ begin
    mysqllibraryhandle:= nilhandle;
   end;
  end;
- sys_mutexunlock(liblock);
+ mysqlunlock;
 end;
 
 procedure initialisemysql;
