@@ -68,7 +68,7 @@ type
  
  TPQConnection = class (TSQLConnection,iblobconnection,idbevent,idbeventcontroller)
   private
-   FCursorCount         : word;
+//   FCursorCount         : word;
    FConnectString       : string;
    FHandle: ppgconn;
    FIntegerDateTimes    : boolean;
@@ -540,8 +540,8 @@ begin
    tpqtrans(atransaction.trans).fconn:= fhandle; //fake transaction
   end;
   FPrepared := False;
-  nr:= inttostr(FCursorcount);
-  inc(FCursorCount);
+//  nr:= inttostr(FCursorcount);
+//  inc(FCursorCount);
   // Prior to v8 there is no support for cursors and parameters.
   // So that's not supported.
   if FStatementType in [stInsert,stUpdate,stDelete,stSelect] then begin

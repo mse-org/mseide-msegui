@@ -991,7 +991,7 @@ begin
           move(cur1,sqldata^,sizeof(cur1));
          end;
         end;
-        ftString,ftFixedChar  :
+        ftString,ftFixedChar,ftwidestring  :
           begin
           s:= AParams.AsdbString(parnr);
           w:= length(s);

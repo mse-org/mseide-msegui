@@ -13,7 +13,7 @@ interface
 
 uses
   Classes, SysUtils,msqldb,db,dynlibs,msestrings,msedb,
-  mysqldyn;
+  mysqldyn,msetypes;
 
 Type
 
@@ -34,7 +34,16 @@ Type
    public
     property conn: pmysql read fconn;
   end;
-
+ 
+ bindinginfoty = record
+  length: integer;
+  buffer: pointer;
+  isnull: boolean;
+  isblob: boolean
+ end;
+ pbindinginfoty = ^bindinginfoty;
+ bindinginfoarty = array of bindinginfoty;
+ 
   tmysqlcursor = class(TSQLCursor)
   protected
 //    FQMySQL : PMySQL;
@@ -46,11 +55,22 @@ Type
     LastInsertID : QWord;
     ParamBinding : TParamBinding;
     ParamReplaceString : String;
-    MapDSRowToMSQLRow  : array of integer;
+    MapDSRowToMSQLRow: integerarty;
     fprimarykeyfieldname: string;
     fconn: pmysql;
+    fparambinding: tparambinding;
+    fprepstatement: pmysql_stmt;
+    fresultmetadata: pmysql_res;
+    fresultfieldcount: integer;
+    fresultbindinginfo: bindinginfoarty;
+    fresultbindings: pointer;
+    fresultbuf: pointer;
+   procedure freeprepstatement;
   end;
 
+  mysqloptionty = (myo_preparedstatements); //not working!
+  mysqloptionsty = set of mysqloptionty;
+  
   tmysqlconnection = class (TSQLConnection,iblobconnection)
   private
    FDialect: integer;
@@ -60,6 +80,7 @@ Type
 //   FDidConnect : Boolean;
    fport: cardinal;
    flasterror: integer;
+   foptions: mysqloptionsty;
    flasterrormessage: msestring;
    flastsqlcode: string;
    ftransactionconnectionused: boolean;
@@ -71,14 +92,16 @@ Type
    procedure openconnection(var aconn: pmysql);
    procedure closeconnection(var aconnection: pmysql);
   protected
-    Procedure checkerror(const Msg: String; const aconn: pmysql);
+   Procedure checkerror(const Msg: String; const aconn: pmysql);
+   Procedure checkstmterror(const Msg: String; const astmt: pmysql_stmt);
 
 //   function stringtosqltext(const afeildtype: tfieldtype; const avalue: string): string;
     function StrToStatementType(s : string) : TStatementType; override;
 //    Procedure ConnectToServer; virtual;
 //    Procedure SelectDatabase; virtual;
 //    function MySQLDataType(AType: enum_field_types; ASize, ADecimals: Integer; var NewType: TFieldType; var NewSize: Integer): Boolean;
-    function MySQLDataType(const afield: mysql_field; var NewType: TFieldType; var NewSize: Integer): Boolean;
+    function MySQLDataType(const afield: mysql_field; var NewType: TFieldType;
+               var NewSize: Integer): Boolean;
     function MySQLWriteData(const acursor: tsqlcursor; AType: enum_field_types;
                         ASize: Integer;
                         AFieldType: TFieldType;Source, Dest: PChar): Boolean;
@@ -108,7 +131,7 @@ Type
     function Fetch(cursor : TSQLCursor) : boolean; override;
     function loadfield(const cursor: tsqlcursor;
       const datatype: tfieldtype; const fieldnum: integer; //null based
-      const buffer: pointer; var bufsize: integer): boolean; override;
+      const abuffer: pointer; var abufsize: integer): boolean; override;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
     function GetTransactionHandle(trans : TSQLHandle): pointer; override;
     function Commit(trans : TSQLHandle) : boolean; override;
@@ -151,6 +174,7 @@ Type
    property lasterrormessage: msestring read flasterrormessage;
    property lastsqlcode: string read flastsqlcode;
   published
+    property options: mysqloptionsty read foptions write foptions default [];
     property Dialect  : integer read FDialect write FDialect default 0;
     property port: cardinal read fport write fport default 0;
     property DatabaseName;
@@ -165,7 +189,7 @@ Type
 
 implementation
 uses 
- dbconst,msebufdataset,msetypes;
+ dbconst,msebufdataset,typinfo;
 type
  tmsebufdataset1 = class(tmsebufdataset);
  
@@ -176,9 +200,11 @@ Resourcestring
   SErrDatabaseSelectFailed = 'failed to select database: %s';
   SErrDatabaseCreate = 'Failed to create database: %s';
   SErrDatabaseDrop = 'Failed to drop database: %s';
+  sbindresult = 'Failed to bind result: %s';
   serrstarttransaction = 'Failed to start transaction: %s';
   serrcommittransaction = 'Failed to commit transaction: %s';
   serrrollbacktransaction = 'Failed to rollback transaction: %s';
+  serrprepare = 'Failed to prepare statement: %s';
   SErrNoData = 'No data for record';
   SErrExecuting = 'Error executing query: %s';
   SErrFetchingdata = 'Error fetching row data: %s';
@@ -187,6 +213,18 @@ Resourcestring
   SErrNotversion50 = 'TMySQL50Connection can not work with the installed MySQL client version (%s).';
   SErrNotversion41 = 'TMySQL41Connection can not work with the installed MySQL client version (%s).';
   SErrNotversion40 = 'TMySQL40Connection can not work with the installed MySQL client version (%s).';
+
+{ tmysqlcursor }
+
+procedure tmysqlcursor.freeprepstatement;
+begin
+ if fprepstatement <> nil then begin
+  mysql_stmt_close(fprepstatement);
+  fprepstatement:= nil;
+ end;
+end;
+
+{ tmysqlconnection }
 
 Procedure tmysqlconnection.checkerror(const Msg: String; const aconn: pmysql);
 var
@@ -200,6 +238,19 @@ begin
                       flasterror,flastsqlcode);
 end;
 
+Procedure tmysqlconnection.checkstmterror(const Msg: String; 
+                                                    const astmt: pmysql_stmt);
+var
+ str1: msestring;
+begin
+ str1:= connectionmessage(mysql_stmt_error(astmt));
+ flasterrormessage:= str1;
+ flasterror:= 0;          //???
+ flastsqlcode:= '';       //???
+ raise emysqlerror.create(self,format(msg,[str1]),flasterrormessage,
+                      flasterror,flastsqlcode);
+end;
+
 function tmysqlconnection.StrToStatementType(s : string) : TStatementType;
 
 begin
@@ -207,7 +258,6 @@ begin
   if s = 'show' then exit(stSelect);
   result := inherited StrToStatementType(s);
 end;
-
 
 function tmysqlconnection.GetClientInfo: string;
 
@@ -390,9 +440,153 @@ begin
  end;
 end;
 
+function createbindings(const acount: integer): pointer;
+var
+ int1: integer;
+begin
+ result:= nil;
+ int1:= acount * sizeof(mysql_bind);
+ if int1 > 0 then begin
+  result:= getmem(int1);
+  fillchar(result^,int1,0);
+ end;
+end;
+
+procedure freebindings(var abindings: pointer);
+begin
+ if abindings <> nil then begin
+  freemem(abindings);
+  abindings:= nil;
+ end;
+end;
+
+procedure setupresultbinding(const index: integer; const fieldtype: tfieldtype;
+               const len: integer;     //character count
+               const bindings: pointer; var bindinginfo: bindinginfoarty);
+var
+ bi: pbindinginfoty;
+ bufsize: integer;
+begin
+ bi:= @bindinginfo[index];
+ with pmysql_bind(bindings)[index] do begin
+  bufsize:= 0;
+  length:= @bi^.length;
+  is_null:= @bi^.isnull;
+  case fieldtype of
+   ftinteger: begin
+    bufsize:= sizeof(longint);
+    buffer_type:= mysql_type_long;
+   end;
+   ftlargeint: begin
+    bufsize:= sizeof(int64);
+    buffer_type:= mysql_type_longlong;
+   end;
+   ftbcd,ftfloat: begin
+    bufsize:= sizeof(double);
+    buffer_type:= mysql_type_double;
+   end;
+   ftdate,ftdatetime,fttime: begin
+    bufsize:= sizeof(mysql_time);
+    buffer_type:= mysql_type_timestamp;
+   end;
+   ftstring: begin
+    bufsize:= len*4; //room for multibyte encodings
+    buffer_type:= mysql_type_var_string;
+   end;
+   ftblob,ftmemo: begin
+    bufsize:= 0;
+    buffer_type:= mysql_type_blob;
+   end;
+  end;
+  bi^.length:= bufsize;
+  bi^.isblob:= bufsize = 0;
+  buffer_length:= bufsize;
+ end;
+end;
+
+procedure setupinputbinding(const index: integer; const fieldtype: tfieldtype;
+               const bindings: pointer; var bindinginfo: bindinginfoarty;
+               const abuffer: pointer; const abufsize: integer);
+var
+ bi: pbindinginfoty;
+ bufsize: integer;
+begin
+ bi:= @bindinginfo[index];
+ with pmysql_bind(bindings)[index] do begin
+  bufsize:= 0;
+  buffer:= abuffer;
+  length:= @bi^.length;
+  bi^.length:= abufsize;
+  is_null:= @bi^.isnull;
+  case fieldtype of
+   ftinteger: begin
+    bufsize:= sizeof(longint);
+    buffer_type:= mysql_type_long;
+   end;
+   ftlargeint: begin
+    bufsize:= sizeof(int64);
+    buffer_type:= mysql_type_longlong;
+   end;
+   ftbcd,ftfloat: begin
+    bufsize:= sizeof(double);
+    buffer_type:= mysql_type_double;
+   end;
+   ftdate,ftdatetime,fttime: begin
+    bufsize:= sizeof(mysql_time);
+    buffer_type:= mysql_type_timestamp;
+   end;
+   ftstring: begin
+    bufsize:= abufsize;
+    buffer_type:= mysql_type_var_string;
+   end;
+   ftblob: begin
+    bufsize:= abufsize;
+    buffer_type:= mysql_type_blob;
+   end;
+  end;
+  bi^.length:= bufsize;
+  buffer_length:= bufsize;
+ end;
+end;
+
+function createbindingbuffers(const bindings: pointer;
+                          var bindinfos: bindinginfoarty): pointer;
+var
+ int1: integer;
+ bufsum: cardinal;
+begin
+ bufsum:= 0;
+ for int1:= 0 to high(bindinfos) do begin
+  bufsum:= bufsum + bindinfos[int1].length;
+ end;
+ result:= getmem(bufsum);
+ bufsum:= 0;
+ for int1:= 0 to high(bindinfos) do begin
+  with bindinfos[int1] do begin
+   if length > 0 then begin
+    buffer:= result + bufsum;
+    pmysql_bind(bindings)[int1].buffer:= buffer;
+    bufsum:= bufsum + length;
+   end;
+  end;
+ end;   
+end;
+
+procedure freebindingbuffers(var abuffer: pointer);
+begin
+ if abuffer <> nil then begin
+  freemem(abuffer);
+  abuffer:= nil;
+ end;
+end;
+
 procedure tmysqlconnection.preparestatement(const cursor: tsqlcursor; 
                   const atransaction : tsqltransaction;
                   const asql: msestring; const aparams : tmseparams);
+var
+ mstr1: msestring;
+ str1: ansistring;
+ fieldcount: integer;
 begin
  With tmysqlcursor(cursor) do begin
   fconn:= tmysqltrans(atransaction.trans).fconn;
@@ -400,10 +594,46 @@ begin
    fconn:= fmysql1; // dummy transaction
    tmysqltrans(atransaction.trans).fconn:= fmysql1;
   end;
-  FStatementm:= asql;
-  if assigned(AParams) and (AParams.count > 0) then begin
-    FStatementm:= AParams.ParseSQL(FStatementm,false,false,false,psSimulated,
-                     paramBinding,ParamReplaceString);
+  
+  if (myo_preparedstatements in foptions) and 
+             (FStatementType in [stInsert,stUpdate,stDelete,stSelect]) then begin
+   fprepstatement:= mysql_stmt_init(fconn);
+   if fprepstatement = nil then begin
+    checkerror(serrprepare,fconn);
+   end;
+   if assigned(aparams) then begin
+    mstr1:= aparams.parsesql(asql,true,false,false,psinterbase,fparambinding);
+   end
+   else begin
+    mstr1:= asql;
+   end;
+   mstr1:= trim(mstr1);
+   if (mstr1 <> '') and (mstr1[length(mstr1)] = ';') then begin
+    setlength(mstr1,length(mstr1)-1);
+   end;
+   str1:= mstr1;
+   if mysql_stmt_prepare(fprepstatement,pchar(str1),length(str1)) <> 0 then begin
+    try
+     checkstmterror(serrprepare,fprepstatement);
+    finally
+     freeprepstatement;
+    end;
+   end;
+   fresultmetadata:= mysql_stmt_result_metadata(fprepstatement);
+   if fresultmetadata <> nil then begin
+    fresultfieldcount:= mysql_num_fields(fresultmetadata);
+    fresultbindings:= createbindings(fresultfieldcount);
+   end
+   else begin
+    fresultfieldcount:= 0;
+   end;
+  end
+  else begin
+   FStatementm:= asql;
+   if assigned(AParams) and (AParams.count > 0) then begin
+     FStatementm:= AParams.ParseSQL(FStatementm,false,false,false,psSimulated,
+                      paramBinding,ParamReplaceString);
+   end;
   end;
   if FStatementType in datareturningtypes then begin
    FNeedData:=True;
@@ -417,6 +647,13 @@ begin
  with tmysqlcursor(cursor) do begin
   fstatementm:= '';
   fprepared:= false;
+  fparambinding:= nil;
+  freeprepstatement;
+  freebindings(fresultbindings);
+  if fresultmetadata <> nil then begin
+   mysql_free_result(fresultmetadata);
+   fresultmetadata:= nil;
+  end;
  end;
 end;
 
@@ -438,7 +675,10 @@ begin
   if c.FStatementType in datareturningtypes then
     c.FNeedData:=False;
   freeresultbuffer(c);
-  SetLength(c.MapDSRowToMSQLRow,0);
+  c.mapdsrowtomsqlrow:= nil;
+//  SetLength(c.MapDSRowToMSQLRow,0);
+  c.fresultbindinginfo:= nil;
+  freebindingbuffers(c.fresultbuf);
 end;
 
 procedure tmysqlconnection.Execute(const  cursor: TSQLCursor;
@@ -449,11 +689,107 @@ var
  i: integer;
  str1: ansistring;
  par1: tparam;
+ int1: integer;
+ inputparambindings: bindinginfoarty;
+ paramdata: pointer;
+ inputbindings: pointer;
+ strings: stringarty;
+ dataty1: tfieldtype;
 begin
-  C:= tmysqlcursor(cursor);
-  c.frowsaffected:= -1;
-  c.frowsreturned:= -1;
-  freeresultbuffer(c);
+ C:= tmysqlcursor(cursor);
+ c.frowsaffected:= -1;
+ c.frowsreturned:= -1;
+ freeresultbuffer(c);
+ if c.fprepstatement <> nil then begin
+  paramdata:= nil;
+  inputbindings:= nil;
+  if (aparams <> nil) and (aparams.count > 0) then begin
+   inputbindings:= createbindings(length(c.fparambinding));
+   setlength(inputparambindings,length(c.fparambinding));
+   setlength(strings,length(c.fparambinding));
+   for int1:= 0 to high(c.fparambinding) do begin
+    if c.fparambinding[int1] < aparams.count then begin
+     with aparams[c.fparambinding[int1]] do begin
+      case datatype of //todo: date and time
+       ftinteger,ftsmallint,ftword: begin
+        setupinputbinding(int1,ftinteger,inputbindings,
+                                       inputparambindings,nil,sizeof(integer));
+       end;
+       ftlargeint: begin
+        setupinputbinding(int1,ftlargeint,inputbindings,
+                                       inputparambindings,nil,sizeof(int64));
+       end;
+       ftfloat,ftcurrency,ftbcd: begin
+        setupinputbinding(int1,ftfloat,inputbindings,
+                                       inputparambindings,nil,sizeof(double));
+       end;
+       ftstring,ftwidestring,ftblob,ftmemo,ftfixedchar,ftfixedwidechar: begin
+        //setup later
+       end;
+       else begin
+        freebindings(inputbindings);
+        databaseerror('Paramtype '+
+          getenumname(typeinfo(tfieldtype),ord(datatype))+' not supported.',self);
+       end;
+      end; 
+     end;
+    end;
+   end;
+   paramdata:= createbindingbuffers(inputbindings,inputparambindings);
+   for int1:= 0 to high(c.fparambinding) do begin
+    if c.fparambinding[int1] < aparams.count then begin
+     with aparams[c.fparambinding[int1]] do begin
+      if isnull then begin
+       inputparambindings[int1].isnull:= true;
+      end
+      else begin
+       case datatype of //todo: time and date
+        ftinteger,ftsmallint,ftword: begin
+         pinteger(inputparambindings[int1].buffer)^:= asinteger;
+        end;
+        ftlargeint: begin
+         pint64(inputparambindings[int1].buffer)^:= aslargeint;
+        end;
+        ftfloat,ftbcd,ftcurrency: begin
+         pdouble(inputparambindings[int1].buffer)^:= asfloat;
+        end;
+        ftstring,ftwidestring,ftblob,ftmemo,ftfixedchar,ftfixedwidechar: begin
+         strings[int1]:= aparams.asdbstring(int1);
+         dataty1:= datatype;
+         if dataty1 <> ftblob then begin
+          dataty1:= ftstring;
+         end;
+         setupinputbinding(int1,dataty1,inputbindings,
+                                  inputparambindings,pointer(strings[int1]),
+                                  length(strings[int1]));
+        end;
+       end;
+      end;
+     end;
+    end;
+   end;
+  end;
+  try
+   if mysql_stmt_bind_param(c.fprepstatement,inputbindings) <> 0 then begin
+    checkstmterror(serrexecuting,c.fprepstatement);
+   end;
+   if mysql_stmt_execute(c.fprepstatement) <> 0 then begin
+    checkstmterror(serrexecuting,c.fprepstatement);
+   end;
+  finally
+   freebindingbuffers(paramdata);
+   freebindings(inputbindings);
+  end;
+  C.fRowsAffected := mysql_stmt_affected_rows(c.fprepstatement);
+  C.LastInsertID := mysql_stmt_insert_id(c.fprepstatement);
+  if C.FNeedData then begin
+   c.frowsreturned:= -1; //not available
+  end
+  else begin
+   c.frowsreturned:= 0;
+  end;
+ end
+ else begin
   if Assigned(AParams) and (aparams.count > 0) then begin
    str1:= todbstring(aparams.expandvalues(c.fstatementm,
                           c.parambinding,c.paramreplacestring));
@@ -477,6 +813,7 @@ begin
     end;
    end;
   end;
+ end;
 end;
 
 //function tmysqlconnection.MySQLDataType(AType: enum_field_types; ASize, ADecimals: Integer;
@@ -539,6 +876,7 @@ begin
   end;
  end;
 end;
+//var testvar: integerarty; testvar1: bindinginfoarty;
 
 procedure tmysqlconnection.AddFieldDefs(const cursor: TSQLCursor;
                           const FieldDefs: TfieldDefs);
@@ -550,60 +888,89 @@ var
  DFS: Integer;
  fd: tfielddef;
  str1: ansistring;
+ res1: pmysql_res;
 
 begin
  fielddefs.clear;
-  C:= tmysqlcursor(cursor);
+ C:= tmysqlcursor(cursor);
+ if c.fprepstatement <> nil then begin
+  fc:= c.fresultfieldcount;
+  c.fresultbindinginfo:= nil; //initialize with zeros
+  setlength(c.fresultbindinginfo,fc);
+  res1:= mysql_stmt_result_metadata(c.fprepstatement);
+ end
+ else begin
   If (C.FRes=Nil) then begin
-    checkerror(SErrNoQueryResult,c.fconn);
+   checkerror(SErrNoQueryResult,c.fconn);
   end;
-  FC:=mysql_num_fields(C.FRes);
-  SetLength(c.MapDSRowToMSQLRow,FC);
-
-  TF := 1;
-  For I:= 0 to FC-1 do begin
-   field := mysql_fetch_field_direct(C.FRES, I);
-   with field^ do begin
-    if (flags and (pri_key_flag or auto_increment_flag) = 
-              (pri_key_flag or auto_increment_flag)) then begin
-     c.fprimarykeyfieldname:= name;
-    end;
+  res1:= c.fres;
+  FC:= mysql_num_fields(res1);
+ end;
+ 
+ SetLength(c.MapDSRowToMSQLRow,FC);
+ TF := 1;
+ For I:= 0 to FC-1 do begin
+  field := mysql_fetch_field_direct(res1, I);
+  with field^ do begin
+   if (flags and (pri_key_flag or auto_increment_flag) = 
+             (pri_key_flag or auto_increment_flag)) then begin
+    c.fprimarykeyfieldname:= name;
    end;
-   if MySQLDataType(field^,DFT,DFS) then begin
-    if (dft = ftmemo) and (cursor.stringmemo) then begin
-     dft:= ftstring;
-     dfs:= 0;
-    end;
-    str1:= field^.name;
-    if not(dft in varsizefields) then begin
-     dfs:= 0;
-    end;
-    fd:= TFieldDef.Create(nil,str1,DFT,DFS,False,TF);
-    {$ifndef mse_FPC_2_2} 
-    fd.displayname:= str1;
-    {$endif}
-    fd.collection:= fielddefs;
-    
-    c.MapDSRowToMSQLRow[TF-1] := I;
-    inc(TF);
-   end
   end;
+  if MySQLDataType(field^,DFT,DFS) then begin
+   if (dft = ftmemo) and (cursor.stringmemo) then begin
+    dft:= ftstring;
+    dfs:= 0;
+   end;
+   str1:= field^.name;
+   if not(dft in varsizefields) then begin
+    dfs:= 0;
+   end;
+   fd:= TFieldDef.Create(nil,str1,DFT,DFS,False,TF);
+   {$ifndef mse_FPC_2_2} 
+   fd.displayname:= str1;
+   {$endif}
+   fd.collection:= fielddefs;
+   
+   c.MapDSRowToMSQLRow[TF-1] := I;
+   if c.fprepstatement <> nil then begin
+    setupresultbinding(i,dft,dfs,c.fresultbindings,c.fresultbindinginfo);
+   end;
+   inc(TF);
+  end
+ end;
+ if (c.fprepstatement <> nil) and (res1 <> nil) then begin
+  c.fresultbuf:= createbindingbuffers(c.fresultbindings,c.fresultbindinginfo);
+  mysql_free_result(res1);
+  if mysql_stmt_bind_result(c.fprepstatement,c.fresultbindings) <> 0 then begin
+   checkstmterror(sbindresult,c.fprepstatement);
+  end;
+ end;
 end;
 
 function tmysqlconnection.Fetch(cursor: TSQLCursor): boolean;
 
 Var
   C : tmysqlcursor;
-
+  int1: integer;
 begin
-  C:=Cursor as tmysqlcursor;
+ C:= tmysqlcursor(cursor);
+ if c.fprepstatement <> nil then begin
+  int1:= mysql_stmt_fetch(c.fprepstatement);
+  result:= int1 <> mysql_no_data;
+  if result and (int1 <> 0) and (int1 <> mysql_data_truncated) then begin
+   checkstmterror(serrfetchingdata,c.fprepstatement);
+  end;
+ end
+ else begin
   C.Row:=MySQL_Fetch_row(C.FRes);
   Result:=(C.Row<>Nil);
+ end;
 end;
 
 function tmysqlconnection.loadfield(const cursor: tsqlcursor;
       const datatype: tfieldtype; const fieldnum: integer; //null based
-      const buffer: pointer; var bufsize: integer): boolean;
+      const abuffer: pointer; var abufsize: integer): boolean;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
 
 var
@@ -617,41 +984,80 @@ begin
  result:= false;
  C:= tmysqlcursor(Cursor);
  fno:= fieldnum;
- if C.Row=nil then
-    begin
- //   Writeln('LoadFieldsFromBuffer: row=nil');
-    checkerror(SErrFetchingData,c.fconn);
+ if c.fprepstatement <> nil then begin
+  with c.fresultbindinginfo[c.MapDSRowToMSQLRow[fno]] do begin
+   result:= not isnull and (buffer <> nil);
+   if abuffer = nil then begin
+    exit;     //check null state
+   end;
+   if result then begin
+    case datatype of        //todo: blobs and time
+     ftinteger,ftsmallint,ftword: begin
+      pinteger(abuffer)^:= pinteger(buffer)^;
+     end;
+     ftlargeint: begin
+      pint64(abuffer)^:= pint64(buffer)^;
+     end;
+     ftfloat: begin
+      pdouble(abuffer)^:= pdouble(buffer)^;
+     end;
+     ftbcd: begin
+      pcurrency(abuffer)^:= pdouble(buffer)^;
+     end;
+     ftstring: begin
+      if length > abufsize then begin
+       abufsize:= -length;
+      end
+      else begin
+       move(buffer^,abuffer^,length);
+       abufsize:= length;
+      end;
+     end
+     else begin
+      result:= false; //not suported
+     end;
     end;
- Row:=C.Row;
- 
- inc(Row,c.MapDSRowToMSQLRow[fno]);
- if row^ <> nil then begin
-  if buffer = nil then begin
-   exit;
+   end;
   end;
-  field:= mysql_fetch_field_direct(C.FRES,c.MapDSRowToMSQLRow[fno]);
-  if datatype = ftstring then begin
-//   alen:= strlen(row^);
-   alen:= mysql_fetch_lengths(c.fres)[c.MapDSRowToMSQLRow[fno]];
-   if bufsize < alen then begin 
-    bufsize:= -alen;
-    result:= true;
+ end
+ else begin
+  if C.Row=nil then
+     begin
+  //   Writeln('LoadFieldsFromBuffer: row=nil');
+     checkerror(SErrFetchingData,c.fconn);
+     end;
+  Row:=C.Row;
+  
+  inc(Row,c.MapDSRowToMSQLRow[fno]);
+//  inc(row,fno);
+  if row^ <> nil then begin
+   if abuffer = nil then begin
     exit;
-   end
-   else begin
-    bufsize:= alen;
    end;
-  end
-  else begin
-   if datatype in [ftmemo,ftgraphic,ftblob] then begin
+   field:= mysql_fetch_field_direct(C.FRES,c.MapDSRowToMSQLRow[fno]);
+   if datatype = ftstring then begin
+ //   alen:= strlen(row^);
     alen:= mysql_fetch_lengths(c.fres)[c.MapDSRowToMSQLRow[fno]];
+    if abufsize < alen then begin 
+     abufsize:= -alen;
+     result:= true;
+     exit;
+    end
+    else begin
+     abufsize:= alen;
+    end;
    end
    else begin
-    alen:= field^.length;
+    if datatype in [ftmemo,ftgraphic,ftblob] then begin
+     alen:= mysql_fetch_lengths(c.fres)[c.MapDSRowToMSQLRow[fno]];
+    end
+    else begin
+     alen:= field^.length;
+    end;
    end;
+   Result:= MySQLWriteData(cursor, field^.ftype,alen,
+        DataType,Row^,aBuffer);
   end;
-  Result:= MySQLWriteData(cursor, field^.ftype,alen,
-       DataType,Row^,Buffer);
  end;
 end;
 

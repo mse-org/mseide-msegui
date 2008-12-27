@@ -29,7 +29,6 @@ unit mysqldyn;
 interface
 
 uses
-{$define mysql50}
 {$IFDEF LinkDynamically}
       sysutils,
 {$ENDIF}
@@ -95,6 +94,33 @@ uses
        
        pppchar = ^ppchar;
        PPByte     = ^PByte;
+
+{  ------------ Start of declaration in "mysql_time.h"   ---------------------  }
+
+{
+  Structure which is used to represent datetime values inside MySQL.
+
+  We assume that values in this structure are normalized, i.e. year <= 9999,
+  month <= 12, day <= 31, hour <= 23, hour <= 59, hour <= 59. Many functions
+  in server such as my_system_gmt_sec() or make_time() family of functions
+  rely on this (actually now usage of make_*() family relies on a bit weaker
+  restriction). Also functions that produce MYSQL_TIME as result ensure this.
+  There is one exception to this rule though if this structure holds time
+  value (time_type == MYSQL_TIMESTAMP_TIME) days and hour member can hold
+  bigger values.
+}
+type
+ enum_mysql_timestamp_type = (
+  MYSQL_TIMESTAMP_NONE= -2, MYSQL_TIMESTAMP_ERROR= -1,
+  MYSQL_TIMESTAMP_DATE= 0, MYSQL_TIMESTAMP_DATETIME= 1, MYSQL_TIMESTAMP_TIME= 2);
+
+ MYSQL_TIME = record
+  year, month, day, hour, minute, second: cuint;
+  second_part: culong;
+  neg: my_bool;
+  time_type: enum_mysql_timestamp_type;
+ end;
+
 
 {  ------------ Start of declaration in "mysql_com.h"   ---------------------  }
 
@@ -1072,7 +1098,7 @@ uses
     }
        Pst_mysql_bind = ^st_mysql_bind;
        st_mysql_bind = record
-            length : culong;                // output length pointer
+            length : pculong;                // output length pointer
             is_null : Pmy_bool;             // Pointer to null indicator
             buffer : pointer;               // buffer to get/put data
 {$IFDEF mysql50}
@@ -1726,7 +1752,7 @@ begin
      @mysql_stmt_insert_id,                //90
      @mysql_stmt_field_count               //91
     ]);
-    mysql_library_init(0,nil,nil);
+    mysql_library_init(-1,nil,nil);
    except
     on e: exception do begin
      e.message:= 'Library "'+mstr1+'": '+e.message;
