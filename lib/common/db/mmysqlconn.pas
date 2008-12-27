@@ -8,6 +8,9 @@ unit mmysqlconn;
 {$MACRO on}
 
 {$define mysql50} 
+{$ifdef mysql50}
+ {$define mysql41}
+{$endif}
 
 interface
 
@@ -374,12 +377,14 @@ begin
     checkerror(SErrDatabaseSelectFailed);
 end;
 }
+var testvar: string;
 procedure tmysqlconnection.DoInternalConnect;
 begin
  ftransactionconnectionused:= false;
 //  FDidConnect:=(MySQLLibraryHandle=NilHandle);
 //  if FDidConnect then
  InitialiseMysql;
+testvar:= mysql_get_client_info();
 (*
 {$IFDEF mysql50}
   if copy(strpas(mysql_get_client_info()),1,3)<>'5.0' then

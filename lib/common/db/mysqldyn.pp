@@ -21,7 +21,7 @@ Modified 2008 by Martin Schreiber
 unit mysqldyn;
 
 {$DEFINE LinkDynamically}
-{$DEFINE MYSQL50}
+{$DEFINE mysql50}
 
 {$MODE objfpc}
 {$MACRO on}
