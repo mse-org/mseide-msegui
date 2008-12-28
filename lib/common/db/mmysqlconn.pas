@@ -71,7 +71,7 @@ Type
    procedure freeprepstatement;
   end;
 
-  mysqloptionty = (myo_preparedstatements); //not working!
+  mysqloptionty = (myo_nopreparedstatements);
   mysqloptionsty = set of mysqloptionty;
   
   tmysqlconnection = class (TSQLConnection,iblobconnection)
@@ -192,12 +192,10 @@ Type
 
 implementation
 uses 
- dbconst,msebufdataset,typinfo;
+ dbconst,msebufdataset,typinfo,dateutils;
 type
  tmsebufdataset1 = class(tmsebufdataset);
  
-{ tmysqlconnection }
-
 Resourcestring
   SErrServerConnectFailed = 'Server connect failed.';
   SErrDatabaseSelectFailed = 'failed to select database: %s';
@@ -216,6 +214,207 @@ Resourcestring
   SErrNotversion50 = 'TMySQL50Connection can not work with the installed MySQL client version (%s).';
   SErrNotversion41 = 'TMySQL41Connection can not work with the installed MySQL client version (%s).';
   SErrNotversion40 = 'TMySQL40Connection can not work with the installed MySQL client version (%s).';
+
+function datetimetomysql_time(const datatype: tfieldtype; 
+                            const avalue: tdatetime): mysql_time;
+var
+ year1,month1,day1,hour1,minute1,second1,millisecond1: word;
+begin
+ fillchar(result,sizeof(result),0);
+ decodedatetime(avalue,year1,month1,day1,hour1,minute1,second1,millisecond1);
+ with result do begin
+  if datatype in [ftdate,ftdatetime] then begin
+   year:= year1;
+   month:= month1;
+   day:= day1;
+   time_type:= mysql_timestamp_date;
+  end;
+  if datatype in [fttime,ftdatetime] then begin
+   hour:= hour1;
+   minute:= minute1;
+   second:= second1;
+   second_part:= millisecond1 * 1000;
+   time_type:= mysql_timestamp_time;
+  end;
+  if datatype = ftdatetime then begin
+   time_type:= mysql_timestamp_datetime;
+  end;
+ end;
+end;
+
+function mysql_timetodatetime(const avalue: mysql_time): tdatetime;
+begin
+ result:= 0;
+ with avalue do begin
+  case time_type of
+   mysql_timestamp_date: begin
+    tryencodedate(year,month,day,result);
+   end;
+   mysql_timestamp_time: begin
+    tryencodetime(hour,minute,second,second_part div 1000,
+                         result);
+   end;
+   else begin
+    tryencodedatetime(year,month,day,hour,minute,second,second_part div 1000,
+                         result);
+   end;
+  end;
+ end;
+end;
+
+function createbindings(const acount: integer): pointer;
+var
+ int1: integer;
+begin
+ result:= nil;
+ int1:= acount * sizeof(mysql_bind);
+ if int1 > 0 then begin
+  result:= getmem(int1);
+  fillchar(result^,int1,0);
+ end;
+end;
+
+function getbind(const abindings: pointer; const index: integer): pointer;
+begin
+ result:= @pmysql_bind(abindings)[index];
+end;
+
+procedure freebindings(var abindings: pointer);
+begin
+ if abindings <> nil then begin
+  freemem(abindings);
+  abindings:= nil;
+ end;
+end;
+
+procedure setupresultbinding(const index: integer; const fieldtype: tfieldtype;
+               const len: integer;     //character count
+               const bindings: pointer; var bindinginfo: bindinginfoarty);
+var
+ bi: pbindinginfoty;
+ bufsize: integer;
+begin
+ bi:= @bindinginfo[index];
+ with pmysql_bind(bindings)[index] do begin
+  bufsize:= 0;
+  length:= @bi^.length;
+  is_null:= @bi^.isnull;
+  case fieldtype of
+   ftinteger: begin
+    bufsize:= sizeof(longint);
+    buffer_type:= mysql_type_long;
+   end;
+   ftlargeint: begin
+    bufsize:= sizeof(int64);
+    buffer_type:= mysql_type_longlong;
+   end;
+   ftbcd,ftfloat: begin
+    bufsize:= sizeof(double);
+    buffer_type:= mysql_type_double;
+   end;
+   ftdate,ftdatetime,fttime: begin
+    bufsize:= sizeof(mysql_time);
+    buffer_type:= mysql_type_datetime;
+   end;
+   ftstring: begin
+    bufsize:= len*4; //room for multibyte encodings
+    buffer_type:= mysql_type_var_string;
+   end;
+   ftblob,ftmemo,ftgraphic: begin
+    bufsize:= 0;
+    buffer_type:= mysql_type_blob;
+   end;
+  end;
+  bi^.length:= bufsize;
+  bi^.isblob:= bufsize = 0;
+  buffer_length:= bufsize;
+ end;
+end;
+
+procedure setupinputbinding(const index: integer; const fieldtype: tfieldtype;
+               const bindings: pointer; var bindinginfo: bindinginfoarty;
+               const abuffer: pointer; const abufsize: integer);
+var
+ bi: pbindinginfoty;
+ bufsize: integer;
+begin
+ bi:= @bindinginfo[index];
+ with pmysql_bind(bindings)[index] do begin
+  bufsize:= 0;
+  buffer:= abuffer;
+  length:= @bi^.length;
+  bi^.length:= abufsize;
+  is_null:= @bi^.isnull;
+  case fieldtype of
+   ftinteger: begin
+    bufsize:= sizeof(longint);
+    buffer_type:= mysql_type_long;
+   end;
+   ftlargeint: begin
+    bufsize:= sizeof(int64);
+    buffer_type:= mysql_type_longlong;
+   end;
+   ftbcd,ftfloat: begin
+    bufsize:= sizeof(double);
+    buffer_type:= mysql_type_double;
+   end;
+   ftdate,ftdatetime,fttime: begin
+    bufsize:= sizeof(mysql_time);
+    buffer_type:= mysql_type_datetime;
+   end;
+   ftstring: begin
+    bufsize:= abufsize;
+    buffer_type:= mysql_type_var_string;
+   end;
+   ftblob,ftmemo,ftgraphic: begin
+    bufsize:= abufsize;
+    buffer_type:= mysql_type_blob;
+   end;
+  end;
+  bi^.length:= bufsize;
+  buffer_length:= bufsize;
+ end;
+end;
+
+function createbindingbuffers(const bindings: pointer;
+                          var bindinfos: bindinginfoarty): pointer;
+var
+ int1: integer;
+ bufsum: cardinal;
+begin
+ bufsum:= 0;
+ for int1:= 0 to high(bindinfos) do begin
+  bufsum:= bufsum + bindinfos[int1].length;
+ end;
+ result:= getmem(bufsum);
+ bufsum:= 0;
+ for int1:= 0 to high(bindinfos) do begin
+  with bindinfos[int1] do begin
+   if length > 0 then begin
+    buffer:= result + bufsum;
+    pmysql_bind(bindings)[int1].buffer:= buffer;
+    bufsum:= bufsum + length;
+   end;
+  end;
+ end;   
+end;
+
+procedure freebindingbuffers(var abuffer: pointer);
+begin
+ if abuffer <> nil then begin
+  freemem(abuffer);
+  abuffer:= nil;
+ end;
+end;
+
+procedure setbindingbuffer(const bindings: pointer; const index: integer; 
+                          const abuffer: pointer; const alength: integer);
+begin
+ with pmysql_bind(bindings)[index] do begin
+  buffer:= abuffer;
+  buffer_length:= alength;
+ end;
+end;
 
 { tmysqlcursor }
 
@@ -448,146 +647,6 @@ begin
  end;
 end;
 
-function createbindings(const acount: integer): pointer;
-var
- int1: integer;
-begin
- result:= nil;
- int1:= acount * sizeof(mysql_bind);
- if int1 > 0 then begin
-  result:= getmem(int1);
-  fillchar(result^,int1,0);
- end;
-end;
-
-procedure freebindings(var abindings: pointer);
-begin
- if abindings <> nil then begin
-  freemem(abindings);
-  abindings:= nil;
- end;
-end;
-
-procedure setupresultbinding(const index: integer; const fieldtype: tfieldtype;
-               const len: integer;     //character count
-               const bindings: pointer; var bindinginfo: bindinginfoarty);
-var
- bi: pbindinginfoty;
- bufsize: integer;
-begin
- bi:= @bindinginfo[index];
- with pmysql_bind(bindings)[index] do begin
-  bufsize:= 0;
-  length:= @bi^.length;
-  is_null:= @bi^.isnull;
-  case fieldtype of
-   ftinteger: begin
-    bufsize:= sizeof(longint);
-    buffer_type:= mysql_type_long;
-   end;
-   ftlargeint: begin
-    bufsize:= sizeof(int64);
-    buffer_type:= mysql_type_longlong;
-   end;
-   ftbcd,ftfloat: begin
-    bufsize:= sizeof(double);
-    buffer_type:= mysql_type_double;
-   end;
-   ftdate,ftdatetime,fttime: begin
-    bufsize:= sizeof(mysql_time);
-    buffer_type:= mysql_type_timestamp;
-   end;
-   ftstring: begin
-    bufsize:= len*4; //room for multibyte encodings
-    buffer_type:= mysql_type_var_string;
-   end;
-   ftblob,ftmemo: begin
-    bufsize:= 0;
-    buffer_type:= mysql_type_blob;
-   end;
-  end;
-  bi^.length:= bufsize;
-  bi^.isblob:= bufsize = 0;
-  buffer_length:= bufsize;
- end;
-end;
-
-procedure setupinputbinding(const index: integer; const fieldtype: tfieldtype;
-               const bindings: pointer; var bindinginfo: bindinginfoarty;
-               const abuffer: pointer; const abufsize: integer);
-var
- bi: pbindinginfoty;
- bufsize: integer;
-begin
- bi:= @bindinginfo[index];
- with pmysql_bind(bindings)[index] do begin
-  bufsize:= 0;
-  buffer:= abuffer;
-  length:= @bi^.length;
-  bi^.length:= abufsize;
-  is_null:= @bi^.isnull;
-  case fieldtype of
-   ftinteger: begin
-    bufsize:= sizeof(longint);
-    buffer_type:= mysql_type_long;
-   end;
-   ftlargeint: begin
-    bufsize:= sizeof(int64);
-    buffer_type:= mysql_type_longlong;
-   end;
-   ftbcd,ftfloat: begin
-    bufsize:= sizeof(double);
-    buffer_type:= mysql_type_double;
-   end;
-   ftdate,ftdatetime,fttime: begin
-    bufsize:= sizeof(mysql_time);
-    buffer_type:= mysql_type_timestamp;
-   end;
-   ftstring: begin
-    bufsize:= abufsize;
-    buffer_type:= mysql_type_var_string;
-   end;
-   ftblob: begin
-    bufsize:= abufsize;
-    buffer_type:= mysql_type_blob;
-   end;
-  end;
-  bi^.length:= bufsize;
-  buffer_length:= bufsize;
- end;
-end;
-
-function createbindingbuffers(const bindings: pointer;
-                          var bindinfos: bindinginfoarty): pointer;
-var
- int1: integer;
- bufsum: cardinal;
-begin
- bufsum:= 0;
- for int1:= 0 to high(bindinfos) do begin
-  bufsum:= bufsum + bindinfos[int1].length;
- end;
- result:= getmem(bufsum);
- bufsum:= 0;
- for int1:= 0 to high(bindinfos) do begin
-  with bindinfos[int1] do begin
-   if length > 0 then begin
-    buffer:= result + bufsum;
-    pmysql_bind(bindings)[int1].buffer:= buffer;
-    bufsum:= bufsum + length;
-   end;
-  end;
- end;   
-end;
-
-procedure freebindingbuffers(var abuffer: pointer);
-begin
- if abuffer <> nil then begin
-  freemem(abuffer);
-  abuffer:= nil;
- end;
-end;
-
 procedure tmysqlconnection.preparestatement(const cursor: tsqlcursor; 
                   const atransaction : tsqltransaction;
                   const asql: msestring; const aparams : tmseparams);
@@ -603,7 +662,7 @@ begin
    tmysqltrans(atransaction.trans).fconn:= fmysql1;
   end;
   
-  if (myo_preparedstatements in foptions) and 
+  if not (myo_nopreparedstatements in foptions) and 
              (FStatementType in [stInsert,stUpdate,stDelete,stSelect]) then begin
    fprepstatement:= mysql_stmt_init(fconn);
    if fprepstatement = nil then begin
@@ -721,15 +780,19 @@ begin
       case datatype of //todo: date and time
        ftinteger,ftsmallint,ftword: begin
         setupinputbinding(int1,ftinteger,inputbindings,
-                                       inputparambindings,nil,sizeof(integer));
+                                 inputparambindings,nil,sizeof(integer));
        end;
        ftlargeint: begin
         setupinputbinding(int1,ftlargeint,inputbindings,
-                                       inputparambindings,nil,sizeof(int64));
+                                 inputparambindings,nil,sizeof(int64));
        end;
        ftfloat,ftcurrency,ftbcd: begin
         setupinputbinding(int1,ftfloat,inputbindings,
-                                       inputparambindings,nil,sizeof(double));
+                                 inputparambindings,nil,sizeof(double));
+       end;
+       ftdate,ftdatetime,fttime: begin
+        setupinputbinding(int1,ftdatetime,inputbindings,
+                                 inputparambindings,nil,sizeof(mysql_time));
        end;
        ftstring,ftwidestring,ftblob,ftmemo,ftfixedchar,ftfixedwidechar: begin
         //setup later
@@ -751,7 +814,7 @@ begin
        inputparambindings[int1].isnull:= true;
       end
       else begin
-       case datatype of //todo: time and date
+       case datatype of
         ftinteger,ftsmallint,ftword: begin
          pinteger(inputparambindings[int1].buffer)^:= asinteger;
         end;
@@ -760,6 +823,10 @@ begin
         end;
         ftfloat,ftbcd,ftcurrency: begin
          pdouble(inputparambindings[int1].buffer)^:= asfloat;
+        end;
+        ftdate,ftdatetime,fttime: begin
+         pmysql_time(inputparambindings[int1].buffer)^:= 
+                 datetimetomysql_time(datatype,asdatetime);
         end;
         ftstring,ftwidestring,ftblob,ftmemo,ftfixedchar,ftfixedwidechar: begin
          strings[int1]:= aparams.asdbstring(int1);
@@ -987,19 +1054,22 @@ var
   C : tmysqlcursor;
   fno: integer;
   alen: integer;
+  int1: integer;
+  str1: ansistring;
+  index1: integer;
 begin
-//  Writeln('LoadFieldsFromBuffer');
  result:= false;
  C:= tmysqlcursor(Cursor);
  fno:= fieldnum;
  if c.fprepstatement <> nil then begin
-  with c.fresultbindinginfo[c.MapDSRowToMSQLRow[fno]] do begin
-   result:= not isnull and (buffer <> nil);
+  index1:= c.MapDSRowToMSQLRow[fno];
+  with c.fresultbindinginfo[index1] do begin
+   result:= not isnull;
    if abuffer = nil then begin
     exit;     //check null state
    end;
    if result then begin
-    case datatype of        //todo: blobs and time
+    case datatype of        //todo: blobs
      ftinteger,ftsmallint,ftword: begin
       pinteger(abuffer)^:= pinteger(buffer)^;
      end;
@@ -1012,6 +1082,9 @@ begin
      ftbcd: begin
       pcurrency(abuffer)^:= pdouble(buffer)^;
      end;
+     ftdate,fttime,ftdatetime: begin
+      pdatetime(abuffer)^:= mysql_timetodatetime(pmysql_time(buffer)^);
+     end;
      ftstring: begin
       if length > abufsize then begin
        abufsize:= -length;
@@ -1020,7 +1093,21 @@ begin
        move(buffer^,abuffer^,length);
        abufsize:= length;
       end;
-     end
+     end;
+     ftblob,ftgraphic,ftmemo: begin
+      setlength(str1,length);
+      if length > 0 then begin
+       setbindingbuffer(c.fresultbindings,index1,pointer(str1),length);
+       int1:= mysql_stmt_fetch_column(c.fprepstatement,
+                               getbind(c.fresultbindings,index1),index1,0);
+       setbindingbuffer(c.fresultbindings,index1,nil,0);
+       if int1 <> 0 then begin
+        checkstmterror(serrfetchingdata,c.fprepstatement);
+       end;
+      end;
+      int1:= cursor.addblobdata(pchar(str1),system.length(str1));
+      pinteger(abuffer)^:= int1;  //save id
+     end;
      else begin
       result:= false; //not suported
      end;

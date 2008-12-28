@@ -21,7 +21,11 @@ Modified 2008 by Martin Schreiber
 unit mysqldyn;
 
 {$DEFINE LinkDynamically}
+
 {$DEFINE mysql50}
+{$IFDEF mysql50}
+  {$DEFINE mysql41}
+{$ENDIF mysql50}
 
 {$MODE objfpc}
 {$MACRO on}
@@ -58,9 +62,6 @@ uses
 *)
 {$ENDIF}
 
-{$IFDEF mysql50}
-  {$DEFINE mysql41}
-{$ENDIF mysql50}
 
 {$PACKRECORDS C}
 
@@ -120,7 +121,7 @@ type
   neg: my_bool;
   time_type: enum_mysql_timestamp_type;
  end;
-
+ pmysql_time = ^mysql_time;
 
 {  ------------ Start of declaration in "mysql_com.h"   ---------------------  }
 
