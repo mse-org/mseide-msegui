@@ -7,7 +7,12 @@ unit mmysqlconn;
 {$mode objfpc}{$H+}
 {$MACRO on}
 
-{$define mysql50} 
+
+{$DEFINE mysql51}
+
+{$ifdef mysql51}
+ {$define mysql50}
+{$endif}
 {$ifdef mysql50}
  {$define mysql41}
 {$endif}
@@ -195,7 +200,9 @@ uses
  dbconst,msebufdataset,typinfo,dateutils;
 type
  tmsebufdataset1 = class(tmsebufdataset);
- 
+var
+ is51: boolean;
+  
 Resourcestring
   SErrServerConnectFailed = 'Server connect failed.';
   SErrDatabaseSelectFailed = 'failed to select database: %s';
@@ -267,7 +274,12 @@ var
  int1: integer;
 begin
  result:= nil;
- int1:= acount * sizeof(mysql_bind);
+ if is51 then begin
+  int1:= acount * sizeof(mysql_bind_51);
+ end
+ else begin
+  int1:= acount * sizeof(mysql_bind_50);
+ end;
  if int1 > 0 then begin
   result:= getmem(int1);
   fillchar(result^,int1,0);
@@ -276,7 +288,12 @@ end;
 
 function getbind(const abindings: pointer; const index: integer): pointer;
 begin
- result:= @pmysql_bind(abindings)[index];
+ if is51 then begin
+  result:= @pmysql_bind_51(abindings)[index];
+ end
+ else begin
+  result:= @pmysql_bind_50(abindings)[index];
+ end;
 end;
 
 procedure freebindings(var abindings: pointer);
@@ -293,42 +310,56 @@ procedure setupresultbinding(const index: integer; const fieldtype: tfieldtype;
 var
  bi: pbindinginfoty;
  bufsize: integer;
+ pbuffer_type: penum_field_types;
+ pbuffer_length: pculong;
 begin
  bi:= @bindinginfo[index];
- with pmysql_bind(bindings)[index] do begin
-  bufsize:= 0;
-  length:= @bi^.length;
-  is_null:= @bi^.isnull;
-  case fieldtype of
-   ftinteger: begin
-    bufsize:= sizeof(longint);
-    buffer_type:= mysql_type_long;
-   end;
-   ftlargeint: begin
-    bufsize:= sizeof(int64);
-    buffer_type:= mysql_type_longlong;
-   end;
-   ftbcd,ftfloat: begin
-    bufsize:= sizeof(double);
-    buffer_type:= mysql_type_double;
-   end;
-   ftdate,ftdatetime,fttime: begin
-    bufsize:= sizeof(mysql_time);
-    buffer_type:= mysql_type_datetime;
-   end;
-   ftstring: begin
-    bufsize:= len*4; //room for multibyte encodings
-    buffer_type:= mysql_type_var_string;
-   end;
-   ftblob,ftmemo,ftgraphic: begin
-    bufsize:= 0;
-    buffer_type:= mysql_type_blob;
-   end;
+ if is51 then begin
+  with pmysql_bind_51(bindings)[index] do begin
+   pbuffer_type:= @buffer_type;
+   pbuffer_length:= @buffer_length;
+   length:= @bi^.length;
+   is_null:= @bi^.isnull;
   end;
-  bi^.length:= bufsize;
-  bi^.isblob:= bufsize = 0;
-  buffer_length:= bufsize;
+ end
+ else begin
+  with pmysql_bind_50(bindings)[index] do begin
+   pbuffer_type:= @buffer_type;
+   pbuffer_length:= @buffer_length;
+   length:= @bi^.length;
+   is_null:= @bi^.isnull;
+  end;
  end;
+ bufsize:= 0;
+ case fieldtype of
+  ftinteger: begin
+   bufsize:= sizeof(longint);
+   pbuffer_type^:= mysql_type_long;
+  end;
+  ftlargeint: begin
+   bufsize:= sizeof(int64);
+   pbuffer_type^:= mysql_type_longlong;
+  end;
+  ftbcd,ftfloat: begin
+   bufsize:= sizeof(double);
+   pbuffer_type^:= mysql_type_double;
+  end;
+  ftdate,ftdatetime,fttime: begin
+   bufsize:= sizeof(mysql_time);
+   pbuffer_type^:= mysql_type_datetime;
+  end;
+  ftstring: begin
+   bufsize:= len*4; //room for multibyte encodings
+   pbuffer_type^:= mysql_type_var_string;
+  end;
+  ftblob,ftmemo,ftgraphic: begin
+   bufsize:= 0;
+   pbuffer_type^:= mysql_type_blob;
+  end;
+ end;
+ pbuffer_length^:= bufsize;
+ bi^.length:= bufsize;
+ bi^.isblob:= bufsize = 0;
 end;
 
 procedure setupinputbinding(const index: integer; const fieldtype: tfieldtype;
@@ -337,43 +368,58 @@ procedure setupinputbinding(const index: integer; const fieldtype: tfieldtype;
 var
  bi: pbindinginfoty;
  bufsize: integer;
+ pbuffer_type: penum_field_types;
+ pbuffer_length: pculong;
 begin
  bi:= @bindinginfo[index];
- with pmysql_bind(bindings)[index] do begin
-  bufsize:= 0;
-  buffer:= abuffer;
-  length:= @bi^.length;
-  bi^.length:= abufsize;
-  is_null:= @bi^.isnull;
-  case fieldtype of
-   ftinteger: begin
-    bufsize:= sizeof(longint);
-    buffer_type:= mysql_type_long;
-   end;
-   ftlargeint: begin
-    bufsize:= sizeof(int64);
-    buffer_type:= mysql_type_longlong;
-   end;
-   ftbcd,ftfloat: begin
-    bufsize:= sizeof(double);
-    buffer_type:= mysql_type_double;
-   end;
-   ftdate,ftdatetime,fttime: begin
-    bufsize:= sizeof(mysql_time);
-    buffer_type:= mysql_type_datetime;
-   end;
-   ftstring: begin
-    bufsize:= abufsize;
-    buffer_type:= mysql_type_var_string;
-   end;
-   ftblob,ftmemo,ftgraphic: begin
-    bufsize:= abufsize;
-    buffer_type:= mysql_type_blob;
-   end;
+ if is51 then begin
+  with pmysql_bind_51(bindings)[index] do begin
+   pbuffer_type:= @buffer_type;
+   pbuffer_length:= @buffer_length;
+   length:= @bi^.length;
+   is_null:= @bi^.isnull;
+   buffer:= abuffer;
   end;
-  bi^.length:= bufsize;
-  buffer_length:= bufsize;
+ end
+ else begin
+  with pmysql_bind_50(bindings)[index] do begin
+   pbuffer_type:= @buffer_type;
+   pbuffer_length:= @buffer_length;
+   length:= @bi^.length;
+   is_null:= @bi^.isnull;
+   buffer:= abuffer;
+  end;
  end;
+ bufsize:= 0;
+ case fieldtype of
+  ftinteger: begin
+   bufsize:= sizeof(longint);
+   pbuffer_type^:= mysql_type_long;
+  end;
+  ftlargeint: begin
+   bufsize:= sizeof(int64);
+   pbuffer_type^:= mysql_type_longlong;
+  end;
+  ftbcd,ftfloat: begin
+   bufsize:= sizeof(double);
+   pbuffer_type^:= mysql_type_double;
+  end;
+  ftdate,ftdatetime,fttime: begin
+   bufsize:= sizeof(mysql_time);
+   pbuffer_type^:= mysql_type_datetime;
+  end;
+  ftstring: begin
+   bufsize:= abufsize;
+   pbuffer_type^:= mysql_type_var_string;
+  end;
+  ftblob,ftmemo,ftgraphic: begin
+   bufsize:= abufsize;
+   pbuffer_type^:= mysql_type_blob;
+  end;
+ end;
+ bi^.length:= bufsize;
+ pbuffer_length^:= bufsize;
+ bi^.isblob:= bufsize = 0;
 end;
 
 function createbindingbuffers(const bindings: pointer;
@@ -392,7 +438,12 @@ begin
   with bindinfos[int1] do begin
    if length > 0 then begin
     buffer:= result + bufsum;
-    pmysql_bind(bindings)[int1].buffer:= buffer;
+    if is51 then begin
+     pmysql_bind_51(bindings)[int1].buffer:= buffer;
+    end
+    else begin
+     pmysql_bind_50(bindings)[int1].buffer:= buffer;
+    end;
     bufsum:= bufsum + length;
    end;
   end;
@@ -410,9 +461,17 @@ end;
 procedure setbindingbuffer(const bindings: pointer; const index: integer; 
                           const abuffer: pointer; const alength: integer);
 begin
- with pmysql_bind(bindings)[index] do begin
-  buffer:= abuffer;
-  buffer_length:= alength;
+ if is51 then begin
+  with pmysql_bind_51(bindings)[index] do begin
+   buffer:= abuffer;
+   buffer_length:= alength;
+  end;
+ end
+ else begin
+  with pmysql_bind_50(bindings)[index] do begin
+   buffer:= abuffer;
+   buffer_length:= alength;
+  end;
  end;
 end;
 
@@ -576,34 +635,22 @@ begin
     checkerror(SErrDatabaseSelectFailed);
 end;
 }
-var testvar: string;
+
 procedure tmysqlconnection.DoInternalConnect;
+var
+ version: integer;
 begin
  ftransactionconnectionused:= false;
-//  FDidConnect:=(MySQLLibraryHandle=NilHandle);
-//  if FDidConnect then
  InitialiseMysql;
-testvar:= mysql_get_client_info();
-(*
-{$IFDEF mysql50}
-  if copy(strpas(mysql_get_client_info()),1,3)<>'5.0' then
-    Raise EInOutError.CreateFmt(SErrNotversion50,[strpas(mysql_get_client_info())]);
-{$ELSE}
-  {$IFDEF mysql41}
-  if copy(strpas(mysql_get_client_info()),1,3)<>'4.1' then
-    Raise EInOutError.CreateFmt(SErrNotversion41,[strpas(mysql_get_client_info())]);
-  {$ELSE}
-  if copy(strpas(mysql_get_client_info()),1,3)<>'4.0' then
-    Raise EInOutError.CreateFmt(SErrNotversion40,[strpas(mysql_get_client_info())]);
-  {$ENDIF}
-{$ENDIF}
-*)
-  inherited DoInternalConnect;
-  openconnection(fmysql1);
-  FServerInfo := strpas(mysql_get_server_info(FMYSQL1));
-  FHostInfo := strpas(mysql_get_host_info(FMYSQL1));
-//  ConnectToServer;
-//  SelectDatabase;
+ version:= mysql_get_client_version() div 100;
+ if version < 500 then begin
+  raise exception.create(name+': MySql client version must be >= 5.0.');
+ end;
+ is51:= version >= 501;
+ inherited DoInternalConnect;
+ openconnection(fmysql1);
+ FServerInfo := strpas(mysql_get_server_info(FMYSQL1));
+ FHostInfo := strpas(mysql_get_host_info(FMYSQL1));
 end;
 
 procedure tmysqlconnection.DoInternalDisconnect;

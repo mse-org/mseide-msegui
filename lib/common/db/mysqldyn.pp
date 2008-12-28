@@ -22,7 +22,11 @@ unit mysqldyn;
 
 {$DEFINE LinkDynamically}
 
-{$DEFINE mysql50}
+{$DEFINE mysql51}
+
+{$ifdef mysql51}
+ {$define mysql50}
+{$endif}
 {$IFDEF mysql50}
   {$DEFINE mysql41}
 {$ENDIF mysql50}
@@ -95,6 +99,17 @@ uses
        
        pppchar = ^ppchar;
        PPByte     = ^PByte;
+       
+       pculong = ^culong;
+       
+{  ------------ Start of declaration in "my_list.h"   ---------------------  }
+
+ pst_list = ^st_list;
+ st_list = record
+  prev,next: pst_list;
+  data: pointer;
+ end;
+ LIST = st_list;
 
 {  ------------ Start of declaration in "mysql_time.h"   ---------------------  }
 
@@ -365,7 +380,7 @@ type
          MYSQL_TYPE_BLOB := 252,MYSQL_TYPE_VAR_STRING := 253,
          MYSQL_TYPE_STRING := 254,MYSQL_TYPE_GEOMETRY := 255
          );
-
+       penum_field_types = ^enum_field_types;
     { For backward compatibility  }
 
     const
@@ -623,6 +638,9 @@ type
             charsetnr : cuint;        // Character set
 {$ENDIF}
             ftype : enum_field_types; // Type of field. See mysql_com.h for types
+{$ifdef mysql51}
+            extension: pointer;
+{$endif}
          end;
        MYSQL_FIELD = st_mysql_field;
        PMYSQL_FIELD = ^MYSQL_FIELD;
@@ -707,6 +725,16 @@ type
 
     type
        Pst_mysql_data = ^st_mysql_data;
+{$ifdef mysql51}
+       st_mysql_data = record
+            data : PMYSQL_ROWS;
+            prev_ptr : ^PMYSQL_ROWS;
+            alloc : MEM_ROOT;
+            rows : my_ulonglong;
+            fields : cuint;
+            extension: pointer;
+       end;
+{$else}
        st_mysql_data = record
             rows : my_ulonglong;
             fields : cuint;
@@ -716,9 +744,8 @@ type
 {$IFDEF mysql41}
             prev_ptr : ^PMYSQL_ROWS;
 {$ENDIF}
-{ $endif}
          end;
-         
+{$endif}       
        MYSQL_DATA = st_mysql_data;
        PMYSQL_DATA = ^MYSQL_DATA;
        mysql_option = (MYSQL_OPT_CONNECT_TIMEOUT,MYSQL_OPT_COMPRESS,
@@ -824,6 +851,9 @@ type
             local_infile_error : function (_para1:pointer; _para2:Pchar; _para3:cuint):cint;
             local_infile_userdata : pointer;
 {$ENDIF}
+{$ifdef mysql51}
+            extension: pointer;
+{$endif}
          end;
 
        mysql_status = (MYSQL_STATUS_READY,MYSQL_STATUS_GET_RESULT,
@@ -891,7 +921,11 @@ type
        Pst_mysql = ^st_mysql;
        st_mysql = record
             net : NET;                   // Communication parameters
+{$ifdef mysql51}
+            connector_fd: pbyte;         // ConnectorFd for SSL
+{$else}
             connector_fd : gptr;         // ConnectorFd for SSL
+{$endif}
             host : Pchar;
             user : Pchar;
             passwd : Pchar;
@@ -938,12 +972,35 @@ type
         from mysql_stmt_close if close had to cancel result set of this object.       }
             unbuffered_fetch_owner : Pmy_bool;
 {$ENDIF}
+{$ifdef mysql51}
+            info_buffer: pchar;
+            extension: pointer;
+{$endif}
          end;
        MYSQL = st_mysql;
        PMYSQL = ^MYSQL;
 
 
        Pst_mysql_res = ^st_mysql_res;
+{$ifdef mysql51}
+       st_mysql_res = record
+            row_count : my_ulonglong;
+            fields : PMYSQL_FIELD;
+            data : PMYSQL_DATA;
+            data_cursor : PMYSQL_ROWS;
+            lengths : pculong;            // column lengths of current row
+            handle : PMYSQL;             // for unbuffered reads
+            methods : Pst_mysql_methods;
+            row : MYSQL_ROW;             // If unbuffered read
+            current_row : MYSQL_ROW;     // buffer to current row
+            field_alloc : MEM_ROOT;
+            field_count : cuint;
+            current_field : cuint;
+            eof : my_bool;               // Used by mysql_fetch_row
+            unbuffered_fetch_cancelled : my_bool;  // mysql_stmt_close() had to cancel this result
+            extension: pointer;
+         end;
+{$else}
        st_mysql_res = record
             row_count : my_ulonglong;
             fields : PMYSQL_FIELD;
@@ -963,6 +1020,7 @@ type
             methods : Pst_mysql_methods;
 {$ENDIF}
          end;
+{$endif}
        MYSQL_RES = st_mysql_res;
        PMYSQL_RES = ^MYSQL_RES;
 
@@ -971,8 +1029,13 @@ type
 
        st_mysql_methods = record
             read_query_result : function (mysql:PMYSQL):my_bool;cdecl;
+{$ifdef mysql51}
+            advanced_command : function (mysql:PMYSQL; command:enum_server_command; header:Pbyte; header_length:culong; arg:Pbyte;
+                         arg_length:culong; skip_check:my_bool):my_bool;
+{$else}
             advanced_command : function (mysql:PMYSQL; command:enum_server_command; header:Pchar; header_length:culong; arg:Pchar;
                          arg_length:culong; skip_check:my_bool):my_bool;
+{$endif}
             read_rows : function (mysql:PMYSQL; mysql_fields:PMYSQL_FIELD; fields:cuint):PMYSQL_DATA;
             use_result : function (mysql:PMYSQL):PMYSQL_RES;
             fetch_lengths : procedure (fto:pculong; column:MYSQL_ROW; field_count:cuint);
@@ -997,6 +1060,25 @@ type
 
 
        Pst_mysql_manager = ^st_mysql_manager;
+{$ifdef mysql51}
+       st_mysql_manager = record
+            net : NET;
+            host : Pchar;
+            user : Pchar;
+            passwd : Pchar;
+            net_buf : Pchar;
+            net_buf_pos : Pchar;
+            net_data_end : Pchar;
+            port : cuint;
+            cmd_status : cint;
+            last_errno : cint;
+            net_buf_size : cint;
+            free_me : my_bool;
+            eof : my_bool;
+            last_error : array[0..(MAX_MYSQL_MANAGER_ERR)-1] of char;
+            extension: pointer;
+         end;
+{$else}
        st_mysql_manager = record
             net : NET;
             host : Pchar;
@@ -1013,6 +1095,7 @@ type
             net_buf_size : cint;
             last_error : array[0..(MAX_MYSQL_MANAGER_ERR)-1] of char;
          end;
+{$endif}
        MYSQL_MANAGER = st_mysql_manager;
        PMYSQL_MANAGER = ^MYSQL_MANAGER;
 
@@ -1097,6 +1180,60 @@ type
 
       Please note that MYSQL_BIND also has internals members.
     }
+
+{$ifdef mysql51}
+       Pst_mysql_bind_51 = ^st_mysql_bind_51;
+       st_mysql_bind_51 = record
+            length : pculong;                // output length pointer
+            is_null : Pmy_bool;             // Pointer to null indicator
+            buffer : pointer;               // buffer to get/put data
+            error: pmy_bool;                // set this if you want to track data truncations happened during fetch
+            row_ptr : PByte;                // for the current data position
+            store_param_func : procedure (net:PNET; param:Pst_mysql_bind_51);cdecl;
+            fetch_result : procedure (_para1:Pst_mysql_bind_51; _para2:PMYSQL_FIELD; row:PPbyte);
+            skip_result : procedure (_para1:Pst_mysql_bind_51; _para2:PMYSQL_FIELD; row:PPbyte);
+            buffer_length : culong;         // buffer length, must be set for str/binary
+            offset : culong;                // offset position for char/binary fetch
+            length_value : culong;          //  Used if length is 0
+            param_number : cuint;           // For null count and error messages
+            pack_length : cuint;            // Internal length for packed data
+            buffer_type : enum_field_types; // buffer type
+            error_value : my_bool;         // used if error is 0
+            is_unsigned : my_bool;          // set if integer type is unsigned
+            long_data_used : my_bool;       // If used with mysql_send_long_data
+            is_null_value : my_bool;        // Used if is_null is 0
+            extension: pointer;
+         end;
+         
+       MYSQL_BIND_51 = st_mysql_bind_51;
+       PMYSQL_BIND_51 = ^MYSQL_BIND_51;
+
+       Pst_mysql_bind_50 = ^st_mysql_bind_50;
+       st_mysql_bind_50 = record
+            length : pculong;                // output length pointer
+            is_null : Pmy_bool;             // Pointer to null indicator
+            buffer : pointer;               // buffer to get/put data
+            error: pmy_bool;                // set this if you want to track data truncations happened during fetch
+            buffer_type : enum_field_types; // buffer type
+            buffer_length : culong;         // buffer length, must be set for str/binary
+    { Following are for internal use. Set by mysql_stmt_bind_param  }
+            row_ptr : PByte;                // for the current data position
+            offset : culong;                // offset position for char/binary fetch
+            length_value : culong;          //  Used if length is 0
+            param_number : cuint;           // For null count and error messages
+            pack_length : cuint;            // Internal length for packed data
+            error_value : my_bool;         // used if error is 0
+            is_unsigned : my_bool;          // set if integer type is unsigned
+            long_data_used : my_bool;       // If used with mysql_send_long_data
+            is_null_value : my_bool;        // Used if is_null is 0
+            store_param_func : procedure (net:PNET; param:Pst_mysql_bind_50);cdecl;
+            fetch_result : procedure (_para1:Pst_mysql_bind_50; _para2:PMYSQL_FIELD; row:PPbyte);
+            skip_result : procedure (_para1:Pst_mysql_bind_50; _para2:PMYSQL_FIELD; row:PPbyte);
+         end;
+
+       MYSQL_BIND_50 = st_mysql_bind_50;
+       PMYSQL_BIND_50 = ^MYSQL_BIND_50;
+{$else}
        Pst_mysql_bind = ^st_mysql_bind;
        st_mysql_bind = record
             length : pculong;                // output length pointer
@@ -1137,11 +1274,49 @@ type
          end;
        MYSQL_BIND = st_mysql_bind;
        PMYSQL_BIND = ^MYSQL_BIND;
+{$endif}
 
     { statement handler  }
+{$ifdef mysql51}
        st_mysql_stmt = record
             mem_root : MEM_ROOT;            // root allocations
-//            list : LIST;                    // list to keep track of all stmts
+            list : LIST;                    // list to keep track of all stmts
+            mysql : PMYSQL;                 // connection handle
+            params : PMYSQL_BIND_51;           // input parameters
+            bind : PMYSQL_BIND_51;             // input parameters
+            fields : PMYSQL_FIELD;          // result set metadata
+            result : MYSQL_DATA;            // cached result set
+            data_cursor : PMYSQL_ROWS;      // current row in cached result
+    {   mysql_stmt_fetch() calls this function to fetch one row (it's different
+        for buffered, unbuffered and cursor fetch).       }
+            read_row_func : function (stmt:Pst_mysql_stmt; row:PPbyte):cint;cdecl;
+            affected_rows : my_ulonglong;   // copy of mysql->affected_rows after statement execution
+            insert_id : my_ulonglong;       // copy of mysql->insert_id
+            stmt_id : culong;               // Id for prepared statement
+            flags : culong;                 // i.e. type of cursor to open
+            prefetch_rows : culong;         // number of rows per one COM_FETCH
+            server_status : cuint;          // Copied from mysql->server_status after execute/fetch to know
+                                            // server-side cursor status for this statement.
+            last_errno : cuint;             // error code
+            param_count : cuint;            // input parameter count
+            field_count : cuint;            // number of columns in result set
+            state : enum_mysql_stmt_state;  // statement state
+            last_error : array[0..(MYSQL_ERRMSG_SIZE)-1] of char;  // error message
+            sqlstate : array[0..(SQLSTATE_LENGTH+1)-1] of char;
+            send_types_to_server : my_bool; // Types of input parameters should be sent to server
+            bind_param_done : my_bool;      // input buffers were supplied
+            bind_result_done : cuchar;      // output buffers were supplied
+
+            unbuffered_fetch_cancelled : my_bool;   // mysql_stmt_close() had to cancel this result
+    {   Is set to true if we need to calculate field->max_length for
+        metadata fields when doing mysql_stmt_store_result.       }
+            update_max_length : my_bool;
+            extension: pointer;
+         end;
+{$else}
+       st_mysql_stmt = record
+            mem_root : MEM_ROOT;            // root allocations
+            list : LIST;                    // list to keep track of all stmts
             mysql : PMYSQL;                 // connection handle
             params : PMYSQL_BIND;           // input parameters
             bind : PMYSQL_BIND;             // input parameters
@@ -1179,6 +1354,8 @@ type
         metadata fields when doing mysql_stmt_store_result.       }
             update_max_length : my_bool;
          end;
+{$endif}
+
        MYSQL_STMT = st_mysql_stmt;
     {   When doing mysql_stmt_store_result calculate max_length attribute
         of statement metadata. This is to be consistent with the old API,
@@ -1323,7 +1500,11 @@ type
 
     function mysql_list_tables(mysql:PMYSQL; wild:Pchar):PMYSQL_RES;extdecl;external mysqllib name 'mysql_list_tables';
     function mysql_list_processes(mysql:PMYSQL):PMYSQL_RES;extdecl;external mysqllib name 'mysql_list_processes';
+{$ifdef mysql51}
+    function mysql_options(mysql:PMYSQL; option:mysql_option; arg: pointer):cint;extdecl;external mysqllib name 'mysql_options';
+{$else}
     function mysql_options(mysql:PMYSQL; option:mysql_option; arg:Pchar):cint;extdecl;external mysqllib name 'mysql_options';
+{$endif}
     procedure mysql_free_result(result:PMYSQL_RES);extdecl;external mysqllib name 'mysql_free_result';
     procedure mysql_data_seek(result:PMYSQL_RES; offset:my_ulonglong);extdecl;external mysqllib name 'mysql_data_seek';
     function mysql_row_seek(result:PMYSQL_RES; offset:MYSQL_ROW_OFFSET):MYSQL_ROW_OFFSET;extdecl;external mysqllib name 'mysql_row_seek';
@@ -1352,7 +1533,11 @@ type
     function mysql_stmt_prepare(stmt:PMYSQL_STMT; query:Pchar; length:culong):cint;extdecl;external mysqllib name 'mysql_stmt_prepare';
     function mysql_stmt_execute(stmt:PMYSQL_STMT):cint;extdecl;external mysqllib name 'mysql_stmt_execute';
     function mysql_stmt_fetch(stmt:PMYSQL_STMT):cint;extdecl;external mysqllib name 'mysql_stmt_fetch';
+{$ifdef mysql51}
+    function mysql_stmt_fetch_column(stmt:PMYSQL_STMT; bind: pointer{PMYSQL_BIND}; column:cuint; offset:culong):cint;extdecl;external mysqllib name 'mysql_stmt_fetch_column';
+{$else}
     function mysql_stmt_fetch_column(stmt:PMYSQL_STMT; bind:PMYSQL_BIND; column:cuint; offset:culong):cint;extdecl;external mysqllib name 'mysql_stmt_fetch_column';
+{$endif}
     function mysql_stmt_store_result(stmt:PMYSQL_STMT):cint;extdecl;external mysqllib name 'mysql_stmt_store_result';
     function mysql_stmt_param_count(stmt:PMYSQL_STMT):culong;extdecl;external mysqllib name 'mysql_stmt_param_count';
     function mysql_stmt_attr_set(stmt:PMYSQL_STMT; attr_type:enum_stmt_attr_type; attr:pointer):my_bool;extdecl;external mysqllib name 'mysql_stmt_attr_set';
@@ -1484,7 +1669,11 @@ var MysqlLibraryHandle : TLibHandle;
 
       mysql_list_tables: function (mysql:PMYSQL; wild:Pchar):PMYSQL_RES;extdecl;
       mysql_list_processes: function (mysql:PMYSQL):PMYSQL_RES;extdecl;
+{$ifdef mysql51}
+      mysql_options: function (mysql:PMYSQL; option:mysql_option; arg: pointer):cint;extdecl;
+{$else}
       mysql_options: function (mysql:PMYSQL; option:mysql_option; arg:Pchar):cint;extdecl;
+{$endif}
       mysql_free_result: procedure (result:PMYSQL_RES);extdecl;
       mysql_data_seek: procedure (result:PMYSQL_RES; offset:my_ulonglong);extdecl;
       mysql_row_seek: function (result:PMYSQL_RES; offset:MYSQL_ROW_OFFSET):MYSQL_ROW_OFFSET;extdecl;
@@ -1509,13 +1698,22 @@ var MysqlLibraryHandle : TLibHandle;
       mysql_stmt_prepare: function (stmt:PMYSQL_STMT; query:Pchar; length:culong):cint;extdecl;
       mysql_stmt_execute: function (stmt:PMYSQL_STMT):cint;extdecl;
       mysql_stmt_fetch: function (stmt:PMYSQL_STMT):cint;extdecl;
+{$ifdef mysql51}
+      mysql_stmt_fetch_column: function (stmt:PMYSQL_STMT; bind:pointer{PMYSQL_BIND}; column:cuint; offset:culong):cint;extdecl;
+{$else}
       mysql_stmt_fetch_column: function (stmt:PMYSQL_STMT; bind:PMYSQL_BIND; column:cuint; offset:culong):cint;extdecl;
+{$endif}
       mysql_stmt_store_result: function (stmt:PMYSQL_STMT):cint;extdecl;
       mysql_stmt_param_count: function (stmt:PMYSQL_STMT):culong;extdecl;
       mysql_stmt_attr_set: function (stmt:PMYSQL_STMT; attr_type:enum_stmt_attr_type; attr:pointer):my_bool;extdecl;
       mysql_stmt_attr_get: function (stmt:PMYSQL_STMT; attr_type:enum_stmt_attr_type; attr:pointer):my_bool;extdecl;
+{$ifdef mysql51}
+      mysql_stmt_bind_param: function (stmt:PMYSQL_STMT; bnd:pointer{PMYSQL_BIND}):my_bool;extdecl;
+      mysql_stmt_bind_result: function (stmt:PMYSQL_STMT; bnd:pointer{PMYSQL_BIND}):my_bool;extdecl;
+{$else}
       mysql_stmt_bind_param: function (stmt:PMYSQL_STMT; bnd:PMYSQL_BIND):my_bool;extdecl;
       mysql_stmt_bind_result: function (stmt:PMYSQL_STMT; bnd:PMYSQL_BIND):my_bool;extdecl;
+{$endif}
       mysql_stmt_close: function (stmt:PMYSQL_STMT):my_bool;extdecl;
       mysql_stmt_reset: function (stmt:PMYSQL_STMT):my_bool;extdecl;
       mysql_stmt_free_result: function (stmt:PMYSQL_STMT):my_bool;extdecl;
