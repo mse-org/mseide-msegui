@@ -68,7 +68,7 @@ type
  
  TPQConnection = class (TSQLConnection,iblobconnection,idbevent,idbeventcontroller)
   private
-//   FCursorCount         : word;
+   FCursorCount         : integer;
    FConnectString       : string;
    FHandle: ppgconn;
    FIntegerDateTimes    : boolean;
@@ -529,50 +529,66 @@ const TypeStrings : array[TFieldType] of string =
       {$endif}
     );
 
-
+const
+ savepoint = 'mseinternal$prep;';
 var 
  s: string;
  i: integer;
  str1: string;
+ bo1: boolean;
+ n: integer;
 begin
- with (cursor as TPQCursor) do begin
+ with TPQCursor(cursor) do begin
   if tpqtrans(atransaction.trans).fconn = nil then begin
    tpqtrans(atransaction.trans).fconn:= fhandle; //fake transaction
   end;
   FPrepared := False;
-//  nr:= inttostr(FCursorcount);
-//  inc(FCursorCount);
   // Prior to v8 there is no support for cursors and parameters.
   // So that's not supported.
   if FStatementType in [stInsert,stUpdate,stDelete,stSelect] then begin
    tr:= TPQTrans(aTransaction.Handle);
-   // Only available for pq 8.0, so don't use it...
-   // Res := pqprepare(tr,'prepst'+name+nr,pchar(buf),params.Count,pchar(''));
-   s:= 'prepare prepst'+nr+' ';
-   if Assigned(AParams) and (AParams.count > 0) then begin
-    s:= s + '(';
-    for i := 0 to AParams.count-1 do begin
-     if TypeStrings[AParams[i].DataType] <> 'Unknown' then begin
-      s:= s + TypeStrings[AParams[i].DataType] + ','
-     end
-     else begin
-      if AParams[i].DataType = ftUnknown then begin
-       DatabaseErrorFmt(SUnknownParamFieldType,[AParams[i].Name],self);
+   repeat
+    n:= interlockedincrement(fcursorcount) and $ffffff; 
+             //limit range 0..167774655
+    nr:= inttostr(n);
+    // Only available for pq 8.0, so don't use it...
+    // Res := pqprepare(tr,'prepst'+name+nr,pchar(buf),params.Count,pchar(''));
+    s:= 'prepare prepst'+nr+' ';
+    if Assigned(AParams) and (AParams.count > 0) then begin
+     s:= s + '(';
+     for i := 0 to AParams.count-1 do begin
+      if TypeStrings[AParams[i].DataType] <> 'Unknown' then begin
+       s:= s + TypeStrings[AParams[i].DataType] + ','
       end
       else begin
-       DatabaseErrorFmt(SUnsupportedParameter,
-                    [Fieldtypenames[AParams[i].DataType]],self);
+       if AParams[i].DataType = ftUnknown then begin
+        DatabaseErrorFmt(SUnknownParamFieldType,[AParams[i].Name],self);
+       end
+       else begin
+        DatabaseErrorFmt(SUnsupportedParameter,
+                     [Fieldtypenames[AParams[i].DataType]],self);
+       end;
       end;
      end;
+     s[length(s)]:= ')';
+     str1:= todbstring(AParams.ParseSQL(asql,false,false,false,psPostgreSQL));
+    end
+    else begin
+     str1:= todbstring(asql);
     end;
-    s[length(s)]:= ')';
-    str1:= todbstring(AParams.ParseSQL(asql,false,false,false,psPostgreSQL));
-   end
-   else begin
-    str1:= todbstring(asql);
-   end;
-   s:= s + ' as ' + str1;
-   res := pqexec(tr.fconn,pchar(s));
+    s:= s + ' as ' + str1;
+    pqexec(tr.fconn,'SAVEPOINT '+savepoint);
+    res := pqexec(tr.fconn,pchar(s));
+    bo1:= (PQresultStatus(res) = PGRES_COMMAND_OK);
+    if not bo1 then begin
+     pqexec(tr.fconn,'ROLLBACK TO SAVEPOINT '+savepoint);
+    end
+    else begin
+     pqexec(tr.fconn,'RELEASE SAVEPOINT '+savepoint);
+    end;
+   until bo1 or 
+          (strpas(pqresulterrorfield(res,ord(pg_diag_sqlstate))) <> '42P05');
+           //no   duplicate_prepared_statement
    if (PQresultStatus(res) <> PGRES_COMMAND_OK) then begin
      pqclear(res);
      DatabaseError(SErrPrepareFailed + ' (PostgreSQL: ' + 
