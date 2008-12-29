@@ -7,8 +7,8 @@ uses
  
 procedure Register;
 begin
- registercomponents('Exp',[tmsemysqlconnection]);
- registercomponenttabhints(['Exp'],['Experimental Components']);
+// registercomponents('Exp',[tmsemysqlconnection]);
+// registercomponenttabhints(['Exp'],['Experimental Components']);
 end;
 initialization
  register;

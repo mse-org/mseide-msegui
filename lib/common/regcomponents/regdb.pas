@@ -115,7 +115,7 @@ uses
  mselookupbuffer,msedbf,msesdfdata,msememds,
  msedatalist,msedbfieldeditor,sysutils,msetexteditor,
  msedbdispwidgets,msedbgraphics,regdb_bmp,msedbdialog,msegrids,
- regwidgets,msebufdataset,msedbevents,msesqlite3conn,msqldb
+ regwidgets,msebufdataset,msedbevents,msesqlite3conn,msqldb,msemysqlconn
  {$ifdef mse_with_sqlite}
  ,msesqlite3ds
  {$endif}
@@ -226,7 +226,8 @@ begin
       tmsesqlquery,tmsesqltransaction,
       tsqlstatement,tmsesqlscript,tsqlresult,tsqllookupbuffer,
       tmseibconnection,tmsepqconnection,tsqlite3connection,tmseodbcconnection,
-      tmsemysql40connection,tmsemysql41connection,tmsemysql50connection
+      tmsemysql40connection,tmsemysql41connection,tmsemysql50connection,
+      tmsemysqlconnection
       {$ifdef mse_with_sqlite}
        ,tmsesqlite3dataset
       {$endif}
