@@ -1013,7 +1013,6 @@ begin
   end;
  end;
 end;
-//var testvar: integerarty; testvar1: bindinginfoarty;
 
 procedure tmysqlconnection.AddFieldDefs(const cursor: TSQLCursor;
                           const FieldDefs: TfieldDefs);

@@ -486,7 +486,7 @@ procedure tpqconnection.preparestatement(const cursor: tsqlcursor;
 const TypeStrings : array[TFieldType] of string =
     (
       'Unknown',  //ftUnknown
-      'text',     //ftString 
+      'varchar',  //ftString 
       'int',      //ftSmallint
       'int',      //ftInteger
       'int',      //ftWord
