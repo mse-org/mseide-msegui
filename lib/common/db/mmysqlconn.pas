@@ -1553,7 +1553,7 @@ end;
 procedure tmysqlconnection.internalRollBackRetaining(trans: TSQLHandle);
 begin
  with tmysqltrans(trans) do begin
-  if mysql_query(fconn,'ROLLBAK AND CHAIN') <> 0 then begin
+  if mysql_query(fconn,'ROLLBACK AND CHAIN') <> 0 then begin
    checkerror(serrrollbacktransaction,fconn);
   end;
  end;
