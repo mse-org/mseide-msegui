@@ -601,6 +601,7 @@ type
    function getitems(aindex: integer): msestring; virtual;
    procedure setitems(aindex: integer; const Value: msestring);
    function createdatalist: tdatalist; override;
+   procedure updatedisptext(var avalue: msestring); virtual;
    function getrowtext(const arow: integer): msestring; virtual;
    procedure drawcell(const canvas: tcanvas); override;
    procedure docellevent(var info: celleventinfoty); override;
@@ -5104,6 +5105,24 @@ begin
  result:= items[arow];
 end;
 
+procedure tcustomstringcol.updatedisptext(var avalue: msestring);
+begin
+ if scoe_trimleft in foptionsedit then begin
+  avalue:= trimleft(avalue);
+ end;
+ if scoe_trimright in foptionsedit then begin
+  avalue:= trimright(avalue);
+ end;
+ if scoe_uppercase in foptionsedit then begin
+  avalue:= mseuppercase(avalue);
+ end
+ else begin
+  if scoe_lowercase in foptionsedit then begin
+   avalue:= mselowercase(avalue);
+  end;
+ end;
+end;
+
 procedure tcustomstringcol.drawcell(const canvas: tcanvas);
 begin
  inherited;
@@ -5112,6 +5131,7 @@ begin
  with cellinfoty(canvas.drawinfopo^) do begin
   if cell.row < fgrid.rowcount then begin
    ftextinfo.text.text:= getrowtext(cell.row);
+   updatedisptext(ftextinfo.text.text);
    drawtext(canvas,ftextinfo);
   end;
  end;
@@ -11680,12 +11700,18 @@ begin
 end;
 
 procedure tcustomstringgrid.setupeditor(const acell: gridcoordty);
+var
+ col1: tcustomstringcol;
+ mstr1: msestring;
 begin
- feditor.setup(items[acell],0,false,cellrect(acell,cil_inner),
+ col1:= tcustomstringcol(fdatacols[acell.col]);
+ mstr1:= col1[acell.row];
+ col1.updatedisptext(mstr1);
+ feditor.setup(mstr1,0,false,cellrect(acell,cil_inner),
                     cellrect(acell,cil_paint),nil,nil,
                     fdatacols[acell.col].rowfont(acell.row));
- feditor.textflags:= tstringcol(fdatacols[acell.col]).textflags;
- feditor.textflagsactive:= tstringcol(fdatacols[acell.col]).ftextflagsactive;
+ feditor.textflags:= col1.textflags;
+ feditor.textflagsactive:= col1.ftextflagsactive;
  feditor.dofocus;
  if active then begin
   feditor.doactivate;
@@ -11951,6 +11977,7 @@ begin
   strcol:= datacols[ffocusedcell.col];
   if cos_edited in strcol.fstate then begin
    mstr1:= feditor.text;
+   strcol.updatedisptext(mstr1);
    if canevent(tmethod(strcol.fonsetvalue)) then begin
     strcol.fonsetvalue(strcol,mstr1,accept);
    end;

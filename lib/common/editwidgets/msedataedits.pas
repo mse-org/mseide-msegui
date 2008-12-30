@@ -1890,7 +1890,7 @@ end;
 
 procedure tcustomstringedit.updatedisptext(var avalue: msestring);
 begin
- //dummy
+ updateflagtext(avalue);
 end;
 
 procedure tcustomstringedit.dosetvalue(var avalue: msestring; var accept: boolean);
@@ -1905,20 +1905,7 @@ var
  mstr1: msestring;
 begin
  mstr1:= getvaluetext;
- if oe_trimleft in foptionsedit then begin
-  mstr1:= trimleft(mstr1);
- end;
- if oe_trimright in foptionsedit then begin
-  mstr1:= trimright(mstr1);
- end;
- if oe_uppercase in foptionsedit then begin
-  mstr1:= mseuppercase(mstr1);
- end
- else begin
-  if oe_lowercase in foptionsedit then begin
-   mstr1:= mselowercase(mstr1);
-  end;
- end;
+ updateflagtext(mstr1);
  checktext(mstr1,accept);
  if not accept then begin
   exit;
