@@ -339,6 +339,7 @@ type
    feditor: tinplaceedit;
    foptionsedit: optionseditty;
    foptionsdb: optionseditdbty;
+   procedure updateflagtext(var avalue: msestring);
    function geteditor: tinplaceedit;
    function geteditfont: tfont; virtual;
    procedure setupeditor; virtual;
@@ -1357,6 +1358,24 @@ end;
 procedure tcustomedit.changed;
 begin
  dochange;
+end;
+
+procedure tcustomedit.updateflagtext(var avalue: msestring);
+begin
+ if oe_trimleft in foptionsedit then begin
+  avalue:= trimleft(avalue);
+ end;
+ if oe_trimright in foptionsedit then begin
+  avalue:= trimright(avalue);
+ end;
+ if oe_uppercase in foptionsedit then begin
+  avalue:= mseuppercase(avalue);
+ end
+ else begin
+  if oe_lowercase in foptionsedit then begin
+   avalue:= mselowercase(avalue);
+  end;
+ end;
 end;
 
 function tcustomedit.geteditor: tinplaceedit;
