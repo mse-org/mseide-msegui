@@ -338,7 +338,7 @@ type
    {$endif}
   public
    destructor destroy; override;
-   procedure updateskin(const recursive: boolean = false);
+   procedure updateskin(const recursive: boolean = false); virtual;
    function loading: boolean; reintroduce;
        //this hides FPC tcomponent.loading which is not Delphi compatible
    {$ifdef FPC}
