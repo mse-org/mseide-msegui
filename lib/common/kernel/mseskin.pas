@@ -654,6 +654,8 @@ type
    property mainmenu_popupitemframeactive: tframecomp read fmainmenu.pop.itemframeactive 
                                  write setmainmenu_popupitemframeactive;
  end;
+
+function activeskincontroller: tcustomskincontroller;
   
 implementation
 uses
@@ -662,7 +664,14 @@ type
  twidget1 = class(twidget);
  tcustomframe1 = class(tcustomframe);
  ttabs1 = class(ttabs);
-  
+var
+ factiveskincontroller: tcustomskincontroller;
+
+function activeskincontroller: tcustomskincontroller;
+begin
+ result:= factiveskincontroller;
+end;
+   
 { tskincolor }
 
 constructor tskincolor.create;
@@ -810,26 +819,28 @@ begin
 end;
 
 procedure tcustomskincontroller.setactive(const avalue: boolean);
-{$ifndef FPC}
+//{$ifndef FPC}
 var
  meth1: skinobjecteventty;
-{$endif}
+//{$endif}
 begin
  if factive <> avalue then begin
   factive:= avalue;
   if not (csdesigning in componentstate) then begin
    if avalue then begin
     oninitskinobject:= {$ifdef FPC}@{$endif}updateskin;
+    factiveskincontroller:= self;
    end
    else begin
-   {$ifdef FPC}
-    if oninitskinobject = @updateskin then begin
-    {$else}
-    meth1:= updateskin;
+//   {$ifdef FPC}
+//    if oninitskinobject = @updateskin then begin
+//    {$else}
+    meth1:= {$ifdef FPC}@{$endif}updateskin;
     if (tmethod(oninitskinobject).code = tmethod(meth1).code) and
-                  (tmethod(oninitskinobject).code = tmethod(meth1).code) then begin
-    {$endif}
+                  (tmethod(oninitskinobject).data = tmethod(meth1).data) then begin
+//    {$endif}
      oninitskinobject:= nil;
+     factiveskincontroller:= nil;
     end;
    end;
    if not (csloading in componentstate) then begin
