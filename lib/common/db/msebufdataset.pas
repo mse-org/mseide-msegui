@@ -3589,6 +3589,8 @@ begin
     if (characterlength <> 0) and (length(mstr1) > characterlength)  then begin
      setlength(mstr1,characterlength);
     end;
+    dest.aswidestring:= mstr1;
+{
     if isftwidestring then begin
      dest.aswidestring:= mstr1;
     end
@@ -3600,8 +3602,9 @@ begin
       dest.asstring:= mstr1;
      end;
     end;
+}
     if fixedchar then begin
-     dest.datatype:= ftfixedchar;
+     dest.datatype:= ftfixedwidechar;
     end;
    end;
   end;
@@ -3629,14 +3632,17 @@ begin
    end;
   end
   else begin
+  {
    if bs_utf8 in fbstate then begin
     dest.asstring:= stringtoutf8(mstr1);
    end
    else begin
     dest.asstring:= mstr1;
    end;
+  }
+   dest.aswidestring:= mstr1;
    if tmsestringfield(source).fixedchar then begin
-    dest.datatype:= ftfixedchar;
+    dest.datatype:= ftfixedwidechar;
    end;
   end;
  end

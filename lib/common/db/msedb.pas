@@ -1676,6 +1676,7 @@ begin
   end
   else begin
    case datatype of
+   {
     ftstring,ftwidestring: begin
      if (aparam.collection is tmseparams) and 
                          tmseparams(aparam.collection).isutf8 then begin
@@ -1685,8 +1686,20 @@ begin
       result:= encodesqlstring(asstring);
      end;
     end;
-    ftmemo: begin
+    }
+    ftwidestring: begin
+     result:= encodesqlstring(aswidestring);
+    end;
+    ftstring: begin
      result:= encodesqlstring(asstring);
+    end;
+    ftmemo: begin
+     if (aparam.collection is tmseparams) and tmseparams(collection).isutf8 then begin
+      result:= encodesqlstring(utf8tostring(asstring));
+     end
+     else begin
+      result:= encodesqlstring(asstring);
+     end;
     end;
     ftblob,ftgraphic: begin
      result:= encodesqlblob(asstring);
@@ -1710,7 +1723,7 @@ begin
      result:= encodesqlboolean(asboolean);
     end;
     else begin
-     result := asstring;
+     result:= asstring;
     end;
    end;
   end;
@@ -5543,7 +5556,7 @@ end;
 function tmseparams.asdbstring(const index: integer): string;
 begin
  with items[index] do begin
-  if isutf8 then begin
+  if not (datatype in [ftblob,ftmemo]) and isutf8 then begin
    if vartype(value) = varolestr then begin
     result:= stringtoutf8(aswidestring);
    end

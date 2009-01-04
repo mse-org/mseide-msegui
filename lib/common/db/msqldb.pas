@@ -177,7 +177,7 @@ type
     Function AllocateTransactionHandle : TSQLHandle; virtual; abstract;
 
     procedure Execute(const cursor: TSQLCursor; const atransaction: tsqltransaction;
-                                 const AParams : TmseParams); virtual; abstract;
+               const AParams : TmseParams; const autf8: boolean); virtual; abstract;
     function GetTransactionHandle(trans : TSQLHandle): pointer; virtual; abstract;
     function Commit(trans : TSQLHandle) : boolean; virtual; abstract;
     function RollBack(trans : TSQLHandle) : boolean; virtual; abstract;
@@ -219,66 +219,67 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure updateutf8(var autf8: boolean); virtual;
-    function todbstring(const avalue: msestring): string;
-    procedure FreeFldBuffers(cursor : TSQLCursor); virtual; abstract;
-    Function AllocateCursorHandle(const aowner: icursorclient; 
-                const aname: ansistring): TSQLCursor; virtual; abstract;
-                //aowner can be nil
-                        //aowner used as blob cache
-    Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); virtual; abstract;
-    procedure preparestatement(const cursor: tsqlcursor; 
-                  const atransaction : tsqltransaction;
-                  const asql: msestring; const aparams : tmseparams); 
-                                 virtual; abstract; overload;
-    procedure UnPrepareStatement(cursor : TSQLCursor); virtual; abstract;
-    procedure AddFieldDefs(const cursor: TSQLCursor;
-                        const FieldDefs: TfieldDefs); virtual; abstract;
-    function Fetch(cursor : TSQLCursor) : boolean; virtual; abstract;
-    function loadfield(const cursor: tsqlcursor; 
-             const datatype: tfieldtype; const fieldnum: integer; //null based
-      const buffer: pointer; var bufsize: integer): boolean; virtual; abstract;
-           //if bufsize < 0 -> buffer was to small, should be -bufsize
-           //buffer can be nil
-           //false if null
-    function fetchblob(const cursor: tsqlcursor;
-                              const fieldnum: integer): ansistring; virtual;
-                              //null based
-    
-    procedure Close;
-    procedure Open;
-    property Handle: Pointer read GetHandle;
-    procedure StartTransaction; override;
-    procedure EndTransaction; override;
-    property ConnOptions: sqlconnoptionsty read FConnOptions;
-    function executedirect(const asql: msestring): integer; overload;
-               //returns rowsaffected or -1 if not supported
-    function executedirect(const asql: msestring;
-         atransaction: tsqltransaction;
-         const aparams: tmseparams = nil): integer; overload;
-    function ExecuteDirect(const aSQL: mseString;
-          ATransaction: TSQLTransaction;
-          const aparams: array of variant): integer; overload;
-    procedure GetTableNames(List : TStrings; SystemTables : Boolean = false); virtual;
-    procedure GetProcedureNames(List : TStrings); virtual;
-    procedure GetFieldNames(const TableName : string; List :  TStrings); virtual;
-    function getinsertid(const atransaction: tsqltransaction): int64; virtual;
-    function fieldtosql(const afield: tfield): string;
-    function fieldtooldsql(const afield: tfield): string;
-    function paramtosql(const aparam: tparam): string;
-    
-    property Password : string read FPassword write FPassword;
-    property Transaction : TSQLTransaction read FTransaction write SetTransaction;
-    property transactionwrite : tsqltransaction read ftransactionwrite 
-                                                   write settransactionwrite;
-    property UserName : string read FUserName write FUserName;
-    property CharSet : string read FCharSet write FCharSet;
-    property HostName : string Read FHostName Write FHostName;
+   function isutf8: boolean;
+   function todbstring(const avalue: msestring): string;
+   procedure FreeFldBuffers(cursor : TSQLCursor); virtual; abstract;
+   Function AllocateCursorHandle(const aowner: icursorclient; 
+               const aname: ansistring): TSQLCursor; virtual; abstract;
+               //aowner can be nil
+                       //aowner used as blob cache
+   Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); virtual; abstract;
+   procedure preparestatement(const cursor: tsqlcursor; 
+                 const atransaction : tsqltransaction;
+                 const asql: msestring; const aparams : tmseparams); 
+                                virtual; abstract; overload;
+   procedure UnPrepareStatement(cursor : TSQLCursor); virtual; abstract;
+   procedure AddFieldDefs(const cursor: TSQLCursor;
+                       const FieldDefs: TfieldDefs); virtual; abstract;
+   function Fetch(cursor : TSQLCursor) : boolean; virtual; abstract;
+   function loadfield(const cursor: tsqlcursor; 
+            const datatype: tfieldtype; const fieldnum: integer; //null based
+     const buffer: pointer; var bufsize: integer): boolean; virtual; abstract;
+          //if bufsize < 0 -> buffer was to small, should be -bufsize
+          //buffer can be nil
+          //false if null
+   function fetchblob(const cursor: tsqlcursor;
+                             const fieldnum: integer): ansistring; virtual;
+                             //null based
+   
+   procedure Close;
+   procedure Open;
+   property Handle: Pointer read GetHandle;
+   procedure StartTransaction; override;
+   procedure EndTransaction; override;
+   property ConnOptions: sqlconnoptionsty read FConnOptions;
+   function executedirect(const asql: msestring): integer; overload;
+              //returns rowsaffected or -1 if not supported
+   function executedirect(const asql: msestring;
+        atransaction: tsqltransaction;
+        const aparams: tmseparams = nil): integer; overload;
+   function ExecuteDirect(const aSQL: mseString;
+         ATransaction: TSQLTransaction;
+         const aparams: array of variant): integer; overload;
+   procedure GetTableNames(List : TStrings; SystemTables : Boolean = false); virtual;
+   procedure GetProcedureNames(List : TStrings); virtual;
+   procedure GetFieldNames(const TableName : string; List :  TStrings); virtual;
+   function getinsertid(const atransaction: tsqltransaction): int64; virtual;
+   function fieldtosql(const afield: tfield): string;
+   function fieldtooldsql(const afield: tfield): string;
+   function paramtosql(const aparam: tparam): string;
+   
+   property Password : string read FPassword write FPassword;
+   property Transaction : TSQLTransaction read FTransaction write SetTransaction;
+   property transactionwrite : tsqltransaction read ftransactionwrite 
+                                                  write settransactionwrite;
+   property UserName : string read FUserName write FUserName;
+   property CharSet : string read FCharSet write FCharSet;
+   property HostName : string Read FHostName Write FHostName;
 
-    property Connected: boolean read getconnected write setconnected default false;
-    Property Role :  String read FRole write FRole;
-    property afterconnect: tmsesqlscript read fafterconnect write setafteconnect;
-    property beforedisconnect: tmsesqlscript read fbeforedisconnect write setbeforedisconnect;
-    property controller: tdbcontroller read fcontroller write setcontroller;
+   property Connected: boolean read getconnected write setconnected default false;
+   Property Role :  String read FRole write FRole;
+   property afterconnect: tmsesqlscript read fafterconnect write setafteconnect;
+   property beforedisconnect: tmsesqlscript read fbeforedisconnect write setbeforedisconnect;
+   property controller: tdbcontroller read fcontroller write setcontroller;
   end;
 
  tsqlconnection = class(tcustomsqlconnection)
@@ -570,6 +571,7 @@ type
    FTableName: string;
    FReadOnly: boolean;
    fprimarykeyfield: tfield;                   
+   futf8: boolean;
    procedure settransactionwrite(const avalue: tmdbtransaction); override;
    procedure checkpendingupdates; virtual;
    procedure notification(acomponent: tcomponent; operation: toperation); override;   
@@ -584,6 +586,7 @@ type
            const buffer: pointer; var bufsize: integer): boolean; override;
           //if bufsize < 0 -> buffer was to small, should be -bufsize
    // abstract & virtual methods of TDataset
+   function isutf8: boolean; override;
    procedure UpdateIndexDefs; override;
    procedure SetDatabase(const Value: tmdatabase); override;
    Procedure SetTransaction(const Value : tmdbtransaction); override;
@@ -759,7 +762,8 @@ procedure doexecute(const aparams: tmseparams; const atransaction: tmdbtransacti
 begin
  updateparams(aparams,autf8);
  acursor.ftrans:= tsqltransaction(atransaction).handle;
- tcustomsqlconnection(adatabase).execute(acursor,tsqltransaction(atransaction),aParams);
+ tcustomsqlconnection(adatabase).execute(acursor,tsqltransaction(atransaction),
+               aParams,autf8);
 end;
 
 procedure checksqlconnection(const aname: ansistring; const avalue: tmdatabase);
@@ -1099,6 +1103,12 @@ begin
  end;
 end;
 
+function tcustomsqlconnection.isutf8: boolean;
+begin
+ result:= false;
+ updateutf8(result);
+end;
+
 function tcustomsqlconnection.StrToStatementType(s : string) : TStatementType;
 
 var T : TStatementType;
@@ -1217,7 +1227,7 @@ begin
    PrepareStatement(cursor,ATransaction,aSQL,params1);
    cursor.ftrans:= atransaction.handle;
    try    
-    execute(cursor,atransaction,params1);
+    execute(cursor,atransaction,params1,isutf8);
     result:= cursor.frowsaffected;
    finally
     UnPrepareStatement(Cursor);
@@ -1662,12 +1672,8 @@ begin
 end;
 
 function tcustomsqlconnection.todbstring(const avalue: msestring): string;
-var
- bo1: boolean;
 begin
- bo1:= false;
- updateutf8(bo1);
- if bo1 then begin
+ if isutf8 then begin
   result:= stringtoutf8(avalue);
  end
  else begin
@@ -2895,6 +2901,7 @@ begin
   end;
  end;
  with qry do begin
+  futf8:= self.isutf8;
   transaction.active:= true;
   freeblobar:= nil;
   try
@@ -3424,6 +3431,14 @@ begin
  //dummy
 end;
 
+function TSQLQuery.isutf8: boolean;
+begin
+ result:= futf8;
+// if fdatabase <> nil then begin
+//  tcustomsqlconnection(fdatabase).updateutf8(result);
+// end;
+end;
+
 { TSQLCursor }
 
 constructor TSQLCursor.create(const aowner: icursorclient; const aname: ansistring);
@@ -3855,7 +3870,7 @@ begin
  fcursor.ftrans:= tsqltransaction(ftransaction).handle;
  try
   tcustomsqlconnection(fdatabase).execute(fcursor,tsqltransaction(ftransaction),
-                             fparams);
+                             fparams,isutf8);
 //  fcursor.close;
   if sso_autocommit in foptions then begin
    ftransaction.commit;

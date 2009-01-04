@@ -81,7 +81,7 @@ Type
 //    RowsAffected : QWord;
     LastInsertID : QWord;
     ParamBinding : TParamBinding;
-    ParamReplaceString : String;
+    ParamReplaceString : mseString;
     MapDSRowToMSQLRow  : array of integer;
     fprimarykeyfieldname: string;
   end;
@@ -132,7 +132,8 @@ Type
     procedure UnPrepareStatement(cursor:TSQLCursor); override;
     procedure FreeFldBuffers(cursor : TSQLCursor); override;
     procedure Execute(const cursor: TSQLCursor;
-             const atransaction:tSQLtransaction; const AParams : TmseParams); override;
+             const atransaction:tSQLtransaction; const AParams : TmseParams;
+             const autf8: boolean); override;
     procedure AddFieldDefs(const cursor: TSQLCursor; 
                    const FieldDefs : TfieldDefs); override;
     function Fetch(cursor : TSQLCursor) : boolean; override;
@@ -442,25 +443,34 @@ begin
 end;
 
 procedure TConnectionName.Execute(const  cursor: TSQLCursor;
-               const atransaction: tSQLtransaction; const AParams : TmseParams);
+               const atransaction: tSQLtransaction; const AParams : TmseParams;
+               const autf8: boolean);
 
 var
  C: TCursorName;
  i: integer;
  str1: ansistring;
  par1: tparam;
+ mstr1: msestring;
 begin
   C:= TCursorName(cursor);
   c.frowsaffected:= -1;
   c.frowsreturned:= -1;
   freeresultbuffer(c);
   if Assigned(AParams) and (aparams.count > 0) then begin
-   str1:= todbstring(aparams.expandvalues(c.fstatementm,
-                          c.parambinding,c.paramreplacestring));
+   mstr1:= aparams.expandvalues(c.fstatementm,
+                          c.parambinding,c.paramreplacestring);
   end
   else begin
-   str1:= todbstring(c.fstatementm);
+   mstr1:= c.fstatementm;
   end;
+  if autf8 then begin
+   str1:= stringtoutf8(mstr1);
+  end
+  else begin
+   str1:= mstr1;
+  end;
+  
   if mysql_query(FMySQL,Pchar(str1))<>0 then begin
    checkerror(Format(SErrExecuting,[
         ansistring(connectionmessage(mysql_error(FMySQL)))]))
@@ -1008,7 +1018,7 @@ begin
  setlength(str1,alength);
  move(adata^,str1[1],alength);
  if afield.datatype = ftmemo then begin
-  aparam.asstring:= str1;
+  aparam.asmemo:= str1;
  end
  else begin
   aparam.asblob:= str1;
@@ -1021,7 +1031,7 @@ end;
 procedure TConnectionName.setupblobdata(const afield: tfield;
                const acursor: tsqlcursor; const aparam: tparam);
 begin
- acursor.blobfieldtoparam(afield,aparam,afield.datatype = ftmemo);
+ acursor.blobfieldtoparam(afield,aparam,false);
 end;
 
 function TConnectionName.blobscached: boolean;

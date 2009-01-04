@@ -52,14 +52,14 @@ type
 
   TPQCursor = Class(TSQLCursor)
    protected
-    Statement : string;
+    Statementm : msestring;
     tr        : TPQTrans;
     res       : PPGresult;
     CurTuple  : integer;
     Nr        : string;
     fopen: boolean;
     ParamBinding : TParamBinding;
-    ParamReplaceString : String;
+    ParamReplaceString : mseString;
    public
     procedure close; override;
   end;
@@ -104,7 +104,7 @@ type
                   const asql: msestring; const aparams : tmseparams); override;
    procedure FreeFldBuffers(cursor : TSQLCursor); override;
    procedure Execute(const cursor: TSQLCursor; const atransaction: tsqltransaction;
-                                   const AParams : TmseParams); override;
+                     const AParams : TmseParams; const autf8: boolean); override;
    procedure AddFieldDefs(const cursor: TSQLCursor;
                   const FieldDefs : TfieldDefs); override;
    function Fetch(cursor : TSQLCursor) : boolean; override;
@@ -508,8 +508,8 @@ const TypeStrings : array[TFieldType] of string =
       'Unknown',  //ftDBaseOle
       'Unknown',  //ftTypedBinary
       'Unknown',  //ftCursor
-      'Unknown',  //ftFixedChar
-      'Unknown',  //ftWideString
+      'varchar',  //ftFixedChar
+      'varchar',  //ftWideString
       'int',      //ftLargeint
       'Unknown',  //ftADT
       'Unknown',  //ftArray
@@ -524,7 +524,7 @@ const TypeStrings : array[TFieldType] of string =
       'Unknown',  //ftTimeStamp
       'Unknown'   //ftFMTBcd
       {$ifdef mse_FPC_2_2}
-      ,'Unknown', //ftFixedWideChar
+      ,'varchar', //ftFixedWideChar
       'Unknown'   //ftWideMemo
       {$endif}
     );
@@ -597,8 +597,8 @@ begin
    FPrepared := True;
   end
   else begin
-   Statement:= todbstring(AParams.ParseSQL(asql,false,false,false,psSimulated,
-                  paramBinding,ParamReplaceString));
+   Statementm:= {todbstring(}AParams.ParseSQL(asql,false,false,false,psSimulated,
+                  paramBinding,ParamReplaceString){)};
 //      statement := buf;
   end;
  end;
@@ -636,13 +636,15 @@ begin
 end;
 
 procedure TPQConnection.Execute(const cursor: TSQLCursor; 
-           const atransaction: tsqltransaction; const AParams : TmseParams);
+           const atransaction: tsqltransaction; const AParams : TmseParams;
+           const autf8: boolean);
 
 var
  ar: array of pointer;
  i: integer;
  s: string;
  lengths,formats: integerarty;
+ mstr1: msestring;
 
 begin
  with TPQCursor(cursor) do begin
@@ -691,10 +693,16 @@ begin
   else begin
    tr := TPQTrans(cursor.ftrans);
    if aparams <> nil then begin
-    s:= aparams.expandvalues(statement,parambinding,paramreplacestring);
+    mstr1:= aparams.expandvalues(statementm,parambinding,paramreplacestring);
    end
    else begin
-    s:= statement;
+    mstr1:= statementm;
+   end;
+   if autf8 then begin
+    s:= stringtoutf8(mstr1);
+   end
+   else begin
+    s:= mstr1;
    end;
    res:= pqexec(tr.fconn,pchar(s));
   end;
@@ -1049,7 +1057,7 @@ begin
  setlength(str1,alength);
  move(adata^,str1[1],alength);
  if afield.datatype = ftmemo then begin
-  aparam.asstring:= str1;
+  aparam.asmemo:= str1;
  end
  else begin
   aparam.asblob:= str1;
@@ -1062,7 +1070,7 @@ end;
 procedure TPQConnection.setupblobdata(const afield: tfield; 
                       const acursor: tsqlcursor; const aparam: tparam);
 begin
- acursor.blobfieldtoparam(afield,aparam,afield.datatype = ftmemo);
+ acursor.blobfieldtoparam(afield,aparam,false);
 end;
 
 function TPQConnection.getblobdatasize: integer;

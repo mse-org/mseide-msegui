@@ -13,7 +13,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 }
-{Modified 2006-2008 by Martin Schreiber}
+{Modified 2006-2009 by Martin Schreiber}
 
 unit mmysqlconn;
 
@@ -77,7 +77,7 @@ Type
 //    RowsAffected : QWord;
     LastInsertID : QWord;
     ParamBinding : TParamBinding;
-    ParamReplaceString : String;
+    ParamReplaceString : mseString;
     MapDSRowToMSQLRow: integerarty;
     fprimarykeyfieldname: string;
     fconn: pmysql;
@@ -148,7 +148,8 @@ Type
     procedure UnPrepareStatement(cursor:TSQLCursor); override;
     procedure FreeFldBuffers(cursor : TSQLCursor); override;
     procedure Execute(const cursor: TSQLCursor;
-             const atransaction:tSQLtransaction; const AParams : TmseParams); override;
+       const atransaction:tSQLtransaction;
+       const AParams: TmseParams; const autf8: boolean); override;
     procedure AddFieldDefs(const cursor: TSQLCursor; 
                    const FieldDefs : TfieldDefs); override;
     function Fetch(cursor : TSQLCursor) : boolean; override;
@@ -811,7 +812,8 @@ begin
 end;
 
 procedure tmysqlconnection.Execute(const  cursor: TSQLCursor;
-               const atransaction: tSQLtransaction; const AParams : TmseParams);
+               const atransaction: tSQLtransaction; const AParams : TmseParams;
+               const autf8: boolean);
 
 var
  C: tmysqlcursor;
@@ -824,6 +826,7 @@ var
  inputbindings: pointer;
  strings: stringarty;
  dataty1: tfieldtype;
+ mstr1: msestring;
 begin
  C:= tmysqlcursor(cursor);
  c.frowsaffected:= -1;
@@ -926,13 +929,19 @@ begin
    c.frowsreturned:= 0;
   end;
  end
- else begin
+ else begin //not prepared
   if Assigned(AParams) and (aparams.count > 0) then begin
-   str1:= todbstring(aparams.expandvalues(c.fstatementm,
-                          c.parambinding,c.paramreplacestring));
+   mstr1:= aparams.expandvalues(c.fstatementm,
+                          c.parambinding,c.paramreplacestring);
   end
   else begin
-   str1:= todbstring(c.fstatementm);
+   mstr1:= c.fstatementm;
+  end;
+  if autf8 then begin
+   str1:= stringtoutf8(mstr1);
+  end
+  else begin
+   str1:= mstr1;
   end;
   with tmysqltrans(atransaction.trans) do begin
    if mysql_query(fconn,Pchar(str1))<>0 then begin
@@ -1609,7 +1618,7 @@ begin
  setlength(str1,alength);
  move(adata^,str1[1],alength);
  if afield.datatype = ftmemo then begin
-  aparam.asstring:= str1;
+  aparam.asmemo:= str1;
  end
  else begin
   aparam.asblob:= str1;
@@ -1622,7 +1631,7 @@ end;
 procedure tmysqlconnection.setupblobdata(const afield: tfield;
                const acursor: tsqlcursor; const aparam: tparam);
 begin
- acursor.blobfieldtoparam(afield,aparam,afield.datatype = ftmemo);
+ acursor.blobfieldtoparam(afield,aparam,false);
 end;
 
 function tmysqlconnection.blobscached: boolean;

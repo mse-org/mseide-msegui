@@ -139,7 +139,8 @@ type
     procedure UnPrepareStatement(cursor : TSQLCursor); override;
     procedure FreeFldBuffers(cursor : TSQLCursor); override;
     procedure Execute(const cursor: TSQLCursor;
-              const atransaction: tsqltransaction; const AParams : TmseParams); override;
+              const atransaction: tsqltransaction; const AParams : TmseParams;
+              const autf8: boolean); override;
     procedure AddFieldDefs(const cursor: TSQLCursor;
                      const FieldDefs : TfieldDefs); override;
     function Fetch(cursor : TSQLCursor) : boolean; override;
@@ -758,7 +759,8 @@ begin
 end;
 
 procedure TIBConnection.Execute(const cursor: TSQLCursor;
-                const atransaction: tsqltransaction; const AParams : TmseParams);
+                const atransaction: tsqltransaction; const AParams : TmseParams;
+                const autf8: boolean);
 begin
  if Assigned(APArams) and (AParams.count > 0) then begin
   SetParameters(cursor, AParams);

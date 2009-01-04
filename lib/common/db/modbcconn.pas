@@ -97,7 +97,8 @@ type
     procedure internalRollbackRetaining(trans:TSQLHandle); override;
     // - Statement execution
     procedure Execute(const cursor:TSQLCursor; 
-             const ATransaction:TSQLTransaction; const AParams:TmseParams); override;
+             const ATransaction:TSQLTransaction; const AParams:TmseParams;
+             const autf8: boolean); override;
     // - Result retrieving
     procedure AddFieldDefs(const cursor:TSQLCursor; 
                               const FieldDefs:TFieldDefs); override;
@@ -407,7 +408,7 @@ begin
  setlength(str1,alength);
  move(adata^,str1[1],alength);
  if afield.datatype = ftmemo then begin
-  aparam.asstring:= str1;
+  aparam.asmemo:= str1;
  end
  else begin
   aparam.asblob:= str1;
@@ -588,7 +589,7 @@ begin
       end;
      end;
     end;
-    ftstring: begin
+    ftstring,ftfixedchar: begin
      if isnull then begin
       bindnull(i,SQL_C_CHAR,SQL_CHAR);
      end
@@ -600,7 +601,7 @@ begin
       bindstr(i,SQL_C_CHAR,SQL_CHAR,buf,strlen,strlen)
      end;
     end;
-    ftwidestring: begin
+    ftwidestring,ftfixedwidechar: begin
      if isnull then begin
       bindnull(i,SQL_C_WCHAR,SQL_WCHAR);
      end
@@ -804,7 +805,8 @@ begin
 end;
 
 procedure TODBCConnection.Execute(const cursor: TSQLCursor;
-      const ATransaction: TSQLTransaction; const AParams: TmseParams);
+      const ATransaction: TSQLTransaction; const AParams: TmseParams;
+      const autf8: boolean);
 var
   ODBCCursor:TODBCCursor;
   Res: SQLRETURN;
@@ -812,7 +814,9 @@ begin
   ODBCCursor:= TODBCCursor(cursor);
 
   // set parameters
-    if Assigned(APArams) and (AParams.count > 0) then SetParameters(ODBCCursor, AParams);
+    if Assigned(APArams) and (AParams.count > 0) then begin
+     SetParameters(ODBCCursor, AParams);
+    end;
 
   // execute the statement
   res:= SQLExecute(ODBCCursor.FSTMTHandle);

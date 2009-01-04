@@ -3,7 +3,7 @@ unit regexperimental;
 interface
 implementation
 uses
- msedesignintf,msemysqlconn;
+ msedesignintf;
  
 procedure Register;
 begin

@@ -34,7 +34,7 @@ type
    procedure setoptions(const avalue: pqconnectionoptionsty);
   protected
    procedure execute(const cursor: tsqlcursor; const atransaction: tsqltransaction;
-                             const aparams: tmseparams); override;
+                     const aparams: tmseparams; const autf8: boolean); override;
    function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
                          const acursor: tsqlcursor): TStream; override;
    //idbcontroller
@@ -96,7 +96,8 @@ begin
 end;
 
 procedure tmsepqconnection.execute(const cursor: tsqlcursor; 
-               const atransaction: tsqltransaction; const aparams: tmseparams);
+               const atransaction: tsqltransaction;
+               const aparams: tmseparams; const autf8: boolean);
 const
  savepointname = 'mseinternal$savepoint';
 var

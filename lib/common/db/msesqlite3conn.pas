@@ -103,7 +103,7 @@ type
                   const atransaction : tsqltransaction;
                   const asql: msestring; const aparams : tmseparams); override;
    procedure Execute(const cursor: TSQLCursor; const atransaction: tsqltransaction;
-                                const AParams : TmseParams); override;
+                     const AParams : TmseParams; const autf8: boolean); override;
    function Fetch(cursor : TSQLCursor) : boolean; override;
    procedure AddFieldDefs(const cursor: TSQLCursor;
                    const FieldDefs : TfieldDefs); override;
@@ -502,7 +502,8 @@ begin
 end;
 
 procedure tsqlite3connection.Execute(const cursor: TSQLCursor;
-               const atransaction: tsqltransaction; const AParams: TmseParams);
+               const atransaction: tsqltransaction; const AParams: TmseParams;
+               const autf8: boolean);
 var
  int1: integer;
  str1: string;
@@ -538,7 +539,7 @@ begin
         do1:= asfloat;
         checkerror(sqlite3_bind_double(fstatement,int1+1,do1));
        end;
-       ftstring: begin
+       ftstring,ftwidestring,ftmemo,ftfixedchar,ftfixedwidechar: begin
         str1:= aparams.asdbstring(int1);
         stringaddref(str1);
         checkerror(sqlite3_bind_text(fstatement,int1+1,pchar(str1),
@@ -667,7 +668,7 @@ begin
       tdatetime(buffer^):= sqlite3_column_double(fstatement,fnum);
      end;
     end; 
-    ftstring: begin
+    ftstring,ftfixedchar: begin
      int1:= sqlite3_column_bytes(fstatement,fnum);
      if int1 > bufsize then begin
       bufsize:= - int1;
@@ -870,7 +871,7 @@ begin
  setlength(str1,alength);
  move(adata^,str1[1],alength);
  if afield.datatype = ftmemo then begin
-  aparam.asstring:= str1;
+  aparam.asmemo:= str1;
  end
  else begin
   aparam.asblob:= str1;
@@ -883,7 +884,7 @@ end;
 procedure tsqlite3connection.setupblobdata(const afield: tfield;
                const acursor: tsqlcursor; const aparam: tparam);
 begin
- acursor.blobfieldtoparam(afield,aparam,afield.datatype = ftmemo);
+ acursor.blobfieldtoparam(afield,aparam,false);
 end;
 
 function tsqlite3connection.blobscached: boolean;
