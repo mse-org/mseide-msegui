@@ -47,6 +47,7 @@ type
    procedure internalinsert; override;
    procedure internaldelete; override;
    procedure internalclose; override;
+   function  getcanmodify: boolean; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -257,6 +258,11 @@ end;
 procedure tmsememdataset.doidleapplyupdates;
 begin
  //dummy
+end;
+
+function tmsememdataset.getcanmodify: boolean;
+begin
+ result:= fcontroller.getcanmodify and inherited canmodify;
 end;
 
 end.

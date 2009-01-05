@@ -1500,7 +1500,9 @@ end;
 
 procedure tcustomedit.updatereadonlystate;
 begin
- //dummy
+ if feditor <> nil then begin
+  feditor.updatecaret;
+ end;
 end;
 
 function tcustomedit.hasselection: boolean;

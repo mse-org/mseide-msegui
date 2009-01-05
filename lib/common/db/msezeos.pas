@@ -40,6 +40,7 @@ type
    procedure internalinsert; override;
    procedure internaldelete; override;
    procedure internalclose; override;
+   function  getcanmodify: boolean; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -94,6 +95,7 @@ type
    procedure internalinsert; override;
    procedure internaldelete; override;
    procedure internalclose; override;
+   function  getcanmodify: boolean; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -146,6 +148,7 @@ type
    procedure internalinsert; override;
    procedure internaldelete; override;
    procedure internalclose; override;
+   function  getcanmodify: boolean; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -198,6 +201,7 @@ type
    procedure internalinsert; override;
    procedure internaldelete; override;
    procedure internalclose; override;
+   function  getcanmodify: boolean; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -413,6 +417,11 @@ begin
  //dummy
 end;
 
+function tmsezreadonlyquery.getcanmodify: boolean;
+begin
+ result:= fcontroller.getcanmodify and inherited getcanmodify;
+end;
+
 { tmsezquery }
 
 constructor tmsezquery.create(aowner: tcomponent);
@@ -608,6 +617,11 @@ begin
  //dummy
 end;
 
+function tmsezquery.getcanmodify: boolean;
+begin
+ result:= fcontroller.getcanmodify and inherited getcanmodify;
+end;
+
 { tmseztable }
 
 constructor tmseztable.create(aowner: tcomponent);
@@ -798,6 +812,11 @@ begin
  //dummy
 end;
 
+function tmseztable.getcanmodify: boolean;
+begin
+ result:= fcontroller.getcanmodify and inherited getcanmodify;
+end;
+
 { tmsezstoredproc }
 
 constructor tmsezstoredproc.create(aowner: tcomponent);
@@ -986,6 +1005,11 @@ end;
 procedure tmsezstoredproc.doidleapplyupdates;
 begin
  //dummy
+end;
+
+function tmsezstoredproc.getcanmodify: boolean;
+begin
+ result:= fcontroller.getcanmodify and inherited getcanmodify;
 end;
 
 end.

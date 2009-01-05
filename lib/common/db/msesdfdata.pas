@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -51,6 +51,7 @@ type
    procedure internalinsert; override;
    procedure internaldelete; override;
    procedure internalclose; override;
+   function  getcanmodify: boolean; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -109,6 +110,7 @@ type
    procedure internalclose; override;
    procedure internalinsert; override;
    procedure internaldelete; override;
+   function  getcanmodify: boolean; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -342,6 +344,11 @@ begin
  //dummy
 end;
 
+function tmsefixedformatdataset.getcanmodify: boolean;
+begin
+ result:= fcontroller.getcanmodify and inherited getcanmodify;
+end;
+
 { tmsesdfdataset }
 
 constructor tmsesdfdataset.create(aowner: tcomponent);
@@ -547,6 +554,11 @@ end;
 procedure tmsesdfdataset.doidleapplyupdates;
 begin
  //dummy
+end;
+
+function tmsesdfdataset.getcanmodify: boolean;
+begin
+ result:= fcontroller.getcanmodify and inherited getcanmodify;
 end;
 
 end.

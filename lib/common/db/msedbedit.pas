@@ -43,6 +43,7 @@ type
 const
  defaultdbnavigatoroptions = [dno_confirmdelete,dno_append];
  designdbnavigbuttons = [dbnb_first,dbnb_prior,dbnb_next,dbnb_last];
+ editnavigbuttons = [dbnb_insert,dbnb_delete,dbnb_edit];
  
 type  
  idbnaviglink = interface(inullinterface)
@@ -61,6 +62,7 @@ type
    procedure datasetchanged; override;
    procedure editingchanged; override;
    procedure recordchanged(Field: TField); override;
+   procedure disabledstatechange; override;
   public
    constructor create(const intf: idbnaviglink);
    procedure execbutton(const abutton: dbnavigbuttonty);
@@ -168,6 +170,7 @@ type
    procedure editingchanged; override;
    procedure focuscontrol(afield: tfieldref); override;
    procedure updatedata; override;
+   procedure disabledstatechange; override;
   public
    constructor create(const intf: idbeditfieldlink);
    procedure recordchanged(afield: tfield); override;
@@ -2050,6 +2053,7 @@ type
  tdataset1 = class(tdataset);
  tdatasource1 = class(tdatasource);
  ttoolbuttons1 = class(ttoolbuttons);
+ tcustomstringgrid1 = class(tcustomstringgrid);
 
 function encoderowstate(const color: integer = -1; const font: integer = -1;
                             const readonly: boolean = false): integer;
@@ -2132,6 +2136,9 @@ begin
     bu1:= bu1 + [dbnb_refresh,dbnb_insert,dbnb_delete,dbnb_edit,
                  dbnb_filteronoff];
    end;
+  end;
+  if (fdscontroller <> nil) and fdscontroller.noedit then begin
+   bu1:= bu1 - editnavigbuttons;
   end;
   if bof and eof then begin
    bu1:= bu1 - [dbnb_delete];
@@ -2232,6 +2239,11 @@ begin
    end;
   end;
  end;
+end;
+
+procedure tnavigdatalink.disabledstatechange;
+begin
+ updatebuttonstate;
 end;
 
 { tdbnavigator }
@@ -2464,7 +2476,7 @@ end;
 function teditwidgetdatalink.canmodify: Boolean;
 begin
  result:= (field <> nil) and 
-           ((ewds_filterediting in fstate) or not readonly and 
+           ((ewds_filterediting in fstate) or not noedit and 
                            not field.readonly);
 end;
 
@@ -2567,6 +2579,12 @@ begin
  else begin
   fmaxlength:= 0;
  end;
+end;
+
+procedure teditwidgetdatalink.disabledstatechange;
+begin
+ inherited;
+ fintf.updatereadonlystate;
 end;
 
 procedure teditwidgetdatalink.focuscontrol(afield: tfieldref);
@@ -7166,7 +7184,9 @@ end;
 
 procedure tdbstringcol.updatereadonlystate;
 begin
- //dummy
+ if fgrid.col = self.index then begin
+  tcustomstringgrid1(fgrid).feditor.updatecaret;
+ end;
 end;
 
 function tdbstringcol.checkvalue(const quiet: boolean = false): boolean;

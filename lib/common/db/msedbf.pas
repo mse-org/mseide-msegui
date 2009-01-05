@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -51,6 +51,7 @@ type
    procedure internalclose; override;
    procedure internalinsert; override;
    procedure internaldelete; override;
+   function  getcanmodify: boolean; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -280,6 +281,11 @@ end;
 procedure tmsedbf.doidleapplyupdates;
 begin
  //dummy
+end;
+
+function tmsedbf.getcanmodify: boolean;
+begin
+ result:= fcontroller.getcanmodify and inherited getcanmodify;
 end;
 
 end.

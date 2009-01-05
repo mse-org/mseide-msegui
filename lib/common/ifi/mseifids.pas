@@ -1,3 +1,12 @@
+{ MSEgui Copyright (c) 2007-2009 by Martin Schreiber
+
+    See the file COPYING.MSE, included in this distribution,
+    for details about the copyright.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+}
 unit mseifids;
 {$ifdef VER2_1_5} {$define mse_FPC_2_2} {$endif}
 {$ifdef VER2_2} {$define mse_FPC_2_2} {$endif}
@@ -274,6 +283,7 @@ type
    function IsCursorOpen: Boolean; override;
    procedure SetBookmarkFlag(Buffer: PChar; Value: TBookmarkFlag); override;
    procedure SetBookmarkData(Buffer: PChar; Data: Pointer); override;
+   function  getcanmodify: boolean; override;
 
    procedure cancelconnection;
    procedure calcrecordsize;
@@ -2258,6 +2268,11 @@ procedure tifidataset.InternalRefresh;
 begin
  active:= false;
  active:= true;
+end;
+
+function tifidataset.getcanmodify: boolean;
+begin
+ result:= fcontroller.getcanmodify and inherited getcanmodify;
 end;
 
 { trxdataset }

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2004-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 2004-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -821,8 +821,11 @@ type
    function getutf8: boolean;
    function getfiltereditkind: filtereditkindty;
    function  GetActiveRecord: Integer; override;
+   procedure DataEvent(Event: TDataEvent; Info: Ptrint); override;
+   procedure disabledstatechange; virtual;
   public
    function moveby(distance: integer): integer; override;
+   function noedit: boolean;
    property dataset: tdataset read getdataset;
    property dscontroller: tdscontroller read fdscontroller;
    property utf8: boolean read getutf8;
@@ -933,7 +936,8 @@ type
                          dso_refreshafterapply,
                          dso_cacheblobs,
                          dso_offline, //disconnect database after open
-                         dso_local);  //do not connect database on open
+                         dso_local,
+                         dso_noedit);  //do not connect database on open
  datasetoptionsty = set of datasetoptionty;
 
  idscontroller = interface(inullinterface)
@@ -998,6 +1002,8 @@ type
    procedure registeronidle;
    procedure unregisteronidle;
    procedure setdelayedapplycount(const avalue: integer);
+   function getnoedit: boolean;
+   procedure setnoedit(const avalue: boolean);
   protected
    procedure setoptions(const avalue: datasetoptionsty); virtual;
    procedure modified;
@@ -1024,6 +1030,7 @@ type
    procedure getfieldclass(const fieldtype: tfieldtype; out result: tfieldclass);
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
+   function getcanmodify: boolean;
    
    procedure dataevent(const event: tdataevent; info: ptrint);
    procedure cancel;
@@ -1052,6 +1059,8 @@ type
    function assql(const avalue: tdatetime): string; overload;
    function assqldate(const avalue: tdatetime): string;
    function assqltime(const avalue: tdatetime): string;
+   property noedit: boolean read getnoedit write setnoedit;
+   
   published
    property fields: tpersistentfields read ffields write setfields;
    property options: datasetoptionsty read foptions write setoptions 
@@ -4049,6 +4058,14 @@ begin
  end;
 end;
 
+procedure tmsedatalink.DataEvent(Event: TDataEvent; Info: Ptrint);
+begin
+ inherited;
+ if event = dedisabledstatechange then begin
+  disabledstatechange;
+ end;
+end;
+
 function tmsedatalink.canclose: boolean;
 begin
  result:= (fcanclosing > 0) or not active;
@@ -4093,6 +4110,16 @@ begin
    ds1.recno:= avalue + 1;
   end;
  end;
+end;
+
+function tmsedatalink.noedit: boolean;
+begin
+ result:= readonly or (dataset <> nil) and not dataset.canmodify;
+end;
+
+procedure tmsedatalink.disabledstatechange;
+begin
+ //dummy
 end;
 
 { tfielddatalink }
@@ -5035,9 +5062,18 @@ end;
 procedure tdscontroller.setoptions(const avalue: datasetoptionsty);
 const
  mask: datasetoptionsty = [dso_autocommitret,dso_autocommit];
+var
+ options1: datasetoptionsty;
 begin
+ options1:= datasetoptionsty(longword(foptions) xor longword(avalue));
  foptions:= datasetoptionsty(setsinglebit(longword(avalue),longword(foptions),
                     longword(mask)));
+ if dso_noedit in options1 then begin
+  if (dso_noedit in avalue) and tdataset(fowner).active then begin
+   tdataset(fowner).checkbrowsemode;
+  end;
+  tdataset1(fowner).dataevent(dedisabledstatechange,0);
+ end;
 end;
 
 function tdscontroller.isutf8: boolean;
@@ -5098,6 +5134,26 @@ begin
    fdelayedapplycount:= avalue;
   end;
  end;   
+end;
+
+function tdscontroller.getnoedit: boolean;
+begin
+ result:= dso_noedit in foptions;
+end;
+
+procedure tdscontroller.setnoedit(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options + [dso_noedit];
+ end
+ else begin
+  options:= options - [dso_noedit];
+ end;  
+end;
+
+function tdscontroller.getcanmodify: boolean;
+begin
+ result:= not (dso_noedit in foptions);
 end;
 
 { tmsedatasource }

@@ -406,8 +406,9 @@ end;
 
 function tmsesqlquery.getcanmodify: Boolean;
 begin
- result:= inherited getcanmodify or not readonly and 
-               (sqs_userapplayrecupdate in fmstate);
+ result:= fcontroller.getcanmodify and 
+              (inherited getcanmodify or not readonly and 
+                                    (sqs_userapplayrecupdate in fmstate));
 end;
 
 procedure tmsesqlquery.applyrecupdate(updatekind: tupdatekind);
