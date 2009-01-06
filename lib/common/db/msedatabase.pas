@@ -3,7 +3,7 @@
     Copyright (c) 1999-2000 by Michael Van Canneyt, member of the
     Free Pascal development team
     
-    Modified 2007-2008 by Martin Schreiber
+    Modified 2007-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -71,6 +71,7 @@ type
     procedure SetActive(Value : boolean);
   Protected
 //    FDataSets      : TList;
+    fcloselock: integer;
     fdatasets: itransactionclientarty;
     fwritedatasets: itransactionclientarty;
     Procedure SetDatabase (Value : tmdatabase); virtual;
@@ -91,6 +92,7 @@ type
     procedure CloseDataSets;
     procedure refreshdatasets(const awrite: boolean = true; 
                                   const aread: boolean = true);
+//    procedure refresh; //closes transaction and reopens datasets
     Property DataBase : tmdatabase Read FDatabase Write SetDatabase;
     property datasets: itransactionclientarty read fdatasets;
     property writedatasets: itransactionclientarty read fdatasets;
@@ -782,8 +784,13 @@ procedure tmdbtransaction.CloseDataSets;
 var
  int1: integer;
 begin
- for int1:= high(fdatasets) downto 0 do begin
-  fdatasets[int1].setactive(false);
+ if fcloselock = 0 then begin
+  for int1:= high(fdatasets) downto 0 do begin
+   fdatasets[int1].setactive(false);
+  end;
+  for int1:= high(fwritedatasets) downto 0 do begin
+   fwritedatasets[int1].setactive(false);
+  end;
  end;
 end;
 

@@ -1,6 +1,6 @@
 {
     Copyright (c) 2004 by Joost van der Sluis
-    Modified 2006-2008 by Martin Schreiber
+    Modified 2006-2009 by Martin Schreiber
 
     SQL database & dataset
 
@@ -19,7 +19,7 @@ unit msqldb;
 {$ifdef VER2_2} {$define mse_FPC_2_2} {$endif}
 {$mode objfpc}{$interfaces corba}
 {$H+}
-{$M+}   // ### remove this!!!
+//{$M+}   // ### remove this!!!
 
 
 interface
@@ -338,9 +338,13 @@ type
     Procedure SetDatabase (Value : tmdatabase); override;
     procedure disconnect(const sender: tsqlquery);
     procedure finalizetransaction; override;
+    procedure doendtransaction(const aaction: tcommitrollbackaction);
    public
     constructor Create(AOwner : TComponent); override;
     destructor Destroy; override;
+    procedure refresh(aaction: tcommitrollbackaction = canone);
+                 //canone -> action property
+                 //closes transaction, calls refreshdatasets
     function Commit: boolean; virtual; //true if ok
     function CommitRetaining: boolean; virtual;
     procedure Rollback; virtual;
@@ -1778,15 +1782,37 @@ begin
  end;
 end;
 
-procedure TSQLTransaction.EndTransaction;
-
+procedure TSQLTransaction.doendtransaction(
+                         const aaction: tcommitrollbackaction);
 begin
- case faction of
+ case aaction of
   caCommit: commit;
   caCommitRetaining: commitretaining;
   caRollbackRetaining: rollbackretaining;
   else rollback;        //canone,caRollback
  end;
+end;
+
+procedure TSQLTransaction.EndTransaction;
+
+begin
+ doendtransaction(faction);
+end;
+
+procedure tsqltransaction.refresh(aaction: tcommitrollbackaction = canone);
+                 //canone -> action property
+                 //closes transaction, calls refreshdatasets
+begin
+ if aaction = canone then begin
+  aaction:= action;
+ end;
+ inc(fcloselock);
+ try
+  doendtransaction(aaction);
+ finally
+  dec(fcloselock);
+ end;
+ refreshdatasets;
 end;
 
 function TSQLTransaction.GetHandle: pointer;
@@ -1997,7 +2023,6 @@ begin
   tsqlconnection(database).finalizetransaction(ftrans);
  end; 
 end;
-
 
 { TSQLQuery }
 
