@@ -262,7 +262,7 @@ end;
 
 function tmsememdataset.getcanmodify: boolean;
 begin
- result:= fcontroller.getcanmodify and inherited canmodify;
+ result:= fcontroller.getcanmodify and inherited getcanmodify;
 end;
 
 end.
