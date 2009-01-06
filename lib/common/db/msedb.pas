@@ -929,7 +929,7 @@ type
 
  datasetoptionty = (dso_utf8,dso_stringmemo,dso_numboolean,
                          dso_initinternalcalc,
-                         dso_refreshtransaction,dso_refreshtransdatasets,
+                         dso_refreshtransaction,{dso_refreshtransdatasets,}
                          dso_cancelupdateonerror,dso_cancelupdatesonerror,                         
                          dso_autoapply,{dso_applyonidle,}
                          dso_autocommitret,dso_autocommit,

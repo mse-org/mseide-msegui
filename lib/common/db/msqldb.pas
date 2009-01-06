@@ -1830,9 +1830,10 @@ function tsqltransaction.docommit(const retaining: boolean): boolean;
    closedatasets;
   end
   else begin
-   if (tao_refreshdatasets in foptions) or 
+   if (fcloselock = 0) and //refresh will not be performed later
+       ((tao_refreshdatasets in foptions) or 
       (sco_emulateretaining in 
-              tcustomsqlconnection(database).connoptions) then begin
+              tcustomsqlconnection(database).connoptions)) then begin
     refreshdatasets(true,true);
    end;
   end;
@@ -1935,7 +1936,9 @@ begin
 //  if (tao_refreshdatasets in foptions) or
 //       (sco_emulateretaining in 
 //             tcustomsqlconnection(database).connoptions) then begin
+  if fcloselock = 0 then begin //refresh will not be performed later
    refreshdatasets;
+  end;
 //  end;
   if checkcanevent(self,tmethod(fonafterrollbackretaining)) then begin
    fonafterrollback(self);
