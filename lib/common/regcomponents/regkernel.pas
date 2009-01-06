@@ -28,6 +28,7 @@ uses
 type
  twidget1 = class(twidget);
  tactivator1 = class(tactivator);
+ tskincontroller1 = class(tskincontroller);
 
  tactionpropertyeditor = class(tcomponentpropertyeditor)
   protected
@@ -73,6 +74,13 @@ type
    function subproperties: propertyeditorarty; override;
  end;
 
+ tskincontrollerextenderspropertyeditor = class(tconstarraypropertyeditor)
+  protected
+   procedure itemmoved(const source,dest: integer); override;
+  public
+   function subproperties: propertyeditorarty; override;
+ end;
+
  tsysshortcutelementeditor = class(tarrayelementeditor)
   public
    function name: msestring; override;
@@ -105,6 +113,7 @@ begin
  registercomponenttabhints(['NoGui'],['Components without GUI Dependence']);
  registercomponents('Gui',[tmainmenu,tpopupmenu,
                     tfacecomp,tfacelist,tframecomp,tskincontroller,
+//                    tskinextender,
                     tbitmapcomp,timagelist,tshortcutcontroller,
                     taction,tguithreadcomp]);
  registercomponenttabhints(['Gui'],['Non visual Components with GUI Dependence']);
@@ -148,6 +157,8 @@ begin
                            toptionalclasspropertyeditor);
  registerpropertyeditor(typeinfo(integer),tactivator,'clients',
                          tactivatorclientspropertyeditor);
+ registerpropertyeditor(typeinfo(integer),tskincontroller,'extenders',
+                         tskincontrollerextenderspropertyeditor);
  registerunitgroup(['msestatfile'],['msestat']);
  
  registerdesignmoduleclass(tmsedatamodule,datamoduleintf);
@@ -244,6 +255,33 @@ procedure tactivatorclientspropertyeditor.itemmoved(const source: integer;
                         const dest: integer);
 begin
  moveitem(tactivator1(fprops[0].instance).fclients,source,dest);
+ modified;
+end;
+
+{ tskincontrollerextenderspropertyeditor }
+
+function tskincontrollerextenderspropertyeditor.subproperties: propertyeditorarty;
+var
+ int1: integer;
+ ar1: stringarty;
+begin
+ with tskincontroller1(fprops[0].instance) do begin
+  updateorder;
+  fextendernames:= nil;
+  ar1:= getextendernames;
+  setlength(result,length(fextenders));
+  for int1:= 0 to high(result) do begin
+   result[int1]:= tconstelementeditor.create(ar1[int1],
+         int1,self,geteditorclass,fdesigner,fobjectinspector,fprops,ftypeinfo);
+  end;
+ end;
+end;
+
+procedure tskincontrollerextenderspropertyeditor.itemmoved(const source: integer;
+                        const dest: integer);
+begin
+ moveitem(pointerarty(tskincontroller1(fprops[0].instance).fextenders),
+                        source,dest);
  modified;
 end;
 

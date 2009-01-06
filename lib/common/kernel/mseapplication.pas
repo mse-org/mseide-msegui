@@ -85,7 +85,7 @@ type
    procedure registerclient(const aclient: iobjectlink);
    procedure unregisterclient(const aclient: iobjectlink);
    procedure updateorder;
-   function getclientname(const avalue: tobject; const aindex: integer): string;
+//   function getclientname(const avalue: tobject; const aindex: integer): string;
    function getclientnames: stringarty;
    procedure defineproperties(filer: tfiler); override;
    procedure doasyncevent(var atag: integer); override;
@@ -290,6 +290,13 @@ procedure designvalidaterename(const acomponent: tcomponent;
                                    const curname, newname: string);
 procedure handlesigchld;
 
+     //helper functions for component extenders
+procedure updateclientorder(var fclientnames: stringarty;
+          var fclients: pointerarty;
+          const getclientnames: getstringareventty);
+function getclientname(const avalue: tobject;
+                   const aindex: integer): string;
+
 type
  validaterenameeventty = procedure(const acomponent: tcomponent;
                                 const curname, newname: string) of object;
@@ -315,6 +322,55 @@ type
 var
  appinst: tcustomapplication;
  appclass: applicationclassty;
+
+function getclientname(const avalue: tobject;
+                   const aindex: integer): string;
+begin
+ if avalue is tcomponent then begin
+  with tcomponent(avalue) do begin
+   if owner <> nil then begin
+    if not (csdesigning in componentstate) or 
+             ((owner.owner <> nil) and (owner.owner.owner = nil)) then begin
+     result:= owner.name+'.'+name;
+    end
+    else begin
+     result:= name;
+    end;
+   end
+   else begin
+    result:= '';
+   end;
+  end;
+ end
+ else begin
+  result:= inttostr(aindex)+'<'+avalue.classname+'>';
+ end;
+end;
+
+procedure updateclientorder(var fclientnames: stringarty;
+          var fclients: pointerarty;
+          const getclientnames: getstringareventty);
+var
+ int1,int2: integer;
+ ar1: stringarty;
+ ar2,ar3: integerarty;
+begin
+ ar1:= nil; //compilerwarning
+ if fclientnames <> nil then begin
+  ar1:= getclientnames();
+  setlength(ar2,length(ar1));
+  for int1:= 0 to high(fclientnames) do begin
+   for int2:= 0 to high(ar1) do begin
+    if ar1[int2] = fclientnames[int1] then begin
+     ar2[int2]:= int1-bigint; //not found items last
+     ar1[int2]:= '';
+    end;
+   end;
+  end;
+  sortarray(ar2,ar3);
+  orderarray(ar3,fclients);
+ end;
+end;
 
 procedure handlesigchld;
 begin
@@ -499,6 +555,11 @@ begin
 end;
 
 procedure tactivator.updateorder;
+begin
+ updateclientorder(fclientnames,fclients,@getclientnames);
+end;
+{
+procedure tactivator.updateorder;
 var
  int1,int2: integer;
  ar1: stringarty;
@@ -520,7 +581,7 @@ begin
   orderarray(ar3,fclients);
  end;
 end;
-
+}
 procedure tactivator.doasyncevent(var atag: integer);
 begin
  activateclients;
@@ -555,6 +616,7 @@ begin
  end;
 end;
 
+{
 function tactivator.getclientname(const avalue: tobject;
                    const aindex: integer): string;
 begin
@@ -578,7 +640,7 @@ begin
   result:= inttostr(aindex)+'<'+avalue.classname+'>';
  end;
 end;
-
+}
 function tactivator.getclientnames: stringarty;
 var
  int1: integer;
@@ -641,6 +703,7 @@ begin
   fonbeforeactivate(self);
  end;
  if factive then begin
+  updateorder;
   bo2:= canevent(tmethod(fonactivateerror));
   for int1:= 0 to high(fclients) do begin
    try
@@ -682,6 +745,7 @@ begin
   fonbeforedeactivate(self);
  end;
  if not active then begin
+  updateorder;
   for int1:= high(fclients) downto 0 do begin
    iobjectlink(fclients[int1]).objevent(ievent(self),oe_deactivate);
   end;

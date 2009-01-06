@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2008 by Martin Schreiber
+{ MSEgui Copyright (c) 2008-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -8,15 +8,13 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 unit mseskin;
-{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
 interface
 uses
  classes,mseclasses,msegui,msescrollbar,mseedit,msegraphics,msegraphutils,
  msetabs,msetoolbar,msedataedits,msemenus,msearrayprops,msegraphedits,msesimplewidgets,
- msegrids,msewidgets;
+ msegrids,msewidgets,msetypes,mseglob;
 type
- beforeskinupdateeventty = procedure(const sender: tobject; 
-                const ainfo: skininfoty; var handled: boolean) of object;
 
 // skinmenuoptionty = (smo_noanim);
 // skinmenuoptionsty = set of skinmenuoptionty;
@@ -181,25 +179,61 @@ type
  end;
 
  createprocty = procedure of object;
- 
-//todo: controller chain for custom components
 
+ tcustomskincontroller = class;
+ 
+ beforeskinupdateeventty = procedure(const sender: tcustomskincontroller; 
+                const ainfo: skininfoty; var handled: boolean) of object;
+ skincontrollereventty = procedure(const sender: tcustomskincontroller; 
+                                  const ainfo: skininfoty) of object;
+                
+ tskinextender = class(tmsecomponent)
+  private
+   fmaster: tcustomskincontroller;
+   procedure setmaster(const avalue: tcustomskincontroller);
+  protected
+   procedure doactivate; virtual;
+   procedure dodeactivate; virtual;
+  public
+   destructor  destroy; override;
+   procedure updateskin(const ainfo: skininfoty; var handled: boolean); virtual;
+  published
+   property master: tcustomskincontroller read fmaster write setmaster;
+ end;
+
+ skinextenderarty = array of tskinextender;
+   
  tcustomskincontroller = class(tmsecomponent)
   private
    fonbeforeupdate: beforeskinupdateeventty;
-   fonafterupdate: skinobjecteventty;
+   fonafterupdate: skincontrollereventty;
    factive: boolean;
    fonactivate: notifyeventty;
    fondeactivate: notifyeventty;
    fcolors: tskincolors;
    ffontalias: tskinfontaliass;
+   fupdating: integer;
    procedure setactive(const avalue: boolean);
    procedure setcolors(const avalue: tskincolors);
    procedure setfontalias(const avalue: tskinfontaliass);
+   function getextenders: integer;
+   procedure setextenders(const avalue: integer);
+   procedure readextendernames(reader: treader);
+   procedure writeextendernames(writer: twriter);
   protected
+   fextendernames: stringarty;
+   fextenders: skinextenderarty;
+   function getextendernames: stringarty;
+   procedure objectevent(const sender: tobject;
+                    const event: objecteventty); override;
+   procedure updateorder;
+   procedure registerextender(const aextender: tskinextender);
+   procedure unregisterextender(const aextender: tskinextender);
+
    procedure doactivate; virtual;
    procedure dodeactivate; virtual;
    procedure loaded; override;
+   procedure defineproperties(filer: tfiler); override;
 
    procedure setfacetemplate(const face: tfacecomp;
                                         const dest: tcustomface);
@@ -242,45 +276,32 @@ type
    procedure setmainmenuskin(const instance: tcustommainmenu;
          const ainfo: mainmenuskininfoty);
 
-   procedure handlewidget(const sender: twidget; 
-                const ainfo: skininfoty); virtual;
-   procedure handlecontainer(const sender: twidget; 
-                const ainfo: skininfoty); virtual;
-   procedure handlegroupbox(const sender: tgroupbox;
-                const ainfo: skininfoty); virtual;
-   procedure handlesimplebutton(const sender: twidget;
-                const ainfo: skininfoty); virtual;
-   procedure handledatabutton(const sender: twidget;
-                const ainfo: skininfoty); virtual;
-   procedure handleuserobject(const sender: tobject;
-                const ainfo: skininfoty); virtual;
-   procedure handletabbar(const sender: tcustomtabbar;
-                           const ainfo: skininfoty); virtual;
-   procedure handletabpage(const sender: ttabpage;
-                           const ainfo: skininfoty); virtual;
-   procedure handletoolbar(const sender: tcustomtoolbar;
-                           const ainfo: skininfoty); virtual;
-   procedure handleedit(const sender: tedit;
-                           const ainfo: skininfoty); virtual;
-   procedure handledataedit(const sender: tdataedit;
-                           const ainfo: skininfoty); virtual;
-   procedure handlebooleanedit(const sender: tgraphdataedit;
-                           const ainfo: skininfoty); virtual;
-   procedure handlemainmenu(const sender: tcustommainmenu;
-                           const ainfo: skininfoty); virtual;
-   procedure handlepopupmenu(const sender: tpopupmenu;
-                           const ainfo: skininfoty); virtual;
-   procedure handlegrid(const sender: tcustomgrid;
-                           const ainfo: skininfoty); virtual;
+   procedure handlewidget(const ainfo: skininfoty); virtual;
+   procedure handlecontainer(const ainfo: skininfoty); virtual;
+   procedure handlegroupbox(const ainfo: skininfoty); virtual;
+   procedure handlesimplebutton(const ainfo: skininfoty); virtual;
+   procedure handledatabutton(const ainfo: skininfoty); virtual;
+   procedure handleuserobject(const ainfo: skininfoty); virtual;
+   procedure handletabbar(const ainfo: skininfoty); virtual;
+   procedure handletabpage(const ainfo: skininfoty); virtual;
+   procedure handletoolbar(const ainfo: skininfoty); virtual;
+   procedure handleedit(const ainfo: skininfoty); virtual;
+   procedure handledataedit(const ainfo: skininfoty); virtual;
+   procedure handlebooleanedit(const ainfo: skininfoty); virtual;
+   procedure handlemainmenu(const ainfo: skininfoty); virtual;
+   procedure handlepopupmenu(const ainfo: skininfoty); virtual;
+   procedure handlegrid(const ainfo: skininfoty); virtual;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   procedure updateskin(const instance: tobject; const ainfo: skininfoty);
+   procedure updateskin(const ainfo: skininfoty);
   published
    property active: boolean read factive write setactive default false;
+   property extenders: integer read getextenders write setextenders; 
+                                  //hook for object inspector
    property onbeforeupdate: beforeskinupdateeventty read fonbeforeupdate
                                  write fonbeforeupdate;
-   property onafterupdate: skinobjecteventty read fonafterupdate
+   property onafterupdate: skincontrollereventty read fonafterupdate
                                  write fonafterupdate;
    property onactivate: notifyeventty read fonactivate write fonactivate;
    property ondeactivate: notifyeventty read fondeactivate write fondeactivate;
@@ -406,34 +427,20 @@ type
    procedure setmainmenu_popupitemfaceactive(const avalue: tfacecomp);
    procedure setmainmenu_popupitemframeactive(const avalue: tframecomp);
   protected
-   procedure handlewidget(const sender: twidget; 
-                                  const ainfo: skininfoty); override;
-   procedure handlecontainer(const sender: twidget; 
-                                  const ainfo: skininfoty); override;
-   procedure handlegroupbox(const sender: tgroupbox; 
-                                  const ainfo: skininfoty); override;
-   procedure handlesimplebutton(const sender: twidget; 
-                                  const ainfo: skininfoty); override;
-   procedure handledatabutton(const sender: twidget; 
-                                  const ainfo: skininfoty); override;
-   procedure handletabbar(const sender: tcustomtabbar;
-                                  const ainfo: skininfoty); override;
-   procedure handletabpage(const sender: ttabpage;
-                                  const ainfo: skininfoty); override;
-   procedure handletoolbar(const sender: tcustomtoolbar;
-                           const ainfo: skininfoty); override;
-   procedure handleedit(const sender: tedit;
-                           const ainfo: skininfoty); override;
-   procedure handledataedit(const sender: tdataedit;
-                           const ainfo: skininfoty); override;
-   procedure handlebooleanedit(const sender: tgraphdataedit;
-                           const ainfo: skininfoty); override;
-   procedure handlemainmenu(const sender: tcustommainmenu;
-                           const ainfo: skininfoty); override;
-   procedure handlepopupmenu(const sender: tpopupmenu;
-                           const ainfo: skininfoty); override;
-   procedure handlegrid(const sender: tcustomgrid;
-                           const ainfo: skininfoty); override;
+   procedure handlewidget(const ainfo: skininfoty); override;
+   procedure handlecontainer(const ainfo: skininfoty); override;
+   procedure handlegroupbox(const ainfo: skininfoty); override;
+   procedure handlesimplebutton(const ainfo: skininfoty); override;
+   procedure handledatabutton(const ainfo: skininfoty); override;
+   procedure handletabbar(const ainfo: skininfoty); override;
+   procedure handletabpage(const ainfo: skininfoty); override;
+   procedure handletoolbar(const ainfo: skininfoty); override;
+   procedure handleedit(const ainfo: skininfoty); override;
+   procedure handledataedit(const ainfo: skininfoty); override;
+   procedure handlebooleanedit(const ainfo: skininfoty); override;
+   procedure handlemainmenu(const ainfo: skininfoty); override;
+   procedure handlepopupmenu(const ainfo: skininfoty); override;
+   procedure handlegrid(const ainfo: skininfoty); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -659,7 +666,7 @@ function activeskincontroller: tcustomskincontroller;
   
 implementation
 uses
- msetabsglob,sysutils;
+ msetabsglob,sysutils,mseapplication,msedatalist;
 type
  twidget1 = class(twidget);
  tcustomframe1 = class(tcustomframe);
@@ -795,18 +802,30 @@ begin
 end;
 
 procedure tcustomskincontroller.doactivate;
+var
+ int1: integer;
 begin
  fcolors.setcolors;
  ffontalias.setfontalias;
  if canevent(tmethod(fonactivate)) then begin
   fonactivate(self);   
  end;
+ updateorder;
+ for int1:= 0 to high(fextenders) do begin
+  fextenders[int1].doactivate;
+ end;
 end;
 
 procedure tcustomskincontroller.dodeactivate;
+var
+ int1: integer;
 begin
  if canevent(tmethod(fondeactivate)) then begin
   fondeactivate(self);   
+ end;
+ updateorder;
+ for int1:= 0 to high(fextenders) do begin
+  fextenders[int1].dodeactivate;
  end;
 end;
 
@@ -821,7 +840,7 @@ end;
 procedure tcustomskincontroller.setactive(const avalue: boolean);
 //{$ifndef FPC}
 var
- meth1: skinobjecteventty;
+ meth1: skineventty;
 //{$endif}
 begin
  if factive <> avalue then begin
@@ -855,73 +874,89 @@ begin
  end;
 end;
 
-procedure tcustomskincontroller.updateskin(const instance: tobject;
-               const ainfo: skininfoty);
+procedure tcustomskincontroller.updateskin(const ainfo: skininfoty);
+label
+ endlab;
 var
- bo1: boolean;
+ bo1,bo2: boolean;
+ int1: integer;
 begin
  if factive then begin
   bo1:= false;
   if assigned(fonbeforeupdate) then begin
-   fonbeforeupdate(instance,ainfo,bo1);
+   fonbeforeupdate(self,ainfo,bo1);
   end;
   if not bo1 then begin
+   if fupdating = 0 then begin
+    inc(fupdating);
+    try
+     bo2:= false;
+     for int1:= 0 to high(fextenders) do begin
+      fextenders[int1].updateskin(ainfo,bo2);
+     end;
+    finally
+     dec(fupdating);
+    end;
+    if bo2 then begin
+     goto endlab;
+    end;
+   end;
    case ainfo.objectkind of 
     sok_widget: begin
-     handlewidget(twidget(instance),ainfo);
+     handlewidget(ainfo);
      if sko_container in ainfo.options then begin
-      handlecontainer(twidget(instance),ainfo);
+      handlecontainer(ainfo);
      end;
     end;
     sok_edit: begin
-     handleedit(tedit(instance),ainfo);
+     handleedit(ainfo);
     end;
     sok_dataedit: begin
-     handledataedit(tdataedit(instance),ainfo);
+     handledataedit(ainfo);
     end;
     sok_booleanedit: begin
-     handlebooleanedit(tgraphdataedit(instance),ainfo);
+     handlebooleanedit(ainfo);
     end;
     sok_groupbox: begin
-     handlegroupbox(tgroupbox(instance),ainfo);
+     handlegroupbox(ainfo);
     end;
     sok_simplebutton: begin
-     handlesimplebutton(tactionsimplebutton(instance),ainfo);
+     handlesimplebutton(ainfo);
     end;
     sok_databutton: begin
-     handledatabutton(tactionsimplebutton(instance),ainfo);
+     handledatabutton(ainfo);
     end;
     sok_tabbar: begin
-     handletabbar(tcustomtabbar(instance),ainfo);
+     handletabbar(ainfo);
     end;
     sok_tabpage: begin
-     handletabpage(ttabpage(instance),ainfo);
+     handletabpage(ainfo);
     end;
     sok_toolbar: begin
-     handletoolbar(tcustomtoolbar(instance),ainfo);
+     handletoolbar(ainfo);
     end;
     sok_mainmenu: begin
-     handlemainmenu(tcustommainmenu(instance),ainfo);
+     handlemainmenu(ainfo);
     end;
     sok_popupmenu: begin
-     handlepopupmenu(tpopupmenu(instance),ainfo);
+     handlepopupmenu(ainfo);
     end;
     sok_grid: begin
-     handlegrid(tcustomgrid(instance),ainfo);
+     handlegrid(ainfo);
     end;
     sok_user: begin
-     handleuserobject(instance,ainfo);
+     handleuserobject(ainfo);
     end;
    end;
   end;
+endlab:
   if assigned(fonafterupdate) then begin
-   fonafterupdate(instance,ainfo);
+   fonafterupdate(self,ainfo);
   end;
  end;
 end;
 
-procedure tcustomskincontroller.handlewidget(const sender: twidget;
-               const ainfo: skininfoty);
+procedure tcustomskincontroller.handlewidget(const ainfo: skininfoty);
 begin
  //dummy
 end;
@@ -1302,88 +1337,135 @@ begin
  ffontalias.assign(avalue);
 end;
 
-procedure tcustomskincontroller.handlegroupbox(const sender: tgroupbox;
-               const ainfo: skininfoty);
+procedure tcustomskincontroller.handlegroupbox(const ainfo: skininfoty);
 begin
  //dummy
 end;
 
-procedure tcustomskincontroller.handlesimplebutton(const sender: twidget;
-               const ainfo: skininfoty);
+procedure tcustomskincontroller.handlesimplebutton(const ainfo: skininfoty);
 begin
  //dummy
 end;
 
-procedure tcustomskincontroller.handledatabutton(const sender: twidget;
-               const ainfo: skininfoty);
+procedure tcustomskincontroller.handledatabutton(const ainfo: skininfoty);
 begin
  //dummy
 end;
 
-procedure tcustomskincontroller.handleuserobject(const sender: tobject;
-               const ainfo: skininfoty);
+procedure tcustomskincontroller.handleuserobject(const ainfo: skininfoty);
 begin
  //dummy
 end;
 
-procedure tcustomskincontroller.handlecontainer(const sender: twidget;
-               const ainfo: skininfoty);
+procedure tcustomskincontroller.handlecontainer(const ainfo: skininfoty);
 begin
  //dummy
 end;
 
-procedure tcustomskincontroller.handletabbar(const sender: tcustomtabbar;
-               const ainfo: skininfoty);
+procedure tcustomskincontroller.handletabbar(const ainfo: skininfoty);
 begin
  //dummy
 end;
 
-procedure tcustomskincontroller.handletabpage(const sender: ttabpage;
-               const ainfo: skininfoty);
+procedure tcustomskincontroller.handletabpage(const ainfo: skininfoty);
 begin
  //dummy
 end;
 
-procedure tcustomskincontroller.handleedit(const sender: tedit;
-               const ainfo: skininfoty);
+procedure tcustomskincontroller.handleedit(const ainfo: skininfoty);
 begin
  //dummy
 end;
 
-procedure tcustomskincontroller.handledataedit(const sender: tdataedit;
-               const ainfo: skininfoty);
+procedure tcustomskincontroller.handledataedit(const ainfo: skininfoty);
 begin
  //dummy
 end;
 
-procedure tcustomskincontroller.handlebooleanedit(const sender: tgraphdataedit;
-               const ainfo: skininfoty);
+procedure tcustomskincontroller.handlebooleanedit(const ainfo: skininfoty);
 begin
  //dummy
 end;
 
-procedure tcustomskincontroller.handlemainmenu(const sender: tcustommainmenu;
-               const ainfo: skininfoty);
+procedure tcustomskincontroller.handlemainmenu(const ainfo: skininfoty);
 begin
  //dummy
 end;
 
-procedure tcustomskincontroller.handlepopupmenu(const sender: tpopupmenu;
-               const ainfo: skininfoty);
+procedure tcustomskincontroller.handlepopupmenu(const ainfo: skininfoty);
 begin
  //dummy
 end;
 
-procedure tcustomskincontroller.handlegrid(const sender: tcustomgrid;
-               const ainfo: skininfoty);
+procedure tcustomskincontroller.handlegrid(const ainfo: skininfoty);
 begin
  //dummy
 end;
 
-procedure tcustomskincontroller.handletoolbar(const sender: tcustomtoolbar;
-               const ainfo: skininfoty);
+procedure tcustomskincontroller.handletoolbar(const ainfo: skininfoty);
 begin
  //dummy
+end;
+
+procedure tcustomskincontroller.updateorder;
+begin
+ updateclientorder(fextendernames,pointerarty(fextenders),@getextendernames); 
+end;
+
+function tcustomskincontroller.getextendernames: stringarty;
+var
+ int1: integer;
+begin
+ setlength(result,length(fextenders));
+ for int1:= 0 to high(result) do begin
+  result[int1]:= getclientname(fextenders[int1],int1);
+ end;
+end;
+
+function tcustomskincontroller.getextenders: integer;
+begin
+ result:= length(fextenders);
+end;
+
+procedure tcustomskincontroller.setextenders(const avalue: integer);
+begin
+ //dummy
+end;
+
+procedure tcustomskincontroller.readextendernames(reader: treader);
+begin
+ readstringar(reader,fextendernames);
+end;
+
+procedure tcustomskincontroller.writeextendernames(writer: twriter);
+begin
+ writestringar(writer,getextendernames);
+end;
+
+procedure tcustomskincontroller.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('extendernames',{$ifdef FPC}@{$endif}readextendernames,
+            {$ifdef FPC}@{$endif}writeextendernames,high(fextenders) >= 0);
+end;
+
+procedure tcustomskincontroller.registerextender(const aextender: tskinextender);
+begin
+ additem(pointerarty(fextenders),aextender);
+end;
+
+procedure tcustomskincontroller.unregisterextender(const aextender: tskinextender);
+begin
+ removeitem(pointerarty(fextenders),aextender);
+end;
+
+procedure tcustomskincontroller.objectevent(const sender: tobject;
+               const event: objecteventty);
+begin
+ if event = oe_destroyed then begin
+  removeitem(pointerarty(fextenders),sender);
+ end;
+ inherited;
 end;
 
 { tskincontroller }
@@ -1803,73 +1885,70 @@ begin
  setlinkedvar(avalue,tmsecomponent(fmainmenu.pop.itemframeactive));
 end;
 
-procedure tskincontroller.handlewidget(const sender: twidget;
-               const ainfo: skininfoty);
+procedure tskincontroller.handlewidget(const ainfo: skininfoty);
 var
  int1: integer;
+ wi1: twidget1;
 begin
- if sender.frame <> nil then begin
-  if sender.frame is tcustomscrollframe then begin
-   setscrollbarskin(tcustomscrollframe(sender.frame).sbvert,fsb_vert);
-   setscrollbarskin(tcustomscrollframe(sender.frame).sbhorz,fsb_horz);
-  end
-  else begin
-   if sender.frame is tcustombuttonframe then begin
-    with tcustombuttonframe(sender.frame) do begin
-     for int1:= 0 to buttons.count - 1 do begin
-      setframebuttonskin(buttons[int1],fframebutton);
-     end;
-    end;
+ wi1:= twidget1(ainfo.instance);
+ with wi1 do begin
+  if fframe <> nil then begin
+   if fframe is tcustomscrollframe then begin
+    setscrollbarskin(tcustomscrollframe(fframe).sbvert,fsb_vert);
+    setscrollbarskin(tcustomscrollframe(fframe).sbhorz,fsb_horz);
    end
    else begin
-    if sender.frame is tcustomstepframe then begin
-     setstepbuttonskin(tcustomstepframe(sender.frame),fstepbutton);
-    end;
+    if fframe is tcustombuttonframe then begin
+     with tcustombuttonframe(fframe) do begin
+      for int1:= 0 to buttons.count - 1 do begin
+       setframebuttonskin(buttons[int1],fframebutton);
+      end;
+     end;
+    end
+    else begin
+     if fframe is tcustomstepframe then begin
+      setstepbuttonskin(tcustomstepframe(fframe),fstepbutton);
+     end;
+    end; 
    end; 
-  end; 
+  end;
+  if (osk_colorcaptionframe in optionsskin) or 
+       not (osk_nocolorcaptionframe in optionsskin) and
+         (fframe is tcustomcaptionframe) and 
+       (tcustomcaptionframe(fframe).caption <> '') then begin
+   setwidgetcolor(wi1,fwidget_colorcaptionframe);
+  end
+  else begin
+   setwidgetcolor(wi1,fwidget_color);
+  end;
  end;
- if (osk_colorcaptionframe in sender.optionsskin) or 
-      not (osk_nocolorcaptionframe in sender.optionsskin) and
-        (twidget1(sender).fframe is tcustomcaptionframe) and 
-      (tcustomcaptionframe(twidget1(sender).fframe).caption <> '') then begin
-  setwidgetcolor(sender,fwidget_colorcaptionframe);
- end
- else begin
-  setwidgetcolor(sender,fwidget_color);
- end;
 end;
 
-procedure tskincontroller.handlegroupbox(const sender: tgroupbox;
-               const ainfo: skininfoty);
+procedure tskincontroller.handlegroupbox(const ainfo: skininfoty);
 begin
- handlewidget(sender,ainfo);
- setgroupboxskin(sender,fgroupbox);
+ handlewidget(ainfo);
+ setgroupboxskin(tgroupbox(ainfo.instance),fgroupbox);
 end;
 
-procedure tskincontroller.handlesimplebutton(const sender: twidget;
-               const ainfo: skininfoty);
+procedure tskincontroller.handlesimplebutton(const ainfo: skininfoty);
 begin
- handlewidget(sender,ainfo);
- setwidgetcolor(sender,fbutton.co);
- setwidgetskin(sender,fbutton.wi);
- setwidgetfont(sender,fbutton.font);
+ handlewidget(ainfo);
+ setwidgetcolor(twidget(ainfo.instance),fbutton.co);
+ setwidgetskin(twidget(ainfo.instance),fbutton.wi);
+ setwidgetfont(twidget(ainfo.instance),fbutton.font);
 end;
 
-procedure tskincontroller.handledatabutton(const sender: twidget;
-               const ainfo: skininfoty);
+procedure tskincontroller.handledatabutton(const ainfo: skininfoty);
 begin
- handlewidget(sender,ainfo);
- setwidgetcolor(sender,fdatabutton.co);
- setwidgetskin(sender,fdatabutton.wi);
- setwidgetfont(sender,fdatabutton.font);
+ handlewidget(ainfo);
+ setwidgetcolor(twidget(ainfo.instance),fdatabutton.co);
+ setwidgetskin(twidget(ainfo.instance),fdatabutton.wi);
+ setwidgetfont(twidget(ainfo.instance),fdatabutton.font);
 end;
 
-procedure tskincontroller.handlecontainer(const sender: twidget;
-               const ainfo: skininfoty);
+procedure tskincontroller.handlecontainer(const ainfo: skininfoty);
 begin
- setwidgetskin(sender,fcontainer.wi);
-// setwidgetface(sender,fcontainer.face);
-// setwidgetframetemplate(sender,fcontainer.frame);
+ setwidgetskin(twidget(ainfo.instance),fcontainer.wi);
 end;
 
 procedure tskincontroller.createbutton_font;
@@ -1908,99 +1987,88 @@ begin
  result:= fdatabutton.font;
 end;
 
-procedure tskincontroller.handletabbar(const sender: tcustomtabbar;
-               const ainfo: skininfoty);
+procedure tskincontroller.handletabbar(const ainfo: skininfoty);
+var
+ ta1: tcustomtabbar;
 begin
- handlewidget(sender,ainfo);
- if tabo_vertical in sender.options then begin
-  if tabo_opposite in sender.options then begin
-   setwidgetskin(sender,ftabbar.wivertopo);
-//   setwidgetframetemplate(sender,ftabbar.wivertopo.fra);
-   settabsskin(sender,ftabbar.tavertopo);
+ handlewidget(ainfo);
+ ta1:= tcustomtabbar(ainfo.instance);
+ if tabo_vertical in ta1.options then begin
+  if tabo_opposite in ta1.options then begin
+   setwidgetskin(ta1,ftabbar.wivertopo);
+   settabsskin(ta1,ftabbar.tavertopo);
   end
   else begin
-   setwidgetskin(sender,ftabbar.wivert);
-//   setwidgetframetemplate(sender,ftabbar.wivert.fra);
-   settabsskin(sender,ftabbar.tavert);
+   setwidgetskin(ta1,ftabbar.wivert);
+   settabsskin(ta1,ftabbar.tavert);
   end;
  end
  else begin
-  if tabo_opposite in sender.options then begin
-   setwidgetskin(sender,ftabbar.wihorzopo);
-//   setwidgetframetemplate(sender,ftabbar.wihorzopo.fra);
-   settabsskin(sender,ftabbar.tahorzopo);
+  if tabo_opposite in ta1.options then begin
+   setwidgetskin(ta1,ftabbar.wihorzopo);
+   settabsskin(ta1,ftabbar.tahorzopo);
   end
   else begin
-   setwidgetskin(sender,ftabbar.wihorz);
-//   setwidgetframetemplate(sender,ftabbar.wihorz.fra);
-   settabsskin(sender,ftabbar.tahorz);
+   setwidgetskin(ta1,ftabbar.wihorz);
+   settabsskin(ta1,ftabbar.tahorz);
   end;
  end;
- setstepbuttonskin(sender.frame,fstepbutton);
+ setstepbuttonskin(ta1.frame,fstepbutton);
 end;
 
-procedure tskincontroller.handletabpage(const sender: ttabpage;
-               const ainfo: skininfoty);
+procedure tskincontroller.handletabpage(const ainfo: skininfoty);
 begin
- handlewidget(sender,ainfo);
- setwidgetskin(sender,ftabpage.wi);
+ handlewidget(ainfo);
+ setwidgetskin(ttabpage(ainfo.instance),ftabpage.wi);
 end;
 
-procedure tskincontroller.handletoolbar(const sender: tcustomtoolbar;
-                           const ainfo: skininfoty);
+procedure tskincontroller.handletoolbar(const ainfo: skininfoty);
+var
+ tb1: tcustomtoolbar;
 begin
- handlewidget(sender,ainfo);
- setwidgetskin(sender,ftoolbar.wi);
-// setwidgetface(sender,ftoolbar.face);
-// setwidgetframetemplate(sender,ftoolbar.frame);
- setstepbuttonskin(sender.frame,fstepbutton);
+ handlewidget(ainfo);
+ tb1:= tcustomtoolbar(ainfo.instance);
+ setwidgetskin(tb1,ftoolbar.wi);
+ setstepbuttonskin(tb1.frame,fstepbutton);
  if ftoolbar.buttonface <> nil then begin
-  with sender.buttons do begin
-//   if face = nil then begin
-    createface;
-    setfacetemplate(ftoolbar.buttonface,face);
-//   end;
+  with tb1.buttons do begin
+   createface;
+   setfacetemplate(ftoolbar.buttonface,face);
   end;
  end;
 end;
 
-procedure tskincontroller.handleedit(const sender: tedit;
-               const ainfo: skininfoty);
+procedure tskincontroller.handleedit(const ainfo: skininfoty);
 begin
- handlewidget(sender,ainfo);
+ handlewidget(ainfo);
 end;
 
-procedure tskincontroller.handledataedit(const sender: tdataedit;
-               const ainfo: skininfoty);
+procedure tskincontroller.handledataedit(const ainfo: skininfoty);
 begin
- handlewidget(sender,ainfo);
- setdataeditskin(sender,fdataedit);
+ handlewidget(ainfo);
+ setdataeditskin(tdataedit(ainfo.instance),fdataedit);
 end;
 
-procedure tskincontroller.handlebooleanedit(const sender: tgraphdataedit;
-               const ainfo: skininfoty);
+procedure tskincontroller.handlebooleanedit(const ainfo: skininfoty);
 begin
- handlewidget(sender,ainfo);
- setgraphdataeditskin(sender,fbooleanedit);
+ handlewidget(ainfo);
+ setgraphdataeditskin(tgraphdataedit(ainfo.instance),fbooleanedit);
 end;
 
-procedure tskincontroller.handlemainmenu(const sender: tcustommainmenu;
-               const ainfo: skininfoty);
+procedure tskincontroller.handlemainmenu(const ainfo: skininfoty);
 begin
- setmainmenuskin(sender,fmainmenu);
+ setmainmenuskin(tcustommainmenu(ainfo.instance),fmainmenu);
 end;
 
-procedure tskincontroller.handlepopupmenu(const sender: tpopupmenu;
-               const ainfo: skininfoty);
+procedure tskincontroller.handlepopupmenu(const ainfo: skininfoty);
 begin
- setpopupmenuskin(sender,fpopupmenu);
+ setpopupmenuskin(tpopupmenu(ainfo.instance),fpopupmenu);
 end;
 
-procedure tskincontroller.handlegrid(const sender: tcustomgrid;
-               const ainfo: skininfoty);
+procedure tskincontroller.handlegrid(const ainfo: skininfoty);
 begin
- handlewidget(sender,ainfo);
- setgridskin(sender,fgrid);
+ handlewidget(ainfo);
+ setgridskin(tcustomgrid(ainfo.instance),fgrid);
 end;
 
 { tskinfontalias }
@@ -2009,6 +2077,41 @@ constructor tskinfontalias.create;
 begin
  fmode:= fam_fixnooverwrite;
  inherited;
+end;
+
+{ tskinextender }
+
+destructor tskinextender.destroy;
+begin
+ master:= nil; //unlink
+ inherited;
+end;
+
+procedure tskinextender.setmaster(const avalue: tcustomskincontroller);
+begin
+ if fmaster <> nil then begin
+  fmaster.unregisterextender(self);
+ end;
+ setlinkedvar(avalue,fmaster);
+ if avalue <> nil then begin
+  avalue.registerextender(self);
+ end;
+end;
+
+procedure tskinextender.doactivate;
+begin
+ //dummy
+end;
+
+procedure tskinextender.dodeactivate;
+begin
+ //dummy
+end;
+
+procedure tskinextender.updateskin(const ainfo: skininfoty;
+                                             var handled: boolean);
+begin
+ //dummy
 end;
 
 end.

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -45,8 +45,9 @@ type
  realchangedeventty = procedure (const sender: tobject;
                             const avalue: realty) of object;
 
- getintegereventty = function :integer of object;
- getint64eventty = function :int64 of object;
+ getintegereventty = function: integer of object;
+ getint64eventty = function: int64 of object;
+ getstringareventty = function: stringarty of object;
  
  updatestringeventty = procedure(const sender: tobject; 
                                  var avalue: msestring) of object;
@@ -272,6 +273,7 @@ type
   objectkind: skinobjectkindty;
   userkind: integer;
   options: skinoptionsty;
+  instance: tobject;
  end;
 
  tmsecomponent = class(tcomponent,ievent
@@ -630,10 +632,9 @@ procedure objectbinarytotextmse(input, output: tstream);
 function setloading(const acomponent: tcomponent; const avalue: boolean): boolean;
            //returns old value
 type
- skinobjecteventty = procedure(const instance: tobject; 
-                                       const ainfo: skininfoty) of object;
+ skineventty = procedure(const ainfo: skininfoty) of object;
 var
- oninitskinobject: skinobjecteventty;
+ oninitskinobject: skineventty;
  
 function getcomponentlist(const acomponent: tcomponent): tlist;
                     //uses tcomponentcracker;
@@ -3036,6 +3037,7 @@ end;
 function tmsecomponent.skininfo: skininfoty;
 begin
  result:= classskininfo;
+ result.instance:= self;
 end;
 
 function tmsecomponent.linkedobjects: objectarty;
@@ -3083,7 +3085,7 @@ begin
     if assigned(fonbeforeupdateskin) then begin
      fonbeforeupdateskin(tobject(tmethod(oninitskinobject).data));
     end;
-    oninitskinobject(self,skininfo);
+    oninitskinobject(skininfo);
     if assigned(fonbeforeupdateskin) then begin
      fonafterupdateskin(tobject(tmethod(oninitskinobject).data));
     end;   

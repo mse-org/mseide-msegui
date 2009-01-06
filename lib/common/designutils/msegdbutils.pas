@@ -2339,16 +2339,12 @@ begin
  if int1 >= 0 then begin
   with response[int1] do begin
    if valuekind = vk_value then begin
-    try
-     if (length(value) > 1) and (value[1] = '0') and (value[2] <> 'x') and
-              (value[2] <> 'X') then begin
-      avalue:= strtointvalue(value,nb_oct);
-     end
-     else begin
-      avalue:= strtointvalue(value);
-     end;
-     result:= true;
-    except
+    if (length(value) > 1) and (value[1] = '0') and (value[2] <> 'x') and
+             (value[2] <> 'X') then begin
+     result:= trystrtointvalue(value,nb_oct,avalue);
+    end
+    else begin
+     result:= trystrtointvalue(value,avalue);
     end;
    end;
   end;
