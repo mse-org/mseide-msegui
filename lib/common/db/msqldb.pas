@@ -570,7 +570,7 @@ type
    function getsqltransactionwrite: tsqltransaction;
    procedure setsqltransactionwrite(const avalue: tsqltransaction);
    procedure resetparsing;
-   procedure dorefresh(const atransaction: boolean);
+   procedure dorefresh;
   protected
    FTableName: string;
    FReadOnly: boolean;
@@ -603,6 +603,7 @@ type
    procedure disconnect;
    procedure InternalOpen; override;
    function closetransactiononrefresh: boolean; virtual;
+//   function refreshtransdatasets: boolean; virtual;
    procedure internalrefresh; override;
    procedure refreshtransaction; override;
    
@@ -2653,7 +2654,7 @@ begin
  inherited;
 end;
 
-procedure tsqlquery.dorefresh(const atransaction: boolean);
+procedure tsqlquery.dorefresh;
 var
  int1: integer;
 begin
@@ -2661,10 +2662,6 @@ begin
  include(fbstate,bs_refreshing);
  try
   active:= false;
-  if not atransaction and closetransactiononrefresh then begin
-   transaction.active:= false;
-   transaction.active:= true;
-  end;
   active:= true;
   if recno <> int1 then begin
    setrecno1(int1,true);
@@ -2680,12 +2677,17 @@ end;
 
 procedure tsqlquery.refreshtransaction;
 begin
- dorefresh(true);
+ dorefresh;
 end;
  
 procedure tsqlquery.internalrefresh;
 begin
- dorefresh(false);
+ if closetransactiononrefresh then begin
+  transaction.refresh;
+ end
+ else begin
+  dorefresh;
+ end;
 end;
 
 procedure TSQLQuery.ExecSQL;

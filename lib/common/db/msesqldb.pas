@@ -96,6 +96,7 @@ type
    procedure dataevent(event: tdataevent; info: ptrint); override;
    function wantblobfetch: boolean; override;
    function closetransactiononrefresh: boolean; override;
+//,   function refreshtransdatasets: boolean; override;
       
   public
    constructor create(aowner: tcomponent); override;
@@ -644,6 +645,13 @@ function tmsesqlquery.closetransactiononrefresh: boolean;
 begin
  result:= (dso_refreshtransaction in fcontroller.options);
 end;
+
+{
+function tmsesqlquery.refreshtransdatasets: boolean;
+begin
+ result:= (dso_refreshtransdatasets in fcontroller.options);
+end;
+}
 
 function tmsesqlquery.islocal: boolean;
 begin
