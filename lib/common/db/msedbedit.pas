@@ -1507,7 +1507,7 @@ type
    property datalink: tstringcoldatalink read fdatalink;
   published
    property datafield: string read getdatafield write setdatafield;
-   property optionsdb: optionseditdbty read foptionsdb write foptionsdb;
+   property optionsdb: optionseditdbty read foptionsdb write foptionsdb default [];
    property focusrectdist;
    property textflags;
    property textflagsactive;

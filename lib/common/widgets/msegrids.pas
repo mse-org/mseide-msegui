@@ -821,7 +821,8 @@ type
   published
 //   property onsortchanged: sortchangedeventty read fonsortchanged
 //                                                   write fonsortchanged;
-   property options: datacolheaderoptionsty read foptions write setoptions;
+   property options: datacolheaderoptionsty read foptions write setoptions
+                            default [];
  end;
  
  tcolheaders = class(tindexpersistentarrayprop)
@@ -11278,11 +11279,16 @@ end;
 
 procedure tcustomgrid.sortchanged;
 begin
- if (og_sorted in foptionsgrid) and not(csloading in componentstate) then begin
+ if not(csloading in componentstate) then begin
   if assigned(fonsortchanged) then begin
    fonsortchanged(self);
   end;
-  sort;
+  if (og_sorted in foptionsgrid) then begin
+   sort;
+  end
+  else begin
+   invalidate; //for sort indicator
+  end;
  end;
 end;
 

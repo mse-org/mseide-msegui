@@ -300,6 +300,8 @@ type
                           //returns index of next bigger or lower
    function findrecord(const arecord: pintrecordty): integer;
                          //returns index, -1 if not found
+   function getdesc: boolean;
+   procedure setdesc(const avalue: boolean);
   public
    constructor create(aowner: tobject); override;
    destructor destroy; override;
@@ -329,9 +331,11 @@ type
                 //sets dataset cursor if found
    function unique(const avalues: array of const): boolean;
    function getbookmark(const arecno: integer): string;
+   property desc: boolean read getdesc write setdesc;
   published
    property fields: tindexfields read ffields write setfields;
-   property options: localindexoptionsty read foptions write setoptions;
+   property options: localindexoptionsty read foptions 
+                              write setoptions default [];
    property active: boolean read getactive write setactive default false;
  end;
  
@@ -5192,6 +5196,21 @@ begin
   bm1.recno:= arecno - 1;
   bm1.recordpo:= findexes[findexlocal.indexof(self) + 1].ind[arecno-1];
   result:= bookmarktostring(bm1);
+ end;
+end;
+
+function tlocalindex.getdesc: boolean;
+begin
+ result:= lio_desc in foptions;
+end;
+
+procedure tlocalindex.setdesc(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options + [lio_desc];
+ end
+ else begin
+  options:= options - [lio_desc];
  end;
 end;
 
