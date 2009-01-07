@@ -989,7 +989,6 @@ type
    fcancelresync: boolean;
    finsertbm: string;
    flinkedfields: fieldlinkarty;
-   foptions: datasetoptionsty;
    fstate: dscontrollerstatesty;
    fdelayedapplycount: integer;
    procedure setfields(const avalue: tpersistentfields);
@@ -1005,6 +1004,7 @@ type
    function getnoedit: boolean;
    procedure setnoedit(const avalue: boolean);
   protected
+   foptions: datasetoptionsty;
    procedure setoptions(const avalue: datasetoptionsty); virtual;
    procedure modified;
    procedure setowneractive(const avalue: boolean); override;

@@ -112,7 +112,7 @@ implementation
 uses
  dbconst,db,mseibconnection,
  msepqconnection,mseodbcconn,msemysql40conn,msemysql41conn,msemysql50conn,{sqldb,}
- mselookupbuffer,msedbf,msesdfdata,msememds,
+ mselookupbuffer,msedbf,msesdfdata,msememds,mselocaldataset,
  msedatalist,msedbfieldeditor,sysutils,msetexteditor,
  msedbdispwidgets,msedbgraphics,regdb_bmp,msedbdialog,msegrids,
  regwidgets,msebufdataset,msedbevents,msesqlite3conn,msqldb,msemysqlconn
@@ -223,6 +223,7 @@ begin
       tlookupbuffer,tdblookupbuffer,tdbmemolookupbuffer,
       tmsedatasource,
       tmsedbf,tmsefixedformatdataset,tmsesdfdataset,tmsememdataset,
+      tlocaldataset,
       tmsesqlquery,tmsesqltransaction,
       tsqlstatement,tmsesqlscript,tsqlresult,tsqllookupbuffer,
       tmseibconnection,tmsepqconnection,tsqlite3connection,tmseodbcconnection,
