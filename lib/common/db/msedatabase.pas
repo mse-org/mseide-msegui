@@ -53,6 +53,7 @@ type
  
  idatabaseclient = interface(idbclient)
   procedure setdatabase(const sender: tmdatabase);
+  procedure setactive(avalue: boolean);
  end;
  idatabaseclientarty = array of idatabaseclient;
  
@@ -347,9 +348,9 @@ end;
 destructor tmdatabase.Destroy;
 
 begin
- connected:=false;
- removedatasets;
+ removedatasets; //needs working connection for closing
  removetransactions;
+ connected:= false;
  ftransactions.free;
  fparams.free;
  inherited destroy;
@@ -543,7 +544,10 @@ var
  int1: integer;
 begin
  for int1:= high(fdatasets) downto 0 do begin
-  fdatasets[int1].setdatabase(nil);
+  with fdatasets[int1] do begin
+   setactive(false);
+   setdatabase(nil);
+  end;
  end;
 end;
 
@@ -552,9 +556,14 @@ procedure tmdatabase.RemoveTransactions;
 Var I : longint;
 
 begin
-  If Assigned(FTransactions) then
-    For I:=FTransactions.Count-1 downto 0 do
-      tmdbtransaction(FTransactions[i]).Database:=Nil;
+ If Assigned(FTransactions) then begin
+  For I:=FTransactions.Count-1 downto 0 do begin
+   with tmdbtransaction(FTransactions[i]) do begin
+    setactive(false);
+    Database:=Nil;
+   end;
+  end;
+ end;
 end;
 {
 Function tmdatabase.GetDataSetCount : Longint;

@@ -140,6 +140,7 @@ type
   private
    fowner: tfieldparamlink;
    fparamset: boolean;
+   fchangelock: integer;
   protected
    procedure recordchanged(afield: tfield); override;
   public
@@ -689,26 +690,34 @@ begin
   inherited;
   if active and (field <> nil) and
                 ((afield = nil) or (afield = self.field)) then begin
-   with fowner do begin
-    if not (csdesigning in componentstate) then begin
-     fparamset:= true;
-     bo1:= false;
-     if assigned(fonsetparam) then begin
-      fonsetparam(fowner,bo1);
-     end;
-     if not bo1 and (fparamname <> '') and (dataset <> nil) then begin
-      fieldtoparam(self.field,param);
-     end;
-     if assigned(fonaftersetparam) then begin
-      fonaftersetparam(fowner);
-     end;
-     if (fplo_autorefresh in foptions) and (destdataset <> nil) and 
-                          destdataset.active then begin
-      destdataset.refresh;
-//      destdataset.active:= false;
-//      destdataset.active:= true;     
+   if fchangelock <> 0 then begin
+    databaseerror('Recursive recordchanged.',fowner);
+   end;
+   inc(fchangelock);
+   try
+    with fowner do begin
+     if not (csdesigning in componentstate) then begin
+      fparamset:= true;
+      bo1:= false;
+      if assigned(fonsetparam) then begin
+       fonsetparam(fowner,bo1);
+      end;
+      if not bo1 and (fparamname <> '') and (dataset <> nil) then begin
+       fieldtoparam(self.field,param);
+      end;
+      if assigned(fonaftersetparam) then begin
+       fonaftersetparam(fowner);
+      end;
+      if (fplo_autorefresh in foptions) and (destdataset <> nil) and 
+                           destdataset.active then begin
+       destdataset.refresh;
+ //      destdataset.active:= false;
+ //      destdataset.active:= true;     
+      end;
      end;
     end;
+   finally
+    dec(fchangelock);
    end;
   end;
  end;
