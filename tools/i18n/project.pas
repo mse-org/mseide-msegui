@@ -91,7 +91,7 @@ var
  int1: integer;
 begin
  int1:= mainfo.grid.datacols.count;
-// filer.updatevalue('colcount',int1);
+ filer.updatevalue('colcount',int1);
  mainfo.grid.datacols.count:= int1+variantshift;
 end;
 
