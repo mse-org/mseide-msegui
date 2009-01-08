@@ -3435,7 +3435,7 @@ var
  reader: treader;
  flags: tfilerflags;
  pos: integer;
- rootnames: tstringlist;
+ rootnames,rootinstancenames: tstringlist;
  int1: integer;
  wstr1: msestring;
  res1: modalresultty;
@@ -3522,6 +3522,7 @@ begin //loadformfile
          doswapmethodpointers(module,true);
          result^.components.assigncomps(module);
          rootnames:= tstringlist.create;
+         rootinstancenames:= tstringlist.create;
          getfixupreferencenames(module,rootnames);
          setlength(result^.referencedmodules,rootnames.Count);
          for int1:= 0 to high(result^.referencedmodules) do begin
@@ -3531,6 +3532,7 @@ begin //loadformfile
          fixupmodule:= '';
          while true do begin
           rootnames.clear;
+          rootinstancenames.clear;
           getfixupreferencenames(module,rootnames);
           if rootnames.Count > 0 then begin
            if assigned(fongetmodulenamefile) then begin
@@ -3540,7 +3542,14 @@ begin //loadformfile
               break;
              end;
              fixupmodule:= rootnames[0];
-             fongetmodulenamefile(result,fixupmodule,res1);
+             getfixupinstancenames(module,fixupmodule,rootinstancenames);
+             if rootinstancenames.count > 0 then begin
+              str1:= '.'+rootinstancenames[0];
+             end
+             else begin
+              str1:= '';
+             end;
+             fongetmodulenamefile(result,fixupmodule+str1,res1);
              dofixup;
              case res1 of
               mr_ok: begin
@@ -3575,9 +3584,11 @@ begin //loadformfile
            wstr1:= wstr1 + ','+rootnames[int1];
           end;
           rootnames.free;
+          rootinstancenames.free;
           raise exception.Create('Unresolved reference to '+wstr1+'.');
          end;
          rootnames.free;
+         rootinstancenames.free;
          result^.resolved:= true;
         except
          dodelete;
