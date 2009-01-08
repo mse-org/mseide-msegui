@@ -55,7 +55,7 @@ type
    procedure projectstatonbeforewritestat(const sender: TObject);
    procedure filenamedataentered(const sender: TObject);
   public
-   colwidths: integerarty;
+ //  colwidths: integerarty;
  end;
 
 var
@@ -77,16 +77,22 @@ procedure tprojectfo.projectstatonbeforewritestat(const sender: TObject);
 var
  int1: integer;
 begin
+{
  setlength(colwidths,mainfo.grid.datacols.count - variantshift);
  for int1:= 0 to high(colwidths) do begin
   colwidths[int1]:= mainfo.grid.datacols[int1+variantshift].width;
  end;
+}
 end;
 
 procedure tprojectfo.projectstatonupdatestat(const sender: TObject;
                      const filer: tstatfiler);
+var
+ int1: integer;
 begin
- filer.updatevalue('colwidths',colwidths);
+ int1:= mainfo.grid.datacols.count;
+// filer.updatevalue('colcount',int1);
+ mainfo.grid.datacols.count:= int1+variantshift;
 end;
 
 procedure tprojectfo.projectstatonafterreadstat(const sender: tobject);
@@ -98,12 +104,14 @@ begin
  except
   application.handleexception(nil);
  end;
+ {
  for int1:= 0 to high(colwidths) do begin
   if int1 >= mainfo.grid.datacols.count + variantshift then begin
    break;
   end;
   mainfo.grid.datacols[int1+variantshift].width:= colwidths[int1];
  end;
+}
 end;
 
 procedure tprojectfo.childscaled(const sender: TObject);
