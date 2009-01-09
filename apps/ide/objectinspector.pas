@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2009 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

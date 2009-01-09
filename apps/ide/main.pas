@@ -352,9 +352,14 @@ var
 
 var
  bo1: boolean;
+ int1: integer;
 
 begin
  wstr2:= struppercase(aname);
+ int1:= findchar(wstr2,'.');
+ if int1 > 0 then begin
+  setlength(wstr2,int1-1); //main name only
+ end;
  with projectoptions do begin
   bo1:= dofind(modulenames,modulefilenames);
  end;
