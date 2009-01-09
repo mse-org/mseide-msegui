@@ -49,6 +49,14 @@ If you wish to to compile the IDE:
 1. In 'Project'-'Open' select 'yourdirectory/msegui/apps/ide/mseide.prj'.
 2. 'Target'-'Continue'.
 
+Creating a new GUI project
+**************************
+'Project'-'New'-'From Template', select "default.prj"
+
+Creating a new console project
+******************************
+'Project'-'New'-'From Template', select "console.prj"
+
 FPC 2.2.2
 *********
 patch_fpc_2_2_2 contains patched FPC files in order to fix FPC Mantis 11774, 
@@ -163,5 +171,5 @@ To install the Zeos components add the path to the Zeos source to 'Project'-
 Dependent of the Zeos version it will be necessary to add -MDelphi to 'Project'-
 'Options'-'Make'-'Make options'.
 There is a predefined IDE project apps/ide/mseide_zeos.prj, update 'Project'-
-'Options'-'Macros' according your installation.
+'Options'-'Macros' according to your installation.
 
