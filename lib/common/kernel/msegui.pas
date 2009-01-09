@@ -1442,7 +1442,9 @@ type
    function getclientrect: rectty;              
    
   public
-   constructor create(aowner: tcomponent); override;
+   constructor create(aowner: tcomponent); override; overload;
+   constructor create(const aowner: tcomponent; 
+                                     const aparentwidget: twidget); overload;
    destructor destroy; override;
    procedure afterconstruction; override;
    procedure initnewcomponent(const ascale: real); override;
@@ -5757,7 +5759,13 @@ begin
  fwidgetrect.cy:= defaultwidgetheight;
  fcolor:= defaultwidgetcolor;
  inherited;
-// include(fmsecomponentstate,cs_hasskin);
+end;
+
+constructor twidget.create(const aowner: tcomponent; 
+                                             const aparentwidget: twidget);
+begin
+ create(aowner);
+ setlockedparentwidget(aparentwidget);
 end;
 
 procedure twidget.afterconstruction;
