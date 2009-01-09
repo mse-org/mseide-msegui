@@ -1442,7 +1442,7 @@ type
    function getclientrect: rectty;              
    
   public
-   constructor create(aowner: tcomponent); override; overload;
+   constructor create(aowner: tcomponent); overload; override;
    constructor create(const aowner: tcomponent; 
                                      const aparentwidget: twidget); overload;
    destructor destroy; override;

@@ -1409,7 +1409,8 @@ end;
 
 procedure tcustomskincontroller.updateorder;
 begin
- updateclientorder(fextendernames,pointerarty(fextenders),@getextendernames); 
+ updateclientorder(fextendernames,pointerarty(fextenders),
+                             {$ifdef FPC}@{$endif}getextendernames);
 end;
 
 function tcustomskincontroller.getextendernames: stringarty;
@@ -2092,7 +2093,7 @@ begin
  if fmaster <> nil then begin
   fmaster.unregisterextender(self);
  end;
- setlinkedvar(avalue,fmaster);
+ setlinkedvar(avalue,tmsecomponent(fmaster));
  if avalue <> nil then begin
   avalue.registerextender(self);
  end;

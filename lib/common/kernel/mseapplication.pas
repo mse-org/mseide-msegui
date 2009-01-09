@@ -556,7 +556,7 @@ end;
 
 procedure tactivator.updateorder;
 begin
- updateclientorder(fclientnames,fclients,@getclientnames);
+ updateclientorder(fclientnames,fclients,{$ifdef FPC}@{$endif}getclientnames);
 end;
 {
 procedure tactivator.updateorder;
