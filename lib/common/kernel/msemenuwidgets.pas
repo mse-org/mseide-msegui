@@ -29,7 +29,8 @@ type
  end;
  menucellinfoarty = array of menucellinfoty;
 
- menulayoutoptionty = (mlo_horz,mlo_keymode,mlo_main,mlo_childreninactive);
+ menulayoutoptionty = (mlo_horz,mlo_keymode,mlo_main,mlo_childreninactive); 
+                               //used for popup close by second click
  menulayoutoptionsty = set of menulayoutoptionty;
 
  menulayoutinfoty = record
@@ -59,6 +60,7 @@ type
    fselecteditem: tmenuitem;
    ftemplates: menutemplatety;
    fmenucomp: tcustommenu;
+   fclickeditem: integer;
    procedure internalsetactiveitem(const avalue: integer;
            const aclicked: boolean; const force: boolean); virtual;
    procedure setactiveitem(const value: integer);
@@ -800,6 +802,7 @@ constructor tpopupmenuwidget.create(instance: ppopupmenuwidget; const amenu: tme
          const transientfor: twindow;
          const aowner: tcomponent = nil; const menucomp: tcustommenu = nil);
 begin
+ fclickeditem:= -1;
  finstancepo:= pobject(instance);
  fmenucomp:= menucomp;
  if finstancepo <> nil then begin
@@ -1081,10 +1084,12 @@ procedure tpopupmenuwidget.mouseevent(var info: mouseeventinfoty);
 var
  bo1: boolean;
  po1: pointty;
+ itembefore: integer;
  int1: integer;
 begin
  with info,flayout do begin
 //  po1:= translatetoscreen(pos);
+  itembefore:= activeitem;
   po1:= translatewidgetpoint(info.pos,self,nil);
   if (mlo_keymode in options) and
    (eventkind in [ek_mousemove,ek_buttonpress,ek_buttonrelease,ek_mousepark]) then begin
@@ -1106,13 +1111,11 @@ begin
   if eventkind in mouseposevents then begin
    if not checkprevpopuparea(po1) then begin
     if pointinrect(pos,paintrect) then begin
-     int1:= flayout.activeitem;
-     internalsetactiveitem(getcellatpos(flayout,
-      subpoint(pos,paintpos)),
-                       ss_left in info.shiftstate,false);
+     internalsetactiveitem(getcellatpos(flayout,subpoint(pos,paintpos)),
+                                             ss_left in info.shiftstate,false);
      if activeitem >= 0 then begin
       include(cells[activeitem].buttoninfo.state,shs_mouse);
-      if (int1 <> flayout.activeitem) and 
+      if (itembefore <> activeitem) and 
                 tmenuitem1(menu.items[activeitem]).canshowhint then begin
        application.restarthint(self);
       end;
@@ -1129,6 +1132,9 @@ begin
   case eventkind of
    ek_buttonpress: begin
     if (activeitem >= 0) and (button = mb_left) then begin
+     if (fnextpopup <> nil) and (activeitem = itembefore) then begin
+      fclickeditem:= activeitem; //prepare for close popupup
+     end;
      if mlo_childreninactive in options then begin
       exclude(options,mlo_childreninactive);
       activeitem:= -1;
@@ -1160,6 +1166,13 @@ begin
                  (int1 <= high(cells)) then begin
         activeitem:= int1; //restore mouseactivating
        end;
+       if (mlo_main in options) and (fclickeditem = activeitem) then begin
+        fclickeditem:= -1;
+        closepopupstack(nil);
+        include(state,shs_mouse);
+        exit;
+       end;
+       fclickeditem:= activeitem;
       end;
      end;
     end;
@@ -1194,6 +1207,7 @@ begin
    value1:= -1;
   end; 
   if (activeitem <> value1) or force then begin
+   fclickeditem:= -1;
    if (activeitem >= 0) and (activeitem < menu.submenu.count) then begin
     if (fnextpopup <> nil) then begin
      fnextpopup.release;
