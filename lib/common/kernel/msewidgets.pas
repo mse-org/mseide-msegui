@@ -1014,7 +1014,8 @@ procedure synccaptiondisty(const awidgets: widgetarty);
                 //adjusts captiondist for equal distouter
                 //don't set cfo_captiondistouter!
                 
-procedure getdropdownpos(const parent: twidget; var rect: rectty);
+procedure getdropdownpos(const parent: twidget; const right: boolean;
+                                            var rect: rectty);
 
 
 //following routines are thread save
@@ -1217,7 +1218,8 @@ begin
  result:= modalresult in [mr_yes,mr_all];
 end;
 
-procedure getdropdownpos(const parent: twidget; var rect: rectty);
+procedure getdropdownpos(const parent: twidget; const right: boolean;
+                                                  var rect: rectty);
 var
  int1: integer;
  size1: sizety;
@@ -1225,6 +1227,9 @@ var
 begin
  size1:= parent.framesize;
  rect.pos:= translatewidgetpoint(parent.framerect.pos,parent,nil);
+ if right then begin
+  rect.x:= rect.x + size1.cx - rect.cx;
+ end;
  workarea:= application.workarea(parent.window);
  inc(rect.pos.y,size1.cy);
  if rect.y + rect.cy > workarea.cy then begin

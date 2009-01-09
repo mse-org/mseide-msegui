@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -39,7 +39,7 @@ type
                         //edit.modified called before dropdown
                         deo_casesensitive,
                         deo_sorted,deo_disabled,deo_autosavehistory,
-                        deo_cliphint);
+                        deo_cliphint,deo_right);
  dropdowneditoptionsty = set of dropdowneditoptionty;
 
 const
@@ -261,7 +261,7 @@ type
    procedure doafterclosedropdown; virtual;
    procedure internaldropdown; virtual;
    function setdropdowntext(const avalue: msestring; const docheckvalue: boolean;
-                                const canceled: boolean; const akey: keyty): boolean;
+                         const canceled: boolean; const akey: keyty): boolean;
              //true if selected
    function candropdown: boolean; virtual;
    procedure selectnone(const akey: keyty); virtual;
@@ -889,7 +889,7 @@ begin
  widget1:= getdropdownwidget;
  if widget1 <> nil then begin
   rect1:= widget1.widgetrect;
-  getdropdownpos(fintf.getwidget,rect1);
+  getdropdownpos(fintf.getwidget,deo_right in foptions,rect1);
   widget1.widgetrect:= rect1;
  end;
 end;
@@ -1134,7 +1134,8 @@ begin
    if fdropdownitems = nil then begin
     fdropdownitems:= fcols;
    end;
-   setlinkedcomponent(ievent(self),createdropdownlist,tmsecomponent(fdropdownlist));
+   setlinkedcomponent(ievent(self),createdropdownlist,
+                                         tmsecomponent(fdropdownlist));
    fdropdownlist.name:= '_dropdownlist'; //debug purposes
    fdropdownlist.updateskin;
    try
