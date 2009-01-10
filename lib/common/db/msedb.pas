@@ -67,7 +67,7 @@ type
 
  filtereditkindty = (fek_filter,fek_filtermin,fek_filtermax,fek_find);
  locateresultty = (loc_timeout,loc_notfound,loc_ok); 
- locateoptionty = (loo_caseinsensitive,loo_partialkey,
+ locateoptionty = (loo_caseinsensitive,loo_partialkey,loo_posinsensitive,
                         loo_noforeward,loo_nobackward);
  locateoptionsty = set of locateoptionty;
  fieldarty = array of tfield;
@@ -2007,6 +2007,7 @@ var
  function checkmsestring: boolean;
  var
   int1: integer;
+  po1,po2: pmsechar;
  begin
   if ismsestringfield then begin
    mstr2:= tmsestringfield(field).asmsestring;
@@ -2022,14 +2023,21 @@ var
   if caseinsensitive then begin
    mstr2:= mseuppercase(mstr2);      //todo: optimize
   end;
-  result:= true;
-  for int1:= 0 to int2 - 1 do begin
-   if pmsechar(mstr1)[int1] <> pmsechar(mstr2)[int1] then begin
-    result:= false;
-    break;
-   end;
-   if pmsechar(mstr1)[int1] = #0 then begin
-    break;
+  if loo_posinsensitive in options then begin
+   result:= pos(mstr1,mstr2) > 0;
+  end
+  else begin
+   result:= true;
+   po1:= pmsechar(mstr1);
+   po2:= pmsechar(mstr2);
+   for int1:= 0 to int2 - 1 do begin
+    if po1[int1] <> po2[int1] then begin
+     result:= false;
+     break;
+    end;
+    if po1[int1] = #0 then begin
+     break;
+    end;
    end;
   end;
  end;
@@ -2039,14 +2047,19 @@ var
   int1: integer;
  begin
   str2:= field.asstring;
-  result:= true;
-  for int1:= 0 to int2 - 1 do begin
-   if pchar(str1)[int1] <> pchar(str2)[int1] then begin
-    result:= false;
-    break;
-   end;
-   if pchar(str1)[int1] = #0 then begin
-    break;
+  if loo_posinsensitive in options then begin
+   result:= pos(str1,str2) > 0;
+  end
+  else begin
+   result:= true;
+   for int1:= 0 to int2 - 1 do begin
+    if pchar(str1)[int1] <> pchar(str2)[int1] then begin
+     result:= false;
+     break;
+    end;
+    if pchar(str1)[int1] = #0 then begin
+     break;
+    end;
    end;
   end;
  end;
