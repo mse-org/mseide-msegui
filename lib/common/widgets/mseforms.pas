@@ -328,6 +328,7 @@ type
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure childmouseevent(const sender: twidget;
                           var info: mouseeventinfoty); override;
+   procedure statechanged; override;
    procedure poschanged; override;
    procedure activechanged; override;
    procedure doactivate; override;
@@ -1662,6 +1663,12 @@ begin
  if fframe <> nil then begin
   invalidaterect(tgripframe(fframe).griprect,org_widget);
  end;
+ inherited;
+end;
+
+procedure tcustomdockform.statechanged;
+begin
+ fdragdock.statechanged(fwidgetstate);
  inherited;
 end;
 

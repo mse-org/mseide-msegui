@@ -289,6 +289,7 @@ type
    procedure sizechanged(force: boolean = false; scalefixedalso: boolean = false;
                            const awidgets: widgetarty = nil);
    procedure poschanged;
+   procedure statechanged(const astate: widgetstatesty);
    procedure widgetregionchanged(const sender: twidget);
    procedure beginclientrectchanged;
    procedure endclientrectchanged;
@@ -477,6 +478,13 @@ type
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure updatewindowinfo(var info: windowinfoty); override;
    procedure internalcreateframe; override;
+   procedure clientrectchanged; override;
+   procedure widgetregionchanged(const sender: twidget); override;
+   procedure setparentwidget(const Value: twidget); override;
+   procedure dopaint(const acanvas: tcanvas); override;
+   procedure doactivate; override;
+   procedure statechanged; override;
+   procedure poschanged; override;
    //idockcontroller
    function checkdock(var info: draginfoty): boolean;
    function getbuttonrects(const index: dockbuttonrectty): rectty;
@@ -489,11 +497,6 @@ type
    procedure statreading;
    procedure statread;
    function getstatvarname: msestring;
-   procedure clientrectchanged; override;
-   procedure widgetregionchanged(const sender: twidget); override;
-   procedure setparentwidget(const Value: twidget); override;
-   procedure dopaint(const acanvas: tcanvas); override;
-   procedure doactivate; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -715,6 +718,7 @@ begin
  inherited;
  if (child = ftarget) then begin
   ftarget:= nil;
+  child.anchors:= ftargetanchors;
   if not application.terminated then begin
    visible:= false;
    parentwidget:= nil;
@@ -836,27 +840,14 @@ begin
       if (od_propsize in opt1) and not (od_fixsize in opt1) or 
                              fixedareprop and (od_fixsize in opt1) then begin
        isprop[int2]:= true;
-       if fsplitdir = sd_x then begin
-        inc(propsize,ar1[int1].bounds_cx);
-       end
-       else begin
-        inc(propsize,ar1[int1].bounds_cy);
-       end;
+       propsize:= propsize + fw^.size(ar1[int1]);
       end
      end;
     end;
     if not isprop[int2] then begin
-     if fsplitdir = sd_x then begin
-      inc(fixsize,ar1[int1].bounds_cx);
-      if not isfix[int2] then begin
-       inc(varsize,ar1[int1].bounds_cx);
-      end;
-     end
-     else begin
-      inc(fixsize,ar1[int1].bounds_cy);
-      if not isfix[int2] then begin
-       inc(varsize,ar1[int1].bounds_cy);
-      end;
+     fixsize:= fixsize + fw^.size(ar1[int1]);
+     if not isfix[int2] then begin
+      varsize:= varsize + fw^.size(ar1[int1]);
      end;
     end;
     inc(int2);
@@ -897,272 +888,6 @@ begin
  end
  else begin
   result:= checksplit(nil,int1,int2,int3,int4,ar1,ar2,false);
- end;
-end;
-
-procedure tdockcontroller.dopaint(const acanvas: tcanvas); //canvasorigin = container.clientpos;
-var
- int1: integer;
- color1: colorty;
- brush1: tsimplebitmap;
-begin
- if fsplitterrects <> nil then begin
-  if fsplitter_color <> cl_none then begin
-   for int1:= 0 to high(fsplitterrects) do begin
-    acanvas.fillrect(fsplitterrects[int1],fsplitter_color);
-   end;
-  end;
-  if fsplitter_grip <> stb_none then begin
-   with acanvas do begin
-    color1:= color;
-    brush1:= brush;
-    brush:= stockobjects.bitmaps[fsplitter_grip];
-    color:= fsplitter_colorgrip;
-    for int1:= 0 to high(fsplitterrects) do begin
-     fillrect(fsplitterrects[int1],cl_brushcanvas);
-    end;
-    brush:= brush1;
-    color:= color1;
-   end;
-  end;
- end;
-end;
-
-procedure tdockcontroller.doactivate;
-var
- size1: sizety;
- intf1: idocktarget;
- widget1: twidget;
-begin
- size1:= fintf.getwidget.size;
- if (size1.cx <= 0) or (size1.cy <= 0) then begin
-  widget1:= fintf.getwidget.parentwidget;
-  if (widget1 <> nil) and widget1.getcorbainterface(typeinfo(idocktarget),intf1) then begin
-   intf1.getdockcontroller.calclayout(nil,false);
-  end;
- end;
-end;
-
-procedure tdockcontroller.updategrip(const asplitdir: splitdirty;
-                       const awidget: twidget);
-var
- frame1: tcustomframe;
- grippos1: captionposty;
-begin
- frame1:= twidget1(awidget).fframe;
- if frame1 is tgripframe then begin
-  with tgripframe(frame1) do begin
-   grippos1:= fgrip_pos;
-   if fgrip_options * [go_horz,go_vert] = [] then begin
-    if asplitdir = sd_x then begin
-     if go_opposite in fgrip_options then begin
-      fgrip_pos:= cp_bottom;
-     end
-     else begin
-      fgrip_pos:= cp_top;
-     end;
-    end
-    else begin
-     if (asplitdir = sd_y) or (asplitdir = sd_tabed) or 
-                                    (asplitdir = sd_none) then begin
-      if go_opposite in fgrip_options then begin
-       fgrip_pos:= cp_left;
-      end
-      else begin
-       fgrip_pos:= cp_right;
-      end;
-     end;
-    end;
-   end;
-   if grippos1 <> fgrip_pos then begin
-    internalupdatestate;
-   end;
-  end;
- end;
-end;
-
-procedure tdockcontroller.updatesplitterrects(const awidgets: widgetarty);
-var
- fixend: boolean;
-
- procedure calcsplitters;
- var
-  rect1: rectty;
-  int1,int2: integer;
-  bandpos: integer;
- begin
-  fr^.setsize(rect1,fsplitter_size);
-  bandpos:= fbandstart;
-  for int2:= 0 to high(fbands) do begin
-   with fbands[int2] do begin
-    fr^.setopos(rect1,bandpos);
-    fr^.setosize(rect1,size);
-    for int1:= first to last do begin
-     fr^.setpos(rect1,fw^.stop(awidgets[int1]));
-     fsplitterrects[int1]:= rect1;
-    end;
-    bandpos:= bandpos + size + fbandgap;
-   end;
-  end;
- end;
-
-var
- po1: pointty;
- int1: integer;
- sd1: splitdirty;
-begin
- sd1:= fsplitdir;
- if nofit then begin
-  if sd1 = sd_x then begin
-   sd1:= sd_y;
-  end
-  else begin
-   sd1:= sd_x;
-  end;
- end;
- for int1:= 0 to high(awidgets) do begin
-  updategrip(sd1,awidgets[int1]);
- end;
- if (high(awidgets) >= 0) and (fsplitter_size > 0) and 
-     ((fsplitter_color <> cl_none) or (fsplitter_grip <> stb_none)) then begin
-  fixend:= foptionsdock * [od_nofit] <> [];
-  setlength(fsplitterrects,length(awidgets));
-  calcsplitters;
-  if not fixend then begin
-   setlength(fsplitterrects,high(fsplitterrects));
-  end;
-  po1:= fintf.getwidget.container.clientwidgetpos;
-  for int1:= 0 to high(fsplitterrects) do begin
-   subpoint1(fsplitterrects[int1].pos,po1); //clientorg
-  end;
- end
- else begin
-  fsplitterrects:= nil;
- end;
- fintf.getwidget.container.invalidate;
-end;
-
-procedure tdockcontroller.setoptionsdock(const avalue: optionsdockty);
-const
- mask1: optionsdockty = [od_top,od_background];
- mask2: optionsdockty = [od_alignbegin,od_aligncenter,od_alignend];
-  
-var
- splitdirbefore: splitdirty;
- intf1: idocktarget;
- cont1: tdockcontroller;
- int1: integer;
- val1,val2,val3: optionsdockty;
- bo1: boolean;
-begin
- if foptionsdock <> avalue then begin
-  bo1:= od_fixsize in foptionsdock;
-  splitdirbefore:= fsplitdir;
-  val1:= optionsdockty(
-       setsinglebit({$ifdef FPC}longword{$else}longword{$endif}(avalue),
-       {$ifdef FPC}longword{$else}longword{$endif}(foptionsdock),
-                          {$ifdef FPC}longword{$else}longword{$endif}(mask1)));
-  val2:= optionsdockty(
-       setsinglebit({$ifdef FPC}longword{$else}longword{$endif}(avalue),
-       {$ifdef FPC}longword{$else}longword{$endif}(foptionsdock),
-                          {$ifdef FPC}longword{$else}longword{$endif}(mask2)));
-  foptionsdock:= (avalue - (mask1+mask2{+mask3})) + val1*mask1 + val2*mask2 {+ 
-                                 val3*mask3};
-  if not (od_nofit in foptionsdock) then begin
-   exclude(foptionsdock,od_banded);
-  end;
-  if (od_banded in foptionsdock) and (foptionsdock * mask2 = []) then begin
-   include(foptionsdock,od_aligncenter);
-  end;
-  if bo1 xor (od_fixsize in foptionsdock) then begin
-   exclude(fdockstate,dos_proprefvalid);
-  end;
-  
-  fuseroptions:= foptionsdock;
-  if not (od_splitvert in avalue) and (fsplitdir = sd_x) then begin
-   fsplitdir:= sd_none;
-  end;
-  if not (od_splithorz in avalue) and (fsplitdir = sd_y) then begin
-   fsplitdir:= sd_none;
-  end;
-  if not (od_tabed in avalue) and (fsplitdir = sd_tabed) then begin
-   fsplitdir:= sd_none;
-  end;
-  if (fsplitdir = sd_none) then begin
-   if od_splithorz in avalue then begin
-    fsplitdir:= sd_y;
-   end
-   else begin
-    if od_splitvert in avalue then begin
-     fsplitdir:= sd_x;
-    end
-    else begin
-     if od_tabed in avalue then begin
-      fsplitdir:= sd_tabed;
-     end;
-    end;
-   end;
-  end;
-  with fintf.getwidget do begin
-   if od_top in foptionsdock then begin
-    optionswidget:= optionswidget + [ow_top];
-   end
-   else begin
-    optionswidget:= optionswidget - [ow_top];
-   end;
-   if od_background in foptionsdock then begin
-    optionswidget:= optionswidget + [ow_background];
-   end
-   else begin
-    optionswidget:= optionswidget - [ow_background];
-   end;
-   if (splitdirbefore <> fsplitdir) and 
-               not (csloading in componentstate) then begin
-    calclayout(nil,false);
-    with container do begin
-     if fsplitdir = sd_none then begin
-      for int1:= 0 to widgetcount - 1 do begin
-       with widgets[int1] do begin
-        if getcorbainterface(typeinfo(idocktarget),intf1) then begin
-         cont1:= intf1.getdockcontroller;
-         cont1.fmdistate:= mds_normal;
-         anchors:= [an_left,an_top];
-         widgetrect:= cont1.fnormalrect;
-        end;
-       end;
-      end;
-     end;
-    end;
-    invalidate;
-   end;
-  end;
- end;
-end;
-
-procedure tdockcontroller.setuseroptions(const avalue: optionsdockty);
-begin
- optionsdock:= optionsdockty(replacebits(
-           {$ifdef FPC}longword{$else}longword{$endif}(avalue),
-           {$ifdef FPC}longword{$else}longword{$endif}(foptionsdock),
-           {$ifdef FPC}longword{$else}longword{$endif}(useroptionsmask)));
-end;
-
-procedure tdockcontroller.splitterchanged;
-begin
- if not (csloading in fintf.getwidget.ComponentState) then begin
-  updatesplitterrects(checksplit);
- end;
-end;
-
-procedure tdockcontroller.checkdirection;
-begin
- if fsplitdir = sd_y then begin
-  fr:= @rectaccessy;
-  fw:= @widgetaccessy;
- end
- else begin
-  fr:= @rectaccessx;
-  fw:= @widgetaccessx;
  end;
 end;
 
@@ -1506,6 +1231,272 @@ begin
  end;
 end;
 
+procedure tdockcontroller.dopaint(const acanvas: tcanvas); //canvasorigin = container.clientpos;
+var
+ int1: integer;
+ color1: colorty;
+ brush1: tsimplebitmap;
+begin
+ if fsplitterrects <> nil then begin
+  if fsplitter_color <> cl_none then begin
+   for int1:= 0 to high(fsplitterrects) do begin
+    acanvas.fillrect(fsplitterrects[int1],fsplitter_color);
+   end;
+  end;
+  if fsplitter_grip <> stb_none then begin
+   with acanvas do begin
+    color1:= color;
+    brush1:= brush;
+    brush:= stockobjects.bitmaps[fsplitter_grip];
+    color:= fsplitter_colorgrip;
+    for int1:= 0 to high(fsplitterrects) do begin
+     fillrect(fsplitterrects[int1],cl_brushcanvas);
+    end;
+    brush:= brush1;
+    color:= color1;
+   end;
+  end;
+ end;
+end;
+
+procedure tdockcontroller.doactivate;
+var
+ size1: sizety;
+ intf1: idocktarget;
+ widget1: twidget;
+begin
+ size1:= fintf.getwidget.size;
+ if (size1.cx <= 0) or (size1.cy <= 0) then begin
+  widget1:= fintf.getwidget.parentwidget;
+  if (widget1 <> nil) and widget1.getcorbainterface(typeinfo(idocktarget),intf1) then begin
+   intf1.getdockcontroller.calclayout(nil,false);
+  end;
+ end;
+end;
+
+procedure tdockcontroller.updategrip(const asplitdir: splitdirty;
+                       const awidget: twidget);
+var
+ frame1: tcustomframe;
+ grippos1: captionposty;
+begin
+ frame1:= twidget1(awidget).fframe;
+ if frame1 is tgripframe then begin
+  with tgripframe(frame1) do begin
+   grippos1:= fgrip_pos;
+   if fgrip_options * [go_horz,go_vert] = [] then begin
+    if asplitdir = sd_x then begin
+     if go_opposite in fgrip_options then begin
+      fgrip_pos:= cp_bottom;
+     end
+     else begin
+      fgrip_pos:= cp_top;
+     end;
+    end
+    else begin
+     if (asplitdir = sd_y) or (asplitdir = sd_tabed) or 
+                                    (asplitdir = sd_none) then begin
+      if go_opposite in fgrip_options then begin
+       fgrip_pos:= cp_left;
+      end
+      else begin
+       fgrip_pos:= cp_right;
+      end;
+     end;
+    end;
+   end;
+   if grippos1 <> fgrip_pos then begin
+    internalupdatestate;
+   end;
+  end;
+ end;
+end;
+
+procedure tdockcontroller.updatesplitterrects(const awidgets: widgetarty);
+var
+ fixend: boolean;
+
+ procedure calcsplitters;
+ var
+  rect1: rectty;
+  int1,int2: integer;
+  bandpos: integer;
+ begin
+  fr^.setsize(rect1,fsplitter_size);
+  bandpos:= fbandstart;
+  for int2:= 0 to high(fbands) do begin
+   with fbands[int2] do begin
+    fr^.setopos(rect1,bandpos);
+    fr^.setosize(rect1,size);
+    for int1:= first to last do begin
+     fr^.setpos(rect1,fw^.stop(awidgets[int1]));
+     fsplitterrects[int1]:= rect1;
+    end;
+    bandpos:= bandpos + size + fbandgap;
+   end;
+  end;
+ end;
+
+var
+ po1: pointty;
+ int1: integer;
+ sd1: splitdirty;
+begin
+ sd1:= fsplitdir;
+ if nofit then begin
+  if sd1 = sd_x then begin
+   sd1:= sd_y;
+  end
+  else begin
+   sd1:= sd_x;
+  end;
+ end;
+ for int1:= 0 to high(awidgets) do begin
+  updategrip(sd1,awidgets[int1]);
+ end;
+ if (high(awidgets) >= 0) and (fsplitter_size > 0) and 
+     ((fsplitter_color <> cl_none) or (fsplitter_grip <> stb_none)) then begin
+  fixend:= foptionsdock * [od_nofit] <> [];
+  setlength(fsplitterrects,length(awidgets));
+  calcsplitters;
+  if not fixend then begin
+   setlength(fsplitterrects,high(fsplitterrects));
+  end;
+  po1:= fintf.getwidget.container.clientwidgetpos;
+  for int1:= 0 to high(fsplitterrects) do begin
+   subpoint1(fsplitterrects[int1].pos,po1); //clientorg
+  end;
+ end
+ else begin
+  fsplitterrects:= nil;
+ end;
+ fintf.getwidget.container.invalidate;
+end;
+
+procedure tdockcontroller.setoptionsdock(const avalue: optionsdockty);
+const
+ mask1: optionsdockty = [od_top,od_background];
+ mask2: optionsdockty = [od_alignbegin,od_aligncenter,od_alignend];
+  
+var
+ splitdirbefore: splitdirty;
+ intf1: idocktarget;
+ cont1: tdockcontroller;
+ int1: integer;
+ val1,val2,val3: optionsdockty;
+ bo1: boolean;
+begin
+ if foptionsdock <> avalue then begin
+  bo1:= od_fixsize in foptionsdock;
+  splitdirbefore:= fsplitdir;
+  val1:= optionsdockty(
+       setsinglebit({$ifdef FPC}longword{$else}longword{$endif}(avalue),
+       {$ifdef FPC}longword{$else}longword{$endif}(foptionsdock),
+                          {$ifdef FPC}longword{$else}longword{$endif}(mask1)));
+  val2:= optionsdockty(
+       setsinglebit({$ifdef FPC}longword{$else}longword{$endif}(avalue),
+       {$ifdef FPC}longword{$else}longword{$endif}(foptionsdock),
+                          {$ifdef FPC}longword{$else}longword{$endif}(mask2)));
+  foptionsdock:= (avalue - (mask1+mask2{+mask3})) + val1*mask1 + val2*mask2 {+ 
+                                 val3*mask3};
+  if not (od_nofit in foptionsdock) then begin
+   exclude(foptionsdock,od_banded);
+  end;
+  if (od_banded in foptionsdock) and (foptionsdock * mask2 = []) then begin
+   include(foptionsdock,od_aligncenter);
+  end;
+  if bo1 xor (od_fixsize in foptionsdock) then begin
+   exclude(fdockstate,dos_proprefvalid);
+  end;
+  
+  fuseroptions:= foptionsdock;
+  if not (od_splitvert in avalue) and (fsplitdir = sd_x) then begin
+   fsplitdir:= sd_none;
+  end;
+  if not (od_splithorz in avalue) and (fsplitdir = sd_y) then begin
+   fsplitdir:= sd_none;
+  end;
+  if not (od_tabed in avalue) and (fsplitdir = sd_tabed) then begin
+   fsplitdir:= sd_none;
+  end;
+  if (fsplitdir = sd_none) then begin
+   if od_splithorz in avalue then begin
+    fsplitdir:= sd_y;
+   end
+   else begin
+    if od_splitvert in avalue then begin
+     fsplitdir:= sd_x;
+    end
+    else begin
+     if od_tabed in avalue then begin
+      fsplitdir:= sd_tabed;
+     end;
+    end;
+   end;
+  end;
+  with fintf.getwidget do begin
+   if od_top in foptionsdock then begin
+    optionswidget:= optionswidget + [ow_top];
+   end
+   else begin
+    optionswidget:= optionswidget - [ow_top];
+   end;
+   if od_background in foptionsdock then begin
+    optionswidget:= optionswidget + [ow_background];
+   end
+   else begin
+    optionswidget:= optionswidget - [ow_background];
+   end;
+   if (splitdirbefore <> fsplitdir) and 
+               not (csloading in componentstate) then begin
+    calclayout(nil,false);
+    with container do begin
+     if fsplitdir = sd_none then begin
+      for int1:= 0 to widgetcount - 1 do begin
+       with widgets[int1] do begin
+        if getcorbainterface(typeinfo(idocktarget),intf1) then begin
+         cont1:= intf1.getdockcontroller;
+         cont1.fmdistate:= mds_normal;
+         anchors:= [an_left,an_top];
+         widgetrect:= cont1.fnormalrect;
+        end;
+       end;
+      end;
+     end;
+    end;
+    invalidate;
+   end;
+  end;
+ end;
+end;
+
+procedure tdockcontroller.setuseroptions(const avalue: optionsdockty);
+begin
+ optionsdock:= optionsdockty(replacebits(
+           {$ifdef FPC}longword{$else}longword{$endif}(avalue),
+           {$ifdef FPC}longword{$else}longword{$endif}(foptionsdock),
+           {$ifdef FPC}longword{$else}longword{$endif}(useroptionsmask)));
+end;
+
+procedure tdockcontroller.splitterchanged;
+begin
+ if not (csloading in fintf.getwidget.ComponentState) then begin
+  updatesplitterrects(checksplit);
+ end;
+end;
+
+procedure tdockcontroller.checkdirection;
+begin
+ if fsplitdir = sd_y then begin
+  fr:= @rectaccessy;
+  fw:= @widgetaccessy;
+ end
+ else begin
+  fr:= @rectaccessx;
+  fw:= @widgetaccessx;
+ end;
+end;
+
 function tdockcontroller.getparentcontroller(out acontroller: tdockcontroller): boolean;
 var
  widget1: twidget;
@@ -1614,7 +1605,7 @@ begin
      widget2:= ftarget;
      ftarget:= nil;
      include(fdockstate,dos_tabedending);
-     widget2.anchors:= fanchors;
+     widget2.anchors:= ftargetanchors;
      widget2.parentwidget:= container1;
      exclude(fdockstate,dos_tabedending);
     end;
@@ -3211,6 +3202,11 @@ begin
  end; 
 end;
 
+procedure tdockcontroller.statechanged(const astate: widgetstatesty);
+begin
+ //not used
+end;
+
 procedure tdockcontroller.settab_options(const avalue: tabbaroptionsty);
 begin
  ftab_options:= avalue;
@@ -4369,6 +4365,17 @@ procedure tdockpanel.doactivate;
 begin
  fdragdock.doactivate;
  inherited;
+end;
+
+procedure tdockpanel.statechanged;
+begin
+ fdragdock.statechanged(fwidgetstate);
+ inherited;
+end;
+
+procedure tdockpanel.poschanged;
+begin
+ fdragdock.poschanged;
 end;
 
 function tdockpanel.getdockcontroller: tdockcontroller;

@@ -1439,8 +1439,7 @@ type
    function getfontclass: widgetfontclassty; virtual;
    procedure internalcreatefont; virtual;
 
-   function getclientrect: rectty;              
-   
+   function getclientrect: rectty;
   public
    constructor create(aowner: tcomponent); overload; override;
    constructor create(const aowner: tcomponent; 
