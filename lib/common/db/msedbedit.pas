@@ -1171,6 +1171,8 @@ type
                              const selectaction: focuscellactionty);
    function moveby(distance: integer): integer; override;
    function rowtorecnonullbased(const row: integer): integer;
+   function isfirstrow: boolean;
+   function islastrow: boolean;
   published
    property options: griddatalinkoptionsty read foptions write foptions default [];
    property onupdaterowdata: updaterowdataeventty read fonupdaterowdata 
@@ -1409,6 +1411,8 @@ type
          const selectmode: selectcellmodety = scm_cell;
          const noshowcell: boolean = false): boolean; override;
                                  //true if ok
+   function isfirstrow: boolean; override;
+   function islastrow: boolean; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -1641,7 +1645,8 @@ type
    procedure beforefocuscell(const cell: gridcoordty;
                              const selectaction: focuscellactionty); override;
    procedure coloptionstoeditoptions(var dest: optionseditty);
-
+   function isfirstrow: boolean; override;
+   function islastrow: boolean; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -6334,6 +6339,16 @@ begin
  end;
 end;
 
+function tgriddatalink.isfirstrow: boolean;
+begin
+ result:= not active or bof;
+end;
+
+function tgriddatalink.islastrow: boolean;
+begin
+ result:= not active or eof;
+end;
+
 procedure tgriddatalink.checkscrollbar;
 var
  rea1: real;
@@ -7048,6 +7063,16 @@ function tcustomdbwidgetgrid.focuscell(cell: gridcoordty;
 begin
  fdatalink.focuscell(cell);
  result:= inherited focuscell(cell,selectaction,selectmode,noshowcell);
+end;
+
+function tcustomdbwidgetgrid.isfirstrow: boolean;
+begin
+ result:= fdatalink.isfirstrow;
+end;
+
+function tcustomdbwidgetgrid.islastrow: boolean;
+begin
+ result:= fdatalink.islastrow;
 end;
 
 function tcustomdbwidgetgrid.getdbindicatorcol: integer;
@@ -7789,6 +7814,16 @@ end;
 procedure tcustomdbstringgrid.coloptionstoeditoptions(var dest: optionseditty);
 begin
  //dummy
+end;
+
+function tcustomdbstringgrid.isfirstrow: boolean;
+begin
+ result:= fdatalink.islastrow;
+end;
+
+function tcustomdbstringgrid.islastrow: boolean;
+begin
+ result:= fdatalink.isfirstrow;
 end;
 
 { tlbdropdowncol }

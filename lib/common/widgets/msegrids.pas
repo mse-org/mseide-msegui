@@ -1527,6 +1527,8 @@ type
                                 const acellinfopo: pcelleventinfoty = nil;
                                 const aeventkind: celleventkindty = cek_none);
    procedure dofocusedcellposchanged; virtual;
+   function isfirstrow: boolean; virtual;
+   function islastrow: boolean; virtual;
 
    function internalsort(sortfunc: gridsorteventty; 
                                  var refindex: integer): boolean;
@@ -8284,6 +8286,16 @@ begin
  //dummy
 end;
 
+function tcustomgrid.isfirstrow: boolean;
+begin
+ result:= (ffocusedcell.row <= 0);
+end;
+
+function tcustomgrid.islastrow: boolean;
+begin
+ result:= (ffocusedcell.row < 0) or (ffocusedcell.row = rowhigh);
+end;
+
 function tcustomgrid.selectcell(const cell: gridcoordty; const amode: cellselectmodety
                                         {avalue: boolean; flip: boolean}): boolean;
  //calls onselectcell
@@ -9675,8 +9687,10 @@ begin
    end;
   end;
   cellbefore:= focusedcell;
-  bo1:= (ow_arrowfocusout in optionswidget) and (info.shiftstate = []);
-                //exit widget
+  bo1:= (ow_arrowfocusout in optionswidget) and (info.shiftstate = []) and
+        not(((info.key = key_up) or (info.key = key_pageup)) and not isfirstrow or
+            ((info.key = key_down) or (info.key = key_pagedown)) and not islastrow);
+                //test for db rows, exit widget
   if info.shiftstate - [ss_shift,ss_ctrl] = [] then begin
    if not (es_processed in info.eventstate) then begin
     if ss_shift in info.shiftstate then begin
