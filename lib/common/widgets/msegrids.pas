@@ -979,8 +979,13 @@ type
               default cl_default;
    property coloractive: colorty read fcoloractive write setcoloractive
               default cl_none;
-end;
+ end;
 
+ tcolsfont = class(tparentfont)
+  public
+   class function getinstancepo(owner: tobject): pfont; override;
+ end;
+ 
  tcols = class(tgridarrayprop)
   private
    fwidth: integer;
@@ -988,12 +993,18 @@ end;
    foptions1: coloptions1ty;
    ffocusrectdist: integer;
    ffontactivenum: integer;
+   ffontselect: tcolsfont;
    function getcols(const index: integer): tcol;
    procedure setwidth(const value: integer);
    procedure setoptions(const Value: coloptionsty);
    procedure setoptions1(const Value: coloptions1ty);
    procedure setfocusrectdist(const avalue: integer);
    procedure setfontactivenum(const avalue: integer);
+   function getfontselect: tcolsfont;
+   function isfontselectstored: Boolean;
+   procedure setfontselect(const Value: tcolsfont);
+   procedure createfontselect;
+   procedure fontselectchanged(const sender: tobject);
   protected
    fdataupdating: integer;
    procedure begindataupdate; virtual;
@@ -1014,10 +1025,13 @@ end;
                 write setoptions1 default [];
   public
    constructor create(aowner: tcustomgrid; aclasstype: gridpropclassty);
+   destructor destroy; override;
    procedure move(const curindex,newindex: integer); override;
    property cols[const index: integer]: tcol read getcols; default;
    property focusrectdist: integer read ffocusrectdist 
                                 write setfocusrectdist default 0;
+   property fontselect: tcolsfont read getfontselect 
+                    write setfontselect stored isfontselectstored;
   published
    property width: integer read fwidth
                 write setwidth default griddefaultcolwidth;
@@ -1122,6 +1136,7 @@ end;
    property width;
    property options default defaultdatacoloptions;
    property options1;
+   property fontselect;
    property linewidth;
    property linecolor default defaultdatalinecolor;
    property linecolorfix;
@@ -2676,6 +2691,9 @@ begin
   end;
   if bo1 and (result = nil) then begin
    result:= ffontselect;
+   if result = nil then begin
+    result:= tcols(prop).ffontselect;
+   end;
   end;
  end;
  if result = nil then begin
@@ -5463,6 +5481,13 @@ begin
  end;
 end;
 
+{ tcolsfont }
+
+class function tcolsfont.getinstancepo(owner: tobject): pfont;
+begin
+ result:= @tcols(owner).ffontselect;
+end;
+
 { tcols }
 
 constructor tcols.create(aowner: tcustomgrid; aclasstype: gridpropclassty);
@@ -5470,6 +5495,12 @@ begin
  fwidth:= griddefaultcolwidth;
  ffontactivenum:= -1;
  inherited;
+end;
+
+destructor tcols.destroy;
+begin
+ inherited;
+ ffontselect.free; 
 end;
 
 procedure tcols.paint(const info: colpaintinfoty; const scrollables: boolean = true);
@@ -5603,6 +5634,40 @@ begin
    end;
   end;
  end;
+end;
+
+function tcols.getfontselect: tcolsfont;
+begin
+ getoptionalobject(fgrid.componentstate,ffontselect,
+                                   {$ifdef FPC}@{$endif}createfontselect);
+ result:= ffontselect;
+end;
+
+procedure tcols.setfontselect(const Value: tcolsfont);
+begin
+ if value <> ffontselect then begin
+  setoptionalobject(fgrid.ComponentState,value,ffontselect,
+                               {$ifdef FPC}@{$endif}createfontselect);
+  fgrid.invalidate;
+ end;
+end;
+
+function tcols.isfontselectstored: Boolean;
+begin
+ result:= ffontselect <> nil;
+end;
+
+procedure tcols.createfontselect;
+begin
+ if ffontselect = nil then begin
+  ffontselect:= tcolsfont.create;
+  ffontselect.onchange:= {$ifdef FPC}@{$endif}fontselectchanged;
+ end;
+end;
+
+procedure tcols.fontselectchanged(const sender: tobject);
+begin
+ fgrid.invalidate;
 end;
 
 procedure tcols.move(const curindex, newindex: integer);
