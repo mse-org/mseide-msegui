@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -194,6 +194,7 @@ type
    fbandgap: integer;
    fsizes: integerarty;
    frefsize: integer;
+   fwidgetsbefore: widgetarty;
    procedure updaterefsize;
    procedure setdockhandle(const avalue: tdockhandle);
    procedure layoutchanged;
@@ -784,7 +785,8 @@ var
  banded: boolean;
  needspropref: boolean;
  dcont1: tdockcontroller;
- 
+ widget1: twidget;
+ bo1: boolean; 
 begin
  checkdirection;
  banded:= (od_banded in foptionsdock) and (fsplitdir in [sd_x,sd_y]);
@@ -860,6 +862,20 @@ begin
  setlength(result,int2);
  setlength(isprop,int2);
  setlength(isfix,int2);
+ if (awidgets = nil) and not banded and (fsplitdir in [sd_x,sd_y]) and (high(result) > 0) and 
+       (fw^.pos(result[0]) = fw^.pos(result[1])) and 
+       (finditem(pointerarty(fwidgetsbefore),pointer(result[1])) < 0) then begin
+  widget1:= result[0];        //probably revisible
+  result[0]:= result[1];
+  result[1]:= widget1;
+  bo1:= isprop[0];
+  isprop[0]:= isprop[1];
+  isprop[1]:= bo1;
+  bo1:= isfix[0];
+  isfix[0]:= isfix[1];
+  isfix[1]:= bo1;
+ end;
+ fwidgetsbefore:= result;
 end;
 
 function tdockcontroller.checksplit(out propsize,fixsize: integer;
