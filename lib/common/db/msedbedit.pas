@@ -7818,12 +7818,12 @@ end;
 
 function tcustomdbstringgrid.isfirstrow: boolean;
 begin
- result:= fdatalink.islastrow;
+ result:= fdatalink.isfirstrow;
 end;
 
 function tcustomdbstringgrid.islastrow: boolean;
 begin
- result:= fdatalink.isfirstrow;
+ result:= fdatalink.islastrow;
 end;
 
 { tlbdropdowncol }
