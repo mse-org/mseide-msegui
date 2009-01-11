@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -42,6 +42,9 @@ type
                 co_cancopy,co_canpaste,co_mousescrollrow,co_rowdatachange
                 );
  coloptionsty = set of coloptionty;
+ coloption1ty = (co1_active); //show coloractive independent of gridfocus
+ coloptions1ty = set of coloption1ty;
+ 
  fixcoloptionty = (fco_invisible,fco_mousefocus,fco_mouseselect,
                      fco_rowfont,fco_rowcolor,fco_zebracolor);
  fixcoloptionsty = set of fixcoloptionty;
@@ -982,11 +985,13 @@ end;
   private
    fwidth: integer;
    foptions: coloptionsty;
+   foptions1: coloptions1ty;
    ffocusrectdist: integer;
    ffontactivenum: integer;
    function getcols(const index: integer): tcol;
    procedure setwidth(const value: integer);
    procedure setoptions(const Value: coloptionsty);
+   procedure setoptions1(const Value: coloptions1ty);
    procedure setfocusrectdist(const avalue: integer);
    procedure setfontactivenum(const avalue: integer);
   protected
@@ -1005,6 +1010,8 @@ end;
    procedure rearange(const list: tintegerdatalist); virtual;
    property options: coloptionsty read foptions
                 write setoptions default [];
+   property options1: coloptions1ty read foptions1
+                write setoptions1 default [];
   public
    constructor create(aowner: tcustomgrid; aclasstype: gridpropclassty);
    procedure move(const curindex,newindex: integer); override;
@@ -1114,6 +1121,7 @@ end;
                                       //-1 -> actual
    property width;
    property options default defaultdatacoloptions;
+   property options1;
    property linewidth;
    property linecolor default defaultdatalinecolor;
    property linecolorfix;
@@ -2568,7 +2576,8 @@ end;
 function tcol.checkactivecolor(const aindex: integer): boolean; 
          //true if coloractive and fontactivenum active
 begin
- result:= fgrid.entered and (aindex = fgrid.ffocusedcell.row) and 
+ result:= (fgrid.entered or (co1_active in tcols(prop).foptions1)) and 
+          (aindex = fgrid.ffocusedcell.row) and 
           ((cos_fix in fstate) or (co_rowcoloractive in foptions) or 
                                (findex = fgrid.ffocusedcell.col))
 end;
@@ -5558,6 +5567,14 @@ begin
                    longword(tcol(items[int1]).options),mask));
    end;
   end;
+ end;
+end;
+
+procedure tcols.setoptions1(const value: coloptions1ty);
+begin
+ if foptions1 <> value then begin
+  foptions1:= Value;
+  fgrid.invalidate;
  end;
 end;
 
