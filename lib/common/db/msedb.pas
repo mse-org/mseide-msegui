@@ -842,9 +842,12 @@ type
    fismsestring: boolean;
    fislargeint: boolean;
    fisstringfield: boolean;
+   fnulltext: msestring;
    procedure setfieldname(const Value: string);
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
+   function getasnullmsestring: msestring;
+   procedure setasnullmsestring(const avalue: msestring);
    procedure checkfield;
    procedure updatefield;
    function GetAsBoolean: Boolean;
@@ -888,8 +891,12 @@ type
    property AsString: string read GetAsString write SetAsString;
    property AsVariant: variant read GetAsVariant write SetAsVariant;
    property asmsestring: msestring read getasmsestring write setasmsestring;
+   property asnullmsestring: msestring read getasnullmsestring 
+                                              write setasnullmsestring;
+                   //uses nulltext
    function msedisplaytext(const aformat: msestring = '';
                                           const aedit: boolean = false): msestring;
+   property nulltext: msestring read fnulltext write fnulltext;
  end;
  
  fieldarrayty = array of tfield;
@@ -4213,6 +4220,50 @@ begin
  end;
 end;
 
+function tfielddatalink.getasnullmsestring: msestring;
+begin
+ if ffield.isnull then begin
+  result:= fnulltext;
+ end
+ else begin
+  if fismsestring then begin
+   result:= tmsestringfield(ffield).asmsestring;
+  end
+  else begin
+   try
+    if utf8 then begin
+     result:= utf8tostring(field.asstring);
+    end
+    else begin
+     result:= field.asstring;
+    end;
+   except
+    result:= converrorstring;
+   end;
+  end;
+ end;
+end;
+
+procedure tfielddatalink.setasnullmsestring(const avalue: msestring);
+begin
+ if avalue = fnulltext then begin
+  ffield.clear;
+ end
+ else begin
+  if fismsestring then begin
+   tmsestringfield(field).asmsestring:= avalue;
+  end
+  else begin
+   if utf8 then begin
+    ffield.asstring:= stringtoutf8(avalue);
+   end
+   else begin
+    ffield.asstring:= avalue;
+   end;
+  end;
+ end;
+end;
+
 function tfielddatalink.msedisplaytext(const aformat: msestring = '';
                            const aedit: boolean = false): msestring;
  function defaulttext: msestring;
@@ -4257,6 +4308,9 @@ begin
      result:= defaulttext;
     end;
    end;
+  end
+  else begin
+   result:= fnulltext;
   end;
  end;
 end;

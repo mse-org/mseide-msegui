@@ -61,6 +61,7 @@ type
   procedure initgridwidget;
   procedure gridtovalue(const row: integer);  //row = -1 -> focused row, -2 -> default value
   procedure valuetogrid(const row: integer);  //row = -1 -> focused row
+  function getnulltext: msestring;
   procedure docellevent(const ownedcol: boolean; var info: celleventinfoty);
   procedure sortfunc(const l,r; var result: integer);
   procedure gridvaluechanged(const index: integer); //index = -1 -> undefined, all
@@ -1064,7 +1065,7 @@ begin
     end;
     dl_msestring: begin
      if po1 = nil then begin
-      msestring(dest):= '';
+      msestring(dest):= fintf.getnulltext;
      end
      else begin
       msestring(dest):= pmsestring(po1)^;

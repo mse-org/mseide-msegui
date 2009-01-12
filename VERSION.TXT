@@ -1,5 +1,9 @@
 MSEide+MSEgui version history
 
+2009-01-12
+ tdb*editwidget.datasource, optionsdb  and datafield moved to 
+ tdb*editwidget.datalink.
+ 
 Version 2.0beta2
 2008-12-15
 2008-10-25

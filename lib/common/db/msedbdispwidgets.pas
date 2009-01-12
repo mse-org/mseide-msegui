@@ -11,41 +11,44 @@ type
   procedure fieldtovalue;
   procedure setnullvalue;
   function getwidget: twidget;
+  procedure getfieldtypes(var afieldtypes: fieldtypesty); //[] = all
  end;
  
- tdispfielddatalink = class(tfielddatalink)
+ tdispfielddatalink = class(tfielddatalink,idbeditinfo)
   private
   protected
    fintf: idbdispfieldlink;
    procedure recordchanged(afield: tfield); override;
    procedure activechanged; override;
+   function getdatasource(const aindex: integer): tdatasource;
+   procedure getfieldtypes(out apropertynames: stringarty; 
+                                     out afieldtypes: fieldtypesarty);
   public
    constructor create(const intf: idbdispfieldlink);
+  published
+   property datasource;
+   property fieldname;
  end;
  
- tdblabel = class(tcustomlabel,idbeditinfo,idbdispfieldlink,ireccontrol)
+ tdblabel = class(tcustomlabel,idbdispfieldlink,ireccontrol)
   private
    fdatalink: tdispfielddatalink;
-   function getdatafield: string; overload;
-   procedure setdatafield(const avalue: string);
-   function getdatasource: tdatasource;
-   procedure setdatasource(const avalue: tdatasource);
-     //idbeditinfo
-   function getdatasource(const aindex: integer): tdatasource; overload;
-   procedure getfieldtypes(out propertynames: stringarty;
-                          out fieldtypes: fieldtypesarty);
      //idbdispfieldlink
+   procedure getfieldtypes(var fieldtypes: fieldtypesty);
    procedure fieldtovalue;
    procedure setnullvalue;
    //ireccontrol
    procedure recchanged;
+   procedure setdatalink(const avalue: tdispfielddatalink);
+   procedure readdatasource(reader: treader);
+   procedure readdatafield(reader: treader);
+  protected   
+   procedure defineproperties(filer: tfiler); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   property datalink: tdispfielddatalink read fdatalink;
   published
-   property datafield: string read getdatafield write setdatafield;
-   property datasource: tdatasource read getdatasource write setdatasource;
+   property datalink: tdispfielddatalink read fdatalink write setdatalink;
    property bounds_cx default defaultlabelwidgetwidth;
    property bounds_cy default defaultlabelwidgetheight;
    property optionswidget default defaultlabeloptionswidget;
@@ -54,43 +57,37 @@ type
    property options;
  end;
 
- tdbstringdisp = class(tcustomstringdisp,idbeditinfo,idbdispfieldlink,
+ tdbstringdisp = class(tcustomstringdisp,idbdispfieldlink,
                                      ireccontrol)
   private
    fdatalink: tdispfielddatalink;
-   function getdatafield: string; overload;
-   procedure setdatafield(const avalue: string);
-   function getdatasource: tdatasource;
-   procedure setdatasource(const avalue: tdatasource);
-   //idbeditinfo
-   function getdatasource(const aindex: integer): tdatasource; overload;
-   procedure getfieldtypes(out propertynames: stringarty;
-                          out fieldtypes: fieldtypesarty); virtual;
    //idbdispfieldlink
+   procedure getfieldtypes(var fieldtypes: fieldtypesty); virtual;
    procedure fieldtovalue; virtual;
    procedure setnullvalue;
    //ireccontrol
    procedure recchanged;
+   procedure setdatalink(const avalue: tdispfielddatalink);
+   procedure readdatasource(reader: treader);
+   procedure readdatafield(reader: treader);
+  protected   
+   procedure defineproperties(filer: tfiler); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   property datalink: tdispfielddatalink read fdatalink;
   published
-   property datafield: string read getdatafield write setdatafield;
-   property datasource: tdatasource read getdatasource write setdatasource;
+   property datalink: tdispfielddatalink read fdatalink write setdatalink;
  end;
   
- tdbstringdisplb = class(tdbstringdisp,idbeditinfo,idbdispfieldlink,ireccontrol)
+ tdbstringdisplb = class(tdbstringdisp,idbdispfieldlink,ireccontrol)
   private
    flookupbuffer: tcustomlookupbuffer;
    flookupkeyfieldno: integer;
    flookupvaluefieldno: integer;   
    fkeyvalue: integer;
    procedure setlookupbuffer(const avalue: tcustomlookupbuffer);
-     //idbeditinfo
-   procedure getfieldtypes(out propertynames: stringarty;
-                          out fieldtypes: fieldtypesarty); override;
      //idbdispfieldlink
+   procedure getfieldtypes(var fieldtypes: fieldtypesty); override;
    procedure fieldtovalue; override;
    procedure setkeyvalue(const avalue: integer);
   protected
@@ -103,35 +100,30 @@ type
    property lookupvaluefieldno: integer read flookupvaluefieldno write flookupvaluefieldno default 0;
  end;
  
- tdbintegerdisp = class(tcustomintegerdisp,idbeditinfo,idbdispfieldlink,ireccontrol)
+ tdbintegerdisp = class(tcustomintegerdisp,idbdispfieldlink,ireccontrol)
   private
    fdatalink: tdispfielddatalink;
    fisnotnull: boolean;
-   function getdatafield: string;
-   procedure setdatafield(const avalue: string);
-   function getdatasource: tdatasource; overload;
-   procedure setdatasource(const avalue: tdatasource);
-     //idbeditinfo
-   function getdatasource(const aindex: integer): tdatasource; overload;
-   procedure getfieldtypes(out propertynames: stringarty;
-                          out fieldtypes: fieldtypesarty);
      //idbdispfieldlink
+   procedure getfieldtypes(var fieldtypes: fieldtypesty);
    procedure fieldtovalue; virtual;
    procedure setnullvalue;
    //ireccontrol
    procedure recchanged;
-  protected
+   procedure setdatalink(const avalue: tdispfielddatalink);
+   procedure readdatasource(reader: treader);
+   procedure readdatafield(reader: treader);
+  protected   
+   procedure defineproperties(filer: tfiler); override;
    function getvaluetext: msestring; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   property datalink: tdispfielddatalink read fdatalink;
   published
-   property datafield: string read getdatafield write setdatafield;
-   property datasource: tdatasource read getdatasource write setdatasource;
+   property datalink: tdispfielddatalink read fdatalink write setdatalink;
  end;
  
- tdbintegerdisplb = class(tdbintegerdisp,idbeditinfo,idbdispfieldlink,ireccontrol)
+ tdbintegerdisplb = class(tdbintegerdisp,idbdispfieldlink,ireccontrol)
   private
    flookupbuffer: tcustomlookupbuffer;
    flookupkeyfieldno: integer;
@@ -151,70 +143,59 @@ type
    property lookupvaluefieldno: integer read flookupvaluefieldno write flookupvaluefieldno default 0;
  end;
  
- tdbbooleandisp = class(tcustombooleandisp,idbeditinfo,idbdispfieldlink,ireccontrol)
+ tdbbooleandisp = class(tcustombooleandisp,idbdispfieldlink,ireccontrol)
   private
    fisnotnull: boolean;
    fdatalink: tdispfielddatalink;
-   function getdatafield: string;
-   procedure setdatafield(const avalue: string);
-   function getdatasource: tdatasource; overload;
-   procedure setdatasource(const avalue: tdatasource);
-     //idbeditinfo
-   function getdatasource(const aindex: integer): tdatasource; overload;
-   procedure getfieldtypes(out propertynames: stringarty;
-                          out fieldtypes: fieldtypesarty);
      //idbdispfieldlink
+   procedure getfieldtypes(var fieldtypes: fieldtypesty);
    procedure fieldtovalue;
    procedure setnullvalue;
    //ireccontrol
    procedure recchanged;
-  protected
+   procedure setdatalink(const avalue: tdispfielddatalink);
+   procedure readdatasource(reader: treader);
+   procedure readdatafield(reader: treader);
+  protected   
+   procedure defineproperties(filer: tfiler); override;
    function getvaluetext: msestring; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   property datalink: tdispfielddatalink read fdatalink;
   published
-   property datafield: string read getdatafield write setdatafield;
-   property datasource: tdatasource read getdatasource write setdatasource;
+   property datalink: tdispfielddatalink read fdatalink write setdatalink;
  end;
  
- tdbrealdisp = class(tcustomrealdisp,idbeditinfo,idbdispfieldlink,ireccontrol)
+ tdbrealdisp = class(tcustomrealdisp,idbdispfieldlink,ireccontrol)
   private
    fdatalink: tdispfielddatalink;
-   function getdatafield: string;
-   procedure setdatafield(const avalue: string);
-   function getdatasource: tdatasource; overload;
-   procedure setdatasource(const avalue: tdatasource);
-     //idbeditinfo
-   function getdatasource(const aindex: integer): tdatasource; overload;
-   procedure getfieldtypes(out propertynames: stringarty;
-                          out fieldtypes: fieldtypesarty); virtual;
      //idbdispfieldlink
+   procedure getfieldtypes(var fieldtypes: fieldtypesty); virtual;
    procedure fieldtovalue; virtual;
    procedure setnullvalue;
    //ireccontrol
    procedure recchanged;
+   procedure setdatalink(const avalue: tdispfielddatalink);
+   procedure readdatasource(reader: treader);
+   procedure readdatafield(reader: treader);
+  protected   
+   procedure defineproperties(filer: tfiler); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   property datalink: tdispfielddatalink read fdatalink;
   published
-   property datafield: string read getdatafield write setdatafield;
-   property datasource: tdatasource read getdatasource write setdatasource;
+   property datalink: tdispfielddatalink read fdatalink write setdatalink;
  end;
   
- tdbrealdisplb = class(tdbrealdisp,idbeditinfo,idbdispfieldlink,ireccontrol)
+ tdbrealdisplb = class(tdbrealdisp,idbdispfieldlink,ireccontrol)
   private
    flookupbuffer: tcustomlookupbuffer;
    flookupkeyfieldno: integer;
    flookupvaluefieldno: integer;   
    fkeyvalue: integer;
    procedure setlookupbuffer(const avalue: tcustomlookupbuffer);
-     //idbeditinfo
-   procedure getfieldtypes(out propertynames: stringarty;
-                          out fieldtypes: fieldtypesarty); override;
      //idbdispfieldlink
+   procedure getfieldtypes(var fieldtypes: fieldtypesty); override;
    procedure fieldtovalue; override;
    procedure setkeyvalue(const avalue: integer);
   protected
@@ -227,42 +208,36 @@ type
    property lookupvaluefieldno: integer read flookupvaluefieldno write flookupvaluefieldno default 0;
  end;
  
- tdbdatetimedisp = class(tcustomdatetimedisp,idbeditinfo,idbdispfieldlink,ireccontrol)
+ tdbdatetimedisp = class(tcustomdatetimedisp,idbdispfieldlink,ireccontrol)
   private
    fdatalink: tdispfielddatalink;
-   function getdatafield: string;
-   procedure setdatafield(const avalue: string);
-   function getdatasource: tdatasource; overload;
-   procedure setdatasource(const avalue: tdatasource);
-     //idbeditinfo
-   function getdatasource(const aindex: integer): tdatasource; overload;
-   procedure getfieldtypes(out propertynames: stringarty;
-                          out fieldtypes: fieldtypesarty); virtual;
      //idbdispfieldlink
+   procedure getfieldtypes(var fieldtypes: fieldtypesty); virtual;
    procedure fieldtovalue; virtual;
    procedure setnullvalue;
    //ireccontrol
    procedure recchanged;
+   procedure setdatalink(const avalue: tdispfielddatalink);
+   procedure readdatasource(reader: treader);
+   procedure readdatafield(reader: treader);
+  protected   
+   procedure defineproperties(filer: tfiler); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   property datalink: tdispfielddatalink read fdatalink;
   published
-   property datafield: string read getdatafield write setdatafield;
-   property datasource: tdatasource read getdatasource write setdatasource;
+   property datalink: tdispfielddatalink read fdatalink write setdatalink;
  end;
  
- tdbdatetimedisplb = class(tdbdatetimedisp,idbeditinfo,idbdispfieldlink,ireccontrol)
+ tdbdatetimedisplb = class(tdbdatetimedisp,idbdispfieldlink,ireccontrol)
   private
    flookupbuffer: tcustomlookupbuffer;
    flookupkeyfieldno: integer;
    flookupvaluefieldno: integer;   
    fkeyvalue: integer;
    procedure setlookupbuffer(const avalue: tcustomlookupbuffer);
-     //idbeditinfo
-   procedure getfieldtypes(out propertynames: stringarty;
-                          out fieldtypes: fieldtypesarty); override;
      //idbdispfieldlink
+   procedure getfieldtypes(var fieldtypes: fieldtypesty); override;
    procedure fieldtovalue; override;
    procedure setkeyvalue(const avalue: integer);
   protected
@@ -277,7 +252,9 @@ type
  
 implementation
 uses
- msereal,sysutils;
+ msereal,sysutils,typinfo;
+type
+ treader1 = class(treader); 
  
 { tdispfielddatalink }
 
@@ -286,6 +263,23 @@ begin
  fintf:= intf;
  inherited create;
  visualcontrol:= true;
+end;
+
+function tdispfielddatalink.getdatasource(const aindex: integer): tdatasource;
+begin
+ result:= datasource;
+end;
+
+procedure tdispfielddatalink.getfieldtypes(out apropertynames: stringarty;
+                          out afieldtypes: fieldtypesarty);
+begin
+ apropertynames:= nil;
+ setlength(afieldtypes,1);
+ afieldtypes[0]:= [];
+ fintf.getfieldtypes(afieldtypes[0]);
+ if afieldtypes[0] = [] then begin
+  afieldtypes:= nil;
+ end;
 end;
 
 procedure tdispfielddatalink.recordchanged(afield: tfield);
@@ -331,31 +325,9 @@ begin
  fdatalink.free;
 end;
 
-function tdblabel.getdatafield: string;
+procedure tdblabel.getfieldtypes(var fieldtypes: fieldtypesty);
 begin
- result:= fdatalink.fieldname;
-end;
-
-procedure tdblabel.setdatafield(const avalue: string);
-begin
- fdatalink.fieldname:= avalue;
-end;
-
-function tdblabel.getdatasource: tdatasource;
-begin
- result:= fdatalink.datasource;
-end;
-
-procedure tdblabel.setdatasource(const avalue: tdatasource);
-begin
- fdatalink.datasource:= avalue;
-end;
-
-procedure tdblabel.getfieldtypes(out propertynames: stringarty; 
-                    out fieldtypes: fieldtypesarty);
-begin
- propertynames:= nil;
- fieldtypes:= nil;
+ //all types
 end;
 
 procedure tdblabel.fieldtovalue;
@@ -368,14 +340,33 @@ begin
  caption:= '';
 end;
 
-function tdblabel.getdatasource(const aindex: integer): tdatasource;
-begin
- result:= datasource;
-end;
-
 procedure tdblabel.recchanged;
 begin
  fdatalink.recordchanged(nil);
+end;
+
+procedure tdblabel.setdatalink(const avalue: tdispfielddatalink);
+begin
+ fdatalink.assign(avalue);
+end;
+
+procedure tdblabel.readdatasource(reader: treader);
+begin
+ treader1(reader).readpropvalue(
+         fdatalink,getpropinfo(typeinfo(tdispfielddatalink),'datasource'));
+end;
+
+procedure tdblabel.readdatafield(reader: treader);
+begin
+ fdatalink.fieldname:= reader.readstring;
+end;
+
+procedure tdblabel.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
+ filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
+               //move values to datalink
 end;
 
 { tdbstringdisp }
@@ -392,32 +383,9 @@ begin
  fdatalink.free;
 end;
 
-function tdbstringdisp.getdatafield: string;
+procedure tdbstringdisp.getfieldtypes(var fieldtypes: fieldtypesty);
 begin
- result:= fdatalink.fieldname;
-end;
-
-procedure tdbstringdisp.setdatafield(const avalue: string);
-begin
- fdatalink.fieldname:= avalue;
-end;
-
-function tdbstringdisp.getdatasource: tdatasource;
-begin
- result:= fdatalink.datasource;
-end;
-
-procedure tdbstringdisp.setdatasource(const avalue: tdatasource);
-begin
- fdatalink.datasource:= avalue;
-end;
-
-procedure tdbstringdisp.getfieldtypes(out propertynames: stringarty; 
-                    out fieldtypes: fieldtypesarty);
-begin
- propertynames:= nil;
- setlength(fieldtypes,1);
- fieldtypes[0]:= textfields;
+ fieldtypes:= textfields;
 end;
 
 procedure tdbstringdisp.fieldtovalue;
@@ -430,24 +398,40 @@ begin
  value:= '';
 end;
 
-function tdbstringdisp.getdatasource(const aindex: integer): tdatasource;
-begin
- result:= datasource;
-end;
-
 procedure tdbstringdisp.recchanged;
 begin
  fdatalink.recordchanged(nil);
 end;
 
+procedure tdbstringdisp.setdatalink(const avalue: tdispfielddatalink);
+begin
+ fdatalink.assign(avalue);
+end;
+
+procedure tdbstringdisp.readdatasource(reader: treader);
+begin
+ treader1(reader).readpropvalue(
+         fdatalink,getpropinfo(typeinfo(tdispfielddatalink),'datasource'));
+end;
+
+procedure tdbstringdisp.readdatafield(reader: treader);
+begin
+ fdatalink.fieldname:= reader.readstring;
+end;
+
+procedure tdbstringdisp.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
+ filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
+               //move values to datalink
+end;
+
 { tdbstringdisplb }
 
-procedure tdbstringdisplb.getfieldtypes(out propertynames: stringarty; 
-                    out fieldtypes: fieldtypesarty);
+procedure tdbstringdisplb.getfieldtypes(var fieldtypes: fieldtypesty);
 begin
- propertynames:= nil;
- setlength(fieldtypes,1);
- fieldtypes[0]:= integerfields;
+ fieldtypes:= integerfields;
 end;
 
 procedure tdbstringdisplb.fieldtovalue;
@@ -484,7 +468,6 @@ begin
  inherited;
  if (event in [oe_changed,oe_connect]) and (sender = flookupbuffer) then begin
   setkeyvalue(fkeyvalue);
-//  fdatalink.recordchanged(nil);
  end;
 end;
 
@@ -502,32 +485,9 @@ begin
  fdatalink.free;
 end;
 
-function tdbintegerdisp.getdatafield: string;
+procedure tdbintegerdisp.getfieldtypes(var fieldtypes: fieldtypesty);
 begin
- result:= fdatalink.fieldname;
-end;
-
-procedure tdbintegerdisp.setdatafield(const avalue: string);
-begin
- fdatalink.fieldname:= avalue;
-end;
-
-function tdbintegerdisp.getdatasource: tdatasource;
-begin
- result:= fdatalink.datasource;
-end;
-
-procedure tdbintegerdisp.setdatasource(const avalue: tdatasource);
-begin
- fdatalink.datasource:= avalue;
-end;
-
-procedure tdbintegerdisp.getfieldtypes(out propertynames: stringarty; 
-                    out fieldtypes: fieldtypesarty);
-begin
- propertynames:= nil;
- setlength(fieldtypes,1);
- fieldtypes[0]:= integerfields;
+ fieldtypes:= integerfields;
 end;
 
 procedure tdbintegerdisp.fieldtovalue;
@@ -552,14 +512,33 @@ begin
  end;
 end;
 
-function tdbintegerdisp.getdatasource(const aindex: integer): tdatasource;
-begin
- result:= datasource;
-end;
-
 procedure tdbintegerdisp.recchanged;
 begin
  fdatalink.recordchanged(nil);
+end;
+
+procedure tdbintegerdisp.setdatalink(const avalue: tdispfielddatalink);
+begin
+ fdatalink.assign(avalue);
+end;
+
+procedure tdbintegerdisp.readdatasource(reader: treader);
+begin
+ treader1(reader).readpropvalue(
+         fdatalink,getpropinfo(typeinfo(tdispfielddatalink),'datasource'));
+end;
+
+procedure tdbintegerdisp.readdatafield(reader: treader);
+begin
+ fdatalink.fieldname:= reader.readstring;
+end;
+
+procedure tdbintegerdisp.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
+ filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
+               //move values to datalink
 end;
 
 { tdbintegerdisplb }
@@ -599,7 +578,6 @@ begin
  inherited;
  if (event in [oe_changed,oe_connect]) and (sender = flookupbuffer) then begin
   setkeyvalue(fkeyvalue);
-//  fdatalink.recordchanged(nil);
  end;
 end;
 
@@ -617,32 +595,9 @@ begin
  fdatalink.free;
 end;
 
-function tdbbooleandisp.getdatafield: string;
+procedure tdbbooleandisp.getfieldtypes(var fieldtypes: fieldtypesty);
 begin
- result:= fdatalink.fieldname;
-end;
-
-procedure tdbbooleandisp.setdatafield(const avalue: string);
-begin
- fdatalink.fieldname:= avalue;
-end;
-
-function tdbbooleandisp.getdatasource: tdatasource;
-begin
- result:= fdatalink.datasource;
-end;
-
-procedure tdbbooleandisp.setdatasource(const avalue: tdatasource);
-begin
- fdatalink.datasource:= avalue;
-end;
-
-procedure tdbbooleandisp.getfieldtypes(out propertynames: stringarty; 
-                    out fieldtypes: fieldtypesarty);
-begin
- propertynames:= nil;
- setlength(fieldtypes,1);
- fieldtypes[0]:= booleanfields;
+ fieldtypes:= booleanfields;
 end;
 
 procedure tdbbooleandisp.fieldtovalue;
@@ -667,14 +622,33 @@ begin
  end;
 end;
 
-function tdbbooleandisp.getdatasource(const aindex: integer): tdatasource;
-begin
- result:= datasource;
-end;
-
 procedure tdbbooleandisp.recchanged;
 begin
  fdatalink.recordchanged(nil);
+end;
+
+procedure tdbbooleandisp.setdatalink(const avalue: tdispfielddatalink);
+begin
+ fdatalink.assign(avalue);
+end;
+
+procedure tdbbooleandisp.readdatasource(reader: treader);
+begin
+ treader1(reader).readpropvalue(
+         fdatalink,getpropinfo(typeinfo(tdispfielddatalink),'datasource'));
+end;
+
+procedure tdbbooleandisp.readdatafield(reader: treader);
+begin
+ fdatalink.fieldname:= reader.readstring;
+end;
+
+procedure tdbbooleandisp.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
+ filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
+               //move values to datalink
 end;
 
 { tdbrealdisp }
@@ -691,32 +665,9 @@ begin
  fdatalink.free;
 end;
 
-function tdbrealdisp.getdatafield: string;
+procedure tdbrealdisp.getfieldtypes(var fieldtypes: fieldtypesty);
 begin
- result:= fdatalink.fieldname;
-end;
-
-procedure tdbrealdisp.setdatafield(const avalue: string);
-begin
- fdatalink.fieldname:= avalue;
-end;
-
-function tdbrealdisp.getdatasource: tdatasource;
-begin
- result:= fdatalink.datasource;
-end;
-
-procedure tdbrealdisp.setdatasource(const avalue: tdatasource);
-begin
- fdatalink.datasource:= avalue;
-end;
-
-procedure tdbrealdisp.getfieldtypes(out propertynames: stringarty; 
-                    out fieldtypes: fieldtypesarty);
-begin
- propertynames:= nil;
- setlength(fieldtypes,1);
- fieldtypes[0]:= realfields;
+ fieldtypes:= realfields;
 end;
 
 procedure tdbrealdisp.fieldtovalue;
@@ -729,24 +680,40 @@ begin
  value:= emptyreal;
 end;
 
-function tdbrealdisp.getdatasource(const aindex: integer): tdatasource;
-begin
- result:= datasource;
-end;
-
 procedure tdbrealdisp.recchanged;
 begin
  fdatalink.recordchanged(nil);
 end;
 
+procedure tdbrealdisp.setdatalink(const avalue: tdispfielddatalink);
+begin
+ fdatalink.assign(avalue);
+end;
+
+procedure tdbrealdisp.readdatasource(reader: treader);
+begin
+ treader1(reader).readpropvalue(
+         fdatalink,getpropinfo(typeinfo(tdispfielddatalink),'datasource'));
+end;
+
+procedure tdbrealdisp.readdatafield(reader: treader);
+begin
+ fdatalink.fieldname:= reader.readstring;
+end;
+
+procedure tdbrealdisp.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
+ filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
+               //move values to datalink
+end;
+
 { tdbrealdisplb }
 
-procedure tdbrealdisplb.getfieldtypes(out propertynames: stringarty; 
-                    out fieldtypes: fieldtypesarty);
+procedure tdbrealdisplb.getfieldtypes(var fieldtypes: fieldtypesty);
 begin
- propertynames:= nil;
- setlength(fieldtypes,1);
- fieldtypes[0]:= integerfields;
+ fieldtypes:= integerfields;
 end;
 
 procedure tdbrealdisplb.fieldtovalue;
@@ -783,7 +750,6 @@ begin
  inherited;
  if (event in [oe_changed,oe_connect]) and (sender = flookupbuffer) then begin
   setkeyvalue(fkeyvalue);
-//  fdatalink.recordchanged(nil);
  end;
 end;
 
@@ -801,32 +767,9 @@ begin
  fdatalink.free;
 end;
 
-function tdbdatetimedisp.getdatafield: string;
+procedure tdbdatetimedisp.getfieldtypes(var fieldtypes: fieldtypesty);
 begin
- result:= fdatalink.fieldname;
-end;
-
-procedure tdbdatetimedisp.setdatafield(const avalue: string);
-begin
- fdatalink.fieldname:= avalue;
-end;
-
-function tdbdatetimedisp.getdatasource: tdatasource;
-begin
- result:= fdatalink.datasource;
-end;
-
-procedure tdbdatetimedisp.setdatasource(const avalue: tdatasource);
-begin
- fdatalink.datasource:= avalue;
-end;
-
-procedure tdbdatetimedisp.getfieldtypes(out propertynames: stringarty; 
-                    out fieldtypes: fieldtypesarty);
-begin
- propertynames:= nil;
- setlength(fieldtypes,1);
- fieldtypes[0]:= datetimefields;
+ fieldtypes:= datetimefields;
 end;
 
 procedure tdbdatetimedisp.fieldtovalue;
@@ -834,9 +777,6 @@ var
  da1: tdatetime;
 begin
  da1:= datalink.field.asdatetime;
-// if da1 = 0 then begin
-//  da1:= nulltime;
-// end;
  value:= da1;
 end;
 
@@ -845,24 +785,40 @@ begin
  value:= emptydatetime;
 end;
 
-function tdbdatetimedisp.getdatasource(const aindex: integer): tdatasource;
-begin
- result:= datasource;
-end;
-
 procedure tdbdatetimedisp.recchanged;
 begin
  fdatalink.recordchanged(nil);
 end;
 
+procedure tdbdatetimedisp.setdatalink(const avalue: tdispfielddatalink);
+begin
+ fdatalink.assign(avalue);
+end;
+
+procedure tdbdatetimedisp.readdatasource(reader: treader);
+begin
+ treader1(reader).readpropvalue(
+         fdatalink,getpropinfo(typeinfo(tdispfielddatalink),'datasource'));
+end;
+
+procedure tdbdatetimedisp.readdatafield(reader: treader);
+begin
+ fdatalink.fieldname:= reader.readstring;
+end;
+
+procedure tdbdatetimedisp.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
+ filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
+               //move values to datalink
+end;
+
 { tdbdatetimedisplb }
 
-procedure tdbdatetimedisplb.getfieldtypes(out propertynames: stringarty; 
-                    out fieldtypes: fieldtypesarty);
+procedure tdbdatetimedisplb.getfieldtypes(var fieldtypes: fieldtypesty);
 begin
- propertynames:= nil;
- setlength(fieldtypes,1);
- fieldtypes[0]:= integerfields;
+ fieldtypes:= integerfields;
 end;
 
 procedure tdbdatetimedisplb.fieldtovalue;
@@ -899,7 +855,6 @@ begin
  inherited;
  if (event in [oe_changed,oe_connect]) and (sender = flookupbuffer) then begin
   setkeyvalue(fkeyvalue);
-//  fdatalink.recordchanged(nil);
  end;
 end;
 

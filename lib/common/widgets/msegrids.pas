@@ -90,7 +90,7 @@ type
                     scoe_uppercase,
                     scoe_lowercase,
                     
-                    scoe_autopost, //depreciated, moved to optionsdb
+//                    scoe_autopost, //deprecated, moved to optionsdb
                     scoe_hintclippedtext
                           );
 
@@ -598,9 +598,9 @@ type
   protected
    ftextinfo: drawtextinfoty;
    foptionsedit: stringcoleditoptionsty;
-   foptionsdb: optionseditdbty;
+//   foptionsdb: optionseditdbty;
    function getoptionsedit: optionseditty;
-   function getoptionsdb: optionseditdbty;
+//   function getoptionsdb: optionseditdbty;
    function getitems(aindex: integer): msestring; virtual;
    procedure setitems(aindex: integer; const Value: msestring);
    function createdatalist: tdatalist; override;
@@ -5285,12 +5285,12 @@ begin
  result:= [];
  stringcoltooptionsedit(foptionsedit,result);
 end;
-
+{
 function tcustomstringcol.getoptionsdb: optionseditdbty;
 begin
  result:= foptionsdb;
 end;
-
+}
 procedure tcustomstringcol.docellevent(var info: celleventinfoty);
 var
  hintinfo: hintinfoty;
@@ -5308,10 +5308,10 @@ end;
 
 procedure tcustomstringcol.setoptionsedit(const avalue: stringcoleditoptionsty);
 begin
- if scoe_autopost in avalue then begin
-  include(foptionsdb,oed_autopost);
- end;
- foptionsedit:= avalue - [scoe_autopost];
+// if scoe_autopost in avalue then begin
+//  include(foptionsdb,oed_autopost);
+// end;
+ foptionsedit:= avalue {- [scoe_autopost]};
 end;
 
 { tfixcol }
@@ -6488,7 +6488,7 @@ var
  int1: integer;
  mask: {$ifdef FPC}longword{$else}byte{$endif};
 begin
- exclude(avalue,scoe_autopost);
+// exclude(avalue,scoe_autopost);
  if foptionsedit <> avalue then begin
   mask:= {$ifdef FPC}longword{$else}word{$endif}(avalue) xor
   {$ifdef FPC}longword{$else}word{$endif}(foptionsedit);

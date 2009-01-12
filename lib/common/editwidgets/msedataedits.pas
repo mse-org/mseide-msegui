@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -89,6 +89,7 @@ type
    function getrowdatapo(const info: cellinfoty): pointer; virtual;
    procedure setgridintf(const intf: iwidgetgrid); virtual;
    function getcellframe: framety; virtual;
+   function getnulltext: msestring; virtual;
    procedure drawcell(const canvas: tcanvas); virtual;
    procedure beforecelldragevent(var ainfo: draginfoty; const arow: integer;
                                var handled: boolean); virtual;
@@ -1558,7 +1559,7 @@ procedure tdataedit.setnullvalue; //for dbedits
 var
  bo1: boolean;
 begin
- text:= '';
+ text:= getnulltext;
  bo1:= true;
  texttovalue(bo1,true); //sevalue call
 end;
@@ -1578,14 +1579,21 @@ begin
  result:= nil;
 end;
 
+function tdataedit.getnulltext: msestring;
+begin
+ result:= '';
+end;
+
 procedure tdataedit.drawcell(const canvas: tcanvas);
 var
  mstr1: msestring;
 begin
  with cellinfoty(canvas.drawinfopo^) do begin
-  mstr1:= '';
   if datapo <> nil then begin
    mstr1:= internaldatatotext(datapo^);
+  end
+  else begin
+   mstr1:= getnulltext;
   end;
   if canevent(tmethod(fongettext)) then begin
    fongettext(self,mstr1,false);
@@ -1747,7 +1755,7 @@ end;
 
 function tdataedit.isempty(const atext: msestring): boolean;
 begin
- result:= trim(atext) = '';
+ result:= trim(atext) = getnulltext;
 end;
 
 function tdataedit.nullcheckneeded(const newfocus: twidget): boolean;
@@ -1758,19 +1766,9 @@ begin
  else begin
   if fgridintf = nil then begin
    result:= newfocus = nil;
-   {
-   if fparentwidget = nil then begin
-    result:= not checkdescendent(newfocus);
-   end
-   else begin
-    result:= not fparentwidget.checkdescendent(newfocus);
-   end;
-   }
   end
   else begin
-   result:= (edited and (oed_autopost in foptionsdb)){ and 
-                          not (fgridintf.nonullcheck)} or 
-              fgridintf.nullcheckneeded(newfocus);
+   result:= fgridintf.nullcheckneeded(newfocus);
   end;
  end;
 end;
@@ -2025,7 +2023,7 @@ end;
 
 function tcustomstringedit.isempty(const atext: msestring): boolean;
 begin
- result:= atext = '';
+ result:= atext = getnulltext;
 end;
 
 { tstringedit }

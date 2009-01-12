@@ -121,6 +121,7 @@ type
    function getrowdatapo(const info: cellinfoty): pointer; virtual;
    procedure setgridintf(const intf: iwidgetgrid);
    function getcellframe: framety; virtual;
+   function getnulltext: msestring;
    procedure drawcell(const canvas: tcanvas);
    procedure beforecelldragevent(var ainfo: draginfoty; const arow: integer;
                                var handled: boolean); virtual;
@@ -403,6 +404,11 @@ begin
  else begin
   result:= texteditminimalframe;
  end;
+end;
+
+function tcustomtextedit.getnulltext: msestring;
+begin
+ result:= '';
 end;
 
 function tcustomtextedit.createdatalist(

@@ -80,21 +80,13 @@ type
    procedure loadbitmap(const abitmap: tmaskedbitmap; const aformat: string);
  end;
 
- tdbdataimage = class(tcustomdataimage,idbeditinfo,idbgraphicfieldlink,ireccontrol)
+ tdbdataimage = class(tcustomdataimage,idbgraphicfieldlink,ireccontrol)
   private
    fdatalink: tgraphicdatalink;
-   function getdatafield: string; overload;
-   procedure setdatafield(const avalue: string);
-   function getdatasource: tdatasource;
-   procedure setdatasource(const avalue: tdatasource);
    procedure griddatasourcechanged; override;
    procedure loadcellbmp(const acanvas: tcanvas; const abmp: tmaskedbitmap); override;
    function getrowdatapo(const info: cellinfoty): pointer; override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
-     //idbeditinfo
-   function getdatasource(const aindex: integer): tdatasource; overload;
-   procedure getfieldtypes(out propertynames: stringarty;
-                          out fieldtypes: fieldtypesarty); virtual;
      //idbeditfieldlink
    function getgriddatasource: tdatasource;
    function edited: boolean;
@@ -102,29 +94,33 @@ type
    function checkvalue(const quiet: boolean = false): boolean;
    procedure valuetofield;
    procedure updatereadonlystate;
+   procedure getfieldtypes(var afieldtypes: fieldtypesty);
      //idbgraphicfieldlink
    procedure fieldtovalue; virtual;
    procedure setnullvalue;
    //ireccontrol
    procedure recchanged;
-  protected
+   procedure setdatalink(const avalue: tgraphicdatalink);
+   procedure readdatasource(reader: treader);
+   procedure readdatafield(reader: treader);
+  protected   
+   procedure defineproperties(filer: tfiler); override;
    procedure gridtovalue(const row: integer); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   property datalink: tgraphicdatalink read fdatalink;
   published
-   property datafield: string read getdatafield write setdatafield;
-   property datasource: tdatasource read getdatasource write setdatasource;
+   property datalink: tgraphicdatalink read fdatalink write setdatalink;
    property format;
  end;
  
 implementation
 uses
- msestream,sysutils,msegraphicstream;
+ msestream,sysutils,msegraphicstream,typinfo;
  
 type
  tsimplebitmap1 = class(tsimplebitmap);
+ treader1 = class(treader);
  
  { tdbdataimage }
 
@@ -141,32 +137,9 @@ begin
  fdatalink.free;
 end;
 
-function tdbdataimage.getdatafield: string;
+procedure tdbdataimage.getfieldtypes(var afieldtypes: fieldtypesty);
 begin
- result:= fdatalink.fieldname;
-end;
-
-procedure tdbdataimage.setdatafield(const avalue: string);
-begin
- fdatalink.fieldname:= avalue;
-end;
-
-function tdbdataimage.getdatasource: tdatasource;
-begin
- result:= fdatalink.datasource;
-end;
-
-procedure tdbdataimage.setdatasource(const avalue: tdatasource);
-begin
- fdatalink.datasource:= avalue;
-end;
-
-procedure tdbdataimage.getfieldtypes(out propertynames: stringarty; 
-                    out fieldtypes: fieldtypesarty);
-begin
- propertynames:= nil;
- setlength(fieldtypes,1);
- fieldtypes[0]:= blobfields + [ftstring];
+ afieldtypes:= blobfields + [ftstring];
 end;
 
 procedure tdbdataimage.fieldtovalue;
@@ -177,11 +150,6 @@ end;
 procedure tdbdataimage.setnullvalue;
 begin
  bitmap.clear;
-end;
-
-function tdbdataimage.getdatasource(const aindex: integer): tdatasource;
-begin
- result:= datasource;
 end;
 
 procedure tdbdataimage.recchanged;
@@ -233,9 +201,6 @@ begin
                                     fdatalink.field,cell.row) then begin
    result:= tgriddatalink(griddatalink).getdummystringbuffer;
    pstring(result)^:= ' ';
-//   result:= tgriddatalink(griddatalink).getansistringbuffer(
-//                                                 fdatalink.field,cell.row);
-    
   end
   else begin
    result:= nil;
@@ -268,6 +233,30 @@ end;
 function tdbdataimage.createdatalist(const sender: twidgetcol): tdatalist;
 begin
  result:= nil;
+end;
+
+procedure tdbdataimage.setdatalink(const avalue: tgraphicdatalink);
+begin
+ fdatalink.assign(avalue);
+end;
+
+procedure tdbdataimage.readdatasource(reader: treader);
+begin
+ treader1(reader).readpropvalue(
+         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'datasource'));
+end;
+
+procedure tdbdataimage.readdatafield(reader: treader);
+begin
+ fdatalink.fieldname:= reader.readstring;
+end;
+
+procedure tdbdataimage.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
+ filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
+               //move values to datalink
 end;
 
 procedure tdbdataimage.gridtovalue(const row: integer);
@@ -346,7 +335,6 @@ begin
   writegraphic(stream1,abitmap,aformat,params);
   stream1.position:= 0;
   loadfromstream(stream1);
-//  asstring:= stream1.readdatastring;
  finally
   stream1.free;
  end;

@@ -46,7 +46,7 @@ type
                     oe_casesensitive,
                     oe_notnull,
                     oe_locate,    //used by titemedit     
-                    oe_autopost,  //depreciated, moved to optiondeditdbty
+ //                   oe_autopost,  //deprecated, moved to optiondeditdbty
                     oe_autopopupmenu,
                     oe_keyexecute, //shift-down-key starts dialog
                     oe_checkvaluepaststatread,

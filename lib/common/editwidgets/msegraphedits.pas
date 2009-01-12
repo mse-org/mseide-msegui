@@ -95,7 +95,7 @@ type
    fstatvarname: msestring;
    fstatfile: tstatfile;
    foptionsedit: optionseditty;
-   foptionsdb: optionseditdbty;
+//   foptionsdb: optionseditdbty;
    fedited: boolean;
 {$ifdef mse_with_ifi}
    fifiserverintf: iifiserver;
@@ -111,7 +111,7 @@ type
    fgridintf: iwidgetgrid;
    
    function getoptionsedit: optionseditty; virtual;
-   function getoptionsdb: optionseditdbty;
+//   function getoptionsdb: optionseditdbty;
    procedure updateoptions; virtual;
    procedure loaded; override;
    procedure internalcreateframe; override;
@@ -154,6 +154,7 @@ type
                                var handled: boolean); virtual;
    procedure valuetogrid(const row: integer); virtual; abstract;
    procedure gridtovalue(const row: integer); virtual;
+   function getnulltext: msestring;
    procedure docellevent(const ownedcol: boolean; var info: celleventinfoty); virtual;
    procedure sortfunc(const l,r; var result: integer); virtual;
    procedure gridvaluechanged(const index: integer); virtual;
@@ -176,7 +177,7 @@ type
    procedure readstatoptions(const reader: tstatreader); virtual;
    procedure writestatoptions(const writer: tstatwriter); virtual;
 
-   property optionsdb: optionseditdbty read foptionsdb write foptionsdb;   
+//   property optionsdb: optionseditdbty read foptionsdb write foptionsdb;   
   public
    constructor create(aowner: tcomponent); override;
    procedure initnewcomponent(const ascale: real); override;
@@ -1507,6 +1508,11 @@ begin
  //dochange;
 end;
 
+function tgraphdataedit.getnulltext: msestring;
+begin
+ result:= '';
+end;
+
 procedure tgraphdataedit.readstatoptions(const reader: tstatreader);
 begin
  //dummy
@@ -1541,12 +1547,12 @@ function tgraphdataedit.getoptionsedit: optionseditty;
 begin
  result := foptionsedit;
 end;
-
+{
 function tgraphdataedit.getoptionsdb: optionseditdbty;
 begin
  result := foptionsdb;
 end;
-
+}
 procedure tgraphdataedit.updateoptions;
 begin
  //dummy
@@ -1554,11 +1560,11 @@ end;
 
 procedure tgraphdataedit.setoptionsedit(const avalue: optionseditty);
 begin
- if oe_autopost in avalue then begin
-  include(foptionsdb,oed_autopost);
- end;
+// if oe_autopost in avalue then begin
+//  include(foptionsdb,oed_autopost);
+// end;
  if foptionsedit <> avalue then begin
-  foptionsedit:= avalue - [oe_autopost];
+  foptionsedit:= avalue {- [oe_autopost]};
   if fgridintf <> nil then begin
    fgridintf.updateeditoptions(foptionsedit);
   end;

@@ -19,17 +19,15 @@ uses
  msedataedits,mseevent,msestrings,msecolordialog,msegraphutils;
  
 type
- tdbfilenameedit = class(tcustomfilenameedit,idbeditfieldlink,idbeditinfo,
-                                      ireccontrol)
+ tdbfilenameedit = class(tcustomfilenameedit,idbeditfieldlink,ireccontrol)
   private
-   fdatalink: teditwidgetdatalink;
-   function getdatafield: string;
-   procedure setdatafield(const avalue: string);
-   function getdatasource: tdatasource; overload;
-   function getdatasource(const aindex: integer): tdatasource; overload;
-   procedure setdatasource(const avalue: tdatasource);
-  protected
-
+   fdatalink: tstringeditwidgetdatalink;
+   procedure setdatalink(const avalue: tstringeditwidgetdatalink);
+   procedure readdatasource(reader: treader);
+   procedure readdatafield(reader: treader);
+   procedure readoptionsdb(reader: treader);
+  protected   
+   procedure defineproperties(filer: tfiler); override;
    procedure editnotification(var info: editnotificationinfoty); override;
    function nullcheckneeded(const newfocus: twidget): boolean; override;
    procedure griddatasourcechanged; override;
@@ -43,38 +41,30 @@ type
    //idbeditfieldlink
    procedure valuetofield;
    procedure fieldtovalue;
-   //idbeditinfo
-   procedure getfieldtypes(out propertynames: stringarty;
-                          out fieldtypes: fieldtypesarty);
+   procedure getfieldtypes(var afieldtypes: fieldtypesty);
    //ireccontrol
    procedure recchanged;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-//   function checkvalue(const quiet: boolean = false): boolean; override;
-   property datalink: teditwidgetdatalink read fdatalink;
   published
-   property datafield: string read getdatafield write setdatafield;
-   property datasource: tdatasource read getdatasource write setdatasource;
-   property optionsdb;
-
+   property datalink: tstringeditwidgetdatalink read fdatalink write setdatalink;
    property frame;
    property passwordchar;
    property maxlength;
-//   property value;
    property onsetvalue;
    property controller;
  end;
  
- tdbcoloredit = class(tcustomcoloredit,idbeditfieldlink,idbeditinfo,ireccontrol)
+ tdbcoloredit = class(tcustomcoloredit,idbeditfieldlink,ireccontrol)
   private
    fdatalink: teditwidgetdatalink;
-   function getdatafield: string;
-   procedure setdatafield(const avalue: string);
-   function getdatasource: tdatasource; overload;
-   function getdatasource(const aindex: integer): tdatasource; overload;
-   procedure setdatasource(const avalue: tdatasource);
-  protected
+   procedure setdatalink(const avalue: teditwidgetdatalink);
+   procedure readdatasource(reader: treader);
+   procedure readdatafield(reader: treader);
+   procedure readoptionsdb(reader: treader);
+  protected   
+   procedure defineproperties(filer: tfiler); override;
 
    function internaldatatotext1(
                  const avalue: integer): msestring; override;
@@ -90,35 +80,31 @@ type
    //idbeditfieldlink
    procedure valuetofield; virtual;
    procedure fieldtovalue; virtual;
-   //idbeditinfo
-   procedure getfieldtypes(out propertynames: stringarty;
-                          out fieldtypes: fieldtypesarty); virtual;
+   procedure getfieldtypes(var afieldtypes: fieldtypesty);
    //ireccontrol
    procedure recchanged;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-//   function checkvalue(const quiet: boolean = false): boolean; override;
   published
-   property datalink: teditwidgetdatalink read fdatalink;
-   property datafield: string read getdatafield write setdatafield;
-   property datasource: tdatasource read getdatasource write setdatasource;
-   property optionsdb;
+   property datalink: teditwidgetdatalink read fdatalink write setdatalink;
    property dropdown;
    property onsetvalue;
    property frame;
  end;
  
 implementation
- 
+uses
+ typinfo; 
 type
  teditwidgetdatalink1 = class(teditwidgetdatalink);
+ treader1 = class(treader);
  
 { tdbfilenameedit }
 
 constructor tdbfilenameedit.create(aowner: tcomponent);
 begin
- fdatalink:= teditwidgetdatalink.Create(idbeditfieldlink(self));
+ fdatalink:= tstringeditwidgetdatalink.Create(idbeditfieldlink(self));
  inherited;
 end;
 
@@ -127,32 +113,6 @@ begin
  inherited;
  fdatalink.free;
 end;
-
-function tdbfilenameedit.getdatafield: string;
-begin
- result:= fdatalink.fieldname;
-end;
-
-procedure tdbfilenameedit.setdatafield(const avalue: string);
-begin
- fdatalink.fieldname:= avalue;
-end;
-
-function tdbfilenameedit.getdatasource: tdatasource;
-begin
- result:= fdatalink.datasource;
-end;
-
-procedure tdbfilenameedit.setdatasource(const avalue: tdatasource);
-begin
- teditwidgetdatalink1(fdatalink).setwidgetdatasource(avalue);
-end;
-{
-function tdbfilenameedit.checkvalue(const quiet: boolean = false): boolean;
-begin
- result:= inherited checkvalue(quiet) and fdatalink.dataentered;
-end;
-}
 
 procedure tdbfilenameedit.dochange;
 begin
@@ -214,23 +174,46 @@ begin
  result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datasource;
 end;
 
-procedure tdbfilenameedit.getfieldtypes(out propertynames: stringarty; 
-                    out fieldtypes: fieldtypesarty);
+procedure tdbfilenameedit.getfieldtypes(var afieldtypes: fieldtypesty);
 begin
- propertynames:= nil;
- setlength(fieldtypes,1);
- fieldtypes[0]:= textfields;
+ afieldtypes:= textfields;
 end;
 
 function tdbfilenameedit.nullcheckneeded(const newfocus: twidget): boolean;
 begin
- result:= inherited nullcheckneeded(newfocus) and 
-            teditwidgetdatalink1(fdatalink).nullcheckneeded;
+ result:= inherited nullcheckneeded(newfocus);
+ teditwidgetdatalink1(fdatalink).nullcheckneeded(result);
 end;
 
-function tdbfilenameedit.getdatasource(const aindex: integer): tdatasource;
+procedure tdbfilenameedit.setdatalink(const avalue: tstringeditwidgetdatalink);
 begin
- result:= datasource;
+ fdatalink.assign(avalue);
+end;
+
+procedure tdbfilenameedit.readdatasource(reader: treader);
+begin
+ treader1(reader).readpropvalue(
+         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'datasource'));
+end;
+
+procedure tdbfilenameedit.readdatafield(reader: treader);
+begin
+ fdatalink.fieldname:= reader.readstring;
+end;
+
+procedure tdbfilenameedit.readoptionsdb(reader: treader);
+begin
+ treader1(reader).readpropvalue(
+         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'options'));
+end;
+
+procedure tdbfilenameedit.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
+ filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
+ filer.defineproperty('optionsdb',{$ifdef FPC}@{$endif}readoptionsdb,nil,false);
+               //move values to datalink
 end;
 
 procedure tdbfilenameedit.editnotification(var info: editnotificationinfoty);
@@ -266,31 +249,6 @@ begin
  fdatalink.free;
 end;
 
-function tdbcoloredit.getdatafield: string;
-begin
- result:= fdatalink.fieldname;
-end;
-
-procedure tdbcoloredit.setdatafield(const avalue: string);
-begin
- fdatalink.fieldname:= avalue;
-end;
-
-function tdbcoloredit.getdatasource: tdatasource;
-begin
- result:= fdatalink.datasource;
-end;
-
-procedure tdbcoloredit.setdatasource(const avalue: tdatasource);
-begin
- fdatalink.setwidgetdatasource(avalue);
-end;
-{
-function tdbcoloredit.checkvalue(const quiet: boolean = false): boolean;
-begin
- result:= inherited checkvalue(quiet) and fdatalink.dataentered;
-end;
-}
 procedure tdbcoloredit.dochange;
 begin
  fdatalink.dataentered;
@@ -342,7 +300,6 @@ begin
   end
   else begin
    result:= @fvaluedefault;
-//   result:= nil;
   end;
  end;
 end;
@@ -362,22 +319,46 @@ begin
  result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datasource;
 end;
 
-procedure tdbcoloredit.getfieldtypes(out propertynames: stringarty; 
-                    out fieldtypes: fieldtypesarty);
+procedure tdbcoloredit.getfieldtypes(var afieldtypes: fieldtypesty);
 begin
- propertynames:= nil;
- setlength(fieldtypes,1);
- fieldtypes[0]:= integerfields;
+ afieldtypes:= integerfields;
 end;
 
 function tdbcoloredit.nullcheckneeded(const newfocus: twidget): boolean;
 begin
- result:= inherited nullcheckneeded(newfocus) and fdatalink.nullcheckneeded;
+ result:= inherited nullcheckneeded(newfocus);
+ fdatalink.nullcheckneeded(result);
 end;
 
-function tdbcoloredit.getdatasource(const aindex: integer): tdatasource;
+procedure tdbcoloredit.setdatalink(const avalue: teditwidgetdatalink);
 begin
- result:= datasource;
+ fdatalink.assign(avalue);
+end;
+
+procedure tdbcoloredit.readdatasource(reader: treader);
+begin
+ treader1(reader).readpropvalue(
+         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'datasource'));
+end;
+
+procedure tdbcoloredit.readdatafield(reader: treader);
+begin
+ fdatalink.fieldname:= reader.readstring;
+end;
+
+procedure tdbcoloredit.readoptionsdb(reader: treader);
+begin
+ treader1(reader).readpropvalue(
+         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'options'));
+end;
+
+procedure tdbcoloredit.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
+ filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
+ filer.defineproperty('optionsdb',{$ifdef FPC}@{$endif}readoptionsdb,nil,false);
+               //move values to datalink
 end;
 
 procedure tdbcoloredit.recchanged;

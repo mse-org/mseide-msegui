@@ -12,7 +12,7 @@ unit msedataimage;
 interface
 uses
  classes,msegui,mseimage,msewidgetgrid,msegrids,msedatalist,msegraphutils,
- msegraphics,mseclasses,mseeditglob,msebitmap,msemenus,mseevent;
+ msegraphics,mseclasses,mseeditglob,msebitmap,msemenus,mseevent,msestrings;
  
 type
  tcustomdataimage = class(timage,igridwidget)
@@ -40,6 +40,7 @@ type
    function getrowdatapo(const info: cellinfoty): pointer; virtual;
    procedure setgridintf(const intf: iwidgetgrid);
    function getcellframe: framety;
+   function getnulltext: msestring;
    procedure loadcellbmp(const acanvas: tcanvas; const abmp: tmaskedbitmap); virtual;
    procedure drawcell(const canvas: tcanvas);
    procedure beforecelldragevent(var ainfo: draginfoty; const arow: integer;
@@ -160,6 +161,11 @@ begin
  else begin
   result:= nullframe;
  end;
+end;
+
+function tcustomdataimage.getnulltext: msestring;
+begin
+ result:= '';
 end;
 
 procedure tcustomdataimage.loadcellbmp(const acanvas: tcanvas;
