@@ -1350,6 +1350,8 @@ type
    function getdatasource(const aindex: integer): tdatasource;
    function getoptionsdb: optionseditdbty;
    procedure setoptionsdb(const avalue: optionseditdbty);
+   function getnulltext: msestring;
+   procedure setnulltext(const avalue: msestring);
   protected
    function getitems(aindex: integer): msestring; override;
    procedure modified; override;
@@ -1375,6 +1377,7 @@ type
   published
    property datafield: string read getdatafield write setdatafield;
    property optionsdb: optionseditdbty read getoptionsdb write setoptionsdb default [];
+   property nulltext: msestring read getnulltext write setnulltext;
    property focusrectdist;
    property textflags;
    property textflagsactive;
@@ -6900,10 +6903,9 @@ var
  po1: pmsestring;
 begin
  po1:= pmsestring(tcustomdbstringgrid(fgrid).fdatalink.getdisplaystringbuffer(
-                           fdatalink.field,arow{,(fgrid.row = arow) and 
-                           (fgrid.col = index) and fgrid.active}));
+                           fdatalink.field,arow));
  if po1 = nil then begin
-  result:= '';
+  result:= fdatalink.nulltext;
  end
  else begin
   result:= po1^;
@@ -6978,13 +6980,7 @@ var
 begin
  int1:= tcustomdbstringgrid(fgrid).fdatalink.activerecord;
  if (int1 >= 0) and (int1 < fgrid.rowcount) then begin
-  mstr1:= items[int1];
-  if mstr1 = '' then begin
-   fdatalink.field.clear;
-  end
-  else begin
-   fdatalink.asmsestring:= mstr1;
-  end;
+  fdatalink.asnullmsestring:= items[int1];
  end;
 end;
 
@@ -7004,7 +7000,7 @@ var
 begin
  int1:= tcustomdbstringgrid(fgrid).fdatalink.activerecord;
  if (int1 >= 0) and (int1 < fgrid.rowcount) then begin
-  items[int1]:= '';
+  items[int1]:= fdatalink.nulltext;
  end;
 end;
 
@@ -7034,6 +7030,16 @@ end;
 procedure tdbstringcol.setoptionsdb(const avalue: optionseditdbty);
 begin
  fdatalink.options:= avalue;
+end;
+
+function tdbstringcol.getnulltext: msestring;
+begin
+ result:= fdatalink.nulltext;
+end;
+
+procedure tdbstringcol.setnulltext(const avalue: msestring);
+begin
+ fdatalink.nulltext:= avalue;
 end;
 
 { tdropdowndbstringcol }
