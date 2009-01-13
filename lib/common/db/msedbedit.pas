@@ -39,6 +39,12 @@ type
 
  dbnavigatoroptionty = (dno_confirmdelete,dno_append,dno_shortcuthint);
  dbnavigatoroptionsty = set of dbnavigatoroptionty;
+ optioneditdbty = (oed_autopost,oed_nofilteredit,oed_nofilterminedit,
+                   oed_nofiltermaxedit,oed_nofindedit,
+                   oed_nonullset, //use TField.DefaultExpression for textedit
+                   oed_nullset);  //don't use TField.DefaultExpression for
+                                  //empty edit value
+ optionseditdbty = set of optioneditdbty;
 
 const
  defaultdbnavigatoroptions = [dno_confirmdelete,dno_append];
@@ -2511,7 +2517,7 @@ begin
   else begin
    raise eabort.create('');
   end;
-  if (field <> nil) then begin
+  if not (oed_nullset in foptions) and (field <> nil) then begin
    with field do begin
     if (defaultexpression <> '') and isnull and 
          (dataset.modified or 

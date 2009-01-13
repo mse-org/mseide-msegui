@@ -32,7 +32,6 @@ type
   //igridwidget
    procedure initgridwidget; virtual;
    function getoptionsedit: optionseditty;
-   function getoptionsdb: optionseditdbty;
    procedure setfirstclick;
    procedure setreadonly(const avalue: boolean);
    function createdatalist(const sender: twidgetcol): tdatalist; virtual;
@@ -248,11 +247,6 @@ end;
 function tcustomdataimage.getoptionsedit: optionseditty;
 begin
  result:= [oe_readonly];
-end;
-
-function tcustomdataimage.getoptionsdb: optionseditdbty;
-begin
- result:= [];
 end;
 
 procedure tcustomdataimage.initgridwidget;

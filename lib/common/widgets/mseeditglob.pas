@@ -54,11 +54,6 @@ type
                     );
 
  optionseditty = set of optioneditty;
- optioneditdbty = (oed_autopost,oed_nofilteredit,oed_nofilterminedit,
-                   oed_nofiltermaxedit,oed_nofindedit,
-                   oed_nonullset); //use TField.DefaultExpression
- optionseditdbty = set of optioneditdbty;
-
 const
  defaultoptionsedit = [oe_undoonesc,oe_closequery,oe_exitoncursor,
                        oe_shiftreturn,oe_eatreturn,
