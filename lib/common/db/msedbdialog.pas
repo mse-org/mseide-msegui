@@ -237,7 +237,6 @@ end;
 
 constructor tdbcoloredit.create(aowner: tcomponent);
 begin
- fisdb:= true;
  fdatalink:= teditwidgetdatalink.create(idbeditfieldlink(self));
  inherited;
  valuedefault:= colorty(-1);

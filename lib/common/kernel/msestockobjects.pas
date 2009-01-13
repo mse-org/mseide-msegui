@@ -32,7 +32,7 @@ const
  stb_block1 = stb_dens50;
 
 type
- stockfontty = (stf_default,stf_unicode,stf_menu,stf_report,stf_proportional,
+ stockfontty = (stf_default,stf_empty,stf_unicode,stf_menu,stf_report,stf_proportional,
                 stf_fixed,
                 stf_helvetica,stf_roman,stf_courier); //scaleable fonts
  defaultfontnamesty = array[stockfontty] of string;
@@ -261,15 +261,8 @@ end;
 { tstockobjects }
 
 constructor tstockobjects.create;
-//var
-// modalresult: modalresultty;
 begin
- {
- for modalresult:= low(modalresultty) to high(modalresultty) do begin
-  fmodalresulttext[modalresult]:= defaultmodalresulttext(modalresult);
-  fmodalresulttextnoshortcut[modalresult]:= defaultmodalresulttextnoshortcut(modalresult);
- end;
- }
+ //dummy
 end;
 
 destructor tstockobjects.destroy;

@@ -109,7 +109,8 @@ type
    procedure setreadonly(const avalue: boolean);
   protected
    fgridintf: iwidgetgrid;
-   
+ 
+   procedure setisdb;  
    function getoptionsedit: optionseditty; virtual;
 //   function getoptionsdb: optionseditdbty;
    procedure updateoptions; virtual;
@@ -1543,16 +1544,16 @@ begin
  //dummy
 end;
 
+procedure tgraphdataedit.setisdb;
+begin
+ //dummy
+end;
+
 function tgraphdataedit.getoptionsedit: optionseditty;
 begin
  result := foptionsedit;
 end;
-{
-function tgraphdataedit.getoptionsdb: optionseditdbty;
-begin
- result := foptionsdb;
-end;
-}
+
 procedure tgraphdataedit.updateoptions;
 begin
  //dummy
@@ -1560,11 +1561,8 @@ end;
 
 procedure tgraphdataedit.setoptionsedit(const avalue: optionseditty);
 begin
-// if oe_autopost in avalue then begin
-//  include(foptionsdb,oed_autopost);
-// end;
  if foptionsedit <> avalue then begin
-  foptionsedit:= avalue {- [oe_autopost]};
+  foptionsedit:= avalue;
   if fgridintf <> nil then begin
    fgridintf.updateeditoptions(foptionsedit);
   end;
@@ -1590,38 +1588,10 @@ begin
  checkgrid;
  fgridintf.setdata(index,avalue);
 end;
-{
-procedure tgraphdataedit.clientmouseevent(var info: mouseeventinfoty);
-begin
- inherited;
- if not (es_processed in info.eventstate) and canevent(tmethod(fonmouseevent)) then begin
-  fonmouseevent(self,info);
- end;
-end;
-}
-{
-procedure tgraphdataedit.dokeydown(var info: keyeventinfoty);
-begin
- if not (es_processed in info.eventstate) and canevent(tmethod(fonkeydown)) then begin
-  fonkeydown(self,info);
- end;
- inherited;
-end;
-}
-{
-function tgraphdataedit.gridvalueempty(const row: integer): boolean;
-begin
- result:= fgridintf.empty(row);
-end;
-}
+
 procedure tgraphdataedit.docellevent(const ownedcol: boolean; var info: celleventinfoty);
 begin
  //dummy
- {
- if ownedcol and canevent(tmethod(foncellevent)) then begin
-  foncellevent(self,info);
- end;
- }
 end;
 
 procedure tgraphdataedit.valuechanged;

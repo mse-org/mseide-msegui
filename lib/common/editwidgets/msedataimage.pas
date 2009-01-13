@@ -27,8 +27,9 @@ type
    procedure setgridvalue(const index: integer; const avalue: string);   
   protected
    fgridintf: iwidgetgrid;
+   procedure setisdb;
    function getgridintf: iwidgetgrid;
-   //igridwidget
+  //igridwidget
    procedure initgridwidget; virtual;
    function getoptionsedit: optionseditty;
    function getoptionsdb: optionseditdbty;
@@ -278,6 +279,11 @@ function tcustomdataimage.getgridvalue(const index: integer): string;
 begin
  checkgrid;
  fgridintf.getdata(index,result);
+end;
+
+procedure tcustomdataimage.setisdb;
+begin
+ //dummy
 end;
 
 procedure tcustomdataimage.setgridvalue(const index: integer;

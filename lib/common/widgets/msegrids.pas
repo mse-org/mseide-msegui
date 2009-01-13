@@ -598,9 +598,8 @@ type
   protected
    ftextinfo: drawtextinfoty;
    foptionsedit: stringcoleditoptionsty;
-//   foptionsdb: optionseditdbty;
+   procedure setisdb;
    function getoptionsedit: optionseditty;
-//   function getoptionsdb: optionseditdbty;
    function getitems(aindex: integer): msestring; virtual;
    procedure setitems(aindex: integer; const Value: msestring);
    function createdatalist: tdatalist; override;
@@ -5192,92 +5191,28 @@ procedure tcustomstringcol.readpipe(const pipe: tpipereader;
                             const processeditchars: boolean = false;
                             const maxchars: integer = 0);
 var
-// str1: string;
-// bo1: boolean;
-// int1: integer;
  mstr1: msestring;
 begin
-// if processeditchars then begin
-  try
-   mstr1:= pipe.readdatastring;
-  except
-  end;
-  datalist.addchars(mstr1,processeditchars,maxchars);
-{
- end
- else begin
-  inc(fgrid.fnoshowcaretrect);
-  try
-   grid.beginupdate;
-   try
-    if grid.rowcount = 0 then begin
-     grid.rowcount:= 1;
-    end;
-    repeat
-     int1:= grid.rowhigh;
-     bo1:= pipe.readuln(str1);
-     try
-      mstr1:= str1;
-     except
-     end;
-     items[int1]:= items[int1]+mstr1;
-     if bo1 then begin
-      grid.appendrow;
-     end;
-    until not bo1;
-   finally
-    grid.endupdate;
-   end;
-  finally
-   dec(fgrid.fnoshowcaretrect);
-  end;
+ try
+  mstr1:= pipe.readdatastring;
+ except
  end;
-}
+ datalist.addchars(mstr1,processeditchars,maxchars);
 end;
 
 procedure tcustomstringcol.readpipe(const text: string;
               const processeditchars: boolean = false;
               const maxchars: integer = 0);
 var
-// ar1: msestringarty;
-// int1: integer;
  mstr1: msestring;
 begin
  mstr1:= text;
  datalist.addchars(mstr1,processeditchars,maxchars);
-{
- ar1:= nil; //compiler warning
- if text <> '' then begin
-  try
-   mstr1:= text;
-  except
-  end;
-  if processeditchars then begin
-   datalist.addchars(mstr1,true,maxchars);
-  end
-  else begin
-   ar1:= breaklines(mstr1);
-   inc(fgrid.fnoshowcaretrect);
-   try
-    grid.beginupdate;
-    try
-     if grid.rowcount = 0 then begin
-      grid.rowcount:= 1;
-     end;
-     items[grid.rowhigh]:= items[grid.rowhigh]+ar1[0];
-     for int1:= 1 to high(ar1) do begin
-      grid.appendrow;
-      items[grid.rowhigh]:= ar1[int1];
-     end;
-    finally
-     grid.endupdate;
-    end;
-   finally
-    dec(fgrid.fnoshowcaretrect);
-   end;
-  end;
- end;
- }
+end;
+
+procedure tcustomstringcol.setisdb;
+begin
+ //dummy
 end;
 
 function tcustomstringcol.getoptionsedit: optionseditty;
@@ -5285,12 +5220,7 @@ begin
  result:= [];
  stringcoltooptionsedit(foptionsedit,result);
 end;
-{
-function tcustomstringcol.getoptionsdb: optionseditdbty;
-begin
- result:= foptionsdb;
-end;
-}
+
 procedure tcustomstringcol.docellevent(var info: celleventinfoty);
 var
  hintinfo: hintinfoty;

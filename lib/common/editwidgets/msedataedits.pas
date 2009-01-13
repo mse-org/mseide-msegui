@@ -23,6 +23,7 @@ uses
 const
  emptyinteger = minint;
  valuevarname = 'value';
+ defaulttextflagsempty = [tf_ycentered,tf_xcentered];
  
 type
  tdataedit = class;
@@ -34,23 +35,41 @@ type
                                const aedit: boolean) of object;
  settexteventty = procedure(const sender: tdataedit;
                            var atext: msestring; var accept: boolean) of object;
+ dataeditstatety = (des_edited,des_emptytext,des_isdb,des_dbnull);
+ dataeditstatesty = set of dataeditstatety;
+
+ teditemptyfont = class(tparentfont)
+  public
+   class function getinstancepo(owner: tobject): pfont; override;
+ end;
  
  tdataedit = class(tcustomedit,igridwidget,istatfile,idragcontroller)
   private
    fondataentered: notifyeventty;
    foncheckvalue: checkvalueeventty;
-   fedited: boolean;
+   fstate: dataeditstatesty;
    fnullchecking: integer;
    fvaluechecking: integer;
    fstatfile: tstatfile;
    fstatvarname: msestring;
    fongettext: gettexteventty;
    fonsettext: settexteventty;
+   ftextempty: msestring;
+   ffontempty: teditemptyfont;
+   ftextflagsempty: textflagsty;
    procedure setstatfile(const Value: tstatfile);
    function getreadonly: boolean;
    procedure setreadonly(const avalue: boolean);
+   procedure settextempty(const avalue: msestring);
+   function getfontempty: teditemptyfont;
+   procedure setfontempty(const avalue: teditemptyfont);
+   function isfontemptystored: boolean;
+   procedure fontemptychanged(const sender: tobject);
+   procedure settextflagsempty(const avalue: textflagsty);
   protected
    fgridintf: iwidgetgrid;
+   procedure setisdb;
+   procedure updateedittext(const force: boolean);
    function getgridintf: iwidgetgrid;
    procedure checkgrid;
    procedure internalgetgridvalue(const index: integer; out value);
@@ -81,7 +100,7 @@ type
                 const canceled: boolean; const akey: keyty): boolean;
    procedure initeditfocus;
                    
-   //igridwidget
+  //igridwidget
    procedure setfirstclick;
    function createdatalist(const sender: twidgetcol): tdatalist; virtual; abstract;
    function getdatatyp: datatypty; virtual; abstract;
@@ -112,7 +131,7 @@ type
    procedure doafterpaint(const canvas: tcanvas); override;
    function needsfocuspaint: boolean; override;
 
-   //istatfile
+  //istatfile
    procedure dostatread(const reader: tstatreader); virtual;
    procedure dostatwrite(const writer: tstatwriter); virtual;
    procedure statreading;
@@ -131,6 +150,10 @@ type
    procedure setnullvalue; virtual; //for dbedits
    function nullcheckneeded(const newfocus: twidget): boolean; virtual;
   public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+   procedure createfontempty;
+   
    procedure initgridwidget; virtual;
    procedure synctofontheight; override;
    function actualcolor: colorty; override;
@@ -143,16 +166,22 @@ type
    function checkvalue(const quiet: boolean = false): boolean; virtual;
    function canclose(const newfocus: twidget): boolean; override;
    function edited: boolean;
+   function emptytext: boolean;
    function seteditfocus: boolean;
    
    property readonly: boolean read getreadonly write setreadonly;
   published
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
+   property fontempy: teditemptyfont read getfontempty write setfontempty 
+                               stored isfontemptystored;
+   property textflagsempty: textflagsty read ftextflagsempty 
+                    write settextflagsempty default defaulttextflagsempty;
    property optionsedit;
    property font;
    property textflags;
    property textflagsactive;
+   property textempty: msestring read ftextempty write settextempty;
    property caretwidth;
    property onchange;
    property ontextedited;
@@ -237,7 +266,7 @@ type
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure domousewheelevent(var info: mousewheeleventinfoty); override;
    procedure dokeydown(var info: keyeventinfoty); override;
-           //iscrollbar
+  //iscrollbar
    procedure scrollevent(sender: tcustomscrollbar; event: scrolleventty);
   public
    constructor create(aowner: tcomponent); override;
@@ -314,7 +343,7 @@ type
    function getcellframe: framety; override;
    procedure dohide; override;
    procedure updatereadonlystate; override;
-   //idropdown
+  //idropdown
    procedure buttonaction(var action: buttonactionty; const buttonindex: integer); virtual;
    procedure dobeforedropdown; virtual;
    procedure doafterclosedropdown; virtual;
@@ -334,7 +363,7 @@ type
    procedure setdropdown(const avalue: tdropdownwidgetcontroller);
   protected
    function createdropdowncontroller: tcustomdropdowncontroller; override;
-   //idropdownwidget
+  //idropdownwidget
    procedure createdropdownwidget(const atext: msestring;
                         out awidget: twidget); virtual; abstract;
    function getdropdowntext(const awidget: twidget): msestring; virtual; abstract;
@@ -357,7 +386,7 @@ type
    function getdropdown: tdropdownlistcontroller;
   protected
 
-   //idropdownlist
+  //idropdownlist
    function getdropdownitems: tdropdowncols; virtual;
    function createdropdowncontroller: tcustomdropdowncontroller; override;
    procedure internalsort(const acol: integer; const sortlist: tintegerdatalist); virtual;
@@ -570,7 +599,6 @@ type
    fonsetvalue1: setintegereventty;
    fvalue1: integer;
    fvaluedefault: integer;
-   fisdb: boolean;
    procedure setvalue(const avalue: integer);
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatyp: datatypty; override;
@@ -674,8 +702,7 @@ type
  end;
 
  tselector = class;
- selectoreventty =
-  procedure (const sender: tselector) of object;
+ selectoreventty = procedure (const sender: tselector) of object;
 
  tselector = class(tcustomselector)
   private
@@ -733,7 +760,6 @@ type
    function getascurrency: currency;
    procedure setascurrency(const avalue: currency);
   protected
-   fisdb: boolean;
    function gettextvalue(var accept: boolean; const quiet: boolean): realty; virtual;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    function internaldatatotext(const data): msestring; override;
@@ -848,17 +874,14 @@ type
    property localprops; //before template
    property localprops1; //before template
    property template;
-//   property disabledbuttons;
    property buttonface;
    property buttonframe;
    property buttonsvisible read fforcevisiblebuttons write setbuttonsvisible 
                                                     default [sk_up,sk_down];
-//   property buttonsinvisible default [];
    property buttonsize;
    property buttonpos;
    property buttonslast;
    property buttonsinline;
-//   property mousewheel;
  end;
  
  tcustomrealspinedit = class(tcustomrealedit,istepbar)
@@ -874,7 +897,7 @@ type
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure domousewheelevent(var info: mousewheeleventinfoty); override;
    procedure updatereadonlystate; override;
-   //istepbar
+  //istepbar
    procedure dostep(const event: stepkindty);
   public
    constructor create(aowner: tcomponent); override;
@@ -920,7 +943,6 @@ type
    procedure readmax(reader: treader);
    procedure writemax(writer: twriter);
   protected
-   fisdb: boolean;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    function internaldatatotext(const data): msestring; override;
    procedure texttodata(const atext: msestring; var data); override;
@@ -973,7 +995,7 @@ type
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure editnotification(var info: editnotificationinfoty); override;
    procedure updatereadonlystate; override;
-   //idropdownwidget
+  //idropdownwidget
    procedure buttonaction(var action: buttonactionty; const buttonindex: integer);
    procedure dobeforedropdown;
    procedure doafterclosedropdown;
@@ -1035,7 +1057,26 @@ begin
  end;
 end;
 
+ { teditemptyfont }
+ 
+class function teditemptyfont.getinstancepo(owner: tobject): pfont;
+begin
+ result:= @tdataedit(owner).ffontempty;
+end;
+
 { tdataedit }
+
+constructor tdataedit.create(aowner: tcomponent);
+begin
+ ftextflagsempty:= defaulttextflagsempty;
+ inherited;
+end;
+
+destructor tdataedit.destroy;
+begin
+ inherited;
+ ffontempty.free;
+end;
 
 function tdataedit.checkvalue(const quiet: boolean = false): boolean;
 begin
@@ -1059,7 +1100,7 @@ begin
     end;
     texttovalue(result,quiet);
     if result then begin
-     fedited:= false;
+     exclude(fstate,des_edited);
      if not quiet and canevent(tmethod(fondataentered)) then begin
       fondataentered(self);
      end;
@@ -1094,7 +1135,7 @@ begin
        try
         grid.col:= index;
         grid.show;
-        if {grid.canfocus and} not focused then begin
+        if not focused then begin
          tcustomgrid1(grid).beginnonullcheck;
          try
           grid.setfocus;
@@ -1107,15 +1148,13 @@ begin
        end;        
       end;
      end;
-//     show;
-//     setfocus;
     finally
      dec(fnullchecking);
     end;
    end;
   end
   else begin
-   if focused and fedited and 
+   if focused and (des_edited in fstate) and 
        ((fgridintf = nil) or not fgridintf.nocheckvalue) then begin
     result:= checkvalue;
    end;
@@ -1128,20 +1167,9 @@ end;
 
 procedure tdataedit.valuetotext;
 begin
- {$ifdef FPC} {$checkpointer off} {$endif}
- feditor.text:= datatotext(nil^);
- {$ifdef FPC} {$checkpointer default} {$endif}
+ updateedittext(false);
  feditor.initfocus;
- {
- feditor.clearundo;
- if active and (oe_autoselect in foptionsedit) then begin
-  feditor.selectall;
- end
- else begin
-  feditor.moveindex(bigint,false,false);
- end;
- }
- fedited:= false;
+ exclude(fstate,des_edited);
 end;
 
 procedure tdataedit.gridtovalue(const row: integer);
@@ -1181,15 +1209,72 @@ end;
 
 function tdataedit.edited: boolean;
 begin
- result:= fedited;
+ result:= des_edited in fstate;
+end;
+
+function tdataedit.emptytext: boolean;
+begin
+ result:= des_emptytext in fstate;
+end;
+
+procedure tdataedit.setisdb;
+begin
+ include(fstate,des_isdb);
+end;
+
+procedure tdataedit.updateedittext(const force: boolean);
+var
+ mstr1: msestring;
+ state1: dataeditstatesty;
+begin
+ state1:= fstate;
+ {$ifdef FPC} {$checkpointer off} {$endif}
+ mstr1:= datatotext(nil^);
+ {$ifdef FPC} {$checkpointer default} {$endif}
+ if (not(des_isdb in fstate) and (mstr1 = '') or (des_dbnull in fstate)) and 
+                                    not focused then begin
+  mstr1:= ftextempty;
+  include(fstate,des_emptytext);
+ end
+ else begin
+  exclude(fstate,des_emptytext);
+ end;
+ feditor.text:= mstr1;
+ if force or ((des_emptytext in fstate) xor (des_emptytext in state1)) then begin
+  if (des_emptytext in fstate) and (ffontempty <> nil) then begin
+   feditor.font:= ffontempty;
+  end
+  else begin
+   feditor.font:= geteditfont;
+  end;
+  if des_emptytext in fstate then begin
+   if isenabled or (oe_nogray in foptionsedit) then begin
+    feditor.textflags:= ftextflagsempty;
+   end
+   else begin
+    feditor.textflags:= ftextflagsempty + [tf_grayed];
+   end;
+  end
+  else begin
+   updatetextflags;
+  end;
+ end;
+end;
+
+procedure tdataedit.settextflagsempty(const avalue: textflagsty);
+begin
+ if avalue <> ftextflagsempty then begin
+  ftextflagsempty:= checktextflags(ftextflagsempty,avalue);
+  if not (csloading in componentstate) then begin
+   updateedittext(true);
+  end;
+ end;
 end;
 
 procedure tdataedit.dodefocus;
 begin
- {$ifdef FPC} {$checkpointer off} {$endif}
- feditor.text:= datatotext(nil^);
- {$ifdef FPC} {$checkpointer default} {$endif}
- fedited:= false;
+ updateedittext(false);
+ exclude(fstate,des_edited);
  inherited;
 end;
 
@@ -1215,7 +1300,8 @@ begin
  case info.action of
   ea_textentered: begin
    bo1:= true;
-   if fedited or (oe_forcereturncheckvalue in foptionsedit) then begin
+   if (des_edited in fstate) or 
+                       (oe_forcereturncheckvalue in foptionsedit) then begin
     bo1:= checkvalue;
     if not bo1 or (oe_eatreturn in foptionsedit) then begin
      info.action:= ea_none;
@@ -1230,12 +1316,12 @@ begin
    end;
   end;
   ea_textedited: begin
-   fedited:= true;
+   include(fstate,des_edited);
    modified;
    inherited;
   end;
   ea_undo: begin
-   fedited:= false;
+   exclude(fstate,des_edited);
   end;
   ea_caretupdating: begin
    if (fgridintf <> nil) and focused then begin
@@ -1265,9 +1351,7 @@ begin
   if fgridintf <> nil then begin
    fgridintf.changed;
   end;
- {$ifdef FPC} {$checkpointer off} {$endif}
-  feditor.text:= datatotext(nil^);
- {$ifdef FPC} {$checkpointer default} {$endif}
+  updateedittext(false);
   invalidate;
  end;
 end;
@@ -1325,13 +1409,18 @@ end;
 
 function tdataedit.geteditfont: tfont;
 begin
- if (fgridintf <> nil) and (ffont = nil) then begin
-  with fgridintf.getcol do begin
-   result:= rowfont(grid.row);
-  end;
+ if (ffontempty <> nil) and (des_emptytext in fstate) then begin
+  result:= ffontempty;
  end
  else begin
-  result:= inherited geteditfont;
+  if (fgridintf <> nil) and (ffont = nil) then begin
+   with fgridintf.getcol do begin
+    result:= rowfont(grid.row);
+   end;
+  end
+  else begin
+   result:= inherited geteditfont;
+  end;
  end;
 end;
 
@@ -1419,17 +1508,7 @@ procedure tdataedit.griddatasourcechanged;
 begin
  //dummy
 end;
-{
-procedure tdataedit.clientmouseevent(var info: mouseeventinfoty);
-begin
- if fgridintf <> nil then begin
-  fgridintf.childmouseevent(self,info);
- end;
- if not (es_processed in info.eventstate) then begin
-  inherited;
- end;
-end;
-}
+
 procedure tdataedit.modified;
 begin
  //dummy
@@ -1438,12 +1517,11 @@ end;
 procedure tdataedit.valuechanged;
 begin
  if not (csloading in componentstate) then begin
+  exclude(fstate,des_dbnull);
   if (fgridintf <> nil) and not (csdesigning in componentstate) then begin
    valuetogrid(fgridintf.getrow);
   end;
-  {$ifdef FPC} {$checkpointer off} {$endif}
-  feditor.text:= datatotext(nil^);
-  {$ifdef FPC} {$checkpointer default} {$endif}
+  updateedittext(false);
   if focused then begin
    feditor.initfocus;
   end
@@ -1489,12 +1567,7 @@ begin
   writestatoptions(writer);
  end;
 end;
-{
-function tdataedit.getobjectlink: iobjectlink;
-begin
- result:= istatfile(self);
-end;
-}
+
 procedure tdataedit.dostatread(const reader: tstatreader);
 begin
  if oe_savevalue in foptionsedit then begin
@@ -1562,6 +1635,8 @@ begin
  text:= getnulltext;
  bo1:= true;
  texttovalue(bo1,true); //sevalue call
+ include(fstate,des_dbnull);
+ updateedittext(true);  //change to textempty
 end;
 
 procedure tdataedit.setfirstclick;
@@ -1587,19 +1662,33 @@ end;
 procedure tdataedit.drawcell(const canvas: tcanvas);
 var
  mstr1: msestring;
+ afont: tfont;
+ atextflags: textflagsty;
 begin
+ afont:= nil;
+ atextflags:= textflags;
  with cellinfoty(canvas.drawinfopo^) do begin
   if datapo <> nil then begin
    mstr1:= internaldatatotext(datapo^);
+   if not (des_isdb in fstate) and (mstr1 = '') and (ftextempty <> '') then begin
+    mstr1:= ftextempty;
+    afont:= ffontempty;
+    atextflags:= ftextflagsempty;
+   end;
   end
   else begin
-   mstr1:= getnulltext;
+//   mstr1:= getnulltext;
+//   if mstr1 = '' then begin
+    mstr1:= ftextempty;
+//   end;
+   afont:= ffontempty;
+   atextflags:= ftextflagsempty;
   end;
   if canevent(tmethod(fongettext)) then begin
    fongettext(self,mstr1,false);
   end;
   if mstr1 <> '' then begin
-   drawtext(canvas,mstr1,innerrect,feditor.textflags);
+   drawtext(canvas,mstr1,innerrect,atextflags,afont);
   end;
  end;
 end;
@@ -1711,7 +1800,6 @@ begin
    rect2:= textrect(canvas1,datatotext(datalist.getitempo(arow)^),
                    acellrect,feditor.textflags,font);
    result:= not rectinrect(rect2,acellrect);
-//   translateclientpoint1(acellrect.pos,grid1,self);
   end
   else begin
    acellrect:= nullrect;
@@ -1835,7 +1923,7 @@ end;
 
 procedure tdataedit.initeditfocus;
 begin
- fedited:= false;
+ exclude(fstate,des_edited);
  initfocus;
 end;
 
@@ -1845,6 +1933,46 @@ begin
  if canevent(tmethod(fongettext)) then begin
   fongettext(self,result,focused);
  end;
+end;
+
+procedure tdataedit.settextempty(const avalue: msestring);
+begin
+ ftextempty:= avalue;
+ formatchanged;
+end;
+
+procedure tdataedit.createfontempty;
+begin
+ if ffontempty = nil then begin
+  ffontempty:= teditemptyfont.create;
+  ffontempty.onchange:= {$ifdef FPC}@{$endif}fontemptychanged;
+ end;
+end;
+
+function tdataedit.getfontempty: teditemptyfont;
+begin
+ getoptionalobject(ffontempty,{$ifdef FPC}@{$endif}createfontempty);
+ result:= ffontempty;
+ if result = nil then begin
+  result:= teditemptyfont(getfont1);
+ end;
+end;
+
+procedure tdataedit.setfontempty(const avalue: teditemptyfont);
+begin
+ if ffontempty <> avalue then begin
+  setoptionalobject(avalue,ffontempty,{$ifdef FPC}@{$endif}createfontempty);
+ end;
+end;
+
+function tdataedit.isfontemptystored: boolean;
+begin
+ result:= ffontempty <> nil;
+end;
+
+procedure tdataedit.fontemptychanged(const sender: tobject);
+begin
+ fontchanged;
 end;
 
 { tcustomstringedit }
@@ -3267,7 +3395,7 @@ begin
    end;
   end;
  end;
- if not (fisdb and (int1 = -1)) and (int1 < fmin) or (int1 > fmax) then begin
+ if not ((des_isdb in fstate) and (int1 = -1)) and (int1 < fmin) or (int1 > fmax) then begin
   rangeerror(fmin,fmax,quiet);
   accept:= false;
  end;
@@ -3615,7 +3743,7 @@ begin
   if (fvaluescale <> 0) and not isemptyreal(rea1) then begin
    rea1:= rea1*fvaluescale;
   end;
-  if not (fisdb and isemptyreal(rea1)) then begin
+  if not ((des_isdb in fstate) and isemptyreal(rea1)) then begin
    if (cmprealty(fmin,rea1) > 0) or (cmprealty(fmax,rea1) < 0) then begin
     rangeerror(fmin,fmax,quiet);
     accept:= false;
@@ -4086,7 +4214,7 @@ begin
  end;
  if accept then begin
   dat1:= checkkind(dat1);
-  if not (fisdb and isemptydatetime(dat1)) then begin
+  if not ((des_isdb in fstate) and isemptydatetime(dat1)) then begin
    if fkind = dtk_time then begin
     if isemptydatetime(fmax) and not isemptydatetime(dat1) or
          not isemptydatetime(fmin) and (dat1 < frac(fmin)) or 

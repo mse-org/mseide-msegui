@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -87,7 +87,7 @@ type
    procedure loadcellbmp(const acanvas: tcanvas; const abmp: tmaskedbitmap); override;
    function getrowdatapo(const info: cellinfoty): pointer; override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
-     //idbeditfieldlink
+  //idbeditfieldlink
    function getgriddatasource: tdatasource;
    function edited: boolean;
    procedure initeditfocus;
@@ -95,10 +95,10 @@ type
    procedure valuetofield;
    procedure updatereadonlystate;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
-     //idbgraphicfieldlink
+  //idbgraphicfieldlink
    procedure fieldtovalue; virtual;
    procedure setnullvalue;
-   //ireccontrol
+  //ireccontrol
    procedure recchanged;
    procedure setdatalink(const avalue: tgraphicdatalink);
    procedure readdatasource(reader: treader);

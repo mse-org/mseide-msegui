@@ -3292,9 +3292,14 @@ end;
 function tgdbmi.getregistervalue(const aname: string; out avalue: ptruint): gdbresultty;
 var
  str1: string;
+ int1: integer;
 begin
  result:= evaluateexpression('$'+aname,str1);
  if result = gdb_ok then begin
+  int1:= findchar(str1,' ');
+  if int1 > 0 then begin
+   setlength(str1,int1-1);
+  end;
   if not trystrtointvalue(str1,avalue) then begin
    result:= gdb_dataerror;
   end;

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -356,7 +356,7 @@ type
    procedure setcharset(const Value: string);
    function getoptions: fontoptionsty;
    procedure setoptions(const avalue: fontoptionsty);
-     //icanvas
+  //icanvas
    procedure gcneeded(const sender: tcanvas);
    function getmonochrome: boolean;
    function getsize: sizety;
@@ -393,8 +393,7 @@ type
    property handle: fontnumty read gethandle;
    property ascent: integer read getascent;
    property descent: integer read getdescent;
-   property glyphheight: integer read getglyphheight;
-                 //ascent + descent
+   property glyphheight: integer read getglyphheight; //ascent + descent
    property lineheight: integer read getlineheight;
    property caretshift: integer read getcaretshift;
    property onchange: notifyeventty read fonchange write fonchange;
@@ -402,8 +401,7 @@ type
    property bold: boolean read getbold write setbold;
    property italic: boolean read getitalic write setitalic;
    property underline: boolean read getunderline write setunderline;
-   property strikeout: boolean read getstrikeout write setstrikeout;
-   
+   property strikeout: boolean read getstrikeout write setstrikeout;   
 
   published
    property color: colorty read getcolor write setcolor default cl_text;

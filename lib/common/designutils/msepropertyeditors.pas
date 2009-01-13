@@ -2583,7 +2583,6 @@ begin
    end;
    setordvalue(0);
   end;
-//  modified;
 end;
 
 function tparentclasspropertyeditor.getinstance: tpersistent;

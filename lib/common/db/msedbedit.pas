@@ -143,6 +143,7 @@ type
   function getoptionsedit: optionseditty;
   procedure updatereadonlystate;
   procedure getfieldtypes(var afieldtypes: fieldtypesty); //[] = all
+  procedure setisdb;
  end;
 
  tgriddatalink = class;
@@ -260,6 +261,7 @@ type
    procedure dochange; override;
 
    function getrowdatapo(const info: cellinfoty): pointer; override;
+   function getnulltext: msestring; override;
   //idbeditfieldlink
    procedure valuetofield;
    procedure fieldtovalue;
@@ -295,6 +297,7 @@ type
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
    function getrowdatapo(const info: cellinfoty): pointer; override;
+   function getnulltext: msestring; override;
   //idbeditfieldlink
    procedure valuetofield;
    procedure fieldtovalue;
@@ -333,6 +336,7 @@ type
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
    function getrowdatapo(const info: cellinfoty): pointer; override;
+   function getnulltext: msestring; override;
   //idbeditfieldlink
    procedure valuetofield;
    procedure fieldtovalue;
@@ -370,6 +374,7 @@ type
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
    function getrowdatapo(const info: cellinfoty): pointer; override;
+   function getnulltext: msestring; override;
   //idbeditfieldlink
    procedure valuetofield;
    procedure fieldtovalue;
@@ -2307,6 +2312,7 @@ begin
  fintf:= intf;
  inherited Create;
  visualcontrol:= true;
+ fintf.setisdb;
 end;
 
 function tcustomeditwidgetdatalink.getasnullmsestring: msestring;
@@ -2820,6 +2826,11 @@ begin
  end;
 end;
 
+function tdbdialogstringedit.getnulltext: msestring;
+begin
+ result:= fdatalink.nulltext;
+end;
+
 function tdbdialogstringedit.createdatalist(const sender: twidgetcol): tdatalist;
 begin
  result:= nil;
@@ -2939,6 +2950,11 @@ begin
    result:= nil;
   end;
  end;
+end;
+
+function tcustomdbdropdownlistedit.getnulltext: msestring;
+begin
+ result:= fdatalink.nulltext;
 end;
 
 function tcustomdbdropdownlistedit.createdatalist(const sender: twidgetcol): tdatalist;
@@ -3065,6 +3081,11 @@ begin
  end;
 end;
 
+function tdbkeystringedit.getnulltext: msestring;
+begin
+ result:= fdatalink.nulltext;
+end;
+
 function tdbkeystringedit.createdatalist(const sender: twidgetcol): tdatalist;
 begin
  result:= nil;
@@ -3184,6 +3205,11 @@ begin
    result:= nil;
   end;
  end;
+end;
+
+function tdbmemoedit.getnulltext: msestring;
+begin
+ result:= fdatalink.nulltext;
 end;
 
 function tdbmemoedit.createdatalist(const sender: twidgetcol): tdatalist;
@@ -3895,7 +3921,6 @@ end;
 
 constructor tdbrealedit.create(aowner: tcomponent);
 begin
- fisdb:= true;
  fdatalink:= teditwidgetdatalink.Create(idbeditfieldlink(self));
  inherited;
 end;
@@ -4022,7 +4047,6 @@ end;
 
 constructor tdbrealspinedit.create(aowner: tcomponent);
 begin
- fisdb:= true;
  fdatalink:= teditwidgetdatalink.Create(idbeditfieldlink(self));
  inherited;
 end;
@@ -4408,7 +4432,6 @@ end;
 constructor tdbdatetimeedit.create(aowner: tcomponent);
 begin
  fdatalink:= teditwidgetdatalink.Create(idbeditfieldlink(self));
- fisdb:= true;
  inherited;
 end;
 
@@ -4537,7 +4560,6 @@ end;
 
 constructor tdbcalendardatetimeedit.create(aowner: tcomponent);
 begin
- fisdb:= true;
  fdatalink:= teditwidgetdatalink.Create(idbeditfieldlink(self));
  inherited;
 end;
@@ -4667,7 +4689,6 @@ end;
 
 constructor tcustomdbenumedit.create(aowner: tcomponent);
 begin
- fisdb:= true;
  fdatalink:= teditwidgetdatalink.create(idbeditfieldlink(self));
  inherited;
 end;

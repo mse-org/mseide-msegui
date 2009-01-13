@@ -333,12 +333,11 @@ type
    procedure settextflagsactive(const value: textflagsty);
    function getcaretwidth: integer;
    procedure setcaretwidth(const Value: integer);
-   procedure updatetextflags;
    
   protected
    feditor: tinplaceedit;
    foptionsedit: optionseditty;
-//   foptionsdb: optionseditdbty;
+   procedure updatetextflags;
    procedure updateflagtext(var avalue: msestring);
    function geteditor: tinplaceedit;
    function geteditfont: tfont; virtual;
@@ -352,7 +351,6 @@ type
    class function classskininfo: skininfoty; override;
      //iedit
    function getoptionsedit: optionseditty; virtual;
-//   function getoptionsdb: optionseditdbty;
    function hasselection: boolean; virtual;
    function cangridcopy: boolean; virtual;
    procedure setoptionsedit(const avalue: optionseditty); virtual;
@@ -379,7 +377,6 @@ type
    procedure readpwchar(reader: treader);
    procedure writepwchar(writer: twriter);
    procedure defineproperties(filer: tfiler); override;
-//   property optionsdb: optionseditdbty read foptionsdb write foptionsdb default [];   
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
