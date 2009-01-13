@@ -16,6 +16,8 @@ type
  
  tdispfielddatalink = class(tfielddatalink,idbeditinfo)
   private
+   procedure readdatasource(reader: treader);
+   procedure readdatafield(reader: treader);
   protected
    fintf: idbdispfieldlink;
    procedure recordchanged(afield: tfield); override;
@@ -25,6 +27,7 @@ type
                                      out afieldtypes: fieldtypesarty);
   public
    constructor create(const intf: idbdispfieldlink);
+   procedure fixupproperties(filer: tfiler); //read moved properties
   published
    property datasource;
    property fieldname;
@@ -40,8 +43,6 @@ type
    //ireccontrol
    procedure recchanged;
    procedure setdatalink(const avalue: tdispfielddatalink);
-   procedure readdatasource(reader: treader);
-   procedure readdatafield(reader: treader);
   protected   
    procedure defineproperties(filer: tfiler); override;
   public
@@ -68,8 +69,6 @@ type
    //ireccontrol
    procedure recchanged;
    procedure setdatalink(const avalue: tdispfielddatalink);
-   procedure readdatasource(reader: treader);
-   procedure readdatafield(reader: treader);
   protected   
    procedure defineproperties(filer: tfiler); override;
   public
@@ -111,8 +110,6 @@ type
    //ireccontrol
    procedure recchanged;
    procedure setdatalink(const avalue: tdispfielddatalink);
-   procedure readdatasource(reader: treader);
-   procedure readdatafield(reader: treader);
   protected   
    procedure defineproperties(filer: tfiler); override;
    function getvaluetext: msestring; override;
@@ -154,8 +151,6 @@ type
    //ireccontrol
    procedure recchanged;
    procedure setdatalink(const avalue: tdispfielddatalink);
-   procedure readdatasource(reader: treader);
-   procedure readdatafield(reader: treader);
   protected   
    procedure defineproperties(filer: tfiler); override;
    function getvaluetext: msestring; override;
@@ -176,8 +171,6 @@ type
    //ireccontrol
    procedure recchanged;
    procedure setdatalink(const avalue: tdispfielddatalink);
-   procedure readdatasource(reader: treader);
-   procedure readdatafield(reader: treader);
   protected   
    procedure defineproperties(filer: tfiler); override;
   public
@@ -218,8 +211,6 @@ type
    //ireccontrol
    procedure recchanged;
    procedure setdatalink(const avalue: tdispfielddatalink);
-   procedure readdatasource(reader: treader);
-   procedure readdatafield(reader: treader);
   protected   
    procedure defineproperties(filer: tfiler); override;
   public
@@ -263,6 +254,25 @@ begin
  fintf:= intf;
  inherited create;
  visualcontrol:= true;
+end;
+
+procedure tdispfielddatalink.readdatasource(reader: treader);
+begin
+ treader1(reader).readpropvalue(self,
+          getpropinfo(typeinfo(tdispfielddatalink),'datasource'));
+end;
+
+procedure tdispfielddatalink.readdatafield(reader: treader);
+begin
+ fieldname:= reader.readstring;
+end;
+
+procedure tdispfielddatalink.fixupproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
+ filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
+               //move values to datalink
 end;
 
 function tdispfielddatalink.getdatasource(const aindex: integer): tdatasource;
@@ -350,23 +360,10 @@ begin
  fdatalink.assign(avalue);
 end;
 
-procedure tdblabel.readdatasource(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(tdispfielddatalink),'datasource'));
-end;
-
-procedure tdblabel.readdatafield(reader: treader);
-begin
- fdatalink.fieldname:= reader.readstring;
-end;
-
 procedure tdblabel.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
- filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
-               //move values to datalink
+ fdatalink.fixupproperties(filer);  //move values to datalink
 end;
 
 { tdbstringdisp }
@@ -408,23 +405,10 @@ begin
  fdatalink.assign(avalue);
 end;
 
-procedure tdbstringdisp.readdatasource(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(tdispfielddatalink),'datasource'));
-end;
-
-procedure tdbstringdisp.readdatafield(reader: treader);
-begin
- fdatalink.fieldname:= reader.readstring;
-end;
-
 procedure tdbstringdisp.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
- filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
-               //move values to datalink
+ fdatalink.fixupproperties(filer);  //move values to datalink
 end;
 
 { tdbstringdisplb }
@@ -522,23 +506,10 @@ begin
  fdatalink.assign(avalue);
 end;
 
-procedure tdbintegerdisp.readdatasource(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(tdispfielddatalink),'datasource'));
-end;
-
-procedure tdbintegerdisp.readdatafield(reader: treader);
-begin
- fdatalink.fieldname:= reader.readstring;
-end;
-
 procedure tdbintegerdisp.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
- filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
-               //move values to datalink
+ fdatalink.fixupproperties(filer);  //move values to datalink
 end;
 
 { tdbintegerdisplb }
@@ -632,23 +603,10 @@ begin
  fdatalink.assign(avalue);
 end;
 
-procedure tdbbooleandisp.readdatasource(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(tdispfielddatalink),'datasource'));
-end;
-
-procedure tdbbooleandisp.readdatafield(reader: treader);
-begin
- fdatalink.fieldname:= reader.readstring;
-end;
-
 procedure tdbbooleandisp.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
- filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
-               //move values to datalink
+ fdatalink.fixupproperties(filer);  //move values to datalink
 end;
 
 { tdbrealdisp }
@@ -690,23 +648,10 @@ begin
  fdatalink.assign(avalue);
 end;
 
-procedure tdbrealdisp.readdatasource(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(tdispfielddatalink),'datasource'));
-end;
-
-procedure tdbrealdisp.readdatafield(reader: treader);
-begin
- fdatalink.fieldname:= reader.readstring;
-end;
-
 procedure tdbrealdisp.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
- filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
-               //move values to datalink
+ fdatalink.fixupproperties(filer);  //move values to datalink
 end;
 
 { tdbrealdisplb }
@@ -795,23 +740,10 @@ begin
  fdatalink.assign(avalue);
 end;
 
-procedure tdbdatetimedisp.readdatasource(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(tdispfielddatalink),'datasource'));
-end;
-
-procedure tdbdatetimedisp.readdatafield(reader: treader);
-begin
- fdatalink.fieldname:= reader.readstring;
-end;
-
 procedure tdbdatetimedisp.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
- filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
-               //move values to datalink
+ fdatalink.fixupproperties(filer);  //move values to datalink
 end;
 
 { tdbdatetimedisplb }

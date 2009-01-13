@@ -101,8 +101,6 @@ type
   //ireccontrol
    procedure recchanged;
    procedure setdatalink(const avalue: tgraphicdatalink);
-   procedure readdatasource(reader: treader);
-   procedure readdatafield(reader: treader);
   protected   
    procedure defineproperties(filer: tfiler); override;
    procedure gridtovalue(const row: integer); override;
@@ -240,23 +238,10 @@ begin
  fdatalink.assign(avalue);
 end;
 
-procedure tdbdataimage.readdatasource(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'datasource'));
-end;
-
-procedure tdbdataimage.readdatafield(reader: treader);
-begin
- fdatalink.fieldname:= reader.readstring;
-end;
-
 procedure tdbdataimage.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
- filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
-               //move values to datalink
+ fdatalink.fixupproperties(filer);  //move values to datalink
 end;
 
 procedure tdbdataimage.gridtovalue(const row: integer);

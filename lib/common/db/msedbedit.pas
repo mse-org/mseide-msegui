@@ -163,7 +163,10 @@ type
    procedure setediting(avalue: boolean);
    function getasnullmsestring: msestring;
    procedure setasnullmsestring(const avalue: msestring);
- protected
+   procedure readdatasource(reader: treader);
+   procedure readdatafield(reader: treader);
+   procedure readoptionsdb(reader: treader);
+  protected   
    fintf: idbeditfieldlink;
    foptions: optionseditdbty;
    procedure dataevent(event: tdataevent; info: ptrint); override;
@@ -178,6 +181,7 @@ type
                                      out afieldtypes: fieldtypesarty);
   public
    constructor create(const intf: idbeditfieldlink);
+   procedure fixupproperties(filer: tfiler); //read moved properties
    procedure recordchanged(afield: tfield); override;
    procedure nullcheckneeded(var avalue: boolean);
    procedure setwidgetdatasource(const avalue: tdatasource);
@@ -210,9 +214,6 @@ type
   private
    fdatalink: tstringeditwidgetdatalink;
    procedure setdatalink(const adatalink: tstringeditwidgetdatalink);
-   procedure readdatasource(reader: treader);
-   procedure readdatafield(reader: treader);
-   procedure readoptionsdb(reader: treader);
   protected   
    procedure defineproperties(filer: tfiler); override;
    procedure editnotification(var info: editnotificationinfoty); override;
@@ -246,9 +247,6 @@ type
   private
    fdatalink: tstringeditwidgetdatalink;
    procedure setdatalink(const avalue: tstringeditwidgetdatalink);
-   procedure readdatasource(reader: treader);
-   procedure readdatafield(reader: treader);
-   procedure readoptionsdb(reader: treader);
   protected   
    procedure defineproperties(filer: tfiler); override;
 
@@ -283,9 +281,6 @@ type
   private
    fdatalink: tstringeditwidgetdatalink;
    procedure setdatalink(const avalue: tstringeditwidgetdatalink);
-   procedure readdatasource(reader: treader);
-   procedure readdatafield(reader: treader);
-   procedure readoptionsdb(reader: treader);
   protected   
    procedure defineproperties(filer: tfiler); override;
 
@@ -323,9 +318,6 @@ type
   private
    fdatalink: tstringeditwidgetdatalink;
    procedure setdatalink(const avalue: tstringeditwidgetdatalink);
-   procedure readdatasource(reader: treader);
-   procedure readdatafield(reader: treader);
-   procedure readoptionsdb(reader: treader);
   protected   
    procedure defineproperties(filer: tfiler); override;
    function nullcheckneeded(const newfocus: twidget): boolean; override;
@@ -360,9 +352,6 @@ type
   private
    fdatalink: tstringeditwidgetdatalink;
    procedure setdatalink(const avalue: tstringeditwidgetdatalink);
-   procedure readdatasource(reader: treader);
-   procedure readdatafield(reader: treader);
-   procedure readoptionsdb(reader: treader);
   protected   
    procedure defineproperties(filer: tfiler); override;
 
@@ -394,9 +383,6 @@ type
   private
    fdatalink: teditwidgetdatalink;
    procedure setdatalink(const avalue: teditwidgetdatalink);
-   procedure readdatasource(reader: treader);
-   procedure readdatafield(reader: treader);
-   procedure readoptionsdb(reader: treader);
   protected   
    procedure defineproperties(filer: tfiler); override;
 
@@ -434,9 +420,6 @@ type
   private
    fdatalink: teditwidgetdatalink;
    procedure setdatalink(const avalue: teditwidgetdatalink);
-   procedure readdatasource(reader: treader);
-   procedure readdatafield(reader: treader);
-   procedure readoptionsdb(reader: treader);
   protected   
    procedure defineproperties(filer: tfiler); override;
    procedure griddatasourcechanged; override;
@@ -468,9 +451,6 @@ type
   private
    fdatalink: teditwidgetdatalink;
    procedure setdatalink(const avalue: teditwidgetdatalink);
-   procedure readdatasource(reader: treader);
-   procedure readdatafield(reader: treader);
-   procedure readoptionsdb(reader: treader);
   protected   
    procedure defineproperties(filer: tfiler); override;
    procedure griddatasourcechanged; override;
@@ -504,9 +484,6 @@ type
   private
    fdatalink: teditwidgetdatalink;
    procedure setdatalink(const avalue: teditwidgetdatalink);
-   procedure readdatasource(reader: treader);
-   procedure readdatafield(reader: treader);
-   procedure readoptionsdb(reader: treader);
   protected   
    procedure defineproperties(filer: tfiler); override;
    procedure griddatasourcechanged; override;
@@ -560,9 +537,6 @@ type
   private
    fdatalink: teditwidgetdatalink;
    procedure setdatalink(const avalue: teditwidgetdatalink);
-   procedure readdatasource(reader: treader);
-   procedure readdatafield(reader: treader);
-   procedure readoptionsdb(reader: treader);
   protected   
    procedure defineproperties(filer: tfiler); override;
    procedure griddatasourcechanged; override;
@@ -595,9 +569,6 @@ type
   private
    fdatalink: teditwidgetdatalink;
    procedure setdatalink(const avalue: teditwidgetdatalink);
-   procedure readdatasource(reader: treader);
-   procedure readdatafield(reader: treader);
-   procedure readoptionsdb(reader: treader);
   protected   
    procedure defineproperties(filer: tfiler); override;
    function nullcheckneeded(const newfocus: twidget): boolean; override;
@@ -632,9 +603,6 @@ type
   private
    fdatalink: teditwidgetdatalink;
    procedure setdatalink(const avalue: teditwidgetdatalink);
-   procedure readdatasource(reader: treader);
-   procedure readdatafield(reader: treader);
-   procedure readoptionsdb(reader: treader);
   protected   
    procedure defineproperties(filer: tfiler); override;
    function nullcheckneeded(const newfocus: twidget): boolean; override;
@@ -670,9 +638,6 @@ type
    fdatalink: teditwidgetdatalink;
    fvaluescale: real;
    procedure setdatalink(const avalue: teditwidgetdatalink);
-   procedure readdatasource(reader: treader);
-   procedure readdatafield(reader: treader);
-   procedure readoptionsdb(reader: treader);
   protected   
    procedure defineproperties(filer: tfiler); override;
    procedure griddatasourcechanged; override;
@@ -704,9 +669,6 @@ type
   private
    fdatalink: teditwidgetdatalink;
    procedure setdatalink(const avalue: teditwidgetdatalink);
-   procedure readdatasource(reader: treader);
-   procedure readdatafield(reader: treader);
-   procedure readoptionsdb(reader: treader);
   protected   
    procedure defineproperties(filer: tfiler); override;
    function getrowdatapo(const info: cellinfoty): pointer; override;
@@ -731,9 +693,6 @@ type
   private
    fdatalink: teditwidgetdatalink;
    procedure setdatalink(const avalue: teditwidgetdatalink);
-   procedure readdatasource(reader: treader);
-   procedure readdatafield(reader: treader);
-   procedure readoptionsdb(reader: treader);
   protected   
    procedure defineproperties(filer: tfiler); override;
    function nullcheckneeded(const newfocus: twidget): boolean; override;
@@ -767,9 +726,6 @@ type
   private
    fdatalink: teditwidgetdatalink;
    procedure setdatalink(const avalue: teditwidgetdatalink);
-   procedure readdatasource(reader: treader);
-   procedure readdatafield(reader: treader);
-   procedure readoptionsdb(reader: treader);
   protected   
    procedure defineproperties(filer: tfiler); override;
    function nullcheckneeded(const newfocus: twidget): boolean; override;
@@ -804,9 +760,6 @@ type
   private
    fdatalink: teditwidgetdatalink;
    procedure setdatalink(const avalue: teditwidgetdatalink);
-   procedure readdatasource(reader: treader);
-   procedure readdatafield(reader: treader);
-   procedure readoptionsdb(reader: treader);
   protected   
    procedure defineproperties(filer: tfiler); override;
    function nullcheckneeded(const newfocus: twidget): boolean; override;
@@ -1795,8 +1748,6 @@ type
   private
    fdatalink: teditwidgetdatalink;
    procedure setdatalink(const avalue: teditwidgetdatalink);
-   procedure readdatasource(reader: treader);
-   procedure readdatafield(reader: treader);
   protected   
    procedure defineproperties(filer: tfiler); override;
 
@@ -1849,8 +1800,6 @@ type
   private
    fdatalink: teditwidgetdatalink;
    procedure setdatalink(const avalue: teditwidgetdatalink);
-   procedure readdatasource(reader: treader);
-   procedure readdatafield(reader: treader);
   protected   
    procedure defineproperties(filer: tfiler); override;
    function nullcheckneeded(const newfocus: twidget): boolean; override;
@@ -2315,6 +2264,32 @@ begin
  fintf.setisdb;
 end;
 
+procedure tcustomeditwidgetdatalink.readdatasource(reader: treader);
+begin
+ treader1(reader).readpropvalue(self,
+          getpropinfo(typeinfo(teditwidgetdatalink),'datasource'));
+end;
+
+procedure tcustomeditwidgetdatalink.readdatafield(reader: treader);
+begin
+ fieldname:= reader.readstring;
+end;
+
+procedure tcustomeditwidgetdatalink.readoptionsdb(reader: treader);
+begin
+ treader1(reader).readpropvalue(self,
+          getpropinfo(typeinfo(teditwidgetdatalink),'options'));
+end;
+
+procedure tcustomeditwidgetdatalink.fixupproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
+ filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
+ filer.defineproperty('optionsdb',{$ifdef FPC}@{$endif}readoptionsdb,nil,false);
+               //move values to datalink
+end;
+
 function tcustomeditwidgetdatalink.getasnullmsestring: msestring;
 begin
  if field.isnull then begin
@@ -2723,31 +2698,10 @@ procedure tdbstringedit.setdatalink(const adatalink: tstringeditwidgetdatalink);
 begin
  fdatalink.assign(adatalink);
 end;
-
-procedure tdbstringedit.readdatasource(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'datasource'));
-end;
-
-procedure tdbstringedit.readdatafield(reader: treader);
-begin
- fdatalink.fieldname:= reader.readstring;
-end;
-
-procedure tdbstringedit.readoptionsdb(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'options'));
-end;
-
 procedure tdbstringedit.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
- filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
- filer.defineproperty('optionsdb',{$ifdef FPC}@{$endif}readoptionsdb,nil,false);
-               //move values to datalink
+ fdatalink.fixupproperties(filer);  //move values to datalink
 end;
 
 procedure tdbstringedit.editnotification(var info: editnotificationinfoty);
@@ -2862,30 +2816,10 @@ begin
  fdatalink.assign(avalue);
 end;
 
-procedure tdbdialogstringedit.readdatasource(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'datasource'));
-end;
-
-procedure tdbdialogstringedit.readdatafield(reader: treader);
-begin
- fdatalink.fieldname:= reader.readstring;
-end;
-
-procedure tdbdialogstringedit.readoptionsdb(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'options'));
-end;
-
 procedure tdbdialogstringedit.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
- filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
- filer.defineproperty('optionsdb',{$ifdef FPC}@{$endif}readoptionsdb,nil,false);
-               //move values to datalink
+ fdatalink.fixupproperties(filer);  //move values to datalink
 end;
 
 procedure tdbdialogstringedit.recchanged;
@@ -2990,30 +2924,10 @@ begin
  fdatalink.assign(avalue);
 end;
 
-procedure tcustomdbdropdownlistedit.readdatasource(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'datasource'));
-end;
-
-procedure tcustomdbdropdownlistedit.readdatafield(reader: treader);
-begin
- fdatalink.fieldname:= reader.readstring;
-end;
-
-procedure tcustomdbdropdownlistedit.readoptionsdb(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'options'));
-end;
-
 procedure tcustomdbdropdownlistedit.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
- filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
- filer.defineproperty('optionsdb',{$ifdef FPC}@{$endif}readoptionsdb,nil,false);
-               //move values to datalink
+ fdatalink.fixupproperties(filer);  //move values to datalink
 end;
 
 procedure tcustomdbdropdownlistedit.recchanged;
@@ -3117,30 +3031,10 @@ begin
  fdatalink.assign(avalue);
 end;
 
-procedure tdbkeystringedit.readdatasource(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'datasource'));
-end;
-
-procedure tdbkeystringedit.readdatafield(reader: treader);
-begin
- fdatalink.fieldname:= reader.readstring;
-end;
-
-procedure tdbkeystringedit.readoptionsdb(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'options'));
-end;
-
 procedure tdbkeystringedit.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
- filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
- filer.defineproperty('optionsdb',{$ifdef FPC}@{$endif}readoptionsdb,nil,false);
-               //move values to datalink
+ fdatalink.fixupproperties(filer);  //move values to datalink
 end;
 
 procedure tdbkeystringedit.recchanged;
@@ -3243,30 +3137,10 @@ begin
  fdatalink.assign(avalue);
 end;
 
-procedure tdbmemoedit.readdatasource(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'datasource'));
-end;
-
-procedure tdbmemoedit.readdatafield(reader: treader);
-begin
- fdatalink.fieldname:= reader.readstring;
-end;
-
-procedure tdbmemoedit.readoptionsdb(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'options'));
-end;
-
 procedure tdbmemoedit.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
- filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
- filer.defineproperty('optionsdb',{$ifdef FPC}@{$endif}readoptionsdb,nil,false);
-               //move values to datalink
+ fdatalink.fixupproperties(filer);  //move values to datalink
 end;
 
 procedure tdbmemoedit.recchanged;
@@ -3388,30 +3262,10 @@ begin
  fdatalink.assign(avalue);
 end;
 
-procedure tdbintegeredit.readdatasource(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'datasource'));
-end;
-
-procedure tdbintegeredit.readdatafield(reader: treader);
-begin
- fdatalink.fieldname:= reader.readstring;
-end;
-
-procedure tdbintegeredit.readoptionsdb(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'options'));
-end;
-
 procedure tdbintegeredit.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
- filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
- filer.defineproperty('optionsdb',{$ifdef FPC}@{$endif}readoptionsdb,nil,false);
-               //move values to datalink
+ fdatalink.fixupproperties(filer);  //move values to datalink
 end;
 
 procedure tdbintegeredit.recchanged;
@@ -3498,30 +3352,10 @@ begin
  fdatalink.assign(avalue);
 end;
 
-procedure tdbbooleanedit.readdatasource(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'datasource'));
-end;
-
-procedure tdbbooleanedit.readdatafield(reader: treader);
-begin
- fdatalink.fieldname:= reader.readstring;
-end;
-
-procedure tdbbooleanedit.readoptionsdb(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'options'));
-end;
-
 procedure tdbbooleanedit.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
- filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
- filer.defineproperty('optionsdb',{$ifdef FPC}@{$endif}readoptionsdb,nil,false);
-               //move values to datalink
+ fdatalink.fixupproperties(filer);  //move values to datalink
 end;
 
 procedure tdbbooleanedit.recchanged;
@@ -3619,30 +3453,10 @@ begin
  fdatalink.assign(avalue);
 end;
 
-procedure tdbdataicon.readdatasource(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'datasource'));
-end;
-
-procedure tdbdataicon.readdatafield(reader: treader);
-begin
- fdatalink.fieldname:= reader.readstring;
-end;
-
-procedure tdbdataicon.readoptionsdb(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'options'));
-end;
-
 procedure tdbdataicon.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
- filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
- filer.defineproperty('optionsdb',{$ifdef FPC}@{$endif}readoptionsdb,nil,false);
-               //move values to datalink
+ fdatalink.fixupproperties(filer);  //move values to datalink
 end;
 
 procedure tdbdataicon.recchanged;
@@ -3740,30 +3554,10 @@ begin
  fdatalink.assign(avalue);
 end;
 
-procedure tdbdatabutton.readdatasource(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'datasource'));
-end;
-
-procedure tdbdatabutton.readdatafield(reader: treader);
-begin
- fdatalink.fieldname:= reader.readstring;
-end;
-
-procedure tdbdatabutton.readoptionsdb(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'options'));
-end;
-
 procedure tdbdatabutton.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
- filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
- filer.defineproperty('optionsdb',{$ifdef FPC}@{$endif}readoptionsdb,nil,false);
-               //move values to datalink
+ fdatalink.fixupproperties(filer);  //move values to datalink
 end;
 
 procedure tdbdatabutton.recchanged;
@@ -3886,30 +3680,10 @@ begin
  fdatalink.assign(avalue);
 end;
 
-procedure tdbbooleaneditradio.readdatasource(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'datasource'));
-end;
-
-procedure tdbbooleaneditradio.readdatafield(reader: treader);
-begin
- fdatalink.fieldname:= reader.readstring;
-end;
-
-procedure tdbbooleaneditradio.readoptionsdb(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'options'));
-end;
-
 procedure tdbbooleaneditradio.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
- filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
- filer.defineproperty('optionsdb',{$ifdef FPC}@{$endif}readoptionsdb,nil,false);
-               //move values to datalink
+ fdatalink.fixupproperties(filer);  //move values to datalink
 end;
 
 procedure tdbbooleaneditradio.recchanged;
@@ -4006,30 +3780,10 @@ begin
  fdatalink.assign(avalue);
 end;
 
-procedure tdbrealedit.readdatasource(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'datasource'));
-end;
-
-procedure tdbrealedit.readdatafield(reader: treader);
-begin
- fdatalink.fieldname:= reader.readstring;
-end;
-
-procedure tdbrealedit.readoptionsdb(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'options'));
-end;
-
 procedure tdbrealedit.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
- filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
- filer.defineproperty('optionsdb',{$ifdef FPC}@{$endif}readoptionsdb,nil,false);
-               //move values to datalink
+ fdatalink.fixupproperties(filer);  //move values to datalink
 end;
 
 procedure tdbrealedit.recchanged;
@@ -4132,30 +3886,10 @@ begin
  fdatalink.assign(avalue);
 end;
 
-procedure tdbrealspinedit.readdatasource(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'datasource'));
-end;
-
-procedure tdbrealspinedit.readdatafield(reader: treader);
-begin
- fdatalink.fieldname:= reader.readstring;
-end;
-
-procedure tdbrealspinedit.readoptionsdb(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'options'));
-end;
-
 procedure tdbrealspinedit.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
- filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
- filer.defineproperty('optionsdb',{$ifdef FPC}@{$endif}readoptionsdb,nil,false);
-               //move values to datalink
+ fdatalink.fixupproperties(filer);  //move values to datalink
 end;
 
 procedure tdbrealspinedit.recchanged;
@@ -4265,30 +3999,10 @@ begin
  fdatalink.assign(avalue);
 end;
 
-procedure tdbslider.readdatasource(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'datasource'));
-end;
-
-procedure tdbslider.readdatafield(reader: treader);
-begin
- fdatalink.fieldname:= reader.readstring;
-end;
-
-procedure tdbslider.readoptionsdb(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'options'));
-end;
-
 procedure tdbslider.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
- filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
- filer.defineproperty('optionsdb',{$ifdef FPC}@{$endif}readoptionsdb,nil,false);
-               //move values to datalink
+ fdatalink.fixupproperties(filer);  //move values to datalink
 end;
 
 procedure tdbslider.recchanged;
@@ -4396,30 +4110,10 @@ begin
  fdatalink.assign(avalue);
 end;
 
-procedure tdbprogressbar.readdatasource(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'datasource'));
-end;
-
-procedure tdbprogressbar.readdatafield(reader: treader);
-begin
- fdatalink.fieldname:= reader.readstring;
-end;
-
-procedure tdbprogressbar.readoptionsdb(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'options'));
-end;
-
 procedure tdbprogressbar.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
- filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
- filer.defineproperty('optionsdb',{$ifdef FPC}@{$endif}readoptionsdb,nil,false);
-               //move values to datalink
+ fdatalink.fixupproperties(filer);  //move values to datalink
 end;
 
 procedure tdbprogressbar.griddatasourcechanged;
@@ -4519,30 +4213,10 @@ begin
  fdatalink.assign(avalue);
 end;
 
-procedure tdbdatetimeedit.readdatasource(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'datasource'));
-end;
-
-procedure tdbdatetimeedit.readdatafield(reader: treader);
-begin
- fdatalink.fieldname:= reader.readstring;
-end;
-
-procedure tdbdatetimeedit.readoptionsdb(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'options'));
-end;
-
 procedure tdbdatetimeedit.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
- filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
- filer.defineproperty('optionsdb',{$ifdef FPC}@{$endif}readoptionsdb,nil,false);
-               //move values to datalink
+ fdatalink.fixupproperties(filer);  //move values to datalink
 end;
 
 procedure tdbdatetimeedit.recchanged;
@@ -4648,30 +4322,10 @@ begin
  fdatalink.assign(avalue);
 end;
 
-procedure tdbcalendardatetimeedit.readdatasource(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'datasource'));
-end;
-
-procedure tdbcalendardatetimeedit.readdatafield(reader: treader);
-begin
- fdatalink.fieldname:= reader.readstring;
-end;
-
-procedure tdbcalendardatetimeedit.readoptionsdb(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'options'));
-end;
-
 procedure tdbcalendardatetimeedit.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
- filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
- filer.defineproperty('optionsdb',{$ifdef FPC}@{$endif}readoptionsdb,nil,false);
-               //move values to datalink
+ fdatalink.fixupproperties(filer);  //move values to datalink
 end;
 
 procedure tdbcalendardatetimeedit.recchanged;
@@ -4779,30 +4433,10 @@ begin
  fdatalink.assign(avalue);
 end;
 
-procedure tcustomdbenumedit.readdatasource(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'datasource'));
-end;
-
-procedure tcustomdbenumedit.readdatafield(reader: treader);
-begin
- fdatalink.fieldname:= reader.readstring;
-end;
-
-procedure tcustomdbenumedit.readoptionsdb(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'options'));
-end;
-
 procedure tcustomdbenumedit.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
- filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
- filer.defineproperty('optionsdb',{$ifdef FPC}@{$endif}readoptionsdb,nil,false);
-               //move values to datalink
+ fdatalink.fixupproperties(filer);  //move values to datalink
 end;
 
 procedure tcustomdbenumedit.recchanged;
@@ -8271,23 +7905,10 @@ begin
  fdatalink.assign(avalue);
 end;
 
-procedure tdbenum64editlb.readdatasource(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'datasource'));
-end;
-
-procedure tdbenum64editlb.readdatafield(reader: treader);
-begin
- fdatalink.fieldname:= reader.readstring;
-end;
-
 procedure tdbenum64editlb.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
- filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
-               //move values to datalink
+ fdatalink.fixupproperties(filer);  //move values to datalink
 end;
 
 function tdbenum64editlb.nullcheckneeded(const newfocus: twidget): boolean;
@@ -8395,23 +8016,10 @@ begin
  fdatalink.assign(avalue);
 end;
 
-procedure tdbenum64editdb.readdatasource(reader: treader);
-begin
- treader1(reader).readpropvalue(
-         fdatalink,getpropinfo(typeinfo(teditwidgetdatalink),'datasource'));
-end;
-
-procedure tdbenum64editdb.readdatafield(reader: treader);
-begin
- fdatalink.fieldname:= reader.readstring;
-end;
-
 procedure tdbenum64editdb.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
- filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
-               //move values to datalink
+ fdatalink.fixupproperties(filer);  //move values to datalink
 end;
 
 function tdbenum64editdb.nullcheckneeded(const newfocus: twidget): boolean;
