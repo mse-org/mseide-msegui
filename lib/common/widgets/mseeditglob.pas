@@ -48,14 +48,15 @@ type
                     oe_locate,    //used by titemedit     
  //                   oe_autopost,  //deprecated, moved to optiondeditdbty
                     oe_autopopupmenu,
-                    oe_keyexecute, //shift-down-key starts dialog
+                    oe_keyexecute, //shift+down-key starts dialog
                     oe_checkvaluepaststatread,
                     oe_savevalue,oe_savestate,oe_saveoptions
                     );
 
  optionseditty = set of optioneditty;
  optioneditdbty = (oed_autopost,oed_nofilteredit,oed_nofilterminedit,
-                   oed_nofiltermaxedit,oed_nofindedit);
+                   oed_nofiltermaxedit,oed_nofindedit,
+                   oed_nonullset); //use TField.DefaultExpression
  optionseditdbty = set of optioneditdbty;
 
 const
