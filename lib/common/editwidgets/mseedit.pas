@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -318,7 +318,7 @@ type
    fonpastefromclipboard: updatestringeventty;
 {$ifdef mse_with_ifi}
    fifiserverintf: iifiserver;
-   //iifiwidget
+  //iifiwidget
    procedure setifiserverintf(const aintf: iifiserver);
    function getifiserverintf: iifiserver;
 {$endif}   
@@ -337,7 +337,7 @@ type
   protected
    feditor: tinplaceedit;
    foptionsedit: optionseditty;
-   procedure updatetextflags;
+   procedure updatetextflags; virtual;
    procedure updateflagtext(var avalue: msestring);
    function geteditor: tinplaceedit;
    function geteditfont: tfont; virtual;
@@ -349,7 +349,7 @@ type
    procedure dragstarted; override;
 
    class function classskininfo: skininfoty; override;
-     //iedit
+  //iedit
    function getoptionsedit: optionseditty; virtual;
    function hasselection: boolean; virtual;
    function cangridcopy: boolean; virtual;

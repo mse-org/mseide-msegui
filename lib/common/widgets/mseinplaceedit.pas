@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -67,6 +67,10 @@ type
    fowner: twidget;
    fintf: iedit;
    finfo: drawtextinfoty;
+   ffont: tfont;
+   ffontstyle: fontstylesty;
+   ffontcolor: colorty;
+   ffontcolorbackground: colorty;
    fbackup: msestring;
    foldtext: msestring;
    fselstart: integer;
@@ -114,6 +118,7 @@ type
    function nofullinvalidateneeded: boolean;
    procedure setfont(const avalue: tfont);
    function gettextrect: rectty;
+   function getfontcanvas: tcanvas;
 
   protected
    fstate: inplaceeditstatesty;
@@ -143,6 +148,10 @@ type
    procedure updatepos(const atextrect,aclientrect: rectty);
    procedure setscrollvalue(const avalue: real; const horz: boolean);
    property font: tfont read finfo.font write setfont;
+   property fontstyle: fontstylesty read ffontstyle write ffontstyle default [];
+   property fontcolor: colorty read ffontcolor write ffontcolor default cl_none;
+   property fontcolorbackground: colorty read ffontcolor write 
+                                     ffontcolorbackground default cl_none;
 
    function beforechange: boolean; //true if not aborted
    procedure begingroup; virtual;
@@ -339,6 +348,8 @@ begin
  fintf:= editintf;
  fcaretwidth:= defaultcaretwidth;
  fmaxlength:= -1;
+ ffontcolor:= cl_none;
+ ffontcolorbackground:= cl_none;
  if istextedit then begin
   include(fstate,ies_istextedit);
  end;
@@ -476,7 +487,7 @@ begin
  finfo.dest:= atextrect;
 // fclientrect:= aclientrect;
  finfo.clip:= aclientrect;
- finfo.font:= font;
+ ffont:= font;
  resetoffset;
  finfo.text.format:= copy(format);
  finfo.tabulators:= tabulators;
@@ -505,8 +516,8 @@ end;
 
 procedure tinplaceedit.setfont(const avalue: tfont);
 begin
- if finfo.font <> avalue then begin
-  finfo.font:= avalue;
+ if ffont <> avalue then begin
+  ffont:= avalue;
   invalidatetext(false,false);
   internalupdatecaret;
  end;
@@ -569,13 +580,12 @@ begin
   exit;  //no createwindow by getcanvas
  end;
  posbefore:= finfo.dest.pos;
- 
  if not (canedit or (oe_caretonreadonly in iedit(fintf).getoptionsedit)) then begin
   nocaret:= true;
  end;
  actioninfo:= initactioninfo(ea_caretupdating);
  if fowner.active or (ies_forcecaret in fstate) or force then begin
-  canvas:= fowner.getcanvas;
+  canvas:= getfontcanvas;
   if fpasswordchar <> #0 then begin
    wstr1:= finfo.text.text;
    finfo.text.text:= stringfromchar(fpasswordchar,length(wstr1));
@@ -609,13 +619,8 @@ begin
    finfo.text.text:= wstr1;
   end;
   with finfo,actioninfo do begin
-   int1:= getinsertcaretwidth(canvas,font);
-   if font = nil then begin
-    afont:= canvas.font;
-   end
-   else begin
-    afont:= font;
-   end;
+   int1:= getinsertcaretwidth(canvas,ffont);
+   afont:= canvas.font;
    if insertstate and not nocaret then begin
     caretrect.cx:= int1;
     showrect.x:= fcaretpos.x;         //for clamp in view
@@ -835,7 +840,7 @@ end;
 
 function tinplaceedit.textclipped: boolean;
 begin
- msedrawtext.textrect(fowner.getcanvas,finfo);
+ msedrawtext.textrect(getfontcanvas,finfo);
  result:= not rectinrect(finfo.res,fowner.innerclientrect);
 end;
 
@@ -846,7 +851,7 @@ end;
 
 function tinplaceedit.mousepostotextindex(const apos: pointty): integer;
 begin
- postotextindex(fowner.getcanvas,finfo,apos,result);
+ postotextindex(getfontcanvas,finfo,apos,result);
 end;
 
 procedure tinplaceedit.deleteselection;
@@ -1179,16 +1184,18 @@ procedure tinplaceedit.mouseevent(var minfo: mouseeventinfoty);
 var
  po1: pointty;
  int1: integer;
+ canvas1: tcanvas;
 begin
  with minfo do begin
   case eventkind of
    ek_buttonpress: begin
     if (minfo.button = mb_left) and pointinrect(pos,finfo.clip) then begin
+     canvas1:= getfontcanvas;
      if not fowner.focused and fowner.canfocus and
                 (ow_mousefocus in fowner.optionswidget) then begin
       include(fstate,ies_firstclick);
       include(minfo.eventstate,es_processed);
-      postotextindex(fowner.getcanvas,finfo,pos,int1);
+      postotextindex(canvas1,finfo,pos,int1);
       moveindex(int1,false);
       internalupdatecaret(true);
       po1:= fcaretpos;
@@ -1199,7 +1206,7 @@ begin
       end;
       if oe_autoselectonfirstclick in fintf.getoptionsedit then begin
        selectall;
-       subpoint1(po1,textindextopos(fowner.getcanvas,finfo,int1));
+       subpoint1(po1,textindextopos(canvas1,finfo,int1));
       end
       else begin
        moveindex(int1,false);
@@ -1207,8 +1214,8 @@ begin
       end;
      end
      else begin
-      postotextindex(fowner.getcanvas,finfo,pos,int1);
-      po1:= textindextopos(fowner.getcanvas,finfo,int1);
+      postotextindex(canvas1,finfo,pos,int1);
+      po1:= textindextopos(canvas1,finfo,int1);
       if (ies_firstclick in fstate) then begin
        finfo.flags:= ftextflagsactive;
        if (oe_autoselectonfirstclick in fintf.getoptionsedit) then begin
@@ -1222,7 +1229,7 @@ begin
       else begin
        moveindex(int1,ss_shift in shiftstate);
       end;
-      subpoint1(po1,textindextopos(fowner.getcanvas,finfo,int1));
+      subpoint1(po1,textindextopos(canvas1,finfo,int1));
      end;
      subpoint1(pos,po1);
      po1:= subpoint(ftextrect.pos,pos);
@@ -1244,7 +1251,6 @@ begin
       fowner.scrollcaret(po1);
      end;
     end;
-//    exclude(fstate,ies_firstclick);
    end;
    ek_buttonrelease,ek_mousecaptureend: begin
     killrepeater;
@@ -1278,13 +1284,13 @@ procedure tinplaceedit.movemouseindex(const sender: tobject);
 var
  int1: integer;
 begin
- postotextindex(fowner.getcanvas,finfo,fmousemovepos,int1);
+ postotextindex(getfontcanvas,finfo,fmousemovepos,int1);
  moveindex(int1,true);
 end;
 
 function tinplaceedit.invalidatepos: integer;
 begin
- result:= fcaretpos.x - fowner.getcanvas.getfontmetrics('o',finfo.font).width;
+ result:= fcaretpos.x - getfontcanvas.getfontmetrics('o').width;
 end;
 
 procedure tinplaceedit.inserttext(const text: msestring; nooverwrite: boolean = true);
@@ -1298,7 +1304,7 @@ begin
   replacetext1(finfo.text.text,fcurindex+1,text);
  end;
  checkmaxlength;
- int3:= fowner.getcanvas.getfontmetrics('o',finfo.font).width;
+ int3:= getfontcanvas.getfontmetrics('o').width;
  int1:= fcaretpos.x - int3;
  moveindex(fcurindex + length(text),false);
  if nofullinvalidateneeded then begin
@@ -1577,6 +1583,18 @@ begin
    str1:= finfo.text.text;
    finfo.text.text:= stringfromchar(fpasswordchar,length(str1));
   end;
+  if ffont <> nil then begin
+   canvas.font:= ffont;
+  end;
+  if ffontstyle <> [] then begin
+   canvas.font.style:= ffontstyle;
+  end;
+  if ffontcolor <> cl_none then begin
+   canvas.font.color:= ffontcolor;
+  end;
+  if ffontcolorbackground <> cl_none then begin
+   canvas.font.colorbackground:= ffontcolorbackground;
+  end;
   msedrawtext.drawtext(canvas,finfo);
   if fpasswordchar <> #0 then begin
    finfo.text.text:= str1;
@@ -1587,10 +1605,21 @@ end;
 function tinplaceedit.gettextrect: rectty;
 begin
  if not (ies_textrectvalid in fstate) then begin
-  msedrawtext.textrect(fowner.getcanvas,finfo);
+  msedrawtext.textrect(getfontcanvas,finfo);
   include(fstate,ies_textrectvalid);
  end;
  result:= finfo.res;
+end;
+
+function tinplaceedit.getfontcanvas: tcanvas;
+begin
+ result:= fowner.getcanvas;
+ if ffont <> nil then begin
+  result.font:= ffont;
+ end;
+ if ffontstyle <> [] then begin
+  result.font.style:= ffontstyle;
+ end;
 end;
 
 procedure tinplaceedit.setpasswordchar(const Value: msechar);

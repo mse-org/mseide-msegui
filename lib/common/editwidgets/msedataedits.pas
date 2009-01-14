@@ -35,7 +35,7 @@ type
                                const aedit: boolean) of object;
  settexteventty = procedure(const sender: tdataedit;
                            var atext: msestring; var accept: boolean) of object;
- dataeditstatety = (des_edited,des_emptytext,des_isdb,des_dbnull);
+ dataeditstatety = (des_edited,des_emptytext,des_grayed,des_isdb,des_dbnull);
  dataeditstatesty = set of dataeditstatety;
 
  teditemptyfont = class(tparentfont)
@@ -54,18 +54,28 @@ type
    fstatvarname: msestring;
    fongettext: gettexteventty;
    fonsettext: settexteventty;
-   ftextempty: msestring;
-   ffontempty: teditemptyfont;
-   ftextflagsempty: textflagsty;
+   fempty_text: msestring;
+   fempty_font: teditemptyfont;
+   fempty_textflags: textflagsty;
+   fempty_textcolor: colorty;
+   fempty_textcolorbackground: colorty;
+   fempty_textstyle: fontstylesty;
+   fempty_color: colorty;
+   procedure fontemptychanged(const sender: tobject);
+   procedure emptychanged;
+   
    procedure setstatfile(const Value: tstatfile);
    function getreadonly: boolean;
    procedure setreadonly(const avalue: boolean);
-   procedure settextempty(const avalue: msestring);
-   function getfontempty: teditemptyfont;
-   procedure setfontempty(const avalue: teditemptyfont);
-   function isfontemptystored: boolean;
-   procedure fontemptychanged(const sender: tobject);
-   procedure settextflagsempty(const avalue: textflagsty);
+   procedure setempty_text(const avalue: msestring);
+   function getempty_font: teditemptyfont;
+   procedure setempty_font(const avalue: teditemptyfont);
+   function isempty_fontstored: boolean;
+   procedure setempty_textflags(const avalue: textflagsty);
+   procedure setempty_textcolor(const avalue: colorty);
+   procedure setempty_textcolorbackground(const avalue: colorty);
+   procedure setempty_textstyle(const avalue: fontstylesty);
+   procedure setempty_color(const avalue: colorty);
   protected
    fgridintf: iwidgetgrid;
    procedure setisdb;
@@ -87,6 +97,7 @@ type
    function internaldatatotext(const data): msestring; virtual; abstract;
    procedure valuetotext;
    procedure setenabled(const avalue: boolean); override;
+   procedure updatetextflags; override;
    procedure dodefocus; override;
    procedure dofocus; override;
    procedure formatchanged;
@@ -95,6 +106,7 @@ type
    procedure dofontheightdelta(var delta: integer); override;
    function geteditfont: tfont; override;
    class function classskininfo: skininfoty; override;
+   procedure dopaintbackground(const canvas: tcanvas); override;
 
    function setdropdowntext(const avalue: msestring; const docheckvalue: boolean;
                 const canceled: boolean; const akey: keyty): boolean;
@@ -173,15 +185,23 @@ type
   published
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
-   property fontempy: teditemptyfont read getfontempty write setfontempty 
-                               stored isfontemptystored;
-   property textflagsempty: textflagsty read ftextflagsempty 
-                    write settextflagsempty default defaulttextflagsempty;
+   property empty_color: colorty read fempty_color write setempty_color 
+                                           default cl_none;
+   property empty_font: teditemptyfont read getempty_font write setempty_font 
+                                                  stored isempty_fontstored;
+   property empty_textstyle: fontstylesty read fempty_textstyle 
+                    write setempty_textstyle default [];
+   property empty_textflags: textflagsty read fempty_textflags 
+                    write setempty_textflags default defaulttextflagsempty;
+   property empty_text: msestring read fempty_text write setempty_text;
+   property empty_textcolor: colorty read fempty_textcolor 
+                                   write setempty_textcolor default cl_none;
+   property empty_textcolorbackground: colorty read fempty_textcolorbackground
+                          write setempty_textcolorbackground default cl_none;
    property optionsedit;
    property font;
    property textflags;
    property textflagsactive;
-   property textempty: msestring read ftextempty write settextempty;
    property caretwidth;
    property onchange;
    property ontextedited;
@@ -1061,21 +1081,24 @@ end;
  
 class function teditemptyfont.getinstancepo(owner: tobject): pfont;
 begin
- result:= @tdataedit(owner).ffontempty;
+ result:= @tdataedit(owner).fempty_font;
 end;
 
 { tdataedit }
 
 constructor tdataedit.create(aowner: tcomponent);
 begin
- ftextflagsempty:= defaulttextflagsempty;
+ fempty_textflags:= defaulttextflagsempty;
+ fempty_textcolor:= cl_none;
+ fempty_textcolorbackground:= cl_none;
+ fempty_color:= cl_none;
  inherited;
 end;
 
 destructor tdataedit.destroy;
 begin
  inherited;
- ffontempty.free;
+ fempty_font.free;
 end;
 
 function tdataedit.checkvalue(const quiet: boolean = false): boolean;
@@ -1222,6 +1245,30 @@ begin
  include(fstate,des_isdb);
 end;
 
+procedure tdataedit.updatetextflags;
+var
+ aflags: textflagsty;
+begin
+ if not (csloading in componentstate) then begin
+  if des_emptytext in fstate then begin
+   aflags:= fempty_textflags;
+  end
+  else begin
+   aflags:= textflags;
+  end;
+  if isenabled or (oe_nogray in foptionsedit) then begin
+   exclude(fstate,des_grayed);
+   feditor.textflags:= aflags;
+   feditor.textflagsactive:= textflagsactive;
+  end
+  else begin
+   include(fstate,des_grayed);
+   feditor.textflags:= aflags + [tf_grayed];
+   feditor.textflagsactive:= textflagsactive + [tf_grayed];
+  end;
+ end;
+end;
+
 procedure tdataedit.updateedittext(const force: boolean);
 var
  mstr1: msestring;
@@ -1233,7 +1280,7 @@ begin
  {$ifdef FPC} {$checkpointer default} {$endif}
  if (not(des_isdb in fstate) and (mstr1 = '') or (des_dbnull in fstate)) and 
                                     not focused then begin
-  mstr1:= ftextempty;
+  mstr1:= fempty_text;
   include(fstate,des_emptytext);
  end
  else begin
@@ -1241,33 +1288,48 @@ begin
  end;
  feditor.text:= mstr1;
  if force or ((des_emptytext in fstate) xor (des_emptytext in state1)) then begin
-  if (des_emptytext in fstate) and (ffontempty <> nil) then begin
-   feditor.font:= ffontempty;
+  if (des_emptytext in fstate) and (fempty_font <> nil) then begin
+   feditor.font:= fempty_font;
   end
   else begin
    feditor.font:= geteditfont;
   end;
   if des_emptytext in fstate then begin
-   if isenabled or (oe_nogray in foptionsedit) then begin
-    feditor.textflags:= ftextflagsempty;
-   end
-   else begin
-    feditor.textflags:= ftextflagsempty + [tf_grayed];
-   end;
+   feditor.fontcolor:= fempty_textcolor;
+   feditor.fontcolorbackground:= fempty_textcolorbackground;
+   feditor.fontstyle:= fempty_textstyle;
   end
   else begin
-   updatetextflags;
+   feditor.fontcolor:= cl_none;
+   feditor.fontcolorbackground:= cl_none;
+   feditor.fontstyle:= [];
   end;
+  updatetextflags;
  end;
 end;
 
-procedure tdataedit.settextflagsempty(const avalue: textflagsty);
+procedure tdataedit.dopaintbackground(const canvas: tcanvas);
 begin
- if avalue <> ftextflagsempty then begin
-  ftextflagsempty:= checktextflags(ftextflagsempty,avalue);
-  if not (csloading in componentstate) then begin
-   updateedittext(true);
-  end;
+ inherited;
+ if (fempty_color <> cl_none) and 
+         (fstate * [des_emptytext,des_grayed] = [des_emptytext]) and 
+                                                      not focused then begin
+  canvas.fillrect(paintclientrect,fempty_color);
+ end;
+end;
+
+procedure tdataedit.emptychanged;
+begin
+ if not (csloading in componentstate) then begin
+  updateedittext(true);
+ end;
+end;
+
+procedure tdataedit.setempty_textflags(const avalue: textflagsty);
+begin
+ if avalue <> fempty_textflags then begin
+  fempty_textflags:= checktextflags(fempty_textflags,avalue);
+  emptychanged;
  end;
 end;
 
@@ -1409,8 +1471,8 @@ end;
 
 function tdataedit.geteditfont: tfont;
 begin
- if (ffontempty <> nil) and (des_emptytext in fstate) then begin
-  result:= ffontempty;
+ if (fempty_font <> nil) and (des_emptytext in fstate) then begin
+  result:= fempty_font;
  end
  else begin
   if (fgridintf <> nil) and (ffont = nil) then begin
@@ -1664,31 +1726,49 @@ var
  mstr1: msestring;
  afont: tfont;
  atextflags: textflagsty;
+ bo1: boolean;
 begin
- afont:= nil;
  atextflags:= textflags;
+ bo1:= false;
  with cellinfoty(canvas.drawinfopo^) do begin
   if datapo <> nil then begin
    mstr1:= internaldatatotext(datapo^);
-   if not (des_isdb in fstate) and (mstr1 = '') and (ftextempty <> '') then begin
-    mstr1:= ftextempty;
-    afont:= ffontempty;
-    atextflags:= ftextflagsempty;
+   if not (des_isdb in fstate) and (mstr1 = '') and 
+                                   (fempty_text <> '') then begin
+    bo1:= true;
+    mstr1:= fempty_text;
    end;
   end
   else begin
-//   mstr1:= getnulltext;
-//   if mstr1 = '' then begin
-    mstr1:= ftextempty;
-//   end;
-   afont:= ffontempty;
-   atextflags:= ftextflagsempty;
+   bo1:= true;
+   mstr1:= fempty_text;
   end;
   if canevent(tmethod(fongettext)) then begin
    fongettext(self,mstr1,false);
   end;
+  if bo1 and (fempty_color <> cl_none) and not (des_grayed in fstate) then begin
+   canvas.fillrect(rect,fempty_color);
+  end;
   if mstr1 <> '' then begin
-   drawtext(canvas,mstr1,innerrect,atextflags,afont);
+   if bo1 then begin    
+    if fempty_font <> nil then begin
+     canvas.font:= afont;
+    end;
+    atextflags:= fempty_textflags;
+    if fempty_textcolor <> cl_none then begin
+     canvas.font.color:= fempty_textcolor;
+    end;
+    if fempty_textcolorbackground <> cl_none then begin
+     canvas.font.color:= fempty_textcolorbackground;
+    end;
+    if fempty_textstyle <> [] then begin
+     canvas.font.style:= fempty_textstyle;
+    end;
+   end;
+   if des_grayed in fstate then begin
+    include(atextflags,tf_grayed);
+   end;
+   drawtext(canvas,mstr1,innerrect,atextflags);
   end;
  end;
 end;
@@ -1935,44 +2015,76 @@ begin
  end;
 end;
 
-procedure tdataedit.settextempty(const avalue: msestring);
+procedure tdataedit.setempty_text(const avalue: msestring);
 begin
- ftextempty:= avalue;
+ fempty_text:= avalue;
  formatchanged;
 end;
 
 procedure tdataedit.createfontempty;
 begin
- if ffontempty = nil then begin
-  ffontempty:= teditemptyfont.create;
-  ffontempty.onchange:= {$ifdef FPC}@{$endif}fontemptychanged;
+ if fempty_font = nil then begin
+  fempty_font:= teditemptyfont.create;
+  fempty_font.onchange:= {$ifdef FPC}@{$endif}fontemptychanged;
  end;
 end;
 
-function tdataedit.getfontempty: teditemptyfont;
+function tdataedit.getempty_font: teditemptyfont;
 begin
- getoptionalobject(ffontempty,{$ifdef FPC}@{$endif}createfontempty);
- result:= ffontempty;
+ getoptionalobject(fempty_font,{$ifdef FPC}@{$endif}createfontempty);
+ result:= fempty_font;
  if result = nil then begin
   result:= teditemptyfont(getfont1);
  end;
 end;
 
-procedure tdataedit.setfontempty(const avalue: teditemptyfont);
+procedure tdataedit.setempty_font(const avalue: teditemptyfont);
 begin
- if ffontempty <> avalue then begin
-  setoptionalobject(avalue,ffontempty,{$ifdef FPC}@{$endif}createfontempty);
+ if fempty_font <> avalue then begin
+  setoptionalobject(avalue,fempty_font,{$ifdef FPC}@{$endif}createfontempty);
  end;
 end;
 
-function tdataedit.isfontemptystored: boolean;
+function tdataedit.isempty_fontstored: boolean;
 begin
- result:= ffontempty <> nil;
+ result:= fempty_font <> nil;
 end;
 
 procedure tdataedit.fontemptychanged(const sender: tobject);
 begin
- fontchanged;
+ emptychanged;
+end;
+
+procedure tdataedit.setempty_textcolor(const avalue: colorty);
+begin
+ if avalue <> fempty_textcolor then begin
+  fempty_textcolor:= avalue;
+  emptychanged;
+ end;
+end;
+
+procedure tdataedit.setempty_textcolorbackground(const avalue: colorty);
+begin
+ if avalue <> fempty_textcolorbackground then begin
+  fempty_textcolorbackground:= avalue;
+  emptychanged;
+ end;
+end;
+
+procedure tdataedit.setempty_textstyle(const avalue: fontstylesty);
+begin
+ if avalue <> fempty_textstyle then begin
+  fempty_textstyle:= avalue;
+  emptychanged;
+ end;
+end;
+
+procedure tdataedit.setempty_color(const avalue: colorty);
+begin
+ if avalue <> fempty_color then begin
+  fempty_color:= avalue;
+  invalidate;
+ end;
 end;
 
 { tcustomstringedit }

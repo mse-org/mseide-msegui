@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -700,9 +700,6 @@ begin
    aindex:= 0;
    exit;
   end;
-//  if info.font <> nil then begin
-//   canvas.font:= info.font;
-//  end;
   layouttext(canvas,info,layoutinfo);
   if pos.y < res.y then begin
    result:= false;
@@ -749,9 +746,6 @@ var
  int1,int2,int3: integer;
 begin
  with info,layoutinfo do begin
-//  if info.font <> nil then begin
-//   canvas.font:= info.font;
-//  end;
   layouttext(canvas,info,layoutinfo);
   if aindex > length(text.text) then begin
    aindex:= length(text.text);

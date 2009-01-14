@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -883,7 +883,6 @@ type
 
  tcustomface = class;
  iface = interface(inullinterface)
-//  function getwidget: twidget;
   procedure invalidate;
   function translatecolor(const acolor: colorty): colorty;
   function getclientrect: rectty;
@@ -1002,7 +1001,6 @@ type
   public
    constructor create(const aintf: iface); reintroduce;
    class function getitemclasstype: persistentclassty; override;
-//   class function getitemclasstype: persistentclassty; override;
    property items[const index: integer]: tface read getitems; default;
  end;
  
@@ -1278,11 +1276,11 @@ type
    function updateopaque(const children: boolean): boolean;
                    //true if widgetregionchanged called
    procedure dragstarted; virtual; //called by tapplication.dragstarted
-   //idragcontroller
+  //idragcontroller
    function getdragrect(const apos: pointty): rectty; virtual;
-   //iface
+  //iface
    procedure widgetregioninvalid;
-   //iframe
+  //iframe
    procedure setframeinstance(instance: tcustomframe); virtual;
    procedure setstaticframe(value: boolean);
    function getwidgetrect: rectty;
@@ -1644,6 +1642,7 @@ type
    function framepos: pointty;               //origin = pos
    function framesize: sizety;
    function paintrect: rectty;               //origin = pos
+   function paintclientrect: rectty;         //origin = clientrect
    function paintpos: pointty;               //origin = pos
    property paintsize: sizety read getpaintsize write setpaintsize;
    function clippedpaintrect: rectty;        //origin = pos, 
@@ -7608,6 +7607,19 @@ begin
  end;
 end;
 
+function twidget.paintclientrect: rectty;         //origin = clientrect
+begin
+ if fframe <> nil then begin
+  fframe.checkstate;
+  result.pos:= fframe.fclientrect.pos;
+  result.size:= fframe.fpaintrect.size;
+ end
+ else begin
+  result.pos:= nullpoint;
+  result.size:= fwidgetrect.size;
+ end;
+end;
+
 function twidget.clippedpaintrect: rectty;    //origin = pos, cliped by all parentpaintrects
 var
  po1: pointty;
@@ -9537,8 +9549,14 @@ begin
 end;
 
 function twidget.isenabled: boolean;
+var
+ wi1: twidget;
 begin
- result:= enabled and ((fparentwidget = nil) or fparentwidget.isenabled);
+ wi1:= self;
+ repeat
+  result:= ws_enabled in wi1.fwidgetstate;
+  wi1:= wi1.fparentwidget;
+ until not result or (wi1 = nil);
 end;
 
 function twidget.active: boolean;

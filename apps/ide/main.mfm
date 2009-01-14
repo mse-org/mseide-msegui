@@ -42,6 +42,7 @@ object mainfo: tmainfo
     bounds_cx = 429
     bounds_cy = 99
     anchors = [an_left, an_top, an_right, an_bottom]
+    dragdock.tab_size = 0
     dragdock.optionsdock = [od_acceptsdock, od_splitvert, od_splithorz, od_tabed, od_proportional, od_fixsize, od_background]
     statfile = projectstatfile
   end
@@ -62,6 +63,10 @@ object mainfo: tmainfo
     reffontheight = 14
   end
   object gdb: tgdbmi
+    gdbdownload = False
+    simulator = False
+    startupbkpt = 0
+    startupbkpton = False
     onevent = gdbonevent
     left = 232
     top = 32

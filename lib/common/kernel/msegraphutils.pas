@@ -85,7 +85,10 @@ const
  cl_infobackground =         cl_mapped + 12;
  cl_glyph =                  cl_mapped + 13;
  cl_activegrip =             cl_mapped + 14;
- cl_lastmapped =             cl_mapped + 15;
+ cl_empty =                  cl_mapped + 15;
+ cl_emptytext =              cl_mapped + 16;
+ cl_emptytextbackground =    cl_mapped + 17;
+ cl_lastmapped =             cl_mapped + 18;
 
  cl_0 =                      cl_namedrgb + 0; //select colorbackground for monochrome bitmaps
  cl_1 =                      cl_namedrgb + 1; //select colorforeground
@@ -187,7 +190,10 @@ const
     (name: 'cl_selectedtextbackground'; rgb: (blue: $c0; green: $00; red: $00; res: $00)), //11
     (name: 'cl_infobackground'; rgb:         (blue: $e0; green: $ff; red: $ff; res: $00)), //12
     (name: 'cl_glyph'; rgb:                  (blue: $00; green: $00; red: $00; res: $00)), //13
-    (name: 'cl_activegrip'; rgb:             (blue: $90; green: $20; red: $20; res: $00))  //14
+    (name: 'cl_activegrip'; rgb:             (blue: $90; green: $20; red: $20; res: $00)), //14
+    (name: 'cl_empty';  rgb:                 (blue: $a0; green: $a0; red: $ff; res: $00)), //15
+    (name: 'cl_emptytext';  rgb:             (blue: $ff; green: $ff; red: $ff; res: $00)), //16
+    (name: 'cl_emptytextbackground';  rgb:   (blue: $00; green: $00; red: $ff; res: $00))  //17
    );
 
  defaultnamedrgb: array[0..namedrgbcolorcount-1]
@@ -253,7 +259,7 @@ type
  graphicdirectionty = (gd_right,gd_up,gd_left,gd_down,gd_none);
  graphicdirectionsty = set of graphicdirectionty;
  
- fontstylety = (fs_bold,fs_italic,fs_underline,fs_strikeout,fs_selected);
+ fontstylety = (fs_bold,fs_italic,fs_underline,fs_strikeout,fs_selected,fs_force);
                       //order fix
  fontstylesty = set of fontstylety;
 

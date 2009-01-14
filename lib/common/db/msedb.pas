@@ -151,7 +151,6 @@ type
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
-//   property Lookup default false;
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
@@ -175,11 +174,13 @@ type
    fvaluebuffer: msestring;
    fvalidating: boolean;
    fisftwidestring: boolean;
+   fdefaultexpression: msestring;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
-   //ifieldcomponent
+  //ifieldcomponent
    procedure setdsintf(const avalue: idsfieldcontroller);
    function getinstance: tfield;
+   procedure setdefaultexpression(const avalue: msestring);
   protected
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
@@ -205,7 +206,6 @@ type
   public
    destructor destroy; override;
    procedure Clear; override;
-//   procedure validate(const buffer: msestring);
    function assql: string;
    function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
@@ -214,11 +214,12 @@ type
    property tagpo: pointer read ftagpo write ftagpo;
    property isftwidestring: boolean read fisftwidestring;
   published
+   property defaultexpression: msestring read fdefaultexpression 
+                                                write setdefaultexpression;
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
-//   property Lookup default false;
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
@@ -249,7 +250,6 @@ type
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
-//   property Lookup default false;
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
@@ -286,7 +286,6 @@ type
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
-//   property Lookup default false;
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
@@ -320,7 +319,6 @@ type
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
-//   property Lookup default false;
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
@@ -354,7 +352,6 @@ type
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
-//   property Lookup default false;
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
@@ -388,7 +385,6 @@ type
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
-//   property Lookup default false;
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
@@ -418,7 +414,6 @@ type
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
-//   property Lookup default false;
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
@@ -452,37 +447,13 @@ type
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
-//   property Lookup default false;
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
  end;
  tmsecurrencyfield = class(tmsefloatfield)
- (*
-  private
-   ftagpo: pointer;
-   function getasmsestring: msestring;
-   procedure setasmsestring(const avalue: msestring);
-  protected
-  {$ifdef hasaswidestring}
-   function getaswidestring: widestring; override;
-   procedure setaswidestring(const avalue: widestring); override;
-  {$endif}
-   function HasParent: Boolean; override;
-   procedure setasfloat(avalue: double); override;
-   *)
   public
    constructor create(aowner: tcomponent); override;
-   (*
-   procedure Clear; override;
-   function assql: string;
-   function asoldsql: string;
-   property asmsestring: msestring read getasmsestring write setasmsestring;
-   property tagpo: pointer read ftagpo write ftagpo;
-  published
-   property DataSet stored false;
-   property ProviderFlags default defaultproviderflags;
-   *)
  end;
  tmsebooleanfield = class(tbooleanfield)
   private
@@ -568,7 +539,6 @@ type
    property options: datetimefieldoptionsty read foptions write setoptions;
    property FieldKind default fkData;
    property HasConstraints default false;
-//   property Lookup default false;
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
@@ -607,7 +577,6 @@ type
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
-//   property Lookup default false;
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
@@ -637,7 +606,6 @@ type
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
-//   property Lookup default false;
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
@@ -667,7 +635,6 @@ type
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
-//   property Lookup default false;
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
@@ -701,7 +668,6 @@ type
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
-//   property Lookup default false;
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
@@ -772,7 +738,6 @@ type
                 //cachesize in kilo bytes, 0 -> no cache
    property FieldKind default fkData;
    property HasConstraints default false;
-//   property Lookup default false;
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
@@ -803,7 +768,6 @@ type
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
    property HasConstraints default false;
-//   property Lookup default false;
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
@@ -842,10 +806,11 @@ type
    fismsestring: boolean;
    fislargeint: boolean;
    fisstringfield: boolean;
-   fnulltext: msestring;
+   fnullsymbol: msestring;
    procedure setfieldname(const Value: string);
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
+   function getmsedefaultexpression: msestring;
    procedure checkfield;
    procedure updatefield;
    function GetAsBoolean: Boolean;
@@ -889,9 +854,10 @@ type
    property AsString: string read GetAsString write SetAsString;
    property AsVariant: variant read GetAsVariant write SetAsVariant;
    property asmsestring: msestring read getasmsestring write setasmsestring;
+   property msedefaultexpression: msestring read getmsedefaultexpression;
    function msedisplaytext(const aformat: msestring = '';
                                           const aedit: boolean = false): msestring;
-   property nulltext: msestring read fnulltext write fnulltext;
+   property nullsymbol: msestring read fnullsymbol write fnullsymbol;
  end;
  
  fieldarrayty = array of tfield;
@@ -2408,17 +2374,16 @@ function tmsestringfield.asoldsql: string;
 begin
  result:= fieldtooldsql(self);
 end;
-{
-function tmsestringfield.getmsevalue(out avalue: msestring): boolean;
+
+procedure tmsestringfield.setdefaultexpression(const avalue: msestring);
 begin
- result:= fgetmsestringdata(self,avalue);
+ fdefaultexpression:= avalue;
+ try
+  inherited defaultexpression:= avalue;
+ except        //catch conversion exception
+ end;
 end;
 
-procedure tmsestringfield.setmsevalue(const avalue: msestring);
-begin
- fsetmsestringdata(self,avalue);
-end;
-}
 { tmsememofield }
 
 constructor tmsememofield.create(aowner: tcomponent);
@@ -2434,12 +2399,7 @@ begin
  end;
  inherited;
 end;
-{
-function tmsememofield.HasParent: Boolean;
-begin
- result:= dataset <> nil;
-end;
-}
+
 function tmsememofield.assql: string;
 begin
  result:= fieldtosql(self);
@@ -4200,6 +4160,16 @@ begin
  end;
 end;
 
+function tfielddatalink.getmsedefaultexpression: msestring;
+begin
+ if fismsestring then begin
+  result:= tmsestringfield(ffield).defaultexpression;
+ end
+ else begin
+  result:= ffield.defaultexpression;
+ end;
+end;
+
 procedure tfielddatalink.setasmsestring(const avalue: msestring);
 begin
  if fismsestring then begin
@@ -4231,6 +4201,7 @@ function tfielddatalink.msedisplaytext(const aformat: msestring = '';
    end;
   end;
  end;
+ 
 begin
  result:= '';
  if ffield <> nil then begin
@@ -4261,7 +4232,7 @@ begin
    end;
   end
   else begin
-   result:= fnulltext;
+   result:= fnullsymbol;
   end;
  end;
 end;

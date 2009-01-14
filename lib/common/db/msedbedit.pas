@@ -213,7 +213,7 @@ type
 
  tstringeditwidgetdatalink = class(teditwidgetdatalink)
   published
-   property nulltext;
+   property nullsymbol;
  end;
   
  tdbstringedit = class(tcustomstringedit,idbeditfieldlink,ireccontrol)
@@ -1316,13 +1316,13 @@ type
    function getdatasource(const aindex: integer): tdatasource;
    function getoptionsdb: optionseditdbty;
    procedure setoptionsdb(const avalue: optionseditdbty);
-   function getnulltext: msestring;
-   procedure setnulltext(const avalue: msestring);
+   function getnullsymbol: msestring;
+   procedure setnullsymbol(const avalue: msestring);
   protected
    function getitems(aindex: integer): msestring; override;
    procedure modified; override;
    function getrowtext(const arow: integer): msestring; override;
-          //idbeditfieldlink
+  //idbeditfieldlink
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
    function getgriddatasource: tdatasource; virtual;
    function getgridintf: iwidgetgrid;
@@ -1343,7 +1343,7 @@ type
   published
    property datafield: string read getdatafield write setdatafield;
    property optionsdb: optionseditdbty read getoptionsdb write setoptionsdb default [];
-   property nulltext: msestring read getnulltext write setnulltext;
+   property nullsymbol: msestring read getnullsymbol write setnullsymbol;
    property focusrectdist;
    property textflags;
    property textflagsactive;
@@ -2299,7 +2299,7 @@ end;
 function tcustomeditwidgetdatalink.getasnullmsestring: msestring;
 begin
  if field.isnull then begin
-  result:= nulltext;
+  result:= nullsymbol;
  end
  else begin
   result:= asmsestring;
@@ -2308,9 +2308,9 @@ end;
 
 procedure tcustomeditwidgetdatalink.setasnullmsestring(const avalue: msestring);
 begin
- if avalue = nulltext then begin
+ if avalue = nullsymbol then begin
   if oed_nonullset in foptions then begin
-   asmsestring:= field.defaultexpression;
+   asmsestring:= msedefaultexpression;
   end
   else begin
    field.clear;
@@ -2659,7 +2659,7 @@ end;
 
 function tdbstringedit.getnulltext: msestring;
 begin
- result:= fdatalink.nulltext;
+ result:= fdatalink.nullsymbol;
 end;
 
 function tdbstringedit.getrowdatapo(const info: cellinfoty): pointer;
@@ -2788,7 +2788,7 @@ end;
 
 function tdbdialogstringedit.getnulltext: msestring;
 begin
- result:= fdatalink.nulltext;
+ result:= fdatalink.nullsymbol;
 end;
 
 function tdbdialogstringedit.createdatalist(const sender: twidgetcol): tdatalist;
@@ -2894,7 +2894,7 @@ end;
 
 function tcustomdbdropdownlistedit.getnulltext: msestring;
 begin
- result:= fdatalink.nulltext;
+ result:= fdatalink.nullsymbol;
 end;
 
 function tcustomdbdropdownlistedit.createdatalist(const sender: twidgetcol): tdatalist;
@@ -3003,7 +3003,7 @@ end;
 
 function tdbkeystringedit.getnulltext: msestring;
 begin
- result:= fdatalink.nulltext;
+ result:= fdatalink.nullsymbol;
 end;
 
 function tdbkeystringedit.createdatalist(const sender: twidgetcol): tdatalist;
@@ -3109,7 +3109,7 @@ end;
 
 function tdbmemoedit.getnulltext: msestring;
 begin
- result:= fdatalink.nulltext;
+ result:= fdatalink.nullsymbol;
 end;
 
 function tdbmemoedit.createdatalist(const sender: twidgetcol): tdatalist;
@@ -6595,7 +6595,7 @@ begin
  po1:= pmsestring(tcustomdbstringgrid(fgrid).fdatalink.getdisplaystringbuffer(
                            fdatalink.field,arow));
  if po1 = nil then begin
-  result:= fdatalink.nulltext;
+  result:= fdatalink.nullsymbol;
  end
  else begin
   result:= po1^;
@@ -6690,7 +6690,7 @@ var
 begin
  int1:= tcustomdbstringgrid(fgrid).fdatalink.activerecord;
  if (int1 >= 0) and (int1 < fgrid.rowcount) then begin
-  items[int1]:= fdatalink.nulltext;
+  items[int1]:= fdatalink.nullsymbol;
  end;
 end;
 
@@ -6722,14 +6722,14 @@ begin
  fdatalink.options:= avalue;
 end;
 
-function tdbstringcol.getnulltext: msestring;
+function tdbstringcol.getnullsymbol: msestring;
 begin
- result:= fdatalink.nulltext;
+ result:= fdatalink.nullsymbol;
 end;
 
-procedure tdbstringcol.setnulltext(const avalue: msestring);
+procedure tdbstringcol.setnullsymbol(const avalue: msestring);
 begin
- fdatalink.nulltext:= avalue;
+ fdatalink.nullsymbol:= avalue;
 end;
 
 { tdropdowndbstringcol }
