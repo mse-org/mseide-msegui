@@ -11302,6 +11302,7 @@ begin
    sort;
   end
   else begin
+   include(fstate,gs_sortvalid);
    invalidate; //for sort indicator
   end;
  end;
