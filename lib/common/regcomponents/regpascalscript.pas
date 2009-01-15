@@ -37,6 +37,7 @@ const
  
 procedure Register;
 begin          
+ registerclass(tscriptform);
  registercomponents('Ifi',[tmsepsscript,tpsdllplugin,tpsimport_classes,
                             tpsimport_dateutils,tpsimportmsegui]);
  registerpropertyeditor(typeinfo(tstrings),tmsepsscript,'Script',tpascaleditor);

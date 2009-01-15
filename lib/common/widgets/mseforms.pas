@@ -1743,9 +1743,5 @@ begin
  end;
 end;
 
-initialization
- registerclass(tmseform);
- registerclass(tdockform);
- registerclass(tsubform);
 end.
 

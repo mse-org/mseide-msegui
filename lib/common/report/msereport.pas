@@ -7895,6 +7895,4 @@ begin
  inherited;
 end;
 
-initialization
- registerclass(treport);
 end.

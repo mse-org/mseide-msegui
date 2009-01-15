@@ -97,6 +97,9 @@ const
 
 procedure Register;
 begin
+ registerclass(tmseform);
+ registerclass(tdockform);
+ registerclass(tsubform);
  registercomponents('Widget',[tsimplewidget,teventwidget,tbutton,trichbutton,tstockglyphbutton,
   tdrawgrid,tstringgrid,tlistview,
   tlabel,tpaintbox,tpolygon,tpickwidget,timage,

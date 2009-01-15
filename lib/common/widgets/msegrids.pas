@@ -12222,8 +12222,5 @@ begin
  setdata(index,value);
 end;
 
-initialization
- registerclass(tdrawgrid);
- registerclass(tstringgrid);
 end.
 

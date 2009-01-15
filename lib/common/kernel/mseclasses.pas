@@ -1756,7 +1756,6 @@ begin
  result:= nil;
 end;
 
-
 function tobjectdatainfolist.itempo(const index: integer): pobjectdatainfoty;
 begin
  result:= pobjectdatainfoty(getitempo(index));
@@ -2700,32 +2699,7 @@ begin
 end;
 
 {$ifdef FPC}
-{
-procedure tmsecomponent.setsubcomponent(avalue: boolean); //todo remove for 1.99 !!!!!
-begin
-end;
-}
-{
-function tmsecomponent._addref: integer; stdcall;
-begin
- result:= -1;
-end;
 
-function tmsecomponent._release: integer; stdcall;
-begin
- result:= -1;
-end;
-
-function tmsecomponent.QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
-begin
- if GetInterface(IID, Obj) then begin
-   Result:=0
- end
- else begin
-  result:= integer(e_nointerface);//hresult(e_nointerface);
- end;
-end;
-}
 procedure tmsecomponent.setinline(value: boolean);
 begin
  with tcomponentcracker(self) do begin
@@ -2870,11 +2844,6 @@ end;
 
 procedure tmsecomponent.loaded;
 begin
-{
- if cs_hasskin in fmsecomponentstate then begin
-  updateskin;
- end;
- }
  inherited;
  include(fmsecomponentstate,cs_loadedproc);
  try
@@ -3079,20 +3048,15 @@ begin
     end;
    end;
   end;
-//  include(fmsecomponentstate,cs_updateskinproc);
-//  try
-   if hasskin{not (cs_noskin in fmsecomponentstate)} then begin
-    if assigned(fonbeforeupdateskin) then begin
-     fonbeforeupdateskin(tobject(tmethod(oninitskinobject).data));
-    end;
-    oninitskinobject(skininfo);
-    if assigned(fonbeforeupdateskin) then begin
-     fonafterupdateskin(tobject(tmethod(oninitskinobject).data));
-    end;   
+  if hasskin then begin
+   if assigned(fonbeforeupdateskin) then begin
+    fonbeforeupdateskin(tobject(tmethod(oninitskinobject).data));
    end;
-//  finally
-//   exclude(fmsecomponentstate,cs_updateskinproc);
-//  end;
+   oninitskinobject(skininfo);
+   if assigned(fonbeforeupdateskin) then begin
+    fonafterupdateskin(tobject(tmethod(oninitskinobject).data));
+   end;   
+  end;
  end;
 end;
 
@@ -3188,9 +3152,7 @@ end;
 procedure tlinkedqueue.objectevent(const sender: tobject;
   const event: objecteventty);
 begin
-// if event = oe_destroyed then begin
-//  remove(sender);
-// end;
+ //dummy
 end;
 
 procedure tlinkedqueue.link(const source,dest: iobjectlink; valuepo: pointer = nil;
@@ -3361,7 +3323,7 @@ begin
  result:= indexof(pointer(ievent(aobject)));
 end;
 
- { tobjectlinkrecordlist }
+{ tobjectlinkrecordlist }
 
 constructor tobjectlinkrecordlist.create(recordsize: integer; aoptions: recordliststatesty = []);
 begin
@@ -3377,9 +3339,7 @@ end;
 
 procedure tobjectlinkrecordlist.finalizerecord(var item);
 begin
-// if fnounlink = 0 then begin
-  dounlink(item)
-// end;
+ dounlink(item)
 end;
 
 function tobjectlinkrecordlist.getinstance: tobject;
@@ -3398,12 +3358,7 @@ procedure tobjectlinkrecordlist.objevent(const sender: iobjectlink;
 begin
  fobjectlinker.objevent(sender,event);
  if event = oe_destroyed then begin
-//  inc(fnounlink);
-//  try
-   itemdestroyed(sender);
-//  finally
-//   dec(fnounlink);
-//  end;
+  itemdestroyed(sender);
  end;
 end;
 

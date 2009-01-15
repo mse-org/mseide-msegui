@@ -165,6 +165,4 @@ begin
  //dummy
 end;
 
-initialization
- registerclass(timage);
 end.

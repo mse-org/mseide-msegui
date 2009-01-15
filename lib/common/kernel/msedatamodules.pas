@@ -255,6 +255,4 @@ begin
  end;
 end;
 
-initialization
- registerclass(tmsedatamodule);
 end.

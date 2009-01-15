@@ -413,6 +413,4 @@ begin
  name:= 'qwertz';
 end;
 
-initialization
- registerclass(tscriptform);
 end.

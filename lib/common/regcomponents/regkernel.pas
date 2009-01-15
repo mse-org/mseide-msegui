@@ -108,6 +108,7 @@ const
 
 procedure Register;
 begin
+ registerclass(tmsedatamodule);
  registercomponents('NoGui',[tstatfile,tnoguiaction,tactivator,
                              ttimer,tthreadcomp,tpipereadercomp,tprocessmonitor]);
  registercomponenttabhints(['NoGui'],['Components without GUI Dependence']);

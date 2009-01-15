@@ -33,6 +33,8 @@ type
    
 procedure Register;
 begin
+ registerclass(treport);
+ registerclass(treportpage);
  registercomponents('Rep',[{treportpage,}tbandarea,ttilearea,tbandgroup,
                     trecordband,
                     trepvaluedisp,treppagenumdisp,trepprintdatedisp,
@@ -104,6 +106,5 @@ begin
 end;
 
 initialization
- registerclass(treportpage);
  register;
 end.
