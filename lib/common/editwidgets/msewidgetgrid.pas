@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -128,7 +128,6 @@ type
    constructor create(const agrid: tcustomgrid;
                      const aowner: tgridarrayprop); override;
    destructor destroy; override;
-//   procedure changed; override;
    function actualfont: tfont; override;
    procedure cellchanged(const row: integer); override;
    property editwidget: twidget read geteditwidget write seteditwidget;

@@ -6693,6 +6693,7 @@ constructor tcustomgrid.create(aowner: tcomponent);
 begin
  include(fstate,gs_updatelocked);
  fmouseeventcol:= -1;
+ fmousecell:= invalidcell;
  fwheelscrollheight:= defaultwheelscrollheight;
  frowcountmax:= bigint;
  frowcolors:= tcolorarrayprop.Create;
@@ -7544,10 +7545,6 @@ begin
  layoutchanged;
  ffixcols.rowcountchanged(newcount);
  fdatacols.rowcountchanged(newcount);
-// if (countbefore = 0) and (newcount > 0) and (og_focuscellonenter in foptionsgrid)
-//    and not isdatacell(ffocusedcell) and entered then begin
-//  focuscell(ffocusedcell,fca_entergrid);
-// end; too dangerous, called after beginupdate
  if canevent(tmethod(fonrowcountchanged)) then begin
   fonrowcountchanged(self);
  end;
@@ -7802,13 +7799,6 @@ var
      result:= fca_reverse;
     end;
    end;
-   {
-   else begin
-    if info.shiftstate * keyshiftstatesmask = [ss_ctrl] then begin
-     result:= fca_reverse;
-    end;
-   end;
-   }
   end;
  end;
  
@@ -7982,7 +7972,6 @@ var
  coord1: gridcoordty;
  str1: msestring;
  hintinfo: hintinfoty;
-// int1: integer;
  mousewidgetbefore: twidget;
  bo1: boolean;
 

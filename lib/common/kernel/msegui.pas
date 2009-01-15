@@ -1621,10 +1621,10 @@ type
 
    property left: integer read fwidgetrect.x write setbounds_x;
    property right: integer read getright write setright;
-                        //widgetrect.x + widgetrect.cx, sets cx;
+                //widgetrect.x + widgetrect.cx, sets cx;
    property top: integer read fwidgetrect.y write setbounds_y;
    property bottom: integer read getbottom write setbottom;
-                        //widgetrect.y + widgetrect.cy, sets cy;
+                //widgetrect.y + widgetrect.cy, sets cy;
    property width: integer read fwidgetrect.cx write setbounds_cx;
    property height: integer read fwidgetrect.cy write setbounds_cy;
 
@@ -2009,7 +2009,6 @@ type
    fdblclicktime: integer;
    fcursorshape: cursorshapety;
    fwidgetcursorshape: cursorshapety;
-//   facursorshape: cursorshapety;
    fbuttonpresswidgetbefore: twidget;
    fbuttonreleasewidgetbefore: twidget;
    factmousewindow: twindow;
@@ -2063,7 +2062,7 @@ type
    procedure settimer(const us: integer); override;
    function findwindow(aid: winidty; out window: twindow): boolean;
    procedure checkwindowrect(winid: winidty; var rect: rectty);
-               //callback from win32 wm_sizing
+                        //callback from win32 wm_sizing
    procedure initialize;
    procedure deinitialize;
 
@@ -2131,7 +2130,7 @@ type
    
    function windowatpos(const pos: pointty): twindow;
    function findwidget(const namepath: string; out awidget: twidget): boolean;
-                //false if invalid namepath, '' -> nil and true
+             //false if invalid namepath, '' -> nil and true
    procedure sortzorder;
              //window list is ordered by z, bottom first, top last,
              //invisibles first
@@ -9350,26 +9349,20 @@ begin
  end;
 end;
 
-procedure twidget.updatecursorshape{(force: boolean = false)};
+procedure twidget.updatecursorshape;
 var
  widget: twidget;
  cursor1: cursorshapety;
 begin
-// if (appinst <> nil) then begin
-//  if force or (appinst.fclientmousewidget = self) or
-//    (appinst.cursorshape = cr_default) and
-//      checkdescendent(appinst.fclientmousewidget) then begin
-   widget:= self;
-   repeat
-    cursor1:= widget.actualcursor;
-    widget:= widget.fparentwidget;
-   until (cursor1 <> cr_default) or (widget = nil);
-   if (widget = nil) and (cursor1 = cr_default) then begin
-    cursor1:= cr_arrow;
-   end;
-   appinst.fwidgetcursorshape:= cursor1;
-//  end;
-// end;
+ widget:= self;
+ repeat
+  cursor1:= widget.actualcursor;
+  widget:= widget.fparentwidget;
+ until (cursor1 <> cr_default) or (widget = nil);
+ if (widget = nil) and (cursor1 = cr_default) then begin
+  cursor1:= cr_arrow;
+ end;
+ appinst.fwidgetcursorshape:= cursor1;
 end;
 
 procedure twidget.setcursor(const avalue: cursorshapety);
@@ -13264,7 +13257,7 @@ var
  int1: integer;
  bo1: boolean;
  window: twindow;
- po1{,po2}: ^twindowevent;
+ po1: ^twindowevent;
  waitcountbefore: integer;
  ar1: integerarty;
  
@@ -13277,7 +13270,6 @@ begin       //eventloop
   waitcountbefore:= fwaitcount;
   fwaitcount:= 0;
   checkcursorshape;
-//  mouse.shape:= fcursorshape;
   if amodalwindow <> nil then begin
    if fmodalwindow <> nil then begin
     setlinkedvar(fmodalwindow,tlinkedobject(modalinfo.modalwindowbefore));

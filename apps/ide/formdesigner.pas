@@ -1823,7 +1823,7 @@ begin
     end;
  
     if not (es_processed in eventstate) then begin
-     if (eventkind = ek_mousemove) then begin
+     if (eventkind = ek_mousemove) or (eventkind = ek_mousepark) then begin
       hidexorpic(fowner.getcanvas(org_widget));
       bo1:= true;
       case factarea of

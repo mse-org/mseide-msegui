@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -39,13 +39,7 @@ type
  imouse = interface(inullinterface)
   function getmousewinid: winidty;
  end;
-{
- icaret = interface(inullinterface)
-  procedure remove;
-  procedure restore;
-  procedure scroll(const dist: pointty);
- end;
-}
+
  tmouse = class
   private
    fshape: cursorshapety;
@@ -303,11 +297,9 @@ var
 begin
  id1:= fintf.getmousewinid;
  if (fshape <> value) or (id1 <> fwinid) then begin
-//  if not((fshape = cr_arrow) and (value = cr_default)) then begin
   fwinid:= id1;
   fshape := Value;
   gui_setcursorshape(id1,value);
-//  end;
  end;
 end;
 
