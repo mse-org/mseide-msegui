@@ -790,6 +790,7 @@ type
  
  tdbenumedit = class(tcustomdbenumedit)
   published
+   property valueoffset; //before value
    property datalink;
    property valuedefault;
    property base;

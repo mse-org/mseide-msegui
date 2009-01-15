@@ -608,13 +608,15 @@ type
    fbitcount: integer;
    fbase: numbasety;
    fmin,fmax: integer;
+   fvalueoffset: integer;
    function getgridvalue(const index: integer): integer;
    procedure setgridvalue(const index, aValue: integer);
    function getgridvalues: integerarty;
    procedure setgridvalues(const avalue: integerarty);
-   function getindex(const avalue: integer): integer;
+   function getindex(avalue: integer): integer;
    procedure setbase(const avalue: numbasety);
    procedure setbitcount(const avalue: integer);
+   procedure setvalueoffset(avalue: integer);
   protected
    fonsetvalue1: setintegereventty;
    fvalue1: integer;
@@ -633,7 +635,7 @@ type
    function createdropdowncontroller: tcustomdropdowncontroller; override;
    procedure internalsort(const acol: integer; const sortlist: tintegerdatalist); override;
   public
-   enums: integerarty; //nil -> enum = item rowindex
+   enums: integerarty; //nil -> enum = item rowindex + valueoffset
    constructor create(aowner: tcomponent); override;
    procedure clear;
    function enumname(const avalue: integer): msestring;
@@ -641,6 +643,8 @@ type
                    //enum = -1 -> no enum set
    procedure fillcol(const avalue: integer);
    procedure assigncol(const avalue: tintegerdatalist);
+   property valueoffset: integer read fvalueoffset write setvalueoffset default 0;
+                                   //before value
    property value: integer read fvalue1 write setvalue default -1;
    property valuedefault: integer read fvaluedefault write fvaluedefault default -1;
    property base: numbasety read fbase write setbase default nb_dec;
@@ -667,6 +671,7 @@ type
  
  tenumedit = class(tcustomenumedit)
   published
+   property valueoffset; //before value
    property value;
    property valuedefault;
    property base;
@@ -738,6 +743,7 @@ type
    property dropdownitems: tdropdowncols read getdropdownitems write setdropdownitems;
    property ongetdropdowninfo: selectoreventty read fongetdropdowninfo write fongetdropdowninfo;
    property oninit: selectoreventty read foninit write foninit;
+   property valueoffset; //before value
    property value;
    property onsetvalue;
    property dropdown;
@@ -3335,11 +3341,10 @@ begin
  fmin:= -1;
  fmax:= maxint;
  inherited;
-// options:= foptions; //add defaultoptions
 end;
 
 function getindex1(const avalue: integer; 
-                       const enums: integerarty): integer;
+                       const enums: integerarty; const offset: integer): integer;
 var
  int1: integer;
 begin
@@ -3353,13 +3358,19 @@ begin
   end;
  end
  else begin
-  result:= avalue;
+  result:= avalue - offset;
+  if result < 0 then begin
+   result:= -1;
+  end;
  end;
 end;
 
-function tcustomenuedit.getindex(const avalue: integer): integer;
+function tcustomenuedit.getindex(avalue: integer): integer;
 begin
- result:= getindex1(avalue,enums);
+ result:= getindex1(avalue,enums,fvalueoffset);
+ if result < 0 then begin
+  result:= -1;
+ end;
 end;
 
 procedure tcustomenuedit.texttodata(const atext: msestring; var data);
@@ -3380,7 +3391,6 @@ begin
   end;
   int2:= getindex(int1);
   if (int2 < 0) or (int2 >= valuelist.count) then begin
-//  if (int2 = -1) or (int2 >= valuelist.count) then begin
    if not (deo_selectonly in options) and (int1 <> -1) then begin
     result:= intvaluetostr(int1,fbase,fbitcount);
    end
@@ -3492,6 +3502,9 @@ begin
    int1:= enums[int1];
   end
   else begin
+   if int1 >= 0 then begin
+    int1:= int1 + fvalueoffset;
+   end;
    if not (deo_selectonly in fdropdown.options) then begin
     try
      mstr1:= feditor.text;
@@ -3532,7 +3545,6 @@ var
 begin
  if fgridintf <> nil then begin
   fgridintf.getcol.dostatread(reader);
-//  reader.readintegerdatalist(valuevarname,tintegerdatalist(fgridintf.getcol.datalist));
  end
  else begin
   if enums <> nil then begin
@@ -3558,12 +3570,7 @@ procedure tcustomenuedit.writestatvalue(const writer: tstatwriter);
 begin
  writer.writeinteger(valuevarname,value);
 end;
-{
-procedure tcustomenumedit.setoptions(const Value: dropdowneditoptionsty);
-begin
- inherited setoptions(value + [deo_autodropdown,deo_selectonly]);
-end;
-}
+
 function tcustomenuedit.createdropdowncontroller: tcustomdropdowncontroller;
 begin
  result:= tenumdropdowncontroller.create(idropdownlist(self));
@@ -3621,6 +3628,17 @@ begin
  if fbitcount <> avalue then begin
   fbitcount:= avalue;
   formatchanged;
+ end;
+end;
+
+procedure tcustomenuedit.setvalueoffset(avalue: integer);
+begin
+ if avalue < 0 then begin
+  avalue:= 0;
+ end;
+ if avalue <> fvalueoffset then begin
+  fvalueoffset:= avalue;
+  value:= value; //update itemindex  
  end;
 end;
 
@@ -3688,10 +3706,10 @@ end;
 procedure tcustomselector.dobeforedropdown;
 begin
  inherited;
-// fdropdownenums:= nil;
  fdropdownenums:= copy(enums);
  getdropdowninfo(fdropdownenums,fdropdownitems);
- tdropdowncols1(fdropdownitems).fitemindex:= getindex1(fvalue1,fdropdownenums);
+ tdropdowncols1(fdropdownitems).fitemindex:= 
+                         getindex1(fvalue1,fdropdownenums,fvalueoffset);
 end;
 
 function tcustomselector.getdropdownitems: tdropdowncols;
@@ -3710,7 +3728,7 @@ begin
   end
   else begin
    if length(fdropdownenums) = 0 then begin
-    int1:= itemindex;
+    int1:= itemindex + fvalueoffset;
    end
    else begin
     int1:= fdropdownenums[itemindex];
