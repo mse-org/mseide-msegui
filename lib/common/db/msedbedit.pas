@@ -2310,7 +2310,7 @@ end;
 procedure tcustomeditwidgetdatalink.setasnullmsestring(const avalue: msestring);
 begin
  if avalue = nullsymbol then begin
-  if oed_nonullset in foptions then begin
+  if oed_nonullset in foptions then begin   
    asmsestring:= msedefaultexpression;
   end
   else begin
@@ -2519,11 +2519,22 @@ begin
    raise eabort.create('');
   end;
   if not (oed_nullset in foptions) and (field <> nil) then begin
-   with field do begin
-    if (defaultexpression <> '') and isnull and 
-         (dataset.modified or 
-           (fdscontroller <> nil) and fdscontroller.posting) then begin
-     asstring:= defaultexpression;
+   if ismsestring then begin
+    with tmsestringfield(field) do begin
+     if (defaultexpression <> '') and isnull and 
+          (dataset.modified or 
+            (fdscontroller <> nil) and fdscontroller.posting) then begin
+      asmsestring:= self.msedefaultexpression;
+     end;
+    end;
+   end
+   else begin
+    with field do begin
+     if (defaultexpression <> '') and isnull and 
+          (dataset.modified or 
+            (fdscontroller <> nil) and fdscontroller.posting) then begin
+      asstring:= defaultexpression;
+     end;
     end;
    end;
   end;

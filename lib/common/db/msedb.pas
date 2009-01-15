@@ -4179,6 +4179,9 @@ function tfielddatalink.getmsedefaultexpression: msestring;
 begin
  if fismsestring then begin
   result:= tmsestringfield(ffield).defaultexpression;
+  if result = #0 then begin
+   result:= '';
+  end;
  end
  else begin
   result:= ffield.defaultexpression;

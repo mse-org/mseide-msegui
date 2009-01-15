@@ -1730,7 +1730,6 @@ end;
 procedure tdataedit.drawcell(const canvas: tcanvas);
 var
  mstr1: msestring;
- afont: tfont;
  atextflags: textflagsty;
  bo1: boolean;
 begin
@@ -1758,7 +1757,7 @@ begin
   if mstr1 <> '' then begin
    if bo1 then begin    
     if fempty_font <> nil then begin
-     canvas.font:= afont;
+     canvas.font:= fempty_font;
     end;
     atextflags:= fempty_textflags;
     if fempty_textcolor <> cl_none then begin
