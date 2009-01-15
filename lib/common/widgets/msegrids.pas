@@ -1565,13 +1565,13 @@ type
                              const selectaction: focuscellactionty); virtual;
    function wheelheight: integer;
    
-   //idragcontroller
+  //idragcontroller
    function getdragrect(const apos: pointty): rectty; override;
-   //iscrollbar
+  //iscrollbar
    procedure scrollevent(sender: tcustomscrollbar; event: scrolleventty); virtual;
 
-   //idragcontroller
-   //iobjectpicker
+  //idragcontroller
+  //iobjectpicker
    function getcursorshape(const apos: pointty;  const shiftstate: shiftstatesty;
                                     var shape: cursorshapety): boolean;
    procedure getpickobjects(const rect: rectty;  const shiftstate: shiftstatesty;
@@ -1583,7 +1583,7 @@ type
    function calcshowshift(const rect: rectty; 
                                    const position: cellpositionty): pointty;
 
-   //istatfile
+  //istatfile
    procedure dostatread(const reader: tstatreader); virtual;
    procedure dostatwrite(const writer: tstatwriter); virtual;
    procedure statreading;
@@ -10953,7 +10953,10 @@ end;
 procedure tcustomgrid.setoptionsgrid(const avalue: optionsgridty);
 begin
  if foptionsgrid <> avalue then begin
-  foptionsgrid := avalue;
+  if (og_sorted in avalue) and not(og_sorted in foptionsgrid) then begin
+   exclude(fstate,gs_sortvalid);
+  end;
+  foptionsgrid:= avalue;
   layoutchanged;
  end;
 end;
