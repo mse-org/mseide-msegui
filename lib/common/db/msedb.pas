@@ -175,11 +175,14 @@ type
    fvalidating: boolean;
    fisftwidestring: boolean;
    fdefaultexpression: msestring;
+   fdefaultexpressionbefore: string; 
+                  //synchronize with TField.DefaultExpression
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   //ifieldcomponent
    procedure setdsintf(const avalue: idsfieldcontroller);
    function getinstance: tfield;
+   function getdefaultexpression: msestring;
    procedure setdefaultexpression(const avalue: msestring);
   protected
    procedure readlookup(reader: treader);
@@ -214,7 +217,7 @@ type
    property tagpo: pointer read ftagpo write ftagpo;
    property isftwidestring: boolean read fisftwidestring;
   published
-   property defaultexpression: msestring read fdefaultexpression 
+   property defaultexpression: msestring read getdefaultexpression 
                                                 write setdefaultexpression;
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
@@ -2375,12 +2378,24 @@ begin
  result:= fieldtooldsql(self);
 end;
 
+function tmsestringfield.getdefaultexpression: msestring;
+begin
+ if inherited defaultexpression <> fdefaultexpressionbefore then begin
+  fdefaultexpressionbefore:= inherited defaultexpression;
+  fdefaultexpression:= fdefaultexpressionbefore;
+ end;
+ result:= fdefaultexpression;
+end;
+
 procedure tmsestringfield.setdefaultexpression(const avalue: msestring);
 begin
  fdefaultexpression:= avalue;
  try
-  inherited defaultexpression:= avalue;
+  fdefaultexpressionbefore:= avalue;
+  inherited defaultexpression:= fdefaultexpressionbefore;
  except        //catch conversion exception
+  fdefaultexpressionbefore:= '';
+  inherited defaultexpression:= '';
  end;
 end;
 
