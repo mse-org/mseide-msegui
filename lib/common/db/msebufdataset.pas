@@ -249,7 +249,8 @@ type
    procedure setoptions(const avalue: indexfieldoptionsty);
   published
    property fieldname: string read ffieldname write setfieldname;
-   property options: indexfieldoptionsty read foptions write setoptions;
+   property options: indexfieldoptionsty read foptions 
+                                    write setoptions default [];
  end;
 
  localindexoptionty = (lio_desc);
@@ -627,8 +628,6 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure Append;
-//   procedure refresh(const aenablecontrols: boolean = false);
-        //no more needed
    procedure notifycontrols; //calls enablecontrols/disablecontrols
 
    procedure recover; //loads from logfile
@@ -669,7 +668,6 @@ type
                    //applies current record
    procedure cancelupdates; virtual;
    procedure cancelupdate; virtual; //cancels current record
-//    function locate(const keyfields: string; const keyvalues: variant; options: tlocateoptions) : boolean; override;
    function updatestatus: tupdatestatus; override;
    property changecount : integer read getchangecount;
    property bookmarkdata: bookmarkdataty read getbookmarkdata1;

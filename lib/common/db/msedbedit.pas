@@ -2346,8 +2346,8 @@ end;
 function tcustomeditwidgetdatalink.canmodify: Boolean;
 begin
  result:= (field <> nil) and 
-           ((ewds_filterediting in fstate) or not noedit and 
-                           not field.readonly);
+           ((ewds_filterediting in fstate) or 
+              not noedit and not field.readonly);
 end;
 
 procedure tcustomeditwidgetdatalink.modified;
@@ -2370,8 +2370,9 @@ var
 begin
  state1:= fintf.getwidget.ComponentState;
  if state1 * [cswriting,csdesigning] = [] then begin
-  if not (ewds_filterediting in fstate) and ((datasource = nil) or
-          not editing and not (canmodify and datasource.AutoEdit)) then begin
+  if not (ewds_filterediting in fstate) and 
+         ((datasource = nil) or
+           not editing and not (canmodify and datasource.AutoEdit)) then begin
    include(aoptions,oe_readonly);
   end;
  end;
