@@ -562,12 +562,14 @@ type
  tcustombooleaneditradio = class(tcustombooleanedit)
   private
    function getglyph: stockglyphty; override;
+   procedure reset;
    procedure setvalue(const avalue: boolean); override;
    function getcheckedtag: integer;
    procedure setcheckedtag(const avalue: integer);
    procedure setgridvalue(const aindex: integer; const aValue: longbool); override;
    function internalcheckeditem(out single: boolean): tcustombooleaneditradio; //nil if none
   protected
+   fresetting: integer;
    procedure togglevalue; override;
   public
    procedure togglegridvalue(const index: integer); override;
@@ -2167,6 +2169,18 @@ begin
  result:= stg_checkedradio;
 end;
 
+procedure tcustombooleaneditradio.reset;
+begin
+ if value then begin
+  inc(fresetting);
+  try
+   value:= false
+  finally
+   dec(fresetting);
+  end;
+ end;
+end;
+
 procedure tcustombooleaneditradio.setvalue(const avalue: boolean);
 var
  widget: twidget;
@@ -2177,7 +2191,7 @@ begin
    widget:= fparentwidget.widgets[int1];
    if (widget is tcustombooleaneditradio) and (widget <> self) and
         (tcustombooleaneditradio(widget).fgroup = fgroup) then begin
-    tcustombooleaneditradio(widget).value:= false;
+    tcustombooleaneditradio(widget).reset;
    end;
   end;
  end;
