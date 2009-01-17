@@ -3212,7 +3212,7 @@ end;
 
 destructor tcustomframe.destroy;
 begin
- if ftemplate <> nil then begin
+ if (ftemplate <> nil) and not (csdestroying in fintf.getcomponentstate) then begin
   fintf.getwidget.setlinkedvar(nil,tmsecomponent(ftemplate));
  end;
  inherited;
@@ -4999,7 +4999,7 @@ end;
 
 destructor tcustomface.destroy;
 begin
- if ftemplate <> nil then begin
+ if (ftemplate <> nil) and not (csdestroying in fintf.getcomponentstate) then begin
   fintf.setlinkedvar(nil,tmsecomponent(ftemplate));
  end;
  inherited;
