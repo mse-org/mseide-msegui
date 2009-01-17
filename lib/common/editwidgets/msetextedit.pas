@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -15,7 +15,8 @@ interface
 uses
  mseeditglob,mseedit,msewidgetgrid,classes,msedatalist,msegraphics,msestream,
  msetypes,mserichstring,msestat,msestatfile,mseclasses,mseinplaceedit,msegrids,
- mseevent,msegui,msegraphutils,msestrings,msedrawtext,msearrayprops,msemenus;
+ mseevent,mseguiglob,msegui,msegraphutils,msestrings,msedrawtext,msearrayprops,
+ msemenus;
 
 const
  defaulttexteditoptions =  (defaultoptionsedit + [oe_linebreak]) -
@@ -26,8 +27,6 @@ const
          (defaulteditwidgetoptions - [ow_fontglyphheight]) + [ow_fontlineheight];
 
 type
-// texteditstatety = record
-// end;
 
  textmouseeventinfoty = record
   eventkind: celleventkindty;
@@ -304,7 +303,7 @@ procedure normalizetextrect(const po1,po2: gridcoordty; out start,stop: gridcoor
 
 implementation
 uses
- msefileutils,sysutils,msesysutils,msesys,mseguiglob,msewidgets,
+ msefileutils,sysutils,msesysutils,msesys,msewidgets,
  msekeyboard;
 
 const

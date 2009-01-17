@@ -2370,7 +2370,7 @@ end;
 
 function tcustomcaptionframe.checkshortcut(var info: keyeventinfoty): boolean;
 begin
- result:= mserichstring.checkshortcut(info,finfo.text,true);
+ result:= msegui.checkshortcut(info,finfo.text,true);
 end;
 
 procedure tcustomcaptionframe.setdisabled(const value: boolean);

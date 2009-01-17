@@ -21,7 +21,7 @@ unit disassform;
 interface
 uses
  msegui,mseclasses,mseforms,msegdbutils,msegrids,msetypes,msestrings,
- mseevent,msegraphics;
+ mseevent,msegraphics,mseguiglob;
 
 type
  tdisassfo = class(tdockform)

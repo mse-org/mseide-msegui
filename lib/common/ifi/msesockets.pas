@@ -11,7 +11,7 @@ unit msesockets;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,mseglob,mseguiglob,mseclasses,msesys,msestrings,msepipestream,
+ classes,mseglob,mseclasses,msesys,msestrings,msepipestream,
  mseapplication,msethread,mseevent,msecryptio;
 
 const

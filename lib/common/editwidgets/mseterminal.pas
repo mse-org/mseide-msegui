@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -14,7 +14,7 @@ unit mseterminal;
 interface
 uses
  msegrids,Classes,msestream,mseclasses,msepipestream,mseevent,mseinplaceedit,
- msetextedit,msestrings,msesys,mseeditglob,msemenus,msegui;
+ msetextedit,msestrings,msesys,mseeditglob,msemenus,msegui,mseguiglob;
 type
  sendtexteventty = procedure(var atext: msestring; var donotsend: boolean) of object;
  terminaloptionty = (teo_readonly,teo_tty);
@@ -79,7 +79,7 @@ type
 
 implementation
 uses
- msesysutils,mseprocutils,msewidgets,mseguiglob,msetypes,
+ msesysutils,mseprocutils,msewidgets,msetypes,
  msekeyboard,sysutils;
 
 { tterminal }

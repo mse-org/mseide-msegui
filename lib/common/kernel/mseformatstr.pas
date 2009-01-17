@@ -13,7 +13,7 @@ unit mseformatstr;     //stringwandelroutinen 31.5.99 mse
 
 interface
 uses
- Classes, msetypes,msestrings,SysUtils,mseguiglob,msesys;
+ Classes, msetypes,msestrings,SysUtils,msesys;
 const
 // noformatsettings = 14.5;    //rtlversion
  noformatsettings = 15;    //rtlversion

@@ -11,7 +11,7 @@ unit msepolygon;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msegui,msewidgets,msegraphutils,msegraphics,classes,msetypes,msebitmap,
+ msegui,mseguiglob,msewidgets,msegraphutils,msegraphics,classes,msetypes,msebitmap,
  msesimplewidgets,msemenus,mseevent;
  
 type

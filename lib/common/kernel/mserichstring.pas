@@ -13,8 +13,8 @@ unit mserichstring;
 
 interface
 uses
- {msegraphics,}SysUtils,msetypes,msekeyboard,mseevent,mseguiglob,msedatalist,
-   msegraphutils,Classes,msestrings;
+ SysUtils,msetypes,msekeyboard,mseevent,msedatalist,msegraphutils,Classes,
+           msestrings;
 
 const
  fsboldmask = $01;
@@ -159,10 +159,11 @@ procedure captiontorichstring(const caption: captionty; var dest: richstringty);
 function richstringtocaption(const caption: richstringty): captionty;
 function isshortcut(key: keyty; const caption: richstringty): boolean; overload;
 function isshortcut(key: msechar; const caption: richstringty): boolean; overload;
-function checkshortcut(var info: keyeventinfoty;
-          const caption: richstringty; const checkalt: boolean): boolean; overload;
-function checkshortcut(var info: keyeventinfoty;
-          const key: keyty; const shiftstate: shiftstatesty): boolean; overload;
+//function checkshortcut(var info: keyeventinfoty;
+//          const caption: richstringty; const checkalt: boolean): boolean; overload;
+      //moved to msegui
+//function checkshortcut(var info: keyeventinfoty;
+//          const key: keyty; const shiftstate: shiftstatesty): boolean; overload;
 
 function expandtabs(const s: richstringty; const tabcharcount: integer): richstringty;
 
@@ -317,33 +318,6 @@ end;
 function isshortcut(key: keyty; const caption: richstringty): boolean;
 begin
  result:= isshortcut(keytomsechar(key),caption);
-end;
-
-function checkshortcut(var info: keyeventinfoty; const caption: richstringty;
-                         const checkalt: boolean): boolean;
-begin
- with info do begin
-  if (eventstate * [es_processed,es_modal] = []) and 
-    (not checkalt and (shiftstate -[ss_alt] = []) or (shiftstate = [ss_alt])) and
-                         (length(info.chars) > 0) then begin
-   result:= isshortcut(info.chars[1],caption);
-   if result then begin
-    include(eventstate,es_processed);
-   end;
-  end
-  else begin
-   result:= false;
-  end;
- end;
-end;
-
-function checkshortcut(var info: keyeventinfoty;
-          const key: keyty; const shiftstate: shiftstatesty): boolean;
-begin
- result:= (key = info.key) and (shiftstate = info.shiftstate);
- if result then begin
-  include(info.eventstate,es_processed);
- end;
 end;
 
 procedure insertfontinfo(var infoar: formatinfoarty; aindex: integer);

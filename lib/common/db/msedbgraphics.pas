@@ -13,7 +13,8 @@ unit msedbgraphics;
 
 interface
 uses
- classes,db,mseimage,msedataimage,msedbdispwidgets,msedb,msetypes,msedbedit,
+ classes,db,mseimage,mseguiglob,msedataimage,msedbdispwidgets,msedb,msetypes,
+ msedbedit,
  msegrids,msewidgetgrid,msedatalist,msebitmap,msebintree,msegraphics,
  msemenus,mseevent,msegui;
 

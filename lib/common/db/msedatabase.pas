@@ -18,7 +18,7 @@ unit msedatabase;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- classes,db,sysutils,msedb,msestrings,mseclasses,mseglob,mseguiglob,msetypes,
+ classes,db,sysutils,msedb,msestrings,mseclasses,mseglob,msetypes,
  mseapplication;
 
 type

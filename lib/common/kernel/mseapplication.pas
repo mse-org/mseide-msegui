@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -46,7 +46,6 @@ type
    procedure setactivator(const avalue: tactivator);
   protected
    fdesignchangedlock: integer;
-//   procedure receiveevent(const event: tobjectevent); override;
    procedure designchanged; //for designer notify
    procedure loaded; override;
    procedure doactivated; virtual;
@@ -85,7 +84,6 @@ type
    procedure registerclient(const aclient: iobjectlink);
    procedure unregisterclient(const aclient: iobjectlink);
    procedure updateorder;
-//   function getclientname(const avalue: tobject; const aindex: integer): string;
    function getclientnames: stringarty;
    procedure defineproperties(filer: tfiler); override;
    procedure doasyncevent(var atag: integer); override;
@@ -168,7 +166,7 @@ type
          aps_active,aps_waiting,aps_terminating,aps_deinitializing,
          aps_shortcutting,
          aps_waitstarted,aps_waitcanceled,aps_waitterminated,aps_waitok,
-         aps_waitidlelock);
+         aps_waitidlelock,aps_eventflushing);
  applicationstatesty = set of applicationstatety;
 
  tcustomapplication = class(tmsecomponent)
@@ -1047,10 +1045,14 @@ var
  int1: integer;
 begin
  sys_mutexlock(feventlock);
- for int1:= 0 to high(fpostedevents) do begin
-  dopostevent(fpostedevents[int1]);
+ if not (aps_eventflushing in fstate) then begin
+  include(fstate,aps_eventflushing);
+  for int1:= 0 to high(fpostedevents) do begin
+   dopostevent(fpostedevents[int1]);
+  end;
+  fpostedevents:= nil;
+  exclude(fstate,aps_eventflushing);
  end;
- fpostedevents:= nil;
  sys_mutexunlock(feventlock);
 end;
 

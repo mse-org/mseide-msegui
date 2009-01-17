@@ -2775,7 +2775,7 @@ end;
 function tcustomdatabutton.checkfocusshortcut(var info: keyeventinfoty): boolean;
 begin
  result:= inherited checkfocusshortcut(info) or 
-         mserichstring.checkshortcut(info,finfo.ca.caption,true);
+         msegui.checkshortcut(info,finfo.ca.caption,true);
 end;
 
 procedure tcustomdatabutton.togglevalue;

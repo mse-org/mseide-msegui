@@ -11,7 +11,8 @@ unit mseifigui;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,mseclasses,mseifiglob,mseifi,mseact,msegui,typinfo,msestrings,
+ classes,mseclasses,mseguiglob,mseifiglob,mseifi,mseact,msegui,typinfo,
+ msestrings,
  msearrayprops,mseglob,msetypes,mseifilink,msewidgetgrid,msemenus,
  mseevent,msegrids,msegraphutils;
  

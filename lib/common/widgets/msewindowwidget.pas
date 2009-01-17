@@ -12,7 +12,7 @@ unit msewindowwidget;
 interface
 uses
  classes,msegui,msetypes,msegraphutils,mseguiintf,msewidgets,msegraphics,
- msesimplewidgets,mseevent,msemenus;
+ msesimplewidgets,mseevent,msemenus,mseguiglob;
  
 type
  tcustomwindowwidget = class;
@@ -127,9 +127,7 @@ type
  end;
  
 implementation
-uses
- mseguiglob;
- 
+
 type
  twindow1 = class(twindow);
   

@@ -20,12 +20,13 @@ type
  sysshortcutaty = array[sysshortcutty] of shortcutty;
  psysshortcutaty = ^sysshortcutaty;
  
- taction = class(tcustomaction)
+ taction = class(tcustomaction,iimagelistinfo)
   private
-   function getimagelist: timagelist;
    procedure setimagelist(const Value: timagelist);
    procedure setshortcut(const avalue: shortcutty);
    procedure setshortcut1(const avalue: shortcutty);
+  //iimagelistinfo
+   function getimagelist: timagelist;
   protected
    procedure registeronshortcut(const avalue: boolean); override;
    procedure doshortcut(const sender: twidget; var info: keyeventinfoty);

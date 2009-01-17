@@ -572,7 +572,7 @@ function tcustombutton.checkfocusshortcut(var info: keyeventinfoty): boolean;
 begin
  result:= inherited checkfocusshortcut(info) or
      (bo_focusonshortcut in options) and
-          mserichstring.checkshortcut(info,factioninfo.caption1,
+          msegui.checkshortcut(info,factioninfo.caption1,
           bo_altshortcut in options) and canfocus;
 end;
 
@@ -583,7 +583,7 @@ begin
     (checkshortcutcode(factioninfo.shortcut,info) or
      checkshortcutcode(factioninfo.shortcut1,info) or
     (bo_executeonshortcut in options) and not (shs_disabled in finfo.state) and
-           mserichstring.checkshortcut(info,factioninfo.caption1,
+           msegui.checkshortcut(info,factioninfo.caption1,
            bo_altshortcut in options) or
     (finfo.state * [shs_invisible,shs_disabled,shs_default] = [shs_default]) and
        ((info.key = key_return) or 

@@ -771,7 +771,7 @@ function checkshortcut(const layout: menulayoutinfoty; var info: keyeventinfoty;
   repeat
    with layout.cells[actualindex].buttoninfo do begin
     if (state * [shs_disabled,shs_invisible] = []) and
-            mserichstring.checkshortcut(info,ca.caption,false) then begin
+            msegui.checkshortcut(info,ca.caption,false) then begin
      result:= actualindex;
      include(info.eventstate,es_processed);
      break;

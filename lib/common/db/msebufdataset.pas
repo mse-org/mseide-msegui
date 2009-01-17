@@ -28,7 +28,7 @@ interface
 
 uses
  db,classes,variants,msetypes,msearrayprops,mseclasses,mselist,msestrings,
- msedb,msedatabase,mseglob,mseguiglob;
+ msedb,msedatabase,mseglob;
   
 const
  defaultpacketrecords = -1;

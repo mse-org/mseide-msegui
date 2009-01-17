@@ -5,7 +5,7 @@ interface
 uses
  msegui,mseclasses,mseforms,msegraphutils,msegrids,msedispwidgets,classes,
  msegraphics,mseeditglob,msetypes,msedropdownlist,msetimer,msesimplewidgets,
- mseinplaceedit,mseevent;
+ mseinplaceedit,mseevent,mseguiglob;
  
 const
  popupcalendarwidth = 233;
@@ -68,7 +68,7 @@ uses
                                 {$ifdef FPC}dateutils,{$endif}
                                {$endif} //kylix compatibility
  msedrawtext,msestrings,
- msekeyboard,mseguiglob;
+ msekeyboard;
 
  {$ifdef UNIX}
  {$ifndef FPC} //kylix compatibility

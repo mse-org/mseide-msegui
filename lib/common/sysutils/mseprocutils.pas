@@ -167,7 +167,7 @@ type
 
 implementation
 uses 
- msesysintf,msestrings,msedatalist,mseguiglob,mseprocmonitor;
+ msesysintf,msestrings,msedatalist,mseprocmonitor;
 
 function getpid: integer;
 begin

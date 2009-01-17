@@ -17,7 +17,7 @@ uses
  {$ifdef FPC}classes{$else}Classes{$endif},mseclasses,mserichstring,
  msetypes,mseglob,mseapplication,
  {msekeyboard,}mseevent,msestat,msestatfile,msestrings,
- msegraphutils,msebitmap;
+ msegraphutils{,msebitmap};
 
 const
  defaultactionstates = [];
@@ -117,7 +117,7 @@ type
 
  actionoptionsty = set of actionoptionty;
 
- tcustomaction = class(tactcomponent,istatfile,iimagelistinfo)
+ tcustomaction = class(tactcomponent,istatfile{,iimagelistinfo})
   private
    fonupdate: actioneventty;
    fstatvarname: msestring;
@@ -159,14 +159,14 @@ type
    procedure eventfired(const sender: tobject; const ainfo: actioninfoty);
    procedure doafterunlink; virtual;
 
-   //istatfile, saves state of as_checked
+  //istatfile, saves state of as_checked
    procedure dostatread(const reader: tstatreader);
    procedure dostatwrite(const writer: tstatwriter);
    procedure statreading;
    procedure statread;
    function getstatvarname: msestring;
-   //iimagelistinfo
-   function getimagelist: timagelist;
+  //iimagelistinfo
+//   function getimagelist: timagelist;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -1156,11 +1156,6 @@ end;
 procedure tcustomaction.doafterunlink;
 begin
  //dummy
-end;
-
-function tcustomaction.getimagelist: timagelist;
-begin
- result:= timagelist(finfo.imagelist);
 end;
 
 end.

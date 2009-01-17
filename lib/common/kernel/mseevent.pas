@@ -13,7 +13,7 @@ unit mseevent;
 
 interface
 uses
- mselist,mseglob,mseguiglob,msegraphutils,msekeyboard,msetypes,msestrings,msesys;
+ mselist,mseglob,msegraphutils,msekeyboard,msetypes,msestrings,msesys;
 
 const
 // eta_timer = 1; //tags for userevents
@@ -48,43 +48,6 @@ type
                  es_local,es_broadcast,es_modal,es_drag,
                  es_reflected,es_nofocus);
  eventstatesty = set of eventstatety;
- mouseeventinfoty = record //same layout as mousewheeleventinfoty!
-  eventkind: eventkindty;
-  shiftstate: shiftstatesty;
-  pos: pointty;
-  eventstate: eventstatesty;
-  timestamp: cardinal; //usec, 0 -> invalid
-  button: mousebuttonty;
- end;
- pmouseeventinfoty = ^mouseeventinfoty;
- 
- mousewheeleventinfoty = record //same layout as mouseeventinfoty!
-  eventkind: eventkindty;
-  shiftstate: shiftstatesty;
-  pos: pointty;
-  eventstate: eventstatesty;
-  timestamp: cardinal; //usec, 0 -> invalid
-  wheel: mousewheelty;
-  delta: real;
- end;
- pmousewheeleventty = ^mousewheeleventinfoty;
- 
- moeventinfoty = record
-  case integer of
-   0: (mouse: mouseeventinfoty);
-   1: (wheel: mousewheeleventinfoty);
- end;
-
- keyeventinfoty = record
-  eventkind: eventkindty;
-  key,keynomod: keyty;
-  chars: msestring;
-  shiftstate: shiftstatesty;
-  eventstate: eventstatesty;
-  timestamp: cardinal; //usec
- end;
- pkeyeventinfoty = ^keyeventinfoty;
-
  tevent = class(tnullinterfacedobject)
   private
   protected

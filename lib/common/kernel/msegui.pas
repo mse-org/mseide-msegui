@@ -18,7 +18,7 @@ uses
  msestrings,mseerr,msegraphutils,mseapplication,
  msepointer,mseevent,msekeyboard,mseclasses,mseglob,mseguiglob,mselist,msesys,
  msethread,
- msebitmap,msearrayprops,msethreadcomp{,msedatamodules};
+ msebitmap,msearrayprops,msethreadcomp{,msedatamodules},mserichstring;
 
 const
  mseguiversiontext = '1.9 unstable';
@@ -2240,6 +2240,11 @@ procedure syncpaintheight(const awidgets: array of twidget;
       //synchronizes paintheight with paintheight of largest outer framewidth 
       //(ex. largest caption)
 
+function checkshortcut(var info: keyeventinfoty;
+          const caption: richstringty; const checkalt: boolean): boolean; overload;
+function checkshortcut(var info: keyeventinfoty;
+          const key: keyty; const shiftstate: shiftstatesty): boolean; overload;
+
 type
  getwidgetintegerty = function(const awidget: twidget): integer;
  getwidgetbooleanty = function(const awidget: twidget): boolean;
@@ -2631,6 +2636,33 @@ end;
 procedure wsetbounds_cymax(const awidget: twidget; const avalue: integer);
 begin
  awidget.bounds_cymax:= avalue;
+end;
+
+function checkshortcut(var info: keyeventinfoty; const caption: richstringty;
+                         const checkalt: boolean): boolean;
+begin
+ with info do begin
+  if (eventstate * [es_processed,es_modal] = []) and 
+    (not checkalt and (shiftstate -[ss_alt] = []) or (shiftstate = [ss_alt])) and
+                         (length(info.chars) > 0) then begin
+   result:= isshortcut(info.chars[1],caption);
+   if result then begin
+    include(eventstate,es_processed);
+   end;
+  end
+  else begin
+   result:= false;
+  end;
+ end;
+end;
+
+function checkshortcut(var info: keyeventinfoty;
+          const key: keyty; const shiftstate: shiftstatesty): boolean;
+begin
+ result:= (key = info.key) and (shiftstate = info.shiftstate);
+ if result then begin
+  include(info.eventstate,es_processed);
+ end;
 end;
 
 procedure translatewidgetpoint1(var point: pointty;

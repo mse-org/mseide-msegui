@@ -20,7 +20,7 @@ unit formdesigner;
 
 interface
 uses
- classes,mseforms,msegui,mseevent,msegraphutils,msegraphics,msedesignintf,
+ classes,mseforms,mseguiglob,msegui,mseevent,msegraphutils,msegraphics,msedesignintf,
  mseclasses,msemenuwidgets,msemenus,msefiledialog,msedesigner,typinfo,
  componentpaletteform,msestrings,msewidgets,mseglob
   {$ifdef FPC}{$ifndef mse_withoutdb},msereport{$endif}{$endif};
@@ -312,7 +312,7 @@ function selectinheritedmodule(const amodule: pmoduleinfoty;
 
 implementation
 uses
- formdesigner_mfm,mselist,msekeyboard,mseguiglob,msepointer,msebits,sysutils,
+ formdesigner_mfm,mselist,msekeyboard,msepointer,msebits,sysutils,
  msestockobjects,msedrawtext,selectsubmoduledialogform,mseshapes,settaborderform,
  msedatalist,objectinspector,projectoptionsform,main,msedatamodules,msetypes,
  setcreateorderform,mseactions;

@@ -14,7 +14,7 @@ unit msedatalist;
 interface
 
 uses
- sysutils,classes,msestrings,typinfo,msereal,msetypes,msestream,mseguiglob,
+ sysutils,classes,msestrings,typinfo,msereal,msetypes,msestream,
  mseclasses,mselist;
 
 type

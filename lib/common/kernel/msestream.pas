@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -14,8 +14,8 @@ unit msestream;
 
 // {$WARN SYMBOL_PLATFORM off}
 interface
-uses Classes,Sysutils,msestrings,msetypes,mseguiglob,
-       msethread,msesys,msereal,mseevent;
+uses 
+ Classes,Sysutils,msestrings,msetypes,msethread,msesys,msereal,mseevent;
 
 const
  defaultfilerights = [s_irusr,s_iwusr,s_irgrp,s_iwgrp,s_iroth,s_iwoth];

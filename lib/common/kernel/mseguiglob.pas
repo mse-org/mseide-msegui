@@ -13,7 +13,7 @@ unit mseguiglob;
 
 interface
 uses
- Classes,msegraphutils,msetypes,msekeyboard,mseerr;
+ Classes,msegraphutils,msetypes,msekeyboard,mseerr,mseevent,msestrings;
 {$ifdef FPC}
  
 {$endif}
@@ -33,6 +33,44 @@ type
 
  shiftstatety = (ss_shift,ss_alt,ss_ctrl,ss_left,ss_right,ss_middle,ss_double);
  shiftstatesty = set of shiftstatety;
+
+ mouseeventinfoty = record //same layout as mousewheeleventinfoty!
+  eventkind: eventkindty;
+  shiftstate: shiftstatesty;
+  pos: pointty;
+  eventstate: eventstatesty;
+  timestamp: cardinal; //usec, 0 -> invalid
+  button: mousebuttonty;
+ end;
+ pmouseeventinfoty = ^mouseeventinfoty;
+ 
+ mousewheeleventinfoty = record //same layout as mouseeventinfoty!
+  eventkind: eventkindty;
+  shiftstate: shiftstatesty;
+  pos: pointty;
+  eventstate: eventstatesty;
+  timestamp: cardinal; //usec, 0 -> invalid
+  wheel: mousewheelty;
+  delta: real;
+ end;
+ pmousewheeleventty = ^mousewheeleventinfoty;
+ 
+ moeventinfoty = record
+  case integer of
+   0: (mouse: mouseeventinfoty);
+   1: (wheel: mousewheeleventinfoty);
+ end;
+
+ keyeventinfoty = record
+  eventkind: eventkindty;
+  key,keynomod: keyty;
+  chars: msestring;
+  shiftstate: shiftstatesty;
+  eventstate: eventstatesty;
+  timestamp: cardinal; //usec
+ end;
+ pkeyeventinfoty = ^keyeventinfoty;
+
 
 const
  defaultppmm = 3;      //3 pixel per mm
