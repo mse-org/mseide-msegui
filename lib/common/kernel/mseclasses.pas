@@ -2326,7 +2326,7 @@ end;
 destructor tlinkedobject.destroy;
 begin
  inherited;
- fobjectlinker.free;
+ freeandnil(fobjectlinker);
 end;
 
 function tlinkedobject.getobjectlinker: tobjectlinker;
@@ -2454,7 +2454,7 @@ end;
 destructor tlinkedpersistent.destroy;
 begin
  inherited;
- fobjectlinker.Free;
+ freeandnil(fobjectlinker);
 end;
 
 function tlinkedpersistent.getobjectlinker: tobjectlinker;
@@ -2539,7 +2539,7 @@ end;
 destructor tmsecomponent.destroy;
 begin
  inherited;
- fobjectlinker.free;
+ freeandnil(fobjectlinker);
 end;
 
 function tmsecomponent.getobjectlinker: tobjectlinker;
@@ -2583,7 +2583,6 @@ begin
 end;
 
 function tmsecomponent.rootowner: tcomponent;
-
 begin
  result:= owner;
  if result <> nil then begin
@@ -2615,33 +2614,48 @@ end;
 procedure tmsecomponent.setlinkedvar(const source: tmsecomponent;
                    var dest: tmsecomponent; const linkintf: iobjectlink = nil);
 begin
- if linkintf = nil then begin
-  getobjectlinker.setlinkedvar(ievent(self),source,dest);
+ if (fobjectlinker = nil) and (csdestroying in componentstate) then begin
+  dest:= source;
  end
  else begin
-  getobjectlinker.setlinkedvar(linkintf,source,dest);
+  if linkintf = nil then begin
+   getobjectlinker.setlinkedvar(ievent(self),source,dest);
+  end
+  else begin
+   getobjectlinker.setlinkedvar(linkintf,source,dest);
+  end;
  end;
 end;
 
 procedure tmsecomponent.setlinkedvar(const source: tlinkedobject;
                    var dest: tlinkedobject; const linkintf: iobjectlink = nil);
 begin
- if linkintf = nil then begin
-  getobjectlinker.setlinkedvar(ievent(self),source,dest);
+ if (fobjectlinker = nil) and (csdestroying in componentstate) then begin
+  dest:= source;
  end
  else begin
-  getobjectlinker.setlinkedvar(linkintf,source,dest);
+  if linkintf = nil then begin
+   getobjectlinker.setlinkedvar(ievent(self),source,dest);
+  end
+  else begin
+   getobjectlinker.setlinkedvar(linkintf,source,dest);
+  end;
  end;
 end;
 
 procedure tmsecomponent.setlinkedvar(const source: tlinkedpersistent;
                    var dest: tlinkedpersistent; const linkintf: iobjectlink = nil);
 begin
- if linkintf = nil then begin
-  getobjectlinker.setlinkedvar(ievent(self),source,dest);
+ if (fobjectlinker = nil) and (csdestroying in componentstate) then begin
+  dest:= source;
  end
  else begin
-  getobjectlinker.setlinkedvar(linkintf,source,dest);
+  if linkintf = nil then begin
+   getobjectlinker.setlinkedvar(ievent(self),source,dest);
+  end
+  else begin
+   getobjectlinker.setlinkedvar(linkintf,source,dest);
+  end;
  end;
 end;
 
