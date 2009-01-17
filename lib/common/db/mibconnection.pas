@@ -1066,6 +1066,14 @@ begin
     ftBCD: begin
      c:= 0;
      Move(CurrBuff^,c,SQLLen);
+     case sqllen of
+      2: begin
+       int64(c):= psmallint(pointer(@c))^; //sign extend
+      end;
+      4: begin
+       int64(c):= pinteger(pointer(@c))^;  //sign extend
+      end;
+     end;
      c:= c*intpower(10,4+SQLScale);
      Move(c,buffer^,sizeof(c));
     end;
