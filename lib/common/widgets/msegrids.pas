@@ -8706,6 +8706,7 @@ begin     //focuscell
    end;
   end
   else begin
+   cellbefore:= ffocusedcell;
    if bo1 then begin
     showcell(cell);
    end;
