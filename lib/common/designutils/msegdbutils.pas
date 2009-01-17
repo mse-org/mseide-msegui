@@ -1095,50 +1095,55 @@ begin
       finterruptthreadid:= 0;
      end;
      {$endif mswindows}
-     bo1:= getstopinfo(values,flastconsoleoutput,stopinfo);
-     if not bo1 then begin
-      stopinfo.messagetext:= 'Stop error: ' + stopinfo.messagetext;
+     if values = nil then begin //gdb 6.8 attach 
+      exit;
      end
      else begin
-      if (stopinfo.reason = sr_breakpoint_hit) and 
-       (stopinfo.bkptno = fexceptionbkpt) then begin
-       if getshortstring('($eax^+12)^',str1) then begin
-        str2:= uppercase(str1);
-        bo1:= false;
-        for int1:= 0 to high(fignoreexceptionclasses) do begin
-         if str2 = fignoreexceptionclasses[int1] then begin
-          bo1:= true;
-          break;
+      bo1:= getstopinfo(values,flastconsoleoutput,stopinfo);
+      if not bo1 then begin
+       stopinfo.messagetext:= 'Stop error: ' + stopinfo.messagetext;
+      end
+      else begin
+       if (stopinfo.reason = sr_breakpoint_hit) and 
+        (stopinfo.bkptno = fexceptionbkpt) then begin
+        if getshortstring('($eax^+12)^',str1) then begin
+         str2:= uppercase(str1);
+         bo1:= false;
+         for int1:= 0 to high(fignoreexceptionclasses) do begin
+          if str2 = fignoreexceptionclasses[int1] then begin
+           bo1:= true;
+           break;
+          end;
+         end;
+         if bo1 then begin
+          fstate:= fstate + [gs_restarted,gs_running];
+          continue;
+          stopinfo.reason:= sr_none;
+         end
+         else begin
+          stopinfo.messagetext:= 'Exception '+str1+'.';
+          stopinfo.reason:= sr_exception;
          end;
         end;
-        if bo1 then begin
-         fstate:= fstate + [gs_restarted,gs_running];
-         continue;
-         stopinfo.reason:= sr_none;
-        end
-        else begin
-         stopinfo.messagetext:= 'Exception '+str1+'.';
-         stopinfo.reason:= sr_exception;
+       end;
+       if stopinfo.reason in [sr_exited,sr_exited_normally] then begin
+        exclude(fstate,gs_started);
+       end;
+       if stopinfo.reason = sr_startup then begin
+        if fstartupbreakpoint >= 0 then begin
+         breakdelete(fstartupbreakpoint);
+         fstartupbreakpoint:= -1;
         end;
+        if fstartupbreakpoint1 >= 0 then begin
+         breakdelete(fstartupbreakpoint1);
+         fstartupbreakpoint1:= -1;
+        end;
+        fprocid:= 0;
+        getprocid(fprocid);
+        {$ifdef UNIX}
+        ftargetterminal.restart;
+        {$endif}
        end;
-      end;
-      if stopinfo.reason in [sr_exited,sr_exited_normally] then begin
-       exclude(fstate,gs_started);
-      end;
-      if stopinfo.reason = sr_startup then begin
-       if fstartupbreakpoint >= 0 then begin
-        breakdelete(fstartupbreakpoint);
-        fstartupbreakpoint:= -1;
-       end;
-       if fstartupbreakpoint1 >= 0 then begin
-        breakdelete(fstartupbreakpoint1);
-        fstartupbreakpoint1:= -1;
-       end;
-       fprocid:= 0;
-       getprocid(fprocid);
-       {$ifdef UNIX}
-       ftargetterminal.restart;
-       {$endif}
       end;
      end;
     end;
