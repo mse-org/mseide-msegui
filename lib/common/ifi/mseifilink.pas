@@ -35,7 +35,7 @@ type
    property prop: tmodulelinkarrayprop read fprop;
   published
    property name: ansistring read fname write fname;
-   property tag: integer read ftag write ftag;
+   property tag: integer read ftag write ftag default 0;
  end;
  modulelinkpropclassty = class of tmodulelinkprop;
    
@@ -386,7 +386,7 @@ type
   published
    property channel: tcustomiochannel read fchannel write setchannel;
    property linkname: string read flinkname write flinkname;
-   property tag: integer read ftag write ftag;
+   property tag: integer read ftag write ftag default 0;
    property options: ifirxoptionsty read foptions write foptions 
                                        default defaultifirxoptions;
    property timeoutus: integer read fdefaulttimeout write fdefaulttimeout 

@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2009 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -1435,7 +1435,7 @@ begin
    end;
   end;
  end;
- if not (es_processed in info.eventstate) then begin
+if not (es_processed in info.eventstate) then begin
   inherited;
  end;
 end;

@@ -64,6 +64,7 @@ type
   debugcommand: filenamety;
   debugoptions: msestring;
   debugtarget: filenamety;
+  runcommand: filenamety;
   remoteconnection: msestring;
   uploadcommand: filenamety;
   gdbprocessor: msestring;
@@ -407,6 +408,8 @@ type
    startupbkpton: tbooleanedit;
    valuehints: tbooleanedit;
    debugtarget: tfilenameedit;
+   runcommand: tfilenameedit;
+   tsplitter6: tsplitter;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -445,6 +448,7 @@ type
    procedure bef1(const sender: tlayouter);
    procedure aft1(const sender: tlayouter);
    }
+   procedure runcommandchange(const sender: TObject);
   private
    procedure activegroupchanged;
  end;
@@ -705,6 +709,7 @@ begin
    li.expandmacros(debugcommand);
    li.expandmacros(debugoptions);
    li.expandmacros(debugtarget);
+   li.expandmacros(runcommand);
    li.expandmacros(remoteconnection);
    li.expandmacros(uploadcommand);
    li.expandmacros(gdbservercommand);
@@ -954,6 +959,7 @@ begin
   debugcommand:= '${DEBUGGER}';
   debugoptions:= '';
   debugtarget:= '';
+  runcommand:= '';
   remoteconnection:= '';
   uploadcommand:= '';
   gdbdownload:= false;
@@ -1141,6 +1147,7 @@ begin
   updatevalue('debugcommand',debugcommand);
   updatevalue('debugoptions',debugoptions);
   updatevalue('debugtarget',debugtarget);
+  updatevalue('runcommand',runcommand);
   updatevalue('remoteconnection',remoteconnection);
   updatevalue('uploadcommand',uploadcommand);
   updatevalue('gdbdownload',gdbdownload);
@@ -1361,6 +1368,7 @@ begin
   fo.debugcommand.value:= debugcommand;
   fo.debugoptions.value:= debugoptions;
   fo.debugtarget.value:= debugtarget;
+  fo.runcommand.value:= runcommand;
   fo.remoteconnection.value:= remoteconnection;
   fo.uploadcommand.value:= uploadcommand;
   fo.gdbdownload.value:= gdbdownload;
@@ -1548,6 +1556,7 @@ begin
   debugcommand:= fo.debugcommand.value;
   debugoptions:= fo.debugoptions.value;
   debugtarget:= fo.debugtarget.value;
+  runcommand:= fo.runcommand.value;
   remoteconnection:= fo.remoteconnection.value;
   uploadcommand:= fo.uploadcommand.value;
   gdbdownload:= fo.gdbdownload.value;
@@ -1839,6 +1848,7 @@ end;
 procedure tprojectoptionsfo.debuggeronchildscaled(const sender: TObject);
 begin
  placeyorder(0,[0,0,10],[debugcommand,debugoptions,debugtarget,tlayouter1]);
+ aligny(wam_center,[debugtarget,runcommand]);
 end;
 
 procedure tprojectoptionsfo.macronchildscaled(const sender: TObject);
@@ -1938,6 +1948,11 @@ end;
 procedure tprojectoptionsfo.copymessagechanged(const sender: TObject);
 begin
  messageoutputfile.enabled:= copymessages.value;
+end;
+
+procedure tprojectoptionsfo.runcommandchange(const sender: TObject);
+begin
+ debugtarget.enabled:= runcommand.value = '';
 end;
 
 {

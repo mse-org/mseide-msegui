@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -334,7 +334,7 @@ function getcomponentpos(const component: tcomponent): pointty;
 implementation
 uses
  msesysutils,msestream,msewidgets,msedatalist,rtlconsts,msedesigner,
- msetabs;
+ msetabs,mseapplication;
 type
 
  {$ifdef FPC}
@@ -1016,6 +1016,7 @@ var
  reader: treader;
  comp1,comp2: tcomponent;
  listend: tvaluetype;
+ validaterenamebefore: validaterenameeventty;
  
 begin
  if aobjecttext = '' then begin
@@ -1060,22 +1061,28 @@ begin
       reader.oncreatecomponent:= {$ifdef FPC}@{$endif}designer.createcomponent;
       factcomp:= nil;
       begingloballoading;
-      with getcomponentlist(comp1) do begin
-       for int1:= 0 to aowner.componentcount - 1 do begin
-        comp2:= aowner.components[int1];
-        comp2.name:= comp2.name + pastenametrailer; //avoid nameclash
-        add(comp2);
-       end;
-      end;
+      validaterenamebefore:= ondesignvalidaterename;
+      ondesignvalidaterename:= nil; //no sourceupdate
       try
-       reader.readrootcomponent(comp1);
-      finally
-       for int1:= 0 to aowner.componentcount - 1 do begin
-        comp2:= aowner.components[int1];
-        comp2.name:= copy(comp2.name,1,length(comp2.name) - 
-                                             length(pastenametrailer));
-                                //restore original name
+       with getcomponentlist(comp1) do begin
+        for int1:= 0 to aowner.componentcount - 1 do begin
+         comp2:= aowner.components[int1];
+         comp2.name:= comp2.name + pastenametrailer; //avoid nameclash
+         add(comp2);
+        end;
        end;
+       try
+        reader.readrootcomponent(comp1);
+       finally
+        for int1:= 0 to aowner.componentcount - 1 do begin
+         comp2:= aowner.components[int1];
+         comp2.name:= copy(comp2.name,1,length(comp2.name) - 
+                                              length(pastenametrailer));
+                                 //restore original name
+        end;
+       end;
+      finally
+       ondesignvalidaterename:= validaterenamebefore;
       end;
       for int1:= aowner.componentcount to comp1.componentcount - 1 do begin
        comp2:= comp1.components[int1];

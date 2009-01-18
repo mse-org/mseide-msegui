@@ -318,7 +318,7 @@ type
 
    function decodelist(const noname: boolean; const inp: string;
                             var value: resultinfoarty): boolean;
-   function ispointervalue(const avalue: string;
+   function ispointervalue(avalue: string;
              out pointervalue: ptruint): boolean;
    function matchpascalformat(const typeinfo: string; const value: string): msestring;
    function getpcharvar(address: cardinal): string;
@@ -3533,8 +3533,14 @@ begin
  end;
 end;
 
-function tgdbmi.ispointervalue(const avalue: string; out pointervalue: ptruint): boolean;
+function tgdbmi.ispointervalue(avalue: string; out pointervalue: ptruint): boolean;
+var
+ int1: integer;
 begin
+ int1:= findchar(avalue,' ');
+ if int1 > 0 then begin
+  setlength(avalue,int1-1);
+ end;
  result:= trystrtoptruint(avalue,pointervalue);
 end;
 
@@ -3559,11 +3565,11 @@ begin
    if startsstr(typetoken,ar1[0]) then begin
     str1:= copy(ar1[0],length(typetoken)+1,length(ar1[0])-length(typetoken));
    end;
-   if str1 = '^character' then begin
+   if (str1 = '^character') or (str1 = '^CHAR') then begin
     result:= getpcharvar(ad1);
    end
    else begin
-    if str1 = '^wchar' then begin
+    if (str1 = '^wchar') or (str1 = '^WIDECHAR') then begin
      result:= getpmsecharvar(ad1);
     end
     else begin

@@ -314,7 +314,7 @@ type
    property ifistate: ifidsstatesty read getifistate;
   published
    property controller: tdscontroller read fcontroller write setcontroller;
-   property Active: boolean read getactive write setactive;
+   property Active: boolean read getactive write setactive default false;
    property ifi: tifidscontroller read fificontroller write setificountroller;
    
    property BeforeOpen;
@@ -339,7 +339,7 @@ type
    property OnFilterRecord;
    property OnNewRecord;
    property OnPostError;
-   property AutoCalcFields;
+   property AutoCalcFields default false;
  end;
  
  trxdataset = class(tifidataset,iifitxaction)
