@@ -385,6 +385,7 @@ procedure tactionsmo.resetactonexecute(const sender: tobject);
 begin
  with mainfo do begin
   gdb.abort;
+  killtarget; //if running
   programfinished;
   setstattext('');
   startgdbonexecute(sender);

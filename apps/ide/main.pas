@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2009 by Martin Schreiber
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ uses
  msedispwidgets,msedataedits,msestat,msestatfile,msemenus,msebitmap,msetoolbar,
  msegrids,msefiledialog,msetypes,sourcepage,msetabs,msedesignintf,msedesigner,
  classes,mseclasses,msegraphutils,typinfo,msedock,sysutils,msesysenv,msestrings,
- msepostscriptprinter,msegraphics,mseglob;
+ msepostscriptprinter,msegraphics,mseglob,mseprocmonitorcomp,msesys;
 const
  versiontext = '1.9 unstable';
  idecaption = 'MSEide';
@@ -60,6 +60,7 @@ type
    vievmenuicons: timagelist;
 
    viewmenu: tframecomp;
+   runprocmon: tprocessmonitor;
    procedure newprogramonexecute(const sender: TObject);
    procedure newunitonexecute(const sender: TObject);
    procedure newformonexecute(const sender: TObject);
@@ -123,6 +124,8 @@ type
    procedure newprojectfromprogramexe(const sender: TObject);
    procedure newemptyprojectexe(const sender: TObject);
    procedure viewmemoryonexecute(const sender: TObject);
+   procedure runprocdied(const sender: TObject; const prochandle: Integer;
+                   const execresult: Integer; const data: Pointer);
   private
    fstartcommand: startcommandty;
    fnoremakecheck: boolean;
@@ -139,8 +142,10 @@ type
    fgdbserverexitcode: integer;
    fgdbservertimeout: longword;
    ftargetfilemodified: boolean;
+   frunningprocess: prochandlety;
    function startgdbconnection: boolean;
    procedure dorun;
+   function runtarget: boolean; //true if run possible
    procedure newproject(const fromprogram,empty: boolean);
    function checkgdberror(aresult: gdbresultty): boolean;
    procedure doshowform(const sender: tobject);
@@ -150,7 +155,7 @@ type
                          var action: modalresultty);
    procedure dofindmodulebytype(const atypename: string);
 
-   //idesignnotification
+  //idesignnotification
    procedure ItemDeleted(const ADesigner: IDesigner;
                    const amodule: tmsecomponent; const AItem: tcomponent);
    procedure ItemInserted(const ADesigner: IDesigner;
@@ -201,8 +206,11 @@ type
    procedure uploadcancel(const sender: tobject);
    procedure gdbserverexe(const sender: tguiapplication; var again: boolean);
    procedure gdbservercancel(const sender: tobject);
+   procedure updatetargetenvironment;
    function needsdownload: boolean;
+   function candebug: boolean; //run command empty or process attached
   public
+   constructor create(aowner: tcomponent); override;
    factivedesignmodule: pmoduleinfoty;
    fprojectloaded: boolean;
    errorformfilename: filenamety;
@@ -211,7 +219,9 @@ type
    procedure refreshstopinfo(const stopinfo: stopinfoty);
    procedure updatemodifiedforms;
    function checkremake(startcommand: startcommandty): boolean;
+                         //true if running possible
    procedure resetstartcommand;
+   procedure killtarget;
    procedure domake(atag: integer);
    procedure targetfilemodified;
    function checksavecancel(const aresult: modalresultty): modalresultty;
@@ -271,7 +281,7 @@ uses
  skeletons,msedatamodules,mseact,
  mseformdatatools,mseshapes,msefileutils,projecttreeform,mseeditglob,
  findinfileform,formdesigner,sourceupdate,actionsmodule,programparametersform,
- objectinspector,msesysutils,msestream,msesys,cpuform,disassform,
+ objectinspector,msesysutils,msestream,cpuform,disassform,
  panelform,watchpointsform,threadsform,targetconsole,
  debuggerform,componentpaletteform,componentstore,
  messageform,msesettings,mseintegerenter
@@ -290,6 +300,12 @@ begin
 end;
 
 { tmainfo }
+
+constructor tmainfo.create(aowner: tcomponent);
+begin
+ frunningprocess:= invalidprochandle;
+ inherited;
+end;
 
 //common
 
@@ -914,22 +930,6 @@ begin
  result:= true;
 end;
 
-procedure tmainfo.dorun;
-begin
- if startgdbconnection then begin
-  gdb.gdbdownload:= projectoptions.gdbdownload and 
-                        (needsdownload or projectoptions.downloadalways);
-  checkgdberror(gdb.run);
- end;
-end;
-
-procedure tmainfo.runexec(const sender: tobject);
-begin
- if checkremake(sc_continue) then begin
-  dorun;
- end;
-end;
-
 function tmainfo.checkgdberror(aresult: gdbresultty): boolean;
 begin
  result:= aresult = gdb_ok;
@@ -1018,15 +1018,40 @@ begin
  result:= ftargetfilemodified or projectoptions.downloadalways;
 end;
 
+function tmainfo.candebug: boolean; //run command empty or process attached
+begin
+ result:= (projectoptions.texp.runcommand = '') or gdb.started;
+end;
+
 procedure tmainfo.downloaded;
 begin
  ftargetfilemodified:= false;
 end;
 
+procedure tmainfo.updatetargetenvironment;
+       //todo: implement for run without gdb
+var
+ int1: integer;
+begin
+ with projectoptions do begin
+  gdb.progparameters:= progparameters;
+  gdb.workingdirectory:= progworkingdirectory;
+  gdb.clearenvvars;
+  for int1:= 0 to high(envvarons) do begin
+   if (int1 > high(envvarnames)) or 
+                    (int1 > high(envvarnames)) then begin
+    break;
+   end;
+   if envvarons[int1] then begin
+    gdb.setenvvar(envvarnames[int1],envvarvalues[int1]);
+   end;
+  end;
+ end;
+end;
+
 function tmainfo.loadexec(isattach: boolean; const force: boolean): boolean;
 var
  str1: filenamety;
- int1: integer;
 begin
  setstattext('');
  result:= false;
@@ -1097,20 +1122,7 @@ begin
  end;
  result:= gdb.execloaded or gdb.attached;
  if result then begin
-  with projectoptions do begin
-   gdb.progparameters:= progparameters;
-   gdb.workingdirectory:= progworkingdirectory;
-   gdb.clearenvvars;
-   for int1:= 0 to high(envvarons) do begin
-    if (int1 > high(envvarnames)) or 
-                     (int1 > high(envvarnames)) then begin
-     break;
-    end;
-    if envvarons[int1] then begin
-     gdb.setenvvar(envvarnames[int1],envvarvalues[int1]);
-    end;
-   end;
-  end;
+  updatetargetenvironment;
   watchpointsfo.clear;
   targetconsolefo.clear;
   if projectoptions.showconsole then begin
@@ -1218,6 +1230,8 @@ begin
 end;
 
 procedure tmainfo.mainmenuonupdate(const sender: tcustommenu);
+var
+ bo1: boolean;
 begin
  with projectoptions,texp,actionsmo do begin
   detachtarget.enabled:= gdb.execloaded;
@@ -1225,14 +1239,17 @@ begin
                ((uploadcommand <> '') or gdbdownload);
   attachprocess.enabled:= not (gdb.execloaded or gdb.attached);
   run.enabled:= not gdb.running and not gdb.downloading;
-  step.enabled:= not gdb.running and not gdb.downloading;
-  stepi.enabled:= not gdb.running and not gdb.downloading;
-  next.enabled:= not gdb.running and not gdb.downloading;
-  nexti.enabled:= not gdb.running and not gdb.downloading;
-  finish.enabled:= not gdb.running and gdb.started;
-  continue.enabled:= not gdb.running and not gdb.downloading;
-  interrupt.enabled:= gdb.running and not gdb.downloading;
-  reset.enabled:= gdb.started or gdb.attached or gdb.downloading;
+  bo1:= candebug;
+  step.enabled:= not gdb.running and not gdb.downloading and bo1;
+  stepi.enabled:= not gdb.running and not gdb.downloading and bo1;
+  next.enabled:= not gdb.running and not gdb.downloading and bo1;
+  nexti.enabled:= not gdb.running and not gdb.downloading and bo1;
+  finish.enabled:= not gdb.running and gdb.started and bo1;
+  continue.enabled:= not gdb.running and not gdb.downloading and 
+                      (bo1 or (frunningprocess = invalidprochandle));
+  interrupt.enabled:= gdb.running and not gdb.downloading and bo1;
+  reset.enabled:= (gdb.started or gdb.attached or gdb.downloading) or
+                    not bo1 and (frunningprocess <> invalidprochandle);
   makeact.enabled:= not making;
   buildact.enabled:= not making;
   make1act.enabled:= not making;
@@ -2268,7 +2285,82 @@ begin
  end;
 end;
 
+procedure tmainfo.dorun;
+var
+ mstr1: msestring;
+ pwdbefore: msestring;
+begin
+ if projectoptions.texp.runcommand = '' then begin
+  if startgdbconnection then begin
+   gdb.gdbdownload:= projectoptions.gdbdownload and 
+                         (needsdownload or projectoptions.downloadalways);
+   checkgdberror(gdb.run);
+  end;
+ end
+ else begin
+  with projectoptions do begin
+   mstr1:= texp.runcommand;
+   if progparameters <> '' then begin
+    mstr1:= mstr1 + ' ' + progparameters;
+   end;
+   if progworkingdirectory <> '' then begin
+    pwdbefore:= getcurrentdir;
+    setcurrentdir(progworkingdirectory);
+   end;
+   frunningprocess:= targetconsolefo.terminal.execprog(mstr1);   
+   if frunningprocess = invalidprochandle then begin
+    setstattext('Can not start Process',mtk_error);
+    exit;
+   end;
+   runprocmon.listentoprocess(frunningprocess);
+   try
+   finally
+    if progworkingdirectory <> '' then begin
+     setcurrentdir(pwdbefore);
+    end;
+   end;
+  end;
+  setstattext('Process '+inttostr(frunningprocess)+' running.',mtk_running);
+ end;
+end;
+
+procedure tmainfo.runprocdied(const sender: TObject; const prochandle: Integer;
+               const execresult: Integer; const data: Pointer);
+begin
+ if prochandle = frunningprocess then begin
+  frunningprocess:= invalidprochandle;
+  if execresult <> 0 then begin
+   setstattext('Process terminated '+inttostr(execresult)+'.',
+                                    mtk_error);
+  end
+  else begin
+   setstattext('Process terminated normally.',mtk_finished);
+  end;
+ end;
+end;
+
+function tmainfo.runtarget: boolean;
+                   //true if run possible
+begin
+ result:= true;
+ if not gdb.attached then begin
+  if projectoptions.texp.runcommand = '' then begin
+   if not gdb.started then begin
+    if loadexec(false,false) then begin
+     result:= false;
+     dorun;
+    end;
+   end;
+  end
+  else begin
+   result:= false;
+   dorun;
+  end;
+ end;
+end;
+
 function tmainfo.checkremake(startcommand: startcommandty): boolean;
+                         //true if running possible
 begin
  if not objectinspectorfo.canclose(nil) then begin
   result:= false;
@@ -2290,12 +2382,7 @@ begin
    fnoremakecheck:= true;
   end;
   if result then begin
-   if not gdb.started then begin
-    result:= false;
-    if loadexec(false,false) then begin
-     dorun;
-    end;
-   end;
+   result:= runtarget;
   end;
  end
  else begin
@@ -2306,9 +2393,48 @@ begin
  end;
 end;
 
+procedure tmainfo.runexec(const sender: tobject);
+begin
+ if checkremake(sc_continue) then begin
+  dorun;
+ end;
+end;
+
+procedure tmainfo.aftermake(const adesigner: idesigner;
+                               const exitcode: integer);
+begin
+ if exitcode <> 0 then begin
+  setstattext('Make ***ERROR*** '+inttostr(exitcode)+'.',mtk_error);
+  showfirsterror;
+ end
+ else begin
+  setstattext('Make OK.',mtk_finished);
+  fcurrent:= true;
+  fnoremakecheck:= false;
+  messagefo.messages.lastrow;
+  if projectoptions.closemessages then begin
+   messagefo.hide;
+  end;
+  if fstartcommand <> sc_none then begin
+   runtarget;
+//   if loadexec(false,false) then begin
+//    dorun;
+//   end;
+  end;
+ end;
+end;
+
 procedure Tmainfo.resetstartcommand;
 begin
  fstartcommand:= sc_none;
+end;
+
+procedure tmainfo.killtarget;
+begin
+ if frunningprocess <> invalidprochandle then begin
+  killprocess(frunningprocess);
+  frunningprocess:= invalidprochandle;
+ end;
 end;
 
 procedure tmainfo.sourcechanged(const sender: tsourcepage);
@@ -2408,28 +2534,6 @@ begin
  //dummy
 end;
 
-procedure tmainfo.aftermake(const adesigner: idesigner;
-                               const exitcode: integer);
-begin
- if exitcode <> 0 then begin
-  setstattext('Make ***ERROR*** '+inttostr(exitcode)+'.',mtk_error);
-  showfirsterror;
- end
- else begin
-  setstattext('Make OK.',mtk_finished);
-  fcurrent:= true;
-  fnoremakecheck:= false;
-  messagefo.messages.lastrow;
-  if projectoptions.closemessages then begin
-   messagefo.hide;
-  end;
-  if fstartcommand <> sc_none then begin
-   if loadexec(false,false) then begin
-    dorun;
-   end;
-  end;
- end;
-end;
 
 procedure tmainfo.beforefilesave(const adesigner: idesigner;
                const afilename: filenamety);

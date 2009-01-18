@@ -221,7 +221,8 @@ type
   protected
    function getbuttonclass: framebuttonclassty; override;
   public
-   constructor create(const intf: icaptionframe; const buttonintf: ibutton); override;                                                  
+   constructor create(const intf: icaptionframe;
+                                         const buttonintf: ibutton); override;                                                  
    procedure updatedropdownoptions(const avalue: dropdowneditoptionsty);
    property activebutton: integer read factivebutton write setactivebutton default 0;
    property readonly: boolean read freadonly write setreadonly default false;
@@ -246,6 +247,7 @@ type
    fdataselected: boolean;
    fselectkey: keyty;
    fcolor: colorty;
+   fdropdowncount: integer;
   protected
    fintf: idropdown;
    foptions: dropdowneditoptionsty;
@@ -779,19 +781,23 @@ end;
 
 procedure tcustomdropdowncontroller.dropdown;
 begin
- if not (deo_disabled in foptions) and candropdown then begin
+ if not (deo_disabled in foptions) and candropdown and 
+                   (fdropdowncount = 0) then begin
   dobeforedropdown;
   internaldropdown;
   application.postevent(tobjectevent.create(ek_dropdown,ievent(self)));
+  inc(fdropdowncount);
   fintf.getwidget.window.registermovenotification(ievent(self));
  end;
 end;
 
 procedure tcustomdropdowncontroller.canceldropdown;
+var
+ widget1: twidget;
 begin
- if getdropdownwidget <> nil then begin
-//  getdropdownwidget.release;
-  getdropdownwidget.window.modalresult:= mr_cancel;
+ widget1:= getdropdownwidget;
+ if widget1 <> nil then begin
+  widget1.window.modalresult:= mr_cancel;
  end;
 end;
 
@@ -898,6 +904,7 @@ procedure tcustomdropdowncontroller.objectevent(const sender: tobject;
   const event: objecteventty);
 begin
  if (event = oe_destroyed) and (sender = getdropdownwidget) then begin
+  dec(fdropdowncount);
   fintf.getwidget.window.unregistermovenotification(ievent(self));
   application.unregisteronapplicationactivechanged(
            {$ifdef FPC}@{$endif}applicationactivechanged);
