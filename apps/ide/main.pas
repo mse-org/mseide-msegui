@@ -210,10 +210,10 @@ type
    function needsdownload: boolean;
    function candebug: boolean; //run command empty or process attached
   public
-   constructor create(aowner: tcomponent); override;
    factivedesignmodule: pmoduleinfoty;
    fprojectloaded: boolean;
    errorformfilename: filenamety;
+   constructor create(aowner: tcomponent); override;
    function loadexec(isattach: boolean; const force: boolean): boolean; //true if ok
    procedure setstattext(const atext: msestring; const akind: messagetextkindty = mtk_info);
    procedure refreshstopinfo(const stopinfo: stopinfoty);
@@ -304,7 +304,7 @@ end;
 constructor tmainfo.create(aowner: tcomponent);
 begin
  frunningprocess:= invalidprochandle;
- inherited;
+ inherited create(aowner);
 end;
 
 //common
