@@ -488,7 +488,7 @@ begin
    exit;
   end;
  end;
- fillchar(info1,0,sizeof(info1));
+ fillchar(info1,sizeof(info1),0);
  info1.address:= addr;
  info1.addressbreakpoint:= true;
  info1.bkpton:= true;
