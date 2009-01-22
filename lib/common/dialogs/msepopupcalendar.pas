@@ -25,7 +25,7 @@ type
  end;
  
  tpopupcalendarfo = class(tmseform)
-   grid: tstringgrid;
+   grid: tdrawgrid;
    monthdisp: tdatetimedisp;
    tstockglyphbutton1: tstockglyphbutton;
    tstockglyphbutton2: tstockglyphbutton;
