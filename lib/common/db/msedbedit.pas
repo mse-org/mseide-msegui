@@ -8631,6 +8631,8 @@ begin
    sbe_stepdown: rowup(fca_focusin);
    sbe_pageup: pagedown(fca_focusin);
    sbe_pagedown: pageup(fca_focusin);
+   sbe_wheelup: wheeldown(fca_focusin);
+   sbe_wheeldown: wheelup(fca_focusin);
    sbe_valuechanged: begin end;
    sbe_thumbtrack,sbe_thumbposition: begin
     int1:= tlbdropdownlistcontroller(fcontroller).lookupbuffer.count - 1;
