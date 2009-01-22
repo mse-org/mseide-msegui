@@ -539,7 +539,7 @@ begin
  else begin
   po2.y:= po1.y;
  end;
- setpickoffset(subpoint(po2,po1));
+ setclippedpickoffset(subpoint(po2,po1));
  if foptions * [spo_hmove,spo_hprop] = [spo_hmove,spo_hprop] then begin
   fhprop:= reader.readreal('xprop',fhprop,0,1);
  end;
