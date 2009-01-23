@@ -354,7 +354,9 @@ begin
   if not sizeisequal(fbounds.size,value.size) then begin
    fbackup.size:= value.size;
    fcaret.size:= value.size;
-   fcaret.init(cl_white);
+   if not fcaret.isempty then begin
+    fcaret.init(cl_white);
+   end;
   end;
   fbounds:= value;
   addpoint1(fbounds.pos,forigin);

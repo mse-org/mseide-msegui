@@ -870,9 +870,11 @@ type
    procedure setvaluefieldname(const value: string);
    procedure settextfield(value: tfield);
    procedure updatefields;
+   procedure updatelookupvalue;
   protected
    procedure layoutchanged; override;
    procedure activechanged; override;
+   procedure editingchanged; override;
   public
    constructor create(const aowner: tdbdropdownlistcontroller);
    function getlookuptext(const key: integer): msestring; overload;
@@ -1081,6 +1083,7 @@ type
   public
    constructor create(const intf: idbdropdownlist; const aisstringkey: boolean);
    destructor destroy; override;
+   procedure dropdown; override;
   published
    property datasource: tdatasource read getdatasource write setdatasource;
    property keyfield: string read getkeyfield write setkeyfield;
@@ -4646,10 +4649,8 @@ begin
  end;
 end;
 
-procedure tdropdowndatalink.activechanged;
+procedure tdropdowndatalink.updatelookupvalue;
 begin
- updatefields;
- inherited;
  with tdataedit1(fowner.fintf.getwidget) do begin
   if fgridintf <> nil then begin
    fgridintf.getcol.changed;
@@ -4657,6 +4658,21 @@ begin
   else begin
    valuetotext;
   end;
+ end;
+end;
+
+procedure tdropdowndatalink.activechanged;
+begin
+ updatefields;
+ inherited;
+ updatelookupvalue;
+end;
+
+procedure tdropdowndatalink.editingchanged;
+begin
+ inherited;
+ if not editing then begin
+  updatelookupvalue;
  end;
 end;
 
@@ -4918,6 +4934,12 @@ destructor tdbdropdownlistcontroller.destroy;
 begin
  inherited;
  fdatalink.free;
+end;
+
+procedure tdbdropdownlistcontroller.dropdown;
+begin
+ tdropdowncols1(fcols).fitemindex:= -1;
+ inherited; 
 end;
 
 function tdbdropdownlistcontroller.getdatasource: tdatasource;

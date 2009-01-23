@@ -56,6 +56,7 @@ type
    function getactive: boolean;
    procedure loaded; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
+   procedure dataevent(event: tdataevent; info: ptrint); override;
 //   procedure openlocal;
    procedure internalopen; override;
    procedure internalinsert; override;
@@ -187,6 +188,11 @@ end;
 function tlocaldataset.getfieldclass(fieldtype: tfieldtype): tfieldclass;
 begin
  fcontroller.getfieldclass(fieldtype,result);
+end;
+
+procedure tlocaldataset.dataevent(event: tdataevent; info: ptrint);
+begin
+ fcontroller.dataevent(event,info);
 end;
 
 function tlocaldataset.getcontroller: tdscontroller;

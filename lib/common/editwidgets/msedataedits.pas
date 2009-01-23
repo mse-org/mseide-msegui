@@ -3366,9 +3366,14 @@ end;
 
 function tcustomenuedit.getindex(avalue: integer): integer;
 begin
- result:= getindex1(avalue,enums,fvalueoffset);
- if result < 0 then begin
+ if avalue = -1 then begin
   result:= -1;
+ end
+ else begin
+  result:= getindex1(avalue,enums,fvalueoffset);
+  if result < 0 then begin
+   result:= -1;
+  end;
  end;
 end;
 
