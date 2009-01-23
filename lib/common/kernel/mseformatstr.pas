@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -1218,6 +1218,9 @@ begin
 end;
 
 function stringtotime(const avalue: msestring): tdatetime;
+var
+ mstr1: msestring;
+ timesep: msechar;
 begin
  if avalue = ' ' then begin
   result:= frac(now);
@@ -1227,7 +1230,26 @@ begin
    result:= emptydatetime;
   end
   else begin
-   result:= sysutils.strtotime(avalue);
+   timesep:= defaultformatsettingsmse.timeseparator;
+   if (countchars(avalue,timesep) = 0) and
+      (countchars(avalue,defaultformatsettingsmse.timeseparator) = 0) then begin
+    case length(avalue) of
+     3,4: begin
+      mstr1:= copy(avalue,1,2)+timesep+copy(avalue,3,2);
+     end;
+     5,6: begin
+      mstr1:= copy(avalue,1,2)+timesep+copy(avalue,3,2)+timesep+
+              copy(avalue,5,2);
+     end;
+     else begin
+      mstr1:= avalue;
+     end;
+    end;
+    result:= sysutils.strtotime(mstr1);
+   end
+   else begin
+    result:= sysutils.strtotime(avalue);
+   end;
   end;
  end;
 end;
@@ -1273,6 +1295,9 @@ begin
 end;
 
 function stringtodatetime(const avalue: msestring): tdatetime;
+var
+ mstr1: msestring;
+ datsep: msechar;
 begin
  if avalue = ' ' then begin
   result:= now;
@@ -1282,7 +1307,26 @@ begin
    result:= emptydatetime;
   end
   else begin
-   result:= strtodatetime(avalue);
+   datsep:= defaultformatsettingsmse.dateseparator;
+   if (countchars(avalue,datsep) = 0) and
+      (countchars(avalue,defaultformatsettingsmse.timeseparator) = 0) then begin
+    case length(avalue) of
+     3,4: begin
+      mstr1:= copy(avalue,1,2)+datsep+copy(avalue,3,2);
+     end;
+     5,6: begin
+      mstr1:= copy(avalue,1,2)+datsep+copy(avalue,3,2)+datsep+
+              copy(avalue,5,2);
+     end;
+     else begin
+      mstr1:= avalue;
+     end;
+    end;
+    result:= strtodatetime(mstr1);
+   end
+   else begin
+    result:= strtodatetime(avalue);
+   end;
   end;
  end;
 end;
