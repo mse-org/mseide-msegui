@@ -929,6 +929,7 @@ type
    ffontdatalink: tfielddatalink;
    frowexited: integer;
    feditingbefore: boolean;
+   fautoinserting: boolean;
    finserting: boolean;
    finsertingbefore: boolean;
    procedure checkscroll;
@@ -954,12 +955,16 @@ type
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
   protected
+   function canautoinsert: boolean;
+   procedure checkdelayedautoinsert;
    function checkvalue: boolean;
    procedure updatelayout;
    procedure updaterowcount;
    procedure datasetscrolled(distance: integer); override;
    procedure activechanged; override;
    procedure editingchanged; override;
+   procedure recordchanged(afield: tfield); override;
+   procedure datasetchanged; override;
    procedure updatedata; override;
    procedure focuscell(var cell: gridcoordty);
    procedure cellevent(var info: celleventinfoty);
@@ -991,8 +996,6 @@ type
    function getint64buffer(const afield: tfield; const row: integer): pointer;
    function getrealtybuffer(const afield: tfield; const row: integer): pointer;
    function getdatetimebuffer(const afield: tfield; const row: integer): pointer;
-   procedure recordchanged(afield: tfield); override;
-   procedure datasetchanged; override;
    function canclose(const newfocus: twidget): boolean;
    procedure painted;
    procedure loaded;
@@ -5663,6 +5666,7 @@ begin
    fgrid.col:= fgrid.datacols.newrowcol;
   end;
   finsertingbefore:= finserting;
+  checkdelayedautoinsert;
  end;
 end;
 
@@ -5708,6 +5712,7 @@ begin
    end;
   end;
   factiverecordbefore:= activerecord;
+  checkdelayedautoinsert;
  end;
 end;
 
@@ -6146,6 +6151,17 @@ begin
   ek_dbupdaterowdata: begin
    doupdaterowdata(-1);
   end;
+  ek_dbinsert: begin
+   if fautoinserting then begin
+    try
+     if canautoinsert then begin
+      dataset.insert;
+     end;
+    finally
+     fautoinserting:= false;
+    end;
+   end;
+  end;
  end;
 end;
 
@@ -6179,12 +6195,30 @@ begin
  fieldtypes[0]:= integerfields;
 end;
 
+function tgriddatalink.canautoinsert: boolean;
+begin
+ result:= fgrid.focused and active and (recordcount = 0) and 
+                                        (og_autofirstrow in fgrid.optionsgrid);
+end;
+
+procedure tgriddatalink.checkdelayedautoinsert;
+begin
+ if canautoinsert and not fautoinserting then begin
+  fautoinserting:= true;
+  application.postevent(tobjectevent.create(ek_dbinsert,ievent(self)));
+ end;
+end;
+
 procedure tgriddatalink.beforefocuscell(const cell: gridcoordty;
                              const selectaction: focuscellactionty);
 begin
- if (selectaction = fca_entergrid) and active and (recordcount = 0) and
-                (og_autofirstrow in fgrid.optionsgrid) then begin
-  dataset.insert;
+ if (selectaction = fca_entergrid) and canautoinsert then begin
+  fautoinserting:= true;
+  try
+   dataset.insert;
+  finally
+   fautoinserting:= false;
+  end;
  end;
 end;
 
@@ -6212,7 +6246,8 @@ begin
    int1:= rowtorecnonullbased(cell.row);
    if not (finserting and not finsertingbefore) then begin
     int3:= recnonullbased;
-    if ds1.state <> dsfilter then begin
+    if (ds1.state <> dsfilter) and not fautoinserting and 
+                        (tcustomgrid1(fgrid).fnocheckvalue = 0) then begin
      ds1.checkbrowsemode;
     end;
     int4:= recnonullbased;

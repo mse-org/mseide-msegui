@@ -33,6 +33,7 @@ type
                 ek_release,ek_closeform,ek_childscaled,ek_resize,
                 ek_dropdown,ek_async,ek_execute,ek_component,ek_synchronize,
                 ek_dbedit,ek_dbupdaterowdata,ek_data,ek_objectdata,ek_childproc,
+                ek_dbinsert, //for tdscontroller
                 ek_mse,
                 ek_user);
 const

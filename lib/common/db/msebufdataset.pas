@@ -3,7 +3,7 @@
     Copyright (c) 1999-2000 by Michael Van Canneyt, member of the
     Free Pascal development team
     
-    Rewritten 2006-2008 by Martin Schreiber
+    Rewritten 2006-2009 by Martin Schreiber
     
     BufDataset implementation
 
@@ -477,6 +477,7 @@ type
    procedure setmsestringdata(const sender: tmsestringfield; const avalue: msestring);
    procedure setoninternalcalcfields(const avalue: internalcalcfieldseventty);
    procedure checkfilterstate;
+   procedure checklogfile;
    procedure openlocal;
    procedure dointernalopen;
    procedure doloadfromstream;
@@ -486,6 +487,7 @@ type
             const alogging: boolean; const alogmode: logflagty);
    procedure logrecbuffer(const awriter: tbufstreamwriter; 
                          const akind: tupdatekind; const abuffer: pintrecordty);
+   function getlogging: boolean;
   protected
    fbrecordcount: integer;
    ffieldinfos: fieldinfoarty;
@@ -630,7 +632,13 @@ type
    procedure Append;
    procedure notifycontrols; //calls enablecontrols/disablecontrols
 
-   procedure recover; //loads from logfile
+   //logging works with persistent fields only
+   procedure recover; 
+            //load from logfile, start logging, 
+   procedure startlogging;
+            //close logfile, save state with truncated log, open logfile
+   procedure stoplogging; //close logfile
+   property logging: boolean read getlogging;
    procedure savetostream(const astream: tstream);
    procedure loadfromstream(const astream: tstream);
    procedure savetofile(const afilename: filenamety);
@@ -1533,7 +1541,7 @@ begin
  if (flogfilename <> '') and findfile(flogfilename) then begin
   floadingstream:= tmsefilestream.create(flogfilename,fm_read);
   try
-   doloadfromstream
+   doloadfromstream;
   finally
    floadingstream.free;
   end;
@@ -3397,7 +3405,8 @@ begin
  if (frecno > arecno) then begin
   inc(frecno);
  end;
- fcurrentbuf:= factindexpo^.ind[frecno];
+ fcurrentbuf:= arecord;
+// fcurrentbuf:= factindexpo^.ind[frecno];
  inc(fbrecordcount);
 end;
 
@@ -4026,7 +4035,8 @@ const
 // endmarker
  
 procedure tmsebufdataset.logupdatebuffer(const awriter: tbufstreamwriter; 
-                const abuffer: recupdatebufferty; const adeletedrecord: pintrecordty;
+                const abuffer: recupdatebufferty; 
+                const adeletedrecord: pintrecordty;
                 const alogging: boolean; const alogmode: logflagty);
 var
  header1: logbufferheaderty;
@@ -4178,6 +4188,7 @@ var
      newpo:= findexes[0].ind[aindex];
      result:= true;
      if delete then begin
+//      appended[int1]:= nil;
       deleteitem(appended,int1);
       dec(fbrecordcount);
      end;
@@ -4281,7 +4292,7 @@ begin
         oldupdatepointers[int2]:= po;
         int3:= -1;
         if deletedrecord <> nil then begin
-         for int1:= 0 to int2-1 do begin
+         for int1:= 0 to int2 - 1 do begin
           if oldupdatepointers[int1] = deletedrecord then begin
            int3:= int1;
            break;
@@ -4298,7 +4309,7 @@ begin
            bookmark.recordpo:= nil;   //deleting of inserted record
            intfreerecord(po1);
           end
-          else begin        //deleting of modified record
+          else begin                  //deleting of modified record
            intfreerecord(updabuf[int3].bookmark.recordpo);
            bookmark.recordpo:= updabuf[int3].oldvalues;
            bookmark.recno:= 0;
@@ -4351,7 +4362,8 @@ begin
          ukdelete: begin
           with updabuf[int3] do begin
            appendrecord(bookmark.recordpo);
-           additem(appended,bookmark.recordpo);
+           additem(appended,oldupdatepointers[int3]);
+//           additem(appended,bookmark.recordpo);
           end;
          end;
          ukinsert: begin
@@ -4513,11 +4525,16 @@ begin
  end;
 end;
 
-procedure tmsebufdataset.recover;
+procedure tmsebufdataset.checklogfile;
 begin
  if trim(flogfilename) = '' then begin
   databaseerror('No log file name.',self);
  end;
+end;
+
+procedure tmsebufdataset.recover;
+begin
+ checklogfile;
  if islocal then begin
   active:= true;
  end
@@ -4549,6 +4566,26 @@ begin
   freeandnil(flogger);
   stream1.free;
  end;
+end;
+
+procedure tmsebufdataset.startlogging; 
+  //close logfile, save state with truncated log, open logfile
+begin
+ checklogfile;
+ checkbrowsemode;
+ closelogger;
+ startlogger;
+end;
+
+procedure tmsebufdataset.stoplogging; 
+  //close logfile
+begin
+ closelogger; 
+end;
+
+function tmsebufdataset.getlogging: boolean;
+begin
+ result:= flogger <> nil;
 end;
 
 function tmsebufdataset.islocal: boolean;
