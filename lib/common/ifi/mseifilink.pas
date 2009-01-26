@@ -1347,6 +1347,10 @@ var
  po1: pchar;
  str1: string;
 begin
+ if csdesigning in componentstate then begin
+  result:= false;
+  exit;
+ end;
  if asequence <> 0 then begin
   mo1:= fmodulesrx.finditem(asequence);
  end
