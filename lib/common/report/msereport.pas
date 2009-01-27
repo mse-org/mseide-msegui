@@ -229,8 +229,9 @@ type
    property sumascurrency: currency read getsumascurrency;
    property richvalue: richstringty read fvalue write setrichvalue;
   published
-   property tag: integer read ftag write ftag;
-   property options: reptabulatoritemoptionsty read foptions write setoptions;
+   property tag: integer read ftag write ftag default 0;
+   property options: reptabulatoritemoptionsty read foptions 
+                                             write setoptions default [];
    property value: msestring read fvalue.text write setvalue;
    property font: treptabfont read getfont write setfont stored isfontstored;
    property color: colorty read fcolor write setcolor default cl_none;
@@ -1545,6 +1546,7 @@ type
    frepdesigninfo: repdesigninfoty;
    freppages: reportpagearty;
    fdefaultprintorientation: pageorientationty;
+   class function hasresource: boolean; override;
    procedure dopagebeforerender(const sender: tcustomreportpage;
                                           var empty: boolean);
    procedure dopagepaint(const sender: tcustomreportpage;
@@ -5890,6 +5892,11 @@ begin
  if not bo1 and candestroyevent(tmethod(fondestroyed)) then begin
   fondestroyed(self);
  end;
+end;
+
+class function tcustomreport.hasresource: boolean;
+begin
+ result:= true;
 end;
 
 procedure tcustomreport.beforedestruction;

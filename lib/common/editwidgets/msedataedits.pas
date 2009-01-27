@@ -4629,12 +4629,20 @@ procedure tcustomcalendardatetimeedit.createdropdownwidget(
          const atext: msestring; out awidget: twidget);
 var
  dat1: tdatetime;
+ mstr1: msestring;
+ bo1: boolean;
 begin
+ bo1:= true;
+ mstr1:= atext;
+ checktext(mstr1,bo1);
+ if not bo1 then begin
+  abort;
+ end;
  awidget:= tpopupcalendarfo.create(nil,fdropdown);
  dat1:= now;
- if trim(atext) <> '' then begin
+ if trim(mstr1) <> '' then begin
   try
-   dat1:= strtodate(atext);
+   dat1:= stringtodatetime(mstr1);
   except
   end;
  end;
