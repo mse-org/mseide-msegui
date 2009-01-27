@@ -1402,7 +1402,8 @@ type
    procedure setfontheight;
    procedure postchildscaled;
    procedure dofontheightdelta(var delta: integer); virtual;
-   procedure syncsinglelinefontheight(const lineheight: boolean = false);
+   procedure syncsinglelinefontheight(const lineheight: boolean = false;
+                       const space: integer = 2);
 
    procedure setwidgetrect(const Value: rectty);
    procedure internalsetwidgetrect(Value: rectty; const windowevent: boolean);
@@ -10570,7 +10571,8 @@ begin
  ffont.onchange:= {$ifdef FPC}@{$endif}dofontchanged;
 end;
 
-procedure twidget.syncsinglelinefontheight(const lineheight: boolean = false);
+procedure twidget.syncsinglelinefontheight(const lineheight: boolean = false;
+                                     const space: integer = 2);
 var
  int1: integer;
 begin
@@ -10581,7 +10583,7 @@ begin
   int1:= getfont.glyphheight;
  end;
  if fframe = nil then begin
-  bounds_cy:= bounds_cy + int1 + 2 - paintsize.cy
+  bounds_cy:= bounds_cy + int1 + space - paintsize.cy
  end
  else begin
   bounds_cy:= bounds_cy + int1 + fframe.framei_top + 

@@ -404,7 +404,10 @@ type
  tcustombuttonframe1 = class(tcustombuttonframe);
  tstringcol1 = class(tstringcol);
  tframebutton1 = class(tframebutton);
-
+const
+ defaultdropdowncellinnerframe: framety = 
+                      (left: 1; top: 0; right: 1; bottom: 0);
+ 
 { tdropdowncol }
 
 constructor tdropdowncol.create(const aowner: tcustomdropdownlistcontroller);
@@ -1374,6 +1377,7 @@ begin
  fcontroller:= acontroller;
  aparent:= fcontroller.getwidget;
  inherited create(nil);
+ fdatacols.innerframe:= defaultdropdowncellinnerframe;
  visible:= false;
  beginupdate;
  try

@@ -332,6 +332,7 @@ type
    procedure updateflagtext(var avalue: msestring);
    function geteditor: tinplaceedit;
    function geteditfont: tfont; virtual;
+   function getinnerframe: framety; virtual;
    procedure setupeditor; virtual;
    procedure internalcreateframe; override;
    procedure clientrectchanged; override;
@@ -1187,12 +1188,17 @@ begin
  result:= getfont1;
 end;
 
+function tcustomedit.getinnerframe: framety;
+begin
+ result:= minimalframe;
+end;
+
 procedure tcustomedit.setupeditor;
 begin
  if not (csloading in componentstate) then begin
   with feditor do begin
    if fframe = nil then begin
-    setup(text,curindex,true,inflaterect(clientrect,-1),
+    setup(text,curindex,true,deflaterect(clientrect,getinnerframe),
              clientrect,nil,nil,geteditfont);
    end
    else begin
@@ -1204,9 +1210,13 @@ begin
 end;
 
 procedure tcustomedit.synctofontheight;
+var
+ int1: integer;
+ fram1: framety;
 begin
  inherited;
- syncsinglelinefontheight;
+ fram1:= getinnerframe;
+ syncsinglelinefontheight(false,fram1.top + fram1.bottom);
 end;
 
 procedure tcustomedit.clientrectchanged;

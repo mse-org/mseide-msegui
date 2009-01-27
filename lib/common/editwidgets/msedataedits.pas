@@ -86,6 +86,7 @@ type
    procedure internalsetgridvalue(const index: integer; const Value);
    procedure internalfillcol(const value);
    procedure internalassigncol(const value);
+   function getinnerframe: framety; override;
    procedure editnotification(var info: editnotificationinfoty); override;
    procedure valuechanged; virtual;
    procedure modified; virtual; //for dbedits
@@ -1355,10 +1356,21 @@ procedure tdataedit.initgridwidget;
 begin
  optionswidget:= optionswidget - [ow_autoscale];
  optionsskin:= optionsskin + defaultgridskinoptions;
- if fframe <> nil then begin
-  fframe.initgridframe;
- end;
+ freeandnil(fframe);
+// if fframe <> nil then begin
+//  fframe.initgridframe;
+// end;
  synctofontheight;
+end;
+
+function tdataedit.getinnerframe: framety;
+begin
+ if fgridintf <> nil then begin
+  result:= fgridintf.getcol.innerframe;
+ end
+ else begin
+  result:= inherited getinnerframe;
+ end;
 end;
 
 procedure tdataedit.editnotification(var info: editnotificationinfoty);
@@ -1548,7 +1560,7 @@ begin
   result:= frame.cellframe;
  end
  else begin
-  result:= minimalframe;
+  result:= tgridarrayprop(fgridintf.getcol.prop).innerframe;
  end;
 end;
 

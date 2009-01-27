@@ -320,6 +320,7 @@ type
                  const aframe: tcustomframe; const aface: tcustomface);
    procedure drawcelloverlay(const acanvas: tcanvas; const aframe: tcustomframe);
    property grid: tcustomgrid read fgrid;
+   property innerframe: framety read getinnerframe;
   published
    property color: colorty read fcolor write setcolor default cl_default;
    property frame: tcellframe read getframe write setframe;
@@ -939,11 +940,17 @@ type
    flinecolorfix: colorty;
    fcolorselect: colorty;
    fcoloractive: colorty;
+   finnerframe: framety;
    procedure setlinewidth(const Value: integer);
    procedure setlinecolor(const Value: colorty);
    procedure setlinecolorfix(const Value: colorty);
    procedure setcolorselect(const avalue: colorty);
    procedure setcoloractive(avalue: colorty);
+   procedure setinnerframe(const avalue: framety);
+   procedure setinnerframe_left(const avalue: integer);
+   procedure setinnerframe_top(const avalue: integer);
+   procedure setinnerframe_right(const avalue: integer);
+   procedure setinnerframe_bottom(const avalue: integer);
   protected
    freversedorder: boolean;
    fgrid: tcustomgrid;
@@ -967,6 +974,7 @@ type
    constructor create(aowner: tcustomgrid; aclasstype: gridpropclassty); reintroduce;
    function fixindex(const index: integer): integer;
    property oppositecount: integer read foppositecount write setoppositecount default 0;
+   property innerframe: framety read finnerframe write setinnerframe;
   published
    property linewidth: integer read flinewidth
                 write setlinewidth default defaultgridlinewidth;
@@ -978,6 +986,14 @@ type
               default cl_default;
    property coloractive: colorty read fcoloractive write setcoloractive
               default cl_none;
+   property innerframe_left: integer read finnerframe.left 
+                              write setinnerframe_left default 1;
+   property innerframe_top: integer read finnerframe.top 
+                              write setinnerframe_top default 1;
+   property innerframe_right: integer read finnerframe.right 
+                              write setinnerframe_right default 1;
+   property innerframe_bottom: integer read finnerframe.bottom 
+                              write setinnerframe_bottom default 1;
  end;
 
  tcolsfont = class(tparentfont)
@@ -2417,7 +2433,7 @@ end;
 
 function tgridprop.getinnerframe: framety;
 begin
- result:= minimalframe;
+ result:= tgridarrayprop(prop).finnerframe;
 end;
 
 procedure tgridprop.updatecellrect(const aframe: tcustomframe);
@@ -2496,27 +2512,6 @@ begin
  result:= [];
 end;
 
-{
-function tgridprop.getframedisabled: boolean;
-begin
- result:= false;
-end;
-
-function tgridprop.getframeclicked: boolean;
-begin
- result:= false;
-end;
-
-function tgridprop.getframemouse: boolean;
-begin
- result:= false;
-end;
-
-function tgridprop.getframeactive: boolean;
-begin
- result:= false;
-end;
-}
 { tcolselectfont }
 
 class function tcolselectfont.getinstancepo(owner: tobject): pfont;
@@ -3639,7 +3634,9 @@ begin
                                      fframe.finnerframe.bottom;
  end
  else begin
-  height:= font.glyphheight + 2;
+  with tgridarrayprop(prop).finnerframe do begin
+   height:= font.glyphheight + top + bottom;
+  end;
  end;
 end;
 
@@ -4020,7 +4017,8 @@ end;
 
 { tgridarrayprop }
 
-constructor tgridarrayprop.create(aowner: tcustomgrid; aclasstype: gridpropclassty);
+constructor tgridarrayprop.create(aowner: tcustomgrid;
+                                                    aclasstype: gridpropclassty);
 begin
  ffirstopposite:= -bigint;
  fgrid:= aowner;
@@ -4028,6 +4026,7 @@ begin
  flinecolorfix:= defaultfixlinecolor;
  fcolorselect:= cl_default;
  fcoloractive:= cl_none;
+ finnerframe:= minimalframe;
  inherited create(self,aclasstype);
 end;
 
@@ -4368,6 +4367,44 @@ begin
     fface.checktemplate(sender);
    end;
   end;
+ end;
+end;
+
+procedure tgridarrayprop.setinnerframe(const avalue: framety);
+begin
+ finnerframe:= avalue;
+ fgrid.layoutchanged;
+end;
+
+procedure tgridarrayprop.setinnerframe_left(const avalue: integer);
+begin
+ if finnerframe.left <> avalue then begin
+  finnerframe.left:= avalue;
+  fgrid.layoutchanged;
+ end;
+end;
+
+procedure tgridarrayprop.setinnerframe_top(const avalue: integer);
+begin
+ if finnerframe.top <> avalue then begin
+  finnerframe.top:= avalue;
+  fgrid.layoutchanged;
+ end;
+end;
+
+procedure tgridarrayprop.setinnerframe_right(const avalue: integer);
+begin
+ if finnerframe.right <> avalue then begin
+  finnerframe.right:= avalue;
+  fgrid.layoutchanged;
+ end;
+end;
+
+procedure tgridarrayprop.setinnerframe_bottom(const avalue: integer);
+begin
+ if finnerframe.bottom <> avalue then begin
+  finnerframe.bottom:= avalue;
+  fgrid.layoutchanged;
  end;
 end;
 
@@ -5075,7 +5112,7 @@ begin
  inherited;
 end;
 
-procedure tcustomstringcol.settextflags(const avalue: textflagsty);
+procedure tcustomstringcol.settextflags(const avalue: textflagsty);	
 begin
  if ftextinfo.flags <> avalue then begin
   ftextinfo.flags:= checktextflags(ftextinfo.flags,avalue);
@@ -5098,11 +5135,14 @@ end;
 
 function tcustomstringcol.getinnerframe: framety;
 begin
+ result:= inherited getinnerframe;
+{
  result.left:= tcustomstringgrid(fgrid).feditor.getinsertcaretwidth(
                  fgrid.getcanvas,fgrid.getfont);
  result.top:= 0;
  result.right:= result.left;
  result.bottom:= 0;
+}
 end;
 
 function tcustomstringcol.getcursor: cursorshapety;
@@ -12105,7 +12145,9 @@ begin
   datarowheight:= font.lineheight;
  end
  else begin
-  datarowheight:= font.glyphheight + 2;
+  with fdatacols.finnerframe do begin
+   datarowheight:= font.glyphheight + top + bottom;
+  end;
  end;
 end;
 
