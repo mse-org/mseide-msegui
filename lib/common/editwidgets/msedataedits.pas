@@ -1356,7 +1356,17 @@ procedure tdataedit.initgridwidget;
 begin
  optionswidget:= optionswidget - [ow_autoscale];
  optionsskin:= optionsskin + defaultgridskinoptions;
- freeandnil(fframe);
+ if (fframe <> nil) then begin
+  if (ws_staticframe in fwidgetstate) then begin
+   fframe.initgridframe;
+   if fgridintf <> nil then begin
+    fframe.framei:= fgridintf.getgrid.datacols.innerframe;
+   end;
+  end
+  else begin
+   freeandnil(fframe);
+  end;
+ end;
 // if fframe <> nil then begin
 //  fframe.initgridframe;
 // end;

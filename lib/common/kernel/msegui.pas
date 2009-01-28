@@ -355,7 +355,8 @@ type
    function iscolordkwidthstored: boolean;
    procedure setcolorhlwidth(const avalue: integer);
    function iscolorhlwidthstored: boolean;
-   
+
+   procedure setframei(const avalue: framety);   
    procedure setframei_bottom(const Value: integer);
    function isfibottomstored: boolean;
    procedure setframei_left(const Value: integer);
@@ -521,7 +522,8 @@ type
    property colorhlwidth: integer read fi.framecolors.light.effectwidth
                      write setcolorhlwidth
                      stored iscolorhlwidthstored default -1;
-   property framei: framety read fi.innerframe;
+   property framei: framety read fi.innerframe write setframei;
+                      //does not set localprops
    property framei_left: integer read fi.innerframe.left write setframei_left
                      stored isfileftstored default 0;
    property framei_top: integer read fi.innerframe.top  write setframei_top
@@ -3699,6 +3701,12 @@ begin
   fi.innerframe.right:= Value;
   internalupdatestate;
  end;
+end;
+
+procedure tcustomframe.setframei(const avalue: framety);
+begin
+ fi.innerframe:= avalue;
+ internalupdatestate;
 end;
 
 procedure tcustomframe.setframei_bottom(const Value: integer);

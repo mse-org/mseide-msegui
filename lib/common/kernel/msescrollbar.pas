@@ -258,7 +258,9 @@ implementation
 
 uses
  msestockobjects,sysutils,msekeyboard,msebits,msepointer,mseact;
-
+type
+ twidget1 = class(twidget);
+ 
 { tcustomscrollbar }
 
 constructor tcustomscrollbar.create(intf: iscrollbar; org: originty = org_client;
