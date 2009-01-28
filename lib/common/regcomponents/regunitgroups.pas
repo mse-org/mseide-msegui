@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 2007-2008 by Martin Schreiber
+{ MSEide Copyright (c) 2007-2009 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,12 +23,13 @@ uses
  
 procedure reggroups;
 begin
+
  registerunitgroup(['mseapplication'],['sysutils']);
  registerunitgroup(['msestatfile'],['msestat']);
- registerunitgroup(['msewidgets'],['msegui','msemenus','mseguiglob']);
+ registerunitgroup(['msewidgets'],['msegui','msemenus','mseguiglob','msescrollbar']);
  registerunitgroup(['msemenuwidgets'],['msegui','msemenus','mseguiglob']);
  registerunitgroup(['mseactions'],['mseact']);
- registerunitgroup(['msefiledialog'],['msegui','msemenus','mseguiglob','msegrids','msegraphics','msedatanodes','mselistbrowser','msegraphutils','msestrings','msesys','msebitmap','mseglob','mseedit','msedataedits']);
+ registerunitgroup(['msefiledialog'],['msegui','msescrollbar','msemenus','mseguiglob','msegrids','msegraphics','msedatanodes','mselistbrowser','msegraphutils','msestrings','msesys','msebitmap','mseglob','mseedit','msedataedits']);
  registerunitgroup(['mseforms'],['msegui','msemenus','mseguiglob','msegraphutils','msewidgets','msegraphics','mseglob','mseevent','msestat','msedock']);
  registerunitgroup(['msesimplewidgets'],['msegui','msemenus','mseguiglob','msegraphics','msegraphutils','msewidgets']);
  registerunitgroup(['msedispwidgets'],['msegui','msemenus','mseguiglob','msestrings','msetypes']);
