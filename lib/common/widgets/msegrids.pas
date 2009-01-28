@@ -1092,6 +1092,7 @@ type
    procedure setsortcol(const avalue: integer);
    procedure setnewrowcol(const avalue: integer);
   protected
+   procedure datasourcechanged; virtual;
    procedure begindataupdate; override;
    procedure enddataupdate; override;
    procedure dosizechanged; override;
@@ -6327,6 +6328,11 @@ begin
    break;
   end;
  end;
+end;
+
+procedure tdatacols.datasourcechanged;
+begin
+ //dummy
 end;
 
 procedure tdatacols.begindataupdate;

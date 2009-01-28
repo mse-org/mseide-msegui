@@ -161,7 +161,7 @@ type
   public
    constructor create(const aowner: tcustomwidgetgrid);
    class function getitemclasstype: persistentclassty; override;
-   procedure datasourcechanged;
+   procedure datasourcechanged; override;
    property cols[const index: integer]: twidgetcol read getcols; default;
  end;
 

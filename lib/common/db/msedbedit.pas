@@ -954,6 +954,8 @@ type
    function getdatasource(const aindex: integer): tdatasource;
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
+   function getdatasource1: tdatasource;
+   procedure settadasource1(const avalue: tdatasource);
   protected
    function canautoinsert: boolean;
    procedure checkdelayedautoinsert;
@@ -981,6 +983,8 @@ type
    procedure gridinvalidate;
    function arecord: integer;
    function hasdata: boolean;
+   procedure readdatasource(reader: treader);
+   procedure fixupproperties(filer: tfiler); //read moved properties
   public
    constructor create(const aowner: tcustomgrid; const aintf: igriddatalink);
    destructor destroy; override;
@@ -1009,6 +1013,7 @@ type
    property options: griddatalinkoptionsty read foptions write foptions default [];
    property onupdaterowdata: updaterowdataeventty read fonupdaterowdata 
                                 write fonupdaterowdata;
+   property datasource: tdatasource read getdatasource1 write settadasource1;
    property datafield: string read getdatafield 
                                        write setdatafield;
              //integer field, selects grid rowcolor (field value and $7f),
@@ -1214,8 +1219,8 @@ type
  tcustomdbwidgetgrid = class(tcustomwidgetgrid,igriddatalink)
   private
    fdatalink: tgriddatalink;
-   function getdatasource: tdatasource;
-   procedure setdatasource(const Value: tdatasource);
+//   function getdatasource: tdatasource;
+//   procedure setdatasource(const Value: tdatasource);
    procedure setdatalink(const avalue: tgriddatalink);
    function getfixcols: tdbwidgetfixcols;
    procedure setfixcols(const avalue: tdbwidgetfixcols);
@@ -1246,6 +1251,7 @@ type
                                  //true if ok
    function isfirstrow: boolean; override;
    function islastrow: boolean; override;
+   procedure defineproperties(filer: tfiler); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -1258,7 +1264,7 @@ type
    procedure wheeldown(const action: focuscellactionty = fca_focusin);  override;
    procedure lastrow(const action: focuscellactionty = fca_focusin); override;
    procedure firstrow(const action: focuscellactionty = fca_focusin); override;
-   property datasource: tdatasource read getdatasource write setdatasource;
+//   property datasource: tdatasource read getdatasource write setdatasource;
    property datalink: tgriddatalink read fdatalink write setdatalink;
    property zebra_step default 0;
    property fixcols: tdbwidgetfixcols read getfixcols write setfixcols;
@@ -1266,7 +1272,7 @@ type
 
  tdbwidgetgrid = class(tcustomdbwidgetgrid)
   published
-   property datasource;
+//   property datasource;
    property optionsgrid;
    property fixcols;
    property fixrows;
@@ -1371,7 +1377,7 @@ type
    procedure setoptionsdb(const avalue: optionseditdbty);
   protected
    function getcolclass: stringcolclassty; override;
-   procedure datasourcechanged;
+   procedure datasourcechanged; override;
   public
    class function getitemclasstype: persistentclassty; override;
    property cols[const index: integer]: tdbstringcol read getcols; default; //last!
@@ -1427,8 +1433,8 @@ type
    fdatalink: tstringgriddatalink;
    foptions: dbstringgridoptionsty;
    ffieldnamedisplayfixrow: integer;
-   function getdatasource: tdatasource;
-   procedure setdatasource(const Value: tdatasource);
+//   function getdatasource: tdatasource;
+//   procedure setdatasource(const Value: tdatasource);
    function getdatacols: tdbstringcols;
    procedure setdatacols(const avalue: tdbstringcols);
   //iwidgetgrid (dummy)
@@ -1486,6 +1492,7 @@ type
    procedure coloptionstoeditoptions(var dest: optionseditty);
    function isfirstrow: boolean; override;
    function islastrow: boolean; override;
+   procedure defineproperties(filer: tfiler); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -1498,7 +1505,7 @@ type
    procedure wheeldown(const action: focuscellactionty = fca_focusin); override;
    procedure lastrow(const action: focuscellactionty = fca_focusin); override;
    procedure firstrow(const action: focuscellactionty = fca_focusin); override;
-   property datasource: tdatasource read getdatasource write setdatasource;
+//   property datasource: tdatasource read getdatasource write setdatasource;
    property datacols: tdbstringcols read getdatacols write setdatacols;
    property datalink: tstringgriddatalink read fdatalink write setdatalink;
    property options: dbstringgridoptionsty read foptions 
@@ -1512,7 +1519,7 @@ type
  
  tdbstringgrid = class(tcustomdbstringgrid)
   published
-   property datasource;
+//   property datasource;
    property options;
    property fieldnamedisplayfixrow;
    
@@ -1876,6 +1883,7 @@ type
  tcomponent1 = class(tcomponent);
  twidget1 = class(twidget);
  tcustomgrid1 = class(tcustomgrid);
+ tdatacols1 = class(tdatacols);
  tdropdowncols1 = class(tdropdowncols);
  tdataedit1 = class(tdataedit);
  tdataset1 = class(tdataset);
@@ -2705,7 +2713,7 @@ end;
 
 function tdbstringedit.getgriddatasource: tdatasource;
 begin
- result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datasource;
+ result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datalink.datasource;
 end;
 
 procedure tdbstringedit.getfieldtypes(var afieldtypes: fieldtypesty);
@@ -2723,6 +2731,7 @@ procedure tdbstringedit.setdatalink(const adatalink: tstringeditwidgetdatalink);
 begin
  fdatalink.assign(adatalink);
 end;
+
 procedure tdbstringedit.defineproperties(filer: tfiler);
 begin
  inherited;
@@ -2822,7 +2831,7 @@ end;
 
 function tdbdialogstringedit.getgriddatasource: tdatasource;
 begin
- result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datasource;
+ result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datalink.datasource;
 end;
 
 procedure tdbdialogstringedit.getfieldtypes(var afieldtypes: fieldtypesty);
@@ -2928,7 +2937,7 @@ end;
 
 function tcustomdbdropdownlistedit.getgriddatasource: tdatasource;
 begin
- result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datasource;
+ result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datalink.datasource;
 end;
 
 procedure tcustomdbdropdownlistedit.getfieldtypes(var afieldtypes: fieldtypesty);
@@ -3037,7 +3046,7 @@ end;
 
 function tdbkeystringedit.getgriddatasource: tdatasource;
 begin
- result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datasource;
+ result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datalink.datasource;
 end;
 
 procedure tdbkeystringedit.getfieldtypes(var afieldtypes: fieldtypesty);
@@ -3143,7 +3152,7 @@ end;
 
 function tdbmemoedit.getgriddatasource: tdatasource;
 begin
- result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datasource;
+ result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datalink.datasource;
 end;
 
 procedure tdbmemoedit.getfieldtypes(var afieldtypes: fieldtypesty);
@@ -3263,7 +3272,7 @@ end;
 
 function tdbintegeredit.getgriddatasource: tdatasource;
 begin
- result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datasource;
+ result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datalink.datasource;
 end;
 
 function tdbintegeredit.createdatalist(const sender: twidgetcol): tdatalist;
@@ -3364,7 +3373,7 @@ end;
 
 function tdbbooleanedit.getgriddatasource: tdatasource;
 begin
- result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datasource;
+ result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datalink.datasource;
 end;
 
 procedure tdbbooleanedit.getfieldtypes(var afieldtypes: fieldtypesty);
@@ -3465,7 +3474,7 @@ end;
 
 function tdbdataicon.getgriddatasource: tdatasource;
 begin
- result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datasource;
+ result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datalink.datasource;
 end;
 
 procedure tdbdataicon.getfieldtypes(var afieldtypes: fieldtypesty);
@@ -3566,7 +3575,7 @@ end;
 
 function tdbdatabutton.getgriddatasource: tdatasource;
 begin
- result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datasource;
+ result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datalink.datasource;
 end;
 
 procedure tdbdatabutton.getfieldtypes(var afieldtypes: fieldtypesty);
@@ -3694,7 +3703,7 @@ end;
 
 function tdbbooleaneditradio.getgriddatasource: tdatasource;
 begin
- result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datasource;
+ result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datalink.datasource;
 end;
 
 procedure tdbbooleaneditradio.getfieldtypes(var afieldtypes: fieldtypesty);
@@ -3788,7 +3797,7 @@ end;
 
 function tdbrealedit.getgriddatasource: tdatasource;
 begin
- result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datasource;
+ result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datalink.datasource;
 end;
 
 procedure tdbrealedit.getfieldtypes(var afieldtypes: fieldtypesty);
@@ -3894,7 +3903,7 @@ end;
 
 function tdbrealspinedit.getgriddatasource: tdatasource;
 begin
- result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datasource;
+ result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datalink.datasource;
 end;
 
 procedure tdbrealspinedit.getfieldtypes(var afieldtypes: fieldtypesty);
@@ -4013,7 +4022,7 @@ end;
 
 function tdbslider.getgriddatasource: tdatasource;
 begin
- result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datasource;
+ result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datalink.datasource;
 end;
 
 procedure tdbslider.getfieldtypes(var afieldtypes: fieldtypesty);
@@ -4119,7 +4128,7 @@ end;
 
 function tdbprogressbar.getgriddatasource: tdatasource;
 begin
- result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datasource;
+ result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datalink.datasource;
 end;
 
 function tdbprogressbar.createdatalist(const sender: twidgetcol): tdatalist;
@@ -4221,7 +4230,7 @@ end;
 
 function tdbdatetimeedit.getgriddatasource: tdatasource;
 begin
- result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datasource;
+ result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datalink.datasource;
 end;
 
 procedure tdbdatetimeedit.getfieldtypes(var afieldtypes: fieldtypesty);
@@ -4330,7 +4339,7 @@ end;
 
 function tdbcalendardatetimeedit.getgriddatasource: tdatasource;
 begin
- result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datasource;
+ result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datalink.datasource;
 end;
 
 procedure tdbcalendardatetimeedit.getfieldtypes(var afieldtypes: fieldtypesty);
@@ -4441,7 +4450,7 @@ end;
 
 function tcustomdbenumedit.getgriddatasource: tdatasource;
 begin
- result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datasource;
+ result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datalink.datasource;
 end;
 
 procedure tcustomdbenumedit.getfieldtypes(var afieldtypes: fieldtypesty);
@@ -4539,16 +4548,19 @@ begin
  with info do begin
   if griddatalink <> nil then begin
    result:= tgriddatalink(griddatalink).getbooleanbuffer(fdatalink.field,cell.row);
+   if result = nil then begin
+    result:= @fvaluedefault;
+   end;
   end
   else begin
-   result:= nil;
+   result:= @fvaluedefault;
   end;
  end;
 end;
 
 function tdbbooleantextedit.getvalue: boolean;
 begin
- result:= inherited value <> 0;
+ result:= inherited value >= 0;
 end;
 
 procedure tdbbooleantextedit.setvalue(const avalue: boolean);
@@ -5443,6 +5455,19 @@ begin
  result:= active and (recordcount > 0);
 end;
 
+procedure tgriddatalink.readdatasource(reader: treader);
+begin
+ treader1(reader).readpropvalue(self,
+          getpropinfo(typeinfo(tgriddatalink),'datasource'));
+end;
+
+procedure tgriddatalink.fixupproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
+               //move values to datalink
+end;
+
 function tgriddatalink.getrowfieldisnull(const afield: tfield; 
                              const row: integer): boolean;
 var
@@ -6276,6 +6301,17 @@ begin
  inherited;
 end;
 
+function tgriddatalink.getdatasource1: tdatasource;
+begin
+ result:= inherited datasource;
+end;
+
+procedure tgriddatalink.settadasource1(const avalue: tdatasource);
+begin
+ inherited datasource:= avalue;
+ tdatacols1(fgrid.datacols).datasourcechanged;
+end;
+
 { tdbwidgetindicatorcol }
 
 constructor tdbwidgetindicatorcol.create(const agrid: tcustomgrid;
@@ -6436,7 +6472,7 @@ function tcustomdbwidgetgrid.createfixcols: tfixcols;
 begin
  result:= tdbwidgetfixcols.create(self,fdatalink);
 end;
-
+{
 function tcustomdbwidgetgrid.getdatasource: tdatasource;
 begin
  result:= fdatalink.datasource;
@@ -6447,7 +6483,7 @@ begin
  fdatalink.datasource:= value;
  datacols.datasourcechanged;
 end;
-
+}
 procedure tcustomdbwidgetgrid.updatelayout;
 begin
  inherited;
@@ -6591,6 +6627,12 @@ begin
  result:= fdatalink.islastrow;
 end;
 
+procedure tcustomdbwidgetgrid.defineproperties(filer: tfiler);
+begin
+ inherited;
+ fdatalink.fixupproperties(filer);  //move values to datalink
+end;
+
 function tcustomdbwidgetgrid.getdbindicatorcol: integer;
 begin
  result:= fixcols.dbindicatorcol;
@@ -6686,7 +6728,7 @@ end;
 
 function tdbstringcol.getgriddatasource: tdatasource;
 begin
- result:= tcustomdbstringgrid(fgrid).datasource;
+ result:= tcustomdbstringgrid(fgrid).datalink.datasource;
 end;
 
 function tdbstringcol.getgridintf: iwidgetgrid;
@@ -7053,7 +7095,7 @@ function tcustomdbstringgrid.createdatacols: tdatacols;
 begin
  result:= tdbstringcols.create(self);
 end;
-
+{
 function tcustomdbstringgrid.getdatasource: tdatasource;
 begin
  result:= fdatalink.datasource;
@@ -7064,7 +7106,7 @@ begin
  fdatalink.datasource:= value;
  datacols.datasourcechanged;
 end;
-
+}
 function tcustomdbstringgrid.getdatacols: tdbstringcols;
 begin
  result:= tdbstringcols(fdatacols);
@@ -7358,6 +7400,12 @@ end;
 function tcustomdbstringgrid.islastrow: boolean;
 begin
  result:= fdatalink.islastrow;
+end;
+
+procedure tcustomdbstringgrid.defineproperties(filer: tfiler);
+begin
+ inherited;
+ fdatalink.fixupproperties(filer);  //move values to datalink
 end;
 
 { tlbdropdowncol }
@@ -7970,7 +8018,7 @@ end;
 
 function tdbenum64editlb.getgriddatasource: tdatasource;
 begin
- result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datasource;
+ result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datalink.datasource;
 end;
 
 procedure tdbenum64editlb.getfieldtypes(var afieldtypes: fieldtypesty);
@@ -8081,7 +8129,7 @@ end;
 
 function tdbenum64editdb.getgriddatasource: tdatasource;
 begin
- result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datasource;
+ result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datalink.datasource;
 end;
 
 procedure tdbenum64editdb.getfieldtypes(var afieldtypes: fieldtypesty);

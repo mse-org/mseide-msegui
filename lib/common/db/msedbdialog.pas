@@ -166,7 +166,7 @@ end;
 
 function tdbfilenameedit.getgriddatasource: tdatasource;
 begin
- result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datasource;
+ result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datalink.datasource;
 end;
 
 procedure tdbfilenameedit.getfieldtypes(var afieldtypes: fieldtypesty);
@@ -290,7 +290,7 @@ end;
 
 function tdbcoloredit.getgriddatasource: tdatasource;
 begin
- result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datasource;
+ result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datalink.datasource;
 end;
 
 procedure tdbcoloredit.getfieldtypes(var afieldtypes: fieldtypesty);

@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+2009-01-28
+ tdb*grid.datasourec moved to tdb*grid.datalink.
 2009-01-17
  mouseeventinfoty, mousewheeleventinfoty, keyeventinfoty moved to 
  mseguiglob.pas.

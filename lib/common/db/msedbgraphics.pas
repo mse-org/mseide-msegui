@@ -163,7 +163,7 @@ end;
 
 function tdbdataimage.getgriddatasource: tdatasource;
 begin
- result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datasource;
+ result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datalink.datasource;
 end;
 
 function tdbdataimage.edited: boolean;
