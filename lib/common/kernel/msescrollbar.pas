@@ -48,7 +48,7 @@ const
 type
  tcustomscrollbar = class;
 
- scrolleventty =  (sbe_valuechanged,sbe_stepup,sbe_stepdown,
+ scrolleventty =  (sbe_none,sbe_valuechanged,sbe_stepup,sbe_stepdown,
                    sbe_pageup,sbe_pagedown,sbe_wheelup,sbe_wheeldown,
                    sbe_thumbposition,sbe_thumbtrack);
 
@@ -69,6 +69,11 @@ type
  scrollbarstatety = (scs_mousecaptured);
  scrollbarstatesty = set of scrollbarstatety;
 
+ beforescrollbareventty = procedure(const sender: tcustomscrollbar;
+              var akind: scrolleventty; var avalue: real) of object;
+ scrollbareventty = procedure(const sender: tcustomscrollbar;
+              const akind: scrolleventty; const avalue: real) of object;
+            //avalue = step or value              
  tcustomscrollbar = class(tnullinterfacedpersistent,iframe)
   private
    forg: originty;
@@ -96,6 +101,8 @@ type
    fbuttonendlength: integer;
    fstate: scrollbarstatesty;
    fpaintedbutton: scrollbarareaty;
+   fonbeforeevent: beforescrollbareventty;
+   fonafterevent: scrollbareventty;
    procedure updatedim;
    procedure setdirection(const avalue: graphicdirectionty);
    procedure setcolor(const avalue: colorty);
@@ -157,6 +164,8 @@ type
    findentstart,findentend: integer;
    procedure setoptions(const avalue: scrollbaroptionsty); virtual;
    procedure invalidate;
+   procedure dostep(akind: scrolleventty; astep: real);
+   procedure dothumbevent(const aevent: scrolleventty);
   public
    tag: integer;
    constructor create(intf: iscrollbar; org: originty = org_client;
@@ -221,6 +230,10 @@ type
    property colorglyph: colorty read fdrawinfo.areas[sbbu_down].ca.colorglyph
                    write setcolorglyph default cl_glyph;
                    //cl_none -> no no glyph
+   property onbeforeevent: beforescrollbareventty read fonbeforeevent 
+                                                        write fonbeforeevent;
+   property onafterevent: scrollbareventty read fonafterevent 
+                                                        write fonafterevent;
  end;
 
  tcustomnomoveautoscrollbar = class(tcustomscrollbar)
@@ -841,6 +854,7 @@ procedure tcustomscrollbar.mouseevent(var info: mouseeventinfoty);
   if (fclickedarea = sbbu_move) and not cancel then begin
    thumbtrack(info.pos);
    fintf.scrollevent(self,sbe_thumbposition);
+   dothumbevent(sbe_thumbposition);
   end;
   fclickedarea:= scrollbarareaty(-1);
  end;
@@ -863,6 +877,7 @@ procedure tcustomscrollbar.mouseevent(var info: mouseeventinfoty);
      thumbtrack(info.pos);
      if sbo_thumbtrack in foptions then begin
       fintf.scrollevent(self,sbe_thumbtrack);
+      dothumbevent(sbe_thumbtrack);
      end;
     end;
     include(info.eventstate,es_processed);
@@ -1039,52 +1054,57 @@ begin
  end;
 end;
 
+procedure tcustomscrollbar.dostep(akind: scrolleventty; astep: real);
+begin
+ if assigned(fonbeforeevent) then begin
+  fonbeforeevent(self,akind,astep);
+ end;
+ if akind <> sbe_none then begin
+  if sbo_moveauto in foptions then begin
+   value:= fvalue + astep;
+  end;
+  fintf.scrollevent(self,akind);
+  if assigned(fonafterevent) then begin
+   fonafterevent(self,akind,astep);
+  end;
+ end;
+end;
+
+procedure tcustomscrollbar.dothumbevent(const aevent: scrolleventty);
+begin
+ if assigned(fonafterevent) then begin
+  fonafterevent(self,aevent,value);
+ end;
+end;
+
 procedure tcustomscrollbar.pagedown;
 begin
- if sbo_moveauto in foptions then begin
-  value:= fvalue - pagesize;
- end;
- fintf.scrollevent(self,sbe_pagedown);
+ dostep(sbe_pagedown,pagesize);
 end;
 
 procedure tcustomscrollbar.pageup;
 begin
- if sbo_moveauto in foptions then begin
-  value:= fvalue + pagesize;
- end;
- fintf.scrollevent(self,sbe_pageup);
+ dostep(sbe_pageup,pagesize);
 end;
 
 procedure tcustomscrollbar.wheeldown;
 begin
- if sbo_moveauto in foptions then begin
-  value:= fvalue - application.mousewheelacceleration(stepsize);
- end;
- fintf.scrollevent(self,sbe_wheeldown);
+ dostep(sbe_wheeldown,-application.mousewheelacceleration(stepsize));
 end;
 
 procedure tcustomscrollbar.wheelup;
 begin
- if sbo_moveauto in foptions then begin
-  value:= fvalue + application.mousewheelacceleration(stepsize);
- end;
- fintf.scrollevent(self,sbe_wheelup);
+ dostep(sbe_wheelup,application.mousewheelacceleration(stepsize));
 end;
 
 procedure tcustomscrollbar.stepdown;
 begin
- if sbo_moveauto in foptions then begin
-  value:= fvalue - stepsize;
- end;
- fintf.scrollevent(self,sbe_stepdown);
+ dostep(sbe_stepdown,-stepsize);
 end;
 
 procedure tcustomscrollbar.stepup;
 begin
- if sbo_moveauto in foptions then begin
-  value:= fvalue + stepsize;
- end;
- fintf.scrollevent(self,sbe_stepup);
+ dostep(sbe_stepup,stepsize);
 end;
 
 destructor tcustomscrollbar.destroy;

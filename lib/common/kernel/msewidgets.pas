@@ -178,6 +178,8 @@ type
    property color;
    property colorpattern;
    property colorglyph;
+   property onbeforeevent;
+   property onafterevent;
  end;
 
 const
