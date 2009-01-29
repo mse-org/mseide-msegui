@@ -46,12 +46,25 @@ type
                                   //empty edit value
  optionseditdbty = set of optioneditdbty;
 
+ griddatalinkoptionty = (gdo_propscrollbar,gdo_thumbtrack,
+           gdo_checkbrowsemodeonexit);
+ griddatalinkoptionsty = set of griddatalinkoptionty;
+
 const
  defaultdbnavigatoroptions = [dno_confirmdelete,dno_append];
  designdbnavigbuttons = [dbnb_first,dbnb_prior,dbnb_next,dbnb_last];
  editnavigbuttons = [dbnb_insert,dbnb_delete,dbnb_edit];
+
+ defaultdbdropdownoptions = [deo_selectonly,deo_autodropdown,deo_keydropdown];   
+ defaultdropdowndatalinkoptions = [gdo_propscrollbar,gdo_thumbtrack];
+
+type 
+ updaterowdataeventty = procedure(const sender: tcustomgrid; 
+                        const arow: integer; const adataset: tdataset)of object;
+
+ optiondbty = (odb_copyitems);
+ optionsdbty = set of optiondbty;
  
-type  
  idbnaviglink = interface(inullinterface)
   procedure setactivebuttons(const abuttons: dbnavigbuttonsty;
                const afiltered: boolean);
@@ -310,6 +323,16 @@ type
    destructor destroy; override;
    property datalink: tstringeditwidgetdatalink read fdatalink write setdatalink;
  end;
+
+ idbdropdownlist = interface(idropdownlist)
+  procedure recordselected(const arecordnum: integer; const akey: keyty);
+                     //-2 = empty row, -1 = none
+ end;
+ 
+ ilbdropdownlist = interface(idropdownlist)
+  procedure recordselected(const arecordnum: integer; const akey: keyty);
+                     //-2 = empty row, -1 = none
+ end;
  
  tdbdropdownlistedit = class(tcustomdbdropdownlistedit)
   published
@@ -319,7 +342,59 @@ type
    property onbeforedropdown;
    property onafterclosedropdown;
  end;
-
+ 
+ tcustomdbdropdownlistcontroller = class;
+// tdbdropdownlistcontroller = class;
+ tdropdownlistcontrollerdb = class;
+ tcustomlbdropdownlistcontroller = class;
+ tdropdownlistcontrollerlb = class;
+ 
+ tdbdropdownlisteditdb = class(tdbdropdownlistedit,idbdropdownlist)
+  private
+   function getdropdown: tdropdownlistcontrollerdb;
+   procedure setdropdown(const avalue: tdropdownlistcontrollerdb);
+  protected
+   function createdropdowncontroller: tcustomdropdowncontroller; override;
+   procedure recordselected(const arecordnum: integer; const akey: keyty);
+  published
+   property dropdown: tdropdownlistcontrollerdb read getdropdown write setdropdown;
+ end;
+ 
+ tdbdropdownlisteditlb = class(tdbdropdownlistedit,ilbdropdownlist)
+  private
+   function getdropdown: tdropdownlistcontrollerlb;
+   procedure setdropdown(const avalue: tdropdownlistcontrollerlb);
+  protected
+   function createdropdowncontroller: tcustomdropdowncontroller; override;
+   procedure recordselected(const arecordnum: integer; const akey: keyty);
+  published
+   property dropdown: tdropdownlistcontrollerlb read getdropdown
+                                                       write setdropdown;
+ end;
+ 
+ tdropdownlisteditdb = class(tdropdownlistedit,idbdropdownlist)
+  private
+   function getdropdown: tdropdownlistcontrollerdb;
+   procedure setdropdown(const avalue: tdropdownlistcontrollerdb);
+  protected
+   function createdropdowncontroller: tcustomdropdowncontroller; override;
+   procedure recordselected(const arecordnum: integer; const akey: keyty);
+  published
+   property dropdown: tdropdownlistcontrollerdb read getdropdown write setdropdown;
+ end;
+ 
+ tdropdownlisteditlb = class(tdropdownlistedit,ilbdropdownlist)
+  private
+   function getdropdown: tdropdownlistcontrollerlb;
+   procedure setdropdown(const avalue: tdropdownlistcontrollerlb);
+  protected
+   function createdropdowncontroller: tcustomdropdowncontroller; override;
+   procedure recordselected(const arecordnum: integer; const akey: keyty);
+  published
+   property dropdown: tdropdownlistcontrollerlb read getdropdown
+                                                       write setdropdown;
+ end;
+ 
  tdbkeystringedit = class(tcustomkeystringedit,idbeditfieldlink,ireccontrol)
   private
    fdatalink: tstringeditwidgetdatalink;
@@ -858,11 +933,9 @@ type
    property items[const index: integer]: tdbdropdowncol read getitems; default;
  end;
 
- tdbdropdownlistcontroller = class;
- 
  tdropdowndatalink = class(tmsedatalink)
   private
-   fowner: tdbdropdownlistcontroller;
+   fowner: tcustomdbdropdownlistcontroller;
    fvaluefield: tfield;
    fvaluefieldname: string;
    ftextfield: tfield;
@@ -876,7 +949,7 @@ type
    procedure activechanged; override;
    procedure editingchanged; override;
   public
-   constructor create(const aowner: tdbdropdownlistcontroller);
+   constructor create(const aowner: tcustomdbdropdownlistcontroller);
    function getlookuptext(const key: integer): msestring; overload;
    function getlookuptext(const key: int64): msestring; overload;
    function getlookuptext(const key: msestring): msestring; overload;
@@ -896,11 +969,6 @@ type
    destructor destroy; override;
  end;
 
- griddatalinkoptionty = (gdo_propscrollbar,gdo_thumbtrack,
-           gdo_checkbrowsemodeonexit);
- griddatalinkoptionsty = set of griddatalinkoptionty;
- updaterowdataeventty = procedure(const sender: tcustomgrid; 
-                        const arow: integer; const adataset: tdataset)of object;
  igriddatalink = interface(inullinterface)
   function getdbindicatorcol: integer;
  end;
@@ -1040,7 +1108,7 @@ type
    function locate(const filter: msestring): boolean; override;
    procedure dopaint(const acanvas: tcanvas); override;
   public
-   constructor create(const acontroller: tdbdropdownlistcontroller;
+   constructor create(const acontroller: tcustomdbdropdownlistcontroller;
                              acols: tdropdowncols);
    destructor destroy; override;
    procedure rowup(const action: focuscellactionty = fca_focusin); override;
@@ -1051,20 +1119,7 @@ type
    procedure wheeldown(const action: focuscellactionty = fca_focusin);  override;
  end;
 
- idbdropdownlist = interface(idropdownlist)
-  procedure recordselected(const arecordnum: integer; const akey: keyty);
-                     //-2 = empty row, -1 = none
- end;
-
-const
- defaultdbdropdownoptions = [deo_selectonly,deo_autodropdown,deo_keydropdown];   
- defaultdropdowndatalinkoptions = [gdo_propscrollbar,gdo_thumbtrack];
-
-type 
- optiondbty = (odb_copyitems);
- optionsdbty = set of optiondbty;
- 
- tdbdropdownlistcontroller = class(tcustomdropdownlistcontroller,idbeditinfo)
+ tcustomdbdropdownlistcontroller = class(tcustomdropdownlistcontroller,idbeditinfo)
   private
    fdatalink: tdropdowndatalink;
    fisstringkey: boolean;
@@ -1092,7 +1147,6 @@ type
    constructor create(const intf: idbdropdownlist; const aisstringkey: boolean);
    destructor destroy; override;
    procedure dropdown; override;
-  published
    property datasource: tdatasource read getdatasource write setdatasource;
    property keyfield: string read getkeyfield write setkeyfield;
    property options default defaultdbdropdownoptions;
@@ -1101,6 +1155,16 @@ type
    property optionsdb: optionsdbty read foptionsdb write foptionsdb default [];
    
    property cols: tdbdropdowncols read getcols write setcols;
+  end;
+
+ tdbdropdownlistcontroller = class(tcustomdbdropdownlistcontroller)
+  published
+   property datasource;
+   property keyfield;
+   property options;
+   property optionsdatalink;
+   property optionsdb;   
+   property cols;
    property dropdownrowcount;
    property valuecol;
    property width;
@@ -1108,8 +1172,25 @@ type
    property datarowlinecolor;
    property buttonlength;
    property buttonminlength;
-  end;
-
+ end;
+ 
+ tdropdownlistcontrollerdb = class(tcustomdbdropdownlistcontroller)
+  published
+   property datasource;
+//   property keyfield;
+   property options;
+   property optionsdatalink;
+   property optionsdb;   
+   property cols;
+   property dropdownrowcount;
+   property valuecol;
+   property width;
+   property datarowlinewidth;
+   property datarowlinecolor;
+   property buttonlength;
+   property buttonminlength;
+ end;
+ 
  tdbenumeditdb = class(tdbenumedit,idbdropdownlist,ireccontrol)
   private
    function getdropdown: tdbdropdownlistcontroller;
@@ -1605,7 +1686,7 @@ type
    procedure moveby(distance: integer);
    property activerecord: integer read getactiverecord write setactiverecord;
   public
-   constructor create(const acontroller: tlbdropdownlistcontroller;
+   constructor create(const acontroller: tcustomlbdropdownlistcontroller;
                              acols: tdropdowncols);
    procedure rowup(const action: focuscellactionty = fca_focusin); override;
    procedure rowdown(const action: focuscellactionty = fca_focusin); override;
@@ -1614,12 +1695,7 @@ type
    procedure wheelup(const action: focuscellactionty = fca_focusin); override;
    procedure wheeldown(const action: focuscellactionty = fca_focusin);  override;
  end;
-  
- ilbdropdownlist = interface(idropdownlist)
-  procedure recordselected(const arecordnum: integer; const akey: keyty);
-                     //-2 = empty row, -1 = none
- end;
-   
+     
  tlbdropdowncol = class(tdropdowncol)
   private
    ffieldno: integer;
@@ -1646,7 +1722,7 @@ type
  optionlbty = (olb_copyitems);
  optionslbty = set of optionlbty;
                                    
- tlbdropdownlistcontroller = class(tcustomdropdownlistcontroller)
+ tcustomlbdropdownlistcontroller = class(tcustomdropdownlistcontroller)
   private
    flookupbuffer: tcustomlookupbuffer;
    fkeyfieldno: integer;
@@ -1667,12 +1743,22 @@ type
   public
    constructor create(const intf: ilbdropdownlist);
    procedure dropdown; override;
-  published
    property lookupbuffer: tcustomlookupbuffer read flookupbuffer write setlookupbuffer;
    property keyfieldno: integer read fkeyfieldno write fkeyfieldno;
    property optionslb: optionslbty read foptionslb write foptionslb default [];
    property options default defaultlbdropdownoptions;
    property cols: tlbdropdowncols read getcols write setcols;
+   property onfilter: lbfiltereventty read fonfilter write fonfilter;
+ end;
+ 
+ tlbdropdownlistcontroller = class(tcustomlbdropdownlistcontroller)
+  published
+   property lookupbuffer;
+   property keyfieldno;
+   property optionslb;
+   property options;
+   property cols;
+   property onfilter;
    property dropdownrowcount;
    property valuecol;
    property width;
@@ -1680,7 +1766,23 @@ type
    property datarowlinecolor;
    property buttonlength;
    property buttonminlength;
-   property onfilter: lbfiltereventty read fonfilter write fonfilter;
+ end;
+ 
+ tdropdownlistcontrollerlb = class(tcustomlbdropdownlistcontroller)
+  published
+   property lookupbuffer;
+//   property keyfieldno;
+   property optionslb;
+   property options;
+   property cols;
+   property onfilter;
+   property dropdownrowcount;
+   property valuecol;
+   property width;
+   property datarowlinewidth;
+   property datarowlinecolor;
+   property buttonlength;
+   property buttonminlength;
  end;
  
  tdbenumeditlb = class(tdbenumedit,ilbdropdownlist)
@@ -4579,14 +4681,14 @@ procedure tdbdropdowncol.setdatafield(const avalue: string);
 begin
  if fdatafield <> avalue then begin
   fdatafield:= avalue;
-  tdbdropdownlistcontroller(fowner).fdatalink.updatefields;
+  tcustomdbdropdownlistcontroller(fowner).fdatalink.updatefields;
  end;
 end;
 
 function tdbdropdowncol.getdatasource(const aindex: integer): tdatasource;
 begin
- if fowner is tdbdropdownlistcontroller then begin
-  result:= tdbdropdownlistcontroller(fowner).datasource;
+ if fowner is tcustomdbdropdownlistcontroller then begin
+  result:= tcustomdbdropdownlistcontroller(fowner).datasource;
  end
  else begin
   result:= nil;
@@ -4615,7 +4717,7 @@ end;
 
 { tdropdowndatalink }
 
-constructor tdropdowndatalink.create(const aowner: tdbdropdownlistcontroller);
+constructor tdropdowndatalink.create(const aowner: tcustomdbdropdownlistcontroller);
 begin
  fowner:= aowner;
 end;
@@ -4806,7 +4908,7 @@ end;
 
 { tdbdropdownlist }
 
-constructor tdbdropdownlist.create(const acontroller: tdbdropdownlistcontroller;
+constructor tdbdropdownlist.create(const acontroller: tcustomdbdropdownlistcontroller;
                              acols: tdropdowncols);
 var
  int1: integer;
@@ -4877,7 +4979,7 @@ var
  datasource1: tdatasource;
 begin
  inherited;
- datasource1:= tdbdropdownlistcontroller(fcontroller).datasource;
+ datasource1:= tcustomdbdropdownlistcontroller(fcontroller).datasource;
  for int1:= 0 to fdatacols.count - 1 do begin
   dbstrcol1:= tdbdropdownstringcol(fdatacols[int1]);
   with tdbdropdowncol(acols[int1]) do begin
@@ -4933,9 +5035,9 @@ begin
  result:= 0; //none
 end;
 
-{ tdbdropdownlistcontroller }
+{ tcustomdbdropdownlistcontroller }
 
-constructor tdbdropdownlistcontroller.create(const intf: idbdropdownlist;
+constructor tcustomdbdropdownlistcontroller.create(const intf: idbdropdownlist;
                       const aisstringkey: boolean);
 begin
  fisstringkey:= aisstringkey;
@@ -4945,65 +5047,65 @@ begin
  options:= defaultdbdropdownoptions;
 end;
 
-destructor tdbdropdownlistcontroller.destroy;
+destructor tcustomdbdropdownlistcontroller.destroy;
 begin
  inherited;
  fdatalink.free;
 end;
 
-procedure tdbdropdownlistcontroller.dropdown;
+procedure tcustomdbdropdownlistcontroller.dropdown;
 begin
  tdropdowncols1(fcols).fitemindex:= -1;
  inherited; 
 end;
 
-function tdbdropdownlistcontroller.getdatasource: tdatasource;
+function tcustomdbdropdownlistcontroller.getdatasource: tdatasource;
 begin
  result:= fdatalink.datasource;
 end;
 
-procedure tdbdropdownlistcontroller.setdatasource(const avalue: tdatasource);
+procedure tcustomdbdropdownlistcontroller.setdatasource(const avalue: tdatasource);
 begin
  fdatalink.datasource:= avalue;
 end;
 
-procedure tdbdropdownlistcontroller.setkeyfield(const avalue: string);
+procedure tcustomdbdropdownlistcontroller.setkeyfield(const avalue: string);
 begin
  fdatalink.valuefieldname:= avalue;
 end;
 
-function tdbdropdownlistcontroller.getkeyfield: string;
+function tcustomdbdropdownlistcontroller.getkeyfield: string;
 begin
  result:= fdatalink.valuefieldname;
 end;
 
-function tdbdropdownlistcontroller.getcols: tdbdropdowncols;
+function tcustomdbdropdownlistcontroller.getcols: tdbdropdowncols;
 begin
  result:= tdbdropdowncols(fcols);
 end;
 
-procedure tdbdropdownlistcontroller.setcols(const avalue: tdbdropdowncols);
+procedure tcustomdbdropdownlistcontroller.setcols(const avalue: tdbdropdowncols);
 begin
  fcols.assign(avalue);
 end;
 
-function tdbdropdownlistcontroller.getbuttonframeclass: dropdownbuttonframeclassty;
+function tcustomdbdropdownlistcontroller.getbuttonframeclass: dropdownbuttonframeclassty;
 begin
  result:= tdropdownbuttonframe;
 end;
 
-procedure tdbdropdownlistcontroller.valuecolchanged;
+procedure tcustomdbdropdownlistcontroller.valuecolchanged;
 begin
  inherited;
  fdatalink.updatefields;
 end;
 
-function tdbdropdownlistcontroller.getdropdowncolsclass: dropdowncolsclassty;
+function tcustomdbdropdownlistcontroller.getdropdowncolsclass: dropdowncolsclassty;
 begin
  result:= tdbdropdowncols;
 end;
 
-function tdbdropdownlistcontroller.createdropdownlist: tdropdownlist;
+function tcustomdbdropdownlistcontroller.createdropdownlist: tdropdownlist;
 type
  pmsestringaarty = array of pmsestringaty;
 var
@@ -5067,12 +5169,12 @@ begin
  end;
 end;
 
-function tdbdropdownlistcontroller.candropdown: boolean;
+function tcustomdbdropdownlistcontroller.candropdown: boolean;
 begin
  result:= inherited candropdown and fdatalink.active;
 end;
 
-procedure tdbdropdownlistcontroller.itemselected(const index: integer;
+procedure tcustomdbdropdownlistcontroller.itemselected(const index: integer;
                                                           const akey: keyty);
 begin
  if index < 0 then begin
@@ -5093,7 +5195,7 @@ begin
  idbdropdownlist(fintf).recordselected(index,akey);
 end;
 
-procedure tdbdropdownlistcontroller.getfieldtypes(out propertynames: stringarty; 
+procedure tcustomdbdropdownlistcontroller.getfieldtypes(out propertynames: stringarty; 
                     out fieldtypes: fieldtypesarty);
 begin
  setlength(propertynames,1);
@@ -5107,31 +5209,11 @@ begin
  end; 
 end;
 
-function tdbdropdownlistcontroller.getdatasource(const aindex: integer): tdatasource;
+function tcustomdbdropdownlistcontroller.getdatasource(const aindex: integer): tdatasource;
 begin
  result:= datasource;
 end;
 
-{ not possible, dropdownlist must work
-procedure tdbdropdownlistcontroller.dobeforedropdown;
-begin
- if (datasource <> nil) and (datasource.dataset <> nil) then begin
-  datasource.dataset.disablecontrols;
- end;
- inherited;
-end;
-
-procedure tdbdropdownlistcontroller.doafterclosedropdown;
-begin
- try
-  inherited;
- finally
-  if (datasource <> nil) and (datasource.dataset <> nil) then begin
-   datasource.dataset.enablecontrols;
-  end;
- end;
-end;
-}
 { tdbenumeditdb }
 
 function tdbenumeditdb.getdropdown: tdbdropdownlistcontroller;
@@ -5149,7 +5231,8 @@ begin
  result:= tdbdropdownlistcontroller.create(idbdropdownlist(self),false);
 end;
 
-procedure tdbenumeditdb.recordselected(const arecordnum: integer; const akey: keyty);
+procedure tdbenumeditdb.recordselected(const arecordnum: integer;
+                                                          const akey: keyty);
 var
  bo1: boolean;
 begin
@@ -5185,6 +5268,184 @@ begin
   int1:= integer(data);
  end;
  result:= tdbdropdownlistcontroller(fdropdown).fdatalink.getlookuptext(int1);
+end;
+
+{ tdbdropdownlisteditdb }
+
+function tdbdropdownlisteditdb.getdropdown: tdropdownlistcontrollerdb;
+begin
+ result:= tdropdownlistcontrollerdb(inherited dropdown);
+end;
+
+procedure tdbdropdownlisteditdb.setdropdown(const avalue: tdropdownlistcontrollerdb);
+begin
+ inherited dropdown.assign(avalue);
+end;
+
+function tdbdropdownlisteditdb.createdropdowncontroller: 
+                                                    tcustomdropdowncontroller;
+begin
+ result:= tdropdownlistcontrollerdb.create(idbdropdownlist(self),false);
+end;
+
+procedure tdbdropdownlisteditdb.recordselected(const arecordnum: integer;
+                                                            const akey: keyty);
+var
+ bo1: boolean;
+begin
+ bo1:= false;
+ if arecordnum >= 0 then begin
+  with tdropdownlistcontrollerdb(fdropdown) do begin
+   setdropdowntext(getasmsestring(fdatalink.textfield,fdatalink.utf8),true,
+                                              false,akey);
+  end; 
+  exit;
+ end
+ else begin
+  if arecordnum = -2 then begin
+   bo1:= checkvalue; 
+  end
+  else begin
+   feditor.undo;
+  end;
+ end;
+ if bo1 and (akey = key_tab) then begin
+  window.postkeyevent(akey);
+ end;
+end;
+
+{ tdropdownlisteditdb }
+
+function tdropdownlisteditdb.getdropdown: tdropdownlistcontrollerdb;
+begin
+ result:= tdropdownlistcontrollerdb(inherited dropdown);
+end;
+
+procedure tdropdownlisteditdb.setdropdown(const avalue: tdropdownlistcontrollerdb);
+begin
+ inherited dropdown.assign(avalue);
+end;
+
+function tdropdownlisteditdb.createdropdowncontroller: 
+                                                    tcustomdropdowncontroller;
+begin
+ result:= tdropdownlistcontrollerdb.create(idbdropdownlist(self),false);
+end;
+
+procedure tdropdownlisteditdb.recordselected(const arecordnum: integer;
+                                                            const akey: keyty);
+var
+ bo1: boolean;
+begin
+ bo1:= false;
+ if arecordnum >= 0 then begin
+  with tdropdownlistcontrollerdb(fdropdown) do begin
+   setdropdowntext(getasmsestring(fdatalink.textfield,fdatalink.utf8),true,
+                                              false,akey);
+  end; 
+  exit;
+ end
+ else begin
+  if arecordnum = -2 then begin
+   bo1:= checkvalue; 
+  end
+  else begin
+   feditor.undo;
+  end;
+ end;
+ if bo1 and (akey = key_tab) then begin
+  window.postkeyevent(akey);
+ end;
+end;
+
+{ tdbdropdownlisteditlb }
+
+function tdbdropdownlisteditlb.getdropdown: tdropdownlistcontrollerlb;
+begin
+ result:= tdropdownlistcontrollerlb(inherited dropdown);
+end;
+
+procedure tdbdropdownlisteditlb.setdropdown(
+                                   const avalue: tdropdownlistcontrollerlb);
+begin
+ inherited dropdown.assign(avalue);
+end;
+
+function tdbdropdownlisteditlb.createdropdowncontroller: 
+                                                    tcustomdropdowncontroller;
+begin
+ result:= tdropdownlistcontrollerlb.create(ilbdropdownlist(self));
+end;
+
+procedure tdbdropdownlisteditlb.recordselected(const arecordnum: integer;
+                                                            const akey: keyty);
+var
+ bo1: boolean;
+begin
+ bo1:= false;
+ if arecordnum >= 0 then begin
+  with tdropdownlistcontrollerlb(fdropdown) do begin
+   setdropdowntext(flookupbuffer.textvaluephys(cols[0].ffieldno,arecordnum),
+                                              true,false,akey);
+  end; 
+  exit;
+ end
+ else begin
+  if arecordnum = -2 then begin
+   bo1:= checkvalue; 
+  end
+  else begin
+   feditor.undo;
+  end;
+ end;
+ if bo1 and (akey = key_tab) then begin
+  window.postkeyevent(akey);
+ end;
+end;
+
+{ tdropdownlisteditlb }
+
+function tdropdownlisteditlb.getdropdown: tdropdownlistcontrollerlb;
+begin
+ result:= tdropdownlistcontrollerlb(inherited dropdown);
+end;
+
+procedure tdropdownlisteditlb.setdropdown(
+                                   const avalue: tdropdownlistcontrollerlb);
+begin
+ inherited dropdown.assign(avalue);
+end;
+
+function tdropdownlisteditlb.createdropdowncontroller: 
+                                                    tcustomdropdowncontroller;
+begin
+ result:= tdropdownlistcontrollerlb.create(ilbdropdownlist(self));
+end;
+
+procedure tdropdownlisteditlb.recordselected(const arecordnum: integer;
+                                                            const akey: keyty);
+var
+ bo1: boolean;
+begin
+ bo1:= false;
+ if arecordnum >= 0 then begin
+  with tdropdownlistcontrollerlb(fdropdown) do begin
+   setdropdowntext(flookupbuffer.textvaluephys(cols[0].ffieldno,arecordnum),
+                                              true,false,akey);
+  end; 
+  exit;
+ end
+ else begin
+  if arecordnum = -2 then begin
+   bo1:= checkvalue; 
+  end
+  else begin
+   feditor.undo;
+  end;
+ end;
+ if bo1 and (akey = key_tab) then begin
+  window.postkeyevent(akey);
+ end;
 end;
 
 { tenumeditdb }
@@ -7429,29 +7690,30 @@ begin
  result:= tlbdropdowncol;
 end;
 
-{ tlbdropdownlistcontroller }
+{ tcustomlbdropdownlistcontroller }
 
-constructor tlbdropdownlistcontroller.create(const intf: ilbdropdownlist);
+constructor tcustomlbdropdownlistcontroller.create(const intf: ilbdropdownlist);
 begin
  inherited;
  options:= defaultlbdropdownoptions;
 end;
 
-procedure tlbdropdownlistcontroller.valuecolchanged;
+procedure tcustomlbdropdownlistcontroller.valuecolchanged;
 begin
+ //dummy
 end;
 
-function tlbdropdownlistcontroller.getbuttonframeclass: dropdownbuttonframeclassty;
+function tcustomlbdropdownlistcontroller.getbuttonframeclass: dropdownbuttonframeclassty;
 begin
  result:= tdropdownbuttonframe;
 end;
 
-function tlbdropdownlistcontroller.getdropdowncolsclass: dropdowncolsclassty;
+function tcustomlbdropdownlistcontroller.getdropdowncolsclass: dropdowncolsclassty;
 begin
  result:= tlbdropdowncols;
 end;
 
-function  tlbdropdownlistcontroller.createdropdownlist: tdropdownlist;
+function  tcustomlbdropdownlistcontroller.createdropdownlist: tdropdownlist;
 var
  int1,int2,int3,int4: integer;
  sortfieldno: integer;
@@ -7497,13 +7759,13 @@ begin
  end;
 end;
 
-function tlbdropdownlistcontroller.candropdown: boolean;
+function tcustomlbdropdownlistcontroller.candropdown: boolean;
 begin
  result:= (flookupbuffer <> nil) and (flookupbuffer.count > 0) and
                  (fcols.count > 0) and inherited candropdown;
 end;
 
-procedure tlbdropdownlistcontroller.itemselected(const index: integer;
+procedure tcustomlbdropdownlistcontroller.itemselected(const index: integer;
                              const akey: keyty);
 var
  int1: integer;
@@ -7533,23 +7795,23 @@ begin
  ilbdropdownlist(fintf).recordselected(int1,akey);
 end;
 
-procedure tlbdropdownlistcontroller.setlookupbuffer(
+procedure tcustomlbdropdownlistcontroller.setlookupbuffer(
                    const avalue: tcustomlookupbuffer);
 begin
  setlinkedvar(avalue,flookupbuffer);
 end;
 
-function tlbdropdownlistcontroller.getcols: tlbdropdowncols;
+function tcustomlbdropdownlistcontroller.getcols: tlbdropdowncols;
 begin
  result:= tlbdropdowncols(fcols);
 end;
 
-procedure tlbdropdownlistcontroller.setcols(const avalue: tlbdropdowncols);
+procedure tcustomlbdropdownlistcontroller.setcols(const avalue: tlbdropdowncols);
 begin
  fcols.assign(avalue);
 end;
 
-procedure tlbdropdownlistcontroller.objectevent(const sender: tobject;
+procedure tcustomlbdropdownlistcontroller.objectevent(const sender: tobject;
              const event: objecteventty);
 begin
  inherited;
@@ -7572,7 +7834,7 @@ begin
 
 end;
 
-procedure tlbdropdownlistcontroller.dropdown;
+procedure tcustomlbdropdownlistcontroller.dropdown;
 begin
  tdropdowncols1(fcols).fitemindex:= -1;
  inherited; 
@@ -8355,8 +8617,8 @@ end;
 
 { tlbdropdownlist }
 
-constructor tlbdropdownlist.create(const acontroller: tlbdropdownlistcontroller;
-                             acols: tdropdowncols);
+constructor tlbdropdownlist.create(
+     const acontroller: tcustomlbdropdownlistcontroller; acols: tdropdowncols);
 var
  int1,int2,int3: integer;
 begin

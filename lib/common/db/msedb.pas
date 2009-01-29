@@ -1423,11 +1423,16 @@ end;
 }
 function getasmsestring(const field: tfield; const utf8: boolean): msestring;
 begin
- if utf8 then begin
-  result:= utf8tostring(field.asstring);
+ if field is tmsestringfield then begin
+  result:= tmsestringfield(field).asmsestring;
  end
  else begin
-  result:= field.asstring;
+  if utf8 then begin
+   result:= utf8tostring(field.asstring);
+  end
+  else begin
+   result:= field.asstring;
+  end;
  end;
 end;
 

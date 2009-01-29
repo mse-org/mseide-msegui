@@ -406,7 +406,6 @@ type
    procedure setdropdown(const avalue: tdropdownlistcontroller);
    function getdropdown: tdropdownlistcontroller;
   protected
-
   //idropdownlist
    function getdropdownitems: tdropdowncols; virtual;
    function createdropdowncontroller: tcustomdropdowncontroller; override;
@@ -2682,7 +2681,6 @@ begin
  valuechanged;
 end;
 
-
 { tcustomdropdownedit }
 
 constructor tcustomdropdownedit.create(aowner: tcomponent);
@@ -2861,7 +2859,8 @@ begin
  result:= tdropdownlistcontroller.create(idropdownlist(self));
 end;
 
-procedure tcustomdropdownlistedit.internalsort(const acol: integer; const sortlist: tintegerdatalist);
+procedure tcustomdropdownlistedit.internalsort(const acol: integer;
+                                            const sortlist: tintegerdatalist);
 var
  list: tintegerdatalist;
  int1: integer;
