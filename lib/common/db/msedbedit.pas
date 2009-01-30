@@ -1744,7 +1744,7 @@ type
    constructor create(const intf: ilbdropdownlist);
    procedure dropdown; override;
    property lookupbuffer: tcustomlookupbuffer read flookupbuffer write setlookupbuffer;
-   property keyfieldno: integer read fkeyfieldno write fkeyfieldno;
+   property keyfieldno: integer read fkeyfieldno write fkeyfieldno default 0;
    property optionslb: optionslbty read foptionslb write foptionslb default [];
    property options default defaultlbdropdownoptions;
    property cols: tlbdropdowncols read getcols write setcols;
