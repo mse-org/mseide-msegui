@@ -6011,7 +6011,7 @@ begin
  rect.pos:= start;
  rect.colcount:= stop.col - start.col;
  rect.rowcount:= stop.row - start.row;
- normalizerect(rectty(rect)); 
+ normalizerect1(rectty(rect)); 
  if calldoselectcell then begin
   if value then begin
    mo1:= csm_select;
