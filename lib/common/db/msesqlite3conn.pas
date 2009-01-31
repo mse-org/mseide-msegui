@@ -27,7 +27,8 @@ uses
 | FLOAT[...] or REAL | REAL                | ftfloat     | double      |
 | or DOUBLE[...]     |                     |             |             |
 | CURRENCY           | REAL                | ftcurrency  | double!     |
-| DATETIME           | REAL                | ftdatetime  | tdatetime   |
+| DATETIME or        | REAL                | ftdatetime  | tdatetime   |
+|  TIMESTAMP         |                     |             |             |
 | DATE               | REAL                | ftdate      | tdatetime   |
 | TIME               | REAL                | fttime      | tdatetime   |
 | NUMERIC[...]       | INTEGER 8 (*10'000) | ftbcd       | currency    |
@@ -150,19 +151,10 @@ type
    property options: sqliteoptionsty read foptions write setoptions default [];
    property busytimeoutms: integer read fbusytimeoutms 
                                         write setbusytimeoutms default 0;
-//    property Password;
    property Transaction;
    property transactionwrite;
    property afterconnect;
    property beforedisconnect;
-//    property UserName;
-//    property CharSet;
-//    property HostName;
-//    Property Role;
-//    property KeepConnection;
-//    property LoginPrompt;
-//    property Params;
-//    property OnLogin;
  end;
 
 implementation
@@ -399,7 +391,7 @@ begin
          ft1:= ftfloat;
         end
         else begin
-         if str2 = 'DATETIME' then begin
+         if (str2 = 'DATETIME') or (str2 = 'TIMESTAMP') then begin
           ft1:= ftdatetime;
          end
          else begin

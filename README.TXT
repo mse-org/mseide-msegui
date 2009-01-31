@@ -151,7 +151,8 @@ tsqlite3connection is available without -dmse_with_sqlite. Field type mapping:
 | FLOAT[...] or REAL | REAL                | ftfloat     | double      |
 | or DOUBLE[...]     |                     |             |             |
 | CURRENCY           | REAL                | ftcurrency  | double!     |
-| DATETIME           | REAL                | ftdatetime  | tdatetime   |
+| DATETIME or        | REAL                | ftdatetime  | tdatetime   |
+|  TIMESTAMP         |                     |             |             |
 | DATE               | REAL                | ftdate      | tdatetime   |
 | TIME               | REAL                | fttime      | tdatetime   |
 | NUMERIC[...]       | INTEGER 8 (*10'000) | ftbcd       | currency    |
