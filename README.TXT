@@ -1,10 +1,10 @@
 MSEide+MSEgui Pascal Cross Platform GUI Development System.
  
-2008-12-15 Version 2.0beta2
-Copyright (c) 1999-2008 by Martin Schreiber
+2009-02-02 Version 2.0rc1
+Copyright (c) 1999-2009 by Martin Schreiber
 
-- Compiles with FPC 2.2.2
-- Tested on i386-linux SuSE 9.0,10.3,11.0 and i386-win32 98 and 2000.
+- Compiles with FPC 2.2.2 and FPC 2.2.4
+- Tested on i386-linux SuSE 9.0,10.3,11.1 and i386-win32 98 and 2000.
 - Links to xlib and gdi32, no external widget library needed.
 - Internal character encoding is UCS2.
 - Uses anti aliased fonts on Linux (Xft).

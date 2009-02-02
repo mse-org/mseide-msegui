@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+Versioon 2.0rc1
+2009-02-02
 2009-01-28
  tdb*grid.datasourec moved to tdb*grid.datalink.
 2009-01-17

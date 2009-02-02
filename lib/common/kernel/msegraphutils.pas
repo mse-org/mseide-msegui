@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -141,8 +141,18 @@ const
  cl_user17 =                 cl_user     + 17;
  cl_user18 =                 cl_user     + 18;
  cl_user19 =                 cl_user     + 19;
+ cl_fade0 =                  cl_user     + 20;
+ cl_fade1 =                  cl_user     + 21;
+ cl_fade2 =                  cl_user     + 22;
+ cl_fade3 =                  cl_user     + 23;
+ cl_fade4 =                  cl_user     + 24;
+ cl_fade5 =                  cl_user     + 25;
+ cl_fade6 =                  cl_user     + 26;
+ cl_fade7 =                  cl_user     + 27;
+ cl_fade8 =                  cl_user     + 28;
+ cl_fade9 =                  cl_user     + 29;
  
- cl_lastuser =               cl_user     + 20;
+ cl_lastuser =               cl_user     + 30;
 
  functionalcolorcount = integer(cl_lastfunctional)-integer(cl_functional);
  mappedcolorcount = integer(cl_lastmapped)-integer(cl_mapped);
@@ -252,7 +262,17 @@ const
     (name: 'cl_user16';  rgb:                (blue: $00; green: $00; red: $00; res: $00)), //16
     (name: 'cl_user17';  rgb:                (blue: $00; green: $00; red: $00; res: $00)), //17
     (name: 'cl_user18';  rgb:                (blue: $00; green: $00; red: $00; res: $00)), //18
-    (name: 'cl_user19';  rgb:                (blue: $00; green: $00; red: $00; res: $00))  //19
+    (name: 'cl_user19';  rgb:                (blue: $00; green: $00; red: $00; res: $00)), //19
+    (name: 'cl_fade0';   rgb:                (blue: $00; green: $00; red: $00; res: $00)), //20
+    (name: 'cl_fade1';   rgb:                (blue: $00; green: $00; red: $00; res: $00)), //21
+    (name: 'cl_fade2';   rgb:                (blue: $00; green: $00; red: $00; res: $00)), //22
+    (name: 'cl_fade3';   rgb:                (blue: $00; green: $00; red: $00; res: $00)), //23
+    (name: 'cl_fade4';   rgb:                (blue: $00; green: $00; red: $00; res: $00)), //24
+    (name: 'cl_fade5';   rgb:                (blue: $00; green: $00; red: $00; res: $00)), //25
+    (name: 'cl_fade6';   rgb:                (blue: $00; green: $00; red: $00; res: $00)), //26
+    (name: 'cl_fade7';   rgb:                (blue: $00; green: $00; red: $00; res: $00)), //27
+    (name: 'cl_fade8';   rgb:                (blue: $00; green: $00; red: $00; res: $00)), //28
+    (name: 'cl_fade9';   rgb:                (blue: $00; green: $00; red: $00; res: $00))  //29
    );
    
 type

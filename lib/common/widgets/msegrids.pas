@@ -1711,7 +1711,8 @@ type
    procedure insertrow(index: integer; count: integer = 1); virtual;
    procedure deleterow(index: integer; count: integer = 1); virtual;
    procedure clear; //sets rowcount to 0
-   function appendrow: integer; //returns index of new row
+   function appendrow: integer; //returns index of new row,
+                                //fast, does not call change events
    procedure sort;
    function copyselection: boolean; virtual;  //false if no copy
    function pasteselection: boolean; virtual; //false if no paste
