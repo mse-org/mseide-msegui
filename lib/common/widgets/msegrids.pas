@@ -7306,6 +7306,9 @@ begin
  if og_savestate in foptionsgrid then begin
   po1.col:= reader.readinteger('col',ffocusedcell.col);
   po1.row:= reader.readinteger('row',ffocusedcell.row);
+  if og_rowsizing in foptionsgrid then begin
+   datarowheight:= reader.readinteger('rowheight',datarowheight);
+  end;
   focuscell(po1);
  end;
 end;
@@ -7318,6 +7321,7 @@ begin
  if og_savestate in foptionsgrid then begin
   writer.writeinteger('col',ffocusedcell.col);
   writer.writeinteger('row',ffocusedcell.row);
+  writer.writeinteger('rowheight',datarowheight);
  end;
 end;
 
