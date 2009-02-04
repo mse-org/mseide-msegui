@@ -475,6 +475,8 @@ type
  showcolhinteventty = procedure(const sender: tdatacol; const arow: integer;
                            var info: hintinfoty) of object;
  datacoleventty = procedure(const sender: tdatacol) of object;
+ datacolchangeeventty = procedure(const sender: tdatacol;
+                                      const aindex: integer) of object;
 
  tdatacol = class(tcol)
   private
@@ -503,7 +505,7 @@ type
   protected
    fdata: tdatalist;
    fname: string;
-   fonchange: notifyeventty;
+   fonchange: datacolchangeeventty;
    procedure beginselect;
    procedure endselect;
    function getdatapo(const arow: integer): pointer; override;
@@ -565,7 +567,7 @@ type
    property widthmin: integer read fwidthmin write setwidthmin default 1;
    property widthmax: integer read fwidthmax write setwidthmax default 0;
    property name: string read fname write fname;
-   property onchange: notifyeventty read fonchange write fonchange;
+   property onchange: datacolchangeeventty read fonchange write fonchange;
    property oncellevent: celleventty read foncellevent write foncellevent;
    property onshowhint: showcolhinteventty read fonshowhint write fonshowhint;
    property onselectionchanged: datacoleventty read fonselectionchanged write
@@ -4774,7 +4776,7 @@ begin
   fgrid.sortinvalid;
  end;
  if fgrid.canevent(tmethod(fonchange)) then begin
-  fonchange(self);
+  fonchange(self,aindex);
  end;
 end;
 

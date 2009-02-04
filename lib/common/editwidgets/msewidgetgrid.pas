@@ -1101,14 +1101,14 @@ begin
    if noinvalidate then begin
     fdata.decupdate;
     if (not fdata.updating) and assigned(fonchange) then begin
-     fonchange(self);
+     fonchange(self,aindex);
     end;
    end;
   end;
  end
  else begin
   if assigned(fonchange) then begin
-   fonchange(self);
+   fonchange(self,aindex);
   end;
  end;
 end;

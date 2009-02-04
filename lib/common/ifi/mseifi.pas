@@ -336,7 +336,7 @@ type
    property active: boolean read factive write setactive;
    property rxdata: string read frxdata write frxdata;
   published
-   property optionsio: optionsiochty read foptionsio write foptionsio;
+   property optionsio: optionsiochty read foptionsio write foptionsio default [];
    property onbeforeconnect: iochanneleventty read fonbeforeconnect 
                                               write fonbeforeconnect;
    property onafterconnect: iochanneleventty read fonafterconnect 
