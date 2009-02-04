@@ -6558,6 +6558,7 @@ end;
 
 procedure tgriddatalink.editingchanged;
 begin
+ updaterowcount; //for insert
  invalidateindicator;
  inherited;
 end;

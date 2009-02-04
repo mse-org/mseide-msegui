@@ -545,8 +545,10 @@ type
    procedure afterapply; virtual;
    procedure freeblob(const ablob: blobinfoty);
    procedure freeblobs(var ablobs: blobinfoarty);
-   procedure deleteblob(var ablobs: blobinfoarty; const aindex: integer); overload;
-   procedure deleteblob(var ablobs: blobinfoarty; const afield: tfield); overload;
+   procedure deleteblob(var ablobs: blobinfoarty; const aindex: integer;
+                  const afreeblob: boolean); overload;
+   procedure deleteblob(var ablobs: blobinfoarty; const afield: tfield;
+                               const adeleteitem: boolean); overload;
    procedure addblob(const ablob: tblobbuffer);
    
    procedure setrecno1(value: longint; const nocheck: boolean);
@@ -1391,6 +1393,7 @@ procedure tmsebufdataset.addblob(const ablob: tblobbuffer);
 var
  int1,int2: integer;
  bo1: boolean;
+ blobfree: boolean;
  po2: pointer;
  po1: precheaderty;
 begin
@@ -1398,9 +1401,11 @@ begin
  int2:= -1;
  if bs_recapplying in fbstate then begin
   po1:= @fnewvaluebuffer^.header;
+  blobfree:= true;
  end
  else begin
   po1:= @pdsrecordty(activebuffer)^.header;
+  blobfree:= false; 
  end;
  with po1^{pdsrecordty(activebuffer)^.header} do begin
   for int1:= high(blobinfo) downto 0 do begin
@@ -1419,10 +1424,12 @@ begin
    blobinfo:= copy(blobinfoarty(po2));
   end;
   if int2 >= 0 then begin
-   deleteblob(blobinfo,int2);
+   deleteblob(blobinfo,int2,blobfree);
   end
   else begin
-   freeblobcache(po1,ablob.ffield);
+   if blobfree then begin                //else done in post
+    freeblobcache(po1,ablob.ffield); 
+   end;
   end;
   setlength(blobinfo,high(blobinfo)+2);
   with blobinfo[high(blobinfo)],ablob do begin
@@ -1454,24 +1461,35 @@ begin
  ablobs:= nil;
 end;
 
-procedure tmsebufdataset.deleteblob(var ablobs: blobinfoarty; const aindex: integer);
+procedure tmsebufdataset.deleteblob(var ablobs: blobinfoarty;
+                    const aindex: integer; const afreeblob: boolean);
 begin
- freeblob(ablobs[aindex]);
+ if afreeblob then begin
+  freeblob(ablobs[aindex]);
+ end;
  deleteitem(ablobs,typeinfo(blobinfoarty),aindex); 
 end;
 
 procedure tmsebufdataset.deleteblob(var ablobs: blobinfoarty; 
-                                              const afield: tfield);
+                     const afield: tfield; const adeleteitem: boolean);
 var
  int1: integer;
 begin
  for int1:= high(ablobs) downto 0 do begin
   if ablobs[int1].field = afield then begin
    freeblob(ablobs[int1]);
-   deleteitem(ablobs,typeinfo(blobinfoarty),int1); 
-   break;
+   if adeleteitem then begin
+    deleteitem(ablobs,typeinfo(blobinfoarty),int1); 
+   end
+   else begin
+    ablobs[int1].field:= nil;
+   end;
+   exit;
   end;
  end;
+ if not adeleteitem then begin //called from post
+  freeblobcache(@fcurrentbuf^.header,afield); 
+ end; 
 end;
 
 procedure tmsebufdataset.dointernalopen;
@@ -2567,6 +2585,7 @@ begin
  checkindex(false); //needed for first append
  with pdsrecordty(activebuffer)^ do begin
   bo1:= false;
+ {
   with header do begin
    for int1:= high(blobinfo) downto 0 do begin
     if blobinfo[int1].new then begin
@@ -2575,6 +2594,7 @@ begin
     end;
    end;
   end;
+ }
   if state = dsinsert then begin
    fcurrentbuf:= intallocrecord;
   end;
@@ -2593,7 +2613,7 @@ begin
       po2:= @oldvalues^.header.blobinfo;
       pointer(po2^):= nil;
       setlength(po2^,length(po1^));
-      for int1:= high(po1^) downto 0 do begin
+      for int1:= high(po1^) downto 0 do begin //copy blobs
        po2^[int1]:= po1^[int1];
        with po2^[int1] do begin
         if datalength > 0 then begin
@@ -2614,6 +2634,20 @@ begin
     end;
    end;
   end;
+
+  with header do begin
+   for int1:= high(blobinfo) downto 0 do begin
+    with blobinfo[int1] do begin
+     if new then begin
+      deleteblob(fcurrentbuf^.header.blobinfo,field,false);
+                            //no reassign of blobinfo
+      new:= false;
+      bo1:= true;
+     end;
+    end;
+   end;
+  end;
+
   if (state = dsedit) and (bs_indexvalid in fbstate) then begin
    setlength(ar1,findexlocal.count);
    setlength(ar2,length(ar1));
@@ -2690,13 +2724,19 @@ end;
 procedure tmsebufdataset.internalcancel;
 var
  int1: integer;
+ bo1: boolean;
 begin
  with pdsrecordty(activebuffer)^,header do begin
   finalizestrings(header);
+  bo1:= false;
   for int1:= high(blobinfo) downto 0 do begin
    if blobinfo[int1].new then begin
-    deleteblob(blobinfo,int1);
+    deleteblob(blobinfo,int1,true);
+    bo1:= true;
    end;
+  end;
+  if bo1 then begin
+   blobinfo:= nil; //free copy
   end;
  end;
  fbstate:= fbstate - [bs_editing,bs_append];

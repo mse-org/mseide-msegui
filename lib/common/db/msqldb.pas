@@ -3002,7 +3002,7 @@ begin
    end;
   finally
    for int1:= high(freeblobar) downto 0 do begin
-    deleteblob(blobspo^,tfield(freeblobar[int1]));
+    deleteblob(blobspo^,tfield(freeblobar[int1]),true);
    end;  
   end;
  end;
