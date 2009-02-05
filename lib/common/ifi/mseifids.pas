@@ -370,6 +370,9 @@ type
   private
    fificontroller: tifidscontroller;
    fmodifiedfields: string; //same layout as nullmask
+   fclientbefporeopen: tdatasetnotifyevent;
+   fclientbeforeopen: tdatasetnotifyevent;
+   fclientafteropen: tdatasetnotifyevent;
    procedure setificontroller(const avalue: tifidscontroller);
    procedure initmodifiedfields;   
   protected
@@ -396,6 +399,10 @@ type
    destructor destroy; override;
   published
    property ifi: tifidscontroller read fificontroller write setificontroller;
+   property clientbeforeopen: tdatasetnotifyevent read fclientbefporeopen 
+                       write fclientbeforeopen;
+   property clientafteropen: tdatasetnotifyevent read fclientafteropen 
+                       write fclientafteropen;
  end;
  
 implementation
@@ -2405,6 +2412,9 @@ var
  str1,str2,str3: ansistring;
  po1: pchar;
 begin
+ if checkcanevent(self,tmethod(fclientbeforeopen)) then begin
+  fclientbeforeopen(self);
+ end;
  str2:= fificontroller.encodefielddefs(fielddefs);
  if factindexpo = nil then begin  
   str3:= fificontroller.encoderecords(fbrecordcount,nil);
@@ -2420,6 +2430,9 @@ begin
   move(str3[1],(@data+length(str2))^,length(str3));
  end;
  fificontroller.senddata(str1);
+ if checkcanevent(self,tmethod(fclientafteropen)) then begin
+  fclientafteropen(self);
+ end;
 end;
 
 procedure ttxsqlquery.fielddefsdatareceived(const asequence: sequencety;

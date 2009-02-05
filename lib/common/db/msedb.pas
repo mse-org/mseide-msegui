@@ -443,6 +443,7 @@ type
    procedure Clear; override;
    function assql: string;
    function asoldsql: string;
+   function sum: double;
    property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
@@ -3028,6 +3029,32 @@ begin
  thetext:='';
  if getdata(@do1) then begin
   thetext:= getnumdisplaytext(self,do1,adisplaytext,currency);
+ end;
+end;
+
+function tmsefloatfield.sum: double;
+var
+ bm: string;
+ do1: double;
+begin
+ result:= 0;
+ if (dataset <> nil) and dataset.active then begin
+  with dataset do begin
+   disablecontrols;
+   try
+    bm:= bookmark;  
+    first;
+    while not eof do begin
+     if getdata(@do1) then begin
+      result:= result + do1;
+     end;
+     next;
+    end;
+    bookmark:= bm;
+   finally
+    enablecontrols;
+   end;
+  end;
  end;
 end;
 
