@@ -67,7 +67,7 @@ uses
 {$else}
  mselibc,
 {$endif}
- msesysintf,msestrings;
+ msesysintf,msestrings,mseformatstr;
 
 function createguidstring: string;
 var
@@ -268,12 +268,14 @@ end;
 
 procedure debugout(const sender: tcomponent; const atext: ansistring);
 begin
- debugwriteln(sender.classname+':'+sender.name+' '+atext);
+ debugwriteln(hextostr(ptruint(sender),8)+' '+
+                      sender.classname+':'+sender.name+' '+atext);
 end;
 
 procedure debugout(const sender: tobject; const atext: ansistring);
 begin
- debugwriteln(sender.classname+' '+atext);
+ debugwriteln(hextostr(ptruint(sender),8)+' '+
+                      sender.classname+' '+atext);
 end;
 
 procedure errorhalt(errortext: string; exitcode: integer = 1);

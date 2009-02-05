@@ -112,7 +112,8 @@ type
                   write setoverloadsleepus default -1;
             //checks application.checkoverload before calling oninputavaliable
             //if >= 0
-   property optionsreader: pipereaderoptionsty read getoptionsreader write setoptionsreader;
+   property optionsreader: pipereaderoptionsty read getoptionsreader 
+                                 write setoptionsreader default [];
    property onbeforeconnect: socketpipeseventty read fonbeforeconnect 
                                                       write fonbeforeconnect;
    property onafterconnect: socketpipeseventty read fonafterconnect 
@@ -207,9 +208,9 @@ type
    procedure seturl(const avalue: filenamety);
   protected
    function getsockaddr: socketaddrty;
-   property kind: socketkindty read fkind write fkind;
+   property kind: socketkindty read fkind write fkind default sok_local;
    property url: filenamety read furl write seturl;
-   property port: word read fport write fport;
+   property port: word read fport write fport default 0;
  end;
 
  turlsocketcomp = class(tcustomurlsocketcomp)
@@ -322,9 +323,10 @@ type
   published
    property maxconnections: integer read fmaxconnections write fmaxconnections 
                              default defaultmaxconnections;
-   property accepttimeoutms: integer read faccepttimeoutms write faccepttimeoutms;
-   property rxtimeoutms: integer read frxtimeoutms write frxtimeoutms;
-   property txtimeoutms: integer read ftxtimeoutms write ftxtimeoutms;
+   property accepttimeoutms: integer read faccepttimeoutms 
+                             write faccepttimeoutms default 0;
+   property rxtimeoutms: integer read frxtimeoutms write frxtimeoutms default 0;
+   property txtimeoutms: integer read ftxtimeoutms write ftxtimeoutms default 0;
    
    property onaccept: socketaccepteventty read fonaccept write fonaccept;
    property onbeforechconnect: socketserverconnecteventty read fonbeforechconnect
@@ -339,7 +341,8 @@ type
                   write foverloadsleepus default -1;
             //checks application.checkoverload before calling oninputavaliable
             //if >= 0
-   property optionsreader: pipereaderoptionsty read foptionsreader write foptionsreader;
+   property optionsreader: pipereaderoptionsty read foptionsreader
+                               write foptionsreader default [];
    property oninputavailable: socketpipeseventty read foninputavailable 
                                  write foninputavailable;
    property onsocketbroken: socketpipeseventty read fonsocketbroken 

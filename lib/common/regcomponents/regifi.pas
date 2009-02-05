@@ -62,6 +62,11 @@ type
   protected
    function filtercomponent(const acomponent: tcomponent): boolean; override;
  end;
+ 
+ tlocalconncompeditor = class(tcomponentpropertyeditor)
+  protected
+   function filtercomponent(const acomponent: tcomponent): boolean; override;
+ end;
    
 procedure register;
 begin
@@ -83,6 +88,8 @@ begin
  registerpropertyeditor(typeinfo(twidget),tvaluewidgetlink,'widget',tifidatawidgeteditor);
  registerpropertyeditor(typeinfo(tcomponent),ttxlinkaction,'ificomp',
                  tifitxactioncompeditor);
+ registerpropertyeditor(typeinfo(tcustomiochannel),tcustomiochannel,'localconn',
+                 tlocalconncompeditor);
 // registerpropertyeditor(typeinfo(tififieldoptions),tifidscontroller,'',
 //                        tififieldoptionseditor);
 end;
@@ -216,11 +223,20 @@ end;
 
 { tifitxactioncompeditor }
 
-function tifitxactioncompeditor.filtercomponent(const acomponent: tcomponent): boolean;
+function tifitxactioncompeditor.filtercomponent(
+                                    const acomponent: tcomponent): boolean;
 var
  intf1: iifitxaction;
 begin
  result:= mseclasses.getcorbainterface(acomponent,typeinfo(iifitxaction),intf1);
+end;
+
+{ tlocalconncompeditor }
+
+function tlocalconncompeditor.filtercomponent(
+                                    const acomponent: tcomponent): boolean;
+begin
+ result:= acomponent <> fcomponent;
 end;
 
 initialization

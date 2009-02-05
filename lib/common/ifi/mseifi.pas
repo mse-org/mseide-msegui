@@ -267,15 +267,12 @@ type
  end;
 
  tiosynchronizer = class;
-// datasynchronizeprocty = procedure(const sender: tiosynchronizer;
-//                               var adata: string) of object;
  stringdataprocty = procedure(var adata: string) of object;
   
  tiosynchronizer = class(teventthread)
   private
    fwaitingclients: tintegeravltree;   
    fondatareceived: stringdataprocty;
-//   fonsynchronize: datasynchronizeprocty;
   protected
    procedure datareceived(const adata: string);
    procedure eventloop;
@@ -287,14 +284,14 @@ type
    function preparewait(const asequence: sequencety): twaitingclient;
    function waitforanswer(const aclient: twaitingclient; 
                    const waitus: integer): boolean; //false on timeout
-//   property onsynchronize: datasynchronizeprocty read fonsynchronize 
-//                                                          write fonsynchronize;
  end;
 
  tcustomiochannel = class;
  iochanneleventty = procedure(const sender: tcustomiochannel) of object;
  optioniochty = (oic_releaseondisconnect);
  optionsiochty = set of optioniochty;
+ iochannelstatety = (iocs_connecting,iocs_disconnecting,iocs_localsetting);
+ iochannelstatesty = set of iochannelstatety;
    
  tcustomiochannel = class(tactcomponent)
   private
@@ -306,15 +303,19 @@ type
    fonbeforedisconnect: iochanneleventty;
    fonafterdisconnect: iochanneleventty;
    foptionsio: optionsiochty;
+   flocalconn: tcustomiochannel;
    procedure setactive(const avalue: boolean);
+   procedure setlocalconn(const avalue: tcustomiochannel);
   protected
    fsynchronizer: tiosynchronizer;
+   fstate: iochannelstatesty;
+   procedure checkinactive;
    function canconnect: boolean; virtual;
-//   procedure receiveevent(const event: tobjectevent); override;
    procedure datareceived(var adata: ansistring);
    procedure internalconnect; virtual; abstract;
    procedure internaldisconnect; virtual; abstract;
-   function commio: boolean; virtual; abstract;
+   function commio: boolean; virtual;
+   procedure localsenddata(const adata: ansistring); virtual;
    procedure internalsenddata(const adata: ansistring); virtual; abstract;
    procedure loaded; override;
    procedure dobeforeconnect;
@@ -325,6 +326,7 @@ type
    procedure doactivated; override;
    procedure dodeactivated; override;
    procedure receiveevent(const event: tobjectevent); override;
+   procedure receivelocaldata(const adata: string); virtual;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -333,8 +335,9 @@ type
    function sequence: sequencety;
    procedure asyncrx; //posts current rxdata to application queue
    property synchronizer: tiosynchronizer read fsynchronizer;
-   property active: boolean read factive write setactive;
+   property active: boolean read factive write setactive default false;
    property rxdata: string read frxdata write frxdata;
+   property localconn: tcustomiochannel read flocalconn write setlocalconn;
   published
    property optionsio: optionsiochty read foptionsio write foptionsio default [];
    property onbeforeconnect: iochanneleventty read fonbeforeconnect 
@@ -353,13 +356,14 @@ type
  tstuffediochannel = class(tcustomiochannel)
   private
    fbuffer: string;
-   fstate: pipeiostatesty;
+   fpipestate: pipeiostatesty;
    frxcheckedindex: integer;
   protected
    function stuff(const adata: string): string;
    function unstuff(const adata: string): string;
    procedure resetrxbuffer;
    procedure addata(const adata: string);
+   procedure receivelocaldata(const adata: string); override;
  end;
   
  tcustompipeiochannel = class(tstuffediochannel)
@@ -372,6 +376,7 @@ type
    procedure internalconnect; override;
    procedure internaldisconnect; override;   
    function commio: boolean; override;
+   procedure localsenddata(const adata: ansistring); override;
    procedure internalsenddata(const adata: ansistring); override;
    procedure doinputavailable(const sender: tpipereader);
    procedure dopipebroken(const sender: tpipereader);
@@ -388,6 +393,7 @@ type
    property activator;
    property serverapp: string read fserverapp write fserverapp;
             //stdin, stdout if ''
+   property localconn;
  end;
  
  tsocketstdiochannel = class(tcustompipeiochannel)
@@ -397,7 +403,6 @@ type
    procedure setcryptio(const avalue: tcryptio);
   protected
    procedure internalconnect; override;
-//   procedure doafterconnect;
    procedure internaldisconnect; override;
   public
    constructor create(aowner: tcomponent); override;
@@ -427,6 +432,7 @@ type
    procedure internalconnect; override;
    procedure internaldisconnect; override;   
    function commio: boolean; override;
+   procedure localsenddata(const adata: ansistring); override;
    procedure internalsenddata(const adata: ansistring); override;
    procedure doinputavailable(const sender: tpipereader);
    procedure dobeforedisconnect(const sender: tcustomsocketpipes);
@@ -437,6 +443,7 @@ type
    property active;
    property activator;
    property socket: tifisocketclient read fsocket write setsocket;
+   property localconn;
  end;
 
  tcustomsocketserveriochannel = class(tstuffediochannel)
@@ -447,6 +454,7 @@ type
    procedure internalconnect; override;
    procedure internaldisconnect; override;   
    function commio: boolean; override;
+   procedure localsenddata(const adata: ansistring); override;
    procedure internalsenddata(const adata: ansistring); override;
    procedure doinputavailable(const sender: tpipereader);
    procedure dobeforedisconnect(const sender: tcustomsocketpipes);
@@ -459,6 +467,8 @@ type
  tsocketserveriochannel = class(tcustomsocketserveriochannel)
   public
    procedure link(const apipes: tcustomsocketpipes);
+  published
+   property localconn;
  end;
  
  tifiiolinkcomponent = class(tmsecomponent)
@@ -873,6 +883,7 @@ destructor tcustomiochannel.destroy;
 begin
  fsynchronizer.free;
  active:= false;
+ localconn:= nil;
  inherited;
 end;
 
@@ -896,10 +907,20 @@ begin
  end;
 end;
 
+procedure tcustomiochannel.localsenddata(const adata: ansistring);
+begin
+ flocalconn.receivelocaldata(adata);
+end;
+
 procedure tcustomiochannel.senddata(const adata: ansistring);
 begin
  if checkconnection then begin
-  internalsenddata(adata);
+  if flocalconn <> nil then begin
+   localsenddata(adata);
+  end
+  else begin
+   internalsenddata(adata);
+  end;
  end;
 end;
 
@@ -924,6 +945,11 @@ begin
  else begin
   inherited;
  end;
+end;
+
+procedure tcustomiochannel.receivelocaldata(const adata: string);
+begin
+ //dummy
 end;
 
 procedure tcustomiochannel.asyncrx; //posts current rxdata to application queue
@@ -974,15 +1000,28 @@ end;
 
 procedure tcustomiochannel.connect;
 begin
+ if not (iocs_connecting in fstate) then begin
 {$ifdef mse_debugsockets}
- debugout(self,'connect');
+  debugout(self,'connect');
 {$endif}
- dobeforeconnect;
- internalconnect;
- doafterconnect;
-{$ifdef mse_debugsockets}
- debugout(self,'connected');
-{$endif}
+  include(fstate,iocs_connecting);
+  try
+   dobeforeconnect;
+   if flocalconn <> nil then begin
+    flocalconn.connect;
+    doactivated;
+   end
+   else begin
+    internalconnect;
+   end;
+   doafterconnect;
+  {$ifdef mse_debugsockets}
+   debugout(self,'connected');
+  {$endif}
+  finally
+   exclude(fstate,iocs_connecting);
+  end;
+ end;
 end;
 
 procedure tcustomiochannel.disconnected;
@@ -1001,19 +1040,43 @@ end;
 
 procedure tcustomiochannel.disconnect;
 begin
-{$ifdef mse_debugsockets}
- debugout(self,'disconnect');
-{$endif}
- if canevent(tmethod(fonbeforedisconnect)) then begin
-  fonbeforedisconnect(self);
+ if not(iocs_disconnecting in fstate) then begin
+  include(fstate,iocs_disconnecting);
+ {$ifdef mse_debugsockets}
+  debugout(self,'disconnect');
+ {$endif}
+  try
+   if canevent(tmethod(fonbeforedisconnect)) then begin
+    fonbeforedisconnect(self);
+   end;
+   if flocalconn <> nil then begin
+    flocalconn.disconnect;
+   end
+   else begin
+    internaldisconnect;
+   end;
+   disconnected;
+  finally
+   exclude(fstate,iocs_disconnecting);
+  end;
  end;
- internaldisconnect;
- disconnected;
+end;
+
+procedure tcustomiochannel.checkinactive;
+begin
+ if active and not(csloading in componentstate) then begin
+  exception.create(name+': Must be inactive.');
+ end;
 end;
 
 function tcustomiochannel.canconnect: boolean;
 begin
  result:= true;
+end;
+
+function tcustomiochannel.commio: boolean;
+begin
+ result:= (flocalconn <> nil) and flocalconn.active;
 end;
 
 procedure tcustomiochannel.doactivated;
@@ -1029,12 +1092,37 @@ begin
  active:= false;
 end;
 
+procedure tcustomiochannel.setlocalconn(const avalue: tcustomiochannel);
+begin
+ if (avalue <> flocalconn) and not (iocs_localsetting in fstate) then begin
+  include(fstate,iocs_localsetting);
+  try
+   if avalue <> nil then begin
+    checkinactive;
+    avalue.checkinactive;
+   end
+   else begin
+    active:= false;
+   end;
+   if flocalconn <> nil then begin
+    flocalconn.localconn:= nil;
+   end;    
+   flocalconn:= avalue;
+   if avalue <> nil then begin
+    avalue.localconn:= self;
+   end;
+  finally
+   exclude(fstate,iocs_localsetting);
+  end;
+ end;
+end;
+
 { tstuffediochannel }
 
 procedure tstuffediochannel.resetrxbuffer;
 begin
  fbuffer:= '';
- exclude(fstate,pis_rxstarted); 
+ exclude(fpipestate,pis_rxstarted); 
  frxcheckedindex:= 0;
 end;
 
@@ -1048,7 +1136,7 @@ begin
  int1:= length(fbuffer);
  if (int1 >= 2) then begin
   po1:= pointer(fbuffer);
-  if (pis_rxstarted in fstate) then begin
+  if (pis_rxstarted in fpipestate) then begin
    for int2:= frxcheckedindex to int1-2 do begin
     if (po1[int2] = c_dle) and (po1[int2+1] = c_etx) and
      ((int2 = 0) or (po1[int2-1] <> c_dle))  then begin
@@ -1072,7 +1160,7 @@ begin
     if (po1[int2] = c_dle) and (po1[int2+1] = c_stx) and
          ((int2 = 0) or (po1[int2-1] <> c_dle)) then begin
      fbuffer:= copy(fbuffer,int2+3,int1);
-     include(fstate,pis_rxstarted);
+     include(fpipestate,pis_rxstarted);
      addata('');
      exit;
     end;
@@ -1083,6 +1171,11 @@ begin
   until (int1 = 0) or (po1[int1] <> c_dle);
   frxcheckedindex:= int1;
  end;
+end;
+
+procedure tstuffediochannel.receivelocaldata(const adata: string);
+begin
+ addata(adata);
 end;
 
 function tstuffediochannel.stuff(const adata: string): string;
@@ -1176,8 +1269,14 @@ end;
 
 function tcustompipeiochannel.commio: boolean;
 begin
- result:= ((fserverapp = '') or (fprochandle <> invalidprochandle))
+ result:= inherited commio or 
+                ((fserverapp = '') or (fprochandle <> invalidprochandle))
                      and frx.active;
+end;
+
+procedure tcustompipeiochannel.localsenddata(const adata: ansistring);
+begin
+ flocalconn.receivelocaldata(stx+stuff(adata)+etx);
 end;
 
 procedure tcustompipeiochannel.internalsenddata(const adata: ansistring);
@@ -1303,6 +1402,7 @@ end;
 function tiosynchronizer.execute(thread: tmsethread): integer;
 begin
  eventloop;
+ result:= 0;
 end;
 
 { twaitingclient }
@@ -1366,12 +1466,17 @@ end;
 
 function tsocketclientiochannel.commio: boolean;
 begin
- result:= fsocket.active and fsocket.pipes.rx.active;
+ result:= inherited commio or (fsocket.active and fsocket.pipes.rx.active);
 end;
 
 procedure tsocketclientiochannel.internalsenddata(const adata: ansistring);
 begin
  fsocket.pipes.tx.writestr(stx+stuff(adata)+etx);
+end;
+
+procedure tsocketclientiochannel.localsenddata(const adata: ansistring);
+begin
+ flocalconn.receivelocaldata(stx+stuff(adata)+etx);
 end;
 
 procedure tsocketclientiochannel.doinputavailable(const sender: tpipereader);
@@ -1435,12 +1540,17 @@ end;
 
 function tcustomsocketserveriochannel.commio: boolean;
 begin
- result:= (fpipes <> nil) and fpipes.rx.active;
+ result:= inherited commio or (fpipes <> nil) and fpipes.rx.active;
 end;
 
 procedure tcustomsocketserveriochannel.internalsenddata(const adata: ansistring);
 begin
  fpipes.tx.writestr(stx+stuff(adata)+etx);
+end;
+
+procedure tcustomsocketserveriochannel.localsenddata(const adata: ansistring);
+begin
+ flocalconn.receivelocaldata(stx+stuff(adata)+etx);
 end;
 
 procedure tcustomsocketserveriochannel.doinputavailable(const sender: tpipereader);

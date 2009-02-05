@@ -573,6 +573,8 @@ procedure unregisterobjectdata(const objectclassname: string; const name: string
 procedure resetchangedmodules;
 procedure reloadchangedmodules;
 
+procedure msebegingloballoading; //recursive
+procedure mseendgloballoading;   //calls notifygloballoading in level 0
 procedure reloadmsecomponent(Instance: tmsecomponent);
 function initmsecomponent(instance: tmsecomponent; rootancestor: tclass;
                             out ancestorloaded: boolean): boolean;
@@ -1419,7 +1421,25 @@ end;
 
 var
  moduleloadlevel: integer;
+ globalloadlevel: integer;
  
+procedure msebegingloballoading;
+begin
+ inc(globalloadlevel);
+ if globalloadlevel = 1 then begin
+  begingloballoading;
+ end;
+end;
+
+procedure mseendgloballoading;
+begin
+ dec(globalloadlevel);
+ if globalloadlevel = 0 then begin
+  notifygloballoading;
+  endgloballoading;
+ end;
+end;
+
 function initmsecomponent(instance: tmsecomponent; rootancestor: tclass;
                                  out ancestorloaded: boolean): boolean;
 var
@@ -1441,7 +1461,7 @@ var
     if not ancestorloaded then begin
      ancestorloaded:= true;    
      inc(moduleloadlevel);
-     if moduleloadlevel = 1 then begin
+     if (moduleloadlevel = 1) and (globalloadlevel = 0) then begin
       begingloballoading;
      end;
     end;
@@ -1471,7 +1491,7 @@ begin
     modules.add(tmsecomponent(instance));
     globalfixupreferences;
    end;
-   if ancestorloaded and (moduleloadlevel = 1) then begin
+   if ancestorloaded and (moduleloadlevel = 1) and (globalloadlevel = 0) then begin
     moduleloadlevel:= 0;  //allow loading of forms in loaded procedure
     notifygloballoading;
    end;
@@ -1480,7 +1500,7 @@ begin
     if moduleloadlevel > 0 then begin
      dec(moduleloadlevel);
     end;
-    if moduleloadlevel = 0 then begin
+    if (moduleloadlevel = 0) and (globalloadlevel = 0) then begin
      endgloballoading;
     end;
    end;
