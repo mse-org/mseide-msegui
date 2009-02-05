@@ -18,7 +18,8 @@ uses
  msestrings,mseerr,msegraphutils,mseapplication,
  msepointer,mseevent,msekeyboard,mseclasses,mseglob,mseguiglob,mselist,msesys,
  msethread,
- msebitmap,msearrayprops,msethreadcomp{,msedatamodules},mserichstring;
+ msebitmap,msearrayprops,msethreadcomp,mserichstring
+                               {$ifdef mse_with_ifi},mseifiglob{$endif};
 
 const
  mseguiversiontext = '1.9 unstable';
@@ -1150,7 +1151,8 @@ type
  widgetclassty = class of twidget;
  navigrequesteventty = procedure(const sender: twidget;
                                 var ainfo: naviginfoty) of object; 
- twidget = class(tactcomponent,iscrollframe,iface)
+ twidget = class(tactcomponent,iscrollframe,iface
+                           {$ifdef mse_with_ifi},iifiwidget{$endif})
   private
    fwidgetregion: regionty;
    frootpos: pointty;   //position in rootwindow
@@ -1248,6 +1250,13 @@ type
    fhint: msestring;
    fdefaultfocuschild: twidget;
 
+{$ifdef mse_with_ifi}
+   fifiserverintf: iifiserver;
+  //iifiwidget
+   procedure setifiserverintf(const aintf: iifiserver);
+   function getifiserverintf: iifiserver;
+{$endif}   
+
    procedure defineproperties(filer: tfiler); override;
    function gethelpcontext: msestring; override;
    class function classskininfo: skininfoty; override;
@@ -1338,6 +1347,11 @@ type
    procedure parentwidgetregionchanged(const sender: twidget); virtual;
    procedure widgetregionchanged(const sender: twidget); virtual;
    procedure scalebasechanged(const sender: twidget); virtual; //used by tlayouter
+ 
+ {$ifdef mse_with_ifi}
+   procedure ifiwidgetstatechanged;
+   function getifiwidgetstate: ifiwidgetstatesty; virtual;
+ {$endif}                     
    procedure statechanged; virtual; //enabled,active,visible
    procedure enabledchanged; virtual;
    procedure activechanged; virtual;
@@ -6772,11 +6786,39 @@ begin
  end;
 end;
 
+{$ifdef mse_with_ifi}
+
+function twidget.getifiwidgetstate: ifiwidgetstatesty;
+begin
+ result:= [];
+ if ws_visible in fwidgetstate then begin
+  include(result,iws_visible);
+ end;
+ if ws_focused in fwidgetstate then begin
+  include(result,iws_focused);
+ end;
+ if ws_active in fwidgetstate then begin
+  include(result,iws_active);
+ end; 
+end;
+
+procedure twidget.ifiwidgetstatechanged;
+begin
+ if fifiserverintf <> nil then begin
+  fifiserverintf.statechanged(iifiwidget(self),getifiwidgetstate);
+ end;
+end;
+
+{$endif}
+
 procedure twidget.statechanged;
 begin
  if fframe <> nil then begin
   fframe.updatewidgetstate;
  end;
+{$ifdef mse_with_ifi}
+ ifiwidgetstatechanged;
+{$endif}
 end;
 
 procedure twidget.enabledchanged;
@@ -10280,6 +10322,18 @@ begin
   end;
  end;
 end;
+
+{$ifdef mse_with_ifi}
+procedure twidget.setifiserverintf(const aintf: iifiserver);
+begin
+ fifiserverintf:= aintf;
+end;
+
+function twidget.getifiserverintf: iifiserver;
+begin
+ result:= fifiserverintf;
+end;
+{$endif}
 
 function twidget.canclose(const newfocus: twidget = nil): boolean;
 var

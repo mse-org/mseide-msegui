@@ -12,12 +12,19 @@ unit mseifiglob;
 interface
 uses
  mseglob;
-type
-
- iifiwidget = interface;
+const
+ ifiwidgetstatename = '#widgestate#';
  
+type
+ ifiwidgetstatety = ({iws_closed,}iws_visible,iws_focused,iws_active); 
+ ifiwidgetstatesty = set of ifiwidgetstatety;
+ 
+type
+ iifiwidget = interface;
+
  iifiserver = interface(inullinterface)
   procedure valuechanged(const sender: iifiwidget);
+  procedure statechanged(const sender: iifiwidget; const astate: ifiwidgetstatesty);
  end;
  
  iifiwidget = interface(inullinterface)['{E3523E5B-604C-46CE-88D4-55C9970BCF9A}']

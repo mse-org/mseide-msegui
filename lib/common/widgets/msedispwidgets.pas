@@ -103,18 +103,12 @@ type
  dispwidgetoptionty = (dwo_hintclippedtext,dwo_nogray);
  dispwidgetoptionsty = set of dispwidgetoptionty;
  
- tdispwidget = class(tpublishedwidget{$ifdef mse_with_ifi},iifiwidget{$endif})
+ tdispwidget = class(tpublishedwidget)
   private
    finfo: drawtextinfoty;
    ftext: msestring;
    foptions: dispwidgetoptionsty;
    ftextflags: textflagsty;
-{$ifdef mse_with_ifi}
-   fifiserverintf: iifiserver;
-   //iifiwidget
-   procedure setifiserverintf(const aintf: iifiserver);
-   function getifiserverintf: iifiserver;
-{$endif}   
    procedure updatetextflags;
    procedure settextflags(const value: textflagsty);
    procedure setoptions(const avalue: dispwidgetoptionsty);
@@ -453,18 +447,6 @@ begin
   invalidate;
  end;
 end;
-
-{$ifdef mse_with_ifi}
-procedure tdispwidget.setifiserverintf(const aintf: iifiserver);
-begin
- fifiserverintf:= aintf;
-end;
-
-function tdispwidget.getifiserverintf: iifiserver;
-begin
- result:= fifiserverintf;
-end;
-{$endif}
 
 { tcustomstringdisp }
 

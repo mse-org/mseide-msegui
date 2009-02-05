@@ -297,7 +297,7 @@ type
                         var atext: msestring) of object;
                       
  
- tcustomedit = class(tpublishedwidget,iedit{$ifdef mse_with_ifi},iifiwidget{$endif})
+ tcustomedit = class(tpublishedwidget,iedit)
   private
    fonchange: notifyeventty;
    fontextedited: texteditedeventty;
@@ -307,12 +307,6 @@ type
    fonkeyup: keyeventty;
    foncopytoclipboard: updatestringeventty;
    fonpastefromclipboard: updatestringeventty;
-{$ifdef mse_with_ifi}
-   fifiserverintf: iifiserver;
-  //iifiwidget
-   procedure setifiserverintf(const aintf: iifiserver);
-   function getifiserverintf: iifiserver;
-{$endif}   
    function getmaxlength: integer;
    function getpasswordchar: msechar;
    procedure setmaxlength(const Value: integer);
@@ -1527,17 +1521,5 @@ begin
  feditor.dragstarted;
  inherited;
 end;
-
-{$ifdef mse_with_ifi}
-procedure tcustomedit.setifiserverintf(const aintf: iifiserver);
-begin
- fifiserverintf:= aintf;
-end;
-
-function tcustomedit.getifiserverintf: iifiserver;
-begin
- result:= fifiserverintf;
-end;
-{$endif}
 
 end.

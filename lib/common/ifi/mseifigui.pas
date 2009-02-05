@@ -18,22 +18,34 @@ uses
  
 type
  
+ ifiwidgetlinkoptionty = (iwlo_sendvalue,iwlo_sendhide,iwlo_sendshow,
+      iwlo_sendfocus,iwlo_senddefocus,iwlo_sendactivate,iwlo_senddeactivate);
+ ifiwidgetlinkoptionsty = set of ifiwidgetlinkoptionty;
+const
+ widgetstateoptionsty = [iwlo_sendhide,iwlo_sendshow,iwlo_sendfocus,
+      iwlo_senddefocus,iwlo_sendactivate,iwlo_senddeactivate];
+type  
  tvaluewidgetlink = class(tvaluelink)
   private
    fwidget: twidget;
    fintf: iifiwidget;
    fvalueproperty: ppropinfo;
    fupdatelock: integer;
+   foptions: ifiwidgetlinkoptionsty;
+   fwidgetstatebefore: ifiwidgetstatesty;
    procedure setwidget(const avalue: twidget);
    procedure checkwidget;
   protected
    procedure setdata(const adata: pifidataty; const aname: ansistring); override;
    procedure sendvalue(const aproperty: ppropinfo); overload;
+   procedure sendstate(const astate: ifiwidgetstatesty);
   public
    procedure sendvalue(const aname: string; const avalue: colorty); overload;
    procedure sendproperties;
   published
    property widget: twidget read fwidget write setwidget;
+   property options: ifiwidgetlinkoptionsty read foptions 
+                                         write foptions default [];
  end; 
 
  tvaluewidgetlinks = class(tvaluelinks) 
@@ -59,6 +71,8 @@ type
    function processdataitem(const adata: pifirecty; var adatapo: pchar;
                   const atag: integer; const aname: string): boolean; override;
    procedure valuechanged(const sender: iifiwidget); override;
+   procedure statechanged(const sender: iifiwidget;
+                             const astate: ifiwidgetstatesty); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -124,6 +138,7 @@ var
  intf1: iifiwidget;
 begin
  intf1:= nil;
+ fwidgetstatebefore:= [];
  fvalueproperty:= nil;
  if (avalue <> nil) and 
     not getcorbainterface(avalue,typeinfo(iifiwidget),intf1) then begin
@@ -217,6 +232,11 @@ begin
    end;
   end;
  end;
+end;
+
+procedure tvaluewidgetlink.sendstate(const astate: ifiwidgetstatesty);
+begin
+ sendvalue(ifiwidgetstatename,integer(astate));
 end;
 
 procedure tvaluewidgetlink.sendproperties;
@@ -368,9 +388,47 @@ begin
     with tvaluewidgetlink(fitems[int1]) do begin
      if fupdatelock = 0 then begin
       if (fintf = sender) then begin
-       sendvalue(fvalueproperty);
+       if iwlo_sendvalue in options then begin
+        sendvalue(fvalueproperty);
+       end;
        break;
       end;
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure tformlink.statechanged(const sender: iifiwidget;
+                             const astate: ifiwidgetstatesty);
+var
+ int1: integer;
+ states1: ifiwidgetstatesty;
+begin
+ if hasconnection then begin
+  with tvaluewidgetlinks(fvalues ) do begin
+   for int1:= 0 to high(fitems) do begin
+    with tvaluewidgetlink(fitems[int1]) do begin
+     if (fintf = sender) then begin
+      if options * widgetstateoptionsty <> [] then begin
+       states1:= ifiwidgetstatesty(longword(fwidgetstatebefore) xor 
+                                 longword(astate));
+       if (iws_visible in states1) and 
+           ((iwlo_sendshow in options) and (iws_visible in astate) or
+             (iwlo_sendhide in options) and not (iws_visible in astate)) or
+          (iws_focused in states1) and 
+           ((iwlo_sendfocus in options) and (iws_focused in astate) or
+             (iwlo_senddefocus in options) and not(iws_focused in astate)) or           
+          (iws_active in states1) and 
+           ((iwlo_sendactivate in options) and (iws_active in astate) or
+             (iwlo_senddeactivate in options) and not(iws_active in astate))
+                                                                     then begin
+        sendstate(astate);
+       end;
+      end;
+      fwidgetstatebefore:= astate;
+      break;
      end;
     end;
    end;

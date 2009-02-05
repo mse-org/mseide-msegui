@@ -210,6 +210,8 @@ type
  
  propertychangedeventty = procedure(const sender: tvaluelink;
                  const atag: integer; const apropertyname: string) of object;
+ widgetstatechangedeventty = procedure(const sender: tvaluelink;
+                 const atag: integer; const astate: ifiwidgetstatesty) of object;
 
 //todo: beginupdate/endupdate
  tvaluelink = class(tmodulelinkprop)
@@ -220,6 +222,7 @@ type
 //   fansistringvalue: ansistring;
    fdatakind: ifidatakindty;
    fonpropertychanged: propertychangedeventty;
+   fonwidgetstatechanged: widgetstatechangedeventty;
    procedure checkdatakind(const akind: ifidatakindty);
    function getasinteger: integer;
    procedure setasinteger(const avalue: integer);
@@ -253,6 +256,8 @@ type
   published
    property onpropertychanged: propertychangedeventty read fonpropertychanged 
                                      write fonpropertychanged;
+   property onwidgetstatechanged: widgetstatechangedeventty
+                        read fonwidgetstatechanged write fonwidgetstatechanged;
  end;
 
  tvaluelinks = class(tmodulelinkarrayprop) 
@@ -323,6 +328,8 @@ type
    procedure receiveevent(const event: tobjectevent); override;
    //iifiserver
    procedure valuechanged(const sender: iifiwidget); virtual;
+   procedure statechanged(const sender: iifiwidget;
+                             const astate: ifiwidgetstatesty); virtual;
    //imodulelink
    procedure connectmodule(const sender: tcustommodulelink);
   public
@@ -859,12 +866,6 @@ begin
     ifinametostring(pifinamety(@data),str1);
     fmsestringvalue:= utf8tostring(str1);
    end;
-   {
-   idk_ansistring: begin
-    ifinametostring(pifinamety(@data),str1);
-    fansistringvalue:= str1;
-   end;
-   }
   end;
  end;
 end;
@@ -1388,14 +1389,27 @@ begin
  if result then begin
   with wi1 do begin
    setdata(adata,apropertyname);
-   if assigned(fonpropertychanged) then begin
-    fonpropertychanged(wi1,atag,apropertyname);
+   if apropertyname = ifiwidgetstatename then begin
+    if assigned(fonwidgetstatechanged) then begin
+     fonwidgetstatechanged(wi1,atag,ifiwidgetstatesty(asinteger));
+    end;
+   end
+   else begin
+    if assigned(fonpropertychanged) then begin
+     fonpropertychanged(wi1,atag,apropertyname);
+    end;
    end;
   end;
  end;    
 end;
 
 procedure tcustommodulelink.valuechanged(const sender: iifiwidget);
+begin
+ //dummy
+end;
+
+procedure tcustommodulelink.statechanged(const sender: iifiwidget;
+              const astate: ifiwidgetstatesty);
 begin
  //dummy
 end;

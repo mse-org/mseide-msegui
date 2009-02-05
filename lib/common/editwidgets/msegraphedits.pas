@@ -95,13 +95,7 @@ type
    fstatvarname: msestring;
    fstatfile: tstatfile;
    foptionsedit: optionseditty;
-//   foptionsdb: optionseditdbty;
    fedited: boolean;
-{$ifdef mse_with_ifi}
-   fifiserverintf: iifiserver;
-   procedure setifiserverintf(const aintf: iifiserver);
-   function getifiserverintf: iifiserver;
-{$endif}   
    procedure setcolorglyph(const Value: colorty);
    procedure setstatfile(const Value: tstatfile);
    procedure setoptionsedit(const avalue: optionseditty);
@@ -112,7 +106,6 @@ type
  
    procedure setisdb;  
    function getoptionsedit: optionseditty; virtual;
-//   function getoptionsdb: optionseditdbty;
    procedure updateoptions; virtual;
    procedure loaded; override;
    procedure internalcreateframe; override;
@@ -1719,18 +1712,6 @@ procedure tgraphdataedit.modified;
 begin
  //dummy
 end;
-
-{$ifdef mse_with_ifi}
-procedure tgraphdataedit.setifiserverintf(const aintf: iifiserver);
-begin
- fifiserverintf:= aintf;
-end;
-
-function tgraphdataedit.getifiserverintf: iifiserver;
-begin
- result:= fifiserverintf;
-end;
-{$endif}
 
 { ttogglegraphdataedit}
 
