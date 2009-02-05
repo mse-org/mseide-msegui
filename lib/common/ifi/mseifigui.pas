@@ -165,7 +165,7 @@ begin
     aproperty:= getpropinfo(fwidget,aname);
    end;
   end;
-  if aproperty <> nil then begin
+  if (aproperty <> nil) and (fwidget <> nil) then begin
    inc(fupdatelock);
    try
     case aproperty^.proptype^.kind of
