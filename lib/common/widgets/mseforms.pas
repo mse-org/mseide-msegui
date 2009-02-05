@@ -726,6 +726,11 @@ begin
                  not (csdesigning in componentstate) then begin
     fstatfile.writestat;
    end;
+ {$ifdef mse_with_ifi}
+   if fifiserverintf <> nil then begin
+    fifiserverintf.sendmodalresult(iifiwidget(self),window.modalresult);
+   end;
+ {$endif}
    if (fo_terminateonclose in foptions) and not application.terminating and
                   not (csdesigning in componentstate) then begin
     application.terminate(window);

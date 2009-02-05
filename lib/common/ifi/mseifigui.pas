@@ -18,7 +18,8 @@ uses
  
 type
  
- ifiwidgetlinkoptionty = (iwlo_sendvalue,iwlo_sendhide,iwlo_sendshow,
+ ifiwidgetlinkoptionty = (iwlo_sendvalue,iwlo_sendmodalresult,
+      iwlo_sendhide,iwlo_sendshow,
       iwlo_sendfocus,iwlo_senddefocus,iwlo_sendactivate,iwlo_senddeactivate);
  ifiwidgetlinkoptionsty = set of ifiwidgetlinkoptionty;
 const
@@ -39,6 +40,7 @@ type
    procedure setdata(const adata: pifidataty; const aname: ansistring); override;
    procedure sendvalue(const aproperty: ppropinfo); overload;
    procedure sendstate(const astate: ifiwidgetstatesty);
+   procedure sendmodalresult(const amodalresult: modalresultty);
   public
    procedure sendvalue(const aname: string; const avalue: colorty); overload;
    procedure sendproperties;
@@ -73,6 +75,8 @@ type
    procedure valuechanged(const sender: iifiwidget); override;
    procedure statechanged(const sender: iifiwidget;
                              const astate: ifiwidgetstatesty); override;
+   procedure sendmodalresult(const sender: iifiwidget; 
+                              const amodalresult: modalresultty); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -239,6 +243,11 @@ begin
  sendvalue(ifiwidgetstatename,integer(astate));
 end;
 
+procedure tvaluewidgetlink.sendmodalresult(const amodalresult: modalresultty);
+begin
+ sendvalue(ifiwidgetmodalresultname,integer(amodalresult));
+end;
+
 procedure tvaluewidgetlink.sendproperties;
 var
  stream1: tmemorystream;
@@ -390,6 +399,29 @@ begin
       if (fintf = sender) then begin
        if iwlo_sendvalue in options then begin
         sendvalue(fvalueproperty);
+       end;
+       break;
+      end;
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure tformlink.sendmodalresult(const sender: iifiwidget; 
+                                         const amodalresult: modalresultty);
+var
+ int1: integer;
+begin
+ if hasconnection then begin
+  with tvaluewidgetlinks(fvalues ) do begin
+   for int1:= 0 to high(fitems) do begin
+    with tvaluewidgetlink(fitems[int1]) do begin
+     if fupdatelock = 0 then begin
+      if (fintf = sender) then begin
+       if iwlo_sendmodalresult in options then begin
+        sendmodalresult(amodalresult);
        end;
        break;
       end;

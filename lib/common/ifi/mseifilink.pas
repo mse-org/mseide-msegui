@@ -212,6 +212,8 @@ type
                  const atag: integer; const apropertyname: string) of object;
  widgetstatechangedeventty = procedure(const sender: tvaluelink;
                  const atag: integer; const astate: ifiwidgetstatesty) of object;
+ modalresulteventty = procedure(const sender: tvaluelink;
+                 const atag: integer; const amodalresult: modalresultty) of object;
 
 //todo: beginupdate/endupdate
  tvaluelink = class(tmodulelinkprop)
@@ -223,6 +225,7 @@ type
    fdatakind: ifidatakindty;
    fonpropertychanged: propertychangedeventty;
    fonwidgetstatechanged: widgetstatechangedeventty;
+   fonmodalresult: modalresulteventty;
    procedure checkdatakind(const akind: ifidatakindty);
    function getasinteger: integer;
    procedure setasinteger(const avalue: integer);
@@ -258,6 +261,8 @@ type
                                      write fonpropertychanged;
    property onwidgetstatechanged: widgetstatechangedeventty
                         read fonwidgetstatechanged write fonwidgetstatechanged;
+   property onmodalresult: modalresulteventty read fonmodalresult 
+                        write fonmodalresult;
  end;
 
  tvaluelinks = class(tmodulelinkarrayprop) 
@@ -330,6 +335,8 @@ type
    procedure valuechanged(const sender: iifiwidget); virtual;
    procedure statechanged(const sender: iifiwidget;
                              const astate: ifiwidgetstatesty); virtual;
+   procedure sendmodalresult(const sender: iifiwidget; 
+                                         const amodalresult: modalresultty); virtual;
    //imodulelink
    procedure connectmodule(const sender: tcustommodulelink);
   public
@@ -1395,8 +1402,15 @@ begin
     end;
    end
    else begin
-    if assigned(fonpropertychanged) then begin
-     fonpropertychanged(wi1,atag,apropertyname);
+    if apropertyname = ifiwidgetmodalresultname then begin
+     if assigned(fonmodalresult) then begin
+      fonmodalresult(wi1,atag,modalresultty(asinteger));
+     end;
+    end
+    else begin
+     if assigned(fonpropertychanged) then begin
+      fonpropertychanged(wi1,atag,apropertyname);
+     end;
     end;
    end;
   end;
@@ -1410,6 +1424,12 @@ end;
 
 procedure tcustommodulelink.statechanged(const sender: iifiwidget;
               const astate: ifiwidgetstatesty);
+begin
+ //dummy
+end;
+
+procedure tcustommodulelink.sendmodalresult(const sender: iifiwidget; 
+                                         const amodalresult: modalresultty);
 begin
  //dummy
 end;

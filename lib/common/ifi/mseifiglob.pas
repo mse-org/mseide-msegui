@@ -14,6 +14,7 @@ uses
  mseglob;
 const
  ifiwidgetstatename = '#widgestate#';
+ ifiwidgetmodalresultname = '#modalres#';
  
 type
  ifiwidgetstatety = ({iws_closed,}iws_visible,iws_focused,iws_active); 
@@ -24,7 +25,10 @@ type
 
  iifiserver = interface(inullinterface)
   procedure valuechanged(const sender: iifiwidget);
-  procedure statechanged(const sender: iifiwidget; const astate: ifiwidgetstatesty);
+  procedure statechanged(const sender: iifiwidget;
+                           const astate: ifiwidgetstatesty);
+  procedure sendmodalresult(const sender: iifiwidget; 
+                                         const amodalresult: modalresultty);
  end;
  
  iifiwidget = interface(inullinterface)['{E3523E5B-604C-46CE-88D4-55C9970BCF9A}']
