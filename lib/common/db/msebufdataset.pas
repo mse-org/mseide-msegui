@@ -94,6 +94,7 @@ type
   fielddata: fielddataty;   
  end;
  precheaderty = ^recheaderty;
+ pprecheaderty = ^precheaderty;
    
  intheaderty = record
  end;
@@ -394,7 +395,7 @@ type
 
  filterediteventty = procedure(const sender: tmsebufdataset;
                              const akind: filtereditkindty) of object;
- tmsebufdataset = class(tmdbdataset,iblobchache)
+ tmsebufdataset = class(tmdbdataset,iblobchache,idatasetsum)
   private
    fpacketrecords: integer;
    fopen: boolean;
@@ -488,6 +489,7 @@ type
    procedure logrecbuffer(const awriter: tbufstreamwriter; 
                          const akind: tupdatekind; const abuffer: pintrecordty);
    function getlogging: boolean;
+   procedure checksumfield(afield: tfield);
   protected
    fbrecordcount: integer;
    ffieldinfos: fieldinfoarty;
@@ -666,6 +668,10 @@ type
    function locaterecno(const arecno: integer): boolean;
         //moves to next valid recno, //returns true if resulting recno = arecno
 
+   procedure sumfield(const afield: tfield; out asum: double);
+   procedure sumfield(const afield: tfield; out asum: currency);
+   procedure sumfield(const afield: tfield; out asum: integer);
+   procedure sumfield(const afield: tfield; out asum: int64);
    function countvisiblerecords: integer;
    procedure fetchall;
    procedure resetindex; //deactivates all indexes
@@ -4019,6 +4025,123 @@ end;
 procedure tmsebufdataset.fetchall;
 begin
  getnextpacket(true);
+end;
+
+procedure tmsebufdataset.checksumfield(afield: tfield);
+begin
+ checkbrowsemode;
+ if (afield.fieldno <= 0) or (afield.dataset <> self) or
+                  not (ffieldinfos[afield.fieldno-1].fieldtype in 
+                      [ftinteger,ftfloat,ftcurrency,ftbcd,ftboolean]) then begin
+  raise edatabaseerror.create('Invalid sum field '+'"'+afield.fieldname+'".');
+ end;
+end;
+
+procedure tmsebufdataset.sumfield(const afield: tfield; out asum: double);
+var
+ int1,int2: integer;
+ index1: integer;
+ po1: precheaderty;
+ po2: pprecheaderty;
+begin
+ checksumfield(afield);
+ index1:= afield.fieldno - 1;
+ asum:= 0;
+ case ffieldinfos[afield.fieldno-1].fieldtype of
+  ftfloat,ftcurrency: begin
+   int2:= ffieldinfos[index1].offset;
+   po2:= pointer(findexes[0]);
+   for int1:= 0 to fbrecordcount - 1 do begin
+    po1:= po2[int1];
+    if not getfieldisnull(po1^.fielddata.nullmask,index1) then begin
+     asum:= asum + pdouble(pchar(po1)+int2)^;
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure tmsebufdataset.sumfield(const afield: tfield; out asum: currency);
+var
+ int1,int2: integer;
+ index1: integer;
+ po1: precheaderty;
+ po2: pprecheaderty;
+begin
+ checksumfield(afield);
+ index1:= afield.fieldno - 1;
+ asum:= 0;
+ case ffieldinfos[afield.fieldno-1].fieldtype of
+  ftbcd: begin
+   int2:= ffieldinfos[index1].offset;
+   po2:= pointer(findexes[0]);
+   for int1:= 0 to fbrecordcount - 1 do begin
+    po1:= po2[int1];
+    if not getfieldisnull(po1^.fielddata.nullmask,index1) then begin
+     asum:= asum + pcurrency(pchar(po1)+int2)^;
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure tmsebufdataset.sumfield(const afield: tfield; out asum: int64);
+var
+ int1,int2: integer;
+ index1: integer;
+ po1: precheaderty;
+ po2: pprecheaderty;
+begin
+ checksumfield(afield);
+ index1:= afield.fieldno - 1;
+ asum:= 0;
+ case ffieldinfos[afield.fieldno-1].fieldtype of
+  ftlargeint: begin
+   int2:= ffieldinfos[index1].offset;
+   po2:= pointer(findexes[0]);
+   for int1:= 0 to fbrecordcount - 1 do begin
+    po1:= po2[int1];
+    if not getfieldisnull(po1^.fielddata.nullmask,index1) then begin
+     asum:= asum + pint64(pchar(po1)+int2)^;
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure tmsebufdataset.sumfield(const afield: tfield; out asum: integer);
+var
+ int1,int2: integer;
+ index1: integer;
+ po1: precheaderty;
+ po2: pprecheaderty;
+begin
+ checksumfield(afield);
+ index1:= afield.fieldno - 1;
+ asum:= 0;
+ case ffieldinfos[afield.fieldno-1].fieldtype of
+  ftinteger: begin
+   int2:= ffieldinfos[index1].offset;
+   po2:= pointer(findexes[0]);
+   for int1:= 0 to fbrecordcount - 1 do begin
+    po1:= po2[int1];
+    if not getfieldisnull(po1^.fielddata.nullmask,index1) then begin
+     asum:= asum + pinteger(pchar(po1)+int2)^;
+    end;
+   end;
+  end;
+  ftboolean: begin
+   int2:= ffieldinfos[index1].offset;
+   po2:= pointer(findexes[0]);
+   for int1:= 0 to fbrecordcount - 1 do begin
+    po1:= po2[int1];
+    if not getfieldisnull(po1^.fielddata.nullmask,index1) and
+               pwordbool(pchar(po1)+int2)^ then begin
+     inc(asum);
+    end;
+   end;
+  end;
+ end;
 end;
 
 function tmsebufdataset.countvisiblerecords: integer;

@@ -95,7 +95,13 @@ type
   function getfieldnames: stringarty;
  end;
  
-  
+ idatasetsum = interface(inullinterface)['{125A1501-400E-4CAC-905C-DF730E41EFA7}']
+  procedure sumfield(const afield: tfield; out asum: integer);
+  procedure sumfield(const afield: tfield; out asum: int64);
+  procedure sumfield(const afield: tfield; out asum: currency);
+  procedure sumfield(const afield: tfield; out asum: double);
+ end;
+ 
  getdatasourcefuncty = function: tdatasource of object;
  
  tdbfieldnamearrayprop = class(tstringarrayprop,idbeditinfo)
@@ -281,6 +287,7 @@ type
    procedure Clear; override;
    function assql: string;
    function asoldsql: string;
+   function sum: integer;
    property asmsestring: msestring read getasmsestring write setasmsestring;
    property asenum: integer read getaslongint write setasenum;
    property tagpo: pointer read ftagpo write ftagpo;
@@ -314,6 +321,7 @@ type
    procedure Clear; override;
    function assql: string;
    function asoldsql: string;
+   function sum: int64;
    property asmsestring: msestring read getasmsestring write setasmsestring;
    property Value: Largeint read GetAsLargeint write SetAsLargeint;
    property tagpo: pointer read ftagpo write ftagpo;
@@ -494,6 +502,7 @@ type
    procedure Clear; override;
    function assql: string;
    function asoldsql: string;
+   function sum: integer; //counts true values
    property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
@@ -665,6 +674,7 @@ type
    procedure Clear; override;
    function assql: string;
    function asoldsql: string;
+   function sum: currency;
    property asmsestring: msestring read getasmsestring write setasmsestring;
    property Value: Currency read GetAsCurrency write SetAsCurrency;
   published
@@ -2634,6 +2644,39 @@ begin
  result:= getaslongint;
 end;
 
+function tmselongintfield.sum: integer;
+var
+ bm: string;
+ int1: integer;
+ intf1: idatasetsum;
+begin
+ result:= 0;
+ if (dataset <> nil) and dataset.active then begin
+  if (fieldkind in [fkdata,fkinternalcalc]) and 
+          getcorbainterface(dataset,typeinfo(idatasetsum),intf1) then begin
+   intf1.sumfield(tfield(self),result);
+  end
+  else begin
+   with dataset do begin
+    disablecontrols;
+    try
+     bm:= bookmark;  
+     first;
+     while not eof do begin
+      if getdata(@int1) then begin
+       result:= result + int1;
+      end;
+      next;
+     end;
+     bookmark:= bm;
+    finally
+     enablecontrols;
+    end;
+   end;
+  end;
+ end;
+end;
+
 procedure tmselongintfield.gettext(var thetext: string; adisplaytext: boolean);
 var
  int1: integer;
@@ -2721,6 +2764,39 @@ begin
  thetext:='';
  if getdata(@int1) then begin
   thetext:= getnumdisplaytext(self,int1,adisplaytext,false);
+ end;
+end;
+
+function tmselargeintfield.sum: int64;
+var
+ bm: string;
+ lint1: int64;
+ intf1: idatasetsum;
+begin
+ result:= 0;
+ if (dataset <> nil) and dataset.active then begin
+  if (fieldkind in [fkdata,fkinternalcalc]) and 
+          getcorbainterface(dataset,typeinfo(idatasetsum),intf1) then begin
+   intf1.sumfield(tfield(self),result);
+  end
+  else begin
+   with dataset do begin
+    disablecontrols;
+    try
+     bm:= bookmark;  
+     first;
+     while not eof do begin
+      if getdata(@lint1) then begin
+       result:= result + lint1;
+      end;
+      next;
+     end;
+     bookmark:= bm;
+    finally
+     enablecontrols;
+    end;
+   end;
+  end;
  end;
 end;
 
@@ -3036,23 +3112,30 @@ function tmsefloatfield.sum: double;
 var
  bm: string;
  do1: double;
+ intf1: idatasetsum;
 begin
  result:= 0;
  if (dataset <> nil) and dataset.active then begin
-  with dataset do begin
-   disablecontrols;
-   try
-    bm:= bookmark;  
-    first;
-    while not eof do begin
-     if getdata(@do1) then begin
-      result:= result + do1;
+  if (fieldkind in [fkdata,fkinternalcalc]) and 
+          getcorbainterface(dataset,typeinfo(idatasetsum),intf1) then begin
+   intf1.sumfield(self,result);
+  end
+  else begin
+   with dataset do begin
+    disablecontrols;
+    try
+     bm:= bookmark;  
+     first;
+     while not eof do begin
+      if getdata(@do1) then begin
+       result:= result + do1;
+      end;
+      next;
      end;
-     next;
+     bookmark:= bm;
+    finally
+     enablecontrols;
     end;
-    bookmark:= bm;
-   finally
-    enablecontrols;
    end;
   end;
  end;
@@ -3311,6 +3394,40 @@ begin
  end
  else begin
   result:= null;
+ end;
+end;
+
+function tmsebooleanfield.sum: integer;
+var
+ bm: string;
+ int1: integer;
+ intf1: idatasetsum;
+ bo1: wordbool;
+begin
+ result:= 0;
+ if (dataset <> nil) and dataset.active then begin
+  if (fieldkind in [fkdata,fkinternalcalc]) and 
+          getcorbainterface(dataset,typeinfo(idatasetsum),intf1) then begin
+   intf1.sumfield(tfield(self),result);
+  end
+  else begin
+   with dataset do begin
+    disablecontrols;
+    try
+     bm:= bookmark;  
+     first;
+     while not eof do begin
+      if getdata(@bo1) and bo1 then begin
+       inc(result);
+      end;
+      next;
+     end;
+     bookmark:= bm;
+    finally
+     enablecontrols;
+    end;
+   end;
+  end;
  end;
 end;
 
@@ -3803,6 +3920,40 @@ begin
   thetext:= getnumdisplaytext(self,cu1,adisplaytext,currency);
  end;
 end;
+
+function tmsebcdfield.sum: currency;
+var
+ curr1: system.currency;
+ bm: string;
+ intf1: idatasetsum;
+begin
+ result:= 0;
+ if (dataset <> nil) and dataset.active then begin
+  if (fieldkind in [fkdata,fkinternalcalc]) and 
+          getcorbainterface(dataset,typeinfo(idatasetsum),intf1) then begin
+   intf1.sumfield(tfield(self),result);
+  end
+  else begin
+   with dataset do begin
+    disablecontrols;
+    try
+     bm:= bookmark;  
+     first;
+     while not eof do begin
+      if getdata(@curr1) then begin
+       result:= result + curr1;
+      end;
+      next;
+     end;
+     bookmark:= bm;
+    finally
+     enablecontrols;
+    end;
+   end;
+  end;
+ end;
+end;
+
 
 { tmseblobfield }
 

@@ -476,7 +476,7 @@ function encodefielddata(const ainfo: fieldinfoty; const headersize: integer): s
 begin
  with ainfo do begin
   if field.isnull then begin
-   result:= encodeifinull;
+   result:= encodeifinull(headersize);
   end
   else begin
    case fieldtype of
