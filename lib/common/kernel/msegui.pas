@@ -21,7 +21,7 @@ uses
  msebitmap,msearrayprops,msethreadcomp{,msedatamodules},mserichstring;
 
 const
- mseguiversiontext = '1.9 unstable';
+ mseguiversiontext = '2.0 fixes';
  
  defaultwidgetcolor = cl_default;
  defaulttoplevelwidgetcolor = cl_background;
