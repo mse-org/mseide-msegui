@@ -728,7 +728,8 @@ type
                               write setimagenrdisabled
                             stored isimagenrdisabledstored default -2;
                       //-1 = none, -2 = grayed, -3 = imageoffsetdisabled
-   property imagedist: integer read finfo.ca.imagedist write setimagedist;
+   property imagedist: integer read finfo.ca.imagedist 
+                                               write setimagedist default 0;
    property colorglyph: colorty read factioninfo.colorglyph write setcolorglyph
                       stored iscolorglyphstored default cl_glyph;
    property shortcut: shortcutty read factioninfo.shortcut write setshortcut
@@ -755,7 +756,7 @@ type
    property max default 0;
   published
    property state: actionstatesty read factioninfo.state write setstate 
-                             stored isstatestored;
+                             stored isstatestored default [];
  end;
 
  tdatabutton = class(tcustomdatabutton)
