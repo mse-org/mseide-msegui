@@ -359,6 +359,7 @@ type
    procedure sizechanged; override;
    procedure visiblepropchanged; override;
   public
+   procedure writestate(writer: twriter); override;
    procedure dochildscaled(const sender: twidget); override;
    property onresize: notifyeventty read fonresize write fonresize;
    property onmove: notifyeventty read fonmove write fonmove;
@@ -1468,6 +1469,14 @@ begin
  if foptionsscale * [osc_invisishrinkx,osc_invisishrinky] <> [] then begin
   updateoptionsscale;
  end;
+end;
+
+procedure tcustomscalingwidget.writestate(writer: twriter);
+begin
+ if (fframe <> nil) and (fframe is tcustomscrollboxframe) then begin
+  tcustomscrollboxframe(fframe).showrect(nullrect,false);
+ end;
+ inherited;
 end;
 
 { tgroupbox }
