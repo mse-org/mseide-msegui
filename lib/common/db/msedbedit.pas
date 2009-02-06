@@ -2570,7 +2570,8 @@ begin
  fintf.updatereadonlystate;
 end;
 
-function tcustomeditwidgetdatalink.getdatasource(const aindex: integer): tdatasource;
+function tcustomeditwidgetdatalink.getdatasource(
+                                      const aindex: integer): tdatasource;
 begin
  result:= datasource;
 end;

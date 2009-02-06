@@ -26,14 +26,14 @@ const
  defaulttextflagsempty = [tf_ycentered,tf_xcentered];
  
 type
- tdataedit = class;
+ tcustomdataedit = class;
  
- checkvalueeventty = procedure(const sender: tdataedit; const quiet: boolean;
+ checkvalueeventty = procedure(const sender: tcustomdataedit; const quiet: boolean;
                            var accept: boolean) of object;
 
- gettexteventty = procedure(const sender: tdataedit; var atext: msestring;
+ gettexteventty = procedure(const sender: tcustomdataedit; var atext: msestring;
                                const aedit: boolean) of object;
- settexteventty = procedure(const sender: tdataedit;
+ settexteventty = procedure(const sender: tcustomdataedit;
                            var atext: msestring; var accept: boolean) of object;
  dataeditstatety = (des_edited,des_emptytext,des_grayed,des_isdb,des_dbnull);
  dataeditstatesty = set of dataeditstatety;
@@ -43,7 +43,7 @@ type
    class function getinstancepo(owner: tobject): pfont; override;
  end;
  
- tdataedit = class(tcustomedit,igridwidget,istatfile,idragcontroller)
+ tcustomdataedit = class(tcustomedit,igridwidget,istatfile,idragcontroller)
   private
    fondataentered: notifyeventty;
    foncheckvalue: checkvalueeventty;
@@ -183,7 +183,6 @@ type
    function seteditfocus: boolean;
    
    property readonly: boolean read getreadonly write setreadonly;
-  published
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
    property empty_color: colorty read fempty_color write setempty_color 
@@ -199,6 +198,23 @@ type
                                    write setempty_textcolor default cl_none;
    property empty_textcolorbackground: colorty read fempty_textcolorbackground
                           write setempty_textcolorbackground default cl_none;
+   property oncheckvalue: checkvalueeventty read foncheckvalue write foncheckvalue;
+   property ondataentered: notifyeventty read fondataentered write fondataentered;
+   property ongettext: gettexteventty read fongettext write fongettext;
+   property onsettext: settexteventty read fonsettext write fonsettext;
+ end;
+
+ tdataedit = class(tcustomdataedit)
+  published
+   property statfile;
+   property statvarname;
+   property empty_color;
+   property empty_font;
+   property empty_textstyle;
+   property empty_textflags;
+   property empty_text;
+   property empty_textcolor;
+   property empty_textcolorbackground;
    property optionsedit;
    property font;
    property textflags;
@@ -206,14 +222,14 @@ type
    property caretwidth;
    property onchange;
    property ontextedited;
-   property oncheckvalue: checkvalueeventty read foncheckvalue write foncheckvalue;
-   property ondataentered: notifyeventty read fondataentered write fondataentered;
-   property ongettext: gettexteventty read fongettext write fongettext;
-   property onsettext: settexteventty read fonsettext write fonsettext;
+   property oncheckvalue;
+   property ondataentered;
+   property ongettext;
+   property onsettext;
    property onkeydown;
    property onkeyup;
  end;
-
+ 
  tcustomstringedit = class(tdataedit)
   private
    fonsetvalue: setstringeventty;
@@ -1087,12 +1103,12 @@ end;
  
 class function teditemptyfont.getinstancepo(owner: tobject): pfont;
 begin
- result:= @tdataedit(owner).fempty_font;
+ result:= @tcustomdataedit(owner).fempty_font;
 end;
 
-{ tdataedit }
+{ tcustomdataedit }
 
-constructor tdataedit.create(aowner: tcomponent);
+constructor tcustomdataedit.create(aowner: tcomponent);
 begin
  fempty_textflags:= defaulttextflagsempty;
  fempty_textcolor:= cl_none;
@@ -1101,13 +1117,13 @@ begin
  inherited;
 end;
 
-destructor tdataedit.destroy;
+destructor tcustomdataedit.destroy;
 begin
  inherited;
  fempty_font.free;
 end;
 
-function tdataedit.checkvalue(const quiet: boolean = false): boolean;
+function tcustomdataedit.checkvalue(const quiet: boolean = false): boolean;
 begin
  result:= true;
  if not ((oe_checkmrcancel in foptionsedit) and
@@ -1144,7 +1160,7 @@ begin
  end;
 end;
 
-function tdataedit.canclose(const newfocus: twidget): boolean;
+function tcustomdataedit.canclose(const newfocus: twidget): boolean;
 var
  widget1: twidget;
 begin
@@ -1194,25 +1210,25 @@ begin
  end;
 end;
 
-procedure tdataedit.valuetotext;
+procedure tcustomdataedit.valuetotext;
 begin
  updateedittext(false);
  feditor.initfocus;
  exclude(fstate,des_edited);
 end;
 
-procedure tdataedit.gridtovalue(const row: integer);
+procedure tcustomdataedit.gridtovalue(const row: integer);
 begin
  valuetotext;
 end;
 
-procedure tdataedit.dofocus;
+procedure tcustomdataedit.dofocus;
 begin
  valuetotext;
  inherited;
 end;
 
-procedure tdataedit.synctofontheight;
+procedure tcustomdataedit.synctofontheight;
 begin 
  inherited;
  if fgridintf <> nil then begin
@@ -1220,7 +1236,7 @@ begin
  end;
 end;
 
-function tdataedit.actualcolor: colorty;
+function tcustomdataedit.actualcolor: colorty;
 begin
  if (fgridintf <> nil) and (fcolor = cl_default) then begin
   result:= fgridintf.getcol.rowcolor(fgridintf.getrow);
@@ -1236,22 +1252,22 @@ begin
  end;
 end;
 
-function tdataedit.edited: boolean;
+function tcustomdataedit.edited: boolean;
 begin
  result:= des_edited in fstate;
 end;
 
-function tdataedit.emptytext: boolean;
+function tcustomdataedit.emptytext: boolean;
 begin
  result:= des_emptytext in fstate;
 end;
 
-procedure tdataedit.setisdb;
+procedure tcustomdataedit.setisdb;
 begin
  include(fstate,des_isdb);
 end;
 
-procedure tdataedit.updatetextflags;
+procedure tcustomdataedit.updatetextflags;
 var
  aflags: textflagsty;
 begin
@@ -1275,7 +1291,7 @@ begin
  end;
 end;
 
-procedure tdataedit.updateedittext(const force: boolean);
+procedure tcustomdataedit.updateedittext(const force: boolean);
 var
  mstr1: msestring;
  state1: dataeditstatesty;
@@ -1314,7 +1330,7 @@ begin
  end;
 end;
 
-procedure tdataedit.dopaintbackground(const canvas: tcanvas);
+procedure tcustomdataedit.dopaintbackground(const canvas: tcanvas);
 begin
  inherited;
  if (fempty_color <> cl_none) and 
@@ -1324,14 +1340,14 @@ begin
  end;
 end;
 
-procedure tdataedit.emptychanged;
+procedure tcustomdataedit.emptychanged;
 begin
  if not (csloading in componentstate) then begin
   updateedittext(true);
  end;
 end;
 
-procedure tdataedit.setempty_textflags(const avalue: textflagsty);
+procedure tcustomdataedit.setempty_textflags(const avalue: textflagsty);
 begin
  if avalue <> fempty_textflags then begin
   fempty_textflags:= checktextflags(fempty_textflags,avalue);
@@ -1339,19 +1355,19 @@ begin
  end;
 end;
 
-procedure tdataedit.dodefocus;
+procedure tcustomdataedit.dodefocus;
 begin
  updateedittext(false);
  exclude(fstate,des_edited);
  inherited;
 end;
 
-function tdataedit.cangridcopy: boolean;
+function tcustomdataedit.cangridcopy: boolean;
 begin
  result:= (fgridintf <> nil) and fgridintf.cangridcopy;
 end;
 
-procedure tdataedit.initgridwidget;
+procedure tcustomdataedit.initgridwidget;
 begin
  optionswidget:= optionswidget - [ow_autoscale];
  optionsskin:= optionsskin + defaultgridskinoptions;
@@ -1372,7 +1388,7 @@ begin
  synctofontheight;
 end;
 
-function tdataedit.getinnerframe: framety;
+function tcustomdataedit.getinnerframe: framety;
 begin
  if fgridintf <> nil then begin
   result:= fgridintf.getcol.innerframe;
@@ -1382,7 +1398,7 @@ begin
  end;
 end;
 
-procedure tdataedit.editnotification(var info: editnotificationinfoty);
+procedure tcustomdataedit.editnotification(var info: editnotificationinfoty);
 var
  bo1: boolean;
 begin
@@ -1434,7 +1450,7 @@ begin
  end;
 end;
 
-procedure tdataedit.formatchanged;
+procedure tcustomdataedit.formatchanged;
 begin
  if not (csloading in componentstate) then begin
   if fgridintf <> nil then begin
@@ -1445,7 +1461,7 @@ begin
  end;
 end;
 
-procedure tdataedit.formaterror(const quiet: boolean);
+procedure tcustomdataedit.formaterror(const quiet: boolean);
 begin
  if not quiet then begin
   showmessage(''''+text+''' '+stockobjects.captions[sc_is_invalid]+'.',
@@ -1453,7 +1469,7 @@ begin
  end;
 end;
 
-procedure tdataedit.notnullerror(const quiet: boolean);
+procedure tcustomdataedit.notnullerror(const quiet: boolean);
 begin
  if not quiet then begin
   showmessage(stockobjects.captions[sc_Value_is_required]+'.',
@@ -1461,7 +1477,7 @@ begin
  end;
 end;
 
-procedure tdataedit.rangeerror(const min, max; const quiet: boolean);
+procedure tcustomdataedit.rangeerror(const min, max; const quiet: boolean);
 begin
  if not quiet then begin
   showmessage(stockobjects.captions[sc_min]+': '+datatotext(min)+' '+
@@ -1470,7 +1486,7 @@ begin
  end;
 end;
 
-procedure tdataedit.loaded;
+procedure tcustomdataedit.loaded;
 begin
  inherited;
  include(fwidgetstate,ws_loadedproc);
@@ -1482,7 +1498,7 @@ begin
  end;
 end;
 
-procedure tdataedit.fontchanged;
+procedure tcustomdataedit.fontchanged;
 begin
  inherited;
  if fgridintf <> nil then begin
@@ -1490,13 +1506,13 @@ begin
  end;
 end;
 
-procedure tdataedit.dofontheightdelta(var delta: integer);
+procedure tcustomdataedit.dofontheightdelta(var delta: integer);
 begin
  inherited;
  gridwidgetfontheightdelta(self,fgridintf,delta);
 end;
 
-function tdataedit.geteditfont: tfont;
+function tcustomdataedit.geteditfont: tfont;
 begin
  if (fempty_font <> nil) and (des_emptytext in fstate) then begin
   result:= fempty_font;
@@ -1513,13 +1529,13 @@ begin
  end;
 end;
 
-class function tdataedit.classskininfo: skininfoty;
+class function tcustomdataedit.classskininfo: skininfoty;
 begin
  result:= inherited classskininfo;
  result.objectkind:= sok_dataedit;
 end;
 
-function tdataedit.setdropdowntext(const avalue: msestring;
+function tcustomdataedit.setdropdowntext(const avalue: msestring;
                 const docheckvalue: boolean; const canceled: boolean;
                 const akey: keyty): boolean;
 var
@@ -1551,7 +1567,7 @@ begin
  end;
 end;
 
-procedure tdataedit.setgridintf(const intf: iwidgetgrid);
+procedure tcustomdataedit.setgridintf(const intf: iwidgetgrid);
 begin
  fgridintf:= intf;
  if fgridintf <> nil then begin
@@ -1563,7 +1579,7 @@ begin
  end;
 end;
 
-function tdataedit.getcellframe: framety;
+function tcustomdataedit.getcellframe: framety;
 begin
  if fframe <> nil then begin
   result:= frame.cellframe;
@@ -1573,12 +1589,12 @@ begin
  end;
 end;
 
-procedure tdataedit.updatecoloptions(const aoptions: coloptionsty);
+procedure tcustomdataedit.updatecoloptions(const aoptions: coloptionsty);
 begin
  fgridintf.coloptionstoeditoptions(foptionsedit);
 end;
 
-procedure tdataedit.setoptionsedit(const avalue: optionseditty);
+procedure tcustomdataedit.setoptionsedit(const avalue: optionseditty);
 begin
  if foptionsedit <> avalue then begin
   inherited;
@@ -1588,22 +1604,22 @@ begin
  end;
 end;
 
-procedure tdataedit.statdataread;
+procedure tcustomdataedit.statdataread;
 begin
  //dummy
 end;
 
-procedure tdataedit.griddatasourcechanged;
+procedure tcustomdataedit.griddatasourcechanged;
 begin
  //dummy
 end;
 
-procedure tdataedit.modified;
+procedure tcustomdataedit.modified;
 begin
  //dummy
 end;
 
-procedure tdataedit.valuechanged;
+procedure tcustomdataedit.valuechanged;
 begin
  if not (csloading in componentstate) then begin
   exclude(fstate,des_dbnull);
@@ -1625,24 +1641,24 @@ begin
  end;
 end;
 
-procedure tdataedit.checktext(var atext: msestring; var accept: boolean);
+procedure tcustomdataedit.checktext(var atext: msestring; var accept: boolean);
 begin
  if canevent(tmethod(fonsettext)) then begin
   fonsettext(self,atext,accept);
  end;
 end;
 
-procedure tdataedit.texttodata(const atext: msestring; var data);
+procedure tcustomdataedit.texttodata(const atext: msestring; var data);
 begin
  //dummy
 end;
 
-procedure tdataedit.setstatfile(const Value: tstatfile);
+procedure tcustomdataedit.setstatfile(const Value: tstatfile);
 begin
  setstatfilevar(istatfile(self),value,fstatfile);
 end;
 
-procedure tdataedit.dostatwrite(const writer: tstatwriter);
+procedure tcustomdataedit.dostatwrite(const writer: tstatwriter);
 begin
  if fgridintf = nil then begin
   if oe_savevalue in foptionsedit then begin
@@ -1657,7 +1673,7 @@ begin
  end;
 end;
 
-procedure tdataedit.dostatread(const reader: tstatreader);
+procedure tcustomdataedit.dostatread(const reader: tstatreader);
 begin
  if oe_savevalue in foptionsedit then begin
   readstatvalue(reader);
@@ -1670,54 +1686,54 @@ begin
  end;
 end;
 
-procedure tdataedit.statreading;
+procedure tcustomdataedit.statreading;
 begin
  //dummy
 end;
 
-procedure tdataedit.statread;
+procedure tcustomdataedit.statread;
 begin
  if oe_checkvaluepaststatread in foptionsedit then begin
   checkvalue;
  end;
 end;
 
-function tdataedit.getstatvarname: msestring;
+function tcustomdataedit.getstatvarname: msestring;
 begin
  result:= fstatvarname;
 end;
 
-procedure tdataedit.readstatoptions(const reader: tstatreader);
+procedure tcustomdataedit.readstatoptions(const reader: tstatreader);
 begin
  //dummy
 end;
 
-procedure tdataedit.readstatstate(const reader: tstatreader);
+procedure tcustomdataedit.readstatstate(const reader: tstatreader);
 begin
  //dummy
 end;
 
-procedure tdataedit.readstatvalue(const reader: tstatreader);
+procedure tcustomdataedit.readstatvalue(const reader: tstatreader);
 begin
  //dummy
 end;
 
-procedure tdataedit.writestatoptions(const writer: tstatwriter);
+procedure tcustomdataedit.writestatoptions(const writer: tstatwriter);
 begin
  //dummy
 end;
 
-procedure tdataedit.writestatstate(const writer: tstatwriter);
+procedure tcustomdataedit.writestatstate(const writer: tstatwriter);
 begin
  //dummy
 end;
 
-procedure tdataedit.writestatvalue(const writer: tstatwriter);
+procedure tcustomdataedit.writestatvalue(const writer: tstatwriter);
 begin
  //dummy
 end;
 
-procedure tdataedit.setnullvalue; //for dbedits
+procedure tcustomdataedit.setnullvalue; //for dbedits
 var
  bo1: boolean;
 begin
@@ -1728,27 +1744,27 @@ begin
  updateedittext(true);  //change to textempty
 end;
 
-procedure tdataedit.setfirstclick;
+procedure tcustomdataedit.setfirstclick;
 begin
  feditor.setfirstclick;
 end;
 
-function tdataedit.getdefaultvalue: pointer;
+function tcustomdataedit.getdefaultvalue: pointer;
 begin
  result:= nil;
 end;
 
-function tdataedit.getrowdatapo(const info: cellinfoty): pointer;
+function tcustomdataedit.getrowdatapo(const info: cellinfoty): pointer;
 begin
  result:= nil;
 end;
 
-function tdataedit.getnulltext: msestring;
+function tcustomdataedit.getnulltext: msestring;
 begin
  result:= '';
 end;
 
-procedure tdataedit.drawcell(const canvas: tcanvas);
+procedure tcustomdataedit.drawcell(const canvas: tcanvas);
 var
  mstr1: msestring;
  atextflags: textflagsty;
@@ -1799,7 +1815,7 @@ begin
  end;
 end;
 
-procedure tdataedit.doafterpaint(const canvas: tcanvas);
+procedure tcustomdataedit.doafterpaint(const canvas: tcanvas);
 begin
  inherited;
  if (fgridintf <> nil) and not (csdesigning in componentstate) then begin
@@ -1807,17 +1823,17 @@ begin
  end;
 end;
 
-function tdataedit.needsfocuspaint: boolean;
+function tcustomdataedit.needsfocuspaint: boolean;
 begin
  result:= (fgridintf = nil) and inherited needsfocuspaint;
 end;
 
-function tdataedit.getgridintf: iwidgetgrid;
+function tcustomdataedit.getgridintf: iwidgetgrid;
 begin
  result:= fgridintf;
 end;
 
-procedure tdataedit.checkgrid;
+procedure tcustomdataedit.checkgrid;
 begin
  if fgridintf = nil then begin
   raise exception.Create('No grid.');
@@ -1827,20 +1843,20 @@ begin
  end;
 end;
 
-procedure tdataedit.internalgetgridvalue(const index: integer; out value);
+procedure tcustomdataedit.internalgetgridvalue(const index: integer; out value);
 begin
  checkgrid;
  fgridintf.getdata(index,value);
 end;
 
-procedure tdataedit.internalsetgridvalue(const index: integer;
+procedure tcustomdataedit.internalsetgridvalue(const index: integer;
   const Value);
 begin
  checkgrid;
  fgridintf.setdata(index,value);
 end;
 
-procedure tdataedit.internalfillcol(const value);
+procedure tcustomdataedit.internalfillcol(const value);
 begin
  checkgrid;
  with tdatalist1(fgridintf.getcol.datalist) do begin
@@ -1848,7 +1864,7 @@ begin
  end;
 end;
 
-procedure tdataedit.internalassigncol(const value);
+procedure tcustomdataedit.internalassigncol(const value);
 begin
  checkgrid;
  with fgridintf.getcol do begin
@@ -1856,7 +1872,7 @@ begin
  end;
 end;
 
-function tdataedit.widgetcol: twidgetcol;
+function tcustomdataedit.widgetcol: twidgetcol;
 begin
  if fgridintf = nil then begin
   result:= nil;
@@ -1866,7 +1882,7 @@ begin
  end;
 end;
 
-function tdataedit.gridrow: integer;
+function tcustomdataedit.gridrow: integer;
 begin
  if fgridintf = nil then begin
   result:= -1;
@@ -1876,18 +1892,18 @@ begin
  end;
 end;
 
-procedure tdataedit.sortfunc(const l, r; var result: integer);
+procedure tcustomdataedit.sortfunc(const l, r; var result: integer);
 begin
  tdatalist1(twidgetcol1(fgridintf.getcol).fdata).compare(l,r,result);
 end;
 
-function tdataedit.griddata: tdatalist;
+function tcustomdataedit.griddata: tdatalist;
 begin
  checkgrid;
  result:= fgridintf.getcol.datalist;
 end;
 
-function tdataedit.textclipped(const arow: integer; out acellrect: rectty): boolean;
+function tcustomdataedit.textclipped(const arow: integer; out acellrect: rectty): boolean;
 var
  rect2: rectty;
  canvas1: tcanvas;
@@ -1913,14 +1929,14 @@ begin
  end;
 end;
 
-function tdataedit.textclipped(const arow: integer): boolean;
+function tcustomdataedit.textclipped(const arow: integer): boolean;
 var
  rect1: rectty;
 begin
  result:= textclipped(arow,rect1);
 end;
 
-procedure tdataedit.docellevent(const ownedcol: boolean; var info: celleventinfoty);
+procedure tcustomdataedit.docellevent(const ownedcol: boolean; var info: celleventinfoty);
 
 var
  hintinfo: hintinfoty;
@@ -1942,17 +1958,17 @@ begin
  end;
 end;
 
-procedure tdataedit.gridvaluechanged(const index: integer);
+procedure tcustomdataedit.gridvaluechanged(const index: integer);
 begin
  //dummy
 end;
 
-function tdataedit.isempty(const atext: msestring): boolean;
+function tcustomdataedit.isempty(const atext: msestring): boolean;
 begin
  result:= trim(atext) = getnulltext;
 end;
 
-function tdataedit.nullcheckneeded(const newfocus: twidget): boolean;
+function tcustomdataedit.nullcheckneeded(const newfocus: twidget): boolean;
 begin
  if newfocus = self then begin
   result:= false;
@@ -1967,7 +1983,7 @@ begin
  end;
 end;
 
-procedure tdataedit.setenabled(const avalue: boolean);
+procedure tcustomdataedit.setenabled(const avalue: boolean);
 begin
  inherited;
  if (fgridintf <> nil) and not (csloading in componentstate) then begin
@@ -1975,12 +1991,12 @@ begin
  end;
 end;
 
-function tdataedit.getreadonly: boolean;
+function tcustomdataedit.getreadonly: boolean;
 begin
  result:= oe_readonly in foptionsedit;
 end;
 
-procedure tdataedit.setreadonly(const avalue: boolean);
+procedure tcustomdataedit.setreadonly(const avalue: boolean);
 begin
  if avalue <> (oe_readonly in foptionsedit) then begin
   if avalue then begin
@@ -1993,7 +2009,7 @@ begin
  end;
 end;
 
-function tdataedit.seteditfocus: boolean;
+function tcustomdataedit.seteditfocus: boolean;
 begin
  if not readonly then begin
   if fgridintf = nil then begin
@@ -2015,25 +2031,25 @@ begin
  result:= focused;
 end;
 
-procedure tdataedit.beforecelldragevent(var ainfo: draginfoty; const arow: integer;
+procedure tcustomdataedit.beforecelldragevent(var ainfo: draginfoty; const arow: integer;
                var handled: boolean);
 begin
  //dummy
 end;
 
-procedure tdataedit.aftercelldragevent(var ainfo: draginfoty; const arow: integer;
+procedure tcustomdataedit.aftercelldragevent(var ainfo: draginfoty; const arow: integer;
                var handled: boolean);
 begin
  //dummy
 end;
 
-procedure tdataedit.initeditfocus;
+procedure tcustomdataedit.initeditfocus;
 begin
  exclude(fstate,des_edited);
  initfocus;
 end;
 
-function tdataedit.datatotext(const data): msestring;
+function tcustomdataedit.datatotext(const data): msestring;
 begin
  result:= internaldatatotext(data);
  if canevent(tmethod(fongettext)) then begin
@@ -2041,13 +2057,13 @@ begin
  end;
 end;
 
-procedure tdataedit.setempty_text(const avalue: msestring);
+procedure tcustomdataedit.setempty_text(const avalue: msestring);
 begin
  fempty_text:= avalue;
  formatchanged;
 end;
 
-procedure tdataedit.createfontempty;
+procedure tcustomdataedit.createfontempty;
 begin
  if fempty_font = nil then begin
   fempty_font:= teditemptyfont.create;
@@ -2055,7 +2071,7 @@ begin
  end;
 end;
 
-function tdataedit.getempty_font: teditemptyfont;
+function tcustomdataedit.getempty_font: teditemptyfont;
 begin
  getoptionalobject(fempty_font,{$ifdef FPC}@{$endif}createfontempty);
  result:= fempty_font;
@@ -2064,24 +2080,24 @@ begin
  end;
 end;
 
-procedure tdataedit.setempty_font(const avalue: teditemptyfont);
+procedure tcustomdataedit.setempty_font(const avalue: teditemptyfont);
 begin
  if fempty_font <> avalue then begin
   setoptionalobject(avalue,fempty_font,{$ifdef FPC}@{$endif}createfontempty);
  end;
 end;
 
-function tdataedit.isempty_fontstored: boolean;
+function tcustomdataedit.isempty_fontstored: boolean;
 begin
  result:= fempty_font <> nil;
 end;
 
-procedure tdataedit.fontemptychanged(const sender: tobject);
+procedure tcustomdataedit.fontemptychanged(const sender: tobject);
 begin
  emptychanged;
 end;
 
-procedure tdataedit.setempty_textcolor(const avalue: colorty);
+procedure tcustomdataedit.setempty_textcolor(const avalue: colorty);
 begin
  if avalue <> fempty_textcolor then begin
   fempty_textcolor:= avalue;
@@ -2089,7 +2105,7 @@ begin
  end;
 end;
 
-procedure tdataedit.setempty_textcolorbackground(const avalue: colorty);
+procedure tcustomdataedit.setempty_textcolorbackground(const avalue: colorty);
 begin
  if avalue <> fempty_textcolorbackground then begin
   fempty_textcolorbackground:= avalue;
@@ -2097,7 +2113,7 @@ begin
  end;
 end;
 
-procedure tdataedit.setempty_textstyle(const avalue: fontstylesty);
+procedure tcustomdataedit.setempty_textstyle(const avalue: fontstylesty);
 begin
  if avalue <> fempty_textstyle then begin
   fempty_textstyle:= avalue;
@@ -2105,7 +2121,7 @@ begin
  end;
 end;
 
-procedure tdataedit.setempty_color(const avalue: colorty);
+procedure tcustomdataedit.setempty_color(const avalue: colorty);
 begin
  if avalue <> fempty_color then begin
   fempty_color:= avalue;

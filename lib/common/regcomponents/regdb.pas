@@ -115,7 +115,8 @@ uses
  mselookupbuffer,msedbf,msesdfdata,msememds,mselocaldataset,
  msedatalist,msedbfieldeditor,sysutils,msetexteditor,
  msedbdispwidgets,msedbgraphics,regdb_bmp,msedbdialog,msegrids,
- regwidgets,msebufdataset,msedbevents,msesqlite3conn,msqldb,msemysqlconn
+ regwidgets,msebufdataset,msedbevents,msesqlite3conn,msqldb,msemysqlconn,
+ msedblookup
  {$ifdef mse_with_sqlite}
  ,msesqlite3ds
  {$endif}
@@ -249,7 +250,8 @@ begin
       tdbprogressbar,tdbslider,
       tdbdatetimeedit,
       tdbcalendardatetimeedit,tdbfilenameedit,tdbcoloredit,
-      tdbbooleanedit,tdbbooleaneditradio
+      tdbbooleanedit,tdbbooleaneditradio,
+      tdbstringlookuplb,tdbintegerlookuplb,tdbreallookuplb,tdbdatetimelookuplb
       ]);
  registercomponenttabhints(['DBe'],['Data edit Components']);
  registercomponents('DBf',[

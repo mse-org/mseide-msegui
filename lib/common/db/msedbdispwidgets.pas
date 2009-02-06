@@ -20,7 +20,6 @@ type
    procedure readdatafield(reader: treader);
   protected
    fintf: idbdispfieldlink;
-   procedure recordchanged(afield: tfield); override;
    procedure activechanged; override;
    function getdatasource(const aindex: integer): tdatasource;
    procedure getfieldtypes(out apropertynames: stringarty; 
@@ -28,6 +27,7 @@ type
   public
    constructor create(const intf: idbdispfieldlink);
    procedure fixupproperties(filer: tfiler); //read moved properties
+   procedure recordchanged(afield: tfield); override;
   published
    property datasource;
    property fieldname;
@@ -36,11 +36,11 @@ type
  tdblabel = class(tcustomlabel,idbdispfieldlink,ireccontrol)
   private
    fdatalink: tdispfielddatalink;
-     //idbdispfieldlink
+  //idbdispfieldlink
    procedure getfieldtypes(var fieldtypes: fieldtypesty);
    procedure fieldtovalue;
    procedure setnullvalue;
-   //ireccontrol
+  //ireccontrol
    procedure recchanged;
    procedure setdatalink(const avalue: tdispfielddatalink);
   protected   
@@ -58,8 +58,7 @@ type
    property options;
  end;
 
- tdbstringdisp = class(tcustomstringdisp,idbdispfieldlink,
-                                     ireccontrol)
+ tdbstringdisp = class(tcustomstringdisp,idbdispfieldlink,ireccontrol)
   private
    fdatalink: tdispfielddatalink;
    //idbdispfieldlink
