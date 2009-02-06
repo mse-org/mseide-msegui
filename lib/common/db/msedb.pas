@@ -973,6 +973,8 @@ type
    flinkedfields: fieldlinkarty;
    fstate: dscontrollerstatesty;
    fdelayedapplycount: integer;
+   fbmbackup: string;
+   fupdatecount: integer;
    procedure setfields(const avalue: tpersistentfields);
    function getcontroller: tdscontroller;
    procedure updatelinkedfields;
@@ -1000,6 +1002,8 @@ type
    function isutf8: boolean;
    function getfieldar(const afieldkinds: tfieldkinds = allfieldkinds): fieldarty;
    function filtereditkind: filtereditkindty;
+   procedure beginupdate; //calls diablecontrols, stores bookmark
+   procedure endupdate;   //restores bookmark, calls enablecontrols
    function locate(const key: integer; const field: tfield;
                        const options: locateoptionsty = []): locateresultty;
                        overload;
@@ -5274,6 +5278,28 @@ end;
 function tdscontroller.filtereditkind: filtereditkindty;
 begin
  result:= fintf.getfiltereditkind;
+end;
+
+procedure tdscontroller.beginupdate; //calls diablecontrols, stores bookmark
+begin
+ with tdataset(fowner) do begin
+  if fupdatecount = 0 then begin
+   fbmbackup:= bookmark;
+  end;
+  inc(fupdatecount);
+  disablecontrols;
+ end;
+end;
+
+procedure tdscontroller.endupdate;   //restores bookmark, calls enablecontrols
+begin
+ with tdataset(fowner) do begin
+  dec(fupdatecount);
+  if fupdatecount = 0 then begin
+   bookmark:= fbmbackup;
+  end;
+  enablecontrols;
+ end;
 end;
 
 procedure tdscontroller.beginfilteredit(const akind: filtereditkindty);

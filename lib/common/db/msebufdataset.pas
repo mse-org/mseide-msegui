@@ -667,7 +667,7 @@ type
                  const options: locateoptionsty = []): locateresultty;
    function locaterecno(const arecno: integer): boolean;
         //moves to next valid recno, //returns true if resulting recno = arecno
-
+   
    procedure sumfield(const afield: tfield; out asum: double);
    procedure sumfield(const afield: tfield; out asum: currency);
    procedure sumfield(const afield: tfield; out asum: integer);
