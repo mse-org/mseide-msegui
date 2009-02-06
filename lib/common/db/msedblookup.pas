@@ -106,10 +106,15 @@ type
  tdbreallookuplb = class(tdblookuplb)
   private
    fformat: msestring;
+   fvaluescale: real;
    procedure setformat(const avalue: msestring);
+   procedure setvaluescale(const avalue: real);
   protected
    function lookuptext(const aindex: integer): msestring; override;
+  public
+   constructor create(aowner: tcomponent); override;
   published
+   property valuescale: real read fvaluescale write setvaluescale;
    property format: msestring read fformat write setformat;
  end;
 
@@ -354,6 +359,12 @@ end;
 
 { tdbreallookuplb }
 
+constructor tdbreallookuplb.create(aowner: tcomponent);
+begin
+ fvaluescale:= 1;
+ inherited;
+end;
+
 procedure tdbreallookuplb.setformat(const avalue: msestring);
 begin
  fformat:= avalue;
@@ -364,6 +375,12 @@ function tdbreallookuplb.lookuptext(const aindex: integer): msestring;
 begin
  result:= realtytostr(flookupbuffer.floatvaluephys(flookupvaluefieldno,aindex),
                                                    fformat);
+end;
+
+procedure tdbreallookuplb.setvaluescale(const avalue: real);
+begin
+ fvaluescale:= avalue;
+ formatchanged;
 end;
 
 { tdatetimelookuplb }

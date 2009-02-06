@@ -3815,6 +3815,7 @@ begin
  fvalue:= emptyreal;
  fmin:= emptyreal;
  fmax:= bigreal;
+ fvaluescale:= 1;
  inherited;
  include(foptionswidget,ow_mousewheel);
 end;
@@ -3841,14 +3842,14 @@ begin
  else begin
   rea1:= realty(data);
  end;
- if (fvaluescale <> 0) and not (isemptyreal(rea1)) then begin
-  rea1:= rea1/fvaluescale;
- end;
+// if (fvaluescale <> 0) and not (isemptyreal(rea1)) then begin
+//  rea1:= rea1/fvaluescale;
+// end;
  if (@data = nil) and focused then begin
-  result:= realtytostr(rea1,fformatedit);
+  result:= realtytostr(rea1,fformatedit,fvaluescale);
  end
  else begin
-  result:= realtytostr(rea1,fformatdisp);
+  result:= realtytostr(rea1,fformatdisp,fvaluescale);
  end;
 end;
 

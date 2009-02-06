@@ -26,7 +26,9 @@ function candiv(const val: realty): boolean; //true if not 0.0 or empty:
 
 function strtorealty(const ein: string; forcevalue: boolean = false): realty;
 function strtorealtydot(const ein: string): realty;
-function realtytostr(const val: realty; const format: msestring = ''): msestring;
+//function realtytostr(const val: realty; const format: msestring = ''): msestring;
+function realtytostr(const val: realty; const format: msestring = '';
+                                            const scale: real = 1): msestring;
 function realtytostrdot(const val: realty): string;
 
 function addrealty(const a,b: realty): realty; //result = a - b
@@ -139,7 +141,7 @@ begin
   end;
  end;
 end;
-
+{
 function realtytostr(const val: realty; const format: msestring = ''): msestring;
 begin
  if isemptyreal(val) then begin
@@ -147,6 +149,25 @@ begin
  end
  else begin
   result:= formatfloatmse(val,format,defaultformatsettingsmse);
+ end;
+end;
+}
+function realtytostr(const val: realty; const format: msestring = '';
+                                            const scale: real = 1): msestring;
+var
+ rea1: real;
+begin
+ if isemptyreal(val) then begin
+  result:= emptyrealstring;
+ end
+ else begin
+  if scale <> 0 then begin
+   rea1:= val/scale;
+  end
+  else begin
+   rea1:= val;
+  end;
+  result:= formatfloatmse(rea1,format,defaultformatsettingsmse);
  end;
 end;
 

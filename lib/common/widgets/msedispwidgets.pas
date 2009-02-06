@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -220,10 +220,12 @@ type
    fvalue: realty;
    fonchange: changerealeventty;
    fformat: msestring;
+   fvaluescale: real;
    procedure setvalue(const avalue: realty);
    procedure readvalue(reader: treader);
    procedure writevalue(writer: twriter);
    procedure setformat(const avalue: msestring);
+   procedure setvaluescale(const avalue: real);
   protected
    procedure valuechanged; override;
    function getvaluetext: msestring; override;
@@ -232,6 +234,7 @@ type
    constructor create(aowner: tcomponent); override;
    property value: realty read fvalue write setvalue stored false;
   published
+   property valuescale: real read fvaluescale write setvaluescale;
    property format: msestring read fformat write setformat;
    property onchange: changerealeventty read fonchange write fonchange;
  end;
@@ -568,6 +571,7 @@ end;
 constructor tcustomrealdisp.create(aowner: tcomponent);
 begin
  fvalue:= emptyreal;
+ fvaluescale:= 1;
  inherited;
 end;
 
@@ -598,7 +602,7 @@ end;
 
 function tcustomrealdisp.getvaluetext: msestring;
 begin
- result:= realtytostr(fvalue,fformat);
+ result:= realtytostr(fvalue,fformat,fvaluescale);
 end;
 
 procedure tcustomrealdisp.setvalue(const avalue: realty);
@@ -620,6 +624,12 @@ end;
 procedure tcustomrealdisp.setformat(const avalue: msestring);
 begin
  fformat:= avalue;
+ formatchanged;
+end;
+
+procedure tcustomrealdisp.setvaluescale(const avalue: real);
+begin
+ fvaluescale:= avalue;
  formatchanged;
 end;
 
