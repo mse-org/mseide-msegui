@@ -15,7 +15,7 @@ uses
  classes,msedbedit,mselookupbuffer,msedb,msedbf,msesdfdata,msememds,msesqldb,
  msqldb,msesqlresult,mseibconnection,msepqconnection,msesqlite3conn,
  mseodbcconn,msemysql40conn,msemysql41conn,msemysql50conn,msedbgraphics,
- msedbdialog,msedbevents,msedbdispwidgets
+ msedbdialog,msedbevents,msedbdispwidgets,msedblookup
   {$ifdef mse_with_sqlite}
  ,msesqlite3ds
  {$endif}
@@ -41,7 +41,8 @@ begin
       tdbdataicon,tdbdataimage,tdbdatabutton,tdbrealedit,tdbprogressbar,
       tdbdatetimeedit,
       tdbcalendardatetimeedit,tdbfilenameedit,
-      tdbbooleanedit,tdbbooleaneditradio
+      tdbbooleanedit,tdbbooleaneditradio,
+      tdbstringlookuplb,tdbintegerlookuplb,tdbreallookuplb,tdbdatetimelookuplb
       ]);
  registerclasses([
       tfieldparamlink,tfieldlink,ttimestampfieldlink,tfieldfieldlink,
