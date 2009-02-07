@@ -959,7 +959,7 @@ var
  cryptioinfo: cryptioinfoty;
 begin
 {$ifdef mse_debugsockets}
- debugout(self,'execthread');
+ debugout(self,'server execthread');
 {$endif}
  result:= 0;
  addr.kind:= fkind;
@@ -1028,6 +1028,9 @@ begin
     end;
    end;
   end;
+ {$ifdef mse_debugsockets}
+  debugout(self,'server exitthread');
+ {$endif}
  end;
 end;
 
@@ -1215,6 +1218,9 @@ function tsocketreader.execthread(thread: tmsethread): integer;
 var
  int1: integer;
 begin                          
+{$ifdef mse_debugsockets}
+ debugout(self,'socketreader execthread');
+{$endif}
  fthread:= tsemthread(thread);
  try
   if assigned(fonafterconnect) then begin
@@ -1254,6 +1260,9 @@ begin
    fonthreadterminate;
   end;
  end;
+{$ifdef mse_debugsockets}
+ debugout(self,'socketreader exitthread');
+{$endif}
 end;
 
 procedure tsocketreader.sethandle(value: integer);

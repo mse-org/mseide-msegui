@@ -1125,15 +1125,17 @@ begin
 end;
 
 function getnestedpropinfo(var ainstance: tobject; 
-                            apropname: pchar; out aindex: integer): ppropinfo;
+                            apropname: pchar; out aindex: integer;
+                            out arraypropkind: arraypropkindty): ppropinfo;
 var
  po1,po2: pchar;
+ prop1: ppropinfo;
  index1: integer;
- arraypropkind: arraypropkindty;
 begin
  result:= nil;
  po1:= apropname;
  index1:= -1;
+ arraypropkind:= apk_none;
  while po1^ <> #0 do begin
   if po1^ = '.' then begin
    break;
@@ -1144,7 +1146,9 @@ begin
     inc(po2);
    end;
    if po2^ <> #0 then begin
-    trystrtoint(psubstr(po1,po2-1),index1);
+    if not trystrtoint(psubstr(po1+1,po2),index1) then begin
+     index1:= -1;
+    end;
     inc(po2);
    end;
    break;
@@ -1156,6 +1160,7 @@ begin
   if result <> nil then begin
    if result^.proptype^.kind = tkclass then begin
     ptruint(ainstance):= ptruint(getordprop(ainstance,result));
+    prop1:= result;    
     result:= nil;
     if ainstance <> nil then begin
      if index1 >= 0 then begin
@@ -1166,11 +1171,11 @@ begin
          if arraypropkind = apk_tpersistent then begin
           ainstance:= tpersistentarrayprop(ainstance)[index1];
           if po2^ = '.' then begin
-           result:= getnestedpropinfo(ainstance,po2+1,index1);
+           result:= getnestedpropinfo(ainstance,po2+1,index1,arraypropkind);
           end;
          end
          else begin
-          result:= getpropinfo(ainstance,'items');
+          result:= prop1;
          end;
         end;
        end;
@@ -1178,7 +1183,7 @@ begin
      end
      else begin
       if (po1^ = '.') then begin
-       result:= getnestedpropinfo(ainstance,po1+1,index1);
+       result:= getnestedpropinfo(ainstance,po1+1,index1,arraypropkind);
       end
       else begin
        result:= nil;
@@ -1197,6 +1202,7 @@ var
  aproperty: ppropinfo;
  instance: tobject;
  index1: integer;
+ arraypropkind: arraypropkindty;
 begin
  inherited;
  aproperty:= nil;
@@ -1204,32 +1210,54 @@ begin
  with adata^ do begin
   if aname = 'value' then begin
    aproperty:= fvalueproperty;
+   index1:= -1;
   end
   else begin
    if fcomponent <> nil then begin
-    aproperty:= getnestedpropinfo(instance,pchar(aname),index1);
+    aproperty:= getnestedpropinfo(instance,pchar(aname),index1,arraypropkind);
    end;
   end;
   if (aproperty <> nil) and (instance <> nil) then begin
    inc(fupdatelock);
    try
-    case aproperty^.proptype^.kind of
-     tkInteger,tkBool,tkInt64,tkset: begin
-      setordprop(instance,aproperty,aslargeint);
+    if index1 >= 0 then begin
+     case arraypropkind of
+      apk_integer,apk_colorty: begin
+       tintegerarrayprop(instance)[index1]:= asinteger;
+      end;
+      apk_real: begin
+       trealarrayprop(instance)[index1]:= asfloat;
+      end;
+      apk_string: begin
+       tstringarrayprop(instance)[index1]:= asstring;
+      end;
+      apk_msestring: begin
+       tmsestringarrayprop(instance)[index1]:= asmsestring;
+      end;
+      apk_boolean: begin
+       tbooleanarrayprop(instance)[index1]:= asinteger <> 0;;
+      end;
      end;
-     tkFloat: begin
-      setfloatprop(instance,aproperty,asfloat);
-     end;
-     tkWString: begin
-      setwidestrprop(instance,aproperty,asmsestring);
-     end;
-    {$ifdef mse_unicodestring}
-     tkUString: begin
-      setunicodestrprop(instance,aproperty,asmsestring);
-     end;
-    {$endif}
-     tkSString,tkLString,tkAString: begin
-      setstrprop(instance,aproperty,asstring);
+    end
+    else begin
+     case aproperty^.proptype^.kind of
+      tkInteger,tkBool,tkInt64,tkset: begin
+       setordprop(instance,aproperty,aslargeint);
+      end;
+      tkFloat: begin
+       setfloatprop(instance,aproperty,asfloat);
+      end;
+      tkWString: begin
+       setwidestrprop(instance,aproperty,asmsestring);
+      end;
+     {$ifdef mse_unicodestring}
+      tkUString: begin
+       setunicodestrprop(instance,aproperty,asmsestring);
+      end;
+     {$endif}
+      tkSString,tkLString,tkAString: begin
+       setstrprop(instance,aproperty,asstring);
+      end;
      end;
     end;
    finally

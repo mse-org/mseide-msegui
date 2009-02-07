@@ -35,7 +35,8 @@ type
    procedure setwidget(const avalue: twidget);
   published
    property widget: twidget read getwidget write setwidget;
-   property options: ifiwidgetlinkoptionsty read foptions write foptions;
+   property options: ifiwidgetlinkoptionsty read foptions 
+                                                 write foptions default [];
  end;
  
  tvaluewidgetlinks = class(tvaluelinks) 

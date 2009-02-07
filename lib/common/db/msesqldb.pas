@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -78,10 +78,10 @@ type
    function  getcanmodify: boolean; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
    function islocal: boolean; override;
-   //icursorclient
+  //icursorclient
    function stringmemo: boolean; override;
        //memo fields are text(0) fields
-   //idscontroller
+  //idscontroller
    procedure inheriteddataevent(const event: tdataevent; const info: ptrint);
    procedure inheritedcancel;
    procedure inheritedpost;
@@ -172,7 +172,7 @@ type
    procedure setdestdataset(const avalue: tsqlquery);
   protected
    procedure loaded; override;
-   //idbeditinfo
+  //idbeditinfo
    function getdatasource(const aindex: integer): tdatasource; overload;
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
