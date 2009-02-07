@@ -30,6 +30,9 @@ type
  arraypropstatety = (aps_linking,aps_destroying,aps_needsindexing,aps_moved);
  arraypropsstatesty = set of arraypropstatety;
 
+ arraypropkindty = (apk_none,apk_tpersistent,apk_integer,apk_colorty,apk_real,
+                    apk_string,apk_msestring,apk_boolean);
+ 
  tarrayprop = class(tpersistent)
   private
    itemsread: boolean;
@@ -64,6 +67,7 @@ type
    procedure checkindex(const index: integer);
    function checkstored(ancestor: tpersistent): boolean; virtual;
   public
+   function propkind: arraypropkindty; virtual;
    procedure beginupdate;
    procedure endupdate(nochange: boolean = false);
    procedure clear;
@@ -96,6 +100,7 @@ type
    function getitemspo(const index: integer): pointer; override;
    function checkstored(ancestor: tpersistent): boolean; override;
   public
+   function propkind: arraypropkindty; override;
    procedure assign(source: tpersistent); override;
    property items[const index: integer]: integer read getitems write setitems; default;
  end;
@@ -107,6 +112,7 @@ type
   protected
    procedure init(startindex,endindex: integer); override;
   public
+   function propkind: arraypropkindty; override;
    property items[const index: integer]: colorty read getitems write setitems; default;
  end;
 
@@ -125,6 +131,7 @@ type
    function getitemspo(const index: integer): pointer; override;
    function checkstored(ancestor: tpersistent): boolean; override;
   public
+   function propkind: arraypropkindty; override;
    procedure assign(source: tpersistent); override;
    property items[const index: integer]: real read getitems write setitems; default;
  end;
@@ -144,6 +151,7 @@ type
    function getitemspo(const index: integer): pointer; override;
    function checkstored(ancestor: tpersistent): boolean; override;
   public
+   function propkind: arraypropkindty; override;
    procedure assign(source: tpersistent); override;
    property items[const index: integer]: string read getitems write setitems; default;
  end;
@@ -163,6 +171,7 @@ type
    function getitemspo(const index: integer): pointer; override;
    function checkstored(ancestor: tpersistent): boolean; override;
   public
+   function propkind: arraypropkindty; override;
    procedure assign(source: tpersistent); override;
    property items[const index: integer]: msestring read getitems write setitems; default;
  end;
@@ -172,6 +181,7 @@ type
    function getitems(const index: integer): boolean;
    procedure setitems(const index: integer; const Value: boolean);
   public
+   function propkind: arraypropkindty; override;
    property items[const index: integer]: boolean read getitems write setitems; default;
  end;
 
@@ -235,6 +245,7 @@ type
    procedure setlinkedvar(const source: tlinkedobject; var dest: tlinkedobject;
               const linkintf: iobjectlink = nil); overload;
   public
+   function propkind: arraypropkindty; override;
    constructor create(itemclasstype: virtualpersistentclassty); reintroduce;
    destructor destroy; override;
    function displayname(const index: integer): msestring; virtual;
@@ -665,6 +676,11 @@ begin
  internalinsert(index,true);
 end;
 
+function tarrayprop.propkind: arraypropkindty;
+begin
+ result:= apk_none;
+end;
+
 { tintegerarraypropmse }
 
 function tintegerarrayprop.checkstored(ancestor: tpersistent): boolean;
@@ -744,6 +760,11 @@ begin
  end;
 end;
 
+function tintegerarrayprop.propkind: arraypropkindty;
+begin
+ result:= apk_integer;
+end;
+
 { tcolorarrayprop }
 
 function tcolorarrayprop.getitems(const index: integer): colorty;
@@ -764,6 +785,11 @@ begin
  for int1:= startindex to endindex do begin
   items[int1]:= cl_transparent;
  end;
+end;
+
+function tcolorarrayprop.propkind: arraypropkindty;
+begin
+ result:= apk_colorty;
 end;
 
 { trealarraypropmse }
@@ -843,6 +869,11 @@ begin
  else begin
   inherited;
  end;
+end;
+
+function trealarrayprop.propkind: arraypropkindty;
+begin
+ result:= apk_real;
 end;
 
 { tstringarrayprop }
@@ -928,6 +959,11 @@ begin
  else begin
   inherited;
  end;
+end;
+
+function tstringarrayprop.propkind: arraypropkindty;
+begin
+ result:= apk_string;
 end;
 
 { tmsestringarrayprop }
@@ -1023,6 +1059,11 @@ begin
  end;
 end;
 
+function tmsestringarrayprop.propkind: arraypropkindty;
+begin
+ result:= apk_msestring;
+end;
+
 { tbooleanarrayprop }
 
 function tbooleanarrayprop.getitems(const index: integer): boolean;
@@ -1035,6 +1076,11 @@ procedure tbooleanarrayprop.setitems(const index: integer;
   const Value: boolean);
 begin
  inherited setitems(index,integer(value));
+end;
+
+function tbooleanarrayprop.propkind: arraypropkindty;
+begin
+ result:= apk_boolean;
 end;
 
 { tenumarrayprop }
@@ -1449,6 +1495,11 @@ begin
    result:= int1;
   end;
  end;
+end;
+
+function tpersistentarrayprop.propkind: arraypropkindty;
+begin
+ result:= apk_tpersistent;
 end;
 
 { townedpersistentarrayprop }

@@ -26,30 +26,18 @@ const
  widgetstateoptionsty = [iwlo_sendhide,iwlo_sendshow,iwlo_sendfocus,
       iwlo_senddefocus,iwlo_sendactivate,iwlo_senddeactivate];
 type  
- tvaluewidgetlink = class(tvaluelink)
+
+ tvaluewidgetlink = class(tcustomvaluecomponentlink)
   private
-   fwidget: twidget;
-   fintf: iifiwidget;
-   fvalueproperty: ppropinfo;
-   fupdatelock: integer;
    foptions: ifiwidgetlinkoptionsty;
    fwidgetstatebefore: ifiwidgetstatesty;
+   function getwidget: twidget;
    procedure setwidget(const avalue: twidget);
-   procedure checkwidget;
-  protected
-   procedure setdata(const adata: pifidataty; const aname: ansistring); override;
-   procedure sendvalue(const aproperty: ppropinfo); overload;
-   procedure sendstate(const astate: ifiwidgetstatesty);
-   procedure sendmodalresult(const amodalresult: modalresultty);
-  public
-   procedure sendvalue(const aname: string; const avalue: colorty); overload;
-   procedure sendproperties;
   published
-   property widget: twidget read fwidget write setwidget;
-   property options: ifiwidgetlinkoptionsty read foptions 
-                                         write foptions default [];
- end; 
-
+   property widget: twidget read getwidget write setwidget;
+   property options: ifiwidgetlinkoptionsty read foptions write foptions;
+ end;
+ 
  tvaluewidgetlinks = class(tvaluelinks) 
   private
    function getitems(const index: integer): tvaluewidgetlink;
@@ -83,6 +71,7 @@ type
   published
    property valuewidgets: tvaluewidgetlinks read getvaluewidgets 
                                                       write setvaluewidgets;
+   property valuecomponents;
    property linkname;
    property actionsrx;
    property actionstx;
@@ -137,6 +126,11 @@ type
   
 { tvaluewidgetlink }
 
+function tvaluewidgetlink.getwidget: twidget;
+begin
+ result:= twidget(fcomponent);
+end;
+
 procedure tvaluewidgetlink.setwidget(const avalue: twidget);
 var
  intf1: iifiwidget;
@@ -155,155 +149,7 @@ begin
  if fintf <> nil then begin
   fintf.setifiserverintf(iifiserver(tcustommodulelink(fowner)));
  end;
- setlinkedvar(avalue,tmsecomponent(fwidget));
- if avalue <> nil then begin
-  fvalueproperty:= getpropinfo(avalue,'value');
- end;
-end;
-
-procedure tvaluewidgetlink.checkwidget;
-begin
- if fwidget = nil then begin
-  exception.create(tcustommodulelink(fowner).name+': No widget.');
- end;
-end;
-
-function getnestedpropinfo(var ainstance: tobject; 
-                                               apropname: pchar): ppropinfo;
-var
- po1: pchar;
-begin
- result:= nil;
- po1:= apropname;
- while po1^ <> #0 do begin
-  if po1^ = '.' then begin
-   break;
-  end;
-  inc(po1);
- end;
- if po1 <> apropname then begin
-  result:= getpropinfo(ainstance,psubstr(apropname,po1));
-  if (po1^ = '.') and (result <> nil) then begin
-   if result^.proptype^.kind = tkclass then begin
-    ptruint(ainstance):= ptruint(getordprop(ainstance,result));
-    if ainstance <> nil then begin
-     result:= getnestedpropinfo(ainstance,po1+1);
-    end
-    else begin
-     result:= nil;
-    end;
-   end
-   else begin
-    result:= nil;
-   end;
-  end;
- end;
-end;
-
-procedure tvaluewidgetlink.setdata(const adata: pifidataty; 
-                                               const aname: ansistring);
-var
- aproperty: ppropinfo;
- instance: tobject;
-begin
- inherited;
- aproperty:= nil;
- instance:= fwidget;
- with adata^ do begin
-  if aname = 'value' then begin
-   aproperty:= fvalueproperty;
-  end
-  else begin
-   if fwidget <> nil then begin
-    aproperty:= getnestedpropinfo(instance,pchar(aname));
-   end;
-  end;
-  if (aproperty <> nil) and (instance <> nil) then begin
-   inc(fupdatelock);
-   try
-    case aproperty^.proptype^.kind of
-     tkInteger,tkBool,tkInt64: begin
-      setordprop(instance,aproperty,aslargeint);
-     end;
-     tkFloat: begin
-      setfloatprop(instance,aproperty,asfloat);
-     end;
-     tkWString: begin
-      setwidestrprop(instance,aproperty,asmsestring);
-     end;
-    {$ifdef mse_unicodestring}
-     tkUString: begin
-      setunicodestrprop(instance,aproperty,asmsestring);
-     end;
-    {$endif}
-     tkSString,tkLString,tkAString: begin
-      setstrprop(instance,aproperty,asstring);
-     end;
-    end;
-   finally
-    dec(fupdatelock);
-   end;
-  end;
- end;
-end;
-
-procedure tvaluewidgetlink.sendvalue(const aproperty: ppropinfo);
-begin
- if aproperty <> nil then begin
-  case aproperty^.proptype^.kind of
-   tkInteger,tkBool,tkInt64: begin
-    sendvalue(aproperty^.name,getordprop(fwidget,aproperty));
-   end;
-   tkFloat: begin
-    sendvalue(aproperty^.name,double(getfloatprop(fwidget,aproperty)));
-   end;
-  {$ifdef mse_unicodestring}
-   tkUString: begin
-    sendvalue(aproperty^.name,getunicodestrprop(fwidget,aproperty));
-   end;
-  {$endif}
-   tkWString: begin
-    sendvalue(aproperty^.name,getwidestrprop(fwidget,aproperty));
-   end;
-   tkSString,tkLString,tkAString: begin
-    sendvalue(aproperty^.name,getstrprop(fwidget,aproperty));
-   end;
-  end;
- end;
-end;
-
-procedure tvaluewidgetlink.sendstate(const astate: ifiwidgetstatesty);
-begin
- sendvalue(ifiwidgetstatename,integer(astate));
-end;
-
-procedure tvaluewidgetlink.sendmodalresult(const amodalresult: modalresultty);
-begin
- sendvalue(ifiwidgetmodalresultname,integer(amodalresult));
-end;
-
-procedure tvaluewidgetlink.sendproperties;
-var
- stream1: tmemorystream;
- str1: string;
- po1: pchar;
-begin
- checkwidget;
- stream1:= tmemorystream.create;
- try
-  stream1.writecomponent(fwidget);
-  inititemheader(str1,ik_widgetproperties,0,stream1.size,po1);
-  setifibytes(stream1.memory,stream1.size,pifibytesty(po1));
- finally
-  stream1.free;
- end;
- tcustommodulelink1(fowner).senddata(str1);
-end;
-
-procedure tvaluewidgetlink.sendvalue(const aname: string;
-               const avalue: colorty);
-begin
- sendvalue(aname,int64(avalue));
+ inherited component:= avalue;
 end;
 
 { tvaluewidgetlinks }
@@ -383,7 +229,7 @@ var
 begin
  wi1:= tvaluewidgetlink(fvalues.finditem(aname));
  result:= wi1 <> nil;
- if result and (wi1.fwidget <> nil) then begin
+ if result and (wi1.fcomponent <> nil) then begin
   with wi1.widget do begin
    case acommand of
     iwc_enable: begin
@@ -411,10 +257,10 @@ var
 begin
  wi1:= tvaluewidgetlink(fvalues.finditem(aname));
  result:= wi1 <> nil;
- if result and (wi1.fwidget <> nil) then begin
+ if result and (wi1.fcomponent <> nil) then begin
   stream1:= tmemorycopystream.create(@adata^.data,adata^.length);
   try
-   stream1.readcomponent(wi1.fwidget);
+   stream1.readcomponent(wi1.fcomponent);
   finally
    stream1.free;
   end;

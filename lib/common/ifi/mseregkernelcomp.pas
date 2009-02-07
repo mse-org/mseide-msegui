@@ -13,12 +13,18 @@ interface
 implementation
 uses
  classes,msestatfile,mseact,mseapplication,msetimer,msethreadcomp,
- msepipestream,msemenus,msegui,msebitmap,mseactions,mseprinter;
+ msepipestream,msemenus,msegui,msebitmap,mseactions,mseprinter,mseskin,
+ mseguithreadcomp;
 initialization
  registerclasses([tstatfile,tnoguiaction,tactivator,
                              ttimer,tthreadcomp,tpipereadercomp,
                     tmainmenu,tpopupmenu,tfacecomp,tframecomp,
                     tbitmapcomp,timagelist,taction,
+                    tmainmenu,tpopupmenu,
+                    tfacecomp,tfacelist,tframecomp,tskincontroller,
+//                    tskinextender,
+                    tbitmapcomp,timagelist,tshortcutcontroller,
+                    taction,tguithreadcomp,
                     tpagesizeselector,tpageorientationselector
                     ]);
 end.

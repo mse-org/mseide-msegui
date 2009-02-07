@@ -12,7 +12,7 @@ unit mseifilink;
 interface
 uses
  classes,mseclasses,mseifiglob,mseifi,msearrayprops,mseapplication,mseact,
- mseevent,mseglob,msestrings,msetypes,msedatalist,msegraphutils;
+ mseevent,mseglob,msestrings,msetypes,msedatalist,msegraphutils,typinfo;
  
 const
  ifidatatypes = [dl_integer,dl_int64,dl_currency,dl_real,
@@ -285,6 +285,41 @@ type
    property items[const index: integer]: tvaluelink read getitems; default;   
  end;
 
+ tcustomvaluecomponentlink = class(tvaluelink)
+  private
+   procedure setcomponent(const avalue: tmsecomponent);
+   procedure checkcomponent;
+  protected
+   fcomponent: tmsecomponent;
+   fintf: iifiwidget;
+   fvalueproperty: ppropinfo;
+   fupdatelock: integer;
+   procedure setdata(const adata: pifidataty; const aname: ansistring); override;
+   procedure sendvalue(const aproperty: ppropinfo); overload;
+   procedure sendstate(const astate: ifiwidgetstatesty);
+   procedure sendmodalresult(const amodalresult: modalresultty);
+  public
+   procedure sendvalue(const aname: string; const avalue: colorty); overload;
+   procedure sendproperties;
+   property component: tmsecomponent read fcomponent write setcomponent;
+ end; 
+
+ tvaluecomponentlink = class(tcustomvaluecomponentlink)
+  published
+   property component;
+ end;
+ 
+ tvaluecomponentlinks = class(tvaluelinks)
+  private
+   function getitems(const index: integer): tvaluecomponentlink;
+  protected
+   function getitemclass: modulelinkpropclassty; override;  
+  public
+   class function getitemclasstype: persistentclassty; override;
+   function byname(const aname: string): tvaluecomponentlink;
+   property items[const index: integer]: tvaluecomponentlink read getitems; default;   
+ end;
+ 
  formlinkoptionty = (flo_useclientchannel);
  formlinkoptionsty = set of formlinkoptionty;
 const
@@ -295,6 +330,7 @@ type
                           ['{90279F1E-E80F-4657-9531-3C3A2CF151BD}']
   procedure connectmodule(const sender: tcustommodulelink);
  end;
+ 
  tcustommodulelink = class(tifiiolinkcomponent,iifiserver,iifimodulelink)
   private
    factionsrx: trxlinkactions;
@@ -308,8 +344,10 @@ type
    procedure setmodulestx(const avalue: ttxlinkmodules);
    procedure setmodulesrx(const avalue: trxlinkmodules);
    procedure setvalues(const avalue: tvaluelinks);
+   procedure setvaluecomponents(const avalue: tvaluecomponentlinks);
   protected
    fvalues: tvaluelinks;
+   fvaluecomponents: tvaluecomponentlinks;
    function hasconnection: boolean;
    function encodemodulecommand(const acommand: ificommandcodety;
                const atag: integer; const aname: string): string;
@@ -358,6 +396,8 @@ type
    property actionstx: ttxlinkactions read factionstx write setactionstx;
    property modulesrx: trxlinkmodules read fmodulesrx write setmodulesrx;
    property modulestx: ttxlinkmodules read fmodulestx write setmodulestx;
+   property valuecomponents: tvaluecomponentlinks read fvaluecomponents 
+                                                     write setvaluecomponents;
    property values: tvaluelinks read fvalues write setvalues;
    property options: formlinkoptionsty read foptions write foptions
                                       default defaultformlinkoptions;
@@ -371,15 +411,18 @@ type
    property modulesrx;
    property modulestx;
    property values;
+   property valuecomponents;
    property channel;
    property options;
  end;
 
  ifirxoptionty = (irxo_useclientchannel,irxo_postecho); 
  ifirxoptionsty = set of ifirxoptionty;
+
 const 
  defaultifirxoptions = [irxo_useclientchannel];
  defaultifirxtimeout = 10000000; //10 second
+
 type 
  tificontroller = class(tactivatorcontroller,iifimodulelink)
   private
@@ -1064,6 +1107,219 @@ begin
  result:= tvaluelink;
 end;
 
+{ tcustomvaluecomponentlink }
+
+procedure tcustomvaluecomponentlink.setcomponent(const avalue: tmsecomponent);
+begin
+ setlinkedvar(avalue,fcomponent);
+ if avalue <> nil then begin
+  fvalueproperty:= getpropinfo(avalue,'value');
+ end;
+end;
+
+procedure tcustomvaluecomponentlink.checkcomponent;
+begin
+ if fcomponent = nil then begin
+  exception.create(tcustommodulelink(fowner).name+': No component.');
+ end;
+end;
+
+function getnestedpropinfo(var ainstance: tobject; 
+                            apropname: pchar; out aindex: integer): ppropinfo;
+var
+ po1,po2: pchar;
+ index1: integer;
+ arraypropkind: arraypropkindty;
+begin
+ result:= nil;
+ po1:= apropname;
+ index1:= -1;
+ while po1^ <> #0 do begin
+  if po1^ = '.' then begin
+   break;
+  end;
+  if po1^ = '[' then begin
+   po2:= po1+1;
+   while (po2^ <> ']') and (po2^ <> #0) do begin
+    inc(po2);
+   end;
+   if po2^ <> #0 then begin
+    trystrtoint(psubstr(po1,po2-1),index1);
+    inc(po2);
+   end;
+   break;
+  end;
+  inc(po1);
+ end;
+ if po1 <> apropname then begin
+  result:= getpropinfo(ainstance,psubstr(apropname,po1));
+  if result <> nil then begin
+   if result^.proptype^.kind = tkclass then begin
+    ptruint(ainstance):= ptruint(getordprop(ainstance,result));
+    result:= nil;
+    if ainstance <> nil then begin
+     if index1 >= 0 then begin
+      if ainstance is tarrayprop then begin
+       with tarrayprop(ainstance) do begin
+        if index1 < count then begin
+         arraypropkind:= propkind; 
+         if arraypropkind = apk_tpersistent then begin
+          ainstance:= tpersistentarrayprop(ainstance)[index1];
+          if po2^ = '.' then begin
+           result:= getnestedpropinfo(ainstance,po2+1,index1);
+          end;
+         end
+         else begin
+          result:= getpropinfo(ainstance,'items');
+         end;
+        end;
+       end;
+      end
+     end
+     else begin
+      if (po1^ = '.') then begin
+       result:= getnestedpropinfo(ainstance,po1+1,index1);
+      end
+      else begin
+       result:= nil;
+      end;
+     end;
+    end;
+   end;
+  end;
+ end;
+ aindex:= index1;
+end;
+
+procedure tcustomvaluecomponentlink.setdata(const adata: pifidataty; 
+                                               const aname: ansistring);
+var
+ aproperty: ppropinfo;
+ instance: tobject;
+ index1: integer;
+begin
+ inherited;
+ aproperty:= nil;
+ instance:= fcomponent;
+ with adata^ do begin
+  if aname = 'value' then begin
+   aproperty:= fvalueproperty;
+  end
+  else begin
+   if fcomponent <> nil then begin
+    aproperty:= getnestedpropinfo(instance,pchar(aname),index1);
+   end;
+  end;
+  if (aproperty <> nil) and (instance <> nil) then begin
+   inc(fupdatelock);
+   try
+    case aproperty^.proptype^.kind of
+     tkInteger,tkBool,tkInt64,tkset: begin
+      setordprop(instance,aproperty,aslargeint);
+     end;
+     tkFloat: begin
+      setfloatprop(instance,aproperty,asfloat);
+     end;
+     tkWString: begin
+      setwidestrprop(instance,aproperty,asmsestring);
+     end;
+    {$ifdef mse_unicodestring}
+     tkUString: begin
+      setunicodestrprop(instance,aproperty,asmsestring);
+     end;
+    {$endif}
+     tkSString,tkLString,tkAString: begin
+      setstrprop(instance,aproperty,asstring);
+     end;
+    end;
+   finally
+    dec(fupdatelock);
+   end;
+  end;
+ end;
+end;
+
+procedure tcustomvaluecomponentlink.sendvalue(const aproperty: ppropinfo);
+begin
+ if aproperty <> nil then begin
+  case aproperty^.proptype^.kind of
+   tkInteger,tkBool,tkInt64: begin
+    sendvalue(aproperty^.name,getordprop(fcomponent,aproperty));
+   end;
+   tkFloat: begin
+    sendvalue(aproperty^.name,double(getfloatprop(fcomponent,aproperty)));
+   end;
+  {$ifdef mse_unicodestring}
+   tkUString: begin
+    sendvalue(aproperty^.name,getunicodestrprop(fcomponent,aproperty));
+   end;
+  {$endif}
+   tkWString: begin
+    sendvalue(aproperty^.name,getwidestrprop(fcomponent,aproperty));
+   end;
+   tkSString,tkLString,tkAString: begin
+    sendvalue(aproperty^.name,getstrprop(fcomponent,aproperty));
+   end;
+  end;
+ end;
+end;
+
+procedure tcustomvaluecomponentlink.sendstate(const astate: ifiwidgetstatesty);
+begin
+ sendvalue(ifiwidgetstatename,integer(astate));
+end;
+
+procedure tcustomvaluecomponentlink.sendmodalresult(const amodalresult: modalresultty);
+begin
+ sendvalue(ifiwidgetmodalresultname,integer(amodalresult));
+end;
+
+procedure tcustomvaluecomponentlink.sendproperties;
+var
+ stream1: tmemorystream;
+ str1: string;
+ po1: pchar;
+begin
+ checkcomponent;
+ stream1:= tmemorystream.create;
+ try
+  stream1.writecomponent(fcomponent);
+  inititemheader(str1,ik_widgetproperties,0,stream1.size,po1);
+  setifibytes(stream1.memory,stream1.size,pifibytesty(po1));
+ finally
+  stream1.free;
+ end;
+ tcustommodulelink(fowner).senddata(str1);
+end;
+
+procedure tcustomvaluecomponentlink.sendvalue(const aname: string;
+               const avalue: colorty);
+begin
+ sendvalue(aname,int64(avalue));
+end;
+
+{ tvaluecomponentlinks }
+
+class function tvaluecomponentlinks.getitemclasstype: persistentclassty;
+begin
+ result:= tvaluecomponentlink;
+end;
+
+function tvaluecomponentlinks.getitems(const index: integer): tvaluecomponentlink;
+begin
+ result:= tvaluecomponentlink(inherited getitems(index));
+end;
+
+function tvaluecomponentlinks.byname(const aname: string): tvaluecomponentlink;
+begin
+ result:= tvaluecomponentlink(inherited byname(aname));
+end;
+
+function tvaluecomponentlinks.getitemclass: modulelinkpropclassty;
+begin
+ result:= tvaluecomponentlink;
+end;
+
 { tcustommodulelink }
 
 constructor tcustommodulelink.create(aowner: tcomponent);
@@ -1073,6 +1329,7 @@ begin
  factionstx:= ttxlinkactions.create(self);
  fmodulestx:= ttxlinkmodules.create(self);
  fmodulesrx:= trxlinkmodules.create(self);
+ fvaluecomponents:= tvaluecomponentlinks.create(self);
  if fvalues = nil then begin
   fvalues:= tvaluelinks.create(self);
  end;
@@ -1085,6 +1342,7 @@ begin
  factionstx.free;
  fmodulesrx.free;
  fmodulestx.free;
+ fvaluecomponents.free;
  fvalues.free;
  inherited;
 end;
@@ -1443,33 +1701,42 @@ end;
 function tcustommodulelink.propertychangereceived(const atag: integer;
                      const aname: string; const apropertyname: string;
                      const adata: pifidataty): boolean;
-var
- wi1: tvaluelink;
-begin
- wi1:= tvaluelink(fvalues.finditem(aname));
- result:= wi1 <> nil;
- if result then begin
-  with wi1 do begin
-   setdata(adata,apropertyname);
-   if apropertyname = ifiwidgetstatename then begin
-    if assigned(fonwidgetstatechanged) then begin
-     fonwidgetstatechanged(wi1,atag,ifiwidgetstatesty(asinteger));
-    end;
-   end
-   else begin
-    if apropertyname = ifiwidgetmodalresultname then begin
-     if assigned(fonmodalresult) then begin
-      fonmodalresult(wi1,atag,modalresultty(asinteger));
+                     
+ procedure check(const alinks: tvaluelinks);
+ var
+  wi1: tvaluelink;
+ begin
+  wi1:= tvaluelink(alinks.finditem(aname));
+  result:= wi1 <> nil;
+  if result then begin
+   with wi1 do begin
+    setdata(adata,apropertyname);
+    if apropertyname = ifiwidgetstatename then begin
+     if assigned(fonwidgetstatechanged) then begin
+      fonwidgetstatechanged(wi1,atag,ifiwidgetstatesty(asinteger));
      end;
     end
     else begin
-     if assigned(fonpropertychanged) then begin
-      fonpropertychanged(wi1,atag,apropertyname);
+     if apropertyname = ifiwidgetmodalresultname then begin
+      if assigned(fonmodalresult) then begin
+       fonmodalresult(wi1,atag,modalresultty(asinteger));
+      end;
+     end
+     else begin
+      if assigned(fonpropertychanged) then begin
+       fonpropertychanged(wi1,atag,apropertyname);
+      end;
      end;
     end;
    end;
-  end;
- end;    
+  end;    
+ end; //check
+ 
+begin
+ check(fvalues);
+ if not result then begin
+  check(fvaluecomponents);
+ end;
 end;
 
 procedure tcustommodulelink.valuechanged(const sender: iifiwidget);
@@ -1519,6 +1786,11 @@ end;
 procedure tcustommodulelink.setvalues(const avalue: tvaluelinks);
 begin
  fvalues.assign(avalue);
+end;
+
+procedure tcustommodulelink.setvaluecomponents(const avalue: tvaluecomponentlinks);
+begin
+ fvaluecomponents.assign(avalue);
 end;
 
 { ttxlinkmodule }
