@@ -168,42 +168,76 @@ begin
  end;
 end;
 
+function getnestedpropinfo(var ainstance: tobject; 
+                                               apropname: pchar): ppropinfo;
+var
+ po1: pchar;
+begin
+ result:= nil;
+ po1:= apropname;
+ while po1^ <> #0 do begin
+  if po1^ = '.' then begin
+   break;
+  end;
+  inc(po1);
+ end;
+ if po1 <> apropname then begin
+  result:= getpropinfo(ainstance,psubstr(apropname,po1));
+  if (po1^ = '.') and (result <> nil) then begin
+   if result^.proptype^.kind = tkclass then begin
+    ptruint(ainstance):= ptruint(getordprop(ainstance,result));
+    if ainstance <> nil then begin
+     result:= getnestedpropinfo(ainstance,po1+1);
+    end
+    else begin
+     result:= nil;
+    end;
+   end
+   else begin
+    result:= nil;
+   end;
+  end;
+ end;
+end;
+
 procedure tvaluewidgetlink.setdata(const adata: pifidataty; 
                                                const aname: ansistring);
 var
  aproperty: ppropinfo;
+ instance: tobject;
 begin
  inherited;
  aproperty:= nil;
+ instance:= fwidget;
  with adata^ do begin
   if aname = 'value' then begin
    aproperty:= fvalueproperty;
   end
   else begin
    if fwidget <> nil then begin
-    aproperty:= getpropinfo(fwidget,aname);
+    aproperty:= getnestedpropinfo(instance,pchar(aname));
    end;
   end;
-  if (aproperty <> nil) and (fwidget <> nil) then begin
+  if (aproperty <> nil) and (instance <> nil) then begin
    inc(fupdatelock);
    try
     case aproperty^.proptype^.kind of
      tkInteger,tkBool,tkInt64: begin
-      setordprop(fwidget,aproperty,aslargeint);
+      setordprop(instance,aproperty,aslargeint);
      end;
      tkFloat: begin
-      setfloatprop(fwidget,aproperty,asfloat);
+      setfloatprop(instance,aproperty,asfloat);
      end;
      tkWString: begin
-      setwidestrprop(fwidget,aproperty,asmsestring);
+      setwidestrprop(instance,aproperty,asmsestring);
      end;
     {$ifdef mse_unicodestring}
      tkUString: begin
-      setunicodestrprop(fwidget,aproperty,asmsestring);
+      setunicodestrprop(instance,aproperty,asmsestring);
      end;
     {$endif}
      tkSString,tkLString,tkAString: begin
-      setstrprop(fwidget,aproperty,asstring);
+      setstrprop(instance,aproperty,asstring);
      end;
     end;
    finally

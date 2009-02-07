@@ -12,7 +12,7 @@ unit mseifilink;
 interface
 uses
  classes,mseclasses,mseifiglob,mseifi,msearrayprops,mseapplication,mseact,
- mseevent,mseglob,msestrings,msetypes,msedatalist;
+ mseevent,mseglob,msestrings,msetypes,msedatalist,msegraphutils;
  
 const
  ifidatatypes = [dl_integer,dl_int64,dl_currency,dl_real,
@@ -249,6 +249,15 @@ type
    procedure sendvalue(const aname: string; const avalue: ansistring); overload;
    procedure sendcommand(const acommand: ifiwidgetcommandty);
   public
+   procedure sendproperty(const aname: string; const avalue: boolean); overload;
+   procedure sendproperty(const aname: string; const avalue: integer); overload;
+   procedure sendproperty(const aname: string; const avalue: colorty); overload;
+   procedure sendproperty(const aname: string; const avalue: int64); overload;
+   procedure sendproperty(const aname: string; const avalue: string); overload;
+   procedure sendproperty(const aname: string; const avalue: msestring); overload;
+   procedure sendproperty(const aname: string; const avalue: realty); overload;
+   procedure sendproperty(const aname: string; const avalue: currency); overload;
+
    property asinteger: integer read getasinteger write setasinteger;
    property aslargeint: int64 read getaslargeint write setaslargeint;
    property asfloat: double read getasfloat write setasfloat;
@@ -985,6 +994,52 @@ begin
  else begin
   sendcommand(iwc_hide);
  end;
+end;
+
+procedure tvaluelink.sendproperty(const aname: string; const avalue: boolean);
+var
+ int1: integer;
+begin
+ int1:= 0;
+ if avalue then begin
+  int1:= -1;
+ end;
+ sendvalue(aname,int1);
+end;
+
+procedure tvaluelink.sendproperty(const aname: string; const avalue: integer);
+begin
+ sendvalue(aname,avalue);
+end;
+
+procedure tvaluelink.sendproperty(const aname: string; const avalue: colorty);
+begin
+ sendvalue(aname,avalue);
+end;
+
+procedure tvaluelink.sendproperty(const aname: string; const avalue: int64);
+begin
+ sendvalue(aname,avalue);
+end;
+
+procedure tvaluelink.sendproperty(const aname: string; const avalue: string);
+begin
+ sendvalue(aname,avalue);
+end;
+
+procedure tvaluelink.sendproperty(const aname: string; const avalue: msestring);
+begin
+ sendvalue(aname,avalue);
+end;
+
+procedure tvaluelink.sendproperty(const aname: string; const avalue: realty);
+begin
+ sendvalue(aname,avalue);
+end;
+
+procedure tvaluelink.sendproperty(const aname: string; const avalue: currency);
+begin
+ sendvalue(aname,avalue);
 end;
 
 { tvaluelinks }
