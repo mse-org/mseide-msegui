@@ -53,7 +53,7 @@ type
    procedure gridonrowsdeleted(const sender: tcustomgrid; const index,count: integer);
    procedure gridonrowsinserted(const sender: tcustomgrid; const index,count: integer);
    procedure sourcefoonloaded(const sender: TObject);
-   procedure textchanged(const sender: TObject);
+   procedure textchanged(const sender: tdatacol; const aindex: integer);
    procedure sourcefoonshow(const sender: TObject);
    procedure editonfontchanged(const sender: TObject);
    procedure sourcefoondeactivate(const sender: TObject);
@@ -247,7 +247,8 @@ begin
  grid.bottom:= linedisp.top - 1;
 end;
 
-procedure tsourcepage.textchanged(const sender: TObject);
+procedure tsourcepage.textchanged(const sender: tdatacol;
+                                      const aindex: integer);
 begin
  sourcechanged(edit.filename);
 end;

@@ -67,7 +67,7 @@ uses
 {$else}
  mselibc,
 {$endif}
- msesysintf,msestrings,mseformatstr;
+ msesysintf,msestrings,mseformatstr,msetypes;
 
 function createguidstring: string;
 var
