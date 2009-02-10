@@ -208,7 +208,8 @@ type
 
  variantarty = array of variant;
  variantararty = array of variantarty;
-  
+ sqlresulteventty = procedure(const sender: tsqlresult) of object;  
+ 
  tsqlresult = class(tmsecomponent,isqlpropertyeditor,isqlclient,itransactionclient)
   private
    fsql: tsqlstringlist;
@@ -225,6 +226,8 @@ type
    foptions: sqlresultoptionsty;
    fbeforeopen: tmsesqlscript;
    fafteropen: tmsesqlscript;
+   fonbeforeopen: sqlresulteventty;
+   fonafteropen: sqlresulteventty;
    procedure setsql(const avalue: tsqlstringlist);
    function getactive: boolean;
    procedure setactive(avalue: boolean);
@@ -292,6 +295,8 @@ type
    property active: boolean read getactive write setactive default false;
    property options: sqlresultoptionsty read foptions write foptions default [];
    property fielddefs: tsqlresultfielddefs read ffielddefs write setfielddefs;
+   property onbeforeopen: sqlresulteventty read fonbeforeopen write fonbeforeopen;
+   property onafteropen: sqlresulteventty read fonafteropen write fonafteropen;
  end;
  
  idbcolinfo = interface(inullinterface)
@@ -988,6 +993,9 @@ end;
 
 procedure tsqlresult.open;
 begin
+ if canevent(tmethod(fonbeforeopen)) then begin
+  fonbeforeopen(self);
+ end;
  if fbeforeopen <> nil then begin
   fbeforeopen.execute;
  end;
@@ -1004,6 +1012,9 @@ begin
   fafteropen.execute;
  end;
  changed;
+ if canevent(tmethod(fonafteropen)) then begin
+  fonafteropen(self);
+ end;
 end;
 
 procedure tsqlresult.close;
