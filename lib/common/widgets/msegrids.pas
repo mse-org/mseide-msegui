@@ -61,6 +61,7 @@ const
  defaultwheelscrollheight = 0;
  foldhiddenbit = 7;
  foldhiddenmask = 1 shl foldhiddenbit;
+ foldlevelmask = not foldhiddenmask;
   
 type
  optiongridty = (og_colsizing,og_colmoving,og_keycolmoving,
@@ -1087,6 +1088,8 @@ type
    procedure setfoldlevel(const index: integer; const avalue: foldlevelty);
    procedure setfolded(const avalue: boolean);
    procedure doclean(arow: integer; visibleindex: integer);
+   function isvisible(const arow: integer): boolean;
+   procedure counthidden(var aindex: integer);
   protected
    procedure setcount(const value: integer); override;
    procedure show(const aindex: integer);
@@ -12485,51 +12488,114 @@ begin
  result:= items[index].fold and foldhiddenmask <> 0;
 end;
 
+function trowstatelist.isvisible(const arow: integer): boolean;
+begin
+ result:= not hidden[arow]; //todo: implement
+end;
+
+procedure trowstatelist.counthidden(var aindex: integer);
+var                    //todo: optimize
+ po1: prowstateaty;
+ level1,level2: foldlevelty;
+begin
+ po1:= prowstateaty(datapo);
+ level1:= po1^[aindex].fold and foldlevelmask;
+ while (aindex < count) do begin
+  level2:= po1^[aindex].fold and foldlevelmask;
+  if level2 < level1 then begin
+   break;
+  end;
+  if po1^[aindex].fold and foldhiddenmask = 0 then begin
+   if level2 > level1 then begin
+    counthidden(aindex);
+   end
+   else begin //same level
+    inc(fhiddencount);
+    inc(aindex);
+   end;
+  end
+  else begin
+   inc(aindex);
+  end;
+ end;  
+end;
+
 procedure trowstatelist.show(const aindex: integer);
+var
+ int1,int2: integer;
+ po1: prowstateaty;
 begin
  dec(fhiddencount);
+ int1:= aindex+1;
+ if (int1 < count) then begin
+  po1:= prowstateaty(datapo);
+  if (po1^[int1].fold and foldlevelmask) > 
+                        (po1^[aindex].fold and foldlevelmask) then begin
+   int2:= fhiddencount;
+   counthidden(int1);
+   fhiddencount:= fhiddencount - 2*(fhiddencount-int2);
+  end;
+ end;
  checkdirty(aindex);
 end;
 
 procedure trowstatelist.hide(const aindex: integer);
+
+var
+ int1: integer; 
+ po1: prowstateaty;
 begin
  inc(fhiddencount);
+ int1:= aindex+1;
+ if (int1 < count) then begin
+  po1:= prowstateaty(datapo);
+  if (po1^[int1].fold and foldlevelmask) > 
+                        (po1^[aindex].fold and foldlevelmask) then begin
+   counthidden(int1);
+  end;
+ end;
  checkdirty(aindex);
 end;
 
 procedure trowstatelist.sethidden(const index: integer; const avalue: boolean);
 var
  po1: prowstatety;
+ bo1: boolean;
 begin
- po1:= getitempo(index);
- if updatebit(po1^.fold,foldhiddenbit,avalue) then begin
-  if avalue then begin          //todo: check foldlevel
-   hide(index);
-  end
-  else begin
-   show(index);
-  end;
-  if ffolded then begin
+ if ffolded then begin
+  po1:= getitempo(index);
+  bo1:= isvisible(index);
+  if updatebit(po1^.fold,foldhiddenbit,avalue) then begin
+   if avalue then begin        
+    if bo1 then begin
+     hide(index);
+    end;
+   end
+   else begin
+    if not bo1 then begin
+     show(index);
+    end;
+   end;
    fgrid.layoutchanged;
   end;
+ end
+ else begin
+  raise exception.create('Grid not folded.');
  end;
 end;
 
 function trowstatelist.getfoldlevel(const index: integer): foldlevelty;
 begin
- result:= items[index].fold and not foldhiddenmask;
+ result:= items[index].fold and foldlevelmask;
 end;
 
 procedure trowstatelist.setfoldlevel(const index: integer;
                const avalue: foldlevelty);
 var
  po1: prowstatety;
- bo1: boolean;
 begin
  po1:= getitempo(index);
- bo1:= po1^.fold and not foldhiddenmask <> avalue;
- if bo1 then begin
-  replacebits(byte(avalue),byte(po1^.fold),byte(not foldhiddenmask));
+ if replacebits1(byte(po1^.fold),byte(avalue),byte(foldlevelmask)) then begin
   checkdirty(index);
  end;
 end;
@@ -12585,6 +12651,7 @@ var
  int1,int2: integer;
  rowstat1: prowstatety;
  visirow1: pinteger;
+ level1: foldlevelty;
 begin                  //todo: optimize
  int2:= 0;
  if fdirtyvisible > 0 then begin
@@ -12595,10 +12662,18 @@ begin                  //todo: optimize
  int1:= fdirtyvisible-1;
  while int1 < visibleindex do begin
   while (rowstat1^.fold and foldhiddenmask <> 0) and (int2 <= arow) do begin
+   level1:= rowstat1^.fold and foldlevelmask;
    visirow1^:= int1;
    inc(rowstat1);
    inc(visirow1);
    inc(int2);
+   while (int2 <= arow) and 
+                     (rowstat1^.fold and foldlevelmask > level1) do begin
+    visirow1^:= int1;
+    inc(rowstat1);
+    inc(visirow1);
+    inc(int2);
+   end;
   end;
   if int2 <= arow then begin
    inc(int1);

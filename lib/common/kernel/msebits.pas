@@ -71,10 +71,11 @@ function lowestbit(value: cardinal): integer;
 function replacebits(const new,old,mask: byte): byte; overload;
 function replacebits(const new,old,mask: word): word; overload;
 function replacebits(const new,old,mask: longword): longword; overload;
-procedure replacebits1(var dest: byte; const value,mask: byte); overload;
-procedure replacebits1(var dest: word; const value,mask: word); overload;
-procedure replacebits1(var dest: longword; const value,mask: longword); overload;
-
+function replacebits1(var dest: byte; const value,mask: byte): boolean; overload;
+function replacebits1(var dest: word; const value,mask: word): boolean; overload;
+function replacebits1(var dest: longword;
+                                   const value,mask: longword): boolean; overload;
+                            //true if modified
 function bitschanged(const a,b,mask: byte): boolean; overload;
 function bitschanged(const a,b,mask: word): boolean; overload;
 function bitschanged(const a,b,mask: longword): boolean; overload;
@@ -277,19 +278,30 @@ begin
  result:= old and not mask or new and mask;
 end;
 
-procedure replacebits1(var dest: byte; const value,mask: byte);
+function replacebits1(var dest: byte; const value,mask: byte): boolean;
 begin
- dest:= dest and not mask or value and mask
+ result:= (dest xor value) and mask <> 0;
+ if result then begin
+  dest:= dest and not mask or value and mask
+ end;
 end;
 
-procedure replacebits1(var dest: word; const value,mask: word); overload;
+function replacebits1(var dest: word;
+                              const value,mask: word): boolean; overload;
 begin
- dest:= dest and not mask or value and mask
+ result:= (dest xor value) and mask <> 0;
+ if result then begin
+  dest:= dest and not mask or value and mask
+ end;
 end;
 
-procedure replacebits1(var dest: longword; const value,mask: longword); overload;
+function replacebits1(var dest: longword;
+                              const value,mask: longword): boolean; overload;
 begin
- dest:= dest and not mask or value and mask
+ result:= (dest xor value) and mask <> 0;
+ if result then begin
+  dest:= dest and not mask or value and mask
+ end;
 end;
 
 function bitschanged(const a,b,mask: byte): boolean; overload;
