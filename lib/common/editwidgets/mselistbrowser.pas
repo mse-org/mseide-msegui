@@ -39,7 +39,7 @@ type
  filelistviewoptionsty = set of filelistviewoptionty;
 
 const
- defaultlistviewoptionsgrid = defaultoptionsgrid + [og_rotaterow,og_mousescrollcol];
+ defaultlistviewoptionsgrid = defaultoptionsgrid + [og_rowwrap,og_mousescrollcol];
  defaultlistviewoptions = [lvo_focusselect,lvo_mouseselect,lvo_drawfocus,
                            lvo_leftbuttonfocusonly];
  defaultfilelistviewoptions = [flvo_nodirselect];

@@ -14,7 +14,6 @@ object imagelisteditorfo: timagelisteditorfo
   options = [fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
   statfile = statfile1
   caption = 'Imagelisteditor'
-  icon.transparency = -2147483648
   moduleclassname = 'tmseform'
   object add: tbutton
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -24,6 +23,8 @@ object imagelisteditorfo: timagelisteditorfo
     bounds_cy = 20
     anchors = [an_left, an_bottom]
     state = [as_localcaption, as_localonexecute]
+    autosize_cx = 0
+    autosize_cy = 0
     caption = 'add'
     onexecute = addonexecute
   end
@@ -36,6 +37,8 @@ object imagelisteditorfo: timagelisteditorfo
     anchors = [an_left, an_bottom]
     taborder = 2
     state = [as_localcaption]
+    autosize_cx = 0
+    autosize_cy = 0
     caption = 'cancel'
     modalresult = mr_cancel
   end
@@ -48,6 +51,8 @@ object imagelisteditorfo: timagelisteditorfo
     anchors = [an_left, an_bottom]
     taborder = 3
     state = [as_localcaption]
+    autosize_cx = 0
+    autosize_cy = 0
     caption = 'OK'
     modalresult = mr_ok
   end
@@ -60,6 +65,8 @@ object imagelisteditorfo: timagelisteditorfo
     anchors = [an_left, an_bottom]
     taborder = 1
     state = [as_localcaption, as_localonexecute]
+    autosize_cx = 0
+    autosize_cy = 0
     caption = 'clear'
     onexecute = clearonexecute
   end
@@ -73,9 +80,7 @@ object imagelisteditorfo: timagelisteditorfo
     anchors = [an_top, an_bottom]
     taborder = 7
     cellheight = 62
-    fixcols.coloractive = -2147483648
-    fixrows.coloractive = -2147483648
-    optionsgrid = [og_colsizing, og_rowsizing, og_focuscellonenter, og_rotaterow, og_autopopup]
+    optionsgrid = [og_colsizing, og_rowsizing, og_focuscellonenter, og_rowwrap, og_autopopup]
     options = [lvo_mousemoving, lvo_keymoving, lvo_horz, lvo_drawfocus, lvo_focusselect, lvo_mouseselect, lvo_keyselect, lvo_multiselect]
     itemlist.captionpos = cp_bottom
     itemlist.imagelist = imagelist
@@ -122,7 +127,6 @@ object imagelisteditorfo: timagelisteditorfo
     value = True
   end
   object transparentcolor: tcoloredit
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 80
     bounds_y = 293
     bounds_cx = 206
@@ -130,7 +134,9 @@ object imagelisteditorfo: timagelisteditorfo
     frame.caption = 'Transparent color'
     frame.captionpos = cp_right
     frame.button.width = 13
+    frame.button.color = -2147483646
     frame.buttonellipse.width = 13
+    frame.buttonellipse.color = -2147483646
     frame.buttonellipse.imagenr = 17
     frame.dummy = 0
     frame.outerframe = (
@@ -143,7 +149,6 @@ object imagelisteditorfo: timagelisteditorfo
     taborder = 5
     statfile = statfile1
     value = -2147483647
-    valuedefault = -2147483648
     dropdown.options = [deo_autodropdown, deo_keydropdown]
     reffontheight = 14
   end

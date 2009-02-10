@@ -60,7 +60,6 @@ type
    procedure clearbuffer; //buffer release
    procedure Setcapacity(Value: integer);
    procedure internalsetcount(value: integer; nochangeandinit: boolean);
-   procedure setcount(const value: integer);
    procedure checkcapacity; //ev. reduktion des memory
    procedure assigndata(source: tdatalist);
    procedure setmaxcount(const Value: integer);
@@ -73,6 +72,7 @@ type
    fsize: integer;
    finternaloptions: internallistoptionsty;
    fcount: integer;
+   procedure setcount(const value: integer); virtual;
    property nochange: integer read fnochange;
    procedure internalgetasarray(datapo: pointer);
    procedure internalsetasarray(acount: integer; source: pointer);

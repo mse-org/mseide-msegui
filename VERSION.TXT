@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+2009-02-09
+ optiongridty og_rotaterow -> og_rowwrap.
 2009-02-06
  checkvalueeventty, settexteventty, gettexteventty tdataedit -> tcustomdataedit.
 2009-02-04

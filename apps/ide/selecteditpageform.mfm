@@ -36,7 +36,7 @@ object selecteditpagefo: tselecteditpagefo
     cellframe.leveli = 1
     cellframe.localprops = [frl_leveli]
     cellframe.dummy = 0
-    optionsgrid = [og_colsizing, og_focuscellonenter, og_colchangeontabkey, og_rotaterow, og_autopopup]
+    optionsgrid = [og_colsizing, og_focuscellonenter, og_colchangeontabkey, og_rowwrap, og_autopopup]
     options = [lvo_readonly, lvo_drawfocus, lvo_mousemovefocus, lvo_focusselect, lvo_mouseselect]
     onitemevent = doonitemevent
   end
@@ -61,6 +61,8 @@ object selecteditpagefo: tselecteditpagefo
     anchors = [an_right, an_bottom]
     taborder = 1
     state = [as_localcaption, as_localonexecute]
+    autosize_cx = 0
+    autosize_cy = 0
     caption = '&open'
     onexecute = openfileonexecute
     reffontheight = 14

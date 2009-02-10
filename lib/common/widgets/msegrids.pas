@@ -59,16 +59,18 @@ const
  defaultgridskinoptions = [osk_framebuttononly];
  sortglyphwidth = 11;
  defaultwheelscrollheight = 0;
- 
+ foldhiddenbit = 7;
+ foldhiddenmask = 1 shl foldhiddenbit;
+  
 type
  optiongridty = (og_colsizing,og_colmoving,og_keycolmoving,
                  og_rowsizing,og_rowmoving,og_keyrowmoving,
                  og_rowinserting,og_rowdeleting,og_selectedrowsdeleting,
                  og_focuscellonenter,og_containerfocusbackonesc,
                  og_autofirstrow,og_autoappend,og_appendempty,
-                 og_savestate,og_sorted,
+                 og_savestate,og_sorted,og_folded,
                  og_colchangeontabkey,og_colchangeonreturnkey,
-                 og_rotaterow,og_visiblerowpagestep,
+                 og_rowwrap,og_visiblerowpagestep,
                  og_autopopup,
                  og_mousescrollcol,og_noresetselect);
  optionsgridty = set of optiongridty;
@@ -189,6 +191,7 @@ type
                       fca_focusinshift,fca_focusinrepeater,fca_setfocusedcell,
                       fca_selectstart,fca_selectend);
  tcustomgrid = class;
+
  celleventinfoty = record
   cell: gridcoordty;
   grid: tcustomgrid;
@@ -230,7 +233,7 @@ type
  cellinfoty = record
   cell: gridcoordty;
   rect: rectty;
-  innerrect: rectty; //origin rect.pos
+  innerrect: rectty;      //origin rect.pos
   frameinnerrect: rectty; //innerrect of cell frame or rect if nil
   color: colorty;
   colorline: colorty;
@@ -286,7 +289,7 @@ type
    procedure updatecellrect(const aframe: tcustomframe);
    function getinnerframe: framety; virtual;
    function step(getscrollable: boolean = true): integer; virtual; abstract;
-    //iframe
+  //iframe
    function getwidget: twidget;
    procedure setframeinstance(instance: tcustomframe);
    function getwidgetrect: rectty;
@@ -301,7 +304,7 @@ type
    procedure invalidaterect(const rect: rectty; const org: originty = org_client;
                                   const noclip: boolean = false);
    function getframestateflags: framestateflagsty;
-   //iface
+  //iface
    function getclientrect: rectty;
    procedure setlinkedvar(const source: tmsecomponent; var dest: tmsecomponent;
                const linkintf: iobjectlink = nil);
@@ -342,7 +345,8 @@ type
  colpaintinfoty = record
   canvas: tcanvas;
   ystart,ystep: integer;
-  startrow,endrow: integer;
+  rows: integerarty;
+  startrow,endrow: integer; //index in rows
  end;
 
  tcols = class;
@@ -811,21 +815,16 @@ type
                    //cl_none -> no no glyph
  end;
 
-// sortchangedeventty = procedure(sender: tdatacol) of object;
- 
  datacolheaderoptionty = (dco_colsort);
  datacolheaderoptionsty = set of datacolheaderoptionty;
  
  tdatacolheader = class(tcolheader)
   private
-//   fonsortchanged: sortchangedeventty;
    foptions: datacolheaderoptionsty;
    procedure setoptions(const avalue: datacolheaderoptionsty);
   protected
    procedure drawcell(const acanvas: tcanvas; const adest: rectty); override;
   published
-//   property onsortchanged: sortchangedeventty read fonsortchanged
-//                                                   write fonsortchanged;
    property options: datacolheaderoptionsty read foptions write setoptions
                             default [];
  end;
@@ -1060,21 +1059,62 @@ type
  rowstatety = record
   selected: cardinal; //bitset lsb = col 0, msb-1 = col 30, msb = whole row
                       //adressed by fcreateindex
+//  cellrow: integer;   //
   color: byte; //index in rowcolors, 0 = none, 1 = rowcolors[0]
   font: byte;  //index in rowfonts, 0 = none, 1 = rowfonts[0]
+  fold: byte;  // h nnnnnnn  h = hidden, nnnnnnn = fold level, 0 -> top
  end;
  prowstatety = ^rowstatety;
  rowstateaty = array[0..0] of rowstatety;
  prowstateaty  = ^rowstateaty;
-
+ foldlevelty = 0..127;
+ 
  trowstatelist = class(tdatalist)
   private
+   fdirtyvisible: integer;
+   fdirtyrow: integer;
+   ffolded: boolean;
+   fgrid: tcustomgrid;
+   fhiddencount: integer;
+   fvisiblerows: integerarty;
+   fvisiblerowmap: tintegerdatalist;
+   ffoldchangedrow: integer;
    function getrowstate(const index: integer): rowstatety;
    procedure setrowstate(const index: integer; const Value: rowstatety);
+   function gethidden(const index: integer): boolean;
+   procedure sethidden(const index: integer; const avalue: boolean);
+   function getfoldlevel(const index: integer): foldlevelty;
+   procedure setfoldlevel(const index: integer; const avalue: foldlevelty);
+   procedure setfolded(const avalue: boolean);
+   procedure doclean(arow: integer; visibleindex: integer);
+  protected
+   procedure setcount(const value: integer); override;
+   procedure show(const aindex: integer);
+   procedure hide(const aindex: integer);
+//   procedure foldchanged(const index: integer);
+   procedure cleanvisible(visibleindex: integer);
+   procedure clean(arow: integer);
+   procedure checkdirty(const arow: integer);
   public
-   constructor create; override;
+   constructor create(const aowner: tcustomgrid); reintroduce;
+   destructor destroy; override;
    function getitempo(const index: integer): prowstatety;
-   property items[const index: integer]: rowstatety read getrowstate write setrowstate; default;
+   function cellrow(const arow: integer): integer;
+   function visiblerow(const arowindex: integer): integer;
+                 //returns count of visible previous rows
+   function visiblerowcount: integer;
+   function visiblerowtoindex(const avisibleindex: integer): integer;
+   function visiblerows(const astart: integer; acount: integer): integerarty;
+   function visiblerowstep(const arow: integer; const step: integer;
+                            const autoappend: boolean): integer;
+   function rowhidden(const arow: integer): boolean;
+   function nearestvisiblerow(const arow: integer): integer;
+   property hidden[const index: integer]: boolean read gethidden write sethidden;
+   property foldlevel[const index: integer]: foldlevelty read getfoldlevel write setfoldlevel;
+                                                           //0..127
+   property items[const index: integer]: rowstatety read getrowstate 
+                                              write setrowstate; default;
+   property folded: boolean read ffolded write setfolded;
  end;
 
  tdatacols = class(tcols)
@@ -1299,12 +1339,9 @@ type
    property caption;
    property captionpos;
    property captiondist;
-//   property captiondistouter;
-//   property captionframecentered;
    property captionoffset;
-//   property captionnoclip;
    property font;
-   property localprops; //before template
+   property localprops;  //before template
    property localprops1; //before template
    property template;
  end;
@@ -1349,6 +1386,9 @@ type
    fystep: integer;
    ffirstvisiblerow: integer;
    flastvisiblerow: integer;
+   fvisiblerows: integerarty;
+   fvisiblerowsbase: integer; //number of visible rows below scrollwindow
+   
    flayoutupdating: integer;
    fnullchecking: integer;
    frowdatachanging: integer;
@@ -1434,6 +1474,10 @@ type
    procedure setzebra_step(const avalue: integer);
    function getrowreadonlystate(const index: integer): boolean;
    procedure setrowreadonlystate(const index: integer; const avalue: boolean);
+   function getrowhidden(const index: integer): boolean;
+   procedure setrowhidden(const index: integer; const avalue: boolean);
+   function getrowfoldlevel(const index: integer): foldlevelty;
+   procedure setrowfoldlevel(const index: integer; const avalue: foldlevelty);
   protected
    fupdating: integer;
    ffocuscount: integer;
@@ -1742,6 +1786,8 @@ type
                               //col,row = invalidaxis if none
    property col: integer read ffocusedcell.col write setcol;
    property row: integer read ffocusedcell.row write setrow;
+   function visiblerow(const arow: integer): integer;
+                 //returns index in visible rows, -1 if not visible
    property firstvisiblerow: integer read ffirstvisiblerow;
    property lastvisiblerow: integer read flastvisiblerow;
    
@@ -1758,6 +1804,11 @@ type
                         write setrowfontstate;  //default = -1
    property rowreadonlystate[const index: integer]: boolean read getrowreadonlystate
                         write setrowreadonlystate;
+   property rowhidden[const index: integer]: boolean read getrowhidden 
+                        write setrowhidden;
+   property rowfoldlevel[const index: integer]: foldlevelty read getrowfoldlevel 
+                        write setrowfoldlevel;
+                        
    property zebra_color: colorty read fzebra_color write setzebra_color default cl_infobackground;
    property zebra_start: integer read fzebra_start write setzebra_start default 0;
    property zebra_height: integer read fzebra_height write setzebra_height default 0;
@@ -1896,6 +1947,7 @@ type
    procedure updatecopytoclipboard(var atext: msestring);
    procedure updatepastefromclipboard(var atext: msestring);
 
+   procedure dofocusedcellposchanged; override;
    procedure focusedcellchanged; override;
    procedure checkrowreadonlystate; override;
      //interface to inplaceedit
@@ -2723,6 +2775,7 @@ var
  font1: tfont;
  canbeforedrawcell: boolean;
  canafterdrawcell: boolean;
+ row1: integer;
 
 begin
  if not (co_invisible in foptions) or (csdesigning in fgrid.ComponentState) then begin
@@ -2737,28 +2790,29 @@ begin
    bo1:= (fcellinfo.cell.col = fgrid.ffocusedcell.col) and
        (gs_cellentered in fgrid.fstate);
    canvas.drawinfopo:= @fcellinfo;
-   canvas.move(makepoint(fcellrect.x,fcellrect.y + ystep * startrow));
+   canvas.move(makepoint(fcellrect.x,fcellrect.y + ystart));
    for int1:= startrow to endrow do begin
-    font1:= rowfont(int1);
+    row1:= rows[int1];
+    font1:= rowfont(row1);
     if font1 <> fcellinfo.font then begin
      fcellinfo.font:= font1;
      canvas.font:= font1;
     end;
-    fcellinfo.datapo:= getdatapo(int1);
-    fcellinfo.cell.row:= int1;
-    fcellinfo.selected:= getselected(int1);
+    fcellinfo.datapo:= getdatapo(row1);
+    fcellinfo.cell.row:= row1;
+    fcellinfo.selected:= getselected(row1);
     fcellinfo.notext:= false;
     fcellinfo.ismousecell:= (fgrid.fmousecell.col = fcellinfo.cell.col) and 
-                              (fgrid.fmousecell.row = int1);
+                              (fgrid.fmousecell.row = row1);
     saveindex:= canvas.save;
-    fcellinfo.color:= rowcolor(int1);
+    fcellinfo.color:= rowcolor(row1);
     canvas.intersectcliprect(makerect(nullpoint,fcellrect.size));
     bo2:= false;
     if canbeforedrawcell then begin
      fonbeforedrawcell(self,canvas,fcellinfo,bo2);
     end;
     if not bo2 then begin
-      if bo1 and (int1 = fgrid.ffocusedcell.row) then begin
+      if bo1 and (row1 = fgrid.ffocusedcell.row) then begin
        drawfocusedcell(canvas);
       end
       else begin
@@ -2772,7 +2826,7 @@ begin
     if not bo2 then begin
      drawcelloverlay(canvas,fframe);
     end;
-    if bo1 and (int1 = fgrid.ffocusedcell.row) and 
+    if bo1 and (row1 = fgrid.ffocusedcell.row) and 
                                  (co_drawfocus in foptions) then begin
      if fframe <> nil then begin
       canvas.move(fframe.fpaintrect.pos);
@@ -2793,7 +2847,7 @@ begin
      canvas.linewidth:= flinewidth;
     end;
     int1:= flinepos{-fcellrect.x};
-    canvas.drawline(makepoint(int1,-(ystep * (endrow-startrow+1))),
+    canvas.drawline(makepoint(int1,-(ystep * length(rows))),
                       makepoint(int1,-1),flinecolor);
     canvas.linewidth:= linewidthbefore;
    end;
@@ -5711,7 +5765,7 @@ begin
  fselectedrow:= -1;
  fsortcol:= -1;
  fnewrowcol:= -1;
- frowstate:= trowstatelist.create;
+ frowstate:= trowstatelist.create(aowner);
  inherited;
  flinecolor:= defaultdatalinecolor;
  foptions:= defaultdatacoloptions;
@@ -5790,7 +5844,13 @@ begin
    end;
   end;
  end;
- frowstate.count:= newcount;
+ with frowstate do begin
+  count:= newcount;
+  if fvisiblerowmap <> nil then begin
+   fvisiblerowmap.count:= newcount;
+   checkdirty(newcount);
+  end;
+ end;
  inherited;
 end;
 
@@ -5798,7 +5858,13 @@ procedure tdatacols.setrowcountmax(const value: integer);
 var
  int1: integer;
 begin
- frowstate.maxcount:= value;
+ with frowstate do begin
+  maxcount:= value;
+  if fvisiblerowmap <> nil then begin
+   fvisiblerowmap.maxcount:= value;
+   checkdirty(value);
+  end;
+ end;
  for int1:= 0 to count - 1 do begin
   with tdatacol(items[int1]) do begin
    if fdata <> nil then begin
@@ -5857,21 +5923,40 @@ end;
 procedure tdatacols.moverow(const fromindex, toindex: integer; const acount: integer = 1);
 begin
  roworderinvalid;
- frowstate.blockmovedata(fromindex,toindex,acount);
+ with frowstate do begin
+  blockmovedata(fromindex,toindex,acount);
+  if fvisiblerowmap <> nil then begin
+   fvisiblerowmap.blockmovedata(fromindex,toindex,acount);
+   checkdirty(fromindex);
+   checkdirty(toindex);
+  end;
+ end;
  inherited;
 end;
 
 procedure tdatacols.insertrow(const index: integer; const acount: integer = 1);
 begin
  roworderinvalid;
- frowstate.insertitems(index,acount);
+ with frowstate do begin
+  insertitems(index,acount);
+  if fvisiblerowmap <> nil then begin
+   fvisiblerowmap.insertitems(index,acount);
+   checkdirty(index);
+  end;
+ end;
  inherited;
 end;
 
 procedure tdatacols.deleterow(const index: integer; const acount: integer = 1);
 begin
  roworderinvalid;
- frowstate.deleteitems(index,acount);
+ with frowstate do begin
+  deleteitems(index,acount);
+  if fvisiblerowmap <> nil then begin
+   fvisiblerowmap.deleteitems(index,acount);
+   checkdirty(index);
+  end;
+ end;
  inherited;
 end;
 
@@ -6900,7 +6985,8 @@ begin
   result.cx:= fdatacols.ftotsize + ffixcols.ftotsize + ffirstnohscroll +
              tgridframe(fframe).fi.innerframe.left +
              tgridframe(fframe).fi.innerframe.right;
-  result.cy:= frowcount * fystep+ ffixrows.ftotsize +
+  result.cy:= (frowcount - fdatacols.frowstate.fhiddencount) * 
+                                          fystep+ ffixrows.ftotsize +
              tgridframe(fframe).fi.innerframe.top +
              tgridframe(fframe).fi.innerframe.bottom;
  end
@@ -7087,10 +7173,15 @@ begin
   end;
   fdatacols.updatelayout;
   ffixrows.updatemergedcells;
+  updatevisiblerows; //scroll needs valid visiblerows
   tgridframe(fframe).updatestate;
   inc(int2);
- until (frame.state * scrollbarframestates = scrollstate * scrollbarframestates) or
-         (int2 > 40);
+ until (frame.state * scrollbarframestates = 
+                       scrollstate * scrollbarframestates) or
+                                          (int2 > 40);
+// if og_folded in foptionsgrid then begin
+//  updatevisiblerows;
+// end;
 end;
 
 procedure tcustomgrid.internalupdatelayout;
@@ -7184,97 +7275,101 @@ begin
   rect1.cy:= fdatarecty.cy;
   acanvas.intersectcliprect(rect1);
   acanvas.move(makepoint(0,fscrollrect.y + ffixrows.ffirstsize));
+                       //move to clientorigin
   rect1:= acanvas.clipbox;
   if (rect1.cx > 0) and (rect1.cy > 0) then begin
-   with colinfo do begin
-    ystep:= self.fystep;
-    startrow:= rect1.y div ystep;
-    if startrow < 0 then begin
-     startrow:= 0;
-    end;
-    ystart:= startrow * ystep;
-    endrow:= (rect1.y + rect1.cy - 1) div ystep;
-    if endrow >= frowcount then begin
-     endrow:= frowcount - 1;
-    end;
-    if endrow >= startrow then begin
-     canvas:= acanvas;
-     ffixcols.paint(colinfo);
-     fdatacols.paint(colinfo,false);     //draw fix datacols
-     if ffirstnohscroll > 0 then begin
-      adatarect:= makerect(fdatarect.x-tframe1(fframe).fi.innerframe.left-ffirstnohscroll,
-            -fscrollrect.y,fdatarect.cx+ffirstnohscroll,fdatarect.cy);
-     end
-     else begin
-      adatarect:= removerect(fdatarect,
-                    makepoint(tframe1(fframe).fi.innerframe.left,
-                     tframe1(fframe).fi.innerframe.top+ffixrows.ffirstsize+fscrollrect.y));
+   if high(fvisiblerows) >= 0 then begin
+    with colinfo do begin
+     ystep:= self.fystep;
+     startrow:= rect1.y div ystep - fvisiblerowsbase;
+     if startrow < 0 then begin
+      startrow:= 0;
+     end; 
+     ystart:= (startrow + fvisiblerowsbase) * ystep;
+     rows:= fvisiblerows; 
+     endrow:= (rect1.y + rect1.cy - 1) div ystep - fvisiblerowsbase;
+     if endrow > high(fvisiblerows) then begin
+      endrow:= high(fvisiblerows);
      end;
-     linewidthbefore:= acanvas.linewidth;
-     if fdatarowlinewidth > 0 then begin
-      if fdatarowlinewidth > 0 then begin
-       acanvas.linewidth:= fdatarowlinewidth;
-      end;
-      setlength(lines,endrow-startrow+1);
-      int2:= startrow * ystep - (fdatarowlinewidth + 1) div 2;
-      int3:= tframe1(fframe).finnerclientrect.cx{ - 1};
-      for int1:= 0 to high(lines) do begin
-       inc(int2,ystep);
-       with lines[int1] do begin
-        a.x:= 0;
-        a.y:= int2;
-        b.x:= int3;
-        b.y:= int2;
-       end;
-      end;
-      if ffixcols.count > 0 then begin   //draw horz lines fixcols
-       reg:= acanvas.copyclipregion;
-       acanvas.subcliprect(adatarect);
-       if not acanvas.clipregionisempty then begin
-        acanvas.drawlinesegments(lines,fdatarowlinecolorfix);
-       end;
-       acanvas.clipregion:= reg;
-      end;
-     end;
-     acanvas.intersectcliprect(adatarect);
-     if not acanvas.clipregionisempty then begin //draw horz lines datacols
-      int2:= ffixcols.ffirstsize + datacols.ftotsize +
-                     {fscrollrect.x +} ffirstnohscroll{ - 1};
+     if endrow >= startrow then begin
+      canvas:= acanvas;
+      ffixcols.paint(colinfo);
+      fdatacols.paint(colinfo,false);     //draw fix datacols
       if ffirstnohscroll > 0 then begin
-       int3:= ffixcols.ffirstsize;
+       adatarect:= makerect(fdatarect.x-tframe1(fframe).fi.innerframe.left-ffirstnohscroll,
+             -fscrollrect.y,fdatarect.cx+ffirstnohscroll,fdatarect.cy);
       end
       else begin
-       int3:= {fscrollrect.x + }ffixcols.ffirstsize;
+       adatarect:= removerect(fdatarect,
+                     makepoint(tframe1(fframe).fi.innerframe.left,
+                      tframe1(fframe).fi.innerframe.top+ffixrows.ffirstsize+fscrollrect.y));
       end;
-      if int2 > paintrect.cx then begin
-       int2:= paintrect.cx;
-      end;
-      if int3 < 0 then begin
-       int3:= 0;
-      end;
-      if length(lines) > 0 then begin //draw horz lines datacols
+      linewidthbefore:= acanvas.linewidth;
+      if fdatarowlinewidth > 0 then begin
+       if fdatarowlinewidth > 0 then begin
+        acanvas.linewidth:= fdatarowlinewidth;
+       end;
+       setlength(lines,endrow-startrow+1);
+       int2:= ystart - (fdatarowlinewidth + 1) div 2;
+       int3:= tframe1(fframe).finnerclientrect.cx{ - 1};
        for int1:= 0 to high(lines) do begin
+        inc(int2,ystep);
         with lines[int1] do begin
-         a.x:= int3;
-         b.x:= int2;
+         a.x:= 0;
+         a.y:= int2;
+         b.x:= int3;
+         b.y:= int2;
         end;
        end;
-       acanvas.drawlinesegments(lines,fdatarowlinecolor);
+       if ffixcols.count > 0 then begin   //draw horz lines fixcols
+        reg:= acanvas.copyclipregion;
+        acanvas.subcliprect(adatarect);
+        if not acanvas.clipregionisempty then begin
+         acanvas.drawlinesegments(lines,fdatarowlinecolorfix);
+        end;
+        acanvas.clipregion:= reg;
+       end;
       end;
-      if ffirstnohscroll > 0 then begin
-       acanvas.intersectcliprect(
-            makerect(ffirstnohscroll+ffixcols.ffirstsize,-fscrollrect.y,
-               fscrollrect.size.cx,fscrollrect.size.cy));
+      acanvas.intersectcliprect(adatarect);
+      if not acanvas.clipregionisempty then begin //draw horz lines datacols
+       int2:= ffixcols.ffirstsize + datacols.ftotsize +
+                      {fscrollrect.x +} ffirstnohscroll{ - 1};
+       if ffirstnohscroll > 0 then begin
+        int3:= ffixcols.ffirstsize;
+       end
+       else begin
+        int3:= {fscrollrect.x + }ffixcols.ffirstsize;
+       end;
+       if int2 > paintrect.cx then begin
+        int2:= paintrect.cx;
+       end;
+       if int3 < 0 then begin
+        int3:= 0;
+       end;
+       if length(lines) > 0 then begin //draw horz lines datacols
+        for int1:= 0 to high(lines) do begin
+         with lines[int1] do begin
+          a.x:= int3;
+          b.x:= int2;
+         end;
+        end;
+        acanvas.drawlinesegments(lines,fdatarowlinecolor);
+       end;
+       if ffirstnohscroll > 0 then begin
+        acanvas.intersectcliprect(
+             makerect(ffirstnohscroll+ffixcols.ffirstsize,-fscrollrect.y,
+                fscrollrect.size.cx,fscrollrect.size.cy));
+       end;
+       acanvas.move(makepoint(ffirstnohscroll+ffixcols.ffirstsize+
+                        fscrollrect.x,0));
+       acanvas.linewidth:= linewidthbefore;
+       fdatacols.paint(colinfo,true); //draw normal cols
       end;
-      acanvas.move(makepoint(ffirstnohscroll+ffixcols.ffirstsize+
-                       fscrollrect.x,0));
       acanvas.linewidth:= linewidthbefore;
-      fdatacols.paint(colinfo,true); //draw normal cols
-     end;
-     acanvas.linewidth:= linewidthbefore;
-    end;
-   end;
-  end;
+     end; //endrow >= startrow
+    end; //with colinfo
+   end; //fvisiblerows <> nil
+  end; //rect1 not empty
  end; //if cliprect not empty
 
  if saveindex >= 0 then begin
@@ -7549,6 +7644,15 @@ begin
  focuscell(makegridcoord(ffocusedcell.col,value));
 end;
 
+function tcustomgrid.visiblerow(const arow: integer): integer;
+                 //returns index in visible rows, -1 if not visible
+begin
+ result:= arow;
+ if not (csdesigning in componentstate) then begin
+  result:= fdatacols.frowstate.visiblerow(arow);
+ end;
+end;
+
 function tcustomgrid.createdatacols: tdatacols;
 begin
  result:= tdatacols.create(self,tdatacol);
@@ -7743,7 +7847,7 @@ begin
     result:= ck_fixcolrow;
    end;
   end
-  else begin
+  else begin //datarows
    dec(y,fscrollrect.y+ffixrows.ffirstsize);
    row:= rowatpos(y);
    col:= ffixcols.colatpos(x);
@@ -7777,10 +7881,7 @@ var
 begin
  result:= invalidaxis;
  if y >= 0 then begin
-  int1:= y div fystep;
-  if int1 < frowcount then begin
-   result:= int1;
-  end;
+  result:= fdatacols.frowstate.visiblerowtoindex(y div fystep);
  end;
 end;
 
@@ -9308,10 +9409,11 @@ begin  //cellrect
     cy:= tgridframe(fframe).finnerclientrect.cy;
    end;
   end
-  else begin
-   if (row < frowcount) or (csdesigning in componentstate) then begin
+  else begin //datarows
+   int1:= visiblerow(row);
+   if int1 >= 0 then begin
     cy:= fystep;
-    y:= row * cy + ffixrows.ffirstsize + fscrollrect.y;
+    y:= int1 * cy + ffixrows.ffirstsize + fscrollrect.y;
     if innerlevel > cil_all then begin
      dec(cy,fdatarowlinewidth);
     end;
@@ -9446,25 +9548,46 @@ end;
 
 procedure tcustomgrid.rowup(const action: focuscellactionty = fca_focusin);
 begin
- if ffocusedcell.row > 0 then begin
-  focuscell(makegridcoord(ffocusedcell.col,ffocusedcell.row - 1),action);
- end
- else begin
-  if og_rotaterow in foptionsgrid then begin
-   focuscell(makegridcoord(ffocusedcell.col,frowcount - 1),action);
+ with fdatacols.frowstate do begin
+  if visiblerowcount > 0 then begin
+   if ffocusedcell.row > 0 then begin
+    focuscell(makegridcoord(ffocusedcell.col,
+          visiblerowstep(ffocusedcell.row,-1,false)),action);
+ //   focuscell(makegridcoord(ffocusedcell.col,ffocusedcell.row - 1),action);
+   end
+   else begin
+    if og_rowwrap in foptionsgrid then begin
+     focuscell(makegridcoord(ffocusedcell.col,
+           visiblerowstep(frowcount-1,0,false)),action);
+  //   focuscell(makegridcoord(ffocusedcell.col,frowcount - 1),action);
+    end;
+   end;
   end;
  end;
 end;
 
 procedure tcustomgrid.rowdown(const action: focuscellactionty = fca_focusin);
+var
+ int1: integer;
 begin
- if (ffocusedcell.row < frowcount - 1) or 
-               not (og_rotaterow in foptionsgrid) then begin
-  focuscell(makegridcoord(ffocusedcell.col,ffocusedcell.row + 1),action);
- end
- else begin
-  if og_rotaterow in foptionsgrid then begin
-   focuscell(makegridcoord(ffocusedcell.col,0),action);
+ with fdatacols.frowstate do begin
+//  if (ffocusedcell.row < frowcount - 1) or 
+//                not (og_rotaterow in foptionsgrid) then begin
+  if visiblerowcount > 0 then begin
+   if not (og_rowwrap in foptionsgrid) or 
+                (visiblerow(ffocusedcell.row) < visiblerowcount - 1) then begin
+    focuscell(makegridcoord(ffocusedcell.col,
+           visiblerowstep(ffocusedcell.row,1,og_autoappend in foptionsgrid)),
+                                                    action);
+  //  focuscell(makegridcoord(ffocusedcell.col,ffocusedcell.row + 1),action);
+   end
+   else begin
+    if og_rowwrap in foptionsgrid then begin
+     focuscell(makegridcoord(ffocusedcell.col,
+           visiblerowstep(0,0,false)),action);
+ //    focuscell(makegridcoord(ffocusedcell.col,0),action);
+    end;
+   end;
   end;
  end;
 end;
@@ -9473,13 +9596,19 @@ procedure tcustomgrid.pageup(const action: focuscellactionty = fca_focusin);
 var
  int1: integer;
 begin
- int1:= ffocusedcell.row - rowsperpage + 1;
- if int1 < 0 then begin
-  int1:= 0;
- end;
- if int1 < frowcount then begin
-  scrollrows(rowsperpage - 1);
-  focuscell(makegridcoord(ffocusedcell.col,int1),action);
+ with fdatacols.frowstate do begin
+ // int1:= ffocusedcell.row - rowsperpage + 1;
+  if visiblerowcount > 0 then begin
+   int1:= visiblerowstep(ffocusedcell.row,-rowsperpage+1,false);
+ //  if int1 < 0 then begin
+ //   int1:= 0;
+ //  end;
+ //  if int1 < frowcount then begin
+   if visiblerow(int1) < visiblerowcount then begin
+    scrollrows(rowsperpage - 1);
+    focuscell(makegridcoord(ffocusedcell.col,int1),action);
+   end;
+  end;
  end;
 end;
 
@@ -9487,13 +9616,19 @@ procedure tcustomgrid.pagedown(const action: focuscellactionty = fca_focusin);
 var
  int1: integer;
 begin
- int1:= ffocusedcell.row + rowsperpage - 1;
- if int1 > frowcount - 1 then begin
-  int1:= frowcount -1;
- end;
- if int1 >= 0 then begin
-  scrollrows(-(rowsperpage - 1));
-  focuscell(makegridcoord(ffocusedcell.col,int1),action);
+ with fdatacols.frowstate do begin
+ // int1:= ffocusedcell.row - rowsperpage + 1;
+  if visiblerowcount > 0 then begin
+   int1:= visiblerowstep(ffocusedcell.row,rowsperpage-1,false);
+//   int1:= ffocusedcell.row + rowsperpage - 1;
+//   if int1 > frowcount - 1 then begin
+//    int1:= frowcount -1;
+//   end;
+   if int1 >= 0 then begin
+    scrollrows(-(rowsperpage - 1));
+    focuscell(makegridcoord(ffocusedcell.col,int1),action);
+   end;
+  end;
  end;
 end;
 
@@ -9906,8 +10041,10 @@ begin
 end;
 
 procedure tcustomgrid.updatevisiblerows;
+ //todo: optimize
 var
  cell: gridcoordty;
+ int1: integer;
 begin
  cellatpos(makepoint(0,fdatarecty.y),cell);
  ffirstvisiblerow:= cell.row;
@@ -9918,6 +10055,33 @@ begin
  end;
  if flastvisiblerow < 0 then begin
   flastvisiblerow:= frowcount - 1;
+ end;
+ fvisiblerowsbase:= fdatacols.frowstate.visiblerow(ffirstvisiblerow);
+ if flastvisiblerow < 0 then begin
+  fvisiblerows:= nil;
+ end
+ else begin
+  fvisiblerows:= fdatacols.frowstate.visiblerows(fvisiblerowsbase,
+                     fdatarect.cy div fdatarowheight + 2);
+  int1:= high(fvisiblerows);
+  while fvisiblerows[int1] > flastvisiblerow do begin
+   dec(int1);
+  end;
+  setlength(fvisiblerows,int1+1);
+ end;
+ if (og_folded in foptionsgrid) then begin
+  with fdatacols.frowstate do begin
+   if (row >= 0) then begin
+    int1:= row;
+    row:= nearestvisiblerow(row);
+    if row = int1 then begin //no focuscell
+     if row >= ffoldchangedrow then begin
+      dofocusedcellposchanged;
+      fdatacols.frowstate.ffoldchangedrow:= bigint;
+     end;
+    end;
+   end;
+  end;
  end;
 end;
 
@@ -11011,6 +11175,7 @@ begin
    exclude(fstate,gs_sortvalid);
   end;
   foptionsgrid:= avalue;
+  fdatacols.frowstate.folded:= og_folded in avalue;
   layoutchanged;
  end;
 end;
@@ -11667,6 +11832,27 @@ begin
  //dummy
 end;
 
+function tcustomgrid.getrowhidden(const index: integer): boolean;
+begin
+ result:= fdatacols.frowstate.hidden[index];
+end;
+
+procedure tcustomgrid.setrowhidden(const index: integer; const avalue: boolean);
+begin
+ fdatacols.frowstate.hidden[index]:= avalue;
+end;
+
+function tcustomgrid.getrowfoldlevel(const index: integer): foldlevelty;
+begin
+ result:= fdatacols.frowstate.foldlevel[index];
+end;
+
+procedure tcustomgrid.setrowfoldlevel(const index: integer;
+               const avalue: foldlevelty);
+begin
+ fdatacols.frowstate.foldlevel[index]:= avalue;
+end;
+
 { tdrawgrid }
 
 function tdrawgrid.createdatacols: tdatacols;
@@ -11794,6 +11980,15 @@ begin
  feditor.dofocus;
  if active then begin
   feditor.doactivate;
+ end;
+end;
+
+procedure tcustomstringgrid.dofocusedcellposchanged;
+begin
+ inherited;
+ if ffocusedcell.col >= 0 then begin
+  feditor.updatepos(cellrect(ffocusedcell,cil_inner),
+                                      cellrect(ffocusedcell,cil_paint));
  end;
 end;
 
@@ -12256,10 +12451,17 @@ end;
 
 { trowstatelist }
 
-constructor trowstatelist.create;
+constructor trowstatelist.create(const aowner: tcustomgrid);
+begin
+ fgrid:= aowner;
+ inherited create;
+ fsize:= sizeof(rowstatety);
+end;
+
+destructor trowstatelist.destroy;
 begin
  inherited;
- fsize:= sizeof(rowstatety);
+ fvisiblerowmap.free;
 end;
 
 function trowstatelist.getitempo(const index: integer): prowstatety;
@@ -12276,6 +12478,316 @@ procedure trowstatelist.setrowstate(const index: integer;
   const Value: rowstatety);
 begin
  setdata(index,value);
+end;
+
+function trowstatelist.gethidden(const index: integer): boolean;
+begin
+ result:= items[index].fold and foldhiddenmask <> 0;
+end;
+
+procedure trowstatelist.show(const aindex: integer);
+begin
+ dec(fhiddencount);
+ checkdirty(aindex);
+end;
+
+procedure trowstatelist.hide(const aindex: integer);
+begin
+ inc(fhiddencount);
+ checkdirty(aindex);
+end;
+
+procedure trowstatelist.sethidden(const index: integer; const avalue: boolean);
+var
+ po1: prowstatety;
+begin
+ po1:= getitempo(index);
+ if updatebit(po1^.fold,foldhiddenbit,avalue) then begin
+  if avalue then begin          //todo: check foldlevel
+   hide(index);
+  end
+  else begin
+   show(index);
+  end;
+  if ffolded then begin
+   fgrid.layoutchanged;
+  end;
+ end;
+end;
+
+function trowstatelist.getfoldlevel(const index: integer): foldlevelty;
+begin
+ result:= items[index].fold and not foldhiddenmask;
+end;
+
+procedure trowstatelist.setfoldlevel(const index: integer;
+               const avalue: foldlevelty);
+var
+ po1: prowstatety;
+ bo1: boolean;
+begin
+ po1:= getitempo(index);
+ bo1:= po1^.fold and not foldhiddenmask <> avalue;
+ if bo1 then begin
+  replacebits(byte(avalue),byte(po1^.fold),byte(not foldhiddenmask));
+  checkdirty(index);
+ end;
+end;
+
+procedure trowstatelist.setfolded(const avalue: boolean);
+begin
+ if avalue <> ffolded then begin
+  ffolded:= avalue;
+  if avalue then begin
+   setlength(fvisiblerows,count);
+   fvisiblerowmap:= tintegerdatalist.create;
+   fvisiblerowmap.count:= count;
+   fdirtyvisible:= 0;
+   fdirtyrow:= 0;
+  end
+  else begin
+   fvisiblerows:= nil;
+   freeandnil(fvisiblerowmap);
+   fhiddencount:= 0;
+  end;
+  checkdirty(0); 
+ end;
+end;
+
+function trowstatelist.cellrow(const arow: integer): integer;
+begin
+ result:= arow;
+ if ffolded then begin
+  clean(arow);
+  result:= fvisiblerowmap[arow];
+ end;
+end;
+
+procedure trowstatelist.checkdirty(const arow: integer);
+begin
+ if ffolded then begin
+  if arow < fdirtyrow then begin
+   fdirtyrow:= arow;
+   fdirtyvisible:= 0;
+   if arow > 0 then begin
+    fdirtyvisible:= fvisiblerowmap[arow-1];
+   end;
+   fgrid.layoutchanged;
+  end;
+  if arow < ffoldchangedrow then begin
+   ffoldchangedrow:= arow;
+  end;
+ end;
+end;
+
+procedure trowstatelist.doclean(arow: integer; visibleindex: integer);
+var
+ int1,int2: integer;
+ rowstat1: prowstatety;
+ visirow1: pinteger;
+begin                  //todo: optimize
+ int2:= 0;
+ if fdirtyvisible > 0 then begin
+  int2:= fvisiblerows[fdirtyvisible-1]+1;  //first row to check
+ end;
+ rowstat1:= @prowstateaty(datapo)^[int2];
+ visirow1:= @pintegeraty(fvisiblerowmap.datapo)^[int2];
+ int1:= fdirtyvisible-1;
+ while int1 < visibleindex do begin
+  while (rowstat1^.fold and foldhiddenmask <> 0) and (int2 <= arow) do begin
+   visirow1^:= int1;
+   inc(rowstat1);
+   inc(visirow1);
+   inc(int2);
+  end;
+  if int2 <= arow then begin
+   inc(int1);
+   visirow1^:= int1;
+   fvisiblerows[int1]:= int2;
+   inc(int2);
+   inc(rowstat1);
+   inc(visirow1);
+  end
+  else begin
+   break;
+  end;
+ end;
+ fdirtyvisible:= int1 + 1;
+ fdirtyrow:= int2;
+end;
+
+procedure trowstatelist.cleanvisible(visibleindex: integer);
+var
+ int1: integer;
+begin
+ if ffolded then begin
+  int1:= visiblerowcount;
+  if visibleindex >= int1 then begin
+   visibleindex:= int1 - 1;
+  end;
+  if (visibleindex >= fdirtyvisible) then begin
+   doclean(count-1,visibleindex);
+  end;
+ end;
+end;
+
+procedure trowstatelist.clean(arow: integer);
+var
+ int1: integer;
+begin
+ if ffolded then begin
+  int1:= count;
+  if arow >= int1 then begin
+   arow:= int1 -1;
+  end;
+  if  arow >= fdirtyrow then begin
+   doclean(arow,visiblerowcount-1);
+  end;
+ end;
+end;
+
+function trowstatelist.visiblerows(const astart: integer;
+               acount: integer): integerarty;
+var
+ int1,int2: integer;
+begin                         //todo: optimize
+ if ffolded then begin
+  cleanvisible(astart+acount);
+  int1:= visiblerowcount;
+  if astart + acount > int1 then begin
+   acount:= int1 - astart;
+  end;
+  if acount > 0 then begin
+   result:= copy(fvisiblerows,astart,acount);
+  end
+  else begin
+   result:= nil;
+  end;
+ end
+ else begin
+  setlength(result,acount);
+  int2:= astart;
+  for int1:= 0 to high(result) do begin
+   result[int1]:= int2;
+   inc(int2);
+  end;
+ end;
+end;
+
+function trowstatelist.visiblerowstep(const arow: integer; const step: integer;
+                                  const autoappend: boolean): integer;
+begin
+ if not folded then begin
+  result:= arow + step;
+  if result < 0 then begin
+   result:= 0;
+  end;
+  if result >= fgrid.frowcount then begin
+   if autoappend then begin
+    result:= fgrid.frowcount;
+   end
+   else begin
+    result:= fgrid.frowcount - 1;
+   end;
+  end;
+ end
+ else begin
+  result:= visiblerowtoindex(visiblerow(arow)+step);
+  if result < 0 then begin
+   if step < 0 then begin
+    result:= visiblerowtoindex(0);
+   end
+   else begin
+    if autoappend then begin
+     result:= fgrid.frowcount;
+    end
+    else begin
+     if visiblerowcount > 0 then begin
+      result:= visiblerowtoindex(visiblerowcount - 1);
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
+function trowstatelist.visiblerow(const arowindex: integer): integer;
+begin
+ result:= invalidaxis;
+ if (arowindex >= 0) or (arowindex < count) then begin
+  if not ffolded then begin
+   result:= arowindex;
+  end
+  else begin
+   if not hidden[arowindex] then begin
+    clean(arowindex);
+    result:= fvisiblerowmap[arowindex];
+   end;
+  end;
+ end;
+end;
+
+function trowstatelist.visiblerowcount: integer;
+begin
+ result:= count - fhiddencount;
+end;
+
+function trowstatelist.visiblerowtoindex(const avisibleindex: integer): integer;
+begin
+ result:= invalidaxis;
+ if (avisibleindex >= 0) then begin
+  if not ffolded then begin
+   if avisibleindex < count then begin
+    result:= avisibleindex;
+   end;
+  end
+  else begin
+   if avisibleindex < visiblerowcount then begin
+    cleanvisible(avisibleindex);
+    result:= fvisiblerows[avisibleindex];
+   end;
+  end;
+ end;
+end;
+
+procedure trowstatelist.setcount(const value: integer);
+begin
+ inherited;
+ if ffolded then begin
+  setlength(fvisiblerows,count);
+ end;
+end;
+
+function trowstatelist.rowhidden(const arow: integer): boolean;
+begin
+ result:= ffolded;
+ if result then begin
+  result:= hidden[arow];
+ end;
+end;
+
+function trowstatelist.nearestvisiblerow(const arow: integer): integer;
+var
+ po1: prowstateaty;
+ int1: integer;
+begin
+ result:= arow;
+ if rowhidden(arow) then begin
+  po1:= datapo;
+  for int1:= arow to count -1 do begin
+   if po1^[int1].fold and foldhiddenmask = 0 then begin
+    result:= int1;
+    exit;
+   end;
+  end;
+  result:= invalidaxis;
+  for int1:= arow - 1 downto 0 do begin
+   if po1^[int1].fold and foldhiddenmask = 0 then begin
+    result:= int1;
+    exit;
+   end;
+  end;
+ end;
 end;
 
 end.
