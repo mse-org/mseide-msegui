@@ -12489,8 +12489,35 @@ begin
 end;
 
 function trowstatelist.isvisible(const arow: integer): boolean;
+var
+ po1: pintegeraty;
+ po2: prowstateaty;
+ int1: integer;
+ by1: byte;
 begin
- result:= not hidden[arow]; //todo: implement
+ if arow < fdirtyrow then begin
+  po1:= fvisiblerowmap.datapo;
+  if arow > 0 then begin
+   result:= po1^[arow] <> po1^[arow-1];
+  end
+  else begin
+   result:= po1^[0] >= 0;
+  end;
+ end
+ else begin
+  result:= false;
+  po1:= datapo;
+  for int1:= arow downto 0 do begin
+   by1:= po2^[int1].fold;
+   if by1 = 0 then begin
+    result:= true;
+    break;
+   end;
+   if (by1 and foldhiddenmask <> 0) or (by1 and foldlevelmask = 0) then begin
+    break;
+   end;
+  end;  
+ end;
 end;
 
 procedure trowstatelist.counthidden(var aindex: integer);
