@@ -84,6 +84,7 @@ type
    make3act: taction;
    make4act: taction;
    download: taction;
+   helpact: taction;
    procedure findinfileonexecute(const sender: tobject);
 
    //file
@@ -139,6 +140,7 @@ type
    procedure onattachprocess(const sender: TObject);
    procedure updateshortcuts(const sender: tshortcutcontroller);
    procedure downloadexe(const sender: TObject);
+   procedure helpex(const sender: TObject);
  end;
 
 var
@@ -500,6 +502,11 @@ end;
 procedure tactionsmo.downloadexe(const sender: TObject);
 begin
  mainfo.loadexec(false,true);
+end;
+
+procedure tactionsmo.helpex(const sender: TObject);
+begin
+ application.help(application.activewidget);
 end;
 
 end.

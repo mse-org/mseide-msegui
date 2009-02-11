@@ -122,6 +122,9 @@ type
    function locate(const info: stopinfoty): tsourcepage;
    function count: integer;
    function activepage: tsourcepage;
+   function currentselection: msestring;
+   function currentfilename: filenamety;
+   function currentwordatcursor: msestring;
    procedure updatecaption;
    function newpage: tsourcepage;
    function findsourcepage(afilename: filenamety; wholepath: boolean = true;
@@ -1173,6 +1176,38 @@ end;
 procedure tsourcefo.savecanceled;
 begin
  fallsaved:= false;
+end;
+
+function tsourcefo.currentselection: msestring;
+begin
+ result:= '';
+ if activepage <> nil then begin
+  with activepage do begin
+   result:= edit.selectedtext;
+  end;
+ end;
+end;
+
+function tsourcefo.currentfilename: filenamety;
+begin
+ result:= '';
+ if activepage <> nil then begin
+  with activepage do begin
+   result:= filepath;
+  end;
+ end;
+end;
+
+function tsourcefo.currentwordatcursor: msestring;
+var
+ gridcoord1: gridcoordty;
+begin
+ result:= '';
+ if activepage <> nil then begin
+  with activepage do begin
+   result:= getpascalvarname(edit,edit.editpos,gridcoord1);
+  end;
+ end;
 end;
 
 end.

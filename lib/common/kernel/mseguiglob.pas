@@ -53,7 +53,7 @@ type
   wheel: mousewheelty;
   delta: real;
  end;
- pmousewheeleventty = ^mousewheeleventinfoty;
+ pmousewheeleventinfoty = ^mousewheeleventinfoty;
  
  moeventinfoty = record
   case integer of

@@ -1274,221 +1274,306 @@ object actionsmo: tactionsmo
     top = 200
   end
   object shortcuts: tshortcutcontroller
-    actions.count = 49
+    actions.count = 51
     actions.items = <    
       item
+        shortcutdefault = 0
+        shortcut1default = 0
         dispname = 'File'
       end    
       item
         action = opensource
         shortcutdefault = 16463
+        shortcut1default = 0
         dispname = 'Open'
       end    
       item
         action = save
         shortcutdefault = 16467
+        shortcut1default = 0
         dispname = 'Save'
       end    
       item
         action = saveall
+        shortcutdefault = 0
+        shortcut1default = 0
         dispname = 'Save all'
       end    
       item
         action = saveas
+        shortcutdefault = 0
+        shortcut1default = 0
         dispname = 'Save as'
       end    
       item
         action = close
         shortcutdefault = 20531
+        shortcut1default = 0
         dispname = 'Close'
       end    
       item
         action = closeall
+        shortcutdefault = 0
+        shortcut1default = 0
         dispname = 'Close all'
       end    
       item
         action = print
+        shortcutdefault = 0
+        shortcut1default = 0
         dispname = 'Print'
       end    
       item
+        shortcutdefault = 0
+        shortcut1default = 0
         dispname = 'Search'
       end    
       item
         action = line
         shortcutdefault = 16460
+        shortcut1default = 0
         dispname = 'Line'
       end    
       item
         action = find
         shortcutdefault = 16454
+        shortcut1default = 0
         dispname = 'Find'
       end    
       item
         action = repeatfind
         shortcutdefault = 4146
+        shortcut1default = 0
         dispname = 'Repeat Find'
       end    
       item
         action = replace
         shortcutdefault = 16466
+        shortcut1default = 0
         dispname = 'Find and replace'
       end    
       item
         action = findinfile
+        shortcutdefault = 0
+        shortcut1default = 0
         dispname = 'Findinfile'
       end    
       item
+        shortcutdefault = 0
+        shortcut1default = 0
         dispname = 'Edit'
       end    
       item
         action = undo
         shortcutdefault = 16474
+        shortcut1default = 0
         dispname = 'Undo'
       end    
       item
         action = redo
         shortcutdefault = 24666
+        shortcut1default = 0
         dispname = 'Redo'
       end    
       item
         action = selecteditpage
         shortcutdefault = 16453
+        shortcut1default = 0
         dispname = 'Select Editpage'
       end    
       item
         action = indent
         shortcutdefault = 16457
+        shortcut1default = 0
         dispname = 'Indent'
       end    
       item
         action = unindent
         shortcutdefault = 16469
+        shortcut1default = 0
         dispname = 'Unindent'
       end    
       item
         action = lowercase
+        shortcutdefault = 0
+        shortcut1default = 0
         dispname = 'Lowercase'
       end    
       item
         action = uppercase
+        shortcutdefault = 0
+        shortcut1default = 0
         dispname = 'Uppercase'
       end    
       item
+        shortcutdefault = 0
+        shortcut1default = 0
         dispname = 'Target'
       end    
       item
         action = attachprocess
+        shortcutdefault = 0
+        shortcut1default = 0
         dispname = 'Attach Process'
       end    
       item
         action = detachtarget
+        shortcutdefault = 0
+        shortcut1default = 0
         dispname = 'Detach Target'
       end    
       item
         action = continue
         shortcutdefault = 4152
+        shortcut1default = 0
         dispname = 'Continue'
       end    
       item
         action = reset
+        shortcutdefault = 0
+        shortcut1default = 0
         dispname = 'Reset'
       end    
       item
         action = interrupt
+        shortcutdefault = 0
+        shortcut1default = 0
         dispname = 'Interrupt'
       end    
       item
         action = next
         shortcutdefault = 4151
+        shortcut1default = 0
         dispname = 'Next'
       end    
       item
         action = nexti
         shortcutdefault = 28727
+        shortcut1default = 0
         dispname = 'Next Instruction'
       end    
       item
         action = step
         shortcutdefault = 4150
+        shortcut1default = 0
         dispname = 'Step'
       end    
       item
         action = stepi
         shortcutdefault = 28726
+        shortcut1default = 0
         dispname = 'Step Instruction'
       end    
       item
         action = finish
         shortcutdefault = 12342
+        shortcut1default = 0
         dispname = 'Finish'
       end    
       item
         action = bkptsonact
         shortcutdefault = 16450
+        shortcut1default = 0
         dispname = 'Breakpoints on/off'
       end    
       item
         action = togglebkpt
         shortcutdefault = 4148
+        shortcut1default = 0
         dispname = 'Toggle Breakpoint'
       end    
       item
         action = togglebkptenable
         shortcutdefault = 12340
+        shortcut1default = 0
         dispname = 'Toggle Breakpoint enabled'
       end    
       item
         action = watchesonact
         shortcutdefault = 16471
+        shortcut1default = 0
         dispname = 'Watches on/off'
       end    
       item
         action = bluedotsonact
+        shortcutdefault = 0
+        shortcut1default = 0
         dispname = 'Exec Line Hints on/off'
       end    
       item
+        shortcutdefault = 0
+        shortcut1default = 0
         dispname = 'View'
       end    
       item
         action = toggleinspector
         shortcutdefault = 4154
+        shortcut1default = 0
         dispname = 'Toggle Form/Object Inspector'
       end    
       item
         action = toggleformunit
         shortcutdefault = 4155
+        shortcut1default = 0
         dispname = 'Toggle Form/Unit'
       end    
       item
+        shortcutdefault = 0
+        shortcut1default = 0
         dispname = 'Project'
       end    
       item
         action = makeact
+        shortcutdefault = 0
+        shortcut1default = 0
         dispname = 'Make'
       end    
       item
         action = buildact
+        shortcutdefault = 0
+        shortcut1default = 0
         dispname = 'Build'
       end    
       item
         action = make1act
+        shortcutdefault = 0
+        shortcut1default = 0
         dispname = 'Make 1'
       end    
       item
         action = make2act
+        shortcutdefault = 0
+        shortcut1default = 0
         dispname = 'Make 2'
       end    
       item
         action = make3act
+        shortcutdefault = 0
+        shortcut1default = 0
         dispname = 'Make 3'
       end    
       item
         action = make4act
+        shortcutdefault = 0
+        shortcut1default = 0
         dispname = 'Make 4'
       end    
       item
         action = abortmakeact
+        shortcutdefault = 0
+        shortcut1default = 0
         dispname = 'Abort Make'
+      end    
+      item
+        shortcutdefault = 0
+        shortcut1default = 0
+        dispname = 'Help'
+      end    
+      item
+        action = helpact
+        shortcutdefault = 4144
+        shortcut1default = 0
+        dispname = 'Help'
       end>
     sysshortcuts.count = 6
     sysshortcuts.items = (
@@ -1549,5 +1634,12 @@ object actionsmo: tactionsmo
     onexecute = downloadexe
     left = 16
     top = 216
+  end
+  object helpact: taction
+    shortcut = 4144
+    options = [ao_globalshortcut]
+    onexecute = helpex
+    left = 320
+    top = 344
   end
 end

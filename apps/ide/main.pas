@@ -2564,9 +2564,9 @@ begin
     end;
     if sourcefo.activepage <> nil then begin
      with sourcefo.activepage do begin
-      cursourcefile:= tosysfilepath(filepath);
-      cursselection:= edit.selectedtext;
-      cursword:= getpascalvarname(edit,edit.editpos,gridcoord1);
+      cursourcefile:= tosysfilepath(sourcefo.currentfilename);
+      cursselection:= sourcefo.currentselection;//edit.selectedtext;
+      cursword:= sourcefo.currentwordatcursor;//getpascalvarname(edit,edit.editpos,gridcoord1);
       if (index <= high(toolparse)) and toolparse[index] then begin
        spos1.pos:= edit.editpos;
        spos1.filename:= designer.designfiles.find(edit.filename);

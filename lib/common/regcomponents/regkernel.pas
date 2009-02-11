@@ -115,7 +115,7 @@ begin
  registercomponents('Gui',[tmainmenu,tpopupmenu,
                     tfacecomp,tfacelist,tframecomp,tskincontroller,
 //                    tskinextender,
-                    tbitmapcomp,timagelist,tshortcutcontroller,
+                    tbitmapcomp,timagelist,tshortcutcontroller,thelpcontroller,
                     taction,tguithreadcomp]);
  registercomponenttabhints(['Gui'],['Non visual Components with GUI Dependence']);
  registercomponents('Dialog',[tpagesizeselector,tpageorientationselector]);

@@ -161,6 +161,30 @@ type
                                 write fonafterupdate;
  end;
 
+ tcustomhelpcontroller = class;
+ helpcontrollereventty = procedure(const sender: tcustomhelpcontroller;
+          const helpsender: tmsecomponent; var handled: boolean) of object;
+ helpcontrollerprocty = procedure(const sender: tcustomhelpcontroller;
+          const helpsender: tmsecomponent; var handled: boolean);
+                          
+ tcustomhelpcontroller = class(tmsecomponent)
+  private
+   fonhelp: helpcontrollereventty;
+   fonhelp1: helpcontrollerprocty;
+  protected
+   procedure dohelp(const sender: tmsecomponent; var handled: boolean); virtual;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+   property onhelp: helpcontrollereventty read fonhelp write fonhelp;
+   property onhelp1: helpcontrollerprocty read fonhelp1 write fonhelp1;
+ end;
+
+ thelpcontroller = class(tcustomhelpcontroller)
+  published 
+   property onhelp;
+ end;
+ 
 procedure setactionshortcut(const sender: iactionlink; const value: shortcutty);
 procedure setactionshortcut1(const sender: iactionlink; const value: shortcutty);
 function isactionshortcutstored(const info: actioninfoty): boolean;
@@ -591,7 +615,7 @@ begin
            not (es_processed in keyinfo.eventstate) then begin
    if shortcut <> 0 then begin
     if checkshortcutcode(shortcut,keyinfo) then begin
-     doactionexecute(sender,info);
+     doactionexecute(sender,info,false,false);
      result:= true;
     end;
    end;
@@ -923,6 +947,35 @@ procedure tsysshortcuts.dostatwrite(const varname: string;
 begin
  writer.writerecordarray(varname,count,
                                {$ifdef FPC}@{$endif}getshortcutrecord);
+end;
+
+{ tcustomhelpcontroller }
+
+constructor tcustomhelpcontroller.create(aowner: tcomponent);
+begin
+ inherited;
+ if not (csdesigning in componentstate) then begin
+  application.registerhelphandler({$ifdef FPC}@{$endif}dohelp);
+ end;
+end;
+
+destructor tcustomhelpcontroller.destroy;
+begin
+ if not (csdesigning in componentstate) then begin
+  application.unregisterhelphandler({$ifdef FPC}@{$endif}dohelp);
+ end;
+ inherited;
+end;
+
+procedure tcustomhelpcontroller.dohelp(const sender: tmsecomponent;
+               var handled: boolean);
+begin
+ if not handled and canevent(tmethod(fonhelp)) then begin
+  fonhelp(self,sender,handled);
+ end;
+ if not handled and assigned(fonhelp1) then begin
+  fonhelp1(self,sender,handled);
+ end;
 end;
 
 initialization

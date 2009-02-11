@@ -2001,6 +2001,8 @@ type
  tguiapplication = class; 
  waitidleeventty = procedure(const sender: tguiapplication; var again: boolean)
                                       of object; 
+ helpeventty = procedure(const sender: tmsecomponent;
+                                      var handled: boolean) of object;
 
  tguiapplication = class(tcustomapplication)
   private
@@ -2038,6 +2040,9 @@ type
    flastshiftstate: shiftstatesty;
    flastkey: keyty;
    flastbutton: mousebuttonty;
+   fkeyeventinfo: pkeyeventinfoty;
+   fmouseeventinfo: pmouseeventinfoty;
+   fmousewheeleventinfo: pmousewheeleventinfoty;
 
    fmousewheelfrequmin: real;
    fmousewheelfrequmax: real;
@@ -2129,11 +2134,15 @@ type
    procedure restarthint(const sender: twidget);
    function hintedwidget: twidget; //last hinted widget
    function activehintedwidget: twidget; //nil if no hint active
-   
+
+   procedure help(const sender: tmsecomponent);
+   procedure registerhelphandler(const ahandler: helpeventty);
+   procedure unregisterhelphandler(const ahandler: helpeventty);
    function activehelpcontext: msestring;
                 //returns helpcontext of active widget, '' if none;
    function mousehelpcontext: msestring;
                 //returns helpcontext of mouse widget, '' if none;
+
    function active: boolean;
    function screensize: sizety;
    function workarea(const awindow: twindow = nil): rectty;
@@ -2193,7 +2202,14 @@ type
    property lastshiftstate: shiftstatesty read flastshiftstate;
    property lastkey: keyty read flastkey;
    property lastbutton: mousebuttonty read flastbutton;
-       
+   property mouseeventinfo: pmouseeventinfoty read fmouseeventinfo;
+                   //nil if no mouse event processing
+   property mousewheeleventinfo: pmousewheeleventinfoty 
+                                             read fmousewheeleventinfo;
+                   //nil if no mousewheel event processing
+   property keyeventinfo: pkeyeventinfoty read fkeyeventinfo;
+                   //nil if no key event processing
+
    property cursorshape: cursorshapety read fcursorshape write setcursorshape;
                 //persistent
    property widgetcursorshape: cursorshapety read fwidgetcursorshape write
@@ -2448,6 +2464,11 @@ type
   protected
    procedure doevent(const activated: boolean);
  end;
+
+ tonhelpeventlist = class(tmethodlist)
+  protected
+   procedure doevent(const sender: tmsecomponent);
+ end;
  
  windowstackinfoty = record
   lower,upper: twindow;
@@ -2465,6 +2486,7 @@ type
    fonwindowdestroyedlist: tonwindoweventlist;
    fonwiniddestroyedlist: tonwinideventlist;
    fonapplicationactivechangedlist: tonapplicationactivechangedlist;
+   fonhelp: tonhelpeventlist;
 
    fcaretwidget: twidget;
    fmousewinid: winidty;
@@ -12542,12 +12564,25 @@ end;
 
 { tonapplicationactivechangedlist }
 
-
 procedure tonapplicationactivechangedlist.doevent(const activated: boolean);
 begin
  factitem:= 0;
  while factitem < fcount do begin
   booleaneventty(getitempo(factitem)^)(activated);
+  inc(factitem);
+ end;
+end;
+
+{ tonhelpeventlist }
+
+procedure tonhelpeventlist.doevent (const sender: tmsecomponent);
+var
+ bo1: boolean;
+begin
+ factitem:= 0;
+ bo1:= false;
+ while (factitem < fcount) and not bo1 do begin
+  helpeventty(getitempo(factitem)^)(sender,bo1);
   inc(factitem);
  end;
 end;
@@ -12642,6 +12677,7 @@ begin
  fonwindowdestroyedlist:= tonwindoweventlist.create;
  fonwiniddestroyedlist:= tonwinideventlist.create;
  fonapplicationactivechangedlist:= tonapplicationactivechangedlist.create;
+ fonhelp:= tonhelpeventlist.create;
 // fwindows:= tpointerlist.create;
  fcaret:= tcaret.create;
  fmouse:= tmouse.create(imouse(self));
@@ -12667,6 +12703,7 @@ begin
  fonwindowdestroyedlist.free;
  fonwiniddestroyedlist.free;
  fonapplicationactivechangedlist.free;
+ fonhelp.free;
 end;
 
 procedure tinternalapplication.twindowdestroyed(const sender: twindow);
@@ -12823,194 +12860,201 @@ var
  widget1: twidget;
  pt1: pointty;
 begin
- with event do begin
-  if findwindow(fwinid,window) then begin
-   fillchar(info,sizeof(info),0);
-   with info.mouse do begin
-    timestamp:= ftimestamp;
-    if freflected then begin
-     include(eventstate,es_reflected);
-    end;
-    if kind = ek_enterwindow then begin
-     eventkind:= ek_mousemove;
-    end
-    else begin
-     eventkind:= kind;
-    end;
-    shift:= [];
-    if kind = ek_mousewheel then begin
-     info.wheel.wheel:= fwheel;
-     calcmousewheeldelta(info.wheel,fmousewheelfrequmin,fmousewheelfrequmax,
-                         fmousewheeldeltamin,fmousewheeldeltamax);
-     if ftimestamp <> 0 then begin
-      flastmousewheeltimestampbefore:= flastmousewheeltimestamp;
-      flastmousewheeltimestamp:= ftimestamp;
+ try
+  with event do begin
+   if findwindow(fwinid,window) then begin
+    fillchar(info,sizeof(info),0);
+    with info.mouse do begin
+     timestamp:= ftimestamp;
+     if freflected then begin
+      include(eventstate,es_reflected);
      end;
-    end
-    else begin
-     button:= fbutton;
-     case button of
-      mb_left: shift:= [ss_left];
-      mb_middle: shift:= [ss_middle];
-      mb_right: shift:= [ss_right];
+     if kind = ek_enterwindow then begin
+      eventkind:= ek_mousemove;
+     end
+     else begin
+      eventkind:= kind;
      end;
-    end;
-    if eventkind = ek_buttonpress then begin
-     shiftstate:= fshiftstate + shift;
-    end
-    else begin
-     shiftstate:= fshiftstate - shift;
-    end;
-    pos:= fpos;
-    abspos:= addpoint(window.fowner.fwidgetrect.pos,pos);
-   end;
-   
-   if (fmodalwindow <> nil) and (window <> fmodalwindow) then begin
-    addpoint1(info.mouse.pos,subpoint(window.fowner.fwidgetrect.pos,
-        fmodalwindow.fowner.fwidgetrect.pos));
-    window:= fmodalwindow;
-   end;
-   if (fmousecapturewidget <> nil) and 
-                   (fmousecapturewidget.window <> window) then begin
-    addpoint1(info.mouse.pos,subpoint(window.fowner.fwidgetrect.pos,
-        fmousecapturewidget.fwindow.fowner.fwidgetrect.pos));
-    window:= fmousecapturewidget.fwindow;
-   end;
-   if (aps_mousecaptured in fstate) and
-            (event.fshiftstate * mousebuttons = []) then begin
-    ungrabpointer;
-   end;
-   if (fhintwidget <> nil) and
-    (fhintinfo.flags*[{hfl_custom,}hfl_noautohidemove] = [{hfl_custom}]) and
-      (
-      (info.mouse.eventkind = ek_buttonpress) or
-      (info.mouse.eventkind = ek_buttonrelease) or
-      (info.mouse.eventkind = ek_mousemove) and
-         (distance(fhintinfo.mouserefpos,abspos) > 3)
-       ) then begin
-    bo1:= window = fhintwidget.window;
-    deactivatehint;
-    if bo1 then begin
-     exit; //widow is destroyed
-    end;
-   end;
-   fmouseparkeventinfo:= info.mouse;
-   {
-   if factmousewindow <> window then begin
-    ek1:= info.eventkind;
-    info.eventkind:= ek_mouseenter;
-    window.dispatchmouseevent(info,nil);
-    info.eventkind:= ek1;
-   end;
-   }
-   factmousewindow:= window;
-   fmouseparktimer.interval:= -mouseparktime;
-   fmouseparktimer.enabled:= true;
-   if ftimestamp <> 0 then begin
-    if (fbutton <> mb_none) then begin
-                //test reflected event
-     if kind = ek_buttonpress then begin
-      if flastbuttonpresstimestamp = ftimestamp then begin
-       flastbuttonpresstimestamp:= ftimestampbefore;
+     shift:= [];
+     if kind = ek_mousewheel then begin
+      fmousewheeleventinfo:= @info;
+      info.wheel.wheel:= fwheel;
+      calcmousewheeldelta(info.wheel,fmousewheelfrequmin,fmousewheelfrequmax,
+                          fmousewheeldeltamin,fmousewheeldeltamax);
+      if ftimestamp <> 0 then begin
+       flastmousewheeltimestampbefore:= flastmousewheeltimestamp;
+       flastmousewheeltimestamp:= ftimestamp;
       end;
+     end
+     else begin
+      fmouseeventinfo:= @info;
+      button:= fbutton;
+      case button of
+       mb_left: shift:= [ss_left];
+       mb_middle: shift:= [ss_middle];
+       mb_right: shift:= [ss_right];
+      end;
+     end;
+     if eventkind = ek_buttonpress then begin
+      shiftstate:= fshiftstate + shift;
+     end
+     else begin
+      shiftstate:= fshiftstate - shift;
+     end;
+     pos:= fpos;
+     abspos:= addpoint(window.fowner.fwidgetrect.pos,pos);
+    end;
+    
+    if (fmodalwindow <> nil) and (window <> fmodalwindow) then begin
+     addpoint1(info.mouse.pos,subpoint(window.fowner.fwidgetrect.pos,
+         fmodalwindow.fowner.fwidgetrect.pos));
+     window:= fmodalwindow;
+    end;
+    if (fmousecapturewidget <> nil) and 
+                    (fmousecapturewidget.window <> window) then begin
+     addpoint1(info.mouse.pos,subpoint(window.fowner.fwidgetrect.pos,
+         fmousecapturewidget.fwindow.fowner.fwidgetrect.pos));
+     window:= fmousecapturewidget.fwindow;
+    end;
+    if (aps_mousecaptured in fstate) and
+             (event.fshiftstate * mousebuttons = []) then begin
+     ungrabpointer;
+    end;
+    if (fhintwidget <> nil) and
+     (fhintinfo.flags*[{hfl_custom,}hfl_noautohidemove] = [{hfl_custom}]) and
+       (
+       (info.mouse.eventkind = ek_buttonpress) or
+       (info.mouse.eventkind = ek_buttonrelease) or
+       (info.mouse.eventkind = ek_mousemove) and
+          (distance(fhintinfo.mouserefpos,abspos) > 3)
+        ) then begin
+     bo1:= window = fhintwidget.window;
+     deactivatehint;
+     if bo1 then begin
+      exit; //widow is destroyed
+     end;
+    end;
+    fmouseparkeventinfo:= info.mouse;
+    {
+    if factmousewindow <> window then begin
+     ek1:= info.eventkind;
+     info.eventkind:= ek_mouseenter;
+     window.dispatchmouseevent(info,nil);
+     info.eventkind:= ek1;
+    end;
+    }
+    factmousewindow:= window;
+    fmouseparktimer.interval:= -mouseparktime;
+    fmouseparktimer.enabled:= true;
+    if ftimestamp <> 0 then begin
+     if (fbutton <> mb_none) then begin
+                 //test reflected event
+      if kind = ek_buttonpress then begin
+       if flastbuttonpresstimestamp = ftimestamp then begin
+        flastbuttonpresstimestamp:= ftimestampbefore;
+       end;
+      end
+      else begin
+       if kind = ek_buttonrelease then begin
+        if flastbuttonreleasetimestamp = ftimestamp then begin
+         flastbuttonreleasetimestamp:= ftimestampbefore;
+        end;
+       end;
+      end;
+     end;
+     if kind in [ek_buttonpress,ek_buttonrelease] then begin
+      int1:= bigint;
+      if (kind = ek_buttonpress) then begin
+       if (flastbuttonpresstimestamp <> 0) and (fbutton = flastbuttonpress) then begin
+        int1:= ftimestamp - flastbuttonpresstimestamp;
+       end;
+      end
+      else begin
+       if (flastbuttonreleasetimestamp <> 0) and
+            (fbutton = flastbuttonrelease) then begin
+        int1:= ftimestamp - flastbuttonreleasetimestamp;
+       end;
+      end;
+      if (int1 >= 0) and (int1 < fdblclicktime) then begin
+       include(info.mouse.shiftstate,ss_double);
+      end;
+      flastbutton:= fbutton;
+     end;
+    end;
+    flastshiftstate:= info.mouse.shiftstate;
+    window.dispatchmouseevent(info,fmousecapturewidget);
+    if (ftimestamp <> 0) and (fbutton <> mb_none) then begin
+     if kind = ek_buttonpress then begin
+      fbuttonpresswidgetbefore:= fmousewidget;
+      ftimestampbefore:= flastbuttonpresstimestamp;
+      flastbuttonpress:= fbutton;
+      flastbuttonpresstimestamp:= ftimestamp;
      end
      else begin
       if kind = ek_buttonrelease then begin
-       if flastbuttonreleasetimestamp = ftimestamp then begin
-        flastbuttonreleasetimestamp:= ftimestampbefore;
-       end;
+       fbuttonreleasewidgetbefore:= fmousewidget;
+       ftimestampbefore:= flastbuttonreleasetimestamp;
+       flastbuttonrelease:= fbutton;
+       flastbuttonreleasetimestamp:= ftimestamp;
       end;
      end;
     end;
-    if kind in [ek_buttonpress,ek_buttonrelease] then begin
-     int1:= bigint;
-     if (kind = ek_buttonpress) then begin
-      if (flastbuttonpresstimestamp <> 0) and (fbutton = flastbuttonpress) then begin
-       int1:= ftimestamp - flastbuttonpresstimestamp;
+    if not (hfl_custom in fhintinfo.flags) then begin
+     widget1:= fmousewidget;
+ //    widget1:= fmousehintwidget;
+     if widget1 <> nil then begin
+      widget1:= widget1.widgetatpos(info.mouse.pos);
+              //search diabled child
+     end;
+     while (widget1 <> nil) and 
+       ((ow_mousetransparent in widget1.foptionswidget) or 
+         not widget1.isvisible or
+         not (widget1.enabled or (ow_disabledhint in widget1.foptionswidget))
+       ) do begin
+      widget1:= widget1.parentwidget;
+     end;
+     if widget1 <> nil then begin
+      if widget1.fframe <> nil then begin
+       with widget1.fframe do begin
+        checkstate;
+        pt1:= translatewidgetpoint(abspos,nil,widget1);
+        if not (pointinrect(pt1,fpaintrect) or 
+            (fs_captionhint in fstate) and pointincaption(pt1)) then begin
+         widget1:= nil;
+        end;
+       end;
+      end;
+     end;
+     if (widget1 <> fhintedwidget) then begin
+      if (widget1 <> fhintwidget) and
+                (fhintedwidget <> nil) or (fhintwidget = nil) then begin
+       deactivatehint;
+       fhintedwidget:= widget1;
+       if fhintedwidget <> nil then begin
+        fhinttimer.interval:= -hintdelaytime;
+        fhinttimer.enabled:= true;
+       end;
       end;
      end
      else begin
-      if (flastbuttonreleasetimestamp <> 0) and
-           (fbutton = flastbuttonrelease) then begin
-       int1:= ftimestamp - flastbuttonreleasetimestamp;
-      end;
-     end;
-     if (int1 >= 0) and (int1 < fdblclicktime) then begin
-      include(info.mouse.shiftstate,ss_double);
-     end;
-     flastbutton:= fbutton;
-    end;
-   end;
-   flastshiftstate:= info.mouse.shiftstate;
-   window.dispatchmouseevent(info,fmousecapturewidget);
-   if (ftimestamp <> 0) and (fbutton <> mb_none) then begin
-    if kind = ek_buttonpress then begin
-     fbuttonpresswidgetbefore:= fmousewidget;
-     ftimestampbefore:= flastbuttonpresstimestamp;
-     flastbuttonpress:= fbutton;
-     flastbuttonpresstimestamp:= ftimestamp;
-    end
-    else begin
-     if kind = ek_buttonrelease then begin
-      fbuttonreleasewidgetbefore:= fmousewidget;
-      ftimestampbefore:= flastbuttonreleasetimestamp;
-      flastbuttonrelease:= fbutton;
-      flastbuttonreleasetimestamp:= ftimestamp;
-     end;
-    end;
-   end;
-   if not (hfl_custom in fhintinfo.flags) then begin
-    widget1:= fmousewidget;
-//    widget1:= fmousehintwidget;
-    if widget1 <> nil then begin
-     widget1:= widget1.widgetatpos(info.mouse.pos);
-             //search diabled child
-    end;
-    while (widget1 <> nil) and 
-      ((ow_mousetransparent in widget1.foptionswidget) or 
-        not widget1.isvisible or
-        not (widget1.enabled or (ow_disabledhint in widget1.foptionswidget))
-      ) do begin
-     widget1:= widget1.parentwidget;
-    end;
-    if widget1 <> nil then begin
-     if widget1.fframe <> nil then begin
-      with widget1.fframe do begin
-       checkstate;
-       pt1:= translatewidgetpoint(abspos,nil,widget1);
-       if not (pointinrect(pt1,fpaintrect) or 
-           (fs_captionhint in fstate) and pointincaption(pt1)) then begin
-        widget1:= nil;
+      if (fhintedwidget <> nil) and (fhintwidget = nil) and 
+                                   (kind = ek_mousemove) then begin
+       fhinttimer.interval:= -hintdelaytime;
+       if (ow_multiplehint in fhintedwidget.foptionswidget) and
+         (distance(fhintinfo.mouserefpos,abspos) > 3) then begin
+        fhinttimer.enabled:= true;
        end;
       end;
      end;
     end;
-    if (widget1 <> fhintedwidget) then begin
-     if (widget1 <> fhintwidget) and
-               (fhintedwidget <> nil) or (fhintwidget = nil) then begin
-      deactivatehint;
-      fhintedwidget:= widget1;
-      if fhintedwidget <> nil then begin
-       fhinttimer.interval:= -hintdelaytime;
-       fhinttimer.enabled:= true;
-      end;
-     end;
-    end
-    else begin
-     if (fhintedwidget <> nil) and (fhintwidget = nil) and 
-                                  (kind = ek_mousemove) then begin
-      fhinttimer.interval:= -hintdelaytime;
-      if (ow_multiplehint in fhintedwidget.foptionswidget) and
-        (distance(fhintinfo.mouserefpos,abspos) > 3) then begin
-       fhinttimer.enabled:= true;
-      end;
-     end;
-    end;
+   end
+   else begin
+    ungrabpointer;
    end;
-  end
-  else begin
-   ungrabpointer;
   end;
+ finally
+  fmouseeventinfo:= nil;
+  fmousewheeleventinfo:= nil;
  end;
 end;
 
@@ -13021,56 +13065,61 @@ var
  info: keyeventinfoty;
  shift: shiftstatesty;
 begin
- with event do begin
-  if findwindow(fwinid,window1) then begin
-   fillchar(info,sizeof(info),0);
-   with info do begin
-    eventkind:= fkind;
-    timestamp:= event.timestamp;
-    key:= fkey;
-    keynomod:= fkeynomod;
-    case key of
-     key_shift: shift:= [ss_shift];
-     key_alt: shift:= [ss_alt];
-     key_control: shift:= [ss_ctrl];
-     else shift:= [];
-    end;
-    chars:= fchars;
-    if kind = ek_keypress then begin
-     shiftstate:= fshiftstate + shift;
-    end
-    else begin
-     shiftstate:= fshiftstate - shift;
-    end;
-    flastshiftstate:= shiftstate;
-    flastkey:= key;
-    if fkeyboardcapturewidget <> nil then begin
-     window1:= fkeyboardcapturewidget.window;
-     widget1:= fkeyboardcapturewidget;
-    end
-    else begin
-     window1:= factivewindow;
-     if window1 <> nil then begin
-      widget1:= factivewindow.ffocusedwidget;
+ try 
+  fkeyeventinfo:= @info;
+  with event do begin
+   if findwindow(fwinid,window1) then begin
+    fillchar(info,sizeof(info),0);
+    with info do begin
+     eventkind:= fkind;
+     timestamp:= event.timestamp;
+     key:= fkey;
+     keynomod:= fkeynomod;
+     case key of
+      key_shift: shift:= [ss_shift];
+      key_alt: shift:= [ss_alt];
+      key_control: shift:= [ss_ctrl];
+      else shift:= [];
+     end;
+     chars:= fchars;
+     if kind = ek_keypress then begin
+      shiftstate:= fshiftstate + shift;
      end
      else begin
-      widget1:= nil; //compiler warning
+      shiftstate:= fshiftstate - shift;
      end;
-    end;
-    if window1 <> nil then begin
-     fmouseparkeventinfo.shiftstate:= shiftstatesty(
-        replacebits({$ifdef FPC}longword{$else}byte{$endif}(shiftstate),
-          {$ifdef FPC}longword{$else}byte{$endif}(fmouseparkeventinfo.shiftstate),
-          {$ifdef FPC}longword{$else}byte{$endif}(keyshiftstatesmask)));
-     if kind = ek_keypress then begin
-      fonkeypresslist.dokeyevent(widget1,info);
+     flastshiftstate:= shiftstate;
+     flastkey:= key;
+     if fkeyboardcapturewidget <> nil then begin
+      window1:= fkeyboardcapturewidget.window;
+      widget1:= fkeyboardcapturewidget;
+     end
+     else begin
+      window1:= factivewindow;
+      if window1 <> nil then begin
+       widget1:= factivewindow.ffocusedwidget;
+      end
+      else begin
+       widget1:= nil; //compiler warning
+      end;
      end;
-     if not (es_processed in eventstate) then begin
-      window1.dispatchkeyevent(kind,info);
+     if window1 <> nil then begin
+      fmouseparkeventinfo.shiftstate:= shiftstatesty(
+         replacebits({$ifdef FPC}longword{$else}byte{$endif}(shiftstate),
+           {$ifdef FPC}longword{$else}byte{$endif}(fmouseparkeventinfo.shiftstate),
+           {$ifdef FPC}longword{$else}byte{$endif}(keyshiftstatesmask)));
+      if kind = ek_keypress then begin
+       fonkeypresslist.dokeyevent(widget1,info);
+      end;
+      if not (es_processed in eventstate) then begin
+       window1.dispatchkeyevent(kind,info);
+      end;
      end;
     end;
    end;
   end;
+ finally
+  fkeyeventinfo:= nil;
  end;
 end;
 
@@ -14566,6 +14615,23 @@ begin
  else begin
   result:= fhintedwidget;
  end;
+end;
+
+procedure tguiapplication.help(const sender: tmsecomponent);
+begin
+ with tinternalapplication(self) do begin
+  fonhelp.doevent(sender);
+ end;
+end;
+
+procedure tguiapplication.registerhelphandler(const ahandler: helpeventty);
+begin
+ tinternalapplication(self).fonhelp.add(tmethod(ahandler));
+end;
+
+procedure tguiapplication.unregisterhelphandler(const ahandler: helpeventty);
+begin
+ tinternalapplication(self).fonhelp.remove(tmethod(ahandler));
 end;
 
 function tguiapplication.activehelpcontext: msestring;
