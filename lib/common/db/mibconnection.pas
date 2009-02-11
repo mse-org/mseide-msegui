@@ -1,6 +1,6 @@
 {
     Copyright (c) 2004 by Joost van der Sluis
-    Modified 2006-2008 by Martin Schreiber
+    Modified 2006-2009 by Martin Schreiber
     
     See the file COPYING.FPC, included in this distribution,
     for details about the copyright.
@@ -955,84 +955,87 @@ begin
  Result:= retcode = 0;
 end;
 
-procedure TIBConnection.SetParameters(cursor : TSQLCursor;AParams : TmseParams);
-
-var ParNr,SQLVarNr : integer;
-    s               : string;
-    i               : integer;
-    li              : LargeInt;
-    currbuff        : pchar;
-    w               : word;
-    cur1: currency;
+procedure TIBConnection.SetParameters(cursor: TSQLCursor; AParams: TmseParams);
+var
+ ParNr,SQLVarNr: integer;
+ s: string;
+ i: integer;
+ li: LargeInt;
+ currbuff: pchar;
+ w: word;
+ cur1: currency;
 
 begin
-  with cursor as TIBCursor do for SQLVarNr := 0 to High(ParamBinding){AParams.count-1} do
-    begin
-    ParNr := ParamBinding[SQLVarNr];
-    if AParams[ParNr].IsNull then
-      begin
-      If Assigned(in_sqlda^.SQLvar[SQLVarNr].SQLInd) then
-        in_sqlda^.SQLvar[SQLVarNr].SQLInd^ := -1;
-      end
-    else
-      begin
-      if assigned(in_sqlda^.SQLvar[SQLVarNr].SQLInd) then in_sqlda^.SQLvar[SQLVarNr].SQLInd^ := 0;
-
-      case paramtypes[ParNr] of
-        ftInteger,ftsmallint :
-          begin
-          i := AParams[ParNr].AsInteger;
-          Move(i, in_sqlda^.SQLvar[SQLVarNr].SQLData^, in_SQLDA^.SQLVar[SQLVarNr].SQLLen);
-   //todo: byte order?
-          end;
-        ftbcd,ftcurrency: begin
-         cur1:= AParams[ParNr].ascurrency;
-         with in_sqlda^.SQLvar[SQLVarNr] do begin
-          cur1:= cur1 / intpower(10,4+SQLScale);
-          reallocmem(sqldata,sizeof(cur1));
-          move(cur1,sqldata^,sizeof(cur1));
-         end;
-        end;
-        ftString,ftFixedChar,ftwidestring  :
-          begin
-          s:= AParams.AsdbString(parnr);
-          w:= length(s);
-          with in_sqlda^.SQLvar[SQLVarNr] do begin
-           if ((SQLType and not 1) = SQL_VARYING) then begin
-            SQLLen:= w;
-            ReAllocMem(SQLData,SQLLen+sizeof(w));
-            CurrBuff:= SQLData;
-            move(w,CurrBuff^,sizeof(w));
-            inc(CurrBuff,sizeof(w));
-           end
-           else begin
-            if w > sqllen then begin
-             w:= sqllen;
-            end;
-            CurrBuff:= SQLData;
-            if w < sqllen then begin
-             fillchar((currbuff+w)^,sqllen-w,' ');
-            end;
-           end;
-          end;
-          Move(s[1],CurrBuff^,w);
-          end;
-        ftDate, ftTime, ftDateTime:
-          SetDateTime(in_sqlda^.SQLvar[SQLVarNr].SQLData, 
-               AParams[ParNr].AsDateTime, in_SQLDA^.SQLVar[SQLVarNr].SQLType);
-        ftLargeInt,ftblob,ftmemo:
-          begin
-          li := AParams[ParNr].AsLargeInt;
-          Move(li, in_sqlda^.SQLvar[SQLVarNr].SQLData^,
-                        in_SQLDA^.SQLVar[SQLVarNr].SQLLen);
-          end;
-        ftFloat:
-          SetFloat(in_sqlda^.SQLvar[SQLVarNr].SQLData, AParams[ParNr].AsFloat, in_SQLDA^.SQLVar[SQLVarNr].SQLLen);
-      else
-        DatabaseErrorFmt(SUnsupportedParameter,[Fieldtypenames[AParams[ParNr].DataType]],self);
-      end {case}
-      end;
+ with tibcursor(cursor) do begin
+  for SQLVarNr := 0 to High(ParamBinding){AParams.count-1} do begin
+   ParNr := ParamBinding[SQLVarNr];
+   if AParams[ParNr].IsNull then begin
+    If Assigned(in_sqlda^.SQLvar[SQLVarNr].SQLInd) then begin
+      in_sqlda^.SQLvar[SQLVarNr].SQLInd^ := -1;
     end;
+   end
+   else begin
+    if assigned(in_sqlda^.SQLvar[SQLVarNr].SQLInd) then begin
+     in_sqlda^.SQLvar[SQLVarNr].SQLInd^ := 0;
+    end;
+    case paramtypes[sqlvarnr] of
+     ftInteger,ftsmallint : begin
+       i := AParams[ParNr].AsInteger;
+       Move(i, in_sqlda^.SQLvar[SQLVarNr].SQLData^, in_SQLDA^.SQLVar[SQLVarNr].SQLLen);
+//todo: byte order?
+     end;
+     ftbcd,ftcurrency: begin
+      cur1:= AParams[ParNr].ascurrency;
+      with in_sqlda^.SQLvar[SQLVarNr] do begin
+       cur1:= cur1 / intpower(10,4+SQLScale);
+       reallocmem(sqldata,sizeof(cur1));
+       move(cur1,sqldata^,sizeof(cur1));
+      end;
+     end;
+     ftString,ftFixedChar,ftwidestring: begin
+      s:= AParams.AsdbString(parnr);
+      w:= length(s);
+      with in_sqlda^.SQLvar[SQLVarNr] do begin
+       if ((SQLType and not 1) = SQL_VARYING) then begin
+        SQLLen:= w;
+        ReAllocMem(SQLData,SQLLen+sizeof(w));
+        CurrBuff:= SQLData;
+        move(w,CurrBuff^,sizeof(w));
+        inc(CurrBuff,sizeof(w));
+       end
+       else begin
+        if w > sqllen then begin
+         w:= sqllen;
+        end;
+        CurrBuff:= SQLData;
+        if w < sqllen then begin
+         fillchar((currbuff+w)^,sqllen-w,' ');
+        end;
+       end;
+      end;
+      Move(s[1],CurrBuff^,w);
+     end;
+     ftDate, ftTime, ftDateTime: begin
+      SetDateTime(in_sqlda^.SQLvar[SQLVarNr].SQLData, 
+           AParams[ParNr].AsDateTime, in_SQLDA^.SQLVar[SQLVarNr].SQLType);
+     end;
+     ftLargeInt,ftblob,ftmemo: begin
+      li := AParams[ParNr].AsLargeInt;
+      Move(li, in_sqlda^.SQLvar[SQLVarNr].SQLData^,
+                    in_SQLDA^.SQLVar[SQLVarNr].SQLLen);
+     end;
+     ftFloat: begin
+      SetFloat(in_sqlda^.SQLvar[SQLVarNr].SQLData, AParams[ParNr].AsFloat,
+                    in_SQLDA^.SQLVar[SQLVarNr].SQLLen);
+     end;
+     else begin
+      DatabaseErrorFmt(SUnsupportedParameter,
+                    [Fieldtypenames[AParams[ParNr].DataType]],self);
+     end;
+    end; {case}
+   end;
+  end;
+ end;
 end;
 
 function tibconnection.loadfield(const cursor: tsqlcursor;
