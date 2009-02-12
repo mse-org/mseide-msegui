@@ -71,7 +71,7 @@ type
                  og_autofirstrow,og_autoappend,og_appendempty,
                  og_savestate,og_sorted,og_folded,
                  og_colchangeontabkey,og_colchangeonreturnkey,
-                 og_rowwrap,og_visiblerowpagestep,
+                 og_wraprow,og_wrapcol,og_visiblerowpagestep,
                  og_autopopup,
                  og_mousescrollcol,og_noresetselect);
  optionsgridty = set of optiongridty;
@@ -118,7 +118,7 @@ const
  notfixcoloptions = [co_fixwidth,co_fixpos,co_fill,co_proportional,co_nohscroll,
                      co_rowdatachange];
  defaultoptionsgrid = [og_autopopup,og_colchangeontabkey,og_focuscellonenter,
-                                   og_mousescrollcol];
+                                   og_mousescrollcol,og_wrapcol];
 
  mousescrolldist = 5;
  griddefaultcolwidth = 50;
@@ -1691,7 +1691,7 @@ type
 
    procedure colstep(const action: focuscellactionty; step: integer;
                            const rowchange: boolean;
-                           const nocolrotate: boolean); virtual;
+                           const nocolwrap: boolean); virtual;
                  //step > 0 -> right, step < 0 left
 
    function isdatacell(const coord: gridcoordty): boolean;
@@ -9559,7 +9559,7 @@ begin
  //   focuscell(makegridcoord(ffocusedcell.col,ffocusedcell.row - 1),action);
    end
    else begin
-    if og_rowwrap in foptionsgrid then begin
+    if og_wraprow in foptionsgrid then begin
      focuscell(makegridcoord(ffocusedcell.col,
            visiblerowstep(frowcount-1,0,false)),action);
   //   focuscell(makegridcoord(ffocusedcell.col,frowcount - 1),action);
@@ -9577,7 +9577,7 @@ begin
 //  if (ffocusedcell.row < frowcount - 1) or 
 //                not (og_rotaterow in foptionsgrid) then begin
   if visiblerowcount > 0 then begin
-   if not (og_rowwrap in foptionsgrid) or 
+   if not (og_wraprow in foptionsgrid) or 
                 (visiblerow(ffocusedcell.row) < visiblerowcount - 1) then begin
     focuscell(makegridcoord(ffocusedcell.col,
            visiblerowstep(ffocusedcell.row,1,og_autoappend in foptionsgrid)),
@@ -9585,7 +9585,7 @@ begin
   //  focuscell(makegridcoord(ffocusedcell.col,ffocusedcell.row + 1),action);
    end
    else begin
-    if og_rowwrap in foptionsgrid then begin
+    if og_wraprow in foptionsgrid then begin
      focuscell(makegridcoord(ffocusedcell.col,
            visiblerowstep(0,0,false)),action);
  //    focuscell(makegridcoord(ffocusedcell.col,0),action);
@@ -9678,7 +9678,7 @@ begin
 end;
 
 procedure tcustomgrid.colstep(const action: focuscellactionty; step: integer;
-                 const rowchange: boolean; const nocolrotate: boolean);
+                 const rowchange: boolean; const nocolwrap: boolean);
 var
  int1: integer;
  arow: integer;
@@ -9713,7 +9713,7 @@ begin
    if step > 0 then begin
     inc(int1);
     if int1 >= fdatacols.count then begin
-     if nocolrotate then begin
+     if nocolwrap then begin
       exit;
      end;
      int1:= 0;
@@ -9728,7 +9728,7 @@ begin
    else begin
     dec(int1);
     if int1 < 0 then begin
-     if nocolrotate then begin
+     if nocolwrap then begin
       exit;
      end;
      int1:=  fdatacols.count - 1;
@@ -9930,7 +9930,7 @@ begin
        exit;
       end
       else begin
-       colstep(action,-1,false,bo1);
+       colstep(action,-1,false,bo1 or not (og_wrapcol in foptionsgrid));
        checkselection;
        goto checkwidgetexit;
       end;
@@ -9948,7 +9948,7 @@ begin
        exit;
       end
       else begin
-       colstep(action,1,false,bo1);
+       colstep(action,1,false,bo1 or not (og_wrapcol in foptionsgrid));
        checkselection;
        goto checkwidgetexit;
       end;

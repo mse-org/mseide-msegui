@@ -1,7 +1,8 @@
 MSEide+MSEgui version history
 
-2009-02-09
- optiongridty og_rotaterow -> og_rowwrap.
+2009-02-12
+ optiongridty og_rotaterow -> og_wraprow, additional og_wrapcol, 
+ must be activated in existing projects. 
 2009-02-06
  checkvalueeventty, settexteventty, gettexteventty tdataedit -> tcustomdataedit.
 2009-02-04
