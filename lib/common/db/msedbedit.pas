@@ -178,6 +178,9 @@ type
    fbeginedit: integer;
    fmaxlength: integer;
    fposting: integer;
+   fonbeginedit: notifyeventty;
+   fonendedit: notifyeventty;
+   fondataentered: notifyeventty;
    function canmodify: boolean;
    procedure setediting(avalue: boolean);
    function getasnullmsestring: msestring;
@@ -185,6 +188,7 @@ type
    procedure readdatasource(reader: treader);
    procedure readdatafield(reader: treader);
    procedure readoptionsdb(reader: treader);
+   function getownerwidget: twidget;
   protected   
    fintf: idbeditfieldlink;
    foptions: optionseditdbty;
@@ -215,6 +219,11 @@ type
    property asnullmsestring: msestring read getasnullmsestring 
                                               write setasnullmsestring;
                    //uses nulltext
+   property onbeginedit: notifyeventty read fonbeginedit write fonbeginedit;
+   property onendedit: notifyeventty read fonendedit write fonendedit;
+   property ondataentered: notifyeventty read fondataentered 
+                                     write fondataentered;
+   property owner: twidget read getownerwidget;
  end;
 
  teditwidgetdatalink = class(tcustomeditwidgetdatalink)
@@ -222,6 +231,9 @@ type
    property datasource read fdatasource write setwidgetdatasource;
    property fieldname;
    property options;
+   property onbeginedit;
+   property onendedit;
+   property ondataentered;
  end;
 
  tstringeditwidgetdatalink = class(teditwidgetdatalink)
@@ -1000,6 +1012,8 @@ type
    fautoinserting: boolean;
    finserting: boolean;
    finsertingbefore: boolean;
+   fonbeginedit: notifyeventty;
+   fonendedit: notifyeventty;
    procedure checkscroll;
    procedure checkscrollbar;
    function getfirstrecord: integer;
@@ -1077,6 +1091,7 @@ type
    function rowtorecnonullbased(const row: integer): integer;
    function isfirstrow: boolean;
    function islastrow: boolean;
+   property owner: tcustomgrid read fgrid;
   published
    property options: griddatalinkoptionsty read foptions write foptions default [];
    property onupdaterowdata: updaterowdataeventty read fonupdaterowdata 
@@ -1088,6 +1103,8 @@ type
              //readonlystate (field value and $80) and
              //grid rowfont ((fieldvalue shr 8) and $7f). 
              // $xx7f = default color, $7fxx = default font.
+   property onbeginedit: notifyeventty read fonbeginedit write fonbeginedit;
+   property onendedit: notifyeventty read fonendedit write fonendedit;
  end;
 
  tdropdownlistdatalink = class(tgriddatalink)
@@ -2496,8 +2513,17 @@ end;
 
 procedure tcustomeditwidgetdatalink.editingchanged;
 begin
+ inherited;
+ if not editing and assigned(fonendedit) and 
+         fintf.getwidget.canevent(tmethod(fonendedit)) then begin
+  fonendedit(self);
+ end;
  setediting(inherited editing and canmodify);
  fintf.updatereadonlystate;
+ if editing and assigned(fonbeginedit) and 
+         fintf.getwidget.canevent(tmethod(fonbeginedit)) then begin
+  fonbeginedit(self);
+ end;
 end;
 
 procedure tcustomeditwidgetdatalink.dataevent(event: tdataevent; info: ptrint);
@@ -2678,6 +2704,10 @@ begin
    else begin
     if editing then begin
      fintf.valuetofield;
+     if assigned(fondataentered) and 
+            fintf.getwidget.canevent(tmethod(fondataentered)) then begin
+      fondataentered(self);
+     end;
      if (oed_autopost in foptions) and active then begin
       widget1:= widget1.parentwidget;
       try
@@ -2749,6 +2779,11 @@ function tcustomeditwidgetdatalink.cuttext(const atext: msestring;
 begin
  maxlength:= fmaxlength;
  result:= (maxlength > 0) and (length(atext) > maxlength);
+end;
+
+function tcustomeditwidgetdatalink.getownerwidget: twidget;
+begin
+ result:= fintf.getwidget;
 end;
 
 { tdbstringedit }
@@ -6565,6 +6600,12 @@ begin
  updaterowcount; //for insert
  invalidateindicator;
  inherited;
+ if editing and fgrid.canevent(tmethod(fonbeginedit)) then begin
+  fonbeginedit(self);
+ end;
+ if not editing and fgrid.canevent(tmethod(fonendedit)) then begin
+  fonendedit(self);
+ end;
 end;
 
 function tgriddatalink.getdatasource1: tdatasource;

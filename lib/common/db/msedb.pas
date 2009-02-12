@@ -966,7 +966,9 @@ type
  fieldlinkarty = array of ifieldcomponent;
  dscontrollerstatety = (dscs_posting,dscs_onidleregistered);
  dscontrollerstatesty = set of dscontrollerstatety;
- 
+
+ datasetstatechangedeventty = procedure(const sender: tdataset;
+                                  const statebefore: tdatasetstate) of object;
  tdscontroller = class(tactivatorcontroller,idsfieldcontroller)
   private
    ffields: tpersistentfields;
@@ -985,6 +987,8 @@ type
    fdelayedapplycount: integer;
    fbmbackup: string;
    fupdatecount: integer;
+   fstatebefore: tdatasetstate;
+   fonstatechanged: datasetstatechangedeventty;
    procedure setfields(const avalue: tpersistentfields);
    function getcontroller: tdscontroller;
    procedure updatelinkedfields;
@@ -1064,6 +1068,8 @@ type
    property delayedapplycount: integer read fdelayedapplycount 
                                        write setdelayedapplycount default 0;
                //0 -> no autoapply
+   property onstatechanged: datasetstatechangedeventty read fonstatechanged 
+                                                write fonstatechanged;
  end;
  
  idbcontroller = interface(inullinterface)
@@ -4930,6 +4936,7 @@ end;
 procedure tdscontroller.dataevent(const event: tdataevent; info: ptrint);
 var
  field1: tfield;
+ state1,state2: tdatasetstate;
 begin
  case event of
   dedatasetscroll: begin
@@ -4951,6 +4958,14 @@ begin
  end;
  if not fmovebylock or (event <> dedatasetchange) then begin
   fintf.inheriteddataevent(event,info);
+ end;
+ state1:= tdataset(fowner).state;
+ if (state1 <> fstatebefore) then begin
+  state2:= fstatebefore;
+  fstatebefore:= state1;
+  if checkcanevent(fowner,tmethod(fonstatechanged)) then begin
+   fonstatechanged(tdataset(fowner),state2);
+  end;
  end;
 end;
 
