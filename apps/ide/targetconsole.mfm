@@ -16,6 +16,7 @@ object targetconsolefo: ttargetconsolefo
   container.bounds_cx = 358
   container.bounds_cy = 137
   container.frame.dummy = 0
+  dragdock.tab_size = 0
   dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_propsize]
   options = [fo_savepos, fo_savestate]
   statfile = mainfo.projectstatfile
@@ -59,7 +60,7 @@ object targetconsolefo: ttargetconsolefo
     font.name = 'stf_fixed'
     font.xscale =  1.0000000000000000E+0000
     font.dummy = 0
-    optionsgrid = [og_focuscellonenter, og_autofirstrow, og_colchangeontabkey, og_autopopup]
+    optionsgrid = [og_focuscellonenter, og_autofirstrow, og_colchangeontabkey, og_wrapcol, og_autopopup]
     rowcountmax = 5000
     datacols.count = 1
     datacols.items = <    

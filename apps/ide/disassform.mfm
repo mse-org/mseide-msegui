@@ -18,6 +18,7 @@ object disassfo: tdisassfo
   container.bounds_cy = 210
   container.frame.dummy = 0
   dragdock.splitter_size = 0
+  dragdock.tab_size = 0
   dragdock.caption = 'Assembler'
   dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_propsize]
   options = [fo_savepos, fo_savezorder, fo_savestate]
@@ -100,7 +101,7 @@ object disassfo: tdisassfo
     frame.dummy = 0
     anchors = []
     onkeydown = keydo
-    optionsgrid = [og_colsizing, og_colchangeontabkey, og_autopopup]
+    optionsgrid = [og_colsizing, og_colchangeontabkey, og_wrapcol, og_autopopup]
     datacols.count = 2
     datacols.options = [co_readonly, co_drawfocus, co_savestate]
     datacols.items = <    

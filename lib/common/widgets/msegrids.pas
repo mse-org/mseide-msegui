@@ -9930,7 +9930,7 @@ begin
        exit;
       end
       else begin
-       colstep(action,-1,false,bo1 or not (og_wrapcol in foptionsgrid));
+       colstep(action,-1,false,{bo1 or} not (og_wrapcol in foptionsgrid));
        checkselection;
        goto checkwidgetexit;
       end;
@@ -9948,7 +9948,7 @@ begin
        exit;
       end
       else begin
-       colstep(action,1,false,bo1 or not (og_wrapcol in foptionsgrid));
+       colstep(action,1,false,{bo1 or} not (og_wrapcol in foptionsgrid));
        checkselection;
        goto checkwidgetexit;
       end;

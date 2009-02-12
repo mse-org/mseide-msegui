@@ -17,6 +17,7 @@ object watchpointsfo: twatchpointsfo
   container.bounds_cy = 210
   container.frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
   container.frame.dummy = 0
+  dragdock.tab_size = 0
   dragdock.caption = 'Watchpoints'
   dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_propsize]
   options = [fo_savepos, fo_savestate]
@@ -100,7 +101,7 @@ object watchpointsfo: twatchpointsfo
     anchors = [an_top, an_bottom]
     taborder = 1
     popupmenu = gripopup
-    optionsgrid = [og_colsizing, og_rowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_autopopup]
+    optionsgrid = [og_colsizing, og_rowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup]
     fixrows.count = 1
     fixrows.items = <    
       item

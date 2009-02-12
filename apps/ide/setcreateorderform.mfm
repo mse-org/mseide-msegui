@@ -22,7 +22,7 @@ object setcreateorderfo: tsetcreateorderfo
     bounds_cy = 306
     frame.dummy = 0
     anchors = [an_top, an_bottom]
-    optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_focuscellonenter, og_colchangeontabkey, og_autopopup, og_mousescrollcol]
+    optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_focuscellonenter, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
     datacols.count = 2
     datacols.options = [co_readonly, co_focusselect, co_rowselect, co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
     datacols.items = <    
@@ -71,6 +71,8 @@ object setcreateorderfo: tsetcreateorderfo
     anchors = [an_right, an_bottom]
     taborder = 1
     state = [as_localcaption]
+    autosize_cx = 0
+    autosize_cy = 0
     caption = '&OK'
     modalresult = mr_ok
     reffontheight = 14
@@ -84,6 +86,8 @@ object setcreateorderfo: tsetcreateorderfo
     anchors = [an_right, an_bottom]
     taborder = 2
     state = [as_default, as_localdefault, as_localcaption]
+    autosize_cx = 0
+    autosize_cy = 0
     caption = '&Cancel'
     modalresult = mr_cancel
     reffontheight = 14

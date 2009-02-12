@@ -22,6 +22,8 @@ object doublestringlisteditor: tdoublestringlisteditor
     bounds_cy = 20
     taborder = 3
     state = [as_default, as_localdefault, as_localcaption]
+    autosize_cx = 0
+    autosize_cy = 0
     caption = '&OK'
     modalresult = mr_ok
     reffontheight = 14
@@ -33,6 +35,8 @@ object doublestringlisteditor: tdoublestringlisteditor
     bounds_cx = 50
     bounds_cy = 20
     state = [as_localcaption]
+    autosize_cx = 0
+    autosize_cy = 0
     caption = '&Cancel'
     modalresult = mr_cancel
     reffontheight = 14
@@ -46,7 +50,7 @@ object doublestringlisteditor: tdoublestringlisteditor
     frame.dummy = 0
     anchors = [an_left, an_top, an_right, an_bottom]
     taborder = 2
-    optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend]
+    optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_wrapcol]
     fixcols.count = 1
     fixcols.items = <    
       item

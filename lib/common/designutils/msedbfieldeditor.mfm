@@ -11,26 +11,8 @@ object msedbfieldeditorfo: tmsedbfieldeditorfo
   container.bounds_y = 0
   container.bounds_cx = 601
   container.bounds_cy = 216
-  container.frame.frameimage_left = 0
-  container.frame.frameimage_top = 0
-  container.frame.frameimage_right = 0
-  container.frame.frameimage_bottom = 0
-  container.frame.frameimage_offset = 0
-  container.frame.frameimage_offsetdisabled = 0
-  container.frame.frameimage_offsetmouse = 0
-  container.frame.frameimage_offsetclicked = 0
-  container.frame.frameimage_offsetactive = 0
-  container.frame.frameimage_offsetactivemouse = 0
-  container.frame.frameimage_offsetactiveclicked = 0
-  container.frame.frameface_offset = 0
-  container.frame.frameface_offsetdisabled = 0
-  container.frame.frameface_offsetmouse = 0
-  container.frame.frameface_offsetclicked = 0
-  container.frame.frameface_offsetactive = 0
-  container.frame.frameface_offsetactivemouse = 0
-  container.frame.frameface_offsetactiveclicked = 0
-  container.frame.optionsskin = []
   container.frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
+  container.frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
   container.frame.dummy = 0
   options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
   statfile = tstatfile1
@@ -48,7 +30,6 @@ object msedbfieldeditorfo: tmsedbfieldeditorfo
     autosize_cy = 0
     caption = 'OK'
     modalresult = mr_ok
-    imagedist = 0
   end
   object tbutton2: tbutton
     bounds_x = 536
@@ -61,221 +42,165 @@ object msedbfieldeditorfo: tmsedbfieldeditorfo
     autosize_cy = 0
     caption = 'Cancel'
     modalresult = mr_cancel
-    imagedist = 0
   end
   object fielddefli: tstringgrid
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 336
-    bounds_y = 8
+    bounds_y = 7
     bounds_cx = 258
-    bounds_cy = 170
-    frame.frameimage_left = 0
-    frame.frameimage_top = 0
-    frame.frameimage_right = 0
-    frame.frameimage_bottom = 0
-    frame.frameimage_offset = 0
-    frame.frameimage_offsetdisabled = 0
-    frame.frameimage_offsetmouse = 0
-    frame.frameimage_offsetclicked = 0
-    frame.frameimage_offsetactive = 0
-    frame.frameimage_offsetactivemouse = 0
-    frame.frameimage_offsetactiveclicked = 0
-    frame.frameface_offset = 0
-    frame.frameface_offsetdisabled = 0
-    frame.frameface_offsetmouse = 0
-    frame.frameface_offsetclicked = 0
-    frame.frameface_offsetactive = 0
-    frame.frameface_offsetactivemouse = 0
-    frame.frameface_offsetactiveclicked = 0
-    frame.optionsskin = []
+    bounds_cy = 171
     frame.caption = 'Fielddefs'
     frame.captionpos = cp_top
     frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
+    frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
     frame.dummy = 0
     frame.outerframe = (
       0
-      16
+      17
       0
-      0)
+      0
+    )
     anchors = [an_left, an_top, an_right, an_bottom]
     taborder = 1
-    optionsgrid = [og_colsizing, og_focuscellonenter, og_colchangeontabkey, og_autopopup]
+    optionsgrid = [og_colsizing, og_focuscellonenter, og_colchangeontabkey, og_wrapcol, og_autopopup]
     datacols.count = 2
     datacols.options = [co_readonly, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
-    datacols.items = <
+    datacols.items = <    
       item
-        tag = 0
         width = 123
         options = [co_readonly, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         optionsedit = [scoe_eatreturn]
-      end
+      end    
       item
-        tag = 0
         width = 129
         options = [co_readonly, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         optionsedit = [scoe_eatreturn]
       end>
     fixrows.count = 1
-    fixrows.items = <
+    fixrows.items = <    
       item
-        tag = 0
-        height = 15
+        height = 16
         captions.count = 2
-        captions.items = <
+        captions.items = <        
           item
             caption = 'Name'
-            options = []
-          end
+          end        
           item
             caption = 'Type'
-            options = []
           end>
-        options = []
       end>
-    rowcount = 0
     rowfonts.count = 1
-    rowfonts.items = <
+    rowfonts.items = <    
       item
         color = -1610612732
         name = 'stf_default'
-        xscale = 1.000000000000000000
+        xscale =  1.0000000000000000E+0000
         dummy = 0
       end>
-    datarowheight = 15
+    datarowheight = 16
     oncellevent = defscellevent
     onselectionchanged = defsselectioncha
-    reffontheight = 13
+    reffontheight = 14
   end
   object fields: twidgetgrid
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 8
-    bounds_y = 8
+    bounds_y = 7
     bounds_cx = 323
-    bounds_cy = 170
-    frame.frameimage_left = 0
-    frame.frameimage_top = 0
-    frame.frameimage_right = 0
-    frame.frameimage_bottom = 0
-    frame.frameimage_offset = 0
-    frame.frameimage_offsetdisabled = 0
-    frame.frameimage_offsetmouse = 0
-    frame.frameimage_offsetclicked = 0
-    frame.frameimage_offsetactive = 0
-    frame.frameimage_offsetactivemouse = 0
-    frame.frameimage_offsetactiveclicked = 0
-    frame.frameface_offset = 0
-    frame.frameface_offsetdisabled = 0
-    frame.frameface_offsetmouse = 0
-    frame.frameface_offsetclicked = 0
-    frame.frameface_offsetactive = 0
-    frame.frameface_offsetactivemouse = 0
-    frame.frameface_offsetactiveclicked = 0
-    frame.optionsskin = []
+    bounds_cy = 171
     frame.caption = 'Fields'
     frame.captionpos = cp_top
     frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
+    frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
     frame.dummy = 0
     frame.outerframe = (
       0
-      16
+      17
       0
-      0)
+      0
+    )
     anchors = [an_left, an_top, an_bottom]
     taborder = 2
-    optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_sorted, og_colchangeontabkey, og_autopopup]
+    optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_sorted, og_colchangeontabkey, og_wrapcol, og_autopopup]
     fixcols.count = 1
-    fixcols.items = <
+    fixcols.items = <    
       item
-        tag = 0
         width = 15
         numstep = 1
       end>
     fixrows.count = 1
-    fixrows.items = <
+    fixrows.items = <    
       item
-        tag = 0
-        height = 15
+        height = 16
         captions.count = 5
-        captions.items = <
+        captions.items = <        
           item
-            options = []
-          end
+          end        
           item
-            options = []
-          end
+          end        
           item
             caption = 'Name'
-            options = []
-          end
+          end        
           item
             caption = 'Class type'
-            options = []
-          end
+          end        
           item
             caption = 'Field kind'
-            options = []
           end>
-        options = []
       end>
-    rowcount = 0
     rowfonts.count = 1
-    rowfonts.items = <
+    rowfonts.items = <    
       item
         color = -1610612732
         name = 'stf_default'
-        xscale = 1.000000000000000000
+        xscale =  1.0000000000000000E+0000
         dummy = 0
       end>
     datacols.count = 5
     datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
-    datacols.items = <
+    datacols.items = <    
       item
-        tag = 0
         width = 13
         options = [co_invisible, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         widgetname = 'index'
-      end
+      end    
       item
-        tag = 0
         width = 12
         options = [co_invisible, co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         widgetname = 'fieldpo'
-      end
+      end    
       item
-        tag = 0
         width = 97
         options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         widgetname = 'fieldname'
-      end
+      end    
       item
-        tag = 0
         width = 92
         options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         widgetname = 'classty'
-      end
+      end    
       item
-        tag = 0
         width = 84
         options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         widgetname = 'fieldkind'
       end>
-    datarowheight = 15
+    datarowheight = 16
     onrowsdeleting = fieldrowsdeleting
     onrowsdeleted = fieldsrowdel
     oncellevent = fieldcellevent
     onselectionchanged = fieldselectioncha
     onsort = fieldssort
-    reffontheight = 13
+    reffontheight = 14
     object index: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
       optionsskin = [osk_noskin]
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 13
-      bounds_cy = 15
+      bounds_cy = 16
       taborder = 1
       visible = False
-      reffontheight = 13
+      reffontheight = 14
     end
     object fieldpo: tpointeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
@@ -283,7 +208,7 @@ object msedbfieldeditorfo: tmsedbfieldeditorfo
       bounds_x = 14
       bounds_y = 0
       bounds_cx = 12
-      bounds_cy = 15
+      bounds_cy = 16
       taborder = 2
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
       visible = False
@@ -293,12 +218,12 @@ object msedbfieldeditorfo: tmsedbfieldeditorfo
       bounds_x = 27
       bounds_y = 0
       bounds_cx = 97
-      bounds_cy = 15
+      bounds_cy = 16
       taborder = 3
       visible = False
       ondataentered = fieldsdataentered
       onsetvalue = fieldnamesetvalue
-      reffontheight = 13
+      reffontheight = 14
     end
     object classty: tenumtypeedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
@@ -306,28 +231,11 @@ object msedbfieldeditorfo: tmsedbfieldeditorfo
       bounds_x = 125
       bounds_y = 0
       bounds_cx = 92
-      bounds_cy = 15
+      bounds_cy = 16
       frame.levelo = 0
-      frame.frameimage_left = 0
-      frame.frameimage_top = 0
-      frame.frameimage_right = 0
-      frame.frameimage_bottom = 0
-      frame.frameimage_offset = 0
-      frame.frameimage_offsetdisabled = 0
-      frame.frameimage_offsetmouse = 0
-      frame.frameimage_offsetclicked = 0
-      frame.frameimage_offsetactive = 0
-      frame.frameimage_offsetactivemouse = 0
-      frame.frameimage_offsetactiveclicked = 0
-      frame.frameface_offset = 0
-      frame.frameface_offsetdisabled = 0
-      frame.frameface_offsetmouse = 0
-      frame.frameface_offsetclicked = 0
-      frame.frameface_offsetactive = 0
-      frame.frameface_offsetactivemouse = 0
-      frame.frameface_offsetactiveclicked = 0
       frame.colorclient = -2147483646
       frame.localprops = [frl_levelo, frl_colorclient]
+      frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
       frame.button.color = -1879048187
       frame.dummy = 0
       taborder = 4
@@ -336,11 +244,12 @@ object msedbfieldeditorfo: tmsedbfieldeditorfo
       valuedefault = 0
       min = 0
       dropdown.cols.count = 1
-      dropdown.cols.items = <
+      dropdown.cols.items = <      
         item
         end>
+      dropdown.itemindex = 0
       oninit = initcla
-      reffontheight = 13
+      reffontheight = 14
     end
     object fieldkind: tenumtypeedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
@@ -348,28 +257,11 @@ object msedbfieldeditorfo: tmsedbfieldeditorfo
       bounds_x = 218
       bounds_y = 0
       bounds_cx = 84
-      bounds_cy = 15
+      bounds_cy = 16
       frame.levelo = 0
-      frame.frameimage_left = 0
-      frame.frameimage_top = 0
-      frame.frameimage_right = 0
-      frame.frameimage_bottom = 0
-      frame.frameimage_offset = 0
-      frame.frameimage_offsetdisabled = 0
-      frame.frameimage_offsetmouse = 0
-      frame.frameimage_offsetclicked = 0
-      frame.frameimage_offsetactive = 0
-      frame.frameimage_offsetactivemouse = 0
-      frame.frameimage_offsetactiveclicked = 0
-      frame.frameface_offset = 0
-      frame.frameface_offsetdisabled = 0
-      frame.frameface_offsetmouse = 0
-      frame.frameface_offsetclicked = 0
-      frame.frameface_offsetactive = 0
-      frame.frameface_offsetactivemouse = 0
-      frame.frameface_offsetactiveclicked = 0
       frame.colorclient = -2147483646
       frame.localprops = [frl_levelo, frl_colorclient]
+      frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
       frame.button.width = 15
       frame.button.color = -1879048187
       frame.dummy = 0
@@ -379,11 +271,12 @@ object msedbfieldeditorfo: tmsedbfieldeditorfo
       valuedefault = 0
       min = 0
       dropdown.cols.count = 1
-      dropdown.cols.items = <
+      dropdown.cols.items = <      
         item
         end>
+      dropdown.itemindex = 0
       oninit = initfieldkind
-      reffontheight = 13
+      reffontheight = 14
     end
   end
   object splitter: tsplitter
@@ -393,7 +286,6 @@ object msedbfieldeditorfo: tmsedbfieldeditorfo
     bounds_cy = 154
     anchors = [an_left, an_top, an_bottom]
     taborder = 6
-    optionsscale = []
     options = [spo_hmove, spo_hprop]
     linkleft = fields
     linkright = fielddefli
@@ -411,7 +303,6 @@ object msedbfieldeditorfo: tmsedbfieldeditorfo
     glyph = stg_arrowleft
     autosize_cx = 0
     autosize_cy = 0
-    imagedist = 0
     onexecute = transferfields
   end
   object fieldtodef: tstockglyphbutton
@@ -425,13 +316,12 @@ object msedbfieldeditorfo: tmsedbfieldeditorfo
     glyph = stg_arrowright
     autosize_cx = 0
     autosize_cy = 0
-    imagedist = 0
     onexecute = deletefields
   end
   object tstatfile1: tstatfile
     filename = 'dbfieldeditor.sta'
     options = [sfo_memory]
-    Left = 24
-    Top = 152
+    left = 24
+    top = 152
   end
 end

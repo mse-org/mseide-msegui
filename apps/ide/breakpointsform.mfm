@@ -16,6 +16,7 @@ object breakpointsfo: tbreakpointsfo
   container.bounds_cy = 128
   container.frame.dummy = 0
   dragdock.splitter_size = 0
+  dragdock.tab_size = 0
   dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_propsize]
   options = [fo_savepos, fo_savezorder, fo_savestate]
   statfile = mainfo.projectstatfile
@@ -91,7 +92,7 @@ object breakpointsfo: tbreakpointsfo
     anchors = [an_top, an_bottom]
     taborder = 1
     popupmenu = gripopup
-    optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_autopopup]
+    optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup]
     fixrows.count = 1
     fixrows.items = <    
       item

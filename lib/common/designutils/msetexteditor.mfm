@@ -15,7 +15,6 @@ object msetexteditorfo: tmsetexteditorfo
   options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
   statfile = tstatfile1
   caption = 'Texteditor'
-  icon.transparency = -2147483648
   moduleclassname = 'tmseform'
   object ok: tbutton
     bounds_x = 248
@@ -24,6 +23,8 @@ object msetexteditorfo: tmsetexteditorfo
     bounds_cy = 22
     anchors = [an_right, an_bottom]
     state = [as_localcaption]
+    autosize_cx = 0
+    autosize_cy = 0
     caption = '&OK'
     modalresult = mr_ok
   end
@@ -35,6 +36,8 @@ object msetexteditorfo: tmsetexteditorfo
     anchors = [an_right, an_bottom]
     taborder = 1
     state = [as_localcaption]
+    autosize_cx = 0
+    autosize_cy = 0
     caption = '&Cancel'
     modalresult = mr_cancel
   end
@@ -48,23 +51,18 @@ object msetexteditorfo: tmsetexteditorfo
     anchors = [an_top, an_bottom]
     taborder = 2
     popupmenu = tpopupmenu1
-    optionsgrid = [og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_autopopup]
+    optionsgrid = [og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup]
     fixcols.count = 1
-    fixcols.coloractive = -2147483648
     fixcols.items = <    
       item
         linewidth = 0
-        coloractive = -2147483648
         width = 20
         numstart = 1
         numstep = 1
       end>
-    fixrows.coloractive = -2147483648
     datacols.count = 1
-    datacols.coloractive = -2147483648
     datacols.items = <    
       item
-        coloractive = -2147483648
         width = 2000
         options = [co_leftbuttonfocusonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         widgetname = 'textedit'
@@ -85,11 +83,10 @@ object msetexteditorfo: tmsetexteditorfo
       frame.dummy = 0
       taborder = 1
       visible = False
-      font.colorshadow = -2147483648
       font.xscale =  1.0000000000000000E+0000
       font.dummy = 0
       optionsedit = [oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_linebreak, oe_eatreturn, oe_keyexecute, oe_savevalue, oe_savestate]
-      marginlinecolor = -2147483648
+      encoding = ce_locale
       oneditnotifcation = editnotify
       reffontheight = 14
     end
@@ -112,6 +109,8 @@ object msetexteditorfo: tmsetexteditorfo
     anchors = [an_right, an_bottom]
     taborder = 3
     state = [as_disabled, as_invisible, as_localdisabled, as_localinvisible, as_localcaption, as_localonexecute]
+    autosize_cx = 0
+    autosize_cy = 0
     caption = '&Test'
     onexecute = testexe
   end
@@ -179,16 +178,16 @@ object msetexteditorfo: tmsetexteditorfo
     top = 152
   end
   object undoact: taction
-    caption = '&Undo'
     shortcut = 16474
+    caption = '&Undo'
     options = [ao_globalshortcut]
     onexecute = undoexe
     left = 216
     top = 72
   end
   object redoact: taction
-    caption = '&Redo'
     shortcut = 24666
+    caption = '&Redo'
     options = [ao_globalshortcut]
     onexecute = redoexe
     left = 216

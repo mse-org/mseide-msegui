@@ -33,7 +33,7 @@ object sourcepage: tsourcepage
     frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
     frame.dummy = 0
     anchors = [an_top, an_bottom]
-    optionsgrid = [og_focuscellonenter, og_autofirstrow, og_visiblerowpagestep]
+    optionsgrid = [og_focuscellonenter, og_autofirstrow, og_wrapcol, og_visiblerowpagestep]
     rowcolors.count = 4
     rowcolors.items = (
       14745599
@@ -106,8 +106,10 @@ object sourcepage: tsourcepage
       font.xscale =  1.0000000000000000E+0000
       font.dummy = 0
       optionsedit = [oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_linebreak, oe_eatreturn, oe_keyexecute, oe_savestate]
+      encoding = ce_locale
       onkeydown = editonkeydown
       tabulators.ppmm =  3.0000000000000000E+0000
+      tabulators.defaultdist =  0.0000000000000000E+0000
       onfontchanged = editonfontchanged
       onmodifiedchanged = editonmodifiedchanged
       ontextmouseevent = editontextmouseevent

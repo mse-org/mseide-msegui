@@ -23,6 +23,7 @@ object programparametersfo: tprogramparametersfo
     bounds_cx = 324
     bounds_cy = 37
     frame.caption = '&Working directory'
+    frame.button.color = -2147483646
     frame.button.imagenr = 17
     frame.dummy = 0
     frame.outerframe = (
@@ -45,6 +46,8 @@ object programparametersfo: tprogramparametersfo
     anchors = [an_right, an_bottom]
     taborder = 4
     state = [as_default, as_localdefault, as_localcaption]
+    autosize_cx = 0
+    autosize_cy = 0
     caption = 'OK'
     modalresult = mr_ok
   end
@@ -55,6 +58,8 @@ object programparametersfo: tprogramparametersfo
     bounds_cy = 20
     anchors = [an_right, an_bottom]
     state = [as_localcaption]
+    autosize_cx = 0
+    autosize_cy = 0
     caption = 'Cancel'
     modalresult = mr_cancel
   end
@@ -65,6 +70,7 @@ object programparametersfo: tprogramparametersfo
     bounds_cx = 324
     bounds_cy = 37
     frame.caption = '&Parameters'
+    frame.button.color = -2147483646
     frame.dummy = 0
     frame.outerframe = (
       0
@@ -97,7 +103,7 @@ object programparametersfo: tprogramparametersfo
     )
     anchors = [an_left, an_top, an_right, an_bottom]
     taborder = 3
-    optionsgrid = [og_colsizing, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_savestate, og_colchangeontabkey, og_autopopup]
+    optionsgrid = [og_colsizing, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_savestate, og_colchangeontabkey, og_wrapcol, og_autopopup]
     fixrows.count = 1
     fixrows.items = <    
       item

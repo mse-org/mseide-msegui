@@ -23,7 +23,7 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
     frame.dummy = 0
     anchors = [an_top, an_bottom]
     popupmenu = tpopupmenu1
-    optionsgrid = [og_colsizing, og_focuscellonenter, og_colchangeontabkey, og_autopopup, og_mousescrollcol]
+    optionsgrid = [og_colsizing, og_focuscellonenter, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
     fixrows.count = 1
     fixrows.items = <    
       item
@@ -74,7 +74,6 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
     oncellevent = gridcellevent
     reffontheight = 14
     object sc: ttreeitemedit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
       optionsskin = [osk_framebuttononly]
       bounds_x = 0
       bounds_y = 0
@@ -133,6 +132,8 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
     anchors = [an_left, an_bottom]
     taborder = 1
     state = [as_localcaption]
+    autosize_cx = 0
+    autosize_cy = 0
     caption = '&OK'
     modalresult = mr_ok
   end
@@ -144,6 +145,8 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
     anchors = [an_left, an_bottom]
     taborder = 2
     state = [as_localcaption]
+    autosize_cx = 0
+    autosize_cy = 0
     caption = '&Cancel'
     modalresult = mr_cancel
   end
@@ -217,6 +220,8 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
     anchors = [an_left, an_bottom]
     taborder = 5
     state = [as_localcaption, as_localcolor, as_localonexecute]
+    autosize_cx = 0
+    autosize_cy = 0
     caption = '&Default'
     onexecute = defaultex
   end

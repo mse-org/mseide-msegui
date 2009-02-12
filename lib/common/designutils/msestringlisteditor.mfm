@@ -25,6 +25,8 @@ object stringlisteditor: tstringlisteditor
     anchors = [an_left, an_bottom]
     taborder = 3
     state = [as_default, as_localdefault, as_localcaption]
+    autosize_cx = 0
+    autosize_cy = 0
     caption = '&OK'
     modalresult = mr_ok
     reffontheight = 14
@@ -37,6 +39,8 @@ object stringlisteditor: tstringlisteditor
     bounds_cy = 20
     anchors = [an_left, an_bottom]
     state = [as_localcaption]
+    autosize_cx = 0
+    autosize_cy = 0
     caption = '&Cancel'
     modalresult = mr_cancel
     reffontheight = 14
@@ -50,7 +54,7 @@ object stringlisteditor: tstringlisteditor
     frame.dummy = 0
     anchors = [an_top, an_bottom]
     taborder = 1
-    optionsgrid = [og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autopopup]
+    optionsgrid = [og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_wrapcol, og_autopopup]
     fixcols.count = 1
     fixcols.items = <    
       item
@@ -79,6 +83,7 @@ object stringlisteditor: tstringlisteditor
       taborder = 1
       visible = False
       optionsedit = [oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_linebreak, oe_shiftreturn, oe_eatreturn, oe_keyexecute, oe_savestate]
+      encoding = ce_locale
       reffontheight = 14
     end
   end

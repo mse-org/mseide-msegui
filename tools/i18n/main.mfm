@@ -60,7 +60,7 @@ object mainfo: tmainfo
     frame.dummy = 0
     anchors = [an_left, an_top, an_right, an_bottom]
     taborder = 5
-    optionsgrid = [og_colsizing, og_focuscellonenter, og_colchangeontabkey, og_autopopup]
+    optionsgrid = [og_colsizing, og_focuscellonenter, og_colchangeontabkey, og_wrapcol, og_autopopup]
     fixrows.count = 1
     fixrows.items = <    
       item
@@ -71,23 +71,18 @@ object mainfo: tmainfo
         captions.items = <        
           item
             caption = 'Name'
-            options = []
           end        
           item
             caption = 'Type'
-            options = []
           end        
           item
             caption = 'NT'
-            options = []
           end        
           item
             caption = 'Comment'
-            options = []
           end        
           item
             caption = 'Value'
-            options = []
           end>
       end>
     datacols.count = 5

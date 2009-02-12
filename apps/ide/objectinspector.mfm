@@ -17,6 +17,7 @@ object objectinspectorfo: tobjectinspectorfo
   container.frame.dummy = 0
   container.onchildscaled = objectinspectoronchildscaled
   dragdock.splitter_size = 0
+  dragdock.tab_size = 0
   dragdock.caption = 'Objectinspector'
   dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_propsize]
   options = [fo_savepos, fo_savezorder, fo_savestate]
@@ -123,7 +124,7 @@ object objectinspectorfo: tobjectinspectorfo
     anchors = [an_top, an_bottom]
     taborder = 1
     popupmenu = tpopupmenu1
-    optionsgrid = [og_colsizing, og_colmoving, og_focuscellonenter, og_colchangeontabkey, og_noresetselect]
+    optionsgrid = [og_colsizing, og_colmoving, og_focuscellonenter, og_colchangeontabkey, og_wrapcol, og_noresetselect]
     rowcolors.count = 1
     rowcolors.items = (
       16777202
@@ -270,6 +271,8 @@ object objectinspectorfo: tobjectinspectorfo
     anchors = [an_top, an_right]
     hint = 'Show component editor.'
     state = [as_disabled, as_localdisabled, as_localcaption, as_localhint, as_localonexecute]
+    autosize_cx = 0
+    autosize_cy = 0
     caption = 'ED'
     onexecute = compeditonexecute
     reffontheight = 14
