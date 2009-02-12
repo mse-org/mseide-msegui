@@ -813,13 +813,18 @@ type
                                           write setrecnonullbased;
  end;
 
+ fielddatalinkstatety = (fds_ismsestring,fds_islargeint,fds_isstring,
+                         fds_editing,fds_modified,fds_filterediting,
+                              fds_filtereditdisabled);
+ fielddatalinkstatesty = set of fielddatalinkstatety;
+ 
  tfielddatalink = class(tmsedatalink)
   private
    ffield: tfield;
    ffieldname: string;
-   fismsestring: boolean;
-   fislargeint: boolean;
-   fisstringfield: boolean;
+//   fismsestring: boolean;
+//   fislargeint: boolean;
+//   fisstringfield: boolean;
    fnullsymbol: msestring;
    procedure setfieldname(const Value: string);
    function getasmsestring: msestring;
@@ -845,7 +850,11 @@ type
    procedure SetAsString(const avalue: string);
    function GetAsVariant: variant;
    procedure SetAsVariant(const avalue: variant);
+   function getislargeint: boolean;
+   function getismsestring: boolean;
+   function getisstringfield: boolean;
   protected
+   fstate: fielddatalinkstatesty;
    procedure setfield(const value: tfield); virtual;
    procedure activechanged; override;
    procedure layoutchanged; override;
@@ -854,9 +863,10 @@ type
    function fieldactive: boolean;
    property field: tfield read ffield;
    property fieldname: string read ffieldname write setfieldname;
-   property islargeint: boolean read fislargeint;
-   property ismsestring: boolean read fismsestring;
-   property isstringfield: boolean read fisstringfield;
+   property state: fielddatalinkstatesty read fstate;
+   property islargeint: boolean read getislargeint;
+   property ismsestring: boolean read getismsestring;
+   property isstringfield: boolean read getisstringfield;
    
    property AsBoolean: Boolean read GetAsBoolean write SetAsBoolean;
    property AsCurrency: Currency read GetAsCurrency write SetAsCurrency;
@@ -1269,8 +1279,8 @@ function realtytovariant(const value: realty): variant; overload;
 
 implementation
 uses
- rtlconsts,msefileutils,typinfo,dbconst,msedatalist,mseformatstr,
- msereal,variants,msebits,msedate{,msedbgraphics}{$ifdef unix},cwstring{$endif};
+ rtlconsts,msefileutils,typinfo,dbconst,msedatalist,mseformatstr,msebits,
+ msereal,variants,msedate{,msedbgraphics}{$ifdef unix},cwstring{$endif};
 
 var
  msefieldtypeclasses: array[fieldclasstypety] of fieldclassty = 
@@ -4310,12 +4320,27 @@ begin
 end; 
 
 procedure tfielddatalink.setfield(const value: tfield);
+const
+ mask: fielddatalinkstatesty = [fds_ismsestring,fds_islargeint,
+                                   fds_isstring];
+var
+ state1: fielddatalinkstatesty;
 begin
  if ffield <> value then begin
   ffield := value;
-  fismsestring:= (ffield <> nil) and (ffield is tmsestringfield);
-  fislargeint:= (ffield <> nil) and (ffield.datatype = ftlargeint);
-  fisstringfield:= (ffield <> nil) and (ffield.datatype in textfields);
+  state1:= [];
+  if (ffield <> nil) then begin
+   if ffield is tmsestringfield then begin
+    include(state1,fds_ismsestring);
+   end;
+   if (ffield.datatype = ftlargeint) then begin
+    include(state1,fds_islargeint);
+   end;
+   if (ffield.datatype in textfields) then begin
+    include(state1,fds_isstring);
+   end;
+  end;
+  replacebits1(longword(fstate),longword(state1),longword(mask));
   editingchanged;
   recordchanged(nil);
  end;
@@ -4345,7 +4370,7 @@ end;
 
 function tfielddatalink.getasmsestring: msestring;
 begin
- if fismsestring then begin
+ if fds_ismsestring in fstate then begin
   result:= tmsestringfield(ffield).asmsestring;
  end
  else begin
@@ -4364,7 +4389,7 @@ end;
 
 function tfielddatalink.getmsedefaultexpression: msestring;
 begin
- if fismsestring then begin
+ if fds_ismsestring in fstate then begin
   result:= tmsestringfield(ffield).defaultexpression;
   if result = #0 then begin
    result:= '';
@@ -4377,7 +4402,7 @@ end;
 
 procedure tfielddatalink.setasmsestring(const avalue: msestring);
 begin
- if fismsestring then begin
+ if fds_ismsestring in fstate then begin
   tmsestringfield(field).asmsestring:= avalue;
  end
  else begin
@@ -4411,7 +4436,7 @@ begin
  result:= '';
  if ffield <> nil then begin
   if not ffield.isnull then begin
-   if fismsestring then begin
+   if fds_ismsestring in fstate then begin
     result:= aformat + tmsestringfield(ffield).asmsestring;
    end
    else begin
@@ -4566,6 +4591,21 @@ function tfielddatalink.fieldactive: boolean;
 begin
  result:= (ffield <> nil) and (dataset <> nil) and (dataset.state <> dsinactive);
 // result:= active and (ffield <> nil); //unreliable
+end;
+
+function tfielddatalink.getislargeint: boolean;
+begin
+ result:= fds_islargeint in fstate;
+end;
+
+function tfielddatalink.getismsestring: boolean;
+begin
+ result:= fds_ismsestring in fstate;
+end;
+
+function tfielddatalink.getisstringfield: boolean;
+begin
+ result:= fds_isstring in fstate;
 end;
 
 { tpersistentfields }

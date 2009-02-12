@@ -167,13 +167,13 @@ type
 
  tgriddatalink = class;
  
- editwidgetdatalinkstatety = (ewds_editing,ewds_modified,ewds_filterediting,
-                              ewds_filtereditdisabled);
- editwidgetdatalinkstatesty = set of editwidgetdatalinkstatety;
+// editwidgetdatalinkstatety = (ewds_editing,ewds_modified,ewds_filterediting,
+//                              ewds_filtereditdisabled);
+// editwidgetdatalinkstatesty = set of editwidgetdatalinkstatety;
  
  tcustomeditwidgetdatalink = class(tfielddatalink,idbeditinfo)
   private
-   fstate: editwidgetdatalinkstatesty;
+//   fstate: editwidgetdatalinkstatesty;
    frecordchange: integer;
    fbeginedit: integer;
    fmaxlength: integer;
@@ -2440,14 +2440,14 @@ end;
 
 procedure tcustomeditwidgetdatalink.setediting(avalue: boolean);
 begin
- if (ewds_editing in fstate) <> avalue then begin
+ if (fds_editing in fstate) <> avalue then begin
   if avalue then begin
-   include(fstate,ewds_editing);
+   include(fstate,fds_editing);
   end
   else begin
-   exclude(fstate,ewds_editing);
+   exclude(fstate,fds_editing);
   end;
-  exclude(fstate,ewds_modified);
+  exclude(fstate,fds_modified);
  end;
 end;
 
@@ -2456,20 +2456,20 @@ begin
  if canmodify then begin
   inherited edit;
  end;
- result:= ewds_editing in fstate;
+ result:= fds_editing in fstate;
 end;
 
 function tcustomeditwidgetdatalink.canmodify: Boolean;
 begin
  result:= (field <> nil) and 
-           ((ewds_filterediting in fstate) or 
+           ((fds_filterediting in fstate) or 
               not noedit and not field.readonly);
 end;
 
 procedure tcustomeditwidgetdatalink.modified;
 begin
  if not editing and (frecordchange = 0) and 
-                not (ewds_filterediting in fstate) then begin
+                not (fds_filterediting in fstate) then begin
   inc(fbeginedit);
   try
    edit;
@@ -2477,7 +2477,7 @@ begin
    dec(fbeginedit);
   end;
  end;
- include(fstate,ewds_modified);
+ include(fstate,fds_modified);
 end;
 
 procedure tcustomeditwidgetdatalink.updateoptionsedit(var aoptions: optionseditty);
@@ -2486,7 +2486,7 @@ var
 begin
  state1:= fintf.getwidget.ComponentState;
  if state1 * [cswriting,csdesigning] = [] then begin
-  if not (ewds_filterediting in fstate) and 
+  if not (fds_filterediting in fstate) and 
          ((datasource = nil) or
            not editing and not (canmodify and datasource.AutoEdit)) then begin
    include(aoptions,oe_readonly);
@@ -2505,20 +2505,20 @@ var
  bo1: boolean;
  bo2: boolean;
 begin
- bo1:= ewds_filterediting in fstate;
+ bo1:= fds_filterediting in fstate;
  if event = deupdatestate then begin
   if (dataset <> nil) and (dataset.state = dsfilter) then begin
-   include(fstate,ewds_filterediting);
+   include(fstate,fds_filterediting);
   end
   else begin
-   exclude(fstate,ewds_filterediting);
+   exclude(fstate,fds_filterediting);
   end;
  end;
  inherited;
- if bo1 <> (ewds_filterediting in fstate) then begin
+ if bo1 <> (fds_filterediting in fstate) then begin
   if bo1 then begin
-   if ewds_filtereditdisabled in fstate then begin
-    exclude(fstate,ewds_filtereditdisabled);
+   if fds_filtereditdisabled in fstate then begin
+    exclude(fstate,fds_filtereditdisabled);
     fintf.setenabled(true);
    end;
   end
@@ -2530,7 +2530,7 @@ begin
     else bo2:= oed_nofilteredit in foptions; //fek_filter
    end;
    if bo2 then begin
-    include(fstate,ewds_filtereditdisabled);
+    include(fstate,fds_filtereditdisabled);
     fintf.setenabled(false);
    end;
   end;
@@ -2541,7 +2541,7 @@ end;
 procedure tcustomeditwidgetdatalink.activechanged;
 begin
  if not active then begin
-  fstate:= fstate - [ewds_filterediting,ewds_filtereditdisabled];
+  fstate:= fstate - [fds_filterediting,fds_filtereditdisabled];
  end;
  fintf.updatereadonlystate;
  try
@@ -2622,7 +2622,7 @@ begin
     dec(frecordchange);
    end;
   end;
-  exclude(fstate,ewds_modified);
+  exclude(fstate,fds_modified);
  end;
 end;
 
@@ -2631,7 +2631,7 @@ begin
  inc(fcanclosing);
  try
   if fintf.getwidget.canclose(nil) then begin
-   exclude(fstate,ewds_modified);
+   exclude(fstate,fds_modified);
   end
   else begin
    raise eabort.create('');
@@ -2672,7 +2672,7 @@ begin
   if not (ws_loadedproc in widget1.widgetstate) and (field <> nil) and 
                not ((oe_checkmrcancel in fintf.getoptionsedit) and
              (widget1.window.modalresult = mr_cancel)) then begin
-   if ewds_filterediting in fstate then begin
+   if fds_filterediting in fstate then begin
     fintf.valuetofield;
    end
    else begin
@@ -6550,7 +6550,10 @@ begin
    int2:= ds1.recordcount;
    if (int1 >= 0) and (int1 < int2) and (ds1.state <> dsfilter) then begin
     invalidateindicator; //grid can be defocused
-    dataset.moveby(int1-recnonullbased);
+    int1:= int1-recnonullbased;
+    if int1 <> 0 then begin
+     dataset.moveby(int1);
+    end;
    end;
    cell.row:= activerecord;
   end;   
@@ -7019,7 +7022,7 @@ end;
 
 function tdbstringcol.edited: boolean;
 begin
- result:= ewds_modified in fdatalink.fstate;
+ result:= fds_modified in fdatalink.fstate;
 end;
 
 procedure tdbstringcol.initeditfocus;
@@ -7420,7 +7423,7 @@ begin
  inherited;
  if accept and (ffocusedcell.col >= 0) then begin
   with datacols[ffocusedcell.col] do begin;
-   if (ewds_modified in fdatalink.fstate) and self.fdatalink.active then begin
+   if (fds_modified in fdatalink.fstate) and self.fdatalink.active then begin
     fdatalink.dataentered;
    end;
   end;
