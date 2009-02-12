@@ -147,7 +147,7 @@ type
               const font: tfont = nil; noinvalidate: boolean = false);
    procedure updatepos(const atextrect,aclientrect: rectty);
    procedure setscrollvalue(const avalue: real; const horz: boolean);
-   property font: tfont read finfo.font write setfont;
+   property font: tfont read ffont write setfont;
    property fontstyle: fontstylesty read ffontstyle write ffontstyle default [];
    property fontcolor: colorty read ffontcolor write ffontcolor default cl_none;
    property fontcolorbackground: colorty read ffontcolor write 
