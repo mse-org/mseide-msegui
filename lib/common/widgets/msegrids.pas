@@ -8413,7 +8413,8 @@ var
   beginupdate;
   try
    case selectaction of
-    fca_entergrid,fca_focusin,fca_focusinrepeater,fca_focusinforce,fca_setfocusedcell: begin
+    fca_entergrid,fca_focusin,fca_focusinshift,fca_focusinrepeater,
+               fca_focusinforce,fca_setfocusedcell: begin
      if (selectaction <> fca_entergrid) then begin
       if not (og_noresetselect in foptionsgrid) then begin
        fdatacols.selected[invalidcell]:= false;
@@ -9667,7 +9668,13 @@ begin
   if info.shiftstate - [ss_shift,ss_ctrl] = [] then begin
    if not (es_processed in info.eventstate) then begin
     if ss_shift in info.shiftstate then begin
-     action:= fca_focusinshift;
+     if (ffocusedcell.col >= 0) and
+             (co_keyselect in fdatacols[ffocusedcell.col].foptions) then begin
+      action:= fca_selectend;
+     end
+     else begin
+      action:= fca_focusinshift;
+     end;
     end
     else begin
      action:= fca_focusin;
