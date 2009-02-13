@@ -1092,6 +1092,8 @@ type
    procedure counthidden(var aindex: integer);
   protected
    procedure setcount(const value: integer); override;
+   procedure internalshow(var aindex: integer);
+   procedure internalhide(var aindex: integer);
    procedure show(const aindex: integer);
    procedure hide(const aindex: integer);
 //   procedure foldchanged(const index: integer);
@@ -1114,7 +1116,8 @@ type
    function nearestvisiblerow(const arow: integer): integer;
    procedure getfoldstate(const arow: integer; out aisvisible: boolean; 
                 out afoldlevel: foldlevelty; out ahaschildren,aisopen: boolean);
-
+   procedure hidechildren(const arow: integer);
+   procedure showchildren(const arow: integer);
    property hidden[const index: integer]: boolean read gethidden write sethidden;
    property foldlevel[const index: integer]: foldlevelty read getfoldlevel write setfoldlevel;
                                                            //0..127
@@ -12557,7 +12560,7 @@ begin
  end;  
 end;
 
-procedure trowstatelist.show(const aindex: integer);
+procedure trowstatelist.internalshow(var aindex: integer);
 var
  int1,int2: integer;
  po1: prowstateaty;
@@ -12567,17 +12570,25 @@ begin
  if (int1 < count) then begin
   po1:= prowstateaty(datapo);
   if (po1^[int1].fold and foldlevelmask) > 
-                        (po1^[aindex].fold and foldlevelmask) then begin
+                            (po1^[aindex].fold and foldlevelmask) then begin
    int2:= fhiddencount;
    counthidden(int1);
    fhiddencount:= fhiddencount - 2*(fhiddencount-int2);
   end;
  end;
+ aindex:= int1;
+end;
+
+procedure trowstatelist.show(const aindex: integer);
+var
+ int1: integer;
+begin
+ int1:= aindex;
+ internalshow(int1);
  checkdirty(aindex);
 end;
 
-procedure trowstatelist.hide(const aindex: integer);
-
+procedure trowstatelist.internalhide(var aindex: integer);
 var
  int1: integer; 
  po1: prowstateaty;
@@ -12591,7 +12602,78 @@ begin
    counthidden(int1);
   end;
  end;
+ aindex:= int1;
+end;
+
+procedure trowstatelist.hide(const aindex: integer);
+var
+ int1: integer;
+begin
+ int1:= aindex; 
+ internalhide(int1);
  checkdirty(aindex);
+end;
+
+procedure trowstatelist.hidechildren(const arow: integer);
+var
+ int1,int2: integer; 
+ po1: prowstateaty;
+ level1,level2: foldlevelty;
+begin
+ checkindexrange(arow);
+ po1:= prowstateaty(datapo);
+ level1:= po1^[arow].fold and foldlevelmask;
+ int1:= arow+1;
+ while int1 < count do begin
+  with po1^[int1] do begin
+   level2:= fold and foldlevelmask;
+   if level2 <= level1 then begin
+    break;
+   end;
+   if fold and foldhiddenmask = 0 then begin
+    fold:= fold or foldhiddenmask;
+    internalhide(int1);
+   end
+   else begin
+    while (int1 < count) and (po1^[int1].fold and foldhiddenmask >
+                                                          level2) do begin
+     inc(int1);
+    end;
+   end;
+  end;
+ end;
+ checkdirty(arow+1);
+end;
+
+procedure trowstatelist.showchildren(const arow: integer);
+var
+ int1,int2: integer; 
+ po1: prowstateaty;
+ level1,level2: foldlevelty;
+begin
+ checkindexrange(arow);
+ po1:= prowstateaty(datapo);
+ level1:= po1^[arow].fold and foldlevelmask;
+ int1:= arow+1;
+ while int1 < count do begin
+  with po1^[int1] do begin
+   level2:= fold and foldlevelmask;
+   if level2 <= level1 then begin
+    break;
+   end;
+   if fold and foldhiddenmask <> 0 then begin
+    fold:= fold and not foldhiddenmask;
+    internalshow(int1);
+   end
+   else begin
+    while (int1 < count) and (po1^[int1].fold and foldhiddenmask >
+                                                          level2) do begin
+     inc(int1);
+    end;
+   end;
+  end;
+ end;
+ checkdirty(arow+1);
 end;
 
 procedure trowstatelist.sethidden(const index: integer; const avalue: boolean);

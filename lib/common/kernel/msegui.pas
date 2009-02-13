@@ -1608,9 +1608,11 @@ type
    function isdblclicked(const info: mouseeventinfoty): boolean;
    //true if eventtype in [et_buttonpress,et_butonrelease], button is mb_left,
    // and timedlay to last same buttonevent is short
-   function isleftbuttondown(const info: mouseeventinfoty): boolean;
+   function isleftbuttondown(const info: mouseeventinfoty): boolean; overload;
    //true if eventtype = et_butonpress, button is mb_left, pos in clientrect
    //origin = paintrect.pos
+   function isleftbuttondown(const info: mouseeventinfoty;
+                      const akeyshiftstate: shiftstatesty): boolean; overload;
 
    function rootpos: pointty;
    property screenpos: pointty read getscreenpos write setscreenpos;
@@ -9552,6 +9554,16 @@ begin
  with info do begin
   result:= (eventkind = ek_buttonpress) and
               (button = mb_left) and pointinrect(pos,clientrect);
+ end;
+end;
+
+function twidget.isleftbuttondown(const info: mouseeventinfoty;
+                 const akeyshiftstate: shiftstatesty): boolean;
+begin
+ with info do begin
+  result:= (eventkind = ek_buttonpress) and
+              (button = mb_left) and pointinrect(pos,clientrect) and (
+              shiftstate*keyshiftstatesmask = akeyshiftstate);
  end;
 end;
 

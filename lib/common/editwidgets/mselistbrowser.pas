@@ -2617,7 +2617,7 @@ begin
 end;
 
 procedure titemedit.docellevent(const ownedcol: boolean;
-  var info: celleventinfoty);
+                                            var info: celleventinfoty);
 begin
  with info do begin
   if ownedcol then begin
