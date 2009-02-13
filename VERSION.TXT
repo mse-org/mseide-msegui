@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+2009-02-13
+ titemedit.onmouseevent -> onclientmouseevent.
 2009-02-12
  optiongridty og_rotaterow -> og_wraprow, additional og_wrapcol, 
  must be activated in existing projects. 

@@ -108,8 +108,9 @@ type
                    ws1_noclipchildren,
                    ws1_nodesignvisible,ws1_nodesignframe,ws1_nodesignhandles,
                    ws1_nodesigndelete,ws1_designactive,
-                   ws1_fakevisible,ws1_nominsize
+                   ws1_fakevisible,ws1_nominsize,
                          //used for report size calculations
+                   ws1_onkeydowncalled
                    );
  widgetstates1ty = set of widgetstate1ty;
 
@@ -9425,6 +9426,7 @@ end;
 procedure twidget.internalkeydown(var info: keyeventinfoty);
 begin
  if not (es_processed in info.eventstate) then begin
+  exclude(fwidgetstate1,ws1_onkeydowncalled);
   dokeydown(info);
  end;
  if not (es_processed in info.eventstate) then begin

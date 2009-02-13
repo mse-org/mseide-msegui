@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -402,9 +402,9 @@ type
   private
    fitemlist: tcustomitemeditlist;
    fonsetvalue: setstringeventty;
-   fonkeydown: keyeventty;
-   fonkeyup: keyeventty;
-   fonmouseevent: mouseeventty;
+//   fonkeydown: keyeventty;
+//   fonkeyup: keyeventty;
+   fonclientmouseevent: mouseeventty;
    fonbuttonaction: buttoneventty;
    fonupdaterowvalues: itemindexeventty;
    foncellevent: celleventty;
@@ -451,7 +451,7 @@ type
    procedure setupeditor; override;
    procedure dopaint(const acanvas: tcanvas); override;
    procedure dokeydown(var info: keyeventinfoty); override;
-   procedure dokeyup(var info: keyeventinfoty); override;
+//   procedure dokeyup(var info: keyeventinfoty); override;
 
    procedure getitemvalues; virtual;
    procedure internalcreateframe; override;
@@ -484,9 +484,10 @@ type
   published
    property itemlist: titemeditlist read getitemlist write setitemlist;
    property onsetvalue: setstringeventty read fonsetvalue write fonsetvalue;
-   property onmouseevent: mouseeventty read fonmouseevent write fonmouseevent;
-   property onkeydown: keyeventty read fonkeydown write fonkeydown;
-   property onkeyup: keyeventty read fonkeyup write fonkeyup;
+   property onclientmouseevent: mouseeventty read fonclientmouseevent 
+                           write fonclientmouseevent;
+//   property onkeydown: keyeventty read fonkeydown write fonkeydown;
+//   property onkeyup: keyeventty read fonkeyup write fonkeyup;
    property optionsedit;
    property font;
    property passwordchar;
@@ -683,7 +684,7 @@ type
    procedure expandedchanged(const avalue: boolean);
    procedure setfieldedit(const avalue: trecordfieldedit);
   protected
-   procedure clientmouseevent(var info: mouseeventinfoty); override;
+//   procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure doitembuttonpress(var info: mouseeventinfoty); override;
    procedure setfiltertext(const value: msestring); override;
    function getkeystring1(const aindex: integer): msestring;
@@ -2327,8 +2328,8 @@ var
  po1: pointty;
 
 begin
- if canevent(tmethod(fonmouseevent)) then begin
-  fonmouseevent(self,info);
+ if canevent(tmethod(fonclientmouseevent)) then begin
+  fonclientmouseevent(self,info);
  end;
  if not (es_processed in info.eventstate) then begin
   if fvalue <> nil then begin
@@ -2442,40 +2443,43 @@ procedure titemedit.dokeydown(var info: keyeventinfoty);
 var
  str1: msestring;
 begin
- if canevent(tmethod(fonkeydown)) then begin
-  fonkeydown(self,info);
- end;
+// if canevent(tmethod(fonkeydown)) then begin
+//  fonkeydown(self,info);
+// end;
+ doonkeydown(info);
  with info do begin
-  if (oe_locate in foptionsedit) and isenterkey(nil,key) and 
-                      (shiftstate = []) then begin
-   if not editing then begin
-    editing:= (item <> nil) and not (ns_readonly in item.state) and 
-                 not (oe_readonly in foptionsedit);
-    if editing then begin
-     include(eventstate,es_processed);
-    end;
-   end
-   else begin
-    inherited;
-    editing:= false;
-    include(eventstate,es_processed);
-   end;
-  end;
-  
-  if not(es_processed in eventstate) and islocating then begin
-//      (foptionsedit * [oe_readonly,oe_locate] = [oe_readonly,oe_locate]) then begin
-   if (key = key_backspace) and (shiftstate = []) then begin
-    filtertext:= copy(ffiltertext,1,length(ffiltertext)-1);
-   end
-   else begin
-    if (key = key_home) and (shiftstate = []) then begin
-     filtertext:= '';
+  if not(es_processed in eventstate) then begin
+   if (oe_locate in foptionsedit) and isenterkey(nil,key) and 
+                       (shiftstate = []) then begin
+    if not editing then begin
+     editing:= (item <> nil) and not (ns_readonly in item.state) and 
+                  not (oe_readonly in foptionsedit);
+     if editing then begin
+      include(eventstate,es_processed);
+     end;
     end
     else begin
-     str1:= mseextractprintchars(info.chars);
-     if (str1 <> '') and (shiftstate - [ss_shift] = []) then begin
-      filtertext:= ffiltertext + str1;
-      include(eventstate,es_processed);
+     inherited;
+     editing:= false;
+     include(eventstate,es_processed);
+    end;
+   end;
+   
+   if not(es_processed in eventstate) and islocating then begin
+ //      (foptionsedit * [oe_readonly,oe_locate] = [oe_readonly,oe_locate]) then begin
+    if (key = key_backspace) and (shiftstate = []) then begin
+     filtertext:= copy(ffiltertext,1,length(ffiltertext)-1);
+    end
+    else begin
+     if (key = key_home) and (shiftstate = []) then begin
+      filtertext:= '';
+     end
+     else begin
+      str1:= mseextractprintchars(info.chars);
+      if (str1 <> '') and (shiftstate - [ss_shift] = []) then begin
+       filtertext:= ffiltertext + str1;
+       include(eventstate,es_processed);
+      end;
      end;
     end;
    end;
@@ -2485,7 +2489,7 @@ begin
   inherited;
  end;
 end;
-
+{
 procedure titemedit.dokeyup(var info: keyeventinfoty);
 begin
  if canevent(tmethod(fonkeyup)) then begin
@@ -2495,7 +2499,7 @@ begin
   inherited;
  end;
 end;
-
+}
 function titemedit.getvaluetext: msestring;
 begin
  if (fvalue <> nil) then begin
@@ -3841,6 +3845,7 @@ var
  cellbefore: gridcoordty;
 
 begin
+ doonkeydown(info);
  with info do begin
   if (fgridintf <> nil) and not (es_processed in eventstate) and
                                                   (fvalue <> nil) then begin
@@ -4020,8 +4025,8 @@ begin
  end;
 end;
 
-
-procedure ttreeitemedit.docellevent(const ownedcol: boolean; var info: celleventinfoty);
+procedure ttreeitemedit.docellevent(const ownedcol: boolean;
+                                                   var info: celleventinfoty);
 begin
  inherited;
  if fvalue <> nil then begin
@@ -4038,6 +4043,7 @@ begin
  fdragcontroller.assign(avalue);
 end;
 }
+(*
 procedure ttreeitemedit.clientmouseevent(var info: mouseeventinfoty);
 begin
  inherited;
@@ -4047,6 +4053,7 @@ begin
  end;
  }
 end;
+*)
 {
 procedure ttreeitemedit.dragevent(var info: draginfoty);
 begin

@@ -345,6 +345,7 @@ type
    procedure updatecopytoclipboard(var atext: msestring); virtual;
    procedure updatepastefromclipboard(var atext: msestring); virtual;
 
+   procedure doonkeydown(var info: keyeventinfoty);
                //interface to inplaceedit
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure dokeyup(var info: keyeventinfoty); override;
@@ -1089,11 +1090,19 @@ begin
  inherited;
 end;
 
+procedure tcustomedit.doonkeydown(var info: keyeventinfoty);
+begin
+ if not (ws1_onkeydowncalled in fwidgetstate1) then begin
+  include(fwidgetstate1,ws1_onkeydowncalled);
+  if canevent(tmethod(fonkeydown)) then begin
+   fonkeydown(self,info);
+  end;
+ end;
+end;
+
 procedure tcustomedit.dokeydown(var info: keyeventinfoty);
 begin
- if canevent(tmethod(fonkeydown)) then begin
-  fonkeydown(self,info);
- end;
+ doonkeydown(info);
  if not (es_processed in info.eventstate) then begin
   feditor.dokeydown(info);
   if not (es_processed in info.eventstate) then begin

@@ -1675,36 +1675,7 @@ begin
     end;
    end;
    setlength(lines,int1+1);
-   acanvas.save;
-   acanvas.color:= colorline;
-   acanvas.brush:= stockobjects.bitmaps[stb_dens50];
-   {$ifdef mswindows}
-   {workaround: colors are wrong by negativ x on win2000! bug?}
-   int2:= levelshift;
-   acanvas.remove(makepoint(int2,0));
-   for int1:= 0 to high(lines) do begin
-    inc(lines[int1].a.x,int2);
-    inc(lines[int1].b.x,int2);
-   end;
-   if iswin95 then begin //win95 can not draw brushed lines
-    for int1:= 0 to high(lines) do begin
-     with lines[int1] do begin
-      if a.x <> b.x then begin
-       acanvas.fillrect(makerect(a.x,a.y,b.x-a.x+1,1),cl_brushcanvas);
-      end
-      else begin
-       acanvas.fillrect(makerect(a.x,a.y,1,b.y-a.y+1),cl_brushcanvas);
-      end;
-     end;
-    end;
-   end
-   else begin
-   {$endif}
-   acanvas.drawlinesegments(lines,cl_brushcanvas);
-   {$ifdef mswindows}
-   end;
-   {$endif}
-   acanvas.restore;
+   drawdottedlines(acanvas,lines,colorline);
   end;
   if boxno >= 0 then begin
    stockobjects.glyphs.paint(acanvas,boxno,expandboxrect,

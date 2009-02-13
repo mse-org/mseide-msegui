@@ -1112,6 +1112,9 @@ type
                             const autoappend: boolean): integer;
    function rowhidden(const arow: integer): boolean;
    function nearestvisiblerow(const arow: integer): integer;
+   procedure getfoldstate(const arow: integer; out aisvisible: boolean; 
+                out afoldlevel: foldlevelty; out ahaschildren,aisopen: boolean);
+
    property hidden[const index: integer]: boolean read gethidden write sethidden;
    property foldlevel[const index: integer]: foldlevelty read getfoldlevel write setfoldlevel;
                                                            //0..127
@@ -1122,7 +1125,6 @@ type
 
  tdatacols = class(tcols)
   private
-   frowstate: trowstatelist;
    fselectedrow: integer; //-1 none, -2 more than one
    fsortcol: integer;
    fnewrowcol: integer;
@@ -1137,6 +1139,7 @@ type
    procedure setsortcol(const avalue: integer);
    procedure setnewrowcol(const avalue: integer);
   protected
+   frowstate: trowstatelist;
    procedure datasourcechanged; virtual;
    procedure begindataupdate; override;
    procedure enddataupdate; override;
@@ -8517,7 +8520,8 @@ var
   beginupdate;
   try
    case selectaction of
-    fca_entergrid,fca_focusin,fca_focusinrepeater,fca_focusinforce,fca_setfocusedcell: begin
+    fca_entergrid,fca_focusin,fca_focusinshift,fca_focusinrepeater,
+               fca_focusinforce,fca_setfocusedcell: begin
      if (selectaction <> fca_entergrid) then begin
       if not (og_noresetselect in foptionsgrid) then begin
        fdatacols.selected[invalidcell]:= false;
@@ -9805,7 +9809,13 @@ begin
   if info.shiftstate - [ss_shift,ss_ctrl] = [] then begin
    if not (es_processed in info.eventstate) then begin
     if ss_shift in info.shiftstate then begin
-     action:= fca_focusinshift;
+     if (ffocusedcell.col >= 0) and
+             (co_keyselect in fdatacols[ffocusedcell.col].foptions) then begin
+      action:= fca_selectend;
+     end
+     else begin
+      action:= fca_focusinshift;
+     end;
     end
     else begin
      action:= fca_focusin;
@@ -12889,6 +12899,22 @@ begin
     exit;
    end;
   end;
+ end;
+end;
+
+procedure trowstatelist.getfoldstate(const arow: integer; 
+                       out aisvisible: boolean; out afoldlevel: foldlevelty;
+                       out ahaschildren,aisopen: boolean);
+var
+ po1: prowstateaty;
+begin
+ checkindexrange(arow);
+ po1:= datapo;
+ with po1^[arow] do begin
+  afoldlevel:= fold and foldlevelmask;
+  aisvisible:= fold and foldhiddenmask = 0;
+  ahaschildren:= (arow < count-1) and (po1^[arow+1].fold > afoldlevel);
+  aisopen:= ahaschildren and (po1^[arow+1].fold and foldhiddenmask = 0);
  end;
 end;
 

@@ -121,6 +121,7 @@ type
    procedure doitemchange(const index: integer); virtual;
    procedure dochange; virtual;
    procedure internaldeletedata(index: integer; dofree: boolean);
+   procedure checkindexrange(const aindex: integer);
   public
    constructor create; override;
    destructor destroy; override;
@@ -2153,6 +2154,13 @@ begin
   result:= sort(arangelist,true);
  finally
   arangelist.free;
+ end;
+end;
+
+procedure tdatalist.checkindexrange(const aindex: integer);
+begin
+ if (aindex < 0) or (aindex >= fcount) then begin
+  tlist.error(slistindexerror, aindex);
  end;
 end;
 

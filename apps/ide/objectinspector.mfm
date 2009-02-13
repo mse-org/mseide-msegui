@@ -249,7 +249,7 @@ object objectinspectorfo: tobjectinspectorfo
       font.dummy = 0
       onkeydown = valueskeydown
       onsetvalue = valuessetvalue
-      onmouseevent = valuesonmouseevent
+      onclientmouseevent = valuesonmouseevent
       onbuttonaction = valuesbuttonaction
       onupdaterowvalues = valueupdaterowvalue
       dropdown.options = [deo_autodropdown, deo_keydropdown, deo_cliphint]
