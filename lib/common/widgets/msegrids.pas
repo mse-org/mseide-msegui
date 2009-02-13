@@ -12619,11 +12619,13 @@ var
  int1,int2: integer; 
  po1: prowstateaty;
  level1,level2: foldlevelty;
+ bo1: boolean;
 begin
  checkindexrange(arow);
  po1:= prowstateaty(datapo);
  level1:= po1^[arow].fold and foldlevelmask;
  int1:= arow+1;
+ bo1:= false;
  while int1 < count do begin
   with po1^[int1] do begin
    level2:= fold and foldlevelmask;
@@ -12631,6 +12633,7 @@ begin
     break;
    end;
    if fold and foldhiddenmask = 0 then begin
+    bo1:= true;
     fold:= fold or foldhiddenmask;
     internalhide(int1);
    end
@@ -12642,7 +12645,10 @@ begin
    end;
   end;
  end;
- checkdirty(arow+1);
+ if bo1 then begin
+  checkdirty(arow+1);
+  fgrid.layoutchanged;
+ end;
 end;
 
 procedure trowstatelist.showchildren(const arow: integer);
@@ -12650,11 +12656,13 @@ var
  int1,int2: integer; 
  po1: prowstateaty;
  level1,level2: foldlevelty;
+ bo1: boolean;
 begin
  checkindexrange(arow);
  po1:= prowstateaty(datapo);
  level1:= po1^[arow].fold and foldlevelmask;
  int1:= arow+1;
+ bo1:= false;
  while int1 < count do begin
   with po1^[int1] do begin
    level2:= fold and foldlevelmask;
@@ -12662,6 +12670,7 @@ begin
     break;
    end;
    if fold and foldhiddenmask <> 0 then begin
+    bo1:= true;
     fold:= fold and not foldhiddenmask;
     internalshow(int1);
    end
@@ -12673,7 +12682,10 @@ begin
    end;
   end;
  end;
- checkdirty(arow+1);
+ if bo1 then begin
+  checkdirty(arow+1);
+  fgrid.layoutchanged;
+ end;
 end;
 
 procedure trowstatelist.sethidden(const index: integer; const avalue: boolean);
