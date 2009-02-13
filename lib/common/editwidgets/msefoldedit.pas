@@ -24,12 +24,15 @@ type
    flevelstep: integer;
    procedure setlevelstep(const avalue: integer);
   protected
+   procedure drawimage(const acanvas: tcanvas; const arow: integer;
+                    var arect: rectty);
    procedure drawcell(const canvas: tcanvas); override;
    procedure clientmouseevent(var ainfo: mouseeventinfoty); override;
    procedure docellevent(const ownedcol: boolean;
                                          var info: celleventinfoty); override;
    procedure updatecellzone(const alevel: integer; const apos: pointty;
                                          var azone: cellzonety); virtual;
+   procedure dopaint(const acanvas: tcanvas); override;
   public
    constructor create(aowner: tcomponent); override;
   published
@@ -54,35 +57,53 @@ begin
  inherited;
 end;
 
-procedure tfoldedit.drawcell(const canvas: tcanvas);
+procedure tfoldedit.drawimage(const acanvas: tcanvas; const arow: integer;
+                    var arect: rectty);
 var
  isvisible1,haschildren1,isopen1: boolean;
  foldlevel1: foldlevelty;
  int1: integer;
  glyph1: stockglyphty;
+begin
+ with tdatacols1(fgridintf.getcol.grid.datacols).frowstate do begin
+  getfoldstate(arow,isvisible1,foldlevel1,haschildren1,isopen1);
+  int1:= flevelstep*foldlevel1;
+  glyph1:= stg_none;
+  if haschildren1 then begin
+   if isopen1 then begin
+    glyph1:= stg_boxexpanded;
+   end
+   else begin
+    glyph1:= stg_boxexpand;
+   end;
+  end;
+  inc(arect.x,int1);
+  acanvas.drawline(makepoint(int1,0),makepoint(int1,arect.cy),cl_red);
+  if glyph1 <> stg_none then begin
+   stockobjects.glyphs.paint(acanvas,ord(glyph1),arect,[al_ycentered],cl_glyph);
+  end;
+ end;
+end;
+
+procedure tfoldedit.drawcell(const canvas: tcanvas);
+var
  rect1: rectty;
 begin
  inherited;
  with cellinfoty(canvas.drawinfopo^) do begin
-  with tdatacols1(fgridintf.getcol.grid.datacols).frowstate do begin
-   getfoldstate(cell.row,isvisible1,foldlevel1,haschildren1,isopen1);
-   int1:= flevelstep*foldlevel1;
-   glyph1:= stg_none;
-   if haschildren1 then begin
-    if isopen1 then begin
-     glyph1:= stg_boxexpanded;
-    end
-    else begin
-     glyph1:= stg_boxexpand;
-    end;
-   end;
-   rect1:= rect;
-   inc(rect1.x,int1);
-   canvas.drawline(makepoint(int1,0),makepoint(int1,rect1.cy),cl_red);
-   if glyph1 <> stg_none then begin
-    stockobjects.glyphs.paint(canvas,ord(glyph1),rect1,[al_ycentered],cl_glyph);
-   end;
-  end;
+  rect1:= rect;
+  drawimage(canvas,cell.row,rect1);
+ end;
+end;
+
+procedure tfoldedit.dopaint(const acanvas: tcanvas);
+var
+ rect1: rectty;
+begin
+ inherited;
+ if fgridintf <> nil then begin
+  rect1:= clientrect;
+  drawimage(acanvas,fgridintf.getcol.grid.row,rect1);
  end;
 end;
 
