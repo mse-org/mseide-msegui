@@ -65,22 +65,24 @@ var
  int1: integer;
  glyph1: stockglyphty;
 begin
- with tdatacols1(fgridintf.getcol.grid.datacols).frowstate do begin
-  getfoldstate(arow,isvisible1,foldlevel1,haschildren1,isopen1);
-  int1:= flevelstep*foldlevel1;
-  glyph1:= stg_none;
-  if haschildren1 then begin
-   if isopen1 then begin
-    glyph1:= stg_boxexpanded;
-   end
-   else begin
-    glyph1:= stg_boxexpand;
+ if arow >= 0 then begin
+  with tdatacols1(fgridintf.getcol.grid.datacols).frowstate do begin
+   getfoldstate(arow,isvisible1,foldlevel1,haschildren1,isopen1);
+   int1:= flevelstep*foldlevel1;
+   glyph1:= stg_none;
+   if haschildren1 then begin
+    if isopen1 then begin
+     glyph1:= stg_boxexpanded;
+    end
+    else begin
+     glyph1:= stg_boxexpand;
+    end;
    end;
-  end;
-  inc(arect.x,int1);
-  acanvas.drawline(makepoint(int1,0),makepoint(int1,arect.cy),cl_red);
-  if glyph1 <> stg_none then begin
-   stockobjects.glyphs.paint(acanvas,ord(glyph1),arect,[al_ycentered],cl_glyph);
+   inc(arect.x,int1);
+   acanvas.drawline(makepoint(int1,0),makepoint(int1,arect.cy),cl_red);
+   if glyph1 <> stg_none then begin
+    stockobjects.glyphs.paint(acanvas,ord(glyph1),arect,[al_ycentered],cl_glyph);
+   end;
   end;
  end;
 end;

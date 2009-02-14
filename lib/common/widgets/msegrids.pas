@@ -71,7 +71,8 @@ type
                  og_autofirstrow,og_autoappend,og_appendempty,
                  og_savestate,og_sorted,og_folded,
                  og_colchangeontabkey,og_colchangeonreturnkey,
-                 og_wraprow,og_wrapcol,og_visiblerowpagestep,
+                 og_wraprow,og_wrapcol,
+                 og_visiblerowpagestep,
                  og_autopopup,
                  og_mousescrollcol,og_noresetselect);
  optionsgridty = set of optiongridty;
