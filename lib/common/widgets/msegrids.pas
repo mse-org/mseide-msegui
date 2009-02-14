@@ -10092,46 +10092,55 @@ begin
  if not (gs_visiblerowsupdating in fstate) then begin
   include(fstate,gs_visiblerowsupdating);
   try
-   cellatpos(makepoint(0,fdatarecty.y),cell);
-   ffirstvisiblerow:= cell.row;
-   cellatpos(makepoint(0,fdatarecty.y+fdatarecty.cy-1),cell);
-   flastvisiblerow:= cell.row;
-   if ffirstvisiblerow < 0 then begin
-    ffirstvisiblerow:= 0;
-   end;
-   if flastvisiblerow < 0 then begin
-    flastvisiblerow:= frowcount - 1;
-   end;
-   fvisiblerowsbase:= fdatacols.frowstate.visiblerow(ffirstvisiblerow);
-   if flastvisiblerow < 0 then begin
+   if frowcount = 0 then begin
+    fvisiblerowfoldinfo:= nil;
     fvisiblerows:= nil;
+    ffirstvisiblerow:= invalidaxis;
+    flastvisiblerow:= invalidaxis;
+    fvisiblerowsbase:= invalidaxis;
    end
    else begin
-    fvisiblerows:= fdatacols.frowstate.visiblerows(fvisiblerowsbase,
-                       fdatarect.cy div fdatarowheight + 2);
-    int1:= high(fvisiblerows);
-    while fvisiblerows[int1] > flastvisiblerow do begin
-     dec(int1);
+    cellatpos(makepoint(0,fdatarecty.y),cell);
+    ffirstvisiblerow:= cell.row;
+    cellatpos(makepoint(0,fdatarecty.y+fdatarecty.cy-1),cell);
+    flastvisiblerow:= cell.row;
+    if ffirstvisiblerow < 0 then begin
+     ffirstvisiblerow:= 0;
     end;
-    setlength(fvisiblerows,int1+1);
-   end;
-   if (og_folded in foptionsgrid) then begin
-    with fdatacols.frowstate do begin
-     updatefoldinfo(fvisiblerows,fvisiblerowfoldinfo);
-     if (row >= 0) then begin
-      int1:= row;
-      row:= nearestvisiblerow(row);
-      if row = int1 then begin //no focuscell
-       if row >= ffoldchangedrow then begin
-        dofocusedcellposchanged;
-        fdatacols.frowstate.ffoldchangedrow:= bigint;
+    if flastvisiblerow < 0 then begin
+     flastvisiblerow:= frowcount - 1;
+    end;
+    fvisiblerowsbase:= fdatacols.frowstate.visiblerow(ffirstvisiblerow);
+    if flastvisiblerow < 0 then begin
+     fvisiblerows:= nil;
+    end
+    else begin
+     fvisiblerows:= fdatacols.frowstate.visiblerows(fvisiblerowsbase,
+                        fdatarect.cy div fdatarowheight + 2);
+     int1:= high(fvisiblerows);
+     while fvisiblerows[int1] > flastvisiblerow do begin
+      dec(int1);
+     end;
+     setlength(fvisiblerows,int1+1);
+    end;
+    if (og_folded in foptionsgrid) then begin
+     with fdatacols.frowstate do begin
+      updatefoldinfo(fvisiblerows,fvisiblerowfoldinfo);
+      if (row >= 0) then begin
+       int1:= row;
+       row:= nearestvisiblerow(row);
+       if row = int1 then begin //no focuscell
+        if row >= ffoldchangedrow then begin
+         dofocusedcellposchanged;
+         fdatacols.frowstate.ffoldchangedrow:= bigint;
+        end;
        end;
       end;
      end;
+    end
+    else begin
+     fvisiblerowfoldinfo:= nil;
     end;
-   end
-   else begin
-    fvisiblerowfoldinfo:= nil;
    end;
   finally
    exclude(fstate,gs_visiblerowsupdating);
