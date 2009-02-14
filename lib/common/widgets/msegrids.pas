@@ -155,6 +155,7 @@ type
 
  gridstatety = (
       gs_layoutvalid,gs_layoutupdating,gs_updatelocked,{gs_mousefocuslocked,}
+      gs_visiblerowsupdating,
       gs_sortvalid,gs_cellentered,gs_cellclicked,gs_emptyrowremoved,
       gs_rowcountinvalid,gs_rowreadonly,
       gs_scrollup,gs_scrolldown,gs_scrollleft,gs_scrollright,
@@ -239,7 +240,7 @@ type
   isvisible: boolean;
   haschildren: boolean;
   isopen: boolean;
-  lines: booleanarty;
+  nolines: booleanarty;
  end;
  prowfoldinfoty = ^rowfoldinfoty;
  rowfoldinfoarty = array of rowfoldinfoty;
@@ -10088,46 +10089,53 @@ var
  cell: gridcoordty;
  int1: integer;
 begin
- cellatpos(makepoint(0,fdatarecty.y),cell);
- ffirstvisiblerow:= cell.row;
- cellatpos(makepoint(0,fdatarecty.y+fdatarecty.cy-1),cell);
- flastvisiblerow:= cell.row;
- if ffirstvisiblerow < 0 then begin
-  ffirstvisiblerow:= 0;
- end;
- if flastvisiblerow < 0 then begin
-  flastvisiblerow:= frowcount - 1;
- end;
- fvisiblerowsbase:= fdatacols.frowstate.visiblerow(ffirstvisiblerow);
- if flastvisiblerow < 0 then begin
-  fvisiblerows:= nil;
- end
- else begin
-  fvisiblerows:= fdatacols.frowstate.visiblerows(fvisiblerowsbase,
-                     fdatarect.cy div fdatarowheight + 2);
-  int1:= high(fvisiblerows);
-  while fvisiblerows[int1] > flastvisiblerow do begin
-   dec(int1);
-  end;
-  setlength(fvisiblerows,int1+1);
- end;
- if (og_folded in foptionsgrid) then begin
-  with fdatacols.frowstate do begin
-   updatefoldinfo(fvisiblerows,fvisiblerowfoldinfo);
-   if (row >= 0) then begin
-    int1:= row;
-    row:= nearestvisiblerow(row);
-    if row = int1 then begin //no focuscell
-     if row >= ffoldchangedrow then begin
-      dofocusedcellposchanged;
-      fdatacols.frowstate.ffoldchangedrow:= bigint;
+ if not (gs_visiblerowsupdating in fstate) then begin
+  include(fstate,gs_visiblerowsupdating);
+  try
+   cellatpos(makepoint(0,fdatarecty.y),cell);
+   ffirstvisiblerow:= cell.row;
+   cellatpos(makepoint(0,fdatarecty.y+fdatarecty.cy-1),cell);
+   flastvisiblerow:= cell.row;
+   if ffirstvisiblerow < 0 then begin
+    ffirstvisiblerow:= 0;
+   end;
+   if flastvisiblerow < 0 then begin
+    flastvisiblerow:= frowcount - 1;
+   end;
+   fvisiblerowsbase:= fdatacols.frowstate.visiblerow(ffirstvisiblerow);
+   if flastvisiblerow < 0 then begin
+    fvisiblerows:= nil;
+   end
+   else begin
+    fvisiblerows:= fdatacols.frowstate.visiblerows(fvisiblerowsbase,
+                       fdatarect.cy div fdatarowheight + 2);
+    int1:= high(fvisiblerows);
+    while fvisiblerows[int1] > flastvisiblerow do begin
+     dec(int1);
+    end;
+    setlength(fvisiblerows,int1+1);
+   end;
+   if (og_folded in foptionsgrid) then begin
+    with fdatacols.frowstate do begin
+     updatefoldinfo(fvisiblerows,fvisiblerowfoldinfo);
+     if (row >= 0) then begin
+      int1:= row;
+      row:= nearestvisiblerow(row);
+      if row = int1 then begin //no focuscell
+       if row >= ffoldchangedrow then begin
+        dofocusedcellposchanged;
+        fdatacols.frowstate.ffoldchangedrow:= bigint;
+       end;
+      end;
      end;
     end;
+   end
+   else begin
+    fvisiblerowfoldinfo:= nil;
    end;
-  end;
- end
- else begin
-  fvisiblerowfoldinfo:= nil;
+  finally
+   exclude(fstate,gs_visiblerowsupdating);
+  end; 
  end;
 end;
 
@@ -12938,21 +12946,55 @@ procedure trowstatelist.updatefoldinfo(const rows: integerarty;
                                            var infos: rowfoldinfoarty);
 var
  int1,int2: integer;
- ar1: array[foldlevelty] of boolean;
  po1: prowstateaty;
+ po2: prowstatety;
+ po3: prowfoldinfoty;
+ level1,level2: foldlevelty;
+ lastrow: integer;
+ visible1: boolean;
+ ar1: booleanarty;
 begin
- po1:= datapo;
  setlength(infos,length(rows));
- for int1:= high(rows) downto 0 do begin
-  with infos[int1] do begin
-   getfoldstate(rows[int1],isvisible,foldlevel,haschildren,isopen);
-   setlength(lines,foldlevel);
-   for int2:= 0 to foldlevel-2 do begin
-    lines[int2]:= false;
+ if high(rows) >= 0 then begin
+  for int1:= high(rows) downto 0 do begin
+   with infos[int1] do begin
+    getfoldstate(rows[int1],isvisible,foldlevel,haschildren,isopen);
+    setlength(nolines,foldlevel);
+    fillchar(nolines[0],(foldlevel)*sizeof(boolean),0);
    end;
-   if foldlevel > 0 then begin
-    lines[foldlevel-1]:= true;
+  end;
+  po1:= datapo;
+  lastrow:= rows[high(rows)];
+  po2:= @po1^[lastrow];
+  level1:= po2^.fold and foldlevelmask; //level of last row
+  setlength(ar1,level1+1);
+  for int1:= lastrow+1 to count-1 do begin  //mark linecontinuations
+   inc(po2);
+   with po2^ do begin
+    if fold and foldhiddenmask = 0 then begin
+     level2:= fold and foldlevelmask;
+     if (level2 = 0) then begin
+      break;
+     end;
+     if level2 <= level1 then begin
+      ar1[level2]:= true;              //line continuation found
+      level1:= level2;
+     end;
+    end;
    end;
+  end;
+  po3:= @infos[high(infos)];
+  for int1:= high(ar1) downto 1 do begin
+   po3^.nolines[int1-1]:= not ar1[int1]; //set missing continuations
+  end;
+  for int1:= high(infos) - 1 downto 0 do begin
+   with infos[int1] do begin
+    for int2:= 0 to high(nolines) do begin
+     nolines[int2]:= (int2 > high(po3^.nolines)) or 
+           (int2 < high(po3^.nolines)) and po3^.nolines[int2];
+    end;
+   end;
+   dec(po3);
   end;
  end;
 end;
@@ -13078,14 +13120,22 @@ procedure trowstatelist.getfoldstate(const arow: integer;
                        out ahaschildren,aisopen: boolean);
 var
  po1: prowstateaty;
+ nextfoldlevel: foldlevelty;
+ by1: byte;
+ bo1: boolean;
 begin
  checkindexrange(arow);
  po1:= datapo;
  with po1^[arow] do begin
   afoldlevel:= fold and foldlevelmask;
   aisvisible:= fold and foldhiddenmask = 0;
-  ahaschildren:= (arow < count-1) and (po1^[arow+1].fold > afoldlevel);
-  aisopen:= ahaschildren and (po1^[arow+1].fold and foldhiddenmask = 0);
+  bo1:= arow < count-1;
+  if bo1 then begin
+   by1:= po1^[arow+1].fold;
+   nextfoldlevel:= by1 and foldlevelmask;
+  end;
+  ahaschildren:= bo1 and (nextfoldlevel > afoldlevel);
+  aisopen:= ahaschildren and (by1 and foldhiddenmask = 0);
  end;
 end;
 

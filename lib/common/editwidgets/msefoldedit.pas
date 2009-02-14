@@ -59,12 +59,17 @@ end;
 
 procedure tfoldedit.drawimage(const acanvas: tcanvas; 
                               const ainfo: prowfoldinfoty; var arect: rectty);
+const
+ boxsize = 11;
 var
- int1,int2,int3: integer;
+ int1,int2,int3,int4: integer;
  glyph1: stockglyphty;
+ lines: segmentarty;
+ ycenter: integer;
 begin
  if ainfo <> nil then begin
   with ainfo^ do begin
+   ycenter:= arect.cy div 2;
    int1:= flevelstep*foldlevel;
    glyph1:= stg_none;
    if haschildren then begin
@@ -76,16 +81,66 @@ begin
     end;
    end;
    inc(arect.x,int1);
-   int3:= flevelstep;
-   for int2:= 0 to high(lines) do begin
-    if lines[int2] then begin
-     acanvas.drawline(makepoint(int3,0),
-                        makepoint(int3,arect.cy),cl_red);
+   int3:= flevelstep + flevelstep div 2;
+   int4:= 0;
+   setlength(lines,foldlevel+2);
+   for int2:= 0 to high(nolines) - 1 do begin
+    with lines[int4] do begin
+     if not nolines[int2] then begin
+      a.x:= int3;
+      b.x:= int3;
+      a.y:= 0;
+      b.y:= arect.cy;
+      inc(int4);
+     end;
     end;
     inc(int3,flevelstep);
    end;
+   if foldlevel > 0 then begin
+    with lines[int4] do begin
+     a.x:= int3;
+     b.x:= int3;
+     a.y:= 0;
+     if (glyph1 = stg_none) then begin
+      if nolines[high(nolines)] then begin
+       b.y:= ycenter;
+      end
+      else begin
+       b.y:= arect.cy;
+      end;
+      inc(int4);
+      with lines[int4] do begin
+       a.x:= int3;
+       b.x:= int3 + flevelstep div 2;
+       a.y:= ycenter;
+       b.y:= ycenter;
+      end;
+     end
+     else begin
+      b.y:= ycenter - boxsize div 2;
+      if not nolines[high(nolines)] then begin
+       inc(int4);
+       with lines[int4] do begin
+        a.x:= int3;
+        b.x:= int3;
+        a.y:= ycenter + boxsize div 2;
+        b.y:= arect.cy;
+       end;
+      end;
+     end;  
+     inc(int4);
+    end;
+   end;
+   if int4 > 0 then begin
+    setlength(lines,int4);
+    drawdottedlinesegments(acanvas,lines,cl_shadow);
+   end;
    if glyph1 <> stg_none then begin
-    stockobjects.glyphs.paint(acanvas,ord(glyph1),arect,[al_ycentered],cl_glyph);
+    int1:= arect.cx;
+    arect.cx:= flevelstep;
+    stockobjects.glyphs.paint(acanvas,ord(glyph1),arect,
+                                [al_ycentered,al_xcentered],cl_glyph);
+    arect.cx:= int1;
    end;
   end;
  end;
@@ -108,6 +163,7 @@ var
 begin
  inherited;
  if fgridintf <> nil then begin
+  acanvas.rootbrushorigin:= fgridintf.getbrushorigin;
   rect1:= clientrect;
   drawimage(acanvas,fgridintf.getcol.grid.rowfoldinfo,rect1);
  end;

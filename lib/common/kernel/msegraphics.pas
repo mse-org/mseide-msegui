@@ -892,7 +892,7 @@ procedure setcolormapvalue(index: colorty; const red,green,blue: integer); overl
 procedure setcolormapvalue(const index: colorty; const acolor: colorty); overload;
 function isvalidmapcolor(index: colorty): boolean;
 
-procedure drawdottedlines(const acanvas: tcanvas; const lines: segmentarty;
+procedure drawdottedlinesegments(const acanvas: tcanvas; const lines: segmentarty;
                                               const colorline: colorty);
 
 var
@@ -980,7 +980,7 @@ begin
  end;
 end;
 
-procedure drawdottedlines(const acanvas: tcanvas; const lines: segmentarty;
+procedure drawdottedlinesegments(const acanvas: tcanvas; const lines: segmentarty;
                                               const colorline: colorty);
 var
  int1: integer;
@@ -988,7 +988,7 @@ begin
  acanvas.save;
  acanvas.color:= colorline;
  acanvas.brush:= stockobjects.bitmaps[stb_dens50];
- {$ifdef mswindows}
+{$ifdef mswindows}
  {workaround: colors are wrong by negativ x on win2000! bug?}
  int2:= levelshift;
  acanvas.remove(makepoint(int2,0));
@@ -1009,11 +1009,11 @@ begin
   end;
  end
  else begin
- {$endif}
- acanvas.drawlinesegments(lines,cl_brushcanvas);
- {$ifdef mswindows}
+{$endif}
+  acanvas.drawlinesegments(lines,cl_brushcanvas);
+{$ifdef mswindows}
  end;
- {$endif}
+{$endif}
  acanvas.restore;
 end;
 

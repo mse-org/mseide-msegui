@@ -1675,7 +1675,7 @@ begin
     end;
    end;
    setlength(lines,int1+1);
-   drawdottedlines(acanvas,lines,colorline);
+   drawdottedlinesegments(acanvas,lines,colorline);
   end;
   if boxno >= 0 then begin
    stockobjects.glyphs.paint(acanvas,boxno,expandboxrect,
