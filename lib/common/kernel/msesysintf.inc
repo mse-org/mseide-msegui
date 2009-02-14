@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -16,9 +16,6 @@ function sys_gettimeus: cardinal;
                //systemtime in microseconds, origin undefined
 function sys_getpid: procidty;
 function sys_getprocesses: procitemarty;
-
-//function sys_towupper(char: widechar): widechar;
-//function sys_toupper(char: char): char;
 
 function sys_threadcreate(var info: threadinfoty): syserrorty;
 function sys_threadwaitfor(var info: threadinfoty): syserrorty;
@@ -98,7 +95,6 @@ procedure sys_schedyield;
 
 function sys_localtimeoffset: tdatetime;
 function sys_getlangname: string;
-//function sys_getlastsyserror: integer;
 function sys_getprintcommand: string;
 
 function sys_utctolocaltime(const value: tdatetime): tdatetime;

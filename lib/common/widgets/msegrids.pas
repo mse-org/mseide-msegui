@@ -231,6 +231,20 @@ type
 
  tfixcellface = class(tcellface)
  end;
+
+ foldlevelty = 0..127;
+ 
+ rowfoldinfoty = record
+  foldlevel: foldlevelty;
+  isvisible: boolean;
+  haschildren: boolean;
+  isopen: boolean;
+  lines: booleanarty;
+ end;
+ prowfoldinfoty = ^rowfoldinfoty;
+ rowfoldinfoarty = array of rowfoldinfoty;
+ rowfoldinfoaty = array[0..0] of rowfoldinfoty;
+ prowfoldinfoaty = ^rowfoldinfoaty;
   
  cellinfoty = record
   cell: gridcoordty;
@@ -245,6 +259,7 @@ type
   ismousecell: boolean;
   datapo: pointer;
   griddatalink: pointer;
+  foldinfo: prowfoldinfoty;
  end;
  pcellinfoty = ^cellinfoty;
 
@@ -348,6 +363,7 @@ type
   canvas: tcanvas;
   ystart,ystep: integer;
   rows: integerarty;
+  foldinfo: rowfoldinfoarty;
   startrow,endrow: integer; //index in rows
  end;
 
@@ -1069,8 +1085,7 @@ type
  prowstatety = ^rowstatety;
  rowstateaty = array[0..0] of rowstatety;
  prowstateaty  = ^rowstateaty;
- foldlevelty = 0..127;
- 
+   
  trowstatelist = class(tdatalist)
   private
    fdirtyvisible: integer;
@@ -1111,6 +1126,8 @@ type
    function visiblerowcount: integer;
    function visiblerowtoindex(const avisibleindex: integer): integer;
    function visiblerows(const astart: integer; acount: integer): integerarty;
+   procedure updatefoldinfo(const rows: integerarty;
+                                           var infos: rowfoldinfoarty);
    function visiblerowstep(const arow: integer; const step: integer;
                             const autoappend: boolean): integer;
    function rowhidden(const arow: integer): boolean;
@@ -1397,6 +1414,7 @@ type
    ffirstvisiblerow: integer;
    flastvisiblerow: integer;
    fvisiblerows: integerarty;
+   fvisiblerowfoldinfo: rowfoldinfoarty;
    fvisiblerowsbase: integer; //number of visible rows below scrollwindow
    
    flayoutupdating: integer;
@@ -1818,6 +1836,7 @@ type
                         write setrowhidden;
    property rowfoldlevel[const index: integer]: foldlevelty read getrowfoldlevel 
                         write setrowfoldlevel;
+   function rowfoldinfo: prowfoldinfoty; //nil if focused row not visible
                         
    property zebra_color: colorty read fzebra_color write setzebra_color default cl_infobackground;
    property zebra_start: integer read fzebra_start write setzebra_start default 0;
@@ -2801,12 +2820,16 @@ begin
        (gs_cellentered in fgrid.fstate);
    canvas.drawinfopo:= @fcellinfo;
    canvas.move(makepoint(fcellrect.x,fcellrect.y + ystart));
+   fcellinfo.foldinfo:= nil;
    for int1:= startrow to endrow do begin
     row1:= rows[int1];
     font1:= rowfont(row1);
     if font1 <> fcellinfo.font then begin
      fcellinfo.font:= font1;
      canvas.font:= font1;
+    end;
+    if og_folded in fgrid.foptionsgrid then begin
+     fcellinfo.foldinfo:= @foldinfo[int1];
     end;
     fcellinfo.datapo:= getdatapo(row1);
     fcellinfo.cell.row:= row1;
@@ -7220,7 +7243,7 @@ begin
  internalupdatelayout;
  result:= intersectrect(fdatarect,arect,arect);
 end;
-
+var testvar: rowfoldinfoarty;
 procedure tcustomgrid.dopaint(const acanvas: tcanvas);
 
 var
@@ -7297,6 +7320,8 @@ begin
      end; 
      ystart:= (startrow + fvisiblerowsbase) * ystep;
      rows:= fvisiblerows; 
+     foldinfo:= fvisiblerowfoldinfo;
+testvar:= fvisiblerowfoldinfo;
      endrow:= (rect1.y + rect1.cy - 1) div ystep - fvisiblerowsbase;
      if endrow > high(fvisiblerows) then begin
       endrow:= high(fvisiblerows);
@@ -10088,6 +10113,7 @@ begin
  end;
  if (og_folded in foptionsgrid) then begin
   with fdatacols.frowstate do begin
+   updatefoldinfo(fvisiblerows,fvisiblerowfoldinfo);
    if (row >= 0) then begin
     int1:= row;
     row:= nearestvisiblerow(row);
@@ -10099,6 +10125,9 @@ begin
     end;
    end;
   end;
+ end
+ else begin
+  fvisiblerowfoldinfo:= nil;
  end;
 end;
 
@@ -11870,6 +11899,26 @@ begin
  fdatacols.frowstate.foldlevel[index]:= avalue;
 end;
 
+function tcustomgrid.rowfoldinfo: prowfoldinfoty; 
+         //nil if focused row not visible
+var
+ int1: integer;
+begin                 //todo: optimize
+ result:= nil;
+ if row >= 0 then begin
+  internalupdatelayout;
+  if (fvisiblerowfoldinfo <> nil) and (row >= fvisiblerows[0]) and 
+               (row <= fvisiblerows[high(fvisiblerows)]) then begin
+   for int1:= 0 to high(fvisiblerows) do begin
+    if fvisiblerows[int1] = row then begin
+     result:= @fvisiblerowfoldinfo[int1];
+     break;
+    end;
+   end;
+  end;
+ end;
+end;
+
 { tdrawgrid }
 
 function tdrawgrid.createdatacols: tdatacols;
@@ -12665,6 +12714,7 @@ begin
  int1:= arow+1;
  bo1:= false;
  while int1 < count do begin
+  int2:= int1;
   with po1^[int1] do begin
    level2:= fold and foldlevelmask;
    if level2 <= level1 then begin
@@ -12681,6 +12731,9 @@ begin
      inc(int1);
     end;
    end;
+  end;
+  if int1 = int2 then begin
+   break; //invalid
   end;
  end;
  if bo1 then begin
@@ -12877,6 +12930,29 @@ begin                         //todo: optimize
   for int1:= 0 to high(result) do begin
    result[int1]:= int2;
    inc(int2);
+  end;
+ end;
+end;
+
+procedure trowstatelist.updatefoldinfo(const rows: integerarty;
+                                           var infos: rowfoldinfoarty);
+var
+ int1,int2: integer;
+ ar1: array[foldlevelty] of boolean;
+ po1: prowstateaty;
+begin
+ po1:= datapo;
+ setlength(infos,length(rows));
+ for int1:= high(rows) downto 0 do begin
+  with infos[int1] do begin
+   getfoldstate(rows[int1],isvisible,foldlevel,haschildren,isopen);
+   setlength(lines,foldlevel);
+   for int2:= 0 to foldlevel-2 do begin
+    lines[int2]:= false;
+   end;
+   if foldlevel > 0 then begin
+    lines[foldlevel-1]:= true;
+   end;
   end;
  end;
 end;

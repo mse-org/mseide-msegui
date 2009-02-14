@@ -24,8 +24,8 @@ type
    flevelstep: integer;
    procedure setlevelstep(const avalue: integer);
   protected
-   procedure drawimage(const acanvas: tcanvas; const arow: integer;
-                    var arect: rectty);
+   procedure drawimage(const acanvas: tcanvas;
+                              const ainfo: prowfoldinfoty; var arect: rectty);
    procedure drawcell(const canvas: tcanvas); override;
    procedure clientmouseevent(var ainfo: mouseeventinfoty); override;
    procedure docellevent(const ownedcol: boolean;
@@ -57,21 +57,18 @@ begin
  inherited;
 end;
 
-procedure tfoldedit.drawimage(const acanvas: tcanvas; const arow: integer;
-                    var arect: rectty);
+procedure tfoldedit.drawimage(const acanvas: tcanvas; 
+                              const ainfo: prowfoldinfoty; var arect: rectty);
 var
- isvisible1,haschildren1,isopen1: boolean;
- foldlevel1: foldlevelty;
- int1: integer;
+ int1,int2,int3: integer;
  glyph1: stockglyphty;
 begin
- if arow >= 0 then begin
-  with tdatacols1(fgridintf.getcol.grid.datacols).frowstate do begin
-   getfoldstate(arow,isvisible1,foldlevel1,haschildren1,isopen1);
-   int1:= flevelstep*foldlevel1;
+ if ainfo <> nil then begin
+  with ainfo^ do begin
+   int1:= flevelstep*foldlevel;
    glyph1:= stg_none;
-   if haschildren1 then begin
-    if isopen1 then begin
+   if haschildren then begin
+    if isopen then begin
      glyph1:= stg_boxexpanded;
     end
     else begin
@@ -79,7 +76,14 @@ begin
     end;
    end;
    inc(arect.x,int1);
-   acanvas.drawline(makepoint(int1,0),makepoint(int1,arect.cy),cl_red);
+   int3:= flevelstep;
+   for int2:= 0 to high(lines) do begin
+    if lines[int2] then begin
+     acanvas.drawline(makepoint(int3,0),
+                        makepoint(int3,arect.cy),cl_red);
+    end;
+    inc(int3,flevelstep);
+   end;
    if glyph1 <> stg_none then begin
     stockobjects.glyphs.paint(acanvas,ord(glyph1),arect,[al_ycentered],cl_glyph);
    end;
@@ -94,7 +98,7 @@ begin
  inherited;
  with cellinfoty(canvas.drawinfopo^) do begin
   rect1:= rect;
-  drawimage(canvas,cell.row,rect1);
+  drawimage(canvas,foldinfo,rect1);
  end;
 end;
 
@@ -105,7 +109,7 @@ begin
  inherited;
  if fgridintf <> nil then begin
   rect1:= clientrect;
-  drawimage(acanvas,fgridintf.getcol.grid.row,rect1);
+  drawimage(acanvas,fgridintf.getcol.grid.rowfoldinfo,rect1);
  end;
 end;
 
