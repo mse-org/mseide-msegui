@@ -7244,7 +7244,7 @@ begin
  internalupdatelayout;
  result:= intersectrect(fdatarect,arect,arect);
 end;
-var testvar: rowfoldinfoarty;
+
 procedure tcustomgrid.dopaint(const acanvas: tcanvas);
 
 var
@@ -7322,7 +7322,6 @@ begin
      ystart:= (startrow + fvisiblerowsbase) * ystep;
      rows:= fvisiblerows; 
      foldinfo:= fvisiblerowfoldinfo;
-testvar:= fvisiblerowfoldinfo;
      endrow:= (rect1.y + rect1.cy - 1) div ystep - fvisiblerowsbase;
      if endrow > high(fvisiblerows) then begin
       endrow:= high(fvisiblerows);
@@ -10125,7 +10124,8 @@ begin
     end;
     if (og_folded in foptionsgrid) then begin
      with fdatacols.frowstate do begin
-      updatefoldinfo(fvisiblerows,fvisiblerowfoldinfo);
+      updatefoldinfo(self.fvisiblerows,fvisiblerowfoldinfo);
+      {
       if (row >= 0) then begin
        int1:= row;
        row:= nearestvisiblerow(row);
@@ -10136,6 +10136,7 @@ begin
         end;
        end;
       end;
+      }
      end;
     end
     else begin
