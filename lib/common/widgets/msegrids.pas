@@ -256,6 +256,7 @@ type
   colorline: colorty;
   font: tfont;
   selected: boolean;
+  readonly: boolean;
   notext: boolean;
   ismousecell: boolean;
   datapo: pointer;
@@ -2835,6 +2836,7 @@ begin
     fcellinfo.datapo:= getdatapo(row1);
     fcellinfo.cell.row:= row1;
     fcellinfo.selected:= getselected(row1);
+    fcellinfo.readonly:= fgrid.getrowreadonlystate(row1);
     fcellinfo.notext:= false;
     fcellinfo.ismousecell:= (fgrid.fmousecell.col = fcellinfo.cell.col) and 
                               (fgrid.fmousecell.row = row1);

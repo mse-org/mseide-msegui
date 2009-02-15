@@ -13,8 +13,8 @@ unit msefoldedit;
 
 interface
 uses
- classes,msedataedits,msegraphics,mseguiglob,msegrids,mseevent,msegui,
-     msegraphutils;
+ classes,mseclasses,msedataedits,msegraphics,mseguiglob,msegrids,mseevent,msegui,
+     msegraphutils,msebitmap,mseeditglob;
 
 type
  tfoldedit = class(tstringedit)
@@ -22,10 +22,28 @@ type
    foncellevent: celleventty;
    fonclientmouseevent: mouseeventty;
    flevelstep: integer;
+   fimagesize: sizety;
+   fimnr_base: integer;
+   fimnr_expanded: integer;
+   fimnr_selected: integer;
+   fimnr_readonly: integer;
+   fimnr_subitems: integer;
+   fimagelist: timagelist;
    procedure setlevelstep(const avalue: integer);
+   procedure setimagesize(const avalue: sizety);
+   procedure setimagewidth(const avalue: integer);
+   procedure setimageheight(const avalue: integer);
+   procedure setimnr_base(const avalue: integer);
+   procedure setimnr_expanded(const avalue: integer);
+   procedure setimnr_selected(const avalue: integer);
+   procedure setimnr_readonly(const avalue: integer);
+   procedure setimnr_subitems(const avalue: integer);
+   procedure setimagelist(const avalue: timagelist);
   protected
+   procedure updatelayout;
    procedure drawimage(const acanvas: tcanvas;
-                              const ainfo: prowfoldinfoty; var arect: rectty);
+                       const ainfo: prowfoldinfoty; var arect: rectty;
+                       const isselected,isreadonly: boolean);
    procedure drawcell(const canvas: tcanvas); override;
    procedure clientmouseevent(var ainfo: mouseeventinfoty); override;
    procedure docellevent(const ownedcol: boolean;
@@ -35,11 +53,20 @@ type
    procedure dopaint(const acanvas: tcanvas); override;
   public
    constructor create(aowner: tcomponent); override;
+   property imagesize: sizety read fimagesize write setimagesize;
   published
    property oncellevent: celleventty read foncellevent write foncellevent;
    property onclientmouseevent: mouseeventty read fonclientmouseevent 
                            write fonclientmouseevent;
    property levelstep: integer read flevelstep write setlevelstep default 10;
+   property imnr_base: integer read fimnr_base write setimnr_base default 0;
+   property imnr_expanded: integer read fimnr_expanded write setimnr_expanded default 0;
+   property imnr_selected: integer read fimnr_selected write setimnr_selected default 0;
+   property imnr_readonly: integer read fimnr_readonly write setimnr_readonly default 0;
+   property imnr_subitems: integer read fimnr_subitems write setimnr_subitems default 0;
+   property imagelist: timagelist read fimagelist write setimagelist;
+   property imagewidth: integer read fimagesize.cx write setimagewidth default 0;
+   property imageheight: integer read fimagesize.cy write setimageheight default 0;
  end;
  
 implementation
@@ -58,7 +85,8 @@ begin
 end;
 
 procedure tfoldedit.drawimage(const acanvas: tcanvas; 
-                              const ainfo: prowfoldinfoty; var arect: rectty);
+                  const ainfo: prowfoldinfoty; var arect: rectty;
+                  const isselected,isreadonly: boolean);
 const
  boxsize = 11;
 var
@@ -142,6 +170,28 @@ begin
                                 [al_ycentered,al_xcentered],cl_glyph);
     arect.cx:= int1;
    end;
+   inc(arect.x,flevelstep);
+   if fimagelist <> nil then begin
+    int1:= fimnr_base { fimagenr};
+    if isopen then begin
+     inc(int1,fimnr_expanded);
+    end;
+    if isselected then begin
+     inc(int1,fimnr_selected);
+    end;
+    if isreadonly then begin
+     inc(int1,fimnr_readonly);
+    end;
+    if isselected then begin
+     inc(int1,fimnr_selected);
+    end;
+    if haschildren then begin
+     inc(int1,fimnr_subitems);
+    end;
+    if int1 >= 0 then begin
+     fimagelist.paint(acanvas,int1,arect,[al_ycentered]);
+    end;
+   end;
   end;
  end;
 end;
@@ -153,19 +203,29 @@ begin
  inherited;
  with cellinfoty(canvas.drawinfopo^) do begin
   rect1:= rect;
-  drawimage(canvas,foldinfo,rect1);
+  drawimage(canvas,foldinfo,rect1,selected,readonly);
  end;
 end;
 
 procedure tfoldedit.dopaint(const acanvas: tcanvas);
 var
  rect1: rectty;
+ int1: integer;
 begin
  inherited;
- if fgridintf <> nil then begin
+ if (fgridintf <> nil) then begin
   acanvas.rootbrushorigin:= fgridintf.getbrushorigin;
   rect1:= clientrect;
-  drawimage(acanvas,fgridintf.getcol.grid.rowfoldinfo,rect1);
+  with fgridintf.getcol,grid do begin
+   int1:= row;
+   if int1 >= 0 then begin //not csdesigning
+    drawimage(acanvas,rowfoldinfo,rect1,
+          datacols.selected[makegridcoord(index,int1)],rowreadonlystate[int1]);
+   end
+   else begin
+    drawimage(acanvas,rowfoldinfo,rect1,false,false);
+   end;
+  end;
  end;
 end;
 
@@ -184,15 +244,17 @@ begin
    if isleftbuttondown(ainfo,[]) then begin
     with fgridintf.getcol.grid,tdatacols1(datacols).frowstate do begin
      row1:= row;
-     getfoldstate(row1,isvisible1,foldlevel1,haschildren1,isopen1);
-     zone1:= cz_default;
-     updatecellzone(foldlevel1,ainfo.pos,zone1);
-     if zone1 = cz_default then begin
-      if isopen1 then begin
-       hidechildren(row1);
-      end
-      else begin
-       showchildren(row1);
+     if row1 >= 0 then begin //no csdesigning
+      getfoldstate(row1,isvisible1,foldlevel1,haschildren1,isopen1);
+      zone1:= cz_default;
+      updatecellzone(foldlevel1,ainfo.pos,zone1);
+      if zone1 = cz_default then begin
+       if isopen1 then begin
+        hidechildren(row1);
+       end
+       else begin
+        showchildren(row1);
+       end;
       end;
      end;
     end;
@@ -258,8 +320,91 @@ procedure tfoldedit.setlevelstep(const avalue: integer);
 begin
  if avalue <> flevelstep then begin
   flevelstep:= avalue;
-  formatchanged;
+  updatelayout;
  end;
+end;
+
+procedure tfoldedit.setimageheight(const avalue: integer);
+begin
+ if fimagesize.cy <> avalue then begin
+  fimagesize.cy := avalue;
+  updatelayout;
+//  invalidate;
+ end;
+end;
+
+procedure tfoldedit.setimagewidth(const avalue: integer);
+begin
+ if fimagesize.cx <> avalue then begin
+  fimagesize.cx := avalue;
+  updatelayout;
+//  invalidate;
+ end;
+end;
+
+procedure tfoldedit.setimagesize(const avalue: sizety);
+begin
+ if (fimagesize.cx <> avalue.cx) or (fimagesize.cy <> avalue.cy) then begin
+  fimagesize:= avalue;
+  updatelayout;
+ end;
+end;
+
+procedure tfoldedit.setimagelist(const avalue: timagelist);
+begin
+ if fimagelist <> avalue then begin
+  setlinkedvar(avalue,tmsecomponent(fimagelist));
+  if (fimagelist <> nil) and (csdesigning in componentstate) then begin
+   fimagesize:= fimagelist.size;
+  end;
+  updatelayout;
+//  invalidate;
+ end;
+end;
+
+procedure tfoldedit.setimnr_base(const avalue: integer);
+begin
+ if fimnr_base <> avalue then begin
+  fimnr_base:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tfoldedit.setimnr_expanded(const avalue: integer);
+begin
+ if fimnr_expanded <> avalue then begin
+  fimnr_expanded:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tfoldedit.setimnr_selected(const avalue: integer);
+begin
+ if fimnr_selected <> avalue then begin
+  fimnr_selected:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tfoldedit.setimnr_readonly(const avalue: integer);
+begin
+ if fimnr_readonly <> avalue then begin
+  fimnr_readonly:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tfoldedit.setimnr_subitems(const avalue: integer);
+begin
+ if fimnr_subitems <> avalue then begin
+  fimnr_subitems := avalue;
+  invalidate;
+ end;
+end;
+
+procedure tfoldedit.updatelayout;
+begin
+ formatchanged;
 end;
 
 end.
