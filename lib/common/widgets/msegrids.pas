@@ -5984,14 +5984,34 @@ begin
 end;
 
 procedure tdatacols.deleterow(const index: integer; const acount: integer = 1);
+var
+ int1: integer;
+ int2: integer;
+ po1: pinteger;
 begin
  roworderinvalid;
  with frowstate do begin
-  deleteitems(index,acount);
   if fvisiblerowmap <> nil then begin
+   clean(index+acount-1);
+   po1:= @pintegeraty(fvisiblerowmap.datapo)[index];
+   dec(po1);
+   if index = 0 then begin
+    int2:= -1;
+   end
+   else begin
+    int2:= po1^;
+   end;
+   for int1:= acount-1 downto 0 do begin
+    inc(po1);
+    if (po1^ = int2) then begin
+     dec(fhiddencount);
+    end;
+    int2:= po1^;
+   end;
    fvisiblerowmap.deleteitems(index,acount);
    checkdirty(index);
   end;
+  deleteitems(index,acount);
  end;
  inherited;
 end;
