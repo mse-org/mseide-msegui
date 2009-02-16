@@ -14,9 +14,18 @@ unit msefoldedit;
 interface
 uses
  classes,mseclasses,msedataedits,msegraphics,mseguiglob,msegrids,mseevent,msegui,
-     msegraphutils,msebitmap,mseeditglob;
+     msegraphutils,msebitmap,mseeditglob,msedatalist,msewidgetgrid;
 
 type
+ tgridmsestringintdatalist = class(tmsestringintdatalist)
+  private
+   fowner: twidgetcol;
+  protected
+   function getdefault: pointer; override;
+  public
+   constructor create(owner: twidgetcol); reintroduce;
+ end;
+
  tfoldedit = class(tstringedit)
   private
    foncellevent: celleventty;
@@ -29,6 +38,8 @@ type
    fimnr_readonly: integer;
    fimnr_subitems: integer;
    fimagelist: timagelist;
+   fdefault: msestringintty;
+   
    procedure setlevelstep(const avalue: integer);
    procedure setimagesize(const avalue: sizety);
    procedure setimagewidth(const avalue: integer);
@@ -43,7 +54,8 @@ type
    procedure updatelayout;
    procedure drawimage(const acanvas: tcanvas;
                        const ainfo: prowfoldinfoty; var arect: rectty;
-                       const isselected,isreadonly: boolean);
+                       const isselected,isreadonly: boolean;
+                       const datapo: pmsestringintty);
    procedure drawcell(const canvas: tcanvas); override;
    procedure clientmouseevent(var ainfo: mouseeventinfoty); override;
    procedure docellevent(const ownedcol: boolean;
@@ -51,6 +63,8 @@ type
    procedure updatecellzone(const alevel: integer; const apos: pointty;
                                          var azone: cellzonety); virtual;
    procedure dopaint(const acanvas: tcanvas); override;
+   function createdatalist(const sender: twidgetcol): tdatalist; override;
+   function getdefaultvalue: pointer; override;
   public
    constructor create(aowner: tcomponent); override;
    property imagesize: sizety read fimagesize write setimagesize;
@@ -75,18 +89,35 @@ uses
 
 type
  tdatacols1 = class(tdatacols);
+ twidgetcol1 = class(twidgetcol);
+
+{ tgridmsestringintdatalist }
+
+constructor tgridmsestringintdatalist.create(owner: twidgetcol);
+begin
+ fowner:= owner;
+ inherited create;
+end;
+
+function tgridmsestringintdatalist.getdefault: pointer;
+begin
+ result:= twidgetcol1(fowner).fintf.getdefaultvalue;
+end;
+
   
 { tfoldedit }
 
 constructor tfoldedit.create(aowner: tcomponent);
 begin
  flevelstep:= 10;
+ fdefault.int:= -1;
  inherited;
 end;
 
 procedure tfoldedit.drawimage(const acanvas: tcanvas; 
                   const ainfo: prowfoldinfoty; var arect: rectty;
-                  const isselected,isreadonly: boolean);
+                  const isselected,isreadonly: boolean;
+                  const datapo: pmsestringintty);
 const
  boxsize = 11;
 var
@@ -172,21 +203,26 @@ begin
    end;
    inc(arect.x,flevelstep);
    if fimagelist <> nil then begin
-    int1:= fimnr_base { fimagenr};
-    if isopen then begin
-     inc(int1,fimnr_expanded);
-    end;
-    if isselected then begin
-     inc(int1,fimnr_selected);
-    end;
-    if isreadonly then begin
-     inc(int1,fimnr_readonly);
-    end;
-    if isselected then begin
-     inc(int1,fimnr_selected);
-    end;
-    if haschildren then begin
-     inc(int1,fimnr_subitems);
+    if (datapo <> nil) and (datapo^.int <> -1) then begin
+     int1:= datapo^.int;
+    end
+    else begin
+     int1:= fimnr_base { fimagenr};
+     if isopen then begin
+      inc(int1,fimnr_expanded);
+     end;
+     if isselected then begin
+      inc(int1,fimnr_selected);
+     end;
+     if isreadonly then begin
+      inc(int1,fimnr_readonly);
+     end;
+     if isselected then begin
+      inc(int1,fimnr_selected);
+     end;
+     if haschildren then begin
+      inc(int1,fimnr_subitems);
+     end;
     end;
     if int1 >= 0 then begin
      fimagelist.paint(acanvas,int1,arect,[al_ycentered]);
@@ -203,7 +239,7 @@ begin
  inherited;
  with cellinfoty(canvas.drawinfopo^) do begin
   rect1:= rect;
-  drawimage(canvas,foldinfo,rect1,selected,readonly);
+  drawimage(canvas,foldinfo,rect1,selected,readonly,pmsestringintty(datapo));
  end;
 end;
 
@@ -220,10 +256,11 @@ begin
    int1:= row;
    if int1 >= 0 then begin //not csdesigning
     drawimage(acanvas,rowfoldinfo,rect1,
-          datacols.selected[makegridcoord(index,int1)],rowreadonlystate[int1]);
+          datacols.selected[makegridcoord(index,int1)],
+          rowreadonlystate[int1],nil);
    end
    else begin
-    drawimage(acanvas,rowfoldinfo,rect1,false,false);
+    drawimage(acanvas,rowfoldinfo,rect1,false,false,nil);
    end;
   end;
  end;
@@ -405,6 +442,16 @@ end;
 procedure tfoldedit.updatelayout;
 begin
  formatchanged;
+end;
+
+function tfoldedit.createdatalist(const sender: twidgetcol): tdatalist;
+begin
+ result:= tgridmsestringintdatalist.create(sender);
+end;
+
+function tfoldedit.getdefaultvalue: pointer;
+begin
+ result:= @fdefault;
 end;
 
 end.

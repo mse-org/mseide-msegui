@@ -19,7 +19,8 @@ uses
 
 type
  datatypty = (dl_none,dl_integer,dl_int64,dl_currency,dl_real,dl_datetime,
-    dl_ansistring,dl_msestring,dl_doublemsestring,dl_complex,dl_custom);
+    dl_ansistring,dl_msestring,dl_doublemsestring,dl_msestringint,
+    dl_complex,dl_custom);
 
  doublestringty = record
   a,b: string;
@@ -509,6 +510,54 @@ type
                    write Setdoubleitems; default;
  end;
 
+ msestringintty = record
+                   mstr: msestring;
+                   int: integer;
+                  end;
+ pmsestringintty = ^msestringintty;
+ msestringintarty = array of msestringintty;
+ msestringintaty = array[0..0] of msestringintty;
+                   
+ tmsestringintdatalist = class(tpoorstringdatalist)
+  private
+   function Getdoubleitems(index: integer): msestringintty;
+   procedure Setdoubleitems(index: integer; const Value: msestringintty);
+   function Getitemsb(index: integer): integer;
+   procedure Setitemsb(index: integer; const Value: integer);
+   function getasarray: msestringintarty;
+   procedure setasarray(const data: msestringintarty);
+   function getasarraya: msestringarty;
+   procedure setasarraya(const data: msestringarty);
+   function getasarrayb: integerarty;
+   procedure setasarrayb(const data: integerarty);
+  protected
+   procedure readitem(const reader: treader; var value); override;
+   procedure writeitem(const writer: twriter; var value); override;
+   procedure compare(const l,r; var result: integer); override;
+//   procedure freedata(var data); override;
+//   procedure copyinstance(var data); override;
+  public
+   constructor create; override;
+   procedure assign(source: tpersistent); override;
+   procedure assignb(const source: tdatalist); override;
+   procedure assigntob(const dest: tdatalist); override;
+
+   function datatyp: datatypty; override;
+   function add(const valuea: msestring; const valueb: integer = 0): integer; overload;
+   function add(const value: msestringintty): integer; overload;
+   procedure insert(const index: integer; const item: msestring;
+                               const itemint: integer);
+   procedure fill(const acount: integer; const defaultvalue: msestring;
+                     const defaultint: integer);
+
+   property asarray: msestringintarty read getasarray write setasarray;
+   property asarraya: msestringarty read getasarraya write setasarraya;
+   property asarrayb: integerarty read getasarrayb write setasarrayb;
+   property itemsb[index: integer]: integer read Getitemsb write Setitemsb;
+   property doubleitems[index: integer]: msestringintty read Getdoubleitems
+                   write Setdoubleitems; default;
+ end;
+
  createobjecteventty = procedure(const sender: tobject; var obj: tobject) of object;
 
  tobjectdatalist = class(tdynamicpointerdatalist)
@@ -541,6 +590,8 @@ const
  trealdatalist,
 //dl_ansistring,              dl_msestring,           dl_doublemsestring,
   tansistringdatalist,tmsestringdatalist,tdoublemsestringdatalist,
+//dl_msestringint
+  tmsestringintdatalist,
 //dl_complex,          dl_custom);
   tcomplexdatalist,nil);
 type
@@ -5182,11 +5233,11 @@ end;
 
 procedure tdoublemsestringdatalist.compare(const l, r; var result: integer);
 begin
-{$ifdef FPC}
- result:= comparestr(doublemsestringty(l).a,doublemsestringty(r).a); //!!!!todo
-{$else}
+//{$ifdef FPC}
+// result:= comparestr(doublemsestringty(l).a,doublemsestringty(r).a); //!!!!todo
+//{$else}
  result:= msecomparestr(doublemsestringty(l).a,doublemsestringty(r).a);
-{$endif}
+//{$endif}
 end;
 {
 function tdoublestringdatalist.Getdoubleitemspo(index: integer): pdoublemsestringty;
@@ -5397,6 +5448,311 @@ begin
  {$else}
   writewidestring(doublemsestringty(value).a);
   writewidestring(doublemsestringty(value).b);
+ {$endif}
+// {$endif}
+  writelistend;
+ end;
+end;
+
+{ tmsestringintdatalist }
+
+constructor tmsestringintdatalist.create;
+begin
+ inherited;
+ fsize:= sizeof(msestringintty);
+end;
+
+function tmsestringintdatalist.datatyp: datatypty;
+begin
+ result:= dl_msestringint;
+end;
+
+function tmsestringintdatalist.add(const valuea: msestring; const valueb: integer = 0): integer;
+var
+ dstr1: msestringintty;
+begin
+ dstr1.mstr:= valuea;
+ dstr1.int:= valueb;
+ result:= adddata(dstr1);
+end;
+
+function tmsestringintdatalist.add(const value: msestringintty): integer;
+begin
+ result:= adddata(value);
+end;
+{
+procedure tmsestringintdatalist.copyinstance(var data);
+begin
+ inherited;
+ stringaddref(doublemsestringty(data).b);
+// reallocstring(doublemsestringty(data).b);
+end;
+}
+procedure tmsestringintdatalist.fill(const acount: integer;
+                   const defaultvalue: msestring; const defaultint: integer);
+var
+ dstr1: msestringintty;
+begin
+ dstr1.mstr:= defaultvalue;
+ dstr1.int:= defaultint;
+ internalfill(count,dstr1);
+end;
+{
+procedure tmsestringintdatalist.freedata(var data);
+begin
+ inherited;
+ doublemsestringty(data).b:= '';
+end;
+}
+function tmsestringintdatalist.Getitemsb(index: integer): integer;
+begin
+ result:= pmsestringintty(getitempo(index))^.int;
+end;
+
+procedure tmsestringintdatalist.Setitemsb(index: integer;
+                                             const Value: integer);
+begin
+ pmsestringintty(getitempo(index))^.int:= value;
+end;
+
+function tmsestringintdatalist.Getdoubleitems(index: integer): msestringintty;
+begin
+ result:= pmsestringintty(getitempo(index))^;
+end;
+
+procedure tmsestringintdatalist.Setdoubleitems(index: integer;
+                         const Value: msestringintty);
+begin
+ pmsestringintty(getitempo(index))^:= value;
+end;
+
+procedure tmsestringintdatalist.insert(const index: integer;
+                    const item: msestring; const itemint: integer);
+var
+ dstr1: msestringintty;
+begin
+ dstr1.mstr:= item;
+ dstr1.int:= itemint;
+ insertdata(index,dstr1);
+end;
+
+procedure tmsestringintdatalist.compare(const l, r; var result: integer);
+begin
+//{$ifdef FPC}
+// result:= comparestr(doublemsestringty(l).a,doublemsestringty(r).a); //!!!!todo
+//{$else}
+ result:= msecomparestr(msestringintty(l).mstr,msestringintty(r).mstr);
+//{$endif}
+end;
+{
+function tdoublestringdatalist.Getdoubleitemspo(index: integer): pdoublemsestringty;
+begin
+ checkindex(index);
+ result:= @lidoublemsestringarty(fdatapo^)[index];
+end;
+}
+procedure tmsestringintdatalist.assign(source: tpersistent);
+var
+ int1: integer;
+ po1,po2: pmsestringintty;
+begin
+ if source = self then begin
+  exit;
+ end;
+ if source is tmsestringintdatalist then begin
+  beginupdate;
+  with source as tmsestringintdatalist do begin
+   po2:= pointer(fdatapo);
+   self.clear;
+   self.count:= count;
+   po1:= pointer(self.fdatapo);
+   for int1:= 0 to count - 1 do begin
+    po1^:= po2^;
+    inc(pchar(po1),self.fsize);
+    inc(pchar(po2),fsize);
+   end;
+  end;
+  endupdate;
+ end
+ else begin
+  inherited;
+ end;
+end;
+
+procedure tmsestringintdatalist.assignb(const source: tdatalist);
+var
+ int1: integer;
+ po1,po2: pmsestringintty;
+ po3: pinteger;
+begin
+ if source is tmsestringintdatalist then begin
+  beginupdate;
+  with tmsestringintdatalist(source) do begin
+   self.count:= fcount;
+   normalizering;
+   self.normalizering;
+   po1:= pointer(self.fdatapo);
+   po2:= pointer(fdatapo);
+   for int1:= 0 to fcount-1 do begin
+    po1^.int:= po2^.int;
+    inc(po1);
+    inc(po2);
+   end;
+  end;
+  endupdate;
+ end
+ else begin
+  if source is tintegerdatalist then begin
+   beginupdate;
+   with tmsestringdatalist(source) do begin
+    self.count:= fcount;
+    normalizering;
+    self.normalizering;
+    po1:= pointer(self.fdatapo);
+    po3:= pointer(fdatapo);
+    for int1:= 0 to fcount-1 do begin
+     po1^.int:= po3^;
+     inc(po1);
+     inc(po3);
+    end;
+   end;
+   endupdate;
+  end
+  else begin
+   inherited;
+  end;
+ end;
+end;
+
+procedure tmsestringintdatalist.assigntob(const dest: tdatalist);
+var
+ int1: integer;
+ po1: pmsestringintty;
+ po2: pinteger;
+begin
+ if dest is tintegerdatalist then begin
+  with tintegerdatalist(dest) do begin
+   beginupdate;
+   clear;
+   count:= self.fcount;
+   self.normalizering;
+   po1:= pointer(self.fdatapo);
+   po2:= pointer(fdatapo);
+   for int1:= 0 to fcount-1 do begin
+    po2^:= po1^.int;
+    inc(po1);
+    inc(po2);
+   end;
+   endupdate;
+  end
+ end
+ else begin
+  inherited;
+ end;
+end;
+
+procedure tmsestringintdatalist.setasarray(const data: msestringintarty);
+begin
+ internalsetasarray(length(data),pointer(data));
+end;
+
+function tmsestringintdatalist.getasarray: msestringintarty;
+begin
+ setlength(result,fcount);
+ internalgetasarray(pointer(result));
+end;
+
+function tmsestringintdatalist.getasarraya: msestringarty;
+var
+ int1: integer;
+ po1: pmsestringintty;
+begin
+ setlength(result,fcount);
+ po1:= pmsestringintty(datapo);
+ for int1:= 0 to fcount - 1 do begin
+  result[int1]:= po1^.mstr;
+  inc(po1);
+ end;
+end;
+
+procedure tmsestringintdatalist.setasarraya(const data: msestringarty);
+var
+ int1: integer;
+ po1: pmsestringintty;
+begin
+ beginupdate;
+  count:= length(data);
+  po1:= pmsestringintty(datapo);
+  for int1:= 0 to fcount - 1 do begin
+   po1^.mstr:= data[int1];
+   inc(po1);
+  end;
+ endupdate;
+end;
+
+procedure tmsestringintdatalist.setasarrayb(const data: integerarty);
+var
+ int1: integer;
+ po1: pmsestringintty;
+begin
+ beginupdate;
+  count:= length(data);
+  po1:= pmsestringintty(datapo);
+  for int1:= 0 to fcount - 1 do begin
+   po1^.int:= data[int1];
+   inc(po1);
+  end;
+ endupdate;
+end;
+
+function tmsestringintdatalist.getasarrayb: integerarty;
+var
+ int1: integer;
+ po1: pmsestringintty;
+begin
+ setlength(result,fcount);
+ normalizering;
+ po1:= pmsestringintty(fdatapo);
+ for int1:= 0 to fcount - 1 do begin
+  result[int1]:= po1^.int;
+  inc(po1);
+ end;
+end;
+
+procedure tmsestringintdatalist.readitem(const reader: treader; var value);
+begin
+ with reader do begin
+  readlistbegin;
+ {$ifdef fpcbug4519read}
+  msestringintty(value).mstr:= readwidestring4519(reader); 
+  msestringintty(value).int:= readinteger;
+ {$else}
+  {$ifdef mse_unicodestring}
+  msestringintty(value).mstr:= readunicodestring; 
+  msestringintty(value).int:= readinteger;
+  {$else}
+  msestringintty(value).mstr:= readwidestring; 
+  msestringintty(value).int:= readinteger;
+  {$endif}
+ {$endif}
+  readlistend;
+ end;
+end;
+
+procedure tmsestringintdatalist.writeitem(const writer: twriter; var value);
+begin
+ with writer do begin
+  writelistbegin;
+// {$ifdef fpcbug4519}
+//  writewidestring4519(writer,doublemsestringty(value).a);
+//  writewidestring4519(writer,doublemsestringty(value).b);
+// {$else}
+ {$ifdef mse_unicodestring}
+  writeunicodestring(msestringintty(value).mstr);
+  writeinteger(msestringintty(value).int);
+ {$else}
+  writewidestring(msestringintty(value).mstr);
+  writeinteger(msestringintty(value).int);
  {$endif}
 // {$endif}
   writelistend;

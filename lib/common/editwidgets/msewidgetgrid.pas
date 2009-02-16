@@ -73,7 +73,6 @@ type
 
  twidgetcol = class(tdatacol,iwidgetgrid)
   private
-   fintf: igridwidget;
    fwidgetname: string;
    ffixrowwidgets: widgetarty;
    ffixrowwidgetnames: stringarty;
@@ -85,7 +84,8 @@ type
    procedure readdata(reader: treader);
    procedure writedata(writer: twriter);
   protected
-    //iwidgetgrid
+   fintf: igridwidget;
+  //iwidgetgrid
    function getgrid: tcustomwidgetgrid;
    function getbrushorigin: pointty;
    function getcol: twidgetcol;
