@@ -10,6 +10,11 @@
 unit msesqlite3ds;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+
+{$ifndef ver2_2_0}
+ {$define hasoptionsproperty}
+{$endif}
+
 interface
 uses
  classes,db,sqlite3ds,msedb,msestrings;
@@ -66,7 +71,9 @@ type
    property Active: boolean read getactive write setactive default false;
    property AutocalcFields default false;
    property AutoIncrementKey default false;
+   {$ifdef hasoptionsproperty}
    property Options default [];
+   {$endif}
    property SaveOnClose default false;
    property SaveOnRefetch default false;
  end;

@@ -121,6 +121,7 @@ procedure tfoldedit.drawimage(const acanvas: tcanvas;
 const
  boxsize = 11;
 var
+ levelshift: integer;
  int1,int2,int3,int4: integer;
  glyph1: stockglyphty;
  lines: segmentarty;
@@ -129,7 +130,7 @@ begin
  if ainfo <> nil then begin
   with ainfo^ do begin
    ycenter:= arect.cy div 2;
-   int1:= flevelstep*foldlevel;
+   levelshift:= flevelstep*foldlevel;
    glyph1:= stg_none;
    if haschildren then begin
     if isopen then begin
@@ -139,7 +140,7 @@ begin
      glyph1:= stg_boxexpand;
     end;
    end;
-   inc(arect.x,int1);
+   inc(arect.x,levelshift);
    int3:= flevelstep + flevelstep div 2;
    int4:= 0;
    setlength(lines,foldlevel+2);
