@@ -203,12 +203,13 @@ procedure deletecommandlineargument(const index: integer);
 
 function loadlib(const libnames: array of filenamety; 
                                       out libname: filenamety): tlibhandle;
-procedure getprocaddresses(const lib: tlibhandle;
-                             const anames: array of string;
-                             const adest: array of ppointer); overload;
+procedure getprocaddresses(const lib: tlibhandle; const anames: array of string;
+               const adest: array of ppointer;
+               const noexception: boolean = false); overload;
 function getprocaddresses(const libnames: array of filenamety; 
                              const anames: array of string; 
-                             const adest: array of ppointer): tlibhandle; overload;
+                             const adest: array of ppointer;
+                             const noexception: boolean = false): tlibhandle; overload;
 function checkprocaddresses(const libnames: array of filenamety; 
                              const anames: array of string; 
                              const adest: array of ppointer): boolean;
@@ -235,9 +236,8 @@ Procedure CatchUnhandledException (Obj : TObject; Addr: Pointer;
  {$endif}
 {$endif}
 
-procedure getprocaddresses(const lib: tlibhandle; 
-                             const anames: array of string; 
-                             const adest: array of ppointer);
+procedure getprocaddresses(const lib: tlibhandle; const anames: array of string; 
+             const adest: array of ppointer; const noexception: boolean = false);
 var
  int1: integer;
 begin
@@ -280,24 +280,36 @@ begin
 end;
 
 function getprocaddresses(const libnames: array of filenamety;
-                             const anames: array of string; 
-                             const adest: array of ppointer): tlibhandle; overload;
+                 const anames: array of string; const adest: array of ppointer;
+                 const noexception: boolean = false): tlibhandle; overload;
 var
  mstr1: filenamety;
 begin
  result:= loadlib(libnames,mstr1);
- getprocaddresses(result,anames,adest);
+ getprocaddresses(result,anames,adest,noexception);
 end;
 
 function checkprocaddresses(const libnames: array of filenamety; 
                              const anames: array of string; 
                              const adest: array of ppointer): boolean;
+var
+ int1: integer;
 begin
+ for int1:= 0 to high(adest) do begin
+  adest[int1]^:= nil;
+ end;
  result:= true;
  try
-  getprocaddresses(libnames,anames,adest);
+  getprocaddresses(libnames,anames,adest,true);
  except
   result:= false;
+  exit;
+ end;
+ for int1:= 0 to high(adest) do begin
+  if adest[int1]^ = nil then begin
+   result:= false;
+   break;
+  end;
  end;
 end;
 

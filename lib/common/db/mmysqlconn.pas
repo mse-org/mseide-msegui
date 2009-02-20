@@ -91,7 +91,7 @@ Type
    procedure freeprepstatement;
   end;
 
-  mysqloptionty = (myo_nopreparedstatements);
+  mysqloptionty = (myo_nopreparedstatements,myo_ssl);
   mysqloptionsty = set of mysqloptionty;
   
   tmysqlconnection = class (TSQLConnection,iblobconnection)
@@ -107,6 +107,11 @@ Type
    flasterrormessage: msestring;
    flastsqlcode: string;
    ftransactionconnectionused: boolean;
+   fssl_key: filenamety;
+   fssl_cert: filenamety;
+   fssl_ca: filenamety;
+   fssl_capath: filenamety;
+   fssl_cipher: filenamety;
    function GetClientInfo: string;
    function GetServerStatus: String;
    procedure ConnectMySQL(var HMySQL : PMySQL;H,U,P : pchar);
@@ -201,6 +206,11 @@ Type
     property options: mysqloptionsty read foptions write foptions default [];
     property Dialect  : integer read FDialect write FDialect default 0;
     property port: cardinal read fport write fport default 0;
+    property ssl_key: filenamety read fssl_key write fssl_key;
+    property ssl_cert: filenamety read fssl_cert write fssl_cert;
+    property ssl_ca: filenamety read fssl_ca write fssl_ca;
+    property ssl_capath: filenamety read fssl_capath write fssl_capath;
+    property ssl_cipher: filenamety read fssl_cipher write fssl_cipher;
     property DatabaseName;
     property HostName;
     property KeepConnection;
@@ -213,7 +223,7 @@ Type
 
 implementation
 uses 
- dbconst,msebufdataset,typinfo,dateutils;
+ dbconst,msebufdataset,typinfo,dateutils,msefileutils;
 type
  tmsebufdataset1 = class(tmsebufdataset);
 var
@@ -561,11 +571,25 @@ begin
 end;
 
 procedure tmysqlconnection.ConnectMySQL(var HMySQL : PMySQL;H,U,P : pchar);
-
+var
+ key,cert,ca,capath,cipher: string;
 begin
  mysqllock;
  HMySQL := mysql_init(HMySQL);
  mysqlunlock;
+ if myo_ssl in foptions then begin
+  key:= tosysfilepath(fssl_key);
+  cert:= tosysfilepath(fssl_cert);
+  ca:= tosysfilepath(fssl_ca);
+  capath:= tosysfilepath(fssl_capath);
+  cipher:= fssl_cipher;  
+  mysql_ssl_set(hmysql,pointer(key),pointer(cert),pointer(ca),pointer(capath),
+           pointer(cipher));
+  if (mysql_get_ssl_cipher <> nil) and 
+            (mysql_get_ssl_cipher(hmysql) = nil) then begin
+   databaseerror('Can not encrypt connection.',self);
+  end;
+ end;
  HMySQL:=mysql_real_connect(HMySQL,PChar(H),PChar(U),Pchar(P),Nil,fport,Nil,0);
  If (HMySQL=Nil) then begin
   databaseerror(SErrServerConnectFailed,Self);
@@ -1063,24 +1087,25 @@ begin
    end;
   end;
   if MySQLDataType(field^,DFT,DFS) then begin
+   if not(dft in varsizefields) then begin
+    dfs:= 0;
+   end;
+   c.MapDSRowToMSQLRow[TF-1] := I;
+   if c.fprepstatement <> nil then begin
+    setupresultbinding(i,dft,dfs,c.fresultbindings,c.fresultbindinginfo);
+   end;
    if (dft = ftmemo) and (cursor.stringmemo) then begin
     dft:= ftstring;
     dfs:= 0;
    end;
    str1:= field^.name;
-   if not(dft in varsizefields) then begin
-    dfs:= 0;
-   end;
+
    fd:= TFieldDef.Create(nil,str1,DFT,DFS,False,TF);
    {$ifndef mse_FPC_2_2} 
    fd.displayname:= str1;
    {$endif}
    fd.collection:= fielddefs;
    
-   c.MapDSRowToMSQLRow[TF-1] := I;
-   if c.fprepstatement <> nil then begin
-    setupresultbinding(i,dft,dfs,c.fresultbindings,c.fresultbindinginfo);
-   end;
    inc(TF);
   end
  end;
@@ -1127,6 +1152,23 @@ var
   int1: integer;
   str1: ansistring;
   index1: integer;
+
+ procedure loadblob;
+ begin
+  with c.fresultbindinginfo[index1] do begin
+   setlength(str1,length);
+   if length > 0 then begin
+    setbindingbuffer(c.fresultbindings,index1,pointer(str1),length);
+    int1:= mysql_stmt_fetch_column(c.fprepstatement,
+                            getbind(c.fresultbindings,index1),index1,0);
+    setbindingbuffer(c.fresultbindings,index1,nil,0);
+    if int1 <> 0 then begin
+     checkstmterror(serrfetchingdata,c.fprepstatement);
+    end;
+   end;
+  end;
+ end;
+
 begin
  result:= false;
  C:= tmysqlcursor(Cursor);
@@ -1160,21 +1202,19 @@ begin
        abufsize:= -length;
       end
       else begin
-       move(buffer^,abuffer^,length);
-       abufsize:= length;
+       if isblob then begin //stringmemo
+        loadblob;
+        move(pointer(str1)^,abuffer^,length);
+        abufsize:= length;
+       end
+       else begin
+        move(buffer^,abuffer^,length);
+        abufsize:= length;
+       end;
       end;
      end;
      ftblob,ftgraphic,ftmemo: begin
-      setlength(str1,length);
-      if length > 0 then begin
-       setbindingbuffer(c.fresultbindings,index1,pointer(str1),length);
-       int1:= mysql_stmt_fetch_column(c.fprepstatement,
-                               getbind(c.fresultbindings,index1),index1,0);
-       setbindingbuffer(c.fresultbindings,index1,nil,0);
-       if int1 <> 0 then begin
-        checkstmterror(serrfetchingdata,c.fprepstatement);
-       end;
-      end;
+      loadblob;
       int1:= cursor.addblobdata(pchar(str1),system.length(str1));
       pinteger(abuffer)^:= int1;  //save id
      end;

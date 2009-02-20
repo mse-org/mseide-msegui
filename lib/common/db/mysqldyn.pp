@@ -1633,9 +1633,9 @@ var MysqlLibraryHandle : TLibHandle;
 //      my_thread_end : procedure ;cdecl;
     var
       mysql_server_init: function (argc:cint; argv:PPchar; groups:PPchar):cint;cdecl;
-      mysql_server_end: procedure ;cdecl;
+      mysql_server_end: procedure ;extdecl;
       mysql_library_init: function (argc:cint; argv:PPchar; groups:PPchar):cint;cdecl;
-      mysql_library_end: procedure ;cdecl;
+      mysql_library_end: procedure ;extdecl;
       mysql_num_rows: function (res:PMYSQL_RES):my_ulonglong;extdecl;
       mysql_num_fields: function (res:PMYSQL_RES):cuint;extdecl;
       mysql_eof: function (res:PMYSQL_RES):my_bool;extdecl;
@@ -1657,6 +1657,7 @@ var MysqlLibraryHandle : TLibHandle;
       mysql_init: function (mysql:PMYSQL):PMYSQL;extdecl;
       mysql_ssl_set: function (mysql:PMYSQL; key:Pchar; cert:Pchar; ca:Pchar; capath:Pchar;
                  cipher:Pchar):my_bool;extdecl;
+      mysql_get_ssl_cipher: function (mysql: pmysql): pchar; extdecl;
       mysql_change_user: function (mysql:PMYSQL; user:Pchar; passwd:Pchar; db:Pchar):my_bool;extdecl;
       mysql_real_connect: function (mysql:PMYSQL; host:Pchar; user:Pchar; passwd:Pchar; db:Pchar;
                  port:cuint; unix_socket:Pchar; clientflag:culong):PMYSQL;extdecl;
@@ -1873,7 +1874,8 @@ begin
      'mysql_stmt_num_rows',                //88
      'mysql_stmt_affected_rows',           //89
      'mysql_stmt_insert_id',               //90
-     'mysql_stmt_field_count'              //91
+     'mysql_stmt_field_count',             //91
+     'mysql_ssl_set'                       //92
     ],
     [
  //    @my_init,                             //0
@@ -1967,9 +1969,16 @@ begin
      @mysql_stmt_num_rows,                 //88
      @mysql_stmt_affected_rows,            //89
      @mysql_stmt_insert_id,                //90
-     @mysql_stmt_field_count               //91
+     @mysql_stmt_field_count,              //91
+     @mysql_ssl_set                        //92
     ]);
 //    mysql_library_init(-1,nil,nil);
+    getprocaddresses(mysqllibraryhandle,
+     [
+     'mysql_get_ssl_cipher'
+     ],
+     [
+     @mysql_get_ssl_cipher],true);
    except
     on e: exception do begin
      e.message:= 'Library "'+mstr1+'": '+e.message;
