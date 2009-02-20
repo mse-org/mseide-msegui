@@ -930,6 +930,9 @@ begin
     end
     else begin
      cx:= fbuttonwidth;
+     if cx < 0 then begin
+      cx:= 0;
+     end;
     end;
     y:= fouterframe.top + fwidth.top;
     if fbo_left in foptions then begin
