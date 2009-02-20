@@ -1063,24 +1063,25 @@ begin
    end;
   end;
   if MySQLDataType(field^,DFT,DFS) then begin
+   if not(dft in varsizefields) then begin
+    dfs:= 0;
+   end;
+   c.MapDSRowToMSQLRow[TF-1] := I;
+   if c.fprepstatement <> nil then begin
+    setupresultbinding(i,dft,dfs,c.fresultbindings,c.fresultbindinginfo);
+   end;
    if (dft = ftmemo) and (cursor.stringmemo) then begin
     dft:= ftstring;
     dfs:= 0;
    end;
    str1:= field^.name;
-   if not(dft in varsizefields) then begin
-    dfs:= 0;
-   end;
+
    fd:= TFieldDef.Create(nil,str1,DFT,DFS,False,TF);
    {$ifndef mse_FPC_2_2} 
    fd.displayname:= str1;
    {$endif}
    fd.collection:= fielddefs;
    
-   c.MapDSRowToMSQLRow[TF-1] := I;
-   if c.fprepstatement <> nil then begin
-    setupresultbinding(i,dft,dfs,c.fresultbindings,c.fresultbindinginfo);
-   end;
    inc(TF);
   end
  end;
@@ -1127,6 +1128,23 @@ var
   int1: integer;
   str1: ansistring;
   index1: integer;
+
+ procedure loadblob;
+ begin
+  with c.fresultbindinginfo[index1] do begin
+   setlength(str1,length);
+   if length > 0 then begin
+    setbindingbuffer(c.fresultbindings,index1,pointer(str1),length);
+    int1:= mysql_stmt_fetch_column(c.fprepstatement,
+                            getbind(c.fresultbindings,index1),index1,0);
+    setbindingbuffer(c.fresultbindings,index1,nil,0);
+    if int1 <> 0 then begin
+     checkstmterror(serrfetchingdata,c.fprepstatement);
+    end;
+   end;
+  end;
+ end;
+
 begin
  result:= false;
  C:= tmysqlcursor(Cursor);
@@ -1160,21 +1178,19 @@ begin
        abufsize:= -length;
       end
       else begin
-       move(buffer^,abuffer^,length);
-       abufsize:= length;
+       if isblob then begin //stringmemo
+        loadblob;
+        move(pointer(str1)^,abuffer^,length);
+        abufsize:= length;
+       end
+       else begin
+        move(buffer^,abuffer^,length);
+        abufsize:= length;
+       end;
       end;
      end;
      ftblob,ftgraphic,ftmemo: begin
-      setlength(str1,length);
-      if length > 0 then begin
-       setbindingbuffer(c.fresultbindings,index1,pointer(str1),length);
-       int1:= mysql_stmt_fetch_column(c.fprepstatement,
-                               getbind(c.fresultbindings,index1),index1,0);
-       setbindingbuffer(c.fresultbindings,index1,nil,0);
-       if int1 <> 0 then begin
-        checkstmterror(serrfetchingdata,c.fprepstatement);
-       end;
-      end;
+      loadblob;
       int1:= cursor.addblobdata(pchar(str1),system.length(str1));
       pinteger(abuffer)^:= int1;  //save id
      end;
