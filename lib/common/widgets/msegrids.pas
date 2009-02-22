@@ -150,11 +150,11 @@ type
  tgridexception = class(exception);
 
  gridstatety = (
-      gs_layoutvalid,gs_layoutupdating,gs_updatelocked,{gs_mousefocuslocked,}
+      gs_layoutvalid,gs_layoutupdating,gs_updatelocked,gs_changelock,
       gs_sortvalid,gs_cellentered,gs_cellclicked,gs_emptyrowremoved,
       gs_rowcountinvalid,gs_rowreadonly,
       gs_scrollup,gs_scrolldown,gs_scrollleft,gs_scrollright,
-      gs_selectionchanged,gs_rowdatachanged,gs_invalidated,{gs_rowappended,}
+      gs_selectionchanged,gs_rowdatachanged,gs_invalidated,
       gs_mouseentered,gs_childmousecaptured,gs_child,
       gs_mousecellredirected,gs_restorerow,gs_cellexiting,gs_rowremoving,
       gs_hasactiverowcolor,
@@ -365,7 +365,7 @@ type
  end;
 
  colstatety = (cos_fix,cos_selected,cos_noinvalidate,cos_edited,
-               cos_readonlyupdating,cos_selectionchanged);
+               cos_readonlyupdating,cos_selectionchanged,cos_changelock);
  colstatesty = set of colstatety;
 
  tcolselectfont = class(tparentfont)
@@ -1083,6 +1083,7 @@ type
    fselectedrow: integer; //-1 none, -2 more than one
    fsortcol: integer;
    fnewrowcol: integer;
+   fchangelock: integer;
    function getcols(const index: integer): tdatacol;
    procedure setcols(const index: integer; const Value: tdatacol);
    function getselectedcells: gridcoordarty;
@@ -1094,6 +1095,8 @@ type
    procedure setsortcol(const avalue: integer);
    procedure setnewrowcol(const avalue: integer);
   protected
+   procedure beginchangelock;
+   procedure endchangelock;
    procedure datasourcechanged; virtual;
    procedure begindataupdate; override;
    procedure enddataupdate; override;
@@ -4775,7 +4778,8 @@ begin
  if not (co_nosort in foptions) then begin
   fgrid.sortinvalid;
  end;
- if fgrid.canevent(tmethod(fonchange)) then begin
+ if not (cos_changelock in fstate) and 
+                                fgrid.canevent(tmethod(fonchange)) then begin
   fonchange(self,aindex);
  end;
 end;
@@ -5873,6 +5877,44 @@ begin
  roworderinvalid;
  frowstate.deleteitems(index,acount);
  inherited;
+end;
+
+procedure tdatacols.beginchangelock;
+var
+ int1: integer;
+begin
+ if fchangelock = 0 then begin
+  for int1:= 0 to count-1 do begin
+   with tdatacol(fitems[int1]) do begin
+    include(fstate,cos_changelock);
+   end;
+  end;
+ end;
+ inc(fchangelock);
+end;
+
+procedure tdatacols.endchangelock;
+var
+ int1: integer;
+ col1: tdatacol;
+begin
+ dec(fchangelock);
+ if fchangelock = 0 then begin
+  for int1:= 0 to count-1 do begin
+   with tdatacol(fitems[int1]) do begin
+    exclude(fstate,cos_changelock);
+   end;
+  end;
+  if fgrid.componentstate * 
+                  [csloading,csdesigning,csdestroying] = [] then begin
+   for int1:= 0 to count - 1 do begin
+    col1:= tdatacol(fitems[int1]);
+    if assigned(col1.fonchange) then begin
+     col1.fonchange(col1,-1);
+    end;
+   end;
+  end;
+ end;
 end;
 
 procedure tdatacols.setcount1(acount: integer; doinit: boolean);
@@ -10608,13 +10650,6 @@ begin
       int1:= int1 - count + 1;
      end;
      ffocusedcell.row:= ffocusedcell.row + int1 - curindex;
-     {
-     int1:= newindex;
-     if int1 + count > frowcount then begin
-      int1:= frowcount - count;
-     end;
-     ffocusedcell.row:= int1 + ffocusedcell.row - curindex;
-     }
     end
     else begin
      if (ffocusedcell.row > curindex) and  (ffocusedcell.row < newindex + count) then begin
@@ -10629,6 +10664,10 @@ begin
    end;
    if factiverow >= 0 then begin
     factiverow:= ffocusedcell.row;
+   end;
+   if not (gs_changelock in fstate) then begin
+    include(fstate,gs_changelock);
+    fdatacols.beginchangelock;
    end;
    fdatacols.moverow(curindex,newindex,count);
    invalidate //for fixcols colorselect
@@ -10649,26 +10688,31 @@ begin
   dorowsinserting(index,count);
   rowbefore:= ffocusedcell.row;
   beginupdate;
-  if index >= 0 then begin //datarows
-   fdatacols.insertrow(index,count);
-   ffixcols.insertrow(index,count);
-   if (ffocusedcell.row >= 0) then begin
-    if (ffocusedcell.row >= index) then begin
-     inc(ffocusedcell.row,count);
-     if (factiverow >= 0) then begin
-      factiverow:= ffocusedcell.row;
+  try
+   if index >= 0 then begin //datarows
+    if not (gs_changelock in fstate) then begin
+     include(fstate,gs_changelock);
+     fdatacols.beginchangelock;
+    end;
+    if (ffocusedcell.row >= 0) then begin
+     if (ffocusedcell.row >= index) then begin
+      inc(ffocusedcell.row,count);
+      if (factiverow >= 0) then begin
+       factiverow:= ffocusedcell.row;
+      end;
      end;
     end;
+    fdatacols.insertrow(index,count);
+    ffixcols.insertrow(index,count);
+    inc(frowcount,count);
+    if frowcount > frowcountmax then begin
+     frowcount:= frowcountmax;
+    end;
+    dorowcountchanged(frowcount-count,frowcount);
    end;
-//   fdatacols.insertrow(index,count);
-//   ffixcols.insertrow(index,count);
-   inc(frowcount,count);
-   if frowcount > frowcountmax then begin
-    frowcount:= frowcountmax;
-   end;
-   dorowcountchanged(frowcount-count,frowcount);
+  finally
+   endupdate;
   end;
-  endupdate;
   dorowsinserted(index,count);
   if rowbefore <> ffocusedcell.row then begin
    dofocusedcellposchanged;
@@ -10687,66 +10731,51 @@ begin
   defocused:= false;
   cellbefore:= ffocusedcell;
   beginupdate;
-  if index >= 0 then begin //datarows
-   if (factiverow >= 0) then begin
-    if (factiverow >= index + count) then begin
-     dec(factiverow,count);
-    end
-   end;
-   if (ffocusedcell.row >= 0) then begin
-    if (ffocusedcell.row >= index + count) then begin
-     dec(ffocusedcell.row,count);
-    end
-    else begin
-     if ffocusedcell.row >= index then begin
-      countbefore:= frowcount;
-      focuscell(makegridcoord(ffocusedcell.col,invalidaxis)); //defocus row
-      if ffocusedcell.row <> invalidaxis then begin
-       factiverow:= ffocusedcell.row;
-       exit;
-      end;
-      defocused:= true;
-      dec(count,countbefore - frowcount); //correct removed empty last row
-     {
-      if index < frowcount - count then begin
-       ffocusedcell.row:= index;
-      end
-      else begin
-       int1:= frowcount-count-1;
-       if int1 < 0 then begin
-        countbefore:= frowcount;
-        focuscell(makegridcoord(ffocusedcell.col,invalidaxis)); //defocus row
-        if ffocusedcell.row <> invalidaxis then begin
-         factiverow:= ffocusedcell.row;
-         exit;
-        end;
-        defocused:= true;
-        dec(count,countbefore - frowcount); //correct removed empty last row
-       end
-       else begin
-        ffocusedcell.row:= int1;
+  try
+   if index >= 0 then begin //datarows
+    if (factiverow >= 0) then begin
+     if (factiverow >= index + count) then begin
+      dec(factiverow,count);
+     end
+    end;
+    if (ffocusedcell.row >= 0) then begin
+     if (ffocusedcell.row >= index + count) then begin
+      dec(ffocusedcell.row,count);
+     end
+     else begin
+      if ffocusedcell.row >= index then begin
+       countbefore:= frowcount;
+       focuscell(makegridcoord(ffocusedcell.col,invalidaxis)); //defocus row
+       if ffocusedcell.row <> invalidaxis then begin
+        factiverow:= ffocusedcell.row;
+        exit;
        end;
+       defocused:= true;
+       dec(count,countbefore - frowcount); //correct removed empty last row
       end;
-      }
      end;
     end;
-//    factiverow:= ffocusedcell.row;
+    if count > 0 then begin
+     if not (gs_changelock in fstate) then begin
+      include(fstate,gs_changelock);
+      fdatacols.beginchangelock;
+     end;
+     fdatacols.deleterow(index,count);
+     ffixcols.deleterow(index,count);
+     dec(frowcount,count);
+     dorowcountchanged(frowcount+count,frowcount);
+    end;
    end;
-   if count > 0 then begin
-    fdatacols.deleterow(index,count);
-    ffixcols.deleterow(index,count);
-    dec(frowcount,count);
-    dorowcountchanged(frowcount+count,frowcount);
-   end;
+  finally
+   endupdate;
   end;
-  endupdate;
   dorowsdeleted(index,count);
   if cellbefore.row <> ffocusedcell.row then begin
    dofocusedcellposchanged;
   end;
   if (og_focuscellonenter in foptionsgrid) and defocused then begin
    cellbefore.row:= index;
-   focuscell(cellbefore,fca_focusin{fca_entergrid});
+   focuscell(cellbefore,fca_focusin);
              //ev. auto append row
   end;
  end;
@@ -10756,70 +10785,6 @@ procedure tcustomgrid.clear; //sets rowcount to 0
 begin
  rowcount:= 0;
 end;
-(*
-function tcustomgrid.appendrow: integer; //returns index of new row
-var
- updatingbefore: integer;
- noinvalidatebefore: integer;
- po1: pointty;
- statebefore: framestatesty;
- scrollheightbefore: integer;
- 
- procedure updatelayout1;
- begin
-  fupdating:= 0;
-  internalupdatelayout;
-  fupdating:= updatingbefore;
- end;
-var
- rect1: rectty; 
-begin
- statebefore:= tgridframe(fframe).fstate;
- scrollheightbefore:= 
-  tcustomscrollbar1(tgridframe(fframe).fvert).fdrawinfo.areas[sbbu_move].dim.cy;
- noinvalidatebefore:= fnoinvalidate;
- updatingbefore:= fupdating;
- beginupdate;
- inc(fnoinvalidate);
- try
-  if frowcount >= frowcountmax then begin
-   po1.x:= 0;
-   po1.y:= -fystep;
-   updatelayout1;
-   dec(fnoinvalidate);
-   checkinvalidate1;
-   inc(fnoinvalidate);
-   scrollrect(po1,fdatarecty,scrollcaret);
-   rowcount:= frowcount+1;
-   updatelayout1;
-//   scrollrect(po1,fdatarecty,scrollcaret);
-   dec(fnoinvalidate);
-//invalidaterect(clientrect);
-   rowchanged(frowcount-1);
-  end
-  else begin
-   rowcount:= rowcount+1;
-   updatelayout1;
-   dec(fnoinvalidate);
-   rowchanged(frowcount-1);
-  end;
-  result:= frowcount-1;
-  if statebefore * scrollbarframestates <> 
-                    tgridframe(fframe).fstate * scrollbarframestates then begin
-   invalidatewidget;
-  end
-  else begin
-   if tcustomscrollbar1(tgridframe(fframe).fvert).fdrawinfo.areas[sbbu_move].dim.cy <> 
-                    scrollheightbefore then begin
-    tcustomscrollbar1(tgridframe(fframe).fvert).invalidate;
-   end;
-  end;
- finally
-  fnoinvalidate:= noinvalidatebefore;
-  fupdating:= updatingbefore
- end;
-end;
-*)
 
 function tcustomgrid.appendrow: integer; //returns index of new row
 var
@@ -10950,6 +10915,10 @@ begin
    checksort;
   end;
   checkinvalidate;
+  if gs_changelock in fstate then begin
+   exclude(fstate,gs_changelock);
+   fdatacols.endchangelock;
+  end;
   if gs_rowdatachanged in fstate then begin
    rowdatachanged(makegridcoord(invalidaxis,0),frowcount);
   end; 
