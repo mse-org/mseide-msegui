@@ -7181,6 +7181,7 @@ begin
   end;
   ffirstnohscroll:= ffirstnohscroll - fixcols.ffirstsize;
   with tgridframe(fframe) do begin
+   checkstate;
    with fdatarecty,ffixrows do begin
     finnerdatarect.y:= ffirstsize + fi.innerframe.top;
     finnerdatarect.cy:= finnerclientrect.cy - ftotsize;
