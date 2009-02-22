@@ -11746,8 +11746,13 @@ begin
  if high(ar1) >= 0 then begin
   if askok('Delete '+inttostr(length(ar1))+
                 ' selected rows?','Confirmation') then begin
-   for int1:= high(ar1) downto 0 do begin
-    deleterow(ar1[int1]);
+   beginupdate;
+   try
+    for int1:= high(ar1) downto 0 do begin
+     deleterow(ar1[int1]);
+    end;
+   finally
+    endupdate;
    end;
   end;
  end;
