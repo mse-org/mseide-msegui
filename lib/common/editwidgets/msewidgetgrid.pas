@@ -90,7 +90,9 @@ type
    function getbrushorigin: pointty;
    function getcol: twidgetcol;
    procedure getdata(aindex: integer; var dest);
-   procedure setdata(aindex: integer; const source; const noinvalidate: boolean = false);
+   procedure setdata(aindex: integer;
+                const source; const noinvalidate: boolean = false); virtual;
+                                    //wish from liuzg
    function getrow: integer;
    procedure setrow(arow: integer);
    function empty(aindex: integer): boolean;
