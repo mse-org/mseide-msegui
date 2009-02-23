@@ -230,7 +230,7 @@ var
  is51: boolean;
   
 Resourcestring
-  SErrServerConnectFailed = 'Server connect failed.';
+  SErrServerConnectFailed = 'Server connect failed: %s';
   SErrDatabaseSelectFailed = 'failed to select database: %s';
   SErrDatabaseCreate = 'Failed to create database: %s';
   SErrDatabaseDrop = 'Failed to drop database: %s';
@@ -573,6 +573,8 @@ end;
 procedure tmysqlconnection.ConnectMySQL(var HMySQL : PMySQL;H,U,P : pchar);
 var
  key,cert,ca,capath,cipher: string;
+ hmysql1: pmysql;
+ actcipher: pchar;
 begin
  mysqllock;
  HMySQL := mysql_init(HMySQL);
@@ -585,14 +587,17 @@ begin
   cipher:= fssl_cipher;  
   mysql_ssl_set(hmysql,pointer(key),pointer(cert),pointer(ca),pointer(capath),
            pointer(cipher));
-  if (mysql_get_ssl_cipher <> nil) and 
-            (mysql_get_ssl_cipher(hmysql) = nil) then begin
+ end;
+ HMySQL1:=mysql_real_connect(HMySQL,PChar(H),PChar(U),Pchar(P),Nil,fport,Nil,0);
+ If (HMySQL1=Nil) then begin
+  checkerror(SErrServerConnectFailed,hmysql);
+ end;
+ if (myo_ssl in foptions) and (mysql_get_ssl_cipher <> nil) then begin
+  actcipher:= mysql_get_ssl_cipher(hmysql);
+  if actcipher =  nil then begin
+   closeconnection(hmysql);
    databaseerror('Can not encrypt connection.',self);
   end;
- end;
- HMySQL:=mysql_real_connect(HMySQL,PChar(H),PChar(U),Pchar(P),Nil,fport,Nil,0);
- If (HMySQL=Nil) then begin
-  databaseerror(SErrServerConnectFailed,Self);
  end;
 end;
 {
