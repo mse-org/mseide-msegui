@@ -1479,11 +1479,13 @@ begin
                                tmsestringarraypropertyeditor);
  registerpropertyeditor(tmaskedbitmap.classinfo,nil,'',tbitmappropertyeditor);
  registerpropertyeditor(tstrings.classinfo,nil,'',tstringspropertyeditor);
- registerpropertyeditor(tdatalist.classinfo,nil,'',tdatalistpropertyeditor);
  registerpropertyeditor(tmsestringdatalist.classinfo,nil,'',
                                tmsestringdatalistpropertyeditor);
  registerpropertyeditor(tdoublemsestringdatalist.classinfo,nil,'',
                             tdoublemsestringdatalistpropertyeditor);
+ registerpropertyeditor(typeinfo(tmsestringintdatalist),nil,'',
+                            tmsestringintdatalistpropertyeditor);
+ registerpropertyeditor(tdatalist.classinfo,nil,'',tdatalistpropertyeditor);
 {
  info.editorclass:= timagelisteditor;
  info.propertytype:= typeinfo(timagelist);//tobject.classinfo;

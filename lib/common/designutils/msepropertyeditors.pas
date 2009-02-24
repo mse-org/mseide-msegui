@@ -417,7 +417,6 @@ type
  tdialogclasspropertyeditor = class(tclasspropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
-  public
  end;
 
  tbitmappropertyeditor = class(tdialogclasspropertyeditor)
@@ -455,7 +454,8 @@ type
    function getvalue: msestring; override;
  end;
 
- listeditformkindty = (lfk_none,lfk_msestring,lfk_real,lfk_integer);
+ listeditformkindty = (lfk_none,lfk_msestring,lfk_real,lfk_integer,
+                       lfk_msestringint);
  
  tdatalistpropertyeditor = class(tdialogclasspropertyeditor)
   protected
@@ -479,6 +479,15 @@ type
  end;
 
  tdoublemsestringdatalistpropertyeditor = class(tdialogclasspropertyeditor)
+   procedure edit; override;
+   function getvalue: msestring; override;
+  protected
+   procedure closequery(const sender: tcustommseform;
+                       var amodalresult: modalresultty);
+   function getdefaultstate: propertystatesty; override;
+ end;
+
+ tmsestringintdatalistpropertyeditor = class(tdialogclasspropertyeditor)
    procedure edit; override;
    function getvalue: msestring; override;
   protected
@@ -780,7 +789,8 @@ uses
  mseformatstr,msebits,msearrayprops,msebitmap,
  msefiledialog,mseimagelisteditor,msereal,msewidgets,
  mseactions,msehash,msegraphutils,
- msestringlisteditor,msedoublestringlisteditor,msereallisteditor,
+ msestringlisteditor,msedoublestringlisteditor,msestringintlisteditor,
+ msereallisteditor,
  mseintegerlisteditor,mseact,
  msecolordialog,msememodialog,
  mseshapes,msestockobjects,msetexteditor,
@@ -4293,6 +4303,11 @@ begin
   else begin
    if datalist1 is tintegerdatalist then begin
     formkind:= lfk_integer;
+   end
+   else begin
+    if datalist1 is tmsestringintdatalist then begin
+     formkind:= lfk_msestringint;
+    end;
    end;
   end;
  end;
@@ -4313,6 +4328,9 @@ begin
   lfk_integer: begin
    editform:= tintegerlisteditor.create({$ifdef FPC}@{$endif}closequery);
   end;
+  lfk_msestringint: begin
+   editform:= tmsestringintlisteditor.create({$ifdef FPC}@{$endif}closequery);
+  end;
   else begin
    editform:= nil;
   end;
@@ -4328,6 +4346,12 @@ begin
     end;
     lfk_integer: begin
      tintegerlisteditor(editform).valueedit.griddata.assign(tintegerdatalist(getordvalue));
+    end;
+    lfk_msestringint: begin
+     with tmsestringintlisteditor(editform) do begin
+      texta.assigncol(tmsestringdatalist(getordvalue));
+      tmsestringintdatalist(getordvalue).assigntob(textb.griddata);
+     end;
     end;
    end;
    editform.show(true,nil);
@@ -4377,6 +4401,12 @@ begin
      lfk_integer: begin
       tintegerdatalist(datalist1).assign(
                     tintegerlisteditor(sender).valueedit.griddata);
+     end;
+     lfk_msestringint: begin
+      with tmsestringintlisteditor(sender) do begin
+       tmsestringintdatalist(datalist1).assign(texta.griddata);
+       tmsestringintdatalist(datalist1).assignb(textb.griddata);
+      end;
      end;
     end;
     modified;
@@ -4500,6 +4530,65 @@ begin
 end;
 
 function tdoublemsestringdatalistpropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate;
+ checkdatalistnostreaming(self,result);
+end;
+
+{ tmsestringintdatalistpropertyeditor }
+
+procedure tmsestringintdatalistpropertyeditor.closequery(
+          const sender: tcustommseform; var amodalresult: modalresultty);
+var
+ list: tmsestringintdatalist;
+begin
+ if amodalresult = mr_ok then begin
+  try
+   with tmsestringintlisteditor(sender) do begin
+    list:= tmsestringintdatalist.create;
+    try
+     list.assign(texta.griddata);
+     list.assignb(textb.griddata);
+     tmsestringintdatalist(getordvalue).assign(list);
+     modified;
+    finally
+     list.Free;
+    end;
+   end;
+  except
+   application.handleexception(nil);
+   amodalresult:= mr_none;
+  end;
+ end;
+end;
+
+procedure tmsestringintdatalistpropertyeditor.edit;
+var
+ editform: tmsestringintlisteditor;
+begin
+ editform:= tmsestringintlisteditor.create({$ifdef FPC}@{$endif}closequery);
+ try
+  with editform do begin
+   texta.assigncol(tmsestringdatalist(getordvalue));
+   tmsestringintdatalist(getordvalue).assigntob(textb.griddata);
+   show(true,nil);
+  end;
+ finally
+  editform.Free;
+ end;
+end;
+
+function tmsestringintdatalistpropertyeditor.getvalue: msestring;
+begin
+ if tmsestringintdatalist(getordvalue).count = 0 then begin
+  result:= '<empty>';
+ end
+ else begin
+  result:= inherited getvalue;
+ end;
+end;
+
+function tmsestringintdatalistpropertyeditor.getdefaultstate: propertystatesty;
 begin
  result:= inherited getdefaultstate;
  checkdatalistnostreaming(self,result);

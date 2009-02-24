@@ -1,0 +1,137 @@
+object msestringintlisteditor: tmsestringintlisteditor
+  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  bounds_x = 130
+  bounds_y = 203
+  bounds_cx = 338
+  bounds_cy = 194
+  taborder = 1
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
+  container.bounds_cx = 338
+  container.bounds_cy = 194
+  container.frame.dummy = 0
+  options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat]
+  caption = 'Stringlisteditor'
+  moduleclassname = 'tmseform'
+  object ok: tbutton
+    optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 212
+    bounds_y = 160
+    bounds_cx = 50
+    bounds_cy = 20
+    taborder = 3
+    state = [as_default, as_localdefault, as_localcaption]
+    autosize_cx = 0
+    autosize_cy = 0
+    caption = '&OK'
+    modalresult = mr_ok
+    reffontheight = 14
+  end
+  object cancel: tbutton
+    optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 276
+    bounds_y = 160
+    bounds_cx = 50
+    bounds_cy = 20
+    state = [as_localcaption]
+    autosize_cx = 0
+    autosize_cy = 0
+    caption = '&Cancel'
+    modalresult = mr_cancel
+    reffontheight = 14
+  end
+  object grid: twidgetgrid
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 8
+    bounds_y = 8
+    bounds_cx = 320
+    bounds_cy = 140
+    frame.dummy = 0
+    anchors = [an_left, an_top, an_right, an_bottom]
+    taborder = 2
+    optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_wrapcol]
+    fixcols.count = 1
+    fixcols.items = <    
+      item
+        width = 31
+        numstep = 1
+      end>
+    fixrows.count = 1
+    fixrows.items = <    
+      item
+        height = 16
+        captions.count = 3
+        captions.items = <        
+          item
+            caption = 'a'
+            textflags = []
+          end        
+          item
+            caption = 'b'
+          end        
+          item
+            caption = 'b'
+            textflags = []
+          end>
+      end>
+    datacols.count = 2
+    datacols.items = <    
+      item
+        width = 232
+        options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        widgetname = 'texta'
+      end    
+      item
+        widgetname = 'textb'
+      end>
+    datarowheight = 16
+    onrowcountchanged = gridonrowcountchanged
+    reffontheight = 14
+    object texta: tstringedit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      optionsskin = [osk_framebuttononly]
+      bounds_x = 0
+      bounds_y = 0
+      bounds_cx = 232
+      bounds_cy = 16
+      frame.levelo = 0
+      frame.colorclient = -2147483646
+      frame.localprops = [frl_levelo, frl_colorclient]
+      frame.dummy = 0
+      taborder = 1
+      visible = False
+      reffontheight = 14
+    end
+    object textb: tintegeredit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+      optionsskin = [osk_framebuttononly]
+      bounds_x = 233
+      bounds_y = 0
+      bounds_cx = 50
+      bounds_cy = 16
+      taborder = 2
+      visible = False
+      reffontheight = 14
+    end
+  end
+  object rowcount: tintegeredit
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 36
+    bounds_y = 160
+    bounds_cx = 108
+    bounds_cy = 20
+    frame.caption = 'Rowcount'
+    frame.captionpos = cp_right
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      0
+      58
+      0
+    )
+    taborder = 1
+    onsetvalue = rowcountonsetvalue
+    reffontheight = 14
+  end
+end
