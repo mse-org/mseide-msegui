@@ -14,8 +14,12 @@ unit msefoldedit;
 interface
 uses
  classes,mseclasses,msedataedits,msegraphics,mseguiglob,msegrids,mseevent,msegui,
-     msegraphutils,msebitmap,mseeditglob,msedatalist,msewidgetgrid;
+     msegraphutils,msebitmap,mseeditglob,msedatalist,msewidgetgrid,mseedit,
+     msedrawtext;
 
+const
+ defaultfoldedittextflags = defaulttextflags + [tf_clipo];
+ defaultfoldedittextflagsactive = defaulttextflagsactive + [tf_clipo];
 type
  tgridmsestringintdatalist = class(tmsestringintdatalist)
   private
@@ -65,6 +69,10 @@ type
    procedure dopaint(const acanvas: tcanvas); override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdefaultvalue: pointer; override;
+//   function getinnerframe: framety; override;
+   function imageshift(arow: integer): integer;
+                    //-1 -> focused row
+   procedure setupeditor; override;
   public
    constructor create(aowner: tcomponent); override;
    property imagesize: sizety read fimagesize write setimagesize;
@@ -81,6 +89,8 @@ type
    property imagelist: timagelist read fimagelist write setimagelist;
    property imagewidth: integer read fimagesize.cx write setimagewidth default 0;
    property imageheight: integer read fimagesize.cy write setimageheight default 0;
+   property textflags default defaultfoldedittextflags;
+   property textflagsactive default defaultfoldedittextflagsactive;
  end;
  
 implementation
@@ -112,6 +122,8 @@ begin
  flevelstep:= 10;
  fdefault.int:= -1;
  inherited;
+ textflags:=  defaultfoldedittextflags;
+ textflagsactive:=  defaultfoldedittextflagsactive;
 end;
 
 procedure tfoldedit.drawimage(const acanvas: tcanvas; 
@@ -125,10 +137,11 @@ var
  int1,int2,int3,int4: integer;
  glyph1: stockglyphty;
  lines: segmentarty;
- ycenter: integer;
+ ycenter,xbefore: integer;
 begin
  if ainfo <> nil then begin
   with ainfo^ do begin
+   xbefore:= arect.x;
    ycenter:= arect.cy div 2;
    levelshift:= flevelstep*foldlevel;
    glyph1:= stg_none;
@@ -228,7 +241,9 @@ begin
     if int1 >= 0 then begin
      fimagelist.paint(acanvas,int1,arect,[al_ycentered]);
     end;
+    inc(arect.x,fimagelist.width);
    end;
+   arect.cx:= arect.cx - (arect.x-xbefore);
   end;
  end;
 end;
@@ -236,11 +251,26 @@ end;
 procedure tfoldedit.drawcell(const canvas: tcanvas);
 var
  rect1: rectty;
+ int1,int2,int3: integer;
 begin
- inherited;
  with cellinfoty(canvas.drawinfopo^) do begin
   rect1:= rect;
-  drawimage(canvas,foldinfo,rect1,selected,readonly,pmsestringintty(datapo));
+  drawimage(canvas,foldinfo,rect,selected,readonly,pmsestringintty(datapo));
+  int1:= innerrect.x;
+  int2:= innerrect.cx;
+  try
+   int3:= rect1.x - rect.x;         //apply adjustments to innerrect
+   innerrect.x:= innerrect.x + int3;
+   innerrect.cx:= innerrect.cx - int3;
+   if innerrect.cx < 0 then begin
+    innerrect.cx:= 0;
+   end;
+   inherited;
+  finally
+   innerrect.x:= int1;
+   innerrect.cx:= int2;
+   rect:= rect1;
+  end;
  end;
 end;
 
@@ -249,7 +279,6 @@ var
  rect1: rectty;
  int1: integer;
 begin
- inherited;
  if (fgridintf <> nil) then begin
   acanvas.rootbrushorigin:= fgridintf.getbrushorigin;
   rect1:= clientrect;
@@ -265,6 +294,7 @@ begin
    end;
   end;
  end;
+ inherited;
 end;
 
 procedure tfoldedit.clientmouseevent(var ainfo: mouseeventinfoty);
@@ -315,7 +345,6 @@ begin
    end
    else begin
     if eventkind = cek_exit then begin
-//     filtertext:= '';
     end;
    end;
   end;
@@ -455,4 +484,52 @@ begin
  result:= @fdefault;
 end;
 
+function tfoldedit.imageshift(arow: integer): integer;
+begin
+ result:= 0;
+ if fimagelist <> nil then begin
+  inc(result,fimagelist.width);
+ end;
+ if fgridintf <> nil then begin
+  with fgridintf.getcol.grid do begin
+   if arow < 0 then begin
+    arow:= row;
+   end;
+   if arow >= 0 then begin
+    inc(result,(rowfoldlevel[arow]+1)*flevelstep);
+   end;
+  end;
+ end;
+end;
+
+procedure tfoldedit.setupeditor;
+var
+ int1: integer;
+ rect1,rect2: rectty;
+begin
+ inherited;
+ int1:= imageshift(-1);
+ if int1 > 0 then begin
+  rect1:= feditor.cliprect;
+  rect2:= feditor.destrect;
+  inc(rect1.x,int1);
+  dec(rect1.cx,int1);
+  if rect1.cx < 0 then begin
+   rect1.cx:= 0;
+  end;
+  inc(rect2.x,int1);
+  dec(rect2.cx,int1);
+  if rect2.cx < 0 then begin
+   rect2.cx:= 0;
+  end;
+  feditor.updatepos(rect2,rect1);
+ end;
+end;
+{
+function tfoldedit.getinnerframe: framety;
+begin
+ result:= inherited getinnerframe;
+// result.left:= result.left + imageshift(-1);
+end;
+}
 end.

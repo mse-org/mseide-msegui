@@ -1810,7 +1810,7 @@ begin
    if des_grayed in fstate then begin
     include(atextflags,tf_grayed);
    end;
-   drawtext(canvas,mstr1,innerrect,atextflags);
+   drawtext(canvas,mstr1,innerrect,rect,atextflags);
   end;
  end;
 end;

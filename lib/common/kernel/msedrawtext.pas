@@ -144,6 +144,9 @@ procedure drawtext(const canvas: tcanvas; const text: richstringty;
                    const dest,clip: rectty; flags: textflagsty = [];
                    font: tfont = nil; tabulators: tcustomtabulators = nil); overload;
 procedure drawtext(const canvas: tcanvas; const text: msestring;
+                   const dest,clip: rectty; flags: textflagsty = [];
+                   font: tfont = nil; tabulators: tcustomtabulators = nil); overload;
+procedure drawtext(const canvas: tcanvas; const text: msestring;
                    const dest: rectty; flags: textflagsty = [];
                    font: tfont = nil; tabulators: tcustomtabulators = nil); overload;
 procedure layouttext(const canvas: tcanvas; var info: drawtextinfoty;
@@ -1091,6 +1094,23 @@ var
 begin
 // info.canvas:= canvas;
  info.text:= text;
+ info.dest:= dest;
+ info.clip:= clip;
+ info.flags:= flags;
+ info.font:= font;
+ info.tabulators:= tabulators;
+ drawtext(canvas,info);
+end;
+
+procedure drawtext(const canvas: tcanvas; const text: msestring;
+                        const dest,clip: rectty; flags: textflagsty = [];
+                        font: tfont = nil; tabulators: tcustomtabulators = nil);
+var
+ info: drawtextinfoty;
+begin
+// info.canvas:= canvas;
+ info.text.format:= nil;
+ info.text.text:= text;
  info.dest:= dest;
  info.clip:= clip;
  info.flags:= flags;
