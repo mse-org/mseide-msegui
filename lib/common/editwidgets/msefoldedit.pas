@@ -15,7 +15,7 @@ interface
 uses
  classes,mseclasses,msedataedits,msegraphics,mseguiglob,msegrids,mseevent,msegui,
      msegraphutils,msebitmap,mseeditglob,msedatalist,msewidgetgrid,mseedit,
-     msedrawtext,msetypes;
+     msedrawtext,msetypes,msestat;
 
 const
  defaultfoldedittextflags = defaulttextflags + [tf_clipo];
@@ -93,6 +93,8 @@ type
    procedure setupeditor; override;
    procedure gridtovalue(const arow: integer); override;
    procedure valuetogrid(const arow: integer); override;
+   procedure writestatvalue(const writer: tstatwriter); override;
+   procedure readstatvalue(const reader: tstatreader); override;
   public
    constructor create(aowner: tcomponent); override;
    property imagesize: sizety read fimagesize write setimagesize;
@@ -703,6 +705,20 @@ begin
  val1.mstr:= fvalue;
  val1.int:= fimnr_value;
  fgridintf.setdata(arow,val1);
+end;
+
+procedure tfoldedit.writestatvalue(const writer: tstatwriter);
+begin
+ inherited;
+ writer.writeinteger(valuevarname+'_imnr',fimnr_value);
+end;
+
+procedure tfoldedit.readstatvalue(const reader: tstatreader);
+begin
+ inherited;
+ if fgridintf = nil then begin
+  imnr_value:= reader.readinteger(valuevarname+'_imnr',imnr_value);
+ end;
 end;
 
 {

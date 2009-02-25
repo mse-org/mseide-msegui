@@ -536,6 +536,8 @@ type
    procedure compare(const l,r; var result: integer); override;
 //   procedure freedata(var data); override;
 //   procedure copyinstance(var data); override;
+   procedure setstatdata(const index: integer; const value: msestring); override;
+   function getstatdata(const index: integer): msestring; override;
   public
    constructor create; override;
    procedure assign(source: tpersistent); override;
@@ -5758,6 +5760,27 @@ begin
  {$endif}
 // {$endif}
   writelistend;
+ end;
+end;
+
+procedure tmsestringintdatalist.setstatdata(const index: integer;
+               const value: msestring);
+var
+ strint1: msestringintty;
+ int1: integer;
+begin
+ int1:= findchar(value,',');
+ if int1 > 0 then begin
+  strint1.int:= strtoint(copy(value,1,int1-1));
+  strint1.mstr:= copy(value,int1+1,bigint);
+  setdata(index,strint1);
+ end;
+end;
+
+function tmsestringintdatalist.getstatdata(const index: integer): msestring;
+begin
+ with pmsestringintty(getitempo(index))^ do begin
+  result:= inttostr(int)+','+mstr;
  end;
 end;
 

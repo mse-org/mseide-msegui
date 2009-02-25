@@ -1118,6 +1118,10 @@ type
    procedure cleanvisible(visibleindex: integer);
    procedure clean(arow: integer);
    procedure checkdirty(const arow: integer);
+   procedure recalchidden;
+   function getstatdata(const index: integer): msestring; override;
+   procedure setstatdata(const index: integer; const value: msestring);
+                                 override;
   public
    constructor create(const aowner: tcustomgrid); reintroduce;
    destructor destroy; override;
@@ -6436,6 +6440,9 @@ begin
    cols[int1].dostatread(reader);
   end;
   if not (gs_isdb in fgrid.fstate) then begin
+   if frowstate.folded then begin
+    reader.readdatalist('fold',frowstate);
+   end;
    int2:= 0;
    for int1:= 0 to count - 1 do begin
     with cols[int1] do begin
@@ -6444,6 +6451,7 @@ begin
      end;
     end;
    end;
+   frowstate.count:= int2;
    for int1:= 0 to count - 1 do begin
     with cols[int1] do begin
      if (fdata <> nil) then begin
@@ -6452,6 +6460,9 @@ begin
     end;
    end;
    fgrid.rowcount:= int2;
+   if frowstate.folded then begin
+    frowstate.recalchidden;
+   end;
   end;
  finally
   fgrid.endupdate;
@@ -6463,6 +6474,9 @@ begin
  inherited;
  if og_savestate in fgrid.foptionsgrid then begin
   writer.writeinteger('sortcol',sortcol);
+  if frowstate.folded then begin
+   writer.writedatalist('fold',frowstate);
+  end;
  end;
 end;
 
@@ -12626,6 +12640,36 @@ begin
  end;  
 end;
 
+procedure trowstatelist.recalchidden;
+var
+ int1: integer;
+ po1: prowstatety;
+ lev1: foldlevelty;
+begin
+ checkdirty(0);
+ fhiddencount:= 0;
+ po1:= datapo;
+ int1:= count;
+ while int1 > 0 do begin
+  if po1^.fold and foldhiddenmask <> 0 then begin
+   inc(fhiddencount);
+   lev1:= po1^.fold and foldlevelmask;
+   dec(int1);
+   inc(po1);
+   while (int1 > 0) and (po1^.fold and foldlevelmask > lev1) do begin
+    inc(fhiddencount);
+    dec(int1);
+    inc(po1);
+   end;
+  end
+  else begin
+   dec(int1);
+   inc(po1);
+  end;
+ end;
+end;
+
+
 procedure trowstatelist.internalshow(var aindex: integer);
 var
  int1,int2: integer;
@@ -13145,6 +13189,17 @@ begin
   ahaschildren:= bo1 and (nextfoldlevel > afoldlevel);
   aisopen:= ahaschildren and (by1 and foldhiddenmask = 0);
  end;
+end;
+
+function trowstatelist.getstatdata(const index: integer): msestring;
+begin
+ result:= inttostr(prowstatety(inherited getitempo(index))^.fold);
+end;
+
+procedure trowstatelist.setstatdata(const index: integer;
+               const value: msestring);
+begin
+ prowstatety(inherited getitempo(index))^.fold:= strtoint(value);
 end;
 
 end.
