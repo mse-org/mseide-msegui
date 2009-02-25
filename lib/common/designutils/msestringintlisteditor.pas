@@ -14,8 +14,8 @@ unit msestringintlisteditor;
 interface
 uses
  mseforms,msedataedits,msesimplewidgets,msewidgetgrid,msegrids,db,mseclasses,
- msedbedit,msedialog,mseedit,mseglob,msegraphics,msegraphutils,msegui,
- mseguiglob,mselookupbuffer,msemenus,msestrings,msetypes;
+ msedialog,mseedit,mseglob,msegraphics,msegraphutils,msegui,
+ mseguiglob,msemenus,msestrings,msetypes;
 type
  tmsestringintlisteditor = class(tmseform)
    cancel: tbutton;
