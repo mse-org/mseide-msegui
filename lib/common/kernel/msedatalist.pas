@@ -5513,6 +5513,7 @@ procedure tmsestringintdatalist.Setitemsb(index: integer;
                                              const Value: integer);
 begin
  pmsestringintty(getitempo(index))^.int:= value;
+ change(index);
 end;
 
 function tmsestringintdatalist.Getdoubleitems(index: integer): msestringintty;
@@ -5524,6 +5525,7 @@ procedure tmsestringintdatalist.Setdoubleitems(index: integer;
                          const Value: msestringintty);
 begin
  pmsestringintty(getitempo(index))^:= value;
+ change(index);
 end;
 
 procedure tmsestringintdatalist.insert(const index: integer;

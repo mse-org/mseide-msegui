@@ -15,7 +15,7 @@ interface
 uses
  classes,mseclasses,msedataedits,msegraphics,mseguiglob,msegrids,mseevent,msegui,
      msegraphutils,msebitmap,mseeditglob,msedatalist,msewidgetgrid,mseedit,
-     msedrawtext;
+     msedrawtext,msetypes;
 
 const
  defaultfoldedittextflags = defaulttextflags + [tf_clipo];
@@ -44,6 +44,13 @@ type
    fimagelist: timagelist;
    fdefault: msestringintty;
    
+   fimnr_value: integer;
+   fimnr_valuebase: integer;
+   fimnr_valueexpanded: integer;
+   fimnr_valueselected: integer;
+   fimnr_valuereadonly: integer;
+   fimnr_valuesubitems: integer;
+   fimagelistvalue: timagelist;
    procedure setlevelstep(const avalue: integer);
    procedure setimagesize(const avalue: sizety);
    procedure setimagewidth(const avalue: integer);
@@ -54,6 +61,17 @@ type
    procedure setimnr_readonly(const avalue: integer);
    procedure setimnr_subitems(const avalue: integer);
    procedure setimagelist(const avalue: timagelist);
+   function getgridimnr(const index: integer): integer;
+   procedure setgridimnr(const index: integer; const avalue: integer);
+   function getgridimnrs: integerarty;
+   procedure setgridimnrs(const avalue: integerarty);
+   procedure setimnr_value(const avalue: integer);
+   procedure setimnr_valuebase(const avalue: integer);
+   procedure setimnr_valueexpanded(const avalue: integer);
+   procedure setimnr_valueselected(const avalue: integer);
+   procedure setimnr_valuereadonly(const avalue: integer);
+   procedure setimnr_valuesubitems(const avalue: integer);
+   procedure setimagelistvalue(const avalue: timagelist);
   protected
    procedure updatelayout;
    procedure drawimage(const acanvas: tcanvas;
@@ -73,20 +91,47 @@ type
    function imageshift(arow: integer): integer;
                     //-1 -> focused row
    procedure setupeditor; override;
+   procedure gridtovalue(const arow: integer); override;
+   procedure valuetogrid(const arow: integer); override;
   public
    constructor create(aowner: tcomponent); override;
    property imagesize: sizety read fimagesize write setimagesize;
+   property gridimnr[const index: integer]: integer
+                                    read getgridimnr write setgridimnr;
+   property gridimnrs: integerarty read getgridimnrs write setgridimnrs;
   published
    property oncellevent: celleventty read foncellevent write foncellevent;
    property onclientmouseevent: mouseeventty read fonclientmouseevent 
                            write fonclientmouseevent;
    property levelstep: integer read flevelstep write setlevelstep default 10;
+
    property imnr_base: integer read fimnr_base write setimnr_base default 0;
    property imnr_expanded: integer read fimnr_expanded write setimnr_expanded default 0;
    property imnr_selected: integer read fimnr_selected write setimnr_selected default 0;
    property imnr_readonly: integer read fimnr_readonly write setimnr_readonly default 0;
    property imnr_subitems: integer read fimnr_subitems write setimnr_subitems default 0;
+                      
+                      
+   property imnr_value: integer read fimnr_value write setimnr_value default -1;
+             //-1 -> use imagelist, imnr_base, imnr_expanded, imnr_selected
+             //imnr_readonly, imnr_subitems
+             //-2 none
+             // >= 0 use imagelistvalue, imnr_value + imnr_base, imnr_expanded, imnr_selected
+             //imnr_readonly, imnr_subitems
+   property imnr_valuebase: integer read fimnr_valuebase 
+                                       write setimnr_valuebase default 0;
+   property imnr_valueexpanded: integer read fimnr_valueexpanded 
+                                       write setimnr_valueexpanded default 0;
+   property imnr_valueselected: integer read fimnr_valueselected
+                                       write setimnr_valueselected default 0;
+   property imnr_valuereadonly: integer read fimnr_valuereadonly
+                                       write setimnr_valuereadonly default 0;
+   property imnr_valuesubitems: integer read fimnr_valuesubitems
+                                       write setimnr_valuesubitems default 0;
+
    property imagelist: timagelist read fimagelist write setimagelist;
+   property imagelistvalue: timagelist read fimagelistvalue
+                                       write setimagelistvalue;
    property imagewidth: integer read fimagesize.cx write setimagewidth default 0;
    property imageheight: integer read fimagesize.cy write setimageheight default 0;
    property textflags default defaultfoldedittextflags;
@@ -121,6 +166,7 @@ constructor tfoldedit.create(aowner: tcomponent);
 begin
  flevelstep:= 10;
  fdefault.int:= -1;
+ fimnr_value:= -1;
  inherited;
  textflags:=  defaultfoldedittextflags;
  textflagsactive:=  defaultfoldedittextflagsactive;
@@ -138,6 +184,7 @@ var
  glyph1: stockglyphty;
  lines: segmentarty;
  ycenter,xbefore: integer;
+ imli1: timagelist;
 begin
  if ainfo <> nil then begin
   with ainfo^ do begin
@@ -216,11 +263,37 @@ begin
     arect.cx:= int1;
    end;
    inc(arect.x,flevelstep);
-   if fimagelist <> nil then begin
-    if (datapo <> nil) and (datapo^.int <> -1) then begin
-     int1:= datapo^.int;
-    end
-    else begin
+   imli1:= nil;
+   if datapo <> nil then begin
+    int1:= datapo^.int;
+   end
+   else begin
+    int1:= fimnr_value;
+   end;
+   if int1 <> -1 then begin
+    if fimagelistvalue <> nil then begin
+     imli1:= fimagelistvalue;     
+     inc(int1,fimnr_valuebase);
+     if isopen then begin
+      inc(int1,fimnr_valueexpanded);
+     end;
+     if isselected then begin
+      inc(int1,fimnr_valueselected);
+     end;
+     if isreadonly then begin
+      inc(int1,fimnr_valuereadonly);
+     end;
+     if isselected then begin
+      inc(int1,fimnr_valueselected);
+     end;
+     if haschildren then begin
+      inc(int1,fimnr_valuesubitems);
+     end;
+    end;
+   end
+   else begin
+    if fimagelist <> nil then begin
+     imli1:= fimagelist;
      int1:= fimnr_base { fimagenr};
      if isopen then begin
       inc(int1,fimnr_expanded);
@@ -238,10 +311,13 @@ begin
       inc(int1,fimnr_subitems);
      end;
     end;
-    if int1 >= 0 then begin
-     fimagelist.paint(acanvas,int1,arect,[al_ycentered]);
-    end;
-    inc(arect.x,fimagelist.width);
+   end;
+   if (imli1 <> nil) and (int1 >= 0) then begin
+    int2:= arect.cx;
+    arect.cx:= fimagesize.cx;
+    imli1.paint(acanvas,int1,arect,[al_ycentered,al_xcentered]);
+    inc(arect.x,fimagesize.cx);
+    arect.cx:= int2;
    end;
    arect.cx:= arect.cx - (arect.x-xbefore);
   end;
@@ -429,11 +505,23 @@ begin
  end;
 end;
 
+procedure tfoldedit.setimagelistvalue(const avalue: timagelist);
+begin
+ if fimagelistvalue <> avalue then begin
+  setlinkedvar(avalue,tmsecomponent(fimagelistvalue));
+  if (fimagelistvalue <> nil) and (csdesigning in componentstate) then begin
+   fimagesize:= fimagelistvalue.size;
+  end;
+  updatelayout;
+//  invalidate;
+ end;
+end;
+
 procedure tfoldedit.setimnr_base(const avalue: integer);
 begin
  if fimnr_base <> avalue then begin
   fimnr_base:= avalue;
-  invalidate;
+  formatchanged;
  end;
 end;
 
@@ -441,7 +529,7 @@ procedure tfoldedit.setimnr_expanded(const avalue: integer);
 begin
  if fimnr_expanded <> avalue then begin
   fimnr_expanded:= avalue;
-  invalidate;
+  formatchanged;
  end;
 end;
 
@@ -449,7 +537,7 @@ procedure tfoldedit.setimnr_selected(const avalue: integer);
 begin
  if fimnr_selected <> avalue then begin
   fimnr_selected:= avalue;
-  invalidate;
+  formatchanged;
  end;
 end;
 
@@ -457,15 +545,63 @@ procedure tfoldedit.setimnr_readonly(const avalue: integer);
 begin
  if fimnr_readonly <> avalue then begin
   fimnr_readonly:= avalue;
-  invalidate;
+  formatchanged;
  end;
 end;
 
 procedure tfoldedit.setimnr_subitems(const avalue: integer);
 begin
  if fimnr_subitems <> avalue then begin
-  fimnr_subitems := avalue;
-  invalidate;
+  fimnr_subitems:= avalue;
+  formatchanged;
+ end;
+end;
+
+procedure tfoldedit.setimnr_value(const avalue: integer);
+begin
+ if fimnr_value <> avalue then begin
+  fimnr_value:= avalue;
+  valuechanged;
+ end;
+end;
+
+procedure tfoldedit.setimnr_valuebase(const avalue: integer);
+begin
+ if fimnr_valuebase <> avalue then begin
+  fimnr_valuebase:= avalue;
+  formatchanged;
+ end;
+end;
+
+procedure tfoldedit.setimnr_valueexpanded(const avalue: integer);
+begin
+ if fimnr_valueexpanded <> avalue then begin
+  fimnr_valueexpanded:= avalue;
+  formatchanged;
+ end;
+end;
+
+procedure tfoldedit.setimnr_valueselected(const avalue: integer);
+begin
+ if fimnr_valueselected <> avalue then begin
+  fimnr_valueselected:= avalue;
+  formatchanged;
+ end;
+end;
+
+procedure tfoldedit.setimnr_valuereadonly(const avalue: integer);
+begin
+ if fimnr_valuereadonly <> avalue then begin
+  fimnr_valuereadonly:= avalue;
+  formatchanged;
+ end;
+end;
+
+procedure tfoldedit.setimnr_valuesubitems(const avalue: integer);
+begin
+ if fimnr_valuesubitems <> avalue then begin
+  fimnr_valuesubitems:= avalue;
+  formatchanged;
  end;
 end;
 
@@ -525,6 +661,50 @@ begin
   feditor.updatepos(rect2,rect1);
  end;
 end;
+
+function tfoldedit.getgridimnr(const index: integer): integer;
+begin
+ checkgrid;
+ result:= tmsestringintdatalist(fgridintf.getcol.datalist).itemsb[index];
+end;
+
+procedure tfoldedit.setgridimnr(const index: integer; const avalue: integer);
+begin
+ checkgrid;
+ tmsestringintdatalist(fgridintf.getcol.datalist).itemsb[index]:= avalue;
+end;
+
+function tfoldedit.getgridimnrs: integerarty;
+begin
+ checkgrid;
+ result:= tmsestringintdatalist(fgridintf.getcol.datalist).asarrayb;
+end;
+
+procedure tfoldedit.setgridimnrs(const avalue: integerarty);
+begin
+ checkgrid;
+ tmsestringintdatalist(fgridintf.getcol.datalist).asarrayb:= avalue;
+end;
+
+procedure tfoldedit.gridtovalue(const arow: integer);
+var
+ val1: msestringintty;
+begin
+ fgridintf.getdata(arow,val1);
+ fvalue:= val1.mstr;
+ fimnr_value:= val1.int;
+ valuetotext;
+end;
+
+procedure tfoldedit.valuetogrid(const arow: integer);
+var
+ val1: msestringintty;
+begin
+ val1.mstr:= fvalue;
+ val1.int:= fimnr_value;
+ fgridintf.setdata(arow,val1);
+end;
+
 {
 function tfoldedit.getinnerframe: framety;
 begin
