@@ -176,6 +176,7 @@ type
   cols: integer;
   rows: integer;
   data: datarecty; //array[0..cols-1] of coldataty
+  rowinfo: ifibytesty; //if folded
  end;
  pgriddatadataty = ^griddatadataty;
  griddataty = record

@@ -16,7 +16,7 @@ uses
  
 const
  ifidatatypes = [dl_integer,dl_int64,dl_currency,dl_real,
-                 dl_msestring,dl_ansistring];
+                 dl_msestring,dl_ansistring,dl_msestringint];
  
 type
  tmodulelinkarrayprop = class;
@@ -2249,6 +2249,7 @@ var
  po1: pmsestring; 
  po2: pinteger;
  po3: pansistring;
+ po4: pmsestringintty;
 begin
  if (adatalist <> nil) and (adatalist.datatyp <> akind) then begin
   raise exception.create('Datakinds do not match.');
@@ -2284,7 +2285,7 @@ begin
    if adatalist <> nil then begin
     po1:= adatalist.datapo;
     for int1:= 0 to arowcount - 1 do begin
-     int2:= po2^;
+     move(po2^,int2,sizeof(integer));
      setlength(po1[int1],int2);
      int2:= int2 * sizeof(msechar);
      result:= result + int2;
@@ -2302,13 +2303,40 @@ begin
     end;
    end;    
   end;
+  dl_msestringint: begin
+   po2:= pinteger(adata);
+   result:= arowcount * (sizeof(integer)+sizeof(integer));
+   if adatalist <> nil then begin
+    po4:= adatalist.datapo;
+    for int1:= 0 to arowcount - 1 do begin
+     move(po2^,po4[int1].int,sizeof(integer));
+     inc(po2);
+     move(po2^,int2,sizeof(integer));
+     setlength(po4[int1].mstr,int2);
+     int2:= int2 * sizeof(msechar);
+     result:= result + int2;
+     inc(po2);
+     move(po2^,po4[int1].mstr[1],int2);
+     inc(pointer(po2),int2);
+    end;
+   end
+   else begin
+    for int1:= 0 to arowcount - 1 do begin
+     inc(po2);
+     int2:= po2^*sizeof(msechar);
+     result:= result + int2;
+     inc(po2);
+     inc(pointer(po2),int2);
+    end;
+   end;    
+  end;
   dl_ansistring: begin
    po2:= pinteger(adata);
    result:= arowcount * sizeof(integer);
    if adatalist <> nil then begin
     po3:= adatalist.datapo;
     for int1:= 0 to arowcount - 1 do begin
-     int2:= po2^;
+     move(po2^,int2,sizeof(integer));
      setlength(po3[int1],int2);
      result:= result + int2;
      inc(po2);
@@ -2373,6 +2401,18 @@ begin
      inc(dest,int2);
     end;
    end;
+   dl_msestringint: begin
+    for int1:= 0 to count - 1 do begin
+     move(pmsestringintty(po4)[int1].int,dest^,sizeof(integer));
+     inc(dest,sizeof(integer));
+     int2:= length(pmsestringintty(po4)[int1].mstr);
+     move(int2,dest^,sizeof(integer));
+     int2:= int2 * sizeof(msechar);
+     inc(dest,sizeof(integer));
+     move(pmsestringintty(po4)[int1].mstr[1],dest^,int2);
+     inc(dest,int2);
+    end;
+   end;
    dl_ansistring: begin
     for int1:= 0 to count - 1 do begin
      int2:= length(pansistring(po4)[int1]);
@@ -2392,6 +2432,7 @@ var
  int1: integer;
  po1: pmsestring;
  po2: pansistring;
+ po3: pmsestringintty;
 begin
  with adatalist do begin
   case adatalist.datatyp of
@@ -2412,6 +2453,13 @@ begin
     result:= count * sizeof(integer);
     for int1:= 0 to count - 1 do begin
      result:= result + length(po1[int1]) * sizeof(msechar);
+    end;
+   end;
+   dl_msestringint: begin
+    po3:= datapo;
+    result:= count * (sizeof(integer)+sizeof(integer));
+    for int1:= 0 to count - 1 do begin
+     result:= result + length(po3[int1].mstr) * sizeof(msechar);
     end;
    end;
    dl_ansistring: begin

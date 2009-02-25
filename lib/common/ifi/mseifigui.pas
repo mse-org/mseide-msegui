@@ -123,6 +123,8 @@ uses
  sysutils,msestream,msesysutils,msetmpmodules,msedatalist;
 type
  tcustommodulelink1 = class(tcustommodulelink);
+ tdatacols1 = class(tdatacols);
+ 
 // tlinkdata1 = class(tlinkdata);
   
 { tvaluewidgetlink }
@@ -369,24 +371,30 @@ var
  po2: pmsestring;
  po3: pansistring;
  ar1: booleanarty;
+ ar2: bytearty;
 begin
  with trxwidgetgrid(fowner) do begin
   setlength(ar1,datacols.count);
   int2:= 0;
+  int3:= 0;
   for int1:= 0 to datacols.count - 1 do begin
    with datacols[int1] do begin
     ar1[int1]:= (name <> '') and (datalist <> nil) and 
                                (datalist.datatyp in ifidatatypes);
     if ar1[int1] then begin
+     inc(int3);
      int2:= int2 + (sizeof(datatypty)+1) + length(name) + 
                        datalisttoifidata(datalist);
     end;
    end;
   end;
+  if tdatacols1(datacols).frowstate.folded then begin
+   int2:= int2 + rowcount * sizeof(byte);
+  end;
   inititemheader(result,ik_griddata,asequence,int2,po1);
   with pgriddatadataty(po1)^ do begin
    rows:= rowcount;
-   cols:= datacols.count;
+   cols:= int3;
    po1:= @data;
    for int1:= 0 to high(ar1) do begin
     if ar1[int1] then begin
@@ -399,6 +407,13 @@ begin
       datalisttoifidata(datalist,po1);
      end;
     end;
+   end;
+   if tdatacols1(datacols).frowstate.folded then begin
+    ar2:= tdatacols1(datacols).frowstate.foldinfoar;
+    inc(po1,setifibytes(pointer(ar2),rowcount,pifibytesty(po1)));
+   end
+   else begin
+    inc(po1,setifibytes(pointer(ar2),0,pifibytesty(po1)));
    end;
   end;
  end;
@@ -418,6 +433,9 @@ var
 begin
  with adata^.header do begin
   case kind of
+   ik_requestopen: begin
+    senddata(encodegriddata(sequence));
+   end;
    ik_griddata: begin
     if answersequence = fdatasequence then begin
      with trxwidgetgrid(fowner) do begin
@@ -444,6 +462,13 @@ begin
          inc(po1,ifidatatodatalist(kind1,rows1,po1,list1));
         end;
        end;
+       with pifibytesty(po1)^ do begin
+        if tdatacols1(datacols).frowstate.folded and 
+                             (length = rowcount) then begin
+         tdatacols1(datacols).frowstate.setupfoldinfo(@data,rowcount);
+        end;
+       end;
+       inc(po1,sizeof(ifibytesty)+pifibytesty(po1)^.length);
        include(fistate,rws_datareceived);
       finally
        endupdate;
@@ -457,7 +482,7 @@ end;
 
 function tifiwidgetgridcontroller.getifireckinds: ifireckindsty;
 begin
- result:= [ik_griddata];
+ result:= [ik_griddata,ik_requestopen];
 end;
 
 { trxwidgetgrid }

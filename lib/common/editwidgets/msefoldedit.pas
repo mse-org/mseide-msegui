@@ -337,7 +337,7 @@ begin
   int1:= innerrect.x;
   int2:= innerrect.cx;
   try
-   int3:= rect1.x - rect.x;         //apply adjustments to innerrect
+   int3:= rect.x - rect1.x;         //apply adjustments to innerrect
    innerrect.x:= innerrect.x + int3;
    innerrect.cx:= innerrect.cx - int3;
    if innerrect.cx < 0 then begin

@@ -1108,6 +1108,7 @@ type
    procedure doclean(arow: integer; visibleindex: integer);
    function isvisible(const arow: integer): boolean;
    procedure counthidden(var aindex: integer);
+   function getfoldinfoar: bytearty;
   protected
    procedure setcount(const value: integer); override;
    procedure internalshow(var aindex: integer);
@@ -1148,6 +1149,9 @@ type
    property items[const index: integer]: rowstatety read getrowstate 
                                               write setrowstate; default;
    property folded: boolean read ffolded write setfolded;
+
+   property foldinfoar: bytearty read getfoldinfoar;
+   procedure setupfoldinfo(asource: pbyte; const acount: integer);
  end;
 
  tdatacols = class(tcols)
@@ -12669,6 +12673,35 @@ begin
  end;
 end;
 
+function trowstatelist.getfoldinfoar: bytearty;
+var
+ int1: integer;
+ po1: prowstatety;
+begin
+ setlength(result,count);
+ po1:= datapo;
+ inc(po1,count);
+ for int1:= high(result) downto 0 do begin
+  dec(po1);
+  result[int1]:= po1^.fold;
+ end;
+end;
+
+procedure trowstatelist.setupfoldinfo(asource: pbyte;
+               const acount: integer);
+var
+ po1: prowstatety;
+ var int1: integer;
+begin
+ fgrid.rowcount:= acount;
+ po1:= datapo;
+ for int1:= count-1 downto 0 do begin
+  po1^.fold:= asource^;
+  inc(po1);
+  inc(asource);
+ end;
+ recalchidden;
+end;
 
 procedure trowstatelist.internalshow(var aindex: integer);
 var
