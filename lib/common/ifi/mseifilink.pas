@@ -545,11 +545,11 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   property rowhigh: integer read getrowhigh;
   published
    property ifi: ttxdatagridcontroller read fifi write setifi;
    property datacols: tifidatacols read fdatacols write setdatacols;
-   property rowcount: integer read frowcount write setrowcount;
-   property rowhigh: integer read getrowhigh;
+   property rowcount: integer read frowcount write setrowcount default 0;
  end;
    
 function ifidatatodatalist(const akind: datatypty; const arowcount: integer;
