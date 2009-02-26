@@ -1642,16 +1642,7 @@ begin
  include(fbstate,bs_editing);
  with pdsrecordty(activebuffer)^.dsheader.bookmark.data do begin
   recordpo:= nil;
-//  recno:= -1;
   recno:= frecno;
-  {
-  if eof then begin
-   recno:= fbrecordcount //append
-  end
-  else begin
-   recno:= frecno;
-  end;
-  }
  end;
  inherited;
 end;
@@ -2014,8 +2005,8 @@ var
  int1: integer;
 begin 
  result:= false;
+ buffer:= nil;
  if not active then begin
-  buffer:= nil;
   exit;
  end;
  int1:= afield.fieldno - 1;
@@ -2061,8 +2052,11 @@ begin
      buffer:= @pintrecordty(buffer)^.header;
     end;
    end
-   else begin
-    buffer:= @fcurrentbuf^.header   //there is no old value available
+   else begin //there is no old value available
+    if pdsrecordty(activebuffer)^.dsheader.bookmark.data.recordpo <> nil
+                                 then begin //dsinsert otherwise
+     buffer:= @fcurrentbuf^.header   
+    end;
    end;
   end;
   if buffer <> nil then begin
