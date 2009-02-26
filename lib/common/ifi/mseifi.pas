@@ -36,7 +36,7 @@ type
  pifinamety = ^ifinamety;
 
  ifidatakindty = (idk_none,idk_null,idk_integer,idk_int64,idk_currency,idk_real,
-                  idk_msestring,{idk_ansistring,}idk_bytes);
+                  idk_msestring,idk_msestringint,idk_bytes);
  pifidatakindty = ^ifidatakindty;
   
  datarecty = record //dummy
@@ -522,15 +522,16 @@ function setifibytes(const source: pointer; const size: integer;
 
 const 
  datarecsizes: array[ifidatakindty] of integer = (
-  sizeof(ifidataty),                             //idk_none
-  sizeof(ifidataty),                             //idk_null
-  sizeof(ifidataty)+sizeof(integer),             //idk_integer
-  sizeof(ifidataty)+sizeof(int64),               //idk_int64
-  sizeof(ifidataty)+sizeof(currency),            //idk_currency
-  sizeof(ifidataty)+sizeof(double),              //idk_real
-  sizeof(ifidataty)+sizeof(ifinamety),           //idk_msestring
-//  sizeof(ifidataty)+sizeof(ifinamety),         //idk_ansistring
-  sizeof(ifidataty)+sizeof(ifibytesty)           //idk_bytes
+  sizeof(ifidataty),                                   //idk_none
+  sizeof(ifidataty),                                   //idk_null
+  sizeof(ifidataty)+sizeof(integer),                   //idk_integer
+  sizeof(ifidataty)+sizeof(int64),                     //idk_int64
+  sizeof(ifidataty)+sizeof(currency),                  //idk_currency
+  sizeof(ifidataty)+sizeof(double),                    //idk_real
+  sizeof(ifidataty)+sizeof(ifinamety),                 //idk_msestring
+  sizeof(ifidataty)+sizeof(integer)+sizeof(ifinamety), //idk_msestringint
+//  sizeof(ifidataty)+sizeof(ifinamety),               //idk_ansistring
+  sizeof(ifidataty)+sizeof(ifibytesty)                 //idk_bytes
 
  );
 implementation

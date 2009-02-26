@@ -59,9 +59,6 @@ const
  defaultgridskinoptions = [osk_framebuttononly];
  sortglyphwidth = 11;
  defaultwheelscrollheight = 0;
- foldhiddenbit = 7;
- foldhiddenmask = 1 shl foldhiddenbit;
- foldlevelmask = not foldhiddenmask;
   
 type
  optiongridty = (og_colsizing,og_colmoving,og_keycolmoving,
@@ -233,8 +230,6 @@ type
  tfixcellface = class(tcellface)
  end;
 
- foldlevelty = 0..127;
- 
  rowfoldinfoty = record
   foldlevel: foldlevelty;
   isvisible: boolean;
@@ -1076,19 +1071,7 @@ type
              //index in grid.rowfonts, uses row active if co_rowcoloractive set
  end;
 
- rowstatety = record
-  selected: cardinal; //bitset lsb = col 0, msb-1 = col 30, msb = whole row
-                      //adressed by fcreateindex
-//  cellrow: integer;   //
-  color: byte; //index in rowcolors, 0 = none, 1 = rowcolors[0]
-  font: byte;  //index in rowfonts, 0 = none, 1 = rowfonts[0]
-  fold: byte;  // h nnnnnnn  h = hidden, nnnnnnn = fold level, 0 -> top
- end;
- prowstatety = ^rowstatety;
- rowstateaty = array[0..0] of rowstatety;
- prowstateaty  = ^rowstateaty;
-   
- trowstatelist = class(tdatalist)
+ trowstatelist = class(tcustomrowstatelist)
   private
    fdirtyvisible: integer;
    fdirtyrow: integer;
@@ -1098,17 +1081,12 @@ type
    fvisiblerows: integerarty;
    fvisiblerowmap: tintegerdatalist;
    ffoldchangedrow: integer;
-   function getrowstate(const index: integer): rowstatety;
-   procedure setrowstate(const index: integer; const Value: rowstatety);
-   function gethidden(const index: integer): boolean;
-   procedure sethidden(const index: integer; const avalue: boolean);
-   function getfoldlevel(const index: integer): foldlevelty;
-   procedure setfoldlevel(const index: integer; const avalue: foldlevelty);
-   procedure setfolded(const avalue: boolean);
    procedure doclean(arow: integer; visibleindex: integer);
    function isvisible(const arow: integer): boolean;
    procedure counthidden(var aindex: integer);
-   function getfoldinfoar: bytearty;
+   procedure sethidden(const index: integer; const avalue: boolean);
+   procedure setfoldlevel(const index: integer; const avalue: foldlevelty);
+   procedure setfolded(const avalue: boolean);
   protected
    procedure setcount(const value: integer); override;
    procedure internalshow(var aindex: integer);
@@ -1143,17 +1121,13 @@ type
                 out afoldlevel: foldlevelty; out ahaschildren,aisopen: boolean);
    procedure hidechildren(const arow: integer);
    procedure showchildren(const arow: integer);
+   property folded: boolean read ffolded write setfolded;
+   procedure setupfoldinfo(asource: pbyte; const acount: integer);
    property hidden[const index: integer]: boolean read gethidden write sethidden;
    property foldlevel[const index: integer]: foldlevelty read getfoldlevel write setfoldlevel;
                                                            //0..127
-   property items[const index: integer]: rowstatety read getrowstate 
-                                              write setrowstate; default;
-   property folded: boolean read ffolded write setfolded;
-
-   property foldinfoar: bytearty read getfoldinfoar;
-   procedure setupfoldinfo(asource: pbyte; const acount: integer);
  end;
-
+ 
  tdatacols = class(tcols)
   private
    fselectedrow: integer; //-1 none, -2 more than one
@@ -1226,6 +1200,7 @@ type
    procedure setselectedrange(const start,stop: gridcoordty;
                     const value: boolean;
                     const calldoselectcell: boolean = false); overload; virtual;
+   property rowstate: trowstatelist read frowstate;
   published
    property sortcol: integer read fsortcol write setsortcol default -1;
                                       //-1 -> all
@@ -12555,7 +12530,6 @@ constructor trowstatelist.create(const aowner: tcustomgrid);
 begin
  fgrid:= aowner;
  inherited create;
- fsize:= sizeof(rowstatety);
 end;
 
 destructor trowstatelist.destroy;
@@ -12567,22 +12541,6 @@ end;
 function trowstatelist.getitempo(const index: integer): prowstatety;
 begin
  result:= prowstatety(inherited getitempo(index));
-end;
-
-function trowstatelist.getrowstate(const index: integer): rowstatety;
-begin
- getdata(index,result);
-end;
-
-procedure trowstatelist.setrowstate(const index: integer;
-  const Value: rowstatety);
-begin
- setdata(index,value);
-end;
-
-function trowstatelist.gethidden(const index: integer): boolean;
-begin
- result:= items[index].fold and foldhiddenmask <> 0;
 end;
 
 function trowstatelist.isvisible(const arow: integer): boolean;
@@ -12670,20 +12628,6 @@ begin
    dec(int1);
    inc(po1);
   end;
- end;
-end;
-
-function trowstatelist.getfoldinfoar: bytearty;
-var
- int1: integer;
- po1: prowstatety;
-begin
- setlength(result,count);
- po1:= datapo;
- inc(po1,count);
- for int1:= high(result) downto 0 do begin
-  dec(po1);
-  result[int1]:= po1^.fold;
  end;
 end;
 
@@ -12860,11 +12804,6 @@ begin
  else begin
   raise exception.create('Grid not folded.');
  end;
-end;
-
-function trowstatelist.getfoldlevel(const index: integer): foldlevelty;
-begin
- result:= items[index].fold and foldlevelmask;
 end;
 
 procedure trowstatelist.setfoldlevel(const index: integer;

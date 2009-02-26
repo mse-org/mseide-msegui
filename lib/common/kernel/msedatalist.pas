@@ -20,7 +20,7 @@ uses
 type
  datatypty = (dl_none,dl_integer,dl_int64,dl_currency,dl_real,dl_datetime,
     dl_ansistring,dl_msestring,dl_doublemsestring,dl_msestringint,
-    dl_complex,dl_custom);
+    dl_complex,dl_rowstate,dl_custom);
 
  doublestringty = record
   a,b: string;
@@ -560,6 +560,39 @@ type
                    write Setdoubleitems; default;
  end;
 
+const
+ foldhiddenbit = 7;
+ foldhiddenmask = 1 shl foldhiddenbit;
+ foldlevelmask = not foldhiddenmask;
+type
+ foldlevelty = 0..127;
+ rowstatety = record
+  selected: cardinal; //bitset lsb = col 0, msb-1 = col 30, msb = whole row
+                      //adressed by fcreateindex
+  color: byte; //index in rowcolors, 0 = none, 1 = rowcolors[0]
+  font: byte;  //index in rowfonts, 0 = none, 1 = rowfonts[0]
+  fold: byte;  // h nnnnnnn  h = hidden, nnnnnnn = fold level, 0 -> top
+ end;
+ prowstatety = ^rowstatety;
+ rowstateaty = array[0..0] of rowstatety;
+ prowstateaty  = ^rowstateaty;
+   
+ tcustomrowstatelist = class(tdatalist)
+  private
+   function getrowstate(const index: integer): rowstatety;
+   procedure setrowstate(const index: integer; const Value: rowstatety);
+   function gethidden(const index: integer): boolean;
+   function getfoldlevel(const index: integer): foldlevelty;
+   function getfoldinfoar: bytearty;
+  public
+   constructor create; override;
+   procedure assign(source: tpersistent); override;
+   function datatyp: datatypty; override;
+   property items[const index: integer]: rowstatety read getrowstate 
+                                              write setrowstate; default;
+   property foldinfoar: bytearty read getfoldinfoar;
+ end;
+
  createobjecteventty = procedure(const sender: tobject; var obj: tobject) of object;
 
  tobjectdatalist = class(tdynamicpointerdatalist)
@@ -594,8 +627,8 @@ const
   tansistringdatalist,tmsestringdatalist,tdoublemsestringdatalist,
 //dl_msestringint
   tmsestringintdatalist,
-//dl_complex,          dl_custom);
-  tcomplexdatalist,nil);
+//dl_complex,      dl_rowstate        dl_custom);
+  tcomplexdatalist,tcustomrowstatelist,nil);
 type
  indexcomparety = function(item1,item2: pointer): integer of object;
 
@@ -5781,6 +5814,69 @@ function tmsestringintdatalist.getstatdata(const index: integer): msestring;
 begin
  with pmsestringintty(getitempo(index))^ do begin
   result:= inttostr(int)+','+mstr;
+ end;
+end;
+
+{ tcustomrowstatelist }
+
+constructor tcustomrowstatelist.create;
+begin
+ inherited;
+ fsize:= sizeof(rowstatety);
+end;
+
+function tcustomrowstatelist.datatyp: datatypty;
+begin
+ result:= dl_rowstate;
+end;
+
+function tcustomrowstatelist.getrowstate(const index: integer): rowstatety;
+begin
+ getdata(index,result);
+end;
+
+procedure tcustomrowstatelist.setrowstate(const index: integer;
+  const Value: rowstatety);
+begin
+ setdata(index,value);
+end;
+
+function tcustomrowstatelist.gethidden(const index: integer): boolean;
+begin
+ result:= items[index].fold and foldhiddenmask <> 0;
+end;
+
+function tcustomrowstatelist.getfoldinfoar: bytearty;
+var
+ int1: integer;
+ po1: prowstatety;
+begin
+ setlength(result,count);
+ po1:= datapo;
+ inc(po1,count);
+ for int1:= high(result) downto 0 do begin
+  dec(po1);
+  result[int1]:= po1^.fold;
+ end;
+end;
+
+function tcustomrowstatelist.getfoldlevel(const index: integer): foldlevelty;
+begin
+ result:= items[index].fold and foldlevelmask;
+end;
+
+procedure tcustomrowstatelist.assign(source: tpersistent);
+begin
+ if source is tcustomrowstatelist then begin
+  with tcustomrowstatelist(source) do begin
+   self.beginupdate;
+   self.count:= count;
+   move(datapo^,self.datapo^,count*sizeof(rowstatety));
+   self.endupdate;
+  end;
+ end
+ else begin
+  inherited;
  end;
 end;
 

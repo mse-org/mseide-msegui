@@ -483,6 +483,12 @@ type
    procedure setasmsestring(const index: integer; const avalue: msestring);
    function getasbytes(const index: integer): ansistring;
    procedure setasbytes(const index: integer; const avalue: ansistring);
+   function getasmsestringint(const index: integer): msestringintty;
+   procedure setasmsestringint(const index: integer; const avalue: msestringintty);
+   function getasmsestringinti(const index: integer): integer;
+   procedure setasmsestringinti(const index: integer; const avalue: integer);
+   function getasmsestringints(const index: integer): msestring;
+   procedure setasmsestringints(const index: integer; const avalue: msestring);
   protected
    procedure freedatalist;
    procedure checkdatalist; overload;
@@ -500,6 +506,12 @@ type
                                write setasreal;
    property asmsestring[const index: integer]: msestring read getasmsestring 
                                write setasmsestring;
+   property asmsestringint[const index: integer]: msestringintty
+                         read getasmsestringint write setasmsestringint;
+   property asmsestringinti[const index: integer]: integer
+                         read getasmsestringinti write setasmsestringinti;
+   property asmsestringints[const index: integer]: msestring
+                         read getasmsestringints write setasmsestringints;
    property asbytes[const index: integer]: ansistring read getasbytes 
                                write setasbytes;
   published
@@ -509,15 +521,20 @@ type
  end;
   
  ttxdatagrid = class;
- 
+ tifirowstatelist = class(tcustomrowstatelist)
+ end;
+    
  tifidatacols = class(townedpersistentarrayprop)
   private
+   frowstate: tifirowstatelist;
    function getcols(const index: integer): tifidatacol;
    procedure setcols(const index: integer; const avalue: tifidatacol);
   public 
    constructor create(const aowner: ttxdatagrid);
+   destructor destroy; override;
    class function getitemclasstype: persistentclassty; override;
    function colbyname(const aname: ansistring): tifidatacol;
+   property rowstate: tifirowstatelist read frowstate;
    property cols[const index: integer]: tifidatacol read getcols write setcols;
                                                  default;
  end;
@@ -532,12 +549,13 @@ type
   public
    constructor create(const aowner: ttxdatagrid);
  end;
-  
+
  ttxdatagrid = class(tmsecomponent)
   private
    fifi: ttxdatagridcontroller;
    fdatacols: tifidatacols;
    frowcount: integer;
+   
    procedure setifi(const avalue: ttxdatagridcontroller);
    procedure setdatacols(const avalue: tifidatacols);
    procedure setrowcount(const avalue: integer);
@@ -546,6 +564,7 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    property rowhigh: integer read getrowhigh;
+//   property 
   published
    property ifi: ttxdatagridcontroller read fifi write setifi;
    property datacols: tifidatacols read fdatacols write setdatacols;
@@ -1993,6 +2012,9 @@ begin
    idk_msestring: begin
     fdatalist:= tmsestringdatalist.create;
    end;
+   idk_msestringint: begin
+    fdatalist:= tmsestringintdatalist.create;
+   end;
    idk_bytes: begin
     fdatalist:= tansistringdatalist.create;
    end;
@@ -2095,11 +2117,57 @@ begin
  tansistringdatalist(fdatalist).items[index]:= avalue;
 end;
 
+function tifidatacol.getasmsestringint(const index: integer): msestringintty;
+begin
+ checkdatalist(idk_msestringint);
+ result:= tmsestringintdatalist(fdatalist).doubleitems[index];
+end;
+
+procedure tifidatacol.setasmsestringint(const index: integer;
+               const avalue: msestringintty);
+begin
+ checkdatalist(idk_msestringint);
+ tmsestringintdatalist(fdatalist).doubleitems[index]:= avalue;
+end;
+
+function tifidatacol.getasmsestringinti(const index: integer): integer;
+begin
+ checkdatalist(idk_msestringint);
+ result:= tmsestringintdatalist(fdatalist).itemsb[index];
+end;
+
+procedure tifidatacol.setasmsestringinti(const index: integer;
+               const avalue: integer);
+begin
+ checkdatalist(idk_msestringint);
+ tmsestringintdatalist(fdatalist).itemsb[index]:= avalue;
+end;
+
+function tifidatacol.getasmsestringints(const index: integer): msestring;
+begin
+ checkdatalist(idk_msestringint);
+ result:= tmsestringintdatalist(fdatalist).items[index];
+end;
+
+procedure tifidatacol.setasmsestringints(const index: integer;
+               const avalue: msestring);
+begin
+ checkdatalist(idk_msestringint);
+ tmsestringintdatalist(fdatalist).items[index]:= avalue;
+end;
+
 { tifidatacols }
 
 constructor tifidatacols.create(const aowner: ttxdatagrid);
 begin
+ frowstate:= tifirowstatelist.create;
  inherited create(aowner,tifidatacol);
+end;
+
+destructor tifidatacols.destroy;
+begin
+ inherited;
+ frowstate.free;
 end;
 
 class function tifidatacols.getitemclasstype: persistentclassty;
@@ -2330,6 +2398,12 @@ begin
     end;
    end;    
   end;
+  dl_rowstate: begin
+   result:= arowcount * sizeof(rowstatety);
+   if adatalist <> nil then begin
+    move(adata^,adatalist.datapo^,result);
+   end;
+  end;
   dl_ansistring: begin
    po2:= pinteger(adata);
    result:= arowcount * sizeof(integer);
@@ -2413,6 +2487,11 @@ begin
      inc(dest,int2);
     end;
    end;
+   dl_rowstate: begin
+    int2:= count * sizeof(rowstatety);
+    move(po4^,dest^,int2);
+    inc(dest,int2);
+   end;
    dl_ansistring: begin
     for int1:= 0 to count - 1 do begin
      int2:= length(pansistring(po4)[int1]);
@@ -2462,6 +2541,9 @@ begin
      result:= result + length(po3[int1].mstr) * sizeof(msechar);
     end;
    end;
+   dl_rowstate: begin
+    result:= count * sizeof(rowstatety);
+   end;
    dl_ansistring: begin
     po2:= datapo;
     result:= count * sizeof(integer);
@@ -2495,6 +2577,7 @@ begin
     end;
    end;
   end;
+  int2:= int2 + datalisttoifidata(datacols.frowstate);
   inititemheader(result,ik_griddata,asequence,int2,po1);
   with pgriddatadataty(po1)^ do begin
    rows:= rowcount;
@@ -2512,6 +2595,7 @@ begin
      end;
     end;
    end;
+   datalisttoifidata(datacols.frowstate,po1);
   end;
  end;
 end;

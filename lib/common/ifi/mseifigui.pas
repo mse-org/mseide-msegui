@@ -388,9 +388,10 @@ begin
     end;
    end;
   end;
-  if tdatacols1(datacols).frowstate.folded then begin
-   int2:= int2 + rowcount * sizeof(byte);
-  end;
+  int2:= int2 + datalisttoifidata(tdatacols1(datacols).frowstate);
+//  if tdatacols1(datacols).frowstate.folded then begin
+//   int2:= int2 + rowcount * sizeof(byte);
+//  end;
   inititemheader(result,ik_griddata,asequence,int2,po1);
   with pgriddatadataty(po1)^ do begin
    rows:= rowcount;
@@ -408,6 +409,8 @@ begin
      end;
     end;
    end;
+   datalisttoifidata(tdatacols1(datacols).frowstate,po1);
+{
    if tdatacols1(datacols).frowstate.folded then begin
     ar2:= tdatacols1(datacols).frowstate.foldinfoar;
     inc(po1,setifibytes(pointer(ar2),rowcount,pifibytesty(po1)));
@@ -415,6 +418,7 @@ begin
    else begin
     inc(po1,setifibytes(pointer(ar2),0,pifibytesty(po1)));
    end;
+   }
   end;
  end;
 end;
@@ -462,6 +466,9 @@ begin
          inc(po1,ifidatatodatalist(kind1,rows1,po1,list1));
         end;
        end;
+       inc(po1,ifidatatodatalist(dl_rowstate,rows1,po1,
+                                    tdatacols1(datacols).frowstate));
+       {
        with pifibytesty(po1)^ do begin
         if tdatacols1(datacols).frowstate.folded and 
                              (length = rowcount) then begin
@@ -469,6 +476,7 @@ begin
         end;
        end;
        inc(po1,sizeof(ifibytesty)+pifibytesty(po1)^.length);
+       }
        include(fistate,rws_datareceived);
       finally
        endupdate;
