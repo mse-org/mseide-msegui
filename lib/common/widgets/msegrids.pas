@@ -1088,6 +1088,7 @@ type
    procedure setfoldlevel(const index: integer; const avalue: foldlevelty);
    procedure setfolded(const avalue: boolean);
   protected
+   procedure updatedeletedrows(const index: integer; const acount: integer);
    procedure setcount(const value: integer); override;
    procedure internalshow(var aindex: integer);
    procedure internalhide(var aindex: integer);
@@ -1548,7 +1549,7 @@ type
    function caninvalidate: boolean;
    function docheckcellvalue: boolean;
    procedure removeappendedrow;
-   procedure internalupdatelayout;
+   procedure internalupdatelayout(const force: boolean = false);
    procedure updatelayout; virtual;
    function intersectdatarect(var arect: rectty): boolean;
    procedure setdatarowheight(const value: integer);
@@ -5868,6 +5869,9 @@ begin
   end;
  end;
  with frowstate do begin
+  if folded and (newcount < count) then begin
+   updatedeletedrows(newcount,count-newcount);   
+  end;
   count:= newcount;
   if fvisiblerowmap <> nil then begin
    fvisiblerowmap.count:= newcount;
@@ -5972,32 +5976,12 @@ end;
 
 
 procedure tdatacols.deleterow(const index: integer; const acount: integer = 1);
-var
- int1: integer;
- int2: integer;
- po1: pinteger;
 begin
  roworderinvalid;
  with frowstate do begin
   if fvisiblerowmap <> nil then begin
-   clean(index+acount-1);
-   po1:= @pintegeraty(fvisiblerowmap.datapo)[index];
-   dec(po1);
-   if index = 0 then begin
-    int2:= -1;
-   end
-   else begin
-    int2:= po1^;
-   end;
-   for int1:= acount-1 downto 0 do begin
-    inc(po1);
-    if (po1^ = int2) then begin
-     dec(fhiddencount);
-    end;
-    int2:= po1^;
-   end;
+   updatedeletedrows(index,acount);
    fvisiblerowmap.deleteitems(index,acount);
-   checkdirty(index);
   end;
   deleteitems(index,acount);
  end;
@@ -7277,10 +7261,11 @@ begin
 // end;
 end;
 
-procedure tcustomgrid.internalupdatelayout;
+procedure tcustomgrid.internalupdatelayout(const force: boolean);
 begin
  if (fstate * [gs_layoutvalid,gs_updatelocked] = []) and 
-             not (csdestroying in componentstate) and (fupdating = 0) then begin
+             not (csdestroying in componentstate) and 
+             (force or (fupdating = 0)) then begin
   fstate:= fstate + [gs_layoutvalid,gs_layoutupdating];
   updatelayout;
   exclude(fstate,gs_layoutupdating);
@@ -7319,7 +7304,7 @@ var
 
 begin
  inherited;
- internalupdatelayout;
+ internalupdatelayout(true);
  fnumoffset:= getnumoffset;
  saveindex:= -1;
  if fgridframewidth <> 0 then begin
@@ -12933,7 +12918,8 @@ begin
    arow:= int1 -1;
   end;
   if  arow >= fdirtyrow then begin
-   doclean(arow,visiblerowcount-1);
+//   doclean(arow,visiblerowcount-1);
+   doclean(arow,bigint);
   end;
  end;
 end;
@@ -13105,6 +13091,37 @@ begin
  if ffolded then begin
   setlength(fvisiblerows,count);
  end;
+end;
+
+procedure trowstatelist.updatedeletedrows(const index: integer;
+                                                  const acount: integer);
+var
+ int1: integer;
+ int2: integer;
+ po1: pinteger;
+begin
+ if acount >= count then begin
+  fhiddencount:= 0;
+ end
+ else begin
+  clean(index+acount-1);
+  po1:= @pintegeraty(fvisiblerowmap.datapo)[index];
+  dec(po1);
+  if index = 0 then begin
+   int2:= -1;
+  end
+  else begin
+   int2:= po1^;
+  end;
+  for int1:= acount-1 downto 0 do begin
+   inc(po1);
+   if (po1^ = int2) then begin
+    dec(fhiddencount);
+   end;
+   int2:= po1^;
+  end;
+ end;
+ checkdirty(index);
 end;
 
 function trowstatelist.rowhidden(const arow: integer): boolean;

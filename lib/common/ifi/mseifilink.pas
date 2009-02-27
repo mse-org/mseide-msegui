@@ -372,19 +372,19 @@ type
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
    function processdataitem(const adata: pifirecty; var adatapo: pchar;
                   const atag: integer; const aname: string): boolean; virtual;
-                  //true if handled
+                //true if handled
    function processdata(const adata: pifirecty): boolean;
-             //true if handled
+                //true if handled
    function senddata(const adata: ansistring): sequencety;
                 //returns sequence number
    procedure receiveevent(const event: tobjectevent); override;
-   //iifiserver
+  //iifiserver
    procedure valuechanged(const sender: iifiwidget); virtual;
    procedure statechanged(const sender: iifiwidget;
                              const astate: ifiwidgetstatesty); virtual;
    procedure sendmodalresult(const sender: iifiwidget; 
                                          const amodalresult: modalresultty); virtual;
-   //imodulelink
+  //imodulelink
    procedure connectmodule(const sender: tcustommodulelink);
   public
    constructor create(aowner: tcomponent); override;
@@ -439,6 +439,9 @@ type
                          const asequence: sequencety = 0): sequencety;
    function senddataandwait(const adata: ansistring;
             out asequence: sequencety; atimeoutus: integer = 0): boolean;
+   function senditem(const kind: ifireckindty; 
+                               const data: array of ansistring): sequencety;
+                //returns sequence number
    procedure inititemheader(out arec: string;
                const akind: ifireckindty; const asequence: sequencety; 
                 const datasize: integer; out datapo: pchar);
@@ -449,6 +452,7 @@ type
    procedure connectmodule(const sender: tcustommodulelink);
   public
    constructor create(const aowner: tcomponent);
+   function cansend: boolean;
   published
    property channel: tcustomiochannel read fchannel write setchannel;
    property linkname: string read flinkname write flinkname;
@@ -1927,6 +1931,28 @@ begin
  end;
 end;
 
+function tificontroller.senditem(const kind: ifireckindty; 
+                            const data: array of ansistring): sequencety;
+                //returns sequence number
+var
+ str1: ansistring;
+ po1: pchar;
+ int1,int2: integer;
+begin
+ int2:= 0;
+ for int1:= 0 to high(data) do begin
+  inc(int2,length(data[int1]));
+ end;
+ inititemheader(str1,ik_data,0,int2,po1);
+ pifirecty(str1)^.header.kind:= kind;
+ for int1:= 0 to high(data) do begin
+  int2:= length(data[int1]);
+  move(pointer(data[int1])^,po1^,int2);
+  inc(po1,int2);
+ end; 
+ result:= senddata(str1);
+end;
+
 procedure tificontroller.objectevent(const sender: tobject;
                const event: objecteventty);
 var
@@ -1968,6 +1994,13 @@ end;
 function tificontroller.getifireckinds: ifireckindsty;
 begin
  result:= [];
+end;
+
+function tificontroller.cansend: boolean;
+begin
+ result:= (channel <> nil) or 
+             not ((csdesigning in fowner.componentstate) and 
+                  (irxo_useclientchannel in foptions));
 end;
 
 { tifidatacol }
@@ -2238,6 +2271,7 @@ begin
      end;
     end;
    end;
+   frowstate.count:= avalue;
   end;
  end;
 end;

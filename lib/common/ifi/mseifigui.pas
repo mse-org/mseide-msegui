@@ -109,6 +109,12 @@ type
    procedure loaded; override;
    procedure internalopen;
    procedure internalclose;
+   procedure docolmoved(const fromindex,toindex: integer); override;
+   procedure dorowsmoved(const fromindex,toindex,count: integer); override;
+   procedure dorowsinserted(const index,count: integer); override;
+   procedure dorowsdeleted(index,count: integer); override;
+//   procedure dorowsdatachanged(const acell: gridcoordty; 
+//                                           const acount: integer); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -117,6 +123,9 @@ type
    property ifi: tifiwidgetgridcontroller read fifi write setifi;
    property active: boolean read factive write setactive default false;
  end;
+
+function encodegridcommanddata(const akind: gridcommandkindty;
+                                      const asource,adest,acount: integer): string;
  
 implementation
 uses
@@ -126,6 +135,20 @@ type
  tdatacols1 = class(tdatacols);
  
 // tlinkdata1 = class(tlinkdata);
+
+function encodegridcommanddata(const akind: gridcommandkindty;
+                                      const asource,adest,acount: integer): string;
+begin
+ result:= nullstring(sizeof(gridcommanddatadataty));
+ {
+ with pgridcommanddatadataty(result)^ do begin
+  kind:= akind;
+  dest:= adest;
+  source:= asource;
+  count:= acount;
+ end;
+ }
+end;
   
 { tvaluewidgetlink }
 
@@ -553,9 +576,7 @@ var
  po1: pchar;
 begin
  with fifi do begin
-  if (channel <> nil) or 
-    not ((csdesigning in componentstate) and 
-         (irxo_useclientchannel in foptions)) then begin
+  if cansend then begin
    inititemheader(str1,ik_requestopen,0,0,po1);
    include(fistate,rws_openpending);
    if senddataandwait(str1,fdatasequence) and 
@@ -571,9 +592,7 @@ end;
 procedure trxwidgetgrid.post;
 begin
  with fifi do begin
-  if (channel <> nil) or 
-    not ((csdesigning in componentstate) and 
-         (irxo_useclientchannel in foptions)) then begin
+  if cansend then begin
    senddata(encodegriddata(0));
   end;
  end;
@@ -582,6 +601,36 @@ end;
 procedure trxwidgetgrid.internalclose;
 begin
  rowcount:= 0;
+end;
+
+procedure trxwidgetgrid.docolmoved(const fromindex: integer;
+               const toindex: integer);
+begin
+ inherited;
+end;
+
+procedure trxwidgetgrid.dorowsmoved(const fromindex: integer;
+               const toindex: integer; const count: integer);
+begin
+ inherited;
+end;
+
+procedure trxwidgetgrid.dorowsinserted(const index: integer;
+               const count: integer);
+begin
+ inherited;
+ with fifi do begin
+  if cansend then begin
+//   senditem(ik_gridcommand,[
+//       encodegridcommanddata(gck_insertrow,index,index,count)]);
+   senditem(ik_gridcommand,['dfgsdtgst']);
+  end;
+ end;
+end;
+
+procedure trxwidgetgrid.dorowsdeleted(index: integer; count: integer);
+begin
+ inherited;
 end;
 
 end.

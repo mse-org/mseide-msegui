@@ -19,9 +19,10 @@ type
  sequencety = longword;
  
  ifireckindty = (ik_none,ik_data,ik_itemheader,ik_actionfired,ik_propertychanged,
-                 ik_widgetcommand,ik_widgetproperties,ik_requestmodule,ik_moduledata,
+                 ik_widgetcommand,ik_widgetproperties,ik_requestmodule,
+                 ik_moduledata,
                  ik_requestfielddefs,ik_fielddefsdata,ik_fieldrec,
-                 ik_griddata,
+                 ik_griddata,ik_gridcommand,
                  ik_requestopen,ik_dsdata,ik_postresult,ik_modulecommand);
  ifireckindsty = set of ifireckindty;
 const
@@ -183,7 +184,20 @@ type
   header: itemheaderty;
   data: griddatadataty;
  end;
- 
+
+ gridcommandkindty = (gck_insertrow,gck_deleterow,gck_moverow,gck_rowenter);
+ gridcommanddatadataty = record
+  kind: gridcommandkindty;
+  dest: integer;
+  source: integer;
+  count: integer;
+ end;
+ pgridcommanddatadataty = ^gridcommanddatadataty;
+ gridcommanddataty = record
+  header: itemheaderty;
+  data: gridcommanddatadataty;
+ end;
+  
  recdataty = record
   count: integer; //recordcount
   data: datarecty; //dummy, array[count] of 
@@ -557,6 +571,7 @@ const
   sizeof(ifiheaderty)+sizeof(fielddefsdataty),   //ik_fielddefsdata
   sizeof(ifiheaderty)+sizeof(fieldrecty),        //ik_fieldrec
   sizeof(ifiheaderty)+sizeof(griddataty),        //ik_griddata
+  sizeof(ifiheaderty)+sizeof(gridcommanddataty), //ik_gridcommand
   sizeof(ifiheaderty)+sizeof(requestopenty),     //ik_requestopen
   sizeof(ifiheaderty)+sizeof(dsdataty),          //ik_dsdata
   sizeof(ifiheaderty)+sizeof(postresultty),      //ik_postresult

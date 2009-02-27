@@ -357,6 +357,7 @@ procedure textdim(const atext: msestring; out firstx,lastx,y: integer);
 function shrinkpathellipse(var value: msestring): boolean;
 function shrinkstring(const value: msestring; maxcharcount: integer): msestring;
 
+function nullstring(const count: integer): string;
 function charstring(ch: char; count: integer): string; overload;
 function charstring(ch: msechar; count: integer): msestring; overload;
 function countleadingchars(const str: msestring;  char: msechar): integer; overload;
@@ -1647,6 +1648,12 @@ begin
  else begin
   result:= -1; //leer
  end;
+end;
+
+function nullstring(const count: integer): string;
+begin
+ setlength(result,count);
+ fillchar(pointer(result)^,count,#0 );
 end;
 
 function charstring(ch: char; count: integer): string; overload;
