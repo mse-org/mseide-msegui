@@ -831,8 +831,9 @@ var
  int1: integer;
 begin
  int1:= headersizes[akind] + datalength;
- setlength(arec,int1);
- fillchar(arec[1],int1,0);
+ arec:= nullstring(int1);
+// setlength(arec,int1);
+// fillchar(arec[1],int1,0);
  with pifiheaderty(arec)^ do begin
   size:= int1;
   answersequence:= asequence;

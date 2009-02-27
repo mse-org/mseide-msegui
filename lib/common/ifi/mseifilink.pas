@@ -1943,7 +1943,7 @@ begin
  for int1:= 0 to high(data) do begin
   inc(int2,length(data[int1]));
  end;
- inititemheader(str1,ik_data,0,int2,po1);
+ inititemheader(str1,ik_itemheader,0,int2,po1);
  pifirecty(str1)^.header.kind:= kind;
  for int1:= 0 to high(data) do begin
   int2:= length(data[int1]);

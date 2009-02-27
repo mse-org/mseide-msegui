@@ -87,6 +87,7 @@ type
  tifiwidgetgridcontroller = class(tifirxcontroller)
   protected
    fdatasequence: sequencety;
+   fcommandlock: integer;
    procedure processdata(const adata: pifirecty; var adatapo: pchar); 
                                     override;
    procedure setowneractive(const avalue: boolean); override;
@@ -94,9 +95,10 @@ type
    function encodegriddata(const asequence: sequencety): ansistring;
   public
    constructor create(const aowner: trxwidgetgrid);
+   function cancommandsend: boolean;
  end;
 
- rxwidgetstatety = (rws_openpending,rws_datareceived); 
+ rxwidgetstatety = (rws_openpending,rws_datareceived,rws_commandsending); 
  rxwidgetstatesty = set of rxwidgetstatety;
  trxwidgetgrid = class(twidgetgrid)
   private
@@ -113,6 +115,7 @@ type
    procedure dorowsmoved(const fromindex,toindex,count: integer); override;
    procedure dorowsinserted(const index,count: integer); override;
    procedure dorowsdeleted(index,count: integer); override;
+   procedure docellevent(var info: celleventinfoty); override;
 //   procedure dorowsdatachanged(const acell: gridcoordty; 
 //                                           const acount: integer); override;
   public
@@ -125,7 +128,9 @@ type
  end;
 
 function encodegridcommanddata(const akind: gridcommandkindty;
-                                      const asource,adest,acount: integer): string;
+                               const asource,adest,acount: integer): string;
+function decodegridcommanddata(const adata: pchar; out akind: gridcommandkindty;
+                               out asource,adest,acount: integer): integer;
  
 implementation
 uses
@@ -140,14 +145,24 @@ function encodegridcommanddata(const akind: gridcommandkindty;
                                       const asource,adest,acount: integer): string;
 begin
  result:= nullstring(sizeof(gridcommanddatadataty));
- {
  with pgridcommanddatadataty(result)^ do begin
   kind:= akind;
   dest:= adest;
   source:= asource;
   count:= acount;
  end;
- }
+end;
+
+function decodegridcommanddata(const adata: pchar; out akind: gridcommandkindty;
+                               out asource,adest,acount: integer): integer;
+begin
+ result:= sizeof(gridcommanddatadataty);
+ with pgridcommanddatadataty(adata)^ do begin
+  akind:= kind;
+  adest:= dest;
+  asource:= source;
+  acount:= count;
+ end;
 end;
   
 { tvaluewidgetlink }
@@ -457,6 +472,8 @@ var
  po2: pointer;
  col1: tdatacol;
  list1: tdatalist;
+ ckind1: gridcommandkindty;
+ source1,dest1,count1: integer;
 begin
  with adata^.header do begin
   case kind of
@@ -507,13 +524,42 @@ begin
      end;
     end;
    end;
+   ik_gridcommand: begin
+    inc(adatapo,decodegridcommanddata(adatapo,ckind1,source1,dest1,count1));
+    with trxwidgetgrid(fowner) do begin
+     inc(fcommandlock);
+     try
+      case ckind1 of
+       gck_insertrow: begin
+        insertrow(dest1,count1);       
+       end;
+       gck_deleterow: begin
+        deleterow(dest1,count1);       
+       end;
+       gck_moverow: begin
+        moverow(source1,dest1,count1);       
+       end;
+       gck_rowenter: begin
+        row:= dest1;
+       end;
+      end;
+     finally
+      dec(fcommandlock);
+     end;
+    end;
+   end;
   end;
  end;
 end;
 
 function tifiwidgetgridcontroller.getifireckinds: ifireckindsty;
 begin
- result:= [ik_griddata,ik_requestopen];
+ result:= [ik_griddata,ik_requestopen,ik_gridcommand];
+end;
+
+function tifiwidgetgridcontroller.cancommandsend: boolean;
+begin
+ result:= (fcommandlock = 0) and cansend;
 end;
 
 { trxwidgetgrid }
@@ -613,6 +659,12 @@ procedure trxwidgetgrid.dorowsmoved(const fromindex: integer;
                const toindex: integer; const count: integer);
 begin
  inherited;
+ with fifi do begin
+  if cancommandsend then begin
+   senditem(ik_gridcommand,[
+       encodegridcommanddata(gck_moverow,fromindex,toindex,count)]);
+  end;
+ end;
 end;
 
 procedure trxwidgetgrid.dorowsinserted(const index: integer;
@@ -620,10 +672,9 @@ procedure trxwidgetgrid.dorowsinserted(const index: integer;
 begin
  inherited;
  with fifi do begin
-  if cansend then begin
-//   senditem(ik_gridcommand,[
-//       encodegridcommanddata(gck_insertrow,index,index,count)]);
-   senditem(ik_gridcommand,['dfgsdtgst']);
+  if cancommandsend then begin
+   senditem(ik_gridcommand,[
+       encodegridcommanddata(gck_insertrow,index,index,count)]);
   end;
  end;
 end;
@@ -631,6 +682,21 @@ end;
 procedure trxwidgetgrid.dorowsdeleted(index: integer; count: integer);
 begin
  inherited;
+ with fifi do begin
+  if cancommandsend then begin
+   senditem(ik_gridcommand,[
+       encodegridcommanddata(gck_deleterow,index,index,count)]);
+  end;
+ end;
+end;
+
+procedure trxwidgetgrid.docellevent(var info: celleventinfoty);
+begin
+ inherited;
+ if isrowenter(info) and fifi.cancommandsend then begin
+  fifi.senditem(ik_gridcommand,[
+       encodegridcommanddata(gck_rowenter,info.cell.row,info.cell.row,0)]);
+ end;
 end;
 
 end.

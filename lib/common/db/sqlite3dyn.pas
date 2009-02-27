@@ -5,6 +5,8 @@
   {$linklib pthread}
 {$endif}
 
+// use mse_sqlite3static for static linking of the SQLite3 library
+//
 unit sqlite3dyn;
 
 interface
@@ -27,15 +29,14 @@ procedure releasesqlite3;
 
 {$PACKRECORDS C}
 const
-(*
-{$ifdef mswindows}
- sqlite3lib = 'sqlite3.dll';
-{$else}
- sqlite3lib = 'libsqlite3.so';
+
+{$ifdef mse_sqlite3static}
+ {$ifdef mswindows}
+  sqlite3lib = 'sqlite3.dll';
+ {$else}
+  sqlite3lib = 'libsqlite3.so';
+ {$endif}
 {$endif}
- moved to msesonames
-*)
-//  External_library='sqlite3';
 
   SQLITE_INTEGER = 1;   
   SQLITE_FLOAT = 2;   
@@ -194,8 +195,192 @@ const
 Const
   SQLITE_STATIC    =  0;
   SQLITE_TRANSIENT =  -1;
-  
 
+{$ifdef mse_sqlite3static}
+ function sqlite3_close(_para1:Psqlite3):longint; cdecl; external sqlite3lib;
+// sqlite3_exec: function(_para1: Psqlite3; sql: Pchar; _para3: sqlite3_callback;
+//              _para4: pointer; errmsg: PPchar): longint; cdecl;
+ function sqlite3_exec(_para1: Psqlite3; sql: Pchar; _para3: sqlite3_callback;
+              var _para4; errmsg: PPchar): longint; cdecl; external sqlite3lib;
+ function sqlite3_last_insert_rowid(_para1: Psqlite3): sqlite_int64; cdecl; external sqlite3lib;
+ function sqlite3_changes(_para1: Psqlite3): longint; cdecl; external sqlite3lib;
+ function sqlite3_total_changes(_para1: Psqlite3): longint; cdecl; external sqlite3lib;
+ procedure sqlite3_interrupt(_para1: Psqlite3); cdecl; external sqlite3lib;
+ function sqlite3_complete(sql: Pchar): longint; cdecl; external sqlite3lib;
+ function sqlite3_complete16(sql: pointer):longint; cdecl; external sqlite3lib;
+ function sqlite3_busy_handler(_para1: Psqlite3; _para2: busy_handler_func;
+                      _para3: pointer):longint; cdecl; external sqlite3lib;
+ function sqlite3_busy_timeout(_para1: Psqlite3; ms: longint):longint; cdecl; external sqlite3lib;
+ function sqlite3_get_table(_para1: Psqlite3; sql: Pchar; resultp: PPPchar;
+               nrow: Plongint; ncolumn: Plongint; errmsg: PPchar):longint;cdecl; external sqlite3lib;
+ procedure sqlite3_free_table(result:PPchar);cdecl; external sqlite3lib;
+
+// Todo: see how translate sqlite3_mprintf, sqlite3_vmprintf, sqlite3_snprintf
+// function sqlite3_mprintf(_para1:Pchar; args:array of const):Pchar;cdecl;external External_library name 'sqlite3_mprintf';
+ function sqlite3_mprintf(_para1:Pchar):Pchar;cdecl; external sqlite3lib;
+//function sqlite3_vmprintf(_para1:Pchar; _para2:va_list):Pchar;cdecl;external External_library name 'sqlite3_vmprintf';
+ procedure sqlite3_free(z:Pchar);cdecl; external sqlite3lib;
+//function sqlite3_snprintf(_para1:longint; _para2:Pchar; _para3:Pchar; args:array of const):Pchar;cdecl;external External_library name 'sqlite3_snprintf';
+ function sqlite3_snprintf(_para1:longint; _para2:Pchar; _para3:Pchar):Pchar;cdecl; external sqlite3lib;
+
+ function sqlite3_set_authorizer(_para1:Psqlite3; xAuth:sqlite3_set_authorizer_func; pUserData:pointer):longint;cdecl; external sqlite3lib;
+
+
+ function sqlite3_trace(_para1:Psqlite3; xTrace:sqlite3_trace_func;
+                     _para3:pointer):pointer;cdecl; external sqlite3lib;
+ procedure sqlite3_progress_handler(_para1:Psqlite3; _para2:longint;
+                  _para3:sqlite3_progress_handler_func; _para4:pointer);cdecl; external sqlite3lib;
+ function sqlite3_commit_hook(_para1:Psqlite3; 
+           _para2:sqlite3_commit_hook_func; _para3:pointer):pointer;cdecl; external sqlite3lib;
+ function sqlite3_open(filename:Pchar; ppDb:PPsqlite3):longint;cdecl; external sqlite3lib;
+ function sqlite3_open16(filename:pointer; ppDb:PPsqlite3):longint;cdecl; external sqlite3lib;
+ function sqlite3_errcode(db:Psqlite3):longint;cdecl; external sqlite3lib;
+ function sqlite3_errmsg(_para1:Psqlite3):Pchar;cdecl; external sqlite3lib;
+ function sqlite3_errmsg16(_para1:Psqlite3):pointer;cdecl; external sqlite3lib;
+ function sqlite3_prepare(db:Psqlite3; zSql:Pchar; nBytes:longint;
+                          ppStmt:PPsqlite3_stmt; pzTail:PPchar):longint;cdecl; external sqlite3lib;
+ function sqlite3_prepare16(db:Psqlite3; zSql:pointer; nBytes:longint;
+                        ppStmt:PPsqlite3_stmt; pzTail:Ppointer):longint;cdecl; external sqlite3lib;
+// sqlite3_prepare_v2: function(db:Psqlite3; zSql:Pchar; nBytes:longint;
+//                          ppStmt:PPsqlite3_stmt; pzTail:PPchar):longint;cdecl; external sqlite3lib;
+// sqlite3_prepare16_v2: function(db:Psqlite3; zSql:pointer; nBytes:longint;
+//                        ppStmt:PPsqlite3_stmt; pzTail:Ppointer):longint;cdecl; external sqlite3lib;
+ function sqlite3_bind_blob(_para1:Psqlite3_stmt; _para2:longint;
+          _para3:pointer; n:longint; _para5:bind_destructor_func):longint;cdecl; external sqlite3lib;
+ function sqlite3_bind_double(_para1:Psqlite3_stmt; _para2:longint;
+           _para3:double):longint;cdecl; external sqlite3lib;
+ function sqlite3_bind_int(_para1:Psqlite3_stmt; _para2:longint;
+           _para3:longint):longint;cdecl; external sqlite3lib;
+ function sqlite3_bind_int64(_para1:Psqlite3_stmt; _para2:longint;
+            _para3:sqlite_int64):longint;cdecl; external sqlite3lib;
+ function sqlite3_bind_null(_para1:Psqlite3_stmt;
+             _para2:longint):longint;cdecl; external sqlite3lib;
+ function sqlite3_bind_text(_para1:Psqlite3_stmt; _para2:longint;
+          _para3:Pchar; n:longint; _para5:bind_destructor_func):longint;cdecl; external sqlite3lib;
+ function sqlite3_bind_text16(_para1:Psqlite3_stmt; _para2:longint;
+   _para3:pointer; _para4:longint; _para5:bind_destructor_func):longint;cdecl; external sqlite3lib;
+//function sqlite3_bind_value(_para1:Psqlite3_stmt; _para2:longint; _para3:Psqlite3_value):longint;cdecl; external sqlite3lib;external External_library name 'sqlite3_bind_value';
+
+  
+//These overloaded functions were introduced to allow the use of SQLITE_STATIC and SQLITE_TRANSIENT
+//It's the c world man ;-)
+ function sqlite3_bind_blob1(_para1:Psqlite3_stmt; _para2:longint;
+                    _para3:pointer; n:longint; _para5:longint):longint;cdecl; external sqlite3lib;
+ function sqlite3_bind_text1(_para1:Psqlite3_stmt; _para2:longint;
+                   _para3:Pchar; n:longint; _para5:longint):longint;cdecl; external sqlite3lib;
+ function sqlite3_bind_text161(_para1:Psqlite3_stmt; _para2:longint;
+                _para3:pointer; _para4:longint; _para5:longint):longint;cdecl; external sqlite3lib;
+
+ function sqlite3_bind_parameter_count(_para1:Psqlite3_stmt):longint;cdecl; external sqlite3lib;
+ function sqlite3_bind_parameter_name(_para1:Psqlite3_stmt;
+                                                 _para2:longint):Pchar;cdecl; external sqlite3lib;
+ function sqlite3_bind_parameter_index(_para1:Psqlite3_stmt;
+                                                  zName:Pchar):longint;cdecl; external sqlite3lib;
+ function sqlite3_clear_bindings(_para1:Psqlite3_stmt):longint;cdecl; external sqlite3lib;
+ function sqlite3_column_count(pStmt:Psqlite3_stmt):longint;cdecl; external sqlite3lib;
+ function sqlite3_column_name(_para1:Psqlite3_stmt;
+                                          _para2:longint):Pchar;cdecl; external sqlite3lib;
+ function sqlite3_column_name16(_para1:Psqlite3_stmt;
+                                        _para2:longint):pointer;cdecl; external sqlite3lib;
+ function sqlite3_column_decltype(_para1:Psqlite3_stmt;
+                                              i:longint):Pchar;cdecl; external sqlite3lib;
+ function sqlite3_column_decltype16(_para1:Psqlite3_stmt;
+                                        _para2:longint):pointer;cdecl; external sqlite3lib;
+ function sqlite3_step(_para1:Psqlite3_stmt):longint;cdecl; external sqlite3lib;
+ function sqlite3_data_count(pStmt:Psqlite3_stmt):longint;cdecl; external sqlite3lib;
+ function sqlite3_column_blob(_para1:Psqlite3_stmt;
+                                              iCol:longint):pointer;cdecl; external sqlite3lib;
+ function sqlite3_column_bytes(_para1:Psqlite3_stmt;
+                                              iCol:longint):longint;cdecl; external sqlite3lib;
+ function sqlite3_column_bytes16(_para1:Psqlite3_stmt;
+                                               iCol:longint):longint;cdecl; external sqlite3lib;
+ function sqlite3_column_double(_para1:Psqlite3_stmt;
+                                                iCol:longint):double;cdecl; external sqlite3lib;
+ function sqlite3_column_int(_para1:Psqlite3_stmt;
+                                               iCol:longint):longint;cdecl; external sqlite3lib;
+ function sqlite3_column_int64(_para1:Psqlite3_stmt; 
+                                           iCol:longint):sqlite_int64;cdecl; external sqlite3lib;
+ function sqlite3_column_text(_para1:Psqlite3_stmt;
+                                                   iCol:longint):PChar;cdecl; external sqlite3lib;
+ function sqlite3_column_text16(_para1:Psqlite3_stmt; 
+                                                  iCol:longint):pointer;cdecl; external sqlite3lib;
+ function sqlite3_column_type(_para1:Psqlite3_stmt; iCol:longint):longint;cdecl; external sqlite3lib;
+ function sqlite3_finalize(pStmt:Psqlite3_stmt):longint;cdecl; external sqlite3lib;
+ function sqlite3_reset(pStmt:Psqlite3_stmt):longint;cdecl; external sqlite3lib;
+ function sqlite3_create_function(_para1:Psqlite3; zFunctionName:Pchar;
+                    nArg:longint; eTextRep:longint; _para5:pointer; 
+           xFunc:create_function_func_func; xStep:create_function_step_func; 
+                    xFinal:create_function_final_func):longint;cdecl; external sqlite3lib;
+ function sqlite3_create_function16(_para1:Psqlite3; zFunctionName:pointer;
+                   nArg:longint; eTextRep:longint; _para5:pointer; 
+           xFunc:create_function_func_func; xStep:create_function_step_func; 
+                     xFinal:create_function_final_func):longint;cdecl; external sqlite3lib;
+ function sqlite3_aggregate_count(_para1:Psqlite3_context):longint;cdecl; external sqlite3lib;
+ function sqlite3_value_blob(_para1:Psqlite3_value):pointer;cdecl; external sqlite3lib;
+ function sqlite3_value_bytes(_para1:Psqlite3_value):longint;cdecl; external sqlite3lib;
+ function sqlite3_value_bytes16(_para1:Psqlite3_value):longint;cdecl; external sqlite3lib;
+ function sqlite3_value_double(_para1:Psqlite3_value):double;cdecl; external sqlite3lib;
+ function sqlite3_value_int(_para1:Psqlite3_value):longint;cdecl; external sqlite3lib;
+ function sqlite3_value_int64(_para1:Psqlite3_value):sqlite_int64;cdecl; external sqlite3lib;
+ function sqlite3_value_text(_para1:Psqlite3_value):PChar;cdecl; external sqlite3lib;
+ function sqlite3_value_text16(_para1:Psqlite3_value):pointer;cdecl; external sqlite3lib;
+ function sqlite3_value_text16le(_para1:Psqlite3_value):pointer;cdecl; external sqlite3lib;
+ function sqlite3_value_text16be(_para1:Psqlite3_value):pointer;cdecl; external sqlite3lib;
+ function sqlite3_value_type(_para1:Psqlite3_value):longint;cdecl; external sqlite3lib;
+ function sqlite3_aggregate_context(_para1:Psqlite3_context;
+                                           nBytes:longint):pointer;cdecl; external sqlite3lib;
+ function sqlite3_user_data(_para1:Psqlite3_context):pointer;cdecl; external sqlite3lib;
+ function sqlite3_get_auxdata(_para1:Psqlite3_context;
+                                           _para2:longint):pointer;cdecl; external sqlite3lib;
+ procedure sqlite3_set_auxdata(_para1:Psqlite3_context; _para2:longint; 
+                   _para3:pointer; _para4:sqlite3_set_auxdata_func);cdecl; external sqlite3lib;
+ procedure sqlite3_result_blob(_para1:Psqlite3_context; _para2:pointer;
+                          _para3:longint; _para4:sqlite3_result_func);cdecl; external sqlite3lib;
+ procedure sqlite3_result_double(_para1:Psqlite3_context;
+                                               _para2:double);cdecl; external sqlite3lib;
+ procedure sqlite3_result_error(_para1:Psqlite3_context;
+                                     _para2:Pchar; _para3:longint);cdecl; external sqlite3lib;
+ procedure sqlite3_result_error16(_para1:Psqlite3_context;
+                                    _para2:pointer; _para3:longint);cdecl; external sqlite3lib;
+ procedure sqlite3_result_int(_para1:Psqlite3_context; _para2:longint);cdecl; external sqlite3lib;
+ procedure sqlite3_result_int64(_para1:Psqlite3_context; 
+                                               _para2:sqlite_int64);cdecl; external sqlite3lib;
+ procedure sqlite3_result_null(_para1:Psqlite3_context);cdecl; external sqlite3lib;
+ procedure sqlite3_result_text(_para1:Psqlite3_context; _para2:Pchar; 
+                          _para3:longint; _para4:sqlite3_result_func);cdecl; external sqlite3lib;
+ procedure sqlite3_result_text16(_para1:Psqlite3_context; _para2:pointer;
+                           _para3:longint; _para4:sqlite3_result_func);cdecl; external sqlite3lib;
+ procedure sqlite3_result_text16le(_para1:Psqlite3_context; _para2:pointer; 
+                            _para3:longint; _para4:sqlite3_result_func);cdecl; external sqlite3lib;
+ procedure sqlite3_result_text16be(_para1:Psqlite3_context; _para2:pointer;
+                            _para3:longint; _para4:sqlite3_result_func);cdecl; external sqlite3lib;
+ procedure sqlite3_result_value(_para1:Psqlite3_context;
+                                                 _para2:Psqlite3_value);cdecl; external sqlite3lib;
+    
+ function sqlite3_create_collation(_para1:Psqlite3; zName:Pchar;
+               eTextRep:longint; _para4:pointer; 
+               xCompare:sqlite3_create_collation_func):longint;cdecl; external sqlite3lib;
+ function sqlite3_create_collation16(_para1:Psqlite3; zName:Pchar; 
+                 eTextRep:longint; _para4:pointer; 
+                 xCompare:sqlite3_create_collation_func):longint;cdecl; external sqlite3lib;
+ 
+ function sqlite3_collation_needed(_para1:Psqlite3; _para2:pointer;
+                            _para3:sqlite3_collation_needed_func):longint;cdecl; external sqlite3lib;
+ function sqlite3_collation_needed16(_para1:Psqlite3; _para2:pointer;
+                            _para3:sqlite3_collation_needed_func):longint;cdecl; external sqlite3lib;
+
+ function sqlite3_libversion:PChar;cdecl; external sqlite3lib;
+//Alias for allowing better code portability (win32 is not working with external variables) 
+ function sqlite3_version: PChar;cdecl; external sqlite3lib;
+
+// Not published functions
+ function sqlite3_libversion_number:longint;cdecl; external sqlite3lib;
+// sqlite3_key: function(db:Psqlite3; pKey:pointer; nKey:longint):longint;cdecl; external sqlite3lib;
+// sqlite3_rekey: function(db:Psqlite3; pKey:pointer; nKey:longint):longint;cdecl; external sqlite3lib;
+// sqlite3_sleep: function(_para1:longint):longint;cdecl; external sqlite3lib;
+// sqlite3_expired: function(_para1:Psqlite3_stmt):longint;cdecl; external sqlite3lib;
+// sqlite3_global_recover: function:longint;cdecl; external sqlite3lib;
+{$else}
 var
  sqlite3_close: function(_para1:Psqlite3):longint; cdecl;
 // sqlite3_exec: function(_para1: Psqlite3; sql: Pchar; _para3: sqlite3_callback;
@@ -381,9 +566,11 @@ var
 // sqlite3_expired: function(_para1:Psqlite3_stmt):longint;cdecl;
 // sqlite3_global_recover: function:longint;cdecl;
 
+{$endif} //not mse_sqlite3static
 implementation
 uses
- sysutils,dynlibs,msesys,msestrings,msesysintf;
+ sysutils,{$ifndef mse_sqlite3static}dynlibs,{$endif}msesys,msestrings,msesysintf;
+{$ifndef mse_sqlite3static}
 var
  sqlite3libraryhandle: tlibhandle;
  liblock: mutexty;
@@ -640,4 +827,14 @@ initialization
  sys_mutexcreate(liblock);
 finalization
  sys_mutexdestroy(liblock);
+{$else}
+procedure initialisesqlite3;
+begin
+end;
+
+procedure releasesqlite3;
+begin
+end;
+ 
+{$endif} //mse_sqlite3static
 end.
