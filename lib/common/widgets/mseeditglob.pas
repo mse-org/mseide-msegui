@@ -42,10 +42,10 @@ type
                     oe_uppercase,
                     oe_lowercase,
                     oe_hintclippedtext,
-
+                    oe_locate,
                     oe_casesensitive,
+                    
                     oe_notnull,
-                    oe_locate,    //used by titemedit     
  //                   oe_autopost,  //deprecated, moved to optiondeditdbty
                     oe_autopopupmenu,
                     oe_keyexecute, //shift+down-key starts dialog

@@ -344,6 +344,10 @@ type
    procedure editnotification(var info: editnotificationinfoty); virtual;
    procedure updatecopytoclipboard(var atext: msestring); virtual;
    procedure updatepastefromclipboard(var atext: msestring); virtual;
+   function locatecount: integer; virtual;        //number of locate values
+   function locatecurrentindex: integer; virtual; //index of current row
+   procedure locatesetcurrentindex(const aindex: integer); virtual;
+   function getkeystring(const aindex: integer): msestring; virtual; //locate text
 
    procedure doonkeydown(var info: keyeventinfoty);
                //interface to inplaceedit
@@ -1160,6 +1164,26 @@ begin
  if canevent(tmethod(fonpastefromclipboard)) then begin
   fonpastefromclipboard(self,atext);
  end;
+end;
+
+function tcustomedit.locatecount: integer;        //number of locate values
+begin
+ result:= 0;
+end;
+
+function tcustomedit.locatecurrentindex: integer; //index of current row
+begin
+ result:= -1;
+end;
+
+procedure tcustomedit.locatesetcurrentindex(const aindex: integer);
+begin
+ //dummy
+end;
+
+function tcustomedit.getkeystring(const aindex: integer): msestring; //locate text
+begin
+ result:= '';
 end;
 
 class function tcustomedit.classskininfo: skininfoty;

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -492,23 +492,29 @@ type
    function setregistervalue(const aname: string; const avalue: ptruint): gdbresultty;
    function listregisternames(out aresult: stringarty): gdbresultty;
    function listregistervalues(out aresult: registerinfoarty): gdbresultty;
-   function listlines(const path: filenamety;
-                          out lines: integerarty; out addresses: ptruintarty): gdbresultty;
+   function listlines(const path: filenamety; out lines: integerarty;
+                                    out addresses: ptruintarty): gdbresultty;
 
-   function getsystemregister(const anumber: integer; out avalue: ptruint): gdbresultty;
-   function setsystemregister(const anumber: integer; const avalue: ptruint): gdbresultty;
+   function getsystemregister(const anumber: integer;
+                                     out avalue: ptruint): gdbresultty;
+   function setsystemregister(const anumber: integer;
+                                     const avalue: ptruint): gdbresultty;
                       //for avr32
    function infoline(const filename: filenamety; const line: integer;
                          out start,stop: cardinal): gdbresultty; overload;
-   function infoline(const address: cardinal; out filename: filenamety; out line: integer;
+   function infoline(const address: cardinal; out filename: filenamety;
+                         out line: integer;
                          out start,stop: cardinal): gdbresultty; overload;
-   function infosymbol(const symbol: msestring; out info: msestring): gdbresultty;
+   function infosymbol(const symbol: msestring;
+                         out info: msestring): gdbresultty;
    function disassemble(out aresult: asmlinearty; const filename: filenamety;
-                 const line: integer; const count: integer): gdbresultty; overload;
-   function disassemble(out aresult: asmlinearty; const start,stop: cardinal): gdbresultty; overload;
+              const line: integer; const count: integer): gdbresultty; overload;
+   function disassemble(out aresult: asmlinearty;
+                            const start,stop: cardinal): gdbresultty; overload;
    function disassemble(out aresult: disassarty; const filename: filenamety;
-                 const line: integer; const count: integer): gdbresultty; overload;
-   function disassemble(out aresult: disassarty; const start,stop: cardinal): gdbresultty; overload;
+             const line: integer; const count: integer): gdbresultty; overload;
+   function disassemble(out aresult: disassarty;
+             const start,stop: cardinal): gdbresultty; overload;
    function getframeaddress(out address: ptruint): gdbresultty;
 
    property guiintf: boolean read fguiintf write fguiintf default true;

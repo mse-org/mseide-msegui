@@ -27,12 +27,13 @@ const
  defaultitemedittextflagsactive = defaulttextflagsactive + [tf_clipo];
 
 type
- listviewoptionty = (lvo_readonly,lvo_mousemoving,lvo_keymoving,lvo_horz,
-                     lvo_drawfocus,lvo_mousemovefocus,lvo_leftbuttonfocusonly,
-                     lvo_noctrlmousefocus,
-                     lvo_focusselect,lvo_mouseselect,lvo_keyselect,
-                     lvo_multiselect,lvo_resetselectonexit,{lvo_noresetselect,}
-                     lvo_casesensitive,lvo_savevalue,lvo_hintclippedtext
+ listviewoptionty = (
+          lvo_readonly,lvo_mousemoving,lvo_keymoving,lvo_horz,
+          lvo_drawfocus,lvo_mousemovefocus,lvo_leftbuttonfocusonly,
+          lvo_noctrlmousefocus,
+          lvo_focusselect,lvo_mouseselect,lvo_keyselect,
+          lvo_multiselect,lvo_resetselectonexit,{lvo_noresetselect,}
+          lvo_locate,lvo_casesensitive,lvo_savevalue,lvo_hintclippedtext
                      );
  listviewoptionsty = set of listviewoptionty;
  filelistviewoptionty = (flvo_nodirselect,flvo_nofileselect,flvo_checksubdir);
@@ -41,7 +42,7 @@ type
 const
  defaultlistviewoptionsgrid = defaultoptionsgrid + [og_wraprow,og_mousescrollcol];
  defaultlistviewoptions = [lvo_focusselect,lvo_mouseselect,lvo_drawfocus,
-                           lvo_leftbuttonfocusonly];
+                           lvo_leftbuttonfocusonly,lvo_locate];
  defaultfilelistviewoptions = [flvo_nodirselect];
  coloptionsmask: listviewoptionsty =
                     [lvo_readonly,{lvo_mousemoving,lvo_keymoving,lvo_horz,}
@@ -183,13 +184,11 @@ type
    fcellwidthmax: integer;
    fcellwidthmin: integer;
    foptions: listviewoptionsty;
-//   ffocusrectdist: integer;
    fcellwidth: integer;
-//   fcolorselect: colorty;
    fcolorglyph: colorty;
    fediting: boolean;
    fonitemsmoved: gridblockmovedeventty;
-   ffiltertext: msestring;
+//   ffiltertext: msestring;
    fcellframe: tcellframe;
    foncopytoclipboard: updatestringeventty;
    fonpastefromclipboard: updatestringeventty;
@@ -208,7 +207,7 @@ type
    procedure setcolorselect(const Value: colorty);
    procedure setcolorglyph(const Value: colorty);
    procedure setediting(const Value: boolean);
-   procedure setfiltertext(const value: msestring);
+//   procedure setfiltertext(const value: msestring);
    function getkeystring(const index: integer): msestring;
    function getfocusedindex: integer;
    procedure setfocusedindex(const avalue: integer);
@@ -230,7 +229,8 @@ type
    procedure setoptions(const Value: listviewoptionsty); virtual;
    procedure rootchanged; override;
    procedure doitemchange(index: integer);
-   procedure doitemevent(const index: integer; var info: celleventinfoty); virtual;
+   procedure doitemevent(const index: integer;
+                               var info: celleventinfoty); virtual;
    procedure docellevent(var info: celleventinfoty); override;
    function createdatacols: tdatacols; override;
    procedure createdatacol(const index: integer; out item: tdatacol); override;
@@ -247,6 +247,9 @@ type
    function hasselection: boolean;
    procedure updatecopytoclipboard(var atext: msestring); virtual;
    procedure updatepastefromclipboard(var atext: msestring); virtual;
+   function locatecount: integer; virtual;        //number of locate values
+   function locatecurrentindex: integer; virtual; //index of current row
+   procedure locatesetcurrentindex(const aindex: integer);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -265,6 +268,7 @@ type
 
    property items[const index: integer]: tlistitem read getitems write setitems;
    property editing: boolean read fediting write setediting;
+   property editor: tinplaceedit read feditor;
 
    property colorselect: colorty read getcolorselect 
                                     write setcolorselect default cl_default;
@@ -274,15 +278,17 @@ type
                    default defaultcellwidth;
    property cellheight: integer read fdatarowheight write setdatarowheight
                    default defaultcellheight;
-   property cellwidthmin: integer read fcellwidthmin write setcellwidthmin default defaultcellwidthmin;
-   property cellwidthmax: integer read fcellwidthmax write setcellwidthmax default 0;
+   property cellwidthmin: integer read fcellwidthmin 
+                         write setcellwidthmin default defaultcellwidthmin;
+   property cellwidthmax: integer read fcellwidthmax 
+                         write setcellwidthmax default 0;
    property cellframe: tcellframe read getcellframe write setcellframe;
    property itemlist: titemviewlist read fitemlist write setitemlist;
    property options: listviewoptionsty read foptions write setoptions
                             default defaultlistviewoptions;
    property cellfocusrectdist: integer read getcellfocusrectdist 
                                         write setcellfocusrectdist default 0;
-   property filtertext: msestring read ffiltertext write setfiltertext;
+//   property filtertext: msestring read ffiltertext write setfiltertext;
    property datacollinewidth: integer read getdatacollinewidth
                     write setdatacollinewidth default defaultgridlinewidth;
    property datacollinecolor: colorty read getdatacollinecolor
@@ -402,14 +408,12 @@ type
   private
    fitemlist: tcustomitemeditlist;
    fonsetvalue: setstringeventty;
-//   fonkeydown: keyeventty;
-//   fonkeyup: keyeventty;
    fonclientmouseevent: mouseeventty;
    fonbuttonaction: buttoneventty;
    fonupdaterowvalues: itemindexeventty;
    foncellevent: celleventty;
    factiverow: integer;
-   ffiltertext: msestring;
+//   ffiltertext: msestring;
    fstate: itemeditstatesty;
 
    fediting: boolean;
@@ -417,18 +421,21 @@ type
    procedure setitemlist(const Value: titemeditlist);
    function getitems(const index: integer): tlistitem;
    procedure setitems(const index: integer; const Value: tlistitem);
-   procedure updatefilterselect;
+//   procedure updatefilterselect;
    procedure setediting(const avalue: boolean);
   protected
    flayoutinfo: listitemlayoutinfoty;
    fvalue: tlistitem;
 
-   procedure setfiltertext(const value: msestring); virtual;
-   function getkeystring(const index: integer): msestring;
+//   procedure setfiltertext(const value: msestring); virtual;
+  //iedit
+   function locatecount: integer; override;        //number of locate values
+   function getkeystring(const index: integer): msestring; override;
+
    procedure itemchanged(const index: integer); virtual;
    procedure createnode(var item: tlistitem); virtual;
 
-   //iitemlist
+  //iitemlist
    function getlayoutinfo: plistitemlayoutinfoty;
    procedure itemcountchanged;
    procedure updateitemvalues(const index: integer; const count: integer); virtual;
@@ -451,12 +458,11 @@ type
    procedure setupeditor; override;
    procedure dopaint(const acanvas: tcanvas); override;
    procedure dokeydown(var info: keyeventinfoty); override;
-//   procedure dokeyup(var info: keyeventinfoty); override;
 
    procedure getitemvalues; virtual;
    procedure internalcreateframe; override;
 
-   //ibuttonaction
+  //ibuttonaction
    procedure buttonaction(var action: buttonactionty;
          const buttonindex: integer); virtual;
 
@@ -464,9 +470,7 @@ type
    procedure docellevent(const ownedcol: boolean;
                                          var info: celleventinfoty); override;
 
-//   procedure dostatread(const reader: tstatreader); override;
-//   procedure dostatwrite(const writer: tstatwriter); override;
-   function islocating: boolean;
+//   function islocating: boolean;
    function getoptionsedit: optionseditty; override;
    property editing: boolean read fediting write setediting;
   public
@@ -480,14 +484,12 @@ type
    property items[const index: integer]: tlistitem read getitems 
                                                     write setitems; default;
    property activerow: integer read factiverow;
-   property filtertext: msestring read ffiltertext write setfiltertext;
+//   property filtertext: msestring read ffiltertext write setfiltertext;
   published
    property itemlist: titemeditlist read getitemlist write setitemlist;
    property onsetvalue: setstringeventty read fonsetvalue write fonsetvalue;
    property onclientmouseevent: mouseeventty read fonclientmouseevent 
                            write fonclientmouseevent;
-//   property onkeydown: keyeventty read fonkeydown write fonkeydown;
-//   property onkeyup: keyeventty read fonkeyup write fonkeyup;
    property optionsedit;
    property font;
    property passwordchar;
@@ -508,8 +510,6 @@ type
    fonbeforedropdown: notifyeventty;
    fonafterclosedropdown: notifyeventty;
    procedure setdropdown(const Value: tcustomdropdownlistcontroller);
-//   function getbutton: tdropdownbutton;
-//   procedure setbutton(const avalue: tdropdownbutton);
   protected
    function getframe: tdropdownbuttonframe;
    procedure setframe(const Value: tdropdownbuttonframe);
@@ -518,18 +518,15 @@ type
    procedure internalcreateframe; override;
 
    procedure editnotification(var info: editnotificationinfoty); override;
-   //idropdown
+  //idropdown
    procedure dobeforedropdown; virtual;
    procedure doafterclosedropdown; virtual;
-//   function setdropdowntext(const value: msestring; const docheckvalue: boolean;
-//                            const canceled: boolean): boolean;
    function getdropdownitems: tdropdowncols;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
   published
    property frame: tdropdownbuttonframe read getframe write setframe;
-//   property button: tdropdownbutton read getbutton write setbutton;
    property dropdown: tcustomdropdownlistcontroller read fdropdown write setdropdown;
    property onbeforedropdown: notifyeventty read fonbeforedropdown write fonbeforedropdown;
    property onafterclosedropdown: notifyeventty read fonafterclosedropdown
@@ -622,7 +619,7 @@ type
                  //adds toplevel node
    procedure add(const anodes: treelistedititemarty); overload;
    procedure add(const acount: integer; 
-               const aitemclass: treelistedititemclassty = nil); overload;
+                             aitemclass: treelistedititemclassty = nil); overload;
    function toplevelnodes: treelistedititemarty;
    procedure expandall;
    procedure collapseall;
@@ -684,11 +681,16 @@ type
    procedure expandedchanged(const avalue: boolean);
    procedure setfieldedit(const avalue: trecordfieldedit);
   protected
-//   procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure doitembuttonpress(var info: mouseeventinfoty); override;
-   procedure setfiltertext(const value: msestring); override;
-   function getkeystring1(const aindex: integer): msestring;
-   function getkeystring2(const aindex: integer): msestring;
+//   procedure setfiltertext(const value: msestring); override;
+
+   function locatecount: integer; override;        //number of locate values
+   function locatecurrentindex: integer; override; //index of current row
+   procedure locatesetcurrentindex(const aindex: integer); override;
+   function getkeystring(const aindex: integer): msestring; override; //locate text
+
+//   function getkeystring1(const aindex: integer): msestring;
+//   function getkeystring2(const aindex: integer): msestring;
    procedure updatelayout; override;
    function getitemclass: listitemclassty; override;
    procedure dokeydown(var info: keyeventinfoty); override;
@@ -704,7 +706,8 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    function item: ttreelistitem;
-   property items[const index: integer]: ttreelistitem read getitems write setitems; default;
+   property items[const index: integer]: ttreelistitem read getitems 
+                                                 write setitems; default;
    function candragsource(const apos: pointty): boolean;
    procedure dragdrop(const adragobject: ttreeitemdragobject);
   published
@@ -1321,7 +1324,8 @@ begin
  else begin
   locopt:= [lso_exact];
  end;
- if locatestring(acaption,{$ifdef FPC}@{$endif}getkeystring,locopt,fitemlist.count,int1) then begin
+ if locatestring(acaption,{$ifdef FPC}@{$endif}getkeystring,locopt,
+                               fitemlist.count,int1) then begin
   result:= fitemlist[int1];
  end
  else begin
@@ -1482,18 +1486,24 @@ begin
  updatecoloptions;
 end;
 
+function tcustomlistview.locatecount: integer;        //number of locate values
+begin
+ result:= fitemlist.count;
+end;
+
+function tcustomlistview.locatecurrentindex: integer; //index of current row
+begin
+ result:= celltoindex(ffocusedcell,false);
+end;
+
+procedure tcustomlistview.locatesetcurrentindex(const aindex: integer);
+begin
+ focuscell(indextocell(aindex));
+end;
+
 function tcustomlistview.getkeystring(const index: integer): msestring;
 begin
  result:= fitemlist[index].caption;
-{
- if index < fitemlist.count then begin
-  result:= true;
-  astring:= fitemlist[index].caption;
- end
- else begin
-  result:= false;
- end;
- }
 end;
 
 procedure tcustomlistview.setediting(const Value: boolean);
@@ -1516,6 +1526,7 @@ begin
    else begin
     feditor.dofocus;
    end;
+   feditor.updatecaret;
   end;
  end;
 end;
@@ -1560,7 +1571,7 @@ begin
     end;
     cek_exit: begin
      editing:= false;
-     filtertext:= '';
+//     filtertext:= '';
     end;
     cek_select: begin
      if selected and (celltoindex(cell,false) < 0) then begin
@@ -1641,9 +1652,6 @@ begin
   updatelayout;
   beginupdate;
   try
-//   for int1:= 0 to fitemlist.count - 1 do begin
-//    itemstatetocellstate(int1,indextocell(int1));
-//   end;
    for int1:= fitemlist.count to rowcount * datacols.count - 1 do begin
     fdatacols.selected[indextocell(int1)]:= false;
    end;
@@ -1700,7 +1708,13 @@ end;
 
 function tcustomlistview.getoptionsedit: optionseditty;
 begin
- result:= [oe_autoselect,oe_resetselectonexit];
+ result:= [oe_autoselect,oe_resetselectonexit,oe_exitoncursor];
+ if lvo_locate in foptions then begin
+  include(result,oe_locate);
+ end;
+ if lvo_casesensitive in foptions then begin
+  include(result,oe_casesensitive);
+ end;
  if not fediting then begin
   include(result,oe_readonly);
  end;
@@ -1758,7 +1772,7 @@ begin
  end;
  inherited;
 end;
-
+(*
 procedure tcustomlistview.setfiltertext(const value: msestring);
 var
  int1: integer;
@@ -1779,7 +1793,7 @@ begin
   feditor.sellength:= length(ffiltertext);
  end;
 end;
-
+*)
 procedure tcustomlistview.dokeydown(var info: keyeventinfoty);
 var
  item: tlistitem;
@@ -1788,13 +1802,14 @@ var
  action1: focuscellactionty;
 begin
  with info do begin
-  if fediting then begin
-   feditor.dokeydown(info);
-   if ((key = key_left) or (key = key_right)) and (shiftstate - [ss_shift] = []) then begin
-    include(eventstate,es_processed);
-   end;
-  end
-  else begin
+  feditor.dokeydown(info);
+//  if fediting then begin
+//   if ((key = key_left) or (key = key_right)) and (shiftstate - [ss_shift] = []) then begin
+//    include(eventstate,es_processed);
+//   end;
+//  end
+//  else begin
+  {
    if (key = key_backspace) and (shiftstate = []) then begin
     filtertext:= copy(ffiltertext,1,length(ffiltertext)-1);
    end
@@ -1810,7 +1825,8 @@ begin
      end;
     end;
    end;
-  end;
+   }
+//  end;
   if not (es_processed in eventstate) then begin
    if (lvo_keymoving in foptions) and (shiftstate = [ss_ctrl])
               and (focuseditem <> nil) then begin
@@ -2443,9 +2459,6 @@ procedure titemedit.dokeydown(var info: keyeventinfoty);
 var
  str1: msestring;
 begin
-// if canevent(tmethod(fonkeydown)) then begin
-//  fonkeydown(self,info);
-// end;
  doonkeydown(info);
  with info do begin
   if not(es_processed in eventstate) then begin
@@ -2464,9 +2477,8 @@ begin
      include(eventstate,es_processed);
     end;
    end;
-   
+{   
    if not(es_processed in eventstate) and islocating then begin
- //      (foptionsedit * [oe_readonly,oe_locate] = [oe_readonly,oe_locate]) then begin
     if (key = key_backspace) and (shiftstate = []) then begin
      filtertext:= copy(ffiltertext,1,length(ffiltertext)-1);
     end
@@ -2483,6 +2495,7 @@ begin
      end;
     end;
    end;
+}
   end;
  end;
  if not (es_processed in info.eventstate) then begin
@@ -2564,25 +2577,22 @@ begin
  fitemlist[index]:= value;
 end;
 
+function titemedit.locatecount: integer;        //number of locate values
+begin
+ result:= fitemlist.count;
+end;
+
 function titemedit.getkeystring(const index: integer): msestring;
 begin
  result:= fitemlist[index].caption;
-{
- if index < fitemlist.count then begin
-  astring:= fitemlist[index].caption;
-  result:= true;
- end
- else begin
-  result:= false;
- end;
- }
 end;
-
+{
 function titemedit.islocating: boolean;
 begin
  result:= not editing and (oe_locate in foptionsedit)
 end;
-
+}
+(*
 procedure titemedit.setfiltertext(const value: msestring);
 var
  int1: integer;
@@ -2610,6 +2620,7 @@ begin
  end;
  updatefilterselect;
 end;
+*)
 
 function titemedit.getcolorglyph: colorty;
 begin
@@ -2627,9 +2638,9 @@ begin
     end;
    end
    else begin
-    if eventkind = cek_exit then begin
-     filtertext:= '';
-    end;
+//    if eventkind = cek_exit then begin
+//     filtertext:= '';
+//    end;
    end;
   end;
   if (info.eventkind = cek_enter) or 
@@ -2653,7 +2664,7 @@ begin
  end;
  inherited;
 end;
-
+{
 procedure titemedit.updatefilterselect;
 begin
  if islocating then begin
@@ -2661,7 +2672,7 @@ begin
   feditor.sellength:= length(ffiltertext);
  end;
 end;
-
+}
 procedure titemedit.setediting(const avalue: boolean);
 begin
  if avalue or (oe_locate in foptionsedit) then begin
@@ -2669,14 +2680,14 @@ begin
    fediting:= avalue;
    setupeditor;
    if fediting then begin
-    ffiltertext:= '';
+//    ffiltertext:= '';
     feditor.selectall;
    end
    else begin
     if foptionsedit * [oe_autoselect,oe_locate] = [oe_autoselect] then begin
      feditor.selectall;
     end;
-    updatefilterselect;
+//    updatefilterselect;
    end;
   end;
  end
@@ -3154,11 +3165,14 @@ begin
 end;
 
 procedure ttreeitemeditlist.add(const acount: integer; 
-               const aitemclass: treelistedititemclassty = nil);
+                              aitemclass: treelistedititemclassty = nil);
 var
  int1: integer;
 begin
  beginupdate;
+ if aitemclass = nil then begin
+  aitemclass:= itemclass; //default
+ end;
  try
   for int1:= 0 to acount - 1 do begin
    add(aitemclass.create);
@@ -3593,6 +3607,7 @@ begin
  result:= ttreelistedititem;
 end;
 
+(*
 function ttreeitemedit.getkeystring1(const aindex: integer): msestring;
 begin
 // if (aindex < fitemlist.count) then begin
@@ -3623,7 +3638,60 @@ begin
 //  end;
  end;
 end;
+*)
 
+function ttreeitemedit.locatecount: integer;        //number of locate values
+begin
+ if (fvalue = nil) or (ttreelistitem1(fvalue).treelevel = 0) then begin
+  result:= fitemlist.count;
+ end
+ else begin
+  result:= ttreelistitem1(ttreelistitem1(fvalue).fparent).count
+ end;
+end;
+
+function ttreeitemedit.locatecurrentindex: integer; //index of current row
+begin
+ if (fvalue = nil) or (ttreelistitem1(fvalue).treelevel = 0) then begin
+  result:= factiverow;
+ end
+ else begin
+  result:= ttreelistitem1(fvalue).fparentindex
+ end;
+end;
+
+procedure ttreeitemedit.locatesetcurrentindex(const aindex: integer);
+begin
+ if (fvalue = nil) or (ttreelistitem1(fvalue).treelevel = 0) then begin
+  inherited;
+ end
+ else begin
+  fgridintf.getcol.grid.row:=
+        ttreelistitem1(ttreelistitem1(ttreelistitem1(fvalue).fparent).
+                                                      fitems[aindex]).findex;
+ end;
+end;
+
+function ttreeitemedit.getkeystring(const aindex: integer): msestring; //locate text
+begin
+ if (fvalue = nil) or (ttreelistitem1(fvalue).treelevel = 0) then begin
+  with ttreelistitem1(fitemlist[aindex]) do begin
+   if treelevel = 0 then begin
+    result:= caption;
+   end
+   else begin
+    result:= '';
+   end;
+  end;
+ end
+ else begin
+  with ttreelistitem1(ttreelistitem1(fvalue).fparent) do begin
+   result:= fitems[aindex].caption;
+  end;
+ end;
+end;
+
+(*
 procedure ttreeitemedit.setfiltertext(const value: msestring);
 var
  int1: integer;
@@ -3668,6 +3736,7 @@ begin
   feditor.sellength:= length(ffiltertext);
  end;
 end;
+*)
 
 procedure ttreeitemedit.updatelayout;
 begin

@@ -294,7 +294,7 @@ type
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
    procedure openlocal;
    procedure internalinsert; override;
-   //iifimodulelink
+  //iifimodulelink
    procedure connectmodule(const sender: tcustommodulelink);
   public
    constructor create(aowner: tcomponent); override;

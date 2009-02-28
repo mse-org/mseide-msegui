@@ -89,10 +89,10 @@ type
                     scoe_trimright,
                     scoe_trimleft,
                     scoe_uppercase,
-                    scoe_lowercase,
-                    
-//                    scoe_autopost, //deprecated, moved to optionsdb
-                    scoe_hintclippedtext
+                    scoe_lowercase,                    
+                    scoe_hintclippedtext,                    
+                    scoe_locate,
+                    scoe_casesensitive
                           );
 
  stringcoleditoptionsty = set of stringcoleditoptionty;
@@ -100,13 +100,17 @@ type
 const
  stringcoloptionseditmask: optionseditty = [
                     oe_endonenter,
+                    oe_homeonenter,
                     oe_autoselect, //selectall bei enter
                     oe_autoselectonfirstclick,
                     oe_caretonreadonly,
                     oe_trimright,
                     oe_trimleft,
                     oe_uppercase,
-                    oe_lowercase];
+                    oe_lowercase,
+                    oe_hintclippedtext,
+                    oe_locate,
+                    oe_casesensitive];
  stringcoloptionseditshift = ord(oe_endonenter) - ord(scoe_endonenter);
 
  gridvaluevarname = 'values';
@@ -1959,12 +1963,18 @@ type
    procedure scrolled(const dist: pointty); override;
    function getcaretcliprect: rectty; override;  //origin = clientrect.pos
    property cols[index: integer]: tstringcol read getcols write setcols; default;
+   function currentdatalist: tmsestringdatalist;
+
   //iedit
    function getoptionsedit: optionseditty; virtual;
    procedure editnotification(var info: editnotificationinfoty); virtual;
    function hasselection: boolean;
    procedure updatecopytoclipboard(var atext: msestring);
    procedure updatepastefromclipboard(var atext: msestring);
+   function locatecount: integer;        //number of locate values
+   function locatecurrentindex: integer; //index of current row
+   procedure locatesetcurrentindex(const aindex: integer);
+   function getkeystring(const aindex: integer): msestring; //locate text
 
    procedure dofocusedcellposchanged; override;
    procedure focusedcellchanged; override;
@@ -12499,6 +12509,44 @@ begin
  result:= inherited canclose(newfocus);
  if result then begin
   checkcellvalue(result);
+ end;
+end;
+
+function tcustomstringgrid.currentdatalist: tmsestringdatalist;
+begin
+ result:= nil;
+ if ffocusedcell.col >= 0 then begin
+  result:= tmsestringdatalist(
+           tcustomstringcol(fdatacols.fitems[ffocusedcell.col]).fdata);
+ end;
+end;
+
+function tcustomstringgrid.locatecount: integer;
+begin
+ result:= rowcount;
+ if currentdatalist = nil then begin
+  result:= 0;
+ end;
+end;
+
+function tcustomstringgrid.locatecurrentindex: integer;
+begin
+ result:= row;
+end;
+
+procedure tcustomstringgrid.locatesetcurrentindex(const aindex: integer);
+begin
+ row:= aindex;
+end;
+
+function tcustomstringgrid.getkeystring(const aindex: integer): msestring;
+var
+ list1: tmsestringdatalist; 
+begin
+ result:= '';
+ list1:= currentdatalist;
+ if currentdatalist <> nil then begin
+  result:= currentdatalist[aindex];
  end;
 end;
 

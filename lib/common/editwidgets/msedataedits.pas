@@ -112,6 +112,12 @@ type
    function setdropdowntext(const avalue: msestring; const docheckvalue: boolean;
                 const canceled: boolean; const akey: keyty): boolean;
    procedure initeditfocus;
+
+  //iedit
+   function locatecount: integer; override;        //number of locate values
+   function locatecurrentindex: integer; override; //index of current row
+   procedure locatesetcurrentindex(const aindex: integer); override;
+   function getkeystring(const aindex: integer): msestring; override; //locate text
                    
   //igridwidget
    procedure setfirstclick;
@@ -2127,6 +2133,34 @@ begin
   fempty_color:= avalue;
   invalidate;
  end;
+end;
+
+function tcustomdataedit.locatecount: integer;
+var
+ datalist1: tdatalist;
+begin
+ result:= 0;
+ if fgridintf <> nil then begin
+  datalist1:= fgridintf.getcol.datalist;
+  if datalist1 <> nil then begin
+   result:= datalist1.count;
+  end;
+ end;
+end;
+
+function tcustomdataedit.locatecurrentindex: integer;
+begin
+ result:= fgridintf.getcol.grid.row;
+end;
+
+procedure tcustomdataedit.locatesetcurrentindex(const aindex: integer);
+begin
+ fgridintf.getcol.grid.row:= aindex;
+end;
+
+function tcustomdataedit.getkeystring(const aindex: integer): msestring;
+begin
+ result:= datatotext(fgridintf.getcol.datalist.getitempo(aindex)^);
 end;
 
 { tcustomstringedit }

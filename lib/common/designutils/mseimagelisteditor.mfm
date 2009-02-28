@@ -81,7 +81,7 @@ object imagelisteditorfo: timagelisteditorfo
     taborder = 7
     cellheight = 62
     optionsgrid = [og_colsizing, og_rowsizing, og_focuscellonenter, og_wraprow, og_wrapcol, og_autopopup]
-    options = [lvo_mousemoving, lvo_keymoving, lvo_horz, lvo_drawfocus, lvo_focusselect, lvo_mouseselect, lvo_keyselect, lvo_multiselect]
+    options = [lvo_readonly, lvo_mousemoving, lvo_keymoving, lvo_horz, lvo_drawfocus, lvo_focusselect, lvo_mouseselect, lvo_keyselect, lvo_multiselect, lvo_locate]
     itemlist.captionpos = cp_bottom
     itemlist.imagelist = imagelist
     itemlist.imagewidth = 16

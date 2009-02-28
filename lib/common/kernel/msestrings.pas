@@ -209,6 +209,9 @@ function msecomparestrlen(const S1, S2: msestring): Integer;
                 //case sensitiv, beruecksichtigt nur s1 laenge
 function mseCompareTextlen(const S1, S2: msestring): Integer;
                 //case insensitiv, beruecksichtigt nur s1 laenge
+function mseCompareTextlenupper(const S1, S2: msestring): Integer;
+                //case insensitiv, checks length s1 only, s1 must be uppercase
+
 function mseissamestrlen(const apartstring,astring: msestring): boolean;
 function mseissametextlen(const apartstring,astring: msestring): boolean;
                 //case insensitive
@@ -276,6 +279,7 @@ function StrLIComp(const Str1, upstr: PChar; len: integer): Integer;
                 //ascii caseinsensitive, upstr muss upcase sein
 function StrIComp(const Str1, upstr: PChar): Integer;
                 //ascii caseinsensitive, upstr muss upcase sein
+
 function startsstr(substring,s: pchar): boolean; overload;
 function startsstr(const substring,s: string): boolean; overload;
 function msestartsstr(substring,s: pmsechar): boolean; overload;
@@ -3796,6 +3800,15 @@ var
 begin
  str1:= copy(s2,1,length(s1));  //todo: optimize
  result:= msecomparetext(s1,str1);
+end;
+
+function mseCompareTextlenupper(const S1, S2: msestring): Integer;
+                //case insensitiv, checks length s1 only, s1 must be uppercase
+var
+ str1: msestring;
+begin
+ str1:= mseuppercase(copy(s2,1,length(s1)));  //todo: optimize
+ result:= msecomparestr(s1,str1);
 end;
 
 function mseissamestrlen(const apartstring,astring: msestring): boolean;

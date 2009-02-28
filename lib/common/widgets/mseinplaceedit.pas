@@ -56,6 +56,10 @@ type
   function getwidget: twidget;
   procedure updatecopytoclipboard(var atext: msestring);
   procedure updatepastefromclipboard(var atext: msestring);
+  function locatecount: integer;        //number of locate values
+  function locatecurrentindex: integer; //index of current row
+  procedure locatesetcurrentindex(const aindex: integer);
+  function getkeystring(const aindex: integer): msestring; //locate text
  end;
 
  inplaceeditstatety = (ies_focused,ies_poschanging,ies_firstclick,ies_istextedit,
@@ -85,6 +89,7 @@ type
    fpasswordchar: msechar;
    fmousemovepos: pointty;
    frepeater: tsimpletimer;
+   ffiltertext: msestring;
    procedure resetoffset;
    function getinsertstate: boolean;
    procedure setinsertstate(const Value: boolean);
@@ -120,6 +125,7 @@ type
    function gettextrect: rectty;
    function getfontcanvas: tcanvas;
 
+   procedure setfiltertext(const avalue: msestring);
   protected
    fstate: inplaceeditstatesty;
    fcaretwidth: integer;
@@ -217,6 +223,7 @@ type
    property destrect: rectty read finfo.dest;
    property cliprect: rectty read finfo.clip;
    property textrect: rectty read gettextrect;
+   property filtertext: msestring read ffiltertext write setfiltertext;
  end;
 
  undotypety = (ut_none,ut_setpos,ut_inserttext,ut_overwritetext,
@@ -481,11 +488,11 @@ procedure tinplaceedit.setup(const text: msestring;
               const font: tfont = nil;
               noinvalidate: boolean = false);
 begin
+ ffiltertext:= '';
  finfo.text.text:= text;
  fcurindex:= cursorindex;
  ftextrect := atextrect;
  finfo.dest:= atextrect;
-// fclientrect:= aclientrect;
  finfo.clip:= aclientrect;
  ffont:= font;
  resetoffset;
@@ -941,6 +948,7 @@ var
  actioninfo: editnotificationinfoty;
  bo1: boolean;
  opt1: optionseditty;
+ locating: boolean;
 
 begin
  with kinfo do begin
@@ -948,6 +956,7 @@ begin
    exit;
   end;
   opt1:= iedit(fintf).getoptionsedit;
+  locating:= opt1 * [oe_locate,oe_readonly] = [oe_locate,oe_readonly];
   include(eventstate,es_processed);
   nochars:= true;
   finished:= true;
@@ -1019,25 +1028,30 @@ begin
        insertstate:= not insertstate;
       end;
       key_backspace: begin
-       include(actioninfo.state,eas_delete);
-       actioninfo.dir:= gd_left;
-       if canedit then begin
-        if fsellength > 0 then begin
-         deleteselection;
-        end
-        else begin
-         if fcurindex > 0 then begin
-          deleteback;
-         end
-         else begin
-          if checkaction(actioninfo) then begin
-           finished:= false;
-          end;
-         end;
-        end;
+       if locating then begin
+        filtertext:= copy(filtertext,1,length(filtertext)-1);
        end
        else begin
-        exclude(eventstate,es_processed);
+        include(actioninfo.state,eas_delete);
+        actioninfo.dir:= gd_left;
+        if canedit then begin
+         if fsellength > 0 then begin
+          deleteselection;
+         end
+         else begin
+          if fcurindex > 0 then begin
+           deleteback;
+          end
+          else begin
+           if checkaction(actioninfo) then begin
+            finished:= false;
+           end;
+          end;
+         end;
+        end
+        else begin
+         exclude(eventstate,es_processed);
+        end;
        end;
       end;
       key_delete: begin
@@ -1092,10 +1106,20 @@ begin
        nochars:= true;
       end;
       key_home: begin
-       moveindex(0,shiftstate = [ss_shift]);
+       if locating and (shiftstate = []) then begin
+        filtertext:= '';
+       end
+       else begin
+        moveindex(0,shiftstate = [ss_shift]);
+       end;
       end;
       key_end: begin
-       moveindex(length(finfo.text.text),shiftstate = [ss_shift]);
+       if locating and (shiftstate = []) then begin
+        filtertext:= finfo.text.text;
+       end
+       else begin
+        moveindex(length(finfo.text.text),shiftstate = [ss_shift]);
+       end;
       end;
       key_left: begin
        if (fsellength = length(finfo.text.text)) and (shiftstate <> [ss_shift]) or
@@ -1164,11 +1188,17 @@ begin
   if not finished then begin
    exclude(eventstate,es_processed);
   end;
-  if not (es_processed in eventstate) and not nochars and (chars <> '') and 
-                 canedit then begin
-   enterchars(chars);
-   fselstart:= fcurindex;
-   include(eventstate,es_processed);
+  if not (es_processed in eventstate) and not nochars and (chars <> '') then begin
+   if locating then begin
+    filtertext:= filtertext + chars;
+   end
+   else begin
+    if canedit then begin
+     enterchars(chars);
+     fselstart:= fcurindex;
+     include(eventstate,es_processed);
+    end;
+   end;
   end;
  end;
 end;
@@ -1521,19 +1551,23 @@ begin
 end;
 
 procedure tinplaceedit.initfocus;
+var
+ opt1: optionseditty;
 begin
+ ffiltertext:= '';
  resetoffset;
  invalidatetextrect(-bigint,bigint);
- if iedit(fintf).getoptionsedit  * [oe_autoselect,oe_locate] = 
-                                              [oe_autoselect] then begin
+ opt1:= iedit(fintf).getoptionsedit;
+ if (oe_autoselect in opt1) and not (opt1 * [oe_locate,oe_readonly] = 
+                                              [oe_locate,oe_readonly]) then begin
   selectall;
  end
  else begin
-  if oe_endonenter in iedit(fintf).getoptionsedit then begin
+  if oe_endonenter in opt1 then begin
    moveindex(bigint,false,false);
   end
   else begin
-   if oe_homeonenter in iedit(fintf).getoptionsedit then begin
+   if oe_homeonenter in opt1 then begin
     moveindex(0,false,false);
    end
   end;
@@ -1777,6 +1811,79 @@ end;
 procedure tinplaceedit.dragstarted;
 begin
  killrepeater;
+end;
+
+procedure tinplaceedit.setfiltertext(const avalue: msestring);
+var
+ int1,int2,int3: integer;
+ foundindex: integer;
+ mstr1: msestring;
+ casesensitive: boolean;
+begin
+ if avalue <> '' then begin
+  int1:= fintf.locatecount;
+  if int1 > 0 then begin
+   casesensitive:= oe_casesensitive in fintf.getoptionsedit;
+   if casesensitive then begin
+    mstr1:= avalue;
+   end
+   else begin
+    mstr1:= mseuppercase(avalue);
+   end;
+   foundindex:= -1;
+   int2:= fintf.locatecurrentindex;
+   if int2 < 0 then begin
+    int2:= 0;
+   end;
+   if casesensitive then begin
+    for int3:= int2 to int1 - 1 do begin
+     if msecomparestrlen(mstr1,fintf.getkeystring(int3)) = 0 then begin
+      foundindex:= int3;
+      break;
+     end;
+    end;
+   end
+   else begin
+    for int3:= int2 to int1 - 1 do begin
+     if msecomparetextlenupper(mstr1,fintf.getkeystring(int3)) = 0 then begin
+      foundindex:= int3;
+      break;
+     end;
+    end;
+   end;
+   if foundindex < 0 then begin
+    if casesensitive then begin
+     for int3:= int2-1 downto 0 do begin
+      if msecomparestrlen(mstr1,fintf.getkeystring(int3)) = 0 then begin
+       foundindex:= int3;
+       break;
+      end;
+     end;
+    end
+    else begin
+     for int3:= int2-1 downto 0 do begin
+      if msecomparetextlenupper(mstr1,fintf.getkeystring(int3)) = 0 then begin
+       foundindex:= int3;
+       break;
+      end;
+     end;
+    end;
+   end;
+   if foundindex >= 0 then begin
+    fintf.locatesetcurrentindex(foundindex);
+    ffiltertext:= avalue;
+    fselstart:= 0;
+    fsellength:= length(ffiltertext);
+    updateselect;    
+   end;
+  end;
+ end
+ else begin
+  ffiltertext:= '';
+  fselstart:= 0;
+  fsellength:= 0;
+  updateselect;    
+ end;
 end;
 
 { ttextundolist }
