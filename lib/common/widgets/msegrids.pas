@@ -1190,6 +1190,7 @@ type
    property cols[const index: integer]: tdatacol read getcols write setcols; default;
    function colbyname(const aname: string): tdatacol;
                   //name is case sensitive
+   function datalistbyname(const aname: string): tdatalist; //can be nil
    
    function selectedcellcount: integer;
    property selectedcells: gridcoordarty read getselectedcells write setselectedcells;
@@ -6491,6 +6492,17 @@ begin
    result:= tdatacol(fitems[int1]);
    break;
   end;
+ end;
+end;
+
+function tdatacols.datalistbyname(const aname: string): tdatalist; //can be nil
+var
+ col1: tdatacol;
+begin
+ result:= nil;
+ col1:= colbyname(aname);
+ if col1 <> nil then begin
+  result:= col1.datalist;
  end;
 end;
 

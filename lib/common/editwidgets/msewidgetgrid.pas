@@ -89,13 +89,12 @@ type
    function getgrid: tcustomwidgetgrid;
    function getbrushorigin: pointty;
    function getcol: twidgetcol;
-   procedure getdata(aindex: integer; var dest);
-   procedure setdata(aindex: integer;
+   procedure getdata(arow: integer; var dest);
+   procedure setdata(arow: integer;
                 const source; const noinvalidate: boolean = false); virtual;
-                                    //wish from liuzg
    function getrow: integer;
    procedure setrow(arow: integer);
-   function empty(aindex: integer): boolean;
+   function empty(arow: integer): boolean;
    function cangridcopy: boolean;
    procedure updateeditoptions(var aoptions: optionseditty);
    function showcaretrect(const arect: rectty; const aframe: tcustomframe): pointty;
@@ -1011,18 +1010,18 @@ begin
  end;
 end;
 
-procedure twidgetcol.getdata(aindex: integer; var dest);
+procedure twidgetcol.getdata(arow: integer; var dest);
 var
  datatyp: datatypty;
  info: cellinfoty;
  po1: pointer;
 begin
  if fdata <> nil then begin
-  if aindex = -1 then begin
-   aindex:= twidgetgrid(fgrid).ffocusedcell.row;
+  if arow = -1 then begin
+   arow:= twidgetgrid(fgrid).ffocusedcell.row;
   end;
-  if aindex >= 0 then begin
-   tdatalist1(fdata).getdata(aindex,dest);
+  if arow >= 0 then begin
+   tdatalist1(fdata).getdata(arow,dest);
   end
   else begin
    tdatalist1(fdata).getdefaultdata(dest);
@@ -1031,8 +1030,8 @@ begin
  else begin
   if fintf <> nil then begin
    datatyp:= fintf.getdatatyp;
-   if aindex >= 0 then begin
-    info.cell.row:= aindex;
+   if arow >= 0 then begin
+    info.cell.row:= arow;
     info.griddatalink:= tcustomwidgetgrid(fgrid).getgriddatalink;
     po1:= fintf.getrowdatapo(info);
    end
@@ -1085,45 +1084,45 @@ begin
  end;
 end;
 
-procedure twidgetcol.setdata(aindex: integer; const source;
+procedure twidgetcol.setdata(arow: integer; const source;
                              const noinvalidate: boolean = false);
 begin
  if fdata <> nil then begin
-  if aindex = -1 then begin
-   aindex:= twidgetgrid(fgrid).ffocusedcell.row;
+  if arow = -1 then begin
+   arow:= twidgetgrid(fgrid).ffocusedcell.row;
   end;
-  if aindex >= 0 then begin
+  if arow >= 0 then begin
    if noinvalidate then begin
     fdata.beginupdate;
    end;
-   tdatalist1(fdata).setdata(aindex,source);
-   if (aindex = twidgetgrid(fgrid).ffocusedcell.row) and (fintf <> nil) then begin
-    fintf.gridtovalue(aindex);
+   tdatalist1(fdata).setdata(arow,source);
+   if (arow = twidgetgrid(fgrid).ffocusedcell.row) and (fintf <> nil) then begin
+    fintf.gridtovalue(arow);
    end;
    if noinvalidate then begin
     fdata.decupdate;
     if (not fdata.updating) and assigned(fonchange) then begin
-     fonchange(self,aindex);
+     fonchange(self,arow);
     end;
    end;
   end;
  end
  else begin
   if assigned(fonchange) then begin
-   fonchange(self,aindex);
+   fonchange(self,arow);
   end;
  end;
 end;
 
-function twidgetcol.empty(aindex: integer): boolean;
+function twidgetcol.empty(arow: integer): boolean;
 begin
  result:= true;
  if fdata <> nil then begin
-  if aindex = -1 then begin
-   aindex:= twidgetgrid(fgrid).ffocusedcell.row;
+  if arow = -1 then begin
+   arow:= twidgetgrid(fgrid).ffocusedcell.row;
   end;
-  if aindex >= 0 then begin
-   result:= tdatalist1(fdata).empty(aindex);
+  if arow >= 0 then begin
+   result:= tdatalist1(fdata).empty(arow);
   end;
  end;
 end;

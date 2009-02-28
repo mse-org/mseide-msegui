@@ -14,7 +14,7 @@ uses
  classes,mseclasses,mseguiglob,mseifiglob,mseifi,mseact,msegui,typinfo,
  msestrings,
  msearrayprops,mseglob,msetypes,mseifilink,msewidgetgrid,msemenus,
- mseevent,msegrids,msegraphutils;
+ mseevent,msegrids,msegraphutils,msedatalist;
  
 type
  
@@ -98,6 +98,12 @@ type
    function cancommandsend: boolean;
  end;
 
+ tifiwidgetcol = class(twidgetcol)
+  protected
+   procedure setdata(arow: integer;
+                const source; const noinvalidate: boolean = false); override;
+ end;
+ 
  rxwidgetstatety = (rws_openpending,rws_datareceived,rws_commandsending); 
  rxwidgetstatesty = set of rxwidgetstatety;
  trxwidgetgrid = class(twidgetgrid)
@@ -118,6 +124,7 @@ type
    procedure docellevent(var info: celleventinfoty); override;
 //   procedure dorowsdatachanged(const acell: gridcoordty; 
 //                                           const acount: integer); override;
+   procedure createdatacol(const index: integer; out item: tdatacol); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -127,44 +134,15 @@ type
    property active: boolean read factive write setactive default false;
  end;
 
-function encodegridcommanddata(const akind: gridcommandkindty;
-                               const asource,adest,acount: integer): string;
-function decodegridcommanddata(const adata: pchar; out akind: gridcommandkindty;
-                               out asource,adest,acount: integer): integer;
- 
 implementation
 uses
- sysutils,msestream,msesysutils,msetmpmodules,msedatalist;
+ sysutils,msestream,msesysutils,msetmpmodules;
 type
  tcustommodulelink1 = class(tcustommodulelink);
  tdatacols1 = class(tdatacols);
  
 // tlinkdata1 = class(tlinkdata);
 
-function encodegridcommanddata(const akind: gridcommandkindty;
-                                      const asource,adest,acount: integer): string;
-begin
- result:= nullstring(sizeof(gridcommanddatadataty));
- with pgridcommanddatadataty(result)^ do begin
-  kind:= akind;
-  dest:= adest;
-  source:= asource;
-  count:= acount;
- end;
-end;
-
-function decodegridcommanddata(const adata: pchar; out akind: gridcommandkindty;
-                               out asource,adest,acount: integer): integer;
-begin
- result:= sizeof(gridcommanddatadataty);
- with pgridcommanddatadataty(adata)^ do begin
-  akind:= kind;
-  adest:= dest;
-  asource:= source;
-  acount:= count;
- end;
-end;
-  
 { tvaluewidgetlink }
 
 function tvaluewidgetlink.getwidget: twidget;
@@ -548,18 +526,43 @@ begin
      end;
     end;
    end;
+   ik_coldatachange: begin
+    inc(fcommandlock);
+    try
+     int1:= pcolitemdataty(adatapo)^.header.row;
+     ifinametostring(@pcolitemdataty(adatapo)^.header.name,str1);
+     inc(adatapo,sizeof(colitemheaderty)+length(str1));
+     inc(adatapo,decodeifidata(pifidataty(adatapo),int1,
+                      trxwidgetgrid(fowner).fdatacols.datalistbyname(str1)));
+    finally
+     dec(fcommandlock);
+    end;
+   end;
   end;
  end;
 end;
 
 function tifiwidgetgridcontroller.getifireckinds: ifireckindsty;
 begin
- result:= [ik_griddata,ik_requestopen,ik_gridcommand];
+ result:= [ik_griddata,ik_requestopen,ik_gridcommand,ik_coldatachange];
 end;
 
 function tifiwidgetgridcontroller.cancommandsend: boolean;
 begin
  result:= (fcommandlock = 0) and cansend;
+end;
+
+{ tifiwidgetcol }
+
+procedure tifiwidgetcol.setdata(arow: integer; const source;
+               const noinvalidate: boolean = false);
+begin
+ inherited;
+ with trxwidgetgrid(fgrid).fifi do begin
+  if (self.name <> '') and cancommandsend and (fdata <> nil) then begin
+   senditem(ik_coldatachange,[encodecolchangedata(self.name,arow,fdata)]);
+  end;
+ end;  
 end;
 
 { trxwidgetgrid }
@@ -697,6 +700,11 @@ begin
   fifi.senditem(ik_gridcommand,[
        encodegridcommanddata(gck_rowenter,info.cell.row,info.cell.row,0)]);
  end;
+end;
+
+procedure trxwidgetgrid.createdatacol(const index: integer; out item: tdatacol);
+begin
+ item:= tifiwidgetcol.create(self,fdatacols);
 end;
 
 end.

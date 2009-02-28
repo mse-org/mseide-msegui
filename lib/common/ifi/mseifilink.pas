@@ -538,12 +538,15 @@ type
    destructor destroy; override;
    class function getitemclasstype: persistentclassty; override;
    function colbyname(const aname: ansistring): tifidatacol;
+   function datalistbyname(const aname: ansistring): tdatalist;
    property rowstate: tifirowstatelist read frowstate;
    property cols[const index: integer]: tifidatacol read getcols write setcols;
                                                  default;
  end;
  
  ttxdatagridcontroller = class(tifitxcontroller)
+  private
+   fcommandlock: integer;
   protected
    function getifireckinds: ifireckindsty; override;
    procedure setowneractive(const avalue: boolean); override;
@@ -559,7 +562,7 @@ type
    fifi: ttxdatagridcontroller;
    fdatacols: tifidatacols;
    frowcount: integer;
-   
+   frow: integer;   
    procedure setifi(const avalue: ttxdatagridcontroller);
    procedure setdatacols(const avalue: tifidatacols);
    procedure setrowcount(const avalue: integer);
@@ -567,8 +570,11 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure moverow(const curindex,newindex: integer; const count: integer = 1);
+   procedure insertrow(index: integer; count: integer = 1);
+   procedure deleterow(index: integer; count: integer = 1);
    property rowhigh: integer read getrowhigh;
-//   property 
+   property row: integer read frow write frow;
   published
    property ifi: ttxdatagridcontroller read fifi write setifi;
    property datacols: tifidatacols read fdatacols write setdatacols;
@@ -581,6 +587,14 @@ function ifidatatodatalist(const akind: datatypty; const arowcount: integer;
 function datalisttoifidata(const adatalist: tdatalist): integer; overload;
 procedure datalisttoifidata(const adatalist: tdatalist;
                                          var dest: pchar); overload;
+
+function encodegridcommanddata(const akind: gridcommandkindty;
+                               const asource,adest,acount: integer): string;
+function decodegridcommanddata(const adata: pchar; out akind: gridcommandkindty;
+                               out asource,adest,acount: integer): integer;
+function encodecolchangedata(const acolname: string; const arow: integer;
+                                     const alist: tdatalist): string;
+ 
 implementation
 uses
  sysutils,msestream,msesysutils,msetmpmodules;
@@ -594,7 +608,41 @@ type
    constructor create(const adata: ansistring; const dest: ievent;
         const amodulelink: trxlinkmodule; const amoduledata: pmoduledatadataty);
  end;
- 
+
+function encodegridcommanddata(const akind: gridcommandkindty;
+                                      const asource,adest,acount: integer): string;
+begin
+ result:= nullstring(sizeof(gridcommanddatadataty));
+ with pgridcommanddatadataty(result)^ do begin
+  kind:= akind;
+  dest:= adest;
+  source:= asource;
+  count:= acount;
+ end;
+end;
+
+function decodegridcommanddata(const adata: pchar; out akind: gridcommandkindty;
+                               out asource,adest,acount: integer): integer;
+begin
+ result:= sizeof(gridcommanddatadataty);
+ with pgridcommanddatadataty(adata)^ do begin
+  akind:= kind;
+  adest:= dest;
+  asource:= source;
+  acount:= count;
+ end;
+end;
+
+function encodecolchangedata(const acolname: string; const arow: integer;
+                                     const alist: tdatalist): string;
+begin
+ result:= encodeifidata(alist,arow,sizeof(colitemheaderty)+length(acolname));
+ with pcolitemdataty(result)^.header do begin
+  row:= arow;
+  stringtoifiname(acolname,@name);
+ end;
+end;
+   
 { tmodulelinkprop }
 
 procedure tmodulelinkprop.inititemheader(out arec: string;
@@ -2231,6 +2279,17 @@ begin
  end;
 end;
 
+function tifidatacols.datalistbyname(const aname: ansistring): tdatalist;
+var
+ col1: tifidatacol;
+begin
+ result:= nil;
+ col1:= colbyname(aname);
+ if col1 <> nil then begin
+  result:= col1.datalist;
+ end;
+end;
+
 { ttxdatagrid }
 
 constructor ttxdatagrid.create(aowner: tcomponent);
@@ -2281,6 +2340,19 @@ begin
  result:= frowcount - 1;
 end;
 
+procedure ttxdatagrid.moverow(const curindex: integer; const newindex: integer;
+               const count: integer = 1);
+begin
+end;
+
+procedure ttxdatagrid.insertrow(index: integer; count: integer = 1);
+begin
+end;
+
+procedure ttxdatagrid.deleterow(index: integer; count: integer = 1);
+begin
+end;
+
 { ttxdatagridcontroller }
 
 constructor ttxdatagridcontroller.create(const aowner: ttxdatagrid);
@@ -2298,6 +2370,8 @@ var
  str1: ansistring;
  col1: tifidatacol;
  list1: tdatalist;
+ ckind1: gridcommandkindty;
+ source1,dest1,count1: integer;
 begin
  with adata^.header do begin
   case kind of
@@ -2329,6 +2403,42 @@ begin
      end;
     end;
    end;
+   ik_gridcommand: begin
+    inc(adatapo,decodegridcommanddata(adatapo,ckind1,source1,dest1,count1));
+    with ttxdatagrid(fowner) do begin
+     inc(fcommandlock);
+     try
+      case ckind1 of
+       gck_insertrow: begin
+        insertrow(dest1,count1);       
+       end;
+       gck_deleterow: begin
+        deleterow(dest1,count1);       
+       end;
+       gck_moverow: begin
+        moverow(source1,dest1,count1);       
+       end;
+       gck_rowenter: begin
+        row:= dest1;
+       end;
+      end;
+     finally
+      dec(fcommandlock);
+     end;
+    end;
+   end;
+   ik_coldatachange: begin
+    inc(fcommandlock);
+    try
+     int1:= pcolitemdataty(adatapo)^.header.row;
+     ifinametostring(@pcolitemdataty(adatapo)^.header.name,str1);
+     inc(adatapo,sizeof(colitemheaderty)+length(str1));
+     inc(adatapo,decodeifidata(pifidataty(adatapo),int1,
+                      ttxdatagrid(fowner).fdatacols.datalistbyname(str1)));
+    finally
+     dec(fcommandlock);
+    end;
+   end;
   end;
  end;
 end;
@@ -2340,7 +2450,7 @@ end;
 
 function ttxdatagridcontroller.getifireckinds: ifireckindsty;
 begin
- result:= [ik_requestopen,ik_griddata];
+ result:= [ik_requestopen,ik_griddata,ik_gridcommand,ik_coldatachange];
 end;
 
 function ifidatatodatalist(const akind: datatypty; const arowcount: integer;

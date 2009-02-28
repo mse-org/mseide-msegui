@@ -22,7 +22,7 @@ type
                  ik_widgetcommand,ik_widgetproperties,ik_requestmodule,
                  ik_moduledata,
                  ik_requestfielddefs,ik_fielddefsdata,ik_fieldrec,
-                 ik_griddata,ik_gridcommand,
+                 ik_griddata,ik_gridcommand,ik_coldatachange,
                  ik_requestopen,ik_dsdata,ik_postresult,ik_modulecommand);
  ifireckindsty = set of ifireckindty;
 const
@@ -167,6 +167,16 @@ type
   data: fieldrecdataty;
  end;
 
+ colitemheaderty = record
+  row: integer;
+  name: ifinamety;
+ end;
+ colitemdataty = record
+  header: colitemheaderty;
+  data: ifidataty;
+ end;
+ pcolitemdataty = ^colitemdataty;
+ 
  coldataty = record
   kind: datatypty;
   name: ifinamety;
@@ -518,15 +528,30 @@ function encodeifidata(const avalue: msestring;
                        const headersize: integer = 0): string; overload;
 function encodeifidata(const avalue: ansistring; 
                        const headersize: integer = 0): string; overload;
+function encodeifidata(const alist: tdatalist; const aindex: integer;
+                       const headersize: integer = 0): string; overload;
 
 function skipifidata(const source: pifidataty): integer;
 function decodeifidata(const source: pifidataty; out dest: msestring): integer;
+                                                        overload;
 function decodeifidata(const source: pifidataty; out dest: string): integer;
+                                                        overload;
 function decodeifidata(const source: pifidataty; out dest: integer): integer;
+                                                        overload;
 function decodeifidata(const source: pifidataty; out dest: int64): integer;
+                                                        overload;
 function decodeifidata(const source: pifidataty; out dest: real): integer;
+                                                        overload;
 function decodeifidata(const source: pifidataty; out dest: currency): integer;
+                                                        overload;
 function decodeifidata(const source: pifidataty; out dest: variant): integer;
+                                                        overload;
+function decodeifidata(const source: pifidataty; const aindex: integer;
+                          const alist: tdatalist): integer; overload;
+                                     //alist can be nil
+//function decodecolitemdata(const source: pcolitemdataty;
+//,                                 const alist: tdatalist): integer;
+                                     //alist can be nil
 
 procedure addifiintegervalue(var adata: ansistring; var adatapo: pchar; 
                                      const avalue: integer);
@@ -558,24 +583,25 @@ type
  
 const
  headersizes: array[ifireckindty] of integer = (
-  sizeof(ifiheaderty),                           //ik_none
-  sizeof(ifiheaderty),                           //ik_data
-  sizeof(ifiheaderty)+sizeof(itemheaderty),      //ik_itemheader
-  sizeof(ifiheaderty)+sizeof(actionfiredty),     //ik_actionfired
-  sizeof(ifiheaderty)+sizeof(propertychangedty), //ik_propertychanged
-  sizeof(ifiheaderty)+sizeof(widgetcommandty),   //ik_widgetcommand
-  sizeof(ifiheaderty)+sizeof(widgetpropertiesty),//ik_widgetproperties
-  sizeof(ifiheaderty)+sizeof(requestmodulety),   //ik_requestmodule
-  sizeof(ifiheaderty)+sizeof(moduledataty),      //ik_moduledata
-  sizeof(ifiheaderty)+sizeof(requestfielddefsty),//ik_requestfielddefs
-  sizeof(ifiheaderty)+sizeof(fielddefsdataty),   //ik_fielddefsdata
-  sizeof(ifiheaderty)+sizeof(fieldrecty),        //ik_fieldrec
-  sizeof(ifiheaderty)+sizeof(griddataty),        //ik_griddata
-  sizeof(ifiheaderty)+sizeof(gridcommanddataty), //ik_gridcommand
-  sizeof(ifiheaderty)+sizeof(requestopenty),     //ik_requestopen
-  sizeof(ifiheaderty)+sizeof(dsdataty),          //ik_dsdata
-  sizeof(ifiheaderty)+sizeof(postresultty),      //ik_postresult
-  sizeof(ifiheaderty)+sizeof(modulecommandty)    //ik_modulecommand
+  sizeof(ifiheaderty),                            //ik_none
+  sizeof(ifiheaderty),                            //ik_data
+  sizeof(ifiheaderty)+sizeof(itemheaderty),       //ik_itemheader
+  sizeof(ifiheaderty)+sizeof(actionfiredty),      //ik_actionfired
+  sizeof(ifiheaderty)+sizeof(propertychangedty),  //ik_propertychanged
+  sizeof(ifiheaderty)+sizeof(widgetcommandty),    //ik_widgetcommand
+  sizeof(ifiheaderty)+sizeof(widgetpropertiesty), //ik_widgetproperties
+  sizeof(ifiheaderty)+sizeof(requestmodulety),    //ik_requestmodule
+  sizeof(ifiheaderty)+sizeof(moduledataty),       //ik_moduledata
+  sizeof(ifiheaderty)+sizeof(requestfielddefsty), //ik_requestfielddefs
+  sizeof(ifiheaderty)+sizeof(fielddefsdataty),    //ik_fielddefsdata
+  sizeof(ifiheaderty)+sizeof(fieldrecty),         //ik_fieldrec
+  sizeof(ifiheaderty)+sizeof(griddataty),         //ik_griddata
+  sizeof(ifiheaderty)+sizeof(gridcommanddataty),  //ik_gridcommand
+  sizeof(ifiheaderty)+sizeof(colitemdataty),      //ik_coldatachange
+  sizeof(ifiheaderty)+sizeof(requestopenty),      //ik_requestopen
+  sizeof(ifiheaderty)+sizeof(dsdataty),           //ik_dsdata
+  sizeof(ifiheaderty)+sizeof(postresultty),       //ik_postresult
+  sizeof(ifiheaderty)+sizeof(modulecommandty)     //ik_modulecommand
  );
 
  stuffchar = c_dle;
@@ -657,6 +683,22 @@ function encodeifidata(const avalue: ansistring;
 begin
  setifibytes(avalue,pifibytesty(
         initdataheader(headersize,idk_bytes,length(avalue),result))); 
+end;
+
+function encodeifidata(const alist: tdatalist; const aindex: integer;
+                       const headersize: integer = 0): string;
+begin
+ case alist.datatyp of
+  dl_integer: begin
+   result:= encodeifidata(tintegerdatalist(alist).items[aindex],headersize);
+  end;
+  dl_msestring: begin
+   result:= encodeifidata(tmsestringdatalist(alist).items[aindex],headersize);
+  end;
+  else begin
+   result:= '';
+  end;
+ end;
 end;
 
 procedure addifiintegervalue(var adata: ansistring; var adatapo: pchar;
@@ -824,6 +866,42 @@ begin
  end;
 end;
 
+function decodeifidata(const source: pifidataty; const aindex: integer;
+                             const alist: tdatalist): integer; overload;
+                                     //alist can be nil
+var
+ int1: integer;
+ mstr1: msestring;
+begin
+ result:= 0;
+ if alist <> nil then begin
+  case source^.header.kind of
+   idk_integer: begin
+    if alist.datatyp = dl_integer then begin
+     result:= decodeifidata(source,int1);
+     tintegerdatalist(alist)[aindex]:= int1;
+    end;
+   end;
+   idk_msestring: begin
+    if alist.datatyp = dl_msestring then begin
+     result:= decodeifidata(source,mstr1);
+     tmsestringdatalist(alist)[aindex]:= mstr1;
+    end;
+   end;    
+  end;
+ end;
+ if result = 0 then begin
+  result:= skipifidata(source);
+ end;
+end;
+{
+function decodecolitemdata(const source: pcolitemdataty;
+                                 const alist: tdatalist): integer;
+begin
+ result:= sizeof(colitemheaderty) + 
+       decodeifidata(@source^.data,alist,source^.header.row);
+end;
+}
 procedure initifirec(out arec: string; const akind: ifireckindty;
                       const asequence: sequencety; const datalength: integer;
                       out datapo: pchar);
@@ -843,8 +921,7 @@ begin
  datapo:= pointer(arec) + sizeof(ifiheaderty);
 end;
 
-function stringtoifiname(const source: string;
-               const dest: pifinamety): integer;
+function stringtoifiname(const source: string; const dest: pifinamety): integer;
 var
  int1: integer;
 begin
