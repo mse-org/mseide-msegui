@@ -121,6 +121,7 @@ type
    procedure dorowsmoved(const fromindex,toindex,count: integer); override;
    procedure dorowsinserted(const index,count: integer); override;
    procedure dorowsdeleted(index,count: integer); override;
+   procedure rowstatechanged(const arow: integer); override;
    procedure docellevent(var info: celleventinfoty); override;
 //   procedure dorowsdatachanged(const acell: gridcoordty; 
 //                                           const acount: integer); override;
@@ -452,6 +453,8 @@ var
  list1: tdatalist;
  ckind1: gridcommandkindty;
  source1,dest1,count1: integer;
+ rowstate1: rowstatety;
+ lwo1: longword;
 begin
  with adata^.header do begin
   case kind of
@@ -486,15 +489,6 @@ begin
        end;
        inc(po1,ifidatatodatalist(dl_rowstate,rows1,po1,
                                     tdatacols1(datacols).frowstate));
-       {
-       with pifibytesty(po1)^ do begin
-        if tdatacols1(datacols).frowstate.folded and 
-                             (length = rowcount) then begin
-         tdatacols1(datacols).frowstate.setupfoldinfo(@data,rowcount);
-        end;
-       end;
-       inc(po1,sizeof(ifibytesty)+pifibytesty(po1)^.length);
-       }
        include(fistate,rws_datareceived);
       finally
        endupdate;
@@ -538,13 +532,36 @@ begin
      dec(fcommandlock);
     end;
    end;
+   ik_rowstatechange: begin
+    inc(fcommandlock);
+    try
+     int1:= prowstatedataty(adatapo)^.header.row;
+     inc(adatapo,sizeof(rowstateheaderty));
+     inc(adatapo,decodeifidata(pifidataty(adatapo),rowstate1));
+     with trxwidgetgrid(fowner),rowstate1 do begin
+      rowcolorstate[int1]:= color;
+      rowfontstate[int1]:= font;
+      lwo1:= fdatacols.rowstate[int1].selected;
+      if lwo1 <> selected then begin
+       fdatacols.rowstate.getitempo(int1)^.selected:= lwo1;
+       invalidaterow(int1);
+       internalselectionchanged;
+      end;
+      rowhidden[int1]:= fold and foldhiddenmask <> 0;
+      rowfoldlevel[int1]:= fold and foldlevelmask;
+     end;
+    finally
+     dec(fcommandlock);
+    end;
+   end;
   end;
  end;
 end;
 
 function tifiwidgetgridcontroller.getifireckinds: ifireckindsty;
 begin
- result:= [ik_griddata,ik_requestopen,ik_gridcommand,ik_coldatachange];
+ result:= [ik_griddata,ik_requestopen,ik_gridcommand,
+           ik_coldatachange,ik_rowstatechange];
 end;
 
 function tifiwidgetgridcontroller.cancommandsend: boolean;
@@ -689,6 +706,17 @@ begin
   if cancommandsend then begin
    senditem(ik_gridcommand,[
        encodegridcommanddata(gck_deleterow,index,index,count)]);
+  end;
+ end;
+end;
+
+procedure trxwidgetgrid.rowstatechanged(const arow: integer);
+begin
+ inherited;
+ with fifi do begin
+  if cancommandsend then begin
+   senditem(ik_rowstatechange,
+               encoderowstatedata(arow,fdatacols.rowstate[arow]));
   end;
  end;
 end;

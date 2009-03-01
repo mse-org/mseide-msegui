@@ -1706,8 +1706,9 @@ begin
  end;
 end;
 
-class procedure ttreelistitem.calcitemlayout(const asize: sizety; const ainnerframe: framety;
-       const list: tcustomitemlist; var info: listitemlayoutinfoty);
+class procedure ttreelistitem.calcitemlayout(const asize: sizety; 
+                  const ainnerframe: framety; const list: tcustomitemlist;
+                                              var info: listitemlayoutinfoty);
 var
  boxdist: integer;
 begin
@@ -1746,7 +1747,8 @@ begin
  with info do begin
   if (eventkind = ek_buttonpress) and
         (shiftstate * keyshiftstatesmask = []) and (button = mb_left) and
-    pointinrect(makepoint(pos.x-levelshift,pos.y),fowner.fintf.getlayoutinfo^.expandboxrect) then begin
+    pointinrect(makepoint(pos.x-levelshift,pos.y),
+                        fowner.fintf.getlayoutinfo^.expandboxrect) then begin
    expanded:= not expanded;
    include(eventstate,es_processed);
   end;

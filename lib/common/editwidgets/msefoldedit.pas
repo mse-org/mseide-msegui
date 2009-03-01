@@ -15,7 +15,7 @@ interface
 uses
  classes,mseclasses,msedataedits,msegraphics,mseguiglob,msegrids,mseevent,msegui,
      msegraphutils,msebitmap,mseeditglob,msedatalist,msewidgetgrid,mseedit,
-     msedrawtext,msetypes,msestat;
+     msedrawtext,msetypes,msestat,msepointer;
 
 const
  defaultfoldedittextflags = defaulttextflags + [tf_clipo];
@@ -84,7 +84,7 @@ type
                                          var info: celleventinfoty); override;
    procedure updatecellzone(const alevel: integer; const apos: pointty;
                                          var azone: cellzonety); virtual;
-   procedure dopaint(const acanvas: tcanvas); override;
+   procedure doonpaint(const acanvas: tcanvas); override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdefaultvalue: pointer; override;
 //   function getinnerframe: framety; override;
@@ -95,6 +95,7 @@ type
    procedure valuetogrid(const arow: integer); override;
    procedure writestatvalue(const writer: tstatwriter); override;
    procedure readstatvalue(const reader: tstatreader); override;
+   procedure synctofontheight; override;
   public
    constructor create(aowner: tcomponent); override;
    property imagesize: sizety read fimagesize write setimagesize;
@@ -138,6 +139,7 @@ type
    property imageheight: integer read fimagesize.cy write setimageheight default 0;
    property textflags default defaultfoldedittextflags;
    property textflagsactive default defaultfoldedittextflagsactive;
+   property cursor default cr_default;
  end;
  
 implementation
@@ -170,6 +172,7 @@ begin
  fdefault.int:= -1;
  fimnr_value:= -1;
  inherited;
+ cursor:= cr_default;
  textflags:=  defaultfoldedittextflags;
  textflagsactive:=  defaultfoldedittextflagsactive;
 end;
@@ -352,7 +355,7 @@ begin
  end;
 end;
 
-procedure tfoldedit.dopaint(const acanvas: tcanvas);
+procedure tfoldedit.doonpaint(const acanvas: tcanvas);
 var
  rect1: rectty;
  int1: integer;
@@ -394,7 +397,8 @@ begin
       getfoldstate(row1,isvisible1,foldlevel1,haschildren1,isopen1);
       zone1:= cz_default;
       updatecellzone(foldlevel1,ainfo.pos,zone1);
-      if zone1 = cz_default then begin
+      if (zone1 = cz_default) and 
+                         (ainfo.pos.x >= foldlevel1 * flevelstep) then begin
        if isopen1 then begin
         hidechildren(row1);
        end
@@ -456,8 +460,13 @@ var
  int1: integer;
 begin
  int1:= (alevel+1) * flevelstep;
- if apos.x >= int1 then begin
+ if apos.x >= int1 + fimagesize.cx then begin
   azone:= cz_caption;
+ end
+ else begin
+  if apos.x >= int1 then begin
+   azone:= cz_image;
+  end;
  end;
 end;
 
@@ -626,7 +635,7 @@ function tfoldedit.imageshift(arow: integer): integer;
 begin
  result:= 0;
  if fimagelist <> nil then begin
-  inc(result,fimagelist.width);
+  inc(result,fimagesize.cx);
  end;
  if fgridintf <> nil then begin
   with fgridintf.getcol.grid do begin
@@ -718,6 +727,21 @@ begin
  inherited;
  if fgridintf = nil then begin
   imnr_value:= reader.readinteger(valuevarname+'_imnr',imnr_value);
+ end;
+end;
+
+procedure tfoldedit.synctofontheight;
+var
+ size1: sizety;
+begin
+ inherited;
+ size1:= paintsize;
+ if size1.cy < fimagesize.cy then begin
+  size1.cy:= fimagesize.cy;
+  paintsize:= size1;
+  if fgridintf <> nil then begin
+   fgridintf.getcol.grid.datarowheight:= bounds_cy;
+  end;
  end;
 end;
 

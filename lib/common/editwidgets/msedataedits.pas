@@ -2160,7 +2160,14 @@ end;
 
 function tcustomdataedit.getkeystring(const aindex: integer): msestring;
 begin
- result:= datatotext(fgridintf.getcol.datalist.getitempo(aindex)^);
+ with fgridintf.getcol do begin
+  if grid.rowhidden[aindex] then begin
+   result:= '';
+  end
+  else begin
+   result:= datatotext(datalist.getitempo(aindex)^);
+  end;
+ end;
 end;
 
 { tcustomstringedit }

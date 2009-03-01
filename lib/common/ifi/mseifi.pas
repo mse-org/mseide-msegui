@@ -22,7 +22,7 @@ type
                  ik_widgetcommand,ik_widgetproperties,ik_requestmodule,
                  ik_moduledata,
                  ik_requestfielddefs,ik_fielddefsdata,ik_fieldrec,
-                 ik_griddata,ik_gridcommand,ik_coldatachange,
+                 ik_griddata,ik_gridcommand,ik_coldatachange,ik_rowstatechange,
                  ik_requestopen,ik_dsdata,ik_postresult,ik_modulecommand);
  ifireckindsty = set of ifireckindty;
 const
@@ -37,7 +37,7 @@ type
  pifinamety = ^ifinamety;
 
  ifidatakindty = (idk_none,idk_null,idk_integer,idk_int64,idk_currency,idk_real,
-                  idk_msestring,idk_msestringint,idk_bytes);
+                  idk_msestring,idk_msestringint,idk_bytes,idk_rowstate);
  pifidatakindty = ^ifidatakindty;
   
  datarecty = record //dummy
@@ -167,6 +167,16 @@ type
   data: fieldrecdataty;
  end;
 
+ rowstateheaderty = record
+  row: integer;
+ end;
+ prowstateheaderty = ^rowstateheaderty;
+ rowstatedataty = record
+  header: rowstateheaderty;
+  data: ifidataty; //idk_rowstate
+ end;
+ prowstatedataty = ^rowstatedataty;
+ 
  colitemheaderty = record
   row: integer;
   name: ifinamety;
@@ -530,6 +540,8 @@ function encodeifidata(const avalue: ansistring;
                        const headersize: integer = 0): string; overload;
 function encodeifidata(const alist: tdatalist; const aindex: integer;
                        const headersize: integer = 0): string; overload;
+function encodeifidata(const avalue: rowstatety; 
+                       const headersize: integer = 0): string; overload;
 
 function skipifidata(const source: pifidataty): integer;
 function decodeifidata(const source: pifidataty; out dest: msestring): integer;
@@ -549,9 +561,8 @@ function decodeifidata(const source: pifidataty; out dest: variant): integer;
 function decodeifidata(const source: pifidataty; const aindex: integer;
                           const alist: tdatalist): integer; overload;
                                      //alist can be nil
-//function decodecolitemdata(const source: pcolitemdataty;
-//,                                 const alist: tdatalist): integer;
-                                     //alist can be nil
+function decodeifidata(const source: pifidataty; out dest: rowstatety): integer;
+                                                        overload;
 
 procedure addifiintegervalue(var adata: ansistring; var adatapo: pchar; 
                                      const avalue: integer);
@@ -570,8 +581,8 @@ const
   sizeof(ifidataty)+sizeof(ifinamety),                 //idk_msestring
   sizeof(ifidataty)+sizeof(integer)+sizeof(ifinamety), //idk_msestringint
 //  sizeof(ifidataty)+sizeof(ifinamety),               //idk_ansistring
-  sizeof(ifidataty)+sizeof(ifibytesty)                 //idk_bytes
-
+  sizeof(ifidataty)+sizeof(ifibytesty),                //idk_bytes
+  sizeof(ifidataty)+sizeof(rowstatety)                 //idk_rowstate
  );
 implementation
 uses
@@ -598,6 +609,7 @@ const
   sizeof(ifiheaderty)+sizeof(griddataty),         //ik_griddata
   sizeof(ifiheaderty)+sizeof(gridcommanddataty),  //ik_gridcommand
   sizeof(ifiheaderty)+sizeof(colitemdataty),      //ik_coldatachange
+  sizeof(ifiheaderty)+sizeof(rowstatedataty),      //ik_rowstatechange
   sizeof(ifiheaderty)+sizeof(requestopenty),      //ik_requestopen
   sizeof(ifiheaderty)+sizeof(dsdataty),           //ik_dsdata
   sizeof(ifiheaderty)+sizeof(postresultty),       //ik_postresult
@@ -699,6 +711,12 @@ begin
    result:= '';
   end;
  end;
+end;
+
+function encodeifidata(const avalue: rowstatety; 
+                       const headersize: integer = 0): string; overload;
+begin
+ prowstatety(initdataheader(headersize,idk_rowstate,0,result))^:= avalue;
 end;
 
 procedure addifiintegervalue(var adata: ansistring; var adatapo: pchar;
@@ -894,6 +912,16 @@ begin
   result:= skipifidata(source);
  end;
 end;
+
+function decodeifidata(const source: pifidataty; out dest: rowstatety): integer;
+begin
+ if source^.header.kind <> idk_rowstate then begin
+  datakinderror;
+ end;
+ dest:= prowstatety(@source^.data)^;
+ result:= datarecsizes[idk_rowstate];
+end;                                                       
+                        
 {
 function decodecolitemdata(const source: pcolitemdataty;
                                  const alist: tdatalist): integer;

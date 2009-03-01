@@ -1466,7 +1466,6 @@ type
    procedure setcol(const value: integer);
    procedure setrow(const value: integer);
 
-   procedure internalselectionchanged;
    procedure killrepeater;
    procedure startrepeater(state: gridstatety; time: integer);
    procedure repeatproc(const sender: tobject);
@@ -1538,6 +1537,7 @@ type
    fappendcount: integer;
    class function classskininfo: skininfoty; override;
    
+   procedure internalselectionchanged;
    procedure setoptionsgrid(const avalue: optionsgridty); virtual;
    procedure checkrowreadonlystate; virtual;
 
@@ -1587,7 +1587,8 @@ type
    procedure colchanged(const sender: tcol);
    procedure cellchanged(const sender: tcol; const row: integer);
    procedure focusedcellchanged; virtual;
-   procedure rowchanged(const row: integer); virtual;
+   procedure rowchanged(const arow: integer); virtual;
+   procedure rowstatechanged(const arow: integer); virtual;
    procedure scrolled(const dist: pointty); virtual;
    procedure sortchanged;
    procedure sortinvalid;
@@ -7903,15 +7904,20 @@ begin
  end;
 end;
 
-procedure tcustomgrid.rowchanged(const row: integer);
+procedure tcustomgrid.rowchanged(const arow: integer);
 var
  rect1: rectty;
 begin
  internalupdatelayout;
- rect1:= cellrect(makegridcoord(0,row));
+ rect1:= cellrect(makegridcoord(0,arow));
  rect1.x:= 0;
  rect1.cx:= tgridframe(fframe).fpaintrect.cx;
  invalidaterect(rect1);
+end;
+
+procedure tcustomgrid.rowstatechanged(const arow: integer);
+begin
+ //dummy
 end;
 
 function tcustomgrid.cellatpos(const apos: pointty;
@@ -11620,6 +11626,7 @@ begin
   color:= replacebits(value + 1,color,rowstatemask);
  end;
  rowchanged(index);
+ rowstatechanged(index);
 end;
 
 function tcustomgrid.getrowfontstate(index: integer): rowstatenumty;
@@ -11633,6 +11640,7 @@ begin
   font:= replacebits(value + 1,font,rowstatemask);
  end;
  rowchanged(index);
+ rowstatechanged(index);
 end;
 
 function tcustomgrid.getrowreadonlystate(const index: integer): boolean;
@@ -11654,6 +11662,7 @@ begin
    checkrowreadonlystate;
   end;
  end;
+ rowstatechanged(index);
 end;
 
 procedure tcustomgrid.checkrowreadonlystate;
@@ -12767,6 +12776,7 @@ begin
    if fold and foldhiddenmask = 0 then begin
     bo1:= true;
     fold:= fold or foldhiddenmask;
+    fgrid.rowstatechanged(int1);
     internalhide(int1);
    end
    else begin
@@ -12805,6 +12815,7 @@ begin
    if fold and foldhiddenmask <> 0 then begin
     bo1:= true;
     fold:= fold and not foldhiddenmask;
+    fgrid.rowstatechanged(int1);
     internalshow(int1);
    end
    else begin
@@ -12844,6 +12855,7 @@ begin
     end;
    end;
    fgrid.layoutchanged;
+   fgrid.rowstatechanged(index);
   end;
  end
  else begin
@@ -12859,6 +12871,7 @@ begin
  po1:= getitempo(index);
  if replacebits1(byte(po1^.fold),byte(avalue),byte(foldlevelmask)) then begin
   checkdirty(index);
+  fgrid.rowstatechanged(index);
  end;
 end;
 

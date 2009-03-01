@@ -1299,7 +1299,7 @@ type
    function getcomponentstate: tcomponentstate;
 
    function getframestateflags: framestateflagsty; virtual;
-   //igridcomp,itabwidget
+  //igridcomp,itabwidget
    function getwidget: twidget;
 
    function getframe: tcustomframe;

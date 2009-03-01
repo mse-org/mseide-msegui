@@ -594,6 +594,7 @@ function decodegridcommanddata(const adata: pchar; out akind: gridcommandkindty;
                                out asource,adest,acount: integer): integer;
 function encodecolchangedata(const acolname: string; const arow: integer;
                                      const alist: tdatalist): string;
+function encoderowstatedata(const arow: integer; const astate: rowstatety): string;
  
 implementation
 uses
@@ -642,7 +643,15 @@ begin
   stringtoifiname(acolname,@name);
  end;
 end;
-   
+
+function encoderowstatedata(const arow: integer; const astate: rowstatety): string;
+begin
+ result:= encodeifidata(astate,sizeof(rowstateheaderty));
+ with prowstatedataty(result)^.header do begin
+  row:= arow;
+ end;
+end;
+
 { tmodulelinkprop }
 
 procedure tmodulelinkprop.inititemheader(out arec: string;
@@ -2450,7 +2459,8 @@ end;
 
 function ttxdatagridcontroller.getifireckinds: ifireckindsty;
 begin
- result:= [ik_requestopen,ik_griddata,ik_gridcommand,ik_coldatachange];
+ result:= [ik_requestopen,ik_griddata,ik_gridcommand,ik_coldatachange,
+           ik_rowstatechange];
 end;
 
 function ifidatatodatalist(const akind: datatypty; const arowcount: integer;
