@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+Version 2.0
+2009-03-01
 2009-02-04
  tdatacol.onchange -> datacolchangeeventty.
  
