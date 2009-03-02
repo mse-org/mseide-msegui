@@ -89,13 +89,17 @@ type
    procedure fieldtovalue; override;
    procedure setkeyvalue(const avalue: integer);
   protected
-   procedure objectevent(const sender: tobject; const event: objecteventty); override;
+   procedure objectevent(const sender: tobject;
+                                  const event: objecteventty); override;
   public
    property keyvalue: integer read fkeyvalue write setkeyvalue;
   published
-   property lookupbuffer: tcustomlookupbuffer read flookupbuffer write setlookupbuffer;
-   property lookupkeyfieldno: integer read flookupkeyfieldno write flookupkeyfieldno default 0;
-   property lookupvaluefieldno: integer read flookupvaluefieldno write flookupvaluefieldno default 0;
+   property lookupbuffer: tcustomlookupbuffer read flookupbuffer
+                                            write setlookupbuffer;
+   property lookupkeyfieldno: integer read flookupkeyfieldno 
+                                            write flookupkeyfieldno default 0;
+   property lookupvaluefieldno: integer read flookupvaluefieldno
+                                            write flookupvaluefieldno default 0;
  end;
  
  tdbintegerdisp = class(tcustomintegerdisp,idbdispfieldlink,ireccontrol)
@@ -130,13 +134,17 @@ type
    procedure fieldtovalue; override;
    procedure setkeyvalue(const avalue: integer);
   protected
-   procedure objectevent(const sender: tobject; const event: objecteventty); override;
+   procedure objectevent(const sender: tobject; 
+                           const event: objecteventty); override;
   public
    property keyvalue: integer read fkeyvalue write setkeyvalue;
   published
-   property lookupbuffer: tcustomlookupbuffer read flookupbuffer write setlookupbuffer;
-   property lookupkeyfieldno: integer read flookupkeyfieldno write flookupkeyfieldno default 0;
-   property lookupvaluefieldno: integer read flookupvaluefieldno write flookupvaluefieldno default 0;
+   property lookupbuffer: tcustomlookupbuffer read flookupbuffer 
+                                          write setlookupbuffer;
+   property lookupkeyfieldno: integer read flookupkeyfieldno 
+                                          write flookupkeyfieldno default 0;
+   property lookupvaluefieldno: integer read flookupvaluefieldno
+                                          write flookupvaluefieldno default 0;
  end;
  
  tdbbooleandisp = class(tcustombooleandisp,idbdispfieldlink,ireccontrol)

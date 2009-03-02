@@ -144,18 +144,18 @@ type
 
    function findphys(const fieldno: integer; const avalue: integer;
          out aindex: integer; const filter: lbfiltereventty = nil): boolean; overload;
-              //physical index, true if found else next bigger
+              //physical index, true if found else -1
    function findphys(const fieldno: integer; const avalue: realty;
                  out aindex: integer; const filter: lbfiltereventty = nil): boolean; overload;
-              //physical index, true if found else next bigger
+              //physical index, true if found else -1
    function findphys(const fieldno: integer; const avalue: int64;
                  out aindex: integer; const filter: lbfiltereventty = nil): boolean; overload;
-              //physical index, true if found else next bigger
+              //physical index, true if found else -1
    function findphys(const fieldno: integer; const avalue: msestring;
                  out aindex: integer;
                  const caseinsensitive: boolean;
                  const filter: lbfiltereventty = nil): boolean; overload;
-              //physical index, true if found else next bigger
+              //physical index, true if found else -1
 
    function integervaluephys(const fieldno,aindex: integer): integer;
               //physical index
@@ -609,7 +609,7 @@ end;
 
 function tcustomlookupbuffer.findphys(const fieldno: integer; const avalue: integer;
          out aindex: integer; const filter: lbfiltereventty = nil): boolean; overload;
-              //physical index, true if found else next bigger
+              //physical index, true if found else -1
 var
  int1: integer;
 begin
@@ -624,7 +624,7 @@ end;
 
 function tcustomlookupbuffer.findphys(const fieldno: integer; const avalue: realty;
                  out aindex: integer; const filter: lbfiltereventty = nil): boolean; overload;
-              //physical index, true if found else next bigger
+              //physical index, true if found else -1
 var
  int1: integer;
 begin
@@ -639,7 +639,7 @@ end;
 
 function tcustomlookupbuffer.findphys(const fieldno: integer; const avalue: int64;
                  out aindex: integer; const filter: lbfiltereventty = nil): boolean; overload;
-              //physical index, true if found else next bigger
+              //physical index, true if found else -1
 var
  int1: integer;
 begin
@@ -656,7 +656,7 @@ function tcustomlookupbuffer.findphys(const fieldno: integer; const avalue: mses
                  out aindex: integer;
                  const caseinsensitive: boolean;
                  const filter: lbfiltereventty = nil): boolean; overload;
-              //physical index, true if found else next bigger
+              //physical index, true if found else -1
 var
  int1: integer;
 begin
