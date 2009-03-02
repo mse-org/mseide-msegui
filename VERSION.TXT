@@ -1,6 +1,6 @@
 MSEide+MSEgui version history
 
-2009-03-02
+2009-03-02 
  const modifiers for indexeventty parameters (datalist.pas).
 2009-02-13
  titemedit.onmouseevent -> onclientmouseevent.
