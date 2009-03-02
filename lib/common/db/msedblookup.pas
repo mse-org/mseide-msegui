@@ -4,13 +4,13 @@ interface
 uses
  classes,db,msewidgetgrid,msedataedits,mseeditglob,msestrings,msedatalist,
  msedbedit,msedb,msegui,msegrids,msedbdispwidgets,mselookupbuffer,mseclasses,
- mseformatstr,msetypes;
+ mseformatstr,msetypes,mseglob;
 
 const
  defaultlookupoptionsedit = defaultoptionsedit + [oe_readonly];
 
 type
- tdblookuplb = class;
+ tdblookup32lb = class;
  
  tlookupdispfielddatalink = class(tdispfielddatalink)
   private
@@ -24,180 +24,105 @@ type
    property datasource read fdatasource write setwidgetdatasource;
  end;
  
- tdblookuplb = class(tcustomdataedit,idbdispfieldlink,ireccontrol)
+ tdblookuplb = class(tcustomdataedit,idbdispfieldlink)
   private
    fdatalink: tlookupdispfielddatalink;
    fisnull: boolean;
    flookupbuffer: tcustomlookupbuffer;
    flookupkeyfieldno: integer;
    flookupvaluefieldno: integer;   
+   procedure setdatalink(const avalue: tlookupdispfielddatalink);
+   procedure setlookupbuffer(const avalue: tcustomlookupbuffer);
+  protected
+   function lookuptext(const aindex: integer): msestring; virtual; abstract;
+   function getdatatyp: datatypty; override;
+   procedure valuetogrid(const row: integer); override;
+   procedure griddatasourcechanged; override;
+   function createdatalist(const sender: twidgetcol): tdatalist; override;
+   function getoptionsedit: optionseditty; override;
+   procedure texttovalue(var accept: boolean; const quiet: boolean); override;
+   procedure setnullvalue; override;
+   procedure objectevent(const sender: tobject; const event: objecteventty); override;
+  
+  //idispfieldlink
+   procedure fieldtovalue; virtual;
+   procedure valuetofield;
+   procedure getfieldtypes(var afieldtypes: fieldtypesty); virtual;
+  //ireccontrol
+   procedure recchanged;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+   property isnull: boolean read fisnull;
+  published
+   property datalink: tlookupdispfielddatalink read fdatalink write setdatalink;
+   property lookupbuffer: tcustomlookupbuffer read flookupbuffer write setlookupbuffer;
+   property lookupkeyfieldno: integer read flookupkeyfieldno write flookupkeyfieldno default 0;
+   property lookupvaluefieldno: integer read flookupvaluefieldno write flookupvaluefieldno default 0;
+
+   property empty_color;
+   property empty_font;
+   property empty_textstyle;
+   property empty_textflags;
+   property empty_text;
+   property empty_textcolor;
+   property empty_textcolorbackground;
+   property optionsedit default defaultlookupoptionsedit;
+   property font;
+   property textflags;
+   property textflagsactive;
+   property caretwidth;
+   property ongettext;
+   property onsettext;
+   property onkeydown;
+   property onkeyup;
+ end;
+ 
+ tdblookup32lb = class(tdblookuplb,ireccontrol)
+  private
    fkey: integer;
-   procedure setdatalink(const avalue: tlookupdispfielddatalink);
-   procedure setlookupbuffer(const avalue: tcustomlookupbuffer);
   protected
-   function lookuptext(const aindex: integer): msestring; virtual; abstract;
-   function getdatatyp: datatypty; override;
-   procedure valuetogrid(const row: integer); override;
 
-   procedure griddatasourcechanged; override;
-   function createdatalist(const sender: twidgetcol): tdatalist; override;
-   function getoptionsedit: optionseditty; override;
    function internaldatatotext(const data): msestring; override;
-   procedure texttovalue(var accept: boolean; const quiet: boolean); override;
-   procedure setnullvalue; override;
    function getrowdatapo(const info: cellinfoty): pointer; override;
   //idbeditfieldlink
-   procedure valuetofield;
-   procedure fieldtovalue;
-   procedure getfieldtypes(var afieldtypes: fieldtypesty);
-  //ireccontrol
-   procedure recchanged;
+   procedure fieldtovalue; override;
+   procedure getfieldtypes(var afieldtypes: fieldtypesty); override;
   public
-   constructor create(aowner: tcomponent); override;
-   destructor destroy; override;
-   property isnull: boolean read fisnull;
-  published
-   property datalink: tlookupdispfielddatalink read fdatalink write setdatalink;
-   property lookupbuffer: tcustomlookupbuffer read flookupbuffer write setlookupbuffer;
-   property lookupkeyfieldno: integer read flookupkeyfieldno write flookupkeyfieldno default 0;
-   property lookupvaluefieldno: integer read flookupvaluefieldno write flookupvaluefieldno default 0;
-
-   property empty_color;
-   property empty_font;
-   property empty_textstyle;
-   property empty_textflags;
-   property empty_text;
-   property empty_textcolor;
-   property empty_textcolorbackground;
-   property optionsedit default defaultlookupoptionsedit;
-   property font;
-   property textflags;
-   property textflagsactive;
-   property caretwidth;
-   property ongettext;
-   property onsettext;
-   property onkeydown;
-   property onkeyup;
  end;
 
- tdblookup64lb = class(tcustomdataedit,idbdispfieldlink,ireccontrol)
+ tdblookup64lb = class(tdblookuplb,ireccontrol)
   private
-   fdatalink: tlookupdispfielddatalink;
-   fisnull: boolean;
-   flookupbuffer: tcustomlookupbuffer;
-   flookupkeyfieldno: integer;
-   flookupvaluefieldno: integer;   
    fkey: int64;
-   procedure setdatalink(const avalue: tlookupdispfielddatalink);
-   procedure setlookupbuffer(const avalue: tcustomlookupbuffer);
   protected
-   function lookuptext(const aindex: integer): msestring; virtual; abstract;
-   function getdatatyp: datatypty; override;
-   procedure valuetogrid(const row: integer); override;
 
-   procedure griddatasourcechanged; override;
-   function createdatalist(const sender: twidgetcol): tdatalist; override;
-   function getoptionsedit: optionseditty; override;
    function internaldatatotext(const data): msestring; override;
-   procedure texttovalue(var accept: boolean; const quiet: boolean); override;
-   procedure setnullvalue; override;
    function getrowdatapo(const info: cellinfoty): pointer; override;
   //idbeditfieldlink
-   procedure valuetofield;
-   procedure fieldtovalue;
-   procedure getfieldtypes(var afieldtypes: fieldtypesty);
-  //ireccontrol
-   procedure recchanged;
+   procedure fieldtovalue; override;
+   procedure getfieldtypes(var afieldtypes: fieldtypesty); override;
   public
-   constructor create(aowner: tcomponent); override;
-   destructor destroy; override;
-   property isnull: boolean read fisnull;
-  published
-   property datalink: tlookupdispfielddatalink read fdatalink write setdatalink;
-   property lookupbuffer: tcustomlookupbuffer read flookupbuffer write setlookupbuffer;
-   property lookupkeyfieldno: integer read flookupkeyfieldno write flookupkeyfieldno default 0;
-   property lookupvaluefieldno: integer read flookupvaluefieldno write flookupvaluefieldno default 0;
-
-   property empty_color;
-   property empty_font;
-   property empty_textstyle;
-   property empty_textflags;
-   property empty_text;
-   property empty_textcolor;
-   property empty_textcolorbackground;
-   property optionsedit default defaultlookupoptionsedit;
-   property font;
-   property textflags;
-   property textflagsactive;
-   property caretwidth;
-   property ongettext;
-   property onsettext;
-   property onkeydown;
-   property onkeyup;
  end;
 
- tdblookupstrlb = class(tcustomdataedit,idbdispfieldlink,ireccontrol)
+ tdblookupstrlb = class(tdblookuplb,ireccontrol)
   private
-   fdatalink: tlookupdispfielddatalink;
-   fisnull: boolean;
-   flookupbuffer: tcustomlookupbuffer;
-   flookupkeyfieldno: integer;
-   flookupvaluefieldno: integer;   
    fkey: msestring;
-   procedure setdatalink(const avalue: tlookupdispfielddatalink);
-   procedure setlookupbuffer(const avalue: tcustomlookupbuffer);
   protected
-   function lookuptext(const aindex: integer): msestring; virtual; abstract;
-   function getdatatyp: datatypty; override;
-   procedure valuetogrid(const row: integer); override;
 
-   procedure griddatasourcechanged; override;
-   function createdatalist(const sender: twidgetcol): tdatalist; override;
-   function getoptionsedit: optionseditty; override;
    function internaldatatotext(const data): msestring; override;
-   procedure texttovalue(var accept: boolean; const quiet: boolean); override;
-   procedure setnullvalue; override;
    function getrowdatapo(const info: cellinfoty): pointer; override;
   //idbeditfieldlink
-   procedure valuetofield;
-   procedure fieldtovalue;
-   procedure getfieldtypes(var afieldtypes: fieldtypesty);
-  //ireccontrol
-   procedure recchanged;
+   procedure fieldtovalue; override;
+   procedure getfieldtypes(var afieldtypes: fieldtypesty); override;
   public
-   constructor create(aowner: tcomponent); override;
-   destructor destroy; override;
-   property isnull: boolean read fisnull;
-  published
-   property datalink: tlookupdispfielddatalink read fdatalink write setdatalink;
-   property lookupbuffer: tcustomlookupbuffer read flookupbuffer write setlookupbuffer;
-   property lookupkeyfieldno: integer read flookupkeyfieldno write flookupkeyfieldno default 0;
-   property lookupvaluefieldno: integer read flookupvaluefieldno write flookupvaluefieldno default 0;
-
-   property empty_color;
-   property empty_font;
-   property empty_textstyle;
-   property empty_textflags;
-   property empty_text;
-   property empty_textcolor;
-   property empty_textcolorbackground;
-   property optionsedit default defaultlookupoptionsedit;
-   property font;
-   property textflags;
-   property textflagsactive;
-   property caretwidth;
-   property ongettext;
-   property onsettext;
-   property onkeydown;
-   property onkeyup;
  end;
 
- tdbstringlookuplb = class(tdblookuplb)
+ tdbstringlookuplb = class(tdblookup32lb)
   protected
    function lookuptext(const aindex: integer): msestring; override;
  end;
 
- tdbintegerlookuplb = class(tdblookuplb)
+ tdbintegerlookuplb = class(tdblookup32lb)
   private
    fbase: numbasety;
    fbitcount: integer;
@@ -212,7 +137,7 @@ type
    property bitcount: integer read fbitcount write setbitcount default 32;
  end;
 
- tdbreallookuplb = class(tdblookuplb)
+ tdbreallookuplb = class(tdblookup32lb)
   private
    fformat: msestring;
    fvaluescale: real;
@@ -227,7 +152,7 @@ type
    property format: msestring read fformat write setformat;
  end;
 
- tdbdatetimelookuplb = class(tdblookuplb)
+ tdbdatetimelookuplb = class(tdblookup32lb)
   private
    fformat: msestring;
    fkind: datetimekindty;
@@ -401,7 +326,68 @@ begin
  fisnull:= true;
 end;
 
-function tdblookuplb.internaldatatotext(const data): msestring;
+procedure tdblookuplb.texttovalue(var accept: boolean; const quiet: boolean);
+begin
+ fisnull:= text = '';
+end;
+
+procedure tdblookuplb.valuetofield;
+begin
+ //dummy
+end;
+
+procedure tdblookuplb.griddatasourcechanged;
+begin
+ fdatalink.griddatasourcechanged;
+end;
+
+function tdblookuplb.createdatalist(const sender: twidgetcol): tdatalist;
+begin
+ result:= nil;
+end;
+
+procedure tdblookuplb.setdatalink(const avalue: tlookupdispfielddatalink);
+begin
+ fdatalink.assign(avalue);
+end;
+
+procedure tdblookuplb.recchanged;
+begin
+ fdatalink.recordchanged(nil);
+end;
+
+function tdblookuplb.getdatatyp: datatypty;
+begin
+ result:= dl_none;
+end;
+
+procedure tdblookuplb.valuetogrid(const row: integer);
+begin
+ //dummy
+end;
+
+procedure tdblookuplb.fieldtovalue;
+begin
+ //dummy
+end;
+
+procedure tdblookuplb.getfieldtypes(var afieldtypes: fieldtypesty);
+begin
+ //dummy
+end;
+
+procedure tdblookuplb.objectevent(const sender: tobject;
+               const event: objecteventty);
+begin
+ inherited;
+ if (event in [oe_changed,oe_connect]) and (sender = flookupbuffer) then begin
+  formatchanged;
+ end;
+end;
+
+{ tdblookup32lb }
+
+function tdblookup32lb.internaldatatotext(const data): msestring;
 
  procedure lookup(const akey: integer);
  var
@@ -429,23 +415,13 @@ begin
  end;
 end;
 
-procedure tdblookuplb.texttovalue(var accept: boolean; const quiet: boolean);
-begin
- fisnull:= text = '';
-end;
-
-procedure tdblookuplb.valuetofield;
-begin
- //dummy
-end;
-
-procedure tdblookuplb.fieldtovalue;
+procedure tdblookup32lb.fieldtovalue;
 begin
  fisnull:= false;
  fkey:= fdatalink.field.asinteger;
 end;
 
-function tdblookuplb.getrowdatapo(const info: cellinfoty): pointer;
+function tdblookup32lb.getrowdatapo(const info: cellinfoty): pointer;
 begin
  with info do begin
   if griddatalink <> nil then begin
@@ -457,72 +433,13 @@ begin
  end;
 end;
 
-procedure tdblookuplb.griddatasourcechanged;
-begin
- fdatalink.griddatasourcechanged;
-end;
-
-function tdblookuplb.createdatalist(const sender: twidgetcol): tdatalist;
-begin
- result:= nil;
-end;
-
-procedure tdblookuplb.getfieldtypes(var afieldtypes: fieldtypesty);
+procedure tdblookup32lb.getfieldtypes(var afieldtypes: fieldtypesty);
 begin
  afieldtypes:= integerfields;
 end;
 
-procedure tdblookuplb.setdatalink(const avalue: tlookupdispfielddatalink);
-begin
- fdatalink.assign(avalue);
-end;
-
-procedure tdblookuplb.recchanged;
-begin
- fdatalink.recordchanged(nil);
-end;
-
-function tdblookuplb.getdatatyp: datatypty;
-begin
- result:= dl_none;
-end;
-
-procedure tdblookuplb.valuetogrid(const row: integer);
-begin
- //dummy
-end;
-
 { tdblookup64lb }
 
-constructor tdblookup64lb.create(aowner: tcomponent);
-begin
- fisnull:= true;
- fdatalink:= tlookupdispfielddatalink.create(self,idbdispfieldlink(self));
- inherited;
- foptionsedit:= defaultlookupoptionsedit;
-end;
-
-destructor tdblookup64lb.destroy;
-begin
- inherited;
- fdatalink.free;
-end;
-
-procedure tdblookup64lb.setlookupbuffer(const avalue: tcustomlookupbuffer);
-begin
- setlinkedvar(avalue,tmsecomponent(flookupbuffer));
-end;
-
-function tdblookup64lb.getoptionsedit: optionseditty;
-begin
- result:= inherited getoptionsedit + [oe_readonly];
-end;
-
-procedure tdblookup64lb.setnullvalue;
-begin
- inherited;
- fisnull:= true;
-end;
 
 function tdblookup64lb.internaldatatotext(const data): msestring;
 
@@ -552,16 +469,6 @@ begin
  end;
 end;
 
-procedure tdblookup64lb.texttovalue(var accept: boolean; const quiet: boolean);
-begin
- fisnull:= text = '';
-end;
-
-procedure tdblookup64lb.valuetofield;
-begin
- //dummy
-end;
-
 procedure tdblookup64lb.fieldtovalue;
 begin
  fisnull:= false;
@@ -580,72 +487,12 @@ begin
  end;
 end;
 
-procedure tdblookup64lb.griddatasourcechanged;
-begin
- fdatalink.griddatasourcechanged;
-end;
-
-function tdblookup64lb.createdatalist(const sender: twidgetcol): tdatalist;
-begin
- result:= nil;
-end;
-
 procedure tdblookup64lb.getfieldtypes(var afieldtypes: fieldtypesty);
 begin
  afieldtypes:= integerfields;
 end;
 
-procedure tdblookup64lb.setdatalink(const avalue: tlookupdispfielddatalink);
-begin
- fdatalink.assign(avalue);
-end;
-
-procedure tdblookup64lb.recchanged;
-begin
- fdatalink.recordchanged(nil);
-end;
-
-function tdblookup64lb.getdatatyp: datatypty;
-begin
- result:= dl_none;
-end;
-
-procedure tdblookup64lb.valuetogrid(const row: integer);
-begin
- //dummy
-end;
-
 { tdblookupstrlb }
-
-constructor tdblookupstrlb.create(aowner: tcomponent);
-begin
- fisnull:= true;
- fdatalink:= tlookupdispfielddatalink.create(self,idbdispfieldlink(self));
- inherited;
- foptionsedit:= defaultlookupoptionsedit;
-end;
-
-destructor tdblookupstrlb.destroy;
-begin
- inherited;
- fdatalink.free;
-end;
-
-procedure tdblookupstrlb.setlookupbuffer(const avalue: tcustomlookupbuffer);
-begin
- setlinkedvar(avalue,tmsecomponent(flookupbuffer));
-end;
-
-function tdblookupstrlb.getoptionsedit: optionseditty;
-begin
- result:= inherited getoptionsedit + [oe_readonly];
-end;
-
-procedure tdblookupstrlb.setnullvalue;
-begin
- inherited;
- fisnull:= true;
-end;
 
 function tdblookupstrlb.internaldatatotext(const data): msestring;
 
@@ -675,16 +522,6 @@ begin
  end;
 end;
 
-procedure tdblookupstrlb.texttovalue(var accept: boolean; const quiet: boolean);
-begin
- fisnull:= text = '';
-end;
-
-procedure tdblookupstrlb.valuetofield;
-begin
- //dummy
-end;
-
 procedure tdblookupstrlb.fieldtovalue;
 begin
  fisnull:= false;
@@ -704,39 +541,9 @@ begin
  end;
 end;
 
-procedure tdblookupstrlb.griddatasourcechanged;
-begin
- fdatalink.griddatasourcechanged;
-end;
-
-function tdblookupstrlb.createdatalist(const sender: twidgetcol): tdatalist;
-begin
- result:= nil;
-end;
-
 procedure tdblookupstrlb.getfieldtypes(var afieldtypes: fieldtypesty);
 begin
- afieldtypes:= stringfields;
-end;
-
-procedure tdblookupstrlb.setdatalink(const avalue: tlookupdispfielddatalink);
-begin
- fdatalink.assign(avalue);
-end;
-
-procedure tdblookupstrlb.recchanged;
-begin
- fdatalink.recordchanged(nil);
-end;
-
-function tdblookupstrlb.getdatatyp: datatypty;
-begin
- result:= dl_none;
-end;
-
-procedure tdblookupstrlb.valuetogrid(const row: integer);
-begin
- //dummy
+ afieldtypes:= textfields;
 end;
 
 { tdbstringlookuplb }
