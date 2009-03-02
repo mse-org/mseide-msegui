@@ -82,36 +82,15 @@ type
    property options;
  end;
 
- ifigridoptionty = (
-             igo_state,   //send the whole gridstate after endupdate
-             igo_rowenter,igo_rowmove,igo_rowdelete,
-             igo_rowinsert,igo_rowstate,igo_coldata);
- ifigridoptionsty = set of ifigridoptionty;
  trxwidgetgrid = class;
- 
- tifiwidgetgridcontroller = class(tifirxcontroller)
-  private
-   foptionstx: ifigridoptionsty;
-   foptionsrx: ifigridoptionsty;
-   fupdating: integer;
+  
+ tifiwidgetgridcontroller = class(tifigridcontroller)
   protected
-   fdatasequence: sequencety;
-   fcommandlock: integer;
    procedure processdata(const adata: pifirecty; var adatapo: pchar); override;
    procedure setowneractive(const avalue: boolean); override;
-   function getifireckinds: ifireckindsty; override;
-   function encodegriddata(const asequence: sequencety): ansistring;
+   function encodegriddata(const asequence: sequencety): ansistring; override;
   public
    constructor create(const aowner: trxwidgetgrid);
-   function cancommandsend(const akind: ifigridoptionty): boolean;
-   procedure beginupdate;
-   procedure endupdate;
-   procedure sendstate;
-  published
-   property optionstx: ifigridoptionsty read foptionstx
-                                           write foptionstx default[];
-   property optionsrx: ifigridoptionsty read foptionsrx
-                                           write foptionsrx default[];
  end;
 
  tifiwidgetcol = class(twidgetcol)
@@ -584,37 +563,6 @@ begin
     end;
    end;
   end;
- end;
-end;
-
-function tifiwidgetgridcontroller.getifireckinds: ifireckindsty;
-begin
- result:= [ik_griddata,ik_requestopen,ik_gridcommand,
-           ik_coldatachange,ik_rowstatechange];
-end;
-
-function tifiwidgetgridcontroller.cancommandsend(
-          const akind: ifigridoptionty): boolean;
-begin
- result:= (akind in foptionstx) and (fcommandlock = 0) and 
-                                        (fupdating = 0) and cansend;
-end;
-
-procedure tifiwidgetgridcontroller.sendstate;
-begin
- senddata(encodegriddata(0));  
-end;
-
-procedure tifiwidgetgridcontroller.beginupdate;
-begin
- inc(fupdating);
-end;
-
-procedure tifiwidgetgridcontroller.endupdate;
-begin
- dec(fupdating);
- if (fupdating = 0) and cancommandsend(igo_state) then begin
-  sendstate;
  end;
 end;
 

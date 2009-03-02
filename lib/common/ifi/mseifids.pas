@@ -106,7 +106,7 @@ type
                       const dest: ievent);
  end;
   
- tifidscontroller = class(tifirxcontroller,ievent)
+ tifidscontroller = class(tificontroller,ievent)
   private
    fintf: iifidscontroller;
    fremotedatachange: notifyeventty;

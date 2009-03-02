@@ -462,12 +462,12 @@ type
    property timeoutus: integer read fdefaulttimeout write fdefaulttimeout 
                        default defaultifirxtimeout;
  end;
-
+{
  tifirxcontroller = class(tificontroller)
  end;
  tifitxcontroller = class(tificontroller)
  end;
-
+}
  tifidatacol = class(townedpersistent)
   private
    fdatalist: tdatalist;
@@ -543,16 +543,43 @@ type
    property cols[const index: integer]: tifidatacol read getcols write setcols;
                                                  default;
  end;
- 
- ttxdatagridcontroller = class(tifitxcontroller)
+
+ ifigridoptionty = (
+             igo_state,   //send the whole gridstate after endupdate
+             igo_rowenter,igo_rowmove,igo_rowdelete,
+             igo_rowinsert,igo_rowstate,igo_coldata);
+ ifigridoptionsty = set of ifigridoptionty;
+
+ tifigridcontroller = class(tificontroller)
   private
-   fcommandlock: integer;
+   fupdating: integer;
   protected
+   foptionstx: ifigridoptionsty;
+   foptionsrx: ifigridoptionsty;
+   fdatasequence: sequencety;
+   fcommandlock: integer;
+   function encodegriddata(const asequence: sequencety): ansistring; 
+                                                     virtual; abstract;
    function getifireckinds: ifireckindsty; override;
+  public
+   function cancommandsend(const akind: ifigridoptionty): boolean;
+   procedure beginupdate;
+   procedure endupdate;
+   procedure sendstate;
+  published
+   property optionstx: ifigridoptionsty read foptionstx
+                                           write foptionstx default[];
+   property optionsrx: ifigridoptionsty read foptionsrx
+                                           write foptionsrx default[];
+ end;
+ 
+ ttxdatagridcontroller = class(tifigridcontroller)
+  protected
+//   function getifireckinds: ifireckindsty; override;
    procedure setowneractive(const avalue: boolean); override;
    procedure processdata(const adata: pifirecty; var adatapo: pchar); 
                                     override;
-   function encodegriddata(const asequence: sequencety): ansistring;
+   function encodegriddata(const asequence: sequencety): ansistring; override;
   public
    constructor create(const aowner: ttxdatagrid);
  end;
@@ -2362,6 +2389,39 @@ procedure ttxdatagrid.deleterow(index: integer; count: integer = 1);
 begin
 end;
 
+{ tifigridcontroller }
+
+function tifigridcontroller.getifireckinds: ifireckindsty;
+begin
+ result:= [ik_griddata,ik_requestopen,ik_gridcommand,
+           ik_coldatachange,ik_rowstatechange];
+end;
+
+function tifigridcontroller.cancommandsend(
+          const akind: ifigridoptionty): boolean;
+begin
+ result:= (akind in foptionstx) and (fcommandlock = 0) and 
+                                        (fupdating = 0) and cansend;
+end;
+
+procedure tifigridcontroller.sendstate;
+begin
+ senddata(encodegriddata(0));  
+end;
+
+procedure tifigridcontroller.beginupdate;
+begin
+ inc(fupdating);
+end;
+
+procedure tifigridcontroller.endupdate;
+begin
+ dec(fupdating);
+ if (fupdating = 0) and cancommandsend(igo_state) then begin
+  sendstate;
+ end;
+end;
+
 { ttxdatagridcontroller }
 
 constructor ttxdatagridcontroller.create(const aowner: ttxdatagrid);
@@ -2456,13 +2516,13 @@ procedure ttxdatagridcontroller.setowneractive(const avalue: boolean);
 begin
  //dummy
 end;
-
+{
 function ttxdatagridcontroller.getifireckinds: ifireckindsty;
 begin
  result:= [ik_requestopen,ik_griddata,ik_gridcommand,ik_coldatachange,
            ik_rowstatechange];
 end;
-
+}
 function ifidatatodatalist(const akind: datatypty; const arowcount: integer;
                        const adata: pchar; const adatalist: tdatalist): integer;
        //returns datasize
