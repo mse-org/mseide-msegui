@@ -368,7 +368,7 @@ end;
 
 procedure tdblookuplb.fieldtovalue;
 begin
- //dummy
+ valuetotext;
 end;
 
 procedure tdblookuplb.getfieldtypes(var afieldtypes: fieldtypesty);
@@ -419,6 +419,7 @@ procedure tdblookup32lb.fieldtovalue;
 begin
  fisnull:= false;
  fkey:= fdatalink.field.asinteger;
+ inherited;
 end;
 
 function tdblookup32lb.getrowdatapo(const info: cellinfoty): pointer;
@@ -473,6 +474,7 @@ procedure tdblookup64lb.fieldtovalue;
 begin
  fisnull:= false;
  fkey:= fdatalink.field.aslargeint;
+ inherited;
 end;
 
 function tdblookup64lb.getrowdatapo(const info: cellinfoty): pointer;
@@ -526,6 +528,7 @@ procedure tdblookupstrlb.fieldtovalue;
 begin
  fisnull:= false;
  fkey:= fdatalink.asmsestring;
+ inherited;
 end;
 
 function tdblookupstrlb.getrowdatapo(const info: cellinfoty): pointer;
