@@ -82,20 +82,36 @@ type
    property options;
  end;
 
+ ifigridoptionty = (
+             igo_state,   //send the whole gridstate after endupdate
+             igo_rowenter,igo_rowmove,igo_rowdelete,
+             igo_rowinsert,igo_rowstate,igo_coldata);
+ ifigridoptionsty = set of ifigridoptionty;
  trxwidgetgrid = class;
  
  tifiwidgetgridcontroller = class(tifirxcontroller)
+  private
+   foptionstx: ifigridoptionsty;
+   foptionsrx: ifigridoptionsty;
+   fupdating: integer;
   protected
    fdatasequence: sequencety;
    fcommandlock: integer;
-   procedure processdata(const adata: pifirecty; var adatapo: pchar); 
-                                    override;
+   procedure processdata(const adata: pifirecty; var adatapo: pchar); override;
    procedure setowneractive(const avalue: boolean); override;
    function getifireckinds: ifireckindsty; override;
    function encodegriddata(const asequence: sequencety): ansistring;
   public
    constructor create(const aowner: trxwidgetgrid);
-   function cancommandsend: boolean;
+   function cancommandsend(const akind: ifigridoptionty): boolean;
+   procedure beginupdate;
+   procedure endupdate;
+   procedure sendstate;
+  published
+   property optionstx: ifigridoptionsty read foptionstx
+                                           write foptionstx default[];
+   property optionsrx: ifigridoptionsty read foptionsrx
+                                           write foptionsrx default[];
  end;
 
  tifiwidgetcol = class(twidgetcol)
@@ -455,6 +471,7 @@ var
  source1,dest1,count1: integer;
  rowstate1: rowstatety;
  lwo1: longword;
+ datalist1: tdatalist;
 begin
  with adata^.header do begin
   case kind of
@@ -462,7 +479,8 @@ begin
     senddata(encodegriddata(sequence));
    end;
    ik_griddata: begin
-    if answersequence = fdatasequence then begin
+    if (igo_state in foptionsrx) or 
+        (answersequence <> 0) and (answersequence = fdatasequence) then begin
      with trxwidgetgrid(fowner) do begin
       beginupdate;
       try
@@ -503,16 +521,24 @@ begin
      try
       case ckind1 of
        gck_insertrow: begin
-        insertrow(dest1,count1);       
+        if igo_rowinsert in foptionsrx then begin
+         insertrow(dest1,count1);       
+        end;
        end;
        gck_deleterow: begin
-        deleterow(dest1,count1);       
+        if igo_rowdelete in foptionsrx then begin
+         deleterow(dest1,count1);       
+        end;
        end;
        gck_moverow: begin
-        moverow(source1,dest1,count1);       
+        if igo_rowmove in foptionsrx then begin
+         moverow(source1,dest1,count1);       
+        end;
        end;
        gck_rowenter: begin
-        row:= dest1;
+        if igo_rowenter in foptionsrx then begin
+         row:= dest1;
+        end;
        end;
       end;
      finally
@@ -526,8 +552,11 @@ begin
      int1:= pcolitemdataty(adatapo)^.header.row;
      ifinametostring(@pcolitemdataty(adatapo)^.header.name,str1);
      inc(adatapo,sizeof(colitemheaderty)+length(str1));
-     inc(adatapo,decodeifidata(pifidataty(adatapo),int1,
-                      trxwidgetgrid(fowner).fdatacols.datalistbyname(str1)));
+     datalist1:= nil;
+     if igo_coldata in foptionsrx then begin
+      datalist1:= trxwidgetgrid(fowner).fdatacols.datalistbyname(str1);
+     end;    //skip data otherwise
+     inc(adatapo,decodeifidata(pifidataty(adatapo),int1,datalist1));
     finally
      dec(fcommandlock);
     end;
@@ -564,9 +593,29 @@ begin
            ik_coldatachange,ik_rowstatechange];
 end;
 
-function tifiwidgetgridcontroller.cancommandsend: boolean;
+function tifiwidgetgridcontroller.cancommandsend(
+          const akind: ifigridoptionty): boolean;
 begin
- result:= (fcommandlock = 0) and cansend;
+ result:= (akind in foptionstx) and (fcommandlock = 0) and 
+                                        (fupdating = 0) and cansend;
+end;
+
+procedure tifiwidgetgridcontroller.sendstate;
+begin
+ senddata(encodegriddata(0));  
+end;
+
+procedure tifiwidgetgridcontroller.beginupdate;
+begin
+ inc(fupdating);
+end;
+
+procedure tifiwidgetgridcontroller.endupdate;
+begin
+ dec(fupdating);
+ if (fupdating = 0) and cancommandsend(igo_state) then begin
+  sendstate;
+ end;
 end;
 
 { tifiwidgetcol }
@@ -576,7 +625,8 @@ procedure tifiwidgetcol.setdata(arow: integer; const source;
 begin
  inherited;
  with trxwidgetgrid(fgrid).fifi do begin
-  if (self.name <> '') and cancommandsend and (fdata <> nil) then begin
+  if (self.name <> '') and cancommandsend(igo_coldata) and 
+                                            (fdata <> nil) then begin
    senditem(ik_coldatachange,[encodecolchangedata(self.name,arow,fdata)]);
   end;
  end;  
@@ -680,7 +730,7 @@ procedure trxwidgetgrid.dorowsmoved(const fromindex: integer;
 begin
  inherited;
  with fifi do begin
-  if cancommandsend then begin
+  if cancommandsend(igo_rowmove) then begin
    senditem(ik_gridcommand,[
        encodegridcommanddata(gck_moverow,fromindex,toindex,count)]);
   end;
@@ -692,7 +742,7 @@ procedure trxwidgetgrid.dorowsinserted(const index: integer;
 begin
  inherited;
  with fifi do begin
-  if cancommandsend then begin
+  if cancommandsend(igo_rowinsert) then begin
    senditem(ik_gridcommand,[
        encodegridcommanddata(gck_insertrow,index,index,count)]);
   end;
@@ -703,7 +753,7 @@ procedure trxwidgetgrid.dorowsdeleted(index: integer; count: integer);
 begin
  inherited;
  with fifi do begin
-  if cancommandsend then begin
+  if cancommandsend(igo_rowdelete) then begin
    senditem(ik_gridcommand,[
        encodegridcommanddata(gck_deleterow,index,index,count)]);
   end;
@@ -714,7 +764,7 @@ procedure trxwidgetgrid.rowstatechanged(const arow: integer);
 begin
  inherited;
  with fifi do begin
-  if cancommandsend then begin
+  if cancommandsend(igo_rowstate) then begin
    senditem(ik_rowstatechange,
                encoderowstatedata(arow,fdatacols.rowstate[arow]));
   end;
@@ -724,7 +774,7 @@ end;
 procedure trxwidgetgrid.docellevent(var info: celleventinfoty);
 begin
  inherited;
- if isrowenter(info) and fifi.cancommandsend then begin
+ if isrowenter(info) and fifi.cancommandsend(igo_rowenter) then begin
   fifi.senditem(ik_gridcommand,[
        encodegridcommanddata(gck_rowenter,info.cell.row,info.cell.row,0)]);
  end;
