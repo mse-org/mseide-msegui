@@ -251,7 +251,11 @@ begin
       tdbdatetimeedit,
       tdbcalendardatetimeedit,tdbfilenameedit,tdbcoloredit,
       tdbbooleanedit,tdbbooleaneditradio,
-      tdbstringlookuplb,tdbintegerlookuplb,tdbreallookuplb,tdbdatetimelookuplb
+      tdbstringlookuplb,tdbintegerlookuplb,tdbreallookuplb,tdbdatetimelookuplb,
+      tdbstringlookup64lb,tdbintegerlookup64lb,tdbreallookup64lb,
+      tdbdatetimelookup64lb,
+      tdbstringlookupstrlb,tdbintegerlookupstrlb,tdbreallookupstrlb,
+      tdbdatetimelookupstrlb
       ]);
  registercomponenttabhints(['DBe'],['Data edit Components']);
  registercomponents('DBf',[
