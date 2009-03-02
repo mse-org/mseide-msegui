@@ -111,8 +111,10 @@ type
    procedure drawcell(const canvas: tcanvas); override;
    procedure drawfocusedcell(const acanvas: tcanvas); override;
    procedure drawfocus(const acanvas: tcanvas); override;
-   procedure sortcompare(const index1,index2: integer; var result: integer); override;
-   procedure itemchanged(sender: tdatalist; aindex: integer); override;
+   procedure sortcompare(const index1,index2: integer;
+                                  var result: integer); override;
+   procedure itemchanged(const sender: tdatalist; 
+                                  const aindex: integer); override;
    procedure setwidget(const awidget: twidget);
    procedure seteditwidget(const value: twidget);
    procedure setfixrowwidget(const awidget: twidget; const rowindex: integer);
@@ -1287,7 +1289,7 @@ begin
  end;
 end;
 
-procedure twidgetcol.itemchanged(sender: tdatalist; aindex: integer);
+procedure twidgetcol.itemchanged(const sender: tdatalist; const aindex: integer);
 begin
  inherited;
  if {(tcustomwidgetgrid(fgrid).fupdating = 0) and} (fintf <> nil) then begin

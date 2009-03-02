@@ -124,7 +124,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   procedure post;
+//   procedure post;
   published
    property ifi: tifiwidgetgridcontroller read fifi write setifi;
    property active: boolean read factive write setactive default false;
@@ -444,8 +444,6 @@ var
  po1: pchar;
  str1: ansistring;
  po2: pointer;
- col1: tdatacol;
- list1: tdatalist;
  ckind1: gridcommandkindty;
  source1,dest1,count1: integer;
  rowstate1: rowstatety;
@@ -474,14 +472,8 @@ begin
          kind1:= kind;
          po1:= @name;
          inc(po1,ifinametostring(pifinamety(po1),str1));
-         col1:= datacols.colbyname(str1);
-         if col1 <> nil then begin
-          list1:= col1.datalist;
-         end
-         else begin
-          list1:= nil;
-         end;
-         inc(po1,ifidatatodatalist(kind1,rows1,po1,list1));
+         inc(po1,ifidatatodatalist(kind1,rows1,po1,
+                   datacols.datalistbyname(str1)));
         end;
        end;
        inc(po1,ifidatatodatalist(dl_rowstate,rows1,po1,
@@ -652,7 +644,7 @@ begin
   end;
  end;
 end;
-
+{
 procedure trxwidgetgrid.post;
 begin
  with fifi do begin
@@ -661,7 +653,7 @@ begin
   end;
  end;
 end;
-
+}
 procedure trxwidgetgrid.internalclose;
 begin
  rowcount:= 0;

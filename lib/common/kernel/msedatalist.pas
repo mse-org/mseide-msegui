@@ -41,7 +41,7 @@ type
  tdatalist = class;
  tintegerdatalist = class;
 
- indexeventty = procedure(sender: tdatalist; index: integer) of object;
+ indexeventty = procedure(const sender: tdatalist; const index: integer) of object;
 // listlineeventty = procedure (sender: tdatalist; index: integer) of object;
 
  blockcopymodety = (bcm_none,bcm_copy,bcm_init,bcm_rotate);
@@ -564,7 +564,11 @@ const
  foldhiddenbit = 7;
  foldhiddenmask = 1 shl foldhiddenbit;
  foldlevelmask = not foldhiddenmask;
+ rowstatemask = $7f;
 type
+ rowstatenumty = -1..126; //msb = row readonly flag for rowfontstate,
+                          //reserved for rowcolorstate
+
  foldlevelty = 0..127;
  rowstatety = record
   selected: cardinal; //bitset lsb = col 0, msb-1 = col 30, msb = whole row
@@ -584,10 +588,23 @@ type
    function gethidden(const index: integer): boolean;
    function getfoldlevel(const index: integer): foldlevelty;
    function getfoldinfoar: bytearty;
+   function getcolor(const index: integer): rowstatenumty;
+   procedure setcolor(const index: integer; const avalue: rowstatenumty);
+   function getfont(const index: integer): rowstatenumty;
+   procedure setfont(const index: integer; const avalue: rowstatenumty);
+   function getreadonly(const index: integer): boolean;
+   procedure setreadonly(const index: integer; const avalue: boolean);
   public
    constructor create; override;
    procedure assign(source: tpersistent); override;
    function datatyp: datatypty; override;
+   function getitempo(const index: integer): prowstatety;
+   property color[const index: integer]: rowstatenumty read getcolor
+                                                            write setcolor;
+   property font[const index: integer]: rowstatenumty read getfont
+                                                            write setfont;
+   property readonly[const index: integer]: boolean read getreadonly
+                                                            write setreadonly;
    property items[const index: integer]: rowstatety read getrowstate 
                                               write setrowstate; default;
    property foldinfoar: bytearty read getfoldinfoar;
@@ -834,7 +851,7 @@ function newidentnum(const count: integer; getfunc: getintegeritemfuncty): integ
 
 implementation
 uses
- rtlconsts,msestreaming,msesys,msestat;
+ rtlconsts,msestreaming,msesys,msestat,msebits;
 
 function opentodynarraym(const items: array of msestring): msestringarty;
 var
@@ -5830,6 +5847,11 @@ begin
  result:= dl_rowstate;
 end;
 
+function tcustomrowstatelist.getitempo(const index: integer): prowstatety;
+begin
+ result:= prowstatety(inherited getitempo(index));
+end;
+
 function tcustomrowstatelist.getrowstate(const index: integer): rowstatety;
 begin
  getdata(index,result);
@@ -5877,6 +5899,50 @@ begin
  end
  else begin
   inherited;
+ end;
+end;
+
+function tcustomrowstatelist.getcolor(const index: integer): rowstatenumty;
+begin
+ result:= (getitempo(index)^.color and rowstatemask) - 1;
+end;
+
+procedure tcustomrowstatelist.setcolor(const index: integer;
+               const avalue: rowstatenumty);
+begin
+ with getitempo(index)^ do begin
+  color:= replacebits(avalue + 1,color,rowstatemask);
+ end;
+end;
+
+function tcustomrowstatelist.getfont(const index: integer): rowstatenumty;
+begin
+ result:= (getitempo(index)^.font and rowstatemask) - 1;
+end;
+
+procedure tcustomrowstatelist.setfont(const index: integer;
+               const avalue: rowstatenumty);
+begin
+ with getitempo(index)^ do begin
+  font:= replacebits(avalue + 1,font,rowstatemask);
+ end;
+end;
+
+function tcustomrowstatelist.getreadonly(const index: integer): boolean;
+begin
+ result:= getitempo(index)^.font and $80 <> 0;
+end;
+
+procedure tcustomrowstatelist.setreadonly(const index: integer;
+               const avalue: boolean);
+begin
+ with getitempo(index)^ do begin
+  if avalue then begin
+   font:= font or $80;
+  end
+  else begin
+   font:= font and not $80;
+  end;
  end;
 end;
 

@@ -91,7 +91,7 @@ type
    fkeyvalue: msestring;
    procedure setcount1(acount: integer; doinit: boolean); override;
    procedure createitem(const index: integer; var item: tpersistent); override;
-   procedure itemchanged(sender: tdatalist; index: integer);
+   procedure itemchanged(const sender: tdatalist; const index: integer);
              //sender = nil -> col undefined
    function maxrowcount: integer;
    function minrowcount: integer;
@@ -334,7 +334,7 @@ type
    fcols: tdropdowncols;
    procedure valuecolchanged; virtual;
    function getdropdownwidget: twidget; override;
-   procedure itemchanged(sender: tdatalist; index: integer);
+   procedure itemchanged(const sender: tdatalist; const index: integer);
    function getdropdowncolsclass: dropdowncolsclassty; virtual;
    procedure selectnone(const akey: keyty); override;
    procedure clearitemindex; //sets fcols.fitemindex to -1, no events
@@ -485,7 +485,7 @@ begin
  result:= tdropdowncol(inherited getitems(index));
 end;
 
-procedure tdropdowncols.itemchanged(sender: tdatalist; index: integer);
+procedure tdropdowncols.itemchanged(const sender: tdatalist; const index: integer);
 begin
  if (fupdating1 = 0 ) and assigned(fonitemchange) then begin
   fonitemchange(sender,index);
@@ -1118,7 +1118,8 @@ begin
  result:= fcols[fvaluecol];
 end;
 
-procedure tcustomdropdownlistcontroller.itemchanged(sender: tdatalist; index: integer);
+procedure tcustomdropdownlistcontroller.itemchanged(
+               const sender: tdatalist; const index: integer);
 begin
  if (deo_selectonly in foptions) and (index = fcols.fitemindex) and 
                            (index >= 0) then begin

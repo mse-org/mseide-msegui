@@ -55,7 +55,6 @@ const
  fixcoloptionsshift = ord(co_rowfont)-ord(fco_rowfont);
  fixcoloptionsmask:coloptionsty = [co_rowfont,co_rowcolor,co_zebracolor];
  defaultfixcoloptions = [];
- rowstatemask = $7f;
  defaultgridskinoptions = [osk_framebuttononly];
  sortglyphwidth = 11;
  defaultwheelscrollheight = 0;
@@ -549,7 +548,7 @@ type
    procedure dodeactivate; virtual;
    procedure clientmouseevent(const acell: gridcoordty; var info: mouseeventinfoty); virtual;
    procedure dokeyevent(var info: keyeventinfoty; up: boolean); virtual;
-   procedure itemchanged(sender: tdatalist; aindex: integer); virtual;
+   procedure itemchanged(const sender: tdatalist; const aindex: integer); virtual;
    procedure updatelayout; override;
    procedure moverow(const fromindex,toindex: integer; const count: integer = 1); override;
    procedure insertrow(const aindex: integer; const count: integer = 1); override;
@@ -694,7 +693,7 @@ type
    procedure setcaptions(const Value: tmsestringdatalist);
    function getcaptions: tmsestringdatalist;
    function iscaptionsstored: Boolean;
-   procedure captionchanged(sender: tdatalist; aindex: integer);
+   procedure captionchanged(const sender: tdatalist; const aindex: integer);
    procedure setoptionsfix(const avalue: fixcoloptionsty);
    function getvisible: boolean;
    procedure setvisible(const avalue: boolean);
@@ -1109,7 +1108,6 @@ type
   public
    constructor create(const aowner: tcustomgrid); reintroduce;
    destructor destroy; override;
-   function getitempo(const index: integer): prowstatety;
    function cellrow(const arow: integer): integer;
    function visiblerow(const arowindex: integer): integer;
                  //returns count of visible previous rows
@@ -1393,9 +1391,6 @@ type
                   const aindex: integer; const acount: integer) of object;
  gridsorteventty = procedure(sender: tcustomgrid;
                        const index1,index2: integer; var aresult: integer) of object;
-
- rowstatenumty = -1..126; //msb = row readonly flag for rowfontstate,
-                          //reserved for rowcolorstate
 
  gridscrolleventty = procedure(const sender: tcustomgrid;
                                      var step: integer) of object; 
@@ -4842,7 +4837,7 @@ begin
  end;
 end;
 
-procedure tdatacol.itemchanged(sender: tdatalist; aindex: integer);
+procedure tdatacol.itemchanged(const sender: tdatalist; const aindex: integer);
 begin
  if (aindex < 0) and (sender.count <> fgrid.frowcount) then begin
   if fgrid.fupdating = 0 then begin
@@ -5514,7 +5509,7 @@ begin
  result:= fcaptions.count > 0;
 end;
 
-procedure tfixcol.captionchanged(sender: tdatalist; aindex: integer);
+procedure tfixcol.captionchanged(const sender: tdatalist; const aindex: integer);
 begin
  if aindex < 0 then begin
   changed;
@@ -11617,51 +11612,57 @@ end;
 
 function tcustomgrid.getrowcolorstate(index: integer): rowstatenumty;
 begin
- result:= (fdatacols.frowstate.getitempo(index)^.color and rowstatemask) - 1;
+ result:= fdatacols.frowstate.color[index];
+// result:= (fdatacols.frowstate.getitempo(index)^.color and rowstatemask) - 1;
 end;
 
 procedure tcustomgrid.setrowcolorstate(index: integer; const Value: rowstatenumty);
 begin
- with fdatacols.frowstate.getitempo(index)^ do begin
-  color:= replacebits(value + 1,color,rowstatemask);
- end;
+ fdatacols.frowstate.color[index]:= value;
+// with fdatacols.frowstate.getitempo(index)^ do begin
+//  color:= replacebits(value + 1,color,rowstatemask);
+// end;
  rowchanged(index);
  rowstatechanged(index);
 end;
 
 function tcustomgrid.getrowfontstate(index: integer): rowstatenumty;
 begin
- result:= (fdatacols.frowstate.getitempo(index)^.font and rowstatemask) - 1;
+ result:= fdatacols.frowstate.font[index];
+// result:= (fdatacols.frowstate.getitempo(index)^.font and rowstatemask) - 1;
 end;
 
 procedure tcustomgrid.setrowfontstate(index: integer; const Value: rowstatenumty);
 begin
- with fdatacols.frowstate.getitempo(index)^ do begin
-  font:= replacebits(value + 1,font,rowstatemask);
- end;
+ fdatacols.frowstate.font[index]:= value;
+// with fdatacols.frowstate.getitempo(index)^ do begin
+//  font:= replacebits(value + 1,font,rowstatemask);
+// end;
  rowchanged(index);
  rowstatechanged(index);
 end;
 
 function tcustomgrid.getrowreadonlystate(const index: integer): boolean;
 begin
- result:= fdatacols.frowstate.getitempo(index)^.font and $80 <> 0;
+ result:= fdatacols.frowstate.readonly[index];
+// result:= fdatacols.frowstate.getitempo(index)^.font and $80 <> 0;
 end;
 
 procedure tcustomgrid.setrowreadonlystate(const index: integer;
                const avalue: boolean);
 begin
- with fdatacols.frowstate.getitempo(index)^ do begin
-  if avalue then begin
-   font:= font or $80;
-  end
-  else begin
-   font:= font and not $80;
-  end;
+ fdatacols.frowstate.readonly[index]:= avalue;
+// with fdatacols.frowstate.getitempo(index)^ do begin
+//  if avalue then begin
+//   font:= font or $80;
+//  end
+//  else begin
+//   font:= font and not $80;
+//  end;
   if index = row then begin
    checkrowreadonlystate;
   end;
- end;
+// end;
  rowstatechanged(index);
 end;
 
@@ -12590,11 +12591,6 @@ destructor trowstatelist.destroy;
 begin
  inherited;
  fvisiblerowmap.free;
-end;
-
-function trowstatelist.getitempo(const index: integer): prowstatety;
-begin
- result:= prowstatety(inherited getitempo(index));
 end;
 
 function trowstatelist.isvisible(const arow: integer): boolean;

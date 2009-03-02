@@ -468,11 +468,17 @@ type
  tifitxcontroller = class(tificontroller)
  end;
 }
+ tifidatacol = class;
+ 
+ ifidatacolchangeeventty = procedure(const sender: tifidatacol;
+                                      const aindex: integer) of object;
+
  tifidatacol = class(townedpersistent)
   private
    fdatalist: tdatalist;
    fdatakind: ifidatakindty;
    fname: ansistring;
+   fonchange: ifidatacolchangeeventty;
    procedure setdatakind(const avalue: ifidatakindty);
    function getdatalist: tdatalist;
    function getasinteger(const index: integer): integer;
@@ -497,6 +503,7 @@ type
    procedure freedatalist;
    procedure checkdatalist; overload;
    procedure checkdatalist(const akind: ifidatakindty); overload;
+   procedure dochange(const sender: tdatalist; const aindex: integer);
   public
    destructor destroy; override;
    property datalist: tdatalist read getdatalist;
@@ -522,10 +529,18 @@ type
    property datakind: ifidatakindty read fdatakind write setdatakind 
                          default idk_none;
    property name: ansistring read fname write fname;
+   property onchange: ifidatacolchangeeventty read fonchange write fonchange;
  end;
   
  ttxdatagrid = class;
  tifirowstatelist = class(tcustomrowstatelist)
+  private
+   procedure sethidden(const index: integer; const avalue: boolean);
+   procedure setfoldlevel(const index: integer; const avalue: foldlevelty);
+  public
+   property hidden[const index: integer]: boolean read gethidden write sethidden;
+   property foldlevel[const index: integer]: foldlevelty read getfoldlevel 
+                                  write setfoldlevel;   //0..127
  end;
     
  tifidatacols = class(townedpersistentarrayprop)
@@ -571,9 +586,11 @@ type
                                            write foptionstx default[];
    property optionsrx: ifigridoptionsty read foptionsrx
                                            write foptionsrx default[];
+
  end;
  
  ttxdatagridcontroller = class(tifigridcontroller)
+  private
   protected
 //   function getifireckinds: ifireckindsty; override;
    procedure setowneractive(const avalue: boolean); override;
@@ -584,16 +601,41 @@ type
    constructor create(const aowner: ttxdatagrid);
  end;
 
+ ifigriditemeventty = procedure(const sender: ttxdatagrid;
+                                    const aindex: integer) of object;
+ ifigridblockeventty = procedure(const sender: ttxdatagrid; 
+                  const aindex: integer; const acount: integer) of object;
+ ifigridblockmovedeventty = procedure(const sender: ttxdatagrid; 
+                  const fromindex,toindex,acount: integer) of object;
+ ifigrideventty = procedure(const sender: ttxdatagrid) of object;
+
  ttxdatagrid = class(tmsecomponent)
   private
    fifi: ttxdatagridcontroller;
    fdatacols: tifidatacols;
    frowcount: integer;
    frow: integer;   
+   fonrowsdeleted: ifigridblockeventty;
+   fonrowsinserted: ifigridblockeventty;
+   fonrowsmoved: ifigridblockmovedeventty;
+   fonrowindexchanged: ifigrideventty;
+   fonrowstatechanged: ifigriditemeventty;
+   procedure rowstatechanged(const aindex: integer);
    procedure setifi(const avalue: ttxdatagridcontroller);
    procedure setdatacols(const avalue: tifidatacols);
    procedure setrowcount(const avalue: integer);
    function getrowhigh: integer;
+   procedure setrow(const avalue: integer);
+   function getrowcolorstate(index: integer): rowstatenumty;
+   procedure setrowcolorstate(index: integer; const avalue: rowstatenumty);
+   function getrowfontstate(index: integer): rowstatenumty;
+   procedure setrowfontstate(index: integer; const avalue: rowstatenumty);
+   function getrowreadonlystate(const index: integer): boolean;
+   procedure setrowreadonlystate(const index: integer; const avalue: boolean);
+   function getrowhidden(const index: integer): boolean;
+   procedure setrowhidden(const index: integer; const avalue: boolean);
+   function getrowfoldlevel(const index: integer): foldlevelty;
+   procedure setrowfoldlevel(const index: integer; const avalue: foldlevelty);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -601,11 +643,31 @@ type
    procedure insertrow(index: integer; count: integer = 1);
    procedure deleterow(index: integer; count: integer = 1);
    property rowhigh: integer read getrowhigh;
-   property row: integer read frow write frow;
+   property row: integer read frow write setrow;
+   property rowcolorstate[index: integer]: rowstatenumty read getrowcolorstate 
+                        write setrowcolorstate; //default = -1
+   property rowfontstate[index: integer]: rowstatenumty read getrowfontstate 
+                        write setrowfontstate;  //default = -1
+   property rowreadonlystate[const index: integer]: boolean read getrowreadonlystate
+                        write setrowreadonlystate;
+   property rowhidden[const index: integer]: boolean read getrowhidden 
+                        write setrowhidden;
+   property rowfoldlevel[const index: integer]: foldlevelty read getrowfoldlevel 
+                        write setrowfoldlevel;
   published
    property ifi: ttxdatagridcontroller read fifi write setifi;
    property datacols: tifidatacols read fdatacols write setdatacols;
    property rowcount: integer read frowcount write setrowcount default 0;
+   property onrowsdeleted: ifigridblockeventty read fonrowsdeleted 
+                           write fonrowsdeleted;
+   property onrowsinserted: ifigridblockeventty read fonrowsinserted 
+                           write fonrowsinserted;
+   property onrowsmoved: ifigridblockmovedeventty read fonrowsmoved
+                           write fonrowsmoved;
+   property onrowindexchanged: ifigrideventty read fonrowindexchanged 
+                           write fonrowindexchanged;
+   property onrowstatechanged: ifigriditemeventty read fonrowstatechanged 
+                           write fonrowstatechanged;
  end;
    
 function ifidatatodatalist(const akind: datatypty; const arowcount: integer;
@@ -625,7 +687,7 @@ function encoderowstatedata(const arow: integer; const astate: rowstatety): stri
  
 implementation
 uses
- sysutils,msestream,msesysutils,msetmpmodules;
+ sysutils,msestream,msesysutils,msetmpmodules,msebits;
 
 type
  tmoduledataevent = class(tstringobjectevent)
@@ -2141,6 +2203,7 @@ begin
   end;
  end;
  fdatalist.count:= ttxdatagrid(fowner).rowcount;
+ fdatalist.onitemchange:= @dochange;
 end;
 
 procedure tifidatacol.checkdatalist(const akind: ifidatakindty);
@@ -2150,6 +2213,13 @@ begin
  end;
  if fdatalist = nil then begin
   checkdatalist;
+ end;
+end;
+
+procedure tifidatacol.dochange(const sender: tdatalist; const aindex: integer);
+begin
+ if ttxdatagrid(fowner).canevent(tmethod(fonchange)) then begin
+  fonchange(self,aindex);
  end;
 end;
 
@@ -2371,6 +2441,64 @@ begin
  end;
 end;
 
+function ttxdatagrid.getrowcolorstate(index: integer): rowstatenumty;
+begin
+ result:= fdatacols.frowstate.color[index];
+end;
+
+procedure ttxdatagrid.setrowcolorstate(index: integer;
+               const avalue: rowstatenumty);
+begin
+ fdatacols.frowstate.color[index]:= avalue;
+ rowstatechanged(index);
+end;
+
+function ttxdatagrid.getrowfontstate(index: integer): rowstatenumty;
+begin
+ result:= fdatacols.frowstate.font[index];
+end;
+
+procedure ttxdatagrid.setrowfontstate(index: integer;
+               const avalue: rowstatenumty);
+begin
+ fdatacols.frowstate.font[index]:= avalue;
+ rowstatechanged(index);
+end;
+
+function ttxdatagrid.getrowreadonlystate(const index: integer): boolean;
+begin
+ result:= fdatacols.frowstate.readonly[index];
+end;
+
+procedure ttxdatagrid.setrowreadonlystate(const index: integer;
+               const avalue: boolean);
+begin
+ fdatacols.frowstate.readonly[index]:= avalue;
+ rowstatechanged(index);
+end;
+
+function ttxdatagrid.getrowhidden(const index: integer): boolean;
+begin
+ result:= fdatacols.frowstate.hidden[index];
+end;
+
+procedure ttxdatagrid.setrowhidden(const index: integer;
+               const avalue: boolean);
+begin
+ fdatacols.frowstate.hidden[index]:= avalue;
+end;
+
+function ttxdatagrid.getrowfoldlevel(const index: integer): foldlevelty;
+begin
+ result:= fdatacols.frowstate.foldlevel[index];
+end;
+
+procedure ttxdatagrid.setrowfoldlevel(const index: integer;
+               const avalue: foldlevelty);
+begin
+ fdatacols.frowstate.foldlevel[index]:= avalue;
+end;
+
 function ttxdatagrid.getrowhigh: integer;
 begin
  result:= frowcount - 1;
@@ -2378,15 +2506,105 @@ end;
 
 procedure ttxdatagrid.moverow(const curindex: integer; const newindex: integer;
                const count: integer = 1);
+var
+ int1: integer;
 begin
+ with fdatacols do begin
+  for int1:= 0 to high(fitems) do begin
+   with tifidatacol(fitems[int1]) do begin
+    if fdatalist <> nil then begin
+     fdatalist.blockmovedata(curindex,newindex,count);
+    end;
+   end;
+  end;
+  frowstate.blockmovedata(curindex,newindex,count);
+ end;
+ if canevent(tmethod(fonrowsmoved)) then begin
+  fonrowsmoved(self,curindex,newindex,count);
+ end;  
+ with fifi do begin
+  if cancommandsend(igo_rowmove) then begin
+   senditem(ik_gridcommand,[
+       encodegridcommanddata(gck_moverow,curindex,newindex,count)]);
+  end;
+ end;
 end;
 
 procedure ttxdatagrid.insertrow(index: integer; count: integer = 1);
+var
+ int1: integer;
 begin
+ with fdatacols do begin
+  for int1:= 0 to high(fitems) do begin
+   with tifidatacol(fitems[int1]) do begin
+    if fdatalist <> nil then begin
+     fdatalist.insertitems(index,count);
+    end;
+   end;
+  end;
+  frowstate.insertitems(index,count);
+ end;
+ if canevent(tmethod(fonrowsinserted)) then begin
+  fonrowsinserted(self,index,count);
+ end;  
+ with fifi do begin
+  if cancommandsend(igo_rowinsert) then begin
+   senditem(ik_gridcommand,[
+       encodegridcommanddata(gck_insertrow,index,index,count)]);
+  end;
+ end;
 end;
 
 procedure ttxdatagrid.deleterow(index: integer; count: integer = 1);
+var
+ int1: integer;
 begin
+ with fdatacols do begin
+  for int1:= 0 to high(fitems) do begin
+   with tifidatacol(fitems[int1]) do begin
+    if fdatalist <> nil then begin
+     fdatalist.deleteitems(index,count);
+    end;
+   end;
+  end;
+  frowstate.deleteitems(index,count);
+ end;
+ if canevent(tmethod(fonrowsdeleted)) then begin
+  fonrowsdeleted(self,index,count);
+ end;  
+ with fifi do begin
+  if cancommandsend(igo_rowdelete) then begin
+   senditem(ik_gridcommand,[
+       encodegridcommanddata(gck_deleterow,index,index,count)]);
+  end;
+ end;
+end;
+
+procedure ttxdatagrid.setrow(const avalue: integer);
+begin
+ frow:= avalue;
+ if canevent(tmethod(fonrowindexchanged)) then begin
+  fonrowindexchanged(self);
+ end;
+ with fifi do begin
+  if cancommandsend(igo_rowenter) then begin
+   senditem(ik_gridcommand,
+                   [encodegridcommanddata(gck_rowenter,avalue,avalue,0)]);
+  end;
+ end;
+end;
+
+procedure ttxdatagrid.rowstatechanged(const aindex: integer);
+begin
+ if canevent(tmethod(fonrowstatechanged)) then begin
+  fonrowstatechanged(self,aindex);
+ end;
+ with fifi do begin
+  if cancommandsend(igo_rowstate) then begin
+   senditem(ik_rowstatechange,
+               encoderowstatedata(aindex,fdatacols.rowstate[aindex]));
+  end;
+ end;
 end;
 
 { tifigridcontroller }
@@ -2406,7 +2624,9 @@ end;
 
 procedure tifigridcontroller.sendstate;
 begin
- senddata(encodegriddata(0));  
+ if cansend then begin
+  senddata(encodegriddata(0));  
+ end;
 end;
 
 procedure tifigridcontroller.beginupdate;
@@ -2437,10 +2657,12 @@ var
  kind1: datatypty;
  po1: pchar;
  str1: ansistring;
- col1: tifidatacol;
- list1: tdatalist;
+ datalist1: tdatalist;
  ckind1: gridcommandkindty;
  source1,dest1,count1: integer;
+ rowstate1: rowstatety;
+ lwo1: longword;
+
 begin
  with adata^.header do begin
   case kind of
@@ -2448,26 +2670,22 @@ begin
     senddata(encodegriddata(sequence));
    end;
    ik_griddata: begin
-    with ttxdatagrid(fowner) do begin
-     with pgriddatadataty(adatapo)^ do begin
-      rows1:= rows;
-      rowcount:= rows1;
-      cols1:= cols;
-      po1:= @data;
-     end;
-     for int1:= 0 to cols1 - 1 do begin
-      with pcoldataty(po1)^ do begin
-       kind1:= kind;
-       po1:= @name;
-       inc(po1,ifinametostring(pifinamety(po1),str1));
-       col1:= datacols.colbyname(str1);
-       if col1 <> nil then begin
-        list1:= col1.datalist;
-       end
-       else begin
-        list1:= nil;
+    if (igo_state in foptionsrx) then begin
+     with ttxdatagrid(fowner) do begin
+      with pgriddatadataty(adatapo)^ do begin
+       rows1:= rows;
+       rowcount:= rows1;
+       cols1:= cols;
+       po1:= @data;
+      end;
+      for int1:= 0 to cols1 - 1 do begin
+       with pcoldataty(po1)^ do begin
+        kind1:= kind;
+        po1:= @name;
+        inc(po1,ifinametostring(pifinamety(po1),str1));
+        inc(po1,ifidatatodatalist(kind1,rows1,po1,
+                       datacols.datalistbyname(str1)));
        end;
-       inc(po1,ifidatatodatalist(kind1,rows1,po1,list1));
       end;
      end;
     end;
@@ -2479,16 +2697,24 @@ begin
      try
       case ckind1 of
        gck_insertrow: begin
-        insertrow(dest1,count1);       
+        if igo_rowinsert in foptionsrx then begin
+         insertrow(dest1,count1);       
+        end;
        end;
        gck_deleterow: begin
-        deleterow(dest1,count1);       
+        if igo_rowdelete in foptionsrx then begin
+         deleterow(dest1,count1);       
+        end;
        end;
        gck_moverow: begin
-        moverow(source1,dest1,count1);       
+        if igo_rowmove in foptionsrx then begin
+         moverow(source1,dest1,count1);       
+        end;
        end;
        gck_rowenter: begin
-        row:= dest1;
+        if igo_rowenter in foptionsrx then begin
+         row:= dest1;
+        end;
        end;
       end;
      finally
@@ -2502,8 +2728,33 @@ begin
      int1:= pcolitemdataty(adatapo)^.header.row;
      ifinametostring(@pcolitemdataty(adatapo)^.header.name,str1);
      inc(adatapo,sizeof(colitemheaderty)+length(str1));
-     inc(adatapo,decodeifidata(pifidataty(adatapo),int1,
-                      ttxdatagrid(fowner).fdatacols.datalistbyname(str1)));
+     datalist1:= nil;
+     if igo_coldata in foptionsrx then begin
+      datalist1:= ttxdatagrid(fowner).fdatacols.datalistbyname(str1);
+     end;    //skip data otherwise
+     inc(adatapo,decodeifidata(pifidataty(adatapo),int1,datalist1));
+    finally
+     dec(fcommandlock);
+    end;
+   end;
+   ik_rowstatechange: begin
+    inc(fcommandlock);
+    try
+     int1:= prowstatedataty(adatapo)^.header.row;
+     inc(adatapo,sizeof(rowstateheaderty));
+     inc(adatapo,decodeifidata(pifidataty(adatapo),rowstate1));
+     with ttxdatagrid(fowner),rowstate1 do begin
+      rowcolorstate[int1]:= color;
+      rowfontstate[int1]:= font;
+      lwo1:= fdatacols.rowstate[int1].selected;
+      if lwo1 <> selected then begin
+       fdatacols.rowstate.getitempo(int1)^.selected:= lwo1;
+//       invalidaterow(int1);
+//       internalselectionchanged;
+      end;
+      rowhidden[int1]:= fold and foldhiddenmask <> 0;
+      rowfoldlevel[int1]:= fold and foldlevelmask;
+     end;
     finally
      dec(fcommandlock);
     end;
@@ -2814,4 +3065,19 @@ begin
  end;
 end;
 
+{ tifirowstatelist }
+
+procedure tifirowstatelist.sethidden(const index: integer;
+               const avalue: boolean);
+begin
+ updatebit(getitempo(index)^.fold,foldhiddenbit,avalue);
+end;
+
+procedure tifirowstatelist.setfoldlevel(const index: integer;
+               const avalue: foldlevelty);
+begin
+ replacebits1(byte(getitempo(index)^.fold),byte(avalue),byte(foldlevelmask));
+end;
+
 end.
+
