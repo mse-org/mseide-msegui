@@ -8,17 +8,26 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 unit mselookupbuffer;
-{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 
 uses
  classes,db,msedb,msetypes,msestrings,mseclasses,msearrayprops,mselist,
- mseapplication;
+ mseapplication,mseglob;
  
 type
- 
+
  tcustomlookupbuffer = class;
  tcustomdblookupbuffer = class;
+ 
+ lookupbufferfieldnoty = type integer;
+ lbdatakindty = (lbdk_none,lbdk_integer,lbdk_int64,lbdk_float,lbdk_text);
+ 
+ ilookupbufferfieldinfo = interface(inullinterface)
+                             ['{7F51DC33-BFF6-4577-97FA-248486892C19}']
+  function getlbdatakind(const apropname: string): lbdatakindty;
+  function getlookupbuffer: tcustomlookupbuffer;
+ end; 
  
  lbfiltereventty = procedure(const sender: tcustomlookupbuffer; 
                     const physindex: integer; var valid: boolean) of object;
@@ -234,6 +243,12 @@ type
                            //emptyreal if not found
                            
    function count: integer; virtual;
+   
+   function fieldnamestext: stringarty; virtual;
+   function fieldnamesfloat: stringarty; virtual;
+   function fieldnamesinteger: stringarty; virtual;
+   function fieldnamesint64: stringarty; virtual;
+   
    property fieldcounttext: integer read getfieldcounttext
                                         write setfieldcounttext default 0;
    property fieldcountfloat: integer read getfieldcountfloat
@@ -312,6 +327,12 @@ type
    destructor destroy; override;
    procedure clearbuffer; override;
    property datasource: tdatasource read getdatasource write setdatasource;
+
+   function fieldnamestext: stringarty; override;
+   function fieldnamesfloat: stringarty; override;
+   function fieldnamesinteger: stringarty; override;
+   function fieldnamesint64: stringarty; override;
+
    property textfields: tdbfieldnamearrayprop read ftextfields write settextfields;
    property integerfields: tdbfieldnamearrayprop read fintegerfields write setintegerfields;
    property floatfields: tdbfieldnamearrayprop read ffloatfields write setfloatfields;
@@ -1166,6 +1187,26 @@ begin
  msedatalist.checkarrayindex(value,index);
 end;
 
+function tcustomlookupbuffer.fieldnamestext: stringarty;
+begin
+ result:= nil;
+end;
+
+function tcustomlookupbuffer.fieldnamesfloat: stringarty;
+begin
+ result:= nil;
+end;
+
+function tcustomlookupbuffer.fieldnamesinteger: stringarty;
+begin
+ result:= nil;
+end;
+
+function tcustomlookupbuffer.fieldnamesint64: stringarty;
+begin
+ result:= nil;
+end;
+
 { tlookupbuffer }
 
 procedure tlookupbuffer.addrow(const integervalues: array of integer;
@@ -1433,6 +1474,26 @@ begin
    aint64fields[int1]:= fieldbyname(fint64fields[int1]);
   end;
  end;
+end;
+
+function tcustomdblookupbuffer.fieldnamestext: stringarty;
+begin
+ result:= ftextfields.itemar;
+end;
+
+function tcustomdblookupbuffer.fieldnamesfloat: stringarty;
+begin
+ result:= ffloatfields.itemar;
+end;
+
+function tcustomdblookupbuffer.fieldnamesinteger: stringarty;
+begin
+ result:= fintegerfields.itemar;
+end;
+
+function tcustomdblookupbuffer.fieldnamesint64: stringarty;
+begin
+ result:= fint64fields.itemar;
 end;
 
 { tlookupbufferfieldsdatalink }

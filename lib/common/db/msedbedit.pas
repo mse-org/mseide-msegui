@@ -344,6 +344,7 @@ type
  ilbdropdownlist = interface(idropdownlist)
   procedure recordselected(const arecordnum: integer; const akey: keyty);
                      //-2 = empty row, -1 = none
+  function getlbkeydatakind: lbdatakindty;                     
  end;
  
  tdbdropdownlistedit = class(tcustomdbdropdownlistedit)
@@ -379,6 +380,8 @@ type
   protected
    function createdropdowncontroller: tcustomdropdowncontroller; override;
    procedure recordselected(const arecordnum: integer; const akey: keyty);
+  //ilbdropdownlist
+   function getlbkeydatakind: lbdatakindty;                     
   published
    property dropdown: tdropdownlistcontrollerlb read getdropdown
                                                        write setdropdown;
@@ -402,6 +405,8 @@ type
   protected
    function createdropdowncontroller: tcustomdropdowncontroller; override;
    procedure recordselected(const arecordnum: integer; const akey: keyty);
+  //ilbdropdownlist
+   function getlbkeydatakind: lbdatakindty;                     
   published
    property dropdown: tdropdownlistcontrollerlb read getdropdown
                                                        write setdropdown;
@@ -1713,12 +1718,17 @@ type
    procedure wheeldown(const action: focuscellactionty = fca_focusin);  override;
  end;
      
- tlbdropdowncol = class(tdropdowncol)
+ tlbdropdowncol = class(tdropdowncol,ilookupbufferfieldinfo)
   private
-   ffieldno: integer;
-   procedure setfieldno(const avalue: integer);
+   ffieldno: lookupbufferfieldnoty;
+   procedure setfieldno(const avalue: lookupbufferfieldnoty);
+  protected
+  //ilookupbufferfieldinfo
+   function getlbdatakind(const apropname: string): lbdatakindty;
+   function getlookupbuffer: tcustomlookupbuffer;
   published
-   property fieldno: integer read ffieldno write setfieldno default 0;
+   property fieldno: lookupbufferfieldnoty read ffieldno write setfieldno
+                                                         default 0;
                     //colindex in lookupbuffer
  end;
  
@@ -1739,10 +1749,11 @@ type
  optionlbty = (olb_copyitems);
  optionslbty = set of optionlbty;
                                    
- tcustomlbdropdownlistcontroller = class(tcustomdropdownlistcontroller)
+ tcustomlbdropdownlistcontroller = class(tcustomdropdownlistcontroller,
+                                        ilookupbufferfieldinfo)
   private
    flookupbuffer: tcustomlookupbuffer;
-   fkeyfieldno: integer;
+   fkeyfieldno: lookupbufferfieldnoty;
    fonfilter: lbfiltereventty;
    foptionslb: optionslbty;
    flbrecnums: integerarty;
@@ -1757,11 +1768,14 @@ type
    function candropdown: boolean; override;
    procedure itemselected(const index: integer; const akey: keyty); override;
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
+  //ilookupbufferfieldinfo
+   function getlbdatakind(const apropname: string): lbdatakindty;
+   function getlookupbuffer: tcustomlookupbuffer;
   public
    constructor create(const intf: ilbdropdownlist);
    procedure dropdown; override;
    property lookupbuffer: tcustomlookupbuffer read flookupbuffer write setlookupbuffer;
-   property keyfieldno: integer read fkeyfieldno write fkeyfieldno default 0;
+   property keyfieldno: lookupbufferfieldnoty read fkeyfieldno write fkeyfieldno default 0;
    property optionslb: optionslbty read foptionslb write foptionslb default [];
    property options default defaultlbdropdownoptions;
    property cols: tlbdropdowncols read getcols write setcols;
@@ -1811,6 +1825,7 @@ type
    function internaldatatotext(const data): msestring; override;
           //ilbdropdownlist
    procedure recordselected(const arecordnum: integer; const akey: keyty);
+   function getlbkeydatakind: lbdatakindty;                     
   published
    property dropdown: tlbdropdownlistcontroller read getdropdown write setdropdown;
  end;
@@ -1822,8 +1837,9 @@ type
   protected
    function createdropdowncontroller: tcustomdropdowncontroller; override;
    function internaldatatotext(const data): msestring; override;
-          //ilbdropdownlist
+  //ilbdropdownlist
    procedure recordselected(const arecordnum: integer; const akey: keyty);
+   function getlbkeydatakind: lbdatakindty;                     
   public
   published
    property dropdown: tlbdropdownlistcontroller read getdropdown write setdropdown;
@@ -1871,6 +1887,7 @@ type
    function internaldatatotext(const data): msestring; override;
   //ilbdropdownlist
    procedure recordselected(const arecordnum: integer; const akey: keyty);
+   function getlbkeydatakind: lbdatakindty;                     
   public
    property dropdown: tlbdropdownlistcontroller read getdropdown write setdropdown;
  end;
@@ -1973,6 +1990,7 @@ type
    function internaldatatotext(const data): msestring; override;
   //ilbdropdownlist
    procedure recordselected(const arecordnum: integer; const akey: keyty);
+   function getlbkeydatakind: lbdatakindty;                     
   published
    property dropdown: tlbdropdownlistcontroller read getdropdown write setdropdown;
  end;
@@ -1986,6 +2004,7 @@ type
    function internaldatatotext(const data): msestring; override;
   //ilbdropdownlist
    procedure recordselected(const arecordnum: integer; const akey: keyty);
+   function getlbkeydatakind: lbdatakindty;                     
   published
    property dropdown: tlbdropdownlistcontroller read getdropdown write setdropdown;
  end;
@@ -5439,6 +5458,11 @@ begin
  end;
 end;
 
+function tdbdropdownlisteditlb.getlbkeydatakind: lbdatakindty;
+begin
+ result:= lbdk_none;
+end;
+
 { tdropdownlisteditlb }
 
 function tdropdownlisteditlb.getdropdown: tdropdownlistcontrollerlb;
@@ -5482,6 +5506,11 @@ begin
  if bo1 and (akey = key_tab) then begin
   window.postkeyevent(akey);
  end;
+end;
+
+function tdropdownlisteditlb.getlbkeydatakind: lbdatakindty;
+begin
+ result:= lbdk_none;
 end;
 
 { tenumeditdb }
@@ -7717,11 +7746,21 @@ end;
 
 { tlbdropdowncol }
 
-procedure tlbdropdowncol.setfieldno(const avalue: integer);
+procedure tlbdropdowncol.setfieldno(const avalue: lookupbufferfieldnoty);
 begin
  if avalue <> ffieldno then begin
   ffieldno:= avalue;
  end;
+end;
+
+function tlbdropdowncol.getlbdatakind(const apropname: string): lbdatakindty;
+begin
+ result:= lbdk_text;
+end;
+
+function tlbdropdowncol.getlookupbuffer: tcustomlookupbuffer;
+begin
+ result:= tcustomlbdropdownlistcontroller(fowner).lookupbuffer;
 end;
 
 { tlbdropdowncols }
@@ -7886,6 +7925,16 @@ begin
  inherited; 
 end;
 
+function tcustomlbdropdownlistcontroller.getlbdatakind(const apropname: string): lbdatakindty;
+begin
+ result:= ilbdropdownlist(fintf).getlbkeydatakind;
+end;
+
+function tcustomlbdropdownlistcontroller.getlookupbuffer: tcustomlookupbuffer;
+begin
+ result:= flookupbuffer;
+end;
+
 { tdbenumeditlb }
 
 function tdbenumeditlb.getdropdown: tlbdropdownlistcontroller;
@@ -7955,6 +8004,11 @@ begin
  end;
 end;
 
+function tdbenumeditlb.getlbkeydatakind: lbdatakindty;
+begin
+ result:= lbdk_integer;
+end;
+
 { tenumeditlb }
 
 function tenumeditlb.getdropdown: tlbdropdownlistcontroller;
@@ -8022,6 +8076,11 @@ begin
    result:= '';
   end;
  end;
+end;
+
+function tenumeditlb.getlbkeydatakind: lbdatakindty;
+begin
+ result:= lbdk_integer;
 end;
 
 { tcustomenum64edit }
@@ -8194,6 +8253,11 @@ begin
    result:= '';
   end;
  end;
+end;
+
+function tcustomenum64editlb.getlbkeydatakind: lbdatakindty;
+begin
+ result:= lbdk_int64;
 end;
 
  { tcustomenum64editdb }
@@ -8545,6 +8609,11 @@ begin
  end;
 end;
 
+function tdbkeystringeditlb.getlbkeydatakind: lbdatakindty;
+begin
+ result:= lbdk_text;
+end;
+
 { tkeystringeditlb }
 
 function tkeystringeditlb.getdropdown: tlbdropdownlistcontroller;
@@ -8615,6 +8684,11 @@ begin
    result:= '';
   end;
  end;
+end;
+
+function tkeystringeditlb.getlbkeydatakind: lbdatakindty;
+begin
+ result:= lbdk_text;
 end;
 
 { tcopydropdownlist }

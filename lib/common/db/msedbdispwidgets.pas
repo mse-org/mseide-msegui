@@ -77,11 +77,12 @@ type
    property datalink: tdispfielddatalink read fdatalink write setdatalink;
  end;
   
- tdbstringdisplb = class(tdbstringdisp,idbdispfieldlink,ireccontrol)
+ tdbstringdisplb = class(tdbstringdisp,idbdispfieldlink,ireccontrol,
+                               ilookupbufferfieldinfo)
   private
    flookupbuffer: tcustomlookupbuffer;
-   flookupkeyfieldno: integer;
-   flookupvaluefieldno: integer;   
+   flookupkeyfieldno: lookupbufferfieldnoty;
+   flookupvaluefieldno: lookupbufferfieldnoty;   
    fkeyvalue: integer;
    procedure setlookupbuffer(const avalue: tcustomlookupbuffer);
      //idbdispfieldlink
@@ -91,14 +92,17 @@ type
   protected
    procedure objectevent(const sender: tobject;
                                   const event: objecteventty); override;
+  //ilookupbufferfieldinfo
+   function getlbdatakind(const apropname: string): lbdatakindty;
+   function getlookupbuffer: tcustomlookupbuffer;
   public
    property keyvalue: integer read fkeyvalue write setkeyvalue;
   published
    property lookupbuffer: tcustomlookupbuffer read flookupbuffer
                                             write setlookupbuffer;
-   property lookupkeyfieldno: integer read flookupkeyfieldno 
+   property lookupkeyfieldno: lookupbufferfieldnoty read flookupkeyfieldno 
                                             write flookupkeyfieldno default 0;
-   property lookupvaluefieldno: integer read flookupvaluefieldno
+   property lookupvaluefieldno: lookupbufferfieldnoty read flookupvaluefieldno
                                             write flookupvaluefieldno default 0;
  end;
  
@@ -123,11 +127,12 @@ type
    property datalink: tdispfielddatalink read fdatalink write setdatalink;
  end;
  
- tdbintegerdisplb = class(tdbintegerdisp,idbdispfieldlink,ireccontrol)
+ tdbintegerdisplb = class(tdbintegerdisp,idbdispfieldlink,ireccontrol,
+                            ilookupbufferfieldinfo)
   private
    flookupbuffer: tcustomlookupbuffer;
-   flookupkeyfieldno: integer;
-   flookupvaluefieldno: integer;   
+   flookupkeyfieldno: lookupbufferfieldnoty;
+   flookupvaluefieldno: lookupbufferfieldnoty;   
    fkeyvalue: integer;
    procedure setlookupbuffer(const avalue: tcustomlookupbuffer);
      //idbdispfieldlink
@@ -136,14 +141,17 @@ type
   protected
    procedure objectevent(const sender: tobject; 
                            const event: objecteventty); override;
+  //ilookupbufferfieldinfo
+   function getlbdatakind(const apropname: string): lbdatakindty;
+   function getlookupbuffer: tcustomlookupbuffer;
   public
    property keyvalue: integer read fkeyvalue write setkeyvalue;
   published
    property lookupbuffer: tcustomlookupbuffer read flookupbuffer 
                                           write setlookupbuffer;
-   property lookupkeyfieldno: integer read flookupkeyfieldno 
+   property lookupkeyfieldno: lookupbufferfieldnoty read flookupkeyfieldno 
                                           write flookupkeyfieldno default 0;
-   property lookupvaluefieldno: integer read flookupvaluefieldno
+   property lookupvaluefieldno: lookupbufferfieldnoty read flookupvaluefieldno
                                           write flookupvaluefieldno default 0;
  end;
  
@@ -187,11 +195,12 @@ type
    property datalink: tdispfielddatalink read fdatalink write setdatalink;
  end;
   
- tdbrealdisplb = class(tdbrealdisp,idbdispfieldlink,ireccontrol)
+ tdbrealdisplb = class(tdbrealdisp,idbdispfieldlink,ireccontrol,
+                         ilookupbufferfieldinfo)
   private
    flookupbuffer: tcustomlookupbuffer;
-   flookupkeyfieldno: integer;
-   flookupvaluefieldno: integer;   
+   flookupkeyfieldno: lookupbufferfieldnoty;
+   flookupvaluefieldno: lookupbufferfieldnoty;   
    fkeyvalue: integer;
    procedure setlookupbuffer(const avalue: tcustomlookupbuffer);
      //idbdispfieldlink
@@ -200,12 +209,15 @@ type
    procedure setkeyvalue(const avalue: integer);
   protected
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
+  //ilookupbufferfieldinfo
+   function getlbdatakind(const apropname: string): lbdatakindty;
+   function getlookupbuffer: tcustomlookupbuffer;
   public
    property keyvalue: integer read fkeyvalue write setkeyvalue;
   published
    property lookupbuffer: tcustomlookupbuffer read flookupbuffer write setlookupbuffer;
-   property lookupkeyfieldno: integer read flookupkeyfieldno write flookupkeyfieldno default 0;
-   property lookupvaluefieldno: integer read flookupvaluefieldno write flookupvaluefieldno default 0;
+   property lookupkeyfieldno: lookupbufferfieldnoty read flookupkeyfieldno write flookupkeyfieldno default 0;
+   property lookupvaluefieldno: lookupbufferfieldnoty read flookupvaluefieldno write flookupvaluefieldno default 0;
  end;
  
  tdbdatetimedisp = class(tcustomdatetimedisp,idbdispfieldlink,ireccontrol)
@@ -227,11 +239,12 @@ type
    property datalink: tdispfielddatalink read fdatalink write setdatalink;
  end;
  
- tdbdatetimedisplb = class(tdbdatetimedisp,idbdispfieldlink,ireccontrol)
+ tdbdatetimedisplb = class(tdbdatetimedisp,idbdispfieldlink,ireccontrol,
+                                         ilookupbufferfieldinfo)
   private
    flookupbuffer: tcustomlookupbuffer;
-   flookupkeyfieldno: integer;
-   flookupvaluefieldno: integer;   
+   flookupkeyfieldno: lookupbufferfieldnoty;
+   flookupvaluefieldno: lookupbufferfieldnoty;   
    fkeyvalue: integer;
    procedure setlookupbuffer(const avalue: tcustomlookupbuffer);
      //idbdispfieldlink
@@ -240,12 +253,15 @@ type
    procedure setkeyvalue(const avalue: integer);
   protected
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
+  //ilookupbufferfieldinfo
+   function getlbdatakind(const apropname: string): lbdatakindty;
+   function getlookupbuffer: tcustomlookupbuffer;
   public
    property keyvalue: integer read fkeyvalue write setkeyvalue;
   published
    property lookupbuffer: tcustomlookupbuffer read flookupbuffer write setlookupbuffer;
-   property lookupkeyfieldno: integer read flookupkeyfieldno write flookupkeyfieldno default 0;
-   property lookupvaluefieldno: integer read flookupvaluefieldno write flookupvaluefieldno default 0;
+   property lookupkeyfieldno: lookupbufferfieldnoty read flookupkeyfieldno write flookupkeyfieldno default 0;
+   property lookupvaluefieldno: lookupbufferfieldnoty read flookupvaluefieldno write flookupvaluefieldno default 0;
  end;
  
 implementation
@@ -462,6 +478,21 @@ begin
  end;
 end;
 
+function tdbstringdisplb.getlbdatakind(const apropname: string): lbdatakindty;
+begin
+ if apropname = 'lookupkeyfieldno' then begin
+  result:= lbdk_integer;
+ end
+ else begin
+  result:= lbdk_text;
+ end;
+end;
+
+function tdbstringdisplb.getlookupbuffer: tcustomlookupbuffer;
+begin
+ result:= flookupbuffer;
+end;
+
 { tdbintegerdisp }
 
 constructor tdbintegerdisp.create(aowner: tcomponent);
@@ -557,6 +588,21 @@ begin
  if (event in [oe_changed,oe_connect]) and (sender = flookupbuffer) then begin
   setkeyvalue(fkeyvalue);
  end;
+end;
+
+function tdbintegerdisplb.getlbdatakind(const apropname: string): lbdatakindty;
+begin
+ if apropname = 'lookupkeyfieldno' then begin
+  result:= lbdk_integer;
+ end
+ else begin
+  result:= lbdk_integer;
+ end;
+end;
+
+function tdbintegerdisplb.getlookupbuffer: tcustomlookupbuffer;
+begin
+ result:= flookupbuffer;
 end;
 
 { tdbbooleandisp }
@@ -705,6 +751,21 @@ begin
  end;
 end;
 
+function tdbrealdisplb.getlbdatakind(const apropname: string): lbdatakindty;
+begin
+ if apropname = 'lookupkeyfieldno' then begin
+  result:= lbdk_integer;
+ end
+ else begin
+  result:= lbdk_float;
+ end;
+end;
+
+function tdbrealdisplb.getlookupbuffer: tcustomlookupbuffer;
+begin
+ result:= flookupbuffer;
+end;
+
 { tdbdatetimedisp }
 
 constructor tdbdatetimedisp.create(aowner: tcomponent);
@@ -795,6 +856,21 @@ begin
  if (event in [oe_changed,oe_connect]) and (sender = flookupbuffer) then begin
   setkeyvalue(fkeyvalue);
  end;
+end;
+
+function tdbdatetimedisplb.getlbdatakind(const apropname: string): lbdatakindty;
+begin
+ if apropname = 'lookupkeyfieldno' then begin
+  result:= lbdk_integer;
+ end
+ else begin
+  result:= lbdk_float;
+ end;
+end;
+
+function tdbdatetimedisplb.getlookupbuffer: tcustomlookupbuffer;
+begin
+ result:= flookupbuffer;
 end;
 
 end.

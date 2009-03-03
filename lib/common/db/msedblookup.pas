@@ -24,20 +24,21 @@ type
    property datasource read fdatasource write setwidgetdatasource;
  end;
  
- tdblookuplb = class(tcustomdataedit,idbdispfieldlink)
+ tdblookuplb = class(tcustomdataedit,idbdispfieldlink,ilookupbufferfieldinfo)
   private
    fdatalink: tlookupdispfielddatalink;
    fisnull: boolean;
    flookupbuffer: tcustomlookupbuffer;
-   flookupkeyfieldno: integer;
-   flookupvaluefieldno: integer;   
+   flookupkeyfieldno: lookupbufferfieldnoty;
+   flookupvaluefieldno: lookupbufferfieldnoty;   
    procedure setdatalink(const avalue: tlookupdispfielddatalink);
    procedure setlookupbuffer(const avalue: tcustomlookupbuffer);
   protected
    procedure updatelookupvalue; virtual; abstract;
    procedure setlookupvalue(const aindex: integer); virtual; abstract;
                   //aindex -1 -> NULL
-
+   function getkeylbdatakind: lbdatakindty; virtual; abstract;
+   function getdatalbdatakind: lbdatakindty; virtual; abstract;
    procedure dochange; override;
    function lookuptext(const aindex: integer): msestring; virtual; abstract;
    function getdatatyp: datatypty; override;
@@ -55,6 +56,9 @@ type
    procedure getfieldtypes(var afieldtypes: fieldtypesty); virtual;
   //ireccontrol
    procedure recchanged;
+  //ilookupbufferfieldinfo
+   function getlbdatakind(const apropname: string): lbdatakindty;
+   function getlookupbuffer: tcustomlookupbuffer;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -63,9 +67,9 @@ type
    property datalink: tlookupdispfielddatalink read fdatalink write setdatalink;
    property lookupbuffer: tcustomlookupbuffer read flookupbuffer 
                                             write setlookupbuffer;
-   property lookupkeyfieldno: integer read flookupkeyfieldno 
+   property lookupkeyfieldno: lookupbufferfieldnoty read flookupkeyfieldno 
                                             write flookupkeyfieldno default 0;
-   property lookupvaluefieldno: integer read flookupvaluefieldno
+   property lookupvaluefieldno: lookupbufferfieldnoty read flookupvaluefieldno
                                             write flookupvaluefieldno default 0;
 
    property empty_color;
@@ -94,6 +98,7 @@ type
    procedure updatelookupvalue; override;
    function internaldatatotext(const data): msestring; override;
    function getrowdatapo(const info: cellinfoty): pointer; override;
+   function getkeylbdatakind: lbdatakindty; override;
   //idbeditfieldlink
    procedure fieldtovalue; override;
    procedure getfieldtypes(var afieldtypes: fieldtypesty); override;
@@ -107,6 +112,7 @@ type
    procedure updatelookupvalue; override;
    function internaldatatotext(const data): msestring; override;
    function getrowdatapo(const info: cellinfoty): pointer; override;
+   function getkeylbdatakind: lbdatakindty; override;
   //idbeditfieldlink
    procedure fieldtovalue; override;
    procedure getfieldtypes(var afieldtypes: fieldtypesty); override;
@@ -120,6 +126,7 @@ type
    procedure updatelookupvalue; override;
    function internaldatatotext(const data): msestring; override;
    function getrowdatapo(const info: cellinfoty): pointer; override;
+   function getkeylbdatakind: lbdatakindty; override;
   //idbeditfieldlink
    procedure fieldtovalue; override;
    procedure getfieldtypes(var afieldtypes: fieldtypesty); override;
@@ -130,6 +137,7 @@ type
   private
    fvalue: msestring;
   protected
+   function getdatalbdatakind: lbdatakindty; override;
    procedure setlookupvalue(const aindex: integer); override;
    function lookuptext(const aindex: integer): msestring; override;
   public
@@ -144,6 +152,7 @@ type
    procedure setbase(const avalue: numbasety);
    procedure setbitcount(const avalue: integer);
   protected
+   function getdatalbdatakind: lbdatakindty; override;
    procedure setlookupvalue(const aindex: integer); override;
    function lookuptext(const aindex: integer): msestring; override;
   public
@@ -162,6 +171,7 @@ type
    procedure setformat(const avalue: msestring);
    procedure setvaluescale(const avalue: real);
   protected
+   function getdatalbdatakind: lbdatakindty; override;
    procedure setlookupvalue(const aindex: integer); override;
    function lookuptext(const aindex: integer): msestring; override;
   public
@@ -180,6 +190,7 @@ type
    procedure setformat(const avalue: msestring);
    procedure setkind(const avalue: datetimekindty);
   protected
+   function getdatalbdatakind: lbdatakindty; override;
    procedure setlookupvalue(const aindex: integer); override;
    function lookuptext(const aindex: integer): msestring; override;
   published
@@ -192,6 +203,7 @@ type
   private
    fvalue: msestring;
   protected
+   function getdatalbdatakind: lbdatakindty; override;
    procedure setlookupvalue(const aindex: integer); override;
    function lookuptext(const aindex: integer): msestring; override;
   public
@@ -206,6 +218,7 @@ type
    procedure setbase(const avalue: numbasety);
    procedure setbitcount(const avalue: integer);
   protected
+   function getdatalbdatakind: lbdatakindty; override;
    procedure setlookupvalue(const aindex: integer); override;
    function lookuptext(const aindex: integer): msestring; override;
   public
@@ -224,6 +237,7 @@ type
    procedure setformat(const avalue: msestring);
    procedure setvaluescale(const avalue: real);
   protected
+   function getdatalbdatakind: lbdatakindty; override;
    procedure setlookupvalue(const aindex: integer); override;
    function lookuptext(const aindex: integer): msestring; override;
   public
@@ -242,6 +256,7 @@ type
    procedure setformat(const avalue: msestring);
    procedure setkind(const avalue: datetimekindty);
   protected
+   function getdatalbdatakind: lbdatakindty; override;
    procedure setlookupvalue(const aindex: integer); override;
    function lookuptext(const aindex: integer): msestring; override;
   public
@@ -255,6 +270,7 @@ type
   private
    fvalue: msestring;
   protected
+   function getdatalbdatakind: lbdatakindty; override;
    procedure setlookupvalue(const aindex: integer); override;
    function lookuptext(const aindex: integer): msestring; override;
   public
@@ -269,6 +285,7 @@ type
    procedure setbase(const avalue: numbasety);
    procedure setbitcount(const avalue: integer);
   protected
+   function getdatalbdatakind: lbdatakindty; override;
    procedure setlookupvalue(const aindex: integer); override;
    function lookuptext(const aindex: integer): msestring; override;
   public
@@ -287,6 +304,7 @@ type
    procedure setformat(const avalue: msestring);
    procedure setvaluescale(const avalue: real);
   protected
+   function getdatalbdatakind: lbdatakindty; override;
    procedure setlookupvalue(const aindex: integer); override;
    function lookuptext(const aindex: integer): msestring; override;
   public
@@ -305,6 +323,7 @@ type
    procedure setformat(const avalue: msestring);
    procedure setkind(const avalue: datetimekindty);
   protected
+   function getdatalbdatakind: lbdatakindty; override;
    procedure setlookupvalue(const aindex: integer); override;
    function lookuptext(const aindex: integer): msestring; override;
   public
@@ -449,6 +468,21 @@ begin
  inherited;
 end;
 
+function tdblookuplb.getlbdatakind(const apropname: string): lbdatakindty;
+begin
+ if apropname = 'lookupkeyfieldno' then begin
+  result:= getkeylbdatakind;
+ end
+ else begin
+  result:= getdatalbdatakind;
+ end;
+end;
+
+function tdblookuplb.getlookupbuffer: tcustomlookupbuffer;
+begin
+ result:= flookupbuffer;
+end;
+
 { tdblookup32lb }
 
 procedure tdblookup32lb.updatelookupvalue;
@@ -514,6 +548,11 @@ begin
  afieldtypes:= integerfields;
 end;
 
+function tdblookup32lb.getkeylbdatakind: lbdatakindty;
+begin
+ result:= lbdk_integer;
+end;
+
 { tdblookup64lb }
 
 procedure tdblookup64lb.updatelookupvalue;
@@ -577,6 +616,11 @@ end;
 procedure tdblookup64lb.getfieldtypes(var afieldtypes: fieldtypesty);
 begin
  afieldtypes:= integerfields;
+end;
+
+function tdblookup64lb.getkeylbdatakind: lbdatakindty;
+begin
+ result:= lbdk_int64;
 end;
 
 { tdblookupstrlb }
@@ -645,6 +689,11 @@ begin
  afieldtypes:= textfields;
 end;
 
+function tdblookupstrlb.getkeylbdatakind: lbdatakindty;
+begin
+ result:= lbdk_text;
+end;
+
 { tdbstringlookuplb }
 
 procedure tdbstringlookuplb.setlookupvalue(const aindex: integer);
@@ -660,6 +709,11 @@ end;
 function tdbstringlookuplb.lookuptext(const aindex: integer): msestring;
 begin
  result:= flookupbuffer.textvaluephys(flookupvaluefieldno,aindex);
+end;
+
+function tdbstringlookuplb.getdatalbdatakind: lbdatakindty;
+begin
+ result:= lbdk_text;
 end;
 
 { tdbintegerlookuplb }
@@ -703,6 +757,11 @@ begin
  end;
 end;
 
+function tdbintegerlookuplb.getdatalbdatakind: lbdatakindty;
+begin
+ result:= lbdk_integer;
+end;
+
 { tdbreallookuplb }
 
 constructor tdbreallookuplb.create(aowner: tcomponent);
@@ -737,6 +796,11 @@ procedure tdbreallookuplb.setvaluescale(const avalue: real);
 begin
  fvaluescale:= avalue;
  formatchanged;
+end;
+
+function tdbreallookuplb.getdatalbdatakind: lbdatakindty;
+begin
+ result:= lbdk_float;
 end;
 
 { tdatetimelookuplb }
@@ -778,6 +842,11 @@ begin
  end;
 end;
 
+function tdbdatetimelookuplb.getdatalbdatakind: lbdatakindty;
+begin
+ result:= lbdk_float;
+end;
+
 { tdbstringlookup64lb }
 
 procedure tdbstringlookup64lb.setlookupvalue(const aindex: integer);
@@ -793,6 +862,11 @@ end;
 function tdbstringlookup64lb.lookuptext(const aindex: integer): msestring;
 begin
  result:= flookupbuffer.textvaluephys(flookupvaluefieldno,aindex);
+end;
+
+function tdbstringlookup64lb.getdatalbdatakind: lbdatakindty;
+begin
+ result:= lbdk_text;
 end;
 
 { tdbintegerlookup64lb }
@@ -836,6 +910,11 @@ begin
  end;
 end;
 
+function tdbintegerlookup64lb.getdatalbdatakind: lbdatakindty;
+begin
+ result:= lbdk_integer;
+end;
+
 { tdbreallookup64lb }
 
 constructor tdbreallookup64lb.create(aowner: tcomponent);
@@ -870,6 +949,11 @@ procedure tdbreallookup64lb.setvaluescale(const avalue: real);
 begin
  fvaluescale:= avalue;
  formatchanged;
+end;
+
+function tdbreallookup64lb.getdatalbdatakind: lbdatakindty;
+begin
+ result:= lbdk_float;
 end;
 
 { tdatetimelookup64lb }
@@ -911,6 +995,11 @@ begin
  end;
 end;
 
+function tdbdatetimelookup64lb.getdatalbdatakind: lbdatakindty;
+begin
+ result:= lbdk_float;
+end;
+
 { tdbstringlookupstrlb }
 
 function tdbstringlookupstrlb.lookuptext(const aindex: integer): msestring;
@@ -926,6 +1015,11 @@ begin
  else begin
   fvalue:= flookupbuffer.textvaluephys(flookupvaluefieldno,aindex);
  end;
+end;
+
+function tdbstringlookupstrlb.getdatalbdatakind: lbdatakindty;
+begin
+ result:= lbdk_text;
 end;
 
 { tdbintegerlookupstrlb }
@@ -969,6 +1063,11 @@ begin
  end;
 end;
 
+function tdbintegerlookupstrlb.getdatalbdatakind: lbdatakindty;
+begin
+ result:= lbdk_integer;
+end;
+
 { tdbreallookupstrlb }
 
 constructor tdbreallookupstrlb.create(aowner: tcomponent);
@@ -1003,6 +1102,11 @@ procedure tdbreallookupstrlb.setvaluescale(const avalue: real);
 begin
  fvaluescale:= avalue;
  formatchanged;
+end;
+
+function tdbreallookupstrlb.getdatalbdatakind: lbdatakindty;
+begin
+ result:= lbdk_float;
 end;
 
 { tdatetimelookupstrlb }
@@ -1042,6 +1146,11 @@ begin
   fkind:= avalue;
   formatchanged;
  end;
+end;
+
+function tdbdatetimelookupstrlb.getdatalbdatakind: lbdatakindty;
+begin
+ result:= lbdk_float;
 end;
 
 end.

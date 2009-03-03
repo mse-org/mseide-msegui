@@ -153,6 +153,7 @@ type
   public
    function propkind: arraypropkindty; override;
    procedure assign(source: tpersistent); override;
+   function itemar: stringarty;
    property items[const index: integer]: string read getitems write setitems; default;
  end;
 
@@ -964,6 +965,11 @@ end;
 function tstringarrayprop.propkind: arraypropkindty;
 begin
  result:= apk_string;
+end;
+
+function tstringarrayprop.itemar: stringarty;
+begin
+ result:= copy(fitems);
 end;
 
 { tmsestringarrayprop }

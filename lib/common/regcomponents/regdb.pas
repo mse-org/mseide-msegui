@@ -107,7 +107,17 @@ type
   protected
    function nocheck: boolean; override;
  end;
+
+ tlbdropdowncolitemeditor = class(tclasselementeditor)
+  public
+   function getvalue: msestring; override;
+ end;
  
+ tlbdropdowncolseditor = class(tpersistentarraypropertyeditor)
+  protected
+   function geteditorclass: propertyeditorclassty; override;
+ end;
+  
 implementation
 uses
  dbconst,db,mseibconnection,
@@ -124,6 +134,7 @@ uses
 
 type
  tpropertyeditor1 = class(tpropertyeditor);
+ tlbdropdowncol1 = class(tlbdropdowncol);
  
  tnolistdropdowncolpropertyeditor = class(tarraypropertyeditor)
   protected
@@ -216,7 +227,24 @@ type
   protected
    function geteditorclass: propertyeditorclassty; override;
  end;
-    
+
+ tlookupbufferfieldnopropertyeditor = class(tordinalpropertyeditor)
+  private
+   fintf: ilookupbufferfieldinfo;
+   flbdatakind: lbdatakindty;
+  protected
+   function getdefaultstate: propertystatesty; override;
+   function getnames: msestringarty;
+  public
+   constructor create(const adesigner: idesigner;
+        const amodule: tmsecomponent; const acomponent: tcomponent;
+            const aobjectinspector: iobjectinspector;
+            const aprops: propinstancearty; atypeinfo: ptypeinfo); override;
+   function getvalues: msestringarty; override;
+   function getvalue: msestring; override;
+   procedure setvalue(const value: msestring); override;
+ end;
+ 
 procedure Register;
 begin
  registercomponents('DB',[     
@@ -339,6 +367,10 @@ begin
                  tindexfieldnamepropertyeditor);
  registerpropertyeditor(typeinfo(tindexfields),nil,'',tindexfieldspropertyeditor);
  registerpropertyeditor(typeinfo(tlocalindexes),nil,'',tlocalindexespropertyeditor);
+ registerpropertyeditor(typeinfo(lookupbufferfieldnoty),nil,'',
+                     tlookupbufferfieldnopropertyeditor);
+ registerpropertyeditor(typeinfo(tlbdropdowncols),nil,'',
+                     tlbdropdowncolseditor);
 end;
 
 
@@ -1119,6 +1151,129 @@ constructor tdbfieldnamenocalcpropertyeditor.create(const adesigner: idesigner;
 begin
  fnocalc:= true;
  inherited;
+end;
+
+{ tlookupbufferfieldnopropertyeditor }
+
+constructor tlookupbufferfieldnopropertyeditor.create(const adesigner: idesigner;
+               const amodule: tmsecomponent; const acomponent: tcomponent;
+               const aobjectinspector: iobjectinspector;
+               const aprops: propinstancearty; atypeinfo: ptypeinfo);
+begin
+ getcorbainterface(aprops[0].instance,typeinfo(ilookupbufferfieldinfo),fintf);
+ if fintf <> nil then begin
+  flbdatakind:= fintf.getlbdatakind(aprops[0].propinfo^.name);
+  if fintf.getlookupbuffer = nil then begin
+   flbdatakind:= lbdk_none;
+  end;
+ end;
+ inherited;
+end;
+
+function tlookupbufferfieldnopropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate;
+ if flbdatakind <> lbdk_none then begin
+  result:= result + [ps_valuelist,ps_sortlist];
+ end;
+end;
+
+function tlookupbufferfieldnopropertyeditor.getnames: msestringarty;
+var
+ lb1: tcustomlookupbuffer;
+ ar1: stringarty;
+ int1: integer;
+begin
+ ar1:= nil;
+ if fintf <> nil then begin
+  lb1:= fintf.getlookupbuffer;
+  if lb1 <> nil then begin
+   case flbdatakind of
+    lbdk_integer: begin
+     ar1:= lb1.fieldnamesinteger;
+    end;
+    lbdk_int64: begin
+     ar1:= lb1.fieldnamesint64;
+    end;
+    lbdk_float: begin
+     ar1:= lb1.fieldnamesfloat;
+    end;
+    lbdk_text: begin
+     ar1:= lb1.fieldnamestext;
+    end;
+   end;
+  end;
+ end;
+ setlength(result,length(ar1));
+ for int1:= 0 to high(ar1) do begin
+  result[int1]:= ar1[int1];
+ end;
+end;
+
+function tlookupbufferfieldnopropertyeditor.getvalues: msestringarty;
+begin
+ result:= getnames;
+end;
+
+procedure tlookupbufferfieldnopropertyeditor.setvalue(const value: msestring);
+var
+ ar1: msestringarty;
+ int1: integer;
+begin
+ if value <> '' then begin
+  ar1:= getnames;
+  for int1:= 0 to high(ar1) do begin
+   if value = ar1[int1] then begin
+    setordvalue(int1);
+    exit;
+   end;
+  end;
+ end;
+ inherited;
+end;
+
+function tlookupbufferfieldnopropertyeditor.getvalue: msestring;
+var
+ ar1: msestringarty;
+ int1: integer;
+begin
+ result:= inherited getvalue;
+ if fintf <> nil then begin
+  int1:= getordvalue;
+  ar1:= getnames;
+  if (int1 >= 0) and (int1 <= high(ar1)) then begin
+   result:= result+'<'+ar1[int1]+'>';
+  end
+  else begin
+   result:= result+'<>';
+  end;
+ end;
+end;
+
+{ tlbdropdowncolitemeditor }
+
+function tlbdropdowncolitemeditor.getvalue: msestring;
+var
+ lb1: tcustomlookupbuffer;
+ ar1: stringarty;
+begin
+ result:= '<>';
+ with tlbdropdowncol1(getordvalue) do begin
+  lb1:= getlookupbuffer;
+  if lb1 <> nil then begin
+   ar1:= lb1.fieldnamestext;
+   if (fieldno >= 0) and (fieldno <= high(ar1)) then begin
+    result:= '<'+ar1[fieldno]+'>';
+   end;
+  end;
+ end;
+end;
+
+{ tlbdropdowncolseditor }
+
+function tlbdropdowncolseditor.geteditorclass: propertyeditorclassty;
+begin    
+ result:= tlbdropdowncolitemeditor;
 end;
 
 initialization
