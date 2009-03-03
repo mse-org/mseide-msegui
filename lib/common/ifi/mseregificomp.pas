@@ -17,7 +17,7 @@ initialization
  registerclasses([tmodulelink,tformlink,
                      {tpipeifichannel,tsocketpipeifichannel,
                      tsocketclientifichannel,tsocketserverifichannel,}
-                     ttxdataset,trxdataset,ttxdatagrid,
+                     ttxdataset,trxdataset,ttxdatagrid,trxwidgetgrid,
                      tpipeiochannel,tsocketstdiochannel,
                      tsocketclientiochannel,tsocketserveriochannel,
                      tsocketstdio,tsocketclient,

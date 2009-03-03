@@ -101,7 +101,7 @@ type
  
  rxwidgetstatety = (rws_openpending,rws_datareceived,rws_commandsending); 
  rxwidgetstatesty = set of rxwidgetstatety;
- trxwidgetgrid = class(twidgetgrid)
+ trxwidgetgrid = class(twidgetgrid,iifimodulelink)
   private
    fifi: tifiwidgetgridcontroller;
    factive: boolean;
@@ -121,6 +121,8 @@ type
 //   procedure dorowsdatachanged(const acell: gridcoordty; 
 //                                           const acount: integer); override;
    procedure createdatacol(const index: integer; out item: tdatacol); override;
+  //iifimodulelink
+   procedure connectmodule(const sender: tcustommodulelink);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -723,6 +725,11 @@ end;
 procedure trxwidgetgrid.createdatacol(const index: integer; out item: tdatacol);
 begin
  item:= tifiwidgetcol.create(self,fdatacols);
+end;
+
+procedure trxwidgetgrid.connectmodule(const sender: tcustommodulelink);
+begin
+ fifi.connectmodule(sender);
 end;
 
 end.
