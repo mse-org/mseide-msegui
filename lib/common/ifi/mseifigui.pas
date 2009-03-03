@@ -99,7 +99,7 @@ type
                 const source; const noinvalidate: boolean = false); override;
  end;
  
- rxwidgetstatety = (rws_openpending,rws_datareceived,rws_commandsending); 
+ rxwidgetstatety = ({rws_openpending,}rws_datareceived,rws_commandsending); 
  rxwidgetstatesty = set of rxwidgetstatety;
  trxwidgetgrid = class(twidgetgrid,iifimodulelink)
   private
@@ -107,6 +107,7 @@ type
    factive: boolean;
    fistate: rxwidgetstatesty;
    procedure setifi(const avalue: tifiwidgetgridcontroller);
+   procedure setactive1(const avalue: boolean);
    procedure setactive(const avalue: boolean);
   protected
    procedure loaded; override;
@@ -129,7 +130,7 @@ type
 //   procedure post;
   published
    property ifi: tifiwidgetgridcontroller read fifi write setifi;
-   property active: boolean read factive write setactive default false;
+   property active: boolean read factive write setactive1 default false;
  end;
 
 implementation
@@ -436,6 +437,7 @@ begin
   end;
  end;
 end;
+var testvar: trxwidgetgrid;
 
 procedure tifiwidgetgridcontroller.processdata(const adata: pifirecty;
                var adatapo: pchar);
@@ -460,6 +462,7 @@ begin
    ik_griddata: begin
     if (igo_state in foptionsrx) or 
         (answersequence <> 0) and (answersequence = fdatasequence) then begin
+testvar:= trxwidgetgrid(fowner);
      with trxwidgetgrid(fowner) do begin
       beginupdate;
       try
@@ -597,10 +600,10 @@ procedure trxwidgetgrid.setactive(const avalue: boolean);
 begin
  if avalue <> factive then begin
   if avalue then begin
-   if csloading in componentstate then begin
-    include(fistate,rws_openpending);
-   end
-   else begin
+//   if csloading in componentstate then begin
+//    include(fistate,rws_openpending);
+//   end
+//   else begin
     try
      internalopen;
     except
@@ -608,10 +611,10 @@ begin
      raise;
     end;
     factive:= true;
-   end;
+//   end;
   end
   else begin
-   exclude(fistate,rws_openpending);
+//   exclude(fistate,rws_openpending);
    internalclose;
    factive:= false;
   end;
@@ -621,10 +624,12 @@ end;
 procedure trxwidgetgrid.loaded;
 begin
  inherited;
+ {
  if rws_openpending in fistate then begin
   exclude(fistate,rws_openpending);
   active:= true;
  end;
+ }
  fifi.loaded;
 end;
 
@@ -636,7 +641,7 @@ begin
  with fifi do begin
   if cansend then begin
    inititemheader(str1,ik_requestopen,0,0,po1);
-   include(fistate,rws_openpending);
+//   include(fistate,rws_openpending);
    if senddataandwait(str1,fdatasequence) and 
               (rws_datareceived in fistate) then begin
    end
@@ -730,6 +735,13 @@ end;
 procedure trxwidgetgrid.connectmodule(const sender: tcustommodulelink);
 begin
  fifi.connectmodule(sender);
+end;
+
+procedure trxwidgetgrid.setactive1(const avalue: boolean);
+begin
+ if fifi.setactive(avalue) then begin
+  setactive(avalue);
+ end;
 end;
 
 end.

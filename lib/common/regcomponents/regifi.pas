@@ -67,7 +67,17 @@ type
   protected
    function filtercomponent(const acomponent: tcomponent): boolean; override;
  end;
-   
+
+ tifidatacolsitemeditor = class(tmodulelinkitemeditor)
+  protected
+   function getvalue: msestring; override;
+ end;
+ 
+ tifidatacolseditor = class(tpersistentarraypropertyeditor)
+  protected
+   function geteditorclass: propertyeditorclassty; override;
+ end;
+    
 procedure register;
 begin
  registercomponents('Ifi',[tmodulelink,tformlink,
@@ -90,6 +100,7 @@ begin
                  tifitxactioncompeditor);
  registerpropertyeditor(typeinfo(tcustomiochannel),tcustomiochannel,'localconn',
                  tlocalconncompeditor);
+ registerpropertyeditor(typeinfo(tifidatacols),nil,'',tifidatacolseditor);
 // registerpropertyeditor(typeinfo(tififieldoptions),tifidscontroller,'',
 //                        tififieldoptionseditor);
 end;
@@ -237,6 +248,22 @@ function tlocalconncompeditor.filtercomponent(
                                     const acomponent: tcomponent): boolean;
 begin
  result:= acomponent <> fcomponent;
+end;
+
+{ tifidatacolsitemeditor }
+
+function tifidatacolsitemeditor.getvalue: msestring;
+begin
+ with tifidatacol(getordvalue) do begin
+  result:= '<'+name+'>';
+ end;
+end;
+
+{ tifidatacolseditor }
+
+function tifidatacolseditor.geteditorclass: propertyeditorclassty;
+begin
+ result:= tifidatacolsitemeditor;
 end;
 
 initialization

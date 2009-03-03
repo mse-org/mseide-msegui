@@ -504,9 +504,11 @@ type
    procedure checkdatalist; overload;
    procedure checkdatalist(const akind: ifidatakindty); overload;
    procedure dochange(const sender: tdatalist; const aindex: integer);
+   
   public
    destructor destroy; override;
    property datalist: tdatalist read getdatalist;
+   
    property asinteger[const index: integer]: integer read getasinteger 
                                write setasinteger;
    property asint64[const index: integer]: int64 read getasint64 
@@ -620,6 +622,7 @@ type
    fonrowsmoved: ifigridblockmovedeventty;
    fonrowindexchanged: ifigrideventty;
    fonrowstatechanged: ifigriditemeventty;
+   fonbeforeopen: ifigrideventty;
    procedure rowstatechanged(const aindex: integer);
    procedure setifi(const avalue: ttxdatagridcontroller);
    procedure setdatacols(const avalue: tifidatacols);
@@ -639,6 +642,10 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+
+   procedure beginupdate;
+   procedure endupdate;   
+   procedure clear;
    procedure moverow(const curindex,newindex: integer; const count: integer = 1);
    procedure insertrow(index: integer; count: integer = 1);
    procedure deleterow(index: integer; count: integer = 1);
@@ -668,6 +675,7 @@ type
                            write fonrowindexchanged;
    property onrowstatechanged: ifigriditemeventty read fonrowstatechanged 
                            write fonrowstatechanged;
+   property onbeforeopen: ifigrideventty read fonbeforeopen write fonbeforeopen;
  end;
    
 function ifidatatodatalist(const akind: datatypty; const arowcount: integer;
@@ -684,7 +692,7 @@ function decodegridcommanddata(const adata: pchar; out akind: gridcommandkindty;
 function encodecolchangedata(const acolname: string; const arow: integer;
                                      const alist: tdatalist): string;
 function encoderowstatedata(const arow: integer; const astate: rowstatety): string;
- 
+
 implementation
 uses
  sysutils,msestream,msesysutils,msetmpmodules,msebits;
@@ -2607,6 +2615,21 @@ begin
  end;
 end;
 
+procedure ttxdatagrid.beginupdate;
+begin
+ fifi.beginupdate;
+end;
+
+procedure ttxdatagrid.endupdate;
+begin
+ fifi.endupdate;
+end;
+
+procedure ttxdatagrid.clear;
+begin
+ rowcount:= 0;
+end;
+
 { tifigridcontroller }
 
 function tifigridcontroller.getifireckinds: ifireckindsty;
@@ -2667,6 +2690,18 @@ begin
  with adata^.header do begin
   case kind of
    ik_requestopen: begin
+    with ttxdatagrid(fowner) do begin
+     if canevent(tmethod(fonbeforeopen)) then begin
+      inc(fcommandlock);
+      inc(fupdating);
+      try
+       fonbeforeopen(ttxdatagrid(fowner));
+      finally
+       dec(fcommandlock);
+       dec(fupdating);
+      end;      
+     end;
+    end;
     senddata(encodegriddata(sequence));
    end;
    ik_griddata: begin

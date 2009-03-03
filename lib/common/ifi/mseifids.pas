@@ -404,10 +404,13 @@ type
    property clientafteropen: tdatasetnotifyevent read fclientafteropen 
                        write fclientafteropen;
  end;
+
+procedure loadtxdatagridfromdataset(const agrid: ttxdatagrid;
+                                                const asource: tdataset);
  
 implementation
 uses
- sysutils,msedatalist,dbconst,mseapplication;
+ sysutils,msedatalist,dbconst,mseapplication,msereal;
 type
  tmsestringfield1 = class(tmsestringfield);
  
@@ -423,6 +426,7 @@ const
  openflags = [ids_openpending,ids_fielddefsreceived,ids_append];
  
 type
+ ttxdatagrid1 = class(ttxdatagrid);
  
  fdefitemty = record
   datatype: tfieldtype;
@@ -435,6 +439,139 @@ type
   items: datarecty; //dummy
  end;
  pfdefdataty = ^fdefdataty;
+
+fieldtoificolprocty = procedure(const acol: tifidatacol; const aindex: integer;
+                                      const afield: tfield);
+fieldtoificolprocarty = array of fieldtoificolprocty;
+
+procedure storemsestringfield(const acol: tifidatacol; const aindex: integer;
+                                        const afield: tfield);
+begin
+ acol.asmsestring[aindex]:= tmsestringfield(afield).asmsestring;
+end;
+
+procedure storestringfield(const acol: tifidatacol; const aindex: integer;
+                                        const afield: tfield);
+begin
+ acol.asmsestring[aindex]:= afield.asstring;
+end;
+
+procedure storelongintfield(const acol: tifidatacol; const aindex: integer;
+                                        const afield: tfield);
+begin
+ acol.asinteger[aindex]:= afield.aslongint;
+end;
+
+procedure storelargintfield(const acol: tifidatacol; const aindex: integer;
+                                        const afield: tfield);
+begin
+ acol.asint64[aindex]:= afield.aslargeint;
+end;
+
+procedure storefloatfield(const acol: tifidatacol; const aindex: integer;
+                                        const afield: tfield);
+begin
+ if afield.isnull then begin
+  acol.asreal[aindex]:= emptyreal;
+ end
+ else begin
+  acol.asreal[aindex]:= afield.asfloat;
+ end;
+end;
+
+procedure storebcdfield(const acol: tifidatacol; const aindex: integer;
+                                        const afield: tfield);
+begin
+ acol.ascurrency[aindex]:= afield.ascurrency;
+end;
+
+procedure loadtxdatagridfromdataset(const agrid: ttxdatagrid;
+                                                const asource: tdataset);
+type
+ fieldlinkinfoty = record
+  col: tifidatacol;
+  field: tfield;
+  proc: fieldtoificolprocty;
+ end;
+ fieldlinkinfoarty = array of fieldlinkinfoty;
+ 
+var
+ bm: string;
+ ar1: fieldlinkinfoarty;
+ int1,int2: integer;
+ str1: string;
+ bo1: boolean;
+begin
+ setlength(ar1,agrid.datacols.count); //max
+ int2:= 0;
+ for int1:= 0 to high(ar1) do begin
+  bo1:= false;
+  with ar1[int2] do begin
+   col:= agrid.datacols[int1];
+   str1:= col.name;
+   if str1 <> '' then begin
+    field:= asource.findfield(str1);
+    if field <> nil then begin
+     bo1:= true;
+     if field is tmsestringfield then begin
+      proc:= @storemsestringfield;
+     end
+     else begin
+      case field.datatype of
+       ftboolean,ftsmallint,ftinteger,ftword: begin
+        proc:= @storelongintfield;
+       end;
+       ftstring: begin
+        proc:= @storestringfield;
+       end;
+       ftbcd: begin
+        proc:= @storebcdfield;
+       end;
+       ftfloat,fttime,ftdate,ftdatetime: begin
+        proc:= @storefloatfield;
+       end;
+       else begin
+        bo1:= false;
+       end;
+      end;
+     end;      
+    end;
+   end;
+   if bo1 then begin
+    inc(int2);
+   end;
+  end;
+ end;
+ setlength(ar1,int2);
+ 
+ with ttxdatagrid1(agrid) do begin
+  asource.disablecontrols;
+  bm:= asource.bookmark;
+  try
+   beginupdate;
+   try
+    clear;
+    asource.first;
+    int2:= 0;
+    while not asource.eof do begin
+     agrid.rowcount:= int2+1;     
+     for int1:= 0 to high(ar1) do begin
+      with ar1[int1] do begin
+       proc(col,int2,field);
+      end;
+     end;
+     asource.next;
+     inc(int2);
+    end;
+   finally
+    endupdate;
+   end;
+  finally
+   asource.bookmark:= bm;
+   asource.enablecontrols;
+  end;
+ end;
+end; 
  
 function decodefielddefs(const adata: pfdefdataty;
                   const fielddefs: tfielddefs; out asize: integer): boolean;
