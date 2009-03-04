@@ -1161,9 +1161,9 @@ begin
 //               shl listviewoptionshift));
  item.options:= coloptionsty(
       replacebits(
-      {$ifdef FPC}longword{$else}word{$endif}(foptions),
+      {$ifdef FPC}longword{$else}longword{$endif}(foptions),
       {$ifdef FPC}longword{$else}longword{$endif}(item.options),
-      {$ifdef FPC}longword{$else}word{$endif}(coloptionsmask)));
+      {$ifdef FPC}longword{$else}longword{$endif}(coloptionsmask)));
  if fcellframe <> nil then begin
   item.frame:= fcellframe;
  end;

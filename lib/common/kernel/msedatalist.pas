@@ -585,8 +585,6 @@ type
   private
    function getrowstate(const index: integer): rowstatety;
    procedure setrowstate(const index: integer; const Value: rowstatety);
-   function gethidden(const index: integer): boolean;
-   function getfoldlevel(const index: integer): foldlevelty;
    function getfoldinfoar: bytearty;
    function getcolor(const index: integer): rowstatenumty;
    procedure setcolor(const index: integer; const avalue: rowstatenumty);
@@ -594,6 +592,9 @@ type
    procedure setfont(const index: integer; const avalue: rowstatenumty);
    function getreadonly(const index: integer): boolean;
    procedure setreadonly(const index: integer; const avalue: boolean);
+  protected
+   function gethidden(const index: integer): boolean;
+   function getfoldlevel(const index: integer): foldlevelty;
   public
    constructor create; override;
    procedure assign(source: tpersistent); override;
