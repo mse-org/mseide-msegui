@@ -437,7 +437,8 @@ const
 {$endif}
 
  ifidskinds = [ik_requestfielddefs,ik_requestopen,ik_fielddefsdata,
-               ik_fieldrec,ik_dsdata,ik_postresult,ik_coldatachange];
+               ik_fieldrec,ik_dsdata,ik_postresult,ik_coldatachange,
+               ik_gridcommand];
  openflags = [ids_openpending,ids_fielddefsreceived,ids_append];
  
 type
@@ -983,6 +984,8 @@ var
  int1: integer;
  str1: string;
  field1: tfield;
+ ckind1: gridcommandkindty;
+ source1,dest1,count1: integer;
 begin
  with adata^ do begin
   case header.kind of
@@ -1027,6 +1030,32 @@ begin
        exclude(fistate,ids_remotedata);
       end;
      end; 
+    end;
+   end;
+   ik_gridcommand: begin
+    inc(adatapo,decodegridcommanddata(adatapo,ckind1,source1,dest1,count1));
+    include(fistate,ids_remotedata);
+    try
+     with tdataset(fowner) do begin
+      case ckind1 of
+       gck_insertrow: begin
+        if dest1 >= recordcount then begin
+         append;
+        end
+        else begin
+         fdscontroller.recnonullbased:= dest1;
+         insert;
+        end;
+        post;
+       end;
+       gck_deleterow: begin
+        fdscontroller.recnonullbased:= dest1;
+        delete;
+       end;
+      end;
+     end;
+    finally
+     exclude(fistate,ids_remotedata);
     end;
    end;
   end;
