@@ -405,8 +405,22 @@ type
                        write fclientafteropen;
  end;
 
+ fdefitemty = record
+  datatype: tfieldtype;
+  size: integer;
+  name: ifinamety;
+ end; 
+ pfdefitemty = ^fdefitemty;
+ fdefdataty = record
+  count: integer;
+  items: datarecty; //dummy
+ end;
+ pfdefdataty = ^fdefdataty;
+
 procedure loadtxdatagridfromdataset(const agrid: ttxdatagrid;
                                                 const asource: tdataset);
+function decodefielddefs(const adata: pfdefdataty;
+                  const fielddefs: tfielddefs; out asize: integer): boolean;
  
 implementation
 uses
@@ -428,18 +442,6 @@ const
 type
  ttxdatagrid1 = class(ttxdatagrid);
  
- fdefitemty = record
-  datatype: tfieldtype;
-  size: integer;
-  name: ifinamety;
- end; 
- pfdefitemty = ^fdefitemty;
- fdefdataty = record
-  count: integer;
-  items: datarecty; //dummy
- end;
- pfdefdataty = ^fdefdataty;
-
 fieldtoificolprocty = procedure(const acol: tifidatacol; const aindex: integer;
                                       const afield: tfield);
 fieldtoificolprocarty = array of fieldtoificolprocty;
@@ -684,9 +686,6 @@ begin
  for int1:= 0 to high(ffielddefindex) do begin
   int2:= int2 + length(fielddefs[ffielddefindex[int1]].name);
  end;
-if int1 = 0 then begin
- beep;
-end;
  setlength(result,sizeof(fdefdataty)+length(ffielddefindex)*sizeof(fdefitemty)+
                               int2*6);
  with pfdefdataty(result)^ do begin
@@ -2334,7 +2333,7 @@ var
  po1: pointer;
 begin
  result:= true;
- fbrecordcount:= adata^.count;
+ fbrecordcount:= adata^.header.count;
  setlength(fbufs,fbrecordcount);
  po1:= @adata^.data;
  for int1:= 0 to high(fbufs) do begin

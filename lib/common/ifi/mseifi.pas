@@ -217,9 +217,12 @@ type
   header: itemheaderty;
   data: gridcommanddatadataty;
  end;
-  
- recdataty = record
+
+ recdataheaderty = record
   count: integer; //recordcount
+ end;  
+ recdataty = record
+  header: recdataheaderty;
   data: datarecty; //dummy, array[count] of 
                             //array[fielddef count] of ifidataty
  end;

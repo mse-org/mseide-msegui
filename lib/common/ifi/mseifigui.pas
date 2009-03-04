@@ -98,18 +98,19 @@ type
    procedure setdata(arow: integer;
                 const source; const noinvalidate: boolean = false); override;
  end;
- 
+ ifiwidgetcolarty = array of tifiwidgetcol;
+  
  rxwidgetstatety = ({rws_openpending,}rws_datareceived,rws_commandsending); 
  rxwidgetstatesty = set of rxwidgetstatety;
  trxwidgetgrid = class(twidgetgrid,iifimodulelink)
   private
-   fifi: tifiwidgetgridcontroller;
    factive: boolean;
    fistate: rxwidgetstatesty;
-   procedure setifi(const avalue: tifiwidgetgridcontroller);
    procedure setactive1(const avalue: boolean);
    procedure setactive(const avalue: boolean);
   protected
+   fifi: tifiwidgetgridcontroller;
+   procedure setifi(const avalue: tifiwidgetgridcontroller);
    procedure loaded; override;
    procedure internalopen;
    procedure internalclose;
@@ -437,7 +438,6 @@ begin
   end;
  end;
 end;
-var testvar: trxwidgetgrid;
 
 procedure tifiwidgetgridcontroller.processdata(const adata: pifirecty;
                var adatapo: pchar);
@@ -462,7 +462,6 @@ begin
    ik_griddata: begin
     if (igo_state in foptionsrx) or 
         (answersequence <> 0) and (answersequence = fdatasequence) then begin
-testvar:= trxwidgetgrid(fowner);
      with trxwidgetgrid(fowner) do begin
       beginupdate;
       try
@@ -581,7 +580,9 @@ end;
 
 constructor trxwidgetgrid.create(aowner: tcomponent);
 begin
- fifi:= tifiwidgetgridcontroller.create(self);
+ if fifi = nil then begin
+  fifi:= tifiwidgetgridcontroller.create(self);
+ end;
  inherited;
 end;
 

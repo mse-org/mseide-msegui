@@ -5,7 +5,7 @@ implementation
 uses
  classes,mseifi,msedesignintf,msepropertyeditors,msestrings,msedesigner,
  mseclasses,mseifids,mseifiglob,msegui,typinfo,msesockets,mseifigui,
- mseifilink,msessl,db,regifi_bmp;
+ mseifilink,msessl,db,regifi_bmp,mseifidbgui;
  
 type
  tmodulelinkitemeditor = class(tclasselementeditor)
@@ -81,7 +81,7 @@ type
 procedure register;
 begin
  registercomponents('Ifi',[tmodulelink,tformlink,
-                     trxwidgetgrid,ttxdatagrid,
+                     trxwidgetgrid,tdbrxwidgetgrid,ttxdatagrid,
                      {tpipeifichannel,tsocketpipeifichannel,
                      tsocketclientifichannel,tsocketserverifichannel,}
                      ttxdataset,trxdataset,ttxsqlquery,
