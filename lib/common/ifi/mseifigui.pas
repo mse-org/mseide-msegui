@@ -105,10 +105,10 @@ type
  trxwidgetgrid = class(twidgetgrid,iifimodulelink)
   private
    factive: boolean;
-   fistate: rxwidgetstatesty;
    procedure setactive1(const avalue: boolean);
    procedure setactive(const avalue: boolean);
   protected
+   fistate: rxwidgetstatesty;
    fifi: tifiwidgetgridcontroller;
    procedure setifi(const avalue: tifiwidgetgridcontroller);
    procedure loaded; override;

@@ -119,6 +119,7 @@ type
 //   procedure setfieldoptions(const avalue: tififieldoptions);
   protected
    fistate: ifidsstatesty;
+   fdscontroller: tdscontroller;
    procedure requestfielddefsreceived(const asequence: sequencety);
    procedure processfieldrecdata(const asequence: sequencety;
                                        const adata: pfieldrecdataty);
@@ -436,7 +437,7 @@ const
 {$endif}
 
  ifidskinds = [ik_requestfielddefs,ik_requestopen,ik_fielddefsdata,
-               ik_fieldrec,ik_dsdata,ik_postresult];
+               ik_fieldrec,ik_dsdata,ik_postresult,ik_coldatachange];
  openflags = [ids_openpending,ids_fielddefsreceived,ids_append];
  
 type
@@ -665,8 +666,13 @@ end;
 
 constructor tifidscontroller.create(const aowner: tdataset;
                     const aintf: iifidscontroller);
+var
+ intf1: igetdscontroller;
 begin
  fintf:= aintf;
+ if getcorbainterface(aowner,typeinfo(igetdscontroller),intf1) then begin
+  fdscontroller:= intf1.getcontroller;
+ end;
 // ffieldoptions:= tififieldoptions.create(typeinfo(ififieldoptionsty));
  inherited create(aowner);
 end;
@@ -747,9 +753,9 @@ begin                 //postrecord
  end;
  inititemheader(str1,ik_fieldrec,0,int3+sizeof(fieldrecdataty),
                                      pchar(po1));
- po1^.kind:= akind;
- po1^.recno:= tdataset(fowner).recno;
- po1^.count:= int2;
+ po1^.header.kind:= akind;
+ po1^.header.rowindex:= fdscontroller.recnonullbased;
+ po1^.header.count:= int2;
  po2:= @po1^.data;
  for int1:= 0 to int2 - 1 do begin
   int3:= length(ar1[int1]);
@@ -838,17 +844,58 @@ begin
  end;
 end;
 
+function ifidatatofield(const datapo: pifidataty; const afield: tfield): integer;
+var
+ str1: string;
+ mstr1: msestring;
+ integer1: integer;
+ int641: int64;
+ rea1: real;
+ cu1: currency;
+begin
+ case datapo^.header.kind of
+  idk_null: begin
+   afield.clear;
+   result:= sizeof(ifidataty);
+  end;
+  idk_integer: begin
+   result:= decodeifidata(datapo,integer1);
+   afield.asinteger:= integer1;
+  end;
+  idk_int64: begin
+   result:= decodeifidata(datapo,int641);
+   afield.aslargeint:= int641;
+  end;
+  idk_real: begin
+   result:= decodeifidata(datapo,rea1);
+   afield.asfloat:= rea1;
+  end;
+  idk_currency: begin
+   result:= decodeifidata(datapo,cu1);
+   afield.ascurrency:= cu1;
+  end;
+  idk_bytes: begin
+   result:= decodeifidata(datapo,str1);
+   afield.asstring:= str1;
+  end;
+  idk_msestring: begin
+   result:= decodeifidata(datapo,mstr1);
+   if afield is tmsestringfield then begin
+    tmsestringfield(afield).asmsestring:= mstr1;
+   end
+   else begin
+    afield.asstring:= mstr1;
+   end;
+  end;
+ end;
+end;
+
 procedure tifidscontroller.processfieldrecdata(const asequence: sequencety;
                                                    const adata: pfieldrecdataty);
 var
  int1: integer;
  index1: integer;
  po1: pchar;
- mstr1: msestring;
- integer1: integer;
- int641: int64;
- rea1: real;
- cu1: currency;
  str1: string; 
  field1: tfield;
  bo1: boolean;
@@ -862,66 +909,32 @@ begin
     bm:= bookmark;
     include(fistate,ids_remotedata);
     try
-     if adata^.kind = frk_delete then begin
-      recno:= adata^.recno;
+     if adata^.header.kind = frk_delete then begin
+      fdscontroller.recnonullbased:= adata^.header.rowindex;
       delete;
      end
      else begin
-      bo1:= adata^.kind = frk_insert;
+      bo1:= adata^.header.kind = frk_insert;
       if bo1 then begin
-       if adata^.recno >= recordcount then begin
+       if adata^.header.rowindex >= recordcount-1 then begin
         append;
        end
        else begin
-        recno:= adata^.recno;
+        fdscontroller.recnonullbased:= adata^.header.rowindex;
         insert;
        end;
       end
       else begin
-       recno:= adata^.recno;
+       fdscontroller.recnonullbased:= adata^.header.rowindex;
        edit;
       end;
       po1:= @adata^.data;
-      for int1:= 0 to adata^.count - 1 do begin
+      for int1:= 0 to adata^.header.count - 1 do begin
        index1:= pfielddataty(po1)^.header.index;
        if (index1 >= 0) and (index1 <= high(fbindings)) then begin
         field1:= fields[fbindings[index1]];
         inc(po1,sizeof(mseifi.fielddataty.header));
-        case pifidataty(po1)^.header.kind of
-         idk_null: begin
-          field1.clear;
-          inc(po1,sizeof(ifidataty));
-         end;
-         idk_integer: begin
-          inc(po1,decodeifidata(pifidataty(po1),integer1));
-          field1.asinteger:= integer1;
-         end;
-         idk_int64: begin
-          inc(po1,decodeifidata(pifidataty(po1),int641));
-          field1.aslargeint:= int641;
-         end;
-         idk_real: begin
-          inc(po1,decodeifidata(pifidataty(po1),rea1));
-          field1.asfloat:= rea1;
-         end;
-         idk_currency: begin
-          inc(po1,decodeifidata(pifidataty(po1),cu1));
-          field1.ascurrency:= cu1;
-         end;
-         idk_bytes: begin
-          inc(po1,decodeifidata(pifidataty(po1),str1));
-          field1.asstring:= str1;
-         end;
-         idk_msestring: begin
-          inc(po1,decodeifidata(pifidataty(po1),mstr1));
-          if field1 is tmsestringfield then begin
-           tmsestringfield(field1).asmsestring:= mstr1;
-          end
-          else begin
-           field1.asstring:= mstr1;
-          end;
-         end;
-        end;
+        inc(po1,ifidatatofield(pifidataty(po1),field1));
         setfieldisnull(pbyte(fintf.getmodifiedfields),ffielddefindex[index1]);
                      //reset changeflag
        end;
@@ -930,7 +943,7 @@ begin
       post;
      end;
      if (irxo_postecho in foptions) and 
-            (adata^.kind in [frk_insert,frk_edit]) then begin
+            (adata^.header.kind in [frk_insert,frk_edit]) then begin
       str1:= fintf.getmodifiedfields;
       if not isnullstring(str1) then begin
        application.postevent(tpostechoevent.create(str1,bookmark,
@@ -966,6 +979,10 @@ begin
 end;
 
 procedure tifidscontroller.processdata(const adata: pifirecty; var adatapo: pchar);
+var
+ int1: integer;
+ str1: string;
+ field1: tfield;
 begin
  with adata^ do begin
   case header.kind of
@@ -990,6 +1007,27 @@ begin
    end;
    ik_fieldrec: begin
     processfieldrecdata(header.sequence,pfieldrecdataty(adatapo));
+   end;
+   ik_coldatachange: begin
+    int1:= pcolitemdataty(adatapo)^.header.row;
+    ifinametostring(@pcolitemdataty(adatapo)^.header.name,str1);
+    adatapo:= @pcolitemdataty(adatapo)^.data+length(str1);
+    with tdataset(fowner) do begin
+     field1:= findfield(str1);
+     if field1 <> nil then begin
+      include(fistate,ids_remotedata);
+      recno:= int1+1;
+      try
+       if not (state in [dsedit,dsinsert]) then begin
+        edit;
+       end;
+       inc(adatapo,ifidatatofield(pifidataty(adatapo),field1));
+       post;
+      finally
+       exclude(fistate,ids_remotedata);
+      end;
+     end; 
+    end;
    end;
   end;
  end;
@@ -2527,9 +2565,9 @@ end;
 
 constructor ttxsqlquery.create(aowner: tcomponent);
 begin
+ inherited;
  fificontroller:= tifidscontroller.create(self,iifidscontroller(self));
  include(fificontroller.fistate,ids_sendpostresult);
- inherited;
 end;
 
 destructor ttxsqlquery.destroy;

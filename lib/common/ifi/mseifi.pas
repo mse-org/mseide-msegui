@@ -154,10 +154,13 @@ type
   header: itemheaderty;
  end;   
  fieldreckindty = (frk_edit,frk_insert,frk_delete);  
- fieldrecdataty = record
+ fieldrecheaderty = record
   kind: fieldreckindty;
-  recno: integer;
+  rowindex: integer; //null based
   count: integer; 
+ end;
+ fieldrecdataty = record
+  header: fieldrecheaderty;
   data: datarecty; //dummy, array[count] of fielddataty
  end;
  pfieldrecdataty = ^fieldrecdataty;
@@ -523,10 +526,8 @@ procedure initifirec(out arec: string; const akind: ifireckindty;
 procedure inititemheader(const atag: integer; const aname: string; 
        out arec: string; const akind: ifireckindty; 
         const asequence: sequencety; const datasize: integer; out datapo: pchar);
-function ifinametostring(const source: pifinamety;
-               out dest: string): integer;
-function stringtoifiname(const source: string;
-               const dest: pifinamety): integer;
+function ifinametostring(const source: pifinamety; out dest: string): integer;
+function stringtoifiname(const source: string; const dest: pifinamety): integer;
 
 function encodeifinull(const headersize: integer = 0): string;               
 function encodeifidata(const avalue: integer; 
@@ -710,6 +711,9 @@ begin
   dl_msestring: begin
    result:= encodeifidata(tmsestringdatalist(alist).items[aindex],headersize);
   end;
+  dl_real: begin
+   result:= encodeifidata(trealdatalist(alist).items[aindex],headersize);
+  end;
   else begin
    result:= '';
   end;
@@ -892,6 +896,7 @@ function decodeifidata(const source: pifidataty; const aindex: integer;
                                      //alist can be nil
 var
  int1: integer;
+ rea1: real;
  mstr1: msestring;
 begin
  result:= 0;
@@ -909,6 +914,12 @@ begin
      tmsestringdatalist(alist)[aindex]:= mstr1;
     end;
    end;    
+   idk_real: begin
+    if alist.datatyp = dl_real then begin
+     result:= decodeifidata(source,rea1);
+     trealdatalist(alist)[aindex]:= rea1;
+    end;
+   end;
   end;
  end;
  if result = 0 then begin

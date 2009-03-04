@@ -49,7 +49,7 @@ end;
 
 function tifidbwidgetgridcontroller.getifireckinds: ifireckindsty;
 begin
- result:= inherited getifireckinds + [ik_dsdata];
+ result:= inherited getifireckinds + [ik_dsdata,ik_fieldrec];
 end;
 
 procedure tifidbwidgetgridcontroller.decoderecord(const aindex: integer;
@@ -64,10 +64,11 @@ begin
 end;
 
 procedure tifidbwidgetgridcontroller.processdata(const adata: pifirecty;
-               var adatapo: pchar);
+                                                           var adatapo: pchar);
 var
  fielddefs1: tfielddefs;
- int1: integer;
+ int1,int2: integer;
+ index1: integer;
 begin
  with adata^.header do begin
   case kind of
@@ -91,6 +92,7 @@ begin
          for int1:= 0 to rowcount - 1 do begin
           decoderecord(int1,pifidataty(adatapo));
          end;
+         include(fistate,rws_datareceived);
         finally
          dec(fcommandlock);
          endupdate;
@@ -101,6 +103,35 @@ begin
     finally
      fielddefs1.free;
     end;    
+   end;
+   ik_fieldrec: begin
+    with pfieldrecdataty(adatapo)^.header do begin
+     index1:= rowindex;
+     int2:= count;
+     with tdbrxwidgetgrid(fowner) do begin
+      case kind of
+       frk_insert: begin
+        insertrow(index1);
+       end;
+       frk_delete: begin
+        deleterow(index1);
+        exit;
+       end;
+      end;      
+     end;
+    end;
+    adatapo:= @pfieldrecdataty(adatapo)^.data;
+    inc(fcommandlock);
+    try
+     for int1:= 0 to int2 - 1 do begin
+      with pfielddataty(adatapo)^ do begin
+       inc(adatapo,decodeifidata(@data,index1,fcolbinding[header.index]) + 
+                     sizeof(fielddataheaderty));
+      end;
+     end;
+    finally
+     dec(fcommandlock);
+    end;
    end;
    else begin
     inherited;
