@@ -2133,7 +2133,7 @@ begin
        if answersequence <> 0 then begin
         channel.synchronizer.answerreceived(answersequence);
        end;
-       rxdata:= '';
+//       rxdata:= '';
       end;
      end;
     end;

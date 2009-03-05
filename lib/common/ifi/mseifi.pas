@@ -900,7 +900,7 @@ var
  mstr1: msestring;
 begin
  result:= 0;
- if alist <> nil then begin
+ if (alist <> nil) and (aindex < alist.count) then begin
   case source^.header.kind of
    idk_integer: begin
     if alist.datatyp = dl_integer then begin
@@ -1068,7 +1068,7 @@ begin
  str1:= frxdata;
  frxdata:= adata;
  try
-  sendchangeevent(oe_dataready);
+  sendchangeevent(oe_dataready); //todo: don't broadcast, use hashed list
  finally
   frxdata:= str1;
  end;

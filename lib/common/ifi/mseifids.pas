@@ -382,7 +382,7 @@ type
    procedure InternalPost; override;
    function getfieldbuffer(const afield: tfield;
              const isnull: boolean; out datasize: integer): pointer; override;
-   //iifids
+  //iifids
    function getfielddefs: tfielddefs;
    function getfieldinfos: fieldinfoarty;
    procedure requestopendsreceived(const asequence: sequencety);
@@ -1019,7 +1019,7 @@ begin
      field1:= findfield(str1);
      if field1 <> nil then begin
       include(fistate,ids_remotedata);
-      recno:= int1+1;
+      fdscontroller.recnonullbased:= int1;
       try
        if not (state in [dsedit,dsinsert]) then begin
         edit;

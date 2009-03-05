@@ -8887,7 +8887,8 @@ begin     //focuscell
      if fdatacols.fnewrowcol >= 0 then begin
       cell.col:= fdatacols.fnewrowcol;
      end;
-     rowcount:= frowcount + 1;
+     insertrow(frowcount);
+//     rowcount:= frowcount + 1;
     end
     else begin
      factiverow:= coord1.row;
@@ -11418,7 +11419,8 @@ begin
           (frowcount = 1) and (og_autofirstrow in foptionsgrid) or
       (foptionsgrid * [og_autoappend,og_appendempty] = [og_autoappend])
      ) and fdatacols.rowempty(frowcount - 1) then begin
-  rowcount:= rowcount - 1;
+  deleterow(frowcount-1);
+//  rowcount:= rowcount - 1;
   include(fstate,gs_emptyrowremoved);
  end;
 // exclude(fstate,gs_rowappended);

@@ -15,7 +15,7 @@ uses
  classes,msedbedit,mselookupbuffer,msedb,msedbf,msesdfdata,msememds,msesqldb,
  msqldb,msesqlresult,mseibconnection,msepqconnection,msesqlite3conn,
  mseodbcconn,msemysql40conn,msemysql41conn,msemysql50conn,msedbgraphics,
- msedbdialog,msedbevents,msedbdispwidgets,msedblookup
+ msedbdialog,msedbevents,msedbdispwidgets,msedblookup,mseifidbgui
   {$ifdef mse_with_sqlite}
  ,msesqlite3ds
  {$endif}
@@ -32,7 +32,7 @@ begin
       {$ifdef mse_with_sqlite}
        ,tmsesqlite3dataset
       {$endif}]);
- registerclasses([tdbwidgetgrid,
+ registerclasses([tdbwidgetgrid,tdbrxwidgetgrid,
       tenumeditdb,tkeystringeditdb,tenumeditlb,tkeystringeditlb,
       tdbmemoedit,tdbstringedit,tdbdropdownlistedit,tdbdialogstringedit,
       tdbbooleantextedit,

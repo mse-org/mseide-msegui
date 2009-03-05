@@ -455,110 +455,114 @@ var
  datalist1: tdatalist;
 begin
  with adata^.header do begin
-  case kind of
-   ik_requestopen: begin
-    senddata(encodegriddata(sequence));
-   end;
-   ik_griddata: begin
-    if (igo_state in foptionsrx) or 
-        (answersequence <> 0) and (answersequence = fdatasequence) then begin
-     with trxwidgetgrid(fowner) do begin
-      beginupdate;
-      try
-       with pgriddatadataty(adatapo)^ do begin
-        rows1:= rows;
-        rowcount:= rows1;
-        cols1:= cols;
-        po1:= @data;
-       end;
-       for int1:= 0 to cols1 - 1 do begin
-        with pcoldataty(po1)^ do begin
-         kind1:= kind;
-         po1:= @name;
-         inc(po1,ifinametostring(pifinamety(po1),str1));
-         inc(po1,ifidatatodatalist(kind1,rows1,po1,
-                   datacols.datalistbyname(str1)));
+//  if trxwidgetgrid(fowner).active or 
+//                        (kind in [ik_requestopen,ik_griddata]) then begin
+   case kind of
+    ik_requestopen: begin
+     senddata(encodegriddata(sequence));
+    end;
+    ik_griddata: begin
+     if (igo_state in foptionsrx) or 
+         (answersequence <> 0) and (answersequence = fdatasequence) then begin
+      with trxwidgetgrid(fowner) do begin
+       beginupdate;
+       try
+        with pgriddatadataty(adatapo)^ do begin
+         rows1:= rows;
+         rowcount:= rows1;
+         cols1:= cols;
+         po1:= @data;
         end;
+        for int1:= 0 to cols1 - 1 do begin
+         with pcoldataty(po1)^ do begin
+          kind1:= kind;
+          po1:= @name;
+          inc(po1,ifinametostring(pifinamety(po1),str1));
+          inc(po1,ifidatatodatalist(kind1,rows1,po1,
+                    datacols.datalistbyname(str1)));
+         end;
+        end;
+        inc(po1,ifidatatodatalist(dl_rowstate,rows1,po1,
+                                     tdatacols1(datacols).frowstate));
+        include(fistate,rws_datareceived);
+//        factive:= true;
+       finally
+        endupdate;
        end;
-       inc(po1,ifidatatodatalist(dl_rowstate,rows1,po1,
-                                    tdatacols1(datacols).frowstate));
-       include(fistate,rws_datareceived);
-      finally
-       endupdate;
       end;
      end;
     end;
-   end;
-   ik_gridcommand: begin
-    inc(adatapo,decodegridcommanddata(adatapo,ckind1,source1,dest1,count1));
-    with trxwidgetgrid(fowner) do begin
+    ik_gridcommand: begin
+     inc(adatapo,decodegridcommanddata(adatapo,ckind1,source1,dest1,count1));
+     with trxwidgetgrid(fowner) do begin
+      inc(fcommandlock);
+      try
+       case ckind1 of
+        gck_insertrow: begin
+         if igo_rowinsert in foptionsrx then begin
+          insertrow(dest1,count1);       
+         end;
+        end;
+        gck_deleterow: begin
+         if igo_rowdelete in foptionsrx then begin
+          deleterow(dest1,count1);       
+         end;
+        end;
+        gck_moverow: begin
+         if igo_rowmove in foptionsrx then begin
+          moverow(source1,dest1,count1);       
+         end;
+        end;
+        gck_rowenter: begin
+         if igo_rowenter in foptionsrx then begin
+          row:= dest1;
+         end;
+        end;
+       end;
+      finally
+       dec(fcommandlock);
+      end;
+     end;
+    end;
+    ik_coldatachange: begin
      inc(fcommandlock);
      try
-      case ckind1 of
-       gck_insertrow: begin
-        if igo_rowinsert in foptionsrx then begin
-         insertrow(dest1,count1);       
-        end;
+      int1:= pcolitemdataty(adatapo)^.header.row;
+      ifinametostring(@pcolitemdataty(adatapo)^.header.name,str1);
+      inc(adatapo,sizeof(colitemheaderty)+length(str1));
+      datalist1:= nil;
+      if igo_coldata in foptionsrx then begin
+       datalist1:= trxwidgetgrid(fowner).fdatacols.datalistbyname(str1);
+      end;    //skip data otherwise
+      inc(adatapo,decodeifidata(pifidataty(adatapo),int1,datalist1));
+     finally
+      dec(fcommandlock);
+     end;
+    end;
+    ik_rowstatechange: begin
+     inc(fcommandlock);
+     try
+      int1:= prowstatedataty(adatapo)^.header.row;
+      inc(adatapo,sizeof(rowstateheaderty));
+      inc(adatapo,decodeifidata(pifidataty(adatapo),rowstate1));
+      with trxwidgetgrid(fowner),rowstate1 do begin
+       rowcolorstate[int1]:= color;
+       rowfontstate[int1]:= font;
+       lwo1:= fdatacols.rowstate[int1].selected;
+       if lwo1 <> selected then begin
+        fdatacols.rowstate.getitempo(int1)^.selected:= lwo1;
+        invalidaterow(int1);
+        internalselectionchanged;
        end;
-       gck_deleterow: begin
-        if igo_rowdelete in foptionsrx then begin
-         deleterow(dest1,count1);       
-        end;
-       end;
-       gck_moverow: begin
-        if igo_rowmove in foptionsrx then begin
-         moverow(source1,dest1,count1);       
-        end;
-       end;
-       gck_rowenter: begin
-        if igo_rowenter in foptionsrx then begin
-         row:= dest1;
-        end;
-       end;
+       rowhidden[int1]:= fold and foldhiddenmask <> 0;
+       rowfoldlevel[int1]:= fold and foldlevelmask;
       end;
      finally
       dec(fcommandlock);
      end;
     end;
    end;
-   ik_coldatachange: begin
-    inc(fcommandlock);
-    try
-     int1:= pcolitemdataty(adatapo)^.header.row;
-     ifinametostring(@pcolitemdataty(adatapo)^.header.name,str1);
-     inc(adatapo,sizeof(colitemheaderty)+length(str1));
-     datalist1:= nil;
-     if igo_coldata in foptionsrx then begin
-      datalist1:= trxwidgetgrid(fowner).fdatacols.datalistbyname(str1);
-     end;    //skip data otherwise
-     inc(adatapo,decodeifidata(pifidataty(adatapo),int1,datalist1));
-    finally
-     dec(fcommandlock);
-    end;
-   end;
-   ik_rowstatechange: begin
-    inc(fcommandlock);
-    try
-     int1:= prowstatedataty(adatapo)^.header.row;
-     inc(adatapo,sizeof(rowstateheaderty));
-     inc(adatapo,decodeifidata(pifidataty(adatapo),rowstate1));
-     with trxwidgetgrid(fowner),rowstate1 do begin
-      rowcolorstate[int1]:= color;
-      rowfontstate[int1]:= font;
-      lwo1:= fdatacols.rowstate[int1].selected;
-      if lwo1 <> selected then begin
-       fdatacols.rowstate.getitempo(int1)^.selected:= lwo1;
-       invalidaterow(int1);
-       internalselectionchanged;
-      end;
-      rowhidden[int1]:= fold and foldhiddenmask <> 0;
-      rowfoldlevel[int1]:= fold and foldlevelmask;
-     end;
-    finally
-     dec(fcommandlock);
-    end;
-   end;
-  end;
+//  end;
  end;
 end;
 

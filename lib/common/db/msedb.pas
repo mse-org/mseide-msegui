@@ -4881,15 +4881,23 @@ begin
    factiverecordbefore:= activerecord;
    fscrollsum:= 0;
    result:= frecno;
-   if (state = dsinsert) and (getbookmarkflag(activebuffer) = bfeof) then begin
-    inc(result); //append mode
-   end;
+  end;
+  if (state = dsinsert) and (getbookmarkflag(activebuffer) = bfeof) then begin
+   inc(result); //append mode
   end;
  end;
 end;
 
 procedure tdscontroller.setrecnonullbased(const avalue: integer);
 begin
+ if avalue <> getrecnonullbased then begin
+  tdataset1(fowner).recno:= avalue - recnooffset;
+  frecno:= avalue;
+  factiverecordbefore:= tdataset1(fowner).activerecord;
+  fscrollsum:= 0;
+  frecnovalid:= true;
+ end;
+{
  if not frecnovalid or (avalue <> frecno) then begin
   tdataset1(fowner).recno:= avalue - recnooffset;
   frecno:= avalue;
@@ -4897,6 +4905,7 @@ begin
   fscrollsum:= 0;
   frecnovalid:= true;
  end;
+ }
 end;
 
 function tdscontroller.getrecno: integer;
