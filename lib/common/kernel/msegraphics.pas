@@ -919,6 +919,7 @@ type
   height: integer;
   width: integer;
   options: fontoptionsty;
+  xscale: real;
  end;
  pfontaliasty = ^fontaliasty;
  fontaliasaty = array[0..0] of fontaliasty;
@@ -935,7 +936,8 @@ type
    function registeralias(const alias,name: string;
               mode: fontaliasmodety = fam_nooverwrite;
               const height: integer = 0; const width: integer = 0;
-              const options: fontoptionsty = []): boolean;
+              const options: fontoptionsty = [];
+              const xscale: real = 1.0): boolean;
               //true if registering ok
  end;
 
@@ -1505,7 +1507,8 @@ begin
 end;
 
 procedure initfontalias;
-//format aliasdef: --FONTALIAS=<alias>,<fontname>[,<fontheight>[,<fontwidth>[,<options>]]]
+//format aliasdef: 
+//--FONTALIAS=<alias>,<fontname>[,<fontheight>[,<fontwidth>[,<options>[,<xscale>]]]]
 const
  paramname = '--FONTALIAS=';
 var
@@ -1514,14 +1517,16 @@ var
  ar3: array[0..1] of integer;
  option1: fontoptionty;
  options1: fontoptionsty;
+ xscale1: real;
 begin
  ar1:= getcommandlinearguments;
  int3:= 1;
+ xscale1:= 1.0;
  for int1:= 1 to high(ar1) do begin
   if strlicomp(pchar(ar1[int1]),pchar(paramname),length(paramname)) = 0 then begin
    ar2:= nil;
    splitstringquoted(copy(ar1[int1],length(paramname)+1,bigint),ar2,'"',',');
-   if (high(ar2) >= 1) and (high(ar2) <= 4) then begin
+   if (high(ar2) >= 1) and (high(ar2) <= 5) then begin
     try
      for int4:= 0 to high(ar3) do begin
       if int4 + 2 > high(ar2) then begin
@@ -1546,7 +1551,12 @@ begin
        end;
       end;
      end;
-     fontaliaslist.registeralias(ar2[0],ar2[1],fam_overwrite,ar3[0],ar3[1],options1);
+     if high(ar2) >= 5 then begin
+      xscale1:= strtoreal(ar2[5]);
+     end;
+     
+     fontaliaslist.registeralias(ar2[0],ar2[1],fam_overwrite,ar3[0],ar3[1],options1,
+                                 xscale1);
      deletecommandlineargument(int3);
      dec(int3);
     except
@@ -1635,6 +1645,9 @@ begin
    if (width <> 0) and (info.width = 0) then begin
     info.width:= width;
    end;
+   if (xscale <> 1) and (info.xscale = 1) then begin
+    info.xscale:= xscale;
+   end;
    if (options * fontpitchmask <> []) and 
       (info.pitchoptions * fontpitchmask = []) then begin
     info.pitchoptions:= options * fontpitchmask;
@@ -1660,7 +1673,8 @@ end;
 function tfontaliaslist.registeralias(const alias,name: string;
               mode: fontaliasmodety = fam_nooverwrite;
                const height: integer = 0; const width: integer = 0;
-               const options: fontoptionsty = []): boolean;
+               const options: fontoptionsty = [];
+               const xscale: real = 1.0): boolean;
               //true if registering ok
 var
  po1: pfontaliasty;
@@ -1672,6 +1686,7 @@ var
   po1^.height:= height shl fontsizeshift;
   po1^.width:= width shl fontsizeshift;
   po1^.options:= options;
+  po1^.xscale:= xscale;
  end;
 
 var

@@ -89,6 +89,8 @@ function formatfloatmse(const value: double; const format: msestring;
    
 function realtostr(const value: double): string;     //immer'.' als separator
 function strtoreal(const s: string): double;   //immer'.' als separator
+function trystrtoreal(const s: string; out value: real): boolean;
+                                               //immer'.' als separator
 
 function bytetohex(const inp: byte): string;
  //wandelt byte in zwei ascii hexzeichen
@@ -1806,6 +1808,15 @@ begin
  result:= strtofloat(s,defaultformatsettings);
  {$else}
  result:= strtofloat(replacechar(s,'.',decimalseparator));
+ {$endif}
+end;
+
+function trystrtoreal(const s: string; out value: real): boolean;
+begin
+ {$ifdef withformatsettings}
+ result:= trystrtofloat(s,defaultformatsettings,value);
+ {$else}
+ result:= trystrtofloat(replacechar(s,'.',decimalseparator),value);
  {$endif}
 end;
 
