@@ -870,13 +870,15 @@ function findfontdata(const afont: fontty): pfontdataty;
 function registerfontalias(const alias,name: string;
               mode: fontaliasmodety = fam_nooverwrite;
               const height: integer = 0; const width: integer = 0;
-              const options: fontoptionsty = []): boolean;
+              const options: fontoptionsty = [];
+              const xscale: real = 1.0): boolean;
               //true if registering ok
 function unregisterfontalias(const alias: string): boolean;
               //false if alias does not exist
 procedure clearfontalias; //removes all alias which are not fam_fix
 function realfontname(const aliasname: string): string;
 function getfontforglyph(const abasefont: fontty; const glyph: unicharty): fontnumty;
+function fontoptioncharstooptions(const astring: string): fontoptionsty;
 
 procedure gdierrorlocked(error: gdierrorty; const text: string = ''); overload;
 procedure gdierrorlocked(error: gdierrorty; sender: tobject; text: string = ''); overload;
@@ -1075,10 +1077,12 @@ end;
 function registerfontalias(const alias,name: string;
               mode: fontaliasmodety = fam_nooverwrite;
               const height: integer = 0; const width: integer = 0;
-              const options: fontoptionsty = []): boolean;
+              const options: fontoptionsty = [];
+              const xscale: real = 1.0): boolean;
               //true if registering ok
 begin
- result:= fontaliaslist.registeralias(alias,name,mode,height,width,options);
+ result:= fontaliaslist.registeralias(alias,name,mode,height,width,options,
+                                       xscale);
 end;
 
 function realfontname(const aliasname: string): string;
@@ -1506,6 +1510,21 @@ begin
  setcolormapvalue(index,rgb1.red,rgb1.green,rgb1.blue);
 end;
 
+function fontoptioncharstooptions(const astring: string): fontoptionsty;
+var
+ int1: integer;
+ option1: fontoptionty;
+begin
+ result:= [];
+ for int1:= 1 to length(astring) do begin
+  for option1:= low(fontoptionty) to high(fontoptionty) do begin
+   if astring[int1] = fontaliasoptionchars[option1] then begin
+    include(result,option1);
+   end;
+  end;
+ end;
+end;
+
 procedure initfontalias;
 //format aliasdef: 
 //--FONTALIAS=<alias>,<fontname>[,<fontheight>[,<fontwidth>[,<options>[,<xscale>]]]]
@@ -1515,7 +1534,6 @@ var
  ar1,ar2: stringarty;
  int1,{int2,}int3,int4,int5: integer;
  ar3: array[0..1] of integer;
- option1: fontoptionty;
  options1: fontoptionsty;
  xscale1: real;
 begin
@@ -1543,13 +1561,7 @@ begin
      end;
      options1:= [];
      if high(ar2) >= 4 then begin
-      for int5:= 1 to length(ar2[4]) do begin
-       for option1:= low(fontoptionty) to high(fontoptionty) do begin
-        if ar2[4][int5] = fontaliasoptionchars[option1] then begin
-         include(options1,option1);
-        end;
-       end;
-      end;
+      options1:= fontoptioncharstooptions(ar2[4]);
      end;
      if high(ar2) >= 5 then begin
       xscale1:= strtoreal(ar2[5]);

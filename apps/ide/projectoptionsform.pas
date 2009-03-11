@@ -123,6 +123,9 @@ type
   projectdir: filenamety;
   fontalias: msestringarty;
   fontheights: integerarty;
+  fontwidths: integerarty;
+  fontoptions: msestringarty;
+  fontxscales: realarty;
   
   copymessages: boolean;
   closemessages: boolean;
@@ -410,6 +413,9 @@ type
    debugtarget: tfilenameedit;
    runcommand: tfilenameedit;
    tsplitter6: tsplitter;
+   fontwidth: tintegeredit;
+   fontoptions: tstringedit;
+   fontxscale: trealedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -479,7 +485,7 @@ var
 
 implementation
 uses
- projectoptionsform_mfm,breakpointsform,sourceform,mseact,
+ projectoptionsform_mfm,breakpointsform,sourceform,mseact,msereal,
  objectinspector,msebits,msefileutils,msedesignintf,guitemplates,
  watchform,stackform,main,projecttreeform,findinfileform,
  selecteditpageform,programparametersform,sourceupdate,
@@ -693,7 +699,7 @@ end;
 procedure expandprojectmacros;
 var
  li: tmacrolist;
- int1: integer;
+ int1,int2: integer;
  bo1: boolean;
  item1: tmenuitem;
 begin
@@ -754,8 +760,27 @@ begin
    li.expandmacros(newinheritedsource);
    li.expandmacros(newinheritedform);
    clearfontalias;
-   for int1:= 0 to high(fontalias) do begin
-    registerfontalias(fontalias[int1],fontnames[int1],fam_overwrite,fontheights[int1]);
+   int2:= high(fontalias);
+   if int2 > high(fontnames) then begin
+    int2:= high(fontnames);
+   end;
+   if int2 > high(fontheights) then begin
+    int2:= high(fontheights);
+   end;
+   if int2 > high(fontwidths) then begin
+    int2:= high(fontwidths);
+   end;
+   if int2 > high(fontoptions) then begin
+    int2:= high(fontoptions);
+   end;
+   if int2 > high(fontxscales) then begin
+    int2:= high(fontxscales);
+   end;
+   for int1:= 0 to int2 do begin
+    registerfontalias(fontalias[int1],fontnames[int1],fam_overwrite,
+               fontheights[int1],fontwidths[int1],
+               fontoptioncharstooptions(fontoptions[int1]),
+               fontxscales[int1]);
    end;
    if sourceupdater <> nil then begin
     sourceupdater.maxlinelength:= rightmarginchars;
@@ -986,6 +1011,9 @@ begin
   fontalias:= nil;
   fontnames:= nil;
   fontheights:= nil;
+  fontwidths:= nil;
+  fontoptions:= nil;
+  fontxscales:= nil;
   usercolors:= nil;
   usercolorcomment:= nil;
   additem(sourcefilemasks,'"*.pas" "*.dpr" "*.pp" "*.inc"');
@@ -1192,6 +1220,9 @@ begin
   updatevalue('fontalias',fontalias);
   updatevalue('fontnames',fontnames);
   updatevalue('fontheights',fontheights);
+  updatevalue('fontwidths',fontwidths);
+  updatevalue('fontoptions',fontoptions);
+  updatevalue('fontxscales',fontxscales);
   updatevalue('usercolors',integerarty(usercolors));
   updatevalue('usercolorcomment',usercolorcomment);
   updatevalue('showgrid',showgrid);
@@ -1338,6 +1369,9 @@ begin
   fo.fontalias.gridvalues:= fontalias;
   fo.fontname.gridvalues:= fontnames;
   fo.fontheight.gridvalues:= fontheights;
+  fo.fontwidth.gridvalues:= fontwidths;
+  fo.fontoptions.gridvalues:= fontoptions;
+  fo.fontxscale.gridvalues:= fontxscales;
   fo.fontondataentered(nil);
 
   fo.newprojectfiles.gridvalues:= newprojectfiles;
@@ -1526,6 +1560,14 @@ begin
   fontalias:= fo.fontalias.gridvalues;
   fontnames:= fo.fontname.gridvalues;
   fontheights:= fo.fontheight.gridvalues;
+  fontwidths:= fo.fontwidth.gridvalues;
+  fontoptions:= fo.fontoptions.gridvalues;
+  fontxscales:= fo.fontxscale.gridvalues;
+  for int1:= high(fontxscales) downto 0 do begin
+   if isemptyreal(fontxscales[int1]) then begin
+    fontxscales[int1]:= 1.0;
+   end;   
+  end;
   usercolors:= colorarty(fo.usercolors.gridvalues);
   usercolorcomment:= fo.usercolorcomment.gridvalues;
 
