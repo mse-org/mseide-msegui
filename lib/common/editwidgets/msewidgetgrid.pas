@@ -610,20 +610,10 @@ begin
         rect1:= fgrid.cellrect(coord1,cil_noline);
         rect1.pos:= translatewidgetpoint(addpoint(rect1.pos,fgrid.paintpos),
                                fgrid,parentwidget);
-        {
-        with fgrid.fixrows[coord1.row].captions do begin
-         if int1 < count then begin
-          inc(rect1.x,items[int1].mergedx);
-          inc(rect1.cx,items[int1].mergedcx);
-         end;
-        end;
-        }
         widgetrect:= rect1;
-//        visible:= true;
        end
        else begin
         bounds_y:= -bounds_cy;      //shift out of view
-//        visible:= false;
        end;
       end;
      end;
@@ -641,21 +631,10 @@ begin
         rect1:= fgrid.cellrect(coord1,cil_noline);
         rect1.pos:= translatewidgetpoint(addpoint(rect1.pos,fgrid.paintpos),
                                fgrid,parentwidget);
-        {
-        with fgrid.fixrows[coord1.row].captionsfix do begin
-         int4:= int1 + fgrid.fixcols.count;
-         if int4 < count then begin
-          inc(rect1.x,tcolheader(fitems[int4]).mergedx);
-          inc(rect1.cx,tcolheader(fitems[int4]).mergedcx);
-         end;
-        end;
-        }
         widgetrect:= rect1;
-//        visible:= true;
        end
        else begin
         bounds_y:= -bounds_cy;      //shift out of view
-//        visible:= false;
        end;
       end;
      end;
@@ -686,22 +665,25 @@ end;
 procedure twidgetfixrows.countchanged;
 var
  int1,int2: integer;
+ ar1: widgetarty;
 begin
  if not (csdestroying in fgrid.componentstate) then begin
   for int1:= 0 to fgrid.datacols.count - 1 do begin
    with tcustomwidgetgrid(fgrid).datacols[int1] do begin
-    for int2:= high(ffixrowwidgets) downto self.count do begin
-     freedesigncomponent(ffixrowwidgets[int2]);
-    end;
+    ar1:= ffixrowwidgets;
     setlength(ffixrowwidgets,self.count);
+    for int2:= high(ar1) downto self.count do begin
+     freedesigncomponent(ar1[int2]);
+    end;
    end;
   end;
   for int1:= 0 to fgrid.fixcols.count - 1 do begin
    with twidgetfixcol(fgrid.fixcols.items[int1]) do begin
-    for int2:= high(ffixrowwidgets) downto self.count do begin
-     freedesigncomponent(ffixrowwidgets[int2]);
-    end;
+    ar1:= ffixrowwidgets;
     setlength(ffixrowwidgets,self.count);
+    for int2:= high(ar1) downto self.count do begin
+     freedesigncomponent(ar1[int2]);
+    end;
    end;
   end;
  end;
@@ -2047,7 +2029,7 @@ end;
 
 function tcustomwidgetgrid.widgetcell(const awidget: twidget): gridcoordty;
 var
- int1,int2: integer;
+ int1,int2,int3: integer;
 begin
  if awidget <> nil then begin
   for int1:= 0 to fdatacols.count - 1 do begin
