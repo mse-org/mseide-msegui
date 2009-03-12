@@ -663,6 +663,7 @@ type
  end;
 
 function activeskincontroller: tcustomskincontroller;
+function activeskincontrollerdesign: tcustomskincontroller;
   
 implementation
 uses
@@ -673,10 +674,16 @@ type
  ttabs1 = class(ttabs);
 var
  factiveskincontroller: tcustomskincontroller;
+ factiveskincontrollerdesign: tcustomskincontroller;
 
 function activeskincontroller: tcustomskincontroller;
 begin
  result:= factiveskincontroller;
+end;
+   
+function activeskincontrollerdesign: tcustomskincontroller;
+begin
+ result:= factiveskincontrollerdesign;
 end;
    
 { tskincolor }
@@ -838,37 +845,39 @@ begin
 end;
 
 procedure tcustomskincontroller.setactive(const avalue: boolean);
-//{$ifndef FPC}
 var
  meth1: skineventty;
-//{$endif}
+ methodpo: ^skineventty;
+ controllerpo: ^tcustomskincontroller;
 begin
  if factive <> avalue then begin
   factive:= avalue;
   if not (csdesigning in componentstate) then begin
+   methodpo:= @oninitskinobject;
+   controllerpo:= @factiveskincontroller;
+  end
+  else begin
+   methodpo:= @oninitskinobjectdesign;
+   controllerpo:= @factiveskincontrollerdesign;
+  end;
+  if avalue then begin
+   methodpo^:= {$ifdef FPC}@{$endif}updateskin;
+   controllerpo^:= self;
+  end
+  else begin
+   meth1:= {$ifdef FPC}@{$endif}updateskin;
+   if (tmethod(methodpo^).code = tmethod(meth1).code) and
+                 (tmethod(methodpo^).data = tmethod(meth1).data) then begin
+    methodpo^:= nil;
+    controllerpo^:= nil;
+   end;
+  end;
+  if not (csloading in componentstate) then begin
    if avalue then begin
-    oninitskinobject:= {$ifdef FPC}@{$endif}updateskin;
-    factiveskincontroller:= self;
+    doactivate;
    end
    else begin
-//   {$ifdef FPC}
-//    if oninitskinobject = @updateskin then begin
-//    {$else}
-    meth1:= {$ifdef FPC}@{$endif}updateskin;
-    if (tmethod(oninitskinobject).code = tmethod(meth1).code) and
-                  (tmethod(oninitskinobject).data = tmethod(meth1).data) then begin
-//    {$endif}
-     oninitskinobject:= nil;
-     factiveskincontroller:= nil;
-    end;
-   end;
-   if not (csloading in componentstate) then begin
-    if avalue then begin
-     doactivate;
-    end
-    else begin
-     dodeactivate;
-    end;
+    dodeactivate;
    end;
   end;
  end;

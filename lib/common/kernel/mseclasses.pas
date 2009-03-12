@@ -637,6 +637,7 @@ type
  skineventty = procedure(const ainfo: skininfoty) of object;
 var
  oninitskinobject: skineventty;
+ oninitskinobjectdesign: skineventty;
  
 function getcomponentlist(const acomponent: tcomponent): tlist;
                     //uses tcomponentcracker;
@@ -3071,9 +3072,15 @@ procedure tmsecomponent.updateskin(const recursive: boolean = false);
 var
  int1: integer;
  comp1: tcomponent;
+ methodpo: ^skineventty;
 begin
- if assigned(oninitskinobject) and 
-                (componentstate*[csdesigning] = []) then begin
+ if componentstate*[csdesigning] = [] then begin
+  methodpo:= @oninitskinobject;
+ end
+ else begin
+  methodpo:= @oninitskinobjectdesign;
+ end;
+ if assigned(methodpo^) then begin
   if recursive then begin
    for int1:= 0 to componentcount - 1 do begin
     comp1:= components[int1];
@@ -3084,11 +3091,11 @@ begin
   end;
   if hasskin then begin
    if assigned(fonbeforeupdateskin) then begin
-    fonbeforeupdateskin(tobject(tmethod(oninitskinobject).data));
+    fonbeforeupdateskin(tobject(tmethod(methodpo^).data));
    end;
-   oninitskinobject(skininfo);
+   methodpo^(skininfo);
    if assigned(fonbeforeupdateskin) then begin
-    fonafterupdateskin(tobject(tmethod(oninitskinobject).data));
+    fonafterupdateskin(tobject(tmethod(methodpo^).data));
    end;   
   end;
  end;
