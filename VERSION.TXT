@@ -1,5 +1,9 @@
 MSEide+MSEgui version history
 
+2009-03-13
+ Event handlers must be in "managed" area of the class
+ definition, between "class" and the first "private", "protected",
+ "public" or "published".
 2009-03-02 
  const modifiers for indexeventty parameters (datalist.pas).
 2009-02-13
