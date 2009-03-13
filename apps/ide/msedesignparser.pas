@@ -122,6 +122,7 @@ type
    impheaderstartpos: sourceposty;
    impheaderendpos: sourceposty;
    impendpos: sourceposty;
+   managed: boolean;
   end;
   pprocedureinfoty = ^procedureinfoty;
   procedureinfoarty = array of procedureinfoty;
@@ -137,8 +138,10 @@ type
     function finditembyname(const aname: string): pprocedureinfoty;
     function finditembyuppername(const aname: lstringty;
                   const info: methodparaminfoty): pprocedureinfoty;
-    function matchmethod(const atype: ptypeinfo): integerarty;
-    function matchedmethodnames(const atype: ptypeinfo): msestringarty;
+    function matchmethod(const atype: ptypeinfo;
+                                    const amanaged: boolean): integerarty;
+    function matchedmethodnames(const atype: ptypeinfo;
+                                    const managed: boolean): msestringarty;
     property items[const index: integer]: pprocedureinfoty read getitempo; default;
   end;
 
@@ -963,7 +966,8 @@ begin
  end;
 end;
 
-function tprocedureinfolist.matchmethod(const atype: ptypeinfo): integerarty;
+function tprocedureinfolist.matchmethod(const atype: ptypeinfo;
+                                    const amanaged: boolean): integerarty;
 var
  info: methodparaminfoty;
  int1: integer;
@@ -974,7 +978,7 @@ begin
  po1:= datapo;
  for int1:= 0 to fcount - 1 do begin
   with po1^ do begin
-   if parametersmatch1(params,info) then begin
+   if parametersmatch1(params,info) and (not amanaged or managed) then begin
     additem(result,int1);
    end;
   end;
@@ -982,12 +986,13 @@ begin
  end;
 end;
 
-function tprocedureinfolist.matchedmethodnames(const atype: ptypeinfo): msestringarty;
+function tprocedureinfolist.matchedmethodnames(const atype: ptypeinfo;
+                                      const managed: boolean): msestringarty;
 var
  ar1: integerarty;
  int1: integer;
 begin
- ar1:= matchmethod(atype);
+ ar1:= matchmethod(atype,managed);
  setlength(result,length(ar1));
  for int1:= 0 to high(ar1) do begin
   result[int1]:= getitempo(ar1[int1])^.name;

@@ -1731,7 +1731,7 @@ begin
  result:= nil;
  po1:= parsemodule(amodule);
  if po1 <> nil then begin
-  result:= po1^.procedurelist.matchedmethodnames(atype);
+  result:= po1^.procedurelist.matchedmethodnames(atype,true);
  end;
 end;
 

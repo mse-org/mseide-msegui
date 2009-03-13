@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2009 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ type
     function parseprocparams(const akind: tmethodkind;
                             var params: paraminfoarty): boolean;
     function parseclassprocedureheader(atoken: pascalidentty;
-                  classinfopo: pclassinfoty): boolean;
+                  classinfopo: pclassinfoty; const managed: boolean): boolean;
     function skipprocedureparams(atoken: pascalidentty): boolean;
     function skipprocedureheader(atoken: pascalidentty): boolean;
     procedure parseprocedurebody;
@@ -469,7 +469,7 @@ begin
 end;
 
 function tpascaldesignparser.parseclassprocedureheader(atoken: pascalidentty;
-                   classinfopo: pclassinfoty): boolean;
+                   classinfopo: pclassinfoty; const managed: boolean): boolean;
 var
  po1: pprocedureinfoty;
  token1: tokenidty;
@@ -479,6 +479,7 @@ begin
  with classinfopo^ do begin
   po1:= procedurelist.newitem;
   token1:= acttoken;
+  po1^.managed:= managed;
   result:= parseprocedureheader(atoken,po1);
   pos2:= sourcepos;
   if result then begin
@@ -653,7 +654,8 @@ begin
                      isemptysourcepos(privateend) then begin
          privatefieldend:= lasttokenpos;
         end;
-        parseclassprocedureheader(ident1,classinfopo);
+        parseclassprocedureheader(ident1,classinfopo,
+                                        isemptysourcepos(managedend));
        end;
        else begin
         pos1:= sourcepos;

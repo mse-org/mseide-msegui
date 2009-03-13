@@ -3281,9 +3281,7 @@ var
    case ar1[int1]^.proptype^.kind of
     tkmethod: begin
      method1:= getmethodprop(instance,ar1[int1]);
-     if (method1.data <> nil) {and ((quiet = nil) or 
-                         (pointer(quiet) = method1.data))} then begin
-//      method1.data:= amodule^.instance;
+     if (method1.data <> nil) then begin
       po1:= amodule^.methods.findmethod(method1.data);
       if po1 <> nil then begin
        if init then begin
@@ -3292,26 +3290,17 @@ var
        else begin
         po2:= classinf^.procedurelist.finditembyname(po1^.name);
         mr1:= mr_none;
-        if po2 = nil then begin
-//         if quiet <> nil then begin
-//          mr1:= mr_yes;
-//         end
-//         else begin
-          mr1:= askyesnocancel('Method '+amodule^.instance.name+'.'+po1^.name+' ('+
+        if (po2 = nil) or not po2^.managed then begin
+         mr1:= askyesnocancel('Published (managed) method '+
+                 amodule^.instance.name+'.'+po1^.name+' ('+
                  comp1.name+'.'+ar1[int1]^.name+') does not exist.'+lineend+
                  'Do you wish to delete the event?','WARNING');
-//         end;
         end
         else begin
          if not parametersmatch(po1^.typeinfo,po2^.params) then begin
-//          if quiet <> nil then begin
-//           mr1:= mr_yes;
-//          end
-//          else begin
            mr1:= askyesnocancel('Method '+amodule^.instance.name+'.'+po1^.name+' ('+
                  comp1.name+'.'+ar1[int1]^.name+') has different parameters.'+lineend+
                  'Do you wish to delete the event?','WARNING');
-//          end;
          end;
         end;
         if mr1 = mr_yes then begin
@@ -3319,10 +3308,6 @@ var
          modulechanged(amodule);
         end
         else begin
-//         if quiet <> nil then begin
-//          setmethodprop(instance,ar1[int1],method1);
-                   //refresh data pointer
-//         end;
         end;
         result:= mr1 <> mr_cancel;
        end;

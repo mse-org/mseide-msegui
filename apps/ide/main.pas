@@ -275,7 +275,6 @@ uses
 {$ifdef morecomponents}
 {$include regcomponents.inc}
 {$endif}
-
  main_mfm,sourceform,watchform,breakpointsform,stackform,
  guitemplates,projectoptionsform,make,msewidgets,msepropertyeditors,
  skeletons,msedatamodules,mseact,
