@@ -985,7 +985,7 @@ end;
 
 function getpropinfoar(const obj: tobject): propinfopoarty;
 begin
- if obj <> nil then begin
+ if (obj <> nil) and (obj.classinfo <> nil) then begin
   result:= getpropinfoar(obj.classinfo);
  end
  else begin
