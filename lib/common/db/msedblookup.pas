@@ -4,7 +4,7 @@ interface
 uses
  classes,db,msewidgetgrid,msedataedits,mseeditglob,msestrings,msedatalist,
  msedbedit,msedb,msegui,msegrids,msedbdispwidgets,mselookupbuffer,mseclasses,
- mseformatstr,msetypes,mseglob;
+ mseformatstr,msetypes,mseglob,msemenus,mseguiglob;
 
 const
  defaultlookupoptionsedit = defaultoptionsedit + [oe_readonly];

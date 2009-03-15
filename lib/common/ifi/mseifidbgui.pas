@@ -11,7 +11,8 @@ unit mseifidbgui;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,db,mseifigui,mseifids,mseifi,msedatalist;
+ classes,db,mseifigui,mseifids,mseifi,msedatalist,msegui,msemenus,msegrids,
+ mseguiglob,msetypes;
 type
  tdbrxwidgetgrid = class;
  

@@ -15,7 +15,7 @@ interface
 uses
  classes,mseclasses,msedataedits,msegraphics,mseguiglob,msegrids,mseevent,msegui,
      msegraphutils,msebitmap,mseeditglob,msedatalist,msewidgetgrid,mseedit,
-     msedrawtext,msetypes,msestat,msepointer;
+     msedrawtext,msetypes,msestat,msepointer,msemenus,msestrings;
 
 const
  defaultfoldedittextflags = defaulttextflags + [tf_clipo];

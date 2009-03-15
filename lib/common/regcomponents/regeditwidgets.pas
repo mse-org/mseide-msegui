@@ -16,7 +16,7 @@ interface
 implementation
 uses
  {$ifdef FPC}classes{$else}Classes{$endif},mseedit,msedataedits,msegraphedits,
- msedataimage,mselistbrowser,
+ msedataimage,mselistbrowser,msecalendardatetimeedit,
  msewidgetgrid,msetextedit,msedesignintf,regeditwidgets_bmp,msepropertyeditors,
  msedropdownlist,mseterminal,msedrawtext,msedatanodes,msedialog,msestrings,
  regwidgets,msearrayprops,typinfo,msestockobjects,msefoldedit;
