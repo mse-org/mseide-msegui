@@ -24,7 +24,7 @@ const
 
 type
  numbasety = (nb_bin,nb_oct,nb_dec,nb_hex);
- 
+
 function formatdatetimemse(const formatstr: msestring; const datetime: tdatetime;
             const formatsettings: tformatsettingsmse): msestring; overload;
 function formatdatetimemse(const formatstr: msestring;
@@ -171,7 +171,7 @@ function inttobcd(inp: integer): byte;
 function stringtotime(const avalue: msestring): tdatetime;
 function timetostring(const avalue: tdatetime; 
                           const format: msestring = 't'): msestring;
-function datetostring(const avalue: tdatetime; 
+function datetostring(const avalue: tdatetime;
                           const format: msestring = 'c'): msestring;
 function datetimetostring(const avalue: tdatetime; 
                           const format: msestring = 'c'): msestring;
@@ -197,12 +197,14 @@ function pascalstringtostring(const value: string): msestring;
                                     //increments inputpointer
 
 //{$ifdef FPC}
- {$undef withformatsettings}
+// {$undef withformatsettings}
 //{$else}
 // {$if rtlversion > noformatsettings}
 //  {$define withformatsettings}
 // {$ifend}
 //{$endif}
+
+{$define withformatsettings}
 
 {$ifdef withformatsettings}
 var
@@ -210,7 +212,7 @@ var
 {$endif}
 
 const
- charhex: array[0..15] of char = 
+ charhex: array[0..15] of char =
           ('0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F');
  hexchars: array[char] of byte = (
   $80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80, //0
@@ -1419,8 +1421,9 @@ var
  mantissaend: integer;
  ar1: array[0..2] of integer;    //indexes positive, negative, zero
  expchar: msechar;
- 
+
 begin
+ result:= '';
  with formatsettings do begin
   if dot then begin
    decimalsep:= '.';
@@ -1814,9 +1817,9 @@ end;
 function trystrtoreal(const s: string; out value: real): boolean;
 begin
  {$ifdef withformatsettings}
- result:= trystrtofloat(s,defaultformatsettings,value);
+ result:= trystrtofloat(s,double(value),defaultformatsettings);
  {$else}
- result:= trystrtofloat(replacechar(s,'.',decimalseparator),value);
+ result:= trystrtofloat(replacechar(s,'.',decimalseparator),double(value));
  {$endif}
 end;
 
@@ -2371,7 +2374,11 @@ end;
 
 {$ifdef withformatsettings}
 initialization
+{$ifndef FPC}
  getlocaleformatsettings(0,defaultformatsettings);
+{$else}
+ defaultformatsettings:= sysutils.defaultformatsettings;
+{$endif}
  defaultformatsettings.DecimalSeparator:= '.';
 {$endif}
 end.

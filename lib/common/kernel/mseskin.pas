@@ -853,11 +853,11 @@ begin
  if factive <> avalue then begin
   factive:= avalue;
   if not (csdesigning in componentstate) then begin
-   methodpo:= @oninitskinobject;
+   methodpo:= {$ifndef FPC}@{$endif}@oninitskinobject;
    controllerpo:= @factiveskincontroller;
   end
   else begin
-   methodpo:= @oninitskinobjectdesign;
+   methodpo:= {$ifndef FPC}@{$endif}@oninitskinobjectdesign;
    controllerpo:= @factiveskincontrollerdesign;
   end;
   if avalue then begin

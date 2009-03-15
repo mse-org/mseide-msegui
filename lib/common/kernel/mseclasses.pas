@@ -3075,10 +3075,10 @@ var
  methodpo: ^skineventty;
 begin
  if componentstate*[csdesigning] = [] then begin
-  methodpo:= @oninitskinobject;
+  methodpo:= {$ifndef FPC}@{$endif}@oninitskinobject;
  end
  else begin
-  methodpo:= @oninitskinobjectdesign;
+  methodpo:= {$ifndef FPC}@{$endif}@oninitskinobjectdesign;
  end;
  if assigned(methodpo^) then begin
   if recursive then begin
