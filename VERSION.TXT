@@ -1,5 +1,8 @@
 MSEide+MSEgui version history
 
+2009-03-15
+ tcalendardatetimeedit moved to msecalendardatetimeedit.pas.
+ tdbcalendardatetimeedit moved to msedbcalendardatetimeedit.pas.
 2009-03-13
  Event handlers must be in "managed" area of the class
  definition, between "class" and the first "private", "protected",
