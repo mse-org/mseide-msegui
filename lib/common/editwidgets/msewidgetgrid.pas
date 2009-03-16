@@ -2184,6 +2184,8 @@ begin
       if str1 <> '' then begin
        if (str1 = fwidgetname) then begin
         ar1[int2].parentwidget:= fcontainer2;
+        fintf:= nil;    
+            //do not remove existing link, inherited order could be changed
         setwidget(ar1[int2]);
         ar1[int2]:= nil;
        end;
