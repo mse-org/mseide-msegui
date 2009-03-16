@@ -1108,15 +1108,18 @@ begin
      try
       begingloballoading;
       try
-       reader1.readrootcomponent(comp1);
-       checkinline(comp1);
-       placemodule;
-       inc(submodulecopy);
-       designer.dofixup;
-       dec(submodulecopy);
+       try
+        reader1.readrootcomponent(comp1);
+        checkinline(comp1);
+        placemodule;
+        inc(submodulecopy);
+        designer.dofixup;
+        dec(submodulecopy);
+       finally
+        designer.doswapmethodpointers(comp1,true);
+       end;
        notifygloballoading;
       finally
-       designer.doswapmethodpointers(comp1,true);
        inc(submodulecopy);
        endplacement;
       end;
