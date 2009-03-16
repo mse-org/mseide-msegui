@@ -1222,7 +1222,8 @@ end;
 
 function tdataedit.actualcolor: colorty;
 begin
- if (fgridintf <> nil) and (fcolor = cl_default) then begin
+ if (fgridintf <> nil) and (fcolor = cl_default) and 
+                              not (csdestroying in componentstate) then begin
   result:= fgridintf.getcol.rowcolor(fgridintf.getrow);
   if result = cl_transparent then begin
    result:= fgridintf.getcol.actualcolor;
