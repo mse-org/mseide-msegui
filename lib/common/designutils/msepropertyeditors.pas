@@ -2382,7 +2382,8 @@ begin
    if value <> getvalue then begin
     int1:= pos('<',value);
     if int1 > 0 then begin
-     comp:= fmodule.findcomponent(copy(value,1,int1-1));
+     comp:= fdesigner.getcomponent(copy(value,1,int1-1),fmodule);
+//     comp:= fmodule.findcomponent(copy(value,1,int1-1));
     end
     else begin
      comp:= fdesigner.getcomponent(value,fmodule);
