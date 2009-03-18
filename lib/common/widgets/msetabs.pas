@@ -34,6 +34,16 @@ type
  tabstatety = (ts_invisible,ts_disabled,ts_active,ts_updating);
  tabstatesty = set of tabstatety;
 
+ ttabfont = class(tparentfont)
+  public
+   class function getinstancepo(owner: tobject): pfont; override;
+ end;
+ 
+ ttabfontactive = class(tparentfont)
+  public
+   class function getinstancepo(owner: tobject): pfont; override;
+ end;
+ 
  ttab = class(tindexpersistent,iimagelistinfo)
   private
    fcaption: richstringty;
@@ -57,14 +67,26 @@ type
    procedure setimagenr(const avalue: imagenrty);
    procedure setimagenrdisabled(const avalue: imagenrty);
    function getimagelist: timagelist;
+   function getfont: ttabfont;
+   procedure setfont(const avalue: ttabfont);
+   function isfontstored: boolean;
+   function getfontactive: ttabfontactive;
+   procedure setfontactive(const avalue: ttabfontactive);
+   function isfontactivestored: boolean;
   protected
    ftag: integer;
+   ffont: ttabfont;
+   ffontactive: ttabfontactive;
+   procedure fontchanged(const sender: tobject);
    procedure execute(const tag: integer; const info: mouseeventinfoty);
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget);
    procedure objectevent(const sender: tobject;
                                      const event: objecteventty); override;
   public
    constructor create(const aowner: tcustomtabbar); reintroduce;
+   destructor destroy; override;
+   procedure createfont;
+   procedure createfontactive;
    function tabbar: tcustomtabbar;
    property ident: integer read fident;
    property active: boolean read getactive write setactive;
@@ -74,6 +96,9 @@ type
    property color: colorty read fcolor write setcolor default cl_default;
    property coloractive: colorty read fcoloractive
                  write setcoloractive default cl_default;
+   property font: ttabfont read getfont write setfont  stored isfontstored;
+   property fontactive: ttabfontactive read getfontactive write setfontactive
+                                          stored isfontactivestored;
    property imagelist: timagelist read fimagelist write setimagelist;
    property imagenr: imagenrty read fimagenr write setimagenr default -1;
    property imagenrdisabled: imagenrty read fimagenrdisabled
@@ -92,7 +117,17 @@ type
   public
    constructor create(const intf: iframe);
  end;
-                           
+
+ ttabsfont = class(tparentfont)
+  public
+   class function getinstancepo(owner: tobject): pfont; override;
+ end;
+ 
+ ttabsfontactive = class(tparentfont)
+  public
+   class function getinstancepo(owner: tobject): pfont; override;
+ end;
+                            
  ttabs = class(tindexpersistentarrayprop,iframe)
   private
    fcolor: colorty;
@@ -125,8 +160,18 @@ type
    function getframe: tframe;
    procedure setframe(const avalue: tframe);
    procedure setshift(const avalue: integer);
+   function getfont: ttabsfont;
+   procedure setfont(const avalue: ttabsfont);
+   function isfontstored: boolean;
+   function getfontactive: ttabsfontactive;
+   procedure setfontactive(const avalue: ttabsfontactive);
+   function isfontactivestored: boolean;
   protected
    fskinupdating: integer;
+   ffont: ttabsfont;
+   ffontactive: ttabsfontactive;
+   procedure changed;
+   procedure fontchanged(const sender: tobject);
    procedure createitem(const index: integer; var item: tpersistent); override;
    procedure dochange(const index: integer); override;
 //   procedure dosizechanged; override;
@@ -150,6 +195,8 @@ type
                                          reintroduce;
    destructor destroy; override;
    class function getitemclasstype: persistentclassty; override;
+   procedure createfont;
+   procedure createfontactive;
    procedure createframe;
    procedure createface;
    procedure createfaceactive;
@@ -164,6 +211,10 @@ type
                   write setcolor default cl_transparent;
    property coloractive: colorty read fcoloractive
                   write setcoloractive default cl_active;
+   property font: ttabsfont read getfont write setfont  stored isfontstored;
+   property fontactive: ttabsfontactive read getfontactive write setfontactive
+                                          stored isfontactivestored;
+   
    property captionpos: captionposty read fcaptionpos write
                           setcaptionpos default defaultcaptionpos;
    property captionframe_left: integer read fcaptionframe.left write
@@ -369,7 +420,7 @@ type
    property tabindex: integer read gettabindex write settabindex;
    property isactivepage: boolean read getisactivepage write setisactivepage;
   published
-   property invisible: boolean read getinvisible write setinvisible;
+   property invisible: boolean read getinvisible write setinvisible default false;
    property caption: captionty read getcaption write setcaption;
    property tabhint: msestring read gettabhint write settabhint;
    property colortab: colorty read getcolortab
@@ -381,6 +432,7 @@ type
    property imagenrdisabled: imagenrty read getimagenrdisabled 
                                            write setimagenrdisabled default -2;
                 //-2 -> same as imagenr
+   property font: twidgetfont read getfont write setfont stored isfontstored;
    property optionswidget default defaulttaboptionswidget;
    property onchildscaled;
    property onfontheightdelta;
@@ -449,7 +501,7 @@ type
                 //-2 -> same as imagenr
    property onselect: notifyeventty read fonselect write fonselect;
    property ondeselect: notifyeventty read fondeselect write fondeselect;
-   property invisible: boolean read getinvisible write setinvisible;
+   property invisible: boolean read getinvisible write setinvisible default false;
    property visible default false;
    property optionsskin;
  end;
@@ -686,6 +738,7 @@ type
 
 procedure calctablayout(var layout: tabbarlayoutinfoty;
                      const canvas: tcanvas; const focused: boolean);
+
  procedure docommon(const tab: ttab; var cell: shapeinfoty; var textrect: rectty);
  begin
   with tab,cell,ca do begin
@@ -699,7 +752,20 @@ procedure calctablayout(var layout: tabbarlayoutinfoty;
     inc(textrect.cx,fimagelist.width+imagedist);
    end;
   end;
- end;
+ end; //docommon
+
+ procedure dofont(const tab: ttab; var cell: shapeinfoty);
+ begin
+  with tab,cell,ca do begin
+   if ts_active in tab.state then begin
+    font:= tab.fontactive;
+   end
+   else begin
+    font:= tab.font;
+   end;
+  end;
+ end; //dofont
+
 var
  int1: integer;
  aval: integer;
@@ -736,7 +802,9 @@ begin
    for int1:= 0 to high(cells) do begin
     with tabs[int1],cells[int1],ca do begin
      dim.y:= aval;
-     rect1:= textrect(canvas,fcaption,makerect(layout.dim.x,aval,layout.dim.cx,bigint));
+     dofont(tabs[int1],cells[int1]);
+     rect1:= textrect(canvas,fcaption,
+                        makerect(layout.dim.x,aval,layout.dim.cx,bigint),[],font);
      docommon(tabs[int1],cells[int1],rect1);
      dim.cy:= rect1.cy+cyinflate;
      if (imagelist <> nil) and (imagelist.height > dim.cy) then begin
@@ -770,7 +838,9 @@ begin
    for int1:= 0 to high(cells) do begin
     with tabs[int1],cells[int1],ca do begin
      dim.x:= aval;
-     rect1:= textrect(canvas,fcaption,makerect(aval,layout.dim.y,bigint,layout.dim.cy));
+     dofont(tabs[int1],cells[int1]);
+     rect1:= textrect(canvas,fcaption,
+               makerect(aval,layout.dim.y,bigint,layout.dim.cy),[],font);
      docommon(tabs[int1],cells[int1],rect1);
      dim.cx:= rect1.cx + cxinflate;
      if (ts_invisible in fstate) or (int1 < firsttab) or (aval >= endval) then begin
@@ -930,6 +1000,20 @@ begin
  end;
 end;
 
+{ ttabfont }
+
+class function ttabfont.getinstancepo(owner: tobject): pfont;
+begin
+ result:= @ttab(owner).ffont;
+end;
+
+{ ttabfontactive }
+
+class function ttabfontactive.getinstancepo(owner: tobject): pfont;
+begin
+ result:= @ttab(owner).ffontactive;
+end;
+
 { ttab }
 
 constructor ttab.create(const aowner: tcustomtabbar);
@@ -937,9 +1021,15 @@ begin
  fcolor:= cl_default;
  fcoloractive:= cl_default;
  fimagenr:= -1;
-// fimagenractive:= -2;
  fimagenrdisabled:= -2;
  inherited create(aowner,aowner.flayoutinfo.tabs);
+end;
+
+destructor ttab.destroy;
+begin
+ ffont.free;
+ ffontactive.free;
+ inherited;
 end;
 
 procedure ttab.changed;
@@ -947,6 +1037,74 @@ begin
  if not (ts_updating in fstate) then begin
   tcustomtabbar(fowner).tabchanged(self);
  end;
+end;
+
+procedure ttab.createfont;
+begin
+ if ffont = nil then begin
+  ffont:= ttabfont.create;
+  ffont.onchange:= {$ifdef FPC}@{$endif}fontchanged;
+ end;
+end;
+
+function ttab.getfont: ttabfont;
+begin
+ getoptionalobject(ttabbar(fowner).componentstate,ffont,
+                            {$ifdef FPC}@{$endif}createfont);
+ if ffont <> nil then begin
+  result:= ffont;
+ end
+ else begin
+  result:= ttabfont(pointer(ttabs(prop).getfont));
+ end;
+end;
+
+procedure ttab.setfont(const avalue: ttabfont);
+begin
+ if avalue <> ffont then begin
+  setoptionalobject(ttabbar(fowner).ComponentState,avalue,ffont,
+                                       {$ifdef FPC}@{$endif}createfont);
+  changed;
+ end;
+end;
+
+function ttab.isfontstored: boolean;
+begin
+ result:= ffont <> nil;
+end;
+
+procedure ttab.createfontactive;
+begin
+ if ffontactive = nil then begin
+  ffontactive:= ttabfontactive.create;
+  ffontactive.onchange:= {$ifdef FPC}@{$endif}fontchanged;
+ end;
+end;
+
+function ttab.getfontactive: ttabfontactive;
+begin
+ getoptionalobject(ttabbar(fowner).componentstate,ffontactive,
+                            {$ifdef FPC}@{$endif}createfontactive);
+ if ffontactive <> nil then begin
+  result:= ffontactive;
+ end
+ else begin
+  result:= ttabfontactive(pointer(ttabs(prop).getfontactive));
+ end;
+end;
+
+procedure ttab.setfontactive(const avalue: ttabfontactive);
+begin
+ if avalue <> ffontactive then begin
+  setoptionalobject(ttabbar(fowner).ComponentState,avalue,ffontactive,
+                                       {$ifdef FPC}@{$endif}createfontactive);
+  changed;
+ end;
+end;
+
+function ttab.isfontactivestored: boolean;
+begin
+ result:= ffontactive <> nil;
 end;
 
 function ttab.getcaption: captionty;
@@ -959,17 +1117,7 @@ begin
  captiontorichstring(value,fcaption);
  changed;
 end;
-{
-function ttab.index: integer;
-begin
- if ftabbar <> nil then begin
-  result:= ftabbar.tabs.indexof(self);
- end
- else begin
-  result:= -1;
- end;
-end;
-}
+
 function ttab.tabbar: tcustomtabbar;
 begin
  result:= tcustomtabbar(fowner);
@@ -1075,12 +1223,31 @@ begin
  result:= fimagelist;
 end;
 
+procedure ttab.fontchanged(const sender: tobject);
+begin
+ changed;
+end;
+
 { ttabframe }
 
 constructor ttabframe.create(const intf: iframe);
 begin
  inherited;
  include(fstate,fs_needsmouseinvalidate);
+end;
+
+{ ttabsfont }
+
+class function ttabsfont.getinstancepo(owner: tobject): pfont;
+begin
+ result:= @ttabs(owner).ffont;
+end;
+
+{ ttabsfontactive }
+
+class function ttabsfontactive.getinstancepo(owner: tobject): pfont;
+begin
+ result:= @ttabs(owner).ffontactive;
 end;
 
 { ttabs }
@@ -1106,12 +1273,19 @@ begin
  fface.free;
  ffaceactive.free;
  fframe.free;
+ ffont.free;
+ ffontactive.free;
  inherited;
 end;
 
 class function ttabs.getitemclasstype: persistentclassty;
 begin
  result:= ttab;
+end;
+
+procedure ttabs.changed;
+begin
+ tcustomtabbar(fowner).layoutchanged;
 end;
 
 procedure ttabs.createface;
@@ -1137,7 +1311,7 @@ end;
 procedure ttabs.setface(const avalue: tface);
 begin
  tcustomtabbar(fowner).setoptionalobject(avalue,fface,{$ifdef FPC}@{$endif}createface);
- tcustomtabbar(fowner).layoutchanged;
+ changed;
 end;
 
 function ttabs.getfaceactive: tface;
@@ -1151,14 +1325,14 @@ procedure ttabs.setfaceactive(const avalue: tface);
 begin
  tcustomtabbar(fowner).setoptionalobject(avalue,ffaceactive,
                                {$ifdef FPC}@{$endif}createfaceactive);
- tcustomtabbar(fowner).layoutchanged;
+ changed;
 end;
 
 procedure ttabs.setcolor(const avalue: colorty);
 begin
  if avalue <> fcolor then begin
   fcolor:= avalue;
-  tcustomtabbar(fowner).layoutchanged;
+  changed;
  end;
 end;
 
@@ -1166,7 +1340,7 @@ procedure ttabs.setcoloractive(const avalue: colorty);
 begin
  if avalue <> fcoloractive then begin
   fcoloractive:= avalue;
-  tcustomtabbar(fowner).layoutchanged;
+  changed;
  end;
 end;
 
@@ -1174,7 +1348,7 @@ procedure ttabs.setcaptionpos(const avalue: captionposty);
 begin
  if avalue <> fcaptionpos then begin
   fcaptionpos:= avalue;
-  tcustomtabbar(fowner).layoutchanged;
+  changed;
  end;
 end;
 
@@ -1182,7 +1356,7 @@ procedure ttabs.setcaptionframe_left(const avalue: integer);
 begin
  if avalue <> fcaptionframe.left then begin
   fcaptionframe.left:= avalue;
-  tcustomtabbar(fowner).layoutchanged;
+  changed;
  end;
 end;
 
@@ -1190,7 +1364,7 @@ procedure ttabs.setcaptionframe_top(const avalue: integer);
 begin
  if avalue <> fcaptionframe.top then begin
   fcaptionframe.top:= avalue;
-  tcustomtabbar(fowner).layoutchanged;
+  changed;
  end;
 end;
 
@@ -1198,7 +1372,7 @@ procedure ttabs.setcaptionframe_right(const avalue: integer);
 begin
  if avalue <> fcaptionframe.right then begin
   fcaptionframe.right:= avalue;
-  tcustomtabbar(fowner).layoutchanged;
+  changed;
  end;
 end;
 
@@ -1206,7 +1380,7 @@ procedure ttabs.setcaptionframe_bottom(const avalue: integer);
 begin
  if avalue <> fcaptionframe.bottom then begin
   fcaptionframe.bottom:= avalue;
-  tcustomtabbar(fowner).layoutchanged;
+  changed;
  end;
 end;
 
@@ -1214,7 +1388,7 @@ procedure ttabs.setimagedist(const avalue: integer);
 begin
  if avalue <> fimagedist then begin
   fimagedist:= avalue;
-  tcustomtabbar(fowner).layoutchanged;
+  changed;
  end;  
 end;
 
@@ -1228,7 +1402,7 @@ begin
   else begin
    ftabshift:= avalue;
   end;
-  tcustomtabbar(fowner).layoutchanged;
+  changed;
  end;  
 end;
 
@@ -1349,7 +1523,7 @@ end;
 
 procedure ttabs.clientrectchanged;
 begin
- tcustomtabbar(fowner).layoutchanged;
+ changed;
 end;
 
 procedure ttabs.invalidate;
@@ -1410,7 +1584,7 @@ begin
    end;
   end;
  end;
- tcustomtabbar(fowner).layoutchanged;
+ changed;
 // tcustomtabbar(fowner).invalidatewidget;
 end;
 
@@ -1419,6 +1593,79 @@ begin
  if fframe = nil then begin
   fframe:= ttabframe.create(iframe(self));
  end;
+end;
+
+procedure ttabs.createfont;
+begin
+ if ffont = nil then begin
+  ffont:= ttabsfont.create;
+  ffont.onchange:= {$ifdef FPC}@{$endif}fontchanged;
+ end;
+end;
+
+function ttabs.getfont: ttabsfont;
+begin
+ getoptionalobject(ttabbar(fowner).componentstate,ffont,
+                            {$ifdef FPC}@{$endif}createfont);
+ if ffont <> nil then begin
+  result:= ffont;
+ end
+ else begin
+  result:= ttabsfont(pointer(ttabbar(fowner).getfont));
+ end;
+end;
+
+procedure ttabs.setfont(const avalue: ttabsfont);
+begin
+ if avalue <> ffont then begin
+  setoptionalobject(ttabbar(fowner).ComponentState,avalue,ffont,
+                                       {$ifdef FPC}@{$endif}createfont);
+  changed;
+ end;
+end;
+
+function ttabs.isfontstored: boolean;
+begin
+ result:= ffont <> nil;
+end;
+
+procedure ttabs.createfontactive;
+begin
+ if ffontactive = nil then begin
+  ffontactive:= ttabsfontactive.create;
+  ffont.onchange:= {$ifdef FPC}@{$endif}fontchanged;
+ end;
+end;
+
+function ttabs.getfontactive: ttabsfontactive;
+begin
+ getoptionalobject(ttabbar(fowner).componentstate,ffontactive,
+                            {$ifdef FPC}@{$endif}createfontactive);
+ if ffontactive <> nil then begin
+  result:= ffontactive;
+ end
+ else begin
+  result:= ttabsfontactive(pointer(ttabbar(fowner).getfont));
+ end;
+end;
+
+procedure ttabs.setfontactive(const avalue: ttabsfontactive);
+begin
+ if avalue <> ffontactive then begin
+  setoptionalobject(ttabbar(fowner).ComponentState,avalue,ffontactive,
+                                       {$ifdef FPC}@{$endif}createfontactive);
+  changed;
+ end;
+end;
+
+function ttabs.isfontactivestored: boolean;
+begin
+ result:= ffontactive <> nil;
+end;
+
+procedure ttabs.fontchanged(const sender: tobject);
+begin
+ changed;
 end;
 
 { tcustomtabbar }
@@ -1639,14 +1886,7 @@ begin
     color1:= defaultframecolors.light.effectcolor;
    end;
    int3:= rect1.y+rect1.cy-1;
-//   if int1 >= 0 then begin
-//    with cells[int1],ca do begin
-//     canvas.drawline(makepoint(int2,dim.y+dim.cy),makepoint(int2,int3),color1);
-//    end;
-//   end
-//   else begin
-    canvas.drawline(makepoint(int2,rect1.y),makepoint(int2,int3),color1);
-//   end;
+   canvas.drawline(makepoint(int2,rect1.y),makepoint(int2,int3),color1);
   end
   else begin
    if shs_opposite in options then begin
@@ -1658,14 +1898,7 @@ begin
     color1:= defaultframecolors.light.effectcolor;
    end;
    int3:= rect1.x+rect1.cx-1;
-//   if int1 >= 0 then begin
-//    with cells[int1],ca do begin
-//     canvas.drawline(makepoint(dim.x+dim.cx,int2),makepoint(int3,int2),color1);
-//    end;
-//   end
-//   else begin
-    canvas.drawline(makepoint(rect1.x,int2),makepoint(int3,int2),color1);
-//   end;
+   canvas.drawline(makepoint(rect1.x,int2),makepoint(int3,int2),color1);
   end;
   for int1:= firsttab to lasttab do begin
    tabs.factcellindex:= int1;

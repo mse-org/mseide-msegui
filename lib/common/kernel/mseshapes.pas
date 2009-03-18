@@ -845,26 +845,6 @@ begin
     ca.imagelist.paint(canvas,int1,rect1,align1,co1);
    end;
    canvas.clipregion:= reg1;
-   {
-   int1:= ca.imagelist.width + ca.imagedist;
-   int2:= ca.imagelist.height + ca.imagedist;
-   case pos of
-    cp_right: begin
-     dec(arect.cx,int1);
-    end;
-    cp_left: begin
-     inc(arect.x,int1);
-     dec(arect.cx,int1);
-    end;
-    cp_top: begin
-     inc(arect.y,int2);
-     dec(arect.cy,int2);
-    end;
-    cp_bottom: begin
-     dec(arect.cy,int2);
-    end;
-   end;
-   }
   end
   else begin
    result:= false;
@@ -926,7 +906,7 @@ begin
    if outerrect <> nil then begin
     exclude(textflags,tf_clipi);
     include(textflags,tf_clipo);
-    drawtext(canvas,ca.caption,rect1,outerrect^,textflags,font,tab1);
+    drawtext(canvas,ca.caption,rect1,outerrect^,textflags,ca.font,tab1);
    end
    else begin
     drawtext(canvas,ca.caption,rect1,arect,textflags,ca.font,tab1);
@@ -1161,10 +1141,6 @@ begin
    else begin
     color1:= defaultframecolors.light.effectcolor;
    end;
-//  end
-//  else begin
-//   color1:= color;
-//  end;
    if shs_vert in state then begin
     if shs_opposite in state then begin
      int1:= ca.dim.x;

@@ -280,7 +280,6 @@ type
    function getfont: tgridpropfont;
    function isfontstored: Boolean;
    procedure setfont(const Value: tgridpropfont);
-   procedure createfont;
    procedure setlinewidth(const Value: integer);
    procedure setlinecolor(const Value: colorty);
    procedure setlinecolorfix(const Value: colorty);
@@ -334,6 +333,7 @@ type
    constructor create(const agrid: tcustomgrid; 
                const aprop: tgridarrayprop); reintroduce; virtual;
    destructor destroy; override;
+   procedure createfont;
    procedure createframe;
    procedure createface;
    procedure drawcellbackground(const acanvas: tcanvas;
