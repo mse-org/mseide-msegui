@@ -2581,10 +2581,10 @@ begin
   if obj1 = nil then begin
    for int1:= 0 to count - 1 do begin
     persist1:= tpersistent(getordvalue(int1));
-    setordvalue(int1,1);
+    setordvalue(int1,1); //create instance
     persist2:= tpersistent(getordvalue(int1));
     if (persist1 <> nil) and (persist2 <> nil) then begin
-     persist2.Assign(persist1);
+     persist2.Assign(persist1);    //copy default values
     end;
    end;
   end

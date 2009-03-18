@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -359,6 +359,8 @@ type
   function gettabhint: msestring;
   function getcolortab: colorty;
   function getcoloractivetab: colorty;
+  function getfonttab: tfont;
+  function getfontactivetab: tfont;
   function getimagelist: timagelist;
   function getimagenr: imagenrty;
   function getimagenrdisabled: imagenrty;
@@ -367,6 +369,16 @@ type
   procedure dodeselect;
  end;
 
+ ttabpagefonttab = class(tparentfont)
+  public
+   class function getinstancepo(owner: tobject): pfont; override;
+ end;
+ 
+ ttabpagefontactivetab = class(tparentfont)
+  public
+   class function getinstancepo(owner: tobject): pfont; override;
+ end;
+ 
  ttabpage = class(tscrollingwidget,itabpage,iimagelistinfo)
   private
    ftabwidget: tcustomtabwidget;
@@ -379,6 +391,8 @@ type
    fonselect: notifyeventty;
    fondeselect: notifyeventty;
    finvisible: boolean;
+   ffonttab: ttabpagefonttab;
+   ffontactivetab: ttabpagefontactivetab;
    function getcaption: captionty;
    procedure setcaption(const Value: captionty);
    function gettabhint: msestring;
@@ -399,9 +413,18 @@ type
    procedure setimagenrdisabled(const avalue: imagenrty);
    function getinvisible: boolean;
    procedure setinvisible(const avalue: boolean);
+   function getfonttab: tfont;
+   function getfontactivetab: tfont;
+   function getfonttab1: ttabpagefonttab;
+   procedure setfonttab(const avalue: ttabpagefonttab);
+   function isfonttabstored: boolean;
+   function getfontactivetab1: ttabpagefontactivetab;
+   procedure setfontactivetab(const avalue: ttabpagefontactivetab);
+   function isfontactivetabstored: boolean;
   protected
    class function classskininfo: skininfoty; override;
    procedure changed;
+   procedure fontchanged1(const sender: tobject);
    procedure visiblechanged; override;
    procedure enabledchanged; override;
    procedure registerchildwidget(const child: twidget); override;
@@ -415,7 +438,10 @@ type
    procedure setisactivepage(const avalue: boolean);
   public
    constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
    procedure initnewcomponent(const ascale: real); override;
+   procedure createfonttab;
+   procedure createfontactivetab;
    property tabwidget: tcustomtabwidget read ftabwidget;
    property tabindex: integer read gettabindex write settabindex;
    property isactivepage: boolean read getisactivepage write setisactivepage;
@@ -427,6 +453,10 @@ type
                   write setcolortab default cl_default;
    property coloractivetab: colorty read getcoloractivetab
                   write setcoloractivetab default cl_default;
+   property fonttab: ttabpagefonttab read getfonttab1 write setfonttab
+                                                        stored isfonttabstored;
+   property fontactivetab: ttabpagefontactivetab read getfontactivetab1
+                                 write setfontactivetab stored isfontactivetabstored;
    property imagelist: timagelist read getimagelist write setimagelist;
    property imagenr: imagenrty read getimagenr write setimagenr default -1;
    property imagenrdisabled: imagenrty read getimagenrdisabled 
@@ -444,6 +474,16 @@ type
    property optionsskin default defaulttabpageskinoptions;
  end;
 
+ ttabformfonttab = class(tparentfont)
+  public
+   class function getinstancepo(owner: tobject): pfont; override;
+ end;
+ 
+ ttabformfontactivetab = class(tparentfont)
+  public
+   class function getinstancepo(owner: tobject): pfont; override;
+ end;
+ 
  ttabform = class(tmseform,itabpage,iimagelistinfo)
   private
    ftabwidget: tcustomtabwidget;
@@ -455,9 +495,10 @@ type
    fonselect: notifyeventty;
    fondeselect: notifyeventty;
    finvisible: boolean;
+   ffonttab: ttabformfonttab;
+   ffontactivetab: ttabformfontactivetab;
    procedure settabwidget(const value: tcustomtabwidget);
    function gettabwidget: tcustomtabwidget;
-   procedure changed;
    function getcolortab: colorty;
    procedure setcolortab(const avalue: colorty);
    function getcoloractivetab: colorty;
@@ -474,7 +515,17 @@ type
    procedure setimagenrdisabled(const avalue: imagenrty);
    function getinvisible: boolean;
    procedure setinvisible(const avalue: boolean);
+   function getfonttab: tfont;
+   function getfontactivetab: tfont;
+   function getfonttab1: ttabformfonttab;
+   procedure setfonttab(const avalue: ttabformfonttab);
+   function isfonttabstored: boolean;
+   function getfontactivetab1: ttabformfontactivetab;
+   procedure setfontactivetab(const avalue: ttabformfontactivetab);
+   function isfontactivetabstored: boolean;
   protected
+   procedure changed;
+   procedure fontchanged1(const sender: tobject);
    procedure visiblechanged; override;
    procedure setcaption(const value: msestring); override;
    procedure doselect; virtual;
@@ -485,6 +536,9 @@ type
    class function hasresource: boolean; override;
   public
    constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+   procedure createfonttab;
+   procedure createfontactivetab;
    function isactivepage: boolean;
    property tabwidget: tcustomtabwidget read ftabwidget;
    property tabindex: integer read gettabindex write settabindex;
@@ -493,6 +547,10 @@ type
                   write setcolortab default cl_default;
    property coloractivetab: colorty read getcolortab
                   write setcoloractivetab default cl_active;
+   property fonttab: ttabformfonttab read getfonttab1 write setfonttab
+                                                        stored isfonttabstored;
+   property fontactivetab: ttabformfontactivetab read getfontactivetab1 
+                                 write setfontactivetab stored isfonttabstored;
    property tabhint: msestring read gettabhint write settabhint;
    property imagelist: timagelist read getimagelist write setimagelist;
    property imagenr: imagenrty read getimagenr write setimagenr default -1;
@@ -514,6 +572,21 @@ type
    function page: twidget;
  end;
 
+ ttab_font = class(tparentfont)
+  public
+   class function getinstancepo(owner: tobject): pfont; override;
+ end;
+ 
+ ttab_fonttab = class(tparentfont)
+  public
+   class function getinstancepo(owner: tobject): pfont; override;
+ end;
+ 
+ ttab_fontactivetab = class(tparentfont)
+  public
+   class function getinstancepo(owner: tobject): pfont; override;
+ end;
+ 
  tcustomtabwidget = class(tactionwidget,iobjectpicker,istatfile)
   private
    ftabs: tcustomtabbar1;
@@ -572,6 +645,15 @@ type
    procedure settab_shift(const avalue: integer);
    function gettab_optionswidget: optionswidgetty;
    procedure settab_optionswidget(const avalue: optionswidgetty);
+   function gettab_font: ttab_font;
+   procedure settab_font(const avalue: ttab_font);
+   function istab_fontstored: boolean;
+   function gettab_fonttab: ttab_fonttab;
+   procedure settab_fonttab(const avalue: ttab_fonttab);
+   function istab_fonttabstored: boolean;
+   function gettab_fontactivetab: ttab_fontactivetab;
+   procedure set_tabfontactivetab(const avalue: ttab_fontactivetab);
+   function istab_fontactivetabstored: boolean;
   protected
    fpopuptab: integer;
    procedure internaladd(const page: itabpage; aindex: integer);
@@ -645,6 +727,12 @@ type
                         write settab_colortab default cl_transparent;
    property tab_coloractivetab: colorty read gettab_coloractivetab 
                         write settab_coloractivetab default cl_active;
+   property tab_font: ttab_font read gettab_font write settab_font 
+                                                        stored istab_fontstored;
+   property tab_fonttab: ttab_fonttab read gettab_fonttab write settab_fonttab 
+                                                        stored istab_fonttabstored;
+   property tab_fontactivetab: ttab_fontactivetab read gettab_fontactivetab 
+                          write set_tabfontactivetab stored istab_fontactivetabstored;
    property tab_captionpos: captionposty read gettab_captionpos write
                           settab_captionpos default defaultcaptionpos;
    property tab_captionframe_left: integer read gettab_captionframe_left write
@@ -706,6 +794,9 @@ type
    property onpageremoved;
    property options;
    property font;
+   property tab_font;
+   property tab_fonttab;
+   property tab_fontactivetab;
    property tab_frame;
    property tab_face;
    property tab_color;
@@ -2339,6 +2430,20 @@ begin
  //dummy
 end;
 
+{ ttabpagefonttab }
+
+class function ttabpagefonttab.getinstancepo(owner: tobject): pfont;
+begin
+ result:= @ttabpage(owner).ffonttab;
+end;
+
+{ ttabpagefontactivetab }
+
+class function ttabpagefontactivetab.getinstancepo(owner: tobject): pfont;
+begin
+ result:= @ttabpage(owner).ffontactivetab;
+end;
+
 { ttabpage }
 
 constructor ttabpage.create(aowner: tcomponent);
@@ -2352,6 +2457,13 @@ begin
  foptionswidget:= defaulttaboptionswidget;
  optionsskin:= defaulttabpageskinoptions;
  exclude(fwidgetstate,ws_visible);
+end;
+
+destructor ttabpage.destroy;
+begin
+ ffonttab.free;
+ ffontactivetab.free;
+ inherited;
 end;
 
 class function ttabpage.classskininfo: skininfoty;
@@ -2373,6 +2485,11 @@ begin
  if ftabwidget <> nil then begin
   ftabwidget.pagechanged(itabpage(self));
  end;
+end;
+
+procedure ttabpage.fontchanged1(const sender: tobject);
+begin
+ changed;
 end;
 
 function ttabpage.getcaption: captionty;
@@ -2592,6 +2709,88 @@ begin
  caption:= 'caption';
 end;
 
+procedure ttabpage.createfonttab;
+begin
+ if ffonttab = nil then begin
+  ffonttab:= ttabpagefonttab.create;
+  ffonttab.onchange:= {$ifdef FPC}@{$endif}fontchanged1;
+ end; 
+end;
+
+procedure ttabpage.createfontactivetab;
+begin
+ if ffontactivetab = nil then begin
+  ffontactivetab:= ttabpagefontactivetab.create;
+  ffontactivetab.onchange:= {$ifdef FPC}@{$endif}fontchanged1;
+ end; 
+end;
+
+function ttabpage.getfonttab: tfont;
+begin
+ result:= ffonttab;
+end;
+
+function ttabpage.getfontactivetab: tfont;
+begin
+ result:= ffontactivetab;
+end;
+
+function ttabpage.getfonttab1: ttabpagefonttab;
+begin
+ getoptionalobject(ffonttab,
+                            {$ifdef FPC}@{$endif}createfonttab);
+ result:= ffonttab;
+end;
+
+procedure ttabpage.setfonttab(const avalue: ttabpagefonttab);
+begin
+ if avalue <> ffonttab then begin
+  setoptionalobject(avalue,ffonttab,
+                                       {$ifdef FPC}@{$endif}createfonttab);
+  changed;
+ end;
+end;
+
+function ttabpage.isfonttabstored: boolean;
+begin
+ result:= ffonttab <> nil;
+end;
+
+function ttabpage.getfontactivetab1: ttabpagefontactivetab;
+begin
+ getoptionalobject(ffontactivetab,
+                            {$ifdef FPC}@{$endif}createfontactivetab);
+ result:= ffontactivetab;
+end;
+
+procedure ttabpage.setfontactivetab(const avalue: ttabpagefontactivetab);
+begin
+ if avalue <> ffontactivetab then begin
+  setoptionalobject(avalue,ffontactivetab,
+                                       {$ifdef FPC}@{$endif}createfontactivetab);
+  changed;
+ end;
+end;
+
+function ttabpage.isfontactivetabstored: boolean;
+begin
+ result:= ffontactivetab <> nil;
+end;
+
+{ ttabformfonttab }
+
+class function ttabformfonttab.getinstancepo(owner: tobject): pfont;
+begin
+ result:= @ttabform(owner).ffonttab;
+end;
+
+{ ttabpagefontactivetab }
+
+class function ttabformfontactivetab.getinstancepo(owner: tobject): pfont;
+begin
+ result:= @ttabform(owner).ffontactivetab;
+end;
+
 { ttabform }
 
 constructor ttabform.create(aowner: tcomponent);
@@ -2599,10 +2798,32 @@ begin
  fcolortab:= cl_default;
  fcoloractivetab:= cl_active;
  fimagenr:= -1;
-// fimagenractive:= -2;
  fimagenrdisabled:= -2;
  inherited create(aowner);
  exclude(fwidgetstate,ws_visible);
+end;
+
+destructor ttabform.destroy;
+begin
+ ffonttab.free;
+ ffontactivetab.free;
+ inherited;
+end;
+
+procedure ttabform.createfonttab;
+begin
+ if ffonttab = nil then begin
+  ffonttab:= ttabformfonttab.create;
+  ffonttab.onchange:= {$ifdef FPC}@{$endif}fontchanged1;
+ end; 
+end;
+
+procedure ttabform.createfontactivetab;
+begin
+ if ffontactivetab = nil then begin
+  ffontactivetab:= ttabformfontactivetab.create;
+  ffontactivetab.onchange:= {$ifdef FPC}@{$endif}fontchanged1;
+ end; 
 end;
 
 procedure ttabform.loaded;
@@ -2618,6 +2839,11 @@ begin
  if ftabwidget <> nil then begin
   ftabwidget.pagechanged(itabpage(self));
  end;
+end;
+
+procedure ttabform.fontchanged1(const sender: tobject);
+begin
+ changed;
 end;
 
 function ttabform.getcolortab: colorty;
@@ -2798,6 +3024,79 @@ begin
  result:= self <> ttabform;
 end;
 
+function ttabform.getfonttab: tfont;
+begin
+ result:= ffonttab;
+end;
+
+function ttabform.getfontactivetab: tfont;
+begin
+ result:= ffontactivetab;
+end;
+
+function ttabform.getfonttab1: ttabformfonttab;
+begin
+ getoptionalobject(ffonttab,
+                            {$ifdef FPC}@{$endif}createfonttab);
+ result:= ffonttab;
+end;
+
+procedure ttabform.setfonttab(const avalue: ttabformfonttab);
+begin
+ if avalue <> ffonttab then begin
+  setoptionalobject(avalue,ffonttab,
+                                       {$ifdef FPC}@{$endif}createfonttab);
+  changed;
+ end;
+end;
+
+function ttabform.isfonttabstored: boolean;
+begin
+ result:= ffonttab <> nil;
+end;
+
+function ttabform.getfontactivetab1: ttabformfontactivetab;
+begin
+ getoptionalobject(ffontactivetab,
+                            {$ifdef FPC}@{$endif}createfontactivetab);
+ result:= ffontactivetab;
+end;
+
+procedure ttabform.setfontactivetab(const avalue: ttabformfontactivetab);
+begin
+ if avalue <> ffontactivetab then begin
+  setoptionalobject(avalue,ffontactivetab,
+                                       {$ifdef FPC}@{$endif}createfontactivetab);
+  changed;
+ end;
+end;
+
+function ttabform.isfontactivetabstored: boolean;
+begin
+ result:= ffontactivetab <> nil;
+end;
+
+{ ttab_font }
+
+class function ttab_font.getinstancepo(owner: tobject): pfont;
+begin
+ result:= @tcustomtabwidget(owner).ftabs.ffont;
+end;
+
+{ ttab_fonttab }
+
+class function ttab_fonttab.getinstancepo(owner: tobject): pfont;
+begin
+ result:= @tcustomtabwidget(owner).ftabs.tabs.ffont;
+end;
+
+{ ttab_fontactivetab }
+
+class function ttab_fontactivetab.getinstancepo(owner: tobject): pfont;
+begin
+ result:= @tcustomtabwidget(owner).ftabs.tabs.ffontactive;
+end;
+
 { tcustomtabwidget }
 
 constructor tcustomtabwidget.create(aowner: tcomponent);
@@ -2815,7 +3114,6 @@ begin
  ftabs.tabs.oncreatetab:= {$ifdef FPC}@{$endif}createpagetab;
  exclude(ftabs.fwidgetstate,ws_iswidget);
  ftabs.setlockedparentwidget(self);
-// ftabs.parentwidget:= self;
  ftabs.finternaltabchange:= {$ifdef FPC}@{$endif}tabchanged;
  fobjectpicker:= tobjectpicker.create(iobjectpicker(self),org_widget);
 end;
@@ -2856,6 +3154,8 @@ begin
     hint:= sender.gettabhint;
     color:= sender.getcolortab;
     coloractive:= sender.getcoloractivetab;
+    font:= ttabfont(sender.getfonttab);
+    fontactive:= ttabfontactive(sender.getfontactivetab);
     imagelist:= sender.getimagelist;
     imagenr:= sender.getimagenr;
     imagenrdisabled:= sender.getimagenrdisabled;
@@ -2889,7 +3189,7 @@ begin
        if (activepage <> nil) and not activepage.entered and 
         (entered or ((fwindow <> nil) and 
                  (fwindow.focusedwidget = nil))) then begin
-                 //probable page destroyed
+                 //probably page destroyed
         activepage.setfocus(active);
        end;
       end;
@@ -3833,6 +4133,51 @@ end;
 procedure tcustomtabwidget.settab_optionswidget(const avalue: optionswidgetty);
 begin
  ftabs.optionswidget:= avalue;
+end;
+
+function tcustomtabwidget.gettab_font: ttab_font;
+begin
+ result:= ttab_font(ftabs.tabs.font);
+end;
+
+procedure tcustomtabwidget.settab_font(const avalue: ttab_font);
+begin
+ ftabs.font:= twidgetfont(avalue);
+end;
+
+function tcustomtabwidget.istab_fontstored: boolean;
+begin
+ result:=  ftabs.ffont <> nil;
+end;
+
+function tcustomtabwidget.gettab_fonttab: ttab_fonttab;
+begin
+ result:= ttab_fonttab(ftabs.tabs.font);
+end;
+
+procedure tcustomtabwidget.settab_fonttab(const avalue: ttab_fonttab);
+begin
+ ftabs.tabs.font:= ttabsfont(avalue);
+end;
+
+function tcustomtabwidget.istab_fonttabstored: boolean;
+begin
+ result:=  ftabs.tabs.ffont <> nil;
+end;
+
+function tcustomtabwidget.gettab_fontactivetab: ttab_fontactivetab;
+begin
+ result:= ttab_fontactivetab(ftabs.tabs.fontactive);
+end;
+
+procedure tcustomtabwidget.set_tabfontactivetab(const avalue: ttab_fontactivetab);
+begin
+ ftabs.tabs.fontactive:= ttabsfontactive(avalue);
+end;
+
+function tcustomtabwidget.istab_fontactivetabstored: boolean;
+begin
+ result:=  ftabs.tabs.ffontactive <> nil;
 end;
 
 { tpagetab }

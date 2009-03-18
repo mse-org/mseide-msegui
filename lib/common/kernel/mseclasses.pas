@@ -1919,8 +1919,8 @@ begin
   if tpersistent(instance) = nil then begin
    createproc;
   end;
-  if not (csdesigning in componentstate) and 
-                             (pointer(value) <> pointer(1)) then begin
+  if not ((csdesigning in componentstate) and 
+                             (pointer(value) = pointer(1))) then begin
    tpersistent(instance).assign(value);
   end;
  end
