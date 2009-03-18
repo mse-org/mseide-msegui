@@ -5,11 +5,14 @@ uses
  classes,msestat,mseapplication,msetypes,msestrings,mseclasses,msestream,
  mseglob;
 const
- intermediatefileextension = '~';
+ intermediatefileextension = '$$$';
 type
- statupdateeventty = procedure(const sender: tobject; const filer: tstatfiler) of object;
- statreadeventty = procedure(const sender: tobject; const reader: tstatreader) of object;
- statwriteeventty = procedure(const sender: tobject; const writer: tstatwriter) of object;
+ statupdateeventty = procedure(const sender: tobject;
+                                  const filer: tstatfiler) of object;
+ statreadeventty = procedure(const sender: tobject;
+                                  const reader: tstatreader) of object;
+ statwriteeventty = procedure(const sender: tobject; 
+                                  const writer: tstatwriter) of object;
 
  statfileoptionty = (sfo_memory,sfo_createpath,
                      sfo_transaction, //use intermedate file and rename
@@ -119,9 +122,13 @@ end;
 
 procedure commitstreamtransaction(const astream: tmsefilestream;
                                      const aname: filenamety);
+var
+ fname1: filenamety;
 begin
  astream.flush;
- msefileutils.renamefile(astream.filename,aname);
+ fname1:= astream.filename;
+ astream.close;
+ msefileutils.renamefile(fname1,aname);
 end;
 
 { tstatfile }

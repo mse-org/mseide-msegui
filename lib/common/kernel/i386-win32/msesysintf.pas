@@ -439,6 +439,12 @@ end;
 
 function sys_flushfile(const handle: integer): syserrorty;
 begin
+ if flushfilebuffers(handle) then begin
+  result:= sye_ok;
+ end
+ else begin
+  result:= syelasterror;
+ end;
 end;
 
 function sys_dup(const source: integer; out dest: integer): syserrorty;
