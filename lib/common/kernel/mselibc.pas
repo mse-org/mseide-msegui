@@ -1342,6 +1342,7 @@ function fcntl(__fd:longint; __cmd:longint):longint;cdecl;varargs;external clib 
 function open(__file:Pchar; __oflag:longint; args:array of const):longint;cdecl;external clib name 'open';
 function open(__file:Pchar; __oflag:longint):longint;cdecl;varargs;external clib name 'open';
 function __close(Handle: Integer): Integer; cdecl;external clib name 'close';
+function fsync(__fd:longint):longint;cdecl;external clib name 'fsync';
 function dup(__fd:longint):longint;cdecl;external clib name 'dup';
 function dup2(__fd:longint; __fd2:longint):longint;cdecl;external clib name 'dup2';
 function __read(Handle: Integer; var Buffer; Count: size_t): ssize_t; cdecl;external clib name 'read';

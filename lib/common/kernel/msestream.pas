@@ -47,6 +47,7 @@ type
    function isopen: boolean;
    function filename: filenamety;
    procedure close;
+   procedure flush; virtual;
 
    procedure SetSize(const NewSize: Int64); override;
    procedure clear;        //only for memorystream
@@ -785,6 +786,13 @@ procedure tmsefilestream.close;
 begin
  sethandle(invalidfilehandle);
  ffilename:= '';
+end;
+
+procedure tmsefilestream.flush;
+begin
+ if handle <> invalidfilehandle then begin
+  syserror(sys_flushfile(handle));
+ end;
 end;
 
 function tmsefilestream.isopen: boolean;

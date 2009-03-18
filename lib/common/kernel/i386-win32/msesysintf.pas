@@ -437,6 +437,10 @@ begin
  end;
 end;
 
+function sys_flushfile(const handle: integer): syserrorty;
+begin
+end;
+
 function sys_dup(const source: integer; out dest: integer): syserrorty;
 begin
  result:= sye_notimplemented;
