@@ -319,6 +319,7 @@ uses
 
 type
  tcomponent1 = class(tcomponent);
+ tmsecomponent1 = class(tmsecomponent);
  twidget1 = class(twidget);
  tmseform1 = class(tmseform);
  tframe1 = class(tframe);
@@ -693,75 +694,87 @@ end;
 
 function tformdesignerselections.move(const dist: pointty): boolean;
 var
- int1: integer;
+ int1,int2: integer;
  widget1: twidget;
- comp1: tcomponent;
+ comp1,comp2: tcomponent;
  rect1,rect2: rectty;
  pt1: pointty;
+ ar1: componentarty;
 begin
  result:= false;
  if (dist.x <> 0) or (dist.y <> 0) then begin
+  setlength(ar1,count);
+  for int1:= 0 to high(ar1) do begin
+   comp1:= items[int1];
+   while comp1 is twidget and 
+             (cs_parentwidgetrect in twidget1(comp1).fmsecomponentstate) do begin
+    comp1:= twidget(comp1).parentwidget;
+   end;
+   ar1[int1]:= comp1;
+  end;
+  for int1:= 0 to high(ar1) do begin
+   comp1:= ar1[int1];
+   for int2:= int1 + 1 to high(ar1) do begin
+    if ar1[int2] = comp1 then begin
+     ar1[int2]:= nil; //remove duplicates
+    end;
+   end;
+  end;
   for int1:= 0 to count - 1 do begin
-   with itempo(int1)^,selectedinfo do begin
-    if (fowner.form <> nil) and (instance is twidget) and
-                                    (instance <> fowner.module) then begin
-     if not nohandles then begin
-      widget1:= twidget(instance).parentwidget;
-      while widget1 <> nil do begin
-       if (widget1 <> fowner.form) and (indexof(widget1) >= 0) then begin
-        break;  //moved by parent
-       end;
-       widget1:= widget1.parentwidget;
-      end;
-      if widget1 = nil then begin
-       with twidget(instance) do begin
-        pos:= addpoint(pos,dist);
-        result:= true;
-       end;
-      end;
-     end;
-    end
-    else begin
-     comp1:= tcomponent(instance).owner;
-     while comp1 <> nil do begin
-      if (comp1 <> fowner.module) and (comp1 is twidget) and
-                                        (indexof(comp1) >= 0) then begin 
-       break; //moved by owner
-      end;
-      comp1:= comp1.owner;
-     end;
-     if comp1 = nil then begin
-      rect1:= fowner.getcomponentrect1(tcomponent(instance));
-      fowner.fowner.invalidaterect(rect1);
-      pt1:= rect1.pos;
-      addpoint1(rect1.pos,dist);
-      with tformdesignerfo(fowner.fowner) do begin
-       rect2:= compplacementrect;
-       if form <> nil then begin      
-        shiftinrect(rect1,rect2);
-//        subpoint1(rect1.pos,rect2.pos);
-       end
-       else begin
-        if rect1.x < rect2.x then begin
-         rect1.x:= rect2.x;
+   comp1:= ar1[int1];
+   if comp1 <> nil then begin
+    with itempo(int1)^,selectedinfo do begin
+     if (fowner.form <> nil) and (comp1 is twidget) and
+                                     (comp1 <> fowner.module) then begin
+      if not nohandles then begin
+       widget1:= twidget(comp1).parentwidget;
+       while widget1 <> nil do begin
+        if (widget1 <> fowner.form) and (indexof(widget1) >= 0) then begin
+         break;  //moved by parent
         end;
-        if rect1.y < rect2.y then begin
-         rect1.y:= rect2.y;
+        widget1:= widget1.parentwidget;
+       end;
+       if widget1 = nil then begin
+        with twidget(comp1) do begin
+         pos:= addpoint(pos,dist);
+         result:= true;
         end;
        end;
       end;
-      setcomponentpos(tcomponent(instance),
-                addpoint(getcomponentpos(tcomponent(instance)),
-                subpoint(rect1.pos,pt1)));
-      fowner.fowner.invalidaterect(rect1);
-{                                         
-      setcomponentpos(tcomponent(instance),
-             addpoint(getcomponentpos(tcomponent(instance)),dist));
-      fowner.fowner.invalidaterect(getcomponentrect1(
-                                         fowner.fowner,tcomponent(instance),
-                                         fowner.module));
-                                         }
-      result:= true;
+     end
+     else begin
+      comp2:= tcomponent(comp1).owner;
+      while comp2 <> nil do begin
+       if (comp2 <> fowner.module) and (comp2 is twidget) and
+                                         (indexof(comp2) >= 0) then begin 
+        break; //moved by owner
+       end;
+       comp2:= comp2.owner;
+      end;
+      if comp2 = nil then begin
+       rect1:= fowner.getcomponentrect1(tcomponent(comp1));
+       fowner.fowner.invalidaterect(rect1);
+       pt1:= rect1.pos;
+       addpoint1(rect1.pos,dist);
+       with tformdesignerfo(fowner.fowner) do begin
+        rect2:= compplacementrect;
+        if form <> nil then begin      
+         shiftinrect(rect1,rect2);
+        end
+        else begin
+         if rect1.x < rect2.x then begin
+          rect1.x:= rect2.x;
+         end;
+         if rect1.y < rect2.y then begin
+          rect1.y:= rect2.y;
+         end;
+        end;
+       end;
+       setcomponentpos(comp1,addpoint(getcomponentpos(comp1),
+                                              subpoint(rect1.pos,pt1)));
+       fowner.fowner.invalidaterect(rect1);
+       result:= true;
+      end;
      end;
     end;
    end;
@@ -834,7 +847,9 @@ begin
   with itempo(0)^,selectedinfo do begin
    if not nohandles then begin
     if instance is tcomponent then begin
-     if instance is twidget then begin
+     if (instance is twidget) and 
+                    not (cs_parentwidgetrect in 
+                          twidget1(instance).fmsecomponentstate) then begin
       for handle:= firsthandle to lasthandle do begin
        if pointinrect(pos,handles[handle]) then begin
         result:= handle;

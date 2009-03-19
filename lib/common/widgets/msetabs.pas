@@ -3296,6 +3296,7 @@ var
 begin
  widget1:= twidget1(page.getwidget);
  if indexof(widget1) < 0 then begin
+  include(widget1.fmsecomponentstate,cs_parentwidgetrect);
   if aindex > count then begin
    aindex:= count;
   end;
@@ -3334,6 +3335,7 @@ begin
   widget1:= twidget1(page.getwidget);
   int1:= indexof(widget1);
   if int1 >= 0 then begin
+   exclude(widget1.fmsecomponentstate,cs_parentwidgetrect);
    activebefore:= factivepageindex;
    if factivepageindex >= 0 then begin
     if factivepageindex > int1 then begin

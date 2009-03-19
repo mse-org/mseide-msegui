@@ -253,7 +253,9 @@ type
    property sender: tobject read fsender;
  end;
 
- msecomponentstatety = (cs_ismodule,cs_endreadproc,cs_loadedproc,cs_noload{,}
+ msecomponentstatety = (cs_ismodule,cs_endreadproc,cs_loadedproc,cs_noload,
+                        cs_parentwidgetrect //info for designer, example ttabpage
+                        {,}
                         {cs_hasskin,}{cs_noskin}{,cs_updateskinproc});
  msecomponentstatesty = set of msecomponentstatety;
 
