@@ -421,7 +421,7 @@ type
                            //false if no value
  getkeystringfuncty = function (const index: integer): msestring of object;
 
- locatestringoptionty = (lso_casesensitive,lso_exact);
+ locatestringoptionty = (lso_casesensitive,lso_posinsensitive,lso_exact);
  locatestringoptionsty = set of locatestringoptionty;
 
 function locatestring(const afilter: msestring; const getkeystringfunc: getkeystringfuncty;
@@ -443,6 +443,7 @@ type
  locateinfoty = record
   filter: msestring;
   casesensitive: boolean;
+  posinsensitive: boolean;
   exact: boolean;
   result: boolean;
  end;
@@ -455,30 +456,65 @@ var
  procedure check(index1: integer);
  var
   str1: msestring;
+  int1: integer;
+
+  procedure checkexactpos;
+  var
+   int2: integer;
+  begin
+   result:= (int1 > 0) and ((int1 = 1) or (str1[int1] = ' '));
+   if result then begin
+    int2:= int1 + length(locateinfo.filter);
+    result:= (int2 = length(str1)) or (str1[int2] = ' ');
+   end;
+  end; //checkexactpos
+
  begin
   str1:= getkeystringfunc(index1);
   with locateinfo do begin
    if exact then begin
     if casesensitive then begin
-     result:= msecomparestr(filter,str1) = 0;
+     if posinsensitive then begin
+      int1:= pos(filter,str1);
+      checkexactpos;
+     end
+     else begin
+      result:= msecomparestr(filter,str1) = 0;
+     end;
     end
     else begin
-     result:= msecomparetext(filter,str1) = 0;
+     if posinsensitive then begin
+      int1:= pos(filter,mseuppercase(str1));
+      checkexactpos;
+     end
+     else begin
+      result:= msecomparetext(filter,str1) = 0;
+     end;
     end;
    end
    else begin
     if casesensitive then begin
-     result:= msecomparestrlen(filter,str1) = 0;
+     if posinsensitive then begin
+      result:= pos(filter,str1) > 0;
+     end
+     else begin
+      result:= msecomparestrlen(filter,str1) = 0;
+     end;
     end
     else begin
-     result:= msecomparetextlen(filter,str1) = 0;
+     if posinsensitive then begin
+      result:= pos(filter,mseuppercase(str1)) > 0;
+     end
+     else begin
+      result:= msecomparetextlen(filter,str1) = 0;
+     end;
     end;
    end;
    if result then begin
     aindex:= index1;
    end;
   end;
- end;
+ end; //check
 
 var
  int1,int2: integer;

@@ -26,7 +26,7 @@ const
 
 type
 
- dropdownlistoptionty = (dlo_casesensitive);
+ dropdownlistoptionty = (dlo_casesensitive,dlo_posinsensitive);
  dropdownlistoptionsty = set of dropdownlistoptionty;
 
  dropdownliststatety = (dls_firstmousemoved,dls_mousemoved,dls_scrollup{,dls_closing});
@@ -37,7 +37,7 @@ type
                         deo_keydropdown,//shift down starts dropdown
                         deo_modifiedbeforedropdown, 
                         //edit.modified called before dropdown
-                        deo_casesensitive,
+                        deo_casesensitive,deo_posinsensitive,
                         deo_sorted,deo_disabled,deo_autosavehistory,
                         deo_cliphint,deo_right);
  dropdowneditoptionsty = set of dropdowneditoptionty;
@@ -1162,6 +1162,9 @@ begin
       if deo_casesensitive in self.foptions then begin
        options:= options + [dlo_casesensitive];
       end;
+      if deo_posinsensitive in self.foptions then begin
+       options:= options + [dlo_posinsensitive];
+      end;
       if deo_sorted in self.foptions then begin
        sort;
       end;
@@ -1668,11 +1671,12 @@ var
 begin
  if (rowcount > 0) and (fdatacols.count > 0) then begin
   int1:= focusedcell.row;
+  opt1:= [];
   if dlo_casesensitive in foptions1 then begin
    opt1:= [lso_casesensitive];
-  end
-  else begin
-   opt1:= [];
+  end;
+  if dlo_posinsensitive in foptions1 then begin
+   include(opt1,lso_posinsensitive);
   end;
   result:= locatestring(filter,{$ifdef FPC}@{$endif}getkeystring,opt1,
                 fdatacols[0].datalist.count,int1);
