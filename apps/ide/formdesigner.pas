@@ -2526,7 +2526,7 @@ begin
    fo.caption:= caption;
   end;
   if amodule <> nil then begin
-   ar2:= designer.descendentinstancelist.getancestors(amodule^.instance);
+   ar2:= designer.descendentinstancelist.getancestorsandchildren(amodule^.instance);
    additem(pointerarty(ar2),amodule^.instance);
   end
   else begin

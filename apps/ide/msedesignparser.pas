@@ -24,7 +24,6 @@ type
  idesignparser = interface(inullinterface)
  end;
 type
-  punitinfoty = ^unitinfoty;
 
  sourceitemkindty = (sik_uses,sik_include{,sik_identuse});
  identuseflagty = (idu_first,idu_last);
@@ -166,6 +165,7 @@ type
    inimplementation: boolean;
   end;
   pclassinfoty = ^classinfoty;
+  classinfopoarty = array of pclassinfoty;
 
   tclassinfolist = class(tbrowserlist)
    protected
@@ -346,6 +346,51 @@ type
     property infos: definfoarty read finfos;
   end;
 
+  includestatementarty = array of includestatementty;
+  
+  proglangty = (pl_pascal,pl_c);      
+
+  tfunctionheaders = class;
+  tfunctions = class;
+  
+  cunitinfoty = record
+   functionheaders: tfunctionheaders;
+   functions: tfunctions;
+  end; 
+
+  pascalunitinfoty = record
+   procedurelist: tprocedureinfolist;
+   classinfolist: tclassinfolist;
+   interfaceuses,implementationuses: tusesinfolist;
+   implementationstart: sourceposty;
+   implementationbodystart: sourceposty;
+   implementationend: sourceposty;
+   initializationstart: sourceposty;
+   finalizationstart: sourceposty;
+  end;
+
+  unitinfoty = record
+   interfacecompiled: boolean;
+   implementationcompiled: boolean;
+   isprogram: boolean;
+   itemlist: tsourceitemlist;
+   deflist: trootdeflist;
+   sourcefilename: filenamety;
+   unitname: string; //uppercase
+   origunitname: string;
+   formfilename: filenamety;
+   unitend: sourceposty;
+   sourceend: sourceposty;
+   sourcefiles: sourcefileinfoarty;
+   includestatements: includestatementarty;
+   case proglang: proglangty of
+    pl_pascal:
+     (p: pascalunitinfoty);
+    pl_c:
+     (c: cunitinfoty);
+  end;
+  punitinfoty = ^unitinfoty;
+  unitinfopoarty = array of punitinfoty;
 
   trootdeflist = class(tdeflist)
    private
@@ -386,8 +431,6 @@ type
     property actnode: tdeflist read factnode;
   end;
 
-  includestatementarty = array of includestatementty;
-
   tfunctionheaders = class(tbrowserlist)
    private
     function getitempo(const index: integer): pfunctionheaderinfoty;
@@ -414,45 +457,6 @@ type
                                                  read getitempo; default;
   end;
   
-  cunitinfoty = record
-   functionheaders: tfunctionheaders;
-   functions: tfunctions;
-  end; 
-
-  pascalunitinfoty = record
-   procedurelist: tprocedureinfolist;
-   classinfolist: tclassinfolist;
-   interfaceuses,implementationuses: tusesinfolist;
-   implementationstart: sourceposty;
-   implementationbodystart: sourceposty;
-   implementationend: sourceposty;
-   initializationstart: sourceposty;
-   finalizationstart: sourceposty;
-  end;
-
-  proglangty = (pl_pascal,pl_c);  
-  
-  unitinfoty = record
-   interfacecompiled: boolean;
-   implementationcompiled: boolean;
-   isprogram: boolean;
-   itemlist: tsourceitemlist;
-   deflist: trootdeflist;
-   sourcefilename: filenamety;
-   unitname: string; //uppercase
-   origunitname: string;
-   formfilename: filenamety;
-   unitend: sourceposty;
-   sourceend: sourceposty;
-   sourcefiles: sourcefileinfoarty;
-   includestatements: includestatementarty;
-   case proglang: proglangty of
-    pl_pascal:
-     (p: pascalunitinfoty);
-    pl_c:
-     (c: cunitinfoty);
-  end;
-
  tunitinfo = class
   public
    info: unitinfoty;

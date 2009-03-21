@@ -1593,8 +1593,27 @@ end;
 
 function tobjectinspectorfo.getmatchingmethods(
   const sender: tpropertyeditor; atype: ptypeinfo): msestringarty;
+var
+ ar1: componentarty;
+ int1,int2: integer;
+ mstr1: msestring;
 begin
- result:= sourceupdater.getmatchingmethods(sender.module,atype);
+ ar1:= designer.descendentinstancelist.getancestors(sender.module);
+ additem(pointerarty(ar1),sender.module);
+ result:= nil;
+ for int1:= 0 to high(ar1) do begin
+  stackarray(sourceupdater.getmatchingmethods(tmsecomponent(ar1[int1]),atype),
+       result);
+ end;
+ for int1:= 0 to high(result) do begin
+  mstr1:= struppercase(result[int1]);
+  for int2:= int1 + 1 to high(result) do begin
+   if msestringicomp1(result[int2],mstr1) = 0 then begin
+    result[int2]:= '';
+   end;
+  end;
+ end;
+ result:= packarray(result);
 end;
 
 procedure tobjectinspectorfo.methodnamechanged(const adesigner: idesigner;

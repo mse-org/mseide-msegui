@@ -742,6 +742,10 @@ procedure insertarray(const source: realarty; var dest: realarty); overload;
 function reversearray(const source: msestringarty): msestringarty; overload;
 function reversearray(const source: integerarty): integerarty; overload;
 procedure removearrayduplicates(var value: pointerarty);
+function packarray(source: pointerarty): pointerarty; overload;
+               //remove nil items
+function packarray(source: msestringarty): msestringarty; overload;
+               //remove '' items
 
 procedure checkarrayindex(const value; const index: integer);
           //value = dynamic array, exception bei ungueltigem index
@@ -1500,6 +1504,36 @@ begin
   end;
  end;
  setlength(value,int2);
+end;
+
+function packarray(source: pointerarty): pointerarty; //removes nil items
+var
+ int1,int2: integer;
+begin
+ setlength(result,length(source));
+ int2:= 0;
+ for int1:= 0 to high(source) do begin
+  result[int2]:= source[int1];
+  if source[int1] <> nil then begin
+   inc(int2);
+  end;
+ end;
+ setlength(result,int2);
+end;
+
+function packarray(source: msestringarty): msestringarty;
+var
+ int1,int2: integer;
+begin
+ setlength(result,length(source));
+ int2:= 0;
+ for int1:= 0 to high(source) do begin
+  result[int2]:= source[int1];
+  if source[int1] <> '' then begin
+   inc(int2);
+  end;
+ end;
+ setlength(result,int2);
 end;
 
 procedure checkarrayindex(const value; const index: integer);

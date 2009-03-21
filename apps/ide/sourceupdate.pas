@@ -28,7 +28,7 @@ type
  
  unitinfoaty = array[0..0] of tunitinfo;
  punitinfoaty = ^unitinfoaty;
- unitinfopoarty = array of punitinfoty;
+// unitinfopoarty = array of punitinfoty;
 
  tfilenameinfo = class
   private
@@ -1018,18 +1018,27 @@ var
  unitinfo: punitinfoty;
  classinfo1: pclassinfoty;
  procedureinfo: pprocedureinfoty;
-
+ ar1: classinfopoarty;
+ int1: integer;
 begin
  result:= emptysourcepos;
  if amethod.data <> nil then begin
   designer.getmethodinfo(amethod,moduleinfo,methodinfo);
   if moduleinfo <> nil then begin
-   unitinfo:= updateformunit(moduleinfo^.filename,false);
-   if unitinfo <> nil then begin
-    classinfo1:= unitinfo^.p.classinfolist.finditembyname(
-            moduleinfo^.moduleclassname,true);
-    if classinfo1 <> nil then begin
-     procedureinfo:= classinfo1^.procedurelist.finditembyname(methodinfo^.name);
+   ar1:= designer.getancestorclassinfo(moduleinfo^.instance);
+   procedureinfo:= nil;
+   for int1:= high(ar1) downto 0 do begin
+    procedureinfo:= ar1[int1]^.procedurelist.finditembyname(methodinfo^.name);
+    if procedureinfo <> nil then begin
+     break;
+    end;
+   end;
+//   unitinfo:= updateformunit(moduleinfo^.filename,false);
+//   if unitinfo <> nil then begin
+//    classinfo1:= unitinfo^.p.classinfolist.finditembyname(
+//            moduleinfo^.moduleclassname,true);
+//    if classinfo1 <> nil then begin
+//     procedureinfo:= classinfo1^.procedurelist.finditembyname(methodinfo^.name);
      if procedureinfo <> nil then begin
       with procedureinfo^do begin
        if imp and (impheaderendpos.filenum > 0) then begin
@@ -1045,8 +1054,8 @@ begin
        end;
       end;
      end;
-    end;
-   end;
+//    end;
+//   end;
   end;
  end;
 end;
@@ -1497,38 +1506,49 @@ var
  int1: integer;
  pos1: sourceposty;
  posindex: integer;
+ ar1: classinfopoarty;
 begin
  if atype^.Kind = tkmethod then begin
+  ar1:= designer.getancestorclassinfo(amodule);
+  if ar1 = nil then begin
+   exit;
+  end;
+  for int1:= high(ar1) downto 0 do begin
+   if ar1[int1]^.procedurelist.finditembyname(aname{,atype}) <> nil then begin
+    exit;
+   end;
+  end;
+  po2:= ar1[high(ar1)];
   po1:= updatemodule(amodule);
-  po2:= findclassinfobyinstance(amodule,po1);
-  if (po2 <> nil) and (po2^.procedurelist.finditembyname(aname{,atype}) = nil) then begin
-   pos1:= emptysourcepos;
-   str1:= uppercase(aname);
-   with po2^.procedurelist do begin
-    posindex:= count;
-    if falphabeticprocorder then begin
-     for int1:= 0 to count - 1 do begin
-      with items[int1]^ do begin
-       if uppername > str1 then begin
-        posindex:= int1;
-        pos1:= intinsertpos;
-       end;
-       break;
+//  po2:= findclassinfobyinstance(amodule,po1);
+//  if (po2 <> nil) and (po2^.procedurelist.finditembyname(aname{,atype}) = nil) then begin
+  pos1:= emptysourcepos;
+  str1:= uppercase(aname);
+  with po2^.procedurelist do begin
+   posindex:= count;
+   if falphabeticprocorder then begin
+    for int1:= 0 to count - 1 do begin
+     with items[int1]^ do begin
+      if uppername > str1 then begin
+       posindex:= int1;
+       pos1:= intinsertpos;
       end;
+      break;
      end;
     end;
    end;
-   if isemptysourcepos(pos1) then begin
-    pos1:= po2^.managedend;
-   end;
-   if not isemptysourcepos(pos1) then begin
-    createmethodbody(po1,po2,aname,atype,posindex);
-    str1:= composeprocedureheader(aname,atype,false);
-    replacetext(po1,pos1,pos1,limitlinelength(
-              '   ' + str1,fmaxlinelength,';',18)+lineend);
-   end;
+  end;
+  if isemptysourcepos(pos1) then begin
+   pos1:= po2^.managedend;
+  end;
+  if not isemptysourcepos(pos1) then begin
+   createmethodbody(po1,po2,aname,atype,posindex);
+   str1:= composeprocedureheader(aname,atype,false);
+   replacetext(po1,pos1,pos1,limitlinelength(
+             '   ' + str1,fmaxlinelength,';',18)+lineend);
   end;
  end;
+//end;
 end;
 
 procedure tsourceupdater.methodnamechanged(const adesigner: idesigner;
@@ -1538,23 +1558,37 @@ var
  po1: punitinfoty;
  po2: pclassinfoty;
  po3: pprocedureinfoty;
+ ar1: classinfopoarty;
+ ar2: unitinfopoarty;
+ int1: integer;
 begin
- po1:= updatemodule(amodule);
- po2:= findclassinfobyinstance(amodule,po1);
- if po2 <> nil then begin
-  po3:= po2^.procedurelist.finditembyname(oldname{,atypeinfo});
-  if po3 <> nil then begin
-   with po3^ do begin
-    name:= newname;
-    if not isemptysourcepos(po3^.impheaderstartpos) then begin
-     replacetext(po1,impheaderstartpos,impheaderendpos,
-      limitlinelength(composeprocedureheader(po3,po2,false),fmaxlinelength,';',
-                          14,impheaderstartpos.pos.col));
-    end;
-    replacetext(po1,intstartpos,intendpos,
-      limitlinelength(composeproceduretext(po3,false),fmaxlinelength,';',
-                          18,intstartpos.pos.col));
+ ar1:= designer.getancestorclassinfo(amodule,ar2);
+ po3:= nil;
+ for int1:= high(ar1) downto 0 do begin
+  po1:= ar2[int1];
+  if (po1 <> nil) and (ar1[int1] <> nil) then begin
+   po3:= ar1[int1]^.procedurelist.finditembyname(oldname);
+   if po3 <> nil then begin
+    po2:= ar1[int1];
+    break;
    end;
+  end;
+ end;
+// po1:= updatemodule(amodule);
+// po2:= findclassinfobyinstance(amodule,po1);
+// if po2 <> nil then begin
+//  po3:= po2^.procedurelist.finditembyname(oldname{,atypeinfo});
+ if po3 <> nil then begin
+  with po3^ do begin
+   name:= newname;
+   if not isemptysourcepos(po3^.impheaderstartpos) then begin
+    replacetext(po1,impheaderstartpos,impheaderendpos,
+     limitlinelength(composeprocedureheader(po3,po2,false),fmaxlinelength,';',
+                         14,impheaderstartpos.pos.col));
+   end;
+   replacetext(po1,intstartpos,intendpos,
+     limitlinelength(composeproceduretext(po3,false),fmaxlinelength,';',
+                         18,intstartpos.pos.col));
   end;
  end;
 end;

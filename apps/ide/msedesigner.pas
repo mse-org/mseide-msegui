@@ -23,7 +23,7 @@ uses
  classes,msegraphutils,mseglob,mseguiglob,msedesignintf,
  mseforms,mselist,msedatalist,msebitmap,msetypes,sysutils,msehash,mseclasses,
  mseformdatatools,typinfo,msepropertyeditors,msecomponenteditors,msegraphics,
- mseapplication,msegui,msestrings;
+ mseapplication,msegui,msestrings,msedesignparser;
 
 const
  formfileext = 'mfm';
@@ -261,6 +261,7 @@ type
    function getclassname(const comp: tcomponent): string;
                    //returns submodule or root classname if appropriate
    function getancestors(const adescendent: tcomponent): componentarty;
+   function getancestorsandchildren(const adescendent: tcomponent): componentarty;
    function getdescendents(const aancestor: tcomponent): componentarty;
  end;
 
@@ -376,7 +377,7 @@ type
    procedure noselection;
 
    function getmethod(const aname: string; const methodowner: tmsecomponent;
-                        const atype: ptypeinfo): tmethod;
+              const atype: ptypeinfo; const searchancestors: boolean): tmethod;
    function getmethodname(const method: tmethod; const comp: tcomponent): string;
    procedure changemethodname(const method: tmethod; newname: string;
                                            const atypeinfo: ptypeinfo);
@@ -404,6 +405,12 @@ type
                                  const includeinherited: boolean;
                                  const aowner: tcomponent = nil;
                                  const filter: compfilterfuncty = nil): msestringarty;
+   function getancestorclassinfo(const ainstance: tcomponent): classinfopoarty;
+                                                  overload;
+   function getancestorclassinfo(const ainstance: tcomponent;
+                                 out aunits: unitinfopoarty): classinfopoarty;
+                                                  overload;
+                                                          
    procedure setmodulex(const amodule: tmsecomponent; avalue: integer);
    procedure setmoduley(const amodule: tmsecomponent; avalue: integer);
 
@@ -462,7 +469,7 @@ uses
  designer_bmp,msesys,msewidgets,formdesigner,mseevent,objectinspector,
  msefiledialog,projectoptionsform,sourceupdate,sourceform,sourcepage,
  pascaldesignparser,msearrayprops,rtlconsts,
- msesimplewidgets,msedesignparser;
+ msesimplewidgets;
 
 type
  tcomponent1 = class(tcomponent);
@@ -984,13 +991,19 @@ function tdescendentinstancelist.getancestors(
   end;
  end;
  
+begin
+ result:= nil;
+ addancestors(adescendent);
+end;
+
+function tdescendentinstancelist.getancestorsandchildren(
+                               const adescendent: tcomponent): componentarty;
 var
  po1: pointer;
  int1: integer;
  po2: pmoduleinfoty;
 begin
- result:= nil;
- addancestors(adescendent);
+ result:= getancestors(adescendent);
  po1:= datapo;
  for int1:= 0 to count - 1 do begin
   with(pancestorinfoaty(po1)^[int1]) do begin
@@ -3262,11 +3275,62 @@ begin
  end;
 end;
 }
+function tdesigner.getancestorclassinfo(const ainstance: tcomponent): classinfopoarty;
+var
+ ar1: componentarty;
+ ar2: classinfopoarty;
+ int1,int2: integer;
+ po1: punitinfoty;
+ po2: pmoduleinfoty;
+begin
+ ar1:= fdescendentinstancelist.getancestors(ainstance);
+ additem(pointerarty(ar1),ainstance);
+ setlength(ar2,length(ar1));
+ for int1:= 0 to high(ar1) do begin
+  po2:= modules.findmodule(tmsecomponent(ar1[int1]));
+  if po2 <> nil then begin
+   po1:= sourceupdater.updateformunit(po2^.filename,true);
+   if po1 <> nil then begin
+    ar2[int1]:= findclassinfobyinstance(tmsecomponent(ar1[int1]),po1);
+   end;
+  end;
+ end;
+ result:= classinfopoarty(packarray(pointerarty(ar2))); 
+end;
+
+function tdesigner.getancestorclassinfo(const ainstance: tcomponent;
+                                 out aunits: unitinfopoarty): classinfopoarty;
+                                                  
+var
+ ar1: componentarty;
+ ar2: classinfopoarty;
+ int1,int2: integer;
+ po1: punitinfoty;
+ po2: pmoduleinfoty;
+begin
+ ar1:= fdescendentinstancelist.getancestors(ainstance);
+ additem(pointerarty(ar1),ainstance);
+ setlength(ar2,length(ar1));
+ setlength(aunits,length(ar1));
+ for int1:= 0 to high(ar1) do begin
+  po2:= modules.findmodule(tmsecomponent(ar1[int1]));
+  if po2 <> nil then begin
+   po1:= sourceupdater.updateformunit(po2^.filename,true);
+   aunits[int1]:= po1;
+   if po1 <> nil then begin
+    ar2[int1]:= findclassinfobyinstance(tmsecomponent(ar1[int1]),po1);
+   end;
+  end;
+ end;
+ result:= ar2;
+end;
+
 function tdesigner.checkmethodtypes(const amodule: pmoduleinfoty;
                       const init: boolean{; const quiet: tcomponent}): boolean;
                                       //false on cancel
 var
- classinf: pclassinfoty;
+// classinf: pclassinfoty;
+ classinfar: classinfopoarty;
  comp1: tcomponent;
  
  procedure doinit(const instance: tobject);
@@ -3291,7 +3355,13 @@ var
         po1^.typeinfo:= ar1[int1]^.proptype{$ifndef FPC}^{$endif};
        end
        else begin
-        po2:= classinf^.procedurelist.finditembyname(po1^.name);
+        for int2:= 0 to high(classinfar) do begin
+         po2:= classinfar[int2]^.procedurelist.finditembyname(po1^.name);
+         if po2 <> nil then begin
+          break;
+         end;
+        end;
+//        po2:= classinf^.procedurelist.finditembyname(po1^.name);
         mr1:= mr_none;
         if (po2 = nil) or not po2^.managed then begin
          mr1:= askyesnocancel('Published (managed) method '+
@@ -3356,7 +3426,7 @@ var
 var
  int1: integer;
  mstr1: msestring;
- po3: punitinfoty;
+// po3: punitinfoty;
 begin
  result:= true;
  if not init then begin
@@ -3364,14 +3434,15 @@ begin
   if sourcefo.findsourcepage(mstr1) = nil then begin
    exit;
   end;
-  po3:= sourceupdater.updateformunit(amodule^.filename,true);
-  if po3= nil then begin
-   exit;
-  end;
-  classinf:= findclassinfobyinstance(amodule^.instance,po3);
-  if classinf = nil then begin
-   exit;
-  end;
+//  po3:= sourceupdater.updateformunit(amodule^.filename,true);
+//  if po3= nil then begin
+//   exit;
+//  end;
+  classinfar:= getancestorclassinfo(amodule^.instance);
+//  classinf:= findclassinfobyinstance(amodule^.instance,po3);
+//  if classinf = nil then begin
+//   exit;
+//  end;
  end;
  with amodule^ do begin
   for int1:= 0 to components.count - 1 do begin
@@ -3938,9 +4009,22 @@ begin
 end;
 
 function tdesigner.getmethod(const aname: string;
-               const methodowner: tmsecomponent; const atype: ptypeinfo): tmethod;
+               const methodowner: tmsecomponent; const atype: ptypeinfo;
+                      const searchancestors: boolean): tmethod;
+var
+ ar1: componentarty;
+ int1: integer;
 begin
  result:= fmodules.findmethodbyname(aname,atype,methodowner);
+ if searchancestors and (result.data = nil) then begin
+  ar1:= fdescendentinstancelist.getancestors(methodowner);
+  for int1:= high(ar1) downto 0 do begin
+   result:= fmodules.findmethodbyname(aname,atype,tmsecomponent(ar1[int1]));
+   if result.data <> nil then begin
+    break;
+   end;
+  end;
+ end;
 end;
 
 function tdesigner.getmethodname(const Method: TMethod; const comp: tcomponent): string;

@@ -107,7 +107,7 @@ type
   procedure setselections(const list: idesignerselections);
   procedure noselection;
   function getmethod(const name: string; const methodowner: tmsecomponent;
-                      const atype: ptypeinfo): tmethod;
+                      const atype: ptypeinfo; const searchancestors: boolean): tmethod;
   function getmethodname(const method: tmethod; const comp: tcomponent): string;
   procedure changemethodname(const method: tmethod; newname: string;
                              const atypeinfo: ptypeinfo);
