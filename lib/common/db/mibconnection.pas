@@ -733,7 +733,7 @@ end;
 
 procedure TIBConnection.FreeSQLDABuffer(var aSQLDA : PXSQLDA);
 
-var x : shortint;
+var x : integer;
 
 begin
   if assigned(aSQLDA) then
