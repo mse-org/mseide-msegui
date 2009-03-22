@@ -499,7 +499,7 @@ end;
 
 procedure TIBConnection.AllocSQLDA(var aSQLDA : PXSQLDA;Count : integer);
 
-var x : shortint;
+//var x : shortint;
 
 begin
   FreeSQLDABuffer(aSQLDA);
@@ -640,7 +640,8 @@ procedure tibconnection.preparestatement(const cursor: tsqlcursor;
 var dh    : pointer;
     tr    : pointer;
     p     : pchar;
-    x     : shortint;
+//    x     : shortint;
+    x     : integer;
     i     : integer;
  TransLen: word;
  TransType: TFieldType;
@@ -732,7 +733,7 @@ end;
 
 procedure TIBConnection.FreeSQLDABuffer(var aSQLDA : PXSQLDA);
 
-var x : shortint;
+var x : integer;
 
 begin
   if assigned(aSQLDA) then
