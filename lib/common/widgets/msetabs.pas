@@ -2461,9 +2461,9 @@ end;
 
 destructor ttabpage.destroy;
 begin
- ffonttab.free;
- ffontactivetab.free;
  inherited;
+ freeandnil(ffonttab);
+ freeandnil(ffontactivetab);
 end;
 
 class function ttabpage.classskininfo: skininfoty;
@@ -2805,9 +2805,9 @@ end;
 
 destructor ttabform.destroy;
 begin
- ffonttab.free;
- ffontactivetab.free;
  inherited;
+ freeandnil(ffonttab);
+ freeandnil(ffontactivetab);
 end;
 
 procedure ttabform.createfonttab;
