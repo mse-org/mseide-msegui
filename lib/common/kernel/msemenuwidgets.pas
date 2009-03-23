@@ -62,7 +62,8 @@ type
    fmenucomp: tcustommenu;
    fclickeditem: integer;
    procedure internalsetactiveitem(const avalue: integer;
-           const aclicked: boolean; const force: boolean); virtual;
+           const aclicked: boolean; const force: boolean;
+           const nochildreninactive: boolean); virtual;
    procedure setactiveitem(const value: integer);
    procedure applicationactivechanged(const avalue: boolean);
   protected
@@ -118,7 +119,8 @@ type
    fstate: mainmenuwidgetstatesty;
    flayoutcalcing: integer;
    procedure internalsetactiveitem(const Value: integer;
-           const aclicked: boolean; const force: boolean); override;
+                         const aclicked: boolean; const force: boolean;
+                         const nochildreninactive: boolean); override;
    procedure checkactivate(const force: boolean);
   protected
    foptions: mainmenuwidgetoptionsty;
@@ -302,6 +304,7 @@ const
 var
  int1,int2: integer;
  ay,ax: integer;
+ sizemax1: integer;
  atextsize: sizety;
  maxheight: integer;
  textwidth: integer;
@@ -564,6 +567,7 @@ begin
     if commonwidth then begin
      ax:= frame2.left;
     end;
+    sizemax1:= 0;
     for int1:= 0 to count - 1 do begin
      with cells[int1].buttoninfo,ca do begin
       if not (shs_invisible in state) then begin
@@ -581,12 +585,17 @@ begin
         dim.x:= frame2.left;
         inc(regioncount);
        end;
+       int2:= dim.x + dim.cx + shift;
+       if int2 > sizemax1 then begin
+        sizemax1:= int2;
+       end;
        dim.y:= frame2.top + (maxheight+frameheight) * (regioncount - 1);
        dim.cy:= maxheight;
       end;
      end;
     end;
-    sizerect.cx:= ax - extrasp - frame2.right;
+    sizerect.cx:= sizemax1 {- extrasp - frame2.right};
+//    sizerect.cx:= ax - extrasp - frame2.right;
     sizerect.cy:= regioncount * (maxheight + frameheight) - extrasp;
    end
    else begin                                              //vertical
@@ -1083,17 +1092,18 @@ end;
 procedure tpopupmenuwidget.mouseevent(var info: mouseeventinfoty);
 var
  bo1: boolean;
- po1: pointty;
  itembefore: integer;
  int1: integer;
+ pt1,pt2: pointty;
 begin
  with info,flayout do begin
 //  po1:= translatetoscreen(pos);
   itembefore:= activeitem;
-  po1:= translatewidgetpoint(info.pos,self,nil);
+  pt1:= translatewidgetpoint(info.pos,self,nil);
   if (mlo_keymode in options) and
-   (eventkind in [ek_mousemove,ek_buttonpress,ek_buttonrelease,ek_mousepark]) then begin
-   if (distance(po1,mousepos) <= 3) and
+   (eventkind in [ek_mousemove,ek_buttonpress,
+                        ek_buttonrelease,ek_mousepark]) then begin
+   if (distance(pt1,mousepos) <= 3) and
       (eventkind in [ek_mousemove,ek_mousepark]) then begin
     exit;
    end
@@ -1102,17 +1112,18 @@ begin
    end;
   end;
   if (eventkind = ek_mousemove) and (fnextpopup <> nil) and
-         pointinrect(po1,fnextpopup.fwidgetrect) and 
+         pointinrect(pt1,fnextpopup.fwidgetrect) and 
                              not (mlo_childreninactive in options) then begin
    invalidaterect(cells[activeitem].dimouter);
    fnextpopup.activatemenu(false,ss_left in info.shiftstate);
    exit;
   end;
   if eventkind in mouseposevents then begin
-   if not checkprevpopuparea(po1) then begin
+   if not checkprevpopuparea(pt1) then begin
     if pointinrect(pos,paintrect) then begin
-     internalsetactiveitem(getcellatpos(flayout,subpoint(pos,paintpos)),
-                                             ss_left in info.shiftstate,false);
+     pt2:= subpoint(pos,paintpos);
+     internalsetactiveitem(getcellatpos(flayout,pt2),ss_left in info.shiftstate,
+                           false,pointinrect(pt2,sizerect));
      if activeitem >= 0 then begin
       include(cells[activeitem].buttoninfo.state,shs_mouse);
       if (itembefore <> activeitem) and 
@@ -1197,7 +1208,8 @@ begin
 end;
 
 procedure tpopupmenuwidget.internalsetactiveitem(const avalue: integer;
-          const aclicked: boolean; const force: boolean);
+          const aclicked: boolean; const force: boolean;
+          const nochildreninactive: boolean);
 var
  value1: integer;
 begin
@@ -1241,20 +1253,19 @@ begin
      end;
     end;
     capturemouse;
-   end
-   else begin
-    if mlo_main in options then begin
-     include(options,mlo_childreninactive);
-     releasemouse;
-    end;
    end;
+  end;
+  if (activeitem < 0) and (mlo_main in options) and 
+                             not nochildreninactive then begin
+   include(options,mlo_childreninactive);
+   releasemouse;
   end;
  end;
 end;
 
 procedure tpopupmenuwidget.setactiveitem(const value: integer);
 begin
- internalsetactiveitem(value,false,false);
+ internalsetactiveitem(value,false,false,false);
 end;
 
 procedure tpopupmenuwidget.activatemenu(keymode: boolean; aclicked: boolean);
@@ -1269,7 +1280,7 @@ begin
  end;
  if (flayout.menu.count > 0) and (flayout.activeitem < 0) then begin
   if keymode then begin
-   internalsetactiveitem(0,aclicked,true);
+   internalsetactiveitem(0,aclicked,true,false);
   end;
   if (show(true,nil) <> mr_windowdestroyed) and (fprevpopup = nil) then begin
    flayout.menu.owner.checkexec;
@@ -1300,7 +1311,7 @@ begin
  with flayout do begin
   if mlo_childreninactive in options then begin
    exclude(options,mlo_childreninactive);
-   internalsetactiveitem(activeitem,false,true);
+   internalsetactiveitem(activeitem,false,true,false);
   end;
  end;
  if (fnextpopup <> nil) then begin
@@ -1741,7 +1752,8 @@ begin
 end;
 
 procedure tcustommainmenuwidget.internalsetactiveitem(const Value: integer;
-           const aclicked: boolean; const force: boolean);
+           const aclicked: boolean; const force: boolean;
+           const nochildreninactive: boolean);
 begin
  if (value >= 0) and not (csdesigning in componentstate) then begin
   checkactivate(false);
