@@ -405,9 +405,11 @@ type
                                  const includeinherited: boolean;
                                  const aowner: tcomponent = nil;
                                  const filter: compfilterfuncty = nil): msestringarty;
-   function getancestorclassinfo(const ainstance: tcomponent): classinfopoarty;
+   function getancestorclassinfo(const ainstance: tcomponent;
+                 const interfaceonly: boolean): classinfopoarty;
                                                   overload;
    function getancestorclassinfo(const ainstance: tcomponent;
+                 const interfaceonly: boolean;
                                  out aunits: unitinfopoarty): classinfopoarty;
                                                   overload;
                                                           
@@ -3275,7 +3277,8 @@ begin
  end;
 end;
 }
-function tdesigner.getancestorclassinfo(const ainstance: tcomponent): classinfopoarty;
+function tdesigner.getancestorclassinfo(const ainstance: tcomponent;
+                      const interfaceonly: boolean): classinfopoarty;
 var
  ar1: componentarty;
  ar2: classinfopoarty;
@@ -3289,7 +3292,7 @@ begin
  for int1:= 0 to high(ar1) do begin
   po2:= modules.findmodule(tmsecomponent(ar1[int1]));
   if po2 <> nil then begin
-   po1:= sourceupdater.updateformunit(po2^.filename,true);
+   po1:= sourceupdater.updateformunit(po2^.filename,interfaceonly);
    if po1 <> nil then begin
     ar2[int1]:= findclassinfobyinstance(tmsecomponent(ar1[int1]),po1);
    end;
@@ -3299,6 +3302,7 @@ begin
 end;
 
 function tdesigner.getancestorclassinfo(const ainstance: tcomponent;
+                const interfaceonly: boolean;
                                  out aunits: unitinfopoarty): classinfopoarty;
                                                   
 var
@@ -3315,7 +3319,7 @@ begin
  for int1:= 0 to high(ar1) do begin
   po2:= modules.findmodule(tmsecomponent(ar1[int1]));
   if po2 <> nil then begin
-   po1:= sourceupdater.updateformunit(po2^.filename,true);
+   po1:= sourceupdater.updateformunit(po2^.filename,interfaceonly);
    aunits[int1]:= po1;
    if po1 <> nil then begin
     ar2[int1]:= findclassinfobyinstance(tmsecomponent(ar1[int1]),po1);
@@ -3438,7 +3442,7 @@ begin
 //  if po3= nil then begin
 //   exit;
 //  end;
-  classinfar:= getancestorclassinfo(amodule^.instance);
+  classinfar:= getancestorclassinfo(amodule^.instance,true);
 //  classinf:= findclassinfobyinstance(amodule^.instance,po3);
 //  if classinf = nil then begin
 //   exit;

@@ -1025,7 +1025,7 @@ begin
  if amethod.data <> nil then begin
   designer.getmethodinfo(amethod,moduleinfo,methodinfo);
   if moduleinfo <> nil then begin
-   ar1:= designer.getancestorclassinfo(moduleinfo^.instance);
+   ar1:= designer.getancestorclassinfo(moduleinfo^.instance,false);
    procedureinfo:= nil;
    for int1:= high(ar1) downto 0 do begin
     procedureinfo:= ar1[int1]^.procedurelist.finditembyname(methodinfo^.name);
@@ -1509,7 +1509,7 @@ var
  ar1: classinfopoarty;
 begin
  if atype^.Kind = tkmethod then begin
-  ar1:= designer.getancestorclassinfo(amodule);
+  ar1:= designer.getancestorclassinfo(amodule,true);
   if ar1 = nil then begin
    exit;
   end;
@@ -1562,7 +1562,7 @@ var
  ar2: unitinfopoarty;
  int1: integer;
 begin
- ar1:= designer.getancestorclassinfo(amodule,ar2);
+ ar1:= designer.getancestorclassinfo(amodule,false,ar2);
  po3:= nil;
  for int1:= high(ar1) downto 0 do begin
   po1:= ar2[int1];
