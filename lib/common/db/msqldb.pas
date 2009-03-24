@@ -1813,6 +1813,7 @@ begin
  finally
   dec(fcloselock);
  end;
+ starttransaction;
  refreshdatasets;
 end;
 
