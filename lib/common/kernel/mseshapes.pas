@@ -241,6 +241,8 @@ begin
    end;
    state:= statebefore; //restore localflag
    actioninfotoshapeinfo(actioninfo,shapeinfo);
+   updatewidgetshapestate(shapeinfo,sender,false,twidget1(sender).fframe);
+                                   //update shs_disabled by isenabled
    sender.invalidate;
   end;
  end;
