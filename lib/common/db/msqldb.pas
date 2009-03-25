@@ -1807,14 +1807,21 @@ begin
  if aaction = canone then begin
   aaction:= action;
  end;
- inc(fcloselock);
  try
-  doendtransaction(aaction);
- finally
-  dec(fcloselock);
+  inc(fcloselock);
+  try
+   doendtransaction(aaction);
+  finally
+   dec(fcloselock);
+  end;
+  if not active then begin
+   starttransaction;
+  end;
+  refreshdatasets;
+ except
+  closedatasets;
+  raise;
  end;
- starttransaction;
- refreshdatasets;
 end;
 
 function TSQLTransaction.GetHandle: pointer;
