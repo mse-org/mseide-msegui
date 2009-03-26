@@ -707,12 +707,12 @@ type
   private
    fcache: tblobcache;
    ftagpo: pointer;
-   function getasmsestring: msestring;
-   procedure setasmsestring(const avalue: msestring);
    procedure setcachekb(const avalue: integer);
    function getcachekb: integer;
   protected
    fgetblobid: getblobidfuncty;
+   function getasmsestring: msestring; virtual;
+   procedure setasmsestring(const avalue: msestring); virtual;
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
    procedure defineproperties(filer: tfiler); override;
@@ -722,6 +722,8 @@ type
    function getasvariant: variant; override;
    function getasstring: string; override;
    procedure setasstring(const avalue: string); override;
+   function getaswidestring: widestring; override;
+   procedure setaswidestring(const avalue: widestring); override;
    procedure gettext(var atext: string; adisplaytext: boolean); override;
   public
    destructor destroy; override;
@@ -748,12 +750,12 @@ type
  tmsememofield = class(tmseblobfield,ifieldcomponent)
   private
    fdsintf: idsfieldcontroller;
-   function getasmsestring: msestring;
-   procedure setasmsestring(const avalue: msestring);
    //ifieldcomponent
    procedure setdsintf(const avalue: idsfieldcontroller);
    function getinstance: tfield;
   protected
+   function getasmsestring: msestring; override;
+   procedure setasmsestring(const avalue: msestring); override;
    function getasvariant: variant; override;
    procedure setvarvalue(const avalue: variant); override;
    procedure gettext(var thetext: string; adisplaytext: boolean); override;
@@ -3967,6 +3969,16 @@ begin
  else begin
   atext:= '(BLOB)';
  end;
+end;
+
+function tmseblobfield.getaswidestring: widestring;
+begin
+ result:= getasmsestring;
+end;
+
+procedure tmseblobfield.setaswidestring(const avalue: widestring);
+begin
+ setasmsestring(avalue);
 end;
 
 { tdbfieldnamearrayprop }
