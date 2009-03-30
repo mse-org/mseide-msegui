@@ -1241,7 +1241,7 @@ var
  aflags: textflagsty;
 begin
  if not (csloading in componentstate) then begin
-  if des_emptytext in fstate then begin
+  if (des_emptytext in fstate) and (fempty_text <> '') then begin
    aflags:= fempty_textflags;
   end
   else begin
