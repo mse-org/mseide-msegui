@@ -20,7 +20,7 @@ object mainfo: tmainfo
   container.frame.sbvert.options = [sbo_moveauto, sbo_showauto]
   container.frame.dummy = 0
   container.onchildscaled = onscale
-  optionswindow = [wo_groupleader, wo_taskbar]
+  optionswindow = [wo_groupleader]
   mainmenu = mainmenu1
   options = [fo_main, fo_terminateonclose, fo_globalshortcuts, fo_savepos, fo_savezorder, fo_savestate]
   statfile = projectstatfile
