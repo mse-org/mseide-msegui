@@ -244,11 +244,11 @@ type
 
  tcustomdropdowncontroller = class(teventpersistent,ibutton,ievent,idropdowncontroller)
   private
+  protected
    fdataselected: boolean;
-   fselectkey: keyty;
    fcolor: colorty;
    fdropdowncount: integer;
-  protected
+   fselectkey: keyty;
    fintf: idropdown;
    foptions: dropdowneditoptionsty;
    fforcecaret: boolean;
@@ -297,9 +297,9 @@ type
 
  tdropdownwidgetcontroller = class(tdropdowncontroller)
   private
+  protected
    fbounds_cy: integer;
    fbounds_cx: integer;
-  protected
    fdropdownwidget: twidget;
    procedure internaldropdown; override;
    procedure receiveevent(const event: tobjectevent); override;
@@ -317,6 +317,11 @@ type
 
  tcustomdropdownlistcontroller = class(tcustomdropdowncontroller,idropdownlistcontroller)
   private
+   procedure setcols(const Value: tdropdowncols);
+   function getitemindex: integer;
+   procedure setitemindex(const Value: integer);
+   procedure setvaluecol(const avalue: integer);
+  protected
    fdropdownrowcount: integer;
    fwidth: integer;
    fvaluecol: integer;
@@ -324,11 +329,6 @@ type
    fdatarowlinecolor: colorty;
    fbuttonlength: integer;
    fbuttonminlength: integer;
-   procedure setcols(const Value: tdropdowncols);
-   function getitemindex: integer;
-   procedure setitemindex(const Value: integer);
-   procedure setvaluecol(const avalue: integer);
-  protected
    fdropdownitems: tdropdowncols;
    fdropdownlist: tdropdownlist;
    fcols: tdropdowncols;
