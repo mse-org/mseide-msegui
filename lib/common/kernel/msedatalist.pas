@@ -711,6 +711,8 @@ procedure deleteitem(var dest: pointerarty; index: integer); overload;
 procedure insertitem(var dest: integerarty; index: integer; value: integer); overload;
 procedure insertitem(var dest: realarty; index: integer; value: realty); overload;
 procedure insertitem(var dest: pointerarty; index: integer; value: pointer); overload;
+procedure insertitem(var dest: stringarty; index: integer; value: string); overload;
+procedure insertitem(var dest: msestringarty; index: integer; value: msestring); overload;
 function removeitem(var dest: pointerarty; const aitem: pointer): integer;
                                                 overload;    
                         //returns removed index, -1 if none
@@ -719,6 +721,26 @@ function finditem(const ar: pointerarty; const aitem: pointer): integer;
                            //-1 if none
 procedure moveitem(var dest: pointerarty; const sourceindex: integer;
                        destindex: integer); overload;
+
+function removeitem(var dest: stringarty; const aitem: string): integer;
+                                            overload;
+                        //returns removed index, -1 if none
+function finditem(const ar: stringarty; const aitem: string): integer;
+                                                overload;
+                           //-1 if none
+procedure moveitem(var dest: stringarty; const sourceindex: integer;
+                       destindex: integer); overload;
+
+function removeitem(var dest: msestringarty; const aitem: msestring): integer;
+                                            overload;
+                        //returns removed index, -1 if none
+function finditem(const ar: msestringarty; const aitem: msestring): integer;
+                                                overload;
+                           //-1 if none
+procedure moveitem(var dest: msestringarty; const sourceindex: integer;
+                       destindex: integer); overload;
+
+
 function removeitem(var dest: integerarty; const aitem: integer): integer;
                                             overload;
                         //returns removed index, -1 if none
@@ -1274,6 +1296,20 @@ begin
  dest[index]:= value;
 end;
 
+procedure insertitem(var dest: stringarty; index: integer; value: string);
+begin
+ setlength(dest,high(dest) + 2);
+ move(dest[index],dest[index+1],(high(dest)-index) * sizeof(dest[0]));
+ dest[index]:= value;
+end;
+
+procedure insertitem(var dest: msestringarty; index: integer; value: msestring);
+begin
+ setlength(dest,high(dest) + 2);
+ move(dest[index],dest[index+1],(high(dest)-index) * sizeof(dest[0]));
+ dest[index]:= value;
+end;
+
 function removeitem(var dest: pointerarty; const aitem: pointer): integer;
 var
  int1: integer;
@@ -1306,6 +1342,83 @@ procedure moveitem(var dest: pointerarty; const sourceindex: integer;
                               destindex: integer);
 var
  po1: pointer;
+begin
+ po1:= dest[sourceindex];
+ deleteitem(dest,sourceindex);
+ insertitem(dest,destindex,po1);
+end;
+
+
+function removeitem(var dest: stringarty; const aitem: string): integer;
+var
+ int1: integer;
+begin
+ result:= -1;
+ for int1:= 0 to high(dest) do begin
+  if dest[int1] = aitem then begin
+   result:= int1;
+   deleteitem(dest,int1);
+   break;
+  end;
+ end;
+end;
+
+function finditem(const ar: stringarty; const aitem: string): integer;
+                           //-1 if none
+var
+ int1: integer;
+begin
+ result:= -1;
+ for int1:= 0 to high(ar) do begin
+  if ar[int1] = aitem then begin
+   result:= int1;
+   break;
+  end;
+ end;
+end;
+
+procedure moveitem(var dest: stringarty; const sourceindex: integer;
+                              destindex: integer);
+var
+ po1: string;
+begin
+ po1:= dest[sourceindex];
+ deleteitem(dest,sourceindex);
+ insertitem(dest,destindex,po1);
+end;
+
+function removeitem(var dest: msestringarty; const aitem: msestring): integer;
+var
+ int1: integer;
+begin
+ result:= -1;
+ for int1:= 0 to high(dest) do begin
+  if dest[int1] = aitem then begin
+   result:= int1;
+   deleteitem(dest,int1);
+   break;
+  end;
+ end;
+end;
+
+function finditem(const ar: msestringarty; const aitem: msestring): integer;
+                           //-1 if none
+var
+ int1: integer;
+begin
+ result:= -1;
+ for int1:= 0 to high(ar) do begin
+  if ar[int1] = aitem then begin
+   result:= int1;
+   break;
+  end;
+ end;
+end;
+
+procedure moveitem(var dest: msestringarty; const sourceindex: integer;
+                              destindex: integer);
+var
+ po1: msestring;
 begin
  po1:= dest[sourceindex];
  deleteitem(dest,sourceindex);
