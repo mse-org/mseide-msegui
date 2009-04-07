@@ -791,6 +791,7 @@ function findarrayvalue(const item; const items; const index: integerarty;
                out foundindex: integer): boolean; overload;
            //true if exact else next bigger
            //for compare: l is item, r are tablevalues
+           //array must be sorted
 procedure quicksortarray(var asortlist; const acompare: arraysortcomparety;
                             asize,alength: integer; order: boolean;
                             out aindexlist: integerarty);
@@ -799,7 +800,7 @@ procedure quicksortarray(var asortlist; const acompare: arraysortcomparety;
 function findarrayitem(const item; const ar;
                compare: arraysortcomparety; size: integer;
                out foundindex: integer): boolean;
-           //ar = array of type
+           //ar = sorted array of type
            //true if exact else next bigger
            //for compare: l is item, r are tablevalues
 procedure sortarray(var sortlist; compare: arraysortcomparety;
