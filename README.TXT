@@ -33,14 +33,12 @@ Installation:
 *************
 1. Download and install FPC 2.2.2, you can get it from 
    http://www.freepascal.org/download.var
-2. Download mseide_msegui_src_2_0beta2.zip and mseide_bin_2_0beta2.zip
+2. Download mseide_msegui_src_2_0.zip and mseide_bin_2_0.zip
    http://sourceforge.net/project/showfiles.php?group_id=165409
 3. Extract them to a directory of your choice ('yourdirectory') .
 4. Run 'yourdirectory/bin/i386-linux/mseide' on linux or 
    'yourdirectory\bin\i386-win32\mseide.exe' on windows.
 5. In 'Settings'-'Configure MSEide'-'${MSEDIR}' select 'yourdirectory/msegui'.
-5a. On windows you have to setup ${COMPILER} (ppc386.exe) and 
-    ${DEBUGGER} (gdb.exe).
 6. In 'Project'-'Open' select 'yourdirectory/msegui/apps/demo/demo.prj'.
 7. 'Target'-'Continue'.
 
