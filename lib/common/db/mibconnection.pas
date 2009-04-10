@@ -1540,6 +1540,7 @@ var
  bo1: boolean;
 begin
 {$ifdef linkdynamically}
+ useembeddedfirebird:= ibo_embedded in foptions;
  initialiseibase60;
  try
 {$endif}
