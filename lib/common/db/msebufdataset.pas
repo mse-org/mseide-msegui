@@ -2397,7 +2397,7 @@ procedure tmsebufdataset.internalapplyupdate(const maxerrors: integer;
   begin
    fupdatebuffer[fcurrentupdatebuffer].bookmark.recordpo:= nil;
 //   deleteitem(fupdatebuffer,typeinfo(recupdatebufferarty),fcurrentupdatebuffer);
-   fcurrentupdatebuffer:= bigint; //invalid
+//   fcurrentupdatebuffer:= bigint; //invalid
    resync([]);
   end; //deleteupdateitem
  var
@@ -2510,7 +2510,13 @@ begin
    checkbrowsemode;
    if getrecordupdatebuffer then begin
     ffailedcount:= 0;
-    internalapplyupdate(0,revertonerror,response);
+    try
+     internalapplyupdate(0,revertonerror,response);
+    finally
+     if FUpdateBuffer[fcurrentupdatebuffer].Bookmark.recordpo = nil then begin
+      deleteitem(fupdatebuffer,typeinfo(recupdatebufferarty),fcurrentupdatebuffer);
+     end;
+    end;
     if rr_applied in response then begin
      afterapply; //possible commit
     end;
