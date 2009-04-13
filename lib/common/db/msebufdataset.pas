@@ -217,12 +217,14 @@ type
                     //false if eof or lf_end
    procedure readrecord(const arecord: pintrecordty);
  end;
- resolverresponsety = 
-            (rr_abort,rr_abortquiet,rr_applied,rr_skip,rr_again,rr_revert);
-  updateerroreventty = procedure(
+
+ resolverresponsety = (rr_abort,rr_quiet,rr_revert,rr_again,rr_applied);
+ resolverresponsesty = set of resolverresponsety;
+ 
+ updateerroreventty = procedure(
       const sender: tmsebufdataset;
       var e: edatabaseerror; const updatekind: tupdatekind;
-         var response: resolverresponsety) of object;
+         var response: resolverresponsesty) of object;
   
  tblobbuffer = class(tmemorystream)
   private
@@ -544,7 +546,7 @@ type
    function createblobstream(field: tfield;
                                      mode: tblobstreammode): tstream; override;
    procedure internalapplyupdate(const maxerrors: integer;
-                const cancelonerror: boolean; var response: resolverresponsety);
+               const revertonerror: boolean; out response: resolverresponsesty);
    procedure afterapply; virtual;
    procedure freeblob(const ablob: blobinfoty);
    procedure freeblobs(var ablobs: blobinfoarty);
@@ -679,8 +681,8 @@ type
    function createblobbuffer(const afield: tfield): tblobbuffer;
    procedure applyupdates(const maxerrors: integer = 0); virtual; overload;
    procedure applyupdates(const maxerrors: integer;
-                   const cancelonerror: boolean); virtual; overload;
-   procedure applyupdate(const cancelonerror: boolean); virtual; overload;
+                   const revertonerror: boolean); virtual; overload;
+   procedure applyupdate(const revertonerror: boolean); virtual; overload;
    procedure applyupdate; virtual; overload;
                    //applies current record
    procedure cancelupdates; virtual;
@@ -2388,32 +2390,54 @@ begin
 end;
 
 procedure tmsebufdataset.internalapplyupdate(const maxerrors: integer;
-               const cancelonerror: boolean; var response: resolverresponsety);
+               const revertonerror: boolean; out response: resolverresponsesty);
                
- procedure checkcancel;
- begin
-  if cancelonerror or (response = rr_revert) then begin
-   cancelrecupdate(fupdatebuffer[fcurrentupdatebuffer]);
+ procedure checkrevert;
+  procedure disableupdateitem;
+  begin
    fupdatebuffer[fcurrentupdatebuffer].bookmark.recordpo:= nil;
+//   deleteitem(fupdatebuffer,typeinfo(recupdatebufferarty),fcurrentupdatebuffer);
+   fcurrentupdatebuffer:= bigint; //invalid
    resync([]);
+  end; //deleteupdateitem
+ var
+  po1: precupdatebufferty;
+ begin
+  po1:= @fupdatebuffer[fcurrentupdatebuffer];
+  if rr_applied in response then begin
+   if flogger <> nil then begin
+    logupdatebuffer(flogger,po1^,nil,true,lf_apply);
+    flogger.flushbuffer;
+   end;
+   intFreeRecord(po1^.OldValues);
+   disableupdateitem;
+  end
+  else begin
+   if revertonerror or (rr_revert in response) then begin
+    cancelrecupdate(fupdatebuffer[fcurrentupdatebuffer]);
+    disableupdateitem;
+   end;
   end;
- end;
+ end; //checkrevert
  
 var
-// EUpdErr: EUpdateError;
  by1: boolean;
  e1: exception;
  
 begin
  include(fbstate,bs_recapplying);
  by1:= not islocal;
+ response:= [];
  with fupdatebuffer[fcurrentupdatebuffer] do begin
   move(bookmark.recordpo^.header,fnewvaluebuffer^.header,frecordsize);
   try
    repeat
     exclude(fbstate,bs_curvaluemodified);
     getcalcfields(pchar(fnewvaluebuffer));
-    Response:= rr_applied;
+    if rr_again in response then begin
+     dec(ffailedcount);
+    end;
+    Response:= [rr_applied];
     try
      try
       if by1 then begin
@@ -2424,34 +2448,28 @@ begin
        e1:= e;
        Inc(fFailedCount);
        if longword(ffailedcount) > longword(MaxErrors) then begin
-        Response:= rr_Abort
+        Response:= [rr_abort]
        end
        else begin
-        Response:= rr_Skip;
+        Response:= [];
        end;
        e.message:= 'An error occured while applying the updates in a record: '+
                                e.message;
-       try
-        if checkcanevent(self,tmethod(OnUpdateError)) then begin
-         OnUpdateError(Self,edatabaseerror(e1),UpdateKind,Response);
+       if checkcanevent(self,tmethod(OnUpdateError)) then begin
+        OnUpdateError(Self,edatabaseerror(e1),UpdateKind,Response);
+        if rr_applied in response then begin
+         dec(ffailedcount);
         end;
-       finally
-        if Response in [rr_Abort,rr_abortquiet] then begin
-         try
-          checkcancel;
-         finally
-          if response = rr_abortquiet then begin
-           abort;
-          end
-          else begin
-           if e = e1 then begin
-            raise;
-           end
-           else begin
-            if e1 <> nil then begin
-             Raise e1;
-            end;
-           end;
+       end;
+       if rr_abort in response then begin
+        checkrevert;
+        if not (rr_quiet in response) then begin
+         if e = e1 then begin
+          raise;
+         end
+         else begin
+          if e1 <> nil then begin
+           Raise e1;
           end;
          end;
         end;
@@ -2466,18 +2484,8 @@ begin
       move(fnewvaluebuffer^.header,bookmark.recordpo^.header,frecordsize);
      end;
     end;
-   until response <> rr_again;
-   if response = rr_applied then begin
-    if flogger <> nil then begin
-     logupdatebuffer(flogger,fupdatebuffer[fcurrentupdatebuffer],nil,true,lf_apply);
-     flogger.flushbuffer;
-    end;
-    intFreeRecord(OldValues);
-    Bookmark.recordpo:= nil;
-   end
-   else begin
-    checkcancel;
-   end;
+   until response <> [rr_again];
+   checkrevert;
   finally
    exclude(fbstate,bs_recapplying);
    finalizecalcstrings(fnewvaluebuffer^.header);
@@ -2490,10 +2498,9 @@ begin
  //dummy
 end;
 
-procedure tmsebufdataset.applyupdate(const cancelonerror: boolean = false); //applies current record
+procedure tmsebufdataset.applyupdate(const revertonerror: boolean = false); //applies current record
 var
- response: resolverresponsety;
- int1: integer;
+ response: resolverresponsesty;
 begin
  if not (bs_applying in fbstate) then begin
   include(fbstate,bs_applying);
@@ -2503,13 +2510,9 @@ begin
    checkbrowsemode;
    if getrecordupdatebuffer then begin
     ffailedcount:= 0;
-    int1:= fcurrentupdatebuffer;
-    internalapplyupdate(0,cancelonerror,response);
-    if response = rr_applied then begin
-     deleteitem(fupdatebuffer,typeinfo(recupdatebufferarty),int1);
-     fcurrentupdatebuffer:= bigint; //invalid
-     resync([]);
-     afterapply;
+    internalapplyupdate(0,revertonerror,response);
+    if rr_applied in response then begin
+     afterapply; //possible commit
     end;
    end;
    doafterapplyupdate;
@@ -2520,10 +2523,12 @@ begin
 end;
 
 procedure tmsebufdataset.ApplyUpdates(const MaxErrors: Integer; 
-                                const cancelonerror: boolean = false);
+                                const revertonerror: boolean = false);
 var
- Response: ResolverResponsety;
  recnobefore: integer;
+ response: resolverresponsesty;
+ bo1: boolean;
+ int1,int2: integer;
 
 begin
  if not (bs_applying in fbstate) then begin
@@ -2537,11 +2542,12 @@ begin
    try
     fapplyindex := 0;
     fFailedCount := 0;
-    Response := rr_Applied;
-    while (fapplyindex <= high(FUpdateBuffer)) and (Response <> rr_Abort) do begin
+    bo1:= false;
+    while (fapplyindex <= high(FUpdateBuffer)) and not(rr_abort in response) do begin
      fcurrentupdatebuffer:= fapplyindex;
      if FUpdateBuffer[fcurrentupdatebuffer].Bookmark.recordpo <> nil then begin
-      internalapplyupdate(maxerrors,cancelonerror,response);
+      internalapplyupdate(maxerrors,revertonerror,response);
+      bo1:= bo1 or not (rr_applied in response);
      end;
      inc(fapplyindex);
 //     if (bs_idle in fbstate) and not application.idle then begin
@@ -2549,10 +2555,21 @@ begin
 //     end;
                //win98 is not idle after applyupdate ???
     end;
+   finally 
+    fcurrentupdatebuffer:= bigint; //invalid
     if (ffailedcount = 0) and (fapplyindex > high(fupdatebuffer)) then begin
      fupdatebuffer:= nil;
+    end
+    else begin
+     int2:= 0;
+     for int1:= 0 to high(fupdatebuffer) do begin //pack
+      if fupdatebuffer[int1].bookmark.recordpo <> nil then begin
+       fupdatebuffer[int2]:= fupdatebuffer[int1];
+       inc(int2);
+      end;
+     end;
+     setlength(fupdatebuffer,int2);
     end;
-   finally 
     if active then begin
      internalsetrecno(recnobefore);
      Resync([]);
@@ -2562,7 +2579,9 @@ begin
      enablecontrols;
     end;
    end;
-   afterapply;
+   if not bo1 then begin
+    afterapply; //possible commit
+   end;
    doafterapplyupdate;
   finally
    exclude(fbstate,bs_applying);
