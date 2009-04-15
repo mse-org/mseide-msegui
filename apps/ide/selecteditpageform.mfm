@@ -37,7 +37,7 @@ object selecteditpagefo: tselecteditpagefo
     cellframe.localprops = [frl_leveli]
     cellframe.dummy = 0
     optionsgrid = [og_colsizing, og_focuscellonenter, og_colchangeontabkey, og_wraprow, og_wrapcol, og_autopopup]
-    options = [lvo_readonly, lvo_drawfocus, lvo_mousemovefocus, lvo_focusselect, lvo_mouseselect]
+    options = [lvo_readonly, lvo_drawfocus, lvo_mousemovefocus, lvo_focusselect, lvo_mouseselect, lvo_locate]
     onitemevent = doonitemevent
   end
   object pathdisp: tstringdisp
