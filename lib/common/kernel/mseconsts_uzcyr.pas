@@ -19,6 +19,8 @@ uses
  mseconsts;
  
 implementation
+uses
+ msestrings,sysutils;
 const
  uzcyr_modalresulttext: defaultmodalresulttextty = (
   '',                                             //mr_none => Nichego
@@ -124,10 +126,28 @@ const
   'Insert',             //sc_insert
   'Filter off',         //sc_filter_off
   'Portrait',           //sc_portrait print orientation
-  'Landscape'           //sc_landscape print orientation
+  'Landscape',          //sc_landscape print orientation
+  'Delete row?',        //sc_Delete_row_question
+  'selected rows?'      //sc_selected_rows
   );
     
+function delete_n_selected_rows(const params: array of const): msestring;
+begin
+ with params[0] do begin
+  if vinteger = 1 then begin
+   result:= 'Delete selected row?'
+  end
+  else begin
+   result:= 'Delete '+inttostr(vinteger)+' selected rows?';
+  end;
+ end;
+end;
+
+const
+ uzcyr_textgenerator: defaultgeneratortextty = (
+              @delete_n_selected_rows //tg_delete_n_selected_rows
+                                     );
 initialization
- registerlangconsts(langnames[la_uzcyr],uzcyr_stockcaption,uzcyr_modalresulttext,
-                               uzcyr_modalresulttextnoshortcut);
+ registerlangconsts(langnames[la_uzcyr],@uzcyr_stockcaption,@uzcyr_modalresulttext,
+                               @uzcyr_modalresulttextnoshortcut,@uzcyr_textgenerator);
 end.

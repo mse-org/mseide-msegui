@@ -17,6 +17,8 @@ uses
  mseconsts;
  
 implementation
+uses
+ msestrings,sysutils;
 const
  zh_modalresulttext: defaultmodalresulttextty =
  ('',                        //mr_none
@@ -119,11 +121,29 @@ const
   #25554#20837,                        //sc_insert
   #36807#28388#20851#38381,            //sc_filter_off
   'Portrait',                          //sc_portrait print orientation
-  'Landscape'                          //sc_landscape print orientation
+  'Landscape',                         //sc_landscape print orientation
+  'Delete row?',                       //sc_Delete_row_question
+  'selected rows?'                     //sc_selected_rows
 
                        );
     
+function delete_n_selected_rows(const params: array of const): msestring;
+begin
+ with params[0] do begin
+  if vinteger = 1 then begin
+   result:= 'Delete selected row?'
+  end
+  else begin
+   result:= 'Delete '+inttostr(vinteger)+' selected rows?';
+  end;
+ end;
+end;
+
+const
+ zh_textgenerator: defaultgeneratortextty = (
+              @delete_n_selected_rows //tg_delete_n_selected_rows
+                                     );
 initialization
- registerlangconsts(langnames[la_zh],zh_stockcaption,zh_modalresulttext,
-                               zh_modalresulttextnoshortcut);
+ registerlangconsts(langnames[la_zh],@zh_stockcaption,@zh_modalresulttext,
+                               @zh_modalresulttextnoshortcut,@zh_textgenerator);
 end.

@@ -84,9 +84,13 @@ type
                     sc_append,sc_delete,sc_edit,sc_post,sc_cancel,sc_refresh,
                     sc_edit_filter,sc_edit_filter_min,sc_edit_filter_max,
                     sc_filter_on,sc_search,sc_insert,sc_filter_off,
-                    sc_portrait,sc_landscape
+                    sc_portrait,sc_landscape,
+                    sc_Delete_row_question,sc_selected_rows
+
                     );
- 
+ textgeneratorfuncty = function(const params: array of const): msestring;
+ textgeneratorty = (tg_delete_n_selected_rows);
+  
  tstockobjects = class
   private
    fbitmaps: array[stockbitmapty] of tbitmap;
@@ -103,6 +107,7 @@ type
    procedure fontchanged(const sender: tobject);
    function getmseicon: tmaskedbitmap;
    function getcaptions(index: stockcaptionty): msestring;
+   function gettextgenerator(index: textgeneratorty): textgeneratorfuncty;
   public
    constructor create;
    destructor destroy; override;
@@ -112,9 +117,13 @@ type
               aalignment: alignmentsty = [al_ycentered,al_xcentered]);
    property bitmaps[index: stockbitmapty]: tbitmap read getbitmaps;
    property fonts[index: stockfontty]: twidgetfont read getfonts;
-   property modalresulttext[index: modalresultty]: msestring read getmodalresulttext;
-   property modalresulttextnoshortcut[index: modalresultty]: msestring read getmodalresulttextnoshortcut;
+   property modalresulttext[index: modalresultty]: msestring 
+                                               read getmodalresulttext;
+   property modalresulttextnoshortcut[index: modalresultty]: msestring 
+                                            read getmodalresulttextnoshortcut;
    property captions[index: stockcaptionty]: msestring read getcaptions;
+   property textgenerators[index: textgeneratorty]: textgeneratorfuncty 
+                                                       read gettextgenerator;
    property glyphs: timagelist read getglyphs;
    property mseicon: tmaskedbitmap read getmseicon;
  end;
@@ -421,6 +430,11 @@ end;
 function tstockobjects.getcaptions(index: stockcaptionty): msestring;
 begin
  result:= stockcaptions(index);
+end;
+
+function tstockobjects.gettextgenerator(index: textgeneratorty): textgeneratorfuncty;
+begin
+ result:= stocktextgenerators(index);
 end;
 
 procedure tstockobjects.paintglyph(const canvas: tcanvas; 

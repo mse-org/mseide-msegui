@@ -19,6 +19,9 @@ type
  pstockcaptionaty = ^stockcaptionaty;
  defaultmodalresulttextty = array[modalresultty] of msestring;
  pdefaultmodalresulttextty = ^defaultmodalresulttextty;
+ defaultgeneratortextty = array[textgeneratorty] of textgeneratorfuncty;
+ pdefaultgeneratortextty = ^defaultgeneratortextty;
+ 
  langty = (la_none,la_en,la_de,la_ru,la_es,la_uzcyr,la_id,la_zh);
  
 const
@@ -27,14 +30,16 @@ const
  function modalresulttext(const index: modalresultty): msestring;
  function modalresulttextnoshortcut(const index: modalresultty): msestring;
  function stockcaptions(const index: stockcaptionty): msestring;
+ function stocktextgenerators(const index: textgeneratorty): textgeneratorfuncty;
  function uc(const index: integer): msestring; //get user caption
 
  procedure registeruserlangconsts(name: string;
                                       const caption: array of msestring);
  procedure registerlangconsts(const name: string;
-               const stockcaption: stockcaptionaty;
-            const modalresulttext: defaultmodalresulttextty;
-            const modalresulttextnoshortcut: defaultmodalresulttextty);
+               const stockcaptionpo: pstockcaptionaty;
+            const modalresulttextpo: pdefaultmodalresulttextty;
+            const modalresulttextnoshortcutpo: pdefaultmodalresulttextty;
+            const textgeneratorpo: pdefaultgeneratortextty);
  function setlangconsts(const name: string): boolean;
                  //true if ok, no change otherwise
  function getcurrentlangconstsname: string;
@@ -56,6 +61,7 @@ type
   stockcaption: pstockcaptionaty;
   modalresulttext: pdefaultmodalresulttextty;
   modalresulttextnoshortcut: pdefaultmodalresulttextty;
+  textgenerator: pdefaultgeneratortextty;
  end;
  userlanginfoty = record
   name: string;
@@ -172,20 +178,41 @@ const
   'Insert',             //sc_insert
   'Filter off',         //sc_filter_off
   'Portrait',           //sc_portrait print orientation
-  'Landscape'           //sc_landscape print orientation
-
+  'Landscape',          //sc_landscape print orientation
+  'Delete row?',        //sc_Delete_row_question
+  'selected rows?'      //sc_selected_rows
                        );
 
+function delete_n_selected_rows(const params: array of const): msestring;
+begin
+ with params[0] do begin
+  if vinteger = 1 then begin
+   result:= 'Delete selected row?'
+  end
+  else begin
+   result:= 'Delete '+inttostr(vinteger)+' selected rows?';
+  end;
+ end;
+end;
+
+const
+en_textgenerator: defaultgeneratortextty = (
+              @delete_n_selected_rows //tg_delete_n_selected_rows
+                                     );
+                                     
 procedure registerlangconsts(const name: string; 
-                const stockcaption: stockcaptionaty;
-            const modalresulttext: defaultmodalresulttextty;
-            const modalresulttextnoshortcut: defaultmodalresulttextty);
+                const stockcaptionpo: pstockcaptionaty;
+            const modalresulttextpo: pdefaultmodalresulttextty;
+            const modalresulttextnoshortcutpo: pdefaultmodalresulttextty;
+            const textgeneratorpo: pdefaultgeneratortextty);
+            
  procedure setitem(var item: langinfoty);
  begin
   item.name:= name;
-  item.stockcaption:= @stockcaption;
-  item.modalresulttext:= @modalresulttext;
-  item.modalresulttextnoshortcut:= @modalresulttextnoshortcut;
+  item.stockcaption:= stockcaptionpo;
+  item.modalresulttext:= modalresulttextpo;
+  item.modalresulttextnoshortcut:= modalresulttextnoshortcutpo;
+  item.textgenerator:= textgeneratorpo;
  end;
  
 var
@@ -329,6 +356,12 @@ begin
  result:= lang.modalresulttextnoshortcut^[index];
 end;
 
+function stocktextgenerators(const index: textgeneratorty): textgeneratorfuncty;
+begin
+ checklang;
+ result:= lang.textgenerator^[index];
+end;
+
 function stockcaptions(const index: stockcaptionty): msestring;
 begin
  checklang;
@@ -346,7 +379,7 @@ begin
 end;
 
 initialization
- registerlangconsts(langnames[la_en],en_stockcaption,en_modalresulttext,
-                               en_modalresulttextnoshortcut);
+ registerlangconsts(langnames[la_en],@en_stockcaption,@en_modalresulttext,
+                               @en_modalresulttextnoshortcut,@en_textgenerator);
  langbefore:= langnames[la_en];
 end.

@@ -11744,8 +11744,10 @@ end;
 
 procedure tcustomgrid.dodeleterow(const sender: tobject);
 begin
- if askok('Delete row?','Confirmation') then begin
-  deleterow(ffocusedcell.row);
+ with stockobjects do begin
+  if askok(captions[sc_Delete_row_question],captions[sc_Confirmation]) then begin
+   deleterow(ffocusedcell.row);
+  end;
  end;
 end;
 
@@ -11756,8 +11758,10 @@ var
 begin
  ar1:= getselectedrows;
  if high(ar1) >= 0 then begin
-  if askok('Delete '+inttostr(length(ar1))+
-                ' selected rows?','Confirmation') then begin
+  if askok(stockobjects.textgenerators[tg_delete_n_selected_rows]([length(ar1)]),
+//  stockobjects.captions[sc_Delete]+' '+inttostr(length(ar1))+
+//           stockobjects.captions[sc_selected_rows],
+           stockobjects.captions[sc_Confirmation]) then begin
    beginupdate;
    try
     for int1:= high(ar1) downto 0 do begin

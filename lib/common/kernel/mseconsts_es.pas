@@ -17,6 +17,8 @@ uses
  mseconsts;
  
 implementation
+uses
+ msestrings,sysutils;
 const
  es_modalresulttext: defaultmodalresulttextty =
  ('',            //mr_none
@@ -119,10 +121,28 @@ const
   'Insertar',                          //sc_insert
   'Filtro apagado',                    //sc_filter_off
   'Vertical',                          //sc_portrait print orientation
-  'Apaisado'                           //sc_landscape print orientation
+  'Apaisado',                          //sc_landscape print orientation
+  'Delete row?',                       //sc_Delete_row_question
+  'selected rows?'                     //sc_selected_rows
 );
     
+function delete_n_selected_rows(const params: array of const): msestring;
+begin
+ with params[0] do begin
+  if vinteger = 1 then begin
+   result:= 'Delete selected row?'
+  end
+  else begin
+   result:= 'Delete '+inttostr(vinteger)+' selected rows?';
+  end;
+ end;
+end;
+
+const
+ es_textgenerator: defaultgeneratortextty = (
+              @delete_n_selected_rows //tg_delete_n_selected_rows
+                                     );
 initialization
- registerlangconsts(langnames[la_es],es_stockcaption,es_modalresulttext,
-                               es_modalresulttextnoshortcut);
+ registerlangconsts(langnames[la_es],@es_stockcaption,@es_modalresulttext,
+                               @es_modalresulttextnoshortcut,@es_textgenerator);
 end.

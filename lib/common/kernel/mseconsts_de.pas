@@ -14,6 +14,8 @@ uses
  mseconsts;
  
 implementation
+uses
+ msestrings,sysutils;
 const
  de_modalresulttext: defaultmodalresulttextty =
  ('',            //mr_none
@@ -69,14 +71,14 @@ const
   'Zeile a&nf'#252'gen',     //sc_append_row  // hotkeys  //
   'Zeile &l'#246'schen',     //sc_delete_row ///         ///
 
-  '&Dir',               //sc_Dir               /// 
-  '&Auf',               //sc_Up                 //
-  'Dir &neu',           //sc_New_dir            // hotkeys
-  'N&ame',              //sc_Name               //
-  '&Verst.Dat.anzeigen',//sc_Show_hidden_files  //
-  '&Filter',            //sc_Filter            ///   
-  'Speichern',          //sc_save 
-  #214'ffnen',           //sc_open
+  '&Dir',                 //sc_Dir               /// 
+  '&Auf',                 //sc_Up                 //
+  'Dir &neu',             //sc_New_dir            // hotkeys
+  'N&ame',                //sc_Name               //
+  '&Verst.Dat.anzeigen',  //sc_Show_hidden_files  //
+  '&Filter',              //sc_Filter            ///   
+  'Speichern',            //sc_save 
+  #214'ffnen',            //sc_open
   'Name',                 //sc_name1
   'Verzeichnis erstellen',//sc_create_new_directory
   'Datei',                                     //sc_file
@@ -116,10 +118,29 @@ const
   'Einfügen',                 //sc_insert
   'Filter aus',               //sc_filter_off
   'Hochformat',               //sc_portrait print orientation
-  'Querformat'                //sc_landscape print orientation
+  'Querformat',               //sc_landscape print orientation
+  'Zeile l'#246'schen?',      //sc_Delete_row_question
+  'gew'#228'hlte Zeilen'      //sc_selected_rows
 );
     
+function delete_n_selected_rows(const params: array of const): msestring;
+begin
+ with params[0] do begin
+  if vinteger = 1 then begin
+   result:= 'Gew'#228'hlte Zeile l'#246'schen?';
+  end
+  else begin
+   result:= inttostr(vinteger)+
+     widestring(' gew'#228'hlte Zeilen l'#246'schen?');
+  end;
+ end;    
+end;
+
+const
+ de_textgenerator: defaultgeneratortextty = (
+              @delete_n_selected_rows //tg_delete_n_selected_rows
+                                     );
 initialization
- registerlangconsts(langnames[la_de],de_stockcaption,de_modalresulttext,
-                               de_modalresulttextnoshortcut);
+ registerlangconsts(langnames[la_de],@de_stockcaption,@de_modalresulttext,
+                               @de_modalresulttextnoshortcut,@de_textgenerator);
 end.
