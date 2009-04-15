@@ -591,7 +591,8 @@ begin
            //no   duplicate_prepared_statement
    if (PQresultStatus(res) <> PGRES_COMMAND_OK) then begin
      pqclear(res);
-     DatabaseError(SErrPrepareFailed + ' (PostgreSQL: ' + 
+     DatabaseError(SErrPrepareFailed + lineend + asql + lineend +
+          ' (PostgreSQL: ' + 
            connectionmessage(PQerrorMessage(tr.fconn)) + ')',self)
    end;
    FPrepared := True;

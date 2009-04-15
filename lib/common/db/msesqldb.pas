@@ -892,7 +892,10 @@ end;
 procedure tsequencelink.checkintf;
 begin
  if fdbintf = nil then begin
-  raise edatabaseerror.create('Database has no idscontroller interface.');
+  raise edatabaseerror.create(name+': Database has no idscontroller interface.');
+ end;
+ if fsequencename = '' then begin
+  raise edatabaseerror.create(name+': No sequencename.');
  end;
 end;
 
