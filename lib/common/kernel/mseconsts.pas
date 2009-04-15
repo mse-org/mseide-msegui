@@ -196,11 +196,10 @@ begin
 end;
 
 const
-en_textgenerator: defaultgeneratortextty = (
-              @delete_n_selected_rows //tg_delete_n_selected_rows
+ en_textgenerator: defaultgeneratortextty = (
+              {$ifdef FPC}@{$endif}delete_n_selected_rows //tg_delete_n_selected_rows
                                      );
-                                     
-procedure registerlangconsts(const name: string; 
+procedure registerlangconsts(const name: string;
                 const stockcaptionpo: pstockcaptionaty;
             const modalresulttextpo: pdefaultmodalresulttextty;
             const modalresulttextnoshortcutpo: pdefaultmodalresulttextty;

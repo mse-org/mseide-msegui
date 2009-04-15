@@ -138,7 +138,7 @@ end;
 
 const
  de_textgenerator: defaultgeneratortextty = (
-              @delete_n_selected_rows //tg_delete_n_selected_rows
+              {$ifdef FPC}@{$endif}delete_n_selected_rows //tg_delete_n_selected_rows
                                      );
 initialization
  registerlangconsts(langnames[la_de],@de_stockcaption,@de_modalresulttext,

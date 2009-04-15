@@ -181,7 +181,7 @@ end;
 
 const
  ru_textgenerator: defaultgeneratortextty = (
-              @delete_n_selected_rows //tg_delete_n_selected_rows
+              {$ifdef FPC}@{$endif}delete_n_selected_rows //tg_delete_n_selected_rows
                                      );
 initialization
  registerlangconsts(langnames[la_ru],@ru_stockcaption,@ru_modalresulttext,
