@@ -213,6 +213,7 @@ type
    fdbintf: idbcontroller;
    fdatalink: tfielddatalink;
    fonupdatevalue: updateint64eventty;
+   flastvalue: largeint;
    procedure checkintf;
    procedure setdatabase(const avalue: tsqlconnection);
    procedure setsequencename(const avalue: string);
@@ -236,6 +237,7 @@ type
    property aslargeint: largeint read getaslargeint write setaslargeint;
    property asinteger: integer read getasinteger write setasinteger;
    function assql: string;
+   property lastvalue: largeint read flastvalue;
   published
    property database: tsqlconnection read fdatabase write setdatabase;
    property datasource: tdatasource read getdatasource write setdatasource;
@@ -910,7 +912,8 @@ begin
   ds1.sql.add(fdbintf.readsequence(fsequencename));
   ds1.database:= fdatabase;
   ds1.active:= true;
-  result:= ds1.fields[0].aslargeint;
+  flastvalue:= ds1.fields[0].aslargeint;
+  result:= flastvalue;
  finally
   ds1.free;
  end;
