@@ -913,13 +913,13 @@ begin
   ds1.database:= fdatabase;
   ds1.active:= true;
   flastvalue:= ds1.fields[0].aslargeint;
-  result:= flastvalue;
  finally
   ds1.free;
  end;
  if canevent(tmethod(fonupdatevalue)) then begin
-  fonupdatevalue(self,result);
+  fonupdatevalue(self,flastvalue);
  end;
+ result:= flastvalue;
 end;
 
 procedure tsequencelink.setaslargeint(const avalue: largeint);
