@@ -198,33 +198,42 @@ end;
 const
  en_textgenerator: defaultgeneratortextty = (
               {$ifdef FPC}@{$endif}delete_n_selected_rows //tg_delete_n_selected_rows
-                                     );
+                                             );
+
+procedure setitem(var item: langinfoty;
+           const name: string;
+           const stockcaptionpo: pstockcaptionaty;
+           const modalresulttextpo: pdefaultmodalresulttextty;
+           const modalresulttextnoshortcutpo: pdefaultmodalresulttextty;
+           const textgeneratorpo: pdefaultgeneratortextty);
+begin
+ item.name:= name;
+ item.stockcaption:= stockcaptionpo;
+ item.modalresulttext:= modalresulttextpo;
+ item.modalresulttextnoshortcut:= modalresulttextnoshortcutpo;
+ item.textgenerator:= textgeneratorpo;
+end;
+
 procedure registerlangconsts(const name: string;
-                const stockcaptionpo: pstockcaptionaty;
+            const stockcaptionpo: pstockcaptionaty;
             const modalresulttextpo: pdefaultmodalresulttextty;
             const modalresulttextnoshortcutpo: pdefaultmodalresulttextty;
             const textgeneratorpo: pdefaultgeneratortextty);
             
- procedure setitem(var item: langinfoty);
- begin
-  item.name:= name;
-  item.stockcaption:= stockcaptionpo;
-  item.modalresulttext:= modalresulttextpo;
-  item.modalresulttextnoshortcut:= modalresulttextnoshortcutpo;
-  item.textgenerator:= textgeneratorpo;
- end;
  
 var
  int1: integer;
 begin
  for int1:= 0 to high(langs) do begin
   if langs[int1].name = name then begin
-   setitem(langs[int1]);
+   setitem(langs[int1],name,stockcaptionpo,modalresulttextpo,
+                               modalresulttextnoshortcutpo,textgeneratorpo);
    exit;
   end;
  end;
  setlength(langs,high(langs)+2);
- setitem(langs[high(langs)]);
+ setitem(langs[high(langs)],name,stockcaptionpo,modalresulttextpo,
+                               modalresulttextnoshortcutpo,textgeneratorpo);
 end;
 
 procedure registeruserlangconsts(name: string; 
@@ -308,12 +317,17 @@ begin
   end;
   if bo1 then begin
    if lang.name = '' then begin
+    setitem(lang,langnames[la_en],@en_stockcaption,@en_modalresulttext,
+               @en_modalresulttextnoshortcut,@en_textgenerator);
+{
     with lang do begin
      name:= langnames[la_en];
      stockcaption:= @en_stockcaption;
      modalresulttext:= @en_modalresulttext;  
      modalresulttextnoshortcut:= @en_modalresulttextnoshortcut;
+     textgenerator:= @en_textgenerator;
     end;
+}
    end;
   end;
  end;

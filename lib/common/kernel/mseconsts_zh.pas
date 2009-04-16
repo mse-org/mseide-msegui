@@ -122,8 +122,8 @@ const
   #36807#28388#20851#38381,            //sc_filter_off
   'Portrait',                          //sc_portrait print orientation
   'Landscape',                         //sc_landscape print orientation
-  'Delete row?',                       //sc_Delete_row_question
-  'selected rows?'                     //sc_selected_rows
+  '#30830#23450#21024#38500#27492#26465#35760#24405#21527#65311',                       //sc_Delete_row_question
+  '#30830#23450#21024#38500#25152#36873#35760#24405#21527#65311'                     //sc_selected_rows
 
                        );
     
@@ -131,10 +131,11 @@ function delete_n_selected_rows(const params: array of const): msestring;
 begin
  with params[0] do begin
   if vinteger = 1 then begin
-   result:= 'Delete selected row?'
+   result:= #30830#23450#21024#38500#27492#26465#35760#24405#21527#65311
   end
   else begin
-   result:= 'Delete '+inttostr(vinteger)+' selected rows?';
+   result:= #30830#23450#21024#38500#25152#36873#25321#30340' '+
+                    inttostr(vinteger)+' '#34892#35760#24405#21527#65311;
   end;
  end;
 end;
