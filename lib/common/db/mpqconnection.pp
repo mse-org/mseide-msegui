@@ -591,7 +591,13 @@ begin
            //no   duplicate_prepared_statement
    if (PQresultStatus(res) <> PGRES_COMMAND_OK) then begin
      pqclear(res);
-     DatabaseError(SErrPrepareFailed + lineend + asql + lineend +
+     if length(asql) > 400 then begin
+      s:= copy(asql,1,400) + '...';
+     end
+     else begin
+      s:= asql;
+     end;
+     DatabaseError(SErrPrepareFailed + lineend + s + lineend +
           ' (PostgreSQL: ' + 
            connectionmessage(PQerrorMessage(tr.fconn)) + ')',self)
    end;
