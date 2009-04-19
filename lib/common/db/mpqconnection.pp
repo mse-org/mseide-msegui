@@ -590,9 +590,10 @@ begin
           (strpas(pqresulterrorfield(res,ord(pg_diag_sqlstate))) <> '42P05');
            //no   duplicate_prepared_statement
    if (PQresultStatus(res) <> PGRES_COMMAND_OK) then begin
+     s:= connectionmessage(pqresulterrormessage(res));
      pqclear(res);
-     DatabaseError(SErrPrepareFailed + ' (PostgreSQL: ' + 
-           connectionmessage(PQerrorMessage(tr.fconn)) + ')',self)
+     DatabaseError(SErrPrepareFailed + lineend +
+          ' (PostgreSQL: ' + s + ')',self)
    end;
    FPrepared := True;
   end
