@@ -1262,9 +1262,6 @@ begin
    end;
   end;
  end;
- if ffont = nil then begin
-  result:= tmenufont(pointer(stockobjects.fonts[stf_menu]));
- end;
 end;
 
 function tmenuitem.getfontactive: tmenufontactive;
