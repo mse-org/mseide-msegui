@@ -1250,6 +1250,7 @@ begin
   result:= ffont;
  end
  else begin
+  result:= nil;
   if (fowner <> nil) then begin
    result:= fowner.gettemplatefont(self);
   end;
@@ -1272,6 +1273,7 @@ begin
   result:= ffontactive;
  end
  else begin
+  result:= nil;
   if (fowner <> nil) then begin
    result:= fowner.gettemplatefontactive(self);
   end;
