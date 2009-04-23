@@ -131,8 +131,6 @@ type
 
    function getfont: tmenufont;
    function getfontactive: tmenufontactive;
-   procedure createfont;
-   procedure createfontactive;
    procedure setfont(const avalue: tmenufont);
    procedure setfontactive(const avalue: tmenufontactive);
    function isfontstored: boolean;
@@ -177,6 +175,8 @@ type
    function asyncexecute: boolean;
    function canactivate: boolean;
    function canshow: boolean;
+   procedure createfont;
+   procedure createfontactive;
    property onchange: menuitemeventty read fonchange write fonchange;
    property items[const index: integer]: tmenuitem read getitems
                          write setitems; default;
