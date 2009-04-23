@@ -552,10 +552,15 @@ procedure createobjectlinker(const owner: iobjectlink; onevent: objectlinkeventt
  //sets finstancepo
 procedure getoptionalobject(const componentstate: tcomponentstate;
                        const instance: tobject; createproc: createprocty); overload;
+procedure getoptionalobject(const aowner: tcomponent; //can be nil
+                       const instance: tobject; createproc: createprocty); overload;
 procedure getoptionalobject(const componentstate: tcomponentstate;
                   var instance: tvirtualpersistent;
                          const aclass: virtualpersistentclassty); overload;
 procedure setoptionalobject(const componentstate: tcomponentstate;
+                  const value: tpersistent; var instance;
+                    createproc: createprocty); overload;
+procedure setoptionalobject(const aowner: tcomponent; //can be nil
                   const value: tpersistent; var instance;
                     createproc: createprocty); overload;
 procedure setoptionalobject(const componentstate: tcomponentstate;
@@ -1906,6 +1911,18 @@ begin
  end;
 end;
 
+procedure getoptionalobject(const aowner: tcomponent;
+                       const instance: tobject; createproc: createprocty);
+var
+ sta1: tcomponentstate;
+begin
+ sta1:= [];
+ if aowner <> nil then begin
+  sta1:= aowner.componentstate;
+ end;
+ getoptionalobject(sta1,instance,createproc);
+end;
+
 procedure getoptionalobject(const componentstate: tcomponentstate;
            var instance: tvirtualpersistent; const aclass: virtualpersistentclassty);
 begin
@@ -1929,6 +1946,19 @@ begin
  else begin
   freeandnil(tpersistent(instance));
  end;
+end;
+
+procedure setoptionalobject(const aowner: tcomponent; //can be nil
+                  const value: tpersistent; var instance;
+                    createproc: createprocty); overload;
+var
+ sta1: tcomponentstate;
+begin
+ sta1:= [];
+ if aowner <> nil then begin
+  sta1:= aowner.componentstate;
+ end;
+ setoptionalobject(sta1,value,instance,createproc);
 end;
 
 procedure setoptionalobject(const componentstate: tcomponentstate;

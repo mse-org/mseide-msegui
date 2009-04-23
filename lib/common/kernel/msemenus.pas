@@ -1245,9 +1245,7 @@ end;
 
 function tmenuitem.getfont: tmenufont;
 begin
- if fowner <> nil then begin
-  getoptionalobject(fowner.componentstate,ffont,{$ifdef FPC}@{$endif}createfont);
- end;
+ getoptionalobject(fowner,ffont,{$ifdef FPC}@{$endif}createfont);
  if ffont <> nil then begin
   result:= ffont;
  end
@@ -1263,7 +1261,7 @@ end;
 
 function tmenuitem.getfontactive: tmenufontactive;
 begin
- getoptionalobject(fowner.componentstate,ffontactive,
+ getoptionalobject(fowner,ffontactive,
             {$ifdef FPC}@{$endif}createfontactive);
  if ffontactive <> nil then begin
   result:= ffontactive;
@@ -1289,8 +1287,8 @@ end;
 procedure tmenuitem.setfont(const avalue: tmenufont);
 begin
  if avalue <> ffont then begin
-  setoptionalobject(fowner.componentstate,avalue,ffont,
-               {$ifdef FPC}@{$endif}createfont);
+  setoptionalobject(fowner,avalue,ffont,
+                {$ifdef FPC}@{$endif}createfont);
   actionchanged;
  end;
 end;
@@ -1298,7 +1296,7 @@ end;
 procedure tmenuitem.setfontactive(const avalue: tmenufontactive);
 begin
  if avalue <> ffontactive then begin
-  setoptionalobject(fowner.componentstate,avalue,ffontactive,
+  setoptionalobject(fowner,avalue,ffontactive,
                {$ifdef FPC}@{$endif}createfontactive);
   actionchanged;
  end;
