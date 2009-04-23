@@ -1245,7 +1245,9 @@ end;
 
 function tmenuitem.getfont: tmenufont;
 begin
- getoptionalobject(fowner.componentstate,ffont,{$ifdef FPC}@{$endif}createfont);
+ if fowner <> nil then begin
+  getoptionalobject(fowner.componentstate,ffont,{$ifdef FPC}@{$endif}createfont);
+ end;
  if ffont <> nil then begin
   result:= ffont;
  end
