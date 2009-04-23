@@ -1253,8 +1253,13 @@ begin
   if (fowner <> nil) then begin
    result:= fowner.gettemplatefont(self);
   end;
-  if (result = nil) and (fparentmenu <> nil) then begin
-   result:= fparentmenu.getfont;
+  if (result = nil) then begin
+   if fparentmenu <> nil then begin
+    result:= fparentmenu.getfont;
+   end
+   else begin
+    result:= tmenufont(pointer(stockobjects.fonts[stf_menu]));
+   end;
   end;
  end;
 end;
