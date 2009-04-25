@@ -11290,6 +11290,7 @@ begin
   include(fstate,gs_sortvalid);
  end
  else begin
+  fdatacols.roworderinvalid;
   beginupdate;
   try
    int1:= ffocusedcell.row;
@@ -11310,6 +11311,9 @@ begin
    layoutchanged;
   finally
    endupdate;
+  end;
+  if ffocusedcell.row >= 0 then begin
+   showcell(makegridcoord(invalidaxis,ffocusedcell.row));
   end;
  end;
 end;
