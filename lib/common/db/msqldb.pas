@@ -608,6 +608,7 @@ type
    procedure refreshtransaction; override;
    
    function  GetCanModify: Boolean; override;
+   procedure updatewherepart(var sql_where : string; const afield: tfield);
    Procedure internalApplyRecUpdate(UpdateKind : TUpdateKind);
    procedure dobeforeapplyupdate; override;
    procedure ApplyRecUpdate(UpdateKind : TUpdateKind); override;
@@ -626,6 +627,9 @@ type
     procedure applyupdate(const cancelonerror: boolean); override;
     procedure applyupdates(const maxerrors: integer;
                    const cancelonerror: boolean); override;
+    function updaterecquery : string;
+    function insertrecquery : string;
+    function deleterecquery : string;
     function writetransaction: tsqltransaction;
                    //self.transaction if self.transactionwrite = nil
     procedure Prepare; virtual;
@@ -701,6 +705,7 @@ procedure doexecute(const aparams: tmseparams; const atransaction: tmdbtransacti
 procedure checksqlconnection(const aname: ansistring; const avalue: tmdatabase);
 procedure dosetsqldatabase(const sender: isqlclient; const avalue: tmdatabase;
                  var acursor: tsqlcursor; var dest: tmdatabase);
+procedure querytoupdateparams(const source: tsqlquery; const dest: tparams);
 
 implementation
 uses 
@@ -902,7 +907,40 @@ begin
   end; {case}
 end;
 
-{ tsqlstringlist }
+procedure querytoupdateparams(const source: tsqlquery; const dest: tparams);
+var
+ x: integer;
+ param1,param2: tparam;
+ fld: tfield;
+begin
+ for x := 0 to dest.Count-1 do begin
+  param1:= dest[x];
+  with param1 do begin
+   if leftstr(name,4)='OLD_' then begin
+    Fld:= source.FieldByName(copy(name,5,length(name)-4));
+    source.oldfieldtoparam(fld,param1);
+//     AssignFieldValue(Fld,Fld.OldValue);
+   end
+   else begin
+    fld:= source.findfield(name);
+    if fld = nil then begin     //search for param
+     param2:= source.params.findparam(name);
+     if param2 = nil then begin
+      source.fieldbyname(name); //raise exception
+     end
+     else begin
+      value:= param2.value;
+     end;
+    end
+    else begin             //use field
+     source.fieldtoparam(fld,param1);
+    end;
+   end;
+  end;
+ end;
+end;
+   
+   { tsqlstringlist }
 
 function tsqlstringlist.gettext: msestring;
 var
@@ -2803,107 +2841,113 @@ begin
  end;
 end;
 
+procedure tsqlquery.updatewherepart(var sql_where : string; const afield: tfield);
+var
+ quotechar: string;
+begin
+ if database <> nil then begin
+  quotechar:= database.identquotechar;
+ end
+ else begin
+  quotechar:= '"';
+ end;
+ with afield do begin
+  if (pfInKey in ProviderFlags) or
+    ((FUpdateMode = upWhereAll) and (pfInWhere in ProviderFlags)) or
+    ((FUpdateMode = UpWhereChanged) and 
+    (pfInWhere in ProviderFlags) and 
+    (value <> oldvalue)) then begin
+   sql_where := sql_where + '(' + quotechar+FieldName+quotechar+ 
+             '= :OLD_' + FieldName + ') and ';
+  end;
+ end;
+end;
+
+function tsqlquery.updaterecquery : string;
+var 
+ x: integer;
+ sql_set: string;
+ sql_where: string;
+ field1: tfield;
+ quotechar: string;
+begin
+ quotechar:= database.identquotechar;
+ sql_set:= '';
+ sql_where:= '';
+ for x := 0 to Fields.Count -1 do begin
+  field1:= fields[x];
+  with field1 do begin
+   if fieldkind = fkdata then begin
+    UpdateWherePart(sql_where,field1);
+    if (pfInUpdate in ProviderFlags) then begin
+     sql_set:= sql_set + quotechar+FieldName+quotechar + '=:' + FieldName + ',';
+    end;
+   end;
+  end;
+ end;
+ if sql_set = '' then begin
+  databaseerror('No "set" part in SQLUpdate statement.',self);
+ end;
+ if sql_where = '' then begin
+  databaseerror('No "where" part in SQLUpdate statement.',self);
+ end;
+ setlength(sql_set,length(sql_set)-1);
+ setlength(sql_where,length(sql_where)-5);
+ result := 'update ' + FTableName + ' set ' + sql_set + ' where ' + sql_where;
+end;
+
+function tsqlquery.insertrecquery : string;
+var 
+ x: integer;
+ sql_fields: string;
+ sql_values: string;
+ quotechar: string;
+begin
+ quotechar:= database.identquotechar;
+ sql_fields := '';
+ sql_values := '';
+ for x := 0 to Fields.Count -1 do begin
+  with fields[x] do begin
+   if (fieldkind = fkdata) {and not IsNull} and 
+                          (pfInUpdate in ProviderFlags) then begin 
+    sql_fields:= sql_fields + quotechar+FieldName+quotechar+ ',';
+    sql_values:= sql_values + ':' + FieldName + ',';
+   end;
+  end;
+ end;
+ if sql_fields = '' then begin
+  databaseerror('No "values" part in SQLInsert statement.',self);
+ end;
+ setlength(sql_fields,length(sql_fields)-1);
+ setlength(sql_values,length(sql_values)-1);
+ result := 'insert into ' + FTableName + ' (' + sql_fields + ') values (' +
+                     sql_values + ')';
+end;
+
+function tsqlquery.deleterecquery : string;
+var 
+ x: integer;
+ sql_where: string;
+ field1: tfield;
+begin
+ sql_where := '';
+ for x := 0 to Fields.Count -1 do begin
+  field1:= fields[x];
+  if field1.fieldkind = fkdata then begin
+   UpdateWherePart(sql_where,field1);
+  end;
+ end;
+ if sql_where = '' then begin
+  databaseerror('No "where" part in SQLDelete statement.',self);
+ end;
+ setlength(sql_where,length(sql_where)-5);
+ result := 'delete from ' + FTableName + ' where ' + sql_where;
+end;
+
 Procedure TSQLQuery.internalApplyRecUpdate(UpdateKind : TUpdateKind);
 var
  s: string;
  
- procedure UpdateWherePart(var sql_where : string; const afield: tfield);
- var
-  quotechar: string;
- begin
-  quotechar:= database.identquotechar;
-  with afield do begin
-   if (pfInKey in ProviderFlags) or
-     ((FUpdateMode = upWhereAll) and (pfInWhere in ProviderFlags)) or
-     ((FUpdateMode = UpWhereChanged) and 
-     (pfInWhere in ProviderFlags) and 
-     (value <> oldvalue)) then begin
-    sql_where := sql_where + '(' + quotechar+FieldName+quotechar+ 
-              '= :OLD_' + FieldName + ') and ';
-   end;
-  end;
- end;
-
- function ModifyRecQuery : string;
- var 
-  x: integer;
-  sql_set: string;
-  sql_where: string;
-  field1: tfield;
-  quotechar: string;
- begin
-  quotechar:= database.identquotechar;
-  sql_set:= '';
-  sql_where:= '';
-  for x := 0 to Fields.Count -1 do begin
-   field1:= fields[x];
-   with field1 do begin
-    if fieldkind = fkdata then begin
-     UpdateWherePart(sql_where,field1);
-     if (pfInUpdate in ProviderFlags) then begin
-      sql_set:= sql_set + quotechar+FieldName+quotechar + '=:' + FieldName + ',';
-     end;
-    end;
-   end;
-  end;
-  if sql_set = '' then begin
-   databaseerror('No "set" part in SQLUpdate statement.',self);
-  end;
-  if sql_where = '' then begin
-   databaseerror('No "where" part in SQLUpdate statement.',self);
-  end;
-  setlength(sql_set,length(sql_set)-1);
-  setlength(sql_where,length(sql_where)-5);
-  result := 'update ' + FTableName + ' set ' + sql_set + ' where ' + sql_where;
- end;
-
- function InsertRecQuery : string;
- var 
-  x: integer;
-  sql_fields: string;
-  sql_values: string;
-  quotechar: string;
- begin
-  quotechar:= database.identquotechar;
-  sql_fields := '';
-  sql_values := '';
-  for x := 0 to Fields.Count -1 do begin
-   with fields[x] do begin
-    if (fieldkind = fkdata) {and not IsNull} and 
-                           (pfInUpdate in ProviderFlags) then begin 
-     sql_fields:= sql_fields + quotechar+FieldName+quotechar+ ',';
-     sql_values:= sql_values + ':' + FieldName + ',';
-    end;
-   end;
-  end;
-  if sql_fields = '' then begin
-   databaseerror('No "values" part in SQLInsert statement.',self);
-  end;
-  setlength(sql_fields,length(sql_fields)-1);
-  setlength(sql_values,length(sql_values)-1);
-  result := 'insert into ' + FTableName + ' (' + sql_fields + ') values (' +
-                      sql_values + ')';
- end;
-
- function DeleteRecQuery : string;
- var 
-  x: integer;
-  sql_where: string;
-  field1: tfield;
- begin
-  sql_where := '';
-  for x := 0 to Fields.Count -1 do begin
-   field1:= fields[x];
-   if field1.fieldkind = fkdata then begin
-    UpdateWherePart(sql_where,field1);
-   end;
-  end;
-  if sql_where = '' then begin
-   databaseerror('No "where" part in SQLDelete statement.',self);
-  end;
-  setlength(sql_where,length(sql_where)-5);
-  result := 'delete from ' + FTableName + ' where ' + sql_where;
- end;
 
 var
  qry: tsqlquery;
@@ -2922,7 +2966,7 @@ begin
   ukModify: begin
    qry:= FUpdateQry;
    if qry.sql.count = 0 then begin
-    qry.SQL.Add(ModifyRecQuery);
+    qry.SQL.Add(updateRecQuery);
    end;
   end;
   ukInsert: begin
@@ -3679,15 +3723,20 @@ var
  bo1: boolean;
 begin
  dosetdatabase(idatabaseclient(self),avalue,fdatabase);
- if (avalue <> nil) and 
-    mseclasses.getcorbainterface(database,typeinfo(idbcontroller),intf1) then begin
-  bo1:= sso_utf8 in foptions;
-  intf1.updateutf8(bo1);
-  if bo1 then begin
-   foptions:= foptions + [sso_utf8];
-  end
-  else begin
-   foptions:= foptions - [sso_utf8];
+ if (avalue <> nil) then begin
+  if (ftransaction = nil) then begin
+   transaction:= tsqlconnection(avalue).transaction;
+  end;
+  if mseclasses.getcorbainterface(
+                          database,typeinfo(idbcontroller),intf1) then begin
+   bo1:= sso_utf8 in foptions;
+   intf1.updateutf8(bo1);
+   if bo1 then begin
+    foptions:= foptions + [sso_utf8];
+   end
+   else begin
+    foptions:= foptions - [sso_utf8];
+   end;
   end;
  end;
 end;
