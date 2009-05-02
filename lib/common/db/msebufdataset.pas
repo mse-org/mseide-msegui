@@ -47,7 +47,7 @@ const
 const
  bufstreambuffersize = 4096; 
   
-type  
+type
  fieldinfoty = record
   offset: integer; //data offset in buffer     ////
   size: integer;   //size in buffer              //  checked by save/restore
@@ -396,6 +396,15 @@ type
   function addblobcache(const aid: int64; const adata: string): integer; overload;
  end;
 
+ eapplyerror = class(edatabaseerror)
+  private
+   fresponse: resolverresponsesty;
+  public
+   constructor create(const msg: string = '';
+                                   const aresponse: resolverresponsesty = []);
+   property response: resolverresponsesty read fresponse write fresponse;
+ end;
+ 
  filterediteventty = procedure(const sender: tmsebufdataset;
                              const akind: filtereditkindty) of object;
  tmsebufdataset = class(tmdbdataset,iblobchache,idatasetsum)
@@ -1213,6 +1222,15 @@ destructor tblobcopy.destroy;
 begin
  setpointer(nil,0);
  inherited;
+end;
+
+{ eupdateerror }
+
+constructor eupdateerror.create(const msg: string = ''; 
+                         const aresponse: resolverresponsesty = []);
+begin
+ fresponse:= aresponse;
+ inherited create(msg);
 end;
 
 { tmsebufdataset }
@@ -2447,11 +2465,16 @@ begin
       on E: EDatabaseError do begin
        e1:= e;
        Inc(fFailedCount);
-       if longword(ffailedcount) > longword(MaxErrors) then begin
-        Response:= [rr_abort]
+       if e is eupdateerror then begin
+        response:= eupdateerror(e).response;
        end
        else begin
-        Response:= [];
+        if longword(ffailedcount) > longword(MaxErrors) then begin
+         Response:= [rr_abort]
+        end
+        else begin
+         Response:= [];
+        end;
        end;
        e.message:= 'An error occured while applying the updates in a record: '+
                                e.message;

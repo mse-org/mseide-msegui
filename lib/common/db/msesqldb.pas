@@ -116,6 +116,7 @@ type
    property Active: boolean read getactive write setactive1 default false;
    property onapplyrecupdate: applyrecupdateeventty read fonapplyrecupdate
                                   write setonapplyrecupdate;
+             //raise eupdateerror in order to skip update of the record
    property afterapplyrecupdate: afterapplyrecupdateeventty read fafterapplyrecupdate 
                                   write fafterapplyrecupdate;
    property UpdateMode default upWhereKeyOnly;
