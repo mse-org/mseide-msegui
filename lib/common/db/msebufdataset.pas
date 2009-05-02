@@ -1224,9 +1224,9 @@ begin
  inherited;
 end;
 
-{ eupdateerror }
+{ eapplyerror }
 
-constructor eupdateerror.create(const msg: string = ''; 
+constructor eapplyerror.create(const msg: string = ''; 
                          const aresponse: resolverresponsesty = []);
 begin
  fresponse:= aresponse;
@@ -2465,8 +2465,8 @@ begin
       on E: EDatabaseError do begin
        e1:= e;
        Inc(fFailedCount);
-       if e is eupdateerror then begin
-        response:= eupdateerror(e).response;
+       if e is eapplyerror then begin
+        response:= eapplyerror(e).response;
        end
        else begin
         if longword(ffailedcount) > longword(MaxErrors) then begin
