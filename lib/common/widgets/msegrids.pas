@@ -9594,6 +9594,7 @@ begin
   arow:= ffocusedcell.row;
   int1:= ffocusedcell.col;
   repeat
+{
    if step = 0 then begin
     if arow < 0 then begin
      arow:= rowcount-1;
@@ -9616,6 +9617,7 @@ begin
     focuscell(makegridcoord(int1,arow),action);
     break;
    end;
+}
    if step > 0 then begin
     inc(int1);
     if int1 >= fdatacols.count then begin
@@ -9645,6 +9647,28 @@ begin
     if fdatacols[int1].canfocus(mb_none,[],bo1) then begin
      inc(step);
     end;
+   end;
+   if step = 0 then begin
+    if arow < 0 then begin
+     arow:= rowcount-1;
+    end
+    else begin
+     if arow >= rowcount then begin
+      if not (gs_isdb in fstate) and (og_autoappend in foptionsgrid) then begin
+       if fdatacols.rowempty(rowcount - 1) then begin
+        arow:= rowcount-1;
+       end
+       else begin
+        arow:= rowcount;
+       end;
+      end
+      else begin
+       arow:= 0;
+      end;
+     end;
+    end;
+    focuscell(makegridcoord(int1,arow),action);
+    break;
    end;
   until int1 = ffocusedcell.col; //none found
  end;
