@@ -8074,7 +8074,7 @@ var
      bo2:= fdatacols[fmousecell.col].canfocus(info.button,info.shiftstate,rowfocus);
      if not bo2 then begin
       cell1.col:= ffocusedcell.col; //try to focus mouse row
-      if cell1.col < 0 then begin
+      if (cell1.col < 0) or (co_nofocus in fdatacols[cell1.col].options) then begin
        cell1.col:= nextfocusablecol(0);
       end;
      end;
