@@ -3400,7 +3400,8 @@ begin
  rect1:= rect2;
  if afi.levelo <> 0 then begin
   draw3dframe(canvas,rect1,afi.levelo,afi.framecolors,afi.hiddenedges);
-  inflaterect1(rect1,-abs(afi.levelo));
+  updateedgerect(rect1,abs(afi.levelo),afi.hiddenedges);
+//  inflaterect1(rect1,-abs(afi.levelo));
  end;
  if afi.framewidth > 0 then begin
   if (afi.colorframeactive = cl_default) or not (fsf_active in astate) then begin
@@ -3410,12 +3411,14 @@ begin
    col1:= afi.colorframeactive;
   end; 
   canvas.drawframe(rect1,-afi.framewidth,col1,afi.hiddenedges);
-  inflaterect1(rect1,-afi.framewidth);
+  updateedgerect(rect1,afi.framewidth,afi.hiddenedges);
+//  inflaterect1(rect1,-afi.framewidth);
  end;
  if afi.leveli <> 0 then begin
   draw3dframe(canvas,rect1,afi.leveli,afi.framecolors,afi.hiddenedges);
  end;
  if afi.frameimage_list <> nil then begin
+           //todo: implement hiddenedges
   imageoffs:= calcframestateoffs(astate,frameoffsetsty(afi.frameimage_offsets));
   if imageoffs >= 0 then begin
    afi.frameimage_list.paint(canvas,imageoffs,rect2.pos);
@@ -3572,11 +3575,21 @@ class function tcustomframe.calcpaintframe(const afi: baseframeinfoty): framety;
 var
  int1: integer;
 begin
+ result:= nullframe;
  with result do begin
-  left:= abs(afi.levelo) + afi.framewidth + abs(afi.leveli);
-  top:= left;
-  right:= left;
-  bottom:= top;
+  int1:= abs(afi.levelo) + afi.framewidth + abs(afi.leveli);
+  if not(edg_left in afi.hiddenedges) then begin
+   left:= int1;
+  end;
+  if not(edg_top in afi.hiddenedges) then begin
+   top:= int1;
+  end;
+  if not(edg_right in afi.hiddenedges) then begin
+   right:= int1;
+  end;
+  if not(edg_bottom in afi.hiddenedges) then begin
+   bottom:= int1;
+  end;
   if afi.frameimage_list <> nil then begin
    int1:= afi.frameimage_list.width + afi.frameimage_left;
    if int1 > left then begin
@@ -4070,7 +4083,8 @@ begin
  include(flocalprops,frl_hiddenedges);
  if fi.hiddenedges <> avalue then begin
   fi.hiddenedges:= avalue;
-  fintf.invalidatewidget;
+  internalupdatestate;
+//  fintf.invalidatewidget;
  end;
 end;
 

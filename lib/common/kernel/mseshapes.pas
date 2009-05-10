@@ -67,8 +67,10 @@ type
  getbuttonhintty = function(const aindex: integer): msestring of object;
  getbuttonhintposty = function(const aindex: integer): rectty of object;
 
+procedure updateedgerect(var arect: rectty; const awidth: integer;
+                                    const hiddenedges: edgesty);
 procedure draw3dframe(const canvas: tcanvas; const arect: rectty; level: integer;
-                           colorinfo: framecolorinfoty; const hiddenedges: edgesty);
+                      colorinfo: framecolorinfoty; const hiddenedges: edgesty);
 procedure drawfocusrect(const canvas: tcanvas; const arect: rectty);
 procedure drawtoolbutton(const canvas: tcanvas; var info: shapeinfoty);
 procedure drawbutton(const canvas: tcanvas; const info: shapeinfoty);
@@ -506,30 +508,136 @@ begin
   end;
  end;
 end;
+
+procedure updateedgerect(var arect: rectty; const awidth: integer;
+                                    const hiddenedges: edgesty);
+begin
+ if not (edg_right in hiddenedges) then begin
+  dec(arect.cx,awidth);
+ end;
+ if not (edg_top in hiddenedges) then begin
+  inc(arect.y,awidth);
+  dec(arect.cy,awidth);
+ end;
+ if not (edg_left in hiddenedges) then begin
+  inc(arect.x,awidth);
+  dec(arect.cx,awidth);
+ end;
+ if not (edg_bottom in hiddenedges) then begin
+  dec(arect.cy,awidth);
+ end;
+end;
  
+
 procedure draw3dframe(const canvas: tcanvas; const arect: rectty; level: integer;
                        colorinfo: framecolorinfoty; const hiddenedges: edgesty);
+//todo: optimize
 
 type
  cornerinfoty = record
   col1,col2: colorty;
   w1,w2: integer;
  end;
+ pcornerinfoty = ^cornerinfoty;
 
 var
  poly: array[0..5] of pointty;
 
- procedure calculatepoly(w: integer);
- begin
-  poly[3].x:= poly[2].x - w;
-  poly[3].y:= poly[2].y + w;
-  poly[4].x:= poly[1].x + w;
-  poly[4].y:= poly[3].y;
-  poly[5].x:= poly[4].x;
-  poly[5].y:= poly[0].y - w;
- end;
+ procedure drawcorner(const cornerinfo: cornerinfoty;
+                      const firstoff,lastoff,startoff,stopoff: boolean;
+                      const topleft: boolean);
 
- procedure drawcorner(const cornerinfo: cornerinfoty);
+  procedure calculatepoly(w: integer);
+  begin
+   poly[3].x:= poly[2].x - w;
+   poly[3].y:= poly[2].y + w;
+   poly[4].x:= poly[1].x + w;
+   poly[4].y:= poly[3].y;
+   poly[5].x:= poly[4].x;
+   poly[5].y:= poly[0].y - w;
+   if (w = 1) and topleft then begin
+    dec(poly[0].y);
+    dec(poly[2].x);
+   end;
+{   
+   if abs(w) > 1 then begin
+    inc(poly[5].x);
+    inc(poly[4].x);
+    inc(poly[4].y);
+    inc(poly[3].y);
+   end;
+}
+{   
+   if w = 1 then begin
+    if topleft then begin
+     dec(poly[0].y);
+     dec(poly[2].x);
+    end
+    else begin
+     dec(poly[2].y);
+     dec(poly[1].y);
+     dec(poly[1].x);
+     dec(poly[0].x);
+    end;
+   end;
+}
+   if startoff then begin
+    if topleft then begin
+     poly[0].y:= arect.y + arect.cy;
+     if w = 1 then begin
+      dec(poly[0].y);
+     end;
+    end
+    else begin
+     poly[0].y:= arect.y;
+    end;
+    poly[5].y:= poly[0].y;
+   end;
+   if stopoff then begin
+    if topleft then begin
+     poly[2].x:= arect.x + arect.cx;
+     if w = 1 then begin
+      dec(poly[2].x);
+     end;
+    end
+    else begin
+     poly[2].x:= arect.x;
+    end;
+    poly[3].x:= poly[2].x;
+   end;
+
+   if firstoff then begin
+    if topleft then begin
+     poly[1].x:= arect.x;
+     poly[4].x:= poly[1].x;
+    end
+    else begin
+     poly[1].x:= arect.x+arect.cx;
+     if w = 1 then begin
+      dec(poly[1].x);
+     end;
+     poly[4].x:= poly[1].x;
+    end;
+    poly[0]:= poly[1];
+    poly[5]:= poly[4];
+   end;
+   if lastoff then begin
+    if topleft then begin
+     poly[1].y:= arect.y;
+     poly[4].y:= poly[1].y;
+    end
+    else begin
+     poly[4].y:= arect.y+arect.cy;
+     if w = 1 then begin
+      dec(poly[4].y);
+     end;
+     poly[1].y:= poly[4].y;
+    end;
+    poly[2]:= poly[1];
+    poly[3]:= poly[4];
+   end;
+  end; //calculatepoly
+ 
  begin
   with canvas,cornerinfo do begin
    calculatepoly(w1);
@@ -542,12 +650,17 @@ var
     end;
    end;
    if w2 > 0 then begin
+    poly[0]:= poly[5];
+    poly[1]:= poly[4];
+    poly[2]:= poly[3];
+   {
     poly[0].x:= poly[5].x;
     poly[0].y:= poly[5].y;
     poly[1].x:= poly[0].x;
     poly[1].y:= poly[4].y;
     poly[2].x:= poly[3].x;
     poly[2].y:= poly[1].y;
+   }
     calculatepoly(w2);
     if w2 = 1 then begin
      drawlines(poly,false,col2,0,3);
@@ -563,6 +676,7 @@ var
  lightcorner,shadowcorner: cornerinfoty;
  down: boolean;
  int1: integer;
+ po1: pcornerinfoty;
 begin
  if (level = 0) or (arect.cx = 0) or (arect.cy = 0) then begin
   exit;
@@ -625,8 +739,8 @@ begin
    w2:= 0;
   end
   else begin
-   if level - int1 < int1 then begin //reduce dkshadow
-    int1:= level - int1;
+   if level - int1 < 1 then begin //reduce dkshadow
+    int1:= level - 1;
    end;
    if (effectwidth < 0){ xor down} then begin
     col1:= effectcolor;
@@ -644,34 +758,47 @@ begin
  end;
 
  with arect do begin
-  poly[0].x:= x;
-  poly[0].y:= y+arect.cy-1;
-  poly[1]:= pos;
-  poly[2].x:= x+cx-1;
-  poly[2].y:= y;
-
-  if down then begin
-   drawcorner(shadowcorner);
-  end
-  else begin
-   drawcorner(lightcorner);
-   if level > 2 then begin
+  if hiddenedges * [edg_left,edg_top] <> [edg_left,edg_top] then begin
+   poly[0].x:= x;
+   poly[0].y:= y + cy;
+   poly[1]:= pos;
+   poly[2].x:= x + cx;
+   poly[2].y:= y;
+ 
+   if down then begin              //topleft
+    po1:= @shadowcorner;
+   end
+   else begin
+    po1:= @lightcorner;
+    if (level > 2) and (hiddenedges * [edg_left,edg_top] = []) then begin
+     canvas.drawline(pos,makepoint(pos.x+level-1,pos.y+level-1),
+                  colorinfo.light.effectcolor);
+    end;
+   end;
+   drawcorner(po1^,edg_left in hiddenedges,edg_top in hiddenedges,
+                   edg_bottom in hiddenedges,edg_right in hiddenedges,true); 
+   if not down and (level > 2) and 
+                          (hiddenedges * [edg_left,edg_top] = []) then begin
     canvas.drawline(pos,makepoint(pos.x+level-1,pos.y+level-1),
                  colorinfo.light.effectcolor);
    end;
   end;
-  poly[0].x:= x + cx - level;
-  poly[0].y:= y + level-1;
-  poly[1].x:= poly[0].x;
-  poly[1].y:= y + cy - level;
-  poly[2].x:= x + level;
-  poly[2].y:= poly[1].y;
-
-  if down then begin
-   drawcorner(lightcorner);
-  end
-  else begin
-   drawcorner(shadowcorner);
+  if hiddenedges * [edg_right,edg_bottom] <> [edg_right,edg_bottom] then begin
+   poly[0].x:= x + cx - level;
+   poly[0].y:= y + level - 1;
+   poly[1].x:= poly[0].x;
+   poly[1].y:= y + cy - level;
+   poly[2].x:= x + level;
+   poly[2].y:= poly[1].y;
+ 
+   if down then begin           //bottomright
+    po1:= @lightcorner;
+   end
+   else begin
+    po1:= @shadowcorner;
+   end;
+   drawcorner(po1^,edg_right in hiddenedges,edg_bottom in hiddenedges,
+                   edg_top in hiddenedges,edg_left in hiddenedges,false);   
   end;
  end;
 end;
