@@ -166,6 +166,7 @@ type
                      frl_colordkshadow,frl_colorshadow,
                      frl_colorlight,frl_colorhighlight,
                      frl_colordkwidth,frl_colorhlwidth,
+                     frl_hiddenedges,
                      frl_fileft,frl_fitop,frl_firight,frl_fibottom,
                      frl_frameimagelist,frl_frameimageleft,frl_frameimagetop,
                      frl_frameimageright,frl_frameimagebottom,
@@ -194,11 +195,16 @@ type
  
 const
  allframelocalprops: framelocalpropsty =
-                    [frl_levelo,frl_leveli,frl_framewidth,frl_colorframe,
+                    [frl_levelo,frl_leveli,frl_framewidth,
+                     frl_colorframe,frl_colorframeactive,
+                     frl_colordkshadow,frl_colorshadow,
+                     frl_colorlight,frl_colorhighlight,
+                     frl_colordkwidth,frl_colorhlwidth,
+                     frl_hiddenedges,
                      frl_fileft,frl_fitop,frl_firight,frl_fibottom,
                      frl_frameimagelist,frl_frameimageleft,frl_frameimagetop,
                      frl_frameimageright,frl_frameimagebottom,
-                     frl_frameimageoffset,
+                     frl_frameimageoffset,frl_frameimageoffset1,
                      frl_frameimageoffsetdisabled,frl_frameimageoffsetmouse,
                      frl_frameimageoffsetclicked,frl_frameimageoffsetactive,
                      frl_frameimageoffsetactivemouse,
@@ -208,7 +214,7 @@ const
                      frl_nodisable];
  allframelocalprops1: framelocalprops1ty = [
                       frl1_framefacelist,
-                      frl1_framefaceoffset,
+                      frl1_framefaceoffset,frl1_framefaceoffset1,
                       frl1_framefaceoffsetdisabled,frl1_framefaceoffsetmouse,
                       frl1_framefaceoffsetclicked,frl1_framefaceoffsetactive,
                       frl1_framefaceoffsetactivemouse,
@@ -296,6 +302,7 @@ type
   framewidth: integer;
   colorframe: colorty;
   colorframeactive: colorty;
+  hiddenedges: edgesty;
   framecolors: framecolorinfoty;
   colorclient: colorty;
   innerframe: framety;
@@ -357,6 +364,8 @@ type
    function iscolordkwidthstored: boolean;
    procedure setcolorhlwidth(const avalue: integer);
    function iscolorhlwidthstored: boolean;
+   procedure sethiddenedges(const avalue: edgesty);
+   function ishiddenedgesstored: boolean;
 
    procedure setframei(const avalue: framety);   
    procedure setframei_bottom(const Value: integer);
@@ -524,6 +533,8 @@ type
    property colorhlwidth: integer read fi.framecolors.light.effectwidth
                      write setcolorhlwidth
                      stored iscolorhlwidthstored default -1;
+   property hiddenedges: edgesty read fi.hiddenedges 
+                        write sethiddenedges default [];
    property framei: framety read fi.innerframe write setframei;
                       //does not set localprops
    property framei_left: integer read fi.innerframe.left write setframei_left
@@ -675,6 +686,7 @@ type
    property colorhighlight;
    property colordkwidth;
    property colorhlwidth;
+   property hiddenedges;
    property localprops; //before template
    property localprops1; //before template
    property template;
@@ -691,6 +703,7 @@ type
    procedure setcolorhighlight(const avalue: colorty);
    procedure setcolordkwidth(const avalue: integer);
    procedure setcolorhlwidth(const avalue: integer);
+   procedure sethiddenedges(const avalue: edgesty);
 
    procedure setframei_bottom(const Value: integer);
    procedure setframei_left(const Value: integer);
@@ -870,6 +883,8 @@ type
                       write setcolordkwidth default -1;
    property colorhlwidth: integer read fi.ba.framecolors.light.effectwidth
                       write setcolorhlwidth default -1;
+   property hiddenedges: edgesty read fi.ba.hiddenedges write sethiddenedges
+                           default [];
    property optionsskin: frameskinoptionsty read fi.ba.optionsskin 
                       write setoptionsskin default [];
  end;
@@ -3384,7 +3399,7 @@ var
 begin
  rect1:= rect2;
  if afi.levelo <> 0 then begin
-  draw3dframe(canvas,rect1,afi.levelo,afi.framecolors);
+  draw3dframe(canvas,rect1,afi.levelo,afi.framecolors,afi.hiddenedges);
   inflaterect1(rect1,-abs(afi.levelo));
  end;
  if afi.framewidth > 0 then begin
@@ -3394,11 +3409,11 @@ begin
   else begin
    col1:= afi.colorframeactive;
   end; 
-  canvas.drawframe(rect1,-afi.framewidth,col1);
+  canvas.drawframe(rect1,-afi.framewidth,col1,afi.hiddenedges);
   inflaterect1(rect1,-afi.framewidth);
  end;
  if afi.leveli <> 0 then begin
-  draw3dframe(canvas,rect1,afi.leveli,afi.framecolors);
+  draw3dframe(canvas,rect1,afi.leveli,afi.framecolors,afi.hiddenedges);
  end;
  if afi.frameimage_list <> nil then begin
   imageoffs:= calcframestateoffs(astate,frameoffsetsty(afi.frameimage_offsets));
@@ -4050,6 +4065,15 @@ begin
  end;
 end;
 
+procedure tcustomframe.sethiddenedges(const avalue: edgesty);
+begin
+ include(flocalprops,frl_hiddenedges);
+ if fi.hiddenedges <> avalue then begin
+  fi.hiddenedges:= avalue;
+  fintf.invalidatewidget;
+ end;
+end;
+
 procedure tcustomframe.settemplate(const avalue: tframecomp);
 begin
  fintf.getwidget.setlinkedvar(avalue,tmsecomponent(ftemplate));
@@ -4104,6 +4128,9 @@ begin
    if not (frl_colorhlwidth in flocalprops) then begin
     light.effectwidth:= ainfo.ba.framecolors.light.effectwidth;
    end;
+  end;
+  if not (frl_hiddenedges in flocalprops) then begin
+   hiddenedges:= ainfo.ba.hiddenedges;
   end;
   if not (frl_fileft in flocalprops) then begin
    innerframe.left:= ainfo.ba.innerframe.left;
@@ -4382,6 +4409,11 @@ end;
 function tcustomframe.iscolorhlwidthstored: boolean;
 begin
  result:= (ftemplate = nil) or (frl_colorhlwidth in flocalprops);
+end;
+
+function tcustomframe.ishiddenedgesstored: boolean;
+begin
+ result:= (ftemplate = nil) or (frl_hiddenedges in flocalprops);
 end;
 
 function tcustomframe.isfibottomstored: boolean;
@@ -4672,6 +4704,12 @@ end;
 procedure tframetemplate.setcolorhlwidth(const avalue: integer);
 begin
  fi.ba.framecolors.light.effectwidth:= avalue;
+ changed;
+end;
+
+procedure tframetemplate.sethiddenedges(const avalue: edgesty);
+begin
+ fi.ba.hiddenedges:= avalue;
  changed;
 end;
 

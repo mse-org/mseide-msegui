@@ -43,6 +43,7 @@ type
    property colorhighlight;
    property colordkwidth;
    property colorhlwidth;
+   property hiddenedges;
    property framei_left;
    property framei_top;
    property framei_right;

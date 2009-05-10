@@ -483,12 +483,16 @@ type
   stack: canvasvaluesarty;
  end;
 
+ edgety = (edg_right,edg_top,edg_left,edg_bottom);
+ edgesty = set of edgety;
+ 
  edgecolorinfoty = record
   color,effectcolor: colorty;
   effectwidth: integer;
  end;
  framecolorinfoty = record
   light,shadow: edgecolorinfoty;
+  hiddenedges: edgesty;
  end;
 
  edgeinfoty = (kin_dark,kin_reverseend,kin_reversestart);
@@ -662,7 +666,8 @@ type
                          const linecolor: colorty = cl_none); overload;
                          
    procedure drawframe(const arect: rectty; awidth: integer = -1;
-                   const acolor: colorty = cl_default);
+                   const acolor: colorty = cl_default;
+                   const hiddenedges: edgesty = []);
                     //no dashes, awidth < 0 -> inside frame,!
    procedure drawxorframe(const arect: rectty; const awidth: integer = -1;
                            const abrush: tsimplebitmap = nil); overload;
@@ -681,7 +686,8 @@ type
    function getstringwidth(const atext: pmsechar; const acount: integer;
                                  const afont: tfont = nil): integer; overload;
                   //sum of cellwidths
-   function getfontmetrics(const achar: msechar; const afont: tfont = nil): fontmetricsty;
+   function getfontmetrics(const achar: msechar;
+                                     const afont: tfont = nil): fontmetricsty;
 
    function createregion: regionty; overload;
    function createregion(const asource: regionty): regionty; overload;
@@ -854,6 +860,7 @@ var
  defaultframecolors: framecolorinfoty =
   (light: (color: cl_light; effectcolor: cl_highlight; effectwidth: 1);
    shadow: (color: cl_shadow; effectcolor: cl_dkshadow; effectwidth: 1);
+   hiddenedges: []
   );
 
 procedure init;
@@ -3801,7 +3808,7 @@ begin
 end;
 
 procedure tcanvas.drawframe(const arect: rectty; awidth: integer;
-                                 const acolor: colorty);
+                         const acolor: colorty; const hiddenedges: edgesty);
 var
  rect1,rect2: rectty;
 begin
@@ -3825,15 +3832,30 @@ begin
       rect1.pos:= pos;
       rect1.cx:= cx;
       rect1.cy:= awidth;
-      gdi(gdi_fillrect); //top
+      if not (edg_top in hiddenedges) then begin
+       gdi(gdi_fillrect); //top
+      end;
       rect1.pos.y:= y + cy - awidth;
-      gdi(gdi_fillrect); //bottom
-      rect1.pos.y:= y + awidth;
-      rect1.cy:= cy - awidth - awidth;
+      if not (edg_bottom in hiddenedges) then begin
+       gdi(gdi_fillrect); //bottom
+      end;
+      rect1.pos.y:= y;
+      rect1.cy:= cy;
+      if not (edg_top in hiddenedges) then begin
+       inc(rect1.pos.y,awidth);
+       dec(rect1.cy,awidth);
+      end;
+      if not (edg_bottom in hiddenedges) then begin
+       dec(rect1.cy,awidth);
+      end;
       rect1.cx:= awidth;
-      gdi(gdi_fillrect); //left
+      if not (edg_left in hiddenedges) then begin
+       gdi(gdi_fillrect); //left
+      end;
       rect1.pos.x:= x + cx - awidth;
-      gdi(gdi_fillrect); //right
+      if not (edg_right in hiddenedges) then begin
+       gdi(gdi_fillrect); //right
+      end;
      end;
     end;
    end;

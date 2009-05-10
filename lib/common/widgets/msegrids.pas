@@ -1321,6 +1321,7 @@ type
    property colorhighlight;
    property colordkwidth;
    property colorhlwidth;
+   property hiddenedges;
    property colorclient default cl_foreground;
    property framei_left default 0;
    property framei_top default 0;

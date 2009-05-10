@@ -112,6 +112,7 @@ type
    property colorhighlight;
    property colordkwidth;
    property colorhlwidth;
+   property hiddenedges;
    property framei_left;
    property framei_top;
    property framei_right;
@@ -264,8 +265,8 @@ type
    property colorshadow;
    property colorlight;
    property colorhighlight;
-   property colordkwidth;
    property colorhlwidth;
+   property hiddenedges;
    property colorframe;
    property colorframeactive;
    property framei_left;
@@ -399,6 +400,7 @@ type
    property colorhighlight;
    property colordkwidth;
    property colorhlwidth;
+   property hiddenedges;
    property colorclient;
    property framei_left;
    property framei_top;
@@ -571,6 +573,7 @@ type
    property colorhighlight;
    property colordkwidth;
    property colorhlwidth;
+   property hiddenedges;
    property colorclient;
    property colorbutton;
    property framei_left;

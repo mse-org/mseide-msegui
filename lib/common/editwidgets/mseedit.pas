@@ -45,6 +45,7 @@ type
    property colorhighlight;
    property colordkwidth;
    property colorhlwidth;
+   property hiddenedges;
    property framei_left default 1;
    property framei_top default 1;
    property framei_right default 1;
@@ -100,6 +101,7 @@ type
    property colorhighlight;
    property colordkwidth;
    property colorhlwidth;
+   property hiddenedges;
    property framei_left default 1;
    property framei_top default 1;
    property framei_right default 1;
@@ -132,6 +134,7 @@ type
    property colorhighlight;
    property colordkwidth;
    property colorhlwidth;
+   property hiddenedges;
    property framei_left default 1;
    property framei_top default 1;
    property framei_right default 1;

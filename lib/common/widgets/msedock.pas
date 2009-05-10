@@ -3419,7 +3419,7 @@ begin
   case kind of
    dbr_close: begin
     if fgrip_size >= 8 then begin
-     draw3dframe(acanvas,arect,1,defaultframecolors);
+     draw3dframe(acanvas,arect,1,defaultframecolors,[]);
      drawcross(inflaterect(arect,-2),acolorglyph);
     end
     else begin
@@ -3427,12 +3427,12 @@ begin
     end;
    end;
    dbr_maximize: begin
-    draw3dframe(acanvas,arect,1,defaultframecolors);
+    draw3dframe(acanvas,arect,1,defaultframecolors,[]);
     drawframe(inflaterect(arect,-2),-1,acolorglyph);
     drawvect(makepoint(x+2,y+3),gd_right,cx-5,acolorglyph);
    end;
    dbr_normalize: begin
-    draw3dframe(acanvas,arect,1,defaultframecolors);
+    draw3dframe(acanvas,arect,1,defaultframecolors,[]);
     rect2.cx:= cx * 2 div 3 - 3;
     rect2.cy:= rect2.cx;
     rect2.pos:= addpoint(pos,makepoint(2,2));
@@ -3442,7 +3442,7 @@ begin
     drawrect(rect2,acolorglyph);
    end;
    dbr_minimize: begin
-    draw3dframe(acanvas,arect,1,defaultframecolors);
+    draw3dframe(acanvas,arect,1,defaultframecolors,[]);
     case fgrip_pos of
      cp_left: begin
       drawvect(makepoint(x+2,y+2),gd_down,cy-5,acolorglyph);
@@ -3464,19 +3464,19 @@ begin
    end;
    dbr_fixsize: begin
     draw3dframe(acanvas,arect,calclevel(od_fixsize),
-                 defaultframecolors);
+                 defaultframecolors,[]);
     drawframe(inflaterect(arect,-2),-1,acolorglyph);
    end;
    dbr_top: begin
     int1:= x + cx div 2;
-    draw3dframe(acanvas,arect,calclevel(od_top),defaultframecolors);
+    draw3dframe(acanvas,arect,calclevel(od_top),defaultframecolors,[]);
     drawlines([makepoint(int1-3,y+4),makepoint(int1,y+1),makepoint(int1,y+cy-1)],
              false,acolorglyph);
     drawline(makepoint(int1+3,y+4),makepoint(int1,y+1),acolorglyph);
    end;
    dbr_background: begin
     int1:= x + cx div 2;
-    draw3dframe(acanvas,arect,calclevel(od_background),defaultframecolors);
+    draw3dframe(acanvas,arect,calclevel(od_background),defaultframecolors,[]);
     drawlines([makepoint(int1-3,y+cx-4),makepoint(int1,y+cy-1),makepoint(int1,y+1)],
              false,acolorglyph);
     drawline(makepoint(int1+3,y+cx-4),makepoint(int1,y+cy-1),acolorglyph);

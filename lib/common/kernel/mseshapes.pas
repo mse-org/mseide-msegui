@@ -68,7 +68,7 @@ type
  getbuttonhintposty = function(const aindex: integer): rectty of object;
 
 procedure draw3dframe(const canvas: tcanvas; const arect: rectty; level: integer;
-                                 colorinfo: framecolorinfoty);
+                           colorinfo: framecolorinfoty; const hiddenedges: edgesty);
 procedure drawfocusrect(const canvas: tcanvas; const arect: rectty);
 procedure drawtoolbutton(const canvas: tcanvas; var info: shapeinfoty);
 procedure drawbutton(const canvas: tcanvas; const info: shapeinfoty);
@@ -508,7 +508,7 @@ begin
 end;
  
 procedure draw3dframe(const canvas: tcanvas; const arect: rectty; level: integer;
-                                 colorinfo: framecolorinfoty);
+                       colorinfo: framecolorinfoty; const hiddenedges: edgesty);
 
 type
  cornerinfoty = record
@@ -690,7 +690,7 @@ begin
  result:= false;
  with canvas,info do begin
   if shs_separator in state then begin
-   draw3dframe(canvas,ca.dim,-1,defaultframecolors);
+   draw3dframe(canvas,ca.dim,-1,defaultframecolors,[]);
   end
   else begin
    if shs_flat in state then begin
@@ -719,7 +719,7 @@ begin
     canvas.drawframe(clientrect,-1,cl_black);
     inflaterect1(clientrect,-1);
    end;
-   draw3dframe(canvas,clientrect,level,defaultframecolors);
+   draw3dframe(canvas,clientrect,level,defaultframecolors,[]);
    inflaterect1(clientrect,-abs(level));
    if (clientrect.cx > 0) and (clientrect.cy > 0) then begin
     result:= true;
@@ -1010,7 +1010,7 @@ begin
   if pos <> cp_left then begin
    inc(rect1.x,arect.cx-rect1.cx);
   end;
-  draw3dframe(canvas,rect1,-1,defaultframecolors);
+  draw3dframe(canvas,rect1,-1,defaultframecolors,[]);
   if pos = cp_left then begin
    inc(arect.x,menucheckboxwidth);
   end;

@@ -436,6 +436,7 @@ type
    property colorhighlight;
    property colordkwidth;
    property colorhlwidth;
+   property hiddenedges;
    property colorclient;
    property colorbutton;
    property framei_left;
