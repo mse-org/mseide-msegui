@@ -1,6 +1,6 @@
 {
     Copyright (c) 2004 by Joost van der Sluis
-    Modified 2006-2008 by Martin Schreiber
+    Modified 2006-2009 by Martin Schreiber
     
     See the file COPYING.FPC, included in this distribution,
     for details about the copyright.
@@ -651,6 +651,7 @@ begin
  with TPQCursor(cursor) do begin
   frowsreturned:= -1;
   frowsaffected:= -1;
+  curtuple:= -1;
   if FStatementType in [stInsert,stUpdate,stDelete,stSelect] then begin
    if Assigned(AParams) and (AParams.count > 0) then begin
     setlength(ar,Aparams.count);
@@ -766,7 +767,7 @@ begin
    {$endif}
    fd.collection:= fielddefs;
   end;
-  CurTuple:= -1;
+//  CurTuple:= -1; moved to execute
  end;
 end;
 
