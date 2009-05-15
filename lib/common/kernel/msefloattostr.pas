@@ -89,8 +89,8 @@ begin
  end;
 end;
 
-function doubletostring(value: double; precision: integer;
-      mode: floatstringmodety = fsm_default;
+function doubletostring1(value: double; out msbcarry: boolean;
+      precision: integer; mode: floatstringmodety = fsm_default;
       decimalsep: msechar = '.'; thousandsep: msechar = #0): msestring;
   //format double:
   // 1  11  52
@@ -166,6 +166,7 @@ var
  preci: integer;
  
 begin
+ msbcarry:= false;
  preci:= abs(precision);
  with doublerecty(value) do begin
   neg:= by7 and $80 <> 0;
@@ -337,7 +338,50 @@ begin
     if (precision < 0) or defaultmode and (precision = 0) then begin
      int1:= -int1;
     end;
-    result:= doubletostring(do1,int1,mode1,decimalsep); //get mantissa digits
+    result:= doubletostring1(do1,msbcarry,int1,mode1,decimalsep); //get mantissa digits
+    if msbcarry and (int1 >= 0) then begin //no carry check for removed trailing zeros
+     if mode1 = fsm_fix then begin
+      if int1 = 0 then begin
+       if mode >= fsm_engfix then begin
+        setlength(result,length(result)-3);
+        int3:= int3 + 3; //correct carry, 999.99-> 1000 -> 1
+       end
+       else begin
+        setlength(result,length(result)-1);
+        inc(int3);       //correct carry, 9.9999-> 10 -> 1
+       end;
+      end
+      else begin
+       if mode >= fsm_engfix then begin
+        int1:= findchar(result,decimalsep);
+        if int1 = 5 then begin
+         result[5]:= result[4];
+         result[4]:= result[3];
+         result[3]:= result[2];
+         result[2]:= decimalsep;
+         if (mode = fsm_engfix) or (mode = fsm_engsymfix) then begin
+          setlength(result,length(result)-3); //correct carry, 999.999-> 1000.000 -> 1.000
+         end
+         else begin
+          setlength(result,length(result)-1); //correct carry, 999.999-> 1000.000 -> 1.00000
+         end;
+         int3:= int3+3;   
+        end
+        else begin
+         if (mode = fsm_engflo) or (mode = fsm_engsymflo) then begin
+          setlength(result,length(result)-1); //correct carry, 99.999-> 100.000 -> 100.00
+         end
+        end;
+       end
+       else begin
+        result[3]:= result[2];
+        result[2]:= decimalsep;
+        setlength(result,length(result)-1);   //correct carry, 9.999 ->10.000 -> 1.000
+        inc(int3);
+       end;
+      end;
+     end;
+    end;
     int1:= int3 div 3;
     if (mode >= fsm_engsymfix) and (int1 >= ord(low(expsymty))) and 
                                         (int1 <= ord(high(expsymty))) then begin
@@ -409,6 +453,7 @@ begin
      inc(buffer[lastindex]);
      checkcarry(lastindex,buffer);
     end;
+    msbcarry:= buffer[0] <> '0';
     if  (precision < 0) or (defaultmode and (precision = 0)) then begin
      int2:= lastindex - preci + 1; //remove trayling zeros
      for int1:= lastindex downto int2 do begin
@@ -511,6 +556,15 @@ begin
    end;
   end;
  end;
+end;
+
+function doubletostring(value: double; precision: integer;
+      mode: floatstringmodety = fsm_default;
+      decimalsep: msechar = '.'; thousandsep: msechar = #0): msestring;
+var
+ bo1: boolean;
+begin
+ result:= doubletostring1(value,bo1,precision,mode,decimalsep,thousandsep); 
 end;
 
 end.
