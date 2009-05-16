@@ -339,12 +339,14 @@ begin
      int1:= -int1;
     end;
     result:= doubletostring1(do1,msbcarry,int1,mode1,decimalsep); //get mantissa digits
-    if msbcarry and (int1 >= 0) then begin //no carry check for removed trailing zeros
+    if msbcarry then begin 
      if mode1 = fsm_fix then begin
-      if int1 = 0 then begin
-       if mode >= fsm_engfix then begin
-        setlength(result,length(result)-3);
-        int3:= int3 + 3; //correct carry, 999.99-> 1000 -> 1
+      if (int1 <= 0) then begin    //999.99-> 1000.00 -> 1000 (trimmed trailing 0) 
+       if (mode >= fsm_engfix) then begin
+        if length(result) > 3 then begin
+         setlength(result,length(result)-3);
+         int3:= int3 + 3; //correct carry, 999.99-> 1000 -> 1
+        end;
        end
        else begin
         setlength(result,length(result)-1);
@@ -353,8 +355,7 @@ begin
       end
       else begin
        if mode >= fsm_engfix then begin
-        int1:= findchar(result,decimalsep);
-        if int1 = 5 then begin
+        if (length(result) >= 5) and (result[5] = decimalsep) then begin
          result[5]:= result[4];
          result[4]:= result[3];
          result[3]:= result[2];
