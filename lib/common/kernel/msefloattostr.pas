@@ -450,11 +450,12 @@ begin
      do1:= frac(do1)*10;       
     end;
     do1:= do1 - 5 + exps[lastindex] / lsbrounding; //round up lsb
+    msbcarry:= buffer[0] = '0';
     if (do1 > 0) then begin
      inc(buffer[lastindex]);
      checkcarry(lastindex,buffer);
     end;
-    msbcarry:= buffer[0] <> '0';
+    msbcarry:= msbcarry and (buffer[0] <> '0');
     if  (precision < 0) or (defaultmode and (precision = 0)) then begin
      int2:= lastindex - preci + 1; //remove trayling zeros
      for int1:= lastindex downto int2 do begin
