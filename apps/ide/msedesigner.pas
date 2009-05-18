@@ -415,6 +415,7 @@ type
                                                           
    procedure setmodulex(const amodule: tmsecomponent; avalue: integer);
    procedure setmoduley(const amodule: tmsecomponent; avalue: integer);
+   procedure modulesizechanged(const amodule: tmsecomponent);
 
    function isownedmethod(const root: tcomponent; 
                                              const method: tmethod): boolean;
@@ -2724,6 +2725,16 @@ begin
  po1:= fmodules.findmodule(tmsecomponent(amodule));
  if po1 <> nil then begin
   po1^.designform.bounds_y:= avalue;
+ end;
+end;
+
+procedure tdesigner.modulesizechanged(const amodule: tmsecomponent);
+var
+ po1: pmoduleinfoty;
+begin
+ po1:= fmodules.findmodule(tmsecomponent(amodule));
+ if po1 <> nil then begin
+  twidget1(po1^.designform).sizechanged;
  end;
 end;
 

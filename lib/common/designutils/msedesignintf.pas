@@ -137,6 +137,7 @@ type
   procedure setactivemodule(const adesignform: tmseform);
   procedure setmodulex(const amodule: tmsecomponent; avalue: integer);
   procedure setmoduley(const amodule: tmsecomponent; avalue: integer);
+  procedure modulesizechanged(const amodule: tmsecomponent);
  end;
 
  idesignnotification = interface(inullinterface)

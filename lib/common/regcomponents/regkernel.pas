@@ -62,6 +62,11 @@ type
    procedure setvalue(const value: msestring); override;
  end;
 
+ tbounds_sizeeditor = class(tordinalpropertyeditor)
+  public
+   procedure setvalue(const value: msestring); override;
+ end;
+ 
  tframepropertyeditor = class(toptionalclasspropertyeditor)
   public
    procedure edit; override;
@@ -152,6 +157,16 @@ begin
                              tparentfontpropertyeditor);
  registerpropertyeditor(typeinfo(integer),twidget,'bounds_x',tbounds_xeditor);
  registerpropertyeditor(typeinfo(integer),twidget,'bounds_y',tbounds_yeditor);
+ registerpropertyeditor(typeinfo(integer),twidget,'bounds_cy',tbounds_sizeeditor);
+ registerpropertyeditor(typeinfo(integer),twidget,'bounds_cx',tbounds_sizeeditor);
+ registerpropertyeditor(typeinfo(integer),twidget,'bounds_cymin',
+                                                     tbounds_sizeeditor);
+ registerpropertyeditor(typeinfo(integer),twidget,'bounds_cxmin',
+                                                     tbounds_sizeeditor);
+ registerpropertyeditor(typeinfo(integer),twidget,'bounds_cymax',
+                                                     tbounds_sizeeditor);
+ registerpropertyeditor(typeinfo(integer),twidget,'bounds_cxmax',
+                                                     tbounds_sizeeditor);
  registerpropertyeditor(typeinfo(tfacetemplate),tcustommenu,'facetemplate',
                            toptionalclasspropertyeditor);
  registerpropertyeditor(typeinfo(tfacetemplate),tmainmenu,'popupfacetemplate',
@@ -221,6 +236,14 @@ begin
  else begin
   inherited;
  end;
+end;
+
+{ tbounds_sizeeditor }
+
+procedure tbounds_sizeeditor.setvalue(const value: msestring);
+begin
+ inherited;
+ fdesigner.modulesizechanged(fmodule);
 end;
 
 { tframepropertyeditor }
