@@ -9983,6 +9983,23 @@ begin
        goto checkwidgetexit;
       end;
      end;
+     key_home: begin
+      if ss_ctrl in info.shiftstate then begin
+       focuscell(makegridcoord(nextfocusablecol(0),0),action);
+      end
+      else begin
+       exclude(info.eventstate,es_processed);
+      end;
+     end;
+     key_end: begin
+      if ss_ctrl in info.shiftstate then begin
+       focuscell(makegridcoord(nextfocusablecol(datacols.count-1,true),
+                                                       frowcount-1),action);
+      end
+      else begin
+       exclude(info.eventstate,es_processed);
+      end;
+     end;
      key_pageup: begin
       if ss_ctrl in info.shiftstate then begin
        if og_visiblerowpagestep in foptionsgrid then begin
