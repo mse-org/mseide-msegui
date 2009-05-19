@@ -212,9 +212,14 @@ begin
 end;
 
 procedure tterminal.doinputavailable(const sender: tpipereader);
+var
+ str1: string;
 begin
  application.checkoverload;
- addchars(sender.readdatastring)
+ try
+  addchars(sender.readdatastring);
+ except
+ end;
 end;
 
 procedure tterminal.addchars(const avalue: msestring);			
