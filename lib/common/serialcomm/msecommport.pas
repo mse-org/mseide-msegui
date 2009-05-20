@@ -137,6 +137,7 @@ type
 
  trs232 = class
   private
+   fowner: tmsecomponent; //can be nil
    fhandle: cardinal;
    fcommnr: commnrty;
    frtstimevor: integer;  //in us fuer halbduplex
@@ -165,8 +166,11 @@ type
    procedure eotevent(sender: tobject);
    {$endif}
    procedure setdatabits(const avalue: commdatabitsty);
+  protected
+   function canevent(const aevent: tmethod): boolean;
   public
-   constructor create(aoncheckabort: checkeventty = nil);
+   constructor create(const aowner: tmsecomponent;  //aowner can be nil
+                                  const aoncheckabort: checkeventty = nil);
    destructor destroy; override;
    function open: boolean;
    procedure close;
@@ -222,6 +226,7 @@ type
 
  tcommthread = class(teventthread)
   private
+   fowner: tmsecomponent;
    fport: trs232;
    fabort: boolean;
    fsendretrys: integer;
@@ -229,7 +234,7 @@ type
    function checkabort(const sender: tobject): boolean; virtual;
    function execute(thread: tmsethread): integer; override;
   public
-   constructor create;
+   constructor create(const aowner: tmsecomponent); //owner can be nil
    destructor destroy; override;
    function writestring(const dat: string; timeout: integer = 0): boolean;
   //timeout in us, wenn = 0 -> warten auf uebertragungsende, bei halbduplex sowiso
@@ -354,7 +359,7 @@ type
   protected
    function checkabort(const sender: tobject): boolean; override;
   public
-   constructor create;
+   constructor create(const aowner: tmsecomponent);
    procedure reset; override;       //setzt commport zurueck
    function readln(timeout: integer; out dat: string): integer;
                        //cpf_io wenn gelungen
@@ -642,8 +647,10 @@ end;
 
 { trs232 }
 
-constructor trs232.create(aoncheckabort: checkeventty = nil);
+constructor trs232.create(const aowner: tmsecomponent; const
+                      aoncheckabort: checkeventty = nil);
 begin
+ fowner:= aowner;
  fhandle:= invalidfilehandle;
  fbaud:= cbr_9600;
  fdatabits:= cdb_8;
@@ -719,6 +726,11 @@ begin
   fdatabits:= avalue;
   updatebyteinfo;
  end;
+end;
+
+function trs232.canevent(const aevent: tmethod): boolean;
+begin
+ result:= (fowner = nil) or (fowner.canevent(aevent));
 end;
 
 procedure trs232.Setstopbit(const Value: commstopbitty);
@@ -1142,7 +1154,7 @@ begin
     anzahl:= anzahl - int1;
     result:= result + int1;
     if (anzahl <= 0) or timed and msesysutils.timeout(time) or
-       (assigned(foncheckabort) and foncheckabort(self)) then begin
+       (canevent(tmethod(foncheckabort)) and foncheckabort(self)) then begin
      break;
     end
     else begin
@@ -1180,7 +1192,7 @@ begin
     anzahl:= anzahl - int1;
     result:= result + int1;
     if (anzahl <= 0) or timed and zeitabgelaufen(time) or
-       (assigned(foncheckabort) and foncheckabort(self)) then begin
+       (canevent(foncheckabort) and foncheckabort(self)) then begin
      break;
     end
     else begin
@@ -1242,9 +1254,10 @@ end;
 
 { tcommthread }
 
-constructor tcommthread.create;
+constructor tcommthread.create(const aowner: tmsecomponent);
 begin
- fport:= trs232.create({$ifdef FPC}@{$endif}checkabort);
+ fowner:= aowner;
+ fport:= trs232.create(fowner,{$ifdef FPC}@{$endif}checkabort);
  inherited create({$ifdef FPC}@{$endif}execute);
 end;
 
@@ -1438,7 +1451,7 @@ end;
 
 { tasciicommthread }
 
-constructor tasciicommthread.create;
+constructor tasciicommthread.create(const aowner: tmsecomponent);
 begin
  feorchar:= defaulteorchar;
  inherited;
@@ -1546,7 +1559,7 @@ constructor tcommport.create(aowner: tcomponent);
 begin
  ftimeout:= 200000;
  if fthread = nil then begin
-  fthread:= tcommthread.create;
+  fthread:= tcommthread.create(self);
  end;
  inherited;
 end;
@@ -1712,7 +1725,7 @@ end;
 
 procedure tcommport.portchanged;
 begin
- if assigned(fonportchange) then begin
+ if canevent(tmethod(fonportchange)) then begin
   fonportchange(self);
  end;
 end;
@@ -1782,7 +1795,7 @@ end;
 
 constructor tasciicommport.create(aowner: tcomponent);
 begin
- fthread:= tasciicommthread.create;
+ fthread:= tasciicommthread.create(self);
  inherited;
 end;
 
