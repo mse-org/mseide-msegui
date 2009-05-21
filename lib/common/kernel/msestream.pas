@@ -184,6 +184,11 @@ type
    constructor create(ahandle: integer); override;
    procedure writerecord(const fields: array of const); overload;
    procedure writerecord(const fields: msestringarty); overload;
+   procedure writerecord(const fields: stringarty); overload;
+   procedure writerecord(const fields: integerarty); overload;
+   procedure writerecord(const fields: realarty); overload;
+   procedure writerecord(const fields: int64arty); overload;
+   procedure writerecord(const fields: booleanarty); overload;
    function readrecord(fields: array of pointer; types: string): boolean; //true if no error
                 // b -> boolean
                 // i -> integer
@@ -1486,6 +1491,85 @@ begin
   with ar1[int1] do begin
    vtype:= vtwidestring;
    vwidestring:= pointer(fields[int1]);
+  end;
+ end;
+ writerecord(ar1);
+end;
+
+procedure ttextdatastream.writerecord(const fields: stringarty);
+var
+ ar1: varrecarty;
+ int1: integer;
+begin
+ setlength(ar1,length(fields));
+ for int1:= 0 to high(ar1) do begin
+  with ar1[int1] do begin
+   vtype:= vtansistring;
+   vansistring:= pointer(fields[int1]);
+  end;
+ end;
+ writerecord(ar1);
+end;
+
+procedure ttextdatastream.writerecord(const fields: integerarty);
+var
+ ar1: varrecarty;
+ int1: integer;
+begin
+ setlength(ar1,length(fields));
+ for int1:= 0 to high(ar1) do begin
+  with ar1[int1] do begin
+   vtype:= vtinteger;
+   vinteger:= fields[int1];
+  end;
+ end;
+ writerecord(ar1);
+end;
+
+procedure ttextdatastream.writerecord(const fields: realarty);
+var
+ ar1: varrecarty;
+ ar2: array of extended;
+ int1: integer;
+ ext1: extended;
+begin
+ setlength(ar1,length(fields));
+ setlength(ar2,length(fields));
+ for int1:= 0 to high(ar1) do begin
+  with ar1[int1] do begin
+   ar2[int1]:= fields[int1];
+   vtype:= vtextended;
+   vextended:= @ar2[int1];
+  end;
+ end;
+ writerecord(ar1);
+end;
+
+procedure ttextdatastream.writerecord(const fields: int64arty);
+var
+ ar1: varrecarty;
+ int1: integer;
+begin
+ setlength(ar1,length(fields));
+ for int1:= 0 to high(ar1) do begin
+  with ar1[int1] do begin
+   vtype:= vtint64;
+   vint64:= @fields[int1];
+  end;
+ end;
+ writerecord(ar1);
+end;
+
+procedure ttextdatastream.writerecord(const fields: booleanarty);
+var
+ ar1: varrecarty;
+ int1: integer;
+begin
+ setlength(ar1,length(fields));
+ for int1:= 0 to high(ar1) do begin
+  with ar1[int1] do begin
+   vtype:= vtboolean;
+   vboolean:= fields[int1];
   end;
  end;
  writerecord(ar1);

@@ -38,6 +38,7 @@ function formatfloatmse(const value: double; const format: msestring;
    // formats for positive, negative and zero value can be separated by ;
    // ' and " qoted text as is
    // c -> currencyformat
+   // C -> currencyformat without currencyname
    //
    // + 0 or number digit
    // |+ show defaultformatsettingsmse.thousandseparator
@@ -1421,6 +1422,7 @@ var
  mantissaend: integer;
  ar1: array[0..2] of integer;    //indexes positive, negative, zero
  expchar: msechar;
+ bo1: boolean;
 
 begin
  result:= '';
@@ -1431,20 +1433,27 @@ begin
   else begin
    decimalsep:= decimalseparator;
   end;
-  if format = 'c' then begin
+  bo1:= format = 'C';
+  if (format = 'c') or bo1 then begin
+   if bo1 then begin
+    mstr1:= '';
+   end
+   else begin
+    mstr1:= currencystring;
+   end;
    if value < 0 then begin
     case negcurrformat of
      0: begin
-      result:= '('+currencystring;
+      result:= '('+mstr1;
      end;
      1: begin
-      result:= '-'+currencystring;
+      result:= '-'+mstr1;
      end;
      2: begin
-      result:= currencystring+'-';
+      result:= mstr1+'-';
      end;
      3: begin
-      result:= currencystring;
+      result:= mstr1;
      end;
      4,15: begin
       result:= '(';
@@ -1453,26 +1462,26 @@ begin
       result:= '-';
      end;
      9: begin
-      result:= '-'+currencystring+' ';
+      result:= '-'+mstr1+' ';
      end;
      11: begin
-      result:= currencystring+' ';
+      result:= mstr1+' ';
      end;
      12: begin
-      result:= currencystring+' -';
+      result:= mstr1+' -';
      end;
      14: begin
-      result:= '('+currencystring+' ';
+      result:= '('+mstr1+' ';
      end;
     end;
    end
    else begin
     case currencyformat of
      0: begin
-      result:= currencystring;
+      result:= mstr1;
      end;
      2: begin
-      result:= currencystring + ' ';
+      result:= mstr1 + ' ';
      end;
     end;
    end;
@@ -1487,38 +1496,38 @@ begin
       result:= result + '-';
      end;
      4: begin
-      result:= result + currencystring + ')';
+      result:= result + mstr1 + ')';
      end;
      5: begin
-      result:= result + currencystring;
+      result:= result + mstr1;
      end;
      6: begin
-      result:= result + '-' + currencystring;
+      result:= result + '-' + mstr1;
      end;
      7: begin
-      result:= result + currencystring + '-';
+      result:= result + mstr1 + '-';
      end;
      8: begin
-      result:= result + ' ' + currencystring;
+      result:= result + ' ' + mstr1;
      end;
      10: begin
-      result:= result + ' ' + currencystring + '-';
+      result:= result + ' ' + mstr1 + '-';
      end;
      13: begin
-      result:= result + '- ' + currencystring;
+      result:= result + '- ' + mstr1;
      end;
      15: begin
-      result:= result + ' ' + currencystring + ')'
+      result:= result + ' ' + mstr1 + ')'
      end;
     end;
    end
    else begin
     case currencyformat of
      1: begin
-      result:= result + formatsettings.currencystring;
+      result:= result + mstr1;
      end;
      3: begin
-      result:= result + ' ' + formatsettings.currencystring;
+      result:= result + ' ' + mstr1;
      end;
     end;
    end;
