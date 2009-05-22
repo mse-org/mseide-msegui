@@ -1195,6 +1195,7 @@ type
    function datalistbyname(const aname: string): tdatalist; //can be nil
    
    function selectedcellcount: integer;
+   function hascolselection: boolean;
    property selectedcells: gridcoordarty read getselectedcells write setselectedcells;
    property selected[const cell: gridcoordty]: boolean read Getselected write Setselected;
                //col < 0 and row < 0 -> whole grid, col < 0 -> whole col,
@@ -6246,7 +6247,7 @@ begin
   aindex:= count - 1;
  end;
  for int1:= aindex - 1 downto 0 do begin
-  if not (co_invisible in cols[int1].foptions) or
+  if not (co_invisible in tdatacol(fitems[int1]).foptions) or
                   (csdesigning in fgrid.ComponentState) then begin
    result:= int1;
    break;
@@ -6257,17 +6258,32 @@ end;
 function tdatacols.selectedcellcount: integer;
 var
  int1,int2: integer;
+ bo1: boolean;
 begin
  result:= 0;
  if hasselection then begin
+  bo1:= hascolselection;
   for int1:= 0 to frowstate.count - 1 do begin
-   if frowstate.getitempo(int1)^.selected <> 0 then begin
+   if bo1 or (frowstate.getitempo(int1)^.selected <> 0) then begin
     for int2:= 0 to count - 1 do begin
-     if cols[int2].selected[int1] then begin
+     if tdatacol(fitems[int2]).selected[int1] then begin
       inc(result);
      end;
     end;
    end;
+  end;
+ end;
+end;
+
+function tdatacols.hascolselection: boolean;
+var
+ int1: integer;
+begin
+ result:= false;
+ for int1:= 0 to count - 1 do begin
+  if cos_selected in tdatacol(fitems[int1]).fstate then begin
+   result:= true;
+   exit;
   end;
  end;
 end;
@@ -6278,15 +6294,17 @@ const
 var
  int1,int2,int3: integer;
  cell: gridcoordty;
+ bo1: boolean;
 begin
  result:= nil;
  if hasselection then begin          //todo: optimize
   int3:= 0;
+  bo1:= hascolselection;
   for int1:= 0 to frowstate.count - 1 do begin
-   if frowstate.getitempo(int1)^.selected <> 0 then begin
+   if bo1 or (frowstate.getitempo(int1)^.selected <> 0) then begin
     cell.row:= int1;
     for int2:= 0 to count - 1 do begin
-     if cols[int2].selected[int1] then begin
+     if tdatacol(fitems[int2]).selected[int1] then begin
       if int3 >= length(result) then begin
        setlength(result,length(result)*2 + capacitystep);
       end;
@@ -12663,7 +12681,7 @@ begin
  end
  else begin
   result:= false;
-  po1:= datapo;
+  po2:= datapo;
   for int1:= arow downto 0 do begin
    by1:= po2^[int1].fold;
    if by1 = 0 then begin
