@@ -12125,7 +12125,7 @@ begin
  end;
  inherited;
 end;
-var testvar: integer;
+
 procedure tcustomstringgrid.setupeditor(const acell: gridcoordty;
               const focusin: boolean);
 var
@@ -12133,10 +12133,6 @@ var
  mstr1: msestring;
  int1: integer;
 begin
-if (testvar = 2) and (feditor.curindex <> 0) then begin
- testvar:= 2;
-end;
-testvar:= acell.row;
  col1:= tcustomstringcol(fdatacols[acell.col]);
  mstr1:= col1[acell.row];
  col1.updatedisptext(mstr1);
