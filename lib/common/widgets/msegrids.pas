@@ -1946,7 +1946,7 @@ type
    procedure setitems(const cell: gridcoordty; const Value: msestring);
    function getcaretwidth: integer;
    procedure setcaretwidth(const value: integer);
-   procedure setupeditor(const acell: gridcoordty);
+   procedure setupeditor(const acell: gridcoordty; const focusin: boolean);
   protected
    feditor: tinplaceedit;
    function canclose(const newfocus: twidget): boolean; override;
@@ -12125,21 +12125,33 @@ begin
  end;
  inherited;
 end;
-
-procedure tcustomstringgrid.setupeditor(const acell: gridcoordty);
+var testvar: integer;
+procedure tcustomstringgrid.setupeditor(const acell: gridcoordty;
+              const focusin: boolean);
 var
  col1: tcustomstringcol;
  mstr1: msestring;
+ int1: integer;
 begin
+if (testvar = 2) and (feditor.curindex <> 0) then begin
+ testvar:= 2;
+end;
+testvar:= acell.row;
  col1:= tcustomstringcol(fdatacols[acell.col]);
  mstr1:= col1[acell.row];
  col1.updatedisptext(mstr1);
- feditor.setup(mstr1,0,false,cellrect(acell,cil_inner),
+ int1:= 0;
+ if not focusin then begin
+  int1:= feditor.curindex;
+ end;
+ feditor.setup(mstr1,int1,false,cellrect(acell,cil_inner),
                     cellrect(acell,cil_paint),nil,nil,
                     fdatacols[acell.col].rowfont(acell.row));
  feditor.textflags:= col1.textflags;
  feditor.textflagsactive:= col1.ftextflagsactive;
- feditor.dofocus;
+ if focusin then begin
+  feditor.dofocus;
+ end;
  if active then begin
   feditor.doactivate;
  end;
@@ -12156,14 +12168,14 @@ end;
 
 procedure tcustomstringgrid.focusedcellchanged;
 begin
- setupeditor(ffocusedcell);
+ setupeditor(ffocusedcell,false);
 end;
 
 procedure tcustomstringgrid.checkrowreadonlystate;
 begin
  inherited;
  if isdatacell(ffocusedcell) then begin
-  setupeditor(ffocusedcell);
+  setupeditor(ffocusedcell,false);
  end;
 end;
 
@@ -12173,7 +12185,7 @@ begin
  with info do begin
   case eventkind of
    cek_enter: begin
-    setupeditor(newcell);
+    setupeditor(newcell,true);
    end;
    cek_exit: begin
     feditor.dodefocus;
