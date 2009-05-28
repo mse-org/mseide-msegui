@@ -2663,8 +2663,9 @@ begin
   'isc_service_attach',           //143
   'isc_service_detach',           //144
   'isc_service_query',            //145
-  'isc_service_start',            //146
-{$IFDEF Unix}           
+  'isc_service_start'             //146
+{$IFDEF Unix}
+  ,           
   'isc_compile_map',              //147
   'isc_compile_menu',             //148
   'isc_compile_sub_map',          //149
@@ -2835,8 +2836,9 @@ begin
   @isc_service_attach,            //143
   @isc_service_detach,            //144
   @isc_service_query,             //145
-  @isc_service_start,             //146
+  @isc_service_start              //146
 {$IFDEF Unix}
+  ,
   @isc_compile_map,               //147
   @isc_compile_menu,              //148
   @isc_compile_sub_map,           //149
