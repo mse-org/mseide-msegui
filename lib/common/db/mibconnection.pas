@@ -15,10 +15,15 @@ unit mibconnection;
 {$ifdef VER2_1_5} {$define mse_FPC_2_2} {$endif}
 {$ifdef VER2_2} {$define mse_FPC_2_2} {$endif}
 
-{$mode objfpc}{$H+}
+{$mode objfpc}{$H+}{$macro on}
 
 {$Define LinkDynamically}
 {$R-}
+{$IFDEF Unix}
+  {$DEFINE extdecl:=cdecl}
+{$else}
+  {$DEFINE extdecl:=stdcall}
+{$endif}
 interface
 
 uses
@@ -1697,7 +1702,7 @@ begin
  abuffer:= nil;
 end;
 
-procedure versioncallback(user_arg: pointer; atext: pchar); cdecl;
+procedure versioncallback(user_arg: pointer; atext: pchar); extdecl;
 begin
  setlength(stringarty(user_arg^),high(stringarty(user_arg^))+2);
  stringarty(user_arg^)[high(stringarty(user_arg^))]:= atext;
