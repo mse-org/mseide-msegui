@@ -349,8 +349,8 @@ type
      isc_svc_handle = pointer;
      isc_tr_handle = pointer;
      isc_win_handle = pointer;
-     isc_callback = procedure; cdecl;
-     isc_versioncallback = procedure(user_arg: pointer; atext: pchar); cdecl;
+     isc_callback = procedure; extdecl;
+     isc_versioncallback = procedure(user_arg: pointer; atext: pchar); extdecl;
      isc_resv_handle = ISC_LONG;
      tisc_att_handle = isc_att_handle;
      tisc_blob_handle = isc_blob_handle;
@@ -1756,7 +1756,7 @@ type
   procedure isc_encode_timestamp(_para1:pointer; _para2:PISC_TIMESTAMP); extdecl; external gdslib;
 
   function isc_event_block(_para1:PPchar; _para2:PPchar; _para3:word;
-                      args: array of const):ISC_LONG; cdecl; external gdslib;
+                      args: array of const):ISC_LONG; extdecl; external gdslib;
   procedure isc_event_count(_para1: PISC_STATUS; _para2: short;
                      _para3: pchar; _para4: pchar); extdecl;  external gdslib;
   {!!MVC
@@ -1765,7 +1765,7 @@ type
                                          char   ,
                                          char   ); extdecl; external gdslib;
   !!MVC }
-  procedure isc_expand_dpb(_para1:PPchar; _para2:Psmallint; args:array of const); cdecl; external gdslib;
+  procedure isc_expand_dpb(_para1:PPchar; _para2:Psmallint; args:array of const); extdecl; external gdslib;
 
   function isc_modify_dpb(_para1:PPchar; _para2:Psmallint; _para3:word; _para4:Pchar; _para5:smallint):longint; extdecl; external gdslib;
 
@@ -1804,7 +1804,7 @@ type
 
   function isc_start_multiple(_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:smallint; _para4:pointer):ISC_STATUS; extdecl; external gdslib;
 
-  function isc_start_transaction(_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:smallint; args:array of const):ISC_STATUS; cdecl; external gdslib;
+  function isc_start_transaction(_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:smallint; args:array of const):ISC_STATUS; extdecl; external gdslib;
 
   function isc_sqlcode(_para1:PISC_STATUS):ISC_LONG; extdecl; external gdslib;
 
@@ -2138,11 +2138,11 @@ type
 
   procedure isc_encode_timestamp; extdecl; external gdslib;
 
-  function isc_event_block:ISC_LONG; cdecl; external gdslib;
+  function isc_event_block:ISC_LONG; extdecl; external gdslib;
 
   procedure isc_event_counts; extdecl; external gdslib;
 
-  procedure isc_expand_dpb; cdecl; external gdslib;
+  procedure isc_expand_dpb; extdecl; external gdslib;
 
   function isc_modify_dpb:longint; extdecl; external gdslib;
 
@@ -2206,7 +2206,7 @@ type
 
   function isc_start_request:ISC_STATUS; extdecl; external gdslib;
 
-  function isc_start_transaction:ISC_STATUS; cdecl; external gdslib;
+  function isc_start_transaction:ISC_STATUS; extdecl; external gdslib;
 
   function isc_sqlcode:ISC_LONG; extdecl; external gdslib;
 
@@ -2300,7 +2300,7 @@ var
   isc_encode_sql_time : procedure (_para1:pointer; _para2:PISC_TIME); extdecl;
   isc_encode_timestamp : procedure (_para1:pointer; _para2:PISC_TIMESTAMP); extdecl;
   isc_event_block : function (_para1:PPchar; _para2:PPchar; _para3:word;
-                            args: array of const):ISC_LONG; cdecl; {varargs;}
+                            args: array of const):ISC_LONG; extdecl; {varargs;}
   isc_event_counts: procedure (_para1: PISC_STATUS; _para2: short;
                      _para3: pchar; _para4: pchar); extdecl;
 {!!MVC
@@ -2309,7 +2309,7 @@ var
   char   ,
   char   ); extdecl; external gdslib;
 !!MVC }
-  isc_expand_dpb : procedure (_para1:PPchar; _para2:Psmallint; args:array of const); cdecl;
+  isc_expand_dpb : procedure (_para1:PPchar; _para2:Psmallint; args:array of const); extdecl;
   isc_modify_dpb : function (_para1:PPchar; _para2:Psmallint; _para3:word; _para4:Pchar; _para5:smallint):longint; extdecl;
   isc_free : function (_para1:Pchar):ISC_LONG; extdecl;
   isc_get_segment : function (_para1:PISC_STATUS; _para2:Pisc_blob_handle; _para3:Pword; _para4:word; _para5:Pchar):ISC_STATUS; extdecl;
@@ -2326,7 +2326,7 @@ var
   isc_rollback_retaining : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle):ISC_STATUS; extdecl;
   isc_rollback_transaction : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle):ISC_STATUS; extdecl;
   isc_start_multiple : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:smallint; _para4:pointer):ISC_STATUS; extdecl;
-  isc_start_transaction : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:smallint; args:array of const):ISC_STATUS; cdecl;
+  isc_start_transaction : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:smallint; args:array of const):ISC_STATUS; extdecl;
   isc_sqlcode : function (_para1:PISC_STATUS):ISC_LONG; extdecl;
   isc_sql_interprete : procedure (_para1:smallint; _para2:Pchar; _para3:smallint); extdecl;
   isc_transaction_info : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:smallint; _para4:Pchar; _para5:smallint;_para6:Pchar):ISC_STATUS; extdecl;
