@@ -7,7 +7,8 @@
 interface
 
 {$IFDEF LinkDynamically}
-uses Dynlibs, sysutils;
+uses 
+ Dynlibs, sysutils, msestrings;
 
 Var
   UseEmbeddedFirebird : Boolean = False;
@@ -2472,9 +2473,14 @@ var IBaseLibraryHandle : TLibHandle;
 
 {$ENDIF}
 
+{$IFDEF LinkDynamically}
+var
+ libname: filenamety;
+{$endif}
+
 implementation
 uses
- msestrings,msesys,msesonames;
+ msesys,msesonames;
  
 {$IFDEF LinkDynamically}
 
@@ -2506,179 +2512,351 @@ begin
 //  inc(RefCount);
   refcount:= 2; //releasing the library is unsafe!
   LoadedLibrary:= mstr1;
-  pointer(isc_attach_database) := GetProcedureAddress(IBaseLibraryHandle,'isc_attach_database');
-  pointer(isc_array_gen_sdl) := GetProcedureAddress(IBaseLibraryHandle,'isc_array_gen_sdl');
-  pointer(isc_array_get_slice) := GetProcedureAddress(IBaseLibraryHandle,'isc_array_get_slice');
-  pointer(isc_array_lookup_bounds) := GetProcedureAddress(IBaseLibraryHandle,'isc_array_lookup_bounds');
-  pointer(isc_array_lookup_desc) := GetProcedureAddress(IBaseLibraryHandle,'isc_array_lookup_desc');
-  pointer(isc_array_set_desc) := GetProcedureAddress(IBaseLibraryHandle,'isc_array_set_desc');
-  pointer(isc_array_put_slice) := GetProcedureAddress(IBaseLibraryHandle,'isc_array_put_slice');
-  pointer(isc_blob_default_desc) := GetProcedureAddress(IBaseLibraryHandle,'isc_blob_default_desc');
-  pointer(isc_blob_gen_bpb) := GetProcedureAddress(IBaseLibraryHandle,'isc_blob_gen_bpb');
-  pointer(isc_blob_info) := GetProcedureAddress(IBaseLibraryHandle,'isc_blob_info');
-  pointer(isc_blob_lookup_desc) := GetProcedureAddress(IBaseLibraryHandle,'isc_blob_lookup_desc');
-  pointer(isc_blob_set_desc) := GetProcedureAddress(IBaseLibraryHandle,'isc_blob_set_desc');
-  pointer(isc_cancel_blob) := GetProcedureAddress(IBaseLibraryHandle,'isc_cancel_blob');
-  pointer(isc_cancel_events) := GetProcedureAddress(IBaseLibraryHandle,'isc_cancel_events');
-  pointer(isc_close_blob) := GetProcedureAddress(IBaseLibraryHandle,'isc_close_blob');
-  pointer(isc_commit_retaining) := GetProcedureAddress(IBaseLibraryHandle,'isc_commit_retaining');
-  pointer(isc_commit_transaction) := GetProcedureAddress(IBaseLibraryHandle,'isc_commit_transaction');
-  pointer(isc_create_blob) := GetProcedureAddress(IBaseLibraryHandle,'isc_create_blob');
-  pointer(isc_create_blob2) := GetProcedureAddress(IBaseLibraryHandle,'isc_create_blob2');
-  pointer(isc_create_database) := GetProcedureAddress(IBaseLibraryHandle,'isc_create_database');
-  pointer(isc_database_info) := GetProcedureAddress(IBaseLibraryHandle,'isc_database_info');
-  pointer(isc_decode_date) := GetProcedureAddress(IBaseLibraryHandle,'isc_decode_date');
-  pointer(isc_decode_sql_date) := GetProcedureAddress(IBaseLibraryHandle,'isc_decode_sql_date');
-  pointer(isc_decode_sql_time) := GetProcedureAddress(IBaseLibraryHandle,'isc_decode_sql_time');
-  pointer(isc_decode_timestamp) := GetProcedureAddress(IBaseLibraryHandle,'isc_decode_timestamp');
-  pointer(isc_detach_database) := GetProcedureAddress(IBaseLibraryHandle,'isc_detach_database');
-  pointer(isc_drop_database) := GetProcedureAddress(IBaseLibraryHandle,'isc_drop_database');
-  pointer(isc_dsql_allocate_statement) := GetProcedureAddress(IBaseLibraryHandle,'isc_dsql_allocate_statement');
-  pointer(isc_dsql_alloc_statement2) := GetProcedureAddress(IBaseLibraryHandle,'isc_dsql_alloc_statement2');
-  pointer(isc_dsql_describe) := GetProcedureAddress(IBaseLibraryHandle,'isc_dsql_describe');
-  pointer(isc_dsql_describe_bind) := GetProcedureAddress(IBaseLibraryHandle,'isc_dsql_describe_bind');
-  pointer(isc_dsql_exec_immed2) := GetProcedureAddress(IBaseLibraryHandle,'isc_dsql_exec_immed2');
-  pointer(isc_dsql_execute) := GetProcedureAddress(IBaseLibraryHandle,'isc_dsql_execute');
-  pointer(isc_dsql_execute2) := GetProcedureAddress(IBaseLibraryHandle,'isc_dsql_execute2');
-  pointer(isc_dsql_execute_immediate) := GetProcedureAddress(IBaseLibraryHandle,'isc_dsql_execute_immediate');
-  pointer(isc_dsql_fetch) := GetProcedureAddress(IBaseLibraryHandle,'isc_dsql_fetch');
-  pointer(isc_dsql_finish) := GetProcedureAddress(IBaseLibraryHandle,'isc_dsql_finish');
-  pointer(isc_dsql_free_statement) := GetProcedureAddress(IBaseLibraryHandle,'isc_dsql_free_statement');
-  pointer(isc_dsql_insert) := GetProcedureAddress(IBaseLibraryHandle,'isc_dsql_insert');
-  pointer(isc_dsql_prepare) := GetProcedureAddress(IBaseLibraryHandle,'isc_dsql_prepare');
-  pointer(isc_dsql_set_cursor_name) := GetProcedureAddress(IBaseLibraryHandle,'isc_dsql_set_cursor_name');
-  pointer(isc_dsql_sql_info) := GetProcedureAddress(IBaseLibraryHandle,'isc_dsql_sql_info');
-  pointer(isc_encode_date) := GetProcedureAddress(IBaseLibraryHandle,'isc_encode_date');
-  pointer(isc_encode_sql_date) := GetProcedureAddress(IBaseLibraryHandle,'isc_encode_sql_date');
-  pointer(isc_encode_sql_time) := GetProcedureAddress(IBaseLibraryHandle,'isc_encode_sql_time');
-  pointer(isc_encode_timestamp) := GetProcedureAddress(IBaseLibraryHandle,'isc_encode_timestamp');
-  pointer(isc_event_block) := GetProcedureAddress(IBaseLibraryHandle,'isc_event_block');
-  pointer(isc_event_counts) := GetProcedureAddress(IBaseLibraryHandle,'isc_event_counts');
-  pointer(isc_expand_dpb) := GetProcedureAddress(IBaseLibraryHandle,'isc_expand_dpb');
-  pointer(isc_modify_dpb) := GetProcedureAddress(IBaseLibraryHandle,'isc_modify_dpb');
-  pointer(isc_free) := GetProcedureAddress(IBaseLibraryHandle,'isc_free');
-  pointer(isc_get_segment) := GetProcedureAddress(IBaseLibraryHandle,'isc_get_segment');
-  pointer(isc_get_slice) := GetProcedureAddress(IBaseLibraryHandle,'isc_get_slice');
-  pointer(isc_interprete) := GetProcedureAddress(IBaseLibraryHandle,'isc_interprete');
-  pointer(isc_open_blob) := GetProcedureAddress(IBaseLibraryHandle,'isc_open_blob');
-  pointer(isc_open_blob2) := GetProcedureAddress(IBaseLibraryHandle,'isc_open_blob2');
-  pointer(isc_prepare_transaction2) := GetProcedureAddress(IBaseLibraryHandle,'isc_prepare_transaction2');
-  pointer(isc_print_sqlerror) := GetProcedureAddress(IBaseLibraryHandle,'isc_print_sqlerror');
-  pointer(isc_print_status) := GetProcedureAddress(IBaseLibraryHandle,'isc_print_status');
-  pointer(isc_put_segment) := GetProcedureAddress(IBaseLibraryHandle,'isc_put_segment');
-  pointer(isc_put_slice) := GetProcedureAddress(IBaseLibraryHandle,'isc_put_slice');
-  pointer(isc_que_events) := GetProcedureAddress(IBaseLibraryHandle,'isc_que_events');
-  pointer(isc_rollback_retaining) := GetProcedureAddress(IBaseLibraryHandle,'isc_rollback_retaining');
-  pointer(isc_rollback_transaction) := GetProcedureAddress(IBaseLibraryHandle,'isc_rollback_transaction');
-  pointer(isc_start_multiple) := GetProcedureAddress(IBaseLibraryHandle,'isc_start_multiple');
-  pointer(isc_start_transaction) := GetProcedureAddress(IBaseLibraryHandle,'isc_start_transaction');
-  pointer(isc_sqlcode) := GetProcedureAddress(IBaseLibraryHandle,'isc_sqlcode');
-  pointer(isc_sql_interprete) := GetProcedureAddress(IBaseLibraryHandle,'isc_sql_interprete');
-  pointer(isc_transaction_info) := GetProcedureAddress(IBaseLibraryHandle,'isc_transaction_info');
-  pointer(isc_transact_request) := GetProcedureAddress(IBaseLibraryHandle,'isc_transact_request');
-  pointer(isc_vax_integer) := GetProcedureAddress(IBaseLibraryHandle,'isc_vax_integer');
-  pointer(isc_portable_integer) := GetProcedureAddress(IBaseLibraryHandle,'isc_portable_integer');
-  pointer(isc_add_user) := GetProcedureAddress(IBaseLibraryHandle,'isc_add_user');
-  pointer(isc_delete_user) := GetProcedureAddress(IBaseLibraryHandle,'isc_delete_user');
-  pointer(isc_modify_user) := GetProcedureAddress(IBaseLibraryHandle,'isc_modify_user');
-  pointer(isc_compile_request) := GetProcedureAddress(IBaseLibraryHandle,'isc_compile_request');
-  pointer(isc_compile_request2) := GetProcedureAddress(IBaseLibraryHandle,'isc_compile_request2');
-  pointer(isc_ddl) := GetProcedureAddress(IBaseLibraryHandle,'isc_ddl');
-  pointer(isc_prepare_transaction) := GetProcedureAddress(IBaseLibraryHandle,'isc_prepare_transaction');
-  pointer(isc_receive) := GetProcedureAddress(IBaseLibraryHandle,'isc_receive');
-  pointer(isc_reconnect_transaction) := GetProcedureAddress(IBaseLibraryHandle,'isc_reconnect_transaction');
-  pointer(isc_release_request) := GetProcedureAddress(IBaseLibraryHandle,'isc_release_request');
-  pointer(isc_request_info) := GetProcedureAddress(IBaseLibraryHandle,'isc_request_info');
-  pointer(isc_seek_blob) := GetProcedureAddress(IBaseLibraryHandle,'isc_seek_blob');
-  pointer(isc_send) := GetProcedureAddress(IBaseLibraryHandle,'isc_send');
-  pointer(isc_start_and_send) := GetProcedureAddress(IBaseLibraryHandle,'isc_start_and_send');
-  pointer(isc_start_request) := GetProcedureAddress(IBaseLibraryHandle,'isc_start_request');
-  pointer(isc_unwind_request) := GetProcedureAddress(IBaseLibraryHandle,'isc_unwind_request');
-  pointer(isc_wait_for_event) := GetProcedureAddress(IBaseLibraryHandle,'isc_wait_for_event');
-  pointer(isc_close) := GetProcedureAddress(IBaseLibraryHandle,'isc_close');
-  pointer(isc_declare) := GetProcedureAddress(IBaseLibraryHandle,'isc_declare');
-  pointer(isc_describe) := GetProcedureAddress(IBaseLibraryHandle,'isc_describe');
-  pointer(isc_describe_bind) := GetProcedureAddress(IBaseLibraryHandle,'isc_describe_bind');
-  pointer(isc_execute) := GetProcedureAddress(IBaseLibraryHandle,'isc_execute');
-  pointer(isc_execute_immediate) := GetProcedureAddress(IBaseLibraryHandle,'isc_execute_immediate');
-  pointer(isc_fetch) := GetProcedureAddress(IBaseLibraryHandle,'isc_fetch');
-  pointer(isc_open) := GetProcedureAddress(IBaseLibraryHandle,'isc_open');
-  pointer(isc_prepare) := GetProcedureAddress(IBaseLibraryHandle,'isc_prepare');
-  pointer(isc_dsql_execute_m) := GetProcedureAddress(IBaseLibraryHandle,'isc_dsql_execute_m');
-  pointer(isc_dsql_execute2_m) := GetProcedureAddress(IBaseLibraryHandle,'isc_dsql_execute2_m');
-  pointer(isc_dsql_execute_immediate_m) := GetProcedureAddress(IBaseLibraryHandle,'isc_dsql_execute_immediate_m');
-  pointer(isc_dsql_exec_immed3_m) := GetProcedureAddress(IBaseLibraryHandle,'isc_dsql_exec_immed3_m');
-  pointer(isc_dsql_fetch_m) := GetProcedureAddress(IBaseLibraryHandle,'isc_dsql_fetch_m');
-  pointer(isc_dsql_insert_m) := GetProcedureAddress(IBaseLibraryHandle,'isc_dsql_insert_m');
-  pointer(isc_dsql_prepare_m) := GetProcedureAddress(IBaseLibraryHandle,'isc_dsql_prepare_m');
-  pointer(isc_dsql_release) := GetProcedureAddress(IBaseLibraryHandle,'isc_dsql_release');
-  pointer(isc_embed_dsql_close) := GetProcedureAddress(IBaseLibraryHandle,'isc_embed_dsql_close');
-  pointer(isc_embed_dsql_declare) := GetProcedureAddress(IBaseLibraryHandle,'isc_embed_dsql_declare');
-  pointer(isc_embed_dsql_describe) := GetProcedureAddress(IBaseLibraryHandle,'isc_embed_dsql_describe');
-  pointer(isc_embed_dsql_describe_bind) := GetProcedureAddress(IBaseLibraryHandle,'isc_embed_dsql_describe_bind');
-  pointer(isc_embed_dsql_execute) := GetProcedureAddress(IBaseLibraryHandle,'isc_embed_dsql_execute');
-  pointer(isc_embed_dsql_execute2) := GetProcedureAddress(IBaseLibraryHandle,'isc_embed_dsql_execute2');
-  pointer(isc_embed_dsql_execute_immed) := GetProcedureAddress(IBaseLibraryHandle,'isc_embed_dsql_execute_immed');
-  pointer(isc_embed_dsql_fetch) := GetProcedureAddress(IBaseLibraryHandle,'isc_embed_dsql_fetch');
-  pointer(isc_embed_dsql_open) := GetProcedureAddress(IBaseLibraryHandle,'isc_embed_dsql_open');
-  pointer(isc_embed_dsql_open2) := GetProcedureAddress(IBaseLibraryHandle,'isc_embed_dsql_open2');
-  pointer(isc_embed_dsql_insert) := GetProcedureAddress(IBaseLibraryHandle,'isc_embed_dsql_insert');
-  pointer(isc_embed_dsql_prepare) := GetProcedureAddress(IBaseLibraryHandle,'isc_embed_dsql_prepare');
-  pointer(isc_embed_dsql_release) := GetProcedureAddress(IBaseLibraryHandle,'isc_embed_dsql_release');
-  pointer(BLOB_open) := GetProcedureAddress(IBaseLibraryHandle,'BLOB_open');
-  pointer(BLOB_put) := GetProcedureAddress(IBaseLibraryHandle,'BLOB_put');
-  pointer(BLOB_close) := GetProcedureAddress(IBaseLibraryHandle,'BLOB_close');
-  pointer(BLOB_get) := GetProcedureAddress(IBaseLibraryHandle,'BLOB_get');
-  pointer(BLOB_display) := GetProcedureAddress(IBaseLibraryHandle,'BLOB_display');
-  pointer(BLOB_dump) := GetProcedureAddress(IBaseLibraryHandle,'BLOB_dump');
-  pointer(BLOB_edit) := GetProcedureAddress(IBaseLibraryHandle,'BLOB_edit');
-  pointer(BLOB_load) := GetProcedureAddress(IBaseLibraryHandle,'BLOB_load');
-  pointer(BLOB_text_dump) := GetProcedureAddress(IBaseLibraryHandle,'BLOB_text_dump');
-  pointer(BLOB_text_load) := GetProcedureAddress(IBaseLibraryHandle,'BLOB_text_load');
-  pointer(Bopen) := GetProcedureAddress(IBaseLibraryHandle,'Bopen');
+  getprocaddresses(ibaselibraryhandle,
+   [
+  'isc_attach_database',          //1
+  'isc_array_gen_sdl',            //2
+  'isc_array_get_slice',          //3
+  'isc_array_lookup_bounds',      //4
+  'isc_array_lookup_desc',        //5 
+  'isc_array_set_desc',           //6
+  'isc_array_put_slice',          //7
+  'isc_blob_default_desc',        //8
+  'isc_blob_gen_bpb',             //9
+  'isc_blob_info',                //10
+  'isc_blob_lookup_desc',         //11
+  'isc_blob_set_desc',            //12
+  'isc_cancel_blob',              //13
+  'isc_cancel_events',            //14
+  'isc_close_blob',               //15
+  'isc_commit_retaining',         //16
+  'isc_commit_transaction',       //17
+  'isc_create_blob',              //18
+  'isc_create_blob2',             //19
+  'isc_create_database',          //20
+  'isc_database_info',            //21
+  'isc_decode_date',              //22
+  'isc_decode_sql_date',          //23
+  'isc_decode_sql_time',          //24
+  'isc_decode_timestamp',         //25
+  'isc_detach_database',          //26
+  'isc_drop_database',            //27
+  'isc_dsql_allocate_statement',  //28    
+  'isc_dsql_alloc_statement2',    //29
+  'isc_dsql_describe',            //30
+  'isc_dsql_describe_bind',       //31
+  'isc_dsql_exec_immed2',         //32
+  'isc_dsql_execute',             //33
+  'isc_dsql_execute2',            //34
+  'isc_dsql_execute_immediate',   //35
+  'isc_dsql_fetch',               //36
+  'isc_dsql_finish',              //37
+  'isc_dsql_free_statement',      //38  
+  'isc_dsql_insert',              //39
+  'isc_dsql_prepare',             //40
+  'isc_dsql_set_cursor_name',     //41
+  'isc_dsql_sql_info',            //42
+  'isc_encode_date',              //43
+  'isc_encode_sql_date',          //44
+  'isc_encode_sql_time',          //45
+  'isc_encode_timestamp',         //46
+  'isc_event_block',              //47
+  'isc_event_counts',             //48
+  'isc_expand_dpb',               //49
+  'isc_modify_dpb',               //50
+  'isc_free',                     //51
+  'isc_get_segment',              //52
+  'isc_get_slice',                //53
+  'isc_interprete',               //54
+  'isc_open_blob',                //55
+  'isc_open_blob2',               //56
+  'isc_prepare_transaction2',     //57
+  'isc_print_sqlerror',           //58
+  'isc_print_status',             //69
+  'isc_put_segment',              //60
+  'isc_put_slice',                //61
+  'isc_que_events',               //62
+  'isc_rollback_retaining',       //63
+  'isc_rollback_transaction',     //64
+  'isc_start_multiple',           //65
+  'isc_start_transaction',        //66
+  'isc_sqlcode',                  //67
+  'isc_sql_interprete',           //68
+  'isc_transaction_info',         //69
+  'isc_transact_request',         //70
+  'isc_vax_integer',              //71
+  'isc_portable_integer',         //72
+  'isc_add_user',                 //73
+  'isc_delete_user',              //74
+  'isc_modify_user',              //75
+  'isc_compile_request',          //76
+  'isc_compile_request2',         //77
+  'isc_ddl',                      //78
+  'isc_prepare_transaction',      //79
+  'isc_receive',                  //80
+  'isc_reconnect_transaction',    //81
+  'isc_release_request',          //82
+  'isc_request_info',             //83
+  'isc_seek_blob',                //84
+  'isc_send',                     //85
+  'isc_start_and_send',           //86
+  'isc_start_request',            //87
+  'isc_unwind_request',           //88
+  'isc_wait_for_event',           //89
+  'isc_close',                    //90
+  'isc_declare',                  //91
+  'isc_describe',                 //92
+  'isc_describe_bind',            //93 
+  'isc_execute',                  //94
+  'isc_execute_immediate',        //95
+  'isc_fetch',                    //96
+  'isc_open',                     //97
+  'isc_prepare',                  //98
+  'isc_dsql_execute_m',           //99
+  'isc_dsql_execute2_m',          //100
+  'isc_dsql_execute_immediate_m', //101  
+  'isc_dsql_exec_immed3_m',       //102
+  'isc_dsql_fetch_m',             //103
+  'isc_dsql_insert_m',            //104
+  'isc_dsql_prepare_m',           //105
+  'isc_dsql_release',             //106 
+  'isc_embed_dsql_close',         //107
+  'isc_embed_dsql_declare',       //108
+  'isc_embed_dsql_describe',      //109
+  'isc_embed_dsql_describe_bind', //110
+  'isc_embed_dsql_execute',       //111
+  'isc_embed_dsql_execute2',      //112
+  'isc_embed_dsql_execute_immed', //113
+  'isc_embed_dsql_fetch',         //114
+  'isc_embed_dsql_open',          //115
+  'isc_embed_dsql_open2',         //116
+  'isc_embed_dsql_insert',        //117
+  'isc_embed_dsql_prepare',       //118
+  'isc_embed_dsql_release',       //119
+  'BLOB_open',                    //120
+  'BLOB_put',                     //121
+  'BLOB_close',                   //122
+  'BLOB_get',                     //123
+  'BLOB_display',                 //124
+  'BLOB_dump',                    //125
+  'BLOB_edit',                    //126
+  'BLOB_load',                    //127
+  'BLOB_text_dump',               //128
+  'BLOB_text_load',               //129
+  'Bopen',                        //130
+{$IFDEF Unix}              
+  'Bopen2',                       //131
+{$ENDIF}                       
+  'isc_ftof',                     //132
+  'isc_print_blr',                //133
+  'isc_set_debug',                //134
+  'isc_qtoq',                     //135
+  'isc_vtof',                     //136
+  'isc_vtov',                     //137
+  'isc_version',                  //138
+  'isc_get_client_version',       //139
+  'isc_get_client_major_version', //140
+  'isc_get_client_minor_version', //141
 {$IFDEF Unix}
-  pointer(Bopen2) := GetProcedureAddress(IBaseLibraryHandle,'Bopen2');
+  'isc_reset_fpe',                //142
 {$ENDIF}
-  pointer(isc_ftof) := GetProcedureAddress(IBaseLibraryHandle,'isc_ftof');
-  pointer(isc_print_blr) := GetProcedureAddress(IBaseLibraryHandle,'isc_print_blr');
-  pointer(isc_set_debug) := GetProcedureAddress(IBaseLibraryHandle,'isc_set_debug');
-  pointer(isc_qtoq) := GetProcedureAddress(IBaseLibraryHandle,'isc_qtoq');
-  pointer(isc_vtof) := GetProcedureAddress(IBaseLibraryHandle,'isc_vtof');
-  pointer(isc_vtov) := GetProcedureAddress(IBaseLibraryHandle,'isc_vtov');
-  pointer(isc_version) := GetProcedureAddress(IBaseLibraryHandle,'isc_version');
-  pointer(isc_get_client_version):= GetProcedureAddress(IBaseLibraryHandle,
-              'isc_get_client_version');
-  pointer(isc_get_client_major_version):= GetProcedureAddress(IBaseLibraryHandle,
-              'isc_get_client_major_version');
-  pointer(isc_get_client_minor_version):= GetProcedureAddress(IBaseLibraryHandle,
-              'isc_get_client_minor_version');
+  'isc_service_attach',           //143
+  'isc_service_detach',           //144
+  'isc_service_query',            //145
+  'isc_service_start',            //146
+{$IFDEF Unix}           
+  'isc_compile_map',              //147
+  'isc_compile_menu',             //148
+  'isc_compile_sub_map',          //149
+  'isc_create_window',            //150
+  'isc_delete_window',            //151
+  'isc_drive_form',               //152
+  'isc_drive_menu',               //153
+  'isc_form_delete',              //154
+  'isc_form_fetch',               //155
+  'isc_form_insert',              //156
+  'isc_get_entree',               //157
+  'isc_initialize_menu',          //158
+  'isc_menu',                     //159
+  'isc_load_form',                //160
+  'isc_pop_window',               //161
+  'isc_put_entree',               //162
+  'isc_reset_form',               //163
+  'isc_suspend_window'            //164
+{$ENDIF} 
+  ],
+  [
+  @isc_attach_database,           //1
+  @isc_array_gen_sdl,             //2
+  @isc_array_get_slice,           //3
+  @isc_array_lookup_bounds,       //4
+  @isc_array_lookup_desc,         //5
+  @isc_array_set_desc,            //6
+  @isc_array_put_slice,           //7
+  @isc_blob_default_desc,         //8
+  @isc_blob_gen_bpb,              //9
+  @isc_blob_info,                 //10
+  @isc_blob_lookup_desc,          //11
+  @isc_blob_set_desc,             //12
+  @isc_cancel_blob,               //13
+  @isc_cancel_events,             //14
+  @isc_close_blob,                //15
+  @isc_commit_retaining,          //16
+  @isc_commit_transaction,        //17
+  @isc_create_blob,               //18
+  @isc_create_blob2,              //19
+  @isc_create_database,           //20
+  @isc_database_info,             //21
+  @isc_decode_date,               //22
+  @isc_decode_sql_date,           //23
+  @isc_decode_sql_time,           //24
+  @isc_decode_timestamp,          //25
+  @isc_detach_database,           //26
+  @isc_drop_database,             //27
+  @isc_dsql_allocate_statement,   //28
+  @isc_dsql_alloc_statement2,     //29
+  @isc_dsql_describe,             //30
+  @isc_dsql_describe_bind,        //31
+  @isc_dsql_exec_immed2,          //32
+  @isc_dsql_execute,              //33
+  @isc_dsql_execute2,             //34
+  @isc_dsql_execute_immediate,    //35
+  @isc_dsql_fetch,                //36
+  @isc_dsql_finish,               //37
+  @isc_dsql_free_statement,       //38
+  @isc_dsql_insert,               //39
+  @isc_dsql_prepare,              //40
+  @isc_dsql_set_cursor_name,      //41
+  @isc_dsql_sql_info,             //42
+  @isc_encode_date,               //43
+  @isc_encode_sql_date,           //44
+  @isc_encode_sql_time,           //45
+  @isc_encode_timestamp,          //46
+  @isc_event_block,               //47
+  @isc_event_counts,              //48
+  @isc_expand_dpb,                //49
+  @isc_modify_dpb,                //50
+  @isc_free,                      //51
+  @isc_get_segment,               //52
+  @isc_get_slice,                 //53
+  @isc_interprete,                //54
+  @isc_open_blob,                 //55
+  @isc_open_blob2,                //56
+  @isc_prepare_transaction2,      //57
+  @isc_print_sqlerror,            //58
+  @isc_print_status,              //59
+  @isc_put_segment,               //60
+  @isc_put_slice,                 //61
+  @isc_que_events,                //62
+  @isc_rollback_retaining,        //63
+  @isc_rollback_transaction,      //64
+  @isc_start_multiple,            //65
+  @isc_start_transaction,         //66
+  @isc_sqlcode,                   //67
+  @isc_sql_interprete,            //68
+  @isc_transaction_info,          //69
+  @isc_transact_request,          //70
+  @isc_vax_integer,               //71
+  @isc_portable_integer,          //72
+  @isc_add_user,                  //73
+  @isc_delete_user,               //74
+  @isc_modify_user,               //75
+  @isc_compile_request,           //76
+  @isc_compile_request2,          //77
+  @isc_ddl,                       //78
+  @isc_prepare_transaction,       //79
+  @isc_receive,                   //80
+  @isc_reconnect_transaction,     //81
+  @isc_release_request,           //82
+  @isc_request_info,              //83
+  @isc_seek_blob,                 //84
+  @isc_send,                      //85
+  @isc_start_and_send,            //86
+  @isc_start_request,             //87
+  @isc_unwind_request,            //88
+  @isc_wait_for_event,            //89
+  @isc_close,                     //90
+  @isc_declare,                   //91
+  @isc_describe,                  //92
+  @isc_describe_bind,             //93
+  @isc_execute,                   //94
+  @isc_execute_immediate,         //95
+  @isc_fetch,                     //96
+  @isc_open,                      //97
+  @isc_prepare,                   //98
+  @isc_dsql_execute_m,            //99
+  @isc_dsql_execute2_m,           //100
+  @isc_dsql_execute_immediate_m,  //101
+  @isc_dsql_exec_immed3_m,        //102
+  @isc_dsql_fetch_m,              //103
+  @isc_dsql_insert_m,             //104
+  @isc_dsql_prepare_m,            //105
+  @isc_dsql_release,              //106
+  @isc_embed_dsql_close,          //107
+  @isc_embed_dsql_declare,        //108
+  @isc_embed_dsql_describe,       //109
+  @isc_embed_dsql_describe_bind,  //110
+  @isc_embed_dsql_execute,        //111
+  @isc_embed_dsql_execute2,       //112
+  @isc_embed_dsql_execute_immed,  //113
+  @isc_embed_dsql_fetch,          //114
+  @isc_embed_dsql_open,           //115
+  @isc_embed_dsql_open2,          //116
+  @isc_embed_dsql_insert,         //117
+  @isc_embed_dsql_prepare,        //118
+  @isc_embed_dsql_release,        //119
+  @BLOB_open,                     //120
+  @BLOB_put,                      //121
+  @BLOB_close,                    //122
+  @BLOB_get,                      //123
+  @BLOB_display,                  //124
+  @BLOB_dump,                     //125
+  @BLOB_edit,                     //126
+  @BLOB_load,                     //127
+  @BLOB_text_dump,                //128
+  @BLOB_text_load,                //129
+  @Bopen,                         //130
+{$IFDEF Unix}            
+  @Bopen2,                        //131
+{$ENDIF}
+  @isc_ftof,                      //132
+  @isc_print_blr,                 //133
+  @isc_set_debug,                 //134
+  @isc_qtoq,                      //135
+  @isc_vtof,                      //136
+  @isc_vtov,                      //137
+  @isc_version,                   //138
+  @isc_get_client_version,        //139
+  @isc_get_client_major_version,  //140
+  @isc_get_client_minor_version,  //141
+{$IFDEF Unix}  
+  @isc_reset_fpe,                 //142
+{$ENDIF}
+  @isc_service_attach,            //143
+  @isc_service_detach,            //144
+  @isc_service_query,             //145
+  @isc_service_start,             //146
 {$IFDEF Unix}
-  pointer(isc_reset_fpe) := GetProcedureAddress(IBaseLibraryHandle,'isc_reset_fpe');
-{$ENDIF}
-  pointer(isc_service_attach) := GetProcedureAddress(IBaseLibraryHandle,'isc_service_attach');
-  pointer(isc_service_detach) := GetProcedureAddress(IBaseLibraryHandle,'isc_service_detach');
-  pointer(isc_service_query) := GetProcedureAddress(IBaseLibraryHandle,'isc_service_query');
-  pointer(isc_service_start) := GetProcedureAddress(IBaseLibraryHandle,'isc_service_start');
-{$IFDEF Unix}
-  pointer(isc_compile_map) := GetProcedureAddress(IBaseLibraryHandle,'isc_compile_map');
-  pointer(isc_compile_menu) := GetProcedureAddress(IBaseLibraryHandle,'isc_compile_menu');
-  pointer(isc_compile_sub_map) := GetProcedureAddress(IBaseLibraryHandle,'isc_compile_sub_map');
-  pointer(isc_create_window) := GetProcedureAddress(IBaseLibraryHandle,'isc_create_window');
-  pointer(isc_delete_window) := GetProcedureAddress(IBaseLibraryHandle,'isc_delete_window');
-  pointer(isc_drive_form) := GetProcedureAddress(IBaseLibraryHandle,'isc_drive_form');
-  pointer(isc_drive_menu) := GetProcedureAddress(IBaseLibraryHandle,'isc_drive_menu');
-  pointer(isc_form_delete) := GetProcedureAddress(IBaseLibraryHandle,'isc_form_delete');
-  pointer(isc_form_fetch) := GetProcedureAddress(IBaseLibraryHandle,'isc_form_fetch');
-  pointer(isc_form_insert) := GetProcedureAddress(IBaseLibraryHandle,'isc_form_insert');
-  pointer(isc_get_entree) := GetProcedureAddress(IBaseLibraryHandle,'isc_get_entree');
-  pointer(isc_initialize_menu) := GetProcedureAddress(IBaseLibraryHandle,'isc_initialize_menu');
-  pointer(isc_menu) := GetProcedureAddress(IBaseLibraryHandle,'isc_menu');
-  pointer(isc_load_form) := GetProcedureAddress(IBaseLibraryHandle,'isc_load_form');
-  pointer(isc_pop_window) := GetProcedureAddress(IBaseLibraryHandle,'isc_pop_window');
-  pointer(isc_put_entree) := GetProcedureAddress(IBaseLibraryHandle,'isc_put_entree');
-  pointer(isc_reset_form) := GetProcedureAddress(IBaseLibraryHandle,'isc_reset_form');
-  pointer(isc_suspend_window) := GetProcedureAddress(IBaseLibraryHandle,'isc_suspend_window');
-{$ENDIF}
+  @isc_compile_map,               //147
+  @isc_compile_menu,              //148
+  @isc_compile_sub_map,           //149
+  @isc_create_window,             //150
+  @isc_delete_window,             //151
+  @isc_drive_form,                //152
+  @isc_drive_menu,                //153
+  @isc_form_delete,               //154
+  @isc_form_fetch,                //155
+  @isc_form_insert,               //156
+  @isc_get_entree,                //157
+  @isc_initialize_menu,           //158
+  @isc_menu,                      //159
+  @isc_load_form,                 //160
+  @isc_pop_window,                //161
+  @isc_put_entree,                //162
+  @isc_reset_form,                //163
+  @isc_suspend_window             //164
+{$ENDIF}          
+  ],true);  //accept missing entries
  end
  else begin
 //    If (LoadedLibrary<>LibraryName) then
@@ -2698,21 +2876,26 @@ end;
 
 Procedure InitialiseIBase60;
 begin
- If UseEmbeddedFirebird then begin
-  If Not TryInitialiseIBase60(fbembedlib) then begin
+ if libname <> '' then begin
+  If Not TryInitialiseIBase60(libname) then begin
    checkloaded;
-   Raise EInOutError.CreateFmt(SErrEmbeddedFailed,[quotelibnames(fbembedlib)]);
+   Raise EInOutError.CreateFmt(SErrLoadFailed,[libname]);
   end;
  end
  else begin
-  If (Not TryInitialiseIBase60(fbcgdslib)) 
-//         and
-//       (Not TryInitialiseIBase60(gdslib)) 
-                                            then begin
-   checkloaded;
-   Raise EInOutError.CreateFmt(SErrDefaultsFailed,[quotelibnames(fbcgdslib)]);
-  end;
- end;    
+  If UseEmbeddedFirebird then begin
+   If Not TryInitialiseIBase60(fbembedlib) then begin
+    checkloaded;
+    Raise EInOutError.CreateFmt(SErrEmbeddedFailed,[quotelibnames(fbembedlib)]);
+   end;
+  end
+  else begin
+   If (Not TryInitialiseIBase60(fbcgdslib)) then begin
+    checkloaded;
+    Raise EInOutError.CreateFmt(SErrDefaultsFailed,[quotelibnames(fbcgdslib)]);
+   end;
+  end;    
+ end;
 end;
 
 Procedure InitialiseIBase60(Const LibraryNames : array of filenamety);

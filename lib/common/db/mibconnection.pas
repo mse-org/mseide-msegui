@@ -100,69 +100,70 @@ type
    flasterror: statusvectorty;
    flasterrormessage: msestring;
    flastsqlcode: integer;
-    procedure SetDBDialect;
-    procedure AllocSQLDA(var aSQLDA : PXSQLDA;Count : integer);
-    procedure TranslateFldType(SQLType,sqlsubtype,SQLLen,SQLScale: integer;
-                 var LensSet: boolean; var TrType: TFieldType; var TrLen: word);
-    // conversion methods
-    procedure GetDateTime(CurrBuff, Buffer : pointer; AType : integer);
-    procedure SetDateTime(CurrBuff: pointer; PTime : TDateTime; AType : integer);
-    procedure GetFloat(const CurrBuff,Buffer: pointer; 
-                                     const datalength: integer);
-    procedure SetFloat(CurrBuff: pointer; Dbl: Double; Size: integer);
-    procedure CheckError(const ProcName : string; 
-                             const Status : statusvectorty); overload;
-    procedure CheckError(const ProcName : string;
-                             const Status: integer); overload;
-    function getMaxBlobSize(blobHandle : TIsc_Blob_Handle) : longInt;
-    procedure SetParameters(cursor : TSQLCursor;AParams : TmseParams);
-    procedure FreeSQLDABuffer(var aSQLDA : PXSQLDA);
-    function getblobstream(const acursor: tsqlcursor; const blobid: isc_quad;
-                       const forstring: boolean = false): tmemorystream;
-    function getblobstring(const acursor: tsqlcursor;
-                                       const blobid: isc_quad): string;
+//   flibname: filenamety;
+   procedure SetDBDialect;
+   procedure AllocSQLDA(var aSQLDA : PXSQLDA;Count : integer);
+   procedure TranslateFldType(SQLType,sqlsubtype,SQLLen,SQLScale: integer;
+                var LensSet: boolean; var TrType: TFieldType; var TrLen: word);
+   // conversion methods
+   procedure GetDateTime(CurrBuff, Buffer : pointer; AType : integer);
+   procedure SetDateTime(CurrBuff: pointer; PTime : TDateTime; AType : integer);
+   procedure GetFloat(const CurrBuff,Buffer: pointer; 
+                                    const datalength: integer);
+   procedure SetFloat(CurrBuff: pointer; Dbl: Double; Size: integer);
+   procedure CheckError(const ProcName : string; 
+                            const Status : statusvectorty); overload;
+   procedure CheckError(const ProcName : string;
+                            const Status: integer); overload;
+   function getMaxBlobSize(blobHandle : TIsc_Blob_Handle) : longInt;
+   procedure SetParameters(cursor : TSQLCursor;AParams : TmseParams);
+   procedure FreeSQLDABuffer(var aSQLDA : PXSQLDA);
+   function getblobstream(const acursor: tsqlcursor; const blobid: isc_quad;
+                      const forstring: boolean = false): tmemorystream;
+   function getblobstring(const acursor: tsqlcursor;
+                                      const blobid: isc_quad): string;
   protected
    procedure freeeventbuffer(var abuffer: pfbeventbufferty);
    
-    procedure DoInternalConnect; override;
-    procedure DoInternalDisconnect; override;
-    function GetHandle : pointer; override;
+   procedure DoInternalConnect; override;
+   procedure DoInternalDisconnect; override;
+   function GetHandle : pointer; override;
 
-    Function AllocateCursorHandle(const aowner: icursorclient;
-                       const aname: ansistring): TSQLCursor; override;
-    Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); override;
-    Function AllocateTransactionHandle : TSQLHandle; override;
+   Function AllocateCursorHandle(const aowner: icursorclient;
+                      const aname: ansistring): TSQLCursor; override;
+   Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); override;
+   Function AllocateTransactionHandle : TSQLHandle; override;
 
-    procedure preparestatement(const cursor: tsqlcursor; 
-                  const atransaction : tsqltransaction;
-                  const asql: msestring; const aparams : tmseparams); override;
-    procedure UnPrepareStatement(cursor : TSQLCursor); override;
-    procedure FreeFldBuffers(cursor : TSQLCursor); override;
-    procedure Execute(const cursor: TSQLCursor;
-              const atransaction: tsqltransaction; const AParams : TmseParams;
-              const autf8: boolean); override;
-    procedure AddFieldDefs(const cursor: TSQLCursor;
-                     const FieldDefs : TfieldDefs); override;
-    function Fetch(cursor : TSQLCursor) : boolean; override;
-    function loadfield(const cursor: tsqlcursor; 
-                const datatype: tfieldtype; const fieldnum: integer; //null based
-      const buffer: pointer; var bufsize: integer): boolean; override;
-           //if bufsize < 0 -> buffer was to small, should be -bufsize
-    function GetTransactionHandle(trans : TSQLHandle): pointer; override;
-    function Commit(trans : TSQLHandle) : boolean; override;
-    function RollBack(trans : TSQLHandle) : boolean; override;
-    function StartdbTransaction(const trans : TSQLHandle;
-                       const AParams : tstringlist) : boolean; override;
-    procedure internalCommitRetaining(trans : TSQLHandle); override;
-    procedure internalRollBackRetaining(trans : TSQLHandle); override;
-    procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;
-                                           const TableName : string); override;
-    function GetSchemaInfoSQL(SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string) : string; override;
-    function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
-                           const acursor: tsqlcursor): TStream; override;
-    function getblobdatasize: integer; override;
-                           
-           //iblobconnection                           
+   procedure preparestatement(const cursor: tsqlcursor; 
+                 const atransaction : tsqltransaction;
+                 const asql: msestring; const aparams : tmseparams); override;
+   procedure UnPrepareStatement(cursor : TSQLCursor); override;
+   procedure FreeFldBuffers(cursor : TSQLCursor); override;
+   procedure Execute(const cursor: TSQLCursor;
+             const atransaction: tsqltransaction; const AParams : TmseParams;
+             const autf8: boolean); override;
+   procedure AddFieldDefs(const cursor: TSQLCursor;
+                    const FieldDefs : TfieldDefs); override;
+   function Fetch(cursor : TSQLCursor) : boolean; override;
+   function loadfield(const cursor: tsqlcursor; 
+               const datatype: tfieldtype; const fieldnum: integer; //null based
+     const buffer: pointer; var bufsize: integer): boolean; override;
+          //if bufsize < 0 -> buffer was to small, should be -bufsize
+   function GetTransactionHandle(trans : TSQLHandle): pointer; override;
+   function Commit(trans : TSQLHandle) : boolean; override;
+   function RollBack(trans : TSQLHandle) : boolean; override;
+   function StartdbTransaction(const trans : TSQLHandle;
+                      const AParams : tstringlist) : boolean; override;
+   procedure internalCommitRetaining(trans : TSQLHandle); override;
+   procedure internalRollBackRetaining(trans : TSQLHandle); override;
+   procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;
+                                          const TableName : string); override;
+   function GetSchemaInfoSQL(SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string) : string; override;
+   function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
+                          const acursor: tsqlcursor): TStream; override;
+   function getblobdatasize: integer; override;
+                          
+          //iblobconnection                           
    procedure writeblobdata(const atransaction: tsqltransaction;
               const tablename: string; const acursor: tsqlcursor;
               const adata: pointer; const alength: integer;
@@ -192,6 +193,7 @@ type
     property lastsqlcode: integer read flastsqlcode;
   published
     property Dialect  : integer read FDialect write FDialect default 0;
+//    property libname: filenamety read flibname write flibname;
     property options: ibconnectionoptionsty read foptions 
                                            write foptions default [];
     property DatabaseName;
@@ -423,6 +425,11 @@ var
 begin
 {$IfDef LinkDynamically}
  useembeddedfirebird:= ibo_embedded in foptions;
+{
+ if flibname <> '' then begin
+  ibase60dyn.libname:= flibname;
+ end;
+}
  InitialiseIBase60;
  try 
 {$EndIf}

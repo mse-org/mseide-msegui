@@ -15,7 +15,8 @@ uses
  classes,msedbedit,mselookupbuffer,msedb,msedbf,msesdfdata,msememds,msesqldb,
  msqldb,msesqlresult,mseibconnection,msepqconnection,msesqlite3conn,
  mseodbcconn,msemysql40conn,msemysql41conn,msemysql50conn,msedbgraphics,
- msedbdialog,msedbevents,msedbdispwidgets,msedblookup,mseifidbgui
+ msedbdialog,msedbevents,msedbdispwidgets,msedblookup,mseifidbgui,
+ msedbcalendardatetimeedit
   {$ifdef mse_with_sqlite}
  ,msesqlite3ds
  {$endif}

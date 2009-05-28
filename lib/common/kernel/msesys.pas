@@ -250,7 +250,7 @@ begin
   {$else}
   adest[int1]^:= getprocaddress(lib,pansichar(anames[int1]));
   {$endif}
-  if adest[int1]^ = nil then begin
+  if (adest[int1]^ = nil) and not noexception then begin
    raise exception.create('Function "'+anames[int1]+'" not found.');
   end;
  end;

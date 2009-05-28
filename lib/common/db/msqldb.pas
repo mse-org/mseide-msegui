@@ -2076,6 +2076,47 @@ end;
 
 { TSQLQuery }
 
+constructor TSQLQuery.Create(AOwner : TComponent);
+begin
+  inherited Create(AOwner);
+  FParams := TmseParams.create(self);
+  FSQL := TsqlStringList.Create;
+  FSQL.OnChange := @OnChangeSQL;
+
+  FSQLUpdate := TsqlStringList.Create;
+  FSQLUpdate.OnChange := @OnChangeModifySQL;
+  FSQLInsert := TsqlStringList.Create;
+  FSQLInsert.OnChange := @OnChangeModifySQL;
+  FSQLDelete := TsqlStringList.Create;
+  FSQLDelete.OnChange := @OnChangeModifySQL;
+
+  FIndexDefs := TIndexDefs.Create(Self);
+  FReadOnly := false;
+  FParseSQL := True;
+// Delphi has upWhereAll as default, but since strings and oldvalue's don't work yet
+// (variants) set it to upWhereKeyOnly
+  FUpdateMode := upWhereKeyOnly;
+  FUsePrimaryKeyAsKey := True;
+end;
+
+destructor TSQLQuery.Destroy;
+begin
+  if Active then Close;
+  UnPrepare;
+  if assigned(FCursor) then (Database as tcustomsqlconnection).DeAllocateCursorHandle(FCursor);
+  FreeAndNil(FMasterLink);
+  FreeAndNil(FParams);
+  FreeAndNil(FSQL);
+  FreeAndNil(FSQLInsert);
+  FreeAndNil(FSQLDelete);
+  FreeAndNil(FSQLUpdate);
+  FreeAndNil(FIndexDefs);
+  freeandnil(finsertqry);
+  freeandnil(fupdateqry);
+  freeandnil(fdeleteqry);
+  inherited Destroy;
+end;
+
 procedure TSQLQuery.OnChangeSQL(const Sender : TObject);
 
 var ParamName : String;
@@ -2352,30 +2393,31 @@ begin
 // Database and FCursor could be nil, for example if the database is not
 // assigned, and .open is called
  disconnect;
- freemodifyqueries;
+ if not (bs_refreshing in fbstate) then begin
+  freemodifyqueries;
+  fprimarykeyfield:= nil;
+  if DefaultFields then begin
+   DestroyFields;
+  end;
+ end;
  fupdaterowsaffected:= 0;
  fblobintf:= nil;
- fprimarykeyfield:= nil;
  if StatementType in datareturningtypes then FreeFldBuffers;
- if DefaultFields then
-   DestroyFields;
  FIsEOF := False;
  inherited internalclose;
 end;
 
 procedure TSQLQuery.InternalInitFieldDefs;
 begin
-  if FLoadingFieldDefs then
-    Exit;
-
-  FLoadingFieldDefs := True;
-
-  try
-//    FieldDefs.Clear;
-    tcustomsqlconnection(database).AddFieldDefs(fcursor,FieldDefs);
-  finally
-    FLoadingFieldDefs := False;
-  end;
+ if FLoadingFieldDefs then begin
+  Exit;
+ end;
+ FLoadingFieldDefs := True;
+ try
+  tcustomsqlconnection(database).AddFieldDefs(fcursor,FieldDefs);
+ finally
+  FLoadingFieldDefs := False;
+ end;
 end;
 
 procedure tsqlquery.resetparsing;
@@ -2639,13 +2681,11 @@ begin
    if FCursor.FStatementType in datareturningtypes then begin
     indexfields:= nil;
     if FUpdateable then begin
-     if FusePrimaryKeyAsKey then begin
+     if FusePrimaryKeyAsKey and not (bs_refreshing in fbstate) then begin
       UpdateIndexDefs;  //must be before execute because 
                         //of MS SQL ODBC one statement per connection limitation
       for tel := 0 to indexdefs.count-1 do  begin
        if ixPrimary in indexdefs[tel].options then begin
-//         IndexFields := TStringList.Create;
-//         ExtractStrings([';'],[' '],pchar(indexdefs[tel].fields),IndexFields);
         ar1:= nil;
         splitstringquoted(indexdefs[tel].fields,ar1,'"',';');
         stackarray(ar1,indexfields);
@@ -2661,29 +2701,31 @@ begin
      Execute;
      if FCursor.FInitFieldDef then InternalInitFieldDefs;
     end;
-    if DefaultFields then begin
-     CreateFields;
-    end;
-    for int1:= 0 to high(indexfields) do begin
-     F := Findfield(IndexFields[int1]);
-     if F <> nil then begin
-      F.ProviderFlags := F.ProviderFlags + [pfInKey];
+    if not (bs_refreshing in fbstate) then begin
+     if DefaultFields then begin
+      CreateFields;
      end;
-    end;
-    if database <> nil then begin
-     str1:= tcustomsqlconnection(database).getprimarykeyfield(ftablename,fcursor);
-     if (str1 <> '') then begin
-      fprimarykeyfield:= fields.findfield(str1);
+     for int1:= 0 to high(indexfields) do begin
+      F := Findfield(IndexFields[int1]);
+      if F <> nil then begin
+       F.ProviderFlags := F.ProviderFlags + [pfInKey];
+      end;
      end;
-    end;
-    if FUpdateable or (fsqldelete.count > 0) then begin
-     InitialiseModifyQuery(FDeleteQry,FSQLDelete);
-    end;
-    if FUpdateable or (fsqlupdate.count > 0) then begin
-     InitialiseModifyQuery(FUpdateQry,FSQLUpdate);
-    end;
-    if FUpdateable or (fsqlinsert.count > 0) then begin
-     InitialiseModifyQuery(FInsertQry,FSQLInsert);
+     if database <> nil then begin
+      str1:= tcustomsqlconnection(database).getprimarykeyfield(ftablename,fcursor);
+      if (str1 <> '') then begin
+       fprimarykeyfield:= fields.findfield(str1);
+      end;
+     end;
+     if FUpdateable or (fsqldelete.count > 0) then begin
+      InitialiseModifyQuery(FDeleteQry,FSQLDelete);
+     end;
+     if FUpdateable or (fsqlupdate.count > 0) then begin
+      InitialiseModifyQuery(FUpdateQry,FSQLUpdate);
+     end;
+     if FUpdateable or (fsqlinsert.count > 0) then begin
+      InitialiseModifyQuery(FInsertQry,FSQLInsert);
+     end;
     end;
    end
    else begin
@@ -2751,44 +2793,6 @@ begin
    (database as tcustomsqlconnection).UnPrepareStatement(Fcursor);
   end;
  end;
-end;
-
-constructor TSQLQuery.Create(AOwner : TComponent);
-begin
-  inherited Create(AOwner);
-  FParams := TmseParams.create(self);
-  FSQL := TsqlStringList.Create;
-  FSQL.OnChange := @OnChangeSQL;
-
-  FSQLUpdate := TsqlStringList.Create;
-  FSQLUpdate.OnChange := @OnChangeModifySQL;
-  FSQLInsert := TsqlStringList.Create;
-  FSQLInsert.OnChange := @OnChangeModifySQL;
-  FSQLDelete := TsqlStringList.Create;
-  FSQLDelete.OnChange := @OnChangeModifySQL;
-
-  FIndexDefs := TIndexDefs.Create(Self);
-  FReadOnly := false;
-  FParseSQL := True;
-// Delphi has upWhereAll as default, but since strings and oldvalue's don't work yet
-// (variants) set it to upWhereKeyOnly
-  FUpdateMode := upWhereKeyOnly;
-  FUsePrimaryKeyAsKey := True;
-end;
-
-destructor TSQLQuery.Destroy;
-begin
-  if Active then Close;
-  UnPrepare;
-  if assigned(FCursor) then (Database as tcustomsqlconnection).DeAllocateCursorHandle(FCursor);
-  FreeAndNil(FMasterLink);
-  FreeAndNil(FParams);
-  FreeAndNil(FSQL);
-  FreeAndNil(FSQLInsert);
-  FreeAndNil(FSQLDelete);
-  FreeAndNil(FSQLUpdate);
-  FreeAndNil(FIndexDefs);
-  inherited Destroy;
 end;
 
 procedure TSQLQuery.SetReadOnly(AValue : Boolean);
