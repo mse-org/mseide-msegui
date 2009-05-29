@@ -527,6 +527,7 @@ begin
  end
  else begin
   with locateinfo do begin
+   posinsensitive:= lso_posinsensitive in options;
    casesensitive:= lso_casesensitive in options;
    if casesensitive then begin
     filter:= afilter;
