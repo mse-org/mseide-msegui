@@ -610,6 +610,9 @@ type
    property linecolor default defaultdatalinecolor;
  end;
 
+ datacolaty = array[0..0] of tdatacol;
+ pdatacolaty = ^datacolaty;
+ 
  tdrawcol = class(tdatacol)
   private
    fondrawcell: drawcelleventty;
@@ -2822,7 +2825,6 @@ var
  int1,int2,int3: integer;
  bo1,bo2: boolean;
  saveindex: integer;
-// selectedcolor1: colorty;
  linewidthbefore: integer;
  font1: tfont;
  canbeforedrawcell: boolean;
@@ -2830,7 +2832,9 @@ var
  row1: integer;
  hiddenlines: integerarty;
  segments1: segmentarty;
+ po1: pdatacolaty;
  nextcol: tdatacol;
+ widthextend: integer;
 
 begin
  if not (co_invisible in foptions) or (csdesigning in fgrid.ComponentState) then begin
@@ -2848,64 +2852,98 @@ begin
    canvas.drawinfopo:= @fcellinfo;
    canvas.move(makepoint(fcellrect.x,fcellrect.y + ystart));
    fcellinfo.foldinfo:= nil;
-//   fcellinfo.lastvisiblecol:= index = fgrid.datacols.lastvisiblecol;
    nextcol:= nil;
-   if not (cos_fix in fstate) and 
-                         (index <> fgrid.datacols.lastvisiblecol) then begin
-    nextcol:= fgrid.datacols[index+1];
+   po1:= nil;
+   if not (cos_fix in fstate) then begin
+    po1:= pointer(fgrid.fdatacols.fitems);
+    if index <> fgrid.datacols.lastvisiblecol then begin
+     nextcol:= po1^[index+1];
+    end;
    end;
    for int1:= startrow to endrow do begin
     row1:= rows[int1];
     fcellinfo.cell.row:= row1;
     fcellinfo.rowstate:= fgrid.fdatacols.frowstate.getitempo(row1);
+    bo1:= false;
     if (nextcol <> nil) and nextcol.merged[row1] then begin
+     bo1:= true; //has merged cells
      additem(hiddenlines,row1); //by merged columns
     end;
     if not merged[row1] then begin
-     font1:= rowfont(row1);
-     if font1 <> fcellinfo.font then begin
-      fcellinfo.font:= font1;
-      canvas.font:= font1;
-     end;
-     if og_folded in fgrid.foptionsgrid then begin
-      fcellinfo.foldinfo:= @foldinfo[int1];
-     end;
-     fcellinfo.datapo:= getdatapo(row1);
-     fcellinfo.selected:= getselected(row1);
-     fcellinfo.readonly:= fgrid.getrowreadonlystate(row1);
-     fcellinfo.notext:= false;
-     fcellinfo.ismousecell:= (fgrid.fmousecell.col = fcellinfo.cell.col) and 
-                               (fgrid.fmousecell.row = row1);
-     saveindex:= canvas.save;
-     fcellinfo.color:= rowcolor(row1);
-     canvas.intersectcliprect(makerect(nullpoint,fcellrect.size));
-     bo2:= false;
-     if canbeforedrawcell then begin
-      fonbeforedrawcell(self,canvas,fcellinfo,bo2);
-     end;
-     if not bo2 then begin
-       if bo1 and (row1 = fgrid.ffocusedcell.row) then begin
-        drawfocusedcell(canvas);
-       end
-       else begin
-        drawcell(canvas);
+     widthextend:= 0;
+     if bo1 then begin
+      for int2:= index + 1 to fgrid.fdatacols.count - 1 do begin
+       with po1^[int2] do begin
+        if not (co_invisible in foptions) then begin
+         if merged[row1] then begin
+          inc(widthextend,step);
+         end
+         else begin
+          break;
+         end;
+        end;
        end;
-     end;
-     if canafterdrawcell then begin
-      fonafterdrawcell(self,canvas,fcellinfo);
-     end;
-     canvas.restore(saveindex);
-     if not bo2 then begin
-      drawcelloverlay(canvas,fframe);
-     end;
-     if bo1 and (row1 = fgrid.ffocusedcell.row) and 
-                                  (co_drawfocus in foptions) then begin
-      if fframe <> nil then begin
-       canvas.move(fframe.fpaintrect.pos);
       end;
-      drawfocus(canvas);
-      if fframe <> nil then begin
-       canvas.remove(fframe.fpaintrect.pos);
+      with fcellinfo do begin
+       inc(rect.cx,widthextend);      
+       inc(innerrect.cx,widthextend);      
+       inc(frameinnerrect.cx,widthextend);
+      end;
+     end;
+     try
+      font1:= rowfont(row1);
+      if font1 <> fcellinfo.font then begin
+       fcellinfo.font:= font1;
+       canvas.font:= font1;
+      end;
+      if og_folded in fgrid.foptionsgrid then begin
+       fcellinfo.foldinfo:= @foldinfo[int1];
+      end;
+      fcellinfo.datapo:= getdatapo(row1);
+      fcellinfo.selected:= getselected(row1);
+      fcellinfo.readonly:= fgrid.getrowreadonlystate(row1);
+      fcellinfo.notext:= false;
+      fcellinfo.ismousecell:= (fgrid.fmousecell.col = fcellinfo.cell.col) and 
+                                (fgrid.fmousecell.row = row1);
+      saveindex:= canvas.save;
+      fcellinfo.color:= rowcolor(row1);
+      canvas.intersectcliprect(makerect(nullpoint,fcellinfo.rect.size));
+      bo2:= false;
+      if canbeforedrawcell then begin
+       fonbeforedrawcell(self,canvas,fcellinfo,bo2);
+      end;
+      if not bo2 then begin
+        if bo1 and (row1 = fgrid.ffocusedcell.row) then begin
+         drawfocusedcell(canvas);
+        end
+        else begin
+         drawcell(canvas);
+        end;
+      end;
+      if canafterdrawcell then begin
+       fonafterdrawcell(self,canvas,fcellinfo);
+      end;
+      canvas.restore(saveindex);
+      if not bo2 then begin
+       drawcelloverlay(canvas,fframe);
+      end;
+      if bo1 and (row1 = fgrid.ffocusedcell.row) and 
+                                   (co_drawfocus in foptions) then begin
+       if fframe <> nil then begin
+        canvas.move(fframe.fpaintrect.pos);
+       end;
+       drawfocus(canvas);
+       if fframe <> nil then begin
+        canvas.remove(fframe.fpaintrect.pos);
+       end;
+      end;
+     finally
+      if widthextend <> 0 then begin
+       with fcellinfo do begin
+        dec(rect.cx,widthextend);      
+        dec(innerrect.cx,widthextend);      
+        dec(frameinnerrect.cx,widthextend);
+       end;
       end;
      end;
     end;
