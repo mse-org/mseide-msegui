@@ -65,7 +65,7 @@ type
                  og_rowinserting,og_rowdeleting,og_selectedrowsdeleting,
                  og_focuscellonenter,og_containerfocusbackonesc,
                  og_autofirstrow,og_autoappend,og_appendempty,
-                 og_savestate,og_sorted,og_folded,
+                 og_savestate,og_sorted,og_folded,og_merged,
                  og_colchangeontabkey,og_colchangeonreturnkey,
                  og_wraprow,og_wrapcol,
                  og_visiblerowpagestep,
@@ -2823,6 +2823,7 @@ end;
 procedure tcol.paint(const info: colpaintinfoty);
 var
  int1,int2,int3: integer;
+ isfocusedcol: boolean;
  bo1,bo2: boolean;
  saveindex: integer;
  linewidthbefore: integer;
@@ -2835,9 +2836,11 @@ var
  po1: pdatacolaty;
  nextcol: tdatacol;
  widthextend: integer;
+ checkmerge: boolean;
 
 begin
  if not (co_invisible in foptions) or (csdesigning in fgrid.ComponentState) then begin
+  checkmerge:= og_merged in fgrid.foptionsgrid;
   canbeforedrawcell:= fgrid.canevent(tmethod(fonbeforedrawcell));
   canafterdrawcell:= fgrid.canevent(tmethod(fonafterdrawcell));
   hiddenlines:= nil;
@@ -2847,7 +2850,7 @@ begin
     fgrid.fbrushorigin.x:= fgrid.fbrushorigin.x + fgrid.fscrollrect.x;
    end;
    fcellinfo.font:= nil;
-   bo1:= (fcellinfo.cell.col = fgrid.ffocusedcell.col) and
+   isfocusedcol:= (fcellinfo.cell.col = fgrid.ffocusedcell.col) and
        (gs_cellentered in fgrid.fstate);
    canvas.drawinfopo:= @fcellinfo;
    canvas.move(makepoint(fcellrect.x,fcellrect.y + ystart));
@@ -2865,11 +2868,11 @@ begin
     fcellinfo.cell.row:= row1;
     fcellinfo.rowstate:= fgrid.fdatacols.frowstate.getitempo(row1);
     bo1:= false;
-    if (nextcol <> nil) and nextcol.merged[row1] then begin
-     bo1:= true; //has merged cells
+    if checkmerge and (nextcol <> nil) and nextcol.merged[row1] then begin
+     bo1:= true;                //has merged columns
      additem(hiddenlines,row1); //by merged columns
     end;
-    if not merged[row1] then begin
+    if not checkmerge or not merged[row1] then begin
      widthextend:= 0;
      if bo1 then begin
       for int2:= index + 1 to fgrid.fdatacols.count - 1 do begin
@@ -2913,7 +2916,7 @@ begin
        fonbeforedrawcell(self,canvas,fcellinfo,bo2);
       end;
       if not bo2 then begin
-        if bo1 and (row1 = fgrid.ffocusedcell.row) then begin
+        if isfocusedcol and (row1 = fgrid.ffocusedcell.row) then begin
          drawfocusedcell(canvas);
         end
         else begin
@@ -2939,7 +2942,7 @@ begin
       end;
      finally
       if widthextend <> 0 then begin
-       with fcellinfo do begin
+       with fcellinfo do begin  //restore original values
         dec(rect.cx,widthextend);      
         dec(innerrect.cx,widthextend);      
         dec(frameinnerrect.cx,widthextend);
@@ -2969,7 +2972,7 @@ begin
      bo2:= false; //line stopped
      for int1:= startrow to endrow do begin
       if (int2 > high(hiddenlines)) or 
-                              (rows[int1] < hiddenlines[int2]) then begin
+                              (rows[int1] <> hiddenlines[int2]) then begin
        if not bo1 then begin      //start line
         bo1:= true;
         bo2:= false;
@@ -6788,7 +6791,12 @@ end;
 
 procedure tdatacols.mergechanged(const arow: integer);
 begin
- fgrid.invalidaterow(arow);
+ if (arow < 0) or (arow >= 0) and (arow = fgrid.row) then begin
+  fgrid.layoutchanged;
+ end
+ else begin
+  fgrid.invalidaterow(arow);
+ end;
 end;
 
 { tdrawcols }
@@ -9673,6 +9681,8 @@ function tcustomgrid.cellrect(const cell: gridcoordty;
 var
  isfixr: boolean;
  int1: integer; 
+ po1: prowstatety;
+ 
 begin  //cellrect
  result:= nullrect;
  if (cell.col >= fdatacols.count) or (cell.row >= frowcount) and
@@ -9799,6 +9809,26 @@ begin  //cellrect
     end;
     if not isfixr then begin
      updatex(fdatacols[col]);
+     if (og_merged in foptionsgrid) and not nomerged then begin
+      if (row >= 0) and (col < fdatacols.flastvisiblecol) then begin
+       po1:= fdatacols.frowstate.getitempo(row);
+       if po1^.merged <> 0 then begin //has merged cols
+        for int1:= col to fdatacols.flastvisiblecol-1 do begin
+         if (po1^.merged = mergedcolall) or 
+                                  (po1^.merged and bits[int1] <> 0) then begin
+          with tdatacol(fdatacols.fitems[int1+1]) do begin
+           if not (co_invisible in foptions) then begin
+            inc(result.cx,step);
+           end;
+          end;
+         end
+         else begin
+          break;
+         end;
+        end;
+       end;
+      end;
+     end;
     end;
    end;
   end;
