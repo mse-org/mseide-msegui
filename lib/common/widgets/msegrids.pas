@@ -1167,6 +1167,7 @@ type
    procedure enddataupdate; override;
    procedure dosizechanged; override;
    procedure countchanged; override;
+   procedure mergechanged(const arow: integer);
    procedure rearange(const list: tintegerdatalist); override;
    procedure setcount1(acount: integer; doinit: boolean); override;
    procedure setrowcountmax(const value: integer);
@@ -1217,6 +1218,10 @@ type
    procedure setselectedrange(const start,stop: gridcoordty;
                     const value: boolean;
                     const calldoselectcell: boolean = false); overload; virtual;
+   procedure mergecols(const arow: integer; const astart: cardinal = 0; 
+                                              const acount: cardinal = bigint);
+   procedure unmergecols(const arow: integer = invalidaxis);
+                     //invalidaxis = all
    property rowstate: trowstatelist read frowstate;
   published
    property sortcol: integer read fsortcol write setsortcol default -1;
@@ -4738,7 +4743,7 @@ begin
  if (index > 0) and (index <= mergedcolmax) then begin
   if updatebit(fgrid.fdatacols.frowstate.getitempo(row)^.merged,index-1,
                                    avalue) then begin
-   fgrid.invalidaterow(row);
+   fgrid.fdatacols.mergechanged(row);
   end;
  end;
 end;
@@ -6343,6 +6348,45 @@ begin
  end;
 end;
 
+procedure tdatacols.mergecols(const arow: integer; const astart: cardinal = 0; 
+                       const acount: cardinal = bigint);
+var
+ ca1: cardinal;
+begin
+ if (astart < mergedcolmax - 1) and (acount > 0) then begin
+  with frowstate.getitempo(arow)^ do begin
+   if (astart = 0) and (acount > mergedcolmax) then begin
+    merged:= mergedcolall;
+   end
+   else begin
+    ca1:= acount;
+    if ca1 + astart > mergedcolmax then begin
+     ca1:= mergedcolmax - astart;
+    end;
+    merged:= merged or (bitmask[ca1] shl astart);
+   end;
+  end;
+  mergechanged(arow);
+ end;
+end;
+
+procedure tdatacols.unmergecols(const arow: integer = invalidaxis);
+var
+ int1: integer;
+ po1: prowstateaty;
+begin
+ if arow = invalidaxis then begin
+  po1:= frowstate.datapo;
+  for int1:= 0 to count - 1 do begin
+   po1^[int1].merged:= 0;
+  end;
+ end
+ else begin
+  frowstate.getitempo(arow)^.merged:= 0;
+ end;
+ mergechanged(arow);
+end;
+
 function tdatacols.previosvisiblecol(aindex: integer): integer;
 var
  int1: integer;
@@ -6681,6 +6725,11 @@ procedure tdatacols.countchanged;
 begin
  fgrid.ffixrows.datacolscountchanged;
  inherited;
+end;
+
+procedure tdatacols.mergechanged(const arow: integer);
+begin
+ fgrid.invalidaterow(arow);
 end;
 
 { tdrawcols }
