@@ -131,6 +131,8 @@ const
  defaultfixlinecolor = cl_black;
  selectedcolmax = 30; //32 bitset, bit31 -> whole row
  wholerowselectedmask = $80000000;
+ mergedcolmax = 32;
+ mergedcolall = $ffffffff;
  defaultselectedcellcolor = cl_active;
  defaultdatacoloptions = [{co_selectedcolor,}co_savestate,co_savevalue,
                           co_rowfont,co_rowcolor,co_zebracolor,co_mousescrollrow];
@@ -259,7 +261,9 @@ type
   ismousecell: boolean;
   datapo: pointer;
   griddatalink: pointer;
+  rowstate: prowstatety;
   foldinfo: prowfoldinfoty;
+  lastvisiblecol: boolean;
  end;
  pcellinfoty = ^cellinfoty;
 
@@ -440,6 +444,7 @@ type
          //true if coloractive and fontactivenum active
    function isopaque: boolean; virtual;
    function getdatapo(const arow: integer): pointer; virtual;
+   function hasline: boolean; virtual;
    procedure paint(const info: colpaintinfoty); virtual;
    class function defaultstep(width: integer): integer; virtual;
    function step(getscrollable: boolean = true): integer; override;
@@ -524,6 +529,8 @@ type
    procedure setreadonly(const avalue: boolean);
    function getselectedcells: integerarty;
    procedure setselectedcells(const avalue: integerarty);
+   function getmerged(const row: integer): boolean;
+   procedure setmerged(const row: integer; const avalue: boolean);
   protected
    fdata: tdatalist;
    fname: string;
@@ -531,6 +538,7 @@ type
    procedure beginselect;
    procedure endselect;
    function getdatapo(const arow: integer): pointer; override;
+   function hasline: boolean; override;
    procedure beforedragevent(var ainfo: draginfoty; const arow: integer;
                                      var processed: boolean); virtual;
    procedure afterdragevent(var ainfo: draginfoty; const arow: integer;
@@ -546,7 +554,8 @@ type
                const selectaction: focuscellactionty); virtual;
    procedure doactivate; virtual;
    procedure dodeactivate; virtual;
-   procedure clientmouseevent(const acell: gridcoordty; var info: mouseeventinfoty); virtual;
+   procedure clientmouseevent(const acell: gridcoordty; 
+                                          var info: mouseeventinfoty); virtual;
    procedure dokeyevent(var info: keyeventinfoty; up: boolean); virtual;
    procedure itemchanged(const sender: tdatalist; const aindex: integer); virtual;
    procedure updatelayout; override;
@@ -562,7 +571,7 @@ type
    procedure coloptionstoeditoptions(var dest: optionseditty);
   public
    constructor create(const agrid: tcustomgrid;
-                     const aowner: tgridarrayprop); override;
+                                     const aowner: tgridarrayprop); override;
    destructor destroy; override;
 
    procedure cellchanged(const row: integer); override;
@@ -575,6 +584,7 @@ type
    procedure dostatread(const reader: tstatreader); override;
    procedure dostatwrite(const writer: tstatwriter); override;
    procedure clearselection;
+   property merged[const row: integer]: boolean read getmerged write setmerged;
    property selected[const row: integer]: boolean read getselected write setselected;
              //row < 0 -> whole col
    property selectedcells: integerarty read getselectedcells 
@@ -1137,6 +1147,7 @@ type
    fsortcol: integer;
    fnewrowcol: integer;
    fchangelock: integer;
+   flastvisiblecol: integer;
    function getcols(const index: integer): tdatacol;
    procedure setcols(const index: integer; const Value: tdatacol);
    function getselectedcells: gridcoordarty;
@@ -1188,6 +1199,7 @@ type
    function hasselection: boolean;
    function previosvisiblecol(aindex: integer): integer;
                    //invalidaxis if none
+   property lastvisiblecol: integer read flastvisiblecol;
    function rowempty(const arow: integer): boolean;
    property cols[const index: integer]: tdatacol read getcols write setcols; default;
    function colbyname(const aname: string): tdatacol;
@@ -2792,9 +2804,14 @@ begin
  result:= nil;
 end;
 
+function tcol.hasline: boolean;
+begin
+ result:= true;
+end;
+
 procedure tcol.paint(const info: colpaintinfoty);
 var
- int1: integer;
+ int1,int2,int3: integer;
  bo1,bo2: boolean;
  saveindex: integer;
 // selectedcolor1: colorty;
@@ -2803,11 +2820,14 @@ var
  canbeforedrawcell: boolean;
  canafterdrawcell: boolean;
  row1: integer;
+ hiddenlines: integerarty;
+ segments1: segmentarty;
 
 begin
  if not (co_invisible in foptions) or (csdesigning in fgrid.ComponentState) then begin
   canbeforedrawcell:= fgrid.canevent(tmethod(fonbeforedrawcell));
   canafterdrawcell:= fgrid.canevent(tmethod(fonafterdrawcell));
+  hiddenlines:= nil;
   with info do begin
    fgrid.fbrushorigin.x:= fgrid.frootbrushorigin.x;
    if not (co_nohscroll in foptions) then begin
@@ -2819,6 +2839,7 @@ begin
    canvas.drawinfopo:= @fcellinfo;
    canvas.move(makepoint(fcellrect.x,fcellrect.y + ystart));
    fcellinfo.foldinfo:= nil;
+   fcellinfo.lastvisiblecol:= index = fgrid.datacols.lastvisiblecol;
    for int1:= startrow to endrow do begin
     row1:= rows[int1];
     font1:= rowfont(row1);
@@ -2829,6 +2850,7 @@ begin
     if og_folded in fgrid.foptionsgrid then begin
      fcellinfo.foldinfo:= @foldinfo[int1];
     end;
+    fcellinfo.rowstate:= fgrid.fdatacols.frowstate.getitempo(row1);
     fcellinfo.datapo:= getdatapo(row1);
     fcellinfo.cell.row:= row1;
     fcellinfo.selected:= getselected(row1);
@@ -2869,6 +2891,9 @@ begin
      end;
     end;
     canvas.move(makepoint(0,ystep));
+    if not hasline then begin
+     additem(hiddenlines,row1); //by merged columns
+    end;
    end;
    if flinewidth > 0 then begin
     linewidthbefore:= canvas.linewidth;
@@ -2878,9 +2903,46 @@ begin
     else begin
      canvas.linewidth:= flinewidth;
     end;
-    int1:= flinepos{-fcellrect.x};
-    canvas.drawline(makepoint(int1,-(ystep * length(rows))),
-                      makepoint(int1,-1),flinecolor);
+    if hiddenlines = nil then begin
+     canvas.drawline(makepoint(flinepos,-(ystep * length(rows))),
+                       makepoint(flinepos,-1),flinecolor);
+    end
+    else begin
+     setlength(segments1,endrow-startrow+1); //max
+     int2:= 0; //index in hiddenlines
+     int3:= 0; //index in segments1
+     bo1:= false; //line started
+     bo2:= false; //line stopped
+     for int1:= startrow to endrow do begin
+      if (int2 > high(hiddenlines)) or 
+                              (rows[int1] < hiddenlines[int2]) then begin
+       if not bo1 then begin      //start line
+        bo1:= true;
+        bo2:= false;
+        with segments1[int3] do begin
+         a.x:= flinepos;
+         b.x:= flinepos;
+         a.y:= -ystep * (endrow-int1+1);
+        end;
+       end;
+      end
+      else begin
+       if not bo2 and bo1 then begin //stop line
+        bo2:= true;
+        bo1:= false;
+        segments1[int3].b.y:= -ystep * (endrow-int1+1)-1;
+        inc(int2);
+        inc(int3);
+       end;
+      end;
+     end;
+     if bo1 and not bo2 then begin //finish last line
+      segments1[int3].b.y:= -1;
+      inc(int3);
+     end;
+     setlength(segments1,int3);
+     canvas.drawlinesegments(segments1,flinecolor);
+    end;
     canvas.linewidth:= linewidthbefore;
    end;
   end;
@@ -4655,6 +4717,32 @@ begin
  end;
 end;
 
+function tdatacol.getmerged(const row: integer): boolean;
+begin
+ if index = 0 then begin
+  result:= false;
+ end
+ else begin
+  if ident <= mergedcolmax then begin
+   result:= fgrid.fdatacols.frowstate.getitempo(row)^.merged = mergedcolall;
+  end
+  else begin
+   result:= fgrid.fdatacols.frowstate.getitempo(row)^.merged and 
+                                                          bits[index-1] <> 0;
+  end;
+ end;
+end;
+
+procedure tdatacol.setmerged(const row: integer; const avalue: boolean);
+begin
+ if (index > 0) and (index <= mergedcolmax) then begin
+  if updatebit(fgrid.fdatacols.frowstate.getitempo(row)^.merged,index-1,
+                                   avalue) then begin
+   fgrid.invalidaterow(row);
+  end;
+ end;
+end;
+
 function tdatacol.getselectedcells: integerarty;
 const
  capacitystep = 64;
@@ -5157,6 +5245,18 @@ begin
  end
  else begin
   result:= nil;
+ end;
+end;
+
+function tdatacol.hasline: boolean;
+begin
+ with fcellinfo.rowstate^ do begin
+  result:= (merged = 0);
+  if not result then begin
+   result:= fcellinfo.lastvisiblecol or 
+    (merged <> mergedcolall) and ((index >= mergedcolmax) or 
+    (merged and bits[index] = 0));
+  end;
  end;
 end;
 
@@ -5798,6 +5898,7 @@ begin
  fselectedrow:= -1;
  fsortcol:= -1;
  fnewrowcol:= -1;
+ flastvisiblecol:= -1;
  frowstate:= trowstatelist.create(aowner);
  inherited;
  flinecolor:= defaultdatalinecolor;
@@ -5831,11 +5932,15 @@ var
  int1,int2: integer;
 begin
  int2:= -1;
+ flastvisiblecol:= -1;
  for int1:= 0 to count - 1 do begin
   with tdatacol(fitems[int1]) do begin
    fcellinfo.cell.col:= int1;
    if foptions * [co_fill,co_invisible,co_nohscroll] = [co_fill] then begin
     int2:= int1;
+   end;
+   if not (co_invisible in foptions) then begin
+    flastvisiblecol:= int1;
    end;
   end;
  end;

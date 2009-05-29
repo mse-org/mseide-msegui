@@ -94,6 +94,9 @@ function updatebit(var dest: word; bitnum: integer; value: boolean): boolean; ov
              //true if changed
 function updatebit(var dest: longword; bitnum: integer; value: boolean):boolean; overload;
              //true if changed
+procedure updatebit1(var dest: byte; bitnum: integer; value: boolean); overload;
+procedure updatebit1(var dest: word; bitnum: integer; value: boolean); overload;
+procedure updatebit1(var dest: longword; bitnum: integer; value: boolean); overload;
 
 procedure setbit1(var dest: byte; bitnum: integer); overload;
 procedure setbit1(var dest: word; bitnum: integer); overload;
@@ -171,6 +174,45 @@ begin
   dest:= dest and not bits[bitnum];
  end;
  result:= dest <> wo1;
+end;
+
+procedure updatebit1(var dest: byte; bitnum: integer; value: boolean);
+var
+ by1: byte;
+begin
+ by1:= dest;
+ if value then begin
+  dest:= dest or bits[bitnum];
+ end
+ else begin
+  dest:= dest and not bits[bitnum];
+ end;
+end;
+
+procedure updatebit1(var dest: word; bitnum: integer; value: boolean);
+var
+ wo1: word;
+begin
+ wo1:= dest;
+ if value then begin
+  dest:= dest or bits[bitnum];
+ end
+ else begin
+  dest:= dest and not bits[bitnum];
+ end;
+end;
+
+procedure updatebit1(var dest: longword; bitnum: integer; value: boolean);
+var
+ wo1: longword;
+begin
+ wo1:= dest;
+ if value then begin
+  dest:= dest or bits[bitnum];
+ end
+ else begin
+  dest:= dest and not bits[bitnum];
+ end;
 end;
 
 procedure setbit1(var dest: byte; bitnum: integer);

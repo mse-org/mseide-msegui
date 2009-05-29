@@ -570,12 +570,16 @@ type
                           //reserved for rowcolorstate
 
  foldlevelty = 0..127;
- rowstatety = record
+ rowstatety = packed record
   selected: cardinal; //bitset lsb = col 0, msb-1 = col 30, msb = whole row
                       //adressed by fcreateindex
+  merged: cardinal; //bitset lsb = col 1, msb = col32, 
+                    //$ffffffff = first col fills whole row
+                    //addressed by column index
   color: byte; //index in rowcolors, 0 = none, 1 = rowcolors[0]
   font: byte;  //index in rowfonts, 0 = none, 1 = rowfonts[0]
   fold: byte;  // h nnnnnnn  h = hidden, nnnnnnn = fold level, 0 -> top
+  dummy: byte;
  end;
  prowstatety = ^rowstatety;
  rowstateaty = array[0..0] of rowstatety;
