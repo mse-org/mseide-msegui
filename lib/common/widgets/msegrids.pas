@@ -263,7 +263,7 @@ type
   griddatalink: pointer;
   rowstate: prowstatety;
   foldinfo: prowfoldinfoty;
-  lastvisiblecol: boolean;
+//  lastvisiblecol: boolean;
  end;
  pcellinfoty = ^cellinfoty;
 
@@ -444,7 +444,7 @@ type
          //true if coloractive and fontactivenum active
    function isopaque: boolean; virtual;
    function getdatapo(const arow: integer): pointer; virtual;
-   function hasline: boolean; virtual;
+//   function ismerged: boolean; virtual;
    procedure paint(const info: colpaintinfoty); virtual;
    class function defaultstep(width: integer): integer; virtual;
    function step(getscrollable: boolean = true): integer; override;
@@ -461,6 +461,9 @@ type
    property options: coloptionsty read foptions write setoptions;
    property focusrectdist: integer read ffocusrectdist write setfocusrectdist
                                         default 0;
+   function getmerged(const row: integer): boolean; virtual;
+   procedure setmerged(const row: integer; const avalue: boolean); virtual;
+   property merged[const row: integer]: boolean read getmerged write setmerged;
   public
    constructor create(const agrid: tcustomgrid; 
                         const aowner: tgridarrayprop); override;
@@ -529,8 +532,8 @@ type
    procedure setreadonly(const avalue: boolean);
    function getselectedcells: integerarty;
    procedure setselectedcells(const avalue: integerarty);
-   function getmerged(const row: integer): boolean;
-   procedure setmerged(const row: integer; const avalue: boolean);
+   function getmerged(const row: integer): boolean; override;
+   procedure setmerged(const row: integer; const avalue: boolean); override;
   protected
    fdata: tdatalist;
    fname: string;
@@ -538,7 +541,7 @@ type
    procedure beginselect;
    procedure endselect;
    function getdatapo(const arow: integer): pointer; override;
-   function hasline: boolean; override;
+//   function ismerged: boolean; override;
    procedure beforedragevent(var ainfo: draginfoty; const arow: integer;
                                      var processed: boolean); virtual;
    procedure afterdragevent(var ainfo: draginfoty; const arow: integer;
@@ -584,7 +587,7 @@ type
    procedure dostatread(const reader: tstatreader); override;
    procedure dostatwrite(const writer: tstatwriter); override;
    procedure clearselection;
-   property merged[const row: integer]: boolean read getmerged write setmerged;
+   property merged;
    property selected[const row: integer]: boolean read getselected write setselected;
              //row < 0 -> whole col
    property selectedcells: integerarty read getselectedcells 
@@ -2808,12 +2811,12 @@ function tcol.getdatapo(const arow: integer): pointer;
 begin
  result:= nil;
 end;
-
-function tcol.hasline: boolean;
+{
+function tcol.ismerged: boolean;
 begin
- result:= true;
+ result:= false;
 end;
-
+}
 procedure tcol.paint(const info: colpaintinfoty);
 var
  int1,int2,int3: integer;
@@ -2827,6 +2830,7 @@ var
  row1: integer;
  hiddenlines: integerarty;
  segments1: segmentarty;
+ nextcol: tdatacol;
 
 begin
  if not (co_invisible in foptions) or (csdesigning in fgrid.ComponentState) then begin
@@ -2844,61 +2848,68 @@ begin
    canvas.drawinfopo:= @fcellinfo;
    canvas.move(makepoint(fcellrect.x,fcellrect.y + ystart));
    fcellinfo.foldinfo:= nil;
-   fcellinfo.lastvisiblecol:= index = fgrid.datacols.lastvisiblecol;
+//   fcellinfo.lastvisiblecol:= index = fgrid.datacols.lastvisiblecol;
+   nextcol:= nil;
+   if not (cos_fix in fstate) and 
+                         (index <> fgrid.datacols.lastvisiblecol) then begin
+    nextcol:= fgrid.datacols[index+1];
+   end;
    for int1:= startrow to endrow do begin
     row1:= rows[int1];
-    font1:= rowfont(row1);
-    if font1 <> fcellinfo.font then begin
-     fcellinfo.font:= font1;
-     canvas.font:= font1;
-    end;
-    if og_folded in fgrid.foptionsgrid then begin
-     fcellinfo.foldinfo:= @foldinfo[int1];
-    end;
-    fcellinfo.rowstate:= fgrid.fdatacols.frowstate.getitempo(row1);
-    fcellinfo.datapo:= getdatapo(row1);
     fcellinfo.cell.row:= row1;
-    fcellinfo.selected:= getselected(row1);
-    fcellinfo.readonly:= fgrid.getrowreadonlystate(row1);
-    fcellinfo.notext:= false;
-    fcellinfo.ismousecell:= (fgrid.fmousecell.col = fcellinfo.cell.col) and 
-                              (fgrid.fmousecell.row = row1);
-    saveindex:= canvas.save;
-    fcellinfo.color:= rowcolor(row1);
-    canvas.intersectcliprect(makerect(nullpoint,fcellrect.size));
-    bo2:= false;
-    if canbeforedrawcell then begin
-     fonbeforedrawcell(self,canvas,fcellinfo,bo2);
+    fcellinfo.rowstate:= fgrid.fdatacols.frowstate.getitempo(row1);
+    if (nextcol <> nil) and nextcol.merged[row1] then begin
+     additem(hiddenlines,row1); //by merged columns
     end;
-    if not bo2 then begin
-      if bo1 and (row1 = fgrid.ffocusedcell.row) then begin
-       drawfocusedcell(canvas);
-      end
-      else begin
-       drawcell(canvas);
-      end;
-    end;
-    if canafterdrawcell then begin
-     fonafterdrawcell(self,canvas,fcellinfo);
-    end;
-    canvas.restore(saveindex);
-    if not bo2 then begin
-     drawcelloverlay(canvas,fframe);
-    end;
-    if bo1 and (row1 = fgrid.ffocusedcell.row) and 
-                                 (co_drawfocus in foptions) then begin
-     if fframe <> nil then begin
-      canvas.move(fframe.fpaintrect.pos);
+    if not merged[row1] then begin
+     font1:= rowfont(row1);
+     if font1 <> fcellinfo.font then begin
+      fcellinfo.font:= font1;
+      canvas.font:= font1;
      end;
-     drawfocus(canvas);
-     if fframe <> nil then begin
-      canvas.remove(fframe.fpaintrect.pos);
+     if og_folded in fgrid.foptionsgrid then begin
+      fcellinfo.foldinfo:= @foldinfo[int1];
+     end;
+     fcellinfo.datapo:= getdatapo(row1);
+     fcellinfo.selected:= getselected(row1);
+     fcellinfo.readonly:= fgrid.getrowreadonlystate(row1);
+     fcellinfo.notext:= false;
+     fcellinfo.ismousecell:= (fgrid.fmousecell.col = fcellinfo.cell.col) and 
+                               (fgrid.fmousecell.row = row1);
+     saveindex:= canvas.save;
+     fcellinfo.color:= rowcolor(row1);
+     canvas.intersectcliprect(makerect(nullpoint,fcellrect.size));
+     bo2:= false;
+     if canbeforedrawcell then begin
+      fonbeforedrawcell(self,canvas,fcellinfo,bo2);
+     end;
+     if not bo2 then begin
+       if bo1 and (row1 = fgrid.ffocusedcell.row) then begin
+        drawfocusedcell(canvas);
+       end
+       else begin
+        drawcell(canvas);
+       end;
+     end;
+     if canafterdrawcell then begin
+      fonafterdrawcell(self,canvas,fcellinfo);
+     end;
+     canvas.restore(saveindex);
+     if not bo2 then begin
+      drawcelloverlay(canvas,fframe);
+     end;
+     if bo1 and (row1 = fgrid.ffocusedcell.row) and 
+                                  (co_drawfocus in foptions) then begin
+      if fframe <> nil then begin
+       canvas.move(fframe.fpaintrect.pos);
+      end;
+      drawfocus(canvas);
+      if fframe <> nil then begin
+       canvas.remove(fframe.fpaintrect.pos);
+      end;
      end;
     end;
     canvas.move(makepoint(0,ystep));
-    if not hasline then begin
-     additem(hiddenlines,row1); //by merged columns
-    end;
    end;
    if flinewidth > 0 then begin
     linewidthbefore:= canvas.linewidth;
@@ -3171,6 +3182,16 @@ function tcol.translatetocell(const arow: integer;
                const apos: pointty): pointty;
 begin
  result:= subpoint(apos,fgrid.cellrect(makegridcoord(colindex,arow)).pos);
+end;
+
+function tcol.getmerged(const row: integer): boolean;
+begin
+ result:= false;
+end;
+
+procedure tcol.setmerged(const row: integer; const avalue: boolean);
+begin
+ //dummy
 end;
 
 { tcolheaderfont }
@@ -4728,7 +4749,7 @@ begin
   result:= false;
  end
  else begin
-  if ident <= mergedcolmax then begin
+  if index > mergedcolmax then begin
    result:= fgrid.fdatacols.frowstate.getitempo(row)^.merged = mergedcolall;
   end
   else begin
@@ -5252,19 +5273,19 @@ begin
   result:= nil;
  end;
 end;
-
-function tdatacol.hasline: boolean;
+{
+function tdatacol.ismerged: boolean;
 begin
  with fcellinfo.rowstate^ do begin
-  result:= (merged = 0);
-  if not result then begin
-   result:= fcellinfo.lastvisiblecol or 
-    (merged <> mergedcolall) and ((index >= mergedcolmax) or 
-    (merged and bits[index] = 0));
+  result:= merged <> 0;
+  if result then begin
+   result:= (index <> 0) and  
+    ((merged = mergedcolall) or (index < mergedcolmax) and
+    (merged and bits[index] <> 0));
   end;
  end;
 end;
-
+}
 procedure tdatacol.beforedragevent(var ainfo: draginfoty; const arow: integer;
                                            var processed: boolean);
 begin
