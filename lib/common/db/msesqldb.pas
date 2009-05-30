@@ -12,7 +12,7 @@ unit msesqldb;
 interface
 uses
  classes,db,msebufdataset,msqldb,msedb,mseclasses,msetypes,mseglob,
- msedatabase,sysutils;
+ msedatabase,sysutils,msetimer;
   
 type
  tmsesqltransaction = class(tsqltransaction)
@@ -143,6 +143,7 @@ type
    fparamset: boolean;
    fchangelock: integer;
   protected
+   procedure checkrefresh;
    procedure recordchanged(afield: tfield); override;
   public
    constructor create(const aowner: tfieldparamlink);
@@ -163,6 +164,8 @@ type
    fonsetparam: setparameventty;
    fonaftersetparam: notifyeventty;
    foptions: fieldparamlinkoptionsty;
+   ftimer: tsimpletimer;
+   fdelayus: integer;
    function getdatafield: string;
    procedure setdatafield(const avalue: string);
    function getdatasource: tdatasource; overload;
@@ -171,12 +174,14 @@ type
    procedure setvisualcontrol(const avalue: boolean);
    function getdestdataset: tsqlquery;
    procedure setdestdataset(const avalue: tsqlquery);
+   procedure setdelayus(const avalue: integer);
   protected
    procedure loaded; override;
   //idbeditinfo
    function getdatasource(const aindex: integer): tdatasource; overload;
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
+   procedure dotimer(const sender: tobject);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -189,6 +194,8 @@ type
                     write setvisualcontrol default false;
    property destdataset: tsqlquery read getdestdataset write setdestdataset;
    property paramname: string read fparamname write fparamname;
+   property delayus: integer read fdelayus write setdelayus default -1;
+                //-1 -> off, 0 -> on idle
    property options: fieldparamlinkoptionsty read foptions write foptions
                       default defaultfieldparamlinkoptions;
    property onsetparam: setparameventty read fonsetparam write fonsetparam;
@@ -685,6 +692,16 @@ begin
  inherited create;
 end;
 
+procedure tparamsourcedatalink.checkrefresh;
+begin
+ with fowner do begin
+  if (fplo_autorefresh in foptions) and (destdataset <> nil) and 
+                       destdataset.active then begin
+   destdataset.refresh;
+  end;
+ end;
+end;
+
 procedure tparamsourcedatalink.recordchanged(afield: tfield);
 var
  bo1: boolean;
@@ -711,11 +728,12 @@ begin
       if assigned(fonaftersetparam) then begin
        fonaftersetparam(fowner);
       end;
-      if (fplo_autorefresh in foptions) and (destdataset <> nil) and 
-                           destdataset.active then begin
-       destdataset.refresh;
- //      destdataset.active:= false;
- //      destdataset.active:= true;     
+      if ftimer <> nil then begin
+       ftimer.interval:= ftimer.interval;
+       ftimer.enabled:= true;
+      end
+      else begin
+       checkrefresh;
       end;
      end;
     end;
@@ -737,6 +755,7 @@ end;
 
 constructor tfieldparamlink.create(aowner: tcomponent);
 begin
+ fdelayus:= -1;
  foptions:= defaultfieldparamlinkoptions;
  fsourcedatalink:= tparamsourcedatalink.create(self);
  fdestdatasource:= tdatasource.create(nil);
@@ -745,9 +764,15 @@ end;
 
 destructor tfieldparamlink.destroy;
 begin
+ freeandnil(ftimer);
  inherited;
  fsourcedatalink.free;
  fdestdatasource.free;
+end;
+
+procedure tfieldparamlink.dotimer(const sender: tobject);
+begin
+ fsourcedatalink.checkrefresh;
 end;
 
 function tfieldparamlink.getdatafield: string;
@@ -824,6 +849,22 @@ end;
 function tfieldparamlink.getdatasource(const aindex: integer): tdatasource;
 begin
  result:= datasource;
+end;
+
+procedure tfieldparamlink.setdelayus(const avalue: integer);
+begin
+ fdelayus:= abs(avalue);
+ if avalue = -1 then begin
+  freeandnil(ftimer);
+ end
+ else begin
+  if ftimer = nil then begin
+   ftimer:= tsimpletimer.create(-fdelayus,@dotimer,false);
+  end
+  else begin
+   ftimer.interval:= -fdelayus; //single shot
+  end;
+ end;
 end;
 
 { tsequencedatalink }

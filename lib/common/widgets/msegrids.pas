@@ -12383,7 +12383,7 @@ begin
  if not focusin then begin
   int1:= feditor.curindex;
  end;
- feditor.setup(mstr1,int1,false,cellrect(acell,cil_inner),
+ feditor.setup(mstr1,int1,not focusin,cellrect(acell,cil_inner),
                     cellrect(acell,cil_paint),nil,nil,
                     fdatacols[acell.col].rowfont(acell.row));
  feditor.textflags:= col1.textflags;
@@ -12414,6 +12414,7 @@ procedure tcustomstringgrid.checkrowreadonlystate;
 begin
  inherited;
  if isdatacell(ffocusedcell) then begin
+//  feditor.updatecaret;
   setupeditor(ffocusedcell,false);
  end;
 end;

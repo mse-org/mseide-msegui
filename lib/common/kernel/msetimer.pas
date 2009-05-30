@@ -52,6 +52,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure restart;
   published
    property interval: integer read getinterval write setinterval default 1000000;
              //in microseconds, <= 0 -> single shot, max +-2000 seconds
@@ -426,6 +427,12 @@ end;
 procedure ttimer.setontimer(const Value: notifyeventty);
 begin
  ftimer.ontimer:= value;
+end;
+
+procedure ttimer.restart;
+begin
+ interval:= ftimer.interval;
+ enabled:= true;
 end;
 
 initialization
