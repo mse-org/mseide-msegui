@@ -1402,8 +1402,10 @@ type
    procedure setnullsymbol(const avalue: msestring);
   protected
    function getitems(aindex: integer): msestring; override;
+   procedure setitems(aindex: integer; const Value: msestring); override;
    procedure modified; override;
    function getrowtext(const arow: integer): msestring; override;
+   function createdatalist: tdatalist; override;
   //idbeditfieldlink
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
    function getgriddatasource: tdatasource; virtual;
@@ -6916,12 +6918,17 @@ end;
 
 function tdbstringcol.getitems(aindex: integer): msestring;
 begin
- if aindex = fgrid.row then begin
-  result:= inherited getitems(aindex);
- end
- else begin
+// if aindex = fgrid.row then begin
+//  result:= inherited getitems(aindex);
+// end
+// else begin
   result:= getrowtext(aindex);
- end;
+// end;
+end;
+
+procedure tdbstringcol.setitems(aindex: integer; const Value: msestring);
+begin
+ //dummy
 end;
 
 function tdbstringcol.getgriddatasource: tdatasource;
@@ -6976,34 +6983,56 @@ begin
 end;
 
 procedure tdbstringcol.valuetofield;
-var
- int1: integer;
- mstr1: msestring;
+//var
+// int1: integer;
+// mstr1: msestring;
 begin
- int1:= tcustomdbstringgrid(fgrid).fdatalink.activerecord;
- if (int1 >= 0) and (int1 < fgrid.rowcount) then begin
-  fdatalink.asnullmsestring:= items[int1];
+ with tcustomdbstringgrid(fgrid) do begin
+  if col = index then begin
+   self.fdatalink.asnullmsestring:= feditor.text;
+  end;
  end;
+// int1:= tcustomdbstringgrid(fgrid).fdatalink.activerecord;
+// if (int1 >= 0) and (int1 < fgrid.rowcount) then begin
+//  fdatalink.asnullmsestring:= items[int1];
+// end;
 end;
 
 procedure tdbstringcol.fieldtovalue;
-var
- int1: integer;
+//var
+// int1: integer;
 begin
- int1:= tcustomdbstringgrid(fgrid).fdatalink.activerecord;
- if (int1 >= 0) and (int1 < fgrid.rowcount) then begin
-  items[int1]:= fdatalink.msedisplaytext('',true);
+ with tcustomdbstringgrid(fgrid) do begin
+  if col = index then begin
+   feditor.text:= self.fdatalink.msedisplaytext('',true);
+  end
+  else begin
+   self.invalidatecell(fdatalink.activerecord);
+  end;
  end;
+
+// int1:= tcustomdbstringgrid(fgrid).fdatalink.activerecord;
+// if (int1 >= 0) and (int1 < fgrid.rowcount) then begin
+//  items[int1]:= fdatalink.msedisplaytext('',true);
+// end;
 end;
 
 procedure tdbstringcol.setnullvalue;
-var
- int1: integer;
+//var
+// int1: integer;
 begin
- int1:= tcustomdbstringgrid(fgrid).fdatalink.activerecord;
- if (int1 >= 0) and (int1 < fgrid.rowcount) then begin
-  items[int1]:= fdatalink.nullsymbol;
+ with tcustomdbstringgrid(fgrid) do begin
+  if col = index then begin
+   feditor.text:= self.fdatalink.nullsymbol;
+  end
+  else begin
+   self.invalidatecell(fdatalink.activerecord);
+  end;
  end;
+// int1:= tcustomdbstringgrid(fgrid).fdatalink.activerecord;
+// if (int1 >= 0) and (int1 < fgrid.rowcount) then begin
+//  items[int1]:= fdatalink.nullsymbol;
+// end;
 end;
 
 procedure tdbstringcol.getfieldtypes(var afieldtypes: fieldtypesty);
@@ -7042,6 +7071,11 @@ end;
 procedure tdbstringcol.setnullsymbol(const avalue: msestring);
 begin
  fdatalink.nullsymbol:= avalue;
+end;
+
+function tdbstringcol.createdatalist: tdatalist;
+begin
+ result:= nil;
 end;
 
 { tdropdowndbstringcol }

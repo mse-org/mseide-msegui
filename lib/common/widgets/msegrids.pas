@@ -642,7 +642,7 @@ type
    procedure setisdb;
    function getoptionsedit: optionseditty;
    function getitems(aindex: integer): msestring; virtual;
-   procedure setitems(aindex: integer; const Value: msestring);
+   procedure setitems(aindex: integer; const Value: msestring); virtual;
    function createdatalist: tdatalist; override;
    procedure updatedisptext(var avalue: msestring); virtual;
    function getrowtext(const arow: integer): msestring; virtual;
@@ -12414,8 +12414,8 @@ procedure tcustomstringgrid.checkrowreadonlystate;
 begin
  inherited;
  if isdatacell(ffocusedcell) then begin
-//  feditor.updatecaret;
-  setupeditor(ffocusedcell,false);
+  feditor.updatecaret;
+//  setupeditor(ffocusedcell,false);
  end;
 end;
 
