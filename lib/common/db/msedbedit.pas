@@ -5841,7 +5841,11 @@ begin
   forcecalcrange;
   checkscroll;
  end;
+ int1:= fgrid.rowcount;
  updaterowcount;
+ if int1 <> fgrid.rowcount then begin
+  tcustomgrid1(fgrid).updatelayout; //again
+ end;
  checkscrollbar;
 end;
 
