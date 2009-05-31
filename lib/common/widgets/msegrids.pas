@@ -1077,6 +1077,8 @@ type
    constructor create(aowner: tcustomgrid; aclasstype: gridpropclassty);
    destructor destroy; override;
    procedure move(const curindex,newindex: integer); override;
+   function mergedwidth(const acol: integer; const amerged: longword): integer;
+                    //returns addidiional width
    property cols[const index: integer]: tcol read getcols; default;
    property focusrectdist: integer read ffocusrectdist 
                                 write setfocusrectdist default 0;
@@ -1662,7 +1664,11 @@ type
                          var mouseinfo: mouseeventinfoty); override;
    function rowatpos(y: integer): integer; //0..rowcount-1, invalidaxis if invalid
    function ystep: integer;
-   function nextfocusablecol(acol: integer; const aleft: boolean = false): integer;
+   function mergestart(const acol: integer; const arow: integer): integer;
+   function mergeend(const acol: integer; const arow: integer): integer;
+   function getmerged(const arow: integer): longword;
+   function nextfocusablecol(acol: integer; const aleft: boolean;
+                                const arow: integer): integer;
    procedure checkcellvalue(var accept: boolean); virtual; 
                    //store edited value to grid
    procedure beforefocuscell(const cell: gridcoordty;
@@ -5733,31 +5739,89 @@ begin
  ffontselect.free; 
 end;
 
+function tcols.mergedwidth(const acol: integer; const amerged: longword): integer;
+var
+ int1: integer;
+begin
+ result:= 0;
+ if (amerged <> 0) and (acol < mergedcolmax) then begin
+  if (acol = 0) or (amerged and bits[acol-1] = 0) then begin
+   if amerged = mergedcolall then begin
+    for int1:= 1 to count -1 do begin
+     with tcol(fitems[int1]) do begin
+      if not (co_invisible in foptions) then begin
+       result:= result + step;
+      end;
+     end;
+    end;
+   end
+   else begin
+    for int1:= acol to count -1 do begin
+     if amerged and bits[int1] <> 0 then begin
+      with tcol(fitems[int1]) do begin
+       if not (co_invisible in foptions) then begin
+        result:= result + step;
+       end;
+      end;
+     end
+     else begin
+      break;
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
 procedure tcols.paint(const info: colpaintinfoty; const scrollables: boolean = true);
 var
  startx,endx: integer;
- po1,po2: pointty;
- int1: integer;
+ pt1,pt2: pointty;
+ int1,int2,int3,int4: integer;
+ ar1: integerarty;
+ po1: prowstatety;
 begin
  with info do begin
-  po1:= canvas.origin;
+  pt1:= canvas.origin;
   with canvas.clipbox do begin
    startx:= x {+ po1.x};
    endx:= startx + cx;
   end;
-  po2:= po1;
+  pt2:= pt1;
+  setlength(ar1,count);
+  if (og_merged in fgrid.foptionsgrid) and (self is tdatacols) then begin
+   for int1:= 0 to high(ar1) do begin
+    with tcol(fitems[int1]) do begin
+     int4:= 0;
+     if int1 < mergedcolmax then begin
+      for int2:= 0 to high(info.rows) do begin
+       int3:= mergedwidth(int1,tdatacols(self).frowstate.merged[int2]);
+       if int3 > int4 then begin
+        int4:= int3;
+       end;
+      end;
+     end;
+     ar1[int1]:= fend + int4;
+    end;
+   end;
+  end
+  else begin
+   for int1:= 0 to high(ar1) do begin
+    ar1[int1]:= tcol(fitems[int1]).fend;
+   end;
+  end;
   for int1:= 0 to count-1 do begin
    with tcol(fitems[int1]) do begin
     if (scrollables xor (co_nohscroll in foptions)) and 
      not ((startx < fstart) and (endx <= fstart) or 
-          (startx >= fend) and (endx > fend)) then begin
-     po2.x:= fstart + po1.x;
-     canvas.origin:= po2;
+          (startx >= ar1[int1]) and (endx > ar1[int1])) then begin
+     pt2.x:= fstart + pt1.x;
+     canvas.origin:= pt2;
      paint(info);
     end;
    end;
   end;
-  canvas.origin:= po1;
+  canvas.origin:= pt1;
  end;
 end;
 
@@ -8315,7 +8379,7 @@ var
      if not bo2 then begin
       cell1.col:= ffocusedcell.col; //try to focus mouse row
       if (cell1.col < 0) or (co_nofocus in fdatacols[cell1.col].options) then begin
-       cell1.col:= nextfocusablecol(0);
+       cell1.col:= nextfocusablecol(0,false,cell1.row);
       end;
      end;
      if (cell1.col >= 0) and 
@@ -9055,7 +9119,7 @@ begin     //focuscell
    if cell.col < 0 then begin
     cell.col:= 0;
    end;
-   cell.col:= nextfocusablecol(cell.col,false);
+   cell.col:= nextfocusablecol(cell.col,false,cell.row);
    if (gs_hasactiverowcolor in fstate) and (cell.row < frowcount) then begin
     invalidaterow(cell.row);
    end;
@@ -9983,13 +10047,8 @@ var
  int1: integer;
 begin
  with fdatacols.frowstate do begin
- // int1:= ffocusedcell.row - rowsperpage + 1;
   if visiblerowcount > 0 then begin
    int1:= visiblerowstep(ffocusedcell.row,rowsperpage-1,false);
-//   int1:= ffocusedcell.row + rowsperpage - 1;
-//   if int1 > frowcount - 1 then begin
-//    int1:= frowcount -1;
-//   end;
    if int1 >= 0 then begin
     scrollrows(-(rowsperpage - 1));
     focuscell(makegridcoord(ffocusedcell.col,int1),action);
@@ -10037,97 +10096,6 @@ procedure tcustomgrid.lastrow(const action: focuscellactionty = fca_focusin);
 begin
  if frowcount > 0 then begin
   focuscell(makegridcoord(ffocusedcell.col,frowcount-1),action);
- end;
-end;
-
-procedure tcustomgrid.colstep(const action: focuscellactionty; step: integer;
-                 const rowchange: boolean; const nocolwrap: boolean);
-var
- int1: integer;
- arow: integer;
- bo1: boolean;
-begin
- if fdatacols.count > 0 then begin
-  arow:= ffocusedcell.row;
-  int1:= ffocusedcell.col;
-  repeat
-{
-   if step = 0 then begin
-    if arow < 0 then begin
-     arow:= rowcount-1;
-    end
-    else begin
-     if arow >= rowcount then begin
-      if not (gs_isdb in fstate) and (og_autoappend in foptionsgrid) then begin
-       if fdatacols.rowempty(rowcount - 1) then begin
-        arow:= rowcount-1;
-       end
-       else begin
-        arow:= rowcount;
-       end;
-      end
-      else begin
-       arow:= 0;
-      end;
-     end;
-    end;
-    focuscell(makegridcoord(int1,arow),action);
-    break;
-   end;
-}
-   if step > 0 then begin
-    inc(int1);
-    if int1 >= fdatacols.count then begin
-     if nocolwrap then begin
-      exit;
-     end;
-     int1:= 0;
-     if rowchange then begin
-      inc(arow);
-     end;
-    end;
-    if fdatacols[int1].canfocus(mb_none,[],bo1) then begin
-     dec(step);
-    end;
-   end
-   else begin
-    dec(int1);
-    if int1 < 0 then begin
-     if nocolwrap then begin
-      exit;
-     end;
-     int1:=  fdatacols.count - 1;
-     if rowchange then begin
-      dec(arow);
-     end;
-    end;
-    if fdatacols[int1].canfocus(mb_none,[],bo1) then begin
-     inc(step);
-    end;
-   end;
-   if step = 0 then begin
-    if arow < 0 then begin
-     arow:= rowcount-1;
-    end
-    else begin
-     if arow >= rowcount then begin
-      if not (gs_isdb in fstate) and (og_autoappend in foptionsgrid) then begin
-       if fdatacols.rowempty(rowcount - 1) then begin
-        arow:= rowcount-1;
-       end
-       else begin
-        arow:= rowcount;
-       end;
-      end
-      else begin
-       arow:= 0;
-      end;
-     end;
-    end;
-    focuscell(makegridcoord(int1,arow),action);
-    break;
-   end;
-  until int1 = ffocusedcell.col; //none found
  end;
 end;
 
@@ -10246,7 +10214,7 @@ begin
      end;
      key_home: begin
       if ss_ctrl in info.shiftstate then begin
-       focuscell(makegridcoord(nextfocusablecol(0),0),action);
+       focuscell(makegridcoord(nextfocusablecol(0,false,0),0),action);
       end
       else begin
        exclude(info.eventstate,es_processed);
@@ -10254,7 +10222,7 @@ begin
      end;
      key_end: begin
       if ss_ctrl in info.shiftstate then begin
-       focuscell(makegridcoord(nextfocusablecol(datacols.count-1,true),
+       focuscell(makegridcoord(nextfocusablecol(datacols.count-1,true,frowcount-1),
                                                        frowcount-1),action);
       end
       else begin
@@ -11643,15 +11611,160 @@ begin
  end;
 end;
 
-function tcustomgrid.nextfocusablecol(acol: integer;
-  const aleft: boolean): integer;
+function tcustomgrid.getmerged(const arow: integer): longword;
+begin
+ result:= 0;
+ if (og_merged in foptionsgrid) and (arow >= 0) then begin
+  result:= fdatacols.frowstate.getitempo(arow)^.merged;
+ end;
+end;
+
+function tcustomgrid.mergestart(const acol: integer; const arow: integer): integer;
 var
  int1: integer;
+ merged1: longword;
+begin
+ result:= acol;
+ if acol >= 0 then begin
+  merged1:= getmerged(arow);
+  if merged1 <> 0 then begin
+   if merged1 = mergedcolall then begin
+    result:= 0;
+   end
+   else begin
+    if result < mergedcolmax then begin
+     result:= 0;
+     for int1:= acol - 1 downto 0 do begin
+      if merged1 and bits[int1] = 0 then begin
+       result:= int1 + 1;
+       break;
+      end;
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
+function tcustomgrid.mergeend(const acol: integer; const arow: integer): integer;
+var
+ int1,int2: integer;
+ merged1: longword;
+begin
+ result:= acol;
+ if acol >= 0 then begin
+  merged1:= getmerged(arow);
+  if merged1 <> 0 then begin
+   if merged1 = mergedcolall then begin
+    result:= fdatacols.count;
+   end
+   else begin
+    if (result > 0) and (result < mergedcolmax) then begin
+     result:= fdatacols.count;
+     int2:= fdatacols.count - 1;
+     if int2 >= mergedcolmax then begin
+      int2:= mergedcolmax - 1;
+     end;
+     for int1:= acol - 1 to int2 do begin
+      if merged1 and bits[int1] = 0 then begin
+       result:= int1 + 1;
+       break;
+      end;
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure tcustomgrid.colstep(const action: focuscellactionty; step: integer;
+                 const rowchange: boolean; const nocolwrap: boolean);
+var
+ int1: integer;
+ arow: integer;
+ bo1: boolean;
+ finished: boolean;
+begin
+ if fdatacols.count > 0 then begin
+  arow:= ffocusedcell.row;
+  int1:= ffocusedcell.col;
+  finished:= true;
+  repeat
+   if step > 0 then begin
+    inc(int1);
+    finished:= int1 <= ffocusedcell.col;
+    int1:= mergeend(int1,arow);
+    finished:= finished and (int1 >= ffocusedcell.col);
+    if int1 >= fdatacols.count then begin
+     if nocolwrap then begin
+      exit;
+     end;
+     if rowchange then begin
+      inc(arow);
+     end;
+     int1:= 0;
+     finished:= int1 = ffocusedcell.col;
+    end;
+    if fdatacols[int1].canfocus(mb_none,[],bo1) then begin
+     dec(step);
+    end;
+   end
+   else begin
+    dec(int1);
+    finished:= int1 >= ffocusedcell.col;
+    int1:= mergestart(int1,arow);
+    finished:= finished and (int1 <= ffocusedcell.col);
+    if int1 < 0 then begin
+     if nocolwrap then begin
+      exit;
+     end;
+     if rowchange then begin
+      dec(arow);
+     end;
+     int1:=  mergestart(fdatacols.count - 1,arow);
+     finished:= int1 <= ffocusedcell.col;
+    end;
+    if fdatacols[int1].canfocus(mb_none,[],bo1) then begin
+     inc(step);
+    end;
+   end;
+   if step = 0 then begin
+    if arow < 0 then begin
+     arow:= rowcount-1;
+    end
+    else begin
+     if arow >= rowcount then begin
+      if not (gs_isdb in fstate) and (og_autoappend in foptionsgrid) then begin
+       if fdatacols.rowempty(rowcount - 1) then begin
+        arow:= rowcount-1;
+       end
+       else begin
+        arow:= rowcount;
+       end;
+      end
+      else begin
+       arow:= 0;
+      end;
+     end;
+    end;
+    focuscell(makegridcoord(int1,arow),action);
+    break;
+   end;
+  until finished; //none found
+ end;
+end;
+
+function tcustomgrid.nextfocusablecol(acol: integer;
+  const aleft: boolean; const arow: integer): integer;
+var
+ int1,int2: integer;
  loopcount: integer;
  bo1: boolean;
+ merged1: longword;
 begin
  result:= -1;
  if fdatacols.count > 0 then begin
+  merged1:= getmerged(arow);
   if acol > fdatacols.count then begin
    acol:= fdatacols.count;
   end;
@@ -11675,6 +11788,23 @@ begin
     end;
     dec(int1);
    until (int1 = acol) or (loopcount > 0);
+   if (merged1 <> 0) and (result > 0) then begin
+    int2:= 0;
+    if (merged1 <> mergedcolall) then begin
+     if result < mergedcolmax then begin
+      for int1:= result - 1 downto 0 do begin
+       if merged1 and bits[int1] = 0 then begin
+        int2:= int1 + 1;
+        break;
+       end;
+      end;
+     end
+     else begin
+      int2:= result;
+     end;
+    end;
+    result:= int2
+   end;
   end
   else begin
    if acol < 0 then begin

@@ -571,9 +571,9 @@ type
 
  foldlevelty = 0..127;
  rowstatety = packed record
-  selected: cardinal; //bitset lsb = col 0, msb-1 = col 30, msb = whole row
+  selected: longword; //bitset lsb = col 0, msb-1 = col 30, msb = whole row
                       //adressed by fcreateindex
-  merged: cardinal; //bitset lsb = col 1, msb = col32, 
+  merged: longword; //bitset lsb = col 1, msb = col32, 
                     //$ffffffff = first col fills whole row
                     //addressed by column index
   color: byte; //index in rowcolors, 0 = none, 1 = rowcolors[0]
@@ -596,6 +596,10 @@ type
    procedure setfont(const index: integer; const avalue: rowstatenumty);
    function getreadonly(const index: integer): boolean;
    procedure setreadonly(const index: integer; const avalue: boolean);
+   function getselected(const index: integer): longword;
+   procedure setselected(const index: integer; const avalue: longword);
+   function getmerged(const index: integer): longword;
+   procedure setmerged(const index: integer; const avalue: longword);
   protected
    function gethidden(const index: integer): boolean;
    function getfoldlevel(const index: integer): foldlevelty;
@@ -604,14 +608,18 @@ type
    procedure assign(source: tpersistent); override;
    function datatyp: datatypty; override;
    function getitempo(const index: integer): prowstatety;
+   property items[const index: integer]: rowstatety read getrowstate 
+                                              write setrowstate; default;
    property color[const index: integer]: rowstatenumty read getcolor
                                                             write setcolor;
    property font[const index: integer]: rowstatenumty read getfont
                                                             write setfont;
    property readonly[const index: integer]: boolean read getreadonly
                                                             write setreadonly;
-   property items[const index: integer]: rowstatety read getrowstate 
-                                              write setrowstate; default;
+   property selected[const index: integer]: longword read getselected 
+                                                            write setselected;
+   property merged[const index: integer]: longword read getmerged 
+                                                            write setmerged;
    property foldinfoar: bytearty read getfoldinfoar;
  end;
 
@@ -6097,6 +6105,28 @@ begin
    font:= font and not $80;
   end;
  end;
+end;
+
+function tcustomrowstatelist.getselected(const index: integer): longword;
+begin
+ result:= getitempo(index)^.selected;
+end;
+
+procedure tcustomrowstatelist.setselected(const index: integer;
+               const avalue: longword);
+begin
+ getitempo(index)^.selected:= avalue;
+end;
+
+function tcustomrowstatelist.getmerged(const index: integer): longword;
+begin
+ result:= getitempo(index)^.merged;
+end;
+
+procedure tcustomrowstatelist.setmerged(const index: integer;
+               const avalue: longword);
+begin
+ getitempo(index)^.merged:= avalue;
 end;
 
 { tlinindexmse }
