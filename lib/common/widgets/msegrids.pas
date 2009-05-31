@@ -9148,6 +9148,7 @@ begin     //focuscell
      end;
     end;
    end;
+   cell.col:= mergestart(cell.col,cell.row);
   end;
   bo1:= ((cell.col <> invalidaxis) or (cell.row <> invalidaxis)) and 
                                 not noshowcell;
