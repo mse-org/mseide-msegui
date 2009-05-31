@@ -1078,7 +1078,7 @@ type
    destructor destroy; override;
    procedure move(const curindex,newindex: integer); override;
    function mergedwidth(const acol: integer; const amerged: longword): integer;
-                    //returns addidiional width
+                    //returns additional width
    property cols[const index: integer]: tcol read getcols; default;
    property focusrectdist: integer read ffocusrectdist 
                                 write setfocusrectdist default 0;
