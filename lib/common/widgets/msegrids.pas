@@ -1525,6 +1525,7 @@ type
    fupdating: integer;
    ffocuscount: integer;
    fcellvaluechecking: integer;
+   flastcol: integer;
    fpropcolwidthref: integer;
    fzebra_start: integer;
    fzebra_color: colorty;
@@ -1694,6 +1695,7 @@ type
                                    const objects: integerarty);
    function calcshowshift(const rect: rectty; 
                                    const position: cellpositionty): pointty;
+   procedure focusrow(const arow: integer; const action: focuscellactionty);
 
   //istatfile
    procedure dostatread(const reader: tstatreader); virtual;
@@ -7235,6 +7237,7 @@ begin
  fendanchor:= invalidcell;
  fmouseparkcell:= invalidcell;
  factiverow:= invalidaxis;
+ flastcol:= invalidaxis;
 
  foptionsgrid:= defaultoptionsgrid;
  fdatarowlinewidth:= defaultgridlinewidth;
@@ -9284,6 +9287,7 @@ begin     //focuscell
   end;
  end;
  afterfocuscell(cellbefore,selectaction); 
+ flastcol:= ffocusedcell.col;
  result:= true;
 end;
 
@@ -9977,20 +9981,30 @@ begin
  result:= finnerdatarect.cy div ystep;
 end;
 
+procedure tcustomgrid.focusrow(const arow: integer; 
+                 const action: focuscellactionty);
+var
+ int1: integer;
+begin
+// focuscell(makegridcoord(ffocusedcell.col,arow),action);
+ int1:= flastcol;
+ focuscell(makegridcoord(flastcol,arow),action);
+ if (mergestart(flastcol,ffocusedcell.row) <= int1) and 
+            (mergeend(flastcol,ffocusedcell.row) > int1) then begin
+  flastcol:= int1;
+ end;
+end;
+
 procedure tcustomgrid.rowup(const action: focuscellactionty = fca_focusin);
 begin
  with fdatacols.frowstate do begin
   if visiblerowcount > 0 then begin
    if ffocusedcell.row > 0 then begin
-    focuscell(makegridcoord(ffocusedcell.col,
-          visiblerowstep(ffocusedcell.row,-1,false)),action);
- //   focuscell(makegridcoord(ffocusedcell.col,ffocusedcell.row - 1),action);
+    focusrow(visiblerowstep(ffocusedcell.row,-1,false),action);
    end
    else begin
     if og_wraprow in foptionsgrid then begin
-     focuscell(makegridcoord(ffocusedcell.col,
-           visiblerowstep(frowcount-1,0,false)),action);
-  //   focuscell(makegridcoord(ffocusedcell.col,frowcount - 1),action);
+     focusrow(visiblerowstep(frowcount-1,0,false),action);
     end;
    end;
   end;
@@ -10002,21 +10016,15 @@ var
  int1: integer;
 begin
  with fdatacols.frowstate do begin
-//  if (ffocusedcell.row < frowcount - 1) or 
-//                not (og_rotaterow in foptionsgrid) then begin
   if visiblerowcount > 0 then begin
    if not (og_wraprow in foptionsgrid) or 
                 (visiblerow(ffocusedcell.row) < visiblerowcount - 1) then begin
-    focuscell(makegridcoord(ffocusedcell.col,
-           visiblerowstep(ffocusedcell.row,1,og_autoappend in foptionsgrid)),
+    focusrow(visiblerowstep(ffocusedcell.row,1,og_autoappend in foptionsgrid),
                                                     action);
-  //  focuscell(makegridcoord(ffocusedcell.col,ffocusedcell.row + 1),action);
    end
    else begin
     if og_wraprow in foptionsgrid then begin
-     focuscell(makegridcoord(ffocusedcell.col,
-           visiblerowstep(0,0,false)),action);
- //    focuscell(makegridcoord(ffocusedcell.col,0),action);
+     focusrow(visiblerowstep(0,0,false),action);
     end;
    end;
   end;
@@ -10028,16 +10036,11 @@ var
  int1: integer;
 begin
  with fdatacols.frowstate do begin
- // int1:= ffocusedcell.row - rowsperpage + 1;
   if visiblerowcount > 0 then begin
    int1:= visiblerowstep(ffocusedcell.row,-rowsperpage+1,false);
- //  if int1 < 0 then begin
- //   int1:= 0;
- //  end;
- //  if int1 < frowcount then begin
    if visiblerow(int1) < visiblerowcount then begin
     scrollrows(rowsperpage - 1);
-    focuscell(makegridcoord(ffocusedcell.col,int1),action);
+    focusrow(int1,action);
    end;
   end;
  end;
@@ -10052,7 +10055,7 @@ begin
    int1:= visiblerowstep(ffocusedcell.row,rowsperpage-1,false);
    if int1 >= 0 then begin
     scrollrows(-(rowsperpage - 1));
-    focuscell(makegridcoord(ffocusedcell.col,int1),action);
+    focusrow(int1,action);
    end;
   end;
  end;
@@ -10068,7 +10071,7 @@ begin
  end;
  if int1 < frowcount then begin
   scrollrows(wheelheight);
-  focuscell(makegridcoord(ffocusedcell.col,int1),action);
+  focusrow(int1,action);
  end;
 end;
 
@@ -10082,21 +10085,21 @@ begin
  end;
  if int1 >= 0 then begin
   scrollrows(-wheelheight);
-  focuscell(makegridcoord(ffocusedcell.col,int1),action);
+  focusrow(int1,action);
  end;
 end;
 
 procedure tcustomgrid.firstrow(const action: focuscellactionty = fca_focusin);
 begin
  if frowcount > 0 then begin
-  focuscell(makegridcoord(ffocusedcell.col,0),action);
+  focusrow(0,action);
  end;
 end;
 
 procedure tcustomgrid.lastrow(const action: focuscellactionty = fca_focusin);
 begin
  if frowcount > 0 then begin
-  focuscell(makegridcoord(ffocusedcell.col,frowcount-1),action);
+  focusrow(frowcount-1,action);
  end;
 end;
 
@@ -11660,13 +11663,13 @@ begin
     result:= fdatacols.count;
    end
    else begin
-    if (result > 0) and (result < mergedcolmax) then begin
+    if (result < mergedcolmax) then begin
      result:= fdatacols.count;
      int2:= fdatacols.count - 1;
      if int2 >= mergedcolmax then begin
       int2:= mergedcolmax - 1;
      end;
-     for int1:= acol - 1 to int2 do begin
+     for int1:= acol to int2 do begin
       if merged1 and bits[int1] = 0 then begin
        result:= int1 + 1;
        break;
