@@ -956,7 +956,7 @@ type
   function getdbindicatorcol: integer;
  end;
  
- tgriddatalink = class(tfielddatalink,ievent,idbeditinfo)
+ tgriddatalink = class(tfieldsdatalink,ievent,idbeditinfo)
   private
    fintf: igriddatalink;
    fgrid: tcustomgrid;
@@ -985,14 +985,23 @@ type
    finsertingbefore: boolean;
    fonbeginedit: notifyeventty;
    fonendedit: notifyeventty;
+   ffield_state: tfield;
+   ffieldname_state: string;
+   ffield_color: tfield;
+   ffieldname_color: string;
+   ffield_font: tfield;
+   ffieldname_font: string;
+   ffield_readonly: tfield;
+   ffieldname_readonly: string;
+   ffield_merged: tfield;
+   ffieldname_merged: string;
    procedure checkscroll;
    procedure checkscrollbar;
    function getfirstrecord: integer;
    procedure doupdaterowdata(const row: integer);
    procedure beginnullchecking;
    procedure endnullchecking;
-   procedure setdatafield(const avalue: string);
-   function getdatafield: string;
+   procedure setfieldname_state(const avalue: string);
    procedure forcecalcrange;   
    function getobjectlinker: tobjectlinker;
   //iobjectlink
@@ -1009,6 +1018,16 @@ type
                           out fieldtypes: fieldtypesarty);
    function getdatasource1: tdatasource;
    procedure settadasource1(const avalue: tdatasource);
+   procedure setfield_state(const avalue: tfield);
+   procedure setfield_color(const avalue: tfield);
+   procedure setfield_font(const avalue: tfield);
+   procedure setfield_readonly(const avalue: tfield);
+   procedure setfield_merged(const avalue: tfield);
+   procedure readdatafield(reader: treader);
+   procedure setfieldname_merged(const avalue: string);
+   procedure setfieldname_color(const avalue: string);
+   procedure setfieldname_font(const avalue: string);
+   procedure setfieldname_readonly(const avalue: string);
   protected
    function canautoinsert: boolean;
    procedure checkdelayedautoinsert;
@@ -1021,6 +1040,7 @@ type
    procedure recordchanged(afield: tfield); override;
    procedure datasetchanged; override;
    procedure updatedata; override;
+   procedure updatefields; override;
    procedure focuscell(var cell: gridcoordty);
    procedure cellevent(var info: celleventinfoty);
    procedure invalidateindicator;
@@ -1038,6 +1058,7 @@ type
    function hasdata: boolean;
    procedure readdatasource(reader: treader);
    procedure fixupproperties(filer: tfiler); //read moved properties
+   procedure defineproperties(filer: tfiler); override;
   public
    constructor create(const aowner: tcustomgrid; const aintf: igriddatalink);
    destructor destroy; override;
@@ -1063,17 +1084,30 @@ type
    function isfirstrow: boolean;
    function islastrow: boolean;
    property owner: tcustomgrid read fgrid;
+   property field_state: tfield read ffield_state;
+   property field_color: tfield read ffield_color;
+   property field_font: tfield read ffield_font;
+   property field_readonly: tfield read ffield_readonly;
+   property field_merged: tfield read ffield_merged;
   published
    property options: griddatalinkoptionsty read foptions write foptions default [];
    property onupdaterowdata: updaterowdataeventty read fonupdaterowdata 
                                 write fonupdaterowdata;
    property datasource: tdatasource read getdatasource1 write settadasource1;
-   property datafield: string read getdatafield 
-                                       write setdatafield;
+   property fieldname_state: string read ffieldname_state 
+                                       write setfieldname_state;
              //integer field, selects grid rowcolor (field value and $7f),
              //readonlystate (field value and $80) and
              //grid rowfont ((fieldvalue shr 8) and $7f). 
              // $xx7f = default color, $7fxx = default font.
+   property fieldname_color: string read ffieldname_color 
+                                       write setfieldname_color;
+   property fieldname_font: string read ffieldname_font
+                                       write setfieldname_font;
+   property fieldname_readonly: string read ffieldname_readonly 
+                                       write setfieldname_readonly;
+   property fieldname_merged: string read ffieldname_merged 
+                                       write setfieldname_merged;
    property onbeginedit: notifyeventty read fonbeginedit write fonbeginedit;
    property onendedit: notifyeventty read fonendedit write fonendedit;
  end;
@@ -5558,14 +5592,44 @@ begin
  fobjectlinker.free;
 end;
 
-procedure tgriddatalink.setdatafield(const avalue: string);
+procedure tgriddatalink.setfieldname_state(const avalue: string);
 begin
- fieldname:= avalue;
+ if ffieldname_state <> avalue then begin
+  ffieldname_state:= avalue;
+  updatefields;
+ end;
 end;
 
-function tgriddatalink.getdatafield: string;
+procedure tgriddatalink.setfieldname_color(const avalue: string);
 begin
- result:= fieldname;
+ if ffieldname_color <> avalue then begin
+  ffieldname_color:= avalue;
+  updatefields;
+ end;
+end;
+
+procedure tgriddatalink.setfieldname_font(const avalue: string);
+begin
+ if ffieldname_font <> avalue then begin
+  ffieldname_font:= avalue;
+  updatefields;
+ end;
+end;
+
+procedure tgriddatalink.setfieldname_readonly(const avalue: string);
+begin
+ if ffieldname_readonly <> avalue then begin
+  ffieldname_readonly:= avalue;
+  updatefields;
+ end;
+end;
+
+procedure tgriddatalink.setfieldname_merged(const avalue: string);
+begin
+ if ffieldname_merged <> avalue then begin
+  ffieldname_merged:= avalue;
+  updatefields;
+ end;
 end;
 
 function tgriddatalink.getfirstrecord: integer;
@@ -5578,17 +5642,38 @@ procedure tgriddatalink.doupdaterowdata(const row: integer);
  procedure fieldtorowstate(const arow: integer);
  var
   int1: integer;
+  longword1: longword;
  begin
-  if field.isnull then begin
-   fgrid.rowcolorstate[arow]:= -1;
-   fgrid.rowfontstate[arow]:= -1;
-   fgrid.rowreadonlystate[arow]:= false;
-  end
-  else begin
-   int1:= field.asinteger;
-   fgrid.rowcolorstate[arow]:= rowstatenumty(int1 and $7f);
-   fgrid.rowreadonlystate[arow]:= rowstatenumty(int1 and $80) <> 0;
-   fgrid.rowfontstate[arow]:= rowstatenumty((int1 shr 8) and $7f);
+  if field_state <> nil then begin
+   if field_state.isnull then begin
+    fgrid.rowcolorstate[arow]:= -1;
+    fgrid.rowfontstate[arow]:= -1;
+    fgrid.rowreadonlystate[arow]:= false;
+   end
+   else begin
+    int1:= field_state.asinteger;
+    fgrid.rowcolorstate[arow]:= rowstatenumty(int1 and $7f);
+    fgrid.rowreadonlystate[arow]:= rowstatenumty(int1 and $80) <> 0;
+    fgrid.rowfontstate[arow]:= rowstatenumty((int1 shr 8) and $7f);
+   end;
+  end;
+  if (field_color <> nil) and not field_color.isnull then begin
+   fgrid.rowcolorstate[arow]:= field_color.asinteger;
+  end;
+  if (field_font <> nil) and not field_font.isnull then begin
+   fgrid.rowfontstate[arow]:= field_font.asinteger;
+  end;
+  if (field_readonly <> nil) and not field_readonly.isnull then begin
+   fgrid.rowreadonlystate[arow]:= field_readonly.asboolean;
+  end;
+  if field_merged <> nil then begin
+   longword1:= longword(field_merged.asinteger);
+   with tdatacols1(fgrid.datacols) do begin
+    if rowstate.merged[arow] <> longword1 then begin
+     rowstate.merged[arow]:= longword1;
+     mergechanged(arow);
+    end;
+   end;
   end;
  end;
  
@@ -5600,7 +5685,7 @@ begin
                  (row < fgrid.rowcount) then begin
   dataset1:= dataset;
   if dataset1 <> nil then begin
-   if field <> nil then begin
+   if (field_state <> nil) or (field_merged <> nil) then begin
     if row >= 0 then begin
      fieldtorowstate(row);
     end
@@ -5652,6 +5737,16 @@ begin
  inherited;
  filer.defineproperty('datasource',{$ifdef FPC}@{$endif}readdatasource,nil,false);
                //move values to datalink
+end;
+
+procedure tgriddatalink.readdatafield(reader: treader);
+begin
+ fieldname_state:= reader.readstring;
+end;
+
+procedure tgriddatalink.defineproperties(filer: tfiler);
+begin
+ filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
 end;
 
 function tgriddatalink.getrowfieldisnull(const afield: tfield; 
@@ -6510,6 +6605,86 @@ procedure tgriddatalink.settadasource1(const avalue: tdatasource);
 begin
  inherited datasource:= avalue;
  tdatacols1(fgrid.datacols).datasourcechanged;
+end;
+
+procedure tgriddatalink.updatefields;
+begin
+ if active then begin
+  if (ffieldname_state <> '') then begin
+   setfield_state(datasource.dataset.fieldbyname(ffieldname_state));
+  end
+  else begin
+   setfield_state(nil);
+  end;
+  if (ffieldname_color <> '') then begin
+   setfield_color(datasource.dataset.fieldbyname(ffieldname_color));
+  end
+  else begin
+   setfield_color(nil);
+  end;
+  if (ffieldname_font <> '') then begin
+   setfield_font(datasource.dataset.fieldbyname(ffieldname_font));
+  end
+  else begin
+   setfield_font(nil);
+  end;
+  if (ffieldname_readonly <> '') then begin
+   setfield_readonly(datasource.dataset.fieldbyname(ffieldname_readonly));
+  end
+  else begin
+   setfield_readonly(nil);
+  end;
+  if (ffieldname_merged <> '') then begin
+   setfield_merged(datasource.dataset.fieldbyname(ffieldname_merged));
+  end
+  else begin
+   setfield_merged(nil);
+  end;
+ end
+ else begin
+  setfield_state(nil);
+  setfield_merged(nil);
+ end;
+end;
+
+procedure tgriddatalink.setfield_state(const avalue: tfield);
+begin
+ if ffield_state <> avalue then begin
+  ffield_state:= avalue;
+  fieldchanged;
+ end;
+end;
+
+procedure tgriddatalink.setfield_color(const avalue: tfield);
+begin
+ if ffield_color <> avalue then begin
+  ffield_color:= avalue;
+  fieldchanged;
+ end;
+end;
+
+procedure tgriddatalink.setfield_font(const avalue: tfield);
+begin
+ if ffield_font <> avalue then begin
+  ffield_font:= avalue;
+  fieldchanged;
+ end;
+end;
+
+procedure tgriddatalink.setfield_readonly(const avalue: tfield);
+begin
+ if ffield_readonly <> avalue then begin
+  ffield_readonly:= avalue;
+  fieldchanged;
+ end;
+end;
+
+procedure tgriddatalink.setfield_merged(const avalue: tfield);
+begin
+ if ffield_merged <> avalue then begin
+  ffield_merged:= avalue;
+  fieldchanged;
+ end;
 end;
 
 { tdbwidgetindicatorcol }

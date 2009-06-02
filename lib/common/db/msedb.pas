@@ -819,8 +819,16 @@ type
                          fds_editing,fds_modified,fds_filterediting,
                               fds_filtereditdisabled);
  fielddatalinkstatesty = set of fielddatalinkstatety;
- 
- tfielddatalink = class(tmsedatalink)
+
+ tfieldsdatalink = class(tmsedatalink)
+  protected
+   procedure activechanged; override;
+   procedure layoutchanged; override;
+   procedure updatefields; virtual;
+   procedure fieldchanged;
+ end;
+  
+ tfielddatalink = class(tfieldsdatalink)
   private
    ffield: tfield;
    ffieldname: string;
@@ -832,8 +840,8 @@ type
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
    function getmsedefaultexpression: msestring;
-   procedure checkfield;
-   procedure updatefield;
+   procedure checkfield; 
+   procedure updatefields; override;
    function GetAsBoolean: Boolean;
    procedure SetAsBoolean(const avalue: Boolean);
    function GetAsCurrency: Currency;
@@ -858,8 +866,6 @@ type
   protected
    fstate: fielddatalinkstatesty;
    procedure setfield(const value: tfield); virtual;
-   procedure activechanged; override;
-   procedure layoutchanged; override;
   public
    function assql: string;
    function fieldactive: boolean;
@@ -4332,13 +4338,37 @@ begin
  //dummy
 end;
 
+{ tfieldsdatalink }
+
+procedure tfieldsdatalink.updatefields;
+begin
+ //dummy
+end;
+
+procedure tfieldsdatalink.activechanged;
+begin
+ inherited;
+ updatefields;
+end;
+
+procedure tfieldsdatalink.layoutchanged;
+begin
+ inherited;
+ updatefields;
+end;
+
+procedure tfieldsdatalink.fieldchanged;
+begin
+ recordchanged(nil);
+end;
+
 { tfielddatalink }
 
 procedure tfielddatalink.setfieldname(const Value: string);
 begin
  if ffieldname <> value then begin
   ffieldname :=  value;
-  updatefield;
+  updatefields;
  end;
 end; 
 
@@ -4364,12 +4394,12 @@ begin
    end;
   end;
   replacebits1(longword(fstate),longword(state1),longword(mask));
+  fieldchanged;
   editingchanged;
-  recordchanged(nil);
  end;
 end;
 
-procedure tfielddatalink.updatefield;
+procedure tfielddatalink.updatefields;
 begin
  if active and (ffieldname <> '') then begin
   setfield(datasource.dataset.fieldbyname(ffieldname));
@@ -4377,18 +4407,6 @@ begin
  else begin
   setfield(nil);
  end;
-end;
-
-procedure tfielddatalink.activechanged;
-begin
- inherited;
- updatefield;
-end;
-
-procedure tfielddatalink.layoutchanged;
-begin
- inherited;
- updatefield;
 end;
 
 function tfielddatalink.getasmsestring: msestring;

@@ -755,7 +755,9 @@ begin
    end;
    if (csdesigning in componentstate) or (ffocusedcell.row < 0) then begin
     rect1:= cellrect(makegridcoord(colindex,0),cil_noline);
-    rect1.cx:= rect1.cx + fdatacols.mergedwidth(index,row);
+    if not (csdesigning in componentstate) then begin
+     rect1.cx:= rect1.cx + fdatacols.mergedwidth(index,row);
+    end;
     if co_nohscroll in self.foptions then begin
      rect1.y:= fdatarect.y;
      widget1.widgetrect:= moverect(rect1,paintpos);

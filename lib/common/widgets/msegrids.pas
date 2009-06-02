@@ -5459,12 +5459,16 @@ begin
 end;
 
 procedure tcustomstringcol.drawcell(const canvas: tcanvas);
+var
+ int1: integer;
 begin
  inherited;
  ftextinfo.font:= canvas.font;
  ftextinfo.text.format:= nil;
  with cellinfoty(canvas.drawinfopo^) do begin
   if cell.row < fgrid.rowcount then begin
+   ftextinfo.dest.cx:= innerrect.cx;
+   ftextinfo.clip.cx:= rect.cx;
    ftextinfo.text.text:= getrowtext(cell.row);
    updatedisptext(ftextinfo.text.text);
    drawtext(canvas,ftextinfo);
