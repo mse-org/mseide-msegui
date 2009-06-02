@@ -1695,7 +1695,8 @@ type
                                    const objects: integerarty);
    function calcshowshift(const rect: rectty; 
                                    const position: cellpositionty): pointty;
-   procedure focusrow(const arow: integer; const action: focuscellactionty);
+   procedure focusrow(const arow: integer; const action: focuscellactionty;
+                        const selectmode: selectcellmodety = scm_cell);
 
   //istatfile
    procedure dostatread(const reader: tstatreader); virtual;
@@ -8382,9 +8383,10 @@ var
    ck_data: begin
     if not (gs_mousecellredirected in fstate) then begin
      cell1:= fmousecell;
-     bo2:= fdatacols[fmousecell.col].canfocus(info.button,info.shiftstate,rowfocus);
+     cell1.col:= mergestart(cell1.col,cell1.row);
+     bo2:= fdatacols[cell1.col].canfocus(info.button,info.shiftstate,rowfocus);
      if not bo2 then begin
-      cell1.col:= ffocusedcell.col; //try to focus mouse row
+      cell1.col:= mergestart(ffocusedcell.col,cell1.row); //try to focus mouse row
       if (cell1.col < 0) or (co_nofocus in fdatacols[cell1.col].options) then begin
        cell1.col:= nextfocusablecol(0,false,cell1.row);
       end;
@@ -8437,8 +8439,10 @@ var
      if (fco_mousefocus in options) then begin
       if (fmousecell.row <> ffocusedcell.row) or 
                              (info.eventkind = ek_buttonpress) then begin
-       focuscell(makegridcoord(col,fmousecell.row),
-                getfocusact(fco_mouseselect in options),scm_row);
+       focusrow(fmousecell.row,getfocusact(fco_mouseselect in options),scm_row);
+//       focuscell(makegridcoord(nextfocusablecol(col,false,fmousecell.row),
+//                               fmousecell.row),
+//                getfocusact(fco_mouseselect in options),scm_row);
       end;
      end
      else begin
@@ -9986,15 +9990,18 @@ begin
 end;
 
 procedure tcustomgrid.focusrow(const arow: integer; 
-                 const action: focuscellactionty);
+                 const action: focuscellactionty;
+                 const selectmode: selectcellmodety = scm_cell);
 var
- int1: integer;
+ int1,int2: integer;
 begin
 // focuscell(makegridcoord(ffocusedcell.col,arow),action);
  int1:= flastcol;
- focuscell(makegridcoord(flastcol,arow),action);
- if (mergestart(flastcol,ffocusedcell.row) <= int1) and 
-            (mergeend(flastcol,ffocusedcell.row) > int1) then begin
+ focuscell(makegridcoord(nextfocusablecol(flastcol,false,arow),arow),action,
+               selectmode);
+ int2:= mergestart(flastcol,ffocusedcell.row);
+ if (int2 <= int1) and (mergeend(flastcol,ffocusedcell.row) > int1) or
+       (int2 > 0) and not (co_nofocus in datacols[int2].options) then begin
   flastcol:= int1;
  end;
 end;
@@ -11667,7 +11674,8 @@ begin
     result:= fdatacols.count;
    end
    else begin
-    if (result < mergedcolmax) then begin
+    if (acol < mergedcolmax) and 
+               ((acol = 0) or (merged1 and bits[acol-1] <> 0)) then begin
      result:= fdatacols.count;
      int2:= fdatacols.count - 1;
      if int2 >= mergedcolmax then begin
@@ -11768,11 +11776,11 @@ var
  int1,int2: integer;
  loopcount: integer;
  bo1: boolean;
- merged1: longword;
+// merged1: longword;
 begin
  result:= -1;
  if fdatacols.count > 0 then begin
-  merged1:= getmerged(arow);
+//  merged1:= getmerged(arow);
   if acol > fdatacols.count then begin
    acol:= fdatacols.count;
   end;
@@ -11790,12 +11798,14 @@ begin
      int1:=  fdatacols.count - 1;
      inc(loopcount);
     end;
+    int1:= mergestart(int1,arow);
     if fdatacols[int1].canfocus(mb_none,[],bo1) then begin
      result:= int1;
      break;
     end;
     dec(int1);
    until (int1 = acol) or (loopcount > 0);
+   {
    if (merged1 <> 0) and (result > 0) then begin
     int2:= 0;
     if (merged1 <> mergedcolall) then begin
@@ -11813,12 +11823,13 @@ begin
     end;
     result:= int2
    end;
+   }
   end
   else begin
    if acol < 0 then begin
     acol:= 0;
    end;
-   int1:= acol;
+   int1:= mergestart(acol,arow);
    repeat
     if int1 >= fdatacols.count then begin
      int1:= 0;
@@ -11829,6 +11840,7 @@ begin
      break;
     end;
     inc(int1);
+    int1:= mergeend(int1,arow);
    until (int1 = acol) or (loopcount > 0);
   end;
  end;
