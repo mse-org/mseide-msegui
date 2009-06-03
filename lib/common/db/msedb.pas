@@ -825,7 +825,7 @@ type
    procedure activechanged; override;
    procedure layoutchanged; override;
    procedure updatefields; virtual;
-   procedure fieldchanged;
+   procedure fieldchanged; virtual;
  end;
   
  tfielddatalink = class(tfieldsdatalink)

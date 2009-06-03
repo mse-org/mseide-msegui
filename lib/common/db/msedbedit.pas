@@ -956,6 +956,10 @@ type
   function getdbindicatorcol: integer;
  end;
  
+ griddatalinkstatety = (gdls_hasrowstatefield,gdls_booleanmerged,
+                        gdls_booleanselected); 
+ griddatalinkstatesty = set of griddatalinkstatety; 
+
  tgriddatalink = class(tfieldsdatalink,ievent,idbeditinfo)
   private
    fintf: igriddatalink;
@@ -971,6 +975,7 @@ type
    fint64buffer: int64;
    frealtybuffer: realty;
    fgridinvalidated: boolean;
+   fstate: griddatalinkstatesty;
    foptions: griddatalinkoptionsty;
    fonupdaterowdata: updaterowdataeventty;
    fnullchecking: integer;
@@ -995,6 +1000,8 @@ type
    ffieldname_readonly: string;
    ffield_merged: tfield;
    ffieldname_merged: string;
+   ffield_selected: tfield;
+   ffieldname_selected: string;
    procedure checkscroll;
    procedure checkscrollbar;
    function getfirstrecord: integer;
@@ -1023,8 +1030,10 @@ type
    procedure setfield_font(const avalue: tfield);
    procedure setfield_readonly(const avalue: tfield);
    procedure setfield_merged(const avalue: tfield);
+   procedure setfield_selected(const avalue: tfield);
    procedure readdatafield(reader: treader);
    procedure setfieldname_merged(const avalue: string);
+   procedure setfieldname_selected(const avalue: string);
    procedure setfieldname_color(const avalue: string);
    procedure setfieldname_font(const avalue: string);
    procedure setfieldname_readonly(const avalue: string);
@@ -1035,6 +1044,7 @@ type
    procedure updatelayout;
    procedure updaterowcount;
    procedure datasetscrolled(distance: integer); override;
+   procedure fieldchanged; override;
    procedure activechanged; override;
    procedure editingchanged; override;
    procedure recordchanged(afield: tfield); override;
@@ -1089,6 +1099,7 @@ type
    property field_font: tfield read ffield_font;
    property field_readonly: tfield read ffield_readonly;
    property field_merged: tfield read ffield_merged;
+   property field_selected: tfield read ffield_selected;
   published
    property options: griddatalinkoptionsty read foptions write foptions default [];
    property onupdaterowdata: updaterowdataeventty read fonupdaterowdata 
@@ -1108,6 +1119,8 @@ type
                                        write setfieldname_readonly;
    property fieldname_merged: string read ffieldname_merged 
                                        write setfieldname_merged;
+   property fieldname_selected: string read ffieldname_selected 
+                                       write setfieldname_selected;
    property onbeginedit: notifyeventty read fonbeginedit write fonbeginedit;
    property onendedit: notifyeventty read fonendedit write fonendedit;
  end;
@@ -5632,6 +5645,14 @@ begin
  end;
 end;
 
+procedure tgriddatalink.setfieldname_selected(const avalue: string);
+begin
+ if ffieldname_selected <> avalue then begin
+  ffieldname_selected:= avalue;
+  updatefields;
+ end;
+end;
+
 function tgriddatalink.getfirstrecord: integer;
 begin
  result:= inherited firstrecord;
@@ -5667,11 +5688,40 @@ procedure tgriddatalink.doupdaterowdata(const row: integer);
    fgrid.rowreadonlystate[arow]:= field_readonly.asboolean;
   end;
   if field_merged <> nil then begin
-   longword1:= longword(field_merged.asinteger);
+   if gdls_booleanmerged in fstate then begin
+    if field_merged.asboolean then begin
+     longword1:= mergedcolall;
+    end
+    else begin
+     longword1:= 0;
+    end;
+   end
+   else begin
+    longword1:= longword(field_merged.asinteger);
+   end;
    with tdatacols1(fgrid.datacols) do begin
     if rowstate.merged[arow] <> longword1 then begin
      rowstate.merged[arow]:= longword1;
      mergechanged(arow);
+    end;
+   end;
+  end;
+  if field_selected <> nil then begin
+   if gdls_booleanselected in fstate then begin
+    if field_selected.asboolean then begin
+     longword1:= wholerowselectedmask;
+    end
+    else begin
+     longword1:= 0;
+    end;
+   end
+   else begin
+    longword1:= longword(field_selected.asinteger);
+   end;
+   with tdatacols1(fgrid.datacols) do begin
+    if rowstate.selected[arow] <> longword1 then begin
+     rowstate.selected[arow]:= longword1;
+     fgrid.invalidaterow(arow);
     end;
    end;
   end;
@@ -5685,7 +5735,7 @@ begin
                  (row < fgrid.rowcount) then begin
   dataset1:= dataset;
   if dataset1 <> nil then begin
-   if (field_state <> nil) or (field_merged <> nil) then begin
+   if gdls_hasrowstatefield in fstate then begin
     if row >= 0 then begin
      fieldtorowstate(row);
     end
@@ -6640,10 +6690,20 @@ begin
   else begin
    setfield_merged(nil);
   end;
+  if (ffieldname_selected <> '') then begin
+   setfield_selected(datasource.dataset.fieldbyname(ffieldname_selected));
+  end
+  else begin
+   setfield_selected(nil);
+  end;
  end
  else begin
   setfield_state(nil);
+  setfield_color(nil);
+  setfield_font(nil);
+  setfield_readonly(nil);
   setfield_merged(nil);
+  setfield_selected(nil);
  end;
 end;
 
@@ -6683,8 +6743,41 @@ procedure tgriddatalink.setfield_merged(const avalue: tfield);
 begin
  if ffield_merged <> avalue then begin
   ffield_merged:= avalue;
+  if avalue is tbooleanfield then begin
+   include(fstate,gdls_booleanmerged);
+  end
+  else begin
+   exclude(fstate,gdls_booleanmerged);
+  end;
   fieldchanged;
  end;
+end;
+
+procedure tgriddatalink.setfield_selected(const avalue: tfield);
+begin
+ if ffield_selected <> avalue then begin
+  ffield_selected:= avalue;
+  if avalue is tbooleanfield then begin
+   include(fstate,gdls_booleanselected);
+  end
+  else begin
+   exclude(fstate,gdls_booleanselected);
+  end;
+  fieldchanged;
+ end;
+end;
+
+procedure tgriddatalink.fieldchanged;
+begin
+ if (ffield_state <> nil) or (ffield_color <> nil) or (ffield_font <> nil) or
+     (ffield_readonly <> nil) or (ffield_merged <> nil) or 
+     (ffield_selected <> nil) then begin
+  include(fstate,gdls_hasrowstatefield);
+ end
+ else begin
+  exclude(fstate,gdls_hasrowstatefield);
+ end;
+ inherited;
 end;
 
 { tdbwidgetindicatorcol }

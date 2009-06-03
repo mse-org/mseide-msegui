@@ -9887,7 +9887,7 @@ begin  //cellrect
     if not isfixr then begin
      updatex(fdatacols[col]);
      if (og_merged in foptionsgrid) and not nomerged then begin
-      if (row >= 0) and (col < fdatacols.flastvisiblecol) then begin
+      if (row >= 0) and (row < frowcount) and (col < fdatacols.flastvisiblecol) then begin
        po1:= fdatacols.frowstate.getitempo(row);
        if po1^.merged <> 0 then begin //has merged cols
         for int1:= col to fdatacols.flastvisiblecol-1 do begin
