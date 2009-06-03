@@ -1560,6 +1560,8 @@ type
    fappendcount: integer;
    class function classskininfo: skininfoty; override;
    
+   procedure setdbselection(const cell: gridcoordty;
+                                       const avalue: boolean); virtual;
    procedure internalselectionchanged;
    procedure setoptionsgrid(const avalue: optionsgridty); virtual;
    procedure checkrowreadonlystate; virtual;
@@ -6064,7 +6066,7 @@ function tdatacols.colatpos(const x: integer;
 begin
  result:= itematpos(x,getscrollable);
 end;
-
+var testvar2: integer; testvar3: pointer;
 procedure tdatacols.updatelayout;
 var
  int1,int2: integer;
@@ -6082,6 +6084,8 @@ begin
    end;
   end;
  end;
+testvar2:= length(fitems);
+testvar3:= pointer(fitems);
  if int2 >= 0 then begin
   tdatacol(fitems[int2]).fwidth:= 1;
  end;
@@ -6322,81 +6326,86 @@ var
  ca1: cardinal;
  bo1: boolean;
 begin
- if cell.col >= 0 then begin
-  cols[cell.col].setselected(cell.row,value);
+ if gs_isdb in fgrid.fstate then begin
+  fgrid.setdbselection(cell,value);
  end
- else begin            //select-deselect whole row
-  fgrid.beginupdate;
-  try
-   for int1:= 0 to count - 1 do begin
-    cols[int1].setselected(cell.row,value);
-   end;
-   if value then begin
-    ca1:= $ffffffff;
-   end
-   else begin
-    ca1:= 0;
-   end;
-   bo1:= false;
-   if cell.row >= 0 then begin
-    po1:= frowstate.getitempo(cell.row);
-    if ca1 <> po1^.selected then begin
-     if value then begin
-      if fselectedrow = -1 then begin
-       fselectedrow:= cell.row;
+ else begin
+  if cell.col >= 0 then begin
+   cols[cell.col].setselected(cell.row,value);
+  end
+  else begin            //select-deselect whole row
+   fgrid.beginupdate;
+   try
+    for int1:= 0 to count - 1 do begin
+     cols[int1].setselected(cell.row,value);
+    end;
+    if value then begin
+     ca1:= $ffffffff;
+    end
+    else begin
+     ca1:= 0;
+    end;
+    bo1:= false;
+    if cell.row >= 0 then begin
+     po1:= frowstate.getitempo(cell.row);
+     if ca1 <> po1^.selected then begin
+      if value then begin
+       if fselectedrow = -1 then begin
+        fselectedrow:= cell.row;
+       end
+       else begin
+        fselectedrow:= -2;
+       end;
       end
       else begin
-       fselectedrow:= -2;
+       if fselectedrow = cell.row then begin
+        fselectedrow:= -1;
+       end;
       end;
+      po1^.selected:= ca1;
+      fgrid.invalidaterow(cell.row); //for fixcols
+      bo1:= true;
+     end;
+    end
+    else begin
+     po1:= frowstate.datapo;
+     if value then begin
+      for int1:= 0 to frowstate.count - 1 do begin
+       if ca1 <> po1^.selected then begin
+        po1^.selected:= ca1;
+        fgrid.invalidaterow(int1); //for fixcols
+       end;
+       inc(po1);
+      end;
+      fselectedrow:= -2;
      end
      else begin
-      if fselectedrow = cell.row then begin
+      if fselectedrow <> -1 then begin
+       if fselectedrow >= 0 then begin
+        prowstateaty(po1)^[fselectedrow].selected:= ca1;
+        fgrid.invalidaterow(fselectedrow); //for fixcols
+        bo1:= true;
+       end
+       else begin
+        for int1:= 0 to frowstate.count - 1 do begin
+         if ca1 <> po1^.selected then begin
+          po1^.selected:= ca1;
+          fgrid.invalidaterow(int1); //for fixcols
+          bo1:= true;
+         end;
+         inc(po1);
+        end;
+       end;
        fselectedrow:= -1;
       end;
      end;
-     po1^.selected:= ca1;
-     fgrid.invalidaterow(cell.row); //for fixcols
-     bo1:= true;
     end;
-   end
-   else begin
-    po1:= frowstate.datapo;
-    if value then begin
-     for int1:= 0 to frowstate.count - 1 do begin
-      if ca1 <> po1^.selected then begin
-       po1^.selected:= ca1;
-       fgrid.invalidaterow(int1); //for fixcols
-      end;
-      inc(po1);
-     end;
-     fselectedrow:= -2;
-    end
-    else begin
-     if fselectedrow <> -1 then begin
-      if fselectedrow >= 0 then begin
-       prowstateaty(po1)^[fselectedrow].selected:= ca1;
-       fgrid.invalidaterow(fselectedrow); //for fixcols
-       bo1:= true;
-      end
-      else begin
-       for int1:= 0 to frowstate.count - 1 do begin
-        if ca1 <> po1^.selected then begin
-         po1^.selected:= ca1;
-         fgrid.invalidaterow(int1); //for fixcols
-         bo1:= true;
-        end;
-        inc(po1);
-       end;
-      end;
-      fselectedrow:= -1;
-     end;
+    if bo1 then begin
+     fgrid.internalselectionchanged;
     end;
+   finally
+    fgrid.endupdate;
    end;
-   if bo1 then begin
-    fgrid.internalselectionchanged;
-   end;
-  finally
-   fgrid.endupdate;
   end;
  end;
 end;
@@ -6856,6 +6865,9 @@ end;
 
 procedure tdatacols.countchanged;
 begin
+ if flastvisiblecol >= count then begin
+  flastvisiblecol:= count - 1;
+ end;
  fgrid.ffixrows.datacolscountchanged;
  inherited;
 end;
@@ -7337,6 +7349,11 @@ begin
    include(fstate,gs_rowdatachanged);
   end;
  end;
+end;
+
+procedure tcustomgrid.setdbselection(const cell: gridcoordty; const avalue: boolean);
+begin
+ //dummy
 end;
 
 procedure tcustomgrid.internalselectionchanged;
@@ -9681,7 +9698,7 @@ begin
   result:= nullpoint;
  end;
 end;
-
+var testvar: integer;
 procedure tcustomgrid.showcell(const cell: gridcoordty;
                      const position: cellpositionty = cep_nearest;
                      const force: boolean = false);
@@ -9887,12 +9904,14 @@ begin  //cellrect
     if not isfixr then begin
      updatex(fdatacols[col]);
      if (og_merged in foptionsgrid) and not nomerged then begin
-      if (row >= 0) and (row < frowcount) and (col < fdatacols.flastvisiblecol) then begin
+      if (row >= 0) and (row < frowcount) and
+                           (col < fdatacols.flastvisiblecol) then begin
        po1:= fdatacols.frowstate.getitempo(row);
+testvar:= length(fdatacols.fitems);
        if po1^.merged <> 0 then begin //has merged cols
         for int1:= col to fdatacols.flastvisiblecol-1 do begin
          if (po1^.merged = mergedcolall) or 
-                                  (po1^.merged and bits[int1] <> 0) then begin
+          (int1 < mergedcolmax) and (po1^.merged and bits[int1] <> 0) then begin
           with tdatacol(fdatacols.fitems[int1+1]) do begin
            if not (co_invisible in foptions) then begin
             inc(result.cx,step);

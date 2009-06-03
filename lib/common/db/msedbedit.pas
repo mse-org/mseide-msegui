@@ -1087,6 +1087,8 @@ type
    function canclose(const newfocus: twidget): boolean;
    procedure painted;
    procedure loaded;
+   procedure setdbselection(const cell: gridcoordty;
+                                       const avalue: boolean);
    procedure beforefocuscell(const cell: gridcoordty;
                              const selectaction: focuscellactionty);
    function moveby(distance: integer): integer; override;
@@ -1355,6 +1357,8 @@ type
    procedure dopaint(const acanvas: tcanvas); override;
    procedure loaded; override;
 
+   procedure setdbselection(const cell: gridcoordty;
+                                       const avalue: boolean); override;
    procedure doinsertrow(const sender: tobject); override;
    procedure doappendrow(const sender: tobject); override;
    procedure dodeleterow(const sender: tobject); override;
@@ -1579,6 +1583,8 @@ type
    procedure setfixcols(const avalue: tdbstringfixcols);
   protected
    function getdbindicatorcol: integer;
+   procedure setdbselection(const cell: gridcoordty;
+                                       const avalue: boolean); override;
    procedure updatelayout; override;
    procedure editnotification(var info: editnotificationinfoty); override;
    procedure setoptionsgrid(const avalue: optionsgridty); override;
@@ -6780,6 +6786,39 @@ begin
  inherited;
 end;
 
+procedure tgriddatalink.setdbselection(const cell: gridcoordty;
+               const avalue: boolean);
+begin
+ if (ffield_selected <> nil) and (cell.row >= 0) and 
+                (cell.row = activerecord) then begin
+  dataset.edit;
+  if gdls_booleanselected in fstate then begin
+   ffield_selected.asboolean:= avalue;
+  end
+  else begin
+   if cell.col < 0 then begin
+    if avalue then begin
+     ffield_selected.asinteger:= wholerowselectedmask;
+    end
+    else begin
+     ffield_selected.asinteger:= 0;
+    end;
+   end
+   else begin
+    if cell.col <= selectedcolmax then begin
+     if avalue then begin
+      ffield_selected.asinteger:= ffield_selected.asinteger or bits[cell.col];
+     end
+     else begin
+      ffield_selected.asinteger:= ffield_selected.asinteger and 
+                                                      not bits[cell.col];
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
 { tdbwidgetindicatorcol }
 
 constructor tdbwidgetindicatorcol.create(const agrid: tcustomgrid;
@@ -7114,6 +7153,12 @@ end;
 procedure tcustomdbwidgetgrid.setfixcols(const avalue: tdbwidgetfixcols);
 begin
  inherited
+end;
+
+procedure tcustomdbwidgetgrid.setdbselection(const cell: gridcoordty;
+               const avalue: boolean);
+begin
+ fdatalink.setdbselection(cell,avalue);
 end;
 
 { tstringcoldatalink }
@@ -7906,6 +7951,12 @@ procedure tcustomdbstringgrid.defineproperties(filer: tfiler);
 begin
  inherited;
  fdatalink.fixupproperties(filer);  //move values to datalink
+end;
+
+procedure tcustomdbstringgrid.setdbselection(const cell: gridcoordty;
+               const avalue: boolean);
+begin
+ fdatalink.setdbselection(cell,avalue);
 end;
 
 { tlbdropdowncol }
