@@ -102,6 +102,7 @@ type
   
  rxwidgetstatety = ({rws_openpending,}rws_datareceived,rws_commandsending); 
  rxwidgetstatesty = set of rxwidgetstatety;
+ 
  trxwidgetgrid = class(twidgetgrid,iifimodulelink)
   private
    factive: boolean;
