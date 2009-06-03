@@ -2517,13 +2517,16 @@ end;
 procedure tgridprop.drawcellbackground(const acanvas: tcanvas;
                 const aframe: tcustomframe; const aface: tcustomface);
 begin
- acanvas.fillrect(makerect(nullpoint,fcellrect.size),fcellinfo.color);
+ acanvas.fillrect(fcellinfo.rect,fcellinfo.color);
+// acanvas.fillrect(makerect(nullpoint,fcellrect.size),fcellinfo.color);
  if aframe <> nil then begin
-  aframe.paintbackground(acanvas,makerect(nullpoint,fcellrect.size));
+//  aframe.paintbackground(acanvas,makerect(nullpoint,fcellrect.size));
+  aframe.paintbackground(acanvas,fcellinfo.rect);
  end;
  acanvas.rootbrushorigin:= fgrid.fbrushorigin;
  if aface <> nil then begin
-  aface.paint(acanvas,makerect(nullpoint,fcellinfo.rect.size));
+  aface.paint(acanvas,fcellinfo.rect);
+//  aface.paint(acanvas,makerect(nullpoint,fcellinfo.rect.size));
  end;
 end;
 
