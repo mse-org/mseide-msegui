@@ -47,7 +47,7 @@ type
  optionseditdbty = set of optioneditdbty;
 
  griddatalinkoptionty = (gdo_propscrollbar,gdo_thumbtrack,
-           gdo_checkbrowsemodeonexit);
+           gdo_checkbrowsemodeonexit,gdo_selectautopost);
  griddatalinkoptionsty = set of griddatalinkoptionty;
 
 const
@@ -6788,9 +6788,12 @@ end;
 
 procedure tgriddatalink.setdbselection(const cell: gridcoordty;
                const avalue: boolean);
+var
+ bo1: boolean;
 begin
  if (ffield_selected <> nil) and (cell.row >= 0) and 
                 (cell.row = activerecord) then begin
+  bo1:= editing;
   dataset.edit;
   if gdls_booleanselected in fstate then begin
    ffield_selected.asboolean:= avalue;
@@ -6815,6 +6818,9 @@ begin
      end;
     end;
    end;
+  end;
+  if not bo1 and (gdo_selectautopost in foptions) then begin
+   dataset.post;
   end;
  end;
 end;
