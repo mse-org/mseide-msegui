@@ -161,7 +161,7 @@ type
       gs_sortvalid,gs_cellentered,gs_cellclicked,gs_emptyrowremoved,
       gs_rowcountinvalid,gs_rowreadonly,
       gs_scrollup,gs_scrolldown,gs_scrollleft,gs_scrollright,
-      gs_selectionchanged,gs_rowdatachanged,gs_invalidated,
+      gs_selectionchanged,gs_rowdatachanged,gs_focusedcellchanged,gs_invalidated,
       gs_mouseentered,gs_childmousecaptured,gs_child,
       gs_mousecellredirected,gs_restorerow,gs_cellexiting,gs_rowremoving,
       gs_hasactiverowcolor,
@@ -4929,7 +4929,8 @@ begin
        fselectedrow:= -1;
       end;
      end;
-     cellchanged(row);
+     invalidatecell(row);
+//     cellchanged(row);
      doselectionchanged;
     end;
    end;
@@ -4951,7 +4952,8 @@ begin
      if fselectedrow >= 0 then begin
       prowstateaty(po1)^[fselectedrow].selected:= 
                prowstateaty(po1)^[fselectedrow].selected and ca1;
-      cellchanged(fselectedrow);
+      invalidatecell(fselectedrow);
+//      cellchanged(fselectedrow);
      end
      else begin
       for int1:= 0 to fgrid.frowcount - 1 do begin
@@ -8180,7 +8182,11 @@ begin
 end;
 
 procedure tcustomgrid.cellchanged(const sender: tcol; const row: integer);
+var
+ bo1: boolean;
 begin
+ bo1:= (ffocusedcell.row >= 0) and (sender.colindex = ffocusedcell.col) and
+     ((row < 0) or (row = ffocusedcell.row));
  if fupdating = 0 then begin
   if row >= 0 then begin
    invalidatecell(makegridcoord(sender.colindex,row));
@@ -8188,12 +8194,14 @@ begin
   else begin
    colchanged(sender);
   end;
-  if (ffocusedcell.row >= 0) and (sender.colindex = ffocusedcell.col) and
-     ((row < 0) or (row = ffocusedcell.row)) then begin
+  if bo1 then begin
    focusedcellchanged;
   end;
  end
  else begin
+  if bo1 then begin
+   include(fstate,gs_focusedcellchanged);
+  end;
   if fnoinvalidate = 0 then begin
    if fstate * [gs_invalidated,gs_layoutvalid] = [gs_layoutvalid] then begin
     if high(finvalidatedcells) > 20 then begin
@@ -8212,7 +8220,7 @@ end;
 
 procedure tcustomgrid.focusedcellchanged;
 begin
- //dummy
+ exclude(fstate,gs_focusedcellchanged);
 end;
 
 procedure tcustomgrid.colchanged(const sender: tcol);
@@ -11477,7 +11485,8 @@ begin
   if gs_selectionchanged in fstate then begin
    internalselectionchanged;
   end;
-  if (ffocusedcell.col >= 0) and (ffocusedcell.row >= 0) then begin
+  if (gs_focusedcellchanged in fstate) and 
+                 (ffocusedcell.col >= 0) and (ffocusedcell.row >= 0) then begin
    focusedcellchanged;
   end;
  end;
@@ -12576,7 +12585,8 @@ end;
 
 procedure tcustomstringgrid.focusedcellchanged;
 begin
- setupeditor(ffocusedcell,false);
+ inherited;
+ setupeditor(ffocusedcell,true);
 end;
 
 procedure tcustomstringgrid.checkrowreadonlystate;
