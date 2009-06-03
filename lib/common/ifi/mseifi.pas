@@ -43,6 +43,12 @@ type
  datarecty = record //dummy
  end;
 
+ ifimsestringintty = record
+  int: integer;
+  mstr: ifinamety;
+ end;
+ pifimsestringintty = ^ifimsestringintty;
+ 
  ifibytesty = record
   length: integer;
   data: datarecty;
@@ -540,6 +546,8 @@ function encodeifidata(const avalue: real;
                        const headersize: integer = 0): string; overload;
 function encodeifidata(const avalue: msestring; 
                        const headersize: integer = 0): string; overload;
+function encodeifidata(const avalue: msestringintty; 
+                       const headersize: integer = 0): string; overload;
 function encodeifidata(const avalue: ansistring; 
                        const headersize: integer = 0): string; overload;
 function encodeifidata(const alist: tdatalist; const aindex: integer;
@@ -560,6 +568,8 @@ function decodeifidata(const source: pifidataty; out dest: real): integer;
                                                         overload;
 function decodeifidata(const source: pifidataty; out dest: currency): integer;
                                                         overload;
+function decodeifidata(const source: pifidataty; 
+                                 out dest: msestringintty): integer; overload;
 function decodeifidata(const source: pifidataty; out dest: variant): integer;
                                                         overload;
 function decodeifidata(const source: pifidataty; const aindex: integer;
@@ -583,7 +593,7 @@ const
   sizeof(ifidataty)+sizeof(currency),                  //idk_currency
   sizeof(ifidataty)+sizeof(double),                    //idk_real
   sizeof(ifidataty)+sizeof(ifinamety),                 //idk_msestring
-  sizeof(ifidataty)+sizeof(integer)+sizeof(ifinamety), //idk_msestringint
+  sizeof(ifidataty)+sizeof(ifimsestringintty),         //idk_msestringint
 //  sizeof(ifidataty)+sizeof(ifinamety),               //idk_ansistring
   sizeof(ifidataty)+sizeof(ifibytesty),                //idk_bytes
   sizeof(ifidataty)+sizeof(rowstatety)                 //idk_rowstate
@@ -694,6 +704,19 @@ begin
       initdataheader(headersize,idk_msestring,length(str1),result)));
 end;
 
+function encodeifidata(const avalue: msestringintty; 
+                       const headersize: integer = 0): string; overload;
+var
+ str1: string;
+ po1: pifimsestringintty;
+begin
+ str1:= stringtoutf8(avalue.mstr);
+ po1:= pifimsestringintty(initdataheader(
+           headersize,idk_msestringint,length(str1),result));
+ po1^.int:= avalue.int;
+ stringtoifiname(str1,@po1^.mstr);
+end;
+
 function encodeifidata(const avalue: ansistring; 
                        const headersize: integer = 0): string; overload;
 begin
@@ -713,6 +736,9 @@ begin
   end;
   dl_real: begin
    result:= encodeifidata(trealdatalist(alist).items[aindex],headersize);
+  end;
+  dl_msestringint: begin
+   result:= encodeifidata(tmsestringintdatalist(alist).doubleitems[aindex],headersize);
   end;
   else begin
    result:= '';
@@ -847,6 +873,22 @@ begin
  result:= datarecsizes[idk_currency];
 end;
 
+function decodeifidata(const source: pifidataty; 
+                                 out dest: msestringintty): integer; overload;
+var
+ str1: string;
+ po1: pifimsestringintty;
+begin
+ if source^.header.kind <> idk_msestringint then begin
+  datakinderror;
+ end;
+ po1:= @source^.data;
+ dest.int:= po1^.int;
+ ifinametostring(pifinamety(@po1^.mstr),str1);
+ dest.mstr:= utf8tostring(str1);
+ result:= datarecsizes[idk_msestringint] + length(str1);
+end;
+
 function decodeifidata(const source: pifidataty; out dest: variant): integer;
 var
  integer1: integer;
@@ -898,6 +940,7 @@ var
  int1: integer;
  rea1: real;
  mstr1: msestring;
+ strint1: msestringintty;
 begin
  result:= 0;
  if (alist <> nil) and (aindex < alist.count) then begin
@@ -918,6 +961,12 @@ begin
     if alist.datatyp = dl_real then begin
      result:= decodeifidata(source,rea1);
      trealdatalist(alist)[aindex]:= rea1;
+    end;
+   end;
+   idk_msestringint: begin
+    if alist.datatyp = dl_msestringint then begin
+     result:= decodeifidata(source,strint1);
+     tmsestringintdatalist(alist)[aindex]:= strint1;
     end;
    end;
   end;
