@@ -152,7 +152,7 @@ Type
                   const asql: msestring; const aparams : tmseparams); override;
     procedure UnPrepareStatement(cursor:TSQLCursor); override;
     procedure FreeFldBuffers(cursor : TSQLCursor); override;
-    procedure Execute(const cursor: TSQLCursor;
+    procedure internalExecute(const cursor: TSQLCursor;
        const atransaction:tSQLtransaction;
        const AParams: TmseParams; const autf8: boolean); override;
     procedure AddFieldDefs(const cursor: TSQLCursor; 
@@ -840,7 +840,7 @@ begin
   freebindingbuffers(c.fresultbuf);
 end;
 
-procedure tmysqlconnection.Execute(const  cursor: TSQLCursor;
+procedure tmysqlconnection.internalExecute(const  cursor: TSQLCursor;
                const atransaction: tSQLtransaction; const AParams : TmseParams;
                const autf8: boolean);
 

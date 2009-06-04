@@ -103,7 +103,7 @@ type
                   const atransaction : tsqltransaction;
                   const asql: msestring; const aparams : tmseparams); override;
    procedure FreeFldBuffers(cursor : TSQLCursor); override;
-   procedure Execute(const cursor: TSQLCursor; const atransaction: tsqltransaction;
+   procedure internalExecute(const cursor: TSQLCursor; const atransaction: tsqltransaction;
                      const AParams : TmseParams; const autf8: boolean); override;
    procedure AddFieldDefs(const cursor: TSQLCursor;
                   const FieldDefs : TfieldDefs); override;
@@ -636,7 +636,7 @@ begin
 // Do nothing
 end;
 
-procedure TPQConnection.Execute(const cursor: TSQLCursor; 
+procedure TPQConnection.internalExecute(const cursor: TSQLCursor; 
            const atransaction: tsqltransaction; const AParams : TmseParams;
            const autf8: boolean);
 

@@ -96,7 +96,7 @@ type
     procedure internalCommitRetaining(trans:TSQLHandle); override;
     procedure internalRollbackRetaining(trans:TSQLHandle); override;
     // - Statement execution
-    procedure Execute(const cursor:TSQLCursor; 
+    procedure internalExecute(const cursor:TSQLCursor; 
              const ATransaction:TSQLTransaction; const AParams:TmseParams;
              const autf8: boolean); override;
     // - Result retrieving
@@ -804,7 +804,7 @@ begin
   // Tranactions not implemented yet
 end;
 
-procedure TODBCConnection.Execute(const cursor: TSQLCursor;
+procedure TODBCConnection.internalExecute(const cursor: TSQLCursor;
       const ATransaction: TSQLTransaction; const AParams: TmseParams;
       const autf8: boolean);
 var

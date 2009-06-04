@@ -118,6 +118,9 @@ type
 //    procedure SetBeforeConnect(const AValue: TNotifyEvent);
 //    procedure SetBeforeDisconnect(const AValue: TNotifyEvent);
    ftagpo: pointer;
+   fwaitcursor: boolean;
+   factioncount: integer;
+   procedure setwaitcursor(const avalue: boolean);
   protected
     procedure DoConnect; virtual;
     procedure DoDisconnect; virtual;
@@ -131,11 +134,14 @@ type
     procedure Close;
     destructor Destroy; override;
     procedure Open;
+    procedure beforeaction;
+    procedure afteraction;
 //    property DataSetCount: Longint read GetDataSetCount;
 //    property DataSets[Index: Longint]: TDataSet read GetDataSet;
    property tagpo: pointer read ftagpo write ftagpo;
   published
-    property Connected: Boolean read GetConnected write SetConnected;
+   property Connected: Boolean read GetConnected write SetConnected;
+   property waitcursor: boolean read fwaitcursor write setwaitcursor;
 //    property LoginPrompt: Boolean read FLoginPrompt write FLoginPrompt;
 //    property Streamedconnected: Boolean read FStreamedConnected write FStreamedConnected;
 
@@ -1033,6 +1039,39 @@ procedure TCustomConnection.Open;
 begin
   Connected := True;
 end;
+
+procedure TCustomConnection.setwaitcursor(const avalue: boolean);
+var
+ bo1: boolean;
+begin
+ if avalue <> fwaitcursor then begin
+  bo1:= fwaitcursor;
+  fwaitcursor:= avalue;
+  if bo1 and (factioncount > 0) then begin
+   application.endwait;
+  end;
+  factioncount:= 0;
+ end;
+end;
+
+procedure tcustomconnection.beforeaction;
+begin
+ if waitcursor then begin
+  if interlockedincrement(factioncount) = 1 then begin
+   application.beginwait;
+  end;
+ end;
+end;
+
+procedure tcustomconnection.afteraction;
+begin
+ if waitcursor then begin
+  if interlockeddecrement(factioncount) = 0 then begin
+   application.endwait;
+  end;
+ end;
+end;
+
 
 { ttacontroller }
 

@@ -1873,56 +1873,61 @@ begin
   exit;
  end;
  int2:= fbrecordcount;
- while ((result < fpacketrecords) or all) and 
-                             (loadbuffer(femptybuffer^.header) = grok) do begin
-  appendrecord(femptybuffer);
-  femptybuffer:= intallocrecord;
-  inc(result);
- end;
- bo1:= checkcanevent(self,tmethod(foninternalcalcfields));
- bo2:= (bs_initinternalcalc in fbstate);
- if bo2 then begin
-  setlength(ar1,fields.count);
-  int3:= 0;
-  for int1:= 0 to high(ar1) do begin
-   field1:= fields[int1];
-   with field1 do begin
-    if (fieldkind = fkinternalcalc) and (defaultexpression <> '') then begin
-     ar1[int3]:= field1;
-     inc(int3);
-    end;
-   end;
+ database.beforeaction;
+ try
+  while ((result < fpacketrecords) or all) and 
+                              (loadbuffer(femptybuffer^.header) = grok) do begin
+   appendrecord(femptybuffer);
+   femptybuffer:= intallocrecord;
+   inc(result);
   end;
-  setlength(ar1,int3);
- end;
- if bo1 or bo2 then begin
-  state1:= settempstate(dsinternalcalc);
-  fbstate:= fbstate + [bs_internalcalc,bs_fetching];
-  recnobefore:= frecno;
-  bufbefore:= fcurrentbuf;
-  try
-   for int1:= int2 to fbrecordcount-1 do begin
-    frecno:= int1;
-    fcurrentbuf:= findexes[0].ind[int1];
-    if bo2 then begin
-     for int3:= 0 to high(ar1) do begin
-      with ar1[int3] do begin
-       asstring:= defaultexpression;
-      end;
+  bo1:= checkcanevent(self,tmethod(foninternalcalcfields));
+  bo2:= (bs_initinternalcalc in fbstate);
+  if bo2 then begin
+   setlength(ar1,fields.count);
+   int3:= 0;
+   for int1:= 0 to high(ar1) do begin
+    field1:= fields[int1];
+    with field1 do begin
+     if (fieldkind = fkinternalcalc) and (defaultexpression <> '') then begin
+      ar1[int3]:= field1;
+      inc(int3);
      end;
     end;
-    if bo1 then begin
-     foninternalcalcfields(self,true);
-    end;
    end;
-  finally
-   frecno:= recnobefore;
-   fcurrentbuf:= bufbefore;
-   fbstate:= fbstate - [bs_internalcalc,bs_opening,bs_fetching];
-   restorestate(state1);
+   setlength(ar1,int3);
   end;
+  if bo1 or bo2 then begin
+   state1:= settempstate(dsinternalcalc);
+   fbstate:= fbstate + [bs_internalcalc,bs_fetching];
+   recnobefore:= frecno;
+   bufbefore:= fcurrentbuf;
+   try
+    for int1:= int2 to fbrecordcount-1 do begin
+     frecno:= int1;
+     fcurrentbuf:= findexes[0].ind[int1];
+     if bo2 then begin
+      for int3:= 0 to high(ar1) do begin
+       with ar1[int3] do begin
+        asstring:= defaultexpression;
+       end;
+      end;
+     end;
+     if bo1 then begin
+      foninternalcalcfields(self,true);
+     end;
+    end;
+   finally
+    frecno:= recnobefore;
+    fcurrentbuf:= bufbefore;
+    fbstate:= fbstate - [bs_internalcalc,bs_opening,bs_fetching];
+    restorestate(state1);
+   end;
+  end;
+  exclude(fbstate,bs_opening);
+ finally
+  database.afteraction;
  end;
- exclude(fbstate,bs_opening);
 end;
 
 function tmsebufdataset.getfieldsize(const datatype: tfieldtype;

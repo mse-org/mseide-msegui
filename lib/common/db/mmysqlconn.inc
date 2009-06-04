@@ -131,7 +131,7 @@ Type
                   const asql: msestring; const aparams : tmseparams); override;
     procedure UnPrepareStatement(cursor:TSQLCursor); override;
     procedure FreeFldBuffers(cursor : TSQLCursor); override;
-    procedure Execute(const cursor: TSQLCursor;
+    procedure internalExecute(const cursor: TSQLCursor;
              const atransaction:tSQLtransaction; const AParams : TmseParams;
              const autf8: boolean); override;
     procedure AddFieldDefs(const cursor: TSQLCursor; 
@@ -442,7 +442,7 @@ begin
   SetLength(c.MapDSRowToMSQLRow,0);
 end;
 
-procedure TConnectionName.Execute(const  cursor: TSQLCursor;
+procedure TConnectionName.internalExecute(const  cursor: TSQLCursor;
                const atransaction: tSQLtransaction; const AParams : TmseParams;
                const autf8: boolean);
 

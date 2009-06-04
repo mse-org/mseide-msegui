@@ -144,7 +144,7 @@ type
                  const asql: msestring; const aparams : tmseparams); override;
    procedure UnPrepareStatement(cursor : TSQLCursor); override;
    procedure FreeFldBuffers(cursor : TSQLCursor); override;
-   procedure Execute(const cursor: TSQLCursor;
+   procedure internalExecute(const cursor: TSQLCursor;
              const atransaction: tsqltransaction; const AParams : TmseParams;
              const autf8: boolean); override;
    procedure AddFieldDefs(const cursor: TSQLCursor;
@@ -771,7 +771,7 @@ begin
     end;
 end;
 
-procedure TIBConnection.Execute(const cursor: TSQLCursor;
+procedure TIBConnection.internalExecute(const cursor: TSQLCursor;
                 const atransaction: tsqltransaction; const AParams : TmseParams;
                 const autf8: boolean);
 begin
@@ -781,7 +781,7 @@ begin
  with TIBCursor(cursor) do begin
   if isc_dsql_execute2(@Status,@cursor.ftrans,
                         @Statement,1,in_SQLDA,nil) <> 0 then begin
-    CheckError('Execute', Status);
+   CheckError('Execute', Status);
   end;
   fopen:= true;  
  end;

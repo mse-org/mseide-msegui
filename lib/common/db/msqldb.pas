@@ -120,6 +120,8 @@ type
    fdatabasename: filenamety;
    fintf: idbcontroller;
    foptions: databaseoptionsty;
+   factioncount: integer;
+   factionwait: boolean;   
    procedure setoptions(const avalue: databaseoptionsty);
   protected
    procedure setowneractive(const avalue: boolean); override;
@@ -176,8 +178,10 @@ type
 
     Function AllocateTransactionHandle : TSQLHandle; virtual; abstract;
 
+    procedure internalexecute(const cursor: tsqlcursor; const atransaction: tsqltransaction;
+               const aparams : tmseparams; const autf8: boolean); virtual; abstract;
     procedure Execute(const cursor: TSQLCursor; const atransaction: tsqltransaction;
-               const AParams : TmseParams; const autf8: boolean); virtual; abstract;
+               const AParams : TmseParams; const autf8: boolean);
     function GetTransactionHandle(trans : TSQLHandle): pointer; virtual; abstract;
     function Commit(trans : TSQLHandle) : boolean; virtual; abstract;
     function RollBack(trans : TSQLHandle) : boolean; virtual; abstract;
@@ -1357,6 +1361,17 @@ end;
 function tcustomsqlconnection.GetHandle: pointer;
 begin
   Result := nil;
+end;
+
+procedure tcustomsqlconnection.Execute(const cursor: TSQLCursor; const atransaction: tsqltransaction;
+               const AParams : TmseParams; const autf8: boolean);
+begin
+ beforeaction;
+ try
+  internalexecute(cursor,atransaction,aparams,autf8);
+ finally
+  afteraction;
+ end;
 end;
 
 function tcustomsqlconnection.GetSchemaInfoSQL( SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string) : string;

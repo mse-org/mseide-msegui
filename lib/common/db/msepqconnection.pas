@@ -33,7 +33,7 @@ type
    procedure setconnected(const avalue: boolean);
    procedure setoptions(const avalue: pqconnectionoptionsty);
   protected
-   procedure execute(const cursor: tsqlcursor; const atransaction: tsqltransaction;
+   procedure internalexecute(const cursor: tsqlcursor; const atransaction: tsqltransaction;
                      const aparams: tmseparams; const autf8: boolean); override;
    function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
                          const acursor: tsqlcursor): TStream; override;
@@ -95,7 +95,7 @@ begin
  end;
 end;
 
-procedure tmsepqconnection.execute(const cursor: tsqlcursor; 
+procedure tmsepqconnection.internalexecute(const cursor: tsqlcursor; 
                const atransaction: tsqltransaction;
                const aparams: tmseparams; const autf8: boolean);
 const

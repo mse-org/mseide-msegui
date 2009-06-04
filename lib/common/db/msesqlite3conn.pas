@@ -103,7 +103,7 @@ type
    procedure preparestatement(const cursor: tsqlcursor; 
                   const atransaction : tsqltransaction;
                   const asql: msestring; const aparams : tmseparams); override;
-   procedure Execute(const cursor: TSQLCursor; const atransaction: tsqltransaction;
+   procedure internalExecute(const cursor: TSQLCursor; const atransaction: tsqltransaction;
                      const AParams : TmseParams; const autf8: boolean); override;
    function Fetch(cursor : TSQLCursor) : boolean; override;
    procedure AddFieldDefs(const cursor: TSQLCursor;
@@ -493,7 +493,7 @@ begin
  checkerror(sqlite3_clear_bindings(astatement));
 end;
 
-procedure tsqlite3connection.Execute(const cursor: TSQLCursor;
+procedure tsqlite3connection.internalExecute(const cursor: TSQLCursor;
                const atransaction: tsqltransaction; const AParams: TmseParams;
                const autf8: boolean);
 var
