@@ -366,10 +366,11 @@ type
 
  tstreamprintercanvas = class(tprintercanvas)
   protected
-   fstream: ttextstream;  
-   procedure reset; override;
+   fstream: ttextstream;
    procedure streamwrite(const atext: string); //checks fstream = nil
    procedure streamwriteln(const atext: string); //checks fstream = nil
+  public
+   procedure reset; override;
  end;
   
  tprintervalueselector = class(tcustomselector)
@@ -1495,7 +1496,7 @@ begin
   command:= sys_getprintcommand;
  end;
  if canevent(tmethod(fonupdateprintcommand)) then begin
-  application.synchronize(@doupdateprintcommand,@command);
+  application.synchronize({$ifdef FPC}@{$endif}doupdateprintcommand,@command);
  end;
  pip1:= tpipewriter.create;
  try
