@@ -99,6 +99,7 @@ type
    destructor destroy; override; 
    procedure deliver;
    function waitfor: boolean;
+   property quiet: boolean read fquiet;
    property success: boolean read fsuccess;
    property exeptionclass: exceptclass read fexceptionclass;
    property exceptionmessage: string read fexceptionmessage;
@@ -117,14 +118,27 @@ function synchronizeevent(const aevent: tsynchronizeevent): boolean;
 var
  int1: integer;
 begin
- result:= false;
  if not application.terminated then begin
-  int1:= application.unlockall;
-  try
-   application.postevent(aevent);
-   result:= aevent.waitfor and aevent.success;
-  finally
-   application.relockall(int1);
+  if application.ismainthread then begin
+   try
+    aevent.execute;
+    result:= true;
+   except
+    if not aevent.quiet then begin
+     raise;
+     result:= false;
+    end;
+   end;
+  end
+  else begin
+   result:= false;
+   int1:= application.unlockall;
+   try
+    application.postevent(aevent);
+    result:= aevent.waitfor and aevent.success;
+   finally
+    application.relockall(int1);
+   end;
   end;
  end;
 end;

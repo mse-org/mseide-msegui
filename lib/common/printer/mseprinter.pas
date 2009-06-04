@@ -201,13 +201,18 @@ type
    property statvarname;
  end;
 
+ tstreamprinter = class;
+ updateprinteransistringeventty = procedure(const sender: tstreamprinter;
+                                   var avalue: ansistring) of object;
  tstreamprinter = class(tprinter)
   private
    fprintcommand: string;
+   fonupdateprintcommand: updateprinteransistringeventty;
    procedure setstream(const avalue: ttextstream);
   protected
    procedure dostatread(const reader: tstatreader); override;
    procedure dostatwrite(const writer: tstatwriter); override;
+   procedure doupdateprintcommand(const adata: pointer);
   public
    constructor create(aowner: tcomponent); override;
    procedure beginprint(command: string = ''; const apreamble: string = ''); overload;
@@ -218,6 +223,9 @@ type
    property printcommand: string read fprintcommand write fprintcommand;
    property options;
    property onerror;  //call abort for quiet cancel
+   property onupdateprintcommand: updateprinteransistringeventty 
+                      read fonupdateprintcommand write fonupdateprintcommand;
+                      //runs in main thread
  end;
 
  tprinterfont = class(tcanvasfont)
@@ -1468,6 +1476,13 @@ begin
  inherited;
 end;
 
+procedure tstreamprinter.doupdateprintcommand(const adata: pointer);
+begin
+ if canevent(tmethod(fonupdateprintcommand)) then begin
+  fonupdateprintcommand(self,pstring(adata)^);
+ end;
+end;
+
 procedure tstreamprinter.beginprint(command: string = ''; 
                                             const apreamble: string = '');
 var
@@ -1478,6 +1493,9 @@ begin
  end;
  if command = '' then begin
   command:= sys_getprintcommand;
+ end;
+ if canevent(tmethod(fonupdateprintcommand)) then begin
+  application.synchronize(@doupdateprintcommand,@command);
  end;
  pip1:= tpipewriter.create;
  try

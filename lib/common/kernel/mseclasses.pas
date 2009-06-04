@@ -51,6 +51,8 @@ type
  
  updatestringeventty = procedure(const sender: tobject; 
                                  var avalue: msestring) of object;
+ updateansistringeventty = procedure(const sender: tobject; 
+                                 var avalue: ansistring) of object;
  updateint64eventty = procedure(const sender: tobject; var avalue: int64) of object;
  
  setbooleaneventty = procedure(const sender: tobject; var avalue: boolean;

@@ -168,6 +168,8 @@ type
          aps_waitstarted,aps_waitcanceled,aps_waitterminated,aps_waitok,
          aps_waitidlelock,aps_eventflushing);
  applicationstatesty = set of applicationstatety;
+ 
+ synchronizeprocty = procedure(const adata: pointer) of object;
 
  tcustomapplication = class(tmsecomponent)
   private
@@ -260,7 +262,9 @@ type
    procedure lockifnotmainthread;
    procedure unlockifnotmainthread;
    function synchronize(const proc: objectprocty;
-                       const quite: boolean = false): boolean;
+                       const quite: boolean = false): boolean; overload;
+   function synchronize(const proc: synchronizeprocty; const data: pointer;
+                       const quite: boolean = false): boolean; overload;
      //true if not aborted, quiet -> show no exceptions
    function ismainthread: boolean;
    function islockthread: boolean;
@@ -315,6 +319,19 @@ type
    fproc: objectprocty; 
   protected
    procedure execute; override;
+  public
+   constructor create(const aproc: objectprocty; const aquiet: boolean);
+ end;
+
+ tappsynchronizedataevent = class(tsynchronizeevent)
+  private
+   fproc: synchronizeprocty; 
+   fdata: pointer;
+  protected
+   procedure execute; override;
+  public
+   constructor create(const aproc: synchronizeprocty; const adata: pointer;
+                              const aquiet: boolean);
  end;
 
 var
@@ -1003,9 +1020,21 @@ function tcustomapplication.synchronize(const proc: objectprocty;
 var
  event: tappsynchronizeevent;
 begin
- event:= tappsynchronizeevent.create(quite);
+ event:= tappsynchronizeevent.create(proc,quite);
  try
-  event.fproc:= proc;
+  result:= synchronizeevent(event);
+ finally
+  event.free;
+ end;
+end;
+
+function tcustomapplication.synchronize(const proc: synchronizeprocty;
+                   const data: pointer; const quite: boolean = false): boolean;
+var
+ event: tappsynchronizedataevent;
+begin
+ event:= tappsynchronizedataevent.create(proc,data,quite);
+ try
   result:= synchronizeevent(event);
  finally
   event.free;
@@ -1357,9 +1386,31 @@ end;
 
 { tappsynchronizeevent }
 
+constructor tappsynchronizeevent.create(const aproc: objectprocty;
+               const aquiet: boolean);
+begin
+ fproc:= aproc;
+ inherited create(aquiet);
+end;
+
 procedure tappsynchronizeevent.execute;
 begin
  fproc;
+end;
+
+{ tappsynchronizdataeevent }
+
+constructor tappsynchronizedataevent.create(const aproc: synchronizeprocty;
+                       const adata: pointer; const aquiet: boolean);
+begin
+ fproc:= aproc;
+ fdata:= adata;
+ inherited create(aquiet);
+end;
+
+procedure tappsynchronizedataevent.execute;
+begin
+ fproc(fdata);
 end;
 
 initialization
