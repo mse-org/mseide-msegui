@@ -1087,7 +1087,7 @@ type
    function canclose(const newfocus: twidget): boolean;
    procedure painted;
    procedure loaded;
-   procedure setdbselection(const cell: gridcoordty;
+   procedure setselected(const cell: gridcoordty;
                                        const avalue: boolean);
    procedure beforefocuscell(const cell: gridcoordty;
                              const selectaction: focuscellactionty);
@@ -1357,7 +1357,7 @@ type
    procedure dopaint(const acanvas: tcanvas); override;
    procedure loaded; override;
 
-   procedure setdbselection(const cell: gridcoordty;
+   procedure setselected(const cell: gridcoordty;
                                        const avalue: boolean); override;
    procedure doinsertrow(const sender: tobject); override;
    procedure doappendrow(const sender: tobject); override;
@@ -1583,7 +1583,7 @@ type
    procedure setfixcols(const avalue: tdbstringfixcols);
   protected
    function getdbindicatorcol: integer;
-   procedure setdbselection(const cell: gridcoordty;
+   procedure setselected(const cell: gridcoordty;
                                        const avalue: boolean); override;
    procedure updatelayout; override;
    procedure editnotification(var info: editnotificationinfoty); override;
@@ -6786,7 +6786,7 @@ begin
  inherited;
 end;
 
-procedure tgriddatalink.setdbselection(const cell: gridcoordty;
+procedure tgriddatalink.setselected(const cell: gridcoordty;
                const avalue: boolean);
 var
  bo1: boolean;
@@ -7161,10 +7161,10 @@ begin
  inherited
 end;
 
-procedure tcustomdbwidgetgrid.setdbselection(const cell: gridcoordty;
+procedure tcustomdbwidgetgrid.setselected(const cell: gridcoordty;
                const avalue: boolean);
 begin
- fdatalink.setdbselection(cell,avalue);
+ fdatalink.setselected(cell,avalue);
 end;
 
 { tstringcoldatalink }
@@ -7959,10 +7959,10 @@ begin
  fdatalink.fixupproperties(filer);  //move values to datalink
 end;
 
-procedure tcustomdbstringgrid.setdbselection(const cell: gridcoordty;
+procedure tcustomdbstringgrid.setselected(const cell: gridcoordty;
                const avalue: boolean);
 begin
- fdatalink.setdbselection(cell,avalue);
+ fdatalink.setselected(cell,avalue);
 end;
 
 { tlbdropdowncol }

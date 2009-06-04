@@ -1560,7 +1560,7 @@ type
    fappendcount: integer;
    class function classskininfo: skininfoty; override;
    
-   procedure setdbselection(const cell: gridcoordty;
+   procedure setselected(const cell: gridcoordty;
                                        const avalue: boolean); virtual;
    procedure internalselectionchanged;
    procedure setoptionsgrid(const avalue: optionsgridty); virtual;
@@ -6331,10 +6331,8 @@ var
  ca1: cardinal;
  bo1: boolean;
 begin
- if gs_isdb in fgrid.fstate then begin
-  fgrid.setdbselection(cell,value);
- end
- else begin
+ fgrid.setselected(cell,value);
+ if not (gs_isdb in fgrid.fstate) then begin
   if cell.col >= 0 then begin
    cols[cell.col].setselected(cell.row,value);
   end
@@ -6885,6 +6883,7 @@ begin
  else begin
   fgrid.invalidaterow(arow);
  end;
+ fgrid.rowstatechanged(arow);
 end;
 
 { tdrawcols }
@@ -7356,7 +7355,7 @@ begin
  end;
 end;
 
-procedure tcustomgrid.setdbselection(const cell: gridcoordty; const avalue: boolean);
+procedure tcustomgrid.setselected(const cell: gridcoordty; const avalue: boolean);
 begin
  //dummy
 end;

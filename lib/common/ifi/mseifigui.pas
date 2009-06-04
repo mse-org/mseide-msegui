@@ -124,6 +124,8 @@ type
 //   procedure dorowsdatachanged(const acell: gridcoordty; 
 //                                           const acount: integer); override;
    procedure createdatacol(const index: integer; out item: tdatacol); override;
+   procedure setselected(const cell: gridcoordty;
+                                       const avalue: boolean); override;
   //iifimodulelink
    procedure connectmodule(const sender: tcustommodulelink);
   public
@@ -137,7 +139,7 @@ type
 
 implementation
 uses
- sysutils,msestream,msesysutils,msetmpmodules;
+ sysutils,msestream,msesysutils,msetmpmodules,mseeditglob;
 type
  tcustommodulelink1 = class(tcustommodulelink);
  tdatacols1 = class(tdatacols);
@@ -452,8 +454,10 @@ var
  ckind1: gridcommandkindty;
  source1,dest1,count1: integer;
  rowstate1: rowstatety;
+ select1: selectdataty;
  lwo1: longword;
  datalist1: tdatalist;
+ po3: prowstatety;
 begin
  with adata^.header do begin
 //  if trxwidgetgrid(fowner).active or 
@@ -526,40 +530,64 @@ begin
      end;
     end;
     ik_coldatachange: begin
-     inc(fcommandlock);
-     try
-      int1:= pcolitemdataty(adatapo)^.header.row;
-      ifinametostring(@pcolitemdataty(adatapo)^.header.name,str1);
-      inc(adatapo,sizeof(colitemheaderty)+length(str1));
-      datalist1:= nil;
-      if igo_coldata in foptionsrx then begin
-       datalist1:= trxwidgetgrid(fowner).fdatacols.datalistbyname(str1);
-      end;    //skip data otherwise
-      inc(adatapo,decodeifidata(pifidataty(adatapo),int1,datalist1));
-     finally
-      dec(fcommandlock);
+     if igo_coldata in foptionsrx then begin
+      inc(fcommandlock);
+      try
+       int1:= pcolitemdataty(adatapo)^.header.row;
+       ifinametostring(@pcolitemdataty(adatapo)^.header.name,str1);
+       inc(adatapo,sizeof(colitemheaderty)+length(str1));
+       datalist1:= nil;
+       if igo_coldata in foptionsrx then begin
+        datalist1:= trxwidgetgrid(fowner).fdatacols.datalistbyname(str1);
+       end;    //skip data otherwise
+       inc(adatapo,decodeifidata(pifidataty(adatapo),int1,datalist1));
+      finally
+       dec(fcommandlock);
+      end;
      end;
     end;
     ik_rowstatechange: begin
-     inc(fcommandlock);
-     try
-      int1:= prowstatedataty(adatapo)^.header.row;
-      inc(adatapo,sizeof(rowstateheaderty));
-      inc(adatapo,decodeifidata(pifidataty(adatapo),rowstate1));
-      with trxwidgetgrid(fowner),rowstate1 do begin
-       rowcolorstate[int1]:= color;
-       rowfontstate[int1]:= font;
-       lwo1:= fdatacols.rowstate[int1].selected;
-       if lwo1 <> selected then begin
-        fdatacols.rowstate.getitempo(int1)^.selected:= lwo1;
-        invalidaterow(int1);
-        internalselectionchanged;
+     if igo_rowstate in foptionsrx then begin
+      inc(fcommandlock);
+      try
+       int1:= prowstatedataty(adatapo)^.header.row;
+       inc(adatapo,sizeof(rowstateheaderty));
+       inc(adatapo,decodeifidata(pifidataty(adatapo),rowstate1));
+       with trxwidgetgrid(fowner),rowstate1 do begin
+        rowcolorstate[int1]:= color;
+        rowfontstate[int1]:= font;
+        po3:= fdatacols.rowstate.getitempo(int1);
+        if po3^.merged <> merged then begin
+         po3^.merged:= merged;
+         tdatacols1(fdatacols).mergechanged(int1);         
+        end;
+        {
+        lwo1:= fdatacols.rowstate[int1].selected;
+        if lwo1 <> selected then begin
+         po3^.selected:= lwo1;
+         invalidaterow(int1);
+         internalselectionchanged;
+        end;
+        }
+        rowhidden[int1]:= fold and foldhiddenmask <> 0;
+        rowfoldlevel[int1]:= fold and foldlevelmask;
        end;
-       rowhidden[int1]:= fold and foldhiddenmask <> 0;
-       rowfoldlevel[int1]:= fold and foldlevelmask;
+      finally
+       dec(fcommandlock);
       end;
-     finally
-      dec(fcommandlock);
+     end;
+    end;
+    ik_selection: begin
+     if igo_selection in foptionsrx then begin
+      inc(fcommandlock);
+      try
+       inc(adatapo,decodeifidata(pifidataty(adatapo),select1));
+       with select1 do begin
+        trxwidgetgrid(fowner).fdatacols.selected[makegridcoord(col,row)]:= select;
+       end;
+      finally
+       dec(fcommandlock);
+      end;
      end;
     end;
    end;
@@ -720,6 +748,17 @@ begin
   if cancommandsend(igo_rowstate) then begin
    senditem(ik_rowstatechange,
                encoderowstatedata(arow,fdatacols.rowstate[arow]));
+  end;
+ end;
+end;
+
+procedure trxwidgetgrid.setselected(const cell: gridcoordty;
+                                       const avalue: boolean);
+begin
+ inherited;
+ with fifi do begin
+  if cancommandsend(igo_selection) then begin
+   senditem(ik_selection,encodeselectiondata(cell,avalue));
   end;
  end;
 end;

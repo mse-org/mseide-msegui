@@ -564,7 +564,7 @@ type
  ifigridoptionty = (
              igo_state,   //send the whole gridstate after endupdate
              igo_rowenter,igo_rowmove,igo_rowdelete,
-             igo_rowinsert,igo_rowstate,igo_coldata);
+             igo_rowinsert,igo_rowstate,igo_selection,igo_coldata);
  ifigridoptionsty = set of ifigridoptionty;
 
  tifigridcontroller = class(tificontroller)
@@ -691,7 +691,10 @@ function decodegridcommanddata(const adata: pchar; out akind: gridcommandkindty;
                                out asource,adest,acount: integer): integer;
 function encodecolchangedata(const acolname: string; const arow: integer;
                                      const alist: tdatalist): string;
-function encoderowstatedata(const arow: integer; const astate: rowstatety): string;
+function encoderowstatedata(const arow: integer; 
+                                            const astate: rowstatety): string;
+function encodeselectiondata(const acell: gridcoordty; 
+                                            const avalue: boolean): string;
 
 implementation
 uses
@@ -747,6 +750,18 @@ begin
  with prowstatedataty(result)^.header do begin
   row:= arow;
  end;
+end;
+
+function encodeselectiondata(const acell: gridcoordty; 
+                                            const avalue: boolean): string;
+var
+ sel1: selectdataty;
+begin
+ fillchar(sel1,sizeof(sel1),0);
+ sel1.col:= acell.col;
+ sel1.row:= acell.row;
+ sel1.select:= avalue;
+ result:= encodeifidata(sel1);
 end;
 
 { tmodulelinkprop }
@@ -2635,7 +2650,7 @@ end;
 function tifigridcontroller.getifireckinds: ifireckindsty;
 begin
  result:= [ik_griddata,ik_requestopen,ik_gridcommand,
-           ik_coldatachange,ik_rowstatechange];
+           ik_coldatachange,ik_rowstatechange,ik_selection];
 end;
 
 function tifigridcontroller.cancommandsend(
