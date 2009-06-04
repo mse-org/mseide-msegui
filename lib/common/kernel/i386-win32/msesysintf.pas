@@ -183,7 +183,10 @@ end;
 
 function sys_getprintcommand: string;
 begin
- result:= 'gswin32c.exe -dNOPAUSE -sDEVICE=mswinpr2 -';
+ result:= defaultprintcommand;
+ if result = '' then begin
+  result:= 'gswin32c.exe -dNOPAUSE -sDEVICE=mswinpr2 -';
+ end;
 end;
 
 function sys_getlasterror: Integer;

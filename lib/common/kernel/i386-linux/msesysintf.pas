@@ -163,7 +163,10 @@ end;
 
 function sys_getprintcommand: string;
 begin
- result:= 'lp -';
+ result:= defaultprintcommand;
+ if result = '' then begin
+  result:= 'lp -';
+ end;
 end;
 
 function sys_getprocesses: procitemarty;
