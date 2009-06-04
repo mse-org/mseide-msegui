@@ -141,7 +141,8 @@ type
    property tagpo: pointer read ftagpo write ftagpo;
   published
    property Connected: Boolean read GetConnected write SetConnected;
-   property waitcursor: boolean read fwaitcursor write setwaitcursor;
+   property waitcursor: boolean read fwaitcursor 
+                                     write setwaitcursor default false;
 //    property LoginPrompt: Boolean read FLoginPrompt write FLoginPrompt;
 //    property Streamedconnected: Boolean read FStreamedConnected write FStreamedConnected;
 
