@@ -5,7 +5,7 @@ interface
 uses
  mseclasses,msegraphics,msegraphutils,msestrings,msestream,msedrawtext,
  mserichstring,classes,msetypes,msestat,msestatfile,msedataedits,msedropdownlist,
- mseevent,mseglob,mseguiglob,msemenus,mseedit,msegui;
+ mseevent,mseglob,mseguiglob,msemenus,mseedit,msegui,sysutils;
  
 const
  defaultppmm = 10;
@@ -85,6 +85,9 @@ type
  colorspacety = (cos_gray,cos_rgb);
  pageorientationty = (pao_portrait,pao_landscape);
 
+ exceptioneventty = procedure(const sender: tobject; var e: exception;
+                                             var again: boolean) of object; 
+
  tcustomprinter = class(tmsecomponent,istatfile)
   private
    fonpagestart: printereventty;
@@ -102,6 +105,7 @@ type
    fstatvarname: msestring;
    fpa_orientation: pageorientationty;
    foptions: printeroptionsty;
+   fonerror: exceptioneventty;
    procedure settabulators(const avalue: tprintertabulators);
 //   procedure setppmm(const avalue: real);
    procedure setpa_frameleft(const avalue: real);
@@ -127,6 +131,9 @@ type
    procedure setcanvas(const avalue: tprintercanvas);
   protected
    fcanvas: tprintercanvas;
+   fcanceled: boolean;
+   function handleexception(const e: exception; out again: boolean): boolean;
+                  //true if raise wanted
    procedure loaded; override;
    function getwindowsize: sizety; virtual;
    procedure defineproperties(filer: tfiler); override;
@@ -137,6 +144,9 @@ type
    procedure statreading;
    procedure statread;
    function getstatvarname: msestring;
+
+   property onerror: exceptioneventty read fonerror write fonerror;
+                        //call abort for quiet cancel
 
    //icanvas   
    function getsize: sizety;
@@ -207,6 +217,7 @@ type
   published
    property printcommand: string read fprintcommand write fprintcommand;
    property options;
+   property onerror;  //call abort for quiet cancel
  end;
 
  tprinterfont = class(tcanvasfont)
@@ -404,7 +415,7 @@ function stringtopages(const avalue: msestring): pagerangearty;
 
 implementation
 uses
- sysutils,mseprocutils,msepipestream,msesysintf,msestockobjects,mseconsts;
+ mseprocutils,msepipestream,msesysintf,msestockobjects,mseconsts;
  
 type
  tfont1 = class(tfont);
@@ -494,6 +505,25 @@ begin
  inherited;
  pagesizechanged;
  fcanvas.updatescale;
+end;
+
+function tcustomprinter.handleexception(const e: exception;
+                                          out again: boolean): boolean;
+var
+ e1: exception;
+begin
+ result:= true;
+ again:= false;
+ if canevent(tmethod(fonerror)) then begin
+  e1:= e;
+  fcanceled:= true;
+  fonerror(self,e1,again);
+  result:= not again and (e1 = e);
+  if not result and not again and (e1 <> nil) then begin
+   raise e1;
+  end;
+  fcanceled:= result;
+ end;
 end;
 
 function tcustomprinter.getwindowsize: sizety;
@@ -1477,7 +1507,11 @@ end;
 
 procedure tstreamprinter.endprint;
 begin
- setstream(nil);
+ try
+  setstream(nil);
+ finally
+  fcanceled:= false;
+ end;
 end;
 
 procedure tstreamprinter.setstream(const avalue: ttextstream);
@@ -1519,16 +1553,42 @@ begin
 end;
 
 procedure tstreamprintercanvas.streamwrite(const atext: string);
+var
+ bo1: boolean;
 begin
- if fstream <> nil then begin
-  fstream.write(atext);
+ if (fstream <> nil) and not fprinter.fcanceled then begin
+  bo1:= false;
+  repeat
+   try
+    fstream.write(atext);
+   except
+    on e: exception do begin
+     if fprinter.handleexception(e,bo1) then begin
+      raise;
+     end;
+    end;
+   end;
+  until not bo1;
  end;
 end;
 
 procedure tstreamprintercanvas.streamwriteln(const atext: string);
+var
+ bo1: boolean;
 begin
- if fstream <> nil then begin
-  fstream.writeln(atext);
+ if (fstream <> nil) and not fprinter.fcanceled then begin
+  bo1:= false;
+  repeat
+   try
+    fstream.writeln(atext);
+   except
+    on e: exception do begin
+     if fprinter.handleexception(e,bo1) then begin
+      raise;
+     end;
+    end;
+   end;
+  until not bo1;
  end;
 end;
 
