@@ -12,7 +12,8 @@ unit mseifilink;
 interface
 uses
  classes,mseclasses,mseifiglob,mseifi,msearrayprops,mseapplication,mseact,
- mseevent,mseglob,msestrings,msetypes,msedatalist,msegraphutils,typinfo;
+ mseevent,mseglob,msestrings,msetypes,msedatalist,msegraphutils,typinfo,
+ mseeditglob;
  
 const
  ifidatatypes = [dl_integer,dl_int64,dl_currency,dl_real,
@@ -473,7 +474,7 @@ type
  ifidatacolchangeeventty = procedure(const sender: tifidatacol;
                                       const aindex: integer) of object;
 
- tifidatacol = class(townedpersistent)
+ tifidatacol = class(tindexpersistent)
   private
    fdatalist: tdatalist;
    fdatakind: ifidatakindty;
@@ -481,24 +482,28 @@ type
    fonchange: ifidatacolchangeeventty;
    procedure setdatakind(const avalue: ifidatakindty);
    function getdatalist: tdatalist;
-   function getasinteger(const index: integer): integer;
-   procedure setasinteger(const index: integer; const avalue: integer);
-   function getasint64(const index: integer): int64;
-   procedure setasint64(const index: integer; const avalue: int64);
-   function getascurrency(const index: integer): currency;
-   procedure setascurrency(const index: integer; const avalue: currency);
-   function getasreal(const index: integer): real;
-   procedure setasreal(const index: integer; const avalue: real);
-   function getasmsestring(const index: integer): msestring;
-   procedure setasmsestring(const index: integer; const avalue: msestring);
-   function getasbytes(const index: integer): ansistring;
-   procedure setasbytes(const index: integer; const avalue: ansistring);
-   function getasmsestringint(const index: integer): msestringintty;
-   procedure setasmsestringint(const index: integer; const avalue: msestringintty);
-   function getasmsestringinti(const index: integer): integer;
-   procedure setasmsestringinti(const index: integer; const avalue: integer);
-   function getasmsestringints(const index: integer): msestring;
-   procedure setasmsestringints(const index: integer; const avalue: msestring);
+   function getasinteger(const aindex: integer): integer;
+   procedure setasinteger(const aindex: integer; const avalue: integer);
+   function getasint64(const aindex: integer): int64;
+   procedure setasint64(const aindex: integer; const avalue: int64);
+   function getascurrency(const aindex: integer): currency;
+   procedure setascurrency(const aindex: integer; const avalue: currency);
+   function getasreal(const aindex: integer): real;
+   procedure setasreal(const aindex: integer; const avalue: real);
+   function getasmsestring(const aindex: integer): msestring;
+   procedure setasmsestring(const aindex: integer; const avalue: msestring);
+   function getasbytes(const aindex: integer): ansistring;
+   procedure setasbytes(const aindex: integer; const avalue: ansistring);
+   function getasmsestringint(const aindex: integer): msestringintty;
+   procedure setasmsestringint(const aindex: integer; const avalue: msestringintty);
+   function getasmsestringinti(const aindex: integer): integer;
+   procedure setasmsestringinti(const aindex: integer; const avalue: integer);
+   function getasmsestringints(const aindex: integer): msestring;
+   procedure setasmsestringints(const aindex: integer; const avalue: msestring);
+   function getselected(row: integer): boolean;
+   procedure setselected(row: integer; const avalue: boolean);
+   function getmerged(const row: integer): boolean; virtual;
+   procedure setmerged(const row: integer; const avalue: boolean); virtual;
   protected
    procedure freedatalist;
    procedure checkdatalist; overload;
@@ -509,24 +514,26 @@ type
    destructor destroy; override;
    property datalist: tdatalist read getdatalist;
    
-   property asinteger[const index: integer]: integer read getasinteger 
+   property asinteger[const aindex: integer]: integer read getasinteger 
                                write setasinteger;
-   property asint64[const index: integer]: int64 read getasint64 
+   property asint64[const aindex: integer]: int64 read getasint64 
                                write setasint64;
-   property ascurrency[const index: integer]: currency read getascurrency 
+   property ascurrency[const aindex: integer]: currency read getascurrency 
                                write setascurrency;
-   property asreal[const index: integer]: real read getasreal 
+   property asreal[const aindex: integer]: real read getasreal 
                                write setasreal;
-   property asmsestring[const index: integer]: msestring read getasmsestring 
+   property asmsestring[const aindex: integer]: msestring read getasmsestring 
                                write setasmsestring;
-   property asmsestringint[const index: integer]: msestringintty
+   property asmsestringint[const aindex: integer]: msestringintty
                          read getasmsestringint write setasmsestringint;
-   property asmsestringinti[const index: integer]: integer
+   property asmsestringinti[const aindex: integer]: integer
                          read getasmsestringinti write setasmsestringinti;
-   property asmsestringints[const index: integer]: msestring
+   property asmsestringints[const aindex: integer]: msestring
                          read getasmsestringints write setasmsestringints;
-   property asbytes[const index: integer]: ansistring read getasbytes 
+   property asbytes[const aindex: integer]: ansistring read getasbytes 
                                write setasbytes;
+   property merged[const row: integer]: boolean read getmerged write setmerged;
+   property selected[row: integer]: boolean read getselected write setselected;
   published
    property datakind: ifidatakindty read fdatakind write setdatakind 
                          default idk_none;
@@ -545,17 +552,40 @@ type
                                   write setfoldlevel;   //0..127
  end;
     
- tifidatacols = class(townedpersistentarrayprop)
+ tifidatacols = class(tindexpersistentarrayprop)
   private
    frowstate: tifirowstatelist;
+   fselectedrow: integer; //-1 none, -2 more than one
    function getcols(const index: integer): tifidatacol;
    procedure setcols(const index: integer; const avalue: tifidatacol);
+   function getselectedcells: gridcoordarty;
+   procedure setselectedcells(const avalue: gridcoordarty);
+   function Getselected(const cell: gridcoordty): boolean;
+   procedure Setselected(const cell: gridcoordty; const avalue: boolean);
   public 
    constructor create(const aowner: ttxdatagrid);
    destructor destroy; override;
    class function getitemclasstype: persistentclassty; override;
    function colbyname(const aname: ansistring): tifidatacol;
    function datalistbyname(const aname: ansistring): tdatalist;
+
+   function selectedcellcount: integer;
+   function hascolselection: boolean;
+   property selectedcells: gridcoordarty read getselectedcells write setselectedcells;
+   property selected[const cell: gridcoordty]: boolean read Getselected write Setselected;
+               //col < 0 and row < 0 -> whole grid, col < 0 -> whole col,
+               //row = < 0 -> whole row
+   procedure setselectedrange(const rect: gridrectty; const value: boolean;
+             const calldoselectcell: boolean = false); overload;
+   procedure setselectedrange(const start,stop: gridcoordty;
+                    const value: boolean;
+                    const calldoselectcell: boolean = false); overload; virtual;
+
+   procedure mergecols(const arow: integer; const astart: cardinal = 0; 
+                                              const acount: cardinal = bigint);
+   procedure unmergecols(const arow: integer = invalidaxis);
+                     //invalidaxis = all
+
    property rowstate: tifirowstatelist read frowstate;
    property cols[const index: integer]: tifidatacol read getcols write setcols;
                                                  default;
@@ -639,6 +669,8 @@ type
    procedure setrowhidden(const index: integer; const avalue: boolean);
    function getrowfoldlevel(const index: integer): foldlevelty;
    procedure setrowfoldlevel(const index: integer; const avalue: foldlevelty);
+  protected
+   procedure setselected(const cell: gridcoordty; const avalue: boolean);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -2252,124 +2284,159 @@ begin
  result:= fdatalist;
 end;
 
-function tifidatacol.getasinteger(const index: integer): integer;
+function tifidatacol.getasinteger(const aindex: integer): integer;
 begin
  checkdatalist(idk_integer);
- result:= tintegerdatalist(fdatalist).items[index];
+ result:= tintegerdatalist(fdatalist).items[aindex];
 end;
 
-procedure tifidatacol.setasinteger(const index: integer; const avalue: integer);
+procedure tifidatacol.setasinteger(const aindex: integer; const avalue: integer);
 begin
  checkdatalist(idk_integer);
- tintegerdatalist(fdatalist).items[index]:= avalue;
+ tintegerdatalist(fdatalist).items[aindex]:= avalue;
 end;
 
-function tifidatacol.getasint64(const index: integer): int64;
+function tifidatacol.getasint64(const aindex: integer): int64;
 begin
  checkdatalist(idk_int64);
- result:= tint64datalist(fdatalist).items[index];
+ result:= tint64datalist(fdatalist).items[aindex];
 end;
 
-procedure tifidatacol.setasint64(const index: integer; const avalue: int64);
+procedure tifidatacol.setasint64(const aindex: integer; const avalue: int64);
 begin
  checkdatalist(idk_int64);
- tint64datalist(fdatalist).items[index]:= avalue;
+ tint64datalist(fdatalist).items[aindex]:= avalue;
 end;
 
-function tifidatacol.getascurrency(const index: integer): currency;
+function tifidatacol.getascurrency(const aindex: integer): currency;
 begin
  checkdatalist(idk_currency);
- result:= tcurrencydatalist(fdatalist).items[index];
+ result:= tcurrencydatalist(fdatalist).items[aindex];
 end;
 
-procedure tifidatacol.setascurrency(const index: integer;
+procedure tifidatacol.setascurrency(const aindex: integer;
                const avalue: currency);
 begin
  checkdatalist(idk_currency);
- tcurrencydatalist(fdatalist).items[index]:= avalue;
+ tcurrencydatalist(fdatalist).items[aindex]:= avalue;
 end;
 
-function tifidatacol.getasreal(const index: integer): real;
+function tifidatacol.getasreal(const aindex: integer): real;
 begin
  checkdatalist(idk_real);
- result:= trealdatalist(fdatalist).items[index];
+ result:= trealdatalist(fdatalist).items[aindex];
 end;
 
-procedure tifidatacol.setasreal(const index: integer; const avalue: real);
+procedure tifidatacol.setasreal(const aindex: integer; const avalue: real);
 begin
  checkdatalist(idk_real);
- trealdatalist(fdatalist).items[index]:= avalue;
+ trealdatalist(fdatalist).items[aindex]:= avalue;
 end;
 
-function tifidatacol.getasmsestring(const index: integer): msestring;
+function tifidatacol.getasmsestring(const aindex: integer): msestring;
 begin
  checkdatalist(idk_msestring);
- result:= tmsestringdatalist(fdatalist).items[index];
+ result:= tmsestringdatalist(fdatalist).items[aindex];
 end;
 
-procedure tifidatacol.setasmsestring(const index: integer;
+procedure tifidatacol.setasmsestring(const aindex: integer;
                const avalue: msestring);
 begin
  checkdatalist(idk_msestring);
- tmsestringdatalist(fdatalist).items[index]:= avalue;
+ tmsestringdatalist(fdatalist).items[aindex]:= avalue;
 end;
 
-function tifidatacol.getasbytes(const index: integer): ansistring;
+function tifidatacol.getasbytes(const aindex: integer): ansistring;
 begin
  checkdatalist(idk_bytes);
- result:= tansistringdatalist(fdatalist).items[index];
+ result:= tansistringdatalist(fdatalist).items[aindex];
 end;
 
-procedure tifidatacol.setasbytes(const index: integer;
+procedure tifidatacol.setasbytes(const aindex: integer;
                const avalue: ansistring);
 begin
  checkdatalist(idk_bytes);
- tansistringdatalist(fdatalist).items[index]:= avalue;
+ tansistringdatalist(fdatalist).items[aindex]:= avalue;
 end;
 
-function tifidatacol.getasmsestringint(const index: integer): msestringintty;
+function tifidatacol.getasmsestringint(const aindex: integer): msestringintty;
 begin
  checkdatalist(idk_msestringint);
- result:= tmsestringintdatalist(fdatalist).doubleitems[index];
+ result:= tmsestringintdatalist(fdatalist).doubleitems[aindex];
 end;
 
-procedure tifidatacol.setasmsestringint(const index: integer;
+procedure tifidatacol.setasmsestringint(const aindex: integer;
                const avalue: msestringintty);
 begin
  checkdatalist(idk_msestringint);
- tmsestringintdatalist(fdatalist).doubleitems[index]:= avalue;
+ tmsestringintdatalist(fdatalist).doubleitems[aindex]:= avalue;
 end;
 
-function tifidatacol.getasmsestringinti(const index: integer): integer;
+function tifidatacol.getasmsestringinti(const aindex: integer): integer;
 begin
  checkdatalist(idk_msestringint);
- result:= tmsestringintdatalist(fdatalist).itemsb[index];
+ result:= tmsestringintdatalist(fdatalist).itemsb[aindex];
 end;
 
-procedure tifidatacol.setasmsestringinti(const index: integer;
+procedure tifidatacol.setasmsestringinti(const aindex: integer;
                const avalue: integer);
 begin
  checkdatalist(idk_msestringint);
- tmsestringintdatalist(fdatalist).itemsb[index]:= avalue;
+ tmsestringintdatalist(fdatalist).itemsb[aindex]:= avalue;
 end;
 
-function tifidatacol.getasmsestringints(const index: integer): msestring;
+function tifidatacol.getasmsestringints(const aindex: integer): msestring;
 begin
  checkdatalist(idk_msestringint);
- result:= tmsestringintdatalist(fdatalist).items[index];
+ result:= tmsestringintdatalist(fdatalist).items[aindex];
 end;
 
-procedure tifidatacol.setasmsestringints(const index: integer;
+procedure tifidatacol.setasmsestringints(const aindex: integer;
                const avalue: msestring);
 begin
  checkdatalist(idk_msestringint);
- tmsestringintdatalist(fdatalist).items[index]:= avalue;
+ tmsestringintdatalist(fdatalist).items[aindex]:= avalue;
+end;
+
+function tifidatacol.getmerged(const row: integer): boolean;
+begin
+ if index = 0 then begin
+  result:= false;
+ end
+ else begin
+  if index > mergedcolmax then begin
+   result:= tifidatacols(prop).frowstate.getitempo(row)^.merged = mergedcolall;
+  end
+  else begin
+   result:= tifidatacols(prop).frowstate.getitempo(row)^.merged and 
+                                                          bits[index-1] <> 0;
+  end;
+ end;
+end;
+
+procedure tifidatacol.setmerged(const row: integer; const avalue: boolean);
+begin
+ if (index > 0) and (index <= mergedcolmax) then begin
+  if updatebit(tifidatacols(prop).frowstate.getitempo(row)^.merged,index-1,
+                                   avalue) then begin
+   ttxdatagrid(fowner).rowstatechanged(row);
+  end;
+ end;
+end;
+
+function tifidatacol.getselected(row: integer): boolean;
+begin
+end;
+
+procedure tifidatacol.setselected(row: integer; const avalue: boolean);
+begin
 end;
 
 { tifidatacols }
 
 constructor tifidatacols.create(const aowner: ttxdatagrid);
 begin
+ fselectedrow:= -1;
  frowstate:= tifirowstatelist.create;
  inherited create(aowner,tifidatacol);
 end;
@@ -2416,6 +2483,138 @@ begin
  col1:= colbyname(aname);
  if col1 <> nil then begin
   result:= col1.datalist;
+ end;
+end;
+
+function tifidatacols.getselectedcells: gridcoordarty;
+begin
+end;
+
+procedure tifidatacols.setselectedcells(const avalue: gridcoordarty);
+begin
+end;
+
+function tifidatacols.Getselected(const cell: gridcoordty): boolean;
+begin
+end;
+
+procedure tifidatacols.Setselected(const cell: gridcoordty;
+               const avalue: boolean);
+var
+ lwo1: longword;
+ bo1: boolean;
+ po1: prowstatety;
+ int1: integer;
+begin
+ ttxdatagrid(fowner).setselected(cell,avalue);
+ if cell.col >= 0 then begin
+  cols[cell.col].setselected(cell.row,avalue);
+ end
+ else begin            //select-deselect whole row
+//  fgrid.beginupdate;
+//  try
+  for int1:= 0 to count - 1 do begin
+   cols[int1].setselected(cell.row,avalue);
+  end;
+  if avalue then begin
+   lwo1:= $ffffffff;
+  end
+  else begin
+   lwo1:= 0;
+  end;
+  bo1:= false;
+  if cell.row >= 0 then begin
+   po1:= frowstate.getitempo(cell.row);
+   if lwo1 <> po1^.selected then begin
+    if avalue then begin
+     if fselectedrow = -1 then begin
+      fselectedrow:= cell.row;
+     end
+     else begin
+      fselectedrow:= -2;
+     end;
+    end
+    else begin
+     if fselectedrow = cell.row then begin
+      fselectedrow:= -1;
+     end;
+    end;
+    po1^.selected:= lwo1;
+//     fgrid.invalidaterow(cell.row); //for fixcols
+    bo1:= true;
+   end;
+  end
+  else begin
+   po1:= frowstate.datapo;
+   if avalue then begin
+    for int1:= 0 to frowstate.count - 1 do begin
+//      if ca1 <> po1^.selected then begin
+      po1^.selected:= lwo1;
+//       fgrid.invalidaterow(int1); //for fixcols
+//      end;
+     inc(po1);
+    end;
+    fselectedrow:= -2;
+   end
+   else begin
+    if fselectedrow <> -1 then begin
+     if fselectedrow >= 0 then begin
+      prowstateaty(po1)^[fselectedrow].selected:= lwo1;
+//       fgrid.invalidaterow(fselectedrow); //for fixcols
+      bo1:= true;
+     end
+     else begin
+      for int1:= 0 to frowstate.count - 1 do begin
+       if lwo1 <> po1^.selected then begin
+        po1^.selected:= lwo1;
+//         fgrid.invalidaterow(int1); //for fixcols
+        bo1:= true;
+       end;
+       inc(po1);
+      end;
+     end;
+     fselectedrow:= -1;
+    end;
+   end;
+  end;
+ end;
+//   if bo1 then begin
+//    fgrid.internalselectionchanged;
+//   end;
+
+end;
+
+function tifidatacols.selectedcellcount: integer;
+begin
+end;
+
+function tifidatacols.hascolselection: boolean;
+begin
+end;
+
+procedure tifidatacols.setselectedrange(const rect: gridrectty;
+               const value: boolean; const calldoselectcell: boolean = false);
+begin
+end;
+
+procedure tifidatacols.setselectedrange(const start: gridcoordty;
+               const stop: gridcoordty; const value: boolean;
+               const calldoselectcell: boolean = false);
+begin
+end;
+
+procedure tifidatacols.mergecols(const arow: integer;
+               const astart: cardinal = 0; const acount: cardinal = bigint);
+begin
+ if frowstate.mergecols(arow,astart,acount) then begin
+  ttxdatagrid(fowner).rowstatechanged(arow);
+ end;
+end;
+
+procedure tifidatacols.unmergecols(const arow: integer = invalidaxis);
+begin
+ if frowstate.unmergecols(arow) then begin
+  ttxdatagrid(fowner).rowstatechanged(arow);
  end;
 end;
 
@@ -2645,6 +2844,16 @@ begin
  rowcount:= 0;
 end;
 
+procedure ttxdatagrid.setselected(const cell: gridcoordty;
+               const avalue: boolean);
+begin
+ with fifi do begin
+  if cancommandsend(igo_selection) then begin
+   senditem(ik_selection,encodeselectiondata(cell,avalue));
+  end;
+ end;
+end;
+
 { tifigridcontroller }
 
 function tifigridcontroller.getifireckinds: ifireckindsty;
@@ -2700,6 +2909,7 @@ var
  source1,dest1,count1: integer;
  rowstate1: rowstatety;
  lwo1: longword;
+ select1: selectdataty;
 
 begin
  with adata^.header do begin
@@ -2773,40 +2983,55 @@ begin
     end;
    end;
    ik_coldatachange: begin
-    inc(fcommandlock);
-    try
-     int1:= pcolitemdataty(adatapo)^.header.row;
-     ifinametostring(@pcolitemdataty(adatapo)^.header.name,str1);
-     inc(adatapo,sizeof(colitemheaderty)+length(str1));
-     datalist1:= nil;
-     if igo_coldata in foptionsrx then begin
-      datalist1:= ttxdatagrid(fowner).fdatacols.datalistbyname(str1);
-     end;    //skip data otherwise
-     inc(adatapo,decodeifidata(pifidataty(adatapo),int1,datalist1));
-    finally
-     dec(fcommandlock);
+    if igo_coldata in foptionsrx then begin
+     inc(fcommandlock);
+     try
+      int1:= pcolitemdataty(adatapo)^.header.row;
+      ifinametostring(@pcolitemdataty(adatapo)^.header.name,str1);
+      inc(adatapo,sizeof(colitemheaderty)+length(str1));
+      datalist1:= nil;
+      if igo_coldata in foptionsrx then begin
+       datalist1:= ttxdatagrid(fowner).fdatacols.datalistbyname(str1);
+      end;    //skip data otherwise
+      inc(adatapo,decodeifidata(pifidataty(adatapo),int1,datalist1));
+     finally
+      dec(fcommandlock);
+     end;
     end;
    end;
    ik_rowstatechange: begin
-    inc(fcommandlock);
-    try
-     int1:= prowstatedataty(adatapo)^.header.row;
-     inc(adatapo,sizeof(rowstateheaderty));
-     inc(adatapo,decodeifidata(pifidataty(adatapo),rowstate1));
-     with ttxdatagrid(fowner),rowstate1 do begin
-      rowcolorstate[int1]:= color;
-      rowfontstate[int1]:= font;
-      lwo1:= fdatacols.rowstate[int1].selected;
-      if lwo1 <> selected then begin
-       fdatacols.rowstate.getitempo(int1)^.selected:= lwo1;
-//       invalidaterow(int1);
-//       internalselectionchanged;
+    if igo_rowstate in foptionsrx then begin
+     inc(fcommandlock);
+     try
+      int1:= prowstatedataty(adatapo)^.header.row;
+      inc(adatapo,sizeof(rowstateheaderty));
+      inc(adatapo,decodeifidata(pifidataty(adatapo),rowstate1));
+      with ttxdatagrid(fowner),rowstate1 do begin
+       rowcolorstate[int1]:= color;
+       rowfontstate[int1]:= font;
+       lwo1:= fdatacols.rowstate[int1].selected;
+       if lwo1 <> selected then begin
+        fdatacols.rowstate.getitempo(int1)^.selected:= lwo1;
+       end;
+       rowhidden[int1]:= fold and foldhiddenmask <> 0;
+       rowfoldlevel[int1]:= fold and foldlevelmask;
       end;
-      rowhidden[int1]:= fold and foldhiddenmask <> 0;
-      rowfoldlevel[int1]:= fold and foldlevelmask;
+     finally
+      dec(fcommandlock);
      end;
-    finally
-     dec(fcommandlock);
+    end;
+   end;
+   ik_selection: begin
+    if igo_selection in foptionsrx then begin
+     inc(fcommandlock);
+     try
+      inc(adatapo,decodeifidata(pifidataty(adatapo),select1));
+      with ttxdatagrid(fowner),select1 do begin
+       fdatacols.selected[makegridcoord(col,row)]:= select;
+      end;
+     finally
+      dec(fcommandlock);
+     end;
     end;
    end;
   end;

@@ -63,6 +63,11 @@ const
                        oe_autopopupmenu,oe_keyexecute,
                        oe_savevalue,oe_savestate,oe_checkmrcancel];
 
+ nullcoord: gridcoordty = (col: 0; row: 0);
+ invalidaxis = -bigint;
+ invalidcell: gridcoordty = (col: invalidaxis; row: invalidaxis);
+ bigcoord: gridcoordty = (col: bigint; row: bigint);
+
 function makegridcoord(col: integer; row: integer): gridcoordty;
 function makegridsize(colcount: integer; rowcount: integer): gridsizety;
 function makegridrect(const pos: gridcoordty; const size: gridsizety): gridrectty;  overload;

@@ -129,10 +129,7 @@ const
  defaultgridlinewidth = 1;
  defaultdatalinecolor = cl_dkgray;
  defaultfixlinecolor = cl_black;
- selectedcolmax = 30; //32 bitset, bit31 -> whole row
- wholerowselectedmask = $80000000;
- mergedcolmax = 32;
- mergedcolall = $ffffffff;
+
  defaultselectedcellcolor = cl_active;
  defaultdatacoloptions = [{co_selectedcolor,}co_savestate,co_savevalue,
                           co_rowfont,co_rowcolor,co_zebracolor,co_mousescrollrow];
@@ -142,10 +139,6 @@ const
  defaultcolheadertextflags = [tf_ycentered,tf_xcentered];
 
 
- nullcoord: gridcoordty = (col: 0; row: 0);
- invalidaxis = -bigint;
- invalidcell: gridcoordty = (col: invalidaxis; row: invalidaxis);
- bigcoord: gridcoordty = (col: bigint; row: bigint);
  slowrepeat = 200000; //us
  fastrepeat = 100000; //us
 
@@ -1126,6 +1119,7 @@ type
   public
    constructor create(const aowner: tcustomgrid); reintroduce;
    destructor destroy; override;
+
    function cellrow(const arow: integer): integer;
    function visiblerow(const arowindex: integer): integer;
                  //returns count of visible previous rows
@@ -6495,41 +6489,17 @@ end;
 
 procedure tdatacols.mergecols(const arow: integer; const astart: cardinal = 0; 
                        const acount: cardinal = bigint);
-var
- ca1: cardinal;
 begin
- if (astart < mergedcolmax - 1) and (acount > 0) then begin
-  with frowstate.getitempo(arow)^ do begin
-   if (astart = 0) and (acount > mergedcolmax) then begin
-    merged:= mergedcolall;
-   end
-   else begin
-    ca1:= acount;
-    if ca1 + astart > mergedcolmax then begin
-     ca1:= mergedcolmax - astart;
-    end;
-    merged:= merged or (bitmask[ca1] shl astart);
-   end;
-  end;
+ if frowstate.mergecols(arow,astart,acount) then begin
   mergechanged(arow);
  end;
 end;
 
 procedure tdatacols.unmergecols(const arow: integer = invalidaxis);
-var
- int1: integer;
- po1: prowstateaty;
 begin
- if arow = invalidaxis then begin
-  po1:= frowstate.datapo;
-  for int1:= 0 to count - 1 do begin
-   po1^[int1].merged:= 0;
-  end;
- end
- else begin
-  frowstate.getitempo(arow)^.merged:= 0;
+ if frowstate.unmergecols(arow) then begin
+  mergechanged(arow);
  end;
- mergechanged(arow);
 end;
 
 function tdatacols.previosvisiblecol(aindex: integer): integer;

@@ -565,6 +565,12 @@ const
  foldhiddenmask = 1 shl foldhiddenbit;
  foldlevelmask = not foldhiddenmask;
  rowstatemask = $7f;
+
+ selectedcolmax = 30; //32 bitset, bit31 -> whole row
+ wholerowselectedmask = $80000000;
+ mergedcolmax = 32;
+ mergedcolall = $ffffffff;
+
 type
  rowstatenumty = -1..126; //msb = row readonly flag for rowfontstate,
                           //reserved for rowcolorstate
@@ -610,6 +616,11 @@ type
    function getitempo(const index: integer): prowstatety;
    property items[const index: integer]: rowstatety read getrowstate 
                                               write setrowstate; default;
+
+   function mergecols(const arow: integer; const astart: cardinal;
+                                 const acount: cardinal): boolean;
+   function unmergecols(const arow: integer): boolean;
+
    property color[const index: integer]: rowstatenumty read getcolor
                                                             write setcolor;
    property font[const index: integer]: rowstatenumty read getfont
@@ -891,7 +902,7 @@ function newidentnum(const count: integer; getfunc: getintegeritemfuncty): integ
 
 implementation
 uses
- rtlconsts,msestreaming,msesys,msestat,msebits;
+ rtlconsts,msestreaming,msesys,msestat,msebits,mseeditglob;
 
 function opentodynarraym(const items: array of msestring): msestringarty;
 var
@@ -6022,6 +6033,57 @@ procedure tcustomrowstatelist.setrowstate(const index: integer;
   const Value: rowstatety);
 begin
  setdata(index,value);
+end;
+
+function tcustomrowstatelist.mergecols(const arow: integer; const astart: cardinal;
+                                 const acount: cardinal): boolean;
+var
+ ca1,ca2: cardinal;
+begin
+ result:= false;
+ if (astart < mergedcolmax - 1) and (acount > 0) then begin
+  with getitempo(arow)^ do begin
+   if (astart = 0) and (acount > mergedcolmax) then begin
+    ca2:= mergedcolall;
+   end
+   else begin
+    ca1:= acount;
+    if ca1 + astart > mergedcolmax then begin
+     ca1:= mergedcolmax - astart;
+    end;
+    ca2:= merged or (bitmask[ca1] shl astart);
+   end;
+   if merged <> ca2 then begin
+    merged:= ca2;
+    result:= true;
+   end;
+  end;
+ end;
+end;
+
+function tcustomrowstatelist.unmergecols(const arow: integer): boolean;
+var
+ int1: integer;
+ po1: prowstateaty;
+begin
+ result:= false;
+ if arow = invalidaxis then begin
+  po1:= datapo;
+  for int1:= 0 to count - 1 do begin
+   if po1^[int1].merged <> 0 then begin
+    result:= true;
+    po1^[int1].merged:= 0;
+   end;
+  end;
+ end
+ else begin
+  with getitempo(arow)^ do begin
+   if merged <> 0 then begin
+    result:= true;
+    merged:= 0;
+   end;
+  end;
+ end;
 end;
 
 function tcustomrowstatelist.gethidden(const index: integer): boolean;
