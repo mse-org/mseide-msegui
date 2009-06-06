@@ -4792,110 +4792,6 @@ begin
  end;
 end;
 
-function tdatacol.getmerged(const row: integer): boolean;
-begin
- if index = 0 then begin
-  result:= false;
- end
- else begin
-  if index > mergedcolmax then begin
-   result:= fgrid.fdatacols.frowstate.getitempo(row)^.merged = mergedcolall;
-  end
-  else begin
-   result:= fgrid.fdatacols.frowstate.getitempo(row)^.merged and 
-                                                          bits[index-1] <> 0;
-  end;
- end;
-end;
-
-procedure tdatacol.setmerged(const row: integer; const avalue: boolean);
-begin
- if (index > 0) and (index <= mergedcolmax) then begin
-  if updatebit(fgrid.fdatacols.frowstate.getitempo(row)^.merged,index-1,
-                                   avalue) then begin
-   fgrid.fdatacols.mergechanged(row);
-  end;
- end;
-end;
-
-function tdatacol.getselectedcells: integerarty;
-const
- capacitystep = 64;
-var
- int1,int3: integer;
-begin
- result:= nil;
- with tdatacols(prop) do begin
-  if hasselection then begin          //todo: optimize
-   int3:= 0;
-   for int1:= 0 to frowstate.count - 1 do begin
-    if frowstate.getitempo(int1)^.selected <> 0 then begin
-     if SELF.selected[int1] then begin
-      if int3 >= length(result) then begin
-       setlength(result,length(result)*2 + capacitystep);
-      end;
-      result[int3]:= int1;
-      inc(int3);
-     end;
-    end;
-   end;
-   setlength(result,int3);
-  end;
- end;
-end;
-
-procedure tdatacol.setselectedcells(const avalue: integerarty);
-              //todo: optimize
-var
- int1: integer;
-begin
- grid.beginupdate;
- try
-  beginselect;
-  clearselection;
-  for int1:= 0 to high(avalue) do begin
-   setselected(avalue[int1],true);
-  end;
-  endselect;
- finally
-  grid.endupdate;
- end;
-end;
-
-procedure tdatacol.doselectionchanged;
-begin
- if (fselectlock = 0) then begin
-  if assigned(fonselectionchanged) then begin
-   inc(fselectlock); //avoid recursion
-   try
-    fonselectionchanged(self);
-   finally
-    dec(fselectlock);
-   end;
-  end;
- end
- else begin
-  include(fstate,cos_selectionchanged);
- end;
- fgrid.internalselectionchanged;
-end;
-
-procedure tdatacol.beginselect;
-begin
- inc(fselectlock);
-end;
-
-procedure tdatacol.endselect;
-begin
- dec(fselectlock);
- if fselectlock = 0 then begin
-  if cos_selectionchanged in fstate then begin
-   exclude(fstate,cos_selectionchanged);
-   doselectionchanged;
-  end;
- end;
-end;
-
 procedure tdatacol.setselected(const row: integer; value: boolean);
 var
  po1: prowstatety;
@@ -4963,6 +4859,110 @@ begin
      doselectionchanged;
     end;
    end;
+  end;
+ end;
+end;
+
+function tdatacol.getmerged(const row: integer): boolean;
+begin
+ if index = 0 then begin
+  result:= false;
+ end
+ else begin
+  if index > mergedcolmax then begin
+   result:= fgrid.fdatacols.frowstate.getitempo(row)^.merged = mergedcolall;
+  end
+  else begin
+   result:= fgrid.fdatacols.frowstate.getitempo(row)^.merged and 
+                                                          bits[index-1] <> 0;
+  end;
+ end;
+end;
+
+procedure tdatacol.setmerged(const row: integer; const avalue: boolean);
+begin
+ if (index > 0) and (index <= mergedcolmax) then begin
+  if updatebit(fgrid.fdatacols.frowstate.getitempo(row)^.merged,index-1,
+                                   avalue) then begin
+   fgrid.fdatacols.mergechanged(row);
+  end;
+ end;
+end;
+
+function tdatacol.getselectedcells: integerarty;
+const
+ capacitystep = 64;
+var
+ int1,int3: integer;
+begin
+ result:= nil;
+ with tdatacols(prop) do begin
+  if hasselection then begin          //todo: optimize
+   int3:= 0;
+   for int1:= 0 to frowstate.count - 1 do begin
+    if frowstate.getitempo(int1)^.selected <> 0 then begin
+     if self.selected[int1] then begin
+      if int3 >= length(result) then begin
+       setlength(result,length(result)*2 + capacitystep);
+      end;
+      result[int3]:= int1;
+      inc(int3);
+     end;
+    end;
+   end;
+   setlength(result,int3);
+  end;
+ end;
+end;
+
+procedure tdatacol.setselectedcells(const avalue: integerarty);
+              //todo: optimize
+var
+ int1: integer;
+begin
+ grid.beginupdate;
+ try
+  beginselect;
+  clearselection;
+  for int1:= 0 to high(avalue) do begin
+   setselected(avalue[int1],true);
+  end;
+  endselect;
+ finally
+  grid.endupdate;
+ end;
+end;
+
+procedure tdatacol.doselectionchanged;
+begin
+ if (fselectlock = 0) then begin
+  if assigned(fonselectionchanged) then begin
+   inc(fselectlock); //avoid recursion
+   try
+    fonselectionchanged(self);
+   finally
+    dec(fselectlock);
+   end;
+  end;
+ end
+ else begin
+  include(fstate,cos_selectionchanged);
+ end;
+ fgrid.internalselectionchanged;
+end;
+
+procedure tdatacol.beginselect;
+begin
+ inc(fselectlock);
+end;
+
+procedure tdatacol.endselect;
+begin
+ dec(fselectlock);
+ if fselectlock = 0 then begin
+  if cos_selectionchanged in fstate then begin
+   exclude(fstate,cos_selectionchanged);
+   doselectionchanged;
   end;
  end;
 end;

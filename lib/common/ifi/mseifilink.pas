@@ -474,12 +474,18 @@ type
  ifidatacolchangeeventty = procedure(const sender: tifidatacol;
                                       const aindex: integer) of object;
 
+ ifidatacolstatety = (icos_selected);
+ ifidatacolstatesty = set of ifidatacolstatety;
+ 
  tifidatacol = class(tindexpersistent)
   private
    fdatalist: tdatalist;
    fdatakind: ifidatakindty;
    fname: ansistring;
    fonchange: ifidatacolchangeeventty;
+   fstate: ifidatacolstatesty;
+   fselectedrow: integer;
+   fselectlock: integer;
    procedure setdatakind(const avalue: ifidatakindty);
    function getdatalist: tdatalist;
    function getasinteger(const aindex: integer): integer;
@@ -509,8 +515,12 @@ type
    procedure checkdatalist; overload;
    procedure checkdatalist(const akind: ifidatakindty); overload;
    procedure dochange(const sender: tdatalist; const aindex: integer);
-   
+   procedure doselectionchanged;
+   procedure beginselect;
+   procedure endselect;
   public
+   constructor create(const aowner: tobject;
+         const aprop: tindexpersistentarrayprop); override;
    destructor destroy; override;
    property datalist: tdatalist read getdatalist;
    
@@ -562,6 +572,8 @@ type
    procedure setselectedcells(const avalue: gridcoordarty);
    function Getselected(const cell: gridcoordty): boolean;
    procedure Setselected(const cell: gridcoordty; const avalue: boolean);
+   procedure beginselect;
+   procedure endselect;
   public 
    constructor create(const aowner: ttxdatagrid);
    destructor destroy; override;
@@ -569,17 +581,17 @@ type
    function colbyname(const aname: ansistring): tifidatacol;
    function datalistbyname(const aname: ansistring): tdatalist;
 
+   procedure clearselection;
+   function hasselection: boolean;
    function selectedcellcount: integer;
    function hascolselection: boolean;
    property selectedcells: gridcoordarty read getselectedcells write setselectedcells;
    property selected[const cell: gridcoordty]: boolean read Getselected write Setselected;
                //col < 0 and row < 0 -> whole grid, col < 0 -> whole col,
                //row = < 0 -> whole row
-   procedure setselectedrange(const rect: gridrectty; const value: boolean;
-             const calldoselectcell: boolean = false); overload;
+   procedure setselectedrange(const rect: gridrectty; const value: boolean); overload;
    procedure setselectedrange(const start,stop: gridcoordty;
-                    const value: boolean;
-                    const calldoselectcell: boolean = false); overload; virtual;
+                    const value: boolean); overload;
 
    procedure mergecols(const arow: integer; const astart: cardinal = 0; 
                                               const acount: cardinal = bigint);
@@ -2206,6 +2218,13 @@ end;
 
 { tifidatacol }
 
+constructor tifidatacol.create(const aowner: tobject;
+         const aprop: tindexpersistentarrayprop);
+begin
+ fselectedrow:= -1;
+ inherited;
+end;
+
 destructor tifidatacol.destroy;
 begin
  freedatalist;
@@ -2426,9 +2445,101 @@ end;
 
 function tifidatacol.getselected(row: integer): boolean;
 begin
+ if ident <= selectedcolmax then begin
+  if row >= 0 then begin
+   result:= (icos_selected in fstate) or
+    (tifidatacols(prop).frowstate.getitempo(row)^.selected and
+     (bits[ident] or wholerowselectedmask) <> 0);
+  end
+  else begin
+   result:= icos_selected in fstate;
+  end;
+ end
+ else begin
+  result:= false;
+ end;
 end;
 
 procedure tifidatacol.setselected(row: integer; const avalue: boolean);
+var
+ po1: prowstatety;
+ ca1: cardinal;
+ int1: integer;
+begin
+ if ident <= selectedcolmax then begin
+  if row >= 0 then begin
+   with tifidatacols(prop).frowstate.getitempo(row)^ do begin
+    ca1:= selected;
+    if avalue then begin
+     ca1:= selected or bits[ident];
+    end
+    else begin
+     ca1:= selected and not (bits[ident] {or wholerowselectedmask});
+    end;
+    if ca1 <> selected then begin
+     if avalue then begin
+      if fselectedrow = -1 then begin
+       fselectedrow:= row;
+      end
+      else begin
+       fselectedrow:= -2;
+      end;
+     end
+     else begin
+      if fselectedrow = row then begin
+       fselectedrow:= -1;
+      end;
+     end;
+//     invalidatecell(row);
+     doselectionchanged;
+    end;
+   end;
+  end
+  else begin //row < 0
+   if avalue then begin
+    if not (icos_selected in fstate) then begin
+     include(fstate,icos_selected);
+     fselectedrow:= -2;
+//     changed;
+     doselectionchanged;
+    end;
+   end
+   else begin
+    exclude(fstate,icos_selected);
+    if fselectedrow <> -1 then begin
+     po1:= tifidatacols(prop).frowstate.datapo;
+     ca1:= not (bits[ident] {or wholerowselectedmask});
+     if fselectedrow >= 0 then begin
+      prowstateaty(po1)^[fselectedrow].selected:= 
+               prowstateaty(po1)^[fselectedrow].selected and ca1;
+//      invalidatecell(fselectedrow);
+//      cellchanged(fselectedrow);
+     end
+     else begin
+      for int1:= 0 to ttxdatagrid(fowner).frowcount - 1 do begin
+       po1^.selected:= po1^.selected and ca1;
+       inc(po1);
+      end;
+//      changed;
+     end;
+     fselectedrow:= -1;
+     doselectionchanged;
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure tifidatacol.doselectionchanged;
+begin
+ //dummy
+end;
+
+procedure tifidatacol.beginselect;
+begin
+end;
+
+procedure tifidatacol.endselect;
 begin
 end;
 
@@ -2487,15 +2598,71 @@ begin
 end;
 
 function tifidatacols.getselectedcells: gridcoordarty;
+const
+ capacitystep = 64;
+var
+ int1,int2,int3: integer;
+ cell: gridcoordty;
+ bo1: boolean;
 begin
+ result:= nil;
+ if hasselection then begin          //todo: optimize
+  int3:= 0;
+  bo1:= hascolselection;
+  for int1:= 0 to frowstate.count - 1 do begin
+   if bo1 or (frowstate.getitempo(int1)^.selected <> 0) then begin
+    cell.row:= int1;
+    for int2:= 0 to count - 1 do begin
+     if tifidatacol(fitems[int2]).selected[int1] then begin
+      if int3 >= length(result) then begin
+       setlength(result,length(result)*2 + capacitystep);
+      end;
+      cell.col:= int2;
+      result[int3]:= cell;
+      inc(int3);
+     end;
+    end;
+   end;
+  end;
+  setlength(result,int3);
+ end;
 end;
 
 procedure tifidatacols.setselectedcells(const avalue: gridcoordarty);
+var
+ int1: integer;
 begin
+ ttxdatagrid(fowner).beginupdate;
+ beginselect;
+ clearselection;
+ for int1:= 0 to high(avalue) do begin
+  setselected(avalue[int1],true);
+ end;
+ endselect;
+ ttxdatagrid(fowner).endupdate;
 end;
 
 function tifidatacols.Getselected(const cell: gridcoordty): boolean;
+var
+ int1: integer;
 begin
+ if cell.col >= 0 then begin
+  result:= cols[cell.col].getselected(cell.row);
+ end
+ else begin
+  if cell.row >= 0 then begin
+   result:= (frowstate.getitempo(cell.row)^.selected and wholerowselectedmask <> 0);
+  end
+  else begin
+   result:= true;
+   for int1:= 0 to count - 1 do begin
+    if not (icos_selected in cols[int1].fstate) then begin
+     result:= false;
+     break;
+    end;
+   end;
+  end;
+ end;
 end;
 
 procedure tifidatacols.Setselected(const cell: gridcoordty;
@@ -2585,22 +2752,66 @@ begin
 end;
 
 function tifidatacols.selectedcellcount: integer;
+var
+ int1,int2: integer;
+ bo1: boolean;
 begin
+ result:= 0;
+ if hasselection then begin
+  bo1:= hascolselection;
+  for int1:= 0 to frowstate.count - 1 do begin
+   if bo1 or (frowstate.getitempo(int1)^.selected <> 0) then begin
+    for int2:= 0 to count - 1 do begin
+     if tifidatacol(fitems[int2]).selected[int1] then begin
+      inc(result);
+     end;
+    end;
+   end;
+  end;
+ end;
 end;
 
 function tifidatacols.hascolselection: boolean;
+var
+ int1: integer;
 begin
+ result:= false;
+ for int1:= 0 to count - 1 do begin
+  if icos_selected in tifidatacol(fitems[int1]).fstate then begin
+   result:= true;
+   exit;
+  end;
+ end;
 end;
 
 procedure tifidatacols.setselectedrange(const rect: gridrectty;
-               const value: boolean; const calldoselectcell: boolean = false);
+               const value: boolean);
 begin
+ setselectedrange(rect.pos,
+      makegridcoord(rect.col+rect.colcount,rect.row+rect.rowcount),
+      value);
 end;
 
 procedure tifidatacols.setselectedrange(const start: gridcoordty;
-               const stop: gridcoordty; const value: boolean;
-               const calldoselectcell: boolean = false);
+               const stop: gridcoordty; const value: boolean);
+var
+ int1,int2: integer;
+// mo1: cellselectmodety;
+ rect: gridrectty;
 begin
+ rect.pos:= start;
+ rect.colcount:= stop.col - start.col;
+ rect.rowcount:= stop.row - start.row;
+ normalizerect1(rectty(rect)); 
+ for int1:= rect.col to rect.col + rect.colcount - 1 do begin
+  cols[int1].beginselect;   
+  for int2:= rect.row to rect.row + rect.rowcount - 1 do begin
+   selected[makegridcoord(int1,int2)]:= value;
+  end;
+ end;
+ for int1:= rect.col to rect.col + rect.colcount - 1 do begin
+  dec(cols[int1].fselectlock);
+ end;
 end;
 
 procedure tifidatacols.mergecols(const arow: integer;
@@ -2616,6 +2827,34 @@ begin
  if frowstate.unmergecols(arow) then begin
   ttxdatagrid(fowner).rowstatechanged(arow);
  end;
+end;
+
+function tifidatacols.hasselection: boolean;
+var
+ int1: integer;
+begin
+ result:= fselectedrow <> -1;
+ if not result then begin
+  for int1:= 0 to count - 1 do begin
+   if cols[int1].fselectedrow <> -1 then begin
+    result:= true;
+    break;
+   end;
+  end;
+ end;
+end;
+
+procedure tifidatacols.beginselect;
+begin
+end;
+
+procedure tifidatacols.endselect;
+begin
+end;
+
+procedure tifidatacols.clearselection;
+begin
+ setselected(invalidcell,false);
 end;
 
 { ttxdatagrid }
