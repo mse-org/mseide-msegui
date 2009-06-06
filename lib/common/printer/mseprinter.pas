@@ -526,7 +526,12 @@ begin
  if canevent(tmethod(fonerror)) then begin
   e1:= e;
   fcanceled:= true;
-  fonerror(self,e1,again);
+  application.lock;
+  try
+   fonerror(self,e1,again);
+  finally
+   application.unlock;
+  end;
   result:= not again and (e1 = e);
   if not result and not again and (e1 <> nil) then begin
    raise e1;
