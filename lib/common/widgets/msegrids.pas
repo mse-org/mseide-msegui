@@ -6326,7 +6326,7 @@ var
  bo1: boolean;
 begin
  fgrid.setselected(cell,value);
- if not (gs_isdb in fgrid.fstate) then begin
+// if not (gs_isdb in fgrid.fstate) then begin
   if cell.col >= 0 then begin
    cols[cell.col].setselected(cell.row,value);
   end
@@ -6404,7 +6404,7 @@ begin
     fgrid.endupdate;
    end;
   end;
- end;
+// end;
 end;
 
 procedure tdatacols.clearselection;
