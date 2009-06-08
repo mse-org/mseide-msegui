@@ -171,13 +171,18 @@ type
  
  synchronizeprocty = procedure(const adata: pointer) of object;
 
+ teventlist = class(tobjectqueue)
+  protected
+   procedure finalizeitem(var item: pointer); override;
+ end;
+ 
  tcustomapplication = class(tmsecomponent)
   private
    fapplicationname: filenamety;
    flockthread: threadty;
    flockcount: integer;
    fmutex: mutexty;
-   feventlist: tobjectqueue;
+   feventlist: teventlist;
    feventlock: mutexty;
    fpostedevents: eventarty;
    fidlecount: integer;
@@ -207,7 +212,7 @@ type
    procedure dobeforerun; virtual;
    procedure doafterrun; virtual;
    procedure dowakeup(sender: tobject);
-   property eventlist: tobjectqueue read feventlist;
+   property eventlist: teventlist read feventlist;
   public
    {$ifdef mse_debug_mutex}
    function getmutexaddr: pointer;
@@ -311,7 +316,7 @@ var
  
 implementation
 uses
- msedatalist,msebits,msesysintf,msesysutils,msefileutils;
+ msebits,msesysintf,msesysutils,msefileutils,msedatalist;
 
 type
  tappsynchronizeevent = class(tsynchronizeevent)
@@ -827,6 +832,16 @@ begin
  end;
 end;
 
+{ teventlist }
+
+procedure teventlist.finalizeitem(var item: pointer);
+begin
+ if ownsobjects then begin
+  tevent(item).Free1;
+  item:= nil;
+ end;
+end;
+
 { tcustomapplication }
 
 {$ifdef mse_debug_mutex}
@@ -855,7 +870,7 @@ begin
  appinst:= self;
  fapplicationname:= filename(sys_getapplicationpath);
  fthread:= sys_getcurrentthread;
- feventlist:= tobjectqueue.create(true);
+ feventlist:= teventlist.create(true);
  fonterminatedlist:= tnotifylist.create;
  fonterminatequerylist:= tonterminatequerylist.create;
  fonidlelist:= tonidlelist.create;

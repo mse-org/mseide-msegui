@@ -114,7 +114,7 @@ uses
  msesysintf,mseapplication;
  
 function synchronizeevent(const aevent: tsynchronizeevent): boolean;
-          //true if not aborted
+          //true if not aborted, frees the event
 var
  int1: integer;
 begin
@@ -126,8 +126,8 @@ begin
    except
     if not aevent.quiet then begin
      raise;
-     result:= false;
     end;
+    result:= false;
    end;
   end
   else begin
@@ -136,6 +136,7 @@ begin
    try
     application.postevent(aevent);
     result:= aevent.waitfor and aevent.success;
+     //wait until main eventloop calls tevent.free1
    finally
     application.relockall(int1);
    end;
@@ -173,12 +174,12 @@ begin
    fexceptionclass:= exceptclass(e.classinfo);
    fexceptionmessage:= e.message;
    if not fquiet then begin
-    sys_sempost(fsem);
+//    sys_sempost(fsem);
     raise;
    end;
   end;
  end;
- sys_sempost(fsem);
+// sys_sempost(fsem);
 end;
 
 function tsynchronizeevent.waitfor: boolean;
@@ -188,9 +189,9 @@ end;
 
 procedure tsynchronizeevent.internalfree1;
 begin
- if application.terminated then begin
-  sys_sempost(fsem);
- end;
+// if application.terminated then begin
+  sys_sempost(fsem); //no inherited, don't free in main eventloop
+// end;    
 end;
 
 { tmsethread }
