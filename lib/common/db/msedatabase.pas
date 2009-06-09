@@ -804,9 +804,9 @@ begin
   for int1:= high(fdatasets) downto 0 do begin
    fdatasets[int1].setactive(false);
   end;
-  for int1:= high(fwritedatasets) downto 0 do begin
-   fwritedatasets[int1].setactive(false);
-  end;
+//  for int1:= high(fwritedatasets) downto 0 do begin
+//   fwritedatasets[int1].setactive(false);
+//  end;
  end;
 end;
 
