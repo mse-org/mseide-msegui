@@ -11,7 +11,9 @@ unit mseucs2toru;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
 interface
-
+uses
+ msestrings;
+ 
 function ucs2to866(const avalue: msechar): char;
 function ucs2to866(const avalue: msestring): ansistring;
 
