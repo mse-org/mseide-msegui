@@ -2577,6 +2577,7 @@ begin
     fapplyindex := 0;
     fFailedCount := 0;
     bo1:= false;
+    response:= [];
     while (fapplyindex <= high(FUpdateBuffer)) and not(rr_abort in response) do begin
      fcurrentupdatebuffer:= fapplyindex;
      if FUpdateBuffer[fcurrentupdatebuffer].Bookmark.recordpo <> nil then begin
