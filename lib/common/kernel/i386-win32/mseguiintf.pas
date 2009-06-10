@@ -4360,8 +4360,10 @@ var
  windowstyle,windowstyleex,ca2: cardinal;
  rect1: rectty;
  classname: string;
+ ownerwindow: winidty;
 begin
  with awindow,options do begin
+  ownerwindow:= applicationwindow;
   windowstyleex:= 0;
   if wo_popup in options then begin
    windowstyle:= ws_popup;
@@ -4377,6 +4379,7 @@ begin
     if wo_taskbar in options then begin
      windowstyleex:= windowstyleex or ws_ex_appwindow;
      showwindow(applicationwindow,sw_hide);
+     ownerwindow:= 0;
     end;
    end;
   end;
@@ -4404,7 +4407,7 @@ begin
     classname:= childwidgetclassname;
    end
    else begin
-    ca2:= applicationwindow;
+    ca2:= ownerwindow;
     classname:= widgetclassname;
    end;
    {
