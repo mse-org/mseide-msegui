@@ -543,7 +543,10 @@ begin
     TrType := ftBCD
     end
   else begin
-    TrType := ftFMTBcd;
+//    TrType := ftFMTBcd;
+    LensSet := True;
+    TrLen := SQLLen;
+    TrType := ftfloat;
   end;
  end
  else begin
@@ -977,29 +980,31 @@ var
  currbuff: pchar;
  w: word;
  cur1: currency;
+ po1: pxsqlvar;
 
 begin
  with tibcursor(cursor) do begin
   for SQLVarNr := 0 to High(ParamBinding){AParams.count-1} do begin
    ParNr := ParamBinding[SQLVarNr];
+   po1:= @in_sqlda^.SQLvar[SQLVarNr];
    if AParams[ParNr].IsNull then begin
-    If Assigned(in_sqlda^.SQLvar[SQLVarNr].SQLInd) then begin
-      in_sqlda^.SQLvar[SQLVarNr].SQLInd^ := -1;
+    If Assigned(po1^.SQLInd) then begin
+      po1^.SQLInd^ := -1;
     end;
    end
    else begin
-    if assigned(in_sqlda^.SQLvar[SQLVarNr].SQLInd) then begin
-     in_sqlda^.SQLvar[SQLVarNr].SQLInd^ := 0;
+    if assigned(po1^.SQLInd) then begin
+     po1^.SQLInd^ := 0;
     end;
     case paramtypes[sqlvarnr] of
      ftInteger,ftsmallint : begin
        i := AParams[ParNr].AsInteger;
-       Move(i, in_sqlda^.SQLvar[SQLVarNr].SQLData^, in_SQLDA^.SQLVar[SQLVarNr].SQLLen);
+       Move(i, po1^.SQLData^,po1^.SQLLen);
 //todo: byte order?
      end;
-     ftbcd,ftcurrency: begin
+     ftbcd: begin
       cur1:= AParams[ParNr].ascurrency;
-      with in_sqlda^.SQLvar[SQLVarNr] do begin
+      with po1^ do begin
        cur1:= cur1 / intpower(10,4+SQLScale);
        reallocmem(sqldata,sizeof(cur1));
        move(cur1,sqldata^,sizeof(cur1));
@@ -1008,7 +1013,7 @@ begin
      ftString,ftFixedChar,ftwidestring: begin
       s:= AParams.AsdbString(parnr);
       w:= length(s);
-      with in_sqlda^.SQLvar[SQLVarNr] do begin
+      with po1^ do begin
        if ((SQLType and not 1) = SQL_VARYING) then begin
         SQLLen:= w;
         ReAllocMem(SQLData,SQLLen+sizeof(w));
@@ -1029,17 +1034,22 @@ begin
       Move(s[1],CurrBuff^,w);
      end;
      ftDate, ftTime, ftDateTime: begin
-      SetDateTime(in_sqlda^.SQLvar[SQLVarNr].SQLData, 
-           AParams[ParNr].AsDateTime, in_SQLDA^.SQLVar[SQLVarNr].SQLType);
+      SetDateTime(po1^.SQLData,AParams[ParNr].AsDateTime, po1^.SQLType);
      end;
      ftLargeInt,ftblob,ftmemo: begin
       li := AParams[ParNr].AsLargeInt;
-      Move(li, in_sqlda^.SQLvar[SQLVarNr].SQLData^,
-                    in_SQLDA^.SQLVar[SQLVarNr].SQLLen);
+      Move(li, po1^.SQLData^,po1^.SQLLen);
      end;
-     ftFloat: begin
-      SetFloat(in_sqlda^.SQLvar[SQLVarNr].SQLData, AParams[ParNr].AsFloat,
-                    in_SQLDA^.SQLVar[SQLVarNr].SQLLen);
+     ftFloat,ftcurrency: begin
+      with po1^ do begin
+       if sqlscale < 0 then begin
+        reallocmem(sqldata,sizeof(int64));
+        pint64(sqldata)^:= round(AParams[ParNr].asfloat * intpower(10,-SQLScale));
+       end
+       else begin
+        SetFloat(po1^.SQLData, AParams[ParNr].AsFloat,po1^.SQLLen);
+       end;
+      end;
      end;
      else begin
       DatabaseErrorFmt(SUnsupportedParameter,
@@ -1060,8 +1070,27 @@ var
  CurrBuff: pchar;
  b: longint;
  c: currency;
+ i64: int64;
+ po1: pxsqlvar;
+ do1: double;
+ 
+ procedure getbcdnum;
+ begin
+  i64:= 0;
+  Move(CurrBuff^,i64,po1^.SQLLen);
+  case po1^.sqllen of
+   2: begin
+    i64:= psmallint(pointer(@i64))^; //sign extend
+   end;
+   4: begin
+    i64:= pinteger(pointer(@i64))^;  //sign extend
+   end;
+  end;
+ end;
+
 begin
- with TIBCursor(cursor),SQLDA^.SQLVar[fieldnum] do begin
+ po1:= @TIBCursor(cursor).SQLDA^.SQLVar[fieldnum];
+ with TIBCursor(cursor),po1^ do begin
   if assigned(SQLInd) and (SQLInd^ = -1) then begin
    result:= false
   end
@@ -1080,17 +1109,8 @@ begin
    end;
    case DataType of
     ftBCD: begin
-     c:= 0;
-     Move(CurrBuff^,c,SQLLen);
-     case sqllen of
-      2: begin
-       int64(c):= psmallint(pointer(@c))^; //sign extend
-      end;
-      4: begin
-       int64(c):= pinteger(pointer(@c))^;  //sign extend
-      end;
-     end;
-     c:= c*intpower(10,4+SQLScale);
+     getbcdnum;
+     c:= i64*intpower(10,4+SQLScale);
      Move(c,buffer^,sizeof(c));
     end;
     ftInteger,ftsmallint: begin
@@ -1122,7 +1142,14 @@ begin
  //    PChar(Buffer + VarCharLen)^ := #0;
     end;
     ftFloat,ftcurrency: begin
-     GetFloat(CurrBuff,Buffer,sqllen);
+     if sqlscale < 0 then begin //decimal
+      getbcdnum;
+      do1:= i64/intpower(10,-SQLScale);
+      move(do1,buffer^,sizeof(double));
+     end
+     else begin
+      GetFloat(CurrBuff,Buffer,sqllen);
+     end;
     end;
     ftBlob,ftmemo,ftgraphic: begin  // load the BlobIb in field's buffer
      FillByte(buffer^,sizeof(LargeInt),0);
