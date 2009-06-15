@@ -210,6 +210,9 @@ const Oid_Bool     = 16;
  inv_write = $20000;
  invalidoid = 0;
 
+ varhdrsz = 4;
+ nbase = 10000; //base for numeric digits
+ 
 type 
   TDatabasecracker = class(TComponent)
   private
@@ -715,7 +718,6 @@ begin
  end;
 end;
 
-
 procedure TPQConnection.AddFieldDefs(const cursor: TSQLCursor;
                     const FieldDefs : TfieldDefs);
 var
@@ -726,6 +728,7 @@ var
  nFields: integer;
  fd: tfielddef;
  str1: ansistring;
+ int1: integer;
 begin
  fielddefs.clear;
  with tpqcursor(cursor) do begin
@@ -755,6 +758,12 @@ begin
     end;
     ftblob,ftmemo: begin
      size:= blobidsize;
+    end;
+    ftbcd: begin
+     int1:= PQfmod(Res,i);
+     if (int1 = -1) or ((int1 and $ffff) > varhdrsz + 4) then begin
+      fieldtype:= ftfloat;
+     end;
     end;
    end;
    str1:= PQfname(Res,i);
@@ -815,6 +824,21 @@ var
   NumericRecord : ^TNumericRecord;
  int1: integer;
  sint1: smallint;
+ do1: double;
+
+ function getnumeric: boolean;
+ begin
+  NumericRecord := pointer(CurrBuff);
+  NumericRecord^.Digits := BEtoN(NumericRecord^.Digits);
+  NumericRecord^.Scale := BEtoN(NumericRecord^.Scale);
+  NumericRecord^.Weight := BEtoN(NumericRecord^.Weight);
+  numericrecord^.sign:= beton(numericrecord^.sign);
+  inc(pointer(currbuff),sizeof(TNumericRecord));
+  result:= numericrecord^.sign and numericnan = 0;
+//          if (NumericRecord^.Digits = 0) and (NumericRecord^.Scale = 0) then 
+// = NaN, which is not supported by Currency-type, so we return NULL 
+        //???? 0 in database seems to return digits and scale 0. mse
+ end;
  
 begin
 {$ifdef FPC}{$checkpointer off}{$endif}
@@ -832,17 +856,42 @@ begin
    result := true;
    case DataType of
     ftInteger, ftSmallint, ftLargeInt,ftfloat,ftcurrency: begin
-     case i of               // postgres returns big-endian numbers
-      sizeof(int64) : pint64(buffer)^ := BEtoN(pint64(CurrBuff)^);
-      sizeof(integer) : pinteger(buffer)^ := BEtoN(pinteger(CurrBuff)^);
-      sizeof(smallint) : psmallint(buffer)^ := BEtoN(psmallint(CurrBuff)^);
-      else begin
-       if i > bufsize then begin
-        bufsize:= -bufsize;
+     if (datatype = ftfloat) and (pqftype(res,x) = oid_numeric) then begin
+      if getnumeric then begin
+       do1:= 0;
+       for int1 := NumericRecord^.Digits - 1 downto 0 do begin
+        do1:= do1 + beton(pword(currbuff)^) * intpower(nbase,int1);
+        inc(pointer(currbuff),2);
+       end;
+       int1:= numericrecord^.weight - numericrecord^.digits + 1;
+       if int1 < 0 then begin
+        do1:= do1 / intpower(nbase,-int1);
        end
        else begin
-        for tel:= 1 to i do begin
-         pchar(Buffer)[tel-1] := CurrBuff[i-tel];
+        do1:= do1 * intpower(nbase,int1);
+       end;
+       if NumericRecord^.Sign <> 0 then begin
+        do1:= -do1;
+       end;
+      end
+      else begin
+       do1:= nan;
+      end;
+      Move(do1, Buffer^, sizeof(double));
+     end
+     else begin
+      case i of               // postgres returns big-endian numbers
+       sizeof(int64) : pint64(buffer)^ := BEtoN(pint64(CurrBuff)^);
+       sizeof(integer) : pinteger(buffer)^ := BEtoN(pinteger(CurrBuff)^);
+       sizeof(smallint) : psmallint(buffer)^ := BEtoN(psmallint(CurrBuff)^);
+       else begin
+        if i > bufsize then begin
+         bufsize:= -bufsize;
+        end
+        else begin
+         for tel:= 1 to i do begin
+          pchar(Buffer)[tel-1] := CurrBuff[i-tel];
+         end;
         end;
        end;
       end;
@@ -885,26 +934,15 @@ begin
      end;
     end;
     ftBCD: begin
-     NumericRecord := pointer(CurrBuff);
-     NumericRecord^.Digits := BEtoN(NumericRecord^.Digits);
-     NumericRecord^.Scale := BEtoN(NumericRecord^.Scale);
-     NumericRecord^.Weight := BEtoN(NumericRecord^.Weight);
-     numericrecord^.sign:= beton(numericrecord^.sign);
-     inc(pointer(currbuff),sizeof(TNumericRecord));
-     cur := 0;
-     if numericrecord^.sign and numericnan <> 0 then begin 
-//          if (NumericRecord^.Digits = 0) and (NumericRecord^.Scale = 0) then 
-// = NaN, which is not supported by Currency-type, so we return NULL 
-        //???? 0 in database seems to return digits and scale 0. mse
-      result := false;            //nan
-     end
-     else begin
+     result:= getnumeric;
+     if result then begin
+      cur := 0;
       for tel := 1 to NumericRecord^.Digits  do begin
         cur := cur + beton(pword(currbuff)^) * intpower(10000,-(tel-1)+
                                      NumericRecord^.weight);
         inc(pointer(currbuff),2);
       end;
-      if BEtoN(NumericRecord^.Sign) <> 0 then begin
+      if NumericRecord^.Sign <> 0 then begin
        cur := -cur;
       end;
       Move(Cur, Buffer^, sizeof(currency));

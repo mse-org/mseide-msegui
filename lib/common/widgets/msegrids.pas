@@ -6065,7 +6065,7 @@ function tdatacols.colatpos(const x: integer;
 begin
  result:= itematpos(x,getscrollable);
 end;
-var testvar2: integer; testvar3: pointer;
+
 procedure tdatacols.updatelayout;
 var
  int1,int2: integer;
@@ -6083,8 +6083,6 @@ begin
    end;
   end;
  end;
-testvar2:= length(fitems);
-testvar3:= pointer(fitems);
  if int2 >= 0 then begin
   tdatacol(fitems[int2]).fwidth:= 1;
  end;
@@ -9678,7 +9676,7 @@ begin
   result:= nullpoint;
  end;
 end;
-var testvar: integer;
+
 procedure tcustomgrid.showcell(const cell: gridcoordty;
                      const position: cellpositionty = cep_nearest;
                      const force: boolean = false);
@@ -9887,7 +9885,6 @@ begin  //cellrect
       if (row >= 0) and (row < frowcount) and
                            (col < fdatacols.flastvisiblecol) then begin
        po1:= fdatacols.frowstate.getitempo(row);
-testvar:= length(fdatacols.fitems);
        if po1^.merged <> 0 then begin //has merged cols
         for int1:= col to fdatacols.flastvisiblecol-1 do begin
          if (po1^.merged = mergedcolall) or 
