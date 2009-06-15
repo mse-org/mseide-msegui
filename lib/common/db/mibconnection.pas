@@ -216,7 +216,7 @@ function clientminorversion: integer;
 implementation
 
 uses 
- strutils,msesysintf;
+ strutils,msesysintf,msebits;
 
 function clientversion: string;
 var
@@ -1110,7 +1110,7 @@ begin
    case DataType of
     ftBCD: begin
      getbcdnum;
-     c:= i64*intpower(10,4+SQLScale);
+     int64(c):= i64 * intexp10ar[4+SQLScale];
      Move(c,buffer^,sizeof(c));
     end;
     ftInteger,ftsmallint: begin
