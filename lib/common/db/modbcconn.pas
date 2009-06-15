@@ -259,7 +259,8 @@ const
 {$endif}
 
  blobidsize = sizeof(integer);
-
+ maxstrlen = 3000;
+ 
   DefaultEnvironment:TODBCEnvironment = nil;
   ODBCLoadCount:integer = 0; // ODBC is loaded when > 0; modified by TODBCEnvironment.Create/Destroy
 
@@ -598,7 +599,12 @@ begin
       StrLen:= Length(StrVal);
       Buf:= GetMem(StrLen+sizeof(sqlinteger));
       Move(StrVal[1],(buf+sizeof(sqlinteger))^,StrLen);
-      bindstr(i,SQL_C_CHAR,SQL_CHAR,buf,strlen,strlen)
+      if strlen > maxstrlen then begin
+       bindstr(i,SQL_C_CHAR,SQL_CHAR,buf,strlen,strlen)
+      end
+      else begin
+       bindstr(i,SQL_C_CHAR,SQL_LONGVARCHAR,buf,strlen,strlen)
+      end;
      end;
     end;
     ftwidestring,ftfixedwidechar: begin
@@ -611,7 +617,12 @@ begin
       buflen:= strlen*sizeof(msechar);
       buf:= getmem(buflen+sizeof(sqlinteger));
       move(widestrval[1],(buf+sizeof(sqlinteger))^,buflen);
-      bindstr(i,SQL_C_WCHAR,SQL_WCHAR,buf,strlen,buflen);
+      if strlen > maxstrlen then begin
+       bindstr(i,SQL_C_WCHAR,SQL_WLONGVARCHAR,buf,strlen,buflen);
+      end
+      else begin
+       bindstr(i,SQL_C_WCHAR,SQL_WCHAR,buf,strlen,buflen);
+      end;
  //     bindstr(i,SQL_C_WCHAR,SQL_WCHAR,buf,buflen,buflen);
      end;
     end;
@@ -849,8 +860,6 @@ function todbcconnection.loadfield(const cursor: tsqlcursor;
        const datatype: tfieldtype; const fieldnum: integer; //null based
        const buffer: pointer; var bufsize: integer): boolean;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
- //untested!
- //todo: blob implementing 2006-11-14 MSE
  
 const
   DEFAULT_BLOB_BUFFER_SIZE = 1024;
