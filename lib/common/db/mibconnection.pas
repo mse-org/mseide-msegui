@@ -216,7 +216,7 @@ function clientminorversion: integer;
 implementation
 
 uses 
- strutils,msesysintf,msebits;
+ strutils,msesysintf,msebits,msefloattostr;
 
 function clientversion: string;
 var
@@ -1005,7 +1005,7 @@ begin
      ftbcd: begin
       cur1:= AParams[ParNr].ascurrency;
       with po1^ do begin
-       cur1:= cur1 / intpower(10,4+SQLScale);
+       cur1:= cur1 / intexp10ar[4+SQLScale];
        reallocmem(sqldata,sizeof(cur1));
        move(cur1,sqldata^,sizeof(cur1));
       end;
@@ -1044,7 +1044,7 @@ begin
       with po1^ do begin
        if sqlscale < 0 then begin
         reallocmem(sqldata,sizeof(int64));
-        pint64(sqldata)^:= round(AParams[ParNr].asfloat * intpower(10,-SQLScale));
+        pint64(sqldata)^:= round(AParams[ParNr].asfloat * intexp10(-SQLScale));
        end
        else begin
         SetFloat(po1^.SQLData, AParams[ParNr].AsFloat,po1^.SQLLen);
@@ -1144,7 +1144,7 @@ begin
     ftFloat,ftcurrency: begin
      if sqlscale < 0 then begin //decimal
       getbcdnum;
-      do1:= i64/intpower(10,-SQLScale);
+      do1:= i64/intexp10(-SQLScale);
       move(do1,buffer^,sizeof(double));
      end
      else begin
