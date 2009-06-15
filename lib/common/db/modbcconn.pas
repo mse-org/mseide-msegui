@@ -1162,10 +1162,14 @@ begin
       end; // is a blob
       SQL_NUMERIC,SQL_DECIMAL:
       begin 
-       FieldType:= ftFloat;
-       FieldSize:= 0;
-//       FieldType:= ftbcd;
-//       FieldSize:= decimaldigits;
+       if decimaldigits > 4 then begin
+        FieldType:= ftFloat;
+        FieldSize:= 0;
+       end
+       else begin
+        FieldType:= ftbcd;
+        FieldSize:= 0;
+       end;
       end;
       SQL_SMALLINT:      begin FieldType:=ftSmallint;   FieldSize:=0; end;
       SQL_INTEGER:       begin FieldType:=ftInteger;    FieldSize:=0; end;
