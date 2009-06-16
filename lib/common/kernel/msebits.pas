@@ -139,9 +139,12 @@ procedure swaprgb1(var value: cardinal);
 function swaprgb(const value: cardinal): cardinal;
 
 function roundint(const value: integer; const step: integer): integer;
-procedure scaleexp10(var value: int64; const exp: integer); overload;
-procedure scaleexp10(var value: integer; const exp: integer); overload;
-procedure scaleexp10(var value: currency; const exp: integer); overload;
+procedure scaleexp101(var value: int64; const exp: integer); overload;
+procedure scaleexp101(var value: integer; const exp: integer); overload;
+procedure scaleexp101(var value: currency; const exp: integer); overload;
+function scaleexp10(const value: int64; const exp: integer): int64; overload;
+function scaleexp10(const value: integer; const exp: integer): integer; overload;
+function scaleexp10(const value: currency; const exp: integer): currency; overload;
 
 implementation
 
@@ -463,7 +466,46 @@ begin
  result:= ((value + int1) div step) * step;
 end;
 
-procedure scaleexp10(var value: int64; const exp: integer);
+function scaleexp10(const value: int64; const exp: integer): int64;
+begin
+ if exp < 0 then begin
+  result:= value div int64exp10ar[-exp];
+ end
+ else begin
+  result:= value * int64exp10ar[exp];
+ end;
+end;
+
+function scaleexp10(const value: integer; const exp: integer): integer;
+begin
+ if exp < 0 then begin
+  result:= value div intexp10ar[-exp];
+ end
+ else begin
+  result:= value * intexp10ar[exp];
+ end;
+end;
+
+function scaleexp10(const value: currency; const exp: integer): currency;
+begin
+{$ifdef FPC}
+ if exp < 0 then begin
+  int64(result):= int64(value) div int64exp10ar[-exp];
+ end
+ else begin
+  int64(result):= int64(value) * int64exp10ar[exp];
+ end;
+{$else}
+ if exp < 0 then begin
+  pint64(@result)^:= pint64(@value)^ div int64exp10ar[-exp];
+ end
+ else begin
+  pint64(@result)^:= pint64(@value)^ * int64exp10ar[exp];
+ end;
+{$endif}
+end;
+
+procedure scaleexp101(var value: int64; const exp: integer);
 begin
  if exp < 0 then begin
   value:= value div int64exp10ar[-exp];
@@ -473,7 +515,7 @@ begin
  end;
 end;
 
-procedure scaleexp10(var value: integer; const exp: integer);
+procedure scaleexp101(var value: integer; const exp: integer);
 begin
  if exp < 0 then begin
   value:= value div intexp10ar[-exp];
@@ -483,7 +525,7 @@ begin
  end;
 end;
 
-procedure scaleexp10(var value: currency; const exp: integer);
+procedure scaleexp101(var value: currency; const exp: integer);
 begin
 {$ifdef FPC}
  if exp < 0 then begin

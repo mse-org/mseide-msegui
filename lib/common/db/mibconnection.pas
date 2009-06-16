@@ -109,7 +109,7 @@ type
    procedure SetDBDialect;
    procedure AllocSQLDA(var aSQLDA : PXSQLDA;Count : integer);
    procedure TranslateFldType(SQLType,sqlsubtype,SQLLen,SQLScale: integer;
-                var LensSet: boolean; var TrType: TFieldType; var TrLen: word);
+                               out TrType: TFieldType; out TrLen: word);
    // conversion methods
    procedure GetDateTime(CurrBuff, Buffer : pointer; AType : integer);
    procedure SetDateTime(CurrBuff: pointer; PTime : TDateTime; AType : integer);
@@ -532,62 +532,37 @@ end;
 
 procedure TIBConnection.TranslateFldType(SQLType,sqlsubtype,SQLLen,
             SQLScale: integer;
-            var LensSet: boolean; var TrType: TFieldType; var TrLen: word);
+            out TrType: TFieldType; out TrLen: word);
 begin
- LensSet := False;
+ TrLen:= SQLLen;
  if SQLScale < 0 then begin
+  TrLen:= -sqlscale;
   if (sqlscale < -4) and (dbo_bcdtofloatif in controller.options) then begin
-   LensSet:= True;
-   TrLen:= SQLLen;
    TrType:= ftfloat;
   end
   else begin
-   LensSet:= True;
-   TrLen:= SQLLen;
    TrType:= ftBCD
   end;
-{
-  if (SQLScale >= -4) and (SQLScale <= -1) then //in [-4..-1] then
-    begin
-    LensSet := True;
-    TrLen := SQLLen;
-    TrType := ftBCD
-    end
-  else begin
-//    TrType := ftFMTBcd;
-    LensSet := True;
-    TrLen := SQLLen;
-    TrType := ftfloat;
-  end;
-}
  end
  else begin
-  LensSet:= True;
-  TrLen:= SQLLen;
   case (SQLType and not 1) of
    SQL_VARYING: begin
-//        LensSet := True;
-       TrType := ftString;
-//        TrLen := SQLLen;
+    TrType:= ftString;
    end;
    SQL_TEXT: begin
-       LensSet := True;
-       TrType := ftString;
-       TrLen := SQLLen;
+    TrType := ftString;
    end;
    SQL_TYPE_DATE: begin
-     TrType:= ftDate{Time};
+    TrType:= ftDate{Time};
    end;
    SQL_TYPE_TIME: begin
-       TrType:= ftDateTime;
+    TrType:= ftDateTime;
    end;
    SQL_TIMESTAMP: begin
-       TrType := ftDateTime;
+    TrType := ftDateTime;
    end;
    SQL_ARRAY: begin
-       TrType := ftArray;
-//        LensSet := true;
-//        TrLen := SQLLen;
+    TrType := ftArray;
    end;
    SQL_BLOB: begin
     if sqlsubtype = isc_blob_text then begin
@@ -596,32 +571,23 @@ begin
     else begin
      TrType:= ftBlob;
     end;
-    LensSet:= True;
-    TrLen:= SQLLen;
    end;
    SQL_SHORT: begin
-//        TrType := ftInteger;
     TrType:= ftsmallint;
    end;
    SQL_LONG: begin
-//        LensSet := True;
-//       TrLen := 0;
     TrType:= ftInteger;
    end;
    SQL_INT64: begin
-       TrType:= ftLargeInt;
+    TrType:= ftLargeInt;
    end;
    SQL_DOUBLE: begin
     TrType:= ftFloat;
    end;
    SQL_FLOAT: begin
-    LensSet:= True;
-    TrLen:= SQLLen;
     TrType:= ftFloat;
    end
    else begin
-//     LensSet := True;
-    TrLen := 0;
     TrType := ftUnknown;
    end;
   end;
@@ -672,7 +638,6 @@ var dh    : pointer;
     i     : integer;
  TransLen: word;
  TransType: TFieldType;
- lenset: boolean;
  str1: string;
 
 begin
@@ -707,7 +672,7 @@ begin
      setlength(paramtypes,in_SQLDA^.SQLD);
      for x := 0 to in_SQLDA^.SQLD - 1 do begin
       with in_SQLDA^.SQLVar[x] do begin
-       TranslateFldType(SQLType,sqlsubtype,SQLLen,SQLScale,lenset,TransType,TransLen);
+       TranslateFldType(SQLType,sqlsubtype,SQLLen,SQLScale,TransType,TransLen);
        paramtypes[x]:= transtype;
        if ((SQLType and not 1) = SQL_VARYING) then begin
          SQLData := AllocMem(in_SQLDA^.SQLVar[x].SQLLen+2)
@@ -923,7 +888,6 @@ procedure TIBConnection.AddFieldDefs(const cursor: TSQLCursor;
                const FieldDefs: TfieldDefs);
 var
  x: integer;
- lenset: boolean; //what is the use of this?
  TransLen: word;
  TransType: TFieldType;
  FD: TFieldDef;
@@ -936,12 +900,19 @@ begin
   with tibcursor(cursor) do begin
    for x := 0 to SQLDA^.SQLD - 1 do begin
     with SQLDA^.SQLVar[x] do begin
-     TranslateFldType(SQLType,sqlsubtype,SQLLen,SQLScale,lenset,TransType,TransLen);
-     if transtype = ftstring then begin
-      int1:= chlengetter.characterlength(sqlvarnametostring(@relname_length),
-                 sqlvarnametostring(@sqlname_length));
-      if int1 >= 0 then begin
-       translen:= int1;
+     TranslateFldType(SQLType,sqlsubtype,SQLLen,SQLScale,TransType,TransLen);
+     case transtype of
+      ftstring: begin
+       int1:= chlengetter.characterlength(sqlvarnametostring(@relname_length),
+                  sqlvarnametostring(@sqlname_length));
+       if int1 >= 0 then begin
+        translen:= int1;
+       end;
+      end;
+      ftbcd: begin
+       if translen > 4 then begin
+        translen:= 4;
+       end;
       end;
      end;
      if not(transtype in varsizefields) then begin
@@ -950,7 +921,14 @@ begin
      FD:= TFieldDef.Create(nil,AliasName,TransType,
                 TransLen,False,(x + 1));
      if TransType = ftBCD then begin
-      FD.precision:= SQLLen;
+      case sqllen of
+       2: fd.precision:= 4;
+       4: fd.precision:= 9;
+       8: fd.precision:= 18;
+       else begin
+        FD.precision:= SQLLen;
+       end;
+      end;
      end;
      {$ifndef mse_FPC_2_2} //???
      FD.DisplayName:= AliasName;
@@ -1089,16 +1067,17 @@ var
  po1: pxsqlvar;
  do1: double;
  
- procedure getbcdnum;
+ function getint64: int64;
  begin
-  c:= 0;
-  Move(CurrBuff^,c,po1^.SQLLen);
   case po1^.sqllen of
    2: begin
-    int64(c):= psmallint(pointer(@c))^; //sign extend
+    int64(result):= psmallint(currbuff)^; //sign extend
    end;
    4: begin
-    int64(c):= pinteger(pointer(@c))^;  //sign extend
+    int64(result):= pinteger(currbuff)^;  //sign extend
+   end;
+   else begin
+    result:= pint64(currbuff)^;
    end;
   end;
  end;
@@ -1127,27 +1106,18 @@ begin
    end;
    case DataType of
     ftBCD: begin
-     getbcdnum;
-     scaleexp10(c,4+SQLScale);
-     Move(c,buffer^,sizeof(c));
+     pint64(buffer)^:= scaleexp10(getint64,4+SQLScale);
     end;
     ftInteger,ftsmallint: begin
-//     b:= 0;        //todo: byte order?
-//     Move(b, Buffer^,sizeof(longint));
-//     Move(CurrBuff^,Buffer^,SQLLen);
-//     longint(buffer^):= 0;
      if datatype = ftsmallint then begin
-      Move(CurrBuff^,b,SQLLen);
-      b:= psmallint(@b)^;   //sign extend
-      Move(b,buffer^,sizeof(b));
+      pinteger(buffer)^:= psmallint(currbuff)^;
      end
      else begin
-      Move(CurrBuff^,buffer^,SQLLen);
+      pinteger(buffer)^:= pinteger(currbuff)^;
      end;
     end;
     ftLargeint: begin
-     FillByte(buffer^,sizeof(LargeInt),0);
-     Move(CurrBuff^,Buffer^,SQLLen);
+     pint64(buffer)^:= pint64(currbuff)^;
     end;
     ftDate,ftTime,ftDateTime: begin
      GetDateTime(CurrBuff,Buffer,SQLType);
@@ -1160,22 +1130,17 @@ begin
       bufsize:= varcharlen;
       move(currbuff^,buffer^,varcharlen);
      end;
- //    Move(CurrBuff^,Buffer^,SQLDA^.SQLVar[x].SQLLen);
- //    PChar(Buffer + VarCharLen)^ := #0;
     end;
     ftFloat,ftcurrency: begin
-     if sqlscale < 0 then begin //decimal
-      getbcdnum;
-      do1:= int64(c)/intexp10(-SQLScale);
-      move(do1,buffer^,sizeof(double));
+     if sqlscale < 0 then begin //numeric/decimal
+      pdouble(buffer)^:= getint64 / intexp10(-SQLScale);
      end
      else begin
       GetFloat(CurrBuff,Buffer,sqllen);
      end;
     end;
     ftBlob,ftmemo,ftgraphic: begin  // load the BlobIb in field's buffer
-     FillByte(buffer^,sizeof(LargeInt),0);
-     Move(CurrBuff^,Buffer^,SQLLen);
+     pint64(buffer)^:= getint64;
      if wantblobfetch then begin
       addblobcache(pint64(buffer)^,getblobstring(cursor,pisc_quad(buffer)^));
      end;
@@ -1192,7 +1157,6 @@ procedure TIBConnection.GetDateTime(CurrBuff, Buffer : pointer; AType : integer)
 var
   CTime : TTm;          // C struct time
   STime : TSystemTime;  // System time
-  PTime : TDateTime;    // Pascal time
 begin
   case (AType and not 1) of
     SQL_TYPE_DATE :
@@ -1211,8 +1175,7 @@ begin
   STime.Second      := CTime.tm_sec;
   STime.Millisecond := 0;
 
-  PTime := SystemTimeToDateTime(STime);
-  Move(PTime, Buffer^, SizeOf(PTime));
+  pdatetime(buffer)^:= SystemTimeToDateTime(STime);
 end;
 
 procedure TIBConnection.SetDateTime(CurrBuff: pointer; PTime : TDateTime; AType : integer);
@@ -1369,49 +1332,34 @@ end;
 
 procedure TIBConnection.SetFloat(CurrBuff: pointer; Dbl: Double; Size: integer);
 
-var
-  Ext : extended;
-  Sin : single;
 begin
-  case Size of
-    4 :
-      begin
-        Sin := Dbl;
-        Move(Sin, CurrBuff^, 4);
-      end;
-    8 :
-      begin
-        Move(Dbl, CurrBuff^, 8);
-      end;
-    10:
-      begin
-        Ext := Dbl;
-        Move(Ext, CurrBuff^, 10);
-      end;
+ case Size of
+  4: begin
+   psingle(currbuff)^:= Dbl;
   end;
+  8: begin
+   pdouble(currbuff)^:= Dbl;
+  end;
+  10: begin
+   pextended(currbuff)^:= Dbl;
+  end;
+ end;
 end;
 
 procedure tibconnection.GetFloat(const CurrBuff,Buffer: pointer; 
                                      const datalength: integer);
-var
- Ext: extended;
- Dbl: double;
- Sin: single;
 begin
  case datalength of
   4: begin
-   Move(CurrBuff^, Sin, 4);
-   Dbl := Sin;
+   pdouble(buffer)^:= psingle(currbuff)^;
   end;
   8: begin
-   Move(CurrBuff^, Dbl, 8);
+   pdouble(buffer)^:= pdouble(currbuff)^;
   end;
   10: begin
-   Move(CurrBuff^, Ext, 10);
-   Dbl := double(Ext);
+   pdouble(buffer)^:= pextended(currbuff)^;
   end;
  end;
- Move(Dbl,Buffer^,8);
 end;
 
 

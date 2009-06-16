@@ -53,7 +53,8 @@ const
  blobfields = [ftblob,ftmemo,ftgraphic{,ftstring}];
  defaultproviderflags = [pfInUpdate,pfInWhere];
 
- varsizefields = [ftstring,ftbytes,ftvarbytes,ftwidestring];
+ varsizefields = [ftstring,ftfixedchar,ftwidestring,ftfixedwidechar,
+                  ftbytes,ftvarbytes,ftbcd,ftfmtbcd];
  
  converrorstring = '?';
  
