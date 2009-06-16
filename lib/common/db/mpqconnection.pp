@@ -174,7 +174,7 @@ type
 implementation
 
 uses 
- math,msestream,msetypes,msedatalist,mseformatstr;
+ math,msestream,msetypes,msedatalist,mseformatstr,msedatabase;
 
 ResourceString
   SErrRollbackFailed = 'Rollback transaction failed';
@@ -760,9 +760,11 @@ begin
      size:= blobidsize;
     end;
     ftbcd: begin
-     int1:= PQfmod(Res,i);
-     if (int1 = -1) or ((int1 and $ffff) > varhdrsz + 4) then begin
-      fieldtype:= ftfloat;
+     if dbo_bcdtofloatif in controller.options then begin
+      int1:= PQfmod(Res,i);
+      if (int1 = -1) or ((int1 and $ffff) > varhdrsz + 4) then begin
+       fieldtype:= ftfloat;
+      end;
      end;
     end;
    end;
@@ -823,7 +825,9 @@ var
   cur           : currency;
   NumericRecord : ^TNumericRecord;
  int1: integer;
+ lint1: int64;
  sint1: smallint;
+ wbo1: wordbool;
  do1: double;
 
  function getnumeric: boolean;
@@ -838,6 +842,19 @@ var
 //          if (NumericRecord^.Digits = 0) and (NumericRecord^.Scale = 0) then 
 // = NaN, which is not supported by Currency-type, so we return NULL 
         //???? 0 in database seems to return digits and scale 0. mse
+ end;
+ 
+ function getfloat4: single;
+ var
+  si1: single;
+ begin
+  integer(si1):= beton(pinteger(currbuff)^);
+  result:= si1;
+ end;
+ 
+ function getfloat8: double;
+ begin
+  int64(result):= beton(pint64(currbuff)^);
  end;
  
 begin
@@ -855,8 +872,23 @@ begin
    CurrBuff := pqgetvalue(res,CurTuple,x);
    result := true;
    case DataType of
-    ftInteger, ftSmallint, ftLargeInt,ftfloat,ftcurrency: begin
-     if (datatype = ftfloat) and (pqftype(res,x) = oid_numeric) then begin
+    ftInteger,ftSmallint,ftword: begin
+     case i of               // postgres returns big-endian numbers
+      sizeof(integer): begin
+       int1:= BEtoN(pinteger(CurrBuff)^);
+      end;
+      sizeof(smallint): begin
+       int1:= BEtoN(psmallint(CurrBuff)^);
+      end;
+     end;
+     move(int1,buffer^,sizeof(int1));
+    end;
+    ftlargeint: begin
+     lint1:= BEtoN(pint64(CurrBuff)^);
+     move(lint1,buffer^,sizeof(lint1));
+    end;
+    ftfloat,ftcurrency: begin
+     if pqftype(res,x) = oid_numeric then begin
       if getnumeric then begin
        do1:= 0;
        for int1 := NumericRecord^.Digits - 1 downto 0 do begin
@@ -877,25 +909,16 @@ begin
       else begin
        do1:= nan;
       end;
-      Move(do1, Buffer^, sizeof(double));
      end
      else begin
-      case i of               // postgres returns big-endian numbers
-       sizeof(int64) : pint64(buffer)^ := BEtoN(pint64(CurrBuff)^);
-       sizeof(integer) : pinteger(buffer)^ := BEtoN(pinteger(CurrBuff)^);
-       sizeof(smallint) : psmallint(buffer)^ := BEtoN(psmallint(CurrBuff)^);
-       else begin
-        if i > bufsize then begin
-         bufsize:= -bufsize;
-        end
-        else begin
-         for tel:= 1 to i do begin
-          pchar(Buffer)[tel-1] := CurrBuff[i-tel];
-         end;
-        end;
-       end;
+      if pqftype(res,x) = oid_float4 then begin
+       do1:= getfloat4;
+      end
+      else begin
+       do1:= getfloat8;
       end;
      end;
+     Move(do1, Buffer^, sizeof(do1));
     end;
     ftString: begin
      li:= pqgetlength(res,curtuple,x);
@@ -916,40 +939,50 @@ begin
       //save id
     end;
     ftdate: begin
-     dbl:= pointer(buffer);
-     dbl^:= BEtoN(plongint(CurrBuff)^) + 36526;
-     i:= sizeof(double);
+     do1:= BEtoN(plongint(CurrBuff)^) + 36526;
+     move(do1,buffer^,sizeof(do1));
     end;
     ftDateTime,fttime: begin
-     pint64(buffer)^ := BEtoN(pint64(CurrBuff)^);
-     dbl := pointer(buffer);
+     do1:= double(BEtoN(pint64(CurrBuff)^));
      if FIntegerDatetimes then begin
-      dbl^ := pint64(buffer)^/1000000;
+      do1:= do1/1000000;
      end;
-     dbl^ := (dbl^+3.1558464E+009)/86400;  // postgres counts seconds elapsed since 1-1-2000
+     do1:= (do1+3.1558464E+009)/86400;  // postgres counts seconds elapsed since 1-1-2000
      // Now convert the mathematically-correct datetime to the
      // illogical windows/delphi/fpc TDateTime:
-     if (dbl^ <= 0) and (frac(dbl^)<0) then begin
-       dbl^ := trunc(dbl^)-2-frac(dbl^);
+     if (do1 <= 0) and (frac(do1)<0) then begin
+      do1:= trunc(do1)-2-frac(do1);
      end;
+     move(do1,buffer^,sizeof(do1));
     end;
     ftBCD: begin
-     result:= getnumeric;
-     if result then begin
-      cur := 0;
-      for tel := 1 to NumericRecord^.Digits  do begin
-        cur := cur + beton(pword(currbuff)^) * intpower(10000,-(tel-1)+
-                                     NumericRecord^.weight);
-        inc(pointer(currbuff),2);
+     case pqftype(res,x) of
+      oid_float4: begin
+       cur:= getfloat4;
       end;
-      if NumericRecord^.Sign <> 0 then begin
-       cur := -cur;
+      oid_float8: begin
+       cur:= getfloat8;
       end;
-      Move(Cur, Buffer^, sizeof(currency));
+      else begin
+       result:= getnumeric;
+       if result then begin
+        cur := 0;
+        for tel := 1 to NumericRecord^.Digits  do begin
+          cur := cur + beton(pword(currbuff)^) * intpower(10000,-(tel-1)+
+                                                      NumericRecord^.weight);
+          inc(pointer(currbuff),2);
+        end;
+        if NumericRecord^.Sign <> 0 then begin
+         cur := -cur;
+        end;
+       end;
+      end;
      end;
+     Move(Cur, Buffer^, sizeof(cur));
     end;
     ftBoolean: begin
-     pwordbool(buffer)^:= CurrBuff[0] <> #0;
+     wbo1:= CurrBuff[0] <> #0;
+     move(wbo1,buffer^,sizeof(wbo1));
     end;
     else begin
       result := false;

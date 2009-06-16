@@ -60,6 +60,11 @@ const
 
  intexp10ar: array[0..9] of integer = 
           (1,10,100,1000,10000,100000,1000000,10000000,100000000,1000000000);
+ int64exp10ar: array[0..19] of int64 = 
+          (1,10,100,1000,10000,100000,1000000,10000000,100000000,1000000000,
+           1000000000,10000000000,100000000000,1000000000000,10000000000000,
+           100000000000000,1000000000000000,10000000000000000,
+           100000000000000000,1000000000000000000);
 type
  int64recty = record
   lsw: cardinal;
@@ -134,6 +139,9 @@ procedure swaprgb1(var value: cardinal);
 function swaprgb(const value: cardinal): cardinal;
 
 function roundint(const value: integer; const step: integer): integer;
+procedure scaleexp10(var value: int64; const exp: integer); overload;
+procedure scaleexp10(var value: integer; const exp: integer); overload;
+procedure scaleexp10(var value: currency; const exp: integer); overload;
 
 implementation
 
@@ -453,6 +461,36 @@ begin
   int1:= -int1;
  end;
  result:= ((value + int1) div step) * step;
+end;
+
+procedure scaleexp10(var value: int64; const exp: integer);
+begin
+ if exp < 0 then begin
+  value:= value div int64exp10ar[-exp];
+ end
+ else begin
+  value:= value * int64exp10ar[exp];
+ end;
+end;
+
+procedure scaleexp10(var value: integer; const exp: integer);
+begin
+ if exp < 0 then begin
+  value:= value div intexp10ar[-exp];
+ end
+ else begin
+  value:= value * intexp10ar[exp];
+ end;
+end;
+
+procedure scaleexp10(var value: currency; const exp: integer);
+begin
+ if exp < 0 then begin
+  int64(value):= int64(value) div int64exp10ar[-exp];
+ end
+ else begin
+  int64(value):= int64(value) * int64exp10ar[exp];
+ end;
 end;
 
 procedure swaprgb1(var value: cardinal);

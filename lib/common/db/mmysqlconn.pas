@@ -223,7 +223,7 @@ Type
 
 implementation
 uses 
- dbconst,msebufdataset,typinfo,dateutils,msefileutils;
+ dbconst,msebufdataset,typinfo,dateutils,msefileutils,msedatabase;
 type
  tmsebufdataset1 = class(tmsebufdataset);
 var
@@ -1010,7 +1010,7 @@ begin
     FIELD_TYPE_NEWDECIMAL,
  {$endif}
     FIELD_TYPE_DECIMAL: begin
-     if Decimals < 5 then begin
+     if (Decimals < 4) or not (dbo_bcdtofloatif in controller.options) then begin
       NewType:= ftBCD;
      end
      else begin

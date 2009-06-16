@@ -1094,7 +1094,7 @@ const
  mask: databaseoptionsty = [dbo_utf8,dbo_noutf8];
 begin
  if foptions <> avalue then begin
-  tmdatabase1(fowner).checkdisconnected;
+//  tmdatabase1(fowner).checkdisconnected;
   foptions:= databaseoptionsty(setsinglebit(longword(avalue),
                 longword(foptions),longword(mask)));
  end;

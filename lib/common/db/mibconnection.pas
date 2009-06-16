@@ -216,7 +216,7 @@ function clientminorversion: integer;
 implementation
 
 uses 
- strutils,msesysintf,msebits,msefloattostr;
+ strutils,msesysintf,msebits,msefloattostr,msedatabase;
 
 function clientversion: string;
 var
@@ -536,6 +536,17 @@ procedure TIBConnection.TranslateFldType(SQLType,sqlsubtype,SQLLen,
 begin
  LensSet := False;
  if SQLScale < 0 then begin
+  if (sqlscale < -4) and (dbo_bcdtofloatif in controller.options) then begin
+   LensSet:= True;
+   TrLen:= SQLLen;
+   TrType:= ftfloat;
+  end
+  else begin
+   LensSet:= True;
+   TrLen:= SQLLen;
+   TrType:= ftBCD
+  end;
+{
   if (SQLScale >= -4) and (SQLScale <= -1) then //in [-4..-1] then
     begin
     LensSet := True;
@@ -548,6 +559,7 @@ begin
     TrLen := SQLLen;
     TrType := ftfloat;
   end;
+}
  end
  else begin
   LensSet:= True;
@@ -972,6 +984,7 @@ begin
 end;
 
 procedure TIBConnection.SetParameters(cursor: TSQLCursor; AParams: TmseParams);
+         //todo: remove not needed move operations
 var
  ParNr,SQLVarNr: integer;
  s: string;
@@ -1005,9 +1018,10 @@ begin
      ftbcd: begin
       cur1:= AParams[ParNr].ascurrency;
       with po1^ do begin
-       cur1:= cur1 / intexp10ar[4+SQLScale];
-       reallocmem(sqldata,sizeof(cur1));
-       move(cur1,sqldata^,sizeof(cur1));
+       scaleexp10(cur1,-(4+sqlscale));
+//       reallocmem(sqldata,sizeof(cur1));
+//       move(cur1,sqldata^,sizeof(cur1));
+       move(cur1,sqldata^,po1^.sqllen);
       end;
      end;
      ftString,ftFixedChar,ftwidestring: begin
@@ -1043,8 +1057,9 @@ begin
      ftFloat,ftcurrency: begin
       with po1^ do begin
        if sqlscale < 0 then begin
-        reallocmem(sqldata,sizeof(int64));
-        pint64(sqldata)^:= round(AParams[ParNr].asfloat * intexp10(-SQLScale));
+//        reallocmem(sqldata,sizeof(int64));
+        int64(cur1):= round(AParams[ParNr].asfloat * intexp10(-SQLScale));
+        move(cur1,sqldata^,po1^.sqllen);
        end
        else begin
         SetFloat(po1^.SQLData, AParams[ParNr].AsFloat,po1^.SQLLen);
@@ -1070,24 +1085,27 @@ var
  CurrBuff: pchar;
  b: longint;
  c: currency;
- i64: int64;
+// i64: int64;
  po1: pxsqlvar;
  do1: double;
  
  procedure getbcdnum;
  begin
-  i64:= 0;
-  Move(CurrBuff^,i64,po1^.SQLLen);
+  c:= 0;
+  Move(CurrBuff^,c,po1^.SQLLen);
   case po1^.sqllen of
    2: begin
-    i64:= psmallint(pointer(@i64))^; //sign extend
+    int64(c):= psmallint(pointer(@c))^; //sign extend
    end;
    4: begin
-    i64:= pinteger(pointer(@i64))^;  //sign extend
+    int64(c):= pinteger(pointer(@c))^;  //sign extend
    end;
   end;
  end;
 
+var
+ int1: integer;
+ 
 begin
  po1:= @TIBCursor(cursor).SQLDA^.SQLVar[fieldnum];
  with TIBCursor(cursor),po1^ do begin
@@ -1110,17 +1128,21 @@ begin
    case DataType of
     ftBCD: begin
      getbcdnum;
-     int64(c):= i64 * intexp10ar[4+SQLScale];
+     scaleexp10(c,4+SQLScale);
      Move(c,buffer^,sizeof(c));
     end;
     ftInteger,ftsmallint: begin
 //     b:= 0;        //todo: byte order?
 //     Move(b, Buffer^,sizeof(longint));
 //     Move(CurrBuff^,Buffer^,SQLLen);
-     longint(buffer^):= 0;
-     Move(CurrBuff^,buffer^,SQLLen);
+//     longint(buffer^):= 0;
      if datatype = ftsmallint then begin
-      longint(buffer^):= smallint(buffer^);
+      Move(CurrBuff^,b,SQLLen);
+      b:= psmallint(@b)^;   //sign extend
+      Move(b,buffer^,sizeof(b));
+     end
+     else begin
+      Move(CurrBuff^,buffer^,SQLLen);
      end;
     end;
     ftLargeint: begin
@@ -1144,7 +1166,7 @@ begin
     ftFloat,ftcurrency: begin
      if sqlscale < 0 then begin //decimal
       getbcdnum;
-      do1:= i64/intexp10(-SQLScale);
+      do1:= int64(c)/intexp10(-SQLScale);
       move(do1,buffer^,sizeof(double));
      end
      else begin

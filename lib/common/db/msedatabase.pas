@@ -22,7 +22,10 @@ uses
  mseapplication;
 
 type
- databaseoptionty = (dbo_utf8,dbo_noutf8,dbo_utf8message);
+ databaseoptionty = 
+      (dbo_utf8,dbo_noutf8,dbo_utf8message,
+       dbo_bcdtofloatif //use ftFloat for scale > 4 instead ftBCD
+      );
  databaseoptionsty = set of databaseoptionty;
  
  tmdbdataset = class;

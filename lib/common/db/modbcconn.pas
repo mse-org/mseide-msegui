@@ -1104,7 +1104,7 @@ var
   ColumnSize:SQLUINTEGER;
   ColName,TypeName:string;
   FieldType:TFieldType;
-  FieldSize:word;
+  FieldSize: integer;
   fd: tfielddef;
 begin
  fielddefs.clear;
