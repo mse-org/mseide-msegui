@@ -161,6 +161,8 @@ implementation
 uses
  msesqldb,msebufdataset,dbconst,sysutils,typinfo,dateutils,msesysintf,msedate,
  msefileutils;
+const
+ maxprecision = 18;
 type
  tmsebufdataset1 = class(tmsebufdataset);
  
@@ -471,6 +473,9 @@ begin
    if ft1 <> ftstring then begin
     size1:= fieldsizes[ft1];
    end;
+   if ft1 = ftbcd then begin
+    size1:= 4;  //scale fix
+   end;
    if size1 < 0 then begin
     ft1:= ftunknown;
     size1:= 0;
@@ -483,6 +488,9 @@ begin
    fd.displayname:= str1;
    {$endif}
    fd.collection:= fielddefs;
+   if ft1 = ftbcd then begin
+    fd.precision:= maxprecision;       //precision fix
+   end;
   end;
  end;
 end;
