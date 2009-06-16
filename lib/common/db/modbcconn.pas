@@ -260,7 +260,7 @@ const
 
  blobidsize = sizeof(integer);
  maxstrlen = 3000;
- 
+ maxprecision = 18; 
   DefaultEnvironment:TODBCEnvironment = nil;
   ODBCLoadCount:integer = 0; // ODBC is loaded when > 0; modified by TODBCEnvironment.Create/Destroy
 
@@ -1106,6 +1106,7 @@ var
   FieldType:TFieldType;
   FieldSize: integer;
   fd: tfielddef;
+  int1: integer;
 begin
  fielddefs.clear;
   ODBCCursor:=cursor as TODBCCursor;
@@ -1178,7 +1179,10 @@ begin
        end
        else begin
         FieldType:= ftbcd;
-        FieldSize:= 0;
+        FieldSize:= decimaldigits;
+        if fieldsize > 4 then begin
+         fieldsize:= 4;
+        end;
        end;
       end;
       SQL_SMALLINT:      begin FieldType:=ftSmallint;   FieldSize:=0; end;
@@ -1268,6 +1272,13 @@ begin
     fd.displayname:= colname;
     {$endif}
     fd.collection:= fielddefs;
+    if fieldtype = ftbcd then begin
+     int1:= columnsize;
+     if int1 > maxprecision then begin
+      int1:= maxprecision;
+     end;
+     fd.precision:= int1;
+    end;
     odbccursor.ffieldnames[i-1]:= colname;
   end;
 end;
