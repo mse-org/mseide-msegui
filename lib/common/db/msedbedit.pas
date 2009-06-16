@@ -7285,7 +7285,11 @@ end;
 
 procedure tdbstringcol.initeditfocus;
 begin
- //dummy
+ with tcustomstringgrid1(fgrid) do begin
+  if ffocusedcell.col = index then begin
+   feditor.dofocus;
+  end;
+ end;
 end;
 
 procedure tdbstringcol.updatereadonlystate;
