@@ -212,6 +212,7 @@ const Oid_Bool     = 16;
 
  varhdrsz = 4;
  nbase = 10000; //base for numeric digits
+ maxprecision = 18;
  
 type 
   TDatabasecracker = class(TComponent)
@@ -729,6 +730,7 @@ var
  fd: tfielddef;
  str1: ansistring;
  int1: integer;
+ precision: integer;
 begin
  fielddefs.clear;
  with tpqcursor(cursor) do begin
@@ -740,8 +742,6 @@ begin
     ftstring: begin
      if size = -1 then begin
       size:= pqfmod(res,i)-4;
-// WARNING string length is actual bigger for multi byte encodings (utf8!) 
-// 5.11.2006 MSE
       if size = -5 then begin //text
        if stringmemo then begin
         size:= 0;
@@ -760,10 +760,16 @@ begin
      size:= blobidsize;
     end;
     ftbcd: begin
-     if dbo_bcdtofloatif in controller.options then begin
-      int1:= PQfmod(Res,i);
-      if (int1 = -1) or ((int1 and $ffff) > varhdrsz + 4) then begin
-       fieldtype:= ftfloat;
+     int1:= PQfmod(Res,i) - varhdrsz; //can be -1 - 4 = -5
+     size:= int1 and $ffff;
+     precision:= int1 and $ffff0000 shr 16;
+     if (dbo_bcdtofloatif in controller.options) and (size > 4) then begin
+                             //for pqfmod = -1 too
+      fieldtype:= ftfloat;
+     end
+     else begin
+      if size > 4 then begin
+       size:= 4;
       end;
      end;
     end;
@@ -777,6 +783,12 @@ begin
    fd.displayname:= str1;
    {$endif}
    fd.collection:= fielddefs;
+   if fieldtype = ftbcd then begin
+    if precision > maxprecision then begin
+     precision:= maxprecision;
+    end;
+    fd.precision:= precision;
+   end;
   end;
 //  CurTuple:= -1; moved to execute
  end;

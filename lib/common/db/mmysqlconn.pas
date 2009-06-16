@@ -128,8 +128,8 @@ Type
 //    Procedure ConnectToServer; virtual;
 //    Procedure SelectDatabase; virtual;
 //    function MySQLDataType(AType: enum_field_types; ASize, ADecimals: Integer; var NewType: TFieldType; var NewSize: Integer): Boolean;
-    function MySQLDataType(const afield: mysql_field; var NewType: TFieldType;
-               var NewSize: Integer): Boolean;
+    function MySQLDataType(const afield: mysql_field; out NewType: TFieldType;
+               out NewSize: Integer; out newprecision: integer): Boolean;
     function MySQLWriteData(const acursor: tsqlcursor; AType: enum_field_types;
                         ASize: Integer;
                         AFieldType: TFieldType;Source, Dest: PChar): Boolean;
@@ -228,7 +228,9 @@ type
  tmsebufdataset1 = class(tmsebufdataset);
 var
  is51: boolean;
-  
+const
+ maxprecision = 18;
+   
 Resourcestring
   SErrServerConnectFailed = 'Server connect failed: %s';
   SErrDatabaseSelectFailed = 'failed to select database: %s';
@@ -993,11 +995,13 @@ end;
 
 //function tmysqlconnection.MySQLDataType(AType: enum_field_types; ASize, ADecimals: Integer;
 //   var NewType: TFieldType; var NewSize: Integer): Boolean;
-function tmysqlconnection.MySQLDataType(const afield: mysql_field; var NewType: TFieldType;
-                            var NewSize: Integer): Boolean;
+function tmysqlconnection.MySQLDataType(const afield: mysql_field;
+                out NewType: TFieldType; out NewSize: Integer;
+                out newprecision: integer): Boolean;
 begin
   Result := True;
   NewSize:= 0;
+  newprecision:= 0;
   with afield do begin
    case ftype of
     FIELD_TYPE_TINY,FIELD_TYPE_SHORT,FIELD_TYPE_LONG: begin
@@ -1010,7 +1014,15 @@ begin
     FIELD_TYPE_NEWDECIMAL,
  {$endif}
     FIELD_TYPE_DECIMAL: begin
-     if (Decimals < 4) or not (dbo_bcdtofloatif in controller.options) then begin
+     newprecision:= length - 2;
+     if (Decimals <= 4) or not (dbo_bcdtofloatif in controller.options) then begin
+      if newprecision > maxprecision then begin
+       newprecision:= maxprecision;
+      end;
+      newsize:= decimals;
+      if newsize > 4 then begin
+       newsize:= 4;
+      end;
       NewType:= ftBCD;
      end
      else begin
@@ -1060,6 +1072,7 @@ var
  field: PMYSQL_FIELD;
  DFT: TFieldType;
  DFS: Integer;
+ precision: integer;
  fd: tfielddef;
  str1: ansistring;
  res1: pmysql_res;
@@ -1091,7 +1104,7 @@ begin
     c.fprimarykeyfieldname:= name;
    end;
   end;
-  if MySQLDataType(field^,DFT,DFS) then begin
+  if MySQLDataType(field^,DFT,DFS,precision) then begin
    if not(dft in varsizefields) then begin
     dfs:= 0;
    end;
@@ -1110,7 +1123,9 @@ begin
    fd.displayname:= str1;
    {$endif}
    fd.collection:= fielddefs;
-   
+   if dft = ftbcd then begin
+    fd.precision:= precision;
+   end;   
    inc(TF);
   end
  end;
