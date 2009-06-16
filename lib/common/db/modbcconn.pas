@@ -157,7 +157,7 @@ type
 implementation
 
 uses
-  Math, DBConst;
+  Math, DBConst,msedatabase;
 {$define ODBCVER3}
 
 (* odbc type nums
@@ -1171,7 +1171,8 @@ begin
       end; // is a blob
       SQL_NUMERIC,SQL_DECIMAL:
       begin 
-       if decimaldigits > 4 then begin
+       if (decimaldigits > 4) and 
+                       (dbo_bcdtofloatif in controller.options) then begin
         FieldType:= ftFloat;
         FieldSize:= 0;
        end
