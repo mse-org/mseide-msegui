@@ -1892,9 +1892,10 @@ function tsqltransaction.docommit(const retaining: boolean): boolean;
   end
   else begin
    if (fcloselock = 0) and //refresh will not be performed later
-       ((tao_refreshdatasets in foptions) or 
+       ((tao_refreshdatasets in foptions) {or 
       (sco_emulateretaining in 
-              tcustomsqlconnection(database).connoptions)) then begin
+              tcustomsqlconnection(database).connoptions)} ) then begin
+              //no refresh for emulateretaining 2009-06-16 mse
     refreshdatasets(true,true);
    end;
   end;

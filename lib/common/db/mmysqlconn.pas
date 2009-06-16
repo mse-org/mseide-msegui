@@ -191,6 +191,7 @@ Type
    function identquotechar: ansistring; override;
    
   Public
+   constructor create(aowner: tcomponent); override;
    function fetchblob(const cursor: tsqlcursor;
                               const fieldnum: integer): ansistring; override;
                               //null based
@@ -514,6 +515,12 @@ begin
 end;
 
 { tmysqlconnection }
+
+constructor tmysqlconnection.create(aowner: tcomponent);
+begin
+ inherited;
+ fconnoptions:= fconnoptions + [sco_supportparams,sco_emulateretaining];
+end;
 
 Procedure tmysqlconnection.checkerror(const Msg: String; const aconn: pmysql);
 var
