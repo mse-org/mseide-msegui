@@ -1162,6 +1162,8 @@ type
    procedure checkindexrange;
    procedure setsortcol(const avalue: integer);
    procedure setnewrowcol(const avalue: integer);
+   function getrowselected(const index: integer): boolean;
+   procedure setrowselected(const index: integer; const avalue: boolean);
   protected
    frowstate: trowstatelist;
    procedure beginchangelock;
@@ -1213,8 +1215,12 @@ type
    
    function selectedcellcount: integer;
    function hascolselection: boolean;
-   property selectedcells: gridcoordarty read getselectedcells write setselectedcells;
-   property selectedrows: integerarty read getselectedrows write setselectedrows;
+   property selectedcells: gridcoordarty read getselectedcells 
+                                         write setselectedcells;
+   property selectedrows: integerarty read getselectedrows 
+                                         write setselectedrows;
+   property rowselected[const index: integer]: boolean read getrowselected 
+                                         write setrowselected;
    property selected[const cell: gridcoordty]: boolean read Getselected write Setselected;
                //col < 0 and row < 0 -> whole grid, col < 0 -> whole col,
                //row = < 0 -> whole row
@@ -6409,6 +6415,16 @@ begin
    end;
   end;
 // end;
+end;
+
+function tdatacols.Getrowselected(const index: integer): boolean;
+begin
+ result:= getselected(makegridcoord(invalidaxis,index));
+end;
+
+procedure tdatacols.Setrowselected(const index: integer; const avalue: boolean);
+begin
+ setselected(makegridcoord(invalidaxis,index),avalue);
 end;
 
 procedure tdatacols.clearselection;

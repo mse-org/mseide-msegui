@@ -49,6 +49,7 @@ object msedbfieldeditorfo: tmsedbfieldeditorfo
     bounds_y = 7
     bounds_cx = 258
     bounds_cy = 171
+    bounds_cxmin = 50
     frame.caption = 'Fielddefs'
     frame.captionpos = cp_top
     frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
@@ -247,7 +248,6 @@ object msedbfieldeditorfo: tmsedbfieldeditorfo
       dropdown.cols.items = <      
         item
         end>
-      dropdown.itemindex = 0
       oninit = initcla
       reffontheight = 14
     end
@@ -274,7 +274,6 @@ object msedbfieldeditorfo: tmsedbfieldeditorfo
       dropdown.cols.items = <      
         item
         end>
-      dropdown.itemindex = 0
       oninit = initfieldkind
       reffontheight = 14
     end

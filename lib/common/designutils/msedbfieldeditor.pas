@@ -281,31 +281,47 @@ var
  ar1,ar2: integerarty;
 begin
  ar1:= fielddefli.datacols.selectedrows;
- setlength(ar2,length(ar1));
- int2:= 0;
- for int1:= 0 to high(ar1) do begin
-  fields.appendrow(true);
-  try
-   fields.row:= fields.rowhigh;
-   fieldpo[fields.rowhigh]:= 
-              ffields.dataset.fielddefs[ar1[int1]].createfield(nil);
-   tfield(fieldpo[fields.rowhigh]).dataset:= nil;
-   fieldname[fields.rowhigh]:= fielddefli[0][ar1[int1]];
-   classty[fields.rowhigh]:= ord(fieldclasstoclasstyp(
-            ffields.dataset.fielddefs[ar1[int1]].fieldclass));
-   fieldkind[fields.rowhigh]:= ord(tfield(fieldpo[fields.rowhigh]).fieldkind);
-   ar2[int2]:= fields.rowhigh;
-   inc(int2);
-  except
-   fields.rowcount:= fields.rowcount - 1;
-   application.handleexception(nil);
+ if high(ar1) >= 0 then begin
+  setlength(ar2,length(ar1));
+  int2:= 0;
+  fields.beginupdate;
+  for int1:= 0 to high(ar1) do begin
+   fields.appendrow(true);
+   try
+    fields.row:= fields.rowhigh;
+    fieldpo[fields.rowhigh]:= 
+               ffields.dataset.fielddefs[ar1[int1]].createfield(nil);
+    tfield(fieldpo[fields.rowhigh]).dataset:= nil;
+    fieldname[fields.rowhigh]:= fielddefli[0][ar1[int1]];
+    classty[fields.rowhigh]:= ord(fieldclasstoclasstyp(
+             ffields.dataset.fielddefs[ar1[int1]].fieldclass));
+    fieldkind[fields.rowhigh]:= ord(tfield(fieldpo[fields.rowhigh]).fieldkind);
+    ar2[int2]:= fields.rowhigh;
+    inc(int2);
+   except
+    fields.rowcount:= fields.rowcount - 1;
+    application.handleexception(nil);
+   end;
+   fielddefli.datacols.clearselection;
   end;
-  fielddefli.datacols.clearselection;
+  setlength(ar2,int2);
+  fields.datacols.selectedrows:= ar2; 
+  fields.endupdate;
+ // fields.sort;
+  checkfielddefs;
+  for int1:= ar1[high(ar1)] + 1 to fielddefli.rowhigh do begin
+   if fielddefli.rowfontstate[int1] = -1 then begin
+    fielddefli.row:= int1;
+    exit;
+   end;
+  end;
+  for int1:= 0 to fielddefli.rowhigh do begin
+   if fielddefli.rowfontstate[int1] = -1 then begin
+    fielddefli.row:= int1;
+    exit;
+   end;
+  end;
  end;
- setlength(ar2,int2);
- fields.datacols.selectedrows:= ar2; 
- fields.sort;
- checkfielddefs;
 end;
 
 procedure tmsedbfieldeditorfo.fieldrowsdeleting(const sender: tcustomgrid;
@@ -383,6 +399,7 @@ begin
  ar1:= fields.datacols.selectedrows;
  setlength(ar2,length(ar1)); //max
  int2:= 0;
+ ffields.beginupdate;
  for int1:= high(ar1) downto 0 do begin
   ar2[int2]:= findfielddef(fieldname[ar1[int1]]);
   if ar2[int2] >= 0 then begin
@@ -390,6 +407,7 @@ begin
   end;
   fields.deleterow(ar1[int1]);
  end;
+ ffields.endupdate;
  if int2 > 0 then begin
   setlength(ar2,int2);
   fielddefli.row:= ar2[high(ar2)];
