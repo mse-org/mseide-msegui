@@ -36,7 +36,7 @@ type
 
  startcommandty = (sc_none,sc_step,sc_continue);
  formkindty = (fok_main,fok_simple,fok_dock,fok_data,fok_subform,
-               fok_report,fok_inherited);
+               fok_report,fok_script,fok_inherited);
 
  tmainfo = class(tmseform,idesignnotification)
    gdb: tgdbmi;
@@ -1789,6 +1789,11 @@ begin
      str2:= newreportsource;
      str3:= newreportform;
      str4:= 'report';
+    end;
+    fok_script: begin
+     str2:= newscriptsource;
+     str3:= newscriptform;
+     str4:= 'script';
     end;
     fok_inherited: begin
      str2:= newinheritedsource;

@@ -1,0 +1,11 @@
+object ${%FORMNAME%}: t${%FORMNAME%}
+  container.bounds_cx = 100
+  container.bounds_cy = 100
+  container.frame.dummy = 0
+  bounds_x = 337
+  bounds_y = 266
+  bounds_cx = 100
+  bounds_cy = 100
+  color = -1879048187
+  moduleclassname = 'tscriptform'
+end
