@@ -184,21 +184,21 @@ function lstringicomp(const a,b: lstringty): integer; overload;
          //ascii case insensitive
 function lstringicomp(const a: lstringty; const b: string): integer; overload;
          //ascii case insensitive
-function lstringicomp1(const a,b: lstringty): integer; overload;
-         //ascii case insensitive, b must be uppercase
-function lstringicomp1(const a: lstringty; const b: string): integer; overload;
-         //ascii case insensitive, b must be uppercase
+function lstringicompupper(const a,upper: lstringty): integer; overload;
+         //ascii case insensitive, upper must be uppercase
+function lstringicompupper(const a: lstringty; const upper: string): integer; overload;
+         //ascii case insensitive, upper must be uppercase
 
 function stringcomp(const a,b: string): integer;
 function stringicomp(const a,b: string): integer;
          //ascii case insensitive
-function stringicomp1(const a,upstr: string): integer;
+function stringicompupper(const a,upstr: string): integer;
          //ascii case insensitive, b must be uppercase
 
 function msestringcomp(const a,b: msestring): integer;
 function msestringicomp(const a,b: msestring): integer;
          //ascii case insensitive
-function msestringicomp1(const a,upstr: msestring): integer;
+function msestringicompupper(const a,upstr: msestring): integer;
          //ascii case insensitive, upstr must be uppercase
 
 function comparestrlen(S1,S2: string): integer;
@@ -3422,48 +3422,48 @@ begin
  end;
 end;
 
-function lstringicomp1(const a,b: lstringty): integer;
-         //case insensitive, b must be uppercase
+function lstringicompupper(const a,upper: lstringty): integer;
+         //case insensitive, upper must be uppercase
 var
  int1: integer;
  by1: byte;
  po1,po2: pcharaty;
 begin
  po1:= pointer(a.po);
- po2:= pointer(b.po);
+ po2:= pointer(upper.po);
  by1:= 0;
- for int1:= 0 to minhigh(a,b) do begin
+ for int1:= 0 to minhigh(a,upper) do begin
   by1:= byte(upperchars[po1^[int1]]) - byte(po2^[int1]);
   if by1 <> 0 then begin
    break;
   end;
  end;
  if by1 = 0 then begin
-  result:= a.len - b.len;
+  result:= a.len - upper.len;
  end
  else begin
   result:= shortint(by1);
  end;
 end;
 
-function lstringicomp1(const a: lstringty; const b: string): integer; overload;
-         //ansi case insensitive, b must be uppercase
+function lstringicompupper(const a: lstringty; const upper: string): integer; overload;
+         //ansi case insensitive, upper must be uppercase
 var
  int1: integer;
  by1: byte;
  po1,po2: pcharaty;
 begin
  po1:= pointer(a.po);
- po2:= pointer(b);
+ po2:= pointer(upper);
  by1:= 0;
- for int1:= 0 to minhigh(a,b) do begin
+ for int1:= 0 to minhigh(a,upper) do begin
   by1:= byte(upperchars[po1^[int1]]) - byte(po2^[int1]);
   if by1 <> 0 then begin
    break;
   end;
  end;
  if by1 = 0 then begin
-  result:= a.len - length(b);
+  result:= a.len - length(upper);
  end
  else begin
   result:= shortint(by1);
@@ -3565,7 +3565,7 @@ begin
  end;
 end;
 
-function stringicomp1(const a,upstr: string): integer;
+function stringicompupper(const a,upstr: string): integer;
          //case insensitive, b must be uppercase
 var
  int1: integer;
@@ -3645,7 +3645,7 @@ begin
  end;
 end;
 
-function msestringicomp1(const a,upstr: msestring): integer;
+function msestringicompupper(const a,upstr: msestring): integer;
          //case insensitive, b must be uppercase
 var
  int1: integer;

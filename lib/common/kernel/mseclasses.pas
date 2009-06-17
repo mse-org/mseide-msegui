@@ -1777,7 +1777,7 @@ begin
  aclassname:= uppercase(aclassname);
  result:= pobjectdatainfoty(fdata);
  for int1:= 0 to fcount -1 do begin                           
-  if (stringicomp1(result^.objectclass.classname,aclassname) = 0) and 
+  if (stringicompupper(result^.objectclass.classname,aclassname) = 0) and 
                        ((aname = '') or (result^.name = aname)) then begin
    exit;
   end;
@@ -1835,7 +1835,7 @@ begin
      comp1:= fmodules[int2];
      with comp1 do begin
       if (classtype = po1^.objectclass) and (po1^.name = '') or 
-                (stringicomp1(name,po1^.name) = 0) then begin
+                (stringicompupper(name,po1^.name) = 0) then begin
        comp1.name:= '';
        loadmodule(comp1,po1,true);
       end;

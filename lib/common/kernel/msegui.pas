@@ -11060,7 +11060,7 @@ begin
  result:= nil;
  aname:= struppercase(aname);
  for int1:= 0 to high(awidgets) do begin
-  if stringicomp1(awidgets[int1].name,aname) = 0 then begin
+  if stringicompupper(awidgets[int1].name,aname) = 0 then begin
    result:= awidgets[int1];
    break;
   end;

@@ -1154,6 +1154,8 @@ type
    procedure setcols(const index: integer; const Value: tdatacol);
    function getselectedcells: gridcoordarty;
    procedure setselectedcells(const Value: gridcoordarty);
+   function getselectedrows: integerarty;
+   procedure setselectedrows(const avalue: integerarty);
    function getselected(const cell: gridcoordty): boolean;
    procedure setselected(const cell: gridcoordty; const Value: boolean);
    procedure roworderinvalid;
@@ -1212,6 +1214,7 @@ type
    function selectedcellcount: integer;
    function hascolselection: boolean;
    property selectedcells: gridcoordarty read getselectedcells write setselectedcells;
+   property selectedrows: integerarty read getselectedrows write setselectedrows;
    property selected[const cell: gridcoordty]: boolean read Getselected write Setselected;
                //col < 0 and row < 0 -> whole grid, col < 0 -> whole col,
                //row = < 0 -> whole row
@@ -1739,6 +1742,7 @@ type
                            const nocolwrap: boolean); virtual;
                  //step > 0 -> right, step < 0 left
 
+   function isautoappend: boolean; //true if current row is auto appended
    function isdatacell(const coord: gridcoordty): boolean;
    function isvalidcell(const coord: gridcoordty): boolean;
    function isfixrow(const coord: gridcoordty): boolean;
@@ -1765,7 +1769,8 @@ type
                           const amode: cellselectmodety): boolean; 
                           //true if accepted
    function getselectedrange: gridrectty;
-   function getselectedrows: integerarty;
+//   function getselectedrows: integerarty;
+        //moved to tdatacols.selectedrows
 
    function focuscell(cell: gridcoordty;
               selectaction: focuscellactionty = fca_focusin;
@@ -1805,7 +1810,7 @@ type
    procedure insertrow(index: integer; count: integer = 1); virtual;
    procedure deleterow(index: integer; count: integer = 1); virtual;
    procedure clear; //sets rowcount to 0
-   function appendrow: integer; //returns index of new row,
+   function appendrow(const checkautoappend: boolean = false): integer; //returns index of new row,
                                 //fast, does not call change events
    procedure sort;
    function copyselection: boolean; virtual;  //false if no copy
@@ -2002,6 +2007,7 @@ type
    procedure locatesetcurrentindex(const aindex: integer);
    function getkeystring(const aindex: integer): msestring; //locate text
 
+   procedure rowstatechanged(const arow: integer); override;
    procedure dofocusedcellposchanged; override;
    procedure focusedcellchanged; override;
    procedure checkrowreadonlystate; override;
@@ -6628,6 +6634,37 @@ begin
  fgrid.endupdate;
 end;
 
+function tdatacols.getselectedrows: integerarty;
+var
+ int1,int2: integer;
+ po1: prowstatety;
+begin
+ result:= nil;
+ po1:= frowstate.datapo;
+ int2:= 0;
+ for int1:= 0 to fgrid.frowcount - 1 do begin
+  if po1^.selected and wholerowselectedmask <> 0 then begin
+   additem(result,int1,int2);
+  end;
+  inc(po1);
+ end;
+ setlength(result,int2);
+end;
+
+procedure tdatacols.setselectedrows(const avalue: integerarty);
+var
+ int1: integer;
+begin
+ fgrid.beginupdate;
+ beginselect;
+ clearselection;
+ for int1:= 0 to high(avalue) do begin
+  setselected(makegridcoord(invalidaxis,avalue[int1]),true);
+ end;
+ endselect;
+ fgrid.endupdate;
+end;
+
 procedure tdatacols.sortfunc(sender: tcustomgrid; const index1,
   index2: integer; var result: integer);
 var
@@ -9324,6 +9361,16 @@ begin
             (co_nohscroll in fdatacols[ffocusedcell.col].foptions);
 end;
 
+function tcustomgrid.isautoappend: boolean; 
+      //true if current row is auto appended
+begin
+ result:= not (gs_isdb in fstate) and (frowcount > 0) and 
+ ({(gs_rowappended in fstate) and}
+          (frowcount = 1) and (og_autofirstrow in foptionsgrid) or
+      (foptionsgrid * [og_autoappend,og_appendempty] = [og_autoappend])
+     ) and fdatacols.rowempty(frowcount - 1);
+end;
+
 function tcustomgrid.isdatacell(const coord: gridcoordty): boolean;
 begin
  with coord do begin
@@ -10522,23 +10569,6 @@ begin
  end;
 end;
 
-function tcustomgrid.getselectedrows: integerarty;
-var
- int1,count: integer;
- po1: prowstatety;
-begin
- result:= nil;
- po1:= fdatacols.frowstate.datapo;
- count:= 0;
- for int1:= 0 to frowcount - 1 do begin
-  if po1^.selected and wholerowselectedmask <> 0 then begin
-   additem(result,int1,count);
-  end;
-  inc(po1);
- end;
- setlength(result,count);
-end;
-
 procedure tcustomgrid.dofocus;
 begin
  inherited;
@@ -11315,7 +11345,7 @@ begin
  rowcount:= 0;
 end;
 
-function tcustomgrid.appendrow: integer; //returns index of new row
+function tcustomgrid.appendrow(const checkautoappend: boolean = false): integer; //returns index of new row
 var
  updatingbefore: integer;
  noinvalidatebefore: integer;
@@ -11334,56 +11364,61 @@ var
  canscroll: boolean;
   
 begin
- statebefore:= tgridframe(fframe).fstate;
- scrollheightbefore:= 
-  tcustomscrollbar1(tgridframe(fframe).fvert).fdrawinfo.areas[sbbu_move].ca.dim.cy;
- noinvalidatebefore:= fnoinvalidate;
- updatingbefore:= fupdating;
- beginupdate;
- try
-  if frowcount >= frowcountmax then begin
-   canscroll:= showing and (fappendcount < 5);
-   inc(fappendcount);
-   po1.x:= 0;
-   po1.y:= -fystep;
-   if canscroll then begin
+ if checkautoappend and isautoappend then begin
+  result:= rowhigh;
+ end
+ else begin
+  statebefore:= tgridframe(fframe).fstate;
+  scrollheightbefore:= 
+   tcustomscrollbar1(tgridframe(fframe).fvert).fdrawinfo.areas[sbbu_move].ca.dim.cy;
+  noinvalidatebefore:= fnoinvalidate;
+  updatingbefore:= fupdating;
+  beginupdate;
+  try
+   if frowcount >= frowcountmax then begin
+    canscroll:= showing and (fappendcount < 5);
+    inc(fappendcount);
+    po1.x:= 0;
+    po1.y:= -fystep;
+    if canscroll then begin
+     updatelayout1;
+     checkinvalidate;
+     scrollrect(po1,fdatarecty,scrollcaret);
+    end
+    else begin
+     invalidate;
+    end;
+    inc(fnoinvalidate);
+    rowcount:= frowcount+1;
     updatelayout1;
-    checkinvalidate;
-    scrollrect(po1,fdatarecty,scrollcaret);
+    dec(fnoinvalidate);
+    if canscroll then begin
+     rowchanged(frowcount-1);
+    end;
    end
    else begin
-    invalidate;
-   end;
-   inc(fnoinvalidate);
-   rowcount:= frowcount+1;
-   updatelayout1;
-   dec(fnoinvalidate);
-   if canscroll then begin
+    inc(fnoinvalidate);
+    rowcount:= rowcount+1;
+    updatelayout1;
+    dec(fnoinvalidate);
     rowchanged(frowcount-1);
    end;
-  end
-  else begin
-   inc(fnoinvalidate);
-   rowcount:= rowcount+1;
-   updatelayout1;
-   dec(fnoinvalidate);
-   rowchanged(frowcount-1);
-  end;
-  result:= frowcount-1;
-  if statebefore * scrollbarframestates <> 
-                    tgridframe(fframe).fstate * scrollbarframestates then begin
-   invalidatewidget;
-  end
-  else begin
-   if tcustomscrollbar1(tgridframe(fframe).fvert).
-             fdrawinfo.areas[sbbu_move].ca.dim.cy <> 
-                                        scrollheightbefore then begin
-    tcustomscrollbar1(tgridframe(fframe).fvert).invalidate;
+   result:= frowcount-1;
+   if statebefore * scrollbarframestates <> 
+                     tgridframe(fframe).fstate * scrollbarframestates then begin
+    invalidatewidget;
+   end
+   else begin
+    if tcustomscrollbar1(tgridframe(fframe).fvert).
+              fdrawinfo.areas[sbbu_move].ca.dim.cy <> 
+                                         scrollheightbefore then begin
+     tcustomscrollbar1(tgridframe(fframe).fvert).invalidate;
+    end;
    end;
+  finally
+   fnoinvalidate:= noinvalidatebefore;
+   fupdating:= updatingbefore
   end;
- finally
-  fnoinvalidate:= noinvalidatebefore;
-  fupdating:= updatingbefore
  end;
 end;
 
@@ -11864,13 +11899,8 @@ end;
 procedure tcustomgrid.removeappendedrow;
 begin
  docheckcellvalue;
- if not (gs_isdb in fstate) and (frowcount > 0) and 
- ({(gs_rowappended in fstate) and}
-          (frowcount = 1) and (og_autofirstrow in foptionsgrid) or
-      (foptionsgrid * [og_autoappend,og_appendempty] = [og_autoappend])
-     ) and fdatacols.rowempty(frowcount - 1) then begin
+ if isautoappend then begin
   deleterow(frowcount-1);
-//  rowcount:= rowcount - 1;
   include(fstate,gs_emptyrowremoved);
  end;
 // exclude(fstate,gs_rowappended);
@@ -12210,7 +12240,7 @@ var
  ar1: integerarty;
  int1: integer;
 begin
- ar1:= getselectedrows;
+ ar1:= fdatacols.getselectedrows;
  if high(ar1) >= 0 then begin
   if askok(stockobjects.textgenerators[tg_delete_n_selected_rows]([length(ar1)]),
 //  stockobjects.captions[sc_Delete]+' '+inttostr(length(ar1))+
@@ -12230,7 +12260,8 @@ end;
 
 procedure tcustomgrid.dodeleterows(const sender: tobject);
 begin
- if (og_selectedrowsdeleting in foptionsgrid) and (high(getselectedrows) >= 0) then begin
+ if (og_selectedrowsdeleting in foptionsgrid) and 
+            (high(fdatacols.getselectedrows) >= 0) then begin
   dodeleteselectedrows(sender);
  end
  else begin
@@ -12540,6 +12571,14 @@ begin
  end;
  if active then begin
   feditor.doactivate;
+ end;
+end;
+
+procedure tcustomstringgrid.rowstatechanged(const arow: integer);
+begin
+ inherited;
+ if (arow = ffocusedcell.row) and (ffocusedcell.col >= 0) then begin
+  feditor.font:= fdatacols[ffocusedcell.col].rowfont(ffocusedcell.row)
  end;
 end;
 

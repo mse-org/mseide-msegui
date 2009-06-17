@@ -1608,7 +1608,7 @@ begin
  for int1:= 0 to high(result) do begin
   mstr1:= struppercase(result[int1]);
   for int2:= int1 + 1 to high(result) do begin
-   if msestringicomp1(result[int2],mstr1) = 0 then begin
+   if msestringicompupper(result[int2],mstr1) = 0 then begin
     result[int2]:= '';
    end;
   end;

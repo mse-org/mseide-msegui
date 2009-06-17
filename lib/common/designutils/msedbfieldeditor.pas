@@ -46,6 +46,7 @@ type
   private
    ffields: tpersistentfields;
    procedure checkfielddefs;
+   function findfielddef(aname: msestring): integer;
   public
    constructor create(const afields: tpersistentfields); reintroduce;
  end;
@@ -276,13 +277,16 @@ end;
 
 procedure tmsedbfieldeditorfo.transferfields(const sender: TObject);
 var
- int1: integer;
- ar1: integerarty;
+ int1,int2: integer;
+ ar1,ar2: integerarty;
 begin
- ar1:= fielddefli.getselectedrows;
+ ar1:= fielddefli.datacols.selectedrows;
+ setlength(ar2,length(ar1));
+ int2:= 0;
  for int1:= 0 to high(ar1) do begin
-  fields.rowcount:= fields.rowcount+1;
+  fields.appendrow(true);
   try
+   fields.row:= fields.rowhigh;
    fieldpo[fields.rowhigh]:= 
               ffields.dataset.fielddefs[ar1[int1]].createfield(nil);
    tfield(fieldpo[fields.rowhigh]).dataset:= nil;
@@ -290,13 +294,16 @@ begin
    classty[fields.rowhigh]:= ord(fieldclasstoclasstyp(
             ffields.dataset.fielddefs[ar1[int1]].fieldclass));
    fieldkind[fields.rowhigh]:= ord(tfield(fieldpo[fields.rowhigh]).fieldkind);
+   ar2[int2]:= fields.rowhigh;
+   inc(int2);
   except
    fields.rowcount:= fields.rowcount - 1;
    application.handleexception(nil);
   end;
   fielddefli.datacols.clearselection;
  end;
- 
+ setlength(ar2,int2);
+ fields.datacols.selectedrows:= ar2; 
  fields.sort;
  checkfielddefs;
 end;
@@ -350,17 +357,43 @@ end;
 procedure tmsedbfieldeditorfo.fieldselectioncha(const sender: TObject);
 begin
  fieldtodef.enabled:= fields.datacols.hasselection and 
-                            (length(fields.getselectedrows) > 0);
+                            (length(fields.datacols.selectedrows) > 0);
+end;
+
+function tmsedbfieldeditorfo.findfielddef(aname: msestring): integer;
+var
+ int1: integer;
+begin
+ result:= invalidaxis;
+ aname:= struppercase(aname);
+ for int1:= 0 to fielddefli.rowhigh do begin
+  if msestringicompupper(fielddefli[0][int1],aname) = 0 then begin
+   result:= int1;
+   break;
+  end;
+ end;
 end;
 
 procedure tmsedbfieldeditorfo.deletefields(const sender: TObject);
 var
- ar1: integerarty;
+ ar1,ar2: integerarty;
  int1: integer;
+ int2: integer;
 begin
- ar1:= fields.getselectedrows;
+ ar1:= fields.datacols.selectedrows;
+ setlength(ar2,length(ar1)); //max
+ int2:= 0;
  for int1:= high(ar1) downto 0 do begin
+  ar2[int2]:= findfielddef(fieldname[ar1[int1]]);
+  if ar2[int2] >= 0 then begin
+   inc(int2);
+  end;
   fields.deleterow(ar1[int1]);
+ end;
+ if int2 > 0 then begin
+  setlength(ar2,int2);
+  fielddefli.row:= ar2[high(ar2)];
+  fielddefli.datacols.selectedrows:= ar2;
  end;
 end;
 

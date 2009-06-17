@@ -907,7 +907,7 @@ begin
  result:= nil;
  po1:= datapo;
  for int1:= 0 to fcount - 1 do begin
-  if stringicomp1(aname,po1^.uppername) = 0 then begin
+  if stringicompupper(aname,po1^.uppername) = 0 then begin
    result:= po1;
    break;
   end;
@@ -1040,7 +1040,7 @@ begin
  result:= nil;
  po1:= datapo;
  for int1:= 0 to fcount - 1 do begin
-  if lstringicomp1(aname,po1^.uppername) = 0 then begin
+  if lstringicompupper(aname,po1^.uppername) = 0 then begin
    if not interfaceonly or not po1^.inimplementation then begin
     result:= po1;
    end;

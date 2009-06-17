@@ -1,5 +1,9 @@
 MSEide+MSEgui version history
 
+2009-06-17
+ msestringicomp1 -> msestringicompupper.
+ lstringicomp1 -> lstringicompupper.
+ tcustomgrid.getselectedrows -> tdatacols.selectedrows.
 2009-06-02
  tgriddatalink.datafield -> fieldname_state.
 2009-04-10

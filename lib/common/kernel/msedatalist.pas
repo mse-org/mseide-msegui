@@ -1152,7 +1152,7 @@ procedure additem(var dest: stringarty; const value: string;
                              var count: integer; step: integer = 32);
 begin
  if length(dest) <= count then begin
-  setlength(dest,count+step);
+  setlength(dest,count+step+2*length(dest));
  end;
  dest[count]:= value;
  inc(count);
@@ -1162,7 +1162,7 @@ procedure additem(var dest: msestringarty; const value: msestring;
                              var count: integer; step: integer = 32);
 begin
  if length(dest) <= count then begin
-  setlength(dest,count+step);
+  setlength(dest,count+step+2*length(dest));
  end;
  dest[count]:= value;
  inc(count);
@@ -1172,7 +1172,7 @@ procedure additem(var dest: lstringarty; const value: lstringty;
                              var count: integer; step: integer = 32);
 begin
  if length(dest) <= count then begin
-  setlength(dest,count+step);
+  setlength(dest,count+step+2*length(dest));
  end;
  dest[count]:= value;
  inc(count);
@@ -1182,7 +1182,7 @@ procedure additem(var dest: lmsestringarty; const value: lmsestringty;
                              var count: integer; step: integer = 32);
 begin
  if length(dest) <= count then begin
-  setlength(dest,count+step);
+  setlength(dest,count+step+2*length(dest));
  end;
  dest[count]:= value;
  inc(count);
@@ -1192,7 +1192,7 @@ procedure additem(var dest: integerarty; const value: integer;
                              var count: integer; step: integer = 32);
 begin
  if length(dest) <= count then begin
-  setlength(dest,count+step);
+  setlength(dest,count+step+2*length(dest));
  end;
  dest[count]:= value;
  inc(count);
@@ -1202,7 +1202,7 @@ procedure additem(var dest: pointerarty; const value: pointer;
                              var count: integer; step: integer = 32);
 begin
  if length(dest) <= count then begin
-  setlength(dest,count+step);
+  setlength(dest,count+step+2*length(dest));
  end;
  dest[count]:= value;
  inc(count);
