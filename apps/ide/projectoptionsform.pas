@@ -26,7 +26,8 @@ uses
  msegraphutils,mseevent,msetabsglob,msedatalist,msegraphics,msedropdownlist,
  mseformatstr,mseinplaceedit,msedatanodes,mselistbrowser,msebitmap,
  msecolordialog,msedrawtext,msewidgets,msepointer,mseguiglob,msepipestream,
- msemenus,sysutils,mseglob,mseedit;
+ msemenus,sysutils,mseglob,mseedit,db,msedbedit,msedialog,mselookupbuffer,
+ msescrollbar;
 
 const
  defaultsourceprintfont = 'Courier';
@@ -111,6 +112,8 @@ type
   newreportform: filenamety;
   newinheritedsource: filenamety;
   newinheritedform: filenamety;
+  newscriptsource: filenamety;
+  newscriptform: filenamety;
  end;
 
  projectoptionsty = record
@@ -353,20 +356,6 @@ type
    newprogf: tfilenameedit;
    newunitf: tfilenameedit;
    ttabpage5: ttabpage;
-   mainfosource: tfilenameedit;
-   mainfoform: tfilenameedit;
-   simplefosource: tfilenameedit;
-   simplefoform: tfilenameedit;
-   dockingfosource: tfilenameedit;
-   dockingfoform: tfilenameedit;
-   datamodsource: tfilenameedit;
-   datamodform: tfilenameedit;
-   subfosource: tfilenameedit;
-   subfoform: tfilenameedit;
-   reportsource: tfilenameedit;
-   reportform: tfilenameedit;
-   inheritedsource: tfilenameedit;
-   inheritedform: tfilenameedit;
    ttabpage15: ttabpage;
    twidgetgrid3: twidgetgrid;
    toolsave: tbooleanedit;
@@ -416,6 +405,10 @@ type
    fontwidth: tintegeredit;
    fontoptions: tstringedit;
    fontxscale: trealedit;
+   twidgetgrid4: twidgetgrid;
+   newformname: tstringedit;
+   newformsourcefile: tfilenameedit;
+   newformformfile: tfilenameedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -759,6 +752,8 @@ begin
    li.expandmacros(newreportform);
    li.expandmacros(newinheritedsource);
    li.expandmacros(newinheritedform);
+   li.expandmacros(newscriptsource);
+   li.expandmacros(newscriptform);
    clearfontalias;
    int2:= high(fontalias);
    if int2 > high(fontnames) then begin
@@ -1054,6 +1049,8 @@ begin
   newreportform:= '${TEMPLATEDIR}default/report.mfm';
   newinheritedsource:= '${TEMPLATEDIR}default/inheritedform.pas';
   newinheritedform:= '${TEMPLATEDIR}default/inheritedform.mfm';
+  newscriptsource:= '${TEMPLATEDIR}default/scriptform.pas';
+  newscriptform:= '${TEMPLATEDIR}default/scriptform.mfm';
  end;
  expandprojectmacros;
 end;
@@ -1265,6 +1262,8 @@ begin
   updatevalue('newreportform',newreportform);
   updatevalue('newinheritedsource',newinheritedsource);
   updatevalue('newinheritedform',newinheritedform);
+  updatevalue('newscriptsource',newscriptsource);
+  updatevalue('newscriptform',newscriptform);
   
   if not iswriter then begin
    if guitemplatesmo.sysenv.getintegervalue(int1,ord(env_vargroup),1,6) then begin
@@ -1382,20 +1381,22 @@ begin
   fo.newprogf.value:= newprogramfile;
   fo.newunitf.value:= newunitfile;
 //  fo.newtextf.value:= newtextfile;
-  fo.mainfosource.value:= newmainfosource;
-  fo.mainfoform.value:= newmainfoform;
-  fo.simplefosource.value:= newsimplefosource;
-  fo.simplefoform.value:= newsimplefoform;
-  fo.dockingfosource.value:= newdockingfosource;
-  fo.dockingfoform.value:= newdockingfoform;
-  fo.datamodsource.value:= newdatamodsource;
-  fo.datamodform.value:= newdatamodform;
-  fo.subfosource.value:= newsubfosource;
-  fo.subfoform.value:= newsubfoform;
-  fo.reportsource.value:= newreportsource;
-  fo.reportform.value:= newreportform;
-  fo.inheritedsource.value:= newinheritedsource;
-  fo.inheritedform.value:= newinheritedform;
+  fo.newformsourcefile.gridvalue[0]:= newmainfosource;
+  fo.newformformfile.gridvalue[0]:= newmainfoform;
+  fo.newformsourcefile.gridvalue[1]:= newsimplefosource;
+  fo.newformformfile.gridvalue[1]:= newsimplefoform;
+  fo.newformsourcefile.gridvalue[2]:= newdockingfosource;
+  fo.newformformfile.gridvalue[2]:= newdockingfoform;
+  fo.newformsourcefile.gridvalue[3]:= newdatamodsource;
+  fo.newformformfile.gridvalue[3]:= newdatamodform;
+  fo.newformsourcefile.gridvalue[4]:= newsubfosource;
+  fo.newformformfile.gridvalue[4]:= newsubfoform;
+  fo.newformsourcefile.gridvalue[5]:= newreportsource;
+  fo.newformformfile.gridvalue[5]:= newreportform;
+  fo.newformsourcefile.gridvalue[6]:= newinheritedsource;
+  fo.newformformfile.gridvalue[6]:= newinheritedform;
+  fo.newformsourcefile.gridvalue[7]:= newscriptsource;
+  fo.newformformfile.gridvalue[7]:= newscriptform;
 
   fo.makecommand.value:= makecommand;
   fo.makedir.value:= makedir;
@@ -1578,20 +1579,22 @@ begin
   newprogramfile:= fo.newprogf.value;
   newunitfile:= fo.newunitf.value;
 //  newtextfile:= fo.newtextf.value;
-  newmainfosource:= fo.mainfosource.value;
-  newmainfoform:= fo.mainfoform.value;
-  newsimplefosource:= fo.simplefosource.value;
-  newsimplefoform:= fo.simplefoform.value;
-  newdockingfosource:= fo.dockingfosource.value;
-  newdockingfoform:= fo.dockingfoform.value;
-  newdatamodsource:= fo.datamodsource.value;
-  newdatamodform:= fo.datamodform.value;
-  newsubfosource:= fo.subfosource.value;
-  newsubfoform:= fo.subfoform.value;
-  newreportsource:= fo.reportsource.value;
-  newreportform:= fo.reportform.value;
-  newinheritedsource:= fo.inheritedsource.value;
-  newinheritedform:= fo.inheritedform.value;
+  newmainfosource:= fo.newformsourcefile.gridvalue[0];
+  newmainfoform:= fo.newformformfile.gridvalue[0];
+  newsimplefosource:= fo.newformsourcefile.gridvalue[1];
+  newsimplefoform:= fo.newformformfile.gridvalue[1];
+  newdockingfosource:= fo.newformsourcefile.gridvalue[2];
+  newdockingfoform:= fo.newformformfile.gridvalue[2];
+  newdatamodsource:= fo.newformsourcefile.gridvalue[3];
+  newdatamodform:= fo.newformformfile.gridvalue[3];
+  newsubfosource:= fo.newformsourcefile.gridvalue[4];
+  newsubfoform:= fo.newformformfile.gridvalue[4];
+  newreportsource:= fo.newformsourcefile.gridvalue[5];
+  newreportform:= fo.newformformfile.gridvalue[5];
+  newinheritedsource:= fo.newformsourcefile.gridvalue[6];
+  newinheritedform:= fo.newformformfile.gridvalue[6];
+  newscriptsource:= fo.newformsourcefile.gridvalue[7];
+  newscriptform:= fo.newformformfile.gridvalue[7];
   
   makecommand:= fo.makecommand.value;
   makedir:= fo.makedir.value;
@@ -1905,10 +1908,12 @@ end;
 
 procedure tprojectoptionsfo.formtemplateonchildscaled(const sender: TObject);
 begin
+{
  placeyorder(0,[0],[mainfosource,mainfoform,simplefosource,simplefoform,
        dockingfosource,dockingfoform,datamodsource,datamodform,
        subfosource,subfoform,reportsource,reportform,
        inheritedsource,inheritedform]);
+}
 end;
 
 procedure tprojectoptionsfo.encodingsetvalue(const sender: TObject;
