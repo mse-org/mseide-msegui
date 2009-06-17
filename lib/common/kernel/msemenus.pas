@@ -181,6 +181,8 @@ type
    property items[const index: integer]: tmenuitem read getitems
                          write setitems; default;
    function itembyname(const name: string): tmenuitem;
+   function itembynames(const names: array of string): tmenuitem;
+   procedure deleteitembynames(const names: array of string);
    function index: integer; //-1 if no parent menu
    property checkedtag: integer read getcheckedtag write setcheckedtag;
                              //-1 if none checked
@@ -907,6 +909,34 @@ begin
  end
  else begin
   result:= fsubmenu.itembyname(name);
+ end;
+end;
+
+function tmenuitem.itembynames(const names: array of string): tmenuitem;
+var
+ int1: integer;
+ sub1: tmenuitems;
+begin
+ result:= self;
+ for int1:= 0 to high(names) do begin
+  sub1:= result.fsubmenu;
+  if sub1 = nil then begin
+   break;
+  end;
+  result:= sub1.itembyname(names[int1]);
+  if result = nil then begin
+   break;
+  end;
+ end;
+end;
+
+procedure tmenuitem.deleteitembynames(const names: array of string);
+var
+ item1: tmenuitem;
+begin
+ item1:= itembynames(names);
+ if item1 <> nil then begin
+  item1.fparentmenu.submenu.delete(item1.index);
  end;
 end;
 

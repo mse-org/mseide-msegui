@@ -132,6 +132,7 @@ object mainfo: tmainfo
                   end                
                   item
                     caption = 'S&criptform'
+                    name = 'scriptform'
                     state = [as_localcaption, as_localtag, as_localonexecute]
                     tag = 6
                     onexecute = newformonexecute
@@ -146,6 +147,7 @@ object mainfo: tmainfo
                     onexecute = newformonexecute
                   end>
                 caption = '&Form'
+                name = 'form'
                 state = [as_localcaption]
               end            
               item
@@ -165,6 +167,7 @@ object mainfo: tmainfo
                 onexecute = newtextfileonexecute
               end>
             caption = '&New'
+            name = 'new'
             state = [as_localcaption]
           end        
           item

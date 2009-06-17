@@ -323,6 +323,9 @@ begin
  disassfo.gdb:= gdb;
  initprojectoptions;
  sourceupdate.init(designer);
+{$ifndef mse_with_pascalscript}
+ mainmenu1.menu.deleteitembynames(['file','new','form','scriptform']);
+{$endif}
 end;
 
 procedure tmainfo.mainfoondestroy(const sender: tobject);
