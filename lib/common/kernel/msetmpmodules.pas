@@ -34,7 +34,7 @@ begin
  end;
  result:= tmsecomponent(class1.newinstance);
  with tmsecomponent1(result) do begin
-  include(fmsecomponentstate,cs_noload);
+  fmsecomponentstate:= fmsecomponentstate + [cs_noload,cs_tmpmodule];
   try
    beginloadtmpmodule;
    try

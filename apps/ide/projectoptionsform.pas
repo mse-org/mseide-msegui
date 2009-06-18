@@ -112,8 +112,8 @@ type
   newreportform: filenamety;
   newinheritedsource: filenamety;
   newinheritedform: filenamety;
-  newscriptsource: filenamety;
-  newscriptform: filenamety;
+  newpascsource: filenamety;
+  newpascform: filenamety;
  end;
 
  projectoptionsty = record
@@ -752,8 +752,8 @@ begin
    li.expandmacros(newreportform);
    li.expandmacros(newinheritedsource);
    li.expandmacros(newinheritedform);
-   li.expandmacros(newscriptsource);
-   li.expandmacros(newscriptform);
+   li.expandmacros(newpascsource);
+   li.expandmacros(newpascform);
    clearfontalias;
    int2:= high(fontalias);
    if int2 > high(fontnames) then begin
@@ -1049,8 +1049,8 @@ begin
   newreportform:= '${TEMPLATEDIR}default/report.mfm';
   newinheritedsource:= '${TEMPLATEDIR}default/inheritedform.pas';
   newinheritedform:= '${TEMPLATEDIR}default/inheritedform.mfm';
-  newscriptsource:= '${TEMPLATEDIR}default/scriptform.pas';
-  newscriptform:= '${TEMPLATEDIR}default/scriptform.mfm';
+  newpascsource:= '${TEMPLATEDIR}default/pascform.pas';
+  newpascform:= '${TEMPLATEDIR}default/pascform.mfm';
  end;
  expandprojectmacros;
 end;
@@ -1262,8 +1262,8 @@ begin
   updatevalue('newreportform',newreportform);
   updatevalue('newinheritedsource',newinheritedsource);
   updatevalue('newinheritedform',newinheritedform);
-  updatevalue('newscriptsource',newscriptsource);
-  updatevalue('newscriptform',newscriptform);
+  updatevalue('newpascsource',newpascsource);
+  updatevalue('newpascform',newpascform);
   
   if not iswriter then begin
    if guitemplatesmo.sysenv.getintegervalue(int1,ord(env_vargroup),1,6) then begin
@@ -1395,8 +1395,8 @@ begin
   fo.newformformfile.gridvalue[5]:= newreportform;
   fo.newformsourcefile.gridvalue[6]:= newinheritedsource;
   fo.newformformfile.gridvalue[6]:= newinheritedform;
-  fo.newformsourcefile.gridvalue[7]:= newscriptsource;
-  fo.newformformfile.gridvalue[7]:= newscriptform;
+  fo.newformsourcefile.gridvalue[7]:= newpascsource;
+  fo.newformformfile.gridvalue[7]:= newpascform;
 
   fo.makecommand.value:= makecommand;
   fo.makedir.value:= makedir;
@@ -1593,8 +1593,8 @@ begin
   newreportform:= fo.newformformfile.gridvalue[5];
   newinheritedsource:= fo.newformsourcefile.gridvalue[6];
   newinheritedform:= fo.newformformfile.gridvalue[6];
-  newscriptsource:= fo.newformsourcefile.gridvalue[7];
-  newscriptform:= fo.newformformfile.gridvalue[7];
+  newpascsource:= fo.newformsourcefile.gridvalue[7];
+  newpascform:= fo.newformformfile.gridvalue[7];
   
   makecommand:= fo.makecommand.value;
   makedir:= fo.makedir.value;

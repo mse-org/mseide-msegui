@@ -7,5 +7,5 @@ object ${%FORMNAME%}: t${%FORMNAME%}
   bounds_cx = 100
   bounds_cy = 100
   color = -1879048187
-  moduleclassname = 'tscriptform'
+  moduleclassname = 'tpascform'
 end

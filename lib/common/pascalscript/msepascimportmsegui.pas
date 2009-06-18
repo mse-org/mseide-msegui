@@ -1,10 +1,10 @@
-unit psimportmsegui;
+unit msepascimportmsegui;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
  upscomponent,upscompiler,upsruntime;
 type
- tpsimportmsegui = class(tpsplugin)
+ tpascimportmsegui = class(tpsplugin)
   protected
    procedure CompOnUses(CompExec: TPSScript); override;
    procedure ExecOnUses(CompExec: TPSScript); override;
@@ -35,14 +35,14 @@ begin
  end;
 end;
 
-{ tpsimportmsegui }
+{ tpascimportmsegui }
 
-procedure tpsimportmsegui.CompOnUses(CompExec: TPSScript);
+procedure tpascimportmsegui.CompOnUses(CompExec: TPSScript);
 begin
  registermsegui_c(compexec.comp);
 end;
 
-procedure tpsimportmsegui.ExecOnUses(CompExec: TPSScript);
+procedure tpascimportmsegui.ExecOnUses(CompExec: TPSScript);
 begin
  registermsegui_r(compexec.exec);
 end;

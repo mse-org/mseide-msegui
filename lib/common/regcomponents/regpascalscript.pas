@@ -3,26 +3,27 @@ unit regpascalscript;
 interface 
 implementation
 uses
- classes,msedesignintf,msepascalscript,msepropertyeditors,msetypes,msestrings,
+ classes,msedesignintf,msepascalscript,msepascimport,
+ msepropertyeditors,msetypes,msestrings,
  msetexteditor,mseglob,mseguiglob,msegui,msewidgets,uPSComponent,
  uPSComponent_Default,
- psimportmsegui,formdesigner,sourceupdate,mseparser,pascaldesignparser,
+ msepascimportmsegui,formdesigner,sourceupdate,mseparser,pascaldesignparser,
  msedesigner,mserichstring,mseclasses,msedesignparser;
 type
  tpascaleditor = class(ttextstringspropertyeditor)
   protected
-   function getscript: tmsepsscript; virtual;
+   function getscript: tpasc; virtual;
    function getsyntaxindex: integer; override;   
    procedure doafterclosequery(var amodalresult: modalresultty); override;
    function gettestbutton: boolean; override;
    function getcaption: msestring; override;
  end;
  
- tpsscriptformeditor = class(tpascaleditor)
+ tpascformeditor = class(tpascaleditor)
   private
    fmoduleprefix: ansistring;
   protected
-   function getscript: tmsepsscript; override;  
+   function getscript: tpasc; override;  
    procedure edit; override;
    procedure doafterclosequery(var amodalresult: modalresultty); override;
    procedure updateline(var aline: ansistring); override;
@@ -31,19 +32,21 @@ type
 function sourcetoformscript(const amodule: tmsecomponent;
                       const asource: trichstringdatalist): boolean; forward;
 const
- scriptformintf: designmoduleintfty = 
-  (createfunc: {$ifdef FPC}@{$endif}createscriptform;
+ pascformintf: designmoduleintfty = 
+  (createfunc: {$ifdef FPC}@{$endif}createpascform;
      initnewcomponent: nil; getscale: nil; sourcetoform: @sourcetoformscript);
  
 procedure Register;
 begin          
- registerclass(tscriptform);
- registercomponents('Ifi',[tmsepsscript,tpsdllplugin,tpsimport_classes,
-                            tpsimport_dateutils,tpsimportmsegui]);
- registerpropertyeditor(typeinfo(tstrings),tmsepsscript,'Script',tpascaleditor);
- registerpropertyeditor(typeinfo(tstrings),tscriptform,'ps_script',
-                            tpsscriptformeditor);
- registerdesignmoduleclass(tscriptform,scriptformintf);
+ registerclass(tpascform);
+ registercomponents('PaSc',[tpasc,tpascdllplugin,tpascimport_classes,
+                            tpascimport_dateutils,tpascimportmsegui]);
+ registerpropertyeditor(typeinfo(tstrings),tpasc,'Script',tpascaleditor);
+ registerpropertyeditor(typeinfo(tstrings),tpascform,'ps_script',
+                            tpascformeditor);
+ registerdesignmoduleclass(tpascform,pascformintf);
+ registercomponenttabhints(['PaSc'],
+         ['Experimental Pascal Script Components']);
 end;
 
 procedure doupdateline(aline: pchar; const moduleprefix: ansistring);
@@ -87,7 +90,7 @@ begin
  if bo1 then begin
   po2:= designer.modules.findmodule(amodule);
   prefix:= struppercase(po2^.moduleclassname)+'.';
-  with tscriptform(amodule).script.script do begin
+  with tpascform(amodule).script.script do begin
    text:= mstr1;
    for int1:= 0 to count - 1 do begin
     doupdateline(pchar(strings[int1]),prefix);
@@ -170,9 +173,9 @@ const
 
 { tpascaleditor }
 
-function tpascaleditor.getscript: tmsepsscript;
+function tpascaleditor.getscript: tpasc;
 begin
- result:= tmsepsscript(getordvalue(0));
+ result:= tpasc(getordvalue(0));
 end;
 
 procedure tpascaleditor.doafterclosequery(var amodalresult: modalresultty);
@@ -208,14 +211,14 @@ begin
  result:= pascalindex;
 end;
 
-{ tpsscriptformeditor }
+{ tpascformeditor }
 
-function tpsscriptformeditor.getscript: tmsepsscript;
+function tpascformeditor.getscript: tpasc;
 begin
- result:= tscriptform(component).script;
+ result:= tpascform(component).script;
 end;
 
-procedure tpsscriptformeditor.edit;
+procedure tpascformeditor.edit;
 var
  bo1: boolean;
  po1: punitinfoty;
@@ -235,18 +238,18 @@ begin
  inherited;
  if bo1 and (fmodalresult = mr_ok) then begin
   sourceupdater.replacetext(po1,start,stop,
-        concatstrings(forigtext,msestring(lineend)));
+        concatstrings(forigtext,msestring(lineend))+lineend);
  end;
 end;
 
-procedure tpsscriptformeditor.doafterclosequery(var amodalresult: modalresultty);
+procedure tpascformeditor.doafterclosequery(var amodalresult: modalresultty);
 begin
  if amodalresult in [mr_canclose,mr_ok] then begin
  end;
  inherited; 
 end;
 
-procedure tpsscriptformeditor.updateline(var aline: ansistring);
+procedure tpascformeditor.updateline(var aline: ansistring);
                        //todo: patch PascalScript to accept classname
 begin
  doupdateline(pchar(aline),fmoduleprefix);

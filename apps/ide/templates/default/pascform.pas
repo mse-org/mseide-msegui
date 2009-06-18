@@ -5,7 +5,7 @@ uses
  mseglob,mseguiglob,mseapplication,msestat,msemenus,msegui,
  msegraphics,msegraphutils,mseevent,mseclasses,mseforms,msepascalscript;
 type
- t${%FORMNAME%} = class(tscriptform)
+ t${%FORMNAME%} = class(tpascform)
  end;
 var
  ${%FORMNAME%}: t${%FORMNAME%};

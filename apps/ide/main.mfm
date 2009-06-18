@@ -132,7 +132,7 @@ object mainfo: tmainfo
                   end                
                   item
                     caption = 'S&criptform'
-                    name = 'scriptform'
+                    name = 'pascform'
                     state = [as_localcaption, as_localtag, as_localonexecute]
                     tag = 6
                     onexecute = newformonexecute

@@ -6,7 +6,8 @@ uses
  typinfo,mselist,uPSPreProcessor;
 
 type 
- tmsepsscript = class(tpsscript)
+
+ tpasc = class(tpsscript)
   public
    function compilermessagetext: msestring;
    function compilermessagear: msestringarty;
@@ -22,7 +23,7 @@ type
    property prop: string read fprop write fprop;
  end;
  
- tformscript = class(tmsepsscript)
+ tformscript = class(tpasc)
   private
    fowner: tmsecomponent;
   protected
@@ -53,10 +54,10 @@ type
    constructor create;
    procedure additem(const apropinfo: ppropinfo; const ainstance: tobject;
                           const aname: string);
-   procedure linkmethods(const ascript: tmsepsscript);
+   procedure linkmethods(const ascript: tpasc);
  end;
 
- tscriptform = class(tmseform)
+ tpascform = class(tmseform)
   private
    fscript: tformscript;
    fmethlist: tmethproplist;
@@ -69,6 +70,7 @@ type
    class function hasresource: boolean; override;
    procedure readstate(reader: treader); override;
    procedure doafterload; override;
+   function isscript: boolean;
   public
    constructor create(aowner: tcomponent; load: boolean); override;
    destructor destroy; override;
@@ -78,11 +80,11 @@ type
    property ps_plugins: tpsplugins read getps_plugins write setps_plugins;
  end;
  
- scriptformclassty = class of tscriptform;
+ pascformclassty = class of tpascform;
  
-function createscriptform(const aclass: tclass; 
+function createpascform(const aclass: tclass; 
                    const aclassname: pshortstring): tmsecomponent;
-function loadscriptform(const filename: filenamety): tscriptform;
+function loadpascform(const filename: filenamety): tpascform;
 
 implementation
 uses
@@ -90,46 +92,7 @@ uses
 type
  tmsecomponent1 = class(tmsecomponent);
  
-procedure tscriptform.readstate(reader: treader);
-begin
- if not (csdesigning in componentstate) then begin
-  freeandnil(fmethlist);
-  fmethlist:= tmethproplist.create;
-//  try
-   reader.onsetmethodproperty:= @fmethlist.dosetmethodprop;
-   inherited;
-   {
-   if not fscript.compile then begin
-    raise exception.create('Error compiling script of '+name+':'+lineend+
-             fscript.compilermessagetext);
-   end;
-   methlist.linkmethods(fscript);
-  finally
-   methlist.free;
-  end;
-  }
- end
- else begin
-  inherited;
- end;
-end;
-
-procedure tscriptform.doafterload;
-begin
- if not (csdesigning in componentstate) then begin
-  try
-   if not fscript.compile then begin
-    raise exception.create('Error compiling script of '+name+':'+lineend+
-             fscript.compilermessagetext);
-   end;
-   fmethlist.linkmethods(fscript);
-  finally
-   freeandnil(fmethlist);
-  end;
- end;
-end;
-
-function loadscriptform(const filename: filenamety): tscriptform;
+function loadpascform(const filename: filenamety): tpascform;
 var
  stream1: ttextstream;
  stream2: tmemorystream;
@@ -138,19 +101,19 @@ begin
  stream1:= nil;
  stream2:= nil;
  try
-  result:= tscriptform.create(application,false);
+//  result:= tpascform.create(application,false);
   stream1:= ttextstream.create(filename,fm_read);
   stream2:= tmemorystream.create;
   objecttexttobinary(stream1,stream2);
   stream2.position:= 0;
-  result:= tscriptform(createtmpmodule('tscriptform',stream2));
+  result:= tpascform(createtmpmodule('tpascform',stream2));
  finally
   stream1.free;
   stream2.free;
  end;
 end;
 { 
-function loadscriptform(const filename: filenamety): tscriptform;
+function loadpascform(const filename: filenamety): tpascform;
 var
  methlist: tmethproplist;
  stream1: ttextstream;
@@ -164,7 +127,7 @@ begin
  beginloadtmpmodule;
  try
   try
-   result:= tscriptform.create(application,false);
+   result:= tpascform.create(application,false);
    stream1:= ttextstream.create(filename,fm_read);
    stream2:= tmemorystream.create;
    objecttexttobinary(stream1,stream2);
@@ -191,10 +154,10 @@ begin
  end;
 end;
 } 
-function createscriptform(const aclass: tclass; 
+function createpascform(const aclass: tclass; 
                    const aclassname: pshortstring): tmsecomponent;
 begin
- result:= scriptformclassty(aclass).create(nil,false);
+ result:= pascformclassty(aclass).create(nil,false);
  tmsecomponent1(result).factualclassname:= aclassname;
 end;
 
@@ -238,7 +201,7 @@ begin
  end;
 end;
 
-procedure tmethproplist.linkmethods(const ascript: tmsepsscript);
+procedure tmethproplist.linkmethods(const ascript: tpasc);
 var
  int1: integer;
  meth1: tmethod;
@@ -251,9 +214,9 @@ begin
  end;
 end;
 
-{ tmsepsscript }
+{ tpasc }
 
-function tmsepsscript.compilermessagetext: msestring;
+function tpasc.compilermessagetext: msestring;
 var
  int1: integer;
 begin
@@ -266,7 +229,7 @@ begin
  end;
 end;
 
-function tmsepsscript.compilermessagear: msestringarty;
+function tpasc.compilermessagear: msestringarty;
 var
  int1: integer;
 begin
@@ -277,48 +240,94 @@ begin
  end;
 end;
 
-{ tscriptform }
+{ tpascform }
 
-constructor tscriptform.create(aowner: tcomponent; load: boolean);
+constructor tpascform.create(aowner: tcomponent; load: boolean);
 begin
  fscript:= tformscript.create(self);
  fscript.setsubcomponent(true);
  inherited;
 end;
 
-destructor tscriptform.destroy;
+destructor tpascform.destroy;
 begin
  fmethlist.free;
  fscript.free;
  inherited;
 end;
 
-class function tscriptform.getmoduleclassname: string;
+function tpascform.isscript: boolean;
 begin
- result:= 'tscriptform';
+ result:= (cs_tmpmodule in fmsecomponentstate) and 
+                            not (csdesigning in componentstate);
 end;
 
-class function tscriptform.hasresource: boolean;
+procedure tpascform.readstate(reader: treader);
 begin
- result:= self <> tscriptform;
+ if isscript then begin
+  freeandnil(fmethlist);
+  fmethlist:= tmethproplist.create;
+//  try
+   reader.onsetmethodproperty:= @fmethlist.dosetmethodprop;
+   inherited;
+   {
+   if not fscript.compile then begin
+    raise exception.create('Error compiling script of '+name+':'+lineend+
+             fscript.compilermessagetext);
+   end;
+   methlist.linkmethods(fscript);
+  finally
+   methlist.free;
+  end;
+  }
+ end
+ else begin
+  inherited;
+ end;
 end;
 
-function tscriptform.getps_script: tstrings;
+procedure tpascform.doafterload;
+begin
+ if isscript then begin
+  try
+   if not fscript.compile then begin
+    raise exception.create('Error compiling script of '+name+':'+lineend+
+             fscript.compilermessagetext);
+   end;
+   fmethlist.linkmethods(fscript);
+  finally
+   freeandnil(fmethlist);
+  end;
+ end;
+ inherited;
+end;
+
+class function tpascform.getmoduleclassname: string;
+begin
+ result:= 'tpascform';
+end;
+
+class function tpascform.hasresource: boolean;
+begin
+ result:= self <> tpascform;
+end;
+
+function tpascform.getps_script: tstrings;
 begin
  result:= fscript.script;
 end;
 
-procedure tscriptform.setps_script(const avalue: tstrings);
+procedure tpascform.setps_script(const avalue: tstrings);
 begin
  fscript.script.assign(avalue); 
 end;
 
-function tscriptform.getps_plugins: tpsplugins;
+function tpascform.getps_plugins: tpsplugins;
 begin
  result:= fscript.plugins;
 end;
 
-procedure tscriptform.setps_plugins(const avalue: tpsplugins);
+procedure tpascform.setps_plugins(const avalue: tpsplugins);
 begin
  fscript.plugins.assign(avalue);
 end;

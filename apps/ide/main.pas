@@ -324,7 +324,7 @@ begin
  initprojectoptions;
  sourceupdate.init(designer);
 {$ifndef mse_with_pascalscript}
- mainmenu1.menu.deleteitembynames(['file','new','form','scriptform']);
+ mainmenu1.menu.deleteitembynames(['file','new','form','pascform']);
 {$endif}
 end;
 
@@ -1794,8 +1794,8 @@ begin
      str4:= 'report';
     end;
     fok_script: begin
-     str2:= newscriptsource;
-     str3:= newscriptform;
+     str2:= newpascsource;
+     str3:= newpascform;
      str4:= 'script';
     end;
     fok_inherited: begin
