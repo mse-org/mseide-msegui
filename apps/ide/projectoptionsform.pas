@@ -26,7 +26,7 @@ uses
  msegraphutils,mseevent,msetabsglob,msedatalist,msegraphics,msedropdownlist,
  mseformatstr,mseinplaceedit,msedatanodes,mselistbrowser,msebitmap,
  msecolordialog,msedrawtext,msewidgets,msepointer,mseguiglob,msepipestream,
- msemenus,sysutils,mseglob,mseedit,db,msedbedit,msedialog,mselookupbuffer,
+ msemenus,sysutils,mseglob,mseedit,db,msedialog,
  msescrollbar;
 
 const
