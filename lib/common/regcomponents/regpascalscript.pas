@@ -42,7 +42,7 @@ begin
  registercomponents('PaSc',[tpasc,tpascdllplugin,tpascimport_classes,
                             tpascimport_dateutils,tpascimportmsegui]);
  registerpropertyeditor(typeinfo(tstrings),tpasc,'Script',tpascaleditor);
- registerpropertyeditor(typeinfo(tstrings),tpascform,'ps_script',
+ registerpropertyeditor(typeinfo(tstrings),tpascform,'pasc_script',
                             tpascformeditor);
  registerdesignmoduleclass(tpascform,pascformintf);
  registercomponenttabhints(['PaSc'],

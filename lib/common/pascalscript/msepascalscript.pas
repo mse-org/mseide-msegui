@@ -61,10 +61,10 @@ type
   private
    fscript: tformscript;
    fmethlist: tmethproplist;
-   function getps_script: tstrings;
-   procedure setps_script(const avalue: tstrings);
-   function getps_plugins: tpsplugins;
-   procedure setps_plugins(const avalue: tpsplugins);
+   function getpasc_script: tstrings;
+   procedure setpasc_script(const avalue: tstrings);
+   function getpasc_plugins: tpsplugins;
+   procedure setpasc_plugins(const avalue: tpsplugins);
   protected
    class function getmoduleclassname: string; override;
    class function hasresource: boolean; override;
@@ -76,8 +76,8 @@ type
    destructor destroy; override;
    property script: tformscript read fscript;
   published
-   property ps_script: tstrings read getps_script write setps_script;
-   property ps_plugins: tpsplugins read getps_plugins write setps_plugins;
+   property pasc_script: tstrings read getpasc_script write setpasc_script;
+   property pasc_plugins: tpsplugins read getpasc_plugins write setpasc_plugins;
  end;
  
  pascformclassty = class of tpascform;
@@ -312,22 +312,22 @@ begin
  result:= self <> tpascform;
 end;
 
-function tpascform.getps_script: tstrings;
+function tpascform.getpasc_script: tstrings;
 begin
  result:= fscript.script;
 end;
 
-procedure tpascform.setps_script(const avalue: tstrings);
+procedure tpascform.setpasc_script(const avalue: tstrings);
 begin
  fscript.script.assign(avalue); 
 end;
 
-function tpascform.getps_plugins: tpsplugins;
+function tpascform.getpasc_plugins: tpsplugins;
 begin
  result:= fscript.plugins;
 end;
 
-procedure tpascform.setps_plugins(const avalue: tpsplugins);
+procedure tpascform.setpasc_plugins(const avalue: tpsplugins);
 begin
  fscript.plugins.assign(avalue);
 end;
