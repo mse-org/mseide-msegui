@@ -41,6 +41,7 @@ type
    procedure internaldelete; override;
    procedure internalclose; override;
    function  getcanmodify: boolean; override;
+   procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -96,6 +97,7 @@ type
    procedure internaldelete; override;
    procedure internalclose; override;
    function  getcanmodify: boolean; override;
+   procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -149,6 +151,7 @@ type
    procedure internaldelete; override;
    procedure internalclose; override;
    function  getcanmodify: boolean; override;
+   procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -202,6 +205,7 @@ type
    procedure internaldelete; override;
    procedure internalclose; override;
    function  getcanmodify: boolean; override;
+   procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -422,6 +426,11 @@ begin
  result:= fcontroller.getcanmodify and inherited getcanmodify;
 end;
 
+procedure tmsezreadonlyquery.dscontrolleroptionschanged(const aoptions: datasetoptionsty);
+begin
+ //dummy
+end;
+
 { tmsezquery }
 
 constructor tmsezquery.create(aowner: tcomponent);
@@ -622,6 +631,11 @@ begin
  result:= fcontroller.getcanmodify and inherited getcanmodify;
 end;
 
+procedure tmsezquery.dscontrolleroptionschanged(const aoptions: datasetoptionsty);
+begin
+ //dummy
+end;
+
 { tmseztable }
 
 constructor tmseztable.create(aowner: tcomponent);
@@ -817,6 +831,11 @@ begin
  result:= fcontroller.getcanmodify and inherited getcanmodify;
 end;
 
+procedure tmseztable.dscontrolleroptionschanged(const aoptions: datasetoptionsty);
+begin
+ //dummy
+end;
+
 { tmsezstoredproc }
 
 constructor tmsezstoredproc.create(aowner: tcomponent);
@@ -1010,6 +1029,11 @@ end;
 function tmsezstoredproc.getcanmodify: boolean;
 begin
  result:= fcontroller.getcanmodify and inherited getcanmodify;
+end;
+
+procedure tmsezstoredproc.dscontrolleroptionschanged(const aoptions: datasetoptionsty);
+begin
+ //dummy
 end;
 
 end.

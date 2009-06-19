@@ -48,6 +48,7 @@ type
    procedure internaldelete; override;
    procedure internalclose; override;
    function  getcanmodify: boolean; override;
+   procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -263,6 +264,11 @@ end;
 function tmsememdataset.getcanmodify: boolean;
 begin
  result:= fcontroller.getcanmodify and inherited getcanmodify;
+end;
+
+procedure tmsememdataset.dscontrolleroptionschanged(const aoptions: datasetoptionsty);
+begin
+ //dummy
 end;
 
 end.

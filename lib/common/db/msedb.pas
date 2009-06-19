@@ -73,6 +73,9 @@ type
  locateoptionsty = set of locateoptionty;
  fieldarty = array of tfield;
 
+ masterlinkoptionty = (mdlo_syncedit,mdlo_syncinsert); 
+ masterlinkoptionsty = set of masterlinkoptionty;
+
  imasterlink = interface(inullinterface)
                       ['{2EC83B53-AF9E-4420-925A-C6CCD543D3C3}']
   function refreshing: boolean;
@@ -942,8 +945,9 @@ type
                          dso_refreshafterapply,
                          dso_cacheblobs,
                          dso_offline, //disconnect database after open
-                         dso_local,
-                         dso_noedit);  //do not connect database on open
+                         dso_local,   //do not connect database on open
+                         dso_noedit,
+                         dso_syncmasteredit,dso_syncmasterinsert); 
  datasetoptionsty = set of datasetoptionty;
 
  idscontroller = interface(inullinterface)
@@ -964,6 +968,7 @@ type
   procedure beginfilteredit(const akind:filtereditkindty);
   procedure endfilteredit;
   procedure doidleapplyupdates;
+  procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
  end;
 
  igetdscontroller = interface(inullinterface)
@@ -978,11 +983,14 @@ const
   
 type
  fieldlinkarty = array of ifieldcomponent;
- dscontrollerstatety = (dscs_posting,dscs_onidleregistered);
+ dscontrollerstatety = (dscs_posting,dscs_canceling,dscs_onidleregistered);
  dscontrollerstatesty = set of dscontrollerstatety;
 
  datasetstatechangedeventty = procedure(const sender: tdataset;
                                   const statebefore: tdatasetstate) of object;
+ masterdataseteventty = procedure(const sender: tdataset;
+                                 const master: tdataset) of object;
+
  tdscontroller = class(tactivatorcontroller,idsfieldcontroller)
   private
    ffields: tpersistentfields;
@@ -1003,6 +1011,8 @@ type
    fupdatecount: integer;
    fstatebefore: tdatasetstate;
    fonstatechanged: datasetstatechangedeventty;
+   fonupdatemasteredit: masterdataseteventty;
+   fonupdatemasterinsert: masterdataseteventty;
    procedure setfields(const avalue: tpersistentfields);
    function getcontroller: tdscontroller;
    procedure updatelinkedfields;
@@ -1047,7 +1057,6 @@ type
    function getcanmodify: boolean;
    
    procedure dataevent(const event: tdataevent; info: ptrint);
-   procedure cancel;
    property recno: integer read getrecno write setrecno;
    property recnonullbased: integer read getrecnonullbased 
                                        write setrecnonullbased;
@@ -1062,6 +1071,8 @@ type
    function post: boolean; //calls post if in edit or insert state,
                            //returns false if nothing done
    function posting: boolean; //true if in post procedure
+   procedure cancel;
+   function canceling: boolean;
    function emptyinsert: boolean;
    function assql(const avalue: boolean): string; overload;
    function assql(const avalue: msestring): string; overload;
@@ -1084,6 +1095,10 @@ type
                //0 -> no autoapply
    property onstatechanged: datasetstatechangedeventty read fonstatechanged 
                                                 write fonstatechanged;
+   property onupdatemasteredit: masterdataseteventty read fonupdatemasteredit 
+                     write fonupdatemasteredit;
+   property onupdatemasterinsert: masterdataseteventty read fonupdatemasterinsert 
+                     write fonupdatemasterinsert;
  end;
  
  idbcontroller = interface(inullinterface)
@@ -5023,28 +5038,38 @@ procedure tdscontroller.cancel;
 var
  bo1: boolean;
 begin
- with tdataset1(fowner) do begin
-  bo1:= state = dsinsert;
-  if bo1 then begin
-   dobeforescroll;
-  end;
-  if fcancelresync and (state = dsinsert) and not modified then begin
-   fintf.inheritedcancel;
-   try
-    if finsertbm <> '' then begin
-     bookmark:= finsertbm;
-    end;  
-   except
+ try
+  include(fstate,dscs_canceling);
+  with tdataset1(fowner) do begin
+   bo1:= state = dsinsert;
+   if bo1 then begin
+    dobeforescroll;
    end;
-   finsertbm:= '';
-  end
-  else begin
-   fintf.inheritedcancel;
+   if fcancelresync and (state = dsinsert) and not modified then begin
+    fintf.inheritedcancel;
+    try
+     if finsertbm <> '' then begin
+      bookmark:= finsertbm;
+     end;  
+    except
+    end;
+    finsertbm:= '';
+   end
+   else begin
+    fintf.inheritedcancel;
+   end;
+   if bo1 then begin
+    doafterscroll;
+   end;
   end;
-  if bo1 then begin
-   doafterscroll;
-  end;
+ finally
+  exclude(fstate,dscs_canceling);
  end;
+end;
+
+function tdscontroller.canceling: boolean;
+begin
+ result:= dscs_canceling in fstate;
 end;
 
 function tdscontroller.moveby(const distance: integer): integer;
@@ -5362,8 +5387,9 @@ procedure tdscontroller.setoptions(const avalue: datasetoptionsty);
 const
  mask: datasetoptionsty = [dso_autocommitret,dso_autocommit];
 var
- options1: datasetoptionsty;
+ options1,optionsbefore: datasetoptionsty;
 begin
+ optionsbefore:= foptions;
  options1:= datasetoptionsty(longword(foptions) xor longword(avalue));
  foptions:= datasetoptionsty(setsinglebit(longword(avalue),longword(foptions),
                     longword(mask)));
@@ -5372,6 +5398,9 @@ begin
    tdataset(fowner).checkbrowsemode;
   end;
   tdataset1(fowner).dataevent(dedisabledstatechange,0);
+ end;
+ if optionsbefore <> foptions then begin
+  fintf.dscontrolleroptionschanged(foptions);
  end;
 end;
 
@@ -5596,10 +5625,10 @@ end;
 function tfieldfieldlink.getdatasource(const aindex: integer): tdatasource;
 begin
  if aindex = 0 then begin
-  result:= fdestdatalink.datasource;
+  result:= fsourcedatalink.datasource;
  end
  else begin
-  result:= fsourcedatalink.datasource;
+  result:= fdestdatalink.datasource;
  end;  
 end;
 

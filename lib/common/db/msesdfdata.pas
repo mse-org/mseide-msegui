@@ -52,6 +52,7 @@ type
    procedure internaldelete; override;
    procedure internalclose; override;
    function  getcanmodify: boolean; override;
+   procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -111,6 +112,7 @@ type
    procedure internalinsert; override;
    procedure internaldelete; override;
    function  getcanmodify: boolean; override;
+   procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -349,6 +351,11 @@ begin
  result:= fcontroller.getcanmodify and inherited getcanmodify;
 end;
 
+procedure tmsefixedformatdataset.dscontrolleroptionschanged(const aoptions: datasetoptionsty);
+begin
+ //dummy
+end;
+
 { tmsesdfdataset }
 
 constructor tmsesdfdataset.create(aowner: tcomponent);
@@ -559,6 +566,11 @@ end;
 function tmsesdfdataset.getcanmodify: boolean;
 begin
  result:= fcontroller.getcanmodify and inherited getcanmodify;
+end;
+
+procedure tmsesdfdataset.dscontrolleroptionschanged(const aoptions: datasetoptionsty);
+begin
+ //dummy
 end;
 
 end.

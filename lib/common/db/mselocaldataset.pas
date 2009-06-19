@@ -64,6 +64,7 @@ type
    procedure internalclose; override;
    function  getcanmodify: boolean; override;
    function islocal: boolean; override;
+   procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
 
    function CreateBlobStream(Field: TField; Mode: TBlobStreamMode): TStream; override;
    function fetch : boolean; override;
@@ -376,6 +377,11 @@ begin
    end;
   end;
  end;
+end;
+
+procedure tlocaldataset.dscontrolleroptionschanged(const aoptions: datasetoptionsty);
+begin
+ //dummy
 end;
 
 end.

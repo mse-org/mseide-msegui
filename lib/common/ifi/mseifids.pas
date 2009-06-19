@@ -218,6 +218,7 @@ type
   protected
    ffielddefsequence: sequencety;
    procedure checkrecno(const avalue: integer);
+   procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
 
    //iifidscontroller
    function getfielddefs: tfielddefs;
@@ -2483,6 +2484,11 @@ end;
 function tifidataset.getcanmodify: boolean;
 begin
  result:= fcontroller.getcanmodify and inherited getcanmodify;
+end;
+
+procedure tifidataset.dscontrolleroptionschanged(const aoptions: datasetoptionsty);
+begin
+ //dummy
 end;
 
 { trxdataset }

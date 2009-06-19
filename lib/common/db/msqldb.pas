@@ -17,7 +17,7 @@ unit msqldb;
 
 {$ifdef VER2_1_5} {$define mse_FPC_2_2} {$endif}
 {$ifdef VER2_2} {$define mse_FPC_2_2} {$endif}
-{$mode objfpc}{$interfaces corba}
+{$mode objfpc}{$interfaces corba}{$goto on}
 {$H+}
 //{$M+}   // ### remove this!!!
 
@@ -509,12 +509,17 @@ type
                               const aparam: tparam);
   function blobscached: boolean;
  end;
-
- tmsemasterparamsdatalink = class(tmasterparamsdatalink)
+ 
+ tsqlmasterparamsdatalink = class(tmasterparamsdatalink)
   private
+   frefreshlock: integer;
   protected
    procedure domasterdisable; override;
    procedure domasterchange; override;
+   procedure CheckBrowseMode; override;
+   procedure DataEvent(Event: TDataEvent; Info: Ptrint); override;
+  public
+   constructor create(const aowner: tsqlquery); reintroduce;
  end;
  
  isqlclient = interface(idatabaseclient)
@@ -542,7 +547,7 @@ type
    FWhereStartPos: integer;
    FWhereStopPos: integer;
    FParseSQL: boolean;
-   FMasterLink: TmseMasterParamsDatalink;
+   FMasterLink: TsqlMasterParamsDatalink;
    FUpdateQry,FDeleteQry,FInsertQry: TSQLQuery;
    fupdaterowsaffected: integer;
    fblobintf: iblobconnection;   
@@ -582,6 +587,7 @@ type
    FReadOnly: boolean;
    fprimarykeyfield: tfield;                   
    futf8: boolean;
+   fmasterlinkoptions: masterlinkoptionsty;
    procedure settransactionwrite(const avalue: tmdbtransaction); override;
    procedure checkpendingupdates; virtual;
    procedure notification(acomponent: tcomponent; operation: toperation); override;   
@@ -596,6 +602,7 @@ type
            const buffer: pointer; var bufsize: integer): boolean; override;
           //if bufsize < 0 -> buffer was to small, should be -bufsize
    // abstract & virtual methods of TDataset
+   procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
    function isutf8: boolean; override;
    procedure UpdateIndexDefs; override;
    procedure SetDatabase(const Value: tmdatabase); override;
@@ -3290,7 +3297,7 @@ begin
   end;
   If Assigned(AValue) then begin
    AValue.FreeNotification(Self);  
-   FMasterLink:= TmseMasterParamsDataLink.Create(Self);
+   FMasterLink:= TsqlMasterParamsDataLink.Create(Self);
    FMasterLink.Datasource:= AValue;
   end
   else begin
@@ -3539,6 +3546,17 @@ begin
 // if fdatabase <> nil then begin
 //  tcustomsqlconnection(fdatabase).updateutf8(result);
 // end;
+end;
+
+procedure TSQLQuery.dscontrolleroptionschanged(const aoptions: datasetoptionsty);
+begin
+ fmasterlinkoptions:= [];
+ if dso_syncmasteredit in aoptions then begin
+  include(fmasterlinkoptions,mdlo_syncedit);
+ end;
+ if dso_syncmasterinsert in aoptions then begin
+  include(fmasterlinkoptions,mdlo_syncinsert);
+ end;
 end;
 
 { TSQLCursor }
@@ -4029,31 +4047,104 @@ begin
  end;
 end;
 
-{ tmsemasterparamsdatalink }
+{ tsqlmasterparamsdatalink }
 
-procedure tmsemasterparamsdatalink.domasterchange;
+constructor tsqlmasterparamsdatalink.create(const aowner: tsqlquery);
 begin
- if assigned(onmasterchange) then begin
-  onmasterchange(self); 
- end;
- if assigned(params) and assigned(detaildataset) and detaildataset.active then begin
-  detaildataset.refresh;
+ inherited create(aowner);
+end;
+
+procedure tsqlmasterparamsdatalink.domasterchange;
+var
+ intf: igetdscontroller;
+begin
+ if (frefreshlock = 0) and 
+    (not getcorbainterface(dataset,typeinfo(igetdscontroller),intf) or
+      not intf.getcontroller.posting) then begin
+  if assigned(onmasterchange) then begin
+   onmasterchange(self); 
+  end;
+  if assigned(params) and assigned(detaildataset) and 
+                (detaildataset.state = dsbrowse) then begin
+   detaildataset.refresh;
+  end;
  end;
 end;
 
-procedure tmsemasterparamsdatalink.domasterdisable;
+procedure tsqlmasterparamsdatalink.domasterdisable;
 var
  intf: imasterlink;
 begin
  if not getcorbainterface(dataset,typeinfo(imasterlink),intf) or
           not intf.refreshing then begin
-
   if assigned(onmasterdisable) then begin
    onmasterdisable(self);
   end;
   if assigned(detaildataset) and detaildataset.active then begin
    detaildataset.close;
   end;
+ end;
+end;
+
+procedure tsqlmasterparamsdatalink.DataEvent(Event: TDataEvent; Info: Ptrint);
+begin
+ inherited;
+ if event = deupdatestate then begin
+  if (mdlo_syncedit in tsqlquery(detaildataset).fmasterlinkoptions) and
+      (dataset.state = dsedit) and not (detaildataset.state = dsedit) then begin
+   detaildataset.edit;
+  end;
+  if (mdlo_syncinsert in tsqlquery(detaildataset).fmasterlinkoptions) and
+      (dataset.state = dsinsert) and not (detaildataset.state = dsinsert) then begin
+   detaildataset.insert;
+  end;
+ end;
+end;
+
+procedure tsqlmasterparamsdatalink.CheckBrowseMode;
+label
+ endlab;
+var
+ intf: igetdscontroller;
+begin
+ inc(frefreshlock);
+ try
+  if (tsqlquery(detaildataset).fmasterlinkoptions * 
+        [mdlo_syncedit,mdlo_syncinsert] <> []) then begin
+   if getcorbainterface(dataset,typeinfo(igetdscontroller),intf) and
+                                      intf.getcontroller.canceling then begin
+    detaildataset.cancel;
+    exit;
+   end
+   else begin
+    if detaildataset.state = dsinsert then begin
+     dataset.updaterecord;
+     if dataset.modified then begin
+      detaildataset.post;
+      goto endlab;
+     end;
+    end;
+   end;
+  end;
+  inherited;
+ endlab:
+  if (dataset.state in [dsedit,dsinsert]) and 
+        (tsqlquery(detaildataset).fmasterlinkoptions * 
+                       [mdlo_syncedit,mdlo_syncinsert] <> []) then begin
+   dataset.updaterecord; //synchronize fields
+  end;
+  if getcorbainterface(detaildataset,typeinfo(igetdscontroller),intf) then begin
+   with intf.getcontroller do begin
+    if (dataset.state = dsinsert) and assigned(onupdatemasterinsert) then begin
+     onupdatemasterinsert(detaildataset,dataset);
+    end;
+    if (dataset.state = dsedit) and assigned(onupdatemasteredit) then begin
+     onupdatemasteredit(detaildataset,dataset);
+    end;
+   end;
+  end;
+ finally
+  dec(frefreshlock);
  end;
 end;
 

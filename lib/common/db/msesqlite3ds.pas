@@ -53,6 +53,7 @@ type
    procedure internalinsert; override;
    procedure internaldelete; override;
    procedure internalclose; override;
+   procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
 
   public
    constructor create(aowner: tcomponent); override;
@@ -286,6 +287,11 @@ begin
 end;
 
 procedure tmsesqlite3dataset.doidleapplyupdates;
+begin
+ //dummy
+end;
+
+procedure tmsesqlite3dataset.dscontrolleroptionschanged(const aoptions: datasetoptionsty);
 begin
  //dummy
 end;
