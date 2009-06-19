@@ -2784,7 +2784,14 @@ end;
 
 procedure tmsecomponent.setancestor(value: boolean);
 begin
- inherited setancestor(value);
+ with tcomponentcracker(self) do begin
+  if value then begin
+   include(fcomponentstate,csancestor);
+  end
+  else begin
+   exclude(fcomponentstate,csancestor);
+  end;
+ end;
 end;
 
 {$endif FPC}
