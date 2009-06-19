@@ -511,7 +511,9 @@ type
  end;
 
  tmsemasterparamsdatalink = class(tmasterparamsdatalink)
+  private
   protected
+   procedure domasterdisable; override;
    procedure domasterchange; override;
  end;
  
@@ -3278,25 +3280,23 @@ begin
 end;
 
 Procedure TSQLQuery.SetDataSource(AVAlue : TDatasource);
-
 Var
-  DS : TDatasource;
-
+ DS : TDatasource;
 begin
-  DS:=DataSource;
-  If (AValue<>DS) then
-    begin
-    If Assigned(DS) then
-      DS.RemoveFreeNotification(Self);
-    If Assigned(AValue) then
-      begin
-      AValue.FreeNotification(Self);  
-      FMasterLink:=TmseMasterParamsDataLink.Create(Self);
-      FMasterLink.Datasource:=AValue;
-      end
-    else
-      FreeAndNil(FMasterLink);  
-    end;
+ DS:=DataSource;
+ If (AValue<>DS) then begin
+  If Assigned(DS) then begin
+   DS.RemoveFreeNotification(Self);
+  end;
+  If Assigned(AValue) then begin
+   AValue.FreeNotification(Self);  
+   FMasterLink:= TmseMasterParamsDataLink.Create(Self);
+   FMasterLink.Datasource:= AValue;
+  end
+  else begin
+   FreeAndNil(FMasterLink);  
+  end;
+ end;
 end;
 
 Function TSQLQuery.GetDataSource : TDatasource;
@@ -4038,6 +4038,22 @@ begin
  end;
  if assigned(params) and assigned(detaildataset) and detaildataset.active then begin
   detaildataset.refresh;
+ end;
+end;
+
+procedure tmsemasterparamsdatalink.domasterdisable;
+var
+ intf: imasterlink;
+begin
+ if not getcorbainterface(dataset,typeinfo(imasterlink),intf) or
+          not intf.refreshing then begin
+
+  if assigned(onmasterdisable) then begin
+   onmasterdisable(self);
+  end;
+  if assigned(detaildataset) and detaildataset.active then begin
+   detaildataset.close;
+  end;
  end;
 end;
 

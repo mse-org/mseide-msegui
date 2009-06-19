@@ -407,7 +407,7 @@ type
  
  filterediteventty = procedure(const sender: tmsebufdataset;
                              const akind: filtereditkindty) of object;
- tmsebufdataset = class(tmdbdataset,iblobchache,idatasetsum)
+ tmsebufdataset = class(tmdbdataset,iblobchache,idatasetsum,imasterlink)
   private
    fpacketrecords: integer;
    fopen: boolean;
@@ -660,6 +660,9 @@ type
    procedure savetofile(const afilename: filenamety);
    procedure loadfromfile(const afilename: filenamety);
    function streamloading: boolean;
+
+    //imasterlink   
+   function refreshing: boolean;
    
    function isutf8: boolean; virtual;
    procedure bindfields(const bind: boolean);
@@ -3825,6 +3828,11 @@ begin
   end;
  end;
  inherited;
+end;
+
+function tmsebufdataset.refreshing: boolean;
+begin
+ result:= bs_refreshing in fbstate;
 end;
 
 function tmsebufdataset.isutf8: boolean;

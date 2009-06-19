@@ -73,6 +73,11 @@ type
  locateoptionsty = set of locateoptionty;
  fieldarty = array of tfield;
 
+ imasterlink = interface(inullinterface)
+                      ['{2EC83B53-AF9E-4420-925A-C6CCD543D3C3}']
+  function refreshing: boolean;
+ end;
+ 
  imselocate = interface(inullinterface)['{2680958F-F954-DA11-9015-00C0CA1308FF}']
    function locate(const key: integer; const field: tfield;
                      const options: locateoptionsty = []): locateresultty;
