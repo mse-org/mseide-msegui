@@ -8,7 +8,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 unit msesqldb;
-{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$goto on}{$endif}
 interface
 uses
  classes,db,msebufdataset,msqldb,msedb,mseclasses,msetypes,mseglob,
@@ -72,6 +72,7 @@ type
    procedure loaded; override;
    procedure internalopen; override;
    procedure internalclose; override;
+   procedure DoAfterDelete; override;
    procedure internalinsert; override;
    procedure internaldelete; override;
    procedure applyrecupdate(updatekind: tupdatekind); override;
@@ -92,7 +93,6 @@ type
    procedure inheritedinternalclose;
    procedure doidleapplyupdates;
 
-   procedure DoAfterDelete; override;
    procedure dataevent(event: tdataevent; info: ptrint); override;
    function wantblobfetch: boolean; override;
    function closetransactiononrefresh: boolean; override;
@@ -142,15 +142,19 @@ type
    fowner: tfieldparamlink;
    fparamset: boolean;
    fchangelock: integer;
+   frefreshlock: integer;
   protected
    procedure checkrefresh;
    procedure recordchanged(afield: tfield); override;
+   procedure DataEvent(Event: TDataEvent; Info: Ptrint); override;
+   procedure CheckBrowseMode; override;
   public
    constructor create(const aowner: tfieldparamlink);
    procedure loaded;
  end;
  
- fieldparamlinkoptionty = (fplo_autorefresh);
+ fieldparamlinkoptionty = (fplo_autorefresh,
+                           fplo_syncmasteredit,fplo_syncmasterinsert);
  fieldparamlinkoptionsty = set of fieldparamlinkoptionty;
 const
  defaultfieldparamlinkoptions = [fplo_autorefresh];
@@ -166,6 +170,8 @@ type
    foptions: fieldparamlinkoptionsty;
    ftimer: tsimpletimer;
    fdelayus: integer;
+   fonupdatemasteredit: masterdataseteventty;
+   fonupdatemasterinsert: masterdataseteventty;
    function getdatafield: string;
    procedure setdatafield(const avalue: string);
    function getdatasource: tdatasource; overload;
@@ -201,6 +207,10 @@ type
    property onsetparam: setparameventty read fonsetparam write fonsetparam;
    property onaftersetparam: notifyeventty read fonaftersetparam
                                   write fonaftersetparam;
+   property onupdatemasteredit: masterdataseteventty read fonupdatemasteredit 
+                     write fonupdatemasteredit;
+   property onupdatemasterinsert: masterdataseteventty read fonupdatemasterinsert 
+                     write fonupdatemasterinsert;
  end;
 
  tsequencelink = class;
@@ -708,37 +718,39 @@ var
 begin
  if not (csloading in fowner.componentstate) then begin
   inherited;
-  if active and (field <> nil) and
-                ((afield = nil) or (afield = self.field)) then begin
-   if fchangelock <> 0 then begin
-    databaseerror('Recursive recordchanged.',fowner);
-   end;
-   inc(fchangelock);
-   try
-    with fowner do begin
-     if not (csdesigning in componentstate) then begin
-      fparamset:= true;
-      bo1:= false;
-      if assigned(fonsetparam) then begin
-       fonsetparam(fowner,bo1);
-      end;
-      if not bo1 and (fparamname <> '') and (dataset <> nil) then begin
-       fieldtoparam(self.field,param);
-      end;
-      if assigned(fonaftersetparam) then begin
-       fonaftersetparam(fowner);
-      end;
-      if ftimer <> nil then begin
-       ftimer.interval:= ftimer.interval;
-       ftimer.enabled:= true;
-      end
-      else begin
-       checkrefresh;
+  if frefreshlock = 0 then begin
+   if active and (field <> nil) and
+                 ((afield = nil) or (afield = self.field)) then begin
+    if fchangelock <> 0 then begin
+     databaseerror('Recursive recordchanged.',fowner);
+    end;
+    inc(fchangelock);
+    try
+     with fowner do begin
+      if not (csdesigning in componentstate) then begin
+       fparamset:= true;
+       bo1:= false;
+       if assigned(fonsetparam) then begin
+        fonsetparam(fowner,bo1);
+       end;
+       if not bo1 and (fparamname <> '') and (dataset <> nil) then begin
+        fieldtoparam(self.field,param);
+       end;
+       if assigned(fonaftersetparam) then begin
+        fonaftersetparam(fowner);
+       end;
+       if ftimer <> nil then begin
+        ftimer.interval:= ftimer.interval;
+        ftimer.enabled:= true;
+       end
+       else begin
+        checkrefresh;
+       end;
       end;
      end;
+    finally
+     dec(fchangelock);
     end;
-   finally
-    dec(fchangelock);
    end;
   end;
  end;
@@ -748,6 +760,67 @@ procedure tparamsourcedatalink.loaded;
 begin
  if not fparamset then begin
   recordchanged(nil);
+ end;
+end;
+
+procedure tparamsourcedatalink.DataEvent(Event: TDataEvent; Info: Ptrint);
+begin
+ inherited;
+ with fowner do begin
+  if (destdataset <> nil) and (event = deupdatestate) then begin
+   if (fplo_syncmasteredit in foptions) and
+       (dataset.state = dsedit) and 
+                   not (fowner.destdataset.state = dsedit) then begin
+    destdataset.edit;
+   end;
+   if (fplo_syncmasterinsert in foptions) and
+       (dataset.state = dsinsert) and not (destdataset.state = dsinsert) then begin
+    destdataset.insert;
+   end;
+  end;
+ end;
+end;
+
+procedure tparamsourcedatalink.CheckBrowseMode;
+label
+ endlab;
+var
+ intf: igetdscontroller;
+begin
+ with fowner do begin
+  inc(frefreshlock);
+  try
+   if foptions * [fplo_syncmasteredit,fplo_syncmasterinsert] <> [] then begin
+    if mseclasses.getcorbainterface(dataset,typeinfo(igetdscontroller),intf) and
+                                       intf.getcontroller.canceling then begin
+     destdataset.cancel;
+     exit;
+    end
+    else begin
+     if destdataset.state = dsinsert then begin
+      dataset.updaterecord;
+      if dataset.modified then begin
+       destdataset.post;
+       goto endlab;
+      end;
+     end;
+    end;
+   end;
+   inherited;
+  endlab:
+   if (dataset.state in [dsedit,dsinsert]) and 
+     (foptions * [fplo_syncmasteredit,fplo_syncmasterinsert] <> []) then begin
+    dataset.updaterecord; //synchronize fields
+   end;
+   if (dataset.state = dsinsert) and assigned(onupdatemasterinsert) then begin
+    onupdatemasterinsert(destdataset,dataset);
+   end;
+   if (dataset.state = dsedit) and assigned(onupdatemasteredit) then begin
+    onupdatemasteredit(destdataset,dataset);
+   end;
+  finally
+   dec(frefreshlock);
+  end;
  end;
 end;
 
