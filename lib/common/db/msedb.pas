@@ -32,7 +32,7 @@ interface
 uses
  classes,db,mseclasses,mseglob,msestrings,msetypes,msearrayprops,mseapplication,
  sysutils,msebintree,mseact;
- 
+
 type
  fieldtypearty = array of tfieldtype;
  fieldtypesty = set of tfieldtype;
@@ -73,7 +73,7 @@ type
  locateoptionsty = set of locateoptionty;
  fieldarty = array of tfield;
 
- masterlinkoptionty = (mdlo_syncedit,mdlo_syncinsert); 
+ masterlinkoptionty = (mdlo_syncedit,mdlo_syncinsert,mdlo_syncdelete); 
  masterlinkoptionsty = set of masterlinkoptionty;
 
  imasterlink = interface(inullinterface)
@@ -947,7 +947,8 @@ type
                          dso_offline, //disconnect database after open
                          dso_local,   //do not connect database on open
                          dso_noedit,
-                         dso_syncmasteredit,dso_syncmasterinsert); 
+                         dso_syncmasteredit,dso_syncmasterinsert,
+                         dso_syncmasterdelete); 
  datasetoptionsty = set of datasetoptionty;
 
  idscontroller = interface(inullinterface)
@@ -977,8 +978,10 @@ type
  end;
 
 const
- defaultdscontrolleroptions = [];
  de_modified = ord(high(tdataevent))+1;
+ de_afterdelete = ord(high(tdataevent))+2;
+
+ defaultdscontrolleroptions = [];
  allfieldkinds = [fkData,fkCalculated,fkLookup,fkInternalCalc];
   
 type
@@ -5105,6 +5108,7 @@ procedure tdscontroller.internaldelete;
 begin
  fintf.inheritedinternaldelete;
  modified;
+ tdataset1(fowner).dataevent(tdataevent(de_afterdelete),0);
 end;
 
 procedure tdscontroller.internalopen;

@@ -154,7 +154,8 @@ type
  end;
  
  fieldparamlinkoptionty = (fplo_autorefresh,
-                           fplo_syncmasteredit,fplo_syncmasterinsert);
+              fplo_syncmasterpost,
+              fplo_syncmasteredit,fplo_syncmasterinsert,fplo_syncmasterdelete);
  fieldparamlinkoptionsty = set of fieldparamlinkoptionty;
 const
  defaultfieldparamlinkoptions = [fplo_autorefresh];
@@ -706,7 +707,8 @@ procedure tparamsourcedatalink.checkrefresh;
 begin
  with fowner do begin
   if (fplo_autorefresh in foptions) and (destdataset <> nil) and 
-                       destdataset.active then begin
+//                       destdataset.active then begin
+                        (destdataset.state = dsbrowse) then begin
    destdataset.refresh;
   end;
  end;
@@ -767,15 +769,28 @@ procedure tparamsourcedatalink.DataEvent(Event: TDataEvent; Info: Ptrint);
 begin
  inherited;
  with fowner do begin
-  if (destdataset <> nil) and (event = deupdatestate) then begin
-   if (fplo_syncmasteredit in foptions) and
-       (dataset.state = dsedit) and 
-                   not (fowner.destdataset.state = dsedit) then begin
-    destdataset.edit;
-   end;
-   if (fplo_syncmasterinsert in foptions) and
-       (dataset.state = dsinsert) and not (destdataset.state = dsinsert) then begin
-    destdataset.insert;
+  if (destdataset <> nil) and destdataset.active then begin
+   inc(frefreshlock);
+   try
+    case ord(event) of
+     ord(deupdatestate): begin
+      if (fplo_syncmasteredit in foptions) and (dataset.state = dsedit) and 
+                      not (fowner.destdataset.state = dsedit) then begin
+       destdataset.edit;
+      end;
+      if (fplo_syncmasterinsert in foptions) and(dataset.state = dsinsert) and
+                                   not (destdataset.state = dsinsert) then begin
+       destdataset.insert;
+      end;
+     end;
+     de_afterdelete: begin
+      if (fplo_syncmasterdelete in foptions) then begin
+       destdataset.delete;
+      end;
+     end;
+    end;
+   finally
+    dec(frefreshlock);
    end;
   end;
  end;
@@ -788,38 +803,46 @@ var
  intf: igetdscontroller;
 begin
  with fowner do begin
-  inc(frefreshlock);
-  try
-   if foptions * [fplo_syncmasteredit,fplo_syncmasterinsert] <> [] then begin
-    if mseclasses.getcorbainterface(dataset,typeinfo(igetdscontroller),intf) and
-                                       intf.getcontroller.canceling then begin
-     destdataset.cancel;
-     exit;
-    end
-    else begin
-     if destdataset.state = dsinsert then begin
-      dataset.updaterecord;
-      if dataset.modified then begin
-       destdataset.post;
-       goto endlab;
+  if (destdataset <> nil) and destdataset.active then begin
+   inc(frefreshlock);
+   try
+    if foptions * [fplo_syncmasteredit,fplo_syncmasterinsert] <> [] then begin
+     if mseclasses.getcorbainterface(dataset,typeinfo(igetdscontroller),intf) and
+                                        intf.getcontroller.canceling then begin
+      destdataset.cancel;
+      exit;
+     end
+     else begin
+      if destdataset.state = dsinsert then begin
+       dataset.updaterecord;
+       if dataset.modified then begin
+        destdataset.post;
+        goto endlab;
+       end;
       end;
      end;
     end;
+    if (fplo_syncmasterpost in foptions) then begin
+     destdataset.checkbrowsemode;
+    end;
+    inherited;
+   endlab:
+    if (dataset.state in [dsedit,dsinsert]) and 
+      (foptions * [fplo_syncmasteredit,fplo_syncmasterinsert] <> []) then begin
+     dataset.updaterecord; //synchronize fields
+    end;
+    if (dataset.state = dsinsert) and assigned(onupdatemasterinsert) then begin
+     onupdatemasterinsert(destdataset,dataset);
+    end;
+    if (dataset.state = dsedit) and assigned(onupdatemasteredit) then begin
+     onupdatemasteredit(destdataset,dataset);
+    end;
+   finally
+    dec(frefreshlock);
    end;
+  end
+  else begin
    inherited;
-  endlab:
-   if (dataset.state in [dsedit,dsinsert]) and 
-     (foptions * [fplo_syncmasteredit,fplo_syncmasterinsert] <> []) then begin
-    dataset.updaterecord; //synchronize fields
-   end;
-   if (dataset.state = dsinsert) and assigned(onupdatemasterinsert) then begin
-    onupdatemasterinsert(destdataset,dataset);
-   end;
-   if (dataset.state = dsedit) and assigned(onupdatemasteredit) then begin
-    onupdatemasteredit(destdataset,dataset);
-   end;
-  finally
-   dec(frefreshlock);
   end;
  end;
 end;

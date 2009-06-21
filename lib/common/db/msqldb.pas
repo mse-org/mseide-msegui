@@ -3557,6 +3557,9 @@ begin
  if dso_syncmasterinsert in aoptions then begin
   include(fmasterlinkoptions,mdlo_syncinsert);
  end;
+ if dso_syncmasterdelete in aoptions then begin
+  include(fmasterlinkoptions,mdlo_syncdelete);
+ end;
 end;
 
 { TSQLCursor }
@@ -4089,14 +4092,21 @@ end;
 procedure tsqlmasterparamsdatalink.DataEvent(Event: TDataEvent; Info: Ptrint);
 begin
  inherited;
- if event = deupdatestate then begin
-  if (mdlo_syncedit in tsqlquery(detaildataset).fmasterlinkoptions) and
-      (dataset.state = dsedit) and not (detaildataset.state = dsedit) then begin
-   detaildataset.edit;
+ case ord(event) of
+  ord(deupdatestate): begin
+   if (mdlo_syncedit in tsqlquery(detaildataset).fmasterlinkoptions) and
+       (dataset.state = dsedit) and not (detaildataset.state = dsedit) then begin
+    detaildataset.edit;
+   end;
+   if (mdlo_syncinsert in tsqlquery(detaildataset).fmasterlinkoptions) and
+       (dataset.state = dsinsert) and not (detaildataset.state = dsinsert) then begin
+    detaildataset.insert;
+   end;
   end;
-  if (mdlo_syncinsert in tsqlquery(detaildataset).fmasterlinkoptions) and
-      (dataset.state = dsinsert) and not (detaildataset.state = dsinsert) then begin
-   detaildataset.insert;
+  de_afterdelete: begin
+   if (mdlo_syncdelete in tsqlquery(detaildataset).fmasterlinkoptions) then begin
+    detaildataset.delete;
+   end;
   end;
  end;
 end;
