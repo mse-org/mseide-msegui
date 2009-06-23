@@ -27,7 +27,7 @@ uses
  classes,mseclasses,msegraphutils,typinfo,msedock,sysutils,msesysenv,msestrings,
  msepostscriptprinter,msegraphics,mseglob,mseprocmonitorcomp,msesys;
 const
- versiontext = '2.1 unstable';
+ versiontext = '2.2beta1';
  idecaption = 'MSEide';
 
 type

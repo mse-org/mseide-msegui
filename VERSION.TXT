@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+Version 2.2beta1
+2009-06-23
 2009-06-17
  msestringicomp1 -> msestringicompupper.
  lstringicomp1 -> lstringicompupper.
