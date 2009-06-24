@@ -33,7 +33,7 @@ type
 
  tfileitemlist = class(titemviewlist)
   protected
-   procedure createitem(var item: tlistitem); override;
+   procedure createitem(out item: tlistitem); override;
  end;
 
  getfileiconeventty = procedure(const sender: tobject; const ainfo: fileinfoty;
@@ -935,7 +935,7 @@ end;
 
 { tfileitemlist }
 
-procedure tfileitemlist.createitem(var item: tlistitem);
+procedure tfileitemlist.createitem(out item: tlistitem);
 begin
  item:= tfilelistitem.create(self);
 end;

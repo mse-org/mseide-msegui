@@ -310,7 +310,7 @@ type
    procedure invalidate; virtual;
    procedure updatelayout; virtual;
    procedure docreateobject(var instance: tobject); override;
-   procedure createitem(var item: tlistitem); virtual;
+   procedure createitem(out item: tlistitem); virtual;
    procedure statreaditem(const reader: tstatreader;
                     var aitem: tlistitem); virtual;
    procedure statreadtreeitem(const reader: tstatreader; const parent: ttreelistitem;
@@ -333,7 +333,10 @@ type
    procedure unregisterobject(const aobject: iobjectlink);
 
    function add(const aitem: tlistitem): integer; overload;
+   function add(const aitem: msestring): integer; overload;
+   procedure add(const aitems: listitemarty); overload;
    procedure add(const aitems: msestringarty); overload;
+   procedure add(const aitems: array of msestring); overload;
 
    function indexof(const aitem: tlistitem): integer;
    function nodezone(const point: pointty): cellzonety;
@@ -984,7 +987,7 @@ begin
  end;
 end;
 
-procedure tcustomitemlist.createitem(var item: tlistitem);
+procedure tcustomitemlist.createitem(out item: tlistitem);
 begin
  item:= listitemclassty(fitemclass).create(self);
 end;
@@ -1105,17 +1108,62 @@ begin
  aitem.setowner(self);
 end;
 
+procedure tcustomitemlist.add(const aitems: array of msestring);
+var
+ int1,int2: integer;
+ po1: plistitem;
+begin
+ beginupdate;
+ try
+  int1:= count;
+  count:= count + length(aitems);
+  po1:= datapo;
+  inc(po1,int1);
+  for int2:= 0 to high(aitems) do begin
+   po1^.caption:= aitems[int2];
+   inc(po1);
+  end;
+ finally
+  endupdate;
+ end;
+end;
+
 procedure tcustomitemlist.add(const aitems: msestringarty);
 var
  int1,int2: integer;
- po1: plistitematy;
+ po1: plistitem;
 begin
- int1:= count;
- count:= count + length(aitems);
- po1:= datapo;
  beginupdate;
- for int2:= 0 to high(aitems) do begin
-  po1^[int2+int1].caption:= aitems[int2];
+ try
+  int1:= count;
+  count:= count + length(aitems);
+  po1:= datapo;
+  inc(po1,int1);
+  for int2:= 0 to high(aitems) do begin
+   po1^.caption:= aitems[int2];
+   inc(po1);
+  end;
+ finally
+  endupdate;
+ end;
+end;
+
+function tcustomitemlist.add(const aitem: msestring): integer;
+begin
+ add([aitem]);
+end;
+
+procedure tcustomitemlist.add(const aitems: listitemarty);
+var
+ int1: integer;
+begin
+ beginupdate;
+ try
+  for int1:= 0 to high(aitems) do begin
+   add(aitems[int1]);
+  end;
+ finally
+  endupdate;
  end;
 end;
 

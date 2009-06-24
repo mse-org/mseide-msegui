@@ -597,7 +597,7 @@ type
   protected
    procedure freedata(var data); override;
    procedure docreateobject(var instance: tobject); override;
-   procedure createitem(var item: tlistitem); override;
+   procedure createitem(out item: tlistitem); override;
    procedure nodenotification(const sender: tlistitem;
                   var ainfo: nodeactioninfoty); override;
    procedure compare(const l,r; var result: integer); override;
@@ -2981,7 +2981,7 @@ begin
  onstatreadtreeitem:= avalue;
 end;
 
-procedure ttreeitemeditlist.createitem(var item: tlistitem);
+procedure ttreeitemeditlist.createitem(out item: tlistitem);
 begin
  item:= treelistedititemclassty(fitemclass).create(self);
 end;
