@@ -382,7 +382,7 @@ type
                       bs_editing,bs_append,bs_internalcalc,bs_startedit,
                       bs_utf8,
                       bs_hasfilter,bs_visiblerecordcountvalid,
-                      bs_refreshing,bs_idle        //used by tsqlquery
+                      bs_refreshing,bs_restorerecno,bs_idle        //used by tsqlquery
                       );
  bufdatasetstatesty = set of bufdatasetstatety;
 
@@ -519,6 +519,9 @@ type
    ffreedblobcount: integer;
    fcurrentbuf: pintrecordty;
 
+   function getrestorerecno: boolean;
+   procedure setrestorerecno(const avalue: boolean);
+
    function getfieldbuffer(const afield: tfield;
              out buffer: pointer; out datasize: integer): boolean; overload; 
              //read, true if not null
@@ -642,6 +645,7 @@ type
                     var bufsize: integer): boolean; virtual; abstract;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
    property nullmasksize: integer read fnullmasksize;
+   function islastrecord: boolean;   
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -4907,6 +4911,30 @@ end;
 function tmsebufdataset.getfiltereditkind: filtereditkindty;
 begin
  result:= ffiltereditkind;
+end;
+
+function tmsebufdataset.getrestorerecno: boolean;
+begin
+ result:= bs_restorerecno in fbstate;
+end;
+
+procedure tmsebufdataset.setrestorerecno(const avalue: boolean);
+begin
+ if avalue then begin
+  include(fbstate,bs_restorerecno);
+ end
+ else begin
+  exclude(fbstate,bs_restorerecno);
+ end;
+end;
+
+function tmsebufdataset.islastrecord: boolean;
+begin
+ result:= eof;
+ if not result then begin
+  fetchall;  
+  result:= recno = recordcount;
+ end;
 end;
 
 { tlocalindexes }

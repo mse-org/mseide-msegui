@@ -30,6 +30,8 @@ type
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
    procedure doidleapplyupdates;
+   function getrestorerecno: boolean;
+   procedure setrestorerecno(const avalue: boolean);
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -42,6 +44,7 @@ type
    procedure internalclose; override;
    function  getcanmodify: boolean; override;
    procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
+   function islastrecord: boolean;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -86,6 +89,8 @@ type
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
    procedure doidleapplyupdates;
+   function getrestorerecno: boolean;
+   procedure setrestorerecno(const avalue: boolean);
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -98,6 +103,7 @@ type
    procedure internalclose; override;
    function  getcanmodify: boolean; override;
    procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
+   function islastrecord: boolean;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -140,6 +146,8 @@ type
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
    procedure doidleapplyupdates;
+   function getrestorerecno: boolean;
+   procedure setrestorerecno(const avalue: boolean);
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -152,6 +160,7 @@ type
    procedure internalclose; override;
    function  getcanmodify: boolean; override;
    procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
+   function islastrecord: boolean;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -194,6 +203,8 @@ type
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
    procedure doidleapplyupdates;
+   function getrestorerecno: boolean;
+   procedure setrestorerecno(const avalue: boolean);
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -206,6 +217,7 @@ type
    procedure internalclose; override;
    function  getcanmodify: boolean; override;
    procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
+   function islastrecord: boolean;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -431,6 +443,21 @@ begin
  //dummy
 end;
 
+function tmsezreadonlyquery.getrestorerecno: boolean;
+begin
+ result:= false;
+end;
+
+procedure tmsezreadonlyquery.setrestorerecno(const avalue: boolean);
+begin
+ //dummy
+end;
+
+function tmsezreadonlyquery.islastrecord: boolean;
+begin
+ result:= eof or (recno = recordcount);
+end;
+
 { tmsezquery }
 
 constructor tmsezquery.create(aowner: tcomponent);
@@ -636,6 +663,21 @@ begin
  //dummy
 end;
 
+function tmsezquery.getrestorerecno: boolean;
+begin
+ result:= false;
+end;
+
+procedure tmsezquery.setrestorerecno(const avalue: boolean);
+begin
+ //dummy
+end;
+
+function tmsezquery.islastrecord: boolean;
+begin
+ result:= eof or (recno = recordcount);
+end;
+
 { tmseztable }
 
 constructor tmseztable.create(aowner: tcomponent);
@@ -836,6 +878,21 @@ begin
  //dummy
 end;
 
+function tmseztable.getrestorerecno: boolean;
+begin
+ result:= false;
+end;
+
+procedure tmseztable.setrestorerecno(const avalue: boolean);
+begin
+ //dummy
+end;
+
+function tmseztable.islastrecord: boolean;
+begin
+ result:= eof or (recno = recordcount);
+end;
+
 { tmsezstoredproc }
 
 constructor tmsezstoredproc.create(aowner: tcomponent);
@@ -1034,6 +1091,21 @@ end;
 procedure tmsezstoredproc.dscontrolleroptionschanged(const aoptions: datasetoptionsty);
 begin
  //dummy
+end;
+
+function tmsezstoredproc.getrestorerecno: boolean;
+begin
+ result:= false;
+end;
+
+procedure tmsezstoredproc.setrestorerecno(const avalue: boolean);
+begin
+ //dummy
+end;
+
+function tmsezstoredproc.islastrecord: boolean;
+begin
+ result:= eof or (recno = recordcount);
 end;
 
 end.

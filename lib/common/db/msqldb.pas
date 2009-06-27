@@ -2779,7 +2779,7 @@ begin
  try
   active:= false;
   active:= true;
-  if recno <> int1 then begin
+  if (recno <> int1) and (bs_restorerecno in fbstate) then begin
    setrecno1(int1,true);
   end;
  finally

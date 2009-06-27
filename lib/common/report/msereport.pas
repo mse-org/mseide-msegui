@@ -458,8 +458,8 @@ type
  end;
   
  recordbandstatety = (rbs_rendering,rbs_showed,rbs_pageshowed,rbs_finish,
-                      rbs_notfirstrecord,rbs_lastrecord,rbs_visibilitychecked{,
-                      rbs_empty});
+                      rbs_notfirstrecord,rbs_lastrecord,rbs_visibilitychecked,
+                      rbs_nextrecordpending);
  recordbandstatesty = set of recordbandstatety; 
  
  ireportclient = interface(inullinterface)
@@ -511,6 +511,7 @@ type
                   //defines hasdata, page nums are null based
                  bo_visigroupfirst,bo_visigroupnotfirst,
                  bo_visigrouplast,bo_visigroupnotlast,
+                 bo_delayednextrecord,
                  bo_localvalue,
                   //used in treppagenumdisp to show the number of the current 
                   //treportpage instead the number of the printed pages
@@ -607,7 +608,9 @@ type
    fnextgroupstring: msestring;
    fobjectpicker: tobjectpicker;
    fnextband: tcustomrecordband;
+   fnextbandiflastofarea: tcustomrecordband;
    fnextbandifempty: tcustomrecordband;
+   fnextbandiflast: tcustomrecordband;
    fareas: bandareaarty;
    fonbeforepaint: painteventty;
    fonbeforenextrecord: notifyeventty;
@@ -635,7 +638,9 @@ type
               //ireccontrol
    procedure recchanged;
    procedure setnextband(const avalue: tcustomrecordband);
+   procedure setnextbandiflastofarea(const avalue: tcustomrecordband);
    procedure setnextbandifempty(const avalue: tcustomrecordband);
+   procedure setnextbandiflast(const avalue: tcustomrecordband);
   protected
    procedure setfont(const avalue: trepwidgetfont);
    function getfont: trepwidgetfont;
@@ -716,8 +721,14 @@ type
    property optionsshow: bandoptionshowsty read foptionsshow write setoptionsshow default [];
    property nextband: tcustomrecordband read fnextband write setnextband;
                        //used by tcustombandarea
+   property nextbandiflastofarea: tcustomrecordband read fnextbandiflastofarea 
+                                       write setnextbandiflastofarea;
+                       //used by tcustombandarea
    property nextbandifempty: tcustomrecordband read fnextbandifempty 
                                        write setnextbandifempty;
+                       //used by tcustombandarea
+   property nextbandiflast: tcustomrecordband read fnextbandiflast 
+                                       write setnextbandiflast;
                        //used by tcustombandarea
    property zebra_counter: integer read fzebra_counter write fzebra_counter;
    property zebra_color: colorty read fzebra_color write fzebra_color default cl_infobackground;
@@ -755,7 +766,9 @@ type
    property visidatafield;
    property visigroupfield;
    property nextband;
+   property nextbandiflastofarea;
    property nextbandifempty;
+   property nextbandiflast;
    
    property zebra_color;
    property zebra_start;
@@ -914,7 +927,9 @@ type
    property tabs;
    property datasource;
    property nextband;
+   property nextbandiflastofarea;
    property nextbandifempty;
+   property nextbandiflast;
    property options;
    property optionsshow;
    property optionsscale;
@@ -1029,6 +1044,9 @@ type
    property onafterpaint: bandareapainteventty read fonafterpaint write fonafterpaint;
  end; 
 
+ bandareaoptionty = (bao_nopagerestart);
+ bandareaoptionsty = set of bandareaoptionty;
+ 
  tcustombandarea = class(tbasebandarea)
   private
    factiveband: integer;
@@ -1037,6 +1055,7 @@ type
    fbandnum: integer;
    function getacty: integer;
   protected
+   foptions: bandareaoptionsty;
    procedure init; override;
    procedure initband; override;
    procedure initareapage; override;
@@ -1055,11 +1074,13 @@ type
 
    property acty: integer read getacty;
    property areafull: boolean read getareafull write setareafull;
+   property options: bandareaoptionsty read foptions write foptions default [];
  end;
   
  tbandarea = class(tcustombandarea)
   published
    property font;
+   property options;
    property onfirstarea;
    property onlastarea;
    property onbeforerender;
@@ -1279,7 +1300,8 @@ type
  
  reportpagestatety = (rpps_inited,rpps_rendering,rpps_backgroundrendered,
                       rpps_restart,
-                      rpps_showed,rpps_finish,rpps_notfirstrecord,rpps_lastrecord);
+                      rpps_showed,rpps_finish,rpps_notfirstrecord,rpps_lastrecord,
+                      rpps_nextrecordpending);
  reportpagestatesty = set of reportpagestatety;
  
  tcustomreport = class;
@@ -1287,7 +1309,8 @@ type
  treportpagedatalink = class(tmsedatalink)
  end;
 
- reportpageoptionty = (rpo_once,rpo_firsteven,rpo_firstodd);
+ reportpageoptionty = (rpo_once,rpo_firsteven,rpo_firstodd,
+                       rpo_delayednextrecord,rpo_datasourceonly);
  reportpageoptionsty = set of reportpageoptionty;
 
  reportpageeventty = procedure(const sender: tcustomreportpage) of object;
@@ -1316,6 +1339,7 @@ type
    fonafterlastpage: reportpageeventty;
    fnextpage: tcustomreportpage;
    fnextpageifempty: tcustomreportpage;
+   fnextpageiflast: tcustomreportpage;
    fsaveindex: integer;
    fdatalink: treportpagedatalink;
    foptions: reportpageoptionsty;
@@ -1331,6 +1355,7 @@ type
    procedure setppmm(const avalue: real);
    procedure setnextpage(const avalue: tcustomreportpage);
    procedure setnextpageifempty(const avalue: tcustomreportpage);
+   procedure setnextpageiflast(const avalue: tcustomreportpage);
    function getdatasource: tdatasource;
    procedure setdatasource(const avalue: tdatasource);
    procedure setoptions(const avalue: reportpageoptionsty);
@@ -1362,6 +1387,7 @@ type
    property ppmm: real read fppmm write setppmm; //pixel per mm
    
    procedure init; virtual;
+   procedure nextrecord;
    function render(const acanvas: tcanvas): boolean;
           //true if empty
 
@@ -1413,6 +1439,8 @@ type
    property nextpage: tcustomreportpage read fnextpage write setnextpage;
    property nextpageifempty: tcustomreportpage read fnextpageifempty write 
                           setnextpageifempty;
+   property nextpageiflast: tcustomreportpage read fnextpageiflast write 
+                          setnextpageiflast;
    property datasource: tdatasource read getdatasource write setdatasource;
    property options: reportpageoptionsty read foptions write setoptions
                                                  default [];
@@ -1450,6 +1478,7 @@ type
    property font;
    property nextpage;
    property nextpageifempty;
+   property nextpageiflast;
    property visiblepage;
    property datasource;
    property options;
@@ -1687,6 +1716,7 @@ type
  twidget1 = class(twidget);
  twindow1 = class(twindow);
  tmsecomponent1 = class(tmsecomponent);
+ tdataset1 = class(tdataset);
 
 function checkdashes(const avalue: string): string;
 var
@@ -1736,26 +1766,31 @@ var
  bm: string;
  int1: integer;
 begin                     
+ result:= false;
  with adatalink do begin          //todo: optimize   
   if active then begin
-   if not dataset.eof then begin
-//    bm:= dataset.7; //boookmarks are broken for TFixedFormatDataSet
-// and recnos are faster anyway
-    int1:= dataset.recno; 
-    dataset.next;
-    result:= dataset.eof;
-    if assigned(syncproc) and not result then begin
-     syncproc;
-    end;
-//    dataset.bookmark:= bm;
-    dataset.recno:= int1;
+   if dataset.eof then begin
+    result:= true;
    end
    else begin
-    result:= true;
+    if dscontroller <> nil then begin
+     result:= dscontroller.islastrecord;
+    end
+    else begin
+     int1:= dataset.recno; 
+     tdataset1(dataset).settempstate(dataset.state); //disable controls
+     try
+      dataset.next;
+      result:= dataset.eof;
+      if assigned(syncproc) and not result then begin
+       syncproc;
+      end;
+      dataset.recno:= int1;
+     finally
+      tdataset1(dataset).restorestate(dataset.state);
+     end;
+    end;
    end;
-  end
-  else begin
-   result:= false;
   end;
  end;
 end;
@@ -3640,7 +3675,8 @@ begin
   end;
  end;
  if not empty and visible and (bo_topofarea in foptions) and 
-         (fparentintf <> nil) and not fparentintf.isfirstband  then begin
+         (fparentintf <> nil) and not fparentintf.istopband
+                                    {fparentintf.isfirstband}  then begin
   fparentintf.setareafull(true);
  end;
 end;
@@ -3695,6 +3731,9 @@ begin
   abort;
  end;
  application.checkoverload;
+ if rbs_nextrecordpending in fstate then begin
+  nextrecord;
+ end;
  fparentintf.updatevisible; //??
  include(fstate,rbs_visibilitychecked);
  empty:= empty or (rbs_finish in fstate);
@@ -3724,7 +3763,12 @@ begin
     end;
    end;
   end;
-  nextrecord;
+  if bo_delayednextrecord in foptions then begin
+   include(fstate,rbs_nextrecordpending);
+  end
+  else begin
+   nextrecord;
+  end;
  end;
 end;
 
@@ -3888,6 +3932,7 @@ procedure tcustomrecordband.nextrecord(const setflag: boolean = true);
 begin
  application.lock;
  try
+  exclude(fstate,rbs_nextrecordpending);
   if canevent(tmethod(fonbeforenextrecord)) then begin
    fonbeforenextrecord(self);
   end;
@@ -4397,9 +4442,20 @@ begin
  setlinkedvar(avalue,fnextband);
 end;
 
+procedure tcustomrecordband.setnextbandiflastofarea(
+                                              const avalue: tcustomrecordband);
+begin
+ setlinkedvar(avalue,fnextbandiflastofarea);
+end;
+
 procedure tcustomrecordband.setnextbandifempty(const avalue: tcustomrecordband);
 begin
  setlinkedvar(avalue,fnextbandifempty);
+end;
+
+procedure tcustomrecordband.setnextbandiflast(const avalue: tcustomrecordband);
+begin
+ setlinkedvar(avalue,fnextbandiflast);
 end;
 
 procedure tcustomrecordband.registerchildwidget(const child: twidget);
@@ -5274,6 +5330,28 @@ begin
  end;
 end;
 
+procedure tcustomreportpage.nextrecord;
+begin
+ application.lock;
+ try
+  exclude(fstate,rpps_nextrecordpending);
+  if canevent(tmethod(fonbeforenextrecord)) then begin
+   fonbeforenextrecord(self);
+  end;
+  dobeforenextrecord(fdatalink.datasource);
+  fdatalink.dataset.next;
+  if checkislastrecord(fdatalink,@dosyncnextrecord) then begin
+   include(fstate,rpps_lastrecord);
+  end; 
+  if canevent(tmethod(fonafternextrecord)) then begin
+   fonafternextrecord(self);
+  end;
+ finally
+  application.unlock;
+ end;
+ recordchanged;
+end;
+
 function tcustomreportpage.render(const acanvas: tcanvas): boolean;
 var
  int1: integer;
@@ -5323,6 +5401,9 @@ begin
   if rpps_finish in fstate then begin
    break;
   end;
+  if rpps_nextrecordpending in fstate then begin
+   nextrecord;
+  end;
   exclude(fstate,rpps_backgroundrendered);
   acanvas.reset;
   if acanvas is tprintercanvas then begin
@@ -5340,69 +5421,60 @@ begin
          not ((rpo_once in foptions) and not (rpps_showed in fstate));
   dobeforerender(bo1);
   customdataempty:= bo1;
-  for int1:= 0 to high(fareas) do begin
-   fareas[int1].initpage;
-  end;
-  for int1:= 0 to high(fbands) do begin
-   fbands[int1].initpage;
-  end;
-  updatevisible;
-  for int1:= 0 to high(fareas) do begin
-   with fareas[int1] do begin
-    if visible then begin
-     bo1:= render(acanvas) and bo1;
+  if not bo1 or not (rpo_datasourceonly in foptions) then begin
+   for int1:= 0 to high(fareas) do begin
+    fareas[int1].initpage;
+   end;
+   for int1:= 0 to high(fbands) do begin
+    fbands[int1].initpage;
+   end;
+   updatevisible;
+   for int1:= 0 to high(fareas) do begin
+    with fareas[int1] do begin
+     if visible then begin
+      bo1:= render(acanvas) and bo1;
+     end;
     end;
    end;
-  end;
-  sortwidgetsyorder(widgetarty(fbands),self);
-  bo2:= odd(reppagenum);
-//  bo5:= true;
-  backgroundrendered:= rpps_backgroundrendered in fstate;
-  for int1:= 0 to high(fbands) do begin
-   if not (fbands[int1] is tcustomrepvaluedisp) then begin
-    renderband(fbands[int1]);
-   end;
-  end;
-  backgroundrendered:= rpps_backgroundrendered in fstate;
-  for int1:= 0 to high(fbands) do begin
-   if fbands[int1] is tcustomrepvaluedisp then begin
-    renderband(fbands[int1]);
-   end;
-  end;
-  if not (rpps_backgroundrendered in fstate) and not customdataempty then begin
-   renderbackground(acanvas);  
-  end;
-              
-  if rpps_backgroundrendered in fstate then begin
-   doafterpaint1(acanvas);
-   if canevent(tmethod(fonafterrender)) then begin
-    fonafterrender(self);
-   end;
-   if not (rpps_finish in fstate) and  fdatalink.active then begin
-    bo1:= false;
-    application.lock;
-    try
-     if canevent(tmethod(fonbeforenextrecord)) then begin
-      fonbeforenextrecord(self);
-     end;
-     dobeforenextrecord(fdatalink.datasource);
-     fdatalink.dataset.next;
-     if checkislastrecord(fdatalink,@dosyncnextrecord) then begin
-      include(fstate,rpps_lastrecord);
-     end; 
-     if canevent(tmethod(fonafternextrecord)) then begin
-      fonafternextrecord(self);
-     end;
-    finally
-     application.unlock;
+   sortwidgetsyorder(widgetarty(fbands),self);
+   bo2:= odd(reppagenum);
+ //  bo5:= true;
+   backgroundrendered:= rpps_backgroundrendered in fstate;
+   for int1:= 0 to high(fbands) do begin
+    if not (fbands[int1] is tcustomrepvaluedisp) then begin
+     renderband(fbands[int1]);
     end;
-    recordchanged;
    end;
-   inc(fpagenum);
-   inc(freport.fpagenum);
-   include(fstate,rpps_showed);
+   backgroundrendered:= rpps_backgroundrendered in fstate;
+   for int1:= 0 to high(fbands) do begin
+    if fbands[int1] is tcustomrepvaluedisp then begin
+     renderband(fbands[int1]);
+    end;
+   end;
+   if not (rpps_backgroundrendered in fstate) and not customdataempty then begin
+    renderbackground(acanvas);  
+   end;
+               
+   if rpps_backgroundrendered in fstate then begin
+    doafterpaint1(acanvas);
+    if canevent(tmethod(fonafterrender)) then begin
+     fonafterrender(self);
+    end;
+    if not (rpps_finish in fstate) and  fdatalink.active then begin
+     bo1:= false;
+     if rpo_delayednextrecord in foptions then begin
+      include(fstate,rpps_nextrecordpending);
+     end
+     else begin
+      nextrecord;
+     end;
+    end;
+    inc(fpagenum);
+    inc(freport.fpagenum);
+    include(fstate,rpps_showed);
+   end;
+   freport.doprogress;
   end;
-  freport.doprogress;
   result:= result and bo1;
   if bo1 or (fnextpage <> nil) or (rpps_finish in fstate) then begin 
                         //next page
@@ -5675,6 +5747,11 @@ end;
 procedure tcustomreportpage.setnextpageifempty(const avalue: tcustomreportpage);
 begin
  setlinkedvar(avalue,fnextpageifempty);
+end;
+
+procedure tcustomreportpage.setnextpageiflast(const avalue: tcustomreportpage);
+begin
+ setlinkedvar(avalue,fnextpageiflast);
 end;
 
 function tcustomreportpage.beginband(const acanvas: tcanvas;
@@ -6169,20 +6246,25 @@ begin
          page1:= freppages[factivepage];
         end
         else begin
-         if not bo1 and (page1.nextpage <> nil) then begin
-           page1:= page1.nextpage;
+         if not bo1 and (page1.fnextpage <> nil) then begin
+           page1:= page1.fnextpage;
          end
          else begin
-          if bo1 and (page1.nextpageifempty <> nil) then begin
-           page1:= page1.nextpageifempty;
+          if bo1 and (page1.fnextpageifempty <> nil) then begin
+           page1:= page1.fnextpageifempty;
           end
           else begin
-           int1:= finditem(pointerarty(freppages),page1);
-           if (int1 >= 0) and (int1 < high(freppages)) then begin
-            page1:= freppages[int1+1];
+           if page1.fnextpageiflast <> nil then begin
+            page1:= page1.fnextpageiflast;
            end
            else begin
-            page1:= nil;
+            int1:= finditem(pointerarty(freppages),page1);
+            if (int1 >= 0) and (int1 < high(freppages)) then begin
+             page1:= freppages[int1+1];
+            end
+            else begin
+             page1:= nil;
+            end;
            end;
           end;
          end;
@@ -7141,7 +7223,9 @@ end;
 
 procedure tcustombandarea.initband;
 begin
- factiveband:= 0;
+ if not (bao_nopagerestart in foptions) then begin
+  factiveband:= 0;
+ end;
  inherited;
 end;
 
@@ -7157,6 +7241,8 @@ var                     //true if finished
  bo1,bo2: boolean;
  int1,int2: integer;
  isfinished: boolean;
+ band1: tcustomrecordband;
+ activebandhaddata: boolean;
 begin
  result:= true;
  if not (bas_inited in fstate) then begin
@@ -7168,6 +7254,7 @@ begin
    updatevisible;
    dobeforerender;
    isfinished:= true;
+   activebandhaddata:= false;
    while (factiveband <= high(fareabands)) and not areafull do begin
     exclude(fstate,bas_bandstarted);
     while (factiveband <= high(fareabands)) and 
@@ -7188,8 +7275,10 @@ begin
       bo1:= ((rbs_showed in fstate) or not(bo_once in foptions)) and
             ((rbs_pageshowed in fstate) or not bo2);   //empty    
       render(acanvas,bo1);
+      activebandhaddata:= activebandhaddata or not bo1;
       if bas_activebandchanged in self.fstate then begin
        updatevisible;
+       activebandhaddata:= false;
        continue;
       end;
       if not bo2 then begin
@@ -7198,9 +7287,18 @@ begin
       bo1:= bo1 or bo2;
       result:= result and bo1;
       if bo1 then begin //empty
-       if fnextbandifempty <> nil then begin
+       band1:= nil;
+       if not activebandhaddata and (fnextbandifempty <> nil) then begin
+        band1:= fnextbandifempty;
+       end
+       else begin
+        if fnextbandiflast <> nil then begin
+         band1:= fnextbandiflast;
+        end;
+       end;
+       if band1 <> nil then begin
         for int1:= 0 to high(fareabands) do begin
-         if fareabands[int1] = fnextbandifempty then begin
+         if fareabands[int1] = band1 then begin
           for int2:= int1 to factiveband do begin
            exclude(fareabands[int2].fstate,rbs_showed);
           end;
@@ -7212,12 +7310,24 @@ begin
        repeat
         inc(factiveband);
        until (factiveband > high(fareabands)) or fareabands[factiveband].visible;
+       activebandhaddata:= false;
       end
       else begin
-       if not (bas_areafull in self.fstate) and (fnextband <> nil) and 
-                  not (fdatalink.active and fdatalink.dataset.eof) then begin
+       band1:= nil;
+       if bas_areafull in self.fstate then begin
+        if fnextbandiflastofarea <> nil then begin
+         band1:= fnextbandiflastofarea;
+        end;
+       end
+       else begin
+        if (fnextband <> nil) and 
+                   not (fdatalink.active and fdatalink.dataset.eof) then begin
+         band1:= fnextband;       
+        end;
+       end;
+       if band1 <> nil then begin
         for int1:= 0 to high(fareabands) do begin
-         if fareabands[int1] = fnextband then begin
+         if fareabands[int1] = band1 then begin
           for int2:= int1 to factiveband do begin
            exclude(fareabands[int2].fstate,rbs_showed);
           end;
@@ -7226,6 +7336,7 @@ begin
                           not fareabands[factiveband].visible do begin
            inc(factiveband);
           end;
+          activebandhaddata:= false;
           break;
          end;         
         end;

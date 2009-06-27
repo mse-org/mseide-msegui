@@ -970,6 +970,11 @@ type
   procedure endfilteredit;
   procedure doidleapplyupdates;
   procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
+  function getrestorerecno: boolean;
+  procedure setrestorerecno(const avalue: boolean);
+  property restorerecno: boolean read getrestorerecno write setrestorerecno;
+                          //for refresh
+  function islastrecord: boolean;
  end;
 
  igetdscontroller = interface(inullinterface)
@@ -1065,6 +1070,7 @@ type
                                        write setrecnonullbased;
    property recnooffset: integer read frecnooffset;
    function moveby(const distance: integer): integer;
+   function islastrecord: boolean;
    procedure internalinsert;
    procedure internaldelete;
    procedure internalopen;
@@ -1077,6 +1083,7 @@ type
    procedure cancel;
    function canceling: boolean;
    function emptyinsert: boolean;
+   procedure refresh(const restorerecno: boolean);
    function assql(const avalue: boolean): string; overload;
    function assql(const avalue: msestring): string; overload;
    function assql(const avalue: integer): string; overload;
@@ -5508,6 +5515,50 @@ end;
 function tdscontroller.getcanmodify: boolean;
 begin
  result:= not (dso_noedit in foptions);
+end;
+
+procedure tdscontroller.refresh(const restorerecno: boolean);
+var
+ bo1: boolean;
+begin
+ if restorerecno then begin
+  bo1:= fintf.restorerecno;
+  fintf.restorerecno:= true;
+  try
+   tdataset(fowner).refresh;
+  finally
+   if not bo1 then begin
+    fintf.restorerecno:= false;
+   end;
+  end;
+ end
+ else begin
+  tdataset(fowner).refresh;
+ end;
+end;
+
+function tdscontroller.islastrecord: boolean;
+begin
+ with tdataset1(fowner) do begin
+  result:= eof;
+  if not result then begin
+   if filtered then begin
+    settempstate(state);
+    try
+     next;
+     result:= eof;
+     if not result then begin
+      prior;
+     end;
+    finally
+     restorestate(state);
+    end;
+   end
+   else begin
+    result:= fintf.islastrecord;
+   end;
+  end;
+ end;
 end;
 
 { tmsedatasource }

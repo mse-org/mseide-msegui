@@ -43,6 +43,8 @@ type
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
    procedure doidleapplyupdates;
+   function getrestorerecno: boolean;
+   procedure setrestorerecno(const avalue: boolean);
   protected
    procedure setactive (value : boolean);
    function getactive: boolean;
@@ -54,6 +56,7 @@ type
    procedure internaldelete; override;
    procedure internalclose; override;
    procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
+   function islastrecord: boolean;
 
   public
    constructor create(aowner: tcomponent); override;
@@ -294,6 +297,21 @@ end;
 procedure tmsesqlite3dataset.dscontrolleroptionschanged(const aoptions: datasetoptionsty);
 begin
  //dummy
+end;
+
+function tmsesqlite3dataset.getrestorerecno: boolean;
+begin
+ result:= false;
+end;
+
+procedure tmsesqlite3dataset.setrestorerecno(const avalue: boolean);
+begin
+ //dummy
+end;
+
+function tmsesqlite3dataset.islastrecord: boolean;
+begin
+ result:= eof or (recno = recordcount);
 end;
 
 end.

@@ -153,7 +153,7 @@ type
    procedure loaded;
  end;
  
- fieldparamlinkoptionty = (fplo_autorefresh,
+ fieldparamlinkoptionty = (fplo_autorefresh,fplo_restorerecno,
               fplo_syncmasterpost,
               fplo_syncmasteredit,fplo_syncmasterinsert,fplo_syncmasterdelete);
  fieldparamlinkoptionsty = set of fieldparamlinkoptionty;
@@ -164,7 +164,9 @@ type
  tfieldparamlink = class(tmsecomponent,idbeditinfo,idbparaminfo)
   private
    fsourcedatalink: tparamsourcedatalink;
-   fdestdatasource: tdatasource;
+//   fdestdatasource: tlinkdatasource;
+   fdestdataset: tsqlquery;
+   fdestcontroller: tdscontroller;
    fparamname: string;
    fonsetparam: setparameventty;
    fonaftersetparam: notifyeventty;
@@ -189,6 +191,9 @@ type
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
    procedure dotimer(const sender: tobject);
+   procedure notification(acomponent: tcomponent;
+                                operation: toperation); override;
+
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -709,7 +714,12 @@ begin
   if (fplo_autorefresh in foptions) and (destdataset <> nil) and 
 //                       destdataset.active then begin
                         (destdataset.state = dsbrowse) then begin
-   destdataset.refresh;
+   if fdestcontroller <> nil then begin
+    fdestcontroller.refresh(fplo_restorerecno in foptions);
+   end
+   else begin
+    fdestdataset.refresh;
+   end;
   end;
  end;
 end;
@@ -854,7 +864,7 @@ begin
  fdelayus:= -1;
  foptions:= defaultfieldparamlinkoptions;
  fsourcedatalink:= tparamsourcedatalink.create(self);
- fdestdatasource:= tdatasource.create(nil);
+// fdestdatasource:= tlinkdatasource.create(nil);
  inherited;
 end;
 
@@ -863,7 +873,7 @@ begin
  freeandnil(ftimer);
  inherited;
  fsourcedatalink.free;
- fdestdatasource.free;
+// fdestdatasource.free;
 end;
 
 procedure tfieldparamlink.dotimer(const sender: tobject);
@@ -903,21 +913,44 @@ end;
 
 function tfieldparamlink.getdestdataset: tsqlquery;
 begin
- result:= tsqlquery(fdestdatasource.dataset);
+ result:= fdestdataset;
 end;
 
 procedure tfieldparamlink.setdestdataset(const avalue: tsqlquery);
+var
+ intf: igetdscontroller;
 begin
- fdestdatasource.dataset:= avalue;
+// fdestdatasource.dataset:= avalue;
+ if fdestdataset <> nil then begin
+  fdestdataset.removefreenotification(self);
+ end;
+ fdestdataset:= avalue;
+ fdestcontroller:= nil;
+ if avalue <> nil then begin
+  avalue.freenotification(self);
+  if mseclasses.getcorbainterface(avalue,
+                              typeinfo(igetdscontroller),intf) then begin
+   fdestcontroller:= intf.getcontroller;
+  end;
+ end;
+end;
+
+procedure tfieldparamlink.notification(acomponent: tcomponent;
+                                operation: toperation);
+begin
+ if (operation = opremove) and (acomponent = fdestdataset) then begin
+  fdestdataset:= nil;
+ end;
+ inherited;
 end;
 
 function tfieldparamlink.param: tparam;
 begin
- if fdestdatasource.dataset = nil then begin
+ if fdestdataset = nil then begin
   databaseerror(name+': No destdataset');
  end
  else begin
-  result:= tsqlquery(fdestdatasource.dataset).params.findparam(fparamname);
+  result:= fdestdataset.params.findparam(fparamname);
   if result = nil then begin
    databaseerror(name+': param "'+fparamname+'" not found');
   end;

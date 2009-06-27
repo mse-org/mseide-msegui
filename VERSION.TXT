@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
-
+2009-06-27
+ tmsesqlquery.refresh does not restore recno, use controller.refresh(true).
+ 
 Version 2.2beta1
 2009-06-23
 2009-06-17

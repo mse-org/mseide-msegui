@@ -215,6 +215,8 @@ type
    
    procedure setificountroller(const avalue: tifidscontroller);
    function getifistate: ifidsstatesty;
+   function getrestorerecno: boolean;
+   procedure setrestorerecno(const avalue: boolean);
   protected
    ffielddefsequence: sequencety;
    procedure checkrecno(const avalue: integer);
@@ -313,6 +315,7 @@ type
    procedure cancel; override;
    procedure post; override;
    function moveby(const distance: integer): integer;
+   function islastrecord: boolean;
    property ifistate: ifidsstatesty read getifistate;
   published
    property controller: tdscontroller read fcontroller write setcontroller;
@@ -2489,6 +2492,21 @@ end;
 procedure tifidataset.dscontrolleroptionschanged(const aoptions: datasetoptionsty);
 begin
  //dummy
+end;
+
+function tifidataset.getrestorerecno: boolean;
+begin
+ result:= false;
+end;
+
+procedure tifidataset.setrestorerecno(const avalue: boolean);
+begin
+ //dummy
+end;
+
+function tifidataset.islastrecord: boolean;
+begin
+ result:= eof or (recno = recordcount);
 end;
 
 { trxdataset }

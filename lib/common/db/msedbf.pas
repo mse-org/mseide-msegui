@@ -40,6 +40,8 @@ type
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
    procedure doidleapplyupdates;
+   function getrestorerecno: boolean;
+   procedure setrestorerecno(const avalue: boolean);
   protected
    procedure setactive (value : boolean); {override;}
    function getactive: boolean;
@@ -53,6 +55,7 @@ type
    procedure internaldelete; override;
    function  getcanmodify: boolean; override;
    procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
+   function islastrecord: boolean;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -292,6 +295,21 @@ end;
 procedure tmsedbf.dscontrolleroptionschanged(const aoptions: datasetoptionsty);
 begin
  //dummy
+end;
+
+function tmsedbf.getrestorerecno: boolean;
+begin
+ result:= false;
+end;
+
+procedure tmsedbf.setrestorerecno(const avalue: boolean);
+begin
+ //dummy
+end;
+
+function tmsedbf.islastrecord: boolean;
+begin
+ result:= eof or (recno = recordcount);
 end;
 
 end.
