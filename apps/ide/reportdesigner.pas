@@ -279,6 +279,7 @@ var
 begin
  comp1:= designer.createnewcomponent(report,treportpage);
  placecomponent(comp1,reportcontainer.rootpos,report);
+ updatetabs;
 end;
 
 procedure treportdesignerfo.deletepage(const sender: TObject);
@@ -290,6 +291,7 @@ begin
                           comp1.name+'''?','WARNING',mr_cancel) then begin
 //  designer.deletecomponent(comp1);
   deletecomponent(comp1);
+  updatetabs;
  end;
 end;
 
