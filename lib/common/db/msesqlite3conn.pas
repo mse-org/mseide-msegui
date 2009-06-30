@@ -85,8 +85,6 @@ type
    function getassqltext(const param : tparam) : string; override;
    
    procedure resetstatement(const astatement: psqlite3_stmt);
-   function stringquery(const asql: string): stringarty;
-   function stringsquery(const asql: string): stringararty;
    procedure checkerror(const aerror: integer);
    function cantransaction: boolean;
    
@@ -142,6 +140,8 @@ type
    function fetchblob(const cursor: tsqlcursor;
                               const fieldnum: integer): ansistring; override;
                               //null based
+   function stringquery(const asql: string): stringarty;
+   function stringsquery(const asql: string): stringararty;
    property lasterror: integer read flasterror;
    property lasterrormessage: msestring read flasterrormessage;
   published
