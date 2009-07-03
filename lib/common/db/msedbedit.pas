@@ -37,7 +37,8 @@ const
  
 type
 
- dbnavigatoroptionty = (dno_confirmdelete,dno_append,dno_shortcuthint);
+ dbnavigatoroptionty = (dno_confirmdelete,dno_append,dno_shortcuthint,
+                        dno_norefreshrecno);
  dbnavigatoroptionsty = set of dbnavigatoroptionty;
  optioneditdbty = (oed_autopost,oed_nofilteredit,oed_nofilterminedit,
                    oed_nofiltermaxedit,oed_nofindedit,
@@ -2183,6 +2184,7 @@ end;
 procedure tnavigdatalink.execbutton(const abutton: dbnavigbuttonty);
 var
  widget1: twidget;
+ options1: dbnavigatoroptionsty;
 begin
  if (datasource <> nil) and (datasource.State <> dsinactive) then begin
   if not (abutton in [dbnb_cancel,dbnb_delete]) then begin
@@ -2192,6 +2194,7 @@ begin
     exit;
    end;
   end;
+  options1:= fintf.getnavigoptions;
   with datasource.dataset do begin
    case abutton of
     dbnb_first: first;
@@ -2199,7 +2202,7 @@ begin
     dbnb_next: self.moveby(1);
     dbnb_last: last;
     dbnb_insert: begin
-     if dno_append in fintf.getnavigoptions then begin
+     if dno_append in options1 then begin
       append;
      end
      else begin
@@ -2207,15 +2210,21 @@ begin
      end;
     end;
     dbnb_delete: begin
-     if not (dno_confirmdelete in fintf.getnavigoptions) or 
-                        confirmdeleterecord then begin
+     if not (dno_confirmdelete in options1) or confirmdeleterecord then begin
       delete;
      end;
     end;
     dbnb_edit: edit;
     dbnb_post: post;
     dbnb_cancel: cancel;
-    dbnb_refresh: refresh;
+    dbnb_refresh: begin
+     if dscontroller <> nil then begin
+      dscontroller.refresh(not (dno_norefreshrecno in options1));
+     end
+     else begin
+      refresh;
+     end;
+    end;
     dbnb_filteronoff: filtered:= not filtered;
    end;
    if fdscontroller <> nil then begin
