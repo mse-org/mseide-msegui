@@ -1137,6 +1137,7 @@ begin
   end
  end;
  if (c.fprepstatement <> nil) and (res1 <> nil) then begin
+  freebindingbuffers(c.fresultbuf); //could be refresh operation
   c.fresultbuf:= createbindingbuffers(c.fresultbindings,c.fresultbindinginfo);
   mysql_free_result(res1);
   if mysql_stmt_bind_result(c.fprepstatement,c.fresultbindings) <> 0 then begin
