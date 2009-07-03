@@ -2724,7 +2724,9 @@ begin
       fbeforeexecute.execute(database,tsqltransaction(transaction));
      end;
      Execute;
-     if FCursor.FInitFieldDef then InternalInitFieldDefs;
+     if FCursor.FInitFieldDef and not (bs_refreshing in fbstate) then begin
+      InternalInitFieldDefs;
+     end;
     end;
     if not (bs_refreshing in fbstate) then begin
      if DefaultFields then begin
