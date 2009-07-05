@@ -3370,6 +3370,7 @@ var
         po1^.typeinfo:= ar1[int1]^.proptype{$ifndef FPC}^{$endif};
        end
        else begin
+        po2:= nil;
         for int2:= 0 to high(classinfar) do begin
          po2:= classinfar[int2]^.procedurelist.finditembyname(po1^.name);
          if po2 <> nil then begin
