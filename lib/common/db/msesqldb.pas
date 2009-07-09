@@ -96,6 +96,7 @@ type
    procedure dataevent(event: tdataevent; info: ptrint); override;
    function wantblobfetch: boolean; override;
    function closetransactiononrefresh: boolean; override;
+   function cantransactionrefresh: boolean; override;
 //,   function refreshtransdatasets: boolean; override;
       
   public
@@ -698,6 +699,11 @@ end;
 function tmsesqlquery.stringmemo: boolean;
 begin
  result:= dso_stringmemo in fcontroller.options;
+end;
+
+function tmsesqlquery.cantransactionrefresh: boolean;
+begin
+ result:= not (dso_notransactionrefresh in fcontroller.options);
 end;
 
 { tparamsourcedatalink }

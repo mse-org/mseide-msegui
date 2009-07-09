@@ -942,7 +942,7 @@ type
                          dso_cancelupdateonerror,dso_cancelupdatesonerror,                         
                          dso_autoapply,{dso_applyonidle,}
                          dso_autocommitret,dso_autocommit,
-                         dso_refreshafterapply,
+                         dso_refreshafterapply,dso_notransactionrefresh,
                          dso_cacheblobs,
                          dso_offline, //disconnect database after open
                          dso_local,   //do not connect database on open

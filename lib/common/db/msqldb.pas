@@ -616,6 +616,7 @@ type
    procedure disconnect;
    procedure InternalOpen; override;
    function closetransactiononrefresh: boolean; virtual;
+   function cantransactionrefresh: boolean; virtual;
 //   function refreshtransdatasets: boolean; virtual;
    procedure internalrefresh; override;
    procedure refreshtransaction; override;
@@ -2795,7 +2796,9 @@ end;
 
 procedure tsqlquery.refreshtransaction;
 begin
- dorefresh;
+ if cantransactionrefresh then begin
+  dorefresh;
+ end;
 end;
  
 procedure tsqlquery.internalrefresh;
@@ -3437,6 +3440,11 @@ end;
 function TSQLQuery.closetransactiononrefresh: boolean;
 begin
  result:= false;
+end;
+
+function tsqlquery.cantransactionrefresh: boolean;
+begin
+ result:= true;
 end;
 
 function TSQLQuery.getnumboolean: boolean;
