@@ -19,6 +19,11 @@ uses
 
 type
  syseventty = record
+  hwnd: hwnd;
+  umsg: uint;
+  wparam: wparam;
+  lparam: lparam;
+  lresult: lresult;
  end;
   
 const
@@ -3973,7 +3978,22 @@ var
  key1: keyty;
  str1: string;
  int1: integer;
+ bo1: boolean;
+ sysevent: syseventty;
 begin
+ if application.ismainthread then begin
+  sysevent.hwnd:= ahwnd;
+  sysevent.umsg:= msg;
+  sysevent.wparam:= wparam;
+  sysevent.lparam:= lparam;
+  sysevent.lresult:= 0;
+  bo1:= false;
+  tapplication1(application).sysevent(ahwnd,sysevent,bo1);
+  if bo1 then begin
+   result:= sysevent.lresult;
+   exit;
+  end;
+ end;
  result:= 1;
  case msg of
   msemessage: begin
