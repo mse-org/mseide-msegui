@@ -732,6 +732,7 @@ type
        net_wm_window_type,
        net_wm_window_type_normal,
        net_wm_window_type_dialog,
+       net_wm_window_type_dropdown_menu,
        net_wm_state_fullscreen,
        net_frame_extents,
        net_request_frame_extents,
@@ -748,6 +749,7 @@ const
        '_NET_WM_WINDOW_TYPE',
        '_NET_WM_WINDOW_TYPE_NORMAL',
        '_NET_WM_WINDOW_TYPE_DIALOG',
+       '_NET_WM_WINDOW_TYPE_DROPDOWN_MENU',
        '_NET_WM_STATE_FULLSCREEN',
        '_NET_FRAME_EXTENTS', 
        '_NET_REQUEST_FRAME_EXTENTS',
@@ -2878,6 +2880,7 @@ begin
      //transientforhint not used by overrideredirect
   end;
   if (wo_popup in options.options) then begin
+   setnetatom(id,net_wm_window_type,net_wm_window_type_dropdown_menu);
    gui_raisewindow(id);
   end
   else begin
