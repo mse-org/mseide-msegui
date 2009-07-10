@@ -14,7 +14,7 @@ unit msebitmap;
 interface
 uses
  {$ifdef FPC}classes{$else}Classes{$endif},msegraphics,msetypes,msestrings,
- msegraphutils,mseclasses,mseglob,sysutils;
+ msegraphutils,mseclasses,mseglob,sysutils,mseguiglob;
 
 const
  defaultimagelistwidth = 16;

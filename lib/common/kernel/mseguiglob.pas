@@ -71,6 +71,40 @@ type
  end;
  pkeyeventinfoty = ^keyeventinfoty;
 
+ stockfontty = (stf_default,stf_empty,stf_unicode,stf_menu,stf_report,stf_proportional,
+                stf_fixed,
+                stf_helvetica,stf_roman,stf_courier); //scaleable fonts
+ defaultfontnamesty = array[stockfontty] of string;
+
+ windowoptionty = (wo_popup,wo_message,wo_buttonendmodal,wo_groupleader,
+                   wo_taskbar, //win32 only
+                   wo_windowcentermessage); //showmessage centered in window
+ windowoptionsty = set of windowoptionty;
+ windowposty = (wp_normal,wp_screencentered,wp_minimized,wp_maximized,wp_default,
+                wp_fullscreen);
+ windowsizety = (wsi_normal,wsi_minimized,wsi_maximized,wsi_fullscreen);
+
+ paintdevicety = cardinal;
+ fontty = cardinal;
+ regionty = cardinal;
+ pixmapty = cardinal;
+
+ windowty = record
+  id: winidty;
+  platformdata: array[0..7] of pointer;
+ end;
+ pwindowty = ^windowty;
+ 
+ internalwindowoptionsty = record
+  parent: winidty;
+  options: windowoptionsty;
+  pos: windowposty;
+  transientfor: winidty;
+  setgroup: boolean;
+  groupleader: winidty;
+  icon,iconmask: pixmapty;
+ end;
+ pinternalwindowoptionsty = ^internalwindowoptionsty;
 
 const
  defaultppmm = 3;      //3 pixel per mm

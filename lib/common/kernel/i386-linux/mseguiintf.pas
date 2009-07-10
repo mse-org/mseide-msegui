@@ -15,10 +15,10 @@ unit mseguiintf; //i386-linux
 interface
 
 uses
- {$ifdef FPC}xlib{$else}Xlib{$endif},msetypes,mseapplication,msegui,msegraphics,
- msegraphutils,mseevent,msepointer,mseguiglob,msesys,
+ {$ifdef FPC}xlib{$else}Xlib{$endif},msetypes,mseapplication,
+ msegraphutils,mseevent,msepointer,mseguiglob,msesys,{msestockobjects,}
  msethread{$ifdef FPC},x,xutil,dynlibs{$endif},
- mselibc,msesysintf,msestockobjects,
+ mselibc,msesysintf,msegraphics,
  msestrings,xft,xrender;
 
 {$ifdef FPC}
@@ -46,7 +46,8 @@ var
 {$ifndef with_sm}
  { $define with_saveyourself}
 {$endif}
-
+type
+ syseventty = txevent;
 const
  //from keysymdef.h
  XK_BackSpace =     $FF08; //* back space, back char */
@@ -479,7 +480,7 @@ implementation
 
 uses
  msebits,msekeyboard,sysutils,msesysutils,msefileutils,msedatalist
- {$ifdef with_sm},sm,ice{$endif},msesonames;
+ {$ifdef with_sm},sm,ice{$endif},msesonames,msegui;
 
 const
  highresfontshift = 6;  //64
@@ -492,6 +493,7 @@ var
 type
  tsimplebitmap1 = class(tsimplebitmap);
  twindow1 = class(msegui.twindow);
+ tguiapplication1 = class(tguiapplication);
 
 {$ifdef FPC}
  {$macro on}
@@ -5369,6 +5371,11 @@ begin
 eventrestart:
  xnextevent(appdisp,@xev);
  if longint(xfilterevent(@xev,none)) <> 0 then begin
+  exit;
+ end;
+ bo1:= false;
+ tguiapplication1(application).sysevent(xev,bo1);
+ if bo1 then begin
   exit;
  end;
  if xev.xany.xwindow = appid then begin

@@ -17,7 +17,7 @@ uses
  {$ifdef FPC}classes{$else}Classes{$endif},sysutils,msegraphics,msetypes,
  msestrings,mseerr,msegraphutils,mseapplication,
  msepointer,mseevent,msekeyboard,mseclasses,mseglob,mseguiglob,mselist,msesys,
- msethread,
+ msethread,mseguiintf,
  msebitmap,msearrayprops,msethreadcomp,mserichstring
                                {$ifdef mse_with_ifi},mseifiglob{$endif};
 
@@ -1101,14 +1101,6 @@ type
 
  twindow = class;
 
- windowoptionty = (wo_popup,wo_message,wo_buttonendmodal,wo_groupleader,
-                   wo_taskbar, //win32 only
-                   wo_windowcentermessage); //showmessage centered in window
- windowoptionsty = set of windowoptionty;
-
- windowposty = (wp_normal,wp_screencentered,wp_minimized,wp_maximized,wp_default,
-                wp_fullscreen);
-
  windowinfoty = record
   options: windowoptionsty;
   initialwindowpos: windowposty;
@@ -1779,31 +1771,12 @@ type
                   tws_canvasoverride);
  windowstatesty = set of windowstatety;
 
- internalwindowoptionsty = record
-  parent: winidty;
-  options: windowoptionsty;
-  pos: windowposty;
-  transientfor: winidty;
-  setgroup: boolean;
-  groupleader: winidty;
-  icon,iconmask: pixmapty;
- end;
- pinternalwindowoptionsty = ^internalwindowoptionsty;
-
  pmodalinfoty = ^modalinfoty;
  modalinfoty = record
   modalend: boolean;
   modalwindowbefore: twindow;
  end;
 
- windowsizety = (wsi_normal,wsi_minimized,wsi_maximized,wsi_fullscreen);
-
- windowty = record
-  id: winidty;
-  platformdata: array[0..7] of pointer;
- end;
- pwindowty = ^windowty;
- 
  twindow = class(teventobject,icanvas)
   private
    fstate: windowstatesty;
@@ -2090,6 +2063,7 @@ type
    procedure dowaitidle(var again: boolean);
    procedure dowaitidle1(var again: boolean);
   protected  
+   procedure sysevent(var aevent: syseventty; var handled: boolean);
    procedure dopostevent(const aevent: tevent); override;
    procedure eventloop(const once: boolean = false);
                         //used in win32 wm_queryendsession and wm_entersizemove
@@ -2409,7 +2383,7 @@ function combineframestateflags(
 implementation
 
 uses
- mseguiintf,msesysintf,typinfo,msestreaming,msetimer,msebits,msewidgets,
+ msesysintf,typinfo,msestreaming,msetimer,msebits,msewidgets,
  mseshapes,msestockobjects,msefileutils,msedatalist,Math,msesysutils,
  {$ifdef FPCc} rtlconst {$else} RtlConsts{$endif},mseformatstr,
  mseprocutils;
@@ -15270,6 +15244,10 @@ begin
  if assigned(fonterminatebefore) then begin
   fonterminatebefore(sender);
  end;
+end;
+
+procedure tguiapplication.sysevent(var aevent: syseventty; var handled: boolean);
+begin
 end;
 
 procedure tguiapplication.dopostevent(const aevent: tevent);

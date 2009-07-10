@@ -26,11 +26,6 @@ const
  invalidgchandle = cardinal(-1);
  
 type
- paintdevicety = cardinal;
- fontty = cardinal;
- regionty = cardinal;
- pixmapty = cardinal;
-
  gckindty = (gck_screen,gck_pixmap,gck_printer,gck_metafile);
  
  alignmentty = (al_left,al_xcentered,al_right,al_top,al_ycentered,al_bottom,
