@@ -14,7 +14,7 @@ unit mseforms;
 interface
 uses
  msewidgets,msemenus,msegraphics,mseapplication,msegui,msegraphutils,mseevent,
- msetypes,msestrings,mseglob,mseguiglob,
+ msetypes,msestrings,mseglob,mseguiglob,mseguiintf,
  msemenuwidgets,msestat,msestatfile,mseclasses,Classes,msedock,
  msebitmap{$ifdef mse_with_ifi},mseifiglob{$endif};
 
@@ -65,6 +65,9 @@ type
    property optionswidget default defaultoptionswidgetmousewheel;
  end;
 
+ syseventeventty = procedure(const sender: tcustommseform;
+                    var aevent: syseventty; var handled: boolean) of object;
+                             
  tcustommseform = class(tcustomeventwidget,istatfile,idockcontroller)
   private
    foncreate: notifyeventty;
@@ -95,6 +98,8 @@ type
    fonfontheightdelta: fontheightdeltaeventty;
    ficon: tmaskedbitmap;
    ficonchanging: integer;
+   fonsysevent: syseventeventty;
+   fonsyswindowevent: syseventeventty;
    function getonchildscaled: notifyeventty;
    procedure setonchildscaled(const avalue: notifyeventty);
    procedure setmainmenu(const Value: tmainmenu);
@@ -112,6 +117,8 @@ type
    procedure seticon(const avalue: tmaskedbitmap);
    procedure iconchanged(const sender: tobject);
    procedure registerhandlers;
+   procedure setsyseventty(const avalue: syseventeventty);
+   procedure setsyswindoweventty(const avalue: syseventeventty);
   protected
    fscrollbox: tformscrollbox;
     //needed to distinguish between scrolled and unscrolled (mainmenu...) widgets
@@ -140,6 +147,8 @@ type
    procedure dowindowactivechanged(const oldwindow,newwindow: twindow); virtual;
    procedure dowindowdestroyed(const awindow: twindow); virtual;
    procedure doapplicationactivechanged(const avalue: boolean); virtual;
+   procedure dosysevent(const awindow: winidty; var aevent: syseventty;
+                            var handled: boolean); virtual;
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
    procedure receiveevent(const event: tobjectevent); override;
    procedure dokeydown(var info: keyeventinfoty); override;
@@ -229,6 +238,9 @@ type
    property onfontheightdelta: fontheightdeltaeventty read fonfontheightdelta
                      write fonfontheightdelta;
    property onchildscaled: notifyeventty read getonchildscaled write setonchildscaled;
+   property onsysevent: syseventeventty read fonsysevent write setsyseventty;
+   property onsyswindowevent: syseventeventty read fonsyswindowevent 
+                                         write setsyswindoweventty;
   published
    property container: tformscrollbox read fscrollbox write setscrollbox;
  end;
@@ -295,6 +307,9 @@ type
 
    property onfontheightdelta;
    property onchildscaled;
+   
+   property onsysevent;
+   property onsyswindowevent;
  end;
 
  tmseform = class(tmseformwidget)
@@ -445,7 +460,7 @@ function simulatemodalresult(const awidget: twidget;
 
 implementation
 uses
- sysutils,mselist,mseguiintf,typinfo,msekeyboard,msebits;
+ sysutils,mselist,typinfo,msekeyboard,msebits;
 const
  containercommonflags: optionswidgetty = 
             [ow_arrowfocus,ow_arrowfocusin,ow_arrowfocusout,ow_destroywidgets,
@@ -649,6 +664,10 @@ begin
  application.unregisteronwindowdestroyed({$ifdef FPC}@{$endif}dowindowdestroyed);
  application.unregisteronapplicationactivechanged(
        {$ifdef FPC}@{$endif}doapplicationactivechanged);
+ if not (csdesigning in componentstate) and 
+            (assigned(fonsysevent) or assigned(fonsyswindowevent)) then begin
+  application.unregistersyseventhandler({$ifdef FPC}@{$endif}dosysevent);
+ end;
  mainmenu:= nil;
  ficon.free;
  fscrollbox.free;
@@ -1467,6 +1486,52 @@ begin
  inherited;
  if (fmainmenuwidget <> nil) and (sender = fmainmenuwidget) then begin
   updatescrollboxrect;
+ end;
+end;
+
+procedure tcustommseform.setsyseventty(const avalue: syseventeventty);
+begin
+ if not (csdesigning in componentstate) then begin
+  if assigned(avalue) then begin
+   if not assigned(fonsysevent) and not assigned(fonsyswindowevent) then begin
+    application.registersyseventhandler({$ifdef FPC}@{$endif}dosysevent);
+   end;
+  end
+  else begin
+   if assigned(fonsysevent) and not assigned(fonsyswindowevent) then begin
+    application.unregistersyseventhandler({$ifdef FPC}@{$endif}dosysevent);
+   end;
+  end;
+ end;
+ fonsysevent:= avalue;
+end;
+
+procedure tcustommseform.setsyswindoweventty(const avalue: syseventeventty);
+begin
+ if not (csdesigning in componentstate) then begin
+  if assigned(avalue) then begin
+   if not assigned(fonsysevent) and not assigned(fonsyswindowevent) then begin
+    application.registersyseventhandler({$ifdef FPC}@{$endif}dosysevent);
+   end;
+  end
+  else begin
+   if assigned(fonsyswindowevent) and not assigned(fonsysevent) then begin
+    application.unregistersyseventhandler({$ifdef FPC}@{$endif}dosysevent);
+   end;
+  end;
+ end;
+ fonsyswindowevent:= avalue;
+end;
+
+procedure tcustommseform.dosysevent(const awindow: winidty;
+               var aevent: syseventty; var handled: boolean);
+begin
+ if assigned(fonsysevent) then begin
+  fonsysevent(self,aevent,handled);
+ end;
+ if assigned(fonsyswindowevent) and not handled and 
+         (awindow <> 0) and (twindow1(window).fwindow.id = awindow) then begin
+  fonsyswindowevent(self,aevent,handled);
  end;
 end;
 

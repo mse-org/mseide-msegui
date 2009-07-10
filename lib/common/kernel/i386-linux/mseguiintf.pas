@@ -1,4 +1,4 @@
-	{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -47,7 +47,7 @@ var
  { $define with_saveyourself}
 {$endif}
 type
- syseventty = txevent;
+ syseventty = type txevent;
 const
  //from keysymdef.h
  XK_BackSpace =     $FF08; //* back space, back char */
@@ -5374,7 +5374,7 @@ eventrestart:
   exit;
  end;
  bo1:= false;
- tguiapplication1(application).sysevent(xev,bo1);
+ tguiapplication1(application).sysevent(xev.xany.xwindow,syseventty(xev),bo1);
  if bo1 then begin
   exit;
  end;

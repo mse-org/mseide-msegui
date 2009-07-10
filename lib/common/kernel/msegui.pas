@@ -1995,6 +1995,9 @@ type
  helpeventty = procedure(const sender: tmsecomponent;
                                       var handled: boolean) of object;
 
+ syseventhandlereventty = procedure(const awindow: winidty;
+                  var aevent: syseventty; var handled: boolean) of object;
+ 
  tguiapplication = class(tcustomapplication)
   private
    finiting: integer;
@@ -2063,7 +2066,8 @@ type
    procedure dowaitidle(var again: boolean);
    procedure dowaitidle1(var again: boolean);
   protected  
-   procedure sysevent(var aevent: syseventty; var handled: boolean);
+   procedure sysevent(const awindow: winidty; var aevent: syseventty;
+                                                    var handled: boolean);
    procedure dopostevent(const aevent: tevent); override;
    procedure eventloop(const once: boolean = false);
                         //used in win32 wm_queryendsession and wm_entersizemove
@@ -2175,6 +2179,8 @@ type
    procedure unregisteronwiniddestroyed(const method: winideventty);
    procedure registeronapplicationactivechanged(const method: booleaneventty);
    procedure unregisteronapplicationactivechanged(const method: booleaneventty);
+   procedure registersyseventhandler(const method: syseventhandlereventty);
+   procedure unregistersyseventhandler(const method: syseventhandlereventty);
 
    procedure terminate(const sender: twindow = nil); 
         //calls canclose of all windows except sender and terminatequery
@@ -2462,6 +2468,12 @@ type
    procedure doevent(const sender: tmsecomponent);
  end;
  
+ tonsyseventlist = class(tmethodlist)
+  protected
+   procedure doevent(const awindow: winidty; var aevent: syseventty;
+                               var handled: boolean);
+ end;
+ 
  windowstackinfoty = record
   lower,upper: twindow;
   level: integer;
@@ -2479,6 +2491,7 @@ type
    fonwiniddestroyedlist: tonwinideventlist;
    fonapplicationactivechangedlist: tonapplicationactivechangedlist;
    fonhelp: tonhelpeventlist;
+   fonsyseventlist: tonsyseventlist;
 
    fcaretwidget: twidget;
    fmousewinid: winidty;
@@ -12682,6 +12695,20 @@ begin
  end;
 end;
 
+{ tonsyseventlist }
+
+procedure tonsyseventlist.doevent(const awindow: winidty; 
+                               var aevent: syseventty; var handled: boolean);
+var
+ bo1: boolean;
+begin
+ factitem:= 0;
+ while (factitem < fcount) and not handled do begin
+  syseventhandlereventty(getitempo(factitem)^)(awindow,aevent,handled);
+  inc(factitem);
+ end;
+end;
+
 { twindowevent }
 
 constructor twindowevent.create(akind: eventkindty; winid: winidty);
@@ -12773,6 +12800,7 @@ begin
  fonwiniddestroyedlist:= tonwinideventlist.create;
  fonapplicationactivechangedlist:= tonapplicationactivechangedlist.create;
  fonhelp:= tonhelpeventlist.create;
+ fonsyseventlist:= tonsyseventlist.create;
 // fwindows:= tpointerlist.create;
  fcaret:= tcaret.create;
  fmouse:= tmouse.create(imouse(self));
@@ -12799,6 +12827,7 @@ begin
  fonwiniddestroyedlist.free;
  fonapplicationactivechangedlist.free;
  fonhelp.free;
+ fonsyseventlist.free;
 end;
 
 procedure tinternalapplication.twindowdestroyed(const sender: twindow);
@@ -14883,6 +14912,16 @@ begin
  tinternalapplication(self).fonapplicationactivechangedlist.remove(tmethod(method));
 end;
 
+procedure tguiapplication.registersyseventhandler(const method: syseventhandlereventty);
+begin
+ tinternalapplication(self).fonsyseventlist.add(tmethod(method)); 
+end;
+
+procedure tguiapplication.unregistersyseventhandler(const method: syseventhandlereventty);
+begin
+ tinternalapplication(self).fonsyseventlist.remove(tmethod(method)); 
+end;
+
 procedure tguiapplication.updatecursorshape; //restores cursorshape of mousewidget
 begin
  if fclientmousewidget <> nil then begin
@@ -15246,8 +15285,10 @@ begin
  end;
 end;
 
-procedure tguiapplication.sysevent(var aevent: syseventty; var handled: boolean);
+procedure tguiapplication.sysevent(const awindow: winidty; 
+                            var aevent: syseventty; var handled: boolean);
 begin
+ tinternalapplication(self).fonsyseventlist.doevent(awindow,aevent,handled);
 end;
 
 procedure tguiapplication.dopostevent(const aevent: tevent);
