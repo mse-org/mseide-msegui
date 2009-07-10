@@ -13,10 +13,14 @@ unit mseguiintf; //i386-win32
 
 interface
 uses
- windows,messages,mseapplication,msegui,msetypes,msegraphics,msegraphutils,
- mseevent,msepointer,
- mseguiglob,msethread,mseformatstr,msesysintf,msestockobjects,msestrings;
- 
+ windows,messages,mseapplication,msetypes,msegraphutils,
+ mseevent,msepointer,mseguiglob,msegraphics,
+ msethread,mseformatstr,msesysintf,msestrings;
+
+type
+ syseventty = record
+ end;
+  
 const
 // pixel0 = $000000;
 // pixel1 = $ffffff;
@@ -43,7 +47,7 @@ var
 implementation
 //todo: 19.10.03 rasterops for textout
 uses
- sysutils,mselist,msekeyboard,msebits,msedatalist,msesysutils;
+ sysutils,mselist,msekeyboard,msebits,msedatalist,msesysutils,msegui;
 
 type
  wndextrainfoty = record

@@ -14,7 +14,7 @@ unit msestockobjects;
 interface
 uses
  msegraphics,mseglob,msegui,msebitmap,msegraphutils,mseclasses,msestrings,
- msedatamodules;
+ msedatamodules,mseguiglob;
 
 const
  boxsize = 11;
@@ -31,11 +31,6 @@ type
 const
  stb_block1 = stb_dens50;
 
-type
- stockfontty = (stf_default,stf_empty,stf_unicode,stf_menu,stf_report,stf_proportional,
-                stf_fixed,
-                stf_helvetica,stf_roman,stf_courier); //scaleable fonts
- defaultfontnamesty = array[stockfontty] of string;
 type             
  stockglyphty = (        //order fix!
  //  0         1               2

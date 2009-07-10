@@ -29,7 +29,7 @@ uses
   componentpaletteform,componentstore,
   messageform,watchform,objectinspector,breakpointsform,watchpointsform,
   stackform,projecttreeform,findinfileform,cpuform,disassform,memoryform,
-  threadsform,
+  threadsform,mseguiglob,
   targetconsole,main,mseguiintf,msestockobjects,regunitgroups,guitemplates,
   msegraphutils;
 begin

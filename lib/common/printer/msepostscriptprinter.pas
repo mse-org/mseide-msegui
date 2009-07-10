@@ -14,7 +14,7 @@ interface
 
 uses
  msegraphics,mseclasses,classes,msegraphutils,msestream,msestrings,msetypes,
- msedrawtext,mserichstring,mseprinter;
+ msedrawtext,mserichstring,mseprinter,mseguiglob;
 
 type
   
@@ -130,7 +130,7 @@ function psrealtostr(const avalue: real): string;
  
 implementation
 uses
- msegui,mseguiglob,msesys,sysutils,msedatalist,mseformatstr,mseunicodeps,
+ msegui,msesys,sysutils,msedatalist,mseformatstr,mseunicodeps,
  mseguiintf,msebits,msefloattostr;
 type
  tsimplebitmap1 = class(tsimplebitmap); 
