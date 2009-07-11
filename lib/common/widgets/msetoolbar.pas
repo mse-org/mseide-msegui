@@ -29,6 +29,7 @@ type
    fonupdate: actioneventty;
    procedure setaction(const Value: tcustomaction);
    procedure setimagenr(const Value: imagenrty);
+   procedure setimagenrdisabled(const Value: imagenrty);
    procedure setcolorglyph(const avalue: colorty);
    function iscolorglyphstored: boolean;
    procedure setcolor(const avalue: colorty);
@@ -38,6 +39,7 @@ type
    function isstatestored: Boolean;
    procedure setstate(const Value: actionstatesty);
    function isimagenrstored: Boolean;
+   function isimagenrdisabledstored: Boolean;
    function isimagecheckedoffsetstored: Boolean;
    function isimageliststored: Boolean;
    function getimagelist: timagelist;
@@ -85,6 +87,8 @@ type
                     stored isimageliststored;
    property imagenr: imagenrty read finfo.imagenr write setimagenr
                             stored isimagenrstored default -1;
+   property imagenrdisabled: imagenrty read finfo.imagenrdisabled write setimagenrdisabled
+                            stored isimagenrdisabledstored default -2;
    property colorglyph: colorty read finfo.colorglyph write setcolorglyph 
                        stored iscolorglyphstored default cl_glyph;
    property color: colorty read finfo.color write setcolor 
@@ -372,6 +376,11 @@ begin
  setactionimagenr(iactionlink(self),value);
 end;
 
+procedure ttoolbutton.setimagenrdisabled(const Value: imagenrty);
+begin
+ setactionimagenr(iactionlink(self),value);
+end;
+
 procedure ttoolbutton.setcolorglyph(const avalue: colorty);
 begin
  setactioncolorglyph(iactionlink(self),avalue);
@@ -400,6 +409,11 @@ end;
 function ttoolbutton.isimagenrstored: Boolean;
 begin
  result:= isactionimagenrstored(finfo);
+end;
+
+function ttoolbutton.isimagenrdisabledstored: Boolean;
+begin
+ result:= isactionimagenrdisabledstored(finfo);
 end;
 
 function ttoolbutton.isimagecheckedoffsetstored: Boolean;
