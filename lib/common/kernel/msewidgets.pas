@@ -657,6 +657,7 @@ type
    procedure doactivate; override;
    procedure dodeactivate; override;
    procedure dokeydown(var info: keyeventinfoty); override;
+   procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
    procedure internalcreateframe; override;
    procedure enabledchanged; override;
    property frame: tcaptionframe read getframe write setframe;
@@ -4215,6 +4216,18 @@ end;
 procedure tactionwidget.getpopuppos(var apos: pointty);
 begin
  //dummy
+end;
+
+procedure tactionwidget.doshortcut(var info: keyeventinfoty;
+               const sender: twidget);
+begin
+ if (fpopupmenu <> nil) and (sender <> nil) //no broadcast
+                          and not(csdesigning in componentstate) then begin
+  fpopupmenu.doshortcut(info);
+ end;
+ if not (es_processed in info.eventstate) then begin
+  inherited;
+ end;
 end;
 
 { tcustomeventwidget }
