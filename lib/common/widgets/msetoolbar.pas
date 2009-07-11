@@ -62,10 +62,13 @@ type
    function getvisible: boolean;
    procedure setenabled(const avalue: boolean);
    procedure setvisible(const avalue: boolean);
+   procedure readbool(reader: treader);
+   procedure writebool(writer: twriter);
   protected
    ftag: integer;
    procedure doexecute(const tag: integer; const info: mouseeventinfoty);
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
+   procedure defineproperties(filer: tfiler); override;
    //iactionlink
    procedure actionchanged;
    function getactioninfopo: pactioninfoty;
@@ -82,6 +85,8 @@ type
    function toolbar: tcustomtoolbar;
    function index: integer;
    property checked: boolean read getchecked write setchecked;
+   property visible: boolean read getvisible write setvisible default true;
+   property enabled: boolean read getenabled write setenabled default true;
   published
    property imagelist: timagelist read getimagelist write setimagelist
                     stored isimageliststored;
@@ -108,8 +113,6 @@ type
    property options: menuactionoptionsty read finfo.options write setoptions default [];
    property group: integer read finfo.group write setgroup
                              stored isgroupstored default 0;
-   property visible: boolean read getvisible write setvisible default true;
-   property enabled: boolean read getenabled write setenabled default true;
    property onexecute: notifyeventty read finfo.onexecute write setonexecute
                                stored isonexecutestored;
    property onupdate: actioneventty read fonupdate write fonupdate;
@@ -378,7 +381,7 @@ end;
 
 procedure ttoolbutton.setimagenrdisabled(const Value: imagenrty);
 begin
- setactionimagenr(iactionlink(self),value);
+ setactionimagenrdisabled(iactionlink(self),value);
 end;
 
 procedure ttoolbutton.setcolorglyph(const avalue: colorty);
@@ -548,6 +551,25 @@ end;
 procedure ttoolbutton.calccaptiontext(var ainfo: actioninfoty);
 begin
  mseactions.calccaptiontext(ainfo,shortcutseparator);
+end;
+
+procedure ttoolbutton.readbool(reader: treader);
+begin
+ reader.readboolean; //dummy
+end;
+
+procedure ttoolbutton.writebool(writer: twriter);
+begin
+ //dummy
+end;
+
+procedure ttoolbutton.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('visible',{$ifdef FPC}@{$endif}readbool,
+                                {$ifdef FPC}@{$endif}writebool,false);
+ filer.defineproperty('enabled',{$ifdef FPC}@{$endif}readbool,
+                                {$ifdef FPC}@{$endif}writebool,false);
 end;
 
 { ttoolbuttons }
