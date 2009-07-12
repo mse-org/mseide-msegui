@@ -128,6 +128,7 @@ type
 
    procedure modified; virtual;
    function getdefaultstate: propertystatesty; virtual;
+   procedure setsubprop; virtual;
   public
    constructor create(const adesigner: idesigner;
         const amodule: tmsecomponent; const acomponent: tcomponent;
@@ -738,6 +739,7 @@ type
 //   fname: string;
   protected
    function getdefaultstate: propertystatesty; override;
+   procedure setsubprop; override;
   public
    constructor create(const adesigner: idesigner;
             const amodule: tmsecomponent; const acomponent: tcomponent;
@@ -1856,6 +1858,11 @@ begin
  end;
 end;
 
+procedure tpropertyeditor.setsubprop;
+begin
+ include(fstate,ps_subprop);
+end;
+
 { tordinalpropertyeditor }
 
 function tordinalpropertyeditor.allequal: boolean;
@@ -2235,6 +2242,7 @@ function tclasspropertyeditor.subproperties: propertyeditorarty;
 var
  ar1: objectarty;
  int1: integer;
+ prop1: tpropertyeditor;
 begin
  setlength(ar1,count);
  for int1:= 0 to high(fprops) do begin
@@ -2246,7 +2254,7 @@ begin
  end;
  if fstate * [ps_component,ps_subprop] <> [] then begin
   for int1:= 0 to high(result) do begin
-   include(result[int1].fstate,ps_subprop);
+   result[int1].setsubprop;
   end;
  end;
 end;
@@ -4644,6 +4652,16 @@ end;
 function trecordpropertyeditor.subproperties: propertyeditorarty;
 begin
  result:= fsubproperties;
+end;
+
+procedure trecordpropertyeditor.setsubprop;
+var
+ int1: integer;
+begin
+ inherited;
+ for int1:= 0 to high(fsubproperties) do begin
+  include(fsubproperties[int1].fstate,ps_subprop);
+ end;
 end;
 
 { tconstelementeditor }
