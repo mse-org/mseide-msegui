@@ -21,7 +21,7 @@ uses
 type
  ififieldoptionty = (ifo_local);
  ififieldoptionsty = set of ififieldoptionty;
-
+(*
  recheaderty = record
   blobinfo: pointer; //dummy
   fielddata: fielddataty;   
@@ -57,7 +57,7 @@ type
   header: recheaderty;
  end;
  pdsrecordty = ^dsrecordty;
- 
+*) 
 const
  intheadersize = sizeof(intrecordty.intheader);
  dsheadersize = sizeof(dsrecordty.dsheader);
@@ -92,6 +92,7 @@ type
    procedure cancelconnection;
    function getmodifiedfields: string;
    procedure initmodifiedfields;
+   function setcurrentbuf(const abuf: pintrecordty): pintrecordty;
  end;
 
  tififieldoptions = class(tsetarrayprop)
@@ -232,6 +233,7 @@ type
    procedure dsdatareceived( const asequence: sequencety; 
                                  const adata: pfielddefsdatadataty); virtual;
    function getmodifiedfields: string;
+   function setcurrentbuf(const abuf: pintrecordty): pintrecordty;
 
    procedure decoderecord(var adata: pointer; const dest: pintrecordty);
    function decoderecords(const adata: precdataty; out asize: integer): boolean;
@@ -395,6 +397,8 @@ type
    procedure dsdatareceived( const asequence: sequencety; 
                                  const adata: pfielddefsdatadataty);
    function getmodifiedfields: string;
+   function setcurrentbuf(const abuf: pintrecordty): pintrecordty;
+
    procedure cancelconnection;
    procedure internaledit; override;
    procedure inheritedinternalinsert; override;
@@ -432,6 +436,7 @@ uses
  sysutils,msedatalist,dbconst,mseapplication,msereal;
 type
  tmsestringfield1 = class(tmsestringfield);
+ tdataset1 = class(tdataset);
  
 const
 {$ifdef mse_FPC_2_2}
@@ -637,7 +642,7 @@ begin
     ftbcd: begin
      result:= encodeifidata(field.ascurrency,headersize);
     end;
-    ftblob,ftgraphic: begin
+    ftblob,ftgraphic,ftmemo: begin
      result:= encodeifidata(field.asstring,headersize);
     end;
     ftstring: begin
@@ -885,12 +890,15 @@ begin
   end;
   idk_msestring: begin
    result:= decodeifidata(datapo,mstr1);
+   afield.aswidestring:= mstr1;
+   {
    if afield is tmsestringfield then begin
     tmsestringfield(afield).asmsestring:= mstr1;
    end
    else begin
     afield.asstring:= mstr1;
    end;
+   }
   end;
  end;
 end;
@@ -1050,7 +1058,7 @@ begin
          fdscontroller.recnonullbased:= dest1;
          insert;
         end;
-        post;
+//        post;
        end;
        gck_deleterow: begin
         fdscontroller.recnonullbased:= dest1;
@@ -1068,6 +1076,10 @@ end;
 
 function tifidscontroller.encoderecord(const aindex: integer;
                                             const recpo: pintrecordty): string;
+var
+ str1: string;
+ mstr1: msestring;
+ 
 begin
  if getfieldisnull(pbyte(@recpo^.header.fielddata.nullmask),aindex) then begin
   result:= encodeifinull;
@@ -1087,8 +1099,13 @@ begin
     ftbcd: begin
      result:= encodeifidata(pcurrency(pointer(recpo)+offset)^);
     end;
+    ftmemo: begin
+     mstr1:= field.aswidestring;
+     result:= encodeifidata(mstr1);
+    end;
     ftblob,ftgraphic: begin
-     result:= encodeifidata(pstring(pointer(recpo)+offset)^);
+     str1:= field.asstring;
+     result:= encodeifidata(str1);
     end;
     ftstring: begin
      result:= encodeifidata(pmsestring(pointer(recpo)+offset)^);
@@ -1120,12 +1137,18 @@ var
 var
  int1,int2: integer;
  str1: string;
+ bufbefore: pintrecordty;
+ statebefore: tdatasetstate;
+ 
 begin
  setlength(result,16);
  ind1:= 1;
  move(arecordcount,result[1],sizeof(arecordcount));
  inc(ind1,sizeof(arecordcount));
+ bufbefore:= fintf.setcurrentbuf(nil);
+ statebefore:= tdataset1(fowner).settempstate(dscurvalue);
  for int1:= 0 to arecordcount - 1 do begin
+  fintf.setcurrentbuf(abufs[int1]);
   for int2:= 0 to high(fbindings) do begin
    str1:= encoderecord(ffielddefindex[int2],abufs[int1]);
    if ind1 + length(str1) > length(result) then begin
@@ -1135,6 +1158,8 @@ begin
    inc(ind1,length(str1));
   end;
  end;
+ fintf.setcurrentbuf(bufbefore);
+ tdataset1(fowner).restorestate(statebefore);
  setlength(result,ind1 - 1);
 end;
 
@@ -1886,7 +1911,7 @@ begin
      fttime,ftdate,ftdatetime: begin
       int3:= sizeof(tdatetime);
      end;
-     ftmemo,ftblob: begin
+     ftblob,ftmemo: begin
       additem(fansistringpositions,frecordsize);
       int3:= sizeof(string);
      end;
@@ -2380,7 +2405,7 @@ begin
       inc(adata,decodeifidata(pifidataty(adata),cur1));
       pcurrency(pointer(dest)+offset)^:= cur1;
      end;
-     ftblob,ftgraphic: begin
+     ftblob,ftgraphic,ftmemo: begin
       inc(adata,decodeifidata(pifidataty(adata),str1));
       pstring(pointer(dest)+offset)^:= str1;
      end;
@@ -2466,6 +2491,12 @@ end;
 function tifidataset.getmodifiedfields: string;
 begin
  result:= fmodifiedfields;
+end;
+
+function tifidataset.setcurrentbuf(const abuf: pintrecordty): pintrecordty;
+begin
+ result:= fcurrentbuf;
+ fcurrentbuf:= abuf;
 end;
 
 function tifidataset.getifistate: ifidsstatesty;
@@ -2693,6 +2724,12 @@ end;
 function ttxsqlquery.getmodifiedfields: string;
 begin
  result:= fmodifiedfields;
+end;
+
+function ttxsqlquery.setcurrentbuf(const abuf: pintrecordty): pintrecordty;
+begin
+ result:= fcurrentbuf;
+ fcurrentbuf:= abuf;
 end;
 
 procedure ttxsqlquery.initmodifiedfields;

@@ -963,6 +963,7 @@ function decodeifidata(const source: pifidataty; const aindex: integer;
                                      //alist can be nil
 var
  int1: integer;
+ lint1: int64;
  rea1: real;
  mstr1: msestring;
  strint1: msestringintty;
@@ -970,10 +971,19 @@ begin
  result:= 0;
  if (alist <> nil) and (aindex < alist.count) then begin
   case source^.header.kind of
+   idk_null: begin
+    alist.cleardata(aindex);
+   end;
    idk_integer: begin
     if alist.datatyp = dl_integer then begin
      result:= decodeifidata(source,int1);
      tintegerdatalist(alist)[aindex]:= int1;
+    end;
+   end;
+   idk_int64: begin
+    if alist.datatyp = dl_int64 then begin
+     result:= decodeifidata(source,lint1);
+     tint64datalist(alist)[aindex]:= int1;
     end;
    end;
    idk_msestring: begin
