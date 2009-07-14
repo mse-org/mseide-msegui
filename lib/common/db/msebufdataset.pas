@@ -375,6 +375,7 @@ type
  
  bufdatasetstatety = (bs_opening,bs_loading,bs_fetching,
                       bs_applying,bs_recapplying,bs_curvaluemodified,
+                      bs_curvaluesetting,bs_curvalueset,
                       bs_connected,
                       bs_hasindex,bs_fetchall,bs_initinternalcalc,
                       bs_blobsfetched,bs_blobscached,bs_blobssorted,
@@ -396,6 +397,12 @@ type
   function addblobcache(const aid: int64; const adata: string): integer; overload;
  end;
 
+ ecurrentvalueaccess = class(edatabaseerror)
+  public
+   constructor create(const adataset: tdataset; const afield: tfield;
+                const msg: string);
+ end;
+ 
  eapplyerror = class(edatabaseerror)
   private
    fresponse: resolverresponsesty;
@@ -413,6 +420,8 @@ type
    fopen: boolean;
    fupdatebuffer: recupdatebufferarty;
    fcurrentupdatebuffer: integer;
+   fstatebefore: tdatasetstate;
+   fcurrentbufbefore: pintrecordty;
 
    frecordsize: integer;
    fnullmasksize: integer;
@@ -502,6 +511,10 @@ type
                          const akind: tupdatekind; const abuffer: pintrecordty);
    function getlogging: boolean;
    procedure checksumfield(afield: tfield);
+   function getcurrentasfloat(const afield: tfield; aindex: integer): double;
+   procedure setcurrentasfloat(const afield: tfield; aindex: integer;
+                   const avalue: double);
+   function getcurrentisnull(const afield: tfield; aindex: integer): boolean;
   protected
    fbrecordcount: integer;
    ffieldinfos: fieldinfoarty;
@@ -518,10 +531,18 @@ type
    ffreedblobs: integerarty;
    ffreedblobcount: integer;
    fcurrentbuf: pintrecordty;
+   fcurrentupdating: integer;
 
    function getrestorerecno: boolean;
    procedure setrestorerecno(const avalue: boolean);
 
+   procedure beforecurrent(const afield: tfield; var aindex: integer;
+                                const checkinternalcalc: boolean);
+   procedure aftercurrentget(const afield: tfield;
+                                               const aindex: integer); virtual;
+   procedure aftercurrentset(const afield: tfield;
+                                               const aindex: integer); virtual;
+   
    function getfieldbuffer(const afield: tfield;
              out buffer: pointer; out datasize: integer): boolean; overload; 
              //read, true if not null
@@ -707,6 +728,17 @@ type
    property changecount : integer read getchangecount;
    property bookmarkdata: bookmarkdataty read getbookmarkdata1;
    property filtereditkind: filtereditkindty read ffiltereditkind write ffiltereditkind;
+
+   procedure begincurrentupdate; virtual;
+   procedure endcurrentupdate; virtual;
+   procedure deccurrentupdate; virtual;
+
+   procedure currentclear(const afield: tfield; aindex: integer);
+   property currentisnull[const afield: tfield; aindex: integer]: boolean read
+                 getcurrentisnull;
+   property currentasfloat[const afield: tfield; aindex: integer]: double
+                  read getcurrentasfloat write setcurrentasfloat;
+                    //for calculated fields only
   published
    property logfilename: filenamety read flogfilename write flogfilename;
    property packetrecords : integer read fpacketrecords write setpacketrecords 
@@ -2187,7 +2219,8 @@ begin
         (afield.fieldkind = fkinternalcalc) and 
                                  (state = dsinternalcalc) or
         (afield.fieldkind = fkcalculated) and 
-                                 (state = dscalcfields)) then begin
+                                 (state = dscalcfields) or 
+        (bs_curvaluesetting in fbstate) and (state = dscurvalue)) then begin
    databaseerrorfmt(snotineditstate,[name],self);
   end;
   state1:= state;
@@ -2199,6 +2232,9 @@ begin
   end;
   dsfilter:  begin 
    result:= @ffilterbuffer[ffiltereditkind]^.header;
+  end;
+  dscurvalue: begin
+   result:= @fcurrentbuf^.header;
   end;
   else begin
    if bs_internalcalc in fbstate then begin
@@ -3404,7 +3440,8 @@ begin
  end;
 end;
 
-procedure tmsebufdataset.setdatastringvalue(const afield: tfield; const avalue: string);
+procedure tmsebufdataset.setdatastringvalue(const afield: tfield;
+                                                      const avalue: string);
 var
  po1: pbyte;
  int1: integer;
@@ -4937,6 +4974,133 @@ begin
  end;
 end;
 
+procedure tmsebufdataset.beforecurrent(const afield: tfield;
+                     var aindex: integer; const checkinternalcalc: boolean);
+begin
+ checkbrowsemode;
+ if checkinternalcalc and (afield.fieldkind <> fkinternalcalc) then begin
+  raise ecurrentvalueaccess.create(self,afield,'Field must be fkInternalCalc.');
+ end;
+ checkindex(false);
+ if aindex < 0 then begin
+  aindex:= frecno;
+ end;
+ if (aindex < 0) or (aindex > high(factindexpo^.ind)) then begin
+  raise edatabaseerror.create(
+     'Current value access: Invalid index '+inttostr(aindex)+'.'+lineend+
+     'Dataset: '+name+' Field: '+ afield.fieldname);  
+ end; 
+ fstatebefore:= settempstate(dscurvalue);
+ fcurrentbufbefore:= fcurrentbuf;
+ fcurrentbuf:= factindexpo^.ind[aindex];
+ include(fbstate,bs_curvaluesetting);
+end;
+
+procedure tmsebufdataset.aftercurrentget(const afield: tfield;
+                              const aindex: integer);
+begin
+ exclude(fbstate,bs_curvaluesetting);
+ fcurrentbuf:= fcurrentbufbefore;
+ restorestate(fstatebefore);
+end;
+
+procedure tmsebufdataset.aftercurrentset(const afield: tfield;
+               const aindex: integer);
+begin
+ exclude(fbstate,bs_curvaluesetting);
+ fcurrentbuf:= fcurrentbufbefore;
+ restorestate(fstatebefore);
+ if fcurrentupdating = 0 then begin
+  resync([]);
+ end
+ else begin
+  include(fbstate,bs_curvalueset);
+ end;
+end;
+
+function tmsebufdataset.getcurrentisnull(const afield: tfield;
+               aindex: integer): boolean;
+begin
+ beforecurrent(afield,aindex,false);
+ try
+  result:= afield.isnull;
+ finally
+  aftercurrentget(afield,aindex);
+ end;
+end;
+
+procedure tmsebufdataset.currentclear(const afield: tfield; aindex: integer);
+begin
+begin
+ beforecurrent(afield,aindex,true);
+ try
+  if not afield.isnull then begin
+   afield.clear;
+   aftercurrentset(afield,aindex);
+  end
+  else begin
+   aftercurrentget(afield,aindex);   
+  end;
+ except
+  aftercurrentget(afield,aindex);
+  raise;
+ end;
+end;
+end;
+
+function tmsebufdataset.getcurrentasfloat(const afield: tfield;
+               aindex: integer): double;
+begin
+ beforecurrent(afield,aindex,false);
+ try
+  result:= afield.asfloat;
+ finally
+  aftercurrentget(afield,aindex);
+ end;
+end;
+
+procedure tmsebufdataset.setcurrentasfloat(const afield: tfield;
+              aindex: integer; const avalue: double);
+begin
+ beforecurrent(afield,aindex,true);
+ try
+  if afield.asfloat <> avalue then begin
+   afield.asfloat:= avalue;
+   aftercurrentset(afield,aindex);
+  end
+  else begin
+   aftercurrentget(afield,aindex);   
+  end;
+ except
+  aftercurrentget(afield,aindex);
+  raise;
+ end;
+end;
+
+procedure tmsebufdataset.begincurrentupdate;
+begin
+ inc(fcurrentupdating);
+end;
+
+procedure tmsebufdataset.deccurrentupdate;
+begin
+ dec(fcurrentupdating);
+ if fcurrentupdating = 0 then begin
+  exclude(fbstate,bs_curvalueset);
+ end;
+end;
+
+procedure tmsebufdataset.endcurrentupdate;
+begin
+ deccurrentupdate;
+ if fcurrentupdating = 0 then begin
+  if bs_curvalueset in fbstate then begin
+   exclude(fbstate,bs_curvalueset);
+   resync([]);
+  end;
+ end;
+end;
+
 { tlocalindexes }
 
 constructor tlocalindexes.create(const aowner: tmsebufdataset);
@@ -5541,6 +5705,15 @@ begin
   foptions:= avalue;
   change;
  end;
+end;
+
+{ ecurrentvalueaccess }
+
+constructor ecurrentvalueaccess.create(const adataset: tdataset;
+                                    const afield: tfield; const msg: string);
+begin
+ inherited create('Current value access: '+msg+lineend+
+                     'Dataset: '+adataset.name+' Field: '+ afield.fieldname);
 end;
 
 end.
