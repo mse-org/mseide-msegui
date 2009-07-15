@@ -7853,7 +7853,12 @@ begin
  fdatacols.dostatread(reader);
  if og_savestate in foptionsgrid then begin
   po1.col:= reader.readinteger('col',ffocusedcell.col);
-  po1.row:= reader.readinteger('row',ffocusedcell.row);
+  if not (gs_isdb in fstate) then begin
+   po1.row:= reader.readinteger('row',ffocusedcell.row);
+  end
+  else begin
+   po1.row:= ffocusedcell.row;
+  end;
   if og_rowsizing in foptionsgrid then begin
    datarowheight:= reader.readinteger('rowheight',datarowheight);
   end;
@@ -7868,7 +7873,9 @@ begin
  fdatacols.dostatwrite(writer);
  if og_savestate in foptionsgrid then begin
   writer.writeinteger('col',ffocusedcell.col);
-  writer.writeinteger('row',ffocusedcell.row);
+  if not (gs_isdb in fstate) then begin
+   writer.writeinteger('row',ffocusedcell.row);
+  end;
   writer.writeinteger('rowheight',datarowheight);
  end;
 end;
