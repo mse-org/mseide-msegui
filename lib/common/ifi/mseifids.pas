@@ -637,7 +637,7 @@ end;
 
 function encodefielddata(const ainfo: fieldinfoty; const headersize: integer): string;
 begin
- with ainfo do begin
+ with ainfo,base,ext do begin
   if field.isnull then begin
    result:= encodeifinull(headersize);
   end
@@ -716,8 +716,8 @@ testvar:= ftxbindings;
  int2:= 0;
  infos:= fintf.getfieldinfos;
  for int1:= 0 to high(ftxbindings) do begin
-testvar1:= infos[ftxbindings[int1]].field;
-  int2:= int2 + length(infos[ftxbindings[int1]].field.fieldname);
+testvar1:= infos[ftxbindings[int1]].ext.field;
+  int2:= int2 + length(infos[ftxbindings[int1]].ext.field.fieldname);
  end;
  setlength(result,sizeof(fdefdataty)+length(ftxbindings)*sizeof(fdefitemty)+
                               int2*6); //max
@@ -726,7 +726,7 @@ testvar1:= infos[ftxbindings[int1]].field;
   po1:= @items;
  end;
  for int1:= 0 to high(ftxbindings) do begin
-  with infos[ftxbindings[int1]] do begin
+  with infos[ftxbindings[int1]],base,ext do begin
    pfdefitemty(po1)^.datatype:= fieldtype;
    pfdefitemty(po1)^.size:= dbfieldsize;
    po1:= @pfdefitemty(po1)^.name;
@@ -964,7 +964,7 @@ begin
       for int1:= 0 to adata^.header.count - 1 do begin
        index1:= pfielddataty(po1)^.header.index;
        if (index1 >= 0) and (index1 <= high(frxbindings)) then begin
-        with ar1[frxbindings[index1]] do begin
+        with ar1[frxbindings[index1]],base,ext do begin
          inc(po1,sizeof(mseifi.fielddataty.header));
          inc(po1,ifidatatofield(pifidataty(po1),field));
          setfieldisnull(pbyte(fintf.getmodifiedfields),index1);
@@ -1105,7 +1105,7 @@ begin
   result:= encodeifinull;
  end
  else begin
-  with fintf.getfieldinfos[aindex] do begin
+  with fintf.getfieldinfos[aindex],base,ext do begin
    case fieldtype of
     ftinteger: begin
      result:= encodeifidata(pinteger(pointer(recpo)+offset)^);
@@ -1211,7 +1211,7 @@ begin
  result:= nil; 
  ar1:= fintf.getfieldinfos;
  if aindex <= high(ar1) then begin
-  result:= ar1[aindex].field;
+  result:= ar1[aindex].ext.field;
  end;
 end;
 
@@ -1224,7 +1224,7 @@ begin
  setlength(ftxbindings,length(ar1));
  int2:= 0;
  for int1:= 0 to high(ftxbindings) do begin
-  with ar1[int1].field do begin
+  with ar1[int1].ext.field do begin
    if not (pfhidden in providerflags) and (index >= 0) then begin
     ftxbindings[int2]:= index;
     inc(int2);
@@ -1593,8 +1593,8 @@ begin
   }
   if buffer <> nil then begin
    result:= not getfieldisnull(precheaderty(buffer)^.fielddata.nullmask,int1);
-   inc(buffer,ffieldinfos[int1].offset{ffieldbufpositions[int1]});
-   datasize:= ffieldinfos[int1].size{ffieldsizes[int1]};
+   inc(buffer,ffieldinfos[int1].base.offset{ffieldbufpositions[int1]});
+   datasize:= ffieldinfos[int1].base.size{ffieldsizes[int1]};
   end
   else begin
    datasize:= 0;
@@ -1668,8 +1668,8 @@ begin
   else begin
    unsetfieldisnull(precheaderty(result)^.fielddata.nullmask,int1);
   end;
-  inc(result,ffieldinfos[int1].offset{ffieldbufpositions[int1]});
-  datasize:= ffieldinfos[int1].size{ffieldsizes[int1]};
+  inc(result,ffieldinfos[int1].base.offset{ffieldbufpositions[int1]});
+  datasize:= ffieldinfos[int1].base.size{ffieldsizes[int1]};
  end
  else begin
   int1:= -2 - int1;
@@ -1977,7 +1977,7 @@ begin
      end;
     end;
    end;
-   with ffieldinfos[int2] do begin
+   with ffieldinfos[int2],base,ext do begin
     offset:= frecordsize;
     inc(frecordsize,int3);
     alignfieldpos(frecordsize);
@@ -2445,7 +2445,7 @@ begin
   if pifidataty(adata)^.header.kind <> idk_null then begin
    unsetfieldisnull(pbyte(@dest^.header.fielddata.nullmask),
                                     fificontroller.frxbindings[int1]);
-   with ffieldinfos[fificontroller.frxbindings[int1]] do begin
+   with ffieldinfos[fificontroller.frxbindings[int1]].base do begin
     case fieldtype of 
      ftinteger: begin
       inc(adata,decodeifidata(pifidataty(adata),integer1));
