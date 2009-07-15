@@ -313,6 +313,7 @@ type
    class function classskininfo: skininfoty; virtual;
    function skininfo: skininfoty; virtual;
    function hasskin: boolean; virtual;
+   function getcomponentinstance: tcomponent;
    
     //iobjectlink
    procedure link(const source,dest: iobjectlink; valuepo: pointer = nil;
@@ -2848,6 +2849,11 @@ begin
 end;
 
 function tmsecomponent.getinstance: tobject;
+begin
+ result:= self;
+end;
+
+function tmsecomponent.getcomponentinstance: tcomponent;
 begin
  result:= self;
 end;

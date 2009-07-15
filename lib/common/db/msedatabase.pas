@@ -33,7 +33,7 @@ type
  tmdbtransaction = class;
  
  idbclient = interface(inullinterface)
-  function getinstance: tobject;
+  function getcomponentinstance: tcomponent;
   function getname: ansistring;
   function getactive: boolean;
   procedure setactive(avalue: boolean);
@@ -50,6 +50,7 @@ type
   procedure settransactionwrite(const avalue: tmdbtransaction);
   function getactive: boolean;
   procedure refreshtransaction;
+  function getcomponentinstance: tcomponent;
  end;
  itransactionclientarty = array of itransactionclient;
  pitransactionclientarty = ^itransactionclientarty;
@@ -245,7 +246,7 @@ type
     procedure settransactionwrite(const value: tmdbtransaction); virtual;
 //      procedure checkdatabase;
     //idbclient
-    function getinstance: tobject;
+    function getcomponentinstance: tcomponent;
     function getname: ansistring;
     function gettransaction: tmdbtransaction;
     procedure refreshtransaction; virtual; abstract;
@@ -337,10 +338,12 @@ begin
   end;
   if dest <> nil then begin
    dest.unregisterdataset(sender,awrite);
+   dest.removefreenotification(sender.getcomponentinstance);
   end;
   dest:= nil;
   if avalue <> nil then begin
    avalue.registerdataset(sender,awrite);
+   avalue.freenotification(sender.getcomponentinstance); //used by IDE for namechange link
   end;
   dest:= avalue;
  end;
@@ -682,7 +685,7 @@ begin
  dosettransaction(itransactionclient(self),value,ftransactionwrite,true);
 end;
 
-function tmdbdataset.getinstance: tobject;
+function tmdbdataset.getcomponentinstance: tcomponent;
 begin
  result:= self;
 end;
