@@ -996,7 +996,7 @@ begin
      ftbcd: begin
       cur1:= AParams[ParNr].ascurrency;
       with po1^ do begin
-       scaleexp10(cur1,-(4+sqlscale));
+       cur1:= scaleexp10(cur1,-(4+sqlscale));
 //       reallocmem(sqldata,sizeof(cur1));
 //       move(cur1,sqldata^,sizeof(cur1));
        move(cur1,sqldata^,po1^.sqllen);

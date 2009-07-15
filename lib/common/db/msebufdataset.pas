@@ -48,13 +48,30 @@ const
  bufstreambuffersize = 4096; 
   
 type
- fieldinfoty = record
+
+ fieldinfo_0ty = record      //version 0
   offset: integer; //data offset in buffer     ////
   size: integer;   //size in buffer              //  checked by save/restore
   fieldtype:  tfieldtype;                        //
   dbfieldsize: integer; //maxsize of dbfield   ////
   field: tfield; //last!
  end;
+
+ fieldinfobasety = record
+  offset: integer; //data offset in buffer     ////
+  size: integer;   //size in buffer              //  checked by save/restore
+  fieldtype:  tfieldtype;                        //
+  dbfieldsize: integer; //maxsize of dbfield   ////
+ end;
+ fieldinfoextty = record
+  basetype: tfieldtype;
+  field: tfield;
+ end;
+ fieldinfoty = record
+  base: fieldinfobasety;
+  ext: fieldinfoextty;
+ end;
+ 
  fieldinfoarty = array of fieldinfoty;
  
  fielddataty = record
@@ -375,7 +392,7 @@ type
  
  bufdatasetstatety = (bs_opening,bs_loading,bs_fetching,
                       bs_applying,bs_recapplying,bs_curvaluemodified,
-                      bs_curvaluesetting,bs_curvalueset,
+                      bs_curvalueset,
                       bs_connected,
                       bs_hasindex,bs_fetchall,bs_initinternalcalc,
                       bs_blobsfetched,bs_blobscached,bs_blobssorted,
@@ -462,7 +479,7 @@ type
    procedure calcrecordsize;
    function loadbuffer(var buffer: recheaderty): tgetresult;
    function getfieldsize(const datatype: tfieldtype; 
-                                   out isstring: boolean) : longint;
+                         out basetype: tfieldtype) : longint;
    function getrecordupdatebuffer: boolean;
    procedure setpacketrecords(avalue: integer);
    function  intallocrecord: pintrecordty;    
@@ -515,6 +532,25 @@ type
    procedure setcurrentasfloat(const afield: tfield; aindex: integer;
                    const avalue: double);
    function getcurrentisnull(const afield: tfield; aindex: integer): boolean;
+   function getcurrentasboolean(const afield: tfield; aindex: integer): boolean;
+   procedure setcurrentasboolean(const afield: tfield; aindex: integer;
+                   const avalue: boolean);
+   function getcurrentasinteger(const afield: tfield; aindex: integer): integer;
+   procedure setcurrentasinteger(const afield: tfield; aindex: integer;
+                   const avalue: integer);
+   function getcurrentaslargeint(const afield: tfield; aindex: integer): int64;
+   procedure setcurrentaslargeint(const afield: tfield; aindex: integer;
+                   const avalue: int64);
+   function getcurrentasdatetime(const afield: tfield; aindex: integer): tdatetime;
+   procedure setcurrentasdatetime(const afield: tfield; aindex: integer;
+                   const avalue: tdatetime);
+   function getcurrentascurrency(const afield: tfield; aindex: integer): currency;
+   procedure setcurrentascurrency(const afield: tfield; aindex: integer;
+                   const avalue: currency);
+   function getcurrentasmsestring(const afield: tfield;
+                   aindex: integer): msestring;
+   procedure setcurrentasmsestring(const afield: tfield; aindex: integer;
+                   const avalue: msestring);
   protected
    fbrecordcount: integer;
    ffieldinfos: fieldinfoarty;
@@ -536,10 +572,11 @@ type
    function getrestorerecno: boolean;
    procedure setrestorerecno(const avalue: boolean);
 
-   procedure beforecurrent(const afield: tfield; var aindex: integer;
-                                const checkinternalcalc: boolean);
-   procedure aftercurrentget(const afield: tfield;
-                                               const aindex: integer); virtual;
+   function beforecurrentget(const afield: tfield;
+              const afieldtype: tfieldtype; var aindex: integer): pointer;
+   function beforecurrentset(const afield: tfield;
+              const afieldtype: tfieldtype; var aindex: integer;
+              const isnull: boolean; out changed: boolean): pointer;
    procedure aftercurrentset(const afield: tfield;
                                                const aindex: integer); virtual;
    
@@ -733,12 +770,25 @@ type
    procedure endcurrentupdate; virtual;
    procedure deccurrentupdate; virtual;
 
+       //calls checkbrowsemode, writing for fkInternalCalc only, 
+       //aindex -1 -> current record
    procedure currentclear(const afield: tfield; aindex: integer);
    property currentisnull[const afield: tfield; aindex: integer]: boolean read
                  getcurrentisnull;
+   property currentasboolean[const afield: tfield; aindex: integer]: boolean
+                  read getcurrentasboolean write setcurrentasboolean;
+   property currentasinteger[const afield: tfield; aindex: integer]: integer
+                  read getcurrentasinteger write setcurrentasinteger;
+   property currentaslargeint[const afield: tfield; aindex: integer]: int64
+                  read getcurrentaslargeint write setcurrentaslargeint;
    property currentasfloat[const afield: tfield; aindex: integer]: double
                   read getcurrentasfloat write setcurrentasfloat;
-                    //for calculated fields only
+   property currentasdatetime[const afield: tfield; aindex: integer]: tdatetime
+                  read getcurrentasdatetime write setcurrentasdatetime;
+   property currentascurrency[const afield: tfield; aindex: integer]: currency
+                  read getcurrentascurrency write setcurrentascurrency;
+   property currentasmsestring[const afield: tfield; aindex: integer]: msestring
+                  read getcurrentasmsestring write setcurrentasmsestring;
   published
    property logfilename: filenamety read flogfilename write flogfilename;
    property packetrecords : integer read fpacketrecords write setpacketrecords 
@@ -1013,7 +1063,7 @@ var
  fielddata: pointer;
  blobinfo: blobstreaminfoty;
 begin
- with fowner.ffieldinfos[aindex] do begin
+ with fowner.ffieldinfos[aindex].base do begin
   fielddata:= pointer(data) + offset;
   case fieldtype of
    ftstring,ftfixedchar: begin
@@ -1131,7 +1181,7 @@ var
  fielddata: pointer;
  blobinfo: blobstreaminfoty;
 begin
- with fowner.ffieldinfos[aindex] do begin
+ with fowner.ffieldinfos[aindex].base do begin
   fielddata:= pointer(data) + offset;
   case fieldtype of
    ftstring,ftfixedchar: begin
@@ -1448,7 +1498,7 @@ begin
  if bs_blobscached in fbstate then begin
   fieldindex:= afield.fieldno-1;
   if not getfieldisnull(arec^.fielddata.nullmask,fieldindex) then begin
-   blobid:= pinteger(pbyte(arec) + ffieldinfos[fieldindex].offset)^;   
+   blobid:= pinteger(pbyte(arec) + ffieldinfos[fieldindex].base.offset)^;   
    fblobcache[blobid].data:= '';
    additem(ffreedblobs,blobid,ffreedblobcount,(high(ffreedblobs)+129)*2);
   end;
@@ -1970,22 +2020,45 @@ begin
 end;
 
 function tmsebufdataset.getfieldsize(const datatype: tfieldtype;
-                                         out isstring: boolean): longint;
+                                          out basetype: tfieldtype): longint;
 begin
- isstring:= false;
  case datatype of
   ftstring,ftfixedchar,ftwidestring,ftfixedwidechar,ftwidememo: begin
-   isstring:= true;
    result:= sizeof(msestring);
+   basetype:= ftwidestring;
   end;
-  ftsmallint,ftinteger,ftword: result:= sizeof(longint);
-  ftboolean: result:= sizeof(longbool);
-  ftbcd: result:= sizeof(currency);
-  ftfloat,ftcurrency: result:= sizeof(double);
-  ftlargeint: result:= sizeof(largeint);
-  fttime,ftdate,ftdatetime: result:= sizeof(tdatetime);
-  ftmemo,ftblob: result:= getblobdatasize;
-  else result:= 0;
+  ftsmallint,ftinteger,ftword: begin
+   result:= sizeof(longint);
+   basetype:= ftinteger;
+  end;
+  ftboolean: begin
+   result:= sizeof(longbool);
+   basetype:= ftboolean;
+  end;
+  ftbcd: begin
+   result:= sizeof(currency);
+   basetype:= ftbcd;
+  end;
+  ftfloat,ftcurrency: begin
+   result:= sizeof(double);
+   basetype:= ftfloat;
+  end;
+  ftlargeint: begin
+   result:= sizeof(largeint);
+   basetype:= ftlargeint;
+  end;
+  fttime,ftdate,ftdatetime: begin
+   result:= sizeof(tdatetime);
+   basetype:= ftdatetime;
+  end;
+  ftmemo,ftblob: begin
+   result:= getblobdatasize;
+   basetype:= ftblob;
+  end;
+  else begin 
+   result:= 0;
+   basetype:= ftunknown;
+  end;
  end;
 end;
 
@@ -2007,7 +2080,7 @@ begin
  for int1:= 0 to fields.count-1 do begin
   field1:= fields[ffieldorder[int1]]; //ODBC needs ordered loadfield
   fno:= field1.fieldno-1;
-  with ffieldinfos[fno] do begin
+  with ffieldinfos[fno].base do begin
    case field1.fieldkind of
     fkdata: begin
      int2:= dbfieldsize;
@@ -2126,8 +2199,8 @@ begin
   end;
   if buffer <> nil then begin
    result:= not getfieldisnull(precheaderty(buffer)^.fielddata.nullmask,int1);
-   inc(buffer,ffieldinfos[int1].offset{ffieldbufpositions[int1]});
-   datasize:= ffieldinfos[int1].size{ffieldsizes[int1]};
+   inc(buffer,ffieldinfos[int1].base.offset{ffieldbufpositions[int1]});
+   datasize:= ffieldinfos[int1].base.size{ffieldsizes[int1]};
   end
   else begin
    datasize:= 0;
@@ -2219,8 +2292,8 @@ begin
         (afield.fieldkind = fkinternalcalc) and 
                                  (state = dsinternalcalc) or
         (afield.fieldkind = fkcalculated) and 
-                                 (state = dscalcfields) or 
-        (bs_curvaluesetting in fbstate) and (state = dscurvalue)) then begin
+                                 (state = dscalcfields) {or 
+        (bs_curvaluesetting in fbstate) and (state = dscurvalue)}) then begin
    databaseerrorfmt(snotineditstate,[name],self);
   end;
   state1:= state;
@@ -2263,8 +2336,8 @@ begin
   else begin
    unsetfieldisnull(precheaderty(result)^.fielddata.nullmask,int1);
   end;
-  inc(result,ffieldinfos[int1].offset{ffieldbufpositions[int1]});
-  datasize:= ffieldinfos[int1].size{ffieldsizes[int1]};
+  inc(result,ffieldinfos[int1].base.offset{ffieldbufpositions[int1]});
+  datasize:= ffieldinfos[int1].base.size{ffieldsizes[int1]};
  end
  else begin
   int1:= -2 - int1;
@@ -2857,22 +2930,20 @@ procedure tmsebufdataset.calcrecordsize;
 
  procedure addfield(const aindex: integer; const datatype: tfieldtype;
                         const asize: integer; const afield: tfield);
- var
-  bo1: boolean;
  begin
   with ffieldinfos[aindex] do begin
-   offset:= frecordsize;
-   size:= getfieldsize(datatype,bo1);
-   if bo1 then begin
+   base.offset:= frecordsize;
+   base.size:= getfieldsize(datatype,ext.basetype);
+   if ext.basetype = ftwidestring then begin
     additem(fstringpositions,frecordsize);
-    dbfieldsize:= asize;     //max size
+    base.dbfieldsize:= asize;     //max size
    end
    else begin
-    dbfieldsize:= size;
+    base.dbfieldsize:= base.size;
    end;
-   fieldtype:= datatype;        //used for savetostream;
-   field:= afield;
-   inc(frecordsize,size);
+   base.fieldtype:= datatype;        //used for savetostream;
+   ext.field:= afield;
+   inc(frecordsize,base.size);
    alignfieldpos(frecordsize);
   end;
  end; //addfield
@@ -3387,7 +3458,7 @@ var
  cacheinfo: blobcacheinfoty;
  int1: integer;
 begin
- with ffieldinfos[aindex] do begin
+ with ffieldinfos[aindex],base,ext do begin
   cacheinfo.id:= 0; //field size can be 32 bit
   move((pointer(data)+offset)^,cacheinfo.id,size);
   with data^ do begin
@@ -3419,13 +3490,13 @@ procedure tmsebufdataset.setofflineblob(const adata: precheaderty;
                        const aindex: integer; const ainfo: blobstreaminfoty);
 begin
  with ainfo,info do begin
-  with ffieldinfos[aindex] do begin
+  with ffieldinfos[aindex],base,ext do begin
    move(id,(pointer(adata)+offset)^,size);
    if current then begin
     with adata^ do begin
      setlength(blobinfo,high(blobinfo) + 2);
      with blobinfo[high(blobinfo)] do begin
-      field:= ffieldinfos[aindex].field;
+      field:= ffieldinfos[aindex].ext.field;
       new:= info.new; //??
       datalength:= length(ainfo.data);
       data:= getmem(datalength); //todo: no move
@@ -3456,7 +3527,8 @@ begin
  end;
  int1:= afield.fieldno - 1;
  if avalue <> '' then begin
-  move(avalue[1],(po1+ffieldinfos[int1].offset{ffieldbufpositions[int1]})^,length(avalue));
+  move(avalue[1],(po1+ffieldinfos[int1].base.offset{ffieldbufpositions[int1]})^,
+                                 length(avalue));
   unsetfieldisnull(precheaderty(po1)^.fielddata.nullmask,int1);
  end
  else begin
@@ -4137,7 +4209,7 @@ procedure tmsebufdataset.checksumfield(afield: tfield);
 begin
  checkbrowsemode;
  if (afield.fieldno <= 0) or (afield.dataset <> self) or
-                  not (ffieldinfos[afield.fieldno-1].fieldtype in 
+                  not (ffieldinfos[afield.fieldno-1].base.fieldtype in 
                       [ftinteger,ftfloat,ftcurrency,ftbcd,ftboolean]) then begin
   raise edatabaseerror.create('Invalid sum field '+'"'+afield.fieldname+'".');
  end;
@@ -4153,9 +4225,9 @@ begin
  checksumfield(afield);
  index1:= afield.fieldno - 1;
  asum:= 0;
- case ffieldinfos[afield.fieldno-1].fieldtype of
+ case ffieldinfos[afield.fieldno-1].base.fieldtype of
   ftfloat,ftcurrency: begin
-   int2:= ffieldinfos[index1].offset;
+   int2:= ffieldinfos[index1].base.offset;
    po2:= pointer(findexes[0]);
    for int1:= 0 to fbrecordcount - 1 do begin
     po1:= po2[int1];
@@ -4177,9 +4249,9 @@ begin
  checksumfield(afield);
  index1:= afield.fieldno - 1;
  asum:= 0;
- case ffieldinfos[afield.fieldno-1].fieldtype of
+ case ffieldinfos[afield.fieldno-1].base.fieldtype of
   ftbcd: begin
-   int2:= ffieldinfos[index1].offset;
+   int2:= ffieldinfos[index1].base.offset;
    po2:= pointer(findexes[0]);
    for int1:= 0 to fbrecordcount - 1 do begin
     po1:= po2[int1];
@@ -4201,9 +4273,9 @@ begin
  checksumfield(afield);
  index1:= afield.fieldno - 1;
  asum:= 0;
- case ffieldinfos[afield.fieldno-1].fieldtype of
+ case ffieldinfos[afield.fieldno-1].base.fieldtype of
   ftlargeint: begin
-   int2:= ffieldinfos[index1].offset;
+   int2:= ffieldinfos[index1].base.offset;
    po2:= pointer(findexes[0]);
    for int1:= 0 to fbrecordcount - 1 do begin
     po1:= po2[int1];
@@ -4225,9 +4297,9 @@ begin
  checksumfield(afield);
  index1:= afield.fieldno - 1;
  asum:= 0;
- case ffieldinfos[afield.fieldno-1].fieldtype of
+ case ffieldinfos[afield.fieldno-1].base.fieldtype of
   ftinteger: begin
-   int2:= ffieldinfos[index1].offset;
+   int2:= ffieldinfos[index1].base.offset;
    po2:= pointer(findexes[0]);
    for int1:= 0 to fbrecordcount - 1 do begin
     po1:= po2[int1];
@@ -4237,7 +4309,7 @@ begin
    end;
   end;
   ftboolean: begin
-   int2:= ffieldinfos[index1].offset;
+   int2:= ffieldinfos[index1].base.offset;
    po2:= pointer(findexes[0]);
    for int1:= 0 to fbrecordcount - 1 do begin
     po1:= po2[int1];
@@ -4366,7 +4438,7 @@ begin
  with header do begin
   tag:= bufdattag;
   byteorder:= 0;
-  version:= 0;
+  version:= 1;
   fieldcount:= fieldco;
   fielddefcount:= fielddefs.count;
   recordcount:= self.recordcount;
@@ -4376,7 +4448,9 @@ begin
   for int1:= 0 to header.fielddefcount - 1 do begin
    awriter.writefielddef(fielddefs[int1]);
   end;
-  awriter.write(ffieldinfos[0],fieldco * sizeof(ffieldinfos[0]));
+  for int1:= 0 to high(ffieldinfos) do begin
+   awriter.write(ffieldinfos[int1],sizeof(fieldinfobasety));
+  end;
   with findexes[0] do begin
    for int1:= 0 to recordcount - 1 do begin
     logrecbuffer(awriter,ukinsert,pintrecordty(ind[int1]));
@@ -4424,7 +4498,6 @@ var
  header: tbsfheaderty;
  reader: tbufstreamreader;
  fieldco: integer;
- ar1: fieldinfoarty;
  ar2: pointerarty;
  ar3: integerarty;
  appended: pointerarty;
@@ -4503,13 +4576,23 @@ begin
     formaterror;
    end;
    if fieldco > 0 then begin
-    setlength(ar1,fieldco);
-    reader.readbuffer(ar1[0],fieldco * sizeof(ar1[0]));
-    for int1:= 0 to high(ar1) do begin
-     if not comparemem(@ar1[int1],@ffieldinfos[int1],sizeof(ar1[0]) - 
-                  sizeof(ar1[0].field)) then begin
-      formaterror;
+    if header.version = 0 then begin
+     int1:= sizeof(fieldinfo_0ty);
+    end
+    else begin
+     int1:= sizeof(fieldinfobasety);
+    end;    
+    getmem(po1,int1*fieldco);
+    try
+     reader.readbuffer(po1^,int1*fieldco);
+     for int2:= 0 to fieldco-1 do begin
+      if not comparemem(po1+int1*int2,@ffieldinfos[int2],
+                                   sizeof(fieldinfobasety)) then begin
+       formaterror;
+      end;
      end;
+    finally
+     freemem(po1);
     end;
     setlength(ar2,header.recordcount);
     for int1:= 0 to high(ar2) do begin
@@ -4522,10 +4605,10 @@ begin
      appendrecord(femptybuffer);
      femptybuffer:= intallocrecord;
     end;
-    ar1:= nil;
+//    ar1:= nil;
     if header.recordcount > 0 then begin
-     allocuninitedarray(fbrecordcount,sizeof(pointer),ar1);
-     move(pointer(findexes[0])^,pointer(ar1)^,fbrecordcount*sizeof(pointer));
+//     allocuninitedarray(fbrecordcount,sizeof(pointer),ar1);
+//     move(pointer(findexes[0])^,pointer(ar1)^,fbrecordcount*sizeof(pointer));
      sortarray(ar2,@comparepointer,sizeof(pointer),ar3);
          //index of old pointers
     end
@@ -4974,11 +5057,55 @@ begin
  end;
 end;
 
-procedure tmsebufdataset.beforecurrent(const afield: tfield;
-                     var aindex: integer; const checkinternalcalc: boolean);
+function tmsebufdataset.beforecurrentget(const afield: tfield;
+              const afieldtype: tfieldtype; var aindex: integer): pointer;
+var
+ po1: pointer;
+ int1: integer;
 begin
  checkbrowsemode;
- if checkinternalcalc and (afield.fieldkind <> fkinternalcalc) then begin
+ if afield.dataset <> self then begin
+  raise ecurrentvalueaccess.create(self,afield,'Wrong dataset.');
+ end;
+ if afield.index < 0 then begin
+  raise ecurrentvalueaccess.create(self,afield,
+                                           'Field can not be be fkCalculated.');
+ end;
+ checkindex(false);
+ if aindex < 0 then begin
+  aindex:= frecno;
+ end;
+ if (aindex < 0) or (aindex > high(factindexpo^.ind)) then begin
+  raise ecurrentvalueaccess.create(self,afield,
+                             'Invalid index '+inttostr(aindex)+'.');  
+ end; 
+ po1:= factindexpo^.ind[aindex]; //precheaderty
+ int1:= afield.fieldno-1;
+ if getfieldisnull(@precheaderty(po1)^.fielddata.nullmask,int1) then begin 
+  result:= nil;
+ end
+ else begin
+  with ffieldinfos[afield.fieldno] do begin
+   if (afieldtype <> ftunknown) and (ext.basetype <> afieldtype) then begin
+    raise ecurrentvalueaccess.create(self,afield,'Invalid fieldtype.');  
+   end;   
+   result:= po1 + base.offset;
+  end;
+ end;
+end;
+var testvar: fieldinfoty;
+function tmsebufdataset.beforecurrentset(const afield: tfield;
+              const afieldtype: tfieldtype; var aindex: integer;
+              const isnull: boolean; out changed: boolean): pointer;
+var
+ po1: pbyte;
+ int1: integer;
+begin
+ checkbrowsemode;
+ if afield.dataset <> self then begin
+  raise ecurrentvalueaccess.create(self,afield,'Wrong dataset.');
+ end;
+ if (afield.fieldkind <> fkinternalcalc) then begin
   raise ecurrentvalueaccess.create(self,afield,'Field must be fkInternalCalc.');
  end;
  checkindex(false);
@@ -4986,30 +5113,34 @@ begin
   aindex:= frecno;
  end;
  if (aindex < 0) or (aindex > high(factindexpo^.ind)) then begin
-  raise edatabaseerror.create(
-     'Current value access: Invalid index '+inttostr(aindex)+'.'+lineend+
-     'Dataset: '+name+' Field: '+ afield.fieldname);  
+  raise ecurrentvalueaccess.create(self,afield,
+                             'Invalid index '+inttostr(aindex)+'.');  
  end; 
- fstatebefore:= settempstate(dscurvalue);
- fcurrentbufbefore:= fcurrentbuf;
- fcurrentbuf:= factindexpo^.ind[aindex];
- include(fbstate,bs_curvaluesetting);
+ result:= factindexpo^.ind[aindex]; //precheaderty
+ po1:= @precheaderty(result)^.fielddata.nullmask;
+ int1:= afield.fieldno-1;
+testvar:= ffieldinfos[int1];
+ with ffieldinfos[int1] do begin
+  if (afieldtype <> ftunknown) and (ext.basetype <> afieldtype) then begin
+   raise ecurrentvalueaccess.create(self,afield,'Invalid fieldtype.');  
+  end;   
+  changed:= getfieldisnull(po1,int1) xor isnull;
+  if changed then begin
+   if isnull then begin
+    setfieldisnull(po1,int1);
+   end
+   else begin
+    unsetfieldisnull(po1,int1);
+   end;
+  end;
+  result:= result + base.offset;
+ end;
 end;
 
-procedure tmsebufdataset.aftercurrentget(const afield: tfield;
-                              const aindex: integer);
-begin
- exclude(fbstate,bs_curvaluesetting);
- fcurrentbuf:= fcurrentbufbefore;
- restorestate(fstatebefore);
-end;
 
 procedure tmsebufdataset.aftercurrentset(const afield: tfield;
                const aindex: integer);
 begin
- exclude(fbstate,bs_curvaluesetting);
- fcurrentbuf:= fcurrentbufbefore;
- restorestate(fstatebefore);
  if fcurrentupdating = 0 then begin
   resync([]);
  end
@@ -5021,60 +5152,198 @@ end;
 function tmsebufdataset.getcurrentisnull(const afield: tfield;
                aindex: integer): boolean;
 begin
- beforecurrent(afield,aindex,false);
- try
-  result:= afield.isnull;
- finally
-  aftercurrentget(afield,aindex);
- end;
+ result:= beforecurrentget(afield,ftunknown,aindex) = nil;
 end;
 
 procedure tmsebufdataset.currentclear(const afield: tfield; aindex: integer);
+var
+ bo1: boolean;
 begin
-begin
- beforecurrent(afield,aindex,true);
- try
-  if not afield.isnull then begin
-   afield.clear;
-   aftercurrentset(afield,aindex);
-  end
-  else begin
-   aftercurrentget(afield,aindex);   
-  end;
- except
-  aftercurrentget(afield,aindex);
-  raise;
+ beforecurrentset(afield,ftunknown,aindex,true,bo1);
+ if bo1 then begin
+  aftercurrentset(afield,aindex);
  end;
-end;
 end;
 
 function tmsebufdataset.getcurrentasfloat(const afield: tfield;
                aindex: integer): double;
+var
+ po1: pdouble;
 begin
- beforecurrent(afield,aindex,false);
- try
-  result:= afield.asfloat;
- finally
-  aftercurrentget(afield,aindex);
+ po1:= beforecurrentget(afield,ftfloat,aindex);
+ if po1 = nil then begin
+  result:= emptyreal;
+ end
+ else begin
+  result:= po1^;
  end;
 end;
 
 procedure tmsebufdataset.setcurrentasfloat(const afield: tfield;
               aindex: integer; const avalue: double);
+var
+ po1: pdouble;
+ bo1: boolean;
 begin
- beforecurrent(afield,aindex,true);
- try
-  if afield.asfloat <> avalue then begin
-   afield.asfloat:= avalue;
-   aftercurrentset(afield,aindex);
-  end
-  else begin
-   aftercurrentget(afield,aindex);   
-  end;
- except
-  aftercurrentget(afield,aindex);
-  raise;
+ po1:= beforecurrentset(afield,ftfloat,aindex,isemptyreal(avalue),bo1);
+ if bo1 or (po1^ <> avalue) then begin
+  po1^:= avalue;
+  aftercurrentset(afield,aindex);
  end;
+end;
+
+function tmsebufdataset.getcurrentasboolean(const afield: tfield;
+               aindex: integer): boolean;
+var
+ po1: plongbool;
+begin
+ po1:= beforecurrentget(afield,ftboolean,aindex);
+ if po1 = nil then begin
+  result:= false;
+ end
+ else begin
+  result:= po1^;
+ end;
+end;
+
+procedure tmsebufdataset.setcurrentasboolean(const afield: tfield;
+               aindex: integer; const avalue: boolean);
+var
+ po1: plongbool;
+ bo1: boolean;
+begin
+ po1:= beforecurrentset(afield,ftboolean,aindex,false,bo1);
+ if bo1 or (po1^ <> avalue) then begin
+  po1^:= avalue;
+  aftercurrentset(afield,aindex);
+ end;
+end;
+
+function tmsebufdataset.getcurrentasinteger(const afield: tfield;
+               aindex: integer): integer;
+var
+ po1: pinteger;
+begin
+ po1:= beforecurrentget(afield,ftinteger,aindex);
+ if po1 = nil then begin
+  result:= 0;
+ end
+ else begin
+  result:= po1^;
+ end;
+end;
+
+procedure tmsebufdataset.setcurrentasinteger(const afield: tfield;
+               aindex: integer; const avalue: integer);
+var
+ po1: pinteger;
+ bo1: boolean;
+begin
+ po1:= beforecurrentset(afield,ftinteger,aindex,false,bo1);
+ if bo1 or (po1^ <> avalue) then begin
+  po1^:= avalue;
+  aftercurrentset(afield,aindex);
+ end;
+end;
+
+function tmsebufdataset.getcurrentaslargeint(const afield: tfield;
+               aindex: integer): int64;
+var
+ po1: pint64;
+begin
+ po1:= beforecurrentget(afield,ftlargeint,aindex);
+ if po1 = nil then begin
+  result:= 0;
+ end
+ else begin
+  result:= po1^;
+ end;
+end;
+
+procedure tmsebufdataset.setcurrentaslargeint(const afield: tfield;
+               aindex: integer; const avalue: int64);
+var
+ po1: pint64;
+ bo1: boolean;
+begin
+ po1:= beforecurrentset(afield,ftlargeint,aindex,false,bo1);
+ if bo1 or (po1^ <> avalue) then begin
+  po1^:= avalue;
+  aftercurrentset(afield,aindex);
+ end;
+end;
+
+function tmsebufdataset.getcurrentasdatetime(const afield: tfield;
+               aindex: integer): tdatetime;
+var
+ po1: pdatetime;
+begin
+ po1:= beforecurrentget(afield,ftfloat,aindex);
+ if po1 = nil then begin
+  result:= emptydatetime;
+ end
+ else begin
+  result:= po1^;
+ end;
+end;
+
+procedure tmsebufdataset.setcurrentasdatetime(const afield: tfield;
+               aindex: integer; const avalue: tdatetime);
+var
+ po1: pdouble;
+ bo1: boolean;
+begin
+ po1:= beforecurrentset(afield,ftfloat,aindex,isemptydatetime(avalue),bo1);
+ if bo1 or (po1^ <> avalue) then begin
+  po1^:= avalue;
+  aftercurrentset(afield,aindex);
+ end;
+end;
+
+function tmsebufdataset.getcurrentascurrency(const afield: tfield;
+               aindex: integer): currency;
+var
+ po1: pcurrency;
+begin
+ po1:= beforecurrentget(afield,ftbcd,aindex);
+ if po1 = nil then begin
+  result:= 0;
+ end
+ else begin
+  result:= po1^;
+ end;
+end;
+
+procedure tmsebufdataset.setcurrentascurrency(const afield: tfield;
+               aindex: integer; const avalue: currency);
+var
+ po1: pcurrency;
+ bo1: boolean;
+begin
+ po1:= beforecurrentset(afield,ftbcd,aindex,false,bo1);
+ if bo1 or (po1^ <> avalue) then begin
+  po1^:= avalue;
+  aftercurrentset(afield,aindex);
+ end;
+end;
+
+function tmsebufdataset.getcurrentasmsestring(const afield: tfield;
+               aindex: integer): msestring;
+var
+ po1: pmsestring;
+begin
+ po1:= beforecurrentget(afield,ftfloat,aindex);
+ if po1 = nil then begin
+  result:= '';
+ end
+ else begin
+  result:= po1^;
+ end;
+end;
+
+procedure tmsebufdataset.setcurrentasmsestring(const afield: tfield;
+               aindex: integer; const avalue: msestring);
+begin
 end;
 
 procedure tmsebufdataset.begincurrentupdate;
@@ -5442,7 +5711,7 @@ begin
      end;
      fieldindex:= fieldno - 1;
      if fieldindex >= 0 then begin
-      recoffset:= ffieldinfos[fieldindex].offset{ffieldbufpositions[fieldindex]}+
+      recoffset:= ffieldinfos[fieldindex].base.offset+
                           intheadersize;
      end
      else begin
