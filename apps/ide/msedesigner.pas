@@ -3520,6 +3520,7 @@ var
  isinherited: boolean;
  str1: string;
  fixupmodule: string;
+ lastmissed: string;
 
 begin //loadformfile
  filename:= filepath(filename);
@@ -3605,6 +3606,7 @@ begin //loadformfile
          end;
          dofixup;
          fixupmodule:= '';
+         lastmissed:= '';
          while true do begin
           rootnames.clear;
           rootinstancenames.clear;
@@ -3624,7 +3626,8 @@ begin //loadformfile
              else begin
               str1:= '';
              end;
-             fongetmodulenamefile(result,fixupmodule+str1,res1);
+             lastmissed:= fixupmodule + str1;
+             fongetmodulenamefile(result,lastmissed,res1);
              dofixup;
              case res1 of
               mr_ok: begin
@@ -3660,7 +3663,8 @@ begin //loadformfile
           end;
           rootnames.free;
           rootinstancenames.free;
-          raise exception.Create('Unresolved reference to '+wstr1+'.');
+          raise exception.Create('Unresolved reference(s) to '+lastmissed+lineend+
+          'Module(s): '+wstr1+'.');
          end;
          rootnames.free;
          rootinstancenames.free;
