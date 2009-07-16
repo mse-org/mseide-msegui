@@ -791,10 +791,6 @@ type
    procedure internaldestroyhandle;
    procedure destroyhandle; virtual;
    procedure createhandle(copyfrom: pixmapty); virtual;
-   procedure copyhandle;
-   procedure releasehandle; virtual;
-   procedure acquirehandle; virtual;
-   property handle: pixmapty read gethandle write sethandle;
    function getmonochrome: boolean;
    procedure setmonochrome(const avalue: boolean); virtual;
    function getconverttomonochromecolorbackground: colorty; virtual;
@@ -812,6 +808,12 @@ type
   public
    constructor create(monochrome: boolean); reintroduce;
    destructor destroy; override;
+
+   procedure copyhandle;
+   procedure releasehandle; virtual;
+   procedure acquirehandle; virtual;
+   property handle: pixmapty read gethandle write sethandle;
+
    procedure assign(source: tpersistent); override;
    procedure assignnegative(source: tsimplebitmap);
                       //gets negative copy
@@ -1880,6 +1882,7 @@ procedure tsimplebitmap.copyhandle;
 var
  ahandle: pixmapty;
 begin
+ releasehandle;
  ahandle:= fhandle;
  fhandle:= 0;
  createhandle(ahandle);
@@ -1937,12 +1940,15 @@ begin
  if fhandle <> value then begin
   internaldestroyhandle;
  end;
- fhandle:= value;
  if value <> 0 then begin
   info.handle:= value;
   gdi_lock;
-  gui_getpixmapinfo(info);
-  gdi_unlock;
+  try
+  gdierror(gui_getpixmapinfo(info));
+  finally
+   gdi_unlock;
+  end;
+  fhandle:= value;
   with info do begin
    fsize:= size;
    if depth = 1 then begin
