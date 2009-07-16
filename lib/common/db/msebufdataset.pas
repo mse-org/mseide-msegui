@@ -5085,7 +5085,7 @@ begin
   result:= nil;
  end
  else begin
-  with ffieldinfos[afield.fieldno] do begin
+  with ffieldinfos[int1] do begin
    if (afieldtype <> ftunknown) and (ext.basetype <> afieldtype) then begin
     raise ecurrentvalueaccess.create(self,afield,'Invalid fieldtype.');  
    end;   
@@ -5278,7 +5278,7 @@ function tmsebufdataset.getcurrentasdatetime(const afield: tfield;
 var
  po1: pdatetime;
 begin
- po1:= beforecurrentget(afield,ftfloat,aindex);
+ po1:= beforecurrentget(afield,ftdatetime,aindex);
  if po1 = nil then begin
   result:= emptydatetime;
  end
@@ -5293,7 +5293,7 @@ var
  po1: pdouble;
  bo1: boolean;
 begin
- po1:= beforecurrentset(afield,ftfloat,aindex,isemptydatetime(avalue),bo1);
+ po1:= beforecurrentset(afield,ftdatetime,aindex,isemptydatetime(avalue),bo1);
  if bo1 or (po1^ <> avalue) then begin
   po1^:= avalue;
   aftercurrentset(afield,aindex);
@@ -5332,7 +5332,7 @@ function tmsebufdataset.getcurrentasmsestring(const afield: tfield;
 var
  po1: pmsestring;
 begin
- po1:= beforecurrentget(afield,ftfloat,aindex);
+ po1:= beforecurrentget(afield,ftwidestring,aindex);
  if po1 = nil then begin
   result:= '';
  end
@@ -5343,7 +5343,15 @@ end;
 
 procedure tmsebufdataset.setcurrentasmsestring(const afield: tfield;
                aindex: integer; const avalue: msestring);
+var
+ po1: pmsestring;
+ bo1: boolean;
 begin
+ po1:= beforecurrentset(afield,ftwidestring,aindex,false,bo1);
+ if bo1 or (po1^ <> avalue) then begin
+  po1^:= avalue;
+  aftercurrentset(afield,aindex);
+ end;
 end;
 
 procedure tmsebufdataset.begincurrentupdate;
