@@ -168,8 +168,7 @@ type
    property HasConstraints default false;
    property LookupCache default false;
    property ReadOnly default false;
-   property Required default false;
-   
+   property Required default false; 
  end;
  
  tmsestringfield = class;
@@ -308,6 +307,7 @@ type
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
+   property DisplayWidth default 10;
  end;
  tmselargeintfield = class(tlargeintfield)
   private
@@ -342,6 +342,7 @@ type
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
+   property DisplayWidth default 10;
  end;
  tmsesmallintfield = class(tsmallintfield)
   private
@@ -375,6 +376,7 @@ type
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
+   property DisplayWidth default 10;
  end;
  tmsewordfield = class(twordfield)
   private
@@ -408,6 +410,7 @@ type
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
+   property DisplayWidth default 10;
  end;
  tmseautoincfield = class(tautoincfield)
   private
@@ -437,6 +440,7 @@ type
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
+   property DisplayWidth default 10;
  end;
  tmsefloatfield = class(tfloatfield)
   private
@@ -471,6 +475,7 @@ type
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
+   property DisplayWidth default 10;
  end;
  tmsecurrencyfield = class(tmsefloatfield)
   public
@@ -524,6 +529,7 @@ type
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
+//   property DisplayWidth default 5; variable!
  end;
  
  datetimefieldoptionty = (dtfo_utc,dtfo_local); //DB time format
@@ -558,12 +564,13 @@ type
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
-   property options: datetimefieldoptionsty read foptions write setoptions;
+   property options: datetimefieldoptionsty read foptions write setoptions default [];
    property FieldKind default fkData;
    property HasConstraints default false;
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
+   property DisplayWidth default 10;
  end; 
  tmsedatefield = class(tmsedatetimefield)
   public
@@ -694,6 +701,9 @@ type
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
+   property precision default 15;
+//   property displaywidth default 15; variable!
+   property currency default false;
  end;
  
  blobidty = record
