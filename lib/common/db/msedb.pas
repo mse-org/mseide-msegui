@@ -240,6 +240,7 @@ type
    property LookupCache default false;
    property ReadOnly default false;
    property Required default false;
+   property Transliterate default false;
  end;
 
  tmsenumericfield = class(tnumericfield)
