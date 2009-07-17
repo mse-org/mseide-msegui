@@ -1079,7 +1079,7 @@ end;
 
 procedure tcustomscrollbar.pagedown;
 begin
- dostep(sbe_pagedown,pagesize);
+ dostep(sbe_pagedown,-pagesize);
 end;
 
 procedure tcustomscrollbar.pageup;

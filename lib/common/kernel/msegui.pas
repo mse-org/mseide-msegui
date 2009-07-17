@@ -10125,7 +10125,7 @@ begin
    inc(rect1.x,fframe.fpaintrect.x);
    inc(rect1.y,fframe.fpaintrect.y); //widget origin
   end;
-  if (ow_noscroll in foptionswidget) {or not (ws_opaque in fwidgetstate)} or
+  if (ow_noscroll in foptionswidget) and not (csdesigning in componentstate) or
      (tws_painting in fwindow.fstate) or
      (abs(dist.x) >= rect.cx) or (abs(dist.y) > rect1.cy) then begin
    invalidaterect(rect1,org_widget);

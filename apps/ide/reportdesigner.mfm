@@ -15,7 +15,7 @@ inherited reportdesignerfo: treportdesignerfo
   moduleclassname = 'Tformdesignerfo'
   object dialh: tdial[0]
     bounds_x = 7
-    bounds_y = 19
+    bounds_y = 18
     bounds_cx = 194
     bounds_cy = 7
     color = -1879048185
@@ -24,11 +24,14 @@ inherited reportdesignerfo: treportdesignerfo
     anchors = [an_left, an_top, an_right]
     taborder = 4
     dial.widthmm =  2.9999999999999999E-0001
+    dial.offset =  0.0000000000000000E+0000
     dial.range =  1.0000000000000000E+0002
     dial.markers.count = 1
     dial.markers.items = <    
       item
         color = -1610612729
+        widthmm =  0.0000000000000000E+0000
+        escapement =  0.0000000000000000E+0000
         val = (
            0.0000000000000000E+0000
           True
@@ -37,25 +40,32 @@ inherited reportdesignerfo: treportdesignerfo
     dial.ticks.count = 3
     dial.ticks.items = <    
       item
+        widthmm =  0.0000000000000000E+0000
+        escapement =  0.0000000000000000E+0000
         intervalcount =  1.0000000000000000E+0001
       end    
       item
         color = -1610612733
+        widthmm =  0.0000000000000000E+0000
         length = 6
+        escapement =  0.0000000000000000E+0000
         intervalcount =  2.0000000000000000E+0001
       end    
       item
         color = -1610612733
+        widthmm =  0.0000000000000000E+0000
         length = 3
+        escapement =  0.0000000000000000E+0000
         intervalcount =  1.0000000000000000E+0002
       end>
+    dial.angle =  0.0000000000000000E+0000
   end
   object tabbar: ttabbar[1]
     optionswidget = [ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 120
     bounds_y = 0
     bounds_cx = 83
-    bounds_cy = 19
+    bounds_cy = 18
     color = -1879048187
     frame.dummy = 0
     anchors = [an_left, an_top, an_right]
@@ -63,13 +73,13 @@ inherited reportdesignerfo: treportdesignerfo
     ontabmoving = tabmo
     onclientmouseevent = tabmouse
     options = [tabo_dragsource, tabo_dragdest]
-    reffontheight = 15
+    reffontheight = 14
   end
   object reportcontainer: tscrollbox[2]
     bounds_x = 7
-    bounds_y = 26
+    bounds_y = 25
     bounds_cx = 198
-    bounds_cy = 433
+    bounds_cy = 434
     color = -1879048187
     frame.optionsscroll = [oscr_drag, oscr_key]
     frame.colorclient = -1610612730
@@ -82,7 +92,7 @@ inherited reportdesignerfo: treportdesignerfo
   end
   object tspacer1: tspacer[3]
     bounds_x = 144
-    bounds_y = 19
+    bounds_y = 18
     bounds_cx = 50
     bounds_cy = 5
     taborder = 2
@@ -92,19 +102,22 @@ inherited reportdesignerfo: treportdesignerfo
   end
   object dialv: tdial[4]
     bounds_x = 0
-    bounds_y = 26
+    bounds_y = 25
     bounds_cx = 7
-    bounds_cy = 430
+    bounds_cy = 431
     color = -1879048185
     anchors = [an_left, an_top, an_bottom]
     taborder = 3
     dial.widthmm =  2.9999999999999999E-0001
     dial.direction = gd_down
+    dial.offset =  0.0000000000000000E+0000
     dial.range =  1.0000000000000000E+0002
     dial.markers.count = 1
     dial.markers.items = <    
       item
         color = -1610612729
+        widthmm =  0.0000000000000000E+0000
+        escapement =  0.0000000000000000E+0000
         val = (
            0.0000000000000000E+0000
           True
@@ -113,22 +126,29 @@ inherited reportdesignerfo: treportdesignerfo
     dial.ticks.count = 3
     dial.ticks.items = <    
       item
+        widthmm =  0.0000000000000000E+0000
+        escapement =  0.0000000000000000E+0000
         intervalcount =  1.0000000000000000E+0001
       end    
       item
         color = -1610612733
+        widthmm =  0.0000000000000000E+0000
         length = 6
+        escapement =  0.0000000000000000E+0000
         intervalcount =  2.0000000000000000E+0001
       end    
       item
         color = -1610612733
+        widthmm =  0.0000000000000000E+0000
         length = 4
+        escapement =  0.0000000000000000E+0000
         intervalcount =  1.0000000000000000E+0002
       end>
+    dial.angle =  0.0000000000000000E+0000
   end
   object tspacer2: tspacer[5]
     bounds_x = 144
-    bounds_y = 26
+    bounds_y = 25
     bounds_cx = 50
     bounds_cy = 5
     taborder = 5
@@ -150,28 +170,30 @@ inherited reportdesignerfo: treportdesignerfo
     bounds_x = 52
     bounds_y = 0
     bounds_cx = 68
-    bounds_cy = 19
+    bounds_cy = 18
     color = -1879048187
     frame.dummy = 0
     taborder = 7
     textflags = [tf_ycentered]
+    valuescale =  1.0000000000000000E+0000
     format = '0.0mm'
-    reffontheight = 15
+    reffontheight = 14
   end
   object ydisp: trealdisp[8]
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 52
-    bounds_cy = 19
+    bounds_cy = 18
     color = -1879048187
     frame.dummy = 0
     taborder = 8
+    valuescale =  1.0000000000000000E+0000
     format = '0.0'
-    reffontheight = 15
+    reffontheight = 14
   end
   object tspacer4: tspacer[9]
     bounds_x = 16
-    bounds_y = 26
+    bounds_y = 25
     bounds_cx = 50
     bounds_cy = 5
     taborder = 9
