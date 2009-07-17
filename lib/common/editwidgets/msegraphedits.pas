@@ -1322,6 +1322,8 @@ end;
 }
 procedure tgraphdataedit.initgridwidget;
 begin
+ defaultinitgridwidget(self,fgridintf);
+{
  if fframe <> nil then begin
   with fframe do begin
    leveli:= 0;
@@ -1332,6 +1334,7 @@ begin
  fgridintf.getcol.options:= fgridintf.getcol.options + [co_drawfocus];
  optionswidget:= optionswidget - [ow_autoscale];
  optionsskin:= optionsskin + defaultgridskinoptions;
+}
 end;
 
 function tgraphdataedit.docheckvalue(var avalue): boolean;

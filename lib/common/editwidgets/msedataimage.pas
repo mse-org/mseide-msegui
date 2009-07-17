@@ -265,7 +265,7 @@ end;
 
 procedure tcustomdataimage.initgridwidget;
 begin
- //dummy
+ defaultinitgridwidget(self,fgridintf);
 end;
 
 procedure tcustomdataimage.setformat(const avalue: string);

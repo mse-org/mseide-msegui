@@ -373,9 +373,9 @@ type
    constructor create(owner: twidgetcol); reintroduce;
  end;
 
-//procedure coloptionstoeditoptions(const source: coloptionsty; var dest: optionseditty);
 procedure gridwidgetfontheightdelta(const sender: twidget; const gridintf: iwidgetgrid;
                         const delta: integer);
+procedure defaultinitgridwidget(const awidget: twidget; const agridintf: iwidgetgrid);
 
 implementation
 uses
@@ -424,6 +424,28 @@ type
   public
    constructor create(aowner: tcustomwidgetgrid); reintroduce;
  end;
+
+procedure defaultinitgridwidget(const awidget: twidget; 
+                                         const agridintf: iwidgetgrid);
+
+begin
+ with twidget1(awidget) do begin
+  optionswidget:= optionswidget - [ow_autoscale];
+  optionsskin:= optionsskin + defaultgridskinoptions;
+  if (fframe <> nil) then begin
+   if (ws_staticframe in fwidgetstate) then begin
+    fframe.initgridframe;
+    if agridintf <> nil then begin
+     fframe.framei:= agridintf.getgrid.datacols.innerframe;
+    end;
+   end
+   else begin
+    freeandnil(fframe);
+   end;
+  end;
+  synctofontheight;
+ end;
+end;
 
 procedure gridwidgetfontheightdelta(const sender: twidget; const gridintf: iwidgetgrid;
                         const delta: integer);
