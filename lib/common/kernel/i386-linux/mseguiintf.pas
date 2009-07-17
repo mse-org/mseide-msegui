@@ -5370,6 +5370,9 @@ begin
 
 eventrestart:
  xnextevent(appdisp,@xev);
+{$ifdef mse_debugsysevent}
+ writeln(xev.xany.xtype,' ',xev.xany.xwindow);
+{$endif}
  if longint(xfilterevent(@xev,none)) <> 0 then begin
   exit;
  end;

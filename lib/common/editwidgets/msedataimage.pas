@@ -33,6 +33,7 @@ type
    procedure setisdb;
    function getgridintf: iwidgetgrid;
    procedure defineproperties(filer: tfiler); override;
+
   //igridwidget
    procedure initgridwidget; virtual;
    function getoptionsedit: optionseditty;
@@ -63,6 +64,7 @@ type
    constructor create(aowner: tcomponent); override;
    function seteditfocus: boolean;
    procedure changed; override;
+   function actualcolor: colorty; override;
    property value: string write setvalue stored false;
    property gridvalue[const index: integer]: string read getgridvalue 
                              write setgridvalue;
@@ -348,6 +350,16 @@ begin
  inherited;
  filer.definebinaryproperty('valuedata',{$ifdef FPC}@{$endif}readvalue,
             {$ifdef FPC}@{$endif}writevalue,fvalue <> '');
+end;
+
+function tcustomdataimage.actualcolor: colorty;
+begin
+ if (fgridintf <> nil) and (fcolor = cl_default) then begin
+  result:= fgridintf.getcol.rowcolor(fgridintf.getrow);
+ end
+ else begin
+  result:= inherited actualcolor;
+ end;
 end;
 
 end.
