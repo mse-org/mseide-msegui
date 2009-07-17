@@ -19,7 +19,8 @@ uses
  msedataimage,mselistbrowser,msecalendardatetimeedit,
  msewidgetgrid,msetextedit,msedesignintf,regeditwidgets_bmp,msepropertyeditors,
  msedropdownlist,mseterminal,msedrawtext,msedatanodes,msedialog,msestrings,
- regwidgets,msearrayprops,typinfo,msestockobjects,msefoldedit,msebitmap,mseglob;
+ regwidgets,msearrayprops,typinfo,msestockobjects,msefoldedit,msebitmap,mseglob,
+ msestream;
 
 type
  tdropdowncolpropertyeditor = class(tarraypropertyeditor)
@@ -160,28 +161,13 @@ procedure tdataimagepropertyeditor.edit;
 var
  mstr1: filenamety;
  format1: string;
- bmp,bmp1: tmaskedbitmap;
  int1: integer;
 begin
  if imagefilepropedit(mstr1,format1) = mr_ok then begin
-  bmp:= tmaskedbitmap.create(false);
-  try
-   bmp.loadfromfile(mstr1,format1);
-   for int1:= 0 to high(fprops) do begin
-    bmp1:= tdataimage(fprops[int1].instance).bitmap;
-    if bmp1 <> nil then begin
-     bmp.alignment:= bmp1.alignment;
-     bmp.colorbackground:= bmp1.colorbackground;
-     bmp.colorforeground:= bmp1.colorforeground;
-     bmp.transparency:= bmp1.transparency;
-     bmp.transparentcolor:= bmp1.transparentcolor;
-    end;
-    bmp1.assign(bmp);
-   end;
-   modified;
-  finally
-   bmp.Free;
+  for int1:= 0 to high(fprops) do begin
+   tdataimage(fprops[int1].instance).value:= readfiledatastring(mstr1);
   end;
+  modified;
  end;
 end;
 

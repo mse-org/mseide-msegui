@@ -24,11 +24,15 @@ type
    procedure setformat(const avalue: string);
    procedure checkgrid;
    function getgridvalue(const index: integer): string;
-   procedure setgridvalue(const index: integer; const avalue: string);   
+   procedure setgridvalue(const index: integer; const avalue: string);
+   procedure readvalue(stream: tstream);
+   procedure writevalue(stream: tstream);
   protected
    fgridintf: iwidgetgrid;
+   fvalue: string;   //in design mode only
    procedure setisdb;
    function getgridintf: iwidgetgrid;
+   procedure defineproperties(filer: tfiler); override;
   //igridwidget
    procedure initgridwidget; virtual;
    function getoptionsedit: optionseditty;
@@ -59,7 +63,7 @@ type
    constructor create(aowner: tcomponent); override;
    function seteditfocus: boolean;
    procedure changed; override;
-   property value: string write setvalue;
+   property value: string write setvalue stored false;
    property gridvalue[const index: integer]: string read getgridvalue 
                              write setgridvalue;
    property format: string read fformat write setformat;
@@ -98,6 +102,9 @@ begin
   bitmap.loadfromstring(avalue,fformat);
  except
   bitmap.clear;
+ end;
+ if csdesigning in componentstate then begin
+  fvalue:= avalue;
  end;
  changed;
 end;
@@ -314,6 +321,33 @@ end;
 procedure tcustomdataimage.setreadonly(const avalue: boolean);
 begin
  //dummy
+end;
+
+procedure tcustomdataimage.readvalue(stream: tstream);
+var
+ str1: string;
+ int1: integer;
+begin
+ stream.readbuffer(int1,sizeof(integer)); 
+ setlength(str1,int1);
+ stream.readbuffer(pointer(str1)^,int1);
+ value:= str1;
+end;
+
+procedure tcustomdataimage.writevalue(stream: tstream);
+var
+ int1: integer;
+begin
+ int1:= length(fvalue);
+ stream.writebuffer(int1,sizeof(integer)); 
+ stream.writebuffer(pointer(fvalue)^,int1);
+end;
+
+procedure tcustomdataimage.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.definebinaryproperty('valuedata',{$ifdef FPC}@{$endif}readvalue,
+            {$ifdef FPC}@{$endif}writevalue,fvalue <> '');
 end;
 
 end.
