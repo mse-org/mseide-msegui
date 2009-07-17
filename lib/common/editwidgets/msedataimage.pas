@@ -81,13 +81,15 @@ type
 implementation
 uses
  msestream,sysutils;
-  
+type
+ tsimplebitmap1 = class(tsimplebitmap);
+ 
 { tcustomdataimage }
 
 constructor tcustomdataimage.create(aowner: tcomponent);
 begin
  inherited;
- fbitmapstreamed:= false;
+ include(tsimplebitmap1(bitmap).fstate,pms_nosave);
 end;
 
 procedure tcustomdataimage.setvalue(const avalue: string);
@@ -349,7 +351,10 @@ procedure tcustomdataimage.defineproperties(filer: tfiler);
 begin
  inherited;
  filer.definebinaryproperty('valuedata',{$ifdef FPC}@{$endif}readvalue,
-            {$ifdef FPC}@{$endif}writevalue,fvalue <> '');
+            {$ifdef FPC}@{$endif}writevalue,
+             (filer.ancestor = nil) and (fvalue <> '') or 
+             (filer.ancestor <> nil) and 
+                       (tcustomdataimage(filer.ancestor).fvalue <> fvalue));
 end;
 
 function tcustomdataimage.actualcolor: colorty;

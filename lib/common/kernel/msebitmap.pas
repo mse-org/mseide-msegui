@@ -328,6 +328,8 @@ type
    property pos: integer read fseekpos write setpos;
  end;
 
+procedure zeropad(var aimage: imagety);
+
 implementation
 uses
  mseguiintf,msebits,msestream,mseevent,msesys,msedatalist,msegraphicstream;
@@ -338,6 +340,28 @@ type
  twriter1 = class(twriter);
 type
  tbitmap1 = class(tbitmap);
+
+procedure zeropad(var aimage: imagety);
+var
+ mask: longword;
+ step: integer;
+ po1: plongword;
+ int1: integer;
+begin
+ with aimage do begin
+  if monochrome then begin
+   mask:= bitmask[size.cx and $1f];
+   if mask <> 0 then begin
+    step:= (size.cx+31) div 32;
+    po1:= @pixels[step-1];
+    for int1:= size.cy - 1 downto 0 do begin
+     po1^:= po1^ and mask;   //mask padding
+     inc(po1,step);
+    end; 
+   end;
+  end;
+ end;
+end;
 
 { tformatstream }
 
@@ -622,15 +646,30 @@ begin
 end;
 
 procedure tbitmap.allocimagemem;
+var
+ int1: integer;
+ po1: plongword;
+ step: integer;
 begin
  if fimage.monochrome then begin
-  fimage.length:= ((fsize.cx+31) div 32) * fsize.cy;
+  step:= (fsize.cx+31) div 32;
+  fimage.length:= step * fsize.cy;
  end
  else begin
+  step:= fsize.cx;
   fimage.length:= fsize.cx * fsize.cy;
  end;
  if fimage.length > 0 then begin
   fimage.pixels:= gui_allocimagemem(fimage.length);
+  {
+  if fimage.monochrome then begin
+   po1:= @fimage.pixels[step-1];
+   for int1:= fsize.cy - 1 downto 0 do begin
+    po1^:= 0;   //init padding
+    inc(po1);
+   end; 
+  end;
+  }
  end
  else begin
   fimage.pixels:= nil;
@@ -1635,13 +1674,17 @@ begin
    if masked then begin
     fmask.checkimage;
     ancestor.fmask.checkimage;
-    result:= not comparemem(fmask.fimage.pixels,ancestor.fmask.fimage.pixels,
+    zeropad(fmask.fimage);
+    zeropad(ancestor.fmask.fimage);
+    result:= (fmask.fimage.length <> ancestor.fmask.fimage.length) or 
+              not comparemem(fmask.fimage.pixels,ancestor.fmask.fimage.pixels,
                          fmask.fimage.length * sizeof(longword));
    end;
    if not result then begin
     checkimage;
     ancestor.checkimage;
-    result:= not comparemem(fimage.pixels,ancestor.fimage.pixels,
+    result:= (fimage.length <> ancestor.fimage.length) or
+              not comparemem(fimage.pixels,ancestor.fimage.pixels,
                          fimage.length * sizeof(longword));
    end;
   end;
