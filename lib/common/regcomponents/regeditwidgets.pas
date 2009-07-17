@@ -19,7 +19,7 @@ uses
  msedataimage,mselistbrowser,msecalendardatetimeedit,
  msewidgetgrid,msetextedit,msedesignintf,regeditwidgets_bmp,msepropertyeditors,
  msedropdownlist,mseterminal,msedrawtext,msedatanodes,msedialog,msestrings,
- regwidgets,msearrayprops,typinfo,msestockobjects,msefoldedit;
+ regwidgets,msearrayprops,typinfo,msestockobjects,msefoldedit,msebitmap,mseglob;
 
 type
  tdropdowncolpropertyeditor = class(tarraypropertyeditor)
@@ -52,7 +52,14 @@ type
    function geteditorclass: propertyeditorclassty; override;
  end;
 
-  
+ tdataimagepropertyeditor = class(tstringpropertyeditor)
+ protected
+   function getdefaultstate: propertystatesty; override;
+   procedure edit; override;
+  public
+   function getvalue: msestring; override;
+ end;
+ 
 procedure Register;
 begin
  registercomponents('Edit',[twidgetgrid,tedit,tslider,tprogressbar,
@@ -77,6 +84,8 @@ begin
  registerpropertyeditor(typeinfo(twidgetcols),nil,'',twidgetcolspropertyeditor);
  registerpropertyeditor(typeinfo(tintegerarrayprop),tstockglyphdatabutton,'',
               tstockglypharraypropertyeditor);
+ registerpropertyeditor(typeinfo(string),tdataimage,'value',tdataimagepropertyeditor);
+ registerpropertyeditor(typeinfo(tmaskedbitmap),tdataimage,'bitmap',tclasspropertyeditor);
 end;
 
 { tdropdowncolpropertyeditor }
@@ -128,6 +137,52 @@ end;
 function tstockglypheditor.gettypeinfo: ptypeinfo;
 begin
  result:= typeinfo(stockglyphty);
+end;
+
+{ tdataimagepropertyeditor }
+
+function tdataimagepropertyeditor.getvalue: msestring;
+begin
+ if tcustomdataimage(fcomponent).bitmap.isempty then begin
+  result:= '<empty>';
+ end
+ else begin
+  result:= '<image>';
+ end;
+end;
+
+function tdataimagepropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate + [ps_dialog];
+end;
+
+procedure tdataimagepropertyeditor.edit;
+var
+ mstr1: filenamety;
+ format1: string;
+ bmp,bmp1: tmaskedbitmap;
+ int1: integer;
+begin
+ if imagefilepropedit(mstr1,format1) = mr_ok then begin
+  bmp:= tmaskedbitmap.create(false);
+  try
+   bmp.loadfromfile(mstr1,format1);
+   for int1:= 0 to high(fprops) do begin
+    bmp1:= tdataimage(fprops[int1].instance).bitmap;
+    if bmp1 <> nil then begin
+     bmp.alignment:= bmp1.alignment;
+     bmp.colorbackground:= bmp1.colorbackground;
+     bmp.colorforeground:= bmp1.colorforeground;
+     bmp.transparency:= bmp1.transparency;
+     bmp.transparentcolor:= bmp1.transparentcolor;
+    end;
+    bmp1.assign(bmp);
+   end;
+   modified;
+  finally
+   bmp.Free;
+  end;
+ end;
 end;
 
 initialization

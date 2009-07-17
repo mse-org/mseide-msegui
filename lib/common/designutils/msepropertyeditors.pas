@@ -785,6 +785,8 @@ function propertyeditors: tpropertyeditors;
 procedure registerpropertyeditor(propertytype: ptypeinfo;
   propertyownerclass: tclass; const propertyname: string;
   editorclass: propertyeditorclassty);
+function imagefilepropedit(out afilename: filenamety;
+                                         out aformat: string): modalresultty;
   
 implementation
 uses
@@ -815,6 +817,39 @@ type
 var
  fpropertyeditors: tpropertyeditors;
  ftextpropertyfont: tfont;
+
+function imagefilepropedit(out afilename: filenamety;
+                                         out aformat: string): modalresultty;
+var
+ dialog: tfiledialog;
+ statfile1: tstatfile;
+begin
+ statfile1:= tstatfile.create(nil);
+ dialog:= tfiledialog.create(nil);
+ try
+  aformat:= '';
+  afilename:= '';
+  statfile1.options:= [sfo_memory];
+  statfile1.filename:= bmpfiledialogstatname;
+  with dialog,controller do begin
+   filterlist.asarraya:= graphicfilefilternames;
+   filterlist.asarrayb:= graphicfilemasks;
+   captionopen:= 'Open image file';
+   statfile:= statfile1;
+   statfile.readstat;
+   filename:= filedir(filename);
+   result:= execute;
+   if result = mr_ok then begin
+    aformat:= graphicfilefilterlabel(filterindex);
+    afilename:= filename;
+    statfile.writestat;
+   end;
+  end;
+ finally
+  dialog.free;
+  statfile1.free;
+ end;
+end;
 
 procedure checkdatalistnostreaming(const sender: tpropertyeditor;
                                 var defaultstate: propertystatesty);
@@ -3673,6 +3708,35 @@ procedure tbitmappropertyeditor.edit;
 var
  bmp,bmp1: tmaskedbitmap;
  int1: integer;
+ mstr1: filenamety;
+ format1: string;
+begin
+ if imagefilepropedit(mstr1,format1) = mr_ok then begin
+  bmp:= tmaskedbitmap.create(false);
+  try
+   bmp.loadfromfile(mstr1,format1);
+   for int1:= 0 to high(fprops) do begin
+    bmp1:= tmaskedbitmap(getordvalue(int1));
+    if bmp1 <> nil then begin
+     bmp.alignment:= bmp1.alignment;
+     bmp.colorbackground:= bmp1.colorbackground;
+     bmp.colorforeground:= bmp1.colorforeground;
+     bmp.transparency:= bmp1.transparency;
+     bmp.transparentcolor:= bmp1.transparentcolor;
+    end;
+    setordvalue(int1,ptruint(bmp));
+   end;
+   modified;
+  finally
+   bmp.Free;
+  end;
+ end;
+end;
+{
+procedure tbitmappropertyeditor.edit;
+var
+ bmp,bmp1: tmaskedbitmap;
+ int1: integer;
  dialog: tfiledialog;
  statfile1: tstatfile;
 begin
@@ -3714,25 +3778,8 @@ begin
   dialog.free;
   statfile1.free;
  end;
- {
- str1:= '';
- int1:= 0;
- if filedialog(str1,[],'',graphicfilefilternames,graphicfilemasks,
-                  '',@int1) = mr_ok then begin
-  bmp:= tmaskedbitmap.create(false);
-  try
-   bmp.loadfromfile(str1,graphicfilefilterlabel(int1));
-   for int1:= 0 to high(fprops) do begin
-    tmaskedbitmap(getordvalue(int1)).assign(bmp);
-   end;
-   modified;
-  finally
-   bmp.Free;
-  end;
- end;
- }
 end;
-
+}
 function tbitmappropertyeditor.getvalue: msestring;
 begin
  with tmaskedbitmap(getordvalue) do begin

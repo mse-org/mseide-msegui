@@ -56,6 +56,7 @@ type
    procedure statdataread; virtual;
    procedure griddatasourcechanged; virtual;
   public
+   constructor create(aowner: tcomponent); override;
    function seteditfocus: boolean;
    procedure changed; override;
    property value: string write setvalue;
@@ -76,6 +77,12 @@ uses
  msestream,sysutils;
   
 { tcustomdataimage }
+
+constructor tcustomdataimage.create(aowner: tcomponent);
+begin
+ inherited;
+ fbitmapstreamed:= false;
+end;
 
 procedure tcustomdataimage.setvalue(const avalue: string);
 begin

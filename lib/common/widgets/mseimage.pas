@@ -37,6 +37,7 @@ type
    procedure setcolorbackground(const Value: colorty);
    procedure setcolorforeground(const Value: colorty);
   protected
+   fbitmapstreamed: boolean;
    procedure paintbmp(const acanvas: tcanvas; const abmp: tmaskedbitmap;
                           const dest: rectty);
    procedure dopaint(const canvas: tcanvas); override;
@@ -47,7 +48,7 @@ type
    destructor destroy; override;
    procedure changed; virtual;
   published
-   property bitmap: tmaskedbitmap read fbitmap write setbitmap;
+   property bitmap: tmaskedbitmap read fbitmap write setbitmap stored fbitmapstreamed;
    property colorforeground: colorty read fcolorforeground //for monochrome bitmaps
                   write setcolorforeground default cl_black;
    property colorbackground: colorty read fcolorbackground //for monochrome bitmaps
@@ -69,6 +70,7 @@ uses
 
 constructor timage.create(aowner: tcomponent);
 begin
+ fbitmapstreamed:= true;
  fcolorforeground:= cl_black;
  fcolorbackground:= cl_white;
  fbitmap:= tmaskedbitmap.create(false);
