@@ -948,6 +948,9 @@ begin
 end;
 
 procedure twidgetcol.defineproperties(filer: tfiler);
+var
+ bo1: boolean;
+ col1: twidgetcol;
 begin
  inherited;
  filer.defineproperty('widgetname',{$ifdef FPC}@{$endif}readwidgetname,
@@ -955,9 +958,17 @@ begin
  filer.defineproperty('fixwidgetnames',{$ifdef FPC}@{$endif}readfixwidgetnames,
                    {$ifdef FPC}@{$endif}writefixwidgetnames,
                    needswidgetnamewriting(ffixrowwidgets));
+ bo1:= false;
+ if fdata <> nil then begin
+  col1:= twidgetcol(filer.ancestor);
+  if col1 <> nil then begin
+   filer.ancestor:= col1.fdata;
+  end;
+  bo1:= fdata.checkwritedata(filer);
+  filer.ancestor:= col1;
+ end;
  filer.defineproperty('data',{$ifdef FPC}@{$endif}readdata,
-                       {$ifdef FPC}@{$endif}writedata,
-                              (fdata <> nil) and (fdata.count > 0));
+                       {$ifdef FPC}@{$endif}writedata,bo1);
 end;
 
 procedure twidgetcol.setfixrowwidget(const awidget: twidget;

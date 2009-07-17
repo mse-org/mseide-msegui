@@ -148,6 +148,7 @@ type
                 //anzahl -> count, initialisiert mit defaultwert
    procedure cleardata(index: integer);
    function deleting: boolean;
+   function checkwritedata(const filer: tfiler): boolean;
 
    procedure rearange(const arangelist: tintegerdatalist);
    procedure movedata(const fromindex,toindex: integer);
@@ -3176,35 +3177,36 @@ begin
  //dummy
 end;
 
-procedure tdatalist.defineproperties(filer: tfiler);
+function tdatalist.checkwritedata(const filer: tfiler): boolean;
 var
- bo1: boolean;
  int1,int2: integer;
- po1: pchar;
+ po1: pointer;
 begin
- inherited;
- bo1:= not (ilo_nostreaming in finternaloptions);
- if bo1 then begin
-  if filer.ancestor = nil then begin
-   bo1:= (fcount <> 0);
-  end
-  else begin
-   bo1:= tdatalist(filer.ancestor).fcount <> fcount;
-   if not bo1 and (filer is twriter) then begin
-    datapo; //normalize ring
-    po1:= tdatalist(filer.ancestor).datapo;
-    for int1:= 0 to fcount-1 do begin
-     compare((fdatapo+int1*fsize)^,(po1+int1*fsize)^,int2);
-     if int2 <> 0 then begin
-      bo1:= true;
-      break;
-     end;
+ if filer.ancestor = nil then begin
+  result:= (fcount <> 0);
+ end
+ else begin
+  result:= tdatalist(filer.ancestor).fcount <> fcount;
+  if not result and (filer is twriter) then begin
+   datapo; //normalize ring
+   po1:= tdatalist(filer.ancestor).datapo;
+   for int1:= 0 to fcount-1 do begin
+    compare((fdatapo+int1*fsize)^,(po1+int1*fsize)^,int2);
+    if int2 <> 0 then begin
+     result:= true;
+     break;
     end;
    end;
   end;
  end;
+end;
+
+procedure tdatalist.defineproperties(filer: tfiler);
+begin
+ inherited;
  filer.defineproperty('data',
-  {$ifdef FPC}@{$endif}readdata,{$ifdef FPC}@{$endif}writedata,bo1);
+  {$ifdef FPC}@{$endif}readdata,{$ifdef FPC}@{$endif}writedata,
+           not (ilo_nostreaming in finternaloptions) and checkwritedata(filer));
 end;
 
 procedure tdatalist.freedata(var data);
