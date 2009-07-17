@@ -923,12 +923,13 @@ begin
  str1:= reader.readident;
  int1:= getenumvalue(typeinfo(datatypty),str1);
  if int1 >= 0 then begin
-  if fdata = nil then begin
+  freeandnil(fdata);
+//  if fdata = nil then begin
    licla:= datalistclasses[datatypty(int1)];
    if licla <> nil then begin
     fdata:= licla.create;
    end;
-  end;
+//  end;
   if fdata <> nil then begin
    tdatalist1(fdata).readdata(reader);
   end
@@ -962,9 +963,10 @@ begin
  if fdata <> nil then begin
   col1:= twidgetcol(filer.ancestor);
   if col1 <> nil then begin
+   bo1:= (col1.fdata = nil) or (fdata.datatyp <> col1.fdata.datatyp);
    filer.ancestor:= col1.fdata;
   end;
-  bo1:= fdata.checkwritedata(filer);
+  bo1:= bo1 or fdata.checkwritedata(filer);
   filer.ancestor:= col1;
  end;
  filer.defineproperty('data',{$ifdef FPC}@{$endif}readdata,
