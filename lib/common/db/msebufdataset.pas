@@ -569,6 +569,8 @@ type
    fcurrentbuf: pintrecordty;
    fcurrentupdating: integer;
 
+   procedure currentcheckbrowsemode;
+
    function getrestorerecno: boolean;
    procedure setrestorerecno(const avalue: boolean);
 
@@ -766,9 +768,10 @@ type
    property bookmarkdata: bookmarkdataty read getbookmarkdata1;
    property filtereditkind: filtereditkindty read ffiltereditkind write ffiltereditkind;
 
-   procedure begincurrentupdate; virtual;
-   procedure endcurrentupdate; virtual;
-   procedure deccurrentupdate; virtual;
+   procedure currentbeginupdate; virtual;
+   procedure currentendupdate; virtual;
+   procedure currentdecupdate; virtual;
+   function currentrecordhigh: integer; //calls checkbrowsemode
 
        //calls checkbrowsemode, writing for fkInternalCalc only, 
        //aindex -1 -> current record
@@ -5057,13 +5060,45 @@ begin
  end;
 end;
 
+procedure tmsebufdataset.currentbeginupdate;
+begin
+ currentcheckbrowsemode;
+ inc(fcurrentupdating);
+end;
+
+procedure tmsebufdataset.currentdecupdate;
+begin
+ dec(fcurrentupdating);
+ if fcurrentupdating = 0 then begin
+  exclude(fbstate,bs_curvalueset);
+ end;
+end;
+
+procedure tmsebufdataset.currentendupdate;
+begin
+ currentdecupdate;
+ if fcurrentupdating = 0 then begin
+  if bs_curvalueset in fbstate then begin
+   exclude(fbstate,bs_curvalueset);
+   resync([]);
+  end;
+ end;
+end;
+
+procedure tmsebufdataset.currentcheckbrowsemode;
+begin
+ if (state <> dsbrowse) or (fcurrentupdating = 0) then begin
+  checkbrowsemode;
+ end;
+end;
+
 function tmsebufdataset.beforecurrentget(const afield: tfield;
               const afieldtype: tfieldtype; var aindex: integer): pointer;
 var
  po1: pointer;
  int1: integer;
 begin
- checkbrowsemode;
+ currentcheckbrowsemode;
  if afield.dataset <> self then begin
   raise ecurrentvalueaccess.create(self,afield,'Wrong dataset.');
  end;
@@ -5101,7 +5136,7 @@ var
  po1: pbyte;
  int1: integer;
 begin
- checkbrowsemode;
+ currentcheckbrowsemode;
  if afield.dataset <> self then begin
   raise ecurrentvalueaccess.create(self,afield,'Wrong dataset.');
  end;
@@ -5354,28 +5389,10 @@ begin
  end;
 end;
 
-procedure tmsebufdataset.begincurrentupdate;
+function tmsebufdataset.currentrecordhigh: integer;
 begin
- inc(fcurrentupdating);
-end;
-
-procedure tmsebufdataset.deccurrentupdate;
-begin
- dec(fcurrentupdating);
- if fcurrentupdating = 0 then begin
-  exclude(fbstate,bs_curvalueset);
- end;
-end;
-
-procedure tmsebufdataset.endcurrentupdate;
-begin
- deccurrentupdate;
- if fcurrentupdating = 0 then begin
-  if bs_curvalueset in fbstate then begin
-   exclude(fbstate,bs_curvalueset);
-   resync([]);
-  end;
- end;
+ currentcheckbrowsemode;
+ result:= fbrecordcount - 1;
 end;
 
 { tlocalindexes }
