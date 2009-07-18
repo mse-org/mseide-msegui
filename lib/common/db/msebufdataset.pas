@@ -287,10 +287,11 @@ type
    class function getitemclasstype: persistentclassty; override;
    property items[const index: integer]: tindexfield read getitems; default;
  end;
-
+ 
  intrecordpoaty = array[0..0] of pintrecordty;
  pintrecordpoaty = ^intrecordpoaty;
  indexfieldinfoty = record
+  fieldinstance: tfield;
   comparefunc: arraysortcomparety;
   vtype: integer;
   recoffset: integer;
@@ -307,6 +308,7 @@ type
    foptions: localindexoptionsty;
    fsortarray: pintrecordpoaty;
    findexfieldinfos: indexfieldinfoarty;
+   finvalid: boolean;
    procedure change;
    procedure setoptions(const avalue: localindexoptionsty);
    procedure setfields(const avalue: tindexfields);
@@ -377,6 +379,10 @@ type
    property items[const index: integer]: tlocalindex read getitems; default;
    property activeindex: integer read getactiveindex write setactiveindex;
                        //-1 > none
+   function fieldactive(const afield: tfield): boolean;
+                   //true if field in active index
+   function fieldmodified(const afield: tfield; const delayed: boolean): boolean;
+   procedure preparefixup; //clear changed indexes
  end;
   
 type
@@ -392,7 +398,7 @@ type
  
  bufdatasetstatety = (bs_opening,bs_loading,bs_fetching,
                       bs_applying,bs_recapplying,bs_curvaluemodified,
-                      bs_curvalueset,
+                      bs_curvalueset,{bs_curindexinvalid,}
                       bs_connected,
                       bs_hasindex,bs_fetchall,bs_initinternalcalc,
                       bs_blobsfetched,bs_blobscached,bs_blobssorted,
@@ -569,6 +575,7 @@ type
    fcurrentbuf: pintrecordty;
    fcurrentupdating: integer;
 
+   procedure fixupcurrentset; virtual;
    procedure currentcheckbrowsemode;
 
    function getrestorerecno: boolean;
@@ -770,7 +777,7 @@ type
 
    procedure currentbeginupdate; virtual;
    procedure currentendupdate; virtual;
-   procedure currentdecupdate; virtual;
+//   procedure currentdecupdate; virtual;
    function currentrecordhigh: integer; //calls checkbrowsemode
 
        //calls checkbrowsemode, writing for fkInternalCalc only, 
@@ -1935,6 +1942,7 @@ begin
    if (recno >= fbrecordcount) or (recno < 0) then begin
     databaseerror('Invalid bookmark recno: '+inttostr(recno)+'.'); 
    end;
+   checkindex(false);
    if (factindexpo^.ind[recno] <> recordpo) and (recordpo <> nil) then begin
     int1:= findrecord(recordpo);
     if int1 < 0 then begin
@@ -5065,7 +5073,7 @@ begin
  currentcheckbrowsemode;
  inc(fcurrentupdating);
 end;
-
+{
 procedure tmsebufdataset.currentdecupdate;
 begin
  dec(fcurrentupdating);
@@ -5073,14 +5081,25 @@ begin
   exclude(fbstate,bs_curvalueset);
  end;
 end;
+}
+procedure tmsebufdataset.fixupcurrentset;
+begin
+ if factindexpo^.ind = nil then begin
+  bookmark:= bookmark; //possibly invalid recno
+ end
+ else begin
+  resync([]);
+ end;
+end;
 
 procedure tmsebufdataset.currentendupdate;
 begin
- currentdecupdate;
+ dec(fcurrentupdating);
  if fcurrentupdating = 0 then begin
   if bs_curvalueset in fbstate then begin
    exclude(fbstate,bs_curvalueset);
-   resync([]);
+   findexlocal.preparefixup;
+   fixupcurrentset;
   end;
  end;
 end;
@@ -5172,15 +5191,18 @@ testvar:= ffieldinfos[int1];
  end;
 end;
 
-
 procedure tmsebufdataset.aftercurrentset(const afield: tfield;
                const aindex: integer);
+var
+ int1: integer;
 begin
  if fcurrentupdating = 0 then begin
-  resync([]);
+  findexlocal.fieldmodified(afield,false);
+  fixupcurrentset;
  end
  else begin
   include(fbstate,bs_curvalueset);
+  findexlocal.fieldmodified(afield,true);
  end;
 end;
 
@@ -5458,6 +5480,68 @@ begin
  end;
 end;
 
+function tlocalindexes.fieldactive(const afield: tfield): boolean;
+var
+ int1: integer;
+begin
+ result:= tmsebufdataset(fowner).factindex > 0;
+ if result and (afield <> nil) then begin
+  result:= false;
+  with items[tmsebufdataset(fowner).factindex-1] do begin
+   for int1:= 0 to high(findexfieldinfos) do begin
+    if findexfieldinfos[int1].fieldinstance = afield then begin
+     result:= true;
+     break;
+    end;
+   end;
+  end;
+ end;
+end;
+
+function tlocalindexes.fieldmodified(const afield: tfield;
+                                    const delayed: boolean): boolean;
+var
+ int1,int2: integer;
+begin
+ result:= false;
+ for int1:= 0 to count-1 do begin
+  with tlocalindex(fitems[int1]) do begin
+   for int2:= 0 to high(findexfieldinfos) do begin
+    if findexfieldinfos[int2].fieldinstance = afield then begin
+     result:= true;
+     if delayed then begin
+      finvalid:= true;
+     end
+     else begin
+      with tmsebufdataset(fowner) do begin
+       findexes[int1+1].ind:= nil;
+       exclude(tmsebufdataset(fowner).fbstate,bs_indexvalid);
+      end;
+     end;      
+    end;
+    break;
+   end;
+  end;
+ end;
+end;
+
+procedure tlocalindexes.preparefixup;
+var
+ int1: integer;
+begin
+ for int1:= 0 to count-1 do begin
+  with tlocalindex(fitems[int1]) do begin
+   if finvalid then begin
+    finvalid:= false;
+    with tmsebufdataset(fowner) do begin
+     findexes[int1+1].ind:= nil;
+     exclude(fbstate,bs_indexvalid);
+    end;
+   end;
+  end;
+ end;
+end;
+
 { tlocalindex }
 
 constructor tlocalindex.create(aowner: tobject);
@@ -5714,6 +5798,7 @@ begin
      databaseerror('Index field "'+fieldname+'" not found.',
                                                    tmsebufdataset(self.fowner));
     end;
+    fieldinstance:= field1;
     with field1 do begin
      if not(fieldkind in [fkdata,fkinternalcalc]) or 
                       not (datatype in indexfieldtypes) then begin

@@ -414,11 +414,12 @@ type
    procedure internaledit; override;
    procedure inheritedinternalinsert; override;
    procedure inheritedinternaldelete; override;
+   procedure fixupcurrentset; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   procedure endcurrentupdate; override;
-   procedure deccurrentupdate; override;
+//   procedure currentendupdate; override;
+//   procedure deccurrentupdate; override;
   published
    property ifi: tifidscontroller read fificontroller write setificontroller;
    property clientbeforeopen: tdatasetnotifyevent read fclientbefporeopen 
@@ -2847,15 +2848,13 @@ begin
  //dummy
 end;
 
-procedure ttxsqlquery.endcurrentupdate;
+procedure ttxsqlquery.fixupcurrentset;
 begin
- if fcurrentupdating = 0 then begin
-  fupdatedcurrentrecords:= nil;
-  fupdatedcurrentrecordcount:= 0;
-  resync([]);
- end;
+ fupdatedcurrentrecords:= nil;
+ fupdatedcurrentrecordcount:= 0;
+ inherited;
 end;
-
+{
 procedure ttxsqlquery.deccurrentupdate;
 begin
  if fcurrentupdating = 0 then begin
@@ -2864,7 +2863,7 @@ begin
  end;
  inherited;
 end;
-
+}
 procedure ttxsqlquery.aftercurrentset(const afield: tfield;
                const aindex: integer);
 begin
