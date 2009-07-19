@@ -1233,6 +1233,7 @@ begin
   end;
  end;
  setlength(ftxbindings,int2);
+ frxbindings:= ftxbindings;
  {
  with tdataset(fowner) do begin
   setlength(fbindings,fields.count);

@@ -1496,13 +1496,14 @@ begin
  result:= gue_ok;
 end;
 
-function stackwindow(id: winidty; predecessor: winidty; stackmode: integer): guierrorty;
+function stackwindow(id: winidty; predecessor: winidty;
+                                   stackmode: integer): guierrorty;
 var
  changes: xwindowchanges;
  ar1: winidarty;
  int1: integer;
  idindex,pindex: integer;
-
+ winar1: array[0..1] of winidty;
 begin
  if predecessor = 0 then begin
   result:= gui_raisewindow(id);
@@ -1510,9 +1511,20 @@ begin
  else begin
   if id <> predecessor then begin
    if gui_canstackunder then begin
+    if stackmode = above then begin
+     winar1[0]:= toplevelwindow(id);
+     winar1[1]:= toplevelwindow(predecessor);
+    end
+    else begin
+     winar1[0]:= toplevelwindow(predecessor);
+     winar1[1]:= toplevelwindow(id);
+    end;
+    xrestackwindows(appdisp,@winar1,2);
+   {
     changes.sibling:= toplevelwindow(predecessor);
     changes.stack_mode:= stackmode;
     xconfigurewindow(appdisp,toplevelwindow(id),cwsibling or cwstackmode,@changes);
+   }
    end
    else begin
     application.sortzorder;
