@@ -269,7 +269,7 @@ end;
 constructor tmouse.create(mouseintf: imouse);
 begin
  fintf:= mouseintf;
- fwinid:= winidty(-1);
+// fwinid:= winidty(-1);
 end;
 
 function tmouse.getpos: pointty;

@@ -14123,16 +14123,21 @@ end;
 
 procedure tinternalapplication.checkcursorshape;
 begin
- if not waiting then begin
-  if fcursorshape = cr_default then begin
-   fmouse.shape:= fwidgetcursorshape;
-  end
-  else begin
-   fmouse.shape:= fcursorshape;
-  end;
+ if terminated then begin
+  fmouse.shape:= cr_default;
  end
  else begin
-  fmouse.shape:= cr_wait;
+  if not waiting then begin
+   if fcursorshape = cr_default then begin
+    fmouse.shape:= fwidgetcursorshape;
+   end
+   else begin
+    fmouse.shape:= fcursorshape;
+   end;
+  end
+  else begin
+   fmouse.shape:= cr_wait;
+  end;
  end;
 end;
 

@@ -772,7 +772,7 @@ var
  terminated: boolean;
  childevent: boolean;
 // cursorshape: cursorshapety;
- screencursor: cursor;
+// screencursor: cursor;
  im: xim;
  appic: xic;
  appicmask: longword;
@@ -2152,20 +2152,28 @@ begin
 end;
 
 function gui_setcursorshape(winid: winidty; shape: cursorshapety): guierrorty;
+var
+ cursor1: cursor;
 begin
  result:= gue_ok;
+// if screencursor <> 0 then begin
+//  xfreecursor(appdisp,screencursor);
+//  screencursor:= 0;
+// end;
  if winid = 0 then begin
-  winid:= mserootwindow;
+  exit; //do not modify root window cursor
+//  winid:= mserootwindow;
  end;
-// if cursorshape <> shape then begin
-  if screencursor <> 0 then begin
-   xfreecursor(appdisp,screencursor);
-  end;
-  screencursor:= xcreatefontcursor(appdisp,standardcursors[shape]);
-  if screencursor <> 0 then begin
-//   cursorshape:= shape;
-   xdefinecursor(appdisp,winid,screencursor);
+// if shape = cr_default then begin  gnome has not cr_arrow as default?
+//  xundefinecursor(appdisp,winid);
+//  xflush(appdisp);
+// end
+// else begin
+  cursor1:= xcreatefontcursor(appdisp,standardcursors[shape]);
+  if cursor1 <> 0 then begin
+   xdefinecursor(appdisp,winid,cursor1);
    xflush(appdisp);
+   xfreecursor(appdisp,cursor1);
   end
   else begin
    result:= gue_cursor;
@@ -6141,10 +6149,10 @@ begin
   xdestroywindow(appdisp,appid);
   appid:= 0;
  end;
- if screencursor <> 0 then begin
-  xfreecursor(appdisp,screencursor);
-  screencursor:= 0;
- end;
+// if screencursor <> 0 then begin
+//  xfreecursor(appdisp,screencursor);
+//  screencursor:= 0;
+// end;
  if appdisp <> nil then begin
   if msecolormap <> 0 then begin
    xfreecolormap(appdisp,msecolormap);
