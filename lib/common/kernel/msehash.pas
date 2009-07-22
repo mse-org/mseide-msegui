@@ -13,7 +13,7 @@ unit msehash;
 
 interface
 uses
- msestrings;
+ msestrings,msetypes;
 const
  defaultbucketcount = $20;
  defaultgrowstep = 8;
@@ -155,9 +155,49 @@ type
    function findi(const key: lstringty): tobject; overload;
  end;
 
+ datarecty = record
+  //dummy
+ end;
+
+ hashheaderty = record
+  key: ptruint;
+  next: ptruint; //offset from liststart
+ end;
+ phashheaderty = ^hashheaderty;
+ 
+ hashdataty = record
+  header: hashheaderty;
+  data: datarecty;
+ end;
+ phashdataty = ^hashdataty;
+ 
+ tptruinthashdatalist = class   //todo: optimize, 64bit
+  private
+   fmask: longword;
+   fdatasize: integer;
+   frecsize: integer;
+   fcapacity: integer;
+   fcount: integer;
+   fhashtable: ptruintarty;
+   fdata: pointer; //first record is a dummy
+   flist: pointer;
+   procedure setcapacity(const avalue: integer);
+  protected
+   function hash(key: ptrint): longword; inline;
+   procedure rehash;
+   procedure grow;
+  public
+   constructor create(const datasize: integer);
+   destructor destroy; override;
+   function add(const key: ptruint): pointer;
+   function find(const key: ptruint): pointer;
+   property capacity: integer read fcapacity write setcapacity;
+   property count: integer read fcount;
+ end;
+ 
 implementation
 uses
- sysutils;
+ sysutils,msebits;
 
 function datahash(const data; len: integer): cardinal;
 var
@@ -944,6 +984,122 @@ end;
 function thashedmsestringobjects.findi(const key: lmsestringty): tobject;
 begin
  result:= tobject(inherited findi(key));
+end;
+
+{ tptruinthasdatalist }
+
+constructor tptruinthashdatalist.create(const datasize: integer);
+begin
+ fdatasize:= datasize;
+ frecsize:= sizeof(hashheaderty) + 
+              ((datasize + 3) and not 3) + fdatasize; //round up to 4 byte
+ inherited create;
+end;
+
+destructor tptruinthashdatalist.destroy;
+begin
+ inherited;
+ if flist <> nil then begin
+  freemem(fdata);
+ end;
+end;
+
+procedure tptruinthashdatalist.setcapacity(const avalue: integer);
+var
+ int1: integer;
+begin
+ if avalue <> fcapacity then begin
+  if avalue < fcount then begin
+   raise exception.create('Capacity < count.');
+  end;
+  if avalue >= high(ptruint) div frecsize then begin
+   raise exception.create('Capacity too big.');
+  end;
+  if reallocmem(fdata,(avalue+1)*frecsize) = nil then begin
+   raise exception.create('Out of memory');
+  end;
+  fcapacity:= avalue;
+  flist:= fdata + frecsize; 
+         //first record is a dummy so offset = 0 -> not assigned
+  int1:= bits[highestbit(avalue)];
+  if int1 < avalue then begin
+   int1:= int1 * 2;
+  end;
+  if int1 <> length(fhashtable) then begin
+   fillchar(pointer(fhashtable)^,length(fhashtable)*sizeof(fhashtable[0]),0);
+   setlength(fhashtable,int1); //additional length nulled by setlength
+   fmask:= int1 - 1;
+   rehash;
+  end;
+ end; 
+end;
+
+function tptruinthashdatalist.hash(key: ptrint): longword;
+// todo: optimize
+begin
+ result:= (key xor (key shr 2)) and fmask;
+end;
+
+procedure tptruinthashdatalist.rehash;
+var
+ int1: integer;
+ po1: phashheaderty;
+ lwo1: longword;
+begin
+ po1:= flist;
+ for int1:= 0 to fcount - 1 do begin
+  lwo1:= hash(po1^.key);
+  po1^.next:= fhashtable[lwo1];
+  fhashtable[lwo1]:= po1 - fdata;
+  inc(pointer(po1),frecsize);
+ end;
+end;
+
+procedure tptruinthashdatalist.grow;
+begin
+ capacity:= 2*capacity + 256;
+end;
+
+function tptruinthashdatalist.add(const key: ptruint): pointer;
+var
+ po1: phashdataty;
+ lwo1: longint;
+begin
+ if count = capacity then begin
+  grow;
+ end;
+ po1:= flist + count * frecsize;
+ lwo1:= hash(key);
+ po1^.header.key:= key;
+ po1^.header.next:= fhashtable[lwo1];
+ fhashtable[lwo1]:= po1-fdata;
+ result:= @po1^.data;
+ inc(fcount);
+end;
+
+function tptruinthashdatalist.find(const key: ptruint): pointer;
+var
+ uint1: ptruint;
+ po1: phashdataty;
+begin
+ result:= nil;
+ uint1:= fhashtable[hash(key)];
+ if uint1 <> 0 then begin
+  po1:= fdata + uint1;
+  while true do begin
+   if po1^.header.key = key then begin
+    break;
+   end;
+   if po1^.header.next = 0 then begin
+    po1:= nil;
+    break;
+   end;
+   po1:= fdata + po1^.header.next;
+  end;
+  if po1 <> nil then begin
+   result:= @po1^.data;
+  end;
+ end;
 end;
 
 end.
