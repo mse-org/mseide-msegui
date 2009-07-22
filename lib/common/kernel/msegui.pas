@@ -1629,7 +1629,7 @@ type
    function paintpostowidgetpos(const apos: pointty): pointty;
    procedure scale(const ascale: real); virtual;
 
-   property widgetrect: rectty read getwidgetrect write setwidgetrect;
+   property widgetrect: rectty read fwidgetrect write setwidgetrect;
    property pos: pointty read fwidgetrect.pos write setpos;
    property size: sizety read fwidgetrect.size write setsize;
    property minsize: sizety read fminsize write setminsize;
@@ -1829,6 +1829,21 @@ type
    procedure setlocalshortcuts(const Value: boolean);
    function getbuttonendmodal: boolean;
    procedure setbuttonendmodal(const value: boolean);
+
+   function getdecoratedwidgetrect: rectty;
+   procedure setdecoratedwidgetrect(const avalue: rectty);
+   function getdecoratedpos: pointty;
+   procedure setdecoratedpos(const avalue: pointty);
+   function getdecoratedsize: sizety;
+   procedure setdecoratedsize(const avalue: sizety);
+   function getdecoratedbounds_x: integer;
+   procedure setdecoratedbounds_x(const avalue: integer);
+   function getdecoratedbounds_y: integer;
+   procedure setdecoratedbounds_y(const avalue: integer);
+   function getdecoratedbounds_cx: integer;
+   procedure setdecoratedbounds_cx(const avalue: integer);
+   function getdecoratedbounds_cy: integer;
+   procedure setdecoratedbounds_cy(const avalue: integer);
   protected
    fwindow: windowty;
    fowner: twidget;
@@ -1918,6 +1933,21 @@ type
    property localshortcuts: boolean read getlocalshortcuts write setlocalshortcuts;
    property windowpos: windowposty read getwindowpos write setwindowpos;
    property caption: msestring read fcaption write setcaption;
+
+   property decoratedwidgetrect: rectty read getdecoratedwidgetrect 
+                                     write setdecoratedwidgetrect;
+   property decoratedpos: pointty read getdecoratedpos
+                                     write setdecoratedpos;
+   property decoratedsize: sizety read getdecoratedsize
+                                     write setdecoratedsize;
+   property decoratedbounds_x: integer read getdecoratedbounds_x
+                                     write setdecoratedbounds_x;
+   property decoratedbounds_y: integer read getdecoratedbounds_y
+                                     write setdecoratedbounds_y;
+   property decoratedbounds_cx: integer read getdecoratedbounds_cx
+                                     write setdecoratedbounds_cx;
+   property decoratedbounds_cy: integer read getdecoratedbounds_cy
+                                     write setdecoratedbounds_cy;
  end;
 
  windowarty = array of twindow;
@@ -12621,6 +12651,102 @@ end;
 procedure twindow.unregisteronscroll(const method: notifyeventty);
 begin
  fscrollnotifylist.remove(tmethod(method));
+end;
+
+function twindow.getdecoratedwidgetrect: rectty;
+begin
+ guierror(gui_getdecoratedwindowrect(winid,result));
+end;
+
+procedure twindow.setdecoratedwidgetrect(const avalue: rectty);
+var
+ rect1: rectty;
+begin
+ guierror(gui_setdecoratedwindowrect(winid,avalue,rect1));
+end;
+
+function twindow.getdecoratedpos: pointty;
+begin
+ result:= decoratedwidgetrect.pos;
+end;
+
+procedure twindow.setdecoratedpos(const avalue: pointty);
+var
+ rect1: rectty;
+begin
+ rect1:= decoratedwidgetrect;
+ rect1.pos:= avalue;
+ decoratedwidgetrect:= rect1;
+end;
+
+function twindow.getdecoratedsize: sizety;
+begin
+ result:= decoratedwidgetrect.size;
+end;
+
+procedure twindow.setdecoratedsize(const avalue: sizety);
+var
+ rect1: rectty;
+begin
+ rect1:= decoratedwidgetrect;
+ rect1.size:= avalue;
+ decoratedwidgetrect:= rect1;
+end;
+
+function twindow.getdecoratedbounds_x: integer;
+begin
+ result:= decoratedwidgetrect.x;
+end;
+
+procedure twindow.setdecoratedbounds_x(const avalue: integer);
+var
+ rect1: rectty;
+begin
+ rect1:= decoratedwidgetrect;
+ rect1.x:= avalue;
+ decoratedwidgetrect:= rect1;
+end;
+
+function twindow.getdecoratedbounds_y: integer;
+begin
+ result:= decoratedwidgetrect.y;
+end;
+
+procedure twindow.setdecoratedbounds_y(const avalue: integer);
+var
+ rect1: rectty;
+begin
+ rect1:= decoratedwidgetrect;
+ rect1.y:= avalue;
+ decoratedwidgetrect:= rect1;
+end;
+
+function twindow.getdecoratedbounds_cx: integer;
+begin
+ result:= decoratedwidgetrect.cx;
+end;
+
+procedure twindow.setdecoratedbounds_cx(const avalue: integer);
+var
+ rect1: rectty;
+begin
+ rect1:= decoratedwidgetrect;
+ rect1.cx:= avalue;
+ decoratedwidgetrect:= rect1;
+end;
+
+function twindow.getdecoratedbounds_cy: integer;
+begin
+ result:= decoratedwidgetrect.cy;
+end;
+
+procedure twindow.setdecoratedbounds_cy(const avalue: integer);
+var
+ rect1: rectty;
+begin
+ rect1:= decoratedwidgetrect;
+ rect1.cy:= avalue;
+ decoratedwidgetrect:= rect1;
 end;
 
 { tonkeyeventlist}

@@ -3031,6 +3031,16 @@ begin
  result:= gue_ok;
 end;
 
+function gui_getdecoratedwindowrect(id: winidty; out arect: rectty): guierrorty;
+var
+ frame1: framety;
+begin
+ result:= gui_getwindowrect(id,arect);
+ if result = gue_ok then begin
+  inflaterect1(arect,getwindowframe(id))
+ end;
+end;
+
 function gui_setdecoratedwindowrect(id: winidty; const rect: rectty; 
                                     out clientrect: rectty): guierrorty;
 var

@@ -53,6 +53,7 @@ function gui_getwindowpos(id: winidty; out pos: pointty): guierrorty;
             
 function gui_setsizeconstraints(id: winidty; const min,max: sizety): guierrorty;
 function gui_reposwindow(id: winidty; const rect: rectty): guierrorty;
+function gui_getdecoratedwindowrect(id: winidty; out arect: rectty): guierrorty;
 function gui_setdecoratedwindowrect(id: winidty; const rect: rectty; 
                                     out clientrect: rectty): guierrorty;
 function gui_setembeddedwindowrect(id: winidty; const rect: rectty): guierrorty;

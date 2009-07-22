@@ -3894,6 +3894,17 @@ begin
  end;
 end;
 
+function gui_getdecoratedwindowrect(id: winidty; out arect: rectty): guierrorty;
+begin
+ if windows.getwindowrect(id,trect(rect1)) then begin
+  winrecttorect(arect);
+  result:= gue_ok;
+ end
+ else begin
+  result:= gue_error;
+ end;
+end;
+
 function gui_setdecoratedwindowrect(id: winidty; const rect: rectty; 
                                     out clientrect: rectty): guierrorty;
 var
