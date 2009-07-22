@@ -183,7 +183,7 @@ type
    flist: pointer;
    procedure setcapacity(const avalue: integer);
   protected
-   function hash(key: ptrint): longword; inline;
+   function hash(key: ptrint): longword; {$ifdef FPC}inline;{$endif}
    procedure rehash;
    procedure grow;
   public
@@ -1015,11 +1015,15 @@ begin
   if avalue >= high(ptruint) div frecsize then begin
    raise exception.create('Capacity too big.');
   end;
+  {$ifdef FPC}
   if reallocmem(fdata,(avalue+1)*frecsize) = nil then begin
    raise exception.create('Out of memory');
   end;
+  {$else}
+  reallocmem(fdata,(avalue+1)*frecsize);
+  {$endif}
   fcapacity:= avalue;
-  flist:= fdata + frecsize; 
+  flist:= pchar(fdata) + frecsize;
          //first record is a dummy so offset = 0 -> not assigned
   int1:= bits[highestbit(avalue)];
   if int1 < avalue then begin
@@ -1050,8 +1054,8 @@ begin
  for int1:= 0 to fcount - 1 do begin
   lwo1:= hash(po1^.key);
   po1^.next:= fhashtable[lwo1];
-  fhashtable[lwo1]:= po1 - fdata;
-  inc(pointer(po1),frecsize);
+  fhashtable[lwo1]:= pchar(po1) - fdata;
+  inc(pchar(po1),frecsize);
  end;
 end;
 
@@ -1068,11 +1072,11 @@ begin
  if count = capacity then begin
   grow;
  end;
- po1:= flist + count * frecsize;
+ po1:= phashdataty(pchar(flist) + count * frecsize);
  lwo1:= hash(key);
  po1^.header.key:= key;
  po1^.header.next:= fhashtable[lwo1];
- fhashtable[lwo1]:= po1-fdata;
+ fhashtable[lwo1]:= pchar(po1)-fdata;
  result:= @po1^.data;
  inc(fcount);
 end;
@@ -1085,7 +1089,7 @@ begin
  result:= nil;
  uint1:= fhashtable[hash(key)];
  if uint1 <> 0 then begin
-  po1:= fdata + uint1;
+  po1:= phashdataty(pchar(fdata) + uint1);
   while true do begin
    if po1^.header.key = key then begin
     break;
@@ -1094,7 +1098,7 @@ begin
     po1:= nil;
     break;
    end;
-   po1:= fdata + po1^.header.next;
+   po1:= phashdataty(pchar(fdata) + po1^.header.next);
   end;
   if po1 <> nil then begin
    result:= @po1^.data;

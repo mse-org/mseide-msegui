@@ -3191,7 +3191,7 @@ begin
    datapo; //normalize ring
    po1:= tdatalist(filer.ancestor).datapo;
    for int1:= 0 to fcount-1 do begin
-    compare((fdatapo+int1*fsize)^,(po1+int1*fsize)^,int2);
+    compare((fdatapo+int1*fsize)^,(pchar(po1)+int1*fsize)^,int2);
     if int2 <> 0 then begin
      result:= true;
      break;

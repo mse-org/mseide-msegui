@@ -3896,7 +3896,7 @@ end;
 
 function gui_getdecoratedwindowrect(id: winidty; out arect: rectty): guierrorty;
 begin
- if windows.getwindowrect(id,trect(rect1)) then begin
+ if windows.getwindowrect(id,trect(arect)) then begin
   winrecttorect(arect);
   result:= gue_ok;
  end
