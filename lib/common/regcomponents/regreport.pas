@@ -70,7 +70,11 @@ begin
    mstr1:= value;
   end
   else begin
-   mstr1:= datafield;
+   mstr1:= '';
+   if datasource <> nil then begin
+    mstr1:= datasource.name+'.';
+   end;
+   mstr1:= mstr1+datafield;
    if (lookupbuffer <> nil) and (lookupbuffer is tdblookupbuffer) and 
     (lookupvaluefieldno >= 0) then begin
     with tdblookupbuffer(lookupbuffer) do begin

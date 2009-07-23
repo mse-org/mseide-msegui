@@ -191,6 +191,7 @@ type
    destructor destroy; override;
    function add(const key: ptruint): pointer;
    function find(const key: ptruint): pointer;
+   function addunique(const key: ptruint): pointer;
    property capacity: integer read fcapacity write setcapacity;
    property count: integer read fcount;
  end;
@@ -1103,6 +1104,14 @@ begin
   if po1 <> nil then begin
    result:= @po1^.data;
   end;
+ end;
+end;
+
+function tptruinthashdatalist.addunique(const key: ptruint): pointer;
+begin
+ result:= find(key);
+ if result = nil then begin
+  result:= add(key);
  end;
 end;
 
