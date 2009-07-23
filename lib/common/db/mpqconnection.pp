@@ -680,9 +680,6 @@ begin
        end; {case}
        GetMem(ar[i],length(s)+1);
        StrMove(PChar(ar[i]),Pchar(s),Length(S)+1);
-      end
-      else begin
-       FreeAndNil(ar[i]);
       end;
      end;
     end;

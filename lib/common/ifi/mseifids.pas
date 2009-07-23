@@ -140,6 +140,7 @@ type
    procedure postrecord1(const akind: fieldreckindty;
                                    const amodifiedfields: pbyte);
    procedure receiveevent(const event: tobjectevent);
+   procedure sendchangedrecord(const aitem: phashdataty);
   public
    constructor create(const aowner: tdataset; const aintf: iifidscontroller);
    destructor destroy; override;
@@ -150,7 +151,6 @@ type
                         const abufs: pointerarty): string;
    procedure sendpostresult(const asequence: sequencety;
                     const acode: postresultcodety; const amessage: msestring);
-   procedure sendchangedrecord(const aitem: phashdataty);
    procedure sendchangedrecords(const alist: tcurrentchangedlist);
    procedure post;
    procedure delete;
