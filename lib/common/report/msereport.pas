@@ -1773,7 +1773,7 @@ begin
     result:= true;
    end
    else begin
-    if dscontroller <> nil then begin
+    if (dscontroller <> nil) and not assigned(syncproc) then begin
      result:= dscontroller.islastrecord;
     end
     else begin
