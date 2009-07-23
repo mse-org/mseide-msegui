@@ -170,7 +170,12 @@ type
   data: datarecty;
  end;
  phashdataty = ^hashdataty;
- 
+
+ hashliststatety = (hls_needsnull);
+ hashliststatesty = set of hashliststatety;
+
+ hashiteratorprocty = procedure(const aitem: phashdataty) of object;
+   
  tptruinthashdatalist = class   //todo: optimize, 64bit
   private
    fmask: longword;
@@ -183,6 +188,7 @@ type
    flist: pointer;
    procedure setcapacity(const avalue: integer);
   protected
+   fstate: hashliststatesty;
    function hash(key: ptrint): longword; {$ifdef FPC}inline;{$endif}
    procedure rehash;
    procedure grow;
@@ -192,8 +198,10 @@ type
    function add(const key: ptruint): pointer;
    function find(const key: ptruint): pointer;
    function addunique(const key: ptruint): pointer;
+   procedure clear;
    property capacity: integer read fcapacity write setcapacity;
    property count: integer read fcount;
+   procedure iterate(const aiterator: hashiteratorprocty);
  end;
  
 implementation
@@ -1000,9 +1008,7 @@ end;
 destructor tptruinthashdatalist.destroy;
 begin
  inherited;
- if flist <> nil then begin
-  freemem(fdata);
- end;
+ clear;
 end;
 
 procedure tptruinthashdatalist.setcapacity(const avalue: integer);
@@ -1023,9 +1029,12 @@ begin
   {$else}
   reallocmem(fdata,(avalue+1)*frecsize);
   {$endif}
-  fcapacity:= avalue;
   flist:= pchar(fdata) + frecsize;
          //first record is a dummy so offset = 0 -> not assigned
+  if hls_needsnull in fstate then begin
+   fillchar((pchar(flist)+fcapacity*frecsize)^,(avalue-fcapacity)*frecsize,0);
+  end;
+  fcapacity:= avalue;
   int1:= bits[highestbit(avalue)];
   if int1 < avalue then begin
    int1:= int1 * 2;
@@ -1088,21 +1097,23 @@ var
  po1: phashdataty;
 begin
  result:= nil;
- uint1:= fhashtable[hash(key)];
- if uint1 <> 0 then begin
-  po1:= phashdataty(pchar(fdata) + uint1);
-  while true do begin
-   if po1^.header.key = key then begin
-    break;
+ if count > 0 then begin
+  uint1:= fhashtable[hash(key)];
+  if uint1 <> 0 then begin
+   po1:= phashdataty(pchar(fdata) + uint1);
+   while true do begin
+    if po1^.header.key = key then begin
+     break;
+    end;
+    if po1^.header.next = 0 then begin
+     po1:= nil;
+     break;
+    end;
+    po1:= phashdataty(pchar(fdata) + po1^.header.next);
    end;
-   if po1^.header.next = 0 then begin
-    po1:= nil;
-    break;
+   if po1 <> nil then begin
+    result:= @po1^.data;
    end;
-   po1:= phashdataty(pchar(fdata) + po1^.header.next);
-  end;
-  if po1 <> nil then begin
-   result:= @po1^.data;
   end;
  end;
 end;
@@ -1112,6 +1123,29 @@ begin
  result:= find(key);
  if result = nil then begin
   result:= add(key);
+ end;
+end;
+
+procedure tptruinthashdatalist.clear;
+begin
+ if fdata <> nil then begin
+  freemem(fdata);
+  fdata:= nil;
+  fhashtable:= nil;
+  fcount:= 0;
+  fcapacity:= 0;
+ end;
+end;
+
+procedure tptruinthashdatalist.iterate(const aiterator: hashiteratorprocty);
+var
+ int1: integer;
+ po1: pointer;
+begin
+ po1:= flist;
+ for int1:= 0 to count - 1 do begin
+  aiterator(po1);
+  inc(po1,frecsize);
  end;
 end;
 

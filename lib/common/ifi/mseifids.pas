@@ -15,7 +15,7 @@ unit mseifids;
 interface
 uses
  classes,db,mseifi,mseclasses,mseglob,mseevent,msedb,msetypes,msebufdataset,
- msestrings,mseifilink,msesqldb,msearrayprops;
+ msestrings,mseifilink,msesqldb,msearrayprops,msehash;
 
 
 type
@@ -106,7 +106,13 @@ type
    constructor create(const amodifiedfields: string; const abookmark:string;
                       const dest: ievent);
  end;
-  
+
+ tcurrentchangedlist = class(tptruinthashdatalist)
+  public 
+   constructor create(const anullmasksize: integer);
+   procedure fieldchanged(const afield: tfield; const aindex: integer);
+ end;
+    
  tifidscontroller = class(tificontroller,ievent)
   private
    fintf: iifidscontroller;
@@ -132,7 +138,7 @@ type
    procedure doremotedatachange;
    function encodefielddefs: string;
    procedure postrecord1(const akind: fieldreckindty;
-                                   const amodifiedfields: ansistring);
+                                   const amodifiedfields: pbyte);
    procedure receiveevent(const event: tobjectevent);
   public
    constructor create(const aowner: tdataset; const aintf: iifidscontroller);
@@ -144,6 +150,8 @@ type
                         const abufs: pointerarty): string;
    procedure sendpostresult(const asequence: sequencety;
                     const acode: postresultcodety; const amessage: msestring);
+   procedure sendchangedrecord(const aitem: phashdataty);
+   procedure sendchangedrecords(const alist: tcurrentchangedlist);
    procedure post;
    procedure delete;
    procedure opened;
@@ -155,7 +163,7 @@ type
 //   property fieldoptions: tififieldoptions read ffieldoptions 
 //                                  write setfieldoptions;
  end;
- 
+
  tifidataset = class(tdataset,idscontroller,igetdscontroller,
                      iifidscontroller,iifimodulelink)
   private
@@ -384,11 +392,10 @@ type
    fclientbefporeopen: tdatasetnotifyevent;
    fclientbeforeopen: tdatasetnotifyevent;
    fclientafteropen: tdatasetnotifyevent;
+   fcurrentchanged: tcurrentchangedlist;
    procedure setificontroller(const avalue: tifidscontroller);
    procedure initmodifiedfields;   
   protected
-   fupdatedcurrentrecords: integerarty;
-   fupdatedcurrentrecordcount: integer;
 
    procedure currentrecordupdated(const aindex: integer);
       
@@ -407,8 +414,7 @@ type
                                  const adata: pfielddefsdatadataty);
    function getmodifiedfields: string;
    function setcurrentbuf(const abuf: pintrecordty): pintrecordty;
-   procedure aftercurrentset(const afield: tfield;
-                                               const aindex: integer); override;
+   procedure aftercurrentset(const afield: tfield); override;
 
    procedure cancelconnection;
    procedure internaledit; override;
@@ -418,7 +424,8 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-//   procedure currentendupdate; override;
+   procedure currentbeginupdate; override;
+   procedure currentendupdate; override;
 //   procedure deccurrentupdate; override;
   published
    property ifi: tifidscontroller read fificontroller write setificontroller;
@@ -682,6 +689,7 @@ constructor tpostechoevent.create(const amodifiedfields: string;
                const abookmark: string; const dest: ievent);
 begin
  fmodifiedfields:= amodifiedfields;
+ setlength(fmodifiedfields,length(fmodifiedfields)); //unique
  fbookmark:= abookmark;
  inherited create(ek_mse,dest);
 end;
@@ -706,18 +714,16 @@ begin
  inherited;
 // ffieldoptions.free;
 end;
-var testvar: integerarty; testvar1: tfield;
+
 function tifidscontroller.encodefielddefs: string;
 var
  int1,int2: integer;
  po1: pchar;
  infos: fieldinfoarty;
 begin
-testvar:= ftxbindings;
  int2:= 0;
  infos:= fintf.getfieldinfos;
  for int1:= 0 to high(ftxbindings) do begin
-testvar1:= infos[ftxbindings[int1]].ext.field;
   int2:= int2 + length(infos[ftxbindings[int1]].ext.field.fieldname);
  end;
  setlength(result,sizeof(fdefdataty)+length(ftxbindings)*sizeof(fdefitemty)+
@@ -738,7 +744,7 @@ testvar1:= infos[ftxbindings[int1]].ext.field;
 end;
 
 procedure tifidscontroller.postrecord1(const akind: fieldreckindty;
-                                       const amodifiedfields: ansistring);
+                                       const amodifiedfields: pbyte);
  function encodefdat(const ainfo: fieldinfoty; const aindex: integer): string;
  begin
   result:= encodefielddata(ainfo,sizeof(fielddataheaderty));
@@ -755,7 +761,7 @@ var
  ar1: stringarty;
  po1: pfieldrecdataty;
  po2: pchar;
- modifiedfields: pbyte;
+// modifiedfields: pbyte;
  fieldinfos1: fieldinfoarty;
  index1: integer;
  
@@ -765,10 +771,10 @@ begin                 //postrecord
  int2:= 0;
  int3:= 0;
  if akind <> frk_delete then begin
-  modifiedfields:= pbyte(amodifiedfields);
+//  modifiedfields:= pbyte(amodifiedfields);
   for int1:= 0 to high(ftxbindings) do begin
    index1:= ftxbindings[int1];
-   if not getfieldisnull(modifiedfields,index1) then begin
+   if getfieldflag(amodifiedfields,index1) then begin
     ar1[int2]:= encodefdat(fieldinfos1[index1],int1);
     if ar1[int2] <> '' then begin
      inc(int2);
@@ -817,20 +823,40 @@ procedure tifidscontroller.post;
 begin
  if fistate * [ids_remotedata,ids_updating] = [] then begin
   if tdataset(fowner).state = dsinsert then begin
-   postrecord1(frk_insert,fintf.getmodifiedfields);
+   postrecord1(frk_insert,pbyte(fintf.getmodifiedfields));
   end
   else begin
-   postrecord1(frk_edit,fintf.getmodifiedfields);
+   postrecord1(frk_edit,pbyte(fintf.getmodifiedfields));
   end;
   exclude(fistate,ids_append);
   fintf.initmodifiedfields;
  end;
 end;
 
+procedure tifidscontroller.sendchangedrecord(const aitem: phashdataty);
+begin
+ fdscontroller.recnonullbased:= aitem^.header.key;
+ postrecord1(frk_edit,pbyte(@aitem^.data));
+end;
+
+procedure tifidscontroller.sendchangedrecords(const alist: tcurrentchangedlist);
+var
+ int1: integer;
+begin
+ if alist.count > 0 then begin
+  fdscontroller.beginupdate;
+  try
+   alist.iterate(@sendchangedrecord);
+  finally
+   fdscontroller.endupdate;
+  end;
+ end;
+end;
+
 procedure tifidscontroller.delete;
 begin
  if fistate * [ids_remotedata,ids_updating] = [] then begin
-  postrecord1(frk_delete,'');
+  postrecord1(frk_delete,nil);
   fintf.initmodifiedfields;
  end;
 end;
@@ -864,7 +890,7 @@ begin
    bm1:= bookmark;
    try
     bookmark:= fbookmark;
-    postrecord1(frk_edit,fmodifiedfields);
+    postrecord1(frk_edit,pbyte(fmodifiedfields));
    except
    end;
    bookmark:= bm1; 
@@ -968,7 +994,7 @@ begin
         with ar1[frxbindings[index1]],base,ext do begin
          inc(po1,sizeof(mseifi.fielddataty.header));
          inc(po1,ifidatatofield(pifidataty(po1),field));
-         setfieldisnull(pbyte(fintf.getmodifiedfields),index1);
+         clearfieldflag(pbyte(fintf.getmodifiedfields),index1);
                      //reset changeflag
         end;
        end;
@@ -1102,7 +1128,7 @@ var
  mstr1: msestring;
  
 begin
- if getfieldisnull(pbyte(@recpo^.header.fielddata.nullmask),aindex) then begin
+ if not getfieldflag(pbyte(@recpo^.header.fielddata.nullmask),aindex) then begin
   result:= encodeifinull;
  end
  else begin
@@ -1594,7 +1620,7 @@ begin
   end;
   }
   if buffer <> nil then begin
-   result:= not getfieldisnull(precheaderty(buffer)^.fielddata.nullmask,int1);
+   result:= getfieldflag(precheaderty(buffer)^.fielddata.nullmask,int1);
    inc(buffer,ffieldinfos[int1].base.offset{ffieldbufpositions[int1]});
    datasize:= ffieldinfos[int1].base.size{ffieldsizes[int1]};
   end
@@ -1663,12 +1689,12 @@ begin
   end;
  end;
  if int1 >= 0 then begin // data field
-  unsetfieldisnull(pointer(fmodifiedfields),int1); //modified
+  setfieldflag(pointer(fmodifiedfields),int1); //modified
   if isnull then begin
-   setfieldisnull(precheaderty(result)^.fielddata.nullmask,int1);
+   clearfieldflag(precheaderty(result)^.fielddata.nullmask,int1);
   end
   else begin
-   unsetfieldisnull(precheaderty(result)^.fielddata.nullmask,int1);
+   setfieldflag(precheaderty(result)^.fielddata.nullmask,int1);
   end;
   inc(result,ffieldinfos[int1].base.offset{ffieldbufpositions[int1]});
   datasize:= ffieldinfos[int1].base.size{ffieldsizes[int1]};
@@ -2445,7 +2471,7 @@ begin
  for int1:= 0 to high(fificontroller.frxbindings) do begin
 //  if fificontroller.fbindings[int1] >= 0 then begin
   if pifidataty(adata)^.header.kind <> idk_null then begin
-   unsetfieldisnull(pbyte(@dest^.header.fielddata.nullmask),
+   setfieldflag(pbyte(@dest^.header.fielddata.nullmask),
                                     fificontroller.frxbindings[int1]);
    with ffieldinfos[fificontroller.frxbindings[int1]].base do begin
     case fieldtype of 
@@ -2719,6 +2745,7 @@ destructor ttxsqlquery.destroy;
 begin
  inherited;
  fificontroller.free;
+ fcurrentchanged.free
 end;
 
 procedure ttxsqlquery.setificontroller(const avalue: tifidscontroller);
@@ -2776,6 +2803,8 @@ end;
 procedure ttxsqlquery.internalopen;
 begin
  inherited;
+ fcurrentchanged.free;
+ fcurrentchanged:= tcurrentchangedlist.create(nullmasksize);
  fificontroller.opened;
 end;
 
@@ -2840,7 +2869,7 @@ begin
  int1:= afield.fieldno-1;
  if (int1 >= 0) and (state <> dscurvalue) and 
                  not (bs_fetching in fbstate) then begin //datafield
-  unsetfieldisnull(pointer(fmodifiedfields),int1); //modified
+  setfieldflag(pointer(fmodifiedfields),int1); //modified
  end;
 end;
 
@@ -2851,8 +2880,6 @@ end;
 
 procedure ttxsqlquery.fixupcurrentset;
 begin
- fupdatedcurrentrecords:= nil;
- fupdatedcurrentrecordcount:= 0;
  inherited;
 end;
 {
@@ -2865,20 +2892,50 @@ begin
  inherited;
 end;
 }
-procedure ttxsqlquery.aftercurrentset(const afield: tfield;
-               const aindex: integer);
+procedure ttxsqlquery.aftercurrentset(const afield: tfield);
 begin
  inherited;
  if fcurrentupdating = 0 then begin
-  currentrecordupdated(aindex);
+  currentrecordupdated(flastcurrentindex);
  end
  else begin
-  additem(fupdatedcurrentrecords,aindex,fupdatedcurrentrecordcount);
+  fcurrentchanged.fieldchanged(afield,flastcurrentindex);
  end;
 end;
 
 procedure ttxsqlquery.currentrecordupdated(const aindex: integer);
 begin
+end;
+
+procedure ttxsqlquery.currentbeginupdate;
+begin
+ if fcurrentupdating = 0 then begin
+  fcurrentchanged.clear;
+ end;
+ inherited;
+end;
+
+procedure ttxsqlquery.currentendupdate;
+begin
+ inherited;
+ if fcurrentupdating = 0 then begin
+  fificontroller.sendchangedrecords(fcurrentchanged);
+  fcurrentchanged.clear;
+ end;
+end;
+
+{ tcurrentchangedlist }
+
+constructor tcurrentchangedlist.create(const anullmasksize: integer);
+begin
+ inherited create(anullmasksize);
+ include(fstate,hls_needsnull);
+end;
+
+procedure tcurrentchangedlist.fieldchanged(const afield: tfield;
+                                             const aindex: integer);
+begin
+ setfieldflag(pbyte(addunique(ptruint(aindex))),afield.fieldno-1);
 end;
 
 end.

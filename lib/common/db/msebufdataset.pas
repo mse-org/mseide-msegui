@@ -574,6 +574,8 @@ type
    ffreedblobcount: integer;
    fcurrentbuf: pintrecordty;
    fcurrentupdating: integer;
+   flastcurrentrec: pintrecordty;
+   flastcurrentindex: integer;
 
    procedure fixupcurrentset; virtual;
    procedure currentcheckbrowsemode;
@@ -586,8 +588,7 @@ type
    function beforecurrentset(const afield: tfield;
               const afieldtype: tfieldtype; var aindex: integer;
               const isnull: boolean; out changed: boolean): pointer;
-   procedure aftercurrentset(const afield: tfield;
-                                               const aindex: integer); virtual;
+   procedure aftercurrentset(const afield: tfield); virtual;
    
    function getfieldbuffer(const afield: tfield;
              out buffer: pointer; out datasize: integer): boolean; overload; 
@@ -825,9 +826,9 @@ type
    property AutocalcFields default false;
   end;
    
-function getfieldisnull(nullmask: pbyte; const x: integer): boolean;
-procedure setfieldisnull(nullmask: pbyte; const x: integer);
-procedure unsetfieldisnull(nullmask: pbyte; const x: integer);
+function getfieldflag(nullmask: pbyte; const x: integer): boolean;
+procedure setfieldflag(nullmask: pbyte; const x: integer);
+procedure clearfieldflag(nullmask: pbyte; const x: integer);
 procedure alignfieldpos(var avalue: integer);
 
 implementation
@@ -1004,7 +1005,7 @@ const
  andmask: array[0..7] of byte = (%11111110,%11111101,%11111011,%11110111,
                                  %11101111,%11011111,%10111111,%01111111);
           
-procedure unsetfieldisnull(nullmask: pbyte; const x: integer);
+procedure setfieldflag(nullmask: pbyte; const x: integer);
 var
  int1: integer;
 begin
@@ -1012,16 +1013,16 @@ begin
  nullmask^:= nullmask^ or ormask[x and 7];
 end;
 
-procedure setfieldisnull(nullmask: pbyte; const x: integer);
+procedure clearfieldflag(nullmask: pbyte; const x: integer);
 begin
  inc(nullmask,(x shr 3));
  nullmask^:= nullmask^ and andmask[x and 7];
 end;
 
-function getfieldisnull(nullmask: pbyte; const x: integer): boolean;
+function getfieldflag(nullmask: pbyte; const x: integer): boolean;
 begin
  inc(nullmask,(x shr 3));
- result:= nullmask^ and ormask[x and 7] = 0;
+ result:= nullmask^ and ormask[x and 7] <> 0;
 end;
 
 
@@ -1080,7 +1081,7 @@ begin
     writemsestring(msestring(fielddata^));
    end;
    ftmemo,ftblob,ftgraphic: begin
-    if not getfieldisnull(@data^.fielddata.nullmask,aindex) then begin
+    if getfieldflag(@data^.fielddata.nullmask,aindex) then begin
      fowner.getofflineblob(data,aindex,blobinfo);
      write(blobinfo.info,sizeof(blobinfo.info));
      writestring(blobinfo.data);
@@ -1198,7 +1199,7 @@ begin
     msestring(fielddata^):= readmsestring;
    end;
    ftmemo,ftblob,ftgraphic: begin
-    if not getfieldisnull(@data^.fielddata.nullmask,aindex) then begin
+    if getfieldflag(@data^.fielddata.nullmask,aindex) then begin
      readbuffer(blobinfo.info,sizeof(blobinfo.info));
      blobinfo.data:= readstring;
      fowner.setofflineblob(data,aindex,blobinfo);
@@ -1507,7 +1508,7 @@ begin
 //todo: free offline blobs
  if bs_blobscached in fbstate then begin
   fieldindex:= afield.fieldno-1;
-  if not getfieldisnull(arec^.fielddata.nullmask,fieldindex) then begin
+  if getfieldflag(arec^.fielddata.nullmask,fieldindex) then begin
    blobid:= pinteger(pbyte(arec) + ffieldinfos[fieldindex].base.offset)^;   
    fblobcache[blobid].data:= '';
    additem(ffreedblobs,blobid,ffreedblobcount,(high(ffreedblobs)+129)*2);
@@ -1567,10 +1568,10 @@ begin
     new:= true;
    end;
    if size = 0 then begin
-    setfieldisnull(fielddata.nullmask,field.fieldno-1);
+    clearfieldflag(fielddata.nullmask,field.fieldno-1);
    end
    else begin
-    unsetfieldisnull(fielddata.nullmask,field.fieldno-1);
+    setfieldflag(fielddata.nullmask,field.fieldno-1);
    end;
    fieldchanged(field);
   end;
@@ -2099,7 +2100,7 @@ begin
       int2:= int2*4+4; //room for multibyte encodings
       setlength(str1,int2); 
       if not loadfield(fno,fieldtype,pointer(str1),int2) then begin
-       setfieldisnull(buffer.fielddata.nullmask,fno);
+       clearfieldflag(buffer.fielddata.nullmask,fno);
       end
       else begin
        if int2 < 0 then begin //buffer to small
@@ -2133,12 +2134,12 @@ begin
      else begin
       if not loadfield(fno,fieldtype,pointer(@buffer)+offset,int2) or 
                            (int2 < 0)then begin
-       setfieldisnull(buffer.fielddata.nullmask,fno);        //buffer too small
+       clearfieldflag(buffer.fielddata.nullmask,fno);        //buffer too small
       end;
      end;
     end;
     fkinternalcalc: begin
-     setfieldisnull(buffer.fielddata.nullmask,fno);
+     clearfieldflag(buffer.fielddata.nullmask,fno);
     end;
    end;
   end;
@@ -2209,7 +2210,7 @@ begin
    end;
   end;
   if buffer <> nil then begin
-   result:= not getfieldisnull(precheaderty(buffer)^.fielddata.nullmask,int1);
+   result:= getfieldflag(precheaderty(buffer)^.fielddata.nullmask,int1);
    inc(buffer,ffieldinfos[int1].base.offset{ffieldbufpositions[int1]});
    datasize:= ffieldinfos[int1].base.size{ffieldsizes[int1]};
   end
@@ -2220,7 +2221,7 @@ begin
  else begin   
   int1:= -2 - int1;
   if int1 >= 0 then begin //calc field
-   result:= not getfieldisnull(pbyte(buffer+frecordsize),int1);
+   result:= getfieldflag(pbyte(buffer+frecordsize),int1);
    inc(buffer,fcalcfieldbufpositions[int1]);
    datasize:= fcalcfieldsizes[int1];
   end
@@ -2342,10 +2343,10 @@ begin
  end;
  if int1 >= 0 then begin // data field
   if isnull then begin
-   setfieldisnull(precheaderty(result)^.fielddata.nullmask,int1);
+   clearfieldflag(precheaderty(result)^.fielddata.nullmask,int1);
   end
   else begin
-   unsetfieldisnull(precheaderty(result)^.fielddata.nullmask,int1);
+   setfieldflag(precheaderty(result)^.fielddata.nullmask,int1);
   end;
   inc(result,ffieldinfos[int1].base.offset{ffieldbufpositions[int1]});
   datasize:= ffieldinfos[int1].base.size{ffieldsizes[int1]};
@@ -2354,10 +2355,10 @@ begin
   int1:= -2 - int1;
   if int1 >= 0 then begin //calc field
    if isnull then begin
-    setfieldisnull(pbyte(result+frecordsize),int1);
+    clearfieldflag(pbyte(result+frecordsize),int1);
    end
    else begin
-    unsetfieldisnull(pbyte(result+frecordsize),int1);
+    setfieldflag(pbyte(result+frecordsize),int1);
    end;
    inc(result,fcalcfieldbufpositions[int1]);
    datasize:= fcalcfieldsizes[int1];
@@ -3435,7 +3436,7 @@ begin
     for int1:= 0 to recordcount - 1 do begin
      fcurrentbuf:= ind1[int1];
      for int2:= 0 to high(fieldar1) do begin
-      if not getfieldisnull(fcurrentbuf^.header.fielddata.nullmask,
+      if getfieldflag(fcurrentbuf^.header.fielddata.nullmask,
                                                         ar1[int2]) then begin
        stream1:= tmemorystream(createblobstream(fieldar1[int2],bmread));
        int3:= addblobcache(stream1.memory,stream1.size);
@@ -3540,10 +3541,10 @@ begin
  if avalue <> '' then begin
   move(avalue[1],(po1+ffieldinfos[int1].base.offset{ffieldbufpositions[int1]})^,
                                  length(avalue));
-  unsetfieldisnull(precheaderty(po1)^.fielddata.nullmask,int1);
+  setfieldflag(precheaderty(po1)^.fielddata.nullmask,int1);
  end
  else begin
-  setfieldisnull(precheaderty(po1)^.fielddata.nullmask,int1);
+  clearfieldflag(precheaderty(po1)^.fielddata.nullmask,int1);
  end;
 end; 
 
@@ -4242,7 +4243,7 @@ begin
    po2:= pointer(findexes[0]);
    for int1:= 0 to fbrecordcount - 1 do begin
     po1:= po2[int1];
-    if not getfieldisnull(po1^.fielddata.nullmask,index1) then begin
+    if getfieldflag(po1^.fielddata.nullmask,index1) then begin
      asum:= asum + pdouble(pchar(po1)+int2)^;
     end;
    end;
@@ -4266,7 +4267,7 @@ begin
    po2:= pointer(findexes[0]);
    for int1:= 0 to fbrecordcount - 1 do begin
     po1:= po2[int1];
-    if not getfieldisnull(po1^.fielddata.nullmask,index1) then begin
+    if getfieldflag(po1^.fielddata.nullmask,index1) then begin
      asum:= asum + pcurrency(pchar(po1)+int2)^;
     end;
    end;
@@ -4290,7 +4291,7 @@ begin
    po2:= pointer(findexes[0]);
    for int1:= 0 to fbrecordcount - 1 do begin
     po1:= po2[int1];
-    if not getfieldisnull(po1^.fielddata.nullmask,index1) then begin
+    if getfieldflag(po1^.fielddata.nullmask,index1) then begin
      asum:= asum + pint64(pchar(po1)+int2)^;
     end;
    end;
@@ -4314,7 +4315,7 @@ begin
    po2:= pointer(findexes[0]);
    for int1:= 0 to fbrecordcount - 1 do begin
     po1:= po2[int1];
-    if not getfieldisnull(po1^.fielddata.nullmask,index1) then begin
+    if getfieldflag(po1^.fielddata.nullmask,index1) then begin
      asum:= asum + pinteger(pchar(po1)+int2)^;
     end;
    end;
@@ -4324,7 +4325,7 @@ begin
    po2:= pointer(findexes[0]);
    for int1:= 0 to fbrecordcount - 1 do begin
     po1:= po2[int1];
-    if not getfieldisnull(po1^.fielddata.nullmask,index1) and
+    if getfieldflag(po1^.fielddata.nullmask,index1) and
                pwordbool(pchar(po1)+int2)^ then begin
      inc(asum);
     end;
@@ -5135,7 +5136,7 @@ begin
  end; 
  po1:= factindexpo^.ind[aindex]; //precheaderty
  int1:= afield.fieldno-1;
- if getfieldisnull(@precheaderty(po1)^.fielddata.nullmask,int1) then begin 
+ if not getfieldflag(@precheaderty(po1)^.fielddata.nullmask,int1) then begin 
   result:= nil;
  end
  else begin
@@ -5147,7 +5148,7 @@ begin
   end;
  end;
 end;
-var testvar: fieldinfoty;
+
 function tmsebufdataset.beforecurrentset(const afield: tfield;
               const afieldtype: tfieldtype; var aindex: integer;
               const isnull: boolean; out changed: boolean): pointer;
@@ -5170,29 +5171,28 @@ begin
   raise ecurrentvalueaccess.create(self,afield,
                              'Invalid index '+inttostr(aindex)+'.');  
  end; 
- result:= factindexpo^.ind[aindex]; //precheaderty
- po1:= @precheaderty(result)^.fielddata.nullmask;
+ flastcurrentrec:= factindexpo^.ind[aindex]; //precheaderty
+ flastcurrentindex:= aindex;
+ po1:= @flastcurrentrec^.header.fielddata.nullmask;
  int1:= afield.fieldno-1;
-testvar:= ffieldinfos[int1];
  with ffieldinfos[int1] do begin
   if (afieldtype <> ftunknown) and (ext.basetype <> afieldtype) then begin
    raise ecurrentvalueaccess.create(self,afield,'Invalid fieldtype.');  
   end;   
-  changed:= getfieldisnull(po1,int1) xor isnull;
+  changed:= not getfieldflag(po1,int1) xor isnull;
   if changed then begin
    if isnull then begin
-    setfieldisnull(po1,int1);
+    clearfieldflag(po1,int1);
    end
    else begin
-    unsetfieldisnull(po1,int1);
+    setfieldflag(po1,int1);
    end;
   end;
-  result:= result + base.offset;
+  result:= pointer(@flastcurrentrec^.header) + base.offset;
  end;
 end;
 
-procedure tmsebufdataset.aftercurrentset(const afield: tfield;
-               const aindex: integer);
+procedure tmsebufdataset.aftercurrentset(const afield: tfield);
 var
  int1: integer;
 begin
@@ -5218,7 +5218,7 @@ var
 begin
  beforecurrentset(afield,ftunknown,aindex,true,bo1);
  if bo1 then begin
-  aftercurrentset(afield,aindex);
+  aftercurrentset(afield);
  end;
 end;
 
@@ -5245,7 +5245,7 @@ begin
  po1:= beforecurrentset(afield,ftfloat,aindex,isemptyreal(avalue),bo1);
  if bo1 or (po1^ <> avalue) then begin
   po1^:= avalue;
-  aftercurrentset(afield,aindex);
+  aftercurrentset(afield);
  end;
 end;
 
@@ -5272,7 +5272,7 @@ begin
  po1:= beforecurrentset(afield,ftboolean,aindex,false,bo1);
  if bo1 or (po1^ <> avalue) then begin
   po1^:= avalue;
-  aftercurrentset(afield,aindex);
+  aftercurrentset(afield);
  end;
 end;
 
@@ -5299,7 +5299,7 @@ begin
  po1:= beforecurrentset(afield,ftinteger,aindex,false,bo1);
  if bo1 or (po1^ <> avalue) then begin
   po1^:= avalue;
-  aftercurrentset(afield,aindex);
+  aftercurrentset(afield);
  end;
 end;
 
@@ -5326,7 +5326,7 @@ begin
  po1:= beforecurrentset(afield,ftlargeint,aindex,false,bo1);
  if bo1 or (po1^ <> avalue) then begin
   po1^:= avalue;
-  aftercurrentset(afield,aindex);
+  aftercurrentset(afield);
  end;
 end;
 
@@ -5353,7 +5353,7 @@ begin
  po1:= beforecurrentset(afield,ftdatetime,aindex,isemptydatetime(avalue),bo1);
  if bo1 or (po1^ <> avalue) then begin
   po1^:= avalue;
-  aftercurrentset(afield,aindex);
+  aftercurrentset(afield);
  end;
 end;
 
@@ -5380,7 +5380,7 @@ begin
  po1:= beforecurrentset(afield,ftbcd,aindex,false,bo1);
  if bo1 or (po1^ <> avalue) then begin
   po1^:= avalue;
-  aftercurrentset(afield,aindex);
+  aftercurrentset(afield);
  end;
 end;
 
@@ -5407,7 +5407,7 @@ begin
  po1:= beforecurrentset(afield,ftwidestring,aindex,false,bo1);
  if bo1 or (po1^ <> avalue) then begin
   po1^:= avalue;
-  aftercurrentset(afield,aindex);
+  aftercurrentset(afield);
  end;
 end;
 
@@ -5602,8 +5602,8 @@ begin
  result:= 0;
  for int1:= 0 to alastindex do begin
   with findexfieldinfos[int1] do begin
-   if getfieldisnull(@l^.header.fielddata.nullmask,fieldindex) then begin
-    if getfieldisnull(@r^.header.fielddata.nullmask,fieldindex) then begin
+   if not getfieldflag(@l^.header.fielddata.nullmask,fieldindex) then begin
+    if not getfieldflag(@r^.header.fielddata.nullmask,fieldindex) then begin
      continue;
     end
     else begin
@@ -5611,7 +5611,7 @@ begin
     end;
    end
    else begin
-    if getfieldisnull(@r^.header.fielddata.nullmask,fieldindex) then begin
+    if not getfieldflag(@r^.header.fielddata.nullmask,fieldindex) then begin
      inc(result);
     end
     else begin    
@@ -5899,7 +5899,7 @@ begin
     bo1:= aisnull[int1];
    end;
    if not bo1 then begin
-    unsetfieldisnull(@po1^.header.fielddata.nullmask,fieldindex);
+    setfieldflag(@po1^.header.fielddata.nullmask,fieldindex);
    end; 
   end;
  end;
