@@ -1036,8 +1036,13 @@ begin
 end;
 
 procedure tcustommseform.setoptionswindow(const Value: windowoptionsty);
+const
+ mask1: windowoptionsty = [wo_taskbar,wo_notaskbar];
 begin
- foptionswindow:= value;
+ foptionswindow:= windowoptionsty(setsinglebit(
+                    longword(value),
+                    longword(foptionswindow),
+                    longword(mask1)));
 end;
 
 procedure tcustommseform.setstatfile(const avalue: tstatfile);

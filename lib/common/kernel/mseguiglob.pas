@@ -77,7 +77,8 @@ type
  defaultfontnamesty = array[stockfontty] of string;
 
  windowoptionty = (wo_popup,wo_message,wo_buttonendmodal,wo_groupleader,
-                   wo_taskbar, //win32 only
+                   wo_taskbar,    //win32 only
+                   wo_notaskbar,  //linux only
                    wo_windowcentermessage); //showmessage centered in window
  windowoptionsty = set of windowoptionty;
  windowposty = (wp_normal,wp_screencentered,wp_minimized,wp_maximized,wp_default,

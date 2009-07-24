@@ -736,6 +736,7 @@ type
        net_wm_window_type_dialog,
        net_wm_window_type_dropdown_menu,
        net_wm_state_fullscreen,
+       net_wm_state_skip_taskbar,
        net_frame_extents,
        net_request_frame_extents,
        net_wm_pid,
@@ -753,6 +754,7 @@ const
        '_NET_WM_WINDOW_TYPE_DIALOG',
        '_NET_WM_WINDOW_TYPE_DROPDOWN_MENU',
        '_NET_WM_STATE_FULLSCREEN',
+       '_NET_WM_STATE_SKIP_TASKBAR',
        '_NET_FRAME_EXTENTS', 
        '_NET_REQUEST_FRAME_EXTENTS',
        '_NET_WM_PID', 
@@ -2911,6 +2913,9 @@ begin
    end
    else begin
     setnetatom(id,net_wm_window_type,net_wm_window_type_normal);
+   end;
+   if wo_notaskbar in options.options then begin
+    setnetatom(id,net_wm_state,net_wm_state_skip_taskbar);
    end;
   end;
  end;
