@@ -117,6 +117,7 @@ type
  dropdowncolsclassty = class of tdropdowncols;
  
  idropdown = interface(inullinterface)
+  function getvalueempty: integer;
   function getwidget: twidget;
   function geteditor: tinplaceedit;
   function edited: boolean;

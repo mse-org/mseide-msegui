@@ -36,6 +36,7 @@ type
    procedure doafterclosedropdown;
    procedure createdropdownwidget(const atext: msestring; out awidget: twidget);
    function getdropdowntext(const awidget: twidget): msestring;
+   function getvalueempty: integer;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -177,6 +178,11 @@ end;
 function tcustomcalendardatetimeedit.getcellframe: framety;
 begin
  result:= fframe.cellframe;
+end;
+
+function tcustomcalendardatetimeedit.getvalueempty: integer;
+begin
+ result:= -1; //dummy
 end;
 
 end.

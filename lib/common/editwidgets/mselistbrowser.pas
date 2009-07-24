@@ -522,6 +522,7 @@ type
    procedure dobeforedropdown; virtual;
    procedure doafterclosedropdown; virtual;
    function getdropdownitems: tdropdowncols;
+   function getvalueempty: integer; virtual;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -2814,6 +2815,11 @@ end;
 procedure tdropdownitemedit.setdropdown(const Value: tcustomdropdownlistcontroller);
 begin
  fdropdown.assign(Value);
+end;
+
+function tdropdownitemedit.getvalueempty: integer;
+begin
+ result:= -1;
 end;
 {
 function tdropdownitemedit.setdropdowntext(const value: msestring;

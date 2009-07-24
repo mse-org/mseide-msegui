@@ -391,6 +391,7 @@ type
    procedure buttonaction(var action: buttonactionty; const buttonindex: integer); virtual;
    procedure dobeforedropdown; virtual;
    procedure doafterclosedropdown; virtual;
+   function getvalueempty: integer; virtual;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -644,6 +645,7 @@ type
    fonsetvalue1: setintegereventty;
    fvalue1: integer;
    fvaluedefault: integer;
+   fvalueempty: integer;
    procedure setvalue(const avalue: integer);
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatyp: datatypty; override;
@@ -657,6 +659,8 @@ type
    procedure writestatvalue(const writer: tstatwriter); override;
    function createdropdowncontroller: tcustomdropdowncontroller; override;
    procedure internalsort(const acol: integer; const sortlist: tintegerdatalist); override;
+
+   function getvalueempty: integer; override;
   public
    enums: integerarty; //nil -> enum = item rowindex + valueoffset
    constructor create(aowner: tcomponent); override;
@@ -670,6 +674,7 @@ type
                                    //before value
    property value: integer read fvalue1 write setvalue default -1;
    property valuedefault: integer read fvaluedefault write fvaluedefault default -1;
+   property valueempty: integer read fvalueempty write fvalueempty default -1;
    property base: numbasety read fbase write setbase default nb_dec;
    property bitcount: integer read fbitcount write setbitcount default 32;
    property min: integer read fmin write fmin default -1;
@@ -697,6 +702,7 @@ type
    property valueoffset; //before value
    property value;
    property valuedefault;
+   property valueempty;
    property base;
    property bitcount;
    property min;
@@ -2807,6 +2813,11 @@ begin
  end;
 end;
 
+function tcustomdropdownedit.getvalueempty: integer;
+begin
+ result:= -1;
+end;
+
 
 {
 function tcustomdropdownedit.getbutton: tdropdownbutton;
@@ -3361,6 +3372,7 @@ constructor tcustomenuedit.create(aowner: tcomponent);
 begin
  fvalue1:= -1;
  fvaluedefault:= -1;
+ fvalueempty:= -1;
  fbase:= nb_dec;
  fbitcount:= 32;
  fmin:= -1;
@@ -3392,7 +3404,7 @@ end;
 
 function tcustomenuedit.getindex(avalue: integer): integer;
 begin
- if avalue = -1 then begin
+ if avalue = fvalueempty then begin
   result:= -1;
  end
  else begin
@@ -3421,7 +3433,7 @@ begin
   end;
   int2:= getindex(int1);
   if (int2 < 0) or (int2 >= valuelist.count) then begin
-   if not (deo_selectonly in options) and (int1 <> -1) then begin
+   if not (deo_selectonly in options) and (int1 <> fvalueempty) then begin
     result:= intvaluetostr(int1,fbase,fbitcount);
    end
    else begin
@@ -3524,7 +3536,7 @@ var
  mstr1: msestring;
 begin
  if trim(text) = '' then begin
-  int1:= -1;
+  int1:= fvalueempty;
  end
  else begin
   int1:= tdropdownlistcontroller(fdropdown).itemindex;
@@ -3534,23 +3546,26 @@ begin
   else begin
    if int1 >= 0 then begin
     int1:= int1 + fvalueoffset;
-   end;
-   if not (deo_selectonly in fdropdown.options) then begin
-    try
-     mstr1:= feditor.text;
-     checktext(mstr1,accept);
-     if not accept then begin
-      exit;
+   end
+   else begin
+    if not (deo_selectonly in fdropdown.options) and 
+                                   not (des_isdb in fstate) then begin
+     try
+      mstr1:= feditor.text;
+      checktext(mstr1,accept);
+      if not accept then begin
+       exit;
+      end;
+      int1:= strtointvalue(mstr1,fbase);
+     except
+      accept:= false;
+      formaterror(quiet);
      end;
-     int1:= strtointvalue(mstr1,fbase);
-    except
-     accept:= false;
-     formaterror(quiet);
     end;
    end;
   end;
  end;
- if not ((des_isdb in fstate) and (int1 = -1)) and (int1 < fmin) or (int1 > fmax) then begin
+ if not ({(des_isdb in fstate) and} (int1 = fvalueempty)) and (int1 < fmin) or (int1 > fmax) then begin
   rangeerror(fmin,fmax,quiet);
   accept:= false;
  end;
@@ -3586,7 +3601,7 @@ begin
     min1:= 0;
    end
    else begin
-    min1:= -1;
+    min1:= fvalueempty;
    end;
    with tenumdropdowncontroller(fdropdown) do begin
     max1:= cols[valuecol].count - 1;
@@ -3675,6 +3690,11 @@ end;
 procedure tcustomenuedit.assigncol(const avalue: tintegerdatalist);
 begin
  internalassigncol(avalue);
+end;
+
+function tcustomenuedit.getvalueempty: integer;
+begin
+ result:= fvalueempty;
 end;
 
 { tenumdropdowncontroller }

@@ -852,6 +852,7 @@ type
    property valueoffset; //before value
    property datalink;
    property valuedefault;
+   property valueempty;
    property base;
    property bitcount;
    property min;
@@ -4483,7 +4484,7 @@ end;
 
 procedure tcustomdbenumedit.valuetofield;
 begin
- if value = -1 then begin
+ if value = fvalueempty then begin
   fdatalink.field.clear;
  end
  else begin
@@ -5156,7 +5157,7 @@ procedure tcustomdbdropdownlistcontroller.itemselected(const index: integer;
 begin
  if index < 0 then begin
   if index = -2 then begin
-   tdropdowncols1(fcols).fitemindex:= -1;
+   tdropdowncols1(fcols).fitemindex:= fintf.getvalueempty;
   end;
  end
  else begin
@@ -8092,7 +8093,7 @@ begin
  int1:= index;
  if index < 0 then begin
   if index = -2 then begin
-   tdropdowncols1(fcols).fitemindex:= -1;
+   tdropdowncols1(fcols).fitemindex:= fintf.getvalueempty;
   end;
  end
  else begin
