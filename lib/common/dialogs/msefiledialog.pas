@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -98,7 +98,8 @@ type
                        fdo_directory,fdo_file,
                        fdo_absolute,fdo_relative,fdo_quotesingle,
                        fdo_link, //links lastdir of controllers with same group
-                       fdo_checkexist,fdo_acceptempty,fdo_chdir,fdo_savelastdir,
+                       fdo_checkexist,fdo_acceptempty,fdo_single,
+                       fdo_chdir,fdo_savelastdir,
                        fdo_checksubdir);
  filedialogoptionsty = set of filedialogoptionty;
 const
@@ -447,7 +448,7 @@ function filedialog1(dialog: tfiledialogfo; var afilenames: filenamearty;
            const filterdesc: array of msestring;
            const filtermask: array of msestring;
            const filterindex: pinteger = nil;
-           const afilter: pfilenamety = nil;       //nil -> unused
+           const afilter: pfilenamety = nil;      //nil -> unused
            const colwidth: pinteger = nil;        //nil -> default
            const includeattrib: fileattributesty = [fa_all];
            const excludeattrib: fileattributesty = [fa_hidden];
@@ -466,6 +467,9 @@ begin
   dir.checksubdir:= fdo_checksubdir in aoptions;
   listview.checksubdir:= fdo_checksubdir in aoptions;
   dialogoptions:= aoptions;
+  if fdo_single in aoptions then begin
+   listview.options:= listview.options - [lvo_multiselect];
+  end;
   defaultext:= adefaultext;
   caption:= acaption;
   listview.includeattrib:= includeattrib;
@@ -1058,8 +1062,8 @@ begin
  end;
 end;
 
-procedure Tfiledialogfo.filenamesetvalue(const sender: TObject; var avalue: mseString;
-  var accept: Boolean);
+procedure Tfiledialogfo.filenamesetvalue(const sender: TObject; 
+                                var avalue: msestring;  var accept: Boolean);
 var
  str1,str2,str3: filenamety;
 // ar1: msestringarty;
@@ -1067,6 +1071,13 @@ var
 begin
  avalue:= trim(avalue);
  unquotefilename(avalue,fselectednames);
+ if (fdo_single in dialogoptions) and (high(fselectednames) > 0) then begin
+  with stockobjects do begin
+   showmessage(captions[sc_single_item_only]+'.',captions[sc_error]);
+  end;
+  accept:= false;
+  exit;  
+ end;
  bo1:= false;
  if high(fselectednames) > 0 then begin
   str1:= extractrootpath(fselectednames);

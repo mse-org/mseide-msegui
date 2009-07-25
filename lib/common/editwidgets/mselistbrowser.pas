@@ -159,8 +159,10 @@ type
    procedure dostatwrite(const writer: tstatwriter); override;
   public
    constructor create(aowner: tcustomlistview);
-   procedure setselectedrange(const start,stop: gridcoordty; const value: boolean;
-                         const calldoselectcell: boolean = false); overload; override;
+   procedure setselectedrange(const start,stop: gridcoordty;
+                  const value: boolean;
+                  const calldoselectcell: boolean = false;
+                  const checkmultiselect: boolean = false); overload; override;
  end;
 
  itemeventty = procedure(const sender: tcustomlistview; const index: integer;
@@ -983,34 +985,52 @@ begin
  end;
 end;
 
-procedure tlistcols.setselectedrange(const start,stop: gridcoordty; const value: boolean;
-                      const calldoselectcell: boolean = false);
+procedure tlistcols.setselectedrange(const start,stop: gridcoordty;
+               const value: boolean;
+               const calldoselectcell: boolean = false;
+               const checkmultiselect: boolean = false);
 var
  int1,int2,int3: integer;
- co1: gridcoordty;
+ sto1: gridcoordty;
 begin
- co1:= stop;
- if co1.col < start.col then begin
-  inc(co1.col);
+ sto1:= stop;
+ if sto1.col < start.col then begin
+  inc(sto1.col);
  end
  else begin
-  if co1.col = start.col then begin
+  if sto1.col = start.col then begin
    exit;
   end;
-  dec(co1.col);
+  dec(sto1.col);
  end;
- if co1.row < start.row then begin
-  inc(co1.row);
+ if sto1.row < start.row then begin
+  inc(sto1.row);
  end
  else begin
-  if co1.row = start.row then begin
+  if sto1.row = start.row then begin
    exit;
   end;
-  dec(co1.row);
+  dec(sto1.row);
  end;
+
+ if value and checkmultiselect and 
+       not (lvo_multiselect in tcustomlistview(fgrid).foptions) then begin
+  with tcustomlistview(fgrid) do begin
+   if calldoselectcell then begin
+    selectcell(invalidcell,csm_deselect);
+    selectcell(sto1,csm_select);
+   end
+   else begin
+    selected[invalidcell]:= false;
+    selected[sto1]:= true;
+   end;
+  end;
+  exit;
+ end;
+
  with tcustomlistview(fgrid) do begin
   int1:= celltoindex(start,true);
-  int2:= celltoindex(co1,true);
+  int2:= celltoindex(sto1,true);
   if int1 > int2 then begin //swap values
    int3:= int1;
    int1:= int2;
@@ -1059,8 +1079,20 @@ procedure tlistcols.changeselectedrange(const start,oldend,newend: gridcoordty;
 
 var
  int1,int2,int3,int4,int5: integer;
+
 begin
  with tcustomlistview(fgrid) do begin
+  if not (lvo_multiselect in options) then begin
+   if calldoselectcell then begin
+    selectcell(invalidcell,csm_deselect);
+    selectcell(newend,csm_select);
+   end
+   else begin
+    selected[invalidcell]:= false;
+    selected[newend]:= true;
+   end;
+   exit;
+  end;
   int1:= celltoindex(start,true);
   int2:= celltoindex(oldend,true);
   int4:= celltoindex(newend,true);

@@ -122,9 +122,11 @@ const
   #36807#28388#20851#38381,            //sc_filter_off
   'Portrait',                          //sc_portrait print orientation
   'Landscape',                         //sc_landscape print orientation
-  #30830#23450#21024#38500#27492#26465#35760#24405#21527#65311,                       //sc_Delete_row_question
-  #30830#23450#21024#38500#25152#36873#35760#24405#21527#65311                    //sc_selected_rows
-
+  #30830#23450#21024#38500#27492#26465#35760#24405#21527#65311,
+                                      //sc_Delete_row_question
+  #30830#23450#21024#38500#25152#36873#35760#24405#21527#65311,
+                                      //sc_selected_rows
+  'Single item only'    //sc_Single_item_only 
                        );
     
 function delete_n_selected_rows(const params: array of const): msestring;

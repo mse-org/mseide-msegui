@@ -949,9 +949,11 @@ var
  bo1: boolean;
  opt1: optionseditty;
  locating: boolean;
+ shiftstate1: shiftstatesty;
 
 begin
  with kinfo do begin
+  shiftstate1:= shiftstate * keyshiftstatesmask;
   if (es_processed in eventstate) then begin
    exit;
   end;
@@ -961,7 +963,7 @@ begin
   nochars:= true;
   finished:= true;
   actioninfo:= initactioninfo(ea_exit);
-  if ss_shift in kinfo.shiftstate then begin
+  if ss_shift in shiftstate1 then begin
    include(actioninfo.state,eas_shift);
   end;
   if issysshortcut(sho_copy,kinfo) then begin
@@ -993,14 +995,14 @@ begin
   if finished then begin
    exit;
   end;
-  if shiftstate <> [ss_ctrl] then begin
+  if shiftstate1 <> [ss_ctrl] then begin
    finished:= true;
    bo1:= true;
    if (key = key_return) or (key = key_enter) then  begin
     removechar1(chars,c_return);
     removechar1(chars,c_linefeed);
-    if (shiftstate - [ss_shift] = []) and (oe_linebreak in opt1) and 
-          ((oe_shiftreturn in opt1) xor (shiftstate = []))then begin
+    if (shiftstate1 - [ss_shift] = []) and (oe_linebreak in opt1) and 
+          ((oe_shiftreturn in opt1) xor (shiftstate1 = []))then begin
      finished:= false;
      nochars:= false;
      bo1:= false;
@@ -1009,7 +1011,7 @@ begin
     end;
    end;
    if bo1 then begin
-    if (shiftstate = []) then begin
+    if (shiftstate1 = []) then begin
      case key of
       key_return,key_enter: begin
        if checkaction(ea_textentered) then begin
@@ -1088,7 +1090,7 @@ begin
      end;
     end
     else begin
-     if shiftstate = [ss_shift] then begin
+     if shiftstate1 = [ss_shift] then begin
       finished:= false;
       nochars:= false;
      end
@@ -1099,32 +1101,36 @@ begin
    end;
    if not finished then begin
     finished:= true;
-    if (shiftstate = []) or (shiftstate = [ss_shift]) then begin
+    if (shiftstate1 = []) or (shiftstate1 = [ss_shift]) then begin
      case key of
       key_tab,key_backtab,key_escape,key_backspace,key_delete: begin //nochars
        finished:= false;
        nochars:= true;
       end;
+      key_space: begin          //nochars with modifier
+       finished:= false;
+       nochars:= shiftstate1 <> [];
+      end;
       key_home: begin
-       if locating and (shiftstate = []) then begin
+       if locating and (shiftstate1 = []) then begin
         filtertext:= '';
        end
        else begin
-        moveindex(0,shiftstate = [ss_shift]);
+        moveindex(0,shiftstate1 = [ss_shift]);
        end;
       end;
       key_end: begin
-       if locating and (shiftstate = []) then begin
+       if locating and (shiftstate1 = []) then begin
         filtertext:= finfo.text.text;
        end
        else begin
-        moveindex(length(finfo.text.text),shiftstate = [ss_shift]);
+        moveindex(length(finfo.text.text),shiftstate1 = [ss_shift]);
        end;
       end;
       key_left: begin
-       if (fsellength = length(finfo.text.text)) and (shiftstate <> [ss_shift]) or
+       if (fsellength = length(finfo.text.text)) and (shiftstate1 <> [ss_shift]) or
            (fcurindex = 0) and 
-             ((fsellength = 0) or (shiftstate <> [ss_shift]) or
+             ((fsellength = 0) or (shiftstate1 <> [ss_shift]) or
               (ies_istextedit in fstate)
              ) or
            (opt1 * [oe_readonly,oe_caretonreadonly] =
@@ -1132,7 +1138,7 @@ begin
         actioninfo.dir:= gd_left;
         if checkaction(actioninfo) then begin
          if not(oe_exitoncursor in opt1) then begin
-          if shiftstate <> [ss_shift] then begin
+          if shiftstate1 <> [ss_shift] then begin
            sellength:= 0;
           end;
          end
@@ -1142,23 +1148,23 @@ begin
         end;
        end
        else begin
-        moveindex(fcurindex-1,shiftstate = [ss_shift]);
+        moveindex(fcurindex-1,shiftstate1 = [ss_shift]);
        end;
       end;
       key_right: begin
-       if (fsellength = length(finfo.text.text)) and (shiftstate <> [ss_shift]) or
+       if (fsellength = length(finfo.text.text)) and (shiftstate1 <> [ss_shift]) or
          (fcurindex = length(finfo.text.text)) and 
-           ((shiftstate <> [ss_shift]) or (fsellength = 0) or 
+           ((shiftstate1 <> [ss_shift]) or (fsellength = 0) or 
             (ies_istextedit in fstate) or
             (fsellength = length(finfo.text.text)) and (oe_autoselect in opt1) and
-               (shiftstate <> [ss_shift])
+               (shiftstate1 <> [ss_shift])
            ) or
          (opt1 * [oe_readonly,oe_caretonreadonly] =
                   [oe_readonly]) then begin
         actioninfo.dir:= gd_right;
         if checkaction(actioninfo) then begin
          if not(oe_exitoncursor in opt1) then begin
-          if shiftstate <> [ss_shift] then begin
+          if shiftstate1 <> [ss_shift] then begin
            sellength:= 0;
           end;
          end
@@ -1168,7 +1174,7 @@ begin
         end;
        end
        else begin
-        moveindex(fcurindex+1,shiftstate = [ss_shift]);
+        moveindex(fcurindex+1,shiftstate1 = [ss_shift]);
        end;
       end
       else begin
@@ -1179,7 +1185,7 @@ begin
     end
     else begin
      finished:= false;
-     if shiftstate = [ss_ctrl,ss_alt] then begin
+     if (shiftstate1 = [ss_ctrl,ss_alt]) then begin
       nochars:= false;
      end;
     end;
@@ -1191,6 +1197,7 @@ begin
   if not (es_processed in eventstate) and not nochars and (chars <> '') then begin
    if locating then begin
     filtertext:= filtertext + chars;
+    include(eventstate,es_processed);
    end
    else begin
     if canedit then begin

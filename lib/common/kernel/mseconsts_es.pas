@@ -123,7 +123,8 @@ const
   'Vertical',                          //sc_portrait print orientation
   'Apaisado',                          //sc_landscape print orientation
   'Delete row?',                       //sc_Delete_row_question
-  'selected rows?'                     //sc_selected_rows
+  'selected rows?',                    //sc_selected_rows
+  'Single item only'                   //sc_Single_item_only 
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;

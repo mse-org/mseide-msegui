@@ -1225,10 +1225,12 @@ type
                //col < 0 and row < 0 -> whole grid, col < 0 -> whole col,
                //row = < 0 -> whole row
    procedure setselectedrange(const rect: gridrectty; const value: boolean;
-             const calldoselectcell: boolean = false); overload;
+             const calldoselectcell: boolean = false;
+             const checkmultiselect: boolean = false); overload;
    procedure setselectedrange(const start,stop: gridcoordty;
                     const value: boolean;
-                    const calldoselectcell: boolean = false); overload; virtual;
+                    const calldoselectcell: boolean = false;
+                    const checkmultiselect: boolean = false); overload; virtual;
    procedure mergecols(const arow: integer; const astart: cardinal = 0; 
                                               const acount: cardinal = bigint);
    procedure unmergecols(const arow: integer = invalidaxis);
@@ -1772,7 +1774,8 @@ type
    procedure invalidatefocusedcell;
    procedure invalidaterow(const arow: integer);
    function selectcell(const cell: gridcoordty; 
-                          const amode: cellselectmodety): boolean; 
+                          const amode: cellselectmodety;
+                          const checkmultiselect: boolean = false): boolean; 
                           //true if accepted
    function getselectedrange: gridrectty;
 //   function getselectedrows: integerarty;
@@ -2950,7 +2953,7 @@ begin
       if not bo2 then begin
        drawcelloverlay(canvas,fframe);
       end;
-      if bo1 and (row1 = fgrid.ffocusedcell.row) and 
+      if isfocusedcol and (row1 = fgrid.ffocusedcell.row) and 
                                    (co_drawfocus in foptions) then begin
        if fframe <> nil then begin
         canvas.move(fframe.fpaintrect.pos);
@@ -6434,7 +6437,8 @@ end;
 
 procedure tdatacols.setselectedrange(const start,stop: gridcoordty;
                     const value: boolean;
-                    const calldoselectcell: boolean = false);
+                    const calldoselectcell: boolean = false;
+                    const checkmultiselect: boolean = false);
 var
  int1,int2: integer;
  mo1: cellselectmodety;
@@ -6454,7 +6458,7 @@ begin
   for int1:= rect.col to rect.col + rect.colcount - 1 do begin
    cols[int1].beginselect;   
    for int2:= rect.row to rect.row + rect.rowcount - 1 do begin
-    fgrid.selectcell(makegridcoord(int1,int2),mo1{value,false});
+    fgrid.selectcell(makegridcoord(int1,int2),mo1,checkmultiselect);
    end;
   end;
   for int1:= rect.col to rect.col + rect.colcount - 1 do begin
@@ -6467,9 +6471,14 @@ begin
  end
  else begin
   for int1:= rect.col to rect.col + rect.colcount - 1 do begin
-   cols[int1].beginselect;   
-   for int2:= rect.row to rect.row + rect.rowcount - 1 do begin
-    selected[makegridcoord(int1,int2)]:= value;
+   with cols[int1] do begin
+    beginselect;
+    if not value or not checkmultiselect or 
+                             (co_multiselect in options) then begin
+     for int2:= rect.row to rect.row + rect.rowcount - 1 do begin
+      selected[int2]:= value;
+     end;
+    end;
    end;
   end;
   for int1:= rect.col to rect.col + rect.colcount - 1 do begin
@@ -6479,11 +6488,12 @@ begin
 end;
 
 procedure tdatacols.setselectedrange(const rect: gridrectty; const value: boolean;
-                        const calldoselectcell: boolean = false);
+                        const calldoselectcell: boolean = false;
+                        const checkmultiselect: boolean = false);
 begin
  setselectedrange(rect.pos,
       makegridcoord(rect.col+rect.colcount,rect.row+rect.rowcount),
-      value,calldoselectcell);
+      value,calldoselectcell,checkmultiselect);
 end;
 
 procedure tdatacols.changeselectedrange(const start,oldend,newend: gridcoordty;
@@ -8841,11 +8851,14 @@ begin
  result:= (ffocusedcell.row < 0) or (ffocusedcell.row = rowhigh);
 end;
 
-function tcustomgrid.selectcell(const cell: gridcoordty; const amode: cellselectmodety
-                                        {avalue: boolean; flip: boolean}): boolean;
+function tcustomgrid.selectcell(const cell: gridcoordty;
+                                const amode: cellselectmodety;
+                                const checkmultiselect: boolean = false): boolean;
  //calls onselectcell
 var
  info: celleventinfoty;
+ bo1: boolean;
+ int1: integer;
 begin
  initeventinfo(cell,cek_select,info);
  info.accept:= true;
@@ -8860,15 +8873,37 @@ begin
    info.selected:= false;
   end;
  end;
- if (amode = csm_reverse) or (info.selected <> fdatacols.selected[cell]) then begin
+ if (amode = csm_reverse) or 
+               (cell.row = invalidaxis) or (cell.col = invalidaxis) or 
+               (info.selected <> fdatacols.selected[cell]) then begin
+  bo1:= info.selected;
   docellevent(info);
   result:= info.accept;
   if result then begin
-   if (cell.col >= 0) and (co_rowselect in fdatacols[cell.col].foptions) then begin
-    fdatacols.selected[makegridcoord(invalidaxis,cell.row)]:= info.selected;
-   end
-   else begin
-    fdatacols.selected[cell]:= info.selected;
+   bo1:= bo1 and checkmultiselect;
+   if bo1 then begin
+    beginupdate;
+   end;
+   try
+    if bo1 then begin
+     for int1:= 0 to fdatacols.count - 1 do begin
+      with tdatacol(fdatacols.fitems[int1]) do begin
+       if not (co_multiselect in foptions) then begin
+        selected[invalidaxis]:= false;
+       end;
+      end;
+     end;
+    end;
+    if (cell.col >= 0) and (co_rowselect in fdatacols[cell.col].foptions) then begin
+     fdatacols.selected[makegridcoord(invalidaxis,cell.row)]:= info.selected;
+    end
+    else begin
+     fdatacols.selected[cell]:= info.selected;
+    end;
+   finally
+    if bo1 then begin
+     endupdate;
+    end;
    end;
   end;
  end
@@ -8931,7 +8966,7 @@ function tcustomgrid.focuscell(cell: gridcoordty;
    if po1^ < po2^.pos then begin
     po2^.count:= po2^.pos - po1^;
     po2^.pos:= po1^;
-    fdatacols.setselectedrange(rect1,true,true);
+    fdatacols.setselectedrange(rect1,true,true,true);
    end
    else begin
     if po1^ >= po3^ then begin //right side
@@ -8939,12 +8974,12 @@ function tcustomgrid.focuscell(cell: gridcoordty;
      if int1 >= 0 then begin
       po2^.pos:= po2^.pos + po2^.count;
       po2^.count:= int1 + 1;
-      fdatacols.setselectedrange(rect1,true,true);
+      fdatacols.setselectedrange(rect1,true,true,true);
      end
      else begin
       po2^.pos:= po1^ + 1;
       po2^.count:= -int1 - 1;
-      fdatacols.setselectedrange(rect1,false,true);
+      fdatacols.setselectedrange(rect1,false,true,true);
      end;
     end
     else begin //left side
@@ -8952,11 +8987,11 @@ function tcustomgrid.focuscell(cell: gridcoordty;
      if int1 >= 0 then begin
       po2^.pos:= po1^;
       po2^.count:= int1;
-      fdatacols.setselectedrange(rect1,true,true);
+      fdatacols.setselectedrange(rect1,true,true,true);
      end
      else begin
       po2^.count:= -int1;
-      fdatacols.setselectedrange(rect1,false,true);
+      fdatacols.setselectedrange(rect1,false,true,true);
      end;
     end;
    end;
@@ -8966,13 +9001,13 @@ function tcustomgrid.focuscell(cell: gridcoordty;
   begin
    case selectmode of
     scm_row: begin
-     selectcell(makegridcoord(invalidaxis,cell.row),mode);
+     selectcell(makegridcoord(invalidaxis,cell.row),mode,true);
     end;
     scm_col: begin
-     selectcell(makegridcoord(cell.col,invalidaxis),mode);
+     selectcell(makegridcoord(cell.col,invalidaxis),mode,true);
     end;
     else begin
-     selectcell(cell,mode);
+     selectcell(cell,mode,true);
     end;
    end;      
   end;
@@ -9044,7 +9079,7 @@ var
                    (fendanchor.row >= fstartanchor.row)) then begin
          rect1:= makegridrect(celle,cells);
          fdatacols.selected[invalidcell]:= false;
-         fdatacols.setselectedrange(rect1,true,true);
+         fdatacols.setselectedrange(rect1,true,true,true);
          case selectmode of
           scm_row: begin
            beginupdate;
@@ -9086,7 +9121,7 @@ var
        else begin
         inc(celle.row);
        end;
-       fdatacols.setselectedrange(cells,celle,true,true);
+       fdatacols.setselectedrange(cells,celle,true,true,true);
       end;
      end;
      fendanchor:= cell;
@@ -9134,14 +9169,6 @@ begin     //focuscell
     if bo1 then begin
      update; //scrolling needed, update pending paintings with old focused cell
     end;
-{
-    if (cell.row >= 0) and 
-         ((x < fdatarect.x) or (x + cx > fdatarect.x + fdatarect.cx)) or
-       (cell.col >= 0) and 
-         ((y < fdatarect.y) or (y + cy > fdatarect.y + fdatarect.cy)) then begin
-     update; //scrolling needed, update pending paintings with old focused cell
-    end;
-}
    end;
   end;
  end;
@@ -9259,7 +9286,6 @@ begin     //focuscell
       cell.col:= fdatacols.fnewrowcol;
      end;
      insertrow(frowcount);
-//     rowcount:= frowcount + 1;
     end
     else begin
      factiverow:= coord1.row;
@@ -10420,8 +10446,9 @@ begin
    checkselection;
    if not (es_processed in info.eventstate) and (ffocusedcell.col >= 0) then begin
     with fdatacols[ffocusedcell.col] do begin
-     if (info.key = key_space) and
-          (foptions * [co_keyselect,co_multiselect] = [co_keyselect,co_multiselect]) and
+     if (info.key = key_space) and (co_keyselect in foptions) and
+//        (foptions * [co_keyselect,co_multiselect] = 
+//                                          [co_keyselect,co_multiselect]) and
       ((info.shiftstate = [ss_shift]) or (info.shiftstate = [ss_ctrl])) then begin
       if info.shiftstate = [ss_ctrl] then begin
        mo1:= csm_reverse;
@@ -10429,7 +10456,7 @@ begin
       else begin
        mo1:= csm_select;
       end;
-      selectcell(ffocusedcell,mo1{true,(info.shiftstate = [ss_ctrl])});
+      selectcell(ffocusedcell,mo1,true);
       include(info.eventstate,es_processed);
      end;
     end;

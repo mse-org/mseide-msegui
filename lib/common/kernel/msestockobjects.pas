@@ -80,8 +80,8 @@ type
                     sc_edit_filter,sc_edit_filter_min,sc_edit_filter_max,
                     sc_filter_on,sc_search,sc_insert,sc_filter_off,
                     sc_portrait,sc_landscape,
-                    sc_Delete_row_question,sc_selected_rows
-
+                    sc_Delete_row_question,sc_selected_rows,
+                    sc_Single_item_only
                     );
  textgeneratorfuncty = function(const params: array of const): msestring;
  textgeneratorty = (tg_delete_n_selected_rows);

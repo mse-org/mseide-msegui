@@ -120,7 +120,8 @@ const
   'Hochformat',               //sc_portrait print orientation
   'Querformat',               //sc_landscape print orientation
   'Zeile l'#246'schen?',      //sc_Delete_row_question
-  'gew'#228'hlte Zeilen'      //sc_selected_rows
+  'gew'#228'hlte Zeilen',      //sc_selected_rows
+  'Nur Einzeleintrag erlaubt'  //sc_Single_item_only 
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;
