@@ -20,7 +20,7 @@ uses
  msewidgetgrid,msetextedit,msedesignintf,regeditwidgets_bmp,msepropertyeditors,
  msedropdownlist,mseterminal,msedrawtext,msedatanodes,msedialog,msestrings,
  regwidgets,msearrayprops,typinfo,msestockobjects,msefoldedit,msebitmap,mseglob,
- msestream;
+ msestream,mserealsumedit;
 
 type
  tdropdowncolpropertyeditor = class(tarraypropertyeditor)
@@ -69,7 +69,7 @@ begin
    tpointeredit,
    tstringedit,tdropdownlistedit,thistoryedit,tdialogstringedit,
    thexstringedit,tmemoedit,tfoldedit,
-   tintegeredit,trealedit,trealspinedit,tdatetimeedit,tcalendardatetimeedit,tkeystringedit,
+   tintegeredit,trealedit,trealspinedit,trealsumedit,tdatetimeedit,tcalendardatetimeedit,tkeystringedit,
    tenumedit,tenumtypeedit,tselector,
    {tstringlistedit,}
    titemedit,tdropdownitemedit,tmbdropdownitemedit,ttreeitemedit,

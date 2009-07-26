@@ -18,7 +18,8 @@ uses
  mseclasses,mselist;
 
 type
- datatypty = (dl_none,dl_integer,dl_int64,dl_currency,dl_real,dl_datetime,
+ datatypty = (dl_none,dl_integer,dl_int64,dl_currency,dl_real,dl_realsum,
+    dl_datetime,
     dl_ansistring,dl_msestring,dl_doublemsestring,dl_msestringint,
     dl_complex,dl_rowstate,dl_custom);
 
@@ -86,8 +87,11 @@ type
    procedure internalsetdata(index: integer; const quelle);
    procedure internalfill(const anzahl: integer; const wert);
    procedure getdefaultdata(var dest);
+   procedure getgriddefaultdata(var dest); virtual;
    procedure getdata(index: integer; var dest);
+   procedure getgriddata(index: integer; var dest); virtual;
    procedure setdata(index: integer; const source);
+   procedure setgriddata(index: integer; const source); virtual;
    function getstatdata(const index: integer): msestring; virtual;
    procedure setstatdata(const index: integer; const value: msestring); virtual;
    procedure writestate(const writer; const name: msestring); virtual;
@@ -160,6 +164,7 @@ type
    function empty(const index: integer): boolean; virtual;         //true wenn leer
    function sort(const arangelist: tintegerdatalist; dorearange: boolean): boolean; overload;
    function sort: boolean; overload; //true if changed
+   procedure clean(const aindex: integer); virtual;
 
    property count: integer read Fcount write Setcount;       //anzahl zeilen
    property capacity: integer read Fcapacity write Setcapacity;
@@ -658,19 +663,7 @@ type
  end;
 
  datalistclassty = class of tdatalist;
- 
-const
- datalistclasses: array[datatypty] of datalistclassty = 
-//dl_none,dl_integer, dl_int64,       dl_currency,       dl_real,      
- (nil,tintegerdatalist,tint64datalist,tcurrencydatalist,trealdatalist,
-//dl_datetime,
- trealdatalist,
-//dl_ansistring,              dl_msestring,           dl_doublemsestring,
-  tansistringdatalist,tmsestringdatalist,tdoublemsestringdatalist,
-//dl_msestringint
-  tmsestringintdatalist,
-//dl_complex,      dl_rowstate        dl_custom);
-  tcomplexdatalist,tcustomrowstatelist,nil);
+
 type
  indexcomparety = function(item1,item2: pointer): integer of object;
 
@@ -899,11 +892,49 @@ type
  
 function newidentnum(const count: integer; getfunc: getintegeritemfuncty): integer;
  //returns lowest not used value
-
+function getdatalistclass(const adatatype: datatypty): datalistclassty;
+procedure registerdatalistclass(const adatatype: datatypty;
+                                    const aclass: datalistclassty);
 
 implementation
 uses
  rtlconsts,msestreaming,msesys,msestat,msebits,mseeditglob;
+ 
+const  //todo: use hash list
+ datalistclasses: array[datatypty] of datalistclassty = 
+//dl_none,dl_integer, dl_int64,       dl_currency,       dl_real,      
+ (nil,tintegerdatalist,tint64datalist,tcurrencydatalist,trealdatalist,
+ //dl_realsum,
+  nil,
+//dl_datetime,
+ trealdatalist,
+//dl_ansistring,              dl_msestring,           dl_doublemsestring,
+  tansistringdatalist,tmsestringdatalist,tdoublemsestringdatalist,
+//dl_msestringint
+  tmsestringintdatalist,
+//dl_complex,      dl_rowstate        
+  tcomplexdatalist,tcustomrowstatelist,
+//dl_custom
+  nil);
+
+function getdatalistclass(const adatatype: datatypty): datalistclassty;
+begin
+ if adatatype <= high(datalistclasses) then begin
+  result:= datalistclasses[adatatype];
+ end
+ else begin
+  result:= nil;
+ end;
+end;
+
+procedure registerdatalistclass(const adatatype: datatypty;
+                                    const aclass: datalistclassty);
+begin
+ if adatatype > high(datalistclasses) then begin
+  raise exception.create('Invalid datalist class.');
+ end;
+ datalistclasses[adatatype]:= aclass;
+end;
 
 function opentodynarraym(const items: array of msestring): msestringarty;
 var
@@ -2597,6 +2628,11 @@ begin
  end;
 end;
 
+procedure tdatalist.getgriddata(index: integer; var dest);
+begin
+ getdata(index,dest);
+end;
+
 procedure tdatalist.internalsetdata(index: integer; const quelle);
 var
  po1: pointer;
@@ -2616,6 +2652,11 @@ begin
 end;
 
 procedure tdatalist.setdata(index: integer; const source);
+begin
+ internalsetdata(index,source);
+end;
+
+procedure tdatalist.setgriddata(index: integer; const source);
 begin
  internalsetdata(index,source);
 end;
@@ -2837,6 +2878,11 @@ begin
    copyinstance(dest);
   end;
  end;
+end;
+
+procedure tdatalist.getgriddefaultdata(var dest);
+begin
+ getdefaultdata(dest);
 end;
 
 procedure tdatalist.internalcleardata(const index: integer);
@@ -3511,6 +3557,11 @@ begin
  if sender <> self then begin
   inherited;
  end;
+end;
+
+procedure tdatalist.clean(const aindex: integer);
+begin
+ //dummy
 end;
 
 { tintegerdatalist }

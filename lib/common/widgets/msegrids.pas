@@ -438,6 +438,7 @@ type
    function isopaque: boolean; virtual;
    function getdatapo(const arow: integer): pointer; virtual;
 //   function ismerged: boolean; virtual;
+   procedure clean(const aindex: integer); virtual;
    procedure paint(const info: colpaintinfoty); virtual;
    class function defaultstep(width: integer): integer; virtual;
    function step(getscrollable: boolean = true): integer; override;
@@ -565,6 +566,7 @@ type
    function getcursor: cursorshapety; virtual;
    function getdatastatname: msestring;
    procedure coloptionstoeditoptions(var dest: optionseditty);
+   procedure clean(const aindex: integer); override;
   public
    constructor create(const agrid: tcustomgrid;
                                      const aowner: tgridarrayprop); override;
@@ -2886,6 +2888,7 @@ begin
      nextcol:= po1^[index+1];
     end;
    end;
+   clean(endrow);
    for int1:= startrow to endrow do begin
     row1:= rows[int1];
     fcellinfo.cell.row:= row1;
@@ -3254,6 +3257,11 @@ begin
 end;
 
 procedure tcol.setmerged(const row: integer; const avalue: boolean);
+begin
+ //dummy
+end;
+
+procedure tcol.clean(const aindex: integer);
 begin
  //dummy
 end;
@@ -5367,6 +5375,13 @@ end;
 function tdatacol.isreadonly: boolean;
 begin
  result:= (gs_rowreadonly in fgrid.fstate) or (co_readonly in foptions);
+end;
+
+procedure tdatacol.clean(const aindex: integer);
+begin
+ if fdata <> nil then begin
+  fdata.clean(aindex);
+ end;
 end;
 
 { tdrawcol }

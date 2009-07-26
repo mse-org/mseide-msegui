@@ -925,7 +925,7 @@ begin
  if int1 >= 0 then begin
   freeandnil(fdata);
 //  if fdata = nil then begin
-   licla:= datalistclasses[datatypty(int1)];
+   licla:= getdatalistclass(datatypty(int1));
    if licla <> nil then begin
     fdata:= licla.create;
    end;
@@ -1043,10 +1043,10 @@ begin
    arow:= twidgetgrid(fgrid).ffocusedcell.row;
   end;
   if arow >= 0 then begin
-   tdatalist1(fdata).getdata(arow,dest);
+   tdatalist1(fdata).getgriddata(arow,dest);
   end
   else begin
-   tdatalist1(fdata).getdefaultdata(dest);
+   tdatalist1(fdata).getgriddefaultdata(dest);
   end;
  end
  else begin
