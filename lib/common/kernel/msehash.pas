@@ -1145,7 +1145,7 @@ begin
  po1:= flist;
  for int1:= 0 to count - 1 do begin
   aiterator(po1);
-  inc(po1,frecsize);
+  inc(pchar(po1),frecsize);
  end;
 end;
 

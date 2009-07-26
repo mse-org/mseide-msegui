@@ -900,7 +900,7 @@ implementation
 uses
  rtlconsts,msestreaming,msesys,msestat,msebits,mseeditglob;
  
-const  //todo: use hash list
+var  //todo: use hash list
  datalistclasses: array[datatypty] of datalistclassty = 
 //dl_none,dl_integer, dl_int64,       dl_currency,       dl_real,      
  (nil,tintegerdatalist,tint64datalist,tcurrencydatalist,trealdatalist,

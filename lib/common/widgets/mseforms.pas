@@ -1040,9 +1040,9 @@ const
  mask1: windowoptionsty = [wo_taskbar,wo_notaskbar];
 begin
  foptionswindow:= windowoptionsty(setsinglebit(
-                    longword(value),
-                    longword(foptionswindow),
-                    longword(mask1)));
+                    {$ifdef FPC}longword{$else}byte{$endif}(value),
+                    {$ifdef FPC}longword{$else}byte{$endif}(foptionswindow),
+                    {$ifdef FPC}longword{$else}byte{$endif}(mask1)));
 end;
 
 procedure tcustommseform.setstatfile(const avalue: tstatfile);
