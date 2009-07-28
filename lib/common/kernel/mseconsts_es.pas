@@ -122,19 +122,19 @@ const
   'Filtro apagado',                    //sc_filter_off
   'Vertical',                          //sc_portrait print orientation
   'Apaisado',                          //sc_landscape print orientation
-  'Delete row?',                       //sc_Delete_row_question
-  'selected rows?',                    //sc_selected_rows
-  'Single item only'                   //sc_Single_item_only 
+  #191'Borrar fila?',                       //sc_Delete_row_question
+  'filas seleccionadas?',                    //sc_selected_rows
+  'un elemento solamente'                   //sc_Single_item_only 
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;
 begin
  with params[0] do begin
   if vinteger = 1 then begin
-   result:= 'Delete selected row?'
+   result:= #191'Borrar la fila seleccionada?'
   end
   else begin
-   result:= 'Delete '+inttostr(vinteger)+' selected rows?';
+   result:= #191'Borrar '+inttostr(vinteger)+' filas seleccionadas?';
   end;
  end;
 end;
