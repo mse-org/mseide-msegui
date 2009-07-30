@@ -786,7 +786,6 @@ type
   private
    fonsetvalue: setrealeventty;
    fonsetintvalue: setintegereventty;
-   fvalue: realty;
    fformatdisp: msestring;
    fformatedit: msestring;
    fvaluescale: real;
@@ -815,6 +814,7 @@ type
    function getascurrency: currency;
    procedure setascurrency(const avalue: currency);
   protected
+   fvalue: realty;
    function gettextvalue(var accept: boolean; const quiet: boolean): realty; virtual;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    function internaldatatotext(const data): msestring; override;

@@ -752,4 +752,12 @@ begin
 // result.left:= result.left + imageshift(-1);
 end;
 }
+function createtgridmsestringintdatalist(const aowner:twidgetcol): tdatalist;
+begin
+ result:= tgridmsestringintdatalist.create(aowner);
+end;
+
+initialization
+ registergriddatalistclass(tgridmsestringintdatalist.classname,
+                     {$ifdef FPC}@{$endif}createtgridmsestringintdatalist);
 end.

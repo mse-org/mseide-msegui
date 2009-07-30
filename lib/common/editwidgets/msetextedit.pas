@@ -873,7 +873,6 @@ begin
   beforechange;
   normalizetextrect(start,stop,po1,po2);
   beginupdate;
-  bo1:= false;
   feditor.begingroup;
   application.caret.remove;
   grid:= tcustomwidgetgrid1(fgridintf.getcol.grid);
@@ -910,7 +909,7 @@ begin
   finally
    application.caret.restore;
    feditor.endgroup;
-   if bo1 then begin
+   if not bo1 then begin
     exclude(grid.foptionsgrid,og_appendempty);
    end;
    endupdate;

@@ -23,7 +23,7 @@ uses
  mseprinter,msetypes,msedatalist,msedatamodules,mseclasses,formdesigner,
  mseapplication,mseglob,mseguiglob,mseskin,msedesigner,typinfo,
  mseguithreadcomp,mseprocmonitorcomp,imageselectorform,msefadeedit,
- msearrayprops;
+ msearrayprops,msesumlist;
 
 type
  twidget1 = class(twidget);
@@ -43,6 +43,16 @@ type
  tshortcutactionspropertyeditor = class(tpersistentarraypropertyeditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
+ end;
+
+ tlevelarrayelementeditor = class(tarrayelementeditor)
+  public
+   function name: msestring; override;
+ end;
+ 
+ tlevelarraypropertyeditor = class(tpersistentarraypropertyeditor)
+  protected
+   function getelementeditorclass: elementeditorclassty; override;
  end;
   
  tshapestatespropertyeditor = class(tsetpropertyeditor)
@@ -137,6 +147,8 @@ begin
                                     tfacetemplatefadecoloreditor);
  registerpropertyeditor(typeinfo(trealarrayprop),tfacetemplate,'fade_pos',
                                     tfacetemplatefadeposeditor);
+ registerpropertyeditor(typeinfo(tsumarrayprop),nil,'',
+                                    tlevelarraypropertyeditor);
  registerpropertyeditor(typeinfo(tsysshortcuts),nil,'',tsysshortcutspropertyeditor);
  registerpropertyeditor(typeinfo(string),tfont,'name',tfontnamepropertyeditor);
  registerpropertyeditor(typeinfo(actionstatesty),nil,'',tshapestatespropertyeditor);
@@ -375,6 +387,20 @@ begin
   timageselectorfo.create(nil,fintf.getimagelist,int1);
   setordvalue(int1);
  end;
+end;
+
+{ tlevelarraypropertyeditor }
+
+function tlevelarraypropertyeditor.getelementeditorclass: elementeditorclassty;
+begin
+ result:= tlevelarrayelementeditor;
+end;
+
+{ tlevelarrayelementeditor }
+
+function tlevelarrayelementeditor.name: msestring;
+begin
+ result:= 'Level ' + inttostr(findex+1);
 end;
 
 initialization

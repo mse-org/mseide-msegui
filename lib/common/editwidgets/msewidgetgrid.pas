@@ -81,8 +81,14 @@ type
    procedure writewidgetname(writer: twriter);
    procedure readfixwidgetnames(reader: treader);
    procedure writefixwidgetnames(writer: twriter);
+   procedure readdataclass(reader: treader);
+   procedure writedataclass(writer: twriter);
+   procedure readdatatype(reader: treader);
+   procedure writedatatype(writer: twriter);
    procedure readdata(reader: treader);
    procedure writedata(writer: twriter);
+   procedure readdataprops(reader: treader);
+   procedure writedataprops(writer: twriter);
   protected
    fintf: igridwidget;
   //iwidgetgrid
@@ -132,10 +138,11 @@ type
                      const aowner: tgridarrayprop); override;
    destructor destroy; override;
    function actualfont: tfont; override;
-   procedure cellchanged(const row: integer); override;
+//   procedure cellchanged(const row: integer); override;
    property editwidget: twidget read geteditwidget write seteditwidget;
   published
-   property datalist stored false;
+//   property datalist;
+   property datalist stored false; //stored by defineproperties
  end;
 
  twidgetfixrow = class(tfixrow)
@@ -373,6 +380,12 @@ type
    constructor create(owner: twidgetcol); reintroduce;
  end;
 
+type
+ creategriddatalistty = function(const aowner: twidgetcol): tdatalist;
+
+procedure registergriddatalistclass(const tag: ansistring;
+       const createfunc: creategriddatalistty);
+
 procedure gridwidgetfontheightdelta(const sender: twidget; const gridintf: iwidgetgrid;
                         const delta: integer);
 procedure defaultinitgridwidget(const awidget: twidget; const agridintf: iwidgetgrid);
@@ -380,13 +393,15 @@ procedure defaultinitgridwidget(const awidget: twidget; const agridintf: iwidget
 implementation
 uses
  sysutils,msebits,msedataedits,msewidgets,mseshapes,msekeyboard,typinfo,
- msereal,mseapplication;
+ msereal,mseapplication,msehash;
 
 type
  tdatalist1 = class(tdatalist);
  twidget1 = class(twidget);
  tcustomgrid1 = class(tcustomgrid);
  tdataedit1 = class(tdataedit);
+ twriter1 = class(twriter);
+ treader1 = class(treader);
 
  tfixcontainer = class(twidget)
   private
@@ -425,6 +440,9 @@ type
    constructor create(aowner: tcustomwidgetgrid); reintroduce;
  end;
 
+var
+ griddatalists: tpointerstringhashdatalist;
+ 
 procedure defaultinitgridwidget(const awidget: twidget; 
                                          const agridintf: iwidgetgrid);
 
@@ -483,11 +501,17 @@ constructor tgridmsestringdatalist.create(owner: twidgetcol);
 begin
  fowner:= owner;
  inherited create;
+ include(finternaloptions,ilo_nostreaming);
 end;
 
 function tgridmsestringdatalist.getdefault: pointer;
 begin
- result:= fowner.fintf.getdefaultvalue;
+ if fowner.fintf <> nil then begin
+  result:= fowner.fintf.getdefaultvalue;
+ end
+ else begin
+  result:= inherited getdefault;
+ end;
 end;
 
 { tgridansistringdatalist }
@@ -496,14 +520,18 @@ constructor tgridansistringdatalist.create(owner: twidgetcol);
 begin
  fowner:= owner;
  inherited create;
+ include(finternaloptions,ilo_nostreaming);
 end;
 
 function tgridansistringdatalist.getdefault: pointer;
 begin
- result:= fowner.fintf.getdefaultvalue;
+ if fowner.fintf <> nil then begin
+  result:= fowner.fintf.getdefaultvalue;
+ end
+ else begin
+  result:= inherited getdefault;
+ end;
 end;
-
-
 
 { tgridpointerdatalist }
 
@@ -511,6 +539,7 @@ constructor tgridpointerdatalist.create(owner: twidgetcol);
 begin
  fowner:= owner;
  inherited create;
+ include(finternaloptions,ilo_nostreaming);
 end;
 
 { tgridintegerdatalist }
@@ -519,11 +548,17 @@ constructor tgridintegerdatalist.create(owner: twidgetcol);
 begin
  fowner:= owner;
  inherited create;
+ include(finternaloptions,ilo_nostreaming);
 end;
 
 function tgridintegerdatalist.getdefault: pointer;
 begin
- result:= fowner.fintf.getdefaultvalue;
+ if fowner.fintf <> nil then begin
+  result:= fowner.fintf.getdefaultvalue;
+ end
+ else begin
+  result:= inherited getdefault;
+ end;
 end;
 
 { tgridenumdatalist }
@@ -532,11 +567,17 @@ constructor tgridenumdatalist.create(owner: twidgetcol);
 begin
  fowner:= owner;
  inherited create({$ifdef FPC}@{$endif}getdefaultenum);
+ include(finternaloptions,ilo_nostreaming);
 end;
 
 function tgridenumdatalist.getdefaultenum: integer;
 begin
- result:= integer(fowner.fintf.getdefaultvalue^);
+ if fowner.fintf <> nil then begin
+  result:= integer(fowner.fintf.getdefaultvalue^);
+ end
+ else begin
+  result:= integer(inherited getdefault^);
+ end;
 end;
 
 { tgridenum64datalist }
@@ -545,11 +586,17 @@ constructor tgridenum64datalist.create(owner: twidgetcol);
 begin
  fowner:= owner;
  inherited create({$ifdef FPC}@{$endif}getdefaultenum);
+ include(finternaloptions,ilo_nostreaming);
 end;
 
 function tgridenum64datalist.getdefaultenum: int64;
 begin
- result:= int64(fowner.fintf.getdefaultvalue^);
+ if fowner.fintf <> nil then begin
+  result:= int64(fowner.fintf.getdefaultvalue^);
+ end
+ else begin
+  result:= int64(inherited getdefault^);
+ end;
 end;
 
 { tgridrealdatalist }
@@ -558,11 +605,17 @@ constructor tgridrealdatalist.create(owner: twidgetcol);
 begin
  fowner:= owner;
  inherited create;
+ include(finternaloptions,ilo_nostreaming);
 end;
 
 function tgridrealdatalist.getdefault: pointer;
 begin
- result:= fowner.fintf.getdefaultvalue;
+ if fowner.fintf <> nil then begin
+  result:= fowner.fintf.getdefaultvalue;
+ end
+ else begin
+  result:= nil;
+ end;
  if result = nil then begin
   result:= inherited getdefault;
  end;
@@ -913,29 +966,62 @@ begin
  writer.writestring(fintf.getwidget.name);
 end;
 
-procedure twidgetcol.readdata(reader: treader);
+procedure twidgetcol.readdataclass(reader: treader);
+var
+ createproc: creategriddatalistty;
+ str1: string;
+begin
+ str1:= reader.readident;
+ if (fdata = nil) or (fdata.classname <> str1) then begin
+  freeandnil(fdata);
+  if griddatalists.find(str1,pointer(createproc)) then begin
+   fdata:= createproc(self);
+   include(fstate,cos_datalistvalid);
+  end
+  else begin
+   raise exception.create('Unknown grid datalist type '+str1+'.');
+  end;
+ end;
+end;
+
+procedure twidgetcol.writedataclass(writer: twriter);
+begin
+ writer.writeident(fdata.classname);
+end;
+
+procedure twidgetcol.readdatatype(reader: treader);
 var
  str1: string;
  int1: integer;
  licla: datalistclassty;
 begin
- reader.readlistbegin;
  str1:= reader.readident;
  int1:= getenumvalue(typeinfo(datatypty),str1);
  if int1 >= 0 then begin
   freeandnil(fdata);
-//  if fdata = nil then begin
-   licla:= getdatalistclass(datatypty(int1));
-   if licla <> nil then begin
-    fdata:= licla.create;
-   end;
-//  end;
-  if fdata <> nil then begin
-   tdatalist1(fdata).readdata(reader);
-  end
-  else begin
-   reader.{$ifdef FPC}driver.{$endif}skipvalue;
+  licla:= getdatalistclass(datatypty(int1));
+  if licla <> nil then begin
+   fdata:= licla.create;
   end;
+ end;
+end;
+
+procedure twidgetcol.writedatatype(writer: twriter);
+begin
+ writer.writeident(getenumname(typeinfo(datatypty),integer(fdata.datatyp)));
+end;
+
+procedure twidgetcol.readdata(reader: treader);
+begin
+ reader.readlistbegin;
+ if reader.nextvalue <> valist then begin
+  readdatatype(reader);
+ end;
+ if fdata <> nil then begin
+  tdatalist1(fdata).readdata(reader);
+ end
+ else begin
+  reader.{$ifdef FPC}driver.{$endif}skipvalue;
  end;
  reader.readlistend;
 end;
@@ -943,8 +1029,24 @@ end;
 procedure twidgetcol.writedata(writer: twriter);
 begin
  writer.writelistbegin;
- writer.writeident(getenumname(typeinfo(datatypty),integer(fdata.datatyp)));
+// writedatatype(writer);
  tdatalist1(fdata).writedata(writer);
+ writer.writelistend;
+end;
+
+procedure twidgetcol.readdataprops(reader: treader);
+begin
+ reader.readlistbegin;
+ while not reader.endoflist do begin
+  treader1(reader).readproperty(fdata);
+ end;
+ reader.readlistend;
+end;
+
+procedure twidgetcol.writedataprops(writer: twriter);
+begin
+ writer.writelistbegin;
+ twriter1(writer).writeproperties(fdata);
  writer.writelistend;
 end;
 
@@ -952,6 +1054,7 @@ procedure twidgetcol.defineproperties(filer: tfiler);
 var
  bo1: boolean;
  col1: twidgetcol;
+ str1,str2: string;
 begin
  inherited;
  filer.defineproperty('widgetname',{$ifdef FPC}@{$endif}readwidgetname,
@@ -969,8 +1072,31 @@ begin
   bo1:= bo1 or fdata.checkwritedata(filer);
   filer.ancestor:= col1;
  end;
+ filer.defineproperty('dataclass',{$ifdef FPC}@{$endif}readdataclass,
+                       {$ifdef FPC}@{$endif}writedataclass,fdata <> nil);
  filer.defineproperty('data',{$ifdef FPC}@{$endif}readdata,
                        {$ifdef FPC}@{$endif}writedata,bo1);
+// filer.defineproperty('datatype',{$ifdef FPC}@{$endif}readdatatype,
+//                       {$ifdef FPC}@{$endif}writedatatype,not bo1);
+// filer.defineproperty('dataprops',{$ifdef FPC}@{$endif}readdataprops,
+//                       {$ifdef FPC}@{$endif}writedataprops,
+//                (fdata <> nil) and 
+//                (ilo_propertystreaming in tdatalist1(fdata).finternaloptions));
+ if (fdata <> nil) and (ilo_propertystreaming in 
+        tdatalist1(fdata).finternaloptions) and (filer is twriter) then begin
+  with twriter1(filer) do begin
+   str1:= getfproppath(twriter(filer));
+   if str1 = '' then begin
+    str2:= 'datalist.';
+   end
+   else begin
+    str2:= str1+'.datalist.';
+   end;
+   setfproppath(twriter(filer),str2);
+   writeproperties(fdata);
+   setfproppath(twriter(filer),str1);
+  end;
+ end;
 end;
 
 procedure twidgetcol.setfixrowwidget(const awidget: twidget;
@@ -995,7 +1121,12 @@ begin
    awidget.visible:= false;
    awidget.getcorbainterface(typeinfo(igridwidget),fintf);
  //  awidget.getcorbainterface(igridwidget,fintf);
-   fdata:= fintf.createdatalist(self);
+   if not (cos_datalistvalid in fstate) then begin
+    fdata:= fintf.createdatalist(self);
+   end
+   else begin
+    fdata:= dl1;
+   end;
    fintf.setgridintf(iwidgetgrid(self));
    options:= foptions; //call updatecoloptions;
    po1:= fintf.getdefaultvalue;
@@ -1117,7 +1248,7 @@ begin
    if noinvalidate then begin
     fdata.beginupdate;
    end;
-   tdatalist1(fdata).setdata(arow,source);
+   tdatalist1(fdata).setgriddata(arow,source);
    if (arow = twidgetgrid(fgrid).ffocusedcell.row) and (fintf <> nil) then begin
     fintf.gridtovalue(arow);
    end;
@@ -1223,7 +1354,7 @@ function twidgetcol.getcol: twidgetcol;
 begin
  result:= self;
 end;
-
+{
 procedure twidgetcol.cellchanged(const row: integer);
 var
  int1: integer;
@@ -1237,6 +1368,7 @@ begin
   end;
  end;
 end;
+}
 {
 procedure twidgetcol.changed;
 begin
@@ -1312,8 +1444,12 @@ end;
 procedure twidgetcol.itemchanged(const sender: tdatalist; const aindex: integer);
 begin
  inherited;
- if {(tcustomwidgetgrid(fgrid).fupdating = 0) and} (fintf <> nil) then begin
+ if {(tcustomwidgetgrid(fgrid).fupdating = 0) and} (fintf <> nil) and
+               not (gs_rowremoving in tcustomgrid1(fgrid).fstate) then begin
   fintf.gridvaluechanged(aindex);
+  if ((aindex < 0) or (aindex = grid.row)) and (grid.row >= 0) then begin
+   fintf.gridtovalue(aindex);
+  end;
  end;
 end;
 
@@ -2643,5 +2779,64 @@ begin
  end;
 end;
 
+procedure registergriddatalistclass(const tag: ansistring;
+       const createfunc: creategriddatalistty);
+begin
+ griddatalists.addunique(tag,createfunc);
+end;
+
+function createtgridmsestringdatalist(const aowner:twidgetcol): tdatalist;
+begin
+ result:= tgridmsestringdatalist.create(aowner);
+end;
+
+function createtgridansistringdatalist(const aowner:twidgetcol): tdatalist;
+begin
+ result:= tgridansistringdatalist.create(aowner);
+end;
+
+function createtgridpointerdatalist(const aowner:twidgetcol): tdatalist;
+begin
+ result:= tgridpointerdatalist.create(aowner);
+end;
+
+function createtgridintegerdatalist(const aowner:twidgetcol): tdatalist;
+begin
+ result:= tgridintegerdatalist.create(aowner);
+end;
+
+function createtgridenumdatalist(const aowner:twidgetcol): tdatalist;
+begin
+ result:= tgridenumdatalist.create(aowner);
+end;
+
+function createtgridenum64datalist(const aowner:twidgetcol): tdatalist;
+begin
+ result:= tgridenum64datalist.create(aowner);
+end;
+
+function createtgridrealdatalist(const aowner:twidgetcol): tdatalist;
+begin
+ result:= tgridrealdatalist.create(aowner);
+end;
+
+initialization
+ griddatalists:= tpointerstringhashdatalist.create;
+ registergriddatalistclass(tgridmsestringdatalist.classname,
+                     {$ifdef FPC}@{$endif}createtgridmsestringdatalist);
+ registergriddatalistclass(tgridansistringdatalist.classname,
+                     {$ifdef FPC}@{$endif}createtgridansistringdatalist);
+ registergriddatalistclass(tgridpointerdatalist.classname,
+                     {$ifdef FPC}@{$endif}createtgridpointerdatalist);
+ registergriddatalistclass(tgridintegerdatalist.classname,
+                     {$ifdef FPC}@{$endif}createtgridintegerdatalist);
+ registergriddatalistclass(tgridenumdatalist.classname,
+                     {$ifdef FPC}@{$endif}createtgridenumdatalist);
+ registergriddatalistclass(tgridenum64datalist.classname,
+                     {$ifdef FPC}@{$endif}createtgridenum64datalist);
+ registergriddatalistclass(tgridrealdatalist.classname,
+                     {$ifdef FPC}@{$endif}createtgridrealdatalist);
+finalization
+ griddatalists.free;
 end.
 

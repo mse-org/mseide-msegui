@@ -598,6 +598,9 @@ procedure loadmsemodule(const instance: tmsecomponent; const rootancestor: tclas
 function findmoduledata(const aclassname: string; 
                             out aparentclassname: string): pobjectdataty;
 
+function getfproppath(const writer:twriter): string;
+procedure setfproppath(const writer:twriter; const value: string);
+
 function copycomponent(const source: tcomponent; const aowner: tcomponent = nil;
               const onfindancestor: tfindancestorevent = nil;
               const onfindcomponentclass: tfindcomponentclassevent = nil;
@@ -716,6 +719,22 @@ type
     FIgnoreChildren: Boolean;
   end;
  {$endif}
+
+ {$ifdef FPC}
+  TWritercracker = class(TFiler)
+  private
+    FDriver: TAbstractObjectWriter;
+    FDestroyDriver: Boolean;
+    FRootAncestor: TComponent;
+    FPropPath: String;
+  end;
+  {$else}
+  TWritercracker = class(TFiler)
+  private
+    FRootAncestor: TComponent;
+    FPropPath: string;
+  end;
+  {$endif}
  
  tpersistent1 = class(tpersistent);
  tcomponent1 = class(tcomponent);
@@ -760,6 +779,16 @@ var
  fmodules: tmodulelist;
  floadedlist: tloadedlist;
  fmodulestoregister: msecomponentarty;
+
+function getfproppath(const writer:twriter): string;
+begin
+ result:= twritercracker(writer).fproppath;
+end;
+
+procedure setfproppath(const writer:twriter; const value: string);
+begin
+ twritercracker(writer).fproppath:= value;
+end;
 
 function modules: tmodulelist;
 begin

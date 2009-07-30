@@ -384,7 +384,8 @@ type
  end;
 
  colstatety = (cos_fix,cos_selected,cos_noinvalidate,cos_edited,
-               cos_readonlyupdating,cos_selectionchanged,cos_changelock);
+               cos_readonlyupdating,cos_selectionchanged,cos_changelock,
+               cos_datalistvalid);
  colstatesty = set of colstatety;
 
  tcolselectfont = class(tparentfont)
@@ -438,7 +439,7 @@ type
    function isopaque: boolean; virtual;
    function getdatapo(const arow: integer): pointer; virtual;
 //   function ismerged: boolean; virtual;
-   procedure clean(const aindex: integer); virtual;
+   procedure clean(const start,stop: integer); virtual;
    procedure paint(const info: colpaintinfoty); virtual;
    class function defaultstep(width: integer): integer; virtual;
    function step(getscrollable: boolean = true): integer; override;
@@ -528,6 +529,7 @@ type
    procedure setselectedcells(const avalue: integerarty);
    function getmerged(const row: integer): boolean; override;
    procedure setmerged(const row: integer; const avalue: boolean); override;
+   procedure setdata(const avalue: tdatalist);
   protected
    fdata: tdatalist;
    fname: string;
@@ -566,19 +568,19 @@ type
    function getcursor: cursorshapety; virtual;
    function getdatastatname: msestring;
    procedure coloptionstoeditoptions(var dest: optionseditty);
-   procedure clean(const aindex: integer); override;
+   procedure clean(const start,stop: integer); override;
   public
    constructor create(const agrid: tcustomgrid;
                                      const aowner: tgridarrayprop); override;
    destructor destroy; override;
 
-   procedure cellchanged(const row: integer); override;
+//   procedure cellchanged(const row: integer); override;
    function canfocus(const abutton: mousebuttonty;
                      const ashiftstate: shiftstatesty;
                      out canrowfocus: boolean): boolean; virtual;
    function isreadonly: boolean; //col readonly or row readonly
    procedure updatecellzone(const pos: pointty; var result: cellzonety); virtual;
-   property datalist: tdatalist read fdata;
+   property datalist: tdatalist read fdata write setdata;
    procedure dostatread(const reader: tstatreader); override;
    procedure dostatwrite(const writer: tstatwriter); override;
    procedure clearselection;
@@ -2888,7 +2890,7 @@ begin
      nextcol:= po1^[index+1];
     end;
    end;
-   clean(endrow);
+   clean(startrow,endrow);
    for int1:= startrow to endrow do begin
     row1:= rows[int1];
     fcellinfo.cell.row:= row1;
@@ -3261,7 +3263,7 @@ begin
  //dummy
 end;
 
-procedure tcol.clean(const aindex: integer);
+procedure tcol.clean(const start,stop: integer);
 begin
  //dummy
 end;
@@ -5028,6 +5030,8 @@ begin
 end;
 
 procedure tdatacol.itemchanged(const sender: tdatalist; const aindex: integer);
+var
+ coord1: gridcoordty;
 begin
  if (aindex < 0) and (sender.count <> fgrid.frowcount) then begin
   if fgrid.fupdating = 0 then begin
@@ -5044,6 +5048,18 @@ begin
   end
   else begin
    cellchanged(aindex);
+  end;
+  if (co_rowdatachange in foptions) and (fgrid.frowdatachanging = 0) then begin
+                                           //no recursion
+   coord1.col:= index;
+   if aindex < 0 then begin
+    coord1.row:= 0;
+    fgrid.rowdatachanged(coord1,fgrid.frowcount);
+   end
+   else begin
+    coord1.row:= aindex;
+    fgrid.rowdatachanged(coord1);
+   end;
   end;
  end;
  if not (co_nosort in foptions) then begin
@@ -5273,7 +5289,7 @@ begin
   writer.writeboolean('sortdescent'+mstr1,co_sortdescent in foptions);
  end;
 end;
-
+{
 procedure tdatacol.cellchanged(const row: integer);
 var
  coord1: gridcoordty;
@@ -5292,7 +5308,7 @@ begin
   end;
  end;
 end;
-
+}
 function tdatacol.getvisible: boolean;
 begin
  result:= not (co_invisible in foptions);
@@ -5377,11 +5393,16 @@ begin
  result:= (gs_rowreadonly in fgrid.fstate) or (co_readonly in foptions);
 end;
 
-procedure tdatacol.clean(const aindex: integer);
+procedure tdatacol.clean(const start,stop: integer);
 begin
  if fdata <> nil then begin
-  fdata.clean(aindex);
+  fdata.clean(start,stop);
  end;
+end;
+
+procedure tdatacol.setdata(const avalue: tdatalist);
+begin
+ fdata.assign(avalue);
 end;
 
 { tdrawcol }

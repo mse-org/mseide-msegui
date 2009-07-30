@@ -36,7 +36,7 @@ type
  doublemsestringarty = array of doublemsestringty;
  dataprocty = procedure(var data) of object;
  internallistoptionty = (ilo_needsfree,ilo_needscopy,ilo_needsinit,
-                         ilo_nostreaming);
+                         ilo_nostreaming,ilo_propertystreaming);
  internallistoptionsty = set of internallistoptionty;
 
  tdatalist = class;
@@ -164,7 +164,7 @@ type
    function empty(const index: integer): boolean; virtual;         //true wenn leer
    function sort(const arangelist: tintegerdatalist; dorearange: boolean): boolean; overload;
    function sort: boolean; overload; //true if changed
-   procedure clean(const aindex: integer); virtual;
+   procedure clean(const start,stop: integer); virtual;
 
    property count: integer read Fcount write Setcount;       //anzahl zeilen
    property capacity: integer read Fcapacity write Setcapacity;
@@ -3559,7 +3559,7 @@ begin
  end;
 end;
 
-procedure tdatalist.clean(const aindex: integer);
+procedure tdatalist.clean(const start,stop: integer);
 begin
  //dummy
 end;
@@ -4001,7 +4001,7 @@ begin
   result:= nil;
  end
  else begin
-  fdefaultval:= emptyreal;
+//  fdefaultval:= emptyreal;
   result:= @fdefaultval;
  end;
 end;
@@ -4077,6 +4077,7 @@ begin
  fsize:= sizeof(real);
  min:= emptyreal;
  max:= bigreal;
+ fdefaultval:= emptyreal;
 end;
 
 function trealdatalist.Getitems(index: integer): realty;

@@ -346,23 +346,9 @@ uses
  rtlconsts,msedatalist;
 
 type
- {$ifdef FPC}
-  TWritercracker = class(TFiler)
-  private
-    FDriver: TAbstractObjectWriter;
-    FDestroyDriver: Boolean;
-    FRootAncestor: TComponent;
-    FPropPath: String;
-  end;
-  tbinaryobjectreader1 = class(tbinaryobjectreader);
-  {$else}
-  TWritercracker = class(TFiler)
-  protected
-    FRootAncestor: TComponent;
-    FPropPath: string;
-  end;
-  {$endif}
-
+{$ifdef FPC}
+ tbinaryobjectreader1 = class(tbinaryobjectreader);
+{$endif}
  twriter1 = class(twriter);
  treader1 = class(treader);
 
@@ -1348,8 +1334,8 @@ var
  ancestorbefore: tpersistentarrayprop;
 
 begin
- proppathvorher:= twritercracker(writer).fproppath;
- twritercracker(writer).fproppath:= '';
+ proppathvorher:= getfproppath(writer);
+ setfproppath(writer,'');
  ancestorbefore:= tpersistentarrayprop(writer.ancestor);
  try
   with twriter1(writer) do begin
@@ -1374,7 +1360,7 @@ begin
    WriteListEnd;
   end;
  finally
-  twritercracker(writer).fproppath:= proppathvorher;
+  setfproppath(writer,proppathvorher);
   writer.Ancestor:= ancestorbefore;
  end;
 end;

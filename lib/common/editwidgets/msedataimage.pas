@@ -245,6 +245,7 @@ end;
 
 procedure tcustomdataimage.gridvaluechanged(const index: integer);
 begin
+ //dummy
 end;
 
 procedure tcustomdataimage.updatecoloptions(const aoptions: coloptionsty);

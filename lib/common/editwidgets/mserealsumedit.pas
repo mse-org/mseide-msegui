@@ -19,7 +19,8 @@ type
   protected
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatyp: datatypty; override;
-   function internaldatatotext(const data): msestring; override;
+//   function internaldatatotext(const data): msestring; override;
+//   procedure valuetogrid(const arow: integer); override;
   public
    function griddata: tgridrealsumlist;
  end;
@@ -32,6 +33,7 @@ constructor tgridrealsumlist.create(owner: twidgetcol);
 begin
  fowner:= owner;
  inherited create;
+ finternaloptions:= finternaloptions + [ilo_nostreaming,ilo_propertystreaming];
 end;
 
 function tgridrealsumlist.getdefault: pointer;
@@ -55,7 +57,13 @@ function trealsumedit.griddata: tgridrealsumlist;
 begin
  result:= tgridrealsumlist(inherited griddata);
 end;
-
+{
+procedure trealsumedit.valuetogrid(const arow: integer);
+begin
+ griddata.setgriddata(arow,fvalue);
+end;
+}
+{
 function trealsumedit.internaldatatotext(const data): msestring;
 begin
  if (@data = nil) or (realsumty(data).level = 0) then begin
@@ -65,5 +73,14 @@ begin
   result:= inherited internaldatatotext(realsumty(data).sum);
  end;
 end;
+}
+function createtgridrealsumlist(const aowner:twidgetcol): tdatalist;
+begin
+ result:= tgridrealsumlist.create(aowner);
+end;
+
+initialization
+ registergriddatalistclass(tgridrealsumlist.classname,
+                     {$ifdef FPC}@{$endif}createtgridrealsumlist);
 
 end.

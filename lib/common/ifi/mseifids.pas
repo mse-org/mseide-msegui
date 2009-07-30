@@ -140,7 +140,7 @@ type
    procedure postrecord1(const akind: fieldreckindty;
                                    const amodifiedfields: pbyte);
    procedure receiveevent(const event: tobjectevent);
-   procedure sendchangedrecord(const aitem: phashdataty);
+   procedure sendchangedrecord(const aitem: pptruintdataty);
   public
    constructor create(const aowner: tdataset; const aintf: iifidscontroller);
    destructor destroy; override;
@@ -833,9 +833,9 @@ begin
  end;
 end;
 
-procedure tifidscontroller.sendchangedrecord(const aitem: phashdataty);
+procedure tifidscontroller.sendchangedrecord(const aitem: pptruintdataty);
 begin
- fdscontroller.recnonullbased:= aitem^.header.key;
+ fdscontroller.recnonullbased:= aitem^.key;
  postrecord1(frk_edit,pbyte(@aitem^.data));
 end;
 
@@ -846,7 +846,7 @@ begin
  if alist.count > 0 then begin
   fdscontroller.beginupdate;
   try
-   alist.iterate(@sendchangedrecord);
+   alist.iterate(hashiteratorprocty(@sendchangedrecord));
   finally
    fdscontroller.endupdate;
   end;
