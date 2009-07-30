@@ -974,7 +974,7 @@ begin
  str1:= reader.readident;
  if (fdata = nil) or (fdata.classname <> str1) then begin
   freeandnil(fdata);
-  if griddatalists.find(str1,pointer(createproc)) then begin
+  if griddatalists.find(str1,pointer({$ifndef FPC}@{$endif}createproc)) then begin
    fdata:= createproc(self);
    include(fstate,cos_datalistvalid);
   end
@@ -2782,7 +2782,7 @@ end;
 procedure registergriddatalistclass(const tag: ansistring;
        const createfunc: creategriddatalistty);
 begin
- griddatalists.addunique(tag,createfunc);
+ griddatalists.addunique(tag,{$ifndef FPC}@{$endif}createfunc);
 end;
 
 function createtgridmsestringdatalist(const aowner:twidgetcol): tdatalist;

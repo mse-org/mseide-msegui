@@ -241,7 +241,7 @@ type
   private
   protected
    function dohash(const aitem: phashdataty): hashvaluety; override;
-   procedure finalizeitem(const aitem: pstringdataty);
+   procedure finalizeitem(const aitem: phashdatadataty);
   public
    constructor create(const datasize: integer);
    procedure clear; override;
@@ -1244,14 +1244,15 @@ begin
  result:= stringhash(pstringhashdataty(aitem)^.data.key) and fmask;
 end;
 
-procedure tstringhashdatalist.finalizeitem(const aitem: pstringdataty);
+procedure tstringhashdatalist.finalizeitem(const aitem: phashdatadataty);
 begin
- finalize(aitem^);
+ finalize(pstringdataty(aitem)^);
 end;
 
 procedure tstringhashdatalist.clear;
 begin
- iterate(hashiteratorprocty(@finalizeitem));
+// iterate(hashiteratorprocty(@finalizeitem));
+ iterate({$ifdef FPC}@{$endif}finalizeitem);
  inherited;
 end;
 
