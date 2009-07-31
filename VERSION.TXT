@@ -1,4 +1,6 @@
 MSEide+MSEgui version history
+2009-07-31
+ optiongridty og_merged -> og_colmerged.
 2009-06-27
  tmsesqlquery.refresh does not restore recno, use controller.refresh(true).
  

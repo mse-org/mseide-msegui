@@ -1121,7 +1121,8 @@ type
    procedure setstatdata(const index: integer; const value: msestring);
                                  override;
   public
-   constructor create(const aowner: tcustomgrid); reintroduce;
+   constructor create(const aowner: tcustomgrid;
+                          const ainfolevel: rowinfolevelty); reintroduce;
    destructor destroy; override;
 
    function cellrow(const arow: integer): integer;
@@ -1830,7 +1831,7 @@ type
    function pasteselection: boolean; virtual; //false if no paste
 
    property optionsgrid: optionsgridty read foptionsgrid write setoptionsgrid
-                default defaultoptionsgrid;
+                default defaultoptionsgrid; //first!
 
    property datarowlinewidth: integer read fdatarowlinewidth
                 write setdatarowlinewidth default defaultgridlinewidth;
@@ -4895,10 +4896,10 @@ begin
  end
  else begin
   if index > mergedcolmax then begin
-   result:= fgrid.fdatacols.frowstate.getitempo(row)^.merged = mergedcolall;
+   result:= fgrid.fdatacols.frowstate.getitempocolmerge(row)^.colmerge.merged = mergedcolall;
   end
   else begin
-   result:= fgrid.fdatacols.frowstate.getitempo(row)^.merged and 
+   result:= fgrid.fdatacols.frowstate.getitempocolmerge(row)^.colmerge.merged and 
                                                           bits[index-1] <> 0;
   end;
  end;
@@ -4907,8 +4908,8 @@ end;
 procedure tdatacol.setmerged(const row: integer; const avalue: boolean);
 begin
  if (index > 0) and (index <= mergedcolmax) then begin
-  if updatebit(fgrid.fdatacols.frowstate.getitempo(row)^.merged,index-1,
-                                   avalue) then begin
+  if updatebit(fgrid.fdatacols.frowstate.getitempocolmerge(row)^.colmerge.merged,
+                              index-1,avalue) then begin
    fgrid.fdatacols.mergechanged(row);
   end;
  end;
@@ -6089,7 +6090,7 @@ begin
  fsortcol:= -1;
  fnewrowcol:= -1;
  flastvisiblecol:= -1;
- frowstate:= trowstatelist.create(aowner);
+ frowstate:= trowstatelist.create(aowner,ril_normal);
  inherited;
  flinecolor:= defaultdatalinecolor;
  foptions:= defaultdatacoloptions;
@@ -9885,7 +9886,7 @@ function tcustomgrid.cellrect(const cell: gridcoordty;
 var
  isfixr: boolean;
  int1: integer; 
- po1: prowstatety;
+ po1: prowstatecolmergety;
  
 begin  //cellrect
  result:= nullrect;
@@ -10016,11 +10017,12 @@ begin  //cellrect
      if (og_merged in foptionsgrid) and not nomerged then begin
       if (row >= 0) and (row < frowcount) and
                            (col < fdatacols.flastvisiblecol) then begin
-       po1:= fdatacols.frowstate.getitempo(row);
-       if po1^.merged <> 0 then begin //has merged cols
+       po1:= fdatacols.frowstate.getitempocolmerge(row);
+       if po1^.colmerge.merged <> 0 then begin //has merged cols
         for int1:= col to fdatacols.flastvisiblecol-1 do begin
-         if (po1^.merged = mergedcolall) or 
-          (int1 < mergedcolmax) and (po1^.merged and bits[int1] <> 0) then begin
+         if (po1^.colmerge.merged = mergedcolall) or 
+          (int1 < mergedcolmax) and (po1^.colmerge.merged and 
+                                                bits[int1] <> 0) then begin
           with tdatacol(fdatacols.fitems[int1+1]) do begin
            if not (co_invisible in foptions) then begin
             inc(result.cx,step);
@@ -11632,10 +11634,22 @@ begin
 end;
 
 procedure tcustomgrid.setoptionsgrid(const avalue: optionsgridty);
+const
+ mask1: optionsgridty = [og_merged];
+var
+ level1: rowinfolevelty;
 begin
  if foptionsgrid <> avalue then begin
   if (og_sorted in avalue) and not(og_sorted in foptionsgrid) then begin
    exclude(fstate,gs_sortvalid);
+  end;
+  if (longword(avalue) xor longword(foptionsgrid)) and longword(mask1) <> 0 then begin
+   fdatacols.frowstate.free;
+   level1:= ril_normal;
+   if og_merged in avalue then begin
+    level1:= ril_colmerge;
+   end;
+   fdatacols.frowstate:= trowstatelist.create(self,level1);
   end;
   foptionsgrid:= avalue;
   fdatacols.frowstate.folded:= og_folded in avalue;
@@ -11748,7 +11762,7 @@ function tcustomgrid.getmerged(const arow: integer): longword;
 begin
  result:= 0;
  if (og_merged in foptionsgrid) and (arow >= 0) then begin
-  result:= fdatacols.frowstate.getitempo(arow)^.merged;
+  result:= fdatacols.frowstate.getitempocolmerge(arow)^.colmerge.merged;
  end;
 end;
 
@@ -13176,10 +13190,11 @@ end;
 
 { trowstatelist }
 
-constructor trowstatelist.create(const aowner: tcustomgrid);
+constructor trowstatelist.create(const aowner: tcustomgrid;
+                                            const ainfolevel: rowinfolevelty);
 begin
  fgrid:= aowner;
- inherited create;
+ inherited create(ainfolevel);
 end;
 
 destructor trowstatelist.destroy;

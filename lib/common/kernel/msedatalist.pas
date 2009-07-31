@@ -581,13 +581,11 @@ type
  rowstatenumty = -1..126; //msb = row readonly flag for rowfontstate,
                           //reserved for rowcolorstate
 
+ rowinfolevelty = (ril_normal,ril_colmerge);
  foldlevelty = 0..127;
  rowstatety = packed record
   selected: longword; //bitset lsb = col 0, msb-1 = col 30, msb = whole row
                       //adressed by fcreateindex
-  merged: longword; //bitset lsb = col 1, msb = col32, 
-                    //$ffffffff = first col fills whole row
-                    //addressed by column index
   color: byte; //index in rowcolors, 0 = none, 1 = rowcolors[0]
   font: byte;  //index in rowfonts, 0 = none, 1 = rowfonts[0]
   fold: byte;  // h nnnnnnn  h = hidden, nnnnnnn = fold level, 0 -> top
@@ -596,9 +594,23 @@ type
  prowstatety = ^rowstatety;
  rowstateaty = array[0..0] of rowstatety;
  prowstateaty  = ^rowstateaty;
-   
+
+ colmergety = packed record
+  merged: longword; //bitset lsb = col 1, msb = col32, 
+                    //$ffffffff = first col fills whole row
+                    //addressed by column index
+ end;
+ rowstatecolmergety = packed record
+  normal: rowstatety;
+  colmerge: colmergety;
+ end;
+ prowstatecolmergety = ^rowstatecolmergety;
+ rowstatecolmergeaty = array[0..0] of rowstatecolmergety;
+ prowstatecolmergeaty  = ^rowstatecolmergeaty;
+ 
  tcustomrowstatelist = class(tdatalist)
   private
+   finfolevel: rowinfolevelty;
    function getrowstate(const index: integer): rowstatety;
    procedure setrowstate(const index: integer; const Value: rowstatety);
    function getfoldinfoar: bytearty;
@@ -615,11 +627,15 @@ type
   protected
    function gethidden(const index: integer): boolean;
    function getfoldlevel(const index: integer): foldlevelty;
+   procedure checkinfolevel(const wantedlevel: rowinfolevelty);
   public
    constructor create; override;
+   constructor create(const ainfolevel: rowinfolevelty);
    procedure assign(source: tpersistent); override;
    function datatyp: datatypty; override;
+   function datapocolmerge: pointer;
    function getitempo(const index: integer): prowstatety;
+   function getitempocolmerge(const index: integer): prowstatecolmergety;
    property items[const index: integer]: rowstatety read getrowstate 
                                               write setrowstate; default;
 
@@ -6068,6 +6084,20 @@ begin
  fsize:= sizeof(rowstatety);
 end;
 
+constructor tcustomrowstatelist.create(const ainfolevel: rowinfolevelty);
+begin
+ finfolevel:= ainfolevel;
+ inherited create;
+ case finfolevel of
+  ril_colmerge: begin
+   fsize:= sizeof(rowstatecolmergety);
+  end;
+  else begin
+   fsize:= sizeof(rowstatety);
+  end;
+ end;
+end;
+
 function tcustomrowstatelist.datatyp: datatypty;
 begin
  result:= dl_rowstate;
@@ -6096,7 +6126,7 @@ var
 begin
  result:= false;
  if (astart < mergedcolmax - 1) and (acount > 0) then begin
-  with getitempo(arow)^ do begin
+  with getitempocolmerge(arow)^ do begin
    if (astart = 0) and (acount > mergedcolmax) then begin
     ca2:= mergedcolall;
    end
@@ -6105,10 +6135,10 @@ begin
     if ca1 + astart > mergedcolmax then begin
      ca1:= mergedcolmax - astart;
     end;
-    ca2:= merged or (bitmask[ca1] shl astart);
+    ca2:= colmerge.merged or (bitmask[ca1] shl astart);
    end;
-   if merged <> ca2 then begin
-    merged:= ca2;
+   if colmerge.merged <> ca2 then begin
+    colmerge.merged:= ca2;
     result:= true;
    end;
   end;
@@ -6118,23 +6148,23 @@ end;
 function tcustomrowstatelist.unmergecols(const arow: integer): boolean;
 var
  int1: integer;
- po1: prowstateaty;
+ po1: prowstatecolmergeaty;
 begin
  result:= false;
  if arow = invalidaxis then begin
-  po1:= datapo;
+  po1:= datapocolmerge;
   for int1:= 0 to count - 1 do begin
-   if po1^[int1].merged <> 0 then begin
+   if po1^[int1].colmerge.merged <> 0 then begin
     result:= true;
-    po1^[int1].merged:= 0;
+    po1^[int1].colmerge.merged:= 0;
    end;
   end;
  end
  else begin
-  with getitempo(arow)^ do begin
-   if merged <> 0 then begin
+  with getitempocolmerge(arow)^ do begin
+   if colmerge.merged <> 0 then begin
     result:= true;
-    merged:= 0;
+    colmerge.merged:= 0;
    end;
   end;
  end;
@@ -6236,13 +6266,32 @@ end;
 
 function tcustomrowstatelist.getmerged(const index: integer): longword;
 begin
- result:= getitempo(index)^.merged;
+ result:= getitempocolmerge(index)^.colmerge.merged;
 end;
 
 procedure tcustomrowstatelist.setmerged(const index: integer;
                const avalue: longword);
 begin
- getitempo(index)^.merged:= avalue;
+ getitempocolmerge(index)^.colmerge.merged:= avalue;
+end;
+
+procedure tcustomrowstatelist.checkinfolevel(const wantedlevel: rowinfolevelty);
+begin
+ if wantedlevel > finfolevel then begin
+  raise exception.create('Wrong rowinfolevel.');
+ end;
+end;
+
+function tcustomrowstatelist.datapocolmerge: pointer;
+begin
+ checkinfolevel(ril_colmerge);
+ result:= datapo;
+end;
+
+function tcustomrowstatelist.getitempocolmerge(const index: integer): prowstatecolmergety;
+begin
+ checkinfolevel(ril_colmerge);
+ result:= prowstatecolmergety(inherited getitempo(index));
 end;
 
 { tlinindexmse }
