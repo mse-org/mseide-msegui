@@ -453,11 +453,11 @@ var
  po2: pointer;
  ckind1: gridcommandkindty;
  source1,dest1,count1: integer;
- rowstate1: rowstatety;
+ rowstate1: rowstatecolmergety;
  select1: selectdataty;
  lwo1: longword;
  datalist1: tdatalist;
- po3: prowstatety;
+ po3: prowstatecolmergety;
 begin
  with adata^.header do begin
   case kind of
@@ -551,15 +551,15 @@ begin
       inc(adatapo,sizeof(rowstateheaderty));
       inc(adatapo,decodeifidata(pifidataty(adatapo),rowstate1));
       with trxwidgetgrid(fowner),rowstate1 do begin
-       rowcolorstate[int1]:= color;
-       rowfontstate[int1]:= font;
-       po3:= fdatacols.rowstate.getitempo(int1);
-       if po3^.merged <> merged then begin
-        po3^.merged:= merged;
+       rowcolorstate[int1]:= normal.color;
+       rowfontstate[int1]:= normal.font;
+       po3:= fdatacols.rowstate.getitempocolmerge(int1);
+       if po3^.colmerge.merged <> colmerge.merged then begin
+        po3^.colmerge.merged:= colmerge.merged;
         tdatacols1(fdatacols).mergechanged(int1);         
        end;
-       rowhidden[int1]:= fold and foldhiddenmask <> 0;
-       rowfoldlevel[int1]:= fold and foldlevelmask;
+       rowhidden[int1]:= normal.fold and foldhiddenmask <> 0;
+       rowfoldlevel[int1]:= normal.fold and foldlevelmask;
       end;
      finally
       dec(fcommandlock);
@@ -735,7 +735,7 @@ begin
  with fifi do begin
   if cancommandsend(igo_rowstate) then begin
    senditem(ik_rowstatechange,
-               encoderowstatedata(arow,fdatacols.rowstate[arow]));
+               encoderowstatedata(arow,fdatacols.rowstate.itemscolmerge[arow]));
   end;
  end;
 end;

@@ -613,6 +613,9 @@ type
    finfolevel: rowinfolevelty;
    function getrowstate(const index: integer): rowstatety;
    procedure setrowstate(const index: integer; const Value: rowstatety);
+   function getrowstatecolmerge(const index: integer): rowstatecolmergety;
+   procedure setrowstatecolmerge(const index: integer;
+                                        const Value: rowstatecolmergety);
    function getfoldinfoar: bytearty;
    function getcolor(const index: integer): rowstatenumty;
    procedure setcolor(const index: integer; const avalue: rowstatenumty);
@@ -638,6 +641,8 @@ type
    function getitempocolmerge(const index: integer): prowstatecolmergety;
    property items[const index: integer]: rowstatety read getrowstate 
                                               write setrowstate; default;
+   property itemscolmerge[const index: integer]: rowstatecolmergety
+            read getrowstatecolmerge write setrowstatecolmerge;
 
    function mergecols(const arow: integer; const astart: cardinal;
                                  const acount: cardinal): boolean;
@@ -6116,6 +6121,19 @@ end;
 procedure tcustomrowstatelist.setrowstate(const index: integer;
   const Value: rowstatety);
 begin
+ setdata(index,value);
+end;
+
+function tcustomrowstatelist.getrowstatecolmerge(const index: integer): rowstatecolmergety;
+begin
+ checkinfolevel(ril_colmerge);
+ getdata(index,result);
+end;
+
+procedure tcustomrowstatelist.setrowstatecolmerge(const index: integer;
+  const Value: rowstatecolmergety);
+begin
+ checkinfolevel(ril_colmerge);
  setdata(index,value);
 end;
 

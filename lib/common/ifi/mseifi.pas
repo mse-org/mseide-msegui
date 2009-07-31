@@ -565,7 +565,7 @@ function encodeifidata(const avalue: ansistring;
                        const headersize: integer = 0): string; overload;
 function encodeifidata(const alist: tdatalist; const aindex: integer;
                        const headersize: integer = 0): string; overload;
-function encodeifidata(const avalue: rowstatety; 
+function encodeifidata(const avalue: rowstatecolmergety; 
                        const headersize: integer = 0): string; overload;
 function encodeifidata(const avalue: selectdataty; 
                        const headersize: integer = 0): string; overload;
@@ -590,7 +590,7 @@ function decodeifidata(const source: pifidataty; out dest: variant): integer;
 function decodeifidata(const source: pifidataty; const aindex: integer;
                           const alist: tdatalist): integer; overload;
                                      //alist can be nil
-function decodeifidata(const source: pifidataty; out dest: rowstatety): integer;
+function decodeifidata(const source: pifidataty; out dest: rowstatecolmergety): integer;
                                                         overload;
 function decodeifidata(const source: pifidataty; out dest: selectdataty): integer;
                                                         overload;
@@ -613,8 +613,8 @@ const
   sizeof(ifidataty)+sizeof(ifimsestringintty),         //idk_msestringint
 //  sizeof(ifidataty)+sizeof(ifinamety),               //idk_ansistring
   sizeof(ifidataty)+sizeof(ifibytesty),                //idk_bytes
-  sizeof(ifidataty)+sizeof(rowstatety),                //idk_rowstate
-  sizeof(ifidataty)+sizeof(selectdataty)                //idk_selection
+  sizeof(ifidataty)+sizeof(rowstatecolmergety),        //idk_rowstate
+  sizeof(ifidataty)+sizeof(selectdataty)               //idk_selection
  );
 implementation
 uses
@@ -765,10 +765,10 @@ begin
  end;
 end;
 
-function encodeifidata(const avalue: rowstatety; 
+function encodeifidata(const avalue: rowstatecolmergety; 
                        const headersize: integer = 0): string; overload;
 begin
- prowstatety(initdataheader(headersize,idk_rowstate,0,result))^:= avalue;
+ prowstatecolmergety(initdataheader(headersize,idk_rowstate,0,result))^:= avalue;
 end;
 
 function encodeifidata(const avalue: selectdataty; 
@@ -1011,12 +1011,12 @@ begin
  end;
 end;
 
-function decodeifidata(const source: pifidataty; out dest: rowstatety): integer;
+function decodeifidata(const source: pifidataty; out dest: rowstatecolmergety): integer;
 begin
  if source^.header.kind <> idk_rowstate then begin
   datakinderror;
  end;
- dest:= prowstatety(@source^.data)^;
+ dest:= prowstatecolmergety(@source^.data)^;
  result:= datarecsizes[idk_rowstate];
 end;                                                       
                         

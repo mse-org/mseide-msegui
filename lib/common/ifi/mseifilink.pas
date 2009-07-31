@@ -736,7 +736,7 @@ function decodegridcommanddata(const adata: pchar; out akind: gridcommandkindty;
 function encodecolchangedata(const acolname: string; const arow: integer;
                                      const alist: tdatalist): string;
 function encoderowstatedata(const arow: integer; 
-                                            const astate: rowstatety): string;
+                                            const astate: rowstatecolmergety): string;
 function encodeselectiondata(const acell: gridcoordty; 
                                             const avalue: boolean): string;
 
@@ -788,7 +788,7 @@ begin
  end;
 end;
 
-function encoderowstatedata(const arow: integer; const astate: rowstatety): string;
+function encoderowstatedata(const arow: integer; const astate: rowstatecolmergety): string;
 begin
  result:= encodeifidata(astate,sizeof(rowstateheaderty));
  with prowstatedataty(result)^.header do begin
@@ -2424,10 +2424,10 @@ begin
  end
  else begin
   if index > mergedcolmax then begin
-   result:= tifidatacols(prop).frowstate.getitempo(row)^.merged = mergedcolall;
+   result:= tifidatacols(prop).frowstate.getitempocolmerge(row)^.colmerge.merged = mergedcolall;
   end
   else begin
-   result:= tifidatacols(prop).frowstate.getitempo(row)^.merged and 
+   result:= tifidatacols(prop).frowstate.getitempocolmerge(row)^.colmerge.merged and 
                                                           bits[index-1] <> 0;
   end;
  end;
@@ -2436,7 +2436,7 @@ end;
 procedure tifidatacol.setmerged(const row: integer; const avalue: boolean);
 begin
  if (index > 0) and (index <= mergedcolmax) then begin
-  if updatebit(tifidatacols(prop).frowstate.getitempo(row)^.merged,index-1,
+  if updatebit(tifidatacols(prop).frowstate.getitempocolmerge(row)^.colmerge.merged,index-1,
                                    avalue) then begin
    ttxdatagrid(fowner).rowstatechanged(row);
   end;
@@ -3063,7 +3063,7 @@ begin
  with fifi do begin
   if cancommandsend(igo_rowstate) then begin
    senditem(ik_rowstatechange,
-               encoderowstatedata(aindex,fdatacols.rowstate[aindex]));
+               encoderowstatedata(aindex,fdatacols.rowstate.itemscolmerge[aindex]));
   end;
  end;
 end;
@@ -3146,7 +3146,7 @@ var
  datalist1: tdatalist;
  ckind1: gridcommandkindty;
  source1,dest1,count1: integer;
- rowstate1: rowstatety;
+ rowstate1: rowstatecolmergety;
  lwo1: longword;
  select1: selectdataty;
 
@@ -3246,14 +3246,14 @@ begin
       inc(adatapo,sizeof(rowstateheaderty));
       inc(adatapo,decodeifidata(pifidataty(adatapo),rowstate1));
       with ttxdatagrid(fowner),rowstate1 do begin
-       rowcolorstate[int1]:= color;
-       rowfontstate[int1]:= font;
+       rowcolorstate[int1]:= normal.color;
+       rowfontstate[int1]:= normal.font;
        lwo1:= fdatacols.rowstate[int1].selected;
-       if lwo1 <> selected then begin
+       if lwo1 <> normal.selected then begin
         fdatacols.rowstate.getitempo(int1)^.selected:= lwo1;
        end;
-       rowhidden[int1]:= fold and foldhiddenmask <> 0;
-       rowfoldlevel[int1]:= fold and foldlevelmask;
+       rowhidden[int1]:= normal.fold and foldhiddenmask <> 0;
+       rowfoldlevel[int1]:= normal.fold and foldlevelmask;
       end;
      finally
       dec(fcommandlock);
