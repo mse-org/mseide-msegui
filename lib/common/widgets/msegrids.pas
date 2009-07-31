@@ -65,7 +65,7 @@ type
                  og_rowinserting,og_rowdeleting,og_selectedrowsdeleting,
                  og_focuscellonenter,og_containerfocusbackonesc,
                  og_autofirstrow,og_autoappend,og_appendempty,
-                 og_savestate,og_sorted,og_folded,og_merged,
+                 og_savestate,og_sorted,og_folded,og_colmerged,
                  og_colchangeontabkey,og_colchangeonreturnkey,
                  og_wraprow,og_wrapcol,
                  og_visiblerowpagestep,
@@ -2868,7 +2868,7 @@ var
 
 begin
  if not (co_invisible in foptions) or (csdesigning in fgrid.ComponentState) then begin
-  checkmerge:= og_merged in fgrid.foptionsgrid;
+  checkmerge:= og_colmerged in fgrid.foptionsgrid;
   canbeforedrawcell:= fgrid.canevent(tmethod(fonbeforedrawcell));
   canafterdrawcell:= fgrid.canevent(tmethod(fonafterdrawcell));
   hiddenlines:= nil;
@@ -5849,7 +5849,7 @@ begin
   end;
   pt2:= pt1;
   setlength(ar1,count);
-  if (og_merged in fgrid.foptionsgrid) and (self is tdatacols) then begin
+  if (og_colmerged in fgrid.foptionsgrid) and (self is tdatacols) then begin
    for int1:= 0 to high(ar1) do begin
     with tcol(fitems[int1]) do begin
      int4:= 0;
@@ -10014,7 +10014,7 @@ begin  //cellrect
     end;
     if not isfixr then begin
      updatex(fdatacols[col]);
-     if (og_merged in foptionsgrid) and not nomerged then begin
+     if (og_colmerged in foptionsgrid) and not nomerged then begin
       if (row >= 0) and (row < frowcount) and
                            (col < fdatacols.flastvisiblecol) then begin
        po1:= fdatacols.frowstate.getitempocolmerge(row);
@@ -11635,7 +11635,7 @@ end;
 
 procedure tcustomgrid.setoptionsgrid(const avalue: optionsgridty);
 const
- mask1: optionsgridty = [og_merged];
+ mask1: optionsgridty = [og_colmerged];
 var
  level1: rowinfolevelty;
 begin
@@ -11646,7 +11646,7 @@ begin
   if (longword(avalue) xor longword(foptionsgrid)) and longword(mask1) <> 0 then begin
    fdatacols.frowstate.free;
    level1:= ril_normal;
-   if og_merged in avalue then begin
+   if og_colmerged in avalue then begin
     level1:= ril_colmerge;
    end;
    fdatacols.frowstate:= trowstatelist.create(self,level1);
@@ -11761,7 +11761,7 @@ end;
 function tcustomgrid.getmerged(const arow: integer): longword;
 begin
  result:= 0;
- if (og_merged in foptionsgrid) and (arow >= 0) then begin
+ if (og_colmerged in foptionsgrid) and (arow >= 0) then begin
   result:= fdatacols.frowstate.getitempocolmerge(arow)^.colmerge.merged;
  end;
 end;
