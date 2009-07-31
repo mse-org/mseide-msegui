@@ -25,12 +25,15 @@ type
    procedure cleardown;
   published
  end;
+ psumprop = ^tsumprop;
  
  tsumarrayprop = class(tindexpersistentarrayprop)
   protected
    procedure clearup;
    procedure cleardown;
-   function newsum(alevel: integer; const asum: realty;
+   function newsumup(const alevel: integer; const asum: realty;
+                                     const aindex: integer): realty;
+   function newsumdown(const alevel: integer; const asum: realty;
                                      const aindex: integer): realty;
    function needsclear(const aindex: integer): boolean;
   public
@@ -61,6 +64,7 @@ type
 
    property sumlevel[index: integer]: sumlevelty read getsumlevel 
                             write setsumlevel;
+             //0 -> no sum > 0 top down, < 0 bottom up
 //   property sum[index: integer]: realty read getsum;
   published
    property sums: tsumarrayprop read fsums write setsums;
@@ -168,7 +172,7 @@ end;
 procedure trealsumlist.clean(const start,stop: integer);
 var
  po1: prealsumty;
- int1: integer;
+ int1,int2: integer;
  rea1: realty;
 begin
  if stop >= fdirtyup then begin
@@ -184,12 +188,18 @@ begin
   po1:= datapo;
   inc(po1,fdirtyup);
   for int1:= fdirtyup to stop do begin
-   if po1^.level = 0 then begin
+   int2:= po1^.level;
+   if int2 = 0 then begin
     rea1:= addrealty(rea1,po1^.data);
    end
    else begin
-    if po1^.level > 0 then begin
-     po1^.data:= fsums.newsum(po1^.level,rea1,int1);
+    if int2 > 0 then begin
+     if int2 <= high(fsums.fitems) then begin
+      po1^.data:= fsums.newsumup(int2-1,rea1,int1);
+     end
+     else begin
+      po1^.data:= rea1;
+     end;
     end;
    end;
    po1^.sumup:= rea1;
@@ -210,12 +220,18 @@ begin
   po1:= datapo;
   inc(po1,fdirtydown);
   for int1:= fdirtydown downto start do begin
-   if po1^.level = 0 then begin
+   int2:= -po1^.level;
+   if int2 = 0 then begin
     rea1:= addrealty(rea1,po1^.data);
    end
    else begin
-    if po1^.level < 0 then begin
-     po1^.data:= fsums.newsum(po1^.level,rea1,int1);
+    if int2 > 0 then begin
+     if int2 <= high(fsums.fitems) then begin
+      po1^.data:= fsums.newsumdown(int2-1,rea1,int1);
+     end
+     else begin
+      po1^.data:= rea1;
+     end;
     end;
    end;
    po1^.sumdown:= rea1;
@@ -296,29 +312,33 @@ begin
  end;
 end;
 
-function tsumarrayprop.newsum(alevel: integer;
+function tsumarrayprop.newsumup(const alevel: integer;
               const asum: realty; const aindex: integer): realty;
+var
+ po1: psumprop;
+ int1: integer;
 begin
- result:= asum;
- if alevel > 0 then begin
-  dec(alevel);
-  if (alevel >= 0) and (alevel < count) then begin
-   with tsumprop(fitems[alevel])do begin
-    result:= subrealty(asum,fsumup);
-    fsumup:= asum;
-    findexup:= aindex;
-   end;
-  end;
- end
- else begin
-  alevel:= -alevel;
-  if (alevel >= 0) and (alevel < count) then begin
-   with tsumprop(fitems[alevel])do begin
-    result:= subrealty(asum,fsumdown);
-    fsumdown:= asum;
-    findexdown:= aindex;
-   end;
-  end;
+ po1:= psumprop(@fitems[alevel]);
+ result:= subrealty(asum,po1^.fsumup);
+ for int1:= alevel to high(fitems) do begin
+  po1^.fsumup:= asum;
+  po1^.findexup:= aindex;
+  inc(po1);
+ end;
+end;
+
+function tsumarrayprop.newsumdown(const alevel: integer;
+              const asum: realty; const aindex: integer): realty;
+var
+ po1: psumprop;
+ int1: integer;
+begin
+ po1:= psumprop(@fitems[alevel]);
+ result:= subrealty(asum,po1^.fsumdown);
+ for int1:= alevel to high(fitems) do begin
+  po1^.fsumdown:= asum;
+  po1^.findexdown:= aindex;
+  inc(po1);
  end;
 end;
 
@@ -326,15 +346,10 @@ function tsumarrayprop.needsclear(const aindex: integer): boolean;
 var
  int1: integer;
 begin
- result:= aindex < 0;
+ result:= (aindex < 0);
  if not result then begin
-  for int1:= 0 to high(fitems) do begin
-   with tsumprop(fitems[int1]) do begin
-    if (aindex <= findexup) or (aindex >= findexdown) then begin
-     result:= true;
-     break;
-    end;
-   end;
+  with tsumprop(fitems[high(fitems)]) do begin
+   result:= (aindex <= findexup) or (aindex >= findexdown);
   end;
  end;
 end;
