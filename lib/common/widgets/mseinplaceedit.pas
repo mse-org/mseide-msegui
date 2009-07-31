@@ -1107,10 +1107,10 @@ begin
        finished:= false;
        nochars:= true;
       end;
-      key_space: begin          //nochars with modifier
-       finished:= false;
-       nochars:= shiftstate1 <> [];
-      end;
+//      key_space: begin          //nochars with modifier
+//       finished:= false;
+//       nochars:= shiftstate1 <> [];
+//      end;
       key_home: begin
        if locating and (shiftstate1 = []) then begin
         filtertext:= '';
