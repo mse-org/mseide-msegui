@@ -581,7 +581,7 @@ type
  rowstatenumty = -1..126; //msb = row readonly flag for rowfontstate,
                           //reserved for rowcolorstate
 
- rowinfolevelty = (ril_normal,ril_colmerge);
+ rowinfolevelty = (ril_normal,ril_colmerge,ril_rowheight);
  foldlevelty = 0..127;
  rowstatety = packed record
   selected: longword; //bitset lsb = col 0, msb-1 = col 30, msb = whole row
@@ -607,10 +607,22 @@ type
  prowstatecolmergety = ^rowstatecolmergety;
  rowstatecolmergeaty = array[0..0] of rowstatecolmergety;
  prowstatecolmergeaty  = ^rowstatecolmergeaty;
- 
+
+ rowheightty = packed record
+  height: integer;
+  ypos: integer;
+ end;
+ rowstaterowheightty = packed record
+  normal: rowstatety;
+  colmerge: colmergety;
+  rowheight: rowheightty;
+ end;
+ prowstaterowheightty = ^rowstaterowheightty;
+ rowstaterowheightaty = array[0..0] of rowstaterowheightty;
+ prowstaterowheightaty  = ^rowstaterowheightaty;
+  
  tcustomrowstatelist = class(tdatalist)
   private
-   finfolevel: rowinfolevelty;
    function getrowstate(const index: integer): rowstatety;
    procedure setrowstate(const index: integer; const Value: rowstatety);
    function getrowstatecolmerge(const index: integer): rowstatecolmergety;
@@ -628,6 +640,7 @@ type
    function getmerged(const index: integer): longword;
    procedure setmerged(const index: integer; const avalue: longword);
   protected
+   finfolevel: rowinfolevelty;
    function gethidden(const index: integer): boolean;
    function getfoldlevel(const index: integer): foldlevelty;
    procedure checkinfolevel(const wantedlevel: rowinfolevelty);
@@ -637,8 +650,10 @@ type
    procedure assign(source: tpersistent); override;
    function datatyp: datatypty; override;
    function datapocolmerge: pointer;
+   function dataporowheight: pointer;
    function getitempo(const index: integer): prowstatety;
    function getitempocolmerge(const index: integer): prowstatecolmergety;
+   function getitemporowheight(const index: integer): prowstaterowheightty;
    property items[const index: integer]: rowstatety read getrowstate 
                                               write setrowstate; default;
    property itemscolmerge[const index: integer]: rowstatecolmergety
@@ -6097,6 +6112,9 @@ begin
   ril_colmerge: begin
    fsize:= sizeof(rowstatecolmergety);
   end;
+  ril_rowheight: begin
+   fsize:= sizeof(rowstaterowheightty);
+  end;
   else begin
    fsize:= sizeof(rowstatety);
   end;
@@ -6306,10 +6324,22 @@ begin
  result:= datapo;
 end;
 
+function tcustomrowstatelist.dataporowheight: pointer;
+begin
+ checkinfolevel(ril_rowheight);
+ result:= datapo;
+end;
+
 function tcustomrowstatelist.getitempocolmerge(const index: integer): prowstatecolmergety;
 begin
  checkinfolevel(ril_colmerge);
  result:= prowstatecolmergety(inherited getitempo(index));
+end;
+
+function tcustomrowstatelist.getitemporowheight(const index: integer): prowstaterowheightty;
+begin
+ checkinfolevel(ril_rowheight);
+ result:= prowstaterowheightty(inherited getitempo(index));
 end;
 
 { tlinindexmse }
