@@ -717,7 +717,7 @@ type
    procedure setvisible(const avalue: boolean);
   protected
    ftextinfo: drawtextinfoty;
-   procedure updatelayout; override;
+//   procedure updatelayout; override;
    procedure setoptions(const Value: coloptionsty); override;
    procedure drawcell(const canvas: tcanvas); override;
    procedure moverow(const fromindex,toindex: integer; const count: integer = 1); override;
@@ -1142,7 +1142,7 @@ type
                  //returns count of visible previous rows
    function visiblerowcount: integer;
    function visiblerowtoindex(const avisibleindex: integer): integer;
-   function visiblerows(const astart: integer; acount: integer): integerarty;
+   function visiblerows1(const astart: integer; const aendy: integer): integerarty;
    procedure updatefoldinfo(const rows: integerarty;
                                            var infos: rowfoldinfoarty);
    function visiblerowstep(const arow: integer; const step: integer;
@@ -5721,6 +5721,7 @@ begin
  inherited;
  with cellinfoty(canvas.drawinfopo^) do begin
   if not notext then begin
+   ftextinfo.dest:= innerrect;
    if cell.row < fcaptions.count then begin
     ftextinfo.text.text:= fcaptions[cell.row];
     drawtext(canvas,ftextinfo);
@@ -5780,11 +5781,13 @@ begin
  end;
 end;
 
+{
 procedure tfixcol.updatelayout;
 begin
  inherited;
  ftextinfo.dest:= fcellinfo.innerrect;
 end;
+}
 
 procedure tfixcol.paint(const info: colpaintinfoty);
 begin
@@ -7794,10 +7797,12 @@ var
  saveindex: integer;
  linewidthbefore: integer;
  rowheight1: boolean;
+ rowstate1: trowstatelist;
 
 begin
  inherited;
  rowheight1:= og_rowheight in foptionsgrid;
+ rowstate1:= fdatacols.frowstate;
  internalupdatelayout(true);
  fnumoffset:= getnumoffset;
  saveindex:= -1;
@@ -7854,10 +7859,31 @@ begin
     with colinfo do begin
      ystep:= self.fystep;
      if rowheight1 then begin
-      startrow:= fdatacols.rowstate.rowindex(rect1.y);
-      ystart:= prowstaterowheightty(fdatacols.frowstate.getitempo(startrow))^.
-                                                          rowheight.ypos;
-      endrow:= fdatacols.rowstate.rowindex(rect1.y+rect1.cy);
+      startrow:= -1;
+      for int1:= high(fvisiblerows) downto 0 do begin
+       with prowstaterowheightty(rowstate1.getitempo(fvisiblerows[int1]))^ do begin
+        if rect1.y >= rowheight.ypos then begin
+         startrow:= int1;
+         ystart:= rowheight.ypos;
+         break;
+        end;
+       end;
+      end;
+      if startrow < 0 then begin
+       startrow:= 0;
+       ystart:= prowstaterowheightty(
+                 rowstate1.getitempo(fvisiblerows[0]))^.rowheight.ypos;
+      end;
+      endrow:= high(fvisiblerows);
+      int2:= rect1.y + rect1.cy;
+      for int1:= startrow to high(fvisiblerows) do begin
+       if prowstaterowheightty(
+               rowstate1.getitempo(fvisiblerows[int1]))^.rowheight.ypos >
+                      int2 then begin
+        endrow:= int1;
+        break;
+       end;
+      end;
      end
      else begin
       startrow:= rect1.y div ystep - fvisiblerowsbase;
@@ -7895,7 +7921,7 @@ begin
        int3:= tframe1(fframe).finnerclientrect.cx{ - 1};
        for int1:= 0 to high(lines) do begin
         if rowheight1 then begin
-         inc(int2,fdatacols.frowstate.internalystep(fvisiblerows[int1]));
+         inc(int2,rowstate1.internalystep(fvisiblerows[int1+startrow]));
         end
         else begin
          inc(int2,ystep);
@@ -10707,8 +10733,8 @@ begin
      fvisiblerows:= nil;
     end
     else begin
-     fvisiblerows:= fdatacols.frowstate.visiblerows(fvisiblerowsbase,
-                        fdatarect.cy div fdatarowheight + 2);
+     fvisiblerows:= fdatacols.frowstate.visiblerows1(fvisiblerowsbase,
+                         fdatarect.cy - fscrollrect.y{ div fdatarowheight + 2});
      int1:= high(fvisiblerows);
      while fvisiblerows[int1] > flastvisiblerow do begin
       dec(int1);
@@ -13785,11 +13811,19 @@ begin
 end;
 
 
-function trowstatelist.visiblerows(const astart: integer;
-               acount: integer): integerarty;
+function trowstatelist.visiblerows1(const astart: integer;
+               const aendy: integer): integerarty;
 var
  int1,int2: integer;
+ acount: integer;
 begin                         //todo: optimize
+ if og_rowheight in fgrid.foptionsgrid then begin
+  acount:= cellrow(rowindex(aendy));
+ end
+ else begin
+  acount:= aendy div fgrid.fdatarowheight;
+ end;
+ acount:= acount - astart + 2;
  if ffolded then begin
   cleanvisible(astart+acount);
   int1:= visiblerowcount;
