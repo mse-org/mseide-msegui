@@ -1127,6 +1127,7 @@ type
    procedure cleanrowheight(const aindex: integer);
    procedure checkdirty(const arow: integer);
    procedure recalchidden;
+   procedure readstate(const reader; const acount: integer); override;
    function getstatdata(const index: integer): msestring; override;
    procedure setstatdata(const index: integer; const value: msestring);
                                  override;
@@ -6872,10 +6873,11 @@ begin
    cols[int1].dostatread(reader);
   end;
   if not (gs_isdb in fgrid.fstate) then begin
-   if frowstate.folded then begin
-    reader.readdatalist('fold',frowstate);
-   end;
    int2:= 0;
+   if fgrid.foptionsgrid * [og_folded,og_colmerged,og_rowheight] <> [] then begin
+    reader.readdatalist('rowstate',frowstate);
+    int2:= frowstate.count;
+   end;
    for int1:= 0 to count - 1 do begin
     with cols[int1] do begin
      if (fdata <> nil) and (fdata.count > int2) then begin
@@ -6906,9 +6908,9 @@ begin
  inherited;
  if og_savestate in fgrid.foptionsgrid then begin
   writer.writeinteger('sortcol',sortcol);
-  if frowstate.folded then begin
-   writer.writedatalist('fold',frowstate);
-  end;
+ end;
+ if fgrid.foptionsgrid * [og_folded,og_colmerged,og_rowheight] <> [] then begin
+  writer.writedatalist('rowstate',frowstate);
  end;
 end;
 
@@ -12701,7 +12703,7 @@ end;
 
 procedure tcustomgrid.setrowheight(const index: integer; avalue: integer);
 begin
- if avalue < fdatarowheightmin then begin 
+ if (avalue <> 0) and (avalue < fdatarowheightmin) then begin 
   avalue:= fdatarowheightmin;
  end
  else begin
@@ -14110,13 +14112,42 @@ end;
 
 function trowstatelist.getstatdata(const index: integer): msestring;
 begin
- result:= inttostr(prowstatety(inherited getitempo(index))^.fold);
+ with prowstaterowheightty(inherited getitempo(index))^ do begin
+  result:= inttostr(normal.fold);
+  if finfolevel >= ril_colmerge then begin
+   result:= result + ' ' + inttostr(colmerge.merged);
+  end;
+  if (finfolevel >= ril_rowheight) and 
+                      (og_savestate in fgrid.foptionsgrid) then begin
+   result:= result + ' ' + inttostr(rowheight.height);
+  end;
+ end;
 end;
 
 procedure trowstatelist.setstatdata(const index: integer;
                const value: msestring);
+var
+ ar1: msestringarty;
 begin
- prowstatety(inherited getitempo(index))^.fold:= strtoint(value);
+ splitstring(value,ar1,' ');
+ if high(ar1) >= 0 then begin
+  with prowstaterowheightty(inherited getitempo(index))^ do begin
+   normal.fold:= strtoint(ar1[0]);
+   if (finfolevel >= ril_colmerge) and (high(ar1) > 0) then begin
+    colmerge.merged:= strtoint(ar1[1]);
+   end;
+   if (og_savestate in fgrid.foptionsgrid) and (finfolevel >= ril_rowheight) and (high(ar1) > 1) then begin
+    rowheight.height:= strtoint(ar1[2]);
+    if (rowheight.height <> 0) and 
+                      (rowheight.height < fgrid.fdatarowheightmin) then begin
+     rowheight.height:= fgrid.fdatarowheightmin;
+    end;
+    if rowheight.height > fgrid.fdatarowheightmax then begin
+     rowheight.height:= fgrid.fdatarowheightmax;
+    end;
+   end;
+  end;
+ end;
 end;
 
 function trowstatelist.getrowheight(const index: integer): integer;
@@ -14201,6 +14232,14 @@ begin
   else begin
   end;
  end;
+end;
+
+procedure trowstatelist.readstate(const reader; const acount: integer);
+begin
+ fdirtyvisible:= 0;
+ fdirtyrow:= 0;
+ fdirtyrowheight:= 0;
+ inherited;
 end;
 
 end.
