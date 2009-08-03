@@ -13688,7 +13688,7 @@ end;
 function trowstatelist.cellrow(const arow: integer): integer;
 begin
  result:= arow;
- if ffolded then begin
+ if ffolded and (arow >= 0) then begin
   clean(arow);
   result:= fvisiblerowmap[arow];
  end;
@@ -13841,32 +13841,41 @@ var
  int1,int2: integer;
  acount: integer;
 begin                         //todo: optimize
- if og_rowheight in fgrid.foptionsgrid then begin
-  acount:= cellrow(rowindex(aendy));
- end
- else begin
-  acount:= aendy div fgrid.fdatarowheight;
- end;
- acount:= acount - astart + 2;
- if ffolded then begin
-  cleanvisible(astart+acount);
-  int1:= visiblerowcount;
-  if astart + acount > int1 then begin
-   acount:= int1 - astart;
-  end;
-  if acount > 0 then begin
-   result:= copy(fvisiblerows,astart,acount);
+ result:= nil;
+ if count > 0 then begin
+  if og_rowheight in fgrid.foptionsgrid then begin
+   int1:= rowindex(aendy);
+   if int1 < 0 then begin
+    acount:= cellrow(count-1);
+   end
+   else begin
+    acount:= cellrow(int1);
+   end;
   end
   else begin
-   result:= nil;
+   acount:= aendy div fgrid.fdatarowheight;
   end;
- end
- else begin
-  setlength(result,acount);
-  int2:= astart;
-  for int1:= 0 to high(result) do begin
-   result[int1]:= int2;
-   inc(int2);
+  acount:= acount - astart + 2;
+  if ffolded then begin
+   cleanvisible(astart+acount);
+   int1:= visiblerowcount;
+   if astart + acount > int1 then begin
+    acount:= int1 - astart;
+   end;
+   if acount > 0 then begin
+    result:= copy(fvisiblerows,astart,acount);
+   end
+   else begin
+    result:= nil;
+   end;
+  end
+  else begin
+   setlength(result,acount);
+   int2:= astart;
+   for int1:= 0 to high(result) do begin
+    result[int1]:= int2;
+    inc(int2);
+   end;
   end;
  end;
 end;
@@ -14141,7 +14150,7 @@ begin
      result:= result + fgrid.fdatarowheight + fgrid.fdatarowlinewidth;
     end
     else begin
-     result:= result + rowheight.height;
+     result:= result + rowheight.height + fgrid.fdatarowlinewidth;
     end;
    end;
   end;
@@ -14172,11 +14181,25 @@ end;
 function trowstatelist.rowindex(const aypos: integer): integer;
 var
  po1: prowstaterowheightty;
+ int1: integer;
 begin
- cleanrowheight(fgrid.frowcount-1);
+ cleanrowheight(count-1);
  po1:= dataporowheight;
  if not findarrayvalue(aypos,po1,count,@comprowypos,fsize,result) then begin
   dec(result);
+  if (result = count-1) then begin
+   with po1[result] do begin 
+    int1:= rowheight.ypos + fgrid.fdatarowlinewidth + rowheight.height;
+    if rowheight.height = 0 then begin
+     int1:= int1 + fgrid.fdatarowheight;
+    end;
+    if aypos >= int1 then begin
+     result:= invalidaxis;
+    end;
+   end;
+  end
+  else begin
+  end;
  end;
 end;
 
