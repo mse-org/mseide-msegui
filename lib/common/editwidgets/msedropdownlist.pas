@@ -1269,8 +1269,9 @@ begin
  else begin
   if int1 = -2 then begin //empty row selected
    int1:= -1;
+   fcols.fitemindex:= int1;
    if deo_selectonly in foptions then begin
-    fcols.fitemindex:= int1;
+//    fcols.fitemindex:= int1;
     fcols.fkeyvalue:= '';
     setdropdowntext('',true,false,akey);
    end
