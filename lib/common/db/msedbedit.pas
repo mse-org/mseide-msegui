@@ -1414,6 +1414,8 @@ type
    property datarowlinecolorfix;
    property datarowlinecolor;
    property datarowheight;
+   property datarowheightmin;
+   property datarowheightmax;
 
    property statfile;
    property statvarname;
@@ -1667,6 +1669,8 @@ type
    property datarowlinecolorfix;
    property datarowlinecolor;
    property datarowheight;
+   property datarowheightmin;
+   property datarowheightmax;
    property caretwidth;
 
    property statfile;

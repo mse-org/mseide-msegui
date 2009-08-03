@@ -1502,6 +1502,8 @@ type
    fonscrollrows: gridscrolleventty;
 
    fonsortchanged: gridnotifyeventty;
+   fdatarowheightmin: integer;
+   fdatarowheightmax: integer;
    procedure setframe(const avalue: tgridframe);
    function getframe: tgridframe;
    procedure setstatfile(const Value: tstatfile);
@@ -1548,7 +1550,7 @@ type
    function getrowfoldlevel(const index: integer): foldlevelty;
    procedure setrowfoldlevel(const index: integer; const avalue: foldlevelty);
    function getrowheight(const index: integer): integer;
-   procedure setrowheight(const index: integer; const avalue: integer);
+   procedure setrowheight(const index: integer; avalue: integer);
   protected
    fupdating: integer;
    ffocuscount: integer;
@@ -1859,6 +1861,10 @@ type
                 write setdatarowlinecolor default defaultdatalinecolor;
    property datarowheight: integer read fdatarowheight
                 write setdatarowheight default griddefaultrowheight;
+   property datarowheightmin: integer read fdatarowheightmin
+                                        write fdatarowheightmin default 1;
+   property datarowheightmax: integer read fdatarowheightmax
+                                        write fdatarowheightmax default maxint;
 
    property datacols: tdatacols read fdatacols write setdatacols;
    property fixcols: tfixcols read ffixcols write setfixcols;
@@ -1981,6 +1987,8 @@ type
    property datarowlinecolorfix;
    property datarowlinecolor;
    property datarowheight;
+   property datarowheightmin;
+   property datarowheightmax;
 
    property statfile;
    property statvarname;
@@ -2092,6 +2100,8 @@ type
    property datarowlinecolorfix;
    property datarowlinecolor;
    property datarowheight;
+   property datarowheightmin;
+   property datarowheightmax;
    property caretwidth;
 
    property statfile;
@@ -7405,6 +7415,8 @@ begin
  fdatarowlinecolor:= defaultdatalinecolor;
 
  fdatarowheight:= griddefaultrowheight;
+ fdatarowheightmin:= 1;
+ fdatarowheightmax:= maxint;
 
  fgridframecolor:= cl_black;
 
@@ -8301,11 +8313,16 @@ end;
 procedure tcustomgrid.setdatarowheight(const value: integer);
 begin
  if fdatarowheight <> value then begin
-  if value < 1 then begin
-   fdatarowheight:= 1;
+  if value < fdatarowheightmin then begin
+   fdatarowheight:= fdatarowheightmin;
   end
   else begin
-   fdatarowheight:= value;
+   if value > fdatarowheightmax then begin
+    fdatarowheight:= fdatarowheightmax;
+   end
+   else begin
+    fdatarowheight:= value;
+   end;
   end;
   layoutchanged;
  end;
@@ -12682,9 +12699,16 @@ begin
  result:= fdatacols.frowstate.rowheight[index];
 end;
 
-procedure tcustomgrid.setrowheight(const index: integer;
-                                                 const avalue: integer);
+procedure tcustomgrid.setrowheight(const index: integer; avalue: integer);
 begin
+ if avalue < fdatarowheightmin then begin 
+  avalue:= fdatarowheightmin;
+ end
+ else begin
+  if avalue > fdatarowheightmax then begin
+   avalue:= fdatarowheightmax;
+  end;
+ end; 
  fdatacols.frowstate.rowheight[index]:= avalue;
 end;
 

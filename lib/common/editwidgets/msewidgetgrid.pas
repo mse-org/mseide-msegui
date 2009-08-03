@@ -296,6 +296,8 @@ type
    property datarowlinecolorfix;
    property datarowlinecolor;
    property datarowheight;
+   property datarowheightmin;
+   property datarowheightmax;
 
    property statfile;
    property statvarname;
