@@ -234,7 +234,7 @@ type
  end;
 
  rowfoldinfoty = record
-  foldlevel: foldlevelty;
+  foldlevel: byte;
   isvisible: boolean;
   haschildren: boolean;
   isopen: boolean;
@@ -1109,7 +1109,7 @@ type
    function isvisible(const arow: integer): boolean;
    procedure counthidden(var aindex: integer);
    procedure sethidden(const index: integer; const avalue: boolean);
-   procedure setfoldlevel(const index: integer; const avalue: foldlevelty);
+   procedure setfoldlevel(const index: integer; const avalue: byte);
    procedure setfolded(const avalue: boolean);
    function getrowheight(const index: integer): integer;
    procedure setrowheight(const index: integer; const avalue: integer);
@@ -1151,13 +1151,13 @@ type
    function rowhidden(const arow: integer): boolean;
    function nearestvisiblerow(const arow: integer): integer;
    procedure getfoldstate(const arow: integer; out aisvisible: boolean; 
-                out afoldlevel: foldlevelty; out ahaschildren,aisopen: boolean);
+                out afoldlevel: byte; out ahaschildren,aisopen: boolean);
    procedure hidechildren(const arow: integer);
    procedure showchildren(const arow: integer);
    property folded: boolean read ffolded write setfolded;
    procedure setupfoldinfo(asource: pbyte; const acount: integer);
    property hidden[const index: integer]: boolean read gethidden write sethidden;
-   property foldlevel[const index: integer]: foldlevelty read getfoldlevel write setfoldlevel;
+   property foldlevel[const index: integer]: byte read getfoldlevel write setfoldlevel;
                                                            //0..127
    property rowheight[const index: integer]: integer read getrowheight 
                                                             write setrowheight;
@@ -1548,8 +1548,8 @@ type
    procedure setrowreadonlystate(const index: integer; const avalue: boolean);
    function getrowhidden(const index: integer): boolean;
    procedure setrowhidden(const index: integer; const avalue: boolean);
-   function getrowfoldlevel(const index: integer): foldlevelty;
-   procedure setrowfoldlevel(const index: integer; const avalue: foldlevelty);
+   function getrowfoldlevel(const index: integer): byte;
+   procedure setrowfoldlevel(const index: integer; const avalue: byte);
    function getrowheight(const index: integer): integer;
    procedure setrowheight(const index: integer; avalue: integer);
   protected
@@ -1898,7 +1898,7 @@ type
                         write setrowreadonlystate;
    property rowhidden[const index: integer]: boolean read getrowhidden 
                         write setrowhidden;
-   property rowfoldlevel[const index: integer]: foldlevelty read getrowfoldlevel 
+   property rowfoldlevel[const index: integer]: byte read getrowfoldlevel 
                         write setrowfoldlevel;
    function rowfoldinfo: prowfoldinfoty; //nil if focused row not visible
    property rowheight[const index: integer]: integer read getrowheight
@@ -2943,7 +2943,7 @@ begin
        heightextend:= int2 - rect.cy;
        inc(rect.cy,heightextend);      
        inc(innerrect.cy,heightextend);      
-       inc(frameinnerrect.cy,widthextend);
+       inc(frameinnerrect.cy,heightextend);
       end;
      end;
      widthextend:= 0;
@@ -4948,8 +4948,10 @@ begin
      po1:= fgrid.fdatacols.frowstate.datapo;
      ca1:= not (bits[ident] {or wholerowselectedmask});
      if fselectedrow >= 0 then begin
-      prowstateaty(po1)^[fselectedrow].selected:= 
-               prowstateaty(po1)^[fselectedrow].selected and ca1;
+      with prowstatety(pchar(po1)+
+             fselectedrow*fgrid.fdatacols.frowstate.fsize)^ do begin
+       selected:= selected and ca1;
+      end;
       invalidatecell(fselectedrow);
 //      cellchanged(fselectedrow);
      end
@@ -5281,7 +5283,8 @@ procedure tdatacol.sortcompare(const index1, index2: integer;
 begin
  if fdata <> nil then begin
   with tdatalist1(fdata) do begin
-   tdatalist1(fdata).compare((fdatapo+index1*fsize)^,(fdatapo+index2*fsize)^,result);
+   tdatalist1(fdata).compare((fdatapo+index1*fsize)^,
+                                (fdatapo+index2*fsize)^,result);
   end;
  end;
 end;
@@ -6436,7 +6439,8 @@ begin
  end
  else begin
   if cell.row >= 0 then begin
-   result:= (frowstate.getitempo(cell.row)^.selected and wholerowselectedmask <> 0);
+   result:= (frowstate.getitempo(cell.row)^.selected and 
+                                              wholerowselectedmask <> 0);
   end
   else begin
    result:= true;
@@ -6456,6 +6460,8 @@ var
  po1: prowstatety;
  ca1: cardinal;
  bo1: boolean;
+ rowstatesize: integer;
+ 
 begin
  fgrid.setselected(cell,value);
 // if not (gs_isdb in fgrid.fstate) then begin
@@ -6498,20 +6504,21 @@ begin
     end
     else begin
      po1:= frowstate.datapo;
+     rowstatesize:= frowstate.fsize;
      if value then begin
       for int1:= 0 to frowstate.count - 1 do begin
        if ca1 <> po1^.selected then begin
         po1^.selected:= ca1;
         fgrid.invalidaterow(int1); //for fixcols
        end;
-       inc(po1);
+       inc(pchar(po1),rowstatesize);
       end;
       fselectedrow:= -2;
      end
      else begin
       if fselectedrow <> -1 then begin
        if fselectedrow >= 0 then begin
-        prowstateaty(po1)^[fselectedrow].selected:= ca1;
+        prowstatety(pchar(po1) + fselectedrow * rowstatesize)^.selected:= ca1;
         fgrid.invalidaterow(fselectedrow); //for fixcols
         bo1:= true;
        end
@@ -6522,7 +6529,7 @@ begin
           fgrid.invalidaterow(int1); //for fixcols
           bo1:= true;
          end;
-         inc(po1);
+         inc(pchar(po1),rowstatesize);
         end;
        end;
        fselectedrow:= -1;
@@ -12665,13 +12672,13 @@ begin
  fdatacols.frowstate.hidden[index]:= avalue;
 end;
 
-function tcustomgrid.getrowfoldlevel(const index: integer): foldlevelty;
+function tcustomgrid.getrowfoldlevel(const index: integer): byte;
 begin
  result:= fdatacols.frowstate.foldlevel[index];
 end;
 
 procedure tcustomgrid.setrowfoldlevel(const index: integer;
-               const avalue: foldlevelty);
+               const avalue: byte);
 begin
  fdatacols.frowstate.foldlevel[index]:= avalue;
 end;
@@ -13392,11 +13399,14 @@ end;
 function trowstatelist.isvisible(const arow: integer): boolean;
 var
  po1: pintegeraty;
- po2: prowstateaty;
+ po2: prowstatety;
  int1: integer;
  by1: byte;
 begin
  if arow < fdirtyrow then begin
+  result:= prowstatety(inherited getitempo(arow))^.fold and 
+                                         currentfoldhiddenmask = 0;
+ {
   po1:= fvisiblerowmap.datapo;
   if arow > 0 then begin
    result:= po1^[arow] <> po1^[arow-1];
@@ -13404,12 +13414,14 @@ begin
   else begin
    result:= po1^[0] >= 0;
   end;
+  }
  end
  else begin
   result:= false;
   po2:= datapo;
+  inc(pchar(po2),arow*fsize);
   for int1:= arow downto 0 do begin
-   by1:= po2^[int1].fold;
+   by1:= po2^.fold;
    if by1 = 0 then begin
     result:= true;
     break;
@@ -13417,33 +13429,37 @@ begin
    if (by1 and foldhiddenmask <> 0) or (by1 and foldlevelmask = 0) then begin
     break;
    end;
+   dec(pchar(po2),fsize);
   end;  
  end;
 end;
 
 procedure trowstatelist.counthidden(var aindex: integer);
 var                    //todo: optimize
- po1: prowstateaty;
- level1,level2: foldlevelty;
+ po1: prowstatety;
+ level1,level2: byte;
 begin
- po1:= prowstateaty(datapo);
- level1:= po1^[aindex].fold and foldlevelmask;
+ po1:= datapo;
+ inc(pchar(po1),aindex*fsize);
+ level1:= po1^.fold and foldlevelmask;
  while (aindex < count) do begin
-  level2:= po1^[aindex].fold and foldlevelmask;
+  level2:= po1^.fold and foldlevelmask;
   if level2 < level1 then begin
    break;
   end;
-  if po1^[aindex].fold and foldhiddenmask = 0 then begin
+  if po1^.fold and foldhiddenmask = 0 then begin
    if level2 > level1 then begin
     counthidden(aindex);
    end
    else begin //same level
     inc(fhiddencount);
     inc(aindex);
+    inc(pchar(po1),fsize);
    end;
   end
   else begin
    inc(aindex);
+   inc(pchar(po1),fsize);
   end;
  end;  
 end;
@@ -13452,7 +13468,7 @@ procedure trowstatelist.recalchidden;
 var
  int1: integer;
  po1: prowstatety;
- lev1: foldlevelty;
+ lev1: byte;
 begin
  checkdirty(0);
  fhiddencount:= 0;
@@ -13496,14 +13512,15 @@ end;
 procedure trowstatelist.internalshow(var aindex: integer);
 var
  int1,int2: integer;
- po1: prowstateaty;
+ po1: prowstatety;
 begin
  dec(fhiddencount);
  int1:= aindex+1;
  if (int1 < count) then begin
-  po1:= prowstateaty(datapo);
-  if (po1^[int1].fold and foldlevelmask) > 
-                            (po1^[aindex].fold and foldlevelmask) then begin
+  po1:= datapo;
+  inc(pchar(po1),fsize*aindex);
+  if (prowstatety(pchar(po1)+fsize)^.fold and foldlevelmask) > 
+                            (po1^.fold and foldlevelmask) then begin
    int2:= fhiddencount;
    counthidden(int1);
    fhiddencount:= fhiddencount - 2*(fhiddencount-int2);
@@ -13524,14 +13541,15 @@ end;
 procedure trowstatelist.internalhide(var aindex: integer);
 var
  int1: integer; 
- po1: prowstateaty;
+ po1: prowstatety;
 begin
  inc(fhiddencount);
  int1:= aindex+1;
  if (int1 < count) then begin
-  po1:= prowstateaty(datapo);
-  if (po1^[int1].fold and foldlevelmask) > 
-                        (po1^[aindex].fold and foldlevelmask) then begin
+  po1:= datapo;
+  inc(pchar(po1),int1*fsize);
+  if (po1^.fold and foldlevelmask) > 
+             (prowstatety(pchar(po1)-fsize)^.fold and foldlevelmask) then begin
    counthidden(int1);
   end;
  end;
@@ -13550,17 +13568,20 @@ end;
 procedure trowstatelist.hidechildren(const arow: integer);
 var
  int1,int2: integer; 
- po1: prowstateaty;
- level1,level2: foldlevelty;
+ po0: pchar;
+ po1: prowstatety;
+ level1,level2: byte;
  bo1: boolean;
 begin
  checkindexrange(arow);
- po1:= prowstateaty(datapo);
- level1:= po1^[arow].fold and foldlevelmask;
+ po0:= datapo;
+ po1:= prowstatety(po0+arow*fsize);
+ level1:= po1^.fold and foldlevelmask;
  int1:= arow+1;
  bo1:= false;
  while int1 < count do begin
-  with po1^[int1] do begin
+  po1:= prowstatety(po0+int1*fsize);
+  with po1^ do begin
    level2:= fold and foldlevelmask;
    if level2 <= level1 then begin
     break;
@@ -13572,9 +13593,10 @@ begin
     internalhide(int1);
    end
    else begin
-    while (int1 < count) and (po1^[int1].fold and foldhiddenmask >
+    while (int1 < count) and (po1^.fold and foldhiddenmask >
                                                           level2) do begin
      inc(int1);
+     inc(po1,fsize);
     end;
    end;
   end;
@@ -13588,18 +13610,21 @@ end;
 procedure trowstatelist.showchildren(const arow: integer);
 var
  int1,int2: integer; 
- po1: prowstateaty;
- level1,level2: foldlevelty;
+ po0: pchar;
+ po1: prowstatety;
+ level1,level2: byte;
  bo1: boolean;
 begin
  checkindexrange(arow);
- po1:= prowstateaty(datapo);
- level1:= po1^[arow].fold and foldlevelmask;
+ po0:= datapo;
+ po1:= prowstatety(po0+arow*fsize);
+ level1:= po1^.fold and foldlevelmask;
  int1:= arow+1;
  bo1:= false;
  while int1 < count do begin
+  po1:= prowstatety(po0+int1*fsize);
   int2:= int1;
-  with po1^[int1] do begin
+  with po1^ do begin
    level2:= fold and foldlevelmask;
    if level2 <= level1 then begin
     break;
@@ -13611,9 +13636,10 @@ begin
     internalshow(int1);
    end
    else begin
-    while (int1 < count) and (po1^[int1].fold and foldhiddenmask >
+    while (int1 < count) and (po1^.fold and foldhiddenmask >
                                                           level2) do begin
      inc(int1);
+     inc(pchar(po1),fsize);
     end;
    end;
   end;
@@ -13656,7 +13682,7 @@ begin
 end;
 
 procedure trowstatelist.setfoldlevel(const index: integer;
-               const avalue: foldlevelty);
+               const avalue: byte);
 var
  po1: prowstatety;
 begin
@@ -13699,6 +13725,9 @@ end;
 procedure trowstatelist.checkdirty(const arow: integer);
 begin
  if ffolded then begin
+  if arow < fdirtyrowheight then begin
+   fdirtyrowheight:= arow;
+  end;
   if arow < fdirtyrow then begin
    fdirtyrow:= arow;
    fdirtyvisible:= 0;
@@ -13730,26 +13759,28 @@ var
  int1,int2: integer;
  rowstat1: prowstatety;
  visirow1: pinteger;
- level1: foldlevelty;
+ level1: byte;
 begin                  //todo: optimize
  int2:= 0;
  if fdirtyvisible > 0 then begin
   int2:= fvisiblerows[fdirtyvisible-1]+1;  //first row to check
  end;
- rowstat1:= @prowstateaty(datapo)^[int2];
+ rowstat1:= prowstatety(pchar(datapo)+int2*fsize);
  visirow1:= @pintegeraty(fvisiblerowmap.datapo)^[int2];
- int1:= fdirtyvisible-1;
+ int1:= fdirtyvisible-1; //visible row index
  while int1 < visibleindex do begin
   while (rowstat1^.fold and foldhiddenmask <> 0) and (int2 <= arow) do begin
+   rowstat1^.fold:= rowstat1^.fold or currentfoldhiddenmask;
    level1:= rowstat1^.fold and foldlevelmask;
    visirow1^:= int1;
-   inc(rowstat1);
+   inc(pchar(rowstat1),fsize);
    inc(visirow1);
    inc(int2);
    while (int2 <= arow) and 
                      (rowstat1^.fold and foldlevelmask > level1) do begin
     visirow1^:= int1;
-    inc(rowstat1);
+    rowstat1^.fold:= rowstat1^.fold or currentfoldhiddenmask;
+    inc(pchar(rowstat1),fsize);
     inc(visirow1);
     inc(int2);
    end;
@@ -13758,8 +13789,9 @@ begin                  //todo: optimize
    inc(int1);
    visirow1^:= int1;
    fvisiblerows[int1]:= int2;
+   rowstat1^.fold:= rowstat1^.fold and not currentfoldhiddenmask;
    inc(int2);
-   inc(rowstat1);
+   inc(pchar(rowstat1),fsize);
    inc(visirow1);
   end
   else begin
@@ -13803,17 +13835,18 @@ end;
 
 procedure trowstatelist.cleanrowheight(const aindex: integer);
 var
- int1,int2,int3,int4: integer;
+ int1,int2,int3,int4,int5: integer;
  po1: prowstaterowheightty;
+ po2: pintegeraty;
 begin
  if aindex >= fdirtyrowheight then begin
   int4:= fgrid.fdatarowlinewidth;
   int2:= fgrid.fdatarowheight + int4;
   po1:= dataporowheight;
-  dec(po1);
+  dec(pchar(po1),fsize);
   int3:= 0;
   if fdirtyrowheight > 0 then begin
-   inc(po1,fdirtyrowheight);
+   inc(pchar(po1),fdirtyrowheight*fsize);
    int3:= po1^.rowheight.ypos;
    if po1^.rowheight.height = 0 then begin
     int3:= int3 + int2;
@@ -13822,14 +13855,21 @@ begin
     int3:= int3 + po1^.rowheight.height;
    end;
   end;
+  if ffolded then begin
+   cleanvisible(aindex);
+   po2:= fvisiblerowmap.datapo;
+   int5:= fcount - 1;
+  end;
   for int1:= fdirtyrowheight to aindex do begin
-   inc(po1);
+   inc(pchar(po1),fsize);
    po1^.rowheight.ypos:= int3;
-   if po1^.rowheight.height = 0 then begin
-    int3:= int3 + int2;
-   end
-   else begin
-    int3:= int3 + po1^.rowheight.height + int4;
+   if not folded or (po1^.normal.fold and currentfoldhiddenmask = 0) then begin
+    if po1^.rowheight.height = 0 then begin
+     int3:= int3 + int2;
+    end
+    else begin
+     int3:= int3 + po1^.rowheight.height + int4;
+    end;
    end;
   end; 
   fdirtyrowheight:= aindex+1;
@@ -13886,10 +13926,10 @@ procedure trowstatelist.updatefoldinfo(const rows: integerarty;
                                            var infos: rowfoldinfoarty);
 var
  int1,int2: integer;
- po1: prowstateaty;
+ po1: prowstatety;
  po2: prowstatety;
  po3: prowfoldinfoty;
- level1,level2: foldlevelty;
+ level1,level2: byte;
  lastrow: integer;
  visible1: boolean;
  ar1: booleanarty;
@@ -13905,11 +13945,11 @@ begin
   end;
   po1:= datapo;
   lastrow:= rows[high(rows)];
-  po2:= @po1^[lastrow];
+  po2:= prowstatety(pchar(po1)+lastrow*fsize);
   level1:= po2^.fold and foldlevelmask; //level of last row
   setlength(ar1,level1+1);
   for int1:= lastrow+1 to count-1 do begin  //mark linecontinuations
-   inc(po2);
+   inc(pchar(po2),fsize);
    with po2^ do begin
     if fold and foldhiddenmask = 0 then begin
      level2:= fold and foldlevelmask;
@@ -14064,45 +14104,51 @@ end;
 
 function trowstatelist.nearestvisiblerow(const arow: integer): integer;
 var
- po1: prowstateaty;
+ po1: prowstatety;
  int1: integer;
 begin
  result:= arow;
  if rowhidden(arow) then begin
   po1:= datapo;
+  inc(pchar(po1),arow*fsize);
   for int1:= arow to count -1 do begin
-   if po1^[int1].fold and foldhiddenmask = 0 then begin
+   if po1^.fold and foldhiddenmask = 0 then begin
     result:= int1;
     exit;
    end;
+   inc(pchar(po1),fsize);
   end;
   result:= invalidaxis;
+  po1:= datapo;
+  inc(pchar(po1),(arow-1)*fsize);
   for int1:= arow - 1 downto 0 do begin
-   if po1^[int1].fold and foldhiddenmask = 0 then begin
+   if po1^.fold and foldhiddenmask = 0 then begin
     result:= int1;
     exit;
    end;
+   dec(pchar(po1),fsize);
   end;
  end;
 end;
 
 procedure trowstatelist.getfoldstate(const arow: integer; 
-                       out aisvisible: boolean; out afoldlevel: foldlevelty;
+                       out aisvisible: boolean; out afoldlevel: byte;
                        out ahaschildren,aisopen: boolean);
 var
- po1: prowstateaty;
- nextfoldlevel: foldlevelty;
+ po1: prowstatety;
+ nextfoldlevel: byte;
  by1: byte;
  bo1: boolean;
 begin
  checkindexrange(arow);
  po1:= datapo;
- with po1^[arow] do begin
+ inc(pchar(po1),arow*fsize);
+ with po1^ do begin
   afoldlevel:= fold and foldlevelmask;
   aisvisible:= fold and foldhiddenmask = 0;
   bo1:= arow < count-1;
   if bo1 then begin
-   by1:= po1^[arow+1].fold;
+   by1:= prowstatety(pchar(po1)+fsize)^.fold;
    nextfoldlevel:= by1 and foldlevelmask;
   end;
   ahaschildren:= bo1 and (nextfoldlevel > afoldlevel);
@@ -14212,11 +14258,13 @@ end;
 function trowstatelist.rowindex(const aypos: integer): integer;
 var
  po1: prowstaterowheightty;
- int1: integer;
+ int1,int2: integer;
+ bo1: boolean;
 begin
  cleanrowheight(count-1);
  po1:= dataporowheight;
- if not findarrayvalue(aypos,po1,count,@comprowypos,fsize,result) then begin
+ bo1:= findarrayvalue(aypos,po1,count,@comprowypos,fsize,result);
+ if not bo1 then begin
   dec(result);
   if (result = count-1) then begin
    with po1[result] do begin 
@@ -14228,8 +14276,19 @@ begin
      result:= invalidaxis;
     end;
    end;
-  end
-  else begin
+  end;
+  if (result >= 0) and ffolded then begin
+   cleanvisible(result);
+   int2:= invalidaxis;
+   inc(pchar(po1),result*fsize);
+   for int1:= result downto 0 do begin
+    if po1^.normal.fold and currentfoldhiddenmask = 0 then begin
+     int2:= int1;
+     break;
+    end;
+    dec(po1,fsize);
+   end;
+   result:= int2;
   end;
  end;
 end;

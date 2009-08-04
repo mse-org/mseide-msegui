@@ -160,7 +160,12 @@ end;
 
 function tgridmsestringintdatalist.getdefault: pointer;
 begin
- result:= twidgetcol1(fowner).fintf.getdefaultvalue;
+ result:= nil;
+ with twidgetcol1(fowner) do begin
+  if fintf <> nil then begin
+   result:= fintf.getdefaultvalue;
+  end;
+ end;
 end;
 
   
@@ -381,7 +386,7 @@ end;
 procedure tfoldedit.clientmouseevent(var ainfo: mouseeventinfoty);
 var
  isvisible1,haschildren1,isopen1: boolean;
- foldlevel1: foldlevelty;
+ foldlevel1: byte;
  zone1: cellzonety; 
  row1: integer;
 begin

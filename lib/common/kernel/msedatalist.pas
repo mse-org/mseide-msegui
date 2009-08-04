@@ -569,7 +569,13 @@ type
 const
  foldhiddenbit = 7;
  foldhiddenmask = 1 shl foldhiddenbit;
- foldlevelmask = not foldhiddenmask;
+ currentfoldhiddenbit = 6;
+ currentfoldhiddenmask = 1 shl currentfoldhiddenbit;
+ foldlevelmask = byte(not (foldhiddenmask or currentfoldhiddenmask));
+//type
+// foldlevelty = 0..foldlevelmask; //0..63
+ 
+const
  rowstatemask = $7f;
 
  selectedcolmax = 30; //32 bitset, bit31 -> whole row
@@ -582,13 +588,13 @@ type
                           //reserved for rowcolorstate
 
  rowinfolevelty = (ril_normal,ril_colmerge,ril_rowheight);
- foldlevelty = 0..127;
  rowstatety = packed record
   selected: longword; //bitset lsb = col 0, msb-1 = col 30, msb = whole row
                       //adressed by fcreateindex
   color: byte; //index in rowcolors, 0 = none, 1 = rowcolors[0]
   font: byte;  //index in rowfonts, 0 = none, 1 = rowfonts[0]
-  fold: byte;  // h nnnnnnn  h = hidden, nnnnnnn = fold level, 0 -> top
+  fold: byte;  // hc nnnnnn  h = hidden c = current hidden,
+               //    nnnnnn = fold level, 0 -> top
   dummy: byte;
  end;
  prowstatety = ^rowstatety;
@@ -642,7 +648,7 @@ type
   protected
    finfolevel: rowinfolevelty;
    function gethidden(const index: integer): boolean;
-   function getfoldlevel(const index: integer): foldlevelty;
+   function getfoldlevel(const index: integer): byte;
    procedure checkinfolevel(const wantedlevel: rowinfolevelty);
   public
    constructor create; override;
@@ -6225,7 +6231,7 @@ begin
  end;
 end;
 
-function tcustomrowstatelist.getfoldlevel(const index: integer): foldlevelty;
+function tcustomrowstatelist.getfoldlevel(const index: integer): byte;
 begin
  result:= items[index].fold and foldlevelmask;
 end;

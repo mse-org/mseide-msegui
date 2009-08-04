@@ -555,10 +555,10 @@ type
  tifirowstatelist = class(tcustomrowstatelist)
   private
    procedure sethidden(const index: integer; const avalue: boolean);
-   procedure setfoldlevel(const index: integer; const avalue: foldlevelty);
+   procedure setfoldlevel(const index: integer; const avalue: byte);
   public
    property hidden[const index: integer]: boolean read gethidden write sethidden;
-   property foldlevel[const index: integer]: foldlevelty read getfoldlevel 
+   property foldlevel[const index: integer]: byte read getfoldlevel 
                                   write setfoldlevel;   //0..127
  end;
     
@@ -679,8 +679,8 @@ type
    procedure setrowreadonlystate(const index: integer; const avalue: boolean);
    function getrowhidden(const index: integer): boolean;
    procedure setrowhidden(const index: integer; const avalue: boolean);
-   function getrowfoldlevel(const index: integer): foldlevelty;
-   procedure setrowfoldlevel(const index: integer; const avalue: foldlevelty);
+   function getrowfoldlevel(const index: integer): byte;
+   procedure setrowfoldlevel(const index: integer; const avalue: byte);
   protected
    procedure setselected(const cell: gridcoordty; const avalue: boolean);
   public
@@ -703,7 +703,7 @@ type
                         write setrowreadonlystate;
    property rowhidden[const index: integer]: boolean read getrowhidden 
                         write setrowhidden;
-   property rowfoldlevel[const index: integer]: foldlevelty read getrowfoldlevel 
+   property rowfoldlevel[const index: integer]: byte read getrowfoldlevel 
                         write setrowfoldlevel;
   published
    property ifi: ttxdatagridcontroller read fifi write setifi;
@@ -2949,13 +2949,13 @@ begin
  fdatacols.frowstate.hidden[index]:= avalue;
 end;
 
-function ttxdatagrid.getrowfoldlevel(const index: integer): foldlevelty;
+function ttxdatagrid.getrowfoldlevel(const index: integer): byte;
 begin
  result:= fdatacols.frowstate.foldlevel[index];
 end;
 
 procedure ttxdatagrid.setrowfoldlevel(const index: integer;
-               const avalue: foldlevelty);
+               const avalue: byte);
 begin
  fdatacols.frowstate.foldlevel[index]:= avalue;
 end;
@@ -3588,7 +3588,7 @@ begin
 end;
 
 procedure tifirowstatelist.setfoldlevel(const index: integer;
-               const avalue: foldlevelty);
+               const avalue: byte);
 begin
  replacebits1(byte(getitempo(index)^.fold),byte(avalue),byte(foldlevelmask));
 end;
