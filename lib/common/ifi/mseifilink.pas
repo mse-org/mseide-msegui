@@ -559,7 +559,7 @@ type
   public
    property hidden[const index: integer]: boolean read gethidden write sethidden;
    property foldlevel[const index: integer]: byte read getfoldlevel 
-                                  write setfoldlevel;   //0..127
+                                  write setfoldlevel;   //0..63
  end;
     
  tifidatacols = class(tindexpersistentarrayprop)
@@ -2548,7 +2548,7 @@ end;
 constructor tifidatacols.create(const aowner: ttxdatagrid);
 begin
  fselectedrow:= -1;
- frowstate:= tifirowstatelist.create;
+ frowstate:= tifirowstatelist.create(ril_colmerge);
  inherited create(aowner,tifidatacol);
 end;
 
@@ -3293,6 +3293,8 @@ function ifidatatodatalist(const akind: datatypty; const arowcount: integer;
        //returns datasize
 var
  int1,int2: integer;
+ posource,podest: pchar;
+ movesize,sourcestep,deststep: integer;
  po1: pmsestring; 
  po2: pinteger;
  po3: pansistring;
@@ -3378,10 +3380,30 @@ begin
    end;    
   end;
   dl_rowstate: begin
-   result:= arowcount * sizeof(rowstatety);
+   move(adata^,int1,sizeof(int1));
+   posource:= adata;
+   inc(posource,sizeof(int1));
+   sourcestep:= rowinfosizes[rowinfolevelty(int1)];
+   result:= arowcount * sourcestep;
    if adatalist <> nil then begin
-    move(adata^,adatalist.datapo^,result);
+    if tcustomrowstatelist(adatalist).infolevel = 
+                 rowinfolevelty(int1) then begin
+     move(posource^,adatalist.datapo^,result);
+    end
+    else begin
+     deststep:= adatalist.size;
+     movesize:= deststep;
+     if movesize > sourcestep then begin
+      movesize:= sourcestep;
+     end;
+     for int2:= 0 to arowcount - 1 do begin
+      move(posource^,podest^,movesize);
+      inc(posource,sourcestep);
+      inc(podest,deststep);
+     end;
+    end;
    end;
+   result:= result + sizeof(int1);
   end;
   dl_ansistring: begin
    po2:= pinteger(adata);
@@ -3467,7 +3489,10 @@ begin
     end;
    end;
    dl_rowstate: begin
-    int2:= count * sizeof(rowstatety);
+    move(integer(tcustomrowstatelist(adatalist).infolevel),dest^,
+                                                       sizeof(integer));
+    inc(dest,sizeof(integer));
+    int2:= count * size;
     move(po4^,dest^,int2);
     inc(dest,int2);
    end;
@@ -3521,7 +3546,7 @@ begin
     end;
    end;
    dl_rowstate: begin
-    result:= count * sizeof(rowstatety);
+    result:= count * size + sizeof(integer);
    end;
    dl_ansistring: begin
     po2:= datapo;

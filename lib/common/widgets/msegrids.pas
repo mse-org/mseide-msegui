@@ -13852,7 +13852,7 @@ begin
     int3:= int3 + int2;
    end
    else begin
-    int3:= int3 + po1^.rowheight.height;
+    int3:= int3 + po1^.rowheight.height + int4;
    end;
   end;
   if ffolded then begin

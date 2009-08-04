@@ -131,6 +131,7 @@ type
    constructor create; override;
    destructor destroy; override;
 
+   property size: integer read fsize;
    function datapo: pointer; //calls normalizering,
              //do not use in copyinstance,initinstance,freedata
    function getitempo(index: integer): pointer;
@@ -626,7 +627,11 @@ type
  prowstaterowheightty = ^rowstaterowheightty;
  rowstaterowheightaty = array[0..0] of rowstaterowheightty;
  prowstaterowheightaty  = ^rowstaterowheightaty;
-  
+const
+ rowinfosizes: array[rowinfolevelty] of integer = 
+            (sizeof(rowstatety),sizeof(rowstatecolmergety),
+            sizeof(rowstaterowheightty));
+type
  tcustomrowstatelist = class(tdatalist)
   private
    function getrowstate(const index: integer): rowstatety;
@@ -653,6 +658,7 @@ type
   public
    constructor create; override;
    constructor create(const ainfolevel: rowinfolevelty);
+   property infolevel: rowinfolevelty read finfolevel;
    procedure assign(source: tpersistent); override;
    function datatyp: datatypty; override;
    function datapocolmerge: pointer;

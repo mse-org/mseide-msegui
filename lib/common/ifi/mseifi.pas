@@ -38,7 +38,9 @@ type
  pifinamety = ^ifinamety;
 
  ifidatakindty = (idk_none,idk_null,idk_integer,idk_int64,idk_currency,idk_real,
-                  idk_msestring,idk_msestringint,idk_bytes,idk_rowstate,
+                  idk_msestring,idk_msestringint,idk_bytes,
+                  idk_rowstate,idk_rowstatecolmerge,
+                  idk_rowstaterowheight,
                   idk_selection);
  pifidatakindty = ^ifidatakindty;
   
@@ -191,7 +193,7 @@ type
  prowstateheaderty = ^rowstateheaderty;
  rowstatedataty = record
   header: rowstateheaderty;
-  data: ifidataty; //idk_rowstate
+  data: ifidataty; //idk_rowstate, idk_rowstatecolmerge, idk_rowstaterowheight
  end;
  prowstatedataty = ^rowstatedataty;
 
@@ -565,7 +567,11 @@ function encodeifidata(const avalue: ansistring;
                        const headersize: integer = 0): string; overload;
 function encodeifidata(const alist: tdatalist; const aindex: integer;
                        const headersize: integer = 0): string; overload;
+function encodeifidata(const avalue: rowstatety; 
+                       const headersize: integer = 0): string; overload;
 function encodeifidata(const avalue: rowstatecolmergety; 
+                       const headersize: integer = 0): string; overload;
+function encodeifidata(const avalue: rowstaterowheightty; 
                        const headersize: integer = 0): string; overload;
 function encodeifidata(const avalue: selectdataty; 
                        const headersize: integer = 0): string; overload;
@@ -590,7 +596,11 @@ function decodeifidata(const source: pifidataty; out dest: variant): integer;
 function decodeifidata(const source: pifidataty; const aindex: integer;
                           const alist: tdatalist): integer; overload;
                                      //alist can be nil
+function decodeifidata(const source: pifidataty; out dest: rowstatety): integer;
+                                                        overload;
 function decodeifidata(const source: pifidataty; out dest: rowstatecolmergety): integer;
+                                                        overload;
+function decodeifidata(const source: pifidataty; out dest: rowstaterowheightty): integer;
                                                         overload;
 function decodeifidata(const source: pifidataty; out dest: selectdataty): integer;
                                                         overload;
@@ -613,7 +623,9 @@ const
   sizeof(ifidataty)+sizeof(ifimsestringintty),         //idk_msestringint
 //  sizeof(ifidataty)+sizeof(ifinamety),               //idk_ansistring
   sizeof(ifidataty)+sizeof(ifibytesty),                //idk_bytes
-  sizeof(ifidataty)+sizeof(rowstatecolmergety),        //idk_rowstate
+  sizeof(ifidataty)+sizeof(rowstatety),                //idk_rowstate
+  sizeof(ifidataty)+sizeof(rowstatecolmergety),        //idk_rowstatecolmerge
+  sizeof(ifidataty)+sizeof(rowstaterowheightty),       //idk_rowstaterowheight
   sizeof(ifidataty)+sizeof(selectdataty)               //idk_selection
  );
 implementation
@@ -765,10 +777,25 @@ begin
  end;
 end;
 
+function encodeifidata(const avalue: rowstatety; 
+                       const headersize: integer = 0): string; overload;
+begin
+ prowstatety(initdataheader(headersize,
+                                 idk_rowstate,0,result))^:= avalue;
+end;
+
 function encodeifidata(const avalue: rowstatecolmergety; 
                        const headersize: integer = 0): string; overload;
 begin
- prowstatecolmergety(initdataheader(headersize,idk_rowstate,0,result))^:= avalue;
+ prowstatecolmergety(initdataheader(headersize,
+                                 idk_rowstatecolmerge,0,result))^:= avalue;
+end;
+
+function encodeifidata(const avalue: rowstaterowheightty; 
+                       const headersize: integer = 0): string; overload;
+begin
+ prowstaterowheightty(initdataheader(headersize,
+                                 idk_rowstatecolmerge,0,result))^:= avalue;
 end;
 
 function encodeifidata(const avalue: selectdataty; 
@@ -1011,13 +1038,54 @@ begin
  end;
 end;
 
-function decodeifidata(const source: pifidataty; out dest: rowstatecolmergety): integer;
+function decodeifidata(const source: pifidataty; out dest: rowstatety): integer;
 begin
- if source^.header.kind <> idk_rowstate then begin
+ if not (source^.header.kind in 
+        [idk_rowstate,idk_rowstatecolmerge,idk_rowstaterowheight]) then begin
   datakinderror;
  end;
- dest:= prowstatecolmergety(@source^.data)^;
- result:= datarecsizes[idk_rowstate];
+ dest:= prowstatety(@source^.data)^;
+ result:= datarecsizes[source^.header.kind];
+end;                                                       
+                        
+function decodeifidata(const source: pifidataty; 
+                                    out dest: rowstatecolmergety): integer;
+begin
+ case source^.header.kind of
+  idk_rowstate: begin
+   fillchar(dest.colmerge,sizeof(dest.colmerge),0);
+   prowstatety(@dest)^:= prowstatety(@source^.data)^;
+  end;
+  idk_rowstatecolmerge,idk_rowstaterowheight: begin
+   dest:= prowstatecolmergety(@source^.data)^;
+  end;
+  else begin
+   datakinderror;
+  end;
+ end;
+ result:= datarecsizes[source^.header.kind];
+end;                                                       
+                        
+function decodeifidata(const source: pifidataty; 
+                                   out dest: rowstaterowheightty): integer;
+begin
+ case source^.header.kind of
+  idk_rowstate: begin
+   fillchar(dest.colmerge,sizeof(dest.colmerge)+sizeof(dest.rowheight),0);
+   prowstatety(@dest)^:= prowstatety(@source^.data)^;
+  end;
+  idk_rowstatecolmerge: begin
+   fillchar(dest.rowheight,sizeof(dest.rowheight),0);
+   prowstatecolmergety(@dest)^:= prowstatecolmergety(@source^.data)^;
+  end;
+  idk_rowstaterowheight: begin
+   dest:= prowstaterowheightty(@source^.data)^;
+  end;
+  else begin
+   datakinderror;
+  end;
+ end;
+ result:= datarecsizes[source^.header.kind];
 end;                                                       
                         
 function decodeifidata(const source: pifidataty; out dest: selectdataty): integer;
