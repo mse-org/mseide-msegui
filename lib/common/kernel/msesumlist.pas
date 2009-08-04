@@ -9,9 +9,9 @@ type
  
  realsumty = record
   data: realty; //first!
+  level: sumlevelty;
   sumup: realty;
   sumdown: realty;
-  level: sumlevelty;
  end;
  prealsumty = ^realsumty;
 
@@ -347,7 +347,7 @@ var
  int1: integer;
 begin
  result:= (aindex < 0);
- if not result then begin
+ if not result and (fitems <> nil) then begin
   with tsumprop(fitems[high(fitems)]) do begin
    result:= (aindex <= findexup) or (aindex >= findexdown);
   end;

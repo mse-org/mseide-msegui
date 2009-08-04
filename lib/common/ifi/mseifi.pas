@@ -1020,7 +1020,7 @@ begin
     end;
    end;    
    idk_real: begin
-    if alist.datatyp = dl_real then begin
+    if alist.datatyp in [dl_real,dl_realsum] then begin
      result:= decodeifidata(source,rea1);
      trealdatalist(alist)[aindex]:= rea1;
     end;

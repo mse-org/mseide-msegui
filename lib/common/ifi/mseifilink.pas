@@ -782,9 +782,11 @@ function encodecolchangedata(const acolname: string; const arow: integer;
                                      const alist: tdatalist): string;
 begin
  result:= encodeifidata(alist,arow,sizeof(colitemheaderty)+length(acolname));
- with pcolitemdataty(result)^.header do begin
-  row:= arow;
-  stringtoifiname(acolname,@name);
+ if result <> '' then begin
+  with pcolitemdataty(result)^.header do begin
+   row:= arow;
+   stringtoifiname(acolname,@name);
+  end;
  end;
 end;
 
