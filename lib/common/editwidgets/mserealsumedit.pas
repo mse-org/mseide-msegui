@@ -7,9 +7,14 @@ uses
  
 type
 
+ optionsumeditty = (ose_sumsonly);
+ optionssumeditty = set of optionsumeditty;
+ 
  tgridrealsumlist = class(trealsumlist)
   private
    fowner: twidgetcol;
+   foptionssum: optionssumeditty;
+   procedure setoptionssum(const avalue: optionssumeditty);
   protected
    function getdefault: pointer; override;
    procedure setsourcename(const avalue: string); override;
@@ -17,15 +22,13 @@ type
    constructor create(owner: twidgetcol); reintroduce;
   published
    property sourcename;
+  published
+   property optionssum: optionssumeditty read foptionssum write setoptionssum
+                                                     default [];
  end;
 
- optionsumeditty = (ose_sumsonly);
- optionssumeditty = set of optionsumeditty;
- 
  trealsumedit = class(trealedit)
   private
-   foptionssum: optionssumeditty;
-   procedure setoptionssum(const avalue: optionssumeditty);
   protected
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatype: listdatatypety; override;
@@ -35,9 +38,6 @@ type
    function internaldatatotext(const data): msestring; override;
   public
    function griddata: tgridrealsumlist;
-  published
-   property optionssum: optionssumeditty read foptionssum write setoptionssum
-                                                     default [];
  end;
  
 implementation
@@ -60,6 +60,14 @@ procedure tgridrealsumlist.setsourcename(const avalue: string);
 begin
  inherited;
  fowner.sourcenamechanged;
+end;
+
+procedure tgridrealsumlist.setoptionssum(const avalue: optionssumeditty);
+begin
+ if foptionssum <> avalue then begin
+  foptionssum:= avalue;
+  fowner.changed;
+ end;
 end;
 
 { trealsumedit }
@@ -99,9 +107,10 @@ function trealsumedit.internaldatatotext(const data): msestring;
 var
  po1: prealsumty;
 begin
- if ose_sumsonly in foptionssum then begin
+ if (fdatalist <> nil) and 
+        (ose_sumsonly in tgridrealsumlist(fdatalist).foptionssum) then begin
   po1:= @data;
-  if (po1 = nil) and (fgridintf <> nil) then begin
+  if (po1 = nil) then begin
    po1:= fgridintf.getrowdatapo;
   end;   
   if (po1 <> nil) and (po1^.level = 0) then begin
@@ -110,14 +119,6 @@ begin
   end;
  end; 
  result:= inherited internaldatatotext(data);
-end;
-
-procedure trealsumedit.setoptionssum(const avalue: optionssumeditty);
-begin
- if foptionssum <> avalue then begin
-  foptionssum:= avalue;
-  formatchanged;
- end;
 end;
 
 {

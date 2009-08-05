@@ -78,6 +78,7 @@ type
    procedure setempty_color(const avalue: colorty);
   protected
    fgridintf: iwidgetgrid;
+   fdatalist: tdatalist;
    procedure setisdb;
    procedure updateedittext(const force: boolean);
    function getgridintf: iwidgetgrid;
@@ -1531,11 +1532,15 @@ procedure tcustomdataedit.setgridintf(const intf: iwidgetgrid);
 begin
  fgridintf:= intf;
  if fgridintf <> nil then begin
+  fdatalist:= fgridintf.getcol.datalist;
   fgridintf.updateeditoptions(foptionsedit);
   if (ow_autoscale in foptionswidget) and
               (foptionswidget * [ow_fontglyphheight,ow_fontlineheight] <> []) then begin
    fgridintf.getcol.grid.datarowheight:= bounds_cy;
   end;
+ end
+ else begin
+  fdatalist:= nil;
  end;
 end;
 
@@ -1860,7 +1865,7 @@ end;
 function tcustomdataedit.griddata: tdatalist;
 begin
  checkgrid;
- result:= fgridintf.getcol.datalist;
+ result:= fdatalist;
 end;
 
 function tcustomdataedit.textclipped(const arow: integer; out acellrect: rectty): boolean;

@@ -1578,6 +1578,8 @@ type
    function nullcheckneeded(const newfocus: twidget): boolean;
    function nonullcheck: boolean;
    function getgrid: tcustomwidgetgrid;
+   function getdatapo(const arow: integer): pointer;
+   function getrowdatapo: pointer;
    
    procedure setoptions(const avalue: dbstringgridoptionsty);
    procedure checkautofields;
@@ -7911,6 +7913,16 @@ begin
 end;
 
 function tcustomdbstringgrid.getgrid: tcustomwidgetgrid;
+begin
+ result:= nil;
+end;
+
+function tcustomdbstringgrid.getdatapo(const arow: integer): pointer;
+begin
+ result:= nil;
+end;
+
+function tcustomdbstringgrid.getrowdatapo: pointer;
 begin
  result:= nil;
 end;
