@@ -159,6 +159,7 @@ begin
      data:= emptyreal;
     end;
    end;
+   inherited sourcechange(int1);
    change(-1); 
   end;
  end;
