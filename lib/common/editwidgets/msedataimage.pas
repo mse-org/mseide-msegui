@@ -40,7 +40,7 @@ type
    procedure setfirstclick;
    procedure setreadonly(const avalue: boolean);
    function createdatalist(const sender: twidgetcol): tdatalist; virtual;
-   function getdatatyp: datatypty;
+   function getdatatype: listdatatypety;
    function getdefaultvalue: pointer;
    function getrowdatapo(const info: cellinfoty): pointer; virtual;
    procedure setgridintf(const intf: iwidgetgrid);
@@ -151,7 +151,7 @@ begin
  result:= tansistringdatalist.create;
 end;
 
-function tcustomdataimage.getdatatyp: datatypty;
+function tcustomdataimage.getdatatype: listdatatypety;
 begin
  result:= dl_ansistring;
 end;

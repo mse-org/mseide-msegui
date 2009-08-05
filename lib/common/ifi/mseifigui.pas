@@ -399,10 +399,10 @@ begin
   for int1:= 0 to datacols.count - 1 do begin
    with datacols[int1] do begin
     ar1[int1]:= (name <> '') and (datalist <> nil) and 
-                               (datalist.datatyp in ifidatatypes);
+                               (datalist.datatype in ifidatatypes);
     if ar1[int1] then begin
      inc(int3);
-     int2:= int2 + (sizeof(datatypty)+1) + length(name) + 
+     int2:= int2 + (sizeof(listdatatypety)+1) + length(name) + 
                        datalisttoifidata(datalist);
     end;
    end;
@@ -420,7 +420,7 @@ begin
     if ar1[int1] then begin
      with datacols[int1] do begin
       with pcoldataty(po1)^ do begin
-       kind:= datalist.datatyp;
+       kind:= datalist.datatype;
        po1:= @name;   
       end;
       inc(po1,stringtoifiname(name,pifinamety(po1)));
@@ -447,7 +447,7 @@ procedure tifiwidgetgridcontroller.processdata(const adata: pifirecty;
 var
  int1: integer;
  rows1,cols1: integer;
- kind1: datatypty;
+ kind1: listdatatypety;
  po1: pchar;
  str1: ansistring;
  po2: pointer;

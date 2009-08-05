@@ -15,14 +15,15 @@ interface
 
 uses
  sysutils,classes,msestrings,typinfo,msereal,msetypes,msestream,
- mseclasses,mselist;
+ mseclasses,mselist,mseglob;
 
 type
- datatypty = (dl_none,dl_integer,dl_int64,dl_currency,dl_real,dl_realsum,
+ listdatatypety = (dl_none,dl_integer,dl_int64,dl_currency,dl_real,dl_realsum,
     dl_datetime,
     dl_ansistring,dl_msestring,dl_doublemsestring,dl_msestringint,
     dl_complex,dl_rowstate,dl_custom);
-
+ listdatatypesty = set of listdatatypety;
+ 
  doublestringty = record
   a,b: string;
  end;
@@ -46,7 +47,15 @@ type
 // listlineeventty = procedure (sender: tdatalist; index: integer) of object;
 
  blockcopymodety = (bcm_none,bcm_copy,bcm_init,bcm_rotate);
-
+{
+ idatalist = interface(inullinterface)
+  procedure listdestroyed(const sender: idatalist);
+  getlist: tdatalist;  
+ end;
+ idatalistarty = array of idatalist;
+}
+ datalistarty = array of tdatalist;
+ 
  tdatalist = class(tnullinterfacedpersistent)
   private
    fbytelength: integer;   //pufferlaenge
@@ -59,6 +68,7 @@ type
    fdeleting: integer;
    fmaxcount: integer;
    fringpointer: integer;
+   fsourcename: string;
    procedure clearbuffer; //buffer release
    procedure Setcapacity(Value: integer);
    procedure internalsetcount(value: integer; nochangeandinit: boolean);
@@ -74,6 +84,11 @@ type
    fsize: integer;
    finternaloptions: internallistoptionsty;
    fcount: integer;
+   flinkdest: datalistarty;
+   flinksource: tdatalist;
+   fsourcedirtystart: integer;
+   fsourcedirtystop: integer;
+   procedure setsourcename(const avalue: string); virtual;
    procedure setcount(const value: integer); virtual;
    property nochange: integer read fnochange;
    procedure internalgetasarray(datapo: pointer);
@@ -127,10 +142,20 @@ type
    procedure dochange; virtual;
    procedure internaldeletedata(index: integer; dofree: boolean);
    procedure checkindexrange(const aindex: integer);
+
+   function getlinkdatatypes: listdatatypesty; virtual;
+   //idatalist
+   procedure listdestroyed(const sender: tdatalist);
+   procedure sourcechange(const index: integer); virtual;
   public
    constructor create; override;
    destructor destroy; override;
 
+   procedure linkdest(const dest: tdatalist);
+   procedure unlinkdest(const dest: tdatalist);
+   procedure linksource(const source: tdatalist);
+   function canlink(const asource: tdatalist): boolean; virtual;
+   
    property size: integer read fsize;
    function datapo: pointer; //calls normalizering,
              //do not use in copyinstance,initinstance,freedata
@@ -141,7 +166,7 @@ type
              //assign auf 2. spalte falls vorhanden, sonst exception
    procedure change(const index: integer); virtual;
                    //index -1 -> undefined
-   function datatyp: datatypty; virtual;
+   function datatype: listdatatypety; virtual;
    procedure checkindex(var index: integer); //bringt absolute zeilennummer in ringpuffer
    procedure beginupdate; virtual;
    procedure endupdate; virtual;
@@ -175,6 +200,7 @@ type
    property maxcount: integer read fmaxcount
                      write setmaxcount default bigint; //for ring buffer
    property sorted: boolean read fsorted write setsorted;
+   property sourcename: string read fsourcename write setsourcename;
  end;
 
  tintegerdatalist = class(tdatalist)
@@ -193,7 +219,7 @@ type
    min: integer;
    max: integer;
    constructor create; override;
-   function datatyp: datatypty; override;
+   function datatype: listdatatypety; override;
    procedure assign(source: tpersistent); override;
    function empty(const index: integer): boolean; override;   //true wenn leer
    function add(const value: integer): integer;
@@ -220,7 +246,7 @@ type
    function getstatdata(const index: integer): msestring; override;
   public
    constructor create; override;
-   function datatyp: datatypty; override;
+   function datatype: listdatatypety; override;
    procedure assign(source: tpersistent); override;
    function empty(const index: integer): boolean; override;   //true wenn leer
    function add(const avalue: int64): integer;
@@ -246,7 +272,7 @@ type
    function getstatdata(const index: integer): msestring; override;
   public
    constructor create; override;
-   function datatyp: datatypty; override;
+   function datatype: listdatatypety; override;
    procedure assign(source: tpersistent); override;
    function empty(const index: integer): boolean; override;   //true wenn leer
    function add(const avalue: currency): integer;
@@ -258,8 +284,6 @@ type
    property items[index: integer]: currency read Getitems write Setitems; default;
  end;
   
- datalistarty = array of tdatalist;
-
  tenumdatalist = class(tintegerdatalist)
   private
    fgetdefault: getintegereventty;
@@ -303,7 +327,7 @@ type
    min: realty;
    max: realty;
    constructor create; override;
-   function datatyp: datatypty; override;
+   function datatype: listdatatypety; override;
    procedure assign(source: tpersistent); override;
    procedure assignre(source: tcomplexdatalist);
    procedure assignim(source: tcomplexdatalist);
@@ -322,7 +346,7 @@ type
   protected
    function getdefault: pointer; override;
   public
-   function datatyp: datatypty; override;
+   function datatype: listdatatypety; override;
    function empty(const index: integer): boolean; override;   //true wenn leer
    procedure fill(acount: integer; const defaultvalue: tdatetime);
  end;
@@ -342,7 +366,7 @@ type
    procedure assigntob(const dest: tdatalist); override;
    procedure assignto(dest: tpersistent); override;
   public
-   function datatyp: datatypty; override;
+   function datatype: listdatatypety; override;
    constructor create; override;
    procedure assign(source: tpersistent); override;
    procedure assignb(const source: tdatalist); override;
@@ -401,7 +425,7 @@ type
    procedure setstatdata(const index: integer; const value: msestring); override;
    function getstatdata(const index: integer): msestring; override;
   public
-   function datatyp: datatypty; override;
+   function datatype: listdatatypety; override;
    procedure assign(source: tpersistent); override;
    procedure assignarray(const data: array of ansistring); overload;
    procedure assignarray(const data: stringarty); overload;
@@ -473,7 +497,7 @@ type
   protected
    procedure compare(const l,r; var result: integer); override;
   public
-   function datatyp: datatypty; override;
+   function datatype: listdatatypety; override;
    function add(const value: msestring): integer; override;
    procedure insert(const index: integer; const item: msestring); override;
    procedure fill(acount: integer; const defaultvalue: msestring);
@@ -503,7 +527,7 @@ type
    procedure assignb(const source: tdatalist); override;
    procedure assigntob(const dest: tdatalist); override;
 
-   function datatyp: datatypty; override;
+   function datatype: listdatatypety; override;
    function add(const valuea: msestring; const valueb: msestring = ''): integer; overload;
    function add(const value: doublemsestringty): integer; overload;
    procedure insert(const index: integer; const item: msestring); override;
@@ -551,7 +575,7 @@ type
    procedure assignb(const source: tdatalist); override;
    procedure assigntob(const dest: tdatalist); override;
 
-   function datatyp: datatypty; override;
+   function datatype: listdatatypety; override;
    function add(const valuea: msestring; const valueb: integer = 0): integer; overload;
    function add(const value: msestringintty): integer; overload;
    procedure insert(const index: integer; const item: msestring;
@@ -660,7 +684,7 @@ type
    constructor create(const ainfolevel: rowinfolevelty);
    property infolevel: rowinfolevelty read finfolevel;
    procedure assign(source: tpersistent); override;
-   function datatyp: datatypty; override;
+   function datatype: listdatatypety; override;
    function datapocolmerge: pointer;
    function dataporowheight: pointer;
    function getitempo(const index: integer): prowstatety;
@@ -778,6 +802,9 @@ procedure insertitem(var dest: realarty; index: integer; value: realty); overloa
 procedure insertitem(var dest: pointerarty; index: integer; value: pointer); overload;
 procedure insertitem(var dest: stringarty; index: integer; value: string); overload;
 procedure insertitem(var dest: msestringarty; index: integer; value: msestring); overload;
+
+procedure removeitems(var dest: pointerarty; const aitem: pointer);
+                            //removes all matching items
 function removeitem(var dest: pointerarty; const aitem: pointer): integer;
                                                 overload;    
                         //returns removed index, -1 if none
@@ -940,8 +967,8 @@ type
  
 function newidentnum(const count: integer; getfunc: getintegeritemfuncty): integer;
  //returns lowest not used value
-function getdatalistclass(const adatatype: datatypty): datalistclassty;
-procedure registerdatalistclass(const adatatype: datatypty;
+function getdatalistclass(const adatatype: listdatatypety): datalistclassty;
+procedure registerdatalistclass(const adatatype: listdatatypety;
                                     const aclass: datalistclassty);
 
 implementation
@@ -949,7 +976,7 @@ uses
  rtlconsts,msestreaming,msesys,msestat,msebits,mseeditglob;
  
 var  //todo: use hash list
- datalistclasses: array[datatypty] of datalistclassty = 
+ datalistclasses: array[listdatatypety] of datalistclassty = 
 //dl_none,dl_integer, dl_int64,       dl_currency,       dl_real,      
  (nil,tintegerdatalist,tint64datalist,tcurrencydatalist,trealdatalist,
  //dl_realsum,
@@ -965,7 +992,7 @@ var  //todo: use hash list
 //dl_custom
   nil);
 
-function getdatalistclass(const adatatype: datatypty): datalistclassty;
+function getdatalistclass(const adatatype: listdatatypety): datalistclassty;
 begin
  if adatatype <= high(datalistclasses) then begin
   result:= datalistclasses[adatatype];
@@ -975,7 +1002,7 @@ begin
  end;
 end;
 
-procedure registerdatalistclass(const adatatype: datatypty;
+procedure registerdatalistclass(const adatatype: listdatatypety;
                                     const aclass: datalistclassty);
 begin
  if adatatype > high(datalistclasses) then begin
@@ -1412,6 +1439,23 @@ begin
  setlength(dest,high(dest) + 2);
  move(dest[index],dest[index+1],(high(dest)-index) * sizeof(dest[0]));
  dest[index]:= value;
+end;
+procedure removeitems(var dest: pointerarty; const aitem: pointer);
+                            //removes all matching items
+var
+ int1,int2: integer;
+ ar1: pointerarty;
+begin
+ setlength(ar1,length(dest));
+ int2:= 0;
+ for int1:= 0 to high(dest) do begin
+  if dest[int1] <> aitem then begin
+   ar1[int2]:= dest[int1];
+   inc(int2);
+  end;
+ end;
+ setlength(ar1,int2);
+ dest:= ar1;
 end;
 
 function removeitem(var dest: pointerarty; const aitem: pointer): integer;
@@ -2413,9 +2457,79 @@ begin
 end;
 
 destructor tdatalist.destroy;
+var
+ int1: integer;
 begin
+ if flinksource <> nil then begin
+  flinksource.listdestroyed(self);
+  flinksource:= nil;
+ end;
+ for int1:= 0 to high(flinkdest) do begin
+  flinkdest[int1].listdestroyed(self);
+ end;
+ flinkdest:= nil;
  clearbuffer;
  inherited;
+end;
+
+procedure tdatalist.listdestroyed(const sender: tdatalist);
+var
+ int1: integer;
+begin
+ if sender = flinksource then begin
+  flinksource:= nil;
+ end;
+ removeitem(pointerarty(flinkdest),sender);
+end;
+
+procedure tdatalist.sourcechange(const index: integer);
+begin
+ if index < 0 then begin
+  fsourcedirtystart:= 0;
+  fsourcedirtystop:= flinksource.count-1;
+ end
+ else begin
+  if index < fsourcedirtystart then begin
+   fsourcedirtystart:= index;
+  end;
+  if index > fsourcedirtystop then begin
+   fsourcedirtystop:= index;
+  end;
+ end;
+end;
+
+function tdatalist.canlink(const asource: tdatalist): boolean;
+begin
+ result:= (asource <> nil) and (asource.datatype in getlinkdatatypes) and 
+               (asource <> self);
+end;
+
+procedure tdatalist.linkdest(const dest: tdatalist);
+begin
+ if dest.flinksource <> nil then begin
+  dest.flinksource.unlinkdest(dest);
+ end;
+ if dest.canlink(self) then begin
+  dest.flinksource:= self;
+  additem(pointerarty(flinkdest),dest);
+  dest.sourcechange(-1);
+ end;
+end;
+
+procedure tdatalist.unlinkdest(const dest: tdatalist);
+begin
+ removeitems(pointerarty(flinkdest),dest);
+ dest.flinksource:= nil;
+end;
+
+procedure tdatalist.linksource(const source: tdatalist);
+begin
+ if flinksource <> nil then begin
+  flinksource.unlinkdest(self);
+ end;
+ if (source <> nil) and canlink(source) then begin
+  source.linkdest(self);
+ end;
 end;
 
 procedure tdatalist.clearbuffer;
@@ -3378,6 +3492,8 @@ begin
 end;
 
 procedure tdatalist.change(const index: integer);
+var
+ int1: integer;
 begin
  fsortio:= false;
  if fnochange = 0 then begin
@@ -3386,6 +3502,11 @@ begin
    sort;
   end;
   dochange;
+  if flinkdest <> nil then begin
+   for int1:= 0 to high(flinkdest) do begin
+    flinkdest[int1].sourcechange(index);
+   end;
+  end;
  end;
 end;
 
@@ -3461,7 +3582,7 @@ begin
  result:= true;
 end;
 
-function tdatalist.datatyp: datatypty;
+function tdatalist.datatype: listdatatypety;
 begin
  result:= dl_custom;
 end;
@@ -3612,6 +3733,16 @@ begin
  //dummy
 end;
 
+procedure tdatalist.setsourcename(const avalue: string);
+begin
+ fsourcename:= avalue;
+end;
+
+function tdatalist.getlinkdatatypes: listdatatypesty;
+begin
+ result:= [datatype];
+end;
+
 { tintegerdatalist }
 
 constructor tintegerdatalist.create;
@@ -3671,7 +3802,7 @@ begin
  internalsetdata(index,value);
 end;
 
-function tintegerdatalist.datatyp: datatypty;
+function tintegerdatalist.datatype: listdatatypety;
 begin
  result:= dl_integer;
 end;
@@ -3764,7 +3895,7 @@ begin
 // max:= maxint;
 end;
 
-function tint64datalist.datatyp: datatypty;
+function tint64datalist.datatype: listdatatypety;
 begin
  result:= dl_int64;
 end;
@@ -3883,7 +4014,7 @@ begin
 // max:= maxint;
 end;
 
-function tcurrencydatalist.datatyp: datatypty;
+function tcurrencydatalist.datatype: listdatatypety;
 begin
  result:= dl_currency;
 end;
@@ -4154,7 +4285,7 @@ begin
  internalsetasarray(length(data),pointer(data));
 end;
 
-function trealdatalist.datatyp: datatypty;
+function trealdatalist.datatype: listdatatypety;
 begin
  result:= dl_real;
 end;
@@ -4230,7 +4361,7 @@ end;
 
 { tdatetimedatalist }
 
-function tdatetimedatalist.datatyp: datatypty;
+function tdatetimedatalist.datatype: listdatatypety;
 begin
  result:= dl_datetime;
 end;
@@ -4427,7 +4558,7 @@ begin
  internalsetdata(index,value);
 end;
 
-function tcomplexdatalist.datatyp: datatypty;
+function tcomplexdatalist.datatype: listdatatypety;
 begin
  result:= dl_complex;
 end;
@@ -4685,7 +4816,7 @@ begin
  change(index);
 end;
 
-function tansistringdatalist.datatyp: datatypty;
+function tansistringdatalist.datatype: listdatatypety;
 begin
  result:= dl_ansistring;
 end;
@@ -5450,7 +5581,7 @@ end;
 
 { tmsestringdatalist }
 
-function tmsestringdatalist.datatyp: datatypty;
+function tmsestringdatalist.datatype: listdatatypety;
 begin
  result:= dl_msestring;
 end;
@@ -5504,7 +5635,7 @@ begin
  fsize:= sizeof(doublemsestringty);
 end;
 
-function tdoublemsestringdatalist.datatyp: datatypty;
+function tdoublemsestringdatalist.datatype: listdatatypety;
 begin
  result:= dl_doublemsestring;
 end;
@@ -5788,7 +5919,7 @@ begin
  fsize:= sizeof(msestringintty);
 end;
 
-function tmsestringintdatalist.datatyp: datatypty;
+function tmsestringintdatalist.datatype: listdatatypety;
 begin
  result:= dl_msestringint;
 end;
@@ -6133,7 +6264,7 @@ begin
  end;
 end;
 
-function tcustomrowstatelist.datatyp: datatypty;
+function tcustomrowstatelist.datatype: listdatatypety;
 begin
  result:= dl_rowstate;
 end;

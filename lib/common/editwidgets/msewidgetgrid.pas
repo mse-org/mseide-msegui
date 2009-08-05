@@ -48,7 +48,7 @@ type
   function getwidget: twidget;
   function getcellframe: framety;
   function createdatalist(const sender: twidgetcol): tdatalist;
-  function getdatatyp: datatypty;
+  function getdatatype: listdatatypety;
   function getdefaultvalue: pointer;
   function getrowdatapo(const info: cellinfoty): pointer;
   function getoptionsedit: optionseditty;
@@ -137,9 +137,11 @@ type
    constructor create(const agrid: tcustomgrid;
                      const aowner: tgridarrayprop); override;
    destructor destroy; override;
+   procedure sourcenamechanged;
    function actualfont: tfont; override;
 //   procedure cellchanged(const row: integer); override;
    property editwidget: twidget read geteditwidget write seteditwidget;
+   property grid: tcustomwidgetgrid read getgrid;
   published
 //   property datalist;
    property datalist stored false; //stored by defineproperties
@@ -998,10 +1000,10 @@ var
  licla: datalistclassty;
 begin
  str1:= reader.readident;
- int1:= getenumvalue(typeinfo(datatypty),str1);
+ int1:= getenumvalue(typeinfo(listdatatypety),str1);
  if int1 >= 0 then begin
   freeandnil(fdata);
-  licla:= getdatalistclass(datatypty(int1));
+  licla:= getdatalistclass(listdatatypety(int1));
   if licla <> nil then begin
    fdata:= licla.create;
   end;
@@ -1010,7 +1012,7 @@ end;
 
 procedure twidgetcol.writedatatype(writer: twriter);
 begin
- writer.writeident(getenumname(typeinfo(datatypty),integer(fdata.datatyp)));
+ writer.writeident(getenumname(typeinfo(listdatatypety),integer(fdata.datatype)));
 end;
 
 procedure twidgetcol.readdata(reader: treader);
@@ -1068,7 +1070,7 @@ begin
  if fdata <> nil then begin
   col1:= twidgetcol(filer.ancestor);
   if col1 <> nil then begin
-   bo1:= (col1.fdata = nil) or (fdata.datatyp <> col1.fdata.datatyp);
+   bo1:= (col1.fdata = nil) or (fdata.datatype <> col1.fdata.datatype);
    filer.ancestor:= col1.fdata;
   end;
   bo1:= bo1 or fdata.checkwritedata(filer);
@@ -1117,6 +1119,9 @@ begin
  fdata:= nil;
  try
   if fintf <> nil then begin
+   if fdata <> nil then begin
+    fdata.linksource(nil);
+   end;
    fintf.setgridintf(nil);
   end;
   if awidget <> nil then begin
@@ -1155,6 +1160,7 @@ begin
    if gs_isdb in tcustomgrid1(fgrid).fstate then begin
     datasourcechanged;
    end;
+   sourcenamechanged;   
    tcustomgrid1(fgrid).layoutchanged;
   end
   else begin
@@ -1167,7 +1173,7 @@ end;
 
 procedure twidgetcol.getdata(arow: integer; var dest);
 var
- datatyp: datatypty;
+ datatype: listdatatypety;
  info: cellinfoty;
  po1: pointer;
 begin
@@ -1184,7 +1190,7 @@ begin
  end
  else begin
   if fintf <> nil then begin
-   datatyp:= fintf.getdatatyp;
+   datatype:= fintf.getdatatype;
    if arow >= 0 then begin
     info.cell.row:= arow;
     info.griddatalink:= tcustomwidgetgrid(fgrid).getgriddatalink;
@@ -1193,7 +1199,7 @@ begin
    else begin
     po1:= nil;
    end;
-   case datatyp of
+   case datatype of
     dl_integer: begin
      if po1 = nil then begin
       integer(dest):= 0;
@@ -1538,6 +1544,21 @@ procedure twidgetcol.afterdragevent(var ainfo: draginfoty; const arow: integer;
 begin
  if fintf <> nil then begin
   fintf.aftercelldragevent(ainfo,arow,processed);
+ end;
+end;
+
+procedure twidgetcol.sourcenamechanged;
+var
+ datalist1: tdatalist;
+ str1: string;
+begin
+ if fdata <> nil then begin
+  str1:= fdata.sourcename;
+  datalist1:= nil;
+  if str1 <> '' then begin
+   datalist1:= fgrid.datacols.datalistbyname(str1);
+  end;
+  fdata.linksource(datalist1);
  end;
 end;
 
@@ -2382,6 +2403,9 @@ begin
     ffixrowwidgetnames:= nil;
    end;
   end;
+  for int1:= 0 to fdatacols.count - 1 do begin
+   twidgetcols(fdatacols)[int1].sourcenamechanged;
+  end;
   for int1:= 0 to ffixcols.count - 1 do begin
    with twidgetfixcol(ffixcols.items[int1]) do begin
     for int2:= 0 to high(ar1) do begin
@@ -2542,7 +2566,7 @@ begin
      end
      else begin
       if ar3[col] <> nil then begin
-       case ar3[col].datatyp of
+       case ar3[col].datatype of
         dl_integer: wstr2:= inttostr(tintegerdatalist(ar3[col]).items[row]);
        end;
       end;
@@ -2628,7 +2652,7 @@ begin
        end
        else begin
         if ar3[int3] <> nil then begin
-         case ar3[int3].datatyp of
+         case ar3[int3].datatype of
           dl_integer: begin
            tintegerdatalist(ar3[int3]).items[int5]:= strtoint(ar5[int2]);
           end;

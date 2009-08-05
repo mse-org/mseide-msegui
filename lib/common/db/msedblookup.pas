@@ -41,7 +41,7 @@ type
    function getdatalbdatakind: lbdatakindty; virtual; abstract;
    procedure dochange; override;
    function lookuptext(const aindex: integer): msestring; virtual; abstract;
-   function getdatatyp: datatypty; override;
+   function getdatatype: listdatatypety; override;
    procedure valuetogrid(const row: integer); override;
    procedure griddatasourcechanged; override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
@@ -429,7 +429,7 @@ begin
  fdatalink.recordchanged(nil);
 end;
 
-function tdblookuplb.getdatatyp: datatypty;
+function tdblookuplb.getdatatype: listdatatypety;
 begin
  result:= dl_none;
 end;

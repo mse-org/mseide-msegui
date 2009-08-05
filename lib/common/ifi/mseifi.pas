@@ -212,7 +212,7 @@ type
  pcolitemdataty = ^colitemdataty;
  
  coldataty = record
-  kind: datatypty;
+  kind: listdatatypety;
   name: ifinamety;
   data: datarecty; //array[0..rows-1] of datatype
  end;
@@ -758,7 +758,7 @@ end;
 function encodeifidata(const alist: tdatalist; const aindex: integer;
                        const headersize: integer = 0): string;
 begin
- case alist.datatyp of
+ case alist.datatype of
   dl_integer: begin
    result:= encodeifidata(tintegerdatalist(alist).items[aindex],headersize);
   end;
@@ -1002,31 +1002,31 @@ begin
     alist.cleardata(aindex);
    end;
    idk_integer: begin
-    if alist.datatyp = dl_integer then begin
+    if alist.datatype = dl_integer then begin
      result:= decodeifidata(source,int1);
      tintegerdatalist(alist)[aindex]:= int1;
     end;
    end;
    idk_int64: begin
-    if alist.datatyp = dl_int64 then begin
+    if alist.datatype = dl_int64 then begin
      result:= decodeifidata(source,lint1);
      tint64datalist(alist)[aindex]:= int1;
     end;
    end;
    idk_msestring: begin
-    if alist.datatyp = dl_msestring then begin
+    if alist.datatype = dl_msestring then begin
      result:= decodeifidata(source,mstr1);
      tmsestringdatalist(alist)[aindex]:= mstr1;
     end;
    end;    
    idk_real: begin
-    if alist.datatyp in [dl_real,dl_realsum] then begin
+    if alist.datatype in [dl_real,dl_realsum] then begin
      result:= decodeifidata(source,rea1);
      trealdatalist(alist)[aindex]:= rea1;
     end;
    end;
    idk_msestringint: begin
-    if alist.datatyp = dl_msestringint then begin
+    if alist.datatype = dl_msestringint then begin
      result:= decodeifidata(source,strint1);
      tmsestringintdatalist(alist)[aindex]:= strint1;
     end;

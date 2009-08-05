@@ -281,16 +281,16 @@ type
    procedure beginlink(linkto: undotypety; forcenew: boolean);
    procedure endlink(forcenew: boolean);
    procedure setpos(const endpos: gridcoordty; selected: boolean;
-         link: boolean = false);
+         alink: boolean = false);
    procedure inserttext(const startpos,endpos: gridcoordty;
             const atext: msestring;
-            selected: boolean; backwards: boolean; link: boolean = false);
+            selected: boolean; backwards: boolean; alink: boolean = false);
    procedure overwritetext(const startpos,endpos: gridcoordty;
            const atext,atextbefore: msestring; selected: boolean;
-           link: boolean = false);
+           alink: boolean = false);
    procedure deletetext(const startpos,endpos: gridcoordty;
        const atext: msestring; selected: boolean;
-       backwards: boolean; link: boolean = false);
+       backwards: boolean; alink: boolean = false);
    procedure undo;
    procedure redo;
    property canundo: boolean read getcanundo;
@@ -2010,28 +2010,29 @@ begin
 end;
 
 procedure ttextundolist.setpos(const endpos: gridcoordty; selected: boolean;
-                        link: boolean = false);
+                        alink: boolean = false);
 begin
  if flock <> 0 then exit;
- checkrecord(ut_setpos,gridcoordty(nullpoint),endpos,selected,false,link,0);
+ checkrecord(ut_setpos,gridcoordty(nullpoint),endpos,selected,false,alink,0);
 end;
 
 procedure ttextundolist.inserttext(const startpos,endpos: gridcoordty;
            const atext: msestring; selected: boolean; backwards: boolean;
-           link: boolean = false);
+           alink: boolean = false);
 begin
  if flock <> 0 then exit;
- with checkrecord(ut_inserttext,startpos,endpos,selected,backwards,link,length(atext))^ do begin
+ with checkrecord(ut_inserttext,startpos,endpos,selected,backwards,alink,length(atext))^ do begin
   text:= text + atext;
  end;
 end;
 
 procedure ttextundolist.overwritetext(const startpos,endpos: gridcoordty;
              const atext, atextbefore: msestring; selected: boolean;
-              link: boolean = false);
+              alink: boolean = false);
 begin
  if flock <> 0 then exit;
- with checkrecord(ut_overwritetext,startpos,endpos,selected,false,link,length(atext))^ do begin
+ with checkrecord(ut_overwritetext,startpos,endpos,selected,false,
+                                              alink,length(atext))^ do begin
   text:= text + atext;
   textbefore:= textbefore + atextbefore;
  end;
@@ -2039,10 +2040,11 @@ end;
 
 procedure ttextundolist.deletetext(const startpos,endpos: gridcoordty;
         const atext: msestring; selected: boolean; backwards: boolean;
-        link: boolean = false);
+        alink: boolean = false);
 begin
  if flock <> 0 then exit;
- with checkrecord(ut_deletetext,startpos,endpos,selected,backwards,link,length(atext))^ do begin
+ with checkrecord(ut_deletetext,startpos,endpos,selected,backwards,
+                                              alink,length(atext))^ do begin
   if backwards then begin
    text:= atext + text;
   end

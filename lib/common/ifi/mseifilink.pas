@@ -722,7 +722,7 @@ type
    property onbeforeopen: ifigrideventty read fonbeforeopen write fonbeforeopen;
  end;
    
-function ifidatatodatalist(const akind: datatypty; const arowcount: integer;
+function ifidatatodatalist(const akind: listdatatypety; const arowcount: integer;
                        const adata: pchar; const adatalist: tdatalist): integer;
        //returns datasize
 function datalisttoifidata(const adatalist: tdatalist): integer; overload;
@@ -3142,7 +3142,7 @@ procedure ttxdatagridcontroller.processdata(const adata: pifirecty;
 var
  int1: integer;
  rows1,cols1: integer;
- kind1: datatypty;
+ kind1: listdatatypety;
  po1: pchar;
  str1: ansistring;
  datalist1: tdatalist;
@@ -3290,7 +3290,7 @@ begin
            ik_rowstatechange];
 end;
 }
-function ifidatatodatalist(const akind: datatypty; const arowcount: integer;
+function ifidatatodatalist(const akind: listdatatypety; const arowcount: integer;
                        const adata: pchar; const adatalist: tdatalist): integer;
        //returns datasize
 var
@@ -3302,7 +3302,7 @@ var
  po3: pansistring;
  po4: pmsestringintty;
 begin
- if (adatalist <> nil) and (adatalist.datatyp <> akind) then begin
+ if (adatalist <> nil) and (adatalist.datatype <> akind) then begin
   raise exception.create('Datakinds do not match.');
  end;
  case akind of
@@ -3447,7 +3447,7 @@ var
 begin
  with adatalist do begin
   po4:= datapo;
-  case datatyp of
+  case datatype of
    dl_integer: begin
     int2:= count * sizeof(integer);
     move(po4^,dest^,int2);
@@ -3520,7 +3520,7 @@ var
  po3: pmsestringintty;
 begin
  with adatalist do begin
-  case adatalist.datatyp of
+  case adatalist.datatype of
    dl_integer: begin
     result:= count * sizeof(integer);
    end;
@@ -3576,9 +3576,9 @@ begin
   for int1:= 0 to datacols.count - 1 do begin
    with datacols[int1] do begin
     checkdatalist;
-    ar1[int1]:= (name <> '') and (datalist.datatyp in ifidatatypes);
+    ar1[int1]:= (name <> '') and (datalist.datatype in ifidatatypes);
     if ar1[int1] then begin
-     int2:= int2 + (sizeof(datatypty)+1) + length(name) + 
+     int2:= int2 + (sizeof(listdatatypety)+1) + length(name) + 
                        datalisttoifidata(datalist);
     end;
    end;
@@ -3593,7 +3593,7 @@ begin
     if ar1[int1] then begin
      with datacols[int1] do begin
       with pcoldataty(po1)^ do begin
-       kind:= datalist.datatyp;
+       kind:= datalist.datatype;
        po1:= @name;   
       end;
       inc(po1,stringtoifiname(name,pifinamety(po1)));

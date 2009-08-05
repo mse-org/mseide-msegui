@@ -1,4 +1,6 @@
 MSEide+MSEgui version history
+2009-08-05
+ datatypty -> listdatatypety.
 2009-07-31
  optiongridty og_merged -> og_colmerged.
 2009-06-27

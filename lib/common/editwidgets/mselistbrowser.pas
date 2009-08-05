@@ -445,7 +445,7 @@ type
 
    procedure setgridintf(const intf: iwidgetgrid); override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
-   function getdatatyp: datatypty; override;
+   function getdatatype: listdatatypety; override;
    procedure drawcell(const canvas: tcanvas); override;
    procedure valuetogrid(const arow: integer); override;
    procedure gridtovalue(const arow: integer); override;
@@ -2193,7 +2193,7 @@ begin
  result:= fitemlist;
 end;
 
-function titemedit.getdatatyp: datatypty;
+function titemedit.getdatatype: listdatatypety;
 begin
  result:= dl_none;
 end;

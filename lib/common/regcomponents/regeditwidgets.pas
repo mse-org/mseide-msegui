@@ -20,7 +20,7 @@ uses
  msewidgetgrid,msetextedit,msedesignintf,regeditwidgets_bmp,msepropertyeditors,
  msedropdownlist,mseterminal,msedrawtext,msedatanodes,msedialog,msestrings,
  regwidgets,msearrayprops,typinfo,msestockobjects,msefoldedit,msebitmap,mseglob,
- msestream,mserealsumedit;
+ msestream,mserealsumedit,msedatalist,msegui,msegrids;
 
 type
  tdropdowncolpropertyeditor = class(tarraypropertyeditor)
@@ -61,6 +61,12 @@ type
    function getvalue: msestring; override;
  end;
  
+ tdatalistsourcenamepropertyeditor = class(tstringpropertyeditor)
+  protected
+   function getdefaultstate: propertystatesty; override;
+   function getvalues: msestringarty; override;  
+ end;
+ 
 procedure Register;
 begin
  registercomponents('Edit',[twidgetgrid,tedit,tslider,tprogressbar,
@@ -87,6 +93,8 @@ begin
               tstockglypharraypropertyeditor);
  registerpropertyeditor(typeinfo(string),tdataimage,'value',tdataimagepropertyeditor);
  registerpropertyeditor(typeinfo(tmaskedbitmap),tdataimage,'bitmap',tclasspropertyeditor);
+ registerpropertyeditor(typeinfo(string),tdatalist,'sourcename',
+                                           tdatalistsourcenamepropertyeditor);
 end;
 
 { tdropdowncolpropertyeditor }
@@ -168,6 +176,32 @@ begin
    tdataimage(fprops[int1].instance).value:= readfiledatastring(mstr1);
   end;
   modified;
+ end;
+end;
+
+{ tdatalistsourcenamepropertyeditor }
+
+function tdatalistsourcenamepropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate + [ps_valuelist,ps_sortlist];
+end;
+
+function tdatalistsourcenamepropertyeditor.getvalues: msestringarty;
+var
+ int1: integer;
+begin
+ result:= nil;
+ if fcomponent is tcustomgrid then begin
+  with tcustomgrid(fcomponent).datacols do begin
+   for int1:= 0 to count -1 do begin
+    with cols[int1] do begin
+     if (name <> '') and 
+               (tdatalist(fprops[0].instance).canlink(datalist)) then begin
+      additem(result,name);
+     end;
+    end;
+   end;
+  end;
  end;
 end;
 

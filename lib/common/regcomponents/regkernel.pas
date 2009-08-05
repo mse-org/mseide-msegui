@@ -116,7 +116,7 @@ type
   public
    procedure edit; override;
  end;
- 
+
 const   
  datamoduleintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createmsedatamodule);

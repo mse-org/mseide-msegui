@@ -114,7 +114,7 @@ type
    //igridwidget
    procedure setfirstclick;
    function createdatalist(const sender: twidgetcol): tdatalist; virtual;
-   function getdatatyp: datatypty; virtual;
+   function getdatatype: listdatatypety; virtual;
    function getinitvalue: pointer;
    function getdefaultvalue: pointer;
    function getrowdatapo(const info: cellinfoty): pointer; virtual;
@@ -417,7 +417,7 @@ begin
  result:= flines;
 end;
 
-function tcustomtextedit.getdatatyp: datatypty;
+function tcustomtextedit.getdatatype: listdatatypety;
 begin
  result:= dl_none;
 end;

@@ -48,15 +48,17 @@ type
    procedure setsumlevel(index: integer; const avalue: sumlevelty);
 //   function getsum(index: integer): realty;
    procedure setsums(const avalue: tsumarrayprop);
+   function getlinkdatatypes: listdatatypesty; override;
   protected
    fdirtyup: integer;
    fdirtydown: integer;
    procedure clean(const start,stop: integer); override;
-   function datatyp: datatypty; override;
+   function datatype: listdatatypety; override;
    procedure getgriddefaultdata(var dest); override;
    procedure getgriddata(index: integer; var dest); override;
    procedure setgriddata(index: integer; const source); override;
    function getdefault: pointer; override;
+   procedure sourcechange(const index: integer); override;
   public
    constructor create; override;
    destructor destroy; override;
@@ -91,7 +93,7 @@ begin
  inherited;
 end;
 
-function trealsumlist.datatyp: datatypty;
+function trealsumlist.datatype: listdatatypety;
 begin
  result:= dl_realsum;
 end;
@@ -172,9 +174,25 @@ end;
 procedure trealsumlist.clean(const start,stop: integer);
 var
  po1: prealsumty;
+ sourcepo: preal;
  int1,int2: integer;
  rea1: realty;
 begin
+ if (flinksource <> nil) and 
+         (fsourcedirtystop >= fsourcedirtystart) then begin //copy source column data
+  int2:= flinksource.size;
+  po1:= datapo;
+  inc(po1,fsourcedirtystart);
+  sourcepo:= flinksource.datapo;
+  inc(pchar(sourcepo),fsourcedirtystart*int2);
+  for int1:= fsourcedirtystop - fsourcedirtystart downto 0 do begin
+   po1^.data:= sourcepo^;
+   inc(po1);
+   inc(pchar(sourcepo),int2);
+  end;
+  fsourcedirtystart:= maxint;
+  fsourcedirtystop:= -1;
+ end;
  if stop >= fdirtyup then begin
   if fdirtyup > 0 then begin
    po1:= datapo;
@@ -271,6 +289,17 @@ begin
  else begin
   result:= @fdefaultval;
  end;
+end;
+
+procedure trealsumlist.sourcechange(const index: integer);
+begin
+ inherited;
+ change(index);
+end;
+
+function trealsumlist.getlinkdatatypes: listdatatypesty;
+begin
+ result:= inherited getlinkdatatypes + [dl_real];
 end;
 
 { tsumprop }

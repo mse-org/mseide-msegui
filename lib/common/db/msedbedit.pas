@@ -1893,7 +1893,7 @@ type
    procedure writestatvalue(const writer: tstatwriter); override;
 
    function createdatalist(const sender: twidgetcol): tdatalist; override;
-   function getdatatyp: datatypty; override;
+   function getdatatype: listdatatypety; override;
 
   public
    constructor create(aowner: tcomponent); override;
@@ -8336,7 +8336,7 @@ begin
  result:= tgridenum64datalist.create(sender);
 end;
 
-function tcustomenum64edit.getdatatyp: datatypty;
+function tcustomenum64edit.getdatatype: listdatatypety;
 begin
  result:= dl_int64;
 end;
