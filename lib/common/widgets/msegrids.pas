@@ -542,6 +542,7 @@ type
    procedure beginselect;
    procedure endselect;
    function getdatapo(const arow: integer): pointer; override;
+   function getrowdatapo: pointer;
 //   function ismerged: boolean; override;
    procedure beforedragevent(var ainfo: draginfoty; const arow: integer;
                                      var processed: boolean); virtual;
@@ -5439,13 +5440,22 @@ end;
 
 function tdatacol.getdatapo(const arow: integer): pointer;
 begin
- if fdata <> nil then begin
+ if (fdata <> nil) then begin
   result:= fdata.getitempo(arow);
  end
  else begin
   result:= nil;
  end;
 end;
+
+function tdatacol.getrowdatapo: pointer;
+begin
+ result:= nil;
+ if fgrid.row >= 0 then begin
+  result:= getdatapo(fgrid.row);
+ end;
+end;
+
 {
 function tdatacol.ismerged: boolean;
 begin

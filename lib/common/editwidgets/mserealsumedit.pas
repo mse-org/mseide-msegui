@@ -19,15 +19,25 @@ type
    property sourcename;
  end;
 
+ optionsumeditty = (ose_sumsonly);
+ optionssumeditty = set of optionsumeditty;
+ 
  trealsumedit = class(trealedit)
+  private
+   foptionssum: optionssumeditty;
+   procedure setoptionssum(const avalue: optionssumeditty);
   protected
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatype: listdatatypety; override;
 //   function internaldatatotext(const data): msestring; override;
 //   procedure valuetogrid(const arow: integer); override;
    function getoptionsedit: optionseditty; override;
+   function internaldatatotext(const data): msestring; override;
   public
    function griddata: tgridrealsumlist;
+  published
+   property optionssum: optionssumeditty read foptionssum write setoptionssum
+                                                     default [];
  end;
  
 implementation
@@ -71,20 +81,42 @@ end;
 
 function trealsumedit.getoptionsedit: optionseditty;
 var
+ po1: prealsumty;
  datacol1: tdatacol;
  data1: tgridrealsumlist;
  int1: integer;
 begin
  result:= inherited getoptionsedit;
  if fgridintf <> nil then begin
-  datacol1:= fgridintf.getcol;
-  data1:= tgridrealsumlist(datacol1.datalist);
-  if (data1 <> nil) then begin
-   int1:= datacol1.grid.row;
-   if (int1 >= 0) and (data1.sumlevel[int1] <> 0) then begin
-    include(result,oe_readonly);
-   end;
+  po1:= fgridintf.getrowdatapo;
+  if (po1 <> nil) and (po1^.level <> 0) then begin
+   include(result,oe_readonly);
   end;
+ end;
+end;
+
+function trealsumedit.internaldatatotext(const data): msestring;
+var
+ po1: prealsumty;
+begin
+ if ose_sumsonly in foptionssum then begin
+  po1:= @data;
+  if (po1 = nil) and (fgridintf <> nil) then begin
+   po1:= fgridintf.getrowdatapo;
+  end;   
+  if (po1 <> nil) and (po1^.level = 0) then begin
+   result:= '';
+   exit;
+  end;
+ end; 
+ result:= inherited internaldatatotext(data);
+end;
+
+procedure trealsumedit.setoptionssum(const avalue: optionssumeditty);
+begin
+ if foptionssum <> avalue then begin
+  foptionssum:= avalue;
+  formatchanged;
  end;
 end;
 

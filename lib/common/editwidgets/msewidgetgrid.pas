@@ -26,6 +26,8 @@ type
   function getgrid: tcustomwidgetgrid;
   function getbrushorigin: pointty;
   function getcol: twidgetcol;
+  function getdatapo(const arow: integer): pointer;
+  function getrowdatapo: pointer;
   procedure getdata(index: integer; var dest);
   procedure setdata(index: integer; const source; const noinvalidate: boolean = false);
   function getrow: integer;
