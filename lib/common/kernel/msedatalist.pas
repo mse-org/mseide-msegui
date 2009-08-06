@@ -703,8 +703,8 @@ type
    function getfoldlevel(const index: integer): byte;
    procedure checkinfolevel(const wantedlevel: rowinfolevelty);
   public
-   constructor create; override;
-   constructor create(const ainfolevel: rowinfolevelty);
+   constructor create; overload; override;
+   constructor create(const ainfolevel: rowinfolevelty); overload;
    property infolevel: rowinfolevelty read finfolevel;
    procedure assign(source: tpersistent); override;
    function datatype: listdatatypety; override;
@@ -2535,7 +2535,8 @@ end;
 function tdatalist.checksourcecopy(var ainfo: listlinkinfoty;
                                       const copyproc: copyprocty): boolean;
 var
- int1,int2,int3: integer;
+ int1: integer;
+ int2,int3: ptruint;
  po1,po2: pchar; //delphi needs pchar for pointer arithmetic
 begin
  with ainfo do begin
@@ -2548,9 +2549,9 @@ begin
     dirtystop:= count  - 1;
    end;
    int2:= source.size;
-   po1:= source.datapo + int2 * dirtystart;
+   po1:= pchar(source.datapo) + int2 * dirtystart;
    int3:= size;
-   po2:= datapo + int3 * dirtystart;
+   po2:= pchar(datapo) + int3 * dirtystart;
    for int1:= dirtystop - dirtystart downto 0 do begin
     copyproc(po1,po2);
     inc(po1,int2);
@@ -2565,7 +2566,8 @@ end;
 function tdatalist.checksourcecopy2(var ainfo: listlinkinfoty;
            const source2: tdatalist; const copyproc: copy2procty): boolean;
 var
- int1,int2,int3,int4: integer;
+ int1: integer;
+ int2,int3,int4: ptruint;
  po1,po2,po3: pchar; //delphi needs pchar for pointer arithmetic
 begin
  with ainfo do begin
@@ -2581,11 +2583,11 @@ begin
     dirtystop:= count  - 1;
    end;
    int2:= source.size;
-   po1:= source.datapo + int2 * dirtystart;
+   po1:= pchar(source.datapo) + int2 * dirtystart;
    int3:= source2.size;
-   po2:= source2.datapo + int3 * dirtystart;
+   po2:= pchar(source2.datapo) + int3 * dirtystart;
    int4:= size;
-   po3:= datapo + int4 * dirtystart;
+   po3:= pchar(datapo) + int4 * dirtystart;
    for int1:= dirtystop - dirtystart downto 0 do begin
     copyproc(po1,po2,po3);
     inc(po1,int2);

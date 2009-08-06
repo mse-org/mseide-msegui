@@ -14186,7 +14186,7 @@ procedure trowstatelist.setstatdata(const index: integer;
 var
  ar1: msestringarty;
 begin
- splitstring(value,ar1,' ');
+ splitstring(value,ar1,msechar(' '));
  if high(ar1) >= 0 then begin
   with prowstaterowheightty(inherited getitempo(index))^ do begin
    normal.fold:= strtoint(ar1[0]);
@@ -14278,7 +14278,7 @@ begin
  if not bo1 then begin
   dec(result);
   if (result = count-1) then begin
-   with po1[result] do begin 
+   with prowstaterowheightaty(po1)^[result] do begin
     int1:= rowheight.ypos + fgrid.fdatarowlinewidth + rowheight.height;
     if rowheight.height = 0 then begin
      int1:= int1 + fgrid.fdatarowheight;
