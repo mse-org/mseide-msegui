@@ -30,7 +30,8 @@ type
  end;
  psumprop = ^tsumprop;
 
- optionsumty = (osu_sumsonly,osu_sumup,osu_sumdown);
+ optionsumty = (osu_sumup,osu_sumdown,osu_sumsonly,
+                osu_foldsumdown,osu_folddefaultsum);
  optionssumty = set of optionsumty;
  
  
@@ -233,13 +234,48 @@ end;
 
 procedure copylevelrowstate(const source,dest: pointer);
 begin
- prealsumty(dest)^.level:= -prowstatety(source)^.fold;
+ prealsumty(dest)^.level:= -(prowstatety(source)^.fold + 1);
 end;
 
 procedure copylevelrowstateissum(const source1,source2,dest: pointer);
 begin
  if pinteger(source2)^ <> 0 then begin
-  prealsumty(dest)^.level:= -(prowstatety(source1)^.fold+1);
+  prealsumty(dest)^.level:= -(prowstatety(source1)^.fold + 1);
+ end
+ else begin
+  prealsumty(dest)^.level:= 0;
+ end;
+end;
+
+procedure copylevelrowstateissumsum(const source1,source2,dest: pointer);
+begin
+ if pinteger(source2)^ = 0 then begin
+  prealsumty(dest)^.level:= -(prowstatety(source1)^.fold + 1);
+ end
+ else begin
+  prealsumty(dest)^.level:= 0;
+ end;
+end;
+
+procedure copylevelrowstatedown(const source,dest: pointer);
+begin
+ prealsumty(dest)^.level:= prowstatety(source)^.fold + 1;
+end;
+
+procedure copylevelrowstateissumdown(const source1,source2,dest: pointer);
+begin
+ if pinteger(source2)^ <> 0 then begin
+  prealsumty(dest)^.level:= (prowstatety(source1)^.fold + 1);
+ end
+ else begin
+  prealsumty(dest)^.level:= 0;
+ end;
+end;
+
+procedure copylevelrowstateissumdownsum(const source1,source2,dest: pointer);
+begin
+ if pinteger(source2)^ = 0 then begin
+  prealsumty(dest)^.level:= (prowstatety(source1)^.fold + 1);
  end
  else begin
   prealsumty(dest)^.level:= 0;
@@ -256,11 +292,32 @@ var
 begin
  checksourcecopy(flinkvalue,@copyvalue);
  if flinklevel.source is tcustomrowstatelist then begin
-  if flinkissum.source <> nil then begin
-   checksourcecopy2(flinklevel,flinkissum.source,@copylevelrowstateissum);
+  if osu_foldsumdown in fsums.options then begin
+   if flinkissum.source <> nil then begin
+    if osu_folddefaultsum in fsums.options then begin
+     checksourcecopy2(flinklevel,flinkissum.source,
+                                         @copylevelrowstateissumdownsum);
+    end
+    else begin
+     checksourcecopy2(flinklevel,flinkissum.source,@copylevelrowstateissumdown);
+    end;
+   end
+   else begin
+    checksourcecopy(flinklevel,@copylevelrowstatedown);
+   end;
   end
   else begin
-   checksourcecopy(flinklevel,@copylevelrowstate);
+   if flinkissum.source <> nil then begin
+    if osu_folddefaultsum in fsums.options then begin
+     checksourcecopy2(flinklevel,flinkissum.source,@copylevelrowstateissumsum);
+    end
+    else begin
+     checksourcecopy2(flinklevel,flinkissum.source,@copylevelrowstateissum);
+    end;
+   end
+   else begin
+    checksourcecopy(flinklevel,@copylevelrowstate);
+   end;
   end;
  end
  else begin
