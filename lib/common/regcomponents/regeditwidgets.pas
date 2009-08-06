@@ -20,7 +20,7 @@ uses
  msewidgetgrid,msetextedit,msedesignintf,regeditwidgets_bmp,msepropertyeditors,
  msedropdownlist,mseterminal,msedrawtext,msedatanodes,msedialog,msestrings,
  regwidgets,msearrayprops,typinfo,msestockobjects,msefoldedit,msebitmap,mseglob,
- msestream,mserealsumedit,msedatalist,msegui,msegrids;
+ msestream,mserealsumedit,msedatalist,msegui,msegrids,msesumlist,mseclasses;
 
 type
  tdropdowncolpropertyeditor = class(tarraypropertyeditor)
@@ -61,10 +61,24 @@ type
    function getvalue: msestring; override;
  end;
  
- tdatalistsourcenamepropertyeditor = class(tstringpropertyeditor)
+ tdatalistsourcepropertyeditor = class(tstringpropertyeditor)
   protected
+   function gettag: integer; virtual;
    function getdefaultstate: propertystatesty; override;
    function getvalues: msestringarty; override;  
+ end;
+
+ tsumlistsourcelevelpropertyeditor = 
+                   class(tdatalistsourcepropertyeditor)
+  protected
+   function getvalues: msestringarty; override;  
+   function gettag: integer; override;
+ end;
+
+ tsumlistsourceissumpropertyeditor = 
+                   class(tdatalistsourcepropertyeditor)
+  protected
+   function gettag: integer; override;
  end;
  
 procedure Register;
@@ -93,8 +107,12 @@ begin
               tstockglypharraypropertyeditor);
  registerpropertyeditor(typeinfo(string),tdataimage,'value',tdataimagepropertyeditor);
  registerpropertyeditor(typeinfo(tmaskedbitmap),tdataimage,'bitmap',tclasspropertyeditor);
- registerpropertyeditor(typeinfo(string),tdatalist,'sourcename',
-                                           tdatalistsourcenamepropertyeditor);
+ registerpropertyeditor(typeinfo(string),tdatalist,'sourcevalue',
+                                           tdatalistsourcepropertyeditor);
+ registerpropertyeditor(typeinfo(string),trealsumlist,'sourcelevel',
+                                      tsumlistsourcelevelpropertyeditor);
+ registerpropertyeditor(typeinfo(string),trealsumlist,'sourceissum',
+                                      tsumlistsourceissumpropertyeditor);
 end;
 
 { tdropdowncolpropertyeditor }
@@ -179,14 +197,14 @@ begin
  end;
 end;
 
-{ tdatalistsourcenamepropertyeditor }
+{ tdatalistsourcepropertyeditor }
 
-function tdatalistsourcenamepropertyeditor.getdefaultstate: propertystatesty;
+function tdatalistsourcepropertyeditor.getdefaultstate: propertystatesty;
 begin
  result:= inherited getdefaultstate + [ps_valuelist,ps_sortlist];
 end;
 
-function tdatalistsourcenamepropertyeditor.getvalues: msestringarty;
+function tdatalistsourcepropertyeditor.getvalues: msestringarty;
 var
  int1: integer;
 begin
@@ -196,13 +214,38 @@ begin
    for int1:= 0 to count -1 do begin
     with cols[int1] do begin
      if (name <> '') and 
-               (tdatalist(fprops[0].instance).canlink(datalist)) then begin
+               (tdatalist(fprops[0].instance).canlink(datalist,gettag)) then begin
       additem(result,name);
      end;
     end;
    end;
   end;
  end;
+end;
+
+function tdatalistsourcepropertyeditor.gettag: integer;
+begin
+ result:= 0;
+end;
+
+{ tsumlistsourcelevelpropertyeditor }
+
+function tsumlistsourcelevelpropertyeditor.getvalues: msestringarty;
+begin
+ result:= inherited getvalues;
+ additem(result,foldlevelsumname);
+end;
+
+function tsumlistsourcelevelpropertyeditor.gettag: integer;
+begin
+ result:= 1;
+end;
+
+{ tsumlistsourceissumpropertyeditor }
+
+function tsumlistsourceissumpropertyeditor.gettag: integer;
+begin
+ result:= 3;
 end;
 
 initialization

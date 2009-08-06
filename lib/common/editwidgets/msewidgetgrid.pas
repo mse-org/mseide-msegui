@@ -139,7 +139,7 @@ type
    constructor create(const agrid: tcustomgrid;
                      const aowner: tgridarrayprop); override;
    destructor destroy; override;
-   procedure sourcenamechanged;
+   procedure sourcenamechanged(const atag: integer);
    function actualfont: tfont; override;
 //   procedure cellchanged(const row: integer); override;
    property editwidget: twidget read geteditwidget write seteditwidget;
@@ -399,7 +399,7 @@ procedure defaultinitgridwidget(const awidget: twidget; const agridintf: iwidget
 implementation
 uses
  sysutils,msebits,msedataedits,msewidgets,mseshapes,msekeyboard,typinfo,
- msereal,mseapplication,msehash;
+ msereal,mseapplication,msehash,msesumlist;
 
 type
  tdatalist1 = class(tdatalist);
@@ -1122,7 +1122,7 @@ begin
  try
   if fintf <> nil then begin
    if fdata <> nil then begin
-    fdata.linksource(nil);
+    fdata.linksource(nil,0);
    end;
    fintf.setgridintf(nil);
   end;
@@ -1162,7 +1162,7 @@ begin
    if gs_isdb in tcustomgrid1(fgrid).fstate then begin
     datasourcechanged;
    end;
-   sourcenamechanged;   
+   sourcenamechanged(-1);   
    tcustomgrid1(fgrid).layoutchanged;
   end
   else begin
@@ -1549,18 +1549,36 @@ begin
  end;
 end;
 
-procedure twidgetcol.sourcenamechanged;
+procedure twidgetcol.sourcenamechanged(const atag: integer);
 var
  datalist1: tdatalist;
  str1: string;
+ int1: integer;
 begin
  if fdata <> nil then begin
-  str1:= fdata.sourcename;
-  datalist1:= nil;
-  if str1 <> '' then begin
-   datalist1:= fgrid.datacols.datalistbyname(str1);
+  if atag >= 0 then begin
+   str1:= fdata.getsourcename(atag);
+   datalist1:= nil;
+   if str1 <> '' then begin
+    datalist1:= fgrid.datacols.datalistbyname(str1);
+   end;
+   fdata.linksource(datalist1,atag);
+  end
+  else begin
+   for int1:= 0 to fdata.getsourcenamecount-1 do begin
+    str1:= fdata.getsourcename(int1);
+    datalist1:= nil;
+    if str1 = foldlevelsumname then begin
+     datalist1:= fgrid.datacols.rowstate;
+    end
+    else begin
+     if str1 <> '' then begin
+      datalist1:= fgrid.datacols.datalistbyname(str1);
+     end;
+    end;
+    fdata.linksource(datalist1,int1);
+   end;
   end;
-  fdata.linksource(datalist1);
  end;
 end;
 
@@ -2406,7 +2424,7 @@ begin
    end;
   end;
   for int1:= 0 to fdatacols.count - 1 do begin
-   twidgetcols(fdatacols)[int1].sourcenamechanged;
+   twidgetcols(fdatacols)[int1].sourcenamechanged(-1);
   end;
   for int1:= 0 to ffixcols.count - 1 do begin
    with twidgetfixcol(ffixcols.items[int1]) do begin

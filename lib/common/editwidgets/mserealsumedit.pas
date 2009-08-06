@@ -7,24 +7,20 @@ uses
  
 type
 
- optionsumeditty = (ose_sumsonly);
- optionssumeditty = set of optionsumeditty;
- 
  tgridrealsumlist = class(trealsumlist)
   private
    fowner: twidgetcol;
-   foptionssum: optionssumeditty;
-   procedure setoptionssum(const avalue: optionssumeditty);
   protected
    function getdefault: pointer; override;
-   procedure setsourcename(const avalue: string); override;
+   procedure setsourcevalue(const avalue: string); override;
+   procedure setsourcelevel(const avalue: string); override;
+   procedure setsourceissum(const avalue: string); override;
   public
    constructor create(owner: twidgetcol); reintroduce;
   published
-   property sourcename;
-  published
-   property optionssum: optionssumeditty read foptionssum write setoptionssum
-                                                     default [];
+   property sourcevalue;
+   property sourcelevel;
+   property sourceissum;
  end;
 
  trealsumedit = class(trealedit)
@@ -56,18 +52,23 @@ begin
  result:= inherited getdefault;
 end;
 
-procedure tgridrealsumlist.setsourcename(const avalue: string);
+procedure tgridrealsumlist.setsourcevalue(const avalue: string);
 begin
  inherited;
- fowner.sourcenamechanged;
+ fowner.sourcenamechanged(0);
 end;
 
-procedure tgridrealsumlist.setoptionssum(const avalue: optionssumeditty);
+procedure tgridrealsumlist.setsourcelevel(const avalue: string);
 begin
- if foptionssum <> avalue then begin
-  foptionssum:= avalue;
-  fowner.changed;
- end;
+ inherited;
+ fowner.sourcenamechanged(1);
+ fowner.sourcenamechanged(2);
+end;
+
+procedure tgridrealsumlist.setsourceissum(const avalue: string);
+begin
+ inherited;
+ fowner.sourcenamechanged(3);
 end;
 
 { trealsumedit }
@@ -108,7 +109,7 @@ var
  po1: prealsumty;
 begin
  if (fdatalist <> nil) and 
-        (ose_sumsonly in tgridrealsumlist(fdatalist).foptionssum) then begin
+        (osu_sumsonly in tgridrealsumlist(fdatalist).sums.options) then begin
   po1:= @data;
   if (po1 = nil) then begin
    po1:= fgridintf.getrowdatapo;

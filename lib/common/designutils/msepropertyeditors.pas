@@ -857,8 +857,8 @@ var
  datalist1: tdatalist1;
 begin
  datalist1:= tdatalist1(sender.getordvalue);
- if (datalist1 = nil) or 
-           (ilo_nostreaming in datalist1.finternaloptions) then begin
+ if (datalist1 = nil) {or 
+           (ilo_nostreaming in datalist1.finternaloptions)} then begin
   exclude(defaultstate,ps_dialog);
  end;
 end;

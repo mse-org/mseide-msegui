@@ -13699,6 +13699,7 @@ begin
  po1:= getitempo(index);
  if replacebits1(byte(po1^.fold),byte(avalue),byte(foldlevelmask)) then begin
   checkdirty(index);
+  change(index);
   fgrid.rowstatechanged(index);
  end;
 end;

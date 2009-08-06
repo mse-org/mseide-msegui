@@ -54,8 +54,17 @@ type
  end;
  idatalistarty = array of idatalist;
 }
- datalistarty = array of tdatalist;
+ copyprocty = procedure(const source,dest:pointer);
+ copy2procty = procedure(const source1,source2,dest:pointer);
  
+ datalistarty = array of tdatalist;
+
+ listlinkinfoty = record
+  name: string; //case sensitive
+  dirtystart,dirtystop: integer;
+  source: tdatalist;
+ end;
+  
  tdatalist = class(tnullinterfacedpersistent)
   private
    fbytelength: integer;   //pufferlaenge
@@ -68,9 +77,9 @@ type
    fdeleting: integer;
    fmaxcount: integer;
    fringpointer: integer;
-   fsourcename: string;
+//   fsource: string;
    procedure clearbuffer; //buffer release
-   procedure Setcapacity(Value: integer);
+   procedure setcapacity(value: integer);
    procedure internalsetcount(value: integer; nochangeandinit: boolean);
    procedure checkcapacity; //ev. reduktion des memory
    procedure assigndata(source: tdatalist);
@@ -85,10 +94,10 @@ type
    finternaloptions: internallistoptionsty;
    fcount: integer;
    flinkdest: datalistarty;
-   flinksource: tdatalist;
-   fsourcedirtystart: integer;
-   fsourcedirtystop: integer;
-   procedure setsourcename(const avalue: string); virtual;
+//   flinksource: tdatalist;
+//   fsourcedirtystart: integer;
+//   fsourcedirtystop: integer;
+//   procedure setsource(const avalue: string); virtual;
    procedure setcount(const value: integer); virtual;
    property nochange: integer read fnochange;
    procedure internalgetasarray(datapo: pointer);
@@ -143,18 +152,33 @@ type
    procedure internaldeletedata(index: integer; dofree: boolean);
    procedure checkindexrange(const aindex: integer);
 
-   function getlinkdatatypes: listdatatypesty; virtual;
-   //idatalist
-   procedure listdestroyed(const sender: tdatalist);
-   procedure sourcechange(const index: integer); virtual;
+   function getlinkdatatypes(const atag: integer): listdatatypesty; virtual;
+   procedure initsource(var asource: listlinkinfoty);
+   procedure removesource(var asource: listlinkinfoty);
+   procedure checklistdestroyed(var ainfo: listlinkinfoty;
+                                                const sender: tdatalist);
+   function internallinksource(const source: tdatalist;
+                 const atag: integer; var variable: tdatalist): boolean;
+   function checksourcechange(var ainfo: listlinkinfoty; 
+                        const sender: tdatalist; const index: integer): boolean;
+   function checksourcecopy(var ainfo: listlinkinfoty;
+                                     const copyproc: copyprocty): boolean;
+   function checksourcecopy2(var ainfo: listlinkinfoty;
+                const source2: tdatalist; const copyproc: copy2procty): boolean;
+//   property sourcevalue: string read fsourcevalue write setsourcevalue;
   public
    constructor create; override;
    destructor destroy; override;
 
-   procedure linkdest(const dest: tdatalist);
-   procedure unlinkdest(const dest: tdatalist);
-   procedure linksource(const source: tdatalist);
-   function canlink(const asource: tdatalist): boolean; virtual;
+   //idatalist
+   procedure listdestroyed(const sender: tdatalist); virtual;
+   procedure sourcechange(const sender: tdatalist; const index: integer); virtual;
+
+   function getsourcenamecount: integer; virtual;
+   function getsourcename(const atag: integer): string; virtual;
+   procedure linksource(const source: tdatalist; const atag: integer); virtual;
+   function canlink(const asource: tdatalist;
+                                        const atag: integer): boolean; virtual;
    
    property size: integer read fsize;
    function datapo: pointer; //calls normalizering,
@@ -200,7 +224,6 @@ type
    property maxcount: integer read fmaxcount
                      write setmaxcount default bigint; //for ring buffer
    property sorted: boolean read fsorted write setsorted;
-   property sourcename: string read fsourcename write setsourcename;
  end;
 
  tintegerdatalist = class(tdatalist)
@@ -2454,16 +2477,13 @@ constructor tdatalist.create;
 begin
  fsize:= 1;
  fmaxcount:= bigint;
+// fsourcedirtystop:= maxint;
 end;
 
 destructor tdatalist.destroy;
 var
  int1: integer;
 begin
- if flinksource <> nil then begin
-  flinksource.listdestroyed(self);
-  flinksource:= nil;
- end;
  for int1:= 0 to high(flinkdest) do begin
   flinkdest[int1].listdestroyed(self);
  end;
@@ -2473,37 +2493,112 @@ begin
 end;
 
 procedure tdatalist.listdestroyed(const sender: tdatalist);
-var
- int1: integer;
 begin
- if sender = flinksource then begin
-  flinksource:= nil;
- end;
- removeitem(pointerarty(flinkdest),sender);
+ removeitems(pointerarty(flinkdest),sender);
 end;
 
-procedure tdatalist.sourcechange(const index: integer);
+function tdatalist.checksourcechange(var ainfo: listlinkinfoty;
+                const sender: tdatalist; const index: integer): boolean;
 begin
- if index < 0 then begin
-  fsourcedirtystart:= 0;
-  fsourcedirtystop:= flinksource.count-1;
- end
- else begin
-  if index < fsourcedirtystart then begin
-   fsourcedirtystart:= index;
-  end;
-  if index > fsourcedirtystop then begin
-   fsourcedirtystop:= index;
+ with ainfo do begin
+  result:= (source = sender) and (sender <> nil);
+  if result then begin
+   if index < 0 then begin
+    dirtystart:= 0;
+    dirtystop:= sender.count-1;
+   end
+   else begin
+    if index < dirtystart then begin
+     dirtystart:= index;
+    end;
+    if index > ainfo.dirtystop then begin
+     dirtystop:= index;
+    end;
+   end;
   end;
  end;
 end;
 
-function tdatalist.canlink(const asource: tdatalist): boolean;
+procedure tdatalist.sourcechange(const sender: tdatalist; const index: integer);
 begin
- result:= (asource <> nil) and (asource.datatype in getlinkdatatypes) and 
+ //dummy
+// checksourcechange(flinksource,sender,index,fsourcedirtystart,fsourcedirtystop);
+end;
+
+function tdatalist.canlink(const asource: tdatalist;
+                                        const atag: integer): boolean;
+begin
+ result:= (asource <> nil) and (asource.datatype in getlinkdatatypes(atag)) and 
                (asource <> self);
 end;
 
+function tdatalist.checksourcecopy(var ainfo: listlinkinfoty;
+                                      const copyproc: copyprocty): boolean;
+var
+ int1,int2,int3: integer;
+ po1,po2: pchar; //delphi needs pchar for pointer arithmetic
+begin
+ with ainfo do begin
+  result:= (source <> nil) and (dirtystop >= dirtystart);
+  if result then begin
+   if dirtystop >= source.count then begin
+    dirtystop:= source.count - 1;
+   end;
+   if dirtystop >= count then begin
+    dirtystop:= count  - 1;
+   end;
+   int2:= source.size;
+   po1:= source.datapo + int2 * dirtystart;
+   int3:= size;
+   po2:= datapo + int3 * dirtystart;
+   for int1:= dirtystop - dirtystart downto 0 do begin
+    copyproc(po1,po2);
+    inc(po1,int2);
+    inc(po2,int3);
+   end;
+   dirtystart:= maxint;
+   dirtystop:= -1;
+  end;
+ end;
+end;
+
+function tdatalist.checksourcecopy2(var ainfo: listlinkinfoty;
+           const source2: tdatalist; const copyproc: copy2procty): boolean;
+var
+ int1,int2,int3,int4: integer;
+ po1,po2,po3: pchar; //delphi needs pchar for pointer arithmetic
+begin
+ with ainfo do begin
+  result:= (source <> nil) and (source2 <> nil) and (dirtystop >= dirtystart);
+  if result then begin
+   if dirtystop >= source.count then begin
+    dirtystop:= source.count - 1;
+   end;
+   if dirtystop >= source2.count then begin
+    dirtystop:= source2.count - 1;
+   end;
+   if dirtystop >= count then begin
+    dirtystop:= count  - 1;
+   end;
+   int2:= source.size;
+   po1:= source.datapo + int2 * dirtystart;
+   int3:= source2.size;
+   po2:= source2.datapo + int3 * dirtystart;
+   int4:= size;
+   po3:= datapo + int4 * dirtystart;
+   for int1:= dirtystop - dirtystart downto 0 do begin
+    copyproc(po1,po2,po3);
+    inc(po1,int2);
+    inc(po2,int3);
+    inc(po3,int4);
+   end;
+   dirtystart:= maxint;
+   dirtystop:= -1;
+  end;
+ end;
+end;
+
+{
 procedure tdatalist.linkdest(const dest: tdatalist);
 begin
  if dest.flinksource <> nil then begin
@@ -2512,7 +2607,7 @@ begin
  if dest.canlink(self) then begin
   dest.flinksource:= self;
   additem(pointerarty(flinkdest),dest);
-  dest.sourcechange(-1);
+  dest.sourcechange(self,-1);
  end;
 end;
 
@@ -2521,15 +2616,25 @@ begin
  removeitems(pointerarty(flinkdest),dest);
  dest.flinksource:= nil;
 end;
+}
 
-procedure tdatalist.linksource(const source: tdatalist);
+function tdatalist.internallinksource(const source: tdatalist;
+                 const atag: integer; var variable: tdatalist): boolean;
 begin
- if flinksource <> nil then begin
-  flinksource.unlinkdest(self);
+ if variable <> nil then begin
+  removeitem(pointerarty(variable.flinkdest),self);
  end;
- if (source <> nil) and canlink(source) then begin
-  source.linkdest(self);
+ result:= (source <> nil) and canlink(source,atag);
+ if result then begin
+  variable:= source;
+  additem(pointerarty(source.flinkdest),self);
+  sourcechange(source,-1);
  end;
+end;
+
+procedure tdatalist.linksource(const source: tdatalist; const atag: integer);
+begin
+ //dummy
 end;
 
 procedure tdatalist.clearbuffer;
@@ -3504,7 +3609,7 @@ begin
   dochange;
   if flinkdest <> nil then begin
    for int1:= 0 to high(flinkdest) do begin
-    flinkdest[int1].sourcechange(index);
+    flinkdest[int1].sourcechange(self,index);
    end;
   end;
  end;
@@ -3732,15 +3837,56 @@ procedure tdatalist.clean(const start,stop: integer);
 begin
  //dummy
 end;
-
+{
 procedure tdatalist.setsourcename(const avalue: string);
 begin
  fsourcename:= avalue;
 end;
+}
+function tdatalist.getsourcenamecount: integer;
+begin
+ result:= 0;
+end;
 
-function tdatalist.getlinkdatatypes: listdatatypesty;
+function tdatalist.getsourcename(const atag: integer): string;
+begin
+ result:= '';
+ {
+ if atag = 0 then begin
+  result:= fsourcename;
+ end;
+ }
+end;
+
+function tdatalist.getlinkdatatypes(const atag: integer): listdatatypesty;
 begin
  result:= [datatype];
+end;
+
+procedure tdatalist.initsource(var asource: listlinkinfoty);
+begin
+ fillchar(asource,sizeof(asource),0);
+ with asource do begin
+  dirtystop:= maxint;
+ end;
+end;
+
+procedure tdatalist.removesource(var asource: listlinkinfoty);
+begin
+ with asource do begin
+  if source <> nil then begin
+   source.listdestroyed(self);
+   source:= nil;
+  end;
+ end;
+end;
+
+procedure tdatalist.checklistdestroyed(var ainfo: listlinkinfoty;
+                                                const sender: tdatalist);
+begin
+ if sender = ainfo.source then begin
+  ainfo.source:= nil;
+ end;
 end;
 
 { tintegerdatalist }
