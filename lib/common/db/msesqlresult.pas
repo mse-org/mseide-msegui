@@ -395,7 +395,7 @@ const
 //         ft_datetime,   ft_date,       ft_time,
            tdatetimedbcol,tdatetimedbcol,tdatetimedbcol,
 //         ft_binary,ft_bytes,ft_varbytes,
-           tdbcol,   tdbcol,  tdbcol,
+           tdbcol,   tstringdbcol,  tstringdbcol,
 //         ft_bcd,        ft_blob,   ft_memo,   ft_graphic);
            tcurrencydbcol,tblobdbcol,tmemodbcol,tblobdbcol);
  SBoolean = 'Boolean';
@@ -798,6 +798,11 @@ begin
    loadfield(pointer(result),int1);
   end;
   setlength(result,int1);
+  if fdatatype = ftvarbytes then begin
+   int1:= int1 - sizeof(word);
+   move((pchar(pointer(result))+sizeof(word))^,(pchar(pointer(result)))^,int1);
+   setlength(result,int1);
+  end;
  end;
 end;
 

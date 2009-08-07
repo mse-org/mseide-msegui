@@ -484,7 +484,7 @@ type
    
    procedure calcrecordsize;
    function loadbuffer(var buffer: recheaderty): tgetresult;
-   function getfieldsize(const datatype: tfieldtype; 
+   function getfieldsize(const datatype: tfieldtype; const varsize: integer;
                          out basetype: tfieldtype) : longint;
    function getrecordupdatebuffer: boolean;
    procedure setpacketrecords(avalue: integer);
@@ -2032,12 +2032,20 @@ begin
 end;
 
 function tmsebufdataset.getfieldsize(const datatype: tfieldtype;
-                                          out basetype: tfieldtype): longint;
+            const varsize: integer; out basetype: tfieldtype): longint;
 begin
  case datatype of
   ftstring,ftfixedchar,ftwidestring,ftfixedwidechar,ftwidememo: begin
    result:= sizeof(msestring);
    basetype:= ftwidestring;
+  end;
+  ftbytes: begin
+   result:= varsize;
+   basetype:= ftbytes;
+  end;
+  ftvarbytes: begin
+   result:= varsize + sizeof(word);
+   basetype:= ftvarbytes;
   end;
   ftsmallint,ftinteger,ftword: begin
    result:= sizeof(longint);
@@ -2945,7 +2953,7 @@ procedure tmsebufdataset.calcrecordsize;
  begin
   with ffieldinfos[aindex] do begin
    base.offset:= frecordsize;
-   base.size:= getfieldsize(datatype,ext.basetype);
+   base.size:= getfieldsize(datatype,asize,ext.basetype);
    if ext.basetype = ftwidestring then begin
     additem(fstringpositions,frecordsize);
     base.dbfieldsize:= asize;     //max size

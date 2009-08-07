@@ -99,20 +99,32 @@ function wordtohex(const inp: word; lsbfirst: boolean = false): string;
  //wandelt word in vier ascii hexzeichen
 
 
-function dectostr(const inp: integer; digits: integer): string;
+function dectostr(const inp: integer; digits: integer): string; overload;
           //leading zeroes if digits < 0
-function bintostr(inp: longword; digits: integer): string;
+function dectostr(const inp: int64; digits: integer): string; overload;
+          //leading zeroes if digits < 0
+function bintostr(inp: longword; digits: integer): string; overload;
    //convert longword to binstring, digits = bit count
-function octtostr(inp: longword; digits: integer): string;
+function bintostr(inp: uint64; digits: integer): string; overload;
+   //convert longword to binstring, digits = bit count
+function octtostr(inp: longword; digits: integer): string; overload;
    //convert longword to octaltring, digits = octet count
-function hextostr(inp: longword; digits: integer): string;
+function octtostr(inp: uint64; digits: integer): string; overload;
+   //convert longword to octaltring, digits = octet count
+function hextostr(inp: longword; digits: integer): string; overload;
    //convert longword to hexstring, digits = nibble count
-function hextocstr(const inp: longword; stellen: integer): string;
+function hextostr(inp: uint64; digits: integer): string; overload;
+   //convert longword to hexstring, digits = nibble count
+function hextocstr(const inp: longword; stellen: integer): string; overload;
    //convert longword to 0x..., digits = nibble count
-function ptruinttocstr(inp: ptruint): string;
+function hextocstr(const inp: uint64; stellen: integer): string; overload;
+   //convert longword to 0x..., digits = nibble count
+function ptruinttocstr(inp: ptruint): string; overload;
    //convert ptruint to 0x...
 function intvaluetostr(const value: integer; const base: numbasety = nb_dec;
-                          const bitcount: integer = 32): string;
+                          const bitcount: integer = 32): string; overload;
+function intvaluetostr(const value: int64; const base: numbasety = nb_dec;
+                          const bitcount: integer = 64): string; overload;
 
 function trystrtoptruint(const inp: string; out value: ptruint): boolean;
 function strtoptruint(const inp: string): ptruint;
@@ -136,7 +148,8 @@ function trystrtointvalue(const text: msestring; base: numbasety;
 function strtointvalue(const text: msestring; base: numbasety): longword; overload;
 
 
-function bytestrtostr(const inp: ansistring; base: numbasety; abstand: boolean): string;
+function bytestrtostr(const inp: ansistring; base: numbasety = nb_hex;
+                                          space: boolean = false): string;
    //wandelt bytefolge in ascii hexstring
 function bytestrtobin(const inp: ansistring; abstand: boolean): string;
    //wandelt bytefolge in ascii binstring,
@@ -1878,7 +1891,8 @@ begin
  end;
 end;
 
-function bytestrtostr(const inp: ansistring; base: numbasety; abstand: boolean): string;
+function bytestrtostr(const inp: ansistring; base: numbasety = nb_hex;
+                               space: boolean = false): string;
    //wandelt bytefolge in ascii hexstring
 var
  int1: integer;
@@ -1886,7 +1900,7 @@ begin
  result:= '';
  for int1:= 1 to length(inp) do begin
   result:= result + intvaluetostr(byte(inp[int1]),base,8);
-  if abstand and (int1 <> length(inp)) then begin
+  if space and (int1 <> length(inp)) then begin
     result:= result + ' ';
   end;
  end;
@@ -2072,6 +2086,18 @@ begin
  end;
 end;
 
+function bintostr(inp: uint64; digits: integer): string;
+   //convert longword to binstring, digits = bit count
+var
+ int1: integer;
+begin
+ setlength(result,digits);
+ for int1:= digits downto 1  do begin
+  result[int1]:= char(ord('0') + (inp and $1));
+  inp:= inp shr 1;
+ end;
+end;
+
 function octtostr(inp: longword; digits: integer): string;
    //convert longword to octaltring, digits = octet count
 var
@@ -2084,7 +2110,36 @@ begin
  end;
 end;
 
+function octtostr(inp: uint64; digits: integer): string;
+   //convert longword to octaltring, digits = octet count
+var
+ int1: integer;
+begin
+ setlength(result,digits);
+ for int1:= digits downto 1  do begin
+  result[int1]:= char(ord('0') + (inp and $7));
+  inp:= inp shr 3;
+ end;
+end;
+
 function dectostr(const inp: integer; digits: integer): string;
+          //leading zeroes if digits < 0
+begin
+ result:= inttostr(abs(inp));
+ if digits < 0 then begin
+  digits:= -digits;
+  if digits > length(nullen) then begin
+   digits:= length(nullen);
+  end;
+  result:= copy(nullen,1,digits-length(result)) + result;
+ end;
+ result:= copy(result,length(result)-digits+1,bigint);
+ if inp < 0 then begin
+  result:= '-' + result;
+ end;
+end;
+
+function dectostr(const inp: int64; digits: integer): string;
           //leading zeroes if digits < 0
 begin
  result:= inttostr(abs(inp));
@@ -2116,7 +2171,27 @@ begin
  end;
 end;
 
+function hextostr(inp: uint64; digits: integer): string;
+   //wandelt longword in hexstring, stellen = anzahl nibbles
+var
+ int1: integer;
+begin
+ setlength(result,digits);
+ for int1:= digits downto 1  do begin
+  result[int1]:= char(ord('0') + (inp and $f));
+  if result[int1] > '9' then begin
+   inc(result[int1],ord('A')-ord('9')-1);
+  end;
+  inp:= inp shr 4;
+ end;
+end;
+
 function hextocstr(const inp: longword; stellen: integer): string;
+begin
+ result:= '0x' + hextostr(inp, stellen);
+end;
+
+function hextocstr(const inp: uint64; stellen: integer): string;
 begin
  result:= '0x' + hextostr(inp, stellen);
 end;
@@ -2173,6 +2248,25 @@ end;
 
 function intvaluetostr(const value: integer; const base: numbasety = nb_dec;
                           const bitcount: integer = 32): string;
+begin
+ case base of
+  nb_bin: begin
+   result:= bintostr(value,abs(bitcount));
+  end;
+  nb_oct: begin
+   result:= octtostr(value,(abs(bitcount)+2) div 3);
+  end;
+  nb_hex: begin
+   result:= hextostr(value,(abs(bitcount)+3) div 4);
+  end;
+  else begin //nb_dec
+   result:= dectostr(value,sign(bitcount)*(abs(bitcount)*100+331) div 332);
+  end;
+ end;
+end;
+
+function intvaluetostr(const value: int64; const base: numbasety = nb_dec;
+                          const bitcount: integer = 64): string;
 begin
  case base of
   nb_bin: begin

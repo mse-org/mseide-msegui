@@ -547,10 +547,20 @@ begin
  else begin
   case (SQLType and not 1) of
    SQL_VARYING: begin
-    TrType:= ftString;
+    if sqlsubtype and $ff = 1 then begin //octets
+     trtype:= ftvarbytes;
+    end
+    else begin
+     TrType:= ftString;
+    end;
    end;
    SQL_TEXT: begin
-    TrType := ftString;
+    if sqlsubtype and $ff = 1 then begin //octets
+     trtype:= ftbytes;
+    end
+    else begin
+     TrType:= ftString;
+    end;
    end;
    SQL_TYPE_DATE: begin
     TrType:= ftDate{Time};
@@ -972,6 +982,7 @@ var
  w: word;
  cur1: currency;
  po1: pxsqlvar;
+ bo1: boolean;
 
 begin
  with tibcursor(cursor) do begin
@@ -1002,8 +1013,14 @@ begin
        move(cur1,sqldata^,po1^.sqllen);
       end;
      end;
-     ftString,ftFixedChar,ftwidestring: begin
-      s:= AParams.AsdbString(parnr);
+     ftString,ftFixedChar,ftwidestring,ftbytes,ftvarbytes: begin
+      bo1:= paramtypes[sqlvarnr] in [ftbytes,ftvarbytes];
+      if bo1 then begin
+       s:= aparams[parnr].asstring;
+      end
+      else begin
+       s:= AParams.AsdbString(parnr);
+      end;
       w:= length(s);
       with po1^ do begin
        if ((SQLType and not 1) = SQL_VARYING) then begin
@@ -1019,11 +1036,16 @@ begin
         end;
         CurrBuff:= SQLData;
         if w < sqllen then begin
-         fillchar((currbuff+w)^,sqllen-w,' ');
+         if bo1 then begin
+          fillchar((currbuff+w)^,sqllen-w,0);
+         end
+         else begin
+          fillchar((currbuff+w)^,sqllen-w,' ');
+         end;
         end;
        end;
       end;
-      Move(s[1],CurrBuff^,w);
+      Move(pointer(s)^,CurrBuff^,w);
      end;
      ftDate, ftTime, ftDateTime: begin
       SetDateTime(po1^.SQLData,AParams[ParNr].AsDateTime, po1^.SQLType);
@@ -1122,7 +1144,11 @@ begin
     ftDate,ftTime,ftDateTime: begin
      GetDateTime(CurrBuff,Buffer,SQLType);
     end;
-    ftString: begin
+    ftString,ftBytes,ftvarbytes: begin
+     if datatype = ftvarbytes then begin
+      currbuff:= currbuff - sizeof(word);
+      varcharlen:= varcharlen + sizeof(word);
+     end;
      if bufsize < varcharlen then begin
       bufsize:= -varcharlen;
      end

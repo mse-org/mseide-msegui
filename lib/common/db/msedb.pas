@@ -625,6 +625,9 @@ type
    procedure setaswidestring(const avalue: widestring); override;
   {$endif}
    function HasParent: Boolean; override;
+   function getasvariant: variant; override;
+   function getasstring: string; override;
+   procedure setasstring(const avalue: string); override;
   public
    procedure Clear; override;
    function assql: string;
@@ -654,6 +657,9 @@ type
    procedure setaswidestring(const avalue: widestring); override;
   {$endif}
    function HasParent: Boolean; override;
+   function getasvariant: variant; override;
+   procedure setasstring(const avalue: string); override;
+   function getasstring: string; override;
   public
    procedure Clear; override;
    function assql: string;
@@ -3859,6 +3865,37 @@ begin
  result:= fieldtooldsql(self);
 end;
 
+function tmsebytesfield.getasvariant: variant;
+begin
+ result:= asstring;
+end;
+
+procedure tmsebytesfield.setasstring(const avalue: string);
+var
+ int1,int2: integer;
+ str1: string;
+begin
+ int1:= datasize;
+ int2:= length(avalue);
+ if int2 < int1 then begin
+  str1:= avalue;
+  setlength(str1,int1);
+  fillchar((pchar(pointer(str1))+int2)^,int1-int2,0);
+  setdata(pointer(str1));
+ end
+ else begin
+  setdata(pointer(avalue));
+ end;
+end;
+
+function tmsebytesfield.getasstring: string;
+begin
+ setlength(result,datasize);
+ if not getdata(pointer(result)) then begin
+  result:= '';
+ end;
+end;
+
 { tmsevarbytesfield }
 
 function tmsevarbytesfield.HasParent: Boolean;
@@ -3912,6 +3949,42 @@ end;
 function tmsevarbytesfield.asoldsql: string;
 begin
  result:= fieldtooldsql(self);
+end;
+
+function tmsevarbytesfield.getasvariant: variant;
+begin
+ result:= asstring;
+end;
+
+procedure tmsevarbytesfield.setasstring(const avalue: string);
+var
+ int1,int2: integer;
+ str1: string;
+begin
+ int1:= datasize;
+ int2:= length(avalue);
+ if int2 > int1 - sizeof(word) then begin
+  int2:= int1 - sizeof(word);
+ end;
+ setlength(str1,int1);
+ pword(pointer(str1))^:= int2;
+ move((pchar(pointer(avalue)))^,(pchar(pointer(str1))+sizeof(word))^,int2);
+ setdata(pointer(str1));
+end;
+
+function tmsevarbytesfield.getasstring: string;
+var
+ wo1: word;
+begin
+ setlength(result,datasize);
+ if not getdata(pointer(result)) then begin
+  result:= '';
+ end
+ else begin
+  wo1:= pword(pointer(result))^;
+  move((pchar(pointer(result))+2)^,pchar(pointer(result))^,wo1);
+  setlength(result,wo1);
+ end
 end;
 
 { tmsebcdfield }
