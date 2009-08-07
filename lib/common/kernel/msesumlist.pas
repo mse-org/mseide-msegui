@@ -20,50 +20,60 @@ type
 
  tsumprop = class(tindexpersistent)
   protected
-   fsumup: realty;
-   fsumdown: realty;
-   findexup: integer;
-   findexdown: integer;
-   procedure clearup;
-   procedure cleardown;
+   fsum: realty;
+   fsumindex: integer;
+//   fsumup: realty;
+//   fsumdown: realty;
+//   findexup: integer;
+//   findexdown: integer;
+//   procedure clearup;
+//   procedure cleardown;
   published
  end;
  psumprop = ^tsumprop;
 
- optionsumty = (osu_sumup,osu_sumdown,osu_sumsonly,
+ optionsumty = ({osu_sumup,osu_sumdown,}osu_sumsonly,
                 osu_foldsumdown,osu_folddefaultsum);
  optionssumty = set of optionsumty;
  
  
  tsumarrayprop = class(tindexpersistentarrayprop)
   private
-   procedure setoptions(const avalue: optionssumty);
   protected
-   foptions: optionssumty;
-   procedure clearup;
-   procedure cleardown;
+//   procedure clearup;
+//   procedure cleardown;
+   function newsum(const alevel: integer; const asum: realty;
+                                     const aindex: integer): realty;
+{
    function newsumup(const alevel: integer; const asum: realty;
                                      const aindex: integer): realty;
    function newsumdown(const alevel: integer; const asum: realty;
                                      const aindex: integer): realty;
-   function needsclear(const aindex: integer): boolean;
+}
+//   function needsclear(const aindex: integer): boolean;
   public
    constructor create(const aowner: tdatalist);
-  published
-   property options: optionssumty read foptions write setoptions
-                                                     default [];
  end;
-  
+
+ tsumuparrayprop = class(tsumarrayprop)
+ end;
+ 
+ tsumdownarrayprop = class(tsumarrayprop)
+ end;
+ 
  trealsumlist = class(trealdatalist)
   private
-   fsums: tsumarrayprop;
+   fsumsup: tsumuparrayprop;
+   fsumsdown: tsumdownarrayprop;
    fdefaultval: realsumty;
 //   fsourceissumname: string;
    function getsumlevel(index: integer): sumlevelty;
    procedure setsumlevel(index: integer; const avalue: sumlevelty);
 //   function getsum(index: integer): realty;
-   procedure setsums(const avalue: tsumarrayprop);
+   procedure setsumsup(const avalue: tsumuparrayprop);
+   procedure setsumsdown(const avalue: tsumdownarrayprop);
    function getlinkdatatypes(const atag: integer): listdatatypesty; override;
+   procedure setoptions(const avalue: optionssumty);
   protected
 //   fsourceleveldirtystart: integer;
 //   fsourceleveldirtystop: integer;
@@ -73,6 +83,7 @@ type
    flinkvalue: listlinkinfoty;
    flinklevel: listlinkinfoty;
    flinkissum: listlinkinfoty;
+   foptions: optionssumty;
    procedure setsourcevalue(const avalue: string); virtual;
    procedure setsourcelevel(const avalue: string); virtual;
    procedure setsourceissum(const avalue: string); virtual;
@@ -106,7 +117,10 @@ type
                                             write setsourceissum;
           //define leaves for #foldlevel
   published
-   property sums: tsumarrayprop read fsums write setsums;
+   property sumsup: tsumuparrayprop read fsumsup write setsumsup;
+   property sumsdown: tsumdownarrayprop read fsumsdown write setsumsdown;
+   property options: optionssumty read foptions write setoptions
+                                                     default [];
 end; 
  
 implementation
@@ -122,7 +136,8 @@ begin
  initsource(flinkissum);
  inherited;
  fsize:= sizeof(realsumty);
- fsums:= tsumarrayprop.create(self);
+ fsumsup:= tsumuparrayprop.create(self);
+ fsumsdown:= tsumdownarrayprop.create(self);
  fillchar(fdefaultval,sizeof(fdefaultval),0);
  fdefaultval.data:= emptyreal;
 end;
@@ -132,7 +147,8 @@ begin
  removesource(flinkvalue);
  removesource(flinklevel);
  removesource(flinkissum);
- fsums.free;
+ fsumsup.free;
+ fsumsdown.free;
  inherited;
 end;
 
@@ -292,9 +308,9 @@ var
 begin
  checksourcecopy(flinkvalue,@copyvalue);
  if flinklevel.source is tcustomrowstatelist then begin
-  if osu_foldsumdown in fsums.options then begin
+  if osu_foldsumdown in foptions then begin
    if flinkissum.source <> nil then begin
-    if osu_folddefaultsum in fsums.options then begin
+    if osu_folddefaultsum in foptions then begin
      checksourcecopy2(flinklevel,flinkissum.source,
                                          @copylevelrowstateissumdownsum);
     end
@@ -308,7 +324,7 @@ begin
   end
   else begin
    if flinkissum.source <> nil then begin
-    if osu_folddefaultsum in fsums.options then begin
+    if osu_folddefaultsum in foptions then begin
      checksourcecopy2(flinklevel,flinkissum.source,@copylevelrowstateissumsum);
     end
     else begin
@@ -318,12 +334,12 @@ begin
    else begin
     checksourcecopy(flinklevel,@copylevelrowstate);
    end;
-  end;
+  end
  end
  else begin
   checksourcecopy(flinklevel,@copylevel);
  end;
- if osu_sumup in fsums.options then begin
+ if fsumsup.count > 0 then begin
   if stop >= fdirtyup then begin
    if fdirtyup > 0 then begin
     po1:= datapo;
@@ -331,7 +347,15 @@ begin
     rea1:= po1^.sumup;
    end
    else begin
-    fsums.clearup;
+    with fsumsup do begin
+     for int1:= 0 to high(fitems) do begin
+      with tsumprop(fitems[int1]) do begin
+       fsum:= emptyreal;
+       fsumindex:= -1;
+      end;
+     end;
+    end;
+//    fsumsup.clearup;
     rea1:= emptyreal;
    end;
    po1:= datapo;
@@ -343,8 +367,8 @@ begin
     end
     else begin
      if int2 > 0 then begin
-      if int2 <= high(fsums.fitems) then begin
-       po1^.data:= fsums.newsumup(int2-1,rea1,int1);
+      if int2 <= high(fsumsup.fitems) then begin
+       po1^.data:= fsumsup.newsum(int2-1,rea1,int1);
       end
       else begin
        po1^.data:= rea1;
@@ -357,7 +381,7 @@ begin
    fdirtyup:= stop+1;
   end;
  end;
- if osu_sumdown in fsums.options then begin
+ if fsumsdown.count > 0 then begin
   if start <= fdirtydown then begin
    if fdirtydown < count - 1 then begin
     po1:= datapo;
@@ -365,7 +389,15 @@ begin
     rea1:= po1^.sumdown;
    end
    else begin
-    fsums.cleardown;
+    with fsumsdown do begin
+     for int1:= 0 to high(fitems) do begin
+      with tsumprop(fitems[int1]) do begin
+       fsum:= emptyreal;
+       fsumindex:= maxint;
+      end;
+     end;
+    end;
+//    fsumsdown.cleardown;
     rea1:= emptyreal;
    end;
    po1:= datapo;
@@ -377,8 +409,8 @@ begin
     end
     else begin
      if int2 > 0 then begin
-      if int2 <= high(fsums.fitems) then begin
-       po1^.data:= fsums.newsumdown(int2-1,rea1,int1);
+      if int2 <= high(fsumsdown.fitems) then begin
+       po1^.data:= fsumsdown.newsum(int2-1,rea1,int1);
       end
       else begin
        po1^.data:= rea1;
@@ -395,7 +427,26 @@ end;
 
 procedure trealsumlist.change(const index: integer);
 begin
- if fsums.needsclear(index) then begin
+ if index < 0 then begin
+  fdirtyup:= 0;
+  fdirtydown:= count-1;
+ end
+ else begin
+  with fsumsup do begin
+   if (fitems <> nil) and 
+            (tsumprop(fitems[high(fitems)]).fsumindex <= index) then begin
+    fdirtyup:= 0;
+   end;
+  end;
+  with fsumsdown do begin
+   if (fitems <> nil) and 
+            (tsumprop(fitems[high(fitems)]).fsumindex >= index) then begin
+    fdirtydown:= self.count-1;
+   end;
+  end;
+ end;
+{
+ if fsumsdown.needsclear(index) or fsumsup.needsclear(index) then begin
   fdirtyup:= 0;
   fdirtydown:= count-1;
  end
@@ -407,12 +458,18 @@ begin
    fdirtydown:= index;
   end;
  end;
+ }
  inherited change(-1); //sum invalid
 end;
 
-procedure trealsumlist.setsums(const avalue: tsumarrayprop);
+procedure trealsumlist.setsumsup(const avalue: tsumuparrayprop);
 begin
- fsums.assign(avalue);
+ fsumsup.assign(avalue);
+end;
+
+procedure trealsumlist.setsumsdown(const avalue: tsumdownarrayprop);
+begin
+ fsumsdown.assign(avalue);
 end;
 
 function trealsumlist.getdefault: pointer;
@@ -460,6 +517,14 @@ begin
   2: begin
    result:= [dl_rowstate];
   end;
+ end;
+end;
+
+procedure trealsumlist.setoptions(const avalue: optionssumty);
+begin
+ if foptions <> avalue then begin
+  foptions:= avalue;
+  change(-1);
  end;
 end;
 
@@ -546,7 +611,7 @@ begin
 end;
 
 { tsumprop }
-
+{
 procedure tsumprop.clearup;
 begin
  fsumup:= emptyreal;
@@ -558,28 +623,23 @@ begin
  fsumdown:= emptyreal;
  findexdown:= maxint;
 end;
-
+}
 { tsumarrayprop }
 
 constructor tsumarrayprop.create(const aowner: tdatalist);
 begin
  inherited create(aowner,tsumprop);
 end;
-
-procedure tsumarrayprop.setoptions(const avalue: optionssumty);
-begin
- if foptions <> avalue then begin
-  foptions:= avalue;
-  tdatalist(fowner).change(-1);
- end;
-end;
-
+{
 procedure tsumarrayprop.clearup;
 var
  int1: integer;
 begin
  for int1:= 0 to high(fitems) do begin
-  tsumprop(fitems[int1]).clearup;
+  with tsumprop(fitems[int1]) do begin
+   fsum:= emptyreal;
+   fsumindex:= -1;
+  end;
  end;
 end;
 
@@ -588,25 +648,28 @@ var
  int1: integer;
 begin
  for int1:= 0 to high(fitems) do begin
-  tsumprop(fitems[int1]).cleardown;
+  with tsumprop(fitems[int1]) do begin
+   fsum:= emptyreal;
+   fsumindex:= maxint;
+  end;
  end;
 end;
-
-function tsumarrayprop.newsumup(const alevel: integer;
+}
+function tsumarrayprop.newsum(const alevel: integer;
               const asum: realty; const aindex: integer): realty;
 var
  po1: psumprop;
  int1: integer;
 begin
  po1:= psumprop(@fitems[alevel]);
- result:= subrealty(asum,po1^.fsumup);
+ result:= subrealty(asum,po1^.fsum);
  for int1:= alevel to high(fitems) do begin
-  po1^.fsumup:= asum;
-  po1^.findexup:= aindex;
+  po1^.fsum:= asum;
+  po1^.findex:= aindex;
   inc(po1);
  end;
 end;
-
+{
 function tsumarrayprop.newsumdown(const alevel: integer;
               const asum: realty; const aindex: integer): realty;
 var
@@ -621,7 +684,8 @@ begin
   inc(po1);
  end;
 end;
-
+}
+{
 function tsumarrayprop.needsclear(const aindex: integer): boolean;
 var
  int1: integer;
@@ -633,7 +697,7 @@ begin
   end;
  end;
 end;
-
+}
 initialization
  registerdatalistclass(dl_realsum,trealsumlist);
 end.

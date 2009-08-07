@@ -55,6 +55,16 @@ type
    function getelementeditorclass: elementeditorclassty; override;
  end;
   
+ tneglevelarrayelementeditor = class(tarrayelementeditor)
+  public
+   function name: msestring; override;
+ end;
+ 
+ tneglevelarraypropertyeditor = class(tpersistentarraypropertyeditor)
+  protected
+   function getelementeditorclass: elementeditorclassty; override;
+ end;
+  
  tshapestatespropertyeditor = class(tsetpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
@@ -147,8 +157,10 @@ begin
                                     tfacetemplatefadecoloreditor);
  registerpropertyeditor(typeinfo(trealarrayprop),tfacetemplate,'fade_pos',
                                     tfacetemplatefadeposeditor);
- registerpropertyeditor(typeinfo(tsumarrayprop),nil,'',
+ registerpropertyeditor(typeinfo(tsumdownarrayprop),nil,'',
                                     tlevelarraypropertyeditor);
+ registerpropertyeditor(typeinfo(tsumuparrayprop),nil,'',
+                                    tneglevelarraypropertyeditor);
  registerpropertyeditor(typeinfo(tsysshortcuts),nil,'',tsysshortcutspropertyeditor);
  registerpropertyeditor(typeinfo(string),tfont,'name',tfontnamepropertyeditor);
  registerpropertyeditor(typeinfo(actionstatesty),nil,'',tshapestatespropertyeditor);
@@ -401,6 +413,20 @@ end;
 function tlevelarrayelementeditor.name: msestring;
 begin
  result:= 'Level ' + inttostr(findex+1);
+end;
+
+{ tneglevelarraypropertyeditor }
+
+function tneglevelarraypropertyeditor.getelementeditorclass: elementeditorclassty;
+begin
+ result:= tneglevelarrayelementeditor;
+end;
+
+{ tneglevelarrayelementeditor }
+
+function tneglevelarrayelementeditor.name: msestring;
+begin
+ result:= 'Level ' + inttostr(-(findex+1));
 end;
 
 initialization

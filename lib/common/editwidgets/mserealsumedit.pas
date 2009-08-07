@@ -109,7 +109,7 @@ var
  po1: prealsumty;
 begin
  if (fdatalist <> nil) and 
-        (osu_sumsonly in tgridrealsumlist(fdatalist).sums.options) then begin
+        (osu_sumsonly in tgridrealsumlist(fdatalist).options) then begin
   po1:= @data;
   if (po1 = nil) then begin
    po1:= fgridintf.getrowdatapo;
