@@ -6290,7 +6290,8 @@ begin
     sbe_pagedown: pageup(fca_focusin);
     sbe_wheelup: wheeldown(fca_focusin);
     sbe_wheeldown: wheelup(fca_focusin);
-    {sbe_thumbtrack,}sbe_valuechanged: begin end;
+    {sbe_thumbtrack,}sbe_valuechanged: begin
+    end;
     sbe_thumbtrack,sbe_thumbposition: begin
      if (event <> sbe_thumbtrack) or (gdo_thumbtrack in foptions) then begin
       if self.active then begin
@@ -6306,7 +6307,8 @@ begin
          end;
         end
         else begin
-         if not dataset.filtered and (gdo_propscrollbar in foptions) then begin
+         if (not dataset.filtered or (dscontroller <> nil)) and 
+                                     (gdo_propscrollbar in foptions) then begin
           int1:= dataset.recordcount;
           if int1 >= 0 then begin
            int2:= round(int1 * sender.value)+1;
@@ -6321,7 +6323,8 @@ begin
              dataset.recno:= int2;
             end
             else begin
-             dscontroller.recno:= int2; //use cached recno
+             dscontroller.findrecno(int2,[rso_foreward,rso_backward]); //use cached recno
+//             dscontroller.recno:= int2; //use cached recno
             end;
            end;
           end;

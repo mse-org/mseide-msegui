@@ -71,6 +71,9 @@ type
  locateoptionty = (loo_caseinsensitive,loo_partialkey,loo_posinsensitive,
                         loo_noforeward,loo_nobackward);
  locateoptionsty = set of locateoptionty;
+ recnosearchoptionty = (rso_foreward,rso_backward);
+ recnosearchoptionsty = set of recnosearchoptionty;
+ 
  fieldarty = array of tfield;
 
  masterlinkoptionty = (mdlo_syncedit,mdlo_syncinsert,mdlo_syncdelete); 
@@ -1086,6 +1089,11 @@ type
    property recnonullbased: integer read getrecnonullbased 
                                        write setrecnonullbased;
    property recnooffset: integer read frecnooffset;
+   function findrecno(const arecno: integer; 
+                            const options: recnosearchoptionsty): integer;
+   function findrecnonullbased(const arecno: integer; 
+                            const options: recnosearchoptionsty): integer;
+   
    function moveby(const distance: integer): integer;
    function islastrecord: boolean;
    procedure internalinsert;
@@ -5011,7 +5019,7 @@ begin
    result:= -1;
   end
   else begin
-   if not frecnovalid then begin
+   if not frecnovalid or tdataset(fowner).filtered then begin
     if bof then begin
      frecno:= 0;
     end
@@ -5023,7 +5031,7 @@ begin
       frecno:= recno + frecnooffset;
      end;
     end;
-    frecnovalid:= true;
+    frecnovalid:= not tdataset(fowner).filtered;
    end
    else begin
     inc(frecno,fscrollsum + activerecord - factiverecordbefore);
@@ -5045,7 +5053,7 @@ begin
   frecno:= avalue;
   factiverecordbefore:= tdataset1(fowner).activerecord;
   fscrollsum:= 0;
-  frecnovalid:= true;
+  frecnovalid:= not tdataset1(fowner).filtered;
  end;
 {
  if not frecnovalid or (avalue <> frecno) then begin
@@ -5066,6 +5074,38 @@ end;
 procedure tdscontroller.setrecno(const avalue: integer);
 begin
  recnonullbased:= avalue + frecnooffset;
+end;
+
+function tdscontroller.findrecno(const arecno: integer;
+               const options: recnosearchoptionsty): integer;
+begin
+ result:= findrecnonullbased(arecno+frecnooffset,options)-frecnooffset;
+end;
+
+function tdscontroller.findrecnonullbased(const arecno: integer;
+               const options: recnosearchoptionsty): integer;
+begin
+ try
+  recnonullbased:= arecno;
+ except
+  if options <> [] then begin
+   with tdataset(fowner) do begin
+    disablecontrols;
+    try
+     resync([]);
+     if (recnonullbased > arecno) and not (rso_foreward in options) then begin
+      prior;
+     end;
+    finally
+     enablecontrols;
+    end;
+   end;
+  end
+  else begin
+   raise;
+  end;
+ end;
+ result:= recnonullbased;
 end;
 
 procedure tdscontroller.updatelinkedfields;
