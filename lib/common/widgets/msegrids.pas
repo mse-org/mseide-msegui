@@ -1953,6 +1953,7 @@ type
    property onkeydown: keyeventty read fonkeydown write fonkeydown;
    property wheelscrollheight: integer read fwheelscrollheight write
                     fwheelscrollheight default defaultwheelscrollheight;
+   property optionswidget default defaultgridwidgetoptions;
  end;
 
  tcellgrid = class(tcustomgrid)

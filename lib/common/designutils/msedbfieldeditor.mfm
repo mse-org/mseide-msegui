@@ -44,7 +44,7 @@ object msedbfieldeditorfo: tmsedbfieldeditorfo
     modalresult = mr_cancel
   end
   object fielddefli: tstringgrid
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 336
     bounds_y = 7
     bounds_cx = 258
@@ -104,7 +104,7 @@ object msedbfieldeditorfo: tmsedbfieldeditorfo
     reffontheight = 14
   end
   object fields: twidgetgrid
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 8
     bounds_y = 7
     bounds_cx = 323
@@ -164,26 +164,31 @@ object msedbfieldeditorfo: tmsedbfieldeditorfo
         width = 13
         options = [co_invisible, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         widgetname = 'index'
+        dataclass = tgridintegerdatalist
       end    
       item
         width = 12
         options = [co_invisible, co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         widgetname = 'fieldpo'
+        dataclass = tgridpointerdatalist
       end    
       item
         width = 97
         options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         widgetname = 'fieldname'
+        dataclass = tgridmsestringdatalist
       end    
       item
         width = 92
         options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         widgetname = 'classty'
+        dataclass = tgridenumdatalist
       end    
       item
         width = 84
         options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         widgetname = 'fieldkind'
+        dataclass = tgridenumdatalist
       end>
     datarowheight = 16
     onrowsdeleting = fieldrowsdeleting
@@ -248,6 +253,7 @@ object msedbfieldeditorfo: tmsedbfieldeditorfo
       dropdown.cols.items = <      
         item
         end>
+      dropdown.itemindex = 0
       oninit = initcla
       reffontheight = 14
     end
@@ -274,6 +280,7 @@ object msedbfieldeditorfo: tmsedbfieldeditorfo
       dropdown.cols.items = <      
         item
         end>
+      dropdown.itemindex = 0
       oninit = initfieldkind
       reffontheight = 14
     end
