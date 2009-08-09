@@ -71,7 +71,7 @@ type
  locateoptionty = (loo_caseinsensitive,loo_partialkey,loo_posinsensitive,
                         loo_noforeward,loo_nobackward);
  locateoptionsty = set of locateoptionty;
- recnosearchoptionty = (rso_foreward,rso_backward);
+ recnosearchoptionty = (rso_backward);
  recnosearchoptionsty = set of recnosearchoptionty;
  
  fieldarty = array of tfield;
@@ -1090,9 +1090,9 @@ type
                                        write setrecnonullbased;
    property recnooffset: integer read frecnooffset;
    function findrecno(const arecno: integer; 
-                            const options: recnosearchoptionsty): integer;
+                            const options: recnosearchoptionsty = []): integer;
    function findrecnonullbased(const arecno: integer; 
-                            const options: recnosearchoptionsty): integer;
+                            const options: recnosearchoptionsty = []): integer;
    
    function moveby(const distance: integer): integer;
    function islastrecord: boolean;
@@ -5083,26 +5083,21 @@ begin
 end;
 
 function tdscontroller.findrecnonullbased(const arecno: integer;
-               const options: recnosearchoptionsty): integer;
+               const options: recnosearchoptionsty = []): integer;
 begin
  try
   recnonullbased:= arecno;
  except
-  if options <> [] then begin
-   with tdataset(fowner) do begin
-    disablecontrols;
-    try
-     resync([]);
-     if (recnonullbased > arecno) and not (rso_foreward in options) then begin
-      prior;
-     end;
-    finally
-     enablecontrols;
+  with tdataset(fowner) do begin
+   disablecontrols;
+   try
+    resync([]);
+    if (recnonullbased > arecno) and (rso_backward in options) then begin
+     prior;
     end;
+   finally
+    enablecontrols;
    end;
-  end
-  else begin
-   raise;
   end;
  end;
  result:= recnonullbased;

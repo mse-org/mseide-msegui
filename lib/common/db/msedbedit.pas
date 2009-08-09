@@ -6323,7 +6323,7 @@ begin
              dataset.recno:= int2;
             end
             else begin
-             dscontroller.findrecno(int2,[rso_foreward,rso_backward]); //use cached recno
+             dscontroller.findrecno(int2); //use cached recno
 //             dscontroller.recno:= int2; //use cached recno
             end;
            end;
