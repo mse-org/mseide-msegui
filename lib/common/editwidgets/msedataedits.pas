@@ -2300,7 +2300,7 @@ end;
 
 procedure tcustomstringedit.setgridvalues(const Value: msestringarty);
 begin
- tmsestringdatalist(fgridintf.getcol.datalist).assignarray(value);
+ tmsestringdatalist(fgridintf.getcol.datalist).asarray:= value;
 end;
 
 function tcustomstringedit.isempty(const atext: msestring): boolean;
@@ -2604,7 +2604,7 @@ end;
 
 procedure thexstringedit.setgridvalues(const Value: stringarty);
 begin
- tansistringdatalist(fgridintf.getcol.datalist).assignarray(value);
+ tansistringdatalist(fgridintf.getcol.datalist).asarray:= value;
 end;
 
 procedure thexstringedit.fillcol(const value: string);
@@ -3736,7 +3736,7 @@ procedure tenumtypeedit.settypeinfopo(const avalue: ptypeinfo);
 begin
  if avalue <> ftypeinfopo then begin
   if avalue <> nil then begin
-   dropdown.cols[dropdown.valuecol].assignarray(getenumnames(avalue));
+   dropdown.cols[dropdown.valuecol].asarray:= getenumnames(avalue);
   end
   else begin
    dropdown.cols[dropdown.valuecol].clear;

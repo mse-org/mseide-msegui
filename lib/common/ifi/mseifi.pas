@@ -37,8 +37,10 @@ type
  ifinamety = array[0..0] of char; //null terminated
  pifinamety = ^ifinamety;
 
- ifidatakindty = (idk_none,idk_null,idk_integer,idk_int64,idk_currency,idk_real,
-                  idk_msestring,idk_msestringint,idk_bytes,
+ ifidatakindty = (idk_none,idk_null,idk_integer,idk_int64,idk_currency,
+                  idk_real,idk_realint,
+                  idk_msestring,idk_msestringint,
+                  idk_bytes,
                   idk_rowstate,idk_rowstatecolmerge,
                   idk_rowstaterowheight,
                   idk_selection);
@@ -47,6 +49,12 @@ type
  datarecty = record //dummy
  end;
 
+ ifirealintty = record
+  rea: double;
+  int: integer;
+ end;
+ pifirealintty = ^ifirealintty;
+ 
  ifimsestringintty = record
   int: integer;
   mstr: ifinamety;
@@ -559,6 +567,8 @@ function encodeifidata(const avalue: currency;
                        const headersize: integer = 0): string; overload;
 function encodeifidata(const avalue: real; 
                        const headersize: integer = 0): string; overload;
+function encodeifidata(const avalue: realintty; 
+                       const headersize: integer = 0): string; overload;
 function encodeifidata(const avalue: msestring; 
                        const headersize: integer = 0): string; overload;
 function encodeifidata(const avalue: msestringintty; 
@@ -586,6 +596,8 @@ function decodeifidata(const source: pifidataty; out dest: integer): integer;
 function decodeifidata(const source: pifidataty; out dest: int64): integer;
                                                         overload;
 function decodeifidata(const source: pifidataty; out dest: real): integer;
+                                                        overload;
+function decodeifidata(const source: pifidataty; out dest: realintty): integer;
                                                         overload;
 function decodeifidata(const source: pifidataty; out dest: currency): integer;
                                                         overload;
@@ -619,9 +631,9 @@ const
   sizeof(ifidataty)+sizeof(int64),                     //idk_int64
   sizeof(ifidataty)+sizeof(currency),                  //idk_currency
   sizeof(ifidataty)+sizeof(double),                    //idk_real
+  sizeof(ifidataty)+sizeof(ifirealintty),              //idk_realint
   sizeof(ifidataty)+sizeof(ifinamety),                 //idk_msestring
   sizeof(ifidataty)+sizeof(ifimsestringintty),         //idk_msestringint
-//  sizeof(ifidataty)+sizeof(ifinamety),               //idk_ansistring
   sizeof(ifidataty)+sizeof(ifibytesty),                //idk_bytes
   sizeof(ifidataty)+sizeof(rowstatety),                //idk_rowstate
   sizeof(ifidataty)+sizeof(rowstatecolmergety),        //idk_rowstatecolmerge
@@ -723,6 +735,15 @@ function encodeifidata(const avalue: real;
                        const headersize: integer = 0): string; overload;
 begin
  preal(initdataheader(headersize,idk_real,0,result))^:= avalue;
+end;
+
+function encodeifidata(const avalue: realintty; 
+                       const headersize: integer = 0): string; overload;
+begin
+ with pifirealintty(initdataheader(headersize,idk_realint,0,result))^ do begin
+  rea:= avalue.rea;
+  int:= avalue.int;
+ end;
 end;
 
 function encodeifidata(const avalue: msestring; 
@@ -914,6 +935,18 @@ begin
  end;
  dest:= preal(@source^.data)^;
  result:= datarecsizes[idk_real];
+end;
+
+function decodeifidata(const source: pifidataty; out dest: realintty): integer;
+begin
+ if source^.header.kind <> idk_realint then begin
+  datakinderror;
+ end;
+ with pifirealintty(@source^.data)^ do begin
+  dest.rea:= rea;
+  dest.int:= int;
+ end;
+ result:= datarecsizes[idk_realint];
 end;
 
 function decodeifidata(const source: pifidataty; out dest: currency): integer;

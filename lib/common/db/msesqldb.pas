@@ -94,9 +94,9 @@ type
    procedure doidleapplyupdates;
 
    procedure dataevent(event: tdataevent; info: ptrint); override;
-   function wantblobfetch: boolean; override;
-   function closetransactiononrefresh: boolean; override;
-   function cantransactionrefresh: boolean; override;
+//   function wantblobfetch: boolean; override;
+   function getdsoptions: datasetoptionsty; override;
+//   function cantransactionrefresh: boolean; override;
 //,   function refreshtransdatasets: boolean; override;
       
   public
@@ -664,6 +664,12 @@ begin
  result:= fcontroller.isutf8;
 end;
 
+function tmsesqlquery.getdsoptions: datasetoptionsty;
+begin
+ result:= fcontroller.options;
+end;
+
+{
 function tmsesqlquery.wantblobfetch: boolean;
 begin
  result:= (dso_cacheblobs in fcontroller.options);
@@ -673,7 +679,7 @@ function tmsesqlquery.closetransactiononrefresh: boolean;
 begin
  result:= (dso_refreshtransaction in fcontroller.options);
 end;
-
+}
 {
 function tmsesqlquery.refreshtransdatasets: boolean;
 begin
@@ -700,12 +706,12 @@ function tmsesqlquery.stringmemo: boolean;
 begin
  result:= dso_stringmemo in fcontroller.options;
 end;
-
+{
 function tmsesqlquery.cantransactionrefresh: boolean;
 begin
  result:= not (dso_notransactionrefresh in fcontroller.options);
 end;
-
+}
 { tparamsourcedatalink }
 
 constructor tparamsourcedatalink.create(const aowner: tfieldparamlink);

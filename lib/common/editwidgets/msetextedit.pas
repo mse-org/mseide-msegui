@@ -1747,7 +1747,7 @@ end;
 
 procedure tcustomtextedit.setgridvalues(const Value: msestringarty);
 begin
- flines.assignarray(value);
+ flines.asmsestringarray:= value;
 end;
 
 function tcustomtextedit.getrichlines(const index: integer): richstringty;

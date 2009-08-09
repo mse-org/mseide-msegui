@@ -613,7 +613,8 @@ type
    procedure setdatastringvalue(const afield: tfield; const avalue: string);
 //   procedure setcurvalue(const afield: tfield; const avalue: int64);
 
-   function wantblobfetch: boolean; virtual;
+//   function wantblobfetch: boolean; virtual;
+   function getdsoptions: datasetoptionsty; virtual;
    procedure resetblobcache;
    procedure sortblobcache;   
    procedure fetchblobs;
@@ -1632,7 +1633,7 @@ begin
   end;
  end;
  include(fbstate,bs_opening);
- if wantblobfetch then begin
+ if dso_cacheblobs in getdsoptions then begin
   include(fbstate,bs_blobsfetched);
  end
  else begin 
@@ -4860,10 +4861,15 @@ begin
  end;
  exclude(fbstate,bs_blobssorted);
 end;
-
+{
 function tmsebufdataset.wantblobfetch: boolean;
 begin
  result:= false;
+end;
+}
+function tmsebufdataset.getdsoptions: datasetoptionsty;
+begin
+ result:= [];
 end;
 
 procedure tmsebufdataset.checkconnected;

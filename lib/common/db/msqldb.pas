@@ -615,8 +615,9 @@ type
    procedure freequery;
    procedure disconnect;
    procedure InternalOpen; override;
-   function closetransactiononrefresh: boolean; virtual;
-   function cantransactionrefresh: boolean; virtual;
+//   function closetransactiononrefresh: boolean; virtual;
+//   function cantransactionrefresh: boolean; virtual;
+//   function recnotransactionrefresh: boolean; virtual;
 //   function refreshtransdatasets: boolean; virtual;
    procedure internalrefresh; override;
    procedure refreshtransaction; override;
@@ -2797,15 +2798,32 @@ begin
 end;
 
 procedure tsqlquery.refreshtransaction;
+var
+ opt1: datasetoptionsty;
+ bo1: boolean;
 begin
- if cantransactionrefresh then begin
-  dorefresh;
+ opt1:= getdsoptions;
+ if not (dso_notransactionrefresh in opt1) then begin
+  if dso_recnotransactionrefresh in opt1 then begin
+   bo1:= bs_restorerecno in fbstate;
+   include(fbstate,bs_restorerecno);
+   try
+    dorefresh;
+   finally
+    if not bo1 then begin
+     exclude(fbstate,bs_restorerecno);
+    end;
+   end;
+  end
+  else begin
+   dorefresh;
+  end;
  end;
 end;
  
 procedure tsqlquery.internalrefresh;
 begin
- if closetransactiononrefresh then begin
+ if dso_refreshtransaction in getdsoptions then begin
   transaction.refresh;
  end
  else begin
@@ -3438,7 +3456,7 @@ begin
   fbeforeexecute.freenotification(self);
  end;
 end;
-
+{
 function TSQLQuery.closetransactiononrefresh: boolean;
 begin
  result:= false;
@@ -3448,7 +3466,7 @@ function tsqlquery.cantransactionrefresh: boolean;
 begin
  result:= true;
 end;
-
+}
 function TSQLQuery.getnumboolean: boolean;
 begin
  result:= tcustomsqlconnection(database).getnumboolean;

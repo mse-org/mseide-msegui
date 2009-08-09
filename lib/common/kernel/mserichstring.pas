@@ -14,7 +14,7 @@ unit mserichstring;
 interface
 uses
  SysUtils,msetypes,msekeyboard,mseevent,msedatalist,msegraphutils,Classes,
-           msestrings;
+ msestrings;
 
 const
  fsboldmask = $01;
@@ -85,7 +85,7 @@ type
    function getstatdata(const index: integer): msestring; override;
   public
    constructor create; override;
-   procedure assign(source: tpersistent); override;
+//   procedure assign(source: tpersistent); override;
    procedure insert(const index: integer; const item: msestring); override;
    function add(const value: msestring): integer; override;
    function nextword(out value: lmsestringty): boolean;
@@ -175,6 +175,9 @@ implementation
 uses
  typinfo;
 
+type
+ tpoorstringdatalist1 = class(tpoorstringdatalist);
+ 
 {$ifdef FPC} 
 function richformatinfotostring(const aformat: formatinfoty): ansistring;
 begin
@@ -995,29 +998,30 @@ end;
 
 procedure trichstringdatalist.setasarray(const data: richstringarty);
 begin
- internalsetasarray(length(data),pointer(data));
+ internalsetasarray(pointer(data),sizeof(richstringty));
 end;
 
 function trichstringdatalist.getasarray: richstringarty;
 begin
  setlength(result,fcount);
- internalgetasarray(pointer(result));
+ internalgetasarray(pointer(result),sizeof(richstringty));
 end;
 
 procedure trichstringdatalist.setasmsestringarray(const data: msestringarty);
 var
  po1: prichstringty;
  int1: integer;
+ s1: integer;
 begin
- beginupdate;
-  count:= length(data);
-  po1:= datapo;
-  for int1:= 0 to fcount - 1 do begin
-   po1^.text:= data[int1];
-   po1^.format:= nil;
-   inc(po1);
-  end;
- endupdate;
+ newbuffer(length(data));
+ po1:= pointer(fdatapo);
+ s1:= size;
+ for int1:= 0 to fcount - 1 do begin
+  po1^.text:= data[int1];
+  po1^.format:= nil;
+  inc(pchar(po1),s1);
+ end;
+ change(-1);
 end;
 
 function trichstringdatalist.getasmsestringarray: msestringarty;
@@ -1073,36 +1077,19 @@ begin
   end;
  end;
 end;
-
+{
 procedure trichstringdatalist.assign(source: tpersistent);
-var
- int1: integer;
- po1,po2: prichstringty;
 begin
- if source is tdoublemsestringdatalist then begin
-  beginupdate;
-  try
-   with source as tdoublemsestringdatalist do begin
-    po2:= prichstringty(fdatapo);
-    self.clear;
-    self.count:= count;
-    po1:= prichstringty(self.fdatapo);
-    for int1:= 0 to count - 1 do begin
-     po1^:= po2^;
-     setlength(po1^.format,length(po1^.format));
-     inc(pchar(po1),self.fsize);
-     inc(pchar(po2),fsize);
-    end;
-   end;
-  finally
-   endupdate;
+ if not assigndata(source) then begin
+  if source is tpoorstringdatalist then begin
+   tpoorstringdatalist1(source).assigntodata(self);
   end
- end
- else begin
-  inherited;
+  else begin
+   inherited;
+  end;
  end;
 end;
-
+}
 procedure trichstringdatalist.setstatdata(const index: integer; const value: msestring);
 var
  po1: prichstringty;

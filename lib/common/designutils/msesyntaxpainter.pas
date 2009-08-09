@@ -77,6 +77,9 @@ type
   private
    function Getitems(index: integer): refreshinfoty;
    procedure Setitems(index: integer; const Value: refreshinfoty); //fifo
+  protected
+   function checkassigncompatibility(
+                            const source: tpersistent): boolean; override;
   public
    constructor create; override;
    procedure push(const value: refreshinfoty);
@@ -257,6 +260,11 @@ end;
 procedure trefreshinfolist.push(const value: refreshinfoty);
 begin
  pushdata(value);
+end;
+
+function trefreshinfolist.checkassigncompatibility(const source: tpersistent): boolean;
+begin
+ result:= source.inheritsfrom(trefreshinfolist);
 end;
 
 { tsyntaxpainter }

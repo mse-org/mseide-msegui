@@ -8,11 +8,12 @@ const
  foldlevelsumname = '#foldlevel';
  
 type
- sumlevelty = integer;
+// sumlevelty = integer;
  
  realsumty = record
-  data: realty; //first!
-  level: sumlevelty;
+//  data: realty; //first!
+//  level: sumlevelty;
+  data: realintty;
   sumup: realty;
   sumdown: realty;
  end;
@@ -61,14 +62,14 @@ type
  tsumdownarrayprop = class(tsumarrayprop)
  end;
  
- trealsumlist = class(trealdatalist)
+ trealsumlist = class(trealintdatalist)
   private
    fsumsup: tsumuparrayprop;
    fsumsdown: tsumdownarrayprop;
    fdefaultval: realsumty;
 //   fsourceissumname: string;
-   function getsumlevel(index: integer): sumlevelty;
-   procedure setsumlevel(index: integer; const avalue: sumlevelty);
+   function getsumlevel(index: integer): integer;
+   procedure setsumlevel(index: integer; const avalue: integer);
 //   function getsum(index: integer): realty;
    procedure setsumsup(const avalue: tsumuparrayprop);
    procedure setsumsdown(const avalue: tsumdownarrayprop);
@@ -104,7 +105,7 @@ type
    function getsourcename(const atag: integer): string; override;
    procedure linksource(const source: tdatalist; const atag: integer); override;
 
-   property sumlevel[index: integer]: sumlevelty read getsumlevel 
+   property sumlevel[index: integer]: integer read getsumlevel 
                             write setsumlevel;
              //0 -> no sum > 0 top down, < 0 bottom up
 //   property sum[index: integer]: realty read getsum;
@@ -139,7 +140,7 @@ begin
  fsumsup:= tsumuparrayprop.create(self);
  fsumsdown:= tsumdownarrayprop.create(self);
  fillchar(fdefaultval,sizeof(fdefaultval),0);
- fdefaultval.data:= emptyreal;
+ fdefaultval.data.rea:= emptyreal;
 end;
 
 destructor trealsumlist.destroy;
@@ -175,16 +176,7 @@ var
 begin
  clean(index,index);
  checkindex(index);
- realty(dest):= prealsumty(fdatapo+index*fsize)^.data;
- {
- po1:= prealsumty(fdatapo+index*fsize);
- if po1^.level = 0 then begin
-  realty(dest):= po1^.data;
- end
- else begin
-  realty(dest):= po1^.sum;
- end;
- }
+ realty(dest):= prealsumty(fdatapo+index*fsize)^.data.rea;
 end;
 
 procedure trealsumlist.setgriddata(index: integer; const source);
@@ -194,35 +186,35 @@ begin
  int1:= index;
  checkindex(index);
  with prealsumty(fdatapo+index*fsize)^ do begin
-  if level = 0 then begin
-   data:= realty(source);
+  if data.int = 0 then begin
+   data.rea:= realty(source);
    change(int1);
   end;
  end;
 end;
 
-function trealsumlist.getsumlevel(index: integer): sumlevelty;
+function trealsumlist.getsumlevel(index: integer): integer;
 begin
  checkindex(index);
- result:= prealsumty(fdatapo+index*fsize)^.level;
+ result:= prealsumty(fdatapo+index*fsize)^.data.int;
 end;
 
 procedure trealsumlist.setsumlevel(index: integer;
-               const avalue: sumlevelty);
+               const avalue: integer);
 var
  int1: integer;
 begin
  int1:= index;
  checkindex(index);
  with prealsumty(fdatapo+index*fsize)^ do begin
-  if level <> avalue then begin
-   level:= avalue;
+  if data.int <> avalue then begin
+   data.int:= avalue;
    if avalue = 0 then begin
     if defaultzero then begin
-     data:= 0;
+     data.rea:= 0;
     end
     else begin
-     data:= emptyreal;
+     data.rea:= emptyreal;
     end;
    end;
    sourcechange(flinkvalue.source,int1); //restore value
@@ -240,61 +232,61 @@ end;
 }
 procedure copyvalue(const source,dest: pointer);
 begin
- prealsumty(dest)^.data:= preal(source)^;
+ prealsumty(dest)^.data.rea:= preal(source)^;
 end;
 
 procedure copylevel(const source,dest: pointer);
 begin
- prealsumty(dest)^.level:= pinteger(source)^;
+ prealsumty(dest)^.data.int:= pinteger(source)^;
 end;
 
 procedure copylevelrowstate(const source,dest: pointer);
 begin
- prealsumty(dest)^.level:= -(prowstatety(source)^.fold + 1);
+ prealsumty(dest)^.data.int:= -(prowstatety(source)^.fold + 1);
 end;
 
 procedure copylevelrowstateissum(const source1,source2,dest: pointer);
 begin
  if pinteger(source2)^ <> 0 then begin
-  prealsumty(dest)^.level:= -(prowstatety(source1)^.fold + 1);
+  prealsumty(dest)^.data.int:= -(prowstatety(source1)^.fold + 1);
  end
  else begin
-  prealsumty(dest)^.level:= 0;
+  prealsumty(dest)^.data.int:= 0;
  end;
 end;
 
 procedure copylevelrowstateissumsum(const source1,source2,dest: pointer);
 begin
  if pinteger(source2)^ = 0 then begin
-  prealsumty(dest)^.level:= -(prowstatety(source1)^.fold + 1);
+  prealsumty(dest)^.data.int:= -(prowstatety(source1)^.fold + 1);
  end
  else begin
-  prealsumty(dest)^.level:= 0;
+  prealsumty(dest)^.data.int:= 0;
  end;
 end;
 
 procedure copylevelrowstatedown(const source,dest: pointer);
 begin
- prealsumty(dest)^.level:= prowstatety(source)^.fold + 1;
+ prealsumty(dest)^.data.int:= prowstatety(source)^.fold + 1;
 end;
 
 procedure copylevelrowstateissumdown(const source1,source2,dest: pointer);
 begin
  if pinteger(source2)^ <> 0 then begin
-  prealsumty(dest)^.level:= (prowstatety(source1)^.fold + 1);
+  prealsumty(dest)^.data.int:= (prowstatety(source1)^.fold + 1);
  end
  else begin
-  prealsumty(dest)^.level:= 0;
+  prealsumty(dest)^.data.int:= 0;
  end;
 end;
 
 procedure copylevelrowstateissumdownsum(const source1,source2,dest: pointer);
 begin
  if pinteger(source2)^ = 0 then begin
-  prealsumty(dest)^.level:= (prowstatety(source1)^.fold + 1);
+  prealsumty(dest)^.data.int:= (prowstatety(source1)^.fold + 1);
  end
  else begin
-  prealsumty(dest)^.level:= 0;
+  prealsumty(dest)^.data.int:= 0;
  end;
 end;
 
@@ -361,17 +353,17 @@ begin
    po1:= datapo;
    inc(po1,fdirtyup);
    for int1:= fdirtyup to stop do begin
-    int2:= po1^.level;
+    int2:= po1^.data.int;
     if int2 = 0 then begin
-     rea1:= addrealty(rea1,po1^.data);
+     rea1:= addrealty(rea1,po1^.data.rea);
     end
     else begin
      if int2 > 0 then begin
       if int2 <= high(fsumsup.fitems) then begin
-       po1^.data:= fsumsup.newsum(int2-1,rea1,int1);
+       po1^.data.rea:= fsumsup.newsum(int2-1,rea1,int1);
       end
       else begin
-       po1^.data:= rea1;
+       po1^.data.rea:= rea1;
       end;
      end;
     end;
@@ -403,17 +395,17 @@ begin
    po1:= datapo;
    inc(po1,fdirtydown);
    for int1:= fdirtydown downto start do begin
-    int2:= -po1^.level;
+    int2:= -po1^.data.int;
     if int2 = 0 then begin
-     rea1:= addrealty(rea1,po1^.data);
+     rea1:= addrealty(rea1,po1^.data.rea);
     end
     else begin
      if int2 > 0 then begin
       if int2 <= high(fsumsdown.fitems) then begin
-       po1^.data:= fsumsdown.newsum(int2-1,rea1,int1);
+       po1^.data.rea:= fsumsdown.newsum(int2-1,rea1,int1);
       end
       else begin
-       po1^.data:= rea1;
+       po1^.data.rea:= rea1;
       end;
      end;
     end;

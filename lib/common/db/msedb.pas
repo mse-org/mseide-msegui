@@ -955,11 +955,11 @@ type
 
  datasetoptionty = (dso_utf8,dso_stringmemo,dso_numboolean,
                          dso_initinternalcalc,
-                         dso_refreshtransaction,{dso_refreshtransdatasets,}
                          dso_cancelupdateonerror,dso_cancelupdatesonerror,                         
-                         dso_autoapply,{dso_applyonidle,}
+                         dso_autoapply,
                          dso_autocommitret,dso_autocommit,
-                         dso_refreshafterapply,dso_notransactionrefresh,
+                         dso_refreshafterapply,dso_refreshtransaction,
+                         dso_notransactionrefresh,dso_recnotransactionrefresh,
                          dso_cacheblobs,
                          dso_offline, //disconnect database after open
                          dso_local,   //do not connect database on open

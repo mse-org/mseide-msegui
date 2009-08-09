@@ -489,7 +489,7 @@ begin
     filter.dropdown.cols[0][int1]:= filtermask[int1];
    end;
   end;
-  filter.dropdown.cols[1].assignarray(filtermask);
+  filter.dropdown.cols[1].assignopenarray(filtermask);
   if filterindex <> nil then begin
    filter.dropdown.itemindex:= filterindex^;
   end
@@ -506,7 +506,7 @@ begin
    listview.mask:= afilter^;
   end;
   if history <> nil then begin
-   filename.dropdown.valuelist.assignarray(history^);
+   filename.dropdown.valuelist.asarray:= history^;
    filename.dropdown.historymaxcount:= historymaxcount;
   end
   else begin

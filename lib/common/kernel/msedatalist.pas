@@ -18,7 +18,8 @@ uses
  mseclasses,mselist,mseglob;
 
 type
- listdatatypety = (dl_none,dl_integer,dl_int64,dl_currency,dl_real,dl_realsum,
+ listdatatypety = (dl_none,dl_integer,dl_int64,dl_currency,
+    dl_real,dl_realint,dl_realsum,
     dl_datetime,
     dl_ansistring,dl_msestring,dl_doublemsestring,dl_msestringint,
     dl_complex,dl_rowstate,dl_custom);
@@ -77,12 +78,10 @@ type
    fdeleting: integer;
    fmaxcount: integer;
    fringpointer: integer;
-//   fsource: string;
    procedure clearbuffer; //buffer release
    procedure setcapacity(value: integer);
    procedure internalsetcount(value: integer; nochangeandinit: boolean);
    procedure checkcapacity; //ev. reduktion des memory
-   procedure assigndata(source: tdatalist);
    procedure setmaxcount(const Value: integer);
    procedure internalfreedata(index,anzahl: integer); //gibt daten frei falls notwendig
    procedure internalcopyinstance(index,anzahl: integer);
@@ -94,14 +93,15 @@ type
    finternaloptions: internallistoptionsty;
    fcount: integer;
    flinkdest: datalistarty;
-//   flinksource: tdatalist;
-//   fsourcedirtystart: integer;
-//   fsourcedirtystop: integer;
-//   procedure setsource(const avalue: string); virtual;
+   function checkassigncompatibility(const source: tpersistent): boolean; virtual;
+   function assigndata(const source: tpersistent): boolean;
+                       //false if not possible
+   procedure assigntodata(const dest: tdatalist);
+   procedure newbuffer(const acount: integer);
    procedure setcount(const value: integer); virtual;
    property nochange: integer read fnochange;
-   procedure internalgetasarray(datapo: pointer);
-   procedure internalsetasarray(acount: integer; source: pointer);
+   procedure internalgetasarray(const adatapo: pointer; const asize: integer);
+   procedure internalsetasarray(const source: pointer; const asize: integer);
    procedure writedata(writer: twriter);
    procedure readdata(reader: treader);
    procedure readitem(const reader: treader; var value); virtual;
@@ -145,8 +145,6 @@ type
                 //initialisiert mit defaultwert
    procedure forall(startindex: integer; const count: integer;
                            const proc: dataprocty);
-   procedure assigntob(const dest: tdatalist); virtual;
-             //assign auf 2. spalte falls vorhanden, sonst exception
    procedure doitemchange(const index: integer); virtual;
    procedure dochange; virtual;
    procedure internaldeletedata(index: integer; dofree: boolean);
@@ -187,7 +185,9 @@ type
              //invalid after capacity change
    procedure assign(sender: tpersistent); override;
    procedure assignb(const source: tdatalist); virtual;
-             //assign auf 2. spalte falls vorhanden, sonst exception
+             //assign with second value if possible, exception otherwise
+   procedure assigntob(const dest: tdatalist); virtual;
+             //assignto with second value if possible, exception otherwise
    procedure change(const index: integer); virtual;
                    //index -1 -> undefined
    function datatype: listdatatypety; virtual;
@@ -233,6 +233,8 @@ type
    procedure setasarray(const value: integerarty);
    function getasarray: integerarty;
   protected
+   function checkassigncompatibility(
+                            const source: tpersistent): boolean; override;
    procedure readitem(const reader: treader; var value); override;
    procedure writeitem(const writer: twriter; var value); override;
    procedure compare(const l,r; var result: integer); override;
@@ -243,7 +245,7 @@ type
    max: integer;
    constructor create; override;
    function datatype: listdatatypety; override;
-   procedure assign(source: tpersistent); override;
+//   procedure assign(source: tpersistent); override;
    function empty(const index: integer): boolean; override;   //true wenn leer
    function add(const value: integer): integer;
    procedure insert(const index: integer; const item: integer);
@@ -262,6 +264,8 @@ type
    procedure setasarray(const value: int64arty);
    function getasarray: int64arty;
   protected
+   function checkassigncompatibility(
+                            const source: tpersistent): boolean; override;
    procedure readitem(const reader: treader; var value); override;
    procedure writeitem(const writer: twriter; var value); override;
    procedure compare(const l,r; var result: integer); override;
@@ -270,7 +274,7 @@ type
   public
    constructor create; override;
    function datatype: listdatatypety; override;
-   procedure assign(source: tpersistent); override;
+//   procedure assign(source: tpersistent); override;
    function empty(const index: integer): boolean; override;   //true wenn leer
    function add(const avalue: int64): integer;
    procedure insert(const index: integer; const avalue: int64);
@@ -288,6 +292,8 @@ type
    procedure setasarray(const value: currencyarty);
    function getasarray: currencyarty;
   protected
+   function checkassigncompatibility(
+                            const source: tpersistent): boolean; override;
    procedure readitem(const reader: treader; var value); override;
    procedure writeitem(const writer: twriter; var value); override;
    procedure compare(const l,r; var result: integer); override;
@@ -296,7 +302,7 @@ type
   public
    constructor create; override;
    function datatype: listdatatypety; override;
-   procedure assign(source: tpersistent); override;
+//   procedure assign(source: tpersistent); override;
    function empty(const index: integer): boolean; override;   //true wenn leer
    function add(const avalue: currency): integer;
    procedure insert(const index: integer; const avalue: currency);
@@ -340,6 +346,8 @@ type
    function getasarray: realarty;
    procedure setasarray(const data: realarty);
   protected
+   function checkassigncompatibility(
+                            const source: tpersistent): boolean; override;
    procedure readitem(const reader: treader; var value); override;
    procedure writeitem(const writer: twriter; var value); override;
    function getdefault: pointer; override;
@@ -351,7 +359,7 @@ type
    max: realty;
    constructor create; override;
    function datatype: listdatatypety; override;
-   procedure assign(source: tpersistent); override;
+//   procedure assign(source: tpersistent); override;
    procedure assignre(source: tcomplexdatalist);
    procedure assignim(source: tcomplexdatalist);
    function empty(const index: integer): boolean; override;
@@ -383,10 +391,11 @@ type
    procedure setasarray(const data: complexarty);
    function getasarray: complexarty;
   protected
+   function checkassigncompatibility(
+                            const source: tpersistent): boolean; override;
    procedure readitem(const reader: treader; var value); override;
    procedure writeitem(const writer: twriter; var value); override;
    function getdefault: pointer; override;
-   procedure assigntob(const dest: tdatalist); override;
    procedure assignto(dest: tpersistent); override;
   public
    function datatype: listdatatypety; override;
@@ -395,6 +404,7 @@ type
    procedure assignb(const source: tdatalist); override;
    procedure assignre(const source: trealdatalist);
    procedure assignim(const source: trealdatalist);
+   procedure assigntob(const dest: tdatalist); override;
    function add(const value: complexty): integer;
    procedure insert(const index: integer; const item: complexty);
    function empty(const index: integer): boolean; override;   //true wenn leer
@@ -405,6 +415,56 @@ type
    property defaultzero: boolean read fdefaultzero write fdefaultzero default false;
  end;
 
+ realintty = record
+              rea: realty;
+              int: integer;
+             end;
+ prealintty = ^realintty;
+ realintarty = array of realintty;
+ realintaty = array[0..0] of realintty;
+                   
+ trealintdatalist = class(trealdatalist)
+  private
+   fdefaultval1: realintty;
+   function Getdoubleitems(index: integer): realintty;
+   procedure Setdoubleitems(index: integer; const Value: realintty);
+   function Getitemsb(index: integer): integer;
+   procedure Setitemsb(index: integer; const Value: integer);
+   function getasarray: realintarty;
+   procedure setasarray(const data: realintarty);
+   function getasarraya: realarty;
+   procedure setasarraya(const data: realarty);
+   function getasarrayb: integerarty;
+   procedure setasarrayb(const data: integerarty);
+  protected
+   procedure readitem(const reader: treader; var value); override;
+   procedure writeitem(const writer: twriter; var value); override;
+   procedure compare(const l,r; var result: integer); override;
+   procedure setstatdata(const index: integer; const value: msestring); override;
+   function getstatdata(const index: integer): msestring; override;
+   function getdefault: pointer; override;
+  public
+   constructor create; override;
+//   procedure assign(source: tpersistent); override;
+   procedure assignb(const source: tdatalist); override;
+   procedure assigntob(const dest: tdatalist); override;
+
+   function datatype: listdatatypety; override;
+   function add(const valuea: realty; const valueb: integer = 0): integer; overload;
+   function add(const value: realintty): integer; overload;
+   procedure insert(const index: integer; const item: realty;
+                               const itemint: integer);
+   procedure fill(const acount: integer; const defaultvalue: realty;
+                     const defaultint: integer);
+
+   property asarray: realintarty read getasarray write setasarray;
+   property asarraya: realarty read getasarraya write setasarraya;
+   property asarrayb: integerarty read getasarrayb write setasarrayb;
+   property itemsb[index: integer]: integer read Getitemsb write Setitemsb;
+   property doubleitems[index: integer]: realintty read Getdoubleitems
+                   write Setdoubleitems; default;
+ end;
+ 
  tpointerdatalist = class(tdatalist)
   private
    function Getitems(index: integer): pointer;
@@ -412,6 +472,8 @@ type
    function getasarray: pointerarty;
    procedure setasarray(const data: pointerarty);
   protected
+   function checkassigncompatibility(
+                            const source: tpersistent): boolean; override;
   public
    constructor create; override;
    property items[index: integer]: pointer read Getitems write Setitems; default;
@@ -438,6 +500,8 @@ type
    function getasmsestringarray: msestringarty;
    procedure setasmsestringarray(const avalue: msestringarty);
   protected
+   function checkassigncompatibility(
+                            const source: tpersistent): boolean; override;
    procedure readitem(const reader: treader; var value); override;
    procedure writeitem(const writer: twriter; var value); override;
    procedure freedata(var data); override; //gibt daten frei
@@ -450,9 +514,9 @@ type
   public
    function datatype: listdatatypety; override;
    procedure assign(source: tpersistent); override;
-   procedure assignarray(const data: array of ansistring); overload;
-   procedure assignarray(const data: stringarty); overload;
-   procedure assignarray(const data: msestringarty); overload;
+   procedure assignopenarray(const data: array of ansistring);
+//   procedure assignarray(const data: stringarty); overload;
+///   procedure assignarray(const data: msestringarty); overload;
    procedure insert(index: integer; const item: ansistring);
    function add(const value: ansistring): integer; overload;
    function addtext(const value: ansistring): integer;
@@ -478,6 +542,8 @@ type
    function getasstringarray: stringarty;
    procedure setasstringarray(const data: stringarty);
   protected
+   function checkassigncompatibility(
+                            const source: tpersistent): boolean; override;
    procedure readitem(const reader: treader; var value); override;
    procedure writeitem(const writer: twriter; var value); override;
    procedure freedata(var data); override; //gibt daten frei
@@ -488,9 +554,9 @@ type
    function getstatdata(const index: integer): msestring; override;
   public
    procedure assign(source: tpersistent); override;
-   procedure assignarray(const data: array of msestring); overload;
-   procedure assignarray(const data: stringarty); overload;
-   procedure assignarray(const data: msestringarty); overload;
+   procedure assignopenarray(const data: array of msestring); overload;
+//   procedure assignarray(const data: stringarty); overload;
+//   procedure assignarray(const data: msestringarty); overload;
    procedure insert(const index: integer; const item: msestring); virtual; abstract;
    function add(const value: tmsestringdatalist): integer; overload;
    function add(const value: msestring): integer; overload; virtual; abstract;
@@ -546,7 +612,7 @@ type
    procedure copyinstance(var data); override;
   public
    constructor create; override;
-   procedure assign(source: tpersistent); override;
+//   procedure assign(source: tpersistent); override;
    procedure assignb(const source: tdatalist); override;
    procedure assigntob(const dest: tdatalist); override;
 
@@ -594,7 +660,7 @@ type
    function getstatdata(const index: integer): msestring; override;
   public
    constructor create; override;
-   procedure assign(source: tpersistent); override;
+//   procedure assign(source: tpersistent); override;
    procedure assignb(const source: tdatalist); override;
    procedure assigntob(const dest: tdatalist); override;
 
@@ -744,6 +810,8 @@ type
    procedure setitems(index: integer; const Value: tobject);
   protected
    fitemclass: tclass;
+   function checkassigncompatibility(
+                            const source: tpersistent): boolean; override;
    procedure checkitemclass(const aitem: tobject);
    procedure freedata(var data); override;
    procedure copyinstance(var data); override;
@@ -998,15 +1066,15 @@ implementation
 uses
  rtlconsts,msestreaming,msesys,msestat,msebits,mseeditglob;
  
-var  //todo: use hash list
+var
  datalistclasses: array[listdatatypety] of datalistclassty = 
-//dl_none,dl_integer, dl_int64,       dl_currency,       dl_real,      
- (nil,tintegerdatalist,tint64datalist,tcurrencydatalist,trealdatalist,
- //dl_realsum,
-  nil,
+//dl_none,dl_integer,  dl_int64,      dl_currency,
+ (nil,tintegerdatalist,tint64datalist,tcurrencydatalist,
+//dl_real,     dl_realint,      dl_realsum
+ trealdatalist,trealintdatalist,nil,
 //dl_datetime,
  trealdatalist,
-//dl_ansistring,              dl_msestring,           dl_doublemsestring,
+//dl_ansistring,      dl_msestring,      dl_doublemsestring,
   tansistringdatalist,tmsestringdatalist,tdoublemsestringdatalist,
 //dl_msestringint
   tmsestringintdatalist,
@@ -2860,20 +2928,118 @@ begin
  end;
 end;
 
-procedure tdatalist.assigndata(source: tdatalist);
+function tdatalist.checkassigncompatibility(const source: tpersistent): boolean;
+begin
+ result:= false;
+end;
+
+function tdatalist.assigndata(const source: tpersistent): boolean;
 begin
  if source = self then begin
+  result:= true;
   exit;
  end;
- clearbuffer;
- with source do begin
-  self.fsize:= fsize;
-  if fcount > 0 then begin
-   self.count:= fcount;
-   move(datapo^,self.fdatapo^,fcount*fsize);
+ result:= checkassigncompatibility(source);
+// result:= (datatype < dl_custom) and (source is tdatalist) and 
+//                      (tdatalist(source).datatype = datatype) or 
+//                       source.inheritsfrom(classtype) or 
+//                       inheritsfrom(source.classtype);
+ if result then begin
+  tdatalist(source).assigntodata(self);
+ end;
+end;
+
+procedure tdatalist.assigntodata(const dest: tdatalist);
+var
+ int1: integer;
+ po1,po2: pointer;
+ s0,s1,s2: integer;
+begin
+ with dest do begin
+  newbuffer(self.count);
+  if size = self.size then begin
+   move(self.datapo^,fdatapo^,fcount*fsize);
+  end
+  else begin
+   po1:= self.datapo;
+   po2:= fdatapo;
+   s1:= self.size;
+   s2:= size;
+   s0:= s1;
+   if s0 > s2 then begin
+    s0:= s2;
+   end;
+   for int1:= 0 to fcount-1 do begin
+    move(po1^,po2^,s0);
+    inc(pchar(po1),s1);
+    inc(pchar(po2),s2);
+   end;
+  end;
+  internalcopyinstance(0,fcount);
+  change(-1);
+ end;
+end;
+
+procedure tdatalist.internalgetasarray(const adatapo: pointer;
+                                                    const asize: integer);
+var
+ int1: integer;
+ po1,po2: pointer;
+ s1,s2: integer;
+begin
+ if fcount > 0 then begin
+  normalizering;
+  if asize < size then begin
+   po1:= fdatapo;
+   po2:= adatapo;
+   s1:= size;
+   s2:= asize;
+   for int1:= 0 to count - 1 do begin
+    move(po1^,po2^,s2);
+    inc(pchar(po1),s1);
+    inc(pchar(po2),s2);
+   end;
+  end
+  else begin
+   move(fdatapo^,adatapo^,fcount*fsize);
+  end;
+  if ilo_needscopy in finternaloptions then begin
+   po1:= adatapo;
+   s1:= asize;
+   for int1:= 0 to fcount - 1 do begin
+    copyinstance(po1^);
+    inc(pchar(po1),s1);
+   end;
   end;
  end;
- change(-1);
+end;
+
+procedure tdatalist.internalsetasarray(const source: pointer; 
+                                              const asize: integer);
+var
+ int1: integer;
+ po1,po2: pointer;
+ s1,s2: integer;
+begin
+ newbuffer(length(bytearty(source)));
+ if fcount > 0 then begin
+  if size > asize then begin
+   po1:= fdatapo;
+   po2:= source;
+   s1:= size;
+   s2:= asize;
+   for int1:= 0 to fcount - 1 do begin
+    move(po2^,po1^,s2);
+    inc(pchar(po1),s1);
+    inc(pchar(po2),s2);
+   end;
+  end
+  else begin
+   move(source^,fdatapo^,fcount*fsize);
+  end;
+  internalcopyinstance(0,fcount);
+ end;
+ change(-1); 
 end;
 
 procedure tdatalist.internalgetdata(index: integer; out ziel);
@@ -3252,6 +3418,17 @@ begin
  end;
 end;
 
+procedure tdatalist.newbuffer(const acount: integer);
+begin
+ clearbuffer;
+ fcount:= acount;
+ if fcount > fmaxcount then begin
+  fcount:= fmaxcount;
+ end;
+ setcapacity(fcount);
+ initdata1(false,0,fcount);
+end;
+
 procedure tdatalist.Setcount(const Value: integer);
 begin
  internalsetcount(value,false);
@@ -3553,37 +3730,6 @@ begin
  end;
 end;
 
-procedure tdatalist.internalgetasarray(datapo: pointer);
-var
- int1: integer;
-begin
- if fcount > 0 then begin
-  normalizering;
-  move(fdatapo^,datapo^,fcount*fsize);
-  if ilo_needscopy in finternaloptions then begin
-   for int1:= 0 to fcount - 1 do begin
-    copyinstance(datapo^);
-    inc(pchar(datapo),fsize);
-   end;
-  end;
- end;
-end;
-
-procedure tdatalist.internalsetasarray(acount: integer; source: pointer);
-begin
- try
-  beginupdate;
-  clear;
-  count:= acount;
-  if acount > 0 then begin
-   move(source^,fdatapo^,acount*fsize);
-   internalcopyinstance(0,acount);
-  end;
- finally
-  endupdate;
- end;
-end;
-
 procedure tdatalist.doitemchange(const index: integer);
 begin
  if assigned(fonitemchange) then begin
@@ -3830,7 +3976,7 @@ end;
 
 procedure tdatalist.assign(sender: tpersistent);
 begin
- if sender <> self then begin
+ if not assigndata(sender) then begin
   inherited;
  end;
 end;
@@ -3839,12 +3985,7 @@ procedure tdatalist.clean(const start,stop: integer);
 begin
  //dummy
 end;
-{
-procedure tdatalist.setsourcename(const avalue: string);
-begin
- fsourcename:= avalue;
-end;
-}
+
 function tdatalist.getsourcenamecount: integer;
 begin
  result:= 0;
@@ -3921,20 +4062,14 @@ function tintegerdatalist.add(const value: integer): integer;
 begin
  result:= adddata(value);
 end;
-
+{
 procedure tintegerdatalist.assign(source: tpersistent);
 begin
- if source = self then begin
-  exit;
- end;
- if source is tintegerdatalist then begin
-  assigndata(tdatalist(source));
- end
- else begin
+ if not assigndata(source) then begin
   inherited;
  end;
 end;
-
+}
 function tintegerdatalist.Getitems(const index: integer): integer;
 begin
  internalgetdata(index,result);
@@ -3994,12 +4129,12 @@ end;
 function tintegerdatalist.getasarray: integerarty;
 begin
  setlength(result,fcount);
- internalgetasarray(pointer(result));
+ internalgetasarray(pointer(result),sizeof(integer));
 end;
 
 procedure tintegerdatalist.setasarray(const value: integerarty);
 begin
- internalsetasarray(length(value),pointer(value));
+ internalsetasarray(pointer(value),sizeof(integer));
 end;
 
 function tintegerdatalist.getstatdata(const index: integer): msestring;
@@ -4033,6 +4168,11 @@ begin
  writer.writeinteger(integer(value))
 end;
 
+function tintegerdatalist.checkassigncompatibility(const source: tpersistent): boolean;
+begin
+ result:= source.inheritsfrom(tintegerdatalist);
+end;
+
 { tint64datalist }
 
 constructor tint64datalist.create;
@@ -4047,20 +4187,14 @@ function tint64datalist.datatype: listdatatypety;
 begin
  result:= dl_int64;
 end;
-
+{
 procedure tint64datalist.assign(source: tpersistent);
 begin
- if source = self then begin
-  exit;
- end;
- if source is tint64datalist then begin
-  assigndata(tdatalist(source));
- end
- else begin
+ if not assigndata(source) then begin
   inherited;
  end;
 end;
-
+}
 function tint64datalist.Getitems(index: integer): int64;
 begin
  internalgetdata(index,result);
@@ -4073,13 +4207,13 @@ end;
 
 procedure tint64datalist.setasarray(const value: int64arty);
 begin
- internalsetasarray(length(value),pointer(value));
+ internalsetasarray(pointer(value),sizeof(int64));
 end;
 
 function tint64datalist.getasarray: int64arty;
 begin
  setlength(result,fcount);
- internalgetasarray(pointer(result));
+ internalgetasarray(pointer(result),sizeof(int64));
 end;
 
 procedure tint64datalist.readitem(const reader: treader; var value);
@@ -4152,6 +4286,11 @@ begin
  internalfill(count,defaultvalue);
 end;
 
+function tint64datalist.checkassigncompatibility(const source: tpersistent): boolean;
+begin
+ result:= source.inheritsfrom(tint64datalist);
+end;
+
 { tcurrencydatalist }
 
 constructor tcurrencydatalist.create;
@@ -4166,20 +4305,14 @@ function tcurrencydatalist.datatype: listdatatypety;
 begin
  result:= dl_currency;
 end;
-
+{
 procedure tcurrencydatalist.assign(source: tpersistent);
 begin
- if source = self then begin
-  exit;
- end;
- if source is tcurrencydatalist then begin
-  assigndata(tdatalist(source));
- end
- else begin
+ if not assigndata(source) then begin
   inherited;
  end;
 end;
-
+}
 function tcurrencydatalist.Getitems(index: integer): currency;
 begin
  internalgetdata(index,result);
@@ -4192,13 +4325,13 @@ end;
 
 procedure tcurrencydatalist.setasarray(const value: currencyarty);
 begin
- internalsetasarray(length(value),pointer(value));
+ internalsetasarray(pointer(value),sizeof(currency));
 end;
 
 function tcurrencydatalist.getasarray: currencyarty;
 begin
  setlength(result,fcount);
- internalgetasarray(pointer(result));
+ internalgetasarray(pointer(result),sizeof(currency));
 end;
 
 procedure tcurrencydatalist.readitem(const reader: treader; var value);
@@ -4282,6 +4415,11 @@ begin
  internalfill(count,defaultvalue);
 end;
 
+function tcurrencydatalist.checkassigncompatibility(const source: tpersistent): boolean;
+begin
+ result:= source.inheritsfrom(tcurrencydatalist);
+end;
+
 { tenumdatalist }
 
 constructor tenumdatalist.create(agetdefault: getintegereventty);
@@ -4322,13 +4460,21 @@ end;
 
 { trealdatalist }
 
+constructor trealdatalist.create;
+begin
+ inherited;
+ fsize:= sizeof(real);
+ min:= emptyreal;
+ max:= bigreal;
+ fdefaultval:= emptyreal;
+end;
+
 function trealdatalist.getdefault: pointer;
 begin
  if fdefaultzero then begin
   result:= nil;
  end
  else begin
-//  fdefaultval:= emptyreal;
   result:= @fdefaultval;
  end;
 end;
@@ -4353,58 +4499,22 @@ function trealdatalist.add(const value: real): integer;
 begin
  result:= adddata(value);
 end;
-
+{
 procedure trealdatalist.assign(source: tpersistent);
 begin
- if source = self then begin
-  exit;
- end;
- if source is trealdatalist then begin
-  assigndata(tdatalist(source));
- end
- else begin
+ if not assigndata(source) then begin
   inherited;
  end;
 end;
-
-procedure trealdatalist.assignre(source: tcomplexdatalist);      //clx
-var
- int1: integer;
+}
+procedure trealdatalist.assignre(source: tcomplexdatalist);
 begin
- beginupdate;
- try
-  count:= source.count;
-  for int1:= 0 to count-1 do begin
-   real(pointer(fdatapo+int1*fsize)^):= source.items[int1].re;
-  end;
- finally
-  endupdate;
- end;
+ source.assigntodata(self);
 end;
 
-procedure trealdatalist.assignim(source: tcomplexdatalist);      //clx
-var
- int1: integer;
+procedure trealdatalist.assignim(source: tcomplexdatalist);
 begin
- beginupdate;
- try
-  count:= source.count;
-  for int1:= 0 to count-1 do begin
-   real(pointer(fdatapo+int1+fsize)^):= source.items[int1].im;
-  end;
- finally
-  endupdate;
- end;
-end;
-
-constructor trealdatalist.create;
-begin
- inherited;
-// foptions:= foptions + [ilo_needsinit];
- fsize:= sizeof(real);
- min:= emptyreal;
- max:= bigreal;
- fdefaultval:= emptyreal;
+ source.assigntob(self);
 end;
 
 function trealdatalist.Getitems(index: integer): realty;
@@ -4425,12 +4535,12 @@ end;
 function trealdatalist.getasarray: realarty;
 begin
  setlength(result,fcount);
- internalgetasarray(pointer(result));
+ internalgetasarray(pointer(result),sizeof(realty));
 end;
 
 procedure trealdatalist.setasarray(const data: realarty);
 begin
- internalsetasarray(length(data),pointer(data));
+ internalsetasarray(pointer(data),sizeof(realty));
 end;
 
 function trealdatalist.datatype: listdatatypety;
@@ -4448,24 +4558,7 @@ begin
   result:= result or (po1^ = 0);
  end;
 end;
-{
-function trealdatalist.Getasvarrec(index: integer): tvarrec;
-begin
- if isemptyreal(items[index]) then begin
-  result.vtype:= vtvariant;
-  result.vvariant:= pvariant(@null);
- end
- else begin
-  result.vtype:= vtextended;
-  extendedvar:= real(pointer(fdatapo+index*fsize)^);
-  result.vextended:= @extendedvar;
- end;
-end;
-procedure trealdatalist.Setasvarrec(index: integer; const Value: tvarrec);
-begin
- items[index]:= value.vextended^;
-end;
-}
+
 procedure trealdatalist.compare(const l, r; var result: integer);
 begin
  result:= cmprealty(real(l),real(r));
@@ -4507,6 +4600,11 @@ begin
  writerealty(writer,realty(value));
 end;
 
+function trealdatalist.checkassigncompatibility(const source: tpersistent): boolean;
+begin
+ result:= source.inheritsfrom(trealdatalist);
+end;
+
 { tdatetimedatalist }
 
 function tdatetimedatalist.datatype: listdatatypety;
@@ -4534,6 +4632,8 @@ end;
 
 constructor tcomplexdatalist.create;
 begin
+ fdefaultval.re:= emptyreal;
+ fdefaultval.im:= emptyreal;
  inherited;
  fsize:= sizeof(complexty);
 end;
@@ -4545,13 +4645,7 @@ end;
 
 procedure tcomplexdatalist.assign(source: tpersistent);
 begin
- if source = self then begin
-  exit;
- end;
- if source is tcomplexdatalist then begin
-  assigndata(tdatalist(source));
- end
- else begin
+ if not assigndata(source) then begin
   if source is trealdatalist then begin
    assignre(trealdatalist(source));
   end
@@ -4565,23 +4659,22 @@ procedure tcomplexdatalist.assignb(const source: tdatalist);
 var
  int1: integer;
  po1,po2: pcomplexty;
+ s1,s2: integer;
 begin
  if source = self then begin
   exit;
  end;
  if source is tcomplexdatalist then begin
   beginupdate;
-  with tcomplexdatalist(source) do begin
-   self.count:= fcount;
-   normalizering;
-   self.normalizering;
-   po1:= pointer(self.fdatapo);
-   po2:= pointer(fdatapo);
-   for int1:= 0 to fcount-1 do begin
-    po1^.im:= po2^.im;
-    inc(po1);
-    inc(po2);
-   end;
+  count:= source.count;
+  po1:= datapo;
+  po2:= source.datapo;
+  s1:= size;
+  s2:= source.size;
+  for int1:= 0 to fcount-1 do begin
+   po1^.im:= po2^.im;
+   inc(pchar(po1),s1);
+   inc(pchar(po2),s2);
   end;
   endupdate;
  end
@@ -4594,25 +4687,8 @@ begin
 end;
 
 procedure tcomplexdatalist.assignre(const source: trealdatalist);
-var
- int1: integer;
- po1: pcomplexty;
- po2: prealty;
 begin
- beginupdate;
- with source do begin
-  self.count:= fcount;
-  normalizering;
-  self.normalizering;
-  po1:= pointer(self.fdatapo);
-  po2:= pointer(fdatapo);
-  for int1:= 0 to fcount-1 do begin
-   po1^.re:= po2^;
-   inc(po1);
-   inc(po2);
-  end;
- end;
- endupdate;
+ source.assigntodata(self);
 end;
 
 procedure tcomplexdatalist.assignim(const source: trealdatalist);
@@ -4620,19 +4696,18 @@ var
  int1: integer;
  po1: pcomplexty;
  po2: prealty;
+ s1,s2: integer;
 begin
  beginupdate;
- with source do begin
-  self.count:= fcount;
-  normalizering;
-  self.normalizering;
-  po1:= pointer(self.fdatapo);
-  po2:= pointer(fdatapo);
-  for int1:= 0 to fcount-1 do begin
-   po1^.im:= po2^;
-   inc(po1);
-   inc(po2);
-  end;
+ count:= source.count;
+ po1:= datapo;
+ po2:= source.datapo;
+ s1:= size;
+ s2:= source.size;
+ for int1:= 0 to fcount-1 do begin
+  po1^.im:= po2^;
+  inc(pchar(po1),s1);
+  inc(pchar(po2),s2);
  end;
  endupdate;
 end;
@@ -4642,21 +4717,21 @@ var
  int1: integer;
  po1: pcomplexty;
  po2: prealty;
+ s1,s2: integer;
 begin
  if dest is trealdatalist then begin
   with trealdatalist(dest) do begin
-   beginupdate;
-   clear;
-   count:= self.fcount;
-   self.normalizering;
-   po1:= pointer(self.fdatapo);
+   newbuffer(count);
+   po1:= self.datapo;
    po2:= pointer(fdatapo);
+   s1:= self.size;
+   s2:= size;
    for int1:= 0 to fcount-1 do begin
     po2^:= po1^.im;
-    inc(po1);
-    inc(po2);
+    inc(pchar(po1),s1);
+    inc(pchar(po2),s2);
    end;
-   endupdate;
+   change(-1);
   end;
  end
  else begin
@@ -4665,26 +4740,9 @@ begin
 end;
 
 procedure tcomplexdatalist.assignto(dest: tpersistent);
-var
- int1: integer;
- po1: pcomplexty;
- po2: prealty;
 begin
  if dest is trealdatalist then begin
-  with trealdatalist(dest) do begin
-   beginupdate;
-   clear;
-   count:= self.fcount;
-   self.normalizering;
-   po1:= pointer(self.fdatapo);
-   po2:= pointer(fdatapo);
-   for int1:= 0 to fcount-1 do begin
-    po2^:= po1^.re;
-    inc(po1);
-    inc(po2);
-   end;
-   endupdate;
-  end;
+  assigntodata(trealdatalist(dest));
  end
  else begin
   inherited;
@@ -4728,8 +4786,8 @@ begin
   result:= nil;
  end
  else begin
-  fdefaultval.re:= emptyreal;
-  fdefaultval.im:= emptyreal;
+//  fdefaultval.re:= emptyreal;
+//  fdefaultval.im:= emptyreal;
   result:= @fdefaultval;
  end;
 end;
@@ -4737,12 +4795,12 @@ end;
 function tcomplexdatalist.getasarray: complexarty;
 begin
  setlength(result,fcount);
- internalgetasarray(pointer(result));
+ internalgetasarray(pointer(result),sizeof(complexty));
 end;
 
 procedure tcomplexdatalist.setasarray(const data: complexarty);
 begin
- internalsetasarray(length(data),pointer(data));
+ internalsetasarray(pointer(data),sizeof(complexty));
 end;
 
 procedure tcomplexdatalist.fill(const acount: integer;
@@ -4769,6 +4827,11 @@ begin
  end;
 end;
 
+function tcomplexdatalist.checkassigncompatibility(const source: tpersistent): boolean;
+begin
+ result:= source.inheritsfrom(tcomplexdatalist);
+end;
+
 { tpointerdatalist }
 
 constructor tpointerdatalist.create;
@@ -4790,12 +4853,17 @@ end;
 function tpointerdatalist.getasarray: pointerarty;
 begin
  setlength(result,fcount);
- internalgetasarray(pointer(result));
+ internalgetasarray(pointer(result),sizeof(pointer));
 end;
 
 procedure tpointerdatalist.setasarray(const data: pointerarty);
 begin
- internalsetasarray(length(data),data[0]);
+ internalsetasarray(pointer(data),sizeof(pointer));
+end;
+
+function tpointerdatalist.checkassigncompatibility(const source: tpersistent): boolean;
+begin
+ result:= source.inheritsfrom(tpointerdatalist);
 end;
 
 { tdynamicdatalist }
@@ -4861,36 +4929,20 @@ procedure tansistringdatalist.assign(source: tpersistent);
 var
  int1: integer;
  po1,po2: pansistring;
+ s1,s2: integer;
 begin
- if source = self then begin
-  exit;
- end;
- if source is tansistringdatalist then begin
-  beginupdate;
-  with source as tansistringdatalist do begin
-   self.count:= count;
-   po1:= pointer(self.fdatapo);
-   po2:= pointer(fdatapo);
-   for int1:= 0 to count - 1 do begin
-    po1^:= po2^;
-    inc(po1);
-    inc(po2);
-   end;
-  end;
-  endupdate;
- end
- else begin
+ if not assigndata(source) then begin
   if source is tstringlist then begin
-   beginupdate;
-   with source as tstringlist do begin
-    self.count:= count;
-    po1:= pointer(self.fdatapo);
-    for int1:= 0 to count - 1 do begin
+   with tstringlist(source) do begin
+    self.newbuffer(count);
+    po1:= self.datapo;
+    s1:= self.size;
+    for int1:= 0 to self.fcount - 1 do begin
      po1^:= strings[int1];
-     inc(po1);
+     inc(pchar(po1),s1);
     end;
    end;
-   endupdate;
+   change(-1);
   end
   else begin
    inherited;
@@ -4898,31 +4950,37 @@ begin
  end;
 end;
 
-procedure tansistringdatalist.assignarray(const data: array of ansistring);
+procedure tansistringdatalist.assignopenarray(const data: array of ansistring);
 var
- ar1: stringarty;
+ po1: pstring;
  int1: integer;
+ s1: integer;
 begin
- setlength(ar1,length(data));
- for int1:= 0 to high(data) do begin
-  ar1[int1]:= data[int1];
+ newbuffer(length(data));
+ po1:= pointer(fdatapo);
+ s1:= size;
+ for int1:= 0 to fcount - 1 do begin
+  po1^:= data[int1];
+  inc(pchar(po1),s1);
  end;
- assignarray(ar1);
+ change(-1);
 end;
-
+{
 procedure tansistringdatalist.assignarray(const data: stringarty);
 var
  int1: integer;
  po1: pansistring;
+ s1: integer;
 begin
  beginupdate;
  try
   count:= 0;
   count:= length(data);
   po1:= pointer(fdatapo);
+  s1:= size;
   for int1:= 0 to length(data)-1 do begin
    po1^:= data[int1];
-   inc(pchar(po1),fsize);
+   inc(pchar(po1),s1);
   end;
  finally
   endupdate;
@@ -4933,21 +4991,23 @@ procedure tansistringdatalist.assignarray(const data: msestringarty);
 var
  int1: integer;
  po1: pansistring;
+ s1: integer;
 begin
  beginupdate;
  try
   count:= 0;
   count:= length(data);
-  po1:= pointer(fdatapo);
+  po1:= datapo;
+  s1:= size;
   for int1:= 0 to length(data)-1 do begin
    po1^:= ansistring(data[int1]);
-   inc(pchar(po1),fsize);
+   inc(pchar(po1),s1);
   end;
  finally
   endupdate;
  end;
 end;
-
+}
 function tansistringdatalist.Getitems(index: integer): ansistring;
 begin
  result:= pansistring(getitempo(index))^;
@@ -4989,16 +5049,17 @@ procedure tansistringdatalist.assignto(dest: tpersistent);
 var
  int1: integer;
  po1: pansistring;
+ s1: integer;
 begin
  if dest is tstringlist then begin
-  normalizering;
-  po1:= pointer(fdatapo);
-  with dest as tstringlist do begin
+  po1:= datapo;
+  s1:= size;
+  with tstringlist(dest) do begin
    clear;
    capacity:= self.count;
    for int1:= 0 to self.count-1 do begin
     add(po1^);
-    inc(po1);
+    inc(pchar(po1),s1);
    end;
   end;
  end
@@ -5120,40 +5181,47 @@ end;
 function tansistringdatalist.getasarray: stringarty;
 begin
  setlength(result,fcount);
- internalgetasarray(pointer(result));
+ internalgetasarray(pointer(result),sizeof(string));
 end;
 
 procedure tansistringdatalist.setasarray(const avalue: stringarty);
 begin
- internalsetasarray(length(avalue),pointer(avalue));
+ internalsetasarray(pointer(avalue),sizeof(string));
 end;
 
 function tansistringdatalist.getasmsestringarray: msestringarty;
 var
- po1: pstringaty;
+ po1: pstring;
  int1: integer;
+ s1: integer;
 begin
  setlength(result,fcount);
  po1:= datapo;
  for int1:= 0 to fcount - 1 do begin
-  result[int1]:= po1^[int1];
+  result[int1]:= po1^;
+  inc(pchar(po1),s1);
  end;
 end;
 
 procedure tansistringdatalist.setasmsestringarray(const avalue: msestringarty);
 var
+ po1: pstring;
+ s1: integer;
  int1: integer;
 begin
- try
-  beginupdate;
-  clear;
-  count:= length(avalue);
-  for int1:= 0 to count - 1 do begin
-   pstringaty(fdatapo)^[int1]:= avalue[int1];
-  end;
- finally
-  endupdate;
+ newbuffer(length(avalue));
+ po1:= pointer(fdatapo);
+ s1:= size;
+ for int1:= 0 to high(avalue) do begin
+  po1^:= avalue[int1];
+  inc(pchar(po1),s1);
  end;
+ change(-1);
+end;
+
+function tansistringdatalist.checkassigncompatibility(const source: tpersistent): boolean;
+begin
+ result:= source.inheritsfrom(tansistringdatalist);
 end;
 
 { tpoorstringdatalist }
@@ -5356,40 +5424,24 @@ procedure tpoorstringdatalist.assign(source: tpersistent);
 var
  int1: integer;
  po1,po2: pmsestring;
- po3: pstringaty;
+ po3: pstring;
+ s1,s2: integer;
 begin
- if source = self then begin
-  exit;
- end;
- if source is tpoorstringdatalist then begin
-  beginupdate;
-  with source as tpoorstringdatalist do begin
-   po2:= pointer(datapo);
-   self.clear;
-   self.count:= count;
-   po1:= pointer(self.fdatapo);
-   for int1:= 0 to count - 1 do begin
-    po1^:= po2^;
-    inc(pchar(po1),self.fsize);
-    inc(pchar(po2),fsize);
-   end;
-  end;
-  endupdate;
- end
- else begin
+ if not assigndata(source) then begin
   if source is tansistringdatalist then begin
-   beginupdate;
-   with source as tansistringdatalist do begin
-    po3:= pstringaty(datapo);
-    self.clear;
-    self.count:= count;
-    po1:= pointer(self.fdatapo);
+   with tansistringdatalist(source) do begin
+    self.newbuffer(count);
+    po3:= datapo;
+    po1:= self.datapo;
+    s1:= self.size;
+    s2:= size;
     for int1:= 0 to count - 1 do begin
-     po1^:= po3^[int1];
-     inc(pchar(po1),fsize);
+     po1^:= po3^;
+     inc(pchar(po1),s1);
+     inc(pchar(po3),s2);
     end;
    end;
-   endupdate;
+   change(-1);
   end
   else begin
    inherited;
@@ -5447,9 +5499,11 @@ procedure tpoorstringdatalist.assignto(dest: tpersistent);
 var
  int1: integer;
  po1: pmsestring;
+ s1: integer;
 begin
  if dest is tstringlist then begin
   normalizering;
+  s1:= size;
   with tstringlist(dest) do begin
    clear;
    capacity:= self.fcount;
@@ -5599,12 +5653,12 @@ end;
 function tpoorstringdatalist.getasarray: msestringarty;
 begin
  setlength(result,fcount);
- internalgetasarray(pointer(result));
+ internalgetasarray(pointer(result),sizeof(msestring));
 end;
 
 procedure tpoorstringdatalist.setasarray(const data: msestringarty);
 begin
- internalsetasarray(length(data),pointer(data));
+ internalsetasarray(pointer(data),sizeof(msestring));
 end;
 
 function tpoorstringdatalist.getasstringarray: stringarty;
@@ -5622,28 +5676,36 @@ end;
 
 procedure tpoorstringdatalist.setasstringarray(const data: stringarty);
 var
- ar1: msestringarty;
+ po1: pmsestring;
  int1: integer;
+ s1: integer;
 begin
- setlength(ar1,length(data));
+ newbuffer(length(data));
+ po1:= pointer(fdatapo);
+ s1:= size;
  for int1:= 0 to high(data) do begin
-  ar1[int1]:= data[int1];
+  po1^:= data[int1];
+  inc(pchar(po1),s1);
  end;
- setasarray(ar1);
+ change(-1);
 end;
 
-procedure tpoorstringdatalist.assignarray(const data: array of msestring);
+procedure tpoorstringdatalist.assignopenarray(const data: array of msestring);
 var
- ar1: msestringarty;
+ po1: pmsestring;
+ s1: integer;
  int1: integer;
 begin
- setlength(ar1,length(data));
+ newbuffer(length(data));
+ po1:= datapo;
+ s1:= size;
  for int1:= 0 to high(data) do begin
-  ar1[int1]:= data[int1];
+  po1^:= data[int1];
+  inc(pchar(po1),s1);
  end;
- assignarray(ar1);
+ change(-1);
 end;
-
+{
 procedure tpoorstringdatalist.assignarray(const data: stringarty);
 var
  int1: integer;
@@ -5681,7 +5743,7 @@ begin
   endupdate;
  end;
 end;
-
+}
 function tpoorstringdatalist.indexof(const value: msestring): integer;
 var
  int1: integer;
@@ -5725,6 +5787,12 @@ end;
 procedure tpoorstringdatalist.setstatdata(const index: integer; const value: msestring);
 begin
  items[index]:= value;
+end;
+
+function tpoorstringdatalist.checkassigncompatibility(
+                                      const source: tpersistent): boolean;
+begin
+ result:= source.inheritsfrom(tpoorstringdatalist);
 end;
 
 { tmsestringdatalist }
@@ -5838,38 +5906,31 @@ end;
 
 procedure tdoublemsestringdatalist.compare(const l, r; var result: integer);
 begin
-//{$ifdef FPC}
-// result:= comparestr(doublemsestringty(l).a,doublemsestringty(r).a); //!!!!todo
-//{$else}
  result:= msecomparestr(doublemsestringty(l).a,doublemsestringty(r).a);
-//{$endif}
 end;
 {
-function tdoublestringdatalist.Getdoubleitemspo(index: integer): pdoublemsestringty;
-begin
- checkindex(index);
- result:= @lidoublemsestringarty(fdatapo^)[index];
-end;
-}
 procedure tdoublemsestringdatalist.assign(source: tpersistent);
 var
  int1: integer;
  po1,po2: pdoublemsestringty;
+ s1,s2: integer;
 begin
  if source = self then begin
   exit;
  end;
  if source is tdoublemsestringdatalist then begin
   beginupdate;
-  with source as tdoublemsestringdatalist do begin
-   po2:= pointer(fdatapo);
+  with tdoublemsestringdatalist(source) do begin
+   po2:= datapo;
    self.clear;
    self.count:= count;
-   po1:= pointer(self.fdatapo);
+   po1:= self.datapo;
+   s1:= self.size;
+   s2:= size;
    for int1:= 0 to count - 1 do begin
     po1^:= po2^;
-    inc(pchar(po1),self.fsize);
-    inc(pchar(po2),fsize);
+    inc(pchar(po1),s1);
+    inc(pchar(po2),s2);
    end;
   end;
   endupdate;
@@ -5878,25 +5939,26 @@ begin
   inherited;
  end;
 end;
-
+}
 procedure tdoublemsestringdatalist.assignb(const source: tdatalist);
 var
  int1: integer;
  po1,po2: pdoublemsestringty;
  po3: pmsestring;
+ s1,s2: integer;
 begin
  if source is tdoublemsestringdatalist then begin
   beginupdate;
   with tdoublemsestringdatalist(source) do begin
    self.count:= fcount;
-   normalizering;
-   self.normalizering;
-   po1:= pointer(self.fdatapo);
-   po2:= pointer(fdatapo);
+   po1:= self.datapo;
+   po2:= datapo;
+   s1:= self.size;
+   s2:= size;
    for int1:= 0 to fcount-1 do begin
     po1^.b:= po2^.b;
-    inc(po1);
-    inc(po2);
+    inc(pchar(po1),s1);
+    inc(pchar(po2),s2);
    end;
   end;
   endupdate;
@@ -5906,14 +5968,14 @@ begin
    beginupdate;
    with tmsestringdatalist(source) do begin
     self.count:= fcount;
-    normalizering;
-    self.normalizering;
-    po1:= pointer(self.fdatapo);
-    po3:= pointer(fdatapo);
+    po1:= self.datapo;
+    po3:= datapo;
+    s1:= self.size;
+    s2:= size;
     for int1:= 0 to fcount-1 do begin
      po1^.b:= po3^;
-     inc(po1);
-     inc(po3);
+     inc(pchar(po1),s1);
+     inc(pchar(po3),s2);
     end;
    end;
    endupdate;
@@ -5929,19 +5991,21 @@ var
  int1: integer;
  po1: pdoublemsestringty;
  po2: pmsestring;
+ s1,s2: integer;
 begin
  if dest is tmsestringdatalist then begin
   with tmsestringdatalist(dest) do begin
    beginupdate;
    clear;
    count:= self.fcount;
-   self.normalizering;
-   po1:= pointer(self.fdatapo);
-   po2:= pointer(fdatapo);
+   po1:= self.datapo;
+   po2:= datapo;
+   s1:= self.size;
+   s2:= size;
    for int1:= 0 to fcount-1 do begin
     po2^:= po1^.b;
-    inc(po1);
-    inc(po2);
+    inc(pchar(po1),s1);
+    inc(pchar(po2),s2);
    end;
    endupdate;
   end
@@ -5953,25 +6017,27 @@ end;
 
 procedure tdoublemsestringdatalist.setasarray(const data: doublemsestringarty);
 begin
- internalsetasarray(length(data),pointer(data));
+ internalsetasarray(pointer(data),sizeof(doublemsestringty));
 end;
 
 function tdoublemsestringdatalist.getasarray: doublemsestringarty;
 begin
  setlength(result,fcount);
- internalgetasarray(pointer(result));
+ internalgetasarray(pointer(result),sizeof(doublemsestringty));
 end;
 
 function tdoublemsestringdatalist.getasarraya: msestringarty;
 var
  int1: integer;
  po1: pdoublemsestringty;
+ s1: integer;
 begin
  setlength(result,fcount);
- po1:= pdoublemsestringty(datapo);
+ po1:= datapo;
+ s1:= size;
  for int1:= 0 to fcount - 1 do begin
   result[int1]:= po1^.a;
-  inc(po1);
+  inc(pchar(po1),s1);
  end;
 end;
 
@@ -5979,14 +6045,16 @@ procedure tdoublemsestringdatalist.setasarraya(const data: msestringarty);
 var
  int1: integer;
  po1: pdoublemsestringty;
+ s1: integer;
 begin
  beginupdate;
-  count:= length(data);
-  po1:= pdoublemsestringty(datapo);
-  for int1:= 0 to fcount - 1 do begin
-   po1^.a:= data[int1];
-   inc(po1);
-  end;
+ count:= length(data);
+ po1:= datapo;
+ s1:= size;
+ for int1:= 0 to fcount - 1 do begin
+  po1^.a:= data[int1];
+  inc(pchar(po1),s1);
+ end;
  endupdate;
 end;
 
@@ -5994,14 +6062,16 @@ procedure tdoublemsestringdatalist.setasarrayb(const data: msestringarty);
 var
  int1: integer;
  po1: pdoublemsestringty;
+ s1: integer;
 begin
  beginupdate;
-  count:= length(data);
-  po1:= pdoublemsestringty(datapo);
-  for int1:= 0 to fcount - 1 do begin
-   po1^.b:= data[int1];
-   inc(po1);
-  end;
+ count:= length(data);
+ po1:= datapo;
+ s1:= size;
+ for int1:= 0 to fcount - 1 do begin
+  po1^.b:= data[int1];
+  inc(pchar(po1),s1);
+ end;
  endupdate;
 end;
 
@@ -6009,13 +6079,14 @@ function tdoublemsestringdatalist.getasarrayb: msestringarty;
 var
  int1: integer;
  po1: pdoublemsestringty;
+ s1: integer;
 begin
  setlength(result,fcount);
- normalizering;
- po1:= pdoublemsestringty(fdatapo);
+ po1:= datapo;
+ s1:= size;
  for int1:= 0 to fcount - 1 do begin
   result[int1]:= po1^.b;
-  inc(po1);
+  inc(pchar(po1),s1);
  end;
 end;
 
@@ -6085,14 +6156,7 @@ function tmsestringintdatalist.add(const value: msestringintty): integer;
 begin
  result:= adddata(value);
 end;
-{
-procedure tmsestringintdatalist.copyinstance(var data);
-begin
- inherited;
- stringaddref(doublemsestringty(data).b);
-// reallocstring(doublemsestringty(data).b);
-end;
-}
+
 procedure tmsestringintdatalist.fill(const acount: integer;
                    const defaultvalue: msestring; const defaultint: integer);
 var
@@ -6102,13 +6166,7 @@ begin
  dstr1.int:= defaultint;
  internalfill(count,dstr1);
 end;
-{
-procedure tmsestringintdatalist.freedata(var data);
-begin
- inherited;
- doublemsestringty(data).b:= '';
-end;
-}
+
 function tmsestringintdatalist.Getitemsb(index: integer): integer;
 begin
  result:= pmsestringintty(getitempo(index))^.int;
@@ -6145,65 +6203,35 @@ end;
 
 procedure tmsestringintdatalist.compare(const l, r; var result: integer);
 begin
-//{$ifdef FPC}
-// result:= comparestr(doublemsestringty(l).a,doublemsestringty(r).a); //!!!!todo
-//{$else}
  result:= msecomparestr(msestringintty(l).mstr,msestringintty(r).mstr);
-//{$endif}
 end;
 {
-function tdoublestringdatalist.Getdoubleitemspo(index: integer): pdoublemsestringty;
-begin
- checkindex(index);
- result:= @lidoublemsestringarty(fdatapo^)[index];
-end;
-}
 procedure tmsestringintdatalist.assign(source: tpersistent);
-var
- int1: integer;
- po1,po2: pmsestringintty;
 begin
- if source = self then begin
-  exit;
- end;
- if source is tmsestringintdatalist then begin
-  beginupdate;
-  with source as tmsestringintdatalist do begin
-   po2:= pointer(fdatapo);
-   self.clear;
-   self.count:= count;
-   po1:= pointer(self.fdatapo);
-   for int1:= 0 to count - 1 do begin
-    po1^:= po2^;
-    inc(pchar(po1),self.fsize);
-    inc(pchar(po2),fsize);
-   end;
-  end;
-  endupdate;
- end
- else begin
+ if not assigndata(source) then begin
   inherited;
  end;
 end;
-
+}
 procedure tmsestringintdatalist.assignb(const source: tdatalist);
 var
  int1: integer;
  po1,po2: pmsestringintty;
  po3: pinteger;
+ s1,s2: integer;
 begin
  if source is tmsestringintdatalist then begin
   beginupdate;
+  count:= source.count;
   with tmsestringintdatalist(source) do begin
-   self.count:= fcount;
-   normalizering;
-   self.normalizering;
-   po1:= pointer(self.fdatapo);
-   po2:= pointer(fdatapo);
-   for int1:= 0 to fcount-1 do begin
+   po1:= self.datapo;
+   po2:= datapo;
+   s1:= self.size;
+   s2:= size;
+   for int1:= 0 to self.fcount-1 do begin
     po1^.int:= po2^.int;
-    inc(po1);
-    inc(po2);
+    inc(pchar(po1),s1);
+    inc(pchar(po2),s2);
    end;
   end;
   endupdate;
@@ -6211,16 +6239,16 @@ begin
  else begin
   if source is tintegerdatalist then begin
    beginupdate;
-   with tmsestringdatalist(source) do begin
-    self.count:= fcount;
-    normalizering;
-    self.normalizering;
-    po1:= pointer(self.fdatapo);
-    po3:= pointer(fdatapo);
+   count:= source.count;
+   with tintegerdatalist(source) do begin
+    po1:= self.datapo;
+    po3:= datapo;
+    s1:= self.size;
+    s2:= size;
     for int1:= 0 to fcount-1 do begin
      po1^.int:= po3^;
-     inc(po1);
-     inc(po3);
+     inc(pchar(po1),s1);
+     inc(pchar(po3),s2);
     end;
    end;
    endupdate;
@@ -6236,21 +6264,21 @@ var
  int1: integer;
  po1: pmsestringintty;
  po2: pinteger;
+ s1,s2: integer;
 begin
  if dest is tintegerdatalist then begin
   with tintegerdatalist(dest) do begin
-   beginupdate;
-   clear;
-   count:= self.fcount;
-   self.normalizering;
-   po1:= pointer(self.fdatapo);
+   newbuffer(self.count);
+   po1:= self.datapo;
    po2:= pointer(fdatapo);
+   s1:= self.size;
+   s2:= size;
    for int1:= 0 to fcount-1 do begin
     po2^:= po1^.int;
-    inc(po1);
-    inc(po2);
+    inc(pchar(po1),s1);
+    inc(pchar(po2),s2);
    end;
-   endupdate;
+   change(-1);
   end
  end
  else begin
@@ -6260,25 +6288,27 @@ end;
 
 procedure tmsestringintdatalist.setasarray(const data: msestringintarty);
 begin
- internalsetasarray(length(data),pointer(data));
+ internalsetasarray(pointer(data),sizeof(msestringintty));
 end;
 
 function tmsestringintdatalist.getasarray: msestringintarty;
 begin
  setlength(result,fcount);
- internalgetasarray(pointer(result));
+ internalgetasarray(pointer(result),sizeof(msestringintty));
 end;
 
 function tmsestringintdatalist.getasarraya: msestringarty;
 var
  int1: integer;
  po1: pmsestringintty;
+ s1: integer;
 begin
  setlength(result,fcount);
- po1:= pmsestringintty(datapo);
+ po1:= datapo;
+ s1:= size;
  for int1:= 0 to fcount - 1 do begin
   result[int1]:= po1^.mstr;
-  inc(po1);
+  inc(pchar(po1),s1);
  end;
 end;
 
@@ -6286,14 +6316,16 @@ procedure tmsestringintdatalist.setasarraya(const data: msestringarty);
 var
  int1: integer;
  po1: pmsestringintty;
+ s1: integer;
 begin
  beginupdate;
-  count:= length(data);
-  po1:= pmsestringintty(datapo);
-  for int1:= 0 to fcount - 1 do begin
-   po1^.mstr:= data[int1];
-   inc(po1);
-  end;
+ count:= length(data);
+ po1:= datapo;
+ s1:= size;
+ for int1:= 0 to fcount - 1 do begin
+  po1^.mstr:= data[int1];
+  inc(pchar(po1),s1);
+ end;
  endupdate;
 end;
 
@@ -6301,14 +6333,16 @@ procedure tmsestringintdatalist.setasarrayb(const data: integerarty);
 var
  int1: integer;
  po1: pmsestringintty;
+ s1: integer;
 begin
  beginupdate;
-  count:= length(data);
-  po1:= pmsestringintty(datapo);
-  for int1:= 0 to fcount - 1 do begin
-   po1^.int:= data[int1];
-   inc(po1);
-  end;
+ count:= length(data);
+ po1:= datapo;
+ s1:= size;
+ for int1:= 0 to fcount - 1 do begin
+  po1^.int:= data[int1];
+  inc(pchar(po1),s1);
+ end;
  endupdate;
 end;
 
@@ -6316,13 +6350,14 @@ function tmsestringintdatalist.getasarrayb: integerarty;
 var
  int1: integer;
  po1: pmsestringintty;
+ s1: integer;
 begin
  setlength(result,fcount);
- normalizering;
- po1:= pmsestringintty(fdatapo);
+ po1:= datapo;
+ s1:= size;
  for int1:= 0 to fcount - 1 do begin
   result[int1]:= po1^.int;
-  inc(po1);
+  inc(pchar(po1),s1);
  end;
 end;
 
@@ -6384,6 +6419,298 @@ function tmsestringintdatalist.getstatdata(const index: integer): msestring;
 begin
  with pmsestringintty(getitempo(index))^ do begin
   result:= inttostr(int)+','+mstr;
+ end;
+end;
+
+{ trealintdatalist }
+
+constructor trealintdatalist.create;
+begin
+ fdefaultval1.rea:= emptyreal;
+ inherited;
+ fsize:= sizeof(realintty);
+end;
+
+function trealintdatalist.datatype: listdatatypety;
+begin
+ result:= dl_realint;
+end;
+
+function trealintdatalist.add(const valuea: realty; 
+                                     const valueb: integer = 0): integer;
+var
+ d1: realintty;
+begin
+ d1.rea:= valuea;
+ d1.int:= valueb;
+ result:= adddata(d1);
+end;
+
+function trealintdatalist.add(const value: realintty): integer;
+begin
+ result:= adddata(value);
+end;
+
+procedure trealintdatalist.fill(const acount: integer;
+                   const defaultvalue: realty; const defaultint: integer);
+var
+ d1: realintty;
+begin
+ d1.rea:= defaultvalue;
+ d1.int:= defaultint;
+ internalfill(count,d1);
+end;
+
+function trealintdatalist.Getitemsb(index: integer): integer;
+begin
+ result:= prealintty(getitempo(index))^.int;
+end;
+
+procedure trealintdatalist.Setitemsb(index: integer;
+                                             const Value: integer);
+begin
+ prealintty(getitempo(index))^.int:= value;
+ change(index);
+end;
+
+function trealintdatalist.Getdoubleitems(index: integer): realintty;
+begin
+ result:= prealintty(getitempo(index))^;
+end;
+
+procedure trealintdatalist.Setdoubleitems(index: integer;
+                         const Value: realintty);
+begin
+ prealintty(getitempo(index))^:= value;
+ change(index);
+end;
+
+procedure trealintdatalist.insert(const index: integer;
+                    const item: realty; const itemint: integer);
+var
+ d1: realintty;
+begin
+ d1.rea:= item;
+ d1.int:= itemint;
+ insertdata(index,d1);
+end;
+
+procedure trealintdatalist.compare(const l, r; var result: integer);
+begin
+ result:= cmprealty(realintty(l).rea,realintty(r).rea);
+end;
+{
+procedure trealintdatalist.assign(source: tpersistent);
+begin
+ if not assigndata(source) then begin
+  inherited;
+ end;
+end;
+}
+procedure trealintdatalist.assignb(const source: tdatalist);
+var
+ int1: integer;
+ po1,po2: prealintty;
+ po3: pinteger;
+ s1,s2: integer;
+begin
+ if source is trealintdatalist then begin
+  beginupdate;
+  count:= source.count;
+  with trealintdatalist(source) do begin
+   po1:= self.datapo;
+   po2:= datapo;
+   s1:= self.size;
+   s2:= size;
+   for int1:= 0 to self.fcount-1 do begin
+    po1^.int:= po2^.int;
+    inc(pchar(po1),s1);
+    inc(pchar(po2),s2);
+   end;
+  end;
+  endupdate;
+ end
+ else begin
+  if source is tintegerdatalist then begin
+   beginupdate;
+   count:= source.count;
+   with tintegerdatalist(source) do begin
+    po1:= self.datapo;
+    po3:= datapo;
+    s1:= self.size;
+    s2:= size;
+    for int1:= 0 to fcount-1 do begin
+     po1^.int:= po3^;
+     inc(pchar(po1),s1);
+     inc(pchar(po3),s2);
+    end;
+   end;
+   endupdate;
+  end
+  else begin
+   inherited;
+  end;
+ end;
+end;
+
+procedure trealintdatalist.assigntob(const dest: tdatalist);
+var
+ int1: integer;
+ po1: prealintty;
+ po2: pinteger;
+ s1,s2: integer;
+begin
+ if dest is tintegerdatalist then begin
+  with tintegerdatalist(dest) do begin
+   newbuffer(self.count);
+   po1:= self.datapo;
+   po2:= pointer(fdatapo);
+   s1:= self.size;
+   s2:= size;
+   for int1:= 0 to fcount-1 do begin
+    po2^:= po1^.int;
+    inc(pchar(po1),s1);
+    inc(pchar(po2),s2);
+   end;
+   change(-1);
+  end
+ end
+ else begin
+  inherited;
+ end;
+end;
+
+procedure trealintdatalist.setasarray(const data: realintarty);
+begin
+ internalsetasarray(pointer(data),sizeof(realintty));
+end;
+
+function trealintdatalist.getasarray: realintarty;
+begin
+ setlength(result,fcount);
+ internalgetasarray(pointer(result),sizeof(realintty));
+end;
+
+function trealintdatalist.getasarraya: realarty;
+var
+ int1: integer;
+ po1: prealintty;
+ s1: integer;
+begin
+ setlength(result,fcount);
+ po1:= datapo;
+ s1:= size;
+ for int1:= 0 to fcount - 1 do begin
+  result[int1]:= po1^.rea;
+  inc(pchar(po1),s1);
+ end;
+end;
+
+procedure trealintdatalist.setasarraya(const data: realarty);
+var
+ int1: integer;
+ po1: prealintty;
+ s1: integer;
+begin
+ beginupdate;
+ count:= length(data);
+ po1:= pointer(fdatapo);
+ s1:= size;
+ for int1:= 0 to fcount - 1 do begin
+  po1^.rea:= data[int1];
+  inc(pchar(po1),s1);
+ end;
+ endupdate;
+end;
+
+procedure trealintdatalist.setasarrayb(const data: integerarty);
+var
+ int1: integer;
+ po1: prealintty;
+ s1: integer;
+begin
+ beginupdate;
+ count:= length(data);
+ po1:= pointer(fdatapo);
+ s1:= size;
+ for int1:= 0 to fcount - 1 do begin
+  po1^.int:= data[int1];
+  inc(pchar(po1),s1);
+ end;
+ endupdate;
+end;
+
+function trealintdatalist.getasarrayb: integerarty;
+var
+ int1: integer;
+ po1: prealintty;
+ s1: integer;
+begin
+ setlength(result,fcount);
+ po1:= datapo;
+ s1:= size;
+ for int1:= 0 to fcount - 1 do begin
+  result[int1]:= po1^.int;
+  inc(pchar(po1),s1);
+ end;
+end;
+
+procedure trealintdatalist.readitem(const reader: treader; var value);
+begin
+ with reader do begin
+  readlistbegin;
+  realintty(value).rea:= readrealty(reader); 
+  realintty(value).int:= readinteger;
+  readlistend;
+ end;
+end;
+
+procedure trealintdatalist.writeitem(const writer: twriter; var value);
+begin
+ with writer do begin
+  writelistbegin;
+  writerealty(writer,realintty(value).rea);
+  writeinteger(realintty(value).int);
+  writelistend;
+ end;
+end;
+
+procedure trealintdatalist.setstatdata(const index: integer;
+               const value: msestring);
+var
+ d1: realintty;
+ int1: integer;
+begin
+ int1:= findchar(value,',');
+ if int1 > 0 then begin
+  d1.rea:= strtorealtydot(copy(value,1,int1-1));
+  if cmprealty(d1.rea,min) < 0 then begin
+   d1.rea:= min;
+  end
+  else begin
+   if cmprealty(d1.rea,max) > 0 then begin
+    d1.rea:= max;
+   end;
+  end;
+  d1.int:= strtoint(copy(value,int1+1,bigint));
+  setdata(index,d1);
+ end;
+end;
+
+function trealintdatalist.getstatdata(const index: integer): msestring;
+begin
+ with prealintty(getitempo(index))^ do begin
+  result:=  realtytostrdot(rea)+','+inttostr(int);
+ end;
+end;
+
+function trealintdatalist.getdefault: pointer;
+begin
+ if fdefaultzero then begin
+  result:= nil;
+ end
+ else begin
+  result:= @fdefaultval1;
  end;
 end;
 
@@ -6817,6 +7144,11 @@ begin
  po1:= getitempo(index);
  freedata(po1^);
  po1^:= value;
+end;
+
+function tobjectdatalist.checkassigncompatibility(const source: tpersistent): boolean;
+begin
+ result:= source.inheritsfrom(tobjectdatalist);
 end;
 
 end.

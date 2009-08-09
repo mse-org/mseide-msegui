@@ -98,7 +98,7 @@ begin
  result:= inherited getoptionsedit;
  if fgridintf <> nil then begin
   po1:= fgridintf.getrowdatapo;
-  if (po1 <> nil) and (po1^.level <> 0) then begin
+  if (po1 <> nil) and (po1^.data.int <> 0) then begin
    include(result,oe_readonly);
   end;
  end;
@@ -114,7 +114,7 @@ begin
   if (po1 = nil) then begin
    po1:= fgridintf.getrowdatapo;
   end;   
-  if (po1 <> nil) and (po1^.level = 0) then begin
+  if (po1 <> nil) and (po1^.data.int = 0) then begin
    result:= '';
    exit;
   end;
