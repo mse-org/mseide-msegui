@@ -17,7 +17,8 @@ uses
  
 const
  ifidatatypes = [dl_integer,dl_int64,dl_currency,dl_real,
-                 dl_msestring,dl_ansistring,dl_msestringint,dl_realint];
+                 dl_msestring,dl_ansistring,dl_msestringint,
+                 dl_realint,dl_realsum];
  
 type
  tmodulelinkarrayprop = class;
@@ -3391,7 +3392,7 @@ begin
     end;
    end;    
   end;
-  dl_realint: begin
+  dl_realint,dl_realsum: begin
    result:= adatalist.setdatablock(adata,sizeof(ifirealintty),arowcount);
    exit;
   end;
@@ -3487,7 +3488,7 @@ begin
     move(po4^,dest^,int2);
     inc(dest,int2);
    end;
-   dl_realint: begin
+   dl_realint,dl_realsum: begin
     inc(dest,getdatablock(dest,sizeof(ifirealintty)));
    end;
    dl_msestring: begin
@@ -3576,7 +3577,7 @@ begin
      inc(pchar(po3),s1);
     end;
    end;
-   dl_realint: begin
+   dl_realint,dl_realsum: begin
     result:= count * sizeof(ifirealintty);
    end;
    dl_rowstate: begin
