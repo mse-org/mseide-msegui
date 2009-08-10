@@ -447,8 +447,8 @@ type
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatype: listdatatypety; override;
    procedure drawcell(const canvas: tcanvas); override;
-   procedure valuetogrid(const arow: integer); override;
-   procedure gridtovalue(const arow: integer); override;
+   procedure valuetogrid(arow: integer); override;
+   procedure gridtovalue(arow: integer); override;
    function internaldatatotext(const data): msestring; override;
    procedure dosetvalue(var avalue: msestring; var accept: boolean); virtual;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
@@ -2259,7 +2259,7 @@ begin
  setupeditor;
 end;
 
-procedure titemedit.gridtovalue(const arow: integer);
+procedure titemedit.gridtovalue(arow: integer);
 var
  int1: integer;
 begin
@@ -2285,7 +2285,7 @@ begin
  inherited;
 end;
 
-procedure titemedit.valuetogrid(const arow: integer);
+procedure titemedit.valuetogrid(arow: integer);
 begin
  fitemlist.incupdate;
  try

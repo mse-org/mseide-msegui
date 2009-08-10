@@ -42,7 +42,7 @@ type
    procedure dochange; override;
    function lookuptext(const aindex: integer): msestring; virtual; abstract;
    function getdatatype: listdatatypety; override;
-   procedure valuetogrid(const row: integer); override;
+   procedure valuetogrid(row: integer); override;
    procedure griddatasourcechanged; override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getoptionsedit: optionseditty; override;
@@ -434,7 +434,7 @@ begin
  result:= dl_none;
 end;
 
-procedure tdblookuplb.valuetogrid(const row: integer);
+procedure tdblookuplb.valuetogrid(row: integer);
 begin
  //dummy
 end;

@@ -104,7 +104,7 @@ type
    procedure setdatalink(const avalue: tgraphicdatalink);
   protected   
    procedure defineproperties(filer: tfiler); override;
-   procedure gridtovalue(const row: integer); override;
+   procedure gridtovalue(row: integer); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -245,7 +245,7 @@ begin
  fdatalink.fixupproperties(filer);  //move values to datalink
 end;
 
-procedure tdbdataimage.gridtovalue(const row: integer);
+procedure tdbdataimage.gridtovalue(row: integer);
 begin
  //dummy
 end;

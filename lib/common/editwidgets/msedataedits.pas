@@ -85,8 +85,8 @@ type
    function checkgrid: tdatalist; overload;
    function checkgrid(var index: integer): tdatalist; overload; 
                         //index -1 -> grid.row, nil if no focused row
-   procedure internalgetgridvalue(const index: integer; out value);
-   procedure internalsetgridvalue(const index: integer; const Value);
+   procedure internalgetgridvalue(index: integer; out value);
+   procedure internalsetgridvalue(index: integer; const Value);
    procedure internalfillcol(const value);
    procedure internalassigncol(const value);
    function getinnerframe: framety; override;
@@ -136,8 +136,8 @@ type
                                var handled: boolean); virtual;
    procedure aftercelldragevent(var ainfo: draginfoty; const arow: integer;
                                var handled: boolean); virtual;
-   procedure valuetogrid(const row: integer); virtual; abstract;
-   procedure gridtovalue(const row: integer); virtual;
+   procedure valuetogrid(row: integer); virtual; abstract;
+   procedure gridtovalue(row: integer); virtual;
    procedure docellevent(const ownedcol: boolean; var info: celleventinfoty); virtual;
    procedure sortfunc(const l,r; var result: integer); virtual;
    procedure gridvaluechanged(const index: integer); virtual;
@@ -259,8 +259,8 @@ type
    procedure texttodata(const atext: msestring; var data); override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatype: listdatatypety; override;
-   procedure valuetogrid(const arow: integer); override;
-   procedure gridtovalue(const arow: integer); override;
+   procedure valuetogrid(arow: integer); override;
+   procedure gridtovalue(arow: integer); override;
    procedure readstatvalue(const reader: tstatreader); override;
    procedure writestatvalue(const writer: tstatwriter); override;
    procedure sortfunc(const l,r; var result: integer); override;
@@ -350,8 +350,8 @@ type
    function internaldatatotext(const data): msestring; override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatype: listdatatypety; override;
-   procedure valuetogrid(const arow: integer); override;
-   procedure gridtovalue(const arow: integer); override;
+   procedure valuetogrid(arow: integer); override;
+   procedure gridtovalue(arow: integer); override;
    procedure readstatvalue(const reader: tstatreader); override;
    procedure writestatvalue(const writer: tstatwriter); override;
    procedure sortfunc(const l,r; var result: integer); override;
@@ -540,8 +540,8 @@ type
    procedure texttodata(const atext: msestring; var data); override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatype: listdatatypety; override;
-   procedure valuetogrid(const arow: integer); override;
-   procedure gridtovalue(const arow: integer); override;
+   procedure valuetogrid(arow: integer); override;
+   procedure gridtovalue(arow: integer); override;
    procedure readstatvalue(const reader: tstatreader); override;
    procedure writestatvalue(const writer: tstatwriter); override;
    procedure setnullvalue; override;
@@ -598,8 +598,8 @@ type
    function internaldatatotext(const data): msestring; override;
    procedure texttodata(const atext: msestring; var data); override;
    function getdefaultvalue: pointer; override;
-   procedure valuetogrid(const arow: integer); override;
-   procedure gridtovalue(const arow: integer); override;
+   procedure valuetogrid(arow: integer); override;
+   procedure gridtovalue(arow: integer); override;
 
    procedure readstatvalue(const reader: tstatreader); override;
    procedure writestatvalue(const writer: tstatwriter); override;
@@ -656,8 +656,8 @@ type
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    procedure texttodata(const atext: msestring; var data); override;
    function internaldatatotext(const data): msestring; override;
-   procedure valuetogrid(const arow: integer); override;
-   procedure gridtovalue(const arow: integer); override;
+   procedure valuetogrid(arow: integer); override;
+   procedure gridtovalue(arow: integer); override;
    procedure readstatvalue(const reader: tstatreader); override;
    procedure writestatvalue(const writer: tstatwriter); override;
    function createdropdowncontroller: tcustomdropdowncontroller; override;
@@ -824,8 +824,8 @@ type
    procedure texttodata(const atext: msestring; var data); override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatype: listdatatypety; override;
-   procedure valuetogrid(const arow: integer); override;
-   procedure gridtovalue(const arow: integer); override;
+   procedure valuetogrid(arow: integer); override;
+   procedure gridtovalue(arow: integer); override;
    procedure defineproperties(filer: tfiler); override;
    procedure readstatvalue(const reader: tstatreader); override;
    procedure writestatvalue(const writer: tstatwriter); override;
@@ -1007,8 +1007,8 @@ type
    procedure texttodata(const atext: msestring; var data); override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatype: listdatatypety; override;
-   procedure valuetogrid(const arow: integer); override;
-   procedure gridtovalue(const arow: integer); override;
+   procedure valuetogrid(arow: integer); override;
+   procedure gridtovalue(arow: integer); override;
    procedure defineproperties(filer: tfiler); override;
    procedure readstatvalue(const reader: tstatreader); override;
    procedure writestatvalue(const writer: tstatwriter); override;
@@ -1195,7 +1195,7 @@ begin
  exclude(fstate,des_edited);
 end;
 
-procedure tcustomdataedit.gridtovalue(const row: integer);
+procedure tcustomdataedit.gridtovalue(row: integer);
 begin
  valuetotext;
 end;
@@ -1823,13 +1823,13 @@ begin
  end;
 end;
 
-procedure tcustomdataedit.internalgetgridvalue(const index: integer; out value);
+procedure tcustomdataedit.internalgetgridvalue(index: integer; out value);
 begin
  checkgrid;
  fgridintf.getdata(index,value);
 end;
 
-procedure tcustomdataedit.internalsetgridvalue(const index: integer;
+procedure tcustomdataedit.internalsetgridvalue(index: integer;
   const Value);
 begin
  checkgrid;
@@ -2213,12 +2213,12 @@ begin
  end;
 end;
 
-procedure tcustomstringedit.valuetogrid(const arow: integer);
+procedure tcustomstringedit.valuetogrid(arow: integer);
 begin
  fgridintf.setdata(arow,fvalue);
 end;
 
-procedure tcustomstringedit.gridtovalue(const arow: integer);
+procedure tcustomstringedit.gridtovalue(arow: integer);
 begin
  fgridintf.getdata(arow,fvalue);
  inherited;
@@ -2678,12 +2678,12 @@ begin
  result:= bytestrtostr(str1,nb_hex,true);
 end;
 
-procedure thexstringedit.valuetogrid(const arow: integer);
+procedure thexstringedit.valuetogrid(arow: integer);
 begin
  fgridintf.setdata(arow,fvalue);
 end;
 
-procedure thexstringedit.gridtovalue(const arow: integer);
+procedure thexstringedit.gridtovalue(arow: integer);
 begin
  fgridintf.getdata(arow,fvalue);
  inherited;
@@ -3071,12 +3071,12 @@ begin
  result:= dl_integer;
 end;
 
-procedure tcustomintegeredit.valuetogrid(const arow: integer);
+procedure tcustomintegeredit.valuetogrid(arow: integer);
 begin
  fgridintf.setdata(arow,fvalue);
 end;
 
-procedure tcustomintegeredit.gridtovalue(const arow: integer);
+procedure tcustomintegeredit.gridtovalue(arow: integer);
 begin
  fgridintf.getdata(arow,fvalue);
  inherited;
@@ -3366,12 +3366,12 @@ begin
  result:= @fvaluedefault;
 end;
 
-procedure tcustomkeystringedit.valuetogrid(const arow: integer);
+procedure tcustomkeystringedit.valuetogrid(arow: integer);
 begin
  fgridintf.setdata(arow,fvalue1);
 end;
 
-procedure tcustomkeystringedit.gridtovalue(const arow: integer);
+procedure tcustomkeystringedit.gridtovalue(arow: integer);
 begin
  fgridintf.getdata(arow,fvalue1);
  tdropdowncols1(tkeystringdropdowncontroller(fdropdown).cols).fitemindex:= -3;
@@ -3544,7 +3544,7 @@ begin
  result:= @fvaluedefault;
 end;
 
-procedure tcustomenuedit.gridtovalue(const arow: integer);
+procedure tcustomenuedit.gridtovalue(arow: integer);
 begin
  fgridintf.getdata(arow,fvalue1);
  valuetotext;
@@ -3599,7 +3599,7 @@ begin
  end;
 end;
 
-procedure tcustomenuedit.valuetogrid(const arow: integer);
+procedure tcustomenuedit.valuetogrid(arow: integer);
 begin
  fgridintf.setdata(arow,fvalue1);
 end;
@@ -3892,13 +3892,13 @@ begin
  result:= dl_real;
 end;
 
-procedure tcustomrealedit.gridtovalue(const arow: integer);
+procedure tcustomrealedit.gridtovalue(arow: integer);
 begin
  fgridintf.getdata(arow,fvalue);
  inherited;
 end;
 
-procedure tcustomrealedit.valuetogrid(const arow: integer);
+procedure tcustomrealedit.valuetogrid(arow: integer);
 begin
  fgridintf.setdata(arow,fvalue);
 end;
@@ -4507,12 +4507,12 @@ begin
  result:= dl_datetime;
 end;
 
-procedure tcustomdatetimeedit.valuetogrid(const arow: integer);
+procedure tcustomdatetimeedit.valuetogrid(arow: integer);
 begin
  fgridintf.setdata(arow,fvalue);
 end;
 
-procedure tcustomdatetimeedit.gridtovalue(const arow: integer);
+procedure tcustomdatetimeedit.gridtovalue(arow: integer);
 begin
  fgridintf.getdata(arow,fvalue);
  inherited;

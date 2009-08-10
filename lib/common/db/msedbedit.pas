@@ -1566,8 +1566,9 @@ type
   //iwidgetgrid (dummy)
    function getbrushorigin: pointty;
    function getcol: twidgetcol;
-   procedure getdata(index: integer; var dest);
-   procedure setdata(index: integer; const source; const noinvalidate: boolean = false);
+   procedure getdata(var index: integer; var dest);
+   procedure setdata(var index: integer; const source; const noinvalidate: boolean = false);
+   procedure datachange(const arow: integer);
    function getrow: integer;
    procedure setrow(arow: integer);
    procedure changed;
@@ -1889,8 +1890,8 @@ type
    function getdefaultvalue: pointer; override;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    procedure texttodata(const atext: msestring; var data); override;
-   procedure valuetogrid(const arow: integer); override;
-   procedure gridtovalue(const arow: integer); override;
+   procedure valuetogrid(arow: integer); override;
+   procedure gridtovalue(arow: integer); override;
    procedure readstatvalue(const reader: tstatreader); override;
    procedure writestatvalue(const writer: tstatwriter); override;
 
@@ -7592,13 +7593,20 @@ begin
  result:= nil;
 end;
 
-procedure tcustomdbstringgrid.getdata(index: integer; var dest);
+procedure tcustomdbstringgrid.getdata(var index: integer; var dest);
 begin
+ //dummy
 end;
 
-procedure tcustomdbstringgrid.setdata(index: integer; const source;
+procedure tcustomdbstringgrid.setdata(var index: integer; const source;
                   const noinvalidate: boolean = false);
 begin
+ //dummy
+end;
+
+procedure tcustomdbstringgrid.datachange(const arow: integer);
+begin
+ //dummy
 end;
 
 function tcustomdbstringgrid.getrow: integer;
@@ -8415,12 +8423,12 @@ begin
  //not supported
 end;
 
-procedure tcustomenum64edit.valuetogrid(const arow: integer);
+procedure tcustomenum64edit.valuetogrid(arow: integer);
 begin
  fgridintf.setdata(arow,fvalue1);
 end;
 
-procedure tcustomenum64edit.gridtovalue(const arow: integer);
+procedure tcustomenum64edit.gridtovalue(arow: integer);
 begin
  fgridintf.getdata(arow,fvalue1);
  valuetotext;

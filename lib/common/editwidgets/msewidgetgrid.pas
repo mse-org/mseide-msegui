@@ -28,8 +28,10 @@ type
   function getcol: twidgetcol;
   function getdatapo(const arow: integer): pointer;
   function getrowdatapo: pointer;
-  procedure getdata(index: integer; var dest);
-  procedure setdata(index: integer; const source; const noinvalidate: boolean = false);
+  procedure getdata(var index: integer; var dest);
+  procedure setdata(var index: integer; const source;
+                        const noinvalidate: boolean = false);
+  procedure datachange(const index: integer);
   function getrow: integer;
   procedure setrow(arow: integer);
   procedure changed;
@@ -61,8 +63,8 @@ type
   procedure aftercelldragevent(var ainfo: draginfoty; const arow: integer;
                                var processed: boolean);
   procedure initgridwidget;
-  procedure gridtovalue(const row: integer);  //row = -1 -> focused row, -2 -> default value
-  procedure valuetogrid(const row: integer);  //row = -1 -> focused row
+  procedure gridtovalue(row: integer);  //row = -1 -> focused row, -2 -> default value
+  procedure valuetogrid(row: integer);  //row = -1 -> focused row
   function getnulltext: msestring;
   procedure docellevent(const ownedcol: boolean; var info: celleventinfoty);
   procedure sortfunc(const l,r; var result: integer);
@@ -97,9 +99,10 @@ type
    function getgrid: tcustomwidgetgrid;
    function getbrushorigin: pointty;
    function getcol: twidgetcol;
-   procedure getdata(arow: integer; var dest);
-   procedure setdata(arow: integer;
+   procedure getdata(var arow: integer; var dest);
+   procedure setdata(var arow: integer;
                 const source; const noinvalidate: boolean = false); virtual;
+   procedure datachange(const arow: integer); virtual;
    function getrow: integer;
    procedure setrow(arow: integer);
    function empty(arow: integer): boolean;
@@ -1173,7 +1176,7 @@ begin
  end;
 end;
 
-procedure twidgetcol.getdata(arow: integer; var dest);
+procedure twidgetcol.getdata(var arow: integer; var dest);
 var
  datatype: listdatatypety;
  info: cellinfoty;
@@ -1247,7 +1250,7 @@ begin
  end;
 end;
 
-procedure twidgetcol.setdata(arow: integer; const source;
+procedure twidgetcol.setdata(var arow: integer; const source;
                              const noinvalidate: boolean = false);
 begin
  if fdata <> nil then begin
@@ -1275,6 +1278,7 @@ begin
    fonchange(self,arow);
   end;
  end;
+ datachange(arow);
 end;
 
 function twidgetcol.empty(arow: integer): boolean;
@@ -1580,6 +1584,11 @@ begin
    end;
   end;
  end;
+end;
+
+procedure twidgetcol.datachange(const arow: integer);
+begin
+ //dummy
 end;
 
 { twidgetcols }

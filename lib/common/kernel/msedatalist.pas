@@ -4544,19 +4544,27 @@ begin
  source.assigntob(self);
 end;
 
-function trealdatalist.Getitems(index: integer): realty;
-begin
- internalgetdata(index,result);
-end;
-
 procedure trealdatalist.insert(index: integer; const item: realty);
 begin
  insertdata(index,item);
 end;
 
-procedure trealdatalist.Setitems(index: integer; const Value: realty);
+function trealdatalist.Getitems(index: integer): realty;
 begin
- internalsetdata(index,value);
+ checkindex(index);
+ result:= prealty(pointer(fdatapo+index*fsize))^;
+// internalgetdata(index,result);
+end;
+
+procedure trealdatalist.Setitems(index: integer; const Value: realty);
+var
+ int1: integer;
+begin
+ int1:= index;
+ checkindex(index);
+ prealty(pointer(fdatapo+index*fsize))^:= value;
+ change(int1);
+// internalsetdata(index,value);
 end;
 
 function trealdatalist.getasarray: realarty;

@@ -95,8 +95,7 @@ type
 
  tifiwidgetcol = class(twidgetcol)
   protected
-   procedure setdata(arow: integer;
-                const source; const noinvalidate: boolean = false); override;
+   procedure datachange(const arow: integer); override;
  end;
  ifiwidgetcolarty = array of tifiwidgetcol;
   
@@ -585,10 +584,8 @@ end;
 
 { tifiwidgetcol }
 
-procedure tifiwidgetcol.setdata(arow: integer; const source;
-               const noinvalidate: boolean = false);
+procedure tifiwidgetcol.datachange(const arow: integer);
 begin
- inherited;
  with trxwidgetgrid(fgrid).fifi do begin
   if (self.name <> '') and cancommandsend(igo_coldata) and 
                                             (fdata <> nil) then begin
@@ -596,7 +593,14 @@ begin
   end;
  end;  
 end;
-
+{
+procedure tifiwidgetcol.setdata(var arow: integer; const source;
+               const noinvalidate: boolean = false);
+begin
+ inherited;
+ datachange(arow);
+end;
+}
 { trxwidgetgrid }
 
 constructor trxwidgetgrid.create(aowner: tcomponent);

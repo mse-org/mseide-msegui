@@ -146,6 +146,7 @@ begin
  list:= checkgrid(index);
  if list <> nil then begin
   tgridrealsumlist(list).sumlevel[index]:= avalue;
+  fgridintf.datachange(index);
  end;
 end;
 

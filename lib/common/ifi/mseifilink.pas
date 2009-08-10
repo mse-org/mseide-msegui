@@ -480,7 +480,7 @@ type
  
  tifidatacol = class(tindexpersistent)
   private
-   fdatalist: tdatalist;
+   fdata: tdatalist;
    fdatakind: ifidatakindty;
    fname: ansistring;
    fonchange: ifidatacolchangeeventty;
@@ -511,6 +511,12 @@ type
    procedure setselected(row: integer; const avalue: boolean);
    function getmerged(const row: integer): boolean; virtual;
    procedure setmerged(const row: integer; const avalue: boolean); virtual;
+   function getasrealint(const aindex: integer): realintty;
+   procedure setasrealint(const aindex: integer; const avalue: realintty);
+   function getasrealintr(const aindex: integer): realty;
+   procedure setasrealintr(const aindex: integer; const avalue: realty);
+   function getasrealinti(const aindex: integer): integer;
+   procedure setasrealinti(const aindex: integer; const avalue: integer);
   protected
    procedure freedatalist;
    procedure checkdatalist; overload;
@@ -519,6 +525,7 @@ type
    procedure doselectionchanged;
    procedure beginselect;
    procedure endselect;
+   procedure datachange(const aindex: integer);
   public
    constructor create(const aowner: tobject;
          const aprop: tindexpersistentarrayprop); override;
@@ -541,6 +548,12 @@ type
                          read getasmsestringinti write setasmsestringinti;
    property asmsestringints[const aindex: integer]: msestring
                          read getasmsestringints write setasmsestringints;
+   property asrealint[const aindex: integer]: realintty read getasrealint write
+                         setasrealint;
+   property asrealintr[const aindex: integer]: realty read getasrealintr write
+                         setasrealintr;
+   property asrealinti[const aindex: integer]: integer read getasrealinti write
+                         setasrealinti;
    property asbytes[const aindex: integer]: ansistring read getasbytes 
                                write setasbytes;
    property merged[const row: integer]: boolean read getmerged write setmerged;
@@ -2238,7 +2251,7 @@ end;
 
 procedure tifidatacol.freedatalist;
 begin
- fdatalist.free;
+ fdata.free;
 end;
 
 procedure tifidatacol.setdatakind(const avalue: ifidatakindty);
@@ -2251,10 +2264,10 @@ end;
 
 procedure tifidatacol.checkdatalist;
 begin
- if fdatalist = nil then begin
+ if fdata = nil then begin
   case datakind of
    idk_integer: begin
-    fdatalist:= tintegerdatalist.create;
+    fdata:= tintegerdatalist.create;
    end;
    {
    idk_int64: begin
@@ -2265,27 +2278,27 @@ begin
    end;
    }
    idk_real: begin
-    fdatalist:= trealdatalist.create;
+    fdata:= trealdatalist.create;
    end;
    idk_msestring: begin
-    fdatalist:= tmsestringdatalist.create;
+    fdata:= tmsestringdatalist.create;
    end;
    idk_msestringint: begin
-    fdatalist:= tmsestringintdatalist.create;
+    fdata:= tmsestringintdatalist.create;
    end;
    idk_bytes: begin
-    fdatalist:= tansistringdatalist.create;
+    fdata:= tansistringdatalist.create;
    end;
    idk_realint: begin
-    fdatalist:= trealintdatalist.create;
+    fdata:= trealintdatalist.create;
    end;
    else begin
     raise exception.create('Invalid ifidatakind.');
    end;
   end;
  end;
- fdatalist.count:= ttxdatagrid(fowner).rowcount;
- fdatalist.onitemchange:= @dochange;
+ fdata.count:= ttxdatagrid(fowner).rowcount;
+ fdata.onitemchange:= @dochange;
 end;
 
 procedure tifidatacol.checkdatalist(const akind: ifidatakindty);
@@ -2293,7 +2306,7 @@ begin
  if akind <> datakind then begin
   raise exception.create('Wrong datakind.');
  end;
- if fdatalist = nil then begin
+ if fdata = nil then begin
   checkdatalist;
  end;
 end;
@@ -2308,121 +2321,182 @@ end;
 function tifidatacol.getdatalist: tdatalist;
 begin
  checkdatalist;
- result:= fdatalist;
+ result:= fdata;
+end;
+
+procedure tifidatacol.datachange(const aindex: integer);
+begin
+ with ttxdatagrid(fowner).fifi do begin
+  if (self.name <> '') and cancommandsend(igo_coldata) and 
+                                            (fdata <> nil) then begin
+   senditem(ik_coldatachange,[encodecolchangedata(self.name,aindex,fdata)]);
+  end;
+ end;
 end;
 
 function tifidatacol.getasinteger(const aindex: integer): integer;
 begin
  checkdatalist(idk_integer);
- result:= tintegerdatalist(fdatalist).items[aindex];
+ result:= tintegerdatalist(fdata).items[aindex];
 end;
 
 procedure tifidatacol.setasinteger(const aindex: integer; const avalue: integer);
 begin
  checkdatalist(idk_integer);
- tintegerdatalist(fdatalist).items[aindex]:= avalue;
+ tintegerdatalist(fdata).items[aindex]:= avalue;
+ datachange(aindex);
 end;
 
 function tifidatacol.getasint64(const aindex: integer): int64;
 begin
  checkdatalist(idk_int64);
- result:= tint64datalist(fdatalist).items[aindex];
+ result:= tint64datalist(fdata).items[aindex];
 end;
 
 procedure tifidatacol.setasint64(const aindex: integer; const avalue: int64);
 begin
  checkdatalist(idk_int64);
- tint64datalist(fdatalist).items[aindex]:= avalue;
+ tint64datalist(fdata).items[aindex]:= avalue;
+ datachange(aindex);
 end;
 
 function tifidatacol.getascurrency(const aindex: integer): currency;
 begin
  checkdatalist(idk_currency);
- result:= tcurrencydatalist(fdatalist).items[aindex];
+ result:= tcurrencydatalist(fdata).items[aindex];
 end;
 
 procedure tifidatacol.setascurrency(const aindex: integer;
                const avalue: currency);
 begin
  checkdatalist(idk_currency);
- tcurrencydatalist(fdatalist).items[aindex]:= avalue;
+ tcurrencydatalist(fdata).items[aindex]:= avalue;
+ datachange(aindex);
 end;
 
 function tifidatacol.getasreal(const aindex: integer): real;
 begin
  checkdatalist(idk_real);
- result:= trealdatalist(fdatalist).items[aindex];
+ result:= trealdatalist(fdata).items[aindex];
 end;
 
 procedure tifidatacol.setasreal(const aindex: integer; const avalue: real);
 begin
  checkdatalist(idk_real);
- trealdatalist(fdatalist).items[aindex]:= avalue;
+ trealdatalist(fdata).items[aindex]:= avalue;
+ datachange(aindex);
 end;
 
 function tifidatacol.getasmsestring(const aindex: integer): msestring;
 begin
  checkdatalist(idk_msestring);
- result:= tmsestringdatalist(fdatalist).items[aindex];
+ result:= tmsestringdatalist(fdata).items[aindex];
 end;
 
 procedure tifidatacol.setasmsestring(const aindex: integer;
                const avalue: msestring);
 begin
  checkdatalist(idk_msestring);
- tmsestringdatalist(fdatalist).items[aindex]:= avalue;
+ tmsestringdatalist(fdata).items[aindex]:= avalue;
+ datachange(aindex);
 end;
 
 function tifidatacol.getasbytes(const aindex: integer): ansistring;
 begin
  checkdatalist(idk_bytes);
- result:= tansistringdatalist(fdatalist).items[aindex];
+ result:= tansistringdatalist(fdata).items[aindex];
 end;
 
 procedure tifidatacol.setasbytes(const aindex: integer;
                const avalue: ansistring);
 begin
  checkdatalist(idk_bytes);
- tansistringdatalist(fdatalist).items[aindex]:= avalue;
+ tansistringdatalist(fdata).items[aindex]:= avalue;
+ datachange(aindex);
 end;
 
 function tifidatacol.getasmsestringint(const aindex: integer): msestringintty;
 begin
  checkdatalist(idk_msestringint);
- result:= tmsestringintdatalist(fdatalist).doubleitems[aindex];
+ result:= tmsestringintdatalist(fdata).doubleitems[aindex];
 end;
 
 procedure tifidatacol.setasmsestringint(const aindex: integer;
                const avalue: msestringintty);
 begin
  checkdatalist(idk_msestringint);
- tmsestringintdatalist(fdatalist).doubleitems[aindex]:= avalue;
+ tmsestringintdatalist(fdata).doubleitems[aindex]:= avalue;
+ datachange(aindex);
 end;
 
 function tifidatacol.getasmsestringinti(const aindex: integer): integer;
 begin
  checkdatalist(idk_msestringint);
- result:= tmsestringintdatalist(fdatalist).itemsb[aindex];
+ result:= tmsestringintdatalist(fdata).itemsb[aindex];
 end;
 
 procedure tifidatacol.setasmsestringinti(const aindex: integer;
                const avalue: integer);
 begin
  checkdatalist(idk_msestringint);
- tmsestringintdatalist(fdatalist).itemsb[aindex]:= avalue;
+ tmsestringintdatalist(fdata).itemsb[aindex]:= avalue;
+ datachange(aindex);
 end;
 
 function tifidatacol.getasmsestringints(const aindex: integer): msestring;
 begin
  checkdatalist(idk_msestringint);
- result:= tmsestringintdatalist(fdatalist).items[aindex];
+ result:= tmsestringintdatalist(fdata).items[aindex];
 end;
 
 procedure tifidatacol.setasmsestringints(const aindex: integer;
                const avalue: msestring);
 begin
  checkdatalist(idk_msestringint);
- tmsestringintdatalist(fdatalist).items[aindex]:= avalue;
+ tmsestringintdatalist(fdata).items[aindex]:= avalue;
+ datachange(aindex);
+end;
+
+function tifidatacol.getasrealint(const aindex: integer): realintty;
+begin
+ checkdatalist(idk_realint);
+ result:= trealintdatalist(fdata).doubleitems[aindex];
+end;
+
+procedure tifidatacol.setasrealint(const aindex: integer;
+               const avalue: realintty);
+begin
+ checkdatalist(idk_realint);
+ trealintdatalist(fdata).doubleitems[aindex]:= avalue;
+ datachange(aindex);
+end;
+
+function tifidatacol.getasrealintr(const aindex: integer): realty;
+begin
+ checkdatalist(idk_realint);
+ result:= trealintdatalist(fdata).items[aindex];
+end;
+
+procedure tifidatacol.setasrealintr(const aindex: integer;
+               const avalue: realty);
+begin
+ checkdatalist(idk_realint);
+ trealintdatalist(fdata).items[aindex]:= avalue;
+ datachange(aindex);
+end;
+
+function tifidatacol.getasrealinti(const aindex: integer): integer;
+begin
+ checkdatalist(idk_realint);
+ result:= trealintdatalist(fdata).itemsb[aindex];
+end;
+
+procedure tifidatacol.setasrealinti(const aindex: integer;
+               const avalue: integer);
+begin
+ checkdatalist(idk_realint);
+ trealintdatalist(fdata).itemsb[aindex]:= avalue;
+ datachange(aindex);
 end;
 
 function tifidatacol.getmerged(const row: integer): boolean;
@@ -2900,8 +2974,8 @@ begin
   with fdatacols do begin
    for int1:= 0 to high(fitems) do begin
     with tifidatacol(fitems[int1]) do begin
-     if fdatalist <> nil then begin
-      fdatalist.count:= avalue;
+     if fdata <> nil then begin
+      fdata.count:= avalue;
      end;
     end;
    end;
@@ -2981,8 +3055,8 @@ begin
  with fdatacols do begin
   for int1:= 0 to high(fitems) do begin
    with tifidatacol(fitems[int1]) do begin
-    if fdatalist <> nil then begin
-     fdatalist.blockmovedata(curindex,newindex,count);
+    if fdata <> nil then begin
+     fdata.blockmovedata(curindex,newindex,count);
     end;
    end;
   end;
@@ -3006,8 +3080,8 @@ begin
  with fdatacols do begin
   for int1:= 0 to high(fitems) do begin
    with tifidatacol(fitems[int1]) do begin
-    if fdatalist <> nil then begin
-     fdatalist.insertitems(index,count);
+    if fdata <> nil then begin
+     fdata.insertitems(index,count);
     end;
    end;
   end;
@@ -3031,8 +3105,8 @@ begin
  with fdatacols do begin
   for int1:= 0 to high(fitems) do begin
    with tifidatacol(fitems[int1]) do begin
-    if fdatalist <> nil then begin
-     fdatalist.deleteitems(index,count);
+    if fdata <> nil then begin
+     fdata.deleteitems(index,count);
     end;
    end;
   end;

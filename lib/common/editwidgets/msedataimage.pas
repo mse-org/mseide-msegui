@@ -23,8 +23,8 @@ type
    procedure setvalue(const avalue: string);
    procedure setformat(const avalue: string);
    procedure checkgrid;
-   function getgridvalue(const index: integer): string;
-   procedure setgridvalue(const index: integer; const avalue: string);
+   function getgridvalue(index: integer): string;
+   procedure setgridvalue(index: integer; const avalue: string);
    procedure readvalue(stream: tstream);
    procedure writevalue(stream: tstream);
   protected
@@ -52,8 +52,8 @@ type
                                var handled: boolean); virtual;
    procedure aftercelldragevent(var ainfo: draginfoty; const arow: integer;
                                var handled: boolean); virtual;
-   procedure valuetogrid(const row: integer); virtual;
-   procedure gridtovalue(const row: integer); virtual;
+   procedure valuetogrid(row: integer); virtual;
+   procedure gridtovalue(row: integer); virtual;
    procedure docellevent(const ownedcol: boolean; var info: celleventinfoty); virtual;
    procedure sortfunc(const l,r; var result: integer); virtual;
    procedure gridvaluechanged(const index: integer); virtual;
@@ -93,11 +93,14 @@ begin
 end;
 
 procedure tcustomdataimage.setvalue(const avalue: string);
+var
+ int1: integer;
 begin
  if (fgridintf <> nil) and not (csdesigning in componentstate) then begin
   inc(fgridsetting);
   try
-   fgridintf.setdata(fgridintf.getrow,avalue);
+   int1:= -1;
+   fgridintf.setdata(int1,avalue);
   finally
    dec(fgridsetting);
   end;
@@ -217,12 +220,12 @@ begin
  end;
 end;
 
-procedure tcustomdataimage.valuetogrid(const row: integer);
+procedure tcustomdataimage.valuetogrid(row: integer);
 begin
  //dummy
 end;
 
-procedure tcustomdataimage.gridtovalue(const row: integer);
+procedure tcustomdataimage.gridtovalue(row: integer);
 var
  str1: string;
 begin
@@ -288,7 +291,7 @@ begin
  end;
 end;
 
-function tcustomdataimage.getgridvalue(const index: integer): string;
+function tcustomdataimage.getgridvalue(index: integer): string;
 begin
  checkgrid;
  fgridintf.getdata(index,result);
@@ -299,7 +302,7 @@ begin
  //dummy
 end;
 
-procedure tcustomdataimage.setgridvalue(const index: integer;
+procedure tcustomdataimage.setgridvalue(index: integer;
                const avalue: string);
 begin
  checkgrid;

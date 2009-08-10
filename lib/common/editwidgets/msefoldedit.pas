@@ -91,8 +91,8 @@ type
    function imageshift(arow: integer): integer;
                     //-1 -> focused row
    procedure setupeditor; override;
-   procedure gridtovalue(const arow: integer); override;
-   procedure valuetogrid(const arow: integer); override;
+   procedure gridtovalue(arow: integer); override;
+   procedure valuetogrid(arow: integer); override;
    procedure writestatvalue(const writer: tstatwriter); override;
    procedure readstatvalue(const reader: tstatreader); override;
    procedure synctofontheight; override;
@@ -713,7 +713,7 @@ begin
  tmsestringintdatalist(fgridintf.getcol.datalist).asarrayb:= avalue;
 end;
 
-procedure tfoldedit.gridtovalue(const arow: integer);
+procedure tfoldedit.gridtovalue(arow: integer);
 var
  val1: msestringintty;
 begin
@@ -723,7 +723,7 @@ begin
  valuetotext;
 end;
 
-procedure tfoldedit.valuetogrid(const arow: integer);
+procedure tfoldedit.valuetogrid(arow: integer);
 var
  val1: msestringintty;
 begin

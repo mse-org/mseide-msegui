@@ -127,8 +127,8 @@ type
    procedure aftercelldragevent(var ainfo: draginfoty; const arow: integer;
                                var handled: boolean); virtual;
    procedure initgridwidget;
-   procedure valuetogrid(const row: integer);
-   procedure gridtovalue(const row: integer);
+   procedure valuetogrid(row: integer);
+   procedure gridtovalue(row: integer);
    procedure docellevent(const ownedcol: boolean; var info: celleventinfoty); virtual;
    procedure sortfunc(const l,r; var result: integer);
    procedure gridvaluechanged(const index: integer); virtual;
@@ -490,12 +490,12 @@ begin
  result:= nil;
 end;
 
-procedure tcustomtextedit.valuetogrid(const row: integer);
+procedure tcustomtextedit.valuetogrid(row: integer);
 begin
  fgridintf.setdata(row,feditor.richtext);
 end;
 
-procedure tcustomtextedit.gridtovalue(const row: integer);
+procedure tcustomtextedit.gridtovalue(row: integer);
 var
  text1: richstringty;
 begin

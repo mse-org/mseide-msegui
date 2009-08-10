@@ -116,8 +116,8 @@ type
    procedure checkgrid;
    procedure internalfillcol(const value);
    procedure internalassigncol(const value);
-   procedure internalgetgridvalue(const index: integer; out value);
-   procedure internalsetgridvalue(const index: integer; const avalue);
+   procedure internalgetgridvalue(index: integer; out value);
+   procedure internalsetgridvalue(index: integer; const avalue);
    procedure dochange; virtual;
    function docheckvalue(var avalue): boolean; virtual;
    procedure valuechanged;
@@ -147,8 +147,8 @@ type
                                var handled: boolean); virtual;
    procedure aftercelldragevent(var ainfo: draginfoty; const arow: integer;
                                var handled: boolean); virtual;
-   procedure valuetogrid(const row: integer); virtual; abstract;
-   procedure gridtovalue(const row: integer); virtual;
+   procedure valuetogrid(row: integer); virtual; abstract;
+   procedure gridtovalue(row: integer); virtual;
    function getnulltext: msestring;
    procedure docellevent(const ownedcol: boolean; var info: celleventinfoty); virtual;
    procedure sortfunc(const l,r; var result: integer); virtual;
@@ -293,8 +293,8 @@ type
    procedure setdirection(const avalue: graphicdirectionty); virtual;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatype: listdatatypety; override;
-   procedure valuetogrid(const arow: integer); override;
-   procedure gridtovalue(const arow: integer); override;
+   procedure valuetogrid(arow: integer); override;
+   procedure gridtovalue(arow: integer); override;
    procedure internalcheckvalue(var avalue; var accept: boolean); override;
    procedure readstatvalue(const reader: tstatreader); override;
    procedure writestatvalue(const writer: tstatwriter); override;
@@ -488,8 +488,8 @@ type
    class function classskininfo: skininfoty; override;
    procedure setnullvalue;
    function getdefaultvalue: pointer; override;
-   procedure valuetogrid(const arow: integer); override;
-   procedure gridtovalue(const arow: integer); override;
+   procedure valuetogrid(arow: integer); override;
+   procedure gridtovalue(arow: integer); override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatype: listdatatypety; override;
    procedure togglevalue; override;
@@ -599,8 +599,8 @@ type
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatype: listdatatypety; override;
    function getdefaultvalue: pointer; override;
-   procedure valuetogrid(const arow: integer); override;
-   procedure gridtovalue(const arow: integer); override;
+   procedure valuetogrid(arow: integer); override;
+   procedure gridtovalue(arow: integer); override;
    procedure internalcheckvalue(var avalue; var accept: boolean); override;
    procedure readstatvalue(const reader: tstatreader); override;
    procedure writestatvalue(const writer: tstatwriter); override;
@@ -998,12 +998,12 @@ begin
  end;
 end;
 
-procedure tcustomrealgraphdataedit.valuetogrid(const arow: integer);
+procedure tcustomrealgraphdataedit.valuetogrid(arow: integer);
 begin
  fgridintf.setdata(arow,fvalue);
 end;
 
-procedure tcustomrealgraphdataedit.gridtovalue(const arow: integer);
+procedure tcustomrealgraphdataedit.gridtovalue(arow: integer);
 begin
  fgridintf.getdata(arow,fvalue);
  inherited;
@@ -1503,7 +1503,7 @@ begin
  end;
 end;
 
-procedure tgraphdataedit.gridtovalue(const row: integer);
+procedure tgraphdataedit.gridtovalue(row: integer);
 begin
  invalidate;
  //dochange;
@@ -1575,14 +1575,14 @@ begin
  tdatalist1(twidgetcol1(fgridintf.getcol).fdata).compare(l,r,result);
 end;
 
-procedure tgraphdataedit.internalgetgridvalue(const index: integer;
+procedure tgraphdataedit.internalgetgridvalue(index: integer;
   out value);
 begin
  checkgrid;
  fgridintf.getdata(index,value);
 end;
 
-procedure tgraphdataedit.internalsetgridvalue(const index: integer;
+procedure tgraphdataedit.internalsetgridvalue(index: integer;
                                                         const avalue);
 begin
  checkgrid;
@@ -1904,7 +1904,7 @@ begin
  value:= false;
 end;
 
-procedure tcustombooleanedit.gridtovalue(const arow: integer);
+procedure tcustombooleanedit.gridtovalue(arow: integer);
 var
  int1: integer;
 begin
@@ -1917,7 +1917,7 @@ begin
  inherited;
 end;
 
-procedure tcustombooleanedit.valuetogrid(const arow: integer);
+procedure tcustombooleanedit.valuetogrid(arow: integer);
 var
  int1: integer;
 begin
@@ -2327,13 +2327,13 @@ begin
  result:= @fvaluedefault;
 end;
 
-procedure tcustomintegergraphdataedit.gridtovalue(const arow: integer);
+procedure tcustomintegergraphdataedit.gridtovalue(arow: integer);
 begin
  fgridintf.getdata(arow,fvalue);
  inherited;
 end;
 
-procedure tcustomintegergraphdataedit.valuetogrid(const arow: integer);
+procedure tcustomintegergraphdataedit.valuetogrid(arow: integer);
 begin
  fgridintf.setdata(arow,fvalue);
 end;
