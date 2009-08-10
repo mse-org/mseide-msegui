@@ -998,7 +998,7 @@ end;
 
 procedure trichstringdatalist.setasarray(const data: richstringarty);
 begin
- internalsetasarray(pointer(data),sizeof(richstringty));
+ internalsetasarray(pointer(data),sizeof(richstringty),length(data));
 end;
 
 function trichstringdatalist.getasarray: richstringarty;

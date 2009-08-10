@@ -61,8 +61,8 @@ type
    procedure setimnr_readonly(const avalue: integer);
    procedure setimnr_subitems(const avalue: integer);
    procedure setimagelist(const avalue: timagelist);
-   function getgridimnr(const index: integer): integer;
-   procedure setgridimnr(const index: integer; const avalue: integer);
+   function getgridimnr(index: integer): integer;
+   procedure setgridimnr(index: integer; const avalue: integer);
    function getgridimnrs: integerarty;
    procedure setgridimnrs(const avalue: integerarty);
    procedure setimnr_value(const avalue: integer);
@@ -99,7 +99,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    property imagesize: sizety read fimagesize write setimagesize;
-   property gridimnr[const index: integer]: integer
+   property gridimnr[index: integer]: integer
                                     read getgridimnr write setgridimnr;
    property gridimnrs: integerarty read getgridimnrs write setgridimnrs;
   published
@@ -678,16 +678,27 @@ begin
  end;
 end;
 
-function tfoldedit.getgridimnr(const index: integer): integer;
+function tfoldedit.getgridimnr(index: integer): integer;
+var
+ list: tdatalist;
 begin
- checkgrid;
- result:= tmsestringintdatalist(fgridintf.getcol.datalist).itemsb[index];
+ list:= checkgrid(index);
+ if list <> nil then begin
+  result:= tmsestringintdatalist(list).itemsb[index];
+ end
+ else begin
+  result:= -1;
+ end;
 end;
 
-procedure tfoldedit.setgridimnr(const index: integer; const avalue: integer);
+procedure tfoldedit.setgridimnr(index: integer; const avalue: integer);
+var
+ list: tdatalist;
 begin
- checkgrid;
- tmsestringintdatalist(fgridintf.getcol.datalist).itemsb[index]:= avalue;
+ list:= checkgrid(index);
+ if list <> nil then begin
+  tmsestringintdatalist(list).itemsb[index]:= avalue;
+ end;
 end;
 
 function tfoldedit.getgridimnrs: integerarty;

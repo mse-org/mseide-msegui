@@ -101,7 +101,8 @@ type
    procedure setcount(const value: integer); virtual;
    property nochange: integer read fnochange;
    procedure internalgetasarray(const adatapo: pointer; const asize: integer);
-   procedure internalsetasarray(const source: pointer; const asize: integer);
+   procedure internalsetasarray(const source: pointer; const asize: integer;
+                                const acount: integer);
    procedure writedata(writer: twriter);
    procedure readdata(reader: treader);
    procedure readitem(const reader: treader; var value); virtual;
@@ -177,7 +178,7 @@ type
    procedure linksource(const source: tdatalist; const atag: integer); virtual;
    function canlink(const asource: tdatalist;
                                         const atag: integer): boolean; virtual;
-   
+ 
    property size: integer read fsize;
    function datapo: pointer; //calls normalizering,
              //do not use in copyinstance,initinstance,freedata
@@ -188,6 +189,11 @@ type
              //assign with second value if possible, exception otherwise
    procedure assigntob(const dest: tdatalist); virtual;
              //assignto with second value if possible, exception otherwise
+   function getdatablock(const source: pointer; const destsize: integer): integer;
+             //returns size of datablock
+   function setdatablock(const dest: pointer; const sourcesize: integer;
+                                       const acount: integer): integer;
+             //returns size of datablock
    procedure change(const index: integer); virtual;
                    //index -1 -> undefined
    function datatype: listdatatypety; virtual;
@@ -768,11 +774,17 @@ type
    function gethidden(const index: integer): boolean;
    function getfoldlevel(const index: integer): byte;
    procedure checkinfolevel(const wantedlevel: rowinfolevelty);
+   procedure change(const aindex: integer); override;
+   procedure initdirty; virtual;
+   procedure recalchidden; virtual;
+   function checkassigncompatibility(const source: tpersistent): boolean; override;
+   procedure readstate(const reader; const acount: integer); override;
   public
    constructor create; overload; override;
    constructor create(const ainfolevel: rowinfolevelty); overload;
-   property infolevel: rowinfolevelty read finfolevel;
    procedure assign(source: tpersistent); override;
+   property infolevel: rowinfolevelty read finfolevel;
+//   procedure assign(source: tpersistent); override;
    function datatype: listdatatypety; override;
    function datapocolmerge: pointer;
    function dataporowheight: pointer;
@@ -3015,13 +3027,13 @@ begin
 end;
 
 procedure tdatalist.internalsetasarray(const source: pointer; 
-                                              const asize: integer);
+                            const asize: integer; const acount: integer);
 var
  int1: integer;
  po1,po2: pointer;
  s1,s2: integer;
 begin
- newbuffer(length(bytearty(source)));
+ newbuffer(acount);
  if fcount > 0 then begin
   if size > asize then begin
    po1:= fdatapo;
@@ -3040,6 +3052,21 @@ begin
   internalcopyinstance(0,fcount);
  end;
  change(-1); 
+end;
+
+function tdatalist.getdatablock(const source: pointer; const destsize: integer): integer;
+             //returns size of datablock
+begin
+ internalgetasarray(source,destsize);
+ result:= count * destsize;
+end;
+
+function tdatalist.setdatablock(const dest: pointer; const sourcesize: integer;
+                                         const acount: integer): integer;
+             //returns size of datablock
+begin
+ internalsetasarray(dest,sourcesize,acount);
+ result:= acount * sourcesize;
 end;
 
 procedure tdatalist.internalgetdata(index: integer; out ziel);
@@ -4134,7 +4161,7 @@ end;
 
 procedure tintegerdatalist.setasarray(const value: integerarty);
 begin
- internalsetasarray(pointer(value),sizeof(integer));
+ internalsetasarray(pointer(value),sizeof(integer),length(value));
 end;
 
 function tintegerdatalist.getstatdata(const index: integer): msestring;
@@ -4207,7 +4234,7 @@ end;
 
 procedure tint64datalist.setasarray(const value: int64arty);
 begin
- internalsetasarray(pointer(value),sizeof(int64));
+ internalsetasarray(pointer(value),sizeof(int64),length(value));
 end;
 
 function tint64datalist.getasarray: int64arty;
@@ -4325,7 +4352,7 @@ end;
 
 procedure tcurrencydatalist.setasarray(const value: currencyarty);
 begin
- internalsetasarray(pointer(value),sizeof(currency));
+ internalsetasarray(pointer(value),sizeof(currency),length(value));
 end;
 
 function tcurrencydatalist.getasarray: currencyarty;
@@ -4540,7 +4567,7 @@ end;
 
 procedure trealdatalist.setasarray(const data: realarty);
 begin
- internalsetasarray(pointer(data),sizeof(realty));
+ internalsetasarray(pointer(data),sizeof(realty),length(data));
 end;
 
 function trealdatalist.datatype: listdatatypety;
@@ -4800,7 +4827,7 @@ end;
 
 procedure tcomplexdatalist.setasarray(const data: complexarty);
 begin
- internalsetasarray(pointer(data),sizeof(complexty));
+ internalsetasarray(pointer(data),sizeof(complexty),length(data));
 end;
 
 procedure tcomplexdatalist.fill(const acount: integer;
@@ -4858,7 +4885,7 @@ end;
 
 procedure tpointerdatalist.setasarray(const data: pointerarty);
 begin
- internalsetasarray(pointer(data),sizeof(pointer));
+ internalsetasarray(pointer(data),sizeof(pointer),length(data));
 end;
 
 function tpointerdatalist.checkassigncompatibility(const source: tpersistent): boolean;
@@ -5186,7 +5213,7 @@ end;
 
 procedure tansistringdatalist.setasarray(const avalue: stringarty);
 begin
- internalsetasarray(pointer(avalue),sizeof(string));
+ internalsetasarray(pointer(avalue),sizeof(string),length(avalue));
 end;
 
 function tansistringdatalist.getasmsestringarray: msestringarty;
@@ -5658,7 +5685,7 @@ end;
 
 procedure tpoorstringdatalist.setasarray(const data: msestringarty);
 begin
- internalsetasarray(pointer(data),sizeof(msestring));
+ internalsetasarray(pointer(data),sizeof(msestring),length(data));
 end;
 
 function tpoorstringdatalist.getasstringarray: stringarty;
@@ -6017,7 +6044,7 @@ end;
 
 procedure tdoublemsestringdatalist.setasarray(const data: doublemsestringarty);
 begin
- internalsetasarray(pointer(data),sizeof(doublemsestringty));
+ internalsetasarray(pointer(data),sizeof(doublemsestringty),length(data));
 end;
 
 function tdoublemsestringdatalist.getasarray: doublemsestringarty;
@@ -6288,7 +6315,7 @@ end;
 
 procedure tmsestringintdatalist.setasarray(const data: msestringintarty);
 begin
- internalsetasarray(pointer(data),sizeof(msestringintty));
+ internalsetasarray(pointer(data),sizeof(msestringintty),length(data));
 end;
 
 function tmsestringintdatalist.getasarray: msestringintarty;
@@ -6582,7 +6609,7 @@ end;
 
 procedure trealintdatalist.setasarray(const data: realintarty);
 begin
- internalsetasarray(pointer(data),sizeof(realintty));
+ internalsetasarray(pointer(data),sizeof(realintty),length(data));
 end;
 
 function trealintdatalist.getasarray: realintarty;
@@ -6847,7 +6874,7 @@ function tcustomrowstatelist.getfoldlevel(const index: integer): byte;
 begin
  result:= items[index].fold and foldlevelmask;
 end;
-
+{
 procedure tcustomrowstatelist.assign(source: tpersistent);
 begin
  if source is tcustomrowstatelist then begin
@@ -6862,7 +6889,7 @@ begin
   inherited;
  end;
 end;
-
+}
 function tcustomrowstatelist.getcolor(const index: integer): rowstatenumty;
 begin
  result:= (getitempo(index)^.color and rowstatemask) - 1;
@@ -6958,6 +6985,43 @@ function tcustomrowstatelist.getitemporowheight(const index: integer): prowstate
 begin
  checkinfolevel(ril_rowheight);
  result:= prowstaterowheightty(inherited getitempo(index));
+end;
+
+procedure tcustomrowstatelist.initdirty;
+begin
+ //dummy
+end;
+
+procedure tcustomrowstatelist.recalchidden;
+begin
+ //dummy
+end;
+
+function tcustomrowstatelist.checkassigncompatibility(
+                                   const source: tpersistent): boolean;
+begin
+ result:= source.inheritsfrom(tcustomrowstatelist);
+end;
+
+procedure tcustomrowstatelist.change(const aindex: integer);
+begin
+ if aindex < 0 then begin
+  initdirty;
+ end;
+ inherited;
+end;
+
+procedure tcustomrowstatelist.readstate(const reader; const acount: integer);
+begin
+ initdirty;
+ inherited;
+ recalchidden; 
+end;
+
+procedure tcustomrowstatelist.assign(source: tpersistent);
+begin
+ inherited;
+ recalchidden;
 end;
 
 { tlinindexmse }

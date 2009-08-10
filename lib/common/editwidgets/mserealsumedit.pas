@@ -25,6 +25,8 @@ type
 
  trealsumedit = class(trealedit)
   private
+   function getsumlevel(index: integer): integer;
+   procedure setsumlevel(index: integer; const avalue: integer);
   protected
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatype: listdatatypety; override;
@@ -34,6 +36,8 @@ type
    function internaldatatotext(const data): msestring; override;
   public
    function griddata: tgridrealsumlist;
+   property gridsumlevel[index: integer]: integer read getsumlevel 
+                              write setsumlevel;
  end;
  
 implementation
@@ -120,6 +124,29 @@ begin
   end;
  end; 
  result:= inherited internaldatatotext(data);
+end;
+
+function trealsumedit.getsumlevel(index: integer): integer;
+var
+ list: tdatalist;
+begin
+ list:= checkgrid(index);
+ if list <> nil then begin
+  result:= tgridrealsumlist(list).sumlevel[index];
+ end
+ else begin
+  result:= 0;
+ end;
+end;
+
+procedure trealsumedit.setsumlevel(index: integer; const avalue: integer);
+var
+ list: tdatalist;
+begin
+ list:= checkgrid(index);
+ if list <> nil then begin
+  tgridrealsumlist(list).sumlevel[index]:= avalue;
+ end;
 end;
 
 {

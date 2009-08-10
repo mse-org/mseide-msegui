@@ -1123,12 +1123,13 @@ type
    procedure show(const aindex: integer);
    procedure hide(const aindex: integer);
 //   procedure foldchanged(const index: integer);
+   procedure initdirty; override;
    procedure cleanvisible(visibleindex: integer);
    procedure clean(arow: integer);
    procedure cleanrowheight(const aindex: integer);
    procedure checkdirty(const arow: integer);
-   procedure recalchidden;
-   procedure readstate(const reader; const acount: integer); override;
+   procedure recalchidden; override;
+//   procedure readstate(const reader; const acount: integer); override;
    function getstatdata(const index: integer): msestring; override;
    procedure setstatdata(const index: integer; const value: msestring);
                                  override;
@@ -1137,6 +1138,7 @@ type
   public
    constructor create(const aowner: tcustomgrid); reintroduce;
    destructor destroy; override;
+//   procedure assign(source: tpersistent); override;
 
    procedure change(const index: integer); override;
    function cellrow(const arow: integer): integer;
@@ -13480,26 +13482,28 @@ var
  int1: integer;
  po1: prowstatety;
  lev1: byte;
+ s1: integer;
 begin
  checkdirty(0);
  fhiddencount:= 0;
  po1:= datapo;
  int1:= count;
+ s1:= size;
  while int1 > 0 do begin
   if po1^.fold and foldhiddenmask <> 0 then begin
    inc(fhiddencount);
    lev1:= po1^.fold and foldlevelmask;
    dec(int1);
-   inc(po1);
+   inc(pchar(po1),s1);
    while (int1 > 0) and (po1^.fold and foldlevelmask > lev1) do begin
     inc(fhiddencount);
     dec(int1);
-    inc(po1);
+    inc(pchar(po1),s1);
    end;
   end
   else begin
    dec(int1);
-   inc(po1);
+   inc(pchar(po1),s1);
   end;
  end;
 end;
@@ -13509,12 +13513,14 @@ procedure trowstatelist.setupfoldinfo(asource: pbyte;
 var
  po1: prowstatety;
  var int1: integer;
+ s1: integer;
 begin
  fgrid.rowcount:= acount;
  po1:= datapo;
+ s1:= size;
  for int1:= count-1 downto 0 do begin
   po1^.fold:= asource^;
-  inc(po1);
+  inc(pchar(po1),s1);
   inc(asource);
  end;
  recalchidden;
@@ -13583,15 +13589,17 @@ var
  po1: prowstatety;
  level1,level2: byte;
  bo1: boolean;
+ s1: integer;
 begin
  checkindexrange(arow);
  po0:= datapo;
- po1:= prowstatety(po0+arow*fsize);
+ s1:= size;
+ po1:= prowstatety(po0+arow*s1);
  level1:= po1^.fold and foldlevelmask;
  int1:= arow+1;
  bo1:= false;
  while int1 < count do begin
-  po1:= prowstatety(po0+int1*fsize);
+  po1:= prowstatety(po0+int1*s1);
   with po1^ do begin
    level2:= fold and foldlevelmask;
    if level2 <= level1 then begin
@@ -13607,7 +13615,7 @@ begin
     while (int1 < count) and (po1^.fold and foldhiddenmask >
                                                           level2) do begin
      inc(int1);
-     inc(po1,fsize);
+     inc(pchar(po1),s1);
     end;
    end;
   end;
@@ -13625,15 +13633,17 @@ var
  po1: prowstatety;
  level1,level2: byte;
  bo1: boolean;
+ s1: integer;
 begin
  checkindexrange(arow);
  po0:= datapo;
- po1:= prowstatety(po0+arow*fsize);
+ s1:= size;
+ po1:= prowstatety(po0+arow*s1);
  level1:= po1^.fold and foldlevelmask;
  int1:= arow+1;
  bo1:= false;
  while int1 < count do begin
-  po1:= prowstatety(po0+int1*fsize);
+  po1:= prowstatety(po0+int1*s1);
   int2:= int1;
   with po1^ do begin
    level2:= fold and foldlevelmask;
@@ -13650,7 +13660,7 @@ begin
     while (int1 < count) and (po1^.fold and foldhiddenmask >
                                                           level2) do begin
      inc(int1);
-     inc(pchar(po1),fsize);
+     inc(pchar(po1),s1);
     end;
    end;
   end;
@@ -14305,13 +14315,25 @@ begin
  end;
 end;
 
-procedure trowstatelist.readstate(const reader; const acount: integer);
+procedure trowstatelist.initdirty;
 begin
  fdirtyvisible:= 0;
  fdirtyrow:= 0;
  fdirtyrowheight:= 0;
+end;
+{
+procedure trowstatelist.readstate(const reader; const acount: integer);
+begin
+ initdirty;
  inherited;
+ 
 end;
 
+procedure trowstatelist.assign(source: tpersistent);
+begin
+ inherited;
+ recalchidden;
+end;
+}
 end.
 

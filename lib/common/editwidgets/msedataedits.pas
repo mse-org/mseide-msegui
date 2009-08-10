@@ -82,7 +82,9 @@ type
    procedure setisdb;
    procedure updateedittext(const force: boolean);
    function getgridintf: iwidgetgrid;
-   procedure checkgrid;
+   function checkgrid: tdatalist; overload;
+   function checkgrid(var index: integer): tdatalist; overload; 
+                        //index -1 -> grid.row, nil if no focused row
    procedure internalgetgridvalue(const index: integer; out value);
    procedure internalsetgridvalue(const index: integer; const Value);
    procedure internalfillcol(const value);
@@ -1798,13 +1800,26 @@ begin
  result:= fgridintf;
 end;
 
-procedure tcustomdataedit.checkgrid;
+function tcustomdataedit.checkgrid: tdatalist;
 begin
  if fgridintf = nil then begin
   raise exception.Create('No grid.');
  end;
- if fgridintf.getcol = nil then begin
+ result:= fgridintf.getcol.datalist;
+ if result = nil then begin
   raise exception.Create('No datalist.');
+ end;
+end;
+
+function tcustomdataedit.checkgrid(var index: integer): tdatalist;
+                        //index -1 -> grid.row, nil if no focused row
+begin
+ result:= checkgrid();
+ if index = -1 then begin
+  index:= fgridintf.getcol.grid.row;
+ end;
+ if index < 0 then begin
+  result:= nil;
  end;
 end;
 

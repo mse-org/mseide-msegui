@@ -17,7 +17,7 @@ uses
  
 const
  ifidatatypes = [dl_integer,dl_int64,dl_currency,dl_real,
-                 dl_msestring,dl_ansistring,dl_msestringint];
+                 dl_msestring,dl_ansistring,dl_msestringint,dl_realint];
  
 type
  tmodulelinkarrayprop = class;
@@ -745,6 +745,8 @@ uses
  sysutils,msestream,msesysutils,msetmpmodules,msebits;
 
 type
+ tcustomrowstatelist1 = class(tcustomrowstatelist);
+ 
  tmoduledataevent = class(tstringobjectevent)
   protected
    fmodulelink: trxlinkmodule;
@@ -2273,6 +2275,9 @@ begin
    idk_bytes: begin
     fdatalist:= tansistringdatalist.create;
    end;
+   idk_realint: begin
+    fdatalist:= trealintdatalist.create;
+   end;
    else begin
     raise exception.create('Invalid ifidatakind.');
    end;
@@ -3302,7 +3307,8 @@ var
  po3: pansistring;
  po4: pmsestringintty;
 begin
- if (adatalist <> nil) and (adatalist.datatype <> akind) then begin
+ if (adatalist <> nil) and (adatalist.datatype <> akind) and 
+     not((akind = dl_realint) and (adatalist.datatype = dl_realsum)) then begin
   raise exception.create('Datakinds do not match.');
  end;
  case akind of
@@ -3334,15 +3340,17 @@ begin
    po2:= pinteger(adata);
    result:= arowcount * sizeof(integer);
    if adatalist <> nil then begin
+    deststep:= adatalist.size;
     po1:= adatalist.datapo;
     for int1:= 0 to arowcount - 1 do begin
      move(po2^,int2,sizeof(integer));
-     setlength(po1[int1],int2);
+     setlength(po1^,int2);
      int2:= int2 * sizeof(msechar);
      result:= result + int2;
      inc(po2);
-     move(po2^,po1[int1][1],int2);
+     move(po2^,pointer(po1^)^,int2);
      inc(pointer(po2),int2);
+     inc(pchar(po1),deststep);
     end;
    end
    else begin
@@ -3359,16 +3367,18 @@ begin
    result:= arowcount * (sizeof(integer)+sizeof(integer));
    if adatalist <> nil then begin
     po4:= adatalist.datapo;
+    deststep:= adatalist.size;
     for int1:= 0 to arowcount - 1 do begin
-     move(po2^,po4[int1].int,sizeof(integer));
+     move(po2^,po4^.int,sizeof(integer));
      inc(po2);
      move(po2^,int2,sizeof(integer));
-     setlength(po4[int1].mstr,int2);
+     setlength(po4^.mstr,int2);
      int2:= int2 * sizeof(msechar);
      result:= result + int2;
      inc(po2);
-     move(po2^,po4[int1].mstr[1],int2);
+     move(po2^,po4^.mstr[1],int2);
      inc(pointer(po2),int2);
+     inc(pchar(po4),deststep);
     end;
    end
    else begin
@@ -3381,6 +3391,10 @@ begin
     end;
    end;    
   end;
+  dl_realint: begin
+   result:= adatalist.setdatablock(adata,sizeof(ifirealintty),arowcount);
+   exit;
+  end;
   dl_rowstate: begin
    move(adata^,int1,sizeof(int1));
    posource:= adata;
@@ -3388,11 +3402,13 @@ begin
    sourcestep:= rowinfosizes[rowinfolevelty(int1)];
    result:= arowcount * sourcestep;
    if adatalist <> nil then begin
+//    tcustomrowstatelist1(adatalist).initdirty;
     if tcustomrowstatelist(adatalist).infolevel = 
                  rowinfolevelty(int1) then begin
      move(posource^,adatalist.datapo^,result);
     end
     else begin
+     podest:= adatalist.datapo;
      deststep:= adatalist.size;
      movesize:= deststep;
      if movesize > sourcestep then begin
@@ -3404,6 +3420,7 @@ begin
       inc(podest,deststep);
      end;
     end;
+    tcustomrowstatelist1(adatalist).recalchidden;
    end;
    result:= result + sizeof(int1);
   end;
@@ -3411,14 +3428,16 @@ begin
    po2:= pinteger(adata);
    result:= arowcount * sizeof(integer);
    if adatalist <> nil then begin
+    deststep:= adatalist.size;
     po3:= adatalist.datapo;
     for int1:= 0 to arowcount - 1 do begin
      move(po2^,int2,sizeof(integer));
-     setlength(po3[int1],int2);
+     setlength(po3^,int2);
      result:= result + int2;
      inc(po2);
      move(po2^,po3[int1][1],int2);
      inc(pointer(po2),int2);
+     inc(pchar(po3),deststep);
     end;
    end
    else begin
@@ -3468,6 +3487,9 @@ begin
     move(po4^,dest^,int2);
     inc(dest,int2);
    end;
+   dl_realint: begin
+    inc(dest,getdatablock(dest,sizeof(ifirealintty)));
+   end;
    dl_msestring: begin
     for int1:= 0 to count - 1 do begin
      int2:= length(pmsestring(po4)[int1]);
@@ -3507,6 +3529,9 @@ begin
      inc(dest,int2);
     end;
    end;
+   else begin
+    raise exception.create('No ifi datalist');
+   end;
   end;
  end;
 end;
@@ -3518,8 +3543,10 @@ var
  po1: pmsestring;
  po2: pansistring;
  po3: pmsestringintty;
+ s1: integer;
 begin
  with adatalist do begin
+  s1:= size;
   case adatalist.datatype of
    dl_integer: begin
     result:= count * sizeof(integer);
@@ -3537,15 +3564,20 @@ begin
     po1:= datapo;
     result:= count * sizeof(integer);
     for int1:= 0 to count - 1 do begin
-     result:= result + length(po1[int1]) * sizeof(msechar);
+     result:= result + length(po1^) * sizeof(msechar);
+     inc(pchar(po1),s1);
     end;
    end;
    dl_msestringint: begin
     po3:= datapo;
     result:= count * (sizeof(integer)+sizeof(integer));
     for int1:= 0 to count - 1 do begin
-     result:= result + length(po3[int1].mstr) * sizeof(msechar);
+     result:= result + length(po3^.mstr) * sizeof(msechar);
+     inc(pchar(po3),s1);
     end;
+   end;
+   dl_realint: begin
+    result:= count * sizeof(ifirealintty);
    end;
    dl_rowstate: begin
     result:= count * size + sizeof(integer);
@@ -3554,8 +3586,12 @@ begin
     po2:= datapo;
     result:= count * sizeof(integer);
     for int1:= 0 to count - 1 do begin
-     result:= result + length(po2[int1]);
+     result:= result + length(po2^);
+     inc(pchar(po2),s1);
     end;
+   end;
+   else begin
+    raise exception.create('No ifi datalist.');
    end;
   end;
  end;
