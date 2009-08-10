@@ -792,8 +792,12 @@ begin
   dl_msestringint: begin
    result:= encodeifidata(tmsestringintdatalist(alist).doubleitems[aindex],headersize);
   end;
+  dl_realint,dl_realsum: begin
+   result:= encodeifidata(trealintdatalist(alist).doubleitems[aindex],headersize);
+  end;
   else begin
-   result:= '';
+   raise exception.create('Wrong datakind.');
+   //result:= '';
   end;
  end;
 end;
@@ -1027,6 +1031,7 @@ var
  rea1: real;
  mstr1: msestring;
  strint1: msestringintty;
+ realint1: realintty;
 begin
  result:= 0;
  if (alist <> nil) and (aindex < alist.count) then begin
@@ -1062,6 +1067,12 @@ begin
     if alist.datatype = dl_msestringint then begin
      result:= decodeifidata(source,strint1);
      tmsestringintdatalist(alist)[aindex]:= strint1;
+    end;
+   end;
+   idk_realint: begin
+    if alist is trealintdatalist then begin
+     result:= decodeifidata(source,realint1);
+     trealintdatalist(alist).doubleitems[aindex]:= realint1;
     end;
    end;
   end;
