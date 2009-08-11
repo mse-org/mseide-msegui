@@ -729,7 +729,7 @@ begin
  setlength(result,sizeof(fdefdataty)+length(ftxbindings)*sizeof(fdefitemty)+
                               int2*6); //max
  with pfdefdataty(result)^ do begin
-  count:= length(infos);
+  count:= length(ftxbindings);
   po1:= @items;
  end;
  for int1:= 0 to high(ftxbindings) do begin
@@ -1251,10 +1251,14 @@ begin
  setlength(ftxbindings,length(ar1));
  int2:= 0;
  for int1:= 0 to high(ftxbindings) do begin
-  with ar1[int1].ext.field do begin
-   if not (pfhidden in providerflags) and (index >= 0) then begin
-    ftxbindings[int2]:= index;
-    inc(int2);
+  with ar1[int1].ext do begin
+   if field <> nil then begin
+    with field do begin
+     if not (pfhidden in providerflags) {and (recno >= 0)} then begin
+      ftxbindings[int2]:= int1;
+      inc(int2);
+     end;
+    end;
    end;
   end;
  end;
