@@ -608,6 +608,8 @@ function decodeifidata(const source: pifidataty; out dest: variant): integer;
 function decodeifidata(const source: pifidataty; const aindex: integer;
                           const alist: tdatalist): integer; overload;
                                      //alist can be nil
+function decodeifidata(const source: pifidataty; const aindex: integer;
+                          const alist: subdatainfoty): integer; overload;
 function decodeifidata(const source: pifidataty; out dest: rowstatety): integer;
                                                         overload;
 function decodeifidata(const source: pifidataty; out dest: rowstatecolmergety): integer;
@@ -643,7 +645,7 @@ const
 implementation
 uses
  sysutils,mseprocutils,msesysintf,{mseforms,}msetmpmodules,
- msesysutils,variants;
+ msesysutils,variants,msesumlist;
 type
  tsocketreader1 = class(tsocketreader);
  tsocketwriter1 = class(tsocketwriter);
@@ -1026,6 +1028,17 @@ function decodeifidata(const source: pifidataty; const aindex: integer;
                              const alist: tdatalist): integer; overload;
                                      //alist can be nil
 var
+ ainfo: subdatainfoty;
+begin
+ ainfo.list:= alist;
+ ainfo.subindex:= 0;
+ result:= decodeifidata(source,aindex,ainfo);
+end;
+
+function decodeifidata(const source: pifidataty; const aindex: integer;
+                             const alist: subdatainfoty): integer; overload;
+                                     //alist can be nil
+var
  int1: integer;
  lint1: int64;
  rea1: real;
@@ -1033,52 +1046,75 @@ var
  strint1: msestringintty;
  realint1: realintty;
 begin
- result:= 0;
- if (alist <> nil) and (aindex < alist.count) then begin
-  case source^.header.kind of
-   idk_null: begin
-    alist.cleardata(aindex);
-   end;
-   idk_integer: begin
-    if alist.datatype = dl_integer then begin
-     result:= decodeifidata(source,int1);
-     tintegerdatalist(alist)[aindex]:= int1;
+ with alist do begin
+  result:= 0;
+  if (list <> nil) and (aindex < list.count) then begin
+   if alist.subindex = 0 then begin
+    case source^.header.kind of
+     idk_null: begin
+      list.cleardata(aindex);
+     end;
+     idk_integer: begin
+      if list.datatype = dl_integer then begin
+       result:= decodeifidata(source,int1);
+       tintegerdatalist(list)[aindex]:= int1;
+      end;
+     end;
+     idk_int64: begin
+      if list.datatype = dl_int64 then begin
+       result:= decodeifidata(source,lint1);
+       tint64datalist(list)[aindex]:= int1;
+      end;
+     end;
+     idk_msestring: begin
+      if list.datatype = dl_msestring then begin
+       result:= decodeifidata(source,mstr1);
+       tmsestringdatalist(list)[aindex]:= mstr1;
+      end;
+     end;    
+     idk_real: begin
+      if list.datatype in [dl_real,dl_realsum] then begin
+       result:= decodeifidata(source,rea1);
+       trealdatalist(list)[aindex]:= rea1;
+      end;
+     end;
+     idk_msestringint: begin
+      if list.datatype = dl_msestringint then begin
+       result:= decodeifidata(source,strint1);
+       tmsestringintdatalist(list)[aindex]:= strint1;
+      end;
+     end;
+     idk_realint: begin
+      if list is trealintdatalist then begin
+       result:= decodeifidata(source,realint1);
+       trealintdatalist(list).doubleitems[aindex]:= realint1;
+      end;
+     end;
     end;
-   end;
-   idk_int64: begin
-    if alist.datatype = dl_int64 then begin
-     result:= decodeifidata(source,lint1);
-     tint64datalist(alist)[aindex]:= int1;
-    end;
-   end;
-   idk_msestring: begin
-    if alist.datatype = dl_msestring then begin
-     result:= decodeifidata(source,mstr1);
-     tmsestringdatalist(alist)[aindex]:= mstr1;
-    end;
-   end;    
-   idk_real: begin
-    if alist.datatype in [dl_real,dl_realsum] then begin
-     result:= decodeifidata(source,rea1);
-     trealdatalist(alist)[aindex]:= rea1;
-    end;
-   end;
-   idk_msestringint: begin
-    if alist.datatype = dl_msestringint then begin
-     result:= decodeifidata(source,strint1);
-     tmsestringintdatalist(alist)[aindex]:= strint1;
-    end;
-   end;
-   idk_realint: begin
-    if alist is trealintdatalist then begin
-     result:= decodeifidata(source,realint1);
-     trealintdatalist(alist).doubleitems[aindex]:= realint1;
+   end
+   else begin
+    case source^.header.kind of
+     idk_null: begin
+      case list.datatype of       
+       dl_realsum: begin
+        trealsumlist(list).sumlevel[aindex]:= 0;
+       end;
+      end;
+     end;
+     idk_integer: begin
+      case list.datatype of       
+       dl_realsum: begin
+        result:= decodeifidata(source,int1);
+        trealsumlist(list).sumlevel[aindex]:= int1;
+       end;
+      end;
+     end;
     end;
    end;
   end;
- end;
- if result = 0 then begin
-  result:= skipifidata(source);
+  if result = 0 then begin
+   result:= skipifidata(source);
+  end;
  end;
 end;
 

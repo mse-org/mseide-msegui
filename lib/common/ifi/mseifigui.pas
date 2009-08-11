@@ -455,7 +455,7 @@ var
  rowstate1: rowstatecolmergety;
  select1: selectdataty;
  lwo1: longword;
- datalist1: tdatalist;
+ datalist1: subdatainfoty;
  po3: prowstatecolmergety;
 begin
  with adata^.header do begin
@@ -481,7 +481,7 @@ begin
          po1:= @name;
          inc(po1,ifinametostring(pifinamety(po1),str1));
          inc(po1,ifidatatodatalist(kind1,rows1,po1,
-                   datacols.datalistbyname(str1)));
+                   datacols.colsubdatainfo(str1)));
         end;
        end;
        inc(po1,ifidatatodatalist(dl_rowstate,rows1,po1,
@@ -532,9 +532,9 @@ begin
       int1:= pcolitemdataty(adatapo)^.header.row;
       ifinametostring(@pcolitemdataty(adatapo)^.header.name,str1);
       inc(adatapo,sizeof(colitemheaderty)+length(str1));
-      datalist1:= nil;
+      datalist1.list:= nil;
       if igo_coldata in foptionsrx then begin
-       datalist1:= trxwidgetgrid(fowner).fdatacols.datalistbyname(str1);
+       datalist1:= trxwidgetgrid(fowner).fdatacols.colsubdatainfo(str1);
       end;    //skip data otherwise
       inc(adatapo,decodeifidata(pifidataty(adatapo),int1,datalist1));
      finally

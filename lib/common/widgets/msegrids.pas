@@ -538,6 +538,7 @@ type
   protected
    fdata: tdatalist;
    fname: string;
+   fnameb: string;
    fonchange: datacolchangeeventty;
    procedure beginselect;
    procedure endselect;
@@ -605,6 +606,7 @@ type
    property widthmin: integer read fwidthmin write setwidthmin default 1;
    property widthmax: integer read fwidthmax write setwidthmax default 0;
    property name: string read fname write fname;
+   property nameb: string read fnameb write fnameb; //ex. sumlevel
    property onchange: datacolchangeeventty read fonchange write fonchange;
    property oncellevent: celleventty read foncellevent write foncellevent;
    property onshowhint: showcolhinteventty read fonshowhint write fonshowhint;
@@ -1167,7 +1169,7 @@ type
    property rowypos[const index: integer]: integer read getrowypos;
    function rowindex(const aypos: integer): integer;
  end;
- 
+
  tdatacols = class(tcols)
   private
    fselectedrow: integer; //-1 none, -2 more than one
@@ -1237,6 +1239,7 @@ type
    function colbyname(const aname: string): tdatacol;
                   //name is case sensitive
    function datalistbyname(const aname: string): tdatalist; //can be nil
+   function colsubdatainfo(const aname: string): subdatainfoty;
    
    function selectedcellcount: integer;
    function hascolselection: boolean;
@@ -6993,6 +6996,27 @@ begin
  col1:= colbyname(aname);
  if col1 <> nil then begin
   result:= col1.datalist;
+ end;
+end;
+
+function tdatacols.colsubdatainfo(const aname: string): subdatainfoty;
+var
+ int1: integer;
+begin
+ result.subindex:= 0;
+ result.list:= nil;
+ for int1:= 0 to count - 1 do begin
+  with tdatacol(fitems[int1]) do begin
+   if fname = aname then begin
+    result.list:= datalist;
+    break;
+   end;
+   if fnameb = aname then begin
+    result.list:= datalist;
+    result.subindex:= 1;
+    break;
+   end;
+  end;
  end;
 end;
 

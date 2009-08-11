@@ -231,6 +231,12 @@ type
                      write setmaxcount default bigint; //for ring buffer
    property sorted: boolean read fsorted write setsorted;
  end;
+ 
+ subdatainfoty = record
+  list: tdatalist;
+  subindex: integer; //0 = main
+ end;
+ subdatainfoarty = array of subdatainfoty;
 
  tintegerdatalist = class(tdatalist)
   private

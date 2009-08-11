@@ -18,7 +18,7 @@ type
  
  tifidbwidgetgridcontroller = class(tifiwidgetgridcontroller)
   private
-   fcolbinding: datalistarty;
+   fcolbinding: subdatainfoarty;
   protected
    procedure decoderecord(const aindex: integer; var adatapo: pifidataty);
    procedure processdata(const adata: pifirecty; var adatapo: pchar); override;
@@ -59,8 +59,7 @@ var
  int1: integer;
 begin
  for int1:= 0 to high(fcolbinding) do begin
-  inc(pchar(adatapo),decodeifidata(adatapo,aindex,
-                                                     fcolbinding[int1]));
+  inc(pchar(adatapo),decodeifidata(adatapo,aindex,fcolbinding[int1]));
  end;
 end;
 
@@ -81,7 +80,7 @@ begin
       with tdbrxwidgetgrid(fowner) do begin
        setlength(fcolbinding,fielddefs1.count);
        for int1:= 0 to high(fcolbinding) do begin
-        fcolbinding[int1]:= datacols.datalistbyname(fielddefs1[int1].name);
+        fcolbinding[int1]:= datacols.colsubdatainfo(fielddefs1[int1].name);
        end;
        if (igo_state in foptionsrx) or 
            (answersequence <> 0) and (answersequence = fdatasequence) then begin

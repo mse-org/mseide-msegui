@@ -906,6 +906,7 @@ var
  int641: int64;
  rea1: real;
  cu1: currency;
+ realint1: realintty;
 begin
  case datapo^.header.kind of
   idk_null: begin
@@ -923,6 +924,10 @@ begin
   idk_real: begin
    result:= decodeifidata(datapo,rea1);
    afield.asfloat:= rea1;
+  end;
+  idk_realint: begin
+   result:= decodeifidata(datapo,realint1);
+   afield.asfloat:= realint1.rea;
   end;
   idk_currency: begin
    result:= decodeifidata(datapo,cu1);

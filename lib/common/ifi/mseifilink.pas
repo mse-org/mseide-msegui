@@ -739,6 +739,9 @@ type
 function ifidatatodatalist(const akind: listdatatypety; const arowcount: integer;
                        const adata: pchar; const adatalist: tdatalist): integer;
        //returns datasize
+function ifidatatodatalist(const akind: listdatatypety; const arowcount: integer;
+                       const adata: pchar; const adatalist: subdatainfoty): integer;
+       //returns datasize
 function datalisttoifidata(const adatalist: tdatalist): integer; overload;
 procedure datalisttoifidata(const adatalist: tdatalist;
                                          var dest: pchar); overload;
@@ -3374,6 +3377,16 @@ function ifidatatodatalist(const akind: listdatatypety; const arowcount: integer
                        const adata: pchar; const adatalist: tdatalist): integer;
        //returns datasize
 var
+ info1: subdatainfoty;
+begin
+ info1.subindex:= 0;
+ info1.list:= adatalist;
+ result:= ifidatatodatalist(akind,arowcount,adata,info1);
+end;
+
+function ifidatatodatalist(const akind: listdatatypety; const arowcount: integer;
+                       const adata: pchar; const adatalist: subdatainfoty): integer;
+var
  int1,int2: integer;
  posource,podest: pchar;
  movesize,sourcestep,deststep: integer;
@@ -3382,154 +3395,156 @@ var
  po3: pansistring;
  po4: pmsestringintty;
 begin
- if (adatalist <> nil) and (adatalist.datatype <> akind) and 
-     not((akind = dl_realint) and (adatalist.datatype = dl_realsum)) then begin
-  raise exception.create('Datakinds do not match.');
- end;
- case akind of
-  dl_integer: begin
-   result:= arowcount * sizeof(integer);
-   if adatalist <> nil then begin
-    move(adata^,adatalist.datapo^,result);
-   end;
+ with adatalist do begin
+  if (list <> nil) and (list.datatype <> akind) and 
+      not((akind = dl_realint) and (list.datatype = dl_realsum)) then begin
+   raise exception.create('Datakinds do not match.');
   end;
-  dl_int64: begin
-   result:= arowcount * sizeof(int64);
-   if adatalist <> nil then begin
-    move(adata^,adatalist.datapo^,result);
-   end;
-  end;
-  dl_currency: begin
-   result:= arowcount * sizeof(currency);
-   if adatalist <> nil then begin
-    move(adata^,adatalist.datapo^,result);
-   end;
-  end;
-  dl_real: begin
-   result:= arowcount * sizeof(real);
-   if adatalist <> nil then begin
-    move(adata^,adatalist.datapo^,result);
-   end;
-  end;
-  dl_msestring: begin
-   po2:= pinteger(adata);
-   result:= arowcount * sizeof(integer);
-   if adatalist <> nil then begin
-    deststep:= adatalist.size;
-    po1:= adatalist.datapo;
-    for int1:= 0 to arowcount - 1 do begin
-     move(po2^,int2,sizeof(integer));
-     setlength(po1^,int2);
-     int2:= int2 * sizeof(msechar);
-     result:= result + int2;
-     inc(po2);
-     move(po2^,pointer(po1^)^,int2);
-     inc(pointer(po2),int2);
-     inc(pchar(po1),deststep);
+  case akind of
+   dl_integer: begin
+    result:= arowcount * sizeof(integer);
+    if list <> nil then begin
+     move(adata^,list.datapo^,result);
     end;
-   end
-   else begin
-    for int1:= 0 to arowcount - 1 do begin
-     int2:= po2^*sizeof(msechar);
-     result:= result + int2;
-     inc(po2);
-     inc(pointer(po2),int2);
+   end;
+   dl_int64: begin
+    result:= arowcount * sizeof(int64);
+    if list <> nil then begin
+     move(adata^,list.datapo^,result);
     end;
-   end;    
-  end;
-  dl_msestringint: begin
-   po2:= pinteger(adata);
-   result:= arowcount * (sizeof(integer)+sizeof(integer));
-   if adatalist <> nil then begin
-    po4:= adatalist.datapo;
-    deststep:= adatalist.size;
-    for int1:= 0 to arowcount - 1 do begin
-     move(po2^,po4^.int,sizeof(integer));
-     inc(po2);
-     move(po2^,int2,sizeof(integer));
-     setlength(po4^.mstr,int2);
-     int2:= int2 * sizeof(msechar);
-     result:= result + int2;
-     inc(po2);
-     move(po2^,po4^.mstr[1],int2);
-     inc(pointer(po2),int2);
-     inc(pchar(po4),deststep);
+   end;
+   dl_currency: begin
+    result:= arowcount * sizeof(currency);
+    if list <> nil then begin
+     move(adata^,list.datapo^,result);
     end;
-   end
-   else begin
-    for int1:= 0 to arowcount - 1 do begin
-     inc(po2);
-     int2:= po2^*sizeof(msechar);
-     result:= result + int2;
-     inc(po2);
-     inc(pointer(po2),int2);
+   end;
+   dl_real: begin
+    result:= arowcount * sizeof(real);
+    if list <> nil then begin
+     move(adata^,list.datapo^,result);
     end;
-   end;    
-  end;
-  dl_realint,dl_realsum: begin
-   result:= adatalist.setdatablock(adata,sizeof(ifirealintty),arowcount);
-   exit;
-  end;
-  dl_rowstate: begin
-   move(adata^,int1,sizeof(int1));
-   posource:= adata;
-   inc(posource,sizeof(int1));
-   sourcestep:= rowinfosizes[rowinfolevelty(int1)];
-   result:= arowcount * sourcestep;
-   if adatalist <> nil then begin
-//    tcustomrowstatelist1(adatalist).initdirty;
-    if tcustomrowstatelist(adatalist).infolevel = 
-                 rowinfolevelty(int1) then begin
-     move(posource^,adatalist.datapo^,result);
+   end;
+   dl_msestring: begin
+    po2:= pinteger(adata);
+    result:= arowcount * sizeof(integer);
+    if list <> nil then begin
+     deststep:= list.size;
+     po1:= list.datapo;
+     for int1:= 0 to arowcount - 1 do begin
+      move(po2^,int2,sizeof(integer));
+      setlength(po1^,int2);
+      int2:= int2 * sizeof(msechar);
+      result:= result + int2;
+      inc(po2);
+      move(po2^,pointer(po1^)^,int2);
+      inc(pointer(po2),int2);
+      inc(pchar(po1),deststep);
+     end;
     end
     else begin
-     podest:= adatalist.datapo;
-     deststep:= adatalist.size;
-     movesize:= deststep;
-     if movesize > sourcestep then begin
-      movesize:= sourcestep;
+     for int1:= 0 to arowcount - 1 do begin
+      int2:= po2^*sizeof(msechar);
+      result:= result + int2;
+      inc(po2);
+      inc(pointer(po2),int2);
      end;
-     for int2:= 0 to arowcount - 1 do begin
-      move(posource^,podest^,movesize);
-      inc(posource,sourcestep);
-      inc(podest,deststep);
-     end;
-    end;
-    tcustomrowstatelist1(adatalist).recalchidden;
+    end;    
    end;
-   result:= result + sizeof(int1);
-  end;
-  dl_ansistring: begin
-   po2:= pinteger(adata);
-   result:= arowcount * sizeof(integer);
-   if adatalist <> nil then begin
-    deststep:= adatalist.size;
-    po3:= adatalist.datapo;
-    for int1:= 0 to arowcount - 1 do begin
-     move(po2^,int2,sizeof(integer));
-     setlength(po3^,int2);
-     result:= result + int2;
-     inc(po2);
-     move(po2^,po3[int1][1],int2);
-     inc(pointer(po2),int2);
-     inc(pchar(po3),deststep);
+   dl_msestringint: begin
+    po2:= pinteger(adata);
+    result:= arowcount * (sizeof(integer)+sizeof(integer));
+    if list <> nil then begin
+     po4:= list.datapo;
+     deststep:= list.size;
+     for int1:= 0 to arowcount - 1 do begin
+      move(po2^,po4^.int,sizeof(integer));
+      inc(po2);
+      move(po2^,int2,sizeof(integer));
+      setlength(po4^.mstr,int2);
+      int2:= int2 * sizeof(msechar);
+      result:= result + int2;
+      inc(po2);
+      move(po2^,po4^.mstr[1],int2);
+      inc(pointer(po2),int2);
+      inc(pchar(po4),deststep);
+     end;
+    end
+    else begin
+     for int1:= 0 to arowcount - 1 do begin
+      inc(po2);
+      int2:= po2^*sizeof(msechar);
+      result:= result + int2;
+      inc(po2);
+      inc(pointer(po2),int2);
+     end;
+    end;    
+   end;
+   dl_realint,dl_realsum: begin
+    result:= list.setdatablock(adata,sizeof(ifirealintty),arowcount);
+    exit;
+   end;
+   dl_rowstate: begin
+    move(adata^,int1,sizeof(int1));
+    posource:= adata;
+    inc(posource,sizeof(int1));
+    sourcestep:= rowinfosizes[rowinfolevelty(int1)];
+    result:= arowcount * sourcestep;
+    if list <> nil then begin
+ //    tcustomrowstatelist1(adatalist).initdirty;
+     if tcustomrowstatelist(list).infolevel = 
+                  rowinfolevelty(int1) then begin
+      move(posource^,list.datapo^,result);
+     end
+     else begin
+      podest:= list.datapo;
+      deststep:= list.size;
+      movesize:= deststep;
+      if movesize > sourcestep then begin
+       movesize:= sourcestep;
+      end;
+      for int2:= 0 to arowcount - 1 do begin
+       move(posource^,podest^,movesize);
+       inc(posource,sourcestep);
+       inc(podest,deststep);
+      end;
+     end;
+     tcustomrowstatelist1(list).recalchidden;
     end;
-   end
+    result:= result + sizeof(int1);
+   end;
+   dl_ansistring: begin
+    po2:= pinteger(adata);
+    result:= arowcount * sizeof(integer);
+    if list <> nil then begin
+     deststep:= list.size;
+     po3:= list.datapo;
+     for int1:= 0 to arowcount - 1 do begin
+      move(po2^,int2,sizeof(integer));
+      setlength(po3^,int2);
+      result:= result + int2;
+      inc(po2);
+      move(po2^,po3[int1][1],int2);
+      inc(pointer(po2),int2);
+      inc(pchar(po3),deststep);
+     end;
+    end
+    else begin
+     for int1:= 0 to arowcount - 1 do begin
+      int2:= po2^;
+      result:= result + int2;
+      inc(po2);
+      inc(pointer(po2),int2);
+     end;
+    end;    
+   end;
    else begin
-    for int1:= 0 to arowcount - 1 do begin
-     int2:= po2^;
-     result:= result + int2;
-     inc(po2);
-     inc(pointer(po2),int2);
-    end;
-   end;    
+    raise exception.create('Invalid datakind.');
+   end;
   end;
-  else begin
-   raise exception.create('Invalid datakind.');
+  if list <> nil then begin
+   list.change(-1);
   end;
- end;
- if adatalist <> nil then begin
-  adatalist.change(-1);
  end;
 end;
 
