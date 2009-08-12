@@ -444,7 +444,7 @@ end;
 procedure tifiwidgetgridcontroller.processdata(const adata: pifirecty;
                var adatapo: pchar);
 var
- int1: integer;
+ int1,int2: integer;
  rows1,cols1: integer;
  kind1: listdatatypety;
  po1: pchar;
@@ -452,11 +452,12 @@ var
  po2: pointer;
  ckind1: gridcommandkindty;
  source1,dest1,count1: integer;
- rowstate1: rowstatecolmergety;
+ rowstate1: rowstaterowheightty;
  select1: selectdataty;
  lwo1: longword;
  datalist1: subdatainfoty;
- po3: prowstatecolmergety;
+ po3: prowstaterowheightty;
+ ifikind1: ifidatakindty;
 begin
  with adata^.header do begin
   case kind of
@@ -548,17 +549,41 @@ begin
      try
       int1:= prowstatedataty(adatapo)^.header.row;
       inc(adatapo,sizeof(rowstateheaderty));
-      inc(adatapo,decodeifidata(pifidataty(adatapo),rowstate1));
-      with trxwidgetgrid(fowner),rowstate1 do begin
-       rowcolorstate[int1]:= normal.color;
-       rowfontstate[int1]:= normal.font;
-       po3:= fdatacols.rowstate.getitempocolmerge(int1);
-       if po3^.colmerge.merged <> colmerge.merged then begin
-        po3^.colmerge.merged:= colmerge.merged;
-        tdatacols1(fdatacols).mergechanged(int1);         
+      ifikind1:= pifidataty(adatapo)^.header.kind;
+      case ifikind1 of
+       idk_rowstatecolmerge: begin       
+        inc(adatapo,decodeifidata(pifidataty(adatapo),
+                      prowstatecolmergety(@rowstate1)^));
        end;
-       rowhidden[int1]:= normal.fold and foldhiddenmask <> 0;
-       rowfoldlevel[int1]:= normal.fold and foldlevelmask;
+       idk_rowstaterowheight: begin
+        inc(adatapo,decodeifidata(pifidataty(adatapo),
+                      prowstaterowheightty(@rowstate1)^));
+
+       end;
+       else begin
+        inc(adatapo,decodeifidata(pifidataty(adatapo),
+                      prowstatety(@rowstate1)^));
+       end;
+      end;
+      with trxwidgetgrid(fowner) do begin
+       int2:= ord(datacols.rowstate.infolevel) - ord(ril_normal);
+       if ord(ifikind1)-ord(idk_rowstate) < int2 then begin
+        ifikind1:= ifidatakindty(ord(idk_rowstate)+int2);
+       end;
+       rowcolorstate[int1]:= rowstate1.normal.color;
+       rowfontstate[int1]:= rowstate1.normal.font;
+       rowhidden[int1]:= rowstate1.normal.fold and foldhiddenmask <> 0;
+       rowfoldlevel[int1]:= rowstate1.normal.fold and foldlevelmask;
+       if ifikind1 >= idk_rowstatecolmerge then begin
+        po3:= prowstaterowheightty(fdatacols.rowstate.getitempo(int1));
+        if po3^.colmerge.merged <> rowstate1.colmerge.merged then begin
+         po3^.colmerge.merged:= rowstate1.colmerge.merged;
+         tdatacols1(fdatacols).mergechanged(int1);         
+        end;
+        if ifikind1 >= idk_rowstaterowheight then begin
+         rowheight[int1]:= rowstate1.rowheight.height;
+        end;
+       end;
       end;
      finally
       dec(fcommandlock);
@@ -738,8 +763,20 @@ begin
  inherited;
  with fifi do begin
   if cancommandsend(igo_rowstate) then begin
-   senditem(ik_rowstatechange,
+   case fdatacols.rowstate.infolevel of
+    ril_normal: begin
+     senditem(ik_rowstatechange,
+               encoderowstatedata(arow,fdatacols.rowstate.items[arow]));
+    end;
+    ril_colmerge: begin
+     senditem(ik_rowstatechange,
                encoderowstatedata(arow,fdatacols.rowstate.itemscolmerge[arow]));
+    end;
+    ril_rowheight: begin
+     senditem(ik_rowstatechange,
+               encoderowstatedata(arow,fdatacols.rowstate.itemsrowheight[arow]));
+    end;
+   end;
   end;
  end;
 end;

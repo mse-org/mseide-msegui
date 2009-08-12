@@ -753,7 +753,11 @@ function decodegridcommanddata(const adata: pchar; out akind: gridcommandkindty;
 function encodecolchangedata(const acolname: string; const arow: integer;
                                      const alist: tdatalist): string;
 function encoderowstatedata(const arow: integer; 
+                                            const astate: rowstatety): string;
+function encoderowstatedata(const arow: integer; 
                                             const astate: rowstatecolmergety): string;
+function encoderowstatedata(const arow: integer; 
+                                            const astate: rowstaterowheightty): string;
 function encodeselectiondata(const acell: gridcoordty; 
                                             const avalue: boolean): string;
 
@@ -809,7 +813,26 @@ begin
  end;
 end;
 
-function encoderowstatedata(const arow: integer; const astate: rowstatecolmergety): string;
+function encoderowstatedata(const arow: integer; 
+                               const astate: rowstatety): string;
+begin
+ result:= encodeifidata(astate,sizeof(rowstateheaderty));
+ with prowstatedataty(result)^.header do begin
+  row:= arow;
+ end;
+end;
+
+function encoderowstatedata(const arow: integer; 
+                               const astate: rowstatecolmergety): string;
+begin
+ result:= encodeifidata(astate,sizeof(rowstateheaderty));
+ with prowstatedataty(result)^.header do begin
+  row:= arow;
+ end;
+end;
+
+function encoderowstatedata(const arow: integer; 
+                               const astate: rowstaterowheightty): string;
 begin
  result:= encodeifidata(astate,sizeof(rowstateheaderty));
  with prowstatedataty(result)^.header do begin

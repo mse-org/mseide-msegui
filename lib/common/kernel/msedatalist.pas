@@ -772,6 +772,9 @@ type
    function getrowstatecolmerge(const index: integer): rowstatecolmergety;
    procedure setrowstatecolmerge(const index: integer;
                                         const Value: rowstatecolmergety);
+   function getrowstaterowheight(const index: integer): rowstaterowheightty;
+   procedure setrowstaterowheight(const index: integer;
+                                        const Value: rowstaterowheightty);
    function getfoldinfoar: bytearty;
    function getcolor(const index: integer): rowstatenumty;
    procedure setcolor(const index: integer; const avalue: rowstatenumty);
@@ -809,6 +812,8 @@ type
                                               write setrowstate; default;
    property itemscolmerge[const index: integer]: rowstatecolmergety
             read getrowstatecolmerge write setrowstatecolmerge;
+   property itemsrowheight[const index: integer]: rowstaterowheightty
+            read getrowstaterowheight write setrowstaterowheight;
 
    function mergecols(const arow: integer; const astart: cardinal;
                                  const acount: cardinal): boolean;
@@ -6831,6 +6836,19 @@ procedure tcustomrowstatelist.setrowstatecolmerge(const index: integer;
   const Value: rowstatecolmergety);
 begin
  checkinfolevel(ril_colmerge);
+ setdata(index,value);
+end;
+
+function tcustomrowstatelist.getrowstaterowheight(const index: integer): rowstaterowheightty;
+begin
+ checkinfolevel(ril_rowheight);
+ getdata(index,result);
+end;
+
+procedure tcustomrowstatelist.setrowstaterowheight(const index: integer;
+  const Value: rowstaterowheightty);
+begin
+ checkinfolevel(ril_rowheight);
  setdata(index,value);
 end;
 
