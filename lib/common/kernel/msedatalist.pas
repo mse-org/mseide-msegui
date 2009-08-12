@@ -221,6 +221,10 @@ type
    function sort(const arangelist: tintegerdatalist; dorearange: boolean): boolean; overload;
    function sort: boolean; overload; //true if changed
    procedure clean(const start,stop: integer); virtual;
+   procedure clearmemberitem(const subitem: integer; 
+                                    const index: integer); virtual;
+   procedure setmemberitem(const subitem: integer; 
+                         const index: integer; const avalue: integer); virtual;
 
    property count: integer read Fcount write Setcount;       //anzahl zeilen
    property capacity: integer read Fcapacity write Setcapacity;
@@ -752,6 +756,10 @@ type
  prowstaterowheightty = ^rowstaterowheightty;
  rowstaterowheightaty = array[0..0] of rowstaterowheightty;
  prowstaterowheightaty  = ^rowstaterowheightaty;
+
+ rowstatememberty = (rsm_select,rsm_color,rsm_font,rsm_readonly,rsm_foldlevel,
+                     rsm_hidden,rsm_merged,rsm_height);
+
 const
  rowinfosizes: array[rowinfolevelty] of integer = 
             (sizeof(rowstatety),sizeof(rowstatecolmergety),
@@ -4063,6 +4071,18 @@ begin
  if sender = ainfo.source then begin
   ainfo.source:= nil;
  end;
+end;
+
+procedure tdatalist.clearmemberitem(const subitem: integer;
+               const index: integer);
+begin
+ //dummy
+end;
+
+procedure tdatalist.setmemberitem(const subitem: integer;
+               const index: integer; const avalue: integer);
+begin
+ //dummy
 end;
 
 { tintegerdatalist }

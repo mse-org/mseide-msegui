@@ -15,16 +15,33 @@ uses
  mseguiglob,msetypes;
 type
  tdbrxwidgetgrid = class;
- 
+
+ bindnamesty = array[rowstatememberty] of string;
+  
  tifidbwidgetgridcontroller = class(tifiwidgetgridcontroller)
   private
    fcolbinding: subdatainfoarty;
+   fnames: bindnamesty;
   protected
    procedure decoderecord(const aindex: integer; var adatapo: pifidataty);
    procedure processdata(const adata: pifirecty; var adatapo: pchar); override;
    function getifireckinds: ifireckindsty; override;
+   function bindnames(const aname: string; var ainfo: subdatainfoty): boolean;
   public
    constructor create(const aowner: tdbrxwidgetgrid);
+  published
+   property name_select: string read fnames[rsm_select] write fnames[rsm_select];
+   property name_color: string read fnames[rsm_color] write fnames[rsm_color];
+   property name_font: string read fnames[rsm_font] write fnames[rsm_font];
+   property name_readonly: string read fnames[rsm_readonly] 
+                                           write fnames[rsm_readonly];
+   property name_foldlevel: string read fnames[rsm_foldlevel] 
+                                           write fnames[rsm_foldlevel];
+   property name_hidden: string read fnames[rsm_hidden] 
+                                           write fnames[rsm_hidden];
+   property name_merged: string read fnames[rsm_merged]
+                                           write fnames[rsm_merged];
+   property name_height: string read fnames[rsm_height] write fnames[rsm_height];
  end;
  
  tdbrxwidgetgrid = class(trxwidgetgrid)
@@ -78,9 +95,12 @@ begin
      if decodefielddefs(pfdefdataty(adatapo),fielddefs1,int1) then begin
       inc(adatapo,int1);
       with tdbrxwidgetgrid(fowner) do begin
+       fcolbinding:= nil;
        setlength(fcolbinding,fielddefs1.count);
        for int1:= 0 to high(fcolbinding) do begin
-        fcolbinding[int1]:= datacols.colsubdatainfo(fielddefs1[int1].name);
+        if not bindnames(fielddefs1[int1].name,fcolbinding[int1]) then begin
+         fcolbinding[int1]:= datacols.colsubdatainfo(fielddefs1[int1].name);
+        end;
        end;
        if (igo_state in foptionsrx) or 
            (answersequence <> 0) and (answersequence = fdatasequence) then begin
@@ -136,6 +156,22 @@ begin
    else begin
     inherited;
    end;
+  end;
+ end;
+end;
+
+function tifidbwidgetgridcontroller.bindnames(const aname: string;
+                                       var ainfo: subdatainfoty): boolean;
+var
+ na1: rowstatememberty;
+begin
+ result:= false;
+ for na1:= low(rowstatememberty) to high(rowstatememberty) do begin
+  if fnames[na1] = aname then begin
+   ainfo.list:= tdbrxwidgetgrid(fowner).datacols.rowstate;
+   ainfo.subindex:= ord(na1) + 1;
+   result:= true;
+   break;
   end;
  end;
 end;

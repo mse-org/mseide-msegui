@@ -103,6 +103,10 @@ type
                                          const index: integer); override;
    function getsourcenamecount: integer; override;
    function getsourcename(const atag: integer): string; override;
+   procedure clearmemberitem(const subitem: integer; 
+                                    const index: integer); override;
+   procedure setmemberitem(const subitem: integer; 
+                         const index: integer; const avalue: integer); override;
    procedure linksource(const source: tdatalist; const atag: integer); override;
 
    property sumlevel[index: integer]: integer read getsumlevel 
@@ -599,6 +603,22 @@ begin
   else begin
    result:= '';
   end;
+ end;
+end;
+
+procedure trealsumlist.clearmemberitem(const subitem: integer;
+                                                     const index: integer);
+begin
+ if subitem = 1 then begin
+  sumlevel[index]:= 0;
+ end;
+end;
+
+procedure trealsumlist.setmemberitem(const subitem: integer;
+                                const index: integer; const avalue: integer);
+begin
+ if subitem = 1 then begin
+  sumlevel[index]:= avalue;
  end;
 end;
 

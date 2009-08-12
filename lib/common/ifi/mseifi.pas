@@ -1095,19 +1095,11 @@ begin
    else begin
     case source^.header.kind of
      idk_null: begin
-      case list.datatype of       
-       dl_realsum: begin
-        trealsumlist(list).sumlevel[aindex]:= 0;
-       end;
-      end;
+      list.clearmemberitem(subindex,aindex);
      end;
      idk_integer: begin
-      case list.datatype of       
-       dl_realsum: begin
-        result:= decodeifidata(source,int1);
-        trealsumlist(list).sumlevel[aindex]:= int1;
-       end;
-      end;
+      result:= decodeifidata(source,int1);
+      list.setmemberitem(subindex,aindex,int1);
      end;
     end;
    end;

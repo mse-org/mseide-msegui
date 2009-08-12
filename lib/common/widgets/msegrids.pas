@@ -1142,6 +1142,11 @@ type
    destructor destroy; override;
 //   procedure assign(source: tpersistent); override;
 
+   procedure clearmemberitem(const subitem: integer; 
+                                    const index: integer); override;
+   procedure setmemberitem(const subitem: integer; 
+                         const index: integer; const avalue: integer); override;
+
    procedure change(const index: integer); override;
    function cellrow(const arow: integer): integer;
    function visiblerow(const arowindex: integer): integer;
@@ -12403,15 +12408,11 @@ end;
 function tcustomgrid.getrowcolorstate(index: integer): rowstatenumty;
 begin
  result:= fdatacols.frowstate.color[index];
-// result:= (fdatacols.frowstate.getitempo(index)^.color and rowstatemask) - 1;
 end;
 
 procedure tcustomgrid.setrowcolorstate(index: integer; const Value: rowstatenumty);
 begin
  fdatacols.frowstate.color[index]:= value;
-// with fdatacols.frowstate.getitempo(index)^ do begin
-//  color:= replacebits(value + 1,color,rowstatemask);
-// end;
  rowchanged(index);
  rowstatechanged(index);
 end;
@@ -12419,15 +12420,11 @@ end;
 function tcustomgrid.getrowfontstate(index: integer): rowstatenumty;
 begin
  result:= fdatacols.frowstate.font[index];
-// result:= (fdatacols.frowstate.getitempo(index)^.font and rowstatemask) - 1;
 end;
 
 procedure tcustomgrid.setrowfontstate(index: integer; const Value: rowstatenumty);
 begin
  fdatacols.frowstate.font[index]:= value;
-// with fdatacols.frowstate.getitempo(index)^ do begin
-//  font:= replacebits(value + 1,font,rowstatemask);
-// end;
  rowchanged(index);
  rowstatechanged(index);
 end;
@@ -12435,24 +12432,15 @@ end;
 function tcustomgrid.getrowreadonlystate(const index: integer): boolean;
 begin
  result:= fdatacols.frowstate.readonly[index];
-// result:= fdatacols.frowstate.getitempo(index)^.font and $80 <> 0;
 end;
 
 procedure tcustomgrid.setrowreadonlystate(const index: integer;
                const avalue: boolean);
 begin
  fdatacols.frowstate.readonly[index]:= avalue;
-// with fdatacols.frowstate.getitempo(index)^ do begin
-//  if avalue then begin
-//   font:= font or $80;
-//  end
-//  else begin
-//   font:= font and not $80;
-//  end;
-  if index = row then begin
-   checkrowreadonlystate;
-  end;
-// end;
+ if index = row then begin
+  checkrowreadonlystate;
+ end;
  rowstatechanged(index);
 end;
 
@@ -12547,8 +12535,6 @@ begin
  ar1:= fdatacols.getselectedrows;
  if high(ar1) >= 0 then begin
   if askok(stockobjects.textgenerators[tg_delete_n_selected_rows]([length(ar1)]),
-//  stockobjects.captions[sc_Delete]+' '+inttostr(length(ar1))+
-//           stockobjects.captions[sc_selected_rows],
            stockobjects.captions[sc_Confirmation]) then begin
    beginupdate;
    try
@@ -14344,6 +14330,84 @@ begin
  fdirtyvisible:= 0;
  fdirtyrow:= 0;
  fdirtyrowheight:= 0;
+end;
+
+procedure trowstatelist.clearmemberitem(const subitem: integer;
+               const index: integer);
+begin
+ case rowstatememberty(subitem-1) of
+  rsm_select: begin
+   selected[index]:= 0;
+   fgrid.invalidaterow(index); //todo: update selectstate
+  end;
+  rsm_color: begin
+   fgrid.rowcolorstate[index]:= -1;
+  end;
+  rsm_font: begin
+   fgrid.rowfontstate[index]:= -1;
+  end;
+  rsm_readonly: begin
+   fgrid.rowreadonlystate[index]:= false;
+  end;
+  rsm_foldlevel: begin
+   fgrid.rowfoldlevel[index]:= 0;
+  end;
+  rsm_hidden: begin
+   if folded then begin
+    fgrid.rowhidden[index]:= false;
+   end;
+  end;
+  rsm_merged: begin
+   if finfolevel >= ril_colmerge then begin
+    merged[index]:= 0;
+    fgrid.datacols.mergechanged(index);
+   end;
+  end;
+  rsm_height: begin
+   if finfolevel >= ril_rowheight then begin
+    fgrid.rowheight[index]:= 0;
+   end;
+  end;
+ end;
+end;
+
+procedure trowstatelist.setmemberitem(const subitem: integer;
+               const index: integer; const avalue: integer);
+begin
+ case rowstatememberty(subitem-1) of
+  rsm_select: begin
+   selected[index]:= avalue;
+   fgrid.invalidaterow(index); //todo: update selectstate
+  end;
+  rsm_color: begin
+   fgrid.rowcolorstate[index]:= avalue;
+  end;
+  rsm_font: begin
+   fgrid.rowfontstate[index]:= avalue;
+  end;
+  rsm_readonly: begin
+   fgrid.rowreadonlystate[index]:= avalue <> 0;
+  end;
+  rsm_foldlevel: begin
+   fgrid.rowfoldlevel[index]:= avalue;
+  end;
+  rsm_hidden: begin
+   if folded then begin
+    fgrid.rowhidden[index]:= avalue <> 0;
+   end;
+  end;
+  rsm_merged: begin
+   if finfolevel >= ril_colmerge then begin
+    merged[index]:= avalue;
+    fgrid.datacols.mergechanged(index);
+   end;
+  end;
+  rsm_height: begin
+   if finfolevel >= ril_rowheight then begin
+    fgrid.rowheight[index]:= avalue;
+   end;
+  end;
+ end;
 end;
 {
 procedure trowstatelist.readstate(const reader; const acount: integer);
