@@ -496,7 +496,7 @@ begin
   end;
  end;
  if dso_refreshafterapply in fcontroller.options then begin
-  refresh;
+  fcontroller.refresh(dso_recnoapplyrefresh in fcontroller.options);
  end;
 end;
 
