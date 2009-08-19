@@ -66,7 +66,7 @@ type
    procedure changed; override;
    function actualcolor: colorty; override;
    property value: string write setvalue stored false;
-   property gridvalue[const index: integer]: string read getgridvalue 
+   property gridvalue[index: integer]: string read getgridvalue
                              write setgridvalue;
    property format: string read fformat write setformat;
    property onchange: notifyeventty read fonchange write fonchange;
