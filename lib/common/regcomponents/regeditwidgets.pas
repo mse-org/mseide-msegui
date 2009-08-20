@@ -233,19 +233,19 @@ end;
 function tsumlistsourcelevelpropertyeditor.getvalues: msestringarty;
 begin
  result:= inherited getvalues;
- additem(result,foldlevelsumname);
+// additem(result,foldlevelsumname);
 end;
 
 function tsumlistsourcelevelpropertyeditor.gettag: integer;
 begin
- result:= 1;
+ result:= sumleveltag;
 end;
 
 { tsumlistsourceissumpropertyeditor }
 
 function tsumlistsourceissumpropertyeditor.gettag: integer;
 begin
- result:= 3;
+ result:= sumissumtag;
 end;
 
 initialization

@@ -144,7 +144,7 @@ type
  
 implementation
 uses
- msestockobjects;
+ msestockobjects,msesumlist;
 
 type
  tdatacols1 = class(tdatacols);
@@ -167,7 +167,6 @@ begin
   end;
  end;
 end;
-
   
 { tfoldedit }
 

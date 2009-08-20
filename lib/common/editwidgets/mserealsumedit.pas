@@ -11,10 +11,12 @@ type
   private
    fowner: twidgetcol;
   protected
+   procedure setoptions(const avalue: optionssumty); override;
    function getdefault: pointer; override;
    procedure setsourcevalue(const avalue: string); override;
    procedure setsourcelevel(const avalue: string); override;
    procedure setsourceissum(const avalue: string); override;
+   procedure linksource(const source: tdatalist; const atag: integer); override;
   public
    constructor create(owner: twidgetcol); reintroduce;
   published
@@ -65,14 +67,40 @@ end;
 procedure tgridrealsumlist.setsourcelevel(const avalue: string);
 begin
  inherited;
- fowner.sourcenamechanged(1);
- fowner.sourcenamechanged(2);
+ fowner.sourcenamechanged(sumleveltag);
 end;
 
 procedure tgridrealsumlist.setsourceissum(const avalue: string);
 begin
  inherited;
- fowner.sourcenamechanged(3);
+ fowner.sourcenamechanged(2);
+end;
+
+procedure tgridrealsumlist.setoptions(const avalue: optionssumty);
+var
+ optionsbefore: optionssumty;
+begin
+ if foptions <> avalue then begin
+  optionsbefore:= foptions;
+  foptions:= avalue;
+  if osu_foldsum in 
+         optionssumty(longword(avalue) xor longword(optionsbefore)) then begin
+   fowner.sourcenamechanged(sumleveltag);
+  end;
+  change(-1);
+ end;
+end;
+
+procedure tgridrealsumlist.linksource(const source: tdatalist;
+               const atag: integer);
+begin
+ if {(source = nil) and} (atag = sumleveltag) and 
+                                      (osu_foldsum in options) then begin
+  inherited linksource(fowner.grid.datacols.rowstate,atag);  
+ end
+ else begin
+  inherited;
+ end;
 end;
 
 { trealsumedit }
@@ -102,8 +130,17 @@ begin
  result:= inherited getoptionsedit;
  if fgridintf <> nil then begin
   po1:= fgridintf.getrowdatapo;
-  if (po1 <> nil) and (po1^.data.int <> 0) then begin
-   include(result,oe_readonly);
+  if (po1 <> nil) then begin
+   if osu_foldsum in trealsumlist(fdatalist).options then begin
+    if (po1^.issum) then begin
+     include(result,oe_readonly);
+    end;
+   end
+   else begin
+    if (po1^.data.int <> 0) then begin
+     include(result,oe_readonly);
+    end;
+   end;
   end;
  end;
 end;

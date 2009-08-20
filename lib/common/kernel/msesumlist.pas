@@ -4,18 +4,20 @@ interface
 uses
  msedatalist,msetypes,msearrayprops,mseclasses;
 
+//todo: optimize!!!
+
 const
- foldlevelsumname = '#foldlevel';
+// foldlevelsumname = '#foldlevel';
+ sumleveltag = 1;
+ sumissumtag = 2;
  
 type
-// sumlevelty = integer;
  
  realsumty = record
-//  data: realty; //first!
-//  level: sumlevelty;
   data: realintty;
   sumup: realty;
   sumdown: realty;
+  issum: boolean;
  end;
  prealsumty = ^realsumty;
 
@@ -23,35 +25,20 @@ type
   protected
    fsum: realty;
    fsumindex: integer;
-//   fsumup: realty;
-//   fsumdown: realty;
-//   findexup: integer;
-//   findexdown: integer;
-//   procedure clearup;
-//   procedure cleardown;
   published
  end;
  psumprop = ^tsumprop;
 
- optionsumty = ({osu_sumup,osu_sumdown,}osu_sumsonly,
-                osu_foldsumdown,osu_folddefaultsum);
+ optionsumty = (osu_sumsonly,
+                osu_foldsum{,osu_foldsumdown,osu_folddefaultsum});
  optionssumty = set of optionsumty;
  
  
  tsumarrayprop = class(tindexpersistentarrayprop)
   private
   protected
-//   procedure clearup;
-//   procedure cleardown;
    function newsum(const alevel: integer; const asum: realty;
                                      const aindex: integer): realty;
-{
-   function newsumup(const alevel: integer; const asum: realty;
-                                     const aindex: integer): realty;
-   function newsumdown(const alevel: integer; const asum: realty;
-                                     const aindex: integer): realty;
-}
-//   function needsclear(const aindex: integer): boolean;
   public
    constructor create(const aowner: tdatalist);
  end;
@@ -67,24 +54,21 @@ type
    fsumsup: tsumuparrayprop;
    fsumsdown: tsumdownarrayprop;
    fdefaultval: realsumty;
-//   fsourceissumname: string;
    function getsumlevel(index: integer): integer;
    procedure setsumlevel(index: integer; const avalue: integer);
-//   function getsum(index: integer): realty;
+   function getisfoldsum(index: integer): boolean;
+   procedure setisfoldsum(index: integer; const avalue: boolean);
    procedure setsumsup(const avalue: tsumuparrayprop);
    procedure setsumsdown(const avalue: tsumdownarrayprop);
    function getlinkdatatypes(const atag: integer): listdatatypesty; override;
-   procedure setoptions(const avalue: optionssumty);
   protected
-//   fsourceleveldirtystart: integer;
-//   fsourceleveldirtystop: integer;
    fdirtyup: integer;
    fdirtydown: integer;
-//   fsourcelevelname: string;
    flinkvalue: listlinkinfoty;
    flinklevel: listlinkinfoty;
    flinkissum: listlinkinfoty;
    foptions: optionssumty;
+   procedure setoptions(const avalue: optionssumty); virtual;
    procedure setsourcevalue(const avalue: string); virtual;
    procedure setsourcelevel(const avalue: string); virtual;
    procedure setsourceissum(const avalue: string); virtual;
@@ -111,16 +95,17 @@ type
 
    property sumlevel[index: integer]: integer read getsumlevel 
                             write setsumlevel;
-             //0 -> no sum > 0 top down, < 0 bottom up
-//   property sum[index: integer]: realty read getsum;
-  public
+             //0 -> no sum > 0 top down, < 0 bottom up, not used for osu_foldsum
+   property isfoldsum[index: integer]: boolean read getisfoldsum 
+                            write setisfoldsum;
+             //for osu_foldsum only
    property sourcevalue: string read flinkvalue.name 
                                             write setsourcevalue;
    property sourcelevel: string read flinklevel.name 
                                             write setsourcelevel;
    property sourceissum: string read flinkissum.name 
                                             write setsourceissum;
-          //define leaves for #foldlevel
+            //for osu_foldsum only
   published
    property sumsup: tsumuparrayprop read fsumsup write setsumsup;
    property sumsdown: tsumdownarrayprop read fsumsdown write setsumsdown;
@@ -213,27 +198,55 @@ begin
  with prealsumty(fdatapo+index*fsize)^ do begin
   if data.int <> avalue then begin
    data.int:= avalue;
-   if avalue = 0 then begin
-    if defaultzero then begin
-     data.rea:= 0;
-    end
-    else begin
-     data.rea:= emptyreal;
+   if not (osu_foldsum in foptions) then begin
+    if avalue = 0 then begin
+     if defaultzero then begin
+      data.rea:= 0;
+     end
+     else begin
+      data.rea:= emptyreal;
+     end;
+    end;
+    sourcechange(flinkvalue.source,int1); //restore value
+    change(-1); 
+   end;
+  end;
+ end;
+end;
+
+function trealsumlist.getisfoldsum(index: integer): boolean;
+begin
+ checkindex(index);
+ result:= prealsumty(fdatapo+index*fsize)^.issum;
+end;
+
+procedure trealsumlist.setisfoldsum(index: integer;
+               const avalue: boolean);
+var
+ int1: integer;
+begin
+ int1:= index;
+ checkindex(index);
+ with prealsumty(fdatapo+index*fsize)^ do begin
+  if issum <> avalue then begin
+   issum:= avalue;
+   if (osu_foldsum in foptions) then begin
+    if not avalue then begin
+     if defaultzero then begin
+      data.rea:= 0;
+     end
+     else begin
+      data.rea:= emptyreal;
+     end;
     end;
    end;
+   sourcechange(flinklevel.source,int1); //restore sumlevel
    sourcechange(flinkvalue.source,int1); //restore value
    change(-1); 
   end;
  end;
 end;
-{
-function trealsumlist.getsum(index: integer): realty;
-begin
- clean(index);
- checkindex(index);
- result:= prealsumty(fdatapo+index*fsize)^.sum;
-end;
-}
+
 procedure copyvalue(const source,dest: pointer);
 begin
  prealsumty(dest)^.data.rea:= preal(source)^;
@@ -246,7 +259,12 @@ end;
 
 procedure copylevelrowstate(const source,dest: pointer);
 begin
- prealsumty(dest)^.data.int:= -(prowstatety(source)^.fold + 1);
+ if prealsumty(dest)^.issum then begin
+  prealsumty(dest)^.data.int:= -(prowstatety(source)^.fold + 1);
+ end
+ else begin
+  prealsumty(dest)^.data.int:= 0
+ end;
 end;
 
 procedure copylevelrowstateissum(const source1,source2,dest: pointer);
@@ -258,7 +276,7 @@ begin
   prealsumty(dest)^.data.int:= 0;
  end;
 end;
-
+{
 procedure copylevelrowstateissumsum(const source1,source2,dest: pointer);
 begin
  if pinteger(source2)^ = 0 then begin
@@ -268,10 +286,16 @@ begin
   prealsumty(dest)^.data.int:= 0;
  end;
 end;
-
+}
+{
 procedure copylevelrowstatedown(const source,dest: pointer);
 begin
- prealsumty(dest)^.data.int:= prowstatety(source)^.fold + 1;
+ if prealsumty(dest)^.issum then begin
+  prealsumty(dest)^.data.int:= prowstatety(source)^.fold + 1;
+ end
+ else begin
+  prealsumty(dest)^.data.int:= 0;
+ end;
 end;
 
 procedure copylevelrowstateissumdown(const source1,source2,dest: pointer);
@@ -283,7 +307,8 @@ begin
   prealsumty(dest)^.data.int:= 0;
  end;
 end;
-
+}
+{
 procedure copylevelrowstateissumdownsum(const source1,source2,dest: pointer);
 begin
  if pinteger(source2)^ = 0 then begin
@@ -293,7 +318,7 @@ begin
   prealsumty(dest)^.data.int:= 0;
  end;
 end;
-
+}
 procedure trealsumlist.clean(const start,stop: integer);
 var
  po1: prealsumty;
@@ -304,33 +329,33 @@ var
 begin
  checksourcecopy(flinkvalue,@copyvalue);
  if flinklevel.source is tcustomrowstatelist then begin
-  if osu_foldsumdown in foptions then begin
+//  if osu_foldsumdown in foptions then begin
+//   if flinkissum.source <> nil then begin
+//    if osu_folddefaultsum in foptions then begin
+//     checksourcecopy2(flinklevel,flinkissum.source,
+//                                         @copylevelrowstateissumdownsum);
+//    end
+//    else begin
+//     checksourcecopy2(flinklevel,flinkissum.source,@copylevelrowstateissumdown);
+//    end;
+//   end
+//   else begin
+//    checksourcecopy(flinklevel,@copylevelrowstatedown);
+//   end;
+//  end
+//  else begin
    if flinkissum.source <> nil then begin
-    if osu_folddefaultsum in foptions then begin
-     checksourcecopy2(flinklevel,flinkissum.source,
-                                         @copylevelrowstateissumdownsum);
-    end
-    else begin
-     checksourcecopy2(flinklevel,flinkissum.source,@copylevelrowstateissumdown);
-    end;
-   end
-   else begin
-    checksourcecopy(flinklevel,@copylevelrowstatedown);
-   end;
-  end
-  else begin
-   if flinkissum.source <> nil then begin
-    if osu_folddefaultsum in foptions then begin
-     checksourcecopy2(flinklevel,flinkissum.source,@copylevelrowstateissumsum);
-    end
-    else begin
+//    if osu_folddefaultsum in foptions then begin
+//     checksourcecopy2(flinklevel,flinkissum.source,@copylevelrowstateissumsum);
+//    end
+//    else begin
      checksourcecopy2(flinklevel,flinkissum.source,@copylevelrowstateissum);
-    end;
+//    end;
    end
    else begin
     checksourcecopy(flinklevel,@copylevelrowstate);
    end;
-  end
+//  end
  end
  else begin
   checksourcecopy(flinklevel,@copylevel);
@@ -351,7 +376,6 @@ begin
       end;
      end;
     end;
-//    fsumsup.clearup;
     rea1:= emptyreal;
    end;
    po1:= datapo;
@@ -393,7 +417,6 @@ begin
       end;
      end;
     end;
-//    fsumsdown.cleardown;
     rea1:= emptyreal;
    end;
    po1:= datapo;
@@ -441,20 +464,6 @@ begin
    end;
   end;
  end;
-{
- if fsumsdown.needsclear(index) or fsumsup.needsclear(index) then begin
-  fdirtyup:= 0;
-  fdirtydown:= count-1;
- end
- else begin
-  if index < fdirtyup then begin
-   fdirtyup:= index;
-  end;
-  if index > fdirtydown then begin
-   fdirtydown:= index;
-  end;
- end;
- }
  inherited change(-1); //sum invalid
 end;
 
@@ -482,19 +491,21 @@ procedure trealsumlist.sourcechange(const sender: tdatalist;
                                                 const index: integer);
 begin
  inherited;
- if sender = flinkvalue.source then begin
-  change(index);
- end
- else begin
-  if (sender = flinkissum.source) then begin
-   checksourcechange(flinklevel,flinklevel.source,index); //invalid
-   checksourcechange(flinkvalue,flinkvalue.source,index); //restore value
-   change(-1);
+ if sender <> nil then begin
+  if sender = flinkvalue.source then begin
+   change(index);
   end
   else begin
-   if checksourcechange(flinklevel,sender,index) then begin
+   if (sender = flinkissum.source) then begin
+    checksourcechange(flinklevel,flinklevel.source,index); //invalid
     checksourcechange(flinkvalue,flinkvalue.source,index); //restore value
     change(-1);
+   end
+   else begin
+    if checksourcechange(flinklevel,sender,index) then begin
+     checksourcechange(flinkvalue,flinkvalue.source,index); //restore value
+     change(-1);
+    end;
    end;
   end;
  end;
@@ -507,11 +518,16 @@ begin
   0: begin
    result:= result + [dl_real];
   end;
-  1,3: begin
-   result:= [dl_integer];
+  sumleveltag: begin
+   if osu_foldsum in foptions then begin
+    result:= [dl_rowstate];
+   end
+   else begin
+    result:= [dl_integer];
+   end;
   end;
-  2: begin
-   result:= [dl_rowstate];
+  sumissumtag: begin
+   result:= [dl_integer];
   end;
  end;
 end;
@@ -545,42 +561,21 @@ begin
   0: begin
    internallinksource(source,atag,flinkvalue.source);
   end;
-  1,2: begin
-   if (atag = 1) or (flinklevel.name = foldlevelsumname) then begin
-    internallinksource(source,atag,flinklevel.source);
-   end;
+  sumleveltag: begin
+   internallinksource(source,atag,flinklevel.source);
   end;
-  3: begin
+  sumissumtag: begin
    if internallinksource(source,atag,flinkissum.source) and 
                                    (flinklevel.source <> nil)then begin
     sourcechange(flinklevel.source,-1); //sum level invalid
    end;
   end;
-  {
- if (atag = 0) and internallinksource(source,atag,flinksource) then begin
-  sourcechange(source,-1);
- end
- else begin
-  if (atag = 1) or (atag = 2) and (fsourcelevelname = foldlevelsumname) then begin
-   if internallinksource(source,atag,flinksourcelevel) then begin
-    sourcechange(source,-1);
-   end;
-  end
-  else begin
-   if (atag = 3) then begin
-    if internallinksource(source,atag,flinksourceissum) and 
-                                    (flinksourcelevel <> nil)then begin
-     sourcechange(flinksourcelevel,-1); //sum level invalid
-    end;
-   end;
-  end;
-  }
  end;
 end;
 
 function trealsumlist.getsourcenamecount: integer;
 begin
- result:= 4;
+ result:= 3;
 end;
 
 function trealsumlist.getsourcename(const atag: integer): string;
@@ -589,15 +584,10 @@ begin
   0: begin
    result:= flinkvalue.name;
   end;
-  1,2: begin
-   if (flinklevel.name = foldlevelsumname) xor (atag = 2) then begin
-    result:= '';
-   end
-   else begin
-    result:= flinklevel.name;
-   end;
+  sumleveltag: begin
+   result:= flinklevel.name;
   end;
-  3: begin
+  sumissumtag: begin
    result:= flinkissum.name;
   end
   else begin
@@ -610,7 +600,12 @@ procedure trealsumlist.clearmemberitem(const subitem: integer;
                                                      const index: integer);
 begin
  if subitem = 1 then begin
-  sumlevel[index]:= 0;
+  if osu_foldsum in foptions then begin
+   isfoldsum[index]:= false;
+  end
+  else begin
+   sumlevel[index]:= 0;
+  end;
  end;
 end;
 
@@ -618,55 +613,24 @@ procedure trealsumlist.setmemberitem(const subitem: integer;
                                 const index: integer; const avalue: integer);
 begin
  if subitem = 1 then begin
-  sumlevel[index]:= avalue;
+  if osu_foldsum in foptions then begin
+   isfoldsum[index]:= avalue <> 0;
+  end
+  else begin
+   sumlevel[index]:= avalue;
+  end;
  end;
 end;
 
 { tsumprop }
-{
-procedure tsumprop.clearup;
-begin
- fsumup:= emptyreal;
- findexup:= -1;
-end;
 
-procedure tsumprop.cleardown;
-begin
- fsumdown:= emptyreal;
- findexdown:= maxint;
-end;
-}
 { tsumarrayprop }
 
 constructor tsumarrayprop.create(const aowner: tdatalist);
 begin
  inherited create(aowner,tsumprop);
 end;
-{
-procedure tsumarrayprop.clearup;
-var
- int1: integer;
-begin
- for int1:= 0 to high(fitems) do begin
-  with tsumprop(fitems[int1]) do begin
-   fsum:= emptyreal;
-   fsumindex:= -1;
-  end;
- end;
-end;
 
-procedure tsumarrayprop.cleardown;
-var
- int1: integer;
-begin
- for int1:= 0 to high(fitems) do begin
-  with tsumprop(fitems[int1]) do begin
-   fsum:= emptyreal;
-   fsumindex:= maxint;
-  end;
- end;
-end;
-}
 function tsumarrayprop.newsum(const alevel: integer;
               const asum: realty; const aindex: integer): realty;
 var
@@ -681,35 +645,7 @@ begin
   inc(po1);
  end;
 end;
-{
-function tsumarrayprop.newsumdown(const alevel: integer;
-              const asum: realty; const aindex: integer): realty;
-var
- po1: psumprop;
- int1: integer;
-begin
- po1:= psumprop(@fitems[alevel]);
- result:= subrealty(asum,po1^.fsumdown);
- for int1:= alevel to high(fitems) do begin
-  po1^.fsumdown:= asum;
-  po1^.findexdown:= aindex;
-  inc(po1);
- end;
-end;
-}
-{
-function tsumarrayprop.needsclear(const aindex: integer): boolean;
-var
- int1: integer;
-begin
- result:= (aindex < 0);
- if not result and (fitems <> nil) then begin
-  with tsumprop(fitems[high(fitems)]) do begin
-   result:= (aindex <= findexup) or (aindex >= findexdown);
-  end;
- end;
-end;
-}
+
 initialization
  registerdatalistclass(dl_realsum,trealsumlist);
 end.

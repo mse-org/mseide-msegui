@@ -164,7 +164,6 @@ type
                                      const copyproc: copyprocty): boolean;
    function checksourcecopy2(var ainfo: listlinkinfoty;
                 const source2: tdatalist; const copyproc: copy2procty): boolean;
-//   property sourcevalue: string read fsourcevalue write setsourcevalue;
   public
    constructor create; override;
    destructor destroy; override;
@@ -1297,7 +1296,8 @@ var
 begin
  int1:= high(pointerarty(value)) + 1;
  if int1 <= count then begin
-  incrementarraylength(pointer(value),typeinfo,count-int1+step);
+  incrementarraylength(pointer(value),typeinfo,count+step);
+//  incrementarraylength(pointer(value),typeinfo,count-int1+step);
  end;
  result:= count;
  inc(count);

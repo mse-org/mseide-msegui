@@ -1323,6 +1323,7 @@ end;
 procedure tgraphdataedit.initgridwidget;
 begin
  defaultinitgridwidget(self,fgridintf);
+ fgridintf.getcol.options:= fgridintf.getcol.options + [co_drawfocus];
 {
  if fframe <> nil then begin
   with fframe do begin
