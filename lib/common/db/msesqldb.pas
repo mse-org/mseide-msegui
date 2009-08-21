@@ -172,7 +172,7 @@ type
    fonsetparam: setparameventty;
    fonaftersetparam: notifyeventty;
    foptions: fieldparamlinkoptionsty;
-   ftimer: tsimpletimer;
+//   ftimer: tsimpletimer;
    fdelayus: integer;
    fonupdatemasteredit: masterdataseteventty;
    fonupdatemasterinsert: masterdataseteventty;
@@ -191,7 +191,7 @@ type
    function getdatasource(const aindex: integer): tdatasource; overload;
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
-   procedure dotimer(const sender: tobject);
+//   procedure dotimer(const sender: tobject);
    procedure notification(acomponent: tcomponent;
                                 operation: toperation); override;
 
@@ -763,6 +763,17 @@ begin
        if assigned(fonaftersetparam) then begin
         fonaftersetparam(fowner);
        end;
+       if (fplo_autorefresh in foptions) and (destdataset <> nil) and 
+     //                       destdataset.active then begin
+                             (destdataset.state = dsbrowse) then begin
+        if fdestcontroller <> nil then begin
+         fdestcontroller.refresh(fplo_restorerecno in foptions,fdelayus);
+        end
+        else begin
+         fdestdataset.refresh;
+        end;
+       end;
+       {
        if ftimer <> nil then begin
         ftimer.interval:= ftimer.interval;
         ftimer.enabled:= true;
@@ -770,6 +781,7 @@ begin
        else begin
         checkrefresh;
        end;
+       }
       end;
      end;
     finally
@@ -882,17 +894,17 @@ end;
 
 destructor tfieldparamlink.destroy;
 begin
- freeandnil(ftimer);
+// freeandnil(ftimer);
  inherited;
  fsourcedatalink.free;
 // fdestdatasource.free;
 end;
-
+{
 procedure tfieldparamlink.dotimer(const sender: tobject);
 begin
  fsourcedatalink.checkrefresh;
 end;
-
+}
 function tfieldparamlink.getdatafield: string;
 begin
  result:= fsourcedatalink.fieldname;
@@ -994,7 +1006,11 @@ end;
 
 procedure tfieldparamlink.setdelayus(const avalue: integer);
 begin
- fdelayus:= abs(avalue);
+ fdelayus:= avalue;
+ if fdelayus < -1 then begin
+  fdelayus:= -1;
+ end;
+ {
  if avalue = -1 then begin
   freeandnil(ftimer);
  end
@@ -1006,6 +1022,7 @@ begin
    ftimer.interval:= -fdelayus; //single shot
   end;
  end;
+ }
 end;
 
 { tsequencedatalink }

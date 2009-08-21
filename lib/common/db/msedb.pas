@@ -31,7 +31,7 @@ interface
 
 uses
  classes,db,mseclasses,mseglob,msestrings,msetypes,msearrayprops,mseapplication,
- sysutils,msebintree,mseact;
+ sysutils,msebintree,mseact,msetimer;
 
 type
  fieldtypearty = array of tfieldtype;
@@ -1012,7 +1012,8 @@ const
   
 type
  fieldlinkarty = array of ifieldcomponent;
- dscontrollerstatety = (dscs_posting,dscs_canceling,dscs_onidleregistered);
+ dscontrollerstatety = (dscs_posting,dscs_canceling,dscs_onidleregistered,
+                        dscs_restorerecno);
  dscontrollerstatesty = set of dscontrollerstatety;
 
  datasetstatechangedeventty = procedure(const sender: tdataset;
@@ -1042,6 +1043,7 @@ type
    fonstatechanged: datasetstatechangedeventty;
    fonupdatemasteredit: masterdataseteventty;
    fonupdatemasterinsert: masterdataseteventty;
+   ftimer: tsimpletimer;
    procedure setfields(const avalue: tpersistentfields);
    function getcontroller: tdscontroller;
    procedure updatelinkedfields;
@@ -1061,6 +1063,7 @@ type
    procedure setowneractive(const avalue: boolean); override;
    procedure fielddestroyed(const sender: ifieldcomponent);
    procedure doonidle(var again: boolean);
+   procedure dorefresh(const sender: tobject);
   public
    constructor create(const aowner: tdataset; const aintf: idscontroller;
                       const arecnooffset: integer = 0;
@@ -1109,7 +1112,9 @@ type
    procedure cancel;
    function canceling: boolean;
    function emptyinsert: boolean;
-   procedure refresh(const restorerecno: boolean);
+   procedure refresh(const restorerecno: boolean;
+               const delayus: integer = -1);
+               //-1 -> no delay, 0 -> in onidle
    function assql(const avalue: boolean): string; overload;
    function assql(const avalue: msestring): string; overload;
    function assql(const avalue: integer): string; overload;
@@ -4925,6 +4930,7 @@ begin
   end;
  end;
  ffields.free;
+ freeandnil(ftimer);
  inherited;
 end;
 
@@ -5637,11 +5643,12 @@ begin
  result:= not (dso_noedit in foptions);
 end;
 
-procedure tdscontroller.refresh(const restorerecno: boolean);
+procedure tdscontroller.dorefresh(const sender: tobject);
 var
  bo1: boolean;
 begin
- if restorerecno then begin
+ if dscs_restorerecno in fstate then begin
+  exclude(fstate,dscs_restorerecno);
   bo1:= fintf.restorerecno;
   fintf.restorerecno:= true;
   try
@@ -5654,6 +5661,27 @@ begin
  end
  else begin
   tdataset(fowner).refresh;
+ end;
+end;
+
+procedure tdscontroller.refresh(const restorerecno: boolean;
+                                           const delayus: integer = -1);
+begin
+ if restorerecno then begin
+  include(fstate,dscs_restorerecno);
+ end;
+ if delayus < 0 then begin
+  freeandnil(ftimer);
+  dorefresh(nil);
+ end
+ else begin
+  if ftimer = nil then begin
+   ftimer:= tsimpletimer.create(-delayus,@dorefresh,true);
+  end
+  else begin
+   ftimer.interval:= -delayus; //single shot
+   ftimer.enabled:= true;
+  end;
  end;
 end;
 
