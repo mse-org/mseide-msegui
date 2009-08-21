@@ -112,7 +112,10 @@ type
    constructor create(const anullmasksize: integer);
    procedure fieldchanged(const afield: tfield; const aindex: integer);
  end;
-    
+
+ ifioptiondbty = (iod_autopost);
+ ifioptionsdbty = set of ifioptiondbty;
+     
  tifidscontroller = class(tificontroller,ievent)
   private
    fintf: iifidscontroller;
@@ -122,6 +125,7 @@ type
    fpostmessage: msestring;
    frxbindings: integerarty;
    ftxbindings: integerarty;
+   foptionsdb: ifioptionsdbty;
 //   fbindings: integerarty;
 //   ffielddefindex: integerarty;
 //   ffieldoptions: tififieldoptions;
@@ -162,6 +166,7 @@ type
                                               write fremotedatachange;
 //   property fieldoptions: tififieldoptions read ffieldoptions 
 //                                  write setfieldoptions;
+   property optionsdb: ifioptionsdbty read foptionsdb write foptionsdb;
  end;
 
  tifidataset = class(tdataset,idscontroller,igetdscontroller,
@@ -1089,7 +1094,9 @@ begin
         edit;
        end;
        inc(adatapo,ifidatatofield(pifidataty(adatapo),field1));
-       post;
+       if iod_autopost in foptionsdb then begin
+        post;
+       end;
       finally
        exclude(fistate,ids_remotedata);
       end;
@@ -1145,6 +1152,15 @@ begin
     ftlargeint: begin
      result:= encodeifidata(plargeint(pointer(recpo)+offset)^);
     end;
+    ftsmallint: begin
+     result:= encodeifidata(integer(psmallint(pointer(recpo)+offset)^));
+    end;
+    ftword: begin
+     result:= encodeifidata(integer(pword(pointer(recpo)+offset)^));
+    end;
+    ftboolean: begin
+     result:= encodeifidata(integer(pwordbool(pointer(recpo)+offset)^));
+    end;
     ftfloat,ftcurrency: begin
      result:= encodeifidata(pdouble(pointer(recpo)+offset)^);
     end;
@@ -1163,7 +1179,8 @@ begin
      result:= encodeifidata(pmsestring(pointer(recpo)+offset)^);
     end;
     else begin
-     result:='';
+     result:= encodeifinull;
+//     result:='';
      exit;
     end;
    end;
