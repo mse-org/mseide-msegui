@@ -84,7 +84,8 @@ begin
   optionsbefore:= foptions;
   foptions:= avalue;
   if osu_foldsum in 
-         optionssumty(longword(avalue) xor longword(optionsbefore)) then begin
+         optionssumty({$ifdef FPC}longword{$else}byte{$endif}(avalue) xor
+         {$ifdef FPC}longword{$else}byte{$endif}(optionsbefore)) then begin
    fowner.sourcenamechanged(sumleveltag);
   end;
   change(-1);
