@@ -21,8 +21,9 @@ const
 {$endif}
 const
  NR_sendfile = 187;
+ __SIZEOF_PTHREAD_COND_T = {$ifdef CPU64}48{$else}48{$endif};
 type
- tcondvar = array[0..47] of byte;
+ tcondvar = array[0..__SIZEOF_PTHREAD_COND_T-1] of byte;
 
 {$ifndef FPC}
 type

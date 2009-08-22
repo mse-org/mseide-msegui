@@ -36,11 +36,13 @@ var
 {$include ../msesysintf.inc}
 
 type
- linuxsemty = record
-//  outoforder: boolean;
+ linuxsemdty = record
   destroyed: integer;
   sema: tsemaphore;
-  platformdata: array[5..7] of cardinal;
+ end;
+ linuxsemty = record
+  d: linuxsemdty;
+  platformdata: array[0..sizeof(semty)-sizeof(linuxsemdty)-1] of byte;
  end;
 
 function timestampms: cardinal;
@@ -99,24 +101,29 @@ const
 // timeoffset = 0.0;
  datetimeoffset = -25569;
  
-
 type
  linuxmutexty = record
   mutex: pthread_mutex_t;
-  platformdata: array[6..7] of cardinal;
+  platformdata: array[0..sizeof(semty)-sizeof(pthread_mutex_t)-1] of byte;
  end;
-
- linuxcondty = record
+ linuxconddty = record
   cond: tcondvar;
   mutex: pthread_mutex_t;
-  platformdata: array[18..31] of cardinal;
+ end;
+ linuxcondty = record
+  d: linuxconddty;
+  platformdata: array[0..sizeof(condty)-sizeof(linuxconddty)-1] of byte;
  end;
 
- dirstreamlinuxty = record
+ dirstreamlinuxdty = record
   dir: pdirectorystream;
   needsstat: boolean;
   dirpath: pointer;
-  platformdata: array[3..7] of cardinal;
+ end;
+ dirstreamlinuxty = record
+  d: dirstreamlinuxdty;
+  platformdata: array[0..sizeof(dirstreamty.platformdata)-
+                    sizeof(dirstreamlinuxdty)-1] of byte;
  end;
 
 function unblocksignal(const signum: integer): boolean;
@@ -472,6 +479,13 @@ begin
  result:= time.tv_sec * 1000000 + time.tv_usec;
 end;
 
+type
+ pthread_mutex_tx = array[0..40-1] of byte;
+ testty = record
+  mutex: pthread_mutex_tx;
+  platformdata: array[{$ifdef CPU64}5{$else}6{$endif}..7] of pointer;
+ end;
+
 function sys_mutexcreate(out mutex: mutexty): syserrorty;
 begin
  initmutex(linuxmutexty(mutex).mutex);
@@ -542,7 +556,7 @@ function sys_semcreate(out sem: semty; count: integer): syserrorty;
 begin
  fillchar(sem,sizeof(sem),0);
  with linuxsemty(sem) do begin
-  if sem_init(sema,{$ifdef FPC}0{$else}false{$endif},count) = 0 then begin
+  if sem_init(d.sema,{$ifdef FPC}0{$else}false{$endif},count) = 0 then begin
    result:= sye_ok;
   end
   else begin
@@ -554,7 +568,7 @@ end;
 function sempost1(var sem: semty): syserrorty;
 begin
  with linuxsemty(sem) do begin
-  if sem_post(sema) = 0 then begin
+  if sem_post(d.sema) = 0 then begin
    result:= sye_ok;
   end
   else begin
@@ -566,7 +580,7 @@ end;
 function sys_sempost(var sem: semty): syserrorty;
 begin
  with linuxsemty(sem) do begin
-  if destroyed <> 0 then begin
+  if d.destroyed <> 0 then begin
    result:= sye_semaphore;
    exit;
   end;
@@ -580,14 +594,14 @@ var
 begin
  result:= sye_ok;
  with linuxsemty(sem) do begin
-  int1:= interlockedincrement(destroyed);
+  int1:= interlockedincrement(d.destroyed);
   if int1 = 1 then begin
    while sys_semcount(sem) = 0 do begin
-    if sem_post(sema) <> 0 then begin
+    if sem_post(d.sema) <> 0 then begin
      break;
     end;
    end;
-   sem_destroy(sema);
+   sem_destroy(d.sema);
   end;
  end;
 end;
@@ -600,11 +614,11 @@ var
 begin
  result:= sye_semaphore;
  with linuxsemty(sem) do begin
-  if destroyed <> 0 then begin
+  if d.destroyed <> 0 then begin
    exit;
   end;
   if timeoutusec = 0 then begin
-   while sem_wait(sema) <> 0 do begin
+   while sem_wait(d.sema) <> 0 do begin
     if sys_getlasterror <> eintr then begin
      exit;
     end;
@@ -612,7 +626,7 @@ begin
   end
   else begin
    time1:= gettimestamp(timeoutusec);
-   while sem_timedwait(sema,@time1) <> 0 do begin
+   while sem_timedwait(d.sema,@time1) <> 0 do begin
     case sys_getlasterror of
      eintr: begin
      end;
@@ -633,12 +647,12 @@ end;
 function sys_semtrywait(var sem: semty): boolean;
 begin
  with linuxsemty(sem) do begin
-  if destroyed <> 0 then begin
+  if d.destroyed <> 0 then begin
    result:= false;
    exit;
   end;
   repeat
-   result:= sem_trywait(sema) = 0;
+   result:= sem_trywait(d.sema) = 0;
   until result or (sys_getlasterror <> eintr);
  end;
 end;
@@ -646,53 +660,53 @@ end;
 function sys_semcount(var sem: semty): integer;
 begin
  with linuxsemty(sem) do begin
-  sem_getvalue(sema,{$ifdef FPC}@{$endif}result);
+  sem_getvalue(d.sema,{$ifdef FPC}@{$endif}result);
  end;
 end;
 
 function sys_condcreate(out cond: condty): syserrorty;
 begin
- pthread_cond_init(linuxcondty(cond).cond,nil);
- initmutex(linuxcondty(cond).mutex);
+ pthread_cond_init(linuxcondty(cond).d.cond,nil);
+ initmutex(linuxcondty(cond).d.mutex);
  result:= sye_ok;
 end;
 
 function sys_conddestroy(var cond: condty): syserrorty;
 begin
  while true do begin
-  pthread_mutex_lock(linuxcondty(cond).mutex);
-  if pthread_cond_destroy(linuxcondty(cond).cond) = 0 then begin
-   pthread_mutex_unlock(linuxcondty(cond).mutex);
-   destroymutex(linuxcondty(cond).mutex);
+  pthread_mutex_lock(linuxcondty(cond).d.mutex);
+  if pthread_cond_destroy(linuxcondty(cond).d.cond) = 0 then begin
+   pthread_mutex_unlock(linuxcondty(cond).d.mutex);
+   destroymutex(linuxcondty(cond).d.mutex);
    break;
   end;
-  pthread_cond_broadcast(linuxcondty(cond).cond);
-  pthread_mutex_unlock(linuxcondty(cond).mutex);
+  pthread_cond_broadcast(linuxcondty(cond).d.cond);
+  pthread_mutex_unlock(linuxcondty(cond).d.mutex);
  end;
  result:= sye_ok;
 end;
 
 function sys_condlock(var cond: condty): syserrorty;
 begin
- pthread_mutex_lock(linuxcondty(cond).mutex);
+ pthread_mutex_lock(linuxcondty(cond).d.mutex);
  result:= sye_ok;
 end;
 
 function sys_condunlock(var cond: condty): syserrorty;
 begin
- pthread_mutex_unlock(linuxcondty(cond).mutex);
+ pthread_mutex_unlock(linuxcondty(cond).d.mutex);
  result:= sye_ok;
 end;
 
 function sys_condsignal(var cond: condty): syserrorty;
 begin
- pthread_cond_signal(linuxcondty(cond).cond);
+ pthread_cond_signal(linuxcondty(cond).d.cond);
  result:= sye_ok;
 end;
 
 function sys_condbroadcast(var cond: condty): syserrorty;
 begin
- pthread_cond_broadcast(linuxcondty(cond).cond);
+ pthread_cond_broadcast(linuxcondty(cond).d.cond);
  result:= sye_ok;
 end;
 
@@ -706,11 +720,11 @@ var
 begin
  result:= sye_ok;
  if timeoutusec = 0 then begin
-  pthread_cond_wait(linuxcondty(cond).cond,linuxcondty(cond).mutex);
+  pthread_cond_wait(linuxcondty(cond).d.cond,linuxcondty(cond).d.mutex);
  end
  else begin
   time1:= gettimestamp(timeoutusec);
-  if pthread_cond_timedwait(linuxcondty(cond).cond,linuxcondty(cond).mutex,
+  if pthread_cond_timedwait(linuxcondty(cond).d.cond,linuxcondty(cond).d.mutex,
              @time1) <> 0 then begin
    result:= sye_timeout;
   end;
@@ -719,7 +733,7 @@ end;
 
 {$ifdef FPC}
 
-function threadexec(infopo : pointer) : longint;
+function threadexec(infopo : pointer) : ptrint{longint};
 begin
  pthread_setcanceltype(pthread_cancel_asynchronous,nil);
  pthread_setcancelstate(pthread_cancel_enable,nil);
@@ -973,18 +987,18 @@ var
 begin
  str1:= stream.dirname;
  with stream,dirstreamlinuxty(platformdata) do begin
-  dir:= pdir(opendir(pchar(str1)));
-  if dir = nil then begin
+  d.dir:= pdir(opendir(pchar(str1)));
+  if d.dir = nil then begin
    result:= sye_dirstream;
   end
   else begin
    if (infolevel > fil_name) or not (fa_all in include) or
                          (exclude <> []) then begin
-    needsstat:= true;
+    d.needsstat:= true;
     if (str1 <> '') and (str1[length(str1)] <> '/') then begin
      str1:= str1 + '/';
     end;
-    string(dirpath):= str1; //stat needed
+    string(d.dirpath):= str1; //stat needed
    end;
    result:= sye_ok;
   end;
@@ -994,8 +1008,8 @@ end;
 function sys_closedirstream(var stream: dirstreamty): syserrorty;
 begin
  with dirstreamlinuxty(stream.platformdata) do begin
-  string(dirpath):= '';
-  if closedir(pointer(dir)) = 0 then begin
+  string(d.dirpath):= '';
+  if closedir(pointer(d.dir)) = 0 then begin
    result:= sye_ok;
   end
   else begin
@@ -1017,14 +1031,14 @@ begin
  with stream,dirstreamlinuxty(platformdata) do begin
   if not ((include <> []) and (fa_all in exclude)) then begin
    while true do begin
-    if (readdir64_r(dir,@dirent,@po1) = 0) and
+    if (readdir64_r(d.dir,@dirent,@po1) = 0) and
           (po1 <> nil) then begin
      with info do begin
       str1:= dirent.d_name;
       name:= str1;
       if checkfilename(info.name,mask,true) then begin
-       if needsstat then begin
-        if stat64(pchar(string(dirpath)+str1),
+       if d.needsstat then begin
+        if stat64(pchar(string(d.dirpath)+str1),
               @statbuffer) = 0 then begin
          with extinfo1,extinfo2,statbuffer do begin
           filetype:= getfiletype(st_mode);

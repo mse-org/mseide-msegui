@@ -1089,14 +1089,19 @@ type
   pthread_attr_t = __pthread_attr_s;
   Ppthread_attr_t = ^pthread_attr_t;
 
-
+const
+ __SIZEOF_SEM_T = {$ifdef CPU64}32{$else}16{$endif};
+type
 //semaphore
    Psem_t = ^sem_t;
+   sem_t = array[0..__SIZEOF_SEM_T-1] of byte;
+   {
    sem_t = record
         __sem_lock : _pthread_fastlock;
         __sem_value : longint;
         __sem_waiting : _pthread_descr;
      end;
+     }
   TSemaphore = sem_t;
   PSemaphore = ^TSemaphore;
 
@@ -1232,8 +1237,12 @@ function m_sigprocmask(__how:longint; var SigSet : TSigSet;
             var oldset: Tsigset):longint;cdecl;external clib name 'sigprocmask';
 function m_sigismember(var SigSet : TSigSet; SigNum : Longint):longint;cdecl;external clib name 'sigismember';
 
+const
+ __SIZEOF_PTHREAD_MUTEX_T = {$ifdef CPU64}40{$else}24{$endif};
 type
   Ppthread_mutex_t = ^pthread_mutex_t;
+  pthread_mutex_t = array[0..__SIZEOF_PTHREAD_MUTEX_T-1] of byte;
+{
   pthread_mutex_t = record
        __m_reserved : longint;
        __m_count : longint;
@@ -1241,7 +1250,7 @@ type
        __m_kind : longint;
        __m_lock : _pthread_fastlock;
     end;
-
+}
   DIR = record end;
    __dirstream = DIR;
   PDIR = ^DIR;

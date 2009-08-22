@@ -301,7 +301,7 @@ var
   po2: pmsechar;
  begin
   result:= 0;
-  po1:= @pointer(layoutinfo.charwidths[charindex]);
+  po1:= @{pointer}(layoutinfo.charwidths[charindex]);
   po2:= @info.text.text[charindex+1];
   while true do begin
    case po2^ of 

@@ -618,16 +618,21 @@ type
   xftcolorbackground: txftcolor;
   xftfont: pxftfont;
   xftstate: xftstatesty;
-  platformdata: array[12..23] of cardinal; //platform dependent
+  platformdata: array[{$ifdef CPU64}16{$else}12{$endif}..23] of cardinal; //platform dependent
  end;
 
  fontmatrixmodety = (fmm_fix,fmm_linear,fmm_matrix);
- x11fontdataty = record
+ x11fontdatadty = record
   infopo: pxfontstruct;
   matrixmode: fontmatrixmodety;
   defaultwidth: integer;
   rowlength: word;
-  platformdata: array[4..15] of cardinal; //plattform dependent
+ end;
+ x11fontdataty = record
+  d: x11fontdatadty;
+  platformdata: array[0..sizeof(fontdataty.platformdata)-
+             sizeof(x11fontdatadty)-1] of byte;
+//  platformdata: array[5..15] of cardinal; //platform dependent
  end;
 {$ifdef FPC}
  Colormap = TXID;
@@ -3565,12 +3570,12 @@ type
 
 begin
 {$ifdef FPC} {$checkpointer off} {$endif}
- with fontdata,infopo^ do begin
+ with fontdata,d.infopo^ do begin
   if (xchar2b(char).byte1 >= min_byte1) and (xchar2b(char).byte1 <= max_byte1) and
    (xchar2b(char).byte2 >= min_char_or_byte2) and
    (xchar2b(char).byte2 <= max_char_or_byte2) then begin
    result:= pxcharstruct(pchar(per_char) +
-             ((xchar2b(char).byte1 - min_byte1) * rowlength +
+             ((xchar2b(char).byte1 - min_byte1) * d.rowlength +
               (xchar2b(char).byte2 - min_char_or_byte2)
              ) * sizeof(xcharstruct));
   end
@@ -3597,7 +3602,7 @@ begin
   po1:= text;
   po2:= resultpo;
 {$ifdef FPC} {$checkpointer off} {$endif}
-  with datapo^,x11fontdataty(platformdata),infopo^ do begin
+  with datapo^,x11fontdataty(platformdata),d.infopo^ do begin
    if fhasxft then begin
     bo1:= (df_highresfont in drawinfo.gc.drawingflags) and 
            (fonthighres <> 0);
@@ -3625,7 +3630,7 @@ begin
     end;
    end
    else begin
-    case matrixmode of
+    case d.matrixmode of
      fmm_linear: begin
       for int1:= 0 to count - 1 do begin
        char:= word(po1^);
@@ -3634,7 +3639,7 @@ begin
                    (char - min_char_or_byte2)*sizeof(xcharstruct))^.width;
        end
        else begin
-        po2^:= defaultwidth;
+        po2^:= d.defaultwidth;
        end;
        inc(po1);
        inc(po2);
@@ -3646,11 +3651,11 @@ begin
        if charstructpo <> nil then begin
         po2^:= charstructpo^.width;
         if po2^ = 0 then begin
-         po2^:= defaultwidth;
+         po2^:= d.defaultwidth;
         end;
        end
        else begin
-        po2^:= defaultwidth;
+        po2^:= d.defaultwidth;
        end;
        inc(po1);
        inc(po2);
@@ -3678,7 +3683,7 @@ var
 begin
  with drawinfo.getfontmetrics do begin
 {$ifdef FPC} {$checkpointer off} {$endif}
-  with datapo^,x11fontdataty(platformdata),infopo^ do begin
+  with datapo^,x11fontdataty(platformdata),d.infopo^ do begin
    if fhasxft then begin
     xfttextextents16(appdisp,pxftfont(font),@char,1,@glyphinfo);
     with resultpo^ do begin
@@ -3688,7 +3693,7 @@ begin
     end;
    end
    else begin
-    case matrixmode of
+    case d.matrixmode of
      fmm_linear: begin
       if (word(char) >= min_char_or_byte2) and (word(char) <= max_char_or_byte2) then begin
        po1:= pxcharstruct(pchar(per_char) +
@@ -3738,13 +3743,13 @@ begin
  result:= 0;
 {$ifdef FPC} {$checkpointer off} {$endif}
  with drawinfo.gettext16width do begin
-  with datapo^,x11fontdataty(platformdata),infopo^ do begin
+  with datapo^,x11fontdataty(platformdata),d.infopo^ do begin
    if fhasxft then begin
     xfttextextents16(appdisp,pxftfont(font),text,count,@glyphinfo);
     result:= glyphinfo.xoff;
    end
    else begin
-    case matrixmode of
+    case d.matrixmode of
      fmm_linear: begin
       for int1:= 0 to count - 1 do begin
        char:= word(text[int1]);
@@ -3753,7 +3758,7 @@ begin
                    (char - min_char_or_byte2)*sizeof(xcharstruct))^.width);
        end
        else begin
-        inc(result,defaultwidth);
+        inc(result,d.defaultwidth);
        end;
       end;
      end;
@@ -3764,7 +3769,7 @@ begin
         inc(result,charstructpo^.width);
        end
        else begin
-        inc(result,defaultwidth);
+        inc(result,d.defaultwidth);
        end;
       end;
      end;
@@ -3782,8 +3787,8 @@ function getcharstruct(const fontdata: fontdataty; char: msechar): pxcharstruct;
 begin
 {$ifdef FPC} {$checkpointer off} {$endif}
  result:= nil;
- with fontdata,x11fontdataty(platformdata),infopo^ do begin
-  case matrixmode of
+ with fontdata,x11fontdataty(platformdata),d.infopo^ do begin
+  case d.matrixmode of
    fmm_linear: begin
     if (word(char) >= min_char_or_byte2) and (word(char) <= max_char_or_byte2) then begin
      result:= pxcharstruct(pchar(per_char) +
@@ -3794,7 +3799,7 @@ begin
     result:= getmatrixcharstruct(char,x11fontdataty(fontdata.platformdata));
    end;
    else begin //fmm_fix
-    result:= @infopo^.max_bounds;
+    result:= @d.infopo^.max_bounds;
    end;
   end;
  end;
@@ -3819,7 +3824,7 @@ type
   name: string; isstring: boolean;
  end;
 
- intfontproparty = array[fontpropertiesty] of integer;
+ intfontproparty = array[fontpropertiesty] of ptrint;
  strfontproparty = array[fontpropertiesty] of string;
 
  const
@@ -3889,53 +3894,53 @@ type
   slant: string;
   setwidth_name: string;
   add_style_name: string;
-  pixel_size: integer;
-  point_size: integer;
-  resolution_x: integer;
-  resolution_y: integer;
+  pixel_size: ptrint;
+  point_size: ptrint;
+  resolution_x: ptrint;
+  resolution_y: ptrint;
   spacing: string;
-  average_width: integer;
+  average_width: ptrint;
   charset_registry: string;
   charset_encodeing: string;
-  min_space: integer;
-  norm_space: integer;
-  max_space: integer;
-  end_space: integer;
-  superscript_x: integer;
-  superscript_y: integer;
-  subscript_x: integer;
-  subscript_y: integer;
-  underline_position: integer;
-  underline_thickness: integer;
-  strikeout_ascent: integer;
-  strikeout_descent: integer;
-  italic_angle: integer;
-  x_height: integer;
-  weight: integer;
+  min_space: ptrint;
+  norm_space: ptrint;
+  max_space: ptrint;
+  end_space: ptrint;
+  superscript_x: ptrint;
+  superscript_y: ptrint;
+  subscript_x: ptrint;
+  subscript_y: ptrint;
+  underline_position: ptrint;
+  underline_thickness: ptrint;
+  strikeout_ascent: ptrint;
+  strikeout_descent: ptrint;
+  italic_angle: ptrint;
+  x_height: ptrint;
+  weight: ptrint;
   face_name: string;
   font: string;
   copyright: string;
-  avg_capital_width: integer;
-  avg_lowercase_width: integer;
-  relative_setwidth: integer;
-  relative_weight: integer;
-  cap_height: integer;
-  superscript_size: integer;
-  figure_width: integer;
-  subscript_size: integer;
-  small_cap_size: integer;
+  avg_capital_width: ptrint;
+  avg_lowercase_width: ptrint;
+  relative_setwidth: ptrint;
+  relative_weight: ptrint;
+  cap_height: ptrint;
+  superscript_size: ptrint;
+  figure_width: ptrint;
+  subscript_size: ptrint;
+  small_cap_size: ptrint;
   notice: string;
-  destination: integer;
+  destination: ptrint;
   font_type: string;
   font_version: string;
   rasterizer_name: string;
   rasterizer_version: string;
-  raw_ascent: integer;
-  raw_descent: integer;
+  raw_ascent: ptrint;
+  raw_descent: ptrint;
   axis_names: string;
   axis_limits: string;
   axis_types: string;
-  dummy: integer;
+  dummy: ptrint;
  end;
 
 var
@@ -4095,7 +4100,7 @@ begin
  //   linespacing:= ascent + descent;
    linespacing:= po^.height;
    caretshift:= 0;
-   infopo:= nil;
+   d.infopo:= nil;
   end;
  {$ifdef FPC} {$checkpointer default} {$endif}
  end;
@@ -4366,23 +4371,23 @@ function gui_getfont(var drawinfo: drawinfoty): boolean;
    descent:= po^.descent;
    linespacing:= ascent + descent;
    caretshift:= 0;
-   infopo:= po;
+   d.infopo:= po;
    with po^ do begin
     if per_char = nil then begin
-     matrixmode:= fmm_fix;
+     d.matrixmode:= fmm_fix;
     end
     else begin
      if (min_byte1 = 0) and (max_byte1 = 0) then begin
-      matrixmode:= fmm_linear;
+      d.matrixmode:= fmm_linear;
      end
      else begin
-      matrixmode:= fmm_matrix;
-      rowlength:= max_char_or_byte2 - min_char_or_byte2 + 1;
+      d.matrixmode:= fmm_matrix;
+      d.rowlength:= max_char_or_byte2 - min_char_or_byte2 + 1;
      end;
     end;
     charstructpo:= getcharstruct(fontdata^,msechar(default_char));
     if charstructpo <> nil then begin
-     defaultwidth:= charstructpo^.width;
+     d.defaultwidth:= charstructpo^.width;
     end; //0 otherwise
    end;
 {$ifdef FPC} {$checkpointer default} {$endif}
@@ -4472,7 +4477,7 @@ begin
  end
  else begin
   with x11fontdataty(data.platformdata) do begin
-   xfreefontinfo(nil,infopo,1);
+   xfreefontinfo(nil,d.infopo,1);
  //  freemem(infopo);
    xunloadfont(appdisp,data.font);
   end;
