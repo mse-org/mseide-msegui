@@ -270,7 +270,7 @@ begin
  {$ifdef FPC}
   result:= loadlibrary(libnames[int1]);
  {$else}
-  result:= loadlibrary(pansichar(libnames[int1]));
+  result:= loadlibrary(pansichar(string(libnames[int1])));
  {$endif}
   if result <> 0 then begin
    libname:= libnames[int1];

@@ -11,7 +11,7 @@ unit msefloattostr;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msestrings;
+ msestrings,msetypes;
 
 const
  expochar = msechar('E');
@@ -19,9 +19,9 @@ const
 type
  floatstringmodety = (fsm_default,fsm_fix,fsm_sci,fsm_engfix,fsm_engflo,
                       fsm_engsymfix,fsm_engsymflo);
- {$ifndef FPC}
- qword = int64;
- {$endif}
+// {$ifndef FPC}
+// qword = int64;
+// {$endif}
  doublerecty = packed record       //little endian
   case integer of
    0: (by0,by1,by2,by3,by4,by5,by6,by7: byte);

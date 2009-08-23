@@ -2258,7 +2258,7 @@ begin
 end;
 
 function trystrtointvalue64(const text: msestring; base: numbasety;
-                     out value: qword): boolean;
+                     out value: qword): boolean; overload;
 var
  str1: string;
 begin

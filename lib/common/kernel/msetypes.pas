@@ -26,6 +26,7 @@ type
   PPtrUInt = ^PtrUInt;
   ValSInt = Longint;
   ValUInt = Cardinal;
+  qword = uint64;
  {$endif}
  {$ifdef VER2_2_0}
   PPtrUInt = ^PtrUInt;
