@@ -86,12 +86,13 @@ type
 type
  fileinfolevelty = (fil_name,fil_ext1,fil_ext2);
 
+ dirstreampty = array[0..7] of cardinal;
  dirstreamty = record
   infolevel: fileinfolevelty;
   dirname: filenamety;
   mask: filenamearty;
   include,exclude: fileattributesty;
-  platformdata: array[0..7] of cardinal;
+  platformdata: dirstreampty;
  end;
 
  ext1fileinfoty = record

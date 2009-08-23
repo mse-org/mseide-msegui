@@ -41,8 +41,9 @@ type
   sema: tsemaphore;
  end;
  linuxsemty = record
-  d: linuxsemdty;
-  platformdata: array[0..sizeof(semty)-sizeof(linuxsemdty)-1] of byte;
+  case integer of
+   0: (d: linuxsemdty;);
+   1: (_bufferspace: semty;);
  end;
 
 function timestampms: cardinal;
@@ -103,16 +104,18 @@ const
  
 type
  linuxmutexty = record
-  mutex: pthread_mutex_t;
-  platformdata: array[0..sizeof(semty)-sizeof(pthread_mutex_t)-1] of byte;
+  case integer of
+   0: (mutex: pthread_mutex_t;);
+   1: (_bufferspace: mutexty;);
  end;
  linuxconddty = record
   cond: tcondvar;
   mutex: pthread_mutex_t;
  end;
  linuxcondty = record
-  d: linuxconddty;
-  platformdata: array[0..sizeof(condty)-sizeof(linuxconddty)-1] of byte;
+  case integer of
+   0: (d: linuxconddty;);
+   1: (_bufferspace: condty;);
  end;
 
  dirstreamlinuxdty = record
@@ -121,9 +124,9 @@ type
   dirpath: pointer;
  end;
  dirstreamlinuxty = record
-  d: dirstreamlinuxdty;
-  platformdata: array[0..sizeof(dirstreamty.platformdata)-
-                    sizeof(dirstreamlinuxdty)-1] of byte;
+  case integer of
+   0: (d: dirstreamlinuxdty;);
+   1: (_bufferspace: dirstreampty;);
  end;
 
 function unblocksignal(const signum: integer): boolean;
@@ -478,13 +481,6 @@ begin
  gettimeofday(@time,ptimezone(nil));
  result:= time.tv_sec * 1000000 + time.tv_usec;
 end;
-
-type
- pthread_mutex_tx = array[0..40-1] of byte;
- testty = record
-  mutex: pthread_mutex_tx;
-  platformdata: array[{$ifdef CPU64}5{$else}6{$endif}..7] of pointer;
- end;
 
 function sys_mutexcreate(out mutex: mutexty): syserrorty;
 begin

@@ -602,14 +602,18 @@ type
  end;
  pxregion = ^xregion;
 
- x11windowty = record
+ x11windowdty = record
   ic: xic;
-  platformdata: array[1..7] of pointer;
+ end;
+ x11windowty = record
+  case integer of
+   0: (d: x11windowdty;);
+   1: (_bufferspace: windowpty;);
  end;
  
  xftstatety = (xfts_clipregionvalid{,xfts_colorvalid});
  xftstatesty = set of xftstatety;
- x11gcty = record
+ x11gcdty = record
   gcdrawingflags: drawingflagsty;
   gcrasterop: rasteropty;
   gcclipregion: regionty;
@@ -618,7 +622,11 @@ type
   xftcolorbackground: txftcolor;
   xftfont: pxftfont;
   xftstate: xftstatesty;
-  platformdata: array[{$ifdef CPU64}16{$else}12{$endif}..23] of cardinal; //platform dependent
+ end;
+ x11gcty = record
+  case integer of
+   0: (d: x11gcdty;);
+   1: (_bufferspace: gcpty;);
  end;
 
  fontmatrixmodety = (fmm_fix,fmm_linear,fmm_matrix);
@@ -629,10 +637,9 @@ type
   rowlength: word;
  end;
  x11fontdataty = record
-  d: x11fontdatadty;
-  platformdata: array[0..sizeof(fontdataty.platformdata)-
-             sizeof(x11fontdatadty)-1] of byte;
-//  platformdata: array[5..15] of cardinal; //platform dependent
+  case integer of
+   0: (d: x11fontdatadty;);
+   1: (_bufferspace: fontdatapty;);
  end;
 {$ifdef FPC}
  Colormap = TXID;
@@ -2094,7 +2101,7 @@ begin
  {$else}
  if application.findwindow(awindow,twindow(window1)) then begin
  {$endif}
-  with x11windowty(window1.fwindow.platformdata) do begin
+  with x11windowty(window1.fwindow.platformdata).d do begin
    if ic <> nil then begin
     result:= ic;
    end;
@@ -2113,7 +2120,7 @@ end;
 function gui_setimefocus(var awindow: windowty): guierrorty;
 begin
  result:= gue_ok;
- with awindow,x11windowty(platformdata) do begin
+ with awindow,x11windowty(platformdata).d do begin
   if ic <> nil then begin
    xseticvalues(ic,pchar(xnfocuswindow),id,nil);
    xseticfocus(ic);
@@ -2138,7 +2145,7 @@ end;
 function gui_unsetimefocus(var awindow: windowty): guierrorty;
 begin
  result:= gue_ok;
- with x11windowty(awindow.platformdata) do begin
+ with x11windowty(awindow.platformdata).d do begin
   if ic <> nil then begin
    xunseticfocus(ic);
   end
@@ -2813,7 +2820,7 @@ var
  id1: winidty;
  icmask: longword;
 begin
- with awindow,x11windowty(platformdata) do begin
+ with awindow,x11windowty(platformdata).d do begin
   valuemask:= 0;
   if wo_popup in options.options then begin
    attributes.override_redirect:= {$ifdef xboolean}true{$else}1{$endif};
@@ -2928,7 +2935,7 @@ end;
 
 function gui_destroywindow(var awindow: windowty): guierrorty;
 begin
- with awindow,x11windowty(platformdata) do begin
+ with awindow,x11windowty(platformdata).d do begin
   if ic <> nil then begin
 //   xunseticfocus(ic);
    xdestroyic(ic);
@@ -3311,7 +3318,7 @@ end;
 procedure gui_destroygc(var drawinfo: drawinfoty);
 begin
  with drawinfo do begin
-  with x11gcty(gc.platformdata) do begin
+  with x11gcty(gc.platformdata).d do begin
    if xftdraw <> nil then begin
     xftdrawdestroy(xftdraw);
    end;
@@ -3399,7 +3406,7 @@ end;
 
 procedure checkxftdraw(var drawinfo: drawinfoty);
 begin
- with x11gcty(drawinfo.gc.platformdata) do begin
+ with x11gcty(drawinfo.gc.platformdata).d do begin
   if xftdraw = nil then begin
    xftdraw:= xftdrawcreate(appdisp,drawinfo.paintdevice,xlib.pvisual(defvisual),0);
   end;
@@ -3439,7 +3446,7 @@ var
 
 begin
  xmask:= 0;
- with drawinfo.gcvalues^,drawinfo.gc,x11gcty(platformdata) do begin
+ with drawinfo.gcvalues^,drawinfo.gc,x11gcty(platformdata).d do begin
   agc:= tgc(handle);
   if gvm_rasterop in mask then begin
    xmask:= xmask or gcfunction;
@@ -4670,7 +4677,7 @@ label
  end;
 
 begin
- with drawinfo,copyarea,sourcerect^,gc,x11gcty(platformdata) do begin
+ with drawinfo,copyarea,sourcerect^,gc,x11gcty(platformdata).d do begin
   needstransform:= (alignment * [al_stretchx,al_stretchy] <> []) and
             ((destrect^.cx <> sourcerect^.cx) or
             (destrect^.cy <> sourcerect^.cy)) and
@@ -5033,7 +5040,7 @@ begin
    checkxftdraw(drawinfo);
    transformpos(drawinfo);
    with pxpoint(buffer.buffer)^ do begin
-    with x11gcty(gc.platformdata) do begin
+    with x11gcty(gc.platformdata).d do begin
      if df_opaque in gc.drawingflags then begin
       xfttextextents16(appdisp,xftfont,text,count,@glyphinfo);
 //      xftdrawrect(xftdraw,@xftcolorbackground,x-glyphinfo.x,y-xftfont^.ascent,

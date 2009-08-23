@@ -90,9 +90,10 @@ type
  regionty = cardinal;
  pixmapty = cardinal;
 
+ windowpty = array[0..7] of pointer;
  windowty = record
   id: winidty;
-  platformdata: array[0..7] of pointer;
+  platformdata: windowpty;
  end;
  pwindowty = ^windowty;
  

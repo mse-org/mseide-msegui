@@ -73,6 +73,7 @@ const
  fontaliasoptionchars : array[fontoptionty] of char =
                 ('p','P','H','R','S','D','A','a'{,'C','c'});
 type
+ fontdatapty = array[0..15] of cardinal;
  fontdataty = record
   font: fontty;
   fonthighres: fontty;
@@ -87,7 +88,7 @@ type
   pitchoptions,familyoptions,antialiasedoptions{,xcoreoptions}: fontoptionsty;
   style: fontstylesty;                    //fs_bold,fs_italic
   ascent,descent,linespacing,caretshift: integer;
-  platformdata: array[0..15] of cardinal; //platform dependent
+  platformdata: fontdatapty; //platform dependent
  end;
  pfontdataty = ^fontdataty;
 
@@ -164,6 +165,7 @@ type
   function getsize: sizety;
  end;
 
+ gcpty = array[0..23] of cardinal;
  gcty = record
   handle: cardinal;
   refgc: cardinal; //for windowsmetafile
@@ -171,7 +173,7 @@ type
   cliporigin: pointty;
   paintdevicesize: sizety;
   ppmm: real;
-  platformdata: array[0..23] of cardinal; //platform dependent
+  platformdata: gcpty; //platform dependent
  end;
  gcpoty = ^gcty;
 
