@@ -65,7 +65,7 @@ function treptabulatoreditor.getvalue: msestring;
 var
  mstr1: msestring;
 begin
- with treptabulatoritem(getordvalue) do begin
+ with treptabulatoritem(getpointervalue) do begin
   if datafield = '' then begin
    mstr1:= value;
   end

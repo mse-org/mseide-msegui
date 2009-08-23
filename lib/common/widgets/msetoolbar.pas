@@ -66,6 +66,7 @@ type
    procedure writebool(writer: twriter);
   protected
    ftag: integer;
+   ftagpointer: pointer;
    procedure doexecute(const tag: integer; const info: mouseeventinfoty);
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
    procedure defineproperties(filer: tfiler); override;
@@ -87,6 +88,7 @@ type
    property checked: boolean read getchecked write setchecked;
    property visible: boolean read getvisible write setvisible default true;
    property enabled: boolean read getenabled write setenabled default true;
+   property tagpointer: pointer read ftagpointer write ftagpointer;
   published
    property imagelist: timagelist read getimagelist write setimagelist
                     stored isimageliststored;

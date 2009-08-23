@@ -60,6 +60,9 @@ type
   function getint64value(const index: integer = 0): int64;
   procedure setint64value(const value: int64); overload;
   procedure setint64value(const index: integer; const value: int64); overload;
+  function getpointervalue(const index: integer = 0): pointer;
+  procedure setpointervalue(const value: pointer); overload;
+  procedure setpointervalue(const index: integer; const value: pointer); overload;
   function getfloatvalue(const index: integer = 0): extended;
   procedure setfloatvalue(const value: extended);
   function getcurrencyvalue(const index: integer = 0): currency;
@@ -108,6 +111,10 @@ type
    function getint64value(const index: integer = 0): int64;
    procedure setint64value(const value: int64); overload;
    procedure setint64value(const index: integer; const value: int64); overload;
+   function getpointervalue(const index: integer = 0): pointer;
+   procedure setpointervalue(const value: pointer); overload;
+   procedure setpointervalue(const index: integer; const value: pointer); overload;
+
    procedure setbitvalue(const value: boolean; const bitindex: integer);
    function getfloatvalue(const index: integer = 0): extended;
    procedure setfloatvalue(const value: extended);
@@ -856,7 +863,7 @@ procedure checkdatalistnostreaming(const sender: tpropertyeditor;
 var
  datalist1: tdatalist1;
 begin
- datalist1:= tdatalist1(sender.getordvalue);
+ datalist1:= tdatalist1(sender.getpointervalue);
  if (datalist1 = nil) {or 
            (ilo_nostreaming in datalist1.finternaloptions)} then begin
   exclude(defaultstate,ps_dialog);
@@ -871,10 +878,17 @@ begin
  result:= ftextpropertyfont;
 end;
 
+{$ifdef CPU64}
+Function  GetOrdProp1(Instance: TObject; PropInfo : PPropInfo) : int64;
+begin
+ result:= getint64prop(instance,propinfo);
+end;
+{$else}
 Function  GetOrdProp1(Instance: TObject; PropInfo : PPropInfo) : Longint;
 begin
  result:= getordprop(instance,propinfo);
 end;
+{$endif}
 
 function propertyeditors: tpropertyeditors;
 begin
@@ -1306,7 +1320,7 @@ begin
                tcomponentpropertyeditor(ed1).issubcomponent then begin
    setlength(result,count);
    for int1:= 0 to high(result) do begin
-    result[int1]:= tcomponent(ed1.getordvalue);
+    result[int1]:= tcomponent(ed1.getpointervalue);
    end;
    break;
   end;
@@ -1407,7 +1421,7 @@ begin
  end
  else begin
   with fprops[index] do begin
-   result:= GetOrdProp(instance,propinfo);
+   result:= getint64prop(instance,propinfo);
   end;
  end;
 end;
@@ -1447,6 +1461,76 @@ begin
  else begin
   with fprops[index] do begin
    setint64prop(instance, propinfo, value);
+  end;
+  updatedefaultvalue;
+  modified;
+ end;
+end;
+
+function tpropertyeditor.getpointervalue(const index: integer): pointer;
+
+begin
+ if fremote <> nil then begin
+  result:= fremote.getpointervalue(index);
+ end
+ else begin
+  with fprops[index] do begin
+{$ifdef CPU64}
+   result:= pointer(Getint64Prop(instance,propinfo));
+{$else}
+   result:= pointer(GetOrdProp(instance,propinfo));
+{$endif}
+  end;
+ end;
+end;
+
+procedure tpropertyeditor.setpointervalue(const value: pointer);
+var
+ int1: integer;
+ ar1: objectarty;
+begin
+ if fremote <> nil then begin
+  fremote.setpointervalue(value);
+ end
+ else begin
+  ar1:= queryselectedpropinstances;
+  if ar1 = nil then begin
+   for int1:= 0 to high(fprops) do begin
+    with fprops[int1] do begin
+{$ifdef CPU64}
+     setint64prop(instance, propinfo, ptrint(value));
+{$else}
+     setordprop(instance, propinfo, ptrint(value));
+{$endif}
+    end;
+   end;
+  end
+  else begin
+   for int1:= 0 to high(ar1) do begin
+{$ifdef CPU64}
+    setint64prop(ar1[int1],fprops[0].propinfo,ptrint(value));
+{$else}
+    setordprop(ar1[int1],fprops[0].propinfo,ptrint(value));
+{$endif}
+   end;
+  end;
+  updatedefaultvalue;
+  modified;
+ end;
+end;
+
+procedure tpropertyeditor.setpointervalue(const index: integer; const value: pointer);
+begin
+ if fremote <> nil then begin
+  fremote.setpointervalue(index,value);
+ end
+ else begin
+  with fprops[index] do begin
+{$ifdef CPU64}
+   setint64prop(instance, propinfo, ptrint(value));
+{$else}
+   setordprop(instance, propinfo, ptrint(value));
+{$endif}
   end;
   updatedefaultvalue;
   modified;
@@ -2281,7 +2365,7 @@ var
 begin
  setlength(ar1,count);
  for int1:= 0 to high(fprops) do begin
-  ar1[int1]:= tobject(getordvalue(int1));
+  ar1[int1]:= tobject(getpointervalue(int1));
  end;
  result:= fobjectinspector.getproperties(ar1,fmodule,fcomponent);
  for int1:= 0 to high(result) do begin
@@ -2300,7 +2384,7 @@ function tcomponentpropertyeditor.issubcomponent(const index: integer = 0): bool
 var
  comp: tcomponent;
 begin
- comp:= tcomponent(getordvalue(index));
+ comp:= tcomponent(getpointervalue(index));
  if comp = nil then begin
   result:= false;
  end
@@ -2353,7 +2437,7 @@ begin
   result:= inherited getvalue;
  end
  else begin
-  comp1:= tcomponent(getordvalue);
+  comp1:= tcomponent(getpointervalue);
   if comp1 = nil then begin
    result:= '<nil>'
   end
@@ -2579,7 +2663,7 @@ end;
 
 function toptionalclasspropertyeditor.getinstance: tpersistent;
 begin
- result:= tpersistent(getordvalue);
+ result:= tpersistent(getpointervalue);
 end;
 
 function toptionalclasspropertyeditor.getniltext: string;
@@ -2623,9 +2707,9 @@ begin
   obj1:= getinstance;
   if obj1 = nil then begin
    for int1:= 0 to count - 1 do begin
-    persist1:= tpersistent(getordvalue(int1));
+    persist1:= tpersistent(getpointervalue(int1));
     setordvalue(int1,1); //create instance
-    persist2:= tpersistent(getordvalue(int1));
+    persist2:= tpersistent(getpointervalue(int1));
     if (persist1 <> nil) and (persist2 <> nil) then begin
      persist2.Assign(persist1);    //copy default values
     end;
@@ -2756,9 +2840,9 @@ begin
  result:= inherited allequal;
  if not result then begin
   result:= true;
-  int2:= tarrayprop(getordvalue).count;
+  int2:= tarrayprop(getpointervalue).count;
   for int1:= 1 to high(fprops) do begin
-   if int2 <> tarrayprop(getordvalue(int1)).count then begin
+   if int2 <> tarrayprop(getpointervalue(int1)).count then begin
     result:= false;
     break;
    end;
@@ -2783,7 +2867,7 @@ end;
 
 function tarraypropertyeditor.getvalue: msestring;
 begin
- result:= inttostr(tarrayprop(getordvalue).count);
+ result:= inttostr(tarrayprop(getpointervalue).count);
 end;
 
 function tarraypropertyeditor.name: msestring;
@@ -2810,14 +2894,14 @@ begin
    va:= propmaxarraycount;
   end;
  end;
- int1:= tarrayprop(getordvalue).count;
+ int1:= tarrayprop(getpointervalue).count;
  if ( int1 > va) and not askok('Do you wish to delete items '+inttostr(va) +
          ' to '+ inttostr(int1-1) + '?','CONFIRMATION') then begin
   exit;
  end;
  if not ((ps_noadditems in fstate) and (va > int1)) then begin
   for int1:= 0 to high(fprops) do begin
-   tarrayprop(getordvalue(int1)).count:= va;
+   tarrayprop(getpointervalue(int1)).count:= va;
   end;
   modified;
  end;
@@ -2840,7 +2924,7 @@ begin
   end;
  end;
  setlength(result,int2);
- prop:= tarrayprop(getordvalue);
+ prop:= tarrayprop(getpointervalue);
  if prop <> nil then begin
   setlength(fsubprops,prop.count);
   for int1:= 0 to high(fsubprops) do begin
@@ -2871,7 +2955,7 @@ end;
 
 procedure tarraypropertyeditor.doappend(const sender: tobject);
 begin
- with tarrayprop(getordvalue) do begin
+ with tarrayprop(getpointervalue) do begin
   insertdefault(count);
  end;
  modified;
@@ -2883,7 +2967,7 @@ var
  int1: integer;
 begin
  for int1:= 0 to high(fprops) do begin
-  tarrayprop(getordvalue(int1)).move(curindex,newindex);
+  tarrayprop(getpointervalue(int1)).move(curindex,newindex);
  end;
  itemmoved(curindex,newindex)
 end;
@@ -3054,20 +3138,20 @@ end;
 procedure tarrayelementeditor.dodelete(const sender: tobject);
 begin
  if askyesno('Do you wish to delete '+getvalue+'?','CONFIRMATION') then begin
-  tarrayprop(fparenteditor.getordvalue).delete(findex);
+  tarrayprop(fparenteditor.getpointervalue).delete(findex);
   fparenteditor.modified;
  end;
 end;
 
 procedure tarrayelementeditor.doinsert(const sender: tobject);
 begin
- tarrayprop(fparenteditor.getordvalue).insertdefault(findex);
+ tarrayprop(fparenteditor.getpointervalue).insertdefault(findex);
  fparenteditor.modified;
 end;
 
 procedure tarrayelementeditor.doappend(const sender: tobject);
 begin
- tarrayprop(fparenteditor.getordvalue).insertdefault(findex+1);
+ tarrayprop(fparenteditor.getpointervalue).insertdefault(findex+1);
  fparenteditor.modified;
 end;
 
@@ -3174,7 +3258,7 @@ begin
   int2:= 0;
   for int1:= 0 to high(fsubprops) do begin
    if fsubprops[int1].selected then begin
-    result[int2]:= tobject(fsubprops[int1].feditor.getordvalue);
+    result[int2]:= tobject(fsubprops[int1].feditor.getpointervalue);
     inc(int2);
    end;
   end;
@@ -3215,7 +3299,7 @@ end;
 
 function toptionalpersistentarraypropertyeditor.getinstance: tpersistent;
 begin
- result:= tpersistent(getordvalue);
+ result:= tpersistent(getpointervalue);
 end;
 
 function toptionalpersistentarraypropertyeditor.getniltext: string;
@@ -3246,7 +3330,7 @@ function tmenuelementeditor.getvalue: msestring;
 var
  item1: tmenuitem;
 begin
- item1:= tmenuitem(getordvalue);
+ item1:= tmenuitem(getpointervalue);
  if (mao_separator in item1.options) then begin
   result:= '<---->';
  end
@@ -3281,7 +3365,7 @@ constructor tsetarrayelementeditor.create(aindex: integer;
                const aprops: propinstancearty; atypinfo: ptypeinfo);
 begin
  inherited;
- feditor.ftypeinfo:= tsetarrayprop(aparenteditor.getordvalue).typeinfo;
+ feditor.ftypeinfo:= tsetarrayprop(aparenteditor.getpointervalue).typeinfo;
 end;
 
 { tsetarraypropertyeditor }
@@ -3347,7 +3431,7 @@ function tclasselementeditor.getvalue: msestring;
 var
  obj1: tobject;
 begin
- obj1:= tobject(getordvalue);
+ obj1:= tobject(getpointervalue);
  if obj1 = nil then begin
   result:= '<nil>';
  end
@@ -3372,7 +3456,7 @@ begin
  for int1:= 0 to high(props1) do begin
   props1[int1].propinfo:= aprops[int1].propinfo;
   props1[int1].instance:= 
-     tcollection(aparenteditor.getordvalue(int1)).items[aindex];
+     tcollection(aparenteditor.getpointervalue(int1)).items[aindex];
  end;
  findex:= aindex;
  fparenteditor:= aparenteditor;
@@ -3421,7 +3505,7 @@ end;
 
 function tcollectionitemeditor.getordvalue(const index: integer = 0): integer;
 begin
- result:= integer(tcollection(fparenteditor.getordvalue(index)).items[findex]);
+ result:= integer(tcollection(fparenteditor.getpointervalue(index)).items[findex]);
 end;
 
 procedure tcollectionitemeditor.setordvalue(const value: longword);
@@ -3437,19 +3521,19 @@ end;
 
 procedure tcollectionitemeditor.doinsert(const sender: tobject);
 begin
- tcollection(fparenteditor.getordvalue).insert(findex);
+ tcollection(fparenteditor.getpointervalue).insert(findex);
  fparenteditor.modified;
 end;
 
 procedure tcollectionitemeditor.doappend(const sender: tobject);
 begin
- tcollection(fparenteditor.getordvalue).insert(findex+1);
+ tcollection(fparenteditor.getpointervalue).insert(findex+1);
  fparenteditor.modified;
 end;
 
 procedure tcollectionitemeditor.dodelete(const sender: tobject);
 begin
- tcollection(fparenteditor.getordvalue).delete(findex);
+ tcollection(fparenteditor.getpointervalue).delete(findex);
  fparenteditor.modified;
 end;
 
@@ -3477,7 +3561,7 @@ begin
  if (sender is tcollectionitemeditor) and
       (tcollectionitemeditor(sender).fparenteditor = fparenteditor) then begin
   source:= tcollectionitemeditor(sender).findex;
-  tcollection(fparenteditor.getordvalue).items[source].index:= findex;
+  tcollection(fparenteditor.getpointervalue).items[source].index:= findex;
 //  sender.modified;
 //  modified;
   tcollectionpropertyeditor(fparenteditor).itemmoved(source,findex);
@@ -3515,7 +3599,7 @@ function tcollectionpropertyeditor.getvalue: msestring;
 var
  col1: tcollection;
 begin
- col1:= tcollection(getordvalue);
+ col1:= tcollection(getpointervalue);
  if col1 <> nil then begin
   result:= inttostr(col1.count);
  end
@@ -3530,7 +3614,7 @@ var
  va: integer;
  col1: tcollection;
 begin
- col1:= tcollection(getordvalue);
+ col1:= tcollection(getpointervalue);
  if col1 <> nil then begin
   va:= strtoint(value);
   if va < 0 then begin
@@ -3555,7 +3639,7 @@ begin
   end
   else begin
    for int1:= 0 to high(fprops) do begin
-    with tcollection(getordvalue(int1)) do begin
+    with tcollection(getpointervalue(int1)) do begin
      for int2:= count to va - 1 do begin
       add;
      end;
@@ -3573,7 +3657,7 @@ var
  edtype: propertyeditorclassty; 
  int1: integer;
 begin
- col1:= tcollection(getordvalue);
+ col1:= tcollection(getpointervalue);
  if col1 <> nil then begin
   setlength(result,col1.count);
   itemtypeinfo:= ptypeinfo(col1.itemclass.classinfo);
@@ -3600,7 +3684,7 @@ end;
 
 procedure tcollectionpropertyeditor.doappend(const sender: tobject);
 begin
- with tcollection(getordvalue) do begin
+ with tcollection(getpointervalue) do begin
   insert(count);
  end;
  modified;
@@ -3716,7 +3800,7 @@ begin
   try
    bmp.loadfromfile(mstr1,format1);
    for int1:= 0 to high(fprops) do begin
-    bmp1:= tmaskedbitmap(getordvalue(int1));
+    bmp1:= tmaskedbitmap(getpointervalue(int1));
     if bmp1 <> nil then begin
      bmp.alignment:= bmp1.alignment;
      bmp.colorbackground:= bmp1.colorbackground;
@@ -3782,7 +3866,7 @@ end;
 }
 function tbitmappropertyeditor.getvalue: msestring;
 begin
- with tmaskedbitmap(getordvalue) do begin
+ with tmaskedbitmap(getpointervalue) do begin
   if source <> nil then begin
    result:= fdesigner.getcomponentname(source);
   end
@@ -3803,7 +3887,7 @@ var
 begin
  if value = '' then begin
   for int1:= 0 to high(fprops) do begin
-   tmaskedbitmap(getordvalue(int1)).clear;
+   tmaskedbitmap(getpointervalue(int1)).clear;
   end;
   modified;
  end;
@@ -4121,7 +4205,7 @@ var
 begin
  if amodalresult = mr_ok then begin
   try
-   with tstringlisteditor(sender),tstrings(getordvalue) do begin
+   with tstringlisteditor(sender),tstrings(getpointervalue) do begin
     beginupdate;
     try
      clear;
@@ -4146,7 +4230,7 @@ var
  int1: integer;
  strings: tstrings;
 begin
- strings:= tstrings(getordvalue);
+ strings:= tstrings(getpointervalue);
  editform:= tstringlisteditor.create({$ifdef FPC}@{$endif}closequery);
  try
   with editform do begin
@@ -4163,7 +4247,7 @@ end;
 
 function tstringspropertyeditor.getvalue: msestring;
 begin
- if tstrings(getordvalue).count = 0 then begin
+ if tstrings(getpointervalue).count = 0 then begin
   result:= '<empty>';
  end
  else begin
@@ -4187,7 +4271,7 @@ begin
    with tmsetexteditorfo(sender) do begin
     forigtext:= textedit.datalist.asmsestringarray;
     if ismsestring then begin
-     with tmsestringdatalist(getordvalue) do begin
+     with tmsestringdatalist(getpointervalue) do begin
       beginupdate;
       try
        clear;
@@ -4200,7 +4284,7 @@ begin
      end;
     end
     else begin
-     with tstrings(getordvalue) do begin
+     with tstrings(getpointervalue) do begin
       utf8:= getutf8;
       beginupdate;
       try
@@ -4247,14 +4331,14 @@ begin
   with editform do begin
    caption:= getcaption;
    if ismsestring then begin
-    mstrings:= tmsestringdatalist(getordvalue);
+    mstrings:= tmsestringdatalist(getpointervalue);
     grid.rowcount:= mstrings.Count;
     for int1:= 0 to mstrings.Count - 1 do begin
      textedit[int1]:= mstrings[int1];
     end;
    end
    else begin
-    strings:= tstrings(getordvalue);
+    strings:= tstrings(getpointervalue);
     grid.rowcount:= strings.Count;
     for int1:= 0 to strings.Count - 1 do begin
      if utf8 then begin
@@ -4276,7 +4360,7 @@ end;
 function ttextstringspropertyeditor.getvalue: msestring;
 begin
  if ismsestring then begin
-  if tmsestringdatalist(getordvalue).count = 0 then begin
+  if tmsestringdatalist(getpointervalue).count = 0 then begin
    result:= '<empty>';
   end
   else begin
@@ -4284,7 +4368,7 @@ begin
   end;
  end
  else begin
-  if tstrings(getordvalue).count = 0 then begin
+  if tstrings(getpointervalue).count = 0 then begin
    result:= '<empty>';
   end
   else begin
@@ -4317,10 +4401,10 @@ procedure ttextstringspropertyeditor.setvalue(const avalue: msestring);
 begin
  if (avalue = '') and askok('Do you wish to clear "'+fname+'"?') then begin
   if ismsestring then begin
-   tmsestringdatalist(getordvalue).clear;
+   tmsestringdatalist(getpointervalue).clear;
   end
   else begin
-   tstrings(getordvalue).clear;
+   tstrings(getpointervalue).clear;
   end;
  end;
  inherited;
@@ -4348,7 +4432,7 @@ var
  datalist1: tdatalist;
 begin
  formkind:= lfk_none;
- datalist1:= tdatalist(getordvalue);
+ datalist1:= tdatalist(getpointervalue);
  if datalist1 is tmsestringdatalist then begin
   formkind:= lfk_msestring;
  end
@@ -4395,18 +4479,21 @@ begin
   if editform <> nil then begin
    case formkind of
     lfk_msestring: begin
-     tstringlisteditor(editform).valueedit.datalist.assign(tmsestringdatalist(getordvalue));
+     tstringlisteditor(editform).valueedit.datalist.assign(
+                                          tmsestringdatalist(getpointervalue));
     end;
     lfk_real: begin
-     treallisteditor(editform).valueedit.griddata.assign(trealdatalist(getordvalue));
+     treallisteditor(editform).valueedit.griddata.assign(
+                                          trealdatalist(getpointervalue));
     end;
     lfk_integer: begin
-     tintegerlisteditor(editform).valueedit.griddata.assign(tintegerdatalist(getordvalue));
+     tintegerlisteditor(editform).valueedit.griddata.assign(
+                                          tintegerdatalist(getpointervalue));
     end;
     lfk_msestringint: begin
      with tmsestringintlisteditor(editform) do begin
-      texta.assigncol(tmsestringdatalist(getordvalue));
-      tmsestringintdatalist(getordvalue).assigntob(textb.griddata);
+      texta.assigncol(tmsestringdatalist(getpointervalue));
+      tmsestringintdatalist(getpointervalue).assigntob(textb.griddata);
      end;
     end;
    end;
@@ -4421,7 +4508,7 @@ function tdatalistpropertyeditor.getvalue: msestring;
 var
  datalist1: tdatalist;
 begin
- datalist1:= tdatalist(getordvalue);
+ datalist1:= tdatalist(getpointervalue);
  if datalist1 = nil then begin
   result:= '<nil>';
  end
@@ -4444,7 +4531,7 @@ begin
  if amodalresult = mr_ok then begin
   try
    for int1:= 0 to high (fprops) do begin
-    datalist1:= tdatalist(getordvalue(int1));
+    datalist1:= tdatalist(getpointervalue(int1));
     case formkind of
      lfk_msestring: begin
       tmsestringdatalist(datalist1).assign(
@@ -4490,7 +4577,7 @@ begin
  if amodalresult = mr_ok then begin
   for int1:= 0 to high(fprops) do begin
    try
-    tmsestringdatalist(getordvalue(int1)).assign(
+    tmsestringdatalist(getpointervalue(int1)).assign(
                    tstringlisteditor(sender).valueedit.datalist);
     modified;
    except
@@ -4508,7 +4595,7 @@ begin
  editform:= tstringlisteditor.create({$ifdef FPC}@{$endif}closequery);
  try
   with editform do begin
-   valueedit.datalist.assign(tmsestringdatalist(getordvalue));
+   valueedit.datalist.assign(tmsestringdatalist(getpointervalue));
    show(true,nil);
   end;
  finally
@@ -4518,7 +4605,7 @@ end;
 
 function tmsestringdatalistpropertyeditor.getvalue: msestring;
 begin
- if tmsestringdatalist(getordvalue).count = 0 then begin
+ if tmsestringdatalist(getpointervalue).count = 0 then begin
   result:= '<empty>';
  end
  else begin
@@ -4546,7 +4633,7 @@ begin
     try
      list.assign(texta.griddata);
      list.assignb(textb.griddata);
-     tdoublemsestringdatalist(getordvalue).assign(list);
+     tdoublemsestringdatalist(getpointervalue).assign(list);
      modified;
     finally
      list.Free;
@@ -4566,8 +4653,8 @@ begin
  editform:= tdoublestringlisteditor.create({$ifdef FPC}@{$endif}closequery);
  try
   with editform do begin
-   texta.assigncol(tmsestringdatalist(getordvalue));
-   tdoublemsestringdatalist(getordvalue).assigntob(textb.griddata);
+   texta.assigncol(tmsestringdatalist(getpointervalue));
+   tdoublemsestringdatalist(getpointervalue).assigntob(textb.griddata);
    show(true,nil);
   end;
  finally
@@ -4577,7 +4664,7 @@ end;
 
 function tdoublemsestringdatalistpropertyeditor.getvalue: msestring;
 begin
- if tdoublemsestringdatalist(getordvalue).count = 0 then begin
+ if tdoublemsestringdatalist(getpointervalue).count = 0 then begin
   result:= '<empty>';
  end
  else begin
@@ -4605,7 +4692,7 @@ begin
     try
      list.assign(texta.griddata);
      list.assignb(textb.griddata);
-     tmsestringintdatalist(getordvalue).assign(list);
+     tmsestringintdatalist(getpointervalue).assign(list);
      modified;
     finally
      list.Free;
@@ -4625,8 +4712,8 @@ begin
  editform:= tmsestringintlisteditor.create({$ifdef FPC}@{$endif}closequery);
  try
   with editform do begin
-   texta.assigncol(tmsestringdatalist(getordvalue));
-   tmsestringintdatalist(getordvalue).assigntob(textb.griddata);
+   texta.assigncol(tmsestringdatalist(getpointervalue));
+   tmsestringintdatalist(getpointervalue).assigntob(textb.griddata);
    show(true,nil);
   end;
  finally
@@ -4636,7 +4723,7 @@ end;
 
 function tmsestringintdatalistpropertyeditor.getvalue: msestring;
 begin
- if tmsestringintdatalist(getordvalue).count = 0 then begin
+ if tmsestringintdatalist(getpointervalue).count = 0 then begin
   result:= '<empty>';
  end
  else begin

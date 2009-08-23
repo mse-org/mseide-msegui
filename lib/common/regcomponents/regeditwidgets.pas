@@ -135,7 +135,7 @@ function twidgetcolelementeditor.getvalue: msestring;
 var
  col1: twidgetcol;
 begin
- col1:= twidgetcol(getordvalue);
+ col1:= twidgetcol(getpointervalue);
  result:= inherited getvalue;
  if col1.editwidget <> nil then begin
   result:= result + '<'+col1.editwidget.name+'>';

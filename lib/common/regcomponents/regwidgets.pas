@@ -185,7 +185,7 @@ end;
 
 function tdatacoleditor.getvalue: msestring;
 begin
- result:= '<'+tdatacol(getordvalue).name+'>';
+ result:= '<'+tdatacol(getpointervalue).name+'>';
 end;
 
 { tdatacolseditor }
@@ -236,7 +236,7 @@ end;
 
 function tcolheaderelementeditor.getvalue: msestring;
 begin
- result:= '<'+tcolheader(getordvalue).caption+'>';
+ result:= '<'+tcolheader(getpointervalue).caption+'>';
 end;
 
 { tvolatileintegerpropertyeditor }

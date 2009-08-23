@@ -351,7 +351,7 @@ function tshortcutactionpropertyeditor.getvalue: msestring;
 var
  item1: tshortcutaction;
 begin
- item1:= tshortcutaction(getordvalue);
+ item1:= tshortcutaction(getpointervalue);
  if item1.action = nil then begin
   result:= '<--->';
  end

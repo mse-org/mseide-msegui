@@ -400,6 +400,10 @@ type
                  var avalue: integer): boolean; overload;
    function getintegervalue(const response: resultinfoty; const aname: string;
                  var avalue: integer): boolean; overload;
+   function getinteger64value(const response: resultinfoarty; const aname: string;
+                 var avalue: int64): boolean; overload;
+   function getinteger64value(const response: resultinfoty; const aname: string;
+                 var avalue: int64): boolean; overload;
    function getbooleanvalue(const response: resultinfoarty; const aname: string;
                  var avalue: boolean): boolean;
    function getptruintvalue(const response: resultinfoarty; const aname: string;
@@ -2352,10 +2356,18 @@ begin
    if valuekind = vk_value then begin
     if (length(value) > 1) and (value[1] = '0') and (value[2] <> 'x') and
              (value[2] <> 'X') then begin
+  {$ifdef CPU64}
+     result:= trystrtointvalue64(value,nb_oct,avalue);
+  {$else}
      result:= trystrtointvalue(value,nb_oct,avalue);
+  {$endif}
     end
     else begin
+  {$ifdef CPU64}
+     result:= trystrtointvalue64(value,avalue);
+  {$else}
      result:= trystrtointvalue(value,avalue);
+  {$endif}
     end;
    end;
   end;
@@ -2371,6 +2383,18 @@ begin
  result:= getptruintvalue(response,aname,ptruint1);
  avalue:= ptruint1;
 end;
+
+//todo: fix for 32 bit
+function tgdbmi.getinteger64value(const response: resultinfoarty; const aname: string;
+                 var avalue: int64): boolean;
+var
+ ptruint1: ptruint;
+begin
+ ptruint1:= avalue;
+ result:= getptruintvalue(response,aname,ptruint1);
+ avalue:= ptruint1;
+end;
+
 
 function tgdbmi.getptruintvalue(const response: resultinfoty; const aname: string;
                  var avalue: ptruint): boolean;
@@ -2410,6 +2434,17 @@ end;
 
 function tgdbmi.getintegervalue(const response: resultinfoty; const aname: string;
                  var avalue: integer): boolean;
+var
+ ptruint1: ptruint;
+begin
+ ptruint1:= avalue;
+ result:= getptruintvalue(response,aname,ptruint1);
+ avalue:= ptruint1;
+end;
+
+//todo: fix for 32bit
+function tgdbmi.getinteger64value(const response: resultinfoty; const aname: string;
+                 var avalue: int64): boolean;
 var
  ptruint1: ptruint;
 begin
@@ -3311,7 +3346,11 @@ begin
   if int1 > 0 then begin
    setlength(str1,int1-1);
   end;
+{$ifdef CPU64}
+  if not trystrtointvalue64(str1,avalue) then begin
+{$else}
   if not trystrtointvalue(str1,avalue) then begin
+{$endif}
    result:= gdb_dataerror;
   end;
  end;
@@ -3415,7 +3454,11 @@ begin
   result:= gdb_dataerror;
   ar1:= splitstring(str1,'=',true);
   if high(ar1) = 1 then begin
+{$ifdef CPU64}
+   if trystrtointvalue64(trimright(ar1[1]),avalue) then begin
+{$else}
    if trystrtointvalue(trimright(ar1[1]),avalue) then begin
+{$endif}
     result:= gdb_ok;
    end;
   end;
@@ -3846,7 +3889,11 @@ begin
      gettuplevalue(ar1[int1],ar2);
      with list[int1] do begin
       getintegervalue(ar2,'level',level);
+{$ifdef CPU64}
+      getinteger64value(ar2,'addr',int64(addr));
+{$else}
       getintegervalue(ar2,'addr',integer(addr));
+{$endif}
       getstringvalue(ar2,'func',func);
       getstringvalue(ar2,'file',str1);
       filename:= str1;

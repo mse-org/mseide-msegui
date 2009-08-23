@@ -471,70 +471,75 @@ const
           );
 
 type
- postscriptgcty = record
+ postscriptgcdty = record
   canvas: tpostscriptcanvas;
-  res: array[1..23] of cardinal;
+ end;
+ postscriptgcty = record
+  case integer of
+   0: (d: postscriptgcdty);
+   1: (_bufferspace: gcpty;);
+//  res: array[1..23] of cardinal;
  end;
 
  
 procedure gui_destroygc(var drawinfo: drawinfoty);
 begin
  try
-  postscriptgcty(drawinfo.gc.platformdata).canvas.ps_destroygc;
+  postscriptgcty(drawinfo.gc.platformdata).d.canvas.ps_destroygc;
  except //trap for stream write errors
  end;
 end;
  
 procedure gui_changegc(var drawinfo: drawinfoty);
 begin
- postscriptgcty(drawinfo.gc.platformdata).canvas.ps_changegc;
+ postscriptgcty(drawinfo.gc.platformdata).d.canvas.ps_changegc;
 end;
 
 procedure gui_drawlines(var drawinfo: drawinfoty);
 begin
- postscriptgcty(drawinfo.gc.platformdata).canvas.ps_drawlines;
+ postscriptgcty(drawinfo.gc.platformdata).d.canvas.ps_drawlines;
 end;
 
 procedure gui_drawlinesegments(var drawinfo: drawinfoty);
 begin
- postscriptgcty(drawinfo.gc.platformdata).canvas.ps_drawlinesegments;
+ postscriptgcty(drawinfo.gc.platformdata).d.canvas.ps_drawlinesegments;
 end;
 
 procedure gui_drawellipse(var drawinfo: drawinfoty);
 begin
- postscriptgcty(drawinfo.gc.platformdata).canvas.handleellipse(
+ postscriptgcty(drawinfo.gc.platformdata).d.canvas.handleellipse(
                         drawinfo.rect.rect^,false);
 end;
 
 procedure gui_drawarc(var drawinfo: drawinfoty);
 begin
- postscriptgcty(drawinfo.gc.platformdata).canvas.ps_drawarc;
+ postscriptgcty(drawinfo.gc.platformdata).d.canvas.ps_drawarc;
 end;
 
 procedure gui_fillrect(var drawinfo: drawinfoty);
 begin
- postscriptgcty(drawinfo.gc.platformdata).canvas.ps_fillrect;
+ postscriptgcty(drawinfo.gc.platformdata).d.canvas.ps_fillrect;
 end;
 
 procedure gui_fillelipse(var drawinfo: drawinfoty);
 begin
- postscriptgcty(drawinfo.gc.platformdata).canvas.handleellipse(
+ postscriptgcty(drawinfo.gc.platformdata).d.canvas.handleellipse(
                         drawinfo.rect.rect^,true);
 end;
 
 procedure gui_fillarc(var drawinfo: drawinfoty);
 begin
- postscriptgcty(drawinfo.gc.platformdata).canvas.ps_fillarc;
+ postscriptgcty(drawinfo.gc.platformdata).d.canvas.ps_fillarc;
 end;
 
 procedure gui_fillpolygon(var drawinfo: drawinfoty);
 begin
- postscriptgcty(drawinfo.gc.platformdata).canvas.ps_fillpolygon;
+ postscriptgcty(drawinfo.gc.platformdata).d.canvas.ps_fillpolygon;
 end;
 
 procedure gui_drawstring16(var drawinfo: drawinfoty);
 begin
- postscriptgcty(drawinfo.gc.platformdata).canvas.ps_drawstring16;
+ postscriptgcty(drawinfo.gc.platformdata).d.canvas.ps_drawstring16;
 end;
 
 procedure gui_setcliporigin(var drawinfo: drawinfoty);
@@ -614,7 +619,7 @@ end;
    
 procedure gui_copyarea(var drawinfo: drawinfoty);
 begin
- postscriptgcty(drawinfo.gc.platformdata).canvas.ps_copyarea;
+ postscriptgcty(drawinfo.gc.platformdata).d.canvas.ps_copyarea;
 end;
    
 procedure gui_fonthasglyph(var drawinfo: drawinfoty);
@@ -694,7 +699,7 @@ begin
  ffonts:= nil;
  ffontnames:= nil;
  finalize(fmapnames);
- with postscriptgcty(fdrawinfo.gc.platformdata) do begin
+ with postscriptgcty(fdrawinfo.gc.platformdata).d do begin
   canvas:= self;
  end;
  inherited;

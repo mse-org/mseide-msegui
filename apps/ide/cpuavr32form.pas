@@ -140,7 +140,7 @@ begin
   exceptstack.enabled:= false;
  end;
 end;
-
+//todo: fix 32/64
 procedure tcpuavr32fo.checkexcept(const sender: TObject);
 
  procedure locateframe(const address: longword);
@@ -174,7 +174,8 @@ procedure tcpuavr32fo.checkexcept(const sender: TObject);
  end;
 
 var
- lwo1,lwo2,lwo3,lwo4,framead: longword;
+ lwo1,lwo2,{lwo3,}lwo4: longword;
+ lwo3,framead: {$ifdef CPU64}qword{$else}longword{$endif};
 begin
  with mainfo.gdb do begin
   if (getframeaddress(framead) = gdb_ok) then begin

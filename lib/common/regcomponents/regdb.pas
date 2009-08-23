@@ -390,7 +390,7 @@ var
 begin
  result:= inherited getdefaultstate;
  if fremote <> nil then begin
-  obj1:= tobject(tpropertyeditor1(fremote.getparenteditor).getordvalue);
+  obj1:= tobject(tpropertyeditor1(fremote.getparenteditor).getpointervalue);
   if obj1 <> nil then begin
    getcorbainterface(obj1,typeinfo(idbparaminfo),fdbparaminfointf);
   end;
@@ -430,7 +430,7 @@ var
 begin
  result:= inherited getdefaultstate;
  if fremote <> nil then begin
-  obj1:= tobject(tpropertyeditor1(fremote.getparenteditor).getordvalue);
+  obj1:= tobject(tpropertyeditor1(fremote.getparenteditor).getpointervalue);
   if obj1 <> nil then begin
    getcorbainterface(obj1,typeinfo(idbeditinfo),fdbeditinfointf);
   end;
@@ -529,7 +529,7 @@ var
 begin
  result:= inherited getdefaultstate;
  if fremote <> nil then begin
-  obj1:= tobject(tpropertyeditor1(fremote.getparenteditor).getordvalue);
+  obj1:= tobject(tpropertyeditor1(fremote.getparenteditor).getpointervalue);
   if obj1 <> nil then begin
    getcorbainterface(obj1,typeinfo(idbcolinfo),fdbcolinfointf);
   end;
@@ -617,7 +617,7 @@ end;
 
 function tpersistentfieldelementeditor.getvalue: msestring;
 begin
- result:= '<'+tfield(getordvalue).fieldname+'>' + inherited getvalue;
+ result:= '<'+tfield(getpointervalue).fieldname+'>' + inherited getvalue;
 end;
 
 { tpersistentfieldspropertyeditor }
@@ -634,7 +634,7 @@ end;
 
 procedure tpersistentfieldspropertyeditor.edit;
 begin
- if editpersistentfields(tpersistentfields(getordvalue)) then begin
+ if editpersistentfields(tpersistentfields(getpointervalue)) then begin
   modified;
  end;
 end;
@@ -1047,7 +1047,7 @@ end;
 
 function tdbstringcoleditor.getvalue: msestring;
 begin
- result:= inherited getvalue +  '<'+tdbstringcol(getordvalue).datafield+'>';
+ result:= inherited getvalue +  '<'+tdbstringcol(getpointervalue).datafield+'>';
 end;
 
 { tdbstringcolseditor }
@@ -1098,7 +1098,7 @@ end;
 
 function tindexfieldpropertyeditor.getvalue: msestring;
 begin
- result:= '<'+tindexfield(getordvalue).fieldname+'>';
+ result:= '<'+tindexfield(getpointervalue).fieldname+'>';
 end;
 
 function tindexfieldpropertyeditor.getdefaultstate: propertystatesty;
@@ -1120,7 +1120,7 @@ var
  int1: integer;
 begin
  result:= '<';
- with tlocalindex(getordvalue).fields do begin
+ with tlocalindex(getpointervalue).fields do begin
   if count > 0 then begin
    for int1:= 0 to count - 1 do begin
     result:= result + items[int1].fieldname+',';
@@ -1259,7 +1259,7 @@ var
  ar1: stringarty;
 begin
  result:= '<>';
- with tlbdropdowncol1(getordvalue) do begin
+ with tlbdropdowncol1(getpointervalue) do begin
   lb1:= getlookupbuffer;
   if lb1 <> nil then begin
    ar1:= lb1.fieldnamestext;
