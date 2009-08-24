@@ -5,6 +5,82 @@ const
  clib = 'c';
  threadslib = 'pthread';
 
+type
+
+// from bits/types.h
+ __S16_TYPE = smallint;
+ __U16_TYPE = word;
+ __S32_TYPE = longint;
+ __U32_TYPE = longword;
+{$ifndef CPU64}
+ __SLONGWORD_TYPE = longint;
+ __ULONGWORD_TYPE = longword;
+ __SQUAD_TYPE = int64;
+ __UQUAD_TYPE = uint64;
+ __SWORD_TYPE = integer;
+ __UWORD_TYPE = longword;
+ __SLONG32_TYPE = integer;
+ __ULONG32_TYPE = longword;
+ __S64_TYPE = int64;
+ __U64_TYPE = uint64;
+{$else}
+ __SLONGWORD_TYPE = int64;
+ __ULONGWORD_TYPE = uint64;
+ __SQUAD_TYPE = int64;
+ __UQUAD_TYPE = uint64;
+ __SWORD_TYPE = int64;
+ __UWORD_TYPE = uint64;
+ __SLONG32_TYPE = integer;
+ __ULONG32_TYPE = longword;
+ __S64_TYPE = int64;
+ __U64_TYPE = uint64;
+{$endif}
+
+//from bits/typesizes.h
+
+ __dev_t = __UQUAD_TYPE;
+ __uid_t = __U32_TYPE;
+ __gid_t = __U32_TYPE;
+ __ino_t = __ULONGWORD_TYPE;
+ __ino64_t = __UQUAD_TYPE;
+ __mode_t = __U32_TYPE;
+ __nlink_t = __UWORD_TYPE;
+ __off_t = __SLONGWORD_TYPE;
+ __off64_t = __SQUAD_TYPE;
+ __pid_t = __S32_TYPE;
+ __rlim_t = __ULONGWORD_TYPE;
+ __rlim64_t = __UQUAD_TYPE;
+ __blkcnt_t = __SLONGWORD_TYPE;
+ __blkcnt64_t = __SQUAD_TYPE;
+ __fsblkcnt_t = __ULONGWORD_TYPE;
+ __fsblkcnt64_t = __UQUAD_TYPE;
+ __fsfilcnt_t = __ULONGWORD_TYPE;
+ __fsfilcnt64_t = __UQUAD_TYPE;
+ __id_t = __U32_TYPE;
+ __clock_t = __SLONGWORD_TYPE;
+ __time_t = __SLONGWORD_TYPE;
+ __useconds_t = __U32_TYPE;
+ __suseconds_t = __SLONGWORD_TYPE;
+ __daddr_t = __S32_TYPE;
+ __swblk_t = __SLONGWORD_TYPE;
+ __key_t = __S32_TYPE;
+ __clockid_t = __S32_TYPE;
+ __timer_t = pointer; //void *;
+ __blksize_t = __SLONGWORD_TYPE;
+ __fsid_t = record
+             __val: array[0..1] of longint;
+            end;
+//             __struct { int __val[2]; };
+ __ssize_t = __SWORD_TYPE;
+
+ __fd_mask = __ULONGWORD_TYPE; //dWord;
+ {$ifdef CPU64}
+ __ipc_pid_t = integer;
+ {$else}
+ __ipc_pid_t = word;
+ {$endif}
+ __caddr_t = ^char;
+ 
 //ioctrl
 const
    TCGETS = $5401;
@@ -336,22 +412,24 @@ type
    __uint64_t = Qword;
 
    __qaddr_t = __quad_t;
-   __dev_t = __u_quad_t;
-   __uid_t = __u_int;
-   __gid_t = __u_int;
-   __ino_t = __u_long;
-   __mode_t = __u_int;
-   __nlink_t = __u_int;
-   __off_t = longint;
+//   __dev_t = __u_quad_t;
+//   __uid_t = __u_int;
+//   __gid_t = __u_int;
+//   __ino_t = __u_long;
+//   __mode_t = __u_int;
+//   __nlink_t = __u_int;
+//   __off_t = longint;
    __loff_t = __quad_t;
-   __pid_t = longint;
-   __ssize_t = longint;
-   __rlim_t = __u_long;
-   __rlim64_t = __u_quad_t;
-   __id_t = __u_int;
-   __fsid_t = record
-        __val : array[0..1] of longint;
-     end;
+//   __pid_t = longint;
+//   __ssize_t = longint;
+//   __rlim_t = __u_long;
+//   __rlim64_t = __u_quad_t;
+//   __id_t = __u_int;
+//   __fsid_t = record
+//        __val : array[0..1] of longint;
+//     end;
+
+{
    __daddr_t = longint;
    __caddr_t = char;
    __time_t = longint;
@@ -362,7 +440,7 @@ type
    __clockid_t = longint;
    __timer_t = longint;
    __fd_mask = dWord;
-
+}
   int64_t = Int64;
   uint8_t = byte;
 
@@ -398,17 +476,17 @@ const
   __NFDBITS       = 8 * sizeof(__fd_mask);
 
 type
-  __key_t = longint;
-  __ipc_pid_t = word;
-  __blksize_t = longint;
-  __blkcnt_t = longint;
-  __blkcnt64_t = __quad_t;
-  __fsblkcnt_t = __u_long;
-  __fsblkcnt64_t = __u_quad_t;
-  __fsfilcnt_t = __u_long;
-  __fsfilcnt64_t = __u_quad_t;
-  __ino64_t = __u_quad_t;
-  __off64_t = __loff_t;
+//  __key_t = longint;
+//  __ipc_pid_t = word;
+//  __blksize_t = longint;
+//  __blkcnt_t = longint;
+//  __blkcnt64_t = __quad_t;
+//  __fsblkcnt_t = __u_long;
+//  __fsblkcnt64_t = __u_quad_t;
+//  __fsfilcnt_t = __u_long;
+//  __fsfilcnt64_t = __u_quad_t;
+//  __ino64_t = __u_quad_t;
+//  __off64_t = __loff_t;
   __t_scalar_t = longint;
   __t_uscalar_t = dword;
   __intptr_t = longint;
