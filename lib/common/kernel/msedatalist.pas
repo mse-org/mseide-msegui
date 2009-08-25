@@ -1317,10 +1317,10 @@ end;
 
 procedure arrayaddref(var dynamicarray);
 var
- refpo: pinteger;
+ refpo: psizeint;
 begin
  if pointer(dynamicarray) <> nil then begin
-  refpo:= pinteger(pchar(dynamicarray)-2*sizeof(integer));
+  refpo:= psizeint(pchar(dynamicarray)-2*sizeof(sizeint));
   if refpo^ >= 0 then begin
    inc(refpo^);
   end;
@@ -1329,10 +1329,10 @@ end;
 
 procedure arraydecref(var dynamicarray);
 var
- refpo: pinteger;
+ refpo: psizeint;
 begin
  if pointer(dynamicarray) <> nil then begin
-  refpo:= pinteger(pchar(dynamicarray)-2*sizeof(integer));
+  refpo:= psizeint(pchar(dynamicarray)-2*sizeof(sizeint));
   if refpo^ > 0 then begin
    dec(refpo^);
   end;
@@ -1342,19 +1342,19 @@ end;
 procedure allocuninitedarray(count,itemsize: integer; out dynamicarray);
                  //does not init memory, dynamicarray has to be nil!
 var
- po1: pinteger;
+ po1: psizeint;
 begin
  if pointer(dynamicarray) <> nil then begin
   raise exception.Create('allocunitedarray: dynamicarray not nil');
  end;
- getmem(po1,count * itemsize + 2 * sizeof(integer));
+ getmem(po1,count * itemsize + 2 * sizeof(sizeint));
  po1^:= 1; //refcount
  {$ifdef FPC}
- pinteger(pchar(po1)+sizeof(cardinal))^:= count - 1; //high
+ psizeint(pchar(po1)+sizeof(sizeint))^:= count - 1; //high
  {$else}
- pinteger(pchar(po1)+sizeof(cardinal))^:= count;     //count
+ psizeint(pchar(po1)+sizeof(sizeint))^:= count;     //count
  {$endif}
- pointer(dynamicarray):= pointer(pchar(po1) + 2 * sizeof(integer));
+ pointer(dynamicarray):= pointer(pchar(po1) + 2 * sizeof(sizeint));
 end;
 
 function firstitem(const source: stringarty): string; overload;
@@ -2149,7 +2149,7 @@ begin
 end;
 
 const
- adsize = 2*sizeof(integer);
+ adsize = 2*sizeof(sizeint);
 
 function initorderbuffer(var sortlist; const size: integer; clear: boolean;
                              out destpo: pchar): boolean;
@@ -2159,10 +2159,10 @@ begin
  end
  else begin
   getmem(destpo,size*length(bytearty(sortlist))+adsize);
-  pinteger(destpo)^:= 1; //refcount
-  inc(destpo,4);
-  pinteger(destpo)^:= pinteger(pchar(sortlist)-4)^; //length or high
-  inc(destpo,4);
+  psizeint(destpo)^:= 1; //refcount
+  inc(destpo,sizeof(sizeint));
+  psizeint(destpo)^:= pinteger(pchar(sortlist)-sizeof(sizeint))^; //length or high
+  inc(destpo,sizeof(sizeint));
   result:= true;
   if clear then begin
    fillchar(destpo^,size*length(bytearty(sortlist)),0);
@@ -2172,9 +2172,9 @@ end;
 
 procedure storebuffer(const asource: pchar; var sortlist);
 var
- po1: pinteger;
+ po1: psizeint;
 begin
- po1:= pinteger(pchar(sortlist) - 8);
+ po1:= psizeint(pchar(sortlist) - 2*sizeof(sizeint));
  dec(po1^);
  if po1^ >= 0 then begin
   if po1^ = 0 then begin

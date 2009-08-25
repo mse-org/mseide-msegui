@@ -31,7 +31,8 @@ type
  {$ifdef VER2_2_0}
   PPtrUInt = ^PtrUInt;
  {$endif}
- winidty = cardinal;
+// winidty = cardinal;
+ winidty = ptruint;
  winidarty = array of winidty;
  winidaty = array[0..0] of winidty;
  pwinidaty = ^winidaty;

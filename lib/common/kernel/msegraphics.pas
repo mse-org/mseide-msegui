@@ -167,8 +167,8 @@ type
 
  gcpty = array[0..23] of cardinal;
  gcty = record
-  handle: cardinal;
-  refgc: cardinal; //for windowsmetafile
+  handle: ptruint;//cardinal;
+  refgc: ptruint;//cardinal; //for windowsmetafile
   drawingflags: drawingflagsty;
   cliporigin: pointty;
   paintdevicesize: sizety;

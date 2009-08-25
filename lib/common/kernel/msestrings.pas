@@ -797,10 +797,10 @@ end;
 
 procedure stringaddref(var str: string);
 var
- po1: pinteger;
+ po1: psizeint;
 begin
  if pointer(str) <> nil then begin
-  po1:= pinteger(pchar(pointer(str))-8);
+  po1:= psizeint(pchar(pointer(str))-2*sizeof(sizeint));
   if po1^ >= 0 then begin
    inc(po1^);
   end;
@@ -810,12 +810,12 @@ end;
 procedure stringaddref(var str: msestring);
 {$ifndef msestringsarenotrefcounted}
 var
- po1: pinteger;
+ po1: psizeint;
 {$endif}
 begin
  if pointer(str) <> nil then begin
 {$ifndef msestringsarenotrefcounted}
-  po1:= pinteger(pchar(pointer(str))-8);
+  po1:= psizeint(pchar(pointer(str))-2*sizeof(sizeint));
   if po1^ >= 0 then begin
    inc(po1^);
   end;
@@ -2569,7 +2569,7 @@ procedure reallocstring(var value: ansistring);
                 //macht datenkopie ohne free
 var
  po1: pointer;
- int1: integer;
+ int1: sizeint;
 begin
  po1:= pointer(value);
  if po1 <> nil then begin
@@ -2586,7 +2586,7 @@ procedure reallocstring(var value: msestring);
                 //macht datenkopie ohne free
 var
  po1: pointer;
- int1: integer;
+ int1: sizeint;
 begin
  po1:= pointer(value);
  if po1 <> nil then begin

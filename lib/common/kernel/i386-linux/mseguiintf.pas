@@ -300,19 +300,34 @@ type
  XIC = ^_XIC;
  ppucs4char = ^pucs4char;
  dword = longword;
-  VisualID = dword;
-  Visual = record
-    ext_data: PXExtData;  { hook for extension to hang data  }
-    visualid: VisualID;   { visual id of this visual  }
-    _class: Longint;
-    red_mask: Cardinal;
-    green_mask: Cardinal;
-    blue_mask: Cardinal;
-    bits_per_rgb: Longint;
-    map_entries: Longint;
-  end;
-  msepvisual = ^visual;
   
+ VisualID = culong;
+ Visual = record
+  ext_data: PXExtData;  { hook for extension to hang data  }
+  visualid: VisualID;   { visual id of this visual  }
+  _class: cint;
+  red_mask: culong;
+  green_mask: culong;
+  blue_mask: culong;
+  bits_per_rgb: cint;
+  map_entries: cint;
+ end;
+ msepvisual = ^visual;
+
+(* 
+ VisualID = dword;
+ Visual = record
+   ext_data: PXExtData;  { hook for extension to hang data  }
+   visualid: VisualID;   { visual id of this visual  }
+   _class: Longint;
+   red_mask: Cardinal;
+   green_mask: Cardinal;
+   blue_mask: Cardinal;
+   bits_per_rgb: Longint;
+   map_entries: Longint;
+ end;
+ msepvisual = ^visual;
+*)  
   PXWMHints = ^XWMHints;
   XWMHints = record
     flags: Longint;  { marks which fields in this structure are defined  }
@@ -643,7 +658,8 @@ type
  end;
 {$ifdef FPC}
  Colormap = TXID;
- Atom = type Cardinal;
+ Atom = type culong;
+// Atom = type Cardinal;
  Cursor = TXID;
  wchar_t = longword;
  pwchar_t = ^wchar_t;
@@ -2210,19 +2226,41 @@ begin
  childevent:= true;
 end;
 
-function gui_postevent(event: tevent): guierrorty;
-var
- xevent: xclientmessageevent;
+function getclientpointer(const event: xclientmessageevent): pointer;
 begin
- fillchar(xevent,sizeof(xevent),0);
- with xevent do begin
+ with event do begin
+ {$ifdef CPU64}
+  result:= pointer((data.l[0] and $ffffffff) + ((data.l[1] and $ffffffff) shl 32));
+ {$else}
+  result:= pointer(data.l[0]);
+ {$endif}
+ end;
+end;
+
+procedure setclientpointer(const ptr: pointer; out event: xclientmessageevent);
+begin
+ fillchar(event,sizeof(event),0);
+ with event do begin
   xtype:= clientmessage;
   format:= 32;
   message_type:= mseclientmessageatom;
-  data.l[0]:= integer(event); //todo: 64bit
+ {$ifdef CPU64}
+  data.l[0]:= ptruint(ptr) and $ffffffff;
+  data.l[1]:= (ptruint(ptr) shr 32) and $ffffffff;
+ {$else}
+  data.l[0]:= ptruint(ptr);
+ {$endif}
  end;
+end;
+
+function gui_postevent(event: tevent): guierrorty;
+var
+ xevent1: xclientmessageevent;
+begin
+ setclientpointer(event,xevent1);
  gdi_lock;
- if xsendevent(appdisp,appid,{$ifdef xboolean}false{$else}0{$endif},0,@xevent) = 0 then begin
+ if xsendevent(appdisp,appid,{$ifdef xboolean}false{$else}0{$endif},0,
+                                                   @xevent1) = 0 then begin
   result:= gue_postevent;
  end
  else begin
@@ -2517,7 +2555,7 @@ begin
   with xev.xclient do begin
    if (xtype = clientmessage) and (display = appdisp) and
            (message_type = mseclientmessageatom) then begin
-    tevent(data.l[0]).free1;
+    tevent(getclientpointer(xev.xclient)).free1;
    end;
   end;
  end;
@@ -3010,7 +3048,7 @@ function gui_reposwindow(id: winidty; const rect: rectty): guierrorty;
 var
  changes: xwindowchanges;
  sizehints: pxsizehints;
- int1: integer;
+ int1: clong;
 begin
  fillchar(changes,sizeof(changes),0);
  with changes do begin
@@ -3081,7 +3119,7 @@ end;
 function gui_setsizeconstraints(id: winidty; const min,max: sizety): guierrorty;
 var
  sizehints: pxsizehints;
- int1: integer;
+ int1: clong;
 begin
  sizehints:= xallocsizehints;
  {$ifdef FPC} {$checkpointer off} {$endif}
@@ -5287,6 +5325,8 @@ end;
 
 var
  timeoutcount: integer; //for safety timertick
+
+testvar: integer;
  
 function gui_getevent: tevent;
 
@@ -5505,12 +5545,13 @@ eventrestart:
    end;
   end;
  end;
+testvar:= xev.xtype;
  case xev.xtype of
   clientmessage: begin
    with xev.xclient do begin
     if display = appdisp then begin
      if message_type = mseclientmessageatom then begin
-      result:= tevent(data.l[0]); //todo: 64bit
+      result:= tevent(getclientpointer(xev.xclient));
      end
      else begin
       if message_type = wmprotocolsatom then begin

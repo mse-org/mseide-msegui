@@ -36,6 +36,11 @@ type
  __U64_TYPE = uint64;
 {$endif}
 
+ culong = __ULONGWORD_TYPE;
+ clong = __SLONGWORD_TYPE;
+ cint = __S32_TYPE;
+ cuint = __U32_TYPE;
+ 
 //from bits/typesizes.h
 
  __dev_t = __UQUAD_TYPE;
