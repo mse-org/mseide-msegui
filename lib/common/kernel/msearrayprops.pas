@@ -1355,7 +1355,7 @@ end;
 procedure tpointerarrayprop.writeitem(const index: integer; writer: twriter);
 begin
 {$ifdef CPU64}
- writer.writeint64(int64(fitems[index]));
+ writer.writeinteger(int64(fitems[index]));
 {$else}
  writer.writeinteger(integer(fitems[index]));
 {$endif}
