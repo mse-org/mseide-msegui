@@ -31,7 +31,7 @@ type
  arraypropsstatesty = set of arraypropstatety;
 
  arraypropkindty = (apk_none,apk_tpersistent,apk_integer,apk_colorty,apk_real,
-                    apk_string,apk_msestring,apk_boolean);
+                    apk_string,apk_msestring,apk_boolean,apk_pointer,apk_int64);
  
  tarrayprop = class(tpersistent)
   private
@@ -114,6 +114,26 @@ type
   public
    function propkind: arraypropkindty; override;
    property items[const index: integer]: colorty read getitems write setitems; default;
+ end;
+
+ tint64arrayprop = class(tarrayprop)
+  private
+  protected
+   fitems: int64arty;
+   function getitems(const index: integer): int64;
+   procedure setitems(const index: integer; const Value: int64);
+   function getcount: integer; override;
+   procedure setcount1(acount: integer; doinit: boolean); override;
+   procedure writeitem(const index: integer; writer: twriter); override;
+   procedure readitem(const index: integer; reader: treader); override;
+   function getsize: integer; override;
+   function getdatapo: pointer; override;
+   function getitemspo(const index: integer): pointer; override;
+   function checkstored(ancestor: tpersistent): boolean; override;
+  public
+   function propkind: arraypropkindty; override;
+   procedure assign(source: tpersistent); override;
+   property items[const index: integer]: int64 read getitems write setitems; default;
  end;
 
  trealarrayprop = class(tarrayprop)
@@ -207,8 +227,28 @@ type
    property items[const index: integer]: tintegerset read getitems write setitems; default;
  end;
 
+ tpointerarrayprop = class(tarrayprop)
+  private
+  protected
+   fitems: pointerarty;
+   function getitems(const index: integer): pointer;
+   procedure setitems(const index: integer; const Value: pointer);
+   function getcount: integer; override;
+   procedure setcount1(acount: integer; doinit: boolean); override;
+   procedure writeitem(const index: integer; writer: twriter); override;
+   procedure readitem(const index: integer; reader: treader); override;
+   function getsize: integer; override;
+   function getdatapo: pointer; override;
+   function getitemspo(const index: integer): pointer; override;
+   function checkstored(ancestor: tpersistent): boolean; override;
+  public
+   function propkind: arraypropkindty; override;
+   procedure assign(source: tpersistent); override;
+   property items[const index: integer]: pointer read getitems write setitems; default;
+ end;
+
  tpersistentarrayprop = class(tarrayprop,iobjectlink)
-  private                           //same layout as tintegerarrayprop!
+  private                     //same layout as tpointerarrayprop!
   protected
    fitems: persistentarty;    //same layout as tintegerarrayprop!
    fitemclasstype: virtualpersistentclassty;
@@ -668,7 +708,7 @@ begin
  result:= apk_none;
 end;
 
-{ tintegerarraypropmse }
+{ tintegerarrayprop }
 
 function tintegerarrayprop.checkstored(ancestor: tpersistent): boolean;
 begin
@@ -779,7 +819,91 @@ begin
  result:= apk_colorty;
 end;
 
-{ trealarraypropmse }
+{ tint64arrayprop }
+
+function tint64arrayprop.checkstored(ancestor: tpersistent): boolean;
+begin
+ result:= not (ancestor is tint64arrayprop);
+ if not result then begin
+  with tint64arrayprop(ancestor) do begin
+   result:= self.count <> count;
+   if not result then begin
+    result:= not comparemem(@self.fitems[0],@fitems[0],
+        length(fitems)*sizeof(int64));
+   end;
+  end;
+ end;
+end;
+
+function tint64arrayprop.getcount: integer;
+begin
+ result:= length(fitems);
+end;
+
+procedure tint64arrayprop.readitem(const index: integer; reader: treader);
+begin
+ fitems[index]:= reader.ReadInt64;
+end;
+
+procedure tint64arrayprop.writeitem(const index: integer; writer: twriter);
+begin
+ writer.writeinteger(fitems[index]);
+end;
+
+procedure tint64arrayprop.setcount1(acount: integer; doinit: boolean);
+begin
+ checkcount(acount);
+ setlength(fitems,acount);    //immer zuerst!
+ inherited;
+end;
+
+function tint64arrayprop.getitemspo(const index: integer): pointer;
+begin
+ result:= @fitems[index];
+end;
+
+function tint64arrayprop.getsize: integer;
+begin
+ result:= sizeof(int64);
+end;
+
+function tint64arrayprop.getdatapo: pointer;
+begin
+ result:= @fitems;
+end;
+
+function tint64arrayprop.getitems(const index: integer): int64;
+begin
+ checkindex(index);
+ result:= fitems[index];
+end;
+
+procedure tint64arrayprop.setitems(const index: integer; const Value: int64);
+begin
+ checkindex(index);
+ fitems[index]:= value;
+ change(index);
+end;
+
+procedure tint64arrayprop.assign(source: tpersistent);
+begin
+ if source is tint64arrayprop then begin
+  fitems:= copy(tint64arrayprop(source).fitems);
+  beginupdate;
+  setcount1(length(fitems),false);
+  endupdate;
+ end
+ else begin
+  inherited;
+ end;
+end;
+
+function tint64arrayprop.propkind: arraypropkindty;
+begin
+ result:= apk_int64;
+end;
+
+{ trealarrayprop }
 
 function trealarrayprop.getcount: integer;
 begin
@@ -1197,6 +1321,99 @@ begin
  system.move(value,fitems[index],fsize);
 end;
 }
+
+{ tpointerarrayprop }
+
+function tpointerarrayprop.checkstored(ancestor: tpersistent): boolean;
+begin
+ result:= not (ancestor is tpointerarrayprop);
+ if not result then begin
+  with tpointerarrayprop(ancestor) do begin
+   result:= self.count <> count;
+   if not result then begin
+    result:= not comparemem(@self.fitems[0],@fitems[0],
+        length(fitems)*sizeof(pointer));
+   end;
+  end;
+ end;
+end;
+
+function tpointerarrayprop.getcount: integer;
+begin
+ result:= length(fitems);
+end;
+
+procedure tpointerarrayprop.readitem(const index: integer; reader: treader);
+begin
+{$ifdef CPU64}
+ fitems[index]:= pointer(reader.ReadInt64);
+{$else}
+ fitems[index]:= pointer(reader.ReadInteger);
+{$endif}
+end;
+
+procedure tpointerarrayprop.writeitem(const index: integer; writer: twriter);
+begin
+{$ifdef CPU64}
+ writer.writeint64(int64(fitems[index]));
+{$else}
+ writer.writeinteger(integer(fitems[index]));
+{$endif}
+end;
+
+procedure tpointerarrayprop.setcount1(acount: integer; doinit: boolean);
+begin
+ checkcount(acount);
+ setlength(fitems,acount);    //immer zuerst!
+ inherited;
+end;
+
+function tpointerarrayprop.getitemspo(const index: integer): pointer;
+begin
+ result:= @fitems[index];
+end;
+
+function tpointerarrayprop.getsize: integer;
+begin
+ result:= sizeof(pointer);
+end;
+
+function tpointerarrayprop.getdatapo: pointer;
+begin
+ result:= @fitems;
+end;
+
+function tpointerarrayprop.getitems(const index: integer): pointer;
+begin
+ checkindex(index);
+ result:= fitems[index];
+end;
+
+procedure tpointerarrayprop.setitems(const index: integer; const Value: pointer);
+begin
+ checkindex(index);
+ fitems[index]:= value;
+ change(index);
+end;
+
+procedure tpointerarrayprop.assign(source: tpersistent);
+begin
+ if source is tpointerarrayprop then begin
+  fitems:= copy(tpointerarrayprop(source).fitems);
+  beginupdate;
+  setcount1(length(fitems),false);
+  endupdate;
+ end
+ else begin
+  inherited;
+ end;
+end;
+
+function tpointerarrayprop.propkind: arraypropkindty;
+begin
+ result:= apk_pointer;
+end;
+
 { tpersistentarrayprop }
 
 constructor tpersistentarrayprop.create(itemclasstype: virtualpersistentclassty);

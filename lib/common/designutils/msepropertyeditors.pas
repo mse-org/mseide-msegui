@@ -523,6 +523,13 @@ type
    function getordvalue(const index: integer = 0): integer;
    procedure setordvalue(const value: longword); overload;
    procedure setordvalue(const index: integer; const value: longword); overload;
+   function getint64value(const index: integer = 0): int64;
+   procedure setint64value(const value: int64); overload;
+   procedure setint64value(const index: integer; const value: int64); overload;
+   function getpointervalue(const index: integer = 0): pointer;
+   procedure setpointervalue(const value: pointer); overload;
+   procedure setpointervalue(const index: integer; const value: pointer); overload;
+
    procedure setbitvalue(const value: boolean; const bitindex: integer);
    function getfloatvalue(const index: integer = 0): extended;
    procedure setfloatvalue(const value: extended);
@@ -878,17 +885,14 @@ begin
  result:= ftextpropertyfont;
 end;
 
+function  getpointerprop1(instance: tobject; propinfo : ppropinfo): pointer;
+begin
 {$ifdef CPU64}
-Function  GetOrdProp1(Instance: TObject; PropInfo : PPropInfo) : int64;
-begin
- result:= getint64prop(instance,propinfo);
-end;
+  result:= pointer(getint64prop(instance,propinfo));
 {$else}
-Function  GetOrdProp1(Instance: TObject; PropInfo : PPropInfo) : Longint;
-begin
- result:= getordprop(instance,propinfo);
-end;
+  result:= pointer(getordprop(instance,propinfo));
 {$endif}
+end;
 
 function propertyeditors: tpropertyeditors;
 begin
@@ -2998,7 +3002,7 @@ end;
 function tarrayelementeditor.getordvalue(const index: integer = 0): integer;
 begin
  with fprops[index] do begin
-  result:= tintegerarrayprop(GetOrdProp1(instance,propinfo))[findex];
+  result:= tintegerarrayprop(getpointerprop1(instance,propinfo))[findex];
  end;
 end;
 
@@ -3008,7 +3012,7 @@ var
 begin
  for int1:= 0 to high(fprops) do begin
   with fprops[int1] do begin
-   tintegerarrayprop(GetOrdProp1(instance,propinfo))[findex]:= value;
+   tintegerarrayprop(getpointerprop1(instance,propinfo))[findex]:= value;
   end;
  end;
  modified;
@@ -3018,7 +3022,63 @@ procedure tarrayelementeditor.setordvalue(const index: integer;
                          const value: longword);
 begin
  with fprops[index] do begin
-  tintegerarrayprop(GetOrdProp1(instance,propinfo))[findex]:= value;
+  tintegerarrayprop(getpointerprop1(instance,propinfo))[findex]:= value;
+ end;
+ modified;
+end;
+
+function tarrayelementeditor.getint64value(const index: integer = 0): int64;
+begin
+ with fprops[index] do begin
+  result:= tint64arrayprop(getpointerprop1(instance,propinfo))[findex];
+ end;
+end;
+
+procedure tarrayelementeditor.setint64value(const value: int64);
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fprops) do begin
+  with fprops[int1] do begin
+   tint64arrayprop(getpointerprop1(instance,propinfo))[findex]:= value;
+  end;
+ end;
+ modified;
+end;
+
+procedure tarrayelementeditor.setint64value(const index: integer; 
+                         const value: int64);
+begin
+ with fprops[index] do begin
+  tint64arrayprop(getpointerprop1(instance,propinfo))[findex]:= value;
+ end;
+ modified;
+end;
+
+function tarrayelementeditor.getpointervalue(const index: integer = 0): pointer;
+begin
+ with fprops[index] do begin
+  result:= tpointerarrayprop(getpointerprop1(instance,propinfo))[findex];
+ end;
+end;
+
+procedure tarrayelementeditor.setpointervalue(const value: pointer);
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fprops) do begin
+  with fprops[int1] do begin
+   tpointerarrayprop(getpointerprop1(instance,propinfo))[findex]:= value;
+  end;
+ end;
+ modified;
+end;
+
+procedure tarrayelementeditor.setpointervalue(const index: integer; 
+                         const value: pointer);
+begin
+ with fprops[index] do begin
+  tpointerarrayprop(getpointerprop1(instance,propinfo))[findex]:= value;
  end;
  modified;
 end;
@@ -3031,9 +3091,9 @@ var
 begin
  for int1:= 0 to high(fprops) do begin
   with fprops[int1] do begin
-   wo1:= longword(tsetarrayprop(GetOrdProp1(instance,propinfo))[findex]);
+   wo1:= longword(tsetarrayprop(getpointerprop1(instance,propinfo))[findex]);
    updatebit(wo1,bitindex,value);
-   tsetarrayprop(GetOrdProp1(instance,propinfo))[findex]:= tintegerset(wo1);
+   tsetarrayprop(getpointerprop1(instance,propinfo))[findex]:= tintegerset(wo1);
   end;
  end;
  modified;
@@ -3042,7 +3102,7 @@ end;
 function tarrayelementeditor.getfloatvalue(const index: integer = 0): extended;
 begin
  with fprops[index] do begin
-  result:= trealarrayprop(GetOrdProp1(instance,propinfo))[findex];
+  result:= trealarrayprop(getpointerprop1(instance,propinfo))[findex];
  end;
 end;
 
@@ -3052,7 +3112,7 @@ var
 begin
  for int1:= 0 to high(fprops) do begin
   with fprops[int1] do begin
-   trealarrayprop(GetOrdProp1(instance,propinfo))[findex]:= value;
+   trealarrayprop(getpointerprop1(instance,propinfo))[findex]:= value;
   end;
  end;
  modified;
@@ -3061,7 +3121,7 @@ end;
 function tarrayelementeditor.getstringvalue(const index: integer = 0): string;
 begin
  with fprops[index] do begin
-  result:= tstringarrayprop(GetOrdProp1(instance,propinfo))[findex];
+  result:= tstringarrayprop(getpointerprop1(instance,propinfo))[findex];
  end;
 end;
 
@@ -3071,7 +3131,7 @@ var
 begin
  for int1:= 0 to high(fprops) do begin
   with fprops[int1] do begin
-   tstringarrayprop(GetOrdProp1(instance,propinfo))[findex]:= value;
+   tstringarrayprop(getpointerprop1(instance,propinfo))[findex]:= value;
   end;
  end;
  modified;
@@ -3080,7 +3140,7 @@ end;
 function tarrayelementeditor.getmsestringvalue(const index: integer = 0): msestring;
 begin
  with fprops[index] do begin
-  result:= tmsestringarrayprop(GetOrdProp1(instance,propinfo))[findex];
+  result:= tmsestringarrayprop(getpointerprop1(instance,propinfo))[findex];
  end;
 end;
 
@@ -3090,7 +3150,7 @@ var
 begin
  for int1:= 0 to high(fprops) do begin
   with fprops[int1] do begin
-   tmsestringarrayprop(GetOrdProp1(instance,propinfo))[findex]:= value;
+   tmsestringarrayprop(getpointerprop1(instance,propinfo))[findex]:= value;
   end;
  end;
  modified;
