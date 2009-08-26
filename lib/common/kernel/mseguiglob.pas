@@ -85,11 +85,16 @@ type
                 wp_fullscreen);
  windowsizety = (wsi_normal,wsi_minimized,wsi_maximized,wsi_fullscreen);
 
+ paintdevicety = ptruint;
+ fontty = ptruint;
+ regionty = ptruint;
+ pixmapty = ptruint;
+{
  paintdevicety = cardinal;
  fontty = cardinal;
  regionty = cardinal;
  pixmapty = cardinal;
-
+}
  windowpty = array[0..7] of pointer;
  windowty = record
   id: winidty;

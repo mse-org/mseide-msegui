@@ -610,12 +610,13 @@ type
  end;
  pbox = ^box;
  XRegion = record
-    size: integer;
-    numRects: integer;
+    size: clong;
+    numRects: clong;
     rects: pbox;
     extents: box;
  end;
  pxregion = ^xregion;
+
 
  x11windowdty = record
   ic: xic;
@@ -5135,9 +5136,8 @@ begin
   points1[2].x:= x1;
   points1[2].y:= y1;
   points1[3].y:= y1;
+  
   xfillpolygon(appdisp,paintdevice,tgc(gc.handle),@points1[0],4,complex,coordmodeorigin);
-//  xfillrectangle(appdisp,paintdevice,tgc(gc.handle),
-//   x+origin.x,y+origin.y,smallint(cx),smallint(cy)); //does not work with negative cx,cy
  end;
 end;
 
@@ -5326,8 +5326,6 @@ end;
 var
  timeoutcount: integer; //for safety timertick
 
-testvar: integer;
- 
 function gui_getevent: tevent;
 
 var
@@ -5545,7 +5543,6 @@ eventrestart:
    end;
   end;
  end;
-testvar:= xev.xtype;
  case xev.xtype of
   clientmessage: begin
    with xev.xclient do begin
