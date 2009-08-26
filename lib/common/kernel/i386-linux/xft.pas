@@ -2,7 +2,7 @@ unit xft;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- {$ifdef FPC}x,{$endif}Xlib,xrender;
+ {$ifdef FPC}x,{$endif}Xlib,xrender,mselibc;
 
 {
   Automatically converted by H2Pas 0.99.16 from Xft.h
@@ -225,7 +225,7 @@ const
     PXftFontInfo  = ^TXftFontInfo;
 
        TXftColor =  record
-            pixel : dword;
+            pixel : culong;
             color : TXRenderColor;
          end;
     PXftColor  = ^TXftColor;

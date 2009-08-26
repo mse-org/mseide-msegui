@@ -420,7 +420,6 @@ function Xutf8TextListToTextProperty(para1:PDisplay; para2:PPchar; para3: intege
 function Xutf8TextPropertyToTextList(para1:PDisplay; para2:PXTextProperty;
             para3:PPPchar; para4: pinteger): integer; cdecl;
                      external sXlib name 'Xutf8TextPropertyToTextList';
-
 {$ifndef staticxft}
 var //xft functions
  FcPatternDestroy: procedure(p:PFcPattern);cdecl;
