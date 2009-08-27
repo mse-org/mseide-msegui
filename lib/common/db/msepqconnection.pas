@@ -158,7 +158,7 @@ end;
 
 function tmsepqconnection.sequencecurrvalue(const sequencename: string): string;
 begin
- result:= 'select currval(''' +sequencename+''') as res;';
+ result:= 'select last_value from ' + sequencename + ';';
 end;
 
 function tmsepqconnection.writesequence(const sequencename: string;
