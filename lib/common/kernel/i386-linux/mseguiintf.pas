@@ -284,7 +284,7 @@ const
  pixel1 = $ffffff;
 type
   Bool = integer;
-  XID = type Cardinal;
+  XID = type culong;
   TXICCEncodingStyle = (XStringStyle,XCompoundTextStyle,XTextStyle,
      XStdICCTextStyle,XUTF8StringStyle);
 
@@ -3296,7 +3296,7 @@ var
             xOrigin:longint; yOrigin:longint; rects:PXRectangle; n:longint);
            cdecl;
  XRenderCreatePicture: function(dpy:PDisplay; drawable:TDrawable;
-      format:PXRenderPictFormat; valuemask:dword;
+      format:PXRenderPictFormat; valuemask:culong;
       attributes:PXRenderPictureAttributes):TPicture;cdecl;
  XRenderFillRectangle: procedure(dpy:PDisplay; op:longint; dst:TPicture;
               color:PXRenderColor; x:longint;

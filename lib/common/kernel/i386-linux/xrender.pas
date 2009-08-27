@@ -2,7 +2,7 @@ unit xrender;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- {$ifdef FPC} x,{$endif}Xlib;
+ {$ifdef FPC} x,{$endif}Xlib,mselibc;
 
   const
     External_library='libXrender.so';
@@ -48,13 +48,13 @@ uses
      Tdouble = double;
      TXFixed = integer;
      PXFixed = ^TXFixed;
-     TGlyph = longword;
+     TGlyph = txid;
      PGlyph = ^TGlyph;
-     TGlyphSet = longword;
+     TGlyphSet = txid;
      PGlyphSet = ^TGlyphSet;
-     TPicture = longword;
+     TPicture = txid;
      PPicture = ^TPicture;
-     TPictFormat = longword;
+     TPictFormat = txid;
      PPictFormat = ^TPictFormat;
      {$ifdef FPC}
      TRegion = pointer;
@@ -304,7 +304,7 @@ type
      PXFilters = ^TXFilters;
 
      TXIndexValue =  record
-          pixel : dword;
+          pixel : culong;
           red : word;
           green : word;
           blue : word;
@@ -314,7 +314,7 @@ type
 
      TXAnimCursor =  record
           cursor : TCursor;
-          delay : dword;
+          delay : culong;
        end;
      PXAnimCursor = ^TXAnimCursor;
      
@@ -346,7 +346,7 @@ type
 
   function XRenderFindVisualFormat(dpy:PDisplay; visual:PVisual):PXRenderPictFormat;cdecl;external External_library name 'XRenderFindVisualFormat';
 
-  function XRenderFindFormat(dpy:PDisplay; mask:dword; templ:PXRenderPictFormat; count:longint):PXRenderPictFormat;cdecl;external External_library name 'XRenderFindFormat';
+  function XRenderFindFormat(dpy:PDisplay; mask:culong; templ:PXRenderPictFormat; count:longint):PXRenderPictFormat;cdecl;external External_library name 'XRenderFindFormat';
 
 
   function XRenderFindStandardFormat(dpy:PDisplay;
@@ -358,7 +358,7 @@ function XRenderQueryPictIndexValues(dpy:PDisplay; format:PXRenderPictFormat;
           cdecl;external External_library name 'XRenderQueryPictIndexValues';
 
 function XRenderCreatePicture(dpy:PDisplay; drawable:TDrawable;
-      format:PXRenderPictFormat; valuemask:dword;
+      format:PXRenderPictFormat; valuemask:culong;
       attributes:PXRenderPictureAttributes):TPicture;
       cdecl;external External_library name 'XRenderCreatePicture';
 
@@ -366,7 +366,7 @@ procedure XRenderFreePicture(dpy:PDisplay; picture:TPicture);
                  cdecl;external External_library name 'XRenderFreePicture';
 
 procedure XRenderChangePicture(dpy:PDisplay; picture:TPicture;
-          valuemask:dword; attributes:PXRenderPictureAttributes);
+          valuemask:culong; attributes:PXRenderPictureAttributes);
           cdecl;external External_library name 'XRenderChangePicture';
 
 procedure XRenderSetPictureClipRectangles(dpy:PDisplay; picture:TPicture;
