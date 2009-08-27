@@ -932,9 +932,9 @@ begin
 
 end;
 
-function filetimetodatetime(sec: time_t; usec: cardinal): tdatetime;
+function filetimetodatetime(sec: time_t; nsec: cardinal): tdatetime;
 begin
- result:= sec / (24.0*60.0*60.0) + usec / (24.0*60.0*60.0*1e6) - datetimeoffset;
+ result:= sec / (24.0*60.0*60.0) + nsec / (24.0*60.0*60.0*1e9) - datetimeoffset;
 end;
 
 function sys_getcurrentdir: msestring;
@@ -1049,9 +1049,9 @@ begin
                  ((attributes * exclude) = []) then begin
            state:= state + [fis_extinfo1valid,fis_extinfo2valid];
            size:= st_size;
-           modtime:= filetimetodatetime(st_mtime,st_mtime_usec);
-           accesstime:= filetimetodatetime(st_atime,st_atime_usec);
-           ctime:= filetimetodatetime(st_ctime,st_ctime_usec);
+           modtime:= filetimetodatetime(st_mtime,st_mtime_nsec);
+           accesstime:= filetimetodatetime(st_atime,st_atime_nsec);
+           ctime:= filetimetodatetime(st_ctime,st_ctime_nsec);
            id:= st_ino;
            owner:= st_uid;
            group:= st_gid;
@@ -1089,9 +1089,9 @@ begin
   end;
   state:= state + [fis_extinfo1valid,fis_extinfo2valid];
   size:= st_size;
-  modtime:= filetimetodatetime(st_mtime,st_mtime_usec);
-  accesstime:= filetimetodatetime(st_atime,st_atime_usec);
-  ctime:= filetimetodatetime(st_ctime,st_ctime_usec);
+  modtime:= filetimetodatetime(st_mtime,st_mtime_nsec);
+  accesstime:= filetimetodatetime(st_atime,st_atime_nsec);
+  ctime:= filetimetodatetime(st_ctime,st_ctime_nsec);
   id:= st_ino;
   owner:= st_uid;
   group:= st_gid;

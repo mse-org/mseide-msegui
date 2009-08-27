@@ -113,13 +113,15 @@ function octtostr(inp: uint64; digits: integer): string; overload;
    //convert longword to octaltring, digits = octet count
 function hextostr(inp: longword; digits: integer): string; overload;
    //convert longword to hexstring, digits = nibble count
-function hextostr(inp: uint64; digits: integer): string; overload;
+function hextostr(inp: qword; digits: integer): string; overload;
    //convert longword to hexstring, digits = nibble count
 function hextocstr(const inp: longword; stellen: integer): string; overload;
    //convert longword to 0x..., digits = nibble count
-function hextocstr(const inp: uint64; stellen: integer): string; overload;
+function hextocstr(const inp: qword; stellen: integer): string; overload;
    //convert longword to 0x..., digits = nibble count
 function ptruinttocstr(inp: ptruint): string; overload;
+   //convert ptruint to 0x...
+function qwordtocstr(inp: qword): string; overload;
    //convert ptruint to 0x...
 function intvaluetostr(const value: integer; const base: numbasety = nb_dec;
                           const bitcount: integer = 32): string; overload;
@@ -2189,7 +2191,7 @@ begin
  end;
 end;
 
-function hextostr(inp: uint64; digits: integer): string;
+function hextostr(inp: qword; digits: integer): string;
    //wandelt longword in hexstring, stellen = anzahl nibbles
 var
  int1: integer;
@@ -2209,7 +2211,7 @@ begin
  result:= '0x' + hextostr(inp, stellen);
 end;
 
-function hextocstr(const inp: uint64; stellen: integer): string;
+function hextocstr(const inp: qword; stellen: integer): string;
 begin
  result:= '0x' + hextostr(inp, stellen);
 end;
@@ -2221,6 +2223,26 @@ var
 begin
  result:= '0x';
  setlength(result,2+sizeof(ptrint)*2);
+ for int1:= length(result) downto 3  do begin
+  result[int1]:= char(ord('0') + (inp and $f));
+  if result[int1] > '9' then begin
+   inc(result[int1],ord('A')-ord('9')-1);
+  end;
+  inp:= inp shr 4;
+ end;
+end;
+
+function qwordtocstr(inp: qword): string;
+   //convert qword to 0x...
+var
+ int1: integer;
+begin
+ result:= '0x';
+ int1:= 8*2;
+// if inp <= $ffffffff then begin
+//  int1:= 4*2;
+// end;
+ setlength(result,2+int1);
  for int1:= length(result) downto 3  do begin
   result[int1]:= char(ord('0') + (inp and $f));
   if result[int1] > '9' then begin

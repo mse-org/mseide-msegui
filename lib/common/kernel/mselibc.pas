@@ -498,6 +498,35 @@ type
   __socklen_t = dword;
   TFileDescriptor = integer;
 
+{$ifdef CPU64}
+ P_stat = ^_stat;
+ PStat = ^_stat;
+ _stat = packed record
+  st_dev: culong;
+  st_ino: culong;
+  st_nlink: culong;
+  
+  st_mode: cuint;
+  st_uid: cuint;
+  st_gid: cuint;
+  __pad0: cuint;
+  st_rdev: culong;
+  st_size: clong;
+  st_blksize: clong;
+  st_blocks: clong;	///* Number 512-byte blocks allocated. */
+  
+  st_atime: culong;
+  st_atime_nsec: culong;
+  st_mtime: culong;
+  st_mtime_nsec: culong;
+  st_ctime: culong;
+  st_ctime_nsec: culong;
+  __unused: array[0..2] of clong;
+ end;
+ P_stat64 = ^_stat64;
+ Pstat64 = ^_stat64;
+ _stat64 = _stat; 
+{$else}
  P_stat = ^_stat;
  PStat = ^_stat;
  _stat = packed record
@@ -516,11 +545,11 @@ type
    st_blksize : __blksize_t;
    st_blocks : __blkcnt_t;
    st_atime : __time_t;
-   st_atime_usec : longword;
+   st_atime_nsec : longword;
    st_mtime : __time_t;
-   st_mtime_usec: longword;
+   st_mtime_nsec: longword;
    st_ctime : __time_t;
-   st_ctime_usec: longword;
+   st_ctime_nsec: longword;
    __unused4 : dword;
    __unused5 : dword;
  end;
@@ -541,13 +570,14 @@ type
     st_blksize : __blksize_t;
     st_blocks : __blkcnt64_t;
     st_atime : __time_t;
-    st_atime_usec : longword;
+    st_atime_nsec : longword;
     st_mtime : __time_t;
-    st_mtime_usec: longword;
+    st_mtime_nsec: longword;
     st_ctime : __time_t;
-    st_ctime_usec: longword;
+    st_ctime_nsec: longword;
     st_ino : __ino64_t;
    end;
+{$endif}
 
   __fd_set = record
      fds_bits: packed array[0..(__FD_SETSIZE div __NFDBITS)-1] of __fd_mask;
@@ -1470,24 +1500,29 @@ const
  _STAT_VER_LINUX_OLD = 1;
  _STAT_VER_KERNEL = 1;
  _STAT_VER_SVR4 = 2;
+{$ifdef CPU64}
+ _STAT_VER_LINUX = 1;
+{$else}
  _STAT_VER_LINUX = 3;
+{$endif}
  _STAT_VER = _STAT_VER_LINUX;
    
 {$ifdef linux}
+
 function __fxstat(__ver:longint; __fildes:longint; __stat_buf:Pstat):longint;
                              cdecl;external clib name '__fxstat';
 function __xstat(__ver:longint; __filename:Pchar; __stat_buf:Pstat):longint;
                              cdecl;external clib name '__xstat';
 function __lxstat(__ver:longint; __filename:Pchar; __stat_buf:Pstat):longint;
                              cdecl;external clib name '__lxstat';
-
+{$ifndef CPU64}
 function __fxstat64(__ver:longint; __fildes:longint; __stat_buf:Pstat64):longint;
                              cdecl;external clib name '__fxstat64';
 function __xstat64(__ver:longint; __filename:Pchar; __stat_buf:Pstat64):longint;
                              cdecl;external clib name '__xstat64';
 function __lxstat64(__ver:longint; __filename:Pchar; __stat_buf:Pstat64):longint;
                              cdecl;external clib name '__lxstat64';
-                                   
+{$endif}                                   
 function stat(__file:Pchar; __buf:Pstat):longint;
 function fstat(__fd:longint; __buf:Pstat):longint;
 
@@ -2152,17 +2187,29 @@ end;
 
 function stat64(__file:Pchar; __buf:Pstat64):longint;
 begin
+{$ifdef CPU64}
+ __xstat(_STAT_VER,__file,__buf);
+{$else}
  __xstat64(_STAT_VER,__file,__buf);
+{$endif}
 end;
 
 function fstat64(__fd:longint; __buf:Pstat64):longint;
 begin
+{$ifdef CPU64}
+ __fxstat(_STAT_VER,__fd,__buf);
+{$else}
  __fxstat64(_STAT_VER,__fd,__buf);
+{$endif}
 end;
 
 function lstat64(__file:Pchar; __buf:Pstat64):longint;
 begin
+{$ifdef CPU64}
+ __lxstat(_STAT_VER,__file,__buf);
+{$else}
  __lxstat64(_STAT_VER,__file,__buf);
+{$endif}
 end;
 
 {$endif} //linux

@@ -100,7 +100,7 @@ type
   filename: filenamety;
   filedir: filenamety;
   line: integer;
-  addr: cardinal;
+  addr: qword;
   func: string;
   signalname: string;
   signalmeaning: string;
@@ -148,7 +148,7 @@ type
 
  frameinfoty = record
   level: integer;
-  addr: pointer;
+  addr: qword;
   func: string;
   filename: filenamety;
   line: integer;
@@ -225,7 +225,6 @@ type
 
  tgdbmi = class(tactcomponent)
   private
-   fpointersize: integer;
    fgdbto: tpipewriter;
    fgdbfrom,fgdberror: tpipereader;
    {$ifdef UNIX}
@@ -287,6 +286,8 @@ type
    function getprocessorname: ansistring;
    procedure setprocessorname(const avalue: ansistring);
   protected
+   fpointersize: integer;
+   fpointerhexdigits: integer;
    {$ifdef UNIX}
    procedure targetfrom(const sender: tpipereader);
    {$endif}
@@ -301,6 +302,7 @@ type
    procedure doevent(const token: cardinal; const eventkind: gdbeventkindty;
                        const values: resultinfoarty);
    procedure postsyncerror;
+   procedure checkpointersize;
    procedure dorun;
    function internalcommand(acommand: string): boolean;
    function synccommand(const acommand: string; 
@@ -318,11 +320,10 @@ type
 
    function decodelist(const noname: boolean; const inp: string;
                             var value: resultinfoarty): boolean;
-   function ispointervalue(avalue: string;
-             out pointervalue: ptruint): boolean;
+   function ispointervalue(avalue: string; out pointervalue: qword): boolean;
    function matchpascalformat(const typeinfo: string; const value: string): msestring;
-   function getpcharvar(address: cardinal): string;
-   function getpmsecharvar(address: cardinal): msestring;
+   function getpcharvar(address: qword): string;
+   function getpmsecharvar(address: qword): msestring;
    function getnumarrayvalue(const response: resultinfoarty; const aname: string;
                  var avalue; setnumproc: setnumprocty; setlenproc: setlenprocty): boolean;
    function getpascalvalue(const avalue: string): string;
@@ -462,19 +463,19 @@ type
    function getthreadidlist(out idlist: integerarty): gdbresultty;
    function getthreadinfolist(out infolist: threadinfoarty): gdbresultty;
 
-   function readmemorybytes(const address: ptruint; const count: integer;
+   function readmemorybytes(const address: qword; const count: integer;
                  var aresult: bytearty): gdbresultty;
-   function readmemorywords(const address: ptruint; const count: integer;
+   function readmemorywords(const address: qword; const count: integer;
                  var aresult: wordarty): gdbresultty;
-   function readmemorylongwords(const address: ptruint; const count: integer;
+   function readmemorylongwords(const address: qword; const count: integer;
                  var aresult: longwordarty): gdbresultty;
-   function readmemorybyte(const address: ptruint; out aresult: byte): gdbresultty;
-   function readmemoryword(const address: ptruint; out aresult: word): gdbresultty;
-   function readmemorylongword(const address: ptruint; out aresult: longword): gdbresultty;
-   function readmemorypointer(const address: ptruint; out aresult: ptruint): gdbresultty;
-   function writememorybyte(const address: ptruint; const avalue: byte): gdbresultty;
-   function writememoryword(const address: ptruint; const avalue: word): gdbresultty;
-   function writememorylongword(const address: ptruint; const avalue: longword): gdbresultty;
+   function readmemorybyte(const address: qword; out aresult: byte): gdbresultty;
+   function readmemoryword(const address: qword; out aresult: word): gdbresultty;
+   function readmemorylongword(const address: qword; out aresult: longword): gdbresultty;
+   function readmemorypointer(const address: qword; out aresult: qword): gdbresultty;
+   function writememorybyte(const address: qword; const avalue: byte): gdbresultty;
+   function writememoryword(const address: qword; const avalue: word): gdbresultty;
+   function writememorylongword(const address: qword; const avalue: longword): gdbresultty;
 
    function readpascalvariable(const varname: string; out aresult: msestring): gdbresultty;
    function writepascalvariable(const varname: string; const value: string;
@@ -705,6 +706,7 @@ end;
 constructor tgdbmi.create(aowner: tcomponent);
 begin
  fpointersize:= sizeof(pointer);
+ fpointerhexdigits:= fpointersize * 2;
  fgdb:= invalidprochandle;
  fguiintf:= true;
  fsourcefiles:= thashedmsestrings.create;
@@ -1737,6 +1739,21 @@ begin
  end;
 end;
 
+procedure tgdbmi.checkpointersize;
+var
+ str1: string;
+ int1: integer;
+begin
+ fpointersize:= 4;
+ if evaluateexpression('sizeof(pointer)',str1) = gdb_ok then begin
+   //I know there is a gdbcommand for this, I could not find it
+  if trystrtoint(str1,int1) then begin
+   fpointersize:= int1;
+  end;
+ end;
+ fpointerhexdigits:= 2*fpointersize;
+end;
+
 procedure tgdbmi.dorun;
 var
  int1: integer;
@@ -1754,6 +1771,7 @@ begin
    exit;
   end;
  end;
+ checkpointersize;
  str1:= '';
  if fstartupbkpton then begin
   fstartupbreakpoint:= breakinsert(fstartupbkpt);  
@@ -1764,7 +1782,7 @@ begin
    with ev do begin
     stopinfo.reason:= sr_startup;
     with frames1[0] do begin
-     stopinfo.addr:= ptruint(addr);
+     stopinfo.addr:= addr;
      stopinfo.filename:= filename;
      stopinfo.line:= line;
      stopinfo.messagetext:= 'Startup. File: '+
@@ -2023,6 +2041,7 @@ end;
 
 procedure tgdbmi.initproginfo;
 begin
+ checkpointersize;
  getprocaddress('MSEGUIINTF_GUI_DEBUGBEGIN',ftargetdebugbegin);
  getprocaddress('MSEGUIINTF_GUI_DEBUGEND',ftargetdebugend);
 end;
@@ -2809,7 +2828,7 @@ begin
      filename:= str1;
      getintegervalue(frame,'line',line);
      getstringvalue(frame,'func',func);
-     getintegervalue(frame,'addr',integer(addr));
+     getinteger64value(frame,'addr',int64(addr));
      if getsourcename(wstr1)= gdb_ok then begin
       filedir:= msefileutils.filedir(wstr1);
      end;
@@ -3026,13 +3045,13 @@ begin
  end;
 end;
 
-function tgdbmi.readmemorybytes(const address: ptruint; const count: integer;
+function tgdbmi.readmemorybytes(const address: qword; const count: integer;
                  var aresult: bytearty): gdbresultty;
 var
  ar1,ar2: resultinfoarty;
 begin
  aresult:= nil;
- result:= synccommand('-data-read-memory '+ ptruinttocstr(address) + ' u 1 1 ' + inttostr(count));
+ result:= synccommand('-data-read-memory '+ hextocstr(address,fpointerhexdigits) + ' u 1 1 ' + inttostr(count));
  if result = gdb_ok then begin
   result:= gdb_dataerror;
   if getarrayvalue(fsyncvalues,'memory',false,ar1) then begin
@@ -3045,13 +3064,13 @@ begin
  end;
 end;
 
-function tgdbmi.readmemorywords(const address: ptruint; const count: integer;
+function tgdbmi.readmemorywords(const address: qword; const count: integer;
                  var aresult: wordarty): gdbresultty;
 var
  ar1,ar2: resultinfoarty;
 begin
  aresult:= nil;
- result:= synccommand('-data-read-memory '+ ptruinttocstr(address) + ' u 2 1 ' + inttostr(count));
+ result:= synccommand('-data-read-memory '+ hextocstr(address,fpointerhexdigits) + ' u 2 1 ' + inttostr(count));
  if result = gdb_ok then begin
   result:= gdb_dataerror;
   if getarrayvalue(fsyncvalues,'memory',false,ar1) then begin
@@ -3064,13 +3083,13 @@ begin
  end;
 end;
 
-function tgdbmi.readmemorylongwords(const address: ptruint; const count: integer;
+function tgdbmi.readmemorylongwords(const address: qword; const count: integer;
                  var aresult: longwordarty): gdbresultty;
 var
  ar1,ar2: resultinfoarty;
 begin
  aresult:= nil;
- result:= synccommand('-data-read-memory '+ ptruinttocstr(address) + ' u 4 1 ' + inttostr(count));
+ result:= synccommand('-data-read-memory '+ hextocstr(address,fpointerhexdigits) + ' u 4 1 ' + inttostr(count));
  if result = gdb_ok then begin
   result:= gdb_dataerror;
   if getarrayvalue(fsyncvalues,'memory',false,ar1) then begin
@@ -3083,7 +3102,7 @@ begin
  end;
 end;
 
-function tgdbmi.readmemorybyte(const address: ptruint; out aresult: byte): gdbresultty;
+function tgdbmi.readmemorybyte(const address: qword; out aresult: byte): gdbresultty;
 var
  ar1: bytearty;
 begin
@@ -3093,7 +3112,7 @@ begin
  end;
 end;
 
-function tgdbmi.readmemoryword(const address: ptruint; out aresult: word): gdbresultty;
+function tgdbmi.readmemoryword(const address: qword; out aresult: word): gdbresultty;
 var
  ar1: wordarty;
 begin
@@ -3103,7 +3122,7 @@ begin
  end;
 end;
 
-function tgdbmi.readmemorylongword(const address: ptruint; out aresult: longword): gdbresultty;
+function tgdbmi.readmemorylongword(const address: qword; out aresult: longword): gdbresultty;
 var
  ar1: longwordarty;
 begin
@@ -3113,7 +3132,22 @@ begin
  end;
 end;
 
-function tgdbmi.readmemorypointer(const address: ptruint; out aresult: ptruint): gdbresultty;
+function tgdbmi.readmemorypointer(const address: qword; out aresult: qword): gdbresultty;
+var
+ ar1: bytearty;
+begin
+ result:= readmemorybytes(address,fpointersize,ar1);
+ if result = gdb_ok then begin
+  if fpointersize = 8 then begin
+   aresult:= pqword(pointer(ar1))^;
+  end
+  else begin
+   aresult:= plongword(pointer(ar1))^;
+  end;
+ end;
+end;
+{
+function tgdbmi.readmemorypointer(const address: qword; out aresult: qword): gdbresultty;
 var
  ar1: bytearty;
 begin //todo: endianess
@@ -3122,13 +3156,13 @@ begin //todo: endianess
   aresult:= pptruint(pointer(ar1))^;
  end;
 end;
-
-function tgdbmi.writememorybyte(const address: ptruint;
+}
+function tgdbmi.writememorybyte(const address: qword;
                                              const avalue: byte): gdbresultty;
 var
  str1,str2,str3: ansistring;
 begin
- str2:= hextocstr(address,8);
+ str2:= hextocstr(address,fpointerhexdigits);
  str3:= hextocstr(avalue,2);
  if currentlang = 'pascal' then begin
   result:= evaluateexpression('pbyte('+str2+')^:='+str3,str1);
@@ -3138,12 +3172,12 @@ begin
  end;
 end;
 
-function tgdbmi.writememoryword(const address: ptruint; 
+function tgdbmi.writememoryword(const address: qword; 
                                             const avalue: word): gdbresultty;
 var
  str1,str2,str3: ansistring;
 begin
- str2:= hextocstr(address,8);
+ str2:= hextocstr(address,fpointerhexdigits);
  str3:= hextocstr(avalue,4);
  if currentlang = 'pascal' then begin
   result:= evaluateexpression('pword('+str2+')^:='+str3,str1);
@@ -3153,12 +3187,12 @@ begin
  end;
 end;
 
-function tgdbmi.writememorylongword(const address: ptruint;
+function tgdbmi.writememorylongword(const address: qword;
                                             const avalue: longword): gdbresultty;
 var
  str1,str2,str3: ansistring;
 begin
- str2:= hextocstr(address,8);
+ str2:= hextocstr(address,fpointerhexdigits);
  str3:= hextocstr(avalue,8);
  if currentlang = 'pascal' then begin
   result:= evaluateexpression('plongword('+str2+')^:='+str3,str1);
@@ -3472,7 +3506,7 @@ begin
  result:= synccommand('set sysreg '+inttostr(anumber)+'=0x'+hextostr(avalue,8));
 end;
 
-function tgdbmi.getpcharvar(address: cardinal): string;
+function tgdbmi.getpcharvar(address: qword): string;
 const
  maxblocklength = 16;
  maxlength = 10000;
@@ -3527,7 +3561,7 @@ begin
  end;
 end;
 
-function tgdbmi.getpmsecharvar(address: cardinal): msestring;
+function tgdbmi.getpmsecharvar(address: qword): msestring;
 const
  maxblocklength = 16;
  maxlength = 10000;
@@ -3582,7 +3616,7 @@ begin
  end;
 end;
 
-function tgdbmi.ispointervalue(avalue: string; out pointervalue: ptruint): boolean;
+function tgdbmi.ispointervalue(avalue: string; out pointervalue: qword): boolean;
 var
  int1: integer;
 begin
@@ -3590,19 +3624,19 @@ begin
  if int1 > 0 then begin
   setlength(avalue,int1-1);
  end;
- result:= trystrtoptruint(avalue,pointervalue);
+ result:= trystrtoqword(avalue,pointervalue);
 end;
 
 function tgdbmi.matchpascalformat(const typeinfo: string;
                                        const value: string): msestring;
 const
  typetoken = 'type = ';
- dynartoken = 'array [0..-1] of ';
+ dynartoken = 'ARRAY [0..-1] OF ';
 var
  ar1: stringarty;
  str1,str3: string;
  mstr1: msestring;
- ad1,ad2,ad3: ptruint;
+ ad1,ad2,ad3: qword;
  res1: gdbresultty;
  int1: integer;
 begin
@@ -3614,11 +3648,12 @@ begin
    if startsstr(typetoken,ar1[0]) then begin
     str1:= copy(ar1[0],length(typetoken)+1,length(ar1[0])-length(typetoken));
    end;
-   if (str1 = '^character') or (str1 = '^CHAR') then begin
+   str1:= struppercase(str1);
+   if (str1 = '^CHARACTER') or (str1 = '^CHAR') then begin
     result:= getpcharvar(ad1);
    end
    else begin
-    if (str1 = '^wchar') or (str1 = '^WIDECHAR') then begin
+    if (str1 = '^WCHAR') or (str1 = '^WIDECHAR') then begin
      result:= getpmsecharvar(ad1);
     end
     else begin
@@ -3857,7 +3892,7 @@ function tgdbmi.getpascalvalue(const avalue: string): string;
 const
  ansistringtag = '(ANSISTRING)';
 var
- ca1: ptruint;
+ ca1: qword;
 begin
  if startsstr(ansistringtag,avalue) then begin
   if ispointervalue(copy(avalue,length(ansistringtag)+1,bigint),ca1) then begin
@@ -3889,11 +3924,11 @@ begin
      gettuplevalue(ar1[int1],ar2);
      with list[int1] do begin
       getintegervalue(ar2,'level',level);
-{$ifdef CPU64}
+//{$ifdef CPU64}
       getinteger64value(ar2,'addr',int64(addr));
-{$else}
-      getintegervalue(ar2,'addr',integer(addr));
-{$endif}
+//{$else}
+//      getintegervalue(ar2,'addr',integer(addr));
+//{$endif}
       getstringvalue(ar2,'func',func);
       getstringvalue(ar2,'file',str1);
       filename:= str1;
