@@ -575,6 +575,7 @@ type
    function getelementeditorclass: elementeditorclassty; virtual;
    procedure itemmoved(const source,dest: integer); virtual;
   public
+   function itemprefix: msestring; virtual;
    procedure move(const curindex,newindex: integer); virtual;
    function allequal: boolean; override;
    function getvalue: msestring; override;
@@ -2976,6 +2977,11 @@ begin
  itemmoved(curindex,newindex)
 end;
 
+function tarraypropertyeditor.itemprefix: msestring;
+begin
+ result:= 'Item ';
+end;
+
 { tarrayelementeditor }
 
 constructor tarrayelementeditor.create(aindex: integer;
@@ -3166,7 +3172,7 @@ end;
 }
 function tarrayelementeditor.name: msestring;
 begin
- result:= 'Item ' + inttostr(findex);
+ result:= tarraypropertyeditor(fparenteditor).itemprefix + inttostr(findex);
 end;
 
 function tarrayelementeditor.subproperties: propertyeditorarty;

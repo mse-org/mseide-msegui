@@ -1129,6 +1129,7 @@ end;
 function tcustomapplication.checkoverload(const asleepus: integer = 100000): boolean;
               //true if never idle since last call,
               // unlocks application and calls sleep if not mainthread and asleepus >= 0
+//todo: fix for concurent calls, use wait queue instead of sleep
 var
  int1: integer;
 begin

@@ -14,8 +14,8 @@ unit regwidgets;
 interface
 uses
  msepropertyeditors,msestrings;
- 
-type
+
+type 
  tgridpropseditor = class(tpersistentarraypropertyeditor)
   protected
    procedure itemmoved(const source,dest: integer); override;
@@ -30,6 +30,7 @@ type
   protected
    function geteditorclass: propertyeditorclassty; override;  
   public
+   function itemprefix: msestring; override;
 //   procedure move(const curindex,newindex: integer); override;
  end;
  
@@ -49,6 +50,7 @@ type
  tfixrows1 = class(tfixrows);
  
  
+type
  tfixgridpropeditor = class(tarrayelementeditor)
   public
    function name: msestring; override;
@@ -59,11 +61,14 @@ type
    function getelementeditorclass: elementeditorclassty; override;
  end;
    
- tfixcolseditor = class(tgridpropseditor)
-  protected
-   function getelementeditorclass: elementeditorclassty; override;
+ tfixrowseditor = class(tfixgridpropseditor)
   public
-//   procedure move(const curindex,newindex: integer); override;
+   function itemprefix: msestring; override;
+ end;
+ 
+ tfixcolseditor = class(tfixgridpropseditor)
+  public
+   function itemprefix: msestring; override;
  end;
 
  tcolheaderelementeditor = class(tclasselementeditor)
@@ -114,7 +119,7 @@ begin
                             toptionalclasspropertyeditor);
  registerpropertyeditor(typeinfo(tdatacols),nil,'',tdatacolseditor);
  registerpropertyeditor(typeinfo(tfixcols),nil,'',tfixcolseditor);
- registerpropertyeditor(typeinfo(tfixrows),nil,'',tfixgridpropseditor);
+ registerpropertyeditor(typeinfo(tfixrows),nil,'',tfixrowseditor);
  registerpropertyeditor(typeinfo(tfixcolheaders),nil,'',
                              tfixcolheaderspropertyeditor);
  registerpropertyeditor(typeinfo(integer),tcolheader,'mergecols',
@@ -171,7 +176,7 @@ end;
 function tfixgridpropeditor.name: msestring;
 begin
 // result:= 'Item '+inttostr(findex - tarrayprop(tpropertyeditor1(fparenteditor).getordvalue).count);
- result:= 'Item '+inttostr(-findex - 1);
+ result:= tpersistentarraypropertyeditor(fparenteditor).itemprefix+inttostr(-findex - 1);
 end;
 
 { tfixgridpropseditor }
@@ -210,28 +215,21 @@ begin
  end;
  }
 end;
+
 *)
+
+function tdatacolseditor.itemprefix: msestring;
+begin
+ result:= 'Col ';
+end;
+
 { tfixcolseditor }
 
-function tfixcolseditor.getelementeditorclass: elementeditorclassty;
+function tfixcolseditor.itemprefix: msestring;
 begin
- result:= tfixgridpropeditor;
+ result:= 'Col ';
 end;
-(*
-procedure tfixcolseditor.move(const curindex: integer; const newindex: integer);
-var
- int1: integer;
-begin
-{
- for int1:= 0 to high(fprops) do begin
-  with tfixcols1(getordvalue(int1)) do begin
-//   tfixrows1(fgrid.fixrows).movecol(-curindex-1,-newindex-1);
-  end;   
- end;
- }
- inherited;
-end;
-*)
+
 { tcolheaderelementeditor }
 
 function tcolheaderelementeditor.getvalue: msestring;
@@ -263,6 +261,13 @@ end;
 function tfixcolheaderspropertyeditor.getelementeditorclass: elementeditorclassty;
 begin
  result:= tfixgridpropeditor;
+end;
+
+{ tfixrowseditor }
+
+function tfixrowseditor.itemprefix: msestring;
+begin
+ result:= 'Row ';
 end;
 
 initialization
