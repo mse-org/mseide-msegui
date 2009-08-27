@@ -20,9 +20,10 @@ type
  {$ifndef FPC}
  tlibhandle = thandle;
  {$endif}
- threadty = cardinal;
- procidty = integer;
- prochandlety = integer; //todo: 64bit, windows
+ threadty = ptruint;
+ procidty = ptrint;
+ procidarty = array of procidty; //same item size as winidarty!
+ prochandlety = ptrint; //todo: 64bit, windows
 const
  invalidprocid = -1;
  invalidprochandle = -1;
@@ -30,15 +31,15 @@ type
  internalthreadprocty = function(): integer of object;
 
  procitemty = record
-  pid,ppid: integer;
-  children: integerarty;
+  pid,ppid: procidty;
+  children: procidarty;
  end;
  procitemarty = array of procitemty;
 
  threadinfoty = record
   id: threadty;
   threadproc: internalthreadprocty;
-  platformdata: array[0..3] of cardinal;
+  platformdata: array[0..3] of pointer;
  end;
 
  mutexty = array[0..7] of pointer;

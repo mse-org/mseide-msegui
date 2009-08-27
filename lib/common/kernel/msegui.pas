@@ -2762,7 +2762,7 @@ end;
 
 function getprocesswindow(const procid: integer): winidty;
 var
- ar1: integerarty;
+ ar1: procidarty;
 begin
  ar1:= getallprocesschildren(procid);
  result:= gui_pidtowinid(ar1);

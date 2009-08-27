@@ -1352,7 +1352,7 @@ begin
  result:= gue_ok;
 end;
 
-function gui_pidtowinid(const pids: integerarty): winidty;
+function gui_pidtowinid(const pids: procidarty): winidty;
 
 var
  level: integer;
@@ -1430,7 +1430,7 @@ var
 begin
  result:= nil;
  count:= 0;
- additem(integerarty(result),id,count);
+ additem(result,id,count);
  parent:= id;
  repeat
   if (xquerytree(appdisp,parent,@root,@parent,@children,@ca1) <> 0) then begin
@@ -1441,7 +1441,7 @@ begin
   else begin
    break;
   end;
-  additem(integerarty(result),parent,count);
+  additem(result,parent,count);
  until (parent = root);
  setlength(result,count);
 end;

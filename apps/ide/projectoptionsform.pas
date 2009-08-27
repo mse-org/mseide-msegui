@@ -1109,7 +1109,7 @@ begin
     setlength(moduletypes,int2);
     setlength(modulefilenames,int2);
     for int1:= 0 to high(modulenames) do begin
-     with pmoduleinfoty(submenu[int1+int3].tag)^ do begin
+     with pmoduleinfoty(submenu[int1+int3].tagpointer)^ do begin
       modulenames[int1]:= struppercase(instance.name);
       moduletypes[int1]:= struppercase(string(moduleclassname));
       modulefilenames[int1]:= filename;

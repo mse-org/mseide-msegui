@@ -31,12 +31,6 @@ type
  {$ifdef VER2_2_0}
   PPtrUInt = ^PtrUInt;
  {$endif}
-// winidty = cardinal;
- winidty = ptruint;
- winidarty = array of winidty;
- winidaty = array[0..0] of winidty;
- pwinidaty = ^winidaty;
- winidararty = array of winidarty;
 
  preal = ^real;
  realty = type double;
@@ -146,8 +140,6 @@ type
 
  varrecarty = array of tvarrec;
 
- 
-
  gridcoordty = record
   col,row: integer;
  end;
@@ -168,6 +160,13 @@ type
     size: gridsizety;
    )
  end;
+
+// winidty = cardinal;
+ winidty = ptruint;
+ winidarty = array of winidty;
+ winidaty = array[0..0] of winidty;
+ pwinidaty = ^winidaty;
+ winidararty = array of winidarty;
 
 const
  nullcomplex: complexty = (re: 0; im: 0);

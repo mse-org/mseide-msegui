@@ -144,9 +144,9 @@ begin
  registerunitgroup(['msewidgetgrid'],['msedataedits',
                     'msegui','msegraphutils','mseclasses']);
                     
- registerdesignmoduleclass(tmseform,mseformintf);
- registerdesignmoduleclass(tdockform,mseformintf);
- registerdesignmoduleclass(tsubform,subformintf);
+ registerdesignmoduleclass(tmseform,@mseformintf);
+ registerdesignmoduleclass(tdockform,@mseformintf);
+ registerdesignmoduleclass(tsubform,@subformintf);
 end;
 
 

@@ -95,13 +95,13 @@ function execwaitmse(const commandline: string;
 //runs programm, waits for program termination, returns program exitcode
 //inactive true -> no console window (win32 only)
 
-procedure killprocess(handle: integer);
-function terminateprocess(handle: integer): integer;
+procedure killprocess(handle: prochandlety);
+function terminateprocess(handle: prochandlety): integer;
            //sendet sigterm, bringt exitresult
            
 function getprocesstree: procitemarty;
-function getprocesschildren(const pid: integer): integerarty;
-function getallprocesschildren(const pid: integer): integerarty;
+function getprocesschildren(const pid: procidty): procidarty;
+function getallprocesschildren(const pid: procidty): procidarty;
 {moved to msegui
 function activateprocesswindow(const procid: integer; 
                     const araise: boolean = true): boolean;
@@ -152,11 +152,11 @@ type
   processor: integer;
  end;
 
-function getpid: integer; 
-function getprocinfo(pid: integer): procinfoty;
-function getchildpid(pid: integer): integerarty;
-function getinnerstpid(pid: integer): integer;
-function getppid2(pid: integer): integer;
+function getpid: procidty; 
+function getprocinfo(pid: procidty): procinfoty;
+function getchildpid(pid: procidty): procidarty;
+function getinnerstpid(pid: procidty): procidty;
+function getppid2(pid: procidty): procidty;
 function pipe(out desc: pipedescriptorty; write: boolean): boolean;
             //true if ok
 
@@ -169,7 +169,7 @@ implementation
 uses 
  msesysintf,msestrings,msedatalist,mseprocmonitor;
 
-function getpid: integer;
+function getpid: procidty;
 begin
  result:= sys_getpid;
 end;
@@ -181,7 +181,7 @@ end;
 
 function findprocitem(const l,r): integer;
 begin
- result:= integer(l) - procitemty(r).pid;
+ result:= procidty(l) - procitemty(r).pid;
 end;
 
 function getprocesstree: procitemarty;
@@ -193,12 +193,12 @@ begin
  for int1:= 0 to high(result) do begin
   if findarrayitem(result[int1].ppid,result,{$ifdef FPC}@{$endif}findprocitem,
                 sizeof(procitemty),int2) then begin
-   additem(result[int2].children,result[int1].pid);
+   additem(winidarty(result[int2].children),result[int1].pid);
   end;
  end;
 end;
 
-function getprocesschildren(const pid: integer): integerarty;
+function getprocesschildren(const pid: procidty): procidarty;
 var
  ar1: procitemarty;
  int2: integer;
@@ -213,7 +213,7 @@ begin
  end;
 end;
 
-function getallprocesschildren(const pid: integer): integerarty;
+function getallprocesschildren(const pid: procidty): procidarty;
 var
  ar1: procitemarty;
  
@@ -223,7 +223,7 @@ var
  begin
   if findarrayitem(pid,ar1,{$ifdef FPC}@{$endif}findprocitem,
                 sizeof(procitemty),int2) then begin
-   stackarray(ar1[int2].children,result);
+   stackarray(winidarty(ar1[int2].children),winidarty(result));
    for int1:= 0 to high(ar1[int2].children) do begin
     addproc(ar1[int2].children[int1]);
    end;
@@ -841,7 +841,7 @@ begin
  if waitpid(handle,@result,0) = -1 then raise eoserror.create('');
 end;
 
-function getppid2(pid: integer): integer;
+function getppid2(pid: procidty): procidty;
 var
  stream: ttextstream;
  str1: string;
@@ -924,32 +924,34 @@ begin
  end
 end;
 
-function getchildpid(pid: prochandlety): integerarty;
+function getchildpid(pid: prochandlety): procidarty;
 var
  srec: tsearchrec;
- int1: integer;
+ int1: procidty;
 begin
  result:= nil;
  if findfirst('/proc/*',fadirectory,srec) = 0 then begin
   repeat
-   try
-    if (length(srec.name) > 0) and (srec.name[1] >= '0') and
-                (srec.name[1] <= '9') then begin
-     int1:= strtoint(srec.name);
+   if (length(srec.name) > 0) and (srec.name[1] >= '0') and
+               (srec.name[1] <= '9') then begin
+{$ifdef CPU64}
+    if trystrtoint64(srec.name,int1) then begin
+{$else}
+    if trystrtoint(srec.name,int1) then begin
+{$endif}
      if getppid2(int1) = pid then begin
       setlength(result,length(result)+1);
       result[length(result)-1]:= int1;
      end;
     end;
-   except
    end;
   until findnext(srec) <> 0;
  end;
 end;
 
-function getinnerstpid(pid: prochandlety): integer;
+function getinnerstpid(pid: procidty): procidty;
 var
- intar1: integerarty;
+ intar1: procidarty;
  int1,int2: integer;
 begin
  result:= pid;

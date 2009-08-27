@@ -101,6 +101,7 @@ type
   imagelist: tobject; //timagelist
   hint: msestring;
   tag: integer;
+  tagpointer: pointer;
   onexecute: notifyeventty;
  end;
  pactioninfoty = ^actioninfoty;

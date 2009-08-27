@@ -43,7 +43,7 @@ begin
                     trepspacer]); 
  registercomponenttabhints(['Rep'],['Report Components']);
 
- registerdesignmoduleclass(treport,reportintf,treportdesignerfo);
+ registerdesignmoduleclass(treport,@reportintf,treportdesignerfo);
  registerpropertyeditor(typeinfo(treptabulators),nil,'',treptabulatorseditor);
  registerpropertyeditor(typeinfo(tcustomrecordband),treptabulators,'linksource',
                            tlocallinkcomponentpropertyeditor);

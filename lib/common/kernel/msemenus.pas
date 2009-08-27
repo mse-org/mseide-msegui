@@ -189,6 +189,7 @@ type
    property checked: boolean read getchecked write setchecked;
    property enabled: boolean read getenabled write setenabled;
    property visible: boolean read getvisible write setvisible;
+   property tagpointer: pointer read finfo.tagpointer write finfo.tagpointer;
   published
    property action: tcustomaction read finfo.action write setaction;
    property submenu: tmenuitems read getsubmenu write setsubmenu;

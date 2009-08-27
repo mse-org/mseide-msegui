@@ -2044,7 +2044,7 @@ end;
 
 type
  pidinfoty = record
-  pids: integerarty;
+  pids: procidarty;
   winid: winidty;
  end;
  ppidinfoty = ^pidinfoty;
@@ -2069,7 +2069,7 @@ begin
  end;
 end;
 
-function gui_pidtowinid(const pids: integerarty): winidty;
+function gui_pidtowinid(const pids: procidarty): winidty;
 var
  info: pidinfoty;
 begin

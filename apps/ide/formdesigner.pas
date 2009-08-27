@@ -301,7 +301,7 @@ type
  end;
 
 procedure registerdesignmoduleclass(const aclass: tcomponentclass;
-                               const aintf: designmoduleintfty;
+                               const aintf: pdesignmoduleintfty;
                                const adesignformclass: designformclassty = nil);
 function createdesignmodule(const amodule: pmoduleinfoty; designmoduleclassname: string;
                            const aclassname: pshortstring): tmsecomponent;
@@ -352,7 +352,7 @@ begin
 end;
  
 procedure registerdesignmoduleclass(const aclass: tcomponentclass;
-                               const aintf: designmoduleintfty;
+                               const aintf: pdesignmoduleintfty;
                                const adesignformclass: designformclassty = nil);
 var
  int1: integer;
@@ -361,7 +361,7 @@ begin
   for int1:= 0 to high(flist) do begin
    with flist[int1] do begin
     if classtype = aclass then begin
-     intf:= @aintf;
+     intf:= aintf;
      formclass:= adesignformclass;
      exit;
     end;
@@ -371,7 +371,7 @@ begin
   setlength(flist,high(flist)+2);
   with flist[high(flist)] do begin
    classtype:= aclass;
-   intf:= @aintf;
+   intf:= aintf;
    formclass:= adesignformclass;
   end;
  end;

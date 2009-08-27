@@ -201,7 +201,7 @@ begin
                          tskincontrollerextenderspropertyeditor);
  registerunitgroup(['msestatfile'],['msestat']);
  
- registerdesignmoduleclass(tmsedatamodule,datamoduleintf);
+ registerdesignmoduleclass(tmsedatamodule,@datamoduleintf);
 end;
 
 { tactionpropertyeditor }

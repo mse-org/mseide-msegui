@@ -78,7 +78,7 @@ function gui_setwindowstate(id: winidty; size: windowsizety; visible: boolean): 
 function gui_setwindowcaption(id: winidty; const caption: msestring): guierrorty;
 function gui_setwindowicon(id: winidty; const icon,mask: pixmapty): guierrorty;
 function gui_setapplicationicon(const icon,mask: pixmapty): guierrorty;
-function gui_pidtowinid(const pids: integerarty): winidty;
+function gui_pidtowinid(const pids: procidarty): winidty;
 
 function gui_setcursorshape(winid: winidty; shape: cursorshapety): guierrorty;
 function gui_getpointerpos: pointty;

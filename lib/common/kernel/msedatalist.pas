@@ -891,6 +891,8 @@ procedure additem(var dest: integerarty; const value: integer;
                              var count: integer; step: integer = 32); overload;
 procedure additem(var dest: pointerarty; const value: pointer;
                              var count: integer; step: integer = 32); overload;
+procedure additem(var dest: winidarty; const value: winidty;
+                             var count: integer; step: integer = 32); overload;
 
 function incrementarraylength(var value: pointer; typeinfo: pdynarraytypeinfo;
                              increment: integer = 1): integer; overload;
@@ -913,14 +915,17 @@ procedure additem(var dest: longboolarty; const value: longbool); overload;
 procedure additem(var dest: booleanarty; const value: boolean); overload;
 procedure additem(var dest: realarty; const value: real); overload;
 procedure additem(var dest: pointerarty; const value: pointer); overload;
+procedure additem(var dest: winidarty; const value: winidty); overload;
 procedure deleteitem(var dest: stringarty; index: integer); overload;
 procedure deleteitem(var dest: msestringarty; index: integer); overload;
 procedure deleteitem(var dest: integerarty; index: integer); overload;
 procedure deleteitem(var dest: realarty; index: integer); overload;
 procedure deleteitem(var dest: pointerarty; index: integer); overload;
+procedure deleteitem(var dest: winidarty; index: integer); overload;
 procedure insertitem(var dest: integerarty; index: integer; value: integer); overload;
 procedure insertitem(var dest: realarty; index: integer; value: realty); overload;
 procedure insertitem(var dest: pointerarty; index: integer; value: pointer); overload;
+procedure insertitem(var dest: winidarty; index: integer; value: winidty); overload;
 procedure insertitem(var dest: stringarty; index: integer; value: string); overload;
 procedure insertitem(var dest: msestringarty; index: integer; value: msestring); overload;
 
@@ -971,6 +976,7 @@ procedure stackarray(const source: stringarty; var dest: stringarty); overload;
 procedure stackarray(const source: msestringarty; var dest: msestringarty); overload;
 procedure stackarray(const source: integerarty; var dest: integerarty); overload;
 procedure stackarray(const source: pointerarty; var dest: pointerarty); overload;
+procedure stackarray(const source: winidarty; var dest: winidarty); overload;
 procedure stackarray(const source: realarty; var dest: realarty); overload;
 procedure insertarray(const source: integerarty; var dest: integerarty); overload;
 procedure insertarray(const source: realarty; var dest: realarty); overload;
@@ -1437,6 +1443,16 @@ begin
  inc(count);
 end;
 
+procedure additem(var dest: winidarty; const value: winidty;
+                             var count: integer; step: integer = 32);
+begin
+ if length(dest) <= count then begin
+  setlength(dest,count+step+2*length(dest));
+ end;
+ dest[count]:= value;
+ inc(count);
+end;
+
 procedure additem(var dest: stringarty; const value: string);
 begin
  setlength(dest,high(dest)+2);
@@ -1479,13 +1495,19 @@ begin
  dest[high(dest)]:= value;
 end;
 
+procedure additem(var dest: winidarty; const value: winidty);
+begin
+ setlength(dest,high(dest)+2);
+ dest[high(dest)]:= value;
+end;
+
 procedure deleteitem(var dest: stringarty; index: integer);
 begin
  if (index < 0) or (index > high(dest)) then begin
   tlist.Error(SListIndexError, Index);
  end;
  dest[index]:= '';
- move(dest[index+1],dest[index],sizeof(pointer)*(high(dest)-index));
+ move(dest[index+1],dest[index],sizeof(dest[0])*(high(dest)-index));
  pointer(dest[high(dest)]):= nil;
  setlength(dest,high(dest));
 end;
@@ -1496,7 +1518,7 @@ begin
   tlist.Error(SListIndexError, Index);
  end;
  dest[index]:= '';
- move(dest[index+1],dest[index],sizeof(pointer)*(high(dest)-index));
+ move(dest[index+1],dest[index],sizeof(dest[0])*(high(dest)-index));
  pointer(dest[high(dest)]):= nil;
  setlength(dest,high(dest));
 end;
@@ -1506,7 +1528,7 @@ begin
  if (index < 0) or (index > high(dest)) then begin
   tlist.Error(SListIndexError, Index);
  end;
- move(dest[index+1],dest[index],sizeof(integer)*(high(dest)-index));
+ move(dest[index+1],dest[index],sizeof(dest[0])*(high(dest)-index));
  setlength(dest,high(dest));
 end;
 
@@ -1515,7 +1537,7 @@ begin
  if (index < 0) or (index > high(dest)) then begin
   tlist.Error(SListIndexError, Index);
  end;
- move(dest[index+1],dest[index],sizeof(real)*(high(dest)-index));
+ move(dest[index+1],dest[index],sizeof(dest[0])*(high(dest)-index));
  setlength(dest,high(dest));
 end;
 
@@ -1524,7 +1546,16 @@ begin
  if (index < 0) or (index > high(dest)) then begin
   tlist.Error(SListIndexError, Index);
  end;
- move(dest[index+1],dest[index],sizeof(integer)*(high(dest)-index));
+ move(dest[index+1],dest[index],sizeof(dest[0])*(high(dest)-index));
+ setlength(dest,high(dest));
+end;
+
+procedure deleteitem(var dest: winidarty; index: integer);
+begin
+ if (index < 0) or (index > high(dest)) then begin
+  tlist.Error(SListIndexError, Index);
+ end;
+ move(dest[index+1],dest[index],sizeof(dest[0])*(high(dest)-index));
  setlength(dest,high(dest));
 end;
 
@@ -1549,10 +1580,18 @@ begin
  dest[index]:= value;
 end;
 
+procedure insertitem(var dest: winidarty; index: integer; value: winidty);
+begin
+ setlength(dest,high(dest) + 2);
+ move(dest[index],dest[index+1],(high(dest)-index) * sizeof(dest[0]));
+ dest[index]:= value;
+end;
+
 procedure insertitem(var dest: stringarty; index: integer; value: string);
 begin
  setlength(dest,high(dest) + 2);
  move(dest[index],dest[index+1],(high(dest)-index) * sizeof(dest[0]));
+ pointer(dest[index]):= nil;
  dest[index]:= value;
 end;
 
@@ -1560,8 +1599,10 @@ procedure insertitem(var dest: msestringarty; index: integer; value: msestring);
 begin
  setlength(dest,high(dest) + 2);
  move(dest[index],dest[index+1],(high(dest)-index) * sizeof(dest[0]));
+ pointer(dest[index]):= nil;
  dest[index]:= value;
 end;
+
 procedure removeitems(var dest: pointerarty; const aitem: pointer);
                             //removes all matching items
 var
@@ -1792,6 +1833,15 @@ begin
 end;
 
 procedure stackarray(const source: pointerarty; var dest: pointerarty);
+var
+ laengevorher: integer;
+begin
+ laengevorher:= length(dest);
+ setlength(dest,laengevorher+length(source));
+ move(source[0],dest[laengevorher],length(source)*sizeof(source[0]));
+end;
+
+procedure stackarray(const source: winidarty; var dest: winidarty);
 var
  laengevorher: integer;
 begin
