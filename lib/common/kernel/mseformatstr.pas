@@ -76,7 +76,7 @@ function formatfloatmse(const value: double; const format: msestring;
    // 0.0g   
    //
    //    + engeneering notation with metric system prefixes, exponent = n*3
-   // 0.0G   
+   // 0.0G
    //
    // examples for value = 12345.678
    // '0.0'    ->  '12345.7'
@@ -207,7 +207,7 @@ function timetostring(const avalue: tdatetime;
                           const format: msestring = 't'): msestring;
 function datetostring(const avalue: tdatetime;
                           const format: msestring = 'c'): msestring;
-function datetimetostring(const avalue: tdatetime; 
+function datetimetostring(const avalue: tdatetime;
                           const format: msestring = 'c'): msestring;
 function stringtodatetime(const avalue: msestring): tdatetime;
 
@@ -229,6 +229,10 @@ function stringtocstring(const inp: msestring): string;
 function stringtopascalstring(const value: msestring): string;
 function pascalstringtostring(const value: string): msestring;
                                     //increments inputpointer
+
+{$ifndef FPC}
+function TryStrToQWord(const S: string; out Value: QWord): Boolean;
+{$endif}
 
 //{$ifdef FPC}
 // {$undef withformatsettings}
@@ -265,12 +269,18 @@ const
   $80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80, //d
   $80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80, //e
   $80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80);//f
-  
+
 implementation
 
 uses
  sysconst,msedate,msereal,Math,msefloattostr;
- 
+{$ifndef FPC}
+function TryStrToQWord(const S: string; out Value: QWord): Boolean;
+begin
+ result:= trystrtoint64(s,int64(value));
+end;
+{$endif}
+
 //copied from FPC dati.inc todo: use threadsave formatsettings
 function formatdatetimemse(const formatstr: msestring; const datetime: tdatetime;
                   const formatsettings: tformatsettingsmse): msestring;

@@ -19,7 +19,10 @@ type
  {$ifndef FPC}
   DWord = Longword;
   SizeInt = Longint;
+  psizeint = ^sizeint;
   SizeUInt = DWord;
+  psizeuint = ^sizeuint;
+
   PtrInt = Longint;
   PPtrInt = ^PtrInt;
   PtrUInt = DWord;
@@ -27,6 +30,7 @@ type
   ValSInt = Longint;
   ValUInt = Cardinal;
   qword = uint64;
+  pqword = ^qword;
  {$endif}
  {$ifdef VER2_2_0}
   PPtrUInt = ^PtrUInt;

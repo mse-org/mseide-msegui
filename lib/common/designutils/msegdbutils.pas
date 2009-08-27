@@ -3922,6 +3922,7 @@ var
  ar1,ar2,ar3,ar4: resultinfoarty;
  int1,int2: integer;
  str1: string;
+ lint1: int64;
 begin
  result:= synccommand('-stack-info-depth '+ inttostr(last));
  if result = gdb_ok then begin
@@ -3937,11 +3938,12 @@ begin
      gettuplevalue(ar1[int1],ar2);
      with list[int1] do begin
       getintegervalue(ar2,'level',level);
-//{$ifdef CPU64}
+  {$ifndef FPC}
+      getinteger64value(ar2,'addr',lint1);
+      addr:= lint1;
+  {$else}
       getinteger64value(ar2,'addr',int64(addr));
-//{$else}
-//      getintegervalue(ar2,'addr',integer(addr));
-//{$endif}
+  {$endif}
       getstringvalue(ar2,'func',func);
       getstringvalue(ar2,'file',str1);
       filename:= str1;
