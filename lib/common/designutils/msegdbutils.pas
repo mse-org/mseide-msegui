@@ -321,7 +321,8 @@ type
    function decodelist(const noname: boolean; const inp: string;
                             var value: resultinfoarty): boolean;
    function ispointervalue(avalue: string; out pointervalue: qword): boolean;
-   function matchpascalformat(const typeinfo: string; const value: string): msestring;
+   function matchpascalformat(const typeinfo: string; value: string;
+                              const expression: string): msestring;
    function getpcharvar(address: qword): string;
    function getpmsecharvar(address: qword): msestring;
    function getnumarrayvalue(const response: resultinfoarty; const aname: string;
@@ -3628,10 +3629,11 @@ begin
 end;
 
 function tgdbmi.matchpascalformat(const typeinfo: string;
-                                       const value: string): msestring;
+                   value: string; const expression: string): msestring;
 const
  typetoken = 'type = ';
  dynartoken = 'ARRAY [0..-1] OF ';
+ dynartoken2 = 'ARRAY [0..0] OF ';
 var
  ar1: stringarty;
  str1,str3: string;
@@ -3642,13 +3644,24 @@ var
 begin
  ar1:= nil; //compiler warning
  result:= value;
- if ispointervalue(value,ad1) then begin
-  ar1:= breaklines(typeinfo);
-  if length(ar1) > 0 then begin
-   if startsstr(typetoken,ar1[0]) then begin
-    str1:= copy(ar1[0],length(typetoken)+1,length(ar1[0])-length(typetoken));
+ ar1:= breaklines(typeinfo);
+ str1:= '';
+ if length(ar1) > 0 then begin
+  if startsstr(typetoken,ar1[0]) then begin
+   str1:= copy(ar1[0],length(typetoken)+1,length(ar1[0])-length(typetoken));
+  end;
+  str1:= struppercase(str1);
+  if startsstr(dynartoken2,str1) then begin
+   if evaluateexpression('@('+expression+')',str3) = gdb_ok then begin
+    if trystrtointvalue64(str3,ad1) then begin
+     value:= qwordtocstr(ad1);
+     str1:= dynartoken + copy(str1,length(dynartoken2)+1,bigint);
+    end;
    end;
-   str1:= struppercase(str1);
+  end;
+ end;
+ if ispointervalue(value,ad1) then begin
+  if str1 <> '' then begin
    if (str1 = '^CHARACTER') or (str1 = '^CHAR') then begin
     result:= getpcharvar(ad1);
    end
@@ -3663,9 +3676,9 @@ begin
         result:= niltext;
        end
        else begin
-        if readmemorypointer(ad2-4,ad3) = gdb_ok then begin
+        if readmemorypointer(ad2-fpointersize,ad3) = gdb_ok then begin
         //read arrayhigh
-         str3:= '^'+copy(str1,length(dynartoken)+1,bigint)+'('+ptruinttocstr(ad2)+')[';
+         str3:= '^'+copy(str1,length(dynartoken)+1,bigint)+'('+qwordtocstr(ad2)+')[';
          result:= '(';
          if ad3 >= 0 then begin
           for int1:= 0 to ad3 do begin
@@ -3769,7 +3782,7 @@ begin
    result:= evaluateexpression(varname,str2);
    case result of
     gdb_ok: begin
-     aresult:= matchpascalformat(str1,str2);
+     aresult:= matchpascalformat(str1,str2,varname);
     end;
     gdb_message: begin
      aresult:= errormessage;
