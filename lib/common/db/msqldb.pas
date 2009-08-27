@@ -217,6 +217,7 @@ type
    //idbcontroller
    procedure setinheritedconnected(const avalue: boolean);
    function readsequence(const sequencename: string): string; virtual;
+   function sequencecurrvalue(const sequencename: string): string; virtual;
    function writesequence(const sequencename: string;
                     const avalue: largeint): string; virtual;                    
   public
@@ -1143,6 +1144,11 @@ begin
 end;
 
 function tcustomsqlconnection.readsequence(const sequencename: string): string;
+begin
+ result:= ''; //dummy
+end;
+
+function tcustomsqlconnection.sequencecurrvalue(const sequencename: string): string;
 begin
  result:= ''; //dummy
 end;

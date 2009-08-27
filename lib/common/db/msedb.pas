@@ -1146,6 +1146,7 @@ type
           ['{B26D004A-7FEE-44F2-9919-3B8612BDD598}']
   procedure setinheritedconnected(const avalue: boolean);
   function readsequence(const sequencename: string): string;
+  function sequencecurrvalue(const sequencename: string): string;
   function writesequence(const sequencename: string;
                     const avalue: largeint): string;
   function ExecuteDirect(const SQL : mseString): integer;

@@ -25,6 +25,7 @@ type
    
    //idbcontroller
    function readsequence(const sequencename: string): string; override;
+   function sequencecurrvalue(const sequencename: string): string; override;
    function writesequence(const sequencename: string;
                     const avalue: largeint): string; override;
                     
@@ -79,6 +80,11 @@ end;
 function tmseibconnection.readsequence(const sequencename: string): string;
 begin
  result:= 'select gen_id('+sequencename+',1) as res from RDB$DATABASE;';
+end;
+
+function tmseibconnection.sequencecurrvalue(const sequencename: string): string;
+begin
+ result:= 'select gen_id('+sequencename+',0) as res from RDB$DATABASE;';
 end;
 
 function tmseibconnection.writesequence(const sequencename: string;

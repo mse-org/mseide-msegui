@@ -38,9 +38,10 @@ type
    function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
                          const acursor: tsqlcursor): TStream; override;
    //idbcontroller
-   function readsequence(const sequencename: string): string;
+   function readsequence(const sequencename: string): string; override;
+   function sequencecurrvalue(const sequencename: string): string; override;
    function writesequence(const sequencename: string;
-                    const avalue: largeint): string;
+                    const avalue: largeint): string; override;
   public
    constructor create(aowner: tcomponent); override;
   published
@@ -153,6 +154,11 @@ end;
 function tmsepqconnection.readsequence(const sequencename: string): string;
 begin
  result:= 'select nextval(''' +sequencename+''') as res;';
+end;
+
+function tmsepqconnection.sequencecurrvalue(const sequencename: string): string;
+begin
+ result:= 'select currval(''' +sequencename+''') as res;';
 end;
 
 function tmsepqconnection.writesequence(const sequencename: string;

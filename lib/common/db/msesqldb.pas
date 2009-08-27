@@ -263,6 +263,7 @@ type
    property asinteger: integer read getasinteger write setasinteger;
    function assql: string;
    property lastvalue: largeint read flastvalue;
+   function currvalue: largeint;
   published
    property database: tsqlconnection read fdatabase write setdatabase;
    property datasource: tdatasource read getdatasource write setdatasource;
@@ -274,7 +275,7 @@ type
  
 implementation
 uses
- msestrings,dbconst,msesysutils,typinfo,msedatalist,mseapplication;
+ msestrings,dbconst,msesysutils,typinfo,msedatalist,mseapplication,msesqlresult;
  
 { tmsesqltransaction }
 
@@ -1102,6 +1103,17 @@ begin
 end;
 
 function tsequencelink.getaslargeint: largeint;
+begin
+ checkintf;
+ flastvalue:= getsqlresultvar(fdatabase.transaction,
+                         fdbintf.readsequence(fsequencename),[]);
+ if canevent(tmethod(fonupdatevalue)) then begin
+  fonupdatevalue(self,flastvalue);
+ end;
+ result:= flastvalue;
+end;
+{
+function tsequencelink.getaslargeint: largeint;
 var                       //todo: optimize
  ds1: tsqlquery;
 begin
@@ -1120,6 +1132,13 @@ begin
   fonupdatevalue(self,flastvalue);
  end;
  result:= flastvalue;
+end;
+}
+function tsequencelink.currvalue: largeint;
+begin
+ checkintf;
+ result:= getsqlresultvar(fdatabase.transaction,
+                         fdbintf.sequencecurrvalue(fsequencename),[]);
 end;
 
 procedure tsequencelink.setaslargeint(const avalue: largeint);
