@@ -15,7 +15,7 @@ interface
 uses
  windows,messages,mseapplication,msetypes,msegraphutils,
  mseevent,msepointer,mseguiglob,msegraphics,
- msethread,mseformatstr,msesysintf,msestrings;
+ msethread,mseformatstr,msesysintf,msestrings,msesys;
 
 type
  syseventty = record

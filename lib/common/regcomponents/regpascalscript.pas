@@ -44,7 +44,7 @@ begin
  registerpropertyeditor(typeinfo(tstrings),tpasc,'Script',tpascaleditor);
  registerpropertyeditor(typeinfo(tstrings),tpascform,'pasc_script',
                             tpascformeditor);
- registerdesignmoduleclass(tpascform,pascformintf);
+ registerdesignmoduleclass(tpascform,@pascformintf);
  registercomponenttabhints(['PaSc'],
          ['Experimental Pascal Script Components']);
 end;
