@@ -2602,17 +2602,17 @@ end;
 procedure reallocarray(var value; elementsize: integer); overload;
                 //macht datenkopie ohne free
 var
- po1,po2: ^longword;
+ po1,po2: ^sizeint;
  lwo1: longword;
 begin
  if pointer(value) <> nil then begin
-  lwo1:= length(bytearty(value))*elementsize + 8;
+  lwo1:= length(bytearty(value))*elementsize + 2*sizeof(sizeint);
   getmem(po1,lwo1);
   po1^:= 1; //refcount
   inc(po1);
   po2:= pointer(value);
   dec(po2);
-  move(po2^,po1^,lwo1-4); //size+data
+  move(po2^,po1^,lwo1-sizeof(sizeint)); //size+data
   inc(po1);
   pointer(value):= po1;
  end;
@@ -2620,7 +2620,7 @@ end;
 
 procedure resizearray(var value; newlength, elementsize: integer);
 var
- po1: ^longword;
+ po1: ^sizeint;
  lwo1,lwo2: longword;
 begin
  if pointer(value) <> nil then begin
@@ -2643,7 +2643,7 @@ begin
    pointer(value):= nil;
   end
   else begin
-   reallocmem(po1,lwo1 + 2*sizeof(longint));
+   reallocmem(po1,lwo1 + 2*sizeof(sizeint));
    inc(po1);
    {$ifdef FPC}
    po1^:= newlength-1;
