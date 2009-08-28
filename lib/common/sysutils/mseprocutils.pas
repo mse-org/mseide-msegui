@@ -98,6 +98,8 @@ function execwaitmse(const commandline: string;
 procedure killprocess(handle: prochandlety);
 function terminateprocess(handle: prochandlety): integer;
            //sendet sigterm, bringt exitresult
+
+function getpid: procidty; 
            
 function getprocesstree: procitemarty;
 function getprocesschildren(const pid: procidty): procidarty;
@@ -152,7 +154,6 @@ type
   processor: integer;
  end;
 
-function getpid: procidty; 
 function getprocinfo(pid: procidty): procinfoty;
 function getchildpid(pid: procidty): procidarty;
 function getinnerstpid(pid: procidty): procidty;
@@ -514,7 +515,7 @@ begin
  closehandle(handle);
 end;
 
-function terminateprocess(handle: integer): integer;
+function terminateprocess(handle: prochandlety): integer;
            //bricht process ab, kein exitresult
 begin
  result:= 0;
