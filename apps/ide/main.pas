@@ -28,6 +28,15 @@ uses
  msepostscriptprinter,msegraphics,mseglob,mseprocmonitorcomp,msesys;
 const
  versiontext = '2.1 unstable';
+{$ifdef linux}
+ {$ifdef CPU64}
+  hosttext = 'x86_64-linux';
+ {$else}
+  hosttext = 'i386-linux';
+ {$endif}
+{$else}
+ hosttext = 'i386-win32';
+{$endif}
  idecaption = 'MSEide';
 
 type
@@ -2528,7 +2537,8 @@ end;
 procedure tmainfo.aboutonexecute(const sender: TObject);
 begin
  showmessage('MSEgui version: '+mseguiversiontext+c_linefeed+
-             'MSEide version: '+versiontext,'About MSEide');
+             'MSEide version: '+versiontext+c_linefeed+
+             'Host: '+ hosttext,'About MSEide');
 end;
 
 procedure tmainfo.configureexecute(const sender: TObject);

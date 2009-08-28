@@ -750,4 +750,13 @@ inherited cpuc86_64fo: tcpux86_64fo
     taborder = 20
     onsetvalue = flagsetvalue
   end
+  object tlabel1: tlabel[30]
+    bounds_x = 48
+    bounds_y = 184
+    bounds_cx = 43
+    bounds_cy = 15
+    taborder = 30
+    caption = 'tlabel1'
+    reffontheight = 15
+  end
 end

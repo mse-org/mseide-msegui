@@ -21,8 +21,9 @@ unit cpux86_64form;
 interface
 
 uses
- classes,msegui,mseclasses,mseforms,msegdbutils,msetypes,msedataedits,msegraphics,
- msegraphedits,cpuform;
+ classes,msegui,mseclasses,mseforms,msegdbutils,msetypes,msedataedits,
+ msegraphics,msegraphedits,cpuform,msegraphutils,mseguiglob,msemenus,
+ msesimplewidgets,msewidgets;
 
 type
 
@@ -56,6 +57,7 @@ type
    a: tbooleanedit;
    p: tbooleanedit;
    c: tbooleanedit;
+   tlabel1: tlabel;
    procedure flagonchange(const sender: TObject);
    procedure flagsetvalue(const sender: TObject; var avalue: Boolean; var accept: Boolean);
 //   procedure ononchange(const sender: TObject);
