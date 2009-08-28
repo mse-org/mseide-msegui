@@ -17,7 +17,7 @@ type
                      sfo_savedata,sfo_activatorread,sfo_activatorwrite);
  statfileoptionsty = set of statfileoptionty;
 const
- defaultstatfileoptions = [sfo_activatorread,sfo_activatorwrite];
+ defaultstatfileoptions = [sfo_activatorread,sfo_activatorwrite,sfo_transaction];
  
 type
  tstatfile = class(tactcomponent,istatfile)

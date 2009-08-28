@@ -670,8 +670,7 @@ begin
  else begin
   str1:= afilename;
  end;
- stream:= ttextstream.Create(str1,fm_create);
-// stream.encoding:= fencoding;
+ stream:= ttextstream.createtransaction(str1);
  try
   savetostream(stream,true);
   setfilename(str1);

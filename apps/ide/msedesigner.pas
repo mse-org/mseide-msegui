@@ -3835,10 +3835,15 @@ begin
   stream1:= tmemorystream.Create;
   try
    writemodule(modulepo,stream1);
-   stream2:= tmsefilestream.create(afilename,fm_create);
+   stream2:= tmsefilestream.createtransaction(afilename);
    try
     stream1.position:= 0;
-    objectbinarytotextmse(stream1,stream2);
+    try
+     objectbinarytotextmse(stream1,stream2);
+    except
+     stream2.cancel;
+     raise;
+    end;
    finally
     stream2.Free;
    end;

@@ -242,7 +242,7 @@ begin
   memstream:= tmemorystream.Create;
   try
    objecttexttobinary(instream,memstream);
-   outstream:= ttextstream.Create(outname+'.pas',fm_create);
+   outstream:= ttextstream.createtransaction(outname+'.pas');
    try
     outstream.writeln('unit ' + unitname + formdataext+';');
     outstream.writeln(compilerdefaults);
