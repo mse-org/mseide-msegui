@@ -1492,7 +1492,7 @@ begin
    if (xquerytree(appdisp,ar1[0][high(ar1[0])-(int2-1)],@root,@parent,@children,@ca1) <> 0) then begin
     for int1:= 0 to ca1 - 1 do begin
      for int3:= 0 to high(ids) do begin
-      if integer(ar1[int3][high(ar1[int3])-int2]) = pintegeraty(children)^[int1] then begin
+      if integer(ar1[int3][high(ar1[int3])-int2]) = pwinidaty(children)^[int1] then begin
        zorders[int3]:= int1;
        break;
       end;
