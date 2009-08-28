@@ -1183,7 +1183,7 @@ type
     end;
 
   Ppthread_t = ^pthread_t;
-  pthread_t = dword;
+  pthread_t = culong;
   P_pthread_descr = ^_pthread_descr;
   _pthread_descr = pointer; // Opaque type.
 
@@ -1890,9 +1890,12 @@ const
    N_SYNC_PPP = 14;
    N_HCI = 15;
    
-function gettimeofday(var __tv:timeval; var _tz:timezone):longint;cdecl;external clib name 'gettimeofday';
-function gettimeofday(var __tv:timeval; __tz:__timezone_ptr_t):longint;cdecl;external clib name 'gettimeofday';
-function pthread_kill(__thread:pthread_t; __signo:longint):longint;cdecl;external threadslib name 'pthread_kill';
+function gettimeofday(var __tv:timeval; var _tz:timezone):longint;
+                          cdecl;external clib name 'gettimeofday';
+function gettimeofday(var __tv:timeval; __tz:__timezone_ptr_t):longint;
+                          cdecl;external clib name 'gettimeofday';
+function pthread_kill(__thread:pthread_t; __signo:longint):longint;
+                          cdecl;external threadslib name 'pthread_kill';
 const
    WNOHANG = 1;
    WUNTRACED = 2;
