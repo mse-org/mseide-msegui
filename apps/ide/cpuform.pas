@@ -32,9 +32,11 @@ type
    procedure ononchange(const sender: TObject);
   protected
    fflagswidget: tintegeredit;
+   fflagswidget64: tint64edit;
    fregisternames: stringarty;
    fedits: array of tdataedit;
    procedure doregsetvalue(const sender: TObject; var avalue: Integer; var accept: Boolean);
+   procedure doregset64value(const sender: TObject; var avalue: Int64; var accept: Boolean);
    procedure doflagsetvalue(const sender: TObject;
                    var avalue: Boolean; var accept: Boolean);
    procedure doflagonchange(const sender: TObject);
@@ -190,6 +192,25 @@ begin
  end;
 end;
 
+procedure tcpufo.doregset64value(const sender: TObject; var avalue: Int64;
+                    var accept: Boolean);
+//var
+// str1: string;
+begin
+ if mainfo.gdb.cancommand then begin
+  with tintegeredit(sender) do begin
+   if mainfo.gdb.setregistervalue(fregisternames[tag],avalue) <> gdb_ok then begin
+//   if mainfo.gdb.writepascalvariable(
+//        '$'+fregisternames[tag],inttostr(avalue),str1) <> gdb_ok then begin
+    accept:= false;
+   end;
+  end;
+ end
+ else begin
+  accept:= false;
+ end;
+end;
+
 procedure tcpufo.doflagsetvalue(const sender: TObject;
                    var avalue: Boolean; var accept: Boolean);
 begin
@@ -202,6 +223,19 @@ begin
     fflagswidget.value:= cardinal(fflagswidget.value) and not bits[tag];
    end;
    fflagswidget.checkvalue;
+  end;
+ end
+ else begin
+  if fflagswidget64 <> nil then begin
+   with tbooleanedit(sender) do begin
+    if avalue then begin
+     fflagswidget64.value:= cardinal(fflagswidget64.value) or bits[tag];
+    end
+    else begin
+     fflagswidget64.value:= cardinal(fflagswidget64.value) and not bits[tag];
+    end;
+    fflagswidget64.checkvalue;
+   end;
   end;
  end;
 end;
@@ -226,6 +260,24 @@ begin
      ed1.frame.colorclient:= cl_active;
     end;
     ed1.value:= bo1;
+   end;
+  end;
+ end
+ else begin
+  if fflagswidget64 <> nil then begin
+   ca1:= fflagswidget64.value;
+   for int1:= 0 to 31 do begin
+    ed1:= on.tagitem(int1);
+    if (ed1 <> nil) then begin
+     bo1:= bits[int1] and ca1 <> 0;
+     if ed1.value <> bo1 then begin
+      ed1.frame.colorclient:= cl_ltred;
+     end
+     else begin
+      ed1.frame.colorclient:= cl_active;
+     end;
+     ed1.value:= bo1;
+    end;
    end;
   end;
  end;

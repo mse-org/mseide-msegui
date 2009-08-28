@@ -89,7 +89,9 @@ type
  pptrintarty = ^ptrintarty;
  ptruintarty = array of ptruint;
  pptruintarty = ^ptruintarty;
- 
+ qwordarty = array of qword;
+ pqwordarty = ^qwordarty;
+  
  pdatetime = ^tdatetime;
 
  complexty = record re,im: double; end;
@@ -114,6 +116,8 @@ type
  cardinalaty = array[0..0] of cardinal;
  pcardinalaty = ^cardinalaty;
  longboolaty = array[0..0] of longbool;
+ qwordaty = array[0..0] of qword;
+ pqwordaty = ^qwordaty;
  plongboolaty = ^longboolaty;
  ptrintaty = array[0..0] of ptrint;
  pptrintaty = ^ptrintaty;

@@ -571,6 +571,59 @@ type
    property max;
  end;
 
+ tcustomint64edit = class(tnumedit)
+  private
+   fonsetvalue: setint64eventty;
+   fvalue: int64;
+   fbase: numbasety;
+   fbitcount: integer;
+   fmin: int64;
+   fmax: int64;
+   procedure setvalue(const Value: int64);
+   procedure setbase(const Value: numbasety);
+   procedure setbitcount(const Value: integer);
+   function getgridvalue(const index: integer): int64;
+   procedure setgridvalue(const index: integer; const Value: int64);
+   function getgridvalues: int64arty;
+   procedure setgridvalues(const Value: int64arty);
+  protected
+   fisnull: boolean; //used in tdbintegeredit
+   procedure texttovalue(var accept: boolean; const quiet: boolean); override;
+   function internaldatatotext(const data): msestring; override;
+   procedure texttodata(const atext: msestring; var data); override;
+   function createdatalist(const sender: twidgetcol): tdatalist; override;
+   function getdatatype: listdatatypety; override;
+   procedure valuetogrid(arow: integer); override;
+   procedure gridtovalue(arow: integer); override;
+   procedure readstatvalue(const reader: tstatreader); override;
+   procedure writestatvalue(const writer: tstatwriter); override;
+   procedure setnullvalue; override;
+  public
+   constructor create(aowner: tcomponent); override;
+   procedure fillcol(const value: int64);
+   procedure assigncol(const value: tint64datalist);
+   property onsetvalue: setint64eventty read fonsetvalue write fonsetvalue;
+   property value: int64 read fvalue write setvalue default 0;
+   property base: numbasety read fbase write setbase default nb_dec;
+   property bitcount: integer read fbitcount write setbitcount default 64;
+   property min: int64 read fmin write fmin default 0;
+   property max: int64 read fmax write fmax default maxint64;
+
+   property gridvalue[const index: integer]: int64
+        read getgridvalue write setgridvalue; default;
+   property gridvalues: int64arty read getgridvalues write setgridvalues;
+ end;
+
+ tint64edit = class(tcustomint64edit)
+  published
+   property onsetvalue;
+   property value;
+   property base;
+   property bitcount;
+   property min;
+   property max;
+ end;
+ 
  tkeystringdropdowncontroller = class(tdropdownlistcontroller)
   protected
   public
@@ -3240,6 +3293,198 @@ procedure tcustomintegeredit.assigncol(const value: tintegerdatalist);
 begin
  internalassigncol(value);
 end;
+
+{ tcustomint64edit }
+
+constructor tcustomint64edit.create(aowner: tcomponent);
+begin
+ fbase:= nb_dec;
+ fbitcount:= 64;
+ fmax:= maxint64;
+ inherited;
+end;
+
+function tcustomint64edit.createdatalist(const sender: twidgetcol): tdatalist;
+begin
+ result:= tgridint64datalist.create(sender);
+end;
+
+function tcustomint64edit.getdatatype: listdatatypety;
+begin
+ result:= dl_int64;
+end;
+
+procedure tcustomint64edit.valuetogrid(arow: integer);
+begin
+ fgridintf.setdata(arow,fvalue);
+end;
+
+procedure tcustomint64edit.gridtovalue(arow: integer);
+begin
+ fgridintf.getdata(arow,fvalue);
+ inherited;
+end;
+
+procedure tcustomint64edit.setvalue(const Value: int64);
+begin
+ fvalue := Value;
+ if fvaluechecking = 0 then begin
+  fisnull:= false;
+ end;
+ valuechanged;
+end;
+
+procedure tcustomint64edit.texttovalue(var accept: boolean; const quiet: boolean);
+var
+ int1: int64;
+ mstr1: msestring;
+begin
+ if fisnull then begin
+  int1:= 0;
+ end
+ else begin
+  try
+   mstr1:= feditor.text;
+   checktext(mstr1,accept);
+   if not accept then begin
+    exit;
+   end;
+   int1:= strtointvalue64(mstr1,fbase);
+  except
+   formaterror(quiet);
+   accept:= false
+  end;
+ end;
+ if accept then begin
+  if not fisnull then begin
+   if fmax < fmin then begin //unsigned
+    if (uint64(int1) < uint64(fmin)) or (uint64(int1) > uint64(fmax)) then begin
+     rangeerror(fmin,fmax,quiet);
+     accept:= false;
+    end;
+   end
+   else begin
+    if (int1 < fmin) or (int1 > fmax) then begin
+     rangeerror(fmin,fmax,quiet);
+     accept:= false;
+    end;
+   end;
+  end;
+  if accept then begin
+   if not quiet and canevent(tmethod(fonsetvalue)) then begin
+    fonsetvalue(self,int1,accept);
+   end;
+   if accept then begin
+    value:= int1;
+   end;
+  end;
+ end;
+end;
+
+procedure tcustomint64edit.texttodata(const atext: msestring; var data);
+var
+ int1: int64;
+begin
+ try
+  int1:= strtointvalue64(atext,fbase);
+ except
+  int1:= 0;
+ end;
+ if int1 < fmin then begin
+  int1:= fmin;
+ end;
+ if int1 > fmax then begin
+  int1:= fmax;
+ end;
+ int64(data):= int1;
+end;
+
+procedure tcustomint64edit.readstatvalue(const reader: tstatreader);
+begin
+ if fgridintf <> nil then begin
+  with fgridintf.getcol do begin
+   with tint64datalist(datalist) do begin
+    min:= fmin;
+    max:= fmax;
+   end;
+   dostatread(reader);
+  end;
+//  reader.readintegerdatalist(valuevarname,tintegerdatalist(fgridintf.getcol.datalist),fmin,fmax);
+ end
+ else begin
+  value:= reader.readint64(valuevarname,value,fmin,fmax);
+ end;
+end;
+
+procedure tcustomint64edit.writestatvalue(const writer: tstatwriter);
+begin
+ writer.writeint64(valuevarname,value);
+end;
+
+procedure tcustomint64edit.setnullvalue;
+begin
+ value:= 0;
+ text:= '';
+ fisnull:= true;
+end;
+
+procedure tcustomint64edit.setbase(const Value: numbasety);
+begin
+ if fbase <> value then begin
+  fbase := Value;
+  formatchanged;
+ end;
+end;
+
+procedure tcustomint64edit.setbitcount(const Value: integer);
+begin
+ if fbitcount <> value then begin
+  fbitcount := Value;
+  formatchanged;
+ end;
+end;
+
+function tcustomint64edit.internaldatatotext(const data): msestring;
+begin
+ if @data = nil then begin
+  result:= intvaluetostr(fvalue,fbase,fbitcount);
+ end
+ else begin
+  result:= intvaluetostr(int64(data),fbase,fbitcount);
+ end;
+end;
+
+function tcustomint64edit.getgridvalue(const index: integer): int64;
+begin
+ internalgetgridvalue(index,result);
+end;
+
+procedure tcustomint64edit.setgridvalue(const index: integer; 
+                      const Value: int64);
+begin
+ internalsetgridvalue(index,value);
+end;
+
+function tcustomint64edit.getgridvalues: int64arty;
+begin
+ result:= tint64datalist(fgridintf.getcol.datalist).asarray;
+end;
+
+procedure tcustomint64edit.setgridvalues(const Value: int64arty);
+begin
+ tint64datalist(fgridintf.getcol.datalist).asarray:= value;
+end;
+
+procedure tcustomint64edit.fillcol(const value: int64);
+begin
+ internalfillcol(value);
+end;
+
+procedure tcustomint64edit.assigncol(const value: tint64datalist);
+begin
+ internalassigncol(value);
+end;
+
 
 { tkeystringdropdowncontroller }
 

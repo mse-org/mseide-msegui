@@ -110,22 +110,24 @@ object disassfo: tdisassfo
         onbeforedrawcell = befdrawcell
         options = [co_readonly, co_drawfocus, co_savestate, co_rowcolor]
         oncellevent = addrcellevent
-        optionsedit = [scoe_eatreturn]
+        textflags = [tf_right, tf_ycentered, tf_noselect]
+        textflagsactive = [tf_right, tf_ycentered]
+        optionsedit = [scoe_eatreturn, scoe_hintclippedtext]
       end    
       item
         width = 472
         options = [co_readonly, co_drawfocus, co_fill, co_savestate, co_rowcolor]
         textflags = [tf_ycentered, tf_noselect, tf_tabtospace]
         textflagsactive = [tf_ycentered, tf_tabtospace]
-        optionsedit = [scoe_eatreturn]
+        optionsedit = [scoe_eatreturn, scoe_hintclippedtext]
       end>
     rowcolors.count = 2
     rowcolors.items = (
       14745599
       16777184
     )
-    datarowheight = 16
+    datarowheight = 17
     onscrollrows = scrollrows
-    reffontheight = 14
+    reffontheight = 15
   end
 end

@@ -118,7 +118,7 @@ type
   addressbreakpoint: boolean;
   line: integer;    //1. line = 1
   path: filenamety;
-  address: ptruint;
+  address: qword;
 //  filename: string;
   bkptno: integer;
   bkpton: boolean;
@@ -261,7 +261,7 @@ type
    flogtext: string;
    flastbreakpoint: integer;
    fenvvars: doublestringarty;
-   ftargetdebugbegin,ftargetdebugend: ptruint;
+   ftargetdebugbegin,ftargetdebugend: qword;
    {$ifdef mswindows}
    fnewconsole: boolean;
    {$endif}
@@ -317,6 +317,8 @@ type
                          const response: string; out aresult: string): boolean;
    function getcliinteger(const aname: string;
                          const response: string; out aresult: integer): boolean;
+   function getcliint64(const aname: string;
+                         const response: string; out aresult: int64): boolean;
 
    function decodelist(const noname: boolean; const inp: string;
                             var value: resultinfoarty): boolean;
@@ -408,10 +410,14 @@ type
                  var avalue: int64): boolean; overload;
    function getbooleanvalue(const response: resultinfoarty; const aname: string;
                  var avalue: boolean): boolean;
-   function getptruintvalue(const response: resultinfoarty; const aname: string;
-                 var avalue: ptruint): boolean; overload;
-   function getptruintvalue(const response: resultinfoty; const aname: string;
-                 var avalue: ptruint): boolean; overload;
+   function getqwordvalue(const response: resultinfoarty; const aname: string;
+                 var avalue: qword): boolean; overload;
+   function getqwordvalue(const response: resultinfoty; const aname: string;
+                 var avalue: qword): boolean; overload;
+//   function getptruintvalue(const response: resultinfoarty; const aname: string;
+//                 var avalue: ptruint): boolean; overload;
+//   function getptruintvalue(const response: resultinfoty; const aname: string;
+//                 var avalue: ptruint): boolean; overload;
 
    function getarrayvalue(const response: resultinfoarty; const aname: string;
                  const hasitemnames: boolean;
@@ -488,40 +494,40 @@ type
    function stacklistframes(out list: frameinfoarty; first: integer = 0;
                     last: integer = 100): gdbresultty;
    function selectstackframe(const aframe: integer): gdbresultty;
-   function selectstackpointer(const aframe: ptruint): gdbresultty;
+   function selectstackpointer(const aframe: qword): gdbresultty;
    function getsourcename(var path: filenamety; frame: integer = 0): gdbresultty;
    function getprocaddress(const procname: string;
-                        out aaddress: ptruint): gdbresultty;
+                        out aaddress: qword): gdbresultty;
 
-   function getpc(out addr: ptruint): gdbresultty;
-   function getregistervalue(const aname: string; out avalue: ptruint): gdbresultty;
-   function setregistervalue(const aname: string; const avalue: ptruint): gdbresultty;
+   function getpc(out addr: qword): gdbresultty;
+   function getregistervalue(const aname: string; out avalue: qword): gdbresultty;
+   function setregistervalue(const aname: string; const avalue: qword): gdbresultty;
    function listregisternames(out aresult: stringarty): gdbresultty;
    function listregistervalues(out aresult: registerinfoarty): gdbresultty;
    function listlines(const path: filenamety; out lines: integerarty;
-                                    out addresses: ptruintarty): gdbresultty;
+                                    out addresses: qwordarty): gdbresultty;
 
    function getsystemregister(const anumber: integer;
-                                     out avalue: ptruint): gdbresultty;
+                                     out avalue: qword): gdbresultty;
    function setsystemregister(const anumber: integer;
-                                     const avalue: ptruint): gdbresultty;
+                                     const avalue: qword): gdbresultty;
                       //for avr32
    function infoline(const filename: filenamety; const line: integer;
-                         out start,stop: cardinal): gdbresultty; overload;
+                         out start,stop: qword): gdbresultty; overload;
    function infoline(const address: cardinal; out filename: filenamety;
                          out line: integer;
-                         out start,stop: cardinal): gdbresultty; overload;
+                         out start,stop: qword): gdbresultty; overload;
    function infosymbol(const symbol: msestring;
                          out info: msestring): gdbresultty;
    function disassemble(out aresult: asmlinearty; const filename: filenamety;
               const line: integer; const count: integer): gdbresultty; overload;
    function disassemble(out aresult: asmlinearty;
-                            const start,stop: cardinal): gdbresultty; overload;
+                            const start,stop: qword): gdbresultty; overload;
    function disassemble(out aresult: disassarty; const filename: filenamety;
              const line: integer; const count: integer): gdbresultty; overload;
    function disassemble(out aresult: disassarty;
-             const start,stop: cardinal): gdbresultty; overload;
-   function getframeaddress(out address: ptruint): gdbresultty;
+             const start,stop: qword): gdbresultty; overload;
+   function getframeaddress(out address: qword): gdbresultty;
 
    property guiintf: boolean read fguiintf write fguiintf default true;
    property execloaded: boolean read getexecloaded;
@@ -529,6 +535,8 @@ type
    property stoponexception: boolean read fstoponexception write setstoponexception default false;
    property ignoreexceptionclasses: stringarty read fignoreexceptionclasses write
                      setignoreexceptionclasses;
+   property pointersize: integer read fpointersize;
+   property pointerhexdigits: integer read fpointerhexdigits;
 
    property progparameters: string read fprogparameters write fprogparameters;
    property workingdirectory: filenamety read fworkingdirectory write fworkingdirectory;
@@ -2221,7 +2229,7 @@ begin
   with info do begin
    getintegervalue(tup1,'number',bkptno);
    getintegervalue(tup1,'times',passcount);
-   getptruintvalue(tup1,'addr',address);
+   getqwordvalue(tup1,'addr',address);
    if full then begin
     getintegervalue(tup1,'line',line);
     filename:= '';
@@ -2364,8 +2372,8 @@ begin
  result:= getstringvalue(ar1,aname,avalue);
 end;
 
-function tgdbmi.getptruintvalue(const response: resultinfoarty; const aname: string;
-                 var avalue: ptruint): boolean;
+function tgdbmi.getqwordvalue(const response: resultinfoarty; const aname: string;
+                 var avalue: qword): boolean;
 var
  int1: integer;
 begin
@@ -2376,18 +2384,10 @@ begin
    if valuekind = vk_value then begin
     if (length(value) > 1) and (value[1] = '0') and (value[2] <> 'x') and
              (value[2] <> 'X') then begin
-  {$ifdef CPU64}
      result:= trystrtointvalue64(value,nb_oct,avalue);
-  {$else}
-     result:= trystrtointvalue(value,nb_oct,avalue);
-  {$endif}
     end
     else begin
-  {$ifdef CPU64}
      result:= trystrtointvalue64(value,avalue);
-  {$else}
-     result:= trystrtointvalue(value,avalue);
-  {$endif}
     end;
    end;
   end;
@@ -2397,34 +2397,33 @@ end;
 function tgdbmi.getintegervalue(const response: resultinfoarty; const aname: string;
                  var avalue: integer): boolean;
 var
- ptruint1: ptruint;
+ qwo1: qword;
 begin
- ptruint1:= avalue;
- result:= getptruintvalue(response,aname,ptruint1);
- avalue:= ptruint1;
+ qwo1:= avalue;
+ result:= getqwordvalue(response,aname,qwo1);
+ avalue:= qwo1;
 end;
 
-//todo: fix for 32 bit
 function tgdbmi.getinteger64value(const response: resultinfoarty; const aname: string;
                  var avalue: int64): boolean;
 var
- ptruint1: ptruint;
+ qwo1: qword;
 begin
- ptruint1:= avalue;
- result:= getptruintvalue(response,aname,ptruint1);
- avalue:= ptruint1;
+ qwo1:= avalue;
+ result:= getqwordvalue(response,aname,qwo1);
+ avalue:= qwo1;
 end;
 
 
-function tgdbmi.getptruintvalue(const response: resultinfoty; const aname: string;
-                 var avalue: ptruint): boolean;
+function tgdbmi.getqwordvalue(const response: resultinfoty; const aname: string;
+                 var avalue: qword): boolean;
 
 var
  ar1: resultinfoarty;
 begin
  setlength(ar1,1);
  ar1[0]:= response;
- result:= getptruintvalue(ar1,aname,avalue);
+ result:= getqwordvalue(ar1,aname,avalue);
 end;
 
 function tgdbmi.getbooleanvalue(const response: resultinfoarty; const aname: string;
@@ -2455,22 +2454,21 @@ end;
 function tgdbmi.getintegervalue(const response: resultinfoty; const aname: string;
                  var avalue: integer): boolean;
 var
- ptruint1: ptruint;
+ qwo1: qword;
 begin
- ptruint1:= avalue;
- result:= getptruintvalue(response,aname,ptruint1);
- avalue:= ptruint1;
+ qwo1:= avalue;
+ result:= getqwordvalue(response,aname,qwo1);
+ avalue:= qwo1;
 end;
 
-//todo: fix for 32bit
 function tgdbmi.getinteger64value(const response: resultinfoty; const aname: string;
                  var avalue: int64): boolean;
 var
- ptruint1: ptruint;
+ qwo1: qword;
 begin
- ptruint1:= avalue;
- result:= getptruintvalue(response,aname,ptruint1);
- avalue:= ptruint1;
+ qwo1:= avalue;
+ result:= getqwordvalue(response,aname,qwo1);
+ avalue:= qwo1;
 end;
 
 procedure setstringnum(var dataarray; const index: integer; const text: string);
@@ -2746,7 +2744,7 @@ begin
 end;
 
 function tgdbmi.getprocaddress(const procname: string;
-                           out aaddress: ptruint): gdbresultty;
+                           out aaddress: qword): gdbresultty;
 var
  str1: string;
  ar1: stringarty;
@@ -2764,7 +2762,7 @@ begin
     if str1[length(str1)] = '.' then begin
      setlength(str1,length(str1)-1);
     end;
-    if trystrtoptruint(str1,aaddress) then begin
+    if trystrtoqword(str1,aaddress) then begin
      result:= gdb_ok;
     end;
     break;
@@ -3204,29 +3202,29 @@ begin
 end;
 
 function tgdbmi.infoline(const filename: filenamety; const line: integer;
-                         out start,stop: cardinal): gdbresultty;
+                         out start,stop: qword): gdbresultty;
 var
  str1: string;
 begin
  result:= getcliresultstring('info line '+filename+':'+inttostr(line),str1);
  if result = gdb_ok then begin
-  if not getcliinteger('starts at address',str1,integer(start)) or
-          not getcliinteger('ends at',str1,integer(stop)) then begin
+  if not getcliint64('starts at address',str1,int64(start)) or
+          not getcliint64('ends at',str1,int64(stop)) then begin
    result:= gdb_dataerror;
   end;
  end;
 end;
 
 function tgdbmi.infoline(const address: cardinal; out filename: filenamety; out line: integer;
-                         out start,stop: cardinal): gdbresultty;
+                         out start,stop: qword): gdbresultty;
 var
  str1,str2: string;
 begin
  result:= getcliresultstring('info line *'+inttostr(address),str1);
  if result = gdb_ok then begin
   if getclistring('of "',str1,str2) and getcliinteger('Line',str1,line) and
-     getcliinteger('starts at address',str1,integer(start)) and
-     getcliinteger('ends at',str1,integer(stop)) then begin
+     getcliint64('starts at address',str1,int64(start)) and
+     getcliint64('ends at',str1,int64(stop)) then begin
    filename:= copy(str2,1,length(str2)-1);
   end
   else begin
@@ -3317,12 +3315,12 @@ begin
 end;
 
 function tgdbmi.disassemble(out aresult: asmlinearty;
-             const start,stop: cardinal): gdbresultty;
+             const start,stop: qword): gdbresultty;
 var
  str1: string;
  ar1: disassarty;
 begin
- str1:= '-data-disassemble -s '+ptruinttocstr(start)+' -e '+ptruinttocstr(stop);
+ str1:= '-data-disassemble -s '+qwordtocstr(start)+' -e '+qwordtocstr(stop);
  result:= internaldisassemble(ar1,str1,false);
  if result = gdb_ok then begin
   aresult:= ar1[0].asmlines;
@@ -3339,15 +3337,16 @@ begin
  result:= internaldisassemble(aresult,str1,true);
 end;
 
-function tgdbmi.disassemble(out aresult: disassarty; const start,stop: cardinal): gdbresultty;
+function tgdbmi.disassemble(out aresult: disassarty;
+                               const start,stop: qword): gdbresultty;
 var
  str1: string;
 begin
- str1:= '-data-disassemble -s '+ptruinttocstr(start)+' -e '+ptruinttocstr(stop);
+ str1:= '-data-disassemble -s '+qwordtocstr(start)+' -e '+qwordtocstr(stop);
  result:= internaldisassemble(aresult,str1,true);
 end;
 
-function tgdbmi.getframeaddress(out address: ptruint): gdbresultty;
+function tgdbmi.getframeaddress(out address: qword): gdbresultty;
 var
  str1: ansistring;
  ar1: stringarty;
@@ -3360,7 +3359,7 @@ begin
   for int1:= 0 to high(ar1)- 2 do begin
    if (ar1[int1] = 'frame') and (ar1[int1+1] = 'at') then begin
     setlength(ar1[int1+2],length(ar1[int1+2])-1); //remove ':'
-    if not trystrtoptruint(ar1[int1+2],address) then begin
+    if not trystrtoqword(ar1[int1+2],address) then begin
      exit;
     end;
     break;
@@ -3370,7 +3369,7 @@ begin
  end;
 end;
 
-function tgdbmi.getregistervalue(const aname: string; out avalue: ptruint): gdbresultty;
+function tgdbmi.getregistervalue(const aname: string; out avalue: qword): gdbresultty;
 var
  str1: string;
  int1: integer;
@@ -3381,18 +3380,14 @@ begin
   if int1 > 0 then begin
    setlength(str1,int1-1);
   end;
-{$ifdef CPU64}
   if not trystrtointvalue64(str1,avalue) then begin
-{$else}
-  if not trystrtointvalue(str1,avalue) then begin
-{$endif}
    result:= gdb_dataerror;
   end;
  end;
 end;
 
 function tgdbmi.setregistervalue(const aname: string;
-                                         const avalue: ptruint): gdbresultty;
+                                         const avalue: qword): gdbresultty;
 var
  str1: ansistring;
 begin
@@ -3400,7 +3395,7 @@ begin
         '$'+aname,inttostr(avalue),str1);
 end;
 
-function tgdbmi.getpc(out addr: ptruint): gdbresultty;
+function tgdbmi.getpc(out addr: qword): gdbresultty;
 begin
  result:= getregistervalue('pc',addr);
 end;
@@ -3447,7 +3442,7 @@ begin
 end;
 
 function tgdbmi.listlines(const path: filenamety;
-                          out lines: integerarty; out addresses: ptruintarty): gdbresultty;
+             out lines: integerarty; out addresses: qwordarty): gdbresultty;
 var
  ar1,ar2: resultinfoarty;
  int1: integer;
@@ -3464,7 +3459,7 @@ begin
     if not gettuplevalue(ar1[int1],ar2) then begin
      exit;
     end;
-    if not getptruintvalue(ar2,'pc',addresses[int1]) then begin
+    if not getqwordvalue(ar2,'pc',addresses[int1]) then begin
      exit;
     end;
     if not getintegervalue(ar2,'line',lines[int1]) then begin
@@ -3477,7 +3472,7 @@ begin
 end;
 
 function tgdbmi.getsystemregister(const anumber: integer;
-                                           out avalue: ptruint): gdbresultty;
+                                           out avalue: qword): gdbresultty;
                       //for avr32
 var
  str1: ansistring;
@@ -3489,11 +3484,7 @@ begin
   result:= gdb_dataerror;
   ar1:= splitstring(str1,'=',true);
   if high(ar1) = 1 then begin
-{$ifdef CPU64}
    if trystrtointvalue64(trimright(ar1[1]),avalue) then begin
-{$else}
-   if trystrtointvalue(trimright(ar1[1]),avalue) then begin
-{$endif}
     result:= gdb_ok;
    end;
   end;
@@ -3501,10 +3492,10 @@ begin
 end;
 
 function tgdbmi.setsystemregister(const anumber: integer;
-                                           const avalue: ptruint): gdbresultty;
+                                           const avalue: qword): gdbresultty;
                       //for avr32
 begin
- result:= synccommand('set sysreg '+inttostr(anumber)+'=0x'+hextostr(avalue,8));
+ result:= synccommand('set sysreg '+inttostr(anumber)+'='+qwordtocstr(avalue));
 end;
 
 function tgdbmi.getpcharvar(address: qword): string;
@@ -3901,6 +3892,21 @@ begin
  end;
 end;
 
+function tgdbmi.getcliint64(const aname: string; const response: string;
+                       out aresult: int64): boolean;
+var
+ str1: string;
+begin
+ result:= getclistring(aname,response,str1);
+ if result then begin
+  try
+   aresult:= strtointvalue64(str1);
+  except
+   result:= false;
+  end;
+ end;
+end;
+
 function tgdbmi.getpascalvalue(const avalue: string): string;
 const
  ansistringtag = '(ANSISTRING)';
@@ -3979,9 +3985,9 @@ begin
  result:= synccommand('-stack-select-frame '+inttostr(aframe));
 end;
 
-function tgdbmi.selectstackpointer(const aframe: ptruint): gdbresultty;
+function tgdbmi.selectstackpointer(const aframe: qword): gdbresultty;
 begin
- result:= synccommand('frame '+hextocstr(aframe,8));
+ result:= synccommand('frame '+qwordtocstr(aframe));
 end;
 
 function tgdbmi.started: boolean;

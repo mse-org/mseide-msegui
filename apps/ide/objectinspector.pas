@@ -1438,6 +1438,8 @@ begin
  registerpropertyeditor(typeinfo(longword),nil,'',tordinalpropertyeditor);
  registerpropertyeditor(typeinfo(word),nil,'',tordinalpropertyeditor);
  registerpropertyeditor(typeinfo(byte),nil,'',tordinalpropertyeditor);
+ registerpropertyeditor(typeinfo(int64),nil,'',tint64propertyeditor);
+ registerpropertyeditor(typeinfo(uint64),nil,'',tint64propertyeditor);
  registerpropertyeditor(typeinfo(currency),nil,'',tcurrencypropertyeditor);
  registerpropertyeditor(typeinfo(real),nil,'',trealpropertyeditor);
  registerpropertyeditor(typeinfo(double),nil,'',trealpropertyeditor);

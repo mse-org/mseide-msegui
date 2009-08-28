@@ -47,7 +47,7 @@ type
    count: tintegeredit;
    gridpopup: tpopupmenu;
    flags: tintegeredit;
-   address: tintegeredit;
+   address: tint64edit;
    addressbkpt: tbooleanedit;
    procedure bkptsononchange(const sender: TObject);
    procedure bkptsononsetvalue(const sender: TObject; var avalue: boolean;
@@ -105,8 +105,8 @@ type
    procedure showbreakpoint(const filepath: filenamety; const aline: integer; focus: boolean);
    function checkbreakpointcontinue(const stopinfo: stopinfoty): boolean;
                                 //set condition
-   function isactivebreakpoint(const addr: ptruint): boolean;
-   procedure toggleaddrbreakpoint(const addr: ptruint);
+   function isactivebreakpoint(const addr: qword): boolean;
+   procedure toggleaddrbreakpoint(const addr: qword);
  end;
 
 var
@@ -452,10 +452,10 @@ begin
  end;
 end;
 
-function tbreakpointsfo.isactivebreakpoint(const addr: ptruint): boolean;
+function tbreakpointsfo.isactivebreakpoint(const addr: qword): boolean;
 var
  int1: integer;
- po1: pptruintaty;
+ po1: pqwordaty;
  po2: plongboolaty;
 begin
  result:= false;
@@ -469,10 +469,10 @@ begin
  end;
 end;
 
-procedure tbreakpointsfo.toggleaddrbreakpoint(const addr: ptruint);
+procedure tbreakpointsfo.toggleaddrbreakpoint(const addr: qword);
 var
  int1: integer;
- po1: pptruintaty;
+ po1: pqwordaty;
  info1: breakpointinfoty;
 begin
  po1:= address.griddata.datapo;

@@ -174,7 +174,7 @@ type
 
   breakpointpaths: msestringarty;
   breakpointlines: integerarty;
-  breakpointaddress: integerarty;
+  breakpointaddress: int64arty;
   addressbreakpoints: longboolarty;
   breakpointons: longboolarty;
   breakpointignore: integerarty;

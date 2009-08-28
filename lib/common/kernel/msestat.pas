@@ -65,6 +65,7 @@ type
    procedure updatevalue(const name: msestring; var value: msestringarty); overload;
    procedure updatevalue(const name: msestring; var value: longboolarty); overload;
    procedure updatevalue(const name: msestring; var value: integerarty); overload;
+   procedure updatevalue(const name: msestring; var value: int64arty); overload;
    procedure updatevalue(const name: msestring; var value: realarty);  overload;
 
    procedure updatevalue(const name: msestring; const intf: istatupdatevalue); overload;
@@ -126,6 +127,7 @@ type
    function readarray(const name: msestring; const default: stringarty): stringarty; overload;
    function readarray(const name: msestring; const default: msestringarty): msestringarty; overload;
    function readarray(const name: msestring; const default: integerarty): integerarty; overload;
+   function readarray(const name: msestring; const default: int64arty): int64arty; overload;
    function readarray(const name: msestring; const default: longboolarty): longboolarty; overload;
    function readarray(const name: msestring; const default: realarty): realarty; overload;
    function readlistitem: msestring;
@@ -171,6 +173,7 @@ type
    procedure writearray(const name: msestring; const value: stringarty); overload;
    procedure writearray(const name: msestring; const value: msestringarty); overload;
    procedure writearray(const name: msestring; const value: integerarty); overload;
+   procedure writearray(const name: msestring; const value: int64arty); overload;
    procedure writearray(const name: msestring; const value: longboolarty); overload;
    procedure writearray(const name: msestring; const value: realarty); overload;
  
@@ -356,6 +359,16 @@ begin
 end;
 
 procedure tstatfiler.updatevalue(const name: msestring; var value: integerarty);
+begin
+ if fiswriter then begin
+  tstatwriter(self).writearray(name,value);
+ end
+ else begin
+  value:= tstatreader(self).readarray(name,value);
+ end;
+end;
+
+procedure tstatfiler.updatevalue(const name: msestring; var value: int64arty);
 begin
  if fiswriter then begin
   tstatwriter(self).writearray(name,value);
@@ -888,6 +901,28 @@ begin
 end;
 
 function tstatreader.readarray(const name: msestring;
+                             const default: int64arty): int64arty;
+var
+ str1: msestring;
+ int1,int2: integer;
+begin
+ if findvar(name,str1) then begin
+  int2:= strtoint(str1);
+  setlength(result,int2);
+  for int1:= 0 to int2-1 do begin
+   try
+    result[int1]:= strtoint64(readlistitem);
+   except
+    break;
+   end;
+  end;
+ end
+ else begin
+  result:= default;
+ end;
+end;
+
+function tstatreader.readarray(const name: msestring;
             const default: longboolarty): longboolarty;
 var
  str1: msestring;
@@ -1249,6 +1284,16 @@ begin
 end;
 
 procedure tstatwriter.writearray(const name: msestring; const value: integerarty);
+var
+ int1: integer;
+begin
+ writeinteger(name,length(value));
+ for int1:= 0 to high(value) do begin
+  writelistitem(value[int1]);
+ end;
+end;
+
+procedure tstatwriter.writearray(const name: msestring; const value: int64arty);
 var
  int1: integer;
 begin

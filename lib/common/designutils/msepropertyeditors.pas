@@ -220,6 +220,15 @@ type
    function getvalue: msestring; override;
  end;
 
+ tint64propertyeditor = class(tpropertyeditor)
+  protected
+   function getdefaultstate: propertystatesty; override;
+  public
+   function allequal: boolean; override;
+   procedure setvalue(const value: msestring); override;
+   function getvalue: msestring; override;
+ end;
+
  tcharpropertyeditor = class(tordinalpropertyeditor)
   public
    procedure setvalue(const value: msestring); override;
@@ -2018,6 +2027,41 @@ begin
 end;
 
 function tordinalpropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate + [ps_isordprop,ps_candefault];
+end;
+
+{ tint64propertyeditor }
+
+function tint64propertyeditor.allequal: boolean;
+var
+ int1: integer;
+ int2: int64;
+begin
+ result:= inherited allequal;
+ if not result then begin
+  result:= true;
+  int2:= getint64value;
+  for int1:= 1 to high(fprops) do begin
+   if int2 <> getint64value(int1) then begin
+    result:= false;
+    break;
+   end;
+  end;
+ end;
+end;
+
+function tint64propertyeditor.getvalue: msestring;
+begin
+ result:= inttostr(getint64value);
+end;
+
+procedure tint64propertyeditor.setvalue(const value: msestring);
+begin
+ setint64value(strtointvalue64(value));
+end;
+
+function tint64propertyeditor.getdefaultstate: propertystatesty;
 begin
  result:= inherited getdefaultstate + [ps_isordprop,ps_candefault];
 end;

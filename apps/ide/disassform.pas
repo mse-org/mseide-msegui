@@ -35,18 +35,18 @@ type
    procedure addrcellevent(const sender: TObject; var info: celleventinfoty);
    procedure scrollrows(const sender: tcustomgrid; var step: Integer);
   private
-   faddress: cardinal;
-   ffirstaddress: cardinal;
-   flastaddress: cardinal;
+   faddress: qword;
+   ffirstaddress: qword;
+   flastaddress: qword;
    factiverow: integer;
    fshortcutsswapped: boolean;
    procedure swapshortcuts;
    procedure internalrefresh;
-   procedure addlines(const aaddress: longword; const alinecount: integer);
+   procedure addlines(const aaddress: qword; const alinecount: integer);
    procedure addpreviouslines(const asetrow: boolean);
   public
    gdb: tgdbmi;
-   procedure refresh(const addr: ptrint);
+   procedure refresh(const addr: qword);
    procedure clear;
    procedure resetactiverow;
  end;
@@ -72,21 +72,22 @@ begin
  grid.clear;
 end;
 
-procedure tdisassfo.addlines(const aaddress: longword; 
-                                            const alinecount: integer);
+procedure tdisassfo.addlines(const aaddress: qword; const alinecount: integer);
 var
  ar1: asmlinearty;
  int1,int2: integer;
  apage: tsourcepage;
  aline: integer;
- start,stop: cardinal;
+ start,stop: qword;
  fname1: filenamety;
- ca1,ca2: cardinal;
+ ca1,ca2: qword;
  endrow: integer;
-
+ digits: integer;
+ 
 begin
  int2:= grid.rowcount;
  endrow:= int2 + alinecount;
+ digits:= gdb.pointerhexdigits;
  if gdb.infoline(aaddress,fname1,aline,start,stop) <> gdb_ok then begin
   start:= aaddress;
   stop:= aaddress + $100;
@@ -118,7 +119,7 @@ begin
     end;
     for int1:= 0 to high(ar1) do begin
      with ar1[int1] do begin
-      grid[0][int2]:= hextostr(address,8);
+      grid[0][int2]:= hextostr(address,digits);
       grid[1][int2]:= instruction;
       if address = faddress then begin
        factiverow:= int2;
@@ -152,9 +153,9 @@ begin
  end;
 end;
 
-procedure tdisassfo.refresh(const addr: ptrint);
+procedure tdisassfo.refresh(const addr: qword);
 begin
- ffirstaddress:= cardinal(not 0);
+ ffirstaddress:= not qword(0);
  faddress:= addr;
  internalrefresh;
 end;

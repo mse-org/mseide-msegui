@@ -23,27 +23,21 @@ interface
 uses
  classes,msegui,mseclasses,mseforms,msegdbutils,msetypes,msedataedits,
  msegraphics,msegraphedits,cpuform,msegraphutils,mseguiglob,msemenus,
- msesimplewidgets,msewidgets;
+ msesimplewidgets,msewidgets,mseedit,msestrings;
 
 type
 
  tcpux86_64fo = class(tcpufo)
-   eax: tintegeredit;
-   ebx: tintegeredit;
-   ecx: tintegeredit;
-   edx: tintegeredit;
-   esi: tintegeredit;
-   edi: tintegeredit;
-   ebp: tintegeredit;
-   esp: tintegeredit;
-   eip: tintegeredit;
-   eflags: tintegeredit;
-   cs: tintegeredit;
-   ds: tintegeredit;
-   es: tintegeredit;
-   fs: tintegeredit;
-   gs: tintegeredit;
-   ss: tintegeredit;
+   rax: tint64edit;
+   rbx: tint64edit;
+   rcx: tint64edit;
+   rdx: tint64edit;
+   rsi: tint64edit;
+   rdi: tint64edit;
+   rbp: tint64edit;
+   rsp: tint64edit;
+   rip: tint64edit;
+   eflags: tint64edit;
    o: tbooleanedit;
    d: tbooleanedit;
    i: tbooleanedit;
@@ -57,11 +51,18 @@ type
    a: tbooleanedit;
    p: tbooleanedit;
    c: tbooleanedit;
-   tlabel1: tlabel;
+   r8: tint64edit;
+   r9: tint64edit;
+   r15: tint64edit;
+   r10: tint64edit;
+   r11: tint64edit;
+   r12: tint64edit;
+   r13: tint64edit;
+   r14: tint64edit;
    procedure flagonchange(const sender: TObject);
    procedure flagsetvalue(const sender: TObject; var avalue: Boolean; var accept: Boolean);
 //   procedure ononchange(const sender: TObject);
-   procedure regsetvalue(const sender: TObject; var avalue: Integer; var accept: Boolean);
+   procedure regsetvalue(const sender: TObject; var avalue: Int64; var accept: Boolean);
    procedure cpufoonchildscaled(const sender: TObject);
   public
    constructor create(aowner: tcomponent); override;
@@ -69,14 +70,14 @@ type
 
 implementation
 uses
- cpux86_64form_mfm,main,sysutils,mseformatstr,msebits,msestrings;
+ cpux86_64form_mfm,main,sysutils,mseformatstr,msebits;
 
 { tcpux86_64fo }
 
 constructor tcpux86_64fo.create(aowner: tcomponent);
 begin
  inherited create(aowner);
- fflagswidget:= eflags;
+ fflagswidget64:= eflags;
 end;
 
 procedure tcpux86_64fo.flagonchange(const sender: TObject);
@@ -109,17 +110,17 @@ begin
  end;
 end;
 }
-procedure tcpux86_64fo.regsetvalue(const sender: TObject; var avalue: Integer; var accept: Boolean);
+procedure tcpux86_64fo.regsetvalue(const sender: TObject; var avalue: Int64; var accept: Boolean);
 begin
- doregsetvalue(sender,avalue,accept);
+ doregset64value(sender,avalue,accept);
 end;
 
 procedure tcpux86_64fo.cpufoonchildscaled(const sender: TObject);
 begin
- placeyorder(eax.bounds_y,[0],[eax,ebx,ecx,edx,esi,edi,ebp]);
- placeyorder(eflags.bounds_y,[0],[eflags,esp,eip]);
- placeyorder(esi.bounds_y,[0],[cs,ds,es]);
- placeyorder(esi.bounds_y,[0],[fs,gs,ss]);
+ placeyorder(rax.bounds_y,[0],[rax,rbx,rcx,rdx,rbp,rsi,rdi]);
+ placeyorder(rdi.bounds_y+2*rdi.bounds_cy,[0],[r8,r9]);
+ placeyorder(eflags.bounds_y,[0],[eflags,rsp,rip]);
+ placeyorder(rbp.bounds_y,[0],[r10,r11,r12,r13,r14,r15]);
 end;
 
 end.

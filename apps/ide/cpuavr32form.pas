@@ -117,7 +117,7 @@ end;
 
 function tcpuavr32fo.internalrefresh: boolean;
 var
- int1: ptruint;
+ int1: qword;
 begin
  result:= inherited internalrefresh;
  if result then begin
@@ -143,12 +143,12 @@ end;
 //todo: fix 32/64
 procedure tcpuavr32fo.checkexcept(const sender: TObject);
 
- procedure locateframe(const address: longword);
+ procedure locateframe(const address: qword);
  var
   bo1: boolean;
   filename: filenamety;
   line: integer;
-  start,stop: cardinal;
+  start,stop: qword;
   str1: string;
   mstr1: msestring;
  begin
@@ -175,7 +175,7 @@ procedure tcpuavr32fo.checkexcept(const sender: TObject);
 
 var
  lwo1,lwo2,{lwo3,}lwo4: longword;
- lwo3,framead: {$ifdef CPU64}qword{$else}longword{$endif};
+ lwo3,framead: qword;
 begin
  with mainfo.gdb do begin
   if (getframeaddress(framead) = gdb_ok) then begin

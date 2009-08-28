@@ -362,6 +362,15 @@ type
    constructor create(owner: twidgetcol); reintroduce;
  end;
 
+ tgridint64datalist = class(tint64datalist)
+  private
+   fowner: twidgetcol;
+  protected
+   function getdefault: pointer; override;
+  public
+   constructor create(owner: twidgetcol); reintroduce;
+ end;
+
  tgridenumdatalist = class(tenumdatalist)
   private
    fowner: twidgetcol;
@@ -570,6 +579,25 @@ begin
  end;
 end;
 
+{ tgridint64datalist }
+
+constructor tgridint64datalist.create(owner: twidgetcol);
+begin
+ fowner:= owner;
+ inherited create;
+ include(finternaloptions,ilo_nostreaming);
+end;
+
+function tgridint64datalist.getdefault: pointer;
+begin
+ if fowner.fintf <> nil then begin
+  result:= fowner.fintf.getdefaultvalue;
+ end
+ else begin
+  result:= inherited getdefault;
+ end;
+end;
+
 { tgridenumdatalist }
 
 constructor tgridenumdatalist.create(owner: twidgetcol);
@@ -605,7 +633,8 @@ begin
   result:= int64(fowner.fintf.getdefaultvalue^);
  end
  else begin
-  result:= int64(inherited getdefault^);
+//  result:= int64(inherited getdefault^);
+  result:= 0;
  end;
 end;
 
@@ -2871,6 +2900,11 @@ begin
  result:= tgridintegerdatalist.create(aowner);
 end;
 
+function createtgridint64datalist(const aowner:twidgetcol): tdatalist;
+begin
+ result:= tgridint64datalist.create(aowner);
+end;
+
 function createtgridenumdatalist(const aowner:twidgetcol): tdatalist;
 begin
  result:= tgridenumdatalist.create(aowner);
@@ -2896,6 +2930,8 @@ initialization
                      {$ifdef FPC}@{$endif}createtgridpointerdatalist);
  registergriddatalistclass(tgridintegerdatalist.classname,
                      {$ifdef FPC}@{$endif}createtgridintegerdatalist);
+ registergriddatalistclass(tgridint64datalist.classname,
+                     {$ifdef FPC}@{$endif}createtgridint64datalist);
  registergriddatalistclass(tgridenumdatalist.classname,
                      {$ifdef FPC}@{$endif}createtgridenumdatalist);
  registergriddatalistclass(tgridenum64datalist.classname,

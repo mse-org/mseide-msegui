@@ -96,7 +96,7 @@ object breakpointsfo: tbreakpointsfo
     fixrows.count = 1
     fixrows.items = <    
       item
-        height = 16
+        height = 17
         captions.count = 11
         captions.items = <        
           item
@@ -145,38 +145,45 @@ object breakpointsfo: tbreakpointsfo
         width = 16
         options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         widgetname = 'bkpton'
+        dataclass = tgridintegerdatalist
       end    
       item
         linecolorfix = -1610612733
         width = 158
         options = [co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         widgetname = 'filename'
+        dataclass = tgridmsestringdatalist
       end    
       item
         linecolorfix = -1610612733
         options = [co_invisible, co_savevalue]
         widgetname = 'path'
+        dataclass = tgridmsestringdatalist
       end    
       item
         linecolorfix = -1610612733
         options = [co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         widgetname = 'line'
+        dataclass = tgridintegerdatalist
       end    
       item
         width = 61
         onbeforedrawcell = adbefdrawcell
         widgetname = 'address'
+        dataclass = tgridint64datalist
       end    
       item
         width = 6
         options = [co_invisible, co_drawfocus, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         widgetname = 'addressbkpt'
+        dataclass = tgridintegerdatalist
       end    
       item
         linecolorfix = -1610612733
         width = 19
         options = [co_invisible, co_savevalue]
         widgetname = 'bkptno'
+        dataclass = tgridintegerdatalist
       end    
       item
         color = -1879048185
@@ -184,18 +191,21 @@ object breakpointsfo: tbreakpointsfo
         width = 31
         options = [co_readonly, co_nofocus, co_savevalue, co_savestate]
         widgetname = 'count'
+        dataclass = tgridintegerdatalist
       end    
       item
         linecolorfix = -1610612733
         width = 30
         options = [co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         widgetname = 'ignore'
+        dataclass = tgridintegerdatalist
       end    
       item
         linecolorfix = -1610612733
         width = 7
         options = [co_readonly, co_nofocus, co_fixwidth, co_savestate]
         widgetname = 'conderr'
+        dataclass = tgridintegerdatalist
       end    
       item
         linecolorfix = -1610612733
@@ -203,22 +213,24 @@ object breakpointsfo: tbreakpointsfo
         options = [co_fill, co_savevalue, co_savestate]
         widthmin = 200
         widgetname = 'condition'
+        dataclass = tgridmsestringdatalist
       end    
       item
         options = [co_invisible, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         widgetname = 'flags'
+        dataclass = tgridintegerdatalist
       end>
-    datarowheight = 16
+    datarowheight = 17
     onrowsdeleting = gridonrowsdeleting
     onrowsdeleted = gridonrowsdeleted
     oncellevent = gridoncellevent
-    reffontheight = 14
+    reffontheight = 15
     object bkpton: tbooleanedit
       optionsskin = [osk_framebuttononly]
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 16
-      bounds_cy = 16
+      bounds_cy = 17
       taborder = 1
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
       ondataentered = ondataentered
@@ -232,12 +244,12 @@ object breakpointsfo: tbreakpointsfo
       bounds_x = 17
       bounds_y = 0
       bounds_cx = 158
-      bounds_cy = 16
+      bounds_cy = 17
       taborder = 2
       visible = False
       ondataentered = ondataenterednewbkpt
       onsetvalue = filenameonsetvalue
-      reffontheight = 14
+      reffontheight = 15
     end
     object path: tstringedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
@@ -245,10 +257,10 @@ object breakpointsfo: tbreakpointsfo
       bounds_x = 176
       bounds_y = 0
       bounds_cx = 50
-      bounds_cy = 16
+      bounds_cy = 17
       taborder = 3
       visible = False
-      reffontheight = 14
+      reffontheight = 15
     end
     object line: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
@@ -256,21 +268,21 @@ object breakpointsfo: tbreakpointsfo
       bounds_x = 227
       bounds_y = 0
       bounds_cx = 50
-      bounds_cy = 16
+      bounds_cy = 17
       taborder = 4
       visible = False
       ondataentered = ondataenterednewbkpt
       onsetvalue = lineonsetvalue
       min = 1
-      reffontheight = 14
+      reffontheight = 15
     end
-    object address: tintegeredit
+    object address: tint64edit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
       optionsskin = [osk_framebuttononly]
       bounds_x = 278
       bounds_y = 0
       bounds_cx = 61
-      bounds_cy = 16
+      bounds_cy = 17
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
@@ -280,7 +292,7 @@ object breakpointsfo: tbreakpointsfo
       ondataentered = addressentered
       base = nb_hex
       max = -1
-      reffontheight = 14
+      reffontheight = 15
     end
     object addressbkpt: tbooleanedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
@@ -288,7 +300,7 @@ object breakpointsfo: tbreakpointsfo
       bounds_x = 340
       bounds_y = 0
       bounds_cx = 6
-      bounds_cy = 16
+      bounds_cy = 17
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
@@ -302,10 +314,10 @@ object breakpointsfo: tbreakpointsfo
       bounds_x = 347
       bounds_y = 0
       bounds_cx = 19
-      bounds_cy = 16
+      bounds_cy = 17
       taborder = 7
       visible = False
-      reffontheight = 14
+      reffontheight = 15
     end
     object count: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
@@ -313,11 +325,11 @@ object breakpointsfo: tbreakpointsfo
       bounds_x = 367
       bounds_y = 0
       bounds_cx = 31
-      bounds_cy = 16
+      bounds_cy = 17
       taborder = 8
       visible = False
       optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savevalue, oe_savestate]
-      reffontheight = 14
+      reffontheight = 15
     end
     object ignore: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
@@ -325,19 +337,19 @@ object breakpointsfo: tbreakpointsfo
       bounds_x = 399
       bounds_y = 0
       bounds_cx = 30
-      bounds_cy = 16
+      bounds_cy = 17
       taborder = 9
       visible = False
       ondataentered = ondataentered
       onsetvalue = ignoreonsetvalue
-      reffontheight = 14
+      reffontheight = 15
     end
     object conderr: tdataicon
       optionsskin = [osk_framebuttononly]
       bounds_x = 430
       bounds_y = 0
       bounds_cx = 7
-      bounds_cy = 16
+      bounds_cy = 17
       taborder = 10
       optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
       visible = False
@@ -350,13 +362,13 @@ object breakpointsfo: tbreakpointsfo
       bounds_x = 438
       bounds_y = 0
       bounds_cx = 200
-      bounds_cy = 16
+      bounds_cy = 17
       taborder = 11
       visible = False
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_trimright, oe_trimleft, oe_autopopupmenu, oe_savevalue, oe_savestate]
       ondataentered = ondataentered
       onsetvalue = conditiononsetvalue
-      reffontheight = 14
+      reffontheight = 15
     end
     object flags: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
@@ -364,23 +376,23 @@ object breakpointsfo: tbreakpointsfo
       bounds_x = 639
       bounds_y = 0
       bounds_cx = 50
-      bounds_cy = 16
+      bounds_cy = 17
       taborder = 12
       visible = False
-      reffontheight = 14
+      reffontheight = 15
     end
   end
   object bkptson: tbooleanedit
     bounds_x = 8
-    bounds_y = 4
-    bounds_cx = 99
-    bounds_cy = 16
+    bounds_y = 3
+    bounds_cx = 111
+    bounds_cy = 17
     frame.caption = 'Breakpoints on'
     frame.dummy = 0
     frame.outerframe = (
       0
-      1
-      86
+      2
+      98
       2
     )
     statfile = mainfo.projectstatfile

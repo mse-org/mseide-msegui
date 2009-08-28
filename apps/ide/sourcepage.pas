@@ -414,7 +414,7 @@ end;
 procedure tsourcepage.updatedebuglines;
 var
  ar1: integerarty;
- ar2: ptruintarty;
+ ar2: qwordarty;
  po1: pintegeraty;
  int1,int2: integer;
 begin
