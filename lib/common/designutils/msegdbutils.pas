@@ -27,14 +27,14 @@ type
  sigflagty = (sfl_internal,sfl_stop,sfl_handle);
  sigflagsty = set of sigflagty;
  
- processorty = (pro_i386,pro_arm,pro_cpu32,pro_avr32);
+ processorty = (pro_i386,pro_x86_64,pro_arm,pro_cpu32,pro_avr32);
 
 const
  gdberrortexts: array[gdbresultty] of string =
           ('','Error','Timeout','Data error','Message','Target running',
            'Write error','gdb not active');
  niltext = 'nil';
- processornames: array[processorty] of ansistring = ('i386','arm','cpu32','avr32');
+ processornames: array[processorty] of ansistring = ('i386','x86_64','arm','cpu32','avr32');
  simulatorprocessors = [pro_arm];
  
 type
@@ -4014,7 +4014,11 @@ procedure tgdbmi.setprocessorname(const avalue: ansistring);
 var
  pro1: processorty;
 begin
+{$ifdef CPU64}
+ fprocessor:= pro_x86_64;
+{$else}
  fprocessor:= pro_i386;
+{$endif}
  for pro1:= low(processorty) to high(processorty) do begin
   if processornames[pro1] = avalue then begin
    fprocessor:= pro1;

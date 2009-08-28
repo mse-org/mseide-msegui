@@ -69,7 +69,7 @@ type
 
 implementation
 uses
- cpux86_64form_mfm,main,sysutils,mseformatstr,msebits,msestrings,msegraphutils;
+ cpux86_64form_mfm,main,sysutils,mseformatstr,msebits,msestrings;
 
 { tcpux86_64fo }
 

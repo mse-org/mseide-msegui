@@ -40,6 +40,15 @@ type
  texteditstatety = (tes_selectinvalid);
  texteditstatesty = set of texteditstatety;
 
+ tgridrichstringdatalist = class(trichstringdatalist)
+  private
+   fowner: twidgetcol;
+  protected
+   function getdefault: pointer; override;
+  public
+   constructor create(owner: twidgetcol); reintroduce;
+ end;
+ 
  tcustomtextedit = class(tcustomedit,igridwidget,istatfile)
   private
    fstatfile: tstatfile;
@@ -337,6 +346,30 @@ begin
  end;
 end;
 
+function createtgridrichstringdatalist(const aowner:twidgetcol): tdatalist;
+begin
+ result:= tgridrichstringdatalist.create(aowner);
+end;
+
+{ tgridrichstringdatalist }
+
+constructor tgridrichstringdatalist.create(owner: twidgetcol);
+begin
+ fowner:= owner;
+ inherited create;
+ include(finternaloptions,ilo_nostreaming);
+end;
+
+function tgridrichstringdatalist.getdefault: pointer;
+begin
+ if twidgetcol1(fowner).fintf <> nil then begin
+  result:= twidgetcol1(fowner).fintf.getdefaultvalue;
+ end
+ else begin
+  result:= inherited getdefault;
+ end;
+end;
+
 { tcustomtextedit }
 
 constructor tcustomtextedit.create(aowner: tcomponent);
@@ -389,9 +422,12 @@ end;
 procedure tcustomtextedit.setgridintf(const intf: iwidgetgrid);
 begin
  fgridintf:= intf;
- if (intf <> nil) and (ow_autoscale in foptionswidget) and
+ if (intf <> nil) then begin
+  flines:= trichstringdatalist(fgridintf.getcol.datalist);
+  if (ow_autoscale in foptionswidget) and
              (foptionswidget * [ow_fontglyphheight,ow_fontlineheight] <> []) then begin
-  fgridintf.getcol.grid.datarowheight:= bounds_cy;
+   fgridintf.getcol.grid.datarowheight:= bounds_cy;
+  end;
  end;
 end;
 
@@ -410,10 +446,9 @@ begin
  result:= '';
 end;
 
-function tcustomtextedit.createdatalist(
-  const sender: twidgetcol): tdatalist;
+function tcustomtextedit.createdatalist(const sender: twidgetcol): tdatalist;
 begin
- flines:= trichstringdatalist.create;
+ flines:= tgridrichstringdatalist.create(sender);
  result:= flines;
 end;
 
@@ -2016,4 +2051,7 @@ begin
  end;
 end;
 
+initialization
+ registergriddatalistclass(tgridrichstringdatalist.classname,
+                     {$ifdef FPC}@{$endif}createtgridrichstringdatalist);
 end.

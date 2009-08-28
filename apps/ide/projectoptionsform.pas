@@ -987,7 +987,7 @@ begin
   startupbkpt:= 0;
   startupbkpton:= false;
   gdbsimulator:= false;
-  gdbprocessor:= 'i386';
+  gdbprocessor:= 'auto';
   gdbservercommand:= '';
   gdbserverwait:= 0;
   beforeload:= '';

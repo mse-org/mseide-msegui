@@ -52,7 +52,7 @@ procedure createcpufo;
 implementation
 uses
  cpuform_mfm,main,sysutils,mseformatstr,msebits,msestrings,msegraphutils,
- cpui386form,cpuarmform,cpucpu32form,cpuavr32form,projectoptionsform;
+ cpui386form,cpux86_64form,cpuarmform,cpucpu32form,cpuavr32form,projectoptionsform;
 var
  currentproc: processorty;
   
@@ -65,6 +65,9 @@ begin
   case mainfo.gdb.processor of
    pro_i386: begin
     application.createform(tcpui386fo,cpufo);
+   end;
+   pro_x86_64: begin
+    application.createform(tcpux86_64fo,cpufo);
    end;
    pro_arm: begin
     application.createform(tcpuarmfo,cpufo);

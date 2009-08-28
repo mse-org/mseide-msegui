@@ -585,7 +585,8 @@ begin
   result:= integer(fowner.fintf.getdefaultvalue^);
  end
  else begin
-  result:= integer(inherited getdefault^);
+  result:= 0;
+//  result:= integer(inherited getdefault^);
  end;
 end;
 
