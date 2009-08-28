@@ -23,7 +23,7 @@ type
  threadty = ptruint;
  procidty = ptrint;
  procidarty = array of procidty; //same item size as winidarty!
- prochandlety = ptrint; //todo: 64bit, windows
+ prochandlety = type ptrint;
 const
  invalidprocid = -1;
  invalidprochandle = -1;

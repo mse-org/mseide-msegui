@@ -860,7 +860,7 @@ begin
  end;
 end;
 
-function getprocinfo(pid: prochandlety): procinfoty;
+function getprocinfo(pid: procidty): procinfoty;
 var
  stream: ttextstream;
  str1: string;
@@ -924,7 +924,7 @@ begin
  end
 end;
 
-function getchildpid(pid: prochandlety): procidarty;
+function getchildpid(pid: procidty): procidarty;
 var
  srec: tsearchrec;
  int1: procidty;

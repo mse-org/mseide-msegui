@@ -124,7 +124,7 @@ type
    procedure newprojectfromprogramexe(const sender: TObject);
    procedure newemptyprojectexe(const sender: TObject);
    procedure viewmemoryonexecute(const sender: TObject);
-   procedure runprocdied(const sender: TObject; const prochandle: Integer;
+   procedure runprocdied(const sender: TObject; const prochandle: prochandlety;
                    const execresult: Integer; const data: Pointer);
   private
    fstartcommand: startcommandty;
@@ -2331,7 +2331,8 @@ begin
  end;
 end;
 
-procedure tmainfo.runprocdied(const sender: TObject; const prochandle: Integer;
+procedure tmainfo.runprocdied(const sender: TObject;
+                          const prochandle: prochandlety;
                const execresult: Integer; const data: Pointer);
 begin
  if prochandle = frunningprocess then begin

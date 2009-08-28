@@ -895,7 +895,7 @@ procedure additem(var dest: winidarty; const value: winidty;
                              var count: integer; step: integer = 32); overload;
 
 function incrementarraylength(var value: pointer; typeinfo: pdynarraytypeinfo;
-                             increment: integer = 1): integer; overload;
+                             increment: integer = 1): sizeint; overload;
   //returns new length
 function additem(var value; const typeinfo: pdynarraytypeinfo; //typeinfo of dynarray
                 var count: integer; step: integer = 32): integer; overload;
@@ -1251,7 +1251,7 @@ begin
  raise exception.create('Variants not supported');
 end;
 
-function DynArraySize(a: Pointer): Integer;
+function DynArraySize(a: Pointer): sizeint;
 {$ifdef FPC}
 begin
  result:= length(bytearty(a));
@@ -1266,14 +1266,14 @@ end;
 {$endif}
 
 function incrementarraylength(var value: pointer; typeinfo: pdynarraytypeinfo;
-                  increment: integer = 1): integer;
+                  increment: integer = 1): sizeint;
   //returns new length
 begin
  result:= dynarraysize(value) + increment;
  dynarraysetlength(value,typeinfo,1,@result);
 end;
 
-function dynarrayelesize(const typinfo: pdynarraytypeinfo): integer;
+function dynarrayelesize(const typinfo: pdynarraytypeinfo): sizeint;
 var
  ti: pdynarraytypeinfo;
 begin
@@ -1288,7 +1288,7 @@ begin
 end;
 
 function decrementarraylength(var value: pointer; const typeinfo: pdynarraytypeinfo;
-                      decrement: integer = 1): integer;
+                      decrement: integer = 1): sizeint;
   //returns new length
 begin
  result:= dynarraysize(value) - decrement;
