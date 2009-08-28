@@ -27,6 +27,7 @@ type
 
 const
  sortflags: filelistoptionsty = [flo_sortname,flo_sorttime,flo_sortsize];
+ intermediatefileextension = '.$$$';
 type
  filesortfuncty = function(const l,r: fileinfoty): integer of object;
 
@@ -182,10 +183,12 @@ function compfileinfos(const info1,info2: fileinfoty): filechangesty;
 function compfiletime(const a,b: tdatetime): integer;
             //-1 if a < b, 0 if a = b, 1 if a > b
 
+function intermediatefilename(const aname: filenamety): filenamety;
+
 implementation
 
 uses
- {msesysintf,}sysutils,msedate;
+ {msesysintf,}sysutils,msedate,mseprocutils;
 
 const
  quotechar = msechar('"');
@@ -194,6 +197,32 @@ type
  checkmaskresultty = (cmr_correct,cmr_wrong,cmr_wrongfinished,cmr_correctfinished);
 const
  checkmaskfinished = cmr_wrongfinished;
+
+function intermediatefilename(const aname: filenamety): filenamety;
+var
+ fname1,fname2: filenamety;
+ int1: integer;
+begin
+ fname1:= aname + intermediatefileextension + inttostr(getpid);
+ fname2:= fname1;
+ int1:= 0;
+ while findfile(fname2) do begin
+  inc(int1);
+  fname2:= fname1 + '_'+inttostr(int1);
+ end;
+ result:= fname2;
+end;
+
+procedure commitstreamtransaction(const astream: tmsefilestream;
+                                     const aname: filenamety);
+var
+ fname1: filenamety;
+begin
+ astream.flush;
+ fname1:= astream.filename;
+ astream.close;
+ msefileutils.renamefile(fname1,aname);
+end;
 
 function compfiletime(const a,b: tdatetime): integer;
             //-1 if a < b, 0 if a = b, 1 if a > b

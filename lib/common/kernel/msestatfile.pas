@@ -4,8 +4,6 @@ interface
 uses
  classes,msestat,mseapplication,msetypes,msestrings,mseclasses,msestream,
  mseglob;
-const
- intermediatefileextension = '$$$';
 type
  statupdateeventty = procedure(const sender: tobject;
                                   const filer: tstatfiler) of object;
@@ -103,32 +101,6 @@ procedure setstatfilevar(const sender: istatfile; const source: tstatfile;
               var instance: tstatfile);
 begin
  setlinkedcomponent(sender,source,tmsecomponent(instance),typeinfo(istatfile));
-end;
-
-procedure setintermediatefile(var aname: filenamety);
-var
- fname1,fname2: filenamety;
- int1: integer;
-begin
- fname1:= aname + intermediatefileextension;
- fname2:= fname1;
- int1:= 0;
- while findfile(fname2) do begin
-  inc(int1);
-  fname2:= fname1 + inttostr(int1);
- end;
- aname:= fname2;
-end;
-
-procedure commitstreamtransaction(const astream: tmsefilestream;
-                                     const aname: filenamety);
-var
- fname1: filenamety;
-begin
- astream.flush;
- fname1:= astream.filename;
- astream.close;
- msefileutils.renamefile(fname1,aname);
 end;
 
 { tstatfile }
@@ -331,15 +303,14 @@ var
 begin
  fname1:= afilename;
  if sfo_transaction in foptions then begin
-  setintermediatefile(fname1);
+  stream1:= ttextstream.createtransaction(fname1);
+ end
+ else begin
+  stream1:= ttextstream.create(fname1,fm_create);
  end;
- stream1:= ttextstream.create(afilename,fm_create);
  try
   stream1.encoding:= fencoding; 
   writestat(stream1);
-  if sfo_transaction in foptions then begin
-   commitstreamtransaction(stream1,afilename);
-  end;
  finally
   stream1.free;
  end;
@@ -364,10 +335,9 @@ procedure tstatfile.writestat(const stream: ttextstream = nil);
 var
  stream1: ttextstream;
  ar1: filenamearty;
- fname1: filenamety;
- bo1: boolean;
+// fname1: filenamety;
+// bo1: boolean;
 begin
- bo1:= false;
  if assigned(fonstatbeforewrite) then begin
   fonstatbeforewrite(self);
  end;
@@ -391,13 +361,13 @@ begin
      createdirpath(msefileutils.filedir(floadedfile));
     end;
    end;
-   fname1:= floadedfile;
-   if sfo_transaction in foptions then begin
-    setintermediatefile(fname1);
-    bo1:= true;
-   end;
    try
-    stream1:= ttextstream.Create(fname1,fm_create);
+    if sfo_transaction in foptions then begin
+     stream1:= ttextstream.createtransaction(floadedfile);
+    end
+    else begin
+     stream1:= ttextstream.Create(floadedfile,fm_create);
+    end;
    except
     floadedfile:= '';
     raise;
@@ -419,9 +389,6 @@ begin
    end;
   finally
    awriter.free;
-  end;
-  if bo1 then begin
-   commitstreamtransaction(stream1,floadedfile);
   end;
  finally
   if stream = nil then begin

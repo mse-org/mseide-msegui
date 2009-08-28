@@ -25,6 +25,7 @@ type
  tmsefilestream = class(thandlestream)
   private
    ffilename: filenamety;
+   ftransactionname: filenamety;
    function getmemory: pointer;
    procedure checkmemorystream;
   protected
@@ -32,24 +33,27 @@ type
    procedure sethandle(value: integer); virtual;
    procedure closehandle(const ahandle: integer); virtual;
   public
-   constructor Create(const FileName: filenamety; openmode: fileopenmodety = fm_read;
+   constructor create(const afilename: filenamety; openmode: fileopenmodety = fm_read;
                                  accessmode: fileaccessmodesty = [];
-                                 Rights: filerightsty = defaultfilerights); overload;
-   constructor Create(AHandle: Integer); overload; virtual; //allways called
+                                 rights: filerightsty = defaultfilerights); overload;
+   constructor createtransaction(const afilename: filenamety;
+                                 rights: filerightsty = defaultfilerights); overload;
+   constructor create(ahandle: integer); overload; virtual; //allways called
    constructor create; overload; //tmemorystream
-   destructor Destroy; override;
-//   property handle: integer read fhandle;
-   function Read(var Buffer; Count: Longint): Longint; override;
-   function Write(const Buffer; Count: Longint): Longint; override;
-   function Seek(const Offset: Int64; Origin: TSeekOrigin): Int64; override;
+   destructor destroy; override;
+   function read(var buffer; count: longint): longint; override;
+   function write(const buffer; count: longint): longint; override;
+   function seek(const offset: int64; origin: tseekorigin): int64; override;
    function readdatastring: string; virtual; //bringt ab filepointer alle zeichen
    procedure writedatastring(const value: string);
    function isopen: boolean;
-   function filename: filenamety;
-   procedure close;
+   property filename: filenamety read ffilename;
+   property transactionname: filenamety read ftransactionname;
+   function close: boolean; //false on commit error
+   procedure cancel; //calls close without commit, removes intermediate file
    procedure flush; virtual;
 
-   procedure SetSize(const NewSize: Int64); override;
+   procedure setsize(const newsize: int64); override;
    procedure clear;        //only for memorystream
    property memory: pointer read getmemory;     //only for memorystream
  end;
@@ -704,7 +708,7 @@ begin
  create(invalidfilehandle);
 end;
 
-constructor tmsefilestream.create(const FileName: filenamety;
+constructor tmsefilestream.create(const afilename: filenamety;
             openmode: fileopenmodety = fm_read;
             accessmode: fileaccessmodesty = [];
             Rights: filerightsty = defaultfilerights);   //!!!!todo linux lock
@@ -713,7 +717,7 @@ var
  error: syserrorty;
  mstr1: msestring;
 begin
- ffilename:= filepath(filename);
+ ffilename:= filepath(afilename);
  if openmode = fm_append then begin
   error:= sys_openfile(ffilename,fm_readwrite,accessmode,rights,ahandle);
   if error <> sye_ok then begin
@@ -763,6 +767,16 @@ begin
  end;
 end;
 
+constructor tmsefilestream.createtransaction(const afilename: filenamety;
+            rights: filerightsty = defaultfilerights);
+begin
+ if afilename = '' then begin
+  raise exception.create('No transaction name.');
+ end;
+ ftransactionname:= afilename;
+ create(intermediatefilename(afilename),fm_create,[fa_denywrite],rights);
+end;
+
 destructor tmsefilestream.Destroy;
 begin
  close;
@@ -787,10 +801,35 @@ begin
  {$endif}
 end;
 
-procedure tmsefilestream.close;
+function tmsefilestream.close: boolean;  //false on commit error
 begin
- sethandle(invalidfilehandle);
+ result:= true;
+ if (handle <> invalidfilehandle) and (ftransactionname <> '') and
+          (ffilename <> '') then begin
+  flush;
+  sethandle(invalidfilehandle);
+  result:= sys_renamefile(ffilename,ftransactionname) = sye_ok;
+ end
+ else begin
+  sethandle(invalidfilehandle);
+ end;
  ffilename:= '';
+ ftransactionname:= '';
+end;
+
+procedure tmsefilestream.cancel;
+var
+ fstr1: filenamety;
+begin
+ if (ftransactionname <> '') and (ffilename <> '') then begin
+  fstr1:= ffilename;
+  ftransactionname:= '';
+  close;
+  sys_deletefile(fstr1);
+ end
+ else begin
+  close;
+ end;
 end;
 
 procedure tmsefilestream.flush;
@@ -863,11 +902,6 @@ begin
  else begin
   inherited;
  end;
-end;
-
-function tmsefilestream.filename: filenamety;
-begin
- result:= ffilename;
 end;
 
 function tmsefilestream.getmemory: pointer;
