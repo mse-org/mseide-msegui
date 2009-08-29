@@ -809,7 +809,7 @@ var
  icwindow: windowty;
  imewinid: winidty;
  errorhandlerbefore: xerrorhandler;
- lasteventtime: cardinal;
+ lasteventtime: ttime;
 // lastshiftstate: shiftstatesty;
  clipboard: msestring;
 
@@ -846,7 +846,7 @@ begin
  result:= gue_ok;
 end;
 
-function eventlater(const atime: cardinal): boolean;
+function eventlater(const atime: ttime): boolean;
 begin
  result:= (atime = currenttime) or (lasteventtime = currenttime) or
                            laterorsame(lasteventtime,atime);
@@ -860,17 +860,17 @@ var
  value1: string;
  nitems1: integer;
  acttype: atom;
- actformat: cardinal;
+ actformat: cint;
   
  function getdata(const target: atom; const resulttarget: atom): guierrorty;
  var
   event: xevent;
   po1: pchar;
-  nitems: cardinal;
-  bytesafter: cardinal;
+  nitems: culong;
+  bytesafter: culong;
   charoffset: integer;
-  longoffset: integer;
-  time1: cardinal;
+  longoffset: clong;
+  time1: longword;
   int1: integer;
   bo1,bo2: boolean;
  begin
@@ -1070,9 +1070,9 @@ end;
 function readlongproperty(id: winidty; name: atom; count: cardinal; var value): boolean;
 var
  actualtype: atom;
- actualformat: integer;
- nitems: cardinal;
- bytesafter: cardinal;
+ actualformat: cint;
+ nitems: culong;
+ bytesafter: culong;
  prop: pchar;
 begin
  result:= false;
@@ -1091,9 +1091,9 @@ end;
 function readatomproperty(id: winidty; name: atom; var value: atomarty): boolean;
 var
  actualtype: atom;
- actualformat: integer;
- nitems: cardinal;
- bytesafter: cardinal;
+ actualformat: cint;
+ nitems: culong;
+ bytesafter: culong;
  prop: pchar;
 begin
  result:= false;
@@ -1149,10 +1149,10 @@ type
 
 var
  typeatom: atom;
- format: longint;
- itemcount: longint;
+ format: cint;
+ itemcount: culong;
  po1: pwmstatety;
- bytesafterreturn: longword;
+ bytesafterreturn: culong;
 
 begin
  result:= wms_none;
