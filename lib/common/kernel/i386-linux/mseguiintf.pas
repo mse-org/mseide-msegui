@@ -1057,7 +1057,7 @@ begin
  xchangeproperty(appdisp,id,prop,windowatom,32,propmodereplace,@value,1);
 end;
 
-procedure setcardinalproperty(id: winidty; prop: atom; value: cardinal);
+procedure setcardinalproperty(id: winidty; prop: atom; value: culong);
 begin
  xchangeproperty(appdisp,id,prop,cardinalatom,32,propmodereplace,@value,1);
 end;
