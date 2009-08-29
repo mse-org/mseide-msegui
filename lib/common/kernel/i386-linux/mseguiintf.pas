@@ -837,12 +837,12 @@ end;
 
 function gui_canstackunder: boolean;
 begin
-{$ifdef mse_userestackwindow}
- result:= netatoms[net_restack_window] <> 0;
-{$else}
- result:= false;
-{$endif}
-// result:= false; //no solution found to restack windows in kde
+//{$ifdef mse_userestackwindow}
+// result:= netatoms[net_restack_window] <> 0;
+       //does not work, WM does not stack windows contiguous
+//{$else}
+ result:= false; //no solution found to restack windows in kde
+//{$endif}
 end;
 
 function gui_copytoclipboard(const value: msestring): guierrorty;
@@ -1635,18 +1635,13 @@ begin
  else begin
   if id <> predecessor then begin
    if gui_canstackunder then begin
-    topid:= toplevelwindow(id);
-    toppred:= toplevelwindow(predecessor);
     if netatoms[net_restack_window] <> 0 then begin
-//     sendnetrootcardinalmessage(netatoms[net_restack_window],id,
-//                                     [2,predecessor,stackmode]);
-     sendnetrootcardinalmessage(netatoms[net_restack_window],predecessor,
-                                     [2,id,stackmode]);
-     
-//     sendnetrootcardinalmessage(netatoms[net_restack_window],topid,
-//                                     [2,toppred,stackmode]);
+     sendnetrootcardinalmessage(netatoms[net_restack_window],id,
+                                     [1,predecessor,stackmode]);
     end
     else begin
+     topid:= toplevelwindow(id);
+     toppred:= toplevelwindow(predecessor);
      if stackmode = above then begin
       winar1[0]:= topid;
       winar1[1]:= toppred;
@@ -1686,15 +1681,15 @@ begin
       (stackmode = above) and (pindex < high(ar1)) and (ar1[pindex+1] = id) or
       (stackmode <> above) and (pindex > 0) and (ar1[pindex-1] = id)
        ) then begin
-      deleteitem(integerarty(ar1),idindex);
+      deleteitem(ar1,idindex);
       if idindex < pindex then begin
        dec(pindex);
       end;
       if stackmode = above then begin
-       insertitem(integerarty(ar1),pindex+1,id);
+       insertitem(ar1,pindex+1,id);
       end
       else begin
-       insertitem(integerarty(ar1),pindex,id);
+       insertitem(ar1,pindex,id);
        dec(pindex);
       end;
       if pindex < 0 then begin
