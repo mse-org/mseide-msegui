@@ -37,9 +37,13 @@ type
 {$endif}
 
  culong = __ULONGWORD_TYPE;
+ pculong = ^culong;
  clong = __SLONGWORD_TYPE;
+ pclong = ^clong;
  cint = __S32_TYPE;
+ pcint = ^cint;
  cuint = __U32_TYPE;
+ pcuint = ^cuint;
  
 //from bits/typesizes.h
 

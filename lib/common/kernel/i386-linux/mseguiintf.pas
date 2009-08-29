@@ -1074,15 +1074,30 @@ var
  nitems: culong;
  bytesafter: culong;
  prop: pchar;
+ int1: integer;
+ {$ifdef CPU64}
+ po1: pculong;
+ po2: plongword;
+ {$endif}
 begin
  result:= false;
  if xgetwindowproperty(appdisp,id,name,0,count,{$ifdef xboolean}false{$else}0{$endif},
         anypropertytype,@actualtype,@actualformat,@nitems,@bytesafter,@prop) = success then begin
   if nitems = count then begin
+{$ifdef CPU64}
+   po1:= pointer(prop);
+   po2:= @value;
+   for int1:= count-1 downto 0 do begin
+    po2^:= po1^;
+    inc(po1);
+    inc(po2);
+   end;
+{$else}
  {$ifdef FPC} {$checkpointer off} {$endif}
    move(prop^,value,integer(nitems)*actualformat div 8);
  {$ifdef FPC} {$checkpointer default} {$endif}
    result:= true;
+{$endif}
   end;
   xfree(prop);
  end;
@@ -1170,8 +1185,8 @@ end;
 
 function mserootwindow(id: winidty = 0): winidty;
 var
- x,y: integer;
- width,height,border,depth: cardinal;
+ x,y: cint;
+ width,height,border,depth: cuint;
 begin
  if id <> 0 then begin
   if xgetgeometry(appdisp,id,@result,@x,@y,@width,@height,@border,@depth) <> 0 then begin

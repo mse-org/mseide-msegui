@@ -3882,14 +3882,8 @@ function tgdbmi.getcliinteger(const aname: string; const response: string; out a
 var
  str1: string;
 begin
- result:= getclistring(aname,response,str1);
- if result then begin
-  try
-   aresult:= strtointvalue(str1);
-  except
-   result:= false;
-  end;
- end;
+ result:= getclistring(aname,response,str1) and 
+                  trystrtointvalue(str1,longword(aresult));
 end;
 
 function tgdbmi.getcliint64(const aname: string; const response: string;
@@ -3897,14 +3891,8 @@ function tgdbmi.getcliint64(const aname: string; const response: string;
 var
  str1: string;
 begin
- result:= getclistring(aname,response,str1);
- if result then begin
-  try
-   aresult:= strtointvalue64(str1);
-  except
-   result:= false;
-  end;
- end;
+ result:= getclistring(aname,response,str1) and 
+                             trystrtointvalue64(str1,qword(aresult));
 end;
 
 function tgdbmi.getpascalvalue(const avalue: string): string;
