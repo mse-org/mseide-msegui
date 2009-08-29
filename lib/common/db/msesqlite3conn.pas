@@ -945,12 +945,15 @@ var
 begin
  result:= '';
  if atablename <> '' then begin
-  ar1:= stringsquery('PRAGMA table_info('+atablename+');');
-  for int1:= 0 to high(ar1) do begin
-   if (high(ar1[int1]) >= 5) and (ar1[int1][5] <> '0') then begin
-    result:= ar1[int1][1];
-    break;
+  try
+   ar1:= stringsquery('PRAGMA table_info('+atablename+');');
+   for int1:= 0 to high(ar1) do begin
+    if (high(ar1[int1]) >= 5) and (ar1[int1][5] <> '0') then begin
+     result:= ar1[int1][1];
+     break;
+    end;
    end;
+  except
   end;
  end;
 end;
@@ -960,7 +963,11 @@ procedure tsqlite3connection.UpdateIndexDefs(var IndexDefs: TIndexDefs;
 var
  str1: string;
 begin
- str1:= getprimarykeyfield(tablename,nil);
+ try
+  str1:= getprimarykeyfield(tablename,nil);
+ except
+  str1:= '';
+ end;
  if str1 <> '' then begin
   indexdefs.add('$PRIMARY_KEY$',str1,[ixPrimary,ixUnique]);
  end;
