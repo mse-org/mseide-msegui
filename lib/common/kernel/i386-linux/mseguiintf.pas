@@ -768,6 +768,7 @@ type
        net_frame_extents,
        net_request_frame_extents,
        net_wm_pid,
+       net_restack_window,net_close_window,
        net_none);
  netwmstateoperationty = (nso_remove,nso_add,nso_toggle);
 const
@@ -786,6 +787,7 @@ const
        '_NET_FRAME_EXTENTS', 
        '_NET_REQUEST_FRAME_EXTENTS',
        '_NET_WM_PID', 
+       '_NET_RESTACK_WINDOW','_NET_CLOSE_WINDOW',
        ''); 
 // needednetatom = netatomty(ord(high(netatomty))-4);
 var
@@ -835,8 +837,12 @@ end;
 
 function gui_canstackunder: boolean;
 begin
- result:= false; //no solution found to restack windows in kde
-//result:= true;
+{$ifdef mse_userestackwindow}
+ result:= netatoms[net_restack_window] <> 0;
+{$else}
+ result:= false;
+{$endif}
+// result:= false; //no solution found to restack windows in kde
 end;
 
 function gui_copytoclipboard(const value: msestring): guierrorty;
@@ -1057,9 +1063,16 @@ begin
  xchangeproperty(appdisp,id,prop,windowatom,32,propmodereplace,@value,1);
 end;
 
-procedure setcardinalproperty(id: winidty; prop: atom; value: culong);
+procedure setlongproperty(id: winidty; prop: atom; value: culong); overload;
 begin
  xchangeproperty(appdisp,id,prop,cardinalatom,32,propmodereplace,@value,1);
+end;
+
+procedure setlongproperty(id: winidty; prop: atom;
+                            const value: array of culong); overload;
+begin
+ xchangeproperty(appdisp,id,prop,cardinalatom,32,propmodereplace,@value,
+                                                length(value));
 end;
 
 procedure setatomproperty(id: winidty; prop: atom; value: atom);
@@ -1067,23 +1080,24 @@ begin
  xchangeproperty(appdisp,id,prop,atomatom,32,propmodereplace,@value,1);
 end;
 
-function readlongproperty(id: winidty; name: atom; count: cardinal; var value): boolean;
+function readcardinalproperty(id: winidty; name: atom; count: cardinal;
+                                    var value): boolean;
 var
  actualtype: atom;
  actualformat: cint;
- nitems: culong;
+ nitems: clong;
  bytesafter: culong;
  prop: pchar;
  int1: integer;
  {$ifdef CPU64}
  po1: pculong;
- po2: plongword;
+ po2: pcardinal;
  {$endif}
 begin
  result:= false;
  if xgetwindowproperty(appdisp,id,name,0,count,{$ifdef xboolean}false{$else}0{$endif},
         anypropertytype,@actualtype,@actualformat,@nitems,@bytesafter,@prop) = success then begin
-  if nitems = count then begin
+  if (nitems = count) and (actualformat = 32) then begin
 {$ifdef CPU64}
    po1:= pointer(prop);
    po2:= @value;
@@ -1094,7 +1108,46 @@ begin
    end;
 {$else}
  {$ifdef FPC} {$checkpointer off} {$endif}
-   move(prop^,value,integer(nitems)*actualformat div 8);
+   move(prop^,value,nitems*sizeof(cardinal));
+ {$ifdef FPC} {$checkpointer default} {$endif}
+{$endif}
+  end;
+  result:= true;
+  xfree(prop);
+ end;
+end;
+
+function readcardinallistproperty(const id: winidty; const name: atom;
+                out value: cardinalarty): boolean;
+var
+ actualtype: atom;
+ actualformat: cint;
+ nitems: clong;
+ bytesafter: culong;
+ prop: pchar;
+ int1: integer;
+ {$ifdef CPU64}
+ po1: pculong;
+ po2: pcardinal;
+ {$endif}
+begin
+ result:= false;
+ if xgetwindowproperty(appdisp,id,name,0,bigint,{$ifdef xboolean}false{$else}0{$endif},
+        anypropertytype,@actualtype,@actualformat,
+                        @nitems,@bytesafter,@prop) = success then begin
+  if actualformat = 32 then begin
+   setlength(value,nitems);
+{$ifdef CPU64}
+   po1:= pointer(prop);
+   po2:= pointer(value);
+   for int1:= nitems-1 downto 0 do begin
+    po2^:= po1^;
+    inc(po1);
+    inc(po2);
+   end;
+{$else}
+ {$ifdef FPC} {$checkpointer off} {$endif}
+   move(prop^,value,nitems*sizeof(value[0]));
  {$ifdef FPC} {$checkpointer default} {$endif}
    result:= true;
 {$endif}
@@ -1107,18 +1160,18 @@ function readatomproperty(id: winidty; name: atom; var value: atomarty): boolean
 var
  actualtype: atom;
  actualformat: cint;
- nitems: culong;
+ nitems: clong;
  bytesafter: culong;
  prop: pchar;
 begin
  result:= false;
  if xgetwindowproperty(appdisp,id,name,0,10000,{$ifdef xboolean}false{$else}0{$endif},
    atomatom,@actualtype,@actualformat,@nitems,@bytesafter,@prop) = success then begin
-  if actualtype = atomatom then begin
+  if (actualtype = atomatom) and (actualformat = 32) then begin
    setlength(value,nitems);
    if nitems > 0 then begin
  {$ifdef FPC} {$checkpointer off} {$endif}
-    move(prop^,value[0],integer(nitems)*actualformat div 8);
+    move(prop^,value[0],nitems*sizeof(value[0]));
  {$ifdef FPC} {$checkpointer default} {$endif}
    end;
    result:= true;
@@ -1260,6 +1313,32 @@ begin
  end;
 end;
 
+function sendnetrootcardinalmessage(const messagetype: atom;
+         const aid: winidty; const adata: array of cardinal): boolean;
+                  //true if ok
+var
+ xevent: xclientmessageevent;
+ int1: integer;
+begin
+ result:= netsupported and (messagetype <> 0);
+ if result then begin
+  fillchar(xevent,sizeof(xevent),0);
+  with xevent do begin
+   xtype:= clientmessage;
+   display:= appdisp;
+   xwindow:= aid;
+   format:= 32;
+   message_type:= messagetype;
+   for int1:= 0 to high(adata) do begin
+    data.l[int1]:= adata[int1];
+   end;
+   result:= xsendevent(appdisp,rootid,
+           {$ifdef xboolean}false{$else}0{$endif},
+           substructurenotifymask or substructureredirectmask,@xevent) <> 0;
+  end;
+ end;
+end;
+
 function waitfordecoration(id: winidty; raiseexception: boolean = true): boolean;
 var
  int1: integer;
@@ -1299,8 +1378,7 @@ begin
   end;
  end
  else begin
-  changenetwmstate(id,nso_remove,
-                  net_wm_state_fullscreen);
+  changenetwmstate(id,nso_remove,net_wm_state_fullscreen);
   case size of
    wsi_minimized: begin
     if xiconifywindow(appdisp,id,0) = 0 then begin
@@ -1397,7 +1475,7 @@ var
  begin
   result:= false;
   if (gui_windowvisible(aparent) or (getwmstate(aparent) = wms_iconic)) and
-   readlongproperty(aparent,netatoms[net_wm_pid],1,int1) and checkpid(int1) then begin
+   readcardinalproperty(aparent,netatoms[net_wm_pid],1,int1) and checkpid(int1) then begin
    result:= true;
    gui_pidtowinid:= aparent;
   end
@@ -1548,6 +1626,7 @@ var
  ar1: winidarty;
  int1: integer;
  idindex,pindex: integer;
+ topid,toppred: winidty;
  winar1: array[0..1] of winidty;
 begin
  if predecessor = 0 then begin
@@ -1556,15 +1635,29 @@ begin
  else begin
   if id <> predecessor then begin
    if gui_canstackunder then begin
-    if stackmode = above then begin
-     winar1[0]:= toplevelwindow(id);
-     winar1[1]:= toplevelwindow(predecessor);
+    topid:= toplevelwindow(id);
+    toppred:= toplevelwindow(predecessor);
+    if netatoms[net_restack_window] <> 0 then begin
+//     sendnetrootcardinalmessage(netatoms[net_restack_window],id,
+//                                     [2,predecessor,stackmode]);
+     sendnetrootcardinalmessage(netatoms[net_restack_window],predecessor,
+                                     [2,id,stackmode]);
+     
+//     sendnetrootcardinalmessage(netatoms[net_restack_window],topid,
+//                                     [2,toppred,stackmode]);
     end
     else begin
-     winar1[0]:= toplevelwindow(predecessor);
-     winar1[1]:= toplevelwindow(id);
+     if stackmode = above then begin
+      winar1[0]:= topid;
+      winar1[1]:= toppred;
+     end
+     else begin
+      winar1[0]:= toppred;
+      winar1[1]:= topid;
+     end;
+     xrestackwindows(appdisp,@winar1,2);
     end;
-    xrestackwindows(appdisp,@winar1,2);
+
    {
     changes.sibling:= toplevelwindow(predecessor);
     changes.stack_mode:= stackmode;
@@ -1676,7 +1769,7 @@ var
 begin
  bo1:= false;
  if netsupported then begin
-  bo1:= readlongproperty(mserootwindow(id),netatoms[net_workarea],4,result);
+  bo1:= readcardinalproperty(mserootwindow(id),netatoms[net_workarea],4,result);
  end;
  if not bo1 then begin
   result:= makerect(nullpoint,gui_getscreensize);
@@ -1695,7 +1788,7 @@ var
 begin
  bo1:= false;
  if canframeextents then begin
-  bo1:= readlongproperty(id,netatoms[net_frame_extents],4,ar1);
+  bo1:= readcardinalproperty(id,netatoms[net_frame_extents],4,ar1);
  end;
  if bo1 then begin
   with result do begin
@@ -2849,7 +2942,7 @@ function setnetcardinal(const id: winidty; const aproperty: netatomty;
 begin
  result:= false;
  if netatoms[aproperty] <> 0 then begin
-  setcardinalproperty(id,netatoms[aproperty],avalue);
+  setlongproperty(id,netatoms[aproperty],avalue);
   result:= true;
  end;
 end;
@@ -5898,6 +5991,7 @@ var
  int1,int2: integer;
  ar1: stringarty;
  po1: pchar;
+ atom1: atom;
  atomar: atomarty;
  rect1: rectty;
  sigset1,sigset2: sigset_t;
@@ -6121,50 +6215,36 @@ begin
           integer(high(netatomty)),{$ifdef xboolean}true{$else}1{$endif},
           @netatoms[low(netatomty)]);
  netsupported:= netsupportedatom <> 0;
+ if netsupported then begin
+  netsupported:= readatomproperty(rootid,netsupportedatom,atomar);
+  for netnum:= low(netnum) to high(netnum) do begin
+   atom1:= netatoms[netnum];
+   netatoms[netnum]:= 0;
+   for int1:= 0 to high(atomar) do begin
+    if atomar[int1] = atom1 then begin
+     netatoms[netnum]:= atom1;
+     break;
+    end;     
+   end;
+  end;
+ end;
  for netnum:= low(netatomty) to needednetatom do begin
   if netatoms[netnum] = 0 then begin
    netsupported:= false;
    break;
   end;
  end;
-
+ 
+ netsupported:= netsupported and
+                  readcardinalproperty(rootid,netatoms[net_workarea],4,rect1);
  canframeextents:= netatoms[net_frame_extents] <> 0;
- canfullscreen:= netsupported;
- if netsupported and (netatoms[net_wm_state_fullscreen] = 0) then begin
+ canfullscreen:= netatoms[net_wm_state_fullscreen] <> 0;
+ if netsupported and not canfullscreen then begin
   netatoms[net_wm_state_fullscreen]:= xinternatom(appdisp,
           @netatomnames[net_wm_state_fullscreen],
-           {$ifdef xboolean}false{$else}0{$endif});
-           //fake
-  canfullscreen:= false;
+           {$ifdef xboolean}false{$else}0{$endif});      //fake
  end; 
- if readatomproperty(rootid,netsupportedatom,atomar) then begin
-  if canfullscreen then begin
-   canfullscreen:= false;
-   for int1:= 0 to high(atomar) do begin
-    if atomar[int1] = netatoms[net_wm_state_fullscreen] then begin
-     canfullscreen:= true;
-     break;
-    end;
-   end;
-  end;
-  {
-  if canframeextents and (netatoms[net_request_frame_extents] <> 0) then begin
-   canframeextents:= false;
-   for int1:= 0 to high(atomar) do begin
-    if (atomar[int1] = netatoms[net_request_frame_extents]) or 
-        (atomar[int1] = netatoms[net_frame_extents]) then begin
-     canframeextents:= true;
-     break;
-    end;
-   end;
-  end;
-  }
- end;
- if netsupported then begin
-  if not readlongproperty(rootid,netatoms[net_workarea],4,rect1) then begin
-   netsupported:= false;
-  end;
- end;
+
  result:= gue_ok;
  {$ifdef mse_flushgdi}
  xsynchronize(appdisp,{$ifdef xboolean}true{$else}1{$endif});
