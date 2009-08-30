@@ -613,8 +613,8 @@ begin
      po1:= @paramlist;
      for int1:= 0 to paramcount - 1 do begin
       with params[int1] do begin
-       flags:= tparamflags({$ifdef FPC}longword({$endif}byte(po1^){$ifdef FPC}){$endif});
-       inc(po1,sizeof({$ifdef FPC}byte{$else}tparamflags{$endif}));
+       flags:= tparamflags(byteset(po1^));
+       inc(po1,sizeof(byteset));
        name:= getshortstring(po1);
        typename:= getshortstring(po1);
        if (typename = 'WideString') or (typename = 'UnicodeString') then begin

@@ -607,7 +607,7 @@ type
    property base: numbasety read fbase write setbase default nb_dec;
    property bitcount: integer read fbitcount write setbitcount default 64;
    property min: int64 read fmin write fmin default 0;
-   property max: int64 read fmax write fmax {$ifdef FPC}default maxint64{$endif};
+   property max: int64 read fmax write fmax; // {$ifdef FPC}default maxint64{$endif};
 
    property gridvalue[const index: integer]: int64
         read getgridvalue write setgridvalue; default;

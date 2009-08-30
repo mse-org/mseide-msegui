@@ -1877,12 +1877,12 @@ type
 
  tcustomenum64edit = class(tcustomdropdownlistedit)
   private
+   fonsetvalue1: setint64eventty;
    function getgridvalue(const index: integer): int64;
    procedure setgridvalue(const index: integer; aValue: int64);
    function getgridvalues: int64arty;
    procedure setgridvalues(const avalue: int64arty);
    procedure setvalue(const avalue: int64);
-   fonsetvalue1: setint64eventty;
   protected
    fvalue1: int64;
    fvaluedefault: int64;

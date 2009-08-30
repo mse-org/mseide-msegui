@@ -2330,13 +2330,13 @@ function intvaluetostr(const value: integer; const base: numbasety = nb_dec;
 begin
  case base of
   nb_bin: begin
-   result:= bintostr(value,abs(bitcount));
+   result:= bintostr(longword(value),abs(bitcount));
   end;
   nb_oct: begin
-   result:= octtostr(value,(abs(bitcount)+2) div 3);
+   result:= octtostr(longword(value),(abs(bitcount)+2) div 3);
   end;
   nb_hex: begin
-   result:= hextostr(value,(abs(bitcount)+3) div 4);
+   result:= hextostr(longword(value),(abs(bitcount)+3) div 4);
   end;
   else begin //nb_dec
    result:= dectostr(value,sign(bitcount)*(abs(bitcount)*100+331) div 332);
@@ -2349,13 +2349,13 @@ function intvaluetostr(const value: int64; const base: numbasety = nb_dec;
 begin
  case base of
   nb_bin: begin
-   result:= bintostr(value,abs(bitcount));
+   result:= bintostr(uint64(value),abs(bitcount));
   end;
   nb_oct: begin
-   result:= octtostr(value,(abs(bitcount)+2) div 3);
+   result:= octtostr(uint64(value),(abs(bitcount)+2) div 3);
   end;
   nb_hex: begin
-   result:= hextostr(value,(abs(bitcount)+3) div 4);
+   result:= hextostr(uint64(value),(abs(bitcount)+3) div 4);
   end;
   else begin //nb_dec
    result:= dectostr(value,sign(bitcount)*(abs(bitcount)*100+331) div 332);

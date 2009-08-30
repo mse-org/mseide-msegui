@@ -138,7 +138,7 @@ begin
         ns_16: int2:= 16; 
         ns_32: int2:= 32; 
        end;
-       mstr1:= '%'+bintostr(int1,int2);
+       mstr1:= '%'+bintostr(longword(int1),int2);
       end;
       nf_decs: begin
        mstr1:= inttostr(int1);
@@ -153,7 +153,7 @@ begin
         ns_16: int2:= 4; 
         ns_32: int2:= 8; 
        end;
-       mstr1:= '0x'+hextostr(int1,int2);
+       mstr1:= '0x'+hextostr(longword(int1),int2);
       end;
      end;
     except

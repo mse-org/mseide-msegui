@@ -367,7 +367,7 @@ type
    function breakinsert(var info: breakpointinfoty): gdbresultty; overload;
    function breakinsert(const funcname: string): integer; overload;
                 //returns bkpt id, -1 on error
-   function breakinsert(const address: int64): integer; overload;
+   function breakinsert(const address: qword): integer; overload;
    function breaklist(var list: breakpointinfoarty; const full: boolean): gdbresultty;
                //full = false -> only bkptno, address and passcount
    function breakdelete(bkptnum: integer): gdbresultty; //bkptnum = 0 -> all
@@ -2158,7 +2158,7 @@ begin
  end;
 end;
 
-function tgdbmi.breakinsert(const address: int64): integer;
+function tgdbmi.breakinsert(const address: qword): integer;
 begin
  if synccommand('-break-insert *'+hextocstr(address,8)) <> gdb_ok then begin
   result:= -1;

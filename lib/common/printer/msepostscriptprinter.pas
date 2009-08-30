@@ -727,7 +727,7 @@ end;
 
 function tpostscriptcanvas.encodefontname(const namenum,codepage: integer): string;
 begin
- result:= '/F' + hextostr(codepage,2)+inttostr(namenum)+' ';
+ result:= '/F' + hextostr(longword(codepage),2)+inttostr(namenum)+' ';
 end;
 
 procedure tpostscriptcanvas.definefont(const adata: fontnumty;
@@ -2019,12 +2019,12 @@ begin
   end;
  end;
  if result = '' then begin
-  result:= 'E'+hextostr(acodepage,2);
+  result:= 'E'+hextostr(longword(acodepage),2);
   int3:= 256*acodepage;
   str1:= '';
   for int1:= 0 to 31 do begin
    for int2:= 0 to 7 do begin
-    str1:= str1 + '/uni'+hextostr(int3,4)+' ';
+    str1:= str1 + '/uni'+hextostr(longword(int3),4)+' ';
     inc(int3);
    end;
    if int1 = 31 then begin

@@ -15,6 +15,9 @@
 
 {$mode objfpc}
 
+{$ifdef ver2_3}
+ {$define unicodeversion}
+{$endif}
 unit cwstring;
 
 interface
@@ -399,7 +402,11 @@ function StrCompAnsi(s1,s2 : PChar): PtrInt;
 
 Procedure SetCWideStringManager;
 Var
+{$ifdef unicodeversion}
+  CWideStringManager : TUnicodeStringManager;
+{$else}
   CWideStringManager : TWideStringManager;
+{$endif}
 begin
   CWideStringManager:=widestringmanager;
   With CWideStringManager do

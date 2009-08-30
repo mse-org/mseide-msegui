@@ -117,7 +117,7 @@ end;
 procedure tmemoryfo.drawfixcol(const sender: tcol; const canvas: tcanvas;
                const cellinfo: cellinfoty);
 begin
- drawtext(canvas,hextostr(firstadd+cellinfo.cell.row*16,8),cellinfo.innerrect);
+ drawtext(canvas,hextostr(longword(firstadd+cellinfo.cell.row*16),8),cellinfo.innerrect);
 end;
 
 procedure tmemoryfo.updatelayout(const sender: TObject);

@@ -37,7 +37,7 @@ type
   protected
    fkey: int64;
   public 
-   constructor create(const akey: int64);
+   constructor create(const akey: int64); overload;
    property key: int64 read fkey;
  end;
  
@@ -118,9 +118,9 @@ type
    procedure checkbuffersize;
   protected
    procedure addnode(const anode: tcachenode);   
-   function find(const akey: tcachenode; out anode: tcachenode): boolean;
+   function find(const akey: tcachenode; out anode: tcachenode): boolean; overload;
   public
-   procedure clear; override;
+   procedure clear; override; overload;
    procedure removenode(const anode: tcachenode); //does not free node
    property maxsize: integer read fmaxsize write setmaxsize; //0 -> no limit
    property size: integer read fsize;
@@ -136,13 +136,14 @@ type
   private
    fdata: string;
   public
-   constructor create(const akey: int64; const adata: string);
+   constructor create(const akey: int64; const adata: string); overload;
    property data: string read fdata;
  end;
  
  tstringcacheavltree = class(tcacheavltree)
   public
-   function addnode(const akey: int64; const adata: string): tstringcachenode;
+   function addnode(const akey: int64;
+                        const adata: string): tstringcachenode; overload;
  end;
  
 implementation

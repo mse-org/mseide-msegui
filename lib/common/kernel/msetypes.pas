@@ -16,6 +16,21 @@ uses
  SysUtils;
 
 type
+{$ifdef FPC}
+ {$ifdef ver2_3}
+  byteset = byte;
+  wordset = word;
+  longwordset = longword;
+ {$else}
+  byteset = longword;
+  wordset = longword;
+  longwordset = longword;
+ {$endif}
+{$else}
+  byteset = byte;
+  wordset = word;
+  longwordset = longword;
+{$endif}
  {$ifndef FPC}
   DWord = Longword;
   SizeInt = Longint;
