@@ -563,7 +563,7 @@ begin
   end;
  end;
 end;
-
+var testvar1,testvar2: string;
 function parametersmatch1(const a,b: methodparaminfoty): boolean;
 var
  int1: integer;
@@ -572,6 +572,8 @@ begin
  if result then begin
   for int1:= 0 to high(a.params) do begin
    with a.params[int1] do begin
+testvar1:= typename;
+testvar2:= b.params[int1].typename;
     if (flags*[pfvar,pfconst,pfout] <> b.params[int1].flags*[pfvar,pfconst,pfout]) or
            (stringicomp(typename,b.params[int1].typename) <> 0) then begin
      result:= false;
@@ -592,6 +594,12 @@ procedure getmethodparaminfo(const atype: ptypeinfo; var info: methodparaminfoty
    inc(po,length(result));
   end;
 
+type
+ pparamflags = ^tparamflags;
+ paramrecty = record
+               Flags : TParamFlags;
+//               ParamName : ShortString;
+              end;
 var
  isfunction: boolean;
  int1: integer;
@@ -613,8 +621,11 @@ begin
      po1:= @paramlist;
      for int1:= 0 to paramcount - 1 do begin
       with params[int1] do begin
-       flags:= tparamflags(byteset(po1^));
-       inc(po1,sizeof(byteset));
+       flags:= tparamflags(byteset(pbyte(po1)^));
+       inc(po1,1);
+//       inc(po1,sizeof(paramrecty));
+//       inc(po1,sizeof(tparamflags));
+//       inc(po1,sizeof(byteset));
        name:= getshortstring(po1);
        typename:= getshortstring(po1);
        if (typename = 'WideString') or (typename = 'UnicodeString') then begin
