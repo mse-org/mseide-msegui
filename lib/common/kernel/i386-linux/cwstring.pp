@@ -408,46 +408,58 @@ Var
   CWideStringManager : TWideStringManager;
 {$endif}
 begin
-  CWideStringManager:=widestringmanager;
-  With CWideStringManager do
-    begin
-      Wide2AnsiMoveProc:=@Wide2AnsiMove;
-      Ansi2WideMoveProc:=@Ansi2WideMove;
+ CWideStringManager:= widestringmanager;
+ With CWideStringManager do begin
+  Wide2AnsiMoveProc:= @Wide2AnsiMove;
+  Ansi2WideMoveProc:= @Ansi2WideMove;
 
-      UpperWideStringProc:=@UpperWideString;
-      LowerWideStringProc:=@LowerWideString;
+  UpperWideStringProc:= @UpperWideString;
+  LowerWideStringProc:= @LowerWideString;
 
-      CompareWideStringProc:=@CompareWideString;
-      CompareTextWideStringProc:=@CompareTextWideString;
-      {
-      CharLengthPCharProc
+  CompareWideStringProc:= @CompareWideString;
+  CompareTextWideStringProc:= @CompareTextWideString;
+{$ifdef unicodeversion}
+  Unicode2AnsiMoveProc:= @Wide2AnsiMove;
+  Ansi2UnicodeMoveProc:= @Ansi2WideMove;
 
-      UpperAnsiStringProc
-      LowerAnsiStringProc
-      CompareStrAnsiStringProc
-      CompareTextAnsiStringProc
-      }
-      StrCompAnsiStringProc:=@StrCompAnsi;
-      {
-      StrICompAnsiStringProc
-      StrLCompAnsiStringProc
-      StrLICompAnsiStringProc
-      StrLowerAnsiStringProc
-      StrUpperAnsiStringProc
-      }
-    end;
-  SetWideStringManager(CWideStringManager);
+  UpperUnicodeStringProc:= @UpperWideString;
+  LowerUnicodeStringProc:= @LowerWideString;
+
+  CompareUnicodeStringProc:= @CompareWideString;
+  CompareTextUnicodeStringProc:= @CompareTextWideString;
+{$endif}
+  {
+  CharLengthPCharProc
+
+  UpperAnsiStringProc
+  LowerAnsiStringProc
+  CompareStrAnsiStringProc
+  CompareTextAnsiStringProc
+  }
+  StrCompAnsiStringProc:=@StrCompAnsi;
+  {
+  StrICompAnsiStringProc
+  StrLCompAnsiStringProc
+  StrLICompAnsiStringProc
+  StrLowerAnsiStringProc
+  StrUpperAnsiStringProc
+  }
+ end;
+ SetWideStringManager(CWideStringManager);
 end;
 
 
 initialization
  setlocale(LC_ALL,'');
-  SetCWideStringManager;
   { init conversion tables }
-  iconv_wide2ansi:=iconv_open(nl_langinfo(CODESET),unicode_encoding);
-  iconv_ansi2wide:=iconv_open(unicode_encoding,nl_langinfo(CODESET));
-  iconv_ucs42ansi:=iconv_open(nl_langinfo(CODESET),'UCS4');
-  iconv_ansi2ucs4:=iconv_open('UCS4',nl_langinfo(CODESET));
+ iconv_wide2ansi:=iconv_open(nl_langinfo(CODESET),unicode_encoding);
+ iconv_ansi2wide:=iconv_open(unicode_encoding,nl_langinfo(CODESET));
+ iconv_ucs42ansi:=iconv_open(nl_langinfo(CODESET),'UCS4');
+ iconv_ansi2ucs4:=iconv_open('UCS4',nl_langinfo(CODESET));
+ SetCWideStringManager;
 finalization
-  iconv_close(iconv_ansi2wide);
+ iconv_close(iconv_wide2ansi);
+ iconv_close(iconv_ansi2wide);
+ iconv_close(iconv_ucs42ansi);
+ iconv_close(iconv_ansi2ucs4);
 end.
