@@ -15,9 +15,9 @@
 
 {$mode objfpc}
 
-{$ifdef ver2_3}
- {$define unicodeversion}
-{$endif}
+{$ifdef ver2_3}{$define unicodeversion}{$endif}
+{$ifdef ver2_4}{$define unicodeversion}{$endif}
+{$ifdef ver2_5}{$define unicodeversion}{$endif}
 unit cwstring;
 
 interface

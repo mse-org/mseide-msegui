@@ -23,7 +23,9 @@ uses
 
 {$ifdef FPC}
 {$define xbooleanresult}
-{$ifndef VER2_3} {$define xboolean} {$endif}
+{$ifndef VER2_3}{$ifndef VER2_4}{$ifndef VER2_5} 
+ {$define xboolean} 
+{$endif}{$endif}{$endif}
 {$ifdef UNIX}
 {$ifdef msedebug}
 var

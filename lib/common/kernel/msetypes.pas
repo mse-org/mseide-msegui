@@ -17,7 +17,10 @@ uses
 
 type
 {$ifdef FPC}
- {$ifdef ver2_3}
+ {$ifdef ver2_3}{$define longwordbyteset}{$endif}
+ {$ifdef ver2_4}{$define longwordbyteset}{$endif}
+ {$ifdef ver2_5}{$define longwordbyteset}{$endif}
+ {$ifdef longwordbyteset}
   byteset = byte;
   wordset = word;
   longwordset = longword;

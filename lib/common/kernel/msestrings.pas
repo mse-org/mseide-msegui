@@ -16,9 +16,9 @@ uses
  classes,{msegraphutils,}msetypes{$ifdef FPC},strings{$endif};
 {$ifdef FPC}
  {$ifndef mse_nounicodestring}
-  {$ifdef VER2_3}
-   {$define mse_unicodestring}
-  {$endif}
+  {$ifdef VER2_3}{$define mse_unicodestring}{$endif}
+  {$ifdef VER2_4}{$define mse_unicodestring}{$endif}
+  {$ifdef VER2_5}{$define mse_unicodestring}{$endif}
  {$endif}
  {$ifndef mse_unicodestring}
   {$ifdef FPC_WINLIKEWIDESTRING}
