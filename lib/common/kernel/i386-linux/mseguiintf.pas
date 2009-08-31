@@ -762,34 +762,35 @@ type
        net_wm_state_maximized_vert,net_wm_state_maximized_horz,
        //not needed below
        net_wm_window_type,
+       net_wm_state_fullscreen,
+       net_wm_state_skip_taskbar,
+       net_restack_window,net_close_window,
+       net_wm_pid,
        net_wm_window_type_normal,
        net_wm_window_type_dialog,
        net_wm_window_type_dropdown_menu,
-       net_wm_state_fullscreen,
-       net_wm_state_skip_taskbar,
        net_frame_extents,
        net_request_frame_extents,
-       net_wm_pid,
-       net_restack_window,net_close_window,
        net_none);
  netwmstateoperationty = (nso_remove,nso_add,nso_toggle);
 const
  needednetatom = net_wm_state_maximized_horz;
+ lastcheckedatom = net_close_window;
  netatomnames: array[netatomty] of string = 
       ('_NET_SUPPORTED','_NET_WORKAREA',
        '_NET_WM_STATE',
        '_NET_WM_STATE_MAXIMIZED_VERT','_NET_WM_STATE_MAXIMIZED_HORZ',
        //not needed below
        '_NET_WM_WINDOW_TYPE',
+       '_NET_WM_STATE_FULLSCREEN',
+       '_NET_WM_STATE_SKIP_TASKBAR',
+       '_NET_RESTACK_WINDOW','_NET_CLOSE_WINDOW',
+       '_NET_WM_PID', 
        '_NET_WM_WINDOW_TYPE_NORMAL',
        '_NET_WM_WINDOW_TYPE_DIALOG',
        '_NET_WM_WINDOW_TYPE_DROPDOWN_MENU',
-       '_NET_WM_STATE_FULLSCREEN',
-       '_NET_WM_STATE_SKIP_TASKBAR',
        '_NET_FRAME_EXTENTS', 
        '_NET_REQUEST_FRAME_EXTENTS',
-       '_NET_WM_PID', 
-       '_NET_RESTACK_WINDOW','_NET_CLOSE_WINDOW',
        ''); 
 // needednetatom = netatomty(ord(high(netatomty))-4);
 var
@@ -6214,7 +6215,7 @@ begin
  netsupported:= netsupportedatom <> 0;
  if netsupported then begin
   netsupported:= readatomproperty(rootid,netsupportedatom,atomar);
-  for netnum:= low(netnum) to high(netnum) do begin
+  for netnum:= low(netnum) to lastcheckedatom do begin
    atom1:= netatoms[netnum];
    netatoms[netnum]:= 0;
    for int1:= 0 to high(atomar) do begin
