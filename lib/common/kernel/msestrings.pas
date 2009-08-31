@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -15,6 +15,11 @@ interface
 uses
  classes,{msegraphutils,}msetypes{$ifdef FPC},strings{$endif};
 {$ifdef FPC}
+ {$ifndef mse_nounicodestring}
+  {$ifdef VER2_3}
+   {$define mse_unicodestring}
+  {$endif}
+ {$endif}
  {$ifndef mse_unicodestring}
   {$ifdef FPC_WINLIKEWIDESTRING}
    {$define msestringsarenotrefcounted}
