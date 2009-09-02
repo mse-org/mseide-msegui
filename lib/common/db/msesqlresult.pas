@@ -5,7 +5,7 @@ interface
 {$ifdef VER2_2} {$define mse_FPC_2_2} {$endif}
 uses
  classes,db,msqldb,mseclasses,msedb,msedatabase,msearrayprops,msestrings,msereal,
- msetypes,mselookupbuffer,mseglob;
+ msetypes,mselookupbuffer,mseglob,msedatalist;
  
 type
  tsqlresult = class;
@@ -280,6 +280,7 @@ type
 //   procedure asvariant(out avalue: variantararty); overload; 
    function asvariantarar: variantararty;
           //whole resultset, empty variant returned for null fields
+   procedure loaddatalists(const datalists: array of tdatalist);
    property cols: tdbcols read fcols;
    property bof: boolean read fbof;
    property eof: boolean read feof;
@@ -371,6 +372,10 @@ procedure getsqlresult(out avalue: variantarty; const atransaction: tsqltransact
 procedure getsqlresult(out avalue: variantararty; const atransaction: tsqltransaction;
                       const asql: msestring; const aparams: array of variant); overload;
            //whole resultset
+procedure getsqlresult(const avalues: array of tdatalist;
+                        const atransaction: tsqltransaction; const asql: msestring;
+                        const aparams: array of variant); overload;
+           //whole resultset
 function getsqlresultvar( const atransaction: tsqltransaction;
                       const asql: msestring; 
                       const aparams: array of variant): variant;
@@ -405,7 +410,9 @@ const
  SLargeInt = 'LargeInt';
  SVariant = 'Variant';
  SString = 'String';
-
+type
+ tdatalist1 = class(tdatalist);
+ 
 function dogetsqlresult(const atransaction: tsqltransaction; const asql: msestring;
                         const aparams: array of variant): tsqlresult;           
 var
@@ -464,6 +471,21 @@ begin
  sqlresult:= dogetsqlresult(atransaction,asql,aparams);
  try
   avalue:= sqlresult.asvariantarar;
+ finally
+  sqlresult.free;
+ end;
+end;
+
+procedure getsqlresult(const avalues: array of tdatalist;
+                        const atransaction: tsqltransaction; const asql: msestring;
+                        const aparams: array of variant); overload;
+           //whole resultset
+var
+ sqlresult: tsqlresult;
+begin
+ sqlresult:= dogetsqlresult(atransaction,asql,aparams);
+ try
+  sqlresult.loaddatalists(avalues);
  finally
   sqlresult.free;
  end;
@@ -1292,6 +1314,133 @@ begin
    next;
   end;
   setlength(result,int2);
+ end;
+end;
+
+type
+ datagetprocty = procedure(const source: tdbcol; const dest: pointer);
+ datagetprocarty = array of datagetprocty;
+
+procedure getintegerdata(const source: tdbcol; const dest: pointer);
+begin
+ if not source.isnull then begin
+  pinteger(dest)^:= source.asinteger;
+ end;
+end;
+
+procedure getint64data(const source: tdbcol; const dest: pointer);
+begin
+ if not source.isnull then begin
+  pint64(dest)^:= source.aslargeint;
+ end;
+end;
+
+procedure getcurrencydata(const source: tdbcol; const dest: pointer);
+begin
+ if not source.isnull then begin
+  pcurrency(dest)^:= source.aslargeint;
+ end;
+end;
+
+procedure getrealdata(const source: tdbcol; const dest: pointer);
+begin
+ if not source.isnull then begin
+  preal(dest)^:= source.asfloat;
+ end;
+end;
+
+procedure getdatetimedata(const source: tdbcol; const dest: pointer);
+begin
+ if not source.isnull then begin
+  pdatetime(dest)^:= source.asdatetime;
+ end;
+end;
+
+procedure getansistringdata(const source: tdbcol; const dest: pointer);
+begin
+ if not source.isnull then begin
+  pansistring(dest)^:= source.asstring;
+ end;
+end;
+
+procedure getmsestringdata(const source: tdbcol; const dest: pointer);
+begin
+ if not source.isnull then begin
+  pmsestring(dest)^:= source.asmsestring;
+ end;
+end;
+
+procedure tsqlresult.loaddatalists(const datalists: array of tdatalist);
+            //todo: optimize
+var
+ int1,int2,int3: integer;
+ proc1: datagetprocarty;
+ col1: dbcolarty;
+begin
+ refresh;
+ int2:= cols.count;
+ if int2 > length(datalists) then begin
+  int2:= length(datalists);
+ end;
+ setlength(proc1,int2);
+ dec(int2);
+ for int1:= 0 to int2 do begin
+  case datalists[int1].datatype of
+   dl_integer: begin
+    proc1[int1]:= @getintegerdata;
+   end;
+   dl_int64: begin
+    proc1[int1]:= @getint64data;
+   end;
+   dl_currency: begin
+    proc1[int1]:= @getcurrencydata;
+   end;
+   dl_real: begin
+    proc1[int1]:= @getrealdata;
+   end;
+   dl_datetime: begin
+    proc1[int1]:= @getdatetimedata;
+   end;
+   dl_ansistring: begin
+    proc1[int1]:= @getansistringdata;
+   end;
+   dl_msestring: begin
+    proc1[int1]:= @getmsestringdata;
+   end;
+   else begin
+    raise exception.create('tsqlresult.loaddatalists(): Invalid datalist.');
+   end;
+  end;
+ end;
+ for int1:= 0 to int2 do begin
+  with datalists[int1] do begin
+   beginupdate;
+   count:= 0;
+  end;
+ end;
+ try
+  int3:= 0;
+  col1:= dbcolarty(fcols.fitems);
+  while not eof do begin
+   for int1:= 0 to int2 do begin
+    with datalists[int1] do begin
+     count:= int3 + 1;
+     proc1[int1](col1[int1],getitempo(int3));
+    end;
+   end;
+   inc(int3);
+   next;
+  end;
+ finally
+  for int1:= 0 to high(datalists) do begin
+   with datalists[int1] do begin
+    try
+     endupdate;
+    except
+     application.handleexception;
+    end;
+   end;
+  end;
  end;
 end;
 
