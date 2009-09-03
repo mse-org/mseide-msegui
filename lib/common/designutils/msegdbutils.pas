@@ -434,7 +434,9 @@ type
                  var avalue: longwordarty): boolean;
 
    function fileexec(const filename: filenamety): gdbresultty;
+   function filesymbol(const filename: filenamety): gdbresultty;
    function attach(const procid: longword; out info: stopinfoty): gdbresultty;
+   function attachtarget(out info: stopinfoty): gdbresultty;
    function detach: gdbresultty;
    function getprocid(var aprocid: longword): boolean;
                 //true if ok
@@ -1660,6 +1662,26 @@ begin
  end;
 end;
 
+function tgdbmi.filesymbol(const filename: filenamety): gdbresultty;
+begin
+ abort;
+ resetexec;
+ if filename = '' then begin
+  breakdelete(0);
+  result:= synccommand('-file-symbol-file');
+ end
+ else begin
+  result:= synccommand('-file-symbol-file '+togdbfilepath(filename),
+                                    10000000);
+//  updatebit({$ifdef FPC}longword{$else}longword{$endif}(fstate),
+//                 ord(gs_execloaded),result = gdb_ok);
+  if result = gdb_ok then begin
+   initinternalbkpts;
+   initproginfo;
+  end;
+ end;
+end;
+
 function tgdbmi.attach(const procid: longword; out info: stopinfoty): gdbresultty;
 var
  frames1: frameinfoarty;
@@ -1706,11 +1728,53 @@ begin
  end;
 end;
 
+function tgdbmi.attachtarget(out info: stopinfoty): gdbresultty;
+var
+ frames1: frameinfoarty;
+begin
+ abort;
+ resetexec;
+ result:= gdb_ok;
+ finalize(info);
+ fillchar(info,sizeof(info),0);
+ info.reason:= sr_error;
+ result:= checkconnection;
+ if result = gdb_ok then begin
+  result:= stacklistframes(frames1,0,1);
+  if (result = gdb_ok) or (result = gdb_message) then begin
+   if result = gdb_message then begin
+    info.messagetext:= errormessage;
+    result:= gdb_ok;
+   end
+   else begin
+    info.reason:= sr_startup;
+    fstate:= fstate + [gs_execloaded,gs_attached,gs_started];
+    with frames1[0] do begin
+     info.filename:= filename;
+     info.line:= line;
+     info.messagetext:= 'Attached to target ' + ' File: '+
+      filename+':'+inttostr(line)+' Function: '+func;
+    end;
+   end;
+  end;
+  initinternalbkpts;
+  initproginfo;
+ end; 
+ if result <> gdb_ok then begin
+  if result = gdb_message then begin
+   info.messagetext:= errormessage;
+  end
+  else begin
+   info.messagetext:= gdberrortexts[result];
+  end;
+ end;
+end;
+
 function tgdbmi.detach: gdbresultty;
 var
  ev: tgdbevent;
 begin
- result:= synccommand('target-detach');
+ result:= synccommand('-target-detach');
  if result = gdb_ok then begin
   ev:= tgdbevent.create(ek_none,ievent(self));
   ev.eventkind:= gek_stopped;

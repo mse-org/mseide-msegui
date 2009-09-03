@@ -152,11 +152,9 @@ type
    fgdbservertimeout: longword;
    ftargetfilemodified: boolean;
    frunningprocess: prochandlety;
-   function startgdbconnection: boolean;
    procedure dorun;
    function runtarget: boolean; //true if run possible
    procedure newproject(const fromprogram,empty: boolean);
-   function checkgdberror(aresult: gdbresultty): boolean;
    procedure doshowform(const sender: tobject);
    procedure setprojectname(aname: filenamety); 
             //not const because of not refcounted widestrings
@@ -223,6 +221,9 @@ type
    fprojectloaded: boolean;
    errorformfilename: filenamety;
    constructor create(aowner: tcomponent); override;
+
+   function checkgdberror(aresult: gdbresultty): boolean;
+   function startgdbconnection(const attach: boolean): boolean;
    function loadexec(isattach: boolean; const force: boolean): boolean; //true if ok
    procedure setstattext(const atext: msestring; const akind: messagetextkindty = mtk_info);
    procedure refreshstopinfo(const stopinfo: stopinfoty);
@@ -909,16 +910,24 @@ begin
  killprocess(fgdbserverprocid);
 end;
 
-function tmainfo.startgdbconnection: boolean;
+function tmainfo.startgdbconnection(const attach: boolean): boolean;
+var
+ mstr1: msestring;
 begin
  result:= false;
  with projectoptions,texp do begin
-  if gdbservercommand <> '' then begin
-   fgdbserverprocid:= execmse1(gdbservercommand);
+  if attach then begin
+   mstr1:= gdbservercommandattach;
+  end
+  else begin
+   mstr1:= gdbservercommand;
+  end;
+  if mstr1 <> '' then begin
+   fgdbserverprocid:= execmse1(mstr1);
    if fgdbserverprocid <> invalidprochandle then begin
     fgdbservertimeout:= timestep(round(1000000*gdbserverwait));
     if application.waitdialog(nil,'Start gdb server command "'+
-                           gdbservercommand+'" running.','Start gdb Server',
+                           mstr1+'" running.','Start gdb Server',
               {$ifdef FPC}@{$endif}gdbservercancel,nil,
               {$ifdef FPC}@{$endif}gdbserverexe) then begin
      if fgdbserverexitcode <> 0 then begin
@@ -1140,7 +1149,7 @@ begin
    targetconsolefo.activate;
   end;
   if force and projectoptions.gdbdownload then begin
-   if startgdbconnection then begin
+   if startgdbconnection(false) then begin
     gdb.download(false);
    end;
   end;
@@ -1249,6 +1258,7 @@ begin
   download.enabled:= not gdb.started and not gdb.downloading and 
                ((uploadcommand <> '') or gdbdownload);
   attachprocess.enabled:= not (gdb.execloaded or gdb.attached);
+  attachtarget.enabled:= attachprocess.enabled;
   run.enabled:= not gdb.running and not gdb.downloading;
   bo1:= candebug;
   step.enabled:= not gdb.running and not gdb.downloading and bo1;
@@ -2307,7 +2317,7 @@ var
  pwdbefore: msestring;
 begin
  if projectoptions.texp.runcommand = '' then begin
-  if startgdbconnection then begin
+  if startgdbconnection(false) then begin
    gdb.gdbdownload:= projectoptions.gdbdownload and 
                          (needsdownload or projectoptions.downloadalways);
    checkgdberror(gdb.run);

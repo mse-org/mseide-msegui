@@ -85,6 +85,7 @@ type
    make4act: taction;
    download: taction;
    helpact: taction;
+   attachtarget: taction;
    procedure findinfileonexecute(const sender: tobject);
 
    //file
@@ -141,6 +142,7 @@ type
    procedure updateshortcuts(const sender: tshortcutcontroller);
    procedure downloadexe(const sender: TObject);
    procedure helpex(const sender: TObject);
+   procedure onattachtarget(const sender: TObject);
  end;
 
 var
@@ -478,8 +480,9 @@ end;
 
 procedure tactionsmo.ondetachtarget(const sender: TObject);
 begin
- mainfo.gdb.detach;
- mainfo.startgdbonexecute(nil);
+ if mainfo.checkgdberror(mainfo.gdb.detach) then begin
+  mainfo.startgdbonexecute(nil);
+ end;
 end;
 
 procedure tactionsmo.onattachprocess(const sender: TObject);
@@ -493,6 +496,21 @@ begin
           'Process ID','Attach to process') = mr_ok then begin
    startgdbonexecute(nil);
    gdb.attach(int1,info);
+   loadexec(true,false);
+   refreshstopinfo(info);
+  end;
+ end;
+end;
+
+procedure tactionsmo.onattachtarget(const sender: TObject);
+var
+ info: stopinfoty;
+begin
+ with mainfo do begin
+  startgdbonexecute(nil);
+  if checkgdberror(gdb.filesymbol(gettargetfile)) and
+                                startgdbconnection(true) then begin
+   gdb.attachtarget(info);
    loadexec(true,false);
    refreshstopinfo(info);
   end;

@@ -26,8 +26,7 @@ uses
  msegraphutils,mseevent,msetabsglob,msedatalist,msegraphics,msedropdownlist,
  mseformatstr,mseinplaceedit,msedatanodes,mselistbrowser,msebitmap,
  msecolordialog,msedrawtext,msewidgets,msepointer,mseguiglob,msepipestream,
- msemenus,sysutils,mseglob,mseedit,db,msedialog,
- msescrollbar;
+ msemenus,sysutils,mseglob,mseedit,db,msedialog,msescrollbar;
 
 const
  defaultsourceprintfont = 'Courier';
@@ -70,6 +69,7 @@ type
   uploadcommand: filenamety;
   gdbprocessor: msestring;
   gdbservercommand: filenamety;
+  gdbservercommandattach: filenamety;
   beforeload: filenamety;
   afterload: filenamety;
   beforerun: filenamety;
@@ -391,7 +391,7 @@ type
    filefiltergrid: tstringgrid;
    ttabpage14: ttabpage;
    grid: tstringgrid;
-   tlayouter14: tlayouter;
+   serverla: tlayouter;
    uploadcommand: tfilenameedit;
    gdbservercommand: tfilenameedit;
    gdbserverwait: trealedit;
@@ -409,6 +409,8 @@ type
    newformname: tstringedit;
    newformsourcefile: tfilenameedit;
    newformformfile: tfilenameedit;
+   tlayouter2: tlayouter;
+   gdbservercommandattach: tfilenameedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -712,6 +714,7 @@ begin
    li.expandmacros(remoteconnection);
    li.expandmacros(uploadcommand);
    li.expandmacros(gdbservercommand);
+   li.expandmacros(gdbservercommandattach);
    li.expandmacros(beforeload);
    li.expandmacros(afterload);
    li.expandmacros(beforerun);
@@ -989,6 +992,7 @@ begin
   gdbsimulator:= false;
   gdbprocessor:= 'auto';
   gdbservercommand:= '';
+  gdbservercommandattach:= '';
   gdbserverwait:= 0;
   beforeload:= '';
   afterload:= '';
@@ -1182,6 +1186,7 @@ begin
   updatevalue('gdbsimulator',gdbsimulator);
   updatevalue('gdbprocessor',gdbprocessor);
   updatevalue('gdbservercommand',gdbservercommand);
+  updatevalue('gdbservercommandattach',gdbservercommandattach);
   updatevalue('gdbserverwait',gdbserverwait);
   updatevalue('beforeload',beforeload);
   updatevalue('afterload',afterload);
@@ -1413,6 +1418,7 @@ begin
   fo.gdbsimulator.value:= gdbsimulator;
   fo.gdbprocessor.value:= gdbprocessor;
   fo.gdbservercommand.value:= gdbservercommand;
+  fo.gdbservercommandattach.value:= gdbservercommandattach;
   fo.gdbserverwait.value:= gdbserverwait;
   fo.gdbbeforeload.value:= beforeload;
   fo.gdbafterload.value:= afterload;
@@ -1611,6 +1617,7 @@ begin
   gdbsimulator:= fo.gdbsimulator.value;
   gdbprocessor:= fo.gdbprocessor.value;
   gdbservercommand:= fo.gdbservercommand.value;
+  gdbservercommandattach:= fo.gdbservercommandattach.value;
   gdbserverwait:= fo.gdbserverwait.value;
   beforeload:= fo.gdbbeforeload.value;
   afterload:= fo.gdbafterload.value;
@@ -1973,6 +1980,7 @@ begin
  gdbbeforeload.enabled:= gdbdownload.value and not gdbsimulator.value;
  gdbafterload.enabled:= gdbdownload.value and not gdbsimulator.value;
  gdbservercommand.enabled:= not gdbsimulator.value;
+ gdbservercommandattach.enabled:= not gdbsimulator.value;
  gdbserverwait.enabled:= not gdbsimulator.value;
  remoteconnection.enabled:= not gdbsimulator.value;
  gdbdownload.enabled:= not gdbsimulator.value;

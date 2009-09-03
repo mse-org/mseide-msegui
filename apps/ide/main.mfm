@@ -8,9 +8,9 @@ object mainfo: tmainfo
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
   container.bounds_x = 0
-  container.bounds_y = 17
+  container.bounds_y = 16
   container.bounds_cx = 429
-  container.bounds_cy = 121
+  container.bounds_cy = 122
   container.frame.framei_left = 0
   container.frame.framei_top = 0
   container.frame.framei_right = 0
@@ -51,7 +51,7 @@ object mainfo: tmainfo
     bounds_x = 0
     bounds_y = 1
     bounds_cx = 429
-    bounds_cy = 19
+    bounds_cy = 18
     frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
     frame.dummy = 0
     anchors = [an_top]
@@ -60,7 +60,7 @@ object mainfo: tmainfo
     font.xscale =  1.0000000000000000E+0000
     font.dummy = 0
     options = [dwo_hintclippedtext]
-    reffontheight = 15
+    reffontheight = 14
   end
   object gdb: tgdbmi
     gdbdownload = False
@@ -74,7 +74,6 @@ object mainfo: tmainfo
   object mainstatfile: tstatfile
     filename = 'mseide.sta'
     filedir = '"~/.mseide"'
-    options = [sfo_transaction, sfo_activatorread, sfo_activatorwrite]
     onstatupdate = mainstatfileonupdatestat
     left = 32
     top = 24
@@ -271,7 +270,7 @@ object mainfo: tmainfo
         state = [as_localcaption]
       end    
       item
-        submenu.count = 21
+        submenu.count = 22
         submenu.items = <        
           item
             caption = 'En&vironment'
@@ -287,6 +286,11 @@ object mainfo: tmainfo
           end        
           item
             action = actionsmo.attachprocess
+            state = [as_localimagelist]
+            imagelist = dummyimagelist
+          end        
+          item
+            action = actionsmo.attachtarget
             state = [as_localimagelist]
             imagelist = dummyimagelist
           end        
@@ -691,7 +695,6 @@ object mainfo: tmainfo
   end
   object projectstatfile: tstatfile
     filename = 'status.sta'
-    options = [sfo_transaction, sfo_activatorread, sfo_activatorwrite]
     left = 16
     top = 56
   end
