@@ -17,8 +17,7 @@ uses
  msestream,mseclasses,classes,msetypes,mseevent,msehash,msepipestream,msestrings,
  mseapplication,msegui,msedatalist;
 
-//todo: 64bit,
-//non native pointersize and byte endian for remote debugging
+//todo: byte endianess for remote debugging
 
 type
  gdbresultty = (gdb_ok,gdb_error,gdb_timeout,gdb_dataerror,gdb_message,gdb_running,

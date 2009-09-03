@@ -630,6 +630,9 @@ type
    function getordvalue(const index: integer = 0): integer;
    procedure setordvalue(const value: longword); overload;
    procedure setordvalue(const index: integer; const value: longword); overload;
+   function getpointervalue(const index: integer = 0): pointer;
+   procedure setpointervalue(const value: pointer); overload;
+   procedure setpointervalue(const index: integer; const value: pointer); overload;
    procedure doinsert(const sender: tobject);
    procedure doappend(const sender: tobject);
    procedure dodelete(const sender: tobject);
@@ -3625,6 +3628,22 @@ end;
 
 procedure tcollectionitemeditor.setordvalue(const index: integer; 
                                const value: longword);
+begin
+ //dummy
+end;
+
+function tcollectionitemeditor.getpointervalue(const index: integer = 0): pointer;
+begin
+ result:= tcollection(fparenteditor.getpointervalue(index)).items[findex];
+end;
+
+procedure tcollectionitemeditor.setpointervalue(const value: pointer);
+begin
+ //dummy
+end;
+
+procedure tcollectionitemeditor.setpointervalue(const index: integer; 
+                               const value: pointer);
 begin
  //dummy
 end;
