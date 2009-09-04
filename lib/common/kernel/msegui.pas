@@ -2212,8 +2212,9 @@ type
    procedure registersyseventhandler(const method: syseventhandlereventty);
    procedure unregistersyseventhandler(const method: syseventhandlereventty);
 
-   procedure terminate(const sender: twindow = nil); 
+   function terminate(const sender: twindow = nil): boolean; 
         //calls canclose of all windows except sender and terminatequery
+        //true if terminated
    function terminating: boolean;
    function deinitializing: boolean;
    function shortcutting: boolean; //widget is in doshortcut procedure
@@ -15177,7 +15178,7 @@ begin
  result:= aps_deinitializing in fstate;
 end;
 
-procedure tguiapplication.terminate(const sender: twindow = nil);
+function tguiapplication.terminate(const sender: twindow = nil): boolean;
 var
  int1: integer;
 begin
@@ -15195,6 +15196,7 @@ begin
  finally
   exclude(fstate,aps_terminating);
  end;
+ result:= terminated;
 end;
 
 procedure tguiapplication.delayedmouseshift(const ashift: pointty);
