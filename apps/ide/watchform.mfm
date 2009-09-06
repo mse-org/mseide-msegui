@@ -249,7 +249,7 @@ object watchfo: twatchfo
   end
   object gripopup: tpopupmenu
     onupdate = popupdate
-    menu.submenu.count = 20
+    menu.submenu.count = 21
     menu.submenu.items = <    
       item
         caption = 'Delete all'
@@ -279,6 +279,12 @@ object watchfo: twatchfo
         caption = 'Address Watchpoint 32'
         state = [as_localcaption, as_localtag, as_localonexecute]
         tag = 2
+        onexecute = addresswatch
+      end    
+      item
+        caption = 'Address Watchpoint 64'
+        state = [as_localcaption, as_localtag, as_localonexecute]
+        tag = 3
         onexecute = addresswatch
       end    
       item

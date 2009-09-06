@@ -276,6 +276,7 @@ begin
 end;
 
 procedure twatchfo.addresswatch(const sender: TObject);
+//todo: make language independent
 var
  str1: ansistring;
 begin
@@ -290,6 +291,9 @@ begin
    end;
    2: begin
     str1:= 'longword'+str1;
+   end;
+   3: begin
+    str1:= 'qword'+str1;
    end;
   end;
   watchpointsfo.addwatch(str1);
