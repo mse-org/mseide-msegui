@@ -105,11 +105,11 @@ function dectostr(const inp: int64; digits: integer): string; overload;
           //leading zeroes if digits < 0
 function bintostr(inp: longword; digits: integer): string; overload;
    //convert longword to binstring, digits = bit count
-function bintostr(inp: uint64; digits: integer): string; overload;
+function bintostr(inp: qword; digits: integer): string; overload;
    //convert longword to binstring, digits = bit count
 function octtostr(inp: longword; digits: integer): string; overload;
    //convert longword to octaltring, digits = octet count
-function octtostr(inp: uint64; digits: integer): string; overload;
+function octtostr(inp: qword; digits: integer): string; overload;
    //convert longword to octaltring, digits = octet count
 function hextostr(inp: longword; digits: integer): string; overload;
    //convert longword to hexstring, digits = nibble count
@@ -2116,7 +2116,7 @@ begin
  end;
 end;
 
-function bintostr(inp: uint64; digits: integer): string;
+function bintostr(inp: qword; digits: integer): string;
    //convert longword to binstring, digits = bit count
 var
  int1: integer;
@@ -2140,7 +2140,7 @@ begin
  end;
 end;
 
-function octtostr(inp: uint64; digits: integer): string;
+function octtostr(inp: qword; digits: integer): string;
    //convert longword to octaltring, digits = octet count
 var
  int1: integer;

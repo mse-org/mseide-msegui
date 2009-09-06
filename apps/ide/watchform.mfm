@@ -114,11 +114,13 @@ object watchfo: twatchfo
         width = 13
         options = [co_drawfocus, co_savestate, co_rowcolor, co_zebracolor]
         widgetname = 'watchon'
+        dataclass = tgridintegerdatalist
       end    
       item
         width = 152
         options = [co_savevalue, co_savestate]
         widgetname = 'expression'
+        dataclass = tgridmsestringdatalist
       end    
       item
         width = 82
@@ -126,17 +128,20 @@ object watchfo: twatchfo
         widthmin = 50
         oncellevent = resultcellevent
         widgetname = 'expresult'
+        dataclass = tgridmsestringdatalist
       end    
       item
         color = -2147483646
         coloractive = -1879048185
         width = 12
         widgetname = 'formatcode'
+        dataclass = tgridintegerdatalist
       end    
       item
         width = 13
         options = [co_invisible, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         widgetname = 'sizecode'
+        dataclass = tgridintegerdatalist
       end>
     datarowheight = 16
     statfile = mainfo.projectstatfile
@@ -244,7 +249,7 @@ object watchfo: twatchfo
   end
   object gripopup: tpopupmenu
     onupdate = popupdate
-    menu.submenu.count = 19
+    menu.submenu.count = 20
     menu.submenu.items = <    
       item
         caption = 'Delete all'
@@ -348,6 +353,15 @@ object watchfo: twatchfo
         state = [as_localcaption, as_localtag, as_localgroup, as_localonexecute]
         options = [mao_radiobutton, mao_shortcutcaption]
         tag = 3
+        group = 1
+        onexecute = sizeexecute
+      end    
+      item
+        caption = '&64 Bit'
+        name = '&64 Bit'
+        state = [as_localcaption, as_localtag, as_localgroup, as_localonexecute]
+        options = [mao_radiobutton, mao_shortcutcaption]
+        tag = 4
         group = 1
         onexecute = sizeexecute
       end    

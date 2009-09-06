@@ -76,6 +76,11 @@ function highestbit(value: cardinal): integer;
 function lowestbit(value: cardinal): integer;
 //0-> first, 31-> last($80000000), -1-> none ($00000000)
 
+function highestbit64(value: qword): integer;
+//0-> first, 63-> last($8000000000000000), -1-> none ($0000000000000000)
+function lowestbit64(value: qword): integer;
+//0-> first, 63-> last($8000000000000000), -1-> none ($0000000000000000)
+
 function replacebits(const new,old,mask: byte): byte; overload;
 function replacebits(const new,old,mask: word): word; overload;
 function replacebits(const new,old,mask: longword): longword; overload;
@@ -631,6 +636,29 @@ begin
  result:= -1;
  if value <> 0 then begin
   result:= 32;
+  while value <> 0 do begin
+   dec(result);
+   value:= value shl 1;
+  end;
+ end;
+end;
+
+function highestbit64(value: qword): integer;
+//0-> first, 63-> last($8000000000000000), -1-> none ($0000000000000000)
+begin
+ result:= -1;
+ while value <> 0 do begin
+  inc(result);
+  value:= value shr 1;
+ end;
+end;
+
+function lowestbit64(value: qword): integer;
+//0-> first, 63-> last($8000000000000000), -1-> none ($0000000000000000)
+begin
+ result:= -1;
+ if value <> 0 then begin
+  result:= 64;
   while value <> 0 do begin
    dec(result);
    value:= value shl 1;

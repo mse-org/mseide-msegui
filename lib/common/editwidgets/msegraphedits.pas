@@ -596,6 +596,7 @@ type
    function getgridvalues: integerarty;
    procedure setgridvalues(const Value: integerarty);
   protected
+   procedure setgridintf(const intf: iwidgetgrid); override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatype: listdatatypety; override;
    function getdefaultvalue: pointer; override;
@@ -2397,12 +2398,25 @@ end;
 
 function tcustomintegergraphdataedit.getgridvalues: integerarty;
 begin
- result:= tintegerdatalist(fgridintf.getcol.datalist).asarray;
+ checkgrid;
+ result:= fdatalist.asarray;
 end;
 
 procedure tcustomintegergraphdataedit.setgridvalues(const Value: integerarty);
 begin
- tintegerdatalist(fgridintf.getcol.datalist).asarray:= value;
+ checkgrid;
+ fdatalist.asarray:= value;
+end;
+
+procedure tcustomintegergraphdataedit.setgridintf(const intf: iwidgetgrid);
+begin
+ if intf <> nil then begin
+  fdatalist:= tintegerdatalist(intf.getcol.datalist);
+ end
+ else begin
+  fdatalist:= nil;
+ end;
+ inherited;
 end;
 
 { tvaluefacearrayprop }

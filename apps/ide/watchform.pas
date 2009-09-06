@@ -66,7 +66,7 @@ uses
  mseguiglob,mseformatstr,msebits,sysutils,watchpointsform,memoryform;
 type
  numformatty = (nf_default,nf_bin,nf_decs,nf_decu,nf_hex);
- numsizety = (ns_default,ns_8,ns_16,ns_32);
+ numsizety = (ns_default,ns_8,ns_16,ns_32,ns_64);
  
 { twatchfo }
 
@@ -116,16 +116,16 @@ var
  mstr1: msestring;
  fc: numformatty;
  fs: numsizety;
- int1,int2: integer;
+ int641: int64;
+ int2: integer;
 begin
  if (index >= 0) and gdb.cancommand then begin
   if watcheson.value and watchon[index] then begin
    gdb.readpascalvariable(expression[index],mstr1);
    fc:= numformatty(formatcode[index]);
    if fc <> nf_default then begin
-    try
-     int1:= strtointvalue(mstr1);
-     int2:= highestbit(int1);
+    if trystrtointvalue64(mstr1,qword(int641)) then begin
+     int2:= highestbit64(int641);
      if int2 <= 0 then begin
       int2:= 1;
      end;
@@ -137,14 +137,15 @@ begin
         ns_8: int2:= 8; 
         ns_16: int2:= 16; 
         ns_32: int2:= 32; 
+        ns_64: int2:= 64; 
        end;
-       mstr1:= '%'+bintostr(longword(int1),int2);
+       mstr1:= '%'+bintostr(qword(int641),int2);
       end;
       nf_decs: begin
-       mstr1:= inttostr(int1);
+       mstr1:= inttostr(int641);
       end;
       nf_decu: begin
-       mstr1:= inttostr(longword(int1));
+       mstr1:= inttostr(qword(int641));
       end;
       nf_hex: begin
        int2:= int2 div 4 + 1; //nibble count
@@ -152,11 +153,11 @@ begin
         ns_8: int2:= 2; 
         ns_16: int2:= 4; 
         ns_32: int2:= 8; 
+        ns_64: int2:= 16; 
        end;
-       mstr1:= '0x'+hextostr(longword(int1),int2);
+       mstr1:= '0x'+hextostr(qword(int641),int2);
       end;
      end;
-    except
     end;
    end;
    if (expresult[index] <> mstr1) then begin
