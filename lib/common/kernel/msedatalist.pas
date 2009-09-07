@@ -38,7 +38,8 @@ type
  doublemsestringarty = array of doublemsestringty;
  dataprocty = procedure(var data) of object;
  internallistoptionty = (ilo_needsfree,ilo_needscopy,ilo_needsinit,
-                         ilo_nostreaming,ilo_propertystreaming);
+                         ilo_nostreaming,ilo_nogridstreaming,
+                         ilo_propertystreaming);
  internallistoptionsty = set of internallistoptionty;
 
  tdatalist = class;

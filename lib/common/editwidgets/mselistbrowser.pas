@@ -2038,6 +2038,7 @@ begin
  fowner:= owner;
  inherited create(intf);
  fitemclass:= tlistedititem;
+ include(finternaloptions,ilo_nogridstreaming);
 end;
 
 procedure tcustomitemeditlist.setcolorglyph(const Value: colorty);

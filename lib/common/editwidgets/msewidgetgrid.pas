@@ -1102,7 +1102,8 @@ begin
                    {$ifdef FPC}@{$endif}writefixwidgetnames,
                    needswidgetnamewriting(ffixrowwidgets));
  bo1:= false;
- if fdata <> nil then begin
+ if (fdata <> nil) and not (ilo_nogridstreaming in 
+        tdatalist1(fdata).finternaloptions) then begin
   col1:= twidgetcol(filer.ancestor);
   if col1 <> nil then begin
    bo1:= (col1.fdata = nil) or (fdata.datatype <> col1.fdata.datatype);
@@ -1112,7 +1113,9 @@ begin
   filer.ancestor:= col1;
  end;
  filer.defineproperty('dataclass',{$ifdef FPC}@{$endif}readdataclass,
-                       {$ifdef FPC}@{$endif}writedataclass,fdata <> nil);
+                       {$ifdef FPC}@{$endif}writedataclass,
+                              (fdata <> nil) and not (ilo_nogridstreaming in 
+                               tdatalist1(fdata).finternaloptions));
  filer.defineproperty('data',{$ifdef FPC}@{$endif}readdata,
                        {$ifdef FPC}@{$endif}writedata,bo1);
 // filer.defineproperty('datatype',{$ifdef FPC}@{$endif}readdatatype,

@@ -16,6 +16,7 @@ object componentpalettefo: tcomponentpalettefo
   container.bounds_cy = 69
   container.frame.dummy = 0
   container.onchildscaled = componentgrouponchildscaled
+  dragdock.tab_size = 0
   dragdock.caption = 'Component Palette'
   dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_proportional, od_propsize]
   options = [fo_savepos, fo_savezorder, fo_savestate]
