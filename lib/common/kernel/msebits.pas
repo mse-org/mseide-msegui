@@ -12,6 +12,9 @@ unit msebits;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 //bitmanipulationhelpers
 interface
+uses
+ msetypes;
+ 
 type
  bitnumty = 0..32;
 const

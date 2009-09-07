@@ -4474,6 +4474,9 @@ begin
   end;
   if icon <> 0 then begin
    gui_setwindowicon(id,icon,iconmask);
+   if (groupleaderwindow = id) then begin
+    gui_setwindowicon(applicationwindow,icon,iconmask);
+   end;
   end;
  end;
 end;
