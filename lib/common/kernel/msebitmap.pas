@@ -200,6 +200,12 @@ type
                                const index: integer = -1); //index in ico
    procedure loadfromfile(const filename: filenamety; const format: string = '';
                                const index: integer = -1); //index in ico
+   procedure writetostring(out avalue: string; const format: string;
+                                  const params: array of const);
+   procedure writetostream(const stream: tstream; const format: string;
+                               const params: array of const); //index in ico
+   procedure writetofile(const filename: filenamety; const format: string;
+                               const params: array of const); //index in ico
 //   procedure loadfromresourcename(instance: cardinal; const resname: string);
 //   procedure readimagefile(const filename: filenamety); //calls change
    property mask: tbitmap read getmask1 write setmask;
@@ -1815,6 +1821,39 @@ begin
   finally
    stream1.free;
   end;
+ end;
+end;
+
+procedure tmaskedbitmap.writetostring(out avalue: string; const format: string;
+                                  const params: array of const);
+var
+ stream1: tstringstream;
+begin
+ stream1:= tstringstream.create('');
+ try
+  writetostream(stream1,format,params);
+  avalue:= stream1.datastring;
+ finally
+  stream1.free;
+ end;
+end;
+
+procedure tmaskedbitmap.writetostream(const stream: tstream; const format: string;
+                               const params: array of const);
+begin
+ writegraphic(stream,self,format,params);
+end;
+
+procedure tmaskedbitmap.writetofile(const filename: filenamety; const format: string;
+                               const params: array of const);
+var
+ stream1: tmsefilestream;
+begin
+ stream1:= tmsefilestream.create(filename,fm_create);
+ try
+  writetostream(stream1,format,params)
+ finally
+  stream1.free;
  end;
 end;
 
