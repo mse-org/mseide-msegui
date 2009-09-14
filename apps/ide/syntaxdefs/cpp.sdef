@@ -59,10 +59,10 @@ scope block
   '#' macros
   '"' string
   '''' string1
-  '{' block words
+  '{' block default
 
  endtokens
-  '}' words
+  '}' default
 
 scope main
 
@@ -75,6 +75,6 @@ scope main
   '#' macros
   '"' string
   '''' string1
-  '{' block words
+  '{' block default
 
 
