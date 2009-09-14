@@ -106,6 +106,7 @@ type
    procedure setowner(const aowner: tcustomitemlist); virtual;
   public
    tag: integer;
+   tagpointer: pointer;
    constructor create(const aowner: tcustomitemlist);
    destructor destroy; override;
    class procedure calcitemlayout(const asize: sizety; const ainnerframe: framety;
@@ -432,6 +433,7 @@ procedure tlistitem.assign(source: tlistitem);
 begin
  beginupdate;
  tag:= source.tag;
+ tagpointer:= source.tagpointer;
  caption:= source.fcaption;
  state:= source.fstate;
  imagelist:= source.fimagelist;
