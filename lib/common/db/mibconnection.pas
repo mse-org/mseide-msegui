@@ -894,6 +894,30 @@ begin
  end;
 end;
   
+function sqlsubtypetocharlen(const subtype: smallint; const len: integer): integer;
+var
+ int1: integer;
+begin
+ case subtype and $ff of
+//  0,1,2,10,11,12,13,14,19,21,22,39,
+//  45,46,47,50,51,52,53,54,55,58: begin
+//   int1:= 1;
+  5,6,8,44,56,57,64: begin
+   int1:= 2;
+  end;
+  3: begin
+   int1:= 3;
+  end;
+  4,59: begin
+   int1:= 4;
+  end;
+  else begin
+   int1:= 1;
+  end;
+ end;
+ result:= (len) div int1;
+end;
+
 procedure TIBConnection.AddFieldDefs(const cursor: TSQLCursor;
                const FieldDefs: TfieldDefs);
 var
@@ -901,23 +925,24 @@ var
  TransLen: word;
  TransType: TFieldType;
  FD: TFieldDef;
- chlengetter: tcharlengthgetter;
+// chlengetter: tcharlengthgetter;
  int1: integer;
 begin
  fielddefs.clear;
- chlengetter:= tcharlengthgetter.create(self);
- try
+// chlengetter:= tcharlengthgetter.create(self);
+// try
   with tibcursor(cursor) do begin
    for x := 0 to SQLDA^.SQLD - 1 do begin
     with SQLDA^.SQLVar[x] do begin
      TranslateFldType(SQLType,sqlsubtype,SQLLen,SQLScale,TransType,TransLen);
      case transtype of
       ftstring: begin
-       int1:= chlengetter.characterlength(sqlvarnametostring(@relname_length),
-                  sqlvarnametostring(@sqlname_length));
-       if int1 >= 0 then begin
-        translen:= int1;
-       end;
+       translen:= sqlsubtypetocharlen(sqlsubtype,translen);
+//       int1:= chlengetter.characterlength(sqlvarnametostring(@relname_length),
+//                  sqlvarnametostring(@sqlname_length));
+//       if int1 >= 0 then begin
+//        translen:= int1;
+//       end;
       end;
       ftbcd: begin
        if translen > 4 then begin
@@ -947,9 +972,9 @@ begin
     end;
    end;
   end;
- finally
-  chlengetter.free;
- end;
+// finally
+//  chlengetter.free;
+// end;
 end;
 
 function TIBConnection.GetHandle: pointer;
