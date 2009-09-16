@@ -551,7 +551,7 @@ begin
    end;
   end;
   sqlresult1:= fdbcolinfointf.getsqlresult(int2);
-  if (sqlresult1 <> nil) and (sqlresult1.active)  then begin
+  if (sqlresult1 <> nil) {and (sqlresult1.active)}  then begin
    result:= result + [ps_valuelist,ps_sortlist];
   end;
  end; 
@@ -586,7 +586,7 @@ begin
   end;
   sqlresult1:= fdbcolinfointf.getsqlresult(int2);
   if sqlresult1 <> nil then begin
-   if sqlresult1.active or (sqlresult1.cols.count > 0) then begin
+   if {sqlresult1.active or} (sqlresult1.cols.count > 0) then begin
     for int1:= 0 to sqlresult1.cols.count -1 do begin
      with sqlresult1.cols[int1] do begin
       if (ft = []) or (datatype = ftunknown) or (datatype in ft) then begin
@@ -594,6 +594,17 @@ begin
       end;
      end;
     end;
+   end
+   else begin
+    if sqlresult1.fielddefs.count > 0 then begin
+     for int1:= 0 to sqlresult1.fielddefs.count -1 do begin
+      with sqlresult1.fielddefs[int1] do begin
+       if (ft = []) or (datatype = ftunknown) or (datatype in ft) then begin
+        additem(result,msestring(name));
+       end;
+      end;
+     end;
+    end
    end;
   end;
  end;
