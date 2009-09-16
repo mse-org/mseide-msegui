@@ -16,7 +16,8 @@ uses
  msedock,mseforms,msemenuwidgets,msesplitter,msetoolbar,msetabs,msedial,
  msechart,msewindowwidget,mseopenglwidget;
 initialization
- registerclasses([teventwidget,tbutton,trichbutton,tstockglyphbutton,tdrawgrid,
+ registerclasses([teventwidget,tbutton,trichbutton,tstockglyphbutton,
+                 trichstockglyphbutton,tdrawgrid,
                  tstringgrid,tlistview,tlabel,tpaintbox,timage,
   tintegerdisp,trealdisp,tdatetimedisp,tstringdisp,tbytestringdisp,tbooleandisp,
   tgroupbox,tscrollbox,tstepbox,tdockpanel,tdockhandle,tmseformwidget,

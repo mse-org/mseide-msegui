@@ -105,7 +105,8 @@ begin
  registerclass(tmseform);
  registerclass(tdockform);
  registerclass(tsubform);
- registercomponents('Widget',[tsimplewidget,teventwidget,tbutton,trichbutton,tstockglyphbutton,
+ registercomponents('Widget',[tsimplewidget,teventwidget,tbutton,trichbutton,
+  tstockglyphbutton,trichstockglyphbutton,
   tdrawgrid,tstringgrid,tlistview,
   tlabel,tpaintbox,tpolygon,tpickwidget,timage,
   tintegerdisp,trealdisp,tdatetimedisp,tstringdisp,tbytestringdisp,tbooleandisp,

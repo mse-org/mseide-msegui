@@ -234,7 +234,7 @@ type
    property onexecute;
  end;
 
- trichbutton = class(tstockglyphbutton)
+ tcustomrichbutton = class(tcustombutton)
   private
    ffaceactive: tcustomface;
    ffacedisabled: tcustomface;
@@ -278,7 +278,76 @@ type
    property onpaint: painteventty read fonpaint write fonpaint;
    property onafterpaint: painteventty read fonafterpaint write fonafterpaint;
  end;
-  
+
+ trichbutton = class(tcustomrichbutton)
+  published
+   property faceactive;
+   property facemouse;
+   property faceclicked;
+   property facedisabled;
+   property onmouseevent;
+   property onbeforepaint;
+   property onpaintbackground;
+   property onpaint;
+   property onafterpaint;
+
+   property autosize_cx;
+   property autosize_cy;
+   property action;
+   property caption;
+   property shortcut;
+   property shortcut1;
+   property captionpos;
+   property captiondist;
+   property font;
+   property modalresult;
+   property imagelist;
+   property imagenr;
+   property imagenrdisabled;
+   property imagedist;
+   property colorglyph;
+   property options;
+   property focusrectdist;
+   property onexecute;
+ end;
+
+ trichstockglyphbutton = class(tcustomrichbutton)
+  private
+   fglyph: stockglyphty;
+   procedure setglyph(const avalue: stockglyphty);
+   procedure setstate(const avalue: actionstatesty); override;
+   procedure setaction(const avalue: tcustomaction); override;
+  public
+   constructor create(aowner: tcomponent); override;
+  published
+   property glyph: stockglyphty read fglyph write setglyph default stg_none;
+   property faceactive;
+   property facemouse;
+   property faceclicked;
+   property facedisabled;
+   property onmouseevent;
+   property onbeforepaint;
+   property onpaintbackground;
+   property onpaint;
+   property onafterpaint;
+
+   property autosize_cx;
+   property autosize_cy;
+   property action;
+   property caption;
+   property shortcut;
+   property shortcut1;
+   property captionpos;
+   property captiondist;
+   property font;
+   property modalresult;
+   property imagedist;
+   property colorglyph;
+   property options;
+   property focusrectdist;
+   property onexecute;
+ end;
+   
  labeloptionty = (lao_nogray);
  labeloptionsty = set of labeloptionty;
  
@@ -1020,9 +1089,9 @@ begin
  result:= iactionlink(self);
 end;
 }
-{ trichbutton }
+{ tcustomrichbutton }
 
-destructor trichbutton.destroy;
+destructor tcustomrichbutton.destroy;
 begin
  inherited;
  ffaceactive.free;
@@ -1031,76 +1100,76 @@ begin
  ffaceclicked.free;
 end;
 
-function trichbutton.getfaceactive: tcustomface;
+function tcustomrichbutton.getfaceactive: tcustomface;
 begin
  getoptionalobject(ffaceactive,{$ifdef FPC}@{$endif}createfaceactive);
  result:= ffaceactive;
 end;
 
-procedure trichbutton.setfaceactive(const avalue: tcustomface);
+procedure tcustomrichbutton.setfaceactive(const avalue: tcustomface);
 begin
  setoptionalobject(avalue,ffaceactive,{$ifdef FPC}@{$endif}createfaceactive);
  invalidate;
 end;
 
-function trichbutton.getfacemouse: tcustomface;
+function tcustomrichbutton.getfacemouse: tcustomface;
 begin
  getoptionalobject(ffacemouse,{$ifdef FPC}@{$endif}createfacemouse);
  result:= ffacemouse;
 end;
 
-procedure trichbutton.setfacemouse(const avalue: tcustomface);
+procedure tcustomrichbutton.setfacemouse(const avalue: tcustomface);
 begin
  setoptionalobject(avalue,ffacemouse,{$ifdef FPC}@{$endif}createfacemouse);
  invalidate;
 end;
 
-function trichbutton.getfaceclicked: tcustomface;
+function tcustomrichbutton.getfaceclicked: tcustomface;
 begin
  getoptionalobject(ffaceclicked,{$ifdef FPC}@{$endif}createfaceclicked);
  result:= ffaceclicked;
 end;
 
-procedure trichbutton.setfaceclicked(const avalue: tcustomface);
+procedure tcustomrichbutton.setfaceclicked(const avalue: tcustomface);
 begin
  setoptionalobject(avalue,ffaceclicked,{$ifdef FPC}@{$endif}createfaceclicked);
  invalidate;
 end;
 
-function trichbutton.getfacedisabled: tcustomface;
+function tcustomrichbutton.getfacedisabled: tcustomface;
 begin
  getoptionalobject(ffacedisabled,{$ifdef FPC}@{$endif}createfacedisabled);
  result:= ffacedisabled;
 end;
 
-procedure trichbutton.setfacedisabled(const avalue: tcustomface);
+procedure tcustomrichbutton.setfacedisabled(const avalue: tcustomface);
 begin
  setoptionalobject(avalue,ffacedisabled,{$ifdef FPC}@{$endif}createfacedisabled);
  invalidate;
 end;
 
 
-procedure trichbutton.createfaceactive;
+procedure tcustomrichbutton.createfaceactive;
 begin
  ffaceactive:= tface.create(iface(self));
 end;
 
-procedure trichbutton.createfacedisabled;
+procedure tcustomrichbutton.createfacedisabled;
 begin
  ffacedisabled:= tface.create(iface(self));
 end;
 
-procedure trichbutton.createfacemouse;
+procedure tcustomrichbutton.createfacemouse;
 begin
  ffacemouse:= tface.create(iface(self));
 end;
 
-procedure trichbutton.createfaceclicked;
+procedure tcustomrichbutton.createfaceclicked;
 begin
  ffaceclicked:= tface.create(iface(self));
 end;
 
-function trichbutton.getactface: tcustomface;
+function tcustomrichbutton.getactface: tcustomface;
 begin
  result:= inherited getactface;
  if active then begin
@@ -1129,7 +1198,7 @@ begin
  end;
 end;
 
-procedure trichbutton.dobeforepaint(const canvas: tcanvas);
+procedure tcustomrichbutton.dobeforepaint(const canvas: tcanvas);
 begin
  inherited;
  if canevent(tmethod(fonbeforepaint)) then begin
@@ -1137,7 +1206,7 @@ begin
  end;
 end;
 
-procedure trichbutton.dopaintbackground(const canvas: tcanvas);
+procedure tcustomrichbutton.dopaintbackground(const canvas: tcanvas);
 begin
  inherited;
  if canevent(tmethod(fonpaintbackground)) then begin
@@ -1145,7 +1214,7 @@ begin
  end;
 end;
 
-procedure trichbutton.doonpaint(const canvas: tcanvas);
+procedure tcustomrichbutton.doonpaint(const canvas: tcanvas);
 begin
  inherited;
  if canevent(tmethod(fonpaint)) then begin
@@ -1153,7 +1222,7 @@ begin
  end;
 end;
 
-procedure trichbutton.doafterpaint(const canvas: tcanvas);
+procedure tcustomrichbutton.doafterpaint(const canvas: tcanvas);
 begin
  inherited;
  if canevent(tmethod(fonafterpaint)) then begin
@@ -1161,7 +1230,7 @@ begin
  end;
 end;
 
-procedure trichbutton.mouseevent(var info: mouseeventinfoty);
+procedure tcustomrichbutton.mouseevent(var info: mouseeventinfoty);
 begin
  if canevent(tmethod(fonmouseevent)) then begin
   fonmouseevent(self,info);
@@ -1192,6 +1261,33 @@ begin
 end;
 
 procedure tstockglyphbutton.setaction(const avalue: tcustomaction);
+begin
+ inherited;
+ glyph:= glyph;
+ imagelist:= stockobjects.glyphs;
+end;
+
+{ trichstockglyphbutton }
+
+constructor trichstockglyphbutton.create(aowner: tcomponent);
+begin
+ inherited;
+ imagelist:= stockobjects.glyphs;
+ glyph:= stg_none;
+end;
+
+procedure trichstockglyphbutton.setglyph(const avalue: stockglyphty);
+begin
+ fglyph:= avalue;
+ imagenr:= ord(avalue);
+end;
+
+procedure trichstockglyphbutton.setstate(const avalue: actionstatesty);
+begin
+ inherited setstate(avalue + [as_localimagelist,as_localimagenr]);
+end;
+
+procedure trichstockglyphbutton.setaction(const avalue: tcustomaction);
 begin
  inherited;
  glyph:= glyph;

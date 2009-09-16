@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+2009-09-16 
+ trichbutton has no stockglyph, use trichstockglyphbutton.
 2009-08-05
  datatypty -> listdatatypety.
 2009-07-31
