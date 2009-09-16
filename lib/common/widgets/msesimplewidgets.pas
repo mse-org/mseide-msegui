@@ -237,6 +237,7 @@ type
  trichbutton = class(tstockglyphbutton)
   private
    ffaceactive: tcustomface;
+   ffacedisabled: tcustomface;
    ffacemouse: tcustomface;
    ffaceclicked: tcustomface;
    fonbeforepaint: painteventty;
@@ -251,8 +252,11 @@ type
    function getfaceclicked: tcustomface;
    procedure setfaceclicked(const avalue: tcustomface);
    procedure createfaceactive;
+   procedure createfacedisabled;
    procedure createfacemouse;
    procedure createfaceclicked;
+   function getfacedisabled: tcustomface;
+   procedure setfacedisabled(const avalue: tcustomface);
   protected
    function getactface: tcustomface; override;
    procedure dobeforepaint(const canvas: tcanvas); override;
@@ -266,6 +270,7 @@ type
    property faceactive: tcustomface read getfaceactive write setfaceactive;
    property facemouse: tcustomface read getfacemouse write setfacemouse;
    property faceclicked: tcustomface read getfaceclicked write setfaceclicked;
+   property facedisabled: tcustomface read getfacedisabled write setfacedisabled;
    property onmouseevent: mouseeventty read fonmouseevent write fonmouseevent;
    property onbeforepaint: painteventty read fonbeforepaint write fonbeforepaint;
    property onpaintbackground: painteventty read fonpaintbackground 
@@ -1021,6 +1026,7 @@ destructor trichbutton.destroy;
 begin
  inherited;
  ffaceactive.free;
+ ffacedisabled.free;
  ffacemouse.free;
  ffaceclicked.free;
 end;
@@ -1061,9 +1067,27 @@ begin
  invalidate;
 end;
 
+function trichbutton.getfacedisabled: tcustomface;
+begin
+ getoptionalobject(ffacedisabled,{$ifdef FPC}@{$endif}createfacedisabled);
+ result:= ffacedisabled;
+end;
+
+procedure trichbutton.setfacedisabled(const avalue: tcustomface);
+begin
+ setoptionalobject(avalue,ffacedisabled,{$ifdef FPC}@{$endif}createfacedisabled);
+ invalidate;
+end;
+
+
 procedure trichbutton.createfaceactive;
 begin
  ffaceactive:= tface.create(iface(self));
+end;
+
+procedure trichbutton.createfacedisabled;
+begin
+ ffacedisabled:= tface.create(iface(self));
 end;
 
 procedure trichbutton.createfacemouse;
@@ -1085,16 +1109,21 @@ begin
   end;
  end
  else begin
-  if ws_clicked in fwidgetstate then begin
-   if ffaceclicked <> nil then begin
-    result:= ffaceclicked;
+  if not isenabled then begin
+   if ffacedisabled <> nil then begin
+    result:= ffacedisabled;
    end;
   end
   else begin
-   if ws_mouseinclient in fwidgetstate then begin
-    if ffacemouse <> nil then begin
-     result:= ffacemouse;
-    end;    
+   if (ws_clicked in fwidgetstate) and (ffaceclicked <> nil) then begin
+    result:= ffaceclicked;
+   end
+   else begin
+    if application.clientmousewidget = self then begin
+     if ffacemouse <> nil then begin
+      result:= ffacemouse;
+     end;    
+    end;
    end;
   end;
  end;
