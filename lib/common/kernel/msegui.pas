@@ -87,6 +87,7 @@ type
  widgetstatety = (ws_visible,ws_enabled,
                   ws_active,ws_entered,ws_entering,ws_exiting,ws_focused,
                   ws_mouseinclient,ws_wantmousebutton,ws_wantmousemove,
+                  //valid after call of updatemousestate only
 //                  ws_wantmousewheel,
                   ws_wantmousefocus,ws_iswidget,
                   ws_opaque,ws_nopaint,
@@ -8393,6 +8394,7 @@ begin
     end;
    end
    else begin
+//    exclude(fwidgetstate,ws_mouseinclient);
     appinst.setclientmousewidget(nil);
     result:= false;
    end;
@@ -10909,7 +10911,7 @@ end;
 function twidget.getframestateflags: framestateflagsty;
 begin
  result:= combineframestateflags(not isenabled,ws_active in fwidgetstate,
-             ws_mouseinclient in fwidgetstate,ws_clicked in fwidgetstate);
+             appinst.clientmousewidget = self,ws_clicked in fwidgetstate);
 end;
 
 procedure twidget.setframeinstance(instance: tcustomframe);
@@ -14365,7 +14367,7 @@ begin
   fillchar(info,sizeof(info),0);
   if (fclientmousewidget <> nil) and
              not (csdestroying in fclientmousewidget.componentstate) then begin
-   exclude(fclientmousewidget.fwidgetstate,ws_mouseinclient);
+//   exclude(fclientmousewidget.fwidgetstate,ws_mouseinclient);
    info.eventkind:= ek_clientmouseleave;
    fclientmousewidget.mouseevent(info);
   end;
