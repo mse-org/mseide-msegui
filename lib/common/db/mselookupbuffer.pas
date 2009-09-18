@@ -80,7 +80,8 @@ type
  end;
  floatindexinfoarty = array of floatindexinfoty;
 
- lookupbufferstatety = (lbs_changed,lbs_buffervalid,lbs_changeeventposted);
+ lookupbufferstatety = (lbs_changed,lbs_buffervalid,lbs_changeeventposted,
+                         lbs_sourceclosed);
  lookupbufferstatesty = set of lookupbufferstatety;
 
 const
@@ -399,6 +400,12 @@ var
 begin
  for int1:= 0 to high(fintegerdata) do begin
   with fintegerdata[int1] do begin
+   index:= nil;
+   data:= nil;
+  end;
+ end;
+ for int1:= 0 to high(fint64data) do begin
+  with fint64data[int1] do begin
    index:= nil;
    data:= nil;
   end;
@@ -1566,14 +1573,16 @@ begin
  try
   clearbuffer;
   datas:= fdatalink.dataset;
-  include(fstate,lbs_buffervalid);
   if (datas <> nil) and 
        (datas.active or 
         (olbdb_closedataset in foptionsdb) and
-               not (csloading in datas.componentstate)) then begin
-//   fbuffervalid:= true; 
+                    (lbs_sourceclosed in fstate) and 
+                         not (csloading in datas.componentstate)) then begin
    utf8:= fdatalink.utf8;
    bo1:= fdatalink.active;
+   if bo1 then begin
+    exclude(fstate,lbs_sourceclosed);
+   end;
    application.beginwait;
    try
     datas.disablecontrols;
@@ -1678,7 +1687,9 @@ begin
        end;
       end;
      finally
-      if not bo1 and (olbdb_closedataset in foptionsdb) then begin
+      if {not bo1 and} (olbdb_closedataset in foptionsdb) and 
+                       not (csdesigning in componentstate)then begin
+       include(fstate,lbs_sourceclosed);
        datas.active:= false;
       end;
      end;
@@ -1689,6 +1700,7 @@ begin
     application.endwait;
    end;
   end;
+  include(fstate,lbs_buffervalid);
  finally
   endupdate;
  end;

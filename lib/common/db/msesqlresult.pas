@@ -332,20 +332,28 @@ type
    fsource: tsqlresult;
    ftextcols: tdbcolnamearrayprop;
    fintegercols: tdbcolnamearrayprop;
+   fint64cols: tdbcolnamearrayprop;
    ffloatcols: tdbcolnamearrayprop;
    foptionsdb: lbsqoptionsty;
    procedure setsource(const avalue: tsqlresult);
    function getsqlresult(const aindex: integer): tsqlresult;
    procedure settextcols(const avalue: tdbcolnamearrayprop);
    procedure setintegercols(const avalue: tdbcolnamearrayprop);
+   procedure setint64cols(const avalue: tdbcolnamearrayprop);
    procedure setfloatcols(const avalue: tdbcolnamearrayprop);
   protected
    function getfieldcounttext: integer; override;
    function getfieldcountinteger: integer; override;
+   function getfieldcountint64: integer; override;
    function getfieldcountfloat: integer; override;
    procedure setfieldcounttext(const avalue: integer); override;
    procedure setfieldcountinteger(const avalue: integer); override;
+   procedure setfieldcountint64(const avalue: integer); override;
    procedure setfieldcountfloat(const avalue: integer); override;
+   function fieldnamestext: stringarty; override;
+   function fieldnamesfloat: stringarty; override;
+   function fieldnamesinteger: stringarty; override;
+   function fieldnamesint64: stringarty; override;
    procedure loadbuffer; override;
    procedure objectevent(const sender: tobject;
                        const event: objecteventty); override;
@@ -357,6 +365,7 @@ type
    property source: tsqlresult read fsource write setsource;
    property textcols: tdbcolnamearrayprop read ftextcols write settextcols;
    property integercols: tdbcolnamearrayprop read fintegercols write setintegercols;
+   property int64cols: tdbcolnamearrayprop read fint64cols write setint64cols;
    property floatcols: tdbcolnamearrayprop read ffloatcols write setfloatcols;
    property optionsdb: lbsqoptionsty read foptionsdb write foptionsdb default [];
    property onchange;
@@ -1524,12 +1533,15 @@ begin
  fintegercols:= tdbcolnamearrayprop.create(
                    msedb.integerfields+[ftboolean],
                       {$ifdef FPC}@{$endif}getsqlresult);
+ fint64cols:= tdbcolnamearrayprop.create([ftlargeint],
+                      {$ifdef FPC}@{$endif}getsqlresult);
  ftextcols:= tdbcolnamearrayprop.create(
                    msedb.textfields+[ftboolean],
                   {$ifdef FPC}@{$endif}getsqlresult);
  ffloatcols:= tdbcolnamearrayprop.create(msedb.realfields + msedb.datetimefields,
                       {$ifdef FPC}@{$endif}getsqlresult);
  fintegercols.onchange:= @fieldschanged;
+ fint64cols.onchange:= @fieldschanged;
  ftextcols.onchange:= @fieldschanged;
  ffloatcols.onchange:= @fieldschanged;
  inherited;
@@ -1538,6 +1550,7 @@ end;
 destructor tsqllookupbuffer.destroy;
 begin
  fintegercols.free;
+ fint64cols.free;
  ftextcols.free;
  ffloatcols.free;
  inherited;
@@ -1559,6 +1572,11 @@ begin
  fintegercols.assign(avalue);
 end;
 
+procedure tsqllookupbuffer.setint64cols(const avalue: tdbcolnamearrayprop);
+begin
+ fint64cols.assign(avalue);
+end;
+
 procedure tsqllookupbuffer.setfloatcols(const avalue: tdbcolnamearrayprop);
 begin
  ffloatcols.assign(avalue);
@@ -1572,6 +1590,7 @@ end;
 procedure tsqllookupbuffer.clearbuffer;
 begin
  setlength(fintegerdata,fintegercols.count);
+ setlength(fint64data,fint64cols.count);
  setlength(ftextdata,ftextcols.count);
  setlength(ffloatdata,ffloatcols.count);
  inherited;
@@ -1585,6 +1604,11 @@ end;
 function tsqllookupbuffer.getfieldcountinteger: integer;
 begin
  result:= fintegercols.count;
+end;
+
+function tsqllookupbuffer.getfieldcountint64: integer;
+begin
+ result:= fint64cols.count;
 end;
 
 function tsqllookupbuffer.getfieldcountfloat: integer;
@@ -1602,6 +1626,11 @@ begin
  readonlyprop;
 end;
 
+procedure tsqllookupbuffer.setfieldcountint64(const avalue: integer);
+begin
+ readonlyprop;
+end;
+
 procedure tsqllookupbuffer.setfieldcountfloat(const avalue: integer);
 begin
  readonlyprop;
@@ -1612,6 +1641,7 @@ var
  int1,int3,int4: integer;
  textf: array of tdbcol;
  integerf: array of tdbcol;
+ int64f: array of tdbcol;
  realf: array of tdbcol;
  ar1: stringarty;
  bo1: boolean;
@@ -1620,13 +1650,16 @@ begin
  beginupdate;
  try
   clearbuffer;
-  include(fstate,lbs_buffervalid);
   with fsource do begin
-   if (fsource <> nil) and (active or (olbsq_closesqlresult in foptionsdb) {and
-               not (csloading in componentstate)}) then begin
+   if (fsource <> nil) and (active or (olbsq_closesqlresult in foptionsdb) and
+               (lbs_sourceclosed in fstate) and
+               not (csloading in componentstate)) then begin
     try
      bo1:= active;
-     if not bof then begin
+     if bo1 then begin
+      exclude(fstate,lbs_sourceclosed);
+     end;
+     if not bof or not active then begin
       refresh;
      end;
      try
@@ -1640,6 +1673,11 @@ begin
        ar1[int1]:= fintegercols[int1];
       end;
       integerf:= cols.colsbyname(ar1);
+      setlength(ar1,fint64cols.count);
+      for int1:= 0 to high(ar1) do begin
+       ar1[int1]:= fint64cols[int1];
+      end;
+      int64f:= cols.colsbyname(ar1);
       setlength(ar1,floatcols.count);
       for int1:= 0 to high(ar1) do begin
        ar1[int1]:= ffloatcols[int1];
@@ -1657,6 +1695,9 @@ begin
          for int4:= 0 to high(fintegerdata) do begin
           setlength(fintegerdata[int4].data,int3);
          end;
+         for int4:= 0 to high(fint64data) do begin
+          setlength(fint64data[int4].data,int3);
+         end;
          for int4:= 0 to high(ffloatdata) do begin
           setlength(ffloatdata[int4].data,int3);
          end;
@@ -1664,6 +1705,11 @@ begin
         for int4:= 0 to high(integerf) do begin
          if integerf[int4] <> nil then begin
           fintegerdata[int4].data[int1]:= integerf[int4].asinteger;
+         end;
+        end;
+        for int4:= 0 to high(int64f) do begin
+         if int64f[int4] <> nil then begin
+          fint64data[int4].data[int1]:= int64f[int4].aslargeint;
          end;
         end;
         for int4:= 0 to high(realf) do begin
@@ -1688,6 +1734,9 @@ begin
        for int4:= 0 to high(fintegerdata) do begin
         setlength(fintegerdata[int4].data,int1);
        end;
+       for int4:= 0 to high(fint64data) do begin
+        setlength(fint64data[int4].data,int1);
+       end;
        for int4:= 0 to high(ftextdata) do begin
         setlength(ftextdata[int4].data,int1);
        end;
@@ -1697,7 +1746,9 @@ begin
        fcount:= int1;
       end;
      finally
-      if not bo1 and (olbsq_closesqlresult in foptionsdb) then begin
+      if {not bo1 and} (olbsq_closesqlresult in foptionsdb) and 
+                           not (csdesigning in componentstate) then begin
+       include(fstate,lbs_sourceclosed);
        fsource.active:= false;
       end;
      end;
@@ -1711,6 +1762,7 @@ begin
     end;
    end;   
   end;
+  include(fstate,lbs_buffervalid);
  finally
   application.endwait;
   endupdate;
@@ -1727,6 +1779,26 @@ begin
   invalidatebuffer;
   changed;
  end;
+end;
+
+function tsqllookupbuffer.fieldnamestext: stringarty;
+begin
+ result:= ftextcols.itemar;
+end;
+
+function tsqllookupbuffer.fieldnamesfloat: stringarty;
+begin
+ result:= ffloatcols.itemar;
+end;
+
+function tsqllookupbuffer.fieldnamesinteger: stringarty;
+begin
+ result:= fintegercols.itemar;
+end;
+
+function tsqllookupbuffer.fieldnamesint64: stringarty;
+begin
+ result:= fint64cols.itemar;
 end;
 
 { tsqlresultfielddefs }
