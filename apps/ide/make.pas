@@ -51,6 +51,7 @@ type
    fnofilecopy: boolean;
    ffinished: boolean;
   protected
+   fcanceled: boolean;
    procid: integer;
    procedure doasyncevent(var atag: integer); override;
    procedure inputavailable(const sender: tpipereader);
@@ -66,7 +67,6 @@ type
  tscriptrunner = class(tprogrunner)
   private
    fscriptpath: filenamety;
-   fcanceled: boolean;
   protected
    function getcommandline: ansistring; override;
 //   procedure scriptexe(const sender: tguiapplication; var again: boolean);
@@ -268,6 +268,7 @@ begin
    procid:= execmse2(str3,nil,messagepipe,messagepipe,false,-1,true,false,true);
   except
    on e: exception do begin
+    fcanceled:= true;
     if e is eoserror then begin
      fexitcode:= eoserror(e).error;
     end;
@@ -409,7 +410,7 @@ constructor tscriptrunner.create(const aowner: tcomponent;
                const ascriptpath: filenamety; const clearscreen: boolean;
                const setmakedir: boolean);
 begin
- fscriptpath:= ascriptpath;
+ fscriptpath:= tosysfilepath(ascriptpath);
  fnofilecopy:= true;
  if clearscreen then begin
   messagefo.messages.rowcount:= 0;
@@ -417,8 +418,10 @@ begin
  messagefo.messages.appendrow(ascriptpath);
  messagefo.messages.appendrow('');
  inherited create(aowner,false,setmakedir);
- fcanceled:= not application.waitdialog(nil,'"'+ascriptpath+'" running.',
+ if not fcanceled then begin
+  fcanceled:= not application.waitdialog(nil,'"'+ascriptpath+'" running.',
      'Script',nil,nil,nil);
+ end;
 end;
 
 function tscriptrunner.getcommandline: ansistring;
