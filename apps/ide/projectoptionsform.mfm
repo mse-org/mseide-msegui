@@ -92,7 +92,7 @@ object projectoptionsfo: tprojectoptionsfo
       frame.dummy = 0
       anchors = [an_top, an_bottom]
       taborder = 1
-      activepageindex = 1
+      activepageindex = 6
       tab_frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
       tab_frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
       tab_frame.dummy = 0
@@ -852,7 +852,6 @@ object projectoptionsfo: tprojectoptionsfo
         frame.dummy = 0
         anchors = [an_left, an_top, an_right, an_bottom]
         taborder = 4
-        visible = True
         caption = '&Debugger'
         onchildscaled = debuggeronchildscaled
         object debugcommand: tfilenameedit
@@ -913,7 +912,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_cy = 297
           anchors = [an_left, an_top, an_right, an_bottom]
           taborder = 3
-          activepageindex = 4
+          activepageindex = 0
           tab_frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
           tab_frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
           tab_frame.dummy = 0
@@ -933,6 +932,7 @@ object projectoptionsfo: tprojectoptionsfo
             frame.dummy = 0
             anchors = [an_left, an_top, an_right, an_bottom]
             taborder = 4
+            visible = True
             caption = 'Source &directories'
             reffontheight = 14
             object sourcedirgrid: twidgetgrid
@@ -1332,7 +1332,6 @@ object projectoptionsfo: tprojectoptionsfo
             frame.dummy = 0
             anchors = [an_left, an_top, an_right, an_bottom]
             taborder = 5
-            visible = True
             caption = '&Target'
             reffontheight = 14
             object remoteconnection: tstringedit
@@ -3561,6 +3560,7 @@ object projectoptionsfo: tprojectoptionsfo
         frame.dummy = 0
         anchors = [an_left, an_top, an_right, an_bottom]
         taborder = 1
+        visible = True
         caption = '&Templates'
         reffontheight = 14
         object newfile: ttabwidget
@@ -3590,17 +3590,18 @@ object projectoptionsfo: tprojectoptionsfo
             taborder = 3
             visible = True
             caption = 'New Project'
+            onchildscaled = newprojectchildscaled
             reffontheight = 14
-            object twidgetgrid1: twidgetgrid
+            object copygrid: twidgetgrid
               optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
               bounds_x = 0
-              bounds_y = 0
+              bounds_y = 80
               bounds_cx = 667
-              bounds_cy = 502
+              bounds_cy = 420
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
               frame.dummy = 0
-              anchors = []
+              anchors = [an_top, an_bottom]
               optionsgrid = [og_colsizing, og_keycolmoving, og_rowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup]
               fixrows.count = 1
               fixrows.items = <              
@@ -3723,6 +3724,54 @@ object projectoptionsfo: tprojectoptionsfo
                 optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_trimright, oe_trimleft, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
                 reffontheight = 14
               end
+            end
+            object scriptbeforecopy: tfilenameedit
+              optionsskin = [osk_framebuttononly]
+              bounds_x = 0
+              bounds_y = 3
+              bounds_cx = 667
+              bounds_cy = 37
+              frame.caption = 'Script before copy'
+              frame.localprops = [frl_levelo, frl_colorclient]
+              frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
+              frame.button.color = -2147483646
+              frame.button.imagenr = 17
+              frame.dummy = 0
+              frame.outerframe = (
+                0
+                17
+                0
+                0
+              )
+              anchors = [an_top]
+              taborder = 1
+              onshowhint = hintexpandedmacros
+              controller.ongetfilename = expandfilename
+              reffontheight = 14
+            end
+            object scriptaftercopy: tfilenameedit
+              optionsskin = [osk_framebuttononly]
+              bounds_x = 0
+              bounds_y = 40
+              bounds_cx = 667
+              bounds_cy = 37
+              frame.caption = 'Script after copy'
+              frame.localprops = [frl_levelo, frl_colorclient]
+              frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
+              frame.button.color = -2147483646
+              frame.button.imagenr = 17
+              frame.dummy = 0
+              frame.outerframe = (
+                0
+                17
+                0
+                0
+              )
+              anchors = [an_top]
+              taborder = 2
+              onshowhint = hintexpandedmacros
+              controller.ongetfilename = expandfilename
+              reffontheight = 14
             end
           end
           object ttabpage4: ttabpage

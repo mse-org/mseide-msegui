@@ -93,6 +93,8 @@ type
   toolparams: msestringarty;
     
   fontnames: msestringarty;
+  scriptbeforecopy: msestring;
+  scriptaftercopy: msestring;
   newprojectfiles: filenamearty;
   newprojectfilesdest: filenamearty;
   newprogramfile: filenamety;
@@ -347,7 +349,7 @@ type
    ttabpage2: ttabpage;
    newfile: ttabwidget;
    ttabpage3: ttabpage;
-   twidgetgrid1: twidgetgrid;
+   copygrid: twidgetgrid;
    loadprojectfile: tbooleanedit;
    expandprojectfilemacros: tbooleanedit;
    newprojectfiles: tfilenameedit;
@@ -411,6 +413,8 @@ type
    newformformfile: tfilenameedit;
    tlayouter2: tlayouter;
    gdbservercommandattach: tfilenameedit;
+   scriptbeforecopy: tfilenameedit;
+   scriptaftercopy: tfilenameedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -450,6 +454,7 @@ type
    procedure aft1(const sender: tlayouter);
    }
    procedure runcommandchange(const sender: TObject);
+   procedure newprojectchildscaled(const sender: TObject);
   private
    procedure activegroupchanged;
  end;
@@ -736,6 +741,8 @@ begin
    li.expandmacros(toolfiles);
    li.expandmacros(toolparams);
    li.expandmacros(fontnames);
+   li.expandmacros(scriptbeforecopy);
+   li.expandmacros(scriptaftercopy);
    li.expandmacros(newprojectfiles);
    li.expandmacros(newprojectfilesdest);
    li.expandmacros(newprogramfile);
@@ -1028,7 +1035,9 @@ begin
   additem(filemasks,'*.mfm');
   additem(filemasknames,'All Files');
   additem(filemasks,'*');
-  
+
+  scriptbeforecopy:= '';
+  scriptaftercopy:= '';  
   newprojectfiles:= nil;
 //  additem(newprojectfiles,'${TEMPLATEDIR}project1.pas');
 //  additem(newprojectfiles,'${TEMPLATEDIR}main.pas');
@@ -1246,6 +1255,8 @@ begin
   updatevalue('backupfilecount',backupfilecount,0,10);
   updatevalue('encoding',encoding,0,1);
   
+  updatevalue('scriptbeforecopy',scriptbeforecopy);
+  updatevalue('scriptaftercopy',scriptaftercopy);
   updatevalue('newprojectfiles',newprojectfiles);
   updatevalue('newprojectfilesdest',newprojectfilesdest);
   updatevalue('expandprojectfilemacros',expandprojectfilemacros);
@@ -1378,6 +1389,8 @@ begin
   fo.fontxscale.gridvalues:= fontxscales;
   fo.fontondataentered(nil);
 
+  fo.scriptbeforecopy.value:= scriptbeforecopy;
+  fo.scriptaftercopy.value:= scriptaftercopy;
   fo.newprojectfiles.gridvalues:= newprojectfiles;
   fo.newprojectfilesdest.gridvalues:= newprojectfilesdest;
   fo.expandprojectfilemacros.gridvalues:= expandprojectfilemacros;
@@ -1578,6 +1591,8 @@ begin
   usercolors:= colorarty(fo.usercolors.gridvalues);
   usercolorcomment:= fo.usercolorcomment.gridvalues;
 
+  scriptbeforecopy:= fo.scriptbeforecopy.value;
+  scriptaftercopy:= fo.scriptaftercopy.value;
   newprojectfiles:= fo.newprojectfiles.gridvalues;
   newprojectfilesdest:= fo.newprojectfilesdest.gridvalues;
   expandprojectfilemacros:= fo.expandprojectfilemacros.gridvalues;
@@ -2008,6 +2023,11 @@ end;
 procedure tprojectoptionsfo.runcommandchange(const sender: TObject);
 begin
  debugtarget.enabled:= runcommand.value = '';
+end;
+
+procedure tprojectoptionsfo.newprojectchildscaled(const sender: TObject);
+begin
+ placeyorder(4,[4,4],[scriptbeforecopy,scriptaftercopy,copygrid],0);
 end;
 
 {

@@ -1794,6 +1794,7 @@ type
    fnormalwindowrect: rectty;
    fcaption: msestring;
    fscrollnotifylist: tnotifylist;
+   fdestroyevent: pointer; //tdestroywindowevent
    procedure setcaption(const avalue: msestring);
    procedure widgetdestroyed(widget: twidget);
 
@@ -2436,7 +2437,10 @@ type
  trealarrayprop1 = class(trealarrayprop);
  tcaret1 = class(tcaret);
 
- tasyncmessageevent = class(tobjectevent)
+const
+ cancelwaittag = 823757;
+type
+ tasyncmessageevent = class(tuserevent)
   private
    fmessage: msestring;
    fcaption: msestring;
@@ -11469,13 +11473,18 @@ begin
   appinst.windowdestroyed(fwindow.id);
  end;
  if application.ismainthread then begin
+  if fdestroyevent <> nil then begin
+   tdestroywindowevent(fdestroyevent).fwindowpo:= nil;
+  end;
   gui_destroywindow(fwindow);
  end
  else begin
-  event:= tdestroywindowevent.create(false);
-  event.fwindowpo:= @fwindow;
-  synchronizeevent(event);
-  event.free;
+  if fdestroyevent = nil then begin
+   fdestroyevent:= tdestroywindowevent.create(false);
+   tdestroywindowevent(fdestroyevent).fwindowpo:= @fwindow;
+   synchronizeevent(tdestroywindowevent(fdestroyevent));
+   fdestroyevent:= nil;
+  end;
  end;
  fillchar(fwindow,sizeof(fwindow),0);
  exclude(fstate,tws_windowvisible);
@@ -15271,9 +15280,20 @@ end;
 
 procedure tguiapplication.receiveevent(const event: tobjectevent);
 begin
- if (event.kind = ek_user) and (event is tasyncmessageevent) then begin
-  with tasyncmessageevent(event) do begin
-   showmessage(fmessage,fcaption);   
+ if (event.kind = ek_user) then begin
+  with tuserevent(event) do begin
+   case tag of
+    cancelwaittag: begin
+     cancelwait;
+    end
+    else begin
+     if event is tasyncmessageevent then begin
+      with tasyncmessageevent(event) do begin
+       showmessage(fmessage,fcaption);   
+      end;
+     end;
+    end;
+   end;
   end;
  end;
  inherited;
@@ -15364,14 +15384,17 @@ end;
 
 procedure tguiapplication.cancelwait;
 begin
- lock;
- with tinternalapplication(self) do begin
-  if not waitcanceled and (fmodalwindow <> fmodalwindowbeforewaitdialog) and
-             (fmodalwindow <> nil) then begin
-   fmodalwindow.modalresult:= mr_cancel;
+ if not ismainthread then begin
+  postevent(tuserevent.create(ievent(self),cancelwaittag));
+ end
+ else begin
+  with tinternalapplication(self) do begin
+   if not waitcanceled and (fmodalwindow <> fmodalwindowbeforewaitdialog) and
+              (fmodalwindow <> nil) then begin
+    fmodalwindow.modalresult:= mr_cancel;
+   end;
   end;
  end;
- unlock;
 end;
 
 procedure tguiapplication.terminatewait;
@@ -15465,7 +15488,7 @@ constructor tasyncmessageevent.create(const amessage: msestring;
 begin
  fmessage:= amessage;
  fcaption:= acaption;
- inherited create(ek_user,ievent(application));
+ inherited create(ievent(application),0);
 end;
 
 { tmousenterevent }
@@ -15495,7 +15518,9 @@ end;
 
 procedure tdestroywindowevent.execute;
 begin
- gui_destroywindow(fwindowpo^);
+ if fwindowpo <> nil then begin
+  gui_destroywindow(fwindowpo^);
+ end;
 end;
 
 initialization

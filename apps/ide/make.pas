@@ -19,7 +19,9 @@ unit make;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
 interface
-
+uses
+ msestrings;
+ 
 procedure domake(atag: integer);
 procedure abortmake;
 function making: boolean;
@@ -29,18 +31,25 @@ procedure dodownload;
 procedure abortdownload;
 function downloading: boolean;
 function downloadresult: integer;
+function runscript(const script: filenamety;
+                             const clearscreen,setmakedir: boolean): boolean;
 
 implementation
 uses
- classes,mseprocutils,main,msestream,projectoptionsform,sysutils,msegrids,msetypes,
- sourceform,mseclasses,mseapplication,mseeditglob,msefileutils,msesys,msepipestream,
- msesysutils,msegraphics,msestrings,messageform,msedesignintf,msedesigner;
-
+ mseprocutils,main,projectoptionsform,sysutils,msegrids,
+ sourceform,mseeditglob,msefileutils,msesys,
+ msesysutils,msegraphics,messageform,msedesignintf,msedesigner,
+ mseprocmonitor,mseevent,
+ msetypes,classes,mseclasses,mseapplication,msestream,msepipestream,
+ msegui;
+ 
 type
  tprogrunner = class(tactcomponent)
   private
    fexitcode: integer;
    fmessagefile: ttextstream;
+   fnofilecopy: boolean;
+   ffinished: boolean;
   protected
    procid: integer;
    procedure doasyncevent(var atag: integer); override;
@@ -49,8 +58,25 @@ type
    function getcommandline: ansistring; virtual;
   public
    messagepipe: tpipereader;
-   constructor create(aowner: tcomponent); override;
+   constructor create(const aowner: tcomponent;
+                         const clearscreen,setmakedir: boolean); reintroduce;
    destructor destroy; override;
+ end;
+
+ tscriptrunner = class(tprogrunner)
+  private
+   fscriptpath: filenamety;
+   fcanceled: boolean;
+  protected
+   function getcommandline: ansistring; override;
+//   procedure scriptexe(const sender: tguiapplication; var again: boolean);
+//   procedure scriptcancel(const sender: tobject);
+   procedure dofinished(const sender: tpipereader); override;
+  public
+   constructor create(const aowner: tcomponent; const ascriptpath: filenamety;
+                                         const clearscreen,setmakedir: boolean);
+   property exitcode: integer read fexitcode;
+   property canceled: boolean read fcanceled;
  end;
 
  tmaker = class(tprogrunner)
@@ -70,7 +96,7 @@ type
    procedure dofinished(const sender: tpipereader); override;
    function getcommandline: ansistring; override;
   public
-   constructor create(aowner: tcomponent); override;
+   constructor create(aowner: tcomponent);
  end;
  
 var
@@ -196,26 +222,45 @@ begin
  loader:= tloader.create(nil);
 end;
 
+function runscript(const script: filenamety;
+                            const clearscreen,setmakedir: boolean): boolean;
+var
+ runner: tscriptrunner;
+begin
+ result:= script = '';
+ if not result then begin
+  runner:= tscriptrunner.create(nil,script,clearscreen,setmakedir);
+  try
+   result:= not runner.canceled and (runner.fexitcode = 0);
+  finally
+   runner.release;
+  end;
+ end;
+end;
+
 { tprogrunner }
 
-constructor tprogrunner.create(aowner: tcomponent);
+constructor tprogrunner.create(const aowner: tcomponent; 
+                              const clearscreen,setmakedir: boolean);
 var
  str3: string;
  wdbefore: filenamety;
 begin
- inherited;
+ inherited create(aowner);
  str3:= getcommandline; 
  with projectoptions,texp do begin
-  if copymessages and (messageoutputfile <> '') then begin
+  if copymessages and (messageoutputfile <> '') and not fnofilecopy then begin
    fmessagefile:= ttextstream.create(messageoutputfile,fm_create);
   end;
   messagepipe:= tpipereader.create;
   messagepipe.oninputavailable:= {$ifdef FPC}@{$endif}inputavailable;
   messagepipe.onpipebroken:= {$ifdef FPC}@{$endif}dofinished;
-  messagefo.messages.rowcount:= 0;
+  if clearscreen then begin
+   messagefo.messages.rowcount:= 0;
+  end;
   procid:= invalidprochandle;
   fexitcode:= 1; //defaulterror
-  if makedir <> '' then begin
+  if setmakedir and (makedir <> '') then begin
    wdbefore:= getcurrentdir;
    setcurrentdir(makedir);
   end;
@@ -229,7 +274,7 @@ begin
     application.handleexception(nil,'Runerror with "'+str3+'": ');
    end;
   end;
-  if makedir <> '' then begin
+  if setmakedir and (makedir <> '') then begin
    setcurrentdir(wdbefore);
   end;
  end;
@@ -255,15 +300,16 @@ begin
  if not getprocessexitcode(procid,fexitcode,5000000) then begin
   messagefo.messages.appendrow(['Error: Timeout.']);
   messagefo.messages.appendrow(['']);
+  killprocess(procid);
  end;
  procid:= invalidprochandle;
-// mainfo.makefinished(fexitcode);
  messagefo.messages.font.options:= messagefo.messages.font.options +
              [foo_antialiased] - [foo_nonantialiased];
 end;
 
 procedure tprogrunner.dofinished(const sender: tpipereader);
 begin
+ ffinished:= true;
  asyncevent(0);
 end;
 
@@ -300,7 +346,7 @@ constructor tmaker.create(atag: integer);
 begin
  fmaketag:= atag;
  ftargettimestamp:= getfilemodtime(gettargetfile);
- inherited create(nil);
+ inherited create(nil,true,true);
  if procid <> invalidprochandle then begin
   mainfo.setstattext('Making.',mtk_running);
   messagefo.messages.font.options:= messagefo.messages.font.options -
@@ -335,7 +381,7 @@ end;
 
 constructor tloader.create(aowner: tcomponent);
 begin
- inherited;
+ inherited create(aowner,false,true);
  if procid <> invalidprochandle then begin
   mainfo.setstattext('Downloading.',mtk_running);
   messagefo.messages.font.options:= messagefo.messages.font.options -
@@ -357,4 +403,51 @@ begin
  result:= projectoptions.texp.uploadcommand;
 end;
 
+{ tscriptrunner }
+
+constructor tscriptrunner.create(const aowner: tcomponent;
+               const ascriptpath: filenamety; const clearscreen: boolean;
+               const setmakedir: boolean);
+begin
+ fscriptpath:= ascriptpath;
+ fnofilecopy:= true;
+ if clearscreen then begin
+  messagefo.messages.rowcount:= 0;
+ end;
+ messagefo.messages.appendrow(ascriptpath);
+ messagefo.messages.appendrow('');
+ inherited create(aowner,false,setmakedir);
+ fcanceled:= not application.waitdialog(nil,'"'+ascriptpath+'" running.',
+     'Script',nil,nil,nil);
+end;
+
+function tscriptrunner.getcommandline: ansistring;
+begin
+ result:= fscriptpath;
+end;
+
+procedure tscriptrunner.dofinished(const sender: tpipereader);
+begin
+ inherited;
+ application.terminatewait;
+end;
+
+{
+procedure tscriptrunner.scriptexe(const sender: tguiapplication;
+               var again: boolean);
+begin
+ if not ffinished then begin
+  sender.idlesleep(100000);
+  again:= true;
+ end
+ else begin
+  
+ end;
+end;
+
+procedure tscriptrunner.scriptcancel(const sender: tobject);
+begin
+ killprocess(procid);
+end;
+}
 end.

@@ -1010,8 +1010,6 @@ begin
 end;
 
 procedure tmainfo.uploadexe(const sender: tguiapplication; var again: boolean);
-var
- int1: integer;
 begin
  if not downloading then begin
   sender.terminatewait;
@@ -1020,11 +1018,6 @@ begin
   sender.idlesleep(100000);
   again:= true;
  end; 
-{
- if getprocessexitcode(fuploadprocid,fuploadexitcode,100000) then begin
-  application.terminatewait;
- end;
-}
 end;
 
 procedure tmainfo.uploadcancel(const sender: tobject);
@@ -2078,7 +2071,7 @@ var
  macrolist: tmacrolist;
  copiedfiles: filenamearty;
  bo1: boolean;
- 
+  
 begin
  mstr2:= projecttemplatedir; //use macros of actual project
  if openproject('') then begin
@@ -2127,35 +2120,38 @@ begin
       macrolist:= tmacrolist.create([mao_curlybraceonly]);
       try
        macrolist.add(['%PROJECTNAME%','%PROJECTDIR%'],[mstr1,curdir]);
-       for int1:= 0 to high(newprojectfiles) do begin
-        source:= filepath(newprojectfiles[int1]);
-        if int1 <= high(newprojectfilesdest) then begin
-         dest:= newprojectfilesdest[int1];
-        end
-        else begin
-         dest:= '';
-        end;
-        if dest <> '' then begin
-         macrolist.expandmacros(dest);
-        end
-        else begin
-         dest:= filename(source);
-        end;
-        copiedfiles[int1]:= dest;
-        if (int1 <= high(expandprojectfilemacros)) and 
-                           expandprojectfilemacros[int1] then begin
-         copynewfile(source,dest,false,false,['%PROJECTNAME%','%PROJECTDIR%'],
-                                     [mstr1,curdir]);
-        end
-        else begin
-         try
-          if not copyfile(source,dest,false) then begin
-           showerror('File "'+dest+'" exists.');
+       if runscript(scriptbeforecopy,true,false) then begin
+        for int1:= 0 to high(newprojectfiles) do begin
+         source:= filepath(newprojectfiles[int1]);
+         if int1 <= high(newprojectfilesdest) then begin
+          dest:= newprojectfilesdest[int1];
+         end
+         else begin
+          dest:= '';
+         end;
+         if dest <> '' then begin
+          macrolist.expandmacros(dest);
+         end
+         else begin
+          dest:= filename(source);
+         end;
+         copiedfiles[int1]:= dest;
+         if (int1 <= high(expandprojectfilemacros)) and 
+                            expandprojectfilemacros[int1] then begin
+          copynewfile(source,dest,false,false,['%PROJECTNAME%','%PROJECTDIR%'],
+                                      [mstr1,curdir]);
+         end
+         else begin
+          try
+           if not copyfile(source,dest,false) then begin
+            showerror('File "'+dest+'" exists.');
+           end;
+          except
+           application.handleexception(nil);
           end;
-         except
-          application.handleexception(nil);
          end;
         end;
+        runscript(scriptaftercopy,false,false);
        end;
       finally
        macrolist.free;
