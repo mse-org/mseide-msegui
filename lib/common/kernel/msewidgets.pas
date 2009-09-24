@@ -994,6 +994,9 @@ type
    function getframestateflags: framestateflagsty; override;
   public
    constructor create(aowner: tcomponent); override;
+   procedure pressbutton;
+   function releasebutton(const aexecute: boolean): boolean;
+              //true if clicked
    property options: buttonoptionsty read foptions write setoptions
                  default defaultbuttonoptions;
    property colorglyph: colorty read finfo.ca.colorglyph write setcolorglyph
@@ -1674,14 +1677,33 @@ begin
  end;
 end;
 
+procedure tactionsimplebutton.pressbutton;
+begin
+ include(finfo.state,shs_clicked);
+ invalidateframestaterect(finfo.ca.dim,fframe);
+end;
+
+function tactionsimplebutton.releasebutton(const aexecute: boolean): boolean;
+                 //true if clicked
+begin
+ result:= shs_clicked in finfo.state;
+ exclude(finfo.state,shs_clicked);
+ if result then begin
+  invalidateframestaterect(finfo.ca.dim,fframe);
+  if aexecute then begin
+   internalexecute;
+  end;
+ end;
+end;
+
 procedure tactionsimplebutton.dokeydown(var info: keyeventinfoty);
 begin
  inherited;
  with info do begin
   if (shiftstate = []) and (bo_executeonkey in foptions) then begin
    if (key = key_space) then begin
-    include(finfo.state,shs_clicked);
-    invalidateframestaterect(finfo.ca.dim,fframe);
+    include(info.eventstate,es_processed);
+    pressbutton;
    end
    else begin
     if isenterkey(self,key) or (key = key_period) then begin
@@ -1696,13 +1718,10 @@ end;
 procedure tactionsimplebutton.dokeyup(var info: keyeventinfoty);
 begin
  inherited;
- if (info.key = key_space) and (shs_clicked in finfo.state) then begin
-  exclude(finfo.state,shs_clicked);
-  invalidateframestaterect(finfo.ca.dim,fframe);
-  if (info.shiftstate = []) and (bo_executeonkey in foptions) then begin
-   include(info.eventstate,es_processed);
-   internalexecute;
-  end;
+ if (info.key = key_space) and 
+                     releasebutton((info.shiftstate = []) and 
+                     (bo_executeonkey in foptions)) then begin
+  include(info.eventstate,es_processed);
  end;
 end;
 
