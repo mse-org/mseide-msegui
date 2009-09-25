@@ -31,9 +31,16 @@ type
  mousebuttonty = (mb_none,mb_left,mb_right,mb_middle);
  mousewheelty = (mw_none,mw_up,mw_down);
 
- shiftstatety = (ss_shift,ss_alt,ss_ctrl,ss_left,ss_right,ss_middle,ss_double);
+ shiftstatety = (ss_shift,ss_alt,ss_ctrl,ss_left,ss_right,ss_middle,ss_double,
+                 ss_repeat); //repeat keydown
  shiftstatesty = set of shiftstatety;
 
+const
+ keyshiftstatesmask: shiftstatesty = [ss_shift,ss_alt,ss_ctrl];
+ buttonshiftstatesmask: shiftstatesty = [ss_left,ss_right,ss_middle,ss_double];
+ shiftstatesmask = [ss_shift,ss_alt,ss_ctrl,ss_left,ss_right,ss_middle];
+
+type
  mouseeventinfoty = record //same layout as mousewheeleventinfoty!
   eventkind: eventkindty;
   shiftstate: shiftstatesty;
@@ -115,16 +122,9 @@ type
 
 const
  defaultppmm = 3;      //3 pixel per mm
-// shiftstatemask = [ss_shift,ss_alt,ss_ctrl];
  sizingtol = 2; //+- pixel
  sizingwidth = 2*sizingtol;                                        
- keyshiftstatesmask: shiftstatesty = [ss_shift,ss_alt,ss_ctrl];
- buttonshiftstatesmask: shiftstatesty = [ss_left,ss_right,ss_middle,ss_double];
- shiftstatesmask = [ss_shift,ss_alt,ss_ctrl,ss_left,ss_right,ss_middle];
-// keybuttonshiftstatesmask: shiftstatesty = [ss_shift,ss_alt,ss_ctrl,
-//                   ss_left,ss_right,ss_middle,ss_double];
 
-const
  swapcaptionpos: array[captionposty] of captionposty =
  (//cp_center,cp_rightbottom,cp_right,cp_rightcenter,cp_righttop,
     cp_center,cp_leftbottom,cp_left,cp_leftcenter,cp_lefttop,

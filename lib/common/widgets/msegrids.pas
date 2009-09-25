@@ -10463,12 +10463,13 @@ var
  celleventinfo: celleventinfoty;
  cellbefore: gridcoordty;
  bo1: boolean;
+ shiftstate: shiftstatesty;
 
  procedure checkselection; 
  begin
   if (es_processed in info.eventstate) and (ffocusedcell.col >= 0) then begin
    if co_keyselect in fdatacols[ffocusedcell.col].foptions then begin
-    if ss_shift in info.shiftstate then begin
+    if ss_shift in shiftstate then begin
      if fstartanchor.col < 0 then begin
       fstartanchor:= focusbefore;
      end;
@@ -10489,6 +10490,7 @@ begin
   fonkeydown(self,info);
  end;
  if not(es_processed in info.eventstate) then begin
+  shiftstate:= info.shiftstate * shiftstatesmask;
   if ffocusedcell.col >= 0 then begin
    fdatacols[ffocusedcell.col].dokeyevent(info,false);
   end
@@ -10500,13 +10502,13 @@ begin
    end;
   end;
   cellbefore:= focusedcell;
-  bo1:= (ow_arrowfocusout in optionswidget) and (info.shiftstate = []) and
+  bo1:= (ow_arrowfocusout in optionswidget) and (shiftstate = []) and
         not(((info.key = key_up) or (info.key = key_pageup)) and not isfirstrow or
             ((info.key = key_down) or (info.key = key_pagedown)) and not islastrow);
                 //test for db rows, exit widget
-  if info.shiftstate - [ss_shift,ss_ctrl] = [] then begin
+  if shiftstate - [ss_shift,ss_ctrl] = [] then begin
    if not (es_processed in info.eventstate) then begin
-    if ss_shift in info.shiftstate then begin
+    if ss_shift in shiftstate then begin
      if (ffocusedcell.col >= 0) and
              (co_keyselect in fdatacols[ffocusedcell.col].foptions) then begin
       action:= fca_selectend;
@@ -10522,7 +10524,7 @@ begin
     include(info.eventstate,es_processed);
     case info.key of
      key_up: begin
-      if info.shiftstate = [ss_ctrl] then begin
+      if shiftstate = [ss_ctrl] then begin
        if og_keyrowmoving in foptionsgrid then begin
         if ffocusedcell.row > 0 then begin
          moverow(ffocusedcell.row,ffocusedcell.row - 1);
@@ -10541,7 +10543,7 @@ begin
       end;
      end;
      key_down: begin
-      if info.shiftstate = [ss_ctrl] then begin
+      if shiftstate = [ss_ctrl] then begin
        if og_keyrowmoving in foptionsgrid then begin
         if (ffocusedcell.row >= 0) and (ffocusedcell.row < frowcount-1) then begin
          moverow(ffocusedcell.row,ffocusedcell.row + 1);
@@ -10560,7 +10562,7 @@ begin
       end;
      end;
      key_home: begin
-      if ss_ctrl in info.shiftstate then begin
+      if ss_ctrl in shiftstate then begin
        focuscell(makegridcoord(nextfocusablecol(0,false,0),0),action);
       end
       else begin
@@ -10568,7 +10570,7 @@ begin
       end;
      end;
      key_end: begin
-      if ss_ctrl in info.shiftstate then begin
+      if ss_ctrl in shiftstate then begin
        focuscell(makegridcoord(nextfocusablecol(datacols.count-1,true,frowcount-1),
                                                        frowcount-1),action);
       end
@@ -10577,7 +10579,7 @@ begin
       end;
      end;
      key_pageup: begin
-      if ss_ctrl in info.shiftstate then begin
+      if ss_ctrl in shiftstate then begin
        if og_visiblerowpagestep in foptionsgrid then begin
         focuscell(makegridcoord(ffocusedcell.col,ffirstvisiblerow),action);
        end
@@ -10590,7 +10592,7 @@ begin
       end;
      end;
      key_pagedown: begin
-      if ss_ctrl in info.shiftstate then begin
+      if ss_ctrl in shiftstate then begin
        if og_visiblerowpagestep in foptionsgrid then begin
         focuscell(makegridcoord(ffocusedcell.col,flastvisiblerow),action);
        end
@@ -10613,7 +10615,7 @@ begin
     case info.key of
      key_return,key_enter: begin
       if (og_colchangeonreturnkey in foptionsgrid) and 
-                 (info.shiftstate = []) then begin
+                 (shiftstate = []) then begin
        colstep(fca_focusin,1,true,false);
       end
       else begin
@@ -10626,10 +10628,10 @@ begin
        dokeydownaftershortcut(info);
       end
       else begin
-       if info.shiftstate - [ss_shift] = [] then begin
+       if shiftstate - [ss_shift] = [] then begin
         if docheckcellvalue then begin
          action:= fca_focusin;
-         if info.shiftstate = [ss_shift] then begin
+         if shiftstate = [ss_shift] then begin
           colstep(action,-1,true,false);
          end
          else begin
@@ -10643,7 +10645,7 @@ begin
       end;
      end;
      key_left: begin
-      if info.shiftstate = [ss_ctrl] then begin
+      if shiftstate = [ss_ctrl] then begin
        if og_keycolmoving in foptionsgrid then begin
         if ffocusedcell.col > 0 then begin
          movecol(ffocusedcell.col,ffocusedcell.col-1);
@@ -10661,7 +10663,7 @@ begin
       end;
      end;
      key_right: begin
-      if info.shiftstate = [ss_ctrl] then begin
+      if shiftstate = [ss_ctrl] then begin
        if og_keycolmoving in foptionsgrid then begin
         if (ffocusedcell.col >= 0) and (ffocusedcell.col < fdatacols.count-1) then begin
          moverow(ffocusedcell.col,ffocusedcell.col + 1);
@@ -10689,8 +10691,8 @@ begin
      if (info.key = key_space) and (co_keyselect in foptions) and
 //        (foptions * [co_keyselect,co_multiselect] = 
 //                                          [co_keyselect,co_multiselect]) and
-      ((info.shiftstate = [ss_shift]) or (info.shiftstate = [ss_ctrl])) then begin
-      if info.shiftstate = [ss_ctrl] then begin
+      ((shiftstate = [ss_shift]) or (shiftstate = [ss_ctrl])) then begin
+      if shiftstate = [ss_ctrl] then begin
        mo1:= csm_reverse;
       end
       else begin

@@ -5430,6 +5430,14 @@ end;
 
 var
  timeoutcount: integer; //for safety timertick
+ repeatkey: integer;
+ repeatkeytime: ttime;
+
+procedure resetrepeatkey;
+begin
+ repeatkey:= 0;
+ repeatkeytime:= 0;
+end;
 
 function gui_getevent: tevent;
 
@@ -5446,11 +5454,10 @@ var
  pollinfo: array[0..1] of pollfd;
              //0 connection, 1 sessionmanagement
  pollcount: integer;
-// fdsetr,fdsete: tfdset;
  str1: string;
- {$ifdef with_sm}
+{$ifdef with_sm}
  int2: integer;
- {$endif}
+{$endif}
  shiftstate1: shiftstatesty;
  key1,key2: keyty;
  button1: mousebuttonty;
@@ -5721,6 +5728,10 @@ eventrestart:
      escapepressed:= true;
     end;
     shiftstate1:= xtoshiftstate(state,key1,mb_none,false);
+    if (keycode = repeatkey) and (time = repeatkeytime) then begin
+     include(shiftstate1,ss_repeat);
+     resetrepeatkey;
+    end;
     key2:= getkeynomod(xev.xkey);
     result:= tkeyevent.create(xwindow,false,key1,key2,
                                     shiftstate1,chars,time*1000);
@@ -5738,9 +5749,11 @@ eventrestart:
      xpeekevent(appdisp,@xev);
      if (xev.xtype = keypress) and (time - lasteventtime < 10) and 
                                                    (keycode = int1) then begin
-       goto eventrestart;  //auto repeat key, don't send
-      end;
+      repeatkey:= int1;
+      repeatkeytime:= time;
+      goto eventrestart;  //auto repeat key, don't send
      end;
+    end;
     result:= tkeyevent.create(xwindow,true,key1,key2,shiftstate1,'',time*1000);
    end;
   end;
@@ -6000,6 +6013,7 @@ var
 {$endif}
  
 begin
+ resetrepeatkey;
  {$ifdef mse_flushgdi}
  xinitthreads;
  {$endif}
