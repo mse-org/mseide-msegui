@@ -36,9 +36,9 @@ type
 
  actionstatety = (as_disabled = ord(shs_disabled),as_invisible=ord(shs_invisible),
                   as_checked=ord(shs_checked),as_default=ord(shs_default),
-//                  as_checkbox=ord(ss_checkbox),as_radiobutton=ord(ss_radiobutton),
-                  {as_shortcutcaption,}
+                  as_repeatshortcut,
                   as_localdisabled,as_localinvisible,as_localchecked,as_localdefault,
+                  as_localrepeatshortcut,
                   as_localcaption,
                   as_localimagelist,as_localimagenr,as_localimagenrdisabled,
                   as_localimagecheckedoffset,
@@ -56,7 +56,8 @@ type
 
 const
  actionstatesmask: actionstatesty = 
-                            [as_disabled,as_checked,as_invisible,as_default];
+                            [as_disabled,as_checked,as_invisible,as_default,
+                             as_repeatshortcut];
  actionshapestatesconst = [as_disabled,as_invisible,as_checked,as_default];
  actionshapestates: actionstatesty = actionshapestatesconst;
  actionoptionshapestates: menuactionoptionsty = 
@@ -65,6 +66,7 @@ const
 
  localactionstates: actionstatesty =
             [as_localdisabled,as_localinvisible,as_localchecked,as_localdefault,
+             as_localrepeatshortcut,
              as_localcaption,
              as_localimagelist,as_localimagenr,as_localimagenrdisabled,
              as_localimagecheckedoffset,
@@ -73,7 +75,8 @@ const
              as_localgroup,as_localonexecute];
  localactionlshift = ord(as_localdisabled);
  localactionstatestates: actionstatesty =
-          [as_localdisabled,as_localinvisible,as_localchecked,as_localdefault];
+          [as_localdisabled,as_localinvisible,as_localchecked,as_localdefault,
+           as_localrepeatshortcut];
 type
  actionoptionty = (ao_updateonidle,ao_localshortcut,ao_globalshortcut,
                    ao_nocandefocus);
@@ -432,12 +435,6 @@ begin
                   longword(localactionstatestates) shr localactionlshift);
      sender.actionchanged;
     end;
- {
-    if not (as_localimagelist in state) then begin
-     setactionimagelist(sender,nil);
-    end;
-    resetlocalstates(state);
- }
    end;
   end;
  end;
@@ -652,15 +649,11 @@ begin
    {$ifdef FPC}longword{$else}longword{$endif}(state),
               {$ifdef FPC}longword{$else}longword{$endif}(actionstatesmask)));
   if statebefore <> state then begin
-//   include(state,as_localstate);
    if (mao_shortcutcaption in options) and
            (statebefore * [as_disabled] <> state * [as_disabled]) then begin
     sender.calccaptiontext(po1^);
    end;
   end;
-//  obj1:= sender.getinstance;
-//  if not ((obj1 is tcomponent) and 
-//            (csloading in tcomponent(obj1).componentstate)) then begin
   if not sender.loading then begin
 {$ifdef FPC}longword{$else}longword{$endif}(state):=
     {$ifdef FPC}longword{$else}longword{$endif}(state) or
