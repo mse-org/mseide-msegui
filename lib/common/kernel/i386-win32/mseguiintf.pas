@@ -4170,6 +4170,9 @@ begin
   end;
   wm_keydown,wm_syskeydown: begin
    shiftstate:= winkeystatetoshiftstate(lparam);
+   if lparam and $40000000 <> 0 then begin
+    include(shiftstate,ss_repeat);
+   end;
    key1:= winkeytokey(wparam,shiftstate);
    if key1 = key_escape then begin
     escapepressed:= true;
@@ -4177,8 +4180,6 @@ begin
    eventlist.add(tkeyevent.create(ahwnd,false,key1,key1,shiftstate,
                                     charbuffer,timestamp));
    charbuffer:= '';
-//   result:= 0;  //evaluaze alt F4
-//   exit;
   end;
   wm_keyup,wm_syskeyup: begin
    shiftstate:= winkeystatetoshiftstate(lparam);
