@@ -612,7 +612,8 @@ begin
  result:= false;
  with info do begin
   if not (as_disabled in state) and 
-           not (es_processed in keyinfo.eventstate) then begin
+           not (es_processed in keyinfo.eventstate) and 
+           not (ss_repeat in keyinfo.shiftstate) then begin
    if shortcut <> 0 then begin
     if checkshortcutcode(shortcut,keyinfo) then begin
      doactionexecute(sender,info,false,false);
