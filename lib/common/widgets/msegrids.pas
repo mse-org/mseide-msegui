@@ -65,7 +65,7 @@ type
                  og_rowinserting,og_rowdeleting,og_selectedrowsdeleting,
                  og_focuscellonenter,og_containerfocusbackonesc,
                  og_autofirstrow,og_autoappend,og_appendempty,
-                 og_savestate,og_sorted,
+                 og_savestate,og_nosaveremoveappendedrow,og_sorted,
                  og_folded,og_colmerged,og_rowheight,
                  og_colchangeontabkey,og_colchangeonreturnkey,
                  og_wraprow,og_wrapcol,
@@ -8092,7 +8092,9 @@ end;
 
 procedure tcustomgrid.dostatwrite(const writer: tstatwriter);
 begin
- removeappendedrow;
+ if not (og_nosaveremoveappendedrow in foptionsgrid) then begin
+  removeappendedrow; //calls checkcanclose
+ end;
  writer.writeinteger('propcolwidthref',fpropcolwidthref);
  fdatacols.dostatwrite(writer);
  if og_savestate in foptionsgrid then begin
