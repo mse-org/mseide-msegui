@@ -55,6 +55,29 @@ Creating a new console project
 ******************************
 'Project'-'New'-'From Template', select "console.prj"
 
+MSEide command line parameters
+******************************
+-np
+ Do not load a project.
+-ns
+ Do not use a skin, no fades.
+--macrogroup=<n>
+ Use 'Project'-'Options'-'Macros'-'Active group' number <n>, <n> = 1..6.
+--macrodef=<name>,<value>{,<name>,<value>}
+ Macro definition, will be overridden by 'Project'-'Options'-'Macros'. Example:
+ --macrodef=MAC1,abc,MAC2,def
+ defines ${MAC1} with value 'abc' and ${MAC2} with value 'def'.
+--fontalias=<alias>,<fontname>[,<fontheight>[,<fontwidth>[,<options>[,<xscale>]]]]
+ Change the used fonts. <alias> can be stf_default, stf_menu or mseide_source.
+
+MSEide environment variables
+****************************
+Macros in 'Settings'-'Configure MSEide' can be overridden by environment
+variables. They will be overriden by --macrodef and 'Project'-'Options'-'Macros'.
+Possible names: 
+FPCDIR, FPCLIBDIR, MSEDIR, MSELIBDIR, SYNTAXDEFDIR, TEMPLATEDIR,
+COMPSTOREDIR, COMPILER, DEBUGGER, EXEEXT, TARGET.
+
 FPC 2.2.2
 *********
 patch_fpc_2_2_2 contains patched FPC files in order to fix FPC Mantis 11774, 
