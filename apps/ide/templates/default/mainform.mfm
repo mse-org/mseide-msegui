@@ -10,5 +10,5 @@ object ${%FORMNAME%}: t${%FORMNAME%}
   bounds_cx = 403
   bounds_cy = 280
   color = -1879048187
-  moduleclassname = 'tmseform'
+  moduleclassname = 'tmainform'
 end

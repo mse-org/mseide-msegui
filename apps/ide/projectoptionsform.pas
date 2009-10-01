@@ -97,9 +97,19 @@ type
   scriptaftercopy: msestring;
   newprojectfiles: filenamearty;
   newprojectfilesdest: filenamearty;
-  newprogramfile: filenamety;
-  newunitfile: filenamety;
+//  newprogramfile: filenamety;
+//  newunitfile: filenamety;
+  newfinames: msestringarty;
+  newfifilters: msestringarty;
+  newfiexts: msestringarty;
+  newfisources: filenamearty;
+  
 //  newtextfile: filenamety;
+  newfonames: msestringarty;
+  newfonamebases: msestringarty;
+  newfosources: msestringarty;
+  newfoforms: msestringarty;
+{  
   newmainfosource: filenamety;
   newmainfoform: filenamety;
   newsimplefosource: filenamety;
@@ -116,6 +126,7 @@ type
   newinheritedform: filenamety;
   newpascsource: filenamety;
   newpascform: filenamety;
+ }
  end;
 
  projectoptionsty = record
@@ -212,6 +223,9 @@ type
   //templates
   expandprojectfilemacros: longboolarty;
   loadprojectfile: longboolarty;
+
+  //newform  
+  newinheritedforms: longboolarty;
   
   //tools
   toolsave: longboolarty;
@@ -355,8 +369,6 @@ type
    newprojectfiles: tfilenameedit;
    newprojectfilesdest: tstringedit;
    ttabpage4: ttabpage;
-   newprogf: tfilenameedit;
-   newunitf: tfilenameedit;
    ttabpage5: ttabpage;
    ttabpage15: ttabpage;
    twidgetgrid3: twidgetgrid;
@@ -415,6 +427,13 @@ type
    gdbservercommandattach: tfilenameedit;
    scriptbeforecopy: tfilenameedit;
    scriptaftercopy: tfilenameedit;
+   newinheritedform: tbooleanedit;
+   newformnamebase: tstringedit;
+   twidgetgrid1: twidgetgrid;
+   newfiname: tstringedit;
+   newfisource: tfilenameedit;
+   newfifilter: tstringedit;
+   newfiext: tstringedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -745,9 +764,21 @@ begin
    li.expandmacros(scriptaftercopy);
    li.expandmacros(newprojectfiles);
    li.expandmacros(newprojectfilesdest);
-   li.expandmacros(newprogramfile);
-   li.expandmacros(newunitfile);
+
+   li.expandmacros(newfinames);
+   li.expandmacros(newfifilters);
+   li.expandmacros(newfiexts);
+   li.expandmacros(newfisources);
+  
+//   li.expandmacros(newprogramfile);
+//   li.expandmacros(newunitfile);
 //   li.expandmacros(newtextfile);
+
+   li.expandmacros(newfonames);
+   li.expandmacros(newfonamebases);
+   li.expandmacros(newfosources);
+   li.expandmacros(newfoforms);
+{   
    li.expandmacros(newmainfosource);
    li.expandmacros(newmainfoform);
    li.expandmacros(newsimplefosource);
@@ -764,6 +795,7 @@ begin
    li.expandmacros(newinheritedform);
    li.expandmacros(newpascsource);
    li.expandmacros(newpascform);
+}
    clearfontalias;
    int2:= high(fontalias);
    if int2 > high(fontnames) then begin
@@ -808,6 +840,43 @@ begin
    with mainfo.openfile.controller.filterlist do begin
     asarraya:= filemasknames;
     asarrayb:= filemasks;
+   end;
+   item1:= mainfo.mainmenu1.menu.itembynames(['file','new']);
+   item1.submenu.count:= 1;
+   item1.submenu.count:= length(newfinames)+1;
+   for int1:= 0 to high(newfinames) do begin
+    with item1.submenu[int1+1] do begin
+     caption:= newfinames[int1];
+     tag:= int1;
+     onexecute:= @mainfo.newfileonexecute;
+    end;
+   end;
+
+   item1:= mainfo.mainmenu1.menu.itembynames(['file','new','form']);
+   item1.submenu.count:= 0;
+   item1.submenu.count:= length(newfonames)+1;
+   int2:= 0;
+   for int1:= 0 to high(newfonames) do begin
+    if not newinheritedforms[int1] then begin
+     with item1.submenu[int2] do begin
+      caption:= newfonames[int1];
+      tag:= int1;
+      onexecute:= @mainfo.newformonexecute;
+     end;
+     inc(int2);
+    end;
+   end;
+   item1.submenu[int2].options:= [mao_separator];
+   inc(int2);
+   for int1:= 0 to high(newfonames) do begin
+    if newinheritedforms[int1] then begin
+     with item1.submenu[int2] do begin
+      caption:= newfonames[int1];
+      tag:= int1;
+      onexecute:= @mainfo.newformonexecute;
+     end;
+     inc(int2);
+    end;
    end;
    with mainfo.mainmenu1.menu.submenu do begin
     item1:= itembyname('tools');
@@ -1045,26 +1114,86 @@ begin
   newprojectfilesdest:= nil;
   expandprojectfilemacros:= nil;
   loadprojectfile:= nil;
-  newprogramfile:= '${TEMPLATEDIR}default/program.pas';
-  newunitfile:= '${TEMPLATEDIR}default/unit.pas';
+  setlength(newfinames,3);
+  setlength(newfifilters,3);
+  setlength(newfiexts,3);
+  setlength(newfisources,3);
+  
+  newfinames[0]:= 'Program';
+  newfifilters[0]:= '"*.pas" "*.pp"';
+  newfiexts[0]:= 'pas';
+  newfisources[0]:= '${TEMPLATEDIR}default/program.pas';
+
+  newfinames[1]:= 'Unit';
+  newfifilters[1]:= '"*.pas" "*.pp"';
+  newfiexts[1]:= 'pas';
+  newfisources[1]:= '${TEMPLATEDIR}default/unit.pas';
+
+  newfinames[2]:= 'Textfile';
+  newfifilters[2]:= '';
+  newfiexts[2]:= '';
+  newfisources[2]:= '';
+  
+//  newprogramfile:= '${TEMPLATEDIR}default/program.pas';
+//  newunitfile:= '${TEMPLATEDIR}default/unit.pas';
 //  newtextfile:= '';
-  newmainfosource:= '${TEMPLATEDIR}default/mainform.pas';
-  newmainfoform:= '${TEMPLATEDIR}default/mainform.mfm';
-  newsimplefosource:= '${TEMPLATEDIR}default/simpleform.pas';
-  newsimplefoform:= '${TEMPLATEDIR}default/simpleform.mfm';
-  newdockingfosource:= '${TEMPLATEDIR}default/dockingform.pas';
-  newdockingfoform:= '${TEMPLATEDIR}default/dockingform.mfm';
-  newdatamodsource:= '${TEMPLATEDIR}default/datamodule.pas';
-  newdatamodform:= '${TEMPLATEDIR}default/datamodule.mfm';
-  newsubfosource:= '${TEMPLATEDIR}default/subform.pas';
-  newsubfoform:= '${TEMPLATEDIR}default/subform.mfm';
-  newreportsource:= '${TEMPLATEDIR}default/report.pas';
-  newreportform:= '${TEMPLATEDIR}default/report.mfm';
-  newinheritedsource:= '${TEMPLATEDIR}default/inheritedform.pas';
-  newinheritedform:= '${TEMPLATEDIR}default/inheritedform.mfm';
-  newpascsource:= '${TEMPLATEDIR}default/pascform.pas';
-  newpascform:= '${TEMPLATEDIR}default/pascform.mfm';
+
+  setlength(newfonames,8);
+  setlength(newfonamebases,8);
+  setlength(newinheritedforms,8);
+  setlength(newfosources,8);
+  setlength(newfoforms,8);
+
+  newfonames[0]:= 'Mainform';
+  newfonamebases[0]:= 'form';
+  newinheritedforms[0]:= false;
+  newfosources[0]:= '${TEMPLATEDIR}default/mainform.pas';
+  newfoforms[0]:= '${TEMPLATEDIR}default/mainform.mfm';
+ 
+  newfonames[1]:= 'Simple Form';
+  newfonamebases[1]:= 'form';
+  newinheritedforms[1]:= false;
+  newfosources[1]:= '${TEMPLATEDIR}default/simpleform.pas';
+  newfoforms[1]:= '${TEMPLATEDIR}default/simpleform.mfm';
+ 
+  newfonames[2]:= 'Docking Form';
+  newfonamebases[2]:= 'form';
+  newinheritedforms[2]:= false;
+  newfosources[2]:= '${TEMPLATEDIR}default/dockingform.pas';
+  newfoforms[2]:= '${TEMPLATEDIR}default/dockingform.mfm';
+ 
+  newfonames[3]:= 'Datamodule';
+  newfonamebases[3]:= 'module';
+  newinheritedforms[3]:= false;
+  newfosources[3]:= '${TEMPLATEDIR}default/datamodule.pas';
+  newfoforms[3]:= '${TEMPLATEDIR}default/datamodule.mfm';
+ 
+  newfonames[4]:= 'Subform';
+  newfonamebases[4]:= 'form';
+  newinheritedforms[4]:= false;
+  newfosources[4]:= '${TEMPLATEDIR}default/subform.pas';
+  newfoforms[4]:= '${TEMPLATEDIR}default/subform.mfm';
+ 
+  newfonames[5]:= 'Report';
+  newfonamebases[5]:= 'report';
+  newinheritedforms[5]:= false;
+  newfosources[5]:= '${TEMPLATEDIR}default/report.pas';
+  newfoforms[5]:= '${TEMPLATEDIR}default/report.mfm';
+ 
+  newfonames[6]:= 'Scriptform';
+  newfonamebases[6]:= 'script';
+  newinheritedforms[6]:= false;
+  newfosources[6]:= '${TEMPLATEDIR}default/pascform.pas';
+  newfoforms[6]:= '${TEMPLATEDIR}default/pascform.mfm';
+
+  newfonames[7]:= 'Inherited Form';
+  newfonamebases[7]:= 'form';
+  newinheritedforms[7]:= true;
+  newfosources[7]:= '${TEMPLATEDIR}default/inheritedform.pas';
+  newfoforms[7]:= '${TEMPLATEDIR}default/inheritedform.mfm';
+ 
  end;
+ 
  expandprojectmacros;
 end;
 
@@ -1262,8 +1391,55 @@ begin
   updatevalue('expandprojectfilemacros',expandprojectfilemacros);
   updatevalue('loadprojectfile',loadprojectfile);
   
-  updatevalue('newprogramfile',newprogramfile);
-  updatevalue('newunitfile',newunitfile);
+//  updatevalue('newprogramfile',newprogramfile);
+//  updatevalue('newunitfile',newunitfile);
+  updatevalue('newfinames',newfinames);
+  updatevalue('newfinfilters',newfifilters);
+  updatevalue('newfiexts',newfiexts);
+  updatevalue('newfisources',newfisources);
+  if not iswriter then begin
+   int1:= length(newfinames);
+   if int1 > length(newfifilters) then begin
+    int1:= length(newfifilters);
+   end;
+   if int1 > length(newfiexts) then begin
+    int1:= length(newfiexts);
+   end;
+   if int1 > length(newfisources) then begin
+    int1:= length(newfisources);
+   end;
+   setlength(newfinames,int1);
+   setlength(newfifilters,int1);
+   setlength(newfiexts,int1);
+   setlength(newfisources,int1);
+  end;
+    
+  updatevalue('newfonames',newfonames);
+  updatevalue('newfonamebases',newfonamebases);
+  updatevalue('newinheritedforms',newinheritedforms);
+  updatevalue('newfosources',newfosources);
+  updatevalue('newfoforms',newfoforms);
+  if not iswriter then begin
+   int1:= length(newfonames);
+   if int1 > length(newfonamebases) then begin
+    int1:= length(newfonamebases);
+   end;
+   if int1 > length(newinheritedforms) then begin
+    int1:= length(newinheritedforms);
+   end;
+   if int1 > length(newfosources) then begin
+    int1:= length(newfosources);
+   end;
+   if int1 > length(newfoforms) then begin
+    int1:= length(newfoforms);
+   end;
+   setlength(newfonames,int1);
+   setlength(newfonamebases,int1);
+   setlength(newinheritedforms,int1);
+   setlength(newfosources,int1);
+   setlength(newfoforms,int1);
+  end;
+{
   updatevalue('newmainfosource',newmainfosource);
   updatevalue('newmainfoform',newmainfoform);
   updatevalue('newsimplefosource',newsimplefosource);
@@ -1280,7 +1456,7 @@ begin
   updatevalue('newinheritedform',newinheritedform);
   updatevalue('newpascsource',newpascsource);
   updatevalue('newpascform',newpascform);
-  
+} 
   if not iswriter then begin
    if guitemplatesmo.sysenv.getintegervalue(int1,ord(env_vargroup),1,6) then begin
     macrogroup:= int1-1;
@@ -1396,9 +1572,20 @@ begin
   fo.expandprojectfilemacros.gridvalues:= expandprojectfilemacros;
   fo.loadprojectfile.gridvalues:= loadprojectfile;
   
-  fo.newprogf.value:= newprogramfile;
-  fo.newunitf.value:= newunitfile;
+//  fo.newprogf.value:= newprogramfile;
+//  fo.newunitf.value:= newunitfile;
+  fo.newfiname.gridvalues:= newfinames;
+  fo.newfifilter.gridvalues:= newfifilters;
+  fo.newfiext.gridvalues:= newfiexts;
+  fo.newfisource.gridvalues:= newfisources;
+  
 //  fo.newtextf.value:= newtextfile;
+  fo.newformname.gridvalues:= newfonames;
+  fo.newinheritedform.gridvalues:= newinheritedforms;
+  fo.newformnamebase.gridvalues:= newfonamebases;
+  fo.newformsourcefile.gridvalues:= newfosources;
+  fo.newformformfile.gridvalues:= newfoforms;
+{
   fo.newformsourcefile.gridvalue[0]:= newmainfosource;
   fo.newformformfile.gridvalue[0]:= newmainfoform;
   fo.newformsourcefile.gridvalue[1]:= newsimplefosource;
@@ -1415,7 +1602,7 @@ begin
   fo.newformformfile.gridvalue[6]:= newinheritedform;
   fo.newformsourcefile.gridvalue[7]:= newpascsource;
   fo.newformformfile.gridvalue[7]:= newpascform;
-
+}
   fo.makecommand.value:= makecommand;
   fo.makedir.value:= makedir;
   fo.debugcommand.value:= debugcommand;
@@ -1597,9 +1784,20 @@ begin
   newprojectfilesdest:= fo.newprojectfilesdest.gridvalues;
   expandprojectfilemacros:= fo.expandprojectfilemacros.gridvalues;
   loadprojectfile:= fo.loadprojectfile.gridvalues;
-  newprogramfile:= fo.newprogf.value;
-  newunitfile:= fo.newunitf.value;
+//  newprogramfile:= fo.newprogf.value;
+//  newunitfile:= fo.newunitf.value;
+  newfinames:= fo.newfiname.gridvalues;
+  newfifilters:= fo.newfifilter.gridvalues;
+  newfiexts:= fo.newfiext.gridvalues;
+  newfisources:= fo.newfisource.gridvalues;
 //  newtextfile:= fo.newtextf.value;
+
+  newfonames:= fo.newformname.gridvalues;
+  newinheritedforms:= fo.newinheritedform.gridvalues;
+  newfonamebases:= fo.newformnamebase.gridvalues;
+  newfosources:= fo.newformsourcefile.gridvalues;
+  newfoforms:= fo.newformformfile.gridvalues;
+{
   newmainfosource:= fo.newformsourcefile.gridvalue[0];
   newmainfoform:= fo.newformformfile.gridvalue[0];
   newsimplefosource:= fo.newformsourcefile.gridvalue[1];
@@ -1616,7 +1814,7 @@ begin
   newinheritedform:= fo.newformformfile.gridvalue[6];
   newpascsource:= fo.newformsourcefile.gridvalue[7];
   newpascform:= fo.newformformfile.gridvalue[7];
-  
+} 
   makecommand:= fo.makecommand.value;
   makedir:= fo.makedir.value;
   debugcommand:= fo.debugcommand.value;

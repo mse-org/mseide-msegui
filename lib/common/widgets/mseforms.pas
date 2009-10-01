@@ -31,14 +31,15 @@ type
 const
  defaultformoptions = [fo_autoreadstat,fo_autowritestat,
                        fo_savepos,fo_savezorder,fo_savestate];
+ defaultmainformoptions = defaultformoptions + [fo_main,fo_terminateonclose];
+ defaultmainformoptionswindow = [wo_groupleader];
+ 
  defaultformwidgetoptions = (defaultoptionswidgetmousewheel - 
                          [ow_mousefocus,ow_tabfocus]) + [ow_subfocus,ow_hinton];
  defaultcontaineroptionswidget = defaultoptionswidgetmousewheel + 
                                         [ow_subfocus,ow_mousetransparent];
 
-
 type
-
  tcustommseform = class;
  closequeryeventty = procedure(const sender: tcustommseform;
                                var amodalresult: modalresultty) of object;
@@ -122,6 +123,7 @@ type
   protected
    fscrollbox: tformscrollbox;
     //needed to distinguish between scrolled and unscrolled (mainmenu...) widgets
+   procedure aftercreate; virtual;
    function createmainmenuwidget: tframemenuwidget; virtual;
    procedure updateoptions; virtual;
    function getoptions: formoptionsty; virtual;
@@ -320,6 +322,18 @@ type
    constructor create(aowner: tcomponent; load: boolean); override;
  end;
 
+ tmainform = class(tmseform)
+  protected
+   class function getmoduleclassname: string; override;
+   procedure aftercreate; override;
+  public
+  published
+   property options default defaultmainformoptions;
+   property optionswindow default defaultmainformoptionswindow;
+ end;
+
+ mainformclassty = class of tmainform;
+  
  tformdockcontroller = class(tdockcontroller)
   protected
    procedure setoptionsdock(const avalue: optionsdockty); override;
@@ -453,6 +467,8 @@ type
  
 function createmseform(const aclass: tclass; 
                    const aclassname: pshortstring): tmsecomponent;
+function createmainform(const aclass: tclass; 
+                   const aclassname: pshortstring): tmsecomponent;
 function createsubform(const aclass: tclass; 
                    const aclassname: pshortstring): tmsecomponent;
 function simulatemodalresult(const awidget: twidget;
@@ -515,6 +531,14 @@ type
   {$endif}
 
 function createmseform(const aclass: tclass; 
+                    const aclassname: pshortstring): tmsecomponent;
+
+begin
+ result:= mseformclassty(aclass).create(nil,false);
+ tmsecomponent1(result).factualclassname:= aclassname;
+end;
+
+function createmainform(const aclass: tclass; 
                     const aclassname: pshortstring): tmsecomponent;
 
 begin
@@ -629,6 +653,7 @@ begin
  fwidgetrect.y:= 100;
  options:= defaultformoptions;
  inherited create(aowner);
+ aftercreate;
  fwidgetrect.cx:= 100;
  fwidgetrect.cy:= 100;
  if fscrollbox = nil then begin
@@ -1540,6 +1565,11 @@ begin
  end;
 end;
 
+procedure tcustommseform.aftercreate;
+begin
+ //dummy
+end;
+
 { tmseform }
 
 constructor tmseform.create(aowner: tcomponent; load: boolean);
@@ -1558,6 +1588,22 @@ end;
 class function tmseform.hasresource: boolean;
 begin
  result:= self <> tmseform;
+end;
+
+{ tmainform }
+
+class function tmainform.getmoduleclassname: string;
+begin
+// result:= tmseform.ClassName;
+ //bug in dcc32: tmseform is replaced by self
+ result:= 'tmainform';
+end;
+
+procedure tmainform.aftercreate;
+begin
+ inherited;
+ options:= defaultmainformoptions;
+ optionswindow:= defaultmainformoptionswindow;
 end;
 
 { tformdockcontroller }

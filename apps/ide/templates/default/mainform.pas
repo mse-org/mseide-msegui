@@ -6,7 +6,7 @@ uses
  msegui,msegraphics,msegraphutils,mseevent,mseclasses,mseforms;
 
 type
- t${%FORMNAME%} = class(tmseform)
+ t${%FORMNAME%} = class(tmainform)
  end;
 var
  ${%FORMNAME%}: t${%FORMNAME%};

@@ -11,12 +11,23 @@ object projectoptionsfo: tprojectoptionsfo
   container.bounds_y = 0
   container.bounds_cx = 669
   container.bounds_cy = 571
+  container.color = -2147483645
   container.frame.framei_bottom = 0
   container.frame.localprops = [frl_fibottom, frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
   container.frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
   container.frame.sbhorz.options = [sbo_moveauto, sbo_showauto]
+  container.frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+  container.frame.sbhorz.facebutton.dummy = 0
+  container.frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+  container.frame.sbhorz.faceendbutton.dummy = 0
   container.frame.sbvert.options = [sbo_moveauto, sbo_showauto]
+  container.frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+  container.frame.sbvert.facebutton.dummy = 0
+  container.frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+  container.frame.sbvert.faceendbutton.dummy = 0
   container.frame.dummy = 0
+  container.face.template = guitemplatesmo.fadehorzconvex
+  container.face.dummy = 0
   options = [fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder]
   statfile = statfile1
   caption = 'Projectoptions'
@@ -27,6 +38,7 @@ object projectoptionsfo: tprojectoptionsfo
     bounds_y = 0
     bounds_cx = 669
     bounds_cy = 571
+    color = -2147483645
     anchors = []
     optionslayout = [lao_placey]
     place_mindist = 0
@@ -37,6 +49,7 @@ object projectoptionsfo: tprojectoptionsfo
       bounds_y = 540
       bounds_cx = 669
       bounds_cy = 31
+      color = -2147483645
       frame.framei_top = 5
       frame.framei_bottom = 5
       frame.localprops = [frl_fitop, frl_fibottom]
@@ -57,7 +70,10 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_y = 6
         bounds_cx = 49
         bounds_cy = 20
-        state = [as_localcaption]
+        color = -2147483645
+        face.template = guitemplatesmo.fadevertkonvex
+        face.dummy = 0
+        state = [as_localcaption, as_localcolor]
         autosize_cx = 0
         autosize_cy = 0
         caption = 'Cancel'
@@ -70,8 +86,11 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_y = 6
         bounds_cx = 49
         bounds_cy = 20
+        color = -2147483645
+        face.template = guitemplatesmo.fadevertkonvex
+        face.dummy = 0
         taborder = 1
-        state = [as_default, as_localdefault, as_localcaption]
+        state = [as_default, as_localdefault, as_localcaption, as_localcolor]
         autosize_cx = 0
         autosize_cy = 0
         caption = 'Ok'
@@ -92,10 +111,17 @@ object projectoptionsfo: tprojectoptionsfo
       frame.dummy = 0
       anchors = [an_top, an_bottom]
       taborder = 1
-      activepageindex = 6
+      activepageindex = 2
+      tab_frame.buttonface.template = guitemplatesmo.fadehorzconvex
+      tab_frame.buttonface.dummy = 0
       tab_frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
       tab_frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
       tab_frame.dummy = 0
+      tab_face.template = guitemplatesmo.fadevertconcave
+      tab_face.dummy = 0
+      tab_color = -2147483645
+      tab_facetab.template = guitemplatesmo.fadevertkonvex
+      tab_facetab.dummy = 0
       tab_size = 18
       statfile = statfile1
       reffontheight = 14
@@ -105,9 +131,18 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_y = 19
         bounds_cx = 667
         bounds_cy = 520
+        color = -2147483645
         frame.framei_bottom = 0
         frame.localprops = [frl_fibottom, frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
+        frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+        frame.sbhorz.facebutton.dummy = 0
+        frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+        frame.sbhorz.faceendbutton.dummy = 0
+        frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+        frame.sbvert.facebutton.dummy = 0
+        frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+        frame.sbvert.faceendbutton.dummy = 0
         frame.dummy = 0
         anchors = [an_left, an_top, an_right, an_bottom]
         taborder = 5
@@ -118,6 +153,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_y = 89
           bounds_cx = 667
           bounds_cy = 208
+          color = -2147483645
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
           frame.dummy = 0
@@ -136,6 +172,14 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_y = 117
             bounds_cx = 654
             bounds_cy = 91
+            frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+            frame.sbvert.facebutton.dummy = 0
+            frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+            frame.sbvert.faceendbutton.dummy = 0
+            frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+            frame.sbhorz.facebutton.dummy = 0
+            frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+            frame.sbhorz.faceendbutton.dummy = 0
             frame.caption = 'Test'
             frame.captionpos = cp_topright
             frame.font.xscale =  1.0000000000000000E+0000
@@ -195,6 +239,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_y = 78
             bounds_cx = 667
             bounds_cy = 37
+            color = -2147483645
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
             frame.dummy = 0
@@ -330,6 +375,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_y = 39
             bounds_cx = 667
             bounds_cy = 37
+            color = -2147483645
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
             frame.dummy = 0
@@ -348,6 +394,8 @@ object projectoptionsfo: tprojectoptionsfo
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
               frame.button.color = -2147483646
+              frame.button.face.template = guitemplatesmo.fadehorzconvex
+              frame.button.face.dummy = 0
               frame.dummy = 0
               frame.outerframe = (
                 0
@@ -439,6 +487,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_y = 0
             bounds_cx = 667
             bounds_cy = 37
+            color = -2147483645
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
             frame.dummy = 0
@@ -692,11 +741,17 @@ object projectoptionsfo: tprojectoptionsfo
           anchors = [an_top, an_bottom]
           taborder = 7
           activepageindex = 1
+          tab_frame.buttonface.template = guitemplatesmo.fadehorzconvex
+          tab_frame.buttonface.dummy = 0
           tab_frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
           tab_frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
           tab_frame.dummy = 0
           tab_face.localprops = [fal_frameimageoffset]
+          tab_face.template = guitemplatesmo.fadevertconcave
           tab_face.dummy = 0
+          tab_color = -2147483645
+          tab_facetab.template = guitemplatesmo.fadevertkonvex
+          tab_facetab.dummy = 0
           tab_size = 18
           reffontheight = 14
           object ttabpage13: ttabpage
@@ -705,9 +760,18 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_y = 18
             bounds_cx = 667
             bounds_cy = 203
+            color = -2147483645
             frame.framei_bottom = 0
             frame.localprops = [frl_fibottom, frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
+            frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+            frame.sbhorz.facebutton.dummy = 0
+            frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+            frame.sbhorz.faceendbutton.dummy = 0
+            frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+            frame.sbvert.facebutton.dummy = 0
+            frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+            frame.sbvert.faceendbutton.dummy = 0
             frame.dummy = 0
             anchors = [an_left, an_top, an_right, an_bottom]
             taborder = 1
@@ -718,6 +782,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_y = -252
               bounds_cx = 667
               bounds_cy = 434
+              color = -2147483645
               anchors = [an_top]
               taborder = 1
             end
@@ -727,6 +792,15 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_y = 0
               bounds_cx = 667
               bounds_cy = 203
+              color = -2147483645
+              frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+              frame.sbvert.facebutton.dummy = 0
+              frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+              frame.sbvert.faceendbutton.dummy = 0
+              frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+              frame.sbhorz.facebutton.dummy = 0
+              frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+              frame.sbhorz.faceendbutton.dummy = 0
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
               frame.dummy = 0
@@ -753,6 +827,8 @@ object projectoptionsfo: tprojectoptionsfo
               fixrows.count = 1
               fixrows.items = <              
                 item
+                  face.template = guitemplatesmo.fadevertkonvex
+                  face.dummy = 0
                   height = 16
                   captions.count = 2
                   captions.items = <                  
@@ -773,8 +849,17 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_y = 18
             bounds_cx = 667
             bounds_cy = 203
+            color = -2147483645
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
+            frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+            frame.sbhorz.facebutton.dummy = 0
+            frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+            frame.sbhorz.faceendbutton.dummy = 0
+            frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+            frame.sbvert.facebutton.dummy = 0
+            frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+            frame.sbvert.faceendbutton.dummy = 0
             frame.dummy = 0
             anchors = [an_left, an_top, an_right, an_bottom]
             taborder = 2
@@ -788,6 +873,15 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_cx = 667
               bounds_cy = 203
               bounds_cymin = 60
+              color = -2147483645
+              frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+              frame.sbvert.facebutton.dummy = 0
+              frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+              frame.sbvert.faceendbutton.dummy = 0
+              frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+              frame.sbhorz.facebutton.dummy = 0
+              frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+              frame.sbhorz.faceendbutton.dummy = 0
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
               frame.dummy = 0
@@ -820,6 +914,8 @@ object projectoptionsfo: tprojectoptionsfo
               fixrows.count = 1
               fixrows.items = <              
                 item
+                  face.template = guitemplatesmo.fadevertkonvex
+                  face.dummy = 0
                   height = 16
                   captions.count = 2
                   captions.items = <                  
@@ -845,10 +941,19 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_y = 19
         bounds_cx = 667
         bounds_cy = 520
+        color = -2147483645
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
         frame.sbhorz.options = [sbo_moveauto, sbo_showauto]
+        frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+        frame.sbhorz.facebutton.dummy = 0
+        frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+        frame.sbhorz.faceendbutton.dummy = 0
         frame.sbvert.options = [sbo_moveauto, sbo_showauto]
+        frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+        frame.sbvert.facebutton.dummy = 0
+        frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+        frame.sbvert.faceendbutton.dummy = 0
         frame.dummy = 0
         anchors = [an_left, an_top, an_right, an_bottom]
         taborder = 4
@@ -866,6 +971,8 @@ object projectoptionsfo: tprojectoptionsfo
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
           frame.button.color = -2147483646
+          frame.button.face.template = guitemplatesmo.fadehorzconvex
+          frame.button.face.dummy = 0
           frame.button.imagenr = 17
           frame.dummy = 0
           frame.outerframe = (
@@ -913,11 +1020,17 @@ object projectoptionsfo: tprojectoptionsfo
           anchors = [an_left, an_top, an_right, an_bottom]
           taborder = 3
           activepageindex = 0
+          tab_frame.buttonface.template = guitemplatesmo.fadehorzconvex
+          tab_frame.buttonface.dummy = 0
           tab_frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
           tab_frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
           tab_frame.dummy = 0
           tab_face.localprops = [fal_frameimageoffset]
+          tab_face.template = guitemplatesmo.fadevertconcave
           tab_face.dummy = 0
+          tab_color = -2147483645
+          tab_facetab.template = guitemplatesmo.fadevertkonvex
+          tab_facetab.dummy = 0
           tab_size = 18
           statfile = statfile1
           reffontheight = 14
@@ -927,8 +1040,17 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_y = 18
             bounds_cx = 667
             bounds_cy = 279
+            color = -2147483645
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
+            frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+            frame.sbhorz.facebutton.dummy = 0
+            frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+            frame.sbhorz.faceendbutton.dummy = 0
+            frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+            frame.sbvert.facebutton.dummy = 0
+            frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+            frame.sbvert.faceendbutton.dummy = 0
             frame.dummy = 0
             anchors = [an_left, an_top, an_right, an_bottom]
             taborder = 4
@@ -942,6 +1064,15 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_cx = 667
               bounds_cy = 279
               bounds_cymin = 40
+              color = -2147483645
+              frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+              frame.sbvert.facebutton.dummy = 0
+              frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+              frame.sbvert.faceendbutton.dummy = 0
+              frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+              frame.sbhorz.facebutton.dummy = 0
+              frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+              frame.sbhorz.faceendbutton.dummy = 0
               frame.captionoffset = 3
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
@@ -973,6 +1104,8 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.localprops = [frl_levelo, frl_colorclient]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
                 frame.button.color = -2147483646
+                frame.button.face.template = guitemplatesmo.fadehorzconvex
+                frame.button.face.dummy = 0
                 frame.button.imagenr = 17
                 frame.dummy = 0
                 taborder = 1
@@ -994,8 +1127,17 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_y = 18
             bounds_cx = 667
             bounds_cy = 279
+            color = -2147483645
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
+            frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+            frame.sbhorz.facebutton.dummy = 0
+            frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+            frame.sbhorz.faceendbutton.dummy = 0
+            frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+            frame.sbvert.facebutton.dummy = 0
+            frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+            frame.sbvert.faceendbutton.dummy = 0
             frame.dummy = 0
             anchors = [an_left, an_top, an_right, an_bottom]
             taborder = 1
@@ -1006,6 +1148,15 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_y = 0
               bounds_cx = 667
               bounds_cy = 279
+              color = -2147483645
+              frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+              frame.sbvert.facebutton.dummy = 0
+              frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+              frame.sbvert.faceendbutton.dummy = 0
+              frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+              frame.sbhorz.facebutton.dummy = 0
+              frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+              frame.sbhorz.faceendbutton.dummy = 0
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
               frame.dummy = 0
@@ -1014,6 +1165,8 @@ object projectoptionsfo: tprojectoptionsfo
               fixrows.count = 1
               fixrows.items = <              
                 item
+                  face.template = guitemplatesmo.fadevertkonvex
+                  face.dummy = 0
                   height = 16
                   captions.count = 2
                   captions.items = <                  
@@ -1081,8 +1234,17 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_y = 18
             bounds_cx = 667
             bounds_cy = 279
+            color = -2147483645
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
+            frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+            frame.sbhorz.facebutton.dummy = 0
+            frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+            frame.sbhorz.faceendbutton.dummy = 0
+            frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+            frame.sbvert.facebutton.dummy = 0
+            frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+            frame.sbvert.faceendbutton.dummy = 0
             frame.dummy = 0
             anchors = [an_left, an_top, an_right, an_bottom]
             taborder = 3
@@ -1095,6 +1257,15 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_cx = 667
               bounds_cy = 279
               bounds_cymin = 40
+              color = -2147483645
+              frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+              frame.sbvert.facebutton.dummy = 0
+              frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+              frame.sbvert.faceendbutton.dummy = 0
+              frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+              frame.sbhorz.facebutton.dummy = 0
+              frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+              frame.sbhorz.faceendbutton.dummy = 0
               frame.captionoffset = 3
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
@@ -1104,6 +1275,8 @@ object projectoptionsfo: tprojectoptionsfo
               fixrows.count = 1
               fixrows.items = <              
                 item
+                  face.template = guitemplatesmo.fadevertkonvex
+                  face.dummy = 0
                   height = 16
                   captions.count = 5
                   captions.items = <                  
@@ -1217,6 +1390,8 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.localprops = [frl_levelo, frl_colorclient]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
                 frame.button.color = -2147483646
+                frame.button.face.template = guitemplatesmo.fadehorzconvex
+                frame.button.face.dummy = 0
                 frame.dummy = 0
                 taborder = 5
                 visible = False
@@ -1241,8 +1416,17 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_y = 18
             bounds_cx = 667
             bounds_cy = 279
+            color = -2147483645
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
+            frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+            frame.sbhorz.facebutton.dummy = 0
+            frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+            frame.sbhorz.faceendbutton.dummy = 0
+            frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+            frame.sbvert.facebutton.dummy = 0
+            frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+            frame.sbvert.faceendbutton.dummy = 0
             frame.dummy = 0
             anchors = [an_left, an_top, an_right, an_bottom]
             taborder = 2
@@ -1253,6 +1437,15 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_y = 0
               bounds_cx = 667
               bounds_cy = 279
+              color = -2147483645
+              frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+              frame.sbvert.facebutton.dummy = 0
+              frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+              frame.sbvert.faceendbutton.dummy = 0
+              frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+              frame.sbhorz.facebutton.dummy = 0
+              frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+              frame.sbhorz.faceendbutton.dummy = 0
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
               frame.dummy = 0
@@ -1261,6 +1454,8 @@ object projectoptionsfo: tprojectoptionsfo
               fixrows.count = 1
               fixrows.items = <              
                 item
+                  face.template = guitemplatesmo.fadevertkonvex
+                  face.dummy = 0
                   height = 16
                   captions.count = 2
                   captions.items = <                  
@@ -1327,8 +1522,17 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_y = 18
             bounds_cx = 667
             bounds_cy = 279
+            color = -2147483645
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
+            frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+            frame.sbhorz.facebutton.dummy = 0
+            frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+            frame.sbhorz.faceendbutton.dummy = 0
+            frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+            frame.sbvert.facebutton.dummy = 0
+            frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+            frame.sbvert.faceendbutton.dummy = 0
             frame.dummy = 0
             anchors = [an_left, an_top, an_right, an_bottom]
             taborder = 5
@@ -1360,6 +1564,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_y = 188
               bounds_cx = 667
               bounds_cy = 37
+              color = -2147483645
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
               frame.dummy = 0
@@ -1380,6 +1585,8 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
                 frame.button.color = -2147483646
+                frame.button.face.template = guitemplatesmo.fadehorzconvex
+                frame.button.face.dummy = 0
                 frame.button.imagenr = 17
                 frame.dummy = 0
                 frame.outerframe = (
@@ -1419,6 +1626,8 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
                 frame.button.color = -2147483646
+                frame.button.face.template = guitemplatesmo.fadehorzconvex
+                frame.button.face.dummy = 0
                 frame.button.imagenr = 17
                 frame.dummy = 0
                 frame.outerframe = (
@@ -1446,6 +1655,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_y = 225
               bounds_cx = 667
               bounds_cy = 37
+              color = -2147483645
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
               frame.dummy = 0
@@ -1465,6 +1675,8 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
                 frame.button.color = -2147483646
+                frame.button.face.template = guitemplatesmo.fadehorzconvex
+                frame.button.face.dummy = 0
                 frame.button.imagenr = 17
                 frame.dummy = 0
                 frame.outerframe = (
@@ -1500,6 +1712,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_y = 37
               bounds_cx = 667
               bounds_cy = 37
+              color = -2147483645
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
               frame.dummy = 0
@@ -1521,6 +1734,8 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
                 frame.button.color = -2147483646
+                frame.button.face.template = guitemplatesmo.fadehorzconvex
+                frame.button.face.dummy = 0
                 frame.button.imagenr = 17
                 frame.dummy = 0
                 frame.outerframe = (
@@ -1578,6 +1793,8 @@ object projectoptionsfo: tprojectoptionsfo
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
               frame.button.color = -2147483646
+              frame.button.face.template = guitemplatesmo.fadehorzconvex
+              frame.button.face.dummy = 0
               frame.button.imagenr = 17
               frame.dummy = 0
               frame.outerframe = (
@@ -1600,6 +1817,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_y = 151
               bounds_cx = 667
               bounds_cy = 37
+              color = -2147483645
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
               frame.dummy = 0
@@ -1623,6 +1841,8 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
                 frame.button.color = -2147483646
+                frame.button.face.template = guitemplatesmo.fadehorzconvex
+                frame.button.face.dummy = 0
                 frame.dummy = 0
                 frame.outerframe = (
                   0
@@ -1725,6 +1945,7 @@ object projectoptionsfo: tprojectoptionsfo
               object startupbkpton: tbooleanedit
                 bounds_x = 542
                 bounds_y = 21
+                color = -2147483645
                 frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
                 frame.dummy = 0
@@ -1737,6 +1958,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_y = 74
               bounds_cx = 667
               bounds_cy = 37
+              color = -2147483645
               anchors = [an_top]
               taborder = 6
               optionsscale = [osc_expandy, osc_shrinky]
@@ -1755,6 +1977,8 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
                 frame.button.color = -2147483646
+                frame.button.face.template = guitemplatesmo.fadehorzconvex
+                frame.button.face.dummy = 0
                 frame.button.imagenr = 17
                 frame.dummy = 0
                 frame.outerframe = (
@@ -1779,6 +2003,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_y = 196
           bounds_cx = 592
           bounds_cy = 16
+          color = -2147483645
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
           frame.dummy = 0
@@ -1889,6 +2114,8 @@ object projectoptionsfo: tprojectoptionsfo
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
           frame.button.color = -2147483646
+          frame.button.face.template = guitemplatesmo.fadehorzconvex
+          frame.button.face.dummy = 0
           frame.button.imagenr = 17
           frame.dummy = 0
           frame.outerframe = (
@@ -1918,6 +2145,8 @@ object projectoptionsfo: tprojectoptionsfo
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
           frame.button.color = -2147483646
+          frame.button.face.template = guitemplatesmo.fadehorzconvex
+          frame.button.face.dummy = 0
           frame.button.imagenr = 17
           frame.dummy = 0
           frame.outerframe = (
@@ -1954,11 +2183,21 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_y = 19
         bounds_cx = 667
         bounds_cy = 520
+        color = -2147483645
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
+        frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+        frame.sbhorz.facebutton.dummy = 0
+        frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+        frame.sbhorz.faceendbutton.dummy = 0
+        frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+        frame.sbvert.facebutton.dummy = 0
+        frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+        frame.sbvert.faceendbutton.dummy = 0
         frame.dummy = 0
         anchors = [an_top, an_bottom]
         taborder = 6
+        visible = True
         caption = '&Make'
         onchildscaled = makepageonchildscaled
         object tspacer2: tspacer
@@ -1966,6 +2205,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_y = 100
           bounds_cx = 10
           bounds_cy = 26
+          color = -2147483645
           taborder = 15
           linkleft = makecommand
           linkright = copymessages
@@ -1981,6 +2221,8 @@ object projectoptionsfo: tprojectoptionsfo
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
           frame.button.color = -2147483646
+          frame.button.face.template = guitemplatesmo.fadehorzconvex
+          frame.button.face.dummy = 0
           frame.dummy = 0
           frame.outerframe = (
             0
@@ -2020,6 +2262,8 @@ object projectoptionsfo: tprojectoptionsfo
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
           frame.button.color = -2147483646
+          frame.button.face.template = guitemplatesmo.fadehorzconvex
+          frame.button.face.dummy = 0
           frame.button.imagenr = 17
           frame.dummy = 0
           frame.outerframe = (
@@ -2047,6 +2291,8 @@ object projectoptionsfo: tprojectoptionsfo
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
           frame.button.color = -2147483646
+          frame.button.face.template = guitemplatesmo.fadehorzconvex
+          frame.button.face.dummy = 0
           frame.button.imagenr = 17
           frame.dummy = 0
           frame.outerframe = (
@@ -2076,6 +2322,8 @@ object projectoptionsfo: tprojectoptionsfo
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
           frame.button.color = -2147483646
+          frame.button.face.template = guitemplatesmo.fadehorzconvex
+          frame.button.face.dummy = 0
           frame.button.imagenr = 17
           frame.dummy = 0
           frame.outerframe = (
@@ -2101,8 +2349,10 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_cx = 123
           bounds_cy = 20
           color = -2147483645
+          face.template = guitemplatesmo.fadevertkonvex
+          face.dummy = 0
           taborder = 7
-          state = [as_localcaption, as_localonexecute]
+          state = [as_localcaption, as_localcolor, as_localonexecute]
           autosize_cx = 0
           autosize_cy = 0
           caption = 'Show command line'
@@ -2120,6 +2370,8 @@ object projectoptionsfo: tprojectoptionsfo
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
           frame.button.color = -2147483646
+          frame.button.face.template = guitemplatesmo.fadehorzconvex
+          frame.button.face.dummy = 0
           frame.button.imagenr = 17
           frame.dummy = 0
           frame.outerframe = (
@@ -2200,11 +2452,17 @@ object projectoptionsfo: tprojectoptionsfo
           anchors = [an_top, an_bottom]
           taborder = 11
           activepageindex = 0
+          tab_frame.buttonface.template = guitemplatesmo.fadehorzconvex
+          tab_frame.buttonface.dummy = 0
           tab_frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
           tab_frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
           tab_frame.dummy = 0
           tab_face.localprops = [fal_frameimageoffset]
+          tab_face.template = guitemplatesmo.fadevertconcave
           tab_face.dummy = 0
+          tab_color = -2147483645
+          tab_facetab.template = guitemplatesmo.fadevertkonvex
+          tab_facetab.dummy = 0
           tab_size = 18
           statfile = statfile1
           reffontheight = 14
@@ -2214,8 +2472,17 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_y = 18
             bounds_cx = 667
             bounds_cy = 315
+            color = -2147483645
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
+            frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+            frame.sbhorz.facebutton.dummy = 0
+            frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+            frame.sbhorz.faceendbutton.dummy = 0
+            frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+            frame.sbvert.facebutton.dummy = 0
+            frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+            frame.sbvert.faceendbutton.dummy = 0
             frame.dummy = 0
             face.localprops = [fal_frameimageoffset]
             face.dummy = 0
@@ -2231,6 +2498,15 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_cx = 667
               bounds_cy = 315
               bounds_cymin = 40
+              color = -2147483645
+              frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+              frame.sbvert.facebutton.dummy = 0
+              frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+              frame.sbvert.faceendbutton.dummy = 0
+              frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+              frame.sbhorz.facebutton.dummy = 0
+              frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+              frame.sbhorz.faceendbutton.dummy = 0
               frame.captionoffset = 3
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
@@ -2240,6 +2516,8 @@ object projectoptionsfo: tprojectoptionsfo
               fixrows.count = 1
               fixrows.items = <              
                 item
+                  face.template = guitemplatesmo.fadevertkonvex
+                  face.dummy = 0
                   height = 16
                   captions.count = 7
                   captions.items = <                  
@@ -2406,8 +2684,17 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_y = 18
             bounds_cx = 667
             bounds_cy = 315
+            color = -2147483645
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
+            frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+            frame.sbhorz.facebutton.dummy = 0
+            frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+            frame.sbhorz.faceendbutton.dummy = 0
+            frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+            frame.sbvert.facebutton.dummy = 0
+            frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+            frame.sbvert.faceendbutton.dummy = 0
             frame.dummy = 0
             anchors = [an_left, an_top, an_right, an_bottom]
             taborder = 1
@@ -2420,6 +2707,14 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_cx = 667
               bounds_cy = 268
               bounds_cymin = 40
+              frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+              frame.sbvert.facebutton.dummy = 0
+              frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+              frame.sbvert.faceendbutton.dummy = 0
+              frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+              frame.sbhorz.facebutton.dummy = 0
+              frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+              frame.sbhorz.faceendbutton.dummy = 0
               frame.caption = 'Unit, include and library &directories'
               frame.captionoffset = 3
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
@@ -2436,6 +2731,8 @@ object projectoptionsfo: tprojectoptionsfo
               fixrows.count = 1
               fixrows.items = <              
                 item
+                  face.template = guitemplatesmo.fadevertkonvex
+                  face.dummy = 0
                   height = 16
                   captions.count = 11
                   captions.items = <                  
@@ -2686,6 +2983,8 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.localprops = [frl_levelo, frl_colorclient]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
                 frame.button.color = -2147483646
+                frame.button.face.template = guitemplatesmo.fadehorzconvex
+                frame.button.face.dummy = 0
                 frame.button.imagenr = 17
                 frame.dummy = 0
                 taborder = 11
@@ -2776,6 +3075,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_y = 42
               bounds_cx = 50
               bounds_cy = 5
+              color = -2147483645
               taborder = 5
               linktop = objpref
               linkbottom = unitdirgrid
@@ -2812,6 +3112,8 @@ object projectoptionsfo: tprojectoptionsfo
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
           frame.button.color = -2147483646
+          frame.button.face.template = guitemplatesmo.fadehorzconvex
+          frame.button.face.dummy = 0
           frame.button.imagenr = 17
           frame.dummy = 0
           frame.outerframe = (
@@ -2890,8 +3192,17 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_y = 19
         bounds_cx = 667
         bounds_cy = 520
+        color = -2147483645
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
+        frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+        frame.sbhorz.facebutton.dummy = 0
+        frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+        frame.sbhorz.faceendbutton.dummy = 0
+        frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+        frame.sbvert.facebutton.dummy = 0
+        frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+        frame.sbvert.faceendbutton.dummy = 0
         frame.dummy = 0
         anchors = [an_left, an_top, an_right, an_bottom]
         taborder = 3
@@ -2904,6 +3215,15 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_cx = 667
           bounds_cy = 397
           bounds_cymin = 40
+          color = -2147483645
+          frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+          frame.sbvert.facebutton.dummy = 0
+          frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+          frame.sbvert.faceendbutton.dummy = 0
+          frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+          frame.sbhorz.facebutton.dummy = 0
+          frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+          frame.sbhorz.faceendbutton.dummy = 0
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
           frame.dummy = 0
@@ -2913,6 +3233,8 @@ object projectoptionsfo: tprojectoptionsfo
           fixrows.count = 1
           fixrows.items = <          
             item
+              face.template = guitemplatesmo.fadevertkonvex
+              face.dummy = 0
               height = 16
               captions.count = 8
               captions.items = <              
@@ -3100,6 +3422,14 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_cx = 667
           bounds_cy = 121
           bounds_cymin = 40
+          frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+          frame.sbvert.facebutton.dummy = 0
+          frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+          frame.sbvert.faceendbutton.dummy = 0
+          frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+          frame.sbhorz.facebutton.dummy = 0
+          frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+          frame.sbhorz.faceendbutton.dummy = 0
           frame.caption = 'Active group'
           frame.captionoffset = 3
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
@@ -3201,8 +3531,17 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_y = 19
         bounds_cx = 667
         bounds_cy = 520
+        color = -2147483645
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
+        frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+        frame.sbhorz.facebutton.dummy = 0
+        frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+        frame.sbhorz.faceendbutton.dummy = 0
+        frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+        frame.sbvert.facebutton.dummy = 0
+        frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+        frame.sbvert.faceendbutton.dummy = 0
         frame.dummy = 0
         anchors = [an_left, an_top, an_right, an_bottom]
         taborder = 2
@@ -3213,6 +3552,15 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_y = 0
           bounds_cx = 667
           bounds_cy = 520
+          color = -2147483645
+          frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+          frame.sbvert.facebutton.dummy = 0
+          frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+          frame.sbvert.faceendbutton.dummy = 0
+          frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+          frame.sbhorz.facebutton.dummy = 0
+          frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+          frame.sbhorz.faceendbutton.dummy = 0
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
           frame.dummy = 0
@@ -3221,6 +3569,8 @@ object projectoptionsfo: tprojectoptionsfo
           fixrows.count = 1
           fixrows.items = <          
             item
+              face.template = guitemplatesmo.fadevertkonvex
+              face.dummy = 0
               height = 15
               captions.count = 6
               captions.items = <              
@@ -3353,9 +3703,18 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_y = 19
         bounds_cx = 667
         bounds_cy = 520
+        color = -2147483645
         frame.framei_bottom = 0
         frame.localprops = [frl_fibottom, frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
+        frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+        frame.sbhorz.facebutton.dummy = 0
+        frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+        frame.sbhorz.faceendbutton.dummy = 0
+        frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+        frame.sbvert.facebutton.dummy = 0
+        frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+        frame.sbvert.faceendbutton.dummy = 0
         frame.dummy = 0
         anchors = [an_left, an_top, an_right, an_bottom]
         taborder = 7
@@ -3366,6 +3725,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_y = 1003
           bounds_cx = 667
           bounds_cy = 42
+          color = -2147483645
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
           frame.dummy = 0
@@ -3381,8 +3741,10 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_cx = 244
             bounds_cy = 20
             color = -2147483645
+            face.template = guitemplatesmo.fadevertkonvex
+            face.dummy = 0
             anchors = [an_left, an_bottom]
-            state = [as_localcaption, as_localonexecute]
+            state = [as_localcaption, as_localcolor, as_localonexecute]
             autosize_cx = 0
             autosize_cy = 0
             caption = 'Copy "setcolormapvalue" code to clipboard'
@@ -3394,6 +3756,15 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_y = 0
           bounds_cx = 667
           bounds_cy = 520
+          color = -2147483645
+          frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+          frame.sbvert.facebutton.dummy = 0
+          frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+          frame.sbvert.faceendbutton.dummy = 0
+          frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+          frame.sbhorz.facebutton.dummy = 0
+          frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+          frame.sbhorz.faceendbutton.dummy = 0
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
           frame.dummy = 0
@@ -3408,6 +3779,8 @@ object projectoptionsfo: tprojectoptionsfo
           fixrows.count = 1
           fixrows.items = <          
             item
+              face.template = guitemplatesmo.fadevertkonvex
+              face.dummy = 0
               height = 16
               captions.count = 3
               captions.items = <              
@@ -3521,7 +3894,11 @@ object projectoptionsfo: tprojectoptionsfo
             frame.localprops = [frl_levelo, frl_colorclient]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
             frame.button.color = -2147483646
+            frame.button.face.template = guitemplatesmo.fadehorzconvex
+            frame.button.face.dummy = 0
             frame.buttonellipse.color = -2147483646
+            frame.buttonellipse.face.template = guitemplatesmo.fadehorzconvex
+            frame.buttonellipse.face.dummy = 0
             frame.buttonellipse.imagenr = 17
             frame.dummy = 0
             taborder = 2
@@ -3555,12 +3932,20 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_y = 19
         bounds_cx = 667
         bounds_cy = 520
+        color = -2147483645
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
+        frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+        frame.sbhorz.facebutton.dummy = 0
+        frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+        frame.sbhorz.faceendbutton.dummy = 0
+        frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+        frame.sbvert.facebutton.dummy = 0
+        frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+        frame.sbvert.faceendbutton.dummy = 0
         frame.dummy = 0
         anchors = [an_left, an_top, an_right, an_bottom]
         taborder = 1
-        visible = True
         caption = '&Templates'
         reffontheight = 14
         object newfile: ttabwidget
@@ -3571,9 +3956,16 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_cy = 520
           anchors = []
           activepageindex = 0
+          tab_frame.buttonface.template = guitemplatesmo.fadehorzconvex
+          tab_frame.buttonface.dummy = 0
           tab_frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
           tab_frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
           tab_frame.dummy = 0
+          tab_face.template = guitemplatesmo.fadevertconcave
+          tab_face.dummy = 0
+          tab_color = -2147483645
+          tab_facetab.template = guitemplatesmo.fadevertkonvex
+          tab_facetab.dummy = 0
           tab_size = 18
           statfile = statfile1
           reffontheight = 14
@@ -3583,8 +3975,17 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_y = 18
             bounds_cx = 667
             bounds_cy = 502
+            color = -2147483645
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
+            frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+            frame.sbhorz.facebutton.dummy = 0
+            frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+            frame.sbhorz.faceendbutton.dummy = 0
+            frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+            frame.sbvert.facebutton.dummy = 0
+            frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+            frame.sbvert.faceendbutton.dummy = 0
             frame.dummy = 0
             anchors = [an_left, an_top, an_right, an_bottom]
             taborder = 3
@@ -3598,17 +3999,28 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_y = 80
               bounds_cx = 667
               bounds_cy = 420
+              color = -2147483645
+              frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+              frame.sbvert.facebutton.dummy = 0
+              frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+              frame.sbvert.faceendbutton.dummy = 0
+              frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+              frame.sbhorz.facebutton.dummy = 0
+              frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+              frame.sbhorz.faceendbutton.dummy = 0
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
               frame.dummy = 0
               anchors = [an_top, an_bottom]
-              optionsgrid = [og_colsizing, og_keycolmoving, og_rowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup]
+              optionsgrid = [og_colsizing, og_keycolmoving, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup]
               fixrows.count = 1
               fixrows.items = <              
                 item
                   frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
                   frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
                   frame.dummy = 0
+                  face.template = guitemplatesmo.fadevertkonvex
+                  face.dummy = 0
                   height = 16
                   captions.count = 4
                   captions.items = <                  
@@ -3628,29 +4040,30 @@ object projectoptionsfo: tprojectoptionsfo
                     end>
                 end>
               datacols.count = 4
+              datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
               datacols.items = <              
                 item
                   width = 18
-                  options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                  options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste]
                   widgetname = 'loadprojectfile'
                   dataclass = tgridintegerdatalist
                 end              
                 item
                   width = 18
-                  options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                  options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste]
                   widgetname = 'expandprojectfilemacros'
                   dataclass = tgridintegerdatalist
                 end              
                 item
                   width = 334
-                  options = [co_mouseselect, co_keyselect, co_proportional, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste]
+                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste]
                   onshowhint = colonshowhint
                   widgetname = 'newprojectfiles'
                   dataclass = tgridmsestringdatalist
                 end              
                 item
                   width = 289
-                  options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste]
                   onshowhint = colonshowhint
                   widgetname = 'newprojectfilesdest'
                   dataclass = tgridmsestringdatalist
@@ -3698,6 +4111,8 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.localprops = [frl_levelo, frl_colorclient]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
                 frame.button.color = -2147483646
+                frame.button.face.template = guitemplatesmo.fadehorzconvex
+                frame.button.face.dummy = 0
                 frame.button.imagenr = 17
                 frame.dummy = 0
                 taborder = 3
@@ -3735,6 +4150,8 @@ object projectoptionsfo: tprojectoptionsfo
               frame.localprops = [frl_levelo, frl_colorclient]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
               frame.button.color = -2147483646
+              frame.button.face.template = guitemplatesmo.fadehorzconvex
+              frame.button.face.dummy = 0
               frame.button.imagenr = 17
               frame.dummy = 0
               frame.outerframe = (
@@ -3759,6 +4176,8 @@ object projectoptionsfo: tprojectoptionsfo
               frame.localprops = [frl_levelo, frl_colorclient]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
               frame.button.color = -2147483646
+              frame.button.face.template = guitemplatesmo.fadehorzconvex
+              frame.button.face.dummy = 0
               frame.button.imagenr = 17
               frame.dummy = 0
               frame.outerframe = (
@@ -3780,57 +4199,160 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_y = 18
             bounds_cx = 667
             bounds_cy = 502
+            color = -2147483645
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
+            frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+            frame.sbhorz.facebutton.dummy = 0
+            frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+            frame.sbhorz.faceendbutton.dummy = 0
+            frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+            frame.sbvert.facebutton.dummy = 0
+            frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+            frame.sbvert.faceendbutton.dummy = 0
             frame.dummy = 0
             anchors = [an_left, an_top, an_right, an_bottom]
             taborder = 2
             caption = 'New File'
             reffontheight = 14
-            object newprogf: tfilenameedit
+            object twidgetgrid1: twidgetgrid
               bounds_x = 0
-              bounds_y = 22
-              bounds_cx = 667
-              bounds_cy = 37
-              frame.caption = 'Program'
-              frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
-              frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-              frame.button.color = -2147483646
-              frame.button.imagenr = 17
+              bounds_y = 0
+              bounds_cx = 665
+              bounds_cy = 502
+              color = -2147483645
+              frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+              frame.sbvert.facebutton.dummy = 0
+              frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+              frame.sbvert.faceendbutton.dummy = 0
+              frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+              frame.sbhorz.facebutton.dummy = 0
+              frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+              frame.sbhorz.faceendbutton.dummy = 0
               frame.dummy = 0
-              frame.outerframe = (
-                0
-                17
-                0
-                0
-              )
-              anchors = [an_top]
-              taborder = 1
-              onshowhint = hintexpandedmacros
-              controller.ongetfilename = expandfilename
+              anchors = [an_left, an_top, an_right, an_bottom]
+              optionsgrid = [og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
+              fixcols.count = 1
+              fixcols.items = <              
+                item
+                  width = 27
+                  numstep = 1
+                end>
+              fixrows.count = 1
+              fixrows.items = <              
+                item
+                  face.template = guitemplatesmo.fadevertkonvex
+                  face.dummy = 0
+                  height = 16
+                  captions.count = 5
+                  captions.items = <                  
+                    item
+                      caption = 'Kind'
+                    end                  
+                    item
+                      caption = 'Filter'
+                    end                  
+                    item
+                      caption = 'Ext'
+                    end                  
+                    item
+                      caption = 'Source'
+                    end                  
+                    item
+                    end>
+                end>
+              datacols.count = 4
+              datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+              datacols.items = <              
+                item
+                  width = 92
+                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+                  onshowhint = colonshowhint
+                  widgetname = 'newfiname'
+                  dataclass = tgridmsestringdatalist
+                end              
+                item
+                  width = 110
+                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+                  onshowhint = colonshowhint
+                  widgetname = 'newfifilter'
+                  dataclass = tgridmsestringdatalist
+                end              
+                item
+                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+                  onshowhint = colonshowhint
+                  widgetname = 'newfiext'
+                  dataclass = tgridmsestringdatalist
+                end              
+                item
+                  width = 377
+                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+                  onshowhint = colonshowhint
+                  widgetname = 'newfisource'
+                  dataclass = tgridmsestringdatalist
+                end>
+              datarowheight = 16
               reffontheight = 14
-            end
-            object newunitf: tfilenameedit
-              bounds_x = 0
-              bounds_y = 78
-              bounds_cx = 667
-              bounds_cy = 37
-              frame.caption = 'Unit'
-              frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
-              frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-              frame.button.color = -2147483646
-              frame.button.imagenr = 17
-              frame.dummy = 0
-              frame.outerframe = (
-                0
-                17
-                0
-                0
-              )
-              anchors = [an_top]
-              onshowhint = hintexpandedmacros
-              controller.ongetfilename = expandfilename
-              reffontheight = 14
+              object newfiname: tstringedit
+                optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+                optionsskin = [osk_framebuttononly]
+                bounds_x = 0
+                bounds_y = 0
+                bounds_cx = 92
+                bounds_cy = 16
+                taborder = 1
+                onshowhint = hintexpandedmacros
+                visible = False
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+                reffontheight = 14
+              end
+              object newfifilter: tstringedit
+                optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+                optionsskin = [osk_framebuttononly]
+                bounds_x = 93
+                bounds_y = 0
+                bounds_cx = 110
+                bounds_cy = 16
+                taborder = 2
+                onshowhint = hintexpandedmacros
+                visible = False
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+                reffontheight = 14
+              end
+              object newfiext: tstringedit
+                optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+                optionsskin = [osk_framebuttononly]
+                bounds_x = 204
+                bounds_y = 0
+                bounds_cx = 50
+                bounds_cy = 16
+                taborder = 3
+                onshowhint = hintexpandedmacros
+                visible = False
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+                reffontheight = 14
+              end
+              object newfisource: tfilenameedit
+                optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+                optionsskin = [osk_framebuttononly]
+                bounds_x = 255
+                bounds_y = 0
+                bounds_cx = 377
+                bounds_cy = 16
+                frame.levelo = 0
+                frame.colorclient = -2147483645
+                frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+                frame.button.color = -1879048187
+                frame.button.face.template = guitemplatesmo.fadehorzconvex
+                frame.button.face.dummy = 0
+                frame.button.imagenr = 17
+                frame.dummy = 0
+                taborder = 4
+                onshowhint = hintexpandedmacros
+                visible = False
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+                reffontheight = 14
+              end
             end
           end
           object ttabpage5: ttabpage
@@ -3839,8 +4361,17 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_y = 18
             bounds_cx = 667
             bounds_cy = 502
+            color = -2147483645
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
+            frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+            frame.sbhorz.facebutton.dummy = 0
+            frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+            frame.sbhorz.faceendbutton.dummy = 0
+            frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+            frame.sbvert.facebutton.dummy = 0
+            frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+            frame.sbvert.faceendbutton.dummy = 0
             frame.dummy = 0
             anchors = [an_left, an_top, an_right, an_bottom]
             taborder = 1
@@ -3852,17 +4383,41 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_y = 0
               bounds_cx = 665
               bounds_cy = 501
+              color = -2147483645
+              frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+              frame.sbvert.facebutton.dummy = 0
+              frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+              frame.sbvert.faceendbutton.dummy = 0
+              frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+              frame.sbhorz.facebutton.dummy = 0
+              frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+              frame.sbhorz.faceendbutton.dummy = 0
               frame.dummy = 0
               anchors = [an_left, an_top, an_right, an_bottom]
-              optionsgrid = [og_colsizing, og_focuscellonenter, og_savestate, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
+              optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_savestate, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
+              fixcols.count = 1
+              fixcols.items = <              
+                item
+                  width = 23
+                  numstep = 1
+                end>
               fixrows.count = 1
               fixrows.items = <              
                 item
+                  face.template = guitemplatesmo.fadevertkonvex
+                  face.dummy = 0
                   height = 16
-                  captions.count = 3
+                  captions.count = 5
                   captions.items = <                  
                     item
                       caption = 'Kind'
+                    end                  
+                    item
+                      caption = 'I'
+                      hint = 'Inherited'
+                    end                  
+                    item
+                      caption = 'Namebase'
                     end                  
                     item
                       caption = 'Source File'
@@ -3871,65 +4426,42 @@ object projectoptionsfo: tprojectoptionsfo
                       caption = 'Form File'
                     end>
                 end>
-              rowcount = 8
-              datacols.count = 3
+              datacols.count = 5
+              datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
               datacols.items = <              
                 item
-                  color = -1879048185
                   width = 96
-                  options = [co_readonly, co_nofocus, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+                  onshowhint = colonshowhint
                   widgetname = 'newformname'
                   dataclass = tgridmsestringdatalist
-                  data = (
-                    (
-                      'Mainform'
-                      'Simple Form'
-                      'Docking Form'
-                      'Datamodule'
-                      'Subform'
-                      'Report'
-                      'Inherited Form'
-                      'Script Form'
-                    )
-                  )
                 end              
                 item
-                  width = 272
-                  options = [co_proportional, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+                  width = 13
+                  options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+                  widgetname = 'newinheritedform'
+                  dataclass = tgridintegerdatalist
+                end              
+                item
+                  width = 73
+                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+                  onshowhint = colonshowhint
+                  widgetname = 'newformnamebase'
+                  dataclass = tgridmsestringdatalist
+                end              
+                item
+                  width = 220
+                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
                   onshowhint = colonshowhint
                   widgetname = 'newformsourcefile'
                   dataclass = tgridmsestringdatalist
-                  data = (
-                    (
-                      ''
-                      ''
-                      ''
-                      ''
-                      ''
-                      ''
-                      ''
-                      ''
-                    )
-                  )
                 end              
                 item
-                  width = 290
-                  options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+                  width = 230
+                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
                   onshowhint = colonshowhint
                   widgetname = 'newformformfile'
                   dataclass = tgridmsestringdatalist
-                  data = (
-                    (
-                      ''
-                      ''
-                      ''
-                      ''
-                      ''
-                      ''
-                      ''
-                      ''
-                    )
-                  )
                 end>
               datarowheight = 16
               statfile = statfile1
@@ -3941,26 +4473,53 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_cx = 96
                 bounds_cy = 16
                 taborder = 1
+                onshowhint = hintexpandedmacros
                 visible = False
-                optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+                reffontheight = 14
+              end
+              object newinheritedform: tbooleanedit
+                optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
+                optionsskin = [osk_framebuttononly]
+                bounds_x = 97
+                bounds_y = 0
+                bounds_cy = 16
+                taborder = 2
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+                visible = False
+              end
+              object newformnamebase: tstringedit
+                optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+                optionsskin = [osk_framebuttononly]
+                bounds_x = 111
+                bounds_y = 0
+                bounds_cx = 73
+                bounds_cy = 16
+                taborder = 3
+                onshowhint = hintexpandedmacros
+                visible = False
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autopopupmenu, oe_keyexecute, oe_savestate]
                 reffontheight = 14
               end
               object newformsourcefile: tfilenameedit
                 optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
                 optionsskin = [osk_framebuttononly]
-                bounds_x = 97
+                bounds_x = 185
                 bounds_y = 0
-                bounds_cx = 272
+                bounds_cx = 220
                 bounds_cy = 16
                 frame.levelo = 0
                 frame.colorclient = -2147483645
                 frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
                 frame.button.color = -1879048187
+                frame.button.face.template = guitemplatesmo.fadehorzconvex
+                frame.button.face.dummy = 0
                 frame.button.imagenr = 17
                 frame.dummy = 0
-                taborder = 2
+                taborder = 4
                 onshowhint = hintexpandedmacros
                 visible = False
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autopopupmenu, oe_keyexecute, oe_savestate]
                 controller.filterlist.data = (
                   (
                     'Source'
@@ -3977,19 +4536,22 @@ object projectoptionsfo: tprojectoptionsfo
               object newformformfile: tfilenameedit
                 optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
                 optionsskin = [osk_framebuttononly]
-                bounds_x = 370
+                bounds_x = 406
                 bounds_y = 0
-                bounds_cx = 290
+                bounds_cx = 230
                 bounds_cy = 16
                 frame.levelo = 0
                 frame.colorclient = -2147483645
                 frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
                 frame.button.color = -1879048187
+                frame.button.face.template = guitemplatesmo.fadehorzconvex
+                frame.button.face.dummy = 0
                 frame.button.imagenr = 17
                 frame.dummy = 0
-                taborder = 3
+                taborder = 5
                 onshowhint = hintexpandedmacros
                 visible = False
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autopopupmenu, oe_keyexecute, oe_savestate]
                 controller.filterlist.data = (
                   (
                     'Form Files'
@@ -4013,8 +4575,17 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_y = 19
         bounds_cx = 667
         bounds_cy = 520
+        color = -2147483645
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
+        frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+        frame.sbhorz.facebutton.dummy = 0
+        frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+        frame.sbhorz.faceendbutton.dummy = 0
+        frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+        frame.sbvert.facebutton.dummy = 0
+        frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+        frame.sbvert.faceendbutton.dummy = 0
         frame.dummy = 0
         anchors = [an_left, an_top, an_right, an_bottom]
         taborder = 8
@@ -4026,6 +4597,15 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_y = 0
           bounds_cx = 667
           bounds_cy = 520
+          color = -2147483645
+          frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+          frame.sbvert.facebutton.dummy = 0
+          frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+          frame.sbvert.faceendbutton.dummy = 0
+          frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+          frame.sbhorz.facebutton.dummy = 0
+          frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+          frame.sbhorz.faceendbutton.dummy = 0
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
           frame.dummy = 0
@@ -4041,6 +4621,8 @@ object projectoptionsfo: tprojectoptionsfo
           fixrows.count = 1
           fixrows.items = <          
             item
+              face.template = guitemplatesmo.fadevertkonvex
+              face.dummy = 0
               height = 16
               captions.count = 6
               captions.items = <              
@@ -4187,6 +4769,8 @@ object projectoptionsfo: tprojectoptionsfo
             frame.localprops = [frl_levelo, frl_colorclient]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
             frame.button.color = -1879048187
+            frame.button.face.template = guitemplatesmo.fadehorzconvex
+            frame.button.face.dummy = 0
             frame.button.imagenr = 17
             frame.dummy = 0
             taborder = 5

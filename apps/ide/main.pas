@@ -44,8 +44,8 @@ type
  messagetextkindty = (mtk_info,mtk_running,mtk_finished,mtk_error,mtk_signal);
 
  startcommandty = (sc_none,sc_step,sc_continue);
- formkindty = (fok_main,fok_simple,fok_dock,fok_data,fok_subform,
-               fok_report,fok_script,fok_inherited);
+// formkindty = (fok_main,fok_simple,fok_dock,fok_data,fok_subform,
+//               fok_report,fok_script,fok_inherited);
 
  tmainfo = class(tmseform,idesignnotification)
    gdb: tgdbmi;
@@ -70,10 +70,11 @@ type
 
    viewmenu: tframecomp;
    runprocmon: tprocessmonitor;
-   procedure newprogramonexecute(const sender: TObject);
-   procedure newunitonexecute(const sender: TObject);
+   procedure newfileonexecute(const sender: tobject);
+//   procedure newprogramonexecute(const sender: TObject);
+//   procedure newunitonexecute(const sender: TObject);
    procedure newformonexecute(const sender: TObject);
-   procedure newtextfileonexecute(const sender: TObject);
+//   procedure newtextfileonexecute(const sender: TObject);
 
    procedure mainfooncreate(const sender: tobject);
    procedure mainfoondestroy(const sender: tobject);
@@ -207,7 +208,9 @@ type
                             const macronames: array of msestring;
                             const macrovalues: array of msestring): boolean;
                             //true if ok
-   procedure createform(const aname: filenamety; const kind: formkindty);
+//   procedure createform(const aname: filenamety; const kind: formkindty);
+   procedure createform(const aname: filenamety; const namebase: string;
+                        const ancestor: string);
    procedure removemodulemenuitem(const amodule: pmoduleinfoty);
    procedure uploadexe(const sender: tguiapplication; var again: boolean);
    procedure uploadcancel(const sender: tobject);
@@ -1572,16 +1575,20 @@ begin
  end;
 end;
 
-procedure tmainfo.createform(const aname: filenamety; const kind: formkindty);
+procedure tmainfo.createform(const aname: filenamety; const namebase: string;
+                        const ancestor: string);
+//procedure tmainfo.createform(const aname: filenamety; const kind: integer{formkindty});
 
 var
  stream1: ttextstream;
  str1,str2,str3: string;
- ancestor: string;
+// ancestor: string;
  po1: pmoduleinfoty;
 begin
   str2:= removefileext(filename(aname));
   str3:= str2;
+  str2:= getmodulename(str2,namebase);
+{
   case kind of
    fok_dock: begin
     ancestor:= 'tdockform';
@@ -1600,6 +1607,7 @@ begin
     str2:= getmodulename(str2,'form');
    end;
   end;
+}
   stream1:= ttextstream.create(aname,fm_create);
   try
    formskeleton(stream1,filename(str3),str2,ancestor);
@@ -1620,12 +1628,14 @@ begin
    stream1.Free;
   end;
   po1:= openformfile(str1,true,false,true,true);
+{
   if kind = fok_main then begin
    with tmseform(po1^.instance) do begin
     options:= options + [fo_main,fo_terminateonclose];
     optionswindow:= optionswindow + [wo_groupleader];
    end;
   end;
+}
   po1^.modified:= true; //initial create of ..._mfm.pas
 end;
 
@@ -1704,6 +1714,29 @@ begin
  end;
 end;
 
+procedure tmainfo.newfileonexecute(const sender: TObject);
+var
+ str1: filenamety;
+ int1: integer;
+begin
+ str1:= '';
+ int1:= tmenuitem(sender).tag;
+ with projectoptions.texp do begin
+  if newfisources[int1] = '' then begin
+   sourcefo.newpage;
+  end
+  else begin
+   if filedialog(str1,[fdo_save,fdo_checkexist],'New '+newfinames[int1],[newfinames[int1]],
+          [newfifilters[int1]],newfiexts[int1]) = mr_ok then begin
+    copynewfile(newfisources[int1],str1,false,true,
+             ['%PROGRAMNAME%','%UNITNAME%'],['${%FILENAMEBASE%}','${%FILENAMEBASE%}']);
+    sourcefo.openfile(str1,true);
+   end;
+  end;
+ end;
+end;
+
+(*
 procedure tmainfo.newprogramonexecute(const sender: TObject);
 var
  str1: filenamety;
@@ -1751,7 +1784,7 @@ begin
   sourcefo.openfile(str1,true);
  end;
 end;
-
+*)
 procedure tmainfo.newformonexecute(const sender: TObject);
 var
  str1,str2,str3,str4,str5: filenamety;
@@ -1760,7 +1793,8 @@ var
  ancestorclass,ancestorunit: string;
  
 begin
- if formkindty(tmenuitem(sender).tag) = fok_inherited then begin
+// if formkindty(tmenuitem(sender).tag) = fok_inherited then begin
+ if projectoptions.newinheritedforms[tmenuitem(sender).tag] then begin
   po1:= selectinheritedmodule(nil,'Select ancestor');
   if po1 = nil then begin
    exit;
@@ -1777,6 +1811,10 @@ begin
  if filedialog(str1,[fdo_save,fdo_checkexist],'New form',['Pascal Files'],
          ['"*.pas" "*.pp"'],'pas') = mr_ok then begin
   with projectoptions.texp do begin
+   str4:= newfonamebases[tmenuitem(sender).tag];
+   str2:= newfosources[tmenuitem(sender).tag];
+   str3:= newfoforms[tmenuitem(sender).tag];
+{
    str4:= 'form';
    case formkindty(tmenuitem(sender).tag) of
     fok_main: begin
@@ -1819,6 +1857,7 @@ begin
      str3:= '';
     end;
    end;
+}
   end;
 //  selectinheritedmodule(nil,'Select ancestor');
   if (str2 <> '') and (str3 <> '') then begin
@@ -1841,7 +1880,8 @@ begin
    end;
   end
   else begin
-   createform(str1,formkindty(tmenuitem(sender).tag));
+//   createform(str1,formkindty(tmenuitem(sender).tag));
+   createform(str1,'form','tmseform'); //default
   end;
  end;
 end;

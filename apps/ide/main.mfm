@@ -87,7 +87,7 @@ object mainfo: tmainfo
         submenu.count = 10
         submenu.items = <        
           item
-            submenu.count = 4
+            submenu.count = 1
             submenu.items = <            
               item
                 submenu.count = 9
@@ -149,22 +149,6 @@ object mainfo: tmainfo
                 caption = '&Form'
                 name = 'form'
                 state = [as_localcaption]
-              end            
-              item
-                caption = '&Unit'
-                state = [as_localcaption, as_localonexecute]
-                onexecute = newunitonexecute
-              end            
-              item
-                caption = '&Program'
-                state = [as_localcaption, as_localonexecute]
-                onexecute = newprogramonexecute
-              end            
-              item
-                caption = '&Textfile'
-                state = [as_localcaption, as_localonexecute]
-                options = [mao_shortcutcaption, mao_asyncexecute]
-                onexecute = newtextfileonexecute
               end>
             caption = '&New'
             name = 'new'

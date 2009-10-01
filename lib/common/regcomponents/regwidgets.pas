@@ -96,6 +96,9 @@ const
  mseformintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createmseform;
      initnewcomponent: nil; getscale: nil);
+ mainformintf: designmoduleintfty = 
+  (createfunc: {$ifdef FPC}@{$endif}createmainform;
+     initnewcomponent: nil; getscale: nil);
  subformintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createsubform;
      initnewcomponent: nil; getscale: nil);
@@ -151,6 +154,7 @@ begin
                     'msegui','msegraphutils','mseclasses']);
                     
  registerdesignmoduleclass(tmseform,@mseformintf);
+ registerdesignmoduleclass(tmainform,@mainformintf);
  registerdesignmoduleclass(tdockform,@mseformintf);
  registerdesignmoduleclass(tsubform,@subformintf);
 end;
