@@ -378,7 +378,8 @@ begin
  try
   awriter:= tstatwriter.create(stream1);
   try
-   if assigned(fonstatwrite) or assigned(fonstatupdate) then begin
+   if assigned(fonstatwrite) or assigned(fonstatupdate) or 
+                                    (fsavedmemoryfiles <> '') then begin
     awriter.writestat(istatfile(self));
    end;
    if fobjectlinker <> nil then begin
