@@ -542,7 +542,7 @@ begin
         checkerror(sqlite3_bind_double(fstatement,int1+1,do1));
        end;
        ftstring,ftwidestring,ftmemo,ftfixedchar,ftfixedwidechar: begin
-        str1:= aparams.asdbstring(int1);
+        str1:= aparams.asdbstring(fparambinding[int1]);
         stringaddref(str1);
         checkerror(sqlite3_bind_text(fstatement,int1+1,pchar(str1),
                     length(str1),@freebindstring));
