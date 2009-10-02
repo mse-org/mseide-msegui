@@ -1000,7 +1000,9 @@ end;
 procedure tsqlite3connection.updateprimarykeyfield(const afield: tfield;
                                const atransaction: tsqltransaction);
 begin
- afield.aslargeint:= getinsertid(nil);
+ if afield.datatype in integerfields then begin
+  afield.aslargeint:= getinsertid(nil);
+ end;
  {
  with tmsebufdataset1(afield.dataset) do begin
   setcurvalue(afield,getinsertid);

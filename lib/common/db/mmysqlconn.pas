@@ -1721,7 +1721,9 @@ end;
 procedure tmysqlconnection.updateprimarykeyfield(const afield: tfield;
                           const atransaction: tsqltransaction);
 begin
- afield.aslargeint:= getinsertid(atransaction);
+ if afield.datatype in integerfields then begin
+  afield.aslargeint:= getinsertid(atransaction);
+ end;
  {
  with tmsebufdataset1(afield.dataset) do begin
   setcurvalue(afield,getinsertid);
