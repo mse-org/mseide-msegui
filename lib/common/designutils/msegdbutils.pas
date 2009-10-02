@@ -3688,13 +3688,15 @@ const
  typetoken = 'type = ';
  dynartoken = 'ARRAY [0..-1] OF ';
  dynartoken2 = 'ARRAY [0..0] OF ';
+ dynartoken3 = '^(ARRAY [0..-1] OF ';
 var
  ar1: stringarty;
- str1,str3: string;
+ str1,str2,str3: string;
  mstr1: msestring;
  ad1,ad2,ad3: qword;
  res1: gdbresultty;
  int1: integer;
+ bo1: boolean;
 begin
  ar1:= nil; //compiler warning
  result:= value;
@@ -3724,15 +3726,26 @@ begin
      result:= getpmsecharvar(ad1);
     end
     else begin
+     str2:= '';
+     bo1:= false;
      if startsstr(dynartoken,str1) then begin
-      if readmemorypointer(ad1,ad2) = gdb_ok then begin
+      str2:= dynartoken;
+     end;
+     if startsstr(dynartoken3,str1) then begin //dereferenced
+      str2:= dynartoken3;
+      setlength(str1,length(str1)-1);
+      ad2:= ad1;
+      bo1:= true;
+     end;
+     if str2 <> '' then begin
+      if bo1 or (readmemorypointer(ad1,ad2) = gdb_ok) then begin
        if ad2 = 0 then begin
         result:= niltext;
        end
        else begin
         if readmemorypointer(ad2-fpointersize,ad3) = gdb_ok then begin
         //read arrayhigh
-         str3:= '^'+copy(str1,length(dynartoken)+1,bigint)+'('+qwordtocstr(ad2)+')[';
+         str3:= '^'+copy(str1,length(str2)+1,bigint)+'('+qwordtocstr(ad2)+')[';
          result:= '(';
          if ad3 >= 0 then begin
           for int1:= 0 to ad3 do begin
