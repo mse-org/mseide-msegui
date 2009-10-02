@@ -515,6 +515,7 @@ type
    //iframe
    procedure setframeinstance(instance: tcustomframe);
    procedure setstaticframe(value: boolean);
+   function getstaticframe: boolean;
    function getwidgetrect: rectty;
    function getcomponentstate: tcomponentstate;
    function getmsecomponentstate: msecomponentstatesty;
@@ -3398,6 +3399,11 @@ end;
 procedure tcustomstepframe.setstaticframe(value: boolean);
 begin
  //dummy
+end;
+
+function tcustomstepframe.getstaticframe: boolean;
+begin
+ result:= false;
 end;
 
 function tcustomstepframe.getwidgetrect: rectty;

@@ -3,11 +3,5 @@ object mainfo: tmainfo
   bounds_y = 247
   bounds_cx = 403
   bounds_cy = 280
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
-  container.bounds_cx = 403
-  container.bounds_cy = 280
-  container.frame.dummy = 0
-  optionswindow = [wo_groupleader]
-  options = [fo_main, fo_terminateonclose, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
-  moduleclassname = 'tmseform'
+  moduleclassname = 'tmainform'
 end

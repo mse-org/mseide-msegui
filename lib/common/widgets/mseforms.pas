@@ -51,6 +51,10 @@ type
   public
    constructor create(aowner: tcustommseform); reintroduce;
   published
+   property bounds_x stored false;
+   property bounds_y stored false;
+   property bounds_cx stored false;
+   property bounds_cy stored false;
    property onscroll;
    property onresize;
    property onfontheightdelta;
@@ -63,7 +67,7 @@ type
    property onbeforepaint;
    property onpaint;
    property onafterpaint;
-   property optionswidget default defaultoptionswidgetmousewheel;
+   property optionswidget default defaultcontaineroptionswidget;
  end;
 
  syseventeventty = procedure(const sender: tcustommseform;

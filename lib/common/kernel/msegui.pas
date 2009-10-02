@@ -239,6 +239,7 @@ type
  iframe = interface(inullinterface)
   procedure setframeinstance(instance: tcustomframe);
   procedure setstaticframe(value: boolean);
+  function getstaticframe: boolean;
   procedure scrollwidgets(const dist: pointty);
   procedure clientrectchanged;
   function getcomponentstate: tcomponentstate;
@@ -449,6 +450,7 @@ type
    finnerclientrect: rectty;     //origin = fpaintrect.pos
    fpaintposbefore: pointty;
    fi: baseframeinfoty;
+   function isoptional: boolean; override;
    procedure settemplateinfo(const ainfo: frameinfoty); virtual;
    procedure setdisabled(const value: boolean); virtual;
    procedure updateclientrect; virtual;
@@ -1303,6 +1305,7 @@ type
   //iframe
    procedure setframeinstance(instance: tcustomframe); virtual;
    procedure setstaticframe(value: boolean);
+   function getstaticframe: boolean;
    function getwidgetrect: rectty;
    function getcomponentstate: tcomponentstate;
 
@@ -4728,6 +4731,11 @@ end;
 procedure tcustomframe.checkminscrollsize(var asize: sizety);
 begin
  //dummy
+end;
+
+function tcustomframe.isoptional: boolean;
+begin
+ result:= not fintf.getstaticframe;
 end;
 
 { tframetemplate }
@@ -10931,6 +10939,11 @@ begin
  else begin
   exclude(fwidgetstate,ws_staticframe);
  end;
+end;
+
+function twidget.getstaticframe: boolean;
+begin
+ result:= ws_staticframe in fwidgetstate;
 end;
 
 function twidget.isloading: boolean;

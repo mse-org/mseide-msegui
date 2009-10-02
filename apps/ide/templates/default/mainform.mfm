@@ -1,14 +1,8 @@
 object ${%FORMNAME%}: t${%FORMNAME%}
-  optionswindow = [wo_groupleader]
-  options = [fo_main, fo_terminateonclose, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
-  container.bounds_cx = 403
-  container.bounds_cy = 280
-  container.frame.dummy = 0
   bounds_x = 290
   bounds_y = 234
   bounds_cx = 403
   bounds_cy = 280
-  color = -1879048187
+  container.frame.dummy = 0
   moduleclassname = 'tmainform'
 end

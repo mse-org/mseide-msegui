@@ -6,7 +6,7 @@ uses
  msegraphics,msegraphutils,mseevent,mseclasses,mseforms;
 
 type
- tmainfo = class(tmseform)
+ tmainfo = class(tmainform)
  end;
 var
  mainfo: tmainfo;

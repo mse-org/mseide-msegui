@@ -329,7 +329,7 @@ type
    property tab_facetab: tfacecomp read ftab_facetab write settab_facetab;
    property tab_faceactivetab: tfacecomp read ftab_faceactivetab 
                                                  write settab_faceactivetab;
-   property tab_size: integer read ftab_size write settab_size;
+   property tab_size: integer read ftab_size write settab_size default 0;
    property tab_sizemin: integer read ftab_sizemin write settab_sizemin
                             default defaulttabsizemin;
    property tab_sizemax: integer read ftab_sizemax write settab_sizemax

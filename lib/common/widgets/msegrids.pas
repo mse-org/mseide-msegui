@@ -312,6 +312,7 @@ type
    procedure setframeinstance(instance: tcustomframe);
    function getwidgetrect: rectty;
    procedure setstaticframe(value: boolean);
+   function getstaticframe: boolean;
    function widgetstate: widgetstatesty;
    procedure scrollwidgets(const dist: pointty);
    procedure clientrectchanged;
@@ -804,6 +805,7 @@ type
    procedure setframeinstance(instance: tcustomframe);
    function getwidgetrect: rectty;
    procedure setstaticframe(value: boolean);
+   function getstaticframe: boolean;
    function widgetstate: widgetstatesty;
    procedure scrollwidgets(const dist: pointty);
    procedure clientrectchanged;
@@ -2498,6 +2500,11 @@ begin
  //dummy
 end;
 
+function tgridprop.getstaticframe: boolean;
+begin
+ result:= false;
+end;
+
 function tgridprop.widgetstate: widgetstatesty;
 begin
  result:= twidget1(getwidget).widgetstate;
@@ -3480,6 +3487,11 @@ end;
 procedure tcolheader.setstaticframe(value: boolean);
 begin
 // twidget1(getwidget).setstaticframe(value);
+end;
+
+function tcolheader.getstaticframe: boolean;
+begin
+ result:= false;
 end;
 
 function tcolheader.widgetstate: widgetstatesty;

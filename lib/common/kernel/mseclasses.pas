@@ -198,6 +198,7 @@ type
    procedure writedummy(writer: twriter);
   protected
    procedure defineproperties(filer : tfiler); override;
+   function isoptional: boolean; virtual;
  end;
 
  tlinkedpersistent = class(tnullinterfacedpersistent,iobjectlink)
@@ -2531,8 +2532,13 @@ procedure toptionalpersistent.defineproperties(filer: tfiler);
 begin
  inherited;
  filer.defineproperty('dummy',{$ifdef FPC}@{$endif}readdummy,
-             {$ifdef FPC}@{$endif}writedummy,filer.ancestor = nil);
- //to create optional instance
+        {$ifdef FPC}@{$endif}writedummy,(filer.ancestor = nil) and isoptional);
+ //in order to create optional instance
+end;
+
+function toptionalpersistent.isoptional: boolean;
+begin
+ result:= true;
 end;
 
 { tlinkedpersistent }

@@ -141,6 +141,7 @@ type
    //iframe
   procedure setframeinstance(instance: tcustomframe);
   procedure setstaticframe(value: boolean);
+  function getstaticframe: boolean;
   procedure scrollwidgets(const dist: pointty);
   procedure clientrectchanged;
   function getcomponentstate: tcomponentstate;
@@ -1282,6 +1283,11 @@ end;
 procedure tcustomscrollbar.setstaticframe(value: boolean);
 begin
  //dummy
+end;
+
+function tcustomscrollbar.getstaticframe: boolean;
+begin
+ result:= false;
 end;
 
 procedure tcustomscrollbar.scrollwidgets(const dist: pointty);

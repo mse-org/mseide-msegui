@@ -2450,6 +2450,7 @@ begin
    widgetrect:= getdesignrect;
    twidget(fmodule).parentwidget:= getmoduleparent;
    twidget(fmodule).pos:= nullpoint;
+   twidget(fmodule).taborder:= 0;
   end
   else begin
    fform:= nil;

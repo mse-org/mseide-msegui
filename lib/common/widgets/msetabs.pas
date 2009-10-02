@@ -179,6 +179,7 @@ type
    //iframe
    procedure setframeinstance(instance: tcustomframe);
    procedure setstaticframe(value: boolean);
+   function getstaticframe: boolean;
    function getwidgetrect: rectty;
    function getcomponentstate: tcomponentstate;
    function getmsecomponentstate: msecomponentstatesty;
@@ -1590,6 +1591,11 @@ end;
 procedure ttabs.setstaticframe(value: boolean);
 begin
  //dummy
+end;
+
+function ttabs.getstaticframe: boolean;
+begin
+ result:= false;
 end;
 
 function ttabs.getwidgetrect: rectty;
