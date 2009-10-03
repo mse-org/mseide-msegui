@@ -207,12 +207,14 @@ type
   private
    fonbeforeupdate: beforeskinupdateeventty;
    fonafterupdate: skincontrollereventty;
-   factive: boolean;
    fonactivate: notifyeventty;
    fondeactivate: notifyeventty;
    fcolors: tskincolors;
    ffontalias: tskinfontaliass;
    fupdating: integer;
+   factive: boolean;
+   factivedesign: boolean;
+   fisactive: boolean;
    procedure setactive(const avalue: boolean);
    procedure setcolors(const avalue: tskincolors);
    procedure setfontalias(const avalue: tskinfontaliass);
@@ -220,6 +222,8 @@ type
    procedure setextenders(const avalue: integer);
    procedure readextendernames(reader: treader);
    procedure writeextendernames(writer: twriter);
+   procedure setactivedesign(const avalue: boolean);
+   procedure checkactive;
   protected
    fextendernames: stringarty;
    fextenders: skinextenderarty;
@@ -297,6 +301,8 @@ type
    procedure updateskin(const ainfo: skininfoty);
   published
    property active: boolean read factive write setactive default false;
+   property activedesign: boolean read factivedesign 
+                                         write setactivedesign default false;
    property extenders: integer read getextenders write setextenders; 
                                   //hook for object inspector
    property onbeforeupdate: beforeskinupdateeventty read fonbeforeupdate
@@ -844,14 +850,17 @@ begin
  end;
 end;
 
-procedure tcustomskincontroller.setactive(const avalue: boolean);
+procedure tcustomskincontroller.checkactive;
 var
+ bo1: boolean;
  meth1: skineventty;
  methodpo: ^skineventty;
  controllerpo: ^tcustomskincontroller;
 begin
- if factive <> avalue then begin
-  factive:= avalue;
+ factivedesign:= factivedesign and factive;
+ bo1:= factive and (factivedesign or not (csdesigning in componentstate));
+ if fisactive <> bo1 then begin
+  fisactive:= bo1;
   if not (csdesigning in componentstate) then begin
    methodpo:= {$ifndef FPC}@{$endif}@oninitskinobject;
    controllerpo:= @factiveskincontroller;
@@ -860,7 +869,7 @@ begin
    methodpo:= {$ifndef FPC}@{$endif}@oninitskinobjectdesign;
    controllerpo:= @factiveskincontrollerdesign;
   end;
-  if avalue then begin
+  if fisactive then begin
    methodpo^:= {$ifdef FPC}@{$endif}updateskin;
    controllerpo^:= self;
   end
@@ -873,7 +882,7 @@ begin
    end;
   end;
   if not (csloading in componentstate) then begin
-   if avalue then begin
+   if fisactive then begin
     doactivate;
    end
    else begin
@@ -881,6 +890,18 @@ begin
    end;
   end;
  end;
+end;
+
+procedure tcustomskincontroller.setactive(const avalue: boolean);
+begin
+ factive:= avalue;
+ checkactive; 
+end;
+
+procedure tcustomskincontroller.setactivedesign(const avalue: boolean);
+begin
+ factivedesign:= avalue;
+ checkactive; 
 end;
 
 procedure tcustomskincontroller.updateskin(const ainfo: skininfoty);
