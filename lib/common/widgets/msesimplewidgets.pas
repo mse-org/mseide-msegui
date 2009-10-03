@@ -178,8 +178,8 @@ type
                             stored isshortcut1stored;
    property onexecute: notifyeventty read factioninfo.onexecute
                             write setonexecute stored isonexecutestored;
-   property autosize_cx: integer read fautosize_cx write setautosize_cx;
-   property autosize_cy: integer read fautosize_cy write setautosize_cy;
+   property autosize_cx: integer read fautosize_cx write setautosize_cx default 0;
+   property autosize_cy: integer read fautosize_cy write setautosize_cy default 0;
   published
    property state: actionstatesty read getstate write setstate
             stored isstatestored  default [];

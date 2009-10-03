@@ -67,7 +67,7 @@ object guitemplatesmo: tguitemplatesmo
     top = 16
   end
   object skin: tskincontroller
-    active = True
+    extenders = 0
     sb_horz_facebutton = fadevertkonvex
     sb_horz_faceendbutton = fadevertkonvex
     sb_vert_facebutton = fadehorzconvex
@@ -80,12 +80,12 @@ object guitemplatesmo: tguitemplatesmo
     databutton_face = fadevertkonvex
     framebutton_face = fadehorzconvex
     tabbar_horz_face = fadevertconcave
-    tabbar_horzopo_face = fadevertconcave
     tabbar_horz_tab_face = fadevertkonvex
+    tabbar_horzopo_face = fadevertconcave
     tabbar_horzopo_tab_face = fadevertkonvex
     tabbar_vert_face = fadehorzconcave
-    tabbar_vertopo_face = fadehorzconcave
     tabbar_vert_tab_face = fadevertkonvex
+    tabbar_vertopo_face = fadehorzconcave
     tabbar_vertopo_tab_face = fadevertkonvex
     mainmenu_face = fadevertconcave
     left = 24
