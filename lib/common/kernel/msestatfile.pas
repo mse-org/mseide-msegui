@@ -259,7 +259,8 @@ begin
   end;
   areader:= tstatreader.create(stream1);
   try
-   if assigned(fonstatread) or assigned(fonstatupdate) then begin
+   if assigned(fonstatread) or assigned(fonstatupdate) or
+                                    (fsavedmemoryfiles <> '') then begin
     areader.readstat(istatfile(self));
    end;
    if fobjectlinker <> nil then begin
