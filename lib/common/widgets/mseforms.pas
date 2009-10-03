@@ -329,6 +329,7 @@ type
  tmainform = class(tmseform)
   protected
    class function getmoduleclassname: string; override;
+   class function hasresource: boolean; override;
    procedure aftercreate; override;
   public
   published
@@ -1601,6 +1602,11 @@ begin
 // result:= tmseform.ClassName;
  //bug in dcc32: tmseform is replaced by self
  result:= 'tmainform';
+end;
+
+class function tmainform.hasresource: boolean;
+begin
+ result:= self <> tmainform;
 end;
 
 procedure tmainform.aftercreate;

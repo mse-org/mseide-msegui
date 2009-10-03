@@ -8,17 +8,21 @@ object watchfo: twatchfo
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
   frame.dummy = 0
-  taborder = 1
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
-  container.bounds_x = 0
-  container.bounds_y = 0
-  container.bounds_cx = 300
-  container.bounds_cy = 245
+  container.color = -2147483645
   container.frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
-  container.frame.dummy = 0
+  container.frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+  container.frame.sbhorz.facebutton.dummy = 0
+  container.frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+  container.frame.sbhorz.faceendbutton.dummy = 0
+  container.frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+  container.frame.sbvert.facebutton.dummy = 0
+  container.frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+  container.frame.sbvert.faceendbutton.dummy = 0
+  container.face.template = guitemplatesmo.fadehorzconvex
+  container.face.dummy = 0
   dragdock.splitter_size = 0
-  dragdock.tab_size = 0
   dragdock.caption = 'Watches'
   dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_proportional, od_propsize]
   options = [fo_savepos, fo_savestate]
@@ -62,8 +66,16 @@ object watchfo: twatchfo
     bounds_y = 24
     bounds_cx = 300
     bounds_cy = 221
+    color = -2147483645
+    frame.sbvert.facebutton.template = guitemplatesmo.fadehorzconvex
+    frame.sbvert.facebutton.dummy = 0
+    frame.sbvert.faceendbutton.template = guitemplatesmo.fadehorzconvex
+    frame.sbvert.faceendbutton.dummy = 0
+    frame.sbhorz.facebutton.template = guitemplatesmo.fadevertkonvex
+    frame.sbhorz.facebutton.dummy = 0
+    frame.sbhorz.faceendbutton.template = guitemplatesmo.fadevertkonvex
+    frame.sbhorz.faceendbutton.dummy = 0
     frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
-    frame.dummy = 0
     anchors = [an_top, an_bottom]
     taborder = 1
     popupmenu = gripopup
@@ -78,6 +90,8 @@ object watchfo: twatchfo
     fixrows.count = 1
     fixrows.items = <    
       item
+        face.template = guitemplatesmo.fadevertkonvex
+        face.dummy = 0
         height = 16
         captions.count = 6
         captions.items = <        
@@ -112,7 +126,7 @@ object watchfo: twatchfo
     datacols.items = <    
       item
         width = 13
-        options = [co_drawfocus, co_savestate, co_rowcolor, co_zebracolor]
+        options = [co_drawfocus, co_savevalue, co_savestate, co_rowcolor, co_zebracolor]
         widgetname = 'watchon'
         dataclass = tgridintegerdatalist
       end    
@@ -124,7 +138,7 @@ object watchfo: twatchfo
       end    
       item
         width = 82
-        options = [co_fill, co_savevalue, co_rowfont]
+        options = [co_fill, co_rowfont]
         widthmin = 50
         oncellevent = resultcellevent
         widgetname = 'expresult'
@@ -153,7 +167,7 @@ object watchfo: twatchfo
       bounds_cy = 16
       taborder = 1
       statfile = mainfo.projectstatfile
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savevalue, oe_savestate]
       ondataentered = expressionondataentered
       visible = False
       value = True
@@ -182,7 +196,7 @@ object watchfo: twatchfo
       bounds_cy = 16
       taborder = 3
       visible = False
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savestate]
       onsetvalue = expresultonsetvalue
     end
     object formatcode: tdatabutton
@@ -194,6 +208,8 @@ object watchfo: twatchfo
       frame.optionsskin = [fso_nofocusrect, fso_nodefaultrect]
       frame.localprops = [frl_optionsskin]
       frame.dummy = 0
+      face.template = guitemplatesmo.fadevertkonvex
+      face.dummy = 0
       taborder = 4
       ondataentered = formatent
       state = [as_invisible, as_localimagelist]
