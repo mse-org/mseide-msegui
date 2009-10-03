@@ -674,23 +674,23 @@ type
    property ondeactivate: notifyeventty read fondeactivate write fondeactivate;
  end;
 
- tactionpublishedwidget = class(tactionwidget)
+ tactionpublishedwidgetnwr = class(tactionwidget)
   published
    property optionswidget;
    property optionsskin;
-   property bounds_x;
-   property bounds_y;
-   property bounds_cx;
-   property bounds_cy;
-   property bounds_cxmin;
-   property bounds_cymin;
-   property bounds_cxmax;
-   property bounds_cymax;
+//   property bounds_x;
+//   property bounds_y;
+//   property bounds_cx;
+//   property bounds_cy;
+//   property bounds_cxmin;
+//   property bounds_cymin;
+//   property bounds_cxmax;
+//   property bounds_cymax;
    property color;
    property cursor;
    property frame;
    property face;
-   property anchors;
+//   property anchors;
    property taborder;
    property hint;
    property popupmenu;
@@ -704,10 +704,36 @@ type
    property ondeactivate;
  end;
 
- tpublishedwidget = class(tactionpublishedwidget)
+ tactionpublishedwidget = class(tactionpublishedwidgetnwr)
+  published
+   property bounds_x;
+   property bounds_y;
+   property bounds_cx;
+   property bounds_cy;
+   property bounds_cxmin;
+   property bounds_cymin;
+   property bounds_cxmax;
+   property bounds_cymax;
+   property anchors;
+ end;
+
+ tpublishedwidgetnwr = class(tactionpublishedwidgetnwr)
   published
    property enabled;
    property visible;
+ end;
+
+ tpublishedwidget = class(tpublishedwidgetnwr)
+  published
+   property bounds_x;
+   property bounds_y;
+   property bounds_cx;
+   property bounds_cy;
+   property bounds_cxmin;
+   property bounds_cymin;
+   property bounds_cxmax;
+   property bounds_cymax;
+   property anchors;
  end;
 
  tsimplewidget = class(tpublishedwidget)
@@ -717,7 +743,7 @@ type
    property visible default false;
  end;
  
- tcustomeventwidget = class(tpublishedwidget)
+ tcustomeventwidgetnwr = class(tpublishedwidgetnwr)
   private
    fonloaded: notifyeventty;
    fonmouseevent: mouseeventty;
@@ -795,6 +821,19 @@ type
    property onasyncevent: asynceventeventty read fonasyncevent write fonasyncevent;
  end;
 
+ tcustomeventwidget = class(tcustomeventwidgetnwr)
+  published
+   property bounds_x;
+   property bounds_y;
+   property bounds_cx;
+   property bounds_cy;
+   property bounds_cxmin;
+   property bounds_cymin;
+   property bounds_cxmax;
+   property bounds_cymax;
+   property anchors;
+ end;
+
  const
   defaultoptionstoplevelwidget = defaultoptionswidget + [ow_subfocus];
 
@@ -870,11 +909,11 @@ type
    procedure paint(const canvas: tcanvas; const rect: rectty); override;
  end;
 
- tscrollingwidget = class;
- calcminscrollsizeeventty = procedure(const sender: tscrollingwidget;
+ tscrollingwidgetnwr = class;
+ calcminscrollsizeeventty = procedure(const sender: tscrollingwidgetnwr;
                                   var asize: sizety) of object;
  
- tscrollingwidget = class(tcustomeventwidget)
+ tscrollingwidgetnwr = class(tcustomeventwidgetnwr)
   private
    fonscroll: pointeventty;
    fonfontheightdelta: fontheightdeltaeventty;
@@ -920,6 +959,19 @@ type
    property optionsskin default defaultcontainerskinoptions;
  end;
 
+ tscrollingwidget = class(tscrollingwidgetnwr)
+  published
+   property bounds_x;
+   property bounds_y;
+   property bounds_cx;
+   property bounds_cy;
+   property bounds_cxmin;
+   property bounds_cymin;
+   property bounds_cxmax;
+   property bounds_cymax;
+   property anchors;
+ end;
+ 
  tpopupwidget = class(ttoplevelwidget)
   private
    ftransientfor: twindow;
@@ -4255,9 +4307,9 @@ begin
  end;
 end;
 
-{ tcustomeventwidget }
+{ tcustomeventwidgetnwr }
 
-procedure tcustomeventwidget.mouseevent(var info: mouseeventinfoty);
+procedure tcustomeventwidgetnwr.mouseevent(var info: mouseeventinfoty);
 begin
  if canevent(tmethod(fonmouseevent)) then begin
   fonmouseevent(self,info);
@@ -4265,7 +4317,7 @@ begin
  inherited;
 end;
 
-procedure tcustomeventwidget.clientmouseevent(var info: mouseeventinfoty);
+procedure tcustomeventwidgetnwr.clientmouseevent(var info: mouseeventinfoty);
 begin
  if canevent(tmethod(fonclientmouseevent)) then begin
   fonclientmouseevent(self,info);
@@ -4273,7 +4325,7 @@ begin
  inherited;
 end;
 
-procedure tcustomeventwidget.childmouseevent(const sender: twidget;
+procedure tcustomeventwidgetnwr.childmouseevent(const sender: twidget;
                 var info: mouseeventinfoty);
 begin
  if canevent(tmethod(fonchildmouseevent)) then begin
@@ -4282,7 +4334,7 @@ begin
  inherited;
 end;
 
-procedure tcustomeventwidget.domousewheelevent(var info: mousewheeleventinfoty);
+procedure tcustomeventwidgetnwr.domousewheelevent(var info: mousewheeleventinfoty);
 begin
  inherited;
  if canevent(tmethod(fonmousewheelevent)) then begin
@@ -4290,7 +4342,7 @@ begin
  end;
 end;
 
-procedure tcustomeventwidget.dobeforepaint(const canvas: tcanvas);
+procedure tcustomeventwidgetnwr.dobeforepaint(const canvas: tcanvas);
 var
  pt1: pointty;
 begin
@@ -4304,7 +4356,7 @@ begin
  end;
 end;
 
-procedure tcustomeventwidget.dopaintbackground(const canvas: tcanvas);
+procedure tcustomeventwidgetnwr.dopaintbackground(const canvas: tcanvas);
 begin
  inherited;
  if canevent(tmethod(fonpaintbackground)) then begin
@@ -4312,7 +4364,7 @@ begin
  end;
 end;
 
-procedure tcustomeventwidget.doonpaint(const canvas: tcanvas);
+procedure tcustomeventwidgetnwr.doonpaint(const canvas: tcanvas);
 begin
  inherited;
  if canevent(tmethod(fonpaint)) then begin
@@ -4320,7 +4372,7 @@ begin
  end;
 end;
 
-procedure tcustomeventwidget.doafterpaint(const canvas: tcanvas);
+procedure tcustomeventwidgetnwr.doafterpaint(const canvas: tcanvas);
 var
  pt1: pointty;
 begin
@@ -4333,7 +4385,7 @@ begin
  end;
 end;
 
-procedure tcustomeventwidget.doloaded;
+procedure tcustomeventwidgetnwr.doloaded;
 begin
  inherited;
  if canevent(tmethod(fonloaded)) then begin
@@ -4341,7 +4393,7 @@ begin
  end;
 end;
 
-procedure tcustomeventwidget.poschanged;
+procedure tcustomeventwidgetnwr.poschanged;
 begin
  inherited;
  if canevent(tmethod(fonmove)) then begin
@@ -4349,7 +4401,7 @@ begin
  end;
 end;
 
-procedure tcustomeventwidget.sizechanged;
+procedure tcustomeventwidgetnwr.sizechanged;
 begin
  inherited;
  if canevent(tmethod(fonresize)) then begin
@@ -4405,7 +4457,7 @@ begin
  end;
 end;
 }
-procedure tcustomeventwidget.dohide;
+procedure tcustomeventwidgetnwr.dohide;
 begin
  if canevent(tmethod(fonhide)) then begin
   fonhide(self);
@@ -4415,7 +4467,7 @@ begin
  exclude(fwidgetstate,ws_showed);
 end;
 
-procedure tcustomeventwidget.doshow;
+procedure tcustomeventwidgetnwr.doshow;
 begin
  inherited;
  if canevent(tmethod(fonshow)) then begin
@@ -4425,7 +4477,7 @@ begin
  exclude(fwidgetstate,ws_hidden);
 end;
 
-procedure tcustomeventwidget.doshortcut(var info: keyeventinfoty; const sender: twidget);
+procedure tcustomeventwidgetnwr.doshortcut(var info: keyeventinfoty; const sender: twidget);
 begin
  if not (es_processed in info.eventstate) and canevent(tmethod(fonshortcut)) then begin
   fonshortcut(self,info);
@@ -4433,7 +4485,7 @@ begin
  inherited;
 end;
 
-procedure tcustomeventwidget.dokeydown(var info: keyeventinfoty);
+procedure tcustomeventwidgetnwr.dokeydown(var info: keyeventinfoty);
 begin
  if not (es_processed in info.eventstate) and canevent(tmethod(fonkeydown)) then begin
   fonkeydown(self,info);
@@ -4441,7 +4493,7 @@ begin
  inherited;
 end;
 
-procedure tcustomeventwidget.dokeyup(var info: keyeventinfoty);
+procedure tcustomeventwidgetnwr.dokeyup(var info: keyeventinfoty);
 begin
  if not (es_processed in info.eventstate) and canevent(tmethod(fonkeyup)) then begin
   fonkeyup(self,info);
@@ -4449,7 +4501,7 @@ begin
  inherited;
 end;
 
-function tcustomeventwidget.canclose(const newfocus: twidget): boolean;
+function tcustomeventwidgetnwr.canclose(const newfocus: twidget): boolean;
 begin
  result:= inherited canclose(newfocus);
  if result and assigned(fonclosequery) then begin
@@ -4457,7 +4509,7 @@ begin
  end;
 end;
 
-procedure tcustomeventwidget.receiveevent(const event: tobjectevent);
+procedure tcustomeventwidgetnwr.receiveevent(const event: tobjectevent);
 begin
  if canevent(tmethod(fonevent)) then begin
   fonevent(self,event);
@@ -4465,7 +4517,7 @@ begin
  inherited;
 end;
 
-procedure tcustomeventwidget.doasyncevent(var atag: integer);
+procedure tcustomeventwidgetnwr.doasyncevent(var atag: integer);
 begin
  if canevent(tmethod(fonasyncevent)) then begin
   fonasyncevent(self,atag);
@@ -4473,7 +4525,7 @@ begin
  inherited;
 end;
 
-procedure tcustomeventwidget.dofocuschanged(const oldwidget: twidget;
+procedure tcustomeventwidgetnwr.dofocuschanged(const oldwidget: twidget;
                const newwidget: twidget);
 begin
  inherited;
@@ -4524,9 +4576,9 @@ begin
  inherited paint(canvas,fintf.getclientrect);
 end;
 
-{ tscrollingwidget }
+{ tscrollingwidgetnwr }
 
-constructor tscrollingwidget.create(aowner: tcomponent);
+constructor tscrollingwidgetnwr.create(aowner: tcomponent);
 begin
  inherited;
  foptionswidget:= defaultoptionswidgetmousewheel;
@@ -4535,22 +4587,22 @@ begin
  setstaticframe(true);
 end;
 
-procedure tscrollingwidget.internalcreateframe;
+procedure tscrollingwidgetnwr.internalcreateframe;
 begin
  tscrollboxframe.create(iscrollframe(self),self);
 end;
 
-function tscrollingwidget.getframe: tscrollboxframe;
+function tscrollingwidgetnwr.getframe: tscrollboxframe;
 begin
  result:= tscrollboxframe(pointer(inherited getframe));
 end;
 
-procedure tscrollingwidget.setframe(const Value: tscrollboxframe);
+procedure tscrollingwidgetnwr.setframe(const Value: tscrollboxframe);
 begin
  inherited setframe(tcaptionframe(pointer(value)));
 end;
 
-procedure tscrollingwidget.mouseevent(var info: mouseeventinfoty);
+procedure tscrollingwidgetnwr.mouseevent(var info: mouseeventinfoty);
 begin
  inherited;
  if not (es_processed in info.eventstate) then begin
@@ -4558,7 +4610,7 @@ begin
  end;
 end;
 
-procedure tscrollingwidget.childmouseevent(const sender: twidget;
+procedure tscrollingwidgetnwr.childmouseevent(const sender: twidget;
                               var info: mouseeventinfoty);
 var
  po1: pointty; 
@@ -4569,7 +4621,7 @@ begin
  end;
 end;
 
-procedure tscrollingwidget.domousewheelevent(var info: mousewheeleventinfoty);
+procedure tscrollingwidgetnwr.domousewheelevent(var info: mousewheeleventinfoty);
 begin
  inherited;
  if not (es_processed in info.eventstate) then begin
@@ -4577,7 +4629,7 @@ begin
  end;
 end;
 
-procedure tscrollingwidget.doscroll(const dist: pointty);
+procedure tscrollingwidgetnwr.doscroll(const dist: pointty);
 begin
  inherited;
  if canevent(tmethod(fonscroll)) then begin
@@ -4586,7 +4638,7 @@ begin
  end;
 end;
 
-procedure tscrollingwidget.widgetregionchanged(const sender: twidget);
+procedure tscrollingwidgetnwr.widgetregionchanged(const sender: twidget);
 begin
  inherited;
  if not (ws1_anchorsizing in twidget1(sender).fwidgetstate1) and
@@ -4598,19 +4650,19 @@ begin
 // end;
 end;
 
-procedure tscrollingwidget.writestate(writer: twriter);
+procedure tscrollingwidgetnwr.writestate(writer: twriter);
 begin
  frame.sbhorz.value:= 0;
  frame.sbvert.value:= 0;
  inherited;
 end;
 
-procedure tscrollingwidget.internalcreateface;
+procedure tscrollingwidgetnwr.internalcreateface;
 begin
  tscrollface.create(twidget(self));
 end;
 
-procedure tscrollingwidget.sizechanged;
+procedure tscrollingwidgetnwr.sizechanged;
 begin
  inherited;
  tcustomscrollboxframe(fframe).updatestate;
@@ -4618,12 +4670,12 @@ begin
     //set endresult of autosizing
 end;
 
-procedure tscrollingwidget.minscrollsizechanged;
+procedure tscrollingwidgetnwr.minscrollsizechanged;
 begin
  tcustomscrollboxframe(fframe).updatestate;
 end;
 
-function tscrollingwidget.calcminscrollsize: sizety;
+function tscrollingwidgetnwr.calcminscrollsize: sizety;
 begin
  result:= inherited calcminscrollsize;
  if result.cx < fminclientsize.cx then begin
@@ -4638,7 +4690,7 @@ begin
  end;
 end;
 
-procedure tscrollingwidget.setclientsize(const asize: sizety);
+procedure tscrollingwidgetnwr.setclientsize(const asize: sizety);
 begin
  with tcustomscrollboxframe(fframe) do begin
   fminclientsize:= fminminclientsize;
@@ -4655,7 +4707,7 @@ begin
  end;
 end;
 
-procedure tscrollingwidget.dochildscaled(const sender: twidget);
+procedure tscrollingwidgetnwr.dochildscaled(const sender: twidget);
 begin
  if canevent(tmethod(fonchildscaled)) then begin
   fonchildscaled(self);
@@ -4665,7 +4717,7 @@ begin
  end;
 end;
 
-procedure tscrollingwidget.loaded;
+procedure tscrollingwidgetnwr.loaded;
 begin
  inherited;
  if canevent(tmethod(fonchildscaled)) then begin
@@ -4673,7 +4725,7 @@ begin
  end;
 end;
 
-procedure tscrollingwidget.dofontheightdelta(var delta: integer);
+procedure tscrollingwidgetnwr.dofontheightdelta(var delta: integer);
 begin
  if canevent(tmethod(fonfontheightdelta)) then begin
   fonfontheightdelta(self,delta);
@@ -4681,19 +4733,19 @@ begin
  inherited;
 end;
 
-procedure tscrollingwidget.clampinview(const arect: rectty; const bottomright: boolean);
+procedure tscrollingwidgetnwr.clampinview(const arect: rectty; const bottomright: boolean);
 begin
  frame.showrect(removerect(arect,clientpos),bottomright);
 // frame.showrect(removerect(arect,clientwidgetpos));
 // frame.showrect(arect);
 end;
 
-function tscrollingwidget.maxclientsize: sizety;
+function tscrollingwidgetnwr.maxclientsize: sizety;
 begin
  result:= makesize(bigint,bigint);
 end;
 
-procedure tscrollingwidget.setclientpos(const avalue: pointty);
+procedure tscrollingwidgetnwr.setclientpos(const avalue: pointty);
 begin
  frame.showrect(makerect(avalue,paintsize),false);
 end;

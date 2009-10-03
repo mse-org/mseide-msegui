@@ -1434,7 +1434,8 @@ type
                        const space: integer = 2);
 
    procedure setwidgetrect(const Value: rectty);
-   procedure internalsetwidgetrect(Value: rectty; const windowevent: boolean);
+   procedure internalsetwidgetrect(Value: rectty;
+                                const windowevent: boolean); virtual;
    function getclientpos: pointty;              
    function getclientsize: sizety;
    procedure setclientsize(const asize: sizety); virtual; //used in tscrollingwidget

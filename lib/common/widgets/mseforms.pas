@@ -44,17 +44,17 @@ type
  closequeryeventty = procedure(const sender: tcustommseform;
                                var amodalresult: modalresultty) of object;
   
- tformscrollbox = class(tscrollingwidget)
+ tformscrollbox = class(tscrollingwidgetnwr)
           //for internal use only
+  private
+   procedure readdummy(reader: treader);
+   procedure writedummy(writer: twriter);
   protected
    procedure setoptionswidget(const avalue: optionswidgetty); override;
+   procedure defineproperties(filer: tfiler); override;
   public
    constructor create(aowner: tcustommseform); reintroduce;
   published
-   property bounds_x stored false;
-   property bounds_y stored false;
-   property bounds_cx stored false;
-   property bounds_cy stored false;
    property onscroll;
    property onresize;
    property onfontheightdelta;
@@ -132,6 +132,8 @@ type
    procedure updateoptions; virtual;
    function getoptions: formoptionsty; virtual;
    procedure updatescrollboxrect;
+   procedure internalsetwidgetrect(Value: rectty;
+                       const windowevent: boolean); override;
    procedure clientrectchanged; override;
    procedure updatewindowinfo(var info: windowinfoty); override;
    procedure setparentwidget(const Value: twidget); override;
@@ -604,6 +606,34 @@ begin
  inherited;
 end;
 
+procedure tformscrollbox.readdummy(reader: treader);
+begin
+ reader.driver.skipvalue;
+end;
+
+procedure tformscrollbox.writedummy(writer: twriter);
+begin
+ //dummy
+end;
+
+procedure tformscrollbox.defineproperties(filer: tfiler);
+begin
+ filer.defineproperty('bounds_x',{$ifdef FPC}@{$endif}readdummy,
+                                 {$ifdef FPC}@{$endif}writedummy,false);
+ filer.defineproperty('bounds_y',{$ifdef FPC}@{$endif}readdummy,
+                                 {$ifdef FPC}@{$endif}writedummy,false);
+ filer.defineproperty('bounds_cx',{$ifdef FPC}@{$endif}readdummy,
+                                 {$ifdef FPC}@{$endif}writedummy,false);
+ filer.defineproperty('bounds_cy',{$ifdef FPC}@{$endif}readdummy,
+                                 {$ifdef FPC}@{$endif}writedummy,false);
+ filer.defineproperty('bounds_cxmin',{$ifdef FPC}@{$endif}readdummy,
+                                 {$ifdef FPC}@{$endif}writedummy,false);
+ filer.defineproperty('bounds_cymax',{$ifdef FPC}@{$endif}readdummy,
+                                 {$ifdef FPC}@{$endif}writedummy,false);
+ filer.defineproperty('anchors',{$ifdef FPC}@{$endif}readdummy,
+                                 {$ifdef FPC}@{$endif}writedummy,false);
+end;
+
 { tdockformscrollbox }
 
 constructor tdockformscrollbox.create(aowner: tcustomdockform);
@@ -942,13 +972,13 @@ end;
 
 procedure tcustommseform.updatemainmenutemplates;
 begin
- if not (csloading in componentstate) then begin
+// if not (csloading in componentstate) then begin
   if (fmainmenuwidget <> nil) and
                      (fmainmenu <> nil) then begin
    fmainmenuwidget.assigntemplate(fmainmenu.template);
   end;
   updatescrollboxrect;
- end;
+// end;
 end;
 
 function tcustommseform.createmainmenuwidget: tframemenuwidget;
@@ -1228,6 +1258,15 @@ begin
    dec(rect1.cy,fmainmenuwidget.bounds_cy);
   end;
   fscrollbox.setwidgetrect(rect1);
+ end;
+end;
+
+procedure tcustommseform.internalsetwidgetrect(Value: rectty;
+                       const windowevent: boolean);
+begin
+ inherited;
+ if csloading in componentstate then begin
+  updatescrollboxrect; //no clientrectchanged
  end;
 end;
 
