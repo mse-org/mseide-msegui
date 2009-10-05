@@ -1412,7 +1412,8 @@ begin
   else begin
    bo1:= false;
   end;
-  readln(str1);
+//  readln(str1);
+  readstrln(str1); //no encoding
   if so_caseinsensitive in fsearchoptions then begin
    ca1:= stringsearch(fsearchtextupper,str1,1,fsearchoptions,fsearchtextlower);
   end
