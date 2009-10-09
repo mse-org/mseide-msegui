@@ -69,8 +69,10 @@ begin
    for int2:= int1 downto 0 do begin
     with infos[int2] do begin
      if prochandle = infos[int1].prochandle then begin     
-      application.postevent(tchildprocevent.create(dest,prochandle,execresult,
+      if dest <> nil then begin
+       application.postevent(tchildprocevent.create(dest,prochandle,execresult,
                                                      data));
+      end;
       deleteitem(infos,typeinfo(procinfoarty),int2);
       if int2 <> int1 then begin
        dec(int1);
@@ -82,6 +84,11 @@ begin
   dec(int1);
  end;
  application.unlock;
+end;
+
+procedure pro_killzombie(const aprochandle: prochandlety);
+begin
+ pro_listentoprocess(aprochandle,nil,nil);
 end;
 
 initialization

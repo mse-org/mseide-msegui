@@ -92,15 +92,15 @@ end;
 procedure tprocessmonitor.receiveevent(const event: tobjectevent);
 begin
  if (event.kind = ek_childproc) then begin 
-  if canevent(tmethod(fonchilddied)) then begin
-   with tchildprocevent(event) do begin
-    fonchilddied(self,prochandle,execresult,data);
-    internalunlistentoprocess(prochandle,true);
+  with tchildprocevent(event) do begin
+   if canevent(tmethod(fonchilddied)) then begin
+     fonchilddied(self,prochandle,execresult,data);
    end;
-  end
-  else begin
-   inherited;
+   internalunlistentoprocess(prochandle,true);
   end;
+ end
+ else begin
+  inherited;
  end;
 end;
 

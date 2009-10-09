@@ -13,4 +13,5 @@ function pro_listentoprocess(const aprochandle: prochandlety;
              //false on error, limited to 63 items on windows
 procedure pro_unlistentoprocess(const aprochandle: prochandlety;
                                      const adest: ievent);
+procedure pro_killzombie(const aprochandle: prochandlety);
 

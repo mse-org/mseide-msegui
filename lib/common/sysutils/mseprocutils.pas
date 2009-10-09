@@ -788,10 +788,13 @@ function execmse(const commandline: string;
                     const nostdhandle: boolean = false
                                 //windows only
                     ): boolean;
+var
+ procid: prochandlety;
 begin
  result:= true;
  try
-  execmse1(commandline);
+  procid:= execmse1(commandline);
+  pro_killzombie(procid);
  except
   result:= false;
  end;

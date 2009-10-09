@@ -158,6 +158,11 @@ begin
  unlock;
 end;
 
+procedure pro_killzombie(const aprochandle: prochandlety);
+begin
+ closehandle(aprochandle);
+end;
+
 initialization
 finalization
  freeandnil(monitor);
