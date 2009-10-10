@@ -1047,6 +1047,7 @@ type
    function getframestateflags: framestateflagsty; override;
   public
    constructor create(aowner: tcomponent); override;
+   procedure execute;
    procedure pressbutton;
    function releasebutton(const aexecute: boolean): boolean;
               //true if clicked
@@ -1727,6 +1728,13 @@ begin
  if not (csdesigning in componentstate) and 
         not (es_processed in info.eventstate) then begin
   updatemouseshapestate(finfo,info,self,fframe,nil,bo_executeonclick in foptions);
+ end;
+end;
+
+procedure tactionsimplebutton.execute;
+begin
+ if not (shs_disabled in finfo.state) then begin
+  internalexecute;
  end;
 end;
 
