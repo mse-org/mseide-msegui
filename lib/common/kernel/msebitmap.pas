@@ -166,8 +166,6 @@ type
    function getasize: sizety; override;
    procedure createmask(const acolormask: boolean); virtual;
    function getconverttomonochromecolorbackground: colorty; override;
-   procedure releasehandle; override;
-   procedure acquirehandle; override;
    procedure destroyhandle; override;
    procedure setsize(const Value: sizety); override;
    function writedata(const ancestor: tmaskedbitmap): boolean;
@@ -190,6 +188,8 @@ type
    procedure savetoimagebuffer(out abuffer: imagebufferinfoty);
    function bitmap: tmaskedbitmap; //self if source = nil
    
+   procedure releasehandle; override;
+   procedure acquirehandle; override;
    procedure initmask;
    procedure stretch(const dest: tmaskedbitmap);
    procedure remask; //recalc mask

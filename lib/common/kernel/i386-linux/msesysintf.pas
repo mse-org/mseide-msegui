@@ -453,8 +453,11 @@ begin
  repeat
   int1:= mselibc.__write(fd,buf^,nbytes);
   if int1 = -1 then begin
-   result:= int1;
-   break;
+   if sys_getlasterror <> eintr then begin
+    result:= int1;
+    break;
+   end;
+   continue;
   end;
   inc(pchar(buf),int1);
   dec(nbytes,int1);

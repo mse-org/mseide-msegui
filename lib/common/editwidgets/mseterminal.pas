@@ -16,7 +16,10 @@ uses
  msegrids,Classes,msestream,mseclasses,msepipestream,mseevent,mseinplaceedit,
  msetextedit,msestrings,msesys,mseeditglob,msemenus,msegui,mseguiglob;
 type
- sendtexteventty = procedure(var atext: msestring; var donotsend: boolean) of object;
+ sendtexteventty = procedure(const sender: tobject; 
+                       var atext: msestring; var donotsend: boolean) of object;
+ receivetexteventty = procedure(const sender: tobject; 
+                       var atext: ansistring; const errorinput: boolean) of object;
  terminaloptionty = (teo_readonly,teo_tty);
  terminaloptionsty = set of terminaloptionty;
 const
@@ -24,6 +27,9 @@ const
                             [oe_linebreak];
  defaultterminaloptions = [teo_tty];
 type 
+ terminalstatety = ({ts_running,}ts_listening);
+ terminalstatesty = set of terminalstatety;
+ 
  tterminal = class(tcustomtextedit)
   private
    foutput: tpipewriter;
@@ -33,10 +39,13 @@ type
    fexitcode: integer;
    foninputpipebroken: notifyeventty;
    fonerrorpipebroken: notifyeventty;
+   fonprogfinished: notifyeventty;
    finputcolindex: integer;
    fonsendtext: sendtexteventty;
+   fonreceivetext: receivetexteventty;
    foptions: terminaloptionsty;
    fmaxchars: integer;
+   flistenid: ptruint;
    function getinputfd: integer;
    procedure setinoutfd(const Value: integer);
    procedure setoptions(const avalue: terminaloptionsty);
@@ -45,12 +54,21 @@ type
    function geterrorfd: integer;
    procedure seterrorfd(const avalue: integer);
   protected
+   fstate: terminalstatesty;
+
    procedure doinputavailable(const sender: tpipereader);
    procedure dopipebroken(const sender: tpipereader);
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure editnotification(var info: editnotificationinfoty); override;
-   procedure docellevent(const ownedcol: boolean; var info: celleventinfoty); override;
+   procedure docellevent(const ownedcol: boolean; 
+                                     var info: celleventinfoty); override;
    procedure updateeditpos;
+   procedure listen;
+   procedure unlisten;
+   procedure finalizeexec;
+   
+   procedure receiveevent(const event: tobjectevent); override;
+   procedure doprogfinished;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -59,8 +77,11 @@ type
    function prochandle: integer;
    function waitforprocess: integer; //returns exitcode
    function exitcode: integer;
+   function running: boolean;
    procedure addchars(const avalue: msestring);
    procedure addline(const avalue: msestring); //thread save
+   procedure writestr(const atext: string);
+   procedure writestrln(const atext: string);
    property inputfd: integer read getinputfd write setinoutfd;
    property outputfd: integer read getoutputfd write setoutputfd;
    property errorfd: integer read geterrorfd write seterrorfd;
@@ -72,15 +93,19 @@ type
                                                    write foninputpipebroken;
    property onerrorpipebroken: notifyeventty read fonerrorpipebroken 
                                                    write fonerrorpipebroken;
+   property onprogfinished: notifyeventty read fonprogfinished write fonprogfinished;
+   
    property onsendtext: sendtexteventty read fonsendtext write fonsendtext;
+   property onreceivetext: receivetexteventty read fonreceivetext 
+                                                      write fonreceivetext;
    property options: terminaloptionsty read foptions write setoptions 
                           default defaultterminaloptions;
  end;
 
 implementation
 uses
- msesysutils,mseprocutils,msewidgets,msetypes,
- msekeyboard,sysutils;
+ msesysutils,mseprocutils,msewidgets,msetypes,mseprocmonitor,
+ msekeyboard,sysutils,msesysintf,rtlconsts;
 
 { tterminal }
 
@@ -103,10 +128,49 @@ end;
 
 destructor tterminal.destroy;
 begin
+ finalizeexec;
  foutput.Free;
  finput.Free;
  ferrorinput.Free;
  inherited;
+end;
+
+procedure tterminal.listen;
+begin
+ application.lock;
+ if not (ts_listening in fstate) and (fprochandle <> invalidprochandle) then begin
+  inc(flistenid);
+  pro_listentoprocess(fprochandle,ievent(self),pointer(flistenid));
+  include(fstate,ts_listening);
+ end;
+ application.unlock;
+end;
+
+procedure tterminal.unlisten;
+begin
+ application.lock;
+ try
+  if ts_listening in fstate then begin
+   pro_unlistentoprocess(fprochandle,ievent(self));   
+  end;
+  exclude(fstate,ts_listening);
+ finally
+  application.unlock;
+ end;
+end;
+
+procedure tterminal.finalizeexec;
+begin
+ foutput.close;
+ finput.terminateandwait;
+ ferrorinput.terminateandwait;
+ application.lock;
+ unlisten;
+ if fprochandle <> invalidprochandle then begin
+  pro_killzombie(fprochandle);
+  fprochandle:= invalidprochandle;
+ end;
+ application.unlock;
 end;
 
 procedure tterminal.docellevent(const ownedcol: boolean; var info: celleventinfoty);
@@ -149,7 +213,7 @@ begin
       mstr1:= copy(feditor.text,finputcolindex+1,bigint);
       bo1:= false;
       if assigned(fonsendtext) then begin
-       fonsendtext(mstr1,bo1);
+       fonsendtext(self,mstr1,bo1);
       end;
       if not bo1 then begin
        try
@@ -217,7 +281,11 @@ var
 begin
  application.checkoverload;
  try
-  addchars(sender.readdatastring);
+  str1:= sender.readdatastring;
+  if canevent(tmethod(fonreceivetext)) then begin
+   fonreceivetext(self,str1,sender = ferrorinput);
+  end;
+  addchars(str1);
  except
  end;
 end;
@@ -262,10 +330,12 @@ end;
 
 function tterminal.execprog(const commandline: string): integer;
 begin
- fprochandle:= invalidprochandle;
+ finalizeexec;
  result:= execmse2(commandline,foutput,finput,ferrorinput,false,-1,true,false,
                       teo_tty in foptions);
  fprochandle:= result;
+ listen;
+// include(fstate,ts_running);
 end;
 
 function tterminal.getinputfd: integer;
@@ -284,18 +354,40 @@ begin
 end;
 
 function tterminal.waitforprocess: integer;
+var
+ int1: integer;
 begin
- result:= mseprocutils.waitforprocess(fprochandle);
- fexitcode:= result;
- fprochandle:= invalidprochandle;
- while not (finput.eof and ferrorinput.eof) do begin
-  sleep(100); //wait for last chars
+{
+ while running do begin
+  application.processmessages;
+ end;
+ result:= fexitcode;
+}
+ unlisten;
+ if running then begin
+  int1:= application.unlockall;
+  try
+   result:= mseprocutils.waitforprocess(fprochandle);
+   fexitcode:= result;
+   fprochandle:= invalidprochandle;
+   while not (finput.eof and ferrorinput.eof) do begin
+    sleep(100); //wait for last chars
+   end;
+  finally
+   application.relockall(int1);
+  end;
+  doprogfinished;
  end;
 end;
 
 function tterminal.exitcode: integer;
 begin
  result:= fexitcode;
+end;
+
+function tterminal.running: boolean;
+begin
+ result:= fprochandle <> invalidprochandle;
 end;
 
 procedure tterminal.setoptions(const avalue: terminaloptionsty);
@@ -324,6 +416,46 @@ end;
 procedure tterminal.seterrorfd(const avalue: integer);
 begin
  ferrorinput.handle:= avalue;
+end;
+
+procedure tterminal.writestr(const atext: string);
+begin
+ if sys_write(outputfd,pointer(atext),length(atext)) <> length(atext) then begin
+  syserror(syelasterror);
+//  raise ewriteerror.create(swriteerror);
+ end;
+end;
+
+procedure tterminal.writestrln(const atext: string);
+begin
+ writestr(atext+lineend);
+end;
+
+procedure tterminal.receiveevent(const event: tobjectevent);
+begin
+ if (event.kind = ek_childproc) and (ts_listening in fstate) then begin 
+  with tchildprocevent(event) do begin
+   if data = pointer(flistenid) then begin
+    while not (finput.eof and ferrorinput.eof) do begin
+     sleep(100); //wait for last chars
+    end;
+    fexitcode:= execresult;
+    fprochandle:= invalidprochandle;
+    exclude(fstate,ts_listening);
+    doprogfinished;
+   end;
+  end;
+ end
+ else begin
+  inherited;
+ end;
+end;
+
+procedure tterminal.doprogfinished;
+begin
+ if canevent(tmethod(fonprogfinished)) then begin
+  fonprogfinished(self);
+ end;
 end;
 
 end.

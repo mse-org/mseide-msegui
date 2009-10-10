@@ -5472,6 +5472,18 @@ label
     
 begin
  while true do begin
+  if timerevent then begin
+   application.postevent(tevent.create(ek_timer));
+   timerevent:= false;
+  end;
+  if terminated then begin
+   application.postevent(tevent.create(ek_terminate));
+   terminated:= false;
+  end;
+  if childevent then begin
+   childevent:= false;
+   handlesigchld;
+  end;
   if gui_hasevent then begin
    break;
   end;
@@ -5507,7 +5519,7 @@ begin
      end;
     end;
     application.lock;
-   until (int1 <> -1) or timerevent or terminated;
+   until (int1 <> -1) or timerevent or terminated or childevent;
  {$ifdef with_sm}
    if hassm then begin
     if (int1 > 0) and (pollinfo[1].revents <> 0) then begin
@@ -5547,6 +5559,7 @@ begin
    end;
 {$endif}
   end;
+  {
   if timerevent then begin
    application.postevent(tevent.create(ek_timer));
    timerevent:= false;
@@ -5559,6 +5572,7 @@ begin
    childevent:= false;
    handlesigchld;
   end;
+  } //moved out of loop
  end;
  result:= nil;
  if not gui_hasevent then begin

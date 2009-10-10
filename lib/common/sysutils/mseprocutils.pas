@@ -563,13 +563,18 @@ var
  dwo1: cardinal;
  pid: integer;
 begin
- pid:= waitpid(prochandle,@dwo1,0);
- if pid <> -1 then begin
-  result:= wexitstatus(dwo1);
- end
- else begin
-  result:= 0; //compilerwarning
-  raise eoserror.create('');
+ while true do begin
+  pid:= waitpid(prochandle,@dwo1,0);
+  if pid <> -1 then begin
+   result:= wexitstatus(dwo1);
+   break;
+  end
+  else begin
+   if sys_getlasterror <> eintr then begin
+    result:= 0; //compilerwarning
+    raise eoserror.create('');
+   end;
+  end;
  end;
 end;
 

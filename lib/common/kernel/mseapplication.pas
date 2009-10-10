@@ -1259,11 +1259,18 @@ begin
 end;
 
 procedure tcustomapplication.processmessages;
+var
+ int1: integer;
 begin
  if not ismainthread then begin
   raise exception.create('processmessages must be called from main thread.');
  end;
- doeventloop(true);
+ int1:= unlockall;
+ try
+  doeventloop(true);
+ finally
+  relockall(int1);
+ end;
 end;
 
 procedure tcustomapplication.dobeforerun;
