@@ -91,13 +91,13 @@ type
    function getmsesearchtext: msestring;
    procedure setmsesearchtext(const avalue: msestring);
    procedure setsearchoptions(const Value: searchoptionsty);
-   function geteof: boolean;
    function getnotopen: boolean;
   protected
    fbuffer: pchar;
    bufoffset, bufend: pchar;
    fstate: textstreamstatesty;
    fencoding: charencodingty;
+   function geteof: boolean;
    procedure setbuflen(const Value: integer); virtual;
    function readbytes(var buf): integer; virtual;
               //reads max. buflen bytes

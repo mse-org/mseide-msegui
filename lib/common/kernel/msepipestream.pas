@@ -184,6 +184,7 @@ begin
  fwritehandle:= invalidfilehandle;
  foverloadsleepus:= -1;
  inherited;
+ include(fstate,tss_notopen);
 end;
 
 destructor tpipereader.destroy;
@@ -211,7 +212,7 @@ begin
  inherited;
  if value <> invalidfilehandle then begin
   writehandle:= invalidfilehandle;
-  fstate:= fstate - [tss_eof,tss_error,tss_pipeactive];
+  fstate:= fstate - [tss_notopen,tss_eof,tss_error,tss_pipeactive];
   fmsbufcount:= 0;
   fthread:= tsemthread.create({$ifdef FPC}@{$endif}execthread);
  end;
@@ -248,6 +249,7 @@ begin
    writehandle:= invalidfilehandle;
   end;
  end;
+ include(fstate,tss_notopen);
 end;
 
 procedure tpipereader.terminateandwait;

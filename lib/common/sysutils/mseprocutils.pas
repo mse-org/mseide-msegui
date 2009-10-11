@@ -831,8 +831,10 @@ begin
     if (int1 <> 0) and (errno <> esrch) then begin
      raise eoserror.create(''); //sigkill nicht moeglich
     end;
-    if waitpid(handle,@int1,0) = -1 then begin
-     raise eoserror.create('');
+    while waitpid(handle,@int1,0) = -1 do begin
+     if sys_getlasterror <> eintr then begin
+      raise eoserror.create('');
+     end;
     end;
    end;
   end;
@@ -847,7 +849,11 @@ begin
  int1:= kill(handle,sigterm);
  if (int1 <> 0) and (errno <> esrch) then raise eoserror.create(''); 
              //sigterm nicht moeglich
- if waitpid(handle,@result,0) = -1 then raise eoserror.create('');
+ while waitpid(handle,@result,0) = -1 do begin
+  if sys_getlasterror <> eintr then begin
+   raise eoserror.create('');
+  end;
+ end;
 end;
 
 function getppid2(pid: procidty): procidty;

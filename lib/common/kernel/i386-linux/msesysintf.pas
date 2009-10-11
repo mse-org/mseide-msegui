@@ -156,6 +156,26 @@ begin
  result:= mselibc.getpid;
 end;
 
+function sys_terminateprocess(const proc: prochandlety): syserrorty;
+begin
+ if (kill(proc,sigterm) = 0) or (sys_getlasterror = esrch) then begin
+  result:= sye_ok;
+ end
+ else begin
+  result:= syelasterror;
+ end;
+end;
+
+function sys_killprocess(const proc: prochandlety): syserrorty;
+begin
+ if (kill(proc,sigkill) = 0) or (sys_getlasterror = esrch) then begin
+  result:= sye_ok;
+ end
+ else begin
+  result:= syelasterror;
+ end;
+end;
+
 function sys_stdin: integer;
 begin
  result:= stdin;

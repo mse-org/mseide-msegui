@@ -166,6 +166,16 @@ begin
  result:= getcurrentprocessid;
 end;
 
+function sys_terminateprocess(const proc: prochandlety): syserrorty;
+begin
+ result:= sye_ok;
+end;
+
+function sys_killprocess(const proc: prochandlety): syserrorty;
+begin
+ result:= sye_ok;
+end;
+
 function sys_stdin: integer;
 begin
  result:= getstdhandle(std_input_handle);

@@ -16,6 +16,8 @@ function sys_gettimeus: cardinal;
                //systemtime in microseconds, origin undefined
 function sys_getpid: procidty;
 function sys_getprocesses: procitemarty;
+function sys_terminateprocess(const proc: prochandlety): syserrorty;
+function sys_killprocess(const proc: prochandlety): syserrorty;
 
 function sys_threadcreate(var info: threadinfoty): syserrorty;
 function sys_threadwaitfor(var info: threadinfoty): syserrorty;
