@@ -1,22 +1,15 @@
 object targetconsolefo: ttargetconsolefo
   optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  frame.grip_size = 10
+  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
+  frame.dummy = 0
+  popupmenu = tpopupmenu1
+  visible = False
   bounds_x = 205
   bounds_y = 367
   bounds_cx = 368
   bounds_cy = 137
-  frame.grip_size = 10
-  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
-  frame.dummy = 0
-  taborder = 1
-  popupmenu = tpopupmenu1
-  visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
-  container.bounds_x = 0
-  container.bounds_y = 0
-  container.bounds_cx = 358
-  container.bounds_cy = 137
-  container.frame.dummy = 0
-  dragdock.tab_size = 0
   dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_propsize]
   options = [fo_savepos, fo_savestate]
   statfile = mainfo.projectstatfile
@@ -54,7 +47,6 @@ object targetconsolefo: ttargetconsolefo
     bounds_y = 0
     bounds_cx = 358
     bounds_cy = 137
-    frame.dummy = 0
     anchors = []
     font.name = 'stf_fixed'
     font.xscale = 1.000000000000000000
@@ -75,13 +67,14 @@ object targetconsolefo: ttargetconsolefo
     reffontheight = 14
     object terminal: tterminal
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontlineheight, ow_autoscale]
+      taborder = 1
+      visible = False
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 3000
       bounds_cy = 16
-      taborder = 1
-      visible = False
       maxchars = 120
+      onsendtext = sendtext
       reffontheight = 14
     end
   end

@@ -1366,6 +1366,9 @@ var
   setlength(resultar,int1);
  end;
 
+var
+ targetoutp: boolean;
+ 
 begin
  resultar:= nil;
  po1:= pchar(line);
@@ -1386,6 +1389,7 @@ begin
  ch1:= po2^;
  inc(po2);
  try
+  targetoutp:= false;
   case ch1 of
    '~': begin
     if gs_clicommand in fstate then begin
@@ -1428,6 +1432,9 @@ begin
        doevent(token,gek_error,resultar);
       end;
      end;
+    end
+    else begin
+     targetoutp:= true;
     end;
    end;
    '*','+','=': begin
@@ -1440,6 +1447,9 @@ begin
        doevent(token,gek_download,resultar);
       end;
      end;
+    end
+    else begin
+     targetoutp:= true;
     end;
    end;
    '(': begin
@@ -1448,10 +1458,11 @@ begin
     end;
    end;
    else begin
-    if running then begin
-     targetoutput(line+lineend);
-    end;
+    targetoutp:= true;
    end;
+  end;
+  if targetoutp and running then begin
+   targetoutput(line+lineend);
   end;
  except
  end;
@@ -3289,6 +3300,7 @@ begin
      getcliint64('starts at address',str1,int64(start)) and
      getcliint64('ends at',str1,int64(stop)) then begin
    filename:= copy(str2,1,length(str2)-1);
+   filename:= tomsefilepath(filename);
   end
   else begin
    result:= gdb_dataerror;
