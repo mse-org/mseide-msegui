@@ -861,7 +861,7 @@ begin
      with item1.submenu[int2] do begin
       caption:= newfonames[int1];
       tag:= int1;
-      onexecute:= {$ifdef FPD}@{$endif}mainfo.newformonexecute;
+      onexecute:= {$ifdef FPC}@{$endif}mainfo.newformonexecute;
      end;
      inc(int2);
     end;
@@ -873,7 +873,7 @@ begin
      with item1.submenu[int2] do begin
       caption:= newfonames[int1];
       tag:= int1;
-      onexecute:= {$ifdef FPD}@{$endif}mainfo.newformonexecute;
+      onexecute:= {$ifdef FPC}@{$endif}mainfo.newformonexecute;
      end;
      inc(int2);
     end;
