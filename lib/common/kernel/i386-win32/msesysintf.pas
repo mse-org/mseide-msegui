@@ -168,12 +168,15 @@ end;
 
 function sys_terminateprocess(const proc: prochandlety): syserrorty;
 begin
- result:= sye_ok;
+ result:= sye_notimplemented;
 end;
 
 function sys_killprocess(const proc: prochandlety): syserrorty;
 begin
  result:= sye_ok;
+ if not windows.terminateprocess(proc,0) then begin
+  result:= syelasterror;
+ end;
 end;
 
 function sys_stdin: integer;
