@@ -44,8 +44,7 @@ object targetconsolefo: ttargetconsolefo
     7C7C7C01E8E8E80CE6E6E601E0E0E001E8E8E808FFFFFF017C7C7C01E8E8E816
     FFFFFF017C7C7C01E8E8E816FFFFFF017C7C7C01E8E8E816FFFFFF017C7C7C01
     E8E8E816FFFFFF017C7C7C01E8E8E816FFFFFF017C7C7C01E8E8E816FFFFFF01
-    7C7C7C01FFFFFF17
-  }
+    7C7C7C01FFFFFF17}
   onidle = targetconsoleonidle
   onshow = tartgetconsoleonshow
   moduleclassname = 'tdockform'
@@ -58,17 +57,18 @@ object targetconsolefo: ttargetconsolefo
     frame.dummy = 0
     anchors = []
     font.name = 'stf_fixed'
-    font.xscale =  1.0000000000000000E+0000
+    font.xscale = 1.000000000000000000
     font.dummy = 0
     optionsgrid = [og_focuscellonenter, og_autofirstrow, og_colchangeontabkey, og_wrapcol, og_autopopup]
     rowcountmax = 5000
     datacols.count = 1
-    datacols.items = <    
+    datacols.items = <
       item
         width = 3000
         options = [co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         widthmin = 3000
         widgetname = 'terminal'
+        dataclass = tgridrichstringdatalist
       end>
     datarowlinewidth = 0
     datarowheight = 16
@@ -82,19 +82,18 @@ object targetconsolefo: ttargetconsolefo
       taborder = 1
       visible = False
       maxchars = 120
-      onsendtext = sendtext
       reffontheight = 14
     end
   end
   object tpopupmenu1: tpopupmenu
     menu.submenu.count = 1
-    menu.submenu.items = <    
+    menu.submenu.items = <
       item
         caption = 'Clear'
         state = [as_localcaption, as_localonexecute]
         onexecute = clearexe
       end>
-    left = 88
-    top = 48
+    Left = 88
+    Top = 48
   end
 end

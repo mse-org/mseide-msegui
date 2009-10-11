@@ -12,7 +12,7 @@ unit mseprocess;
 interface
 uses
  classes,mseclasses,msepipestream,msestrings,msestatfile,msestat,msesys,
- mseevent;
+ mseevent,msetypes;
 type
  processstatety = (prs_listening);
  processstatesty = set of processstatety;
@@ -134,10 +134,13 @@ end;
 
 procedure tmseprocess.setactive(const avalue: boolean);
 var
- outp: tpipereader = nil;
- erroroutp: tpipereader = nil;
- inp: tpipewriter = nil;
+ outp: tpipereader;
+ erroroutp: tpipereader;
+ inp: tpipewriter;
 begin
+ outp:= nil;
+ erroroutp:= nil;
+ inp:= nil;
  if componentstate * [csloading,csdesigning] <> [] then begin
   factive:= avalue;
  end

@@ -608,7 +608,11 @@ end;
 
 procedure tformscrollbox.readdummy(reader: treader);
 begin
+{$ifdef FPC}
  reader.driver.skipvalue;
+{$else}
+ reader.skipvalue;
+{$endif}
 end;
 
 procedure tformscrollbox.writedummy(writer: twriter);

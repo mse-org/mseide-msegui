@@ -29,7 +29,8 @@ type
    grid: twidgetgrid;
    tpopupmenu1: tpopupmenu;
    procedure tartgetconsoleonshow(const sender: TObject);
-   procedure sendtext(var atext: msestring; var donotsend: Boolean);
+   procedure sendtext(const sender: tobject; var atext: msestring;
+                                                 var donotsend: Boolean);
    procedure targetconsoleonidle(var again: Boolean);
    procedure clearexe(const sender: TObject);
   private
@@ -53,7 +54,8 @@ begin
 // terminal.datalist.add('Target console is not working yet!');
 end;
 
-procedure ttargetconsolefo.sendtext(var atext: msestring; var donotsend: Boolean);
+procedure ttargetconsolefo.sendtext(const sender: tobject;
+                               var atext: msestring; var donotsend: Boolean);
 begin
  mainfo.gdb.targetwriteln(atext);
  donotsend:= true;
