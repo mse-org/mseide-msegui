@@ -1,13 +1,13 @@
 object panelfo: tpanelfo
   optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_hinton]
+  frame.grip_size = 10
+  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton, go_backgroundbutton, go_lockbutton]
+  frame.dummy = 0
+  visible = False
   bounds_x = 157
   bounds_y = 493
   bounds_cx = 323
   bounds_cy = 195
-  frame.grip_size = 10
-  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton, go_backgroundbutton]
-  frame.dummy = 0
-  visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_autoscale]
   container.frame.framei_left = 0
   container.frame.framei_top = 0

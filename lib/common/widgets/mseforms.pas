@@ -368,6 +368,7 @@ type
    procedure poschanged; override;
    procedure activechanged; override;
    procedure doactivate; override;
+   procedure parentchanged; override;
   public
    constructor create(aowner: tcomponent; load: boolean); override;
    destructor destroy; override;
@@ -1814,6 +1815,12 @@ procedure tcustomdockform.doactivate;
 begin
  fdragdock.doactivate;
  inherited;
+end;
+
+procedure tcustomdockform.parentchanged;
+begin
+ inherited;
+ fdragdock.parentchanged(self);
 end;
 
 function tcustomdockform.canfocus: boolean;

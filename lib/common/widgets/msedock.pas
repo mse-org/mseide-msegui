@@ -35,16 +35,17 @@ type
             od_splitvert,od_splithorz,od_tabed,od_proportional,
             od_propsize,od_fixsize,od_top,od_background,
             od_alignbegin,od_aligncenter,od_alignend,
-            od_nofit,od_banded,od_nosplitsize,od_nosplitmove);
+            od_nofit,od_banded,od_nosplitsize,od_nosplitmove,
+            od_lock);
  optionsdockty = set of optiondockty;
 
  dockbuttonrectty = (dbr_none,dbr_handle,dbr_close,dbr_maximize,dbr_normalize,
                      dbr_minimize,dbr_fixsize,
-                     dbr_top,dbr_background);
+                     dbr_top,dbr_background,dbr_lock);
 const
  defaultoptionsdock = [od_savepos,od_savezorder,od_savechildren];
  dbr_first = dbr_handle;
- dbr_last = dbr_background;
+ dbr_last = dbr_lock;
  defaulttaboptions= [tabo_dragdest,tabo_dragsource];
  
 type
@@ -122,6 +123,7 @@ type
                     dos_normalizebuttonclicked,dos_minimizebuttonclicked,
                     dos_fixsizebuttonclicked,
                     dos_topbuttonclicked,dos_backgroundbuttonclicked,
+                    dos_lockbuttonclicked,
                     dos_moving,
                     dos_proprefvalid);
  dockstatesty = set of dockstatety;
@@ -248,6 +250,8 @@ type
    property useroptions: optionsdockty read fuseroptions write setuseroptions
                      default defaultoptionsdock;
 
+//   procedure invalidategripsize;
+   function nogrip: boolean;
    function canfloat: boolean;
    procedure refused(const apos: pointty);
    procedure calclayout(const dragobject: tdockdragobject;
@@ -289,6 +293,7 @@ type
    procedure doactivate;
    procedure sizechanged(force: boolean = false; scalefixedalso: boolean = false;
                            const awidgets: widgetarty = nil);
+   procedure parentchanged(const sender: twidget);
    procedure poschanged;
    procedure statechanged(const astate: widgetstatesty);
    procedure widgetregionchanged(const sender: twidget);
@@ -360,6 +365,7 @@ type
  gripoptionty = (go_closebutton,go_minimizebutton,go_normalizebutton,
                  go_maximizebutton,
                  go_fixsizebutton,go_topbutton,go_backgroundbutton,
+                 go_lockbutton,
                  go_horz,go_vert,go_opposite,go_showsplitcaption,
                  go_showfloatcaption);
  gripoptionsty = set of gripoptionty;
@@ -369,6 +375,9 @@ const
 
 type
 
+ gripstatety = (grps_sizevalid);
+ gripstatesty = set of gripstatety;
+ 
  tgripframe = class(tcaptionframe,iobjectpicker,iface)
   private
    fgrip_pos: captionposty;
@@ -400,6 +409,9 @@ type
   protected
    frects: array[dbr_first..dbr_last] of rectty;
    fgriprect: rectty;
+   fgripstate: gripstatesty;
+   factgripsize: integer;
+   procedure checkgripsize;
    procedure updatewidgetstate; override;   
    procedure updaterects; override;
    procedure updatestate; override;
@@ -486,6 +498,7 @@ type
    procedure doactivate; override;
    procedure statechanged; override;
    procedure poschanged; override;
+   procedure parentchanged; override;
    //idockcontroller
    function checkdock(var info: draginfoty): boolean;
    function getbuttonrects(const index: dockbuttonrectty): rectty;
@@ -525,7 +538,7 @@ type
  tface1 = class(tface);
 
 const
- useroptionsmask: optionsdockty = [od_fixsize,od_top,od_background];
+ useroptionsmask: optionsdockty = [od_fixsize,od_top,od_background,od_lock];
 
 type
  tdocktabwidget = class(ttabwidget)
@@ -1485,13 +1498,65 @@ begin
   end;
  end;
 end;
+{
+procedure tdockcontroller.invalidategripsize;
 
+ procedure descend1(const awidget: twidget1);
+ var
+  int1: integer;
+ begin
+  if awidget.fframe is tgripframe then begin
+   with tgripframe(awidget.fframe) do begin
+    exclude(fgripstate,grps_sizevalid);
+   end;
+  end;
+  for int1:= 0 to awidget.widgetcount-1 do begin
+   descend1(twidget1(awidget.widgets[int1]));
+  end;   
+ end;
+ 
+ procedure descend2(const awidget: twidget1);
+ var
+  int1: integer;
+ begin
+  if awidget.fframe is tgripframe then begin
+   with tgripframe(awidget.fframe) do begin
+    internalupdatestate;
+   end;
+  end;
+  for int1:= 0 to awidget.widgetcount-1 do begin
+   descend2(twidget1(awidget.widgets[int1]));
+  end;   
+ end;
+var
+ widget1: twidget;
+
+begin //invalidategripsize
+ widget1:= fintf.getwidget;
+ if not (csloading in widget1.componentstate) then begin
+  descend1(twidget1(widget1));
+  descend2(twidget1(widget1));
+ end;
+end;
+}
 procedure tdockcontroller.setuseroptions(const avalue: optionsdockty);
+
+ 
+var
+ optbefore: optionsdockty;
+ widget1: twidget1;
 begin
+ optbefore:= foptionsdock;
  optionsdock:= optionsdockty(replacebits(
            {$ifdef FPC}longword{$else}longword{$endif}(avalue),
            {$ifdef FPC}longword{$else}longword{$endif}(foptionsdock),
            {$ifdef FPC}longword{$else}longword{$endif}(useroptionsmask)));
+ if (od_lock in foptionsdock) xor (od_lock in optbefore) then begin
+  widget1:= twidget1(fintf.getwidget);
+  if not widget1.isloading then begin
+   widget1.parentchanged;
+  end;
+ end;
 end;
 
 procedure tdockcontroller.splitterchanged;
@@ -2081,6 +2146,14 @@ function tdockcontroller.canfloat: boolean;
 begin
  result:= (od_canfloat in foptionsdock) and 
                not (ismdi and (mdistate = mds_minimized))
+end;
+
+function tdockcontroller.nogrip: boolean;
+var
+ parent: tdockcontroller;
+begin
+ result:= (od_lock in foptionsdock) or getparentcontroller(parent) and 
+                            parent.nogrip;
 end;
 
 procedure tdockcontroller.refused(const apos: pointty);
@@ -2861,6 +2934,7 @@ begin
         dbr_fixsize: include(fdockstate,dos_fixsizebuttonclicked);
         dbr_top: include(fdockstate,dos_topbuttonclicked);
         dbr_background: include(fdockstate,dos_backgroundbuttonclicked);
+        dbr_lock: include(fdockstate,dos_lockbuttonclicked);
        end;
       end;
      end;
@@ -2910,13 +2984,21 @@ begin
          widget1.invalidatewidget;
         end;
        end;
+       dbr_lock: begin
+        if (dos_lockbuttonclicked in fdockstate) then begin
+         useroptions:= optionsdockty(
+          togglebit({$ifdef FPC}longword{$else}longword{$endif}(fuseroptions),
+          ord(od_lock)));
+         widget1.invalidatewidget;
+        end;
+       end;
       end;
      end;
      fdockstate:= fdockstate - 
         [dos_closebuttonclicked,dos_maximizebuttonclicked,
             dos_normalizebuttonclicked,dos_minimizebuttonclicked,
             dos_fixsizebuttonclicked,dos_topbuttonclicked,
-            dos_backgroundbuttonclicked,dos_moving];
+            dos_backgroundbuttonclicked,dos_lockbuttonclicked,dos_moving];
     end;
    end;
   end;
@@ -3185,6 +3267,17 @@ begin
  end;
 end;
 
+procedure tdockcontroller.parentchanged(const sender: twidget);
+begin
+ if not (csloading in sender.componentstate) and 
+            (twidget1(sender).fframe is tgripframe) then begin
+  with tgripframe(twidget1(sender).fframe) do begin
+   exclude(fgripstate,grps_sizevalid);
+   internalupdatestate;
+  end;
+ end;
+end;
+
 procedure tdockcontroller.poschanged;
 var
  pos1: captionposty;
@@ -3418,7 +3511,7 @@ begin
   fillrect(arect,acolorbutton);
   case kind of
    dbr_close: begin
-    if fgrip_size >= 8 then begin
+    if factgripsize >= 8 then begin
      draw3dframe(acanvas,arect,1,defaultframecolors,[]);
      drawcross(inflaterect(arect,-2),acolorglyph);
     end
@@ -3481,6 +3574,16 @@ begin
              false,acolorglyph);
     drawline(makepoint(int1+3,y+cx-4),makepoint(int1,y+cy-1),acolorglyph);
    end;
+   dbr_lock: begin
+    int1:= 0;
+    if not odd(cx) then begin
+     int1:= 1;
+    end;
+    draw3dframe(acanvas,arect,calclevel(od_lock),defaultframecolors,[]);
+    drawellipse(makerect(arect.x + arect.cx div 2 - int1,
+                         arect.y + arect.cy div 2 - int1,
+                         arect.cx - 5,arect.cy - 5));
+   end;
   end;
  end;  
 end;
@@ -3505,6 +3608,7 @@ begin
  inherited;
  with canvas do begin
   checkstate;
+  checkgripsize;
   rect1:= clipbox;
   if testintersectrect(rect1,fgriprect) then begin
    colorbefore:= color;
@@ -3542,6 +3646,11 @@ begin
    if (frects[dbr_background].cx > 0) and 
                            (go_backgroundbutton in fgrip_options) then begin
     drawgripbutton(canvas,dbr_background,frects[dbr_background],colorglyph,
+                                                                 colorbutton);
+   end;
+   if (frects[dbr_lock].cx > 0) and 
+                           (go_lockbutton in fgrip_options) then begin
+    drawgripbutton(canvas,dbr_lock,frects[dbr_lock],colorglyph,
                                                                  colorbutton);
    end;
    rect1:= frects[dbr_handle];
@@ -3613,8 +3722,8 @@ begin
      col1:=  cl_shadow;
     end;
     with rect1 do begin
-     int1:= fgrip_size div 4;
-     int2:= (fgrip_size mod 4) div 2;
+     int1:= factgripsize div 4;
+     int2:= (factgripsize mod 4) div 2;
      if fgrip_pos in [cp_left,cp_right] then begin
       if cy > 4 then begin
        po1.x:= x + int2;
@@ -3693,11 +3802,12 @@ end;
 procedure tgripframe.getpaintframe(var frame: framety);
 begin
  inherited;
+ checkgripsize;
  case fgrip_pos of
-  cp_right: inc(frame.right,fgrip_size);
-  cp_top: inc(frame.top,fgrip_size);
-  cp_bottom: inc(frame.bottom,fgrip_size);
-  else inc(frame.left,fgrip_size);
+  cp_right: inc(frame.right,factgripsize);
+  cp_top: inc(frame.top,factgripsize);
+  cp_bottom: inc(frame.bottom,factgripsize);
+  else inc(frame.left,factgripsize);
  end;
 end;
 
@@ -3729,6 +3839,7 @@ procedure tgripframe.setgrip_size(const avalue: integer);
 begin
  if fgrip_size <> avalue then begin
   fgrip_size:= avalue;
+  exclude(fgripstate,grps_sizevalid);
   internalupdatestate;
  end;
 end;
@@ -3779,8 +3890,22 @@ begin
  end;
 end;
 
-procedure tgripframe.updaterects;
+procedure tgripframe.checkgripsize;
+var
+ parentcontroller: tdockcontroller;
+begin
+ if not (grps_sizevalid in fgripstate) then begin
+  factgripsize:= fgrip_size;
+  if fcontroller.getparentcontroller(parentcontroller) and 
+                                         parentcontroller.nogrip then begin
+   factgripsize:= 0;
+  end;
+  include(fgripstate,grps_sizevalid);
+ end;
+end;
 
+procedure tgripframe.updaterects;
+ 
  procedure initrect(const index: dockbuttonrectty);
  begin
   with frects[dbr_handle] do begin
@@ -3788,19 +3913,19 @@ procedure tgripframe.updaterects;
     cp_right,cp_left: begin
      frects[index].x:= x;
      frects[index].y:= y;
-     inc(y,fgrip_size);
-     dec(cy,fgrip_size);
+     inc(y,factgripsize);
+     dec(cy,factgripsize);
     end;
     else begin //top,bottom
-     dec(cx,fgrip_size);
+     dec(cx,factgripsize);
      frects[index].x:= x + cx;
      frects[index].y:= y;
     end;
    end;
   end;
   with frects[index] do begin
-   cx:= fgrip_size;
-   cy:= fgrip_size;
+   cx:= factgripsize;
+   cy:= factgripsize;
   end;
  end;
 
@@ -3810,31 +3935,32 @@ var
   
 begin
  inherited;
+ checkgripsize;
  with fgriprect do begin
   case fgrip_pos of
    cp_right: begin
     x:= fpaintrect.x + fpaintrect.cx;
     y:= fpaintrect.y;
-    cx:= fgrip_size;
+    cx:= factgripsize;
     cy:= fpaintrect.cy;
    end;
    cp_left: begin
-    x:= fpaintrect.x - fgrip_size;
+    x:= fpaintrect.x - factgripsize;
     y:= fpaintrect.y;
-    cx:= fgrip_size;
+    cx:= factgripsize;
     cy:= fpaintrect.cy;
    end;
    cp_top: begin
     x:= fpaintrect.x;
-    y:= fpaintrect.y - fgrip_size;
+    y:= fpaintrect.y - factgripsize;
     cx:= fpaintrect.cx;
-    cy:= fgrip_size;
+    cy:= factgripsize;
    end;
    else begin //cp_bottom
     x:= fpaintrect.x;
     y:= fpaintrect.y + fpaintrect.cy;
     cx:= fpaintrect.cx;
-    cy:= fgrip_size;
+    cy:= factgripsize;
    end;
   end;
  end;
@@ -3864,8 +3990,8 @@ begin
    end;
   end;
   if bo1 and (go_fixsizebutton in fgrip_options) then begin
-   if designing or fcontroller.getparentcontroller(parentcontroller) and
-                   bo3 and not parentcontroller.nofit and 
+   if designing or bo3 and fcontroller.getparentcontroller(parentcontroller) and
+                   not parentcontroller.nofit and 
                   (parentcontroller.fsplitdir <> sd_tabed)  then begin
     initrect(dbr_fixsize);
    end;
@@ -3877,6 +4003,9 @@ begin
    if go_backgroundbutton in fgrip_options then begin
     initrect(dbr_background);
    end;
+  end;
+  if go_lockbutton in fgrip_options then begin
+   initrect(dbr_lock);
   end;
  end;
 end;
@@ -4392,6 +4521,12 @@ end;
 procedure tdockpanel.poschanged;
 begin
  fdragdock.poschanged;
+end;
+
+procedure tdockpanel.parentchanged;
+begin
+ inherited;
+ fdragdock.parentchanged(self);
 end;
 
 function tdockpanel.getdockcontroller: tdockcontroller;
