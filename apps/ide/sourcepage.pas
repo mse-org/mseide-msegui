@@ -545,7 +545,7 @@ procedure tsourcepage.editoncellevent(const sender: TObject;
  var
   pos2: gridcoordty;
  begin
-  if info.keyeventinfopo^.shiftstate = [ss_ctrl] then begin
+  if info.keyeventinfopo^.shiftstate * shiftstatesmask = [ss_ctrl] then begin
    if edit.mousepostotextpos(translatewidgetpoint(application.mouse.pos,nil,edit),
                                             pos2,true) then begin
     showlink(pos2);
