@@ -396,7 +396,12 @@ begin
   if (flinkpos.row < datalist.count) then begin
    if updatefontstyle(datalist.getformatpo(flinkpos.row)^,flinkpos.col,
           flinklength,fs_underline,false) then begin
-    fgridintf.getcol.cellchanged(flinkpos.row);
+    with fgridintf.getcol do begin
+     cellchanged(flinkpos.row);
+     if grid.row = flinkpos.row then begin
+      self.gridtovalue(flinkpos.row);
+     end;
+    end;
    end;
   end;
   flinkpos.row:= invalidaxis;
@@ -421,7 +426,12 @@ begin
    application.cursorshape:= cr_pointinghand;
    if updatefontstyle(datalist.getformatpo(flinkpos.row)^,flinkpos.col,
           flinklength,fs_underline,true) then begin
-    fgridintf.getcol.cellchanged(flinkpos.row);
+    with fgridintf.getcol do begin
+     cellchanged(flinkpos.row);
+     if grid.row = flinkpos.row then begin
+      self.gridtovalue(flinkpos.row);
+     end;
+    end;
    end;
   end;
  end;

@@ -559,6 +559,7 @@ procedure tsourcepage.editoncellevent(const sender: TObject;
 var
  pos1,pos2: sourceposty;
  page1: tsourcepage;
+ shiftstate1: shiftstatesty;
  
 begin
  if iscellclick(info,[ccr_nokeyreturn,ccr_dblclick]) and 
@@ -577,11 +578,12 @@ begin
   cek_keydown: begin
    checklink;
    with info.keyeventinfopo^ do begin
+    shiftstate1:= shiftstate * shiftstatesmask;
     if not (es_processed in eventstate) then begin
-     if ((shiftstate = [ss_shift,ss_ctrl]) or (shiftstate = [ss_ctrl])) then begin
+     if ((shiftstate1 = [ss_shift,ss_ctrl]) or (shiftstate1 = [ss_ctrl])) then begin
       include(eventstate,es_processed);
       pos1.pos:= edit.editpos;
-      if (shiftstate = [ss_shift,ss_ctrl]) then begin
+      if (shiftstate1 = [ss_shift,ss_ctrl]) then begin
        case key of
         key_up,key_down: begin
          if switchheaderimplementation(edit.filename,pos1,pos2) then begin
@@ -611,7 +613,7 @@ begin
       end;
      end
      else begin
-      if shiftstate = [] then begin
+      if shiftstate1 = [] then begin
        include(eventstate,es_processed);
        case key of
         key_escape: begin
@@ -994,7 +996,9 @@ var
  po1: gridcoordty;
  str1,str2: msestring;
  pos1: sourceposty;
+ shiftstate1: shiftstatesty;
 begin
+ shiftstate1:= info.mouseeventinfopo^.shiftstate * shiftstatesmask;
  if mainfo.gdb.started and projectoptions.valuehints then begin
   if info.eventkind = cek_mousepark then begin
    str1:= getpascalvarname(edit,info.pos,po1);
@@ -1021,7 +1025,7 @@ begin
  with info do begin
   case eventkind of
    cek_mousemove: begin
-    if (mouseeventinfopo^.shiftstate = [ss_ctrl]) and active then begin
+    if (shiftstate1 = [ss_ctrl]) and active then begin
      showlink(info.pos);
     end;
    end;
@@ -1029,7 +1033,7 @@ begin
     edit.removelink;
    end;
    cek_buttonpress: begin
-    if (mouseeventinfopo^.shiftstate = [ss_ctrl,ss_left]) {and active} then begin
+    if (shiftstate1 = [ss_ctrl,ss_left]) {and active} then begin
 //     include(info.mouseeventinfopo^.eventstate,es_processed);
      pos1.pos:= info.pos;
      pos1.filename:= designer.designfiles.find(edit.filename);
@@ -1041,7 +1045,7 @@ begin
     end
     else begin
      if edit.isdblclicked(info.mouseeventinfopo^) and 
-                (mouseeventinfopo^.shiftstate = [ss_double,ss_shift,ss_left]) then begin
+                (shiftstate1 = [ss_double,ss_shift,ss_left]) then begin
       edit.selectword(info.pos,pascaldelims+'.[]');
       include(info.mouseeventinfopo^.eventstate,es_processed);
      end;
@@ -1149,17 +1153,20 @@ end;
 
 procedure tsourcepage.gridoncellevent(const sender: TObject; 
              var info: celleventinfoty);
+var
+ shiftstate1: shiftstatesty;
 begin
  if (info.eventkind = cek_keydown) then begin
   with info.keyeventinfopo^ do begin
-   if (shiftstate = [ss_ctrl]) and 
+   shiftstate1:= shiftstate * shiftstatesmask;
+   if (shiftstate1 = [ss_ctrl]) and 
         (key >= key_0) and (key <= key_9) then begin
     if sourcefo.findbookmark(ord(key) - ord(key_0)) then begin 
      include(eventstate,es_processed);
     end;    
    end
    else begin
-    if (shiftstate = [ss_ctrl,ss_shift]) and 
+    if (shiftstate1 = [ss_ctrl,ss_shift]) and 
          (keynomod >= key_0) and (keynomod <= key_9) then begin
      sourcefo.setbookmark(self,info.cell.row,ord(keynomod) - ord(key_0));
      include(eventstate,es_processed);
