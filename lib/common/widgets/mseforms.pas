@@ -550,7 +550,9 @@ function createmainform(const aclass: tclass;
                     const aclassname: pshortstring): tmsecomponent;
 
 begin
- result:= mseformclassty(aclass).create(nil,false);
+ result:= tmsecomponent(aclass.newinstance);
+ tcomponent1(result).setdesigning(true); //used for wo_groupleader
+ tcustommseform(result).create(nil,false);
  tmsecomponent1(result).factualclassname:= aclassname;
 end;
 

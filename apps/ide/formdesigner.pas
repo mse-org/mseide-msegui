@@ -105,7 +105,7 @@ type
    procedure deleteexe(const sender: TObject);
    procedure undeleteexe(const sender: TObject);
    procedure cutexe(const sender: TObject);
-   procedure calcscrollsize(const sender: tscrollingwidget; var asize: sizety);
+   procedure calcscrollsize(const sender: tscrollingwidgetnwr; var asize: sizety);
    procedure formdeonclose(const sender: TObject);
    procedure revertexe(const sender: TObject);
    procedure doinsertcomponent(const sender: TObject);
@@ -2762,7 +2762,7 @@ begin
  end;
 end;
 
-procedure tformdesignerfo.calcscrollsize(const sender: tscrollingwidget;
+procedure tformdesignerfo.calcscrollsize(const sender: tscrollingwidgetnwr;
                var asize: sizety);
 var
  size1: sizety;
