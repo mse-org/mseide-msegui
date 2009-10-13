@@ -26,7 +26,7 @@ uses
  msegraphutils,mseevent,msetabsglob,msedatalist,msegraphics,msedropdownlist,
  mseformatstr,mseinplaceedit,msedatanodes,mselistbrowser,msebitmap,
  msecolordialog,msedrawtext,msewidgets,msepointer,mseguiglob,msepipestream,
- msemenus,sysutils,mseglob,mseedit,db,msedialog,msescrollbar;
+ msemenus,sysutils,mseglob,mseedit,db,msedialog,msescrollbar,msememodialog;
 
 const
  defaultsourceprintfont = 'Courier';
@@ -308,7 +308,7 @@ type
    make2on: tbooleanedit;
    make3on: tbooleanedit;
    make4on: tbooleanedit;
-   makeoptions: tstringedit;
+   makeoptions: tmemodialogedit;
    ttabpage11: ttabpage;
    unitdirgrid: twidgetgrid;
    dmakeon: tbooleanedit;
@@ -343,7 +343,7 @@ type
    e4: tbooleanedit;
    e5: tbooleanedit;
    macronames: tstringedit;
-   macrovalues: tstringedit;
+   macrovalues: tmemodialogedit;
    selectactivegroupgrid: twidgetgrid;
    activemacroselect: tbooleaneditradio;
    groupcomment: tstringedit;
