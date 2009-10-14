@@ -3575,14 +3575,13 @@ begin
     drawline(makepoint(int1+3,y+cx-4),makepoint(int1,y+cy-1),acolorglyph);
    end;
    dbr_lock: begin
-    int1:= 0;
-    if not odd(cx) then begin
-     int1:= 1;
-    end;
+//    int1:= 0;
+//    if not odd(cx) then begin
+//     int1:= 1;
+//    end;
     draw3dframe(acanvas,arect,calclevel(od_lock),defaultframecolors,[]);
-    drawellipse(makerect(arect.x + arect.cx div 2 - int1,
-                         arect.y + arect.cy div 2 - int1,
-                         arect.cx - 5,arect.cy - 5));
+    drawellipse1(makerect(arect.x+2,arect.y+2,arect.cx-5,arect.cy-5),
+                                                               acolorglyph);
    end;
   end;
  end;  
