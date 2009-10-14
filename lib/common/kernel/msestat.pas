@@ -46,10 +46,11 @@ type
   protected
    function varname(const intf: istatfile): msestring;
   public
-   constructor create(const stream: ttextstream);
+   constructor create(const astream: ttextstream);
    destructor destroy; override;
    function arrayname(const name: msestring; index: integer): msestring;
    function iswriter: boolean;
+   property stream: ttextstream read fstream;
 
    procedure setsection(const name: msestring);
    procedure updatevalue(const name: msestring; var value: boolean); overload;
@@ -104,7 +105,7 @@ type
    procedure readdata;
    function findvar(const name: msestring; var value: msestring): boolean; //true if ok
   public
-   constructor create(const stream: ttextstream); overload;
+   constructor create(const astream: ttextstream); overload;
    constructor create(const filename: filenamety;
                       const aencoding: charencodingty); overload;
    destructor destroy; override;
@@ -156,7 +157,7 @@ type
    procedure writeval(const name: msestring; const avalue: msestring);
    procedure writelistval(const avalue: msestring);
   public
-   constructor create(const stream: ttextstream); overload;
+   constructor create(const astream: ttextstream); overload;
    constructor create(const filename: filenamety; 
                               const aencoding: charencodingty); overload;
  
@@ -270,9 +271,9 @@ begin
  result:= name + '_'+inttostr(index);
 end;
 
-constructor tstatfiler.create(const stream: ttextstream);
+constructor tstatfiler.create(const astream: ttextstream);
 begin
- fstream:= stream;
+ fstream:= astream;
 end;
 
 destructor tstatfiler.destroy;
@@ -483,7 +484,7 @@ end;
 
 { tstatreader }
 
-constructor tstatreader.create(const stream: ttextstream);
+constructor tstatreader.create(const astream: ttextstream);
 begin
  inherited;
  fsectionlist:= thashedmsestrings.create;
@@ -1076,19 +1077,19 @@ end;
 procedure tstatreader.readmemorystatstream(const name, streamname: msestring);
 var
  ar1: msestringarty;
- stream: ttextstream;
+ stream1: ttextstream;
 begin
  ar1:= readarray(name,msestringarty(nil));
  if high(ar1) >= 0 then begin
-  stream:= nil;
+  stream1:= nil;
   try
    try
-    stream:= memorystatstreams.open(streamname,fm_read);
-    stream.encoding:= fstream.encoding;
-    stream.size:= 0;
-    stream.writemsestrings(ar1);
+    stream1:= memorystatstreams.open(streamname,fm_read);
+    stream1.encoding:= fstream.encoding;
+    stream1.size:= 0;
+    stream1.writemsestrings(ar1);
    finally
-    stream.Free;
+    stream1.Free;
    end;
   except
   end;
@@ -1126,7 +1127,7 @@ end;
 }
 { tstatwriter }
 
-constructor tstatwriter.create(const stream: ttextstream);
+constructor tstatwriter.create(const astream: ttextstream);
 begin
  fiswriter:= true;
  inherited;
@@ -1347,19 +1348,19 @@ end;
 
 procedure tstatwriter.writememorystatstream(const name,streamname: msestring);
 var
- stream: ttextstream;
+ stream1: ttextstream;
  ar1: msestringarty;
 begin
  ar1:= nil; //compiler warning
- stream:= memorystatstreams.open(streamname,fm_read);
+ stream1:= memorystatstreams.open(streamname,fm_read);
  try
-  stream.encoding:= fstream.encoding;
-  if stream.Size > 0 then begin
-   ar1:= stream.readmsestrings;
+  stream1.encoding:= fstream.encoding;
+  if stream1.Size > 0 then begin
+   ar1:= stream1.readmsestrings;
    writearray(name,ar1);
   end;
  finally
-  stream.Free;
+  stream1.Free;
  end;
 end;
 {
