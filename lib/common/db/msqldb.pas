@@ -2739,7 +2739,7 @@ begin
      end;
     end;
     if not (bs_refreshing in fbstate) then begin
-     if DefaultFields then begin
+     if DefaultFields and aexecute then begin
       CreateFields;
      end;
      for int1:= 0 to high(indexfields) do begin
