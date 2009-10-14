@@ -640,43 +640,59 @@ type
                              //def.pos = center, def.cx = width, def.cy = height
    procedure drawellipse1(const def: rectty; const acolor: colorty = cl_default);
                              //def.pos = topleft
+   procedure drawcircle(const center: pointty; const radius: integer;
+                                               const acolor: colorty = cl_default);
    procedure drawarc(const def: rectty; const startang,extentang: real; 
-                              const acolor: colorty = cl_default);
+                              const acolor: colorty = cl_default); overload;
                              //def.pos = center, def.cx = width, def.cy = height
                              //startang,extentang in radiant (2*pi = 360deg CCW)
    procedure drawarc1(const def: rectty; const startang,extentang: real; 
                               const acolor: colorty = cl_default);
                              //def.pos = topleft
+   procedure drawarc(const center: pointty; const radius: integer;
+                              const startang,extentang: real; 
+                              const acolor: colorty = cl_default); overload;
 
    procedure fillrect(const arect: rectty; const acolor: colorty = cl_default;
-                      const linecolor: colorty = cl_none); overload;
+                      const linecolor: colorty = cl_none);
    procedure fillellipse(const def: rectty; const acolor: colorty = cl_default;
-                        const linecolor: colorty = cl_none); overload;
+                        const linecolor: colorty = cl_none);
                              //def.pos = center, def.cx = width, def.cy = height
    procedure fillellipse1(const def: rectty; const acolor: colorty = cl_default;
-                        const linecolor: colorty = cl_none); overload;
+                        const linecolor: colorty = cl_none);
                              //def.pos = topleft
+   procedure fillcircle(const center: pointty; const radius: integer;
+                        const acolor: colorty = cl_default;
+                        const linecolor: colorty = cl_none);
    procedure fillarcchord(const def: rectty; const startang,extentang: real; 
                               const acolor: colorty = cl_default;
-                              const linecolor: colorty = cl_none);
+                              const linecolor: colorty = cl_none); overload;
                              //def.pos = center, def.cx = width, def.cy = height
                              //startang,extentang in radiant (2*pi = 360deg CCW)
    procedure fillarcchord1(const def: rectty; const startang,extentang: real; 
                               const acolor: colorty = cl_default;
                               const linecolor: colorty = cl_none);
                              //def.pos = topleft
+   procedure fillarcchord(const center: pointty; const radius: integer;
+                              const startang,extentang: real; 
+                              const acolor: colorty = cl_default;
+                              const linecolor: colorty = cl_none); overload;
    procedure fillarcpieslice(const def: rectty; const startang,extentang: real; 
                             const acolor: colorty = cl_default;
-                            const linecolor: colorty = cl_none);
+                            const linecolor: colorty = cl_none); overload;
                              //def.pos = center, def.cx = width, def.cy = height
                              //startang,extentang in radiant (2*pi = 360deg CCW)
    procedure fillarcpieslice1(const def: rectty; const startang,extentang: real; 
                             const acolor: colorty = cl_default;
-                            const linecolor: colorty = cl_none);
+                            const linecolor: colorty = cl_none); overload;
                              //def.pos = topleft
+   procedure fillarcpieslice(const center: pointty; const radius: integer;
+                            const startang,extentang: real; 
+                            const acolor: colorty = cl_default;
+                            const linecolor: colorty = cl_none); overload;
    procedure fillpolygon(const apoints: array of pointty; 
                          const acolor: colorty = cl_default;
-                         const linecolor: colorty = cl_none); overload;
+                         const linecolor: colorty = cl_none);
                          
    procedure drawframe(const arect: rectty; awidth: integer = -1;
                    const acolor: colorty = cl_default;
@@ -3573,6 +3589,17 @@ begin
  end;
 end;
 
+procedure tcanvas.drawcircle(const center: pointty; const radius: integer;
+                                               const acolor: colorty = cl_default);
+var
+ rect1: rectty;
+begin
+ rect1.pos:= center;
+ rect1.cx:= 2*radius;
+ rect1.cy:= rect1.cx;
+ drawellipse(rect1,acolor);
+end;
+
 procedure tcanvas.drawellipse1(const def: rectty; const acolor: colorty = cl_default);
                              //def.pos = center, def.cx = width, def.cy = height
 begin
@@ -3589,6 +3616,18 @@ begin
   fdrawinfo.arc.extentang:= extentang;
   gdi(gdi_drawarc);
  end;
+end;
+
+procedure tcanvas.drawarc(const center: pointty; const radius: integer;
+                              const startang,extentang: real; 
+                              const acolor: colorty = cl_default);
+var
+ rect1: rectty;
+begin
+ rect1.pos:= center;
+ rect1.cx:= 2*radius;
+ rect1.cy:= rect1.cx;
+ drawarc(rect1,startang,extentang,acolor);
 end;
 
 procedure tcanvas.drawarc1(const def: rectty; const startang,extentang: real; 
@@ -3625,6 +3664,18 @@ begin
  if (linecolor <> cl_none) then begin
   drawellipse(def,linecolor);
  end;
+end;
+
+procedure tcanvas.fillcircle(const center: pointty; const radius: integer;
+                        const acolor: colorty = cl_default;
+                        const linecolor: colorty = cl_none);
+var
+ rect1: rectty;
+begin
+ rect1.pos:= center;
+ rect1.cx:= 2*radius;
+ rect1.cy:= rect1.cx;
+ fillellipse(rect1,acolor,linecolor);
 end;
 
 procedure tcanvas.fillellipse1(const def: rectty; const acolor: colorty = cl_default;
@@ -3675,6 +3726,19 @@ begin
  end;
 end;
 
+procedure tcanvas.fillarcchord(const center: pointty; const radius: integer;
+                              const startang,extentang: real; 
+                              const acolor: colorty = cl_default;
+                              const linecolor: colorty = cl_none);
+var
+ rect1: rectty;
+begin
+ rect1.pos:= center;
+ rect1.cx:= 2*radius;
+ rect1.cy:= rect1.cx;
+ fillarcchord(rect1,startang,extentang,acolor,linecolor);
+end;
+
 procedure tcanvas.fillarcchord1(const def: rectty; const startang: real;
                const extentang: real; const acolor: colorty = cl_default;
                const linecolor: colorty = cl_none);
@@ -3695,6 +3759,19 @@ begin
   drawlines([startpo,def.pos,endpo],false,linecolor);
   drawarc(def,startang,extentang,linecolor);
  end;
+end;
+
+procedure tcanvas.fillarcpieslice(const center: pointty; const radius: integer;
+                            const startang,extentang: real; 
+                            const acolor: colorty = cl_default;
+                            const linecolor: colorty = cl_none);
+var
+ rect1: rectty;
+begin
+ rect1.pos:= center;
+ rect1.cx:= 2*radius;
+ rect1.cy:= rect1.cx;
+ fillarcpieslice(rect1,startang,extentang,acolor,linecolor);
 end;
 
 procedure tcanvas.fillarcpieslice1(const def: rectty; const startang: real;
