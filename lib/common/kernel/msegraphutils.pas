@@ -488,6 +488,9 @@ procedure subsize1(var dest: sizety; const size: sizety);
 
 function rectcenter(const arect: rectty): pointty;
 procedure centerrect(apos: pointty; asize: integer; out rect: rectty);
+function excenterrect(const arect: rectty): rectty;
+function recenterrect(const arect: rectty): rectty;
+
 function inflaterect(const rect: rectty; value: integer): rectty; overload;
 function inflaterect(const rect: rectty; const frame: framety): rectty; overload;
 procedure inflaterect1(var rect: rectty; value: integer); overload;
@@ -1079,6 +1082,26 @@ begin
   y:= apos.y - int1;
   cx:= asize;
   cy:= asize;
+ end;
+end;
+
+function excenterrect(const arect: rectty): rectty;
+begin
+ with result do begin
+  x:= arect.x - arect.cx div 2;
+  y:= arect.y - arect.cy div 2;
+  cx:= arect.cx;
+  cy:= arect.cy;
+ end;
+end;
+
+function recenterrect(const arect: rectty): rectty;
+begin
+ with result do begin
+  x:= arect.x + arect.cx div 2;
+  y:= arect.y + arect.cy div 2;
+  cx:= arect.cx;
+  cy:= arect.cy;
  end;
 end;
 
