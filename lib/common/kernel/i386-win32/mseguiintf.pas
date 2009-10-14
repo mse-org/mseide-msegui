@@ -2590,9 +2590,9 @@ begin
  allocbuffer(drawinfo.buffer,sizeof(trect));
  with drawinfo,prect(buffer.buffer)^,rect do begin
   Left:= rect^.x + origin.x - drawinfo.rect.rect^.cx div 2;
-  right:= Left + rect^.cx;
+  right:= Left + rect^.cx+1;
   top:= rect^.y + origin.y - drawinfo.rect.rect^.cy div 2;
-  bottom:= top + rect^.cy;
+  bottom:= top + rect^.cy+1;
  end;
 end;
 
