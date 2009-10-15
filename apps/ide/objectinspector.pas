@@ -555,7 +555,9 @@ end;
 
 procedure tobjectinspectorfo.showmethodsource(const aeditor: tmethodpropertyeditor);
 begin
- sourcefo.showsourcepos(sourceupdater.findmethodpos(aeditor.method,true),true);
+ if aeditor.method.data <> nil then begin
+  sourcefo.showsourcepos(sourceupdater.findmethodpos(aeditor.method,true),true);
+ end;
 end;
 
 procedure tobjectinspectorfo.valuesonmouseevent(const sender: twidget; 
@@ -1320,7 +1322,7 @@ begin
     edit;
    end
    else begin
-    if feditor is tmethodpropertyeditor then begin
+    if (feditor is tmethodpropertyeditor) then begin
      showmethodsource(tmethodpropertyeditor(feditor));
     end;
    end;

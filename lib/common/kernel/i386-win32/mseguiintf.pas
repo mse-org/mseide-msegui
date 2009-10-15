@@ -2585,14 +2585,20 @@ begin
  end;
 end;
 
-procedure transformellipseinfo(var drawinfo: drawinfoty);
+procedure transformellipseinfo(var drawinfo: drawinfoty; const fill: boolean);
+var
+ int1: integer;
 begin
  allocbuffer(drawinfo.buffer,sizeof(trect));
+ int1:= 1;
+ if fill then begin
+  int1:= 2;
+ end;
  with drawinfo,prect(buffer.buffer)^,rect do begin
   Left:= rect^.x + origin.x - drawinfo.rect.rect^.cx div 2;
-  right:= Left + rect^.cx+1;
+  right:= Left + rect^.cx+int1;
   top:= rect^.y + origin.y - drawinfo.rect.rect^.cy div 2;
-  bottom:= top + rect^.cy+1;
+  bottom:= top + rect^.cy+int1;
  end;
 end;
 
@@ -2992,13 +2998,13 @@ end;
 
 procedure gui_fillelipse(var drawinfo: drawinfoty);
 begin
- transformellipseinfo(drawinfo);
+ transformellipseinfo(drawinfo,true);
  fill(drawinfo,fs_ellipse);
 end;
 
 procedure gui_fillarc(var drawinfo: drawinfoty);
 begin
- transformellipseinfo(drawinfo);
+ transformellipseinfo(drawinfo,true);
  fill(drawinfo,fs_arc);
 end;
 
@@ -3498,7 +3504,7 @@ procedure gui_drawellipse(var drawinfo: drawinfoty);
 var
  bo1: boolean;
 begin
- transformellipseinfo(drawinfo);
+ transformellipseinfo(drawinfo,false);
  with drawinfo do begin
   bo1:= checkgc(gc,[gcf_foregroundpenvalid,gcf_selectforegroundpen,gcf_selectnullbrush]);
   windows.ellipse(gc.handle,trect(buffer.buffer^).Left,
@@ -3539,7 +3545,7 @@ begin
    setarcdirection(gc.handle,ad_counterclockwise);
   end;
  end;
- transformellipseinfo(drawinfo);
+ transformellipseinfo(drawinfo,false);
  with drawinfo do begin
   bo1:= checkgc(gc,[gcf_foregroundpenvalid,gcf_selectforegroundpen,gcf_selectnullbrush]);
   windows.arc(gc.handle,trect(buffer.buffer^).Left,
