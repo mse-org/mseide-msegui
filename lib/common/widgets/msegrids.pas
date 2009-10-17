@@ -83,6 +83,7 @@ type
 
  stringcoleditoptionty = (
                     scoe_undoonesc,scoe_forcereturncheckvalue,scoe_eatreturn,
+                    scoe_autorowheight,
 
                     //same layout as editoptionty
                     scoe_endonenter,
@@ -164,6 +165,7 @@ type
       gs_mousecellredirected,gs_restorerow,gs_cellexiting,gs_rowremoving,
       gs_hasactiverowcolor,
       gs_needszebraoffset, //has zebrastep or autonumcol
+      gs_needsrowheight,
       gs_islist,//contiguous select blocks
       gs_isdb); //do not change rowcount
  gridstatesty = set of gridstatety;
@@ -261,7 +263,8 @@ type
   griddatalink: pointer;
   rowstate: prowstatety;
   foldinfo: prowfoldinfoty;
-//  lastvisiblecol: boolean;
+  calcrowheight: boolean; // don't paint
+  rowheight: integer;
  end;
  pcellinfoty = ^cellinfoty;
 
@@ -269,6 +272,11 @@ type
   public
    class function getinstancepo(owner: tobject): pfont; override;
  end;
+
+ gridpropstatety = (gps_fix,gps_selected,gps_noinvalidate,gps_edited,
+               gps_readonlyupdating,gps_selectionchanged,gps_changelock,
+               gps_datalistvalid,gps_needsrowheight);
+ gridpropstatesty = set of gridpropstatety;
 
  tgridprop = class(tindexpersistent,iframe,iface)
   private
@@ -288,6 +296,7 @@ type
    procedure setcolorselect(const Value: colorty);
    procedure setcoloractive(avalue: colorty);
   protected
+   fstate: gridpropstatesty;
    fstart,fend: integer;
    flinepos: integer;
    flinewidth: integer;
@@ -307,6 +316,7 @@ type
    procedure updatecellrect(const aframe: tcustomframe);
    function getinnerframe: framety; virtual;
    function step(getscrollable: boolean = true): integer; virtual; abstract;
+
   //iframe
    function getwidget: twidget;
    procedure setframeinstance(instance: tcustomframe);
@@ -323,6 +333,7 @@ type
    procedure invalidaterect(const rect: rectty; const org: originty = org_client;
                                   const noclip: boolean = false);
    function getframestateflags: framestateflagsty;
+   procedure updatecellheight(const canvas: tcanvas; var aheight: integer); virtual;
   //iface
    function getclientrect: rectty;
    procedure setlinkedvar(const source: tmsecomponent; var dest: tmsecomponent;
@@ -368,6 +379,8 @@ type
   rows: integerarty;
   foldinfo: rowfoldinfoarty;
   startrow,endrow: integer; //index in rows
+  calcrowheight: boolean;
+  rowheight: integer;
  end;
 
  tcols = class;
@@ -388,11 +401,6 @@ type
   rowinfo: rowpaintinfoty;
   rowrange: cellaxisrangety;
  end;
-
- colstatety = (cos_fix,cos_selected,cos_noinvalidate,cos_edited,
-               cos_readonlyupdating,cos_selectionchanged,cos_changelock,
-               cos_datalistvalid);
- colstatesty = set of colstatety;
 
  tcolselectfont = class(tparentfont)
   public
@@ -430,7 +438,6 @@ type
   protected
    fwidth: integer;
    fpropwidth: real;
-   fstate: colstatesty;
    ffontselect: tcolselectfont;
    ffocusrectdist: integer;
    procedure createfontselect;
@@ -444,9 +451,8 @@ type
          //true if coloractive and fontactivenum active
    function isopaque: boolean; virtual;
    function getdatapo(const arow: integer): pointer; virtual;
-//   function ismerged: boolean; virtual;
    procedure clean(const start,stop: integer); virtual;
-   procedure paint(const info: colpaintinfoty); virtual;
+   procedure paint(var info: colpaintinfoty); virtual;
    class function defaultstep(width: integer): integer; virtual;
    function step(getscrollable: boolean = true): integer; override;
    procedure drawcell(const acanvas: tcanvas); virtual;
@@ -545,7 +551,6 @@ type
    procedure endselect;
    function getdatapo(const arow: integer): pointer; override;
    function getrowdatapo: pointer;
-//   function ismerged: boolean; override;
    procedure beforedragevent(var ainfo: draginfoty; const arow: integer;
                                      var processed: boolean); virtual;
    procedure afterdragevent(var ainfo: draginfoty; const arow: integer;
@@ -582,7 +587,6 @@ type
                                      const aowner: tgridarrayprop); override;
    destructor destroy; override;
 
-//   procedure cellchanged(const row: integer); override;
    function canfocus(const abutton: mousebuttonty;
                      const ashiftstate: shiftstatesty;
                      out canrowfocus: boolean): boolean; virtual;
@@ -727,7 +731,7 @@ type
    procedure moverow(const fromindex,toindex: integer; const count: integer = 1); override;
    procedure insertrow(const aindex: integer; const count: integer = 1); override;
    procedure deleterow(const aindex: integer; const count: integer = 1); override;
-   procedure paint(const info: colpaintinfoty); override;
+   procedure paint(var info: colpaintinfoty); override;
    procedure rearange(const list: tintegerdatalist); override;
   public
    constructor create(const agrid: tcustomgrid;
@@ -1067,7 +1071,8 @@ type
    procedure begindataupdate; virtual;
    procedure enddataupdate; virtual;
    function getclientsize: integer; override;
-   procedure paint(const info: colpaintinfoty; const scrollables: boolean = true);
+   procedure paint(var info: colpaintinfoty; const scrollables: boolean = true);
+   procedure updaterowheight(const arow: integer; var arowheight: integer);
    function totwidth: integer;
    procedure rowcountchanged(const newcount: integer); virtual;
    procedure updatelayout; override;
@@ -1110,6 +1115,7 @@ type
    fvisiblerows: integerarty;
    fvisiblerowmap: tintegerdatalist;
    ffoldchangedrow: integer;
+   ftopypos: integer;
    procedure cleanfolding(arow: integer; visibleindex: integer);
    function isvisible(const arow: integer): boolean;
    procedure counthidden(var aindex: integer);
@@ -1137,7 +1143,12 @@ type
    function getstatdata(const index: integer): msestring; override;
    procedure setstatdata(const index: integer; const value: msestring);
                                  override;
-   function internalystep(const aindex: integer): integer;
+   function internalheight(const aindex: integer): integer;
+                    //no valid checks
+   function internalystep(const aindex: integer): integer; overload;
+                    //no valid checks
+   procedure internalystep(const aindex: integer; out ay: integer;
+                                      out acy:integer); overload;
                     //no valid checks
   public
    constructor create(const aowner: tcustomgrid); reintroduce;
@@ -1609,6 +1620,8 @@ type
    procedure internalselectionchanged;
    procedure setoptionsgrid(const avalue: optionsgridty); virtual;
    procedure checkrowreadonlystate; virtual;
+   procedure checkneedsrowheight;
+   procedure updaterowheight(const arow: integer; var arowheight: integer);
 
    procedure doinsertrow(const sender: tobject); virtual;
    procedure doappendrow(const sender: tobject); virtual;
@@ -2582,15 +2595,12 @@ procedure tgridprop.drawcellbackground(const acanvas: tcanvas;
                 const aframe: tcustomframe; const aface: tcustomface);
 begin
  acanvas.fillrect(fcellinfo.rect,fcellinfo.color);
-// acanvas.fillrect(makerect(nullpoint,fcellrect.size),fcellinfo.color);
  if aframe <> nil then begin
-//  aframe.paintbackground(acanvas,makerect(nullpoint,fcellrect.size));
   aframe.paintbackground(acanvas,fcellinfo.rect);
  end;
  acanvas.rootbrushorigin:= fgrid.fbrushorigin;
  if aface <> nil then begin
   aface.paint(acanvas,fcellinfo.rect);
-//  aface.paint(acanvas,makerect(nullpoint,fcellinfo.rect.size));
  end;
 end;
 
@@ -2625,7 +2635,6 @@ begin
  fcellinfo.rect:= fcellrect;
  if aframe <> nil then begin
   deflaterect1(fcellinfo.rect,tframe1(aframe).fpaintframe);
-//  fcellinfo.innerrect:= deflaterect(fcellinfo.rect,fframe.fi.innerframe);
   with tframe1(aframe).fi.innerframe do begin
    fcellinfo.innerrect.pos:= pointty(topleft);
    fcellinfo.innerrect.cx:= fcellinfo.rect.cx - left - right;
@@ -2696,6 +2705,11 @@ begin
  result:= [];
 end;
 
+procedure tgridprop.updatecellheight(const canvas: tcanvas; var aheight: integer);
+begin
+ //dummy
+end;
+
 { tcolselectfont }
 
 class function tcolselectfont.getinstancepo(owner: tobject): pfont;
@@ -2745,7 +2759,9 @@ end;
 
 procedure tcol.drawcell(const acanvas: tcanvas);
 begin
- drawcellbackground(acanvas,fframe,fface);
+ if not fcellinfo.calcrowheight then begin
+  drawcellbackground(acanvas,fframe,fface);
+ end;
 end;
 
 function tcol.actualcolor: colorty;
@@ -2773,7 +2789,7 @@ function tcol.checkactivecolor(const aindex: integer): boolean;
 begin
  result:= (fgrid.entered or (co1_active in tcols(prop).foptions1)) and 
           (aindex = fgrid.ffocusedcell.row) and 
-          ((cos_fix in fstate) or (co_rowcoloractive in foptions) or 
+          ((gps_fix in fstate) or (co_rowcoloractive in foptions) or 
                                (findex = fgrid.ffocusedcell.col))
 end;
 
@@ -2893,7 +2909,7 @@ begin
  result:= nil;
 end;
 
-procedure tcol.paint(const info: colpaintinfoty);
+procedure tcol.paint(var info: colpaintinfoty);
 var
  int1,int2,int3: integer;
  isfocusedcol: boolean;
@@ -2921,6 +2937,8 @@ begin
   canafterdrawcell:= fgrid.canevent(tmethod(fonafterdrawcell));
   hiddenlines:= nil;
   with info do begin
+   fcellinfo.calcrowheight:= calcrowheight;
+   fcellinfo.rowheight:= rowheight;
    fgrid.fbrushorigin.x:= fgrid.frootbrushorigin.x;
    if not (co_nohscroll in foptions) then begin
     fgrid.fbrushorigin.x:= fgrid.fbrushorigin.x + fgrid.fscrollrect.x;
@@ -2933,7 +2951,7 @@ begin
    fcellinfo.foldinfo:= nil;
    nextcol:= nil;
    po1:= nil;
-   if not (cos_fix in fstate) then begin
+   if not (gps_fix in fstate) then begin
     po1:= pointer(fgrid.fdatacols.fitems);
     if index <> fgrid.datacols.lastvisiblecol then begin
      nextcol:= po1^[index+1];
@@ -2955,11 +2973,12 @@ begin
      heightextend:= 0;
      if hasrowheight then begin
       with fcellinfo do begin
-       int2:= prowstaterowheightty(rowstate)^.rowheight.height;
-       if int2 = 0 then begin
-        int2:= fgrid.fdatarowheight;
-       end;
-       heightextend:= int2 - rect.cy;
+//       int2:= prowstaterowheightty(rowstate)^.rowheight.height;
+//       if int2 = 0 then begin
+//        int2:= fgrid.fdatarowheight;
+//       end;
+//       heightextend:= int2 - rect.cy;
+       heightextend:= rowstatelist.internalheight(row1) - rect.cy;
        inc(rect.cy,heightextend);      
        inc(innerrect.cy,heightextend);      
        inc(frameinnerrect.cy,heightextend);
@@ -3008,17 +3027,22 @@ begin
        fonbeforedrawcell(self,canvas,fcellinfo,bo2);
       end;
       if not bo2 then begin
-        if isfocusedcol and (row1 = fgrid.ffocusedcell.row) then begin
-         drawfocusedcell(canvas);
-        end
-        else begin
-         drawcell(canvas);
-        end;
+       if isfocusedcol and (row1 = fgrid.ffocusedcell.row) then begin
+        drawfocusedcell(canvas);
+       end
+       else begin
+        drawcell(canvas);
+       end;
       end;
       if canafterdrawcell then begin
        fonafterdrawcell(self,canvas,fcellinfo);
       end;
       canvas.restore(saveindex);
+      if calcrowheight then begin
+       rowheight:= fcellinfo.rowheight;
+       exit;
+      end;
+
       if not bo2 then begin
        drawcelloverlay(canvas,fframe);
       end;
@@ -3050,11 +3074,12 @@ begin
      end;
     end;
     if hasrowheight then begin
-     int2:= prowstaterowheightty(fcellinfo.rowstate)^.rowheight.height;
-     if int2 = 0 then begin
-      int2:= fgrid.fdatarowheight;
-     end;
-     canvas.move(makepoint(0,int2+fgrid.fdatarowlinewidth));
+//     int2:= prowstaterowheightty(fcellinfo.rowstate)^.rowheight.height;
+//     if int2 = 0 then begin
+//      int2:= fgrid.fdatarowheight;
+//     end;
+//     canvas.move(makepoint(0,int2+fgrid.fdatarowlinewidth));
+     canvas.move(makepoint(0,rowstatelist.internalystep(row1)));
     end
     else begin
      canvas.move(makepoint(0,ystep));
@@ -3194,12 +3219,12 @@ end;
 function tcol.getselected(const row: integer): boolean;
 begin
  if row >= 0 then begin
-  result:= (cos_selected in fstate) or
+  result:= (gps_selected in fstate) or
    (fgrid.fdatacols.frowstate.getitempo(row)^.selected and
                wholerowselectedmask <> 0);
  end
  else begin
-  result:= cos_selected in fstate;
+  result:= gps_selected in fstate;
  end;
 end;
 
@@ -4150,7 +4175,7 @@ var
      else begin
       fcellinfo.cell.col:= int1;
       if (fcolorselect <> cl_none) and 
-                    (cos_selected in fgrid.fdatacols[int1].fstate) then begin
+                    (gps_selected in fgrid.fdatacols[int1].fstate) then begin
        if fcolorselect <> cl_default then begin
         fcellinfo.color:= fcolorselect;
        end
@@ -4908,12 +4933,12 @@ function tdatacol.getselected(const row: integer): boolean;
 begin
  if ident <= selectedcolmax then begin
   if row >= 0 then begin
-   result:= (cos_selected in fstate) or
+   result:= (gps_selected in fstate) or
     (fgrid.fdatacols.frowstate.getitempo(row)^.selected and
      (bits[ident] or wholerowselectedmask) <> 0);
   end
   else begin
-   result:= cos_selected in fstate;
+   result:= gps_selected in fstate;
   end;
  end
  else begin
@@ -4959,15 +4984,15 @@ begin
   end
   else begin //row < 0
    if value then begin
-    if not (cos_selected in fstate) then begin
-     include(fstate,cos_selected);
+    if not (gps_selected in fstate) then begin
+     include(fstate,gps_selected);
      fselectedrow:= -2;
      changed;
      doselectionchanged;
     end;
    end
    else begin
-    exclude(fstate,cos_selected);
+    exclude(fstate,gps_selected);
     if fselectedrow <> -1 then begin
      po1:= fgrid.fdatacols.frowstate.datapo;
      ca1:= not (bits[ident] {or wholerowselectedmask});
@@ -5077,7 +5102,7 @@ begin
   end;
  end
  else begin
-  include(fstate,cos_selectionchanged);
+  include(fstate,gps_selectionchanged);
  end;
  fgrid.internalselectionchanged;
 end;
@@ -5091,8 +5116,8 @@ procedure tdatacol.endselect;
 begin
  dec(fselectlock);
  if fselectlock = 0 then begin
-  if cos_selectionchanged in fstate then begin
-   exclude(fstate,cos_selectionchanged);
+  if gps_selectionchanged in fstate then begin
+   exclude(fstate,gps_selectionchanged);
    doselectionchanged;
   end;
  end;
@@ -5147,8 +5172,17 @@ begin
    include(fgrid.fstate,gs_rowcountinvalid)
   end;
  end;
- if not (cos_noinvalidate in fstate) and 
+ if not (gps_noinvalidate in fstate) and 
                      not (csloading in fgrid.componentstate) then begin
+  if gps_needsrowheight in fstate then begin
+   if aindex < 0 then begin
+    tdatacols(prop).frowstate.fdirtyrowheight:= 0;
+   end
+   else begin
+    tdatacols(prop).frowstate.fdirtyrowheight:= aindex;
+   end;   
+   fgrid.layoutchanged;
+  end;
   if aindex < 0 then begin
    cellchanged(invalidaxis);
   end
@@ -5171,7 +5205,7 @@ begin
  if not (co_nosort in foptions) then begin
   fgrid.sortinvalid;
  end;
- if not (cos_changelock in fstate) and 
+ if not (gps_changelock in fstate) and 
                                 fgrid.canevent(tmethod(fonchange)) then begin
   fonchange(self,aindex);
  end;
@@ -5592,7 +5626,7 @@ end;
 
 procedure tcustomstringcol.modified;
 begin
- include(fstate,cos_edited);
+ include(fstate,gps_edited);
  //dummy
 end;
 
@@ -5637,10 +5671,21 @@ begin
  with cellinfoty(canvas.drawinfopo^) do begin
   if cell.row < fgrid.rowcount then begin
    ftextinfo.dest.cx:= innerrect.cx;
+   ftextinfo.dest.cy:= innerrect.cy;
    ftextinfo.clip.cx:= rect.cx;
+   ftextinfo.clip.cy:= rect.cy;
    ftextinfo.text.text:= getrowtext(cell.row);
    updatedisptext(ftextinfo.text.text);
-   drawtext(canvas,ftextinfo);
+   if calcrowheight then begin
+    textrect(canvas,ftextinfo);
+    int1:= rect.cy - innerrect.cy + ftextinfo.res.cy;
+    if int1 > rowheight then begin
+     rowheight:= int1;
+    end;
+   end
+   else begin
+    drawtext(canvas,ftextinfo);
+   end;
   end;
  end;
 end;
@@ -5716,11 +5761,23 @@ begin
 end;
 
 procedure tcustomstringcol.setoptionsedit(const avalue: stringcoleditoptionsty);
+var
+ optionsbefore: stringcoleditoptionsty;
+ options1: stringcoleditoptionsty;
 begin
-// if scoe_autopost in avalue then begin
-//  include(foptionsdb,oed_autopost);
-// end;
- foptionsedit:= avalue {- [scoe_autopost]};
+ optionsbefore:= foptionsedit;
+ foptionsedit:= avalue;
+ options1:= stringcoleditoptionsty(longword(optionsbefore) xor
+                                                     longword(foptionsedit));
+ if scoe_autorowheight in options1 then begin
+  if scoe_autorowheight in foptionsedit then begin
+   include(fstate,gps_needsrowheight);
+  end
+  else begin
+   exclude(fstate,gps_needsrowheight);
+  end; 
+  fgrid.checkneedsrowheight;
+ end;
 end;
 
 { tfixcol }
@@ -5733,7 +5790,7 @@ begin
  fcaptions:= tmsestringdatalist.create;
  fcaptions.onitemchange:= {$ifdef FPC}@{$endif}captionchanged;
  inherited;
- include(fstate,cos_fix);
+ include(fstate,gps_fix);
  fcolor:= cl_parent;
 end;
 
@@ -5836,7 +5893,7 @@ begin
 end;
 }
 
-procedure tfixcol.paint(const info: colpaintinfoty);
+procedure tfixcol.paint(var info: colpaintinfoty);
 begin
  if ffont = nil then begin
   ftextinfo.font:= fgrid.getfont;
@@ -5951,7 +6008,7 @@ begin
  end;
 end;
 
-procedure tcols.paint(const info: colpaintinfoty; const scrollables: boolean = true);
+procedure tcols.paint(var info: colpaintinfoty; const scrollables: boolean = true);
 var
  startx,endx: integer;
  pt1,pt2: pointty;
@@ -6000,6 +6057,23 @@ begin
    end;
   end;
   canvas.origin:= pt1;
+ end;
+end;
+
+procedure tcols.updaterowheight(const arow: integer; var arowheight: integer);
+var
+ info: colpaintinfoty;
+begin
+ fillchar(info,sizeof(info),0);
+ with info do begin
+  calcrowheight:= true;
+  rowheight:= arowheight;
+  canvas:= fgrid.getcanvas;  
+  setlength(rows,1);
+  rows[0]:= arow; //startrow = endrow = 0
+  paint(info,true);
+  paint(info,false);
+  arowheight:= rowheight;
  end;
 end;
 
@@ -6418,7 +6492,7 @@ begin
  if fchangelock = 0 then begin
   for int1:= 0 to count-1 do begin
    with tdatacol(fitems[int1]) do begin
-    include(fstate,cos_changelock);
+    include(fstate,gps_changelock);
    end;
   end;
  end;
@@ -6434,7 +6508,7 @@ begin
  if fchangelock = 0 then begin
   for int1:= 0 to count-1 do begin
    with tdatacol(fitems[int1]) do begin
-    exclude(fstate,cos_changelock);
+    exclude(fstate,gps_changelock);
    end;
   end;
   if fgrid.componentstate * 
@@ -6478,7 +6552,7 @@ begin
   else begin
    result:= true;
    for int1:= 0 to count - 1 do begin
-    if not (cos_selected in cols[int1].fstate) then begin
+    if not (gps_selected in cols[int1].fstate) then begin
      result:= false;
      break;
     end;
@@ -6734,7 +6808,7 @@ var
 begin
  result:= false;
  for int1:= 0 to count - 1 do begin
-  if cos_selected in tdatacol(fitems[int1]).fstate then begin
+  if gps_selected in tdatacol(fitems[int1]).fstate then begin
    result:= true;
    exit;
   end;
@@ -7932,6 +8006,8 @@ begin
   if (rect1.cx > 0) and (rect1.cy > 0) then begin
    if high(fvisiblerows) >= 0 then begin
     with colinfo do begin
+     calcrowheight:= false;
+     rowheight:= 0;
      ystep:= self.fystep;
      if rowheight1 then begin
       startrow:= -1;
@@ -10073,12 +10149,14 @@ function tcustomgrid.cellrect(const cell: gridcoordty;
    case innerlevel of
     cil_paint: begin
      inc(y,fcellinfo.rect.y);
-     cy:= fcellinfo.rect.cy;
+     dec(cy,fdatarowheight-fcellinfo.rect.cy);
+//     cy:= fcellinfo.rect.cy;
     end;
     cil_inner: begin
      inc(y,fcellinfo.rect.y);
      inc(y,fcellinfo.innerrect.y);
-     cy:= fcellinfo.innerrect.cy;
+     dec(cy,fdatarowheight-fcellinfo.innerrect.cy);
+//     cy:= fcellinfo.innerrect.cy;
     end;
    end;
   end;
@@ -10166,15 +10244,17 @@ begin  //cellrect
    if int1 >= 0 then begin
     if og_rowheight in foptionsgrid then begin
      fdatacols.frowstate.cleanrowheight(row);
-     with prowstaterowheightty(fdatacols.frowstate.getitempo(row))^ do begin
-      if rowheight.height = 0 then begin
-       cy:= fystep;
-      end
-      else begin
-       cy:= rowheight.height + fdatarowlinewidth;
-      end;
-      y:= rowheight.ypos;
-     end;
+     fdatacols.frowstate.internalystep(row,y,cy);
+     
+//     with prowstaterowheightty(fdatacols.frowstate.getitempo(row))^ do begin
+//      if rowheight.height = 0 then begin
+//       cy:= fystep;
+//      end
+//      else begin
+//       cy:= rowheight.height + fdatarowlinewidth;
+//      end;
+//      y:= rowheight.ypos;
+//     end;
     end
     else begin
      cy:= fystep;
@@ -10892,6 +10972,7 @@ end;
 procedure tcustomgrid.loaded;
 begin
  inherited;
+ checkneedsrowheight;
  fdatacols.checkindexrange;
  checksort;
  dorowsdatachanged(makegridcoord(invalidaxis,0),frowcount);
@@ -12311,13 +12392,13 @@ begin
      list.add(int1);
     end;
     for int1:= 0 to fdatacols.count - 1 do begin
-     include(tdatacol(fdatacols.fitems[int1]).fstate,cos_noinvalidate);
+     include(tdatacol(fdatacols.fitems[int1]).fstate,gps_noinvalidate);
     end;
     try
      fdatacols.rearange(list);
     finally
      for int1:= 0 to fdatacols.count - 1 do begin
-      exclude(tdatacol(fdatacols.fitems[int1]).fstate,cos_noinvalidate);
+      exclude(tdatacol(fdatacols.fitems[int1]).fstate,gps_noinvalidate);
      end;
     end;
     ffixcols.rearange(list);
@@ -12468,6 +12549,35 @@ begin
  else begin
   exclude(fstate,gs_rowreadonly);
  end;
+end;
+
+procedure tcustomgrid.checkneedsrowheight;
+var
+ int1: integer;
+ bo1: boolean;
+begin
+ if not (csloading in componentstate) then begin
+  bo1:= gs_needsrowheight in fstate;
+  exclude(fstate,gs_needsrowheight);
+  with fdatacols do begin
+   for int1:= 0 to count -1 do begin
+    if gps_needsrowheight in tgridprop(pointerarty(fitems)[int1]).fstate then begin
+     include(self.fstate,gs_needsrowheight);
+     if not bo1 and (frowcount > 0) then begin
+      fdatacols.rowstate.change(-1);
+     end;     
+     break;
+    end;
+   end;
+  end;   
+ end;
+end;
+
+procedure tcustomgrid.updaterowheight(const arow: integer;
+                                                   var arowheight: integer);
+begin
+ fdatacols.updaterowheight(arow,arowheight);
+ ffixcols.updaterowheight(arow,arowheight);
 end;
 
 procedure tcustomgrid.setdragcontroller(const avalue: tdragcontroller);
@@ -12846,12 +12956,25 @@ end;
 procedure tcustomstringgrid.drawfocusedcell(const canvas: tcanvas);
 var
  po1: pointty;
+ rect1: rectty;
+ int1: integer;
 begin
- drawcellbackground(canvas);
- po1:= cellrect(ffocusedcell,cil_paint).pos;
- canvas.remove(po1);
- feditor.dopaint(canvas);
- canvas.move(po1);
+ with cellinfoty(canvas.drawinfopo^) do begin
+  if calcrowheight then begin
+   rect1:= feditor.textrect;
+   int1:= rect.cy - innerrect.cy + rect1.cy;
+   if int1 > rowheight then begin
+    rowheight:= int1;
+   end;
+  end
+  else begin
+   drawcellbackground(canvas);
+   po1:= cellrect(ffocusedcell,cil_paint).pos;
+   canvas.remove(po1);
+   feditor.dopaint(canvas);
+   canvas.move(po1);
+  end;
+ end;
 end;
 
 procedure tcustomstringgrid.doselectionchanged;
@@ -13116,9 +13239,9 @@ begin
     end;
     ea_textentered: begin
      bo1:= true;
-     if (cos_edited in fstate) or 
+     if (gps_edited in fstate) or 
            (scoe_forcereturncheckvalue in foptionsedit) then begin
-      include(fstate,cos_edited);
+      include(fstate,gps_edited);
       bo1:= docheckcellvalue;
       if scoe_eatreturn in foptionsedit then begin
        info.action:= ea_none;
@@ -13130,7 +13253,7 @@ begin
      end;
     end;
     ea_undo: begin
-     exclude(fstate,cos_edited);
+     exclude(fstate,gps_edited);
     end;
     ea_caretupdating: begin
      frame1:= nullframe;
@@ -13174,7 +13297,7 @@ begin
  if  isdatacell(ffocusedcell) 
                   and not (oe_readonly in feditor.optionsedit) then begin
   strcol:= datacols[ffocusedcell.col];
-  if cos_edited in strcol.fstate then begin
+  if gps_edited in strcol.fstate then begin
    mstr1:= feditor.text;
    strcol.updatedisptext(mstr1);
    if canevent(tmethod(strcol.fonsetvalue)) then begin
@@ -13186,7 +13309,7 @@ begin
      strcol.fondataentered(strcol);
     end;
    end;
-   exclude(strcol.fstate,cos_edited);
+   exclude(strcol.fstate,gps_edited);
    feditor.dofocus;
   end;
  end;
@@ -13202,17 +13325,17 @@ procedure tcustomstringgrid.updatelayout;
 var
  rect1,rect2: rectty;
 begin
- rect1:= cellrect(ffocusedcell,cil_inner);
+// rect1:= cellrect(ffocusedcell,cil_inner);
  inherited;
  if focusedcellvalid then begin
   rect2:= cellrect(ffocusedcell,cil_inner);
-  if (rect2.cx <> rect1.cx) or (rect2.cy <> rect1.cy) then begin
+//  if (rect2.cx <> rect1.cx) or (rect2.cy <> rect1.cy) then begin
    feditor.updatepos(rect2,rect2);
-  end
-  else begin
-   feditor.scroll(subpoint(rect2.pos,rect1.pos));
-   feditor.updatecaret;
-  end;
+//  end
+//  else begin
+//   feditor.scroll(subpoint(rect2.pos,rect1.pos));
+//   feditor.updatecaret;
+//  end;
  end;
 end;
 
@@ -13886,40 +14009,44 @@ var
  int1,int2,int3,int4,int5: integer;
  po1: prowstaterowheightty;
  po2: pintegeraty;
+ needsrowheightupdate: boolean;
 begin
  if aindex >= fdirtyrowheight then begin
+  needsrowheightupdate:= gs_needsrowheight in fgrid.fstate;  
   int4:= fgrid.fdatarowlinewidth;
   int2:= fgrid.fdatarowheight + int4;
   po1:= dataporowheight;
-  dec(pchar(po1),fsize);
-  int3:= 0;
-  if fdirtyrowheight > 0 then begin
-   inc(pchar(po1),fdirtyrowheight*fsize);
-   int3:= po1^.rowheight.ypos;
-   if po1^.rowheight.height = 0 then begin
-    int3:= int3 + int2;
-   end
-   else begin
-    int3:= int3 + po1^.rowheight.height + int4;
-   end;
-  end;
+  inc(pchar(po1),fdirtyrowheight*fsize);
+  int3:= po1^.rowheight.ypos;
   if ffolded then begin
    cleanvisible(aindex);
    po2:= fvisiblerowmap.datapo;
-   int5:= fcount - 1;
   end;
   for int1:= fdirtyrowheight to aindex do begin
-   inc(pchar(po1),fsize);
    po1^.rowheight.ypos:= int3;
    if not folded or (po1^.normal.fold and currentfoldhiddenmask = 0) then begin
     if po1^.rowheight.height = 0 then begin
-     int3:= int3 + int2;
+     if needsrowheightupdate then begin
+      int5:= fgrid.fdatarowheight;
+      fgrid.updaterowheight(int1,int5);
+      int3:= int3 + int5 + int4;
+     end
+     else begin
+      int3:= int3 + int2;
+     end;
     end
     else begin
      int3:= int3 + po1^.rowheight.height + int4;
     end;
    end;
+   inc(pchar(po1),fsize);
   end; 
+  if aindex >= count-1 then begin
+   ftopypos:= int3;
+  end
+  else begin
+   po1^.rowheight.ypos:= int3;
+  end;
   fdirtyrowheight:= aindex+1;
  end;
 end;
@@ -14269,15 +14396,7 @@ begin
  if index = count then begin
   if index > 0 then begin
    cleanrowheight(index-1);
-   with getitemporowheight(index-1)^ do begin
-    result:= rowheight.ypos;
-    if rowheight.height = 0 then begin
-     result:= result + fgrid.fdatarowheight + fgrid.fdatarowlinewidth;
-    end
-    else begin
-     result:= result + rowheight.height + fgrid.fdatarowlinewidth;
-    end;
-   end;
+   result:= ftopypos;
   end;
  end
  else begin
@@ -14289,13 +14408,40 @@ end;
 function trowstatelist.internalystep(const aindex: integer): integer;
 begin
  with prowstaterowheightty(getitempo(aindex))^ do begin
-  if rowheight.height = 0 then begin
-   result:= fgrid.fystep;
+  if aindex >= count - 1 then begin
+   result:= ftopypos - rowheight.ypos;
   end
   else begin
-   result:= rowheight.height + fgrid.fdatarowlinewidth;
+   result:= prowstaterowheightty(getitempo(aindex+1))^.rowheight.ypos - rowheight.ypos;
   end;
  end;
+end;
+
+procedure trowstatelist.internalystep(const aindex: integer; out ay: integer;
+                                   out acy: integer);
+begin
+ with prowstaterowheightty(getitempo(aindex))^ do begin
+  ay:= rowheight.ypos;
+  if aindex >= count - 1 then begin
+   acy:= ftopypos - ay;
+  end
+  else begin
+   acy:= prowstaterowheightty(getitempo(aindex+1))^.rowheight.ypos - ay;
+  end;
+ end;
+end;
+
+function trowstatelist.internalheight(const aindex: integer): integer;
+begin
+ with prowstaterowheightty(getitempo(aindex))^ do begin
+  if aindex >= count - 1 then begin
+   result:= ftopypos - rowheight.ypos;
+  end
+  else begin
+   result:= prowstaterowheightty(getitempo(aindex+1))^.rowheight.ypos - rowheight.ypos;
+  end;
+ end;
+ result:= result - fgrid.fdatarowlinewidth;
 end;
 
 function comprowypos(const l,r): integer;
@@ -14316,11 +14462,12 @@ begin
   dec(result);
   if (result = count-1) then begin
    with prowstaterowheightaty(po1)^[result] do begin
-    int1:= rowheight.ypos + fgrid.fdatarowlinewidth + rowheight.height;
-    if rowheight.height = 0 then begin
-     int1:= int1 + fgrid.fdatarowheight;
-    end;
-    if aypos >= int1 then begin
+//    int1:= rowheight.ypos + fgrid.fdatarowlinewidth + rowheight.height;
+//    if rowheight.height = 0 then begin
+//     int1:= int1 + fgrid.fdatarowheight;
+//    end;
+//    if aypos >= int1 then begin
+   if aypos >= ftopypos then begin
      result:= invalidaxis;
     end;
    end;

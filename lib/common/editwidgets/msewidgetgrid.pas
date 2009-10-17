@@ -1015,7 +1015,7 @@ begin
   freeandnil(fdata);
   if griddatalists.find(str1,pointer({$ifndef FPC}@{$endif}createproc)) then begin
    fdata:= createproc(self);
-   include(fstate,cos_datalistvalid);
+   include(fstate,gps_datalistvalid);
   end
   else begin
    raise exception.create('Unknown grid datalist type '+str1+'.');
@@ -1166,7 +1166,7 @@ begin
    awidget.visible:= false;
    awidget.getcorbainterface(typeinfo(igridwidget),fintf);
  //  awidget.getcorbainterface(igridwidget,fintf);
-   if not (cos_datalistvalid in fstate) then begin
+   if not (gps_datalistvalid in fstate) then begin
     fdata:= fintf.createdatalist(self);
    end
    else begin
@@ -1334,7 +1334,7 @@ end;
 
 procedure twidgetcol.updateeditoptions(var aoptions: optionseditty);
 begin
- if not (cos_readonlyupdating in fstate) then begin
+ if not (gps_readonlyupdating in fstate) then begin
   updatebit(cardinal(foptions),ord(co_readonly),oe_readonly in aoptions);
   updatebit(cardinal(foptions),ord(co_savevalue),oe_savevalue in aoptions);
  end;
@@ -2856,9 +2856,9 @@ begin
  if isdatacell(ffocusedcell) then begin
   with datacols[ffocusedcell.col] do begin
    if fintf <> nil then begin
-    include(fstate,cos_readonlyupdating);
+    include(fstate,gps_readonlyupdating);
     fintf.setreadonly(isreadonly);
-    exclude(fstate,cos_readonlyupdating);
+    exclude(fstate,gps_readonlyupdating);
    end;
   end;
  end;
