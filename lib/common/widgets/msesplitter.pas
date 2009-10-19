@@ -91,7 +91,8 @@ type
    procedure getpickobjects(const rect: rectty; const shiftstate: shiftstatesty;
                                            var objects: integerarty);
    procedure beginpickmove(const objects: integerarty);
-   procedure endpickmove(const apos,offset: pointty; const objects: integerarty);
+   procedure endpickmove(const apos: pointty; const ashiftstate: shiftstatesty;
+                         const offset: pointty; const objects: integerarty);
    procedure paintxorpic(const canvas: tcanvas; const apos,offset: pointty;
                  const objects: integerarty);
   public
@@ -511,8 +512,9 @@ begin
  setpickoffset(dist);
 end;
 
-procedure tsplitter.endpickmove(const apos, offset: pointty;
-  const objects: integerarty);
+procedure tsplitter.endpickmove(const apos: pointty;
+                        const ashiftstate: shiftstatesty;
+                         const offset: pointty; const objects: integerarty);
 begin
  setpickoffset(offset);
 end;

@@ -30,8 +30,8 @@ type
  beginpickmoveeventty = procedure(const sender: tcustompickwidget;
                            const objects: integerarty) of object;
  endpickmoveeventty = procedure(const sender: tcustompickwidget;
-                           const apos,offset: pointty;
-                           const objects: integerarty) of object;
+                  const apos: pointty; const ashiftstate: shiftstatesty;
+                  const offset: pointty; const objects: integerarty) of object;
  paintxorpiceventty = procedure(const sender: tcustompickwidget;
                            const canvas: tcanvas; const apos,offset: pointty;
                            const objects: integerarty) of object;
@@ -52,7 +52,8 @@ type
    procedure getpickobjects(const rect: rectty; const shiftstate: shiftstatesty;
                                            var objects: integerarty);
    procedure beginpickmove(const objects: integerarty);
-   procedure endpickmove(const apos,offset: pointty; const objects: integerarty);
+   procedure endpickmove(const apos: pointty; const ashiftstate: shiftstatesty;
+                         const offset: pointty; const objects: integerarty);
    procedure paintxorpic(const canvas: tcanvas; const apos,offset: pointty;
                  const objects: integerarty);
   public
@@ -123,11 +124,12 @@ begin
  end;
 end;
 
-procedure tcustompickwidget.endpickmove(const apos: pointty; const offset: pointty;
-               const objects: integerarty);
+procedure tcustompickwidget.endpickmove(const apos: pointty;
+                 const ashiftstate: shiftstatesty; const offset: pointty;
+                 const objects: integerarty);
 begin
  if canevent(tmethod(fonendpickmove)) then begin
-  fonendpickmove(self,apos,offset,objects);
+  fonendpickmove(self,apos,ashiftstate,offset,objects);
  end;
 end;
 

@@ -434,7 +434,8 @@ type
    procedure getpickobjects(const rect: rectty;  const shiftstate: shiftstatesty;
                                      var objects: integerarty);
    procedure beginpickmove(const objects: integerarty);
-   procedure endpickmove(const pos,offset: pointty; const objects: integerarty);
+   procedure endpickmove(const apos: pointty; const ashiftstate: shiftstatesty;
+                          const offset: pointty; const objects: integerarty);
    procedure paintxorpic(const canvas: tcanvas; const pos,offset: pointty;
                  const objects: integerarty);
    procedure drawgripbutton(const acanvas: tcanvas; const kind: dockbuttonrectty;
@@ -4171,8 +4172,9 @@ begin
  end;
 end;
  
-procedure tgripframe.endpickmove(const pos: pointty; const offset: pointty;
-               const objects: integerarty);
+procedure tgripframe.endpickmove(const apos: pointty;
+              const ashiftstate: shiftstatesty; const offset: pointty;
+              const objects: integerarty);
 begin
  fcontroller.fnormalrect:= calcsizingrect(sizingkindty(objects[0]),offset);
  fcontroller.mdistate:= mds_normal;

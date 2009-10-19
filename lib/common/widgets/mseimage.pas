@@ -42,6 +42,7 @@ type
    procedure dopaint(const canvas: tcanvas); override;
    function calcminscrollsize: sizety; override;
    procedure internalcreateframe; override;
+   procedure getautopaintsize(var asize: sizety); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -156,6 +157,12 @@ end;
 procedure timage.internalcreateframe;
 begin
  timageframe.create(iscrollframe(self),self);
+end;
+
+procedure timage.getautopaintsize(var asize: sizety);
+begin
+ asize:= fbitmap.size;
+ innertopaintsize(asize);
 end;
 
 { timageframe }

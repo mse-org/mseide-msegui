@@ -1275,37 +1275,13 @@ begin
 end;
 
 procedure tsetarrayprop.writeitem(const index: integer; writer: twriter);
-var
- I: Integer;
- BaseType: PTypeInfo;
- value: tintegerset;
 begin
- value:= tintegerset(fitems[index]);
- basetype := gettypedata(ftypeinfo)^.comptype{$ifndef fpc}^{$endif};
- with twriter1(writer) do begin
- {$ifdef FPC}
-  driver.writeset(longint(value),basetype);
- {$else}
-  writevalue(vaset);
-  for I := 0 to SizeOf(TIntegerSet) * 8 - 1 do begin
-   if I in TIntegerSet(Value) then begin
-    WriteStr(GetEnumName(BaseType, I));
-   end;
-  end;
-  WriteStr('');
-  {$endif}
- end;
+ writeset(writer,tintegerset(fitems[index]),ftypeinfo);
 end;
 
 procedure tsetarrayprop.readitem(const index: integer; reader: treader);
 begin
- {$ifdef FPC}
- reader.checkvalue(vaset);
- fitems[index]:= treader1(reader).driver.readset(
-             gettypedata(ftypeinfo)^.comptype{$ifndef fpc}^{$endif});
- {$else}
- fitems[index]:= integer(treader1(reader).readset(ftypeinfo));
- {$endif}
+ fitems[index]:= integer(readset(reader,ftypeinfo));
 end;
 {
 procedure tsetarrayprop.getset(const index: integer; out value);

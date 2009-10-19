@@ -131,6 +131,7 @@ type
    function getcellframe: framety; virtual;
    function getnulltext: msestring;
    procedure drawcell(const canvas: tcanvas);
+   procedure updaterowheight(const canvas: tcanvas); virtual;
    procedure beforecelldragevent(var ainfo: draginfoty; const arow: integer;
                                var handled: boolean); virtual;
    procedure aftercelldragevent(var ainfo: draginfoty; const arow: integer;
@@ -475,12 +476,27 @@ var
  int1: integer;
 begin
  with cellinfoty(canvas.drawinfopo^) do begin
-  if fmarginlinecolor <> cl_none then begin
-   int1:= innerrect.x + fmarginlinepos;
-   canvas.drawline(makepoint(int1,0),makepoint(int1,rect.cy),fmarginlinecolor);
+  if calcrowheight then begin
+   int1:= textrect(canvas,prichstringty(datapo)^,innerrect,
+                                      feditor.textflags,nil,ftabulators).cy;
+   if int1 > rowheight then begin
+    rowheight:= int1;
+   end;
+  end
+  else begin
+   if fmarginlinecolor <> cl_none then begin
+    int1:= innerrect.x + fmarginlinepos;
+    canvas.drawline(makepoint(int1,0),makepoint(int1,rect.cy),fmarginlinecolor);
+   end;
+   drawtext(canvas,prichstringty(datapo)^,innerrect,feditor.textflags,nil,
+                                                                ftabulators);
   end;
-  drawtext(canvas,prichstringty(datapo)^,innerrect,feditor.textflags,nil,ftabulators);
  end;
+end;
+
+procedure tcustomtextedit.updaterowheight(const canvas: tcanvas);
+begin
+ drawcell(canvas);
 end;
 
 function tcustomtextedit.beforechange: boolean; //true if not aborted

@@ -690,7 +690,8 @@ type
    procedure getpickobjects(const arect: rectty;  const ashiftstate: shiftstatesty;
                                      var aobjects: integerarty);
    procedure beginpickmove(const aobjects: integerarty);
-   procedure endpickmove(const apos,aoffset: pointty; const aobjects: integerarty);
+   procedure endpickmove(const apos: pointty; const ashiftstate: shiftstatesty;
+                         const aoffset: pointty; const aobjects: integerarty);
    procedure paintxorpic(const acanvas: tcanvas; const apos,aoffset: pointty;
                  const aobjects: integerarty);
   public
@@ -4390,7 +4391,8 @@ begin
 end;
 
 procedure tcustomrecordband.endpickmove(const apos: pointty;
-               const aoffset: pointty; const aobjects: integerarty);
+                      const ashiftstate: shiftstatesty; const aoffset: pointty;
+                      const aobjects: integerarty);
 begin
  ftabs.linepos[aobjects[0]]:= ftabs.linepos[aobjects[0]] + aoffset.x;
  designchanged;

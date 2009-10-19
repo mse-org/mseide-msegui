@@ -23,8 +23,9 @@ const
  defaultbuttonwidth = 50;
  defaultbuttonheight = 20;
  defaultlabeltextflags = [tf_ycentered];
- defaultlabeloptionswidget = (defaultoptionswidget + [ow_fontglyphheight,ow_autosize]) - 
+ defaultlabeloptionswidget = (defaultoptionswidget + [ow_fontglyphheight{,ow_autosize}]) - 
               [ow_mousefocus,ow_tabfocus,ow_arrowfocus];
+ defaultlabeloptionswidget1 = [ow1_autowidth,ow1_autoheight];
  defaultlabelwidgetwidth = 100;
  defaultlabelwidgetheight = 20;
 
@@ -380,6 +381,7 @@ type
    property options: labeloptionsty read foptions write setoptions default [];
   published
    property optionswidget default defaultlabeloptionswidget;
+   property optionswidget1 default defaultlabeloptionswidget1;
    property bounds_cx default defaultlabelwidgetwidth;
    property bounds_cy default defaultlabelwidgetheight;
  end;
@@ -1044,12 +1046,7 @@ begin
  end;
  inc(asize.cx,8+fautosize_cx);
  inc(asize.cy,6+fautosize_cy);
- if fframe <> nil then begin
-  with fframe do begin
-   asize.cx:= asize.cx + framei_left + framei_right;
-   asize.cy:= asize.cy + framei_top + framei_bottom;
-  end;
- end;
+ innertopaintsize(asize);
 end;
 
 procedure tcustombutton.clientrectchanged;
@@ -1301,6 +1298,7 @@ begin
  ftextflags:= defaultlabeltextflags;
  inherited;
  foptionswidget:= defaultlabeloptionswidget;
+ foptionswidget1:= defaultlabeloptionswidget1;
  fwidgetrect.cx:= defaultlabelwidgetwidth;
  fwidgetrect.cy:= defaultlabelwidgetheight;
 end;
@@ -1369,12 +1367,7 @@ end;
 procedure tcustomlabel.getautopaintsize(var asize: sizety);
 begin
  asize:= textrect(getcanvas,fcaption,ftextflags).size;
- if fframe <> nil then begin
-  with fframe do begin
-   asize.cx:= asize.cx + framei_left + framei_right;
-   asize.cy:= asize.cy + framei_top + framei_bottom;
-  end;
- end;
+ innertopaintsize(asize);
 end;
 
 procedure tcustomlabel.fontchanged;

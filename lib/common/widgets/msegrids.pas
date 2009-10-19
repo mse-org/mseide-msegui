@@ -35,6 +35,7 @@ type
                 co_rowselect,
 
                 co_fixwidth,co_fixpos,co_fill,co_proportional,co_nohscroll,
+//                co_autorowheight,
                 co_savevalue,co_savestate,
                 co_rowfont,co_rowcolor,co_zebracolor,
                 co_rowcoloractive,
@@ -42,9 +43,13 @@ type
                 co_cancopy,co_canpaste,co_mousescrollrow,co_rowdatachange
                 );
  coloptionsty = set of coloptionty;
- coloption1ty = (co1_active); //show coloractive independent of gridfocus
- coloptions1ty = set of coloption1ty;
+// celloptionty = (ceo_autorowheight);
+// celloptionsty = set of celloptionty;
  
+ coloption1ty = (co1_active, //show coloractive independent of gridfocus
+                 co1_autorowheight);
+ coloptions1ty = set of coloption1ty;
+
  fixcoloptionty = (fco_invisible,fco_mousefocus,fco_mouseselect,
                      fco_rowfont,fco_rowcolor,fco_zebracolor);
  fixcoloptionsty = set of fixcoloptionty;
@@ -83,7 +88,7 @@ type
 
  stringcoleditoptionty = (
                     scoe_undoonesc,scoe_forcereturncheckvalue,scoe_eatreturn,
-                    scoe_autorowheight,
+//                    scoe_autorowheight,
 
                     //same layout as editoptionty
                     scoe_endonenter,
@@ -435,15 +440,20 @@ type
    procedure setfontselect(const Value: tcolselectfont);
 
    procedure setfontactivenum(const avalue: integer);
+//   procedure readoptions(reader: treader);
   protected
+   foptions1: coloptions1ty;
    fwidth: integer;
    fpropwidth: real;
    ffontselect: tcolselectfont;
    ffocusrectdist: integer;
+//   foptionscell: celloptionsty;
    procedure createfontselect;
    function getselected(const row: integer): boolean; virtual;
    procedure setwidth(const Value: integer); virtual;
    procedure setoptions(const Value: coloptionsty); virtual;
+   procedure setoptions1(const avalue: coloptions1ty); virtual;
+//   procedure setoptionscell(const avalue: celloptionsty); virtual;
    procedure updatelayout; override;
    procedure rearange(const list: tintegerdatalist); virtual; abstract;
 
@@ -466,11 +476,14 @@ type
    procedure deleterow(const aindex: integer;
                   const count: integer = 1); virtual; abstract;
    property options: coloptionsty read foptions write setoptions;
+   property options1: coloptions1ty read foptions1 write setoptions1 default [];
+//   property optionscell: celloptionsty read foptionscell write setoptionscell;
    property focusrectdist: integer read ffocusrectdist write setfocusrectdist
                                         default 0;
    function getmerged(const row: integer): boolean; virtual;
    procedure setmerged(const row: integer; const avalue: boolean); virtual;
    property merged[const row: integer]: boolean read getmerged write setmerged;
+//   procedure defineproperties(filer: tfiler); override;
   public
    constructor create(const agrid: tcustomgrid; 
                         const aowner: tgridarrayprop); override;
@@ -608,6 +621,7 @@ type
    property readonly: boolean read getreadonly write setreadonly;
   published
    property options default defaultdatacoloptions;
+   property options1;
    property widthmin: integer read fwidthmin write setwidthmin default 1;
    property widthmax: integer read fwidthmax write setwidthmax default 0;
    property name: string read fname write fname;
@@ -645,7 +659,7 @@ type
    function getdatalist: tmsestringdatalist;
    procedure setdatalist(const value: tmsestringdatalist);
    procedure settextflagsactive(const avalue: textflagsty);
-   procedure setoptionsedit(const avalue: stringcoleditoptionsty);
+//   procedure setoptionsedit(const avalue: stringcoleditoptionsty);
   protected
    ftextinfo: drawtextinfoty;
    foptionsedit: stringcoleditoptionsty;
@@ -678,7 +692,7 @@ type
    property textflagsactive: textflagsty read ftextflagsactive
              write settextflagsactive default defaultactivecoltextflags;
    property optionsedit: stringcoleditoptionsty read foptionsedit 
-               write setoptionsedit default defaultstringcoleditoptions;
+               write foptionsedit default defaultstringcoleditoptions;
    property font;
    property datalist: tmsestringdatalist read getdatalist write setdatalist;
    property onsetvalue: setstringeventty read fonsetvalue write fonsetvalue;
@@ -1051,6 +1065,7 @@ type
   private
    fwidth: integer;
    foptions: coloptionsty;
+//   foptionscell: celloptionsty;
    foptions1: coloptions1ty;
    ffocusrectdist: integer;
    ffontactivenum: integer;
@@ -1184,6 +1199,7 @@ type
                                                            //0..127
    property rowheight[const index: integer]: integer read getrowheight 
                                                             write setrowheight;
+   function currentrowheight(const index: integer): integer;
    property rowypos[const index: integer]: integer read getrowypos;
    function rowindex(const aypos: integer): integer;
  end;
@@ -1749,7 +1765,8 @@ type
    procedure getpickobjects(const rect: rectty;  const shiftstate: shiftstatesty;
                                     var objects: integerarty);
    procedure beginpickmove(const objects: integerarty);
-   procedure endpickmove(const apos,offset: pointty; const objects: integerarty);
+   procedure endpickmove(const apos: pointty; const ashiftstate: shiftstatesty;
+                         const offset: pointty; const objects: integerarty);
    procedure paintxorpic(const canvas: tcanvas; const apos,offset: pointty;
                                    const objects: integerarty);
    function calcshowshift(const rect: rectty; 
@@ -2189,6 +2206,9 @@ const
   'Invalid col index',
   'Invalid widget'
  );
+ 
+//var
+// coloptionssplitinfo: setsplitinfoty;
 
 function iscellkeypress(const info: celleventinfoty;
              const akey: keyty = key_none; //key_none -> all keys
@@ -2725,6 +2745,8 @@ begin
  ffocusrectdist:= tcols(aowner).ffocusrectdist;
  fwidth:= tcols(aowner).fwidth;
  foptions:= tcols(aowner).foptions;
+ foptions1:= tcols(aowner).foptions1;
+// foptionscell:= tcols(aowner).foptionscell;
  flinewidth:= tcols(aowner).flinewidth;
  flinecolor:= tcols(aowner).flinecolor;
  ffontactivenum:= tcols(aowner).ffontactivenum;
@@ -2735,7 +2757,23 @@ begin
  ffontselect.free;
  inherited;
 end;
+(*
+procedure tcol.readoptions(reader: treader);
+var
+ set1,set2: tintegerset;
+begin
+ if readsplitset(reader,coloptionssplitinfo,set1,set2) then begin
+  optionscell:= celloptionsty(set2);
+ end;
+ options:= coloptionsty(set1);
+// options:= coloptionsty(readset(reader,typeinfo(coloptionsty)));
+end;
 
+procedure tcol.defineproperties(filer: tfiler);
+begin
+ filer.defineproperty('options',{$ifdef FPC}@{$endif}readoptions,nil,false);
+end;
+*)
 procedure tcol.invalidate;
 begin
  fgrid.colchanged(self);
@@ -2787,7 +2825,7 @@ end;
 function tcol.checkactivecolor(const aindex: integer): boolean; 
          //true if coloractive and fontactivenum active
 begin
- result:= (fgrid.entered or (co1_active in tcols(prop).foptions1)) and 
+ result:= (fgrid.entered or (co1_active in {tcols(prop).}foptions1)) and 
           (aindex = fgrid.ffocusedcell.row) and 
           ((gps_fix in fstate) or (co_rowcoloractive in foptions) or 
                                (findex = fgrid.ffocusedcell.col))
@@ -3187,6 +3225,12 @@ begin
    fwidth:= Value;
   end;
   fgrid.layoutchanged;
+  if (gps_needsrowheight in fstate) and 
+        not (csloading in fgrid.componentstate) then begin
+//   updatecellrect(fframe);
+   fgrid.updatelayout;
+   fgrid.datacols.rowstate.change(-1);
+  end;
   updatepropwidth;
  end;
 end;
@@ -3253,6 +3297,27 @@ begin
   end;
  end;
 end;
+
+procedure tcol.setoptions1(const avalue: coloptions1ty);
+var
+ optionsbefore: coloptions1ty;
+ opt1: coloptions1ty;
+begin
+ optionsbefore:= foptions1;
+ foptions1:= avalue;
+ opt1:= coloptions1ty(longword(optionsbefore) xor
+                                                     longword(foptions1));
+ if co1_autorowheight in opt1 then begin
+  if co1_autorowheight in foptions1 then begin
+   include(fstate,gps_needsrowheight);
+  end
+  else begin
+   exclude(fstate,gps_needsrowheight);
+  end; 
+  fgrid.checkneedsrowheight;
+ end;
+end;
+
 
 procedure tcol.setfocusrectdist(const avalue: integer);
 begin
@@ -5157,6 +5222,11 @@ begin
  if gs_cellentered in fgrid.fstate then begin
   exclude(fgrid.fstate,gs_cellentered);
   dofocusedcellchanged(false,cellbefore,newcell,selectaction);
+ end
+ else begin
+  if (co1_active in foptions1) and (cellbefore.row >= 0) then begin
+   invalidatecell(cellbefore.row);
+  end;
  end;
 end;
 
@@ -5760,26 +5830,6 @@ begin
  inherited;
 end;
 
-procedure tcustomstringcol.setoptionsedit(const avalue: stringcoleditoptionsty);
-var
- optionsbefore: stringcoleditoptionsty;
- options1: stringcoleditoptionsty;
-begin
- optionsbefore:= foptionsedit;
- foptionsedit:= avalue;
- options1:= stringcoleditoptionsty(longword(optionsbefore) xor
-                                                     longword(foptionsedit));
- if scoe_autorowheight in options1 then begin
-  if scoe_autorowheight in foptionsedit then begin
-   include(fstate,gps_needsrowheight);
-  end
-  else begin
-   exclude(fstate,gps_needsrowheight);
-  end; 
-  fgrid.checkneedsrowheight;
- end;
-end;
-
 { tfixcol }
 
 constructor tfixcol.create(const agrid: tcustomgrid; 
@@ -5802,22 +5852,22 @@ end;
 
 procedure tfixcol.setoptionsfix(const avalue: fixcoloptionsty);
 var
- options1: coloptionsty;
+ opt1: coloptionsty;
 begin
  foptionsfix:= avalue;
- options1:= coloptionsty(
+ opt1:= coloptionsty(
                replacebits(cardinal(
                  {$ifndef FPC}byte({$endif}avalue{$ifndef FPC}){$endif})
                             shl cardinal(fixcoloptionsshift),
                      cardinal(foptions),
                      cardinal(fixcoloptionsmask)));
  if fco_invisible in avalue then begin
-  include(options1,co_invisible);
+  include(opt1,co_invisible);
  end
  else begin
-  exclude(options1,co_invisible);
+  exclude(opt1,co_invisible);
  end;
- inherited options:= options1;
+ inherited options:= opt1;
 end;
 
 procedure tfixcol.drawcell(const canvas: tcanvas);
@@ -6148,9 +6198,19 @@ begin
 end;
 
 procedure tcols.setoptions1(const value: coloptions1ty);
+var
+ int1: integer;
+ mask: longword;
 begin
  if foptions1 <> value then begin
-  foptions1:= Value;
+  mask:= longword(value) xor longword(foptions1);
+  foptions1 := Value;
+  if not (csloading in fgrid.componentstate) then begin
+   for int1:= 0 to count - 1 do begin
+    tcol(items[int1]).options1:= coloptions1ty(replacebits(longword(value),
+                   longword(tcol(items[int1]).options1),mask));
+   end;
+  end;
   fgrid.invalidate;
  end;
 end;
@@ -7568,6 +7628,7 @@ begin
  inherited;
  internalcreateframe;
  fobjectpicker:= tobjectpicker.create(iobjectpicker(self));
+// fobjectpicker.options:= fobjectpicker.options + [opo_candoubleclick];
  foptionswidget:= defaultgridwidgetoptions;
  exclude(fstate,gs_updatelocked);
  internalupdatelayout;
@@ -11029,7 +11090,8 @@ var
  function cancolmoving: boolean;
  begin
   result:= (csdesigning in componentstate) or
-    (og_colmoving in foptionsgrid) and not (co_fixpos in fdatacols[cell.col].foptions);
+    (og_colmoving in foptionsgrid) and 
+                        not (co_fixpos in fdatacols[cell.col].foptions);
  end;
 
  function canrowsizing: boolean;
@@ -11162,7 +11224,8 @@ var
  end;
 
 begin
- if (shiftstate <> [ss_left]) or (gs_child in fstate) then begin
+ if (shiftstate * shiftstatesmask <> [ss_left]) or 
+                                           (gs_child in fstate) then begin
   exit;
  end;
  setlength(objects,1);
@@ -11266,8 +11329,9 @@ begin
  end;
 end;
 
-procedure tcustomgrid.endpickmove(const apos,offset: pointty;
-                       const objects: integerarty);
+procedure tcustomgrid.endpickmove(const apos: pointty; 
+                    const ashiftstate: shiftstatesty; const offset: pointty; 
+                    const objects: integerarty);
 var
  kind: pickobjectkindty;
  cell,cell1: gridcoordty;
@@ -11315,11 +11379,13 @@ begin
   end;
   pok_datarowsize: begin
    if og_rowheight in foptionsgrid then begin
-    int1:= rowheight[cell.row];
-    if int1 = 0 then begin
-     int1:= datarowheight;
+    if ss_double in ashiftstate then begin
+     rowheight[cell.row]:= 0;
+    end
+    else begin
+     int1:= fdatacols.frowstate.currentrowheight(cell.row);
+     rowheight[cell.row]:= int1 + offset.y;
     end;
-    rowheight[cell.row]:= int1 + offset.y;
    end
    else begin
     datarowheight:= fdatarowheight + offset.y;
@@ -14005,6 +14071,9 @@ begin
 end;
 
 procedure trowstatelist.cleanrowheight(const aindex: integer);
+
+//todo: optimize cleaning with co1_autorowheight 
+
 var
  int1,int2,int3,int4,int5: integer;
  po1: prowstaterowheightty;
@@ -14444,6 +14513,12 @@ begin
  result:= result - fgrid.fdatarowlinewidth;
 end;
 
+function trowstatelist.currentrowheight(const index: integer): integer;
+begin
+ cleanrowheight(index);
+ result:= internalheight(index);
+end;
+
 function comprowypos(const l,r): integer;
 begin
  result:= integer(l) - rowstaterowheightty(r).rowheight.ypos;
@@ -14585,6 +14660,14 @@ begin
  inherited;
  recalchidden;
 end;
+}
+{
+initialization
+ with coloptionssplitinfo do begin
+  maintype:= typeinfo(coloptionsty);
+  splittype:= typeinfo(celloptionsty);
+  enums:= nil;
+ end;
 }
 end.
 

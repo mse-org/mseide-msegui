@@ -48,6 +48,7 @@ type
    function getnulltext: msestring;
    procedure loadcellbmp(const acanvas: tcanvas; const abmp: tmaskedbitmap); virtual;
    procedure drawcell(const canvas: tcanvas);
+   procedure updaterowheight(const canvas: tcanvas);
    procedure beforecelldragevent(var ainfo: draginfoty; const arow: integer;
                                var handled: boolean); virtual;
    procedure aftercelldragevent(var ainfo: draginfoty; const arow: integer;
@@ -200,6 +201,7 @@ end;
 procedure tcustomdataimage.drawcell(const canvas: tcanvas);
 var
  bmp: tmaskedbitmap;
+ int1: integer;
 begin
  with cellinfoty(canvas.drawinfopo^) do begin
   if (datapo <> nil) and (string(datapo^) <> '') then begin
@@ -212,12 +214,25 @@ begin
      bmp.transparentcolor:= transparentcolor;
     end;
     loadcellbmp(canvas,bmp);
-    paintbmp(canvas,bmp,innerrect);
+    if calcrowheight then begin
+     int1:= bmp.size.cy - innerrect.cy + rect.cy;
+     if int1 > rowheight then begin
+      rowheight:= int1;
+     end;
+    end
+    else begin
+     paintbmp(canvas,bmp,innerrect);
+    end;
    except;
    end;
    bmp.free;
   end;
  end;
+end;
+
+procedure tcustomdataimage.updaterowheight(const canvas: tcanvas);
+begin
+ drawcell(canvas);
 end;
 
 procedure tcustomdataimage.valuetogrid(row: integer);

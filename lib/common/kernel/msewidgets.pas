@@ -677,6 +677,7 @@ type
  tactionpublishedwidgetnwr = class(tactionwidget)
   published
    property optionswidget;
+   property optionswidget1;
    property optionsskin;
 //   property bounds_x;
 //   property bounds_y;

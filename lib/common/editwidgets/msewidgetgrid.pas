@@ -58,6 +58,7 @@ type
   function getoptionsedit: optionseditty;
   procedure setgridintf(const intf: iwidgetgrid);
   procedure drawcell(const canvas: tcanvas);
+  procedure updaterowheight(const canvas: tcanvas);
   procedure beforecelldragevent(var ainfo: draginfoty; const arow: integer;
                                var processed: boolean);
   procedure aftercelldragevent(var ainfo: draginfoty; const arow: integer;
@@ -1372,16 +1373,21 @@ begin
     datapo:= fintf.getrowdatapo(cellinfoty(canvas.drawinfopo^));
    end;
   end;
- end;
- inherited;
- if fintf <> nil then begin
-  if (fface = nil) then begin
-   face1:= fintf.getwidget.face;
-   if face1 <> nil then begin
-    face1.paint(canvas,cellinfoty(canvas.drawinfopo^).rect);
+  inherited;
+  if fintf <> nil then begin
+   if calcrowheight then begin
+    fintf.updaterowheight(canvas);
+   end
+   else begin
+    if (fface = nil) then begin
+     face1:= fintf.getwidget.face;
+     if face1 <> nil then begin
+      face1.paint(canvas,cellinfoty(canvas.drawinfopo^).rect);
+     end;
+    end;
+    fintf.drawcell(canvas);
    end;
   end;
-  fintf.drawcell(canvas);
  end;
 end;
 
@@ -1454,13 +1460,26 @@ begin
 end;
 
 procedure twidgetcol.drawfocusedcell(const acanvas: tcanvas);
+var
+ size1: sizety;
 begin
  with tcustomwidgetgrid(fgrid) do begin
   if (factivewidget = nil) or not factivewidget.visible then begin
    inherited;
-  end;
+  end
+  else begin
+   with fcellinfo do begin
+    if calcrowheight then begin
+     size1:= rect.size;
+     twidget1(factivewidget).getautopaintsize(size1);
+     factivewidget.painttowidgetsize(size1);
+     if size1.cy > rowheight then begin
+      rowheight:= size1.cy;
+     end;
+    end;
+   end;
+  end
  end;
- //else no paint
 end;
 
 procedure twidgetcol.drawfocus(const acanvas: tcanvas);

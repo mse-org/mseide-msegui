@@ -1,5 +1,10 @@
 MSEide+MSEgui version history
 
+2009-10-19
+ twidget.optionswidget ow_autosize, ow_autosizeanright, ow_autosizeanleft moved
+ to optionswidget1 ow1_autowidth, ow1_autoheight, ow1_autosizeanright, 
+ ow1_autosizeanbottom.
+ Changed signature of endpickmoveeventty.
 2009-09-16 
  trichbutton has no stockglyph, use trichstockglyphbutton.
 2009-08-05

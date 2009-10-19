@@ -1596,11 +1596,12 @@ begin
  if flayoutcalcing = 0 then begin
   inc(flayoutcalcing);
   try
-   if ow_autosize in foptionswidget then begin
-    size1:= makesize(bigint,bigint);
-   end
-   else begin 
-    size1:= innerclientrect.size;
+   size1:= innerclientrect.size;
+   if ow1_autowidth in foptionswidget1 then begin
+    size1.cx:= bigint;
+   end;
+   if ow1_autoheight in foptionswidget1 then begin
+    size1.cy:= bigint;
    end;
    if mlo_horz in flayout.options then begin
     calcmenulayout(flayout,getcanvas,size1.cx);

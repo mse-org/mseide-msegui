@@ -40,14 +40,17 @@ type
   procedure getpickobjects(const arect: rectty;  const ashiftstate: shiftstatesty;
                                     var objects: integerarty);
   procedure beginpickmove(const aobjects: integerarty);
-  procedure endpickmove(const apos,aoffset: pointty; const aobjects: integerarty);
+  procedure endpickmove(const apos: pointty; const ashiftstate: shiftstatesty;
+                    const aoffset: pointty; const aobjects: integerarty);
   procedure paintxorpic(const acanvas: tcanvas; const apos,aoffset: pointty;
                 const aobjects: integerarty);
  end;
 
  objectpickerstatety = (ops_moving,ops_xorpicpainted{,ops_cursorchanged});
  objectpickerstatesty = set of objectpickerstatety;
-
+// objectpickeroptionty = (opo_candoubleclick);
+// objectpickeroptionsty = set of objectpickeroptionty;
+ 
  tobjectpicker = class      //todo: area selecting, area deselecting
   private
    fintf: iobjectpicker;
@@ -56,7 +59,7 @@ type
    fpickoffset: pointty;
    fstate: objectpickerstatesty;
    forigin: originty;
-//   fcursorbefore: cursorshapety;
+//   foptions: objectpickeroptionsty;
    procedure removexorpic;
    procedure paintxorpic;
    procedure dokeypress(const sender: twidget; var info: keyeventinfoty);
@@ -67,6 +70,7 @@ type
    procedure mouseevent(var info: mouseeventinfoty);
    procedure restorexorpic(const canvas: tcanvas);
    property objects: integerarty read fobjects;
+//   property options: objectpickeroptionsty read foptions write foptions;
  end;
 
 implementation
@@ -107,6 +111,18 @@ procedure tobjectpicker.mouseevent(var info: mouseeventinfoty);
 var
  shape: cursorshapety;
  widget1: twidget1;
+
+ procedure doend;
+ begin
+    endmoving;
+    fintf.endpickmove(info.pos,info.shiftstate,fpickoffset,fobjects);
+    shape:= fintf.getwidget.actualcursor;
+    fintf.getcursorshape(info.pos,info.shiftstate,shape);
+    application.widgetcursorshape:= shape;
+           //restore pick cursor
+    include(info.eventstate,es_processed);
+ end;
+
 begin
  case info.eventkind of
   ek_buttonpress: begin
@@ -121,24 +137,20 @@ begin
      application.registeronkeypress({$ifdef FPC}@{$endif}dokeypress);
      include(fstate,ops_moving);
      widget1:= twidget1(fintf.getwidget);
-//     fcursorbefore:= widget1.cursor;
-//     widget1.cursor:= application.mouse.shape;
      widget1.capturemouse(true);
      fintf.beginpickmove(fobjects);
      paintxorpic;
      include(info.eventstate,es_processed);
+//     if (ss_double in info.shiftstate) and 
+//                          (opo_candoubleclick in foptions) then begin
+//      doend;
+//     end;
     end;
    end;
   end;
   ek_buttonrelease: begin
    if (info.button = mb_left) and (ops_moving in fstate) then begin
-    endmoving;
-    fintf.endpickmove(info.pos,fpickoffset,fobjects);
-    shape:= fintf.getwidget.actualcursor;
-    fintf.getcursorshape(info.pos,info.shiftstate,shape);
-    application.widgetcursorshape:= shape;
-           //restore pick cursor
-    include(info.eventstate,es_processed);
+    doend;
    end;
   end;
   ek_mousemove,ek_mousepark: begin

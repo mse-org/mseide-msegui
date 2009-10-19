@@ -543,7 +543,16 @@ type
    procedure lock;
    procedure unlock;
  end;
- 
+
+ setsplitpairty = record 
+                   oldenum,newenum: string
+                  end;
+ setsplitinfoty = record
+                   maintype: ptypeinfo;
+                   splittype: ptypeinfo;
+                   enums: array of setsplitpairty;
+                  end;
+                   
 function ownernamepath(const acomponent: tcomponent): string; 
                      //namepath from root to acomponent separated by '.'
 function rootcomponent(const acomponent: tcomponent): tcomponent;
@@ -645,7 +654,12 @@ procedure writestringar(const writer: twriter; const ar: stringarty);
 function swapmethodtable(const instance: tobject; const newtable: pointer): pointer;
 procedure objectbinarytotextmse(input, output: tstream);
                 //workaround for FPC bug 7813 with localized float strings
-
+function readset(const reader: treader; const atypeinfo: ptypeinfo): tintegerset;
+procedure writeset(const writer: twriter; const value: tintegerset;
+                            const atypeinfo: ptypeinfo);
+function readsplitset(const reader: treader; const info: setsplitinfoty;
+                        out set1,set2: tintegerset): boolean;
+                                  //true if splitted
 function setloading(const acomponent: tcomponent; const avalue: boolean): boolean;
            //returns old value
 type
@@ -669,7 +683,7 @@ uses
 {$ifdef mswindows}
  windows,
 {$endif}
- msestream,msesys,msedatalist,msedatamodules;
+ msestream,msesys,msedatalist,msedatamodules,rtlconsts;
 
 type
  {$ifdef FPC}
@@ -739,6 +753,8 @@ type
  
  tpersistent1 = class(tpersistent);
  tcomponent1 = class(tcomponent);
+ twriter1 = class(twriter);
+ treader1 = class(treader);
 
  tobjectdatastream = class(tcustommemorystream)
   public
@@ -915,6 +931,83 @@ begin
  {$else}
   objectbinarytotext(input,output);
  {$endif}
+end;
+
+procedure writeset(const writer: twriter; const value: tintegerset;
+                            const atypeinfo: ptypeinfo);
+var
+ i: integer;
+ basetype: ptypeinfo;
+begin
+ basetype:= gettypedata(atypeinfo)^.comptype{$ifndef FPC}^{$endif};
+ with twriter1(writer) do begin
+ {$ifdef FPC}
+  driver.writeset(longint(value),basetype);
+ {$else}
+  writevalue(vaset);
+  for i := 0 to sizeof(tintegerset) * 8 - 1 do begin
+   if i in tintegerset(value) then begin
+    writestr(getenumname(basetype, i));
+   end;
+  end;
+  writestr('');
+  {$endif}
+ end;
+end;
+
+function readset(const reader: treader; const atypeinfo: ptypeinfo): tintegerset;
+begin
+ {$ifdef FPC}
+ reader.checkvalue(vaset);
+ result:= tintegerset(treader1(reader).driver.readset(
+             gettypedata(atypeinfo)^.comptype{$ifndef fpc}^{$endif}));
+ {$else}
+ result:= treader1(reader).readset(atypeinfo);
+ {$endif}
+end;
+
+function readsplitset(const reader: treader; const info: setsplitinfoty;
+                        out set1,set2: tintegerset): boolean;
+                                  //true if splitted
+var
+ int1,int2: integer;
+ str1: string;
+ po1,po2: ptypeinfo;
+begin
+ reader.checkvalue(vaset);
+ set2:= [];
+ result:= false;
+ with info do begin
+  while true do begin
+   po1:= gettypedata(maintype)^.comptype;
+   po2:= gettypedata(splittype)^.comptype;
+   str1:= reader.driver.readstr;
+   if str1 = '' then begin
+    break;
+   end;
+   int1:= getenumvalue(po1,str1);
+   if int1 >= 0 then begin
+    include(set1,int1);
+   end
+   else begin
+    for int2:= 0 to high(enums) do begin
+     if enums[int1].oldenum = str1 then begin
+      int1:= getenumvalue(po2,enums[int1].newenum);
+      if int1 >= 0 then begin
+       include(set2,int1);
+      end;
+      result:= true;
+      break;
+     end;
+    end;
+   end;
+   if int1 < 0 then begin
+    repeat
+    until reader.driver.readstr = '';
+    raise ereaderror.create(sinvalidpropertyvalue);
+   end;
+  end;
+ end;
 end;
 
 function checkcanevent(const acomponent: tcomponent; const event: tmethod): boolean;

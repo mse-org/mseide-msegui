@@ -334,6 +334,7 @@ type
    procedure setupeditor; virtual;
    procedure internalcreateframe; override;
    procedure clientrectchanged; override;
+   procedure getautopaintsize(var asize: sizety); override;
    procedure fontchanged; override;
    procedure enabledchanged; override;
    procedure dragstarted; override;
@@ -1264,6 +1265,12 @@ begin
  setupeditor;
 end;
 
+procedure tcustomedit.getautopaintsize(var asize: sizety);
+begin
+ asize:= feditor.textrect.size;
+ innertopaintsize(asize);
+end;
+
 procedure tcustomedit.fontchanged;
 begin
  inherited;
@@ -1348,6 +1355,7 @@ end;
 
 procedure tcustomedit.dochange;
 begin
+ checkautosize;
  if not (ws_loadedproc in fwidgetstate) then begin
   if canevent(tmethod(fonchange)) then begin
    fonchange(self);

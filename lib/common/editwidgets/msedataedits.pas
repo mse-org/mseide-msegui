@@ -132,6 +132,7 @@ type
    function getcellframe: framety; virtual;
    function getnulltext: msestring; virtual;
    procedure drawcell(const canvas: tcanvas); virtual;
+   procedure updaterowheight(const canvas: tcanvas); virtual;
    procedure beforecelldragevent(var ainfo: draginfoty; const arow: integer;
                                var handled: boolean); virtual;
    procedure aftercelldragevent(var ainfo: draginfoty; const arow: integer;
@@ -1789,6 +1790,7 @@ var
  mstr1: msestring;
  atextflags: textflagsty;
  bo1: boolean;
+ int1: integer;
 begin
  atextflags:= textflags;
  bo1:= false;
@@ -1808,31 +1810,46 @@ begin
   if canevent(tmethod(fongettext)) then begin
    fongettext(self,mstr1,false);
   end;
-  if bo1 and (fempty_color <> cl_none) and not (des_grayed in fstate) then begin
-   canvas.fillrect(rect,fempty_color);
+  if bo1 then begin    
+   if fempty_textstyle <> [] then begin
+    canvas.font.style:= fempty_textstyle;
+   end;
   end;
-  if mstr1 <> '' then begin
-   if bo1 then begin    
-    if fempty_font <> nil then begin
-     canvas.font:= fempty_font;
-    end;
-    atextflags:= fempty_textflags;
-    if fempty_textcolor <> cl_none then begin
-     canvas.font.color:= fempty_textcolor;
-    end;
-    if fempty_textcolorbackground <> cl_none then begin
-     canvas.font.color:= fempty_textcolorbackground;
-    end;
-    if fempty_textstyle <> [] then begin
-     canvas.font.style:= fempty_textstyle;
-    end;
+  if calcrowheight then begin
+   int1:= textrect(canvas,mstr1,innerrect,atextflags).cy-innerrect.cy + rect.cy;
+   if int1 > rowheight then begin
+    rowheight:= int1;
    end;
-   if des_grayed in fstate then begin
-    include(atextflags,tf_grayed);
+  end
+  else begin
+   if bo1 and (fempty_color <> cl_none) and not (des_grayed in fstate) then begin
+    canvas.fillrect(rect,fempty_color);
    end;
-   drawtext(canvas,mstr1,innerrect,rect,atextflags);
+   if mstr1 <> '' then begin
+    if bo1 then begin    
+     if fempty_font <> nil then begin
+      canvas.font:= fempty_font;
+     end;
+     atextflags:= fempty_textflags;
+     if fempty_textcolor <> cl_none then begin
+      canvas.font.color:= fempty_textcolor;
+     end;
+     if fempty_textcolorbackground <> cl_none then begin
+      canvas.font.color:= fempty_textcolorbackground;
+     end;
+    end;
+    if des_grayed in fstate then begin
+     include(atextflags,tf_grayed);
+    end;
+    drawtext(canvas,mstr1,innerrect,rect,atextflags);
+   end;
   end;
  end;
+end;
+
+procedure tcustomdataedit.updaterowheight(const canvas: tcanvas);
+begin
+ drawcell(canvas);
 end;
 
 procedure tcustomdataedit.doafterpaint(const canvas: tcanvas);

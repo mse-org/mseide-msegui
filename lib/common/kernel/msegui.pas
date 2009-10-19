@@ -63,11 +63,14 @@ type
                    //track font.linespacing,
                    //create fonthighdelta and childscaled events
                    ow_autoscale, //synchronizes bounds_cy with fontheightdelta
-                   ow_autosize,ow_autosizeanright,ow_autosizeanbottom
-                                 //used in tbutton and tlabel
+                   ow_autosize,ow_autosizeanright,ow_autosizeanbottom 
+                           //don't use, will be moved to optionwidget1
                    );
  optionswidgetty = set of optionwidgetty;
-
+ optionwidget1ty = (ow1_autowidth,ow1_autoheight,ow1_autosizeanright,
+                    ow1_autosizeanbottom);
+ optionswidget1ty = set of optionwidget1ty;
+ 
  optionskinty = (osk_skin,osk_noskin,osk_framebuttononly,
                  osk_noframe,osk_noface,
                  osk_container,
@@ -149,6 +152,7 @@ const
  focusstates = [ws_visible,ws_enabled];
  defaultoptionswidget = [ow_mousefocus,ow_tabfocus,ow_arrowfocus,{ow_mousewheel,}
                          ow_destroywidgets,ow_autoscale];
+ defaultoptionswidget1 = [];
  defaultoptionswidgetmousewheel = defaultoptionswidget + [ow_mousewheel];
  defaultoptionswidgetnofocus = defaultoptionswidget -
              [ow_mousefocus,ow_tabfocus,ow_arrowfocus];
@@ -1247,6 +1251,7 @@ type
    fwidgets: widgetarty;
    fnoinvalidate: integer;
    foptionswidget: optionswidgetty;
+   foptionswidget1: optionswidget1ty;
    fparentwidget: twidget;
    fanchors: anchorsty;
    fwidgetstate: widgetstatesty;
@@ -1332,6 +1337,7 @@ type
    procedure updatewindowinfo(var info: windowinfoty); virtual;
    procedure windowcreated; virtual;
    procedure setoptionswidget(const avalue: optionswidgetty); virtual;
+   procedure setoptionswidget1(const avalue: optionswidget1ty); virtual;
    procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
 
    procedure initparentclientsize;
@@ -1709,7 +1715,8 @@ type
    function innerclientpos: pointty;         //origin = clientpos
    function innerclientframe: framety;
    function innerclientwidgetpos: pointty;   //origin = pos
-
+   procedure innertopaintsize(var asize: sizety);
+   procedure painttowidgetsize(var asize: sizety);
 
    property frame: tcustomframe read getframe write setframe;
    property face: tcustomface read getface write setface;
@@ -1750,6 +1757,8 @@ type
 
    property optionswidget: optionswidgetty read foptionswidget 
                  write setoptionswidget default defaultoptionswidget;
+   property optionswidget1: optionswidget1ty read foptionswidget1 
+                 write setoptionswidget1 default defaultoptionswidget1;
    property optionsskin: optionsskinty read foptionsskin 
                                             write setoptionsskin default [];
    function actualcursor: cursorshapety; virtual;
@@ -5972,6 +5981,7 @@ begin
  foptionsskin:= defaultoptionsskin;
  fanchors:= defaultanchors;
  foptionswidget:= defaultoptionswidget;
+ foptionswidget1:= defaultoptionswidget1;
  fwidgetrect.cx:= defaultwidgetwidth;
  fwidgetrect.cy:= defaultwidgetheight;
  fcolor:= defaultwidgetcolor;
@@ -6594,7 +6604,7 @@ var
  int1: integer;
  size1,size2: sizety;
 begin
- if (ow_autosize in foptionswidget) and not (csloading in componentstate) then begin
+ if ([ow1_autowidth,ow1_autoheight]*foptionswidget1 <> []) and not (csloading in componentstate) then begin
   if not windowevent then begin
    checkwidgetsize(value.size);
   end;
@@ -6608,6 +6618,12 @@ begin
   end;
   subsize1(size1,value.size);
   size2:= value.size;
+  if not (ow1_autowidth in foptionswidget1) then begin
+   size1.cx:= 0;
+  end;
+  if not (ow1_autoheight in foptionswidget1) then begin
+   size1.cy:= 0;
+  end;
   inc(value.cx,size1.cx);
   if (ow_autosizeanright in foptionswidget) and not (an_right in fanchors) then begin
    dec(value.x,size1.cx);
@@ -8744,6 +8760,27 @@ begin
  end;
 end;
 
+procedure twidget.innertopaintsize(var asize: sizety);
+begin
+ if fframe <> nil then begin
+  with fframe do begin
+   asize.cx:= asize.cx + framei_left + framei_right;
+   asize.cy:= asize.cy + framei_top + framei_bottom;
+  end;
+ end; 
+end;
+
+procedure twidget.painttowidgetsize(var asize: sizety);
+begin
+ if fframe <> nil then begin
+  with fframe do begin
+   checkstate;
+   asize.cx:= asize.cx + fpaintframe.left + fpaintframe.right;
+   asize.cy:= asize.cy + fpaintframe.top + fpaintframe.bottom;
+  end;
+ end; 
+end;
+
 function twidget.clientparentpos: pointty;
         //origin = parentwidget.pos
 begin
@@ -10437,15 +10474,29 @@ const
  mask2: optionswidgetty = [ow_hinton,ow_hintoff];
 var
  value,value1,value2,delta: optionswidgetty;
+ opt1: optionswidget1ty;
 begin
  if avalue <> foptionswidget then begin
+  opt1:= optionswidget1;
+  if ow_autosize in avalue then begin  //don't use deprecated flags
+   opt1:= opt1 + [ow1_autowidth,ow1_autoheight];
+  end;
+  if ow_autosizeanright in avalue then begin
+   include(opt1,ow1_autosizeanright);
+  end;
+  if ow_autosizeanbottom in avalue then begin
+   include(opt1,ow1_autosizeanbottom);
+  end;
+  optionswidget1:= opt1;
+  
   value1:= optionswidgetty(setsinglebit(longword(avalue),
           longword(foptionswidget),longword(mask1)));
   value2:= optionswidgetty(setsinglebit(longword(avalue),
           longword(foptionswidget),longword(mask2)));
   value:= value1 * mask1 + value2 * mask2 + (avalue - (mask1 + mask2));
   delta:= optionswidgetty(longword(value) xor longword(foptionswidget));
-  foptionswidget:= value;
+  foptionswidget:= value - [ow_autosize,ow_autosizeanright,ow_autosizeanbottom];
+                             //remove deprecated flags
   if (delta * [ow_background,ow_top] <> []) then begin
    if fparentwidget <> nil  then begin
     fparentwidget.sortzorder;
@@ -10459,7 +10510,22 @@ begin
   if delta * [ow_fontlineheight,ow_fontglyphheight] <> [] then begin
    updatefontheight;
   end;
+{
   if (ow_autosize in delta) and (ow_autosize in avalue) then begin
+   checkautosize;
+  end;
+}
+ end;
+end;
+
+procedure twidget.setoptionswidget1(const avalue: optionswidget1ty);
+var
+ delta: optionswidget1ty;
+begin
+ delta:= optionswidget1ty(longword(avalue) xor longword(foptionswidget1));
+ if delta <> [] then begin
+  foptionswidget1:= avalue;
+  if delta * avalue * [ow1_autowidth,ow1_autoheight] <> [] then begin
    checkautosize;
   end;
  end;
@@ -11144,7 +11210,7 @@ end;
 procedure twidget.checkautosize;
 begin
  if [csloading,csdestroying] * componentstate = [] then begin
-  if (ow_autosize in foptionswidget) then begin
+  if ([ow1_autowidth,ow1_autoheight]*foptionswidget1 <> []) then begin
    internalsetwidgetrect(fwidgetrect,false);
   end
   else begin
