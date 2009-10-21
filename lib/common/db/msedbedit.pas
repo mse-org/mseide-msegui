@@ -1045,6 +1045,7 @@ type
    function checkvalue: boolean;
    procedure updatelayout;
    procedure updaterowcount;
+   procedure checkactiverecord;
    procedure datasetscrolled(distance: integer); override;
    procedure fieldchanged; override;
    procedure activechanged; override;
@@ -1350,7 +1351,7 @@ type
    procedure setoptionsgrid(const avalue: optionsgridty); override;
    procedure internalcreateframe; override;
    function createfixcols: tfixcols; override;
-   procedure updatelayout; override;
+   procedure dolayoutchanged; override;
    procedure initcellinfo(var info: cellinfoty); override;
    procedure docellevent(var info: celleventinfoty); override;
    procedure scrollevent(sender: tcustomscrollbar; event: scrolleventty); override;
@@ -5619,7 +5620,7 @@ begin
  fgrid:= aowner;
  include(tcustomgrid1(fgrid).fstate,gs_isdb);
  inherited create;
- visualcontrol:= true;
+// visualcontrol:= true; 
 end;
 
 destructor tgriddatalink.destroy;
@@ -6000,23 +6001,28 @@ end;
 
 procedure tgriddatalink.updatelayout;
 var
+ ar1: integerarty;
  int1: integer;
 begin
- int1:= fgrid.rowsperpage;
- if int1 = 0 then begin
-  int1:= 1;
- end;
- BufferCount:= int1;
- if active then begin
-  forcecalcrange;
-  checkscroll;
- end;
- int1:= fgrid.rowcount;
- updaterowcount;
- if int1 <> fgrid.rowcount then begin
-  tcustomgrid1(fgrid).updatelayout; //again
+ with tcustomgrid1(fgrid) do begin
+  int1:= fgrid.rowsperpage + 1;
+  if int1 = 0 then begin
+   int1:= 1;
+  end;
+  BufferCount:= int1;
+  if active then begin
+   forcecalcrange;
+   checkscroll;
+  end;
+  int1:= fgrid.rowcount;
+  self.updaterowcount;
+  if int1 <> fgrid.rowcount then begin
+   tcustomgrid1(fgrid).updatelayout; //again
+   exit;
+  end;
  end;
  checkscrollbar;
+ checkactiverecord; //show cell
 end;
 
 procedure tgriddatalink.updaterowcount;
@@ -6131,7 +6137,7 @@ begin
      if rowbefore = 0 then begin
       inc(rect1.y,ystep);
      end;
-     if testintersectrect(rect1,updaterect) then begin
+     if (gs_needsrowheight in fstate) or testintersectrect(rect1,updaterect) then begin
       invalidaterect(rect1,org_client); //scrolling not possible
      end
      else begin
@@ -6140,6 +6146,9 @@ begin
      end;
     end;
     doupdaterowdata(-1);
+    if (gs_needsrowheight in fstate) then begin
+     fdatacols.rowstate.change(-1);
+    end;
    end;
   end;
   if (activerecord < rowcount) and 
@@ -6151,6 +6160,18 @@ begin
     dec(fnocheckvalue);
    end;
   end;
+ end;
+end;
+
+procedure tgriddatalink.checkactiverecord;
+var
+ int1: integer;
+begin
+ int1:= activerecord;
+ if (int1 < fgrid.rowcount) and active and  
+               (tcustomgrid1(fgrid).fcellvaluechecking = 0) then begin
+  fgrid.row:= int1; //else empty dataset
+  fgrid.showcell(makegridcoord(invalidaxis,fgrid.row),cep_nearest,true);
  end;
 end;
 
@@ -6169,11 +6190,7 @@ begin
   if (afield = nil) and (frowexited = int1) and (feditingbefore = editing) then begin
    fgrid.row:= invalidaxis;
   end;
-  int1:= activerecord;
-  if (int1 < fgrid.rowcount) and active and  
-                (tcustomgrid1(fgrid).fcellvaluechecking = 0) then begin
-   fgrid.row:= int1; //else empty dataset
-  end;
+  checkactiverecord;
  finally
   tcustomgrid1(fgrid).endnonullcheck;
   tcustomgrid1(fgrid).endnocheckvalue;
@@ -6487,7 +6504,7 @@ begin
    else begin
     tcustomgrid1(fgrid).beginnonullcheck;
     try
-     fgrid.row:= activerecord;
+     checkactiverecord;
     finally
      tcustomgrid1(fgrid).endnonullcheck;
     end;
@@ -7017,7 +7034,7 @@ begin
  datacols.datasourcechanged;
 end;
 }
-procedure tcustomdbwidgetgrid.updatelayout;
+procedure tcustomdbwidgetgrid.dolayoutchanged;
 begin
  inherited;
  fdatalink.updatelayout;

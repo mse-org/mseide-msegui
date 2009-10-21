@@ -6599,8 +6599,19 @@ begin
 end;
 
 procedure twidget.internalsetwidgetrect(Value: rectty; const windowevent: boolean);
+
+ procedure checkwidgetregionchanged(var achanged: boolean);
+ begin
+  if achanged then begin
+   achanged:= false;
+   if (fparentwidget <> nil) then begin
+    fparentwidget.widgetregionchanged(self); //new position
+   end;
+  end;
+ end;
+ 
 var
- bo1,poscha,sizecha: boolean;
+ bo1,bo2,poscha,sizecha: boolean;
  int1: integer;
  size1,size2: sizety;
 begin
@@ -6650,6 +6661,7 @@ begin
  poscha:= (value.x <> fwidgetrect.x) or (value.y <> fwidgetrect.y);
  sizecha:= (value.cx <> fwidgetrect.cx) or (value.cy <> fwidgetrect.cy);
  bo1:= (isvisible or (ws1_fakevisible in fwidgetstate1)) and (poscha or sizecha);
+ bo2:= bo1; //backup because of checkwidgetregionchanged
  if bo1 and (fparentwidget <> nil) then begin
   invalidatewidget; //old position
  end;
@@ -6666,6 +6678,7 @@ begin
   invalidateparentminclientsize;
   exclude(fwidgetstate,ws_minclientsizevalid);
   if not (csloading in componentstate) then begin
+   checkwidgetregionchanged(bo1);
    sizechanged;
    if fsetwidgetrectcount <> int1 then begin
     if poscha and not (csloading in componentstate) then begin
@@ -6680,15 +6693,11 @@ begin
    end;
   end;
  end;
- if bo1 then begin
-  if (fparentwidget <> nil) then begin
-   fparentwidget.widgetregionchanged(self); //new position
-  end;
- end;
+ checkwidgetregionchanged(bo1);
  if poscha and not (csloading in componentstate) then begin
   poschanged;
  end;
- if bo1 then begin
+ if bo2 then begin
   if ownswindow1 and (tws_windowvisible in fwindow.fstate) then begin
    fwindow.checkwindow(windowevent);
   end;

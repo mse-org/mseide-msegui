@@ -1650,7 +1650,11 @@ end;
 
 procedure twidgetcol.datachange(const arow: integer);
 begin
- //dummy
+ if (datalist = nil) and not (gps_noinvalidate in fstate) and 
+                     not (csloading in fgrid.componentstate) then begin
+
+  checkrowheightchange(arow);
+ end;
 end;
 
 { twidgetcols }

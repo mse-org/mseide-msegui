@@ -161,7 +161,7 @@ type
 
  gridstatety = (
       gs_layoutvalid,gs_layoutupdating,gs_updatelocked,gs_changelock,
-      gs_visiblerowsupdating,
+//      gs_visiblerowsupdating,
       gs_sortvalid,gs_cellentered,gs_cellclicked,gs_emptyrowremoved,
       gs_rowcountinvalid,gs_rowreadonly,
       gs_scrollup,gs_scrolldown,gs_scrollleft,gs_scrollright,
@@ -582,6 +582,7 @@ type
    procedure clientmouseevent(const acell: gridcoordty; 
                                           var info: mouseeventinfoty); virtual;
    procedure dokeyevent(var info: keyeventinfoty; up: boolean); virtual;
+   procedure checkrowheightchange(const aindex: integer);
    procedure itemchanged(const sender: tdatalist; const aindex: integer); virtual;
    procedure updatelayout; override;
    procedure moverow(const fromindex,toindex: integer; const count: integer = 1); override;
@@ -1501,6 +1502,7 @@ type
    fvisiblerowsbase: integer; //number of visible rows below scrollwindow
    
    flayoutupdating: integer;
+   fvisiblerowsupdating: integer;
    fnullchecking: integer;
    frowdatachanging: integer;
    fnoshowcaretrect: integer;
@@ -1652,6 +1654,7 @@ type
    function caninvalidate: boolean;
    function docheckcellvalue: boolean;
    procedure removeappendedrow;
+   procedure dolayoutchanged; virtual;
    procedure internalupdatelayout(const force: boolean = false);
    procedure updatelayout; virtual;
    function intersectdatarect(var arect: rectty): boolean;
@@ -1922,9 +1925,10 @@ type
    property col: integer read ffocusedcell.col write setcol;
    property row: integer read ffocusedcell.row write setrow;
    function visiblerow(const arow: integer): integer;
-                 //returns index in visible rows, -1 if not visible
+                 //returns index in visible rows, invaidaxis if not visible
    property firstvisiblerow: integer read ffirstvisiblerow;
    property lastvisiblerow: integer read flastvisiblerow;
+   property visiblerows: integerarty read fvisiblerows;
    
    property gridframewidth: integer read fgridframewidth 
                         write setgridframewidth default 0;
@@ -5230,6 +5234,19 @@ begin
  end;
 end;
 
+procedure tdatacol.checkrowheightchange(const aindex: integer);
+begin
+  if gps_needsrowheight in fstate then begin
+   if aindex < 0 then begin
+    tdatacols(prop).frowstate.fdirtyrowheight:= 0;
+   end
+   else begin
+    tdatacols(prop).frowstate.fdirtyrowheight:= aindex;
+   end;   
+   fgrid.layoutchanged;
+  end;
+end;
+
 procedure tdatacol.itemchanged(const sender: tdatalist; const aindex: integer);
 var
  coord1: gridcoordty;
@@ -5244,15 +5261,7 @@ begin
  end;
  if not (gps_noinvalidate in fstate) and 
                      not (csloading in fgrid.componentstate) then begin
-  if gps_needsrowheight in fstate then begin
-   if aindex < 0 then begin
-    tdatacols(prop).frowstate.fdirtyrowheight:= 0;
-   end
-   else begin
-    tdatacols(prop).frowstate.fdirtyrowheight:= aindex;
-   end;   
-   fgrid.layoutchanged;
-  end;
+  checkrowheightchange(aindex);
   if aindex < 0 then begin
    cellchanged(invalidaxis);
   end
@@ -7966,23 +7975,36 @@ begin
 // end;
 end;
 
+procedure tcustomgrid.dolayoutchanged;
+begin
+ if canevent(tmethod(fonlayoutchanged)) then begin
+  fonlayoutchanged(self);
+  if not (gs_layoutvalid in fstate) and (flayoutupdating < 16) then begin
+   inc(flayoutupdating);
+   try
+    internalupdatelayout;
+   finally
+    dec(flayoutupdating);
+   end;
+  end;
+ end;
+end;
+
 procedure tcustomgrid.internalupdatelayout(const force: boolean);
+var
+ bo1: boolean;
 begin
  if (fstate * [gs_layoutvalid,gs_updatelocked] = []) and 
              not (csdestroying in componentstate) and 
              (force or (fupdating = 0)) then begin
-  fstate:= fstate + [gs_layoutvalid,gs_layoutupdating];
-  updatelayout;
-  exclude(fstate,gs_layoutupdating);
-  if canevent(tmethod(fonlayoutchanged)) then begin
-   fonlayoutchanged(self);
-   if not (gs_layoutvalid in fstate) and (flayoutupdating < 16) then begin
-    inc(flayoutupdating);
-    try
-     internalupdatelayout;
-    finally
-     dec(flayoutupdating);
-    end;
+  bo1:= not (gs_layoutupdating in fstate);
+  try
+   fstate:= fstate + [gs_layoutvalid,gs_layoutupdating];
+   updatelayout;
+  finally
+   if bo1 then begin
+    exclude(fstate,gs_layoutupdating);
+    dolayoutchanged;
    end;
   end;
  end;
@@ -8478,11 +8500,16 @@ begin
 end;
 
 function tcustomgrid.visiblerow(const arow: integer): integer;
-                 //returns index in visible rows, -1 if not visible
+                 //returns index in visible rows, invalidaxis if not visible
 begin
- result:= arow;
  if not (csdesigning in componentstate) then begin
   result:= fdatacols.frowstate.visiblerow(arow);
+ end
+ else begin
+  result:= arow;
+  if (arow <= 0) or (arow >= frowcount) then begin
+   result:= invalidaxis;
+  end;
  end;
 end;
 
@@ -10932,65 +10959,74 @@ var
  cell: gridcoordty;
  int1: integer;
 begin
- if not (gs_visiblerowsupdating in fstate) then begin
-  include(fstate,gs_visiblerowsupdating);
-  try
-   if frowcount = 0 then begin
-    fvisiblerowfoldinfo:= nil;
-    fvisiblerows:= nil;
-    ffirstvisiblerow:= invalidaxis;
-    flastvisiblerow:= invalidaxis;
-    fvisiblerowsbase:= invalidaxis;
-   end
-   else begin
-    cellatpos(makepoint(0,fdatarecty.y),cell);
-    ffirstvisiblerow:= cell.row;
-    cellatpos(makepoint(0,fdatarecty.y+fdatarecty.cy-1),cell);
-    flastvisiblerow:= cell.row;
-    if ffirstvisiblerow < 0 then begin
-     ffirstvisiblerow:= 0;
-    end;
-    if flastvisiblerow < 0 then begin
-     flastvisiblerow:= frowcount - 1;
-    end;
-    fvisiblerowsbase:= fdatacols.frowstate.visiblerow(ffirstvisiblerow);
-    if flastvisiblerow < 0 then begin
-     fvisiblerows:= nil;
-    end
-    else begin
-     fvisiblerows:= fdatacols.frowstate.visiblerows1(fvisiblerowsbase,
-                         fdatarect.cy - fscrollrect.y{ div fdatarowheight + 2});
-     int1:= high(fvisiblerows);
-     while fvisiblerows[int1] > flastvisiblerow do begin
-      dec(int1);
-     end;
-     setlength(fvisiblerows,int1+1);
-    end;
-    if (og_folded in foptionsgrid) then begin
-     with fdatacols.frowstate do begin
-      updatefoldinfo(self.fvisiblerows,fvisiblerowfoldinfo);
-      {
-      if (row >= 0) then begin
-       int1:= row;
-       row:= nearestvisiblerow(row);
-       if row = int1 then begin //no focuscell
-        if row >= ffoldchangedrow then begin
-         dofocusedcellposchanged;
-         fdatacols.frowstate.ffoldchangedrow:= bigint;
-        end;
-       end;
-      end;
-      }
-     end;
-    end
-    else begin
-     fvisiblerowfoldinfo:= nil;
-    end;
+// if not (gs_visiblerowsupdating in fstate) then begin
+//  include(fstate,gs_visiblerowsupdating);
+//  try
+ inc(fvisiblerowsupdating);
+ if frowcount = 0 then begin
+  fvisiblerowfoldinfo:= nil;
+  fvisiblerows:= nil;
+  ffirstvisiblerow:= invalidaxis;
+  flastvisiblerow:= invalidaxis;
+  fvisiblerowsbase:= invalidaxis;
+ end
+ else begin
+  int1:= fvisiblerowsupdating;
+  cellatpos(makepoint(0,fdatarecty.y),cell); //calls updatelayout
+  if int1 <> fvisiblerowsupdating then begin
+   exit; //recursion
+  end;
+  int1:= fvisiblerowsupdating;
+  ffirstvisiblerow:= cell.row;
+  cellatpos(makepoint(0,fdatarecty.y+fdatarecty.cy-1),cell);
+  if int1 <> fvisiblerowsupdating then begin
+   exit; //recursion
+  end;
+  flastvisiblerow:= cell.row;
+  if ffirstvisiblerow < 0 then begin
+   ffirstvisiblerow:= 0;
+  end;
+  if flastvisiblerow < 0 then begin
+   flastvisiblerow:= frowcount - 1;
+  end;
+  fvisiblerowsbase:= fdatacols.frowstate.visiblerow(ffirstvisiblerow);
+  if flastvisiblerow < 0 then begin
+   fvisiblerows:= nil;
+  end
+  else begin
+   fvisiblerows:= fdatacols.frowstate.visiblerows1(fvisiblerowsbase,
+                       fdatarect.cy - fscrollrect.y{ div fdatarowheight + 2});
+   int1:= high(fvisiblerows);
+   while fvisiblerows[int1] > flastvisiblerow do begin
+    dec(int1);
    end;
-  finally
-   exclude(fstate,gs_visiblerowsupdating);
-  end; 
+   setlength(fvisiblerows,int1+1);
+  end;
+  if (og_folded in foptionsgrid) then begin
+   with fdatacols.frowstate do begin
+    updatefoldinfo(self.fvisiblerows,fvisiblerowfoldinfo);
+    {
+    if (row >= 0) then begin
+     int1:= row;
+     row:= nearestvisiblerow(row);
+     if row = int1 then begin //no focuscell
+      if row >= ffoldchangedrow then begin
+       dofocusedcellposchanged;
+       fdatacols.frowstate.ffoldchangedrow:= bigint;
+      end;
+     end;
+    end;
+    }
+   end;
+  end
+  else begin
+   fvisiblerowfoldinfo:= nil;
+  end;
  end;
+//  finally
+//   exclude(fstate,gs_visiblerowsupdating);
+//  end; 
+// end;
 end;
 
 function tcustomgrid.getselectedrange: gridrectty;
@@ -12643,7 +12679,7 @@ procedure tcustomgrid.updaterowheight(const arow: integer;
                                                    var arowheight: integer);
 begin
  fdatacols.updaterowheight(arow,arowheight);
- ffixcols.updaterowheight(arow,arowheight);
+// ffixcols.updaterowheight(arow,arowheight); not used up to now
 end;
 
 procedure tcustomgrid.setdragcontroller(const avalue: tdragcontroller);
@@ -14081,42 +14117,45 @@ var
  needsrowheightupdate: boolean;
 begin
  if aindex >= fdirtyrowheight then begin
-  needsrowheightupdate:= gs_needsrowheight in fgrid.fstate;  
-  int4:= fgrid.fdatarowlinewidth;
-  int2:= fgrid.fdatarowheight + int4;
-  po1:= dataporowheight;
-  inc(pchar(po1),fdirtyrowheight*fsize);
-  int3:= po1^.rowheight.ypos;
-  if ffolded then begin
-   cleanvisible(aindex);
-   po2:= fvisiblerowmap.datapo;
-  end;
-  for int1:= fdirtyrowheight to aindex do begin
-   po1^.rowheight.ypos:= int3;
-   if not folded or (po1^.normal.fold and currentfoldhiddenmask = 0) then begin
-    if po1^.rowheight.height = 0 then begin
-     if needsrowheightupdate then begin
-      int5:= fgrid.fdatarowheight;
-      fgrid.updaterowheight(int1,int5);
-      int3:= int3 + int5 + int4;
+  ftopypos:= 0;
+  if count > 0 then begin
+   needsrowheightupdate:= gs_needsrowheight in fgrid.fstate;  
+   int4:= fgrid.fdatarowlinewidth;
+   int2:= fgrid.fdatarowheight + int4;
+   po1:= dataporowheight;
+   inc(pchar(po1),fdirtyrowheight*fsize);
+   int3:= po1^.rowheight.ypos;
+   if ffolded then begin
+    cleanvisible(aindex);
+    po2:= fvisiblerowmap.datapo;
+   end;
+   for int1:= fdirtyrowheight to aindex do begin
+    po1^.rowheight.ypos:= int3;
+    if not folded or (po1^.normal.fold and currentfoldhiddenmask = 0) then begin
+     if po1^.rowheight.height = 0 then begin
+      if needsrowheightupdate then begin
+       int5:= fgrid.fdatarowheight;
+       fgrid.updaterowheight(int1,int5);
+       int3:= int3 + int5 + int4;
+      end
+      else begin
+       int3:= int3 + int2;
+      end;
      end
      else begin
-      int3:= int3 + int2;
+      int3:= int3 + po1^.rowheight.height + int4;
      end;
-    end
-    else begin
-     int3:= int3 + po1^.rowheight.height + int4;
     end;
+    inc(pchar(po1),fsize);
+   end; 
+   if aindex >= count-1 then begin
+    ftopypos:= int3;
+   end
+   else begin
+    po1^.rowheight.ypos:= int3;
    end;
-   inc(pchar(po1),fsize);
-  end; 
-  if aindex >= count-1 then begin
-   ftopypos:= int3;
-  end
-  else begin
-   po1^.rowheight.ypos:= int3;
+   fdirtyrowheight:= aindex+1;
   end;
-  fdirtyrowheight:= aindex+1;
  end;
 end;
 
@@ -14156,6 +14195,10 @@ begin                         //todo: optimize
    end;
   end
   else begin
+   int1:= count - astart;
+   if acount > int1 then begin
+    acount:= int1;
+   end;
    setlength(result,acount);
    int2:= astart;
    for int1:= 0 to high(result) do begin
@@ -14263,7 +14306,7 @@ end;
 function trowstatelist.visiblerow(const arowindex: integer): integer;
 begin
  result:= invalidaxis;
- if (arowindex >= 0) or (arowindex < count) then begin
+ if (arowindex >= 0) and (arowindex < count) then begin
   if not ffolded then begin
    result:= arowindex;
   end
@@ -14462,9 +14505,9 @@ end;
 function trowstatelist.getrowypos(const index: integer): integer;
 begin
  result:= 0;
- if index = count then begin
+ if index >= count then begin
   if index > 0 then begin
-   cleanrowheight(index-1);
+   cleanrowheight(count-1);
    result:= ftopypos;
   end;
  end
