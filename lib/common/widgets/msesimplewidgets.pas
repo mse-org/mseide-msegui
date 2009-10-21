@@ -33,21 +33,37 @@ type
 
  tpaintbox = class(tpublishedwidget)
   private
-   fonbeforepaint: painteventty;
-   fonpaint: painteventty;
-   fonafterpaint: painteventty;
-   fonpaintbackground: painteventty;
+//   fonbeforepaint: painteventty;
+//   fonpaint: painteventty;
+//   fonafterpaint: painteventty;
+//   fonpaintbackground: painteventty;
   protected
-   procedure dobeforepaint(const canvas: tcanvas); override;
-   procedure dopaintbackground(const canvas: tcanvas); override;
-   procedure doonpaint(const canvas: tcanvas); override;
-   procedure doafterpaint(const canvas: tcanvas); override;
+//   procedure dobeforepaint(const canvas: tcanvas); override;
+//   procedure dopaintbackground(const canvas: tcanvas); override;
+//   procedure doonpaint(const canvas: tcanvas); override;
+//   procedure doafterpaint(const canvas: tcanvas); override;
   published
-   property onbeforepaint: painteventty read fonbeforepaint write fonbeforepaint;
-   property onpaintbackground: painteventty read fonpaintbackground 
-                                                  write fonpaintbackground;
-   property onpaint: painteventty read fonpaint write fonpaint;
-   property onafterpaint: painteventty read fonafterpaint write fonafterpaint;
+//   property onbeforepaint: painteventty read fonbeforepaint write fonbeforepaint;
+//   property onpaintbackground: painteventty read fonpaintbackground 
+//                                                  write fonpaintbackground;
+//   property onpaint: painteventty read fonpaint write fonpaint;
+//   property onafterpaint: painteventty read fonafterpaint write fonafterpaint;
+   property onbeforepaint;
+   property onpaintbackground;
+   property onpaint;
+   property onafterpaint;
+
+   property onmouseevent;
+   property onchildmouseevent;
+   property onclientmouseevent;
+   property onmousewheelevent;
+
+   property onkeydown;
+   property onkeyup;
+   property onshortcut;
+
+   property onresize;
+   property onmove;
  end;
 
  teventwidget = class(tcustomeventwidget)
@@ -1766,7 +1782,7 @@ begin
 end;
 
 { tpaintbox }
-
+{
 procedure tpaintbox.dobeforepaint(const canvas: tcanvas);
 var
  pt1: pointty;
@@ -1808,6 +1824,6 @@ begin
   canvas.remove(pt1);
  end;
 end;
-
+}
 end.
 

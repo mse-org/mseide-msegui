@@ -97,7 +97,7 @@ type
                   ws_clicked,ws_mousecaptured,ws_clientmousecaptured,
                   ws_loadlock,ws_loadedproc,ws_showproc,
                   ws_minclientsizevalid,
-                  ws_showed,ws_hidden, //used in tcustomeventwidget
+//                  ws_showed,ws_hidden, //used in tcustomeventwidget
                   ws_destroying,
                   ws_staticframe,ws_staticface,
                   ws_isvisible
@@ -1396,6 +1396,7 @@ type
    function getactface: tcustomface; virtual;
    procedure dobeforepaint(const canvas: tcanvas); virtual;
    procedure dopaintbackground(const canvas: tcanvas); virtual;
+   procedure doonpaintbackground(const canvas: tcanvas); virtual;
    procedure dopaint(const canvas: tcanvas); virtual;
    procedure dobeforepaintforeground(const canvas: tcanvas); virtual;
    procedure doonpaint(const canvas: tcanvas); virtual;
@@ -7361,8 +7362,13 @@ begin
                  fwidgetrect.cx,fwidgetrect.cy));
  end
  }
+ doonpaintbackground(canvas);
 end;
 
+procedure twidget.doonpaintbackground(const canvas: tcanvas);
+begin
+ //dummy
+end;
 procedure twidget.dopaint(const canvas: tcanvas);
 begin
  dopaintbackground(canvas);
@@ -7466,7 +7472,7 @@ begin
   canvas.brushorigin:= nullpoint;
   actcolor:= actualcolor;
   saveindex:= canvas.save;
-  dobeforepaint(canvas);
+//  dobeforepaint(canvas);
   if (high(fwidgets) >= 0) and not (ws1_noclipchildren in fwidgetstate1) then begin
    updatewidgetregion;
    canvas.subclipregion(fwidgetregion);

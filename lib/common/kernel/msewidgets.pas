@@ -641,26 +641,74 @@ type
    fondefocus: notifyeventty;
    fonactivate: notifyeventty;
    fondeactivate: notifyeventty;
+
+   fonloaded: notifyeventty;
+   fonmouseevent: mouseeventty;
+   fonmousewheelevent: mousewheeleventty;
+   fonchildmouseevent: mouseeventty;
+   fonclientmouseevent: mouseeventty;
+   fonkeyup: keyeventty;
+   fonkeydown: keyeventty;
+   fonshortcut: keyeventty;
+   fonpaint: painteventty;
+   fonbeforepaint: painteventty;
+   fonafterpaint: painteventty;
+   fonmove: notifyeventty;
+   fonresize: notifyeventty;
+   fonhide: notifyeventty;
+   fonshow: notifyeventty;
+   fonclosequery: queryeventty;
+   fonevent: eventeventty;
+   fonasyncevent: asynceventeventty;
+   fonfocusedwidgetchanged: focuschangeeventty;
+   fonpaintbackground: painteventty;
+
    procedure setpopupmenu(const Value: tpopupmenu);
    function getframe: tcaptionframe;
    procedure setframe(const value: tcaptionframe);
    function getface: tface;
    procedure setface(const Value: tface);
   protected
+   procedure mouseevent(var info: mouseeventinfoty); override;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
+   procedure childmouseevent(const sender: twidget;
+                                      var info: mouseeventinfoty); override;
+   procedure domousewheelevent(var info: mousewheeleventinfoty); override;
+
+   procedure dobeforepaint(const canvas: tcanvas); override;
+   procedure doonpaintbackground(const canvas: tcanvas); override;
+   procedure doonpaint(const canvas: tcanvas); override;
+   procedure doafterpaint(const canvas: tcanvas); override;
+
    procedure showhint(var info: hintinfoty); override;
    procedure getpopuppos(var apos: pointty); virtual;
    procedure dopopup(var amenu: tpopupmenu; var mouseinfo: mouseeventinfoty); virtual;
+
+   procedure poschanged; override;
+   procedure sizechanged; override;
+
+   procedure doloaded; override;
    procedure doenter; override;
    procedure doexit; override;
+   function canclose(const newfocus: twidget): boolean; override;
    procedure dofocus; override;
    procedure dodefocus; override;
+   procedure dofocuschanged(const oldwidget: twidget; 
+                                     const newwidget: twidget); override;
    procedure doactivate; override;
    procedure dodeactivate; override;
+   procedure dohide; override;
+   procedure doshow; override;
+
    procedure dokeydown(var info: keyeventinfoty); override;
+   procedure dokeyup(var info: keyeventinfoty); override;
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
+   procedure receiveevent(const event: tobjectevent); override;
+   procedure doasyncevent(var atag: integer); override;
+
    procedure internalcreateframe; override;
    procedure enabledchanged; override;
+
    property frame: tcaptionframe read getframe write setframe;
    property face: tface read getface write setface;
    property popupmenu: tpopupmenu read fpopupmenu write setpopupmenu;
@@ -672,6 +720,39 @@ type
    property ondefocus: notifyeventty read fondefocus write fondefocus;
    property onactivate: notifyeventty read fonactivate write fonactivate;
    property ondeactivate: notifyeventty read fondeactivate write fondeactivate;
+
+   property onfocusedwidgetchanged: focuschangeeventty 
+                     read fonfocusedwidgetchanged write fonfocusedwidgetchanged;
+
+   property onmouseevent: mouseeventty read fonmouseevent write fonmouseevent;
+   property onchildmouseevent: mouseeventty read fonchildmouseevent
+                        write fonchildmouseevent;
+   property onclientmouseevent: mouseeventty read fonclientmouseevent 
+                                             write fonclientmouseevent;
+   property onmousewheelevent: mousewheeleventty read fonmousewheelevent 
+                                             write fonmousewheelevent;
+
+   property onkeydown: keyeventty read fonkeydown write fonkeydown;
+   property onkeyup: keyeventty read fonkeyup write fonkeyup;
+   property onshortcut: keyeventty read fonshortcut write fonshortcut;
+
+   property onloaded: notifyeventty read fonloaded write fonloaded;
+
+   property onbeforepaint: painteventty read fonbeforepaint write fonbeforepaint;
+   property onpaintbackground: painteventty read fonpaintbackground write fonpaintbackground;
+   property onpaint: painteventty read fonpaint write fonpaint;
+   property onafterpaint: painteventty read fonafterpaint write fonafterpaint;
+
+   property onshow: notifyeventty read fonshow write fonshow;
+   property onhide: notifyeventty read fonhide write fonhide;
+//   property onactivate: notifyeventty read fonactivate write fonactivate;
+//   property ondeactivate: notifyeventty read fondeactivate write fondeactivate;
+   property onresize: notifyeventty read fonresize write fonresize;
+   property onmove: notifyeventty read fonmove write fonmove;
+   property onclosequery: queryeventty read fonclosequery write fonclosequery;
+
+   property onevent: eventeventty read fonevent write fonevent;
+   property onasyncevent: asynceventeventty read fonasyncevent write fonasyncevent;
  end;
 
  tactionpublishedwidgetnwr = class(tactionwidget)
@@ -745,6 +826,7 @@ type
  end;
  
  tcustomeventwidgetnwr = class(tpublishedwidgetnwr)
+ (*
   private
    fonloaded: notifyeventty;
    fonmouseevent: mouseeventty;
@@ -820,6 +902,7 @@ type
 
    property onevent: eventeventty read fonevent write fonevent;
    property onasyncevent: asynceventeventty read fonasyncevent write fonasyncevent;
+*)
  end;
 
  tcustomeventwidget = class(tcustomeventwidgetnwr)
@@ -4153,11 +4236,22 @@ begin
  end;
 end;
 
+procedure tactionwidget.mouseevent(var info: mouseeventinfoty);
+begin
+ if canevent(tmethod(fonmouseevent)) then begin
+  fonmouseevent(self,info);
+ end;
+ inherited;
+end;
+
 procedure tactionwidget.clientmouseevent(var info: mouseeventinfoty);
 var
  dummy: tpopupmenu;
  po1: pointty;
 begin
+ if canevent(tmethod(fonclientmouseevent)) then begin
+  fonclientmouseevent(self,info);
+ end;
  inherited;
  with info do begin
   if (eventkind = ek_buttonrelease) and
@@ -4172,11 +4266,74 @@ begin
  end;
 end;
 
+procedure tactionwidget.childmouseevent(const sender: twidget;
+                var info: mouseeventinfoty);
+begin
+ if canevent(tmethod(fonchildmouseevent)) then begin
+  fonchildmouseevent(sender,info);
+ end;
+ inherited;
+end;
+
+procedure tactionwidget.domousewheelevent(var info: mousewheeleventinfoty);
+begin
+ if canevent(tmethod(fonmousewheelevent)) then begin
+  fonmousewheelevent(self,info);
+ end;
+ inherited;
+end;
+
+procedure tactionwidget.dobeforepaint(const canvas: tcanvas);
+var
+ pt1: pointty;
+begin
+ inherited;
+// canvas.font:= getfont;
+ if canevent(tmethod(fonbeforepaint)) then begin
+  pt1:= clientwidgetpos;
+  canvas.move(pt1);
+  fonbeforepaint(self,canvas);
+  canvas.remove(pt1);
+ end;
+end;
+
+procedure tactionwidget.doonpaintbackground(const canvas: tcanvas);
+begin
+ inherited;
+ if canevent(tmethod(fonpaintbackground)) then begin
+  fonpaintbackground(self,canvas);
+ end;
+end;
+
+procedure tactionwidget.doonpaint(const canvas: tcanvas);
+begin
+ inherited;
+ if canevent(tmethod(fonpaint)) then begin
+  fonpaint(self,canvas);
+ end;
+end;
+
+procedure tactionwidget.doafterpaint(const canvas: tcanvas);
+var
+ pt1: pointty;
+begin
+ inherited;
+ if canevent(tmethod(fonafterpaint)) then begin
+  pt1:= clientwidgetpos;
+  canvas.move(pt1);
+  fonafterpaint(self,canvas);
+  canvas.remove(pt1);
+ end;
+end;
+
 procedure tactionwidget.dokeydown(var info: keyeventinfoty);
 var
  dummy: tpopupmenu;
  mouseinfo: mouseeventinfoty;
 begin
+ if not (es_processed in info.eventstate) and canevent(tmethod(fonkeydown)) then begin
+  fonkeydown(self,info);
+ end;
  with info do begin
   if (key = key_menu) and (shiftstate = []) and
                     not(es_processed in eventstate) then begin
@@ -4202,6 +4359,14 @@ begin
    inherited;
   end;
  end;
+end;
+
+procedure tactionwidget.dokeyup(var info: keyeventinfoty);
+begin
+ if not (es_processed in info.eventstate) and canevent(tmethod(fonkeyup)) then begin
+  fonkeyup(self,info);
+ end;
+ inherited;
 end;
 
 procedure tactionwidget.showhint(var info: hintinfoty);
@@ -4251,6 +4416,30 @@ begin
  setlinkedvar(value,tmsecomponent(fpopupmenu));
 end;
 
+procedure tactionwidget.poschanged;
+begin
+ inherited;
+ if canevent(tmethod(fonmove)) then begin
+  fonmove(self);
+ end;
+end;
+
+procedure tactionwidget.sizechanged;
+begin
+ inherited;
+ if canevent(tmethod(fonresize)) then begin
+  fonresize(self);
+ end;
+end;
+
+procedure tactionwidget.doloaded;
+begin
+ inherited;
+ if canevent(tmethod(fonloaded)) then begin
+  fonloaded(self);
+ end;
+end;
+
 procedure tactionwidget.doenter;
 begin
  inherited;
@@ -4264,6 +4453,14 @@ begin
  inherited;
  if canevent(tmethod(fonexit)) then begin
   fonexit(self);
+ end;
+end;
+
+function tactionwidget.canclose(const newfocus: twidget): boolean;
+begin
+ result:= inherited canclose(newfocus);
+ if result and assigned(fonclosequery) then begin
+  fonclosequery(self,result);
  end;
 end;
 
@@ -4283,6 +4480,16 @@ begin
  end;
 end;
 
+procedure tactionwidget.dofocuschanged(const oldwidget: twidget;
+               const newwidget: twidget);
+begin
+ inherited;
+ if canevent(tmethod(fonfocusedwidgetchanged)) and 
+  (checkdescendent(oldwidget) or checkdescendent(newwidget)) then begin
+  fonfocusedwidgetchanged(oldwidget,newwidget);
+ end; 
+end;
+
 procedure tactionwidget.doactivate;
 begin
  inherited;
@@ -4299,6 +4506,27 @@ begin
  end;
 end;
 
+procedure tactionwidget.dohide;
+begin
+ if canevent(tmethod(fonhide)) then begin
+  fonhide(self);
+ end;
+ inherited;
+// include(fwidgetstate,ws_hidden);
+// exclude(fwidgetstate,ws_showed);
+end;
+
+procedure tactionwidget.doshow;
+begin
+ inherited;
+ if canevent(tmethod(fonshow)) then begin
+  fonshow(self);
+ end;
+// include(fwidgetstate,ws_showed);
+// exclude(fwidgetstate,ws_hidden);
+end;
+
+
 procedure tactionwidget.getpopuppos(var apos: pointty);
 begin
  //dummy
@@ -4307,6 +4535,9 @@ end;
 procedure tactionwidget.doshortcut(var info: keyeventinfoty;
                const sender: twidget);
 begin
+ if not (es_processed in info.eventstate) and canevent(tmethod(fonshortcut)) then begin
+  fonshortcut(self,info);
+ end;
  if (fpopupmenu <> nil) and (sender <> nil) //no broadcast
                           and not(csdesigning in componentstate) then begin
   fpopupmenu.doshortcut(info);
@@ -4316,8 +4547,24 @@ begin
  end;
 end;
 
-{ tcustomeventwidgetnwr }
+procedure tactionwidget.receiveevent(const event: tobjectevent);
+begin
+ if canevent(tmethod(fonevent)) then begin
+  fonevent(self,event);
+ end;
+ inherited;
+end;
 
+procedure tactionwidget.doasyncevent(var atag: integer);
+begin
+ if canevent(tmethod(fonasyncevent)) then begin
+  fonasyncevent(self,atag);
+ end;
+ inherited;
+end;
+
+{ tcustomeventwidgetnwr }
+{
 procedure tcustomeventwidgetnwr.mouseevent(var info: mouseeventinfoty);
 begin
  if canevent(tmethod(fonmouseevent)) then begin
@@ -4417,6 +4664,7 @@ begin
   fonresize(self);
  end;
 end;
+}
 {
 procedure tcustomeventwidget.doenter;
 begin
@@ -4465,7 +4713,7 @@ begin
   fondeactivate(self);
  end;
 end;
-}
+
 procedure tcustomeventwidgetnwr.dohide;
 begin
  if canevent(tmethod(fonhide)) then begin
@@ -4543,7 +4791,7 @@ begin
   fonfocusedwidgetchanged(oldwidget,newwidget);
  end; 
 end;
-
+}
 { ttoplevelwidget }
 
 constructor ttoplevelwidget.create(aowner: tcomponent);

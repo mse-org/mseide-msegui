@@ -149,10 +149,10 @@ type
   private
    fdialhorz: tchartdialhorz;
    fdialvert: tchartdialvert;
-   fonbeforepaint: painteventty;
-   fonpaintbackground: painteventty;
-   fonpaint: painteventty;
-   fonafterpaint: painteventty;
+//   fonbeforepaint: painteventty;
+//   fonpaintbackground: painteventty;
+//   fonpaint: painteventty;
+//   fonafterpaint: painteventty;
    procedure setdialhorz(const avalue: tchartdialhorz);
    procedure setdialvert(const avalue: tchartdialvert);
    procedure setcolorchart(const avalue: colorty);
@@ -161,10 +161,10 @@ type
    fstate: chartstatesty;
    procedure changed; virtual;
    procedure clientrectchanged; override;
-   procedure dobeforepaint(const canvas: tcanvas); override;
+//   procedure dobeforepaint(const canvas: tcanvas); override;
    procedure dopaintbackground(const canvas: tcanvas); override;
-   procedure doonpaint(const canvas: tcanvas); override;
-   procedure doafterpaint(const canvas: tcanvas); override;
+//   procedure doonpaint(const canvas: tcanvas); override;
+//   procedure doafterpaint(const canvas: tcanvas); override;
    procedure dopaint(const acanvas: tcanvas); override;
           //idialcontroller
    procedure directionchanged(const dir,dirbefore: graphicdirectionty);
@@ -177,11 +177,11 @@ type
                               default cl_foreground;
    property dialhorz: tchartdialhorz read fdialhorz write setdialhorz;
    property dialvert: tchartdialvert read fdialvert write setdialvert;
-   property onbeforepaint: painteventty read fonbeforepaint write fonbeforepaint;
+//   property onbeforepaint: painteventty read fonbeforepaint write fonbeforepaint;
    property onpaintbackground: painteventty read fonpaintbackground 
                                                   write fonpaintbackground;
-   property onpaint: painteventty read fonpaint write fonpaint;
-   property onafterpaint: painteventty read fonafterpaint write fonafterpaint;
+//   property onpaint: painteventty read fonpaint write fonpaint;
+//   property onafterpaint: painteventty read fonafterpaint write fonafterpaint;
  end;
 
  tchart = class(tcustomchart)
@@ -581,7 +581,7 @@ begin
  fdialvert.changed;
  inherited;
 end;
-
+{
 procedure tcustomchart.dobeforepaint(const canvas: tcanvas);
 var
  pt1: pointty;
@@ -594,6 +594,7 @@ begin
   canvas.remove(pt1);
  end;
 end;
+}
 
 procedure tcustomchart.dopaintbackground(const canvas: tcanvas);
 begin
@@ -602,11 +603,11 @@ begin
                  not (fcolorchart = container.frame.colorclient) then begin
   canvas.fillrect(innerclientrect,fcolorchart);
  end;
- if canevent(tmethod(fonpaintbackground)) then begin
-  fonpaintbackground(self,canvas);
- end;
+// if canevent(tmethod(fonpaintbackground)) then begin
+//  fonpaintbackground(self,canvas);
+// end;
 end;
-
+{
 procedure tcustomchart.doonpaint(const canvas: tcanvas);
 begin
  inherited;
@@ -627,7 +628,7 @@ begin
   canvas.remove(pt1);
  end;
 end;
-
+}
 procedure tcustomchart.dopaint(const acanvas: tcanvas);
 begin
  inherited;
