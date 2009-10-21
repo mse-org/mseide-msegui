@@ -6137,7 +6137,7 @@ begin
      if rowbefore = 0 then begin
       inc(rect1.y,ystep);
      end;
-     if (gs_needsrowheight in fstate) or testintersectrect(rect1,updaterect) then begin
+     if (og_rowheight in foptionsgrid) or testintersectrect(rect1,updaterect) then begin
       invalidaterect(rect1,org_client); //scrolling not possible
      end
      else begin

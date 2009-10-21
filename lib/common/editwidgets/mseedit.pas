@@ -1266,9 +1266,13 @@ begin
 end;
 
 procedure tcustomedit.getautopaintsize(var asize: sizety);
+var
+ fram1: framety;
 begin
+ fram1:= getinnerframe;
  asize:= feditor.textrect.size;
- innertopaintsize(asize);
+ asize.cx:= asize.cx + fram1.left + fram1.right;
+ asize.cy:= asize.cy + fram1.top + fram1.bottom;
 end;
 
 procedure tcustomedit.fontchanged;
