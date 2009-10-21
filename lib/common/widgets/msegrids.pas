@@ -10329,8 +10329,8 @@ begin  //cellrect
   end
   else begin //datarows
    int1:= visiblerow(row);
-   if int1 >= 0 then begin
-    if og_rowheight in foptionsgrid then begin
+   if (int1 >= 0) or (csdesigning in componentstate) then begin
+    if (og_rowheight in foptionsgrid) and (int1 >= 0) then begin
      fdatacols.frowstate.cleanrowheight(row);
      fdatacols.frowstate.internalystep(row,y,cy);
      
