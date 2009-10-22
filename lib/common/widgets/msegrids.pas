@@ -582,7 +582,7 @@ type
    procedure clientmouseevent(const acell: gridcoordty; 
                                           var info: mouseeventinfoty); virtual;
    procedure dokeyevent(var info: keyeventinfoty; up: boolean); virtual;
-   procedure checkrowheightchange(const aindex: integer);
+   procedure checkdirtyautorowheight(aindex: integer);
    procedure itemchanged(const sender: tdatalist; const aindex: integer); virtual;
    procedure updatelayout; override;
    procedure moverow(const fromindex,toindex: integer; const count: integer = 1); override;
@@ -1125,6 +1125,7 @@ type
    fdirtyvisible: integer;
    fdirtyrow: integer;
    fdirtyrowheight: integer;
+   fdirtyautorowheight: integer;
    ffolded: boolean;
    fgrid: tcustomgrid;
    fhiddencount: integer;
@@ -1154,6 +1155,7 @@ type
    procedure clean(arow: integer);
    procedure cleanrowheight(const aindex: integer);
    procedure checkdirty(const arow: integer);
+   procedure checkdirtyautorowheight(const arow: integer);
    procedure recalchidden; override;
 //   procedure readstate(const reader; const acount: integer); override;
    function getstatdata(const index: integer): msestring; override;
@@ -5234,17 +5236,11 @@ begin
  end;
 end;
 
-procedure tdatacol.checkrowheightchange(const aindex: integer);
+procedure tdatacol.checkdirtyautorowheight(aindex: integer);
 begin
-  if gps_needsrowheight in fstate then begin
-   if aindex < 0 then begin
-    tdatacols(prop).frowstate.fdirtyrowheight:= 0;
-   end
-   else begin
-    tdatacols(prop).frowstate.fdirtyrowheight:= aindex;
-   end;   
-   fgrid.layoutchanged;
-  end;
+ if gps_needsrowheight in fstate then begin
+  tdatacols(prop).rowstate.checkdirtyautorowheight(aindex);
+ end;
 end;
 
 procedure tdatacol.itemchanged(const sender: tdatalist; const aindex: integer);
@@ -5261,7 +5257,7 @@ begin
  end;
  if not (gps_noinvalidate in fstate) and 
                      not (csloading in fgrid.componentstate) then begin
-  checkrowheightchange(aindex);
+  checkdirtyautorowheight(aindex);
   if aindex < 0 then begin
    cellchanged(invalidaxis);
   end
@@ -14015,10 +14011,38 @@ begin
  end;
 end;
 
+procedure trowstatelist.checkdirtyautorowheight(const arow: integer);
+begin
+ if arow < 0 then begin
+  fdirtyrowheight:= 0;
+  fdirtyautorowheight:= 0;
+ end
+ else begin
+  if finfolevel >= ril_rowheight then begin
+   with prowstaterowheightty(getitempo(arow))^ do begin
+    if rowheight.height <= 0 then begin
+     rowheight.height:= 0;
+    end
+    else begin
+     exit;
+    end;
+   end;
+  end;
+  if arow < fdirtyrowheight then begin
+   fdirtyrowheight:= arow;
+  end
+  else begin
+   exit;
+  end;
+ end;   
+ fgrid.layoutchanged;
+end;
+
 procedure trowstatelist.change(const index: integer);
 begin
  if (finfolevel >= ril_rowheight) and (index < 0) then begin
   fdirtyrowheight:= 0;
+  fdirtyautorowheight:= 0;
   inherited;
   fgrid.layoutchanged;
  end
@@ -14132,10 +14156,16 @@ begin
    for int1:= fdirtyrowheight to aindex do begin
     po1^.rowheight.ypos:= int3;
     if not folded or (po1^.normal.fold and currentfoldhiddenmask = 0) then begin
-     if po1^.rowheight.height = 0 then begin
+     if po1^.rowheight.height <= 0 then begin
       if needsrowheightupdate then begin
        int5:= fgrid.fdatarowheight;
-       fgrid.updaterowheight(int1,int5);
+       if (po1^.rowheight.height = 0) or (int1 >= fdirtyautorowheight) then begin
+        fgrid.updaterowheight(int1,int5);
+        po1^.rowheight.height:= -int5;
+       end
+       else begin
+        int5:= -po1^.rowheight.height;
+       end;
        int3:= int3 + int5 + int4;
       end
       else begin
@@ -14155,6 +14185,9 @@ begin
     po1^.rowheight.ypos:= int3;
    end;
    fdirtyrowheight:= aindex+1;
+   if fdirtyrowheight > fdirtyautorowheight then begin
+    fdirtyautorowheight:= fdirtyrowheight;
+   end;
   end;
  end;
 end;
@@ -14444,6 +14477,8 @@ begin
 end;
 
 function trowstatelist.getstatdata(const index: integer): msestring;
+var
+ int1: integer;
 begin
  with prowstaterowheightty(inherited getitempo(index))^ do begin
   result:= inttostr(normal.fold);
@@ -14452,7 +14487,11 @@ begin
   end;
   if (finfolevel >= ril_rowheight) and 
                       (og_savestate in fgrid.foptionsgrid) then begin
-   result:= result + ' ' + inttostr(rowheight.height);
+   int1:= rowheight.height;
+   if int1 < 0 then begin
+    int1:= 0;     //auto height
+   end;
+   result:= result + ' ' + inttostr(int1);
   end;
  end;
 end;
@@ -14471,7 +14510,10 @@ begin
    end;
    if (og_savestate in fgrid.foptionsgrid) and (finfolevel >= ril_rowheight) and (high(ar1) > 1) then begin
     rowheight.height:= strtoint(ar1[2]);
-    if (rowheight.height <> 0) and 
+    if (rowheight.height < 0) then begin
+     rowheight.height:= 0;
+    end;
+    if (rowheight.height > 0) and 
                       (rowheight.height < fgrid.fdatarowheightmin) then begin
      rowheight.height:= fgrid.fdatarowheightmin;
     end;
@@ -14486,6 +14528,9 @@ end;
 function trowstatelist.getrowheight(const index: integer): integer;
 begin
  result:= getitemporowheight(index)^.rowheight.height;
+ if result < 0 then begin
+  result:= 0;
+ end;
 end;
 
 procedure trowstatelist.setrowheight(const index: integer;
@@ -14611,6 +14656,7 @@ begin
  fdirtyvisible:= 0;
  fdirtyrow:= 0;
  fdirtyrowheight:= 0;
+ fdirtyautorowheight:= 0;
 end;
 
 procedure trowstatelist.clearmemberitem(const subitem: integer;
