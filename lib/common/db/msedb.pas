@@ -464,6 +464,8 @@ type
    function getascurrency: currency; override;
    procedure setasfloat(avalue: double); override;
    procedure gettext(var thetext: string; adisplaytext: boolean); override;
+   function GetAsLongint: Longint; override;
+   function GetAsLargeint: Largeint; override;
   public
    procedure Clear; override;
    function assql: string;
@@ -3173,6 +3175,17 @@ function tmsefloatfield.getascurrency: currency;
 begin
  result:= inherited getasfloat;
 end;
+
+function tmsefloatfield.GetAsLongint: Longint;
+begin
+ result:= round(inherited getasfloat);
+end;
+
+function tmsefloatfield.GetAsLargeint: Largeint;
+begin
+ result:= round(inherited getasfloat);
+end;
+
 
 procedure tmsefloatfield.setasfloat(avalue: double);
 begin
