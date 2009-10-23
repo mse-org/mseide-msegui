@@ -269,7 +269,7 @@ type
        CLIENT_SECURE_CONNECTION = 32768;   // New 4.1 authentication
        CLIENT_MULTI_STATEMENTS = 65536;    // Enable/disable multi-stmt support
        CLIENT_MULTI_RESULTS = 131072;      // Enable/disable multi-results
-       CLIENT_REMEMBER_OPTIONS : cardinal = 1 shl 31;
+       CLIENT_REMEMBER_OPTIONS : longword = 1 shl 31;
 
 
        SERVER_STATUS_IN_TRANS = 1;         // Transaction has started

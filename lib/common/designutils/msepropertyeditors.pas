@@ -633,9 +633,9 @@ type
    feditor: tpropertyeditor;
   protected
    function getdefaultstate: propertystatesty; override;
-   function getordvalue(const index: integer = 0): integer;
-   procedure setordvalue(const value: longword); overload;
-   procedure setordvalue(const index: integer; const value: longword); overload;
+//   function getordvalue(const index: integer = 0): integer;
+//   procedure setordvalue(const value: longword); overload;
+//   procedure setordvalue(const index: integer; const value: longword); overload;
    function getpointervalue(const index: integer = 0): pointer;
    procedure setpointervalue(const value: pointer); overload;
    procedure setpointervalue(const index: integer; const value: pointer); overload;
@@ -2265,18 +2265,18 @@ end;
 function tsetpropertyeditor.getvalue: msestring;
 begin
  {$ifdef FPC}
- result:= '['+concatstrings(settostrings(tintegerset(cardinal(getordvalue)),
+ result:= '['+concatstrings(settostrings(tintegerset(longword(getordvalue)),
       typedata^.comptype),',')+']';
  {$else}
- result:= '['+concatstrings(settostrings(tintegerset(cardinal(getordvalue)),
+ result:= '['+concatstrings(settostrings(tintegerset(longword(getordvalue)),
       typedata^.comptype^),',')+']';
  {$endif}
 (*
 {$ifdef FPC}
- result:= '['+concatstrings(settostrings(tintegerset(cardinal(getordvalue)),
+ result:= '['+concatstrings(settostrings(tintegerset(longword(getordvalue)),
       gettypedata(fprops[0].propinfo^.proptype)^.comptype),',')+']';
 {$else}
- result:= '['+concatstrings(settostrings(tintegerset(cardinal(getordvalue)),
+ result:= '['+concatstrings(settostrings(tintegerset(longword(getordvalue)),
       gettypedata(fprops[0].propinfo^.proptype^)^.comptype^),',')+']';
 {$endif}
 *)
@@ -2344,7 +2344,7 @@ end;
 
 function tsetelementeditor.getvalue: msestring;
 begin
- if findex in tintegerset(cardinal(getordvalue)) then begin
+ if findex in tintegerset(longword(getordvalue)) then begin
   result:= truename;
  end
  else begin
@@ -2360,9 +2360,9 @@ begin
  result:= inherited allequal;
  if not result then begin
   result:= true;
-  bo1:= findex in tintegerset(cardinal(getordvalue));
+  bo1:= findex in tintegerset(longword(getordvalue));
   for int1:= 1 to high(fprops) do begin
-   if bo1 <> (findex in tintegerset(cardinal(getordvalue(int1)))) then begin
+   if bo1 <> (findex in tintegerset(longword(getordvalue(int1)))) then begin
     result:= false;
     break;
    end;
@@ -2481,7 +2481,8 @@ end;
 
 function tcomponentpropertyeditor.allequal: boolean;
 var
- ca1: cardinal;
+// ca1: cardinal;
+ po1: pointer;
  int1: integer;
 begin
  result:= inherited allequal;
@@ -2496,9 +2497,11 @@ begin
    end;
   end
   else begin
-   ca1:= getordvalue;
+//   ca1:= getordvalue;
+   po1:= getpointervalue;
    for int1:= 1 to high(fprops) do begin
-    if cardinal(getordvalue(int1)) <> ca1 then begin
+//    if cardinal(getordvalue(int1)) <> ca1 then begin
+    if getpointervalue(int1) <> po1 then begin
      result:= false;
      break;
     end;
@@ -3641,7 +3644,7 @@ function tcollectionitemeditor.name: msestring;
 begin
  result:= 'Item '+inttostr(findex);
 end;
-
+{
 function tcollectionitemeditor.getordvalue(const index: integer = 0): integer;
 begin
  result:= integer(tcollection(fparenteditor.getpointervalue(index)).items[findex]);
@@ -3657,7 +3660,7 @@ procedure tcollectionitemeditor.setordvalue(const index: integer;
 begin
  //dummy
 end;
-
+}
 function tcollectionitemeditor.getpointervalue(const index: integer = 0): pointer;
 begin
  result:= tcollection(fparenteditor.getpointervalue(index)).items[findex];
@@ -3914,7 +3917,7 @@ end;
 
 procedure tbooleanpropertyeditor.setvalue(const value: msestring);
 begin
- setordvalue(cardinal(uppercase(trim(value)) = uppercase(truename)));
+ setordvalue(longword(uppercase(trim(value)) = uppercase(truename)));
 end;
 
 function tbooleanpropertyeditor.getvalue: msestring;

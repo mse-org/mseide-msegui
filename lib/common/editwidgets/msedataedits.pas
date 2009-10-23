@@ -3191,7 +3191,7 @@ begin
  if accept then begin
   if not fisnull then begin
    if fmax < fmin then begin //unsigned
-    if (cardinal(int1) < cardinal(fmin)) or (cardinal(int1) > cardinal(fmax)) then begin
+    if (longword(int1) < longword(fmin)) or (longword(int1) > longword(fmax)) then begin
      rangeerror(fmin,fmax,quiet);
      accept:= false;
     end;

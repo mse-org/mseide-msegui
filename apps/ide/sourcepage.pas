@@ -65,7 +65,7 @@ type
    flasthintlength: integer;
    fbackupcreated: boolean;
    ffindpos: gridcoordty;
-   ffiletag: cardinal;
+   ffiletag: longword;
    fsavetime: tdatetime;
    fexecstamp: integer;
    fgotoline: integer;
@@ -143,7 +143,7 @@ type
    property filename: filenamety read getfilename;
    property relpath: filenamety read getrelpath write frelpath;
    property filepath: filenamety read getfilepath write setfilepath;
-   property filetag: cardinal read ffiletag;
+   property filetag: longword read ffiletag;
  end;
 
 function getpascalvarname(const edit: tsyntaxedit; pos: gridcoordty;
@@ -1220,8 +1220,8 @@ begin
    removebookmark(bookmarknum);
   end
   else begin   
-   dataicon[arow]:= replacebits(cardinal(1 shl (bookmarknum + bmbitshift)),
-                                cardinal(dataicon[arow]),cardinal(bmbitmask));
+   dataicon[arow]:= replacebits(longword(1 shl (bookmarknum + bmbitshift)),
+                                longword(dataicon[arow]),longword(bmbitmask));
    setlength(finitialbookmarks,high(finitialbookmarks)+2);
    finitialbookmarks[high(finitialbookmarks)].bookmarknum:= bookmarknum;
   end;

@@ -93,7 +93,7 @@ Type
     FServerInfo: String;
     FMySQL : PMySQL;
     FDidConnect : Boolean;
-   fport: cardinal;
+   fport: longword;
    flasterror: integer;
    flasterrormessage: msestring;
    flastsqlcode: string;
@@ -183,7 +183,7 @@ Type
    property lastsqlcode: string read flastsqlcode;
   published
     property Dialect  : integer read FDialect write FDialect default 0;
-    property port: cardinal read fport write fport default 0;
+    property port: longword read fport write fport default 0;
     property DatabaseName;
     property HostName;
     property KeepConnection;

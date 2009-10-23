@@ -75,10 +75,10 @@ type
    fposvorher: integer;
 //   fnotopen: boolean;
    fsearchabortpo: pboolean;
-   fsearchlinestartpos: cardinal;
-   fsearchlinenumber: cardinal;
-   fsearchpos: cardinal;
-   fsearchfoundpos: cardinal;
+   fsearchlinestartpos: longword;
+   fsearchlinenumber: longword;
+   fsearchpos: longword;
+   fsearchfoundpos: longword;
    fsearchtext: string;
    fsearchtextlower: string;
    fsearchtextupper: string;
@@ -166,10 +166,10 @@ type
    property nativesearchtext: string read fsearchtext write setsearchtext;
    property msesearchtext: msestring read getmsesearchtext write setmsesearchtext;
    property searchoptions: searchoptionsty read fsearchoptions write setsearchoptions;
-   property searchpos: cardinal read fsearchpos write fsearchpos;
-   property searchfoundpos: cardinal read fsearchfoundpos;
-   property searchlinestartpos: cardinal read fsearchlinestartpos write fsearchlinestartpos;
-   property searchlinenumber: cardinal read fsearchlinenumber write fsearchlinenumber;
+   property searchpos: longword read fsearchpos write fsearchpos;
+   property searchfoundpos: longword read fsearchfoundpos;
+   property searchlinestartpos: longword read fsearchlinestartpos write fsearchlinestartpos;
+   property searchlinenumber: longword read fsearchlinenumber write fsearchlinenumber;
    property searchabortpo: pboolean read fsearchabortpo write fsearchabortpo;
 
    property notopen: boolean read getnotopen;
@@ -1393,7 +1393,7 @@ end;
 function ttextstream.searchnext: boolean;
 var
  bo1: boolean;
- ca1: cardinal;
+ ca1: longword;
  str1: string;
 begin
  Position:= fsearchpos;
@@ -1429,7 +1429,7 @@ begin
   result:= false;
   fsearchfoundpos:= Position;
  end;
- fsearchpos:= fsearchfoundpos + cardinal(length(fsearchtext));
+ fsearchpos:= fsearchfoundpos + longword(length(fsearchtext));
 end;
 
 function ttextstream.geteof: boolean;

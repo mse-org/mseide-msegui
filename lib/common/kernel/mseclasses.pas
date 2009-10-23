@@ -898,7 +898,7 @@ end;
 function swapmethodtable(const instance: tobject; const newtable: pointer): pointer;		
 var
  {$ifdef mswindows}
- ca1: cardinal;
+ ca1: longword;
  {$endif}
  methodtabpo: ppointer;
 begin
@@ -2152,7 +2152,7 @@ procedure getdebugtext(owner: tobjectlinker; const source,dest:iobjectlink;
   end
   else begin
    obj1:= iobjectlink(aintf).getinstance;
-   write(hextostr(cardinal(aintf),8) + ' ' + hextostr(cardinal(obj1),8));
+   write(hextostr(longword(aintf),8) + ' ' + hextostr(longword(obj1),8));
    if obj1 <> nil then begin
     write(' '+obj1.classname);
    end;
@@ -2174,7 +2174,7 @@ begin
  else begin
   write(' ');
  end;
- write('v:'+ hextostr(cardinal(valuepo),8));
+ write('v:'+ hextostr(longword(valuepo),8));
  write(' o:');intftext(iobjectlink(owner.fownerintf));
  write(' s:');intftext(source);
  write(' d:');intftext(dest);
@@ -2185,7 +2185,7 @@ end;
 constructor tobjectlinker.create(const owner: iobjectlink; onevent: objectlinkeventty);
 begin
 {$ifdef debugobjectlink}
- writeln('create o: ' + hextostr(cardinal(owner),8));
+ writeln('create o: ' + hextostr(longword(owner),8));
 {$endif}
  pointer(fownerintf):= pointer(owner);
  fonevent:= onevent;
@@ -2202,7 +2202,7 @@ var
  {$endif}
 begin
 {$ifdef debugobjectlink}
- writeln('destroy o: ' + hextostr(cardinal(fownerintf),8));
+ writeln('destroy o: ' + hextostr(longword(fownerintf),8));
 {$endif}
  include(fstate,rels_destroying);
  po2:= datapo;
@@ -3172,7 +3172,7 @@ function setclassname(const instance: tobject;
 var
  classnamepo: ppointer;
  {$ifdef mswindows}
- ca1: cardinal;
+ ca1: longword;
  {$endif}
 begin
  if aclassname = nil then begin

@@ -24,7 +24,7 @@ const
 type
  imagenrty = type integer; //for timagelist
  facenrty = type integer;  //for tfacelist
- pixelty = cardinal;
+ pixelty = longword;
 
  colorty = type longword;
  pcolorty = ^colorty;
@@ -41,7 +41,7 @@ type
  prgbtripleaty = ^rgbtripleaty;
 
  colormapsty = (cm_rgb,cm_functional,cm_mapped,cm_namedrgb,cm_user);
- colormapty = array[colormapsty] of cardinalarty;
+ colormapty = array[colormapsty] of longwordarty;
  
  colorinfoty = record
                 name: string;
@@ -591,11 +591,11 @@ end;
 
 function stringtocolor(value: string): colorty;
 var
- ca1: cardinal;
+ ca1: longword;
 begin
  result:= cl_none;
  if trystrtohex(value,longword(result)) then begin
-  if cardinal(result) > $00ffffff then begin
+  if longword(result) > $00ffffff then begin
    gdierror(gde_invalidcolor);
   end;
  end
@@ -603,25 +603,25 @@ begin
   value:= lowercase(value);
   for ca1:= 0 to mapcolorcounts[cm_namedrgb] - 1 do begin
    if defaultnamedrgb[ca1].name = value then begin
-    result:= colorty(ca1 + cardinal(cl_namedrgb));
+    result:= colorty(ca1 + longword(cl_namedrgb));
     exit;
    end;
   end;
   for ca1:= 0 to mapcolorcounts[cm_mapped] - 1 do begin
    if defaultmapped[ca1].name = value then begin
-    result:= colorty(ca1 + cardinal(cl_mapped));
+    result:= colorty(ca1 + longword(cl_mapped));
     exit;
    end;
   end;
   for ca1:= 0 to mapcolorcounts[cm_functional] - 1 do begin
    if defaultfunctional[ca1].name = value then begin
-    result:= colorty(ca1 + cardinal(cl_functional));
+    result:= colorty(ca1 + longword(cl_functional));
     exit;
    end;
   end;
   for ca1:= 0 to mapcolorcounts[cm_user] - 1 do begin
    if defaultuser[ca1].name = value then begin
-    result:= colorty(ca1 + cardinal(cl_user));
+    result:= colorty(ca1 + longword(cl_user));
     exit;
    end;
   end;
@@ -631,31 +631,31 @@ end;
 
 function colortostring(value: colorty): string;
 begin
- if cardinal(value) <= $00ffffff then begin
-  result:= '$'+hextostr(cardinal(value),6);
+ if longword(value) <= $00ffffff then begin
+  result:= '$'+hextostr(longword(value),6);
  end
  else begin
-  if (cardinal(value) >= cardinal(cl_namedrgb)) and
-       (cardinal(value) < cardinal(cl_lastnamedrgb)) then begin
-   result:= defaultnamedrgb[cardinal(value) - cardinal(cl_namedrgb)].name;
+  if (longword(value) >= longword(cl_namedrgb)) and
+       (longword(value) < longword(cl_lastnamedrgb)) then begin
+   result:= defaultnamedrgb[longword(value) - longword(cl_namedrgb)].name;
   end
   else begin
-   if (cardinal(value) >= cardinal(cl_mapped)) and
-        (cardinal(value) < cardinal(cl_lastmapped)) then begin
-    result:= defaultmapped[cardinal(value) - cardinal(cl_mapped)].name;
+   if (longword(value) >= longword(cl_mapped)) and
+        (longword(value) < longword(cl_lastmapped)) then begin
+    result:= defaultmapped[longword(value) - longword(cl_mapped)].name;
    end
    else begin
-    if (cardinal(value) >= cardinal(cl_functional)) and
-         (cardinal(value) < cardinal(cl_lastfunctional)) then begin
-     result:= defaultfunctional[cardinal(value) - cardinal(cl_functional)].name;
+    if (longword(value) >= longword(cl_functional)) and
+         (longword(value) < longword(cl_lastfunctional)) then begin
+     result:= defaultfunctional[longword(value) - longword(cl_functional)].name;
     end
     else begin
-     if (cardinal(value) >= cardinal(cl_user)) and
-          (cardinal(value) < cardinal(cl_lastuser)) then begin
-      result:= defaultuser[cardinal(value) - cardinal(cl_user)].name;
+     if (longword(value) >= longword(cl_user)) and
+          (longword(value) < longword(cl_lastuser)) then begin
+      result:= defaultuser[longword(value) - longword(cl_user)].name;
      end
      else begin
-      result:= 'Invalid ($'+hextostr(cardinal(value),8)+')';
+      result:= 'Invalid ($'+hextostr(longword(value),8)+')';
      end;
     end;
    end;
@@ -702,28 +702,28 @@ begin
  setlength(result,namedrgbcolorcount+mappedcolorcount+
                      functionalcolorcount+usercolorcount-1);
  for int1:= 0 to high(defaultnamedrgb) do begin
-  result[int1]:= cl_namedrgb + cardinal(int1);
+  result[int1]:= cl_namedrgb + longword(int1);
  end;
  int2:= namedrgbcolorcount;
  for int1:= 0 to high(defaultmapped) do begin
-  result[int1+int2]:= cl_mapped + cardinal(int1);
+  result[int1+int2]:= cl_mapped + longword(int1);
  end;
  inc(int2,mappedcolorcount);
  result[int2]:= cl_functional+cl_nonenum;
  for int1:= 1 to cl_nonenum-1 do begin
-  result[int1+int2]:= cl_functional + cardinal(int1);
+  result[int1+int2]:= cl_functional + longword(int1);
  end;
  for int1:= cl_nonenum+1 to functionalcolorcount-1 do begin
-  result[int1+int2]:= cl_functional + cardinal(int1);
+  result[int1+int2]:= cl_functional + longword(int1);
  end;
  {
  for int1:= cl_nonenum + 1 to high(defaultfunctional) do begin
-  result[int1+int2-1]:= cl_functional + cardinal(int1);
+  result[int1+int2-1]:= cl_functional + longword(int1);
  end;
  }
  inc(int2,functionalcolorcount-1);
  for int1:= 0 to high(defaultuser) do begin
-  result[int1+int2]:= cl_user + cardinal(int1);
+  result[int1+int2]:= cl_user + longword(int1);
  end;
 end;
 

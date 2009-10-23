@@ -1248,7 +1248,7 @@ begin
   result:= 0;
  end
  else begin
-  result:= cardinal(pqbackendpid(fhandle));
+  result:= pqbackendpid(fhandle);
  end;
 end;
 

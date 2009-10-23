@@ -46,7 +46,7 @@ type
   shiftstate: shiftstatesty;
   pos: pointty;
   eventstate: eventstatesty;
-  timestamp: cardinal; //usec, 0 -> invalid
+  timestamp: longword; //usec, 0 -> invalid
   button: mousebuttonty;
  end;
  pmouseeventinfoty = ^mouseeventinfoty;
@@ -56,7 +56,7 @@ type
   shiftstate: shiftstatesty;
   pos: pointty;
   eventstate: eventstatesty;
-  timestamp: cardinal; //usec, 0 -> invalid
+  timestamp: longword; //usec, 0 -> invalid
   wheel: mousewheelty;
   delta: real;
  end;
@@ -74,7 +74,7 @@ type
   chars: msestring;
   shiftstate: shiftstatesty;
   eventstate: eventstatesty;
-  timestamp: cardinal; //usec
+  timestamp: longword; //usec
  end;
  pkeyeventinfoty = ^keyeventinfoty;
 
@@ -96,12 +96,6 @@ type
  fontty = ptruint;
  regionty = ptruint;
  pixmapty = ptruint;
-{
- paintdevicety = cardinal;
- fontty = cardinal;
- regionty = cardinal;
- pixmapty = cardinal;
-}
  windowpty = array[0..7] of pointer;
  windowty = record
   id: winidty;

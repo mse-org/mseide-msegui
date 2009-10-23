@@ -70,13 +70,13 @@ const
            100000000000000000,1000000000000000000);
 type
  int64recty = record
-  lsw: cardinal;
-  msw: cardinal;
+  lsw: longword;
+  msw: longword;
  end;
  
-function highestbit(value: cardinal): integer;
+function highestbit(value: longword): integer;
 //0-> first, 31-> last($80000000), -1-> none ($00000000)
-function lowestbit(value: cardinal): integer;
+function lowestbit(value: longword): integer;
 //0-> first, 31-> last($80000000), -1-> none ($00000000)
 
 function highestbit64(value: qword): integer;
@@ -139,12 +139,12 @@ function iszero(address: pointer; count: integer): boolean;
 
 function swapbytes(const value: word): word; overload;
  //value and result at different adresses!
-function swapbytes(const value: cardinal): cardinal; overload;
+function swapbytes(const value: longword): longword; overload;
  //value and result at different adresses!
 procedure swapbytes1(var value: word); overload;
-procedure swapbytes1(var value: cardinal); overload;
-procedure swaprgb1(var value: cardinal);
-function swaprgb(const value: cardinal): cardinal;
+procedure swapbytes1(var value: longword); overload;
+procedure swaprgb1(var value: longword);
+function swaprgb(const value: longword): longword;
 
 function roundint(const value: integer; const step: integer): integer;
 procedure scaleexp101(var value: int64; const exp: integer); overload;
@@ -337,7 +337,7 @@ begin
  result:= old and not mask or new and mask;
 end;
 
-function replacebits(const new,old,mask: cardinal): cardinal;
+function replacebits(const new,old,mask: longword): longword;
 begin
  result:= old and not mask or new and mask;
 end;
@@ -378,7 +378,7 @@ begin
  result:= (a xor b) and mask <> 0;
 end;
 
-function bitschanged(const a,b,mask: cardinal): boolean; overload;
+function bitschanged(const a,b,mask: longword): boolean; overload;
 begin
  result:= (a xor b) and mask <> 0;
 end;
@@ -425,9 +425,9 @@ begin
  end;
 end;
 
-function setsinglebit(const new,old,mask: cardinal): cardinal; overload;
+function setsinglebit(const new,old,mask: longword): longword; overload;
 var
- v1: cardinal;
+ v1: longword;
 begin
  if new and mask = 0 then begin
   result:= new and not mask;
@@ -552,7 +552,7 @@ begin
 {$endif}
 end;
 
-procedure swaprgb1(var value: cardinal);
+procedure swaprgb1(var value: longword);
 var
  by1: byte;
 begin
@@ -561,7 +561,7 @@ begin
  byte((pchar(@value)+2)^):= by1;
 end;
 
-function swaprgb(const value: cardinal): cardinal;
+function swaprgb(const value: longword): longword;
 begin
  result:= value;
  pchar(@result)^:= (pchar(@value)+2)^;
@@ -577,9 +577,9 @@ begin
  (pchar(@value)+1)^:= (pchar(@wo1))^;
 end;
 
-procedure swapbytes1(var value: cardinal); overload;
+procedure swapbytes1(var value: longword); overload;
 var
- ca1: cardinal;
+ ca1: longword;
  po1,po2: pchar;
 begin
  ca1:= value;
@@ -597,7 +597,7 @@ begin
  (pchar(@result)+1)^:= (pchar(@value))^;
 end;
 
-function swapbytes(const value: cardinal): cardinal; overload;
+function swapbytes(const value: longword): longword; overload;
 var
  po1,po2: pchar;
 begin
@@ -623,7 +623,7 @@ begin
  result:= true;
 end;
 
-function highestbit(value: cardinal): integer;
+function highestbit(value: longword): integer;
 //0-> first, 31-> last($80000000), -1-> none ($00000000)
 begin
  result:= -1;
@@ -633,7 +633,7 @@ begin
  end;
 end;
 
-function lowestbit(value: cardinal): integer;
+function lowestbit(value: longword): integer;
 //0-> first, 31-> last($80000000), -1-> none ($00000000)
 begin
  result:= -1;
@@ -669,7 +669,7 @@ begin
  end;
 end;
 
-function getmask(const mask: array of bitnumty): cardinal;
+function getmask(const mask: array of bitnumty): longword;
 var
  int1: integer;
 begin

@@ -155,7 +155,7 @@ type
 var
  SmcOpenConnection: function(networkIdsList: pchar; context: Pointer;
              xsmpMajorRev: integer; xsmpMinorRev: integer;
-             mask: cardinal; var callbacks: SmcCallbacks;
+             mask: longword; var callbacks: SmcCallbacks;
              previousId: pchar; var clientIdRet: pchar;
              errorLength: integer; errorStringRet: pchar): SmcConn; cdecl;      
  SmcCloseConnection: function(_smcConn: SmcConn;

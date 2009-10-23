@@ -15,7 +15,7 @@ unit msegdbutils;
 interface
 uses
  msestream,mseclasses,classes,msetypes,mseevent,msehash,msepipestream,msestrings,
- mseapplication,msegui,msedatalist;
+ mseapplication,msegui,msedatalist,msesys;
 
 //todo: byte endianess for remote debugging
 
@@ -168,7 +168,7 @@ type
  registerinfoarty = array of registerinfoty;
 
  asmlinety = record
-  address: cardinal;
+  address: qword;
   instruction: string;
  end;
  asmlinearty = array of asmlinety;
@@ -237,10 +237,10 @@ type
    {$endif}
    fgdb: integer; //processhandle
    fstate: gdbstatesty;
-   fsequence: cardinal;
-   fconsolesequence: cardinal;
-   frunsequence: cardinal;
-   fsyncsequence: cardinal;
+   fsequence: longword;
+   fconsolesequence: longword;
+   frunsequence: longword;
+   fsyncsequence: longword;
    fsyncvalues: resultinfoarty;
    fsynceventkind: gdbeventkindty;
    fclivalues: string;
@@ -255,7 +255,7 @@ type
    fstartupbreakpoint1: integer;
    fstoponexception: boolean;
    ferrormessage: string;
-   fprocid: cardinal;
+   fprocid: procidty;
    {$ifdef mswindows}
    finterruptthreadid: longword;
    {$endif}
@@ -304,7 +304,7 @@ type
    procedure logoutput(const text: string);
    procedure sequenceend;
    procedure receiveevent(const event: tobjectevent); override;
-   procedure doevent(const token: cardinal; const eventkind: gdbeventkindty;
+   procedure doevent(const token: longword; const eventkind: gdbeventkindty;
                        const values: resultinfoarty);
    procedure postsyncerror;
    procedure checkpointersize;
@@ -444,7 +444,7 @@ type
    function attach(const procid: longword; out info: stopinfoty): gdbresultty;
    function attachtarget(out info: stopinfoty): gdbresultty;
    function detach: gdbresultty;
-   function getprocid(var aprocid: longword): boolean;
+   function getprocid(var aprocid: procidty): boolean;
                 //true if ok
    function clearenvvars: gdbresultty;
    function setenvvar(const aname,avalue: string): gdbresultty;
@@ -521,7 +521,7 @@ type
                       //for avr32
    function infoline(const filename: filenamety; const line: integer;
                          out start,stop: qword): gdbresultty; overload;
-   function infoline(const address: cardinal; out filename: filenamety;
+   function infoline(const address: qword; out filename: filenamety;
                          out line: integer;
                          out start,stop: qword): gdbresultty; overload;
    function infosymbol(const symbol: msestring;
@@ -571,7 +571,7 @@ implementation
 
 uses
  sysutils,mseformatstr,mseprocutils,msesysutils,msefileutils,
- msebits,msesys,msesysintf,mseguiintf
+ msebits,msesysintf,mseguiintf
         {$ifdef UNIX},mselibc,
         msesysbindings{$else},windows{$endif};
 
@@ -928,7 +928,7 @@ begin
 // consoleoutput(text);
 end;
 
-function tgdbmi.getprocid(var aprocid: longword): boolean;
+function tgdbmi.getprocid(var aprocid: procidty): boolean;
 var
  ar1,ar2: stringarty;
  int1: integer;
@@ -1239,7 +1239,7 @@ begin
  end;
 end;
 
-procedure tgdbmi.doevent(const token: cardinal; const eventkind: gdbeventkindty;
+procedure tgdbmi.doevent(const token: longword; const eventkind: gdbeventkindty;
                                    const values: resultinfoarty);
 var
  ev: tgdbevent;
@@ -1341,7 +1341,7 @@ procedure tgdbmi.interpret(const line: string);
 
 var
  po1,po2: pchar;
- token: cardinal;
+ token: longword;
  ch1: char;
  recordclass: recordclassty;
  isconsole: boolean;
@@ -1578,7 +1578,7 @@ end;
 function tgdbmi.synccommand(const acommand: string; 
                      atimeout: integer = defaultsynctimeout): gdbresultty;
 var
- timestamp: cardinal;
+ timestamp: longword;
  int1: integer;
 
 begin
@@ -1847,7 +1847,7 @@ procedure tgdbmi.dorun;
 var
  int1: integer;
  ar1,ar2: stringarty;
- ca1: cardinal;
+ ca1: longword;
  str1: string;
  frames1: frameinfoarty;
  ev: tgdbstartupevent;
@@ -2064,7 +2064,7 @@ end;
 
 function tgdbmi.interrupttarget: gdbresultty; //stop for breakpointsetting
 var
- timestamp: cardinal;
+ timestamp: longword;
  bo1: boolean;
 begin
  result:= gdb_ok;
@@ -3295,7 +3295,7 @@ begin
  end;
 end;
 
-function tgdbmi.infoline(const address: cardinal; out filename: filenamety; out line: integer;
+function tgdbmi.infoline(const address: qword; out filename: filenamety; out line: integer;
                          out start,stop: qword): gdbresultty;
 var
  str1,str2: string;
@@ -3335,7 +3335,7 @@ function tgdbmi.internaldisassemble(out aresult: disassarty; command: string;
   setlength(dest,length(source));
   for int1:= 0 to high(source) do begin
    with dest[int1] do begin
-    if not getintegervalue(source[int1],'address',integer(address)) then exit;
+    if not getqwordvalue(source[int1],'address',address) then exit;
     if not getstringvalue(source[int1],'inst',instruction) then exit;
    end;
   end;

@@ -589,7 +589,7 @@ procedure tlistitem.setstate(const Value: nodestatesty);
 var
  stat1: nodestatesty;
 begin
- stat1:= nodestatesty(cardinal(fstate) xor cardinal(value));
+ stat1:= nodestatesty(longword(fstate) xor longword(value));
  fstate := Value;
  if stat1 * invalidatestates <> [] then begin
   change;
@@ -756,16 +756,16 @@ end;
 
 procedure tlistitem.dostatread(const reader: tstatreader);
 var
- ca1: cardinal;
+ ca1: longword;
 begin
  reader.readrecord('a',[@tag,@ca1,@fimagenr,@fcaption],
-             [tag,cardinal(fstate),fimagenr,fcaption]);
- fstate:= nodestatesty(replacebits(ca1,cardinal(fstate),cardinal(statstates)));
+             [tag,longword(fstate),fimagenr,fcaption]);
+ fstate:= nodestatesty(replacebits(ca1,longword(fstate),longword(statstates)));
 end;
 
 procedure tlistitem.dostatwrite(const writer: tstatwriter);
 begin
- writer.writerecord('a',[tag,cardinal(fstate),fimagenr,fcaption]);
+ writer.writerecord('a',[tag,longword(fstate),fimagenr,fcaption]);
 end;
 
 procedure tlistitem.dostatupdate(const filer: tstatfiler);

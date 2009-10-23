@@ -109,7 +109,7 @@ const
  commname: array[commnrty] of string = ('ttys0','ttys1','ttys3','ttys4','ttys5',
                                         'ttys6','ttys7','ttys8','ttys9');
  }
- invalidfilehandle = cardinal(-1);
+ invalidfilehandle = ptruint(-1);
  infinitemse = cardinal(-1);
  B57600 =   $1001; //0010001
  B115200 =  $1002; //0010002
@@ -138,7 +138,7 @@ type
  trs232 = class
   private
    fowner: tmsecomponent; //can be nil
-   fhandle: cardinal;
+   fhandle: ptruint;
    fcommnr: commnrty;
    frtstimevor: integer;  //in us fuer halbduplex
    frtstimenach: integer;
@@ -160,7 +160,7 @@ type
    procedure Setparity(const Value: commparityty);
    procedure Setstopbit(const Value: commstopbitty);
    function waitfortx(timeout: integer): boolean;    //timeout in us
-   function defaulttimeout(us: cardinal; anzahl: integer; out timeout: cardinal): boolean;
+   function defaulttimeout(us: longword; anzahl: integer; out timeout: longword): boolean;
              // timeout in us 0 -> 2*uebertragungszeit,
    {$ifdef mswindows}
    procedure eotevent(sender: tobject);
@@ -179,17 +179,17 @@ type
    procedure resetinput;
    procedure resetoutput;
    procedure setrts(active: boolean);
-   function writestring(const dat: string; timeout: cardinal = 0;
+   function writestring(const dat: string; timeout: longword = 0;
                 waitforeot: boolean = false): boolean;
   //timeout in us, wenn = 0 -> warten auf uebertragungsende, bei halbduplex sowiso
    function readbuffer(anzahl: integer; out dat;
-                       timeout: cardinal = 0): integer;
+                       timeout: longword = 0): integer;
             //list daten, true wenn gelungen, timeout in us 0 -> 2*uebertragungszeit
    function readstring(anzahl: integer; out dat: string;
-                       timeout: cardinal = infinitemse): boolean;
+                       timeout: longword = infinitemse): boolean;
             //list daten, true wenn gelungen, timeout in us 0 -> 2*uebertragungszeit
    function uebertragungszeit(anzahl: integer): longword; //bringt uebertragungszeit in us
-   property handle: cardinal read fhandle;
+   property handle: ptruint read fhandle;
    property commnr:commnrty read Fcommnr write Setcommnr;
    property baud: commbaudratety read Fbaud write Setbaud;
    property databits: commdatabitsty read fdatabits write setdatabits;
@@ -354,7 +354,7 @@ type
    zeitstempel: longword; //in us
    timeoutstarted: boolean;
    feorchar: char;
-   procedure starttimeout(step: cardinal);
+   procedure starttimeout(step: longword);
    procedure closetimeout;
   protected
    function checkabort(const sender: tobject): boolean; override;
@@ -587,7 +587,7 @@ begin
  {$else}
  hcomm:= mselibc.open(PChar('/dev/'+commname[commnr]), o_rdwr or o_nonblock
              {,FileAccessRights});
- if cardinal(hcomm) = invalidfilehandle then begin
+ if hcomm = invalidfilehandle then begin
   result:= false;
  end
  else begin
@@ -982,7 +982,7 @@ function trs232.waitfortx(timeout: integer): boolean;
 
  {$ifdef mswindows}
 var
- ca1: cardinal;
+ ca1: longword;
  {$endif}
 begin
  {$ifdef UNIX}
@@ -1008,8 +1008,8 @@ begin
 end;
 
 {$endif}
-function trs232.defaulttimeout(us: cardinal; anzahl: integer;
-      out timeout: cardinal): boolean;
+function trs232.defaulttimeout(us: longword; anzahl: integer;
+      out timeout: longword): boolean;
   // timeout in us 0 -> 2*uebertragungszeit,
 begin
  timeout:= us;
@@ -1021,20 +1021,20 @@ begin
  end;
 end;
 
-function trs232.writestring(const dat: string; timeout: cardinal = 0;
+function trs232.writestring(const dat: string; timeout: longword = 0;
       waitforeot: boolean = false): boolean;
   // timeout in us 0 -> 2*uebertragungszeit,
   // waitforeot -> warten auf uebertragungsende, bei halbduplex sowiso
 var
- len: cardinal;
+ len: longword;
  {$ifdef UNIX}
  timed: boolean;
  int1: integer;
- ca1: cardinal;
+ ca1: longword;
  po: ^byte;
- time: cardinal;
+ time: longword;
  {$else}
- ca1: cardinal;
+ ca1: longword;
 // time: longword;
 // bo1: boolean;
  {$endif}
@@ -1114,7 +1114,7 @@ begin
 end;
 
 function trs232.readbuffer(anzahl: integer; out dat;
-                       timeout: cardinal = 0): integer;
+                       timeout: longword = 0): integer;
             //list daten, bringt anzahl gelesene zeichen timeout in us 0 -> 2*uebertragungszeit
 var
  po: ^byte;
@@ -1167,7 +1167,7 @@ end;
 {$if 0=1}
 {$ifdef UNIX}
 function trs232.readbuffer(anzahl: integer; out dat;
-                       timeout: cardinal = 0): integer;
+                       timeout: longword = 0): integer;
             //list daten, bringt anzahl gelesene zeichen timeout in us 0 -> 2*uebertragungszeit
 var
  po: ^byte;
@@ -1206,7 +1206,7 @@ end;
 {$else}
 
 function trs232.readbuffer(anzahl: integer; out dat;
-                       timeout: cardinal = 0): integer;
+                       timeout: longword = 0): integer;
             //liest daten, bringt anzahl gelesene zeichen timeout in us 0 -> 2*uebertragungszeit
 var
  po: ^byte;
@@ -1218,7 +1218,7 @@ begin
  if opened then begin
   if anzahl > 0 then begin
    defaulttimeout(timeout,anzahl,timeout);
-   bo1:= windows.readfile(fhandle,po^,anzahl,cardinal(result),@overlapped);
+   bo1:= windows.readfile(fhandle,po^,anzahl,longword(result),@overlapped);
    if not bo1 and (getlasterror = ERROR_IO_PENDING) then begin
     bo1:= waitforsingleobject(overlapped.hevent,timeout div 1000) = WAIT_OBJECT_0;
    end;
@@ -1226,7 +1226,7 @@ begin
     purgecomm(fhandle,PURGE_RXABORT); //puffer freigeben
    end
    else begin
-    if not getoverlappedresult(fhandle,overlapped,cardinal(result),false) then begin
+    if not getoverlappedresult(fhandle,overlapped,longword(result),false) then begin
      result:= 0;
     end;
    end;
@@ -1238,7 +1238,7 @@ end;
 
 
 function trs232.readstring(anzahl: integer; out dat: string;
-  timeout: cardinal = infinitemse): boolean;
+  timeout: longword = infinitemse): boolean;
   //timeout = 0 -> timeout = 2*uebertragungszeit
 var
  int1: integer;
@@ -1468,7 +1468,7 @@ begin
  timeoutstarted:= false;
 end;
 
-procedure tasciicommthread.starttimeout(step: cardinal);
+procedure tasciicommthread.starttimeout(step: longword);
 begin
  zeitstempel:= gettickus + step;
  timeoutstarted:= true;
@@ -1479,9 +1479,9 @@ function tasciicommthread.readln(timeout: integer;
 var
  po,po1: pchar;
  laenge: integer; //longword;
- lwo1: cardinal;
+ lwo1: longword;
  bo1,bo2: boolean;
-// ca1: cardinal;
+// ca1: longword;
 begin
  result:= cpf_timeout;
  dat:= '';

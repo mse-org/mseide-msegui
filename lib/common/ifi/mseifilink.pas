@@ -607,8 +607,8 @@ type
    procedure setselectedrange(const start,stop: gridcoordty;
                     const value: boolean); overload;
 
-   procedure mergecols(const arow: integer; const astart: cardinal = 0; 
-                                              const acount: cardinal = bigint);
+   procedure mergecols(const arow: integer; const astart: longword = 0; 
+                                              const acount: longword = bigint);
    procedure unmergecols(const arow: integer = invalidaxis);
                      //invalidaxis = all
 
@@ -2571,7 +2571,7 @@ end;
 procedure tifidatacol.setselected(row: integer; const avalue: boolean);
 var
  po1: prowstatety;
- ca1: cardinal;
+ ca1: longword;
  int1: integer;
 begin
  if ident <= selectedcolmax then begin
@@ -2923,7 +2923,7 @@ begin
 end;
 
 procedure tifidatacols.mergecols(const arow: integer;
-               const astart: cardinal = 0; const acount: cardinal = bigint);
+               const astart: longword = 0; const acount: longword = bigint);
 begin
  if frowstate.mergecols(arow,astart,acount) then begin
   ttxdatagrid(fowner).rowstatechanged(arow);

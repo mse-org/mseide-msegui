@@ -18,7 +18,7 @@ function gui_grouphideminimizedwindows: boolean; //true for win32
 
 //application has to be locked for all following calls
 function gui_postevent(event: tevent): guierrorty;
-function gui_settimer(us: cardinal): guierrorty;
+function gui_settimer(us: longword): guierrorty;
                //send et_timer event after delay of us (micro seconds)
 
 function gui_hasevent: boolean;         //false if no event pending
@@ -87,9 +87,9 @@ function gui_movepointer(const dist: pointty): guierrorty;
 function gui_grabpointer(id: winidty): guierrorty;
 function gui_ungrabpointer: guierrorty;
 
-function gui_rgbtopixel(rgb: cardinal): pixelty;
-function gui_pixeltorgb(pixel: pixelty): cardinal;
-//function gui_rgbtocolormappixel(rgb: cardinal): pixelty;
+function gui_rgbtopixel(rgb: longword): pixelty;
+function gui_pixeltorgb(pixel: pixelty): longword;
+//function gui_rgbtocolormappixel(rgb: longword): pixelty;
               //neutralizes color in 8bit coler depth
 function gui_initcolormap: guierrorty;
 
@@ -114,14 +114,14 @@ function gui_getpixmapinfo(var info: pixmapinfoty): gdierrorty;
 function gui_createbitmapfromdata(const size: sizety; datapo: pbyte;
              msbitfirst: boolean = false; dwordaligned: boolean = false;
              bottomup: boolean = false): pixmapty;
-function gui_pixmaptoimage(pixmap: pixmapty; out image: imagety; gchandle: cardinal): gdierrorty;
+function gui_pixmaptoimage(pixmap: pixmapty; out image: imagety; gchandle: longword): gdierrorty;
                     //gchandle is used on win32 to select bitmap out of devicecontext,
                     //can be 0
-function gui_imagetopixmap(const image: imagety; out pixmap: pixmapty; gchandle: cardinal): gdierrorty;
+function gui_imagetopixmap(const image: imagety; out pixmap: pixmapty; gchandle: longword): gdierrorty;
                     //gchandle is used on win32 to select bitmap out of devicecontext,
                     //can be 0
-function gui_allocimagemem(length: integer): pcardinalaty;
-procedure gui_freeimagemem(data: pcardinalaty);
+function gui_allocimagemem(length: integer): plongwordaty;
+procedure gui_freeimagemem(data: plongwordaty);
 
 //procedure gui_copyarea(var drawinfo: drawinfoty);
 

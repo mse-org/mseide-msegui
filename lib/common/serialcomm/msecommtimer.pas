@@ -47,9 +47,9 @@ type
   public
    constructor create;
    destructor destroy; override;
-   procedure wait(us: cardinal; aontimer: tnotifyevent = nil); overload;
+   procedure wait(us: longword; aontimer: tnotifyevent = nil); overload;
    procedure wait; overload;
-   procedure start(us: cardinal; aontimer: tnotifyevent = nil);
+   procedure start(us: longword; aontimer: tnotifyevent = nil);
    procedure abort;
  end;
 
@@ -120,15 +120,15 @@ begin
  inherited;
 end;
 
-procedure tmmtimermse.start(us: cardinal; aontimer: tnotifyevent = nil);
+procedure tmmtimermse.start(us: longword; aontimer: tnotifyevent = nil);
 var
- ms: cardinal;
+ ms: longword;
 begin
  abort;
  fontimer:= aontimer;
  ms:= us div 1000;
  if ms >= ftimecaps.wPeriodMin then begin
-  ftimehandle:= timesetevent(ms,1,@mmtimerevent,cardinal(self),time_oneshot);
+  ftimehandle:= timesetevent(ms,1,@mmtimerevent,longword(self),time_oneshot);
   if ftimehandle = 0 then begin
    raise exception.Create('timererror');
   end;
@@ -144,7 +144,7 @@ begin
  abort;
 end;
 
-procedure tmmtimermse.wait(us: cardinal; aontimer: tnotifyevent = nil);
+procedure tmmtimermse.wait(us: longword; aontimer: tnotifyevent = nil);
 begin
  start(us,aontimer);
  wait;

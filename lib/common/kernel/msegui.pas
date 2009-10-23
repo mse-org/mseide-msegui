@@ -1795,8 +1795,8 @@ type
  twindow = class(teventobject,icanvas)
   private
    fstate: windowstatesty;
-   ffocuscount: cardinal; //for recursive setwidgetfocus
-   factivecount: cardinal; //for recursive activate,deactivate
+   ffocuscount: longword; //for recursive setwidgetfocus
+   factivecount: longword; //for recursive activate,deactivate
    factivating: integer;
    fmoving: integer;
    ffocusedwidget: twidget;
@@ -1907,7 +1907,7 @@ type
    procedure update;
    function candefocus: boolean;
    procedure nofocus;
-   property focuscount: cardinal read ffocuscount;
+   property focuscount: longword read ffocuscount;
    function close: boolean; //true if ok
    procedure beginmoving; //lock window rect modification
    procedure endmoving;
@@ -1993,30 +1993,30 @@ type
 
  tmouseevent = class(twindowevent)
   private
-   ftimestamp: cardinal;
+   ftimestamp: longword;
   public
    fpos: pointty;
    fbutton: mousebuttonty;
    fwheel: mousewheelty;
    fshiftstate: shiftstatesty;
    freflected: boolean;
-   property timestamp: cardinal read ftimestamp; //usec, 0 -> invalid
+   property timestamp: longword read ftimestamp; //usec, 0 -> invalid
    constructor create(const winid: winidty; const release: boolean;
                       const button: mousebuttonty; const wheel: mousewheelty;
                       const pos: pointty; const shiftstate: shiftstatesty;
-                      atimestamp: cardinal; const reflected: boolean = false);
+                      atimestamp: longword; const reflected: boolean = false);
                       //button = none for mousemove
  end;
 
  tmouseenterevent = class(tmouseevent)
   public
    constructor create(const winid: winidty; const pos: pointty;
-                      const shiftstate: shiftstatesty; atimestamp: cardinal);
+                      const shiftstate: shiftstatesty; atimestamp: longword);
  end;
  
  tkeyevent = class(twindowevent)
   private
-   ftimestamp: cardinal;
+   ftimestamp: longword;
   public
    fkey: keyty;
    fkeynomod: keyty;
@@ -2025,8 +2025,8 @@ type
    fshiftstate: shiftstatesty;
    constructor create(const winid: winidty; const release: boolean;
                   const key,keynomod: keyty; const shiftstate: shiftstatesty;
-                  const chars: msestring; const atimestamp: cardinal);
-   property timestamp: cardinal read ftimestamp; //usec
+                  const chars: msestring; const atimestamp: longword);
+   property timestamp: longword read ftimestamp; //usec
  end;
 
  tresizeevent = class(tobjectevent)
@@ -2089,8 +2089,8 @@ type
    fmousewheeldeltamin: real;
    fmousewheeldeltamax: real;
    fmousewheelaccelerationmax: real;
-   flastmousewheeltimestamp: cardinal;
-   flastmousewheeltimestampbefore: cardinal;
+   flastmousewheeltimestamp: longword;
+   flastmousewheeltimestampbefore: longword;
 
    procedure invalidated;
    function grabpointer(const aid: winidty): boolean;
@@ -2552,11 +2552,11 @@ type
    fhinttimer: tsimpletimer;
    fmouseparktimer: tsimpletimer;
    fmouseparkeventinfo: mouseeventinfoty;
-   ftimestampbefore: cardinal;
+   ftimestampbefore: longword;
    flastbuttonpress: mousebuttonty;
-   flastbuttonpresstimestamp: cardinal;
+   flastbuttonpresstimestamp: longword;
    flastbuttonrelease: mousebuttonty;
-   flastbuttonreleasetimestamp: cardinal;
+   flastbuttonreleasetimestamp: longword;
    fwindowstack: windowstackinfoarty;
    ftimertick: boolean;
 
@@ -3169,8 +3169,8 @@ begin
   result:= [];
  end
  else begin
-  result:= [shiftstatety(cardinal(ss_left) +
-                  cardinal(button) - cardinal(mb_left))];
+  result:= [shiftstatety(longword(ss_left) +
+                  longword(button) - longword(mb_left))];
  end;
 end;
 
@@ -5507,7 +5507,7 @@ begin
     if fi.options * faceoptionsmask <> [] then begin
      createalphabuffer;
      falphabuffer.transparency:=
-      (cardinal(colortorgb(tcolorarrayprop1(fi.fade_color).fitems[0])) xor
+      (longword(colortorgb(tcolorarrayprop1(fi.fade_color).fitems[0])) xor
                 $ffffffff) and $00ffffff;
     end
     else begin
@@ -5518,7 +5518,7 @@ begin
     if fi.options * faceoptionsmask <> [] then begin
      createalphabuffer;
      falphabuffer.transparency:=
-      (cardinal(colortorgb(fi.fade_transparency)) xor $ffffffff) and $00ffffff;
+      (longword(colortorgb(fi.fade_transparency)) xor $ffffffff) and $00ffffff;
     end;
    end;
   end;
@@ -11633,7 +11633,7 @@ procedure twindow.internalactivate(const windowevent: boolean;
  end;
  
 var
- activecountbefore: cardinal;
+ activecountbefore: longword;
  activewindowbefore: twindow;
  widgetar: widgetarty;
  int1: integer;
@@ -11698,7 +11698,7 @@ end;
 procedure twindow.noactivewidget;
 var
  widget: twidget;
- activecountbefore: cardinal;
+ activecountbefore: longword;
 begin
  if ffocusedwidget <> nil then begin
   inc(factivecount);
@@ -11730,7 +11730,7 @@ end;
 
 procedure twindow.deactivate;
 var
- activecountbefore: cardinal;
+ activecountbefore: longword;
 begin
  if appinst.ffocuslockwindow = self then begin
   appinst.ffocuslockwindow:= nil;
@@ -12167,7 +12167,7 @@ end;
 
 procedure twindow.setfocusedwidget(widget: twidget);
 var
- focuscountbefore: cardinal;
+ focuscountbefore: longword;
  focusedwidgetbefore: twidget;
  widget1: twidget;
  widgetar: widgetarty;
@@ -12966,7 +12966,7 @@ end;
 constructor tmouseevent.create(const winid: winidty; const release: boolean;
                       const button: mousebuttonty; const wheel: mousewheelty;
                       const pos: pointty; const shiftstate: shiftstatesty;
-                      atimestamp: cardinal; const reflected: boolean = false);
+                      atimestamp: longword; const reflected: boolean = false);
 var
  eventkind1: eventkindty;
 begin
@@ -13002,7 +13002,7 @@ end;
 
 constructor tkeyevent.create(const winid: winidty; const release: boolean;
                   const key,keynomod: keyty; const shiftstate: shiftstatesty;
-                  const chars: msestring; const atimestamp: cardinal);
+                  const chars: msestring; const atimestamp: longword);
 var
  eventkind1: eventkindty;
 begin
@@ -15590,7 +15590,7 @@ end;
 { tmousenterevent }
 
 constructor tmouseenterevent.create(const winid: winidty; const pos: pointty;
-               const shiftstate: shiftstatesty; atimestamp: cardinal);
+               const shiftstate: shiftstatesty; atimestamp: longword);
 begin
  inherited create(winid,false,mb_none,mw_none,pos,shiftstate,atimestamp);
  fkind:= ek_enterwindow;

@@ -1296,8 +1296,8 @@ type
                     const value: boolean;
                     const calldoselectcell: boolean = false;
                     const checkmultiselect: boolean = false); overload; virtual;
-   procedure mergecols(const arow: integer; const astart: cardinal = 0; 
-                                              const acount: cardinal = bigint);
+   procedure mergecols(const arow: integer; const astart: longword = 0; 
+                                              const acount: longword = bigint);
    procedure unmergecols(const arow: integer = invalidaxis);
                      //invalidaxis = all
    property rowstate: trowstatelist read frowstate;
@@ -5020,7 +5020,7 @@ end;
 procedure tdatacol.setselected(const row: integer; value: boolean);
 var
  po1: prowstatety;
- ca1: cardinal;
+ ca1: longword;
  int1: integer;
 begin
  if ident <= selectedcolmax then begin
@@ -5464,8 +5464,8 @@ end;
 
 procedure tdatacol.coloptionstoeditoptions(var dest: optionseditty);
 begin
- updatebit(cardinal(dest),ord(oe_readonly),isreadonly);
- updatebit(cardinal(dest),ord(oe_savevalue),co_savevalue in foptions);
+ updatebit(longword(dest),ord(oe_readonly),isreadonly);
+ updatebit(longword(dest),ord(oe_savevalue),co_savevalue in foptions);
 end;
 
 procedure tdatacol.dostatread(const reader: tstatreader);
@@ -5865,11 +5865,11 @@ var
 begin
  foptionsfix:= avalue;
  opt1:= coloptionsty(
-               replacebits(cardinal(
+               replacebits(longword(
                  {$ifndef FPC}byte({$endif}avalue{$ifndef FPC}){$endif})
-                            shl cardinal(fixcoloptionsshift),
-                     cardinal(foptions),
-                     cardinal(fixcoloptionsmask)));
+                            shl longword(fixcoloptionsshift),
+                     longword(foptions),
+                     longword(fixcoloptionsmask)));
  if fco_invisible in avalue then begin
   include(opt1,co_invisible);
  end
@@ -6639,7 +6639,7 @@ procedure tdatacols.setselected(const cell: gridcoordty; const Value: boolean);
 var
  int1: integer;
  po1: prowstatety;
- ca1: cardinal;
+ ca1: longword;
  bo1: boolean;
  rowstatesize: integer;
  
@@ -6824,8 +6824,8 @@ begin
  end;
 end;
 
-procedure tdatacols.mergecols(const arow: integer; const astart: cardinal = 0; 
-                       const acount: cardinal = bigint);
+procedure tdatacols.mergecols(const arow: integer; const astart: longword = 0; 
+                       const acount: longword = bigint);
 begin
  if frowstate.mergecols(arow,astart,acount) then begin
   mergechanged(arow);

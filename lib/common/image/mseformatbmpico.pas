@@ -17,7 +17,7 @@ const
  RT_BITMAP = PChar(2);
 
 type
- DWORD = cardinal;
+ DWORD = longword;
  BITMAPFILEHEADERty = packed record
    bfType: Word;
    bfSize: DWORD;
@@ -81,13 +81,13 @@ function readbmp(stream: tformatstream; bfoffbits: integer; dest: tbitmap;
                        //true if biheight < 0
 var
  infoheader: bitmapinfoheaderty;
- palette: array of cardinal;
+ palette: array of longword;
  pixdata: array of byte;
  rowbytelength,paddingcount: integer;
  int1,int2: integer;
  start,stop,step: integer;
  po1: pbyte;
- po2: pcardinal;
+ po2: plongword;
  wo1: word;
 
 begin
@@ -121,7 +121,7 @@ begin
    biclrused:= bits[bibitcount];
   end;
   if bfoffbits <= 0 then begin
-   bfoffbits:= stream.pos + integer(biclrused) * sizeof(cardinal) - bfoffbits;
+   bfoffbits:= stream.pos + integer(biclrused) * sizeof(longword) - bfoffbits;
   end;
   paddingcount:= ((biwidth * bibitcount+7) div 8); //bytecount
   rowbytelength:= ((paddingcount+3) div 4) * 4; //4 byte boundaries
@@ -166,7 +166,7 @@ begin
     while int1 <> stop do begin
      po2:= dest.scanline[int1];
      for int2:= 0 to biwidth - 1 do begin
-      po2^:= pcardinal(po1)^ and $ffffff;
+      po2^:= plongword(po1)^ and $ffffff;
       inc(po1,3);
       inc(po2)
      end;
@@ -189,7 +189,7 @@ begin
    end;
    4,8: begin
     setlength(palette,bits[bibitcount]);
-    stream.read(palette[0],biclrused*sizeof(cardinal));
+    stream.read(palette[0],biclrused*sizeof(longword));
 //    for int2:= 0 to biclrused - 1 do begin
 //     swaprgb1(palette[int2]);
 //    end;

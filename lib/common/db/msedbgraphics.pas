@@ -298,7 +298,7 @@ begin
     n1:= timagecachenode.create(id1);
     abitmap.savetoimagebuffer(n1.fimage);
     n1.fsize:= (n1.fimage.image.length + n1.fimage.mask.length) *
-                                       sizeof(cardinal);
+                                       sizeof(longword);
     fimagecache.addnode(n1);
    end;
   end

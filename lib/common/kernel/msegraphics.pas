@@ -23,7 +23,7 @@ const
  fontsizeshift = 16;
  fontsizeroundvalue = $8000;
  
- invalidgchandle = cardinal(-1);
+ invalidgchandle = ptruint(-1);
  
 type
  gckindty = (gck_screen,gck_pixmap,gck_printer,gck_metafile);
@@ -73,7 +73,7 @@ const
  fontaliasoptionchars : array[fontoptionty] of char =
                 ('p','P','H','R','S','D','A','a'{,'C','c'});
 type
- fontdatapty = array[0..15] of cardinal;
+ fontdatapty = array[0..15] of longword;
  fontdataty = record
   font: fontty;
   fonthighres: fontty;
@@ -132,7 +132,7 @@ type
  fontstatety = (fsta_infovalid,fsta_none);
  fontstatesty = set of fontstatety;
 
- fontnumty = cardinal;
+ fontnumty = longword;
 
  tcanvas = class;
 
@@ -165,7 +165,7 @@ type
   function getsize: sizety;
  end;
 
- gcpty = array[0..23] of cardinal;
+ gcpty = array[0..23] of longword;
  gcty = record
   handle: ptruint;//cardinal;
   refgc: ptruint;//cardinal; //for windowsmetafile
@@ -578,7 +578,7 @@ type
 
    procedure setcliporigin(const Value: pointty);
                //value not saved!
-   function getgchandle: cardinal;
+   function getgchandle: ptruint;
    procedure fillarc(const def: rectty; const startang,extentang: real; 
                               const acolor: colorty; const pieslice: boolean);
    procedure getarcinfo(out startpo,endpo: pointty);
@@ -783,7 +783,7 @@ type
                 default js_miter;
 
    property paintdevice: paintdevicety read fdrawinfo.paintdevice;
-   property gchandle: cardinal read getgchandle;
+   property gchandle: ptruint read getgchandle;
    property ppmm: real read fdrawinfo.gc.ppmm write setppmm; 
                    //used for linewidth mm, value not saved/restored
  end;
@@ -800,8 +800,8 @@ type
  imagety = record
   monochrome: boolean;
   size: sizety;
-  length: integer;  //number of cardinal
-  pixels: pcardinalaty;
+  length: integer;  //number of longword
+  pixels: plongwordaty;
  end;
  pimagety = ^imagety;
 
@@ -829,7 +829,7 @@ type
    procedure setmonochrome(const avalue: boolean); virtual;
    function getconverttomonochromecolorbackground: colorty; virtual;
    function getmask: tsimplebitmap; virtual;
-//   function getmaskhandle(var gchandle: cardinal): pixmapty; virtual;
+//   function getmaskhandle(var gchandle: ptruint): pixmapty; virtual;
                   //gc handle is invalid if result = 0,
                   //gc handle can be 0
    function getimagepo: pimagety; virtual;
@@ -1174,7 +1174,7 @@ end;
 function getfontdata(font: fontnumty): pfontdataty;
 begin
  dec(font);
- if font >= cardinal(length(fonts)) then begin
+ if font >= longword(length(fonts)) then begin
   result:= nil;
  end
  else begin
@@ -1433,19 +1433,19 @@ function colortorgb(color: colorty): rgbtriplety;
 var
  map: colormapsty;
 begin
- map:= colormapsty((cardinal(color) shr speccolorshift));
- color:= colorty(cardinal(color) and not speccolormask);
+ map:= colormapsty((longword(color) shr speccolorshift));
+ color:= colorty(longword(color) and not speccolormask);
  if map = cm_rgb then begin
   result:= rgbtriplety(color);
  end
  else begin
   dec(map,7);
   if (map < cm_rgb) or (map > high(map)) or
-       (cardinal(color) >= cardinal(mapcolorcounts[map])) then begin
+       (longword(color) >= longword(mapcolorcounts[map])) then begin
    gdierror(gde_invalidcolor,
-       hextostr(cardinal(color)+cardinal(map) shl speccolorshift,8));
+       hextostr(longword(color)+longword(map) shl speccolorshift,8));
   end;
-  result:= rgbtriplety(gui_pixeltorgb(colormaps[map][cardinal(color)]));
+  result:= rgbtriplety(gui_pixeltorgb(colormaps[map][longword(color)]));
  end;
 end;
 
@@ -1453,19 +1453,19 @@ function colortopixel(color: colorty): pixelty;
 var
  map: colormapsty;
 begin
- map:= colormapsty((cardinal(color) shr speccolorshift));
- color:= colorty(cardinal(color) and not speccolormask);
+ map:= colormapsty((longword(color) shr speccolorshift));
+ color:= colorty(longword(color) and not speccolormask);
  if map = cm_rgb then begin
   result:= gui_rgbtopixel(color);
  end
  else begin
   dec(map,7);
   if (map < cm_rgb) or (map > high(map)) or
-       (cardinal(color) >= cardinal(mapcolorcounts[map])) then begin
+       (longword(color) >= longword(mapcolorcounts[map])) then begin
    gdierror(gde_invalidcolor,
-       hextostr(cardinal(color)+cardinal(map) shl speccolorshift,8));
+       hextostr(longword(color)+longword(map) shl speccolorshift,8));
   end;
-  result:= colormaps[map][cardinal(color)];
+  result:= colormaps[map][longword(color)];
  end;
 end;
 
@@ -1498,13 +1498,13 @@ begin
  {$ifdef FPC} {$checkpointer off} {$endif}
   for int1:= 0 to mapcolorcounts[colormap] - 1 do begin
    colormaps[colormap][int1]:= gui_rgbtopixel(
-        cardinal(getdefaultcolorinfo(colormap,int1)^.rgb));
+        longword(getdefaultcolorinfo(colormap,int1)^.rgb));
   end;
  {$ifdef FPC} {$checkpointer default} {$endif}
  end;
- colormaps[cm_namedrgb,integer(cardinal(cl_0)-cardinal(cl_namedrgb))]:= 
+ colormaps[cm_namedrgb,integer(longword(cl_0)-longword(cl_namedrgb))]:= 
                                                               mseguiintf.pixel0;
- colormaps[cm_namedrgb,integer(cardinal(cl_1)-cardinal(cl_namedrgb))]:= 
+ colormaps[cm_namedrgb,integer(longword(cl_1)-longword(cl_namedrgb))]:= 
                                                               mseguiintf.pixel1;
  gui_initcolormap;
 end;
@@ -1515,11 +1515,11 @@ var
 begin
  result:= true;
  application.initialize; //colormap must be valid
- map:= colormapsty((cardinal(index) shr speccolorshift));
- index:= colorty(cardinal(index) and not speccolormask);
+ map:= colormapsty((longword(index) shr speccolorshift));
+ index:= colorty(longword(index) and not speccolormask);
  dec(map,7);
  if (map <= cm_rgb) or (map > high(map)) or
-       (cardinal(index) >= cardinal(mapcolorcounts[map])) then begin
+       (longword(index) >= longword(mapcolorcounts[map])) then begin
   result:= false;
  end;
 end;
@@ -1529,15 +1529,15 @@ var
  map: colormapsty;
 begin
  application.initialize; //colormap must be valid
- map:= colormapsty((cardinal(index) shr speccolorshift));
- index:= colorty(cardinal(index) and not speccolormask);
+ map:= colormapsty((longword(index) shr speccolorshift));
+ index:= colorty(longword(index) and not speccolormask);
  dec(map,7);
  if (map <= cm_rgb) or (map > high(map)) or
-       (cardinal(index) >= cardinal(mapcolorcounts[map])) then begin
+       (longword(index) >= longword(mapcolorcounts[map])) then begin
   gdierror(gde_invalidcolor,
-       hextostr(cardinal(index)+cardinal(map) shl speccolorshift,8));
+       hextostr(longword(index)+longword(map) shl speccolorshift,8));
  end;
- colormaps[map][cardinal(index)]:= gui_rgbtopixel(rgbtocolor(red,green,blue));
+ colormaps[map][longword(index)]:= gui_rgbtopixel(rgbtocolor(red,green,blue));
 end;
 
 procedure setcolormapvalue(const index: colorty; const acolor: colorty);
@@ -2087,7 +2087,7 @@ procedure tsimplebitmap.copyarea(asource: tsimplebitmap; const asourcerect: rect
 var
  bo1,bo2: boolean;
 // mask: pixmapty;
-// maskgchandle: cardinal;
+// maskgchandle: ptruint;
  amask: tsimplebitmap;
 begin
  bo1:= canvasallocated;
@@ -2145,14 +2145,14 @@ end;
 {
 procedure tsimplebitmap.stretch(const source: tsimplebitmap; const asize: sizety);
 type
- cardarty = array[0..0] of cardinal;
+ cardarty = array[0..0] of longword;
 var
  sim: pimagety;
  simage,dimage: imagety;
  po1: ^cardarty;
- po2: pcardinal;
- ca1,ca2: cardinal;
- stepx: cardinal;
+ po2: plongword;
+ ca1,ca2: longword;
+ stepx: longword;
  int1: integer;
 begin
  if source.isempty then begin
@@ -2207,7 +2207,7 @@ begin
 end;
 }
 {
-function tsimplebitmap.getmaskhandle(var gchandle: cardinal): pixmapty;
+function tsimplebitmap.getmaskhandle(var gchandle: ptruint): pixmapty;
 begin
  result:= 0; //dummy
 end;
@@ -2239,7 +2239,7 @@ begin
    else begin
     int1:= fsize.cy * fsize.cx;
    end;
-   allocuninitedarray(int1,sizeof(cardinal),pixels);
+   allocuninitedarray(int1,sizeof(longword),pixels);
   end;
  end;
 end;
@@ -3156,7 +3156,7 @@ begin
  end;
 end;
 
-function tcanvas.getgchandle: cardinal;
+function tcanvas.getgchandle: ptruint;
 begin
  checkgcstate([cs_gc]);
  result:= fdrawinfo.gc.handle;
@@ -3195,7 +3195,7 @@ end;
 procedure tcanvas.internalcopyarea(asource: tcanvas; const asourcerect: rectty;
                            const adestrect: rectty; acopymode: rasteropty;
                            atransparentcolor: colorty;
-                           amask: tsimplebitmap{pixmapty;  amaskgchandle: cardinal};
+                           amask: tsimplebitmap{pixmapty;  amaskgchandle: ptruint};
                            const aalignment: alignmentsty;
                            const atileorigin: pointty;
                            const atransparency: colorty); //cl_none -> opaque
@@ -3287,13 +3287,13 @@ begin
    end;
   end;
   if atransparency = cl_none then begin
-   cardinal(transparency):= 0;
+   longword(transparency):= 0;
   end
   else begin
    transparency:= colortorgb(atransparency);
   end;
 
-  if drawingflagsty((cardinal(gc.drawingflags) xor cardinal(source^.gc.drawingflags))) *
+  if drawingflagsty((longword(gc.drawingflags) xor longword(source^.gc.drawingflags))) *
           [df_canvasismonochrome] <> [] then begin //different colorformat
    include(gc.drawingflags,df_colorconvert);
    with fdrawinfo,gc do begin

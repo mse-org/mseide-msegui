@@ -131,6 +131,8 @@ type
  pwordaty = ^wordaty;
  integeraty = array[0..0] of integer;
  pintegeraty = ^integeraty;
+ longwordaty = array[0..0] of longword;
+ plongwordaty = ^longwordaty;
  cardinalaty = array[0..0] of cardinal;
  pcardinalaty = ^cardinalaty;
  longboolaty = array[0..0] of longbool;

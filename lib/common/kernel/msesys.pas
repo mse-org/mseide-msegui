@@ -87,7 +87,7 @@ type
 type
  fileinfolevelty = (fil_name,fil_ext1,fil_ext2);
 
- dirstreampty = array[0..7] of cardinal;
+ dirstreampty = array[0..7] of longword;
  dirstreamty = record
   infolevel: fileinfolevelty;
   dirname: filenamety;
@@ -107,8 +107,8 @@ type
 
  ext2fileinfoty = record
   id: int64;
-  owner: cardinal;
-  group: cardinal;
+  owner: longword;
+  group: longword;
  end;
 
  fileinfostatety = (fis_extinfo1valid,fis_extinfo2valid,fis_diropen,fis_hasentry);

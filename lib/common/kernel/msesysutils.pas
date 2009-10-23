@@ -47,15 +47,15 @@ procedure debugout(const sender: tobject; const atext: ansistring); overload;
 
 function getlasterror: integer;
 function getlasterrortext: string;
-function later(ref,act: cardinal): boolean;
+function later(ref,act: longword): boolean;
  //true if act > ref, with overflowcorrection
-function laterorsame(ref,act: cardinal): boolean;
+function laterorsame(ref,act: longword): boolean;
  //true if act >= ref, with overflowcorrection
 
-procedure sleepus(const us: cardinal);
+procedure sleepus(const us: longword);
 procedure waitus(us: integer);
-function timestamp: cardinal; //us, 0 never reported
-function timestep(us: cardinal): longword;   //bringt aktzeit + us
+function timestamp: longword; //us, 0 never reported
+function timestep(us: longword): longword;   //bringt aktzeit + us
 function timeout(time: longword): boolean;
 
 function createguidstring: string;
@@ -93,7 +93,7 @@ end;
 
  {$ifdef UNIX}
 
-function timestamp: cardinal;
+function timestamp: longword;
 var
  t1: timeval;
 begin
@@ -106,7 +106,7 @@ end;
 
 procedure waitus(us: integer);
 var
- time: cardinal;
+ time: longword;
 begin
  time:= timestep(us);
  repeat
@@ -117,7 +117,7 @@ end;
 
 {$ifdef mswindows}
 
-function timestamp: cardinal;
+function timestamp: longword;
 begin
  result:= gettickcount * 1000;
  if result = 0 then begin
@@ -151,35 +151,35 @@ end;
 
 {$endif}
 
-function timestep(us: cardinal): cardinal;   //bringt aktzeit + us
+function timestep(us: longword): longword;   //bringt aktzeit + us
 begin
  result:= timestamp + us;
 end;
 
-function timeout(time: cardinal): boolean;
+function timeout(time: longword): boolean;
 begin
  result:= later(time,timestamp);
 end;
 
-function later(ref,act: cardinal): boolean;
+function later(ref,act: longword): boolean;
 var
- ca1: cardinal;
+ ca1: longword;
 begin
  ca1:= act-ref;
  result:= integer(ca1) > 0;
 // result:= integer(act-ref) > 0; //FPC bug 4768
 end;
 
-function laterorsame(ref,act: cardinal): boolean;
+function laterorsame(ref,act: longword): boolean;
 var
- ca1: cardinal;
+ ca1: longword;
 begin
  ca1:= act-ref;
  result:= integer(ca1) >= 0;
 // result:= integer(act-ref) > 0; //FPC bug 4768
 end;
 
-procedure sleepus(const us: cardinal);
+procedure sleepus(const us: longword);
 begin
  sys_usleep(us);
 end;
@@ -221,7 +221,7 @@ end;
 procedure writestdout(value: string; newline: boolean = false);
  {$ifdef mswindows}
 var
- ca1: cardinal;
+ ca1: longword;
  {$endif}
 begin
  if newline then begin
@@ -240,7 +240,7 @@ end;
 procedure writestderr(value: string; newline: boolean = false);
  {$ifdef mswindows}
 var
- ca1: cardinal;
+ ca1: longword;
  {$endif}
 begin
  if newline then begin

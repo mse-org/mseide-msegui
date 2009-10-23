@@ -3011,7 +3011,7 @@ begin
    end;
   end
   else begin
-   if (int1 <> -1) and (cardinal(int1) <> $80000000) then begin
+   if (int1 <> -1) and (longword(int1) <> $80000000) then begin
     po1:= pintegeraty(tarrayprop1(fimagenums).getdatapo^);
     for int2:= 0 to fimagenums.count-1 do begin
      if int1 and bits[int2] <> 0 then begin

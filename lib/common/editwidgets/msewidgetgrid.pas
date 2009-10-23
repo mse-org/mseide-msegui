@@ -1336,8 +1336,8 @@ end;
 procedure twidgetcol.updateeditoptions(var aoptions: optionseditty);
 begin
  if not (gps_readonlyupdating in fstate) then begin
-  updatebit(cardinal(foptions),ord(co_readonly),oe_readonly in aoptions);
-  updatebit(cardinal(foptions),ord(co_savevalue),oe_savevalue in aoptions);
+  updatebit(longword(foptions),ord(co_readonly),oe_readonly in aoptions);
+  updatebit(longword(foptions),ord(co_savevalue),oe_savevalue in aoptions);
  end;
 end;
 

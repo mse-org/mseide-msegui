@@ -505,15 +505,15 @@ var
 begin
  statebefore:= finfo.state;
  foptions:= Value;
- updatebit(cardinal(finfo.state),ord(shs_invisible),fbo_invisible in value);
- updatebit(cardinal(finfo.state),ord(shs_disabled),fbo_disabled in value);
- updatebit(cardinal(finfo.state),ord(shs_flat),fbo_flat in value);
- updatebit(cardinal(finfo.state),ord(shs_noanimation),fbo_noanim in value);
- updatebit(cardinal(finfo.state),ord(shs_nomouseanimation),
+ updatebit(longword(finfo.state),ord(shs_invisible),fbo_invisible in value);
+ updatebit(longword(finfo.state),ord(shs_disabled),fbo_disabled in value);
+ updatebit(longword(finfo.state),ord(shs_flat),fbo_flat in value);
+ updatebit(longword(finfo.state),ord(shs_noanimation),fbo_noanim in value);
+ updatebit(longword(finfo.state),ord(shs_nomouseanimation),
                                                   fbo_nomouseanim in value);
- updatebit(cardinal(finfo.state),ord(shs_noclickanimation),
+ updatebit(longword(finfo.state),ord(shs_noclickanimation),
                                                   fbo_noclickanim in value);
- updatebit(cardinal(finfo.state),ord(shs_nofocusanimation),
+ updatebit(longword(finfo.state),ord(shs_nofocusanimation),
                                                   fbo_nofocusanim in value);
  if statebefore <> finfo.state then begin
   changed;
@@ -686,7 +686,7 @@ begin
 // invisiblebefore:= ss_invisible in finfo.state;
  updatewidgetshapestate(finfo,awidget,fbo_disabled in foptions,
                                  {fbo_invisible in foptions,}fframe);
-// updatebit(cardinal(finfo.state),ord(ss_invisible),invisiblebefore);
+// updatebit(longword(finfo.state),ord(ss_invisible),invisiblebefore);
 end;
 
 procedure tframebutton.assign(source: tpersistent);

@@ -918,7 +918,7 @@ begin
    if int1 > high(usercolors) then begin
     break;
    end;
-   setcolormapvalue(cl_user + cardinal(int1),usercolors[int1]);
+   setcolormapvalue(cl_user + longword(int1),usercolors[int1]);
   end;
  end;
  li.free;
@@ -1495,7 +1495,7 @@ begin
  fo.colgrid.fixcols[-1].captions.count:= usercolorcount;
  with fo,projectoptions do begin
   for int1:= 0 to colgrid.rowhigh do begin
-   colgrid.fixcols[-1].captions[int1]:= colortostring(cl_user+cardinal(int1));
+   colgrid.fixcols[-1].captions[int1]:= colortostring(cl_user+longword(int1));
   end;
  end;
  with fo.signame do begin
@@ -2176,7 +2176,7 @@ begin
  str1:= '';
  for int1:= 0 to colgrid.rowhigh do begin
   if usercolors[int1] <> 0 then begin
-   str1:= str1 + ' setcolormapvalue('+colortostring(cl_user+cardinal(int1))+','+
+   str1:= str1 + ' setcolormapvalue('+colortostring(cl_user+longword(int1))+','+
                colortostring(usercolors[int1])+');';
    if usercolorcomment[int1] <> '' then begin
     str1:= str1 + ' //'+usercolorcomment[int1];

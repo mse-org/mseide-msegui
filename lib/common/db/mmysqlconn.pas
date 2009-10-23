@@ -101,7 +101,7 @@ Type
    FServerInfo: String;
    FMySQL1 : PMySQL;
 //   FDidConnect : Boolean;
-   fport: cardinal;
+   fport: longword;
    flasterror: integer;
    foptions: mysqloptionsty;
    flasterrormessage: msestring;
@@ -206,7 +206,7 @@ Type
   published
     property options: mysqloptionsty read foptions write foptions default [];
     property Dialect  : integer read FDialect write FDialect default 0;
-    property port: cardinal read fport write fport default 0;
+    property port: longword read fport write fport default 0;
     property ssl_key: filenamety read fssl_key write fssl_key;
     property ssl_cert: filenamety read fssl_cert write fssl_cert;
     property ssl_ca: filenamety read fssl_ca write fssl_ca;
@@ -455,7 +455,7 @@ function createbindingbuffers(const bindings: pointer;
                           var bindinfos: bindinginfoarty): pointer;
 var
  int1: integer;
- bufsum: cardinal;
+ bufsum: longword;
 begin
  bufsum:= 0;
  for int1:= 0 to high(bindinfos) do begin

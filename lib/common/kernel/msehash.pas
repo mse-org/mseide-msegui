@@ -22,7 +22,7 @@ type
  datastatety = (ds_empty,ds_data);
  bucketty = record
   count: integer;
-  keys: array of cardinal;    //0-> free
+  keys: array of ptruint;    //0-> free
   datapo: pointer;
  end;
  pbucketty = ^bucketty;
@@ -32,26 +32,26 @@ type
   private
    fbuckets: bucketarty;
    fsize: integer;
-   fmask1: cardinal;
+   fmask1: longword;
    fcapacitystep: integer;
    fstepbucket,fstepindex: integer;
    procedure invalidkey;
-   function bucketindex(const key: integer): integer;
+   function bucketindex(const key: ptruint): integer;
   protected
    fcount: integer;
    procedure freedata(var data); virtual;
    procedure initdata(var data); virtual;
-   function add(const key: cardinal; const data): pointer; //key <> 0
+   function add(const key: ptruint; const data): pointer; //key <> 0
                //returns pointer to new data, @data can be nil -> data inited with 0
-   function internalfind(const key: cardinal; var bucket,index: integer): boolean;
-   function find(const key: cardinal): pointer;
+   function internalfind(const key: ptruint; var bucket,index: integer): boolean;
+   function find(const key: ptruint): pointer;
    function next: pointer;
   public
    constructor create(recordsize: integer; abucketcount: integer = defaultbucketcount);
    destructor destroy; override;
    procedure clear;
    function count: integer;
-   function delete(const key: cardinal): boolean; //true if found
+   function delete(const key: ptruint): boolean; //true if found
  end;
 
  datastringty = record
@@ -67,7 +67,7 @@ type
  thashedstrings = class
   private
    fbuckets: stringbucketarty;
-   fmask: cardinal;
+   fmask: longword;
    fcapacitystep: integer;
    fcount: integer;
    fstepbucket,fstepindex: integer;
@@ -108,7 +108,7 @@ type
   private
    fcount: integer;
    fbuckets: msestringbucketarty;
-   fmask: cardinal;
+   fmask: longword;
    fcapacitystep: integer;
    fstepbucket,fstepindex: integer;
    function getbucketcount: integer;
@@ -274,11 +274,11 @@ implementation
 uses
  sysutils,msebits;
 
-function datahash(const data; len: integer): cardinal;
+function datahash(const data; len: integer): longword;
 var
  po1: pbyte;
  int1: integer;
- ca1: cardinal;
+ ca1: longword;
 begin
  ca1:= 0;
  po1:= @data;
@@ -288,7 +288,7 @@ begin
  result:= ca1;
 end;
 
-function stringhash(const key: string): cardinal; overload;
+function stringhash(const key: string): longword; overload;
 var
  I: Integer;
 begin
@@ -299,7 +299,7 @@ begin
  end;
 end;
 
-function stringhash(const key: lstringty): cardinal; overload;
+function stringhash(const key: lstringty): longword; overload;
 var
  I: Integer;
  po: pchar;
@@ -315,7 +315,7 @@ begin
  end;
 end;
 
-function stringhash(const key: msestring): cardinal; overload;
+function stringhash(const key: msestring): longword; overload;
 var
  I: Integer;
 begin
@@ -326,7 +326,7 @@ begin
  end;
 end;
 
-function stringhash(const key: lmsestringty): cardinal; overload;
+function stringhash(const key: lmsestringty): longword; overload;
 var
  I: Integer;
  po: pmsechar;
@@ -342,7 +342,7 @@ begin
  end;
 end;
 
-function maxbitmask(value: cardinal): cardinal;
+function maxbitmask(value: longword): longword;
 begin
  if value = 0 then begin
   result:= 0;
@@ -373,7 +373,7 @@ begin
  inherited;
 end;
 
-function tbucketlist.bucketindex(const key: integer): integer;
+function tbucketlist.bucketindex(const key: ptruint): integer;
 begin
  if key = 0 then begin
   invalidkey;
@@ -421,7 +421,7 @@ begin
  //dummy
 end;
 
-function tbucketlist.add(const key: cardinal; const data): pointer;
+function tbucketlist.add(const key: ptruint; const data): pointer;
 var
  int1: integer;
 begin
@@ -451,7 +451,7 @@ begin
  end;
 end;
 
-function tbucketlist.internalfind(const key: cardinal; var bucket,index: integer): boolean;
+function tbucketlist.internalfind(const key: ptruint; var bucket,index: integer): boolean;
 var
  int1: integer;
 begin
@@ -468,7 +468,7 @@ begin
  end;
 end;
 
-function tbucketlist.delete(const key: cardinal): boolean;
+function tbucketlist.delete(const key: ptruint): boolean;
        //true if found
 var
  bucket,index: integer;
@@ -489,7 +489,7 @@ begin
  raise exception.Create('Invalid keyvalue.');
 end;
 
-function tbucketlist.find(const key: cardinal): pointer;
+function tbucketlist.find(const key: ptruint): pointer;
 var
  bucket,index: integer;
 begin
@@ -570,13 +570,13 @@ end;
 procedure thashedstrings.add(const keys: array of string;
                  startindex:  pointer = pointer($00000001));
 var
- ca1: cardinal;
+ ca1: longword;
 begin
- if cardinal(length(keys)) + cardinal(startindex) <= cardinal(length(keys)) then begin
+ if ptruint(length(keys)) + ptruint(startindex) <= ptruint(length(keys)) then begin
   raise exception.create('nil not allowed.');
  end;
  for ca1:= 0 to high(keys) do begin
-  add(keys[ca1],pointer(ca1+cardinal(startindex)));
+  add(keys[ca1],pointer(ca1+ptruint(startindex)));
  end;
 end;
 
@@ -787,13 +787,13 @@ end;
 procedure thashedmsestrings.add(const keys: array of msestring;
                   startindex:  pointer = pointer($00000001));
 var
- ca1: cardinal;
+ ca1: longword;
 begin
- if cardinal(length(keys)) + cardinal(startindex) <= cardinal(length(keys)) then begin
+ if longword(length(keys)) + ptruint(startindex) <= longword(length(keys)) then begin
   raise exception.create('nil not alowed.');
  end;
  for ca1:= 0 to high(keys) do begin
-  add(keys[ca1],pointer(ca1+cardinal(startindex)));
+  add(keys[ca1],pointer(ca1+ptruint(startindex)));
  end;
 end;
 

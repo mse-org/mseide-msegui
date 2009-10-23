@@ -489,10 +489,10 @@ begin
       end;
      end;
      include(state,shs_flat);
-     updatebit(cardinal(state),ord(shs_noanimation),noanim1);
-     updatebit(cardinal(state),ord(shs_nomouseanimation),nomouseanim1);
-     updatebit(cardinal(state),ord(shs_noclickanimation),noclickanim1);
-     updatebit(cardinal(state),ord(shs_nofocusanimation),nofocusanim1);
+     updatebit(longword(state),ord(shs_noanimation),noanim1);
+     updatebit(longword(state),ord(shs_nomouseanimation),nomouseanim1);
+     updatebit(longword(state),ord(shs_noclickanimation),noclickanim1);
+     updatebit(longword(state),ord(shs_nofocusanimation),nofocusanim1);
     
      if not (shs_invisible in state) then begin
       hassubmenu:= hassubmenu or (shs_menuarrow in state);

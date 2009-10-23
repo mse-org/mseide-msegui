@@ -80,7 +80,7 @@ type
    fasking: boolean;
    fgdbpage: tsourcepage;
    ffileloading: boolean;
-   ffiletag: cardinal;
+   ffiletag: longword;
    fnaviglist: tnaviglist;
    fsourcehintwidget: twidget;
    feditposar: gridcoordarty;
@@ -140,7 +140,7 @@ type
    function closeall(const nosave: boolean): boolean; //false on cancel
    function gdbpage: tsourcepage;
    function modified: boolean;
-   function newfiletag: cardinal;
+   function newfiletag: longword;
    property items[const index: integer]: tsourcepage read getitems; default;
    property naviglist: tnaviglist read fnaviglist;
    function findbookmark(const bookmarknum: integer): boolean;
@@ -555,7 +555,7 @@ var
 begin
  for int1:= 0 to count - 1 do begin
   with items[int1] do begin
-   if (cardinal(info.tag) = filetag) and canchangenotify(info) then begin
+   if (longword(info.tag) = filetag) and canchangenotify(info) then begin
     filechanged:= true;
     application.wakeupmainthread;
    end;
@@ -783,7 +783,7 @@ begin
  end;
 end;
 
-function tsourcefo.newfiletag: cardinal;
+function tsourcefo.newfiletag: longword;
 begin
  inc(ffiletag);
  if ffiletag = 0 then begin

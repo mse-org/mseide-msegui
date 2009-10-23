@@ -486,7 +486,7 @@ type
 var
  fdesigner: tdesigner;
  loadingdesigner: tdesigner;
- methodaddressdummy: cardinal;
+ methodaddressdummy: longword;
  submodulecopy: integer;
 
 function designer: tdesigner;
@@ -1376,7 +1376,7 @@ var
  po1: pmethodinfoty;
 begin
  {$ifdef FPC} {$checkpointer off} {$endif}
- po1:= add(cardinal(aaddress),nil^);
+ po1:= add(ptruint(aaddress),nil^);
  {$ifdef FPC} {$checkpointer default} {$endif}
  with po1^ do begin
   name:= aname;
@@ -1387,7 +1387,7 @@ end;
 
 procedure tmethods.deletemethod(const aadress: pointer);
 begin
-// inherited delete(cardinal(aadress)); do nothing
+// inherited delete(aadress); do nothing
 end;
 
 type
@@ -1524,7 +1524,7 @@ end;
 
 function tmethods.findmethod(const aadress: pointer): pmethodinfoty;
 begin
- result:= pmethodinfoty(find(cardinal(aadress)));
+ result:= pmethodinfoty(find(ptruint(aadress)));
 end;
 
 function tmethods.findmethodbyname(const aname: string;
@@ -1593,7 +1593,7 @@ end;
 procedure tcomponents.destroynotification(const acomponent: tcomponent);
 begin
  fdesigner.componentdestroyed(acomponent,fowner);
- delete(cardinal(acomponent));
+ delete(ptruint(acomponent));
 end;
 
 procedure tcomponents.freedata(var data);
@@ -1633,7 +1633,7 @@ var
  po1: pcomponentinfoty;
 begin
  {$ifdef FPC} {$checkpointer off} {$endif}
- po1:= inherited add(cardinal(comp),nil^);
+ po1:= inherited add(ptruint(comp),nil^);
  {$ifdef FPC} {$checkpointer default} {$endif}
  with po1^ do begin
   instance:= comp;
@@ -1644,7 +1644,7 @@ end;
 
 function tcomponents.find(const value: tobject): pcomponentinfoty;
 begin
- result:= pcomponentinfoty(inherited find(cardinal(value)));
+ result:= pcomponentinfoty(inherited find(ptruint(value)));
 end;
 
 procedure tcomponents.swapcomponent(const old,new: tcomponent);

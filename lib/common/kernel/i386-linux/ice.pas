@@ -101,7 +101,7 @@ type
                              IceProcessMessagesConnectionClosed);
 
  IceReplyWaitInfo = record
-  sequence_of_request: cardinal;
+  sequence_of_request: longword;
   major_opcode_of_request: integer;
   minor_opcode_of_request: integer;
   reply: IcePointer;

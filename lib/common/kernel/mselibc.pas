@@ -395,7 +395,7 @@ type
   ptrdiff_t = Integer;
   __long_double_t = Extended;
   P__long_double_t = ^__long_double_t;
-  size_t = Cardinal;
+  size_t = longword;
   Psize_t = ^size_t;
   UInt64 = 0..High(Int64); // Must be unsigned.
   wchar_t = widechar;
@@ -1254,8 +1254,8 @@ type
    si_fd: Integer;
  end;
  _si_timer = record
-   _timer1: Cardinal;
-   _timer2: Cardinal;
+   _timer1: longword;
+   _timer2: longword;
  end;
  _si_rt =  record
    si_pid: __pid_t;
@@ -1647,7 +1647,7 @@ type
 
 function setitimer(__which:__itimer_which_t; __new:Pitimerval; __old:Pitimerval):longint;cdecl;external clib name 'setitimer';
 type
-  wint_t = Cardinal;
+  wint_t = longword;
   __mbstate_t = record
     count: Integer;
     case { __value } Integer of
@@ -2140,7 +2140,7 @@ function connect(__fd:longint; const __addr: sockaddr; __len:socklen_t):longint;
 function connect(__fd:longint; __addr:Psockaddr; __len:socklen_t):longint;cdecl;external clib name 'connect';
 function __libc_sa_len(__af: sa_family_t): Integer; cdecl;external clib name '__libc_sa_len';
 function bind(__fd:longint; __addr:Psockaddr; __len:socklen_t):longint;cdecl;external clib name 'bind';
-function SA_LEN(const buf): Cardinal; // Untyped buffer; this is *unsafe*.
+function SA_LEN(const buf): longword; // Untyped buffer; this is *unsafe*.
 function listen(__fd:longint; __n:longint):longint;cdecl;external clib name 'listen';
 function accept(__fd:longint; __addr:Psockaddr; __addr_len:Psocklen_t):longint;cdecl;external clib name 'accept';
 function isfdtype(__fd:longint; __fdtype:longint):longint;cdecl;external clib name 'isfdtype';
@@ -2164,7 +2164,7 @@ begin
   Result:=__errno_location()^;
 end;
 
-function SA_LEN(const Buf): Cardinal; // Untyped buffer; this is *unsafe*.
+function SA_LEN(const Buf): longword; // Untyped buffer; this is *unsafe*.
 
 begin
   Result:=__libc_sa_len(PSockAddr(@Buf)^.sa_family);

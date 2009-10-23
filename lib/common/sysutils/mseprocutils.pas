@@ -24,7 +24,7 @@ type
  end;
 
 function getprocessexitcode(prochandle: prochandlety; out exitcode: integer;
-                              const timeoutus: cardinal = 0): boolean;
+                              const timeoutus: longword = 0): boolean;
                  //true if ok, close handle
 function waitforprocess(prochandle: prochandlety): integer;
 
@@ -245,11 +245,11 @@ end;
 {$ifdef mswindows}
 
 function getprocessexitcode(prochandle: prochandlety; out exitcode: integer;
-                  const timeoutus: cardinal = 0): boolean;
+                  const timeoutus: longword = 0): boolean;
                  //true if ok, close handle
 var
- dwo1: cardinal;
- ca1: cardinal;
+ dwo1: longword;
+ ca1: longword;
 begin
  ca1:= timestep(timeoutus);
  result:= false; //compiler warning
@@ -303,7 +303,7 @@ begin
  fillchar(sa,sizeof(sa),0);
  sa.nlength:= sizeof(sa);
  sa.bInheritHandle:= true;
- if createpipe(cardinal(desc.readdes),cardinal(desc.writedes),@sa,0) then begin
+ if createpipe(desc.readdes,desc.writedes,@sa,0) then begin
   if write then begin
    po1:= @desc.writedes;
   end
@@ -526,12 +526,12 @@ end;
 
 {$ifdef UNIX}
 function getprocessexitcode(prochandle: prochandlety; out exitcode: integer;
-                               const timeoutus: cardinal = 0): boolean;
+                               const timeoutus: longword = 0): boolean;
                  //true if ok, close handle
 var
- dwo1: cardinal;
+ dwo1: longword;
  pid: integer;
- ca1: cardinal;
+ ca1: longword;
 begin
  result:= false;
  ca1:= timestep(timeoutus);
@@ -560,7 +560,7 @@ end;
 
 function waitforprocess(prochandle: prochandlety): integer;
 var
- dwo1: cardinal;
+ dwo1: longword;
  pid: integer;
 begin
  while true do begin

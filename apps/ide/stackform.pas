@@ -144,7 +144,7 @@ begin
     grid[1][int1]:= str1 + ')';
     grid[2][int1]:= filename;
     grid[3][int1]:= inttostr(line);
-    grid[4][int1]:= hextostr(cardinal(addr),8);
+    grid[4][int1]:= hextostr(addr,8);
    end;
   end;
   if grid.rowcount > 0 then begin

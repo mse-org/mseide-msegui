@@ -136,8 +136,8 @@ type
  valuekindty = (vk_none,vk_integer,vk_real,vk_string);
 
  tokenidty = record
-  scanner: cardinal;
-  token: cardinal;
+  scanner: longword;
+  token: longword;
  end;
  tokenidarty = array of tokenidty;
 
@@ -163,8 +163,8 @@ type
    fcasesensitive: boolean;
    fscanner: tscanner;
    fownsscanner: boolean;
-   fscannernum: cardinal;
-   ftokennum: cardinal;
+   fscannernum: longword;
+   ftokennum: longword;
    fidents: array[0..identbucketcount-1] of identinfoarty;
    ffilestack: filestackinfoarty;
    ftokenstack: tokenidarty;
@@ -182,9 +182,9 @@ type
    fdefstatecount: integer;
    fstartdefines: stringarty;
    function getacttoken: tokenidty;
-   procedure setacttokennum(anum: cardinal);
+   procedure setacttokennum(anum: longword);
    procedure setacttoken(const atoken: tokenidty);
-   procedure enterinclude(anum: cardinal);
+   procedure enterinclude(anum: longword);
    function exitinclude: boolean;
  protected
    fscanners: scannerarty;
@@ -977,10 +977,10 @@ begin
  result.token:= ftokennum;
 end;
 
-procedure tparser.setacttokennum(anum: cardinal);
+procedure tparser.setacttokennum(anum: longword);
 begin
  with fscanner do begin
-  if anum <= cardinal(high(ftokens)) then begin
+  if anum <= longword(high(ftokens)) then begin
    ftokennum:= anum;
    fto:= @ftokens[ftokennum];
   end
@@ -995,7 +995,7 @@ var
  int1,int2: integer;
 begin
  with atoken do begin
-  if scanner > cardinal(high(fscanners)) then begin
+  if scanner > longword(high(fscanners)) then begin
    internalerror;
   end;
   if ffilestack <> nil then begin
@@ -1012,7 +1012,7 @@ begin
   fscanner:= fscanners[scanner];
   feof:= false;
   with fscanner do begin
-   if token <= cardinal(high(ftokens)) then begin
+   if token <= longword(high(ftokens)) then begin
     ftokennum:= token;
     fto:= @ftokens[ftokennum];
    end
@@ -1023,13 +1023,13 @@ begin
  end;
 end;
 
-procedure tparser.enterinclude(anum: cardinal);
+procedure tparser.enterinclude(anum: longword);
 var
  id1: tokenidty;
  int1: integer;
  aline: integer;
 begin
- if anum > cardinal(high(fscanners)) then begin
+ if anum > longword(high(fscanners)) then begin
   internalerror;
  end;
  inc(fscanner.fincludecount);
@@ -1785,7 +1785,7 @@ var
  int1,int2: integer;
  str1: string;
  filename: filenamety;
- anum: cardinal;
+ anum: longword;
  startpos,endpos: sourceposty;
  lstr1: lstringty;
 begin

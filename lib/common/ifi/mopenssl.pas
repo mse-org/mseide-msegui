@@ -197,7 +197,7 @@ const
                  buf: pchar; size: Integer): pchar; cdecl;
   X509_Get_Subject_Name: function(a: PX509):PX509_NAME; cdecl;
   X509_Get_Issuer_Name: function(a: PX509):PX509_NAME; cdecl;
-  X509_NAME_hash: function(x: PX509_NAME):Cardinal; cdecl;
+  X509_NAME_hash: function(x: PX509_NAME):longword; cdecl;
 //  function SSL_X509Digest(data: PX509; _type: PEVP_MD; md: PChar;
 //                len: PInteger):Integer; cdecl;
   X509_digest: function(data: PX509; _type: PEVP_MD; md: pchar;

@@ -85,7 +85,7 @@ type
                    const fontstyle: fontstylesty = []): string;
    function createpattern(const sourcerect,destrect: rectty; 
                    const acolorbackground,acolorforeground: colorty;
-                   const pixmap: pixmapty; const agchandle: cardinal;
+                   const pixmap: pixmapty; const agchandle: ptruint;
                    const patname: string): boolean;
               //true if ok
    procedure handlepoly(const points: ppointty; const lastpoint: integer;
@@ -478,7 +478,7 @@ type
   case integer of
    0: (d: postscriptgcdty);
    1: (_bufferspace: gcpty;);
-//  res: array[1..23] of cardinal;
+//  res: array[1..23] of longword;
  end;
 
  
@@ -1663,7 +1663,7 @@ end;
 
 function tpostscriptcanvas.createpattern(const sourcerect,destrect: rectty;
                    const acolorbackground,acolorforeground: colorty;
-                   const pixmap: pixmapty; const agchandle: cardinal;
+                   const pixmap: pixmapty; const agchandle: ptruint;
                    const patname: string): boolean;
          //returns pattern dict on ps stack
 var
@@ -2080,7 +2080,7 @@ begin
  end;
  with tpostscriptcanvas(sender) do begin
   fillchar(gc1,sizeof(gc1),0);
-  gc1.handle:= cardinal(invalidgchandle);
+  gc1.handle:= invalidgchandle;
   gc1.drawingflags:= [df_highresfont];
   gc1.paintdevicesize:= getwindowsize;
   linktopaintdevice(ptrint(self),gc1,{getwindowsize,}nullpoint);

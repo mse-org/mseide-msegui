@@ -217,10 +217,10 @@ begin
  if fflagswidget <> nil then begin
   with tbooleanedit(sender) do begin
    if avalue then begin
-    fflagswidget.value:= cardinal(fflagswidget.value) or bits[tag];
+    fflagswidget.value:= longword(fflagswidget.value) or bits[tag];
    end
    else begin
-    fflagswidget.value:= cardinal(fflagswidget.value) and not bits[tag];
+    fflagswidget.value:= longword(fflagswidget.value) and not bits[tag];
    end;
    fflagswidget.checkvalue;
   end;
@@ -229,10 +229,10 @@ begin
   if fflagswidget64 <> nil then begin
    with tbooleanedit(sender) do begin
     if avalue then begin
-     fflagswidget64.value:= cardinal(fflagswidget64.value) or bits[tag];
+     fflagswidget64.value:= longword(fflagswidget64.value) or bits[tag];
     end
     else begin
-     fflagswidget64.value:= cardinal(fflagswidget64.value) and not bits[tag];
+     fflagswidget64.value:= longword(fflagswidget64.value) and not bits[tag];
     end;
     fflagswidget64.checkvalue;
    end;
@@ -245,7 +245,7 @@ var
  int1: integer;
  ed1: tcustombooleanedit;
  bo1: boolean;
- ca1: cardinal;
+ ca1: longword;
 begin
  if fflagswidget <> nil then begin
   ca1:= fflagswidget.value;

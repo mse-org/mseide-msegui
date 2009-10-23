@@ -375,7 +375,7 @@ procedure TMemDataset.InternalDelete;
 
 Var
   TS : TMemoryStream;
-  OldPos,NewPos,CopySize1,CopySize2 : Cardinal;
+  OldPos,NewPos,CopySize1,CopySize2 : longword;
 
 begin
   if (FCurrRecNo<0) or (FCurrRecNo>=FRecCount) then

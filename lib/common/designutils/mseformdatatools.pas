@@ -80,7 +80,7 @@ procedure getobjforminfo(instream: ttextstream; var formname,formclass: string);
 var
  str1: string;
  ar1: stringarty;
- posbefore: cardinal;
+ posbefore: longword;
 begin
  posbefore:= instream.position;
  instream.readln(str1);

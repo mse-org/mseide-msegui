@@ -46,7 +46,7 @@ type
    1: (_bufferspace: semty;);
  end;
 
-function timestampms: cardinal;
+function timestampms: longword;
 function blocksignal(const signum: integer): boolean;
               //true if blocked before
 function unblocksignal(const signum: integer): boolean;
@@ -97,7 +97,7 @@ const
 // stat_ver_mse = 3;
 
  path_max = 1024;
- filetypes: array[filetypety] of cardinal = (0,s_ifdir,s_ifblk,
+ filetypes: array[filetypety] of longword = (0,s_ifdir,s_ifblk,
                                 s_ifchr,s_ifreg,s_iflnk,s_ifsock,s_ififo);
 // timeoffset = 0.0;
  datetimeoffset = -25569;
@@ -237,7 +237,7 @@ begin
  sched_yield;
 end;
 
-procedure sys_usleep(const us: cardinal);
+procedure sys_usleep(const us: longword);
 begin
  mselibc.usleep(us);
 end;
@@ -292,7 +292,7 @@ begin
  end;
 end;
 
-function timestampms: cardinal;
+function timestampms: longword;
 var
  t1: timeval;
 begin
@@ -342,13 +342,13 @@ begin
 end;
 
 const
- openmodes: array[fileopenmodety] of cardinal =
+ openmodes: array[fileopenmodety] of longword =
      (o_rdonly,o_wronly,o_rdwr,o_rdwr or o_creat or o_trunc,
       o_rdwr or o_creat or o_trunc);
 
-function getfilerights(const rights: filerightsty): cardinal;
+function getfilerights(const rights: filerightsty): longword;
 const
- filerights: array[filerightty] of cardinal =
+ filerights: array[filerightty] of longword =
                (mselibc.s_irusr,mselibc.s_iwusr,mselibc.s_ixusr,
                 mselibc.s_irgrp,mselibc.s_iwgrp,mselibc.s_ixgrp,
                 mselibc.s_iroth,mselibc.s_iwoth,mselibc.s_ixoth,
@@ -497,7 +497,7 @@ begin
 end;
 
 {$R-}
-function sys_gettimeus: cardinal;
+function sys_gettimeus: longword;
 var
  time: timeval;
 begin
@@ -919,7 +919,7 @@ begin
  end;
 end;
 
-function getfiletype(value: cardinal): filetypety;
+function getfiletype(value: longword): filetypety;
 var
  count: filetypety;
 begin
@@ -955,7 +955,7 @@ begin
 
 end;
 
-function filetimetodatetime(sec: time_t; nsec: cardinal): tdatetime;
+function filetimetodatetime(sec: time_t; nsec: longword): tdatetime;
 begin
  result:= sec / (24.0*60.0*60.0) + nsec / (24.0*60.0*60.0*1e9) - datetimeoffset;
 end;

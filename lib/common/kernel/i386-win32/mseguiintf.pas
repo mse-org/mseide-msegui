@@ -164,13 +164,13 @@ const
                 $0f,$0f,$0f,$0f,
                 $0f,$0f,$0f,$0f);
 
- rasterops3: array[rasteropty] of cardinal =
+ rasterops3: array[rasteropty] of longword =
                ($000042,$8800c6,$440328,$cc0020,
                 $220326,$aa0029,$660046,$ee0086,
                 $1100a6,$990066,$550009,$dd0228,
                 $330008,$bb0226,$7700e6,$ff0062);
 
- patrops3: array[rasteropty] of cardinal =
+ patrops3: array[rasteropty] of longword =
                ($000042,$a000c9,$500325,$f00021,
                 $0a0329,$aa0029,$5a0049,$fa0089,
                 $0500a9,$a50065,$550009,$f50225,
@@ -261,9 +261,9 @@ var
  eventlist: tobjectqueue;
  nullpen: hpen;
  nullbrush: hbrush;
- timer: cardinal;
- mouseidletimer: cardinal;
- mainthread: cardinal;
+ timer: longword;
+ mouseidletimer: longword;
+ mainthread: longword;
  mousewindow: hwnd;
  lastfocuswindow: hwnd;
  groupleaderwindow: hwnd;
@@ -272,7 +272,7 @@ var
  charbuffer: msestring;
  shiftstate: shiftstatesty;
 
- cursors: array[cursorshapety] of cardinal;
+ cursors: array[cursorshapety] of longword;
 
 type
  tapplication1 = class(tguiapplication);
@@ -285,11 +285,11 @@ type
              gcf_selectforegroundpen,gcf_selectnullpen,gcf_selectnullbrush,
              gcf_ispatternpen,gcf_isopaquedashpen,
                           gcf_last = 31);
-            //-> cardinal
+            //-> longword
  gcflagsty = set of gcflagty;
  win32gcty = record
   flags: gcflagsty;
-  backgroundcol,foregroundcol: cardinal;
+  backgroundcol,foregroundcol: longword;
   backgroundbrush: hbrush;
   colorbrush: hbrush;
   patternbrush: hbrush;
@@ -304,9 +304,9 @@ type
   selectedbrush: hbrush;
   secondpen: hpen;
   {$ifndef FPC}
-  local: array[21..23] of cardinal;
+  local: array[21..23] of longword;
   {$else}
-  local: array[23..23] of cardinal;
+  local: array[23..23] of longword;
   {$endif}
  end;
 
@@ -316,7 +316,7 @@ type
   charwidths: pcharwidthsty;
   overhang: integer;
   xwidth: integer;
-  local: array[3..15] of cardinal; //plattform dependent
+  local: array[3..15] of longword; //plattform dependent
  end;
  monochromebitmapinfoty = packed record
   bmiheader: tbitmapinfoheader;
@@ -327,8 +327,8 @@ type
 
  bitmapinfoty = packed record
   bmiheader: bitmapinfoheader;
-  col0: cardinal;
-  col1: cardinal;
+  col0: longword;
+  col1: longword;
  end;
  
 {$ifdef FPC}
@@ -446,7 +446,7 @@ begin
      if po1 <> nil then begin
       move(pchar(str1)^,po1^,length(str1)+1);
       globalunlock(mem);
-      if setclipboarddata(cf_text,cardinal(mem)) <> 0 then begin
+      if setclipboarddata(cf_text,longword(mem)) <> 0 then begin
        result:= gue_ok;
       end;
      end
@@ -463,7 +463,7 @@ begin
      if po2 <> nil then begin
       move(pwidechar(value)^,po2^,(length(value)+1)*2);
       globalunlock(mem);
-      if setclipboarddata(cf_unicodetext,cardinal(mem)) <> 0 then begin
+      if setclipboarddata(cf_unicodetext,longword(mem)) <> 0 then begin
        result:= gue_ok;
       end;
      end
@@ -710,7 +710,7 @@ begin
         windows.bitmapinfo(pointer(@bitmapinfo)^),dib_rgb_colors);
     setdibits(dc,result,0,size.cy,po1,
           windows.bitmapinfo(pointer(@bitmapinfo)^),dib_rgb_colors);
-    localfree(cardinal(po1));
+    localfree(longword(po1));
    end;
   end;
   releasedc(winid,dc);
@@ -794,7 +794,7 @@ begin
  dc:= getdc(0);
  setdibits(dc,result,0,size.cy,po1,windows.bitmapinfo(pointer(@bitmapinfo)^),dib_rgb_colors);
  releasedc(0,dc);
- localfree(cardinal(po1));
+ localfree(longword(po1));
  {$ifdef FPC}{$checkpointer default}{$endif}
 end;
 
@@ -862,14 +862,14 @@ end;
 var 
  imagememalloc: integer;
  
-function gui_allocimagemem(length: integer): pcardinalaty;
+function gui_allocimagemem(length: integer): plongwordaty;
 begin
  if length = 0 then begin
   result:= nil;
  end
  else begin
   inc(imagememalloc);
-  result:= pointer(localalloc(LMEM_FIXED,length*sizeof(cardinal)));
+  result:= pointer(localalloc(LMEM_FIXED,length*sizeof(longword)));
          //getdibits, setdeibits do not work with normal heap
   if result = nil then begin
    raise exception.Create('Out of memory.');
@@ -877,13 +877,13 @@ begin
  end;
 end;
 
-procedure gui_freeimagemem(data: pcardinalaty);
+procedure gui_freeimagemem(data: plongwordaty);
 begin
  dec(imagememalloc);
- localfree(cardinal(data));
+ localfree(longword(data));
 end;
 
-function gui_pixmaptoimage(pixmap: pixmapty; out image: imagety; gchandle: cardinal): gdierrorty;
+function gui_pixmaptoimage(pixmap: pixmapty; out image: imagety; gchandle: longword): gdierrorty;
 var
  info: pixmapinfoty;
  bitmapinfo: monochromebitmapinfoty;
@@ -933,7 +933,7 @@ begin
 end;
 
 function gui_imagetopixmap(const image: imagety; out pixmap: pixmapty;
-                           gchandle: cardinal): gdierrorty;
+                           gchandle: longword): gdierrorty;
 var
  int1: integer;
  bitmapinfo: monochromebitmapinfoty;
@@ -1101,14 +1101,14 @@ begin
  end;
 end;
 
-procedure TimerProc(hwnd: hwnd; uMsg: cardinal; idEvent: cardinal;
-          dwTime: cardinal); stdcall;
+procedure TimerProc(hwnd: hwnd; uMsg: longword; idEvent: longword;
+          dwTime: longword); stdcall;
 begin
  killtimer;
  eventlist.add(tevent.create(ek_timer));
 end;
 
-function gui_settimer(us: cardinal): guierrorty;
+function gui_settimer(us: longword): guierrorty;
                //send et_timer event after delay or us (micro seconds)
 begin
  killtimer;
@@ -1762,10 +1762,10 @@ begin
   if ahandle <> 0 then begin
    fillchar(data,sizeof(data),0);
    if iswin95 then begin
-    bo1:= getcharabcwidthsw(gc.handle,cardinal(char),cardinal(char),data);
+    bo1:= getcharabcwidthsw(gc.handle,longword(char),longword(char),data);
    {
     if ord(char) < 256 then begin
-     bo1:= getcharabcwidthsa(gc.handle,cardinal(char),cardinal(char),data);
+     bo1:= getcharabcwidthsa(gc.handle,longword(char),longword(char),data);
     end
     else begin
      bo1:= false;
@@ -1773,15 +1773,15 @@ begin
     }
    end
    else begin
-    bo1:= getcharabcwidthsw(gc.handle,cardinal(char),cardinal(char),data);
+    bo1:= getcharabcwidthsw(gc.handle,longword(char),longword(char),data);
    end;
    if not bo1 then begin
     if iswin95 then begin
-     bo1:= getcharwidthw(drawinfo.gc.handle,cardinal(char),cardinal(char),data.abcb);
+     bo1:= getcharwidthw(drawinfo.gc.handle,longword(char),longword(char),data.abcb);
      dec(data.abcB,win32fontdataty(datapo^.platformdata).overhang);
     end
     else begin
-     bo1:= getcharwidth32w(drawinfo.gc.handle,cardinal(char),cardinal(char),data.abcb);
+     bo1:= getcharwidth32w(drawinfo.gc.handle,longword(char),longword(char),data.abcb);
     end;
     data.abca:= 0;
     data.abcC:= 0;
@@ -2079,12 +2079,12 @@ begin
  result:= info.winid;
 end;
 
-function gui_rgbtopixel(rgb: cardinal): pixelty;
+function gui_rgbtopixel(rgb: longword): pixelty;
 begin
  result:= swaprgb(rgb);
 end;
 
-function gui_pixeltorgb(pixel: pixelty): cardinal;
+function gui_pixeltorgb(pixel: pixelty): longword;
 begin
  result:= swaprgb(pixel);
 end;
@@ -2200,7 +2200,7 @@ begin
    end;
    include(flags,gcf_rasterop);
   end;
-  flags1:= gcflagsty((cardinal(aflags) xor cardinal(flags)) and cardinal(aflags));
+  flags1:= gcflagsty((longword(aflags) xor longword(flags)) and longword(aflags));
        //needed objects
   if df_brush in drawingflags then begin
    exclude(flags1,gcf_colorbrushvalid);
@@ -2347,7 +2347,7 @@ begin
    selectobject(gc.handle,nullbrush);
    selectedbrush:= nullbrush;
   end;
-  flags:= gcflagsty(cardinal(flags) or cardinal(flags1));
+  flags:= gcflagsty(longword(flags) or longword(flags1));
 //  if (df_monochrome in drawingflags)  then begin
 //   updateopaquemode(gc);
 //  end;
@@ -2652,7 +2652,7 @@ var
  maskdc: hdc;
  bmp: hbitmap;
  dc: hdc;
- textcol,bkcol: cardinal;
+ textcol,bkcol: longword;
 
  procedure getcopy(arop: rasteropty);
  begin
@@ -3200,7 +3200,7 @@ begin
   else begin
    colormask:= nil;
   end;
-  if ((cardinal(transparency) <> 0) or (colormask <> nil))
+  if ((longword(transparency) <> 0) or (colormask <> nil))
                and not (df_canvasismonochrome in drawingflags) then begin
    maskbmp:= 0;
    destdcbefore:= handle;
@@ -3574,7 +3574,7 @@ begin
  end;
 end;
 
-function winmousekeyflagstoshiftstate(keys: cardinal): shiftstatesty;
+function winmousekeyflagstoshiftstate(keys: longword): shiftstatesty;
 begin
  result:= [];
  if keys and mk_control <> 0 then begin
@@ -3597,18 +3597,18 @@ begin
  end;
 end;
 
-function winmousepostopoint(pos: cardinal): pointty;
+function winmousepostopoint(pos: longword): pointty;
 begin
  result.x:= smallint(loword(pos));
  result.y:= smallint(hiword(pos));
 end;
 
-function pointtowinmousepos(pos: pointty): cardinal;
+function pointtowinmousepos(pos: pointty): longword;
 begin
  result:= word(pos.x) + (word(pos.y) shl 16);
 end;
 
-function winkeytokey(key: cardinal; shift: shiftstatesty): keyty;
+function winkeytokey(key: longword; shift: shiftstatesty): keyty;
 begin
  case key of
   vk_back: result:= key_backspace;
@@ -3643,19 +3643,19 @@ begin
   vk_insert: result:= key_insert;
   vk_delete: result:= key_delete;
   vk_help: result:= key_help;
-  cardinal('0')..cardinal('9'): result:= keyty(key);
-  cardinal('A')..cardinal('Z'): result:= keyty(key);
+  longword('0')..longword('9'): result:= keyty(key);
+  longword('A')..longword('Z'): result:= keyty(key);
   vk_lwin: result:= key_super_l;
   vk_rwin: result:= key_super_r;
   vk_apps: result:= key_menu;
-  vk_numpad0..vk_numpad9: result:= keyty(cardinal(key_0) + key - vk_numpad0);
+  vk_numpad0..vk_numpad9: result:= keyty(longword(key_0) + key - vk_numpad0);
   vk_add: result:= key_plus;
   vk_separator: result:= key_comma;
   vk_subtract: result:= key_minus;
   vk_decimal: result:= key_period;
   vk_multiply: result:= key_multiply;
   vk_divide: result:= key_slash;
-  vk_f1..vk_f24: result:= keyty(cardinal(key_f1) + key - vk_f1);
+  vk_f1..vk_f24: result:= keyty(longword(key_f1) + key - vk_f1);
   vk_numlock: result:= key_numlock;
   vk_scroll: result:= key_scrolllock;
 
@@ -3665,7 +3665,7 @@ begin
  end;
 end;
 
-function winkeystatetoshiftstate(keystate: cardinal): shiftstatesty;
+function winkeystatetoshiftstate(keystate: longword): shiftstatesty;
 begin
  result:= [];
  if $20000000 and keystate <> 0 then begin
@@ -3688,7 +3688,7 @@ begin
  end;
 end;
 
-function wheelkeystatetoshiftstate(keystate: cardinal): shiftstatesty;
+function wheelkeystatetoshiftstate(keystate: longword): shiftstatesty;
 var
  wo1: word;
 begin
@@ -3727,8 +3727,8 @@ end;
 
 procedure checkmousewindow(window: hwnd; const pos: pointty); forward;
 
-procedure mouseidleproc(ahwnd: hwnd; uMsg: cardinal; idEvent: cardinal;
-          dwTime: cardinal); stdcall;
+procedure mouseidleproc(ahwnd: hwnd; uMsg: longword; idEvent: longword;
+          dwTime: longword); stdcall;
 var
  po1: tpoint;
  win1: hwnd;
@@ -3950,7 +3950,7 @@ function gui_postevent(event: tevent): guierrorty;
 //var
 // int1: integer;
 begin
- if windows.postmessage(applicationwindow,msemessage,cardinal(event),0) then begin
+ if windows.postmessage(applicationwindow,msemessage,longword(event),0) then begin
   result:= gue_ok;
  end
  else begin
@@ -3964,7 +3964,7 @@ begin
  else begin
   result:= gue_postevent;
   for int1:= 0 to 15 do begin
-   if windows.postthreadmessage(mainthread,msemessage,cardinal(event),0) then begin
+   if windows.postthreadmessage(mainthread,msemessage,longword(event),0) then begin
     result:= gue_ok;
     break;
    end;
@@ -4399,7 +4399,7 @@ end;
 function gui_createwindow(const rect: rectty; const options: internalwindowoptionsty;
                              var awindow: windowty): guierrorty;
 var
- windowstyle,windowstyleex,ca2: cardinal;
+ windowstyle,windowstyleex,ca2: longword;
  rect1: rectty;
  classname: string;
  ownerwindow: winidty;

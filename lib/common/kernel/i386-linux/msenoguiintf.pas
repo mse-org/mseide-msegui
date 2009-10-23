@@ -29,7 +29,7 @@ var
  childevent: boolean;
  sempo: psemty;
 
-procedure settimer1(us: cardinal);
+procedure settimer1(us: longword);
                //send et_timer event after delay of us (micro seconds)
 var
  timerval: itimerval;
@@ -69,7 +69,7 @@ begin
  end;
 end;
 
-procedure nogui_settimer(us: cardinal);
+procedure nogui_settimer(us: longword);
 begin
  if us = 0 then begin
   us:= 1;

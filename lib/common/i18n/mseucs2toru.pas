@@ -28,9 +28,9 @@ const
 
 function ucs2to866(const avalue: widechar): char;
 var
-    i: cardinal;
+    i: longword;
 begin
-    i:= cardinal(avalue);
+    i:= longword(avalue);
 
 		case i of
   $0..$7f:      result:= char(avalue);

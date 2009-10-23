@@ -12,7 +12,7 @@ function sys_getlasterror: integer;
 procedure sys_setlasterror(const avalue: integer);
 function sys_geterrortext(aerror: integer): string;
 
-function sys_gettimeus: cardinal;
+function sys_gettimeus: longword;
                //systemtime in microseconds, origin undefined
 function sys_getpid: procidty;
 function sys_getprocesses: procitemarty;
@@ -93,7 +93,7 @@ function sys_closedirstream(var stream: dirstreamty): syserrorty;
 function sys_readdirstream(var stream: dirstreamty; var info: fileinfoty): boolean;
  //true if valid
 
-procedure sys_usleep(const us: cardinal);
+procedure sys_usleep(const us: longword);
 procedure sys_schedyield;
 
 function sys_localtimeoffset: tdatetime;

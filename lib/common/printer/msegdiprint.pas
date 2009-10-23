@@ -30,7 +30,7 @@ const
   
 type
  {$ifndef mswindows}
- henhmetafile = cardinal;
+ henhmetafile = longword;
  {$endif}
  
  tgdiprintcanvas = class(tprintercanvas)

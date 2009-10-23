@@ -2448,7 +2448,7 @@ end;
 function strtooct1(const inp: string; out value: longword): boolean;
 var
  int1: integer;
- ca1: cardinal;
+ ca1: longword;
  ch1: char;
 begin
  result:= false;
@@ -2460,7 +2460,7 @@ begin
    if (ch1 < '0') or (ch1 > '7') then begin
     exit;
    end;
-   value:= value + cardinal(((ord(ch1) - ord('0'))) shl ca1);
+   value:= value + longword(((ord(ch1) - ord('0'))) shl ca1);
    inc(ca1,3);
   end;
   result:= true;
@@ -2470,7 +2470,7 @@ end;
 function strtooct164(const inp: string; out value: qword): boolean;
 var
  int1: integer;
- ca1: cardinal;
+ ca1: longword;
  ch1: char;
 begin
  result:= false;

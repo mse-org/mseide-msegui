@@ -322,9 +322,9 @@ type
    ext_data: PXExtData;  { hook for extension to hang data  }
    visualid: VisualID;   { visual id of this visual  }
    _class: Longint;
-   red_mask: Cardinal;
-   green_mask: Cardinal;
-   blue_mask: Cardinal;
+   red_mask: longword;
+   green_mask: longword;
+   blue_mask: longword;
    bits_per_rgb: Longint;
    map_entries: Longint;
  end;
@@ -363,7 +363,7 @@ type
   }
 function XSetWMHints(Display: PDisplay; W: xid; WMHints: PXWMHints): Longint; cdecl;
                               external sXLib name 'XSetWMHints';
-function XSetForeground(Display: PDisplay; GC: TGC; Foreground: Cardinal): longint; cdecl;
+function XSetForeground(Display: PDisplay; GC: TGC; Foreground: longword): longint; cdecl;
                               external sXLib name 'XSetForeground';
       //bug in borland Xlib.pas
 procedure XDrawImageString(Display: PDisplay; D: TDrawable; GC: TGC;
@@ -410,8 +410,8 @@ function XwcTextListToTextProperty(para1:PDisplay; para2:PPucs4Char;
            para3: integer; para4: integer{TXICCEncodingStyle};
            para5:PXTextProperty): integer;cdecl;
                               external sXLib name 'XwcTextListToTextProperty';
-function XCreateImage(Display: PDisplay; Visual: msePVisual; Depth: Cardinal;
-  Format: Longint; Offset: Longint; Data: PChar; Width, Height: Cardinal;
+function XCreateImage(Display: PDisplay; Visual: msePVisual; Depth: longword;
+  Format: Longint; Offset: Longint; Data: PChar; Width, Height: longword;
   BitmapPad: Longint; BytesPerLine: Longint): PXImage; cdecl;
                               external sXLib name 'XCreateImage';
 { xwc function seems to be more stable
@@ -661,7 +661,7 @@ type
 {$ifdef FPC}
  Colormap = TXID;
  Atom = type culong;
-// Atom = type Cardinal;
+// Atom = type longword;
  Cursor = TXID;
  wchar_t = longword;
  pwchar_t = ^wchar_t;
@@ -687,7 +687,7 @@ const
              cr_user);
   }
  defaultshape = xc_left_ptr;
- standardcursors: array[cursorshapety] of cardinal = (
+ standardcursors: array[cursorshapety] of longword = (
       defaultshape,defaultshape,xc_left_ptr,xc_crosshair,xc_watch,xc_xterm,
       xc_sb_v_double_arrow,xc_sb_h_double_arrow,xc_top_right_corner,xc_bottom_right_corner,xc_fleur,
       xc_sb_v_double_arrow,xc_sb_h_double_arrow,xc_hand2,xc_circle,xc_sailboat,
@@ -713,7 +713,7 @@ var
  msecolormap: colormap;
  istruecolor: boolean;
  is8bitcolor: boolean;
- xredmask,xgreenmask,xbluemask: cardinal;
+ xredmask,xgreenmask,xbluemask: longword;
  xredshift,xgreenshift,xblueshift: integer;
  xredshiftleft,xgreenshiftleft,xblueshiftleft: boolean;
  defcolormap: colormap;
@@ -865,7 +865,7 @@ function gui_pastefromclipboard(out value: msestring): guierrorty;
 const
  transferbuffersize = 1024 div 4; //1kb
 var 
- clipboardowner: cardinal;
+ clipboardowner: longword;
  value1: string;
  nitems1: integer;
  acttype: atom;
@@ -1083,7 +1083,7 @@ begin
  xchangeproperty(appdisp,id,prop,atomatom,32,propmodereplace,@value,1);
 end;
 
-function readcardinalproperty(id: winidty; name: atom; count: cardinal;
+function readcardinalproperty(id: winidty; name: atom; count: longword;
                                     var value): boolean;
 var
  actualtype: atom;
@@ -1094,7 +1094,7 @@ var
  int1: integer;
  {$ifdef CPU64}
  po1: pculong;
- po2: pcardinal;
+ po2: plongword;
  {$endif}
 begin
  result:= false;
@@ -1111,7 +1111,7 @@ begin
    end;
 {$else}
  {$ifdef FPC} {$checkpointer off} {$endif}
-   move(prop^,value,nitems*sizeof(cardinal));
+   move(prop^,value,nitems*sizeof(longword));
  {$ifdef FPC} {$checkpointer default} {$endif}
 {$endif}
   end;
@@ -1121,7 +1121,7 @@ begin
 end;
 
 function readcardinallistproperty(const id: winidty; const name: atom;
-                out value: cardinalarty): boolean;
+                out value: longwordarty): boolean;
 var
  actualtype: atom;
  actualformat: cint;
@@ -1131,7 +1131,7 @@ var
  int1: integer;
  {$ifdef CPU64}
  po1: pculong;
- po2: pcardinal;
+ po2: plongword;
  {$endif}
 begin
  result:= false;
@@ -1317,7 +1317,7 @@ begin
 end;
 
 function sendnetrootcardinalmessage(const messagetype: atom;
-         const aid: winidty; const adata: array of cardinal): boolean;
+         const aid: winidty; const adata: array of longword): boolean;
                   //true if ok
 var
  xevent: xclientmessageevent;
@@ -1434,8 +1434,8 @@ begin
  with hints^ do begin
   icon_pixmap:= icon;
   icon_mask:= mask;
-  updatebit(cardinal(flags),2,icon <> 0); //iconpixmaphint
-  updatebit(cardinal(flags),5,mask <> 0); //iconmaskhint
+  updatebit(longword(flags),2,icon <> 0); //iconpixmaphint
+  updatebit(longword(flags),5,mask <> 0); //iconmaskhint
  end;
  xsetwmhints(appdisp,id,hints);
  xfree(hints);
@@ -1470,7 +1470,7 @@ var
   
  var
   parent,root: winidty;
-  ca1: cardinal;
+  ca1: longword;
   children: pwindow;
   int1: integer;
 //  id1: winidty;
@@ -1520,7 +1520,7 @@ end;
 function getwindowstack(const id: winidty): winidarty;
 var
  parent,root: winidty;
- ca1: cardinal;
+ ca1: longword;
  children: pwindow;
  count: integer;
 begin
@@ -1561,7 +1561,7 @@ var
  int1,int2,int3: integer;
  bo1: boolean;
  parent,root: winidty;
- ca1: cardinal;
+ ca1: longword;
  children: pwindow;
 
 begin
@@ -1816,7 +1816,7 @@ end;
 
 function gui_getpointerpos: pointty;
 var
- ca1: cardinal;
+ ca1: longword;
 begin
  xquerypointer(appdisp,rootid,@ca1,@ca1,@result.x,@result.y,@ca1,@ca1,@ca1);
 end;
@@ -1859,27 +1859,27 @@ begin
  pointergrabbed:= false; 
 end;
 
-function gui_allocimagemem(length: integer): pcardinalaty;
+function gui_allocimagemem(length: integer): plongwordaty;
 begin
  if length = 0 then begin
   result:= nil;
  end
  else begin
-  getmem(result,length * sizeof(cardinal));
+  getmem(result,length * sizeof(longword));
  end;
 end;
 
-procedure gui_freeimagemem(data: pcardinalaty);
+procedure gui_freeimagemem(data: plongwordaty);
 begin
  freemem(data);
 end;
 
 function gui_pixmaptoimage(pixmap: pixmapty; out image: imagety;
-                                      gchandle: cardinal): gdierrorty;
+                                      gchandle: longword): gdierrorty;
 var
  info: pixmapinfoty;
  ximage1: pximage;
- po1: pcardinal;
+ po1: plongword;
  po2: pbyte;
  int1,int2: integer;
  wordmax: integer;
@@ -1964,7 +1964,7 @@ begin
 end;
 
 function gui_imagetopixmap(const image: imagety; out pixmap: pixmapty;
-                         gchandle: cardinal): gdierrorty;
+                         gchandle: longword): gdierrorty;
 var
  ximage: pximage;
  po1: prgbtriplety;
@@ -2013,7 +2013,7 @@ begin
    po1:= @image.pixels^[0];
    for int1:= 0 to image.size.cy - 1 do begin
     for int2:= 0 to image.size.cx - 1 do begin
-     f.put_pixel(ximage,int2,int1,gui_rgbtopixel(cardinal(po1^)));
+     f.put_pixel(ximage,int2,int1,gui_rgbtopixel(longword(po1^)));
      inc(po1);
     end;
    end;
@@ -2134,7 +2134,7 @@ end;
 
 function gui_getpixmapinfo(var info: pixmapinfoty): gdierrorty;
 var
- ca1: cardinal;
+ ca1: longword;
 begin
  with info do begin
   if xgetgeometry(appdisp,handle,@ca1,@ca1,@ca1,@size.cx,@size.cy,@ca1,@depth) = 0 then begin
@@ -2376,7 +2376,7 @@ begin
  gdi_unlock;
 end;
 
-function settimer1(us: cardinal): guierrorty;
+function settimer1(us: longword): guierrorty;
                //send et_timer event after delay of us (micro seconds)
 var
  timerval: itimerval;
@@ -2392,7 +2392,7 @@ begin
  end;
 end;
 
-function gui_settimer(us: cardinal): guierrorty;
+function gui_settimer(us: longword): guierrorty;
 begin
  if us = 0 then begin
   us:= 1;
@@ -2491,7 +2491,7 @@ begin
    dest:= 0;
   end
   else begin
-   dest:= cardinal(xcreateregion);
+   dest:= ptruint(xcreateregion);
    xunionregion(region(dest),region(source),region(dest));
   end;
  end;
@@ -2557,7 +2557,7 @@ begin
  end;
 end;
 
-function gui_rgbtopixel(rgb: cardinal): pixelty;
+function gui_rgbtopixel(rgb: longword): pixelty;
 begin                                           //todo: speedup
 // if istruecolor then begin
   if xredshiftleft then begin
@@ -2581,7 +2581,7 @@ begin                                           //todo: speedup
 // end;
 end;
 {
-function gui_rgbtocolormappixel(rgb: cardinal): pixelty;
+function gui_rgbtocolormappixel(rgb: longword): pixelty;
 begin
  with rgbtriplety(rgb) do begin
   if is8bitcolor and (red = green) and (red = blue) and (red <> 255) then begin
@@ -2592,7 +2592,7 @@ begin
  result:= gui_rgbtopixel(rgb);
 end;
 }
-function gui_pixeltorgb(pixel: cardinal): cardinal;
+function gui_pixeltorgb(pixel: longword): longword;
 begin
 // if istruecolor then begin
   if xredshiftleft then begin
@@ -2616,7 +2616,7 @@ begin
 // end;
 end;
 
-function xtomousebutton(button: cardinal): mousebuttonty;
+function xtomousebutton(button: longword): mousebuttonty;
 begin
  case button of
   button1: result:= mb_left;
@@ -2626,7 +2626,7 @@ begin
  end;
 end;
 
-function xtoshiftstate(const shiftstate: cardinal;
+function xtoshiftstate(const shiftstate: longword;
                        const key: keyty; const button: mousebuttonty;
                        const up: boolean): shiftstatesty;
 begin
@@ -2746,9 +2746,9 @@ begin
    xk_kp_subtract: result:= key_minus;
    xk_kp_decimal: result:= key_period;
    xk_kp_divide: result:= key_slash;
-   xk_kp_0..xk_kp_9: result:= keyty(cardinal(key_0) + key - xk_kp_0);
+   xk_kp_0..xk_kp_9: result:= keyty(longword(key_0) + key - xk_kp_0);
 
-   xk_f1..xk_f35: result:= keyty(cardinal(key_f1) + key - xk_f1);
+   xk_f1..xk_f35: result:= keyty(longword(key_f1) + key - xk_f1);
 
    xk_shift_l: result:= key_shift;
    xk_shift_r: result:= key_shift;
@@ -2774,7 +2774,7 @@ end;
 function pchartomsestring(value: pchar; len: integer): msestring;
 var
  int1: integer;
- buffer: cardinalarty;
+ buffer: longwordarty;
 begin
  setlength(buffer,len);
  int1:= mbsnrtowcs(pointer(buffer),@value,len,len,nil);
@@ -2789,7 +2789,7 @@ begin
  end;
 end;
 
-function ucs4stringtomsestring(const source: cardinalarty): msestring;
+function ucs4stringtomsestring(const source: longwordarty): msestring;
 var
  int1: integer;
 begin
@@ -2799,12 +2799,12 @@ begin
  end;
 end;
 
-function getrootpath(id: winidty; out rootpath: cardinalarty): boolean;
+function getrootpath(id: winidty; out rootpath: longwordarty): boolean;
 var
  root,parent: {$ifdef FPC}dword{$else}xlib.twindow{$endif};
  children: pwindow;
  count: integer;
- ca1: cardinal;
+ ca1: longword;
 
 begin
  result:= false;
@@ -2834,7 +2834,7 @@ var
  root,parent: {$ifdef FPC}dword{$else}xlib.twindow{$endif};
  children: pwindow;
  count: integer;
- ca1: cardinal;
+ ca1: longword;
 begin
  result:= 0;
  if xquerytree(appdisp,awindow,@root,@parent,@children,@ca1) = 0 then begin
@@ -2849,10 +2849,10 @@ end;
 function getrootoffset(const id: winidty; out offset: pointty): boolean;
 var
  int1: integer;
- rootpath: cardinalarty;
+ rootpath: longwordarty;
  ax,ay: integer;
- width,height,border: cardinal;
- ca1: cardinal;
+ width,height,border: longword;
+ ca1: longword;
 begin
  result:= getrootpath(id,rootpath);
  if result then begin
@@ -2936,7 +2936,7 @@ begin
 end;
 
 function setnetcardinal(const id: winidty; const aproperty: netatomty;
-                                         const avalue: cardinal): boolean;
+                                         const avalue: longword): boolean;
 begin
  result:= false;
  if netatoms[aproperty] <> 0 then begin
@@ -3266,7 +3266,7 @@ begin
  if paintdevice = 0 then begin
   paintdevice:= mserootwindow;
  end;
- gc.handle:= cardinal(xcreategc(appdisp,paintdevice,0,nil));
+ gc.handle:= ptruint(xcreategc(appdisp,paintdevice,0,nil));
  if gc.handle = 0 then begin
   result:= gue_creategc;
  end
@@ -3583,7 +3583,7 @@ end;
 
 procedure gui_changegc(var drawinfo: drawinfoty);
 var
- xmask: cardinal;
+ xmask: longword;
  xvalues: xgcvalues;
  agc: tgc;
  int1: integer;
@@ -3662,7 +3662,7 @@ begin
    xvalues.ts_y_origin:= brushorigin.y;
   end;
 
-  if drawingflagsty((cardinal(drawingflags) xor cardinal(gcdrawingflags)))
+  if drawingflagsty((longword(drawingflags) xor longword(gcdrawingflags)))
            * fillmodeinfoflags <> [] then begin
    xmask:= xmask or gcfillstyle;
    if df_brush in drawingflags then begin
@@ -4245,7 +4245,7 @@ begin
  if po <> nil then begin
  {$ifdef FPC} {$checkpointer off} {$endif}
   with drawinfo.getfont.fontdata^,x11fontdataty(platformdata) do begin
-   font:= cardinal(po);
+   font:= ptruint(po);
    ascent:= po^.ascent;
    descent:= po^.descent;
  //   linespacing:= ascent + descent;
@@ -4828,7 +4828,7 @@ begin
             (destrect^.cx > 0) and (destrect^.cy > 0);
   colormask:= (mask <> nil) and not mask.monochrome;
 //  inc(destrect^.cx);
-  if hasxrender and (needstransform or (cardinal(transparency) <> 0) or
+  if hasxrender and (needstransform or (longword(transparency) <> 0) or
       colormask) then begin
    if needstransform then begin
 //    pictop:= pictopover;
@@ -4878,8 +4878,9 @@ begin
     ax:= x;
     ay:= y;
    end;
-   if (cardinal(transparency) <> 0) and not colormask then begin
-    maskpic:= createmaskpicture(rgbtriplety(cardinal(transparency) xor $ffffff));
+   if (longword(transparency) <> 0) and not colormask then begin
+    maskpic:= createmaskpicture(rgbtriplety(longword(transparency) xor 
+                                               longword($ffffff)));
     pictop:= pictopover;
    end
    else begin
@@ -5000,7 +5001,7 @@ begin
     amask:= tsimplebitmap1(mask).handle;
     if gcclipregion <> 0 then begin
      pixmap2:= gui_createpixmap(size,0,true);
-     maskgc.handle:= cardinal(xcreategc(appdisp,pixmap2,0,@xvalues));
+     maskgc.handle:= ptruint(xcreategc(appdisp,pixmap2,0,@xvalues));
 //xsetforeground(appdisp,tgc(maskgc.handle),$1);
 //xfillrectangle(appdisp,mask,tgc(maskgc.handle),0,0,100,100);
  //    pixmapgc:= xcreategc(appdisp,pixmap2,0,@xvalues);
@@ -5678,12 +5679,12 @@ eventrestart:
      end
      else begin
       if message_type = wmprotocolsatom then begin
-       if cardinal(data.l[0]) = wmprotocols[wm_delete_window] then begin
+       if longword(data.l[0]) = wmprotocols[wm_delete_window] then begin
         result:= twindowevent.create(ek_close,xwindow);
 {$ifdef with_saveyourself}
        end
        else begin
-        if cardinal(data.l[0]) = wmprotocols[wm_save_yourself] then begin
+        if longword(data.l[0]) = wmprotocols[wm_save_yourself] then begin
          result:= tevent.create(ek_terminate);
          saveyourselfwindow:= window;
         end;

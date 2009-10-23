@@ -815,8 +815,8 @@ type
    property itemsrowheight[const index: integer]: rowstaterowheightty
             read getrowstaterowheight write setrowstaterowheight;
 
-   function mergecols(const arow: integer; const astart: cardinal;
-                                 const acount: cardinal): boolean;
+   function mergecols(const arow: integer; const astart: longword;
+                                 const acount: longword): boolean;
    function unmergecols(const arow: integer): boolean;
 
    property color[const index: integer]: rowstatenumty read getcolor
@@ -1035,8 +1035,8 @@ procedure sortarray(var dest: pointerarty; compare: arraysortcomparety;
 procedure sortarray(var dest: pointerarty); overload; //compares adresses
 procedure sortarray(var dest: integerarty); overload;
 procedure sortarray(var dest: integerarty; out indexlist: integerarty); overload;
-procedure sortarray(var dest: cardinalarty); overload;
-procedure sortarray(var dest: cardinalarty; out indexlist: integerarty); overload;
+procedure sortarray(var dest: longwordarty); overload;
+procedure sortarray(var dest: longwordarty; out indexlist: integerarty); overload;
 procedure sortarray(var dest: realarty); overload;
 procedure sortarray(var dest: realarty; out indexlist: integerarty); overload;
 
@@ -2444,13 +2444,13 @@ begin
  sortarray(dest,{$ifdef FPC}@{$endif}compareinteger,sizeof(integer),indexlist);
 end;
 
-function comparecardinal(const l,r): integer;
+function comparelongword(const l,r): integer;
 begin
- if cardinal(l) > cardinal(r) then begin
+ if longword(l) > longword(r) then begin
   result:= 1;
  end
  else begin
-  if cardinal(l) < cardinal(r) then begin
+  if longword(l) < longword(r) then begin
    result:= -1;
   end
   else begin
@@ -2459,14 +2459,14 @@ begin
  end;
 end;
 
-procedure sortarray(var dest: cardinalarty);
+procedure sortarray(var dest: longwordarty);
 begin
- sortarray(dest,{$ifdef FPC}@{$endif}comparecardinal,sizeof(cardinal));
+ sortarray(dest,{$ifdef FPC}@{$endif}comparelongword,sizeof(longword));
 end;
 
-procedure sortarray(var dest: cardinalarty; out indexlist: integerarty);
+procedure sortarray(var dest: longwordarty; out indexlist: integerarty);
 begin
- sortarray(dest,{$ifdef FPC}@{$endif}comparecardinal,sizeof(cardinal),indexlist);
+ sortarray(dest,{$ifdef FPC}@{$endif}comparelongword,sizeof(longword),indexlist);
 end;
 
 function comparereal(const l,r): integer;
@@ -6903,10 +6903,10 @@ begin
  setdata(index,value);
 end;
 
-function tcustomrowstatelist.mergecols(const arow: integer; const astart: cardinal;
-                                 const acount: cardinal): boolean;
+function tcustomrowstatelist.mergecols(const arow: integer; const astart: longword;
+                                 const acount: longword): boolean;
 var
- ca1,ca2: cardinal;
+ ca1,ca2: longword;
 begin
  result:= false;
  if (astart < mergedcolmax - 1) and (acount > 0) then begin

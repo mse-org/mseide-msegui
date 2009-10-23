@@ -303,7 +303,7 @@ function msestrlcopy(const str: pmsechar; len: integer): msestring;
                        //nicht nullterminiert
 function psubstr(const start,stop: pchar): string;
 
-function msePosEx(const SubStr, S: msestring; Offset: Cardinal = 1): Integer;
+function msePosEx(const SubStr, S: msestring; Offset: longword = 1): Integer;
 
 function mselowercase(const s: msestring): msestring;
 function mseuppercase(const s: msestring): msestring;
@@ -2539,7 +2539,7 @@ begin
  end;
 end;
 
-function msePosEx(const SubStr, S: msestring; Offset: Cardinal = 1): Integer;
+function msePosEx(const SubStr, S: msestring; Offset: longword = 1): Integer;
 var
   I,X: Integer;
   Len, LenSubStr: Integer;
@@ -2634,9 +2634,9 @@ begin
   if po1 <> nil then begin
    dec(po1);
    {$ifdef FPC}
-   lwo2:= (po1^+1)*cardinal(elementsize);
+   lwo2:= (po1^+1)*longword(elementsize);
    {$else}
-   lwo2:= po1^*cardinal(elementsize);
+   lwo2:= po1^*longword(elementsize);
    {$endif}
    dec(po1);
   end

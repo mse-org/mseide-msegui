@@ -286,8 +286,8 @@ var
 begin
  with info do begin
   statebefore:= state;
-  updatebit(cardinal(state),ord(shs_disabled),not widget.isenabled or adisabled);
-  updatebit(cardinal(state),ord(shs_focused),widget.active);
+  updatebit(longword(state),ord(shs_disabled),not widget.isenabled or adisabled);
+  updatebit(longword(state),ord(shs_focused),widget.active);
   result:= state <> statebefore;
   if result then begin
    rect1:= ca.dim;

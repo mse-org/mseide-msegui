@@ -76,8 +76,8 @@ const
 type
  ptimerinfoty = ^timerinfoty;
  timerinfoty = record
-  nexttime: cardinal;
-  interval: cardinal;
+  nexttime: longword;
+  interval: longword;
   prevpo,nextpo: ptimerinfoty;
   ontimer: objectprocty;
  end;
@@ -106,7 +106,7 @@ end;
 procedure insert(po: ptimerinfoty); //mutex has to be locked
 var
  po1,po2: ptimerinfoty;
- ca1: cardinal;
+ ca1: longword;
 begin
  ca1:= po^.nexttime;
  po2:= po;
@@ -161,7 +161,7 @@ begin
  sys_mutexunlock(mutex);
 end;
 
-procedure starttimer(const reftime: cardinal);
+procedure starttimer(const reftime: longword);
 var
  int1: integer;
 begin
@@ -177,7 +177,7 @@ end;
 procedure settimertick(ainterval: integer; aontimer: objectprocty);
 var
  po: ptimerinfoty;
- time: cardinal;
+ time: longword;
 begin
  new(po);
  sys_mutexlock(mutex);
@@ -185,11 +185,11 @@ begin
  fillchar(po^,sizeof(timerinfoty),0);
  with po^ do begin
   if ainterval < 0 then begin
-   nexttime:= time + cardinal(-ainterval);
+   nexttime:= time + longword(-ainterval);
    interval:= 0;
   end
   else begin
-   nexttime:= time + cardinal(ainterval);
+   nexttime:= time + longword(ainterval);
    interval:= ainterval;
   end;
   ontimer:= aontimer;
@@ -207,12 +207,12 @@ begin
 end;
 
 var
- timebefore: cardinal;
+ timebefore: longword;
  
 procedure tick(sender: tobject);
 var
- time: cardinal;
- ca1: cardinal;
+ time: longword;
+ ca1: longword;
  po,po2: ptimerinfoty;
  ontimer: objectprocty;
  int1: integer;

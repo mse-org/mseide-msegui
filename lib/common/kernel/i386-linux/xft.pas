@@ -85,7 +85,7 @@ const
        end;
        TFT_Face = ^TFT_FaceRec;
 
-       TFT_UInt = cardinal;       //from fttypes.h
+       TFT_UInt = longword;       //from fttypes.h
 
        TFcChar8 = byte;           //from fontconfig.h
        PFcChar8 = ^TFcChar8;

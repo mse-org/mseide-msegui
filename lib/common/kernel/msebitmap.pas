@@ -107,8 +107,8 @@ type
                  //useses self.size
 
    procedure init(const acolor: colorty); override;
-   function compressdata: cardinalarty;
-   procedure decompressdata(const asize: sizety; const adata: cardinalarty);
+   function compressdata: longwordarty;
+   procedure decompressdata(const asize: sizety; const adata: longwordarty);
    property pixel[const index: pointty]: colorty read getpixel write setpixel;
    property pixels[const x,y: integer]: colorty read getpixels write setpixels;
    property scanline[index: integer]: pointer read getscanline;
@@ -127,12 +127,12 @@ type
  imageinfoty = (iminf_monochrome,iminf_masked,iminf_colormask);
  imageinfosty = set of imageinfoty;
  imageheaderty = packed record
-  format: cardinal; //imageformatty;
-  info: cardinal;   //imageinfosty;
+  format: longword; //imageformatty;
+  info: longword;   //imageinfosty;
   width: integer;
   height: integer;
   datasize: integer;
-  reserve: array[0..7] of cardinal;
+  reserve: array[0..7] of longword;
  end;
 
  bitmapoptionty = (bmo_monochrome,bmo_masked,bmo_colormask);
@@ -206,7 +206,7 @@ type
                                const params: array of const); //index in ico
    procedure writetofile(const filename: filenamety; const format: string;
                                const params: array of const); //index in ico
-//   procedure loadfromresourcename(instance: cardinal; const resname: string);
+//   procedure loadfromresourcename(instance: longword; const resname: string);
 //   procedure readimagefile(const filename: filenamety); //calls change
    property mask: tbitmap read getmask1 write setmask;
    property masked: boolean read getmasked write setmasked default false;
@@ -420,7 +420,7 @@ begin
     self.clear;
     self.fimage:= fimage;
     self.fimage.pixels:= gui_allocimagemem(fimage.length);
-    move(fimage.pixels^,self.fimage.pixels^,fimage.length*sizeof(cardinal));
+    move(fimage.pixels^,self.fimage.pixels^,fimage.length*sizeof(longword));
     self.fsize:= fimage.size;
     if monochrome then begin
      include(self.fstate,pms_monochrome);
@@ -469,7 +469,7 @@ var
  sourcebmp: tbitmapcomp;
  amask: tsimplebitmap;
 // maskpx: pixmapty;
-// maskgchandle: cardinal;
+// maskgchandle: longword;
  rect1,rect2: rectty;
  po1: pointty;
  col1,col2: colorty;
@@ -625,7 +625,7 @@ end;
 
 procedure tbitmap.init(const acolor: colorty);
 var
- rgb: cardinal;
+ rgb: longword;
  by1: byte;
  int1: integer;
 begin
@@ -641,7 +641,7 @@ begin
    else begin
     by1:= $00;
    end;
-   fillchar(fimage.pixels^,fimage.length*sizeof(cardinal),by1);
+   fillchar(fimage.pixels^,fimage.length*sizeof(longword),by1);
   end
   else begin
    for int1:= 0 to fimage.length-1 do begin
@@ -712,7 +712,7 @@ end;
 procedure tbitmap.putimage;
 var
  pixmap: pixmapty;
- ca1: cardinal;
+ ca1: longword;
 begin
  if fcanvas <> nil then begin
   ca1:= tcanvas1(fcanvas).fdrawinfo.gc.handle;
@@ -1028,16 +1028,16 @@ begin
  end;
 end;
 
-function tbitmap.compressdata: cardinalarty;
+function tbitmap.compressdata: longwordarty;
 var
  int1,int2,int3: integer;
- po1: pcardinal;
- ca1: cardinal;
+ po1: plongword;
+ ca1: longword;
 begin
  checkimage;
- allocuninitedarray(fimage.length,sizeof(cardinal),result); //max
+ allocuninitedarray(fimage.length,sizeof(longword),result); //max
  if monochrome then begin
-  move(fimage.pixels^,result[0],fimage.length*sizeof(cardinal));
+  move(fimage.pixels^,result[0],fimage.length*sizeof(longword));
  end
  else begin
   po1:=  @fimage.pixels^[0];
@@ -1051,18 +1051,18 @@ begin
     inc(int3);
     dec(int1);
    until (po1^ and $ffffff <> ca1) or (int3 = 255) or (int1 = 0);
-   result[int2]:= ca1 or cardinal(int3 shl 24);
+   result[int2]:= ca1 or longword(int3 shl 24);
    inc(int2);
   end;
   setlength(result,int2);
  end;
 end;
 
-procedure tbitmap.decompressdata(const asize: sizety; const adata: cardinalarty);
+procedure tbitmap.decompressdata(const asize: sizety; const adata: longwordarty);
 var
  int1,int2,int3: integer;
- po1: pcardinal;
- ca1: cardinal;
+ po1: plongword;
+ ca1: longword;
 begin
  clear;
  fsize:= asize;
@@ -1071,7 +1071,7 @@ begin
  {$ifdef FPC}{$checkpointer off}{$endif} //not on heap in win32
  allocimagemem;
  if monochrome then begin
-  move(adata[0],fimage.pixels^,fimage.Length*sizeof(cardinal));
+  move(adata[0],fimage.pixels^,fimage.Length*sizeof(longword));
  end
  else begin
   int2:= fimage.length;
@@ -1139,7 +1139,7 @@ begin
   else begin
    aimage:= fimage;
    allocimagemem;
-   move(aimage.pixels^,fimage.pixels^,fimage.length * sizeof(cardinal));
+   move(aimage.pixels^,fimage.pixels^,fimage.length * sizeof(longword));
                //get a copy
   end;
  end
@@ -1465,7 +1465,7 @@ begin
  end;
 end;
 {
-function tmaskedbitmap.getmaskhandle(var gchandle: cardinal): pixmapty;
+function tmaskedbitmap.getmaskhandle(var gchandle: longword): pixmapty;
 begin
  if fmask <> nil then begin
   result:= tsimplebitmap1(fmask).handle;
@@ -1709,7 +1709,7 @@ procedure tmaskedbitmap.writeimage(stream: tstream);
 var
  header: imageheaderty;
  int1: integer;
- ar1: cardinalarty;
+ ar1: longwordarty;
 begin
  fillchar(header,sizeof(header),0);
  with header do begin
@@ -1744,7 +1744,7 @@ procedure tmaskedbitmap.readimage(stream: tstream);
 var
  header: imageheaderty;
  int1: integer;
- ar1: cardinalarty;
+ ar1: longwordarty;
 
 begin
  beginupdate;
@@ -1901,7 +1901,7 @@ begin
 end;
 
 {
-procedure tmaskedbitmap.loadfromresourcename(instance: cardinal;
+procedure tmaskedbitmap.loadfromresourcename(instance: longword;
   const resname: string);
 var
  stream: tresourcestream;

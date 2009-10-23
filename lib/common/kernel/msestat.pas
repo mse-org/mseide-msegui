@@ -535,7 +535,7 @@ begin
       setlength(fsections,length(fsections)+16);
      end;
      inc(fsectioncount);
-     fsectionlist.add(copy(str1,2,int1-2),pointer(fsectioncount));
+     fsectionlist.add(copy(str1,2,int1-2),pointer(ptruint(fsectioncount)));
      with fsections[fsectioncount-1] do begin
       names:= thashedmsestrings.create;
       count:= 0;
@@ -550,7 +550,7 @@ begin
        if (length(str1) > 0) and (str1[1] <> ' ') then begin
         int1:= msestrscan(str1,msechar('='));
         if int1 > 0 then begin
-         names.add(copy(str1,1,int1-1),pointer(count));
+         names.add(copy(str1,1,int1-1),pointer(ptruint(count)));
          values[count-1]:= copy(str1,int1+1,bigint);
         end
         else begin
@@ -581,7 +581,7 @@ begin
  if factsection <> nil then begin
   with factsection^ do begin
    if flistlevel = 0 then begin
-    factitem:= integer(names.find(name));
+    factitem:= ptruint(names.find(name));
     if factitem = 0 then begin
      result:= false;
     end
@@ -642,11 +642,11 @@ end;
 procedure tstatreader.checkintegerrange(var value: integer; const min,max: integer);
 begin
  if max < min then begin  //unsigned
-  if cardinal(value) > cardinal(max) then begin
+  if longword(value) > longword(max) then begin
    value:= max;
   end
   else begin
-   if cardinal(value) < cardinal(min) then begin
+   if longword(value) < longword(min) then begin
     value:= min;
    end;
   end;
@@ -817,7 +817,7 @@ var
  int1: integer;
 begin
  flistlevel:= 0;
- int1:= integer(fsectionlist.find(name));
+ int1:= ptruint(fsectionlist.find(name));
  if int1 = 0 then begin
   factsection:= nil;
  end
