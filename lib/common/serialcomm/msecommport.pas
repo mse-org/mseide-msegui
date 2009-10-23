@@ -17,7 +17,7 @@ uses {$ifdef mswindows} windows,{$ifndef FPC} mmsystem,{$endif}
      {$else} mselibc,
      {$endif}
      Classes,msethread,mseguiglob,msecommtimer,mseevent,mseclasses,msesys,
-     msestrings,msestat,msestatfile;
+     msestrings,msestat,msestatfile,msetypes;
 
 type
  commstatety = (
@@ -418,7 +418,7 @@ function asciitobin(const chars: string): string;
 implementation
 uses
  {$ifdef UNIX} {kernelioctl,}msesysbindings, {$endif}
- sysutils,mseapplication,msesysintf,msesysutils,msetypes;
+ sysutils,mseapplication,msesysintf,msesysutils;
 
 const
  asciipufferlaenge = 255;
