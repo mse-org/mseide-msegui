@@ -303,7 +303,7 @@ begin
  fillchar(sa,sizeof(sa),0);
  sa.nlength:= sizeof(sa);
  sa.bInheritHandle:= true;
- if createpipe(desc.readdes,desc.writedes,@sa,0) then begin
+ if createpipe(longword(desc.readdes),longword(desc.writedes),@sa,0) then begin
   if write then begin
    po1:= @desc.writedes;
   end
