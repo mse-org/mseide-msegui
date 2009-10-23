@@ -58,7 +58,7 @@ type
   function getoptionsedit: optionseditty;
   procedure setgridintf(const intf: iwidgetgrid);
   procedure drawcell(const canvas: tcanvas);
-  procedure updaterowheight(const canvas: tcanvas);
+  procedure updateautocellsize(const canvas: tcanvas);
   procedure beforecelldragevent(var ainfo: draginfoty; const arow: integer;
                                var processed: boolean);
   procedure aftercelldragevent(var ainfo: draginfoty; const arow: integer;
@@ -1375,8 +1375,8 @@ begin
   end;
   inherited;
   if fintf <> nil then begin
-   if calcrowheight then begin
-    fintf.updaterowheight(canvas);
+   if calcautocellsize then begin
+    fintf.updateautocellsize(canvas);
    end
    else begin
     if (fface = nil) then begin
@@ -1469,12 +1469,15 @@ begin
   end
   else begin
    with fcellinfo do begin
-    if calcrowheight then begin
+    if calcautocellsize then begin
      size1:= rect.size;
      twidget1(factivewidget).getautopaintsize(size1);
      factivewidget.painttowidgetsize(size1);
-     if size1.cy > rowheight then begin
-      rowheight:= size1.cy;
+     if size1.cx > autocellsize.cx then begin
+      autocellsize.cx:= size1.cx;
+     end;
+     if size1.cy > autocellsize.cy then begin
+      autocellsize.cy:= size1.cy;
      end;
     end;
    end;

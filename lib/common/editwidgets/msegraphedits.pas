@@ -143,7 +143,7 @@ type
    procedure setgridintf(const intf: iwidgetgrid); virtual;
    function getcellframe: framety; virtual;
    procedure drawcell(const canvas: tcanvas);
-   procedure updaterowheight(const canvas: tcanvas); virtual;
+   procedure updateautocellsize(const canvas: tcanvas); virtual;
    procedure beforecelldragevent(var ainfo: draginfoty; const arow: integer;
                                var handled: boolean); virtual;
    procedure aftercelldragevent(var ainfo: draginfoty; const arow: integer;
@@ -1317,7 +1317,7 @@ begin
  end;
 end;
 
-procedure tgraphdataedit.updaterowheight(const canvas: tcanvas);
+procedure tgraphdataedit.updateautocellsize(const canvas: tcanvas);
 begin
  //dummy;
 end;

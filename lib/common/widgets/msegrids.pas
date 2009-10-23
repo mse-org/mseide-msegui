@@ -268,8 +268,8 @@ type
   griddatalink: pointer;
   rowstate: prowstatety;
   foldinfo: prowfoldinfoty;
-  calcrowheight: boolean; // don't paint
-  rowheight: integer;
+  calcautocellsize: boolean; // don't paint
+  autocellsize: sizety;
  end;
  pcellinfoty = ^cellinfoty;
 
@@ -384,8 +384,8 @@ type
   rows: integerarty;
   foldinfo: rowfoldinfoarty;
   startrow,endrow: integer; //index in rows
-  calcrowheight: boolean;
-  rowheight: integer;
+  calcautocellsize: boolean;
+  autocellsize: sizety;
  end;
 
  tcols = class;
@@ -2803,7 +2803,7 @@ end;
 
 procedure tcol.drawcell(const acanvas: tcanvas);
 begin
- if not fcellinfo.calcrowheight then begin
+ if not fcellinfo.calcautocellsize then begin
   drawcellbackground(acanvas,fframe,fface);
  end;
 end;
@@ -2981,8 +2981,8 @@ begin
   canafterdrawcell:= fgrid.canevent(tmethod(fonafterdrawcell));
   hiddenlines:= nil;
   with info do begin
-   fcellinfo.calcrowheight:= calcrowheight;
-   fcellinfo.rowheight:= rowheight;
+   fcellinfo.calcautocellsize:= calcautocellsize;
+   fcellinfo.autocellsize:= autocellsize;
    fgrid.fbrushorigin.x:= fgrid.frootbrushorigin.x;
    if not (co_nohscroll in foptions) then begin
     fgrid.fbrushorigin.x:= fgrid.fbrushorigin.x + fgrid.fscrollrect.x;
@@ -3082,8 +3082,8 @@ begin
        fonafterdrawcell(self,canvas,fcellinfo);
       end;
       canvas.restore(saveindex);
-      if calcrowheight then begin
-       rowheight:= fcellinfo.rowheight;
+      if calcautocellsize then begin
+       autocellsize:= fcellinfo.autocellsize;
        exit;
       end;
 
@@ -5751,11 +5751,15 @@ begin
    ftextinfo.clip.cy:= rect.cy;
    ftextinfo.text.text:= getrowtext(cell.row);
    updatedisptext(ftextinfo.text.text);
-   if calcrowheight then begin
+   if calcautocellsize then begin
     textrect(canvas,ftextinfo);
+    int1:= rect.cx - innerrect.cx + ftextinfo.res.cx;
+    if int1 > autocellsize.cx then begin
+     autocellsize.cx:= int1;
+    end;
     int1:= rect.cy - innerrect.cy + ftextinfo.res.cy;
-    if int1 > rowheight then begin
-     rowheight:= int1;
+    if int1 > autocellsize.cy then begin
+     autocellsize.cy:= int1;
     end;
    end
    else begin
@@ -6121,14 +6125,15 @@ var
 begin
  fillchar(info,sizeof(info),0);
  with info do begin
-  calcrowheight:= true;
-  rowheight:= arowheight;
+  calcautocellsize:= true;
+  autocellsize.cx:= 0;
+  autocellsize.cy:= arowheight;
   canvas:= fgrid.getcanvas;  
   setlength(rows,1);
   rows[0]:= arow; //startrow = endrow = 0
   paint(info,true);
   paint(info,false);
-  arowheight:= rowheight;
+  arowheight:= autocellsize.cy;
  end;
 end;
 
@@ -8089,8 +8094,8 @@ begin
   if (rect1.cx > 0) and (rect1.cy > 0) then begin
    if high(fvisiblerows) >= 0 then begin
     with colinfo do begin
-     calcrowheight:= false;
-     rowheight:= 0;
+     calcautocellsize:= false;
+     autocellsize:= nullsize;
      ystep:= self.fystep;
      if rowheight1 then begin
       startrow:= -1;
@@ -13062,11 +13067,15 @@ var
  int1: integer;
 begin
  with cellinfoty(canvas.drawinfopo^) do begin
-  if calcrowheight then begin
+  if calcautocellsize then begin
    rect1:= feditor.textrect;
+   int1:= rect.cx - innerrect.cx + rect1.cx;
+   if int1 > autocellsize.cx then begin
+    autocellsize.cx:= int1;
+   end;
    int1:= rect.cy - innerrect.cy + rect1.cy;
-   if int1 > rowheight then begin
-    rowheight:= int1;
+   if int1 > autocellsize.cy then begin
+    autocellsize.cy:= int1;
    end;
   end
   else begin

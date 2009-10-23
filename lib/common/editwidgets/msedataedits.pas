@@ -132,7 +132,7 @@ type
    function getcellframe: framety; virtual;
    function getnulltext: msestring; virtual;
    procedure drawcell(const canvas: tcanvas); virtual;
-   procedure updaterowheight(const canvas: tcanvas); virtual;
+   procedure updateautocellsize(const canvas: tcanvas); virtual;
    procedure beforecelldragevent(var ainfo: draginfoty; const arow: integer;
                                var handled: boolean); virtual;
    procedure aftercelldragevent(var ainfo: draginfoty; const arow: integer;
@@ -1791,6 +1791,7 @@ var
  atextflags: textflagsty;
  bo1: boolean;
  int1: integer;
+ rect1: rectty;
 begin
  atextflags:= textflags;
  bo1:= false;
@@ -1815,10 +1816,15 @@ begin
     canvas.font.style:= fempty_textstyle;
    end;
   end;
-  if calcrowheight then begin
-   int1:= textrect(canvas,mstr1,innerrect,atextflags).cy-innerrect.cy + rect.cy;
-   if int1 > rowheight then begin
-    rowheight:= int1;
+  if calcautocellsize then begin
+   rect1:= textrect(canvas,mstr1,innerrect,atextflags);
+   int1:= rect1.cx - innerrect.cx + rect.cx;
+   if int1 > autocellsize.cx then begin
+    autocellsize.cx:= int1;
+   end;
+   int1:= rect1.cy - innerrect.cy + rect.cy;
+   if int1 > autocellsize.cy then begin
+    autocellsize.cy:= int1;
    end;
   end
   else begin
@@ -1847,7 +1853,7 @@ begin
  end;
 end;
 
-procedure tcustomdataedit.updaterowheight(const canvas: tcanvas);
+procedure tcustomdataedit.updateautocellsize(const canvas: tcanvas);
 begin
  drawcell(canvas);
 end;
