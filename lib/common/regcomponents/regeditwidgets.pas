@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -20,7 +20,8 @@ uses
  msewidgetgrid,msetextedit,msedesignintf,regeditwidgets_bmp,msepropertyeditors,
  msedropdownlist,mseterminal,msedrawtext,msedatanodes,msedialog,msestrings,
  regwidgets,msearrayprops,typinfo,msestockobjects,msefoldedit,msebitmap,mseglob,
- msestream,mserealsumedit,msedatalist,msegui,msegrids,msesumlist,mseclasses;
+ msestream,mserealsumedit,msedatalist,msegui,msegrids,msesumlist,mseclasses,
+ sysutils;
 
 type
  tdropdowncolpropertyeditor = class(tarraypropertyeditor)
@@ -80,7 +81,12 @@ type
   protected
    function gettag: integer; override;
  end;
- 
+
+ toptionswidgetpropertyeditor = class(tsetpropertyeditor)
+  protected
+   function getinvisibleitems: tintegerset; override;
+ end;
+  
 procedure Register;
 begin
  registercomponents('Edit',[twidgetgrid,tedit,tslider,tprogressbar,
@@ -114,6 +120,8 @@ begin
                                       tsumlistsourcelevelpropertyeditor);
  registerpropertyeditor(typeinfo(string),trealsumlist,'sourceissum',
                                       tsumlistsourceissumpropertyeditor);
+ registerpropertyeditor(typeinfo(optionswidgetty),nil,'',
+                                           toptionswidgetpropertyeditor);
 end;
 
 { tdropdowncolpropertyeditor }
@@ -247,6 +255,13 @@ end;
 function tsumlistsourceissumpropertyeditor.gettag: integer;
 begin
  result:= sumissumtag;
+end;
+
+{ toptionswidgetpropertyeditor }
+
+function toptionswidgetpropertyeditor.getinvisibleitems: tintegerset;
+begin
+ result:= [ord(ow_autosize),ord(ow_autosizeanright),ord(ow_autosizeanbottom)]; 
 end;
 
 initialization

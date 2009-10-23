@@ -410,8 +410,14 @@ type
 
  tsetpropertyeditor = class(tordinalpropertyeditor)
   protected
+   finvisibleitems: tintegerset;
    function getdefaultstate: propertystatesty; override;
+   function getinvisibleitems: tintegerset; virtual;
   public
+   constructor create(const adesigner: idesigner;
+        const amodule: tmsecomponent; const acomponent: tcomponent;
+            const aobjectinspector: iobjectinspector;
+            const aprops: propinstancearty; atypeinfo: ptypeinfo); override;
    function getvalue: msestring; override;
    procedure setvalue(const value: msestring); override;
    function subproperties: propertyeditorarty; override;
@@ -2242,6 +2248,15 @@ end;
 
 { tsetpropertyeditor }
 
+constructor tsetpropertyeditor.create(const adesigner: idesigner;
+               const amodule: tmsecomponent; const acomponent: tcomponent;
+               const aobjectinspector: iobjectinspector;
+               const aprops: propinstancearty; atypeinfo: ptypeinfo);
+begin
+ finvisibleitems:= tintegerset(getinvisibleitems);
+ inherited;
+end;
+
 function tsetpropertyeditor.getdefaultstate: propertystatesty;
 begin
  result:= inherited getdefaultstate  + [ps_subproperties];
@@ -2288,13 +2303,24 @@ function tsetpropertyeditor.subproperties: propertyeditorarty;
 var
  compty: ptypeinfo;
  int1: integer;
+ int2: integer;
 begin
  compty:= gettypedata(ftypeinfo)^.comptype{$ifndef FPC}^{$endif};
  setlength(result,gettypedata(compty)^.MaxValue+1);
+ int2:= 0;
  for int1:= 0 to high(result) do begin
-  result[int1]:= tsetelementeditor.create(fdesigner,fmodule,fcomponent,
+  if not (int1 in finvisibleitems) then begin
+   result[int2]:= tsetelementeditor.create(fdesigner,fmodule,fcomponent,
                     fobjectinspector,fprops,compty,self,int1);
+   inc(int2);
+  end;
  end;
+ setlength(result,int2);
+end;
+
+function tsetpropertyeditor.getinvisibleitems: tintegerset;
+begin
+ result:= [];
 end;
 
 { tsetelementeditor }

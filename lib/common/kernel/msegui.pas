@@ -64,7 +64,7 @@ type
                    //create fonthighdelta and childscaled events
                    ow_autoscale, //synchronizes bounds_cy with fontheightdelta
                    ow_autosize,ow_autosizeanright,ow_autosizeanbottom 
-                           //don't use, will be moved to optionwidget1
+                           //don't use, moved to optionwidget1
                    );
  optionswidgetty = set of optionwidgetty;
  optionwidget1ty = (ow1_autowidth,ow1_autoheight,ow1_autosizeanright,
