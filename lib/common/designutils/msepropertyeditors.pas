@@ -2612,7 +2612,7 @@ begin
     exit;
    end;
   end;
-  setordvalue(cardinal(comp));
+  setpointervalue(comp);
  end;
 end;
 
