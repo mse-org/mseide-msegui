@@ -2253,7 +2253,7 @@ constructor tsetpropertyeditor.create(const adesigner: idesigner;
                const aobjectinspector: iobjectinspector;
                const aprops: propinstancearty; atypeinfo: ptypeinfo);
 begin
- finvisibleitems:= tintegerset(getinvisibleitems);
+ finvisibleitems:= getinvisibleitems;
  inherited;
 end;
 

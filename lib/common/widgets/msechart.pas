@@ -178,8 +178,8 @@ type
    property dialhorz: tchartdialhorz read fdialhorz write setdialhorz;
    property dialvert: tchartdialvert read fdialvert write setdialvert;
 //   property onbeforepaint: painteventty read fonbeforepaint write fonbeforepaint;
-   property onpaintbackground: painteventty read fonpaintbackground 
-                                                  write fonpaintbackground;
+//   property onpaintbackground: painteventty read fonpaintbackground
+//                                                  write fonpaintbackground;
 //   property onpaint: painteventty read fonpaint write fonpaint;
 //   property onafterpaint: painteventty read fonafterpaint write fonafterpaint;
  end;

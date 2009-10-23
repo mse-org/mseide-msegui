@@ -962,7 +962,7 @@ begin
  result:= tintegerset(treader1(reader).driver.readset(
              gettypedata(atypeinfo)^.comptype{$ifndef fpc}^{$endif}));
  {$else}
- result:= treader1(reader).readset(atypeinfo);
+ result:= tintegerset(treader1(reader).readset(atypeinfo));
  {$endif}
 end;
 
@@ -979,9 +979,9 @@ begin
  result:= false;
  with info do begin
   while true do begin
-   po1:= gettypedata(maintype)^.comptype;
-   po2:= gettypedata(splittype)^.comptype;
-   str1:= reader.driver.readstr;
+   po1:= gettypedata(maintype)^.comptype{$ifndef FPC}^{$endif};
+   po2:= gettypedata(splittype)^.comptype{$ifndef FPC}^{$endif};
+   str1:= reader.{$ifdef FPC}driver.{$endif}readstr;
    if str1 = '' then begin
     break;
    end;
@@ -1003,7 +1003,7 @@ begin
    end;
    if int1 < 0 then begin
     repeat
-    until reader.driver.readstr = '';
+    until reader.{$ifdef FPC}driver.{$endif}readstr = '';
     raise ereaderror.create(sinvalidpropertyvalue);
    end;
   end;

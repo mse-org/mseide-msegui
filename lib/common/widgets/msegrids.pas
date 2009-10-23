@@ -3311,8 +3311,8 @@ var
 begin
  optionsbefore:= foptions1;
  foptions1:= avalue;
- opt1:= coloptions1ty(longword(optionsbefore) xor
-                                                     longword(foptions1));
+ opt1:= coloptions1ty({$ifdef FPC}longword{$else}byte{$endif}(optionsbefore) xor
+                      {$ifdef FPC}longword{$else}byte{$endif}(foptions1));
  if co1_autorowheight in opt1 then begin
   if co1_autorowheight in foptions1 then begin
    include(fstate,gps_needsrowheight);
@@ -6205,15 +6205,19 @@ end;
 procedure tcols.setoptions1(const value: coloptions1ty);
 var
  int1: integer;
- mask: longword;
+ mask: {$ifdef FPC}longword{$else}byte{$endif};
 begin
  if foptions1 <> value then begin
-  mask:= longword(value) xor longword(foptions1);
+  mask:= {$ifdef FPC}longword{$else}byte{$endif}(value) xor
+         {$ifdef FPC}longword{$else}byte{$endif}(foptions1);
   foptions1 := Value;
   if not (csloading in fgrid.componentstate) then begin
    for int1:= 0 to count - 1 do begin
-    tcol(items[int1]).options1:= coloptions1ty(replacebits(longword(value),
-                   longword(tcol(items[int1]).options1),mask));
+    tcol(items[int1]).options1:= coloptions1ty(
+            replacebits(
+              {$ifdef FPC}longword{$else}byte{$endif}(value),
+              {$ifdef FPC}longword{$else}byte{$endif}(tcol(items[int1]).options1),
+                 mask));
    end;
   end;
   fgrid.invalidate;
