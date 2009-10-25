@@ -2,7 +2,7 @@ unit xrender;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- {$ifdef FPC} x,{$endif}Xlib,mselibc;
+ {$ifdef FPC} x,{$endif}Xlib,mselibc,msectypes;
 
   const
     External_library='libXrender.so';

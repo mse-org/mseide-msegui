@@ -83,7 +83,7 @@ type
 
 Type
    ISC_USHORT    = word;
-   ISC_STATUS    = longint;
+   ISC_STATUS    = ptrint; //defined as intptr_t in types_pub.h
    ISC_INT64     = int64;
    ISC_UINT64    = qword;
    ISC_LONG      = Longint;

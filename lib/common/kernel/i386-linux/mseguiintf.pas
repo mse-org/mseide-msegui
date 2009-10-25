@@ -18,7 +18,7 @@ uses
  {$ifdef FPC}xlib{$else}Xlib{$endif},msetypes,mseapplication,
  msegraphutils,mseevent,msepointer,mseguiglob,msesys,{msestockobjects,}
  msethread{$ifdef FPC},x,xutil,dynlibs{$endif},
- mselibc,msesysintf,msegraphics,
+ mselibc,msectypes,msesysintf,msegraphics,
  msestrings,xft,xrender;
 
 {$ifdef FPC}

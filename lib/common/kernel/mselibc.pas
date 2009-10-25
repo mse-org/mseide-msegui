@@ -1,12 +1,15 @@
 unit mselibc;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
+uses
+ msectypes;
+ 
 const
  clib = 'c';
  threadslib = 'pthread';
 
 type
-
+(* moved to msectypes
 // from bits/types.h
  __S16_TYPE = smallint;
  __U16_TYPE = word;
@@ -44,6 +47,11 @@ type
  pcint = ^cint;
  cuint = __U32_TYPE;
  pcuint = ^cuint;
+ cshort = __S16_TYPE;
+ pcshort = ^cshort;
+ cushort = __U16_TYPE;
+ pcushort = ^cushort;
+*)
  
 //from bits/typesizes.h
 

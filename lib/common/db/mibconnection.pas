@@ -484,29 +484,36 @@ end;
 
 
 procedure TIBConnection.SetDBDialect;
+const
+ bufferlength = 40;
 var
   x : integer;
   Len : integer;
   Buffer : string;
-  ResBuf : array [0..39] of byte;
+  ResBuf : array [0..bufferlength-1] of byte;
+  by1: byte;
 begin
-  Buffer := Chr(isc_info_db_sql_dialect) + Chr(isc_info_end);
-  if isc_database_info(@FStatus, @FSQLDatabaseHandle, Length(Buffer),
-    @Buffer[1], SizeOf(ResBuf), @ResBuf) <> 0 then
-      CheckError('SetDBDialect', FStatus);
-  x := 0;
-  while x < 40 do
-    case ResBuf[x] of
-      isc_info_db_sql_dialect :
-        begin
-          Inc(x);
-          Len := isc_vax_integer(@ResBuf[x], 2);
-          Inc(x, 2);
-          FDialect := isc_vax_integer(@ResBuf[x], Len);
-          Inc(x, Len);
-        end;
-      isc_info_end : Break;
-    end;
+ Buffer:= Chr(isc_info_db_sql_dialect) + Chr(isc_info_end);
+ if isc_database_info(@FStatus, @FSQLDatabaseHandle, Length(Buffer),
+                        @Buffer[1], SizeOf(ResBuf), @ResBuf) <> 0 then begin
+  CheckError('SetDBDialect', FStatus);
+ end;
+ x := 0;
+ while x < bufferlength do begin
+  by1:= resbuf[x];
+  inc(x);
+  len:= isc_vax_integer(@ResBuf[x], 2);
+  inc(x,2);
+  case by1 of
+   isc_info_db_sql_dialect: begin
+    FDialect:= isc_vax_integer(@ResBuf[x], Len);
+   end;
+   isc_info_end: begin
+    Break;
+   end;
+  end;
+  inc(x,len);
+ end;
 end;
 
 procedure TIBConnection.AllocSQLDA(var aSQLDA : PXSQLDA;Count : integer);
@@ -651,72 +658,76 @@ var dh    : pointer;
  str1: string;
 
 begin
-  with cursor as TIBcursor do
-    begin
-    dh := GetHandle;
-    if isc_dsql_allocate_statement(@Status, @dh, @Statement) <> 0 then
-      CheckError('PrepareStatement', Status);
-    tr := aTransaction.Handle;
-    
-    if assigned(AParams) and (AParams.count > 0) then begin
-     str1:= todbstring(AParams.ParseSQL(asql,false,false,false,psInterbase,
-                              paramBinding));
+ with cursor as TIBcursor do begin
+  dh := GetHandle;
+  if isc_dsql_allocate_statement(@Status, @dh, @Statement) <> 0 then begin
+   CheckError('PrepareStatement', Status);
+  end;
+  tr := aTransaction.Handle;
+  
+  if assigned(AParams) and (AParams.count > 0) then begin
+   str1:= todbstring(AParams.ParseSQL(asql,false,false,false,psInterbase,
+                            paramBinding));
+  end
+  else begin
+   str1:= todbstring(asql);
+  end;
+  if isc_dsql_prepare(@Status, @tr, @Statement, 0, @str1[1],
+                                          Dialect, nil) <> 0 then begin
+   isc_dsql_free_statement(@fstatus, @statement, dsql_drop);
+   CheckError('PrepareStatement', Status);
+  end;
+  FPrepared := True;
+  if assigned(AParams) and (AParams.count > 0) then begin
+   AllocSQLDA(in_SQLDA,Length(ParamBinding));
+   if isc_dsql_describe_bind(@Status, @Statement, 1, in_SQLDA) <> 0 then begin
+     CheckError('PrepareStatement', Status);
+   end;
+   if in_SQLDA^.SQLD > in_SQLDA^.SQLN then begin
+     DatabaseError(SParameterCountIncorrect,self);
+   end;
+   setlength(paramtypes,in_SQLDA^.SQLD);
+   for x := 0 to in_SQLDA^.SQLD - 1 do begin
+    with in_SQLDA^.SQLVar[x] do begin
+     TranslateFldType(SQLType,sqlsubtype,SQLLen,SQLScale,TransType,TransLen);
+     paramtypes[x]:= transtype;
+     if ((SQLType and not 1) = SQL_VARYING) then begin
+       SQLData := AllocMem(in_SQLDA^.SQLVar[x].SQLLen+2)
+     end
+     else begin
+       SQLData := AllocMem(in_SQLDA^.SQLVar[x].SQLLen);
+     end;
+  //       if (sqltype and 1) = 1 then begin //check not null constraint
+     sqltype:= sqltype or 1; //always use null flag
+     New(SQLInd);
+  //       end;
+    end;
+   end;
+  end;
+  if FStatementType in datareturningtypes then begin
+  ///////////////////////      FPrepared := False;
+   if isc_dsql_describe(@Status, @Statement, 1, SQLDA) <> 0 then begin
+    CheckError('PrepareSelect', Status);
+   end;
+   if SQLDA^.SQLD > SQLDA^.SQLN then begin
+    AllocSQLDA(SQLDA,SQLDA^.SQLD);
+    if isc_dsql_describe(@Status, @Statement, 1, SQLDA) <> 0 then begin
+     CheckError('PrepareSelect', Status);
+    end;
+   end;
+   for x := 0 to SQLDA^.SQLD - 1 do with SQLDA^.SQLVar[x] do begin
+    if ((SQLType and not 1) = SQL_VARYING) then begin
+     SQLData := AllocMem(SQLDA^.SQLVar[x].SQLLen+2);
     end
     else begin
-     str1:= todbstring(asql);
+     SQLData := AllocMem(SQLDA^.SQLVar[x].SQLLen);
     end;
-    if isc_dsql_prepare(@Status, @tr, @Statement, 0, @str1[1],
-                        Dialect, nil) <> 0 then begin
-     isc_dsql_free_statement(@fstatus, @statement, dsql_drop);
-     CheckError('PrepareStatement', Status);
+    if (SQLType and 1) = 1 then begin //check not null constraint
+     New(SQLInd);
     end;
-    FPrepared := True;
-    if assigned(AParams) and (AParams.count > 0) then begin
-     AllocSQLDA(in_SQLDA,Length(ParamBinding));
-     if isc_dsql_describe_bind(@Status, @Statement, 1, in_SQLDA) <> 0 then begin
-       CheckError('PrepareStatement', Status);
-     end;
-     if in_SQLDA^.SQLD > in_SQLDA^.SQLN then begin
-       DatabaseError(SParameterCountIncorrect,self);
-     end;
-     setlength(paramtypes,in_SQLDA^.SQLD);
-     for x := 0 to in_SQLDA^.SQLD - 1 do begin
-      with in_SQLDA^.SQLVar[x] do begin
-       TranslateFldType(SQLType,sqlsubtype,SQLLen,SQLScale,TransType,TransLen);
-       paramtypes[x]:= transtype;
-       if ((SQLType and not 1) = SQL_VARYING) then begin
-         SQLData := AllocMem(in_SQLDA^.SQLVar[x].SQLLen+2)
-       end
-       else begin
-         SQLData := AllocMem(in_SQLDA^.SQLVar[x].SQLLen);
-       end;
-       if (sqltype and 1) = 1 then begin
-        New(SQLInd);
-       end;
-      end;
-     end;
-    end;
-    if FStatementType in datareturningtypes then
-      begin
-///////////////////////      FPrepared := False;
-      if isc_dsql_describe(@Status, @Statement, 1, SQLDA) <> 0 then
-        CheckError('PrepareSelect', Status);
-      if SQLDA^.SQLD > SQLDA^.SQLN then
-        begin
-        AllocSQLDA(SQLDA,SQLDA^.SQLD);
-        if isc_dsql_describe(@Status, @Statement, 1, SQLDA) <> 0 then
-          CheckError('PrepareSelect', Status);
-        end;
-      for x := 0 to SQLDA^.SQLD - 1 do with SQLDA^.SQLVar[x] do
-        begin
-        if ((SQLType and not 1) = SQL_VARYING) then
-          SQLData := AllocMem(SQLDA^.SQLVar[x].SQLLen+2)
-        else
-          SQLData := AllocMem(SQLDA^.SQLVar[x].SQLLen);
-        if (SQLType and 1) = 1 then New(SQLInd);
-        end;
-      end;
-    end;
+   end;
+  end;
+ end;
 end;
 
 procedure tibconnection.unpreparestatement(cursor: tsqlcursor);
@@ -1012,11 +1023,11 @@ var
 begin
  with tibcursor(cursor) do begin
   for SQLVarNr := 0 to High(ParamBinding){AParams.count-1} do begin
-   ParNr := ParamBinding[SQLVarNr];
+   ParNr:= ParamBinding[SQLVarNr];
    po1:= @in_sqlda^.SQLvar[SQLVarNr];
    if AParams[ParNr].IsNull then begin
     If Assigned(po1^.SQLInd) then begin
-      po1^.SQLInd^ := -1;
+     po1^.SQLInd^ := -1;
     end;
    end
    else begin

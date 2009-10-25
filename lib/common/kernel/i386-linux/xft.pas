@@ -2,7 +2,7 @@ unit xft;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- {$ifdef FPC}x,{$endif}Xlib,xrender,mselibc;
+ {$ifdef FPC}x,{$endif}Xlib,xrender,mselibc,msectypes;
 
 {
   Automatically converted by H2Pas 0.99.16 from Xft.h
