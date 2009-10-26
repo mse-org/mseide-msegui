@@ -1,5 +1,9 @@
 #!/bin/sh
- 
+
+# Assumes that "/usr/local/bin" contains symlinks to:
+# {$mse_dir}/tools/form2pas (shouldn't be renamed!)
+# {$mse_dir}/tools/msedirclear.sh (this script)
+
 [ -z $1 ] && {
   echo "A directory must be supplied!"
   exit -1
@@ -19,7 +23,7 @@ done | sort -ru`
 CURDIR=`pwd`
  
 for d in $DIRS; do
-  cd $d 2>/dev/null && {
+  cd $CURDIR && cd $d 2>/dev/null && {
     rm -f -- *.a *.o *.ppu *.A *.O *.PPU 
     for f in `ls -A1 *.mfm *.MFM 2>/dev/null`; do
       [ -f $f ] && form2pas $f
@@ -28,4 +32,4 @@ for d in $DIRS; do
 done
 
 cd $CURDIR
-exit 0 
+exit 0
