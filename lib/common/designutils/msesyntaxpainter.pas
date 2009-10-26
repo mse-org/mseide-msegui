@@ -165,6 +165,7 @@ type
    procedure unregisterclient(handle: integer);
                //eintreage mit alist loeschen
    function readdeffile(stream: ttextstream): integer; overload;
+   function readdeffile(const afilename: filenamety): integer; overload;
    function readdeffile(const atext: string): integer; overload;
    procedure freedeffile(handle: integer);
    function linkdeffile(const sourcefilename: filenamety): integer;
@@ -1052,6 +1053,18 @@ begin
   end;
  end;
  syntaxchanged;
+end;
+
+function tsyntaxpainter.readdeffile(const afilename: filenamety): integer;
+var
+ stream1: ttextstream;
+begin
+ stream1:= ttextstream.create(afilename,fm_read);
+ try
+  result:= readdeffile(stream1);
+ finally
+  stream1.free;
+ end;
 end;
 
 procedure tsyntaxpainter.freedeffile(handle: integer);
