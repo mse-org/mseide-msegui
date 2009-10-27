@@ -394,7 +394,7 @@ var
  int1: integer;
 begin
 {$IfDef LinkDynamically}
- InitialisePostgres3;
+ InitializePostgres3;
 {$EndIf}
  ftransactionconnectionused:= false;
  inherited dointernalconnect;
@@ -429,7 +429,7 @@ var
  conn: ppgconn;
 begin
 {$IfDef LinkDynamically}
- InitialisePostgres3;
+ InitializePostgres3;
 {$EndIf}
  try
   openconnection(constructconnectstring,conn);
@@ -873,15 +873,15 @@ begin
  with TPQCursor(cursor) do begin
   x:= fieldnum;
   if pqgetisnull(res,CurTuple,x)=1 then begin
-   result := false
+   result:= false
   end
   else begin
+   result:= true;
    if buffer = nil then begin
     exit;
    end;
    i:= PQfsize(res, x);
    CurrBuff := pqgetvalue(res,CurTuple,x);
-   result := true;
    case DataType of
     ftInteger,ftSmallint,ftword: begin
      case i of               // postgres returns big-endian numbers

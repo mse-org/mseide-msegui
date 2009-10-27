@@ -207,9 +207,18 @@ procedure deletecommandlineargument(const index: integer);
 
 function loadlib(const libnames: array of filenamety; 
                                       out libname: filenamety): tlibhandle;
-procedure getprocaddresses(const lib: tlibhandle; const anames: array of string;
+type
+ procinfoty = record
+               n: string;
+               d: ppointer;
+              end;
+              
+function getprocaddresses(const lib: tlibhandle;
+                       const procedures: array of procinfoty;
+                       const noexception: boolean = false): boolean; overload;
+function getprocaddresses(const lib: tlibhandle; const anames: array of string;
                const adest: array of ppointer;
-               const noexception: boolean = false); overload;
+               const noexception: boolean = false): boolean; overload;
 function getprocaddresses(const libnames: array of filenamety; 
                              const anames: array of string; 
                              const adest: array of ppointer;
@@ -240,22 +249,51 @@ Procedure CatchUnhandledException (Obj : TObject; Addr: Pointer;
  {$endif}
 {$endif}
 
-procedure getprocaddresses(const lib: tlibhandle; const anames: array of string; 
-             const adest: array of ppointer; const noexception: boolean = false);
+function getprocaddresses(const lib: tlibhandle;
+                          const procedures: array of procinfoty;
+                          const noexception: boolean = false): boolean; overload;
+var
+ int1: integer;
+begin
+ result:= true;
+ for int1:= 0 to high(procedures) do begin
+  with procedures[int1] do begin
+ {$ifdef FPC}
+  d^:= getprocedureaddress(lib,n);
+  {$else}
+  d^:= getprocaddress(lib,pansichar(n));
+  {$endif}
+  if (d^ = nil) then begin
+   result:= false;
+   if not noexception then begin
+    raise exception.create('Function "'+n+'" not found.');
+   end;
+  end;
+ end;
+end;
+end;
+
+function getprocaddresses(const lib: tlibhandle; const anames: array of string; 
+             const adest: array of ppointer;
+             const noexception: boolean = false): boolean;
 var
  int1: integer;
 begin
  if high(anames) <> high(adest) then begin
   raise exception.create('Invalid parameter.');
  end;
+ result:= true;
  for int1:= 0 to high(anames) do begin
  {$ifdef FPC}
   adest[int1]^:= getprocedureaddress(lib,anames[int1]);
   {$else}
   adest[int1]^:= getprocaddress(lib,pansichar(anames[int1]));
   {$endif}
-  if (adest[int1]^ = nil) and not noexception then begin
-   raise exception.create('Function "'+anames[int1]+'" not found.');
+  if (adest[int1]^ = nil) then begin
+   result:= false;
+   if not noexception then begin
+    raise exception.create('Function "'+anames[int1]+'" not found.');
+   end;
   end;
  end;
 end;
