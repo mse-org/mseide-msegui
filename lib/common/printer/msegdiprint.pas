@@ -409,6 +409,7 @@ procedure doinit;
 var
  haserror: boolean;
 begin
+{$ifdef FPC}
  haserror:= false;
  {$ifdef mswindows}
  if not iswin95 then begin
@@ -445,6 +446,9 @@ begin
   haserror:= true;
  end;
  {$endif}
+{$else} //delphi can not call the correct procedures
+ haserror:= true;
+{$endif}
  hasgdiprint:= not haserror;
 end;
 
