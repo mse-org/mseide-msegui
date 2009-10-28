@@ -24,7 +24,7 @@ uses
   Martin Schreiber 2007
 }
 
-procedure initialisesqlite3;
+procedure initializesqlite3;
 procedure releasesqlite3;
 
 {$PACKRECORDS C}
@@ -801,7 +801,7 @@ begin
 end;
 *)
 
-procedure initialisesqlite3;
+procedure initializesqlite3;
 const
  funcs: array[0..94] of procinfoty = (
   (n: 'sqlite3_close'; d: @sqlite3_close),

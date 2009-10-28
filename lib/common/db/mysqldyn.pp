@@ -30,7 +30,7 @@
     mysqlclient
     mysql_com.h / mysql.h
 
-Modified 2008 by Martin Schreiber
+Modified 2008..2009 by Martin Schreiber
 
 }
 unit mysqldyn;
@@ -56,6 +56,12 @@ uses
       sysutils,
 {$ENDIF}
      dynlibs,ctypes;
+
+procedure initializemysql;
+procedure releasemysql;
+
+procedure mysqllock;
+procedure mysqlunlock;
 
 {$IFDEF Unix}
   {$DEFINE extdecl:=cdecl}
@@ -1621,10 +1627,8 @@ type
 {$IFDEF LinkDynamically}
 //Function InitialiseMysql(Const LibraryName : String) : Integer;
 //Function InitialiseMysql : Integer;
-procedure initialisemysql;
-procedure releasemysql;
 
-var MysqlLibraryHandle : TLibHandle;
+//var MysqlLibraryHandle : TLibHandle;
 {$ENDIF}
 
 //    var
@@ -1748,12 +1752,10 @@ var MysqlLibraryHandle : TLibHandle;
       mysql_stmt_insert_id: function (stmt:PMYSQL_STMT):my_ulonglong;extdecl;
       mysql_stmt_field_count: function (stmt:PMYSQL_STMT):cuint;extdecl;
 
-procedure mysqllock;
-procedure mysqlunlock;
-
 implementation
 uses
- msestrings,msesys,msesysintf,msesonames;
+ msestrings,msesys,msesysintf,msesonames
+                {$IFDEF LinkDynamically},msedynload{$endif};
  
 {$IFDEF LinkDynamically}
 
@@ -1762,11 +1764,65 @@ ResourceString
   SErrLoadFailed     = 'Can not load MySQL library "%s". Please check your installation.';
   SErrDefaultsFailed = 'Can not load default MySQL library ("%s" or "%s"). Check your installation.';
 
-var 
- liblock: mutexty;
-  RefCount : integer;
+var
+ libinfo: dynlibinfoty;
+// liblock: mutexty;
+//  RefCount : integer;
 //  LoadedLibrary : String;
-  
+
+    function net_new_transaction(net : st_net) : st_net;
+    begin
+      net.pkt_nr := 0;
+      result := net;
+    end;
+
+    function IS_PRI_KEY(n : longint) : boolean;
+    begin
+      IS_PRI_KEY:=(n and PRI_KEY_FLAG)<>0;
+    end;
+
+    function IS_NOT_NULL(n : longint) : boolean;
+    begin
+     IS_NOT_NULL:=(n and NOT_NULL_FLAG)<>0;
+    end;
+
+    function IS_BLOB(n : longint) : boolean;
+    begin
+     IS_BLOB:=(n and BLOB_FLAG)<>0;
+    end;
+
+    function IS_NUM_FIELD(f : pst_mysql_field) : boolean;
+    begin
+       IS_NUM_FIELD:=((f^.flags) and NUM_FLAG)<>0;
+    end;
+
+    function IS_NUM(t : enum_field_types) : boolean;
+    begin
+{$IFDEF mysql50}
+      IS_NUM := (t <= FIELD_TYPE_INT24) or (t=FIELD_TYPE_YEAR) or (t=FIELD_TYPE_NEWDECIMAL);
+{$ELSE}
+      IS_NUM := (t <= FIELD_TYPE_INT24) or (t=FIELD_TYPE_YEAR);
+{$ENDIF}
+    end;
+
+    function INTERNAL_NUM_FIELD(f : Pst_mysql_field) : boolean;
+    begin
+      INTERNAL_NUM_FIELD := (f^.ftype <= FIELD_TYPE_INT24) and ((f^.ftype <> FIELD_TYPE_TIMESTAMP)
+      or (f^.length = 14) or (f^.length=8)) or (f^.ftype=FIELD_TYPE_YEAR);
+    end;
+
+    function mysql_reload(mysql : PMySQL) : cint;
+    begin
+      mysql_reload:=mysql_refresh(mysql,REFRESH_GRANT);
+    end;
+
+    function simple_command(mysql,command,arg,length,skip_check : longint) : longint;
+    begin
+      //simple_command:=mysql^.(methods^.advanced_command)(mysqlcommandNullS0arglengthskip_check);
+      result := -1;
+    end;
+
+(*  
 function tryinitialisemysql(const alibnames: array of filenamety): boolean;
 var
  mstr1: filenamety;
@@ -1995,126 +2051,8 @@ begin
   sys_mutexunlock(liblock);
  end;
 end;
-(*
-Function TryInitialiseMysql(Const LibraryName : String) : Integer;
-
-
-begin
-  Result := 0;
-  if (RefCount=0) then
-    begin
-    MysqlLibraryHandle := loadlibrary(LibraryName);
-    if (MysqlLibraryHandle=nilhandle) then
-      Exit;
-    Inc(RefCount);
-    LoadedLibrary:=LibraryName;
-// Only the procedure that are given in the c-library documentation are loaded, to
-// avoid problems with 'incomplete' libraries
-    pointer(my_init) := GetProcedureAddress(MysqlLibraryHandle,'my_init');
-    pointer(my_thread_init) := GetProcedureAddress(MysqlLibraryHandle,'my_thread_init');
-    pointer(my_thread_end) := GetProcedureAddress(MysqlLibraryHandle,'my_thread_end');
-
-    pointer(mysql_affected_rows) := GetProcedureAddress(MysqlLibraryHandle,'mysql_affected_rows');
-    pointer(mysql_autocommit) := GetProcedureAddress(MysqlLibraryHandle,'mysql_autocommit');
-    pointer(mysql_change_user) := GetProcedureAddress(MysqlLibraryHandle,'mysql_change_user');
-//    pointer(mysql_charset_name) := GetProcedureAddress(MysqlLibraryHandle,'mysql_charset_name');
-    pointer(mysql_close) := GetProcedureAddress(MysqlLibraryHandle,'mysql_close');
-    pointer(mysql_commit) := GetProcedureAddress(MysqlLibraryHandle,'mysql_commit');
-//    pointer(mysql_connect) := GetProcedureAddress(MysqlLibraryHandle,'mysql_connect');
-//    pointer(mysql_create_db) := GetProcedureAddress(MysqlLibraryHandle,'mysql_create_db');
-    pointer(mysql_data_seek) := GetProcedureAddress(MysqlLibraryHandle,'mysql_data_seek');
-//    pointer(mysql_drop_db) := GetProcedureAddress(MysqlLibraryHandle,'mysql_drop_db');
-    pointer(mysql_debug) := GetProcedureAddress(MysqlLibraryHandle,'mysql_debug');
-    pointer(mysql_dump_debug_info) := GetProcedureAddress(MysqlLibraryHandle,'mysql_dump_debug_info');
-    pointer(mysql_eof) := GetProcedureAddress(MysqlLibraryHandle,'mysql_eof');
-    pointer(mysql_errno) := GetProcedureAddress(MysqlLibraryHandle,'mysql_errno');
-    pointer(mysql_error) := GetProcedureAddress(MysqlLibraryHandle,'mysql_error');
-    pointer(mysql_escape_string) := GetProcedureAddress(MysqlLibraryHandle,'mysql_escape_string');
-    pointer(mysql_fetch_field) := GetProcedureAddress(MysqlLibraryHandle,'mysql_fetch_field');
-    pointer(mysql_fetch_field_direct) := GetProcedureAddress(MysqlLibraryHandle,'mysql_fetch_field_direct');
-    pointer(mysql_fetch_fields) := GetProcedureAddress(MysqlLibraryHandle,'mysql_fetch_fields');
-    pointer(mysql_fetch_lengths) := GetProcedureAddress(MysqlLibraryHandle,'mysql_fetch_lengths');
-    pointer(mysql_fetch_row) := GetProcedureAddress(MysqlLibraryHandle,'mysql_fetch_row');
-    pointer(mysql_field_seek) := GetProcedureAddress(MysqlLibraryHandle,'mysql_field_seek');
-    pointer(mysql_field_count) := GetProcedureAddress(MysqlLibraryHandle,'mysql_field_count');
-    pointer(mysql_field_tell) := GetProcedureAddress(MysqlLibraryHandle,'mysql_field_tell');
-    pointer(mysql_free_result) := GetProcedureAddress(MysqlLibraryHandle,'mysql_free_result');
-    pointer(mysql_get_client_info) := GetProcedureAddress(MysqlLibraryHandle,'mysql_get_client_info');
-    pointer(mysql_get_client_version) := GetProcedureAddress(MysqlLibraryHandle,'mysql_get_client_version');
-    pointer(mysql_get_host_info) := GetProcedureAddress(MysqlLibraryHandle,'mysql_get_host_info');
-    pointer(mysql_get_server_version) := GetProcedureAddress(MysqlLibraryHandle,'mysql_get_server_version');
-    pointer(mysql_get_proto_info) := GetProcedureAddress(MysqlLibraryHandle,'mysql_get_proto_info');
-    pointer(mysql_get_server_info) := GetProcedureAddress(MysqlLibraryHandle,'mysql_get_server_info');
-    pointer(mysql_info) := GetProcedureAddress(MysqlLibraryHandle,'mysql_info');
-    pointer(mysql_init) := GetProcedureAddress(MysqlLibraryHandle,'mysql_init');
-    pointer(mysql_insert_id) := GetProcedureAddress(MysqlLibraryHandle,'mysql_insert_id');
-    pointer(mysql_kill) := GetProcedureAddress(MysqlLibraryHandle,'mysql_kill');
-    pointer(mysql_library_end) := GetProcedureAddress(MysqlLibraryHandle,'mysql_server_end');
-    pointer(mysql_library_init) := GetProcedureAddress(MysqlLibraryHandle,'mysql_server_init');
-    pointer(mysql_list_dbs) := GetProcedureAddress(MysqlLibraryHandle,'mysql_list_dbs');
-    pointer(mysql_list_fields) := GetProcedureAddress(MysqlLibraryHandle,'mysql_list_fields');
-    pointer(mysql_list_processes) := GetProcedureAddress(MysqlLibraryHandle,'mysql_list_processes');
-    pointer(mysql_list_tables) := GetProcedureAddress(MysqlLibraryHandle,'mysql_list_tables');
-    pointer(mysql_more_results) := GetProcedureAddress(MysqlLibraryHandle,'mysql_more_results');
-    pointer(mysql_next_result) := GetProcedureAddress(MysqlLibraryHandle,'mysql_next_result');
-    pointer(mysql_num_fields) := GetProcedureAddress(MysqlLibraryHandle,'mysql_num_fields');
-    pointer(mysql_num_rows) := GetProcedureAddress(MysqlLibraryHandle,'mysql_num_rows');
-    pointer(mysql_options) := GetProcedureAddress(MysqlLibraryHandle,'mysql_options');
-    pointer(mysql_ping) := GetProcedureAddress(MysqlLibraryHandle,'mysql_ping');
-    pointer(mysql_query) := GetProcedureAddress(MysqlLibraryHandle,'mysql_query');
-    pointer(mysql_real_connect) := GetProcedureAddress(MysqlLibraryHandle,'mysql_real_connect');
-    pointer(mysql_real_escape_string) := GetProcedureAddress(MysqlLibraryHandle,'mysql_real_escape_string');
-    pointer(mysql_real_query) := GetProcedureAddress(MysqlLibraryHandle,'mysql_real_query');
-    pointer(mysql_refresh) := GetProcedureAddress(MysqlLibraryHandle,'mysql_refresh');
-//    pointer(mysql_reload) := GetProcedureAddress(MysqlLibraryHandle,'mysql_reload');
-    pointer(mysql_rollback) := GetProcedureAddress(MysqlLibraryHandle,'mysql_rollback');
-    pointer(mysql_row_seek) := GetProcedureAddress(MysqlLibraryHandle,'mysql_row_seek');
-    pointer(mysql_row_tell) := GetProcedureAddress(MysqlLibraryHandle,'mysql_row_tell');
-    pointer(mysql_select_db) := GetProcedureAddress(MysqlLibraryHandle,'mysql_select_db');
-    pointer(mysql_server_end) := GetProcedureAddress(MysqlLibraryHandle,'mysql_server_end');
-    pointer(mysql_server_init) := GetProcedureAddress(MysqlLibraryHandle,'mysql_server_init');
-    pointer(mysql_set_server_option) := GetProcedureAddress(MysqlLibraryHandle,'mysql_set_server_option');
-    pointer(mysql_sqlstate) := GetProcedureAddress(MysqlLibraryHandle,'mysql_sqlstate');
-    pointer(mysql_shutdown) := GetProcedureAddress(MysqlLibraryHandle,'mysql_shutdown');
-    pointer(mysql_stat) := GetProcedureAddress(MysqlLibraryHandle,'mysql_stat');
-    pointer(mysql_store_result) := GetProcedureAddress(MysqlLibraryHandle,'mysql_store_result');
-    pointer(mysql_thread_id) := GetProcedureAddress(MysqlLibraryHandle,'mysql_thread_id');
-//    pointer(mysql_thread_save) := GetProcedureAddress(MysqlLibraryHandle,'mysql_thread_save');
-    pointer(mysql_use_result) := GetProcedureAddress(MysqlLibraryHandle,'mysql_use_result');
-    pointer(mysql_warning_count) := GetProcedureAddress(MysqlLibraryHandle,'mysql_warning_count');
-    pointer(mysql_stmt_init) := GetProcedureAddress(MysqlLibraryHandle,'mysql_stmt_init');
-    pointer(mysql_stmt_prepare) := GetProcedureAddress(MysqlLibraryHandle,'mysql_stmt_prepare');
-    pointer(mysql_stmt_execute) := GetProcedureAddress(MysqlLibraryHandle,'mysql_stmt_execute');
-    pointer(mysql_stmt_fetch) := GetProcedureAddress(MysqlLibraryHandle,'mysql_stmt_fetch');
-    pointer(mysql_stmt_fetch_column) := GetProcedureAddress(MysqlLibraryHandle,'mysql_stmt_fetch_column');
-    pointer(mysql_stmt_store_result) := GetProcedureAddress(MysqlLibraryHandle,'mysql_stmt_store_result');
-    pointer(mysql_stmt_param_count) := GetProcedureAddress(MysqlLibraryHandle,'mysql_stmt_param_count');
-    pointer(mysql_stmt_attr_set) := GetProcedureAddress(MysqlLibraryHandle,'mysql_stmt_attr_set');
-    pointer(mysql_stmt_attr_get) := GetProcedureAddress(MysqlLibraryHandle,'mysql_stmt_attr_get');
-    pointer(mysql_stmt_bind_param) := GetProcedureAddress(MysqlLibraryHandle,'mysql_stmt_bind_param');
-    pointer(mysql_stmt_bind_result) := GetProcedureAddress(MysqlLibraryHandle,'mysql_stmt_bind_result');
-    pointer(mysql_stmt_close) := GetProcedureAddress(MysqlLibraryHandle,'mysql_stmt_close');
-    pointer(mysql_stmt_reset) := GetProcedureAddress(MysqlLibraryHandle,'mysql_stmt_reset');
-    pointer(mysql_stmt_free_result) := GetProcedureAddress(MysqlLibraryHandle,'mysql_stmt_free_result');
-    pointer(mysql_stmt_send_long_data) := GetProcedureAddress(MysqlLibraryHandle,'mysql_stmt_send_long_data');
-    pointer(mysql_stmt_result_metadata) := GetProcedureAddress(MysqlLibraryHandle,'mysql_stmt_result_metadata');
-    pointer(mysql_stmt_param_metadata) := GetProcedureAddress(MysqlLibraryHandle,'mysql_stmt_param_metadata');
-    pointer(mysql_stmt_errno) := GetProcedureAddress(MysqlLibraryHandle,'mysql_stmt_errno');
-    pointer(mysql_stmt_error) := GetProcedureAddress(MysqlLibraryHandle,'mysql_stmt_error');
-    pointer(mysql_stmt_sqlstate) := GetProcedureAddress(MysqlLibraryHandle,'mysql_stmt_sqlstate');
-    pointer(mysql_stmt_row_seek) := GetProcedureAddress(MysqlLibraryHandle,'mysql_stmt_row_seek');
-    pointer(mysql_stmt_row_tell) := GetProcedureAddress(MysqlLibraryHandle,'mysql_stmt_row_tell');
-    pointer(mysql_stmt_data_seek) := GetProcedureAddress(MysqlLibraryHandle,'mysql_stmt_data_seek');
-    pointer(mysql_stmt_num_rows) := GetProcedureAddress(MysqlLibraryHandle,'mysql_stmt_num_rows');
-    pointer(mysql_stmt_affected_rows) := GetProcedureAddress(MysqlLibraryHandle,'mysql_stmt_affected_rows');
-    pointer(mysql_stmt_insert_id) := GetProcedureAddress(MysqlLibraryHandle,'mysql_stmt_insert_id');
-    pointer(mysql_stmt_field_count) := GetProcedureAddress(MysqlLibraryHandle,'mysql_stmt_field_count');
-    end
-  else
-    inc(RefCount);
-  Result:=RefCount;
-end;
-
+*)
+{
 Function InitialiseMysql : Integer;
 
 begin
@@ -2124,7 +2062,8 @@ begin
       Raise EInOutError.CreateFmt(SErrDefaultsFailed,[mysqlvlib,mysqllib]);
   Result := RefCount;
 end;
-
+}
+{
 Function InitialiseMysql(Const LibraryName : String) : Integer;
 
 begin
@@ -2138,9 +2077,9 @@ begin
     Raise EInOUtError.CreateFmt(SErrAlreadyLoaded,[LoadedLibrary]);
     end;
 end;
-
+}
+{
 Procedure ReleaseMysql;
-
 begin
   if RefCount> 1 then
     Dec(RefCount)
@@ -2151,99 +2090,139 @@ begin
     LoadedLibrary:='';
     end;
 end;
-*)
+}
 
 procedure mysqllock;
 begin
- sys_mutexlock(liblock);
+ sys_mutexlock(libinfo.lock);
 end;
 
 procedure mysqlunlock;
 begin
- sys_mutexunlock(liblock);
+ sys_mutexunlock(libinfo.lock);
 end;
+
 
 procedure releasemysql;
 begin
- mysqllock;
- if refcount > 1 then begin
-  dec(refcount);
- end
- else begin
-  mysql_library_end;
-  if unloadlibrary(mysqllibraryhandle) then begin
-   dec(refcount);
-   mysqllibraryhandle:= nilhandle;
-  end;
- end;
- mysqlunlock;
+ releasedynlib(libinfo);
 end;
 
-procedure initialisemysql;
+procedure initializemysql;
+const 
+ funcs: array[0..89] of procinfoty = (
+  (n: 'mysql_affected_rows'; d: @mysql_affected_rows),
+  (n: 'mysql_autocommit'; d: @mysql_autocommit),
+  (n: 'mysql_change_user'; d: @mysql_change_user),
+  (n: 'mysql_close'; d: @mysql_close),
+  (n: 'mysql_commit'; d: @mysql_commit),
+  (n: 'mysql_data_seek'; d: @mysql_data_seek),
+  (n: 'mysql_debug'; d: @mysql_debug),
+  (n: 'mysql_dump_debug_info'; d: @mysql_dump_debug_info),
+  (n: 'mysql_eof'; d: @mysql_eof),
+  (n: 'mysql_errno'; d: @mysql_errno),
+  (n: 'mysql_error'; d: @mysql_error),
+  (n: 'mysql_escape_string'; d: @mysql_escape_string),
+  (n: 'mysql_fetch_field'; d: @mysql_fetch_field),
+  (n: 'mysql_fetch_field_direct'; d: @mysql_fetch_field_direct),
+  (n: 'mysql_fetch_fields'; d: @mysql_fetch_fields),
+  (n: 'mysql_fetch_lengths'; d: @mysql_fetch_lengths),
+  (n: 'mysql_fetch_row'; d: @mysql_fetch_row),
+  (n: 'mysql_field_seek'; d: @mysql_field_seek),
+  (n: 'mysql_field_count'; d: @mysql_field_count),
+  (n: 'mysql_field_tell'; d: @mysql_field_tell),
+  (n: 'mysql_free_result'; d: @mysql_free_result),
+  (n: 'mysql_get_client_info'; d: @mysql_get_client_info),
+  (n: 'mysql_get_client_version'; d: @mysql_get_client_version),
+  (n: 'mysql_get_host_info'; d: @mysql_get_host_info),
+  (n: 'mysql_get_server_version'; d: @mysql_get_server_version),
+  (n: 'mysql_get_proto_info'; d: @mysql_get_proto_info),
+  (n: 'mysql_get_server_info'; d: @mysql_get_server_info),
+  (n: 'mysql_info'; d: @mysql_info),
+  (n: 'mysql_init'; d: @mysql_init),
+  (n: 'mysql_insert_id'; d: @mysql_insert_id),
+  (n: 'mysql_kill'; d: @mysql_kill),
+  (n: 'mysql_server_end'; d: @mysql_server_end),
+  (n: 'mysql_server_init'; d: @mysql_server_init),
+  (n: 'mysql_list_dbs'; d: @mysql_list_dbs),
+  (n: 'mysql_list_fields'; d: @mysql_list_fields),
+  (n: 'mysql_list_processes'; d: @mysql_list_processes),
+  (n: 'mysql_list_tables'; d: @mysql_list_tables),
+  (n: 'mysql_more_results'; d: @mysql_more_results),
+  (n: 'mysql_next_result'; d: @mysql_next_result),
+  (n: 'mysql_num_fields'; d: @mysql_num_fields),
+  (n: 'mysql_num_rows'; d: @mysql_num_rows),
+  (n: 'mysql_options'; d: @mysql_options),
+  (n: 'mysql_ping'; d: @mysql_ping),
+  (n: 'mysql_query'; d: @mysql_query),
+  (n: 'mysql_real_connect'; d: @mysql_real_connect),
+  (n: 'mysql_real_escape_string'; d: @mysql_real_escape_string),
+  (n: 'mysql_real_query'; d: @mysql_real_query),
+  (n: 'mysql_refresh'; d: @mysql_refresh),
+  (n: 'mysql_rollback'; d: @mysql_rollback),
+  (n: 'mysql_row_seek'; d: @mysql_row_seek),
+  (n: 'mysql_row_tell'; d: @mysql_row_tell),
+  (n: 'mysql_select_db'; d: @mysql_select_db),
+  (n: 'mysql_server_end'; d: @mysql_server_end),
+  (n: 'mysql_server_init'; d: @mysql_server_init),
+  (n: 'mysql_set_server_option'; d: @mysql_set_server_option),
+  (n: 'mysql_sqlstate'; d: @mysql_sqlstate),
+  (n: 'mysql_shutdown'; d: @mysql_shutdown),
+  (n: 'mysql_stat'; d: @mysql_stat),
+  (n: 'mysql_store_result'; d: @mysql_store_result),
+  (n: 'mysql_thread_id'; d: @mysql_thread_id),
+  (n: 'mysql_use_result'; d: @mysql_use_result),
+  (n: 'mysql_warning_count'; d: @mysql_warning_count),
+  (n: 'mysql_stmt_init'; d: @mysql_stmt_init),
+  (n: 'mysql_stmt_prepare'; d: @mysql_stmt_prepare),
+  (n: 'mysql_stmt_execute'; d: @mysql_stmt_execute),
+  (n: 'mysql_stmt_fetch'; d: @mysql_stmt_fetch),
+  (n: 'mysql_stmt_fetch_column'; d: @mysql_stmt_fetch_column),
+  (n: 'mysql_stmt_store_result'; d: @mysql_stmt_store_result),
+  (n: 'mysql_stmt_param_count'; d: @mysql_stmt_param_count),
+  (n: 'mysql_stmt_attr_set'; d: @mysql_stmt_attr_set),
+  (n: 'mysql_stmt_attr_get'; d: @mysql_stmt_attr_get),
+  (n: 'mysql_stmt_bind_param'; d: @mysql_stmt_bind_param),
+  (n: 'mysql_stmt_bind_result'; d: @mysql_stmt_bind_result),
+  (n: 'mysql_stmt_close'; d: @mysql_stmt_close),
+  (n: 'mysql_stmt_reset'; d: @mysql_stmt_reset),
+  (n: 'mysql_stmt_free_result'; d: @mysql_stmt_free_result),
+  (n: 'mysql_stmt_send_long_data'; d: @mysql_stmt_send_long_data),
+  (n: 'mysql_stmt_result_metadata'; d: @mysql_stmt_result_metadata),
+  (n: 'mysql_stmt_param_metadata'; d: @mysql_stmt_param_metadata),
+  (n: 'mysql_stmt_errno'; d: @mysql_stmt_errno),
+  (n: 'mysql_stmt_error'; d: @mysql_stmt_error),
+  (n: 'mysql_stmt_sqlstate'; d: @mysql_stmt_sqlstate),
+  (n: 'mysql_stmt_row_seek'; d: @mysql_stmt_row_seek),
+  (n: 'mysql_stmt_row_tell'; d: @mysql_stmt_row_tell),
+  (n: 'mysql_stmt_data_seek'; d: @mysql_stmt_data_seek),
+  (n: 'mysql_stmt_num_rows'; d: @mysql_stmt_num_rows),
+  (n: 'mysql_stmt_affected_rows'; d: @mysql_stmt_affected_rows),
+  (n: 'mysql_stmt_insert_id'; d: @mysql_stmt_insert_id),
+  (n: 'mysql_stmt_field_count'; d: @mysql_stmt_field_count),
+  (n: 'mysql_ssl_set'; d: @mysql_ssl_set)
+  );
+ funcsopt: array[0..0] of procinfoty = (
+   (n: 'mysql_get_ssl_cipher'; d: @mysql_get_ssl_cipher)
+  );
+  
 begin
- if not tryinitialisemysql(mysqllib) then begin
-  raise exception.create('Can not load MySQL client library '+
-                quotelibnames(mysqllib)+'. Check your installation."');
+ try
+  initializedynlib(libinfo,mysqllib,funcs,funcsopt);
+ except
+  on e: exception do begin
+   e.message:= 'Can not load MySQL library. '+e.message;
+   raise;
+  end;  
  end;
 end;
 
 
 {$ENDIF}
-    function net_new_transaction(net : st_net) : st_net;
-    begin
-      net.pkt_nr := 0;
-      result := net;
-    end;
-
-    function IS_PRI_KEY(n : longint) : boolean;
-    begin
-      IS_PRI_KEY:=(n and PRI_KEY_FLAG)<>0;
-    end;
-
-    function IS_NOT_NULL(n : longint) : boolean;
-    begin
-     IS_NOT_NULL:=(n and NOT_NULL_FLAG)<>0;
-    end;
-
-    function IS_BLOB(n : longint) : boolean;
-    begin
-     IS_BLOB:=(n and BLOB_FLAG)<>0;
-    end;
-
-    function IS_NUM_FIELD(f : pst_mysql_field) : boolean;
-    begin
-       IS_NUM_FIELD:=((f^.flags) and NUM_FLAG)<>0;
-    end;
-
-    function IS_NUM(t : enum_field_types) : boolean;
-    begin
-{$IFDEF mysql50}
-      IS_NUM := (t <= FIELD_TYPE_INT24) or (t=FIELD_TYPE_YEAR) or (t=FIELD_TYPE_NEWDECIMAL);
-{$ELSE}
-      IS_NUM := (t <= FIELD_TYPE_INT24) or (t=FIELD_TYPE_YEAR);
-{$ENDIF}
-    end;
-
-    function INTERNAL_NUM_FIELD(f : Pst_mysql_field) : boolean;
-    begin
-      INTERNAL_NUM_FIELD := (f^.ftype <= FIELD_TYPE_INT24) and ((f^.ftype <> FIELD_TYPE_TIMESTAMP)
-      or (f^.length = 14) or (f^.length=8)) or (f^.ftype=FIELD_TYPE_YEAR);
-    end;
-
-    function mysql_reload(mysql : PMySQL) : cint;
-    begin
-      mysql_reload:=mysql_refresh(mysql,REFRESH_GRANT);
-    end;
-
-    function simple_command(mysql,command,arg,length,skip_check : longint) : longint;
-    begin
-      //simple_command:=mysql^.(methods^.advanced_command)(mysqlcommandNullS0arglengthskip_check);
-      result := -1;
-    end;
 
 initialization
- sys_mutexcreate(liblock);
+ initializelibinfo(libinfo);
 finalization
- sys_mutexdestroy(liblock);
+ finalizelibinfo(libinfo);
 end.
 

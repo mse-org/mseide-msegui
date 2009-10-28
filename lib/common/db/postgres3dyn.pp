@@ -17,6 +17,10 @@ interface
 
 uses
   dynlibs, SysUtils, ctypes;
+
+procedure initializepostgres3;
+procedure releasepostgres3;
+
 (*
 {$IFDEF Unix}
   const
@@ -422,9 +426,6 @@ var
 //  PQgetssl : function (conn:PPGconn):PSSL;cdecl;
   PQgetssl : function (conn:PPGconn): pointer;cdecl;
 //{$endif}
-
-procedure initializepostgres3;
-procedure releasepostgres3;
 
 implementation
 uses

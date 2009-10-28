@@ -13,6 +13,9 @@ uses
 Var
   UseEmbeddedFirebird : Boolean = False;
 
+Procedure InitializeIBase60;
+Procedure ReleaseIBase60;
+
 {$ENDIF}
 
 {$DEFINE extdeclvararg:= cdecl}
@@ -2473,9 +2476,6 @@ var
   isc_suspend_window : function (_para1:PISC_STATUS; _para2:Pisc_win_handle):ISC_STATUS; extdecl;
 {$ENDIF}
 
-Procedure InitialiseIBase60;
-Procedure ReleaseIBase60;
-
 //var IBaseLibraryHandle : TLibHandle;
 
 {$ENDIF}
@@ -2890,7 +2890,7 @@ begin
 end;
 *)
 
-Procedure InitialiseIBase60;
+Procedure InitializeIBase60;
 const
  funcs: array[0..{$ifdef unix}163{$else}143{$endif}] of procinfoty = (
   (n: 'isc_attach_database'; d:  @isc_attach_database),
