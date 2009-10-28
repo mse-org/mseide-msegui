@@ -11,7 +11,7 @@ unit sqlite3dyn;
 
 interface
 uses
- msesonames;
+ msesonames,msedynload;
  
 {
   Automatically converted by H2Pas 0.99.16 from sqlite3.h
@@ -572,10 +572,8 @@ uses
  sysutils,{$ifndef mse_sqlite3static}dynlibs,{$endif}msesys,msestrings,msesysintf;
 {$ifndef mse_sqlite3static}
 var
- sqlite3libraryhandle: tlibhandle;
- liblock: mutexty;
- refcount: integer;
-  
+ libinfo: dynlibinfoty;
+(*  
 function tryinitialisesqlite3(const alibnames: array of filenamety): boolean;
 var
  mstr1: filenamety;
@@ -801,39 +799,136 @@ begin
   sys_mutexunlock(liblock);
  end;
 end;
+*)
 
 procedure initialisesqlite3;
+const
+ funcs: array[0..94] of procinfoty = (
+  (n: 'sqlite3_close'; d: @sqlite3_close),
+  (n: 'sqlite3_exec'; d: @sqlite3_exec),
+  (n: 'sqlite3_last_insert_rowid'; d: @sqlite3_last_insert_rowid),
+  (n: 'sqlite3_changes'; d: @sqlite3_changes),
+  (n: 'sqlite3_total_changes'; d: @sqlite3_total_changes),
+  (n: 'sqlite3_interrupt'; d: @sqlite3_interrupt),
+  (n: 'sqlite3_complete'; d: @sqlite3_complete),
+  (n: 'sqlite3_complete16'; d: @sqlite3_complete16),
+  (n: 'sqlite3_busy_handler'; d: @sqlite3_busy_handler),
+  (n: 'sqlite3_busy_timeout'; d: @sqlite3_busy_timeout),
+  (n: 'sqlite3_get_table'; d: @sqlite3_get_table),
+  (n: 'sqlite3_free_table'; d: @sqlite3_free_table),
+  (n: 'sqlite3_mprintf'; d: @sqlite3_mprintf),
+  (n: 'sqlite3_free'; d: @sqlite3_free),
+  (n: 'sqlite3_snprintf'; d: @sqlite3_snprintf),
+  (n: 'sqlite3_set_authorizer'; d: @sqlite3_set_authorizer),
+  (n: 'sqlite3_trace'; d: @sqlite3_trace),
+  (n: 'sqlite3_progress_handler'; d: @sqlite3_progress_handler),
+  (n: 'sqlite3_commit_hook'; d: @sqlite3_commit_hook),
+  (n: 'sqlite3_open'; d: @sqlite3_open),
+  (n: 'sqlite3_open16'; d: @sqlite3_open16),
+  (n: 'sqlite3_errcode'; d: @sqlite3_errcode),
+  (n: 'sqlite3_errmsg'; d: @sqlite3_errmsg),
+  (n: 'sqlite3_errmsg16'; d: @sqlite3_errmsg16),
+  (n: 'sqlite3_prepare'; d: @sqlite3_prepare),
+  (n: 'sqlite3_prepare16'; d: @sqlite3_prepare16),
+  (n: 'sqlite3_bind_blob'; d: @sqlite3_bind_blob),
+  (n: 'sqlite3_bind_double'; d: @sqlite3_bind_double),
+  (n: 'sqlite3_bind_int'; d: @sqlite3_bind_int),
+  (n: 'sqlite3_bind_int64'; d: @sqlite3_bind_int64),
+  (n: 'sqlite3_bind_null'; d: @sqlite3_bind_null),
+  (n: 'sqlite3_bind_text'; d: @sqlite3_bind_text),
+  (n: 'sqlite3_bind_text16'; d: @sqlite3_bind_text16),
+  (n: 'sqlite3_bind_blob'; d: @sqlite3_bind_blob),
+  (n: 'sqlite3_bind_text'; d: @sqlite3_bind_text),
+  (n: 'sqlite3_bind_text16'; d: @sqlite3_bind_text16),
+  (n: 'sqlite3_bind_parameter_count'; d: @sqlite3_bind_parameter_count),
+  (n: 'sqlite3_bind_parameter_name'; d: @sqlite3_bind_parameter_name),
+  (n: 'sqlite3_bind_parameter_index'; d: @sqlite3_bind_parameter_index),
+  (n: 'sqlite3_column_count'; d: @sqlite3_column_count),
+  (n: 'sqlite3_column_name'; d: @sqlite3_column_name),
+  (n: 'sqlite3_column_name16'; d: @sqlite3_column_name16),
+  (n: 'sqlite3_column_decltype'; d: @sqlite3_column_decltype),
+  (n: 'sqlite3_column_decltype16'; d: @sqlite3_column_decltype16),
+  (n: 'sqlite3_step'; d: @sqlite3_step),
+  (n: 'sqlite3_data_count'; d: @sqlite3_data_count),
+  (n: 'sqlite3_column_blob'; d: @sqlite3_column_blob),
+  (n: 'sqlite3_column_bytes'; d: @sqlite3_column_bytes),
+  (n: 'sqlite3_column_bytes16'; d: @sqlite3_column_bytes16),
+  (n: 'sqlite3_column_double'; d: @sqlite3_column_double),
+  (n: 'sqlite3_column_int'; d: @sqlite3_column_int),
+  (n: 'sqlite3_column_int64'; d: @sqlite3_column_int64),
+  (n: 'sqlite3_column_text'; d: @sqlite3_column_text),
+  (n: 'sqlite3_column_text16'; d: @sqlite3_column_text16),
+  (n: 'sqlite3_column_type'; d: @sqlite3_column_type),
+  (n: 'sqlite3_finalize'; d: @sqlite3_finalize),
+  (n: 'sqlite3_reset'; d: @sqlite3_reset),
+  (n: 'sqlite3_create_function'; d: @sqlite3_create_function),
+  (n: 'sqlite3_create_function16'; d: @sqlite3_create_function16),
+  (n: 'sqlite3_aggregate_count'; d: @sqlite3_aggregate_count),
+  (n: 'sqlite3_value_blob'; d: @sqlite3_value_blob),
+  (n: 'sqlite3_value_bytes'; d: @sqlite3_value_bytes),
+  (n: 'sqlite3_value_bytes16'; d: @sqlite3_value_bytes16),
+  (n: 'sqlite3_value_double'; d: @sqlite3_value_double),
+  (n: 'sqlite3_value_int'; d: @sqlite3_value_int),
+  (n: 'sqlite3_value_int64'; d: @sqlite3_value_int64),
+  (n: 'sqlite3_value_text'; d: @sqlite3_value_text),
+  (n: 'sqlite3_value_text16'; d: @sqlite3_value_text16),
+  (n: 'sqlite3_value_text16le'; d: @sqlite3_value_text16le),
+  (n: 'sqlite3_value_text16be'; d: @sqlite3_value_text16be),
+  (n: 'sqlite3_value_type'; d: @sqlite3_value_type),
+  (n: 'sqlite3_aggregate_context'; d: @sqlite3_aggregate_context),
+  (n: 'sqlite3_user_data'; d: @sqlite3_user_data),
+  (n: 'sqlite3_get_auxdata'; d: @sqlite3_get_auxdata),
+  (n: 'sqlite3_set_auxdata'; d: @sqlite3_set_auxdata),
+  (n: 'sqlite3_result_blob'; d: @sqlite3_result_blob),
+  (n: 'sqlite3_result_double'; d: @sqlite3_result_double),
+  (n: 'sqlite3_result_error'; d: @sqlite3_result_error),
+  (n: 'sqlite3_result_error16'; d: @sqlite3_result_error16),
+  (n: 'sqlite3_result_int'; d: @sqlite3_result_int),
+  (n: 'sqlite3_result_int64'; d: @sqlite3_result_int64),
+  (n: 'sqlite3_result_null'; d: @sqlite3_result_null),
+  (n: 'sqlite3_result_text'; d: @sqlite3_result_text),
+  (n: 'sqlite3_result_text16'; d: @sqlite3_result_text16),
+  (n: 'sqlite3_result_text16le'; d: @sqlite3_result_text16le),
+  (n: 'sqlite3_result_text16be'; d: @sqlite3_result_text16be),
+  (n: 'sqlite3_result_value'; d: @sqlite3_result_value),
+  (n: 'sqlite3_create_collation'; d: @sqlite3_create_collation),
+  (n: 'sqlite3_create_collation16'; d: @sqlite3_create_collation16),
+  (n: 'sqlite3_collation_needed'; d: @sqlite3_collation_needed),
+  (n: 'sqlite3_collation_needed16'; d: @sqlite3_collation_needed16),
+  (n: 'sqlite3_libversion'; d: @sqlite3_libversion),
+  (n: 'sqlite3_version'; d: @sqlite3_version),
+  (n: 'sqlite3_libversion_number'; d: @sqlite3_libversion_number),
+  (n: 'sqlite3_clear_bindings'; d: @sqlite3_clear_bindings)
+ );
 begin
- if not tryinitialisesqlite3(sqlite3lib) then begin
-  raise exception.create('Can not load SQLite3 library '+
-                quotelibnames(sqlite3lib)+'. Check your installation."');
+ try
+  initializedynlib(libinfo,sqlite3lib,funcs,[]);
+ except
+  on e: exception do begin
+   e.message:= 'Can not load Sqlite3 library. '+e.message;
+   raise;
+  end;  
  end;
 end;
 
 procedure releasesqlite3;
 begin
- if refcount > 1 then begin
-  dec(refcount);
- end
- else begin
-  if unloadlibrary(sqlite3libraryhandle) then begin
-   dec(refcount);
-   sqlite3libraryhandle:= nilhandle;
-  end;
- end;
+ releasedynlib(libinfo);
 end;
 
 initialization
- sys_mutexcreate(liblock);
+ initializelibinfo(libinfo);
 finalization
- sys_mutexdestroy(liblock);
+ finalizelibinfo(libinfo);
 {$else}
 procedure initialisesqlite3;
 begin
+ //dummy
 end;
 
 procedure releasesqlite3;
 begin
+ //dummy
 end;
  
 {$endif} //mse_sqlite3static
