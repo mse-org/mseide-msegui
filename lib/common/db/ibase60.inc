@@ -2476,18 +2476,23 @@ var
 Procedure InitialiseIBase60;
 Procedure ReleaseIBase60;
 
-var IBaseLibraryHandle : TLibHandle;
+//var IBaseLibraryHandle : TLibHandle;
 
 {$ENDIF}
 
 {$IFDEF LinkDynamically}
-var
- libname: filenamety;
+//var
+// libname: filenamety;
 {$endif}
 
 implementation
 uses
- msesys,msesonames;
+ msesys,msesonames,msedynload;
+
+function XSQLDA_LENGTH(n: Integer): Integer;
+begin
+  Result := SizeOf(XSQLDA) + (n - 1) * SizeOf(XSQLVAR);
+end;
  
 {$IFDEF LinkDynamically}
 
@@ -2498,9 +2503,10 @@ ResourceString
   SErrAlreadyLoaded  = 'Firebird interface already initialized from library %s.';
   
 var 
-  RefCount : integer;
-  LoadedLibrary : String;
-
+ libinfo: dynlibinfoty;
+//  RefCount : integer;
+//  LoadedLibrary : String;
+(*
 Function TryInitialiseIBase60(Const LibraryNames: array of filenamety) : Boolean;
 var
  mstr1: filenamety;
@@ -2882,9 +2888,196 @@ begin
   raise einouterror.createfmt(serralreadyloaded,[loadedlibrary]);
  end;
 end;
+*)
 
 Procedure InitialiseIBase60;
+const
+ funcs: array[0..{$ifdef unix}163{$else}143{$endif}] of procinfoty = (
+  (n: 'isc_attach_database'; d:  @isc_attach_database),
+  (n: 'isc_array_gen_sdl'; d: @isc_array_gen_sdl),
+  (n: 'isc_array_get_slice'; d: @isc_array_get_slice),
+  (n: 'isc_array_lookup_bounds'; d: @isc_array_lookup_bounds),
+  (n: 'isc_array_lookup_desc'; d: @isc_array_lookup_desc),
+  (n: 'isc_array_set_desc'; d: @isc_array_set_desc),
+  (n: 'isc_array_put_slice'; d: @isc_array_put_slice),
+  (n: 'isc_blob_default_desc'; d: @isc_blob_default_desc),
+  (n: 'isc_blob_gen_bpb'; d: @isc_blob_gen_bpb),
+  (n: 'isc_blob_info'; d: @isc_blob_info),
+  (n: 'isc_blob_lookup_desc'; d: @isc_blob_lookup_desc),
+  (n: 'isc_blob_set_desc'; d: @isc_blob_set_desc),
+  (n: 'isc_cancel_blob'; d: @isc_cancel_blob),
+  (n: 'isc_cancel_events'; d: @isc_cancel_events),
+  (n: 'isc_close_blob'; d: @isc_close_blob),
+  (n: 'isc_commit_retaining'; d: @isc_commit_retaining),
+  (n: 'isc_commit_transaction'; d: @isc_commit_transaction),
+  (n: 'isc_create_blob'; d: @isc_create_blob),
+  (n: 'isc_create_blob2'; d: @isc_create_blob2),
+  (n: 'isc_create_database'; d: @isc_create_database),
+  (n: 'isc_database_info'; d: @isc_database_info),
+  (n: 'isc_decode_date'; d: @isc_decode_date),
+  (n: 'isc_decode_sql_date'; d: @isc_decode_sql_date),
+  (n: 'isc_decode_sql_time'; d: @isc_decode_sql_time),
+  (n: 'isc_decode_timestamp'; d: @isc_decode_timestamp),
+  (n: 'isc_detach_database'; d: @isc_detach_database),
+  (n: 'isc_drop_database'; d: @isc_drop_database),
+  (n: 'isc_dsql_allocate_statement'; d: @isc_dsql_allocate_statement),
+  (n: 'isc_dsql_alloc_statement2'; d: @isc_dsql_alloc_statement2),
+  (n: 'isc_dsql_describe'; d: @isc_dsql_describe),
+  (n: 'isc_dsql_describe_bind'; d: @isc_dsql_describe_bind),
+  (n: 'isc_dsql_exec_immed2'; d: @isc_dsql_exec_immed2),
+  (n: 'isc_dsql_execute'; d: @isc_dsql_execute),
+  (n: 'isc_dsql_execute2'; d: @isc_dsql_execute2),
+  (n: 'isc_dsql_execute_immediate'; d: @isc_dsql_execute_immediate),
+  (n: 'isc_dsql_fetch'; d: @isc_dsql_fetch),
+  (n: 'isc_dsql_finish'; d: @isc_dsql_finish),
+  (n: 'isc_dsql_free_statement'; d: @isc_dsql_free_statement),
+  (n: 'isc_dsql_insert'; d: @isc_dsql_insert),
+  (n: 'isc_dsql_prepare'; d: @isc_dsql_prepare),
+  (n: 'isc_dsql_set_cursor_name'; d: @isc_dsql_set_cursor_name),
+  (n: 'isc_dsql_sql_info'; d: @isc_dsql_sql_info),
+  (n: 'isc_encode_date'; d: @isc_encode_date),
+  (n: 'isc_encode_sql_date'; d: @isc_encode_sql_date),
+  (n: 'isc_encode_sql_time'; d: @isc_encode_sql_time),
+  (n: 'isc_encode_timestamp'; d: @isc_encode_timestamp),
+  (n: 'isc_event_block'; d: @isc_event_block),
+  (n: 'isc_event_counts'; d: @isc_event_counts),
+  (n: 'isc_expand_dpb'; d: @isc_expand_dpb),
+  (n: 'isc_modify_dpb'; d: @isc_modify_dpb),
+  (n: 'isc_free'; d: @isc_free),
+  (n: 'isc_get_segment'; d: @isc_get_segment),
+  (n: 'isc_get_slice'; d: @isc_get_slice),
+  (n: 'isc_interprete'; d: @isc_interprete),
+  (n: 'isc_open_blob'; d: @isc_open_blob),
+  (n: 'isc_open_blob2'; d: @isc_open_blob2),
+  (n: 'isc_prepare_transaction2'; d: @isc_prepare_transaction2),
+  (n: 'isc_print_sqlerror'; d: @isc_print_sqlerror),
+  (n: 'isc_print_status'; d: @isc_print_status),
+  (n: 'isc_put_segment'; d: @isc_put_segment),
+  (n: 'isc_put_slice'; d: @isc_put_slice),
+  (n: 'isc_que_events'; d: @isc_que_events),
+  (n: 'isc_rollback_retaining'; d: @isc_rollback_retaining),
+  (n: 'isc_rollback_transaction'; d: @isc_rollback_transaction),
+  (n: 'isc_start_multiple'; d: @isc_start_multiple),
+  (n: 'isc_start_transaction'; d: @isc_start_transaction),
+  (n: 'isc_sqlcode'; d: @isc_sqlcode),
+  (n: 'isc_sql_interprete'; d: @isc_sql_interprete),
+  (n: 'isc_transaction_info'; d: @isc_transaction_info),
+  (n: 'isc_transact_request'; d: @isc_transact_request),
+  (n: 'isc_vax_integer'; d: @isc_vax_integer),
+  (n: 'isc_portable_integer'; d: @isc_portable_integer),
+  (n: 'isc_add_user'; d: @isc_add_user),
+  (n: 'isc_delete_user'; d: @isc_delete_user),
+  (n: 'isc_modify_user'; d: @isc_modify_user),
+  (n: 'isc_compile_request'; d: @isc_compile_request),
+  (n: 'isc_compile_request2'; d: @isc_compile_request2),
+  (n: 'isc_ddl'; d: @isc_ddl),
+  (n: 'isc_prepare_transaction'; d: @isc_prepare_transaction),
+  (n: 'isc_receive'; d: @isc_receive),
+  (n: 'isc_reconnect_transaction'; d: @isc_reconnect_transaction),
+  (n: 'isc_release_request'; d: @isc_release_request),
+  (n: 'isc_request_info'; d: @isc_request_info),
+  (n: 'isc_seek_blob'; d: @isc_seek_blob),
+  (n: 'isc_send'; d: @isc_send),
+  (n: 'isc_start_and_send'; d: @isc_start_and_send),
+  (n: 'isc_start_request'; d: @isc_start_request),
+  (n: 'isc_unwind_request'; d: @isc_unwind_request),
+  (n: 'isc_wait_for_event'; d: @isc_wait_for_event),
+  (n: 'isc_close'; d: @isc_close),
+  (n: 'isc_declare'; d: @isc_declare),
+  (n: 'isc_describe'; d: @isc_describe),
+  (n: 'isc_describe_bind'; d: @isc_describe_bind),
+  (n: 'isc_execute'; d: @isc_execute),
+  (n: 'isc_execute_immediate'; d: @isc_execute_immediate),
+  (n: 'isc_fetch'; d: @isc_fetch),
+  (n: 'isc_open'; d: @isc_open),
+  (n: 'isc_prepare'; d: @isc_prepare),
+  (n: 'isc_dsql_execute_m'; d: @isc_dsql_execute_m),
+  (n: 'isc_dsql_execute2_m'; d: @isc_dsql_execute2_m),
+  (n: 'isc_dsql_execute_immediate_m'; d: @isc_dsql_execute_immediate_m),
+  (n: 'isc_dsql_exec_immed3_m'; d: @isc_dsql_exec_immed3_m),
+  (n: 'isc_dsql_fetch_m'; d: @isc_dsql_fetch_m),
+  (n: 'isc_dsql_insert_m'; d: @isc_dsql_insert_m),
+  (n: 'isc_dsql_prepare_m'; d: @isc_dsql_prepare_m),
+  (n: 'isc_dsql_release'; d: @isc_dsql_release),
+  (n: 'isc_embed_dsql_close'; d: @isc_embed_dsql_close),
+  (n: 'isc_embed_dsql_declare'; d: @isc_embed_dsql_declare),
+  (n: 'isc_embed_dsql_describe'; d: @isc_embed_dsql_describe),
+  (n: 'isc_embed_dsql_describe_bind'; d: @isc_embed_dsql_describe_bind),
+  (n: 'isc_embed_dsql_execute'; d: @isc_embed_dsql_execute),
+  (n: 'isc_embed_dsql_execute2'; d: @isc_embed_dsql_execute2),
+  (n: 'isc_embed_dsql_execute_immed'; d: @isc_embed_dsql_execute_immed),
+  (n: 'isc_embed_dsql_fetch'; d: @isc_embed_dsql_fetch),
+  (n: 'isc_embed_dsql_open'; d: @isc_embed_dsql_open),
+  (n: 'isc_embed_dsql_open2'; d: @isc_embed_dsql_open2),
+  (n: 'isc_embed_dsql_insert'; d: @isc_embed_dsql_insert),
+  (n: 'isc_embed_dsql_prepare'; d: @isc_embed_dsql_prepare),
+  (n: 'isc_embed_dsql_release'; d: @isc_embed_dsql_release),
+  (n: 'BLOB_open'; d: @BLOB_open),
+  (n: 'BLOB_put'; d: @BLOB_put),
+  (n: 'BLOB_close'; d: @BLOB_close),
+  (n: 'BLOB_get'; d: @BLOB_get),
+  (n: 'BLOB_display'; d: @BLOB_display),
+  (n: 'BLOB_dump'; d: @BLOB_dump),
+  (n: 'BLOB_edit'; d: @BLOB_edit),
+  (n: 'BLOB_load'; d: @BLOB_load),
+  (n: 'BLOB_text_dump'; d: @BLOB_text_dump),
+  (n: 'BLOB_text_load'; d: @BLOB_text_load),
+  (n: 'Bopen'; d: @Bopen),
+  (n: 'isc_ftof'; d: @isc_ftof),
+  (n: 'isc_print_blr'; d: @isc_print_blr),
+  (n: 'isc_set_debug'; d: @isc_set_debug),
+  (n: 'isc_qtoq'; d: @isc_qtoq),
+  (n: 'isc_vtof'; d: @isc_vtof),
+  (n: 'isc_vtov'; d: @isc_vtov),
+  (n: 'isc_version'; d: @isc_version),
+  (n: 'isc_get_client_version'; d: @isc_get_client_version),
+  (n: 'isc_get_client_major_version'; d: @isc_get_client_major_version),
+  (n: 'isc_get_client_minor_version'; d: @isc_get_client_minor_version),
+  (n: 'isc_service_attach'; d: @isc_service_attach),
+  (n: 'isc_service_detach'; d: @isc_service_detach),
+  (n: 'isc_service_query'; d: @isc_service_query),
+  (n: 'isc_service_start'; d: @isc_service_start)
+
+{$IFDEF Unix}
+  ,           
+  (n: 'Bopen2'; d: @Bopen2),
+  (n: 'isc_reset_fpe'; d: @isc_reset_fpe),
+  (n: 'isc_compile_map'; d: @isc_compile_map),
+  (n: 'isc_compile_menu'; d: @isc_compile_menu),
+  (n: 'isc_compile_sub_map'; d: @isc_compile_sub_map),
+  (n: 'isc_create_window'; d: @isc_create_window),
+  (n: 'isc_delete_window'; d: @isc_delete_window),
+  (n: 'isc_drive_form'; d: @isc_drive_form),
+  (n: 'isc_drive_menu'; d: @isc_drive_menu),
+  (n: 'isc_form_delete'; d: @isc_form_delete),
+  (n: 'isc_form_fetch'; d: @isc_form_fetch),
+  (n: 'isc_form_insert'; d: @isc_form_insert),
+  (n: 'isc_get_entree'; d: @isc_get_entree),
+  (n: 'isc_initialize_menu'; d: @isc_initialize_menu),
+  (n: 'isc_menu'; d: @isc_menu),
+  (n: 'isc_load_form'; d: @isc_load_form),
+  (n: 'isc_pop_window'; d: @isc_pop_window),
+  (n: 'isc_put_entree'; d: @isc_put_entree),
+  (n: 'isc_reset_form'; d: @isc_reset_form),
+  (n: 'isc_suspend_window'; d: @isc_suspend_window)
+{$ENDIF} 
+  );
+ 
 begin
+ try
+  if useembeddedfirebird then begin
+   initializedynlib(libinfo,fbembedlib,[],funcs); //accept missing entries
+  end
+  else begin
+   initializedynlib(libinfo,fbcgdslib,[],funcs); //accept missing entries
+  end;
+ except
+  on e: exception do begin
+   e.message:= 'Can not load Firebird library. '+e.message;
+   raise;
+  end;  
+ end;
+(* 
  if libname <> '' then begin
   If Not TryInitialiseIBase60(libname) then begin
    checkloaded;
@@ -2905,8 +3098,9 @@ begin
    end;
   end;    
  end;
+ *)
 end;
-
+(*
 Procedure InitialiseIBase60(Const LibraryNames : array of filenamety);
 
 begin
@@ -2915,28 +3109,17 @@ begin
   Raise EInOutError.CreateFmt(SErrLoadFailed,[quotelibnames(LibraryNames)]);
  end;
 end;
-
+*)
 
 Procedure ReleaseIBase60;
 
 begin
- if refcount > 1 then begin
-  dec(refcount);
- end
- else begin
-  if (refcount = 1) and unloadlibrary(ibaselibraryhandle) then begin
-   dec(refcount);
-   ibaselibraryhandle := nilhandle;
-   loadedlibrary:='';
-  end;
- end;
+ releasedynlib(libinfo);
 end;
 
+initialization
+ initializelibinfo(libinfo);
+finalization
+ finalizelibinfo(libinfo);
 {$ENDIF}
-
-function XSQLDA_LENGTH(n: Integer): Integer;
-begin
-  Result := SizeOf(XSQLDA) + (n - 1) * SizeOf(XSQLVAR);
-end;
-
 

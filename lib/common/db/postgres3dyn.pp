@@ -423,8 +423,6 @@ var
   PQgetssl : function (conn:PPGconn): pointer;cdecl;
 //{$endif}
 
-
-
 procedure initializepostgres3;
 procedure releasepostgres3;
 
