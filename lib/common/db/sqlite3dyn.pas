@@ -11,7 +11,13 @@ unit sqlite3dyn;
 
 interface
 uses
- msesonames,msedynload;
+ {msesonames,}msedynload,msestrings;
+const
+{$ifdef mswindows}
+ sqlite3lib: array[0..0] of filenamety = ('sqlite3.dll');  
+{$else}
+ sqlite3lib: array[0..1] of filenamety = ('libsqlite3.so.0','libsqlite3.so'); 
+{$endif}
  
 {
   Automatically converted by H2Pas 0.99.16 from sqlite3.h
@@ -24,7 +30,7 @@ uses
   Martin Schreiber 2007
 }
 
-procedure initializesqlite3;
+procedure initializesqlite3(const sonames: array of filenamety); //[] = default
 procedure releasesqlite3;
 
 {$PACKRECORDS C}
@@ -569,7 +575,7 @@ var
 {$endif} //not mse_sqlite3static
 implementation
 uses
- sysutils,{$ifndef mse_sqlite3static}dynlibs,{$endif}msesys,msestrings,msesysintf;
+ sysutils,{$ifndef mse_sqlite3static}dynlibs,{$endif}msesys,msesysintf;
 {$ifndef mse_sqlite3static}
 var
  libinfo: dynlibinfoty;
@@ -801,7 +807,7 @@ begin
 end;
 *)
 
-procedure initializesqlite3;
+procedure initializesqlite3(const sonames: array of filenamety);
 const
  funcs: array[0..94] of procinfoty = (
   (n: 'sqlite3_close'; d: @sqlite3_close),
@@ -902,7 +908,12 @@ const
  );
 begin
  try
-  initializedynlib(libinfo,sqlite3lib,funcs,[]);
+  if length(sonames) = 0 then begin
+   initializedynlib(libinfo,sqlite3lib,funcs,[]);
+  end
+  else begin
+   initializedynlib(libinfo,sonames,funcs,[]);
+  end;
  except
   on e: exception do begin
    e.message:= 'Can not load Sqlite3 library. '+e.message;

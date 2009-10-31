@@ -55,9 +55,18 @@ uses
 {$IFDEF LinkDynamically}
       sysutils,
 {$ENDIF}
-     dynlibs,ctypes;
+     dynlibs,ctypes,msestrings;
 
-procedure initializemysql;
+const
+{$ifdef mswindows}
+ mysqllib: array[0..0] of filenamety = ('libmysql.dll');
+{$else}
+ mysqllib: array[0..2] of filenamety = ('libmysqlclient.so.16',
+                                'libmysqlclient.so.15','libmysqlclient.so');
+{$endif}
+
+procedure initializemysql(const sonames: array of filenamety); 
+                                            //[] = default
 procedure releasemysql;
 
 procedure mysqllock;
@@ -1754,7 +1763,7 @@ type
 
 implementation
 uses
- msestrings,msesys,msesysintf,msesonames
+ msesys,msesysintf{,msesonames}
                 {$IFDEF LinkDynamically},msedynload{$endif};
  
 {$IFDEF LinkDynamically}
@@ -2108,7 +2117,7 @@ begin
  releasedynlib(libinfo);
 end;
 
-procedure initializemysql;
+procedure initializemysql(const sonames: array of filenamety);
 const 
  funcs: array[0..89] of procinfoty = (
   (n: 'mysql_affected_rows'; d: @mysql_affected_rows),
@@ -2208,7 +2217,12 @@ const
   
 begin
  try
-  initializedynlib(libinfo,mysqllib,funcs,funcsopt);
+  if length(sonames) = 0 then begin
+   initializedynlib(libinfo,mysqllib,funcs,funcsopt);
+  end
+  else begin
+   initializedynlib(libinfo,sonames,funcs,funcsopt);
+  end;
  except
   on e: exception do begin
    e.message:= 'Can not load MySQL library. '+e.message;

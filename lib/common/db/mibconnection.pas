@@ -435,7 +435,7 @@ begin
   ibase60dyn.libname:= flibname;
  end;
 }
- InitializeIBase60;
+ InitializeIBase60([]);
  try 
 {$EndIf}
   inherited dointernalconnect;
@@ -1612,7 +1612,7 @@ var
 begin
 {$ifdef linkdynamically}
  useembeddedfirebird:= ibo_embedded in foptions;
- initializeibase60;
+ initializeibase60([]);
  try
 {$endif}
   bo1:= isc_dsql_execute_immediate(@fstatus,@dbha,@trha,length(asql),

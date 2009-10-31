@@ -394,7 +394,7 @@ var
  int1: integer;
 begin
 {$IfDef LinkDynamically}
- InitializePostgres3;
+ InitializePostgres3([]);
 {$EndIf}
  ftransactionconnectionused:= false;
  inherited dointernalconnect;
@@ -429,7 +429,7 @@ var
  conn: ppgconn;
 begin
 {$IfDef LinkDynamically}
- InitializePostgres3;
+ InitializePostgres3([]);
 {$EndIf}
  try
   openconnection(constructconnectstring,conn);

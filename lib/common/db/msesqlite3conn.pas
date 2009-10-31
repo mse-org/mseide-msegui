@@ -804,7 +804,7 @@ begin
  if (inherited databasename = '') then begin
   DatabaseError(SErrNoDatabaseName,self);
  end;
- initializesqlite3;
+ initializesqlite3([]);
  str1:= stringtoutf8(inherited databasename);
  checkerror(sqlite3_open(pchar(str1),@fhandle));
  checkbusytimeout;

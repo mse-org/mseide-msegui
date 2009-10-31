@@ -564,7 +564,7 @@ begin
   // To make it possible to call this if there's no connection yet
 //  B:=(MysqlLibraryHandle=Nilhandle);
 //  If B then
-    InitializeMysql;
+    InitializeMysql([]);
   Try  
     Result:=strpas(mysql_get_client_info());
   Finally  
@@ -695,7 +695,7 @@ var
  version: integer;
 begin
  ftransactionconnectionused:= false;
- InitializeMysql;
+ InitializeMysql([]);
  version:= mysql_get_client_version() div 100;
  if version < 500 then begin
   raise exception.create(name+': MySql client version must be >= 5.0.');

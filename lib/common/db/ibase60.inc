@@ -10,11 +10,23 @@ interface
 uses 
  Dynlibs, sysutils, msestrings;
 
-Var
-  UseEmbeddedFirebird : Boolean = False;
+const
+{$ifdef mswindows}
+ fbembedlib: array[0..0] of filenamety = ('fbembed.dll');
+ fbcgdslib: array[0..1] of filenamety = ('fbclient.dll','gds32.dll');
+{$else}
+ fbembedlib: array[0..2] of filenamety = ('libfbembed.so.2','libfbembed.so.1',
+                                          'libfbembed.so');
+ fbcgdslib: array[0..3] of filenamety = ('libfbclient.so.2','libfbclient.so.1',
+                                          'libfbclient.so','libgds.so');
+{$endif}
 
-Procedure InitializeIBase60;
-Procedure ReleaseIBase60;
+var
+ useembeddedfirebird : boolean = false;
+
+procedure initializeibase60(const sonames: array of filenamety); 
+                                     //[] = default
+procedure releaseibase60;
 
 {$ENDIF}
 
@@ -2890,7 +2902,7 @@ begin
 end;
 *)
 
-Procedure InitializeIBase60;
+Procedure InitializeIBase60(const sonames: array of filenamety);
 const
  funcs: array[0..{$ifdef unix}163{$else}143{$endif}] of procinfoty = (
   (n: 'isc_attach_database'; d:  @isc_attach_database),
@@ -3065,11 +3077,16 @@ const
  
 begin
  try
-  if useembeddedfirebird then begin
-   initializedynlib(libinfo,fbembedlib,[],funcs); //accept missing entries
+  if length(sonames) = 0 then begin
+   if useembeddedfirebird then begin
+    initializedynlib(libinfo,fbembedlib,[],funcs); //accept missing entries
+   end
+   else begin
+    initializedynlib(libinfo,fbcgdslib,[],funcs); //accept missing entries
+   end;
   end
   else begin
-   initializedynlib(libinfo,fbcgdslib,[],funcs); //accept missing entries
+   initializedynlib(libinfo,sonames,[],funcs); //accept missing entries
   end;
  except
   on e: exception do begin

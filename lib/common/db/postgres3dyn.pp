@@ -16,9 +16,16 @@ unit postgres3dyn;
 interface
 
 uses
-  dynlibs, SysUtils, ctypes;
+  dynlibs, SysUtils, ctypes,msestrings;
 
-procedure initializepostgres3;
+const
+{$ifdef mswindows}
+ postgreslib: array[0..0] of filenamety = ('libpq.dll');
+{$else}
+ postgreslib: array[0..2] of filenamety = ('libpq.so.5.1','libpq.so.5','libpq.so');
+{$endif}
+
+procedure initializepostgres3(const sonames: array of filenamety);
 procedure releasepostgres3;
 
 (*
@@ -429,7 +436,7 @@ var
 
 implementation
 uses
- msesonames,msedynload,msestrings,msesys;
+ {msesonames,}msedynload,msesys;
 
 var
  libinfo: dynlibinfoty;
@@ -446,7 +453,7 @@ begin
   DLE_VAL:=elem^.dle_val
 end;
 
-procedure initializepostgres3;
+procedure initializepostgres3(const sonames: array of filenamety);
 const
  funcs: array[0..97] of procinfoty = (
   (n: 'PQconnectStart'; d: @PQconnectStart),
@@ -569,7 +576,12 @@ const
   
 begin
  try
-  initializedynlib(libinfo,postgreslib,funcs,funcsopt);
+  if length(sonames) = 0 then begin
+   initializedynlib(libinfo,postgreslib,funcs,funcsopt);
+  end
+  else begin
+   initializedynlib(libinfo,sonames,funcs,funcsopt);
+  end;
  except
   on e: exception do begin
    e.message:= 'Can not load Postgres library. '+e.message;
