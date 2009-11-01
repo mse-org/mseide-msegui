@@ -2119,7 +2119,7 @@ end;
 
 procedure initializemysql(const sonames: array of filenamety);
 const 
- funcs: array[0..89] of procinfoty = (
+ funcs: array[0..89] of funcinfoty = (
   (n: 'mysql_affected_rows'; d: @mysql_affected_rows),
   (n: 'mysql_autocommit'; d: @mysql_autocommit),
   (n: 'mysql_change_user'; d: @mysql_change_user),
@@ -2211,7 +2211,7 @@ const
   (n: 'mysql_stmt_field_count'; d: @mysql_stmt_field_count),
   (n: 'mysql_ssl_set'; d: @mysql_ssl_set)
   );
- funcsopt: array[0..0] of procinfoty = (
+ funcsopt: array[0..0] of funcinfoty = (
    (n: 'mysql_get_ssl_cipher'; d: @mysql_get_ssl_cipher)
   );
   

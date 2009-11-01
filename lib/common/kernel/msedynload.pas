@@ -17,8 +17,8 @@ procedure finalizelibinfo(var info: dynlibinfoty);
 
 procedure initializedynlib(var info: dynlibinfoty;
                              const alibnames: array of filenamety;
-                             const funcs: array of procinfoty;
-                             const funcsopt: array of procinfoty);
+                             const funcs: array of funcinfoty;
+                             const funcsopt: array of funcinfoty);
 procedure releasedynlib(var info: dynlibinfoty);
 
 implementation
@@ -28,8 +28,8 @@ uses
  
 procedure initializedynlib(var info: dynlibinfoty;
                               const alibnames: array of filenamety;
-                              const funcs: array of procinfoty;
-                              const funcsopt: array of procinfoty);
+                              const funcs: array of funcinfoty;
+                              const funcsopt: array of funcinfoty);
 begin
  with info do begin
   sys_mutexlock(lock); 

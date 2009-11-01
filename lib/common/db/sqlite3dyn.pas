@@ -809,7 +809,7 @@ end;
 
 procedure initializesqlite3(const sonames: array of filenamety);
 const
- funcs: array[0..94] of procinfoty = (
+ funcs: array[0..94] of funcinfoty = (
   (n: 'sqlite3_close'; d: @sqlite3_close),
   (n: 'sqlite3_exec'; d: @sqlite3_exec),
   (n: 'sqlite3_last_insert_rowid'; d: @sqlite3_last_insert_rowid),

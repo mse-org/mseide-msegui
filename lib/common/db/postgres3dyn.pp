@@ -455,7 +455,7 @@ end;
 
 procedure initializepostgres3(const sonames: array of filenamety);
 const
- funcs: array[0..97] of procinfoty = (
+ funcs: array[0..97] of funcinfoty = (
   (n: 'PQconnectStart'; d: @PQconnectStart),
   (n: 'PQconnectPoll'; d: @PQconnectPoll),
   (n: 'PQconnectdb'; d: @PQconnectdb),
@@ -556,7 +556,7 @@ const
   (n: 'PQenv2encoding'; d: @PQenv2encoding)
  );
 
- funcsopt: array[0..13] of procinfoty = (
+ funcsopt: array[0..13] of funcinfoty = (
   (n: 'PQgetssl'; d: @PQgetssl),
   
   (n: 'DLNewList'; d: @DLNewList),  //these functions seem not to be exported by

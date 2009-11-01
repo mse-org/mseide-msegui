@@ -2904,7 +2904,7 @@ end;
 
 Procedure InitializeIBase60(const sonames: array of filenamety);
 const
- funcs: array[0..{$ifdef unix}163{$else}143{$endif}] of procinfoty = (
+ funcs: array[0..{$ifdef unix}163{$else}143{$endif}] of funcinfoty = (
   (n: 'isc_attach_database'; d:  @isc_attach_database),
   (n: 'isc_array_gen_sdl'; d: @isc_array_gen_sdl),
   (n: 'isc_array_get_slice'; d: @isc_array_get_slice),

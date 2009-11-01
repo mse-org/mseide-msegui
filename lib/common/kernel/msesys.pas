@@ -208,13 +208,13 @@ procedure deletecommandlineargument(const index: integer);
 function loadlib(const libnames: array of filenamety; 
                                       out libname: filenamety): tlibhandle;
 type
- procinfoty = record
-               n: string;
-               d: ppointer;
+ funcinfoty = record
+               n: string;      //name
+               d: ppointer;    //destination
               end;
               
 function getprocaddresses(const lib: tlibhandle;
-                       const procedures: array of procinfoty;
+                       const procedures: array of funcinfoty;
                        const noexception: boolean = false): boolean; overload;
 function getprocaddresses(const lib: tlibhandle; const anames: array of string;
                const adest: array of ppointer;
@@ -250,7 +250,7 @@ Procedure CatchUnhandledException (Obj : TObject; Addr: Pointer;
 {$endif}
 
 function getprocaddresses(const lib: tlibhandle;
-                          const procedures: array of procinfoty;
+                          const procedures: array of funcinfoty;
                           const noexception: boolean = false): boolean; overload;
 var
  int1: integer;
