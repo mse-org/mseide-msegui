@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+2009-11-01
+ tfont.colorshadow -> shadow_color.
 2009-10-19
  twidget.optionswidget ow_autosize, ow_autosizeanright, ow_autosizeanleft moved
  to optionswidget1 ow1_autowidth, ow1_autoheight, ow1_autosizeanright, 

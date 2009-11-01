@@ -105,7 +105,7 @@ type
   (cs_regioncopy,cs_clipregion,cs_origin,cs_gc,
    cs_acolorbackground,cs_acolorforeground,cs_color,cs_colorbackground,
    cs_dashes,cs_linewidth,cs_capstyle,cs_joinstyle,
-   cs_fonthandle,cs_font,cs_fontcolor,cs_fontcolorbackground,cs_fontcolorshadow,
+   cs_fonthandle,cs_font,cs_fontcolor,cs_fontcolorbackground,cs_fonteffect,
    cs_rasterop,cs_brush,cs_brushorigin,
    cs_painted,cs_internaldrawtext,cs_inactive,cs_pagestarted,cs_metafile{,cs_monochrome});
  canvasstatesty = set of canvasstatety;
@@ -145,7 +145,12 @@ type
   handles: array[0..fontstylehandlemask] of fontnumty;
   color: colorty;
   colorbackground: colorty;
-  colorshadow: colorty;
+  shadow_color: colorty;
+  shadow_shiftx: integer;
+  shadow_shifty: integer;
+  gloss_color: colorty;
+  gloss_shiftx: integer;
+  gloss_shifty: integer;
   style: fontstylesty;
   height: integer;
   width: integer;
@@ -329,8 +334,21 @@ type
    procedure setextraspace(const avalue: integer);
    procedure setcolorbackground(const Value: colorty);
    function getcolorbackground: colorty;
-   procedure setcolorshadow(avalue: colorty);
-   function getcolorshadow: colorty;
+
+   procedure setshadow_color(avalue: colorty);
+   function getshadow_color: colorty;
+   procedure setshadow_shiftx(const avalue: integer);
+   function getshadow_shiftx: integer;
+   procedure setshadow_shifty(const avalue: integer);
+   function getshadow_shifty: integer;
+
+   procedure setgloss_color(avalue: colorty);
+   function getgloss_color: colorty;
+   procedure setgloss_shiftx(const avalue: integer);
+   function getgloss_shiftx: integer;
+   procedure setgloss_shifty(const avalue: integer);
+   function getgloss_shifty: integer;
+
    procedure setcolor(const Value: colorty);
    function getcolor: colorty;
    procedure setheight(avalue: integer);
@@ -370,6 +388,8 @@ type
    procedure setrotation(const avalue: real);
    function getxscale: real;
    procedure setxscale(const avalue: real);
+   
+   procedure readcolorshadow(reader: treader);
   protected
    finfo: fontinfoty;
    fhandlepo: ^fontnumty;
@@ -380,6 +400,7 @@ type
    procedure assignproperties(const source: tfont; const handles: boolean);
    property rotation: real read getrotation write setrotation; 
                                  //0..2*pi-> 0degree..360degree CCW
+   procedure defineproperties(filer: tfiler); override;
   public
    constructor create; override;
    destructor destroy; override;
@@ -404,8 +425,20 @@ type
    property color: colorty read getcolor write setcolor default cl_text;
    property colorbackground: colorty read getcolorbackground
                  write setcolorbackground default cl_transparent;
-   property colorshadow: colorty read getcolorshadow
-                 write setcolorshadow default cl_none;
+   property shadow_color: colorty read getshadow_color
+                 write setshadow_color default cl_none;
+   property shadow_shiftx: integer read getshadow_shiftx write
+                setshadow_shiftx default 1;
+   property shadow_shifty: integer read getshadow_shifty write
+                setshadow_shifty default 1;
+
+   property gloss_color: colorty read getgloss_color
+                 write setgloss_color default cl_none;
+   property gloss_shiftx: integer read getgloss_shiftx write
+                setgloss_shiftx default -1;
+   property gloss_shifty: integer read getgloss_shifty write
+                setgloss_shifty default -1;
+
    property height: integer read getheight write setheight default 0;
    property width: integer read getwidth write setwidth default 0;
                   //avg. character width in 1/10 pixel, 0 = default
@@ -885,7 +918,7 @@ const
                 cs_acolorbackground,cs_acolorforeground,
                 cs_color,cs_colorbackground,
                 cs_fonthandle,cs_font,cs_fontcolor,cs_fontcolorbackground,
-                cs_fontcolorshadow,
+                cs_fonteffect,
                 cs_brush,cs_brushorigin] + linecanvasstates;
 var
  defaultframecolors: framecolorinfoty =
@@ -2253,10 +2286,17 @@ begin
  end;
  finfopo^.color:= cl_text;
  finfopo^.colorbackground:= cl_transparent;
- finfopo^.colorshadow:= cl_none;
+ finfopo^.shadow_color:= cl_none;
+ finfopo^.shadow_shiftx:= 1;
+ finfopo^.shadow_shifty:= 1;
+
+ finfopo^.gloss_color:= cl_none;
+ finfopo^.gloss_shiftx:= -1;
+ finfopo^.gloss_shifty:= -1;
+
  finfopo^.xscale:= 1.0;
  updatehandlepo;
- dochanged([cs_fontcolor,cs_fontcolorbackground,cs_fontcolorshadow],true);
+ dochanged([cs_fontcolor,cs_fontcolorbackground,cs_fonteffect],true);
 end;
 
 destructor tfont.destroy;
@@ -2389,20 +2429,88 @@ begin
  result:= finfopo^.colorbackground;
 end;
 
-procedure tfont.setcolorshadow(avalue: colorty);
+procedure tfont.setshadow_color(avalue: colorty);
 begin
  if avalue = cl_invalid then begin
   avalue:= cl_none;
  end;
- if finfopo^.colorshadow <> avalue then begin
-  finfopo^.colorshadow:= avalue;
-  dochanged([cs_fontcolorshadow],false);
+ if finfopo^.shadow_color <> avalue then begin
+  finfopo^.shadow_color:= avalue;
+  dochanged([cs_fonteffect],false);
  end;
 end;
 
-function tfont.getcolorshadow: colorty;
+function tfont.getshadow_color: colorty;
 begin
- result:= finfopo^.colorshadow;
+ result:= finfopo^.shadow_color;
+end;
+
+procedure tfont.setshadow_shiftx(const avalue: integer);
+begin
+ if finfopo^.shadow_shiftx <> avalue then begin
+  finfopo^.shadow_shiftx:= avalue;
+  dochanged([cs_fonteffect],false);
+ end;
+end;
+
+function tfont.getshadow_shiftx: integer;
+begin
+ result:= finfopo^.shadow_shiftx;
+end;
+
+procedure tfont.setshadow_shifty(const avalue: integer);
+begin
+ if finfopo^.shadow_shifty <> avalue then begin
+  finfopo^.shadow_shifty:= avalue;
+  dochanged([cs_fonteffect],false);
+ end;
+end;
+
+function tfont.getshadow_shifty: integer;
+begin
+ result:= finfopo^.shadow_shifty;
+end;
+
+procedure tfont.setgloss_color(avalue: colorty);
+begin
+ if avalue = cl_invalid then begin
+  avalue:= cl_none;
+ end;
+ if finfopo^.gloss_color <> avalue then begin
+  finfopo^.gloss_color:= avalue;
+  dochanged([cs_fonteffect],false);
+ end;
+end;
+
+function tfont.getgloss_color: colorty;
+begin
+ result:= finfopo^.gloss_color;
+end;
+
+procedure tfont.setgloss_shiftx(const avalue: integer);
+begin
+ if finfopo^.gloss_shiftx <> avalue then begin
+  finfopo^.gloss_shiftx:= avalue;
+  dochanged([cs_fonteffect],false);
+ end;
+end;
+
+function tfont.getgloss_shiftx: integer;
+begin
+ result:= finfopo^.gloss_shiftx;
+end;
+
+procedure tfont.setgloss_shifty(const avalue: integer);
+begin
+ if finfopo^.gloss_shifty <> avalue then begin
+  finfopo^.gloss_shifty:= avalue;
+  dochanged([cs_fonteffect],false);
+ end;
+end;
+
+function tfont.getgloss_shifty: integer;
+begin
+ result:= finfopo^.gloss_shifty;
 end;
 
 procedure tfont.setcolor(const Value: colorty);
@@ -2424,10 +2532,33 @@ begin
    self.finfopo^.colorbackground:= finfopo^.colorbackground;
    include(changed,cs_fontcolorbackground);
   end;
-  if finfopo^.colorshadow <> self.finfopo^.colorshadow then begin
-   self.finfopo^.colorshadow:= finfopo^.colorshadow;
-   include(changed,cs_fontcolorshadow);
+
+  if finfopo^.shadow_color <> self.finfopo^.shadow_color then begin
+   self.finfopo^.shadow_color:= finfopo^.shadow_color;
+   include(changed,cs_fonteffect);
   end;
+  if finfopo^.shadow_shiftx <> self.finfopo^.shadow_shiftx then begin
+   self.finfopo^.shadow_shiftx:= finfopo^.shadow_shiftx;
+   include(changed,cs_fonteffect);
+  end;
+  if finfopo^.shadow_shifty <> self.finfopo^.shadow_shifty then begin
+   self.finfopo^.shadow_shifty:= finfopo^.shadow_shifty;
+   include(changed,cs_fonteffect);
+  end;
+  
+  if finfopo^.gloss_color <> self.finfopo^.gloss_color then begin
+   self.finfopo^.gloss_color:= finfopo^.gloss_color;
+   include(changed,cs_fonteffect);
+  end;
+  if finfopo^.gloss_shiftx <> self.finfopo^.gloss_shiftx then begin
+   self.finfopo^.gloss_shiftx:= finfopo^.gloss_shiftx;
+   include(changed,cs_fonteffect);
+  end;
+  if finfopo^.gloss_shifty <> self.finfopo^.gloss_shifty then begin
+   self.finfopo^.gloss_shifty:= finfopo^.gloss_shifty;
+   include(changed,cs_fonteffect);
+  end;
+  
   if finfopo^.color <> self.finfopo^.color then begin
    self.finfopo^.color:= finfopo^.color;
    include(changed,cs_fontcolor);
@@ -2464,6 +2595,18 @@ begin
  if changed <> [] then begin
   dochanged(changed,false);
  end;
+end;
+
+procedure tfont.readcolorshadow(reader: treader);
+begin
+ shadow_color:= reader.readinteger;
+end;
+
+procedure tfont.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('colorshadow',{$ifdef FPC}@{$endif}readcolorshadow,
+                                                                  nil,false);
 end;
 
 procedure tfont.assign(source: tpersistent);
@@ -3804,8 +3947,16 @@ procedure tcanvas.drawstring(const atext: pmsechar; const acount: integer;
                         const arotation: real = 0);
 var
  afontnum: integer;
- acolorshadow: colorty;
- acolor: colorty;
+ po1: pfontinfoty;
+ 
+// acolorshadow: colorty;
+// ashadow_shiftx: integer;
+// ashadow_shifty: integer;
+// agloss_color: colorty;
+// agloss_shiftx: integer;
+// agloss_shifty: integer;
+
+// acolor: colorty;
  font1: tfont;
  ev1: notifyeventty;
 begin
@@ -3814,55 +3965,83 @@ begin
   if afont <> nil then begin //foreign font
    font1:= afont;
    with afont do begin
+    po1:= finfopo;
     rotation:= arotation;
     afontnum:= gethandleforcanvas(self);
     afonthandle1:= afontnum;
-//    afonthandle:= getfontdata(afontnum)^.font;
-    acolor:= color;
+//    acolor:= color;
     acolorbackground:= colorbackground;
-    acolorshadow:= colorshadow;
+//    acolorshadow:= colorshadow;
+//    ashadow_shiftx:= shadow_shiftx;
+//    ashadow_shifty:= shadow_shifty;
+//    agloss_colorshadow:= gloss_color;
+//    agloss_shiftx:= gloss_shiftx;
+//    agloss_shifty:= gloss_shifty;
    end;
   end
   else begin
    font1:= ffont;
    ffont.rotation:= arotation;
    afonthandle1:= ffont.gethandle;
-//   afonthandle:= ffont.getdatapo^.font;
+   po1:= @fvaluepo^.font;
    with fvaluepo^.font do begin
-    acolor:= color;
+//    acolor:= color;
     acolorbackground:= colorbackground;
-    acolorshadow:= colorshadow;
+//    acolorshadow:= colorshadow;
+//    ashadow_shiftx:= shadow_shiftx;
+//    ashadow_shifty:= shadow_shifty;
    end;
   end;
   with fdrawinfo.text16pos do begin
    pos:= @apos;
    text:= pointer(atext);
    count:= acount;
-   if grayed or (acolorshadow <> cl_none) then begin
-    inc(pos^.x);
-    inc(pos^.y);
+   if grayed or (po1^.shadow_color <> cl_none) or
+                                 (po1^.gloss_color <> cl_none) then begin
     if grayed then begin
      acolorforeground:= cl_white;
     end
     else begin
-     acolorforeground:= acolorshadow;
+     if po1^.shadow_color <> cl_none then begin
+      acolorforeground:= po1^.shadow_color;
+      inc(pos^.x,po1^.shadow_shiftx);
+      inc(pos^.y,po1^.shadow_shifty);
+     end
+     else begin
+      acolorforeground:= po1^.gloss_color;
+      inc(pos^.x,po1^.gloss_shiftx);
+      inc(pos^.y,po1^.gloss_shifty);
+     end;
     end;
     acolorbackground:= cl_transparent;
     checkgcstate([cs_font,cs_acolorforeground,cs_acolorbackground]);
     gdi(gdi_drawstring16);
-    dec(pos^.x);
-    dec(pos^.y);
     if grayed then begin
+     dec(pos^.x);
+     dec(pos^.y);
      acolorforeground:= cl_dkgray;
     end
     else begin
-     acolorforeground:= acolor;
+     if po1^.shadow_color <> cl_none then begin
+      dec(pos^.x,po1^.shadow_shiftx);
+      dec(pos^.y,po1^.shadow_shifty);
+      if po1^.gloss_color <> cl_none then begin
+       acolorforeground:= po1^.gloss_color;
+       inc(pos^.x,po1^.gloss_shiftx);
+       inc(pos^.y,po1^.gloss_shifty);
+       checkgcstate([cs_font,cs_acolorforeground,cs_acolorbackground]);
+       gdi(gdi_drawstring16);
+       dec(pos^.x,po1^.gloss_shiftx);
+       dec(pos^.y,po1^.gloss_shifty);
+      end;
+     end;
+     acolorforeground:= po1^.color;
     end;
     checkgcstate([cs_acolorforeground]);
     gdi(gdi_drawstring16);
    end
    else begin
-    acolorforeground:= acolor;
+    acolorforeground:= po1^.color;
     checkgcstate([cs_font,cs_acolorforeground,cs_acolorbackground]);
     gdi(gdi_drawstring16);
    end;

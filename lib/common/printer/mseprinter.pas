@@ -907,6 +907,8 @@ begin
  end;
 end;
 
+//todo: full support of shadow_*/gloss_*
+
 procedure tcustomprintercanvas.dotextout(const text: richstringty;
                const dest: rectty; const flags: textflagsty;
                const tabdist: real; afontcolorshadow: colorty);
@@ -963,7 +965,7 @@ begin
   with {fvaluepo^.}font do begin
    acolorforeground:= color;
    acolorbackground:= colorbackground;
-   acolorshadow:= colorshadow;
+   acolorshadow:= shadow_color;
   end;
   checkgcstate([cs_font,cs_acolorforeground,cs_acolorbackground]);
  end;
