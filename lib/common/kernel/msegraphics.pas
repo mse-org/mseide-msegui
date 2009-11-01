@@ -4034,6 +4034,10 @@ begin
        dec(pos^.x,po1^.gloss_shiftx);
        dec(pos^.y,po1^.gloss_shifty);
       end;
+     end
+     else begin
+      dec(pos^.x,po1^.gloss_shiftx);
+      dec(pos^.y,po1^.gloss_shifty);
      end;
      acolorforeground:= po1^.color;
     end;
