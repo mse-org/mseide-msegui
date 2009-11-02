@@ -3,7 +3,7 @@ unit mserealsumedit;
 interface
 uses
  msesumlist,msedataedits,msewidgetgrid,msedatalist,msestrings,mseeditglob,
- msegrids;
+ msegrids,msegui,msemenus,msetypes,mseevent,mseguiglob,mseedit;
  
 type
 
