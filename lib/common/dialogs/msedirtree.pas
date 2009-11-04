@@ -27,11 +27,14 @@ type
    constructor create(const aowner: tcustomitemlist = nil;
               const aparent: ttreelistitem = nil); override;
    procedure setentries(const list: tcustomfiledatalist;
-                        const checksubdirectories,showhidden: boolean);
+                        const checksubdirectories,showhidden,checkbox: boolean);
    function findsubdir(const aname: filenamety): tdirlistitem;
    function getpath: filenamety;
  end;
 
+ dirtreeoptionty = (dto_checkbox);
+ dirtreeoptionsty = set of dirtreeoptionty;
+ 
  tdirtreefo = class(tmseform)
    grid: twidgetgrid;
    treeitem: ttreeitemedit;
@@ -47,6 +50,7 @@ type
 //   fpath: filenamety;
    fonpathchanged: notifyeventty;
    fchecksubdir: boolean;
+   foptions: dirtreeoptionsty;
    procedure setpath(const Value: filenamety);
    function getpath: filenamety;
    procedure adddir(const aitem: tdirlistitem);
@@ -56,6 +60,7 @@ type
    property checksubdir: boolean read fchecksubdir 
                                write fchecksubdir;
    property path: filenamety read getpath write setpath;
+   property options: dirtreeoptionsty read foptions write foptions;
    property onpathchanged: notifyeventty read fonpathchanged write fonpathchanged;
  end;
 {
@@ -96,7 +101,7 @@ begin
 end;
 
 procedure tdirlistitem.setentries(const list: tcustomfiledatalist;
-                     const checksubdirectories,showhidden: boolean);
+                     const checksubdirectories,showhidden,checkbox: boolean);
 var
  po1: pfileinfoty;
  ar1: treelistedititemarty;
@@ -117,6 +122,9 @@ begin
   setlength(ar1,list.count);
   for int1:= 0 to list.count - 1 do begin
    item1:= tdirlistitem.create;
+   if checkbox then begin
+    include(item1.fstate,ns_checkbox);
+   end;
    ar1[int1]:= item1;
    item1.finfo:= po1^;
    item1.updateinfo;
@@ -164,7 +172,7 @@ begin
    exclude:= [fa_hidden];
   end;
   list.adddirectory(aitem.getpath,fil_name,nil,[fa_dir],exclude);
-  aitem.setentries(list,checksubdir,showhiddenfiles);
+  aitem.setentries(list,checksubdir,showhiddenfiles,dto_checkbox in foptions);
  finally
   list.free;
  end;
@@ -190,6 +198,12 @@ var
  {$endif}
 
 begin
+ if dto_checkbox in foptions then begin
+  treeitem.itemlist.options:= treeitem.itemlist.options + [no_checkbox];
+ end
+ else begin
+  treeitem.itemlist.options:= treeitem.itemlist.options - [no_checkbox];
+ end;
  ar1:= splitrootpath(value);
  treeitem.itemlist.clear;
  treeitem.itemlist.count:= 1;
@@ -247,6 +261,9 @@ procedure tdirtreefo.treeitemoncreateitem(const sender: tcustomitemlist;
   var item: ttreelistedititem);
 begin
  item:= tdirlistitem.create(sender);
+ if dto_checkbox in foptions then begin
+  include(tdirlistitem(item).fstate,ns_checkbox);
+ end;
 end;
 
 procedure tdirtreefo.treeitemondataentered(const sender: tobject);
@@ -264,7 +281,9 @@ begin
    na_expand: begin
     include(finfo.state,fis_diropen);
     updateinfo;
-    adddir(tdirlistitem(sender));
+    if (count = 0) or not(dto_checkbox in foptions) then begin
+     adddir(tdirlistitem(sender));
+    end;
     if count = 0 then begin
      state:= state - [ns_subitems,ns_expanded];
      action:= na_none;
@@ -272,7 +291,9 @@ begin
    end;
    na_collapse: begin
     bo1:= count > 0;
-    clear;
+    if not (dto_checkbox in foptions) then begin
+     clear;
+    end;
     if bo1 then begin
      state:= state + [ns_subitems];
     end;

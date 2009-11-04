@@ -51,6 +51,9 @@ type
   procedure setfirstclick;
   function getwidget: twidget;
   function getcellframe: framety;
+  function getcellcursor(const acellzone: cellzonety): cursorshapety;
+  procedure updatecellzone(const row: integer; const apos: pointty;
+                           var result: cellzonety);
   function createdatalist(const sender: twidgetcol): tdatalist;
   function getdatatype: listdatatypety;
   function getdefaultvalue: pointer;
@@ -133,12 +136,14 @@ type
    function geteditwidget: twidget;
    function getinnerframe: framety; override;
    procedure setoptions(const avalue: coloptionsty); override;
-   function getcursor: cursorshapety; override;
+   function getcursor(const actcellzone: cellzonety): cursorshapety; override;
    procedure datasourcechanged;
    procedure beforedragevent(var ainfo: draginfoty; const arow: integer;
                                 var processed: boolean); override;
    procedure afterdragevent(var ainfo: draginfoty; const arow: integer;
                                 var processed: boolean); override;
+   procedure updatecellzone(const row: integer; const pos: pointty; var result: cellzonety); override;
+
   public
    constructor create(const agrid: tcustomgrid;
                      const aowner: tgridarrayprop); override;
@@ -1547,13 +1552,13 @@ begin
  end;
 end;
 
-function twidgetcol.getcursor: cursorshapety;
+function twidgetcol.getcursor(const actcellzone: cellzonety): cursorshapety;
 begin
  if (fintf <> nil) and not (co_readonly in foptions) then begin
-  result:= fintf.getwidget.cursor;
+  result:= fintf.getcellcursor(actcellzone);
  end
  else begin
-  result:= inherited getcursor;
+  result:= inherited getcursor(actcellzone);
  end;
 end;
 
@@ -1605,6 +1610,14 @@ procedure twidgetcol.afterdragevent(var ainfo: draginfoty; const arow: integer;
 begin
  if fintf <> nil then begin
   fintf.aftercelldragevent(ainfo,arow,processed);
+ end;
+end;
+
+procedure twidgetcol.updatecellzone(const row: integer; const pos: pointty; var result: cellzonety);
+begin
+ inherited;
+ if fintf <> nil then begin
+  fintf.updatecellzone(row,pos,result);
  end;
 end;
 

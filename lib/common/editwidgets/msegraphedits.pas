@@ -18,7 +18,8 @@ uses
  msewidgets,mseeditglob,msestockobjects,msestat,msestatfile,
  mseclasses,msesimplewidgets,msemenus,mseact,
  msegrids,msewidgetgrid,msedatalist,msebitmap,msetypes,msestrings,msearrayprops,
- msedrawtext,mseshapes{$ifdef mse_with_ifi},mseifi,mseifiglob{$endif};
+ msedrawtext,mseshapes{$ifdef mse_with_ifi},mseifi,mseifiglob{$endif},
+ msepointer;
 
 const
  defaultsliderwidth = 200;
@@ -142,6 +143,9 @@ type
    function getrowdatapo(const info: cellinfoty): pointer; virtual;
    procedure setgridintf(const intf: iwidgetgrid); virtual;
    function getcellframe: framety; virtual;
+   function getcellcursor(const acellzone: cellzonety): cursorshapety; virtual;
+   procedure updatecellzone(const arow: integer; const apos: pointty;
+                            var result: cellzonety); virtual;
    procedure drawcell(const canvas: tcanvas);
    procedure updateautocellsize(const canvas: tcanvas); virtual;
    procedure beforecelldragevent(var ainfo: draginfoty; const arow: integer;
@@ -1723,6 +1727,17 @@ begin
 end;
 
 procedure tgraphdataedit.modified;
+begin
+ //dummy
+end;
+
+function tgraphdataedit.getcellcursor(const acellzone: cellzonety): cursorshapety;
+begin
+ result:= cursor;
+end;
+
+procedure tgraphdataedit.updatecellzone(const arow: integer;
+                                  const apos: pointty; var result: cellzonety);
 begin
  //dummy
 end;

@@ -23,7 +23,7 @@ type
                ns_subitems,ns_drawemptybox,ns_imagenrfix,
                ns_destroying,ns_updating,ns_noowner,ns_nosubnodestat,
                ns_casesensitive,ns_sorted,ns_captionclipped,
-                   ns_res15,ns_res16,
+                   ns_checkbox,ns_res16,
                    ns_useri0,ns_useri1,ns_useri2,ns_useri3,
                           //with invalidate and statsave
                    ns_useri4,ns_useri5,ns_useri6,ns_useri7,
@@ -37,15 +37,15 @@ type
  nodestate1ty = (ns1_statechanged,ns1_rootchange,ns1_candrag);
  nodestates1ty = set of nodestate1ty;
  
- nodeoptionty = (no_drawemptybox);
+ nodeoptionty = (no_drawemptybox,no_checkbox);
  nodeoptionsty = set of nodeoptionty;
 
 const
  invalidatestates = [ns_expanded,ns_selected,ns_checked,
-                     ns_subitems,ns_drawemptybox,
+                     ns_subitems,ns_drawemptybox,ns_checkbox,
                      ns_useri0..ns_useri7];
  invalidateallstates = [ns_expanded];
- statstates: nodestatesty = [ns_expanded,ns_selected,ns_checked,
+ statstates: nodestatesty = [ns_expanded,ns_selected,ns_checked,{ns_checkbox,}
                ns_useri0..ns_useri3,ns_user0..ns_user3];
  defaultlevelstep = 10;
 
@@ -57,6 +57,8 @@ type
   imagerect: rectty;
   textflags: textflagsty;
   expandboxrect: rectty;
+  checkboxrect: rectty;
+  checkboxinnerrect: rectty;
   colorline: colorty;
  end;
  plistitemlayoutinfoty = ^listitemlayoutinfoty;
@@ -88,6 +90,8 @@ type
    procedure setimagenr(const Value: integer);
    function getselected: boolean;
    procedure setselected(const Value: boolean);
+   function getchecked: boolean;
+   procedure setchecked(const avalue: boolean);
    function getimagelist: timagelist;
    procedure setimagelist(const Value: timagelist);
    procedure setvaluetext1(const avalue: msestring);
@@ -136,6 +140,7 @@ type
                       //nil -> fowner.imagelist
    property imagenr: integer read fimagenr write setimagenr;
    property selected: boolean read getselected write setselected;
+   property checked: boolean read getchecked write setchecked;
    property owner: tcustomitemlist read fowner;
    function getvaluetext: msestring; virtual;
    procedure setvaluetext(var avalue: msestring); virtual;
@@ -150,6 +155,9 @@ type
 
  ttreelistitem = class;
  treelistitemarty = array of ttreelistitem;
+ treelistitematy = array[0..0] of ttreelistitem;
+ ptreelistitematy = ^treelistitematy;
+ 
  treelistitemclassty = class of ttreelistitem;
  checktreelistitemprocty = procedure(const sender: ttreelistitem;
                               var delete: boolean) of object;
@@ -228,9 +236,18 @@ type
    function add(const aitem: ttreelistitem): integer; overload; 
                    //returns index, nil ignored
    procedure add(const aitems: treelistitemarty); overload;
-   procedure add(const acount: integer; itemclass: treelistitemclassty = nil); overload;
+   procedure add(const acount: integer;
+                            const itemclass: treelistitemclassty = nil;
+                            const defaultstate: nodestatesty = []); overload;
    procedure insert(const aitem: ttreelistitem; const aindex: integer);
    procedure clear;
+
+   function getnodes(const must: nodestatesty; 
+                        const mustnot: nodestatesty;
+                        const recursive: boolean = false): treelistitemarty;
+   function getselectednodes(const recursive: boolean = false): treelistitemarty;
+   function getcheckednodes(const recursive: boolean = false): treelistitemarty;
+
    procedure expandall;
    procedure collapseall;
    function remove(const aindex: integer): ttreelistitem;
@@ -301,7 +318,7 @@ type
    foptions: nodeoptionsty;
    fcaptionpos: captionposty;
    fstate: itemliststatesty;
-   function getitems(const index: integer): tlistitem;
+   function getitems1(const index: integer): tlistitem;
    procedure setitems(const index: integer; const Value: tlistitem);
    procedure freedata(var data); override;
    procedure change(const item: tlistitem); reintroduce; overload;
@@ -325,7 +342,6 @@ type
    procedure writestate(const writer; const name: msestring); override;
    procedure readstate(const reader; const acount: integer); override;
 
-
   public
    constructor create(const intf: iitemlist); reintroduce;
    destructor destroy; override;
@@ -341,8 +357,11 @@ type
 
    function indexof(const aitem: tlistitem): integer;
    function nodezone(const point: pointty): cellzonety;
+   function getitems(const must: nodestatesty; 
+                        const mustnot: nodestatesty): listitemarty;
    function getselecteditems: listitemarty;
-   property items[const index: integer]: tlistitem read getitems write setitems;
+   function getcheckeditems: listitemarty;
+   property items[const index: integer]: tlistitem read getitems1 write setitems;
                     default;
    property imnr_base: integer read fimnr_base write setimnr_base default 0;
    property imnr_expanded: integer read fimnr_expanded write setimnr_expanded default 0;
@@ -394,7 +413,8 @@ type
    procedure iterate(const event: nodeeventty);
    function converttotreelistitem(flat: boolean = false; withrootnode: boolean =  false;
                 filterfunc: treenodefilterfuncty = nil): ttreelistitem;
-   property items[const index: integer]: ttreenode read getitems write setitems; default;
+   property items[const index: integer]: ttreenode read getitems
+                                                    write setitems; default;
    property parent: ttreenode read fparent;
  end;
 
@@ -441,10 +461,13 @@ begin
  endupdate;
 end;
 
-class procedure tlistitem.calcitemlayout(const asize: sizety; const ainnerframe: framety;
+class procedure tlistitem.calcitemlayout(const asize: sizety;
+        const ainnerframe: framety;
         const list: tcustomitemlist; var info: listitemlayoutinfoty);
 var
  aimagesize: sizety;
+const
+ checkboxdist = 1;
 begin
  with list do begin
   aimagesize:= fimagesize;
@@ -453,6 +476,18 @@ begin
   cellsize:= asize;
   captionrect:= makerect(nullpoint,asize);
   imagerect:= captionrect;
+  if no_checkbox in list.foptions then begin
+   checkboxrect.size.cx:= checkboxsize + 2*checkboxdist;
+   checkboxrect.size.cy:= checkboxrect.size.cx;
+   aimagesize.cx:= aimagesize.cx + checkboxrect.size.cx;
+   if aimagesize.cy < checkboxsize then begin
+    aimagesize.cy:= checkboxsize;
+   end;
+  end
+  else begin
+   checkboxrect.size:= nullsize;
+   checkboxinnerrect.size:= nullsize;
+  end;
   textflags:= [tf_xcentered,tf_ycentered];
   case list.fcaptionpos of
    cp_left,cp_lefttop,cp_leftbottom: begin
@@ -497,6 +532,16 @@ begin
    end;
   end;
   captioninnerrect:= deflaterect(captionrect,ainnerframe);
+  checkboxrect.y:= imagerect.y + (imagerect.cy - checkboxrect.cy) div 2;
+  checkboxrect.x:= imagerect.x;   
+  if no_checkbox in list.foptions then begin
+   imagerect.x:= imagerect.x + checkboxrect.cx;
+   imagerect.cx:= imagerect.cx - checkboxrect.cx;
+   checkboxinnerrect:= inflaterect(checkboxrect,-checkboxdist);
+  end
+  else begin
+   checkboxinnerrect.pos:= checkboxrect.pos;
+  end;
  end;
 end;
 
@@ -504,9 +549,22 @@ procedure tlistitem.drawimage(const acanvas: tcanvas);
 var
  int1: integer;
  aimagelist: timagelist;
+ glyphno: stockglyphty;
 begin
  aimagelist:= imagelist;
  with fowner,fintf.getlayoutinfo^ do begin
+  if (no_checkbox in foptions) and (ns_checkbox in self.fstate) then begin
+   glyphno:= stg_checkbox;
+   if ns_checked in self.fstate then begin
+    glyphno:= stg_checkboxchecked;
+   end;
+   stockobjects.glyphs.paint(acanvas,ord(glyphno),checkboxrect,
+                  [al_xcentered,al_ycentered],fintf.getcolorglyph);
+//   acanvas.drawframe(checkboxinnerrect,-2,cl_black);
+//   if ns_checked in self.fstate then begin
+//    stockobjects.paintglyph(acanvas,stg_checked,checkboxinnerrect,false,cl_black);
+//   end;
+  end;
   if aimagelist <> nil then begin
    int1:= getactimagenr;
    if (int1 >= 0) and (int1 < aimagelist.count) then begin
@@ -523,7 +581,7 @@ var
  po1: pointty;
 begin
  po1:= acanvas.origin;
- drawimage(acanvas); //shifts origin
+ drawimage(acanvas); //ttreelistitem shifts origin
  with fowner.fintf.getlayoutinfo^ do begin
   info.text.text:= fcaption;
   info.text.format:= nil;
@@ -555,8 +613,13 @@ begin
    zone:= cz_caption;
   end
   else begin
-   if pointinrect(pos,imagerect) then begin
-    zone:= cz_image;
+   if (ns_checkbox in fstate) and pointinrect(pos,checkboxinnerrect) then begin
+    zone:= cz_checkbox;
+   end
+   else begin
+    if pointinrect(pos,imagerect) then begin
+     zone:= cz_image;
+    end;
    end;
   end;
  end;
@@ -605,8 +668,17 @@ begin
 end;
 
 procedure tlistitem.mouseevent(var info: mouseeventinfoty);
+const
+ mask: nodestatesty = [ns_checked];
 begin
- //dummy
+ with info do begin
+  if (eventkind = ek_buttonrelease) and
+        (shiftstate * keyshiftstatesmask = []) and (button = mb_left) and
+    pointinrect(pos,fowner.fintf.getlayoutinfo^.checkboxinnerrect) then begin
+   state:= nodestatesty(longword(state) xor longword(mask));
+   include(eventstate,es_processed);
+  end;
+ end;
 end;
 
 function tlistitem.getselected: boolean;
@@ -621,6 +693,21 @@ begin
  end
  else begin
   setstate(fstate - [ns_selected]);
+ end;
+end;
+
+function tlistitem.getchecked: boolean;
+begin
+ result:= ns_checked in fstate;
+end;
+
+procedure tlistitem.setchecked(const avalue: boolean);
+begin
+ if avalue then begin
+  setstate(fstate + [ns_checked]);
+ end
+ else begin
+  setstate(fstate - [ns_checked]);
  end;
 end;
 
@@ -829,7 +916,7 @@ begin
  inherited;
 end;
 
-function tcustomitemlist.getitems(const index: integer): tlistitem;
+function tcustomitemlist.getitems1(const index: integer): tlistitem;
 begin
  result:= tlistitem(inherited items[index]);
 end;
@@ -960,10 +1047,19 @@ begin
 end;
 
 procedure tcustomitemlist.setoptions(const Value: nodeoptionsty);
+var
+ optionsbefore: nodeoptionsty;
 begin
  if foptions <> value then begin
-  foptions := Value;
-  invalidate;
+  optionsbefore:= foptions;
+  foptions:= Value;
+  if nodeoptionsty(longword(foptions) xor longword(optionsbefore)) *
+                                               [no_checkbox] <> [] then begin
+   updatelayout;
+  end
+  else begin
+   invalidate;
+  end;
  end;
 end;
 
@@ -1211,25 +1307,40 @@ begin
  end;
 end;
 
-function tcustomitemlist.getselecteditems: listitemarty;
+function tcustomitemlist.getitems(const must: nodestatesty; 
+                        const mustnot: nodestatesty): listitemarty;
 var
  int1: integer;
  int2: integer;
+ item1: tlistitem;
  po1: ppointeraty;
 begin
  result:= nil;
  int2:= 0;
  po1:= datapo;
  for int1:= 0 to count - 1 do begin
-  if tlistitem(po1^[int1]).selected then begin
-   if int1 > high(result) then begin
-    setlength(result,10+length(result)*2);
+  item1:= tlistitem(po1^[int1]);
+  with item1 do begin
+   if (fstate * must = must) and (fstate * mustnot = []) then begin
+    if int2 > high(result) then begin
+     setlength(result,10+length(result)*2);
+    end;
+    result[int2]:= item1;
+    inc(int2);
    end;
-   result[int2]:= tlistitem(po1^[int1]);
-   inc(int2);
   end;
  end;
  setlength(result,int2);
+end;
+
+function tcustomitemlist.getselecteditems: listitemarty;
+begin
+ result:= getitems([ns_selected],[]);
+end;
+
+function tcustomitemlist.getcheckeditems: listitemarty;
+begin
+ result:= getitems([ns_checked],[]);
 end;
 
 { ttreelistitem }
@@ -1409,7 +1520,9 @@ begin
  end;
 end;
 
-procedure ttreelistitem.add(const acount: integer; itemclass: treelistitemclassty = nil);
+procedure ttreelistitem.add(const acount: integer;
+                            const itemclass: treelistitemclassty = nil;
+                            const defaultstate: nodestatesty = []);
 var
  int1,int2: integer;
 begin
@@ -1420,12 +1533,18 @@ begin
  if itemclass <> nil then begin
   for int1:= 0 to acount-1 do begin
    setitems(fcount,itemclass.create);
+   if defaultstate <> [] then begin
+    fitems[count].fstate:= defaultstate;
+   end;
    inc(fcount);
   end;
  end
  else begin
   for int1:= 0 to acount-1 do begin
    setitems(fcount,createsubnode);
+   if defaultstate <> [] then begin
+    fitems[count].fstate:= defaultstate;
+   end;
    inc(fcount);
   end;
  end;
@@ -1478,6 +1597,54 @@ begin
  fitems:= nil; //ev. free unused memory
  exclude(fstate,ns_noowner);
 end;
+
+function ttreelistitem.getnodes(const must: nodestatesty; 
+                        const mustnot: nodestatesty; 
+                        const recursive: boolean = false): treelistitemarty;
+var
+ int2: integer;
+
+ procedure check(anode: ttreelistitem);
+ var
+  int1: integer;
+  item1: ttreelistitem;
+ begin
+  with anode do begin
+   for int1:= 0 to fcount - 1 do begin
+    item1:= fitems[int1];
+    if (item1.fstate * must = must) and (item1.fstate * mustnot = []) then begin
+     if int2 > high(result) then begin
+      setlength(result,10+length(result)*2);
+     end;
+     result[int2]:= item1;
+     inc(int2);
+    end;
+    if recursive then begin
+     check(item1);
+    end;
+   end;
+  end;
+ end;
+ 
+begin
+ result:= nil;
+ int2:= 0;
+ check(self);
+ setlength(result,int2);
+end;
+
+function ttreelistitem.getselectednodes(
+                       const recursive: boolean = false): treelistitemarty;
+begin
+ result:= getnodes([ns_selected],[],recursive);
+end;
+
+function ttreelistitem.getcheckednodes(
+                       const recursive: boolean = false): treelistitemarty;
+begin
+ result:= getnodes([ns_checked],[],recursive);
+end;
+
 
 procedure ttreelistitem.internalcollapseall;
 var
@@ -1639,7 +1806,7 @@ begin
  end;
  change;
 end;
-
+var testvar: listitemlayoutinfoty;
 procedure ttreelistitem.drawimage(const acanvas: tcanvas);
 var
  boxno: integer;
@@ -1671,6 +1838,7 @@ begin
  end;
  setlength(lines,ftreelevel+2); //last line can be doubled + horz. line
  acanvas.move(makepoint(levelshift,0));
+testvar:= fowner.fintf.getlayoutinfo^;
  with fowner,fintf.getlayoutinfo^ do begin
   cellheight:= cellsize.cy;
   seg.a.x:= (expandboxrect.x + expandboxrect.cx) div 2;
@@ -1718,7 +1886,8 @@ begin
      a.y:= cellheight div 2;
      b.y:= a.y;
      a.x:= lines[0].a.x + 1;
-     b.x:= imagerect.x - 1; //horizontal line
+//     b.x:= imagerect.x - 1; //horizontal line
+     b.x:= checkboxrect.x - 1; //horizontal line
      if b.x < a.x then begin
       dec(int1);
      end;
@@ -1773,6 +1942,14 @@ begin
   inc(x,boxdist);
   dec(cx,boxdist);
  end;
+// if no_checkbox in list.options then begin
+  with info.checkboxrect do begin
+   inc(x,boxdist);
+  end;
+  with info.checkboxinnerrect do begin
+   inc(x,boxdist);
+  end;
+// end;
  inc(info.imagerect.x,boxdist);
  with info.expandboxrect do begin
   x:= 0;
@@ -1793,14 +1970,18 @@ end;
 
 procedure ttreelistitem.mouseevent(var info: mouseeventinfoty);
 begin
- inherited;
  with info do begin
-  if (eventkind = ek_buttonpress) and
-        (shiftstate * keyshiftstatesmask = []) and (button = mb_left) and
-    pointinrect(makepoint(pos.x-levelshift,pos.y),
-                        fowner.fintf.getlayoutinfo^.expandboxrect) then begin
-   expanded:= not expanded;
-   include(eventstate,es_processed);
+  dec(pos.x,levelshift);
+  try
+   inherited;
+   if (eventkind = ek_buttonpress) and
+         (shiftstate * keyshiftstatesmask = []) and (button = mb_left) and
+     pointinrect(pos,fowner.fintf.getlayoutinfo^.expandboxrect) then begin
+    expanded:= not expanded;
+    include(eventstate,es_processed);
+   end;
+  finally
+   inc(pos.x,levelshift);
   end;
  end;
 end;

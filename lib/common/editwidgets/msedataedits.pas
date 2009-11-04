@@ -18,7 +18,7 @@ uses
  mseevent,msegraphutils,msedrawtext,msestat,msestatfile,mseclasses,
  msearrayprops,msegrids,msewidgetgrid,msedropdownlist,msedrag,mseforms,
  mseformatstr,typinfo,msemenus,
- msescrollbar,msewidgets,msepopupcalendar,msekeyboard;
+ msescrollbar,msewidgets,msepopupcalendar,msekeyboard,msepointer;
 
 const
  emptyinteger = minint;
@@ -130,6 +130,8 @@ type
    function getrowdatapo(const info: cellinfoty): pointer; virtual;
    procedure setgridintf(const intf: iwidgetgrid); virtual;
    function getcellframe: framety; virtual;
+   function getcellcursor(const acellzone: cellzonety): cursorshapety; virtual;
+   procedure updatecellzone(const row: integer; const apos: pointty; var result: cellzonety); virtual;
    function getnulltext: msestring; virtual;
    procedure drawcell(const canvas: tcanvas); virtual;
    procedure updateautocellsize(const canvas: tcanvas); virtual;
@@ -1100,7 +1102,7 @@ function inttorealty(const avalue: integer): realty;
 
 implementation
 uses
- sysutils,msereal,msebits,msepointer,msestreaming,msestockobjects;
+ sysutils,msereal,msebits,msestreaming,msestockobjects;
 
 type
  tdatalist1 = class(tdatalist);
@@ -2218,6 +2220,17 @@ begin
    result:= datatotext(datalist.getitempo(aindex)^);
   end;
  end;
+end;
+
+function tcustomdataedit.getcellcursor(const acellzone: cellzonety): cursorshapety;
+begin
+ result:= cursor;
+end;
+
+procedure tcustomdataedit.updatecellzone(const row: integer; const apos: pointty;
+                                                  var result: cellzonety);
+begin
+ //dummy
 end;
 
 { tcustomstringedit }

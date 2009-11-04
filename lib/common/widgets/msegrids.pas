@@ -174,7 +174,7 @@ type
       gs_islist,//contiguous select blocks
       gs_isdb); //do not change rowcount
  gridstatesty = set of gridstatety;
- cellzonety = (cz_none,cz_default,cz_image,cz_caption);
+ cellzonety = (cz_none,cz_default,cz_checkbox,cz_image,cz_caption);
  cellkindty = (ck_invalid,ck_data,ck_fixcol,ck_fixrow,ck_fixcolrow);
  griderrorty = (gre_ok,gre_invaliddatacell,gre_differentrowcount,
                 gre_rowindex,gre_colindex,gre_invalidwidget);
@@ -592,7 +592,7 @@ type
    procedure sortcompare(const index1,index2: integer; var result: integer); virtual;
    function isempty(const aindex: integer): boolean; virtual;
    procedure docellevent(var info: celleventinfoty); virtual;
-   function getcursor: cursorshapety; virtual;
+   function getcursor(const actcellzone: cellzonety): cursorshapety; virtual;
    function getdatastatname: msestring;
    procedure coloptionstoeditoptions(var dest: optionseditty);
    procedure clean(const start,stop: integer); override;
@@ -605,7 +605,8 @@ type
                      const ashiftstate: shiftstatesty;
                      out canrowfocus: boolean): boolean; virtual;
    function isreadonly: boolean; //col readonly or row readonly
-   procedure updatecellzone(const pos: pointty; var result: cellzonety); virtual;
+   procedure updatecellzone(const row: integer; const pos: pointty;
+                                       var result: cellzonety); virtual;
    property datalist: tdatalist read fdata write setdata;
    procedure dostatread(const reader: tstatreader); override;
    procedure dostatwrite(const writer: tstatwriter); override;
@@ -675,7 +676,7 @@ type
    procedure docellevent(var info: celleventinfoty); override;
    procedure updatelayout; override;
    function getinnerframe: framety; override;
-   function getcursor: cursorshapety; override;
+   function getcursor(const actcellzone: cellzonety): cursorshapety; override;
    procedure modified; virtual;
   public
    constructor create(const agrid: tcustomgrid; 
@@ -1633,6 +1634,7 @@ type
    fnonullcheck: integer;
    fnocheckvalue: integer;
    fappendcount: integer;
+   flastcellzone: cellzonety;
    class function classskininfo: skininfoty; override;
    
    procedure setselected(const cell: gridcoordty;
@@ -4965,7 +4967,7 @@ begin
  end;
 end;
 
-procedure tdatacol.updatecellzone(const pos: pointty; var result: cellzonety);
+procedure tdatacol.updatecellzone(const row: integer; const pos: pointty; var result: cellzonety);
 begin
  fgrid.internalupdatelayout;
  if pointinrect(pos,fcellinfo.rect) then begin
@@ -4991,7 +4993,8 @@ begin
    po1:= fgrid.cellrect(cellinfo.cell).pos;
    try
     subpoint1(info.pos,po1);
-    updatecellzone(info.pos,cellinfo.zone);
+    updatecellzone(acell.row,info.pos,cellinfo.zone);
+    fgrid.flastcellzone:= cellinfo.zone;
     fgrid.docellevent(cellinfo);
    finally
     addpoint1(info.pos,po1);
@@ -5447,7 +5450,7 @@ begin
  end;
 end;
 
-function tdatacol.getcursor: cursorshapety;
+function tdatacol.getcursor(const actcellzone: cellzonety): cursorshapety;
 begin
  result:= cr_arrow;
 end;
@@ -5689,13 +5692,13 @@ begin
 }
 end;
 
-function tcustomstringcol.getcursor: cursorshapety;
+function tcustomstringcol.getcursor(const actcellzone: cellzonety): cursorshapety;
 begin
  if not isreadonly{(co_readonly in foptions)} then begin
   result:= cr_ibeam;
  end
  else begin
-  result:= inherited getcursor;
+  result:= inherited getcursor(actcellzone);
  end;
 end;
 
@@ -8797,7 +8800,7 @@ function tcustomgrid.actualcursor: cursorshapety;
 begin
  with fmousecell do begin
   if (row >= 0) and (col >= 0) and (col < datacols.count) then begin
-   result:= datacols[fmousecell.col].getcursor;
+   result:= datacols[fmousecell.col].getcursor(flastcellzone);
   end
   else begin
    result:= inherited actualcursor;
@@ -9082,7 +9085,8 @@ begin
      ek_mousemove,ek_mousepark: begin
       if not (es_child in info.eventstate) then begin
        if cellkind = ck_data then begin
-        application.widgetcursorshape:= datacols[fmousecell.col].getcursor;
+        application.widgetcursorshape:= 
+                 datacols[fmousecell.col].getcursor(flastcellzone);
        end
        else begin
         application.widgetcursorshape:= cr_default{cursor};

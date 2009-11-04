@@ -145,7 +145,8 @@ type
   public
    constructor create(const agrid: tcustomgrid;
                          const aowner: tgridarrayprop); override;
-   procedure updatecellzone(const pos: pointty; var result: cellzonety); override;
+   procedure updatecellzone(const row: integer; const pos: pointty;
+                            var result: cellzonety); override;
    property items[const aindex: integer]: tlistitem read getitems write setitems;
                     default;
  end;
@@ -430,6 +431,10 @@ type
    fvalue: tlistitem;
 
 //   procedure setfiltertext(const value: msestring); virtual;
+  //igridwidget
+   function getcellcursor(const acellzone: cellzonety): cursorshapety; override;
+   procedure updatecellzone(const row: integer; const apos: pointty;
+                            var result: cellzonety); override;
   //iedit
    function locatecount: integer; override;        //number of locate values
    function getkeystring(const index: integer): msestring; override;
@@ -593,7 +598,7 @@ type
    procedure setcolorline(const value: colorty);
    function getonstatreaditem: statreadtreeitemeventty;
    procedure setonstatreaditem(const avalue: statreadtreeitemeventty);
-   function getitems(const index: integer): ttreelistedititem;
+   function getitems1(const index: integer): ttreelistedititem;
    procedure setitems(const index: integer; const avalue: ttreelistedititem);
    function getitemclass: treelistedititemclassty;
    procedure setitemclass(const avalue: treelistedititemclassty);
@@ -624,12 +629,20 @@ type
    procedure add(const acount: integer; 
                              aitemclass: treelistedititemclassty = nil); overload;
    function toplevelnodes: treelistedititemarty;
+   function getnodes(const must: nodestatesty; 
+                        const mustnot: nodestatesty;
+                        const recursive: boolean = false): treelistitemarty;
+   function getselectednodes(
+                   const recursive: boolean = false): treelistitemarty;
+   function getcheckednodes(
+                   const recursive: boolean = false): treelistitemarty;
+
    procedure expandall;
    procedure collapseall;
    procedure moverow(const source,dest: integer);
     //source and dest must belong to the same parent, ignored otherwise
    property itemclass: treelistedititemclassty read getitemclass write setitemclass;
-   property items[const index: integer]: ttreelistedititem read getitems 
+   property items[const index: integer]: ttreelistedititem read getitems1
                                           write setitems; default;
   published
    property imnr_base;
@@ -718,7 +731,7 @@ type
    property fieldedit: trecordfieldedit read ffieldedit write setfieldedit;
    property options: treeitemeditoptionsty read foptions write foptions default [];
    property oncheckrowmove: checkmoveeventty read foncheckrowmove write foncheckrowmove;
-   property cursor default cr_default;
+//   property cursor default cr_default;
  end;
 
 implementation
@@ -859,7 +872,8 @@ begin
  end;
 end;
 
-procedure tlistcol.updatecellzone(const pos: pointty; var result: cellzonety);
+procedure tlistcol.updatecellzone(const row: integer; const pos: pointty;
+                                  var result: cellzonety);
 begin
  if pointinrect(pos,tcustomlistview(fgrid).fitemlist.flayoutinfo.captionrect) then begin
   result:= cz_caption;
@@ -2376,8 +2390,14 @@ end;
 procedure titemedit.clientmouseevent(var info: mouseeventinfoty);
 var
  po1: pointty;
-
+ cursor1: cursorshapety;
+ zone1: cellzonety;
 begin
+ if (fvalue <> nil) and (info.eventkind in mouseposevents) then begin
+  zone1:= cz_default;
+  fvalue.updatecellzone(info.pos,zone1);
+  application.widgetcursorshape:= getcellcursor(zone1);
+ end;
  if canevent(tmethod(fonclientmouseevent)) then begin
   fonclientmouseevent(self,info);
  end;
@@ -2749,6 +2769,25 @@ end;
 procedure titemedit.endedit;
 begin
  editing:= false;
+end;
+
+function titemedit.getcellcursor(const acellzone: cellzonety): cursorshapety;
+begin
+ if acellzone = cz_caption then begin
+  result:= cursor;
+ end
+ else begin
+  result:= cr_arrow;
+ end;
+end;
+
+procedure titemedit.updatecellzone(const row: integer; const apos: pointty;
+                            var result: cellzonety);
+begin
+ inherited;
+ if fitemlist <> nil then begin
+  fitemlist[row].updatecellzone(apos,result);
+ end;
 end;
 
 {
@@ -3375,6 +3414,59 @@ begin
  setlength(result,int2);
 end;
 
+function ttreeitemeditlist.getnodes(const must: nodestatesty; 
+                     const mustnot: nodestatesty;
+                     const recursive: boolean = false): treelistitemarty;
+var
+ int2: integer;
+ 
+ procedure check(const anode: ttreelistitem);
+ var
+  int1: integer;
+ begin
+  with ttreelistitem1(anode) do begin
+   if (fstate * must = must) and (fstate * mustnot = []) then begin
+    if int2 > high(result) then begin
+     setlength(result,10+length(result)*2);
+    end;
+    result[int2]:= anode;
+    inc(int2);
+   end;
+   if recursive then begin
+    for int1:= 0 to fcount - 1 do begin
+     check(fitems[int1]);
+    end;
+   end;
+  end;
+ end;
+ 
+var
+ int1: integer;
+ po1: ptreelistitematy;
+begin
+ result:= nil;
+ int2:= 0;
+ po1:= datapo;
+ for int1:= 0 to count - 1 do begin
+  if po1^[int1].parent = nil then begin
+   check(po1^[int1]);
+  end;
+ end;
+ setlength(result,int2);
+end;
+
+function ttreeitemeditlist.getselectednodes(
+                     const recursive: boolean = false): treelistitemarty;
+begin
+ result:= getnodes([ns_selected],[],recursive);
+end;
+
+function ttreeitemeditlist.getcheckednodes(
+                     const recursive: boolean = false): treelistitemarty;
+begin
+ result:= getnodes([ns_checked],[],recursive);
+end;
+
 procedure ttreeitemeditlist.expandall;
 var
  int1: integer;
@@ -3571,9 +3663,9 @@ begin
  end;
 end;
 
-function ttreeitemeditlist.getitems(const index: integer): ttreelistedititem;
+function ttreeitemeditlist.getitems1(const index: integer): ttreelistedititem;
 begin
- result:= ttreelistedititem(inherited getitems(index));
+ result:= ttreelistedititem(inherited getitems1(index));
 end;
 
 procedure ttreeitemeditlist.setitems(const index: integer;
@@ -3620,7 +3712,7 @@ begin
   fitemlist:=  ttreeitemeditlist.create(iitemlist(self),self);
  end;
  inherited;
- cursor:= cr_default;
+// cursor:= cr_default;
 end;
 
 destructor ttreeitemedit.destroy;

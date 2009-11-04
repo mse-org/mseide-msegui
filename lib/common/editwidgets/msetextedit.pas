@@ -16,7 +16,7 @@ uses
  mseeditglob,mseedit,msewidgetgrid,classes,msedatalist,msegraphics,msestream,
  msetypes,mserichstring,msestat,msestatfile,mseclasses,mseinplaceedit,msegrids,
  mseevent,mseguiglob,msegui,msegraphutils,msestrings,msedrawtext,msearrayprops,
- msemenus;
+ msemenus,msepointer;
 
 const
  defaulttexteditoptions =  (defaultoptionsedit + [oe_linebreak]) -
@@ -129,6 +129,9 @@ type
    function getrowdatapo(const info: cellinfoty): pointer; virtual;
    procedure setgridintf(const intf: iwidgetgrid);
    function getcellframe: framety; virtual;
+   function getcellcursor(const acellzone: cellzonety): cursorshapety; virtual;
+   procedure updatecellzone(const row: integer; const apos: pointty;
+                            var result: cellzonety); virtual;
    function getnulltext: msestring;
    procedure drawcell(const canvas: tcanvas);
    procedure updateautocellsize(const canvas: tcanvas); virtual;
@@ -440,6 +443,17 @@ begin
  else begin
   result:= texteditminimalframe;
  end;
+end;
+
+function tcustomtextedit.getcellcursor(const acellzone: cellzonety): cursorshapety;
+begin
+ result:= cursor;
+end;
+
+procedure tcustomtextedit.updatecellzone(const row: integer; const apos: pointty;
+                            var result: cellzonety);
+begin
+ //dummy
 end;
 
 function tcustomtextedit.getnulltext: msestring;
