@@ -631,13 +631,12 @@ type
    procedure add(const acount: integer; 
                              aitemclass: treelistedititemclassty = nil); overload;
    function toplevelnodes: treelistedititemarty;
-   function getnodes(const must: nodestatesty; 
-                        const mustnot: nodestatesty;
-                        const recursive: boolean = false): treelistitemarty;
-   function getselectednodes(
-                   const recursive: boolean = false): treelistitemarty;
-   function getcheckednodes(
-                   const recursive: boolean = false): treelistitemarty;
+   function getnodes(const must: nodestatesty; const mustnot: nodestatesty;
+                 const amode: getnodemodety = gmo_matching): treelistitemarty;
+   function getselectednodes(const amode: getnodemodety = 
+                                              gmo_matching): treelistitemarty;
+   function getcheckednodes(const amode: getnodemodety = 
+                                              gmo_matching): treelistitemarty;
    procedure updatechildcheckedtree; //slow!
    
    procedure expandall;
@@ -3443,33 +3442,10 @@ begin
 end;
 
 function ttreeitemeditlist.getnodes(const must: nodestatesty; 
-                     const mustnot: nodestatesty;
-                     const recursive: boolean = false): treelistitemarty;
+                   const mustnot: nodestatesty;
+                   const amode: getnodemodety = gmo_matching): treelistitemarty;
 var
- int2: integer;
- 
- procedure check(const anode: ttreelistitem);
- var
-  int1: integer;
- begin
-  with ttreelistitem1(anode) do begin
-   if (fstate * must = must) and (fstate * mustnot = []) then begin
-    if int2 > high(result) then begin
-     setlength(result,10+length(result)*2);
-    end;
-    result[int2]:= anode;
-    inc(int2);
-   end;
-   if recursive then begin
-    for int1:= 0 to fcount - 1 do begin
-     check(fitems[int1]);
-    end;
-   end;
-  end;
- end;
- 
-var
- int1: integer;
+ int1,int2: integer; 
  po1: ptreelistitematy;
 begin
  result:= nil;
@@ -3477,22 +3453,22 @@ begin
  po1:= datapo;
  for int1:= 0 to count - 1 do begin
   if po1^[int1].parent = nil then begin
-   check(po1^[int1]);
+   ttreelistitem1(po1^[int1]).internalgetnodes(result,int2,must,mustnot,amode);
   end;
  end;
  setlength(result,int2);
 end;
 
 function ttreeitemeditlist.getselectednodes(
-                     const recursive: boolean = false): treelistitemarty;
+                     const amode: getnodemodety = gmo_matching): treelistitemarty;
 begin
- result:= getnodes([ns_selected],[],recursive);
+ result:= getnodes([ns_selected],[],amode);
 end;
 
 function ttreeitemeditlist.getcheckednodes(
-                     const recursive: boolean = false): treelistitemarty;
+                     const amode: getnodemodety = gmo_matching): treelistitemarty;
 begin
- result:= getnodes([ns_checked],[],recursive);
+ result:= getnodes([ns_checked],[],amode);
 end;
 
 procedure ttreeitemeditlist.updatechildcheckedtree;

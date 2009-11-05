@@ -46,7 +46,8 @@ type
    function getrowdatapo(const info: cellinfoty): pointer; virtual;
    procedure setgridintf(const intf: iwidgetgrid);
    function getcellframe: framety;
-   function getcellcursor(const acellzone: cellzonety): cursorshapety;
+   function getcellcursor(const arow: integer;
+                             const acellzone: cellzonety): cursorshapety;
    procedure updatecellzone(const row: integer; const apos: pointty;
                             var result: cellzonety);
    function getnulltext: msestring;
@@ -189,7 +190,8 @@ begin
  end;
 end;
 
-function tcustomdataimage.getcellcursor(const acellzone: cellzonety): cursorshapety;
+function tcustomdataimage.getcellcursor(const arow: integer;
+                                  const acellzone: cellzonety): cursorshapety;
 begin
  result:= cursor;
 end;
