@@ -432,7 +432,8 @@ type
 
 //   procedure setfiltertext(const value: msestring); virtual;
   //igridwidget
-   function getcellcursor(const acellzone: cellzonety): cursorshapety; override;
+   function getcellcursor(const arow: integer; 
+                         const acellzone: cellzonety): cursorshapety; override;
    procedure updatecellzone(const row: integer; const apos: pointty;
                             var result: cellzonety); override;
   //iedit
@@ -603,6 +604,7 @@ type
    function getitemclass: treelistedititemclassty;
    procedure setitemclass(const avalue: treelistedititemclassty);
   protected
+   procedure change(const index: integer); override;
    procedure freedata(var data); override;
    procedure docreateobject(var instance: tobject); override;
    procedure createitem(out item: tlistitem); override;
@@ -636,7 +638,8 @@ type
                    const recursive: boolean = false): treelistitemarty;
    function getcheckednodes(
                    const recursive: boolean = false): treelistitemarty;
-
+   procedure updatechildcheckedtree; //slow!
+   
    procedure expandall;
    procedure collapseall;
    procedure moverow(const source,dest: integer);
@@ -1501,10 +1504,10 @@ begin
   feditor.dopaint(canvas);
   canvas.move(po1);
   if feditor.lasttextclipped then begin
-   include(item1.fstate,ns_captionclipped);   
+   include(item1.fstate1,ns1_captionclipped);   
   end
   else begin
-   exclude(item1.fstate,ns_captionclipped);   
+   exclude(item1.fstate1,ns1_captionclipped);   
   end;
  end;
 end;
@@ -2394,9 +2397,14 @@ var
  zone1: cellzonety;
 begin
  if (fvalue <> nil) and (info.eventkind in mouseposevents) then begin
-  zone1:= cz_default;
-  fvalue.updatecellzone(info.pos,zone1);
-  application.widgetcursorshape:= getcellcursor(zone1);
+  if readonly then begin
+   application.widgetcursorshape:= cr_arrow;
+  end
+  else begin
+   zone1:= cz_default;
+   fvalue.updatecellzone(info.pos,zone1);
+   application.widgetcursorshape:= getcellcursor(-1,zone1);
+  end;
  end;
  if canevent(tmethod(fonclientmouseevent)) then begin
   fonclientmouseevent(self,info);
@@ -2458,10 +2466,10 @@ begin
   with tlistitem1(fvalue) do begin
    drawimage(acanvas);
    if feditor.lasttextclipped then begin
-    include(fstate,ns_captionclipped);
+    include(fstate1,ns1_captionclipped);
    end
    else begin
-    exclude(fstate,ns_captionclipped);
+    exclude(fstate1,ns1_captionclipped);
    end;
   end;
  end;
@@ -2729,8 +2737,8 @@ end;
 }
 procedure titemedit.setediting(const avalue: boolean);
 begin
- if avalue or (oe_locate in foptionsedit) then begin
-  if fediting <> avalue then begin
+ if fediting <> avalue then begin
+  if avalue or (oe_locate in foptionsedit) then begin
    fediting:= avalue;
    setupeditor;
    if fediting then begin
@@ -2743,10 +2751,13 @@ begin
     end;
 //    updatefilterselect;
    end;
+  end
+  else begin
+   fediting:= false;
   end;
- end
- else begin
-  fediting:= false;
+ end;
+ if not fediting and (application.clientmousewidget = self) then begin
+  application.widgetcursorshape:= cr_arrow;
  end;
 end;
 
@@ -2771,9 +2782,12 @@ begin
  editing:= false;
 end;
 
-function titemedit.getcellcursor(const acellzone: cellzonety): cursorshapety;
+function titemedit.getcellcursor(const arow: integer;
+                                  const acellzone: cellzonety): cursorshapety;
 begin
- if acellzone = cz_caption then begin
+ if (acellzone = cz_caption) and 
+                       ((foptionsedit * [oe_locate,oe_readonly] = []) or
+                       (arow < 0) and (editing)) then begin
   result:= cursor;
  end
  else begin
@@ -2955,7 +2969,7 @@ var
  po1: ptreelistitem;
 begin
  clear;
- include(fstate,ns_noowner);
+ include(fstate1,ns1_noowner);
  if source.count > 0 then begin
   po1:= source.datapo;
   setlength(fitems,source.count);
@@ -3089,6 +3103,20 @@ begin
    end;
   end;
  end;
+end;
+
+procedure ttreeitemeditlist.change(const index: integer);
+begin
+ if (index < 0) and (no_updatechildchecked in foptions) and 
+                                         (nochange = 0) then begin
+  inherited beginupdate; //no ils_subnodecountupdating
+  try
+   updatechildcheckedtree;
+  finally
+   decupdate;
+  end;
+ end;
+ inherited;
 end;
 
 procedure ttreeitemeditlist.freedata(var data);
@@ -3465,6 +3493,26 @@ function ttreeitemeditlist.getcheckednodes(
                      const recursive: boolean = false): treelistitemarty;
 begin
  result:= getnodes([ns_checked],[],recursive);
+end;
+
+procedure ttreeitemeditlist.updatechildcheckedtree;
+var
+ int1: integer;
+ po1: ptreelistedititematy;
+begin
+ beginupdate;
+ try
+  po1:= datapo;
+  for int1:= 0 to count - 1 do begin
+   with po1^[int1] do begin
+    if ftreelevel = 0 then begin
+     updatechildcheckedtree;
+    end;
+   end;
+  end;
+ finally
+  endupdate;
+ end;
 end;
 
 procedure ttreeitemeditlist.expandall;

@@ -432,13 +432,13 @@ end;
 
 procedure tpropertyitem.updatestate;
 var
- state1: propertystatesty;
+ stat1: propertystatesty;
 begin
  with feditor do begin
   caption:= Name;
-  state1:= state;
-  if ps_subproperties in state1 then begin
-   if ps_expanded in state1 then begin
+  stat1:= state;
+  if ps_subproperties in stat1 then begin
+   if ps_expanded in stat1 then begin
     fimagenr:= 1;
    end
    else begin

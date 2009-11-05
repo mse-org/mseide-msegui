@@ -58,8 +58,8 @@ type
   stg_dbfilteroff,stg_dbindbrowse,stg_dbindedit,stg_dbindinsert,
  //  37        38           39                    40 
   stg_dot,stg_dotsmall,stg_arrowtopsmall,stg_arrowbottomsmall,
- //    41               42             43
-  stg_checkbox,stg_checkboxchecked,stg_checkboxradio
+ //    41               42                      43               44
+  stg_checkbox,stg_checkboxchecked,stg_checkboxchildchecked,stg_checkboxradio
                  );
 
  stockcaptionty = (sc_none,sc_is_invalid,sc_Format_error,sc_Value_is_required,

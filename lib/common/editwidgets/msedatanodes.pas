@@ -21,9 +21,11 @@ type
 
  nodestatty = (ns_expanded,ns_selected,ns_readonly,ns_checked,
                ns_subitems,ns_drawemptybox,ns_imagenrfix,
-               ns_destroying,ns_updating,ns_noowner,ns_nosubnodestat,
-               ns_casesensitive,ns_sorted,ns_captionclipped,
-                   ns_checkbox,ns_res16,
+//               ns_destroying,ns_updating,ns_noowner,
+               ns_checkbox,ns_showchildchecked,ns_res9,
+               ns_nosubnodestat,
+               ns_casesensitive,ns_sorted,ns_res13,//ns_captionclipped,
+                   ns_res14,ns_res15,
                    ns_useri0,ns_useri1,ns_useri2,ns_useri3,
                           //with invalidate and statsave
                    ns_useri4,ns_useri5,ns_useri6,ns_useri7,
@@ -34,10 +36,15 @@ type
                           //without invalidate, no statsave
 
  nodestatesty = set of nodestatty;
- nodestate1ty = (ns1_statechanged,ns1_rootchange,ns1_candrag);
+ nodestate1ty = (ns1_statechanged,ns1_rootchange,ns1_candrag,
+                 ns1_destroying,ns1_updating,ns1_noowner,ns1_captionclipped,
+                 ns1_childchecked
+                );
  nodestates1ty = set of nodestate1ty;
  
- nodeoptionty = (no_drawemptybox,no_checkbox);
+ nodeoptionty = (no_drawemptybox,no_checkbox,
+                 no_updatechildchecked //track ns1_childchecked state, slow!
+                 );
  nodeoptionsty = set of nodeoptionty;
 
 const
@@ -91,17 +98,18 @@ type
    function getselected: boolean;
    procedure setselected(const Value: boolean);
    function getchecked: boolean;
-   procedure setchecked(const avalue: boolean);
    function getimagelist: timagelist;
    procedure setimagelist(const Value: timagelist);
    procedure setvaluetext1(const avalue: msestring);
   protected
    fstate: nodestatesty;
+   fstate1: nodestates1ty;
    findex: integer;
    fimagelist: timagelist;
    fimagenr: integer;
    fcaption: msestring;
    fowner: tcustomitemlist;
+   procedure setchecked(const avalue: boolean); virtual;
    procedure setcaption(const avalue: msestring); virtual;
    function checkaction(aaction: nodeactionty): boolean;
    procedure actionnotification(var ainfo: nodeactioninfoty); virtual;
@@ -145,6 +153,7 @@ type
    function getvaluetext: msestring; virtual;
    procedure setvaluetext(var avalue: msestring); virtual;
    property valuetext: msestring read getvaluetext write setvaluetext1;
+   property state1: nodestates1ty read fstate1;
  end;
 
  plistitem = ^tlistitem;
@@ -173,7 +182,6 @@ type
    procedure setdestroying;
    function inccount: integer; //returns itemindex
   protected
-   fstate1: nodestates1ty;
    fparent: ttreelistitem;
    fparentindex: integer;
    fitems: treelistitemarty;
@@ -183,6 +191,7 @@ type
    procedure checksort;
    procedure setcaption(const avalue: msestring); override;
    procedure setowner(const aowner: tcustomitemlist); override;
+   procedure setchecked(const avalue: boolean); override;
    procedure checkindex(const aindex: integer);
    procedure settreelevel(const value: integer);
    procedure countchange(const atreeheightbefore: integer);
@@ -204,6 +213,8 @@ type
    procedure dostatread(const reader: tstatreader); override;
    procedure dostatwrite(const writer: tstatwriter); override;
 
+   procedure updatechildcheckedstate; //updates ancestors
+   procedure updatechildcheckedtree; //updates self and descendents
    function parent: ttreelistitem;
    function parentindex: integer;
    function treelevel: integer;
@@ -440,8 +451,8 @@ end;
 
 destructor tlistitem.destroy;
 begin
- if not (ns_destroying in fstate) then begin
-  include(fstate,ns_destroying);
+ if not (ns1_destroying in fstate1) then begin
+  include(fstate1,ns1_destroying);
   if (fowner <> nil) and not(ils_destroying in fowner.fstate) then begin
    checkaction(na_destroying);
   end;
@@ -557,6 +568,12 @@ begin
    glyphno:= stg_checkbox;
    if ns_checked in self.fstate then begin
     glyphno:= stg_checkboxchecked;
+   end
+   else begin
+    if (ns_showchildchecked in self.fstate) and 
+                      (ns1_childchecked in self.fstate1) then begin
+     glyphno:= stg_checkboxchildchecked;
+    end;
    end;
    stockobjects.glyphs.paint(acanvas,ord(glyphno),checkboxrect,
                   [al_xcentered,al_ycentered],fintf.getcolorglyph);
@@ -592,10 +609,10 @@ begin
   drawtext(acanvas,info);
   if not rectinrect(info.res,
       moverect(captioninnerrect,subpoint(po1,acanvas.origin))) then begin
-   include(fstate,ns_captionclipped);
+   include(fstate1,ns1_captionclipped);
   end
   else begin
-   exclude(fstate,ns_captionclipped);
+   exclude(fstate1,ns1_captionclipped);
   end;
 //  drawtext(acanvas,fcaption,captioninnerrect,textflags);
  end;
@@ -603,7 +620,7 @@ end;
 
 function tlistitem.captionclipped: boolean;
 begin
- result:= ns_captionclipped in fstate;
+ result:= ns1_captionclipped in fstate1;
 end;
 
 procedure tlistitem.updatecellzone(const pos: pointty; var zone: cellzonety);
@@ -668,14 +685,15 @@ begin
 end;
 
 procedure tlistitem.mouseevent(var info: mouseeventinfoty);
-const
- mask: nodestatesty = [ns_checked];
+//const
+// mask: nodestatesty = [ns_checked];
 begin
  with info do begin
   if (eventkind = ek_buttonrelease) and
         (shiftstate * keyshiftstatesmask = []) and (button = mb_left) and
     pointinrect(pos,fowner.fintf.getlayoutinfo^.checkboxinnerrect) then begin
-   state:= nodestatesty(longword(state) xor longword(mask));
+//   state:= nodestatesty(longword(state) xor longword(mask));
+   checked:= not checked;
    include(eventstate,es_processed);
   end;
  end;
@@ -1167,7 +1185,8 @@ end;
 
 procedure tcustomitemlist.freedata(var data);
 begin
- if (tlistitem(data) <> nil) and not (ns_destroying in tlistitem(data).fstate) then begin
+ if (tlistitem(data) <> nil) and 
+               not (ns1_destroying in tlistitem(data).fstate1) then begin
   inherited;
  end;
 end;
@@ -1362,13 +1381,13 @@ end;
 
 destructor ttreelistitem.destroy;
 begin
- if not (ns_destroying in fstate) then begin
-  include(fstate,ns_destroying);
+ if not (ns1_destroying in fstate1) then begin
+  include(fstate1,ns1_destroying);
   if (fowner <> nil) and not (ils_destroying in fowner.fstate) then begin
    checkaction(na_destroying);
   end;
  end;
- if (fparent <> nil) and not (ns_destroying in fparent.fstate)  then begin
+ if (fparent <> nil) and not (ns1_destroying in fparent.fstate1)  then begin
   fparent.remove(fparentindex);
  end;
  clear;
@@ -1555,7 +1574,7 @@ procedure ttreelistitem.setdestroying;
 var
  int1: integer;
 begin
- include(fstate,ns_destroying);
+ include(fstate1,ns1_destroying);
  for int1:= 0 to fcount - 1 do begin
   fitems[int1].setdestroying;
  end;
@@ -1571,8 +1590,8 @@ begin
  aitems:= nil; //compilerwarning
  if fcount > 0 then begin
   int2:= treeheight;
-  adestroying:= ns_destroying in fstate;
-  if not (ns_noowner in fstate) then begin
+  adestroying:= ns1_destroying in fstate1;
+  if not (ns1_noowner in fstate1) then begin
    setdestroying;
   end;
   aitems:= fitems;
@@ -1580,7 +1599,7 @@ begin
   acount:= fcount;
   fcount:= 0;
   countchange(int2);
-  if not (ns_noowner in fstate) then begin
+  if not (ns1_noowner in fstate1) then begin
    for int1:= 0 to acount-1 do begin
     with aitems[int1] do begin
      if not adestroying then begin
@@ -1591,11 +1610,11 @@ begin
    end;
   end;
   if not adestroying then begin
-   exclude(fstate,ns_destroying);
+   exclude(fstate1,ns1_destroying);
   end;
  end;
  fitems:= nil; //ev. free unused memory
- exclude(fstate,ns_noowner);
+ exclude(fstate1,ns1_noowner);
 end;
 
 function ttreelistitem.getnodes(const must: nodestatesty; 
@@ -1806,6 +1825,63 @@ begin
  end;
  change;
 end;
+
+procedure ttreelistitem.updatechildcheckedstate;
+var
+ node1: ttreelistitem;
+ int1: integer;
+begin
+ node1:= fparent;
+ if ns_checked in fstate then begin
+  while (node1 <> nil) and (ns_showchildchecked in node1.fstate) and
+                               not (ns1_childchecked in node1.fstate1) do begin
+   include(node1.fstate1,ns1_childchecked);
+   node1.change;
+   node1:= node1.fparent;
+  end;
+ end
+ else begin
+  while (node1 <> nil) and (ns_showchildchecked in node1.fstate) and
+                                (ns1_childchecked in node1.fstate1) do begin
+   with node1 do begin
+    for int1:= 0 to fcount-1 do begin
+     if (ns_checked in fitems[int1].fstate) then begin
+      exit;
+     end;
+    end;
+    exclude(fstate1,ns1_childchecked);
+    change;
+    if ns_checked in fstate then begin
+     exit;
+    end;
+    node1:= fparent;
+   end;
+  end;
+ end;
+end;
+
+procedure ttreelistitem.updatechildcheckedtree;
+var
+ int1: integer;
+begin
+ for int1:= 0 to fcount-1 do begin
+  with fitems[int1] do begin
+   updatechildcheckedstate;
+   updatechildcheckedtree;
+  end;
+ end;
+end;
+
+procedure ttreelistitem.setchecked(const avalue: boolean);
+begin
+ if avalue xor (ns_checked in fstate) then begin
+  inherited;
+  if (fowner <> nil) and (no_updatechildchecked in fowner.foptions) then begin
+   updatechildcheckedstate;
+  end;
+ end;
+end;
+
 var testvar: listitemlayoutinfoty;
 procedure ttreelistitem.drawimage(const acanvas: tcanvas);
 var

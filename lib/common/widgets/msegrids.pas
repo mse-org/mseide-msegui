@@ -592,7 +592,8 @@ type
    procedure sortcompare(const index1,index2: integer; var result: integer); virtual;
    function isempty(const aindex: integer): boolean; virtual;
    procedure docellevent(var info: celleventinfoty); virtual;
-   function getcursor(const actcellzone: cellzonety): cursorshapety; virtual;
+   function getcursor(const arow: integer; 
+                        const actcellzone: cellzonety): cursorshapety; virtual;
    function getdatastatname: msestring;
    procedure coloptionstoeditoptions(var dest: optionseditty);
    procedure clean(const start,stop: integer); override;
@@ -676,7 +677,8 @@ type
    procedure docellevent(var info: celleventinfoty); override;
    procedure updatelayout; override;
    function getinnerframe: framety; override;
-   function getcursor(const actcellzone: cellzonety): cursorshapety; override;
+   function getcursor(const arow: integer;
+                        const actcellzone: cellzonety): cursorshapety; override;
    procedure modified; virtual;
   public
    constructor create(const agrid: tcustomgrid; 
@@ -5450,7 +5452,8 @@ begin
  end;
 end;
 
-function tdatacol.getcursor(const actcellzone: cellzonety): cursorshapety;
+function tdatacol.getcursor(const arow: integer;
+                          const actcellzone: cellzonety): cursorshapety;
 begin
  result:= cr_arrow;
 end;
@@ -5692,13 +5695,14 @@ begin
 }
 end;
 
-function tcustomstringcol.getcursor(const actcellzone: cellzonety): cursorshapety;
+function tcustomstringcol.getcursor(const arow: integer;
+                        const actcellzone: cellzonety): cursorshapety;
 begin
  if not isreadonly{(co_readonly in foptions)} then begin
   result:= cr_ibeam;
  end
  else begin
-  result:= inherited getcursor(actcellzone);
+  result:= inherited getcursor(arow,actcellzone);
  end;
 end;
 
@@ -8800,7 +8804,7 @@ function tcustomgrid.actualcursor: cursorshapety;
 begin
  with fmousecell do begin
   if (row >= 0) and (col >= 0) and (col < datacols.count) then begin
-   result:= datacols[fmousecell.col].getcursor(flastcellzone);
+   result:= datacols[fmousecell.col].getcursor(fmousecell.row,flastcellzone);
   end
   else begin
    result:= inherited actualcursor;
@@ -9086,7 +9090,7 @@ begin
       if not (es_child in info.eventstate) then begin
        if cellkind = ck_data then begin
         application.widgetcursorshape:= 
-                 datacols[fmousecell.col].getcursor(flastcellzone);
+              datacols[fmousecell.col].getcursor(fmousecell.row,flastcellzone);
        end
        else begin
         application.widgetcursorshape:= cr_default{cursor};
