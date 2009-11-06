@@ -257,11 +257,11 @@ type
    ffacedisabled: tcustomface;
    ffacemouse: tcustomface;
    ffaceclicked: tcustomface;
-   fonbeforepaint: painteventty;
-   fonpaintbackground: painteventty;
-   fonpaint: painteventty;
-   fonafterpaint: painteventty;
-   fonmouseevent: mouseeventty;
+//   fonbeforepaint: painteventty;
+//   fonpaintbackground: painteventty;
+//   fonpaint: painteventty;
+//   fonafterpaint: painteventty;
+//   fonmouseevent: mouseeventty;
    function getfaceactive: tcustomface;
    procedure setfaceactive(const avalue: tcustomface);
    function getfacemouse: tcustomface;
@@ -276,11 +276,11 @@ type
    procedure setfacedisabled(const avalue: tcustomface);
   protected
    function getactface: tcustomface; override;
-   procedure dobeforepaint(const canvas: tcanvas); override;
-   procedure dopaintbackground(const canvas: tcanvas); override;
-   procedure doonpaint(const canvas: tcanvas); override;
-   procedure doafterpaint(const canvas: tcanvas); override;
-   procedure mouseevent(var info: mouseeventinfoty); override;
+//   procedure dobeforepaint(const canvas: tcanvas); override;
+//   procedure dopaintbackground(const canvas: tcanvas); override;
+//   procedure doonpaint(const canvas: tcanvas); override;
+//   procedure doafterpaint(const canvas: tcanvas); override;
+//   procedure mouseevent(var info: mouseeventinfoty); override;
   public
    destructor destroy; override;
   published
@@ -288,12 +288,11 @@ type
    property facemouse: tcustomface read getfacemouse write setfacemouse;
    property faceclicked: tcustomface read getfaceclicked write setfaceclicked;
    property facedisabled: tcustomface read getfacedisabled write setfacedisabled;
-   property onmouseevent: mouseeventty read fonmouseevent write fonmouseevent;
-   property onbeforepaint: painteventty read fonbeforepaint write fonbeforepaint;
-   property onpaintbackground: painteventty read fonpaintbackground 
-                                                  write fonpaintbackground;
-   property onpaint: painteventty read fonpaint write fonpaint;
-   property onafterpaint: painteventty read fonafterpaint write fonafterpaint;
+   property onmouseevent;
+   property onbeforepaint;
+   property onpaintbackground;
+   property onpaint;
+   property onafterpaint;
  end;
 
  trichbutton = class(tcustomrichbutton)
@@ -1210,7 +1209,7 @@ begin
   end;
  end;
 end;
-
+{
 procedure tcustomrichbutton.dobeforepaint(const canvas: tcanvas);
 begin
  inherited;
@@ -1252,7 +1251,7 @@ begin
   inherited;
  end;
 end;
-
+}
 { tstockglyphbutton }
 
 constructor tstockglyphbutton.create(aowner: tcomponent);

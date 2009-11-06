@@ -7472,7 +7472,7 @@ begin
   canvas.brushorigin:= nullpoint;
   actcolor:= actualcolor;
   saveindex:= canvas.save;
-//  dobeforepaint(canvas);
+  dobeforepaint(canvas);
   if (high(fwidgets) >= 0) and not (ws1_noclipchildren in fwidgetstate1) then begin
    updatewidgetregion;
    canvas.subclipregion(fwidgetregion);
