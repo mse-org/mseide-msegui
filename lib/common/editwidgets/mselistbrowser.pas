@@ -632,11 +632,11 @@ type
                              aitemclass: treelistedititemclassty = nil); overload;
    function toplevelnodes: treelistedititemarty;
    function getnodes(const must: nodestatesty; const mustnot: nodestatesty;
-                 const amode: getnodemodety = gmo_matching): treelistitemarty;
+                 const amode: getnodemodety = gno_matching): treelistitemarty;
    function getselectednodes(const amode: getnodemodety = 
-                                              gmo_matching): treelistitemarty;
+                                              gno_matching): treelistitemarty;
    function getcheckednodes(const amode: getnodemodety = 
-                                              gmo_matching): treelistitemarty;
+                                              gno_matching): treelistitemarty;
    procedure updatechildcheckedtree; //slow!
    
    procedure expandall;
@@ -3443,7 +3443,7 @@ end;
 
 function ttreeitemeditlist.getnodes(const must: nodestatesty; 
                    const mustnot: nodestatesty;
-                   const amode: getnodemodety = gmo_matching): treelistitemarty;
+                   const amode: getnodemodety = gno_matching): treelistitemarty;
 var
  int1,int2: integer; 
  po1: ptreelistitematy;
@@ -3453,20 +3453,21 @@ begin
  po1:= datapo;
  for int1:= 0 to count - 1 do begin
   if po1^[int1].parent = nil then begin
-   ttreelistitem1(po1^[int1]).internalgetnodes(result,int2,must,mustnot,amode);
+   ttreelistitem1(po1^[int1]).internalgetnodes(result,int2,must,
+                                                      mustnot,amode,true);
   end;
  end;
  setlength(result,int2);
 end;
 
 function ttreeitemeditlist.getselectednodes(
-                     const amode: getnodemodety = gmo_matching): treelistitemarty;
+                     const amode: getnodemodety = gno_matching): treelistitemarty;
 begin
  result:= getnodes([ns_selected],[],amode);
 end;
 
 function ttreeitemeditlist.getcheckednodes(
-                     const amode: getnodemodety = gmo_matching): treelistitemarty;
+                     const amode: getnodemodety = gno_matching): treelistitemarty;
 begin
  result:= getnodes([ns_checked],[],amode);
 end;

@@ -32,6 +32,8 @@ type
    function getpath: filenamety;
  end;
 
+ dirlistitemarty = array of tdirlistitem;
+ 
  dirtreeoptionty = (dto_checkbox);
  dirtreeoptionsty = set of dirtreeoptionty;
  
@@ -39,11 +41,12 @@ type
    grid: twidgetgrid;
    treeitem: ttreeitemedit;
    procedure treeitemoncreateitem(const sender: tcustomitemlist;
-                     var item: ttreelistedititem);
+                     var item: ttreelistedititem); virtual;
    procedure treeitemonitemnotification(const sender: tlistitem;
-                 var action: nodeactionty);
-   procedure treeitemondataentered(const sender: tobject);
-   procedure treeitemoncellevent(const sender: tobject; var info: celleventinfoty);
+                 var action: nodeactionty); virtual;
+   procedure treeitemondataentered(const sender: tobject); virtual;
+   procedure treeitemoncellevent(const sender: tobject;
+                 var info: celleventinfoty); virtual;
   private
    fshowhiddenfiles: boolean;
    fcasesensitive: boolean;
@@ -55,6 +58,10 @@ type
    function getpath: filenamety;
    procedure adddir(const aitem: tdirlistitem);
   public
+   function getcheckednodes(const amode: getnodemodety = 
+                                    gno_nochildren): dirlistitemarty;
+   function getcheckedfilenames(const amode: getnodemodety = 
+                                    gno_nochildren): filenamearty;
    property casesensitive: boolean read fcasesensitive write fcasesensitive;
    property showhiddenfiles: boolean read fshowhiddenfiles write fshowhiddenfiles;
    property checksubdir: boolean read fchecksubdir 
@@ -175,6 +182,25 @@ begin
   aitem.setentries(list,checksubdir,showhiddenfiles,dto_checkbox in foptions);
  finally
   list.free;
+ end;
+end;
+
+function tdirtreefo.getcheckednodes(const amode: getnodemodety = 
+                                    gno_nochildren): dirlistitemarty;
+begin
+ result:= dirlistitemarty(treeitem.itemlist.getcheckednodes(amode));
+end;
+
+function tdirtreefo.getcheckedfilenames(const amode: getnodemodety = 
+                                    gno_nochildren): filenamearty;
+var
+ ar1: dirlistitemarty;
+ int1: integer;
+begin
+ ar1:= getcheckednodes(amode);
+ setlength(result,length(ar1));
+ for int1:= 0 to high(ar1) do begin
+  result[int1]:= ar1[int1].getpath;
  end;
 end;
 

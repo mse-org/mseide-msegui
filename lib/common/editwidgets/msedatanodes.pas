@@ -57,7 +57,7 @@ const
  defaultlevelstep = 10;
 
 type
- getnodemodety = (gmo_matching,gmo_allchildren,gmo_nochildren);
+ getnodemodety = (gno_matching,gno_allchildren,gno_nochildren);
  listitemlayoutinfoty = record
   cellsize: sizety;
   captionrect: rectty;
@@ -205,7 +205,7 @@ type
    procedure internalcollapseall;
    procedure internalgetnodes(var aresult: treelistitemarty; var acount: integer;
                        const must: nodestatesty; const mustnot: nodestatesty;
-                       const amode: getnodemodety);
+                       const amode: getnodemodety; const addself: boolean);
 
   public
    constructor create(const aowner: tcustomitemlist = nil;
@@ -260,12 +260,12 @@ type
 
    function getnodes(const must: nodestatesty; 
                         const mustnot: nodestatesty;
-                        const amode: getnodemodety = 
-                                              gmo_matching): treelistitemarty;
-   function getselectednodes(const amode: getnodemodety = 
-                                              gmo_matching): treelistitemarty;
-   function getcheckednodes(const amode: getnodemodety = 
-                                              gmo_matching): treelistitemarty;
+                        const amode: getnodemodety = gno_matching;
+                        const addself: boolean = false): treelistitemarty;
+   function getselectednodes(const amode: getnodemodety = gno_matching;
+                        const addself: boolean = false): treelistitemarty;
+   function getcheckednodes(const amode: getnodemodety = gno_matching;
+                        const addself: boolean = false): treelistitemarty;
 
    procedure expandall;
    procedure collapseall;
@@ -1626,9 +1626,10 @@ begin
 end;
 
 procedure ttreelistitem.internalgetnodes(var aresult: treelistitemarty;
-                       var acount: integer;
-                       const must: nodestatesty; const mustnot: nodestatesty;
-                       const amode: getnodemodety);
+                var acount: integer;
+                const must: nodestatesty; const mustnot: nodestatesty;
+                const amode: getnodemodety; const addself: boolean);
+
  procedure addchi(anode: ttreelistitem);
  var
   int1: integer;
@@ -1639,67 +1640,84 @@ procedure ttreelistitem.internalgetnodes(var aresult: treelistitemarty;
      setlength(aresult,10+length(aresult)*2);
     end;
     aresult[acount]:= fitems[int1];
-    addchi(fitems[int1]);
     inc(acount);
+    addchi(fitems[int1]);
    end;
   end;
- end;
+ end; //addchi
+
+var
+ first: boolean;
  
  procedure check(anode: ttreelistitem);
  var
   int1: integer;
-  item1: ttreelistitem;
+  bo1: boolean;
  begin
   with anode do begin
-   for int1:= 0 to fcount - 1 do begin
-    item1:= fitems[int1];
-    if (item1.fstate * must = must) and (item1.fstate * mustnot = []) then begin
+   if not first then begin
+    bo1:= (fstate * must = must) and (fstate * mustnot = []);
+    if bo1 then begin
      if acount > high(aresult) then begin
       setlength(aresult,10+length(aresult)*2);
      end;
-     aresult[acount]:= item1;
+     aresult[acount]:= anode;
      inc(acount);
     end;
-    case amode of
-     gmo_matching: begin
-      check(item1);
+   end
+   else begin
+    first:= false;
+    bo1:= false;
+   end;
+   case amode of
+    gno_nochildren: begin
+     if bo1 then begin
+      exit;
      end;
-     gmo_allchildren: begin
-      addchi(item1);
-     end;
-     else begin
+    end;
+    gno_allchildren: begin
+     if bo1 then begin
+      addchi(anode);
+      exit;
      end;
     end;
    end;
+   for int1:= 0 to fcount - 1 do begin
+    check(fitems[int1]);
+   end;
   end;
- end;
+ end; //check
  
 begin
+ first:= not addself;
  check(self);
 end;
 
 function ttreelistitem.getnodes(const must: nodestatesty; 
                   const mustnot: nodestatesty; 
-                  const amode: getnodemodety = gmo_matching): treelistitemarty;
+                  const amode: getnodemodety = gno_matching;
+                  const addself: boolean = false): treelistitemarty;
 var
  int2: integer;
 begin
  result:= nil;
  int2:= 0;
- internalgetnodes(result,int2,must,mustnot,amode);
+ internalgetnodes(result,int2,must,mustnot,amode,addself);
  setlength(result,int2);
 end;
 
-function ttreelistitem.getselectednodes(const amode: getnodemodety = 
-                                              gmo_matching): treelistitemarty;
+function ttreelistitem.getselectednodes(
+                    const amode: getnodemodety = gno_matching;
+                    const addself: boolean = false): treelistitemarty;
 begin
  result:= getnodes([ns_selected],[],amode);
 end;
 
-function ttreelistitem.getcheckednodes(const amode: getnodemodety = 
-                                              gmo_matching): treelistitemarty;
+function ttreelistitem.getcheckednodes(
+                    const amode: getnodemodety = gno_matching;
+                    const addself: boolean = false): treelistitemarty;
 begin
- result:= getnodes([ns_checked],[],amode);
+ result:= getnodes([ns_checked],[],amode,addself);
 end;
 
 
