@@ -123,7 +123,7 @@ begin
   for int1:= 0 to list.count - 1 do begin
    item1:= tdirlistitem.create;
    if checkbox then begin
-    include(item1.fstate,ns_checkbox);
+    item1.fstate:= item1.fstate + [ns_checkbox,ns_showchildchecked];
    end;
    ar1[int1]:= item1;
    item1.finfo:= po1^;
@@ -199,10 +199,12 @@ var
 
 begin
  if dto_checkbox in foptions then begin
-  treeitem.itemlist.options:= treeitem.itemlist.options + [no_checkbox];
+  treeitem.itemlist.options:= treeitem.itemlist.options + 
+                                         [no_checkbox,no_updatechildchecked];
  end
  else begin
-  treeitem.itemlist.options:= treeitem.itemlist.options - [no_checkbox];
+  treeitem.itemlist.options:= treeitem.itemlist.options - 
+                                         [no_checkbox,no_updatechildchecked];
  end;
  ar1:= splitrootpath(value);
  treeitem.itemlist.clear;
@@ -262,7 +264,9 @@ procedure tdirtreefo.treeitemoncreateitem(const sender: tcustomitemlist;
 begin
  item:= tdirlistitem.create(sender);
  if dto_checkbox in foptions then begin
-  include(tdirlistitem(item).fstate,ns_checkbox);
+  with tdirlistitem(item) do begin
+   fstate:= fstate + [ns_checkbox,ns_showchildchecked];
+  end;
  end;
 end;
 

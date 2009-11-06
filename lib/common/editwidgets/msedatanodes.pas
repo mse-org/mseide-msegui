@@ -1879,20 +1879,27 @@ begin
   end;
  end
  else begin
-  while (node1 <> nil) and (ns_showchildchecked in node1.fstate) and
-                                (ns1_childchecked in node1.fstate1) do begin
-   with node1 do begin
-    for int1:= 0 to fcount-1 do begin
-     if (ns_checked in fitems[int1].fstate) then begin
+  if not (ns_showchildchecked in fstate) or
+                     not (ns1_childchecked in fstate1) then begin
+   while (node1 <> nil) and (ns_showchildchecked in node1.fstate) and
+                                 (ns1_childchecked in node1.fstate1) do begin
+    with node1 do begin
+     for int1:= 0 to fcount-1 do begin
+      with fitems[int1] do begin
+       if (ns_checked in fstate) or
+                         (ns_showchildchecked in fstate) and
+                         (ns1_childchecked in fstate1) then begin
+        exit;
+       end;
+      end;
+     end;
+     exclude(fstate1,ns1_childchecked);
+     change;
+     if ns_checked in fstate then begin
       exit;
      end;
+     node1:= fparent;
     end;
-    exclude(fstate1,ns1_childchecked);
-    change;
-    if ns_checked in fstate then begin
-     exit;
-    end;
-    node1:= fparent;
    end;
   end;
  end;
@@ -1902,9 +1909,9 @@ procedure ttreelistitem.updatechildcheckedtree;
 var
  int1: integer;
 begin
+ updatechildcheckedstate;
  for int1:= 0 to fcount-1 do begin
   with fitems[int1] do begin
-   updatechildcheckedstate;
    updatechildcheckedtree;
   end;
  end;
