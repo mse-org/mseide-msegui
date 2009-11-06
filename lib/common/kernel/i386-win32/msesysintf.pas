@@ -1337,6 +1337,8 @@ begin
  end;
 end;
 
+//todo: network errormessages
+
 function findservers(const resource: pnetresource; var names: msestringarty): syserrorty;
 var
  wo1: longword;

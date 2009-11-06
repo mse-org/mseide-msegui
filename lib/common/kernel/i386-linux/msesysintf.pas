@@ -1008,7 +1008,7 @@ begin
  with stream,dirstreamlinuxty(platformdata) do begin
   d.dir:= pdir(opendir(pchar(str1)));
   if d.dir = nil then begin
-   result:= sye_dirstream;
+   result:= syelasterror;
   end
   else begin
    if (infolevel > fil_name) or not (fa_all in include) or
