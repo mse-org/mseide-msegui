@@ -1945,7 +1945,6 @@ begin
  end;
 end;
 
-var testvar: listitemlayoutinfoty;
 procedure ttreelistitem.drawimage(const acanvas: tcanvas);
 var
  boxno: integer;
@@ -1977,7 +1976,6 @@ begin
  end;
  setlength(lines,ftreelevel+2); //last line can be doubled + horz. line
  acanvas.move(makepoint(levelshift,0));
-testvar:= fowner.fintf.getlayoutinfo^;
  with fowner,fintf.getlayoutinfo^ do begin
   cellheight:= cellsize.cy;
   seg.a.x:= (expandboxrect.x + expandboxrect.cx) div 2;

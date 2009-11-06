@@ -20,10 +20,10 @@ unit formdesigner;
 
 interface
 uses
- classes,mseforms,mseguiglob,msegui,mseevent,msegraphutils,msegraphics,msedesignintf,
- mseclasses,msemenuwidgets,msemenus,msefiledialog,msedesigner,typinfo,
- componentpaletteform,msestrings,msewidgets,mseglob
-  {$ifdef FPC}{$ifndef mse_withoutdb},msereport{$endif}{$endif};
+ classes,mseforms,mseguiglob,msegui,mseevent,msegraphutils,msegraphics,
+ msedesignintf,mseclasses,msemenuwidgets,msemenus,msefiledialog,msedesigner,
+ typinfo,componentpaletteform,msestrings,msewidgets,
+ mseglob{$ifdef FPC}{$ifndef mse_withoutdb},msereport{$endif}{$endif},msetimer;
 
 type
  areaty = (ar_none,ar_component,ar_componentmove,ar_selectrect,ht_topleft,
@@ -1954,9 +1954,14 @@ end;
 procedure tdesignwindow.selectionchanged(const adesigner: idesigner;
       const aselection: idesignerselections);
 begin
- if fselections.assign(aselection) then begin
-  tformdesignerfo(fowner).componentselected(fselections);
-  fowner.invalidate;
+ try
+  fselections.beginupdate;   
+  if fselections.assign(aselection) then begin
+   tformdesignerfo(fowner).componentselected(fselections);
+   fowner.invalidate;
+  end;
+ finally
+  fselections.decupdate;
  end;
 end;
 

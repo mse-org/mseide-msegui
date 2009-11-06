@@ -215,6 +215,7 @@ type
    procedure change; virtual;
    procedure beginupdate;
    procedure endupdate;
+   procedure decupdate;
     // idesignerselections
    function Add(const Item: Tcomponent): Integer;
    function Equals(const List: IDesignerSelections): Boolean;
@@ -827,6 +828,11 @@ begin
  if fupdating = 0 then begin
   dochanged;
  end;
+end;
+
+procedure tdesignerselections.decupdate;
+begin
+ dec(fupdating);
 end;
 
 function tdesignerselections.isembedded(const component: tcomponent): boolean;
