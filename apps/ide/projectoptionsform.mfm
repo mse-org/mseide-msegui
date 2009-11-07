@@ -87,7 +87,7 @@ object projectoptionsfo: tprojectoptionsfo
       frame.dummy = 0
       anchors = [an_top, an_bottom]
       taborder = 1
-      activepageindex = 2
+      activepageindex = 0
       tab_frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
       tab_frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
       tab_color = -2147483645
@@ -101,6 +101,7 @@ object projectoptionsfo: tprojectoptionsfo
         frame.localprops = [frl_fibottom, frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
         taborder = 5
+        visible = True
         bounds_x = 1
         bounds_y = 19
         bounds_cx = 667
@@ -456,6 +457,7 @@ object projectoptionsfo: tprojectoptionsfo
                 66
                 0
               )
+              taborder = 5
               bounds_x = 463
               bounds_y = 0
               bounds_cx = 102
@@ -465,43 +467,21 @@ object projectoptionsfo: tprojectoptionsfo
               reffontheight = 14
             end
             object spacetabs: tbooleanedit
-              frame.caption = 'Space Tabs'
+              frame.caption = 'Space'
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
               frame.dummy = 0
               frame.outerframe = (
                 0
                 1
-                69
+                38
                 2
               )
-              taborder = 1
-              bounds_x = 351
+              taborder = 4
+              bounds_x = 303
               bounds_y = 20
-              bounds_cx = 82
+              bounds_cx = 51
               bounds_cy = 16
-            end
-            object tabstops: tintegeredit
-              optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-              frame.caption = 'Tabstops'
-              frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
-              frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-              frame.dummy = 0
-              frame.outerframe = (
-                0
-                17
-                18
-                0
-              )
-              taborder = 2
-              bounds_x = 263
-              bounds_y = 0
-              bounds_cx = 54
-              bounds_cy = 37
-              value = 4
-              min = 1
-              max = 50
-              reffontheight = 14
             end
             object blockindent: tintegeredit
               optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
@@ -515,7 +495,7 @@ object projectoptionsfo: tprojectoptionsfo
                 33
                 0
               )
-              taborder = 3
+              taborder = 1
               bounds_x = 167
               bounds_y = 0
               bounds_cx = 69
@@ -537,12 +517,48 @@ object projectoptionsfo: tprojectoptionsfo
                 64
                 2
               )
-              taborder = 4
               bounds_x = 23
               bounds_y = 20
               bounds_cx = 77
               bounds_cy = 16
               value = True
+            end
+            object tabindent: tbooleanedit
+              frame.caption = 'Tab'
+              frame.dummy = 0
+              frame.outerframe = (
+                0
+                1
+                24
+                2
+              )
+              taborder = 2
+              bounds_x = 207
+              bounds_y = 20
+              bounds_cx = 37
+              bounds_cy = 16
+            end
+            object tabstops: tintegeredit
+              optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+              frame.caption = 'Tabstops'
+              frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
+              frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
+              frame.dummy = 0
+              frame.outerframe = (
+                0
+                17
+                18
+                0
+              )
+              taborder = 3
+              bounds_x = 263
+              bounds_y = 0
+              bounds_cx = 54
+              bounds_cy = 37
+              value = 4
+              min = 1
+              max = 50
+              reffontheight = 14
             end
           end
         end
@@ -1942,7 +1958,6 @@ object projectoptionsfo: tprojectoptionsfo
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
         taborder = 6
-        visible = True
         bounds_x = 1
         bounds_y = 19
         bounds_cx = 667
@@ -2081,7 +2096,8 @@ object projectoptionsfo: tprojectoptionsfo
           reffontheight = 14
         end
         object showcommandline: tbutton
-          optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale, ow_autosize]
+          optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+          optionswidget1 = [ow1_autowidth, ow1_autoheight]
           color = -2147483645
           taborder = 7
           bounds_x = 109
@@ -3366,7 +3382,7 @@ object projectoptionsfo: tprojectoptionsfo
           align_glue = wam_center
           place_mindist = 0
           object tbutton1: tbutton
-            optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_autoscale, ow_autosize]
+            optionswidget1 = [ow1_autowidth, ow1_autoheight]
             color = -2147483645
             bounds_x = 15
             bounds_y = 11

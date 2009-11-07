@@ -309,7 +309,8 @@ end;
 
 procedure tactionsmo.indentonexecute(const sender: TObject);
 begin
- sourcefo.activepage.edit.indent(projectoptions.blockindent);
+ sourcefo.activepage.edit.indent(projectoptions.blockindent,
+                                            projectoptions.tabindent);
 end;
 
 procedure tactionsmo.unindentonexecute(const sender: TObject);

@@ -159,6 +159,7 @@ type
   scrollheight: integer;
   tabstops: integer;
   spacetabs: boolean;
+  tabindent: boolean;
   editfontname: string;
   editfontheight: integer;
   editfontwidth: integer;
@@ -434,6 +435,7 @@ type
    newfisource: tfilenameedit;
    newfifilter: tstringedit;
    newfiext: tstringedit;
+   tabindent: tbooleanedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -1014,6 +1016,7 @@ begin
   scrollheight:= 0;
   tabstops:= 4;
   spacetabs:= false;
+  tabindent:= false;
   editfontname:= 'mseide_source';
   editfontheight:= 0;
   editfontwidth:= 0;
@@ -1375,6 +1378,7 @@ begin
   updatevalue('scrollheight',scrollheight);
   updatevalue('tabstops',tabstops);
   updatevalue('spacetabs',spacetabs);
+  updatevalue('tabindent',tabindent);
   updatevalue('editfontname',editfontname);
   updatevalue('editfontheight',editfontheight);
   updatevalue('editfontwidth',editfontwidth);
@@ -1546,6 +1550,7 @@ begin
   fo.blockindent.value:= blockindent;
   fo.tabstops.value:= tabstops;
   fo.spacetabs.value:= spacetabs;
+  fo.tabindent.value:= tabindent;
   fo.rightmarginon.value:= rightmarginon;
   fo.rightmarginchars.value:= rightmarginchars;
   fo.scrollheight.value:= scrollheight;
@@ -1753,6 +1758,7 @@ begin
   blockindent:= fo.blockindent.value;
   tabstops:= fo.tabstops.value;
   spacetabs:= fo.spacetabs.value;
+  tabindent:= fo.tabindent.value;
   rightmarginon:= fo.rightmarginon.value;
   rightmarginchars:= fo.rightmarginchars.value;
   scrollheight:= fo.scrollheight.value;

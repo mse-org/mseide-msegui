@@ -59,7 +59,7 @@ type
    function wordatpos(const apos: gridcoordty; out word: msestring;
                              const delimchars: msestring; 
                              const nodelimstrings: array of msestring): gridcoordty;
-   procedure indent(const acount: integer);
+   procedure indent(const acount: integer; const atabs: boolean);
    procedure unindent(const acount: integer);
    procedure removelink;
    procedure showlink(const apos: gridcoordty;
@@ -303,18 +303,23 @@ begin
  end;
 end;
 
-procedure tsyntaxedit.indent(const acount: integer);
+procedure tsyntaxedit.indent(const acount: integer; const atabs: boolean);
 var
  int1,int2: integer;
  str1: msestring;
  pos1,pos2: gridcoordty;
  po1: prichstringaty;
  selstart,selend: gridcoordty;
+ ch1: msechar;
 begin
  selstart:= selectstart;
  selend:= selectend;
  normalizeselectedrows(int1,int2);
- str1:= charstring(msechar(' '),acount);
+ ch1:= ' ';
+ if atabs then begin
+  ch1:= c_tab;
+ end;
+ str1:= charstring(ch1,acount);
  pos1:= makegridcoord(0,int1);
  pos2:= makegridcoord(acount,int1);
  po1:= datalist.datapo;
@@ -365,7 +370,7 @@ begin
      int4:= acount;
     end;
     for int3:= 1 to int4 do begin
-     if text[int3] <> ' ' then begin
+     if (text[int3] <> ' ') and (text[int3] <> c_tab) then begin
       int4:= int3 - 2;
       break;
      end;
@@ -373,8 +378,9 @@ begin
    end;
    if int4 >= 0 then begin
     pos2.col:= int4;
+    str1:= copy(po1^[pos1.row].text,1,int4);
     richdelete(po1^[pos1.row],1,int4);
-    str1:= charstring(msechar(' '),int4);
+//    str1:= charstring(msechar(' '),int4);
     tundoinplaceedit1(feditor).fundolist.setpos(pos2,false);
     tundoinplaceedit1(feditor).fundolist.deletetext(pos2,pos1,str1,false,true);
 //    deletetext(pos1,pos2);
@@ -521,8 +527,9 @@ end;
  
 procedure tsyntaxedit.insertlinebreak;
 var
- str1: msestring;
+ mstr1: msestring;
  po1: gridcoordty;
+ po2: pmsechar;
 begin
  application.caret.remove;
  beginupdate;
@@ -532,11 +539,16 @@ begin
   if fautoindent then begin
    po1:= editpos;
    if po1.row > 0 then begin
-    str1:= gridvalue[po1.row-1];
-    str1:= charstring(msechar(' '),countleadingchars(str1,msechar(' ')));
-    if str1 <> '' then begin
+    mstr1:= gridvalue[po1.row-1];
+    po2:= pmsechar(mstr1);
+    while (po2^ = ' ') or  (po2^ = c_tab) do begin
+     inc(po2);
+    end;
+    setlength(mstr1,po2-pmsechar(mstr1));
+//    mstr1:= charstring(msechar(' '),countleadingchars(mstr1,msechar(' ')));
+    if mstr1 <> '' then begin
      po1.col:= 0;
-     inserttext(po1,str1);
+     inserttext(po1,mstr1);
     end;
    end;
   end;
