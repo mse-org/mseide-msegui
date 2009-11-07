@@ -38,7 +38,7 @@ type
  nodestatesty = set of nodestatty;
  nodestate1ty = (ns1_statechanged,ns1_rootchange,ns1_candrag,
                  ns1_destroying,ns1_updating,ns1_noowner,ns1_captionclipped,
-                 ns1_childchecked
+                 ns1_childchecked,ns1_checkboxclicked
                 );
  nodestates1ty = set of nodestate1ty;
  
@@ -693,16 +693,34 @@ begin
 end;
 
 procedure tlistitem.mouseevent(var info: mouseeventinfoty);
-//const
-// mask: nodestatesty = [ns_checked];
+var
+ bo1: boolean;
 begin
  with info do begin
-  if (eventkind = ek_buttonrelease) and
-        (shiftstate * keyshiftstatesmask = []) and (button = mb_left) and
-    pointinrect(pos,fowner.fintf.getlayoutinfo^.checkboxinnerrect) then begin
-//   state:= nodestatesty(longword(state) xor longword(mask));
-   checked:= not checked;
-   include(eventstate,es_processed);
+  if eventkind in mouseposevents then begin
+   if pointinrect(pos,fowner.fintf.getlayoutinfo^.checkboxinnerrect) then begin
+    if (eventkind = ek_buttonrelease) then begin
+     if (shiftstate * keyshiftstatesmask = []) and (button = mb_left) and
+       (ns1_checkboxclicked in fstate1) then begin
+      checked:= not checked;
+      include(eventstate,es_processed);
+     end;
+     exclude(fstate1,ns1_checkboxclicked);
+    end
+    else begin
+     if (eventkind = ek_buttonpress) and
+              (shiftstate * keyshiftstatesmask = []) and 
+                                (button = mb_left) then begin
+      include(fstate1,ns1_checkboxclicked);
+     end;
+    end;
+   end
+   else begin
+    exclude(fstate1,ns1_checkboxclicked);
+   end
+  end;
+  if eventkind in [ek_mouseleave,ek_clientmouseleave] then begin
+   exclude(fstate1,ns1_checkboxclicked);
   end;
  end;
 end;
