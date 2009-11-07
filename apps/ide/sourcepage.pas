@@ -1045,7 +1045,8 @@ begin
     end
     else begin
      if edit.isdblclicked(info.mouseeventinfopo^) and 
-                (shiftstate1 = [ss_double,ss_shift,ss_left]) then begin
+                (info.mouseeventinfopo^.shiftstate = 
+                                [ss_double,ss_shift,ss_left]) then begin
       edit.selectword(info.pos,pascaldelims+'.[]');
       include(info.mouseeventinfopo^.eventstate,es_processed);
      end;
