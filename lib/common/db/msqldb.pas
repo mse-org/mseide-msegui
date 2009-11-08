@@ -2403,7 +2403,7 @@ end;
 procedure tsqlquery.freequery;
 begin
  if not (bs_refreshing in fbstate) then begin
-  if (not IsPrepared) and (assigned(database)) and (assigned(FCursor)) then begin
+  if ({not }IsPrepared) and (assigned(database)) and (assigned(FCursor)) then begin
         (database as tcustomsqlconnection).UnPrepareStatement(FCursor);
   end;
   if ftransactionwrite = nil then begin
@@ -2873,7 +2873,7 @@ begin
 //  FReadOnly := True;
   Filtered := False;
 //  FParseSQL := False;
-  freequery;
+//  freequery; //why?
   resetparsing;
  end;
 // else begin
