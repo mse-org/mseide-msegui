@@ -1825,7 +1825,7 @@ type
    procedure lastrow(const action: focuscellactionty = fca_focusin); virtual;
    procedure firstrow(const action: focuscellactionty = fca_focusin); virtual;
 
-   procedure colstep(const action: focuscellactionty; step: integer;
+   procedure colstep(action: focuscellactionty; step: integer;
                            const rowchange: boolean;
                            const nocolwrap: boolean); virtual;
                  //step > 0 -> right, step < 0 left
@@ -9606,15 +9606,16 @@ begin     //focuscell
  try
   if (fnocheckvalue = 0) and not (gs_rowremoving in fstate) then begin
    int1:= ffocusedcell.row;
-   if ((cell.row <> ffocusedcell.row) or (cell.col <> ffocusedcell.col)) and           
+   if ((cell.row <> ffocusedcell.row) or (cell.col <> ffocusedcell.col) or 
+           (selectaction = fca_focusinforce)) and           
            not docheckcellvalue or (focuscount <> ffocuscount) then begin
     exit;
    end;
    if cell.row = int1 then begin
     cell.row:= ffocusedcell.row;       //follow possible change by sort
    end;
-   if (cell.row <> ffocusedcell.row) and (ffocusedcell.row >= 0) and 
-            container.entered and
+   if ((cell.row <> ffocusedcell.row) or (selectaction = fca_focusinforce)) and 
+                     (ffocusedcell.row >= 0) and container.entered and
             not container.canclose(window.focusedwidget) then begin
     exit;        //for not null check in twidgetgrid
    end;
@@ -9681,7 +9682,7 @@ begin     //focuscell
    end;
  
    int1:= cell.row - ffocusedcell.row;
-   if int1 <> 0 then begin
+   if (int1 <> 0) or (selectaction = fca_focusinforce) then begin
     checksort;
     if cell.row >= 0 then begin
      if (cell.row >= 0) and (ffocusedcell.row >= 0) then begin
@@ -10540,7 +10541,7 @@ procedure tcustomgrid.rowup(const action: focuscellactionty = fca_focusin);
 begin
  with fdatacols.frowstate do begin
   if visiblerowcount > 0 then begin
-   if ffocusedcell.row > 0 then begin
+   if (ffocusedcell.row > 0) or not (og_wraprow in foptionsgrid) then begin
     focusrow(visiblerowstep(ffocusedcell.row,-1,false),action);
    end
    else begin
@@ -10655,7 +10656,7 @@ end;
 
 procedure tcustomgrid.dokeydown(var info: keyeventinfoty);
 var
- action: focuscellactionty;
+ action,actioncol: focuscellactionty;
  focusbefore: gridcoordty;
  mo1: cellselectmodety;
  celleventinfo: celleventinfoty;
@@ -10710,13 +10711,16 @@ begin
      if (ffocusedcell.col >= 0) and
              (co_keyselect in fdatacols[ffocusedcell.col].foptions) then begin
       action:= fca_selectend;
+      actioncol:= action;
      end
      else begin
       action:= fca_focusinshift;
+      actioncol:= action;
      end;
     end
     else begin
-     action:= fca_focusin;
+     action:= fca_focusinforce;
+     actioncol:= fca_focusin;
     end;
     focusbefore:= ffocusedcell;
     include(info.eventstate,es_processed);
@@ -10830,10 +10834,10 @@ begin
         if docheckcellvalue then begin
          action:= fca_focusin;
          if shiftstate = [ss_shift] then begin
-          colstep(action,-1,true,false);
+          colstep(actioncol,-1,true,false);
          end
          else begin
-          colstep(action,1,true,false);
+          colstep(actioncol,1,true,false);
          end;
         end;
        end
@@ -10855,7 +10859,7 @@ begin
        exit;
       end
       else begin
-       colstep(action,-1,false,{bo1 or} not (og_wrapcol in foptionsgrid));
+       colstep(actioncol,-1,false,{bo1 or} not (og_wrapcol in foptionsgrid));
        checkselection;
        goto checkwidgetexit;
       end;
@@ -10873,7 +10877,7 @@ begin
        exit;
       end
       else begin
-       colstep(action,1,false,{bo1 or} not (og_wrapcol in foptionsgrid));
+       colstep(actioncol,1,false,{bo1 or} not (og_wrapcol in foptionsgrid));
        checkselection;
        goto checkwidgetexit;
       end;
@@ -12250,7 +12254,7 @@ begin
  end;
 end;
 
-procedure tcustomgrid.colstep(const action: focuscellactionty; step: integer;
+procedure tcustomgrid.colstep(action: focuscellactionty; step: integer;
                  const rowchange: boolean; const nocolwrap: boolean);
 var
  int1: integer;
@@ -12274,6 +12278,9 @@ begin
      end;
      if rowchange then begin
       inc(arow);
+      if action = fca_focusin then begin
+       action:= fca_focusinforce;
+      end;
      end;
      int1:= 0;
      finished:= int1 = ffocusedcell.col;
@@ -12293,6 +12300,9 @@ begin
      end;
      if rowchange then begin
       dec(arow);
+      if action = fca_focusin then begin
+       action:= fca_focusinforce;
+      end;
      end;
      int1:=  mergestart(fdatacols.count - 1,arow);
      finished:= int1 <= ffocusedcell.col;
