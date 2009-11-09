@@ -165,6 +165,7 @@ type
                                      const copyproc: copyprocty): boolean;
    function checksourcecopy2(var ainfo: listlinkinfoty;
                 const source2: tdatalist; const copyproc: copy2procty): boolean;
+   procedure internalrearange(arangelist: pinteger; const acount: integer);
   public
    constructor create; override;
    destructor destroy; override;
@@ -210,7 +211,8 @@ type
    function deleting: boolean;
    function checkwritedata(const filer: tfiler): boolean;
 
-   procedure rearange(const arangelist: tintegerdatalist);
+   procedure rearange(const arangelist: tintegerdatalist); overload;
+   procedure rearange(const arangelist: integerarty); overload;
    procedure movedata(const fromindex,toindex: integer);
    procedure blockmovedata(const fromindex,toindex,count: integer);
    procedure blockcopydata(const fromindex,toindex,count: integer);
@@ -3907,27 +3909,38 @@ begin
  result:= fnochange > 0;
 end;
 
-procedure tdatalist.rearange(const arangelist: tintegerdatalist);
+procedure tdatalist.internalrearange(arangelist: pinteger;
+                                                       const acount: integer);
 var
  datapo1: pchar;
- po1: pinteger;
+// po1: pinteger;
  int1: integer;
 begin
  normalizering;
  getmem(datapo1,fbytelength);
  try
-  po1:= pointer(arangelist.fdatapo);
-  for int1:= 0 to arangelist.fcount -1 do begin
-   move((fdatapo+po1^*fsize)^,(datapo1+int1*fsize)^,fsize);
-   inc(po1);
+//  po1:= arangelist.datapo;
+  for int1:= 0 to acount -1 do begin
+   move((fdatapo+arangelist^*fsize)^,(datapo1+int1*fsize)^,fsize);
+   inc(arangelist);
   end;
-  move((fdatapo+arangelist.fcount*fsize)^,
-         (datapo1+arangelist.fcount*fsize)^,
-              (fcount-arangelist.fcount)*fsize);      //rest kopieren
+  move((fdatapo+acount*fsize)^,
+         (datapo1+acount*fsize)^,
+              (fcount-acount)*fsize);      //rest kopieren
  finally
   freemem(fdatapo);
   fdatapo:= datapo1;
  end;
+end;
+
+procedure tdatalist.rearange(const arangelist: tintegerdatalist);
+begin
+ internalrearange(arangelist.datapo,arangelist.count);
+end;
+
+procedure tdatalist.rearange(const arangelist: integerarty);
+begin
+ internalrearange(pointer(arangelist),length(arangelist));
 end;
 
 function tdatalist.empty(const index: integer): boolean;
