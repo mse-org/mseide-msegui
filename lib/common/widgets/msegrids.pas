@@ -1599,6 +1599,8 @@ type
    procedure setrowfoldlevel(const index: integer; const avalue: byte);
    function getrowheight(const index: integer): integer;
    procedure setrowheight(const index: integer; avalue: integer);
+   function getsorted: boolean;
+   procedure setsorted(const avalue: boolean);
   protected
    fupdating: integer;
    ffocuscount: integer;
@@ -1905,7 +1907,8 @@ type
 
    property optionsgrid: optionsgridty read foptionsgrid write setoptionsgrid
                 default defaultoptionsgrid; //first!
-
+   property sorted: boolean read getsorted write setsorted;
+   
    property datarowlinewidth: integer read fdatarowlinewidth
                 write setdatarowlinewidth default defaultgridlinewidth;
    property datarowlinecolorfix: colorty read fdatarowlinecolorfix
@@ -12065,9 +12068,6 @@ begin
  if foptionsgrid <> avalue then begin
   optionsbefore:= foptionsgrid;
   foptionsgrid:= avalue;
-  if (og_sorted in avalue) and not(og_sorted in foptionsgrid) then begin
-   exclude(fstate,gs_sortvalid);
-  end;
   if (longword(avalue) xor longword(optionsbefore)) and longword(mask1) <> 0 then begin
    fdatacols.frowstate.free;
    fdatacols.frowstate:= trowstatelist.create(self);
@@ -12075,6 +12075,10 @@ begin
   end;
   fdatacols.frowstate.folded:= og_folded in avalue;
   layoutchanged;
+  if (og_sorted in avalue) and not(og_sorted in optionsbefore) then begin
+   exclude(fstate,gs_sortvalid);
+   checksort;
+  end;
  end;
 end;
 
@@ -12983,6 +12987,21 @@ begin
   end;
  end; 
  fdatacols.frowstate.rowheight[index]:= avalue;
+end;
+
+function tcustomgrid.getsorted: boolean;
+begin
+ result:= og_sorted in optionsgrid;
+end;
+
+procedure tcustomgrid.setsorted(const avalue: boolean);
+begin
+ if avalue then begin
+  optionsgrid:= optionsgrid + [og_sorted];
+ end
+ else begin
+  optionsgrid:= optionsgrid - [og_sorted];
+ end;
 end;
 
 { tdrawgrid }

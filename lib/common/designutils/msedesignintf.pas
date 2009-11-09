@@ -48,7 +48,7 @@ type
    function findpage(const pagename: msestring): integer;
    function addpage(const pagename: msestring): integer;
    function getcompareproc: compareprocty; override;
-   procedure compare(const l,r; out result: integer);
+   procedure compare(const l,r; var result: integer);
    function componentcounts: integerarty;
   public
    constructor create;
@@ -652,7 +652,7 @@ begin
  filer.endlist;
 end;
 
-procedure tcomponentclasslist.compare(const l, r; out result: integer);
+procedure tcomponentclasslist.compare(const l, r; var result: integer);
 begin
  result:= integer(componentclassinfoty(l).classtyp) -
               integer(componentclassinfoty(r).classtyp);

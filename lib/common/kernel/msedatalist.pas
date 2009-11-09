@@ -218,8 +218,10 @@ type
    procedure deleteitems(index,acount: integer);
    procedure insertitems(index,acount: integer);
    function empty(const index: integer): boolean; virtual;         //true wenn leer
+   function sort(const compareproc: compareprocty; const arangelist: tintegerdatalist; dorearange: boolean): boolean; overload;
    function sort(const arangelist: tintegerdatalist; dorearange: boolean): boolean; overload;
    function sort: boolean; overload; //true if changed
+   function sort(const compareproc: compareprocty): boolean;
    procedure clean(const start,stop: integer); virtual;
    procedure clearmemberitem(const subitem: integer; 
                                     const index: integer); virtual;
@@ -2802,7 +2804,8 @@ begin
  fringpointer:= 0;
 end;
 
-function tdatalist.sort(const arangelist: tintegerdatalist; dorearange: boolean): boolean;
+function tdatalist.sort(const compareproc: compareprocty; 
+              const arangelist: tintegerdatalist; dorearange: boolean): boolean;
   //true wenn bewegt, refrow erhaelt neue indexpos
 
  procedure QuickSort(var arangelist: integeraty; L, R: Integer);
@@ -2821,7 +2824,7 @@ function tdatalist.sort(const arangelist: tintegerdatalist; dorearange: boolean)
      repeat
        repeat
         int1:= 0;
-        compare((fdatapo+arangeList[I]*fsize)^, pp^,int1);
+        compareproc((fdatapo+arangeList[I]*fsize)^, pp^,int1);
         if int1 = 0 then begin
          int1:= arangelist[i] - p;
         end;
@@ -2830,7 +2833,7 @@ function tdatalist.sort(const arangelist: tintegerdatalist; dorearange: boolean)
        until false;
        repeat
         int1:= 0;
-        compare((fdatapo+arangeList[J]*fsize)^, pp^,int1);
+        compareproc((fdatapo+arangeList[J]*fsize)^, pp^,int1);
         if int1 = 0 then begin
          int1:= arangelist[j] - p;
         end;
@@ -2860,7 +2863,7 @@ begin
  result:= false;
  if fcount > 0 then begin
   arangelist.number(0,1);
-  quicksort(pintegeraty(arangelist.fdatapo)^,0,arangelist.count-1);
+  quicksort(pintegeraty(arangelist.datapo)^,0,arangelist.count-1);
   if result and dorearange then begin
    rearange(arangelist);
    fsortio:= true;
@@ -2871,16 +2874,27 @@ begin
  end;
 end;
 
-function tdatalist.sort: boolean;
+function tdatalist.sort(
+              const arangelist: tintegerdatalist; dorearange: boolean): boolean;
+begin
+ result:= sort(@compare,arangelist,dorearange);
+end;
+
+function tdatalist.sort(const compareproc: compareprocty): boolean;
 var
  arangelist: tintegerdatalist;
 begin
  arangelist:= tintegerdatalist.create;
  try
-  result:= sort(arangelist,true);
+  result:= sort(compareproc,arangelist,true);
  finally
   arangelist.free;
  end;
+end;
+
+function tdatalist.sort: boolean;
+begin
+ result:= sort(@compare);
 end;
 
 procedure tdatalist.checkindexrange(const aindex: integer);

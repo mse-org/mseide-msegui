@@ -62,7 +62,7 @@ type
    property capacity: integer read fcapacity write setcapacity;
  end;
 
- compareprocty = procedure (const l,r; out result: integer) of object;
+ compareprocty = procedure (const l,r; var result: integer) of object;
 
  torderedrecordlist = class(trecordlist)
   private
@@ -186,7 +186,7 @@ type
  tindexednamelist = class(torderedrecordlist)
   private
    fidnames: stringarty;
-   procedure comp(const l,r; out result: integer);
+   procedure comp(const l,r; var result: integer);
   protected
    procedure finalizerecord(var item); override;
    procedure copyrecord(var item); override;
@@ -211,7 +211,7 @@ type
  tmseindexednamelist = class(torderedrecordlist)
   private
    fidnames: msestringarty;
-   procedure comp(const l,r; out result: integer);
+   procedure comp(const l,r; var result: integer);
   protected
    procedure finalizerecord(var item); override;
    procedure copyrecord(var item); override;
@@ -1232,7 +1232,7 @@ begin
  end;
 end;
 
-procedure tindexednamelist.comp(const l,r; out result: integer);
+procedure tindexednamelist.comp(const l,r; var result: integer);
 var
  int1: integer;
 begin
@@ -1312,7 +1312,7 @@ begin
  end;
 end;
 
-procedure tmseindexednamelist.comp(const l,r; out result: integer);
+procedure tmseindexednamelist.comp(const l,r; var result: integer);
 var
  int1: integer;
 begin

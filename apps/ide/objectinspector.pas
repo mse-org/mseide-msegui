@@ -62,7 +62,7 @@ type
 
  tcomponentinfos = class(torderedrecordlist)
   protected
-   procedure compare(const l,r; out result: integer);
+   procedure compare(const l,r; var result: integer);
    function getcompareproc: compareprocty; override;
    procedure finalizerecord(var item); override;
   public
@@ -325,7 +325,7 @@ begin
  inherited create(sizeof(compinfoty),[rels_needsfinalize]);
 end;
 
-procedure tcomponentinfos.compare(const l,r; out result: integer);
+procedure tcomponentinfos.compare(const l,r; var result: integer);
 begin
  result:= pchar(compinfoty(l).instance) - pchar(compinfoty(r).instance);
 end;

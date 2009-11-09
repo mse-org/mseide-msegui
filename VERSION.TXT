@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+2009-11-09
+ comparprocty out result -> var result.
 2009-11-01
  tfont.colorshadow -> shadow_color.
 2009-10-19

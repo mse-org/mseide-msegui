@@ -189,7 +189,7 @@ type
   protected
    procedure finalizerecord(var item); override;
    procedure copyrecord(var item); override;
-   procedure compare(const l,r; out result: integer);
+   procedure compare(const l,r; var result: integer);
    function getcompareproc: compareprocty; override;
    procedure setrec(const index: integer; const avalue: msestring);
    function getrec(const index: integer): msestring;
@@ -935,7 +935,7 @@ begin
  end;
 end;
 
-procedure tmacrolist.compare(const l, r; out result: integer);
+procedure tmacrolist.compare(const l, r; var result: integer);
 begin
  result:= msestrcomp(pmsechar(macroinfoty(l).name),
                    pmsechar(macroinfoty(r).name));

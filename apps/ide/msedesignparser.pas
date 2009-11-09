@@ -55,7 +55,7 @@ type
  tsourceitemlist = class(torderedrecordlist)
   protected
    function getcompareproc: compareprocty; override;
-   procedure compare(const l,r; out result: integer);
+   procedure compare(const l,r; var result: integer);
   public
    constructor create;
    function newitem(const astart,aend: sourceposty;
@@ -292,9 +292,9 @@ type
     fstart,fstop: sourceposty;
     fkind: symbolkindty;
     fcasesensitive: boolean;
-    procedure comp(const l,r; out result: integer);
-    procedure compnopars(const l,r; out result: integer);
-    procedure compsubstr(const l,r; out result: integer);
+    procedure comp(const l,r; var result: integer);
+    procedure compnopars(const l,r; var result: integer);
+    procedure compsubstr(const l,r; var result: integer);
     function getname: string; virtual;
     function getdefinfopo: pdefinfoty;
     function getrootlist: trootdeflist;
@@ -445,7 +445,7 @@ type
   tfunctions = class(torderedrecordlist)
    private
     function getitempo(const index: integer): pfunctioninfoty;
-    procedure comp(const left,right; out res: integer);
+    procedure comp(const left,right; var res: integer);
    protected
     procedure finalizerecord(var item); override;
     function getcompareproc: compareprocty; override;
@@ -688,7 +688,7 @@ begin
  inherited create(sizeof(sourceitemty));
 end;
 
-procedure tsourceitemlist.compare(const l,r; out result: integer);
+procedure tsourceitemlist.compare(const l,r; var result: integer);
 begin
  result:= sourceitemty(l).startpos.row - sourceitemty(r).startpos.row;
  if result = 0 then begin
@@ -1484,7 +1484,7 @@ begin
  end;
 end;
 }
-procedure tdeflist.comp(const l,r; out result: integer);
+procedure tdeflist.comp(const l,r; var result: integer);
 var
  po1,po2: pchar;
  ch1: shortint;
@@ -1502,7 +1502,7 @@ begin
  result:= ch1;
 end;
 
-procedure tdeflist.compnopars(const l,r; out result: integer);
+procedure tdeflist.compnopars(const l,r; var result: integer);
 var
  po1,po2: pchar;
  ch1: shortint;
@@ -1525,7 +1525,7 @@ begin
  result:= ch1;
 end;
 
-procedure tdeflist.compsubstr(const l,r; out result: integer);
+procedure tdeflist.compsubstr(const l,r; var result: integer);
 var
  po1,po2: pchar;
  ch1: shortint;
@@ -1929,7 +1929,7 @@ begin
  end;
 end;
 
-procedure tfunctions.comp(const left; const right; out res: integer);
+procedure tfunctions.comp(const left; const right; var res: integer);
 begin
  res:= stringcomp(ansistring(left),ansistring(right));
 end;
