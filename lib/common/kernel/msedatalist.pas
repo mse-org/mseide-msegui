@@ -2867,8 +2867,8 @@ begin
   arangelist.number(0,1);
   quicksort(pintegeraty(arangelist.datapo)^,0,arangelist.count-1);
   if result and dorearange then begin
-   rearange(arangelist);
    fsortio:= true;
+   rearange(arangelist);
   end;
  end
  else begin
@@ -3931,6 +3931,7 @@ begin
   freemem(fdatapo);
   fdatapo:= datapo1;
  end;
+ change(-1);
 end;
 
 procedure tdatalist.rearange(const arangelist: tintegerdatalist);
