@@ -6170,8 +6170,15 @@ begin
  int1:= activerecord;
  if (int1 < fgrid.rowcount) and active and  
                (tcustomgrid1(fgrid).fcellvaluechecking = 0) then begin
-  fgrid.row:= int1; //else empty dataset
-  fgrid.showcell(makegridcoord(invalidaxis,fgrid.row),cep_nearest,true);
+  with tcustomgrid1(fgrid) do begin
+   inc(fnocheckvalue);
+   try
+    row:= int1; //else empty dataset
+    showcell(makegridcoord(invalidaxis,fgrid.row),cep_nearest,true);
+   finally
+    dec(fnocheckvalue);
+   end;
+  end;
  end;
 end;
 
