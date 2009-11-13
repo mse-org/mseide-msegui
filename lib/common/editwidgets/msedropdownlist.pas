@@ -54,6 +54,7 @@ type
    flinewidth: integer;
    flinecolor: colorty;
    ftextflags: textflagsty;
+   fcolor: colorty;
    fcolorselect: colorty;
    ffontcolorselect: colorty;
    fcaption: msestring;
@@ -69,6 +70,7 @@ type
    property textflags: textflagsty read ftextflags write ftextflags default defaultdropdowncoltextflags;
    property linewidth: integer read flinewidth write flinewidth default 0;
    property linecolor: colorty read flinecolor write flinecolor default cl_gray;
+   property color: colorty read fcolor write fcolor default cl_default;
    property colorselect: colorty read fcolorselect write fcolorselect default cl_default;
    property fontcolorselect: colorty read ffontcolorselect write ffontcolorselect default cl_default;
    property caption: msestring read fcaption write fcaption;
@@ -248,6 +250,7 @@ type
   protected
    fdataselected: boolean;
    fcolor: colorty;
+   fcolorclient: colorty;
    fdropdowncount: integer;
    fselectkey: keyty;
    fintf: idropdown;
@@ -287,6 +290,8 @@ type
                  default defaultdropdownoptionsedit;
   published
    property color: colorty read fcolor write fcolor default cl_default;
+   property colorclient: colorty read fcolorclient write fcolorclient
+                                                       default cl_default;
  end;
 
  tdropdowncontroller = class(tcustomdropdowncontroller)
@@ -418,6 +423,7 @@ begin
  foptions:= defaultdropdowncoloptions;
  flinecolor:= cl_gray;
  ftextflags:= defaultdropdowncoltextflags;
+ fcolor:= cl_default;
  fcolorselect:= cl_default;
  ffontcolorselect:= cl_default;
  inherited create;
@@ -720,6 +726,7 @@ begin
  fintf:= intf;
  foptions:= defaultdropdownoptionsedit;
  fcolor:= cl_default;
+ fcolorclient:= cl_default;
  inherited create;
  createframe;
 end;
@@ -1405,6 +1412,9 @@ begin
   else begin
    color:= fcontroller.color;
   end;
+  if (fcontroller.colorclient <> cl_default) and (fframe <> nil) then begin
+   fframe.colorclient:= fcontroller.colorclient;
+  end;
   fdatacols.options:= fdatacols.options + [co_focusselect,co_readonly];
   font:= twidget1(aparent).getfont;
   frame.levelo:= 0;
@@ -1443,7 +1453,12 @@ begin
     linecolor:= col1.flinecolor;
     textflags:= col1.ftextflags;
     textflagsactive:= col1.ftextflags;
-    colorselect:= col1.fcolorselect;
+    if col1.fcolor <> cl_default then begin
+     color:= col1.fcolor;
+    end;
+    if col1.fcolorselect <> cl_default then begin
+     colorselect:= col1.fcolorselect;
+    end;
     if col1.ffontcolorselect <> cl_default then begin
      createfontselect;
      fontselect.assign(getfont);
