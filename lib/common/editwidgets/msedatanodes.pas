@@ -1097,8 +1097,9 @@ begin
  if foptions <> value then begin
   optionsbefore:= foptions;
   foptions:= Value;
-  if nodeoptionsty(longword(foptions) xor longword(optionsbefore)) *
-                                               [no_checkbox] <> [] then begin
+  if nodeoptionsty({$ifdef FPC}longword{$else}byte{$endif}(foptions) xor
+                     {$ifdef FPC}longword{$else}byte{$endif}(optionsbefore)) *
+                   [no_checkbox] <> [] then begin
    updatelayout;
   end
   else begin

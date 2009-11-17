@@ -66,7 +66,7 @@ type
   dirtystart,dirtystop: integer;
   source: tdatalist;
  end;
-  
+
  tdatalist = class(tnullinterfacedpersistent)
   private
    fbytelength: integer;   //pufferlaenge
@@ -223,7 +223,7 @@ type
    function sort(const compareproc: compareprocty; const arangelist: tintegerdatalist; dorearange: boolean): boolean; overload;
    function sort(const arangelist: tintegerdatalist; dorearange: boolean): boolean; overload;
    function sort: boolean; overload; //true if changed
-   function sort(const compareproc: compareprocty): boolean;
+   function sort(const compareproc: compareprocty): boolean; overload;
    procedure clean(const start,stop: integer); virtual;
    procedure clearmemberitem(const subitem: integer; 
                                     const index: integer); virtual;
@@ -2879,7 +2879,7 @@ end;
 function tdatalist.sort(
               const arangelist: tintegerdatalist; dorearange: boolean): boolean;
 begin
- result:= sort(@compare,arangelist,dorearange);
+ result:= sort({$ifdef FPC}@{$endif}compare,arangelist,dorearange);
 end;
 
 function tdatalist.sort(const compareproc: compareprocty): boolean;
@@ -2896,7 +2896,7 @@ end;
 
 function tdatalist.sort: boolean;
 begin
- result:= sort(@compare);
+ result:= sort({$ifdef FPC}@{$endif}compare);
 end;
 
 procedure tdatalist.checkindexrange(const aindex: integer);

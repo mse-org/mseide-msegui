@@ -3115,7 +3115,7 @@ begin
    decupdate;
   end;
  end;
- inherited;
+ inherited change(index);
 end;
 
 procedure ttreeitemeditlist.freedata(var data);
