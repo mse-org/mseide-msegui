@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+Version 2.2beta2
+2009-11-18
 2009-11-09
  comparprocty out result -> var result.
 2009-11-01
