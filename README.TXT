@@ -1,10 +1,11 @@
 MSEide+MSEgui Pascal Cross Platform GUI Development System.
  
-2009-06-23 Version 2.2.beta1
+2009-11-18 Version 2.2.beta2
 Copyright (c) 1999-2009 by Martin Schreiber
 
-- Compiles with FPC 2.2.4
-- Tested on i386-linux SuSE 9.0,10.3,11.1 and i386-win32 98, 2000, XP and Vista.
+- Compiles with FPC 2.2.4 and FPC 2.4
+- Tested on i386-linux SuSE 9.0,10.3,11.1,11.2, x84-64-linux SuSE 11.1 and
+  i386-win32 98, 2000, XP and Vista.
 - Links to xlib and gdi32, no external widget library needed.
 - Internal character encoding is UCS2.
 - Uses anti aliased fonts on Linux (Xft).
@@ -31,9 +32,10 @@ IDE is under GPL, library under modified LGPL like FPC-RTL.
 
 Installation:
 *************
-1. Download and install FPC 2.2.4, you can get it from 
+1. Download and install FPC 2.2.4 or FPC 2.4, you can get it from 
    http://www.freepascal.org/download.var
-2. Download mseide_msegui_src_2_2beta1.zip and mseide_bin_2_2beta1.zip
+2. Download mseide_msegui_src_2_2beta2.zip and mseide_win32_2_2beta2.zip or
+   mseide_linuxi386_2_2beta2.bz2 or mseide_linuxx8464_2_2beta2.bz2
    http://sourceforge.net/project/showfiles.php?group_id=165409
 3. Extract them to a directory of your choice ('yourdirectory') .
 4. Run 'yourdirectory/bin/i386-linux/mseide' on linux or 
@@ -82,6 +84,13 @@ FPC 2.2.2
 *********
 patch_fpc_2_2_2 contains patched FPC files in order to fix FPC Mantis 11774, 
 11855, 11856.
+
+Linux x84-64
+************
+The 64bit version is experimental and not well tested because nobody
+uses 64bit it seems. ;-)
+There is a problem in FPC with -gl compiler switch, it is possible that the delay
+in case of an exception is very long, please dont use -gl on 64 bit.
 
 Debugging
 *********
