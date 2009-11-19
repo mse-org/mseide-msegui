@@ -47,20 +47,20 @@ type
           (rec_done,rec_running,rec_connected,rec_error,rec_exit,
            rec_stopped,rec_download,
            rec_threadcreated,rec_threadexited,rec_threadgroupexited,
-           rec_libraryloaded);
+           rec_libraryloaded,rec_libraryunloaded);
  resultclassty = rec_done..rec_exit;
- asyncclassty = rec_running..rec_libraryloaded;
+ asyncclassty = rec_running..rec_libraryunloaded;
 const
  recordclassnames: array[recordclassty] of string =
          ('done', 'running',  'connected',   'error',   'exit',
           'stopped', 'download',
           'thread-created','thread-exited', 'thread-group-exited', 
-          'library-loaded');
+          'library-loaded','library-unloaded');
  recordclassnoname: array[recordclassty] of boolean =
          (false,  false,      false,         false,     false,
           false,     true,
           false,           false,           false,
-          false);
+          false,            false);
  defaultsynctimeout = 2000000; //2 seconds
 type
  valuekindty = (vk_value,vk_tuple,vk_list);
