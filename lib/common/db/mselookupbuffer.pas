@@ -1693,6 +1693,7 @@ begin
        datas.active:= false;
       end;
      end;
+     include(fstate,lbs_buffervalid); //no recursion in enablecontrols
     finally
      datas.enablecontrols;
     end;
