@@ -3,7 +3,11 @@ unit msei18nutils;
 {$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
 
 {$undef internalresstrhandling}
-{$ifdef FPC}{$ifndef VER2_2}{$define internalresstrhandling}{$endif}{$endif}
+{$ifdef FPC}
+ {$if fpc_fullversion < 20301}
+  {$ifndef VER2_2}{$define internalresstrhandling}{$endif}
+ {$endif}
+{$endif}
 
 interface
 uses
@@ -42,7 +46,7 @@ type
    function getcompareproc: compareprocty; override;
    procedure finalizerecord(var item); override;
    procedure copyrecord(var item); override;
-   procedure compare(const l,r; out result: integer);
+   procedure compare(const l,r; var result: integer);
   public
    constructor create;
    procedure readvalues(data: pobjectdataty);
@@ -268,7 +272,7 @@ begin
  result:= {$ifdef FPC}@{$endif}compare;
 end;
 
-procedure tresourcestringlist.compare(const l; const r; out result: integer);
+procedure tresourcestringlist.compare(const l; const r; var result: integer);
 begin
  result:= stringcomp(resourcestringinfoty(l).name,resourcestringinfoty(r).name);
 end;
