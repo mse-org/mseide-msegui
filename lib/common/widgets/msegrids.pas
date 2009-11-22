@@ -1225,7 +1225,7 @@ type
    procedure setselectedrows(const avalue: integerarty);
    function getselected(const cell: gridcoordty): boolean;
    procedure setselected(const cell: gridcoordty; const Value: boolean);
-   procedure roworderinvalid;
+   function roworderinvalid: boolean; //true if accepted
    procedure checkindexrange;
    procedure setsortcol(const avalue: integer);
    procedure setnewrowcol(const avalue: integer);
@@ -1260,7 +1260,7 @@ type
    procedure decselect;
    procedure sortfunc(sender: tcustomgrid;
                        const index1,index2: integer; var result: integer);
-   procedure updatedatastate; virtual;
+   procedure updatedatastate(var accepted: boolean); virtual;
 
    procedure dostatread(const reader: tstatreader); virtual;
    procedure dostatwrite(const writer: tstatwriter); virtual;
@@ -1340,6 +1340,7 @@ type
    procedure setoptionsedit(avalue: stringcoleditoptionsty);
   protected
    function getcolclass: stringcolclassty; virtual;
+   procedure updatedatastate(var accepted: boolean); override;
   public
    constructor create(aowner: tcustomgrid);
    class function getitemclasstype: persistentclassty; override;
@@ -6482,7 +6483,7 @@ begin
  end;
 end;
 
-procedure tdatacols.roworderinvalid;
+function tdatacols.roworderinvalid: boolean;
 var
  int1: integer;
 begin
@@ -6496,7 +6497,8 @@ begin
    end;
   end;
  end;
- updatedatastate;
+ result:= true;
+ updatedatastate(result);
 end;
 
 procedure tdatacols.checkindexrange;
@@ -6530,7 +6532,7 @@ end;
 
 procedure tdatacols.moverow(const fromindex, toindex: integer; const acount: integer = 1);
 begin
- roworderinvalid;
+// roworderinvalid;
  with frowstate do begin
   blockmovedata(fromindex,toindex,acount);
   if fvisiblerowmap <> nil then begin
@@ -6544,7 +6546,7 @@ end;
 
 procedure tdatacols.insertrow(const index: integer; const acount: integer = 1);
 begin
- roworderinvalid;
+// roworderinvalid;
  with frowstate do begin
   insertitems(index,acount);
   if fvisiblerowmap <> nil then begin
@@ -6558,7 +6560,7 @@ end;
 
 procedure tdatacols.deleterow(const index: integer; const acount: integer = 1);
 begin
- roworderinvalid;
+// roworderinvalid;
  with frowstate do begin
   if fvisiblerowmap <> nil then begin
    updatedeletedrows(index,acount);
@@ -7040,7 +7042,7 @@ begin
  end;
 end;
 
-procedure tdatacols.updatedatastate;
+procedure tdatacols.updatedatastate(var accepted: boolean);
 begin
 //dummy
 end;
@@ -7357,6 +7359,12 @@ begin
    end;
   end;
  end;
+end;
+
+procedure tstringcols.updatedatastate(var accepted: boolean);
+begin
+ fgrid.checkcellvalue(accepted);
+ inherited;
 end;
 
 { tfixcols }
@@ -11718,6 +11726,14 @@ begin
   rowbefore:= ffocusedcell.row;
   beginupdate;
   if curindex >= 0 then begin //datarows
+   if not (gs_changelock in fstate) then begin
+    include(fstate,gs_changelock);
+    fdatacols.beginchangelock;
+   end;
+   if not fdatacols.roworderinvalid then begin
+    exit;
+   end;
+   fdatacols.moverow(curindex,newindex,count);
    if (ffocusedcell.row >= 0) then begin
     if (ffocusedcell.row >= curindex) and
           (ffocusedcell.row < curindex + count) then begin
@@ -11742,11 +11758,11 @@ begin
    if factiverow >= 0 then begin
     factiverow:= ffocusedcell.row;
    end;
-   if not (gs_changelock in fstate) then begin
-    include(fstate,gs_changelock);
-    fdatacols.beginchangelock;
-   end;
-   fdatacols.moverow(curindex,newindex,count);
+//   if not (gs_changelock in fstate) then begin
+//    include(fstate,gs_changelock);
+//    fdatacols.beginchangelock;
+//   end;
+//   fdatacols.moverow(curindex,newindex,count);
    invalidate //for fixcols colorselect
   end;
   endupdate;
@@ -11771,6 +11787,11 @@ begin
      include(fstate,gs_changelock);
      fdatacols.beginchangelock;
     end;
+    if not fdatacols.roworderinvalid then begin
+     exit;
+    end;
+    fdatacols.insertrow(index,count);
+    ffixcols.insertrow(index,count);
     if (ffocusedcell.row >= 0) then begin
      if (ffocusedcell.row >= index) then begin
       inc(ffocusedcell.row,count);
@@ -11779,8 +11800,8 @@ begin
       end;
      end;
     end;
-    fdatacols.insertrow(index,count);
-    ffixcols.insertrow(index,count);
+//    fdatacols.insertrow(index,count);
+//    ffixcols.insertrow(index,count);
     inc(frowcount,count);
     if frowcount > frowcountmax then begin
      frowcount:= frowcountmax;
@@ -11810,6 +11831,9 @@ begin
   beginupdate;
   try
    if index >= 0 then begin //datarows
+    if not fdatacols.roworderinvalid then begin
+     exit;
+    end;
     if (factiverow >= 0) then begin
      if (factiverow >= index + count) then begin
       dec(factiverow,count);

@@ -120,7 +120,7 @@ type
    function nonullcheck: boolean;
    function nocheckvalue: boolean;
 
-   function checkcanclose: boolean;
+   procedure checkcanclose(var accepted: boolean);
    procedure dofocusedcellchanged(enter: boolean;
                const cellbefore: gridcoordty; var newcell: gridcoordty;
                const selectaction: focuscellactionty); override;
@@ -183,7 +183,7 @@ type
    function getcols(const index: integer): twidgetcol;
    procedure unregisterchildwidget(const child: twidget);
   protected
-   procedure updatedatastate; override;
+   procedure updatedatastate(var accepted: boolean); override;
   public
    constructor create(const aowner: tcustomwidgetgrid);
    class function getitemclasstype: persistentclassty; override;
@@ -907,12 +907,11 @@ begin
 end;
 {$ifdef FPC}{$checkpointer default}{$endif} 
 
-function twidgetcol.checkcanclose: boolean;
+procedure twidgetcol.checkcanclose(var accepted: boolean);
 begin
- result:= true;
  if (fintf <> nil) and fintf.getwidget.focused and 
-       not tcustomgrid1(fgrid).nocheckvalue then begin
-  result:= fintf.getwidget.canclose(nil);
+       not tcustomgrid1(fgrid).nocheckvalue and accepted then begin
+  accepted:= fintf.getwidget.canclose(nil);
  end;
 end;
 
@@ -924,6 +923,7 @@ var
  activewidgetbefore: twidget;
  intf: igridwidget;
  focuscount: integer;
+ bo1: boolean;
  
 begin
 // inherited;
@@ -932,7 +932,9 @@ begin
   activewidgetbefore:= factivewidget;
   if not enter then begin
    factivewidget:= nil;
-   if checkcanclose then begin
+   bo1:= true;
+   checkcanclose(bo1);
+   if bo1 then begin
     if (activewidgetbefore <> nil) and 
            activewidgetbefore.clicked then begin
      with fgrid do begin
@@ -1522,7 +1524,8 @@ procedure twidgetcol.itemchanged(const sender: tdatalist; const aindex: integer)
 begin
  inherited;
  if {(tcustomwidgetgrid(fgrid).fupdating = 0) and} (fintf <> nil) and
-               not (gs_rowremoving in tcustomgrid1(fgrid).fstate) then begin
+               not (gs_rowremoving in tcustomgrid1(fgrid).fstate) and
+               not (gps_changelock in fstate)then begin
   fintf.gridvaluechanged(aindex);
   if ((aindex < 0) or (aindex = grid.row)) and (grid.row >= 0) then begin
    fintf.gridtovalue(aindex);
@@ -1727,13 +1730,16 @@ begin
  end;
 end;
 
-procedure twidgetcols.updatedatastate;
+procedure twidgetcols.updatedatastate(var accepted: boolean);
 var
  int1: integer;
 begin
  if not (csdestroying in fgrid.componentstate) then begin
   for int1:= 0 to count - 1 do begin
-   cols[int1].checkcanclose;
+   if not accepted then begin 
+    break;
+   end;
+   cols[int1].checkcanclose(accepted);
   end;
  end;
  inherited;
@@ -2869,7 +2875,7 @@ end;
 
 procedure tcustomwidgetgrid.checkcellvalue(var accept: boolean);
 begin
- accept:= twidgetcols(fdatacols)[ffocusedcell.col].checkcanclose;
+ twidgetcols(fdatacols)[ffocusedcell.col].checkcanclose(accept);
 end;
 
 procedure tcustomwidgetgrid.dokeydown(var info: keyeventinfoty);
