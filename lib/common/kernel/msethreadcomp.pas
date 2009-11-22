@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -13,13 +13,15 @@ unit msethreadcomp;
 
 interface
 uses
- mseclasses,msethread,classes,mseevent,msetypes,msestrings;
+ mseclasses,msethread,classes,mseevent,msetypes,msestrings,mseapplication;
 
 type
  tthreadcomp = class;
  threadcompeventty = procedure(const sender: tthreadcomp) of object;
-
- tthreadcomp = class(tmsecomponent)
+ threadcompoption = (tco_autorelease);
+ threadcompoptionsty = set of threadcompoption;
+ 
+ tthreadcomp = class(tactcomponent)
   private
    fthread: teventthread;
    fonstart: threadcompeventty;
@@ -27,6 +29,7 @@ type
    fonexecute: threadcompeventty;
    factive: boolean;
    fdatapo: pointer;
+   foptions: threadcompoptionsty;
    function getthread: teventthread;
    function getterminated: boolean;
    function threadproc(sender: tmsethread): integer;
@@ -53,6 +56,7 @@ type
    property terminated: boolean read getterminated;
 
   published
+   property options: threadcompoptionsty read foptions write foptions default [];
    property active: boolean read getactive write setactive default false;
    property onstart: threadcompeventty read fonstart write fonstart;
    property onexecute: threadcompeventty read fonexecute write fonexecute;
@@ -61,7 +65,7 @@ type
 
 implementation
 uses
- sysutils,mseapplication,msesys;
+ sysutils{,mseapplication},msesys;
 
 { tthreadcomp }
 
@@ -106,26 +110,32 @@ end;
 function tthreadcomp.threadproc(sender: tmsethread): integer;
 begin
  fthread:= teventthread(sender);
- if assigned(fonstart) then begin
-  application.lock;
-  try
-   fonstart(self);
-  finally
-   application.unlock;
+ try
+  if assigned(fonstart) then begin
+   application.lock;
+   try
+    fonstart(self);
+   finally
+    application.unlock;
+   end;
+  end;
+  if assigned(fonexecute) then begin
+   fonexecute(self);
+  end;
+  if assigned(fonterminate) then begin
+   application.lock;
+   try
+    fonterminate(self);
+   finally
+    application.unlock;
+   end;
+  end;
+  result:= 0;
+ finally
+  if tco_autorelease in foptions then begin
+   release;
   end;
  end;
- if assigned(fonexecute) then begin
-  fonexecute(self);
- end;
- if assigned(fonterminate) then begin
-  application.lock;
-  try
-   fonterminate(self);
-  finally
-   application.unlock;
-  end;
- end;
- result:= 0;
 end;
 
 function tthreadcomp.getthread: teventthread;

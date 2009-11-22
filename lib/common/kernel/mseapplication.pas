@@ -12,7 +12,7 @@ unit mseapplication;
 interface
 uses
  classes,mseclasses,mseevent,mseglob,sysutils,msetypes,mselist,
-     msethread,msesys,msethreadcomp,msestrings
+     msethread,msesys,{msethreadcomp,}msestrings
      {$ifdef mse_with_ifi},mseifiglob{$endif};
  
 type

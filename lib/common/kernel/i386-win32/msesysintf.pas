@@ -584,6 +584,7 @@ function threadexec(infopo : pointer) : longint;
 begin
 //result:= 0;
 //exit;
+ threadinfoty(infopo^).id:= getcurrentthreadid;
  result:= threadinfoty(infopo^).threadproc();
 end;
 
@@ -591,6 +592,7 @@ end;
 
 function threadexec(infopo: pointer): integer; stdcall;
 begin
+ threadinfoty(infopo^).id:= getcurrentthreadid;
  result:= threadinfoty(infopo^).threadproc();
 end;
 

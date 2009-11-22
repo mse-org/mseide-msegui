@@ -754,6 +754,7 @@ end;
 
 function threadexec(infopo : pointer) : ptrint{longint};
 begin
+ threadinfoty(infopo^).id:= getcurrentthreadid;
  pthread_setcanceltype(pthread_cancel_asynchronous,nil);
  pthread_setcancelstate(pthread_cancel_enable,nil);
  result:= threadinfoty(infopo^).threadproc();
@@ -763,6 +764,7 @@ end;
 
 function threadexec(infopo: pointer): integer; cdecl;
 begin
+ threadinfoty(infopo^).id:= getcurrentthreadid;
  pthread_setcanceltype(pthread_cancel_asynchronous,nil);
  pthread_setcancelstate(pthread_cancel_enable,nil);
  result:= threadinfoty(infopo^).threadproc();

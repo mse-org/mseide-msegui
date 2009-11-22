@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -22,7 +22,7 @@ type
 
  threadprocty = function(thread: tmsethread): integer of object;
 
- threadstatety = (ts_started,ts_running,ts_terminated);
+ threadstatety = (ts_started,ts_running,ts_terminated,ts_freeonterminate);
  threadstatesty = set of threadstatety;
 
  tmsethread = class
@@ -35,11 +35,14 @@ type
    function internalthreadproc: integer;
    function getrunning: boolean;
    function getterminated: boolean;
+   function getfreeonterminate: boolean;
+   procedure setfreeonterminate(const avalue: boolean);
   protected
    function execute(thread: tmsethread): integer; virtual;
   public
-   constructor create; overload;
-   constructor create(athreadproc: threadprocty); overload; virtual;
+   constructor create(const afreeonterminate: boolean = false); overload;
+   constructor create(const athreadproc: threadprocty;
+                const afreeonterminate: boolean = false); overload; virtual;
    destructor destroy; override;
    function waitfor: integer; virtual;
    procedure terminate; virtual;
@@ -47,13 +50,16 @@ type
    property running: boolean read getrunning;
    property terminated: boolean read getterminated;
    property id: threadty read finfo.id;
+   property freeonterminate: boolean read getfreeonterminate write 
+                          setfreeonterminate;
  end;
 
  tmutexthread = class(tmsethread)
   private
    fmutex: mutexty;
   public
-   constructor create(athreadproc: threadprocty); overload; override;
+   constructor create(const athreadproc: threadprocty;
+                      const afreeonterminate: boolean = false); override;
    destructor destroy; override;
    function lock: boolean; //true if ok
    procedure unlock;
@@ -63,7 +69,8 @@ type
   private
    fsem: semty;
   public
-   constructor create(athreadproc: threadprocty); overload; override;
+   constructor create(const athreadproc: threadprocty;
+                      const afreeonterminate: boolean = false); override;
    destructor destroy; override;
    function semwait: boolean; //true if not destroyed
    function sempost: boolean; //true if not destroyed
@@ -75,7 +82,8 @@ type
   private
    feventlist: teventqueue;
   public
-   constructor create(athreadproc: threadprocty); overload; override;
+   constructor create(const athreadproc: threadprocty;
+                     const afreeonterminate: boolean = false); overload; override;
    destructor destroy; override;
    procedure terminate; override;
    procedure postevent(event: tevent);
@@ -196,16 +204,18 @@ end;
 
 { tmsethread }
 
-constructor tmsethread.create;
+constructor tmsethread.create(const afreeonterminate: boolean);
 begin
- create({$ifdef FPC}@{$endif}execute);
+ create({$ifdef FPC}@{$endif}execute,afreeonterminate);
 end;
 
-constructor tmsethread.create(athreadproc: threadprocty);
+constructor tmsethread.create(const athreadproc: threadprocty;
+                                 const afreeonterminate: boolean);
 begin
  sys_semcreate(fwaitforsem,0);
  fthreadproc:= athreadproc;
  fstate:= [ts_running,ts_started];
+ freeonterminate:= afreeonterminate;
  with finfo do begin
   threadproc:= {$ifdef FPC}@{$endif}internalthreadproc;
  end;
@@ -231,6 +241,9 @@ end;
 function tmsethread.waitfor: integer;
 begin
  if ts_started in fstate then begin
+  if ts_freeonterminate in fstate then begin
+   raise exception.create('No waitfor() if ts_freeonterminate set.');
+  end;
   exclude(fstate,ts_started);
   sys_semwait(fwaitforsem,0);
  end;
@@ -263,6 +276,8 @@ begin
 end;
 
 function tmsethread.internalthreadproc: integer;
+var
+ info1: threadinfoty;
 begin
  try
   result:= fthreadproc(self);
@@ -272,12 +287,36 @@ begin
  end;
  fexecresult:= result;
  exclude(fstate,ts_running);
- sys_sempost(fwaitforsem);
+ if not freeonterminate then begin
+  sys_sempost(fwaitforsem);
+ end
+ else begin
+  info1:= finfo;
+  finfo.id:= 0;
+  free;
+  sys_threaddestroy(info1);
+ end;
+end;
+
+function tmsethread.getfreeonterminate: boolean;
+begin
+ result:= ts_freeonterminate in fstate;
+end;
+
+procedure tmsethread.setfreeonterminate(const avalue: boolean);
+begin
+ if avalue then begin
+  include(fstate,ts_freeonterminate);
+ end
+ else begin
+  exclude(fstate,ts_freeonterminate);
+ end;
 end;
 
 { tmutexthread }
 
-constructor tmutexthread.create(athreadproc: threadprocty);
+constructor tmutexthread.create(const athreadproc: threadprocty;
+                                     const afreeonterminate: boolean = false);
 begin
  syserror(sys_mutexcreate(fmutex),self);
  inherited;
@@ -301,7 +340,8 @@ end;
 
 { teventthread }
 
-constructor teventthread.create(athreadproc: threadprocty);
+constructor teventthread.create(const athreadproc: threadprocty;
+                       const afreeonterminate: boolean = false);
 begin
  feventlist:= teventqueue.create(true);
  inherited;
@@ -339,7 +379,8 @@ end;
 
 { tsemthread }
 
-constructor tsemthread.create(athreadproc: threadprocty);
+constructor tsemthread.create(const athreadproc: threadprocty;
+                               const afreeonterminate: boolean = false);
 begin
  sys_semcreate(fsem,0);
  inherited;
