@@ -40,7 +40,8 @@ type
   protected
    function execute(thread: tmsethread): integer; virtual;
   public
-   constructor create(const afreeonterminate: boolean = false); overload;
+   constructor create; overload;
+   constructor create(const afreeonterminate: boolean); overload;
    constructor create(const athreadproc: threadprocty;
                 const afreeonterminate: boolean = false); overload; virtual;
    destructor destroy; override;
@@ -203,6 +204,11 @@ begin
 end;
 
 { tmsethread }
+
+constructor tmsethread.create;
+begin
+ create(false);
+end;
 
 constructor tmsethread.create(const afreeonterminate: boolean);
 begin
