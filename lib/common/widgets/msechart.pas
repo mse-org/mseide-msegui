@@ -942,7 +942,7 @@ procedure tchartdials.changed;
 var
  int1: integer;
 begin
- for int1:= 0 to count - 1 do begin
+ for int1:= high(fitems) downto 0 do begin
   tcustomdialcontroller1(fitems[int1]).changed;
  end;
 end;
@@ -951,7 +951,7 @@ procedure tchartdials.paint(const acanvas: tcanvas);
 var
  int1: integer;
 begin
- for int1:= 0 to count - 1 do begin
+ for int1:= high(fitems) downto 0 do begin
   tcustomdialcontroller(fitems[int1]).paint(acanvas);
  end;
 end;
@@ -960,7 +960,7 @@ procedure tchartdials.afterpaint(const acanvas: tcanvas);
 var
  int1: integer;
 begin
- for int1:= 0 to count - 1 do begin
+ for int1:= high(fitems) downto 0 do begin
   tcustomdialcontroller(fitems[int1]).afterpaint(acanvas);
  end;
 end;
