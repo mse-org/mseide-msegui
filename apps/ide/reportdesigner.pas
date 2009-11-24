@@ -336,9 +336,9 @@ var
  pt1: pointty;
 begin
  pt1:= translatewidgetpoint(avalue,source,reportcontainer);
- xdisp.value:= pt1.x/ppmm + dialh.dial.offset;
+ xdisp.value:= pt1.x/ppmm + dialh.dial.start;
  dialh.dial.markers[0].value:= xdisp.value;
- ydisp.value:= pt1.y/ppmm + dialv.dial.offset;
+ ydisp.value:= pt1.y/ppmm + dialv.dial.start;
  dialv.dial.markers[0].value:= ydisp.value;
 end;
 
@@ -389,8 +389,8 @@ begin
  if dialv.bounds_cy > 0 then begin
   dialv.dial.range:= dialv.bounds_cy / ppmm; //mm
  end;
- dialh.dial.offset:= -reportcontainer.clientpos.x / ppmm;
- dialv.dial.offset:= -reportcontainer.clientpos.y / ppmm;
+ dialh.dial.start:= -reportcontainer.clientpos.x / ppmm;
+ dialv.dial.start:= -reportcontainer.clientpos.y / ppmm;
  adjustticks(dialh.dial);
  adjustticks(dialv.dial);
 end;

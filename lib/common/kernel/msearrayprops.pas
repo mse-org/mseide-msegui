@@ -286,9 +286,9 @@ type
    procedure setlinkedvar(const source: tlinkedobject; var dest: tlinkedobject;
               const linkintf: iobjectlink = nil); overload;
   public
-   function propkind: arraypropkindty; override;
    constructor create(itemclasstype: virtualpersistentclassty); reintroduce;
    destructor destroy; override;
+   function propkind: arraypropkindty; override;
    function displayname(const index: integer): msestring; virtual;
    procedure add(const item: tpersistent);
    function indexof(const aitem: tpersistent): integer; //-1 if not found

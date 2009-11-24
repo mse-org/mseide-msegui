@@ -73,7 +73,7 @@ type
    property kind: tracekindty read fkind write setkind default trk_xseries;
    property xseriescount: integer read fxseriescount write setxseriescount default 0;
                       //0-> xseriesdata count
-   property options: charttraceoptionsty read foptions write setoptions;
+   property options: charttraceoptionsty read foptions write setoptions default [];
  end;
 
  traceaty = array[0..0] of ttrace;
@@ -104,11 +104,13 @@ type
  tchartdialvert = class(tcustomdialcontroller)
   protected
    procedure setdirection(const avalue: graphicdirectionty); override;
+  public
+   constructor create(const aintf: idialcontroller); override;
   published
    property color;
    property widthmm;
    property direction default gd_up;
-   property offset;
+   property start;
    property range;
    property kind;
    property markers;
@@ -119,16 +121,46 @@ type
  tchartdialhorz = class(tcustomdialcontroller)
   protected
    procedure setdirection(const avalue: graphicdirectionty); override;
+  public
+   constructor create(const aintf: idialcontroller); override;
   published
    property color;
    property widthmm;
    property direction default gd_right;
-   property offset;
+   property start;
    property range;
    property kind;
    property markers;
    property ticks;
    property options;
+ end;
+
+ tchartdials = class(tcustomdialcontrollers)
+  protected
+  public
+   procedure changed;
+   procedure paint(const acanvas: tcanvas);
+   procedure afterpaint(const acanvas: tcanvas);
+ end;
+ 
+ tchartdialshorz = class(tchartdials)
+  private
+   function getitems(const aindex: integer): tchartdialhorz;
+   procedure setitems(const aindex: integer; const avalue: tchartdialhorz);
+  protected
+   function getitemclass: dialcontrollerclassty; override;
+  public
+   property items[const aindex: integer]: tchartdialhorz read getitems write setitems; default;
+ end;
+
+ tchartdialsvert = class(tchartdials)
+  private
+   function getitems(const aindex: integer): tchartdialvert;
+   procedure setitems(const aindex: integer; const avalue: tchartdialvert);
+  protected
+   function getitemclass: dialcontrollerclassty; override;
+  public
+   property items[const aindex: integer]: tchartdialvert read getitems write setitems; default;
  end;
 
  tchartframe = class(tscrollboxframe)
@@ -147,14 +179,14 @@ type
  
  tcustomchart = class(tscrollbox,idialcontroller)
   private
-   fdialhorz: tchartdialhorz;
-   fdialvert: tchartdialvert;
+   fdialshorz: tchartdialshorz;
+   fdialsvert: tchartdialsvert;
 //   fonbeforepaint: painteventty;
 //   fonpaintbackground: painteventty;
 //   fonpaint: painteventty;
 //   fonafterpaint: painteventty;
-   procedure setdialhorz(const avalue: tchartdialhorz);
-   procedure setdialvert(const avalue: tchartdialvert);
+   procedure setdialshorz(const avalue: tchartdialshorz);
+   procedure setdialsvert(const avalue: tchartdialsvert);
    procedure setcolorchart(const avalue: colorty);
   protected
    fcolorchart: colorty;
@@ -170,13 +202,14 @@ type
    procedure directionchanged(const dir,dirbefore: graphicdirectionty);
    function getdialrect: rectty;
    procedure internalcreateframe; override;
+   procedure defineproperties(filer: tfiler); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    property colorchart: colorty read fcolorchart write setcolorchart 
                               default cl_foreground;
-   property dialhorz: tchartdialhorz read fdialhorz write setdialhorz;
-   property dialvert: tchartdialvert read fdialvert write setdialvert;
+   property dialshorz: tchartdialshorz read fdialshorz write setdialshorz;
+   property dialsvert: tchartdialsvert read fdialsvert write setdialsvert;
 //   property onbeforepaint: painteventty read fonbeforepaint write fonbeforepaint;
 //   property onpaintbackground: painteventty read fonpaintbackground
 //                                                  write fonpaintbackground;
@@ -197,8 +230,8 @@ type
   published
    property traces: ttraces read ftraces write settraces;
    property colorchart;
-   property dialhorz;
-   property dialvert;
+   property dialshorz;
+   property dialsvert;
    property onbeforepaint;
    property onpaintbackground;
    property onpaint;
@@ -257,8 +290,8 @@ type
    property traces: trecordertraces read ftraces write settraces;
    
    property colorchart;
-   property dialhorz;
-   property dialvert;
+   property dialshorz;
+   property dialsvert;
    property onbeforepaint;
    property onpaintbackground;
    property onpaint;
@@ -268,7 +301,10 @@ type
 implementation
 uses
  sysutils;
- 
+
+type
+ tcustomdialcontroller1 = class(tcustomdialcontroller);
+  
 { ttrace }
 
 constructor ttrace.create(aowner: tobject);
@@ -514,6 +550,12 @@ end;
 
 { tchartdialvert }
 
+constructor tchartdialvert.create(const aintf: idialcontroller);
+begin
+ inherited;
+ direction:= gd_up;
+end;
+
 procedure tchartdialvert.setdirection(const avalue: graphicdirectionty);
 begin
  if avalue in [gd_up,gd_down] then begin
@@ -522,6 +564,12 @@ begin
 end;
 
 { tchartdialhorz }
+
+constructor tchartdialhorz.create(const aintf: idialcontroller);
+begin
+ inherited;
+ direction:= gd_right;
+end;
 
 procedure tchartdialhorz.setdirection(const avalue: graphicdirectionty);
 begin
@@ -547,8 +595,9 @@ end;
 constructor tcustomchart.create(aowner: tcomponent);
 begin
  fcolorchart:= cl_foreground;
- fdialvert:= tchartdialvert.create(idialcontroller(self));
- fdialhorz:= tchartdialhorz.create(idialcontroller(self));
+ fdialsvert:= tchartdialsvert.create(idialcontroller(self));
+ fdialshorz:= tchartdialshorz.create(idialcontroller(self));
+{
  with fdialvert do begin
   direction:= gd_up;
   ticks.count:= 1;
@@ -565,20 +614,21 @@ begin
    color:= cl_dkgray;
   end;
  end;
+}
  inherited;
 end;
 
 destructor tcustomchart.destroy;
 begin
- fdialvert.free;
- fdialhorz.free;
+ fdialsvert.free;
+ fdialshorz.free;
  inherited;
 end;
 
 procedure tcustomchart.clientrectchanged;
 begin
- fdialhorz.changed;
- fdialvert.changed;
+ fdialshorz.changed;
+ fdialsvert.changed;
  inherited;
 end;
 {
@@ -632,10 +682,10 @@ end;
 procedure tcustomchart.dopaint(const acanvas: tcanvas);
 begin
  inherited;
- fdialhorz.paint(acanvas);
- fdialvert.paint(acanvas);
- fdialhorz.afterpaint(acanvas);
- fdialvert.afterpaint(acanvas);
+ fdialshorz.paint(acanvas);
+ fdialsvert.paint(acanvas);
+ fdialshorz.afterpaint(acanvas);
+ fdialsvert.afterpaint(acanvas);
 end;
 
 procedure tcustomchart.setcolorchart(const avalue: colorty);
@@ -646,14 +696,14 @@ begin
  end;
 end;
 
-procedure tcustomchart.setdialhorz(const avalue: tchartdialhorz);
+procedure tcustomchart.setdialshorz(const avalue: tchartdialshorz);
 begin
- fdialhorz.assign(avalue);
+ fdialshorz.assign(avalue);
 end;
 
-procedure tcustomchart.setdialvert(const avalue: tchartdialvert);
+procedure tcustomchart.setdialsvert(const avalue: tchartdialsvert);
 begin
- fdialvert.assign(avalue);
+ fdialsvert.assign(avalue);
 end;
 
 procedure tcustomchart.directionchanged(const dir: graphicdirectionty;
@@ -675,6 +725,11 @@ end;
 procedure tcustomchart.changed;
 begin
  invalidate;
+end;
+
+procedure tcustomchart.defineproperties(filer: tfiler);
+begin
+ inherited;
 end;
 
 { tchart }
@@ -843,6 +898,71 @@ end;
 procedure tchartrecorder.changed;
 begin
  initchart;
+end;
+
+{ tchartdialshorz }
+
+function tchartdialshorz.getitemclass: dialcontrollerclassty;
+begin
+ result:= tchartdialhorz;
+end;
+
+procedure tchartdialshorz.setitems(const aindex: integer;
+               const avalue: tchartdialhorz);
+begin
+ getitems(aindex).assign(avalue);
+end;
+
+function tchartdialshorz.getitems(const aindex: integer): tchartdialhorz;
+begin
+ result:= tchartdialhorz(inherited getitems(aindex));
+end;
+
+{ tchartdialsvert }
+
+function tchartdialsvert.getitemclass: dialcontrollerclassty;
+begin
+ result:= tchartdialvert;
+end;
+
+procedure tchartdialsvert.setitems(const aindex: integer;
+               const avalue: tchartdialvert);
+begin
+ getitems(aindex).assign(avalue);
+end;
+
+function tchartdialsvert.getitems(const aindex: integer): tchartdialvert;
+begin
+ result:= tchartdialvert(inherited getitems(aindex));
+end;
+
+{ tchartdials }
+
+procedure tchartdials.changed;
+var
+ int1: integer;
+begin
+ for int1:= 0 to count - 1 do begin
+  tcustomdialcontroller1(fitems[int1]).changed;
+ end;
+end;
+
+procedure tchartdials.paint(const acanvas: tcanvas);
+var
+ int1: integer;
+begin
+ for int1:= 0 to count - 1 do begin
+  tcustomdialcontroller(fitems[int1]).paint(acanvas);
+ end;
+end;
+
+procedure tchartdials.afterpaint(const acanvas: tcanvas);
+var
+ int1: integer;
+begin
+ for int1:= 0 to count - 1 do begin
+  tcustomdialcontroller(fitems[int1]).afterpaint(acanvas);
+ end;
 end;
 
 end.

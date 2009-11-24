@@ -54,7 +54,7 @@ type
 //  kind: dialdatakindty;
  end;
 
- dialtickoptionty =  (dto_opposite);
+ dialtickoptionty =  (dto_opposite,dto_rotatetext);
  dialtickoptionsty = set of dialtickoptionty;
 
  dialtickinfoty = record
@@ -113,7 +113,7 @@ type
    property escapement: real read fli.escapement write setescapement;
  end;
 
- dialmarkeroptionty = (dmo_opposite);
+ dialmarkeroptionty = (dmo_opposite,dmo_rotatetext);
  dialmarkeroptionsty = set of dialmarkeroptionty;
  
  markerinfoty = record
@@ -187,7 +187,7 @@ type
    property items[const index: integer]: tdialtick read getitems; default;
  end;
  
- dialoptionty = (do_opposite,do_sideline,do_boxline,do_rotatetext);
+ dialoptionty = (do_opposite,do_sideline,do_boxline);
  dialoptionsty = set of dialoptionty;  
 
  idialcontroller = interface(inullinterface)
@@ -196,11 +196,11 @@ type
   function getdialrect: rectty;
  end;
  
- tcustomdialcontroller = class(tpersistent)
+ tcustomdialcontroller = class(tvirtualpersistent)
   private
    fdirection: graphicdirectionty;
    fstate: dialstatesty;
-   foffset: real;
+   fstart: real;
    frange: real;
    fmarkers: tdialmarkers;
    fticks: tdialticks;
@@ -217,7 +217,7 @@ type
    fscalex: real;
    foffsx: integer;
    fendy: integer;
-   procedure setoffset(const avalue: real);
+   procedure setstart(const avalue: real);
    procedure setrange(const avalue: real);
    procedure setmarkers(const avalue: tdialmarkers);
    procedure setoptions(const avalue: dialoptionsty);
@@ -229,6 +229,7 @@ type
    procedure setwidthmm(const avalue: real);
    procedure setkind(const avalue: dialdatakindty);
    procedure setangle(const avalue: real);
+   procedure readstart(reader: treader);
   protected
    procedure setdirection(const avalue: graphicdirectionty); virtual;
    procedure changed;
@@ -236,6 +237,7 @@ type
                    const arect: rectty; out linestart,lineend: integer;
                    out linedirection: graphicdirectionty);
    procedure adjustcaption(const dir: graphicdirectionty;
+                const arotatetext: boolean;
                 const ainfo: diallineinfoty; const afont: tfont;
                 const stringwidth: integer; var pos: pointty);
    procedure checklayout;
@@ -243,14 +245,15 @@ type
    procedure createfont;
    procedure fontchanged(const sender: tobject);
    procedure transform(var apoint: pointty);
+   procedure defineproperties(filer: tfiler); override;
   public
-   constructor create(const aintf: idialcontroller);
+   constructor create(const aintf: idialcontroller); virtual;
    destructor destroy; override;
    procedure paint(const acanvas: tcanvas);
    procedure afterpaint(const acanvas: tcanvas);
    property direction: graphicdirectionty read fdirection write setdirection
                                        default gd_right;
-   property offset: real read foffset write setoffset;//0.0..1.0
+   property start: real read fstart write setstart;
    property range: real read frange write setrange; //default 1.0
    property kind: dialdatakindty read fkind write setkind default dtk_real;
    property markers: tdialmarkers read fmarkers write setmarkers;
@@ -263,12 +266,24 @@ type
    property angle: real read fangle write setangle; //0 -linear, 1 -> 360 grad
  end;
 
+ dialcontrollerclassty = class of tcustomdialcontroller;
+ 
+ tcustomdialcontrollers = class(tpersistentarrayprop)
+  private
+   fintf: idialcontroller;
+  protected
+   function getitemclass: dialcontrollerclassty; virtual;
+   procedure createitem(const index: integer; var item: tpersistent); override;
+  public
+   constructor create(const aintf: idialcontroller);
+ end;
+ 
  tdialcontroller = class(tcustomdialcontroller)
   published
    property color;
    property widthmm;
    property direction;
-   property offset;
+   property start;
    property range;
    property kind;
    property markers;
@@ -604,8 +619,8 @@ begin
  with tcustomdialcontroller(fowner),fli,finfo,line do begin
   rect1:= fintf.getdialrect;
   calclineend(fli,dmo_opposite in options,rect1,linestart,lineend,dir1);
-  rea1:= (value - foffset)/frange;
-  if do_rotatetext in foptions then begin
+  rea1:= (value - fstart)/frange;
+  if dmo_rotatetext in self.finfo.options then begin
    aangle:= angle * (rea1-0.5) * 2*pi;
    if fdirection in [gd_left,gd_right] then begin
     aangle:= -aangle;
@@ -645,7 +660,7 @@ begin
    afont:= self.font;
    acaption:= getactcaption(value,caption);
    captionpos:= a;
-   adjustcaption(dir1,fli,afont,
+   adjustcaption(dir1,dmo_rotatetext in self.finfo.options,fli,afont,
      fintf.getwidget.getcanvas.getstringwidth(acaption,afont),captionpos);
   end;
   transform(a);
@@ -875,7 +890,7 @@ begin
 end;
 
 procedure tcustomdialcontroller.adjustcaption(const dir: graphicdirectionty;
-              const ainfo: diallineinfoty;
+              const arotatetext: boolean; const ainfo: diallineinfoty;
               const afont: tfont; const stringwidth: integer; var pos: pointty);
 begin
  with ainfo,pos do begin
@@ -883,7 +898,7 @@ begin
    gd_right: begin
     y:= y + captiondist;
     x:= x + captionoffset;
-    if not(do_rotatetext in foptions) then begin
+    if not arotatetext then begin
      transform(pos);
     end;
     if escapement = 0 then begin
@@ -894,7 +909,7 @@ begin
    gd_up: begin
     x:= x - captiondist;
     y:= y + captionoffset;
-    if not(do_rotatetext in foptions) then begin
+    if not arotatetext then begin
      transform(pos);
     end;
     if escapement = 0 then begin
@@ -905,7 +920,7 @@ begin
    gd_left: begin
     y:= y - captiondist;
     x:= x + captionoffset;
-    if not(do_rotatetext in foptions) then begin
+    if not arotatetext then begin
      transform(pos);
     end;
     if escapement = 0 then begin
@@ -916,7 +931,7 @@ begin
    gd_down: begin
     x:= x + captiondist;
     y:= y + captionoffset;
-    if not(do_rotatetext in foptions) then begin
+    if not arotatetext then begin
      transform(pos);
     end;
     if escapement = 0 then begin
@@ -925,7 +940,7 @@ begin
    end;
   end;
  end;
- if do_rotatetext in foptions then begin
+ if arotatetext then begin
   transform(pos);
  end;
 end;
@@ -1038,7 +1053,7 @@ begin
       calclineend(fli,dto_opposite in options,rect1,linestart,lineend,dir1);
       step:= 1/intervalcount;
       valstep:= step * frange;
-      first:= (offset*intervalcount)/range;
+      first:= (start*intervalcount)/range;
       offs:= frac(first)/intervalcount; //scaled to 1.0
       first:= int(first);
       if offs > 0.0001 then begin
@@ -1103,9 +1118,9 @@ begin
         captions[int1].caption:= getactcaption(int1*valstep+first,caption);
         with captions[int1] do begin
          pos:= ticks[int1].a;
-         adjustcaption(dir1,fli,afont,
+         adjustcaption(dir1,dto_rotatetext in options,fli,afont,
                canvas1.getstringwidth(caption,afont),pos);
-         if do_rotatetext in foptions then begin
+         if dto_rotatetext in options then begin
           angle:= int2 * rea1;
           int2:= int2 + 2;
          end
@@ -1176,10 +1191,10 @@ begin
  end;
 end;
 
-procedure tcustomdialcontroller.setoffset(const avalue: real);
+procedure tcustomdialcontroller.setstart(const avalue: real);
 begin
- if foffset <> avalue then begin
-  foffset:= avalue;
+ if fstart <> avalue then begin
+  fstart:= avalue;
   changed;
  end;
 end;
@@ -1278,6 +1293,17 @@ begin
  changed;
 end;
 
+procedure tcustomdialcontroller.readstart(reader: treader);
+begin
+ start:= reader.readfloat;
+end;
+
+procedure tcustomdialcontroller.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('offset',{$ifdef FPC}@{$endif}readstart,nil,false);
+end;
+
 { tcustomdial }
 
 constructor tcustomdial.create(aowner: tcomponent);
@@ -1324,6 +1350,25 @@ procedure tcustomdial.clientrectchanged;
 begin
  fdial.changed;
  inherited;
+end;
+
+{ tcustomdialcontrollers }
+
+constructor tcustomdialcontrollers.create(const aintf: idialcontroller);
+begin
+ fintf:= aintf;
+ inherited create(getitemclass);
+end;
+
+procedure tcustomdialcontrollers.createitem(const index: integer;
+               var item: tpersistent);
+begin
+ item:= dialcontrollerclassty(fitemclasstype).create(fintf);
+end;
+
+function tcustomdialcontrollers.getitemclass: dialcontrollerclassty;
+begin
+ result:= tcustomdialcontroller;
 end;
 
 end.

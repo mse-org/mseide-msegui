@@ -1,5 +1,11 @@
 MSEide+MSEgui version history
 
+2009-11-24
+ tcustomchart.dialhorz, dialvert -> array dialshorz, dialsvert.
+ dialoptionty do_rotatetext -> dialmarkeroptionty dmo_rotatetext and
+ dialtickoptionty dto_rotatetext.
+ tcustomdialcontroller.offset -> start.
+ 
 Version 2.2beta2
 2009-11-18
 2009-11-09
