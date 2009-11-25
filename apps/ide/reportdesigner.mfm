@@ -3,8 +3,6 @@ inherited reportdesignerfo: treportdesignerfo
   bounds_y = 127
   bounds_cx = 205
   bounds_cy = 459
-  container.bounds_cx = 205
-  container.bounds_cy = 459
   container.color = -1879048185
   container.onchildscaled = repchildscaled
   container.oncalcminscrollsize = nil
@@ -14,17 +12,17 @@ inherited reportdesignerfo: treportdesignerfo
   onchildscaled = repchildscaled
   moduleclassname = 'Tformdesignerfo'
   object dialh: tdial[0]
+    color = -1879048185
+    frame.localprops = [frl_fileft]
+    frame.dummy = 0
+    taborder = 4
     bounds_x = 7
     bounds_y = 18
     bounds_cx = 194
     bounds_cy = 7
-    color = -1879048185
-    frame.localprops = [frl_fileft]
-    frame.dummy = 0
     anchors = [an_left, an_top, an_right]
-    taborder = 4
     dial.widthmm =  2.9999999999999999E-0001
-    dial.offset =  0.0000000000000000E+0000
+    dial.start =  0.0000000000000000E+0000
     dial.range =  1.0000000000000000E+0002
     dial.markers.count = 1
     dial.markers.items = <    
@@ -58,16 +56,16 @@ inherited reportdesignerfo: treportdesignerfo
         escapement =  0.0000000000000000E+0000
         intervalcount =  1.0000000000000000E+0002
       end>
+    dial.options = []
     dial.angle =  0.0000000000000000E+0000
   end
   object tabbar: ttabbar[1]
     optionswidget = [ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    color = -1879048187
     bounds_x = 120
     bounds_y = 0
     bounds_cx = 83
     bounds_cy = 18
-    color = -1879048187
-    frame.dummy = 0
     anchors = [an_left, an_top, an_right]
     onactivetabchange = tabcha
     ontabmoving = tabmo
@@ -76,41 +74,40 @@ inherited reportdesignerfo: treportdesignerfo
     reffontheight = 14
   end
   object reportcontainer: tscrollbox[2]
-    bounds_x = 7
-    bounds_y = 25
-    bounds_cx = 198
-    bounds_cy = 434
     color = -1879048187
     frame.optionsscroll = [oscr_drag, oscr_key]
     frame.colorclient = -1610612730
     frame.localprops = [frl_colorclient]
-    frame.dummy = 0
-    anchors = [an_left, an_top, an_right, an_bottom]
     taborder = 1
+    bounds_x = 7
+    bounds_y = 25
+    bounds_cx = 198
+    bounds_cy = 434
+    anchors = [an_left, an_top, an_right, an_bottom]
     onchildscaled = repcomtainerchildscaled
     onscroll = reportcontainerscroll
   end
   object tspacer1: tspacer[3]
+    taborder = 2
     bounds_x = 144
     bounds_y = 18
     bounds_cx = 50
     bounds_cy = 5
-    taborder = 2
     linktop = tabbar
     linkbottom = dialh
     dist_bottom = -5
   end
   object dialv: tdial[4]
+    color = -1879048185
+    taborder = 3
     bounds_x = 0
     bounds_y = 25
     bounds_cx = 7
     bounds_cy = 431
-    color = -1879048185
     anchors = [an_left, an_top, an_bottom]
-    taborder = 3
     dial.widthmm =  2.9999999999999999E-0001
     dial.direction = gd_down
-    dial.offset =  0.0000000000000000E+0000
+    dial.start =  0.0000000000000000E+0000
     dial.range =  1.0000000000000000E+0002
     dial.markers.count = 1
     dial.markers.items = <    
@@ -147,56 +144,56 @@ inherited reportdesignerfo: treportdesignerfo
     dial.angle =  0.0000000000000000E+0000
   end
   object tspacer2: tspacer[5]
+    taborder = 5
     bounds_x = 144
     bounds_y = 25
     bounds_cx = 50
     bounds_cy = 5
-    taborder = 5
     linktop = dialh
     linkbottom = reportcontainer
     dist_bottom = -5
   end
   object tspacer3: tspacer[6]
+    taborder = 6
     bounds_x = 7
     bounds_y = 173
     bounds_cx = 5
     bounds_cy = 50
-    taborder = 6
     linkleft = dialv
     linkright = reportcontainer
     dist_right = -5
   end
   object xdisp: trealdisp[7]
+    color = -1879048187
+    frame.dummy = 0
+    taborder = 7
     bounds_x = 52
     bounds_y = 0
     bounds_cx = 68
     bounds_cy = 18
-    color = -1879048187
-    frame.dummy = 0
-    taborder = 7
     textflags = [tf_ycentered]
     valuescale =  1.0000000000000000E+0000
     format = '0.0mm'
     reffontheight = 14
   end
   object ydisp: trealdisp[8]
+    color = -1879048187
+    frame.dummy = 0
+    taborder = 8
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 52
     bounds_cy = 18
-    color = -1879048187
-    frame.dummy = 0
-    taborder = 8
     valuescale =  1.0000000000000000E+0000
     format = '0.0'
     reffontheight = 14
   end
   object tspacer4: tspacer[9]
+    taborder = 9
     bounds_x = 16
     bounds_y = 25
     bounds_cx = 50
     bounds_cy = 5
-    taborder = 9
     linktop = dialh
     linkbottom = dialv
     dist_bottom = -5

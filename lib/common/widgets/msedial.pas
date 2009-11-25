@@ -278,7 +278,20 @@ type
    constructor create(const aintf: idialcontroller);
  end;
  
+const
+ defaultdialcontrolleroptions = [do_opposite];
+// {
+ dirup = gd_down;//gd_up;
+ dirdown = gd_up;//gd_down;
+// }
+ {
+ dirup = gd_up;
+ dirdown = gd_down;
+ }
+type 
  tdialcontroller = class(tcustomdialcontroller)
+  public
+   constructor create(const aintf: idialcontroller); override;
   published
    property color;
    property widthmm;
@@ -288,7 +301,7 @@ type
    property kind;
    property markers;
    property ticks;
-   property options;
+   property options default defaultdialcontrolleroptions;
    property font;
    property angle;
  end;
@@ -621,10 +634,10 @@ begin
   calclineend(fli,dmo_opposite in options,rect1,linestart,lineend,dir1);
   rea1:= (value - fstart)/frange;
   if dmo_rotatetext in self.finfo.options then begin
-   aangle:= angle * (rea1-0.5) * 2*pi;
-   if fdirection in [gd_left,gd_right] then begin
-    aangle:= -aangle;
-   end;
+   aangle:= -angle * (rea1-0.5) * 2*pi;
+//   if fdirection in [gd_left,gd_right] then begin
+//    aangle:= -aangle;
+//   end;
   end
   else begin
    aangle:= 0;
@@ -637,6 +650,7 @@ begin
     a.y:= linestart;
     b.y:= lineend;
    end;
+//   dirup{gd_up}: begin
    gd_up: begin
     a.y:= snap(rect1.cy - (rect1.cy * rea1));
     b.y:= a.y;
@@ -649,6 +663,7 @@ begin
     a.y:= linestart;
     b.y:= lineend;
    end;
+//   dirdown{gd_down}: begin
    gd_down: begin
     a.y:= snap(rect1.cy * rea1);
     b.y:= a.y;
@@ -780,7 +795,7 @@ end;
 
 procedure tcustomdialcontroller.setdirection(const avalue: graphicdirectionty);
 var
- dir1: graphicdirectionty;
+ dir1,dir2: graphicdirectionty;
 begin
  if avalue <> fdirection then begin
   dir1:= fdirection;
@@ -788,8 +803,19 @@ begin
   if fdirection >= gd_none then begin
    fdirection:= pred(fdirection);
   end;
+  dir2:= fdirection;
   changed;
-  fintf.directionchanged(avalue,dir1);
+{
+  case dir1 of
+   gd_up: dir1:= gd_down;
+   gd_down: dir1:= gd_up;
+  end;
+  case dir2 of
+   gd_up: dir2:= gd_down;
+   gd_down: dir2:= gd_up;
+  end;
+}
+  fintf.directionchanged(dir2,dir1);
  end;
 end;
 
@@ -824,7 +850,7 @@ begin
      lineend:= linestart - length;
     end;
    end;
-   gd_down: begin
+   dirdown{gd_down}: begin
     linestart:= arect.x + arect.cx - indent {- 1};
     if length = 0 then begin
      lineend:= linestart - arect.cx + indent;
@@ -842,7 +868,7 @@ begin
      lineend:= linestart + length;
     end;
    end;
-   gd_up: begin
+   dirup{gd_up}: begin
     linestart:= arect.x + indent;
     if length = 0 then begin
      lineend:= linestart + arect.cx - indent;
@@ -874,12 +900,12 @@ begin
     trans(apoint.x,apoint.y);
     apoint.y:= fendy - apoint.y
    end;
-   gd_up: begin
+   dirup{gd_up}: begin
     apoint.x:= fendy - apoint.x;
     trans(apoint.y,apoint.x);
     apoint.x:= fendy - apoint.x
    end;
-   gd_down: begin
+   dirdown{gd_down}: begin
     trans(apoint.y,apoint.x);
    end;
    else begin //gd_right
@@ -906,7 +932,7 @@ begin
      y:= y + afont.ascent;
     end;
    end;
-   gd_up: begin
+   dirup{gd_up}: begin
     x:= x - captiondist;
     y:= y + captionoffset;
     if not arotatetext then begin
@@ -928,7 +954,7 @@ begin
      y:= y - afont.descent;
     end;
    end;
-   gd_down: begin
+   dirdown{gd_down}: begin
     x:= x + captiondist;
     y:= y + captionoffset;
     if not arotatetext then begin
@@ -977,7 +1003,7 @@ begin
    else begin
     int1:= rect1.cy;
     foffsx:= int1 div 2 + rect1.y;
-    if fdirection = gd_up then begin
+    if fdirection = dirup{gd_up} then begin
      fendy:= rect1.x + rect1.cx;
     end;
    end;
@@ -1017,7 +1043,7 @@ begin
     boxlines[1].b.x:= x;
    end;
   end;
-  bo1:= ((fdirection = gd_left) or (fdirection = gd_up)) xor 
+  bo1:= ((fdirection = gd_left) or (fdirection = dirup{gd_up})) xor 
                              (do_opposite in foptions);
   if do_sideline in foptions then begin
    setlength(fboxlines,1);
@@ -1089,7 +1115,7 @@ begin
       else begin
        step:= rect1.cy * step;
        offs:= rect1.cy * offs;
-       if fdirection = gd_up then begin
+       if fdirection = gd_up{gd_up} then begin
         step:= - step;
         offs:= rect1.cy - offs {+ 1};
        end;
@@ -1109,10 +1135,10 @@ begin
       else begin
        system.setlength(captions,system.length(ticks));
        int2:= high(captions) * 2; //2* interval count
-       rea1:= (angle*2*pi) / int2;
-       if fdirection in [gd_left,gd_right] then begin
-        rea1:= -rea1;
-       end;
+       rea1:= -(angle*2*pi) / int2;
+//       if fdirection in [gd_left,gd_right] then begin
+//        rea1:= -rea1;
+//       end;
        int2:= -int2 div 2;
        for int1:= 0 to high(captions) do begin
         captions[int1].caption:= getactcaption(int1*valstep+first,caption);
@@ -1369,6 +1395,14 @@ end;
 function tcustomdialcontrollers.getitemclass: dialcontrollerclassty;
 begin
  result:= tcustomdialcontroller;
+end;
+
+{ tdialcontroller }
+
+constructor tdialcontroller.create(const aintf: idialcontroller);
+begin
+ inherited;
+ options:= defaultdialcontrolleroptions;
 end;
 
 end.

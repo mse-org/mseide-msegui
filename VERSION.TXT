@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+2009-11-25
+ tcustomdialcontroller opposite reversed for gd_up, gd_down.
 2009-11-24
  tcustomchart.dialhorz, dialvert -> array dialshorz, dialsvert.
  dialoptionty do_rotatetext -> dialmarkeroptionty dmo_rotatetext and
