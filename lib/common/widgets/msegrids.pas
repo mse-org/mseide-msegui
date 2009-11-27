@@ -583,6 +583,7 @@ type
                                           var info: mouseeventinfoty); virtual;
    procedure dokeyevent(var info: keyeventinfoty; up: boolean); virtual;
    procedure checkdirtyautorowheight(aindex: integer);
+   procedure afterrowcountupdate; virtual;
    procedure itemchanged(const sender: tdatalist; const aindex: integer); virtual;
    procedure updatelayout; override;
    procedure moverow(const fromindex,toindex: integer; const count: integer = 1); override;
@@ -651,6 +652,21 @@ type
    property font;
  end;
 
+ tstringcoldatalist = class(tmsestringdatalist)
+  private
+   fgrid: tcustomgrid;
+   fnoparagraph: integerarty;
+  protected
+   procedure afterrowcountupdate;
+   function getnoparagraphs(index: integer): boolean; override;
+  public
+   constructor create(const agrid: tcustomgrid);
+   function add(const avalue: msestring; const anoparagraph: boolean): integer; 
+                                                              override;
+   function getparagraph(const index: integer;
+                               const aseparator: msestring = ''): msestring;   
+ end;
+ 
  tcustomstringcol = class(tdatacol)
   private
    ftextflagsactive: textflagsty;
@@ -659,8 +675,8 @@ type
    foncopytoclipboard: updatestringeventty;
    fonpastefromclipboard: updatestringeventty;
    procedure settextflags(const avalue: textflagsty);
-   function getdatalist: tmsestringdatalist;
-   procedure setdatalist(const value: tmsestringdatalist);
+   function getdatalist: tstringcoldatalist;
+   procedure setdatalist(const value: tstringcoldatalist);
    procedure settextflagsactive(const avalue: textflagsty);
 //   procedure setoptionsedit(const avalue: stringcoleditoptionsty);
   protected
@@ -671,6 +687,7 @@ type
    function getitems(aindex: integer): msestring; virtual;
    procedure setitems(aindex: integer; const Value: msestring); virtual;
    function createdatalist: tdatalist; override;
+   procedure afterrowcountupdate; override;
    procedure updatedisptext(var avalue: msestring); virtual;
    function getrowtext(const arow: integer): msestring; virtual;
    procedure drawcell(const canvas: tcanvas); override;
@@ -698,7 +715,7 @@ type
    property optionsedit: stringcoleditoptionsty read foptionsedit 
                write foptionsedit default defaultstringcoleditoptions;
    property font;
-   property datalist: tmsestringdatalist read getdatalist write setdatalist;
+   property datalist: tstringcoldatalist read getdatalist write setdatalist;
    property onsetvalue: setstringeventty read fonsetvalue write fonsetvalue;
    property ondataentered: notifyeventty read fondataentered write fondataentered;
    property oncopytoclipboard: updatestringeventty read foncopytoclipboard 
@@ -5252,6 +5269,11 @@ begin
  end;
 end;
 
+procedure tdatacol.afterrowcountupdate;
+begin
+ //dummy
+end;
+
 procedure tdatacol.itemchanged(const sender: tdatalist; const aindex: integer);
 var
  coord1: gridcoordty;
@@ -5259,6 +5281,7 @@ begin
  if (aindex < 0) and (sender.count <> fgrid.frowcount) then begin
   if fgrid.fupdating = 0 then begin
    fgrid.rowcount:= sender.count;
+   afterrowcountupdate;
   end
   else begin
    include(fgrid.fstate,gs_rowcountinvalid)
@@ -5650,6 +5673,66 @@ begin
  end;
 end;
 
+{ tstringcoldatalist }
+
+constructor tstringcoldatalist.create(const agrid: tcustomgrid);
+begin
+ fgrid:= agrid;
+ inherited create;
+end;
+
+function tstringcoldatalist.add(const avalue: msestring;
+               const anoparagraph: boolean): integer;
+begin
+ result:= inherited add(avalue,anoparagraph);
+ if anoparagraph then begin
+  additem(fnoparagraph,result);
+ end;
+end;
+
+procedure tstringcoldatalist.afterrowcountupdate;
+var
+ int1: integer;
+begin
+ with fgrid.fdatacols.frowstate do begin
+  for int1:= 0 to high(fnoparagraph) do begin
+   if fnoparagraph[int1] < count then begin
+    flag1[fnoparagraph[int1]]:= true;
+   end;
+  end;
+ end;
+ fnoparagraph:= nil;
+end;
+
+function tstringcoldatalist.getparagraph(const index: integer;
+               const aseparator: msestring = ''): msestring;
+var
+ int1: integer;
+ start,stop: integer;
+begin
+ start:= index;
+ with fgrid.fdatacols.frowstate do begin
+  while start >= 0 do begin
+   if not flag1[start] then begin
+    break;
+   end;
+   dec(start);
+  end;
+  result:= self.items[start];
+  for int1:= start+1 to count-1 do begin
+   if not flag1[int1] then begin
+    break;
+   end;
+   result:= result + aseparator + self.items[int1]; 
+  end;
+ end;
+end;
+
+function tstringcoldatalist.getnoparagraphs(index: integer): boolean;
+begin
+ result:= fgrid.fdatacols.frowstate.flag1[index];
+end;
+
 { tcustomstringcol }
 
 constructor tcustomstringcol.create(const agrid: tcustomgrid; 
@@ -5684,7 +5767,7 @@ end;
 
 function tcustomstringcol.createdatalist: tdatalist;
 begin
- result:= tmsestringdatalist.create;
+ result:= tstringcoldatalist.create(fgrid);
 end;
 
 function tcustomstringcol.getinnerframe: framety;
@@ -5791,12 +5874,12 @@ begin
  cellchanged(aindex); //??? already called?
 end;
 
-function tcustomstringcol.getdatalist: tmsestringdatalist;
+function tcustomstringcol.getdatalist: tstringcoldatalist;
 begin
- result:= tmsestringdatalist(fdata);
+ result:= tstringcoldatalist(fdata);
 end;
 
-procedure tcustomstringcol.setdatalist(const value: tmsestringdatalist);
+procedure tcustomstringcol.setdatalist(const value: tstringcoldatalist);
 begin
  fdata.Assign(value);
 end;
@@ -5848,6 +5931,16 @@ begin
   application.showhint(fgrid,hintinfo);
  end;
  inherited;
+end;
+
+procedure tcustomstringcol.afterrowcountupdate;
+var
+ int1: integer;
+begin
+ inherited;
+ if fdata <> nil then begin
+  tstringcoldatalist(fdata).afterrowcountupdate;
+ end;
 end;
 
 { tfixcol }
@@ -10162,7 +10255,8 @@ var
  rect1: rectty;
 begin
  if not window.activating and not (gs_cellexiting in fstate) and 
-   (fnoshowcaretrect = 0) and
+   (fnoshowcaretrect = 0) and 
+   not (frame.sbhorz.clicked or frame.sbvert.clicked) and
    intersectrect(inflaterect(arect,aframe),cellrect(ffocusedcell),rect1) then begin
   result:= showrect(rect1,cep_nearest,noscrollingcol);
  end
@@ -10208,7 +10302,7 @@ var
  rect1: rectty;
  po1: pointty;
 begin
- if force or not (frame.sbvert.clicked or frame.sbvert.clicked) then begin
+ if force or not (frame.sbhorz.clicked or frame.sbvert.clicked) then begin
   coord1:= cell;
   with coord1 do begin
    if col >= fdatacols.count then begin

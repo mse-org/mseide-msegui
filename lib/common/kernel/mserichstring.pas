@@ -53,9 +53,13 @@ type
  formatinfoarty = array of formatinfoty;
  pformatinfoarty = ^formatinfoarty;
 
+ richflagty = (rf_noparagraph);
+ richflagsty = set of richflagty;
+ 
  richstringty = record
   text: msestring;
   format: formatinfoarty;
+  flags: richflagsty;
  end;
 
  prichstringty = ^richstringty;
@@ -70,6 +74,7 @@ type
    fposition: pointty;
    function Getformats(index: integer): formatinfoarty;
    procedure Setformats(index: integer; const Value: formatinfoarty);
+   procedure setnoparagraphs(index: integer; const avalue: boolean);
    function getrichitems(index: integer): richstringty;
    procedure setrichitems(index: integer; const Value: richstringty);
    function getrichitemspo(index: integer): prichstringty;
@@ -78,6 +83,7 @@ type
    procedure setasmsestringarray(const data: msestringarty);
    function getasmsestringarray: msestringarty;
   protected
+   function getnoparagraphs(index: integer): boolean; override;
    procedure freedata(var data); override;      //gibt daten frei
    procedure copyinstance(var data); override;  //nach blockcopy aufgerufen
    procedure compare(const l,r; var result: integer); override;
@@ -88,11 +94,16 @@ type
 //   procedure assign(source: tpersistent); override;
    procedure insert(const index: integer; const item: msestring); override;
    function add(const value: msestring): integer; override;
+   function add(const avalue: msestring; 
+                    const anoparagraph: boolean): integer; override;
    function nextword(out value: lmsestringty): boolean;
               //true bei new line
    function getformatpo(index: integer): pformatinfoarty;
+   function getparagraph(const index: integer;
+                               const aseparator: msestring = ''): msestring;
 
    property formats[index: integer]: formatinfoarty read Getformats write Setformats;
+   property noparagraphs[index : integer]: boolean read getnoparagraphs write setnoparagraphs;
    property richitems[index: integer]: richstringty read getrichitems write setrichitems;
    property richitemspo[index: integer]: prichstringty read getrichitemspo;
    property position: pointty read fposition write fposition;
@@ -939,6 +950,15 @@ begin
  result:= adddata(ristr1);
 end;
 
+function trichstringdatalist.add(const avalue: msestring; 
+                                           const anoparagraph: boolean): integer;
+begin
+ result:= inherited add(avalue,anoparagraph);
+ if anoparagraph then begin
+  noparagraphs[result]:= true;
+ end;
+end;
+
 procedure trichstringdatalist.insert(const index: integer; const item: msestring);
 var
  ristr1: richstringty;
@@ -959,6 +979,37 @@ begin
  result:= @prichstringty(fdatapo+index*sizeof(richstringty))^.format;
 end;
 
+function trichstringdatalist.getparagraph(const index: integer; 
+                          const aseparator: msestring = ''): msestring;
+var
+ int1,int2: integer;
+ start,stop: integer;
+begin
+ start:= index;
+ while start >= 0 do begin
+  int2:= start;
+  checkindex(int2);
+  if not (rf_noparagraph in 
+           prichstringty(fdatapo+int2*sizeof(richstringty))^.flags) then begin
+   break;
+  end;
+  dec(start);
+ end;
+ int2:= start;
+ checkindex(int2);
+ result:= prichstringty(fdatapo+int2*sizeof(richstringty))^.text;
+ for int1:= start+1 to count-1 do begin
+  int2:= int1;
+  checkindex(int2);
+  with prichstringty(fdatapo+int2*sizeof(richstringty))^ do begin
+   if not (rf_noparagraph in flags) then begin
+    break;
+   end;
+   result:= result + aseparator + text; 
+  end;
+ end;
+end;
+
 function trichstringdatalist.Getformats(index: integer): formatinfoarty;
 begin
  checkindex(index);
@@ -971,6 +1022,27 @@ begin
  checkindex(index);
 // prichstringty(fdatapo+index*sizeof(richstringty))^.format:= uniqueformatinfoarty(value);
  prichstringty(fdatapo+index*sizeof(richstringty))^.format:= copy(value);
+end;
+
+function trichstringdatalist.getnoparagraphs(index: integer): boolean;
+begin
+ checkindex(index);
+ result:= rf_noparagraph in 
+                prichstringty(fdatapo+index*sizeof(richstringty))^.flags;
+end;
+
+procedure trichstringdatalist.setnoparagraphs(index: integer;
+                      const avalue: boolean);
+begin
+ checkindex(index);
+ if avalue then begin
+  include(prichstringty(fdatapo+index*sizeof(richstringty))^.flags,
+                                                            rf_noparagraph);
+ end
+ else begin
+  exclude(prichstringty(fdatapo+index*sizeof(richstringty))^.flags,
+                                                            rf_noparagraph);
+ end;
 end;
 
 function trichstringdatalist.getrichitems(index: integer): richstringty;
@@ -1019,6 +1091,7 @@ begin
  for int1:= 0 to fcount - 1 do begin
   po1^.text:= data[int1];
   po1^.format:= nil;
+  po1^.flags:= [];
   inc(pchar(po1),s1);
  end;
  change(-1);

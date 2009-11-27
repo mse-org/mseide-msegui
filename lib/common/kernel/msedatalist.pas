@@ -572,6 +572,7 @@ type
    procedure assignto(dest: tpersistent); override;
    procedure setstatdata(const index: integer; const value: msestring); override;
    function getstatdata(const index: integer): msestring; override;
+   function getnoparagraphs(index: integer): boolean; virtual;
   public
    procedure assign(source: tpersistent); override;
    procedure assignopenarray(const data: array of msestring); overload;
@@ -580,6 +581,8 @@ type
    procedure insert(const index: integer; const item: msestring); virtual; abstract;
    function add(const value: tmsestringdatalist): integer; overload;
    function add(const value: msestring): integer; overload; virtual; abstract;
+   function add(const avalue: msestring; const anoparagraph: boolean): integer; 
+                                                              overload; virtual;
    function addchars(const value: msestring; 
                             const processeditchars: boolean = true;
                             const maxchars: integer = 0): integer;
@@ -588,7 +591,8 @@ type
    function indexof(const value: msestring): integer;
    function empty(const index: integer): boolean; override;   //true wenn leer
    function concatstring(const delim: msestring = '';
-                            const separator: msestring = ''): msestring;
+                            const separator: msestring = '';
+                            const separatornoparagraph: msestring = ''): msestring;
    procedure loadfromfile(const filename: string);
    procedure loadfromstream(const stream: ttextstream);
    procedure savetofile(const filename: string);
@@ -719,7 +723,7 @@ const
 
 type
  rowstatenumty = -1..126; //msb = row readonly flag for rowfontstate,
-                          //reserved for rowcolorstate
+            //reserved for rowcolorstate (used in tcustomstringgrid)
 
  rowinfolevelty = (ril_normal,ril_colmerge,ril_rowheight);
  rowstatety = packed record
@@ -786,6 +790,8 @@ type
    procedure setfont(const index: integer; const avalue: rowstatenumty);
    function getreadonly(const index: integer): boolean;
    procedure setreadonly(const index: integer; const avalue: boolean);
+   function getflag1(const index: integer): boolean;
+   procedure setflag1(const index: integer; const avalue: boolean);
    function getselected(const index: integer): longword;
    procedure setselected(const index: integer; const avalue: longword);
    function getmerged(const index: integer): longword;
@@ -800,6 +806,8 @@ type
    procedure recalchidden; virtual;
    function checkassigncompatibility(const source: tpersistent): boolean; override;
    procedure readstate(const reader; const acount: integer); override;
+   property flag1[const index: integer]: boolean read getflag1
+                                                            write setflag1;
   public
    constructor create; overload; override;
    constructor create(const ainfolevel: rowinfolevelty); overload;
@@ -5393,12 +5401,19 @@ begin
  endupdate;
 end;
 
+function tpoorstringdatalist.add(const avalue: msestring;
+                                 const anoparagraph: boolean): integer; 
+begin
+ add(avalue);
+end;                                                              
+
 function tpoorstringdatalist.addchars(const value: msestring;
                     const processeditchars: boolean = true;
                     const maxchars: integer = 0): integer;		
 var
  int1,int2,int3,int4: integer;
  ar1,ar2: msestringarty;
+ ar3,ar4: booleanarty;
  first: pmsestring;
  mstr1: msestring; 
 begin
@@ -5436,8 +5451,11 @@ begin
    end;
    if int2 <> length(ar1) then begin    //break lines
     setlength(ar2,int2);
+    setlength(ar4,int2);
+    setlength(ar3,int2+1);
     int2:= 0;
     for int1:= 0 to high(ar1) do begin
+     ar4[int2]:= true;
      int3:= length(ar1[int1]);
      if int3 > maxchars then begin
       int4:= 1;
@@ -5445,6 +5463,7 @@ begin
        ar2[int2]:= copy(ar1[int1],int4,maxchars);
        int4:= int4 + maxchars;
        inc(int2);
+       ar3[int2]:= true;
       end;
      end
      else begin
@@ -5455,12 +5474,14 @@ begin
     ar1:= ar2;
    end;
   end;
+  setlength(ar3,length(ar1));
+  setlength(ar4,length(ar1));
   if high(ar1) > 0 then begin
    beginupdate;
   end;
   first^:= ar1[0];
   for int1:= 1 to high(ar1) do begin
-   add(ar1[int1]);
+   add(ar1[int1],ar3[int1] and not ar4[int1]);
   end;
   if high(ar1) > 0 then begin
    endupdate;
@@ -5907,16 +5928,21 @@ begin
 end;
 
 function tpoorstringdatalist.concatstring(const delim: msestring = '';
-                   const separator: msestring = ''): msestring;
+                   const separator: msestring = '';
+                   const separatornoparagraph: msestring = ''): msestring;
 var
  int1: integer;
+ po1: pmsestring;
 begin
  if fcount > 0 then begin
   normalizering;
   result:= delim + pmsestring(fdatapo)^ + delim;
   for int1:= 1 to fcount-1 do begin
-   result:= result + separator + delim +
-         pmsestring(fdatapo+int1*fsize)^ + delim;
+   po1:= @separator;
+   if getnoparagraphs(int1) then begin
+    po1:= @separatornoparagraph;
+   end;
+   result:= result + po1^ + delim + pmsestring(fdatapo+int1*fsize)^ + delim;
   end;
  end
  else begin
@@ -5938,6 +5964,11 @@ function tpoorstringdatalist.checkassigncompatibility(
                                       const source: tpersistent): boolean;
 begin
  result:= source.inheritsfrom(tpoorstringdatalist);
+end;
+
+function tpoorstringdatalist.getnoparagraphs(index: integer): boolean;
+begin
+ result:= false;
 end;
 
 { tmsestringdatalist }
@@ -7061,6 +7092,24 @@ begin
   end
   else begin
    font:= font and not $80;
+  end;
+ end;
+end;
+
+function tcustomrowstatelist.getflag1(const index: integer): boolean;
+begin
+ result:= getitempo(index)^.color and $80 <> 0;
+end;
+
+procedure tcustomrowstatelist.setflag1(const index: integer;
+               const avalue: boolean);
+begin
+ with getitempo(index)^ do begin
+  if avalue then begin
+   color:= color or $80;
+  end
+  else begin
+   color:= color and not $80;
   end;
  end;
 end;

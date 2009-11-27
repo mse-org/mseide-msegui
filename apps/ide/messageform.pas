@@ -40,8 +40,9 @@ procedure tmessagefo.messagesoncellevent(const sender: tobject;
 var
  page: tsourcepage;
 begin
- if iscellclick(info,[ccr_dblclick]) then begin
-  locateerrormessage(messagefo.messages[0][info.cell.row],page);
+ if (info.cell.row >= 0) and iscellclick(info,[ccr_dblclick]) then begin
+  locateerrormessage(
+    messagefo.messages[0].datalist.getparagraph(info.cell.row),page);
  end;
 end;
 
