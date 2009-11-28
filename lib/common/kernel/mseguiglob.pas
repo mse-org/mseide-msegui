@@ -93,6 +93,8 @@ type
                 wp_fullscreen);
  windowsizety = (wsi_normal,wsi_minimized,wsi_maximized,wsi_fullscreen);
 
+ syswindowty = (sywi_tray);
+ 
  paintdevicety = ptruint;
  fontty = ptruint;
  regionty = ptruint;
@@ -161,7 +163,7 @@ type
                gue_registerclass,gue_scroll,gue_clipboard,gue_recursivetransientfor,
                gue_notlocked,
                gue_characterencoding,gue_invalidstream,gue_invalidcanvas,
-               gue_notimplemented,gue_getchildren,gue_reparent
+               gue_notimplemented,gue_getchildren,gue_reparent,gue_docktosyswindow
                );
 
  egui = class(eerror)
@@ -235,7 +237,8 @@ const
    'Invalid canvas',
    'Not implemnted.',
    'Can not get children.',
-   'Can not reparent window.'
+   'Can not reparent window.',
+   'Can not dock to syswindow.'
    );
 
 

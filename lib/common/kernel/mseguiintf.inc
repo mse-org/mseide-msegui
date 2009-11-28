@@ -35,6 +35,8 @@ function gui_getparentwindow(const awindow: winidty): winidty;
 function gui_reparentwindow(const child: winidty; const parent: winidty;
                             const pos: pointty): guierrorty;
 function gui_getchildren(const id: winidty; out children: winidarty): guierrorty;
+function gui_docktosyswindow(const child: winidty; 
+                                   const akind: syswindowty): guierrorty;
 
 function gui_creategc(paintdevice: paintdevicety; const akind: gckindty;
                 var gc: gcty; const aprintername: msestring = ''): guierrorty;

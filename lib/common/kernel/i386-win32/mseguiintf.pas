@@ -4520,6 +4520,12 @@ begin
  end;
 end;
 
+function gui_docktosyswindow(const child: winidty;
+                                   const akind: syswindowty): guierrorty;
+begin
+ result:= gue_notimplemented;
+end;
+
 type
  enumchildinfoty = record
   childlist: winidarty;

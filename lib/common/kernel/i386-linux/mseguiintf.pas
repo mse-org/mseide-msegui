@@ -771,6 +771,7 @@ type
        net_wm_window_type_dropdown_menu,
        net_frame_extents,
        net_request_frame_extents,
+       net_system_tray_s0,net_system_tray_opcode,
        net_none);
  netwmstateoperationty = (nso_remove,nso_add,nso_toggle);
 const
@@ -791,6 +792,7 @@ const
        '_NET_WM_WINDOW_TYPE_DROPDOWN_MENU',
        '_NET_FRAME_EXTENTS', 
        '_NET_REQUEST_FRAME_EXTENTS',
+       '_NET_SYSTEM_TRAY_S0','_NET_SYSTEM_TRAY_OPCODE',
        ''); 
 // needednetatom = netatomty(ord(high(netatomty))-4);
 var
@@ -1292,7 +1294,7 @@ begin
 end;
 
 function changenetwmstate(id: winidty; const operation: netwmstateoperationty;
-                  const value1: netatomty; const value2: netatomty = net_none): boolean;
+         const value1: netatomty; const value2: netatomty = net_none): boolean;
 var
  xevent: xclientmessageevent;
 begin
@@ -1316,8 +1318,9 @@ begin
  end;
 end;
 
-function sendnetrootcardinalmessage(const messagetype: atom;
-         const aid: winidty; const adata: array of longword): boolean;
+function sendnetcardinalmessage(const adest: winidty; const messagetype: atom;
+         const aid: winidty; const adata: array of longword;
+         const amask: longword = noeventmask): boolean;
                   //true if ok
 var
  xevent: xclientmessageevent;
@@ -1335,11 +1338,18 @@ begin
    for int1:= 0 to high(adata) do begin
     data.l[int1]:= adata[int1];
    end;
-   result:= xsendevent(appdisp,rootid,
-           {$ifdef xboolean}false{$else}0{$endif},
-           substructurenotifymask or substructureredirectmask,@xevent) <> 0;
+   result:= xsendevent(appdisp,adest,
+           {$ifdef xboolean}false{$else}0{$endif},amask,@xevent) <> 0;
   end;
  end;
+end;
+
+function sendnetrootcardinalmessage(const messagetype: atom;
+         const aid: winidty; const adata: array of longword): boolean;
+                  //true if ok
+begin
+ result:= sendnetcardinalmessage(rootid,messagetype,aid,adata,
+               substructurenotifymask or substructureredirectmask);
 end;
 
 function waitfordecoration(id: winidty; raiseexception: boolean = true): boolean;
@@ -2857,6 +2867,48 @@ begin
   wi1:= rootid;
  end;
  xreparentwindow(appdisp,child,wi1,pos.x,pos.y);
+end;
+
+function getsyswin(const akind: syswindowty): winidty;
+var
+ at1: atom;
+begin
+ result:= 0;
+ case akind of
+  sywi_tray: begin
+   at1:= netatoms[net_system_tray_s0];
+   if at1 <> 0 then begin
+    result:= xgetselectionowner(appdisp,at1);
+   end;
+  end;
+ end;
+end;
+
+const
+ system_tray_request_dock = 0;
+ system_tray_begin_message = 1;
+ system_tray_cancel_message = 2;
+ 
+function gui_docktosyswindow(const child: winidty;
+                                   const akind: syswindowty): guierrorty;
+var
+ syswin: winidty;
+ at1: atom;
+begin
+ result:= gue_windownotfound;
+ syswin:= getsyswin(akind);
+ if syswin <> 0 then begin
+  result:= gue_docktosyswindow;
+  case akind of
+   sywi_tray: begin
+    at1:= netatoms[net_system_tray_opcode];
+    if (at1 <> 0) and sendnetcardinalmessage(syswin,at1,syswin,
+                   [lasteventtime,system_tray_request_dock,child]) then begin
+     result:= gue_ok;
+    end;
+   end;
+  end;
+ end; 
 end;
 
 function gui_getchildren(const id: winidty; out children: winidarty): guierrorty;
