@@ -11486,7 +11486,7 @@ begin
   fowner.updatewindowinfo(aoptions);
   foptions:= aoptions.options;
   fwindowpos:= aoptions.initialwindowpos;
-  updatebit({$ifdef FPC}longword{$else}word{$endif}(fstate),
+  updatebit({$ifdef FPC}longword{$else}longword{$endif}(fstate),
                ord(tws_needsdefaultpos),fwindowpos = wp_default);
   with aoptions do begin
    buttonendmodal:= wo_buttonendmodal in options;
@@ -12617,7 +12617,8 @@ end;
 
 procedure twindow.setglobalshortcuts(const Value: boolean);
 begin
- updatebit({$ifdef FPC}longword{$else}word{$endif}(fstate),ord(tws_globalshortcuts),value);
+ updatebit({$ifdef FPC}longword{$else}
+              longword{$endif}(fstate),ord(tws_globalshortcuts),value);
 end;
 
 function twindow.getlocalshortcuts: boolean;
@@ -12627,7 +12628,8 @@ end;
 
 procedure twindow.setlocalshortcuts(const Value: boolean);
 begin
- updatebit({$ifdef FPC}longword{$else}word{$endif}(fstate),ord(tws_localshortcuts),value);
+ updatebit({$ifdef FPC}longword{$else}longword{$endif}(fstate),
+                        ord(tws_localshortcuts),value);
 end;
 
 function twindow.visible: boolean;
