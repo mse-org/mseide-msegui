@@ -4424,6 +4424,9 @@ begin
      ownerwindow:= 0;
     end;
    end;
+   if wo_embedded in options then begin
+    windowstyle:= ws_child;
+   end;
   end;
   if pos = wp_default then begin
    rect1.x:= integer(cw_usedefault);
