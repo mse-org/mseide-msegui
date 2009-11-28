@@ -2846,6 +2846,42 @@ begin
  result:= parent;
 end;
 
+function gui_reparentwindow(const child: winidty; const parent: winidty;
+                            const pos: pointty): guierrorty;
+var
+ wi1: winidty;
+begin
+ result:= gue_ok;
+ wi1:= parent;
+ if wi1 = 0 then begin
+  wi1:= rootid;
+ end;
+ xreparentwindow(appdisp,child,wi1,pos.x,pos.y);
+end;
+
+function gui_getchildren(const id: winidty; out children: winidarty): guierrorty;
+var
+ root,parent: {$ifdef FPC}dword{$else}xlib.twindow{$endif};
+ chi: pwindow;
+ count: integer;
+ ca1: longword;
+ int1: integer;
+begin
+ result:= gue_getchildren;
+ children:= nil;
+ if xquerytree(appdisp,id,@root,@parent,@chi,@ca1) = 0 then begin
+  exit;
+ end;
+ if chi <> nil then begin
+  setlength(children,ca1);
+  for int1:= 0 to high(children) do begin
+   children[int1]:= chi[int1];
+  end;
+  xfree(chi);
+ end;
+ result:= gue_ok;
+end;
+
 function getrootoffset(const id: winidty; out offset: pointty): boolean;
 var
  int1: integer;

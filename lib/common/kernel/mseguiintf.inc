@@ -32,6 +32,9 @@ function gui_createwindow(const rect: rectty; const options: internalwindowoptio
 function gui_destroywindow(var awindow: windowty): guierrorty;
                       //id can be 0
 function gui_getparentwindow(const awindow: winidty): winidty;
+function gui_reparentwindow(const child: winidty; const parent: winidty;
+                            const pos: pointty): guierrorty;
+function gui_getchildren(const id: winidty; out children: winidarty): guierrorty;
 
 function gui_creategc(paintdevice: paintdevicety; const akind: gckindty;
                 var gc: gcty; const aprintername: msestring = ''): guierrorty;
@@ -68,7 +71,8 @@ function gui_setappfocus(id: winidty): guierrorty;
 function gui_minimizeapplication: guierrorty;
 function gui_setwindowgroup(id: winidty; group: winidty): guierrorty;
 function gui_settransientfor(id: winidty; transientfor: winidty): guierrorty;
-function gui_movewindowrect(id: winidty; const dist: pointty; const rect: rectty): guierrorty;
+function gui_movewindowrect(id: winidty; const dist: pointty; 
+                                         const rect: rectty): guierrorty;
 function gui_windowatpos(const pos: pointty): winidty;
 function gui_getscreensize: sizety;
 function gui_getworkarea(id: winidty): rectty;

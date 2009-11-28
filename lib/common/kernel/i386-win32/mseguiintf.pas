@@ -4493,6 +4493,17 @@ begin
  result:= getparent(awindow);
 end;
 
+function gui_reparentwindow(const child: winidty; const parent: winidty;
+                            const pos: pointty): guierrorty;
+begin
+ result:= gue_notimplemented;
+end;
+
+function gui_getchildren(const id: winidty; out children: winidarty): guierrorty;
+begin
+ result:= gue_notimplemented;
+end;
+
 function gui_setmainthread: guierrorty; //set mainthread to currentthread
 begin
  mainthread:= getcurrentthreadid;

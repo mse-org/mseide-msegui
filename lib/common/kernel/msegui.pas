@@ -1783,7 +1783,7 @@ type
                   tws_globalshortcuts,tws_localshortcuts,
                   tws_buttonendmodal,tws_grouphidden,tws_groupminimized,
                   tws_grab,tws_activatelocked,
-                  tws_canvasoverride);
+                  tws_canvasoverride,tws_destroying);
  windowstatesty = set of windowstatety;
 
  pmodalinfoty = ^modalinfoty;
@@ -1860,8 +1860,11 @@ type
    procedure setdecoratedbounds_cx(const avalue: integer);
    function getdecoratedbounds_cy: integer;
    procedure setdecoratedbounds_cy(const avalue: integer);
+   procedure setcontainer(const avalue: winidty);
+   procedure containerwindestroyed(const aid: winidty);
   protected
    fwindow: windowty;
+   fcontainer: winidty;
    fowner: twidget;
    fcanvas: tcanvas;
    fasynccanvas: tcanvas;
@@ -1949,6 +1952,9 @@ type
    property localshortcuts: boolean read getlocalshortcuts write setlocalshortcuts;
    property windowpos: windowposty read getwindowpos write setwindowpos;
    property caption: msestring read fcaption write setcaption;
+   property container: winidty read fcontainer 
+                                    write setcontainer default 0;
+
 
    property decoratedwidgetrect: rectty read getdecoratedwidgetrect 
                                      write setdecoratedwidgetrect;
@@ -11419,6 +11425,8 @@ end;
 
 destructor twindow.destroy;
 begin
+ include(fstate,tws_destroying);
+ container:= 0;
  appinst.twindowdestroyed(self);
  if ftransientfor <> nil then begin
   dec(ftransientfor.ftransientforcount);
@@ -11988,11 +11996,20 @@ end;
 
 procedure twindow.wmconfigured(const arect: rectty);
 var
- rect1: rectty;
+ rect1,rect2: rectty;
+ id1: winidty;
 begin
  exclude(fstate,tws_needsdefaultpos);
- if not rectisequal(arect,fowner.fwidgetrect) then begin
-  rect1:= arect;
+ rect1:= arect;
+ if (wo_embedded in foptions) and (fwindow.id <> 0) then begin
+  id1:= gui_getparentwindow(fwindow.id);
+  if id1 <> 0 then begin
+   if gui_getwindowrect(id1,rect2) = gue_ok then begin
+    subpoint1(rect1.pos,rect2.pos);
+   end;
+  end;
+ end;
+ if not rectisequal(rect1,fowner.fwidgetrect) then begin
   fowner.internalsetwidgetrect(rect1,true);
   if pointisequal(arect.pos,fowner.fwidgetrect.pos) then begin
    include(fstate,tws_posvalid);
@@ -12856,6 +12873,39 @@ begin
  rect1:= decoratedwidgetrect;
  rect1.cy:= avalue;
  decoratedwidgetrect:= rect1;
+end;
+
+procedure twindow.setcontainer(const avalue: winidty);
+begin
+// if femb_container <> avalue then begin
+  if fcontainer <> 0 then begin
+   application.unregisteronwiniddestroyed({$ifdef FPC}@{$endif}containerwindestroyed);
+  end;
+  fcontainer:= avalue;
+  if fcontainer <> 0 then begin
+   application.registeronwiniddestroyed({$ifdef FPC}@{$endif}containerwindestroyed);
+   try
+    include(foptions,wo_embedded);
+    guierror(gui_reparentwindow(winid,fcontainer,fowner.pos));
+   except
+    container:= 0;
+    raise;
+   end;
+  end
+  else begin
+   exclude(foptions,wo_embedded);
+   if (fwindow.id <> 0) and not (tws_destroying in fstate) then begin
+    guierror(gui_reparentwindow(winid,0,fowner.pos));
+   end;
+  end;
+// end;
+end;
+
+procedure twindow.containerwindestroyed(const aid: winidty);
+begin
+ if aid = fcontainer then begin
+  container:= 0;
+ end;
 end;
 
 { tonkeyeventlist}

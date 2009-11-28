@@ -83,7 +83,8 @@ type
                 stf_helvetica,stf_roman,stf_courier); //scaleable fonts
  defaultfontnamesty = array[stockfontty] of string;
 
- windowoptionty = (wo_popup,wo_message,wo_buttonendmodal,wo_groupleader,
+ windowoptionty = (wo_popup,wo_message,wo_embedded,
+                   wo_buttonendmodal,wo_groupleader,
                    wo_taskbar,    //win32 only
                    wo_notaskbar,  //linux only
                    wo_windowcentermessage); //showmessage centered in window
@@ -159,7 +160,8 @@ type
                {gue_resnotfound,}gue_capturemouse,gue_mousepos,
                gue_registerclass,gue_scroll,gue_clipboard,gue_recursivetransientfor,
                gue_notlocked,
-               gue_characterencoding,gue_invalidstream,gue_invalidcanvas
+               gue_characterencoding,gue_invalidstream,gue_invalidcanvas,
+               gue_notimplemented,gue_getchildren
                );
 
  egui = class(eerror)
@@ -230,7 +232,9 @@ const
    'Application not locked',
    'Error in character encoding',
    'Invalid stream',
-   'Invalid canvas'
+   'Invalid canvas',
+   'Not implemnted.',
+   'Can not get children.'
    );
 
 
