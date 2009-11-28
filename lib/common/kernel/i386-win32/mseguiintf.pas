@@ -4490,7 +4490,8 @@ end;
 
 function gui_getparentwindow(const awindow: winidty): winidty;
 begin
- result:= getparent(awindow);
+// result:= getparent(awindow);
+ result:= getancestor(awindow,ga_parent);
 end;
 
 function gui_reparentwindow(const child: winidty; const parent: winidty;
@@ -4527,7 +4528,7 @@ type
 function getchildren(child: hwnd; data: lparam): winbool; stdcall;
 begin
  with penumchildinfoty(data)^ do begin
-  if getparent(child) = parent then begin
+  if gui_getparentwindow(child) = parent then begin
    additem(childlist,child,count);
   end;
  end;
