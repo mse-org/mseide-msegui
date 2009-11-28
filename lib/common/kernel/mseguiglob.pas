@@ -161,7 +161,7 @@ type
                gue_registerclass,gue_scroll,gue_clipboard,gue_recursivetransientfor,
                gue_notlocked,
                gue_characterencoding,gue_invalidstream,gue_invalidcanvas,
-               gue_notimplemented,gue_getchildren
+               gue_notimplemented,gue_getchildren,gue_reparent
                );
 
  egui = class(eerror)
@@ -234,7 +234,8 @@ const
    'Invalid stream',
    'Invalid canvas',
    'Not implemnted.',
-   'Can not get children.'
+   'Can not get children.',
+   'Can not reparent window.'
    );
 
 

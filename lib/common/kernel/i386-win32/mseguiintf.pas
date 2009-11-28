@@ -4495,13 +4495,57 @@ end;
 
 function gui_reparentwindow(const child: winidty; const parent: winidty;
                             const pos: pointty): guierrorty;
+var
+ rect1: rectty;
 begin
- result:= gue_notimplemented;
+ result:= gue_reparent;
+ if setparent(child,parent) <> 0 then begin
+  if parent = 0 then begin
+   result:= gui_getwindowrect(child,rect1);
+   if result = gue_ok then begin
+    rect1.pos:= pos;
+    result:= gui_reposwindow(child,rect1);
+   end;
+  end
+  else begin
+   if setwindowpos(child,0,pos.x,pos.y,0,0,swp_nosize or swp_nozorder or
+                                                   swp_noactivate) then begin
+    result:= gue_ok;
+   end;
+  end;
+ end;
+end;
+
+type
+ enumchildinfoty = record
+  childlist: winidarty;
+  count: integer;
+  parent: winidty;
+ end;
+ penumchildinfoty = ^enumchildinfoty;
+
+function getchildren(child: hwnd; data: lparam): winbool; stdcall;
+begin
+ with penumchildinfoty(data)^ do begin
+  if getparent(child) = parent then begin
+   additem(childlist,child,count);
+  end;
+ end;
+ result:= true;
 end;
 
 function gui_getchildren(const id: winidty; out children: winidarty): guierrorty;
+var
+ info: enumchildinfoty;
 begin
- result:= gue_notimplemented;
+ fillchar(info,sizeof(info),0);
+ with info do begin
+  parent:= id;
+  enumchildwindows(id,@getchildren,ptruint(@info));
+  setlength(childlist,count);
+  children:= childlist;
+ end;
+ result:= gue_ok;
 end;
 
 function gui_setmainthread: guierrorty; //set mainthread to currentthread
