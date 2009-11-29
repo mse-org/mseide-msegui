@@ -3836,6 +3836,7 @@ begin
 end;
 
 function getclientrect(hwnd: hwnd; windowrect: prectty = nil): rectty;
+                     //screen origin
 var
  rect1,rect2: trect;
  frame: framety;
@@ -3866,7 +3867,25 @@ begin
  end;
 end;
 
+procedure getwindowrectpa(id: winidty; out rect: rectty; out origin: pointty);
+             //parent origin
+var
+ rect1: rectty;
+ win1: winidty;
+begin
+ rect:= getclientrect(id);
+ win1:= getancestor(id,ga_parent);
+ if win1 <> 0 then begin
+  origin:= getclientrect(win1).pos;
+  subpoint1(rect.pos,origin);
+ end
+ else begin
+  origin:= nullpoint;
+ end;
+end;
+
 function gui_getwindowrect(id: winidty; out rect: rectty): guierrorty;
+            //screen origin
 begin
  rect:= getclientrect(id);
  result:= gue_ok;
@@ -3992,6 +4011,7 @@ const
  wheelstep = 120;
 var
  rect1,rect2,rect3: rectty;
+ pt1: pointty;
  size1: sizety;
  button: mousebuttonty;
  po1: pointty;
@@ -4113,8 +4133,9 @@ begin
   end;
   wm_move,wm_size: begin
    if gui_getwindowsize(ahwnd) <> wsi_minimized then begin
+    getwindowrectpa(ahwnd,rect1,pt1);
     eventlist.add(twindowrectevent.create(ek_configure,ahwnd,
-                            getclientrect(ahwnd),nullpoint));
+                            rect1,pt1));
    end
    else begin
     eventlist.add(twindowevent.create(ek_hide,ahwnd));
@@ -4133,8 +4154,8 @@ begin
     end;
     if ((swp_nomove or swp_nosize) and flags <> (swp_nomove or swp_nosize)) and
             windowvisible(ahwnd) then begin
-      eventlist.add(twindowrectevent.create(ek_configure,ahwnd,getclientrect(ahwnd),
-                              nullpoint));
+     getwindowrectpa(ahwnd,rect1,pt1); 
+     eventlist.add(twindowrectevent.create(ek_configure,ahwnd,rect1,pt1));
       result:= 0;
       exit;
     end;
