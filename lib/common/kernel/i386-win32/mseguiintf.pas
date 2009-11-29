@@ -60,7 +60,10 @@ type
   stylebackup: longword;
 //  l,t,r,b: integer;
  end;
- 
+{$ifndef FPC}
+ winbool = bool;
+{$endif}
+
 const
  flagsoffs =       0*sizeof(integer); //for setwindowlong
  stylebackupoffs = 1*sizeof(integer);
