@@ -4074,7 +4074,7 @@ begin
   wm_paint: begin
    if getupdaterect(ahwnd,trect(rect1),false) then begin
     winrecttorect(rect1);
-    eventlist.add(twindowrectevent.create(ek_expose,ahwnd,rect1));
+    eventlist.add(twindowrectevent.create(ek_expose,ahwnd,rect1,nullpoint));
 //    exit;
    end;
   end;
@@ -4111,7 +4111,7 @@ begin
   wm_move,wm_size: begin
    if gui_getwindowsize(ahwnd) <> wsi_minimized then begin
     eventlist.add(twindowrectevent.create(ek_configure,ahwnd,
-                            getclientrect(ahwnd)));
+                            getclientrect(ahwnd),nullpoint));
    end
    else begin
     eventlist.add(twindowevent.create(ek_hide,ahwnd));
@@ -4130,7 +4130,8 @@ begin
     end;
     if ((swp_nomove or swp_nosize) and flags <> (swp_nomove or swp_nosize)) and
             windowvisible(ahwnd) then begin
-      eventlist.add(twindowrectevent.create(ek_configure,ahwnd,getclientrect(ahwnd)));
+      eventlist.add(twindowrectevent.create(ek_configure,ahwnd,getclientrect(ahwnd),
+                              nullpoint));
       result:= 0;
       exit;
     end;
