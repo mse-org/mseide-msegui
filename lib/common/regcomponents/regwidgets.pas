@@ -40,7 +40,7 @@ uses
  msetoolbar,msetabs,msedesignintf,regwidgets_bmp,mselistbrowser,
  msesplitter,msedock,mseforms,mseclasses,typinfo,msearrayprops,msewidgets,
  msegui,formdesigner,msedial,msemenuwidgets,msewindowwidget,msechart,
- msepolygon,msepickwidget
+ msepolygon,msepickwidget,msetraywidget
  {$ifdef FPC},mseopenglwidget{$endif};
  
 type
@@ -116,7 +116,8 @@ begin
   tgroupbox,tscrollbox,tstepbox,tdockpanel,tdockhandle,tmseformwidget,
   tdockformwidget,tmainmenuwidget,
   tsplitter,tspacer,tlayouter,ttoolbar,ttabbar,ttabwidget,ttabpage,
-  tdial,tchart,tchartrecorder,twindowwidget{$ifdef FPC},topenglwidget{$endif}]);
+  tdial,tchart,tchartrecorder,twindowwidget{$ifdef FPC},topenglwidget{$endif}
+  {ttraywidget}]);
  registercomponenttabhints(['Widget'],
          ['Display Widgets, Widgets which can''t be placed into twidgetgrid']);
  registerpropertyeditor(typeinfo(tcellframe),nil,'',

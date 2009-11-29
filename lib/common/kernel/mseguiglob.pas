@@ -93,7 +93,7 @@ type
                 wp_fullscreen);
  windowsizety = (wsi_normal,wsi_minimized,wsi_maximized,wsi_fullscreen);
 
- syswindowty = (sywi_tray);
+ syswindowty = (sywi_none,sywi_tray);
  
  paintdevicety = ptruint;
  fontty = ptruint;

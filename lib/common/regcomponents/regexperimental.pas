@@ -3,12 +3,12 @@ unit regexperimental;
 interface
 implementation
 uses
- msedesignintf;
+ msedesignintf,msetraywidget;
  
 procedure Register;
 begin
-// registercomponents('Exp',[tmsemysqlconnection]);
-// registercomponenttabhints(['Exp'],['Experimental Components']);
+ registercomponents('Exp',[ttraywidget]);
+ registercomponenttabhints(['Exp'],['Experimental Components']);
 end;
 initialization
  register;

@@ -35,8 +35,13 @@ function gui_getparentwindow(const awindow: winidty): winidty;
 function gui_reparentwindow(const child: winidty; const parent: winidty;
                             const pos: pointty): guierrorty;
 function gui_getchildren(const id: winidty; out children: winidarty): guierrorty;
+
+function gui_showsysdock(const id: winidty): guierrorty;
+function gui_hidesysdock(const id: winidty): guierrorty;
+
 function gui_docktosyswindow(const child: winidty; 
                                    const akind: syswindowty): guierrorty;
+                    //hides window
 function gui_traymessage(const awindow: winidty; const message: msestring;
                           out messageid: longword;
                           const timeoutms: longword = 0): guierrorty;

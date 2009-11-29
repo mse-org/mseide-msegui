@@ -7,6 +7,7 @@ object formdesignerfo: tformdesignerfo
   bounds_cy = 300
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
   container.oncalcminscrollsize = calcscrollsize
+  optionswindow = [wo_notaskbar]
   icon.transparentcolor = -2147483642
   icon.image = {
     00000000000000001800000018000000A4070000000000000000000000000000

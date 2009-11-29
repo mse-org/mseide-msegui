@@ -757,7 +757,9 @@ var
  
 type
  netatomty = 
-      (net_supported,net_workarea,
+      (net_supported,
+       //suports checked below
+       net_workarea,
        net_wm_state,
        net_wm_state_maximized_vert,net_wm_state_maximized_horz,
        //not needed below
@@ -765,6 +767,7 @@ type
        net_wm_state_fullscreen,
        net_wm_state_skip_taskbar,
        net_restack_window,net_close_window,
+       //not supports checked below
        net_wm_pid,
        net_wm_window_type_normal,
        net_wm_window_type_dialog,
@@ -772,6 +775,7 @@ type
        net_frame_extents,
        net_request_frame_extents,
        net_system_tray_s0,net_system_tray_opcode,net_system_tray_message_data,
+       xembed_info,
        net_none);
  netwmstateoperationty = (nso_remove,nso_add,nso_toggle);
 const
@@ -795,6 +799,7 @@ const
        '_NET_REQUEST_FRAME_EXTENTS',
        '_NET_SYSTEM_TRAY_S0','_NET_SYSTEM_TRAY_OPCODE',
        '_NET_SYSTEM_TRAY_MESSAGE_DATA',
+       '_XEMBED_INFO',
        ''); 
 // needednetatom = netatomty(ord(high(netatomty))-4);
 var
@@ -924,7 +929,8 @@ var
     end;
     if bo1 then begin
      bo1:= false;
-     sleep(0);
+//     sleep(0);
+     sys_schedyield;
     end
     else begin
      sleep(20);
@@ -1370,7 +1376,9 @@ begin
  int1:= 0;
  result:= false;
  repeat
-  xflush(appdisp);    //windowmanager has to work
+  xsync(appdisp,false);    //windowmanager has to work
+//  xflush(appdisp);    //windowmanager has to work
+  sys_schedyield;
   if gui_windowvisible(id) then begin
    result:= true;
    break;
@@ -2850,136 +2858,6 @@ begin
  result:= true;
 end;
 
-function gui_getparentwindow(const awindow: winidty): winidty;
-var
- root,parent: {$ifdef FPC}dword{$else}xlib.twindow{$endif};
- children: pwindow;
- count: integer;
- ca1: longword;
-begin
- result:= 0;
- if xquerytree(appdisp,awindow,@root,@parent,@children,@ca1) = 0 then begin
-  exit;
- end;
- if children <> nil then begin
-  xfree(children);
- end;
- result:= parent;
-end;
-
-function gui_reparentwindow(const child: winidty; const parent: winidty;
-                            const pos: pointty): guierrorty;
-var
- wi1: winidty;
-begin
- result:= gue_ok;
- wi1:= parent;
- if wi1 = 0 then begin
-  wi1:= rootid;
- end;
- xreparentwindow(appdisp,child,wi1,pos.x,pos.y);
-end;
-
-function getsyswin(const akind: syswindowty): winidty;
-var
- at1: atom;
-begin
- result:= 0;
- case akind of
-  sywi_tray: begin
-   at1:= netatoms[net_system_tray_s0];
-   if at1 <> 0 then begin
-    result:= xgetselectionowner(appdisp,at1);
-   end;
-  end;
- end;
-end;
-
-const
- system_tray_request_dock = 0;
- system_tray_begin_message = 1;
- system_tray_cancel_message = 2;
-
-function sendtraymessage(const dest: winidty; const awindow: winidty; 
-         const opcode: integer;
-         const data1: longword = 0; const data2: longword = 0;
-         const data3: longword = 0): guierrorty;
-var
- at1: atom;
-begin
- result:= gue_notraywindow;
- at1:= netatoms[net_system_tray_opcode];
- if (at1 <> 0) and sendnetcardinalmessage(dest,at1,awindow,
-               [lasteventtime,opcode,data1,data2,data3]) then begin
-  result:= gue_ok;
- end;
-end;
-
-function gui_docktosyswindow(const child: winidty;
-                                   const akind: syswindowty): guierrorty;
-var
- syswin: winidty;
-begin
- result:= gue_windownotfound;
- syswin:= getsyswin(akind);
- if syswin <> 0 then begin
-  result:= gue_docktosyswindow;
-  case akind of
-   sywi_tray: begin
-    result:= sendtraymessage(syswin,syswin,system_tray_request_dock,child);
-   end;
-  end;
- end; 
-end;
-
-function gui_traymessage(const awindow: winidty; const message: msestring;
-                          out messageid: longword;
-                          const timeoutms: longword = 0): guierrorty;
-var
- str1: ansistring;
- int1: integer;
- event1: xclientmessageevent;
- po1: pchar;
- win1: winidty;
- at1: atom;
-begin
- result:= gue_notraywindow;
- win1:= getsyswin(sywi_tray);
- at1:= netatoms[net_system_tray_message_data];
- if (win1 <> 0) and (at1 <> 0) then begin
-  messageid:= getidnum;
-  str1:= stringtoutf8(message);
-  int1:= length(str1);
-  str1:= str1 + #0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0;
-  result:= sendtraymessage(win1,awindow,system_tray_begin_message,timeoutms,
-                     length(str1),messageid);
-  fillchar(event1,sizeof(event1),0);
-  with event1 do begin
-   xtype:= clientmessage;
-   display:= appdisp;
-   window:= awindow;
-   format:= 8;
-   message_type:= at1;
-   po1:= pchar(str1);
-   while (result = gue_ok) and (int1 > 0) do begin
-    move(po1^,data.b[0],20);
-    inc(po1,20);
-    int1:= int1 - 20;
-    if xsendevent(appdisp,win1,
-            {$ifdef xboolean}false{$else}0{$endif},noeventmask,@event1) = 0 then begin
-     result:= gue_sendevent;
-    end;
-   end;
-  end;
- end;
-end;
-
-function gui_canceltraymessage(const awindow: winidty;
-                          const messageid: longword): guierrorty;
-begin
- result:= gue_notimplemented;
-end;
-
 function gui_getchildren(const id: winidty; out children: winidarty): guierrorty;
 var
  root,parent: {$ifdef FPC}dword{$else}xlib.twindow{$endif};
@@ -3423,6 +3301,191 @@ begin
  unsetime(id);
  xunmapwindow(appdisp,id);
  result:= gue_ok;
+end;
+
+function gui_getparentwindow(const awindow: winidty): winidty;
+var
+ root,parent: {$ifdef FPC}dword{$else}xlib.twindow{$endif};
+ children: pwindow;
+ count: integer;
+ ca1: longword;
+begin
+ result:= 0;
+ if xquerytree(appdisp,awindow,@root,@parent,@children,@ca1) = 0 then begin
+  exit;
+ end;
+ if children <> nil then begin
+  xfree(children);
+ end;
+ result:= parent;
+end;
+
+function gui_reparentwindow(const child: winidty; const parent: winidty;
+                            const pos: pointty): guierrorty;
+var
+ wi1: winidty;
+begin
+ result:= gue_ok;
+ wi1:= parent;
+ if wi1 = 0 then begin
+  wi1:= rootid;
+ end;
+ xsync(appdisp,false);
+ xreparentwindow(appdisp,child,wi1,pos.x,pos.y);
+ xsync(appdisp,false);
+end;
+
+function getsyswin(const akind: syswindowty): winidty;
+var
+ at1: atom;
+begin
+ result:= 0;
+ case akind of
+  sywi_tray: begin
+   at1:= netatoms[net_system_tray_s0];
+   if at1 <> 0 then begin
+    result:= xgetselectionowner(appdisp,at1);
+   end;
+  end;
+ end;
+end;
+
+const
+ xembedversion = 0;
+ xembedflags = 0;
+
+procedure initxembed(const id: winidty);
+begin
+ setlongproperty(id,netatoms[xembed_info],[xembedversion,xembedflags]);
+end;
+
+procedure finalizexembed(const id: winidty);
+begin
+ xdeleteproperty(appdisp,id,netatoms[xembed_info]);
+end;
+
+function gui_showsysdock(const id: winidty): guierrorty;
+begin
+ setlongproperty(id,netatoms[xembed_info],[xembedversion,xembedflags or 1]);
+ result:= gue_ok;
+end;
+
+function gui_hidesysdock(const id: winidty): guierrorty;
+begin
+ setlongproperty(id,netatoms[xembed_info],[xembedversion,xembedflags]);
+ result:= gui_hidewindow(id);
+end;
+
+
+const
+ system_tray_request_dock = 0;
+ system_tray_begin_message = 1;
+ system_tray_cancel_message = 2;
+
+function sendtraymessage(const dest: winidty; const awindow: winidty; 
+         const opcode: integer;
+         const data1: longword = 0; const data2: longword = 0;
+         const data3: longword = 0): guierrorty;
+var
+ at1: atom;
+begin
+ result:= gue_notraywindow;
+ at1:= netatoms[net_system_tray_opcode];
+ if (at1 <> 0) and sendnetcardinalmessage(dest,at1,awindow,
+               [lasteventtime,opcode,data1,data2,data3]) then begin
+  result:= gue_ok;
+ end;
+end;
+var testvar: integer;
+function gui_docktosyswindow(const child: winidty;
+                                   const akind: syswindowty): guierrorty;
+var
+ syswin: winidty;
+ parentbefore: winidty;
+ int1: integer;
+ pt1: pointty;
+ rect1: rectty;
+begin
+ gui_hidewindow(child);
+ if akind = sywi_none then begin
+  result:= getwindowrect(child,rect1,pt1);
+  if result = gue_ok then begin
+   result:= gui_reparentwindow(child,0,rect1.pos);
+  end;
+  finalizexembed(child);
+ end
+ else begin
+  result:= gue_windownotfound;
+  syswin:= getsyswin(akind);
+  if syswin <> 0 then begin
+   result:= gue_docktosyswindow;
+   initxembed(child);
+   parentbefore:= gui_getparentwindow(child);
+   case akind of
+    sywi_tray: begin
+     result:= sendtraymessage(syswin,syswin,system_tray_request_dock,child);
+    end;
+   end;
+   int1:= 0;
+   xsync(appdisp,false);
+   sys_schedyield;
+   while (gui_getparentwindow(child) = parentbefore) and (int1 < 40) do begin
+    xsync(appdisp,false);
+    sleep(5);
+    inc(int1);
+   end;
+   testvar:= gui_getparentwindow(child);
+  end; 
+ end;
+end;
+
+function gui_traymessage(const awindow: winidty; const message: msestring;
+                          out messageid: longword;
+                          const timeoutms: longword = 0): guierrorty;
+var
+ str1: ansistring;
+ int1: integer;
+ event1: xclientmessageevent;
+ po1: pchar;
+ win1: winidty;
+ at1: atom;
+begin
+ result:= gue_notraywindow;
+ win1:= getsyswin(sywi_tray);
+ at1:= netatoms[net_system_tray_message_data];
+ if (win1 <> 0) and (at1 <> 0) then begin
+  messageid:= getidnum;
+  str1:= stringtoutf8(message);
+  int1:= length(str1);
+  str1:= str1 + #0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0;
+  result:= sendtraymessage(win1,awindow,system_tray_begin_message,timeoutms,
+                     length(str1),messageid);
+  fillchar(event1,sizeof(event1),0);
+  with event1 do begin
+   xtype:= clientmessage;
+   display:= appdisp;
+   window:= awindow;
+   format:= 8;
+   message_type:= at1;
+   po1:= pchar(str1);
+   while (result = gue_ok) and (int1 > 0) do begin
+    move(po1^,data.b[0],20);
+    inc(po1,20);
+    int1:= int1 - 20;
+    if xsendevent(appdisp,win1,
+            {$ifdef xboolean}false{$else}0{$endif},
+            structurenotifymask{noeventmask},@event1) = 0 then begin
+     result:= gue_sendevent;
+    end;
+   end;
+  end;
+ end;
+end;
+
+function gui_canceltraymessage(const awindow: winidty;
+                          const messageid: longword): guierrorty;
+begin
+ result:= gue_notimplemented;
 end;
 
 function gui_creategc(paintdevice: paintdevicety; const akind: gckindty;
@@ -6406,8 +6469,11 @@ begin
           @fontpropertyatoms[low(fontpropertiesty)]);
 
  fillchar(netatoms,sizeof(netatoms),0);               //check _net_
+// xinternatoms(appdisp,@netatomnames[low(netatomty)],
+//          integer(high(netatomty)),{$ifdef xboolean}true{$else}1{$endif},
+//          @netatoms[low(netatomty)]);
  xinternatoms(appdisp,@netatomnames[low(netatomty)],
-          integer(high(netatomty)),{$ifdef xboolean}true{$else}1{$endif},
+          integer(high(netatomty)),{$ifdef xboolean}false{$else}0{$endif},
           @netatoms[low(netatomty)]);
  netsupported:= netsupportedatom <> 0;
  if netsupported then begin

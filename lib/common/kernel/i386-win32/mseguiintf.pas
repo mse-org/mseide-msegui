@@ -4545,6 +4545,16 @@ begin
  end;
 end;
 
+function gui_showsysdock(const id: winidty): guierrorty;
+begin
+ result:= gui_hidewindow(id);
+end;
+
+function gui_hidesysdock(const id: winidty): guierrorty;
+begin
+ result:= gui_hidewindow(id);
+end;
+
 function gui_docktosyswindow(const child: winidty;
                                    const akind: syswindowty): guierrorty;
 begin

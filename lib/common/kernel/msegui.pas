@@ -1296,7 +1296,7 @@ type
    function getenabled: boolean;
    procedure setenabled(const Value: boolean); virtual;
    function getvisible: boolean;
-   procedure setvisible(const Value: boolean); virtual;
+   procedure setvisible(const avalue: boolean); virtual;
    function isvisible: boolean;      //checks designing
    function parentisvisible: boolean;//checks isvisible flags of ancestors
    function parentvisible: boolean;  //checks visible flags of ancestors
@@ -1809,6 +1809,7 @@ type
    fcaption: msestring;
    fscrollnotifylist: tnotifylist;
    fdestroyevent: pointer; //tdestroywindowevent
+   fsyscontainer: syswindowty;
    procedure setcaption(const avalue: msestring);
    procedure widgetdestroyed(widget: twidget);
 
@@ -1862,6 +1863,7 @@ type
    procedure setdecoratedbounds_cy(const avalue: integer);
    procedure setcontainer(const avalue: winidty);
    procedure containerwindestroyed(const aid: winidty);
+   procedure setsyscontainer(const avalue: syswindowty);
   protected
    fwindow: windowty;
    fcontainer: winidty;
@@ -1954,6 +1956,8 @@ type
    property caption: msestring read fcaption write setcaption;
    property container: winidty read fcontainer 
                                     write setcontainer default 0;
+   property syscontainer: syswindowty read fsyscontainer 
+                                    write setsyscontainer default sywi_none;
 
 
    property decoratedwidgetrect: rectty read getdecoratedwidgetrect 
@@ -9940,10 +9944,10 @@ begin
  result:= ws_visible in fwidgetstate;
 end;
 
-procedure twidget.setvisible(const Value: boolean);
+procedure twidget.setvisible(const avalue: boolean);
 begin
- if not (csloading in componentstate) and (value <> getvisible) then begin
-  if value then begin
+ if not (csloading in componentstate) and (avalue <> getvisible) then begin
+  if avalue then begin
    if parentisvisible then begin
     show(false,window.ftransientfor);
    end
@@ -9962,7 +9966,7 @@ begin
   visiblepropchanged;
  end
  else begin
-  if value then begin
+  if avalue then begin
    include(fwidgetstate,ws_visible);
   end
   else begin
@@ -11801,45 +11805,57 @@ begin
     if not windowevent or (appinst.factivewindow = self) then begin
      endmodal;
     end;
-    if (application.fmainwindow = self) and not appinst.terminated then begin
-     bo1:= gui_grouphideminimizedwindows;
-     gui_flushgdi;
-     sys_schedyield;
+    if (fsyscontainer <> sywi_none) or (fcontainer <> 0) then begin
      exclude(fstate,tws_windowvisible);
-     include(fstate,tws_grouphidden);
-     include(fstate,tws_groupminimized);
-     application.sortzorder;
-     appinst.fgroupzorder:= copy(appinst.fwindows);
-     for int1:= 0 to high(appinst.fwindows) do begin
-      window1:= appinst.fwindows[int1];
-      if (window1 <> self) and (window1.fwindow.id <> 0) and 
-                        gui_windowvisible(window1.fwindow.id) then begin
-       with window1 do begin
-        include(fstate,tws_grouphidden);
-        if tws_windowvisible in fstate then begin
-         include(fstate,tws_groupminimized);
-        end;
-        gui_setwindowstate(winid,wsi_minimized,false);
-        if bo1 then begin
-         gui_hidewindow(winid);
-        end;
-       end;
+     if not windowevent then begin
+      if (fsyscontainer <> sywi_none) then begin
+       gui_hidesysdock(fwindow.id);
+      end
+      else begin
+       gui_hidewindow(fwindow.id);
       end;
-     end;
-     if bo1 then begin
-      gui_minimizeapplication;
      end;
     end
     else begin
-     exclude(fstate,tws_windowvisible);
-    end;
-    if not windowevent then begin
-     exclude(fstate,tws_grouphidden);
-     gui_hidewindow(fwindow.id);
+     if (application.fmainwindow = self) and not appinst.terminated then begin
+      bo1:= gui_grouphideminimizedwindows;
+      gui_flushgdi;
+      sys_schedyield;
+      exclude(fstate,tws_windowvisible);
+      include(fstate,tws_grouphidden);
+      include(fstate,tws_groupminimized);
+      application.sortzorder;
+      appinst.fgroupzorder:= copy(appinst.fwindows);
+      for int1:= 0 to high(appinst.fwindows) do begin
+       window1:= appinst.fwindows[int1];
+       if (window1 <> self) and (window1.fwindow.id <> 0) and 
+                         gui_windowvisible(window1.fwindow.id) then begin
+        with window1 do begin
+         include(fstate,tws_grouphidden);
+         if tws_windowvisible in fstate then begin
+          include(fstate,tws_groupminimized);
+         end;
+         gui_setwindowstate(winid,wsi_minimized,false);
+         if bo1 then begin
+          gui_hidewindow(winid);
+         end;
+        end;
+       end;
+      end;
+      if bo1 then begin
+       gui_minimizeapplication;
+      end;
+     end
+     else begin
+      exclude(fstate,tws_windowvisible);
+     end;
+     if not windowevent then begin
+      exclude(fstate,tws_grouphidden);
+      gui_hidewindow(fwindow.id);
+     end;
     end;
    end;
   end;
-//  settransientfor(nil,windowevent); //is still active window.
  end;
 end;
 
@@ -11853,10 +11869,20 @@ begin
  if (ws_visible in fowner.fwidgetstate) then begin
   if not visible then begin
    include(fstate,tws_windowvisible);
-   include(appinst.fstate,aps_needsupdatewindowstack);
    if not (csdesigning in fowner.ComponentState) then begin
-    if not windowevent then begin
-//     if fwindowpos <> wp_minimized then begin
+    if (fsyscontainer <> sywi_none) or (fcontainer <> 0) then begin
+     if not windowevent then begin
+      if (fsyscontainer <> sywi_none) then begin
+       gui_showsysdock(fwindow.id);
+      end
+      else begin
+       gui_showwindow(fwindow.id);
+      end;
+     end;
+    end
+    else begin
+     include(appinst.fstate,aps_needsupdatewindowstack);
+     if not windowevent then begin
       case fwindowpos of
        wp_maximized: begin
         size1:= wsi_maximized;
@@ -11869,56 +11895,51 @@ begin
        end;
       end;
       gui_setwindowstate(winid,size1,true);
-//     end;
-//     gui_showwindow(winid);
-     if (fwindowpos = wp_normal) and 
-                               not (tws_needsdefaultpos in fstate) then begin
-//      gui_reposwindow(fwinid,fowner.fwidgetrect);
-      gui_reposwindow(fwindow.id,fnormalwindowrect);
-     end;
-    end;
-    exclude(fstate,tws_grouphidden);
-    exclude(fstate,tws_groupminimized);
-    bo1:= gui_grouphideminimizedwindows;
-    bo2:= false;
-    for int1:= 0 to high(appinst.fwindows) do begin
-     window1:= appinst.fwindows[int1];
-     if window1 <> self then begin
-      with window1 do begin
-       if tws_grouphidden in fstate then begin
-        if tws_groupminimized in fstate then begin
-         size1:= wsi_normal;
-        end
-        else begin
-         size1:= wsi_minimized;
-        end;
-        gui_setwindowstate(winid,size1,true);
-        bo2:= true;
-//        if bo1 then begin
-//         gui_showwindow(winid);
-//        end;
-       end;
-       exclude(fstate,tws_grouphidden);
-       exclude(fstate,tws_groupminimized);
+      if (fwindowpos = wp_normal) and not (tws_needsdefaultpos in fstate) and 
+                                not (wo_embedded in foptions) then begin
+       gui_reposwindow(fwindow.id,fnormalwindowrect);
       end;
      end;
-    end;
-    if bo1 and bo2 then begin
-     window1:= nil; //compiler warning
-     activate;
-     with appinst do begin
-      if fgroupzorder <> nil then begin
-       removeitem(pointerarty(fgroupzorder),window1);
-       additem(pointerarty(fgroupzorder),window1);
-       fwindowstack:= nil;
-       setlength(fwindowstack,high(fgroupzorder));
-       window1:= fgroupzorder[0]; //lowest
-       for int1:= 1 to high(fgroupzorder) do begin
-        fwindowstack[int1-1].upper:= fgroupzorder[int1];
-        fwindowstack[int1-1].lower:= window1;
-        window1:= fgroupzorder[int1];
+     exclude(fstate,tws_grouphidden);
+     exclude(fstate,tws_groupminimized);
+     bo1:= gui_grouphideminimizedwindows;
+     bo2:= false;
+     for int1:= 0 to high(appinst.fwindows) do begin
+      window1:= appinst.fwindows[int1];
+      if window1 <> self then begin
+       with window1 do begin
+        if tws_grouphidden in fstate then begin
+         if tws_groupminimized in fstate then begin
+          size1:= wsi_normal;
+         end
+         else begin
+          size1:= wsi_minimized;
+         end;
+         gui_setwindowstate(winid,size1,true);
+         bo2:= true;
+        end;
+        exclude(fstate,tws_grouphidden);
+        exclude(fstate,tws_groupminimized);
        end;
-       include(fstate,aps_needsupdatewindowstack);
+      end;
+     end;
+     if bo1 and bo2 then begin
+      window1:= nil; //compiler warning
+      activate;
+      with appinst do begin
+       if fgroupzorder <> nil then begin
+        removeitem(pointerarty(fgroupzorder),window1);
+        additem(pointerarty(fgroupzorder),window1);
+        fwindowstack:= nil;
+        setlength(fwindowstack,high(fgroupzorder));
+        window1:= fgroupzorder[0]; //lowest
+        for int1:= 1 to high(fgroupzorder) do begin
+         fwindowstack[int1-1].upper:= fgroupzorder[int1];
+         fwindowstack[int1-1].lower:= window1;
+         window1:= fgroupzorder[int1];
+        end;
+        include(fstate,aps_needsupdatewindowstack);
+       end;
       end;
      end;
     end;
@@ -12718,7 +12739,7 @@ begin
   bo1:= (tws_windowvisible in fstate) {or (wpo1 = wp_minimized)};
   case value of
    wp_screencentered: begin
-    gui_setwindowstate(winid,wsi_normal,bo1{tws_windowvisible in fstate});
+    gui_setwindowstate(winid,wsi_normal,bo1);
     rect2:= appinst.workarea(self);
     with fowner do begin
      rect1:= widgetrect;
@@ -12728,7 +12749,7 @@ begin
     end;
    end;
    wp_minimized: begin
-    gui_setwindowstate(winid,wsi_minimized,bo1{tws_windowvisible in fstate});
+    gui_setwindowstate(winid,wsi_minimized,bo1);
    end;
    wp_maximized: begin
     gui_setwindowstate(winid,wsi_maximized,bo1);
@@ -12737,7 +12758,7 @@ begin
     gui_setwindowstate(winid,wsi_fullscreen,bo1);
    end
    else begin
-    gui_setwindowstate(winid,wsi_normal,bo1{tws_windowvisible in fstate});
+    gui_setwindowstate(winid,wsi_normal,bo1);
    end;
   end;
  end;
@@ -12882,28 +12903,27 @@ end;
 
 procedure twindow.setcontainer(const avalue: winidty);
 begin
-// if femb_container <> avalue then begin
-  if fcontainer <> 0 then begin
-   application.unregisteronwiniddestroyed({$ifdef FPC}@{$endif}containerwindestroyed);
+ fsyscontainer:= sywi_none;
+ if fcontainer <> 0 then begin
+  application.unregisteronwiniddestroyed({$ifdef FPC}@{$endif}containerwindestroyed);
+ end;
+ fcontainer:= avalue;
+ if fcontainer <> 0 then begin
+  application.registeronwiniddestroyed({$ifdef FPC}@{$endif}containerwindestroyed);
+  try
+   include(foptions,wo_embedded);
+   guierror(gui_reparentwindow(winid,fcontainer,fowner.pos));
+  except
+   container:= 0;
+   raise;
   end;
-  fcontainer:= avalue;
-  if fcontainer <> 0 then begin
-   application.registeronwiniddestroyed({$ifdef FPC}@{$endif}containerwindestroyed);
-   try
-    include(foptions,wo_embedded);
-    guierror(gui_reparentwindow(winid,fcontainer,fowner.pos));
-   except
-    container:= 0;
-    raise;
-   end;
-  end
-  else begin
-   exclude(foptions,wo_embedded);
-   if (fwindow.id <> 0) and not (tws_destroying in fstate) then begin
-    guierror(gui_reparentwindow(winid,0,fowner.pos));
-   end;
+ end
+ else begin
+  exclude(foptions,wo_embedded);
+  if (fwindow.id <> 0) and not (tws_destroying in fstate) then begin
+   guierror(gui_reparentwindow(winid,0,fowner.pos));
   end;
-// end;
+ end;
 end;
 
 procedure twindow.containerwindestroyed(const aid: winidty);
@@ -12911,6 +12931,20 @@ begin
  if aid = fcontainer then begin
   container:= 0;
  end;
+end;
+
+procedure twindow.setsyscontainer(const avalue: syswindowty);
+begin
+ if (avalue = sywi_none) or (avalue <> fsyscontainer) then begin
+  container:= 0;
+ end;
+ fsyscontainer:= sywi_none;
+ if fwindow.id = 0 then begin
+  createwindow;
+ end;
+ include(foptions,wo_embedded); 
+ guierror(gui_docktosyswindow(winid,avalue));
+ fsyscontainer:= avalue;
 end;
 
 { tonkeyeventlist}
