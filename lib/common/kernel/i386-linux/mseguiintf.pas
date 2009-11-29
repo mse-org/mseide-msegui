@@ -771,11 +771,12 @@ type
        net_wm_window_type_dropdown_menu,
        net_frame_extents,
        net_request_frame_extents,
-       net_system_tray_s0,net_system_tray_opcode,
+       net_system_tray_s0,net_system_tray_opcode,net_system_tray_message_data,
        net_none);
  netwmstateoperationty = (nso_remove,nso_add,nso_toggle);
 const
  needednetatom = net_wm_state_maximized_horz;
+ firstcheckedatom = net_workarea;
  lastcheckedatom = net_close_window;
  netatomnames: array[netatomty] of string = 
       ('_NET_SUPPORTED','_NET_WORKAREA',
@@ -793,6 +794,7 @@ const
        '_NET_FRAME_EXTENTS', 
        '_NET_REQUEST_FRAME_EXTENTS',
        '_NET_SYSTEM_TRAY_S0','_NET_SYSTEM_TRAY_OPCODE',
+       '_NET_SYSTEM_TRAY_MESSAGE_DATA',
        ''); 
 // needednetatom = netatomty(ord(high(netatomty))-4);
 var
@@ -819,6 +821,15 @@ var
  lasteventtime: ttime;
 // lastshiftstate: shiftstatesty;
  clipboard: msestring;
+ fidnum: longword;
+ 
+function getidnum: longword;
+begin
+ result:= interlockedincrement(fidnum);
+ if result = 0 then begin
+  result:= interlockedincrement(fidnum);
+ end;
+end;
 
 function gui_grouphideminimizedwindows: boolean;
 begin
@@ -2888,12 +2899,26 @@ const
  system_tray_request_dock = 0;
  system_tray_begin_message = 1;
  system_tray_cancel_message = 2;
- 
+
+function sendtraymessage(const dest: winidty; const awindow: winidty; 
+         const opcode: integer;
+         const data1: longword = 0; const data2: longword = 0;
+         const data3: longword = 0): guierrorty;
+var
+ at1: atom;
+begin
+ result:= gue_notraywindow;
+ at1:= netatoms[net_system_tray_opcode];
+ if (at1 <> 0) and sendnetcardinalmessage(dest,at1,awindow,
+               [lasteventtime,opcode,data1,data2,data3]) then begin
+  result:= gue_ok;
+ end;
+end;
+
 function gui_docktosyswindow(const child: winidty;
                                    const akind: syswindowty): guierrorty;
 var
  syswin: winidty;
- at1: atom;
 begin
  result:= gue_windownotfound;
  syswin:= getsyswin(akind);
@@ -2901,14 +2926,58 @@ begin
   result:= gue_docktosyswindow;
   case akind of
    sywi_tray: begin
-    at1:= netatoms[net_system_tray_opcode];
-    if (at1 <> 0) and sendnetcardinalmessage(syswin,at1,syswin,
-                   [lasteventtime,system_tray_request_dock,child]) then begin
-     result:= gue_ok;
-    end;
+    result:= sendtraymessage(syswin,syswin,system_tray_request_dock,child);
    end;
   end;
  end; 
+end;
+
+function gui_traymessage(const awindow: winidty; const message: msestring;
+                          out messageid: longword;
+                          const timeoutms: longword = 0): guierrorty;
+var
+ str1: ansistring;
+ int1: integer;
+ event1: xclientmessageevent;
+ po1: pchar;
+ win1: winidty;
+ at1: atom;
+begin
+ result:= gue_notraywindow;
+ win1:= getsyswin(sywi_tray);
+ at1:= netatoms[net_system_tray_message_data];
+ if (win1 <> 0) and (at1 <> 0) then begin
+  messageid:= getidnum;
+  str1:= stringtoutf8(message);
+  int1:= length(str1);
+  str1:= str1 + #0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0;
+  result:= sendtraymessage(win1,awindow,system_tray_begin_message,timeoutms,
+                     length(str1),messageid);
+  fillchar(event1,sizeof(event1),0);
+  with event1 do begin
+   xtype:= clientmessage;
+   display:= appdisp;
+   window:= awindow;
+   format:= 8;
+   message_type:= at1;
+   po1:= pchar(str1);
+   while (result = gue_ok) and (int1 > 0) do begin
+    move(po1^,data.b[0],20);
+    inc(po1,20);
+    int1:= int1 - 20;
+    if xsendevent(appdisp,win1,
+            {$ifdef xboolean}false{$else}0{$endif},noeventmask,@event1) = 0 then begin
+     result:= gue_sendevent;
+    end;
+   end;
+  end;
+ end;
+end;
+
+function gui_canceltraymessage(const awindow: winidty;
+                          const messageid: longword): guierrorty;
+begin
+ result:= gue_notimplemented;
 end;
 
 function gui_getchildren(const id: winidty; out children: winidarty): guierrorty;
@@ -3209,19 +3278,27 @@ begin
  fillchar(icwindow,sizeof(icwindow),0);
 end;
 }
+function getwindowrect(id: winidty; out rect: rectty; out origin: pointty): guierrorty;
+var
+ int1: integer;
+begin
+ result:= gue_error;
+ with rect do begin
+  if (xgetgeometry(appdisp,id,@int1,@x,@y,@cx,@cy,@int1,@int1) <> 0) and
+                 getrootoffset(id,origin) then begin
+   result:= gue_ok;
+  end;
+ end;
+end;
+
 function gui_getwindowrect(id: winidty; out rect: rectty): guierrorty;
 var
  int1: integer;
  po1: pointty;
 begin
- result:= gue_error;
- with rect do begin
-  if xgetgeometry(appdisp,id,@int1,@x,@y,@cx,@cy,@int1,@int1) <> 0 then begin
-   if getrootoffset(id,po1) then begin
-    addpoint1(rect.pos,po1);
-    result:= gue_ok;
-   end;
-  end;
+ result:= getwindowrect(id,rect,po1);
+ if result = gue_ok then begin
+  addpoint1(rect.pos,po1);
  end;
 end;
 
@@ -5554,6 +5631,7 @@ var
  textprop: xtextproperty;
  bo1: boolean;
  rect1: rectty;
+ pt1: pointty;
  aic: xic;
 
 label
@@ -5913,12 +5991,14 @@ eventrestart:
   end;
   expose: begin
    with xev.xexpose do begin
-    result:= twindowrectevent.create(ek_expose,xwindow,makerect(x,y,width,height));
+    result:= twindowrectevent.create(ek_expose,xwindow,
+                          makerect(x,y,width,height),nullpoint);
    end;
   end;
   graphicsexpose: begin
    with xev.xgraphicsexpose do begin
-    result:= twindowrectevent.create(ek_expose,drawable,makerect(x,y,width,height));
+    result:= twindowrectevent.create(ek_expose,drawable,
+                          makerect(x,y,width,height),nullpoint);
    end;
   end;
   configurenotify: begin
@@ -5933,9 +6013,9 @@ eventrestart:
                    <> 0 do begin end;
       //gnome returns a different pos on window resizing than on window moving!
      if not application.deinitializing then begin //there can be an Xerror?
-      gui_getwindowrect(w,rect1); 
+      getwindowrect(w,rect1,pt1);
      end;
-     result:= twindowrectevent.create(ek_configure,xwindow,rect1);
+     result:= twindowrectevent.create(ek_configure,xwindow,rect1,pt1);
     end;
    end;
   end;
@@ -6332,7 +6412,7 @@ begin
  netsupported:= netsupportedatom <> 0;
  if netsupported then begin
   netsupported:= readatomproperty(rootid,netsupportedatom,atomar);
-  for netnum:= low(netnum) to lastcheckedatom do begin
+  for netnum:= firstcheckedatom to lastcheckedatom do begin
    atom1:= netatoms[netnum];
    netatoms[netnum]:= 0;
    for int1:= 0 to high(atomar) do begin

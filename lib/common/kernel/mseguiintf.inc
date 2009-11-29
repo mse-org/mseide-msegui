@@ -37,6 +37,11 @@ function gui_reparentwindow(const child: winidty; const parent: winidty;
 function gui_getchildren(const id: winidty; out children: winidarty): guierrorty;
 function gui_docktosyswindow(const child: winidty; 
                                    const akind: syswindowty): guierrorty;
+function gui_traymessage(const awindow: winidty; const message: msestring;
+                          out messageid: longword;
+                          const timeoutms: longword = 0): guierrorty;
+function gui_canceltraymessage(const awindow: winidty;
+                          const messageid: longword): guierrorty;
 
 function gui_creategc(paintdevice: paintdevicety; const akind: gckindty;
                 var gc: gcty; const aprintername: msestring = ''): guierrorty;

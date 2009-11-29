@@ -4526,6 +4526,20 @@ begin
  result:= gue_notimplemented;
 end;
 
+function gui_traymessage(const awindow: winidty; const message: msestring;
+                          out messageid: longword;
+                          const timeoutms: longword = 0): guierrorty;
+begin
+ messageid:= 0;
+ result:= gue_notimplemented;
+end;
+
+function gui_canceltraymessage(const awindow: winidty;
+                          const messageid: longword): guierrorty;
+begin
+ result:= gue_notimplemented;
+end;
+
 type
  enumchildinfoty = record
   childlist: winidarty;

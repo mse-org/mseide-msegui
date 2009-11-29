@@ -1816,7 +1816,7 @@ type
    procedure hidden;
    procedure activated;
    procedure deactivated;
-   procedure wmconfigured(const arect: rectty);
+   procedure wmconfigured(const arect: rectty; const aorigin: pointty);
    procedure windowdestroyed;
 
    function internalupdate: boolean;
@@ -1994,7 +1994,9 @@ type
   private
   public
    frect: rectty;
-   constructor create(akind: eventkindty; winid: winidty; const rect: rectty);
+   forigin: pointty;
+   constructor create(akind: eventkindty; winid: winidty;
+                        const rect: rectty; const aorigin: pointty);
  end;
 
  tmouseevent = class(twindowevent)
@@ -11994,20 +11996,21 @@ begin
  end;
 end;
 
-procedure twindow.wmconfigured(const arect: rectty);
+procedure twindow.wmconfigured(const arect: rectty; const aorigin: pointty);
 var
- rect1,rect2: rectty;
- id1: winidty;
+ rect1{,rect2}: rectty;
+// id1: winidty;
 begin
  exclude(fstate,tws_needsdefaultpos);
  rect1:= arect;
- if (wo_embedded in foptions) and (fwindow.id <> 0) then begin
-  id1:= gui_getparentwindow(fwindow.id);
-  if id1 <> 0 then begin
-   if gui_getwindowrect(id1,rect2) = gue_ok then begin
-    subpoint1(rect1.pos,rect2.pos);
-   end;
-  end;
+ if not (wo_embedded in foptions) then begin
+  addpoint1(rect1.pos,aorigin);
+//  id1:= gui_getparentwindow(fwindow.id);
+//  if id1 <> 0 then begin
+//   if gui_getwindowrect(id1,rect2) = gue_ok then begin
+//    subpoint1(rect1.pos,rect2.pos);
+//   end;
+//  end;
  end;
  if not rectisequal(rect1,fowner.fwidgetrect) then begin
   fowner.internalsetwidgetrect(rect1,true);
@@ -13007,10 +13010,11 @@ end;
 { twindowrectevent }
 
 constructor twindowrectevent.create(akind: eventkindty; winid: winidty;
-  const rect: rectty);
+  const rect: rectty; const aorigin: pointty);
 begin
  inherited create(akind,winid);
  frect:= rect;
+ forigin:= aorigin;
 end;
 
 { tmouseevent }
@@ -13195,14 +13199,12 @@ procedure tinternalapplication.processshowingevent(event: twindowevent);
 var
  window: twindow;
 begin
- with window,event do begin
-  if findwindow(fwinid,window) then begin
-   if event.kind = ek_show then begin
-    showed;
-   end
-   else begin
-    hidden;
-   end;
+ if findwindow(event.fwinid,window) then begin
+  if event.kind = ek_show then begin
+   window.showed;
+  end
+  else begin
+   window.hidden;
   end;
  end;
 end;
@@ -13213,7 +13215,7 @@ var
 begin
  with event do begin
   if findwindow(fwinid,window) then begin
-   window.wmconfigured(frect);
+   window.wmconfigured(frect,forigin);
   end;
  end;
 end;
