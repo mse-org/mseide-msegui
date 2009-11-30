@@ -164,7 +164,7 @@ type
                gue_notlocked,
                gue_characterencoding,gue_invalidstream,gue_invalidcanvas,
                gue_notimplemented,gue_getchildren,gue_reparent,gue_docktosyswindow,
-               gue_notraywindow,gue_sendevent
+               gue_notraywindow,gue_sendevent,gue_noshelllib
                );
 
  egui = class(eerror)
@@ -241,7 +241,8 @@ const
    'Can not reparent window.',
    'Can not dock to syswindow.',
    'No tray window.',
-   'Can not send event.'
+   'Can not send event.',
+   'Problem with shell library.'
    );
 
 

@@ -3364,16 +3364,16 @@ begin
  xdeleteproperty(appdisp,id,netatoms[xembed_info]);
 end;
 
-function gui_showsysdock(const id: winidty): guierrorty;
+function gui_showsysdock(var awindow: windowty): guierrorty;
 begin
- setlongproperty(id,netatoms[xembed_info],[xembedversion,xembedflags or 1]);
+ setlongproperty(awindow.id,netatoms[xembed_info],[xembedversion,xembedflags or 1]);
  result:= gue_ok;
 end;
 
-function gui_hidesysdock(const id: winidty): guierrorty;
+function gui_hidesysdock(var awindow: windowty): guierrorty;
 begin
- setlongproperty(id,netatoms[xembed_info],[xembedversion,xembedflags]);
- result:= gui_hidewindow(id);
+ setlongproperty(awindow.id,netatoms[xembed_info],[xembedversion,xembedflags]);
+ result:= gui_hidewindow(window.id);
 end;
 
 
@@ -3397,7 +3397,7 @@ begin
  end;
 end;
 var testvar: integer;
-function gui_docktosyswindow(const child: winidty;
+function gui_docktosyswindow(var child: windowty;
                                    const akind: syswindowty): guierrorty;
 var
  syswin: winidty;
@@ -3406,11 +3406,11 @@ var
  pt1: pointty;
  rect1: rectty;
 begin
- gui_hidewindow(child);
+ gui_hidewindow(child.id);
  if akind = sywi_none then begin
-  result:= getwindowrect(child,rect1,pt1);
+  result:= getwindowrect(child.id,rect1,pt1);
   if result = gue_ok then begin
-   result:= gui_reparentwindow(child,0,rect1.pos);
+   result:= gui_reparentwindow(child.id,0,rect1.pos);
   end;
   finalizexembed(child);
  end
@@ -3419,11 +3419,11 @@ begin
   syswin:= getsyswin(akind);
   if syswin <> 0 then begin
    result:= gue_docktosyswindow;
-   initxembed(child);
+   initxembed(child.id);
    parentbefore:= gui_getparentwindow(child);
    case akind of
     sywi_tray: begin
-     result:= sendtraymessage(syswin,syswin,system_tray_request_dock,child);
+     result:= sendtraymessage(syswin,syswin,system_tray_request_dock,child.id);
     end;
    end;
    int1:= 0;
@@ -3434,7 +3434,7 @@ begin
     sleep(5);
     inc(int1);
    end;
-   testvar:= gui_getparentwindow(child);
+   testvar:= gui_getparentwindow(child.id);
   end; 
  end;
 end;

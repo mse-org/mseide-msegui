@@ -11809,7 +11809,7 @@ begin
      exclude(fstate,tws_windowvisible);
      if not windowevent then begin
       if (fsyscontainer <> sywi_none) then begin
-       gui_hidesysdock(fwindow.id);
+       gui_hidesysdock(fwindow);
       end
       else begin
        gui_hidewindow(fwindow.id);
@@ -11873,7 +11873,7 @@ begin
     if (fsyscontainer <> sywi_none) or (fcontainer <> 0) then begin
      if not windowevent then begin
       if (fsyscontainer <> sywi_none) then begin
-       gui_showsysdock(fwindow.id);
+       gui_showsysdock(fwindow);
       end
       else begin
        gui_showwindow(fwindow.id);
@@ -12903,7 +12903,7 @@ end;
 
 procedure twindow.setcontainer(const avalue: winidty);
 begin
- fsyscontainer:= sywi_none;
+ syscontainer:= sywi_none;
  if fcontainer <> 0 then begin
   application.unregisteronwiniddestroyed({$ifdef FPC}@{$endif}containerwindestroyed);
  end;
@@ -12935,16 +12935,21 @@ end;
 
 procedure twindow.setsyscontainer(const avalue: syswindowty);
 begin
- if (avalue = sywi_none) or (avalue <> fsyscontainer) then begin
-  container:= 0;
+ if avalue <> fsyscontainer then begin
+  if (fsyscontainer <> sywi_none) and (fwindow.id <> 0) then begin
+   gui_undockfromsyswindow(fwindow);
+   fsyscontainer:= sywi_none;
+   container:= 0;
+  end;
+  if avalue <> sywi_none then begin
+   if fwindow.id = 0 then begin
+    createwindow;
+   end;
+   include(foptions,wo_embedded); 
+   guierror(gui_docktosyswindow(fwindow,avalue));
+   fsyscontainer:= avalue;
+  end;
  end;
- fsyscontainer:= sywi_none;
- if fwindow.id = 0 then begin
-  createwindow;
- end;
- include(foptions,wo_embedded); 
- guierror(gui_docktosyswindow(winid,avalue));
- fsyscontainer:= avalue;
 end;
 
 { tonkeyeventlist}
