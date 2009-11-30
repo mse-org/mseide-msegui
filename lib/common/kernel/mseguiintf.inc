@@ -42,7 +42,7 @@ function gui_hidesysdock(var awindow: windowty): guierrorty;
 function gui_docktosyswindow(var child: windowty; 
                                    const akind: syswindowty): guierrorty;
                     //hides window
-function gui_undockfromsyswindow(var child: windowty): guierrorty;
+//function gui_undockfromsyswindow(var child: windowty): guierrorty;
                     //hides window
 
 function gui_traymessage(var awindow: windowty; const message: msestring;

@@ -3373,7 +3373,7 @@ end;
 function gui_hidesysdock(var awindow: windowty): guierrorty;
 begin
  setlongproperty(awindow.id,netatoms[xembed_info],[xembedversion,xembedflags]);
- result:= gui_hidewindow(window.id);
+ result:= gui_hidewindow(awindow.id);
 end;
 
 
@@ -3412,7 +3412,7 @@ begin
   if result = gue_ok then begin
    result:= gui_reparentwindow(child.id,0,rect1.pos);
   end;
-  finalizexembed(child);
+  finalizexembed(child.id);
  end
  else begin
   result:= gue_windownotfound;
@@ -3420,7 +3420,7 @@ begin
   if syswin <> 0 then begin
    result:= gue_docktosyswindow;
    initxembed(child.id);
-   parentbefore:= gui_getparentwindow(child);
+   parentbefore:= gui_getparentwindow(child.id);
    case akind of
     sywi_tray: begin
      result:= sendtraymessage(syswin,syswin,system_tray_request_dock,child.id);
@@ -3429,7 +3429,7 @@ begin
    int1:= 0;
    xsync(appdisp,false);
    sys_schedyield;
-   while (gui_getparentwindow(child) = parentbefore) and (int1 < 40) do begin
+   while (gui_getparentwindow(child.id) = parentbefore) and (int1 < 40) do begin
     xsync(appdisp,false);
     sleep(5);
     inc(int1);
@@ -3439,7 +3439,7 @@ begin
  end;
 end;
 
-function gui_traymessage(const awindow: winidty; const message: msestring;
+function gui_traymessage(var awindow: windowty; const message: msestring;
                           out messageid: longword;
                           const timeoutms: longword = 0): guierrorty;
 var
@@ -3458,13 +3458,13 @@ begin
   str1:= stringtoutf8(message);
   int1:= length(str1);
   str1:= str1 + #0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0;
-  result:= sendtraymessage(win1,awindow,system_tray_begin_message,timeoutms,
+  result:= sendtraymessage(win1,awindow.id,system_tray_begin_message,timeoutms,
                      length(str1),messageid);
   fillchar(event1,sizeof(event1),0);
   with event1 do begin
    xtype:= clientmessage;
    display:= appdisp;
-   window:= awindow;
+   window:= awindow.id;
    format:= 8;
    message_type:= at1;
    po1:= pchar(str1);
@@ -3482,7 +3482,7 @@ begin
  end;
 end;
 
-function gui_canceltraymessage(const awindow: winidty;
+function gui_canceltraymessage(var awindow: windowty;
                           const messageid: longword): guierrorty;
 begin
  result:= gue_notimplemented;

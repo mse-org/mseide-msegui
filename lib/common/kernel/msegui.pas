@@ -12937,7 +12937,7 @@ procedure twindow.setsyscontainer(const avalue: syswindowty);
 begin
  if avalue <> fsyscontainer then begin
   if (fsyscontainer <> sywi_none) and (fwindow.id <> 0) then begin
-   gui_undockfromsyswindow(fwindow);
+   gui_docktosyswindow(fwindow,sywi_none);
    fsyscontainer:= sywi_none;
    container:= 0;
   end;
