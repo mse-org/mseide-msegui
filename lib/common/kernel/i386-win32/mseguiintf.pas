@@ -374,6 +374,44 @@ begin
  result:= applicationwindow;
 end;
 
+{$ifndef FPC}
+type
+      _NOTIFYICONDATAA = record
+          cbSize: DWORD;
+          Wnd: HWND;
+          uID: UINT;
+          uFlags: UINT;
+          uCallbackMessage: UINT;
+          hIcon: HICON;
+          szTip: array [0..63] of Char;
+     end;
+     _NOTIFYICONDATA = _NOTIFYICONDATAA;
+
+     _NOTIFYICONDATAW = record
+         cbSize: DWORD;
+         Wnd: HWND;
+         uID: UINT;
+         uFlags: UINT;
+         uCallbackMessage: UINT;
+         hIcon: HICON;
+         szTip: array [0..63] of Word;
+     end;
+     TNotifyIconDataA = _NOTIFYICONDATAA;
+     TNotifyIconDataW = _NOTIFYICONDATAW;
+     TNotifyIconData = TNotifyIconDataA;
+     NOTIFYICONDATAA = _NOTIFYICONDATAA;
+     NOTIFYICONDATAW = _NOTIFYICONDATAW;
+     NOTIFYICONDATA = NOTIFYICONDATAA;
+     PNotifyIconDataA = ^TNotifyIconDataA;
+     PNotifyIconDataW = ^TNotifyIconDataW;
+     PNotifyIconData = PNotifyIconDataA;
+     
+function Shell_NotifyIconA(dwMessage: DWORD; lpData: PNotifyIconDataA): BOOL;
+                 external 'shell32' name 'Shell_NotifyIconA';
+function Shell_NotifyIconW(dwMessage: DWORD; lpData: PNotifyIconDataW): BOOL;
+                 external 'shell32' name 'Shell_NotifyIconW';
+{$endif}
+{
 var
  Shell_NotifyIconA: function (dwMessage: DWORD; lpData: PNotifyIconDataA): BOOL;
  Shell_NotifyIconW: function (dwMessage: DWORD; lpData: PNotifyIconDataW): BOOL;
@@ -406,6 +444,11 @@ begin
   end;
  end;
  result:= shellinterfaceerror;
+end;
+}
+function checkshellinterface: guierrorty;
+begin
+ result:= gue_ok;
 end;
 
 const
@@ -473,8 +516,8 @@ begin
     ucallbackmessage:= traycallbackmessage;   
     u.uversion:= 0;//notifyicon_version;
    end;
-   if shell_notifyicon(nim_add,@dataw) and 
-               shell_notifyicon(nim_setversion,@dataw) then begin
+   if shell_notifyiconw(nim_add,@dataw) and
+               shell_notifyiconw(nim_setversion,@dataw) then begin
     result:= gue_ok;
    end;
   end;
@@ -497,7 +540,7 @@ begin
     cbsize:= sizeof(dataw);
     wnd:= child.id;
    end;
-   if shell_notifyicon(nim_delete,@dataw) then begin
+   if shell_notifyiconw(nim_delete,@dataw) then begin
     result:= gue_ok;
    end;
   end;
