@@ -1864,6 +1864,8 @@ type
    procedure setcontainer(const avalue: winidty);
    procedure containerwindestroyed(const aid: winidty);
    procedure setsyscontainer(const avalue: syswindowty);
+   function getscreenpos: pointty;
+   procedure setscreenpos(const avalue: pointty);
   protected
    fwindow: windowty;
    fcontainer: winidty;
@@ -1959,7 +1961,7 @@ type
    property syscontainer: syswindowty read fsyscontainer 
                                     write setsyscontainer default sywi_none;
 
-
+   property screenpos: pointty read getscreenpos write setscreenpos;
    property decoratedwidgetrect: rectty read getdecoratedwidgetrect 
                                      write setdecoratedwidgetrect;
    property decoratedpos: pointty read getdecoratedpos
@@ -7738,13 +7740,15 @@ end;
 function twidget.getscreenpos: pointty;
 begin
  updateroot;
- result:= addpoint(frootpos,fwindow.fowner.fwidgetrect.pos);
+// result:= addpoint(frootpos,fwindow.fowner.fwidgetrect.pos);
+ result:= addpoint(frootpos,fwindow.screenpos);
 end;
 
 procedure twidget.setscreenpos(const avalue: pointty);
 begin
  updateroot;
- fwindow.fowner.pos:= subpoint(avalue,frootpos);
+// fwindow.fowner.pos:= subpoint(avalue,frootpos);
+ fwindow.screenpos:= subpoint(avalue,frootpos);
 end;
 
 function twidget.clientpostowidgetpos(const apos: pointty): pointty;
@@ -12949,6 +12953,34 @@ begin
    guierror(gui_docktosyswindow(fwindow,avalue));
    fsyscontainer:= avalue;
   end;
+ end;
+end;
+
+function twindow.getscreenpos: pointty;
+var
+ rect1: rectty;
+begin
+ if not (wo_embedded in foptions) then begin
+  result:= fowner.pos;
+ end
+ else begin
+  guierror(gui_getwindowrect(winid,rect1));
+  result:= rect1.pos;
+ end;
+end;
+
+procedure twindow.setscreenpos(const avalue: pointty);
+var
+ pt1: pointty;
+begin
+ if not (wo_embedded in foptions) then begin
+  fowner.pos:= avalue;
+ end
+ else begin
+  pt1:= screenpos;
+  pt1.x:= avalue.x - pt1.x + fowner.bounds_x;
+  pt1.y:= avalue.y - pt1.y + fowner.bounds_y;
+  fowner.pos:= pt1;
  end;
 end;
 
