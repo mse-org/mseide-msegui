@@ -91,6 +91,8 @@ const
  msemessage = wm_user + $3694;
  wakeupmessage = msemessage + 1;
  destroymessage = msemessage + 2;
+ traycallbackmessage = msemessage + 3;
+ 
  mouseidletime = 100; //milliseconds
  capstyles: array[capstylety] of longword =
        (ps_endcap_flat,ps_endcap_round,ps_endcap_square);
@@ -407,7 +409,6 @@ begin
 end;
 
 const
- traycallbackmessage = wm_user + 937852;
  NIF_MESSAGE = $00000001;
  NIF_ICON = $00000002;
  NIF_TIP = $00000004;
