@@ -1224,7 +1224,8 @@ function placepopuprect(const awindow: twindow; const adest: rectty; //screenori
  //todo
 function placepopuprect(const awidget: twidget; const adest: rectty; //clientorig
                  const placement: captionposty; const asize: sizety): rectty; overload;
-procedure getwindowicon(const abitmap: tmaskedbitmap; out aicon,amask: pixmapty);
+procedure getwindowicon(const abitmap: tmaskedbitmap; out aicon,amask: pixmapty;
+                        const anodefault: boolean = false);
 {
 procedure buttonoptionstoshapestate(avalue: buttonoptionsty;
                                               var astate: shapestatesty);
@@ -1441,7 +1442,8 @@ begin
                translateclientpoint(nullpoint,awidget,nil)),placement,asize);
 end;
 
-procedure getwindowicon(const abitmap: tmaskedbitmap; out aicon,amask: pixmapty);
+procedure getwindowicon(const abitmap: tmaskedbitmap; out aicon,amask: pixmapty;
+                        const anodefault: boolean = false);
 var
  bmp: tmaskedbitmap;
 begin
@@ -1461,7 +1463,7 @@ begin
    end;
   end;
  end;
- if aicon = 0 then begin
+ if (aicon = 0) and not anodefault then begin
   getwindowicon(stockobjects.mseicon,aicon,amask);
  end;
 end;

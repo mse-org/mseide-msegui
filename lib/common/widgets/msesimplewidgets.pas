@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -23,7 +23,8 @@ const
  defaultbuttonwidth = 50;
  defaultbuttonheight = 20;
  defaultlabeltextflags = [tf_ycentered];
- defaultlabeloptionswidget = (defaultoptionswidget + [ow_fontglyphheight{,ow_autosize}]) - 
+ defaultlabeloptionswidget = (defaultoptionswidget + 
+                            [ow_fontglyphheight{,ow_autosize}]) - 
               [ow_mousefocus,ow_tabfocus,ow_arrowfocus];
  defaultlabeloptionswidget1 = [ow1_autowidth,ow1_autoheight];
  defaultlabelwidgetwidth = 100;

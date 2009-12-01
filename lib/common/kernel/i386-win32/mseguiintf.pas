@@ -407,9 +407,9 @@ type
      PNotifyIconData = PNotifyIconDataA;
      
 function Shell_NotifyIconA(dwMessage: DWORD; lpData: PNotifyIconDataA): BOOL;
-                 external 'shell32' name 'Shell_NotifyIconA';
+                 external 'shell32.dll' name 'Shell_NotifyIconA';
 function Shell_NotifyIconW(dwMessage: DWORD; lpData: PNotifyIconDataW): BOOL;
-                 external 'shell32' name 'Shell_NotifyIconW';
+                 external 'shell32.dll' name 'Shell_NotifyIconW';
 {$endif}
 {
 var
@@ -450,103 +450,6 @@ function checkshellinterface: guierrorty;
 begin
  result:= gue_ok;
 end;
-
-const
- NIF_MESSAGE = $00000001;
- NIF_ICON = $00000002;
- NIF_TIP = $00000004;
- NIF_STATE = $00000008;
- NIF_INFO = $00000010;
- NIF_GUID = $00000020;
-
- NIIF_NONE = $00000000;
- NIIF_INFO = $00000001;
- NIIF_WARNING = $00000002;
- NIIF_ERROR = $00000003;
- NIIF_USER = $00000004;
- NIIF_NOSOUND = $00000010;
- NIIF_LARGE_ICON = $00000010;
- NIIF_RESPECT_QUIET_TIME = $00000080;
- NIIF_ICON_MASK = $0000000F;
-
- NIM_ADD = $00000000;
- NIM_MODIFY = $00000001;
- NIM_DELETE = $00000002;
- NIM_SETFOCUS = $00000003;
- NIM_SETVERSION = $00000004;
-
-type
- iconunionty = record
-  case boolean of
-   false: (uTimeout: UINT);
-   true: (uVersion: UINT); // Used with Shell_NotifyIcon flag NIM_SETVERSION.
- end;
- NOTIFYICONDATAW_2 = record
-  cbSize: DWORD;
-  Wnd: HWND;
-  uID: UINT;
-  uFlags: UINT;
-  uCallbackMessage: UINT;
-  hIcon: HICON;
-  szTip: array [0..127] of widechar;
-  dwState: DWORD;
-  dwStateMask: DWORD;
-  szInfo: array[0..255] of widechar;
-  u: iconunionty;
-  szInfoTitle: array[0..63] of widechar;
-  dwInfoFlags: DWORD;
- end;
- 
-function docktotray(var child: windowty): guierrorty;
-var
- dataa: notifyicondataa;
- dataw: notifyicondataw_2;
-begin
- result:= checkshellinterface;
- if result = gue_ok then begin
-  result:= gue_notraywindow;
-  if iswin95 then begin
-  end
-  else begin
-   fillchar(dataw,sizeof(dataw),0);
-   with dataw do begin
-    cbsize:= sizeof(dataw);
-    wnd:= child.id;
-    uflags:= nif_message;
-    ucallbackmessage:= traycallbackmessage;   
-    u.uversion:= 0;//notifyicon_version;
-   end;
-   if shell_notifyiconw(nim_add,@dataw) and
-               shell_notifyiconw(nim_setversion,@dataw) then begin
-    result:= gue_ok;
-   end;
-  end;
- end;
-end;
-
-function undockfromtray(var child: windowty): guierrorty;
-var
- dataa: notifyicondataa;
- dataw: notifyicondataw_2;
-begin
- result:= checkshellinterface;
- if result = gue_ok then begin
-  result:= gue_notraywindow;
-  if iswin95 then begin
-  end
-  else begin
-   fillchar(dataw,sizeof(dataw),0);
-   with dataw do begin
-    cbsize:= sizeof(dataw);
-    wnd:= child.id;
-   end;
-   if shell_notifyiconw(nim_delete,@dataw) then begin
-    result:= gue_ok;
-   end;
-  end;
- end;
-end;
-
 function mrect(aleft,atop,aright,abottom: integer): trect;
 begin
  with result do begin
@@ -4198,10 +4101,9 @@ const
  wheelstep = 120;
 var
  rect1,rect2,rect3: rectty;
- pt1: pointty;
+ pt1,pt2: pointty;
  size1: sizety;
  button: mousebuttonty;
- po1: pointty;
  key1: keyty;
  str1: string;
  int1: integer;
@@ -4231,6 +4133,24 @@ begin
    eventlist.add(nil);
    exit;
   end;
+  traycallbackmessage: begin
+   gui_getwindowrect(ahwnd,rect1);
+   pt1.x:= rect1.cx div 2;
+   pt1.y:= rect1.cy div 2;
+   case lparam and $ffff of
+    wm_rbuttondown: begin
+     windows.getcursorpos(tpoint(pt2));
+     gui_reposwindow(ahwnd,makerect(pt2.x - pt1.x, pt2.y - pt1.y,rect1.cx,rect1.cy));
+     eventlist.add(tmouseevent.create(ahwnd,false,mb_right,mw_none,pt1,
+                                                     [ss_right],timestamp));
+                                                     
+    end;
+    wm_rbuttonup: begin
+     eventlist.add(tmouseevent.create(ahwnd,true,mb_right,mw_none,pt1,
+                                                     [ss_right],timestamp));
+    end;
+   end;
+  end;     
   wm_ime_char: begin
    if iswin95 then begin
     str1:= char(wparam);
@@ -4351,16 +4271,16 @@ begin
   wm_mousewheel: begin
    if mousewindow <> 0 then begin
     shiftstate:= wheelkeystatetoshiftstate(wparam);
-    po1:= winmousepostopoint(lparam);
-    subpoint1(po1,getclientrect(mousewindow).pos);
+    pt1:= winmousepostopoint(lparam);
+    subpoint1(pt1,getclientrect(mousewindow).pos);
     inc(mousewheelpos,smallint(hiword(wparam)));
     while mousewheelpos >= wheelstep do begin
-    eventlist.add(tmouseevent.create(mousewindow,false,mb_none,mw_up,po1,
+    eventlist.add(tmouseevent.create(mousewindow,false,mb_none,mw_up,pt1,
             winmousekeyflagstoshiftstate(wparam),timestamp));
      dec(mousewheelpos,wheelstep);
     end;
     while mousewheelpos <= -wheelstep do begin
-     eventlist.add(tmouseevent.create(mousewindow,false,mb_none,mw_down,po1,
+     eventlist.add(tmouseevent.create(mousewindow,false,mb_none,mw_down,pt1,
             winmousekeyflagstoshiftstate(wparam),timestamp));
      inc(mousewheelpos,wheelstep);
     end;
@@ -4371,8 +4291,8 @@ begin
   wm_mousemove,
   wm_lbuttondown,wm_mbuttondown,wm_rbuttondown,
   wm_lbuttonup,wm_mbuttonup,wm_rbuttonup: begin
-   po1:= winmousepostopoint(lparam);
-   checkmousewindow(ahwnd,po1);
+   pt1:= winmousepostopoint(lparam);
+   checkmousewindow(ahwnd,pt1);
    button:= mb_none;
    case msg of
     wm_lbuttondown,wm_lbuttonup: button:= mb_left;
@@ -4381,7 +4301,7 @@ begin
    end;
    eventlist.add(tmouseevent.create(ahwnd,
         (msg = wm_lbuttonup) or (msg = wm_mbuttonup) or (msg = wm_rbuttonup),
-         button,mw_none,po1,
+         button,mw_none,pt1,
            winmousekeyflagstoshiftstate(wparam),timestamp));
    result:= 0;
    exit;
@@ -4732,58 +4652,6 @@ begin
  end;
 end;
 
-function gui_showsysdock(var awindow: windowty): guierrorty;
-begin
- result:= gui_hidewindow(awindow.id);
-end;
-
-function gui_hidesysdock(var awindow: windowty): guierrorty;
-begin
- result:= gui_hidewindow(awindow.id);
-end;
-
-function gui_docktosyswindow(var child: windowty;
-                                   const akind: syswindowty): guierrorty;
-var
- rect1: rectty;
- pt1: pointty;
-begin
- gui_hidewindow(child.id);
- if akind = sywi_none then begin
-  getwindowrectpa(child.id,rect1,pt1);
-  result:= gui_reparentwindow(child.id,0,subpoint(rect1.pos,pt1));
- end
- else begin
-  result:= gue_windownotfound;
-  case akind of
-   sywi_tray: begin
-    result:= docktotray(child);
-   end;
-  end;
- end;
-end;
-
-function gui_undockfromsyswindow(var child: windowty): guierrorty;
-                    //hides window
-begin
- gui_hidewindow(child.id);
- result:= undockfromtray(child);
-end;
-
-function gui_traymessage(var awindow: windowty; const message: msestring;
-                          out messageid: longword;
-                          const timeoutms: longword = 0): guierrorty;
-begin
- messageid:= 0;
- result:= gue_notimplemented;
-end;
-
-function gui_canceltraymessage(var awindow: windowty;
-                          const messageid: longword): guierrorty;
-begin
- result:= gue_notimplemented;
-end;
-
 type
  enumchildinfoty = record
   childlist: winidarty;
@@ -4836,6 +4704,249 @@ begin
  else begin
   result:= nullrect;                            
  end;
+end;
+
+
+const
+ NIF_MESSAGE = $00000001;
+ NIF_ICON = $00000002;
+ NIF_TIP = $00000004;
+ NIF_STATE = $00000008;
+ NIF_INFO = $00000010;
+ NIF_GUID = $00000020;
+
+ NIIF_NONE = $00000000;
+ NIIF_INFO = $00000001;
+ NIIF_WARNING = $00000002;
+ NIIF_ERROR = $00000003;
+ NIIF_USER = $00000004;
+ NIIF_NOSOUND = $00000010;
+ NIIF_LARGE_ICON = $00000010;
+ NIIF_RESPECT_QUIET_TIME = $00000080;
+ NIIF_ICON_MASK = $0000000F;
+
+ NIM_ADD = $00000000;
+ NIM_MODIFY = $00000001;
+ NIM_DELETE = $00000002;
+ NIM_SETFOCUS = $00000003;
+ NIM_SETVERSION = $00000004;
+
+type
+ iconunionty = record
+  case boolean of
+   false: (uTimeout: UINT);
+   true: (uVersion: UINT); // Used with Shell_NotifyIcon flag NIM_SETVERSION.
+ end;
+ NOTIFYICONDATAW_2 = record
+  cbSize: DWORD;
+  Wnd: HWND;
+  uID: UINT;
+  uFlags: UINT;
+  uCallbackMessage: UINT;
+  hIcon: HICON;
+  szTip: array [0..127] of widechar;
+  dwState: DWORD;
+  dwStateMask: DWORD;
+  szInfo: array[0..255] of widechar;
+  u: iconunionty;
+  szInfoTitle: array[0..63] of widechar;
+  dwInfoFlags: DWORD;
+ end;
+
+function traycommand(var child: windowty; 
+                       const command: integer; const flags: integer = 0;
+                             const CallbackMessage: UINT = 0;
+                             const Icon: HICON = 0;
+                             const Tip: msestring = '';
+                             const State: DWORD = 0;
+                             const StateMask: DWORD = 0;
+                             const Info: msestring = '';
+                             const Timeout: UINT = 0;
+                             const Version: UINT = 0;
+                             const InfoTitle: msestring = '';
+                             const InfoFlags: DWORD = 0): guierrorty;
+
+// traycommand(child,command,flags,0,0,'',0,0,'',0,0,'',0);
+
+ procedure movestr(const source: msestring; var dest; const acount: integer);
+ var
+  int1: integer;
+ begin
+  int1:= length(source);
+  if int1 > acount then begin
+   int1:= acount;
+  end;
+  move(source[1],dest,int1*sizeof(widechar));
+ end;
+ 
+var
+ dataa: notifyicondataa;
+ dataw: notifyicondataw_2;
+ int1: integer;
+begin
+ result:= checkshellinterface;
+ if result = gue_ok then begin
+  result:= gue_notraywindow;
+  if iswin95 then begin
+  end
+  else begin
+   fillchar(dataw,sizeof(dataw),0);
+   with dataw do begin
+    cbsize:= sizeof(dataw);
+    wnd:= child.id;
+    uflags:= flags;
+    uCallbackMessage:= CallbackMessage;
+    hIcon:= Icon;
+    movestr(tip,szTip,sizeof(szTip));
+    dwState:= State;
+    dwStateMask:= StateMask;
+    movestr(Info,szInfo,256);
+    if command = nim_setversion then begin
+     u.uVersion:= version;
+    end
+    else begin
+     u.uTimeout:= Timeout;
+    end;
+    movestr(InfoTitle,szInfoTitle,64);
+    dwInfoFlags:= InfoFlags;
+   end;
+   if shell_notifyiconw(command,@dataw) then begin
+    result:= gue_ok;
+   end;
+  end;
+ end;
+end;
+
+function docktotray(var child: windowty): guierrorty;
+begin
+ result:= traycommand(child,nim_add,nif_message,traycallbackmessage);
+ if result = gue_ok then begin
+  result:= traycommand(child,nim_setversion,0,0,0,'',0,0,'',0,0);
+ end;
+end;
+
+function undockfromtray(var child: windowty): guierrorty;
+begin
+ result:= traycommand(child,nim_delete);
+end;
+
+{                  
+function docktotray(var child: windowty): guierrorty;
+var
+ dataa: notifyicondataa;
+ dataw: notifyicondataw_2;
+begin
+ result:= checkshellinterface;
+ if result = gue_ok then begin
+  result:= gue_notraywindow;
+  if iswin95 then begin
+  end
+  else begin
+   fillchar(dataw,sizeof(dataw),0);
+   with dataw do begin
+    cbsize:= sizeof(dataw);
+    wnd:= child.id;
+    uflags:= nif_message;
+    ucallbackmessage:= traycallbackmessage;   
+    u.uversion:= 0;//notifyicon_version;
+   end;
+   if shell_notifyiconw(nim_add,@dataw) and
+               shell_notifyiconw(nim_setversion,@dataw) then begin
+    result:= gue_ok;
+   end;
+  end;
+ end;
+end;
+
+function undockfromtray(var child: windowty): guierrorty;
+var
+ dataa: notifyicondataa;
+ dataw: notifyicondataw_2;
+begin
+ result:= checkshellinterface;
+ if result = gue_ok then begin
+  result:= gue_notraywindow;
+  if iswin95 then begin
+  end
+  else begin
+   fillchar(dataw,sizeof(dataw),0);
+   with dataw do begin
+    cbsize:= sizeof(dataw);
+    wnd:= child.id;
+   end;
+   if shell_notifyiconw(nim_delete,@dataw) then begin
+    result:= gue_ok;
+   end;
+  end;
+ end;
+end;
+}
+function gui_showsysdock(var awindow: windowty): guierrorty;
+begin
+ result:= gui_hidewindow(awindow.id);
+end;
+
+function gui_hidesysdock(var awindow: windowty): guierrorty;
+begin
+ result:= gui_hidewindow(awindow.id);
+end;
+
+function gui_docktosyswindow(var child: windowty;
+                                   const akind: syswindowty): guierrorty;
+var
+ rect1: rectty;
+ pt1: pointty;
+begin
+ gui_hidewindow(child.id);
+ if akind = sywi_none then begin
+  result:= undockfromtray(child);
+  getwindowrectpa(child.id,rect1,pt1);
+  result:= gui_reparentwindow(child.id,0,subpoint(rect1.pos,pt1));
+ end
+ else begin
+  result:= gue_windownotfound;
+  case akind of
+   sywi_tray: begin
+    result:= docktotray(child);
+   end;
+  end;
+ end;
+end;
+{
+function gui_undockfromsyswindow(var child: windowty): guierrorty;
+                    //hides window
+begin
+ gui_hidewindow(child.id);
+ result:= undockfromtray(child);
+end;
+}
+function gui_traymessage(var awindow: windowty; const message: msestring;
+                          out messageid: longword;
+                          const timeoutms: longword = 0): guierrorty;
+begin
+ messageid:= 0;
+ result:= gue_notimplemented;
+end;
+
+function gui_canceltraymessage(var awindow: windowty;
+                          const messageid: longword): guierrorty;
+begin
+ result:= gue_notimplemented;
+end;
+
+function gui_settrayicon(var awindow: windowty;
+                                     const icon,mask: pixmapty): guierrorty;
+var
+ ico,ico1: hicon;
+begin
+ ico:= 0;
+ if icon <> 0 then begin
+  ico:= composeicon(icon,mask);
+  if ico = 0 then begin
+   exit;
+  end;
+ end;
+ result:= traycommand(awindow,nim_modify,nif_icon,0,ico);
 end;
 
 function gui_initcolormap: guierrorty;

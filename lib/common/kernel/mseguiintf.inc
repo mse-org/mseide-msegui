@@ -50,6 +50,8 @@ function gui_traymessage(var awindow: windowty; const message: msestring;
                           const timeoutms: longword = 0): guierrorty;
 function gui_canceltraymessage(var awindow: windowty;
                           const messageid: longword): guierrorty;
+function gui_settrayicon(var awindow: windowty;
+                                     const icon,mask: pixmapty): guierrorty;
 
 function gui_creategc(paintdevice: paintdevicety; const akind: gckindty;
                 var gc: gcty; const aprintername: msestring = ''): guierrorty;
