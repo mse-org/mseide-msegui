@@ -2028,10 +2028,9 @@ end;
 
 function tcustomdataedit.nullcheckneeded(const newfocus: twidget): boolean;
 begin
- if newfocus = self then begin
-  result:= false;
- end
- else begin
+ result:= false;
+ if (newfocus <> self) and not ((oe_checkmrcancel in foptionsedit) and 
+                            (window.modalresult = mr_cancel)) then begin
   if fgridintf = nil then begin
    result:= newfocus = nil;
   end
