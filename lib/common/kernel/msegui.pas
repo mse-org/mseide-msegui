@@ -13298,6 +13298,7 @@ begin
  if fmousecapturewidget = nil then begin
   setmousewidget(nil);
   widgetcursorshape:= cr_default;
+  fhintedwidget:= nil;
 //  cursorshape:= cr_default;
  end
  else begin
@@ -13508,6 +13509,9 @@ begin
         end;
        end;
       end;
+     end;
+     if kind in [ek_buttonpress,ek_buttonrelease] then begin
+      deactivatehint; //cancel possible hint
      end;
      if (widget1 <> fhintedwidget) then begin
       if (widget1 <> fhintwidget) and
