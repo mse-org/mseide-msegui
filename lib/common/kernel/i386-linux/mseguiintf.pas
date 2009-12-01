@@ -3488,6 +3488,12 @@ begin
  result:= gue_notimplemented;
 end;
 
+function gui_settrayicon(var awindow: windowty;
+                                     const icon,mask: pixmapty): guierrorty;
+begin
+ result:= gui_setwindowicon(awindow.id,icon,mask);
+end;
+
 function gui_creategc(paintdevice: paintdevicety; const akind: gckindty;
      var gc: gcty; const aprintername: msestring = ''): guierrorty;
 begin
