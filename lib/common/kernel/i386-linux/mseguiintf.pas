@@ -3493,6 +3493,12 @@ begin
  result:= gui_setwindowicon(awindow.id,icon,mask);
 end;
 
+function gui_settrayhint(var awindow: windowty;
+                                     const hint: msestring): guierrorty;
+begin
+ result:= gue_ok; //dummy
+end;
+
 function gui_creategc(paintdevice: paintdevicety; const akind: gckindty;
      var gc: gcty; const aprintername: msestring = ''): guierrorty;
 begin
