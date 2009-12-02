@@ -826,7 +826,7 @@ var
  lasteventtime: ttime;
 // lastshiftstate: shiftstatesty;
  clipboard: msestring;
- fidnum: longword;
+ fidnum: integer;
  
 function getidnum: longword;
 begin
