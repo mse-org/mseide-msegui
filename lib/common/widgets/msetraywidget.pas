@@ -3,7 +3,7 @@ unit msetraywidget;
 interface
 uses
  mseclasses,classes,msesimplewidgets,mseguiglob,msebitmap,msegui,mseevent,
- mseglob,msegraphics,msestrings;
+ mseglob,msegraphics,msestrings,msetimer;
 type
  ttraywidget = class(teventwidget)
   private
@@ -12,10 +12,14 @@ type
    fimagelist: timagelist;
    fimagenum: integer;
    fmessageid: longword;
+   ftimer: tsimpletimer;
+   fcaption: msestring;
    procedure seticon(const avalue: tmaskedbitmap);
    procedure setimagelist(const avalue: timagelist);
    procedure setimagenum(const avalue: integer);
+   procedure setcaption(const avalue: msestring);
   protected
+   procedure dotimer(const sender: tobject);
    procedure settrayhint;
    procedure sethint(const avalue: msestring); override;
    procedure dopaint(const acanvas: tcanvas); override;
@@ -29,12 +33,13 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   procedure showmessage(const amessage: msestring; const timeoutms: integer);
+   procedure showmessage(const amessage: msestring; const timeoutms: integer = 0);
    procedure cancelmessage;
   published
    property icon: tmaskedbitmap read ficon write seticon;
    property imagelist: timagelist read fimagelist write setimagelist;
    property imagenum: integer read fimagenum write setimagenum default -1;
+   property caption: msestring read fcaption write setcaption;
  end;
  
 implementation
@@ -54,6 +59,7 @@ end;
 destructor ttraywidget.destroy;
 begin
  visible:= false;
+ freeandnil(ftimer);
  ficon.free;
  inherited;
 end;
@@ -77,6 +83,7 @@ begin
                                            (avalue <> visible) then begin
   if avalue then begin
    dock;
+   setcaption(fcaption);
    iconchanged(nil);
    settrayhint;
    inherited;
@@ -198,15 +205,34 @@ procedure ttraywidget.showmessage(const amessage: msestring;
 begin
  if visible then begin
   cancelmessage;
-  gui_traymessage(windowpo^,amessage,fmessageid,timeoutms);
+  if amessage <> '' then begin
+   gui_traymessage(windowpo^,amessage,fmessageid,timeoutms);
+   if timeoutms > 0 then begin
+    ftimer:= tsimpletimer.create(-timeoutms*1000,{$ifdef FPC}@{$endif}dotimer,true);
+   end;
+  end;
  end;
 end;
 
 procedure ttraywidget.cancelmessage;
 begin
  if fmessageid <> 0 then begin
+  freeandnil(ftimer);
   gui_canceltraymessage(windowpo^,fmessageid);
   fmessageid:= 0;
+ end;
+end;
+
+procedure ttraywidget.dotimer(const sender: tobject);
+begin
+ cancelmessage;
+end;
+
+procedure ttraywidget.setcaption(const avalue: msestring);
+begin
+ fcaption:= avalue;
+ if ownswindow then begin
+  window.caption:= fcaption;
  end;
 end;
 

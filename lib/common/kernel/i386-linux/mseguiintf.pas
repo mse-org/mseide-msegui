@@ -3390,10 +3390,12 @@ var
  at1: atom;
 begin
  result:= gue_notraywindow;
- at1:= netatoms[net_system_tray_opcode];
- if (at1 <> 0) and sendnetcardinalmessage(dest,at1,awindow,
-               [lasteventtime,opcode,data1,data2,data3]) then begin
-  result:= gue_ok;
+ if dest <> 0 then begin
+  at1:= netatoms[net_system_tray_opcode];
+  if (at1 <> 0) and sendnetcardinalmessage(dest,at1,awindow,
+                [lasteventtime,opcode,data1,data2,data3]) then begin
+   result:= gue_ok;
+  end;
  end;
 end;
 
@@ -3458,7 +3460,7 @@ begin
   int1:= length(str1);
   str1:= str1 + #0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0;
   result:= sendtraymessage(win1,awindow.id,system_tray_begin_message,timeoutms,
-                     length(str1),messageid);
+                     int1,messageid);
   fillchar(event1,sizeof(event1),0);
   with event1 do begin
    xtype:= clientmessage;
@@ -3473,7 +3475,7 @@ begin
     int1:= int1 - 20;
     if xsendevent(appdisp,win1,
             {$ifdef xboolean}false{$else}0{$endif},
-            structurenotifymask{noeventmask},@event1) = 0 then begin
+            structurenotifymask or substructurenotifymask{noeventmask},@event1) = 0 then begin
      result:= gue_sendevent;
     end;
    end;
@@ -3484,7 +3486,8 @@ end;
 function gui_canceltraymessage(var awindow: windowty;
                           const messageid: longword): guierrorty;
 begin
- result:= gue_notimplemented;
+ result:= sendtraymessage(getsyswin(sywi_tray),awindow.id,
+                                system_tray_cancel_message,messageid,0,0);
 end;
 
 function gui_settrayicon(var awindow: windowty;
