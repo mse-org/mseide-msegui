@@ -228,6 +228,13 @@ type
    property transparency;
  end;
 
+ tcenteredbitmap = class(tmaskedbitmap)
+  public
+   constructor create(amonochrome: boolean);
+  published
+   property alignment default [al_xcentered,al_ycentered];
+ end;
+ 
  tbitmapcomp = class(tmsecomponent)
   private
    fbitmap: tmaskedbitmap;
@@ -2429,6 +2436,14 @@ begin
  else begin
   inherited;
  end;
+end;
+
+{ tcenteredbitmap }
+
+constructor tcenteredbitmap.create(amonochrome: boolean);
+begin
+ inherited;
+ alignment:= [al_xcentered,al_ycentered];
 end;
 
 end.

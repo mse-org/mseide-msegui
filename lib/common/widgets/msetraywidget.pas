@@ -51,7 +51,7 @@ uses
 constructor ttraywidget.create(aowner: tcomponent);
 begin
  fimagenum:= -1;
- ficon:= tmaskedbitmap.create(false);
+ ficon:= tcenteredbitmap.create(false);
  ficon.onchange:= {$ifdef FPC}@{$endif}iconchanged;
  inherited;
 end;
@@ -182,12 +182,11 @@ procedure ttraywidget.dopaint(const acanvas: tcanvas);
 begin
  inherited;
  if (fimagelist <> nil) and (fimagenum >= 0) then begin
-  fimagelist.paint(acanvas,fimagenum,innerclientrect,
-                                           [al_xcentered,al_ycentered]);
+  fimagelist.paint(acanvas,fimagenum,innerclientrect,ficon.alignment);
  end
  else begin
   if not ficon.isempty then begin
-   ficon.paint(acanvas,innerclientrect,[al_xcentered,al_ycentered]);
+   ficon.paint(acanvas,innerclientrect,ficon.alignment);
   end;
  end;
 end;
