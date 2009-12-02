@@ -3396,7 +3396,7 @@ begin
   result:= gue_ok;
  end;
 end;
-var testvar: integer;
+
 function gui_docktosyswindow(var child: windowty;
                                    const akind: syswindowty): guierrorty;
 var
@@ -3434,7 +3434,6 @@ begin
     sleep(5);
     inc(int1);
    end;
-   testvar:= gui_getparentwindow(child.id);
   end; 
  end;
 end;

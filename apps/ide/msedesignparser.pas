@@ -563,7 +563,7 @@ begin
   end;
  end;
 end;
-var testvar1,testvar2: string;
+
 function parametersmatch1(const a,b: methodparaminfoty): boolean;
 var
  int1: integer;
@@ -572,8 +572,6 @@ begin
  if result then begin
   for int1:= 0 to high(a.params) do begin
    with a.params[int1] do begin
-testvar1:= typename;
-testvar2:= b.params[int1].typename;
     if (flags*[pfvar,pfconst,pfout] <> b.params[int1].flags*[pfvar,pfconst,pfout]) or
            (stringicomp(typename,b.params[int1].typename) <> 0) then begin
      result:= false;

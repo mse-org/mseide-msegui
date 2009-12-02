@@ -1475,6 +1475,7 @@ type
    procedure internalcreatefont; virtual;
 
    function getclientrect: rectty;
+   function windowpo: pwindowty;
   public
    constructor create(aowner: tcomponent); overload; override;
    constructor create(const aowner: tcomponent; 
@@ -7991,6 +7992,12 @@ begin
  end;
 end;
 
+function twidget.windowpo: pwindowty;
+begin
+ window.checkwindow(false);
+ result:= @fwindow.fwindow;
+end;
+
 function twidget.innerclientpos: pointty;
 begin
  if frame <> nil then begin
@@ -11645,7 +11652,8 @@ procedure twindow.internalactivate(const windowevent: boolean;
    appinst.ffocuslockwindow:= self;
    appinst.ffocuslocktransientfor:= ftransientfor;
   end;
-  if appinst.ffocuslockwindow = nil then begin
+  if (appinst.ffocuslockwindow = nil) or 
+                        (appinst.ffocuslockwindow = self) then begin
    guierror(gui_setwindowfocus(fwindow.id),self);
   end;
  end;
@@ -14174,6 +14182,7 @@ begin
  end;
  bo1:= ismainthread and unlock;
  try
+  sender.activate;  
   result:= eventloop(sender);
  finally
   if bo1 then begin

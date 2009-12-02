@@ -3,7 +3,7 @@ unit msetraywidget;
 interface
 uses
  mseclasses,classes,msesimplewidgets,mseguiglob,msebitmap,msegui,mseevent,
- mseglob,msegraphics;
+ mseglob,msegraphics,msestrings;
 type
  ttraywidget = class(teventwidget)
   private
@@ -11,10 +11,13 @@ type
    ficonchanging: integer;
    fimagelist: timagelist;
    fimagenum: integer;
+   fmessageid: longword;
    procedure seticon(const avalue: tmaskedbitmap);
    procedure setimagelist(const avalue: timagelist);
    procedure setimagenum(const avalue: integer);
   protected
+   procedure settrayhint;
+   procedure sethint(const avalue: msestring); override;
    procedure dopaint(const acanvas: tcanvas); override;
    procedure objectevent(const sender: tobject;
                             const event: objecteventty); override;
@@ -26,6 +29,8 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure showmessage(const amessage: msestring; const timeoutms: integer);
+   procedure cancelmessage;
   published
    property icon: tmaskedbitmap read ficon write seticon;
    property imagelist: timagelist read fimagelist write setimagelist;
@@ -36,9 +41,6 @@ implementation
 uses
  mseguiintf,sysutils,msewidgets;
 
-type
- twindow1 = class(twindow);
- 
 { ttraywidget }
 
 constructor ttraywidget.create(aowner: tcomponent);
@@ -76,9 +78,11 @@ begin
   if avalue then begin
    dock;
    iconchanged(nil);
+   settrayhint;
    inherited;
   end
   else begin
+   cancelmessage;
    inherited;
    undock;
   end;
@@ -106,6 +110,13 @@ begin
  ficon.assign(avalue);
 end;
 
+procedure ttraywidget.settrayhint;
+begin
+ if ownswindow then begin
+  gui_settrayhint(windowpo^,hint);
+ end;
+end;
+
 procedure ttraywidget.iconchanged(const sender: tobject);
 var
  icon1,mask1: pixmapty;
@@ -127,7 +138,7 @@ begin
     bmp1.colormask:= false;
     if ownswindow and not (csdesigning in componentstate) then begin
      getwindowicon(bmp1,icon1,mask1,true);
-     gui_settrayicon(twindow1(window).fwindow,icon1,mask1);
+     gui_settrayicon(windowpo^,icon1,mask1);
     end;
    finally
     dec(ficonchanging); 
@@ -171,6 +182,31 @@ begin
   if not ficon.isempty then begin
    ficon.paint(acanvas,innerclientrect,[al_xcentered,al_ycentered]);
   end;
+ end;
+end;
+
+procedure ttraywidget.sethint(const avalue: msestring);
+begin
+ inherited;
+ if not (csloading in componentstate) then begin
+  settrayhint;
+ end;
+end;
+
+procedure ttraywidget.showmessage(const amessage: msestring;
+               const timeoutms: integer);
+begin
+ if visible then begin
+  cancelmessage;
+  gui_traymessage(windowpo^,amessage,fmessageid,timeoutms);
+ end;
+end;
+
+procedure ttraywidget.cancelmessage;
+begin
+ if fmessageid <> 0 then begin
+  gui_canceltraymessage(windowpo^,fmessageid);
+  fmessageid:= 0;
  end;
 end;
 

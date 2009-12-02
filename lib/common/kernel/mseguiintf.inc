@@ -52,6 +52,8 @@ function gui_canceltraymessage(var awindow: windowty;
                           const messageid: longword): guierrorty;
 function gui_settrayicon(var awindow: windowty;
                                      const icon,mask: pixmapty): guierrorty;
+function gui_settrayhint(var awindow: windowty;
+                                     const hint: msestring): guierrorty;
 
 function gui_creategc(paintdevice: paintdevicety; const akind: gckindty;
                 var gc: gcty; const aprintername: msestring = ''): guierrorty;

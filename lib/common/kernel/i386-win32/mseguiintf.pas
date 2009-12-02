@@ -1059,7 +1059,7 @@ end;
 
 function gui_setwindowfocus(id: winidty): guierrorty;
 begin
- windows.SetFocus(id);
+ setfocus(id);
  result:= gue_ok;
 end;
 
@@ -4150,6 +4150,7 @@ begin
                                                      [ss_right],timestamp));
     end;
    end;
+   exit;
   end;     
   wm_ime_char: begin
    if iswin95 then begin
@@ -4393,14 +4394,6 @@ begin
   while peekmessagea(msg,0,0,0,pm_remove) do begin
    with msg do begin
     case message of
-    {
-     msemessage: begin
-      eventlist.add(tevent(wparam));
-     end;
-     wakeupmessage: begin
-      eventlist.add(nil);
-     end;
-     }
      destroymessage: begin
       windows.destroywindow(msg.wparam);
      end;
@@ -4427,14 +4420,6 @@ begin
   while peekmessagew(msg,0,0,0,pm_remove) do begin
    with msg do begin
     case message of
-    {
-     msemessage: begin
-      eventlist.add(tevent(wparam));
-     end;
-     wakeupmessage: begin
-      eventlist.add(nil);
-     end;
-     }
      destroymessage: begin
       windows.destroywindow(msg.wparam);
      end;
@@ -4830,57 +4815,6 @@ begin
  result:= traycommand(child,nim_delete);
 end;
 
-{                  
-function docktotray(var child: windowty): guierrorty;
-var
- dataa: notifyicondataa;
- dataw: notifyicondataw_2;
-begin
- result:= checkshellinterface;
- if result = gue_ok then begin
-  result:= gue_notraywindow;
-  if iswin95 then begin
-  end
-  else begin
-   fillchar(dataw,sizeof(dataw),0);
-   with dataw do begin
-    cbsize:= sizeof(dataw);
-    wnd:= child.id;
-    uflags:= nif_message;
-    ucallbackmessage:= traycallbackmessage;   
-    u.uversion:= 0;//notifyicon_version;
-   end;
-   if shell_notifyiconw(nim_add,@dataw) and
-               shell_notifyiconw(nim_setversion,@dataw) then begin
-    result:= gue_ok;
-   end;
-  end;
- end;
-end;
-
-function undockfromtray(var child: windowty): guierrorty;
-var
- dataa: notifyicondataa;
- dataw: notifyicondataw_2;
-begin
- result:= checkshellinterface;
- if result = gue_ok then begin
-  result:= gue_notraywindow;
-  if iswin95 then begin
-  end
-  else begin
-   fillchar(dataw,sizeof(dataw),0);
-   with dataw do begin
-    cbsize:= sizeof(dataw);
-    wnd:= child.id;
-   end;
-   if shell_notifyiconw(nim_delete,@dataw) then begin
-    result:= gue_ok;
-   end;
-  end;
- end;
-end;
-}
 function gui_showsysdock(var awindow: windowty): guierrorty;
 begin
  result:= gui_hidewindow(awindow.id);
@@ -4923,15 +4857,23 @@ end;
 function gui_traymessage(var awindow: windowty; const message: msestring;
                           out messageid: longword;
                           const timeoutms: longword = 0): guierrorty;
+var
+ int1: integer;
 begin
- messageid:= 0;
- result:= gue_notimplemented;
+ messageid:= 1;
+ int1:= timeoutms;
+ if timeoutms = 0 then begin
+  int1:= bigint;
+ end;
+ result:= traycommand(awindow,nim_modify,nif_info,0,0,'',0,0,
+                                                     message,int1,0,'',0);
 end;
 
 function gui_canceltraymessage(var awindow: windowty;
                           const messageid: longword): guierrorty;
 begin
- result:= gue_notimplemented;
+ result:= traycommand(awindow,nim_modify,nif_info,0,0,'',0,0,
+                                                     '',0,0,'',0);
 end;
 
 function gui_settrayicon(var awindow: windowty;
@@ -4947,6 +4889,12 @@ begin
   end;
  end;
  result:= traycommand(awindow,nim_modify,nif_icon,0,ico);
+end;
+
+function gui_settrayhint(var awindow: windowty;
+                                     const hint: msestring): guierrorty;
+begin
+ result:= traycommand(awindow,nim_modify,nif_tip,0,0,hint);
 end;
 
 function gui_initcolormap: guierrorty;
