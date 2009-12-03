@@ -127,7 +127,7 @@ type
    function isimagenrdisabledstored: Boolean;
    procedure setcolorglyph(const avalue: colorty);
    function iscolorglyphstored: boolean;
-   procedure setcaptionpos(const avalue: captionposty);
+   procedure setimagepos(const avalue: imageposty);
    procedure setcaptiondist(const avalue: integer);
    procedure setautosize_cx(const avalue: integer);
    procedure setautosize_cy(const avalue: integer);
@@ -136,7 +136,10 @@ type
    function isshortcutstored: boolean;
    procedure setshortcut1(const avalue: shortcutty);
    function isshortcut1stored: boolean;
+   procedure readcaptionpos(reader: treader);
+   procedure settextflags(const avalue: textflagsty);
   protected
+   procedure defineproperties(filer: tfiler); override;
    procedure fontchanged; override;
    procedure setcolor(const avalue: colorty); override;
    //iactionlink
@@ -176,8 +179,12 @@ type
                                 default mr_none;
    property action: tcustomaction read factioninfo.action write setaction;   
    property caption: captionty read getcaption write setcaption stored iscaptionstored;
-   property captionpos: captionposty read finfo.ca.captionpos write setcaptionpos
-                              default cp_center;
+   property textflags: textflagsty read finfo.ca.textflags 
+                         write settextflags default defaultcaptiontextflags;
+   property imagepos: imageposty read finfo.ca.imagepos write setimagepos
+                              default ip_center;
+//   property captionpos: captionposty read finfo.ca.captionpos write setcaptionpos
+//                              default cp_center;
    property captiondist: integer read finfo.ca.captiondist write setcaptiondist
                             default defaultshapecaptiondist;
    property imagelist: timagelist read getimagelist write setimagelist
@@ -209,9 +216,10 @@ type
    property autosize_cy;
    property action;
    property caption;
+   property textflags;
    property shortcut;
    property shortcut1;
-   property captionpos;
+   property imagepos;
    property captiondist;
    property font;
    property modalresult;
@@ -239,9 +247,10 @@ type
    property autosize_cy;
    property action;
    property caption;
+   property textflags;
    property shortcut;
    property shortcut1;
-   property captionpos;
+   property imagepos;
    property captiondist;
    property font;
    property modalresult;
@@ -312,9 +321,10 @@ type
    property autosize_cy;
    property action;
    property caption;
+   property textflags;
    property shortcut;
    property shortcut1;
-   property captionpos;
+   property imagepos;
    property captiondist;
    property font;
    property modalresult;
@@ -352,9 +362,10 @@ type
    property autosize_cy;
    property action;
    property caption;
+   property textflags;
    property shortcut;
    property shortcut1;
-   property captionpos;
+   property imagepos;
    property captiondist;
    property font;
    property modalresult;
@@ -624,6 +635,8 @@ uses
 
 constructor tcustombutton.create(aowner: tcomponent);
 begin
+ initcaptioninfo(finfo.ca);
+ finfo.ca.imagepos:= ip_center;
  initactioninfo(factioninfo);
  inherited;
  include(fwidgetstate1,ws1_nodesignframe);
@@ -723,6 +736,18 @@ begin
   exclude(finfo.state,shs_invisible);
 // end;
  checkautosize;
+end;
+
+procedure tcustombutton.readcaptionpos(reader: treader);
+begin
+ imagepos:= readcaptiontoimagepos(reader);
+end;
+
+procedure tcustombutton.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('captionpos',
+                             {$ifdef FPC}@{$endif}readcaptionpos,nil,false);
 end;
 
 procedure tcustombutton.fontchanged;
@@ -900,16 +925,16 @@ begin
  result:= isactionstatestored(factioninfo);
 end;
 
-procedure tcustombutton.setcaptionpos(const avalue: captionposty);
+procedure tcustombutton.setimagepos(const avalue: imageposty);
 begin
- if avalue <> finfo.ca.captionpos then begin
-  if avalue in [cp_left,cp_right,cp_top,cp_bottom,
-                cp_leftcenter,cp_rightcenter,
-                cp_topcenter,cp_bottomcenter] then begin
-   finfo.ca.captionpos:= avalue;
+ if avalue <> finfo.ca.imagepos then begin
+  if avalue in [ip_left,ip_right,ip_top,ip_bottom,
+                ip_leftcenter,ip_rightcenter,
+                ip_topcenter,ip_bottomcenter] then begin
+   finfo.ca.imagepos:= avalue;
   end
   else begin
-   finfo.ca.captionpos:= cp_center;
+   finfo.ca.imagepos:= ip_center;
   end;
   checkautosize;
   invalidate;
@@ -1029,7 +1054,7 @@ var
  int1: integer;
 begin
  asize:= textrect(getcanvas,finfo.ca.caption,[],font).size;
- if captionpos in [cp_top,cp_bottom,cp_topcenter,cp_bottomcenter] then begin
+ if imagepos in [ip_top,ip_bottom,ip_topcenter,ip_bottomcenter] then begin
   inc(asize.cy,finfo.ca.captiondist);
  end
  else begin  
@@ -1037,7 +1062,7 @@ begin
  end;
  if imagelist <> nil then begin
   with imagelist do begin
-   if captionpos in [cp_top,cp_bottom,cp_topcenter,cp_bottomcenter] then begin
+   if imagepos in [ip_top,ip_bottom,ip_topcenter,ip_bottomcenter] then begin
     if width > asize.cx then begin
      asize.cx:= width;
     end;
@@ -1048,7 +1073,7 @@ begin
     if int1 > asize.cy then begin
      asize.cy:= int1;
     end;
-    if captionpos <> cp_center then begin
+    if imagepos <> ip_center then begin
      asize.cx:= asize.cx + width;
     end
     else begin
@@ -1093,6 +1118,15 @@ begin
  inherited;
  if (event = oe_changed) and (sender = finfo.ca.imagelist) then begin
   actionchanged;
+ end;
+end;
+
+procedure tcustombutton.settextflags(const avalue: textflagsty);
+begin
+ if finfo.ca.textflags <> avalue then begin
+  finfo.ca.textflags:= checktextflags(finfo.ca.textflags,avalue);
+  invalidate;
+  checkautosize;
  end;
 end;
 

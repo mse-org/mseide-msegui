@@ -654,6 +654,9 @@ procedure writestringar(const writer: twriter; const ar: stringarty);
 function swapmethodtable(const instance: tobject; const newtable: pointer): pointer;
 procedure objectbinarytotextmse(input, output: tstream);
                 //workaround for FPC bug 7813 with localized float strings
+function readenum(const reader: treader; const atypeinfo: ptypeinfo): integer;
+procedure writeenum(const writer: twriter; const value: integer;
+                                                 const atypeinfo: ptypeinfo);
 function readset(const reader: treader; const atypeinfo: ptypeinfo): tintegerset;
 procedure writeset(const writer: twriter; const value: tintegerset;
                             const atypeinfo: ptypeinfo);
@@ -953,6 +956,20 @@ begin
   writestr('');
   {$endif}
  end;
+end;
+
+function readenum(const reader: treader; const atypeinfo: ptypeinfo): integer;
+begin
+ result:= getenumvalue(atypeinfo,reader.readident);
+ if result < 0 then begin
+  raise ereaderror.create(sinvalidpropertyvalue);
+ end;
+end;
+
+procedure writeenum(const writer: twriter; const value: integer; 
+                                              const atypeinfo: ptypeinfo);
+begin
+ writer.writeident(getenumname(atypeinfo,value));
 end;
 
 function readset(const reader: treader; const atypeinfo: ptypeinfo): tintegerset;

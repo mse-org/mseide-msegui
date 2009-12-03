@@ -417,6 +417,7 @@ begin
     fontactive:= item1.fontactive;
     with buttoninfo,ca do begin
      captiondist:= defaultshapecaptiondist;
+     textflags:= [tf_ycentered];
      imagedist:= imagedi;
      imagelist:= timagelist(item1.finfo.imagelist);
      ar1:= splitrichstring(item1.finfo.caption1,msechar(c_tab));

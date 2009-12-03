@@ -14,6 +14,9 @@ object panelfo: tpanelfo
   container.frame.framei_right = 0
   container.frame.framei_bottom = 0
   container.frame.localprops = [frl_fileft, frl_fitop, frl_firight, frl_fibottom]
+  dragdock.tab_options = [tabo_dragsource, tabo_dragdest, tabo_hintclippedtext]
+  dragdock.tab_textflags = [tf_ycentered, tf_ellipseright]
+  dragdock.tab_widthmax = 100
   dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_acceptsdock, od_dockparent, od_splitvert, od_splithorz, od_tabed, od_proportional, od_propsize]
   dragdock.onlayoutchanged = panellayoutchanged
   options = [fo_globalshortcuts, fo_savepos, fo_savezorder, fo_savestate]

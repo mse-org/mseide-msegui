@@ -17,7 +17,8 @@ uses
  mserichstring,msetypes,msegraphics,msegraphutils,mseevent,
  mseglob,mseguiglob,msegui,msebitmap,
  mseforms,rtlconsts,msesimplewidgets,msedrag,mseact,
- mseobjectpicker,msepointer,msestat,msestatfile,msestrings,msemenus;
+ mseobjectpicker,msepointer,msestat,msestatfile,msestrings,msemenus,
+ msedrawtext;
 
 const
  defaulttaboptionswidget = defaultoptionswidget + [ow_subfocus,ow_fontglyphheight];
@@ -25,13 +26,12 @@ const
  defaultcaptiondist = 1;
  defaultimagedist = 0;
  defaulttabshift = -100; //-> 1
- defaultcaptionpos = cp_right;
+ defaultimagepos = ip_right;
  defaulttabpageskinoptions = defaultcontainerskinoptions;
-
 type
 
  tcustomtabbar = class;
- tabstatety = (ts_invisible,ts_disabled,ts_active,ts_updating);
+ tabstatety = (ts_invisible,ts_disabled,ts_active,ts_updating,ts_captionclipped);
  tabstatesty = set of tabstatety;
 
  ttabfont = class(tparentfont)
@@ -55,6 +55,9 @@ type
    fimagelist: timagelist;
    fimagenr: imagenrty;
    fimagenrdisabled: imagenrty;
+//   fwidth: integer;
+//   fwidthmin: integer;
+//   fwidthmax: integer;
    function getcaption: captionty;
    procedure setcaption(const Value: captionty);
    procedure changed;
@@ -73,6 +76,9 @@ type
    function getfontactive: ttabfontactive;
    procedure setfontactive(const avalue: ttabfontactive);
    function isfontactivestored: boolean;
+//   procedure setwidth(const avalue: integer);
+//   procedure setwidthmin(const avalue: integer);
+//   procedure setwidthmax(const avalue: integer);
   protected
    ftag: integer;
    ffont: ttabfont;
@@ -106,6 +112,9 @@ type
                 //-2 -> same as imagenr
    property tag: integer read ftag write ftag default 0;
    property hint: msestring read fhint write fhint;
+//   property width: integer read fwidth write setwidth default 0;
+//   property widthmin: integer read fwidthmin write setwidthmin default 0;
+//   property widthmax: integer read fwidthmax write setwidthmax default 0;
  end;
 
  ttabs = class;
@@ -132,7 +141,7 @@ type
   private
    fcolor: colorty;
    fcoloractive: colorty;
-   fcaptionpos: captionposty;
+   fimagepos: imageposty;
    fcaptionframe: framety;
    fimagedist: integer;
    fframe: tframe;
@@ -143,6 +152,10 @@ type
    factcellindex: integer;
    ftabshift: integer;
    fshift: integer;
+   ftextflags: textflagsty;
+   fwidth: integer;
+   fwidthmin: integer;
+   fwidthmax: integer;
    procedure setitems(const index: integer; const Value: ttab);
    function getitems(const index: integer): ttab; reintroduce;
    function getface: tface;
@@ -151,7 +164,7 @@ type
    procedure setfaceactive(const avalue: tface);
    procedure setcolor(const avalue: colorty);
    procedure setcoloractive(const avalue: colorty);
-   procedure setcaptionpos(const avalue: captionposty);
+   procedure setimagepos(const avalue: imageposty);
    procedure setcaptionframe_left(const avalue: integer);
    procedure setcaptionframe_top(const avalue: integer);
    procedure setcaptionframe_right(const avalue: integer);
@@ -166,10 +179,16 @@ type
    function getfontactive: ttabsfontactive;
    procedure setfontactive(const avalue: ttabsfontactive);
    function isfontactivestored: boolean;
+   procedure readcaptionpos(reader: treader);
+   procedure settextflags(const avalue: textflagsty);
+   procedure setwidth(const avalue: integer);
+   procedure setwidthmin(const avalue: integer);
+   procedure setwidthmax(const avalue: integer);
   protected
    fskinupdating: integer;
    ffont: ttabsfont;
    ffontactive: ttabsfontactive;
+   procedure defineproperties(filer: tfiler); override;
    procedure changed;
    procedure fontchanged(const sender: tobject);
    procedure createitem(const index: integer; var item: tpersistent); override;
@@ -192,8 +211,8 @@ type
    function getwidget: twidget;
    function getframestateflags: framestateflagsty; virtual;
   public
-   constructor create(const aowner: tcustomtabbar; aclasstype: indexpersistentclassty);
-                                         reintroduce;
+   constructor create(const aowner: tcustomtabbar; 
+                           aclasstype: indexpersistentclassty); reintroduce;
    destructor destroy; override;
    class function getitemclasstype: persistentclassty; override;
    procedure createfont;
@@ -215,9 +234,14 @@ type
    property font: ttabsfont read getfont write setfont  stored isfontstored;
    property fontactive: ttabsfontactive read getfontactive write setfontactive
                                           stored isfontactivestored;
-   
-   property captionpos: captionposty read fcaptionpos write
-                          setcaptionpos default defaultcaptionpos;
+
+   property width: integer read fwidth write setwidth default 0;
+   property widthmin: integer read fwidthmin write setwidthmin default 0;
+   property widthmax: integer read fwidthmax write setwidthmax default 0;
+   property textflags: textflagsty read ftextflags write settextflags 
+                                                default defaultcaptiontextflags;   
+   property imagepos: imageposty read fimagepos write
+                          setimagepos default defaultimagepos;
    property captionframe_left: integer read fcaptionframe.left write
                           setcaptionframe_left default defaultcaptiondist;
    property captionframe_top: integer read fcaptionframe.top write
@@ -358,6 +382,9 @@ type
   function getwidget: twidget;
   function getcaption: msestring;
   function gettabhint: msestring;
+//  function gettabwidth: integer;
+//  function gettabwidthmin: integer;
+//  function gettabwidthmax: integer;
   function getcolortab: colorty;
   function getcoloractivetab: colorty;
   function getfonttab: tfont;
@@ -394,6 +421,9 @@ type
    finvisible: boolean;
    ffonttab: ttabpagefonttab;
    ffontactivetab: ttabpagefontactivetab;
+//   ftabwidth: integer;
+//   ftabwidthmin: integer;
+//   ftabwidthmax: integer;
    function getcaption: captionty;
    procedure setcaption(const Value: captionty);
    function gettabhint: msestring;
@@ -422,6 +452,12 @@ type
    function getfontactivetab1: ttabpagefontactivetab;
    procedure setfontactivetab(const avalue: ttabpagefontactivetab);
    function isfontactivetabstored: boolean;
+//   function gettabwidth: integer;
+//   procedure settabwidth(const avalue: integer);
+//   function gettabwidthmin: integer;
+//   procedure settabwidthmin(const avalue: integer);
+//   function gettabwidthmax: integer;
+//   procedure settabwidthmax(const avalue: integer);
   protected
    class function classskininfo: skininfoty; override;
    procedure changed;
@@ -450,6 +486,9 @@ type
    property invisible: boolean read getinvisible write setinvisible default false;
    property caption: captionty read getcaption write setcaption;
    property tabhint: msestring read gettabhint write settabhint;
+//   property tabwidth: integer read gettabwidth write settabwidth default 0;
+//   property tabwidthmin: integer read gettabwidthmin write settabwidthmin default 0;
+//   property tabwidthmax: integer read gettabwidthmax write settabwidthmax default 0;
    property colortab: colorty read getcolortab
                   write setcolortab default cl_default;
    property coloractivetab: colorty read getcoloractivetab
@@ -498,6 +537,9 @@ type
    finvisible: boolean;
    ffonttab: ttabformfonttab;
    ffontactivetab: ttabformfontactivetab;
+//   ftabwidth: integer;
+//   ftabwidthmin: integer;
+//   ftabwidthmax: integer;
    procedure settabwidget(const value: tcustomtabwidget);
    function gettabwidget: tcustomtabwidget;
    function getcolortab: colorty;
@@ -524,6 +566,12 @@ type
    function getfontactivetab1: ttabformfontactivetab;
    procedure setfontactivetab(const avalue: ttabformfontactivetab);
    function isfontactivetabstored: boolean;
+//   function gettabwidth: integer;
+//   procedure settabwidth(const avalue: integer);
+//   function gettabwidthmin: integer;
+//   procedure settabwidthmin(const avalue: integer);
+//   function gettabwidthmax: integer;
+//   procedure settabwidthmax(const avalue: integer);
   protected
    procedure changed;
    procedure fontchanged1(const sender: tobject);
@@ -553,6 +601,9 @@ type
    property fontactivetab: ttabformfontactivetab read getfontactivetab1 
                                  write setfontactivetab stored isfonttabstored;
    property tabhint: msestring read gettabhint write settabhint;
+//   property tabwidth: integer read gettabwidth write settabwidth default 0;
+//   property tabwidthmin: integer read gettabwidthmin write settabwidthmin default 0;
+//   property tabwidthmax: integer read gettabwidthmax write settabwidthmax default 0;
    property imagelist: timagelist read getimagelist write setimagelist;
    property imagenr: imagenrty read getimagenr write setimagenr default -1;
    property imagenrdisabled: imagenrty read getimagenrdisabled
@@ -630,8 +681,8 @@ type
    procedure settab_faceactivetab(const avalue: tface);
    function checktabsizingpos(const apos: pointty): boolean;
    function getidents: integerarty;
-   function gettab_captionpos: captionposty;
-   procedure settab_captionpos(const avalue: captionposty);
+   function gettab_imagepos: imageposty;
+   procedure settab_imagepos(const avalue: imageposty);
    function gettab_captionframe_left: integer;
    procedure settab_captionframe_left(const avalue: integer);
    function gettab_captionframe_top: integer;
@@ -655,8 +706,18 @@ type
    function gettab_fontactivetab: ttab_fontactivetab;
    procedure set_tabfontactivetab(const avalue: ttab_fontactivetab);
    function istab_fontactivetabstored: boolean;
+   procedure readtab_captionpos(reader: treader);
+   function gettab_textflags: textflagsty;
+   procedure settab_textflags(const avalue: textflagsty);
+   function gettab_width: integer;
+   procedure settab_width(const avalue: integer);
+   function gettab_widthmin: integer;
+   procedure settab_widthmin(const avalue: integer);
+   function gettab_widthmax: integer;
+   procedure settab_widthmax(const avalue: integer);
   protected
    fpopuptab: integer;
+   procedure defineproperties(filer: tfiler); override;
    procedure internaladd(const page: itabpage; aindex: integer);
    procedure internalremove(const page: itabpage);
    procedure registerchildwidget(const child: twidget); override;
@@ -735,8 +796,13 @@ type
                                                         stored istab_fonttabstored;
    property tab_fontactivetab: ttab_fontactivetab read gettab_fontactivetab 
                           write set_tabfontactivetab stored istab_fontactivetabstored;
-   property tab_captionpos: captionposty read gettab_captionpos write
-                          settab_captionpos default defaultcaptionpos;
+   property tab_imagepos: imageposty read gettab_imagepos write
+                          settab_imagepos default defaultimagepos;
+   property tab_textflags: textflagsty read gettab_textflags write
+                          settab_textflags default defaultcaptiontextflags;
+   property tab_width: integer read gettab_width write settab_width default 0;
+   property tab_widthmin: integer read gettab_widthmin write settab_widthmin default 0;
+   property tab_widthmax: integer read gettab_widthmax write settab_widthmax default 0;
    property tab_captionframe_left: integer read gettab_captionframe_left write
                           settab_captionframe_left default defaultcaptiondist;
    property tab_captionframe_top: integer read gettab_captionframe_top write
@@ -802,7 +868,11 @@ type
    property tab_frame;
    property tab_face;
    property tab_color;
-   property tab_captionpos;
+   property tab_imagepos;
+   property tab_textflags;
+   property tab_width;
+   property tab_widthmin;
+   property tab_widthmax;
    property tab_captionframe_left;
    property tab_captionframe_top;
    property tab_captionframe_right;
@@ -824,7 +894,7 @@ type
  
 implementation
 uses
- msedrawtext,sysutils,msedatalist,msekeyboard,msestockobjects;
+ sysutils,msedatalist,msekeyboard,msestockobjects;
 
 type
  twidget1 = class(twidget);
@@ -832,18 +902,29 @@ type
 procedure calctablayout(var layout: tabbarlayoutinfoty;
                      const canvas: tcanvas; const focused: boolean);
 
+var
+ horzimage: boolean;
+ vertimage: boolean;
+ 
  procedure docommon(const tab: ttab; var cell: shapeinfoty; var textrect: rectty);
  begin
   with tab,cell,ca do begin
    caption:= fcaption;
+   textflags:= layout.tabs.ftextflags;
    imagedist:= layout.tabs.fimagedist;
-   captionpos:= layout.tabs.fcaptionpos;
+   imagepos:= layout.tabs.fimagepos;//captiontoimagepos[layout.tabs.fcaptionpos];
    imagelist:= fimagelist;
    imagenr:= fimagenr;
    imagenrdisabled:= fimagenrdisabled;
    if imagelist <> nil then begin
-    inc(textrect.cx,fimagelist.width+imagedist);
+    if horzimage then begin
+     inc(textrect.cx,fimagelist.width+imagedist);
+    end;
+    if vertimage then begin
+     inc(textrect.cy,fimagelist.height+imagedist);
+    end;
    end;
+   
   end;
  end; //docommon
 
@@ -860,7 +941,7 @@ procedure calctablayout(var layout: tabbarlayoutinfoty;
  end; //dofont
 
 var
- int1: integer;
+ int1,int2: integer;
  aval: integer;
  endval: integer;
  rect1: rectty;
@@ -868,8 +949,11 @@ var
  cxinflate: integer;
  cyinflate: integer;
  frame1: framety;
+ textflags1: textflagsty;
 begin
  with layout do begin
+  horzimage:= tabs.imagepos in horzimagepos;
+  vertimage:= tabs.imagepos in vertimagepos;
   cells:= nil;
   setlength(cells,tabs.count);
   if firsttab > high(cells) then begin
@@ -889,6 +973,7 @@ begin
     end;
    end;
   end;
+  textflags1:= tabs.textflags - [tf_ellipseleft,tf_ellipseright];
   if shs_vert in options then begin
    aval:= dim.y;
    endval:= dim.y + dim.cy;
@@ -897,8 +982,16 @@ begin
      dim.y:= aval;
      dofont(tabs[int1],cells[int1]);
      rect1:= textrect(canvas,fcaption,
-                        makerect(layout.dim.x,aval,layout.dim.cx,bigint),[],font);
+                        makerect(layout.dim.x,aval,layout.dim.cx-cxinflate,
+                                   bigint),textflags1,font);
      docommon(tabs[int1],cells[int1],rect1);
+     if rect1.cx <= layout.dim.cx - cxinflate then begin
+      textflags:= textflags - [tf_ellipseleft,tf_ellipseright];
+      exclude(fstate,ts_captionclipped);
+     end
+     else begin
+      include(fstate,ts_captionclipped);
+     end;
      dim.cy:= rect1.cy+cyinflate;
      if (imagelist <> nil) and (imagelist.height > dim.cy) then begin
       dim.cy:= imagelist.height;
@@ -933,8 +1026,29 @@ begin
      dim.x:= aval;
      dofont(tabs[int1],cells[int1]);
      rect1:= textrect(canvas,fcaption,
-               makerect(aval,layout.dim.y,bigint,layout.dim.cy),[],font);
+               makerect(aval,layout.dim.y,bigint,layout.dim.cy),textflags1,font);
      docommon(tabs[int1],cells[int1],rect1);
+     int2:= rect1.cx;
+     with layout.tabs do begin
+      if width <> 0 then begin
+       int2:= width;
+      end;
+      if (widthmax <> 0) and (rect1.cx > widthmax) then begin
+       int2:= widthmax;
+      end;
+      if (widthmin <> 0) and (rect1.cx < widthmin) then begin
+       int2:= widthmin;
+      end;
+     end;
+     if int2 >= rect1.cx then begin
+      textflags:= textflags - [tf_ellipseleft,tf_ellipseright];
+      exclude(fstate,ts_captionclipped);
+     end
+     else begin
+      include(fstate,ts_captionclipped);
+     end;
+     rect1.cx:= int2;
+
      dim.cx:= rect1.cx + cxinflate;
      if (ts_invisible in fstate) or (int1 < firsttab) or (aval >= endval) then begin
       include(state,shs_invisible);
@@ -1320,7 +1434,31 @@ procedure ttab.fontchanged(const sender: tobject);
 begin
  changed;
 end;
+{
+procedure ttab.setwidth(const avalue: integer);
+begin
+ if fwidth <> avalue then begin
+  fwidth:= avalue;
+  changed;
+ end;
+end;
 
+procedure ttab.setwidthmin(const avalue: integer);
+begin
+ if fwidthmin <> avalue then begin
+  fwidthmin:= avalue;
+  changed;
+ end;
+end;
+
+procedure ttab.setwidthmax(const avalue: integer);
+begin
+ if fwidthmax <> avalue then begin
+  fwidthmax:= avalue;
+  changed;
+ end;
+end;
+}
 { ttabframe }
 
 constructor ttabframe.create(const intf: iframe);
@@ -1350,7 +1488,8 @@ constructor ttabs.create(const aowner: tcustomtabbar;
 begin
  fcolor:= cl_transparent;
  fcoloractive:= cl_active;
- fcaptionpos:= defaultcaptionpos;
+ fimagepos:= defaultimagepos;
+ ftextflags:= defaultcaptiontextflags;
  fcaptionframe.left:= defaultcaptiondist;
  fcaptionframe.top:= defaultcaptiondist;
  fcaptionframe.right:= defaultcaptiondist;
@@ -1374,6 +1513,18 @@ end;
 class function ttabs.getitemclasstype: persistentclassty;
 begin
  result:= ttab;
+end;
+
+procedure ttabs.readcaptionpos(reader: treader);
+begin
+ imagepos:= readcaptiontoimagepos(reader);
+end;
+
+procedure ttabs.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('captionpos',
+                             {$ifdef FPC}@{$endif}readcaptionpos,nil,false);
 end;
 
 procedure ttabs.changed;
@@ -1437,10 +1588,42 @@ begin
  end;
 end;
 
-procedure ttabs.setcaptionpos(const avalue: captionposty);
+procedure ttabs.setimagepos(const avalue: imageposty);
 begin
- if avalue <> fcaptionpos then begin
-  fcaptionpos:= avalue;
+ if avalue <> fimagepos then begin
+  fimagepos:= avalue;
+  changed;
+ end;
+end;
+
+procedure ttabs.settextflags(const avalue: textflagsty);
+begin
+ if avalue <> ftextflags then begin
+  ftextflags:= checktextflags(ftextflags,avalue);
+  changed;
+ end;
+end;
+
+procedure ttabs.setwidth(const avalue: integer);
+begin
+ if avalue <> fwidth then begin
+  fwidth:= avalue;
+  changed;
+ end;
+end;
+
+procedure ttabs.setwidthmin(const avalue: integer);
+begin
+ if avalue <> fwidthmin then begin
+  fwidthmin:= avalue;
+  changed;
+ end;
+end;
+
+procedure ttabs.setwidthmax(const avalue: integer);
+begin
+ if avalue <> fwidthmax then begin
+  fwidthmax:= avalue;
   changed;
  end;
 end;
@@ -2061,7 +2244,8 @@ begin
  if not (csdesigning in componentstate) or 
                             (ws1_designactive in fwidgetstate1) then begin
   with flayoutinfo do begin
-   checkbuttonhint(self,info,fhintedbutton,cells,{$ifdef FPC}@{$endif}getbuttonhint,
+   checkbuttonhint(self,info,fhintedbutton,cells,
+                           {$ifdef FPC}@{$endif}getbuttonhint,
                            {$ifdef FPC}@{$endif}gethintpos);
   end;
  end;
@@ -2296,7 +2480,17 @@ end;
 
 function tcustomtabbar.getbuttonhint(const aindex: integer): msestring;
 begin
- result:= flayoutinfo.tabs[aindex].hint;
+ with flayoutinfo.tabs[aindex] do begin
+  if hint <> '' then begin
+   result:= hint;
+  end
+  else begin
+   if (ts_captionclipped in fstate) and 
+                  (tabo_hintclippedtext in options) then begin
+    result:= caption;
+   end;
+  end;
+ end;
 end;
 
 procedure tcustomtabbar.enabledchanged;
@@ -2783,7 +2977,40 @@ function ttabpage.isfontactivetabstored: boolean;
 begin
  result:= ffontactivetab <> nil;
 end;
+{
+function ttabpage.gettabwidth: integer;
+begin
+ result:= ftabwidth;
+end;
 
+procedure ttabpage.settabwidth(const avalue: integer);
+begin
+ ftabwidth:= avalue;
+ changed;
+end;
+
+function ttabpage.gettabwidthmin: integer;
+begin
+ result:= ftabwidthmin;
+end;
+
+procedure ttabpage.settabwidthmin(const avalue: integer);
+begin
+ ftabwidthmin:= avalue;
+ changed;
+end;
+
+function ttabpage.gettabwidthmax: integer;
+begin
+ result:= ftabwidthmax;
+end;
+
+procedure ttabpage.settabwidthmax(const avalue: integer);
+begin
+ ftabwidthmax:= avalue;
+ changed;
+end;
+}
 { ttabformfonttab }
 
 class function ttabformfonttab.getinstancepo(owner: tobject): pfont;
@@ -3082,7 +3309,40 @@ function ttabform.isfontactivetabstored: boolean;
 begin
  result:= ffontactivetab <> nil;
 end;
+{
+function ttabform.gettabwidth: integer;
+begin
+ result:= ftabwidth;
+end;
 
+procedure ttabform.settabwidth(const avalue: integer);
+begin
+ ftabwidth:= avalue;
+ changed;
+end;
+
+function ttabform.gettabwidthmin: integer;
+begin
+ result:= ftabwidthmin;
+end;
+
+procedure ttabform.settabwidthmin(const avalue: integer);
+begin
+ ftabwidthmin:= avalue;
+ changed;
+end;
+
+function ttabform.gettabwidthmax: integer;
+begin
+ result:= ftabwidthmax;
+end;
+
+procedure ttabform.settabwidthmax(const avalue: integer);
+begin
+ ftabwidthmax:= avalue;
+ changed;
+end;
+}
 { ttab_font }
 
 class function ttab_font.getinstancepo(owner: tobject): pfont;
@@ -3159,6 +3419,9 @@ begin
     activepageindexbefore:= factivepageindex;
     caption:= sender.getcaption;
     hint:= sender.gettabhint;
+//    width:= sender.gettabwidth;
+//    widthmin:= sender.gettabwidthmin;
+//    widthmax:= sender.gettabwidthmax;
     color:= sender.getcolortab;
     coloractive:= sender.getcoloractivetab;
     font:= ttabfont(sender.getfonttab);
@@ -3294,6 +3557,18 @@ begin
    end;
   end;
  end;
+end;
+
+procedure tcustomtabwidget.readtab_captionpos(reader: treader);
+begin
+ tab_imagepos:= readcaptiontoimagepos(reader);
+end;
+
+procedure tcustomtabwidget.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('tab_captionpos',
+                             {$ifdef FPC}@{$endif}readtab_captionpos,nil,false);
 end;
 
 procedure tcustomtabwidget.internaladd(const page: itabpage; aindex: integer);
@@ -3993,14 +4268,14 @@ begin
  ftabs.tabs.faceactive:= avalue;
 end;
 
-function tcustomtabwidget.gettab_captionpos: captionposty;
+function tcustomtabwidget.gettab_imagepos: imageposty;
 begin
- result:= ftabs.tabs.captionpos;
+ result:= ftabs.tabs.imagepos;
 end;
 
-procedure tcustomtabwidget.settab_captionpos(const avalue: captionposty);
+procedure tcustomtabwidget.settab_imagepos(const avalue: imageposty);
 begin
- ftabs.tabs.captionpos:= avalue;
+ ftabs.tabs.imagepos:= avalue;
 end;
 
 function tcustomtabwidget.gettab_captionframe_left: integer;
@@ -4189,6 +4464,46 @@ end;
 function tcustomtabwidget.istab_fontactivetabstored: boolean;
 begin
  result:=  ftabs.tabs.ffontactive <> nil;
+end;
+
+function tcustomtabwidget.gettab_textflags: textflagsty;
+begin
+ result:= ftabs.tabs.ftextflags;
+end;
+
+procedure tcustomtabwidget.settab_textflags(const avalue: textflagsty);
+begin
+ ftabs.tabs.textflags:= avalue;
+end;
+
+function tcustomtabwidget.gettab_width: integer;
+begin
+ result:= ftabs.tabs.width;
+end;
+
+procedure tcustomtabwidget.settab_width(const avalue: integer);
+begin
+ ftabs.tabs.width:= avalue;
+end;
+
+function tcustomtabwidget.gettab_widthmin: integer;
+begin
+ result:= ftabs.tabs.widthmin;
+end;
+
+procedure tcustomtabwidget.settab_widthmin(const avalue: integer);
+begin
+ ftabs.tabs.widthmin:= avalue;
+end;
+
+function tcustomtabwidget.gettab_widthmax: integer;
+begin
+ result:= ftabs.tabs.widthmax;
+end;
+
+procedure tcustomtabwidget.settab_widthmax(const avalue: integer);
+begin
+ ftabs.tabs.widthmax:= avalue;
 end;
 
 { tpagetab }

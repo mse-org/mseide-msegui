@@ -1,5 +1,11 @@
 MSEide+MSEgui version history
 
+2009-12-03
+ tcustombutton.captionpos -> imagepos.
+ tcolheader.captionpos -> imagepos.
+ tcustomdatabutton.captionpos -> imagepos.
+ ttabs.captionpos -> imagepos.
+ ttabwidget.tab_captionpos -> tab_imagepos.
 2009-11-25
  tcustomdialcontroller opposite reversed for gd_up, gd_down.
 2009-11-24

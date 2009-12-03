@@ -610,9 +610,10 @@ type
    property font;
    property action;
    property caption;
+   property imagepos;
    property shortcut;
    property shortcut1;
-   property captionpos;
+   property textflags;
    property captiondist;
    property imagelist;
    property imagenr;

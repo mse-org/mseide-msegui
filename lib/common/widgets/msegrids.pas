@@ -147,7 +147,7 @@ const
  defaultfixcoltextflags = [tf_ycentered,tf_xcentered];
  defaultstringcoleditoptions = [scoe_undoonesc,scoe_autoselect,
                                   scoe_autoselectonfirstclick,scoe_eatreturn];
- defaultcolheadertextflags = [tf_ycentered,tf_xcentered];
+// defaultcolheadertextflags = [tf_ycentered,tf_xcentered];
 
 
  slowrepeat = 200000; //us
@@ -828,13 +828,15 @@ type
    procedure setimagelist(const avalue: timagelist);
    procedure setimagenr(const avalue: imagenrty);
    procedure setcolorglyph(const avalue: colorty);
-   procedure setcaptionpos(const avalue: captionposty);
+   procedure setimagepos(const avalue: imageposty);
    procedure setimagedist(const avalue: integer);
    procedure setcaptiondist(const avalue: integer);
+   procedure readcaptionpos(reader: treader);
   protected
    fgrid: tcustomgrid;
    fframe: tfixcellframe;
    fface: tfixcellface;
+   procedure defineproperties(filer: tfiler); override;
    procedure changed;
    procedure fontchanged(const sender: tobject);
    procedure drawcell(const acanvas: tcanvas; const adest: rectty); virtual;
@@ -875,7 +877,7 @@ type
    property color: colorty read fcolor write setcolor default cl_parent;
    property caption: msestring read finfo.caption.text write setcaption;
    property textflags: textflagsty read finfo.textflags write settextflags
-                                             default defaultcolheadertextflags;
+                                             default defaultcaptiontextflags;
    property font: tcolheaderfont read getfont write setfont stored isfontstored;
    property frame: tfixcellframe read getframe write setframe;
    property face: tfixcellface read getface write setface;
@@ -888,8 +890,10 @@ type
                                             default 0;
    property captiondist: integer read finfo.captiondist write setcaptiondist
                                      default defaultshapecaptiondist;
-   property captionpos: captionposty read finfo.captionpos write setcaptionpos 
-                                                     default cp_left;
+   property imagepos: imageposty read finfo.imagepos write setimagepos 
+                                                     default ip_right;
+//   property captionpos: captionposty read finfo.captionpos write setcaptionpos 
+//                                                     default cp_left;
    property colorglyph: colorty read finfo.colorglyph
                    write setcolorglyph default cl_glyph;
                    //cl_none -> no no glyph
@@ -3504,9 +3508,9 @@ begin
  with finfo do begin
   imagenr:= -1;
   colorglyph:= cl_glyph;
-  captionpos:= cp_left;
+  imagepos:= ip_right;
  end;
- finfo.textflags:= defaultcolheadertextflags;
+// finfo.textflags:= defaultcolheadertextflags;
  fcolor:= cl_parent;
  inherited;
  fgrid:= tcolheaders(fowner).fgridprop.fgrid;
@@ -3518,6 +3522,17 @@ begin
  ffont.free;
  fframe.free;
  fface.free;
+end;
+
+procedure tcolheader.readcaptionpos(reader: treader);
+begin
+ imagepos:= readcaptiontoimagepos(reader);
+end;
+
+procedure tcolheader.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('captionpos',{$ifdef FPC}@{$endif}readcaptionpos,nil,false);
 end;
 
 procedure tcolheader.changed;
@@ -3767,10 +3782,10 @@ begin
  end;
 end;
 
-procedure tcolheader.setcaptionpos(const avalue: captionposty);
+procedure tcolheader.setimagepos(const avalue: imageposty);
 begin
- if finfo.captionpos <> avalue then begin
-  finfo.captionpos:= simplecaptionpos[avalue];
+ if finfo.imagepos <> avalue then begin
+  finfo.imagepos:= simpleimagepos[avalue];
   changed;
  end;
 end;

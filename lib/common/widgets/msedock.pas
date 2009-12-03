@@ -16,7 +16,7 @@ uses
  msewidgets,classes,msedrag,msegui,msegraphutils,mseevent,mseclasses,
  msegraphics,msestockobjects,mseglob,mseguiglob,msestat,msestatfile,msepointer,
  msesplitter,msesimplewidgets,msetypes,msestrings,msebitmap,mseobjectpicker,
- msetabsglob,msemenus;
+ msetabsglob,msemenus,msedrawtext,mseshapes;
  
 //todo: optimize
 
@@ -197,6 +197,10 @@ type
    fsizes: integerarty;
    frefsize: integer;
    fwidgetsbefore: widgetarty;
+   ftab_textflags: textflagsty;
+   ftab_width: integer;
+   ftab_widthmin: integer;
+   ftab_widthmax: integer;
    procedure updaterefsize;
    procedure setdockhandle(const avalue: tdockhandle);
    procedure layoutchanged;
@@ -229,6 +233,11 @@ type
    procedure settab_sizemin(const avalue: integer);
    procedure settab_sizemax(const avalue: integer);
    procedure setbandgap(const avalue: integer);
+
+   procedure settab_textflags(const avalue: textflagsty);
+   procedure settab_width(const avalue: integer);
+   procedure settab_widthmin(const avalue: integer);
+   procedure settab_widthmax(const avalue: integer);
   protected
    foptionsdock: optionsdockty;
    fr: prectaccessty;
@@ -324,6 +333,12 @@ type
                         write setsplitter_colorgrip default defaultsplittercolorgrip;
    property tab_options: tabbaroptionsty read ftab_options write settab_options 
                                    default defaulttaboptions;
+   property tab_textflags: textflagsty read ftab_textflags write
+                          settab_textflags default defaultcaptiontextflags;
+   property tab_width: integer read ftab_width write settab_width default 0;
+   property tab_widthmin: integer read ftab_widthmin write settab_widthmin default 0;
+   property tab_widthmax: integer read ftab_widthmax write settab_widthmax default 0;
+
    property tab_frame: tframecomp read ftab_frame write settab_frame;
    property tab_face: tfacecomp read ftab_face write settab_face;
    property tab_color: colorty read ftab_color write settab_color default cl_default;
@@ -528,8 +543,7 @@ type
 
 implementation
 uses
- msedatalist,mseshapes,sysutils,msebits,msetabs,mseguiintf,msedrawtext,
- mseforms,msestream;
+ msedatalist,sysutils,msebits,msetabs,mseguiintf,mseforms,msestream;
 
 type
  twidget1 = class(twidget);
@@ -650,6 +664,10 @@ begin
   self.tab_size:= ftab_size;
   self.tab_sizemin:= ftab_sizemin;
   self.tab_sizemax:= ftab_sizemax;
+  self.tab_textflags:= ftab_textflags;
+  self.tab_width:= ftab_width;
+  self.tab_widthmin:= ftab_widthmin;
+  self.tab_widthmax:= ftab_widthmax;
   if ftab_frame <> nil then begin
    self.tab_frame:= tstepboxframe1(1);
    self.tab_frame.assign(ftab_frame);
@@ -776,6 +794,7 @@ begin
  ftab_coloractivetab:= cl_active;
  ftab_sizemin:= defaulttabsizemin;
  ftab_sizemax:= defaulttabsizemax;
+ ftab_textflags:= defaultcaptiontextflags;
  inherited create(aintf);
 end;
 
@@ -3368,6 +3387,38 @@ end;
 procedure tdockcontroller.settab_sizemax(const avalue: integer);
 begin
  ftab_sizemax:= avalue;
+ if ftabwidget <> nil then begin
+  tdocktabwidget(ftabwidget).updateoptions;
+ end;
+end;
+
+procedure tdockcontroller.settab_textflags(const avalue: textflagsty);
+begin
+ ftab_textflags:= avalue;
+ if ftabwidget <> nil then begin
+  tdocktabwidget(ftabwidget).updateoptions;
+ end;
+end;
+
+procedure tdockcontroller.settab_width(const avalue: integer);
+begin
+ ftab_width:= avalue;
+ if ftabwidget <> nil then begin
+  tdocktabwidget(ftabwidget).updateoptions;
+ end;
+end;
+
+procedure tdockcontroller.settab_widthmin(const avalue: integer);
+begin
+ ftab_widthmin:= avalue;
+ if ftabwidget <> nil then begin
+  tdocktabwidget(ftabwidget).updateoptions;
+ end;
+end;
+
+procedure tdockcontroller.settab_widthmax(const avalue: integer);
+begin
+ ftab_widthmax:= avalue;
  if ftabwidget <> nil then begin
   tdocktabwidget(ftabwidget).updateoptions;
  end;

@@ -22,7 +22,7 @@ const
  menucheckboxwidth = 13;
  defaultshapecaptiondist = 2;
  defaultshapefocusrectdist = 1;
-
+ defaultcaptiontextflags = [tf_xcentered,tf_ycentered];
 
 // styleactionstates: actionstatesty = [as_shortcutcaption,as_radiobutton];
 type
@@ -33,7 +33,8 @@ type
   caption: richstringty;
   font: tfont;
   textflags: textflagsty;
-  captionpos: captionposty;
+//  captionpos: captionposty;
+  imagepos: imageposty;
   captiondist: integer;
   imagenr: imagenrty;
   colorglyph: colorty;
@@ -254,6 +255,8 @@ procedure initcaptioninfo(var ainfo: captioninfoty);
 begin
  with ainfo do begin
   captiondist:= defaultshapecaptiondist;
+  textflags:= defaultcaptiontextflags;
+//  textflags:= [tf_default];
  end;
 end;
  
@@ -868,48 +871,48 @@ end;
 function adjustimagerect(const info: captioninfoty; var arect: rectty;
                               out aalign: alignmentsty): rectty;
 var
- pos: captionposty;
+ pos: imageposty;
  int1,int2: integer; 
 begin
  result:= arect;
  with info do begin
-  case captionpos of
-   cp_right,cp_rightcenter: begin
-    pos:= cp_left;
+  case imagepos of
+   ip_left,ip_leftcenter: begin
+    pos:= ip_left;
    end;
-   cp_left,cp_leftcenter: begin
-    pos:= cp_right;
+   ip_right,ip_rightcenter: begin
+    pos:= ip_right;
    end;
-   cp_top,cp_topcenter: begin
-    pos:= cp_bottom;
+   ip_bottom,ip_bottomcenter: begin
+    pos:= ip_bottom;
    end;
-   cp_bottom,cp_bottomcenter: begin
-    pos:= cp_top;
+   ip_top,ip_topcenter: begin
+    pos:= ip_top;
    end
    else begin
-    pos:= cp_center;
+    pos:= ip_center;
    end;
   end;
-  if not (pos in [cp_top,cp_bottom]) then begin
+  if not (pos in [ip_top,ip_bottom]) then begin
    inc(result.y,imagedisttop + 
     (result.cy - imagedisttop - imagedistbottom - imagelist.height) div 2);
    result.cy:= imagelist.height;
   end;
   case pos of
-   cp_right: begin
+   ip_right: begin
     aalign:= [al_right{,al_ycentered}];
     dec(result.cx,imagedist);
    end;
-   cp_left: begin
+   ip_left: begin
     aalign:= [{al_ycentered}];
     inc(result.x,imagedist);
     dec(result.cx,imagedist);
    end;
-   cp_bottom: begin
+   ip_bottom: begin
     aalign:= [al_xcentered,al_bottom];
     dec(result.cy,imagedist+imagedistbottom);
    end;
-   cp_top: begin
+   ip_top: begin
     aalign:= [al_xcentered];
     inc(result.y,imagedist+imagedistbottom);
    end;
@@ -920,18 +923,18 @@ begin
   int1:= imagelist.width + imagedist;
   int2:= imagelist.height + imagedist;
   case pos of
-   cp_right: begin
+   ip_right: begin
     dec(arect.cx,int1);
    end;
-   cp_left: begin
+   ip_left: begin
     inc(arect.x,int1);
     dec(arect.cx,int1);
    end;
-   cp_top: begin
+   ip_top: begin
     inc(arect.y,int2);
     dec(arect.cy,int2);
    end;
-   cp_bottom: begin
+   ip_bottom: begin
     dec(arect.cy,int2);
    end;
   end;
@@ -982,7 +985,7 @@ begin
 end;
 
 procedure drawbuttoncaption(const canvas: tcanvas; const info: shapeinfoty;
-        const arect: rectty; const pos: captionposty; const outerrect: prectty);
+        const arect: rectty; const pos: imageposty; const outerrect: prectty);
 var
  textflags: textflagsty;
  rect1: rectty;
@@ -993,8 +996,8 @@ begin
   if ca.caption.text <> '' then begin
    rect1:= arect;
    case pos of
-    cp_left,cp_leftcenter: begin
-     textflags:= [tf_ycentered,tf_clipi];
+    ip_left,ip_leftcenter: begin
+//     textflags:= [tf_ycentered,tf_clipi];
      inc(rect1.x,ca.captiondist);
      dec(rect1.cx,ca.captiondist);
      if countchars(ca.caption.text,msechar(c_tab)) = 1 then begin
@@ -1002,33 +1005,41 @@ begin
       tab1[0].pos:= info.tabpos / defaultppmm;
      end;
     end;
-    cp_right,cp_rightcenter: begin
-     textflags:= [tf_ycentered,tf_right,tf_clipi];
+    ip_right,ip_rightcenter: begin
+//     textflags:= [tf_ycentered,tf_right,tf_clipi];
      dec(rect1.cx,ca.captiondist);
     end;
-    cp_top,cp_topcenter: begin
-     textflags:= [tf_xcentered,tf_clipi];
+    ip_top,ip_topcenter: begin
+//     textflags:= [tf_xcentered,tf_clipi];
      inc(rect1.y,ca.captiondist);
      dec(rect1.cy,ca.captiondist);
     end;
-    cp_bottom,cp_bottomcenter: begin
-     textflags:= [tf_xcentered,tf_bottom,tf_clipi];
+    ip_bottom,ip_bottomcenter: begin
+//     textflags:= [tf_xcentered,tf_bottom,tf_clipi];
      dec(rect1.cy,ca.captiondist);
     end;
-    else begin
-     textflags:= [tf_ycentered,tf_xcentered,tf_clipi];
-    end;
+//    else begin
+//     textflags:= [tf_ycentered,tf_xcentered,tf_clipi];
+//    end;
    end;
-   if pos in [cp_rightcenter,cp_leftcenter] then begin
+{
+   if pos in [ip_leftcenter,ip_rightcenter] then begin
     include(textflags,tf_xcentered);
     exclude(textflags,tf_right);
    end
    else begin
-    if pos in [cp_topcenter,cp_bottomcenter] then begin
+    if pos in [ip_bottomcenter,ip_topcenter] then begin
      include(textflags,tf_ycentered);
      exclude(textflags,tf_bottom);
     end;
    end;
+}
+//   if tf_forcealignment in ca.textflags then begin
+    textflags:= ca.textflags + [tf_clipi];
+//   end
+//   else begin
+//    textflags:= textflags + (ca.textflags - textalignments);
+//   end;
    if shs_disabled in state then begin
     include(textflags,tf_grayed);
    end;
@@ -1058,8 +1069,8 @@ begin
                    [shs_focused,shs_showfocusrect] then begin
     drawfocusrect(canvas,inflaterect(rect2,-focusrectdist));
    end;
-   drawbuttoncaption(canvas,info,rect1,
-                           swapcaptionpos[info.ca.captionpos],nil);
+   drawbuttoncaption(canvas,info,rect1,info.ca.imagepos
+                           {swapcaptionpos[info.ca.captionpos]},nil);
   end;
  end;
 end;
@@ -1077,19 +1088,19 @@ begin
     imagelist.paint(acanvas,imagenr,rect1,align1,colorglyph);
    end;
   end;
-  case captionpos of
-   cp_right,cp_rightcenter: begin
+  case imagepos of
+   ip_left,ip_leftcenter: begin
     inc(rect2.x,captiondist);
     dec(rect2.cx,captiondist);
    end;
-   cp_left,cp_leftcenter: begin
+   ip_right,ip_rightcenter: begin
     dec(rect2.cx,captiondist);
    end;
-   cp_bottom,cp_bottomcenter: begin
+   ip_top,ip_topcenter: begin
     inc(rect2.y,captiondist);
     dec(rect2.cy,captiondist);
    end;
-   cp_top,cp_topcenter: begin
+   ip_bottom,ip_bottomcenter: begin
     dec(rect2.cy,captiondist);
    end;
   end;
@@ -1113,7 +1124,7 @@ begin
    frameskinoptionstoshapestate(info.frame,info.state);
   end; 
   if drawbuttonframe(canvas,info,rect1) then begin
-   info.ca.captionpos:= cp_center;
+   info.ca.imagepos:= ip_center;
    drawbuttonimage(canvas,info,rect1{,cp_center});
   end;
   if info.frame <> nil then begin
@@ -1124,7 +1135,7 @@ begin
 end;
 
 function drawbuttoncheckbox(const canvas: tcanvas; const info: shapeinfoty;
-              var arect: rectty; const pos: captionposty = cp_left): boolean;
+              var arect: rectty; const pos: imageposty = ip_left): boolean;
 var
  rect1: rectty;
  align1: alignmentsty;
@@ -1134,11 +1145,11 @@ begin
  if result then begin
   rect1:= arect;
   rect1.cx:= menucheckboxwidth;
-  if pos <> cp_left then begin
+  if pos <> ip_left then begin
    inc(rect1.x,arect.cx-rect1.cx);
   end;
   draw3dframe(canvas,rect1,-1,defaultframecolors,[]);
-  if pos = cp_left then begin
+  if pos = ip_left then begin
    inc(arect.x,menucheckboxwidth);
   end;
   dec(arect.cx,menucheckboxwidth);
@@ -1199,17 +1210,17 @@ var
 begin
  if not (shs_invisible in info.state) and 
               drawbuttonframe(canvas,info,rect1) then begin
-  info.ca.captionpos:= cp_right;
+  info.ca.imagepos:= ip_left;
   drawbuttonimage(canvas,info,rect1{,cp_left});
   if (shs_menuarrow in info.state) then begin
 //  if (ss_submenu in info.state)  then begin
    drawmenuarrow(canvas,info,rect1);
   end;
-  drawbuttoncheckbox(canvas,info,rect1,cp_right);
+  drawbuttoncheckbox(canvas,info,rect1,ip_right);
   if innerframe <> nil then begin
    deflaterect1(rect1,innerframe^);
   end;
-  drawbuttoncaption(canvas,info,rect1,cp_left,nil);
+  drawbuttoncaption(canvas,info,rect1,ip_left,nil);
  end;
 end;
 
@@ -1219,7 +1230,7 @@ var
  int1: integer;
  color1: colorty;
  rect1,rect2,rect3: rectty;
- pos1,pos2: captionposty;
+ pos1: imageposty;
  frame1: framety;
 begin
  with canvas,info do begin
@@ -1236,17 +1247,15 @@ begin
     frameskinoptionstoshapestate(frame,info.state);
    end;     
    if drawbuttonframe(canvas,info,rect1) then begin
-    if ca.captionpos = cp_left then begin
-     pos1:= cp_right;
-     pos2:= cp_left;
+    if ca.imagepos = ip_right then begin
+     pos1:= ip_right;
     end
     else begin
-     pos1:= cp_left;
-     pos2:= cp_right;
+     pos1:= ip_left;
     end;
     rect2:= rect1;
-    drawbuttonimage(canvas,info,rect1{,pos1});
-    drawbuttoncheckbox(canvas,info,rect1,pos2);
+    drawbuttonimage(canvas,info,rect1);
+    drawbuttoncheckbox(canvas,info,rect1,pos1);
     if state * [shs_focused,shs_showfocusrect] = 
                           [shs_focused,shs_showfocusrect] then begin
      drawfocusrect(canvas,inflaterect(rect2,-focusrectdist));

@@ -25,12 +25,14 @@ const
 type
  textflagty = (tf_xcentered,tf_right,tf_xjustify,tf_ycentered,tf_bottom, 
                  //order fix, used in msepostscriptprinter
+//               tf_forcealignment, //do not use default alignment for buttons
                tf_clipi,tf_clipo,
                tf_grayed,tf_wordbreak,tf_softhyphen,tf_noselect,
                tf_ellipseleft,{tf_ellipsemid,}tf_ellipseright,tf_tabtospace);
  textflagsty = set of textflagty;
 const
  ellipsemask: textflagsty = [tf_ellipseleft,{tf_ellipsemid,}tf_ellipseright];
+ textalignments = [tf_xcentered,tf_right,tf_xjustify,tf_ycentered,tf_bottom];
  
 type
 
@@ -202,6 +204,9 @@ begin
  result:= textflagsty(setsinglebit({$ifdef FPC}longword{$else}word{$endif}(result),
               {$ifdef FPC}longword{$else}word{$endif}(old),
               {$ifdef FPC}longword{$else}word{$endif}(ellipsemask)));
+// if tf_default in result then begin
+//  result:= [tf_default];
+// end;
 end;
 
 function mergearray(const a,b: integerarty): integerarty;

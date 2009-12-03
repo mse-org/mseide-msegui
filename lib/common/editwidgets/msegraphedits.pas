@@ -660,7 +660,7 @@ type
    procedure setimagelist(const avalue: timagelist);
    function isimageliststored: Boolean;
    procedure setcaptiondist(const avalue: integer);
-   procedure setcaptionpos(const avalue: captionposty);
+   procedure setimagepos(const avalue: imageposty);
    procedure setimagenr(const avalue: imagenrty);
    function isimagenrstored: boolean;
    procedure setimageoffset(const avalue: integer);
@@ -679,9 +679,12 @@ type
    function isstatestored: boolean;
 
    procedure setaction(const avalue: tcustomaction);
+   procedure readcaptionpos(reader: treader);
+   procedure settextflags(const avalue: textflagsty);
   protected
    finfo: shapeinfoty;
    factioninfo: actioninfoty;
+   procedure defineproperties(filer: tfiler); override;
    procedure loaded; override;
    procedure setenabled(const avalue: boolean); override;
    procedure setvisible(const avalue: boolean); override;
@@ -724,8 +727,12 @@ type
    property font: twidgetfont read getfont write setfont stored isfontstored;
    property action: tcustomaction read factioninfo.action write setaction;
    property caption: captionty read factioninfo.captiontext write setcaption stored iscaptionstored;
-   property captionpos: captionposty read finfo.ca.captionpos write setcaptionpos
-                              default cp_center;
+   property textflags: textflagsty read finfo.ca.textflags 
+                         write settextflags default defaultcaptiontextflags;
+   property imagepos: imageposty read finfo.ca.imagepos write setimagepos
+                              default ip_center;
+//   property captionpos: captionposty read finfo.ca.captionpos write setcaptionpos
+//                              default cp_center;
    property captiondist: integer read finfo.ca.captiondist write setcaptiondist
                             default defaultshapecaptiondist;
    property imagelist: timagelist read getimagelist write setimagelist
@@ -776,9 +783,10 @@ type
 
    property action;
    property caption;
+   property textflags;
    property shortcut;
    property shortcut1;
-   property captionpos;
+   property imagepos;
    property captiondist;
    property imagelist;
    property imagenr;
@@ -815,7 +823,8 @@ type
    property valuefaces;
    property font;
    property caption;
-   property captionpos;
+   property textflags;
+   property imagepos;
    property captiondist;
    property options;
    property imagedist;
@@ -2484,6 +2493,7 @@ begin
  fvaluefaces:= tvaluefacearrayprop.create(self);
  optionswidget:= defaultoptionswidget - [ow_mousefocus];
  initshapeinfo(finfo);
+ finfo.ca.imagepos:= ip_center;
  finfo.ca.dim:= innerclientrect;
  finfo.color:= cl_transparent;
  finfo.ca.colorglyph:= cl_black;
@@ -2723,7 +2733,16 @@ end;
 procedure tcustomdatabutton.setcaption(const avalue: captionty);
 begin
  setactioncaption(iactionlink(self),avalue);
- formatchanged;
+// formatchanged;
+end;
+
+procedure tcustomdatabutton.settextflags(const avalue: textflagsty);
+begin
+ if finfo.ca.textflags <> avalue then begin
+  finfo.ca.textflags:= checktextflags(finfo.ca.textflags,avalue);
+  invalidate;
+  checkautosize;
+ end;
 end;
 
 function tcustomdatabutton.iscaptionstored: boolean;
@@ -2740,10 +2759,10 @@ begin
  end;
 end;
 
-procedure tcustomdatabutton.setcaptionpos(const avalue: captionposty);
+procedure tcustomdatabutton.setimagepos(const avalue: imageposty);
 begin
- if avalue <> finfo.ca.captionpos then begin
-  finfo.ca.captionpos:= avalue;
+ if avalue <> finfo.ca.imagepos then begin
+  finfo.ca.imagepos:= avalue;
   formatchanged;
   checkautosize;
  end;
@@ -2944,6 +2963,17 @@ end;
 function tcustomdatabutton.isstatestored: boolean;
 begin
  result:= isactionstatestored(factioninfo);
+end;
+
+procedure tcustomdatabutton.readcaptionpos(reader: treader);
+begin
+ imagepos:= readcaptiontoimagepos(reader);
+end;
+
+procedure tcustomdatabutton.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('captionpos',{$ifdef FPC}@{$endif}readcaptionpos,nil,false);
 end;
 
 procedure tcustomdatabutton.loaded;

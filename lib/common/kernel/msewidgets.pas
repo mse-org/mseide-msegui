@@ -1154,6 +1154,8 @@ type
 type
  messagepositionty = (mepo_default,mepo_screencentered,mepo_windowcentered);
 
+function readcaptiontoimagepos(const reader: treader): imageposty;
+
 procedure synccaptiondistx(const awidgets: widgetarty);
                 //adjusts captiondist for equal distouter
                 //don't set cfo_captiondistouter!
@@ -1264,6 +1266,12 @@ type
   public
    constructor create(const aowner: tcomponent; const apopuptransient: boolean;
                         const ahasaction: boolean; const exttext: msestring);
+end;
+
+function readcaptiontoimagepos(const reader: treader): imageposty;
+begin
+ result:= captiontoimagepos[captionposty(
+                              readenum(reader,typeinfo(captionposty)))];
 end;
 
 procedure synccaptiondistx(const awidgets: widgetarty);

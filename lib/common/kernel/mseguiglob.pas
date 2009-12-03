@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -27,7 +27,17 @@ type
                  cp_lefttop,cp_left,cp_leftcenter,cp_leftbottom,
                  cp_bottomleft,cp_bottom,cp_bottomcenter,cp_bottomright
                  );
-                 
+ imageposty = (ip_center,ip_rightbottom,ip_right,ip_rightcenter,ip_righttop,
+                 ip_topright,ip_top,ip_topcenter,ip_topleft,
+                 ip_lefttop,ip_left,ip_leftcenter,ip_leftbottom,
+                 ip_bottomleft,ip_bottom,ip_bottomcenter,ip_bottomright
+                 );
+const
+ horzimagepos = [ip_rightbottom,ip_right,ip_rightcenter,ip_righttop,
+                 ip_lefttop,ip_left,ip_leftcenter,ip_leftbottom];
+ vertimagepos = [ip_topright,ip_top,ip_topcenter,ip_topleft,
+                 ip_bottomleft,ip_bottom,ip_bottomcenter,ip_bottomright];
+type                 
  mousebuttonty = (mb_none,mb_left,mb_right,mb_middle);
  mousewheelty = (mw_none,mw_up,mw_down);
 
@@ -122,6 +132,28 @@ const
  sizingtol = 2; //+- pixel
  sizingwidth = 2*sizingtol;                                        
 
+const
+ captiontoimagepos: array[captionposty] of imageposty = (
+               //cp_center,cp_rightbottom,cp_right,cp_rightcenter,cp_righttop,
+                 ip_center,ip_lefttop,    ip_left, ip_leftcenter, ip_leftbottom,
+               //cp_topright,  cp_top,   cp_topcenter,   cp_topleft,
+                 ip_bottomleft,ip_bottom,ip_bottomcenter,ip_bottomright,
+               //cp_lefttop,    cp_left, cp_leftcenter, cp_leftbottom,
+                 ip_rightbottom,ip_right,ip_rightcenter,ip_righttop,
+               //cp_bottomleft,cp_bottom,cp_bottomcenter,cp_bottomright
+                 ip_topright,  ip_top,   ip_topcenter,   ip_topleft
+                 );
+ imagetocaptionpos: array[imageposty] of captionposty = (
+               //ip_center,ip_rightbottom,ip_right,ip_rightcenter,ip_righttop,
+                 cp_center,cp_lefttop,    cp_left, cp_leftcenter, cp_leftbottom,
+               //ip_topright,  ip_top,   ip_topcenter,   ip_topleft,
+                 cp_bottomleft,cp_bottom,cp_bottomcenter,cp_bottomright,
+               //ip_lefttop,    ip_left, ip_leftcenter, ip_leftbottom,
+                 cp_rightbottom,cp_right,cp_rightcenter,cp_righttop,
+               //ip_bottomleft,ip_bottom,ip_bottomcenter,ip_bottomright
+                 cp_topright,  cp_top,   cp_topcenter,   cp_topleft
+                 );
+
  swapcaptionpos: array[captionposty] of captionposty =
  (//cp_center,cp_rightbottom,cp_right,cp_rightcenter,cp_righttop,
     cp_center,cp_leftbottom,cp_left,cp_leftcenter,cp_lefttop,
@@ -141,6 +173,27 @@ const
     cp_left,cp_left,cp_left,cp_left,
   //cp_bottomleft,cp_bottom,cp_bottomcenter,cp_bottomright
     cp_bottom,cp_bottom,cp_bottom,cp_bottom
+ );
+
+ swapimagepos: array[imageposty] of imageposty =
+ (//ip_center,ip_rightbottom,ip_right,ip_rightcenter,ip_righttop,
+    ip_center,ip_leftbottom,ip_left,ip_leftcenter,ip_lefttop,
+  //ip_topright,ip_top,ip_topcenter,ip_topleft,
+    ip_bottomright,ip_bottom,ip_bottomcenter,ip_bottomleft,
+  //ip_lefttop,ip_left,ip_leftcenter,ip_leftbottom,
+    ip_righttop,ip_right,ip_rightcenter,ip_rightbottom,
+  //ip_bottomleft,ip_bottom,ip_bottomcenter,ip_bottomright
+    ip_topleft,ip_top,ip_topcenter,ip_topright
+ );
+ simpleimagepos: array[imageposty] of imageposty =
+ (//ip_center,ip_rightbottom,ip_right,ip_rightcenter,ip_righttop,
+    ip_center,ip_right,ip_right,ip_right,ip_right,
+  //ip_topright,ip_top,ip_topcenter,ip_topleft,
+    ip_top,ip_top,ip_top,ip_top,
+  //ip_lefttop,ip_left,ip_leftcenter,ip_leftbottom,
+    ip_left,ip_left,ip_left,ip_left,
+  //ip_bottomleft,ip_bottom,ip_bottomcenter,ip_bottomright
+    ip_bottom,ip_bottom,ip_bottom,ip_bottom
  );
 
 type
