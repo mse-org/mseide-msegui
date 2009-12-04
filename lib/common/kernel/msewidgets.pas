@@ -1918,6 +1918,7 @@ begin
   include(result,fsf_offset1);
  end;
 end;
+
 {
 function tactionsimplebutton.getframeclicked: boolean;
 begin
