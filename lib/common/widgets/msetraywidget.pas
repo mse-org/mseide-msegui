@@ -3,7 +3,7 @@ unit msetraywidget;
 interface
 uses
  mseclasses,classes,msesimplewidgets,mseguiglob,msebitmap,msegui,mseevent,
- mseglob,msegraphics,msestrings,msetimer;
+ mseglob,msegraphics,msestrings,msetimer,msemenus;
 type
  ttraywidget = class(teventwidget)
   private
@@ -19,6 +19,9 @@ type
    procedure setimagenum(const avalue: integer);
    procedure setcaption(const avalue: msestring);
   protected
+  {$ifdef mswindows}
+   procedure showhint(var info: hintinfoty); override;
+  {$endif}
    procedure dotimer(const sender: tobject);
    procedure settrayhint;
    procedure sethint(const avalue: msestring); override;
@@ -30,6 +33,9 @@ type
    procedure undock;
    procedure setvisible(const avalue: boolean); override;
    procedure loaded; override;
+   procedure dopopup(var amenu: tpopupmenu; 
+                    var mouseinfo: mouseeventinfoty); override;
+
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -199,6 +205,26 @@ begin
  end;
 end;
 
+procedure ttraywidget.dopopup(var amenu: tpopupmenu;
+               var mouseinfo: mouseeventinfoty);
+begin
+ {$ifdef mswindows}
+ if ownswindow then begin
+  gui_settrayhint(windowpo^,'');
+  try
+   inherited;
+  finally
+   gui_settrayhint(windowpo^,hint);
+  end;
+ end
+ else begin
+  inherited;
+ end;
+ {$else}
+ inherited;
+ {$endif}
+end;
+
 procedure ttraywidget.showmessage(const amessage: msestring;
                const timeoutms: integer);
 begin
@@ -234,5 +260,12 @@ begin
   window.caption:= fcaption;
  end;
 end;
+
+{$ifdef mswindows}
+procedure ttraywidget.showhint(var info: hintinfoty);
+begin
+ //dummy;
+end;
+{$endif}
 
 end.

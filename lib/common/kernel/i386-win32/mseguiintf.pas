@@ -1059,6 +1059,7 @@ end;
 
 function gui_setwindowfocus(id: winidty): guierrorty;
 begin
+ setforegroundwindow(applicationwindow);
  setfocus(id);
  result:= gue_ok;
 end;
@@ -3690,6 +3691,26 @@ begin
  end;
 end;
 
+function shiftstatetowinmousekeyflags(shiftstate: shiftstatesty): longword;
+begin
+ result:= 0;
+ if ss_ctrl in shiftstate then begin
+  result:= result or mk_control;
+ end;
+ if ss_left in shiftstate then begin
+  result:= result or mk_lbutton;
+ end;
+ if ss_middle in shiftstate then begin
+  result:= result or mk_mbutton;
+ end;
+ if ss_right in shiftstate then begin
+  result:= result or mk_rbutton;
+ end;
+ if ss_shift in shiftstate then begin
+  result:= result or mk_shift;
+ end;
+end;
+
 function winmousepostopoint(pos: longword): pointty;
 begin
  result.x:= smallint(loword(pos));
@@ -4097,6 +4118,51 @@ begin
 end;
 
 function WindowProc(ahWnd: HWND; Msg: UINT; wParam: WPARAM; lParam: LPARAM): LRESULT; stdcall;
+
+ function checkbutton(const amessage: UINT): mousebuttonty;
+ begin
+  result:= mb_none;
+  case amessage of
+   wm_lbuttondown,wm_lbuttonup: result:= mb_left;
+   wm_mbuttondown,wm_mbuttonup: result:= mb_middle;
+   wm_rbuttondown,wm_rbuttonup: result:= mb_right;
+  end;
+ end;
+ 
+ procedure inittraycallback(const reposition: boolean; out cursorpos: pointty;
+                            out shiftstate: uint);
+ var
+  rect1: rectty;
+  pt1: pointty;
+ begin
+  shiftstate:= 0;
+  if getkeystate(vk_control) < 0 then begin
+   shiftstate:= shiftstate or mk_control;
+  end;
+  if getkeystate(vk_shift) < 0 then begin
+   shiftstate:= shiftstate or mk_shift;
+  end;
+  if getkeystate(vk_lbutton) < 0 then begin
+   shiftstate:= shiftstate or mk_lbutton;
+  end;
+  if getkeystate(vk_mbutton) < 0 then begin
+   shiftstate:= shiftstate or mk_mbutton;
+  end;
+  if getkeystate(vk_rbutton) < 0 then begin
+   shiftstate:= shiftstate or mk_rbutton;
+  end;
+  
+  windows.getcursorpos(tpoint(pt1));
+  gui_getwindowrect(ahwnd,rect1);
+  cursorpos.x:= rect1.cx div 2;
+  cursorpos.y:= rect1.cy div 2;
+  if reposition then begin
+   gui_reposwindow(ahwnd,makerect(pt1.x-cursorpos.x,pt1.y-cursorpos.y,
+                                                           rect1.cx,rect1.cy));
+//   setforegroundwindow(applicationwindow);
+  end;
+ end;
+
 const
  wheelstep = 120;
 var
@@ -4109,6 +4175,7 @@ var
  int1: integer;
  bo1: boolean;
  sysevent: syseventty;
+ shiftstate1: uint;
 begin
  if application.ismainthread then begin
   sysevent.hwnd:= ahwnd;
@@ -4134,23 +4201,16 @@ begin
    exit;
   end;
   traycallbackmessage: begin
-   gui_getwindowrect(ahwnd,rect1);
-   pt1.x:= rect1.cx div 2;
-   pt1.y:= rect1.cy div 2;
    case lparam and $ffff of
-    wm_rbuttondown: begin
-     windows.getcursorpos(tpoint(pt2));
-     gui_reposwindow(ahwnd,makerect(pt2.x - pt1.x, pt2.y - pt1.y,rect1.cx,rect1.cy));
-     eventlist.add(tmouseevent.create(ahwnd,false,mb_right,mw_none,pt1,
-                                                     [ss_right],timestamp));
-                                                     
+    wm_lbuttondown,wm_mbuttondown,wm_rbuttondown: begin
+     inittraycallback(true,pt1,shiftstate1);
+     windowproc(ahwnd,lparam and $ffff,shiftstate1,pointtowinmousepos(pt1));
     end;
-    wm_rbuttonup: begin
-     eventlist.add(tmouseevent.create(ahwnd,true,mb_right,mw_none,pt1,
-                                                     [ss_right],timestamp));
+    wm_lbuttonup,wm_mbuttonup,wm_rbuttonup: begin
+     inittraycallback(true,pt1,shiftstate1);
+     windowproc(ahwnd,lparam and $ffff,shiftstate1,pointtowinmousepos(pt1));
     end;
    end;
-   exit;
   end;     
   wm_ime_char: begin
    if iswin95 then begin
@@ -4294,12 +4354,7 @@ begin
   wm_lbuttonup,wm_mbuttonup,wm_rbuttonup: begin
    pt1:= winmousepostopoint(lparam);
    checkmousewindow(ahwnd,pt1);
-   button:= mb_none;
-   case msg of
-    wm_lbuttondown,wm_lbuttonup: button:= mb_left;
-    wm_mbuttondown,wm_mbuttonup: button:= mb_middle;
-    wm_rbuttondown,wm_rbuttonup: button:= mb_right;
-   end;
+   button:= checkbutton(msg);
    eventlist.add(tmouseevent.create(ahwnd,
         (msg = wm_lbuttonup) or (msg = wm_mbuttonup) or (msg = wm_rbuttonup),
          button,mw_none,pt1,
