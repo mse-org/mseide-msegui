@@ -5077,7 +5077,11 @@ begin
     pictop:= pictopsrc;
     transform:= unitytransform;
     if (cx > 1) and (cx <> destrect^.cx) then begin
-     transform[0,0]:= ((cx - 1) * $10000) div destrect^.cx;
+     int1:= destrect^.cx - 1;
+     if int1 < 1 then begin
+      int1:= 1;
+     end;
+     transform[0,0]:= ((cx - 1) * $10000) div int1;
      //pixel center to pixel center
      if transform[0,0] > 0 then begin
       ax:= (x * $10000 + $8000) div transform[0,0]; 
@@ -5096,7 +5100,11 @@ begin
      end;
     end;
     if (cy > 1) and (cy <> destrect^.cy) then begin
-     transform[1,1]:= ((cy - 1) * $10000) div destrect^.cy;
+     int1:= destrect^.cy-1;
+     if int1 < 1 then begin
+      int1:= 1;
+     end;
+     transform[1,1]:= ((cy - 1) * $10000) div int1;
      //pixel center to pixel center
      if transform[1,1] > 0 then begin
       ay:= (y * $10000 + $8000) div transform[1,1]; 
