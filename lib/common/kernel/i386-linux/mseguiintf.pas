@@ -5081,7 +5081,7 @@ begin
      if int1 < 1 then begin
       int1:= 1;
      end;
-     transform[0,0]:= ((cx - 1) * $10000) div int1;
+     transform[0,0]:= (((cx - 1) * $10000) + int1 div 2) div int1;
      //pixel center to pixel center
      if transform[0,0] > 0 then begin
       ax:= (x * $10000 + $8000) div transform[0,0]; 
@@ -5091,20 +5091,21 @@ begin
      end;
     end
     else begin
-     transform[0,0]:= (cx * $10000) div destrect^.cx;
-     if transform[0,0] > 0 then begin
-      ax:= (x * $10000) div transform[0,0]; 
-     end
-     else begin
-      ax:= x * $10000; //very big
-     end;
+     transform[0,0]:= $10000;
+//     transform[0,0]:= (cx * $10000) div destrect^.cx;
+//     if transform[0,0] > 0 then begin
+//      ax:= (x * $10000) div transform[0,0]; 
+//     end
+//     else begin
+//      ax:= x * $10000; //very big
+//     end;
     end;
     if (cy > 1) and (cy <> destrect^.cy) then begin
      int1:= destrect^.cy-1;
      if int1 < 1 then begin
       int1:= 1;
      end;
-     transform[1,1]:= ((cy - 1) * $10000) div int1;
+     transform[1,1]:= ((cy - 1) * $10000 + int1 div 2) div int1;
      //pixel center to pixel center
      if transform[1,1] > 0 then begin
       ay:= (y * $10000 + $8000) div transform[1,1]; 
@@ -5114,13 +5115,14 @@ begin
      end;
     end
     else begin
-     transform[1,1]:= (cy * $10000) div destrect^.cy;
-     if transform[1,1] > 0 then begin
-      ay:= (y * $10000) div transform[1,1]; 
-     end
-     else begin
-      ay:= y * $10000; //very big
-     end;
+     transform[0,0]:= $10000;
+//     transform[1,1]:= (cy * $10000) div destrect^.cy;
+//     if transform[1,1] > 0 then begin
+//      ay:= (y * $10000) div transform[1,1]; 
+//     end
+//     else begin
+//      ay:= y * $10000; //very big
+//     end;
     end;
    end
    else begin
