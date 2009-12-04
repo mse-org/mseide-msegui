@@ -5062,6 +5062,37 @@ label
   end
  end;
 
+ function getscale(const sourcesize,destsize,sourcepos: integer;
+                                    out destpos: integer): txfixed;
+ var
+  int1: integer;
+ begin
+  if (sourcesize > 1) and (sourcesize <> destsize) then begin
+   int1:= destsize - 1;
+   if int1 < 1 then begin
+    int1:= 1;
+   end;
+   if sourcesize < destsize then begin
+    result:= (((sourcesize - 1) * $10000) + int1 div 2) div int1;
+    //pixel center to pixel center
+   end
+   else begin
+    result:= (((sourcesize) * $10000) + int1 div 2) div (int1 + 1);
+    //pixel end to pixel end
+   end;
+   if result > 0 then begin
+    destpos:= (sourcepos * $10000 + result div 2) div result; 
+   end
+   else begin
+    destpos:= sourcepos * $10000; //very big
+   end;
+  end
+  else begin
+   result:= $10000;
+   destpos:= sourcepos;
+  end;
+ end;
+
 begin
  with drawinfo,copyarea,sourcerect^,gc,x11gcty(platformdata).d do begin
   needstransform:= (alignment * [al_stretchx,al_stretchy] <> []) and
@@ -5069,61 +5100,14 @@ begin
             (destrect^.cy <> sourcerect^.cy)) and
             (destrect^.cx > 0) and (destrect^.cy > 0);
   colormask:= (mask <> nil) and not mask.monochrome;
-//  inc(destrect^.cx);
   if hasxrender and (needstransform or (longword(transparency) <> 0) or
       colormask) then begin
    if needstransform then begin
 //    pictop:= pictopover;
     pictop:= pictopsrc;
     transform:= unitytransform;
-    if (cx > 1) and (cx <> destrect^.cx) then begin
-     int1:= destrect^.cx - 1;
-     if int1 < 1 then begin
-      int1:= 1;
-     end;
-     transform[0,0]:= (((cx - 1) * $10000) + int1 div 2) div int1;
-     //pixel center to pixel center
-     if transform[0,0] > 0 then begin
-      ax:= (x * $10000 + $8000) div transform[0,0]; 
-     end
-     else begin
-      ax:= x * $10000; //very big
-     end;
-    end
-    else begin
-     transform[0,0]:= $10000;
-//     transform[0,0]:= (cx * $10000) div destrect^.cx;
-//     if transform[0,0] > 0 then begin
-//      ax:= (x * $10000) div transform[0,0]; 
-//     end
-//     else begin
-//      ax:= x * $10000; //very big
-//     end;
-    end;
-    if (cy > 1) and (cy <> destrect^.cy) then begin
-     int1:= destrect^.cy-1;
-     if int1 < 1 then begin
-      int1:= 1;
-     end;
-     transform[1,1]:= ((cy - 1) * $10000 + int1 div 2) div int1;
-     //pixel center to pixel center
-     if transform[1,1] > 0 then begin
-      ay:= (y * $10000 + $8000) div transform[1,1]; 
-     end
-     else begin
-      ay:= y * $10000; //very big
-     end;
-    end
-    else begin
-     transform[0,0]:= $10000;
-//     transform[1,1]:= (cy * $10000) div destrect^.cy;
-//     if transform[1,1] > 0 then begin
-//      ay:= (y * $10000) div transform[1,1]; 
-//     end
-//     else begin
-//      ay:= y * $10000; //very big
-//     end;
-    end;
+    transform[0,0]:= getscale(cx,destrect^.cx,x,ax);
+    transform[1,1]:= getscale(cy,destrect^.cy,y,ay);
    end
    else begin
     pictop:= pictopsrc;
