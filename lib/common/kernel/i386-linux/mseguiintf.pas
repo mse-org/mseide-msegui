@@ -5065,19 +5065,24 @@ label
  function getscale(const sourcesize,destsize,sourcepos: integer;
                                     out destpos: integer): txfixed;
  var
-  int1: integer;
+  int1,int2: integer;
  begin
-  if (sourcesize > 1) and (sourcesize <> destsize) then begin
-   int1:= destsize - 1;
-   if int1 < 1 then begin
-    int1:= 1;
-   end;
-   if sourcesize < destsize then begin
-    result:= (((sourcesize - 1) * $10000) + int1 div 2) div int1;
+  if (sourcesize > 0) and (sourcesize <> destsize) then begin
+   if (sourcesize < destsize) then begin
+    int1:= destsize - 1;
+    if int1 < 1 then begin
+     int1:= 1;
+    end;
+    int2:= (sourcesize - 1);
+    if int2 < 1 then begin
+     int2:= 1;
+//     int1:= int1 + 1;
+    end;
+    result:= ((int2 * $10000){ + int1 div 2}) div int1;
     //pixel center to pixel center
    end
    else begin
-    result:= (((sourcesize) * $10000) + int1 div 2) div (int1 + 1);
+    result:= ((sourcesize * $10000) + destsize div 2) div destsize;
     //pixel end to pixel end
    end;
    if result > 0 then begin
