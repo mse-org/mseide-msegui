@@ -208,6 +208,8 @@ type
   published
    property state: actionstatesty read getstate write setstate
             stored isstatestored  default [];
+   property visible stored false;
+   property enabled stored false;
  end;
 
  tbutton = class(tcustombutton)
