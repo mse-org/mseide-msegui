@@ -7,7 +7,7 @@ uses
  
 procedure Register;
 begin
- registercomponents('Exp',[ttraywidget]);
+// registercomponents('Exp',[]);
  registercomponenttabhints(['Exp'],['Experimental Components']);
 end;
 initialization

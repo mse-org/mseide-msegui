@@ -15,11 +15,11 @@ interface
 
 implementation
 uses
- msedesignintf,msesysenv,msefilechange,regsysutils_bmp;
+ msedesignintf,msesysenv,msefilechange,regsysutils_bmp,mseprocess;
 
 procedure Register;
 begin
- registercomponents('NoGui',[tsysenvmanager,tfilechangenotifyer]);
+ registercomponents('NoGui',[tsysenvmanager,tfilechangenotifyer,tmseprocess]);
 end;
 
 initialization

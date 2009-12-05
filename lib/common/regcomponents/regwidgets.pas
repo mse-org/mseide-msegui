@@ -117,7 +117,7 @@ begin
   tdockformwidget,tmainmenuwidget,
   tsplitter,tspacer,tlayouter,ttoolbar,ttabbar,ttabwidget,ttabpage,
   tdial,tchart,tchartrecorder,twindowwidget{$ifdef FPC},topenglwidget{$endif}
-  {ttraywidget}]);
+  ,ttraywidget]);
  registercomponenttabhints(['Widget'],
          ['Display Widgets, Widgets which can''t be placed into twidgetgrid']);
  registerpropertyeditor(typeinfo(tcellframe),nil,'',
