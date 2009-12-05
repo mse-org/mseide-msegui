@@ -4000,6 +4000,8 @@ begin
                                  (po1^.gloss_color <> cl_none) then begin
     if grayed then begin
      acolorforeground:= cl_white;
+     inc(pos^.x,po1^.shadow_shiftx);
+     inc(pos^.y,po1^.shadow_shifty);
     end
     else begin
      if po1^.shadow_color <> cl_none then begin
