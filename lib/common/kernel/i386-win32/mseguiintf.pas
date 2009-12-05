@@ -1059,7 +1059,8 @@ end;
 
 function gui_setwindowfocus(id: winidty): guierrorty;
 begin
- setforegroundwindow(applicationwindow);
+// setforegroundwindow(applicationwindow);
+ setforegroundwindow(id);
  setfocus(id);
  result:= gue_ok;
 end;
