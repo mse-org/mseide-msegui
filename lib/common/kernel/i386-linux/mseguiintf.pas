@@ -1133,8 +1133,8 @@ begin
    move(prop^,value,nitems*sizeof(longword));
  {$ifdef FPC} {$checkpointer default} {$endif}
 {$endif}
+   result:= true;
   end;
-  result:= true;
   xfree(prop);
  end;
 end;
