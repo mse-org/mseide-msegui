@@ -4045,10 +4045,10 @@ begin
     end;
     checkgcstate([cs_acolorforeground]);
     gdi(gdi_drawstring16);
-    if grayed then begin
-     inc(pos^.x);
-     inc(pos^.y);
-    end;
+//    if grayed then begin
+//     inc(pos^.x);
+//     inc(pos^.y);
+//    end;
    end
    else begin
     acolorforeground:= po1^.color;

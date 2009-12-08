@@ -6011,7 +6011,7 @@ begin
    int1:= 1;
   end;
   BufferCount:= int1;
-  if active then begin
+  if self.active then begin
    forcecalcrange;
    checkscroll;
   end;
@@ -6068,11 +6068,13 @@ end;
 
 procedure tgriddatalink.forcecalcrange;
 begin
- inc(fdatasetchangedlock);
- try
-  dataevent(dedatasetchange,0); //force tdatalink.calcrange
- finally
-  dec(fdatasetchangedlock);
+ if active then begin
+  inc(fdatasetchangedlock);
+  try
+   dataevent(dedatasetchange,0); //force tdatalink.calcrange
+  finally
+   dec(fdatasetchangedlock);
+  end;
  end;
 end;
 
