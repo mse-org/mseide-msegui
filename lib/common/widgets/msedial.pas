@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2007 by Martin Schreiber
+{ MSEgui Copyright (c) 2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -61,7 +61,8 @@ type
   ticks: segmentarty;
   ticksreal: realarty;
   captions: tickcaptionarty;
-  intervalcount: real;
+  intervalco: real;
+  interval: real;
   afont: tfont;
   options: dialtickoptionsty;
  end;
@@ -164,13 +165,22 @@ type
  tdialtick = class(tdialprop)
   private
    finfo: dialtickinfoty;
+   function getintervalcount: real;
    procedure setintervalcount(const avalue: real);
    procedure setoptions(const avalue: dialtickoptionsty);
+   function getinterval: real;
+   procedure setinterval(const avalue: real);
+   function isintervalcountstored: boolean;
+   function isintervalstored: boolean;
   protected
 //   procedure paint(const acanvas: tcanvas);
   public
   published
-   property intervalcount: real read finfo.intervalcount write setintervalcount;
+   property intervalcount: real read getintervalcount write setintervalcount 
+                                       stored isintervalcountstored;
+                      //0 -> off
+   property interval: real read getinterval write setinterval
+                                       stored isintervalstored;
                       //0 -> off
    property options: dialtickoptionsty read finfo.options 
                           write setoptions default [];
@@ -270,12 +280,19 @@ type
  
  tcustomdialcontrollers = class(tpersistentarrayprop)
   private
-   fintf: idialcontroller;
+   fstart: real;
+   frange: real;
+   procedure setstart(const avalue: real);
+   procedure setrange(const avalue: real);
   protected
+   fintf: idialcontroller;
    function getitemclass: dialcontrollerclassty; virtual;
    procedure createitem(const index: integer; var item: tpersistent); override;
   public
    constructor create(const aintf: idialcontroller);
+  published
+   property start: real read fstart write setstart;
+   property range: real read frange write setrange;
  end;
  
 const
@@ -734,20 +751,70 @@ end;
 
 { tdialtick }
 
-procedure tdialtick.setintervalcount(const avalue: real);
-begin
- if finfo.intervalcount <> avalue then begin
-  finfo.intervalcount:= avalue;
-  changed;
- end;
-end;
-
 procedure tdialtick.setoptions(const avalue: dialtickoptionsty);
 begin
  if finfo.options <> avalue then begin
   finfo.options:= avalue;
   changed;
  end;
+end;
+
+function tdialtick.getintervalcount: real;
+begin
+ if finfo.intervalco <> 0 then begin
+  result:= finfo.intervalco;
+ end
+ else begin
+  if finfo.interval <> 0 then begin
+   result:= tdialcontroller(fowner).range/finfo.interval;
+  end
+  else begin
+   result:= 0;
+  end;
+ end;
+end;
+
+procedure tdialtick.setintervalcount(const avalue: real);
+begin
+ if finfo.intervalco <> avalue then begin
+  finfo.intervalco:= avalue;
+  finfo.interval:= 0;
+  changed;
+ end;
+end;
+
+function tdialtick.getinterval: real;
+begin
+ if finfo.interval <> 0 then begin
+  result:= finfo.interval;
+ end
+ else begin
+  if finfo.intervalco <> 0 then begin
+   result:= tdialcontroller(fowner).range/finfo.intervalco;
+  end
+  else begin
+   result:= 0;
+  end;
+ end;
+end;
+
+procedure tdialtick.setinterval(const avalue: real);
+begin
+ if avalue <> finfo.interval then begin
+  finfo.interval:= avalue;
+  finfo.intervalco:= 0;
+  changed;
+ end;
+end;
+
+function tdialtick.isintervalcountstored: boolean;
+begin
+ result:= finfo.intervalco <> 0;
+end;
+
+function tdialtick.isintervalstored: boolean;
+begin
+ result:= finfo.interval <> 0;
 end;
 
 { tdialticks }
@@ -1135,7 +1202,10 @@ begin
       else begin
        system.setlength(captions,system.length(ticks));
        int2:= high(captions) * 2; //2* interval count
-       rea1:= -(angle*2*pi) / int2;
+       rea1:= -(angle*2*pi);
+       if int2 <> 0 then begin
+        rea1:= rea1 / int2;
+       end;
 //       if fdirection in [gd_left,gd_right] then begin
 //        rea1:= -rea1;
 //       end;
@@ -1383,6 +1453,7 @@ end;
 constructor tcustomdialcontrollers.create(const aintf: idialcontroller);
 begin
  fintf:= aintf;
+ frange:= 1;
  inherited create(getitemclass);
 end;
 
@@ -1390,11 +1461,33 @@ procedure tcustomdialcontrollers.createitem(const index: integer;
                var item: tpersistent);
 begin
  item:= dialcontrollerclassty(fitemclasstype).create(fintf);
+ tcustomdialcontroller(item).start:= fstart;
+ tcustomdialcontroller(item).range:= frange;
 end;
 
 function tcustomdialcontrollers.getitemclass: dialcontrollerclassty;
 begin
  result:= tcustomdialcontroller;
+end;
+
+procedure tcustomdialcontrollers.setstart(const avalue: real);
+var
+ int1: integer;
+begin
+ fstart:= avalue;
+ for int1:= 0 to high(fitems) do begin
+  tcustomdialcontroller(fitems[int1]).start:= avalue;
+ end;
+end;
+
+procedure tcustomdialcontrollers.setrange(const avalue: real);
+var
+ int1: integer;
+begin
+ frange:= avalue;
+ for int1:= 0 to high(fitems) do begin
+  tcustomdialcontroller(fitems[int1]).range:= avalue;
+ end;
 end;
 
 { tdialcontroller }

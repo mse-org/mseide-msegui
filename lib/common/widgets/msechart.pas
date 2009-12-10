@@ -55,6 +55,7 @@ type
    fstart: integer;
    fimagelist: timagelist;
    fimagenr: imagenrty;
+   fname: string;
    procedure setxydata(const avalue: complexarty);
    procedure datachange;
    procedure setcolor(const avalue: colorty);
@@ -110,6 +111,7 @@ type
    property options: charttraceoptionsty read foptions write setoptions default [];
    property imagelist: timagelist read fimagelist write setimagelist;
    property imagenr: imagenrty read fimagenr write setimagenr default -1;
+   property name: string read fname write fname;
  end;
 
  traceaty = array[0..0] of ttrace;
@@ -121,8 +123,16 @@ type
  ttraces = class(townedeventpersistentarrayprop)
   private
    ftracestate: tracesstatesty;
+   fxstart: real;
+   fystart: real;
+   fxrange: real;
+   fyrange: real;
    procedure setitems(const index: integer; const avalue: ttrace);
    function getitems(const index: integer): ttrace;
+   procedure setxstart(const avalue: real);
+   procedure setystart(const avalue: real);
+   procedure setxrange(const avalue: real);
+   procedure setyrange(const avalue: real);
   protected
    fsize: sizety;
    fscalex: real;
@@ -131,13 +141,26 @@ type
    procedure clientrectchanged;
    procedure paint(const acanvas: tcanvas);
    procedure checkgraphic;
+   procedure createitem(const index: integer; var item: tpersistent); override;
   public
    constructor create(const aowner: tcustomchart); reintroduce;
    class function getitemclasstype: persistentclassty; override;
    property items[const index: integer]: ttrace read getitems write setitems; default;
+   function itembyname(const aname: string): ttrace;
   published
+   property xstart: real read fxstart write setxstart;
+   property ystart: real read fystart write setystart;
+   property xrange: real read fxrange write setxrange;
+   property yrange: real read fyrange write setyrange;
  end;
 
+ ichartdialcontroller = interface(idialcontroller)
+  function getxstart: real;
+  function getystart: real;
+  function getxrange: real;
+  function getyrange: real;
+ end;
+ 
  tchartdialvert = class(tcustomdialcontroller)
   protected
    procedure setdirection(const avalue: graphicdirectionty); override;
@@ -175,6 +198,7 @@ type
  tchartdials = class(tcustomdialcontrollers)
   protected
   public
+   constructor create(const aintf: ichartdialcontroller);
    procedure changed;
    procedure paint(const acanvas: tcanvas);
    procedure afterpaint(const acanvas: tcanvas);
@@ -186,6 +210,7 @@ type
    procedure setitems(const aindex: integer; const avalue: tchartdialhorz);
   protected
    function getitemclass: dialcontrollerclassty; override;
+   procedure createitem(const index: integer; var item: tpersistent); override;
   public
    property items[const aindex: integer]: tchartdialhorz read getitems write setitems; default;
  end;
@@ -196,6 +221,7 @@ type
    procedure setitems(const aindex: integer; const avalue: tchartdialvert);
   protected
    function getitemclass: dialcontrollerclassty; override;
+   procedure createitem(const index: integer; var item: tpersistent); override;
   public
    property items[const aindex: integer]: tchartdialvert read getitems write setitems; default;
  end;
@@ -214,10 +240,14 @@ type
  chartstatety = (chs_nocolorchart);
  chartstatesty = set of chartstatety;
  
- tcustomchart = class(tscrollbox,idialcontroller)
+ tcustomchart = class(tscrollbox,ichartdialcontroller)
   private
    fxdials: tchartdialshorz;
    fydials: tchartdialsvert;
+   fxstart: real;
+   fystart: real;
+   fxrange: real;
+   fyrange: real;
 //   fonbeforepaint: painteventty;
 //   fonpaintbackground: painteventty;
 //   fonpaint: painteventty;
@@ -225,6 +255,14 @@ type
    procedure setxdials(const avalue: tchartdialshorz);
    procedure setydials(const avalue: tchartdialsvert);
    procedure setcolorchart(const avalue: colorty);
+   function getxstart: real;
+   procedure setxstart(const avalue: real); virtual;
+   function getystart: real;
+   procedure setystart(const avalue: real); virtual;
+   function getxrange: real;
+   procedure setxrange(const avalue: real); virtual;
+   function getyrange: real;
+   procedure setyrange(const avalue: real); virtual;
   protected
    fcolorchart: colorty;
    fstate: chartstatesty;
@@ -245,6 +283,11 @@ type
    destructor destroy; override;
    property colorchart: colorty read fcolorchart write setcolorchart 
                               default cl_foreground;
+   property xstart: real read getxstart write setxstart;
+   property ystart: real read getystart write setystart;
+   property xrange: real read getxrange write setxrange; //default 1
+   property yrange: real read getyrange write setyrange; //default 1
+      
    property xdials: tchartdialshorz read fxdials write setxdials;
    property ydials: tchartdialsvert read fydials write setydials;
 //   property onbeforepaint: painteventty read fonbeforepaint write fonbeforepaint;
@@ -258,6 +301,10 @@ type
   private
    ftraces: ttraces;
    procedure settraces(const avalue: ttraces);
+   procedure setxstart(const avalue: real); override;
+   procedure setystart(const avalue: real); override;
+   procedure setxrange(const avalue: real); override;
+   procedure setyrange(const avalue: real); override;
   protected
    procedure clientrectchanged; override;
    procedure dopaint(const acanvas: tcanvas); override;
@@ -267,6 +314,10 @@ type
   published
    property traces: ttraces read ftraces write settraces;
    property colorchart;
+   property xstart;
+   property ystart;
+   property xrange;
+   property yrange;
    property xdials;
    property ydials;
    property onbeforepaint;
@@ -327,6 +378,10 @@ type
    property traces: trecordertraces read ftraces write settraces;
    
    property colorchart;
+   property xstart;
+   property ystart;
+   property xrange;
+   property yrange;
    property xdials;
    property ydials;
    property onbeforepaint;
@@ -778,6 +833,8 @@ end;
 
 constructor ttraces.create(const aowner: tcustomchart);
 begin
+ fxrange:= 1;
+ fyrange:= 1;
  inherited create(aowner,ttrace);
 end;
 
@@ -841,11 +898,75 @@ begin
  result:= ttrace(inherited getitems(index));
 end;
 
+function ttraces.itembyname(const aname: string): ttrace;
+var
+ int1: integer;
+begin
+ result:= nil;
+ for int1:= 0 to high(fitems) do begin
+  if ttrace(fitems[int1]).name = aname then begin
+   result:= ttrace(fitems[int1]);
+   break;
+  end;
+ end;
+end;
+
+procedure ttraces.setxstart(const avalue: real);
+var
+ int1: integer;
+begin
+ fxstart:= avalue;
+ for int1:= 0 to high(fitems) do begin
+  ttrace(fitems[int1]).xstart:= avalue;
+ end;
+end;
+
+procedure ttraces.setystart(const avalue: real);
+var
+ int1: integer;
+begin
+ fystart:= avalue;
+ for int1:= 0 to high(fitems) do begin
+  ttrace(fitems[int1]).ystart:= avalue;
+ end;
+end;
+
+procedure ttraces.setxrange(const avalue: real);
+var
+ int1: integer;
+begin
+ fxrange:= avalue;
+ for int1:= 0 to high(fitems) do begin
+  ttrace(fitems[int1]).xrange:= avalue;
+ end;
+end;
+
+procedure ttraces.setyrange(const avalue: real);
+var
+ int1: integer;
+begin
+ fyrange:= avalue;
+ for int1:= 0 to high(fitems) do begin
+  ttrace(fitems[int1]).yrange:= avalue;
+ end;
+end;
+
+procedure ttraces.createitem(const index: integer; var item: tpersistent);
+begin
+ inherited;
+ with ttrace(item) do begin
+  xstart:= self.fxstart;
+  ystart:= self.fystart;
+  xrange:= self.fxrange;
+  yrange:= self.fyrange;
+ end;
+end;
+
 { tchartdialvert }
 
 constructor tchartdialvert.create(const aintf: idialcontroller);
 begin
- inherited;
+ inherited create(aintf);
  direction:= gd_up;
 end;
 
@@ -888,8 +1009,10 @@ end;
 constructor tcustomchart.create(aowner: tcomponent);
 begin
  fcolorchart:= cl_foreground;
- fydials:= tchartdialsvert.create(idialcontroller(self));
- fxdials:= tchartdialshorz.create(idialcontroller(self));
+ fxrange:= 1;
+ fyrange:= 1;
+ fydials:= tchartdialsvert.create(ichartdialcontroller(self));
+ fxdials:= tchartdialshorz.create(ichartdialcontroller(self));
 {
  with fdialvert do begin
   direction:= gd_up;
@@ -1025,6 +1148,50 @@ begin
  inherited;
 end;
 
+function tcustomchart.getxstart: real;
+begin
+ result:= fxstart;
+end;
+
+procedure tcustomchart.setxstart(const avalue: real);
+begin
+ fxstart:= avalue;
+ fxdials.start:= avalue;
+end;
+
+function tcustomchart.getystart: real;
+begin
+ result:= fystart;
+end;
+
+procedure tcustomchart.setystart(const avalue: real);
+begin
+ fystart:= avalue;
+ fydials.start:= avalue;
+end;
+
+function tcustomchart.getxrange: real;
+begin
+ result:= fxrange;
+end;
+
+procedure tcustomchart.setxrange(const avalue: real);
+begin
+ fxrange:= avalue;
+ fxdials.range:= avalue;
+end;
+
+function tcustomchart.getyrange: real;
+begin
+ result:= fyrange;
+end;
+
+procedure tcustomchart.setyrange(const avalue: real);
+begin
+ fyrange:= avalue;
+ fydials.range:= avalue;
+end;
+
 { tchart }
 
 constructor tchart.create(aowner: tcomponent);
@@ -1059,6 +1226,30 @@ begin
  ftraces.paint(acanvas);
  acanvas.restore;
 // acanvas.remove(innerclientpos);
+end;
+
+procedure tchart.setxstart(const avalue: real);
+begin
+ inherited;
+ ftraces.xstart:= avalue;
+end;
+
+procedure tchart.setystart(const avalue: real);
+begin
+ inherited;
+ ftraces.xrange:= avalue;
+end;
+
+procedure tchart.setxrange(const avalue: real);
+begin
+ inherited;
+ ftraces.ystart:= avalue;
+end;
+
+procedure tchart.setyrange(const avalue: real);
+begin
+ inherited;
+ ftraces.yrange:= avalue;
 end;
 
 { trecordertraces }
@@ -1211,6 +1402,16 @@ begin
  result:= tchartdialhorz(inherited getitems(aindex));
 end;
 
+procedure tchartdialshorz.createitem(const index: integer;
+               var item: tpersistent);
+begin
+ inherited;
+ with tchartdialhorz(item) do begin
+  start:= ichartdialcontroller(fintf).getxstart;
+  range:= ichartdialcontroller(fintf).getxrange;
+ end;
+end;
+
 { tchartdialsvert }
 
 function tchartdialsvert.getitemclass: dialcontrollerclassty;
@@ -1227,6 +1428,16 @@ end;
 function tchartdialsvert.getitems(const aindex: integer): tchartdialvert;
 begin
  result:= tchartdialvert(inherited getitems(aindex));
+end;
+
+procedure tchartdialsvert.createitem(const index: integer;
+               var item: tpersistent);
+begin
+ inherited;
+ with tchartdialvert(item) do begin
+  start:= ichartdialcontroller(fintf).getystart;
+  range:= ichartdialcontroller(fintf).getyrange;
+ end;
 end;
 
 { tchartdials }
@@ -1256,6 +1467,11 @@ begin
  for int1:= high(fitems) downto 0 do begin
   tcustomdialcontroller(fitems[int1]).afterpaint(acanvas);
  end;
+end;
+
+constructor tchartdials.create(const aintf: ichartdialcontroller);
+begin
+ inherited create(aintf);
 end;
 
 end.

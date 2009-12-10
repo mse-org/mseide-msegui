@@ -1216,7 +1216,7 @@ var
 begin
  with flayout do begin
   value1:= avalue;
-  if value1 < 0 then begin
+  if (value1 < 0) or (menu = nil) then begin
    value1:= -1;
   end; 
   if (activeitem <> value1) or force then begin
