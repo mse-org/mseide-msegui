@@ -1099,6 +1099,8 @@ function opentodynarrayr(const items: array of realty): realarty;
 function opentodynarraybo(const items: array of boolean): booleanarty;
 function opentodynarrayby(const items: array of byte): bytearty;
 
+function datalisttocomplexar(const re,im: trealdatalist): complexarty;
+
 procedure readstringar(const reader: treader; out avalue: stringarty);
 procedure writestringar(const writer: twriter; const avalue: stringarty);
 
@@ -1208,6 +1210,32 @@ begin
  setlength(result,length(items));
  for int1:= 0 to high(items) do begin
   result[int1]:= items[int1];
+ end;
+end;
+
+function datalisttocomplexar(const re,im: trealdatalist): complexarty;
+var
+ int1: integer;
+ pre,pim: preal;
+ pres: pcomplexty;
+ intre,intim: integer;
+begin
+ int1:= re.count;
+ if im.count < int1 then begin
+  int1:= im.count;
+ end;
+ setlength(result,int1);
+ pre:= re.datapo;
+ intre:= re.size;
+ pim:= im.datapo;
+ intim:= im.size;
+ pres:= pointer(result);
+ for int1:= high(result) downto 0 do begin
+  pres^.re:= pre^;
+  pres^.im:= pim^;
+  inc(pchar(pre),intre);
+  inc(pchar(pim),intim);
+  inc(pchar(pres),sizeof(complexty));
  end;
 end;
 

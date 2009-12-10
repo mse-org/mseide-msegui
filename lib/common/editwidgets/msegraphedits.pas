@@ -309,6 +309,7 @@ type
    constructor create(aowner: tcomponent); override;
    procedure fillcol(const value: realty);
    procedure assigncol(const avalue: trealdatalist);
+   function checkvalue: boolean; override;
    function isnull: boolean;
    property gridvalue[const index: integer]: realty
         read getgridvalue write setgridvalue; default;
@@ -1086,6 +1087,11 @@ end;
 procedure tcustomrealgraphdataedit.setnullvalue;
 begin
  value:= emptyreal;
+end;
+
+function tcustomrealgraphdataedit.checkvalue: boolean;
+begin
+ docheckvalue(fvalue);
 end;
 
 { tcustomslider }

@@ -13,7 +13,8 @@ interface
 
 uses
  classes,msegui,mseguiglob,mseclasses,msearrayprops,msetypes,msegraphics,msegraphutils,
- msewidgets,msesimplewidgets,msedial,msebitmap,msemenus,mseevent;
+ msewidgets,msesimplewidgets,msedial,msebitmap,msemenus,mseevent,
+ msedatalist;
  
 type
  tcustomchart = class;
@@ -21,59 +22,94 @@ type
  tracestatesty = set of tracestatety;
  tracekindty = (trk_xseries,trk_xy);
 
- charttraceoptionty = (cto_adddataright);
+ charttraceoptionty = (cto_adddataright,
+                       cto_xordered //optimize for big data quantity
+                       );
  charttraceoptionsty = set of charttraceoptionty;
-  
- ttrace = class(townedpersistent)
+
+ datapointty = record
+  first,min,max,last: integer;
+  used: boolean;
+ end;
+ datapointarty = array of datapointty;
+ 
+ ttrace = class(townedeventpersistent,iimagelistinfo)
   private
+   fxdata: realarty;
+   fydata: realarty;
    fxydata: complexarty;
+   fxdatalist: trealdatalist;
+   fydatalist: trealdatalist;
    fstate: tracestatesty;
    fdatapoints: pointarty;
    fcolor: colorty;
-   fxscale: real;
-   fxoffset: real;
-   fyscale: real;
-   fyoffset: real;
-   fxseriesdata: realarty;
+   fxrange: real;
+   fxstart: real;
+   fyrange: real;
+   fystart: real;
    fkind: tracekindty;
-   fxseriescount: integer;
+   fmaxcount: integer;
    fwidthmm: real;
    fdashes: string;
    foptions: charttraceoptionsty;
+   fstart: integer;
+   fimagelist: timagelist;
+   fimagenr: imagenrty;
    procedure setxydata(const avalue: complexarty);
    procedure datachange;
    procedure setcolor(const avalue: colorty);
-   procedure setxscale(const avalue: real);
-   procedure setxoffset(const avalue: real);
-   procedure setyscale(const avalue: real);
-   procedure setyoffset(const avalue: real);
+   procedure setxrange(const avalue: real);
+   procedure setxstart(const avalue: real);
+   procedure setyrange(const avalue: real);
+   procedure setystart(const avalue: real);
    procedure scaleerror;
-   procedure setxseriesdata(const avalue: realarty);
+   procedure setxdata(const avalue: realarty);
+   procedure setydata(const avalue: realarty);
    procedure setkind(const avalue: tracekindty);
-   procedure setxseriescount(const avalue: integer);
+   procedure setmaxcount(const avalue: integer);
    procedure setwidthmm(const avalue: real);
    procedure setdashes(const avalue: string);
    procedure setoptions(const avalue: charttraceoptionsty);
+   procedure readxseriescount(reader: treader);
+   procedure readxscale(reader: treader);
+   procedure readxoffset(reader: treader);
+   procedure readyscale(reader: treader);
+   procedure readyoffset(reader: treader);
+   procedure setstart(const avalue: integer);
+   procedure setxdatalist(const avalue: trealdatalist);
+   procedure setydatalist(const avalue: trealdatalist);
+   procedure setimagelist(const avalue: timagelist);
+   procedure setimagenr(const avalue: imagenrty);
+   function getimagelist: timagelist;
   protected
    procedure checkgraphic;
    procedure paint(const acanvas: tcanvas);
+   procedure paint1(const acanvas: tcanvas);
+   procedure defineproperties(filer: tfiler); override;
   public
    constructor create(aowner: tobject); override;
    procedure addxseriesdata(const avalue: real);
-   property xseriesdata: realarty read fxseriesdata write setxseriesdata;
+   property xdata: realarty read fydata write setxdata;
+   property ydata: realarty read fydata write setydata;
    property xydata: complexarty read fxydata write setxydata;
+   property xdatalist: trealdatalist read fxdatalist write setxdatalist;
+   property ydatalist: trealdatalist read fydatalist write setydatalist;
+   
   published
    property color: colorty read fcolor write setcolor default cl_black;
    property widthmm: real read fwidthmm write setwidthmm;   //default 0.3
    property dashes: string read fdashes write setdashes;
-   property xscale: real read fxscale write setxscale;      //default 1.0
-   property xoffset: real read fxoffset write setxoffset;
-   property yscale: real read fyscale write setyscale;      //default 1.0
-   property yoffset: real read fyoffset write setyoffset;
+   property xrange: real read fxrange write setxrange;      //default 1.0
+   property xstart: real read fxstart write setxstart;
+   property yrange: real read fyrange write setyrange;      //default 1.0
+   property ystart: real read fystart write setystart;
    property kind: tracekindty read fkind write setkind default trk_xseries;
-   property xseriescount: integer read fxseriescount write setxseriescount default 0;
-                      //0-> xseriesdata count
+   property start: integer read fstart write setstart default 0;
+   property maxcount: integer read fmaxcount write setmaxcount default 0;
+                      //0-> data count
    property options: charttraceoptionsty read foptions write setoptions default [];
+   property imagelist: timagelist read fimagelist write setimagelist;
+   property imagenr: imagenrty read fimagenr write setimagenr default -1;
  end;
 
  traceaty = array[0..0] of ttrace;
@@ -82,12 +118,13 @@ type
  tracesstatety = (trss_graphicvalid);
  tracesstatesty = set of tracesstatety;
   
- ttraces = class(townedpersistentarrayprop)
+ ttraces = class(townedeventpersistentarrayprop)
   private
    ftracestate: tracesstatesty;
    procedure setitems(const index: integer; const avalue: ttrace);
    function getitems(const index: integer): ttrace;
   protected
+   fsize: sizety;
    fscalex: real;
    fscaley: real;
    procedure change; reintroduce;
@@ -179,14 +216,14 @@ type
  
  tcustomchart = class(tscrollbox,idialcontroller)
   private
-   fdialshorz: tchartdialshorz;
-   fdialsvert: tchartdialsvert;
+   fxdials: tchartdialshorz;
+   fydials: tchartdialsvert;
 //   fonbeforepaint: painteventty;
 //   fonpaintbackground: painteventty;
 //   fonpaint: painteventty;
 //   fonafterpaint: painteventty;
-   procedure setdialshorz(const avalue: tchartdialshorz);
-   procedure setdialsvert(const avalue: tchartdialsvert);
+   procedure setxdials(const avalue: tchartdialshorz);
+   procedure setydials(const avalue: tchartdialsvert);
    procedure setcolorchart(const avalue: colorty);
   protected
    fcolorchart: colorty;
@@ -208,8 +245,8 @@ type
    destructor destroy; override;
    property colorchart: colorty read fcolorchart write setcolorchart 
                               default cl_foreground;
-   property dialshorz: tchartdialshorz read fdialshorz write setdialshorz;
-   property dialsvert: tchartdialsvert read fdialsvert write setdialsvert;
+   property xdials: tchartdialshorz read fxdials write setxdials;
+   property ydials: tchartdialsvert read fydials write setydials;
 //   property onbeforepaint: painteventty read fonbeforepaint write fonbeforepaint;
 //   property onpaintbackground: painteventty read fonpaintbackground
 //                                                  write fonpaintbackground;
@@ -230,8 +267,8 @@ type
   published
    property traces: ttraces read ftraces write settraces;
    property colorchart;
-   property dialshorz;
-   property dialsvert;
+   property xdials;
+   property ydials;
    property onbeforepaint;
    property onpaintbackground;
    property onpaint;
@@ -290,8 +327,8 @@ type
    property traces: trecordertraces read ftraces write settraces;
    
    property colorchart;
-   property dialshorz;
-   property dialsvert;
+   property xdials;
+   property ydials;
    property onbeforepaint;
    property onpaintbackground;
    property onpaint;
@@ -311,8 +348,9 @@ constructor ttrace.create(aowner: tobject);
 begin
  fcolor:= cl_black;
  fwidthmm:= 0.3;
- fxscale:= 1.0;
- fyscale:= 1.0;
+ fxrange:= 1.0;
+ fyrange:= 1.0;
+ fimagenr:= -1;
  inherited;
 end;
 
@@ -324,41 +362,207 @@ end;
 
 procedure ttrace.setxydata(const avalue: complexarty);
 begin
+ fxdatalist:= nil;
+ fydatalist:= nil;
+ fxdata:= nil;
+ fydata:= nil;
  fxydata:= avalue;
  datachange;
 end;
 
-procedure ttrace.setxseriesdata(const avalue: realarty);
+
+procedure ttrace.setxdata(const avalue: realarty);
 begin
- fxseriesdata:= avalue;
+ fxdatalist:= nil;
+ fxydata:= nil;
+ fxdata:= avalue;
+ datachange;
+end;
+
+procedure ttrace.setydata(const avalue: realarty);
+begin
+ fydatalist:= nil;
+ fxydata:= nil;
+ fydata:= avalue;
+ datachange;
+end;
+
+procedure ttrace.setxdatalist(const avalue: trealdatalist);
+begin
+ fxdata:= nil;
+ fxydata:= nil;
+ fxdatalist:= avalue;
+ datachange;
+end;
+
+procedure ttrace.setydatalist(const avalue: trealdatalist);
+begin
+ fydata:= nil;
+ fxydata:= nil;
+ fydatalist:= avalue;
  datachange;
 end;
 
 procedure ttrace.checkgraphic;
 var
- int1,int2: integer;
+ pox,poy: pchar;
+ intx,inty: integer;
+ 
+ procedure checkrange(var dpcount: integer);
+ var
+  int1: integer;
+ begin
+  int1:= fmaxcount;
+  if int1 = 0 then begin
+   int1:= dpcount;
+  end;
+  if fstart + int1 > dpcount then begin
+   int1:= dpcount - fstart;
+  end;
+  if int1 < dpcount then begin
+   dpcount:= int1;
+  end;
+  if dpcount < 0 then begin
+   dpcount:= 0;
+  end;
+  pox:= pox + fstart * intx;
+  poy:= poy + fstart * inty;
+ end;
+
+var
+ int1,int2,int3,int4: integer;
  xo,xs,yo,ys: real;
  rea1: real;
+ ar1: datapointarty;
+ dpcountx,dpcounty,dpcountxy: integer;
+ 
 begin
  if not (trs_datapointsvalid in fstate) then begin
-  yo:= fyoffset - fyscale;
-  ys:= -tchart(fowner).traces.fscaley / fyscale;
+  dpcountx:= 0;
+  dpcounty:= 0;
+  if fxydata <> nil then begin
+   pox:= @fxydata[0].re;
+   poy:= @fxydata[0].im;
+   intx:= sizeof(complexty);
+   inty:= sizeof(complexty);
+   dpcountx:= length(fxydata);
+   dpcounty:= dpcountx;
+  end
+  else begin
+   if fxdatalist <> nil then begin
+    dpcountx:= fxdatalist.count;
+    pox:= fxdatalist.datapo;
+    intx:= fxdatalist.size;
+   end
+   else begin
+    pox:= pointer(fxdata);
+    intx:= sizeof(real);
+    dpcountx:= length(fxdata);
+   end;
+   if fydatalist <> nil then begin
+    dpcounty:= fydatalist.count;
+    poy:= fydatalist.datapo;
+    inty:= fydatalist.size;
+   end
+   else begin
+    poy:= pointer(fydata);
+    inty:= sizeof(real);
+    dpcounty:= length(fydata);
+   end;
+  end;
+  dpcountxy:= dpcountx;
+  if dpcounty < dpcountxy then begin
+   dpcountxy:= dpcounty;
+  end;
+  
+//  yo:= fyoffset - fyscale;
+  yo:= -fystart - fyrange;
+  ys:= -tchart(fowner).traces.fscaley / fyrange;
   case fkind of
    trk_xy: begin     
-    setlength(fdatapoints,length(fxydata));
-    xo:= fxoffset;
-    xs:= tchart(fowner).traces.fscalex / fxscale;
-    for int1:= 0 to high(fdatapoints) do begin
-     fdatapoints[int1].x:= round((fxydata[int1].re + xo)* xs);
-     fdatapoints[int1].y:= round((fxydata[int1].im + yo)* ys);
+    xo:= -fxstart;
+    xs:= tchart(fowner).traces.fscalex / fxrange;
+    checkrange(dpcountxy);
+    if (cto_xordered in foptions) {and
+                   (dpcount > tchart(fowner).traces.fscalex)} then begin
+     int4:= tchart(fowner).traces.fsize.cx+2;
+     setlength(ar1,int4);
+     dec(int4);
+     for int1:= 0 to dpcountxy - 1 do begin
+      int2:= round((preal(pox)^ + xo)* xs) + 1;
+      int3:= round((preal(poy)^ + yo)* ys);
+      if int2 < 0 then begin
+       int2:= 0;
+      end;
+      if int2 > int4 then begin
+       int2:= int4;
+      end;
+      with ar1[int2] do begin
+       if not used then begin
+        used:= true;
+        first:= int3;
+        min:= int3;
+        max:= int3;
+       end
+       else begin
+        if int3 < min then begin
+         min:= int3;
+        end;
+        if int3 > max then begin
+         max:= int3;
+        end;
+       end;
+       last:= int3;
+      end;
+      inc(pox,intx);
+      inc(poy,inty);
+     end;
+     setlength(fdatapoints,length(ar1)*4);  //first->max->min->last
+     int2:= 0;
+     for int1:= 0 to high(ar1) do begin
+      with ar1[int1] do begin
+       if used then begin
+        int3:= int1-1;
+        fdatapoints[int2].x:= int3;
+        fdatapoints[int2].y:= first;
+        inc(int2);
+        if max > first then begin
+         fdatapoints[int2].x:= int3;
+         fdatapoints[int2].y:= max;
+         inc(int2);
+        end;
+        if min < max then begin
+         fdatapoints[int2].x:= int3;
+         fdatapoints[int2].y:= min;
+         inc(int2);
+        end;
+        if last > min then begin
+         fdatapoints[int2].x:= int3;
+         fdatapoints[int2].y:= last;
+         inc(int2);
+        end;
+       end;
+      end;
+     end;
+     setlength(fdatapoints,int2);
+    end
+    else begin
+     setlength(fdatapoints,dpcountxy);
+     for int1:= 0 to high(fdatapoints) do begin
+      fdatapoints[int1].x:= round((preal(pox)^ + xo)* xs);
+      fdatapoints[int1].y:= round((preal(poy)^ + yo)* ys);
+      inc(pox,intx);
+      inc(poy,inty);
+     end;
     end;
    end;
    else begin //trk_xseries
-    setlength(fdatapoints,length(fxseriesdata));
+    checkrange(dpcounty);
+    setlength(fdatapoints,dpcounty);
     if high(fdatapoints) >= 0 then begin
      rea1:= 0;
-     if xseriescount > 1 then begin
-      int2:= xseriescount - 1;
+     if maxcount > 1 then begin
+      int2:= maxcount - 1;
       if (int2 > high(fdatapoints)) and (cto_adddataright in foptions) then begin
        rea1:= {$ifdef FPC}real({$endif}1.0{$ifdef FPC}){$endif} - high(fdatapoints) / int2;
       end;
@@ -366,11 +570,12 @@ begin
      else begin
       int2:= high(fdatapoints);
      end;
-     xo:= (rea1 + fxoffset) * int2;
-     xs:= tchart(fowner).traces.fscalex / (fxscale * int2);
+     xo:= (rea1 + fxstart) * int2;
+     xs:= tchart(fowner).traces.fscalex / (fxrange * int2);
      for int1:= 0 to high(fdatapoints) do begin
       fdatapoints[int1].x:= round((int1 + xo)* xs);
-      fdatapoints[int1].y:= round((fxseriesdata[int1] + yo)* ys);
+      fdatapoints[int1].y:= round((preal(poy)^ + yo)* ys);
+      inc(poy,inty);
      end;
     end;
    end;
@@ -388,6 +593,24 @@ begin
  acanvas.drawlines(fdatapoints,false,fcolor);
  if fdashes <> '' then begin
   acanvas.dashes:= '';
+ end;
+end;
+
+procedure ttrace.paint1(const acanvas: tcanvas);
+var
+ int1: integer;
+ pt1: pointty;
+begin
+ if (fimagelist <> nil) and (fimagenr >= 0) and 
+                                   (fimagenr < fimagelist.count) then begin
+  pt1:= pointty(fimagelist.size);
+  pt1.x:= pt1.x div 2;
+  pt1.y:= pt1.y div 2;
+  acanvas.remove(pt1);
+  for int1:= 0 to high(fdatapoints) do begin
+   fimagelist.paint(acanvas,fimagenr,fdatapoints[int1],fcolor);
+  end;
+  acanvas.move(pt1);
  end;
 end;
 
@@ -411,12 +634,12 @@ begin
  tchart(fowner).traces.change;
 end;
 
-procedure ttrace.setxscale(const avalue: real);
+procedure ttrace.setxrange(const avalue: real);
 begin
  if avalue = 0 then begin
   scaleerror;
  end;
- fxscale:= avalue;
+ fxrange:= avalue;
  datachange;
 end;
 
@@ -428,30 +651,30 @@ begin
  end;
 end;
 
-procedure ttrace.setxoffset(const avalue: real);
+procedure ttrace.setxstart(const avalue: real);
 begin
- fxoffset:= avalue;
+ fxstart:= avalue;
  datachange;
 end;
 
-procedure ttrace.setyscale(const avalue: real);
+procedure ttrace.setyrange(const avalue: real);
 begin
  if avalue = 0 then begin
   scaleerror;
  end;
- fyscale:= avalue;
+ fyrange:= avalue;
  datachange;
 end;
 
-procedure ttrace.setyoffset(const avalue: real);
+procedure ttrace.setystart(const avalue: real);
 begin
- fyoffset:= avalue;
+ fystart:= avalue;
  datachange;
 end;
 
 procedure ttrace.scaleerror;
 begin
- raise exception.create('Scale can not be 0.');
+ raise exception.create('Range can not be 0.');
 end;
 
 procedure ttrace.setkind(const avalue: tracekindty);
@@ -462,25 +685,93 @@ begin
  end;
 end;
 
-procedure ttrace.setxseriescount(const avalue: integer);
+procedure ttrace.setstart(const avalue: integer);
 begin
- if fxseriescount <> avalue then begin
-  fxseriescount:= avalue;
+ if fstart <> avalue then begin
+  fstart:= avalue;
+  datachange;
+ end;
+end;
+
+procedure ttrace.setmaxcount(const avalue: integer);
+begin
+ if fmaxcount <> avalue then begin
+  fmaxcount:= avalue;
   datachange;
  end;
 end;
 
 procedure ttrace.addxseriesdata(const avalue: real);
 begin
- if (fxseriescount = 0) or (length(fxseriesdata) < fxseriescount) then begin
-  setlength(fxseriesdata,high(fxseriesdata) + 2);
+ fydatalist:= nil;
+ if (fmaxcount = 0) or (length(fydata) < fmaxcount) then begin
+  setlength(fydata,high(fydata) + 2);
  end
  else begin
-  move(fxseriesdata[1],fxseriesdata[0],
-          sizeof(fxseriesdata[0])*high(fxseriesdata));
+  move(fydata[1],fydata[0],
+          sizeof(fydata[0])*high(fydata));
  end;
- fxseriesdata[high(fxseriesdata)]:= avalue;
+ fydata[high(fydata)]:= avalue;
  datachange;
+end;
+
+procedure ttrace.readxseriescount(reader: treader);
+begin
+ maxcount:= reader.readinteger;
+end;
+
+procedure ttrace.readxscale(reader: treader);
+begin
+ xrange:= reader.readfloat;
+end;
+
+procedure ttrace.readxoffset(reader: treader);
+begin
+ xstart:= -reader.readfloat;
+end;
+
+procedure ttrace.readyscale(reader: treader);
+begin
+ yrange:= reader.readfloat;
+end;
+
+procedure ttrace.readyoffset(reader: treader);
+begin
+ ystart:= -reader.readfloat;
+end;
+
+procedure ttrace.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('xseriescount',{$ifdef FPC}@{$endif}readxseriescount,
+                                                         nil,false);
+ filer.defineproperty('xoffset',{$ifdef FPC}@{$endif}readxoffset,
+                                                         nil,false);
+ filer.defineproperty('xscale',{$ifdef FPC}@{$endif}readxscale,
+                                                         nil,false);
+ filer.defineproperty('yoffset',{$ifdef FPC}@{$endif}readyoffset,
+                                                         nil,false);
+ filer.defineproperty('yscale',{$ifdef FPC}@{$endif}readyscale,
+                                                         nil,false);
+end;
+
+procedure ttrace.setimagelist(const avalue: timagelist);
+begin
+ setlinkedvar(avalue,fimagelist);
+ datachange;
+end;
+
+procedure ttrace.setimagenr(const avalue: imagenrty);
+begin
+ if fimagenr <> avalue then begin
+  fimagenr:= avalue;
+  datachange;
+ end;
+end;
+
+function ttrace.getimagelist: timagelist;
+begin
+ result:= fimagelist;
 end;
 
 { ttraces }
@@ -519,18 +810,20 @@ begin
  for int1:= 0 to high(fitems) do begin
   ptraceaty(fitems)^[int1].paint(acanvas);
  end;
+ for int1:= 0 to high(fitems) do begin
+  ptraceaty(fitems)^[int1].paint1(acanvas);
+ end;
  acanvas.linewidth:= 0;
 end;
 
 procedure ttraces.checkgraphic;
 var
  int1: integer;
- size1: sizety;
 begin
  if not (trss_graphicvalid in ftracestate) then begin
-  size1:= twidget(fowner).innerclientsize;
-  fscalex:= size1.cx;
-  fscaley:= size1.cy;
+  fsize:= twidget(fowner).innerclientsize;
+  fscalex:= fsize.cx;
+  fscaley:= fsize.cy;
   for int1:= 0 to high(fitems) do begin
    ptraceaty(fitems)^[int1].checkgraphic;
   end;
@@ -595,8 +888,8 @@ end;
 constructor tcustomchart.create(aowner: tcomponent);
 begin
  fcolorchart:= cl_foreground;
- fdialsvert:= tchartdialsvert.create(idialcontroller(self));
- fdialshorz:= tchartdialshorz.create(idialcontroller(self));
+ fydials:= tchartdialsvert.create(idialcontroller(self));
+ fxdials:= tchartdialshorz.create(idialcontroller(self));
 {
  with fdialvert do begin
   direction:= gd_up;
@@ -620,15 +913,15 @@ end;
 
 destructor tcustomchart.destroy;
 begin
- fdialsvert.free;
- fdialshorz.free;
+ fydials.free;
+ fxdials.free;
  inherited;
 end;
 
 procedure tcustomchart.clientrectchanged;
 begin
- fdialshorz.changed;
- fdialsvert.changed;
+ fxdials.changed;
+ fydials.changed;
  inherited;
 end;
 {
@@ -682,10 +975,10 @@ end;
 procedure tcustomchart.dopaint(const acanvas: tcanvas);
 begin
  inherited;
- fdialshorz.paint(acanvas);
- fdialsvert.paint(acanvas);
- fdialshorz.afterpaint(acanvas);
- fdialsvert.afterpaint(acanvas);
+ fxdials.paint(acanvas);
+ fydials.paint(acanvas);
+ fxdials.afterpaint(acanvas);
+ fydials.afterpaint(acanvas);
 end;
 
 procedure tcustomchart.setcolorchart(const avalue: colorty);
@@ -696,14 +989,14 @@ begin
  end;
 end;
 
-procedure tcustomchart.setdialshorz(const avalue: tchartdialshorz);
+procedure tcustomchart.setxdials(const avalue: tchartdialshorz);
 begin
- fdialshorz.assign(avalue);
+ fxdials.assign(avalue);
 end;
 
-procedure tcustomchart.setdialsvert(const avalue: tchartdialsvert);
+procedure tcustomchart.setydials(const avalue: tchartdialsvert);
 begin
- fdialsvert.assign(avalue);
+ fydials.assign(avalue);
 end;
 
 procedure tcustomchart.directionchanged(const dir: graphicdirectionty;

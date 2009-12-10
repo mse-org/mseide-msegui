@@ -887,6 +887,7 @@ type
    procedure writestatvalue(const writer: tstatwriter); override;
   public
    constructor create(aowner: tcomponent); override;
+   function griddata: trealdatalist;
    procedure fillcol(const value: realty);
    procedure assigncol(const value: trealdatalist);
    function isnull: boolean;
@@ -1071,6 +1072,7 @@ type
    function isempty (const atext: msestring): boolean; override;
   public
    constructor create(aowner: tcomponent); override;
+   function griddata: trealdatalist;
    procedure fillcol(const value: tdatetime);
    procedure assigncol(const value: trealdatalist);
    function isnull: boolean;
@@ -4130,6 +4132,12 @@ begin
  include(foptionswidget,ow_mousewheel);
 end;
 
+function tcustomrealedit.griddata: trealdatalist;
+begin
+ checkgrid;
+ result:= trealdatalist(fdatalist);
+end;
+
 procedure tcustomrealedit.setformatdisp(const Value: msestring);
 begin
  fformatdisp := Value;
@@ -4904,6 +4912,11 @@ end;
 function tcustomdatetimeedit.isnull: boolean;
 begin
  result:= isemptydatetime(value);
+end;
+
+function tcustomdatetimeedit.griddata: trealdatalist;
+begin
+ result:= trealdatalist(fdatalist);
 end;
 
 end.
