@@ -1237,13 +1237,13 @@ end;
 procedure tchart.setystart(const avalue: real);
 begin
  inherited;
- ftraces.xrange:= avalue;
+ ftraces.ystart:= avalue;
 end;
 
 procedure tchart.setxrange(const avalue: real);
 begin
  inherited;
- ftraces.ystart:= avalue;
+ ftraces.xrange:= avalue;
 end;
 
 procedure tchart.setyrange(const avalue: real);
