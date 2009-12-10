@@ -626,7 +626,10 @@ begin
       int2:= high(fdatapoints);
      end;
      xo:= (rea1 + fxstart) * int2;
-     xs:= tchart(fowner).traces.fscalex / (fxrange * int2);
+     xs:= tchart(fowner).traces.fscalex;
+     if int2 > 0 then begin
+      xs:= xs / (fxrange * int2);
+     end;
      for int1:= 0 to high(fdatapoints) do begin
       fdatapoints[int1].x:= round((int1 + xo)* xs);
       fdatapoints[int1].y:= round((preal(poy)^ + yo)* ys);
