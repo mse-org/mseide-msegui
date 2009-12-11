@@ -2997,7 +2997,12 @@ end;
 procedure tcanvas.unlink;
 begin
  reset;
- linktopaintdevice(0,nullgc,{nullsize,}nullpoint);
+ gdi_lock;
+ try
+  linktopaintdevice(0,nullgc,{nullsize,}nullpoint);
+ finally
+  gdi_unlock;
+ end;
 end;
 
 procedure tcanvas.initdrawinfo(var adrawinfo: drawinfoty);
@@ -3176,7 +3181,12 @@ var
  po1: pfontdataty;
 begin
  if fdrawinfo.gc.handle = 0 then begin
-  icanvas(fintf).gcneeded(self);
+  gdi_lock;
+  try
+   icanvas(fintf).gcneeded(self);
+  finally
+   gdi_unlock;
+  end;
   if fdrawinfo.gc.handle = 0 then begin
    gdierror(gde_invalidgc,fuser);
   end;
@@ -3573,31 +3583,33 @@ var
  pointar: pointarty;
 begin
  if cs_inactive in fstate then exit;
- if checkforeground(acolor,true) then begin
-  with fdrawinfo.points do begin
-   int1:= length(apoints) - first;
-   if int1 < 0 then begin
-    intparametererror(first,'drawpoints first');
-   end;
-   if acount < 0 then begin
-    acount:= int1;
-   end
-   else begin
-    if acount > int1 then begin
-     intparametererror(acount,'drawponts acount');
+ if length(apoints) > 0 then begin
+  if checkforeground(acolor,true) then begin
+   with fdrawinfo.points do begin
+    int1:= length(apoints) - first;
+    if int1 < 0 then begin
+     intparametererror(first,'drawpoints first');
     end;
+    if acount < 0 then begin
+     acount:= int1;
+    end
+    else begin
+     if acount > int1 then begin
+      intparametererror(acount,'drawponts acount');
+     end;
+    end;
+    count:= 2*acount;
+    setlength(pointar,count);
+    int2:= 0;
+    for int1:= first to first + acount - 1 do begin
+     pointar[int2]:= apoints[int1];
+     pointar[int2+1]:= apoints[int1];
+     inc(int2,2);
+    end;
+    points:= @pointar[0];
    end;
-   count:= 2*acount;
-   setlength(pointar,count);
-   int2:= 0;
-   for int1:= first to first + acount - 1 do begin
-    pointar[int2]:= apoints[int1];
-    pointar[int2+1]:= apoints[int1];
-    inc(int2,2);
-   end;
-   points:= @pointar[0];
+   gdi(gdi_drawlinesegments);
   end;
-  gdi(gdi_drawlinesegments);
  end;
 end;
 
@@ -3615,25 +3627,27 @@ var
  int1: integer;
 begin
  if cs_inactive in fstate then exit;
- if checkforeground(acolor,true) then begin
-  with fdrawinfo.points do begin
-   closed:= aclosed;
-   points:= @apoints[first];
-   int1:= length(apoints) - first;
-   if int1 < 0 then begin
-    intparametererror(first,'drawlines first');
-   end;
-   if acount < 0 then begin
-    count:= int1;
-   end
-   else begin
-    if acount > int1 then begin
-     intparametererror(acount,'drawlines acount');
+ if length(apoints) > 0 then begin
+  if checkforeground(acolor,true) then begin
+   with fdrawinfo.points do begin
+    closed:= aclosed;
+    points:= @apoints[first];
+    int1:= length(apoints) - first;
+    if int1 < 0 then begin
+     intparametererror(first,'drawlines first');
     end;
-    count:= acount;
+    if acount < 0 then begin
+     count:= int1;
+    end
+    else begin
+     if acount > int1 then begin
+      intparametererror(acount,'drawlines acount');
+     end;
+     count:= acount;
+    end;
    end;
+   gdi(gdi_drawlines);
   end;
-  gdi(gdi_drawlines);
  end;
 end;
 
@@ -3675,12 +3689,14 @@ procedure tcanvas.drawlinesegments(const apoints: array of segmentty;
                const acolor: colorty = cl_default);
 begin
  if cs_inactive in fstate then exit;
- if (high(apoints) >= 0) and checkforeground(acolor,true) then begin
-  with fdrawinfo.points do begin
-   points:= @apoints[0];
-   count:= length(apoints) * 2;
+ if length(apoints) > 0 then begin
+  if (high(apoints) >= 0) and checkforeground(acolor,true) then begin
+   with fdrawinfo.points do begin
+    points:= @apoints[0];
+    count:= length(apoints) * 2;
+   end;
+   gdi(gdi_drawlinesegments);
   end;
-  gdi(gdi_drawlinesegments);
  end;
 end;
 

@@ -92,6 +92,17 @@ type
    function getelementeditorclass: elementeditorclassty; override;
  end;
 
+ ttraceeditor = class(tclasselementeditor)
+  public
+   function getvalue: msestring; override;
+ end;
+ 
+ ttraceseditor = class(tpersistentarraypropertyeditor)
+  protected
+   function geteditorclass: propertyeditorclassty; override;  
+  public
+ end;
+
 const
  mseformintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createmseform;
@@ -149,7 +160,9 @@ begin
 
  registerpropertyeditor(typeinfo(twidget),tlayouter,'align_leader',
                                  tchildwidgetpropertyeditor);
- 
+
+ registerpropertyeditor(typeinfo(ttraces),nil,'',ttraceseditor);
+  
  registerunitgroup(['msegrids'],['msegui','msegraphutils','mseclasses']);
  registerunitgroup(['msewidgetgrid'],['msedataedits',
                     'msegui','msegraphutils','mseclasses']);
@@ -274,6 +287,20 @@ end;
 function tfixrowseditor.itemprefix: msestring;
 begin
  result:= 'Row ';
+end;
+
+{ ttraceeditor }
+
+function ttraceeditor.getvalue: msestring;
+begin
+ result:= '<'+ttrace(getpointervalue).name+'>';
+end;
+
+{ ttraceseditor }
+
+function ttraceseditor.geteditorclass: propertyeditorclassty;
+begin
+ result:= ttraceeditor;
 end;
 
 initialization

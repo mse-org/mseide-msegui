@@ -288,6 +288,7 @@ type
   public
    constructor create(itemclasstype: virtualpersistentclassty); reintroduce;
    destructor destroy; override;
+   procedure assign(source: tpersistent); override;
    function propkind: arraypropkindty; override;
    function displayname(const index: integer): msestring; virtual;
    procedure add(const item: tpersistent);
@@ -1685,6 +1686,24 @@ end;
 function tpersistentarrayprop.propkind: arraypropkindty;
 begin
  result:= apk_tpersistent;
+end;
+
+procedure tpersistentarrayprop.assign(source: tpersistent);
+var
+ int1: integer;
+begin
+ if source is tpersistentarrayprop then begin
+  clear;
+  with tpersistentarrayprop(source) do begin
+   self.count:= count;
+   for int1:= 0 to count - 1 do begin
+    self.fitems[int1].assign(fitems[int1]);
+   end;
+  end;
+ end
+ else begin
+  inherited;
+ end;
 end;
 
 { townedpersistentarrayprop }
