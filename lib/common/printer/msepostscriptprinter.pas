@@ -138,6 +138,8 @@ var
  gdifuncs: pgdifunctionaty;
  
 const
+ pageorientations: array[pageorientationty] of string = ('Portrait','Landscape');
+ 
  imagepatname = 'impat';
  patpatname = 'pat';
  radtodeg = 360/(2*pi);
@@ -711,6 +713,9 @@ begin
                   inttostr(fboundingbox.top)+nl+
 '%%Creator: '+application.applicationname+nl+
 '%%Title: '+ftitle+nl+
+'%%DocumentMedia: '+stdpagesizes[fprinter.pa_size].name+' '+
+                  inttostr(fpapersize.cx)+' '+
+                  inttostr(fpapersize.cy)+' 0 () ()'+nl+
 '%%Pages: (atend)'+nl+
 '%%PageOrder: Ascend'+nl+
  preamble+fpreamble);
@@ -1978,7 +1983,8 @@ procedure tpostscriptcanvas.endpage;
 begin
  inherited;
  if active then begin
-  streamwrite('showpage'+nl);
+  streamwrite('%%PageOrientation: '+pageorientations[printorientation]+nl+
+               'showpage'+nl);
   inc(fps_pagenumber);
  end;
 end;

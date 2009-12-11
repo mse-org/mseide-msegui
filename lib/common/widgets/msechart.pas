@@ -42,6 +42,7 @@ type
   state: tracestatesty;
   datapoints: pointarty;
   color: colorty;
+  colorimage: colorty;
   xrange: real;
   xstart: real;
   yrange: real;
@@ -55,14 +56,16 @@ type
   imagenr: imagenrty;
   name: string;
  end;
-  
+
+ ttraces = class;
+   
  ttrace = class(townedeventpersistent,iimagelistinfo)
   private
    finfo: traceinfoty;
-   fimagelist: timagelist;
    procedure setxydata(const avalue: complexarty);
    procedure datachange;
    procedure setcolor(const avalue: colorty);
+   procedure setcolorimage(const avalue: colorty);
    procedure setxrange(const avalue: real);
    procedure setxstart(const avalue: real);
    procedure setyrange(const avalue: real);
@@ -83,13 +86,14 @@ type
    procedure setstart(const avalue: integer);
    procedure setxdatalist(const avalue: trealdatalist);
    procedure setydatalist(const avalue: trealdatalist);
-   procedure setimagelist(const avalue: timagelist);
    procedure setimagenr(const avalue: imagenrty);
    function getimagelist: timagelist;
   protected
+   ftraces: ttraces;
    procedure checkgraphic;
    procedure paint(const acanvas: tcanvas);
-   procedure paint1(const acanvas: tcanvas);
+   procedure paint1(const acanvas: tcanvas; const imagesize: sizety;
+                        const imagealignment: alignmentsty);
    procedure defineproperties(filer: tfiler); override;
   public
    constructor create(aowner: tobject); override;
@@ -103,6 +107,8 @@ type
    
   published
    property color: colorty read finfo.color write setcolor default cl_black;
+   property colorimage: colorty read finfo.colorimage 
+                      write setcolorimage default cl_default;
    property widthmm: real read finfo.widthmm write setwidthmm;   //default 0.3
    property dashes: string read finfo.dashes write setdashes;
    property xrange: real read finfo.xrange write setxrange;      //default 1.0
@@ -114,7 +120,6 @@ type
    property maxcount: integer read finfo.maxcount write setmaxcount default 0;
                       //0-> data count
    property options: charttraceoptionsty read finfo.options write setoptions default [];
-   property imagelist: timagelist read fimagelist write setimagelist;
    property imagenr: imagenrty read finfo.imagenr write setimagenr default -1;
    property name: string read finfo.name write finfo.name;
  end;
@@ -124,7 +129,8 @@ type
  
  tracesstatety = (trss_graphicvalid);
  tracesstatesty = set of tracesstatety;
-  
+ tchart = class;
+   
  ttraces = class(townedeventpersistentarrayprop)
   private
    ftracestate: tracesstatesty;
@@ -132,12 +138,18 @@ type
    fystart: real;
    fxrange: real;
    fyrange: real;
+   fimage_list: timagelist;
+   fimage_widthmm: real;
+   fimage_heightmm: real;
    procedure setitems(const index: integer; const avalue: ttrace);
    function getitems(const index: integer): ttrace;
    procedure setxstart(const avalue: real);
    procedure setystart(const avalue: real);
    procedure setxrange(const avalue: real);
    procedure setyrange(const avalue: real);
+   procedure setimage_list(const avalue: timagelist);
+   procedure setimage_widthmm(const avalue: real);
+   procedure setimage_heightmm(const avalue: real);
   protected
    fsize: sizety;
    fscalex: real;
@@ -148,7 +160,7 @@ type
    procedure checkgraphic;
    procedure createitem(const index: integer; var item: tpersistent); override;
   public
-   constructor create(const aowner: tcustomchart); reintroduce;
+   constructor create(const aowner: tchart); reintroduce;
    class function getitemclasstype: persistentclassty; override;
    property items[const index: integer]: ttrace read getitems write setitems; default;
    function itembyname(const aname: string): ttrace;
@@ -158,6 +170,10 @@ type
    property ystart: real read fystart write setystart;
    property xrange: real read fxrange write setxrange;
    property yrange: real read fyrange write setyrange;
+     //properties not used in asssign below
+   property image_list: timagelist read fimage_list write setimage_list;
+   property image_widthmm: real read fimage_widthmm write setimage_widthmm;
+   property image_heighthmm: real read fimage_heightmm write setimage_heightmm;
  end;
 
  ichartdialcontroller = interface(idialcontroller)
@@ -407,7 +423,9 @@ type
 
 constructor ttrace.create(aowner: tobject);
 begin
+ ftraces:= tchart(aowner).ftraces;
  finfo.color:= cl_black;
+ finfo.colorimage:= cl_default;
  finfo.widthmm:= 0.3;
  finfo.xrange:= 1.0;
  finfo.yrange:= 1.0;
@@ -652,31 +670,44 @@ end;
 
 procedure ttrace.paint(const acanvas: tcanvas);
 begin
- acanvas.linewidthmm:= finfo.widthmm;
- if finfo.dashes <> '' then begin
-  acanvas.dashes:= finfo.dashes;
- end;
- acanvas.drawlines(finfo.datapoints,false,finfo.color);
- if finfo.dashes <> '' then begin
-  acanvas.dashes:= '';
+ if finfo.widthmm > 0 then begin
+  acanvas.linewidthmm:= finfo.widthmm;
+  if finfo.dashes <> '' then begin
+   acanvas.dashes:= finfo.dashes;
+  end;
+  acanvas.drawlines(finfo.datapoints,false,finfo.color);
+  if finfo.dashes <> '' then begin
+   acanvas.dashes:= '';
+  end;
  end;
 end;
 
-procedure ttrace.paint1(const acanvas: tcanvas);
+procedure ttrace.paint1(const acanvas: tcanvas; const imagesize: sizety;
+                        const imagealignment: alignmentsty);
 var
  int1: integer;
  pt1: pointty;
+ rect1: rectty;
+ co1: colorty;
 begin
- if (fimagelist <> nil) and (finfo.imagenr >= 0) and 
-                                   (finfo.imagenr < fimagelist.count) then begin
-  pt1:= pointty(fimagelist.size);
-  pt1.x:= pt1.x div 2;
-  pt1.y:= pt1.y div 2;
-  acanvas.remove(pt1);
-  for int1:= 0 to high(finfo.datapoints) do begin
-   fimagelist.paint(acanvas,finfo.imagenr,finfo.datapoints[int1],finfo.color);
+ with ftraces do begin
+  if (fimage_list <> nil) and (finfo.imagenr >= 0) and 
+                                    (finfo.imagenr < fimage_list.count) then begin
+   pt1:= pointty(imagesize);
+   pt1.x:= pt1.x div 2;
+   pt1.y:= pt1.y div 2;
+   acanvas.remove(pt1);
+   rect1.size:= imagesize;
+   co1:= finfo.colorimage;
+   if co1 = cl_default then begin
+    co1:= finfo.color;
+   end;
+   for int1:= 0 to high(finfo.datapoints) do begin
+    rect1.pos:= finfo.datapoints[int1];
+    fimage_list.paint(acanvas,finfo.imagenr,rect1,imagealignment,co1);
+   end;
+   acanvas.move(pt1);
   end;
-  acanvas.move(pt1);
  end;
 end;
 
@@ -684,6 +715,14 @@ procedure ttrace.setcolor(const avalue: colorty);
 begin
  if finfo.color <> avalue then begin
   finfo.color:= avalue;
+  tchart(fowner).traces.change;
+ end;
+end;
+
+procedure ttrace.setcolorimage(const avalue: colorty);
+begin
+ if finfo.colorimage <> avalue then begin
+  finfo.colorimage:= avalue;
   tchart(fowner).traces.change;
  end;
 end;
@@ -821,12 +860,6 @@ begin
                                                          nil,false);
 end;
 
-procedure ttrace.setimagelist(const avalue: timagelist);
-begin
- setlinkedvar(avalue,fimagelist);
- datachange;
-end;
-
 procedure ttrace.setimagenr(const avalue: imagenrty);
 begin
  if finfo.imagenr <> avalue then begin
@@ -837,14 +870,13 @@ end;
 
 function ttrace.getimagelist: timagelist;
 begin
- result:= fimagelist;
+ result:= ftraces.fimage_list;
 end;
 
 procedure ttrace.assign(source: tpersistent);
 begin
  if source is ttrace then begin
   with ttrace(source) do begin
-   self.setlinkedvar(self.fimagelist,fimagelist);
    self.finfo:= finfo;
    datachange;
   end;
@@ -856,7 +888,7 @@ end;
 
 { ttraces }
 
-constructor ttraces.create(const aowner: tcustomchart);
+constructor ttraces.create(const aowner: tchart);
 begin
  fxrange:= 1;
  fyrange:= 1;
@@ -887,13 +919,29 @@ end;
 procedure ttraces.paint(const acanvas: tcanvas);
 var
  int1: integer;
+ size1: sizety;
+ align1: alignmentsty;
 begin
  checkgraphic;
  for int1:= 0 to high(fitems) do begin
   ptraceaty(fitems)^[int1].paint(acanvas);
  end;
+ align1:= [];
+ size1:= nullsize;
+ if fimage_list <> nil then begin
+  size1:= fimage_list.size;
+  if fimage_widthmm <> 0 then begin
+   size1.cx:= round(fimage_widthmm*acanvas.ppmm);
+   align1:= align1 + [al_stretchx,al_intpol];
+  end;
+  if fimage_heightmm <> 0 then begin
+   size1.cy:= round(fimage_heightmm*acanvas.ppmm);
+   align1:= align1 + [al_stretchy,al_intpol];
+  end;
+ end;
+ exclude(align1,al_intpol);
  for int1:= 0 to high(fitems) do begin
-  ptraceaty(fitems)^[int1].paint1(acanvas);
+  ptraceaty(fitems)^[int1].paint1(acanvas,size1,align1);
  end;
  acanvas.linewidth:= 0;
 end;
@@ -998,6 +1046,24 @@ begin
   end;
  end;
  inherited;
+end;
+
+procedure ttraces.setimage_list(const avalue: timagelist);
+begin
+ setlinkedvar(avalue,fimage_list);
+ change;
+end;
+
+procedure ttraces.setimage_widthmm(const avalue: real);
+begin
+ fimage_widthmm:= avalue;
+ change;
+end;
+
+procedure ttraces.setimage_heightmm(const avalue: real);
+begin
+ fimage_heightmm:= avalue;
+ change;
 end;
 
 { tchartdialvert }

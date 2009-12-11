@@ -267,6 +267,7 @@ type
    fscale: real;
    foffset: pointty;
    fclientsize: sizety;
+   fpapersize: sizety;
    fboundingbox: framety;
    ftitle: msestring;
    flinenumber: integer;
@@ -847,6 +848,8 @@ begin
    end;
    
    if fprintorientation = pao_landscape then begin
+    fpapersize.cx:= round((fdrawinfo.gc.paintdevicesize.cy/ppmm)*mmtoprintscale);
+    fpapersize.cy:= round((fdrawinfo.gc.paintdevicesize.cx/ppmm)*mmtoprintscale);
     fboundingbox.left:= round(fpa_frametop*mmtoprintscale);
     fboundingbox.bottom:= round(fpa_frameleft*mmtoprintscale);
     fboundingbox.right:= round((fdrawinfo.gc.paintdevicesize.cy/ppmm-fpa_framebottom)*
@@ -855,6 +858,8 @@ begin
                                                                mmtoprintscale);
    end
    else begin
+    fpapersize.cx:= round((fdrawinfo.gc.paintdevicesize.cx/ppmm)*mmtoprintscale);
+    fpapersize.cy:= round((fdrawinfo.gc.paintdevicesize.cy/ppmm)*mmtoprintscale);
     fboundingbox.left:= round(fpa_frameleft*mmtoprintscale);
     fboundingbox.bottom:= round(fpa_framebottom*mmtoprintscale);
     fboundingbox.right:= round((fdrawinfo.gc.paintdevicesize.cx/ppmm-fpa_frameright)*
