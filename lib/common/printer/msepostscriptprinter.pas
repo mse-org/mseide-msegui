@@ -1314,23 +1314,29 @@ procedure tpostscriptcanvas.handlepoly(const points: ppointty;
              const lastpoint: integer; const closed: boolean; const fill: boolean);
 var
  int1: integer;
- str1: string;
+ str1,str2: string;
 begin
  if active then begin
-  str1:= 'newpath '+ posstring(points^) + ' moveto';
+  str1:= '';
+  str2:= 'newpath '+ posstring(points^) + ' moveto '+nl;
   for int1:= 1 to lastpoint do begin
-   str1:= str1 + ' '+posstring(ppointaty(points)^[int1])+' lineto';
+   if length(str1) > 80 then begin
+    str2:= str2 + str1 + nl;
+    str1:= '';
+   end;
+   str1:= str1 + posstring(ppointaty(points)^[int1])+' lineto ';
   end;
+  str2:= str2 + str1 + nl;
   if closed then begin
-   str1:= str1 + ' closepath';
+   str2:= str2 + 'closepath ';
   end;
   if fill then begin
-   str1:= str1 + ' fill';
+   str2:= str2 + 'fill';
   end
   else begin
-   str1:= str1 + ' '+strokestr;
+   str2:= str2 + strokestr;
   end;
-  streamwrite(str1+nl);
+  streamwrite(str2+nl);
  end;
 end;
 
@@ -1983,8 +1989,7 @@ procedure tpostscriptcanvas.endpage;
 begin
  inherited;
  if active then begin
-  streamwrite('%%PageOrientation: '+pageorientations[printorientation]+nl+
-               'showpage'+nl);
+  streamwrite('showpage'+nl);
   inc(fps_pagenumber);
  end;
 end;
@@ -1996,7 +2001,8 @@ begin
  initgcvalues; //init state on every page, necessary for gv
  if active then begin
   str1:= ' '+inttostr(fps_pagenumber+1);
-  streamwrite('%%Page:'+str1+str1+nl);
+  streamwrite('%%Page:'+str1+str1+nl+
+              '%%PageOrientation: '+pageorientations[printorientation]+nl);
   checkscale;
  end;
  inherited;

@@ -689,6 +689,7 @@ var
  pt1: pointty;
  rect1: rectty;
  co1: colorty;
+ bmp1,bmp2: tmaskedbitmap;
 begin
  with ftraces do begin
   if (fimage_list <> nil) and (finfo.imagenr >= 0) and 
@@ -702,9 +703,26 @@ begin
    if co1 = cl_default then begin
     co1:= finfo.color;
    end;
-   for int1:= 0 to high(finfo.datapoints) do begin
-    rect1.pos:= finfo.datapoints[int1];
-    fimage_list.paint(acanvas,finfo.imagenr,rect1,imagealignment,co1);
+   if imagealignment * [al_stretchx,al_stretchy] <> [] then begin
+    bmp1:= tmaskedbitmap.create(fimage_list.monochrome);
+    bmp2:= tmaskedbitmap.create(fimage_list.monochrome);
+    try
+     fimage_list.getimage(finfo.imagenr,bmp1);
+     bmp2.size:= imagesize;
+     bmp1.stretch(bmp2);
+     for int1:= 0 to high(finfo.datapoints) do begin
+      bmp2.paint(acanvas,finfo.datapoints[int1],[],co1);
+     end;
+    finally
+     bmp1.free;
+     bmp2.free;
+    end;
+   end
+   else begin
+    for int1:= 0 to high(finfo.datapoints) do begin
+     rect1.pos:= finfo.datapoints[int1];
+     fimage_list.paint(acanvas,finfo.imagenr,rect1,imagealignment,co1);
+    end;
    end;
    acanvas.move(pt1);
   end;

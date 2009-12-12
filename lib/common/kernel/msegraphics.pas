@@ -2308,7 +2308,9 @@ end;
 
 function tfont.getfont(var drawinfo: drawinfoty): boolean;
 begin
+ gdi_lock;
  result:= gui_getfont(drawinfo);
+ gdi_unlock;
 end;
 
 procedure tfont.createhandle(const canvas: tcanvas);
