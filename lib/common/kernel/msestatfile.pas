@@ -337,7 +337,7 @@ var
  stream1: ttextstream;
  ar1: filenamearty;
 // fname1: filenamety;
-// bo1: boolean;
+ bo1: boolean;
 begin
  if assigned(fonstatbeforewrite) then begin
   fonstatbeforewrite(self);
@@ -378,7 +378,13 @@ begin
  end;
  try
   awriter:= tstatwriter.create(stream1);
+  bo1:= false;
   try
+   if (stream1.handle <> invalidfilehandle) and 
+                                  not stream1.usewritebuffer then begin
+    bo1:= true;
+    stream1.usewritebuffer:= true;
+   end;
    if assigned(fonstatwrite) or assigned(fonstatupdate) or 
                                     (fsavedmemoryfiles <> '') then begin
     awriter.writestat(istatfile(self));
@@ -391,6 +397,9 @@ begin
    end;
   finally
    awriter.free;
+   if bo1 then begin
+    stream1.usewritebuffer:= false;
+   end;
   end;
  finally
   if stream = nil then begin

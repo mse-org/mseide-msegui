@@ -1151,23 +1151,10 @@ begin
 end;
 
 procedure tstatwriter.writestat(const intf: istatfile);
-var
- bo1: boolean;
 begin
  if (intf <> nil) and (fstream <> nil) then begin
-  bo1:= false;
-  try
-   if (fstream.handle <> invalidfilehandle) and not fstream.usewritebuffer then begin
-    bo1:= true;
-    fstream.usewritebuffer:= true;
-   end;
-   writesection(varname(intf));
-   intf.dostatwrite(self);
-  finally
-   if bo1 then begin
-    fstream.usewritebuffer:= false;
-   end;
-  end;
+  writesection(varname(intf));
+  intf.dostatwrite(self);
  end;
 end;
 
