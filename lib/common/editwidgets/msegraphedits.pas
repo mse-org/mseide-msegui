@@ -390,7 +390,7 @@ type
    ffacerect: rectty;
    fframebarrect: rectty;
    ffacebarrect: rectty;
-   fvaluescale: real;
+   fvaluerange: real;
    fformat: string;
    ftextflags: textflagsty;
    fonfinished: progresseventty;
@@ -401,12 +401,13 @@ type
    procedure updatebarrect(const avalue: realty; const arect: rectty;
                     out facedest,framebardest,facebardest: rectty);
    procedure updatebar;
-   procedure setvaluescale(const avalue: real);
+   procedure setvaluerange(const avalue: real);
    procedure setformat(const avalue: string);
    procedure settextflags(const avalue: textflagsty);
    procedure setbar_frame(const avalue: tbarframe);
    procedure readformat(reader: treader);
    procedure writeformat(writer: twriter);
+   procedure readvaluescale(reader: treader);
   protected
    procedure clientrectchanged; override;
    procedure dochange; override;
@@ -433,7 +434,7 @@ type
    property optionswidget default defaultoptionswidgetnofocus;
    property bar_face: tbarface read fbar_face write setbar_face;
    property bar_frame: tbarframe read fbar_frame write setbar_frame;
-   property valuescale: real read fvaluescale write setvaluescale; //default 0.01
+   property valuerange: real read fvaluerange write setvaluerange; //default 100
    property format: string read fformat write setformat stored false;
                    //default '0%', '' for no numeric
    property textflags: textflagsty read ftextflags write settextflags default
@@ -3196,7 +3197,7 @@ begin
  fbar_face:= tbarface.create(iface(self));
  fbar_frame:= tbarframe.create(self);
  fformat:= '0%';
- fvaluescale:= 0.01;
+ fvaluerange:= 100;
  ftextflags:= [tf_ycentered,tf_xcentered];
  inherited;
  optionswidget:= defaultoptionswidgetnofocus;
@@ -3330,10 +3331,8 @@ begin
   canvas.restore;
   fbar_frame.paintoverlay(canvas,po2^);
   if fformat <> '' then begin
-   if fvaluescale <> 0 then begin
-    rea1:= rea1/fvaluescale;
-   end;
-   drawtext(canvas,realtytostr(rea1,fformat),arect,ftextflags,ffont);
+   drawtext(canvas,realtytostr(applyrange(rea1,fvaluerange),fformat),arect,
+                   ftextflags,ffont);
   end;
  end;
 end;
@@ -3343,9 +3342,9 @@ begin
  tdispframe.create(iscrollframe(self));
 end;
 
-procedure tcustomprogressbar.setvaluescale(const avalue: real);
+procedure tcustomprogressbar.setvaluerange(const avalue: real);
 begin
- fvaluescale:= avalue;
+ fvaluerange:= avalue;
  formatchanged;
 end;
 
@@ -3384,12 +3383,6 @@ begin
  end;
 end;
 
-procedure tcustomprogressbar.defineproperties(filer: tfiler);
-begin
- filer.defineproperty('format',{$ifdef FPC}@{$endif}readformat,
-                                    {$ifdef FPC}@{$endif}writeformat,true);
-end;
-
 procedure tcustomprogressbar.readformat(reader: treader);
 begin
  {$ifdef mse_unicodestring}
@@ -3406,6 +3399,18 @@ begin
  {$else}
  writer.writewidestring(fformat);
  {$endif}
+end;
+
+procedure tcustomprogressbar.readvaluescale(reader: treader);
+begin
+ valuerange:= valuescaletorange(reader);
+end;
+
+procedure tcustomprogressbar.defineproperties(filer: tfiler);
+begin
+ filer.defineproperty('format',{$ifdef FPC}@{$endif}readformat,
+                                    {$ifdef FPC}@{$endif}writeformat,true);
+ filer.defineproperty('valuescale',{$ifdef FPC}@{$endif}readvaluescale,nil,false);
 end;
 
 end.

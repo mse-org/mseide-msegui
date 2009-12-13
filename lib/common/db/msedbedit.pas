@@ -694,7 +694,7 @@ type
    property max stored false;
    property formatedit;
    property formatdisp;
-   property valuescale;
+   property valuerange;
    property onsetvalue;
    property onsetintvalue;
  end;
@@ -728,7 +728,7 @@ type
    property max stored false;
    property formatedit;
    property formatdisp;
-   property valuescale;
+   property valuerange;
    property onsetvalue;
    property step;
  end;
@@ -736,8 +736,9 @@ type
  tdbslider = class(tcustomslider,idbeditfieldlink,ireccontrol)
   private
    fdatalink: teditwidgetdatalink;
-   fvaluescale: real;
+   fvaluerange: real;
    procedure setdatalink(const avalue: teditwidgetdatalink);
+   procedure readvaluescale(reader: treader);
   protected   
    procedure defineproperties(filer: tfiler); override;
    procedure griddatasourcechanged; override;
@@ -758,7 +759,7 @@ type
    destructor destroy; override;
    function checkvalue(const quiet: boolean = false): boolean; reintroduce;
   published
-   property valuescale: real read fvaluescale write fvaluescale;
+   property valuerange: real read fvaluerange write fvaluerange;
    property datalink: teditwidgetdatalink read fdatalink write setdatalink;
    property scrollbar;
    property onsetvalue;
@@ -4141,7 +4142,7 @@ end;
 constructor tdbslider.create(aowner: tcomponent);
 begin
  fisdb:= true;
- fvaluescale:= 1;
+ fvaluerange:= 1;
  fdatalink:= teditwidgetdatalink.create(idbeditfieldlink(self));
  inherited;
 end;
@@ -4165,20 +4166,12 @@ begin
 end;
 
 procedure tdbslider.valuetofield;
-var
- rea1: real;
 begin
  if isemptyreal(value) then begin
   fdatalink.field.clear;
  end
  else begin
-  if valuescale <> 0 then begin
-   rea1:= value / valuescale;
-  end
-  else begin
-   rea1:= value;
-  end;
-  fdatalink.field.asfloat:= rea1;
+  fdatalink.field.asfloat:= applyrange(value,valuerange);
  end;
 end;
 
@@ -4188,7 +4181,7 @@ begin
   value:= emptyreal;
  end
  else begin
-  value:= fdatalink.field.asfloat * valuescale;
+  value:= reapplyrange(fdatalink.field.asfloat,valuerange);
  end;
 end;
 
@@ -4198,7 +4191,7 @@ begin
   if griddatalink <> nil then begin
    result:= tgriddatalink(griddatalink).getrealtybuffer(fdatalink.field,cell.row);
    if result <> nil then begin
-    preal(result)^:= preal(result)^ * valuescale;
+    preal(result)^:= reapplyrange(preal(result)^,valuerange);
    end;
   end
   else begin
@@ -4232,10 +4225,16 @@ begin
  fdatalink.assign(avalue);
 end;
 
+procedure tdbslider.readvaluescale(reader: treader);
+begin
+ valuerange:= valuescaletorange(reader);
+end;
+
 procedure tdbslider.defineproperties(filer: tfiler);
 begin
  inherited;
  fdatalink.fixupproperties(filer);  //move values to datalink
+ filer.defineproperty('valuescale',{$ifdef FPC}@{$endif}readvaluescale,nil,false);
 end;
 
 procedure tdbslider.recchanged;
@@ -4276,7 +4275,7 @@ begin
   if griddatalink <> nil then begin
    result:= tgriddatalink(griddatalink).getrealtybuffer(fdatalink.field,cell.row);
    if result <> nil then begin
-    preal(result)^:= preal(result)^ * valuescale;
+    preal(result)^:= reapplyrange(preal(result)^,valuerange);
    end;
   end
   else begin
@@ -4293,13 +4292,7 @@ begin
   fdatalink.field.clear;
  end
  else begin
-  if valuescale <> 0 then begin
-   rea1:= value / valuescale;
-  end
-  else begin
-   rea1:= value;
-  end;
-  fdatalink.field.asfloat:= rea1;
+  fdatalink.field.asfloat:= applyrange(value,valuerange);
  end;
 end;
 
@@ -4309,7 +4302,7 @@ begin
   value:= emptyreal;
  end
  else begin
-  value:= fdatalink.field.asfloat * valuescale;
+  value:= reapplyrange(fdatalink.field.asfloat,valuerange);
  end;
 end;
 

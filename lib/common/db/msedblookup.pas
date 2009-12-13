@@ -166,11 +166,13 @@ type
  tdbreallookuplb = class(tdblookup32lb)
   private
    fformat: msestring;
-   fvaluescale: real;
+   fvaluerange: real;
    fvalue: real;
    procedure setformat(const avalue: msestring);
-   procedure setvaluescale(const avalue: real);
+   procedure setvaluerange(const avalue: real);
+   procedure readvaluescale(reader: treader);
   protected
+   procedure defineproperties(filer: tfiler); override;
    function getdatalbdatakind: lbdatakindty; override;
    procedure setlookupvalue(const aindex: integer); override;
    function lookuptext(const aindex: integer): msestring; override;
@@ -178,7 +180,7 @@ type
    constructor create(aowner: tcomponent); override;
    property value: real read fvalue;
   published
-   property valuescale: real read fvaluescale write setvaluescale;
+   property valuerange: real read fvaluerange write setvaluerange;
    property format: msestring read fformat write setformat;
  end;
 
@@ -232,11 +234,13 @@ type
  tdbreallookup64lb = class(tdblookup64lb)
   private
    fformat: msestring;
-   fvaluescale: real;
+   fvaluerange: real;
    fvalue: real;
    procedure setformat(const avalue: msestring);
-   procedure setvaluescale(const avalue: real);
+   procedure setvaluerange(const avalue: real);
+   procedure readvaluescale(reader: treader);
   protected
+   procedure defineproperties(filer: tfiler); override;
    function getdatalbdatakind: lbdatakindty; override;
    procedure setlookupvalue(const aindex: integer); override;
    function lookuptext(const aindex: integer): msestring; override;
@@ -244,7 +248,7 @@ type
    constructor create(aowner: tcomponent); override;
    property value: real read fvalue;
   published
-   property valuescale: real read fvaluescale write setvaluescale;
+   property valuerange: real read fvaluerange write setvaluerange;
    property format: msestring read fformat write setformat;
  end;
 
@@ -299,11 +303,13 @@ type
  tdbreallookupstrlb = class(tdblookupstrlb)
   private
    fformat: msestring;
-   fvaluescale: real;
+   fvaluerange: real;
    fvalue: real;
    procedure setformat(const avalue: msestring);
-   procedure setvaluescale(const avalue: real);
+   procedure setvaluerange(const avalue: real);
+   procedure readvaluescale(reader: treader);
   protected
+   procedure defineproperties(filer: tfiler); override;
    function getdatalbdatakind: lbdatakindty; override;
    procedure setlookupvalue(const aindex: integer); override;
    function lookuptext(const aindex: integer): msestring; override;
@@ -311,7 +317,7 @@ type
    constructor create(aowner: tcomponent); override;
    property value: real read fvalue;
   published
-   property valuescale: real read fvaluescale write setvaluescale;
+   property valuerange: real read fvaluerange write setvaluerange;
    property format: msestring read fformat write setformat;
  end;
 
@@ -766,7 +772,7 @@ end;
 
 constructor tdbreallookuplb.create(aowner: tcomponent);
 begin
- fvaluescale:= 1;
+ fvaluerange:= 1;
  inherited;
 end;
 
@@ -782,7 +788,8 @@ begin
   fvalue:= emptyreal;
  end
  else begin
-  fvalue:= flookupbuffer.floatvaluephys(flookupvaluefieldno,aindex);
+  fvalue:= reapplyrange(flookupbuffer.floatvaluephys(flookupvaluefieldno,aindex),
+                           valuerange);
  end;
 end;
 
@@ -792,10 +799,21 @@ begin
                                                    fformat);
 end;
 
-procedure tdbreallookuplb.setvaluescale(const avalue: real);
+procedure tdbreallookuplb.setvaluerange(const avalue: real);
 begin
- fvaluescale:= avalue;
+ fvaluerange:= avalue;
  formatchanged;
+end;
+
+procedure tdbreallookuplb.readvaluescale(reader: treader);
+begin
+ valuerange:= valuescaletorange(reader);
+end;
+
+procedure tdbreallookuplb.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('valuescale',{$ifdef FPC}@{$endif}readvaluescale,nil,false);
 end;
 
 function tdbreallookuplb.getdatalbdatakind: lbdatakindty;
@@ -919,7 +937,7 @@ end;
 
 constructor tdbreallookup64lb.create(aowner: tcomponent);
 begin
- fvaluescale:= 1;
+ fvaluerange:= 1;
  inherited;
 end;
 
@@ -935,7 +953,8 @@ begin
   fvalue:= emptyreal;
  end
  else begin
-  fvalue:= flookupbuffer.floatvaluephys(flookupvaluefieldno,aindex);
+  fvalue:= reapplyrange(flookupbuffer.floatvaluephys(flookupvaluefieldno,aindex),
+                        valuerange);
  end;
 end;
 
@@ -945,11 +964,23 @@ begin
                                                    fformat);
 end;
 
-procedure tdbreallookup64lb.setvaluescale(const avalue: real);
+procedure tdbreallookup64lb.setvaluerange(const avalue: real);
 begin
- fvaluescale:= avalue;
+ fvaluerange:= avalue;
  formatchanged;
 end;
+
+procedure tdbreallookup64lb.readvaluescale(reader: treader);
+begin
+ valuerange:= valuescaletorange(reader);
+end;
+
+procedure tdbreallookup64lb.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('valuescale',{$ifdef FPC}@{$endif}readvaluescale,nil,false);
+end;
+
 
 function tdbreallookup64lb.getdatalbdatakind: lbdatakindty;
 begin
@@ -1072,7 +1103,7 @@ end;
 
 constructor tdbreallookupstrlb.create(aowner: tcomponent);
 begin
- fvaluescale:= 1;
+ fvaluerange:= 1;
  inherited;
 end;
 
@@ -1088,7 +1119,8 @@ begin
   fvalue:= emptyreal;
  end
  else begin
-  fvalue:= flookupbuffer.floatvaluephys(flookupvaluefieldno,aindex);
+  fvalue:= reapplyrange(flookupbuffer.floatvaluephys(flookupvaluefieldno,aindex),
+                     valuerange);
  end;
 end;
 
@@ -1098,10 +1130,21 @@ begin
                                                    fformat);
 end;
 
-procedure tdbreallookupstrlb.setvaluescale(const avalue: real);
+procedure tdbreallookupstrlb.setvaluerange(const avalue: real);
 begin
- fvaluescale:= avalue;
+ fvaluerange:= avalue;
  formatchanged;
+end;
+
+procedure tdbreallookupstrlb.readvaluescale(reader: treader);
+begin
+ valuerange:= valuescaletorange(reader);
+end;
+
+procedure tdbreallookupstrlb.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('valuescale',{$ifdef FPC}@{$endif}readvaluescale,nil,false);
 end;
 
 function tdbreallookupstrlb.getdatalbdatakind: lbdatakindty;

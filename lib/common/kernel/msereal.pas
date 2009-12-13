@@ -29,11 +29,17 @@ function strtorealtydot(const ein: string): realty;
 //function realtytostr(const val: realty; const format: msestring = ''): msestring;
 function realtytostr(const val: realty; const format: msestring = '';
                                             const scale: real = 1): msestring;
+function realtytostrrange(const val: realty; const format: msestring = '';
+                                            const range: real = 1): msestring;
 function realtytostrdot(const val: realty): string;
 
 function addrealty(const a,b: realty): realty; //result = a - b
 function subrealty(const a,b: realty): realty; //result = a + b
 function mulrealty(const a,b: realty): realty; //result = a * b
+
+function applyrange(const avalue: realty; const arange: real): realty;
+function reapplyrange(const avalue: realty; const arange: real): realty;
+function valuescaletorange(const reader: treader): real;
 
 implementation
 uses
@@ -45,6 +51,34 @@ const
 {$else}
  co1: array[0..7] of byte = ($0,0,0,0,0,0,$f0,$ff);      //- inf
 {$endif}
+
+function applyrange(const avalue: realty; const arange: real): realty;
+begin
+ if isemptyreal(avalue) or (arange = 0) then begin
+  result:= avalue;
+ end
+ else begin
+  result:= avalue * arange;
+ end;  
+end;
+
+function reapplyrange(const avalue: realty; const arange: real): realty;
+begin
+ if isemptyreal(avalue) or (arange = 0) then begin
+  result:= avalue;
+ end
+ else begin
+  result:= avalue / arange;
+ end;  
+end;
+
+function valuescaletorange(const reader: treader): real;
+begin
+ result:= reader.readfloat;
+ if result <> 0 then begin
+  result:= 1/result;
+ end;
+end;
 
 function addrealty(const a,b: realty): realty; //result = a - b
 begin
@@ -168,6 +202,19 @@ begin
    rea1:= val;
   end;
   result:= formatfloatmse(rea1,format,defaultformatsettingsmse);
+ end;
+end;
+
+function realtytostrrange(const val: realty; const format: msestring = '';
+                                            const range: real = 1): msestring;
+var
+ rea1: real;
+begin
+ if isemptyreal(val) then begin
+  result:= emptyrealstring;
+ end
+ else begin
+  result:= formatfloatmse(val*range,format,defaultformatsettingsmse);
  end;
 end;
 

@@ -221,12 +221,13 @@ type
    fvalue: realty;
    fonchange: changerealeventty;
    fformat: msestring;
-   fvaluescale: real;
+   fvaluerange: real;
    procedure setvalue(const avalue: realty);
    procedure readvalue(reader: treader);
    procedure writevalue(writer: twriter);
    procedure setformat(const avalue: msestring);
-   procedure setvaluescale(const avalue: real);
+   procedure setvaluerange(const avalue: real);
+   procedure readvaluescale(reader: treader);
   protected
    procedure valuechanged; override;
    function getvaluetext: msestring; override;
@@ -235,7 +236,7 @@ type
    constructor create(aowner: tcomponent); override;
    property value: realty read fvalue write setvalue stored false;
   published
-   property valuescale: real read fvaluescale write setvaluescale;
+   property valuerange: real read fvaluerange write setvaluerange;
    property format: msestring read fformat write setformat;
    property onchange: changerealeventty read fonchange write fonchange;
  end;
@@ -572,7 +573,7 @@ end;
 constructor tcustomrealdisp.create(aowner: tcomponent);
 begin
  fvalue:= emptyreal;
- fvaluescale:= 1;
+ fvaluerange:= 1;
  inherited;
 end;
 
@@ -584,6 +585,11 @@ end;
 procedure tcustomrealdisp.writevalue(writer: twriter);
 begin
  writerealty(writer,fvalue);
+end;
+
+procedure tcustomrealdisp.readvaluescale(reader: treader);
+begin
+ valuerange:= valuescaletorange(reader);
 end;
 
 procedure tcustomrealdisp.defineproperties(filer: tfiler);
@@ -599,11 +605,12 @@ begin
  end;
  filer.DefineProperty('val',{$ifdef FPC}@{$endif}readvalue,
           {$ifdef FPC}@{$endif}writevalue,bo1);
+ filer.defineproperty('valuescale',{$ifdef FPC}@{$endif}readvaluescale,nil,false);
 end;
 
 function tcustomrealdisp.getvaluetext: msestring;
 begin
- result:= realtytostr(fvalue,fformat,fvaluescale);
+ result:= realtytostrrange(fvalue,fformat,fvaluerange);
 end;
 
 procedure tcustomrealdisp.setvalue(const avalue: realty);
@@ -628,9 +635,9 @@ begin
  formatchanged;
 end;
 
-procedure tcustomrealdisp.setvaluescale(const avalue: real);
+procedure tcustomrealdisp.setvaluerange(const avalue: real);
 begin
- fvaluescale:= avalue;
+ fvaluerange:= avalue;
  formatchanged;
 end;
 

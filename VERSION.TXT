@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+2009-13-13
+ t*widget.valuescale -> valuerange, inverted.
 2009-12-10
  ttrace.xseriesdata -> ydata.
  ttrace.xoffset, yoffset -> xstart,ystart, sign reversed.

@@ -847,7 +847,7 @@ type
    fonsetintvalue: setintegereventty;
    fformatdisp: msestring;
    fformatedit: msestring;
-   fvaluescale: real;
+   fvaluerange: real;
    fmin: realty;
    fmax: realty;
    procedure setvalue(const Value: realty);
@@ -867,11 +867,12 @@ type
    function getgridintvalues: integerarty;
    procedure setgridvalues(const avalue: realarty);
    procedure setgridintvalues(const avalue: integerarty);
-   procedure setvaluescale(const avalue: real);
+   procedure setvaluerange(const avalue: real);
    function getasinteger: integer;
    procedure setasinteger(const avalue: integer);
    function getascurrency: currency;
    procedure setascurrency(const avalue: currency);
+   procedure readvaluescale(reader: treader);
   protected
    fvalue: realty;
    function gettextvalue(var accept: boolean; const quiet: boolean): realty; virtual;
@@ -901,7 +902,7 @@ type
    property value: realty read fvalue write setvalue stored false;
    property formatedit: msestring read fformatedit write setformatedit;
    property formatdisp: msestring read fformatdisp write setformatdisp;
-   property valuescale: real read fvaluescale write setvaluescale;
+   property valuerange: real read fvaluerange write setvaluerange;
    property min: realty read fmin write fmin stored false;
    property max: realty read fmax write fmax stored false;
    property gridvalue[const index: integer]: realty
@@ -922,7 +923,7 @@ type
    property value stored false;
    property formatedit;
    property formatdisp;
-   property valuescale;
+   property valuerange;
    property min stored false;
    property max stored false;
  end;
@@ -1028,7 +1029,7 @@ type
    property value stored false;
    property formatedit;
    property formatdisp;
-   property valuescale;
+   property valuerange;
    property min stored false;
    property max stored false;
    property step;
@@ -4127,7 +4128,7 @@ begin
  fvalue:= emptyreal;
  fmin:= emptyreal;
  fmax:= bigreal;
- fvaluescale:= 1;
+ fvaluerange:= 1;
  inherited;
  include(foptionswidget,ow_mousewheel);
 end;
@@ -4160,14 +4161,11 @@ begin
  else begin
   rea1:= realty(data);
  end;
-// if (fvaluescale <> 0) and not (isemptyreal(rea1)) then begin
-//  rea1:= rea1/fvaluescale;
-// end;
  if (@data = nil) and focused then begin
-  result:= realtytostr(rea1,fformatedit,fvaluescale);
+  result:= realtytostrrange(rea1,fformatedit,fvaluerange);
  end
  else begin
-  result:= realtytostr(rea1,fformatdisp,fvaluescale);
+  result:= realtytostrrange(rea1,fformatdisp,fvaluerange);
  end;
 end;
 
@@ -4231,9 +4229,7 @@ begin
    rea1:= rea2;
   except
   end;
-  if (fvaluescale <> 0) and not isemptyreal(rea1) then begin
-   rea1:= rea1*fvaluescale;
-  end;
+  rea1:= reapplyrange(rea1,fvaluerange);
   if not ((des_isdb in fstate) and isemptyreal(rea1)) then begin
    if (cmprealty(fmin,rea1) > 0) or (cmprealty(fmax,rea1) < 0) then begin
     rangeerror(fmin,fmax,quiet);
@@ -4265,10 +4261,7 @@ var
  rea1: realty;
 begin
  try
-  rea1:= strtorealty(atext);
-  if (fvaluescale <> 0) and not isemptyreal(rea1) then begin
-   rea1:= rea1*fvaluescale;
-  end;
+  rea1:= reapplyrange(strtorealty(atext),fvaluerange);
  except
   rea1:= emptyreal;
  end;
@@ -4311,6 +4304,11 @@ begin
  writerealty(writer,fmax);
 end;
 
+procedure tcustomrealedit.readvaluescale(reader: treader);
+begin
+ valuerange:= valuescaletorange(reader);
+end;
+
 procedure tcustomrealedit.defineproperties(filer: tfiler);
 var
  bo1,bo2,bo3: boolean;
@@ -4337,6 +4335,7 @@ begin
           {$ifdef FPC}@{$endif}writemin,bo2);
  filer.DefineProperty('ma',{$ifdef FPC}@{$endif}readmax,
           {$ifdef FPC}@{$endif}writemax,bo3);
+ filer.defineproperty('valuescale',{$ifdef FPC}@{$endif}readvaluescale,nil,false);
 end;
 
 procedure tcustomrealedit.readstatvalue(const reader: tstatreader);
@@ -4423,10 +4422,10 @@ begin
  trealdatalist(fgridintf.getcol.datalist).asarray:= ar1;
 end;
 
-procedure tcustomrealedit.setvaluescale(const avalue: real);
+procedure tcustomrealedit.setvaluerange(const avalue: real);
 begin
- if fvaluescale <> avalue then begin
-  fvaluescale:= avalue;
+ if fvaluerange <> avalue then begin
+  fvaluerange:= avalue;
   valuetotext;
  end;
 end;
