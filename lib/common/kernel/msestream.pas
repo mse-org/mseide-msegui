@@ -53,6 +53,7 @@ type
    property transactionname: filenamety read ftransactionname;
    function close: boolean; //false on commit error
    procedure cancel; //calls close without commit, removes intermediate file
+   procedure flushbuffer; virtual;
    procedure flush; virtual;
 
    procedure setsize(const newsize: int64); override;
@@ -61,7 +62,7 @@ type
  end;
 
 const
- defaultbuflen = 256;
+ defaultbuflen = 2048;
 
 type
  textstreamstatety = (tss_eof,tss_error,tss_notopen,tss_pipeactive,tss_response,
@@ -89,16 +90,19 @@ type
    finternalbuffer: string;
    fbuflen: integer;
 
+   fusewritebuffer: boolean;
    procedure setsearchtext(const Value: string);
    function getmsesearchtext: msestring;
    procedure setmsesearchtext(const avalue: msestring);
    procedure setsearchoptions(const Value: searchoptionsty);
    function getnotopen: boolean;
+   procedure setusewritebuffer(const avalue: boolean);
   protected
    fbuffer: pchar;
    bufoffset, bufend: pchar;
    fstate: textstreamstatesty;
    fencoding: charencodingty;
+   fwriting: boolean;
    function geteof: boolean;
    procedure setbuflen(const Value: integer); virtual;
    function readbytes(var buf): integer; virtual;
@@ -112,6 +116,8 @@ type
    function Write(const Buffer; Count: Longint): Longint; overload; override;
    function Seek(const Offset: Int64; Origin: TSeekOrigin): Int64; override;
    procedure return;    //setzt filepointer auf letzte readln position
+   procedure flushbuffer; override;
+   procedure writebuffer(const buffer; count: longint);
 
    procedure writestr(const value: string); //no encoding
    procedure writestrln(const value: string); //no encoding
@@ -178,6 +184,8 @@ type
    property eof: boolean read geteof;
    property encoding: charencodingty read fencoding write fencoding default ce_locale;
    property buflen: integer read fbuflen write setbuflen default defaultbuflen;
+   property usewritebuffer: boolean read fusewritebuffer 
+                         write setusewritebuffer default false;
 
  end;
 
@@ -806,6 +814,7 @@ end;
  
 procedure tmsefilestream.sethandle(value: integer);
 begin
+ flushbuffer;
  if handle <> invalidfilehandle then begin
   closehandle(handle);
  end;
@@ -849,6 +858,7 @@ end;
 
 procedure tmsefilestream.flush;
 begin
+ flushbuffer;
  if handle <> invalidfilehandle then begin
   syserror(sys_flushfile(handle));
  end;
@@ -937,6 +947,11 @@ begin
  fmemorystream.clear; 
 end;
 
+procedure tmsefilestream.flushbuffer;
+begin
+ //dummy
+end;
+
 { tresourcefilestream}
 
 procedure TresourcefileStream.WriteResourceHeader(resourcetyp: word;
@@ -976,8 +991,57 @@ begin
  result:= inherited read(buffer,count);
 end;
 
+procedure ttextstream.flushbuffer;
+var
+ po1: pointer;
+begin
+ if fwriting then begin
+  fwriting:= false;
+  if bufoffset <> nil then begin
+   po1:= bufoffset;
+   bufoffset:= nil;
+   inherited writebuffer(fbuffer^,po1-fbuffer);   
+  end;
+ end;
+end;
+
+procedure ttextstream.writebuffer(const buffer; count: longint);
+begin
+ if fusewritebuffer then begin
+  if fwriting and (bufoffset <> nil) then begin
+   if buflen - (bufoffset - fbuffer) < count then begin
+    flushbuffer;
+   end;
+  end;
+  if (bufoffset = nil) then begin
+   if (buflen > count) then begin
+    move(buffer,fbuffer^,count);
+    bufoffset:= fbuffer+count;
+    fwriting:= true;
+   end
+   else begin
+    inherited writebuffer(buffer,count);
+   end;
+  end
+  else begin
+   if buflen - (bufoffset - fbuffer) >= count then begin
+    move(buffer,bufoffset^,count);
+    bufoffset:= bufoffset+count;
+    fwriting:= true;
+   end
+   else begin
+    inherited writebuffer(buffer,count);
+   end;
+  end
+ end
+ else begin
+  inherited writebuffer(buffer,count);
+ end;
+end;
+
 function ttextstream.Write(const Buffer; Count: Integer): Longint;
 begin
+ flushbuffer;
  bufoffset:= nil;
  result:= inherited write(buffer,count);
 end;
@@ -985,6 +1049,7 @@ end;
 function ttextstream.Seek(const Offset: Int64;
   Origin: TSeekOrigin): Int64;
 begin
+ flushbuffer;
  if (origin <> socurrent) or (offset <> 0) then bufoffset:= nil;
  if bufoffset = nil then begin
   result:= inherited seek(offset,origin);
@@ -1000,6 +1065,7 @@ var
  int1: integer;
 begin
  if fbuflen <> value then begin
+  flushbuffer;
   if value < defaultbuflen then begin
    int1:= defaultbuflen;
   end
@@ -1036,6 +1102,7 @@ begin
  if (tss_eof in fstate) then begin
   raise EInOutError.Create(sendoffile);
  end;
+ flushbuffer;
  gefunden:= false;
  if @value <> nil then begin
   setlength(value,0);
@@ -1094,21 +1161,6 @@ begin
      end;
     end;
    end;
-  end
-  else begin
-  {
-   if bufoffset = bufend then begin          //linefeed-return entfernen
-    fillbuffer;
-   end;
-   if bufoffset < bufend then begin
-    if bufoffset^ = c_return then begin
-     inc(bufoffset);
-     if bufoffset = bufend then begin
-      fillbuffer;
-     end;
-    end;
-   end;
-  }
   end;
  end;
 
@@ -1515,6 +1567,12 @@ begin
   readstrln(str1);
   system.writeln(dest,str1);
  end;
+end;
+
+procedure ttextstream.setusewritebuffer(const avalue: boolean);
+begin
+ flushbuffer;
+ fusewritebuffer:= avalue;
 end;
 
 { ttextdatastream }

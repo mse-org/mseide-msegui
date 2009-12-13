@@ -1129,6 +1129,9 @@ end;
 
 constructor tstatwriter.create(const astream: ttextstream);
 begin
+ if astream.handle <> invalidfilehandle then begin
+  astream.usewritebuffer:= true;
+ end;
  fiswriter:= true;
  inherited;
 end;
