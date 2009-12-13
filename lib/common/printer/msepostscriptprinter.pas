@@ -30,6 +30,7 @@ type
    constructor create(aowner: tcomponent); override;
    property canvas: tpostscriptcanvas read getcanvas;
   published
+   property options default [pro_tempfile];
  end;
 
  psfontinfoty = record
@@ -718,7 +719,13 @@ begin
                   inttostr(fpapersize.cy)+' 0 () ()'+nl+
 '%%Pages: (atend)'+nl+
 '%%PageOrder: Ascend'+nl+
- preamble+fpreamble);
+'%%EndComments'+nl+
+'%%BeginProlog'+nl+
+ preamble+fpreamble+nl,true);
+ if fdeststream = fpreamblestream then begin
+  streamwrite(
+'%%EndProlog'+nl,true);
+ end;
  fpreamble:= '';
  fstarted:= true;
  beginpage;
@@ -726,6 +733,10 @@ end;
 
 procedure tpostscriptcanvas.finalizegcstate;
 begin
+ if fdeststream <> fpreamblestream then begin
+  streamwrite(
+'%%EndProlog'+nl,true);
+ end;
  fstarted:= false;
  inherited;
 end;
@@ -772,7 +783,7 @@ begin
    int2:= high(ffontnames);
                   //alias,encoding,origname
    streamwrite(encodefontname(int2,acodepage)+fmapnames[acodepage]+
-                  ' ('+str1+') rf' + nl);
+                  ' ('+str1+') rf' + nl,true);
             //register font
   end;
   setlength(ffonts,high(ffonts)+2);
@@ -832,7 +843,7 @@ begin
    if not bo1 then begin
     checkmap(acodepage);
     streamwrite(encodefontname(namenum,acodepage)+fmapnames[acodepage]+
-           ' ('+ffontnames[namenum]+') rf' + nl);
+           ' ('+ffontnames[namenum]+') rf' + nl,true);
             //register font
     additem(codepages,acodepage);
    end;
@@ -2012,7 +2023,7 @@ function tpostscriptcanvas.registermap(const acodepage: integer): string;
 
  procedure defpage(const glyphnames: string);
  begin
-  streamwrite('/'+result+' ['+nl+glyphnames+'] def'+nl);
+  streamwrite('/'+result+' ['+nl+glyphnames+'] def'+nl,true);
  end;
  
 var
@@ -2076,6 +2087,7 @@ constructor tpostscriptprinter.create(aowner: tcomponent);
 begin
  fcanvas:= tpostscriptcanvas.create(self,icanvas(self));
  inherited;
+ options:= [pro_tempfile];
 end;
 
 function tpostscriptprinter.getcanvas: tpostscriptcanvas;

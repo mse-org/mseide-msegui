@@ -33,11 +33,13 @@ type
    procedure sethandle(value: integer); virtual;
    procedure closehandle(const ahandle: integer); virtual;
   public
-   constructor create(const afilename: filenamety; openmode: fileopenmodety = fm_read;
-                                 accessmode: fileaccessmodesty = [];
-                                 rights: filerightsty = defaultfilerights); overload;
+   constructor create(const afilename: filenamety; 
+                      const openmode: fileopenmodety = fm_read;
+                      const accessmode: fileaccessmodesty = [];
+                      const rights: filerightsty = defaultfilerights); overload;
    constructor createtransaction(const afilename: filenamety;
-                                 rights: filerightsty = defaultfilerights); overload;
+                      rights: filerightsty = defaultfilerights); overload;
+   constructor createtempfile(const prefix: filenamety; out afilename: filenamety);
    constructor create(ahandle: integer); overload; virtual; //allways called
    constructor create; overload; //tmemorystream
    destructor destroy; override;
@@ -293,7 +295,7 @@ implementation
 
 uses
  msefileutils,msebits,{msegui,}mseformatstr,sysconst,msesysutils,msesysintf,
- msedatalist,mseclasses,
+ msedatalist,mseclasses,mseapplication,
         {$ifdef UNIX} mselibc,
         {$else} windows,
         {$endif}
@@ -709,9 +711,9 @@ begin
 end;
 
 constructor tmsefilestream.create(const afilename: filenamety;
-            openmode: fileopenmodety = fm_read;
-            accessmode: fileaccessmodesty = [];
-            Rights: filerightsty = defaultfilerights);   //!!!!todo linux lock
+            const openmode: fileopenmodety = fm_read;
+            const accessmode: fileaccessmodesty = [];
+            const Rights: filerightsty = defaultfilerights);   //!!!!todo linux lock
 var
  ahandle: integer;
  error: syserrorty;
@@ -775,6 +777,19 @@ begin
  end;
  ftransactionname:= afilename;
  create(intermediatefilename(afilename),fm_create,[fa_denywrite],rights);
+end;
+
+constructor tmsefilestream.createtempfile(const prefix: filenamety;
+                                                   out afilename: filenamety);
+begin
+ application.lock;
+ try
+  create(intermediatefilename(gettempdir+prefix),fm_create,[],
+                            [msesys.s_irusr,msesys.s_iwusr]);
+  afilename:= filename;
+ finally
+  application.unlock;
+ end;
 end;
 
 destructor tmsefilestream.Destroy;

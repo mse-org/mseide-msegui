@@ -67,8 +67,8 @@ const
   );
 
 type
- printeroptionty = (pro_inactivewindow);
-                        //win32: start exe with inactive window
+ printeroptionty = (pro_inactivewindow,//win32: start exe with inactive window
+                    pro_tempfile);     //use temp file for prolog building
  printeroptionsty = set of printeroptionty;
 const
  defaultprinteroptions = [pro_inactivewindow];
@@ -367,9 +367,13 @@ type
 
  tstreamprintercanvas = class(tprintercanvas)
   protected
-   fstream: ttextstream;
-   procedure streamwrite(const atext: string); //checks fstream = nil
-   procedure streamwriteln(const atext: string); //checks fstream = nil
+   fdeststream: ttextstream;
+   fpreamblestream: ttextstream;
+   fbodystream: ttextstream;
+   procedure streamwrite(const atext: string; const apreamble: boolean = false); 
+                      //checks fstream = nil
+   procedure streamwriteln(const atext: string; const apreamble: boolean = false);
+                     //checks fstream = nil
   public
    procedure reset; override;
  end;
@@ -1546,14 +1550,47 @@ begin
 end;
 
 procedure tstreamprinter.setstream(const avalue: ttextstream);
+var
+ fna1: filenamety;
 begin
  with tstreamprintercanvas(fcanvas) do begin
   try
    unlink;
   except
   end;
-  fstream.free;
-  fstream:= avalue;
+  try
+   if (fdeststream <> fpreamblestream) and (fpreamblestream <> nil) then begin
+    fna1:= fpreamblestream.filename;
+    fpreamblestream.position:= 0;
+    fdeststream.copyfrom(fpreamblestream,0);
+    freeandnil(fpreamblestream);
+    sys_deletefile(fna1);
+   end;
+   if (fdeststream <> fbodystream) and (fbodystream <> nil) then begin
+    fna1:= fbodystream.filename;
+    fbodystream.position:= 0;
+    fdeststream.copyfrom(fbodystream,0);
+    freeandnil(fbodystream);
+    sys_deletefile(fna1);
+   end;
+   freeandnil(fdeststream);
+   fdeststream:= avalue;
+   if (pro_tempfile in foptions) and (avalue <> nil) then begin
+    fpreamblestream:= ttextstream.createtempfile('msepspreamble',fna1);
+    fbodystream:= ttextstream.createtempfile('msepsbody',fna1);
+   end
+   else begin   
+    fpreamblestream:= avalue;
+    fbodystream:= avalue;
+   end;
+  except
+   if fdeststream <> fpreamblestream then begin
+    freeandnil(fpreamblestream);
+    freeandnil(fbodystream);
+   end;
+   freeandnil(fdeststream);
+   raise;
+  end;
  end;
 end;
 
@@ -1583,15 +1620,21 @@ begin
  origin:= nullpoint;
 end;
 
-procedure tstreamprintercanvas.streamwrite(const atext: string);
+procedure tstreamprintercanvas.streamwrite(const atext: string;
+                                  const apreamble: boolean = false);
 var
  bo1: boolean;
 begin
- if (fstream <> nil) and not fprinter.fcanceled then begin
+ if (fdeststream <> nil) and not fprinter.fcanceled then begin
   bo1:= false;
   repeat
    try
-    fstream.write(atext);
+    if apreamble then begin
+     fpreamblestream.write(atext);
+    end
+    else begin
+     fbodystream.write(atext);
+    end;
    except
     on e: exception do begin
      if fprinter.handleexception(e,bo1) then begin
@@ -1603,15 +1646,21 @@ begin
  end;
 end;
 
-procedure tstreamprintercanvas.streamwriteln(const atext: string);
+procedure tstreamprintercanvas.streamwriteln(const atext: string;
+                                            const apreamble: boolean = false);
 var
  bo1: boolean;
 begin
- if (fstream <> nil) and not fprinter.fcanceled then begin
+ if (fdeststream <> nil) and not fprinter.fcanceled then begin
   bo1:= false;
   repeat
    try
-    fstream.writeln(atext);
+    if apreamble then begin
+     fpreamblestream.writeln(atext);
+    end
+    else begin
+     fbodystream.writeln(atext);
+    end;
    except
     on e: exception do begin
      if fprinter.handleexception(e,bo1) then begin
