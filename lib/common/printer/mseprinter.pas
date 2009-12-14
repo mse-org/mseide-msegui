@@ -1578,8 +1578,13 @@ begin
    if (pro_tempfile in foptions) and (avalue <> nil) then begin
     fpreamblestream:= ttextstream.createtempfile('msepspreamble',fna1);
     fbodystream:= ttextstream.createtempfile('msepsbody',fna1);
+    fpreamblestream.usewritebuffer:= true;
+    fbodystream.usewritebuffer:= true;
    end
    else begin   
+    if avalue <> nil then begin
+     avalue.usewritebuffer:= true;
+    end;
     fpreamblestream:= avalue;
     fbodystream:= avalue;
    end;

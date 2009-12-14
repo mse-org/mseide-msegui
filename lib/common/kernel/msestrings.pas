@@ -81,6 +81,8 @@ type
  filenamety = msestring;
  pfilenamety = ^filenamety;
  filenamearty = msestringarty;
+ filenamechar = msechar;
+ pfilenamechar = ^filenamechar;
 
 const
  upperchars: array[char] of char = (

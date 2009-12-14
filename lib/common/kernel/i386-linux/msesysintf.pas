@@ -989,6 +989,24 @@ begin
  end;
 end;
 
+function sys_gettempdir(out avalue: filenamety): syserrorty;
+var
+ str1: string;
+begin
+ str1:= getenvironmentvariable('temp');
+ if str1 = '' then begin
+  str1:= getenvironmentvariable('tmp');
+ end;
+ if str1 = '' then begin
+  str1:= '/tmp/'
+ end;
+ if str1 <> '' then begin
+  str1:= includetrailingpathdelimiter(result);
+ end;
+ avalue:= tomsefilepath(str1);
+ result:= gue_ok;
+end;
+
 function sys_setcurrentdir(const dirname: filenamety): syserrorty;
 var
  str1: string;

@@ -1068,7 +1068,7 @@ end;
 
 procedure ttraces.setimage_list(const avalue: timagelist);
 begin
- setlinkedvar(avalue,fimage_list);
+ setlinkedvar(avalue,tmsecomponent(fimage_list));
  change;
 end;
 

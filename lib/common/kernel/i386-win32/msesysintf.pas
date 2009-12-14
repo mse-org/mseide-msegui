@@ -161,6 +161,10 @@ function Process32First(hSnapshot: thandle; lppe: PPROCESSENTRY32): BOOL;
 function Process32Next(hSnapshot: thandle; lppe: PPROCESSENTRY32): BOOL;
               stdcall; external kernel32 name 'Process32Next';
 
+var
+ GetLongPathNameW: function(lpszShortPath: LPCWSTR; lpszLongPath: LPCWSTR;
+                                           cchBuffer: DWORD):DWORD; stdcall;
+
 function sys_getpid: procidty;
 begin
  result:= getcurrentprocessid;
@@ -1752,6 +1756,35 @@ begin
  result:= homedir;
 end;
 
+function sys_gettempdir: filenamety;
+var
+ int1: integer;
+ fna1: filenamety;
+ po1: pfilenamechar;
+begin
+ setlength(fna1,max_path+10);
+ fna1[1]:= #0;
+ int1:= gettemppathw(length(fna1),pointer(fna1));
+ if int1 > length(fna1) then begin
+  setlength(result,int1);
+  int1:= gettemppathw(length(fna1),pointer(fna1));
+ end;
+ if assigned(getlongpathnamew) then begin
+  setlength(result,max_path+10);
+  int1:= getlongpathnamew(pointer(fna1),pointer(result),length(result));
+  if int1 > length(result) then begin
+   setlength(result,int1);
+   int1:= getlongpathnamew(pointer(fna1),pointer(result),length(result));
+  end;
+  setlength(result,int1);
+ end
+ else begin
+  setlength(fna1,int1);
+  result:= fna1;
+ end;
+ tomsefilepath1(result);
+end;
+
 function sys_setcurrentdir(const dirname: filenamety): syserrorty;
 var
  str1: string;
@@ -1860,6 +1893,8 @@ begin
   end;
   freelibrary(libhandle);
  end;
+ checkprocaddresses(['kernel32.dll'],['GetLongPathNameW'],
+                                    [{$ifndef FPC}@{$endif}@GetLongPathNameW]);
 end;
 {
 procedure initformatsettings;

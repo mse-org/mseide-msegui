@@ -184,11 +184,12 @@ function compfiletime(const a,b: tdatetime): integer;
             //-1 if a < b, 0 if a = b, 1 if a > b
 
 function intermediatefilename(const aname: filenamety): filenamety;
+function msegettempdir: filenamety;
 
 implementation
 
 uses
- {msesysintf,}sysutils,msedate,mseprocutils;
+ sysutils,msedate,mseprocutils;
 
 const
  quotechar = msechar('"');
@@ -197,6 +198,11 @@ type
  checkmaskresultty = (cmr_correct,cmr_wrong,cmr_wrongfinished,cmr_correctfinished);
 const
  checkmaskfinished = cmr_wrongfinished;
+
+function msegettempdir: filenamety;
+begin
+ result:= sys_gettempdir;
+end;
 
 function intermediatefilename(const aname: filenamety): filenamety;
 var

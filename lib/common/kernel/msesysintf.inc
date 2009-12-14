@@ -65,6 +65,7 @@ function sys_tosysfilepath(var path: filenamety): syserrorty;
   //all filenames below are in mseformat!
 function sys_getcurrentdir: filenamety;
 function sys_gethomedir: filenamety;
+function sys_gettempdir: filenamety;
 function sys_setcurrentdir(const dirname: filenamety): syserrorty;
 function sys_copyfile(const oldfile,newfile: filenamety): syserrorty;
 function sys_deletefile(const filename: filenamety): syserrorty;

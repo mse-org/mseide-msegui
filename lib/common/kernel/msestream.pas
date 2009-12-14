@@ -793,7 +793,7 @@ constructor tmsefilestream.createtempfile(const prefix: filenamety;
 begin
  application.lock;
  try
-  create(intermediatefilename(gettempdir+prefix),fm_create,[],
+  create(intermediatefilename(msegettempdir+prefix),fm_create,[],
                             [msesys.s_irusr,msesys.s_iwusr]);
   afilename:= filename;
  finally
