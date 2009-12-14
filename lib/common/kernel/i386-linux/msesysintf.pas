@@ -989,7 +989,7 @@ begin
  end;
 end;
 
-function sys_gettempdir(out avalue: filenamety): syserrorty;
+function sys_gettempdir: filenamety;
 var
  str1: string;
 begin
@@ -1000,11 +1000,8 @@ begin
  if str1 = '' then begin
   str1:= '/tmp/'
  end;
- if str1 <> '' then begin
-  str1:= includetrailingpathdelimiter(result);
- end;
- avalue:= tomsefilepath(str1);
- result:= gue_ok;
+ str1:= includetrailingpathdelimiter(str1);
+ result:= tomsefilepath(str1);
 end;
 
 function sys_setcurrentdir(const dirname: filenamety): syserrorty;
