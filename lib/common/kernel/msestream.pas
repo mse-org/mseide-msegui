@@ -63,6 +63,7 @@ type
 
 const
  defaultbuflen = 2048;
+ minbuflen = 256;
 
 type
  textstreamstatety = (tss_eof,tss_error,tss_notopen,tss_pipeactive,tss_response,
@@ -1061,18 +1062,13 @@ begin
 end;
 
 procedure ttextstream.setbuflen(const Value: integer);
-var
- int1: integer;
 begin
  if fbuflen <> value then begin
   flushbuffer;
-  if value < defaultbuflen then begin
-   int1:= defaultbuflen;
-  end
-  else begin
-   int1:= value;
+  fbuflen:= value;
+  if fbuflen < minbuflen then begin
+   fbuflen:= minbuflen;
   end;
-  fbuflen:= int1;
   setlength(finternalbuffer,fbuflen);
   fbuffer:= pointer(finternalbuffer);
   bufoffset:= nil;
