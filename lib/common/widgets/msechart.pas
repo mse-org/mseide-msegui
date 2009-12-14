@@ -598,7 +598,7 @@ begin
      end;
      setlength(finfo.datapoints,length(ar1)*4);  //first->max->min->last
      int2:= 0;
-     for int1:= 0 to high(ar1) do begin
+     for int1:= 0 to high(ar1)-1 do begin
       with ar1[int1] do begin
        if used then begin
         int3:= int1-1;
