@@ -1182,24 +1182,16 @@ end;
 function ttextstream.decode(const value: string): msestring;
 begin
  result:= msestream.decode(value,fencoding);
-{
- case fencoding  of
-  ce_ascii: begin
-   result:= pascalstringtostring(value);
-  end;
-  ce_utf8n: begin
-   result:= utf8tostring(value);
-  end
-  else begin //ce_ansi
-   result:= value;
-  end;
- end;
-}
 end;
 
 procedure ttextstream.write(const value: string);
 begin
- writestr(encode(value));
+ if fencoding = ce_locale then begin
+  writestr(value);
+ end
+ else begin
+  writestr(encode(value));
+ end;
 end;
 
 procedure ttextstream.write(const value: msestring);
@@ -1210,19 +1202,16 @@ end;
 procedure ttextstream.writestrln(const value: string);
 begin
  write(value+eor);
-// writebuffer(eor,sizeof(eor));
 end;
 
 procedure ttextstream.writeln(const value: string);
 begin
  write(value+eor);
-// writebuffer(eor,sizeof(eor));
 end;
 
 procedure ttextstream.writeln(const value: msestring);
 begin
  write(value+lineend);
-// writebuffer(eor,sizeof(eor));
 end;
 
 procedure ttextstream.writeln(const value: real);
@@ -1265,7 +1254,9 @@ end;
 function ttextstream.readln(out value: string): boolean;
 begin
  result:= readstrln(value);
- value:= decode(value);
+ if fencoding <> ce_locale then begin
+  value:= decode(value);
+ end;
 end;
 
 function ttextstream.readln(out value: msestring): boolean;
