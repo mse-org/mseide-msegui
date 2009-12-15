@@ -150,6 +150,8 @@ type
               write fframecolors.shadow.effectwidth default -1;
    property colorhlwidth: integer read fframecolors.light.effectwidth
               write fframecolors.light.effectwidth default -1;
+   property colorframe: colorty read fframecolors.frame
+              write fframecolors.frame default cl_default;
  end;
 
  tskinfontalias = class(tvirtualpersistent)
@@ -718,6 +720,7 @@ begin
   shadow.color:= cl_default;
   shadow.effectcolor:= cl_default;
   shadow.effectwidth:= -1;
+  frame:= cl_default;
  end;
  inherited create(tskincolor);
 end;
@@ -759,7 +762,10 @@ begin
   if effectwidth <> -1 then begin
    defaultframecolors.shadow.effectwidth:= effectwidth;
   end;
- end
+ end;
+ if fframecolors.frame <> cl_default then begin
+  defaultframecolors.frame:= fframecolors.frame;
+ end;
 end;
 
 procedure tskincolors.restorecolors;

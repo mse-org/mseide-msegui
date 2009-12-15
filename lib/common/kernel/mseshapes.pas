@@ -562,28 +562,6 @@ var
     dec(poly[0].y);
     dec(poly[2].x);
    end;
-{   
-   if abs(w) > 1 then begin
-    inc(poly[5].x);
-    inc(poly[4].x);
-    inc(poly[4].y);
-    inc(poly[3].y);
-   end;
-}
-{   
-   if w = 1 then begin
-    if topleft then begin
-     dec(poly[0].y);
-     dec(poly[2].x);
-    end
-    else begin
-     dec(poly[2].y);
-     dec(poly[1].y);
-     dec(poly[1].x);
-     dec(poly[0].x);
-    end;
-   end;
-}
    if startoff then begin
     if topleft then begin
      poly[0].y:= arect.y + arect.cy;
@@ -656,14 +634,6 @@ var
     poly[0]:= poly[5];
     poly[1]:= poly[4];
     poly[2]:= poly[3];
-   {
-    poly[0].x:= poly[5].x;
-    poly[0].y:= poly[5].y;
-    poly[1].x:= poly[0].x;
-    poly[1].y:= poly[4].y;
-    poly[2].x:= poly[3].x;
-    poly[2].y:= poly[1].y;
-   }
     calculatepoly(w2);
     if w2 = 1 then begin
      drawlines(poly,false,col2,0,3);

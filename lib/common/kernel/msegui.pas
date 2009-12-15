@@ -517,7 +517,7 @@ type
    property framewidth: integer read fi.framewidth write setframewidth
                      stored isframewidthstored default 0;
    property colorframe: colorty read fi.colorframe write setcolorframe
-                     stored iscolorframestored default cl_black;
+                     stored iscolorframestored default cl_default;
    property colorframeactive: colorty read fi.colorframeactive 
                      write setcolorframeactive
                      stored iscolorframeactivestored default cl_default;
@@ -783,7 +783,7 @@ type
    property framewidth: integer read fi.ba.framewidth
                      write setframewidth default 0;
    property colorframe: colorty read fi.ba.colorframe 
-                     write setcolorframe default cl_transparent;
+                     write setcolorframe default cl_default;
    property colorframeactive: colorty read fi.ba.colorframeactive 
                      write setcolorframeactive default cl_default;
    property framei_left: integer read fi.ba.innerframe.left 
@@ -3293,7 +3293,7 @@ procedure initframeinfo(var info: baseframeinfoty); overload;
 begin
  with info do begin
   colorclient:= cl_transparent;
-  colorframe:= cl_black;
+  colorframe:= cl_default;
   colorframeactive:= cl_default;
   with framecolors do begin
    shadow.effectcolor:= cl_default;
@@ -3463,6 +3463,9 @@ begin
   else begin
    col1:= afi.colorframeactive;
   end; 
+  if col1 = cl_default then begin
+   col1:= defaultframecolors.frame;
+  end;
   canvas.drawframe(rect1,-afi.framewidth,col1,afi.hiddenedges);
   updateedgerect(rect1,afi.framewidth,afi.hiddenedges);
 //  inflaterect1(rect1,-afi.framewidth);

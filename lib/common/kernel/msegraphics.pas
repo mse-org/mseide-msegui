@@ -522,6 +522,7 @@ type
  end;
  framecolorinfoty = record
   light,shadow: edgecolorinfoty;
+  frame: colorty;
   hiddenedges: edgesty;
  end;
 
@@ -924,6 +925,7 @@ var
  defaultframecolors: framecolorinfoty =
   (light: (color: cl_light; effectcolor: cl_highlight; effectwidth: 1);
    shadow: (color: cl_shadow; effectcolor: cl_dkshadow; effectwidth: 1);
+   frame: cl_black;
    hiddenedges: []
   );
 
