@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2009 by Martin Schreiber
+{ MSEgui Copyright (c) 2007-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -271,10 +271,6 @@ type
    fystart: real;
    fxrange: real;
    fyrange: real;
-//   fonbeforepaint: painteventty;
-//   fonpaintbackground: painteventty;
-//   fonpaint: painteventty;
-//   fonafterpaint: painteventty;
    procedure setxdials(const avalue: tchartdialshorz);
    procedure setydials(const avalue: tchartdialsvert);
    procedure setcolorchart(const avalue: colorty);
@@ -291,10 +287,7 @@ type
    fstate: chartstatesty;
    procedure changed; virtual;
    procedure clientrectchanged; override;
-//   procedure dobeforepaint(const canvas: tcanvas); override;
    procedure dopaintbackground(const canvas: tcanvas); override;
-//   procedure doonpaint(const canvas: tcanvas); override;
-//   procedure doafterpaint(const canvas: tcanvas); override;
    procedure dopaint(const acanvas: tcanvas); override;
           //idialcontroller
    procedure directionchanged(const dir,dirbefore: graphicdirectionty);
@@ -314,11 +307,6 @@ type
       
    property xdials: tchartdialshorz read fxdials write setxdials;
    property ydials: tchartdialsvert read fydials write setydials;
-//   property onbeforepaint: painteventty read fonbeforepaint write fonbeforepaint;
-//   property onpaintbackground: painteventty read fonpaintbackground
-//                                                  write fonpaintbackground;
-//   property onpaint: painteventty read fonpaint write fonpaint;
-//   property onafterpaint: painteventty read fonafterpaint write fonafterpaint;
  end;
 
  tchart = class(tcustomchart)

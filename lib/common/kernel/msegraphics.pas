@@ -3764,7 +3764,7 @@ begin
 end;
 
 procedure tcanvas.drawellipse1(const def: rectty; const acolor: colorty = cl_default);
-                             //def.pos = center, def.cx = width, def.cy = height
+                             //def.pos = topleft, def.cx = width, def.cy = height
 begin
  drawellipse(recenterrect(def),acolor);
 end;

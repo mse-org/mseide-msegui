@@ -222,6 +222,9 @@ type
    fcolor: colorty;
    fwidthmm: real;
    fboxlines: segmentarty;
+   fstartang,farcang: real;
+   fsidearc: rectty;
+   fboxarc: rectty;
    fkind: dialdatakindty;
    fangle: real;
    fa: real;        //0.5 * angle in radiant
@@ -300,14 +303,7 @@ type
  
 const
  defaultdialcontrolleroptions = [do_opposite];
-// {
-// dirup = gd_down;//gd_up;
-// dirdown = gd_up;//gd_down;
-// }
- {
- dirup = gd_up;
- dirdown = gd_down;
- }
+
 type 
  tdialcontroller = class(tcustomdialcontroller)
   public
@@ -1093,6 +1089,7 @@ var
  boxlines: array[0..1] of segmentty;
  bo1: boolean;
  rea1: real;
+ po1,po2: prectty;
  
 begin
  if not (dis_layoutvalid in fstate) then begin
@@ -1100,6 +1097,8 @@ begin
   rect1:= fintf.getdialrect;
 
   exclude(fstate,dis_needstransform);
+  fsidearc:= nullrect;
+  fboxarc:= nullrect;
   if fangle <> 0 then begin
    if fdirection in [gd_right,gd_left] then begin
     foffsr:= rect1.y;
@@ -1126,6 +1125,118 @@ begin
      fr:= fr/sin(fa);
     end;
    end;    
+   int1:= round(abs(fr));   //radius to direction
+   if int1 < 30000 then begin
+    int2:= round(2*abs(fr)); //diameter
+    int3:= 0;             //perpendicular to direction
+    if (fangle < 0) xor (direction in [gd_down,gd_left]) then begin
+     int3:= -int2; 
+    end;
+    if (do_opposite in foptions) then begin
+     po1:= @fsidearc;
+     po2:= @fboxarc;
+    end
+    else begin
+     po1:= @fboxarc;
+     po2:= @fsidearc;
+    end;
+    case direction of
+     gd_right: begin
+      with po1^ do begin //normal circle
+       x:= foffsp - int1;
+       cx:= int2;
+       y:= foffsr + int3;
+       cy:= cx;
+      end;
+      with po2^ do begin //small/big circle
+       if fangle < 0 then begin
+        rea1:= 0.5+1;
+        x:= foffsp - int1 - rect1.cy;
+        cy:= int2 + rect1.cy + rect1.cy;
+        y:= foffsr + int3 - rect1.cy;
+       end
+       else begin
+        rea1:= 0.5;
+        x:= foffsp - int1 + rect1.cy;
+        cy:= int2 - rect1.cy - rect1.cy;
+        y:= foffsr + int3 + rect1.cy;
+       end;
+       cx:= cy;
+      end;
+     end;
+     gd_up: begin
+      with po1^ do begin //normal circle
+       y:= foffsp - int1;
+       cx:= int2;
+       x:= foffsr + int3;
+       cy:= cx;
+      end;
+      with po2^ do begin //small/big circle
+       if fangle < 0 then begin
+        rea1:= 0;
+        y:= foffsp - int1 - rect1.cx;
+        cx:= int2 + rect1.cx + rect1.cx;
+        x:= foffsr + int3 - rect1.cx;
+       end
+       else begin
+        rea1:= 1;
+        y:= foffsp - int1 + rect1.cx;
+        cx:= int2 - rect1.cx - rect1.cx;
+        x:= foffsr + int3 + rect1.cx;
+       end;
+       cy:= cx;
+      end;
+     end;
+     gd_left: begin
+      with po1^ do begin //normal circle
+       x:= foffsp - int1;
+       cx:= int2;
+       y:= foffsr + int3 + rect1.cy;
+       cy:= cx;
+      end;
+      with po2^ do begin //small/big circle
+       if fangle < 0 then begin
+        rea1:= 0.5;
+        x:= foffsp - int1 - rect1.cy;
+        cy:= int2 + rect1.cy + rect1.cy;
+        y:= foffsr + int3;
+       end
+       else begin
+        rea1:= -0.5;
+        x:= foffsp - int1 + rect1.cy;
+        cy:= int2 - rect1.cy - rect1.cy;
+        y:= foffsr + int3 + rect1.cy + rect1.cy;
+       end;
+       cx:= cy;
+      end;
+     end;
+     gd_down: begin
+      with po1^ do begin //normal circle
+       y:= foffsp - int1;
+       cy:= int2;
+       x:= foffsr + int3 + rect1.cx;
+       cx:= cy;
+      end;
+      with po2^ do begin //small/big circle
+       if fangle < 0 then begin
+        rea1:= 1;
+        y:= foffsp - int1 - rect1.cx;
+        cx:= int2 + rect1.cx + rect1.cx;
+        x:= foffsr + int3;
+       end
+       else begin
+        rea1:= 0;
+        y:= foffsp - int1 + rect1.cx;
+        cx:= int2 - rect1.cx - rect1.cx;
+        x:= foffsr + int3 + rect1.cx + rect1.cx;
+       end;
+       cy:= cx;
+      end;
+     end;
+    end;
+    fstartang:= pi*(rea1-fangle);
+    farcang:= 2*pi*fangle;
+   end;
   end;
   
   with rect1 do begin
@@ -1320,7 +1431,27 @@ begin
  if foptions * [do_sideline,do_boxline] <> [] then begin
   acanvas.capstyle:= cs_projecting;
   acanvas.linewidthmm:= fwidthmm;
-  acanvas.drawlinesegments(fboxlines,fcolor);
+  if fboxarc.cx <> 0 then begin
+   if fangle = 1 then begin
+    if do_boxline in foptions then begin
+     acanvas.drawellipse1(fboxarc,fcolor);
+    end;
+    if do_sideline in foptions then begin
+     acanvas.drawellipse1(fsidearc,fcolor);
+    end;
+   end
+   else begin
+    if do_boxline in foptions then begin
+     acanvas.drawarc1(fboxarc,fstartang,farcang,fcolor);
+    end;
+    if do_sideline in foptions then begin
+     acanvas.drawarc1(fsidearc,fstartang,farcang,fcolor);
+    end;
+   end;
+  end
+  else begin
+   acanvas.drawlinesegments(fboxlines,fcolor);
+  end;
   acanvas.capstyle:= cs_butt;
   acanvas.linewidth:= 0;
  end;
@@ -1484,6 +1615,7 @@ procedure tcustomdial.dopaint(const acanvas: tcanvas);
 begin
  inherited;
  fdial.paint(acanvas);
+ fdial.afterpaint(acanvas);
 end;
 
 procedure tcustomdial.clientrectchanged;

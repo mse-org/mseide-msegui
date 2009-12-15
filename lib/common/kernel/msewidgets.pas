@@ -3917,7 +3917,8 @@ begin
   else begin
    fclientheightmin:= value;
   end;
-  fintf.clientrectchanged;
+  internalupdatestate;
+//  fintf.clientrectchanged;
  end;
 end;
 
@@ -3930,7 +3931,8 @@ begin
   else begin
    fclientwidthmin:= value;
   end;
-  fintf.clientrectchanged;
+  internalupdatestate;
+//  fintf.clientrectchanged;
  end;
 end;
 
