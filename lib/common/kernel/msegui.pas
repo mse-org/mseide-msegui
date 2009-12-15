@@ -517,7 +517,7 @@ type
    property framewidth: integer read fi.framewidth write setframewidth
                      stored isframewidthstored default 0;
    property colorframe: colorty read fi.colorframe write setcolorframe
-                     stored iscolorframestored default cl_transparent;
+                     stored iscolorframestored default cl_black;
    property colorframeactive: colorty read fi.colorframeactive 
                      write setcolorframeactive
                      stored iscolorframeactivestored default cl_default;
@@ -3293,7 +3293,7 @@ procedure initframeinfo(var info: baseframeinfoty); overload;
 begin
  with info do begin
   colorclient:= cl_transparent;
-  colorframe:= cl_transparent;
+  colorframe:= cl_black;
   colorframeactive:= cl_default;
   with framecolors do begin
    shadow.effectcolor:= cl_default;

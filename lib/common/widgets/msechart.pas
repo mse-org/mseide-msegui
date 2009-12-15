@@ -41,6 +41,7 @@ type
   ydatalist: trealdatalist;
   state: tracestatesty;
   datapoints: pointarty;
+  bottommargin,topmargin: integer;
   color: colorty;
   colorimage: colorty;
   xrange: real;
@@ -298,6 +299,7 @@ type
           //idialcontroller
    procedure directionchanged(const dir,dirbefore: graphicdirectionty);
    function getdialrect: rectty;
+   function getdialsize: sizety;
    procedure internalcreateframe; override;
    procedure defineproperties(filer: tfiler); override;
   public
@@ -483,10 +485,26 @@ begin
 end;
 
 procedure ttrace.checkgraphic;
+
+ function pkround(const avalue: real): integer;
+ begin
+  if avalue > $7fff then begin
+   result:= $7fff;
+  end
+  else begin
+   if avalue < -$8000 then begin
+    result:= -$8000;
+   end
+   else begin
+    result:= round(avalue);
+   end;
+  end;
+ end;
+  
 var
  pox,poy: pchar;
  intx,inty: integer;
- 
+
  procedure checkrange(var dpcount: integer);
  var
   int1: integer;
@@ -514,47 +532,50 @@ var
  rea1: real;
  ar1: datapointarty;
  dpcountx,dpcounty,dpcountxy: integer;
+ xbottom,xtop: integer;
  
 begin
  if not (trs_datapointsvalid in finfo.state) then begin
   dpcountx:= 0;
   dpcounty:= 0;
-  if finfo.xydata <> nil then begin
-   pox:= @finfo.xydata[0].re;
-   poy:= @finfo.xydata[0].im;
-   intx:= sizeof(complexty);
-   inty:= sizeof(complexty);
-   dpcountx:= length(finfo.xydata);
-   dpcounty:= dpcountx;
-  end
-  else begin
-   if finfo.xdatalist <> nil then begin
-    dpcountx:= finfo.xdatalist.count;
-    pox:= finfo.xdatalist.datapo;
-    intx:= finfo.xdatalist.size;
+  with finfo do begin
+   bottommargin:= 0;
+   topmargin:= 0;
+   if xydata <> nil then begin
+    pox:= @xydata[0].re;
+    poy:= @xydata[0].im;
+    intx:= sizeof(complexty);
+    inty:= sizeof(complexty);
+    dpcountx:= length(xydata);
+    dpcounty:= dpcountx;
    end
    else begin
-    pox:= pointer(finfo.xdata);
-    intx:= sizeof(real);
-    dpcountx:= length(finfo.xdata);
-   end;
-   if finfo.ydatalist <> nil then begin
-    dpcounty:= finfo.ydatalist.count;
-    poy:= finfo.ydatalist.datapo;
-    inty:= finfo.ydatalist.size;
-   end
-   else begin
-    poy:= pointer(finfo.ydata);
-    inty:= sizeof(real);
-    dpcounty:= length(finfo.ydata);
+    if xdatalist <> nil then begin
+     dpcountx:= xdatalist.count;
+     pox:= xdatalist.datapo;
+     intx:= finfo.xdatalist.size;
+    end
+    else begin
+     pox:= pointer(xdata);
+     intx:= sizeof(real);
+     dpcountx:= length(xdata);
+    end;
+    if ydatalist <> nil then begin
+     dpcounty:= ydatalist.count;
+     poy:= ydatalist.datapo;
+     inty:= ydatalist.size;
+    end
+    else begin
+     poy:= pointer(ydata);
+     inty:= sizeof(real);
+     dpcounty:= length(ydata);
+    end;
    end;
   end;
   dpcountxy:= dpcountx;
   if dpcounty < dpcountxy then begin
    dpcountxy:= dpcounty;
   end;
-  
-//  yo:= fyoffset - fyscale;
   yo:= -finfo.ystart - finfo.yrange;
   ys:= -tchart(fowner).traces.fscaley / finfo.yrange;
   case finfo.kind of
@@ -562,18 +583,25 @@ begin
     xo:= -finfo.xstart;
     xs:= tchart(fowner).traces.fscalex / finfo.xrange;
     checkrange(dpcountxy);
-    if (cto_xordered in finfo.options) {and
-                   (dpcount > tchart(fowner).traces.fscalex)} then begin
+    if cto_xordered in finfo.options then begin
      int4:= tchart(fowner).traces.fsize.cx+2;
      setlength(ar1,int4);
      dec(int4);
+     xbottom:= minint;
+     xtop:= maxint;
      for int1:= 0 to dpcountxy - 1 do begin
-      int2:= round((preal(pox)^ + xo)* xs) + 1;
-      int3:= round((preal(poy)^ + yo)* ys);
+      int2:= pkround((preal(pox)^ + xo)* xs) + 1;
+      int3:= pkround((preal(poy)^ + yo)* ys);
       if int2 < 0 then begin
+       if int2 > xbottom then begin
+        xbottom:= int2;
+       end;
        int2:= 0;
       end;
       if int2 > int4 then begin
+       if inty < xtop then begin
+        xtop:= int2;
+       end;
        int2:= int4;
       end;
       with ar1[int2] do begin
@@ -596,9 +624,19 @@ begin
       inc(pox,intx);
       inc(poy,inty);
      end;
+     with ar1[0] do begin         //endpoints
+      first:= last;
+      min:= last;
+      max:= last;
+     end;
+     with ar1[high(ar1)] do begin
+      first:= last;
+      min:= last;
+      max:= last;
+     end;
      setlength(finfo.datapoints,length(ar1)*4);  //first->max->min->last
      int2:= 0;
-     for int1:= 0 to high(ar1)-1 do begin
+     for int1:= 0 to high(ar1) do begin
       with ar1[int1] do begin
        if used then begin
         int3:= int1-1;
@@ -624,12 +662,30 @@ begin
       end;
      end;
      setlength(finfo.datapoints,int2);
+     with finfo do begin
+      if int2 > 1 then begin
+       if ar1[0].used then begin
+        bottommargin:= 1;
+        finfo.datapoints[0].y:= pkround(datapoints[0].y + 
+              (datapoints[1].y - datapoints[0].y) * 
+                (-1-xbottom)/
+                (datapoints[1].x-xbottom));
+       end;
+       if ar1[high(ar1)].used then begin
+        topmargin:= 1;
+        finfo.datapoints[int2-1].y:= pkround(datapoints[int2-1].y + 
+              (datapoints[int2-2].y - datapoints[int2-1].y) * 
+                (length(ar1)-xtop)/
+                (datapoints[int2-2].x-xtop));
+       end;
+      end;
+     end;
     end
     else begin
      setlength(finfo.datapoints,dpcountxy);
      for int1:= 0 to high(finfo.datapoints) do begin
-      finfo.datapoints[int1].x:= round((preal(pox)^ + xo)* xs);
-      finfo.datapoints[int1].y:= round((preal(poy)^ + yo)* ys);
+      finfo.datapoints[int1].x:= pkround((preal(pox)^ + xo)* xs);
+      finfo.datapoints[int1].y:= pkround((preal(poy)^ + yo)* ys);
       inc(pox,intx);
       inc(poy,inty);
      end;
@@ -690,6 +746,7 @@ var
  rect1: rectty;
  co1: colorty;
  bmp1,bmp2: tmaskedbitmap;
+ margin: integer;
 begin
  with ftraces do begin
   if (fimage_list <> nil) and (finfo.imagenr >= 0) and 
@@ -710,7 +767,8 @@ begin
      fimage_list.getimage(finfo.imagenr,bmp1);
      bmp2.size:= imagesize;
      bmp1.stretch(bmp2);
-     for int1:= 0 to high(finfo.datapoints) do begin
+     for int1:= finfo.bottommargin to high(finfo.datapoints) - 
+                                                finfo.topmargin do begin
       bmp2.paint(acanvas,finfo.datapoints[int1],[],co1);
      end;
     finally
@@ -719,7 +777,8 @@ begin
     end;
    end
    else begin
-    for int1:= 0 to high(finfo.datapoints) do begin
+    for int1:= finfo.bottommargin to high(finfo.datapoints) - 
+                                                 finfo.topmargin do begin
      rect1.pos:= finfo.datapoints[int1];
      fimage_list.paint(acanvas,finfo.imagenr,rect1,imagealignment,co1);
     end;
@@ -1255,6 +1314,11 @@ begin
  result:= innerclientrect;
 end;
 
+function tcustomchart.getdialsize: sizety;
+begin
+ result:= clientsize;
+end;
+
 procedure tcustomchart.internalcreateframe;
 begin
  tchartframe.create(iscrollframe(self),self);
@@ -1354,24 +1418,28 @@ procedure tchart.setxstart(const avalue: real);
 begin
  inherited;
  ftraces.xstart:= avalue;
+ fxdials.start:= avalue;
 end;
 
 procedure tchart.setystart(const avalue: real);
 begin
  inherited;
  ftraces.ystart:= avalue;
+ fydials.start:= avalue;
 end;
 
 procedure tchart.setxrange(const avalue: real);
 begin
  inherited;
  ftraces.xrange:= avalue;
+ fxdials.range:= avalue;
 end;
 
 procedure tchart.setyrange(const avalue: real);
 begin
  inherited;
  ftraces.yrange:= avalue;
+ fydials.range:= avalue;
 end;
 
 { trecordertraces }

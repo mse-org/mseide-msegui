@@ -1,6 +1,8 @@
 MSEide+MSEgui version history
 
-2009-13-13
+2009-12-15
+ Default tcustomframe.colorframe = cl_black.
+2009-12-13
  t*widget.valuescale -> valuerange, inverted.
 2009-12-10
  ttrace.xseriesdata -> ydata.

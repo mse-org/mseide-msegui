@@ -114,7 +114,8 @@ type
    property escapement: real read fli.escapement write setescapement;
  end;
 
- dialmarkeroptionty = (dmo_opposite,dmo_rotatetext);
+ dialmarkeroptionty = (dmo_opposite,dmo_rotatetext,
+                       dmo_hideoverload,dmo_limitoverload);
  dialmarkeroptionsty = set of dialmarkeroptionty;
  
  markerinfoty = record
@@ -204,6 +205,7 @@ type
   procedure directionchanged(const dir,dirbefore: graphicdirectionty);
   function getwidget: twidget;
   function getdialrect: rectty;
+  function getdialsize: sizety;
  end;
  
  tcustomdialcontroller = class(tvirtualpersistent)
@@ -222,11 +224,12 @@ type
    fboxlines: segmentarty;
    fkind: dialdatakindty;
    fangle: real;
-   fp: real;
-   fr: real;
-   fscalex: real;
-   foffsx: integer;
-   fendy: integer;
+   fa: real;        //0.5 * angle in radiant
+   fr: real;        //radius
+   fscalep: real;   //periphery scale, 2/size
+   foffsr: integer; //radius offset
+   foffsp: integer; //periphery shift before/after transform
+   fendr: integer;  //radius end for reversed direction
    procedure setstart(const avalue: real);
    procedure setrange(const avalue: real);
    procedure setmarkers(const avalue: tdialmarkers);
@@ -298,8 +301,8 @@ type
 const
  defaultdialcontrolleroptions = [do_opposite];
 // {
- dirup = gd_down;//gd_up;
- dirdown = gd_up;//gd_down;
+// dirup = gd_down;//gd_up;
+// dirdown = gd_up;//gd_down;
 // }
  {
  dirup = gd_up;
@@ -333,6 +336,7 @@ type
           //idialcontroller
    procedure directionchanged(const dir,dirbefore: graphicdirectionty);
    function getdialrect: rectty;
+   function getdialsize: sizety;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -645,58 +649,95 @@ var
  linestart,lineend: integer;
  dir1: graphicdirectionty;
  rea1: real;
+ start1,stop1: real;
+ size1: sizety;
 begin
  with tcustomdialcontroller(fowner),fli,finfo,line do begin
   rect1:= fintf.getdialrect;
-  calclineend(fli,dmo_opposite in options,rect1,linestart,lineend,dir1);
-  rea1:= (value - fstart)/frange;
-  if dmo_rotatetext in self.finfo.options then begin
-   aangle:= -angle * (rea1-0.5) * 2*pi;
-//   if fdirection in [gd_left,gd_right] then begin
-//    aangle:= -aangle;
-//   end;
+  size1:= fintf.getdialsize;
+  if (rect1.cx  <= 0) or (rect1.cy <= 0) then begin
+   active:= false;
   end
   else begin
-   aangle:= 0;
+   calclineend(fli,dmo_opposite in options,rect1,linestart,lineend,dir1);
+   rea1:= (value - fstart)/frange;
+   case fdirection of
+    gd_right: begin
+     start1:= -rect1.x / rect1.cx;
+     stop1:= (size1.cx - rect1.x - 1) / rect1.cx;
+    end;
+    gd_up: begin
+     start1:= ((rect1.y+rect1.cy)-size1.cy - 1) / rect1.cy;
+     stop1:= (rect1.y+rect1.cy) / rect1.cy;
+    end;
+    gd_left: begin
+     start1:= ((rect1.x+rect1.cx)-size1.cx - 1) / rect1.cx;
+     stop1:= (rect1.x+rect1.cx) / rect1.cx;
+    end;
+    gd_down: begin
+     start1:= -rect1.y / rect1.cy;
+     stop1:= (size1.cy - rect1.y - 1) / rect1.cy;
+    end;
+   end;
+   if dmo_hideoverload in options then begin
+    if (rea1 < 0) or (rea1 > 1) then begin
+     active:= false;
+     exit;
+    end;
+   end;
+   if dmo_limitoverload in options then begin
+    if rea1 < start1 then begin
+     rea1:= start1;
+    end
+    else begin
+     if rea1 > stop1 then begin
+      rea1:= stop1;
+     end;
+    end;
+   end;
+   case fdirection of
+    gd_right: begin
+     a.x:= snap(rect1.cx * rea1);
+     b.x:= a.x;
+     a.y:= linestart;
+     b.y:= lineend;
+    end;
+    gd_up: begin
+     a.y:= snap(rect1.cy - (rect1.cy * rea1));
+     b.y:= a.y;
+     a.x:= linestart;
+     b.x:= lineend;
+    end;
+    gd_left: begin
+     a.x:= snap(rect1.cx - (rect1.cx * rea1));
+     b.x:= a.x;
+     a.y:= linestart;
+     b.y:= lineend;
+    end;
+    gd_down: begin
+     a.y:= snap(rect1.cy * rea1);
+     b.y:= a.y;
+     a.x:= linestart;
+     b.x:= lineend;
+    end;
+   end;
+   if dmo_rotatetext in self.finfo.options then begin
+    aangle:= -angle * (rea1-0.5) * 2*pi;
+   end
+   else begin
+    aangle:= 0;
+   end;
+   aangle:= aangle + escapement*2*pi;
+   if caption <> '' then begin
+    afont:= self.font;
+    acaption:= getactcaption(value,caption);
+    captionpos:= a;
+    adjustcaption(dir1,dmo_rotatetext in self.finfo.options,fli,afont,
+      fintf.getwidget.getcanvas.getstringwidth(acaption,afont),captionpos);
+   end;
+   transform(a);
+   transform(b);
   end;
-  aangle:= aangle + escapement*2*pi;
-  case fdirection of
-   gd_right: begin
-    a.x:= snap(rect1.cx * rea1);
-    b.x:= a.x;
-    a.y:= linestart;
-    b.y:= lineend;
-   end;
-//   dirup{gd_up}: begin
-   gd_up: begin
-    a.y:= snap(rect1.cy - (rect1.cy * rea1));
-    b.y:= a.y;
-    a.x:= linestart;
-    b.x:= lineend;
-   end;
-   gd_left: begin
-    a.x:= snap(rect1.cx - (rect1.cx * rea1));
-    b.x:= a.x;
-    a.y:= linestart;
-    b.y:= lineend;
-   end;
-//   dirdown{gd_down}: begin
-   gd_down: begin
-    a.y:= snap(rect1.cy * rea1);
-    b.y:= a.y;
-    a.x:= linestart;
-    b.x:= lineend;
-   end;
-  end;
-  if caption <> '' then begin
-   afont:= self.font;
-   acaption:= getactcaption(value,caption);
-   captionpos:= a;
-   adjustcaption(dir1,dmo_rotatetext in self.finfo.options,fli,afont,
-     fintf.getwidget.getcanvas.getstringwidth(acaption,afont),captionpos);
-  end;
-  transform(a);
-  transform(b);
  end;
 end;
 
@@ -917,7 +958,7 @@ begin
      lineend:= linestart - length;
     end;
    end;
-   dirdown{gd_down}: begin
+   gd_up: begin
     linestart:= arect.x + arect.cx - indent {- 1};
     if length = 0 then begin
      lineend:= linestart - arect.cx + indent;
@@ -935,7 +976,7 @@ begin
      lineend:= linestart + length;
     end;
    end;
-   dirup{gd_up}: begin
+   gd_down: begin
     linestart:= arect.x + indent;
     if length = 0 then begin
      lineend:= linestart + arect.cx - indent;
@@ -949,30 +990,30 @@ begin
 end;
 
 procedure tcustomdialcontroller.transform(var apoint: pointty);
- procedure trans(var x,y: integer);
+ procedure trans(var pxy,ryx: integer);
  var
   r1: real;
-  x1: real;
+  p1: real;
  begin
-  r1:= fr - y;
-  x1:= fp*((x-foffsx)*fscalex);
-  x:= round(r1*sin(x1))+foffsx;
-  y:= round(r1*(1-cos(x1))) + y;
+  r1:= fr - ryx + foffsr;
+  p1:= fa*((pxy-foffsp)*fscalep);
+  pxy:= round(r1*sin(p1)) + foffsp;
+  ryx:= round(r1*(1-cos(p1))) + ryx;
  end; 
 begin
  if dis_needstransform in fstate then begin
   case fdirection of
    gd_left: begin
-    apoint.y:= fendy - apoint.y;
+    apoint.y:= fendr - apoint.y;
     trans(apoint.x,apoint.y);
-    apoint.y:= fendy - apoint.y
+    apoint.y:= fendr - apoint.y
    end;
-   dirup{gd_up}: begin
-    apoint.x:= fendy - apoint.x;
+   gd_down: begin
+    apoint.x:= fendr - apoint.x;
     trans(apoint.y,apoint.x);
-    apoint.x:= fendy - apoint.x
+    apoint.x:= fendr - apoint.x
    end;
-   dirdown{gd_down}: begin
+   gd_up: begin
     trans(apoint.y,apoint.x);
    end;
    else begin //gd_right
@@ -999,7 +1040,7 @@ begin
      y:= y + afont.ascent;
     end;
    end;
-   dirup{gd_up}: begin
+   gd_down: begin
     x:= x - captiondist;
     y:= y + captionoffset;
     if not arotatetext then begin
@@ -1021,7 +1062,7 @@ begin
      y:= y - afont.descent;
     end;
    end;
-   dirdown{gd_down}: begin
+   gd_up: begin
     x:= x + captiondist;
     y:= y + captionoffset;
     if not arotatetext then begin
@@ -1061,27 +1102,28 @@ begin
   exclude(fstate,dis_needstransform);
   if fangle <> 0 then begin
    if fdirection in [gd_right,gd_left] then begin
+    foffsr:= rect1.y;
     int1:= rect1.cx;
-    foffsx:= int1 div 2 + rect1.x;
+    foffsp:= int1 div 2 + rect1.x;
     if fdirection = gd_left then begin
-     fendy:= rect1.y + rect1.cy;
+     fendr:= 2*foffsr + rect1.cy;
     end;
    end
    else begin
+    foffsr:= rect1.x;
     int1:= rect1.cy;
-    foffsx:= int1 div 2 + rect1.y;
-    if fdirection = dirup{gd_up} then begin
-     fendy:= rect1.x + rect1.cx;
+    foffsp:= int1 div 2 + rect1.y;
+    if fdirection = gd_down then begin
+     fendr:= 2*foffsr + rect1.cx;
     end;
    end;
    if int1 > 0 then begin
-    fp:= pi*fangle;
+    fa:= pi*fangle;    //0.5 * angle in radiant
     include(fstate,dis_needstransform);
-    fscalex:= 2.0/int1;
+    fscalep:= 2.0/int1;
     fr:= int1/2.0;
-//    if fangle < 0.25 then begin
     if fangle < 0.5 then begin
-     fr:= fr/sin(fp);
+     fr:= fr/sin(fa);
     end;
    end;    
   end;
@@ -1110,7 +1152,7 @@ begin
     boxlines[1].b.x:= x;
    end;
   end;
-  bo1:= ((fdirection = gd_left) or (fdirection = dirup{gd_up})) xor 
+  bo1:= ((fdirection = gd_left) or (fdirection = gd_down)) xor 
                              (do_opposite in foptions);
   if do_sideline in foptions then begin
    setlength(fboxlines,1);
@@ -1206,9 +1248,6 @@ begin
        if int2 <> 0 then begin
         rea1:= rea1 / int2;
        end;
-//       if fdirection in [gd_left,gd_right] then begin
-//        rea1:= -rea1;
-//       end;
        int2:= -int2 div 2;
        for int1:= 0 to high(captions) do begin
         captions[int1].caption:= getactcaption(int1*valstep+first,caption);
@@ -1434,6 +1473,11 @@ end;
 function tcustomdial.getdialrect: rectty;
 begin
  result:= innerclientrect;
+end;
+
+function tcustomdial.getdialsize: sizety;
+begin
+ result:= clientsize;
 end;
 
 procedure tcustomdial.dopaint(const acanvas: tcanvas);
