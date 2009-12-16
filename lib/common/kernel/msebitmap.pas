@@ -300,6 +300,12 @@ type
                    const acolor: colorty = cl_default
                //used for monochrome bitmaps, cl_default-> acanvas.color
             ); overload;
+   procedure paint(const acanvas: tcanvas; const index: integer;
+                   const dest: rectty; source: rectty;
+                   const alignment: alignmentsty = [];
+                   const acolor: colorty = cl_default
+               //used for monochrome bitmaps, cl_default-> acanvas.color
+            ); overload;
    procedure assign(sender: tpersistent); override;
 
    property size: sizety read fsize write setsize;
@@ -2086,6 +2092,20 @@ procedure timagelist.paint(const acanvas: tcanvas; const index: integer;
 begin
  if (index >= 0) and (index < count) then begin
   fbitmap.paint(acanvas,dest,makerect(indextoorg(index),fsize),alignment,acolor);
+ end;
+end;
+
+procedure timagelist.paint(const acanvas: tcanvas; const index: integer; 
+         const dest: rectty; source: rectty;
+         const alignment: alignmentsty = [];
+         const acolor: colorty = cl_default 
+  //used for monochrome bitmaps, cl_default-> acanvas.color
+                                                               );
+
+begin
+ addpoint1(source.pos,indextoorg(index));
+ if (index >= 0) and (index < count) then begin
+  fbitmap.paint(acanvas,dest,source,alignment,acolor);
  end;
 end;
 

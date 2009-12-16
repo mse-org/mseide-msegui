@@ -1097,11 +1097,11 @@ type
    property template: tfacetemplate read gettemplate write settemplate;
  end;
 
- mouseeventty = procedure (const sender: twidget; var info: mouseeventinfoty) of object;
- mousewheeleventty = procedure (const sender: twidget; var info: mousewheeleventinfoty) of object;
- keyeventty = procedure (const sender: twidget; var info: keyeventinfoty) of object;
- painteventty = procedure (const sender: twidget; const canvas: tcanvas) of object;
- pointeventty = procedure(const sender: twidget; const point: pointty) of object;
+ mouseeventty = procedure (const sender: twidget; var ainfo: mouseeventinfoty) of object;
+ mousewheeleventty = procedure (const sender: twidget; var ainfo: mousewheeleventinfoty) of object;
+ keyeventty = procedure (const sender: twidget; var ainfo: keyeventinfoty) of object;
+ painteventty = procedure (const sender: twidget; const acanvas: tcanvas) of object;
+ pointeventty = procedure(const sender: twidget; const apoint: pointty) of object;
  widgeteventty = procedure(const sender: tobject; const awidget: twidget) of object;
 
  widgetarty = array of twidget;

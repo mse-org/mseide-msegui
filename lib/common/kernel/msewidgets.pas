@@ -745,8 +745,6 @@ type
 
    property onshow: notifyeventty read fonshow write fonshow;
    property onhide: notifyeventty read fonhide write fonhide;
-//   property onactivate: notifyeventty read fonactivate write fonactivate;
-//   property ondeactivate: notifyeventty read fondeactivate write fondeactivate;
    property onresize: notifyeventty read fonresize write fonresize;
    property onmove: notifyeventty read fonmove write fonmove;
    property onclosequery: queryeventty read fonclosequery write fonclosequery;
@@ -760,19 +758,10 @@ type
    property optionswidget;
    property optionswidget1;
    property optionsskin;
-//   property bounds_x;
-//   property bounds_y;
-//   property bounds_cx;
-//   property bounds_cy;
-//   property bounds_cxmin;
-//   property bounds_cymin;
-//   property bounds_cxmax;
-//   property bounds_cymax;
    property color;
    property cursor;
    property frame;
    property face;
-//   property anchors;
    property taborder;
    property hint;
    property popupmenu;

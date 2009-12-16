@@ -640,12 +640,19 @@ type
    procedure move(const dist: pointty);   //add dist to origin
    procedure remove(const dist: pointty); //sub dist from origin
 
-   procedure copyarea(asource: tcanvas; const asourcerect: rectty;
-              const adestpoint: pointty; acopymode: rasteropty = rop_copy;
-              atransparentcolor: colorty = cl_default;
+   procedure copyarea(const asource: tcanvas; const asourcerect: rectty;
+              const adestpoint: pointty; const acopymode: rasteropty = rop_copy;
+              const atransparentcolor: colorty = cl_default;
               //atransparentcolor used for convert color to monochrome
               //cl_default -> colorbackground
-              atransparency: colorty = cl_none);
+              const atransparency: colorty = cl_none); overload;
+   procedure copyarea(const asource: tcanvas; const asourcerect: rectty;
+              const adestrect: rectty; const alignment: alignmentsty = [];
+              const acopymode: rasteropty = rop_copy;
+              const atransparentcolor: colorty = cl_default;
+              //atransparentcolor used for convert color to monochrome
+              //cl_default -> colorbackground
+              const atransparency: colorty = cl_none); overload;
 
    procedure drawpoint(const point: pointty; const acolor: colorty = cl_default);
    procedure drawpoints(const apoints: array of pointty; 
@@ -889,16 +896,25 @@ type
    procedure init(const acolor: colorty); virtual;
    procedure freecanvas;
    function canvasallocated: boolean;
-   procedure copyarea(asource: tsimplebitmap; const asourcerect: rectty;
-              const adestpoint: pointty; acopymode: rasteropty = rop_copy;
-              masked: boolean = true;
-              acolorforeground: colorty = cl_default; //cl_default -> asource.colorforeground
+   procedure copyarea(const asource: tsimplebitmap; const asourcerect: rectty;
+              const adestpoint: pointty; const acopymode: rasteropty = rop_copy;
+              const masked: boolean = true;
+              const acolorforeground: colorty = cl_default; //cl_default -> asource.colorforeground
                     //used for monochrome -> color conversion
-              acolorbackground: colorty = cl_default;//cl_default -> asource.colorbackground
+              const acolorbackground: colorty = cl_default;//cl_default -> asource.colorbackground
                     //used for monochrome -> color conversion or
                     //colorbackground for color -> monochrome conversion
-              atransparency: colorty = cl_none);
-//   procedure stretch(const source: tsimplebitmap; const asize: sizety);
+              const atransparency: colorty = cl_none); overload;
+   procedure copyarea(const asource: tsimplebitmap; const asourcerect: rectty;
+              const adestrect: rectty; const aalignment: alignmentsty = [];
+              const acopymode: rasteropty = rop_copy;
+              const masked: boolean = true;
+              const acolorforeground: colorty = cl_default; //cl_default -> asource.colorforeground
+                    //used for monochrome -> color conversion
+              const acolorbackground: colorty = cl_default;//cl_default -> asource.colorbackground
+                    //used for monochrome -> color conversion or
+                    //colorbackground for color -> monochrome conversion
+              const atransparency: colorty = cl_none); overload;
 
    property canvas: tcanvas read getcanvas;
    property size: sizety read fsize write setsize;
@@ -2110,19 +2126,21 @@ begin
  end;
 end;
 
-procedure tsimplebitmap.copyarea(asource: tsimplebitmap; const asourcerect: rectty;
-              const adestpoint: pointty; acopymode: rasteropty = rop_copy;
-              masked: boolean = true;
-              acolorforeground: colorty = cl_default; //cl_default -> asource.colorforeground
-                    //used if asource is monchrome
-              acolorbackground: colorty = cl_default;//cl_default -> asource.colorbackground
-                    //used if asource is monchrome or
+procedure tsimplebitmap.copyarea(const asource: tsimplebitmap;
+              const asourcerect: rectty;
+              const adestrect: rectty; const aalignment: alignmentsty = [];
+              const acopymode: rasteropty = rop_copy;
+              const masked: boolean = true;
+              const acolorforeground: colorty = cl_default; 
+                    //cl_default -> asource.colorforeground
+                    //used for monochrome -> color conversion
+              const acolorbackground: colorty = cl_default;
+                    //cl_default -> asource.colorbackground
+                    //used for monochrome -> color conversion or
                     //colorbackground for color -> monochrome conversion
-              atransparency: colorty = cl_none);
+              const atransparency: colorty = cl_none); overload;
 var
  bo1,bo2: boolean;
-// mask: pixmapty;
-// maskgchandle: ptruint;
  amask: tsimplebitmap;
 begin
  bo1:= canvasallocated;
@@ -2148,22 +2166,15 @@ begin
  else begin
   canvas.colorbackground:= acolorbackground;
  end;
- {
- if masked then begin
-  mask:= asource.getmaskhandle(maskgchandle);
- end
- else begin
-  mask:= 0;
- end;
- }
  if masked then begin
   amask:= asource.getmask;
  end
  else begin
   amask:= nil;
  end;
- canvas.internalcopyarea(asource.canvas,asourcerect,makerect(adestpoint,asourcerect.size),acopymode,
-                cl_default,amask{mask,maskgchandle},[],nullpoint,atransparency);
+ canvas.internalcopyarea(asource.canvas,asourcerect,
+                         adestrect,acopymode,
+                         cl_default,amask,aalignment,nullpoint,atransparency);
  if bo1 then begin
   canvas.restore;
  end
@@ -2177,6 +2188,21 @@ begin
   asource.freecanvas;
  end;
 end;
+
+procedure tsimplebitmap.copyarea(const asource: tsimplebitmap; const asourcerect: rectty;
+              const adestpoint: pointty; const acopymode: rasteropty = rop_copy;
+              const masked: boolean = true;
+              const acolorforeground: colorty = cl_default; //cl_default -> asource.colorforeground
+                    //used if asource is monchrome
+              const acolorbackground: colorty = cl_default;//cl_default -> asource.colorbackground
+                    //used if asource is monchrome or
+                    //colorbackground for color -> monochrome conversion
+              const atransparency: colorty = cl_none);
+begin
+ copyarea(asource,asourcerect,makerect(adestpoint,asourcerect.size),[],acopymode,
+                        masked,acolorforeground,acolorbackground,atransparency);
+end;
+
 {
 procedure tsimplebitmap.stretch(const source: tsimplebitmap; const asize: sizety);
 type
@@ -3570,14 +3596,28 @@ begin
  end;
 end;
 
-procedure tcanvas.copyarea(asource: tcanvas; const asourcerect: rectty;
-                           const adestpoint: pointty; acopymode: rasteropty = rop_copy;
-                           atransparentcolor: colorty = cl_default;
-                           atransparency: colorty = cl_none);
+procedure tcanvas.copyarea(const asource: tcanvas; const asourcerect: rectty;
+                           const adestpoint: pointty; 
+                           const acopymode: rasteropty = rop_copy;
+                           const atransparentcolor: colorty = cl_default;
+                           const atransparency: colorty = cl_none);
 begin
  if cs_inactive in fstate then exit;
  internalcopyarea(asource,asourcerect,makerect(adestpoint,asourcerect.size),
               acopymode,atransparentcolor,nil,[],nullpoint,atransparency);
+end;
+
+procedure tcanvas.copyarea(const asource: tcanvas; const asourcerect: rectty;
+              const adestrect: rectty; const alignment: alignmentsty = [];
+              const acopymode: rasteropty = rop_copy;
+              const atransparentcolor: colorty = cl_default;
+              //atransparentcolor used for convert color to monochrome
+              //cl_default -> colorbackground
+              const atransparency: colorty = cl_none); overload;
+begin
+ if cs_inactive in fstate then exit;
+ internalcopyarea(asource,asourcerect,adestrect,
+              acopymode,atransparentcolor,nil,alignment,nullpoint,atransparency);
 end;
 
 procedure tcanvas.drawpoints(const apoints: array of pointty; const acolor: colorty;

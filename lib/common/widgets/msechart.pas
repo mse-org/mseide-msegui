@@ -748,10 +748,12 @@ begin
    if co1 = cl_default then begin
     co1:= finfo.color;
    end;
-   if imagealignment * [al_stretchx,al_stretchy] <> [] then begin
+   if (imagealignment * [al_stretchx,al_stretchy] <> []) then begin
     bmp1:= tmaskedbitmap.create(fimage_list.monochrome);
-    bmp2:= tmaskedbitmap.create(fimage_list.monochrome);
+    bmp2:= tmaskedbitmap.create(false);
     try
+     bmp1.masked:= fimage_list.masked;
+     bmp1.monochrome:= fimage_list.monochrome;
      fimage_list.getimage(finfo.imagenr,bmp1);
      bmp2.size:= imagesize;
      bmp1.stretch(bmp2);

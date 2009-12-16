@@ -721,7 +721,8 @@ var
  fhasxft: boolean;
  hassm: boolean;
  toplevelraise: boolean;
- screenrenderpictformat,bitmaprenderpictformat,alpharenderpictformat: pxrenderpictformat;
+ screenrenderpictformat,bitmaprenderpictformat,
+                             alpharenderpictformat: pxrenderpictformat;
 
  rootid: winidty;
  atomatom: atom;
@@ -4979,7 +4980,8 @@ var
 begin
  pixmap:= gui_createpixmap(makesize(1,1));
  attributes._repeat:= 1;
- result:= xrendercreatepicture(appdisp,pixmap,screenrenderpictformat,cprepeat,@attributes);
+ result:= xrendercreatepicture(appdisp,pixmap,screenrenderpictformat,
+                                                       cprepeat,@attributes);
  col:= colortorendercolor(acolor);
  xrenderfillrectangle(appdisp,pictopsrc,result,@col,0,0,1,1);
  xfreepixmap(appdisp,pixmap);
@@ -5010,9 +5012,16 @@ begin
  if amask <> nil then begin
   handle1:= tsimplebitmap1(amask).handle;
   if handle1 <> 0 then begin
-   attributes.component_alpha:= 1;
-   result:= xrendercreatepicture(appdisp,tsimplebitmap1(amask).handle,
-        screenrenderpictformat,cpcomponentalpha,@attributes);
+   if amask.monochrome then begin
+    attributes.component_alpha:= 1;
+    result:= xrendercreatepicture(appdisp,tsimplebitmap1(amask).handle,
+                         bitmaprenderpictformat,cpcomponentalpha,@attributes);
+   end
+   else begin
+    attributes.component_alpha:= 1;
+    result:= xrendercreatepicture(appdisp,tsimplebitmap1(amask).handle,
+                         screenrenderpictformat,cpcomponentalpha,@attributes);
+   end;
   end;
  end;
 end;
@@ -5068,18 +5077,18 @@ label
   int1: integer;
  begin
   if (sourcesize > 0) and (sourcesize <> destsize) then begin
-   if (sourcesize < destsize) and (sourcesize > 1) then begin
-    int1:= destsize - 1;
-    if int1 < 1 then begin
-     int1:= 1;
-    end;
-    result:= (((sourcesize - 1) * $10000)) div int1;
-    //pixel center to pixel center
-   end
-   else begin
+//   if (sourcesize < destsize) and (sourcesize > 1) then begin
+//    int1:= destsize - 1;
+//    if int1 < 1 then begin
+//     int1:= 1;
+//    end;
+//    result:= (((sourcesize - 1) * $10000)) div int1;
+//    //pixel center to pixel center
+//   end
+//   else begin
     result:= (sourcesize * $10000) div destsize;
     //pixel end to pixel end
-   end;
+//   end;
    if result > 0 then begin
     if sourcesize * $10000 div result < destsize then begin
      dec(result);
@@ -5102,9 +5111,9 @@ begin
             ((destrect^.cx <> sourcerect^.cx) or
             (destrect^.cy <> sourcerect^.cy)) and
             (destrect^.cx > 0) and (destrect^.cy > 0);
-  colormask:= (mask <> nil) and not mask.monochrome;
+  colormask:= (mask <> nil) and (not mask.monochrome or needstransform);
   if hasxrender and (needstransform or (longword(transparency) <> 0) or
-      colormask) then begin
+                                                           colormask) then begin
    if needstransform then begin
 //    pictop:= pictopover;
     pictop:= pictopsrc;
@@ -5140,7 +5149,8 @@ begin
      end
      else begin
       if mask <> nil then begin
-       maskpic:= createmaskpicture(rgbwhite);
+       maskpic:= createmaskpicture(mask);
+//       maskpic:= createmaskpicture(rgbwhite);
                  //does not work with none
       end;
       pictop:= pictopover; //pictopsrc is unreliable!?
@@ -5152,7 +5162,7 @@ begin
     clip_y_origin:= ay;
     if (mask <> nil) and not colormask then begin
      clip_mask:= tsimplebitmap1(mask).handle;
-//     clip_mask:= 0;
+//clip_mask:= 0;
     end
     else begin
      clip_mask:= 0;
