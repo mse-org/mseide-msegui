@@ -214,7 +214,13 @@ begin
   result:= emptyrealstring;
  end
  else begin
-  result:= formatfloatmse(val*range,format,defaultformatsettingsmse);
+  if range <> 0 then begin
+   rea1:= val*range;
+  end
+  else begin
+   rea1:= val;
+  end;
+  result:= formatfloatmse(rea1,format,defaultformatsettingsmse);
  end;
 end;
 
