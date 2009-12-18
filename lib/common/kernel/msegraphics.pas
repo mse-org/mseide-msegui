@@ -554,6 +554,7 @@ type
 
 
    function checkforeground(acolor: colorty; lineinfo: boolean): boolean;
+   procedure checkcolors;
    procedure setfont(const Value: tfont);
    procedure updatefontinfo;
    function getbrush: tsimplebitmap;
@@ -3375,6 +3376,15 @@ begin
  end;
 end;
 
+procedure tcanvas.checkcolors;
+begin
+ with fdrawinfo do begin
+  acolorforeground:= fvaluepo^.color;
+  acolorbackground:= fvaluepo^.colorbackground;
+  checkgcstate([cs_acolorforeground,cs_acolorbackground]);
+ end;
+end;
+
 procedure tcanvas.internalcopyarea(asource: tcanvas; const asourcerect: rectty;
                            const adestrect: rectty; acopymode: rasteropty;
                            atransparentcolor: colorty;
@@ -3397,9 +3407,9 @@ var
 // bo1,bo2: boolean;
 
 begin
- checkgcstate([]);  //gc has to be valid
+ checkgcstate([]);  //gc must be valid
  if asource <> self then begin
-  asource.checkgcstate([cs_gc]); //gc has to be valid
+  asource.checkgcstate([cs_gc]); //gc must be valid
  end;
  dpoint.x:= adestrect.x + fdrawinfo.origin.x;
  dpoint.y:= adestrect.y + fdrawinfo.origin.y;

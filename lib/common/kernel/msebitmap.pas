@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -572,13 +572,13 @@ begin
       acanvas.color:= acolorforeground;
      end
      else begin
-      acanvas.color:= fcolorforeground;
+      acanvas.color:= self.fcolorforeground;
      end;
      if acolorbackground <> cl_default then begin
       acanvas.colorbackground:= acolorbackground;
      end
      else begin
-      acanvas.colorbackground:= fcolorbackground;
+      acanvas.colorbackground:= self.fcolorbackground;
      end;
      tcanvas1(acanvas).internalcopyarea(bmp.canvas,rect2,
                rect1,acanvas.rasterop,cl_default,amask,aalignment,po1,transp);
@@ -1192,6 +1192,9 @@ begin
  ftransparentcolor:= cl_default;
  fmaskcolorbackground:= $000000; //max transparent
  fmaskcolorforeground:= $ffffff;
+ if monochrome then begin
+  include(foptions,bmo_monochrome);
+ end;
  inherited;
 end;
 
@@ -1651,7 +1654,7 @@ begin
  initmask;
 end;
 
-procedure tmaskedbitmap.stretch(const dest: tmaskedbitmap);
+procedure tmaskedbitmap.stretch(const dest: tmaskedbitmap);	
 var
  size1: sizety;
 begin

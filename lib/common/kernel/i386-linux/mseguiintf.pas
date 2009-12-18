@@ -5042,7 +5042,7 @@ var
  pixmapgc: tgc;
  maskgc: gcty;
  bitmap: pixmapty;
- bitmapgc: tgc;
+ bitmapgc,bitmapgc2: tgc;
  int1: integer;
  spic,dpic,cpic,maskpic: tpicture;
  sattributes: txrenderpictureattributes;
@@ -5059,7 +5059,7 @@ var
  colormask: boolean;
  bo1: boolean;
 label
- endlab;
+ endlab,endlab2;
   
  procedure updatetransform(const apic: tpicture);
  begin
@@ -5077,18 +5077,8 @@ label
   int1: integer;
  begin
   if (sourcesize > 0) and (sourcesize <> destsize) then begin
-//   if (sourcesize < destsize) and (sourcesize > 1) then begin
-//    int1:= destsize - 1;
-//    if int1 < 1 then begin
-//     int1:= 1;
-//    end;
-//    result:= (((sourcesize - 1) * $10000)) div int1;
-//    //pixel center to pixel center
-//   end
-//   else begin
-    result:= (sourcesize * $10000) div destsize;
+   result:= (sourcesize * $10000) div destsize;
     //pixel end to pixel end
-//   end;
    if result > 0 then begin
     if sourcesize * $10000 div result < destsize then begin
      dec(result);
@@ -5105,6 +5095,9 @@ label
   end;
  end;
 
+var
+ spd: paintdevicety;
+ x1,y1: integer;
 begin
  with drawinfo,copyarea,sourcerect^,gc,x11gcty(platformdata).d do begin
   needstransform:= (alignment * [al_stretchx,al_stretchy] <> []) and
@@ -5135,11 +5128,6 @@ begin
     if colormask then begin
      maskpic:= createmaskpicture(mask);
      updatetransform(maskpic);
-     {
-     if needstransform then begin
-      xrendersetpicturetransform(appdisp,maskpic,@transform);
-     end;
-     }
      pictop:= pictopover;
     end
     else begin
@@ -5150,8 +5138,6 @@ begin
      else begin
       if mask <> nil then begin
        maskpic:= createmaskpicture(mask);
-//       maskpic:= createmaskpicture(rgbwhite);
-                 //does not work with none
       end;
       pictop:= pictopover; //pictopsrc is unreliable!?
      end;
@@ -5162,7 +5148,6 @@ begin
     clip_y_origin:= ay;
     if (mask <> nil) and not colormask then begin
      clip_mask:= tsimplebitmap1(mask).handle;
-//clip_mask:= 0;
     end
     else begin
      clip_mask:= 0;
@@ -5179,7 +5164,41 @@ begin
      exit; //not supported;         //todo !!!
     end
     else begin //monochrome -> color
-     spic:= xrendercreatepicture(appdisp,source^.paintdevice,bitmaprenderpictformat,
+     bitmapgc2:= nil;
+     bitmap:= 0;
+     if (mask <> nil) and mask.monochrome then begin
+      bitmap:= gui_createpixmap(size,0,true);
+      if bitmap <> 0 then begin
+       bitmapgc2:= xcreategc(appdisp,bitmap,0,@xvalues);
+       if bitmapgc2 <> nil then begin
+        xcopyarea(appdisp,source^.paintdevice,bitmap,bitmapgc2,x,y,cx,cy,0,0);
+        xvalues.xfunction:= gxand;
+        xchangegc(appdisp,bitmapgc2,gcfunction,@xvalues);
+        xcopyarea(appdisp,mask.handle,bitmap,bitmapgc2,x,y,cx,cy,0,0);
+        ax:= 0;
+        ay:= 0;
+        x1:= 0;
+        y1:= 0;
+        with sattributes do begin
+         clip_x_origin:= 0;
+         clip_y_origin:= 0;
+        end;
+       end
+       else begin
+        goto endlab2;
+       end;
+      end
+      else begin
+       goto endlab2;
+      end;
+      spd:= bitmap;
+     end
+     else begin
+      spd:= source^.paintdevice;
+      x1:= x;
+      y1:= y;
+     end;
+     spic:= xrendercreatepicture(appdisp,spd,bitmaprenderpictformat,
                       sourceformats,@sattributes);
      dpic:= xrendercreatepicture(appdisp,paintdevice,screenrenderpictformat,
                       destformats,@dattributes);
@@ -5188,26 +5207,35 @@ begin
       setregion(gc,region(gcclipregion),dpic);
      end;
      updatetransform(spic);
-     {
-     if needstransform then begin
-      xrendersetpicturetransform(appdisp,spic,@transform);
+     if acolorforeground <> cl_transparent then begin
+      xrendercomposite(appdisp,pictop,cpic,spic,dpic,0,0,ax,ay,
+                           destrect^.x,destrect^.y,destrect^.cx,destrect^.cy);
      end;
-     }
-     xrendercomposite(appdisp,pictop,cpic,spic,dpic,0,0,ax,ay,
-                          destrect^.x,destrect^.y,destrect^.cx,destrect^.cy);
      xrenderfreepicture(appdisp,cpic);
      if df_opaque in gc.drawingflags then begin
+      if bitmap <> 0 then begin
+       xvalues.xfunction:= gxorinverted;
+       xchangegc(appdisp,bitmapgc2,gcfunction,@xvalues);
+       xcopyarea(appdisp,mask.handle,bitmap,bitmapgc2,x,y,cx,cy,0,0);
+      end;
       xvalues.xfunction:= gxxor;
       xvalues.foreground:= $ffffffff;
-      bitmapgc:= xcreategc(appdisp,source^.paintdevice,gcforeground or gcfunction,@xvalues);
-      xfillrectangle(appdisp,source^.paintdevice,bitmapgc,x,y,cx,cy);
+      bitmapgc:= xcreategc(appdisp,spd,gcforeground or gcfunction,@xvalues);
+      xfillrectangle(appdisp,spd,bitmapgc,x1,y1,cx,cy);
       cpic:= createcolorpicture(acolorbackground);
       xrendercomposite(appdisp,pictop,cpic,spic,dpic,0,0,ax,ay,destrect^.x,destrect^.y,
                          destrect^.cx,destrect^.cy);
       xrenderfreepicture(appdisp,cpic);
-      xfillrectangle(appdisp,source^.paintdevice,bitmapgc,x,y,cx,cy);
+      xfillrectangle(appdisp,spd,bitmapgc,x1,y1,cx,cy);
       xfreegc(appdisp,bitmapgc);
      end;
+endlab2:
+     if bitmapgc2 <> nil then begin 
+      xfreegc(appdisp,bitmapgc2);
+     end;
+     if bitmap <> 0 then begin
+      xfreepixmap(appdisp,bitmap);
+     end;          
     end;
    end
    else begin
@@ -5235,11 +5263,11 @@ begin
 //    xrendercomposite(appdisp,pictop,spic,maskpic,dpic,ax,ay,0,0,destrect^.x,destrect^.y,
 //                       destrect^.cx,destrect^.cy);
    end;
+   xrenderfreepicture(appdisp,spic);
+   xrenderfreepicture(appdisp,dpic);
    if maskpic <> 0 then begin
     xrenderfreepicture(appdisp,maskpic);
    end;
-   xrenderfreepicture(appdisp,spic);
-   xrenderfreepicture(appdisp,dpic);
   end
   else begin
    pixmap2:= 0;
