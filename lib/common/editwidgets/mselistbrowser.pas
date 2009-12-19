@@ -269,7 +269,8 @@ type
                                                var cell: gridcoordty): boolean;
    function getselecteditems: listitemarty;
 
-   property items[const index: integer]: tlistitem read getitems write setitems;
+   property items[const index: integer]: tlistitem read getitems 
+                                                  write setitems; default;
    property editing: boolean read fediting write setediting;
    property editor: tinplaceedit read feditor;
 

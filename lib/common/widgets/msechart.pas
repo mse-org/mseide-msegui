@@ -163,9 +163,9 @@ type
   public
    constructor create(const aowner: tchart); reintroduce;
    class function getitemclasstype: persistentclassty; override;
-   property items[const index: integer]: ttrace read getitems write setitems; default;
    function itembyname(const aname: string): ttrace;
    procedure assign(source: tpersistent); override;
+   property items[const index: integer]: ttrace read getitems write setitems; default;
   published
    property xstart: real read fxstart write setxstart;
    property ystart: real read fystart write setystart;
@@ -748,7 +748,8 @@ begin
    if co1 = cl_default then begin
     co1:= finfo.color;
    end;
-   if (imagealignment * [al_stretchx,al_stretchy] <> []) then begin
+   if not acanvas.highresdevice and 
+               (imagealignment * [al_stretchx,al_stretchy] <> []) then begin
     bmp1:= tmaskedbitmap.create(fimage_list.monochrome);
     bmp2:= tmaskedbitmap.create(false);
     try

@@ -124,7 +124,7 @@ type
    function rectstring(const arect: rectty): string;
    procedure pscommand(const atext: string); // writes atext to postscript stream
   published
-   property pslevel: pslevelty read fpslevel write fpslevel default psl_2;
+   property pslevel: pslevelty read fpslevel write fpslevel default psl_3;
  end;
  
 function psrealtostr(const avalue: real): string;
@@ -675,7 +675,7 @@ end;
 
 constructor tpostscriptcanvas.create(const user: tprinter; const intf: icanvas);
 begin
- fpslevel:= psl_2;
+ fpslevel:= psl_3;
  inherited create(user,intf);
 end;
 

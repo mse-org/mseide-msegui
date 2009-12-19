@@ -107,7 +107,8 @@ type
    cs_dashes,cs_linewidth,cs_capstyle,cs_joinstyle,
    cs_fonthandle,cs_font,cs_fontcolor,cs_fontcolorbackground,cs_fonteffect,
    cs_rasterop,cs_brush,cs_brushorigin,
-   cs_painted,cs_internaldrawtext,cs_inactive,cs_pagestarted,cs_metafile{,cs_monochrome});
+   cs_painted,cs_internaldrawtext,cs_highresdevice,
+   cs_inactive,cs_pagestarted,cs_metafile{,cs_monochrome});
  canvasstatesty = set of canvasstatety;
 
 const
@@ -627,6 +628,7 @@ type
    procedure linktopaintdevice(apaintdevice: paintdevicety; const gc: gcty;
                 {const size: sizety;} const cliporigin: pointty); virtual;
          //calls reset, resets cliporigin, canvas owns the gc!
+   function highresdevice: boolean;
    procedure initflags(const dest: tcanvas); virtual;
    procedure unlink; //frees gc
    procedure initdrawinfo(var adrawinfo: drawinfoty);
@@ -5298,6 +5300,11 @@ begin
   ffont.releasehandles;
   gcfonthandle1:= 0; //invalid  
  end; 
+end;
+
+function tcanvas.highresdevice: boolean;
+begin
+ result:= cs_highresdevice in fstate;
 end;
 
 initialization

@@ -161,7 +161,8 @@ type
    property pa_width: real read fpa_width write setpa_width; 
    property pa_height: real read fpa_height write setpa_height;
    property pa_size: stdpagesizety read fpa_size write setpa_size nodefault;
-   property pa_orientation: pageorientationty read fpa_orientation write setpa_orientation;
+   property pa_orientation: pageorientationty read fpa_orientation 
+                              write setpa_orientation default pao_portrait;
   
    property pa_frameleft: real read fpa_frameleft write setpa_frameleft stored false;
                                      //mm, default 10
@@ -791,7 +792,7 @@ constructor tcustomprintercanvas.create(const user: tcustomprinter;
 begin
  fprinter:= user;
  inherited create(user,intf);
- include(fstate,cs_internaldrawtext);
+ fstate:= fstate+[cs_highresdevice,cs_internaldrawtext];
 end;
 
 procedure tcustomprintercanvas.initflags(const dest: tcanvas);
