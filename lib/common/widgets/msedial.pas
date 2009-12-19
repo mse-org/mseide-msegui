@@ -233,6 +233,8 @@ type
    foffsr: integer; //radius offset
    foffsp: integer; //periphery shift before/after transform
    fendr: integer;  //radius end for reversed direction
+   findent1: integer;
+   findent2: integer;
    procedure setstart(const avalue: real);
    procedure setrange(const avalue: real);
    procedure setmarkers(const avalue: tdialmarkers);
@@ -246,6 +248,8 @@ type
    procedure setkind(const avalue: dialdatakindty);
    procedure setangle(const avalue: real);
    procedure readstart(reader: treader);
+   procedure setindent1(const avalue: integer);
+   procedure setindent2(const avalue: integer);
   protected
    procedure setdirection(const avalue: graphicdirectionty); virtual;
    procedure changed;
@@ -262,6 +266,7 @@ type
    procedure fontchanged(const sender: tobject);
    procedure transform(var apoint: pointty);
    procedure defineproperties(filer: tfiler); override;
+   function getactdialrect(out arect: rectty): boolean;
   public
    constructor create(const aintf: idialcontroller); virtual;
    destructor destroy; override;
@@ -269,6 +274,8 @@ type
    procedure afterpaint(const acanvas: tcanvas);
    property direction: graphicdirectionty read fdirection write setdirection
                                        default gd_right;
+   property indent1: integer read findent1 write setindent1 default 0;
+   property indent2: integer read findent2 write setindent2 default 0;
    property start: real read fstart write setstart;
    property range: real read frange write setrange; //default 1.0
    property kind: dialdatakindty read fkind write setkind default dtk_real;
@@ -312,6 +319,8 @@ type
    property color;
    property widthmm;
    property direction;
+   property indent1;
+   property indent2;
    property start;
    property range;
    property kind;
@@ -649,7 +658,7 @@ var
  size1: sizety;
 begin
  with tcustomdialcontroller(fowner),fli,finfo,line do begin
-  rect1:= fintf.getdialrect;
+  getactdialrect(rect1);
   size1:= fintf.getdialsize;
   if (rect1.cx  <= 0) or (rect1.cy <= 0) then begin
    active:= false;
@@ -1094,30 +1103,41 @@ var
 begin
  if not (dis_layoutvalid in fstate) then begin
   canvas1:= fintf.getwidget.getcanvas;
-  rect1:= fintf.getdialrect;
-
+  bo1:= getactdialrect(rect1);
   exclude(fstate,dis_needstransform);
   fsidearc:= nullrect;
   fboxarc:= nullrect;
   if fangle <> 0 then begin
-   if fdirection in [gd_right,gd_left] then begin
-    foffsr:= rect1.y;
-    int1:= rect1.cx;
-    foffsp:= int1 div 2 + rect1.x;
-    if fdirection = gd_left then begin
-     fendr:= 2*foffsr + rect1.cy;
+   with rect1 do begin
+    fa:= pi*fangle;    //0.5 * angle in radiant
+    if fangle < 0.5 then begin
+     int1:= round(sin(fa)*findent2);
+    end
+    else begin
+     int1:= findent2;
     end;
-   end
-   else begin
-    foffsr:= rect1.x;
-    int1:= rect1.cy;
-    foffsp:= int1 div 2 + rect1.y;
-    if fdirection = gd_down then begin
-     fendr:= 2*foffsr + rect1.cx;
+    if fdirection in [gd_right,gd_left] then begin
+     x:= x + int1;
+     cx:= cx - 2 * int1;
+     foffsr:= y;
+     int1:= cx;
+     foffsp:= int1 div 2 + x;
+     if fdirection = gd_left then begin
+      fendr:= 2*foffsr + cy;
+     end;
+    end
+    else begin
+     y:= y + int1;
+     cy:= cy - 2 * int1;
+     foffsr:= x;
+     int1:= cy;
+     foffsp:= int1 div 2 + y;
+     if fdirection = gd_down then begin
+      fendr:= 2*foffsr + cx;
+     end;
     end;
    end;
    if int1 > 0 then begin
-    fa:= pi*fangle;    //0.5 * angle in radiant
     include(fstate,dis_needstransform);
     fscalep:= 2.0/int1;
     fr:= int1/2.0;
@@ -1263,8 +1283,6 @@ begin
     boxlines[1].b.x:= x;
    end;
   end;
-  bo1:= ((fdirection = gd_left) or (fdirection = gd_down)) xor 
-                             (do_opposite in foptions);
   if do_sideline in foptions then begin
    setlength(fboxlines,1);
    if bo1 then begin
@@ -1559,6 +1577,22 @@ begin
  changed;
 end;
 
+procedure tcustomdialcontroller.setindent1(const avalue: integer);
+begin
+ if findent1 <> avalue then begin
+  findent1:= avalue;
+  changed;
+ end;
+end;
+
+procedure tcustomdialcontroller.setindent2(const avalue: integer);
+begin
+ if findent2 <> avalue then begin
+  findent2:= avalue;
+  changed;
+ end;
+end;
+
 procedure tcustomdialcontroller.readstart(reader: treader);
 begin
  start:= reader.readfloat;
@@ -1568,6 +1602,32 @@ procedure tcustomdialcontroller.defineproperties(filer: tfiler);
 begin
  inherited;
  filer.defineproperty('offset',{$ifdef FPC}@{$endif}readstart,nil,false);
+end;
+
+function tcustomdialcontroller.getactdialrect(out arect: rectty): boolean;
+var
+ int1,int2: integer;
+begin
+ arect:= fintf.getdialrect;
+ result:= (fdirection in [gd_left,gd_down]) xor (do_opposite in foptions);
+ if result then begin
+  int1:= findent1;
+  int2:= findent2;
+ end
+ else begin
+  int2:= findent1;
+  int1:= findent2;
+ end;
+ with arect do begin
+  if fdirection in [gd_right,gd_left] then begin
+   y:= y + int1;
+   cy:= cy - int1 - int2;
+  end
+  else begin
+   x:= x + int1;
+   cx:= cx - int1 - int2;
+  end;
+ end;
 end;
 
 { tcustomdial }

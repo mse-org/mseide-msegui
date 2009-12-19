@@ -193,6 +193,8 @@ type
    property color;
    property widthmm;
    property direction default gd_up;
+   property indent1;
+   property indent2;
    property start;
    property range;
    property kind;
@@ -210,6 +212,8 @@ type
    property color;
    property widthmm;
    property direction default gd_right;
+   property indent1;
+   property indent2;
    property start;
    property range;
    property kind;
