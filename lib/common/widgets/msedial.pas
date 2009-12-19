@@ -233,6 +233,7 @@ type
    foffsr: integer; //radius offset
    foffsp: integer; //periphery shift before/after transform
    fendr: integer;  //radius end for reversed direction
+   farcscale: real; //factor diallenght arc / diallenght linear
    findent1: integer;
    findent2: integer;
    procedure setstart(const avalue: real);
@@ -1031,6 +1032,29 @@ end;
 procedure tcustomdialcontroller.adjustcaption(const dir: graphicdirectionty;
               const arotatetext: boolean; const ainfo: diallineinfoty;
               const afont: tfont; const stringwidth: integer; var pos: pointty);
+
+ function adjustscale(const avalue: integer): real;
+ begin
+  if fangle = 0 then begin
+   result:= 1;
+  end
+  else begin
+   if fdirection in [gd_left,gd_down] then begin
+    result:= fendr - avalue;
+   end
+   else begin
+    result:= avalue;
+   end;
+   result:= fr - result + foffsr;
+   if result = 0 then begin
+    result:= 1;
+   end
+   else begin
+    result:= farcscale/result;
+   end;
+  end;
+ end;
+ 
 begin
  with ainfo,pos do begin
   case dir of 
@@ -1041,8 +1065,8 @@ begin
      transform(pos);
     end;
     if escapement = 0 then begin
-     x:= x - stringwidth div 2;
      y:= y + afont.ascent;
+     x:= x - round((stringwidth div 2)*adjustscale(y));
     end;
    end;
    gd_down: begin
@@ -1053,7 +1077,7 @@ begin
     end;
     if escapement = 0 then begin
      x:= x - stringwidth;
-     y:= y + afont.ascent - afont.glyphheight div 2;
+     y:= y + round((afont.ascent - afont.glyphheight div 2)*adjustscale(x));
     end;
    end;
    gd_left: begin
@@ -1063,8 +1087,8 @@ begin
      transform(pos);
     end;
     if escapement = 0 then begin
-     x:= x - stringwidth div 2;
      y:= y - afont.descent;
+     x:= x - round((stringwidth div 2)*adjustscale(y));
     end;
    end;
    gd_up: begin
@@ -1074,7 +1098,7 @@ begin
      transform(pos);
     end;
     if escapement = 0 then begin
-     y:= y + afont.ascent - afont.glyphheight div 2;
+     y:= y + round((afont.ascent - afont.glyphheight div 2)*adjustscale(x));
     end;
    end;
   end;
@@ -1107,14 +1131,21 @@ begin
   exclude(fstate,dis_needstransform);
   fsidearc:= nullrect;
   fboxarc:= nullrect;
+  farcscale:= 1;
   if fangle <> 0 then begin
+   if bo1 then begin
+    int2:= findent1;
+   end
+   else begin
+    int2:= findent2;
+   end;
    with rect1 do begin
     fa:= pi*fangle;    //0.5 * angle in radiant
     if fangle < 0.5 then begin
-     int1:= round(sin(fa)*findent2);
+     int1:= round(sin(fa)*int2);
     end
     else begin
-     int1:= findent2;
+     int1:= int2;
     end;
     if fdirection in [gd_right,gd_left] then begin
      x:= x + int1;
@@ -1144,6 +1175,7 @@ begin
     if fangle < 0.5 then begin
      fr:= fr/sin(fa);
     end;
+    farcscale:= int1/(fa*2);
    end;    
    int1:= round(abs(fr));   //radius to direction
    if int1 < 30000 then begin
