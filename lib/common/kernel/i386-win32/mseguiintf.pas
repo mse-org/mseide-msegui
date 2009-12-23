@@ -2851,19 +2851,21 @@ var
     fs_copyarea: begin
      with copyarea,sourcerect^ do begin
       if mask = nil then begin
-       bitblt(adc,destrect^.x,destrect^.y,cx,cy,source^.gc.handle,x,y,rasterops3[arop]);
+       bitblt(adc,destrect^.x,destrect^.y,cx,cy,tcanvas1(source).fdrawinfo.gc.handle,x,y,rasterops3[arop]);
       end
       else begin
        if iswin95 or (win32gcty(gc.platformdata).kind = gck_printer) then begin
 //        win95maskblt(adc,destrect^.x,destrect^.y,cx,cy,source^.gc.handle,
 //                    x,y,mask,maskgchandle,x,y,arop);
         tcanvas1(mask.canvas).checkgcstate([cs_gc]);
-        win95maskblt(adc,destrect^.x,destrect^.y,cx,cy,source^.gc.handle,
+        win95maskblt(adc,destrect^.x,destrect^.y,cx,cy,
+                    tcanvas1(source).fdrawinfo.gc.handle,
                     x,y,tsimplebitmap1(mask).handle,
                     tcanvas1(mask.canvas).fdrawinfo.gc.handle,x,y,arop);
        end
        else begin
-        maskblt(adc,destrect^.x,destrect^.y,cx,cy,source^.gc.handle,
+        maskblt(adc,destrect^.x,destrect^.y,cx,cy,
+                    tcanvas1(source).fdrawinfo.gc.handle,
                     x,y,tsimplebitmap1(mask).handle,x,y,
                     makerop4(rasterops3[rop_nop],rasterops3[arop]));
        end;
@@ -3159,7 +3161,8 @@ var
    else begin
     maskbmp:= 0;
    end;
-   stretchedbmp:= createcompatiblebitmap(source^.gc.handle,rect1.cx,rect1.cy);
+   stretchedbmp:= createcompatiblebitmap(tcanvas1(source).fdrawinfo.gc.handle,
+                                                              rect1.cx,rect1.cy);
    destdc:= createcompatibledc(0);
    setintpolmode(destdc);
    if mask <> nil then begin
@@ -3168,7 +3171,8 @@ var
                    x,y,cx,cy,rasterops3[rop_copy]);
    end;
    selectobject(destdc,stretchedbmp);
-   stretchblt(destdc,po1.x,po1.y,destrect^.cx,destrect^.cy,source^.gc.handle,
+   stretchblt(destdc,po1.x,po1.y,destrect^.cx,destrect^.cy,
+                  tcanvas1(source).fdrawinfo.gc.handle,
                   x,y,cx,cy,rasterops3[rop_copy]);
   end;
  end;
@@ -3189,24 +3193,28 @@ var
   with drawinfo,copyarea,sourcerect^,gc,win32gcty(platformdata) do begin
    if alignment * [al_stretchx,al_stretchy] = [] then begin
     if mask = nil then begin
-     bitblt(handle,destrect^.x,destrect^.y,cx,cy,source^.gc.handle,
+     bitblt(handle,destrect^.x,destrect^.y,cx,cy,
+                    tcanvas1(source).fdrawinfo.gc.handle,
                     x,y,rasterops3[copymode]);
      if double then begin
       setbkcolor(handle,$000000);
       settextcolor(handle,foregroundcol);
-      bitblt(handle,destrect^.x,destrect^.y,cx,cy,source^.gc.handle,
+      bitblt(handle,destrect^.x,destrect^.y,cx,cy,
+                     tcanvas1(source).fdrawinfo.gc.handle,
                      x,y,rasterops3[rop_or]);
      end;
     end
     else begin
      if nomaskblt then begin
       tcanvas1(mask.canvas).checkgcstate([cs_gc]);
-      win95maskblt(handle,destrect^.x,destrect^.y,cx,cy,source^.gc.handle,
+      win95maskblt(handle,destrect^.x,destrect^.y,cx,cy,
+                    tcanvas1(source).fdrawinfo.gc.handle,
                     x,y,tsimplebitmap1(mask).fhandle,
                     tcanvas1(mask.canvas).fdrawinfo.gc.handle,x,y,copymode);
      end
      else begin
-      maskblt(handle,destrect^.x,destrect^.y,cx,cy,source^.gc.handle,
+      maskblt(handle,destrect^.x,destrect^.y,cx,cy,
+                    tcanvas1(source).fdrawinfo.gc.handle,
                     x,y,tsimplebitmap1(mask).handle,x,y,
                     makerop4(rasterops3[rop_nop],rasterops3[copymode]));
      end;
@@ -3214,12 +3222,14 @@ var
       setbkcolor(handle,$000000);
       settextcolor(handle,foregroundcol);
       if nomaskblt then begin
-       win95maskblt(handle,destrect^.x,destrect^.y,cx,cy,source^.gc.handle,
+       win95maskblt(handle,destrect^.x,destrect^.y,cx,cy,
+                    tcanvas1(source).fdrawinfo.gc.handle,
                     x,y,tsimplebitmap1(mask).fhandle,
                     tcanvas1(mask.canvas).fdrawinfo.gc.handle,x,y,rop_or);
       end
       else begin
-       maskblt(handle,destrect^.x,destrect^.y,cx,cy,source^.gc.handle,
+       maskblt(handle,destrect^.x,destrect^.y,cx,cy,
+                    tcanvas1(source).fdrawinfo.gc.handle,
                     x,y,tsimplebitmap1(mask).fhandle,x,y,
                     makerop4(rasterops3[rop_nop],rasterops3[rop_or]));
       end;
@@ -3228,12 +3238,14 @@ var
    end
    else begin
     if mask = nil then begin
-     stretchblt(handle,destrect^.x,destrect^.y,destrect^.cx,destrect^.cy,source^.gc.handle,
+     stretchblt(handle,destrect^.x,destrect^.y,destrect^.cx,destrect^.cy,
+                    tcanvas1(source).fdrawinfo.gc.handle,
                     x,y,cx,cy,rasterops3[copymode]);
      if double then begin
       setbkcolor(handle,$000000);
       settextcolor(handle,foregroundcol);
-      stretchblt(handle,destrect^.x,destrect^.y,destrect^.cx,destrect^.cy,source^.gc.handle,
+      stretchblt(handle,destrect^.x,destrect^.y,destrect^.cx,destrect^.cy,
+                    tcanvas1(source).fdrawinfo.gc.handle,
                     x,y,cx,cy,rasterops3[rop_or]);
      end;
     end
@@ -3315,7 +3327,7 @@ begin
   if df_colorconvert in drawingflags then begin
    if df_canvasismonochrome in drawingflags then begin
                //convert to monochrome
-    setbkcolor(source^.gc.handle,transparentcolor);
+    setbkcolor(tcanvas1(source).fdrawinfo.gc.handle,transparentcolor);
 //    copymode:= rasteropty(inverserops[copymode]);
     transfer;
    end
