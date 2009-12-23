@@ -723,7 +723,11 @@ begin
   if finfo.dashes <> '' then begin
    acanvas.dashes:= finfo.dashes;
   end;
+  acanvas.capstyle:= cs_round;
+  acanvas.joinstyle:= js_round;
   acanvas.drawlines(finfo.datapoints,false,finfo.color);
+  acanvas.capstyle:= cs_butt;
+  acanvas.joinstyle:= js_miter;
   if finfo.dashes <> '' then begin
    acanvas.dashes:= '';
   end;

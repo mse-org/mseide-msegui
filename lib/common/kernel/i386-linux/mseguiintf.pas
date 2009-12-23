@@ -510,6 +510,7 @@ type
  tsimplebitmap1 = class(tsimplebitmap);
  twindow1 = class(msegui.twindow);
  tguiapplication1 = class(tguiapplication);
+ tcanvas1 = class(tcanvas);
 
 {$ifdef FPC}
  {$macro on}
@@ -5171,7 +5172,8 @@ begin
       if bitmap <> 0 then begin
        bitmapgc2:= xcreategc(appdisp,bitmap,0,@xvalues);
        if bitmapgc2 <> nil then begin
-        xcopyarea(appdisp,source^.paintdevice,bitmap,bitmapgc2,x,y,cx,cy,0,0);
+        xcopyarea(appdisp,tcanvas1(source).fdrawinfo.paintdevice,
+                          bitmap,bitmapgc2,x,y,cx,cy,0,0);
         xvalues.xfunction:= gxand;
         xchangegc(appdisp,bitmapgc2,gcfunction,@xvalues);
         xcopyarea(appdisp,mask.handle,bitmap,bitmapgc2,x,y,cx,cy,0,0);
@@ -5194,7 +5196,7 @@ begin
       spd:= bitmap;
      end
      else begin
-      spd:= source^.paintdevice;
+      spd:= tcanvas1(source).fdrawinfo.paintdevice;
       x1:= x;
       y1:= y;
      end;
@@ -5247,7 +5249,7 @@ endlab2:
     end;
     dpic:= xrendercreatepicture(appdisp,paintdevice,aformat,destformats,
                @dattributes);
-    spic:= xrendercreatepicture(appdisp,source^.paintdevice,aformat,
+    spic:= xrendercreatepicture(appdisp,tcanvas1(source).paintdevice,aformat,
                sourceformats,@sattributes);
     if gcclipregion <> 0 then begin
      setregion(gc,region(gcclipregion),dpic);
@@ -5320,7 +5322,7 @@ endlab2:
      end;
      pixmapgc:= xcreategc(appdisp,pixmap,gcgraphicsexposures,@xvalues);
      if pixmapgc <> nil then begin
-      xcopyarea(appdisp,source^.paintdevice,pixmap,pixmapgc,x,y,cx,cy,0,0);
+      xcopyarea(appdisp,tcanvas1(source).fdrawinfo.paintdevice,pixmap,pixmapgc,x,y,cx,cy,0,0);
       xvalues.foreground:= transparentcolor;
       xvalues.xfunction:= integer(rop_xor);
       xchangegc(appdisp,pixmapgc,gcforeground or gcfunction,@xvalues);
@@ -5358,7 +5360,7 @@ endlab2:
                 gcgraphicsexposures or gcclipxorigin or
                 gcclipyorigin or gcclipmask or gcforeground or gcbackground,pixmapgc);
       with xvalues do begin
-       stipple:= source^.paintdevice;
+       stipple:= tcanvas1(source).fdrawinfo.paintdevice;
        ts_x_origin:= destrect^.x-x;
        ts_y_origin:= destrect^.y-y;
        if df_opaque in gc.drawingflags then begin
@@ -5376,8 +5378,8 @@ endlab2:
     end;
    end
    else begin
-    xcopyarea(appdisp,source^.paintdevice,paintdevice,tgc(gc.handle),
-                            x,y,cx,cy,destrect^.x,destrect^.y);
+    xcopyarea(appdisp,tcanvas1(source).fdrawinfo.paintdevice,paintdevice,
+                    tgc(gc.handle),x,y,cx,cy,destrect^.x,destrect^.y);
    end;
    if mask <> nil then begin
     xvalues.clip_x_origin:= 0;

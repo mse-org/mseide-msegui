@@ -248,7 +248,7 @@ type
   resultpo: pfontmetricsty;
  end;
  copyareainfoty = record
-  source: pdrawinfoty;     //can be equal to self
+  source: tcanvas{pdrawinfoty};     //can be equal to self
   sourcerect: prectty;
   destrect: prectty;
   tileorigin: ppointty;
@@ -303,6 +303,8 @@ type
  drawinfoty = record
   buffer: bufferty;
   gc: gcty;
+  statestamp: longword;
+//  gcident: longword;
   paintdevice: paintdevicety;
   origin: pointty;
   acolorbackground,acolorforeground: colorty;
@@ -531,15 +533,17 @@ type
  edgeinfosty = set of edgeinfoty;
 
  gdiintffuncty = procedure (func: gdifuncty; var drawinfo: drawinfoty);
-
+ canvasarty = array of tcanvas;
+ 
  tcanvas = class(tpersistent)
   private
    fuser: tobject;
-   fintf: pointer; //icanvas;
    fvaluestack: canvasvaluestackty;
    gccolorbackground,gccolorforeground: colorty;
    fdefaultfont: fontnumty;
    fcliporigin: pointty;
+   fgclinksto: canvasarty;
+   fgclinksfrom: canvasarty;
 //   fppmm: real;
    procedure adjustrectar(po: prectty; count: integer);
    procedure readjustrectar(po: prectty; count: integer);
@@ -581,7 +585,9 @@ type
    procedure updatecliporigin(const Value: pointty);
    function getlinewidthmm: real;
    procedure setlinewidthmm(const avalue: real);
+   function getmonochrome: boolean;
   protected
+   fintf: pointer; //icanvas;
    fstate: canvasstatesty;
 //   fsize: sizety;
    fvaluepo: canvasvaluespoty;
@@ -590,6 +596,10 @@ type
    gcfonthandle1: fontnumty;
    afonthandle1: fontnumty;
    ffont: tfont;
+   procedure registergclink(const dest: tcanvas);
+   procedure unregistergclink(const dest: tcanvas);
+   procedure gcdestroyed(const sender: tcanvas); virtual;
+   
    procedure setppmm(avalue: real); virtual;
    procedure valuechanged(value: canvasstatety);
    procedure valueschanged(values: canvasstatesty);
@@ -804,6 +814,7 @@ type
    property clipregion: regionty {read getclipregion} write setclipregion;
                   //canvas owns the region!
 
+   property monochrome: boolean read getmonochrome;
    property color: colorty read getcolor write setcolor default cl_black;
    property colorbackground: colorty read getcolorbackground
               write setcolorbackground default cl_transparent;
@@ -830,6 +841,8 @@ type
    property gchandle: ptruint read getgchandle;
    property ppmm: real read fdrawinfo.gc.ppmm write setppmm; 
                    //used for linewidth mm, value not saved/restored
+   property statestamp: longword read fdrawinfo.statestamp; 
+                 //incremented by drawing operations
  end;
 
  pixmapstatety = (pms_monochrome,pms_ownshandle,pms_maskvalid,pms_nosave);
@@ -2921,11 +2934,36 @@ begin
 end;
 
 destructor tcanvas.destroy;
+var
+ int1: integer;
 begin
  inherited;
  unlink; //deinit, unregister defaultfont
  ffont.free;
  freebuffer(fdrawinfo.buffer);
+ for int1:= 0 to high(fgclinksto) do begin
+  removeitem(pointerarty(tcanvas(fgclinksto[int1]).fgclinksfrom),self);
+ end;
+ for int1:= 0 to high(fgclinksfrom) do begin
+  removeitem(pointerarty(tcanvas(fgclinksfrom[int1]).fgclinksto),self);
+ end;
+end;
+
+procedure tcanvas.registergclink(const dest: tcanvas);
+begin
+ adduniqueitem(pointerarty(dest.fgclinksto),self);
+ adduniqueitem(pointerarty(fgclinksfrom),dest);
+end;
+
+procedure tcanvas.unregistergclink(const dest: tcanvas);
+begin
+ removeitem(pointerarty(dest.fgclinksto),self);
+ removeitem(pointerarty(fgclinksfrom),dest);
+end;
+
+procedure tcanvas.gcdestroyed(const sender: tcanvas);
+begin
+ //dummy
 end;
 
 function tcanvas.createfont: tcanvasfont;
@@ -2997,16 +3035,35 @@ begin
  //dummy
 end;
 
+//var
+// gcident: longword;
+ 
 procedure tcanvas.linktopaintdevice(apaintdevice: paintdevicety;
                const gc: gcty; {const size: sizety;} const cliporigin: pointty);
 var
  rea1: real;
+ int1: integer;
 begin
  resetpaintedflag;
  if (fdrawinfo.gc.handle <> 0) then begin
+  for int1:= 0 to high(fgclinksto) do begin
+   fgclinksto[int1].gcdestroyed(self);
+  end;
   gdi(gdi_destroygc);
  end;
  fdrawinfo.paintdevice:= apaintdevice;
+{
+ if apaintdevice = 0 then begin
+  fdrawinfo.gcident:= 0;
+ end
+ else begin
+  if gcident = 0 then begin
+   gcident:= 1;
+  end;
+  fdrawinfo.gcident:= gcident;
+  inc(gcident);
+ end;
+}
  rea1:= fdrawinfo.gc.ppmm;
  fdrawinfo.gc:= gc;
  fdrawinfo.gc.ppmm:= rea1;
@@ -3228,6 +3285,7 @@ begin
   exit;
  end;
  include(fstate,cs_painted);
+ inc(fdrawinfo.statestamp);
  values.mask:= [];
 
  if not (cs_clipregion in fstate) then begin
@@ -3445,7 +3503,7 @@ begin
   drect.pos:= dpoint;
  end;
  with fdrawinfo,copyarea do begin
-  source:= @asource.fdrawinfo;
+  source:= asource;
   sourcerect:= @srect;
   destrect:= @drect;
   alignment:= aalignment;
@@ -3488,7 +3546,8 @@ begin
    transparency:= colortorgb(atransparency);
   end;
 
-  if drawingflagsty((longword(gc.drawingflags) xor longword(source^.gc.drawingflags))) *
+  if drawingflagsty((longword(gc.drawingflags) xor 
+                   longword(source.fdrawinfo.gc.drawingflags))) *
           [df_canvasismonochrome] <> [] then begin //different colorformat
    include(gc.drawingflags,df_colorconvert);
    with fdrawinfo,gc do begin
@@ -5305,6 +5364,11 @@ end;
 function tcanvas.highresdevice: boolean;
 begin
  result:= cs_highresdevice in fstate;
+end;
+
+function tcanvas.getmonochrome: boolean;
+begin
+ result:= icanvas(fintf).getmonochrome;
 end;
 
 initialization
