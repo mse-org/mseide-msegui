@@ -2154,7 +2154,7 @@ procedure tsimplebitmap.copyarea(const asource: tsimplebitmap;
                     //cl_default -> asource.colorbackground
                     //used for monochrome -> color conversion or
                     //colorbackground for color -> monochrome conversion
-              const atransparency: colorty = cl_none); overload;
+              const atransparency: colorty = cl_none);
 var
  bo1,bo2: boolean;
  amask: tsimplebitmap;
@@ -3684,7 +3684,7 @@ procedure tcanvas.copyarea(const asource: tcanvas; const asourcerect: rectty;
               const atransparentcolor: colorty = cl_default;
               //atransparentcolor used for convert color to monochrome
               //cl_default -> colorbackground
-              const atransparency: colorty = cl_none); overload;
+              const atransparency: colorty = cl_none);
 begin
  if cs_inactive in fstate then exit;
  internalcopyarea(asource,asourcerect,adestrect,
