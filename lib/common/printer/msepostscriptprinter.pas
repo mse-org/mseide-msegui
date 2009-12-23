@@ -1880,234 +1880,238 @@ begin
   end;
   mono:= source.monochrome;
   subpoint1(destrect^.pos,origin); //map to pd origin
-  checkcolorspace;
-  masked:= (mask <> nil) and mask.monochrome;
-  if masked then begin
-   if (fpslevel >= psl_3) and not mono and 
-                            ((acolorforeground = cl_transparent) or
-                            (acolorbackground = cl_transparent)) then begin
-    cached:= getimagecache(ick_4,source,sourcerect^,varname);
-    if not cached then begin
-     with tcanvas1(source).fdrawinfo do begin
-      gdi_lock;
-      if gui_pixmaptoimage(tsimplebitmap1(mask).handle,image,
-                                    mask.canvas.gchandle) <> gde_ok then begin
-       goto endlab;   
+  try
+   checkcolorspace;
+   masked:= (mask <> nil) and mask.monochrome;
+   if masked then begin
+    if (fpslevel >= psl_3) and not mono and 
+                             ((acolorforeground = cl_transparent) or
+                             (acolorbackground = cl_transparent)) then begin
+     cached:= getimagecache(ick_4,source,sourcerect^,varname);
+     if not cached then begin
+      with tcanvas1(source).fdrawinfo do begin
+       gdi_lock;
+       if gui_pixmaptoimage(tsimplebitmap1(mask).handle,image,
+                                     mask.canvas.gchandle) <> gde_ok then begin
+        goto endlab;   
+       end;
+       gdi_unlock;
+       convertmono(sourcerect^,image,ar2,maskrowbytes);
+       gui_freeimagemem(image.pixels);
+       gdi_lock;
+       if gui_pixmaptoimage(paintdevice,image,gc.handle) <> gde_ok then begin
+        goto endlab;
+       end;
+       gdi_unlock;
       end;
-      gdi_unlock;
-      convertmono(sourcerect^,image,ar2,maskrowbytes);
+      if mono{image.monochrome} then begin
+       if colorspace = cos_gray then begin
+        convertmonotogray(sourcerect^,image,ar3,rowbytes,
+                   acolorforeground,acolorbackground);
+       end
+       else begin
+        convertmonotorgb(sourcerect^,image,ar3,rowbytes,
+                   acolorforeground,acolorbackground);
+       end;
+      end
+      else begin
+       if colorspace = cos_gray then begin
+        convertgray(sourcerect^,image,ar3,rowbytes);
+       end
+       else begin
+        convertrgb(sourcerect^,image,ar3,rowbytes);
+       end;
+      end;
       gui_freeimagemem(image.pixels);
-      gdi_lock;
-      if gui_pixmaptoimage(paintdevice,image,gc.handle) <> gde_ok then begin
-       goto endlab;
+      setlength(ar1,length(ar2)+length(ar3));
+      po1:= pointer(ar1);
+      po2:= pointer(ar2);
+      po3:= pointer(ar3);
+      for int1:= sourcerect^.cy - 1 downto 0 do begin
+       system.move(po2^,po1^,maskrowbytes);
+       inc(po1,maskrowbytes);
+       inc(po2,maskrowbytes);
+       system.move(po3^,po1^,rowbytes);
+       inc(po1,rowbytes);
+       inc(po3,rowbytes);
       end;
-      gdi_unlock;
+      rowbytes:= rowbytes + maskrowbytes;
+      cached:= setimagecache(ick_4,source,sourcerect^,varname,
+                                                ar1,mask.canvas);
      end;
-     if mono{image.monochrome} then begin
-      if colorspace = cos_gray then begin
-       convertmonotogray(sourcerect^,image,ar3,rowbytes,
-                  acolorforeground,acolorbackground);
-      end
-      else begin
-       convertmonotorgb(sourcerect^,image,ar3,rowbytes,
-                  acolorforeground,acolorbackground);
-      end;
-     end
-     else begin
-      if colorspace = cos_gray then begin
-       convertgray(sourcerect^,image,ar3,rowbytes);
-      end
-      else begin
-       convertrgb(sourcerect^,image,ar3,rowbytes);
-      end;
+     mono:= false; //has been converted to color
+     str1:= 'gsave ';
+     if not cached then begin
+      str1:= str1 + '/picstr '+inttostr(rowbytes)+' string def ';
      end;
-     gui_freeimagemem(image.pixels);
-     setlength(ar1,length(ar2)+length(ar3));
-     po1:= pointer(ar1);
-     po2:= pointer(ar2);
-     po3:= pointer(ar3);
-     for int1:= sourcerect^.cy - 1 downto 0 do begin
-      system.move(po2^,po1^,maskrowbytes);
-      inc(po1,maskrowbytes);
-      inc(po2,maskrowbytes);
-      system.move(po3^,po1^,rowbytes);
-      inc(po1,rowbytes);
-      inc(po3,rowbytes);
+     str1:= str1 + rectscalestring(destrect^) + nl;
+     str1:= str1 + '/imdict '+imagedict+' def ';
+     with sourcerect^ do begin
+      str1:= str1 + '/madict  << /ImageType 1 /Width '+inttostr(size.cx)+
+      ' /Height '+inttostr(size.cy)+' /ImageMatrix '+imagematrixstring(size)+nl+
+      '/BitsPerComponent 1 /Decode [1 0] ';
      end;
-     rowbytes:= rowbytes + maskrowbytes;
-     cached:= setimagecache(ick_4,source,sourcerect^,varname,
-                                               ar1,mask.canvas);
-    end;
-    mono:= false; //has been converted to color
-    str1:= 'gsave ';
-    if not cached then begin
-     str1:= str1 + '/picstr '+inttostr(rowbytes)+' string def ';
-    end;
-    str1:= str1 + rectscalestring(destrect^) + nl;
-    str1:= str1 + '/imdict '+imagedict+' def ';
-    with sourcerect^ do begin
-     str1:= str1 + '/madict  << /ImageType 1 /Width '+inttostr(size.cx)+
-     ' /Height '+inttostr(size.cy)+' /ImageMatrix '+imagematrixstring(size)+nl+
-     '/BitsPerComponent 1 /Decode [1 0] ';
-    end;
-    if al_intpol in alignment then begin
-     str1:= str1 +  '/Interpolate true ';
-    end;
-    str1:= str1 + ' >> def'+nl+
-    '<< /ImageType 3 /DataDict imdict /MaskDict madict /InterleaveType 2 >>'+nl;
-    str1:= str1 + 'image';
-   end
-   else begin
-    cached:= getimagecache(ick_2,mask.canvas,sourcerect^,varname{,rowbytes});
-    gdi_lock;
-    if not (createpattern(sourcerect^,destrect^,acolorbackground,acolorforeground,
-         source{tcanvas1(source).fdrawinfo.paintdevice,
-         tcanvas1(source).fdrawinfo.gc.handle},imagepatname) and 
-          (cached or (gui_pixmaptoimage(tsimplebitmap1(mask).handle,image,
-                                   mask.canvas.gchandle) = gde_ok))) then begin
-     goto endlab;
-    end;
-    gdi_unlock;
-    if not cached then begin
-     convertmono(sourcerect^,image,ar1,rowbytes);
-     gui_freeimagemem(image.pixels);
-     cached:= setimagecache(ick_2,mask.canvas,sourcerect^,varname,
-                                               ar1{,rowbytes});
-    end;
-    str1:= 'gsave setpattern';
-    if cached then begin
-     str1:= str1 + ' /bo1 0 def ';
+     if al_intpol in alignment then begin
+      str1:= str1 +  '/Interpolate true ';
+     end;
+     str1:= str1 + ' >> def'+nl+
+     '<< /ImageType 3 /DataDict imdict /MaskDict madict /InterleaveType 2 >>'+nl;
+     str1:= str1 + 'image';
     end
     else begin
-     str1:= str1 + ' /picstr ' + inttostr(rowbytes) + ' string def ';
-    end;
-    str1:= str1 + rectscalestring(destrect^) + nl;
-    str1:= str1 + inttostr(sourcerect^.size.cx) + ' ' + 
-                  inttostr(sourcerect^.size.cy);
-    str1:= str1 + ' true ';
-    str1:= str1 + imagematrixstring(sourcerect^.size)+nl;
-    if cached then begin
-     str1:= str1 + '{bo1 0 ne{()}{/b1 1 def '+varname+'}ifelse} ';
-    end
-    else begin
-     str1:= str1 + '{currentfile picstr readhexstring pop} ';
-    end;
-    str1:= str1 + 'imagemask' + nl;
-    streamwrite(str1);
-    if cached then begin
-     str1:= '/bo1 null def ';
-    end
-    else begin
-     writebinhex(ar1);
-     str1:= '/picstr null def '
-    end;
-    str1:= str1+'/'+imagepatname+' null def grestore'+nl;
-    streamwrite(str1);
-    exit;
-   end;
-  end
-  else begin
-   cached:= getimagecache(ick_1,source,sourcerect^,varname{,rowbytes});
-   if not cached then begin
-    with tcanvas1(source).fdrawinfo do begin
+     cached:= getimagecache(ick_2,mask.canvas,sourcerect^,varname{,rowbytes});
      gdi_lock;
-     if gui_pixmaptoimage(paintdevice,image,gc.handle) <> gde_ok then begin
+     if not (createpattern(sourcerect^,destrect^,acolorbackground,acolorforeground,
+          source{tcanvas1(source).fdrawinfo.paintdevice,
+          tcanvas1(source).fdrawinfo.gc.handle},imagepatname) and 
+           (cached or (gui_pixmaptoimage(tsimplebitmap1(mask).handle,image,
+                                    mask.canvas.gchandle) = gde_ok))) then begin
       goto endlab;
      end;
      gdi_unlock;
-    end;
-    components:= 1;
-    if mono{image.monochrome} then begin
-     convertmono(sourcerect^,image,ar1,rowbytes);
-    end
-    else begin
-     if colorspace = cos_gray then begin
-      convertgray(sourcerect^,image,ar1,rowbytes);
+     if not cached then begin
+      convertmono(sourcerect^,image,ar1,rowbytes);
+      gui_freeimagemem(image.pixels);
+      cached:= setimagecache(ick_2,mask.canvas,sourcerect^,varname,
+                                                ar1{,rowbytes});
+     end;
+     str1:= 'gsave setpattern';
+     if cached then begin
+      str1:= str1 + ' /bo1 0 def ';
      end
      else begin
-      components:= 3;
-      convertrgb(sourcerect^,image,ar1,rowbytes);
+      str1:= str1 + ' /picstr ' + inttostr(rowbytes) + ' string def ';
      end;
-    end;
-    gui_freeimagemem(image.pixels);
-    cached:= setimagecache(ick_1,source,sourcerect^,varname,
-                                               ar1{,rowbytes});
-   end;
-   str1:= 'gsave ';
-   if not cached then begin
-    str1:= str1 + '/picstr '+inttostr(rowbytes)+' string def ';
-   end;
-   str1:= str1 + rectscalestring(destrect^) + nl;
-   if mono{image.monochrome} then begin
-    if acolorbackground <> cl_transparent then begin
-     str1:= str1 + unityrectpath + nl + 
-           setcolorstring(acolorbackground) + ' fill ';   
-    end;
-   end;
-   if fpslevel >= psl_2 then begin
-    str1:= str1 + imagedict;
-    if mono{image.monochrome} then begin
-     str1:= str1 + 'imagemask';
-    end
-    else begin
-     str1:= str1 + 'image';
-    end;
-   end
-   else begin
-    if cached then begin
-     str1:= str1 + '/bo1 0 def ';
-    end;
-    str1:= str1 + setcolorstring(acolorforeground) + nl;
-    with sourcerect^ do begin
-     str1:= str1 +
-          inttostr(size.cx) + ' ' + inttostr(size.cy);
-     if mono{image.monochrome} then begin
-      str1:= str1 + ' true ';
-     end
-     else begin
-      str1:= str1 + ' 8';
-     end;
-     str1:= str1 + imagematrixstring(size)+nl;
+     str1:= str1 + rectscalestring(destrect^) + nl;
+     str1:= str1 + inttostr(sourcerect^.size.cx) + ' ' + 
+                   inttostr(sourcerect^.size.cy);
+     str1:= str1 + ' true ';
+     str1:= str1 + imagematrixstring(sourcerect^.size)+nl;
      if cached then begin
       str1:= str1 + '{bo1 0 ne{()}{/b1 1 def '+varname+'}ifelse} ';
      end
      else begin
       str1:= str1 + '{currentfile picstr readhexstring pop} ';
      end;
-    end;
-    if mono{image.monochrome} then begin
-     str1:= str1 + 'imagemask';
-    end
-    else begin
-     if colorspace = cos_gray then begin
-      str1:= str1 + 'image';
+     str1:= str1 + 'imagemask' + nl;
+     streamwrite(str1);
+     if cached then begin
+      str1:= '/bo1 null def ';
      end
      else begin
-      str1:= str1 + 'false 3 colorimage';
+      writebinhex(ar1);
+      str1:= '/picstr null def '
+     end;
+     str1:= str1+'/'+imagepatname+' null def grestore'+nl;
+     streamwrite(str1);
+     exit;
+    end;
+   end
+   else begin
+    cached:= getimagecache(ick_1,source,sourcerect^,varname{,rowbytes});
+    if not cached then begin
+     with tcanvas1(source).fdrawinfo do begin
+      gdi_lock;
+      if gui_pixmaptoimage(paintdevice,image,gc.handle) <> gde_ok then begin
+       goto endlab;
+      end;
+      gdi_unlock;
+     end;
+     components:= 1;
+     if mono{image.monochrome} then begin
+      convertmono(sourcerect^,image,ar1,rowbytes);
+     end
+     else begin
+      if colorspace = cos_gray then begin
+       convertgray(sourcerect^,image,ar1,rowbytes);
+      end
+      else begin
+       components:= 3;
+       convertrgb(sourcerect^,image,ar1,rowbytes);
+      end;
+     end;
+     gui_freeimagemem(image.pixels);
+     cached:= setimagecache(ick_1,source,sourcerect^,varname,
+                                                ar1{,rowbytes});
+    end;
+    str1:= 'gsave ';
+    if not cached then begin
+     str1:= str1 + '/picstr '+inttostr(rowbytes)+' string def ';
+    end;
+    str1:= str1 + rectscalestring(destrect^) + nl;
+    if mono{image.monochrome} then begin
+     if acolorbackground <> cl_transparent then begin
+      str1:= str1 + unityrectpath + nl + 
+            setcolorstring(acolorbackground) + ' fill ';   
      end;
     end;
-    if cached then begin
-     str1:= str1 + ' /bo1 null def';
+    if fpslevel >= psl_2 then begin
+     str1:= str1 + imagedict;
+     if mono{image.monochrome} then begin
+      str1:= str1 + 'imagemask';
+     end
+     else begin
+      str1:= str1 + 'image';
+     end;
+    end
+    else begin
+     if cached then begin
+      str1:= str1 + '/bo1 0 def ';
+     end;
+     str1:= str1 + setcolorstring(acolorforeground) + nl;
+     with sourcerect^ do begin
+      str1:= str1 +
+           inttostr(size.cx) + ' ' + inttostr(size.cy);
+      if mono{image.monochrome} then begin
+       str1:= str1 + ' true ';
+      end
+      else begin
+       str1:= str1 + ' 8';
+      end;
+      str1:= str1 + imagematrixstring(size)+nl;
+      if cached then begin
+       str1:= str1 + '{bo1 0 ne{()}{/b1 1 def '+varname+'}ifelse} ';
+      end
+      else begin
+       str1:= str1 + '{currentfile picstr readhexstring pop} ';
+      end;
+     end;
+     if mono{image.monochrome} then begin
+      str1:= str1 + 'imagemask';
+     end
+     else begin
+      if colorspace = cos_gray then begin
+       str1:= str1 + 'image';
+      end
+      else begin
+       str1:= str1 + 'false 3 colorimage';
+      end;
+     end;
+     if cached then begin
+      str1:= str1 + ' /bo1 null def';
+     end;
     end;
    end;
+   streamwrite(str1+nl);
+   if cached then begin
+    str1:= '';
+   end
+   else begin
+    writebinhex(ar1);
+    str1:= '/picstr null def ';
+   end;
+   str1:= str1 + 'grestore';
+   if masked then begin
+    str1:= str1 + ' /imdict null def /madict null def ';
+   end;
+   streamwrite(str1+nl);
+   exit;
+endlab:
+   gdi_unlock;
+  finally
+   addpoint1(destrect^.pos,origin); //map to origin
   end;
  end;
- streamwrite(str1+nl);
- if cached then begin
-  str1:= '';
- end
- else begin
-  writebinhex(ar1);
-  str1:= '/picstr null def ';
- end;
- str1:= str1 + 'grestore';
- if masked then begin
-  str1:= str1 + ' /imdict null def /madict null def ';
- end;
- streamwrite(str1+nl);
- exit;
-endlab:
- gdi_unlock;
 end;
 
 procedure tpostscriptcanvas.endpage;
