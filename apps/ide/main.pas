@@ -2171,23 +2171,31 @@ begin
          end;
          if dest <> '' then begin
           macrolist.expandmacros(dest);
+          if source = '' then begin
+           createdirpath(dest);
+          end
+          else begin
+           createdirpath(filedir(dest));
+          end;
          end
          else begin
           dest:= filename(source);
          end;
          copiedfiles[int1]:= dest;
-         if (int1 <= high(expandprojectfilemacros)) and 
-                            expandprojectfilemacros[int1] then begin
-          copynewfile(source,dest,false,false,['%PROJECTNAME%','%PROJECTDIR%'],
-                                      [mstr1,curdir]);
-         end
-         else begin
-          try
-           if not copyfile(source,dest,false) then begin
-            showerror('File "'+dest+'" exists.');
+         if newprojectfiles[int1] <> '' then begin
+          if (int1 <= high(expandprojectfilemacros)) and 
+                             expandprojectfilemacros[int1] then begin
+           copynewfile(source,dest,false,false,['%PROJECTNAME%','%PROJECTDIR%'],
+                                       [mstr1,curdir]);
+          end
+          else begin
+           try
+            if not copyfile(source,dest,false) then begin
+             showerror('File "'+dest+'" exists.');
+            end;
+           except
+            application.handleexception(nil);
            end;
-          except
-           application.handleexception(nil);
           end;
          end;
         end;
