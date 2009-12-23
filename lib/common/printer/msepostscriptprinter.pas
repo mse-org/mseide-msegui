@@ -1538,7 +1538,7 @@ function tpostscriptcanvas.rectscalestring(const arect: rectty): string;
 begin
  with arect do begin
   result:= psrealtostr(x*fgcscale+foriginx)+' '+
-           psrealtostr(foriginy-(y+cy-1)*fgcscale)+' translate '+ 
+           psrealtostr(foriginy-(y+cy{-1})*fgcscale)+' translate '+ 
            psrealtostr(cx*fgcscale)+' '+psrealtostr(cy*fgcscale)+' scale';
  end;
 end;
@@ -1884,9 +1884,9 @@ begin
    checkcolorspace;
    masked:= (mask <> nil) and mask.monochrome;
    if masked then begin
-    if (fpslevel >= psl_3) and not mono and 
+    if (fpslevel >= psl_3) {and not mono and 
                              ((acolorforeground = cl_transparent) or
-                             (acolorbackground = cl_transparent)) then begin
+                             (acolorbackground = cl_transparent))} then begin
      cached:= getimagecache(ick_4,source,sourcerect^,varname);
      if not cached then begin
       with tcanvas1(source).fdrawinfo do begin
