@@ -6129,10 +6129,10 @@ begin
    if (distance <> 0) then begin
     if not fgridinvalidated then begin
      rect1:= fdatarecty;
-     rect1.cy:= rowhigh*ystep;
-     if rowbefore = 0 then begin
-      inc(rect1.y,ystep);
-     end;
+//     rect1.cy:= rowhigh*ystep;
+//     if rowbefore = 0 then begin
+//      inc(rect1.y,ystep);
+//     end;
      if (og_rowheight in foptionsgrid) or testintersectrect(rect1,updaterect) then begin
       invalidaterect(rect1,org_client); //scrolling not possible
      end
