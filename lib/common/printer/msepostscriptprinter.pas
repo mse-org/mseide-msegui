@@ -1914,11 +1914,10 @@ begin
   end;
   try
    checkcolorspace;
-   masked:= (mask <> nil) and mask.monochrome;
+   masked:= (mask <> nil) and (mask.monochrome {or (fpslevel >= psl_3)});
+                                //color masks not implemented in postscript
    if masked then begin
-    if (fpslevel >= psl_3) {and not mono and 
-                             ((acolorforeground = cl_transparent) or
-                             (acolorbackground = cl_transparent))} then begin
+    if (fpslevel >= psl_3) then begin
      cached:= not maskcopy and getimagecache(ick_4,source,sourcerect^,varname);
      if not cached then begin
       with tcanvas1(source).fdrawinfo do begin
@@ -1928,7 +1927,17 @@ begin
         goto endlab;   
        end;
        gdi_unlock;
-       convertmono(sourcerect^,image,ar2,maskrowbytes);
+       if mask.monochrome then begin
+        convertmono(sourcerect^,image,ar2,maskrowbytes);
+       end
+       else begin
+        if colorspace = cos_gray then begin
+         convertgray(sourcerect^,image,ar2,maskrowbytes);
+        end
+        else begin
+         convertrgb(sourcerect^,image,ar2,maskrowbytes);
+        end;
+       end;
        gui_freeimagemem(image.pixels);
        gdi_lock;
        if gui_pixmaptoimage(paintdevice,image,gc.handle) <> gde_ok then begin
@@ -1980,8 +1989,18 @@ begin
      str1:= str1 + '/imdict '+imagedict+' def ';
      with sourcerect^ do begin
       str1:= str1 + '/madict  << /ImageType 1 /Width '+inttostr(size.cx)+
-      ' /Height '+inttostr(size.cy)+' /ImageMatrix '+imagematrixstring(size)+nl+
-      '/BitsPerComponent 1 /Decode [1 0] ';
+      ' /Height '+inttostr(size.cy)+' /ImageMatrix '+imagematrixstring(size)+nl;
+      if mask.monochrome then begin
+       str1:= str1 + '/BitsPerComponent 1 /Decode [1 0] ';
+      end
+      else begin
+       if colorspace = cos_gray then begin
+        str1:= str1 + '/BitsPerComponent 8 /Decode [0 1] ';
+       end
+       else begin
+        str1:= str1 + '/BitsPerComponent 1 /Decode [0 1 0 1 0 1] ';
+       end;
+      end;
      end;
      if al_intpol in alignment then begin
       str1:= str1 +  '/Interpolate true ';
