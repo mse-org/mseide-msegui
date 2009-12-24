@@ -16,6 +16,10 @@ uses
  msegraphics,mseclasses,classes,msegraphutils,msestream,msestrings,msetypes,
  msedrawtext,mserichstring,mseprinter,mseguiglob;
 
+const
+ defaultimagecachesize = 500000;
+ defaultimagecachemaxitemsize = 100000;
+
 type
   
  tpostscriptcanvas = class;
@@ -72,7 +76,11 @@ type
    fpslevel: pslevelty;
    fimagecache: imagecachearty;
    fcacheorder: integerarty;
+   fimagecacheused: integer;
    fimagecachesize: integer;
+   fimagecachemaxitemsize: integer;
+   procedure setimagecachesize(const avalue: integer);
+   procedure setimagecachemaxitemsize(const avalue: integer);
   protected
    procedure gcdestroyed(const sender: tcanvas); override;
    procedure freeimagecache(const index: integer);
@@ -157,6 +165,11 @@ type
    procedure pscommand(const atext: string); // writes atext to postscript stream
   published
    property pslevel: pslevelty read fpslevel write fpslevel default psl_3;
+   property imagecachesize: integer read fimagecachesize write setimagecachesize 
+                                                  default defaultimagecachesize;
+   property imagecachemaxitemsize: integer read fimagecachemaxitemsize 
+                                   write setimagecachemaxitemsize 
+                                           default defaultimagecachemaxitemsize;
  end;
  
 function psrealtostr(const avalue: real): string;
@@ -708,6 +721,8 @@ end;
 
 constructor tpostscriptcanvas.create(const user: tprinter; const intf: icanvas);
 begin
+ fimagecachesize:= defaultimagecachesize;
+ fimagecachemaxitemsize:= defaultimagecachemaxitemsize;
  fpslevel:= psl_3;
  inherited create(user,intf);
 end;
@@ -1868,6 +1883,8 @@ var
  components: integer;
  rowbytes,maskrowbytes: integer;
  masked: boolean;
+ maskcopy: boolean;
+ maskbefore: tsimplebitmap; 
  po1,po2,po3: pbyte;
  int1: integer;
  image: imagety;
@@ -1880,6 +1897,21 @@ begin
   end;
   mono:= source.monochrome;
   subpoint1(destrect^.pos,origin); //map to pd origin
+  maskcopy:= mono and (mask <> nil) and mask.monochrome and 
+             ((acolorforeground = cl_transparent) or 
+              (acolorbackground = cl_transparent));
+  if maskcopy then begin
+   maskbefore:= mask;
+   mask:= tsimplebitmap.create(true);
+   mask.size:= sourcerect^.size;
+   mask.canvas.copyarea(maskbefore.canvas,sourcerect^,nullpoint);
+   if acolorbackground = cl_transparent then begin
+    mask.canvas.copyarea(source,sourcerect^,nullpoint,rop_and);
+   end;
+   if acolorforeground = cl_transparent then begin
+    mask.canvas.copyarea(source,sourcerect^,nullpoint,rop_notand);
+   end;
+  end;
   try
    checkcolorspace;
    masked:= (mask <> nil) and mask.monochrome;
@@ -1887,7 +1919,7 @@ begin
     if (fpslevel >= psl_3) {and not mono and 
                              ((acolorforeground = cl_transparent) or
                              (acolorbackground = cl_transparent))} then begin
-     cached:= getimagecache(ick_4,source,sourcerect^,varname);
+     cached:= not maskcopy and getimagecache(ick_4,source,sourcerect^,varname);
      if not cached then begin
       with tcanvas1(source).fdrawinfo do begin
        gdi_lock;
@@ -1936,7 +1968,7 @@ begin
        inc(po3,rowbytes);
       end;
       rowbytes:= rowbytes + maskrowbytes;
-      cached:= setimagecache(ick_4,source,sourcerect^,varname,
+      cached:= not maskcopy and setimagecache(ick_4,source,sourcerect^,varname,
                                                 ar1,mask.canvas);
      end;
      mono:= false; //has been converted to color
@@ -1959,11 +1991,10 @@ begin
      str1:= str1 + 'image';
     end
     else begin
-     cached:= getimagecache(ick_2,mask.canvas,sourcerect^,varname{,rowbytes});
+     cached:= not maskcopy and getimagecache(ick_2,mask.canvas,sourcerect^,varname);
      gdi_lock;
      if not (createpattern(sourcerect^,destrect^,acolorbackground,acolorforeground,
-          source{tcanvas1(source).fdrawinfo.paintdevice,
-          tcanvas1(source).fdrawinfo.gc.handle},imagepatname) and 
+          source,imagepatname) and 
            (cached or (gui_pixmaptoimage(tsimplebitmap1(mask).handle,image,
                                     mask.canvas.gchandle) = gde_ok))) then begin
       goto endlab;
@@ -1972,8 +2003,8 @@ begin
      if not cached then begin
       convertmono(sourcerect^,image,ar1,rowbytes);
       gui_freeimagemem(image.pixels);
-      cached:= setimagecache(ick_2,mask.canvas,sourcerect^,varname,
-                                                ar1{,rowbytes});
+      cached:= not maskcopy and 
+                     setimagecache(ick_2,mask.canvas,sourcerect^,varname,ar1);
      end;
      str1:= 'gsave setpattern';
      if cached then begin
@@ -2110,6 +2141,10 @@ endlab:
    gdi_unlock;
   finally
    addpoint1(destrect^.pos,origin); //map to origin
+   if maskcopy then begin
+    mask.free;
+    mask:= maskbefore;
+   end;
   end;
  end;
 end;
@@ -2216,7 +2251,7 @@ begin
     mask:= nil;
    end;
    source:= nil;
-   fimagecachesize:= fimagecachesize - bytecount;
+   fimagecacheused:= fimagecacheused - bytecount;
   end;
  end;
  removeitem(fcacheorder,index);
@@ -2274,13 +2309,6 @@ begin
   end;
  end;
 end;
-
-const
- imagemaxcachesize = 1000000;
- imagemaxcacheitemsize = 10000;
-
-// imagemaxcachesize = 88;
-// imagemaxcacheitemsize = 30;
  
 function tpostscriptcanvas.setimagecache(const akind: imagecachekindty;
                const asource: tcanvas;
@@ -2291,11 +2319,10 @@ var
  int1,int2: integer;
  str1: string;
 begin
- result:= {false and} {(fpslevel >= psl_2) and }
-                       (high(bytes) < imagemaxcacheitemsize);
+ result:= (fimagecachemaxitemsize > 0) and (high(bytes) < fimagecachemaxitemsize);
  if result then begin
-  int1:= imagemaxcachesize - length(bytes);
-  while (fimagecachesize > int1) do begin
+  int1:= fimagecachesize - length(bytes);
+  while (fimagecacheused > int1) do begin
    freeimagecache(fcacheorder[0]);
   end;
   int2:= length(fimagecache);
@@ -2318,13 +2345,29 @@ begin
    statestamp:= asource.statestamp;
    bytecount:= length(bytes);
 //   rowbytes:= arowbytes;
-   fimagecachesize:= fimagecachesize + bytecount;
+   fimagecacheused:= fimagecacheused + bytecount;
   end;
   str1:='/'+varname+' '+inttostr(length(bytes))+' string def currentfile '+
            varname + ' readhexstring'+nl;
   streamwrite(str1);
   writebinhex(bytes);
   streamwrite('pop pop'+nl);
+ end;
+end;
+
+procedure tpostscriptcanvas.setimagecachesize(const avalue: integer);
+begin
+ fimagecachesize:= avalue;
+ if fimagecachemaxitemsize < avalue then begin
+  fimagecachemaxitemsize:= avalue;
+ end;
+end;
+
+procedure tpostscriptcanvas.setimagecachemaxitemsize(const avalue: integer);
+begin
+ fimagecachemaxitemsize:= avalue;
+ if fimagecachesize < avalue then begin
+  fimagecachesize:= avalue;
  end;
 end;
 
