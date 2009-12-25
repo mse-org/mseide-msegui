@@ -22,7 +22,7 @@ uses
                                {$ifdef mse_with_ifi},mseifiglob{$endif};
 
 const
- mseguiversiontext = '2.3 fixes';
+ mseguiversiontext = '2.5 unstable';
  
  defaultwidgetcolor = cl_default;
  defaulttoplevelwidgetcolor = cl_background;
