@@ -8,7 +8,10 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 unit mseapplication;
-{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
+{$ifdef FPC}
+ {$define mse_with_ifi}
+ {$mode objfpc}{$h+}{$interfaces corba}
+{$endif}
 interface
 uses
  classes,mseclasses,mseevent,mseglob,sysutils,msetypes,mselist,

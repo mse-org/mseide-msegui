@@ -9,7 +9,10 @@
 }
 unit mseclasses;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
+{$ifdef FPC}
+ {$define mse_with_ifi}
+ {$mode objfpc}{$h+}{$interfaces corba}
+{$endif}
 
 interface
 uses

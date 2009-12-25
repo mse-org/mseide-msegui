@@ -9,7 +9,10 @@
 }
 unit msegraphedits;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$ifdef FPC}
+ {$define mse_with_ifi}
+ {$mode objfpc}{$h+}
+{$endif}
 
 interface
 uses

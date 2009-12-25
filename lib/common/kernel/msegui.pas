@@ -9,10 +9,12 @@
 }
 unit msegui;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$GOTO ON}{$interfaces corba}{$endif}
+{$ifdef FPC}
+ {$define mse_with_ifi}
+ {$mode objfpc}{$h+}{$GOTO ON}{$interfaces corba}
+{$endif}
 
 interface
-
 uses
  {$ifdef FPC}classes{$else}Classes{$endif},sysutils,msegraphics,msetypes,
  msestrings,mseerr,msegraphutils,mseapplication,
