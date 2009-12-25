@@ -1752,6 +1752,7 @@ var
  image: imagety;
  cached: boolean;
 begin
+ result:= true;
  cached:= getimagecache(ick_3,acanvas,sourcerect,varname{,rowbytes});
  if not cached then begin
   gdi_lock;
@@ -1884,12 +1885,12 @@ var
  rowbytes,maskrowbytes: integer;
  masked: boolean;
  maskcopy: boolean;
- maskbefore: tsimplebitmap; 
+ maskbefore: tsimplebitmap;
  po1,po2,po3: pbyte;
  int1: integer;
  image: imagety;
 label
- endlab; 
+ endlab;
 begin
  with fdrawinfo,copyarea do begin
   if not (df_canvasispixmap in tcanvas1(source).fdrawinfo.gc.drawingflags) then begin
@@ -1897,11 +1898,11 @@ begin
   end;
   mono:= source.monochrome;
   subpoint1(destrect^.pos,origin); //map to pd origin
-  maskcopy:= mono and (mask <> nil) and mask.monochrome and 
-             ((acolorforeground = cl_transparent) or 
+  maskcopy:= mono and (mask <> nil) and mask.monochrome and
+             ((acolorforeground = cl_transparent) or
               (acolorbackground = cl_transparent));
+  maskbefore:= mask; //compiler warning
   if maskcopy then begin
-   maskbefore:= mask;
    mask:= tsimplebitmap.create(true);
    mask.size:= sourcerect^.size;
    mask.canvas.copyarea(maskbefore.canvas,sourcerect^,nullpoint);
@@ -2022,7 +2023,7 @@ begin
      if not cached then begin
       convertmono(sourcerect^,image,ar1,rowbytes);
       gui_freeimagemem(image.pixels);
-      cached:= not maskcopy and 
+      cached:= not maskcopy and
                      setimagecache(ick_2,mask.canvas,sourcerect^,varname,ar1);
      end;
      str1:= 'gsave setpattern';
