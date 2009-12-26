@@ -11,9 +11,9 @@ type
  end;
  
  ifiwidgeteventty = procedure(const sender: tobject;
-                             const link: iifiwidget) of object;
+                             const alink: iifiwidget) of object;
  ifiwidgetstateeventty = procedure(const sender: tobject;
-                           const link: iifiwidget;
+                           const alink: iifiwidget;
                            const astate: ifiwidgetstatesty) of object;
  ifiwidgetmodalresulteventty = procedure(const sender: tobject;
                              const link: iifiwidget; 
