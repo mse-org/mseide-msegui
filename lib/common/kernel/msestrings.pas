@@ -489,7 +489,7 @@ begin
 {$ifdef mse_unicodestring}
  result:= areader.Readunicodestring; //msestringimplementation
 {$else}
- result:= reader.Readwidestring; //msestringimplementation
+ result:= areader.Readwidestring; //msestringimplementation
 {$endif}
 end;
 
