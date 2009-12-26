@@ -13,12 +13,13 @@ unit msestrings;
 
 interface
 uses
- classes,{msegraphutils,}msetypes{$ifdef FPC},strings{$endif};
+ classes,{msegraphutils,}msetypes{$ifdef FPC},strings{$endif},typinfo;
 {$ifdef FPC}
  {$ifndef mse_nounicodestring}
   {$ifdef VER2_3}{$define mse_unicodestring}{$endif}
   {$ifdef VER2_4}{$define mse_unicodestring}{$endif}
   {$ifdef VER2_5}{$define mse_unicodestring}{$endif}
+  {$if FPC_FULLVERSION >= 20300}{$define mse_unicodestring}{$endif}
  {$endif}
  {$ifndef mse_unicodestring}
   {$ifdef FPC_WINLIKEWIDESTRING}
@@ -44,6 +45,11 @@ type
  stringposty = (sp_left,sp_center,sp_right);
 
 const
+{$ifdef mse_unicodestring}
+ msestringtypekind = tkustring;
+{$else}
+ msestringtypekind = tkwstring;
+{$endif}
  c_dle = #$10;
  c_stx = #$02;
  c_etx = #$03;
@@ -436,11 +442,56 @@ function locatestring(const afilter: msestring; const getkeystringfunc: getkeyst
            const count: integer; var aindex: integer): boolean;
                //true if found
 
+function getmsestringprop(const ainstance: tobject;
+                                 const apropinfo: ppropinfo): msestring;
+procedure setmsestringprop(const ainstance: tobject;
+                           const apropinfo: ppropinfo; const avalue: msestring);
+function treader_readmsestring(const areader: treader): msestring;
+procedure twriter_writemsestring(awriter: twriter; const avalue: msestring);
+
 implementation
 uses
  sysutils,msedatalist,msesysintf;
 type
  tmemorystream1 = class(tmemorystream);
+
+function getmsestringprop(const ainstance: tobject;
+                                    const apropinfo: ppropinfo): msestring;
+begin
+{$ifdef mse_unicodestring}
+ result:= GetunicodestrProp(ainstance,apropinfo);     
+{$else}
+ result:= GetwidestrProp(ainstance,apropinfo);     
+{$endif}
+end;
+
+procedure twriter_writemsestring(awriter: twriter; const avalue: msestring);
+begin
+{$ifdef mse_unicodestring}
+ awriter.writeunicodestring(avalue);
+{$else}
+ awriter.writewidestring(avalue); //msestringimplementation
+{$endif}
+end;
+
+procedure setmsestringprop(const ainstance: tobject;
+                           const apropinfo: ppropinfo; const avalue: msestring);
+begin
+{$ifdef mse_unicodestring}
+ setunicodestrprop(ainstance,apropinfo,avalue);
+{$else}
+ setwidestrprop(ainstance,apropinfo,avalue);
+{$endif}
+end;
+
+function treader_readmsestring(const areader: treader): msestring;
+begin
+{$ifdef mse_unicodestring}
+ result:= areader.Readunicodestring; //msestringimplementation
+{$else}
+ result:= reader.Readwidestring; //msestringimplementation
+{$endif}
+end;
 
 function locatestring(const afilter: msestring; const getkeystringfunc: getkeystringfuncty;
            const options: locatestringoptionsty;

@@ -5304,11 +5304,12 @@ begin
   result:= '';
  end
  else begin
- {$ifdef mse_unicodestring}
-  result:= reader.readunicodestring;
- {$else}
-  result:= reader.readwidestring;
- {$endif}
+  result:= treader_readmsestring(reader);
+// {$ifdef mse_unicodestring}
+//  result:= reader.readunicodestring;
+// {$else}
+//  result:= reader.readwidestring;
+// {$endif}
  end;
 end;
 {$endif}
@@ -5718,11 +5719,12 @@ begin
 {$ifdef fpcbug4519read}
  msestring(value):= readwidestring4519(reader);
 {$else}
- {$ifdef mse_unicodestring}
- msestring(value):= reader.ReadunicodeString;
- {$else}
- msestring(value):= reader.ReadwideString;
- {$endif}
+ msestring(value):= treader_readmsestring
+// {$ifdef mse_unicodestring}
+// msestring(value):= reader.ReadunicodeString;
+// {$else}
+// msestring(value):= reader.ReadwideString;
+// {$endif}
 {$endif}
 end;
 
@@ -5731,11 +5733,12 @@ begin
 // {$ifdef fpcbug4519}
 // writewidestring4519(writer,msestring(value));
 // {$else}
- {$ifdef mse_unicodestring}
- writer.writeunicodestring(msestring(value));
- {$else}
- writer.WritewideString(msestring(value));
- {$endif}
+ twriter_writemsestring(writer,msestring(value));
+// {$ifdef mse_unicodestring}
+// writer.writeunicodestring(msestring(value));
+// {$else}
+// writer.WritewideString(msestring(value));
+// {$endif}
 // {$endif}
 end;
 
@@ -6302,13 +6305,15 @@ begin
   doublemsestringty(value).a:= readwidestring4519(reader); 
   doublemsestringty(value).b:= readwidestring4519(reader);
  {$else}
-  {$ifdef mse_unicodestring}
-  doublemsestringty(value).a:= readunicodestring; 
-  doublemsestringty(value).b:= readunicodestring;
-  {$else}
-  doublemsestringty(value).a:= readwidestring; 
-  doublemsestringty(value).b:= readwidestring;
-  {$endif}
+  doublemsestringty(value).a:= treader_readmsestring(reader); 
+  doublemsestringty(value).b:= treader_readmsestring(reader);
+//  {$ifdef mse_unicodestring}
+//  doublemsestringty(value).a:= readunicodestring; 
+//  doublemsestringty(value).b:= readunicodestring;
+//  {$else}
+//  doublemsestringty(value).a:= readwidestring; 
+//  doublemsestringty(value).b:= readwidestring;
+//  {$endif}
  {$endif}
   readlistend;
  end;
@@ -6322,13 +6327,15 @@ begin
 //  writewidestring4519(writer,doublemsestringty(value).a);
 //  writewidestring4519(writer,doublemsestringty(value).b);
 // {$else}
- {$ifdef mse_unicodestring}
-  writeunicodestring(doublemsestringty(value).a);
-  writeunicodestring(doublemsestringty(value).b);
- {$else}
-  writewidestring(doublemsestringty(value).a);
-  writewidestring(doublemsestringty(value).b);
- {$endif}
+ twriter_writemsestring(writer,doublemsestringty(value).a);
+ twriter_writemsestring(writer,doublemsestringty(value).b);
+// {$ifdef mse_unicodestring}
+//  writeunicodestring(doublemsestringty(value).a);
+//  writeunicodestring(doublemsestringty(value).b);
+// {$else}
+//  writewidestring(doublemsestringty(value).a);
+//  writewidestring(doublemsestringty(value).b);
+// {$endif}
 // {$endif}
   writelistend;
  end;
@@ -6571,16 +6578,15 @@ begin
   readlistbegin;
  {$ifdef fpcbug4519read}
   msestringintty(value).mstr:= readwidestring4519(reader); 
-  msestringintty(value).int:= readinteger;
  {$else}
-  {$ifdef mse_unicodestring}
-  msestringintty(value).mstr:= readunicodestring; 
-  msestringintty(value).int:= readinteger;
-  {$else}
-  msestringintty(value).mstr:= readwidestring; 
-  msestringintty(value).int:= readinteger;
-  {$endif}
+  msestringintty(value).mstr:= treader_readmsestring(reader); 
+//  {$ifdef mse_unicodestring}
+//  msestringintty(value).mstr:= readunicodestring; 
+//  {$else}
+//  msestringintty(value).mstr:= readwidestring; 
+//  {$endif}
  {$endif}
+  msestringintty(value).int:= readinteger;
   readlistend;
  end;
 end;
@@ -6593,13 +6599,13 @@ begin
 //  writewidestring4519(writer,doublemsestringty(value).a);
 //  writewidestring4519(writer,doublemsestringty(value).b);
 // {$else}
- {$ifdef mse_unicodestring}
-  writeunicodestring(msestringintty(value).mstr);
+  twriter_writemsestring(writer,msestringintty(value).mstr);
+// {$ifdef mse_unicodestring}
+//  writeunicodestring(msestringintty(value).mstr);
+// {$else}
+//  writewidestring(msestringintty(value).mstr);
+// {$endif}
   writeinteger(msestringintty(value).int);
- {$else}
-  writewidestring(msestringintty(value).mstr);
-  writeinteger(msestringintty(value).int);
- {$endif}
 // {$endif}
   writelistend;
  end;
