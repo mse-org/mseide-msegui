@@ -9,7 +9,10 @@
 }
 unit msedataedits;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
+{$ifdef FPC}
+ {$define mse_with_ifi}
+ {$mode objfpc}{$h+}{$goto on}
+{$endif}
 
 interface
 uses
@@ -18,7 +21,11 @@ uses
  mseevent,msegraphutils,msedrawtext,msestat,msestatfile,mseclasses,
  msearrayprops,msegrids,msewidgetgrid,msedropdownlist,msedrag,mseforms,
  mseformatstr,typinfo,msemenus,
- msescrollbar,msewidgets,msepopupcalendar,msekeyboard,msepointer;
+ msescrollbar,msewidgets,msepopupcalendar,msekeyboard,msepointer
+ {$ifdef mse_with_ifi}
+ ,mseificomp,mseifiglob
+ {$endif}
+ ;
 
 const
  emptyinteger = minint;
@@ -43,7 +50,8 @@ type
    class function getinstancepo(owner: tobject): pfont; override;
  end;
  
- tcustomdataedit = class(tcustomedit,igridwidget,istatfile,idragcontroller)
+ tcustomdataedit = class(tcustomedit,igridwidget,istatfile,idragcontroller,
+                         {$ifdef mse_with_ifi}iifidatawidget{$endif})
   private
    fondataentered: notifyeventty;
    foncheckvalue: checkvalueeventty;
@@ -61,6 +69,7 @@ type
    fempty_textcolorbackground: colorty;
    fempty_textstyle: fontstylesty;
    fempty_color: colorty;
+   fifilink: tifilinkcomp;
    procedure fontemptychanged(const sender: tobject);
    procedure emptychanged;
    
@@ -76,6 +85,7 @@ type
    procedure setempty_textcolorbackground(const avalue: colorty);
    procedure setempty_textstyle(const avalue: fontstylesty);
    procedure setempty_color(const avalue: colorty);
+   procedure setifilink(const avalue: tifilinkcomp);
   protected
    fgridintf: iwidgetgrid;
    fdatalist: tdatalist;
@@ -215,6 +225,9 @@ type
    property ondataentered: notifyeventty read fondataentered write fondataentered;
    property ongettext: gettexteventty read fongettext write fongettext;
    property onsettext: settexteventty read fonsettext write fonsettext;
+{$ifdef mse_with_ifi}
+   property ifilink: tifilinkcomp read fifilink write setifilink;
+{$endif}
  end;
 
  tdataedit = class(tcustomdataedit)
@@ -239,6 +252,9 @@ type
    property ondataentered;
    property ongettext;
    property onsettext;
+{$ifdef mse_with_ifi}
+   property ifilink;
+{$endif}
    property onkeydown;
    property onkeyup;
  end;
@@ -2235,6 +2251,13 @@ procedure tcustomdataedit.updatecellzone(const row: integer; const apos: pointty
 begin
  //dummy
 end;
+
+{$ifdef mse_with_ifi}
+procedure tcustomdataedit.setifilink(const avalue: tifilinkcomp);
+begin
+ mseificomp.setifilinkcomp(self,iifidatawidget(self),avalue,fifilink);
+end;
+{$endif}
 
 { tcustomstringedit }
 

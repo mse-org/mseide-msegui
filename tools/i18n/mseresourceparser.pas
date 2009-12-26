@@ -302,11 +302,12 @@ var
 //        stringvalue:= readstring;
 //       end;
        vastring,valstring,vaWString,vautf8string: begin
-        {$ifdef mse_unicodestring}
-        msestringvalue:= readunicodestring;
-        {$else}
-        msestringvalue:= readwidestring;
-        {$endif}
+        msestringvalue:= treader_readmsestring(reader);
+//        {$ifdef mse_unicodestring}
+//        msestringvalue:= readunicodestring;
+//        {$else}
+//        msestringvalue:= readwidestring;
+//        {$endif}
        end;
        vaSet: begin
         readvalue;
@@ -484,11 +485,12 @@ var
         writeident(stringvalue);
        end;
        vaString,vaLString,vaWString,vautf8string: begin
-       {$ifdef mse_unicodestring}
-        writeunicodestring(msestringvalue);
-        {$else}
-        writewidestring(msestringvalue);
-        {$endif}
+        twriter_writemsestring(writer,msestringvalue);
+//       {$ifdef mse_unicodestring}
+//        writeunicodestring(msestringvalue);
+//        {$else}
+//        writewidestring(msestringvalue);
+//        {$endif}
        end;
        (*
        vaString,vaLString:  begin

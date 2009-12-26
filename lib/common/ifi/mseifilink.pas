@@ -217,7 +217,8 @@ type
  modalresulteventty = procedure(const sender: tvaluelink;
                  const atag: integer; const amodalresult: modalresultty) of object;
 
-//todo: beginupdate/endupdate
+//todo: beginupdate/endupdate, use tifivaluelinkcontroller
+
  tvaluelink = class(tmodulelinkprop)
   private
    fint64value: int64;
@@ -1530,7 +1531,8 @@ begin
       tkWString: begin
        setwidestrprop(instance,aproperty,asmsestring);
       end;
-     {$ifdef mse_unicodestring}
+      {$if FPC_FULLVERSION >= 20300}
+//     {$ifdef mse_unicodestring}
       tkUString: begin
        setunicodestrprop(instance,aproperty,asmsestring);
       end;
@@ -1557,7 +1559,8 @@ begin
    tkFloat: begin
     sendvalue(aproperty^.name,double(getfloatprop(fcomponent,aproperty)));
    end;
-  {$ifdef mse_unicodestring}
+  {$if FPC_FULLVERSION >= 20300}
+//  {$ifdef mse_unicodestring}
    tkUString: begin
     sendvalue(aproperty^.name,getunicodestrprop(fcomponent,aproperty));
    end;

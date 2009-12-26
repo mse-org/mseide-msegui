@@ -1278,14 +1278,14 @@ begin
   {$ifdef FPC}tkSString,tkAString,{$endif}tkLString: begin
    setstringvalue(getstrprop(asource,fprops[0].propinfo));
   end;
-  tkWString: begin
-   setmsestringvalue(getwidestrprop(asource,fprops[0].propinfo));
+  msestringtypekind: begin
+   setmsestringvalue(getmsestringprop(asource,fprops[0].propinfo));
   end;
-  {$ifdef mse_unicodestring}
-  tkUString: begin
-   setmsestringvalue(getunicodestrprop(asource,fprops[0].propinfo));
-  end;
-  {$endif}
+//  {$ifdef mse_unicodestring}
+//  tkUString: begin
+//   setmsestringvalue(getunicodestrprop(asource,fprops[0].propinfo));
+//  end;
+//  {$endif}
   tkInt64{$ifdef FPC},tkQWord{$endif}: begin
    setint64value(getint64prop(asource,fprops[0].propinfo));
   end;
@@ -1796,11 +1796,12 @@ begin
  end
  else begin
   with fprops[index] do begin
-  {$ifdef mse_unicodestring}
-   result:= decodemsestring(GetunicodestrProp(instance,propinfo));     
-  {$else}
-   result:= decodemsestring(GetwidestrProp(instance,propinfo));     
-  {$endif}
+   result:= decodemsestring(getmsestringprop(instance,propinfo));
+//  {$ifdef mse_unicodestring}
+//   result:= decodemsestring(GetunicodestrProp(instance,propinfo));     
+//  {$else}
+//   result:= decodemsestring(GetwidestrProp(instance,propinfo));     
+//  {$endif}
   end;
  end;
 end;
@@ -1820,21 +1821,23 @@ begin
   if ar1 = nil then begin
    for int1:= 0 to high(fprops) do begin
     with fprops[int1] do begin
-    {$ifdef mse_unicodestring}
-     setunicodestrprop(instance,propinfo,mstr1);  
-    {$else}
-     setwidestrprop(instance,propinfo,mstr1);  
-    {$endif}
+     setmsestringprop(instance,propinfo,mstr1);
+//    {$ifdef mse_unicodestring}
+//     setunicodestrprop(instance,propinfo,mstr1);  
+//    {$else}
+//     setwidestrprop(instance,propinfo,mstr1);  
+//    {$endif}
     end;
    end;
   end
   else begin
    for int1:= 0 to high(ar1) do begin
-   {$ifdef mse_unicodestring}
-    setunicodestrprop(ar1[int1],fprops[0].propinfo,mstr1);  
-   {$else}
-    setwidestrprop(ar1[int1],fprops[0].propinfo,mstr1);  
-   {$endif}
+    setmsestringprop(ar1[int1],fprops[0].propinfo,mstr1);  
+//   {$ifdef mse_unicodestring}
+//    setunicodestrprop(ar1[int1],fprops[0].propinfo,mstr1);  
+//   {$else}
+//    setwidestrprop(ar1[int1],fprops[0].propinfo,mstr1);  
+//   {$endif}
    end;
   end;    
   modified;

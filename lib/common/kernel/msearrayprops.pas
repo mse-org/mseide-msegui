@@ -1133,11 +1133,12 @@ end;
 
 procedure tmsestringarrayprop.readitem(const index: integer; reader: treader);
 begin
- {$ifdef mse_unicodestring}
- fitems[index]:= reader.Readunicodestring; //msestringimplementation
- {$else}
- fitems[index]:= reader.Readwidestring; //msestringimplementation
- {$endif}
+ fitems[index]:= treader_readmsestring(reader); //msestringimplementation
+// {$ifdef mse_unicodestring}
+// fitems[index]:= reader.Readunicodestring; //msestringimplementation
+// {$else}
+// fitems[index]:= reader.Readwidestring; //msestringimplementation
+// {$endif}
 end;
 
 procedure tmsestringarrayprop.setcount1(acount: integer; doinit: boolean);
@@ -1156,11 +1157,12 @@ end;
 
 procedure tmsestringarrayprop.writeitem(const index: integer; writer: twriter);
 begin
- {$ifdef mse_unicodestring}
- writer.writeunicodestring(fitems[index]);
- {$else}
- writer.writewidestring(fitems[index]); //msestringimplementation
- {$endif}
+ twriter_writemsestring(writer,fitems[index]);
+// {$ifdef mse_unicodestring}
+// writer.writeunicodestring(fitems[index]);
+// {$else}
+// writer.writewidestring(fitems[index]); //msestringimplementation
+// {$endif}
 end;
 
 procedure tmsestringarrayprop.assign(source: tpersistent);

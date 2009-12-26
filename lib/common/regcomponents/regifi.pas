@@ -7,7 +7,7 @@ uses
     
 procedure register;
 begin
- registercomponents('Ifi',[tifilinkcomp]); 
+ registercomponents('Ifi',[tifistringlinkcomp]); 
  registercomponenttabhints(['Ifi'],
    ['IFI Components']);
 end;

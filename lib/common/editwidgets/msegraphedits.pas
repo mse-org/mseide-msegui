@@ -3388,20 +3388,22 @@ end;
 
 procedure tcustomprogressbar.readformat(reader: treader);
 begin
- {$ifdef mse_unicodestring}
- fformat:= reader.readunicodestring;
- {$else}
- fformat:= reader.readwidestring;
- {$endif}
+ fformat:= treader_readmsestring(reader);
+// {$ifdef mse_unicodestring}
+// fformat:= reader.readunicodestring;
+// {$else}
+// fformat:= reader.readwidestring;
+// {$endif}
 end;
 
 procedure tcustomprogressbar.writeformat(writer: twriter);
 begin
- {$ifdef mse_unicodestring}
- writer.writeunicodestring(fformat);
- {$else}
- writer.writewidestring(fformat);
- {$endif}
+ twriter_writemsestring(writer,fformat);
+// {$ifdef mse_unicodestring}
+// writer.writeunicodestring(fformat);
+// {$else}
+// writer.writewidestring(fformat);
+// {$endif}
 end;
 
 procedure tcustomprogressbar.readvaluescale(reader: treader);
