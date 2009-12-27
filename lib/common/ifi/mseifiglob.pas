@@ -27,6 +27,7 @@ type
   procedure valuechanged(const sender: iifiwidget);
   procedure statechanged(const sender: iifiwidget;
                            const astate: ifiwidgetstatesty);
+  procedure setvalue(var avalue; var accept: boolean);
   procedure sendmodalresult(const sender: iifiwidget; 
                                          const amodalresult: modalresultty);
  end;

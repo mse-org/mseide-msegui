@@ -69,7 +69,11 @@ type
    fempty_textcolorbackground: colorty;
    fempty_textstyle: fontstylesty;
    fempty_color: colorty;
+{$ifdef mse_with_ifi}
    fifilink: tifilinkcomp;
+   procedure ifisetvalue(var avalue; var accept: boolean);
+   procedure setifilink(const avalue: tifilinkcomp);
+{$endif}
    procedure fontemptychanged(const sender: tobject);
    procedure emptychanged;
    
@@ -85,7 +89,6 @@ type
    procedure setempty_textcolorbackground(const avalue: colorty);
    procedure setempty_textstyle(const avalue: fontstylesty);
    procedure setempty_color(const avalue: colorty);
-   procedure setifilink(const avalue: tifilinkcomp);
   protected
    fgridintf: iwidgetgrid;
    fdatalist: tdatalist;
@@ -225,9 +228,6 @@ type
    property ondataentered: notifyeventty read fondataentered write fondataentered;
    property ongettext: gettexteventty read fongettext write fongettext;
    property onsettext: settexteventty read fonsettext write fonsettext;
-{$ifdef mse_with_ifi}
-   property ifilink: tifilinkcomp read fifilink write setifilink;
-{$endif}
  end;
 
  tdataedit = class(tcustomdataedit)
@@ -252,9 +252,6 @@ type
    property ondataentered;
    property ongettext;
    property onsettext;
-{$ifdef mse_with_ifi}
-   property ifilink;
-{$endif}
    property onkeydown;
    property onkeyup;
  end;
@@ -267,6 +264,8 @@ type
    procedure setgridvalue(const index: integer; const Value: msestring);
    function getgridvalues: msestringarty;
    procedure setgridvalues(const Value: msestringarty);
+   function getifilink: tifistringlinkcomp;
+   procedure setifilink(const avalue: tifistringlinkcomp);
   protected
    fvalue: msestring;
    function getvaluetext: msestring; virtual;
@@ -294,6 +293,9 @@ type
    property gridvalue[const index: integer]: msestring
         read getgridvalue write setgridvalue; default;
    property gridvalues: msestringarty read getgridvalues write setgridvalues;
+{$ifdef mse_with_ifi}
+   property ifilink: tifistringlinkcomp read getifilink write setifilink;
+{$endif}
  end;
 
  tstringedit = class(tcustomstringedit)
@@ -302,6 +304,9 @@ type
    property maxlength;
    property value;
    property onsetvalue;
+{$ifdef mse_with_ifi}
+   property ifilink;
+{$endif}
  end;
  
 const
@@ -2059,6 +2064,15 @@ begin
  end;
 end;
 
+{$ifdef mse_with_ifi}
+procedure tcustomdataedit.ifisetvalue(var avalue; var accept: boolean);
+begin
+ if accept and (fifiserverintf <> nil) then begin
+  fifiserverintf.setvalue(avalue,accept);
+ end;
+end;
+{$endif}
+
 procedure tcustomdataedit.setenabled(const avalue: boolean);
 begin
  inherited;
@@ -2310,7 +2324,8 @@ begin
  end;
 end;
 
-procedure tcustomstringedit.texttovalue(var accept: boolean; const quiet: boolean);
+procedure tcustomstringedit.texttovalue(var accept: boolean;
+                                                       const quiet: boolean);
 var
  mstr1: msestring;
 begin
@@ -2322,6 +2337,9 @@ begin
  end;
  if not quiet then begin
   dosetvalue(mstr1,accept);
+{$ifdef mse_with_ifi}
+  ifisetvalue(mstr1,accept);
+{$endif}
  end;
  if accept then begin
   value:= mstr1;
@@ -2437,6 +2455,19 @@ function tcustomstringedit.isempty(const atext: msestring): boolean;
 begin
  result:= atext = getnulltext;
 end;
+
+{$ifdef mse_with_ifi}
+function tcustomstringedit.getifilink: tifistringlinkcomp;
+begin
+ result:= tifistringlinkcomp(fifilink);
+end;
+
+procedure tcustomstringedit.setifilink(const avalue: tifistringlinkcomp);
+begin
+ inherited;
+end;
+
+{$endif}
 
 { tstringedit }
 

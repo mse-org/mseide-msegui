@@ -385,6 +385,7 @@ type
    procedure valuechanged(const sender: iifiwidget); virtual;
    procedure statechanged(const sender: iifiwidget;
                              const astate: ifiwidgetstatesty); virtual;
+   procedure setvalue(var avalue; var accept: boolean); virtual;
    procedure sendmodalresult(const sender: iifiwidget; 
                                          const amodalresult: modalresultty); virtual;
   //imodulelink
@@ -2057,6 +2058,11 @@ end;
 
 procedure tcustommodulelink.statechanged(const sender: iifiwidget;
               const astate: ifiwidgetstatesty);
+begin
+ //dummy
+end;
+
+procedure tcustommodulelink.setvalue(var avalue; var accept: boolean);
 begin
  //dummy
 end;

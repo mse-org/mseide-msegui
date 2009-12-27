@@ -1,5 +1,5 @@
 unit mseificomp;
-{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
  classes,mseclasses,msegui,mseifiglob,mseglob,typinfo,msestrings;
@@ -39,6 +39,7 @@ type
    procedure valuechanged(const sender: iifiwidget); virtual;
    procedure statechanged(const sender: iifiwidget;
                             const astate: ifiwidgetstatesty); virtual;
+   procedure setvalue(var avalue; var accept: boolean); virtual;
    procedure sendmodalresult(const sender: iifiwidget; 
                              const amodalresult: modalresultty); virtual;
    procedure setcomponent(const acomponent: tmsecomponent; 
@@ -73,14 +74,17 @@ type
  tstringwidgetcontroller = class(tifivaluewidgetcontroller)
   private
    fvalue: msestring;
+   fonsetvalue: setstringeventty;
    procedure setvalue(const avalue: msestring);
   protected
    procedure valuetowidget; override;
    procedure widgettovalue; override;
+   procedure setvalue(var avalue; var accept: boolean); override;
   public
    constructor create(const aowner: tmsecomponent); override;
   published
    property value: msestring read fvalue write setvalue;
+   property onsetvalue: setstringeventty read fonsetvalue write fonsetvalue;
  end;
   
  tifilinkcomp = class(tmsecomponent)
@@ -92,14 +96,20 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-  published
    property controller: tifivaluewidgetcontroller read fcontroller 
                                                          write setcontroller;
+  published
  end;
  
  tifistringlinkcomp = class(tifilinkcomp)
+  private
+   function getcontroller: tstringwidgetcontroller;
+   procedure setcontroller(const avalue: tstringwidgetcontroller);
   protected
    function getcontrollerclass: ifivaluewidgetcontrollerclassty; override;
+  published
+   property controller: tstringwidgetcontroller read getcontroller
+                                                         write setcontroller;
  end;
  
 procedure setifilinkcomp(const sender: tmsecomponent; 
@@ -247,6 +257,12 @@ begin
  end;
 end;
 
+procedure tcustomifivaluewidgetcontroller.setvalue(var avalue;
+               var accept: boolean);
+begin
+ //dummy
+end;
+
 { tifilinkcomp }
 
 constructor tifilinkcomp.create(aowner: tcomponent);
@@ -294,11 +310,28 @@ begin
  value:= getmsestringprop(fcomponent,fvalueproperty);
 end;
 
+procedure tstringwidgetcontroller.setvalue(var avalue; var accept: boolean);
+begin
+ if fowner.canevent(tmethod(fonsetvalue)) then begin
+  fonsetvalue(self,msestring(avalue),accept);
+ end;
+end;
+
 { tifistringlinkcomp }
 
 function tifistringlinkcomp.getcontrollerclass: ifivaluewidgetcontrollerclassty;
 begin
  result:= tstringwidgetcontroller;
+end;
+
+function tifistringlinkcomp.getcontroller: tstringwidgetcontroller;
+begin
+ result:= tstringwidgetcontroller(inherited controller);
+end;
+
+procedure tifistringlinkcomp.setcontroller(const avalue: tstringwidgetcontroller);
+begin
+ inherited setcontroller(avalue);
 end;
 
 { tifivaluewidgetcontroller }
