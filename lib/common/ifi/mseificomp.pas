@@ -18,10 +18,11 @@ type
  ifiwidgetmodalresulteventty = procedure(const sender: tobject;
                              const link: iifiwidget; 
                              const amodalresult: modalresultty) of object;
- ifivaluelinkstatety = (ivs_linking);
+
+ ifivaluelinkstatety = (ivs_linking,ivs_valuesetting);
  ifivaluelinkstatesty = set of ifivaluelinkstatety;
-                              
- tifivaluewidgetcontroller = class(tlinkedpersistent,iifiserver)
+  
+ tcustomifivaluewidgetcontroller = class(tlinkedpersistent,iifiserver)
   private
    fonvaluechanged: ifiwidgeteventty;
    fonstatechanged: ifiwidgetstateeventty;
@@ -42,12 +43,12 @@ type
                              const amodalresult: modalresultty); virtual;
    procedure setcomponent(const acomponent: tmsecomponent; 
                                                  const aintf: iifiwidget);
-   procedure updatestate; virtual;
-   procedure loaded; virtual;
+   procedure valuetowidget; virtual; 
+   procedure widgettovalue; virtual;
+   procedure change;
   public
    constructor create(const aowner: tmsecomponent; const akind: ttypekind);
    property kind: ttypekind read fkind;
-  published
    property onvaluechanged: ifiwidgeteventty read fonvaluechanged 
                                                     write fonvaluechanged;
    property onstatechanged: ifiwidgetstateeventty read fonstatechanged 
@@ -56,13 +57,38 @@ type
                                                     write fonmodalresult;
    property widget: twidget read getwidget write setwidget;
  end;
- 
+
+ tifivaluewidgetcontroller = class(tcustomifivaluewidgetcontroller)
+  public
+   constructor create(const aowner: tmsecomponent); virtual; overload;
+  published
+   property onvaluechanged;
+   property onstatechanged;
+   property onmodalresult;
+   property widget;
+ end;
+                             
+ ifivaluewidgetcontrollerclassty = class of tifivaluewidgetcontroller;
+
+ tstringwidgetcontroller = class(tifivaluewidgetcontroller)
+  private
+   fvalue: msestring;
+   procedure setvalue(const avalue: msestring);
+  protected
+   procedure valuetowidget; override;
+   procedure widgettovalue; override;
+  public
+   constructor create(const aowner: tmsecomponent); override;
+  published
+   property value: msestring read fvalue write setvalue;
+ end;
+  
  tifilinkcomp = class(tmsecomponent)
   private
    fcontroller: tifivaluewidgetcontroller;
    procedure setcontroller(const avalue: tifivaluewidgetcontroller);
   protected
-   function gettypekind: ttypekind; virtual;
+   function getcontrollerclass: ifivaluewidgetcontrollerclassty; virtual;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -73,7 +99,7 @@ type
  
  tifistringlinkcomp = class(tifilinkcomp)
   protected
-   function gettypekind: ttypekind; override;
+   function getcontrollerclass: ifivaluewidgetcontrollerclassty; override;
  end;
  
 procedure setifilinkcomp(const sender: tmsecomponent; 
@@ -99,9 +125,9 @@ begin
  end;
 end;
 
-{ tifivaluewidgetcontroller}
+{ tcustomifivaluewidgetcontroller}
 
-constructor tifivaluewidgetcontroller.create(const aowner: tmsecomponent; 
+constructor tcustomifivaluewidgetcontroller.create(const aowner: tmsecomponent; 
                                const akind: ttypekind);
 begin
  fowner:= aowner;
@@ -109,7 +135,7 @@ begin
  inherited create;
 end;
 
-procedure tifivaluewidgetcontroller.setcomponent(const acomponent: tmsecomponent;
+procedure tcustomifivaluewidgetcontroller.setcomponent(const acomponent: tmsecomponent;
                                     const aintf: iifiwidget);
 var
  kind1: ttypekind;
@@ -140,9 +166,10 @@ begin
    fvalueproperty:= prop1;
    if fintf <> nil then begin
     fintf.setifiserverintf(iifiserver(self));
-    if not (csloading in fowner.componentstate) then begin
-     updatestate;
-    end;
+    valuetowidget;
+//    if not (csloading in fowner.componentstate) then begin
+//     updatestate;
+//    end;
    end;
   finally
    exclude(fstate,ivs_linking);
@@ -150,14 +177,23 @@ begin
  end;
 end;
 
-procedure tifivaluewidgetcontroller.valuechanged(const sender: iifiwidget);
+procedure tcustomifivaluewidgetcontroller.valuechanged(const sender: iifiwidget);
 begin
  if fowner.canevent(tmethod(fonvaluechanged)) then begin
   fonvaluechanged(self,sender);
  end;
+ if (fvalueproperty <> nil) and not (ivs_valuesetting in fstate) and 
+               not(csloading in fowner.componentstate) then begin
+  include(fstate,ivs_valuesetting);
+  try
+   widgettovalue;
+  finally
+   exclude(fstate,ivs_valuesetting);
+  end;
+ end;
 end;
 
-procedure tifivaluewidgetcontroller.statechanged(const sender: iifiwidget;
+procedure tcustomifivaluewidgetcontroller.statechanged(const sender: iifiwidget;
                const astate: ifiwidgetstatesty);
 begin
  if fowner.canevent(tmethod(fonstatechanged)) then begin
@@ -165,7 +201,7 @@ begin
  end;
 end;
 
-procedure tifivaluewidgetcontroller.sendmodalresult(const sender: iifiwidget;
+procedure tcustomifivaluewidgetcontroller.sendmodalresult(const sender: iifiwidget;
                const amodalresult: modalresultty);
 begin
  if fowner.canevent(tmethod(fonmodalresult)) then begin
@@ -173,22 +209,22 @@ begin
  end;
 end;
 
-procedure tifivaluewidgetcontroller.updatestate;
+procedure tcustomifivaluewidgetcontroller.widgettovalue;
 begin
  //dummy
 end;
 
-procedure tifivaluewidgetcontroller.loaded;
+procedure tcustomifivaluewidgetcontroller.valuetowidget;
 begin
- updatestate;
+ //dummy
 end;
 
-function tifivaluewidgetcontroller.getwidget: twidget;
+function tcustomifivaluewidgetcontroller.getwidget: twidget;
 begin
  result:= twidget(fcomponent);
 end;
 
-procedure tifivaluewidgetcontroller.setwidget(const avalue: twidget);
+procedure tcustomifivaluewidgetcontroller.setwidget(const avalue: twidget);
 var
  intf1: iifidatawidget;
 begin
@@ -199,11 +235,23 @@ begin
  setcomponent(avalue,intf1);
 end;
 
+procedure tcustomifivaluewidgetcontroller.change;
+begin
+ if (fvalueproperty <> nil) and not (ivs_valuesetting in fstate) then begin
+  include(fstate,ivs_valuesetting);
+  try
+   valuetowidget;
+  finally
+   exclude(fstate,ivs_valuesetting);
+  end;
+ end;
+end;
+
 { tifilinkcomp }
 
 constructor tifilinkcomp.create(aowner: tcomponent);
 begin
- fcontroller:= tifivaluewidgetcontroller.create(self,gettypekind);
+ fcontroller:= getcontrollerclass.create(self);
  inherited;
 end;
 
@@ -218,16 +266,46 @@ begin
  fcontroller.assign(avalue);
 end;
 
-function tifilinkcomp.gettypekind: ttypekind;
+function tifilinkcomp.getcontrollerclass: ifivaluewidgetcontrollerclassty;
 begin
- result:= tkunknown;
+ result:= tifivaluewidgetcontroller;
+end;
+
+{ tstringwidgetcontroller }
+
+constructor tstringwidgetcontroller.create(const aowner: tmsecomponent);
+begin
+ inherited create(aowner,msestringtypekind);
+end;
+
+procedure tstringwidgetcontroller.setvalue(const avalue: msestring);
+begin
+ fvalue:= avalue;
+ change;
+end;
+
+procedure tstringwidgetcontroller.valuetowidget;
+begin
+ setmsestringprop(fcomponent,fvalueproperty,fvalue);
+end;
+
+procedure tstringwidgetcontroller.widgettovalue;
+begin
+ value:= getmsestringprop(fcomponent,fvalueproperty);
 end;
 
 { tifistringlinkcomp }
 
-function tifistringlinkcomp.gettypekind: ttypekind;
+function tifistringlinkcomp.getcontrollerclass: ifivaluewidgetcontrollerclassty;
 begin
- result:= msestringtypekind;
+ result:= tstringwidgetcontroller;
+end;
+
+{ tifivaluewidgetcontroller }
+
+constructor tifivaluewidgetcontroller.create(const aowner: tmsecomponent);
+begin
+ inherited create(aowner,tkunknown);
 end;
 
 end.
