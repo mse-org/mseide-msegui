@@ -49,6 +49,7 @@ type
    procedure change;
   public
    constructor create(const aowner: tmsecomponent; const akind: ttypekind);
+   function canconnect(const acomponent: tcomponent): boolean; virtual;
    property kind: ttypekind read fkind;
    property onvaluechanged: ifiwidgeteventty read fonvaluechanged 
                                                     write fonvaluechanged;
@@ -239,7 +240,8 @@ var
  intf1: iifidatawidget;
 begin
  intf1:= nil;
- if (avalue <> nil) and not getcorbainterface(avalue,typeinfo(iifidatawidget),intf1) then begin
+ if (avalue <> nil) and 
+       not getcorbainterface(avalue,typeinfo(iifidatawidget),intf1) then begin
   raise exception.create(avalue.name + ' is no IfI data widget.');
  end;
  setcomponent(avalue,intf1);
@@ -261,6 +263,18 @@ procedure tcustomifivaluewidgetcontroller.setvalue(var avalue;
                var accept: boolean);
 begin
  //dummy
+end;
+
+function tcustomifivaluewidgetcontroller.canconnect(const acomponent: tcomponent): boolean;
+var
+ intf1: pointer;
+ prop1: ppropinfo;
+begin
+ result:= getcorbainterface(acomponent,typeinfo(iifidatawidget),intf1);
+ if result then begin
+  prop1:= getpropinfo(acomponent,'value');
+  result:= (prop1 <> nil) and (prop1^.proptype^.kind = fkind);
+ end;
 end;
 
 { tifilinkcomp }
