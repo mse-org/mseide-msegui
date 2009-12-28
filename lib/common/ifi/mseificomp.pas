@@ -67,7 +67,6 @@ type
    property onvaluechanged;
    property onstatechanged;
    property onmodalresult;
-   property widget;
  end;
                              
  ifivaluewidgetcontrollerclassty = class of tifivaluewidgetcontroller;
