@@ -126,8 +126,8 @@ type
 
  actionoptionsty = set of actionoptionty;
 
- tcustomaction = class(tactcomponent,istatfile{,iimagelistinfo},
-                    {$ifdef mse_with_ifi}iifilink{$endif})
+ tcustomaction = class(tactcomponent,istatfile{,iimagelistinfo}
+                    {$ifdef mse_with_ifi},iifilink{$endif})
   private
    fonupdate: actioneventty;
    fstatvarname: msestring;

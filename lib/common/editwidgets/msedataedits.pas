@@ -52,8 +52,8 @@ type
    class function getinstancepo(owner: tobject): pfont; override;
  end;
  
- tcustomdataedit = class(tcustomedit,igridwidget,istatfile,idragcontroller,
-                         {$ifdef mse_with_ifi}iifilink{$endif})
+ tcustomdataedit = class(tcustomedit,igridwidget,istatfile,idragcontroller
+                         {$ifdef mse_with_ifi},iifilink{$endif})
   private
    fondataentered: notifyeventty;
    foncheckvalue: checkvalueeventty;
@@ -266,8 +266,10 @@ type
    procedure setgridvalue(const index: integer; const Value: msestring);
    function getgridvalues: msestringarty;
    procedure setgridvalues(const Value: msestringarty);
+  {$ifdef mse_with_ifi}
    function getifilink: tifistringlinkcomp;
    procedure setifilink(const avalue: tifistringlinkcomp);
+  {$endif}
   protected
    fvalue: msestring;
    function getvaluetext: msestring; virtual;

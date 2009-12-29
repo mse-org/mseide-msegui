@@ -16,7 +16,12 @@
 }
 unit main;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$ifdef FPC}
+ {$ifndef mse_no_ifi}
+  {$define mse_with_ifi}
+ {$endif}
+ {$mode objfpc}{$h+}
+{$endif}
 
 interface
 
@@ -281,7 +286,9 @@ uses
  mseparser,msesysintf,memoryform,
  regwidgets,regeditwidgets,regkernel,regdialogs,regprinter,
  {$ifdef FPC}{$ifndef mse_withoutdb}regdb,regreport,{$endif}{$endif}
+{$ifdef mse_with_ifi}
  regifi,{$ifdef mse_with_ifirem}regifirem,{$endif}
+{$endif}
  {$ifdef mse_with_zeoslib}regzeoslib,{$endif}
  {$ifdef mse_with_pascalscript}regpascalscript,{$endif}
  regdesignutils,regsysutils,regserialcomm,regexperimental,
