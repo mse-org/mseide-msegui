@@ -55,6 +55,7 @@ type
    fstate: ifivaluelinkstatesty;
    fwidgetstate: ifiwidgetstatesty;
    fwidgetstatebefore: ifiwidgetstatesty;
+   fchangedclient: pointer;
 
    procedure finalizelink(const alink: pointer);
    procedure finalizelinks;
@@ -63,6 +64,7 @@ type
 //   procedure setcomponent(const aintf: iificlient);
    function checkcomponent(const aintf: iificlient): pointer;
                      //returns interface info
+   procedure valuestootherclient(const alink: pointer); 
    procedure valuestoclient(const alink: pointer); virtual; 
    procedure clienttovalues(const alink: pointer); virtual; 
 //   procedure widgettovalue; virtual;
@@ -264,6 +266,8 @@ begin
   include(fstate,ivs_valuesetting);
   try
    clienttovalues(sender);
+   fchangedclient:= sender;
+   tmsecomponent1(fowner).getobjectlinker.forall(@valuestootherclient,self);
   finally
    exclude(fstate,ivs_valuesetting);
   end;
@@ -300,6 +304,13 @@ end;
 procedure tcustomificlientcontroller.valuestoclient(const alink: pointer);
 begin
  //dummy
+end;
+
+procedure tcustomificlientcontroller.valuestootherclient(const alink: pointer);
+begin
+ if alink <> fchangedclient then begin
+  valuestoclient(alink);
+ end;
 end;
 
 procedure tcustomificlientcontroller.clienttovalues(const alink: pointer);
