@@ -165,10 +165,19 @@ end;
 { tobjectevent }
 
 constructor tobjectevent.create(const akind: eventkindty; const dest: ievent);
+{$ifndef FPC}
+var
+ po1: pointer;
+{$endif}
 begin
  finterface:= pointer(dest);
  if finterface <> nil then begin
+{$ifndef FPC}
+  po1:= pointer(1);
+  ievent(finterface).link(iobjectlink(po1),iobjectlink(self));
+{$else}
   ievent(finterface).link(iobjectlink(pointer(1)),iobjectlink(self));
+{$endif}
  end;
  inherited create(akind);
 end;
@@ -181,9 +190,18 @@ begin
 end;
 
 destructor tobjectevent.destroy;
+{$ifndef FPC}
+var
+ po1: pointer;
+{$endif}
 begin
  if finterface <> nil then begin
+{$ifndef FPC}
+  po1:= pointer(1);
+  ievent(finterface).unlink(iobjectlink(po1),iobjectlink(self));
+{$else}
   ievent(finterface).unlink(iobjectlink(pointer(1)),iobjectlink(self));
+{$endif}
  end;
  inherited;
 end;

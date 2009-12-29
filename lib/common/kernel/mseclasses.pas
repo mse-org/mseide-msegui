@@ -2452,7 +2452,7 @@ var
  ba: pointer;
 begin
  if source <> dest then begin
-  ba:= dest;
+  ba:= pointer(dest);
   pointer(dest):= pointer(source);
   if source <> nil then begin
    link(linkintf,source,@dest,ainterfacetype);

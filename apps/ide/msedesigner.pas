@@ -399,7 +399,7 @@ type
                    //handles qualified names for foreign forms
    function componentcanedit: boolean;
    function getcomponenteditor: icomponenteditor;
-   function editcomponent(const aowner: tcomponent = false): boolean; //false if no editor available
+   function editcomponent(const aowner: tcomponent = nil): boolean; //false if no editor available
    function getcomponentlist(const acomponentclass: tcomponentclass;
                               const filter: compfilterfuncty = nil): componentarty;
    function getcomponentnamelist(const acomponentclass: tcomponentclass;
@@ -4318,9 +4318,10 @@ begin
  end;
 end;
 
-function tdesigner.editcomponent(const aowner: tcomponent = false): boolean; //false if no editor available
+function tdesigner.editcomponent(const aowner: tcomponent = nil): boolean;
+                                  //false if no editor available
 begin
- result:= componentcanedit and ((aowner = nil) or 
+ result:= componentcanedit and ((aowner = nil) or
                       (fcomponenteditor.component.owner = aowner));
  if result then begin
   fcomponenteditor.edit;
