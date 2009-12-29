@@ -13,7 +13,7 @@ type
  
 procedure register;
 begin
- registercomponents('Ifi',[tifistringlinkcomp]); 
+ registercomponents('Ifi',[tifiactionlinkcomp,tifistringlinkcomp]); 
  registercomponenttabhints(['Ifi'],
    ['IFI Components']);
 // registerpropertyeditor(typeinfo(tcomponent),tcustomificlientcontroller,

@@ -10,7 +10,9 @@
 unit msegui;
 
 {$ifdef FPC}
- {$define mse_with_ifi}
+ {$ifndef mse_no_ifi}
+  {$define mse_with_ifi}
+ {$endif}
  {$mode objfpc}{$h+}{$GOTO ON}{$interfaces corba}
 {$endif}
 
@@ -1168,8 +1170,7 @@ type
  widgetclassty = class of twidget;
  navigrequesteventty = procedure(const sender: twidget;
                                 var ainfo: naviginfoty) of object; 
- twidget = class(tactcomponent,iscrollframe,iface
-                           {$ifdef mse_with_ifi},iificlient{$endif})
+ twidget = class(tactcomponent,iscrollframe,iface)
   private
    fwidgetregion: regionty;
    frootpos: pointty;   //position in rootwindow
@@ -1267,13 +1268,6 @@ type
    ffont: twidgetfont;
    fhint: msestring;
    fdefaultfocuschild: twidget;
-
-{$ifdef mse_with_ifi}
-   fifiserverintf: iifiserver;
-  //iifiwidget
-   procedure setifiserverintf(const aintf: iifiserver);
-   function getifiserverintf: iifiserver;
-{$endif}   
 
    procedure defineproperties(filer: tfiler); override;
    function gethelpcontext: msestring; override;
@@ -10609,18 +10603,6 @@ begin
   end;
  end;
 end;
-
-{$ifdef mse_with_ifi}
-procedure twidget.setifiserverintf(const aintf: iifiserver);
-begin
- fifiserverintf:= aintf;
-end;
-
-function twidget.getifiserverintf: iifiserver;
-begin
- result:= fifiserverintf;
-end;
-{$endif}
 
 function twidget.canclose(const newfocus: twidget = nil): boolean;
 var

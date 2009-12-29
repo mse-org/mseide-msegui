@@ -8,7 +8,12 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 unit mseactions;
-{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$ifdef FPC}
+ {$ifndef mse_no_ifi}
+  {$define mse_with_ifi}
+ {$endif}
+ {$mode objfpc}{$h+}
+{$endif}
 interface
 uses
  classes,mseact,mseglob,mseguiglob,msegui,mseevent,mseclasses,msebitmap,
@@ -56,6 +61,9 @@ type
    property onupdate;
    property onchange;
    property onasyncevent;
+{$ifdef mse_with_ifi}
+   property ifilink;
+{$endif}
  end;
 
  tshortcutaction = class(townedpersistent)

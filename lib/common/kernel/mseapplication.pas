@@ -9,7 +9,9 @@
 }
 unit mseapplication;
 {$ifdef FPC}
- {$define mse_with_ifi}
+ {$ifndef mse_no_ifi}
+  {$define mse_with_ifi}
+ {$endif}
  {$mode objfpc}{$h+}{$interfaces corba}
 {$endif}
 interface

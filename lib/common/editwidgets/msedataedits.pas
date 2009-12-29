@@ -10,7 +10,9 @@
 unit msedataedits;
 
 {$ifdef FPC}
- {$define mse_with_ifi}
+ {$ifndef mse_no_ifi}
+  {$define mse_with_ifi}
+ {$endif}
  {$mode objfpc}{$h+}{$goto on}
 {$endif}
 
@@ -2068,7 +2070,7 @@ end;
 procedure tcustomdataedit.ifisetvalue(var avalue; var accept: boolean);
 begin
  if accept and (fifiserverintf <> nil) then begin
-  fifiserverintf.setvalue(avalue,accept);
+  fifiserverintf.setvalue(iificlient(self),avalue,accept);
  end;
 end;
 {$endif}

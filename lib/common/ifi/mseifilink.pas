@@ -382,10 +382,12 @@ type
                 //returns sequence number
    procedure receiveevent(const event: tobjectevent); override;
   //iifiserver
+   procedure execute(const sender: iificlient); virtual;
    procedure valuechanged(const sender: iificlient); virtual;
    procedure statechanged(const sender: iificlient;
                              const astate: ifiwidgetstatesty); virtual;
-   procedure setvalue(var avalue; var accept: boolean); virtual;
+   procedure setvalue(const sender: iificlient; var avalue; 
+                                   var accept: boolean); virtual;
    procedure sendmodalresult(const sender: iificlient; 
                                          const amodalresult: modalresultty); virtual;
   //imodulelink
@@ -2051,6 +2053,11 @@ begin
  end;
 end;
 
+procedure tcustommodulelink.execute(const sender: iificlient);
+begin
+ //dummy
+end;
+
 procedure tcustommodulelink.valuechanged(const sender: iificlient);
 begin
  //dummy
@@ -2062,7 +2069,8 @@ begin
  //dummy
 end;
 
-procedure tcustommodulelink.setvalue(var avalue; var accept: boolean);
+procedure tcustommodulelink.setvalue(const sender: iificlient; var avalue;
+                                                    var accept: boolean);
 begin
  //dummy
 end;

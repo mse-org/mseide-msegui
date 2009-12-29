@@ -9,7 +9,12 @@
 }
 unit mseact;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
+{$ifdef FPC}
+ {$ifndef mse_no_ifi}
+  {$define mse_with_ifi}
+ {$endif}
+ {$mode objfpc}{$h+}{$interfaces corba}
+{$endif}
 
 interface
 
@@ -17,7 +22,7 @@ uses
  {$ifdef FPC}classes{$else}Classes{$endif},mseclasses,mserichstring,
  msetypes,mseglob,mseapplication,
  {msekeyboard,}mseevent,msestat,msestatfile,msestrings,
- msegraphutils{,msebitmap};
+ msegraphutils{,msebitmap}{$ifdef mse_with_ifi},mseifiglob,mseificomp{$endif};
 
 const
  defaultactionstates = [];
@@ -121,7 +126,8 @@ type
 
  actionoptionsty = set of actionoptionty;
 
- tcustomaction = class(tactcomponent,istatfile{,iimagelistinfo})
+ tcustomaction = class(tactcomponent,istatfile{,iimagelistinfo},
+                    {$ifdef mse_with_ifi}iifilink{$endif})
   private
    fonupdate: actioneventty;
    fstatvarname: msestring;
@@ -129,6 +135,10 @@ type
    fonchange: notifyeventty;
    fonasyncevent: asynceventty;
    fonexecuteaction: actioneventty;
+{$ifdef mse_with_ifi}
+   fifilink: tifiactionlinkcomp;
+   procedure setifilink(const avalue: tifiactionlinkcomp); overload;
+{$endif}
    function getcaption: captionty;
    procedure setcaption(const Value: captionty);
    procedure setonexecute(const Value: notifyeventty);
@@ -194,6 +204,9 @@ type
                  default defaultactionoptions;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
+{$ifdef mse_with_ifi}
+   property ifilink: tifiactionlinkcomp read fifilink write setifilink;
+{$endif}
 
    property onexecute: notifyeventty read finfo.onexecute write setonexecute;
    property onexecuteaction: actioneventty read fonexecuteaction write fonexecuteaction;
@@ -224,6 +237,9 @@ type
    property onupdate;
    property onchange;
    property onasyncevent;
+{$ifdef mse_with_ifi}
+   property ifilink;
+{$endif}
  end;
 
 procedure linktoaction(const sender: iactionlink; const aaction: tcustomaction;
@@ -1139,7 +1155,12 @@ begin
  if canevent(tmethod(fonexecuteaction)) then begin
   fonexecuteaction(self);
  end;
-  sendchangeevent(oe_fired);
+ sendchangeevent(oe_fired);
+{$ifdef mse_with_ifi}
+ if fifiserverintf <> nil then begin
+  fifiserverintf.execute(iificlient(self));
+ end;
+{$endif}
 end;
 
 procedure tcustomaction.registeronshortcut(const avalue: boolean);
@@ -1151,6 +1172,13 @@ procedure tcustomaction.doafterunlink;
 begin
  //dummy
 end;
+
+{$ifdef mse_with_ifi}
+procedure tcustomaction.setifilink(const avalue: tifiactionlinkcomp);
+begin
+ mseificomp.setifilinkcomp(iifilink(self),avalue,fifilink);
+end;
+{$endif}
 
 end.
 

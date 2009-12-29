@@ -10,7 +10,9 @@
 unit mseclasses;
 
 {$ifdef FPC}
- {$define mse_with_ifi}
+ {$ifndef mse_no_ifi}
+  {$define mse_with_ifi}
+ {$endif}
  {$mode objfpc}{$h+}{$interfaces corba}
 {$endif}
 
@@ -299,7 +301,7 @@ type
  end;
 
  tmsecomponent = class(tcomponent,ievent
-                  {$ifdef mse_with_ifi},iificommand{$endif})
+                  {$ifdef mse_with_ifi},iificommand,iificlient{$endif})
   private
    fonbeforeupdateskin: notifyeventty;
    fonafterupdateskin: notifyeventty;
@@ -313,6 +315,16 @@ type
    factualclassname: pshortstring;
    fancestorclassname: string;
    fhelpcontext: msestring;
+
+{$ifdef mse_with_ifi}
+   fifiserverintf: iifiserver;
+  //iificlient
+   procedure setifiserverintf(const aintf: iifiserver);
+   function getifiserverintf: iifiserver;
+   //iificommand
+   procedure executeificommand(var acommand: ificommandcodety); virtual;
+{$endif}   
+
    function getmsecomponentstate: msecomponentstatesty;
    function getobjectlinker: tobjectlinker;
    procedure objectevent(const sender: tobject; const event: objecteventty); virtual;
@@ -359,10 +371,6 @@ type
    procedure componentevent(const event: tcomponentevent); virtual;
    procedure doasyncevent(var atag: integer); virtual;
    procedure doafterload; virtual;
-   {$ifdef mse_with_ifi}
-   //iificommand
-   procedure executeificommand(var acommand: ificommandcodety); virtual;
-   {$endif}
   public
    destructor destroy; override;
    procedure updateskin(const recursive: boolean = false); virtual;
@@ -3418,6 +3426,16 @@ begin
 end;
 
 {$ifdef mse_with_ifi}
+procedure tmsecomponent.setifiserverintf(const aintf: iifiserver);
+begin
+ fifiserverintf:= aintf;
+end;
+
+function tmsecomponent.getifiserverintf: iifiserver;
+begin
+ result:= fifiserverintf;
+end;
+
 procedure tmsecomponent.executeificommand(var acommand: ificommandcodety);
 begin
  //dummy

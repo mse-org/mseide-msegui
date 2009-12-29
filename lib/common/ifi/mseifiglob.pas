@@ -24,10 +24,12 @@ type
  iificlient = interface;
 
  iifiserver = interface(inullinterface)
+  procedure execute(const sender: iificlient);
   procedure valuechanged(const sender: iificlient);
   procedure statechanged(const sender: iificlient;
                            const astate: ifiwidgetstatesty);
-  procedure setvalue(var avalue; var accept: boolean);
+  procedure setvalue(const sender: iificlient;
+                           var avalue; var accept: boolean);
   procedure sendmodalresult(const sender: iificlient; 
                                          const amodalresult: modalresultty);
  end;

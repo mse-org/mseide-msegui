@@ -21,7 +21,7 @@ type
  
  iifilink = interface(iificlient)
                         ['{29DE5F47-87D3-408A-8BAB-1DDE945938F1}']
-  procedure setifilink(const avalue: tifilinkcomp);
+//  procedure setifilink(const avalue: tifilinkcomp);
   function getobjectlinker: tobjectlinker;
  end;
  
@@ -41,6 +41,7 @@ type
  tcustomificlientcontroller = class(tlinkedpersistent,iifiserver)
   private
    fonclientvaluechanged: ificlienteventty;
+   fonclientexecute: ificlienteventty;
    fonclientstatechanged: ificlientstateeventty;
    fonclientmodalresult: ificlientmodalresulteventty;
    fowner: tmsecomponent;
@@ -59,12 +60,6 @@ type
    procedure finalizelinks;
    procedure loaded; virtual;
    function errorname(const ainstance: tobject): string;
-   procedure valuechanged(const sender: iificlient); virtual;
-   procedure statechanged(const sender: iificlient;
-                            const astate: ifiwidgetstatesty); virtual;
-   procedure setvalue(var avalue; var accept: boolean); virtual;
-   procedure sendmodalresult(const sender: iificlient; 
-                             const amodalresult: modalresultty); virtual;
 //   procedure setcomponent(const aintf: iificlient);
    function checkcomponent(const aintf: iificlient): pointer;
                      //returns interface info
@@ -79,6 +74,15 @@ type
    function getmsestringval(const alink: iificlient; const aname: string;
                                  var avalue: msestring): boolean;
                                     //true if found
+  //iifiserver
+   procedure execute(const sender: iificlient); virtual;
+   procedure valuechanged(const sender: iificlient); virtual;
+   procedure statechanged(const sender: iificlient;
+                            const astate: ifiwidgetstatesty); virtual;
+   procedure setvalue(const sender: iificlient; var avalue;
+                                            var accept: boolean); virtual;
+   procedure sendmodalresult(const sender: iificlient; 
+                             const amodalresult: modalresultty); virtual;
   public
    constructor create(const aowner: tmsecomponent; const akind: ttypekind);
    function canconnect(const acomponent: tcomponent): boolean; virtual;
@@ -89,6 +93,8 @@ type
                      read fonclientstatechanged write fonclientstatechanged;
    property onclientmodalresult: ificlientmodalresulteventty 
                      read fonclientmodalresult write fonclientmodalresult;
+   property onclientexecute: ificlienteventty read fonclientexecute 
+                     write fonclientexecute;
 //   property clientinstance: tobject read getclientinstance;
 //   property widget: twidget read getwidget write setwidget;
  end;
@@ -100,6 +106,7 @@ type
    property onclientvaluechanged;
    property onclientstatechanged;
    property onclientmodalresult;
+   property onclientexecute;
  end;
                              
  ificlientcontrollerclassty = class of tificlientcontroller;
@@ -113,7 +120,8 @@ type
    procedure valuestoclient(const alink: pointer); override;
    procedure clienttovalues(const alink: pointer); override;
 //   procedure widgettovalue; override;
-   procedure setvalue(var avalue; var accept: boolean); override;
+   procedure setvalue(const sender: iificlient;
+                              var avalue; var accept: boolean); override;
   public
    constructor create(const aowner: tmsecomponent); override;
   published
@@ -147,7 +155,12 @@ type
    property controller: tstringclientcontroller read getcontroller
                                                          write setcontroller;
  end;
- 
+
+ tifiactionlinkcomp = class(tifilinkcomp)
+  published
+   property controller;
+ end;
+  
 procedure setifilinkcomp(const alink: iifilink;
                       const alinkcomp: tifilinkcomp; var dest: tifilinkcomp);
 implementation
@@ -237,6 +250,13 @@ begin
  end;
 end;
 }
+procedure tcustomificlientcontroller.execute(const sender: iificlient);
+begin
+ if fowner.canevent(tmethod(fonclientexecute)) then begin
+  fonclientexecute(self,sender);
+ end;
+end;
+
 procedure tcustomificlientcontroller.valuechanged(const sender: iificlient);
 begin
  if {(fvalueproperty <> nil) and} not (ivs_valuesetting in fstate) and 
@@ -345,8 +365,8 @@ begin
  end;
 end;
 
-procedure tcustomificlientcontroller.setvalue(var avalue;
-               var accept: boolean);
+procedure tcustomificlientcontroller.setvalue(const sender: iificlient;
+                   var avalue; var accept: boolean);
 begin
  //dummy
 end;
@@ -477,7 +497,8 @@ begin
  value:= getmsestringprop(clientinstance,fvalueproperty);
 end;
 }
-procedure tstringclientcontroller.setvalue(var avalue; var accept: boolean);
+procedure tstringclientcontroller.setvalue(const sender: iificlient;
+                                         var avalue; var accept: boolean);
 begin
  if fowner.canevent(tmethod(fonclientsetvalue)) then begin
   fonclientsetvalue(self,msestring(avalue),accept);
