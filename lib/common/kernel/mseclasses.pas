@@ -150,7 +150,8 @@ type
    procedure unlink(const source,dest: iobjectlink; valuepo: pointer = nil); overload;
                //source = 1 -> dest destroyed
    procedure unlink(const dest: tmsecomponent; valuepo: pointer = nil); overload;
-   function linkedobjects: objectarty;
+   function linkedobjects: objectarty; overload;
+   function linkedobjects(const ainterfacetype: pointer): objectarty; overload;
 
    procedure setlinkedvar(const linkintf: iobjectlink; 
                             const source: iobjectlink; var dest: iobjectlink;
@@ -2592,6 +2593,24 @@ begin
  po1:= plinkinfoty(fdata);
  for int1:= 0 to fcount - 1 do begin
   if (po1^.dest <> nil) and odd(ptruint(po1^.source)) then begin
+   additem(pointerarty(result),iobjectlink(po1^.dest).getinstance);
+  end;
+  inc(po1);
+ end;
+ removearrayduplicates(pointerarty(result));
+end;
+
+function tobjectlinker.linkedobjects(
+                                const ainterfacetype: pointer): objectarty;
+var
+ po1: plinkinfoty;
+ int1: integer;
+begin
+ result:= nil;
+ po1:= plinkinfoty(fdata);
+ for int1:= 0 to fcount - 1 do begin
+  if (po1^.dest <> nil) and odd(ptruint(po1^.source)) and 
+                      (po1^.interfacetype = ainterfacetype) then begin
    additem(pointerarty(result),iobjectlink(po1^.dest).getinstance);
   end;
   inc(po1);

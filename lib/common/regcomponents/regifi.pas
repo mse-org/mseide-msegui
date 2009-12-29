@@ -3,7 +3,8 @@ unit regifi;
 interface
 implementation
 uses
- classes,mseificomp,msedesignintf,regifi_bmp,msepropertyeditors,mseclasses; 
+ classes,mseificomp,msedesignintf,regifi_bmp,msepropertyeditors,mseclasses,
+ msecomponenteditors,mseificomponenteditors; 
     
 type
  tifiwidgeteditor = class(tcomponentpropertyeditor)
@@ -18,6 +19,7 @@ begin
    ['IFI Components']);
 // registerpropertyeditor(typeinfo(tcomponent),tcustomificlientcontroller,
 //                                                      'widget',tifiwidgeteditor);
+ registercomponenteditor(tifilinkcomp,tifilinkcompeditor);
 end;
 
 { tifiwidgeteditor }

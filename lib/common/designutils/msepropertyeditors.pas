@@ -820,6 +820,7 @@ procedure registerpropertyeditor(propertytype: ptypeinfo;
   editorclass: propertyeditorclassty);
 function imagefilepropedit(out afilename: filenamety;
                                          out aformat: string): modalresultty;
+function getcomponentpropname(const acomp: tcomponent): msestring;
   
 implementation
 uses
@@ -850,6 +851,19 @@ type
 var
  fpropertyeditors: tpropertyeditors;
  ftextpropertyfont: tfont;
+
+function getcomponentpropname(const acomp: tcomponent): msestring;
+begin
+ if acomp = nil then begin
+  result:= '<nil>'
+ end
+ else begin
+  result:= designer.getcomponentname(acomp);
+ end;
+ if result = '' then begin
+  result:= ownernamepath(acomp);
+ end;
+end;
 
 function imagefilepropedit(out afilename: filenamety;
                                          out aformat: string): modalresultty;
@@ -2521,16 +2535,7 @@ begin
   result:= inherited getvalue;
  end
  else begin
-  comp1:= tcomponent(getpointervalue);
-  if comp1 = nil then begin
-   result:= '<nil>'
-  end
-  else begin
-   result:= fdesigner.getcomponentname(comp1);
-  end;
-  if result = '' then begin
-   result:= ownernamepath(comp1);
-  end;
+  result:= getcomponentpropname(tcomponent(getpointervalue));
  end;
 end;
 

@@ -1333,6 +1333,11 @@ begin
    if shiftstate * keyshiftstatesmask = [] then begin
     include(eventstate,es_processed);
     case key of
+     key_return: begin
+      if not designer.editcomponent(module) then begin
+       exclude(eventstate,es_processed);
+      end;
+     end;
      key_escape: begin
       if factarea <> ar_none then begin
        hidexorpic(fowner.container.getcanvas(org_widget));
@@ -1426,27 +1431,6 @@ begin
       end;
      end;
     end;
-    (*
-    if shiftstate = [ss_ctrl] then begin
-     include(eventstate,es_processed);
-     case key of
-      key_c{,key_insert}: begin
-       docopy(false);
-      end;
-      key_x: begin
-       if fselections.candelete then begin
-        docut;
-       end;
-      end;
-      key_v: begin
-       dopaste(false);
-      end;
-      else begin
-       exclude(eventstate,es_processed);
-      end;
-     end;
-    end;
-    *)
    end;
   end;
  end;

@@ -1,0 +1,93 @@
+object mseificlienteditorfo: tmseificlienteditorfo
+  visible = False
+  bounds_x = 137
+  bounds_y = 263
+  bounds_cx = 284
+  bounds_cy = 253
+  options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder, fo_savestate]
+  caption = 'IFI Client Editor'
+  moduleclassname = 'tmseform'
+  object grid: twidgetgrid
+    bounds_x = 0
+    bounds_y = 0
+    bounds_cx = 284
+    bounds_cy = 210
+    anchors = [an_top, an_bottom]
+    optionsgrid = [og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
+    fixcols.count = 1
+    fixcols.items = <    
+      item
+        width = 24
+        numstep = 1
+      end>
+    datacols.count = 2
+    datacols.items = <    
+      item
+        options = [co_invisible, co_drawfocus, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        widgetname = 'po'
+        dataclass = tgridpointerdatalist
+      end    
+      item
+        width = 203
+        options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        oncellevent = celle
+        widgetname = 'na'
+        dataclass = tgridmsestringdatalist
+      end>
+    datarowheight = 16
+    reffontheight = 14
+    object po: tpointeredit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
+      optionsskin = [osk_framebuttononly]
+      taborder = 1
+      bounds_x = 0
+      bounds_y = 0
+      bounds_cx = 50
+      bounds_cy = 16
+      visible = False
+    end
+    object na: tdropdownlistedit
+      optionsskin = [osk_framebuttononly]
+      frame.levelo = 0
+      frame.colorclient = -2147483645
+      frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+      frame.button.color = -1879048187
+      taborder = 2
+      visible = False
+      bounds_x = 51
+      bounds_y = 0
+      bounds_cx = 203
+      bounds_cy = 16
+      onsetvalue = setval
+      dropdown.options = [deo_selectonly, deo_autodropdown, deo_keydropdown]
+      dropdown.cols.count = 1
+      dropdown.cols.items = <      
+        item
+        end>
+      onbeforedropdown = befdrop
+      reffontheight = 14
+    end
+  end
+  object tbutton1: tbutton
+    taborder = 1
+    bounds_x = 168
+    bounds_y = 224
+    bounds_cx = 50
+    bounds_cy = 20
+    anchors = [an_right, an_bottom]
+    state = [as_default, as_localdefault, as_localcaption]
+    caption = '&OK'
+    modalresult = mr_ok
+  end
+  object tbutton2: tbutton
+    taborder = 2
+    bounds_x = 224
+    bounds_y = 224
+    bounds_cx = 50
+    bounds_cy = 20
+    anchors = [an_right, an_bottom]
+    state = [as_localdefault, as_localcaption]
+    caption = '&Cancel'
+    modalresult = mr_cancel
+  end
+end

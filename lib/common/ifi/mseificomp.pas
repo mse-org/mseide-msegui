@@ -113,7 +113,17 @@ type
                              
  ificlientcontrollerclassty = class of tificlientcontroller;
 
- tstringclientcontroller = class(tificlientcontroller)
+ texecclientcontroller = class(tificlientcontroller)
+  protected
+   function canconnect(const acomponent: tcomponent): boolean; override;
+ end;
+ 
+ tvalueclientcontroller = class(tificlientcontroller)
+  protected
+   function canconnect(const acomponent: tcomponent): boolean; override;
+ end;
+ 
+ tstringclientcontroller = class(tvalueclientcontroller)
   private
    fvalue: msestring;
    fonclientsetvalue: setstringeventty;
@@ -159,8 +169,14 @@ type
  end;
 
  tifiactionlinkcomp = class(tifilinkcomp)
+  private
+   function getcontroller: texecclientcontroller;
+   procedure setcontroller(const avalue: texecclientcontroller);
+  protected
+   function getcontrollerclass: ificlientcontrollerclassty; override;
   published
-   property controller;
+   property controller: texecclientcontroller read getcontroller
+                                                         write setcontroller;
  end;
   
 procedure setifilinkcomp(const alink: iifilink;
@@ -384,14 +400,9 @@ end;
 
 function tcustomificlientcontroller.canconnect(const acomponent: tcomponent): boolean;
 var
- intf1: pointer;
- prop1: ppropinfo;
+ po1: pointer;
 begin
- result:= getcorbainterface(acomponent,typeinfo(iifilink),intf1);
- if result then begin
-  prop1:= getpropinfo(acomponent,'value');
-  result:= (prop1 <> nil) and (prop1^.proptype^.kind = fkind);
- end;
+ result:= getcorbainterface(acomponent,typeinfo(iifilink),po1);
 end;
 
 function tcustomificlientcontroller.errorname(const ainstance: tobject): string;
@@ -477,6 +488,20 @@ begin
  fcontroller.loaded;
 end;
 
+{ tvalueclientcontroller }
+
+function tvalueclientcontroller.canconnect(const acomponent: tcomponent): boolean;
+var
+ intf1: pointer;
+ prop1: ppropinfo;
+begin
+ result:= inherited canconnect(acomponent);
+ if result then begin
+  prop1:= getpropinfo(acomponent,'value');
+  result:= (prop1 <> nil) and (prop1^.proptype^.kind = fkind);
+ end;
+end;
+
 { tstringclientcontroller }
 
 constructor tstringclientcontroller.create(const aowner: tmsecomponent);
@@ -538,6 +563,37 @@ end;
 constructor tificlientcontroller.create(const aowner: tmsecomponent);
 begin
  inherited create(aowner,tkunknown);
+end;
+
+{ tifiactionlinkcomp }
+
+function tifiactionlinkcomp.getcontrollerclass: ificlientcontrollerclassty;
+begin
+ result:= texecclientcontroller;
+end;
+
+function tifiactionlinkcomp.getcontroller: texecclientcontroller;
+begin
+ result:= texecclientcontroller(inherited controller);
+end;
+
+procedure tifiactionlinkcomp.setcontroller(const avalue: texecclientcontroller);
+begin
+ inherited setcontroller(avalue);
+end;
+
+{ texecclientcontroller }
+
+function texecclientcontroller.canconnect(const acomponent: tcomponent): boolean;
+var
+ intf1: pointer;
+ prop1: ppropinfo;
+begin
+ result:= inherited canconnect(acomponent);
+ if result then begin
+  prop1:= getpropinfo(acomponent,'onexecute');
+  result:= (prop1 <> nil) and (prop1^.proptype^.kind = tkmethod);
+ end;
 end;
 
 end.

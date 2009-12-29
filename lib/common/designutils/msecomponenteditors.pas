@@ -32,13 +32,15 @@ type
    constructor create(const adesigner: idesigner; acomponent: tcomponent); virtual;
    function state: componenteditorstatesty;
    procedure edit; virtual;
+   property component: tcomponent read fcomponent;
  end;
 
  componenteditorclassty = class of tcomponenteditor;
 
  timagelisteditor = class(tcomponenteditor)
   public
-   constructor create(const adesigner: idesigner; acomponent: tcomponent); override;
+   constructor create(const adesigner: idesigner;
+                           acomponent: tcomponent); override;
    procedure edit; override;
  end;
 
@@ -149,7 +151,8 @@ end;
 
 { timagelisteditor }
 
-constructor timagelisteditor.create(const adesigner: idesigner; acomponent: tcomponent);
+constructor timagelisteditor.create(const adesigner: idesigner;
+                                                    acomponent: tcomponent);
 begin
  inherited;
  fstate:= fstate + [cs_canedit];

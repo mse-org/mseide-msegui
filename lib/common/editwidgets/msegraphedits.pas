@@ -236,6 +236,8 @@ type
    procedure paintglyph(const canvas: tcanvas; const acolorglyph: colorty;
                 const avalue; const arect: rectty); override;
 //   procedure dopaint(const canvas: tcanvas); override;
+   procedure gridtovalue(arow: integer); override;
+   procedure valuetogrid(arow: integer); override;
   public
    procedure initnewcomponent(const ascale: real); override;
    property value: pointer read fvalue write setvalue default nil;
@@ -3173,6 +3175,17 @@ begin
   end;
   fonpaintglyph(self,canvas,po1,int1);
  end;
+end;
+
+procedure tpointeredit.gridtovalue(arow: integer);
+begin
+ fgridintf.getdata(arow,fvalue);
+ inherited;
+end;
+
+procedure tpointeredit.valuetogrid(arow: integer);
+begin
+ fgridintf.setdata(arow,fvalue);
 end;
 
 { tbarface }
