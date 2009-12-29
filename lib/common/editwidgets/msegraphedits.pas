@@ -92,7 +92,7 @@ type
  end;
 
  tgraphdataedit = class(tactionpublishedwidget,igridwidget,istatfile
-                  {$ifdef mse_with_ifi},iifiwidget{$endif})
+                  {$ifdef mse_with_ifi},iificlient{$endif})
   private
    fonchange: notifyeventty;
    fondataentered: notifyeventty;
@@ -1304,7 +1304,7 @@ begin
   end;
 {$ifdef mse_with_ifi}
   if fifiserverintf <> nil then begin
-   fifiserverintf.valuechanged(iifiwidget(self));
+   fifiserverintf.valuechanged(iificlient(self));
   end;
 {$endif}
  end;

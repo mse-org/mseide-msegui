@@ -1169,7 +1169,7 @@ type
  navigrequesteventty = procedure(const sender: twidget;
                                 var ainfo: naviginfoty) of object; 
  twidget = class(tactcomponent,iscrollframe,iface
-                           {$ifdef mse_with_ifi},iifiwidget{$endif})
+                           {$ifdef mse_with_ifi},iificlient{$endif})
   private
    fwidgetregion: regionty;
    frootpos: pointty;   //position in rootwindow
@@ -7016,7 +7016,7 @@ end;
 procedure twidget.ifiwidgetstatechanged;
 begin
  if fifiserverintf <> nil then begin
-  fifiserverintf.statechanged(iifiwidget(self),getifiwidgetstate);
+  fifiserverintf.statechanged(iificlient(self),getifiwidgetstate);
  end;
 end;
 

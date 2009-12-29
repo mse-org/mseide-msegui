@@ -160,9 +160,9 @@ end;
 
 function tifidatawidgeteditor.filtercomponent(const acomponent: tcomponent): boolean;
 var
- intf1: iifiwidget; 
+ intf1: iificlient; 
 begin
- result:= getcorbainterface(acomponent,typeinfo(iifiwidget),intf1);
+ result:= getcorbainterface(acomponent,typeinfo(iificlient),intf1);
 end;
 
 { tvaluewidgetlinkitemeditor }

@@ -294,7 +294,7 @@ type
    procedure checkcomponent;
   protected
    fcomponent: tmsecomponent;
-   fintf: iifiwidget;
+   fintf: iificlient;
    fvalueproperty: ppropinfo;
    fupdatelock: integer;
    procedure setdata(const adata: pifidataty; const aname: ansistring); override;
@@ -382,11 +382,11 @@ type
                 //returns sequence number
    procedure receiveevent(const event: tobjectevent); override;
   //iifiserver
-   procedure valuechanged(const sender: iifiwidget); virtual;
-   procedure statechanged(const sender: iifiwidget;
+   procedure valuechanged(const sender: iificlient); virtual;
+   procedure statechanged(const sender: iificlient;
                              const astate: ifiwidgetstatesty); virtual;
    procedure setvalue(var avalue; var accept: boolean); virtual;
-   procedure sendmodalresult(const sender: iifiwidget; 
+   procedure sendmodalresult(const sender: iificlient; 
                                          const amodalresult: modalresultty); virtual;
   //imodulelink
    procedure connectmodule(const sender: tcustommodulelink);
@@ -2051,12 +2051,12 @@ begin
  end;
 end;
 
-procedure tcustommodulelink.valuechanged(const sender: iifiwidget);
+procedure tcustommodulelink.valuechanged(const sender: iificlient);
 begin
  //dummy
 end;
 
-procedure tcustommodulelink.statechanged(const sender: iifiwidget;
+procedure tcustommodulelink.statechanged(const sender: iificlient;
               const astate: ifiwidgetstatesty);
 begin
  //dummy
@@ -2067,7 +2067,7 @@ begin
  //dummy
 end;
 
-procedure tcustommodulelink.sendmodalresult(const sender: iifiwidget; 
+procedure tcustommodulelink.sendmodalresult(const sender: iificlient; 
                                          const amodalresult: modalresultty);
 begin
  //dummy

@@ -61,10 +61,10 @@ type
                       const adata: pifibytesty): boolean;
    function processdataitem(const adata: pifirecty; var adatapo: pchar;
                   const atag: integer; const aname: string): boolean; override;
-   procedure valuechanged(const sender: iifiwidget); override;
-   procedure statechanged(const sender: iifiwidget;
+   procedure valuechanged(const sender: iificlient); override;
+   procedure statechanged(const sender: iificlient;
                              const astate: ifiwidgetstatesty); override;
-   procedure sendmodalresult(const sender: iifiwidget; 
+   procedure sendmodalresult(const sender: iificlient; 
                               const amodalresult: modalresultty); override;
   public
    constructor create(aowner: tcomponent); override;
@@ -154,13 +154,13 @@ end;
 
 procedure tvaluewidgetlink.setwidget(const avalue: twidget);
 var
- intf1: iifiwidget;
+ intf1: iificlient;
 begin
  intf1:= nil;
  fwidgetstatebefore:= [];
  fvalueproperty:= nil;
  if (avalue <> nil) and 
-    not getcorbainterface(avalue,typeinfo(iifiwidget),intf1) then begin
+    not getcorbainterface(avalue,typeinfo(iificlient),intf1) then begin
   raise exception.create(avalue.name+': No ifiwidget.');
  end;
  if fintf <> nil then begin
@@ -288,7 +288,7 @@ begin
  end;
 end;
 
-procedure tformlink.valuechanged(const sender: iifiwidget);
+procedure tformlink.valuechanged(const sender: iificlient);
 var
  int1: integer;
 begin
@@ -310,7 +310,7 @@ begin
  end;
 end;
 
-procedure tformlink.sendmodalresult(const sender: iifiwidget; 
+procedure tformlink.sendmodalresult(const sender: iificlient; 
                                          const amodalresult: modalresultty);
 var
  int1: integer;
@@ -333,7 +333,7 @@ begin
  end;
 end;
 
-procedure tformlink.statechanged(const sender: iifiwidget;
+procedure tformlink.statechanged(const sender: iificlient;
                              const astate: ifiwidgetstatesty);
 var
  int1: integer;

@@ -21,18 +21,18 @@ type
  ifiwidgetstatesty = set of ifiwidgetstatety;
  
 type
- iifiwidget = interface;
+ iificlient = interface;
 
  iifiserver = interface(inullinterface)
-  procedure valuechanged(const sender: iifiwidget);
-  procedure statechanged(const sender: iifiwidget;
+  procedure valuechanged(const sender: iificlient);
+  procedure statechanged(const sender: iificlient;
                            const astate: ifiwidgetstatesty);
   procedure setvalue(var avalue; var accept: boolean);
-  procedure sendmodalresult(const sender: iifiwidget; 
+  procedure sendmodalresult(const sender: iificlient; 
                                          const amodalresult: modalresultty);
  end;
  
- iifiwidget = interface(inullinterface)['{E3523E5B-604C-46CE-88D4-55C9970BCF9A}']
+ iificlient = interface(iobjectlink)['{E3523E5B-604C-46CE-88D4-55C9970BCF9A}']
   procedure setifiserverintf(const aintf: iifiserver);
   function getifiserverintf: iifiserver;
  end;

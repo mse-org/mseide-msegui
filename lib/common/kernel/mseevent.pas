@@ -168,7 +168,7 @@ constructor tobjectevent.create(const akind: eventkindty; const dest: ievent);
 begin
  finterface:= pointer(dest);
  if finterface <> nil then begin
-  ievent(finterface).link(nil,iobjectlink(self));
+  ievent(finterface).link(iobjectlink(pointer(1)),iobjectlink(self));
  end;
  inherited create(akind);
 end;
@@ -183,7 +183,7 @@ end;
 destructor tobjectevent.destroy;
 begin
  if finterface <> nil then begin
-  ievent(finterface).unlink(nil,iobjectlink(self));
+  ievent(finterface).unlink(iobjectlink(pointer(1)),iobjectlink(self));
  end;
  inherited;
 end;

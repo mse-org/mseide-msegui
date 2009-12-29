@@ -51,7 +51,7 @@ type
  end;
  
  tcustomdataedit = class(tcustomedit,igridwidget,istatfile,idragcontroller,
-                         {$ifdef mse_with_ifi}iifidatawidget{$endif})
+                         {$ifdef mse_with_ifi}iifilink{$endif})
   private
    fondataentered: notifyeventty;
    foncheckvalue: checkvalueeventty;
@@ -2269,7 +2269,7 @@ end;
 {$ifdef mse_with_ifi}
 procedure tcustomdataedit.setifilink(const avalue: tifilinkcomp);
 begin
- mseificomp.setifilinkcomp(self,iifidatawidget(self),avalue,fifilink);
+ mseificomp.setifilinkcomp(iifilink(self),avalue,fifilink);
 end;
 {$endif}
 

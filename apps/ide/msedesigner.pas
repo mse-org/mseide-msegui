@@ -3398,7 +3398,7 @@ var
         end
         else begin
         end;
-        result:= mr1 <> mr_cancel;
+        result:= mr1 in [mr_yes,mr_no,mr_none];
        end;
       end;
      end;

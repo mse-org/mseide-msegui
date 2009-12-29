@@ -122,6 +122,7 @@ type
  plinkedpersistent = ^tlinkedpersistent;
 
  objectlinkprocty = procedure(const info: linkinfoty) of object;
+ objectlinkintfprocty = procedure(const alink: pointer) of object;
 
  tobjectlinker = class(trecordlist)
   private
@@ -133,7 +134,7 @@ type
    procedure removelink(var item: linkinfoty; destroyed: boolean);
   protected
    function isempty(var item): boolean; override;
-   function findsource(const item: linkinfoty): integer;
+//   function findsource(const item: linkinfoty): integer;
   public
    {$ifdef debugobjectlink}
    debugon: boolean;
@@ -149,15 +150,25 @@ type
    procedure unlink(const dest: tmsecomponent; valuepo: pointer = nil); overload;
    function linkedobjects: objectarty;
 
-   procedure setlinkedvar(const linkintf: iobjectlink; const source: tlinkedobject;
-                         var dest: tlinkedobject); overload;
-   procedure setlinkedvar(const linkintf: iobjectlink; const source: tlinkedpersistent;
-                         var dest: tlinkedpersistent); overload;
-   procedure setlinkedvar(const linkintf: iobjectlink; const source: tmsecomponent;
-                         var dest: tmsecomponent); overload;
+   procedure setlinkedvar(const linkintf: iobjectlink; 
+                            const source: iobjectlink; var dest: iobjectlink;
+                            const ainterfacetype: pointer = nil); overload;
+   procedure setlinkedvar(const linkintf: iobjectlink;
+                            const source: tlinkedobject; var dest: tlinkedobject;
+                            const ainterfacetype: pointer = nil); overload;
+   procedure setlinkedvar(const linkintf: iobjectlink;
+                             const source: tlinkedpersistent;
+                             var dest: tlinkedpersistent;
+                             const ainterfacetype: pointer = nil); overload;
+   procedure setlinkedvar(const linkintf: iobjectlink; 
+                          const source: tmsecomponent; var dest: tmsecomponent;
+                          const ainterfacetype: pointer = nil); overload;
    procedure sendevent(event: objecteventty);
    procedure objevent(const sender: iobjectlink; const event: objecteventty);
-   procedure forall(proc: objectlinkprocty; ainterfacetype: pointer);
+   procedure forall(const proc: objectlinkprocty; 
+                            const ainterfacetype: pointer); overload;
+   procedure forall(const proc: objectlinkintfprocty;
+                            const ainterfacetype: pointer); overload;
  end;
 
  tlinkedobject = class(tnullinterfacedobject,iobjectlink)
@@ -219,6 +230,8 @@ type
 
   public
    destructor destroy; override;
+   procedure setlinkedvar(const source: iobjectlink; var dest: iobjectlink;
+              const linkintf: iobjectlink = nil); overload;
    procedure setlinkedvar(const source: tmsecomponent; var dest: tmsecomponent;
               const linkintf: iobjectlink = nil); overload;
    procedure setlinkedvar(const source: tlinkedobject; var dest: tlinkedobject;
@@ -329,6 +342,8 @@ type
    procedure receiveevent(const event: tobjectevent); virtual;
 
    procedure designselected(const selected: boolean); virtual;
+   procedure setlinkedvar(const source: iobjectlink; var dest: iobjectlink;
+              const linkintf: iobjectlink = nil); overload;
    procedure setlinkedvar(const source: tmsecomponent; var dest: tmsecomponent;
               const linkintf: iobjectlink = nil); overload;
    procedure setlinkedvar(const source: tlinkedobject; var dest: tlinkedobject;
@@ -683,9 +698,8 @@ implementation
 uses
 {$ifdef debugobjectlink}
  msegui,mseformatstr,
-{$else}
- mseapplication,
 {$endif}
+ mseapplication,
 {$ifdef mswindows}
  windows,
 {$endif}
@@ -2160,33 +2174,42 @@ end;
 
 {$ifdef debugobjectlink}
 
-procedure getdebugtext(owner: tobjectlinker; const source,dest:iobjectlink;
-                         valuepo: pointer);
-
- procedure intftext(aintf: iobjectlink);
+ function intftext(aintf: iobjectlink): string;
  var
   obj1: tobject;
  begin
+  result:= '';
+  if odd(ptruint(aintf)) then begin
+   dec(pointer(aintf));
+  end;
   if aintf = nil then begin
-   write('<nil>');
+   result:= result+'<nil>';
   end
   else begin
-   obj1:= iobjectlink(aintf).getinstance;
-   write(hextostr(longword(aintf),8) + ' ' + hextostr(longword(obj1),8));
-   if obj1 <> nil then begin
-    write(' '+obj1.classname);
-   end;
-   if obj1 is tcomponent then begin
-    write(' '+tcomponent(obj1).Name);
+   if ptrint(aintf) = 1 then begin
+    result:= result + '<-1->';
    end
    else begin
-    if obj1 is twindow then begin
-     write(' '+twindow(obj1).owner.Name);
+    result:= result + hextostr(longword(aintf),8) + ' ';
+    obj1:= iobjectlink(aintf).getinstance;
+    result:= result + hextostr(longword(obj1),8);
+    if obj1 <> nil then begin
+     result:= result + ' '+obj1.classname;
     end;
-   end
+    if obj1 is tcomponent then begin
+     result:= result+' '+tcomponent(obj1).Name;
+    end
+    else begin
+     if obj1 is twindow then begin
+      result:= result+' '+twindow(obj1).owner.Name;
+     end;
+    end
+   end;
   end;
  end;
 
+procedure getdebugtext(owner: tobjectlinker; const source,dest:iobjectlink;
+                         valuepo: pointer);
 begin
  if rels_destroying in owner.fstate then begin
   write('*');
@@ -2195,17 +2218,18 @@ begin
   write(' ');
  end;
  write('v:'+ hextostr(longword(valuepo),8));
- write(' o:');intftext(iobjectlink(owner.fownerintf));
- write(' s:');intftext(source);
- write(' d:');intftext(dest);
+ write(' o:'+intftext(iobjectlink(owner.fownerintf)));
+ write(' s:'+intftext(source));
+ write(' d:'+intftext(dest));
  writeln;
 end;
+
 {$endif}
 
 constructor tobjectlinker.create(const owner: iobjectlink; onevent: objectlinkeventty);
 begin
 {$ifdef debugobjectlink}
- writeln('create o: ' + hextostr(longword(owner),8));
+ writeln('create o: ' + intftext(owner));
 {$endif}
  pointer(fownerintf):= pointer(owner);
  fonevent:= onevent;
@@ -2222,7 +2246,7 @@ var
  {$endif}
 begin
 {$ifdef debugobjectlink}
- writeln('destroy o: ' + hextostr(longword(fownerintf),8));
+ writeln('destroy o: ' + intftext(iobjectlink(fownerintf)));
 {$endif}
  include(fstate,rels_destroying);
  po2:= datapo;
@@ -2234,8 +2258,8 @@ begin
    write('destrev');getdebugtext(self,iobjectlink(source),iobjectlink(dest),valuepo);
 {$endif}
     dest:= nil;
-    if source = nil then begin
-     iobjectlink(po1).objevent(iobjectlink(fownerintf),oe_destroyed);
+    if odd(ptruint(source)) then begin
+     iobjectlink(po1).objevent(iobjectlink(pchar(source)-1),oe_destroyed);
      if valuepo <> nil then begin
       pobject(valuepo)^:= nil;
      end;
@@ -2298,7 +2322,8 @@ begin
  for int1:= 0 to count - 1 do begin
   with po1^ do begin
    if (dest <> nil) and (dest = item.dest) and
-        (destroyed or (valuepo = item.valuepo) and (source = item.source)) then begin
+        (destroyed or 
+               (valuepo = item.valuepo) and (source = item.source)) then begin
     if (refcount = 0) or destroyed then begin
      dest:= nil;
     end
@@ -2310,7 +2335,7 @@ begin
   inc(po1);
  end;
 end;
-
+{
 function tobjectlinker.findsource(const item: linkinfoty): integer;
 var
  int1: integer;
@@ -2319,7 +2344,7 @@ begin
  result:= -1;
  po1:= plinkinfoty(fdata);
  for int1:= 0 to fcount - 1 do begin
-  with po1^do begin
+  with po1^ do begin
    if source = item.source then begin
     result:= int1;
     break;
@@ -2328,7 +2353,7 @@ begin
   inc(po1);
  end;
 end;
-
+}
 procedure tobjectlinker.link(const source,dest: iobjectlink; valuepo: pointer = nil;
                                   ainterfacetype: pointer = nil; once: boolean = false);
 var
@@ -2346,7 +2371,7 @@ begin
   info.dest:= pointer(dest);
   info.valuepo:= valuepo;
   info.interfacetype:= ainterfacetype;
-  if not (once and (findsource(info) >= 0)) then begin
+  if not (once {and (findsource(info) >= 0)}) then begin
    bo1:= false;
    po1:= datapo;
    for int1:= 0 to count - 1 do begin
@@ -2363,8 +2388,9 @@ begin
    if not bo1 then begin
     add(info);
    end;
-   if source <> nil then begin
-    dest.link(nil,source,valuepo,ainterfacetype);
+   if not odd(ptruint(source)) then begin //full link
+    dest.link(iobjectlink(pchar(dest)+1),source,valuepo,ainterfacetype);
+                      //create backlink
     source.objevent(dest,oe_connect);
    end;
   end;
@@ -2386,17 +2412,18 @@ begin
 {$ifdef debugobjectlink}
   write('unlink');getdebugtext(self,source,dest,valuepo);
 {$endif}
- if ptrint(source) = 1 then begin
-  info.source:= nil;
- end
- else begin
+// if ptrint(source) = 1 then begin //objektlinker destroyed
+//  info.source:= nil;
+// end
+// else begin
   info.source:= pointer(source);
- end;
+// end;
  info.dest:= pointer(dest);
  info.valuepo:= valuepo;
  removelink(info,ptrint(source) = 1);
- if info.source <> nil then begin
-  dest.unlink(nil,source,valuepo);
+ if not odd(ptruint(source)) then begin //full link
+  dest.unlink(iobjectlink(pchar(dest)+1),source,valuepo);
+                       //remove backlink
  end;
  dopack;
 end;
@@ -2408,8 +2435,28 @@ begin
  end;
 end;
 
+procedure tobjectlinker.setlinkedvar(const linkintf: iobjectlink;
+                         const source: iobjectlink;
+                         var dest: iobjectlink;
+                         const ainterfacetype: pointer = nil);
+var
+ ba: pointer;
+begin
+ if source <> dest then begin
+  ba:= dest;
+  pointer(dest):= pointer(source);
+  if source <> nil then begin
+   link(linkintf,source,@dest,ainterfacetype);
+  end;
+  if ba <> nil then begin
+   unlink(linkintf,iobjectlink(ba),@dest);
+  end;
+ end;
+end;
+
 procedure tobjectlinker.setlinkedvar(const linkintf: iobjectlink; 
-                  const source: tlinkedobject; var dest: tlinkedobject);
+                  const source: tlinkedobject; var dest: tlinkedobject;
+                  const ainterfacetype: pointer = nil);
 var
  ba: tlinkedobject;
 begin
@@ -2417,7 +2464,7 @@ begin
   ba:= dest;
   dest:= source;
   if source <> nil then begin
-   link(linkintf,iobjectlink(source),@dest);
+   link(linkintf,iobjectlink(source),@dest,ainterfacetype);
   end;
   if ba <> nil then begin
    unlink(linkintf,iobjectlink(ba),@dest);
@@ -2426,7 +2473,8 @@ begin
 end;
 
 procedure tobjectlinker.setlinkedvar(const linkintf: iobjectlink; 
-                  const source: tlinkedpersistent; var dest: tlinkedpersistent);
+               const source: tlinkedpersistent; var dest: tlinkedpersistent;
+               const ainterfacetype: pointer = nil);
 var
  ba: tlinkedpersistent;
 begin
@@ -2434,7 +2482,7 @@ begin
   ba:= dest;
   dest:= source;
   if source <> nil then begin
-   link(linkintf,iobjectlink(source),@dest);
+   link(linkintf,iobjectlink(source),@dest,ainterfacetype);
   end;
   if ba <> nil then begin
    unlink(linkintf,iobjectlink(ba),@dest);
@@ -2443,7 +2491,8 @@ begin
 end;
 
 procedure tobjectlinker.setlinkedvar(const linkintf: iobjectlink; 
-              const source: tmsecomponent; var dest: tmsecomponent);
+              const source: tmsecomponent; var dest: tmsecomponent;
+              const ainterfacetype: pointer = nil);
 var
  ba: tmsecomponent;
 begin
@@ -2451,7 +2500,7 @@ begin
   ba:= dest;
   dest:= source;
   if source <> nil then begin
-   link(linkintf,ievent(source),@dest);
+   link(linkintf,ievent(source),@dest,ainterfacetype);
   end;
   if ba <> nil then begin
    unlink(linkintf,ievent(ba),@dest);
@@ -2486,7 +2535,8 @@ begin
  end;
 end;
 
-procedure tobjectlinker.forall(proc: objectlinkprocty; ainterfacetype: pointer);
+procedure tobjectlinker.forall(const proc: objectlinkprocty; 
+                                              const ainterfacetype: pointer);
 var
  po1: plinkinfoty;
  int1: integer;
@@ -2495,9 +2545,29 @@ begin
  try
   for int1:= 0 to fcount - 1 do begin
    po1:= @plinkinfoaty(fdata)^[int1];
-   if (po1^.dest <> nil) and (po1^.source = nil) and 
+   if (po1^.dest <> nil) and odd(ptruint(po1^.source)) and 
                              (ainterfacetype = po1^.interfacetype) then begin
     proc(po1^);
+   end;
+  end;
+ finally
+  dec(fnopack);
+ end;
+end;
+
+procedure tobjectlinker.forall(const proc: objectlinkintfprocty; 
+                                              const ainterfacetype: pointer);
+var
+ po1: plinkinfoty;
+ int1: integer;
+begin
+ inc(fnopack);
+ try
+  for int1:= 0 to fcount - 1 do begin
+   po1:= @plinkinfoaty(fdata)^[int1];
+   if (po1^.dest <> nil) and odd(ptruint(po1^.source)) and 
+                             (ainterfacetype = po1^.interfacetype) then begin
+    proc(po1^.dest);
    end;
   end;
  finally
@@ -2513,7 +2583,7 @@ begin
  result:= nil;
  po1:= plinkinfoty(fdata);
  for int1:= 0 to fcount - 1 do begin
-  if (po1^.dest <> nil) and (po1^.source = nil) then begin
+  if (po1^.dest <> nil) and odd(ptruint(po1^.source)) then begin
    additem(pointerarty(result),iobjectlink(po1^.dest).getinstance);
   end;
   inc(po1);
@@ -2687,6 +2757,17 @@ begin
  end;
 end;
 
+procedure tlinkedpersistent.setlinkedvar(const source: iobjectlink; var dest: iobjectlink;
+              const linkintf: iobjectlink = nil);
+begin
+ if linkintf = nil then begin
+  getobjectlinker.setlinkedvar(iobjectlink(self),source,dest);
+ end
+ else begin
+  getobjectlinker.setlinkedvar(linkintf,source,dest);
+ end;
+end;
+
 procedure tlinkedpersistent.setlinkedvar(const source: tlinkedobject; var dest: tlinkedobject;
               const linkintf: iobjectlink = nil);
 begin
@@ -2814,6 +2895,22 @@ begin
   comp:= comp.owner;
  end;
  setlength(result,count);
+end;
+
+procedure tmsecomponent.setlinkedvar(const source: iobjectlink;
+              var dest: iobjectlink; const linkintf: iobjectlink = nil);
+begin
+ if (fobjectlinker = nil) and (csdestroying in componentstate) then begin
+  dest:= source;
+ end
+ else begin
+  if linkintf = nil then begin
+   getobjectlinker.setlinkedvar(ievent(self),source,dest);
+  end
+  else begin
+   getobjectlinker.setlinkedvar(linkintf,source,dest);
+  end;
+ end;
 end;
 
 procedure tmsecomponent.setlinkedvar(const source: tmsecomponent;

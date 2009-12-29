@@ -16,8 +16,8 @@ begin
  registercomponents('Ifi',[tifistringlinkcomp]); 
  registercomponenttabhints(['Ifi'],
    ['IFI Components']);
- registerpropertyeditor(typeinfo(tcomponent),tcustomifivaluewidgetcontroller,
-                                                      'widget',tifiwidgeteditor);
+// registerpropertyeditor(typeinfo(tcomponent),tcustomificlientcontroller,
+//                                                      'widget',tifiwidgeteditor);
 end;
 
 { tifiwidgeteditor }
@@ -26,8 +26,8 @@ function tifiwidgeteditor.filtercomponent(const acomponent: tcomponent): boolean
 var
  intf1: pointer;
 begin
- result:= tcustomifivaluewidgetcontroller(
-                    fprops[0].instance).canconnect(acomponent);
+// result:= tcustomifivaluewidgetcontroller(
+//                    fprops[0].instance).canconnect(acomponent);
 end;
 
 initialization
