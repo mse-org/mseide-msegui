@@ -14,7 +14,7 @@ type
  
 procedure register;
 begin
- registercomponents('Ifi',[tifiactionlinkcomp,tifistringlinkcomp]); 
+ registercomponents('Ifi',[tifiactionlinkcomp,tifiintegerlinkcomp,tifistringlinkcomp]); 
  registercomponenttabhints(['Ifi'],
    ['IFI Components']);
 // registerpropertyeditor(typeinfo(tcomponent),tcustomificlientcontroller,

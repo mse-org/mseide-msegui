@@ -308,6 +308,7 @@ procedure updateclientorder(var fclientnames: stringarty;
           const getclientnames: getstringareventty);
 function getclientname(const avalue: tobject;
                    const aindex: integer): string;
+procedure designchanged(const acomponent: tcomponent); //for designer notify
 
 type
  validaterenameeventty = procedure(const acomponent: tcomponent;
@@ -347,6 +348,14 @@ type
 var
  appinst: tcustomapplication;
  appclass: applicationclassty;
+
+procedure designchanged(const acomponent: tcomponent); //for designer notify
+begin
+ if assigned(ondesignchanged) and 
+       (acomponent.componentstate*[csdesigning,csloading] = [csdesigning]) then begin
+  ondesignchanged(acomponent);
+ end;
+end;
 
 function getclientname(const avalue: tobject;
                    const aindex: integer): string;

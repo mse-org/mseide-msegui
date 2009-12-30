@@ -561,6 +561,10 @@ type
    procedure setgridvalue(const index, Value: integer);
    function getgridvalues: integerarty;
    procedure setgridvalues(const Value: integerarty);
+  {$ifdef mse_with_ifi}
+   function getifilink: tifiintegerlinkcomp;
+   procedure setifilink(const avalue: tifiintegerlinkcomp);
+  {$endif}
   protected
    fisnull: boolean; //used in tdbintegeredit
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
@@ -587,6 +591,9 @@ type
    property gridvalue[const index: integer]: integer
         read getgridvalue write setgridvalue; default;
    property gridvalues: integerarty read getgridvalues write setgridvalues;
+{$ifdef mse_with_ifi}
+   property ifilink: tifiintegerlinkcomp read getifilink write setifilink;
+{$endif}
  end;
 
  tintegeredit = class(tcustomintegeredit)
@@ -597,6 +604,7 @@ type
    property bitcount;
    property min;
    property max;
+   property ifilink;
  end;
 
  tcustomint64edit = class(tnumedit)
@@ -3389,6 +3397,16 @@ end;
 procedure tcustomintegeredit.assigncol(const value: tintegerdatalist);
 begin
  internalassigncol(value);
+end;
+
+function tcustomintegeredit.getifilink: tifiintegerlinkcomp;
+begin
+ result:= tifiintegerlinkcomp(fifilink);
+end;
+
+procedure tcustomintegeredit.setifilink(const avalue: tifiintegerlinkcomp);
+begin
+ inherited;
 end;
 
 { tcustomint64edit }

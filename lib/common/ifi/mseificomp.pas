@@ -76,6 +76,12 @@ type
    function getmsestringval(const alink: iificlient; const aname: string;
                                  var avalue: msestring): boolean;
                                     //true if found
+   function setintegerval(const alink: iificlient; const aname: string;
+                                 const avalue: integer): boolean;
+                                    //true if found
+   function getintegerval(const alink: iificlient; const aname: string;
+                                 var avalue: integer): boolean;
+                                    //true if found
   //iifiserver
    procedure execute(const sender: iificlient); virtual;
    procedure valuechanged(const sender: iificlient); virtual;
@@ -131,7 +137,6 @@ type
   protected
    procedure valuestoclient(const alink: pointer); override;
    procedure clienttovalues(const alink: pointer); override;
-//   procedure widgettovalue; override;
    procedure setvalue(const sender: iificlient;
                               var avalue; var accept: boolean); override;
   public
@@ -139,6 +144,30 @@ type
   published
    property value: msestring read fvalue write setvalue;
    property onclientsetvalue: setstringeventty 
+                read fonclientsetvalue write fonclientsetvalue;
+ end;
+
+ tintegerclientcontroller = class(tvalueclientcontroller)
+  private
+   fvalue: integer;
+   fmin: integer;
+   fmax: integer;
+   fonclientsetvalue: setintegereventty;
+   procedure setvalue(const avalue: integer);
+   procedure setmin(const avalue: integer);
+   procedure setmax(const avalue: integer);
+  protected
+   procedure valuestoclient(const alink: pointer); override;
+   procedure clienttovalues(const alink: pointer); override;
+   procedure setvalue(const sender: iificlient;
+                              var avalue; var accept: boolean); override;
+  public
+   constructor create(const aowner: tmsecomponent); override;
+  published
+   property value: integer read fvalue write setvalue default 0;
+   property min: integer read fmin write setmin default 0;
+   property max: integer read fmax write setmax default maxint;
+   property onclientsetvalue: setintegereventty 
                 read fonclientsetvalue write fonclientsetvalue;
  end;
   
@@ -168,6 +197,17 @@ type
                                                          write setcontroller;
  end;
 
+ tifiintegerlinkcomp = class(tifilinkcomp)
+  private
+   function getcontroller: tintegerclientcontroller;
+   procedure setcontroller(const avalue: tintegerclientcontroller);
+  protected
+   function getcontrollerclass: ificlientcontrollerclassty; override;
+  published
+   property controller: tintegerclientcontroller read getcontroller
+                                                         write setcontroller;
+ end;
+
  tifiactionlinkcomp = class(tifilinkcomp)
   private
    function getcontroller: texecclientcontroller;
@@ -183,7 +223,7 @@ procedure setifilinkcomp(const alink: iifilink;
                       const alinkcomp: tifilinkcomp; var dest: tifilinkcomp);
 implementation
 uses
- sysutils;
+ sysutils,mseapplication;
  
 type
  tmsecomponent1 = class(tmsecomponent);
@@ -317,9 +357,17 @@ begin
  //dummy
 end;
 }
+
 procedure tcustomificlientcontroller.valuestoclient(const alink: pointer);
+var
+ obj: tobject;
 begin
- //dummy
+ if csdesigning in fowner.componentstate then begin
+  obj:= iobjectlink(alink).getinstance;
+  if obj is tcomponent and (tcomponent(obj).owner <> fowner.owner) then begin
+   designchanged(tcomponent(obj));
+  end;
+ end;
 end;
 
 procedure tcustomificlientcontroller.valuestootherclient(const alink: pointer);
@@ -452,6 +500,39 @@ begin
  end; 
 end;
 
+function tcustomificlientcontroller.setintegerval(const alink: iificlient;
+               const aname: string; const avalue: integer): boolean;
+var
+ inst: tobject;
+ prop: ppropinfo;
+ 
+begin
+ inst:= alink.getinstance;
+ prop:= getpropinfo(inst,aname);
+ result:= (prop <> nil) and (prop^.proptype^.kind = tkinteger);
+ if result then begin
+  setordprop(inst,prop,avalue);
+ end; 
+end;
+
+function tcustomificlientcontroller.getintegerval(
+                     const alink: iificlient; const aname: string;
+                     var avalue: integer): boolean;
+                                    //true if found
+var
+ inst: tobject;
+ prop: ppropinfo;
+ 
+begin
+ inst:= alink.getinstance;
+ prop:= getpropinfo(inst,aname);
+ result:= (prop <> nil) and (prop^.proptype^.kind = tkinteger);
+ if result then begin
+  avalue:= getordprop(inst,prop);
+ end; 
+end;
+
+
 procedure tcustomificlientcontroller.loaded;
 begin
  change;
@@ -517,8 +598,8 @@ end;
 
 procedure tstringclientcontroller.valuestoclient(const alink: pointer);
 begin
- inherited;
  setmsestringval(iificlient(alink),'value',fvalue);
+ inherited;
 end;
 
 procedure tstringclientcontroller.clienttovalues(const alink: pointer);
@@ -541,6 +622,55 @@ begin
  end;
 end;
 
+{ tintegerclientcontroller }
+
+constructor tintegerclientcontroller.create(const aowner: tmsecomponent);
+begin
+ fmax:= maxint;
+ inherited create(aowner,tkinteger);
+end;
+
+procedure tintegerclientcontroller.setvalue(const avalue: integer);
+begin
+ fvalue:= avalue;
+ change;
+end;
+
+procedure tintegerclientcontroller.valuestoclient(const alink: pointer);
+begin
+ setintegerval(iificlient(alink),'value',fvalue);
+ setintegerval(iificlient(alink),'min',fmin);
+ setintegerval(iificlient(alink),'max',fmax);
+ inherited;
+end;
+
+procedure tintegerclientcontroller.clienttovalues(const alink: pointer);
+begin
+ inherited;
+ getintegerval(iificlient(alink),'value',fvalue);
+end;
+
+procedure tintegerclientcontroller.setvalue(const sender: iificlient;
+                                         var avalue; var accept: boolean);
+begin
+ if fowner.canevent(tmethod(fonclientsetvalue)) then begin
+  fonclientsetvalue(self,integer(avalue),accept);
+ end;
+end;
+
+procedure tintegerclientcontroller.setmin(const avalue: integer);
+begin
+ fmin:= avalue;
+ change;
+end;
+
+procedure tintegerclientcontroller.setmax(const avalue: integer);
+begin
+ fmax:= avalue;
+ change;
+end;
+
+
 { tifistringlinkcomp }
 
 function tifistringlinkcomp.getcontrollerclass: ificlientcontrollerclassty;
@@ -554,6 +684,23 @@ begin
 end;
 
 procedure tifistringlinkcomp.setcontroller(const avalue: tstringclientcontroller);
+begin
+ inherited setcontroller(avalue);
+end;
+
+{ tifiintegerlinkcomp }
+
+function tifiintegerlinkcomp.getcontrollerclass: ificlientcontrollerclassty;
+begin
+ result:= tintegerclientcontroller;
+end;
+
+function tifiintegerlinkcomp.getcontroller: tintegerclientcontroller;
+begin
+ result:= tintegerclientcontroller(inherited controller);
+end;
+
+procedure tifiintegerlinkcomp.setcontroller(const avalue: tintegerclientcontroller);
 begin
  inherited setcontroller(avalue);
 end;
