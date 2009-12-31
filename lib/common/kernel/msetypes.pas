@@ -198,6 +198,7 @@ type
 
 const
  nullcomplex: complexty = (re: 0; im: 0);
+ bigdatetime = 401768.99999; //2999-12-31
  
 function mergevarrec(a,b: array of const): varrecarty;
 function issamemethod(const method1,method2: tmethod): boolean;

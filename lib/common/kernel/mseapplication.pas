@@ -352,7 +352,8 @@ var
 procedure designchanged(const acomponent: tcomponent); //for designer notify
 begin
  if assigned(ondesignchanged) and 
-       (acomponent.componentstate*[csdesigning,csloading] = [csdesigning]) then begin
+       (acomponent.componentstate*[csdesigning,csloading,csdestroying] =
+                                                     [csdesigning]) then begin
   ondesignchanged(acomponent);
  end;
 end;

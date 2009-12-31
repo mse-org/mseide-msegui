@@ -35,7 +35,7 @@ type
                              const link: iificlient; 
                              const amodalresult: modalresultty) of object;
 
- ifivaluelinkstatety = (ivs_linking,ivs_valuesetting);
+ ifivaluelinkstatety = (ivs_linking,ivs_valuesetting,ivs_loadedproc);
  ifivaluelinkstatesty = set of ifivaluelinkstatety;
 
  tcustomificlientcontroller = class(tlinkedpersistent,iifiserver)
@@ -87,6 +87,12 @@ type
                                     //true if found
    function getrealtyval(const alink: iificlient; const aname: string;
                                  var avalue: realty): boolean;
+                                    //true if found
+   function setdatetimeval(const alink: iificlient; const aname: string;
+                                 const avalue: tdatetime): boolean;
+                                    //true if found
+   function getdatetimeval(const alink: iificlient; const aname: string;
+                                 var avalue: tdatetime): boolean;
                                     //true if found
   //iifiserver
    procedure execute(const sender: iificlient); virtual;
@@ -207,6 +213,37 @@ type
    property onclientsetvalue: setrealeventty 
                        read fonclientsetvalue write fonclientsetvalue;
  end;
+
+ tdatetimeclientcontroller = class(tvalueclientcontroller)
+  private
+   fvalue: tdatetime;
+   fmin: tdatetime;
+   fmax: tdatetime;
+   fonclientsetvalue: setrealeventty;
+   procedure setvalue(const avalue: tdatetime);
+   procedure setmin(const avalue: tdatetime);
+   procedure setmax(const avalue: tdatetime);
+   procedure readvalue(reader: treader);
+   procedure writevalue(writer: twriter);
+   procedure readmin(reader: treader);
+   procedure writemin(writer: twriter);
+   procedure readmax(reader: treader);
+   procedure writemax(writer: twriter);
+  protected
+   procedure valuestoclient(const alink: pointer); override;
+   procedure clienttovalues(const alink: pointer); override;
+   procedure setvalue(const sender: iificlient;
+                              var avalue; var accept: boolean); override;
+   procedure defineproperties(filer: tfiler); override;
+  public
+   constructor create(const aowner: tmsecomponent); override;
+  published
+   property value: tdatetime read fvalue write setvalue stored false;
+   property min: tdatetime read fmin write setmin stored false;
+   property max: tdatetime read fmax write setmax stored false;
+   property onclientsetvalue: setrealeventty 
+                       read fonclientsetvalue write fonclientsetvalue;
+ end;
   
  tifilinkcomp = class(tmsecomponent)
   private
@@ -253,6 +290,17 @@ type
    function getcontrollerclass: ificlientcontrollerclassty; override;
   published
    property controller: trealclientcontroller read getcontroller
+                                                         write setcontroller;
+ end;
+
+ tifidatetimelinkcomp = class(tifilinkcomp)
+  private
+   function getcontroller: tdatetimeclientcontroller;
+   procedure setcontroller(const avalue: tdatetimeclientcontroller);
+  protected
+   function getcontrollerclass: ificlientcontrollerclassty; override;
+  published
+   property controller: tdatetimeclientcontroller read getcontroller
                                                          write setcontroller;
  end;
 
@@ -410,7 +458,9 @@ procedure tcustomificlientcontroller.valuestoclient(const alink: pointer);
 var
  obj: tobject;
 begin
- if csdesigning in fowner.componentstate then begin
+ if not (ivs_loadedproc in fstate) and 
+      (fowner.componentstate * [csdesigning,csloading,csdestroying] = 
+                                                [csdesigning]) then begin
   obj:= iobjectlink(alink).getinstance;
   if (obj is tcomponent) and (tcomponent(obj).owner <> fowner.owner) then begin
    designchanged(tcomponent(obj));
@@ -612,9 +662,47 @@ begin
  end; 
 end;
 
+function tcustomificlientcontroller.setdatetimeval(const alink: iificlient;
+               const aname: string; const avalue: tdatetime): boolean;
+var
+ inst: tobject;
+ prop: ppropinfo;
+ 
+begin
+ inst:= alink.getinstance;
+ prop:= getpropinfo(inst,aname);
+ result:= (prop <> nil) and (prop^.proptype^.kind = tkfloat);
+ if result then begin
+  setfloatprop(inst,prop,avalue);
+ end; 
+end;
+
+function tcustomificlientcontroller.getdatetimeval(
+                     const alink: iificlient; const aname: string;
+                     var avalue: tdatetime): boolean;
+                                    //true if found
+var
+ inst: tobject;
+ prop: ppropinfo;
+ 
+begin
+ inst:= alink.getinstance;
+ prop:= getpropinfo(inst,aname);
+ result:= (prop <> nil) and (prop^.proptype^.kind = tkfloat);
+ if result then begin
+  avalue:= getfloatprop(inst,prop);
+ end; 
+end;
+
+
 procedure tcustomificlientcontroller.loaded;
 begin
- change;
+ include(fstate,ivs_loadedproc);
+ try
+  change;
+ finally
+  exclude(fstate,ivs_loadedproc);
+ end;
 end;
 
 { tifilinkcomp }
@@ -858,6 +946,114 @@ begin
           {$ifdef FPC}@{$endif}writemax,bo3);
 end;
 
+{ tdatetimeclientcontroller }
+
+constructor tdatetimeclientcontroller.create(const aowner: tmsecomponent);
+begin
+ fvalue:= emptydatetime;
+ fmin:= emptydatetime;
+ fmax:= bigdatetime;
+ inherited create(aowner,tkfloat);
+end;
+
+procedure tdatetimeclientcontroller.setvalue(const avalue: tdatetime);
+begin
+ fvalue:= avalue;
+ change;
+end;
+
+procedure tdatetimeclientcontroller.valuestoclient(const alink: pointer);
+begin
+ setdatetimeval(iificlient(alink),'value',fvalue);
+ setdatetimeval(iificlient(alink),'min',fmin);
+ setdatetimeval(iificlient(alink),'max',fmax);
+ inherited;
+end;
+
+procedure tdatetimeclientcontroller.clienttovalues(const alink: pointer);
+begin
+ inherited;
+ getdatetimeval(iificlient(alink),'value',fvalue);
+end;
+
+procedure tdatetimeclientcontroller.setvalue(const sender: iificlient;
+                                         var avalue; var accept: boolean);
+begin
+ if fowner.canevent(tmethod(fonclientsetvalue)) then begin
+  fonclientsetvalue(self,tdatetime(avalue),accept);
+ end;
+end;
+
+procedure tdatetimeclientcontroller.setmin(const avalue: tdatetime);
+begin
+ fmin:= avalue;
+ change;
+end;
+
+procedure tdatetimeclientcontroller.setmax(const avalue: tdatetime);
+begin
+ fmax:= avalue;
+ change;
+end;
+
+procedure tdatetimeclientcontroller.readvalue(reader: treader);
+begin
+ value:= readrealty(reader);
+end;
+
+procedure tdatetimeclientcontroller.writevalue(writer: twriter);
+begin
+ writerealty(writer,fvalue);
+end;
+
+procedure tdatetimeclientcontroller.readmin(reader: treader);
+begin
+ fmin:= readrealty(reader);
+end;
+
+procedure tdatetimeclientcontroller.writemin(writer: twriter);
+begin
+ writerealty(writer,fmin);
+end;
+
+procedure tdatetimeclientcontroller.readmax(reader: treader);
+begin
+ fmax:= readrealty(reader);
+end;
+
+procedure tdatetimeclientcontroller.writemax(writer: twriter);
+begin
+ writerealty(writer,fmax);
+end;
+
+procedure tdatetimeclientcontroller.defineproperties(filer: tfiler);
+var
+ bo1,bo2,bo3: boolean;
+begin
+ inherited;
+ if filer.ancestor <> nil then begin
+  with tdatetimeclientcontroller(filer.ancestor) do begin
+   bo1:= self.fvalue <> fvalue;
+   bo2:= self.fmin <> fmin;
+   bo3:= self.fmax <> fmax;
+  end;
+ end
+ else begin
+  bo1:= not isemptydatetime(fvalue);
+  bo2:= not isemptydatetime(fmin);
+  bo3:= cmprealty(fmax,bigdatetime) <> 0;
+//  bo3:= cmpdatetime(fmax,0.99*bigdatetime) < 0;
+ end;
+ 
+ filer.DefineProperty('val',
+             {$ifdef FPC}@{$endif}readvalue,
+             {$ifdef FPC}@{$endif}writevalue,bo1);
+ filer.DefineProperty('mi',{$ifdef FPC}@{$endif}readmin,
+          {$ifdef FPC}@{$endif}writemin,bo2);
+ filer.DefineProperty('ma',{$ifdef FPC}@{$endif}readmax,
+          {$ifdef FPC}@{$endif}writemax,bo3);
+end;
+
 { tifistringlinkcomp }
 
 function tifistringlinkcomp.getcontrollerclass: ificlientcontrollerclassty;
@@ -909,6 +1105,22 @@ begin
  inherited setcontroller(avalue);
 end;
 
+{ tifidatetimelinkcomp }
+
+function tifidatetimelinkcomp.getcontrollerclass: ificlientcontrollerclassty;
+begin
+ result:= tdatetimeclientcontroller;
+end;
+
+function tifidatetimelinkcomp.getcontroller: tdatetimeclientcontroller;
+begin
+ result:= tdatetimeclientcontroller(inherited controller);
+end;
+
+procedure tifidatetimelinkcomp.setcontroller(const avalue: tdatetimeclientcontroller);
+begin
+ inherited setcontroller(avalue);
+end;
 
 { tificlientcontroller }
 

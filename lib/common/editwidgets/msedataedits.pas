@@ -604,7 +604,9 @@ type
    property bitcount;
    property min;
    property max;
+  {$ifdef mse_with_ifi}
    property ifilink;
+  {$endif}
  end;
 
  tcustomint64edit = class(tnumedit)
@@ -906,12 +908,12 @@ type
    function getascurrency: currency;
    procedure setascurrency(const avalue: currency);
    procedure readvaluescale(reader: treader);
-  protected
-   fvalue: realty;
   {$ifdef mse_with_ifi}
    function getifilink: tifireallinkcomp;
    procedure setifilink(const avalue: tifireallinkcomp);
   {$endif}
+  protected
+   fvalue: realty;
    function gettextvalue(var accept: boolean; const quiet: boolean): realty; virtual;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    function internaldatatotext(const data): msestring; override;
@@ -966,7 +968,9 @@ type
    property valuerange;
    property min stored false;
    property max stored false;
+  {$ifdef mse_with_ifi}
    property ifilink;
+  {$endif}
  end;
 
 const
@@ -1100,6 +1104,10 @@ type
    procedure writemin(writer: twriter);
    procedure readmax(reader: treader);
    procedure writemax(writer: twriter);
+  {$ifdef mse_with_ifi}
+   function getifilink: tifidatetimelinkcomp;
+   procedure setifilink(const avalue: tifidatetimelinkcomp);
+  {$endif}
   protected
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    function internaldatatotext(const data): msestring; override;
@@ -1128,6 +1136,9 @@ type
    property gridvalue[const index: integer]: tdatetime 
                  read getgridvalue write setgridvalue; default;
    property gridvalues: datetimearty read getgridvalues write setgridvalues;
+{$ifdef mse_with_ifi}
+   property ifilink: tifidatetimelinkcomp read getifilink write setifilink;
+{$endif}
  end;
  
  tdatetimeedit = class(tcustomdatetimeedit)
@@ -1139,6 +1150,9 @@ type
    property min stored false;
    property max stored false;
    property kind;
+  {$ifdef mse_with_ifi}
+   property ifilink;
+  {$endif}
  end;
 
 function realtytoint(const avalue: realty): integer;
@@ -3407,6 +3421,7 @@ begin
  internalassigncol(value);
 end;
 
+{$ifdef mse_with_ifi}
 function tcustomintegeredit.getifilink: tifiintegerlinkcomp;
 begin
  result:= tifiintegerlinkcomp(fifilink);
@@ -3416,6 +3431,7 @@ procedure tcustomintegeredit.setifilink(const avalue: tifiintegerlinkcomp);
 begin
  inherited;
 end;
+{$endif}
 
 { tcustomint64edit }
 
@@ -4554,6 +4570,8 @@ begin
  result:= isemptyreal(value);
 end;
 
+{$ifdef mse_with_ifi}
+
 function tcustomrealedit.getifilink: tifireallinkcomp;
 begin
  result:= tifireallinkcomp(fifilink);
@@ -4563,6 +4581,7 @@ procedure tcustomrealedit.setifilink(const avalue: tifireallinkcomp);
 begin
  inherited;
 end;
+{$endif}
 
 { tspineditframe }
 
@@ -4718,7 +4737,7 @@ constructor tcustomdatetimeedit.create(aowner: tcomponent);
 begin
  fvalue:= emptydatetime;
  fmin:= emptydatetime;
- fmax:= 401768.99999; //2999-12-31
+ fmax:= bigdatetime;
  inherited;
 end;
 
@@ -4985,7 +5004,7 @@ begin
  else begin
   bo1:= not isemptyreal(fvalue);
   bo2:= not isemptyreal(fmin);
-  bo3:= cmprealty(fmax,0.99*bigreal) < 0;
+  bo3:= cmprealty(fmax,bigdatetime) <> 0;
  end;
  
  filer.DefineProperty('val',
@@ -5011,5 +5030,17 @@ function tcustomdatetimeedit.griddata: trealdatalist;
 begin
  result:= trealdatalist(fdatalist);
 end;
+
+{$ifdef mse_with_ifi}
+function tcustomdatetimeedit.getifilink: tifidatetimelinkcomp;
+begin
+ result:= tifidatetimelinkcomp(fifilink);
+end;
+
+procedure tcustomdatetimeedit.setifilink(const avalue: tifidatetimelinkcomp);
+begin
+ inherited;
+end;
+{$endif}
 
 end.
