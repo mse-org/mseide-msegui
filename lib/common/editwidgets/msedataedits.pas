@@ -908,6 +908,10 @@ type
    procedure readvaluescale(reader: treader);
   protected
    fvalue: realty;
+  {$ifdef mse_with_ifi}
+   function getifilink: tifireallinkcomp;
+   procedure setifilink(const avalue: tifireallinkcomp);
+  {$endif}
    function gettextvalue(var accept: boolean; const quiet: boolean): realty; virtual;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    function internaldatatotext(const data): msestring; override;
@@ -945,6 +949,9 @@ type
    property gridvalues: realarty read getgridvalues write setgridvalues;
    property gridintvalues: integerarty read getgridintvalues 
                                                  write setgridintvalues;
+{$ifdef mse_with_ifi}
+   property ifilink: tifireallinkcomp read getifilink write setifilink;
+{$endif}
   published
    property optionswidget default defaulteditwidgetoptions + [ow_mousewheel]; //first!
  end;
@@ -959,6 +966,7 @@ type
    property valuerange;
    property min stored false;
    property max stored false;
+   property ifilink;
  end;
 
 const
@@ -4544,6 +4552,16 @@ end;
 function tcustomrealedit.isnull: boolean;
 begin
  result:= isemptyreal(value);
+end;
+
+function tcustomrealedit.getifilink: tifireallinkcomp;
+begin
+ result:= tifireallinkcomp(fifilink);
+end;
+
+procedure tcustomrealedit.setifilink(const avalue: tifireallinkcomp);
+begin
+ inherited;
 end;
 
 { tspineditframe }

@@ -15,7 +15,7 @@ unit mseificomp;
 
 interface
 uses
- classes,mseclasses,msegui,mseifiglob,mseglob,typinfo,msestrings;
+ classes,mseclasses,msegui,mseifiglob,mseglob,typinfo,msestrings,msetypes;
 type
  tifilinkcomp = class;
  
@@ -81,6 +81,12 @@ type
                                     //true if found
    function getintegerval(const alink: iificlient; const aname: string;
                                  var avalue: integer): boolean;
+                                    //true if found
+   function setrealtyval(const alink: iificlient; const aname: string;
+                                 const avalue: realty): boolean;
+                                    //true if found
+   function getrealtyval(const alink: iificlient; const aname: string;
+                                 var avalue: realty): boolean;
                                     //true if found
   //iifiserver
    procedure execute(const sender: iificlient); virtual;
@@ -170,6 +176,37 @@ type
    property onclientsetvalue: setintegereventty 
                 read fonclientsetvalue write fonclientsetvalue;
  end;
+
+ trealclientcontroller = class(tvalueclientcontroller)
+  private
+   fvalue: realty;
+   fmin: realty;
+   fmax: realty;
+   fonclientsetvalue: setrealeventty;
+   procedure setvalue(const avalue: realty);
+   procedure setmin(const avalue: realty);
+   procedure setmax(const avalue: realty);
+   procedure readvalue(reader: treader);
+   procedure writevalue(writer: twriter);
+   procedure readmin(reader: treader);
+   procedure writemin(writer: twriter);
+   procedure readmax(reader: treader);
+   procedure writemax(writer: twriter);
+  protected
+   procedure valuestoclient(const alink: pointer); override;
+   procedure clienttovalues(const alink: pointer); override;
+   procedure setvalue(const sender: iificlient;
+                              var avalue; var accept: boolean); override;
+   procedure defineproperties(filer: tfiler); override;
+  public
+   constructor create(const aowner: tmsecomponent); override;
+  published
+   property value: realty read fvalue write setvalue stored false;
+   property min: realty read fmin write setmin stored false;
+   property max: realty read fmax write setmax stored false;
+   property onclientsetvalue: setrealeventty 
+                       read fonclientsetvalue write fonclientsetvalue;
+ end;
   
  tifilinkcomp = class(tmsecomponent)
   private
@@ -208,6 +245,17 @@ type
                                                          write setcontroller;
  end;
 
+ tifireallinkcomp = class(tifilinkcomp)
+  private
+   function getcontroller: trealclientcontroller;
+   procedure setcontroller(const avalue: trealclientcontroller);
+  protected
+   function getcontrollerclass: ificlientcontrollerclassty; override;
+  published
+   property controller: trealclientcontroller read getcontroller
+                                                         write setcontroller;
+ end;
+
  tifiactionlinkcomp = class(tifilinkcomp)
   private
    function getcontroller: texecclientcontroller;
@@ -223,7 +271,7 @@ procedure setifilinkcomp(const alink: iifilink;
                       const alinkcomp: tifilinkcomp; var dest: tifilinkcomp);
 implementation
 uses
- sysutils,mseapplication;
+ sysutils,mseapplication,msereal,msestreaming;
  
 type
  tmsecomponent1 = class(tmsecomponent);
@@ -364,7 +412,7 @@ var
 begin
  if csdesigning in fowner.componentstate then begin
   obj:= iobjectlink(alink).getinstance;
-  if obj is tcomponent and (tcomponent(obj).owner <> fowner.owner) then begin
+  if (obj is tcomponent) and (tcomponent(obj).owner <> fowner.owner) then begin
    designchanged(tcomponent(obj));
   end;
  end;
@@ -532,6 +580,37 @@ begin
  end; 
 end;
 
+function tcustomificlientcontroller.setrealtyval(const alink: iificlient;
+               const aname: string; const avalue: realty): boolean;
+var
+ inst: tobject;
+ prop: ppropinfo;
+ 
+begin
+ inst:= alink.getinstance;
+ prop:= getpropinfo(inst,aname);
+ result:= (prop <> nil) and (prop^.proptype^.kind = tkfloat);
+ if result then begin
+  setfloatprop(inst,prop,avalue);
+ end; 
+end;
+
+function tcustomificlientcontroller.getrealtyval(
+                     const alink: iificlient; const aname: string;
+                     var avalue: realty): boolean;
+                                    //true if found
+var
+ inst: tobject;
+ prop: ppropinfo;
+ 
+begin
+ inst:= alink.getinstance;
+ prop:= getpropinfo(inst,aname);
+ result:= (prop <> nil) and (prop^.proptype^.kind = tkfloat);
+ if result then begin
+  avalue:= getfloatprop(inst,prop);
+ end; 
+end;
 
 procedure tcustomificlientcontroller.loaded;
 begin
@@ -671,6 +750,114 @@ begin
 end;
 
 
+{ trealclientcontroller }
+
+constructor trealclientcontroller.create(const aowner: tmsecomponent);
+begin
+ fvalue:= emptyreal;
+ fmin:= emptyreal;
+ fmax:= bigreal;
+ inherited create(aowner,tkfloat);
+end;
+
+procedure trealclientcontroller.setvalue(const avalue: realty);
+begin
+ fvalue:= avalue;
+ change;
+end;
+
+procedure trealclientcontroller.valuestoclient(const alink: pointer);
+begin
+ setrealtyval(iificlient(alink),'value',fvalue);
+ setrealtyval(iificlient(alink),'min',fmin);
+ setrealtyval(iificlient(alink),'max',fmax);
+ inherited;
+end;
+
+procedure trealclientcontroller.clienttovalues(const alink: pointer);
+begin
+ inherited;
+ getrealtyval(iificlient(alink),'value',fvalue);
+end;
+
+procedure trealclientcontroller.setvalue(const sender: iificlient;
+                                         var avalue; var accept: boolean);
+begin
+ if fowner.canevent(tmethod(fonclientsetvalue)) then begin
+  fonclientsetvalue(self,realty(avalue),accept);
+ end;
+end;
+
+procedure trealclientcontroller.setmin(const avalue: realty);
+begin
+ fmin:= avalue;
+ change;
+end;
+
+procedure trealclientcontroller.setmax(const avalue: realty);
+begin
+ fmax:= avalue;
+ change;
+end;
+
+procedure trealclientcontroller.readvalue(reader: treader);
+begin
+ value:= readrealty(reader);
+end;
+
+procedure trealclientcontroller.writevalue(writer: twriter);
+begin
+ writerealty(writer,fvalue);
+end;
+
+procedure trealclientcontroller.readmin(reader: treader);
+begin
+ fmin:= readrealty(reader);
+end;
+
+procedure trealclientcontroller.writemin(writer: twriter);
+begin
+ writerealty(writer,fmin);
+end;
+
+procedure trealclientcontroller.readmax(reader: treader);
+begin
+ fmax:= readrealty(reader);
+end;
+
+procedure trealclientcontroller.writemax(writer: twriter);
+begin
+ writerealty(writer,fmax);
+end;
+
+procedure trealclientcontroller.defineproperties(filer: tfiler);
+var
+ bo1,bo2,bo3: boolean;
+begin
+ inherited;
+ if filer.ancestor <> nil then begin
+  with trealclientcontroller(filer.ancestor) do begin
+   bo1:= self.fvalue <> fvalue;
+   bo2:= self.fmin <> fmin;
+   bo3:= self.fmax <> fmax;
+  end;
+ end
+ else begin
+  bo1:= not isemptyreal(fvalue);
+  bo2:= not isemptyreal(fmin);
+  bo3:= cmprealty(fmax,bigreal) <> 0;
+//  bo3:= cmprealty(fmax,0.99*bigreal) < 0;
+ end;
+ 
+ filer.DefineProperty('val',
+             {$ifdef FPC}@{$endif}readvalue,
+             {$ifdef FPC}@{$endif}writevalue,bo1);
+ filer.DefineProperty('mi',{$ifdef FPC}@{$endif}readmin,
+          {$ifdef FPC}@{$endif}writemin,bo2);
+ filer.DefineProperty('ma',{$ifdef FPC}@{$endif}readmax,
+          {$ifdef FPC}@{$endif}writemax,bo3);
+end;
+
 { tifistringlinkcomp }
 
 function tifistringlinkcomp.getcontrollerclass: ificlientcontrollerclassty;
@@ -704,6 +891,24 @@ procedure tifiintegerlinkcomp.setcontroller(const avalue: tintegerclientcontroll
 begin
  inherited setcontroller(avalue);
 end;
+
+{ tifireallinkcomp }
+
+function tifireallinkcomp.getcontrollerclass: ificlientcontrollerclassty;
+begin
+ result:= trealclientcontroller;
+end;
+
+function tifireallinkcomp.getcontroller: trealclientcontroller;
+begin
+ result:= trealclientcontroller(inherited controller);
+end;
+
+procedure tifireallinkcomp.setcontroller(const avalue: trealclientcontroller);
+begin
+ inherited setcontroller(avalue);
+end;
+
 
 { tificlientcontroller }
 
