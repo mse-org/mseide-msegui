@@ -21,10 +21,15 @@ type
  
  iifilink = interface(iificlient)
                         ['{29DE5F47-87D3-408A-8BAB-1DDE945938F1}']
-//  procedure setifilink(const avalue: tifilinkcomp);
   function getobjectlinker: tobjectlinker;
  end;
- 
+
+ iifigridlink = interface(iifilink)
+ end;
+
+ iifigridserver = interface(iifiserver)
+ end;
+   
  ificlienteventty = procedure(const sender: tobject;
                              const alink: iificlient) of object;
  ificlientstateeventty = procedure(const sender: tobject;
@@ -258,7 +263,10 @@ type
    property onclientsetvalue: setrealeventty 
                        read fonclientsetvalue write fonclientsetvalue;
  end;
-  
+
+ tgridclientcontroller = class(tificlientcontroller)
+ end;
+ 
  tifilinkcomp = class(tmsecomponent)
   private
    fcontroller: tificlientcontroller;
@@ -339,7 +347,18 @@ type
    property controller: texecclientcontroller read getcontroller
                                                          write setcontroller;
  end;
-  
+
+ tifigridlinkcomp = class(tifilinkcomp)
+  private
+   function getcontroller: tgridclientcontroller;
+   procedure setcontroller(const avalue: tgridclientcontroller);
+  protected
+   function getcontrollerclass: ificlientcontrollerclassty; override;
+  published
+   property controller: tgridclientcontroller read getcontroller
+                                                         write setcontroller;
+ end;
+   
 procedure setifilinkcomp(const alink: iifilink;
                       const alinkcomp: tifilinkcomp; var dest: tifilinkcomp);
 implementation
@@ -1264,6 +1283,23 @@ begin
   prop1:= getpropinfo(acomponent,'onexecute');
   result:= (prop1 <> nil) and (prop1^.proptype^.kind = tkmethod);
  end;
+end;
+
+{ tifigridlinkcomp }
+
+function tifigridlinkcomp.getcontrollerclass: ificlientcontrollerclassty;
+begin
+ result:= tgridclientcontroller;
+end;
+
+function tifigridlinkcomp.getcontroller: tgridclientcontroller;
+begin
+ result:= tgridclientcontroller(inherited controller);
+end;
+
+procedure tifigridlinkcomp.setcontroller(const avalue: tgridclientcontroller);
+begin
+ inherited setcontroller(avalue);
 end;
 
 end.

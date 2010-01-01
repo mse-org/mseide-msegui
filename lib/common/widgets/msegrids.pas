@@ -9,7 +9,12 @@
 }
 unit msegrids;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$goto on}{$endif}
+{$ifdef FPC}
+ {$ifndef mse_no_ifi}
+  {$define mse_with_ifi}
+ {$endif}
+ {$mode objfpc}{$h+}{$interfaces corba}{$goto on}
+{$endif}
 
 interface
 uses
@@ -18,7 +23,8 @@ uses
  msescrollbar,msearrayprops,mseglob,mseguiglob,
  msedatalist,msedrawtext,msewidgets,mseevent,mseinplaceedit,mseeditglob,
  mseobjectpicker,msepointer,msetimer,msebits,msestat,msestatfile,msekeyboard,
- msestream,msedrag,msemenus,msepipestream,mseshapes;
+ msestream,msedrag,msemenus,msepipestream,mseshapes
+ {$ifdef mse_with_ifi} ,mseificomp,mseifiglob{$endif};
 
 type
          //     listvievoptionty from mselistbrowser
@@ -1517,7 +1523,8 @@ type
  gridscrolleventty = procedure(const sender: tcustomgrid;
                                      var step: integer) of object; 
  tcustomgrid = class(tpublishedwidget,iautoscrollframe,iobjectpicker,iscrollbar,
-                    idragcontroller,istatfile)
+                    idragcontroller,istatfile
+                    {$ifdef mse_with_ifi},iifigridlink{$endif})
   private
    frepeater: tsimpletimer;
    frepeataction: focuscellactionty;
@@ -1574,6 +1581,11 @@ type
    fonsortchanged: gridnotifyeventty;
    fdatarowheightmin: integer;
    fdatarowheightmax: integer;
+{$ifdef mse_with_ifi}
+   fifilink: tifigridlinkcomp;
+//   procedure ifisetvalue(var avalue; var accept: boolean);
+   procedure setifilink(const avalue: tifigridlinkcomp);
+{$endif}
    procedure setframe(const avalue: tgridframe);
    function getframe: tgridframe;
    procedure setstatfile(const Value: tstatfile);
@@ -1981,6 +1993,9 @@ type
    function rowfoldinfo: prowfoldinfoty; //nil if focused row not visible
    property rowheight[const index: integer]: integer read getrowheight
                                                           write setrowheight;
+{$ifdef mse_with_ifi}
+   property ifilink: tifigridlinkcomp read fifilink write setifilink;
+{$endif}
                         
    property zebra_color: colorty read fzebra_color write setzebra_color default cl_infobackground;
    property zebra_start: integer read fzebra_start write setzebra_start default 0;
@@ -13146,6 +13161,13 @@ begin
   optionsgrid:= optionsgrid - [og_sorted];
  end;
 end;
+
+{$ifdef mse_with_ifi}
+procedure tcustomgrid.setifilink(const avalue: tifigridlinkcomp);
+begin
+ mseificomp.setifilinkcomp(iifigridlink(self),avalue,fifilink);
+end;
+{$endif}
 
 { tdrawgrid }
 

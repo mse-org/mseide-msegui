@@ -9,7 +9,12 @@
 }
 unit msewidgetgrid;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
+{$ifdef FPC}
+ {$ifndef mse_no_ifi}
+  {$define mse_with_ifi}
+ {$endif}
+ {$mode objfpc}{$h+}{$interfaces corba}
+{$endif}
 
 interface
 uses
@@ -307,6 +312,7 @@ type
    property zebra_height;
    property zebra_step;
    property datacols;
+   property ifilink;
 
    property datarowlinewidth;
    property datarowlinecolorfix;
