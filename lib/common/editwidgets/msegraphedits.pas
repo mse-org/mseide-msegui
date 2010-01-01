@@ -23,7 +23,7 @@ uses
  msewidgets,mseeditglob,msestockobjects,msestat,msestatfile,
  mseclasses,msesimplewidgets,msemenus,mseact,
  msegrids,msewidgetgrid,msedatalist,msebitmap,msetypes,msestrings,msearrayprops,
- msedrawtext,mseshapes{$ifdef mse_with_ifi},mseifi,mseifiglob{$endif},
+ msedrawtext,mseshapes{$ifdef mse_with_ifi},mseifi,mseifiglob,mseificomp{$endif},
  msepointer;
 
 const
@@ -94,7 +94,7 @@ type
  end;
 
  tgraphdataedit = class(tactionpublishedwidget,igridwidget,istatfile
-                  {$ifdef mse_with_ifi},iificlient{$endif})
+                  {$ifdef mse_with_ifi},iifilink{$endif})
   private
    fonchange: notifyeventty;
    fondataentered: notifyeventty;
@@ -103,6 +103,11 @@ type
    fstatfile: tstatfile;
    foptionsedit: optionseditty;
    fedited: boolean;
+{$ifdef mse_with_ifi}
+   fifilink: tifilinkcomp;
+   procedure ifisetvalue(var avalue; var accept: boolean);
+   procedure setifilink(const avalue: tifilinkcomp);
+{$endif}
    procedure setcolorglyph(const Value: colorty);
    procedure setstatfile(const Value: tstatfile);
    procedure setoptionsedit(const avalue: optionseditty);
@@ -131,7 +136,8 @@ type
    procedure formatchanged;
    procedure dopaint(const canvas: tcanvas); override;
    function needsfocuspaint: boolean; override;
-   procedure internalcheckvalue(var avalue; var accept: boolean); virtual; abstract;
+   procedure internalcheckvalue(var avalue; var accept: boolean);
+                                                            virtual; abstract;
    procedure paintglyph(const canvas: tcanvas; const acolorglyph: colorty;
                         const avalue; const arect: rectty);
                  virtual; abstract;
@@ -499,6 +505,10 @@ type
    function getvalue: boolean;
    function getvaluedefault: boolean;
    procedure setvaluedefault(const Value: boolean);
+  {$ifdef mse_with_ifi}
+   function getifilink: tifibooleanlinkcomp;
+   procedure setifilink(const avalue: tifibooleanlinkcomp);
+  {$endif}
   protected
    class function classskininfo: skininfoty; override;
    procedure setnullvalue;
@@ -553,6 +563,9 @@ type
    property bounds_cy default defaultboxsize;
    property onsetvalue: setbooleaneventty read fonsetvalue write fonsetvalue;
    property group: integer read fgroup write fgroup default 0;
+{$ifdef mse_with_ifi}
+   property ifilink: tifibooleanlinkcomp read getifilink write setifilink;
+{$endif}
   published
    property visible;
    property enabled;
@@ -566,6 +579,9 @@ type
    property value;
    property valuedefault;
    property group;
+{$ifdef mse_with_ifi}
+   property ifilink;
+{$endif}
  end;
  
  tcustombooleaneditradio = class(tcustombooleanedit)
@@ -1767,6 +1783,20 @@ begin
  //dummy
 end;
 
+{$ifdef mse_with_ifi}
+procedure tgraphdataedit.setifilink(const avalue: tifilinkcomp);
+begin
+ mseificomp.setifilinkcomp(iifilink(self),avalue,fifilink);
+end;
+
+procedure tgraphdataedit.ifisetvalue(var avalue; var accept: boolean);
+begin
+ if accept and (fifiserverintf <> nil) then begin
+  fifiserverintf.setvalue(iificlient(self),avalue,accept);
+ end;
+end;
+{$endif}
+
 { ttogglegraphdataedit}
 
 constructor ttogglegraphdataedit.create(aowner: tcomponent);
@@ -1868,6 +1898,11 @@ begin
  if canevent(tmethod(fonsetvalue)) then begin
   fonsetvalue(self,boolean(avalue),accept);
  end;
+{$ifdef mse_with_ifi}
+ if accept then begin
+  ifisetvalue(fvalue,accept);
+ end;
+{$endif}
  if accept then begin
   value:= boolean(avalue);
  end;
@@ -2196,6 +2231,18 @@ begin
   end;
  end;
 end;
+
+{$ifdef mse_with_ifi}
+function tcustombooleanedit.getifilink: tifibooleanlinkcomp;
+begin
+ result:= tifibooleanlinkcomp(fifilink);
+end;
+
+procedure tcustombooleanedit.setifilink(const avalue: tifibooleanlinkcomp);
+begin
+ inherited;
+end;
+{$endif}
 
 { tcustombooleaneditradio }
 

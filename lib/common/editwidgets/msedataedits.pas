@@ -2098,15 +2098,6 @@ begin
  end;
 end;
 
-{$ifdef mse_with_ifi}
-procedure tcustomdataedit.ifisetvalue(var avalue; var accept: boolean);
-begin
- if accept and (fifiserverintf <> nil) then begin
-  fifiserverintf.setvalue(iificlient(self),avalue,accept);
- end;
-end;
-{$endif}
-
 procedure tcustomdataedit.setenabled(const avalue: boolean);
 begin
  inherited;
@@ -2304,6 +2295,13 @@ end;
 procedure tcustomdataedit.setifilink(const avalue: tifilinkcomp);
 begin
  mseificomp.setifilinkcomp(iifilink(self),avalue,fifilink);
+end;
+
+procedure tcustomdataedit.ifisetvalue(var avalue; var accept: boolean);
+begin
+ if accept and (fifiserverintf <> nil) then begin
+  fifiserverintf.setvalue(iificlient(self),avalue,accept);
+ end;
 end;
 {$endif}
 

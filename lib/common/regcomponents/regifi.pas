@@ -15,6 +15,7 @@ type
 procedure register;
 begin
  registercomponents('Ifi',[tifiactionlinkcomp,tifiintegerlinkcomp,
+       tifibooleanlinkcomp,
        tifireallinkcomp,tifidatetimelinkcomp,tifistringlinkcomp]); 
  registercomponenttabhints(['Ifi'],
    ['IFI Components']);

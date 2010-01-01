@@ -45,13 +45,8 @@ type
    fonclientstatechanged: ificlientstateeventty;
    fonclientmodalresult: ificlientmodalresulteventty;
    fowner: tmsecomponent;
-//   function getwidget: twidget;
-//   procedure setwidget(const avalue: twidget);
-//   function getclientinstance: tobject;
   protected
-//   fvalueproperty: ppropinfo;
    fkind: ttypekind;
-//   fintf: iificlient;
    fstate: ifivaluelinkstatesty;
    fwidgetstate: ifiwidgetstatesty;
    fwidgetstatebefore: ifiwidgetstatesty;
@@ -61,13 +56,11 @@ type
    procedure finalizelinks;
    procedure loaded; virtual;
    function errorname(const ainstance: tobject): string;
-//   procedure setcomponent(const aintf: iificlient);
    function checkcomponent(const aintf: iificlient): pointer;
                      //returns interface info
    procedure valuestootherclient(const alink: pointer); 
    procedure valuestoclient(const alink: pointer); virtual; 
    procedure clienttovalues(const alink: pointer); virtual; 
-//   procedure widgettovalue; virtual;
    procedure change(const alink: iificlient = nil);
    
    function setmsestringval(const alink: iificlient; const aname: string;
@@ -81,6 +74,12 @@ type
                                     //true if found
    function getintegerval(const alink: iificlient; const aname: string;
                                  var avalue: integer): boolean;
+                                    //true if found
+   function setbooleanval(const alink: iificlient; const aname: string;
+                                 const avalue: boolean): boolean;
+                                    //true if found
+   function getbooleanval(const alink: iificlient; const aname: string;
+                                 var avalue: boolean): boolean;
                                     //true if found
    function setrealtyval(const alink: iificlient; const aname: string;
                                  const avalue: realty): boolean;
@@ -106,7 +105,6 @@ type
   public
    constructor create(const aowner: tmsecomponent; const akind: ttypekind);
    function canconnect(const acomponent: tcomponent): boolean; virtual;
-//   property kind: ttypekind read fkind;
    property onclientvaluechanged: ificlienteventty read fonclientvaluechanged 
                                                     write fonclientvaluechanged;
    property onclientstatechanged: ificlientstateeventty 
@@ -115,8 +113,6 @@ type
                      read fonclientmodalresult write fonclientmodalresult;
    property onclientexecute: ificlienteventty read fonclientexecute 
                      write fonclientexecute;
-//   property clientinstance: tobject read getclientinstance;
-//   property widget: twidget read getwidget write setwidget;
  end;
 
  tificlientcontroller = class(tcustomificlientcontroller)
@@ -180,6 +176,24 @@ type
    property min: integer read fmin write setmin default 0;
    property max: integer read fmax write setmax default maxint;
    property onclientsetvalue: setintegereventty 
+                read fonclientsetvalue write fonclientsetvalue;
+ end;
+
+ tbooleanclientcontroller = class(tvalueclientcontroller)
+  private
+   fvalue: boolean;
+   fonclientsetvalue: setbooleaneventty;
+   procedure setvalue(const avalue: boolean);
+  protected
+   procedure valuestoclient(const alink: pointer); override;
+   procedure clienttovalues(const alink: pointer); override;
+   procedure setvalue(const sender: iificlient;
+                              var avalue; var accept: boolean); override;
+  public
+   constructor create(const aowner: tmsecomponent); override;
+  published
+   property value: boolean read fvalue write setvalue default false;
+   property onclientsetvalue: setbooleaneventty 
                 read fonclientsetvalue write fonclientsetvalue;
  end;
 
@@ -279,6 +293,17 @@ type
    function getcontrollerclass: ificlientcontrollerclassty; override;
   published
    property controller: tintegerclientcontroller read getcontroller
+                                                         write setcontroller;
+ end;
+
+ tifibooleanlinkcomp = class(tifilinkcomp)
+  private
+   function getcontroller: tbooleanclientcontroller;
+   procedure setcontroller(const avalue: tbooleanclientcontroller);
+  protected
+   function getcontrollerclass: ificlientcontrollerclassty; override;
+  published
+   property controller: tbooleanclientcontroller read getcontroller
                                                          write setcontroller;
  end;
 
@@ -630,6 +655,38 @@ begin
  end; 
 end;
 
+function tcustomificlientcontroller.setbooleanval(const alink: iificlient;
+               const aname: string; const avalue: boolean): boolean;
+var
+ inst: tobject;
+ prop: ppropinfo;
+ 
+begin
+ inst:= alink.getinstance;
+ prop:= getpropinfo(inst,aname);
+ result:= (prop <> nil) and (prop^.proptype^.kind = tkbool);
+ if result then begin
+  setordprop(inst,prop,ord(avalue));
+ end; 
+end;
+
+function tcustomificlientcontroller.getbooleanval(
+                     const alink: iificlient; const aname: string;
+                     var avalue: boolean): boolean;
+                                    //true if found
+var
+ inst: tobject;
+ prop: ppropinfo;
+ 
+begin
+ inst:= alink.getinstance;
+ prop:= getpropinfo(inst,aname);
+ result:= (prop <> nil) and (prop^.proptype^.kind = tkenumeration);
+ if result then begin
+  avalue:= getordprop(inst,prop) <> 0;
+ end; 
+end;
+
 function tcustomificlientcontroller.setrealtyval(const alink: iificlient;
                const aname: string; const avalue: realty): boolean;
 var
@@ -837,6 +894,38 @@ begin
  change;
 end;
 
+{ tbooleanclientcontroller }
+
+constructor tbooleanclientcontroller.create(const aowner: tmsecomponent);
+begin
+ inherited create(aowner,tkbool);
+end;
+
+procedure tbooleanclientcontroller.setvalue(const avalue: boolean);
+begin
+ fvalue:= avalue;
+ change;
+end;
+
+procedure tbooleanclientcontroller.valuestoclient(const alink: pointer);
+begin
+ setbooleanval(iificlient(alink),'value',fvalue);
+ inherited;
+end;
+
+procedure tbooleanclientcontroller.clienttovalues(const alink: pointer);
+begin
+ inherited;
+ getbooleanval(iificlient(alink),'value',fvalue);
+end;
+
+procedure tbooleanclientcontroller.setvalue(const sender: iificlient;
+                                         var avalue; var accept: boolean);
+begin
+ if fowner.canevent(tmethod(fonclientsetvalue)) then begin
+  fonclientsetvalue(self,boolean(avalue),accept);
+ end;
+end;
 
 { trealclientcontroller }
 
@@ -1084,6 +1173,23 @@ begin
 end;
 
 procedure tifiintegerlinkcomp.setcontroller(const avalue: tintegerclientcontroller);
+begin
+ inherited setcontroller(avalue);
+end;
+
+{ tifibooleanlinkcomp }
+
+function tifibooleanlinkcomp.getcontrollerclass: ificlientcontrollerclassty;
+begin
+ result:= tbooleanclientcontroller;
+end;
+
+function tifibooleanlinkcomp.getcontroller: tbooleanclientcontroller;
+begin
+ result:= tbooleanclientcontroller(inherited controller);
+end;
+
+procedure tifibooleanlinkcomp.setcontroller(const avalue: tbooleanclientcontroller);
 begin
  inherited setcontroller(avalue);
 end;
