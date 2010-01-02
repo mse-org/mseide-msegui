@@ -1,7 +1,7 @@
 MSEide+MSEgui version history
 
 Version 2.2
-20010-01-02
+2010-01-02
 2009-12-15
  Default tcustomframe.colorframe = cl_black.
 2009-12-13
