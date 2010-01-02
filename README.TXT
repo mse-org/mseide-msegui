@@ -34,8 +34,8 @@ Installation:
 *************
 1. Download and install FPC 2.2.4 or FPC 2.4, you can get it from 
    http://www.freepascal.org/download.var
-2. Download mseide_msegui_src_2_2beta2.zip and mseide_i386_win32_2_2beta2.zip or
-   mseide_i386_linux_2_2beta2.tar.gz or mseide_x84_64_linux_2_2beta2.tar.gz
+2. Download mseide_msegui_src_2_2.zip and mseide_i386_win32_2_2.zip or
+   mseide_i386_linux_2_2.tar.gz or mseide_x84_64_linux_2_2.tar.gz
    http://sourceforge.net/project/showfiles.php?group_id=165409
 3. Extract them to a directory of your choice ('yourdirectory') .
 4. Run 'yourdirectory/bin/mseide' on linux or 
