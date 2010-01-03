@@ -50,13 +50,25 @@ type
    fonclientstatechanged: ificlientstateeventty;
    fonclientmodalresult: ificlientmodalresulteventty;
    fowner: tmsecomponent;
+   function getintegerprop(const aname: string): integer;
+   procedure setintegerprop(const aname: string; const avalue: integer);
   protected
    fkind: ttypekind;
    fstate: ifivaluelinkstatesty;
    fwidgetstate: ifiwidgetstatesty;
    fwidgetstatebefore: ifiwidgetstatesty;
    fchangedclient: pointer;
+   
+   fapropname: string;
+   fapropkind: ttypekind;
+   fapropvalue: pointer;
 
+   procedure dogetprop(const alink: pointer);
+   procedure getprop(const aname: string; const akind: ttypekind;
+                                                const avaluepo: pointer);
+   procedure dosetprop(const alink: pointer);
+   procedure setprop(const aname: string; const akind: ttypekind;
+                                                const avaluepo: pointer);
    procedure finalizelink(const alink: pointer);
    procedure finalizelinks;
    procedure loaded; virtual;
@@ -110,6 +122,8 @@ type
   public
    constructor create(const aowner: tmsecomponent; const akind: ttypekind);
    function canconnect(const acomponent: tcomponent): boolean; virtual;
+   property integerprop[const aname: string]: integer read getintegerprop 
+                                                       write setintegerprop;
    property onclientvaluechanged: ificlienteventty read fonclientvaluechanged 
                                                     write fonclientvaluechanged;
    property onclientstatechanged: ificlientstateeventty 
@@ -790,6 +804,54 @@ begin
  finally
   exclude(fstate,ivs_loadedproc);
  end;
+end;
+
+procedure tcustomificlientcontroller.dogetprop(const alink: pointer); 
+begin
+ case fapropkind of
+  tkinteger: begin
+   getintegerval(iificlient(alink),fapropname,pinteger(fapropvalue)^);
+  end;
+ end;
+end;
+
+procedure tcustomificlientcontroller.getprop(const aname: string;
+               const akind: ttypekind; const avaluepo: pointer);
+begin
+ fapropname:= aname;
+ fapropkind:= akind;
+ fapropvalue:= avaluepo;
+ tmsecomponent1(fowner).getobjectlinker.forall(@dogetprop,self);
+end;
+
+procedure tcustomificlientcontroller.dosetprop(const alink: pointer);
+begin
+ case fapropkind of
+  tkinteger: begin
+   setintegerval(iificlient(alink),fapropname,pinteger(fapropvalue)^);
+  end;
+ end;
+end;
+
+procedure tcustomificlientcontroller.setprop(const aname: string;
+               const akind: ttypekind; const avaluepo: pointer);
+begin
+ fapropname:= aname;
+ fapropkind:= akind;
+ fapropvalue:= avaluepo;
+ tmsecomponent1(fowner).getobjectlinker.forall(@dosetprop,self);
+end;
+
+function tcustomificlientcontroller.getintegerprop(const aname: string): integer;
+begin
+ result:= 0;
+ getprop(aname,tkinteger,@result);
+end;
+
+procedure tcustomificlientcontroller.setintegerprop(const aname: string;
+               const avalue: integer);
+begin
+ setprop(aname,tkinteger,@avalue);
 end;
 
 { tifilinkcomp }
