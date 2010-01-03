@@ -50,8 +50,16 @@ type
    fonclientstatechanged: ificlientstateeventty;
    fonclientmodalresult: ificlientmodalresulteventty;
    fowner: tmsecomponent;
-   function getintegerprop(const aname: string): integer;
-   procedure setintegerprop(const aname: string; const avalue: integer);
+   function getintegerpro(const aname: string): integer;
+   procedure setintegerpro(const aname: string; const avalue: integer);
+   function getmsestringpro(const aname: string): msestring;
+   procedure setmsestringpro(const aname: string; const avalue: msestring);
+   function getbooleanpro(const aname: string): boolean;
+   procedure setbooleanpro(const aname: string; const avalue: boolean);
+   function getrealtypro(const aname: string): realty;
+   procedure setrealtypro(const aname: string; const avalue: realty);
+   function getdatetimepro(const aname: string): tdatetime;
+   procedure setdatetimepro(const aname: string; const avalue: tdatetime);
   protected
    fkind: ttypekind;
    fstate: ifivaluelinkstatesty;
@@ -122,8 +130,18 @@ type
   public
    constructor create(const aowner: tmsecomponent; const akind: ttypekind);
    function canconnect(const acomponent: tcomponent): boolean; virtual;
-   property integerprop[const aname: string]: integer read getintegerprop 
-                                                       write setintegerprop;
+
+   property msestringprop[const aname: string]: msestring read getmsestringpro 
+                                                       write setmsestringpro;
+   property integerprop[const aname: string]: integer read getintegerpro 
+                                                       write setintegerpro;
+   property booleanprop[const aname: string]: boolean read getbooleanpro 
+                                                       write setbooleanpro;
+   property realtyprop[const aname: string]: realty read getrealtypro 
+                                                       write setrealtypro;
+   property datetimeprop[const aname: string]: tdatetime read getdatetimepro 
+                                                       write setdatetimepro;
+
    property onclientvaluechanged: ificlienteventty read fonclientvaluechanged 
                                                     write fonclientvaluechanged;
    property onclientstatechanged: ificlientstateeventty 
@@ -812,6 +830,15 @@ begin
   tkinteger: begin
    getintegerval(iificlient(alink),fapropname,pinteger(fapropvalue)^);
   end;
+  tkbool: begin
+   getbooleanval(iificlient(alink),fapropname,pboolean(fapropvalue)^);
+  end;
+  tkfloat: begin
+   getrealtyval(iificlient(alink),fapropname,prealty(fapropvalue)^);
+  end;
+  msestringtypekind: begin
+   getmsestringval(iificlient(alink),fapropname,pmsestring(fapropvalue)^);
+  end;
  end;
 end;
 
@@ -842,16 +869,64 @@ begin
  tmsecomponent1(fowner).getobjectlinker.forall(@dosetprop,self);
 end;
 
-function tcustomificlientcontroller.getintegerprop(const aname: string): integer;
+function tcustomificlientcontroller.getintegerpro(const aname: string): integer;
 begin
  result:= 0;
  getprop(aname,tkinteger,@result);
 end;
 
-procedure tcustomificlientcontroller.setintegerprop(const aname: string;
+procedure tcustomificlientcontroller.setintegerpro(const aname: string;
                const avalue: integer);
 begin
  setprop(aname,tkinteger,@avalue);
+end;
+
+function tcustomificlientcontroller.getmsestringpro(const aname: string): msestring;
+begin
+ result:= '';
+ getprop(aname,msestringtypekind,@result);
+end;
+
+procedure tcustomificlientcontroller.setmsestringpro(const aname: string;
+               const avalue: msestring);
+begin
+ setprop(aname,msestringtypekind,@avalue);
+end;
+
+function tcustomificlientcontroller.getbooleanpro(const aname: string): boolean;
+begin
+ result:= false;
+ getprop(aname,tkbool,@result);
+end;
+
+procedure tcustomificlientcontroller.setbooleanpro(const aname: string;
+               const avalue: boolean);
+begin
+ setprop(aname,tkbool,@avalue);
+end;
+
+function tcustomificlientcontroller.getrealtypro(const aname: string): realty;
+begin
+ result:= emptyreal;
+ getprop(aname,tkfloat,@result);
+end;
+
+procedure tcustomificlientcontroller.setrealtypro(const aname: string;
+               const avalue: realty);
+begin
+ setprop(aname,tkfloat,@avalue);
+end;
+
+function tcustomificlientcontroller.getdatetimepro(const aname: string): tdatetime;
+begin
+ result:= emptydatetime;
+ getprop(aname,tkfloat,@result);
+end;
+
+procedure tcustomificlientcontroller.setdatetimepro(const aname: string;
+               const avalue: tdatetime);
+begin
+ setprop(aname,tkfloat,@avalue);
 end;
 
 { tifilinkcomp }
