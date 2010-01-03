@@ -265,6 +265,17 @@ type
  end;
 
  tgridclientcontroller = class(tificlientcontroller)
+  private
+   frowcount: integer;
+   procedure setrowcount(const avalue: integer);
+  protected
+   procedure valuestoclient(const alink: pointer); override;
+   procedure clienttovalues(const alink: pointer); override;
+  public
+  published
+   property rowcount: integer read frowcount write setrowcount default 0;
+//  property onclientcellevent: celleventty read fclientcellevent 
+//                                                 write fclientcellevent;
  end;
  
  tifilinkcomp = class(tmsecomponent)
@@ -1300,6 +1311,26 @@ end;
 procedure tifigridlinkcomp.setcontroller(const avalue: tgridclientcontroller);
 begin
  inherited setcontroller(avalue);
+end;
+
+{ tgridclientcontroller }
+
+procedure tgridclientcontroller.setrowcount(const avalue: integer);
+begin
+ frowcount:= avalue;
+ change;
+end;
+
+procedure tgridclientcontroller.valuestoclient(const alink: pointer);
+begin
+ setintegerval(iifigridlink(alink),'rowcount',frowcount);
+ inherited;
+end;
+
+procedure tgridclientcontroller.clienttovalues(const alink: pointer);
+begin
+ inherited;
+ getintegerval(iifigridlink(alink),'rowcount',frowcount);
 end;
 
 end.
