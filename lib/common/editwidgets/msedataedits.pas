@@ -25,7 +25,7 @@ uses
  mseformatstr,typinfo,msemenus,
  msescrollbar,msewidgets,msepopupcalendar,msekeyboard,msepointer
  {$ifdef mse_with_ifi}
- ,mseificomp,mseifiglob
+ ,mseificomp,mseifiglob,mseificompglob
  {$endif}
  ;
 

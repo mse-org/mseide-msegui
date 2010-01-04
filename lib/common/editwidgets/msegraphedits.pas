@@ -23,7 +23,8 @@ uses
  msewidgets,mseeditglob,msestockobjects,msestat,msestatfile,
  mseclasses,msesimplewidgets,msemenus,mseact,
  msegrids,msewidgetgrid,msedatalist,msebitmap,msetypes,msestrings,msearrayprops,
- msedrawtext,mseshapes{$ifdef mse_with_ifi},mseifi,mseifiglob,mseificomp{$endif},
+ msedrawtext,mseshapes
+ {$ifdef mse_with_ifi},mseifi,mseifiglob,mseificomp,mseificompglob{$endif},
  msepointer;
 
 const

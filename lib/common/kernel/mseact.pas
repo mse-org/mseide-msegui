@@ -22,7 +22,8 @@ uses
  {$ifdef FPC}classes{$else}Classes{$endif},mseclasses,mserichstring,
  msetypes,mseglob,mseapplication,
  {msekeyboard,}mseevent,msestat,msestatfile,msestrings,
- msegraphutils{,msebitmap}{$ifdef mse_with_ifi},mseifiglob,mseificomp{$endif};
+ msegraphutils{,msebitmap}
+ {$ifdef mse_with_ifi},mseifiglob,mseificomp,mseificompglob{$endif};
 
 const
  defaultactionstates = [];

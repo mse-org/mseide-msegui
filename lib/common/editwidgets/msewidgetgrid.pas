@@ -312,8 +312,10 @@ type
    property zebra_height;
    property zebra_step;
    property datacols;
+  {$ifdef mse_with_ifi}
    property ifilink;
-
+  {$endif}
+  
    property datarowlinewidth;
    property datarowlinecolorfix;
    property datarowlinecolor;

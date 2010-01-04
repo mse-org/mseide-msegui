@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2009 by Martin Schreiber
+{ MSEgui Copyright (c) 2009-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -15,21 +15,12 @@ unit mseificomp;
 
 interface
 uses
- classes,mseclasses,msegui,mseifiglob,mseglob,typinfo,msestrings,msetypes;
+ classes,mseclasses,msegui,mseifiglob,mseglob,typinfo,msestrings,msetypes,
+ mseificompglob;
+
 type
  tifilinkcomp = class;
  
- iifilink = interface(iificlient)
-                        ['{29DE5F47-87D3-408A-8BAB-1DDE945938F1}']
-  function getobjectlinker: tobjectlinker;
- end;
-
- iifigridlink = interface(iifilink)
- end;
-
- iifigridserver = interface(iifiserver)
- end;
-   
  ificlienteventty = procedure(const sender: tobject;
                              const alink: iificlient) of object;
  ificlientstateeventty = procedure(const sender: tobject;

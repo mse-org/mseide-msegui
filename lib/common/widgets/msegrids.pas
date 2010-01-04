@@ -24,7 +24,7 @@ uses
  msedatalist,msedrawtext,msewidgets,mseevent,mseinplaceedit,mseeditglob,
  mseobjectpicker,msepointer,msetimer,msebits,msestat,msestatfile,msekeyboard,
  msestream,msedrag,msemenus,msepipestream,mseshapes
- {$ifdef mse_with_ifi} ,mseificomp,mseifiglob{$endif};
+ {$ifdef mse_with_ifi} ,mseificomp,mseifiglob,mseificompglob{$endif};
 
 type
          //     listvievoptionty from mselistbrowser
