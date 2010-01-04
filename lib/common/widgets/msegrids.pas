@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -23,7 +23,7 @@ uses
  msescrollbar,msearrayprops,mseglob,mseguiglob,
  msedatalist,msedrawtext,msewidgets,mseevent,mseinplaceedit,mseeditglob,
  mseobjectpicker,msepointer,msetimer,msebits,msestat,msestatfile,msekeyboard,
- msestream,msedrag,msemenus,msepipestream,mseshapes
+ msestream,msedrag,msemenus,msepipestream,mseshapes,msegridsglob
  {$ifdef mse_with_ifi} ,mseificomp,mseifiglob,mseificompglob{$endif};
 
 type
@@ -180,7 +180,6 @@ type
       gs_islist,//contiguous select blocks
       gs_isdb); //do not change rowcount
  gridstatesty = set of gridstatety;
- cellzonety = (cz_none,cz_default,cz_checkbox,cz_image,cz_caption);
  cellkindty = (ck_invalid,ck_data,ck_fixcol,ck_fixrow,ck_fixcolrow);
  griderrorty = (gre_ok,gre_invaliddatacell,gre_differentrowcount,
                 gre_rowindex,gre_colindex,gre_invalidwidget);
@@ -189,12 +188,6 @@ type
                    cep_bottom,cep_bottomleft,cep_left,
                    cep_rowcentered,cep_rowcenteredif);
 
- celleventkindty = (cek_none,cek_enter,cek_exit,cek_select,
-                    cek_focusedcellchanged,
-                    cek_mousemove,cek_mousepark,cek_firstmousepark,
-                    cek_buttonpress,cek_buttonrelease,
-                    cek_mouseenter,cek_mouseleave,
-                    cek_keydown,cek_keyup);
 const
  mousecellevents = [cek_mousemove,cek_mousepark,cek_firstmousepark,
                     cek_buttonpress,cek_buttonrelease];
@@ -202,10 +195,6 @@ const
 
 
 type
- focuscellactionty = (fca_none,fca_entergrid,fca_exitgrid,
-                      fca_reverse,fca_focusin,fca_focusinforce,
-                      fca_focusinshift,fca_focusinrepeater,fca_setfocusedcell,
-                      fca_selectstart,fca_selectend);
  tcustomgrid = class;
 
  celleventinfoty = record

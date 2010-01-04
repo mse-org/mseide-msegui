@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -15,7 +15,7 @@ interface
 uses
  mseforms,msewidgetgrid,mselistbrowser,msedatanodes,msefileutils,
  msetypes,msestrings,msegui,mseglob,
- mseclasses,msegrids,msesys;
+ mseclasses,msegrids,msesys,msegridsglob;
 type
 
  tdirlistitem = class(ttreelistedititem)

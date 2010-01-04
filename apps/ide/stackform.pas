@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2010 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,7 +20,8 @@ unit stackform;
 
 interface
 uses
- mseforms,msegrids,msetypes,msegdbutils,msegui,msedispwidgets,msemenus,mseguiintf;
+ mseforms,msegrids,msetypes,msegdbutils,msegui,msedispwidgets,msemenus,
+ mseguiintf,msegridsglob;
 
 type
  tstackfo = class(tdockform)

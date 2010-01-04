@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -19,7 +19,7 @@ uses
  msesimplewidgets,msedataedits,msedialog,msetypes,msestrings,msesys,
  msedispwidgets,msedatalist,msestat,msestatfile,msebitmap,msedatanodes,
  msefileutils,msedropdownlist,mseevent,msegraphedits,mseeditglob,msesplitter,
- msemenus;
+ msemenus,msegridsglob;
 
 type
 

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -13,7 +13,7 @@ interface
 uses
  classes,mseguiglob,msegui,mseimage,msewidgetgrid,msegrids,msedatalist,msegraphutils,
  msegraphics,mseclasses,mseeditglob,msebitmap,msemenus,mseevent,msestrings,
- msepointer;
+ msepointer,msegridsglob;
  
 type
  tcustomdataimage = class(timage,igridwidget)

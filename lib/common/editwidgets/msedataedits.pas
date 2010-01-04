@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -23,7 +23,7 @@ uses
  mseevent,msegraphutils,msedrawtext,msestat,msestatfile,mseclasses,
  msearrayprops,msegrids,msewidgetgrid,msedropdownlist,msedrag,mseforms,
  mseformatstr,typinfo,msemenus,
- msescrollbar,msewidgets,msepopupcalendar,msekeyboard,msepointer
+ msescrollbar,msewidgets,msepopupcalendar,msekeyboard,msepointer,msegridsglob
  {$ifdef mse_with_ifi}
  ,mseificomp,mseifiglob,mseificompglob
  {$endif}

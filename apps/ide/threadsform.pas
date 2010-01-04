@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2010 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,7 +20,8 @@ unit threadsform;
 
 interface
 uses
- msegui,mseclasses,mseforms,msegrids,msegdbutils,msetypes,msestrings;
+ msegui,mseclasses,mseforms,msegrids,msegdbutils,msetypes,msestrings,
+ msegridsglob;
 
 type
  tthreadsfo = class(tdockform)

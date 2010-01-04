@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -16,7 +16,7 @@ uses
  mseclasses,mseedit,mseevent,mseglob,mseguiglob,msegrids,msedatalist,msegui,
  mseinplaceedit,msearrayprops,classes,msegraphics,msedrawtext,msegraphutils,
  msetimer,mseforms,msetypes,msestrings,msestockobjects,msescrollbar,
- msekeyboard;
+ msekeyboard,msegridsglob;
 
 const
  defaultdropdowncoloptions = [co_fill,co_readonly,co_focusselect,co_mousemovefocus,co_rowselect];

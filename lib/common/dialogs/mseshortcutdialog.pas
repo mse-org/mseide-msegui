@@ -1,3 +1,12 @@
+{ MSEgui Copyright (c) 2008-2010 by Martin Schreiber
+
+    See the file COPYING.MSE, included in this distribution,
+    for details about the copyright.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+}
 unit mseshortcutdialog;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
@@ -5,7 +14,8 @@ uses
  mseglob,mseguiglob,mseapplication,msestat,msemenus,msegui,msegraphics,
  msegraphutils,mseevent,mseclasses,mseforms,msedataedits,mseedit,msegrids,
  msestrings,msetypes,msewidgetgrid,msedatanodes,mselistbrowser,mseactions,
- msesimplewidgets,msewidgets;
+ msesimplewidgets,msewidgets,msegridsglob;
+ 
 type
  tmseshortcutdialogfo = class(tmseform)
    grid: twidgetgrid;

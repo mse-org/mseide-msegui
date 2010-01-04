@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2010 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ unit settaborderform;
 interface
 uses
  mseforms,msegrids,msegui,msewidgetgrid,msedataedits,msesimplewidgets,msedesigner,
- mseevent,mseglob,mseguiglob,msestat,msestatfile;
+ mseevent,mseglob,mseguiglob,msestat,msestatfile,msegridsglob;
 
 type
 

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -16,7 +16,7 @@ uses
  mseeditglob,mseedit,msewidgetgrid,classes,msedatalist,msegraphics,msestream,
  msetypes,mserichstring,msestat,msestatfile,mseclasses,mseinplaceedit,msegrids,
  mseevent,mseguiglob,msegui,msegraphutils,msestrings,msedrawtext,msearrayprops,
- msemenus,msepointer;
+ msemenus,msepointer,msegridsglob;
 
 const
  defaulttexteditoptions =  (defaultoptionsedit + [oe_linebreak]) -
