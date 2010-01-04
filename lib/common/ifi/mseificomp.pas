@@ -72,8 +72,9 @@ type
    procedure finalizelinks;
    procedure loaded; virtual;
    function errorname(const ainstance: tobject): string;
-   function checkcomponent(const aintf: iificlient): pointer;
-                     //returns interface info
+   function getifilinkkind: ptypeinfo; virtual;
+   function checkcomponent(const aintf: iifilink): pointer;
+              //returns interface info, exception if link invalid
    procedure valuestootherclient(const alink: pointer); 
    procedure valuestoclient(const alink: pointer); virtual; 
    procedure clienttovalues(const alink: pointer); virtual; 
@@ -159,10 +160,22 @@ type
   protected
    function canconnect(const acomponent: tcomponent): boolean; override;
  end;
- 
+
+ valarsetterty = procedure(const alink: pointer) of object; 
+ valargetterty = procedure(const alink: pointer) of object;
+  
  tvalueclientcontroller = class(tificlientcontroller)
+  private
+   fvalarpo: pointer;
   protected
+   function getifilinkkind: ptypeinfo; override;
    function canconnect(const acomponent: tcomponent): boolean; override;
+   procedure setmsestringvalar(const alink: pointer);
+                                    //true if found
+   procedure getmsestringvalar(const alink: pointer);
+                                    //true if found
+   procedure getvalar(const agetter: valargetterty; var avalue);
+   procedure setvalar(const asetter: valarsetterty; const avalue);
  end;
  
  tstringclientcontroller = class(tvalueclientcontroller)
@@ -170,6 +183,8 @@ type
    fvalue: msestring;
    fonclientsetvalue: setstringeventty;
    procedure setvalue(const avalue: msestring);
+   function getgridvalues: msestringarty;
+   procedure setgridvalues(const avalue: msestringarty);
   protected
    procedure valuestoclient(const alink: pointer); override;
    procedure clienttovalues(const alink: pointer); override;
@@ -177,6 +192,7 @@ type
                               var avalue; var accept: boolean); override;
   public
    constructor create(const aowner: tmsecomponent); override;
+   property gridvalues: msestringarty read getgridvalues write setgridvalues;
   published
    property value: msestring read fvalue write setvalue;
    property onclientsetvalue: setstringeventty 
@@ -296,6 +312,7 @@ type
    foncellevent: ificelleventty;
    procedure setrowcount(const avalue: integer);
   protected
+   function getifilinkkind: ptypeinfo; override;
    procedure valuestoclient(const alink: pointer); override;
    procedure clienttovalues(const alink: pointer); override;
   public
@@ -403,7 +420,7 @@ procedure setifilinkcomp(const alink: iifilink;
                       const alinkcomp: tifilinkcomp; var dest: tifilinkcomp);
 implementation
 uses
- sysutils,mseapplication,msereal,msestreaming;
+ sysutils,mseapplication,msereal,msestreaming,msedatalist;
  
 type
  tmsecomponent1 = class(tmsecomponent);
@@ -439,8 +456,12 @@ begin
 end;
 
 function tcustomificlientcontroller.checkcomponent(
-          const aintf: iificlient): pointer;
+          const aintf: iifilink): pointer;
 begin
+ if not isinterface(aintf.getifilinkkind,getifilinkkind) then begin
+  raise exception.create(fowner.name+' wrong iificlient interface.');
+            //todo: better error message
+ end;
  result:= self;
 end;
 
@@ -926,6 +947,11 @@ begin
  setprop(aname,tkfloat,@avalue);
 end;
 
+function tcustomificlientcontroller.getifilinkkind: ptypeinfo;
+begin
+ result:= typeinfo(iifilink);
+end;
+
 { tifilinkcomp }
 
 constructor tifilinkcomp.create(aowner: tcomponent);
@@ -971,6 +997,45 @@ begin
  end;
 end;
 
+function tvalueclientcontroller.getifilinkkind: ptypeinfo;
+begin
+ result:= typeinfo(iifidatalink);
+end;
+
+procedure tvalueclientcontroller.setmsestringvalar(const alink: pointer);
+var
+ datalist: tdatalist;
+begin
+ datalist:= iifidatalink(alink).ifigriddata;
+ if datalist is tmsestringdatalist then begin
+  tmsestringdatalist(datalist).asarray:= pmsestringarty(fvalarpo)^;
+ end;
+end;
+
+procedure tvalueclientcontroller.getmsestringvalar(const alink: pointer);
+var
+ datalist: tdatalist;
+begin
+ datalist:= iifidatalink(alink).ifigriddata;
+ if datalist is tmsestringdatalist then begin
+  pmsestringarty(fvalarpo)^:= tmsestringdatalist(datalist).asarray;
+ end;
+end;
+
+procedure tvalueclientcontroller.getvalar(const agetter: valargetterty;
+                       var avalue);
+begin
+ fvalarpo:= @avalue;
+ tmsecomponent1(fowner).getobjectlinker.forall(agetter,self); 
+end;
+
+procedure tvalueclientcontroller.setvalar(const asetter: valarsetterty;
+                        const avalue);
+begin
+ fvalarpo:= @avalue;
+ tmsecomponent1(fowner).getobjectlinker.forall(asetter,self); 
+end;
+
 { tstringclientcontroller }
 
 constructor tstringclientcontroller.create(const aowner: tmsecomponent);
@@ -1008,6 +1073,17 @@ begin
  if fowner.canevent(tmethod(fonclientsetvalue)) then begin
   fonclientsetvalue(self,msestring(avalue),accept);
  end;
+end;
+
+function tstringclientcontroller.getgridvalues: msestringarty;
+begin
+ result:= nil;
+ getvalar(@getmsestringvalar,result);
+end;
+
+procedure tstringclientcontroller.setgridvalues(const avalue: msestringarty);
+begin
+ setvalar(@setmsestringvalar,avalue);
 end;
 
 { tintegerclientcontroller }
@@ -1472,6 +1548,11 @@ begin
  if fowner.canevent(tmethod(foncellevent)) then begin
   foncellevent(self,info);
  end;
+end;
+
+function tgridclientcontroller.getifilinkkind: ptypeinfo;
+begin
+ result:= typeinfo(iifigridlink);
 end;
 
 end.

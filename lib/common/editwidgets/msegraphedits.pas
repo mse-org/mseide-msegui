@@ -21,7 +21,7 @@ uses
  {$ifdef FPC}classes{$else}Classes{$endif},msegui,
  mseglob,mseguiglob,msescrollbar,msegraphutils,msegraphics,mseevent,
  msewidgets,mseeditglob,msestockobjects,msestat,msestatfile,
- mseclasses,msesimplewidgets,msemenus,mseact,
+ mseclasses,msesimplewidgets,msemenus,mseact,typinfo,
  msegrids,msewidgetgrid,msedatalist,msebitmap,msetypes,msestrings,msearrayprops,
  msedrawtext,mseshapes
  {$ifdef mse_with_ifi},mseifi,mseifiglob,mseificomp,mseificompglob{$endif},
@@ -95,7 +95,7 @@ type
  end;
 
  tgraphdataedit = class(tactionpublishedwidget,igridwidget,istatfile
-                  {$ifdef mse_with_ifi},iifilink{$endif})
+                  {$ifdef mse_with_ifi},iifidatalink{$endif})
   private
    fonchange: notifyeventty;
    fondataentered: notifyeventty;
@@ -107,7 +107,9 @@ type
 {$ifdef mse_with_ifi}
    fifilink: tifilinkcomp;
    procedure ifisetvalue(var avalue; var accept: boolean);
+   function getifilinkkind: ptypeinfo;
    procedure setifilink(const avalue: tifilinkcomp);
+   function ifigriddata: tdatalist;
 {$endif}
    procedure setcolorglyph(const Value: colorty);
    procedure setstatfile(const Value: tstatfile);
@@ -1785,15 +1787,28 @@ begin
 end;
 
 {$ifdef mse_with_ifi}
+function tgraphdataedit.getifilinkkind: ptypeinfo;
+begin
+ result:= typeinfo(iifidatalink);
+end;
+
 procedure tgraphdataedit.setifilink(const avalue: tifilinkcomp);
 begin
- mseificomp.setifilinkcomp(iifilink(self),avalue,fifilink);
+ mseificomp.setifilinkcomp(iifidatalink(self),avalue,fifilink);
 end;
 
 procedure tgraphdataedit.ifisetvalue(var avalue; var accept: boolean);
 begin
  if accept and (fifiserverintf <> nil) then begin
-  fifiserverintf.setvalue(iificlient(self),avalue,accept);
+  fifiserverintf.setvalue(iifidatalink(self),avalue,accept);
+ end;
+end;
+
+function tgraphdataedit.ifigriddata: tdatalist;
+begin
+ result:= nil;
+ if fgridintf <> nil then begin
+  result:= fgridintf.getcol.datalist;
  end;
 end;
 {$endif}

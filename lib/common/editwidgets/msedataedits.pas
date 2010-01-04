@@ -53,7 +53,7 @@ type
  end;
  
  tcustomdataedit = class(tcustomedit,igridwidget,istatfile,idragcontroller
-                         {$ifdef mse_with_ifi},iifilink{$endif})
+                         {$ifdef mse_with_ifi},iifidatalink{$endif})
   private
    fondataentered: notifyeventty;
    foncheckvalue: checkvalueeventty;
@@ -74,7 +74,9 @@ type
 {$ifdef mse_with_ifi}
    fifilink: tifilinkcomp;
    procedure ifisetvalue(var avalue; var accept: boolean);
+   function getifilinkkind: ptypeinfo;
    procedure setifilink(const avalue: tifilinkcomp);
+   function ifigriddata: tdatalist;
 {$endif}
    procedure fontemptychanged(const sender: tobject);
    procedure emptychanged;
@@ -2292,15 +2294,25 @@ begin
 end;
 
 {$ifdef mse_with_ifi}
+function tcustomdataedit.getifilinkkind: ptypeinfo;
+begin
+ result:= typeinfo(iifidatalink);
+end;
+
 procedure tcustomdataedit.setifilink(const avalue: tifilinkcomp);
 begin
- mseificomp.setifilinkcomp(iifilink(self),avalue,fifilink);
+ mseificomp.setifilinkcomp(iifidatalink(self),avalue,fifilink);
+end;
+
+function tcustomdataedit.ifigriddata: tdatalist;
+begin
+ result:= fdatalist;
 end;
 
 procedure tcustomdataedit.ifisetvalue(var avalue; var accept: boolean);
 begin
  if accept and (fifiserverintf <> nil) then begin
-  fifiserverintf.setvalue(iificlient(self),avalue,accept);
+  fifiserverintf.setvalue(iifidatalink(self),avalue,accept);
  end;
 end;
 {$endif}

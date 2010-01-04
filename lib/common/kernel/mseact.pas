@@ -21,7 +21,7 @@ interface
 uses
  {$ifdef FPC}classes{$else}Classes{$endif},mseclasses,mserichstring,
  msetypes,mseglob,mseapplication,
- {msekeyboard,}mseevent,msestat,msestatfile,msestrings,
+ {msekeyboard,}mseevent,msestat,msestatfile,msestrings,typinfo,
  msegraphutils{,msebitmap}
  {$ifdef mse_with_ifi},mseifiglob,mseificomp,mseificompglob{$endif};
 
@@ -138,6 +138,7 @@ type
    fonexecuteaction: actioneventty;
 {$ifdef mse_with_ifi}
    fifilink: tifiactionlinkcomp;
+   function getifilinkkind: ptypeinfo;
    procedure setifilink(const avalue: tifiactionlinkcomp); overload;
 {$endif}
    function getcaption: captionty;
@@ -298,7 +299,7 @@ procedure shapestatestoactionstates(source: shapestatesty;
 
 implementation
 uses
- msebits,sysutils,typinfo,msekeyboard;
+ msebits,sysutils,msekeyboard;
 
 function doactionexecute(const sender: tobject; var info: actioninfoty;
                          const nocheckbox: boolean = false;
@@ -1175,6 +1176,11 @@ begin
 end;
 
 {$ifdef mse_with_ifi}
+function tcustomaction.getifilinkkind: ptypeinfo;
+begin
+ result:= typeinfo(iifilink);
+end;
+
 procedure tcustomaction.setifilink(const avalue: tifiactionlinkcomp);
 begin
  mseificomp.setifilinkcomp(iifilink(self),avalue,fifilink);

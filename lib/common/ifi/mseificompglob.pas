@@ -11,9 +11,10 @@ unit mseificompglob;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- mseifiglob,mseclasses,msetypes,msegridsglob,mseguiglob,msegraphutils;
-type
+ mseifiglob,mseclasses,msetypes,msegridsglob,mseguiglob,msegraphutils,
+ typinfo,msedatalist;
 
+type
  ificelleventinfoty = record //same layout as celleventinfoty
   cell: gridcoordty;
   grid: tobject;
@@ -32,9 +33,14 @@ type
 
  iifilink = interface(iificlient)
                         ['{29DE5F47-87D3-408A-8BAB-1DDE945938F1}']
+  function getifilinkkind: ptypeinfo;
   function getobjectlinker: tobjectlinker;
  end;
 
+ iifidatalink = interface(iifilink)
+  function ifigriddata: tdatalist;
+ end;
+ 
  iifigridlink = interface(iifilink)
  end;
 

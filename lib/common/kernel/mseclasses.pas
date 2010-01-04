@@ -672,6 +672,7 @@ function findglobalcomponentlocked: boolean;
 function getenumnames(const atypeinfo: ptypeinfo): msestringarty;
 function getcorbainterface(const aobject: tobject; const aintf: ptypeinfo;
                                                   out obj) : boolean;
+function isinterface(const actual: ptypeinfo; const wanted: ptypeinfo): boolean;
 
 function checkcanevent(const acomponent: tcomponent; const event: tmethod): boolean;
 
@@ -3101,6 +3102,36 @@ end;
 function tmsecomponent.getcorbainterface(const aintf: ptypeinfo; out obj) : boolean;
 begin
  result:= mseclasses.getcorbainterface(self,aintf,obj);
+end;
+
+function isinterface(const actual: ptypeinfo; const wanted: ptypeinfo): boolean;
+var
+ po1: ptypeinfo;
+begin
+ result:= (actual^.kind = tkinterfaceraw) and (wanted^.kind = tkinterfaceraw);
+ if result then begin
+  po1:= actual;
+  while po1 <> nil do begin
+   if po1 = wanted then begin
+    exit;
+   end;
+   po1:= gettypedata(po1)^.rawintfparent;
+  end;
+  result:= false;
+ end
+ else begin
+  result:= (actual^.kind = tkinterface) and (wanted^.kind = tkinterface);
+  if result then begin
+   po1:= actual;
+   while po1 <> nil do begin
+    if po1 = wanted then begin
+     exit;
+    end;
+    po1:= gettypedata(po1)^.intfparent;
+   end;
+   result:= false;
+  end;
+ end;
 end;
 
 procedure tmsecomponent.link(const source,dest: iobjectlink; valuepo: pointer = nil;

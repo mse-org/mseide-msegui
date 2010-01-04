@@ -20,7 +20,7 @@ interface
 uses
  {$ifdef FPC}classes,sysutils{$else}Classes,SysUtils{$endif},mseclasses,msegui,
  msegraphics,msetypes,msestrings,msegraphutils,msebitmap,
- msescrollbar,msearrayprops,mseglob,mseguiglob,
+ msescrollbar,msearrayprops,mseglob,mseguiglob,typinfo,
  msedatalist,msedrawtext,msewidgets,mseevent,mseinplaceedit,mseeditglob,
  mseobjectpicker,msepointer,msetimer,msebits,msestat,msestatfile,msekeyboard,
  msestream,msedrag,msemenus,msepipestream,mseshapes,msegridsglob
@@ -1573,6 +1573,7 @@ type
 {$ifdef mse_with_ifi}
    fifilink: tifigridlinkcomp;
 //   procedure ifisetvalue(var avalue; var accept: boolean);
+   function getifilinkkind: ptypeinfo;
    procedure setifilink(const avalue: tifigridlinkcomp);
 {$endif}
    procedure setframe(const avalue: tgridframe);
@@ -13157,6 +13158,11 @@ begin
 end;
 
 {$ifdef mse_with_ifi}
+function tcustomgrid.getifilinkkind: ptypeinfo;
+begin
+ result:= typeinfo(iifigridlink);
+end;
+
 procedure tcustomgrid.setifilink(const avalue: tifigridlinkcomp);
 begin
  mseificomp.setifilinkcomp(iifigridlink(self),avalue,fifilink);
