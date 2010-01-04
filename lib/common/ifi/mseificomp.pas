@@ -286,17 +286,23 @@ type
    property onclientsetvalue: setrealeventty 
                        read fonclientsetvalue write fonclientsetvalue;
  end;
+ 
+ ificelleventty = procedure(const sender: tobject; 
+                           var info: ificelleventinfoty) of object;
 
  tgridclientcontroller = class(tificlientcontroller)
   private
    frowcount: integer;
+   foncellevent: ificelleventty;
    procedure setrowcount(const avalue: integer);
   protected
    procedure valuestoclient(const alink: pointer); override;
    procedure clienttovalues(const alink: pointer); override;
   public
+   procedure docellevent(var info: ificelleventinfoty);
   published
    property rowcount: integer read frowcount write setrowcount default 0;
+   property oncellevent: ificelleventty read foncellevent write foncellevent;
 //  property onclientcellevent: celleventty read fclientcellevent 
 //                                                 write fclientcellevent;
  end;
@@ -1459,6 +1465,13 @@ procedure tgridclientcontroller.clienttovalues(const alink: pointer);
 begin
  inherited;
  getintegerval(iifigridlink(alink),'rowcount',frowcount);
+end;
+
+procedure tgridclientcontroller.docellevent(var info: ificelleventinfoty);
+begin
+ if fowner.canevent(tmethod(foncellevent)) then begin
+  foncellevent(self,info);
+ end;
 end;
 
 end.

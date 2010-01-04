@@ -197,7 +197,7 @@ const
 type
  tcustomgrid = class;
 
- celleventinfoty = record
+ celleventinfoty = record //same layout as ificelleventinfoty
   cell: gridcoordty;
   grid: tcustomgrid;
   case eventkind: celleventkindty of
@@ -9309,6 +9309,11 @@ begin
   if info.cell.col >= 0 then begin
    datacols[info.cell.col].docellevent(info);
   end;
+ {$ifdef mse_with_ifi}
+  if fifilink <> nil then begin
+   fifilink.controller.docellevent(ificelleventinfoty(info));
+  end;
+ {$endif}
   if eventkind = cek_mousepark then begin
    if (fmouseparkcell.row <> cell.row) or
                      (fmouseparkcell.col <> cell.col) then begin

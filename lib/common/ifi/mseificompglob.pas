@@ -14,7 +14,7 @@ uses
  mseifiglob,mseclasses,msetypes,msegridsglob,mseguiglob,msegraphutils;
 type
 
- ificelleventinfoty = record
+ ificelleventinfoty = record //same layout as celleventinfoty
   cell: gridcoordty;
   grid: tobject;
   case eventkind: celleventkindty of

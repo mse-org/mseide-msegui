@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+20010-01-04
+ Some definitions moved from msegrids.pas to msegridsglob.pas.
 2009-12-15
  Default tcustomframe.colorframe = cl_black.
 2009-12-13
