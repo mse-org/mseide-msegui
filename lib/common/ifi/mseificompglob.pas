@@ -42,6 +42,7 @@ type
  end;
  
  iifigridlink = interface(iifilink)
+  function appendrow(const checkautoappend: boolean = false): integer;
  end;
 
  iifigridserver = interface(iifiserver)
