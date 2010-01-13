@@ -3108,6 +3108,7 @@ function isinterface(const actual: ptypeinfo; const wanted: ptypeinfo): boolean;
 var
  po1: ptypeinfo;
 begin
+{$ifdef FPC}
  result:= (actual^.kind = tkinterfaceraw) and (wanted^.kind = tkinterfaceraw);
  if result then begin
   po1:= actual;
@@ -3120,6 +3121,7 @@ begin
   result:= false;
  end
  else begin
+{$endif}
   result:= (actual^.kind = tkinterface) and (wanted^.kind = tkinterface);
   if result then begin
    po1:= actual;
@@ -3127,11 +3129,13 @@ begin
     if po1 = wanted then begin
      exit;
     end;
-    po1:= gettypedata(po1)^.intfparent;
+    po1:= gettypedata(po1)^.intfparent{$ifndef FPC}^{$endif};
    end;
    result:= false;
   end;
+{$ifdef FPC}
  end;
+{$endif}
 end;
 
 procedure tmsecomponent.link(const source,dest: iobjectlink; valuepo: pointer = nil;
