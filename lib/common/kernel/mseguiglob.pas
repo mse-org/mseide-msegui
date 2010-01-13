@@ -88,11 +88,12 @@ type
  end;
  pkeyeventinfoty = ^keyeventinfoty;
 
- stockfontty = (stf_default,stf_empty,stf_unicode,stf_menu,stf_report,stf_proportional,
-                stf_fixed,
+ stockfontty = (stf_default,stf_empty,stf_unicode,stf_menu,stf_report,
+                stf_proportional,stf_fixed,
                 stf_helvetica,stf_roman,stf_courier); //scaleable fonts
  defaultfontnamesty = array[stockfontty] of string;
-
+ 
+type
  windowoptionty = (wo_popup,wo_message,wo_embedded,
                    wo_buttonendmodal,wo_groupleader,
                    wo_taskbar,    //win32 only

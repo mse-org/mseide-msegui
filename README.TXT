@@ -69,7 +69,8 @@ MSEide command line parameters
  Macro definition, will be overridden by 'Project'-'Options'-'Macros'. Example:
  --macrodef=MAC1,abc,MAC2,def
  defines ${MAC1} with value 'abc' and ${MAC2} with value 'def'.
---fontalias=<alias>,<fontname>[,<fontheight>[,<fontwidth>[,<options>[,<xscale>]]]]
+--fontalias=<alias>,<fontname>[,<fontheight>[,<fontwidth>[,<options>[,<xscale>]
+                              [,<ancestor>]]]]
  Change the used fonts. <alias> can be stf_default, stf_menu or mseide_source.
 
 MSEide environment variables

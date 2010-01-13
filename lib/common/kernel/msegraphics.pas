@@ -22,6 +22,7 @@ const
  linewidthroundvalue = $8000;
  fontsizeshift = 16;
  fontsizeroundvalue = $8000;
+ defaultfontalias = 'stf_default';
  
  invalidgchandle = ptruint(-1);
  
@@ -976,7 +977,8 @@ function registerfontalias(const alias,name: string;
               mode: fontaliasmodety = fam_nooverwrite;
               const height: integer = 0; const width: integer = 0;
               const options: fontoptionsty = [];
-              const xscale: real = 1.0): boolean;
+              const xscale: real = 1.0;
+              const ancestor: string = defaultfontalias): boolean;
               //true if registering ok
 function unregisterfontalias(const alias: string): boolean;
               //false if alias does not exist
@@ -1021,6 +1023,7 @@ type
 
  fontaliasty = record
   alias: string;
+  ancestor: string;
   name: string;
   mode: fontaliasmodety;
   height: integer;
@@ -1044,7 +1047,8 @@ type
               mode: fontaliasmodety = fam_nooverwrite;
               const height: integer = 0; const width: integer = 0;
               const options: fontoptionsty = [];
-              const xscale: real = 1.0): boolean;
+              const xscale: real = 1.0;
+              const ancestor: string = ''): boolean;
               //true if registering ok
  end;
 
@@ -1183,27 +1187,38 @@ function registerfontalias(const alias,name: string;
               mode: fontaliasmodety = fam_nooverwrite;
               const height: integer = 0; const width: integer = 0;
               const options: fontoptionsty = [];
-              const xscale: real = 1.0): boolean;
+              const xscale: real = 1.0;
+              const ancestor: string = defaultfontalias): boolean;
               //true if registering ok
 begin
  result:= fontaliaslist.registeralias(alias,name,mode,height,width,options,
-                                       xscale);
+                                       xscale,ancestor);
 end;
 
 function realfontname(const aliasname: string): string;
-var 
+var                            
  int1: integer;
+ str1: string;
 begin
+ result:= '';
  if ffontaliaslist <> nil then begin
-  int1:= ffontaliaslist.find(aliasname);
-  if int1 >= 0 then begin
-   result:= pfontaliasaty(ffontaliaslist.datapo)^[int1].name;
-  end
-  else begin
-   result:= aliasname;
+  str1:= aliasname;
+  while str1 <> '' do begin
+   int1:= ffontaliaslist.find(str1);
+   if int1 >= 0 then begin
+    with pfontaliasaty(ffontaliaslist.datapo)^[int1] do begin
+     if (result = '') and (name <> '') then begin
+      result:= name;
+      break;
+     end;
+    end;
+   end
+   else begin
+    break;
+   end;
   end;
- end
- else begin
+ end;
+ if result = '' then begin
   result:= aliasname;
  end;
 end;
@@ -1632,7 +1647,8 @@ end;
 
 procedure initfontalias;
 //format aliasdef: 
-//--FONTALIAS=<alias>,<fontname>[,<fontheight>[,<fontwidth>[,<options>[,<xscale>]]]]
+//--FONTALIAS=<alias>,<fontname>[,<fontheight>[,<fontwidth>[,<options>[,<xscale>]
+//                    [,<ancestor>]]]
 const
  paramname = '--FONTALIAS=';
 var
@@ -1641,6 +1657,7 @@ var
  ar3: array[0..1] of integer;
  options1: fontoptionsty;
  xscale1: real;
+ str1: string;
 begin
  ar1:= getcommandlinearguments;
  int3:= 1;
@@ -1649,7 +1666,7 @@ begin
   if strlicomp(pchar(ar1[int1]),pchar(paramname),length(paramname)) = 0 then begin
    ar2:= nil;
    splitstringquoted(copy(ar1[int1],length(paramname)+1,bigint),ar2,'"',',');
-   if (high(ar2) >= 1) and (high(ar2) <= 5) then begin
+   if (high(ar2) >= 1) and (high(ar2) <= 6) then begin
     try
      for int4:= 0 to high(ar3) do begin
       if int4 + 2 > high(ar2) then begin
@@ -1668,12 +1685,23 @@ begin
      if high(ar2) >= 4 then begin
       options1:= fontoptioncharstooptions(ar2[4]);
      end;
-     if high(ar2) >= 5 then begin
+     if (high(ar2) >= 5) and (trim(ar2[5]) <> '') then begin
       xscale1:= strtoreal(ar2[5]);
+     end;
+     if high(ar2) >= 6 then begin
+      str1:= trim(ar2[6]);
+     end
+     else begin
+      if lowercase(ar2[0]) = defaultfontalias then begin
+       str1:= '';
+      end
+      else begin
+       str1:= defaultfontalias;
+      end;
      end;
      
      fontaliaslist.registeralias(ar2[0],ar2[1],fam_overwrite,ar3[0],ar3[1],options1,
-                                 xscale1);
+                                 xscale1,str1);
      deletecommandlineargument(int3);
      dec(int3);
     except
@@ -1751,11 +1779,21 @@ end;
 procedure tfontaliaslist.updatefontdata(var info: fontdataty);
 var
  int1: integer;
+ str1: string;
+ po1: pchar;
 begin
- int1:= find(info.name);
- if int1 >= 0 then begin
+ str1:= info.name;
+ po1:= nil;
+ while str1 <> '' do begin
+  int1:= find(str1);
+  if int1 < 0 then begin
+   break;
+  end;
   with pfontaliasty(getitempo(int1))^ do begin
-   info.name:= pchar(name);
+   str1:= ancestor;
+   if (name <> '') and (po1 = nil) then begin
+    po1:= pchar(name);
+   end;
    if (height <> 0) and (info.height = 0) then begin
     info.height:= height;
    end;
@@ -1777,13 +1815,10 @@ begin
       (info.pitchoptions * fontantialiasedmask = []) then begin
     info.antialiasedoptions:= options * fontantialiasedmask;
    end;
-{
-   if (options * fontxcoremask <> []) and 
-      (info.pitchoptions * fontxcoremask = []) then begin
-    info.xcoreoptions:= options * fontxcoremask;
-   end;
-}
   end;
+ end;
+ if po1 <> nil then begin
+  info.name:= po1;
  end;
 end;
 
@@ -1791,7 +1826,8 @@ function tfontaliaslist.registeralias(const alias,name: string;
               mode: fontaliasmodety = fam_nooverwrite;
                const height: integer = 0; const width: integer = 0;
                const options: fontoptionsty = [];
-               const xscale: real = 1.0): boolean;
+               const xscale: real = 1.0;
+               const ancestor: string = ''): boolean;
               //true if registering ok
 var
  po1: pfontaliasty;
@@ -1804,12 +1840,29 @@ var
   po1^.width:= width shl fontsizeshift;
   po1^.options:= options;
   po1^.xscale:= xscale;
+  po1^.ancestor:= ancestor;
  end;
 
 var
  int1: integer;
+ str1,str2: string;
 begin
  result:= false;
+ str1:= uppercase(alias);
+ str2:= uppercase(ancestor);
+ while str2 <> '' do begin
+  if str1 = str2 then begin
+   raise exception.create('Recursive fontalias "'
+                  +alias+'" name "'+name+'" caller "'+str1+'".');
+  end;
+  int1:= find(str2);
+  if int1 >= 0 then begin
+   str2:= uppercase(pfontaliasty(getitempo(int1))^.ancestor);
+  end
+  else begin
+   break;
+  end;
+ end;
  int1:= find(alias);
  if int1 >= 0 then begin
   po1:= pfontaliasty(getitempo(int1));

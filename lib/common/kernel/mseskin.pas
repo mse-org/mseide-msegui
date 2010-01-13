@@ -162,15 +162,19 @@ type
    fheight: integer;
    fwidth: integer;
    foptions: fontoptionsty;
+   fancestor: string;
+   fxscale: real;
   public
    constructor create; override;
   published
    property name: string read fname write fname;
    property alias: string read falias write falias;
+   property ancestor: string read fancestor write fancestor;
    property mode: fontaliasmodety read fmode write fmode default fam_fixnooverwrite;
    property height: integer read fheight write fheight;
    property width: integer read fwidth write fwidth;
    property options: fontoptionsty read foptions write foptions default [];
+   property xscale: real read fxscale write fxscale;
  end;
 
  tskinfontaliass = class(tpersistentarrayprop)   
@@ -798,7 +802,12 @@ var
 begin
  for int1:= 0 to high(fitems) do begin
   with tskinfontalias(fitems[int1]) do begin
-   registerfontalias(alias,name,mode,height,width,options);
+   if fancestor <> '' then begin
+    registerfontalias(alias,name,mode,height,width,options,xscale,ancestor);
+   end
+   else begin
+    registerfontalias(alias,name,mode,height,width,options,xscale);
+   end;
   end;
  end;
 end;
@@ -2113,6 +2122,7 @@ end;
 constructor tskinfontalias.create;
 begin
  fmode:= fam_fixnooverwrite;
+ fxscale:= 1;
  inherited;
 end;
 

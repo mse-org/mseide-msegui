@@ -390,8 +390,14 @@ var
 begin
  if not ffontaliasregistered then begin
   for fo1:= low(stockfontty) to high(stockfontty) do begin
-   registerfontalias(getenumname(typeinfo(stockfontty),ord(fo1)),gui_getdefaultfontnames[fo1],
-                     fam_fixnooverwrite);
+   if fo1 = stf_default then begin
+    registerfontalias(getenumname(typeinfo(stockfontty),ord(fo1)),
+      gui_getdefaultfontnames[fo1],fam_fixnooverwrite,0,0,[],1.0,'');
+   end
+   else begin
+    registerfontalias(getenumname(typeinfo(stockfontty),ord(fo1)),
+                          gui_getdefaultfontnames[fo1],fam_fixnooverwrite);
+   end;
   end;
   ffontaliasregistered:= true;
  end;
