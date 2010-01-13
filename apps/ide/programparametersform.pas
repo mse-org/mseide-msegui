@@ -21,7 +21,7 @@ unit programparametersform;
 interface
 uses
  mseforms,msestat,mseglob,msestatfile,msesimplewidgets,msedataedits,msefiledialog,
- msewidgetgrid,msegraphedits;
+ msewidgetgrid,msegraphedits,msememodialog;
 
 type
  tprogramparametersfo = class(tmseform)
@@ -32,8 +32,8 @@ type
    parameters: thistoryedit;
    statfile1: tstatfile;
    envvarname: tstringedit;
-   envvarvalue: tstringedit;
-   twidgetgrid1: twidgetgrid;
+   envvarvalue: tmemodialogedit;
+   grid: twidgetgrid;
    workingdirectory: tfilenameedit;
  end;
 
@@ -59,6 +59,7 @@ begin
    fo.envvarvalue.gridvalues:= envvarvalues;
   end;
   if fo.show(true,nil) = mr_ok then begin
+   fo.grid.removeappendedrow;
    with projectoptions do begin
     progparameters:= fo.parameters.value;
     propgparamhistory:= fo.parameters.dropdown.valuelist.asarray;

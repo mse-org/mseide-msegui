@@ -3016,15 +3016,20 @@ end;
 
 procedure tdatalist.deleteitems(index,acount: integer);
 begin
- inc(fdeleting);
- try
-  internalfreedata(index,acount);
-  blockcopymovedata(index+acount,index,fcount-index-acount,bcm_none);
-  fcount:= fcount-acount;
-  checkcapacity;
-  change(-1);
- finally
-  dec(fdeleting);
+ if index + acount > fcount then begin
+  acount:= fcount - index;
+ end;
+ if acount > 0 then begin
+  inc(fdeleting);
+  try
+   internalfreedata(index,acount);
+   blockcopymovedata(index+acount,index,fcount-index-acount,bcm_none);
+   fcount:= fcount-acount;
+   checkcapacity;
+   change(-1);
+  finally
+   dec(fdeleting);
+  end;
  end;
 end;
 

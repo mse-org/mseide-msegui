@@ -1685,7 +1685,6 @@ type
    procedure invalidatesinglecell(const cell: gridcoordty);
    function caninvalidate: boolean;
    function docheckcellvalue: boolean;
-   procedure removeappendedrow;
    procedure dolayoutchanged; virtual;
    procedure internalupdatelayout(const force: boolean = false);
    procedure updatelayout; virtual;
@@ -1855,6 +1854,9 @@ type
                  //step > 0 -> right, step < 0 left
 
    function isautoappend: boolean; //true if current row is auto appended
+   procedure removeappendedrow;
+   function checkreautoappend: boolean; //true if row appended
+   
    function isdatacell(const coord: gridcoordty): boolean;
    function isvalidcell(const coord: gridcoordty): boolean;
    function isfixrow(const coord: gridcoordty): boolean;
@@ -8398,12 +8400,19 @@ begin
 end;
 
 procedure tcustomgrid.dostatwrite(const writer: tstatwriter);
+var
+ int1: integer;
 begin
+ int1:= row;
  if not (og_nosaveremoveappendedrow in foptionsgrid) then begin
-  removeappendedrow; //calls checkcanclose
+  removeappendedrow; //calls docheckcellvalue
+ end
+ else begin
+  docheckcellvalue;
  end;
  writer.writeinteger('propcolwidthref',fpropcolwidthref);
  fdatacols.dostatwrite(writer);
+ row:= int1;
  if og_savestate in foptionsgrid then begin
   writer.writeinteger('col',ffocusedcell.col);
   if not (gs_isdb in fstate) then begin
@@ -9163,6 +9172,9 @@ begin
   end
   else begin                           
    with info do begin
+    if eventkind = ek_buttonpress then begin
+     checkreautoappend;
+    end;
     if eventkind in mouseposevents then  begin
      coord1:= fmousecell;
      cellkind:= cellatpos(pos,fmousecell);
@@ -9857,7 +9869,7 @@ begin     //focuscell
      dec(int1);
     end;
     if (int1 >= 0) and not ((selectaction = fca_exitgrid) and 
-                (gs_rowremoving in fstate)) then begin
+                                 (gs_rowremoving in fstate)) then begin
      ffocusedcell.row:= int1;
     end;
    end;
@@ -10781,6 +10793,16 @@ begin
  inherited;
 end;
 
+function tcustomgrid.checkreautoappend: boolean;
+begin
+ result:= (rowcount = 0) and 
+         (foptionsgrid * [og_autofirstrow,og_focuscellonenter] = 
+                     [og_autofirstrow,og_focuscellonenter]);
+ if result then begin
+  row:= 0;
+ end;
+end;
+
 procedure tcustomgrid.dokeydown(var info: keyeventinfoty);
 var
  action,actioncol: focuscellactionty;
@@ -10793,18 +10815,20 @@ var
 
  procedure checkselection; 
  begin
-  if (es_processed in info.eventstate) and (ffocusedcell.col >= 0) then begin
-   if co_keyselect in fdatacols[ffocusedcell.col].foptions then begin
-    if ss_shift in shiftstate then begin
-     if fstartanchor.col < 0 then begin
-      fstartanchor:= focusbefore;
+  if (es_processed in info.eventstate) then begin
+   if not checkreautoappend and (ffocusedcell.col >= 0) then begin
+    if co_keyselect in fdatacols[ffocusedcell.col].foptions then begin
+     if ss_shift in shiftstate then begin
+      if fstartanchor.col < 0 then begin
+       fstartanchor:= focusbefore;
+      end;
+      action:= fca_selectend;
+     end
+     else begin
+      action:= fca_focusin;
      end;
-     action:= fca_selectend;
-    end
-    else begin
-     action:= fca_focusin;
+     focuscell(ffocusedcell,action);
     end;
-    focuscell(ffocusedcell,action);
    end;
   end;
  end;
@@ -12578,8 +12602,18 @@ procedure tcustomgrid.removeappendedrow;
 begin
  docheckcellvalue;
  if isautoappend then begin
-  deleterow(frowcount-1);
-  include(fstate,gs_emptyrowremoved);
+  if row >= 0 then begin
+   if row = 0 then begin
+    row:= invalidaxis;
+   end
+   else begin
+    row:= row-1;
+   end;
+  end
+  else begin
+   deleterow(frowcount-1);
+   include(fstate,gs_emptyrowremoved);
+  end;
  end;
 // exclude(fstate,gs_rowappended);
 end;
