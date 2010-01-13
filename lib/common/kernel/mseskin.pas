@@ -171,8 +171,8 @@ type
    property alias: string read falias write falias;
    property ancestor: string read fancestor write fancestor;
    property mode: fontaliasmodety read fmode write fmode default fam_fixnooverwrite;
-   property height: integer read fheight write fheight;
-   property width: integer read fwidth write fwidth;
+   property height: integer read fheight write fheight default 0;
+   property width: integer read fwidth write fwidth default 0;
    property options: fontoptionsty read foptions write foptions default [];
    property xscale: real read fxscale write fxscale;
  end;

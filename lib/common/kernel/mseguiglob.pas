@@ -88,7 +88,8 @@ type
  end;
  pkeyeventinfoty = ^keyeventinfoty;
 
- stockfontty = (stf_default,stf_empty,stf_unicode,stf_menu,stf_report,
+ stockfontty = (stf_default,stf_empty,stf_unicode,
+                stf_menu,stf_message,stf_report,
                 stf_proportional,stf_fixed,
                 stf_helvetica,stf_roman,stf_courier); //scaleable fonts
  defaultfontnamesty = array[stockfontty] of string;
