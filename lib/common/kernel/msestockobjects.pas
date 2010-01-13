@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -387,17 +387,20 @@ end;
 function tstockobjects.getfonts(index: stockfontty): twidgetfont;
 var
  fo1: stockfontty;
+ str1: string;
 begin
  if not ffontaliasregistered then begin
   for fo1:= low(stockfontty) to high(stockfontty) do begin
-   if fo1 = stf_default then begin
-    registerfontalias(getenumname(typeinfo(stockfontty),ord(fo1)),
-      gui_getdefaultfontnames[fo1],fam_fixnooverwrite,0,0,[],1.0,'');
-   end
-   else begin
-    registerfontalias(getenumname(typeinfo(stockfontty),ord(fo1)),
-                          gui_getdefaultfontnames[fo1],fam_fixnooverwrite);
+   case fo1 of
+    stf_default: begin
+     str1:= '';
+    end;
+    else begin
+     str1:= 'stf_default';
+    end;
    end;
+   registerfontalias(getenumname(typeinfo(stockfontty),ord(fo1)),
+            gui_getdefaultfontnames[fo1],fam_fixnooverwrite,0,0,[],1.0,str1);
   end;
   ffontaliasregistered:= true;
  end;
