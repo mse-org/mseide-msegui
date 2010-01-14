@@ -1109,6 +1109,7 @@ type
   private
    fonsetvalue: setdatetimeeventty;
    fvalue: tdatetime;
+   fvaluedefault: tdatetime;
    fformatdisp: msestring;
    fformatedit: msestring;
    fmin: tdatetime;
@@ -1125,6 +1126,8 @@ type
    procedure setkind(const avalue: datetimekindty);
    procedure readvalue(reader: treader);
    procedure writevalue(writer: twriter);
+   procedure readvaluedefault(reader: treader);
+   procedure writevaluedefault(writer: twriter);
    procedure readmin(reader: treader);
    procedure writemin(writer: twriter);
    procedure readmax(reader: treader);
@@ -1145,6 +1148,7 @@ type
    procedure readstatvalue(const reader: tstatreader); override;
    procedure writestatvalue(const writer: tstatwriter); override;
    function isempty (const atext: msestring): boolean; override;
+   function getdefaultvalue: pointer; override;
   public
    constructor create(aowner: tcomponent); override;
    function griddata: trealdatalist;
@@ -1153,6 +1157,8 @@ type
    function isnull: boolean;
    property onsetvalue: setdatetimeeventty read fonsetvalue write fonsetvalue;
    property value: tdatetime read fvalue write setvalue stored false;
+   property valuedefault: tdatetime read fvaluedefault 
+                                             write fvaluedefault stored false;
    property formatedit: msestring read fformatedit write setformatedit;
    property formatdisp: msestring read fformatdisp write setformatdisp;
    property min: tdatetime read fmin write fmin;
@@ -1170,6 +1176,7 @@ type
   published
    property onsetvalue;
    property value stored false;
+   property valuedefault stored false;
    property formatedit;
    property formatdisp;
    property min stored false;
@@ -4811,6 +4818,7 @@ end;
 constructor tcustomdatetimeedit.create(aowner: tcomponent);
 begin
  fvalue:= emptydatetime;
+ fvaluedefault:= emptydatetime;
  fmin:= emptydatetime;
  fmax:= bigdatetime;
  inherited;
@@ -5044,6 +5052,16 @@ begin
  writerealty(writer,fvalue);
 end;
 
+procedure tcustomdatetimeedit.readvaluedefault(reader: treader);
+begin
+ valuedefault:= readrealty(reader);
+end;
+
+procedure tcustomdatetimeedit.writevaluedefault(writer: twriter);
+begin
+ writerealty(writer,fvaluedefault);
+end;
+
 procedure tcustomdatetimeedit.readmin(reader: treader);
 begin
  fmin:= readrealty(reader);
@@ -5066,7 +5084,7 @@ end;
 
 procedure tcustomdatetimeedit.defineproperties(filer: tfiler);
 var
- bo1,bo2,bo3: boolean;
+ bo1,bo2,bo3,bo4: boolean;
 begin
  inherited;
  if filer.ancestor <> nil then begin
@@ -5074,12 +5092,14 @@ begin
    bo1:= self.fvalue <> fvalue;
    bo2:= self.fmin <> fmin;
    bo3:= self.fmax <> fmax;
+   bo4:= self.fvaluedefault <> fvaluedefault;
   end;
  end
  else begin
   bo1:= not isemptyreal(fvalue);
   bo2:= not isemptyreal(fmin);
   bo3:= cmprealty(fmax,bigdatetime) <> 0;
+  bo4:= not isemptyreal(fvaluedefault);
  end;
  
  filer.DefineProperty('val',
@@ -5089,6 +5109,9 @@ begin
           {$ifdef FPC}@{$endif}writemin,bo2);
  filer.DefineProperty('ma',{$ifdef FPC}@{$endif}readmax,
           {$ifdef FPC}@{$endif}writemax,bo3);
+ filer.DefineProperty('def',
+             {$ifdef FPC}@{$endif}readvaluedefault,
+             {$ifdef FPC}@{$endif}writevaluedefault,bo4);
 end;
 
 function tcustomdatetimeedit.isempty(const atext: msestring): boolean;
@@ -5117,5 +5140,10 @@ begin
  inherited;
 end;
 {$endif}
+
+function tcustomdatetimeedit.getdefaultvalue: pointer;
+begin
+ result:= @fvaluedefault;
+end;
 
 end.
