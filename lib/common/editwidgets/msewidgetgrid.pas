@@ -351,6 +351,7 @@ type
    function getdefault: pointer; override;
   public
    constructor create(owner: twidgetcol); reintroduce;
+   function empty(const index: integer): boolean; override;   //true wenn leer
  end;
  
  tgridansistringdatalist = class(tansistringdatalist)
@@ -547,6 +548,22 @@ begin
  end
  else begin
   result:= inherited getdefault;
+ end;
+end;
+
+function tgridmsestringdatalist.empty(const index: integer): boolean;
+var
+ po1: pmsestring;
+begin
+ po1:= nil;
+ if fowner.fintf <> nil then begin
+  po1:= fowner.fintf.getdefaultvalue;
+ end;
+ if po1 <> nil then begin
+  result:= msestring(getitempo(index)^) = po1^;
+ end
+ else begin
+  result:= msestring(getitempo(index)^) = '';
  end;
 end;
 

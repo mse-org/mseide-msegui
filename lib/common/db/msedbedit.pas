@@ -1888,7 +1888,7 @@ type
    procedure setvalue(const avalue: int64);
   protected
    fvalue1: int64;
-   fvaluedefault: int64;
+   fvaluedefault1: int64;
    
    function getdefaultvalue: pointer; override;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
@@ -1907,7 +1907,7 @@ type
         read getgridvalue write setgridvalue; default;
    property gridvalues: int64arty read getgridvalues write setgridvalues;
    property value: int64 read fvalue1 write setvalue default -1;
-   property valuedefault: int64 read fvaluedefault write fvaluedefault default -1;
+   property valuedefault: int64 read fvaluedefault1 write fvaluedefault1 default -1;
    property onsetvalue: setint64eventty read fonsetvalue1 write fonsetvalue1;
  end;
 
@@ -4497,7 +4497,7 @@ end;
 procedure tcustomdbenumedit.fieldtovalue;
 begin
  if fdatalink.field.isnull then begin
-  value:= fvaluedefault;
+  value:= fvaluedefault1;
  end
  else begin
   value:= fdatalink.field.asinteger;
@@ -8370,7 +8370,7 @@ end;
 constructor tcustomenum64edit.create(aowner: tcomponent);
 begin
  fvalue1:= -1;
- fvaluedefault:= -1;
+ fvaluedefault1:= -1;
  inherited;
 end;
 
@@ -8414,7 +8414,7 @@ end;
 
 function tcustomenum64edit.getdefaultvalue: pointer;
 begin
- result:= @fvaluedefault;
+ result:= @fvaluedefault1;
 end;
 
 procedure tcustomenum64edit.texttovalue(var accept: boolean; const quiet: boolean);
@@ -8637,7 +8637,7 @@ end;
 procedure tdbenum64editlb.fieldtovalue;
 begin
  if fdatalink.field.isnull then begin
-  value:= fvaluedefault;
+  value:= fvaluedefault1;
  end
  else begin
   value:= fdatalink.field.aslargeint;
@@ -8748,7 +8748,7 @@ end;
 procedure tdbenum64editdb.fieldtovalue;
 begin
  if fdatalink.field.isnull then begin
-  value:= fvaluedefault;
+  value:= fvaluedefault1;
  end
  else begin
   value:= fdatalink.field.aslargeint;

@@ -255,7 +255,7 @@ end;
 procedure tdbcoloredit.fieldtovalue;
 begin
  if fdatalink.field.isnull then begin
-  value:= fvaluedefault;
+  value:= fvaluedefault1;
  end
  else begin
   value:= fdatalink.field.asinteger;

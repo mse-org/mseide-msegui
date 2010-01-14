@@ -274,6 +274,7 @@ type
   {$endif}
   protected
    fvalue: msestring;
+   fvaluedefault: msestring;
    function getvaluetext: msestring; virtual;
    procedure updatedisptext(var avalue: msestring); virtual;
 
@@ -288,7 +289,8 @@ type
    procedure readstatvalue(const reader: tstatreader); override;
    procedure writestatvalue(const writer: tstatwriter); override;
    procedure sortfunc(const l,r; var result: integer); override;
-   function isempty (const atext: msestring): boolean; override;
+//   function isempty (const atext: msestring): boolean; override;
+   function getdefaultvalue: pointer; override;
 
   public
    procedure dragevent(var info: draginfoty); override;
@@ -296,6 +298,7 @@ type
    procedure assigncol(const value: tmsestringdatalist);
    property onsetvalue: setstringeventty read fonsetvalue write fonsetvalue;
    property value: msestring read fvalue write setvalue;
+   property valuedefault: msestring read fvaluedefault write fvaluedefault;
    property gridvalue[const index: integer]: msestring
         read getgridvalue write setgridvalue; default;
    property gridvalues: msestringarty read getgridvalues write setgridvalues;
@@ -309,6 +312,7 @@ type
    property passwordchar;
    property maxlength;
    property value;
+   property valuedefault;
    property onsetvalue;
 {$ifdef mse_with_ifi}
    property ifilink;
@@ -359,6 +363,7 @@ type
  tmemoedit = class(tcustommemoedit)
   published
    property value;
+   property valuedefault;
    property onsetvalue;
    property frame;
    property textflags;
@@ -452,6 +457,7 @@ type
  tdropdownwidgetedit = class(tcustomdropdownwidgetedit)
   published
    property value;
+   property valuedefault;
    property dropdown;
    property onsetvalue;
    property onbeforedropdown;
@@ -476,6 +482,7 @@ type
   published
    property maxlength;
    property value;
+   property valuedefault;
    property onsetvalue;
    property dropdown;
    property onbeforedropdown;
@@ -529,6 +536,7 @@ type
   published
    property maxlength;
    property value;
+   property valuedefault;
    property onsetvalue;
    property dropdown;
    property onbeforedropdown;
@@ -680,7 +688,7 @@ type
 
  tcustomkeystringedit = class(tcustomdropdownlistedit)
   private
-   fvaluedefault: msestring;
+//   fvaluedefault: msestring;
    foninit: keystringediteventty;
   protected
    fvalue1: msestring;
@@ -690,7 +698,7 @@ type
    procedure setnullvalue; override; //for dbedits
    function internaldatatotext(const data): msestring; override;
    procedure texttodata(const atext: msestring; var data); override;
-   function getdefaultvalue: pointer; override;
+//   function getdefaultvalue: pointer; override;
    procedure valuetogrid(arow: integer); override;
    procedure gridtovalue(arow: integer); override;
 
@@ -699,7 +707,7 @@ type
    procedure loaded; override;
   public
    property value: msestring read fvalue1 write setvalue;
-   property valuedefault: msestring read fvaluedefault write fvaluedefault;
+//   property valuedefault: msestring read fvaluedefault write fvaluedefault;
    property oninit: keystringediteventty read foninit write foninit;
  end;
 
@@ -740,7 +748,7 @@ type
   protected
    fonsetvalue1: setintegereventty;
    fvalue1: integer;
-   fvaluedefault: integer;
+   fvaluedefault1: integer;
    fvalueempty: integer;
    procedure setvalue(const avalue: integer);
    function createdatalist(const sender: twidgetcol): tdatalist; override;
@@ -769,7 +777,7 @@ type
    property valueoffset: integer read fvalueoffset write setvalueoffset default 0;
                                    //before value
    property value: integer read fvalue1 write setvalue default -1;
-   property valuedefault: integer read fvaluedefault write fvaluedefault default -1;
+   property valuedefault: integer read fvaluedefault1 write fvaluedefault1 default -1;
    property valueempty: integer read fvalueempty write fvalueempty default -1;
    property base: numbasety read fbase write setbase default nb_dec;
    property bitcount: integer read fbitcount write setbitcount default 32;
@@ -2494,12 +2502,17 @@ procedure tcustomstringedit.setgridvalues(const Value: msestringarty);
 begin
  tmsestringdatalist(fgridintf.getcol.datalist).asarray:= value;
 end;
-
+{
 function tcustomstringedit.isempty(const atext: msestring): boolean;
 begin
- result:= atext = getnulltext;
+ if fvaluedefault <> '' then begin
+  result:= atext = fvaluedefault;
+ end
+ else begin
+  result:= atext = getnulltext;
+ end;
 end;
-
+}
 {$ifdef mse_with_ifi}
 function tcustomstringedit.getifilink: tifistringlinkcomp;
 begin
@@ -2509,6 +2522,11 @@ end;
 procedure tcustomstringedit.setifilink(const avalue: tifistringlinkcomp);
 begin
  inherited;
+end;
+
+function tcustomstringedit.getdefaultvalue: pointer;
+begin
+ result:= @fvaluedefault;
 end;
 
 {$endif}
@@ -3755,10 +3773,10 @@ begin
  //not supported
 end;
 
-function tcustomkeystringedit.getdefaultvalue: pointer;
-begin
- result:= @fvaluedefault;
-end;
+//function tcustomkeystringedit.getdefaultvalue: pointer;
+//begin
+// result:= @fvaluedefault;
+//end;
 
 procedure tcustomkeystringedit.valuetogrid(arow: integer);
 begin
@@ -3785,7 +3803,7 @@ end;
 constructor tcustomenuedit.create(aowner: tcomponent);
 begin
  fvalue1:= -1;
- fvaluedefault:= -1;
+ fvaluedefault1:= -1;
  fvalueempty:= -1;
  fbase:= nb_dec;
  fbitcount:= 32;
@@ -3935,7 +3953,7 @@ end;
 
 function tcustomenuedit.getdefaultvalue: pointer;
 begin
- result:= @fvaluedefault;
+ result:= @fvaluedefault1;
 end;
 
 procedure tcustomenuedit.gridtovalue(arow: integer);

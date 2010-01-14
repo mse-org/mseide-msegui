@@ -138,6 +138,7 @@ type
   projectfilename: filenamety;
   projectdir: filenamety;
   fontalias: msestringarty;
+  fontancestors: msestringarty;
   fontheights: integerarty;
   fontwidths: integerarty;
   fontoptions: msestringarty;
@@ -436,6 +437,7 @@ type
    newfifilter: tstringedit;
    newfiext: tstringedit;
    tabindent: tbooleanedit;
+   fontancestors: tstringedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -800,6 +802,11 @@ begin
 }
    clearfontalias;
    int2:= high(fontalias);
+   int1:= high(fontancestors);
+   setlength(fontancestors,int2+1); //additional field
+   for int1:= int1+1 to int2 do begin
+    fontancestors[int1]:= 'sft_default';
+   end;
    if int2 > high(fontnames) then begin
     int2:= high(fontnames);
    end;
@@ -816,10 +823,14 @@ begin
     int2:= high(fontxscales);
    end;
    for int1:= 0 to int2 do begin
-    registerfontalias(fontalias[int1],fontnames[int1],fam_overwrite,
-               fontheights[int1],fontwidths[int1],
-               fontoptioncharstooptions(fontoptions[int1]),
-               fontxscales[int1]);
+    try
+     registerfontalias(fontalias[int1],fontnames[int1],fam_overwrite,
+                fontheights[int1],fontwidths[int1],
+                fontoptioncharstooptions(fontoptions[int1]),
+                fontxscales[int1],fontancestors[int1]);
+    except
+     application.handleexception;
+    end;
    end;
    if sourceupdater <> nil then begin
     sourceupdater.maxlinelength:= rightmarginchars;
@@ -1087,6 +1098,7 @@ begin
   toolfiles:= nil;
   toolparams:= nil;
   fontalias:= nil;
+  fontancestors:= nil;
   fontnames:= nil;
   fontheights:= nil;
   fontwidths:= nil;
@@ -1361,6 +1373,7 @@ begin
   updatevalue('toolfiles',toolfiles);
   updatevalue('toolparams',toolparams);
   updatevalue('fontalias',fontalias);
+  updatevalue('fontancestors',fontancestors);
   updatevalue('fontnames',fontnames);
   updatevalue('fontheights',fontheights);
   updatevalue('fontwidths',fontwidths);
@@ -1563,6 +1576,7 @@ begin
   fo.backupfilecount.value:= backupfilecount;
   fo.encoding.value:= encoding;
   fo.fontalias.gridvalues:= fontalias;
+  fo.fontancestors.gridvalues:= fontancestors;
   fo.fontname.gridvalues:= fontnames;
   fo.fontheight.gridvalues:= fontheights;
   fo.fontwidth.gridvalues:= fontwidths;
@@ -1771,6 +1785,7 @@ begin
   backupfilecount:= fo.backupfilecount.value;
   encoding:= fo.encoding.value;
   fontalias:= fo.fontalias.gridvalues;
+  fontancestors:= fo.fontancestors.gridvalues;
   fontnames:= fo.fontname.gridvalues;
   fontheights:= fo.fontheight.gridvalues;
   fontwidths:= fo.fontwidth.gridvalues;
