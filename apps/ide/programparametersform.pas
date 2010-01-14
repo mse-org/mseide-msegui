@@ -29,7 +29,7 @@ type
    ok: tbutton;
    envvaron: tbooleanedit;
    tbutton2: tbutton;
-   parameters: thistoryedit;
+   parameters: tmemodialoghistoryedit;
    statfile1: tstatfile;
    envvarname: tstringedit;
    envvarvalue: tmemodialogedit;

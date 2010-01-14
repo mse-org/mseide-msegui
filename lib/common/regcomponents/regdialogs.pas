@@ -22,7 +22,8 @@ procedure Register;
 begin
  registercomponents('Dialog',[tfilelistview,tfiledialog,
                      tfilenameedit,{thistoryfilenameedit,}
-                     tdirdropdownedit,tcoloredit,tmemodialogedit]);
+                     tdirdropdownedit,tcoloredit,tmemodialogedit,
+                     tmemodialoghistoryedit]);
  registercomponenttabhints(['Dialog'],['User Dialogs']);
 end;
 

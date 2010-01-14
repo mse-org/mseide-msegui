@@ -129,6 +129,12 @@ end;
 
 { tcustomdialogstringed }
 
+constructor tcustomdialogstringed.create(aowner: tcomponent);
+begin
+ inherited;
+ internalcreateframe;
+end;
+
 procedure tcustomdialogstringed.buttonaction(var action: buttonactionty;
   const buttonindex: integer);
 begin
@@ -138,12 +144,6 @@ begin
   end;
   internalexecute;
  end;
-end;
-
-constructor tcustomdialogstringed.create(aowner: tcomponent);
-begin
- inherited;
- internalcreateframe;
 end;
 
 procedure tcustomdialogstringed.internalcreateframe;

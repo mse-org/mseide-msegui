@@ -52,10 +52,12 @@ object programparametersfo: tprogramparametersfo
     caption = 'Cancel'
     modalresult = mr_cancel
   end
-  object parameters: thistoryedit
+  object parameters: tmemodialoghistoryedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     frame.caption = '&Parameters'
     frame.button.color = -2147483646
+    frame.buttondialog.color = -2147483646
+    frame.buttondialog.imagenr = 17
     frame.outerframe = (
       0
       17
@@ -68,7 +70,6 @@ object programparametersfo: tprogramparametersfo
     bounds_cx = 324
     bounds_cy = 37
     anchors = [an_left, an_top, an_right]
-    dropdown.options = [deo_autosavehistory]
     dropdown.cols.count = 1
     dropdown.cols.items = <    
       item
