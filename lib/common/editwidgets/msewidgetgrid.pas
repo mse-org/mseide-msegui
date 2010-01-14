@@ -415,6 +415,7 @@ type
    function getdefault: pointer; override;
   public
    constructor create(owner: twidgetcol); reintroduce;
+   function empty(const index: integer): boolean; override;   //true wenn leer
  end;
 
 type
@@ -563,7 +564,7 @@ begin
   result:= msestring(getitempo(index)^) = po1^;
  end
  else begin
-  result:= msestring(getitempo(index)^) = '';
+  result:= inherited empty(index);
  end;
 end;
 
@@ -692,6 +693,22 @@ begin
  end;
  if result = nil then begin
   result:= inherited getdefault;
+ end;
+end;
+
+function tgridrealdatalist.empty(const index: integer): boolean;
+var
+ po1: prealty;
+begin
+ po1:= nil;
+ if fowner.fintf <> nil then begin
+  po1:= fowner.fintf.getdefaultvalue;
+ end;
+ if po1 <> nil then begin
+  result:= realty(getitempo(index)^) = po1^;
+ end
+ else begin
+  result:= inherited empty(index);
  end;
 end;
 

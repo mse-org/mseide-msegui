@@ -908,6 +908,8 @@ type
    procedure setformatedit(const Value: msestring);
    procedure readvalue(reader: treader);
    procedure writevalue(writer: twriter);
+   procedure readvaluedefault(reader: treader);
+   procedure writevaluedefault(writer: twriter);
    procedure readmin(reader: treader);
    procedure writemin(writer: twriter);
    procedure readmax(reader: treader);
@@ -932,6 +934,7 @@ type
   {$endif}
   protected
    fvalue: realty;
+   fvaluedefault: realty;
    function gettextvalue(var accept: boolean; const quiet: boolean): realty; virtual;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    function internaldatatotext(const data): msestring; override;
@@ -943,6 +946,7 @@ type
    procedure defineproperties(filer: tfiler); override;
    procedure readstatvalue(const reader: tstatreader); override;
    procedure writestatvalue(const writer: tstatwriter); override;
+   function getdefaultvalue: pointer; override;
   public
    constructor create(aowner: tcomponent); override;
    function griddata: trealdatalist;
@@ -957,6 +961,8 @@ type
                                   write fonsetintvalue;
                     //overrides onsetvalue
    property value: realty read fvalue write setvalue stored false;
+   property valuedefault: realty read fvaluedefault 
+                                    write fvaluedefault stored false;
    property formatedit: msestring read fformatedit write setformatedit;
    property formatdisp: msestring read fformatdisp write setformatdisp;
    property valuerange: real read fvaluerange write setvaluerange;
@@ -981,6 +987,7 @@ type
    property onsetvalue;
    property onsetintvalue;
    property value stored false;
+   property valuedefault stored false;
    property formatedit;
    property formatdisp;
    property valuerange;
@@ -4273,6 +4280,7 @@ end;
 constructor tcustomrealedit.create(aowner: tcomponent);
 begin
  fvalue:= emptyreal;
+ fvaluedefault:= emptyreal;
  fmin:= emptyreal;
  fmax:= bigreal;
  fvaluerange:= 1;
@@ -4431,6 +4439,16 @@ begin
  writerealty(writer,fvalue);
 end;
 
+procedure tcustomrealedit.readvaluedefault(reader: treader);
+begin
+ valuedefault:= readrealty(reader);
+end;
+
+procedure tcustomrealedit.writevaluedefault(writer: twriter);
+begin
+ writerealty(writer,fvaluedefault);
+end;
+
 procedure tcustomrealedit.readmin(reader: treader);
 begin
  fmin:= readrealty(reader);
@@ -4458,7 +4476,7 @@ end;
 
 procedure tcustomrealedit.defineproperties(filer: tfiler);
 var
- bo1,bo2,bo3: boolean;
+ bo1,bo2,bo3,bo4: boolean;
 begin
  inherited;
  if filer.ancestor <> nil then begin
@@ -4466,12 +4484,14 @@ begin
    bo1:= self.fvalue <> fvalue;
    bo2:= self.fmin <> fmin;
    bo3:= self.fmax <> fmax;
+   bo4:= self.fvaluedefault <> fvaluedefault;
   end;
  end
  else begin
   bo1:= not isemptyreal(fvalue);
   bo2:= not isemptyreal(fmin);
   bo3:= cmprealty(fmax,bigreal) <> 0;
+  bo4:= not isemptyreal(fvaluedefault);
 //  bo3:= cmprealty(fmax,0.99*bigreal) < 0;
  end;
  
@@ -4482,6 +4502,8 @@ begin
           {$ifdef FPC}@{$endif}writemin,bo2);
  filer.DefineProperty('ma',{$ifdef FPC}@{$endif}readmax,
           {$ifdef FPC}@{$endif}writemax,bo3);
+ filer.DefineProperty('def',{$ifdef FPC}@{$endif}readvaluedefault,
+          {$ifdef FPC}@{$endif}writevaluedefault,bo4);
  filer.defineproperty('valuescale',{$ifdef FPC}@{$endif}readvaluescale,nil,false);
 end;
 
@@ -4628,7 +4650,13 @@ procedure tcustomrealedit.setifilink(const avalue: tifireallinkcomp);
 begin
  inherited;
 end;
+
 {$endif}
+
+function tcustomrealedit.getdefaultvalue: pointer;
+begin
+ result:= @fvaluedefault;
+end;
 
 { tspineditframe }
 
