@@ -564,6 +564,7 @@ type
    fbitcount: integer;
    fmin: integer;
    fmax: integer;
+   fvaluedefault: integer;
    procedure setvalue(const Value: integer);
    procedure setbase(const Value: numbasety);
    procedure setbitcount(const Value: integer);
@@ -587,12 +588,14 @@ type
    procedure readstatvalue(const reader: tstatreader); override;
    procedure writestatvalue(const writer: tstatwriter); override;
    procedure setnullvalue; override;
+   function getdefaultvalue: pointer; override;
   public
    constructor create(aowner: tcomponent); override;
    procedure fillcol(const value: integer);
    procedure assigncol(const value: tintegerdatalist);
    property onsetvalue: setintegereventty read fonsetvalue write fonsetvalue;
    property value: integer read fvalue write setvalue default 0;
+   property valuedefault: integer read fvaluedefault write fvaluedefault default 0;
    property base: numbasety read fbase write setbase default nb_dec;
    property bitcount: integer read fbitcount write setbitcount default 32;
    property min: integer read fmin write fmin default 0;
@@ -610,6 +613,7 @@ type
   published
    property onsetvalue;
    property value;
+   property valuedefault;
    property base;
    property bitcount;
    property min;
@@ -627,6 +631,7 @@ type
    fbitcount: integer;
    fmin: int64;
    fmax: int64;
+   fvaluedefault: int64;
    procedure setvalue(const Value: int64);
    procedure setbase(const Value: numbasety);
    procedure setbitcount(const Value: integer);
@@ -646,12 +651,14 @@ type
    procedure readstatvalue(const reader: tstatreader); override;
    procedure writestatvalue(const writer: tstatwriter); override;
    procedure setnullvalue; override;
+   function getdefaultvalue: pointer; override;
   public
    constructor create(aowner: tcomponent); override;
    procedure fillcol(const value: int64);
    procedure assigncol(const value: tint64datalist);
    property onsetvalue: setint64eventty read fonsetvalue write fonsetvalue;
    property value: int64 read fvalue write setvalue default 0;
+   property valuedefault: int64 read fvaluedefault write fvaluedefault default 0;
    property base: numbasety read fbase write setbase default nb_dec;
    property bitcount: integer read fbitcount write setbitcount default 64;
    property min: int64 read fmin write fmin default 0;
@@ -666,6 +673,7 @@ type
   published
    property onsetvalue;
    property value;
+   property valuedefault;
    property base;
    property bitcount;
    property min;
@@ -3459,7 +3467,13 @@ procedure tcustomintegeredit.setifilink(const avalue: tifiintegerlinkcomp);
 begin
  inherited;
 end;
+
 {$endif}
+
+function tcustomintegeredit.getdefaultvalue: pointer;
+begin
+ result:= @fvaluedefault;
+end;
 
 { tcustomint64edit }
 
@@ -3650,6 +3664,11 @@ end;
 procedure tcustomint64edit.assigncol(const value: tint64datalist);
 begin
  internalassigncol(value);
+end;
+
+function tcustomint64edit.getdefaultvalue: pointer;
+begin
+ result:= @fvaluedefault;
 end;
 
 
