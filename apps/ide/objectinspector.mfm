@@ -1,23 +1,16 @@
 object objectinspectorfo: tobjectinspectorfo
   optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  frame.grip_size = 10
+  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton, go_backgroundbutton]
+  frame.dummy = 0
+  visible = False
   bounds_x = 354
   bounds_y = 403
   bounds_cx = 254
   bounds_cy = 248
-  frame.grip_size = 10
-  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton, go_backgroundbutton]
-  frame.dummy = 0
-  taborder = 1
-  visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
-  container.bounds_x = 0
-  container.bounds_y = 0
-  container.bounds_cx = 244
-  container.bounds_cy = 248
-  container.frame.dummy = 0
   container.onchildscaled = objectinspectoronchildscaled
   dragdock.splitter_size = 0
-  dragdock.tab_size = 0
   dragdock.caption = 'Objectinspector'
   dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_propsize]
   options = [fo_savepos, fo_savezorder, fo_savestate]
@@ -96,14 +89,13 @@ object objectinspectorfo: tobjectinspectorfo
   moduleclassname = 'tdockform'
   object compselector: tdropdownlistedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    frame.button.color = -2147483646
+    taborder = 2
     bounds_x = 0
     bounds_y = 1
     bounds_cx = 220
     bounds_cy = 20
-    frame.button.color = -2147483646
-    frame.dummy = 0
     anchors = [an_left, an_top, an_right]
-    taborder = 2
     onsetvalue = compselectoronsetvalue
     dropdown.options = [deo_selectonly, deo_autodropdown, deo_keydropdown]
     dropdown.cols.count = 1
@@ -114,16 +106,14 @@ object objectinspectorfo: tobjectinspectorfo
     reffontheight = 14
   end
   object grid: twidgetgrid
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    frame.localprops = [frl_levelo, frl_colorclient]
+    taborder = 1
+    popupmenu = tpopupmenu1
     bounds_x = 0
     bounds_y = 24
     bounds_cx = 244
     bounds_cy = 224
-    frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
     anchors = [an_top, an_bottom]
-    taborder = 1
-    popupmenu = tpopupmenu1
     optionsgrid = [og_colsizing, og_colmoving, og_focuscellonenter, og_colchangeontabkey, og_wrapcol, og_noresetselect]
     rowcolors.count = 1
     rowcolors.items = (
@@ -185,6 +175,7 @@ object objectinspectorfo: tobjectinspectorfo
         width = 148
         rowfontoffset = 4
         options = [co_fill, co_savestate, co_rowfont, co_zebracolor]
+        oncellevent = valuescellevent
         onshowhint = col1onshowhint
         widgetname = 'values'
       end>
@@ -200,17 +191,16 @@ object objectinspectorfo: tobjectinspectorfo
     object props: ttreeitemedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
       optionsskin = [osk_noskin]
+      frame.levelo = 0
+      frame.colorclient = -2147483646
+      frame.localprops = [frl_levelo, frl_colorclient]
+      taborder = 1
+      onpopup = propsonpopup
+      visible = False
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 90
       bounds_cy = 16
-      frame.levelo = 0
-      frame.colorclient = -2147483646
-      frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
-      taborder = 1
-      onpopup = propsonpopup
-      visible = False
       optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_resetselectonexit, oe_locate, oe_savestate]
       onupdaterowvalues = propupdaterowvalue
       options = [teo_treecolnavig, teo_keyrowmoving]
@@ -219,10 +209,6 @@ object objectinspectorfo: tobjectinspectorfo
     end
     object values: tmbdropdownitemedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight]
-      bounds_x = 91
-      bounds_y = 0
-      bounds_cx = 148
-      bounds_cy = 16
       color = -1879048185
       frame.levelo = 0
       frame.colorclient = -2147483646
@@ -240,10 +226,13 @@ object objectinspectorfo: tobjectinspectorfo
           color = -1879048187
           imagenr = 17
         end>
-      frame.dummy = 0
       taborder = 2
       visible = False
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_forcereturncheckvalue, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
+      bounds_x = 91
+      bounds_y = 0
+      bounds_cx = 148
+      bounds_cy = 16
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
       font.name = 'stf_default'
       font.xscale =  1.0000000000000000E+0000
       font.dummy = 0
@@ -264,15 +253,13 @@ object objectinspectorfo: tobjectinspectorfo
   end
   object compedit: tbutton
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_disabledhint, ow_timedhint, ow_fontglyphheight, ow_autoscale]
+    hint = 'Show component editor.'
     bounds_x = 223
     bounds_y = 2
     bounds_cx = 19
     bounds_cy = 18
     anchors = [an_top, an_right]
-    hint = 'Show component editor.'
     state = [as_disabled, as_localdisabled, as_localcaption, as_localhint, as_localonexecute]
-    autosize_cx = 0
-    autosize_cy = 0
     caption = 'ED'
     onexecute = compeditonexecute
     reffontheight = 14

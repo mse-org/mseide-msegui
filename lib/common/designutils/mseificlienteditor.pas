@@ -121,9 +121,11 @@ procedure tmseificlienteditorfo.celle(const sender: TObject;
                var info: celleventinfoty);
 begin
  if iscellclick(info,[ccr_dblclick,ccr_nokeyreturn]) then begin
+  designer.showformdesigner(designer.modules.findmodulebycomponent(
+                                                       tcomponent(po.value)));
   designer.selectcomponent(tcomponent(po.value));
   window.modalresult:= mr_ok;
-  objectinspectorfo.activate;
+//  objectinspectorfo.activate;
  end;
 end;
 

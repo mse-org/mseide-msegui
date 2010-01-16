@@ -121,6 +121,7 @@ type
                    var cellinfo: cellinfoty; var processed: Boolean);
    procedure selchanged(const sender: tdatacol);
    procedure clearselect(const sender: TObject);
+   procedure valuescellevent(const sender: TObject; var info: celleventinfoty);
   private
    factmodule: tmsecomponent;
    factcomp: tcomponent;
@@ -1779,6 +1780,24 @@ end;
 procedure tobjectinspectorfo.clearselect(const sender: TObject);
 begin
  grid.datacols[0].clearselection;
+end;
+
+procedure tobjectinspectorfo.valuescellevent(const sender: TObject;
+               var info: celleventinfoty);
+var
+ editor1: tpropertyeditor1;
+ comp1: tcomponent;
+begin
+ if iscellclick(info,[ccr_dblclick]) then begin
+  editor1:= tpropertyeditor1(tpropertyitem(props.item).feditor);
+  if tpropertyeditor(editor1) is tcomponentpropertyeditor then begin
+   comp1:= tcomponent(editor1.getpointervalue);
+   if comp1 <> nil then begin
+    designer.showformdesigner(designer.modules.findmodulebycomponent(comp1));
+    designer.selectcomponent(comp1);
+   end;
+  end;
+ end;
 end;
 
 initialization
