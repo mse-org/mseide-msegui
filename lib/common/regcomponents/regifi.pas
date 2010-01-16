@@ -4,7 +4,7 @@ interface
 implementation
 uses
  classes,mseificomp,msedesignintf,regifi_bmp,msepropertyeditors,mseclasses,
- msecomponenteditors,mseificomponenteditors; 
+ msecomponenteditors,mseificomponenteditors,msestrings; 
     
 type
  tifiwidgeteditor = class(tcomponentpropertyeditor)
@@ -19,7 +19,10 @@ begin
        tifireallinkcomp,tifidatetimelinkcomp,tifistringlinkcomp,
        tifigridlinkcomp]); 
  registercomponenttabhints(['Ifi'],
-   ['IFI Components']);
+   ['MSEifi Components (experimental).'+lineend+
+   'Compile MSEide with -dmse_with_ifirem '+
+   'in order to install MSEifi remote components,'+lineend+
+   'compile with -dmse_with_pascalscript for PascalScript components.']);
 // registerpropertyeditor(typeinfo(tcomponent),tcustomificlientcontroller,
 //                                                      'widget',tifiwidgeteditor);
  registercomponenteditor(tifilinkcomp,tifilinkcompeditor);
