@@ -13,10 +13,15 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 }
-{Modified 2006-2008 by Martin Schreiber}
+{Modified 2006-2010 by Martin Schreiber}
 
 {$ifdef VER2_1_5} {$define mse_FPC_2_2} {$endif}
 {$ifdef VER2_2} {$define mse_FPC_2_2} {$endif}
+{$ifdef VER2_3} {$define mse_FPC_2_2} {$endif}
+{$ifdef VER2_4} {$define mse_FPC_2_2} {$endif}
+{$ifdef VER2_5} {$define mse_FPC_2_2} {$endif}
+{$if FPC_FULLVERSION >= 20300} {$define mse_FPC_2_2} {$endif}
+
 {$mode objfpc}{$H+}
 {$MACRO on}
 
@@ -92,7 +97,10 @@ Type
     FHostInfo: String;
     FServerInfo: String;
     FMySQL : PMySQL;
+{$if fpc_fullversion >= 20401}
+{$else}
     FDidConnect : Boolean;
+{$endif}
    fport: longword;
    flasterror: integer;
    flasterrormessage: msestring;
@@ -243,6 +251,15 @@ Var
   B : Boolean;
 
 begin
+{$if fpc_fullversion >= 20401}
+  // To make it possible to call this if there's no connection yet
+  InitialiseMysql;
+  Try  
+    Result:=strpas(mysql_get_client_info());
+  Finally  
+    ReleaseMysql;
+  end;  
+{$else}
   // To make it possible to call this if there's no connection yet
   B:=(MysqlLibraryHandle=Nilhandle);
   If B then
@@ -253,6 +270,7 @@ begin
     if B then
       ReleaseMysql;
   end;  
+{$endif}
 end;
 
 function TConnectionName.GetServerStatus: String;
@@ -344,8 +362,11 @@ end;
 
 procedure TConnectionName.DoInternalConnect;
 begin
+{$if fpc_fullversion >= 20401}
+{$else}
   FDidConnect:=(MySQLLibraryHandle=NilHandle);
   if FDidConnect then
+{$endif}
     InitialiseMysql;
 {$IFDEF mysql50}
   if copy(strpas(mysql_get_client_info()),1,3)<>'5.0' then
@@ -369,7 +390,10 @@ begin
   inherited DoInternalDisconnect;
   mysql_close(FMySQL);
   FMySQL:=Nil;
+{$if fpc_fullversion >= 20401}
+{$else}
   if FDidConnect then
+{$endif}
     ReleaseMysql;
 end;
 
