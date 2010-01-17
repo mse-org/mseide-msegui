@@ -1163,6 +1163,8 @@ type
    procedure setrowheight(const index: integer; const avalue: integer);
    function getrowypos(const index: integer): integer;
   protected
+   function totchildrencount(const aindex: integer;
+                                   const acount: integer): integer;
    procedure updatedeletedrows(const index: integer; const acount: integer);
    procedure setcount(const value: integer); override;
    procedure internalshow(var aindex: integer);
@@ -1499,7 +1501,7 @@ type
  cellselectmodety = (csm_select,csm_deselect,csm_reverse);
  selectcellmodety = (scm_cell,scm_row,scm_col);
  
- optionfoldty = (of_insertsamelevel);
+ optionfoldty = (of_insertsamelevel,of_deletetree);
  optionsfoldty = set of optionfoldty;
 
  gridnotifyeventty = procedure(const sender: tcustomgrid) of object;
@@ -11995,6 +11997,9 @@ var
  defocused: boolean;
 begin
  if acount > 0 then begin
+  if (aindex >= 0) and (of_deletetree in foptionsfold) then begin
+   acount:= fdatacols.rowstate.totchildrencount(aindex,acount);
+  end;
   dorowsdeleting(aindex,acount);
   defocused:= false;
   cellbefore:= ffocusedcell;
@@ -15094,6 +15099,37 @@ begin
    end;
   end;
  end;
+end;
+
+function trowstatelist.totchildrencount(const aindex: integer;
+               const acount: integer): integer;
+var
+ lev1,lev2: byte;
+ ind1: integer;
+ int1: integer;
+ po1: prowstatety;
+begin
+ checkindexrange(aindex,acount);
+ normalizering;
+ po1:= getitempo(aindex);
+ lev1:= po1^.fold and foldlevelmask;
+ ind1:= aindex;
+ for int1:= acount - 1 downto 0 do begin
+  lev2:= po1^.fold and foldlevelmask;
+  if lev2 < lev1 then begin
+   lev1:= lev2;
+   ind1:= aindex - int1 + acount-1
+  end;
+  inc(pbyte(po1),fsize);
+ end; 
+ po1:= getitempo(ind1);
+ for int1:= ind1+1 to fcount-1 do begin
+  inc(pbyte(po1),fsize);
+  if po1^.fold and foldlevelmask <= lev2 then begin
+   break;
+  end;
+ end;
+ result:= int1 - aindex;
 end;
 {
 procedure trowstatelist.readstate(const reader; const acount: integer);
