@@ -150,7 +150,7 @@ type
    procedure doitemchange(const index: integer); virtual;
    procedure dochange; virtual;
    procedure internaldeletedata(index: integer; dofree: boolean);
-   procedure checkindexrange(const aindex: integer);
+//   procedure checkindexrange(const aindex: integer);
 
    function getlinkdatatypes(const atag: integer): listdatatypesty; virtual;
    procedure initsource(var asource: listlinkinfoty);
@@ -198,6 +198,7 @@ type
    procedure change(const index: integer); virtual;
                    //index -1 -> undefined
    function datatype: listdatatypety; virtual;
+   procedure checkindexrange(const aindex: integer; const acount: integer = 1);
    procedure checkindex(var index: integer); //bringt absolute zeilennummer in ringpuffer
    procedure beginupdate; virtual;
    procedure endupdate; virtual;
@@ -2935,9 +2936,13 @@ begin
  result:= sort({$ifdef FPC}@{$endif}compare);
 end;
 
-procedure tdatalist.checkindexrange(const aindex: integer);
+procedure tdatalist.checkindexrange(const aindex: integer;
+                                             const acount: integer = 1);
 begin
  if (aindex < 0) or (aindex >= fcount) then begin
+  tlist.error(slistindexerror, aindex);
+ end;
+ if (aindex+acount > fcount) then begin
   tlist.error(slistindexerror, aindex);
  end;
 end;

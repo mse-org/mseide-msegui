@@ -174,6 +174,7 @@ type
       gs_selectionchanged,gs_rowdatachanged,gs_focusedcellchanged,gs_invalidated,
       gs_mouseentered,gs_childmousecaptured,gs_child,
       gs_mousecellredirected,gs_restorerow,gs_cellexiting,gs_rowremoving,
+      gs_appending,
       gs_hasactiverowcolor,
       gs_needszebraoffset, //has zebrastep or autonumcol
       gs_needsrowheight,
@@ -1224,6 +1225,8 @@ type
    function currentrowheight(const index: integer): integer;
    property rowypos[const index: integer]: integer read getrowypos;
    function rowindex(const aypos: integer): integer;
+   procedure fillfoldlevel(const index: integer; const acount: integer;
+                                                            const avalue: byte);
  end;
 
  tdatacols = class(tcols)
@@ -1495,6 +1498,9 @@ type
  cellinnerlevelty = (cil_all,cil_noline,cil_paint,cil_inner);
  cellselectmodety = (csm_select,csm_deselect,csm_reverse);
  selectcellmodety = (scm_cell,scm_row,scm_col);
+ 
+ optionfoldty = (of_insertsamelevel);
+ optionsfoldty = set of optionfoldty;
 
  gridnotifyeventty = procedure(const sender: tcustomgrid) of object;
  griddataeventty = procedure(const sender: tcustomgrid; 
@@ -1573,6 +1579,7 @@ type
 {$ifdef mse_with_ifi}
    fifilink: tifigridlinkcomp;
 //   procedure ifisetvalue(var avalue; var accept: boolean);
+   foptionsfold: optionsfoldty;
    function getifilinkkind: ptypeinfo;
    procedure setifilink(const avalue: tifigridlinkcomp);
 {$endif}
@@ -1923,8 +1930,8 @@ type
    procedure scrollpageright;
    procedure movecol(const curindex,newindex: integer);
    procedure moverow(const curindex,newindex: integer; const count: integer = 1);
-   procedure insertrow(index: integer; count: integer = 1); virtual;
-   procedure deleterow(index: integer; count: integer = 1); virtual;
+   procedure insertrow(aindex: integer; acount: integer = 1); virtual;
+   procedure deleterow(aindex: integer; acount: integer = 1); virtual;
    procedure clear; //sets rowcount to 0
    function appendrow(const checkautoappend: boolean = false): integer; //returns index of new row,
                                 //fast, does not call change events
@@ -1934,6 +1941,8 @@ type
 
    property optionsgrid: optionsgridty read foptionsgrid write setoptionsgrid
                 default defaultoptionsgrid; //first!
+   property optionsfold: optionsfoldty read foptionsfold 
+                                           write foptionsfold default [];
    property sorted: boolean read getsorted write setsorted;
    
    property datarowlinewidth: integer read fdatarowlinewidth
@@ -2058,6 +2067,7 @@ type
    property cols[index: integer]: tdrawcol read getcols write setcols; default;
   published
    property optionsgrid;
+   property optionsfold;
    property datacols: tdrawcols read getdatacols write setdatacols;
    property fixcols;
    property fixrows;
@@ -2171,6 +2181,7 @@ type
  tstringgrid = class(tcustomstringgrid)
   published
    property optionsgrid;
+   property optionsfold;
    property datacols;
    property fixcols;
    property fixrows;
@@ -11918,16 +11929,17 @@ begin
  end;
 end;
 
-procedure tcustomgrid.insertrow(index: integer; count: integer = 1);
+procedure tcustomgrid.insertrow(aindex: integer; acount: integer = 1);
 var
  rowbefore: integer;
+ int1,int2: integer;
 begin
- if count > 0 then begin
-  dorowsinserting(index,count);
+ if acount > 0 then begin
+  dorowsinserting(aindex,acount);
   rowbefore:= ffocusedcell.row;
   beginupdate;
   try
-   if index >= 0 then begin //datarows
+   if aindex >= 0 then begin //datarows
     if not (gs_changelock in fstate) then begin
      include(fstate,gs_changelock);
      fdatacols.beginchangelock;
@@ -11935,61 +11947,74 @@ begin
     if not fdatacols.roworderinvalid then begin
      exit;
     end;
-    fdatacols.insertrow(index,count);
-    ffixcols.insertrow(index,count);
+    fdatacols.insertrow(aindex,acount);
+    ffixcols.insertrow(aindex,acount);
     if (ffocusedcell.row >= 0) then begin
-     if (ffocusedcell.row >= index) then begin
-      inc(ffocusedcell.row,count);
+     if (ffocusedcell.row >= aindex) then begin
+      inc(ffocusedcell.row,acount);
       if (factiverow >= 0) then begin
        factiverow:= ffocusedcell.row;
       end;
      end;
     end;
-//    fdatacols.insertrow(index,count);
-//    ffixcols.insertrow(index,count);
-    inc(frowcount,count);
+    inc(frowcount,acount);
     if frowcount > frowcountmax then begin
      frowcount:= frowcountmax;
     end;
-    dorowcountchanged(frowcount-count,frowcount);
+    if of_insertsamelevel in foptionsfold then begin
+     with fdatacols.frowstate do begin
+      if folded then begin
+       if (gs_appending in fstate) or (aindex+acount >= frowcount) then begin
+        if (aindex > 0) then begin
+         fillfoldlevel(aindex,acount,foldlevel[aindex-1]);
+        end;
+       end
+       else begin
+        fdatacols.frowstate.fillfoldlevel(aindex,acount,
+                                            foldlevel[aindex+acount]);
+       end;
+      end;
+     end;
+    end;
+    dorowcountchanged(frowcount-acount,frowcount);
    end;
   finally
    endupdate;
   end;
-  dorowsinserted(index,count);
+  dorowsinserted(aindex,acount);
   if rowbefore <> ffocusedcell.row then begin
    dofocusedcellposchanged;
   end;
  end;
 end;
 
-procedure tcustomgrid.deleterow(index: integer; count: integer = 1);
+procedure tcustomgrid.deleterow(aindex: integer; acount: integer = 1);
 var
  cellbefore: gridcoordty;
  countbefore: integer;
  defocused: boolean;
 begin
- if count > 0 then begin
-  dorowsdeleting(index,count);
+ if acount > 0 then begin
+  dorowsdeleting(aindex,acount);
   defocused:= false;
   cellbefore:= ffocusedcell;
   beginupdate;
   try
-   if index >= 0 then begin //datarows
+   if aindex >= 0 then begin //datarows
     if not fdatacols.roworderinvalid then begin
      exit;
     end;
     if (factiverow >= 0) then begin
-     if (factiverow >= index + count) then begin
-      dec(factiverow,count);
+     if (factiverow >= aindex + acount) then begin
+      dec(factiverow,acount);
      end
     end;
     if (ffocusedcell.row >= 0) then begin
-     if (ffocusedcell.row >= index + count) then begin
-      dec(ffocusedcell.row,count);
+     if (ffocusedcell.row >= aindex + acount) then begin
+      dec(ffocusedcell.row,acount);
      end
      else begin
-      if ffocusedcell.row >= index then begin
+      if ffocusedcell.row >= aindex then begin
        countbefore:= frowcount;
        focuscell(makegridcoord(ffocusedcell.col,invalidaxis)); //defocus row
        if ffocusedcell.row <> invalidaxis then begin
@@ -11997,30 +12022,30 @@ begin
         exit;
        end;
        defocused:= true;
-       dec(count,countbefore - frowcount); //correct removed empty last row
+       dec(acount,countbefore - frowcount); //correct removed empty last row
       end;
      end;
     end;
-    if count > 0 then begin
+    if acount > 0 then begin
      if not (gs_changelock in fstate) then begin
       include(fstate,gs_changelock);
       fdatacols.beginchangelock;
      end;
-     fdatacols.deleterow(index,count);
-     ffixcols.deleterow(index,count);
-     dec(frowcount,count);
-     dorowcountchanged(frowcount+count,frowcount);
+     fdatacols.deleterow(aindex,acount);
+     ffixcols.deleterow(aindex,acount);
+     dec(frowcount,acount);
+     dorowcountchanged(frowcount+acount,frowcount);
     end;
    end;
   finally
    endupdate;
   end;
-  dorowsdeleted(index,count);
+  dorowsdeleted(aindex,acount);
   if cellbefore.row <> ffocusedcell.row then begin
    dofocusedcellposchanged;
   end;
   if (og_focuscellonenter in foptionsgrid) and defocused then begin
-   cellbefore.row:= index;
+   cellbefore.row:= aindex;
    focuscell(cellbefore,fca_focusin);
              //ev. auto append row
   end;
@@ -13038,7 +13063,7 @@ end;
 
 procedure tcustomgrid.appinsrow(index: integer);
 var
- int1: integer;
+ int1,int2: integer;
 begin
  if index < 0 then begin
   index:= 0;
@@ -13054,13 +13079,25 @@ begin
 end;
 
 procedure tcustomgrid.doinsertrow(const sender: tobject);
+var
+ int1: integer;
 begin
  appinsrow(ffocusedcell.row);
 end;
 
 procedure tcustomgrid.doappendrow(const sender: tobject);
+var
+ bo1: boolean;
 begin
- appinsrow(ffocusedcell.row+1);
+ bo1:= gs_appending in fstate;
+ include(fstate,gs_appending);
+ try
+  appinsrow(ffocusedcell.row+1);
+ finally
+  if not bo1 then begin
+   exclude(fstate,gs_appending);
+  end;
+ end;
 end;
 
 procedure tcustomgrid.dodeleterow(const sender: tobject);
@@ -14251,6 +14288,36 @@ begin
   checkdirty(index);
   change(index);
   fgrid.rowstatechanged(index);
+ end;
+end;
+
+procedure trowstatelist.fillfoldlevel(const index: integer; 
+                             const acount: integer; const avalue: byte);
+var
+ po1: prowstatety;
+ int1: integer;
+ bo1: boolean;
+begin
+ if acount > 0 then begin
+  checkindexrange(index,acount);
+  normalizering;
+  po1:= getitempo(index);
+  checkdirty(index);
+  bo1:= false;
+  for int1:= 0 to acount-1 do begin
+   bo1:= bo1 or replacebits1(byte(po1^.fold),byte(avalue),byte(foldlevelmask));
+   inc(pbyte(po1),fsize);
+  end;
+  if bo1 then begin
+   if acount = 1 then begin
+    change(index);
+    fgrid.rowstatechanged(index);
+   end
+   else begin
+    change(-1);
+    fgrid.rowstatechanged(-1);
+   end;
+  end;
  end;
 end;
 
