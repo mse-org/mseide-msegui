@@ -1578,10 +1578,10 @@ type
    fonsortchanged: gridnotifyeventty;
    fdatarowheightmin: integer;
    fdatarowheightmax: integer;
+   foptionsfold: optionsfoldty;
 {$ifdef mse_with_ifi}
    fifilink: tifigridlinkcomp;
 //   procedure ifisetvalue(var avalue; var accept: boolean);
-   foptionsfold: optionsfoldty;
    function getifilinkkind: ptypeinfo;
    procedure setifilink(const avalue: tifigridlinkcomp);
 {$endif}
@@ -1989,14 +1989,14 @@ type
    property rowfonts: trowfontarrayprop read frowfonts write setrowfonts;
    property rowfontstate[index: integer]: rowstatenumty read getrowfontstate 
                         write setrowfontstate;  //default = -1
-   property rowreadonlystate[const index: integer]: boolean read getrowreadonlystate
+   property rowreadonlystate[index: integer]: boolean read getrowreadonlystate
                         write setrowreadonlystate;
-   property rowhidden[const index: integer]: boolean read getrowhidden 
+   property rowhidden[index: integer]: boolean read getrowhidden
                         write setrowhidden;
-   property rowfoldlevel[const index: integer]: byte read getrowfoldlevel 
+   property rowfoldlevel[index: integer]: byte read getrowfoldlevel
                         write setrowfoldlevel;
    function rowfoldinfo: prowfoldinfoty; //nil if focused row not visible
-   property rowheight[const index: integer]: integer read getrowheight
+   property rowheight[index: integer]: integer read getrowheight
                                                           write setrowheight;
 {$ifdef mse_with_ifi}
    property ifilink: tifigridlinkcomp read fifilink write setifilink;

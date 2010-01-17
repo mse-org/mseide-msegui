@@ -2535,6 +2535,12 @@ begin
  end;
 end;
 }
+
+function tcustomstringedit.getdefaultvalue: pointer;
+begin
+ result:= @fvaluedefault;
+end;
+
 {$ifdef mse_with_ifi}
 function tcustomstringedit.getifilink: tifistringlinkcomp;
 begin
@@ -2544,11 +2550,6 @@ end;
 procedure tcustomstringedit.setifilink(const avalue: tifistringlinkcomp);
 begin
  inherited;
-end;
-
-function tcustomstringedit.getdefaultvalue: pointer;
-begin
- result:= @fvaluedefault;
 end;
 
 {$endif}
