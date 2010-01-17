@@ -1610,19 +1610,19 @@ type
    procedure setrowfontstate(index: integer; const Value: rowstatenumty);
    procedure appinsrow(index: integer);
    procedure setdragcontroller(const avalue: tdragcontroller);
+   function getrowreadonlystate(index: integer): boolean;
+   procedure setrowreadonlystate(index: integer; const avalue: boolean);
+   function getrowhidden(index: integer): boolean;
+   procedure setrowhidden(index: integer; const avalue: boolean);
+   function getrowfoldlevel(index: integer): byte;
+   procedure setrowfoldlevel(index: integer; const avalue: byte);
+   function getrowheight(index: integer): integer;
+   procedure setrowheight(index: integer; avalue: integer);
 
    procedure setzebra_color(const avalue: colorty);
    procedure setzebra_start(const avalue: integer);
    procedure setzebra_height(const avalue: integer);
    procedure setzebra_step(const avalue: integer);
-   function getrowreadonlystate(const index: integer): boolean;
-   procedure setrowreadonlystate(const index: integer; const avalue: boolean);
-   function getrowhidden(const index: integer): boolean;
-   procedure setrowhidden(const index: integer; const avalue: boolean);
-   function getrowfoldlevel(const index: integer): byte;
-   procedure setrowfoldlevel(const index: integer; const avalue: byte);
-   function getrowheight(const index: integer): integer;
-   procedure setrowheight(const index: integer; avalue: integer);
    function getsorted: boolean;
    procedure setsorted(const avalue: boolean);
   protected
@@ -1665,6 +1665,7 @@ type
    flastcellzone: cellzonety;
    class function classskininfo: skininfoty; override;
    
+   function checkrowindex(var aindex: integer): boolean;
    procedure setselected(const cell: gridcoordty;
                                        const avalue: boolean); virtual;
    procedure internalselectionchanged;
@@ -1970,6 +1971,7 @@ type
    property gridframecolor: colorty read fgridframecolor 
                         write setgridframecolor default cl_black;
 
+                      //rowproperties index = -1 -> focused row
    property rowcolors: tcolorarrayprop read frowcolors write setrowcolors;
    property rowcolorstate[index: integer]: rowstatenumty read getrowcolorstate 
                         write setrowcolorstate; //default = -1
@@ -12808,43 +12810,154 @@ begin
  frowfonts.assign(Value);
 end;
 
+function tcustomgrid.checkrowindex(var aindex: integer): boolean;
+begin
+ if aindex < 0 then begin
+  if aindex = -1 then begin
+   aindex:= ffocusedcell.row;
+  end;
+ end;
+ result:= aindex >= 0; 
+end;
+
 function tcustomgrid.getrowcolorstate(index: integer): rowstatenumty;
 begin
- result:= fdatacols.frowstate.color[index];
+ if checkrowindex(index) then begin
+  result:= fdatacols.frowstate.color[index];
+ end
+ else begin
+  result:= -1;
+ end;
 end;
 
 procedure tcustomgrid.setrowcolorstate(index: integer; const Value: rowstatenumty);
 begin
- fdatacols.frowstate.color[index]:= value;
- rowchanged(index);
- rowstatechanged(index);
+ if checkrowindex(index) then begin
+  fdatacols.frowstate.color[index]:= value;
+  rowchanged(index);
+  rowstatechanged(index);
+ end;
 end;
 
 function tcustomgrid.getrowfontstate(index: integer): rowstatenumty;
 begin
- result:= fdatacols.frowstate.font[index];
+ if checkrowindex(index) then begin
+  result:= fdatacols.frowstate.font[index];
+ end
+ else begin
+  result:= -1;
+ end;
 end;
 
 procedure tcustomgrid.setrowfontstate(index: integer; const Value: rowstatenumty);
 begin
- fdatacols.frowstate.font[index]:= value;
- rowchanged(index);
- rowstatechanged(index);
+ if checkrowindex(index) then begin
+  fdatacols.frowstate.font[index]:= value;
+  rowchanged(index);
+  rowstatechanged(index);
+ end;
 end;
 
-function tcustomgrid.getrowreadonlystate(const index: integer): boolean;
+function tcustomgrid.getrowreadonlystate(index: integer): boolean;
 begin
- result:= fdatacols.frowstate.readonly[index];
+ if checkrowindex(index) then begin
+  result:= fdatacols.frowstate.readonly[index];
+ end
+ else begin
+  result:= false;
+ end;
 end;
 
-procedure tcustomgrid.setrowreadonlystate(const index: integer;
+procedure tcustomgrid.setrowreadonlystate(index: integer;
                const avalue: boolean);
 begin
- fdatacols.frowstate.readonly[index]:= avalue;
- if index = row then begin
-  checkrowreadonlystate;
+ if checkrowindex(index) then begin
+  fdatacols.frowstate.readonly[index]:= avalue;
+  if index = row then begin
+   checkrowreadonlystate;
+  end;
+  rowstatechanged(index);
  end;
- rowstatechanged(index);
+end;
+
+
+function tcustomgrid.getrowhidden(index: integer): boolean;
+begin
+ if checkrowindex(index) then begin
+  result:= fdatacols.frowstate.hidden[index];
+ end
+ else begin
+  result:= false;
+ end;
+end;
+
+procedure tcustomgrid.setrowhidden(index: integer; const avalue: boolean);
+begin
+ if checkrowindex(index) then begin
+  fdatacols.frowstate.hidden[index]:= avalue;
+ end;
+end;
+
+function tcustomgrid.getrowfoldlevel(index: integer): byte;
+begin
+ if checkrowindex(index) then begin
+  result:= fdatacols.frowstate.foldlevel[index];
+ end
+ else begin
+  result:= 0;
+ end;
+end;
+
+procedure tcustomgrid.setrowfoldlevel(index: integer; const avalue: byte);
+begin
+ if checkrowindex(index) then begin
+  fdatacols.frowstate.foldlevel[index]:= avalue;
+ end;
+end;
+
+function tcustomgrid.getrowheight(index: integer): integer;
+begin
+ if checkrowindex(index) then begin
+  result:= fdatacols.frowstate.rowheight[index];
+ end
+ else begin
+  result:= 0;
+ end;
+end;
+
+procedure tcustomgrid.setrowheight(index: integer; avalue: integer);
+begin
+ if checkrowindex(index) then begin
+  if (avalue <> 0) and (avalue < fdatarowheightmin) then begin 
+   avalue:= fdatarowheightmin;
+  end
+  else begin
+   if avalue > fdatarowheightmax then begin
+    avalue:= fdatarowheightmax;
+   end;
+  end; 
+  fdatacols.frowstate.rowheight[index]:= avalue;
+ end;
+end;
+
+function tcustomgrid.rowfoldinfo: prowfoldinfoty; 
+         //nil if focused row not visible
+var
+ int1: integer;
+begin                 //todo: optimize
+ result:= nil;
+ if row >= 0 then begin
+  internalupdatelayout;
+  if (fvisiblerowfoldinfo <> nil) and (row >= fvisiblerows[0]) and 
+               (row <= fvisiblerows[high(fvisiblerows)]) then begin
+   for int1:= 0 to high(fvisiblerows) do begin
+    if fvisiblerows[int1] = row then begin
+     result:= @fvisiblerowfoldinfo[int1];
+     break;
+    end;
+   end;
+  end;
+ end;
 end;
 
 procedure tcustomgrid.checkrowreadonlystate;
@@ -13116,66 +13229,6 @@ procedure tcustomgrid.updaterowdata;
 begin
  //dummy
 end;
-
-function tcustomgrid.getrowhidden(const index: integer): boolean;
-begin
- result:= fdatacols.frowstate.hidden[index];
-end;
-
-procedure tcustomgrid.setrowhidden(const index: integer; const avalue: boolean);
-begin
- fdatacols.frowstate.hidden[index]:= avalue;
-end;
-
-function tcustomgrid.getrowfoldlevel(const index: integer): byte;
-begin
- result:= fdatacols.frowstate.foldlevel[index];
-end;
-
-procedure tcustomgrid.setrowfoldlevel(const index: integer;
-               const avalue: byte);
-begin
- fdatacols.frowstate.foldlevel[index]:= avalue;
-end;
-
-function tcustomgrid.rowfoldinfo: prowfoldinfoty; 
-         //nil if focused row not visible
-var
- int1: integer;
-begin                 //todo: optimize
- result:= nil;
- if row >= 0 then begin
-  internalupdatelayout;
-  if (fvisiblerowfoldinfo <> nil) and (row >= fvisiblerows[0]) and 
-               (row <= fvisiblerows[high(fvisiblerows)]) then begin
-   for int1:= 0 to high(fvisiblerows) do begin
-    if fvisiblerows[int1] = row then begin
-     result:= @fvisiblerowfoldinfo[int1];
-     break;
-    end;
-   end;
-  end;
- end;
-end;
-
-function tcustomgrid.getrowheight(const index: integer): integer;
-begin
- result:= fdatacols.frowstate.rowheight[index];
-end;
-
-procedure tcustomgrid.setrowheight(const index: integer; avalue: integer);
-begin
- if (avalue <> 0) and (avalue < fdatarowheightmin) then begin 
-  avalue:= fdatarowheightmin;
- end
- else begin
-  if avalue > fdatarowheightmax then begin
-   avalue:= fdatarowheightmax;
-  end;
- end; 
- fdatacols.frowstate.rowheight[index]:= avalue;
-end;
-
 function tcustomgrid.getsorted: boolean;
 begin
  result:= og_sorted in optionsgrid;
