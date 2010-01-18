@@ -34,7 +34,7 @@ object mainfo: tmainfo
     bounds_x = 0
     bounds_y = 21
     bounds_cx = 429
-    bounds_cy = 116
+    bounds_cy = 132
     anchors = [an_left, an_top, an_right, an_bottom]
     dragdock.optionsdock = [od_acceptsdock, od_splitvert, od_splithorz, od_tabed, od_proportional, od_fixsize, od_background]
     statfile = projectstatfile
@@ -47,13 +47,13 @@ object mainfo: tmainfo
     bounds_x = 0
     bounds_y = 1
     bounds_cx = 429
-    bounds_cy = 19
+    bounds_cy = 18
     anchors = [an_top]
     font.name = 'stf_default'
     font.xscale =  1.0000000000000000E+0000
     font.dummy = 0
     options = [dwo_hintclippedtext]
-    reffontheight = 15
+    reffontheight = 14
   end
   object gdb: tgdbmi
     gdbdownload = False
@@ -61,6 +61,7 @@ object mainfo: tmainfo
     startupbkpt = 0
     startupbkpton = False
     onevent = gdbonevent
+    overloadsleepus = 10000
     left = 232
     top = 32
   end

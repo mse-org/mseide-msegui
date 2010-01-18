@@ -1165,6 +1165,8 @@ type
   protected
    function totchildrencount(const aindex: integer;
                                    const acount: integer): integer;
+   procedure movegrouptoparent(const aindex: integer; const acount: integer); 
+                 //called before deleting of rows
    procedure updatedeletedrows(const index: integer; const acount: integer);
    procedure setcount(const value: integer); override;
    procedure internalshow(var aindex: integer);
@@ -1220,8 +1222,8 @@ type
    property folded: boolean read ffolded write setfolded;
    procedure setupfoldinfo(asource: pbyte; const acount: integer);
    property hidden[const index: integer]: boolean read gethidden write sethidden;
-   property foldlevel[const index: integer]: byte read getfoldlevel write setfoldlevel;
-                                                           //0..127
+   property foldlevel[const index: integer]: byte read getfoldlevel 
+                                                  write setfoldlevel; //0..127
    property rowheight[const index: integer]: integer read getrowheight 
                                                             write setrowheight;
    function currentrowheight(const index: integer): integer;
@@ -1501,7 +1503,7 @@ type
  cellselectmodety = (csm_select,csm_deselect,csm_reverse);
  selectcellmodety = (scm_cell,scm_row,scm_col);
  
- optionfoldty = (of_insertsamelevel,of_deletetree);
+ optionfoldty = (of_insertsamelevel,of_deletetree,of_movedeltoparent);
  optionsfoldty = set of optionfoldty;
 
  gridnotifyeventty = procedure(const sender: tcustomgrid) of object;
@@ -12036,6 +12038,9 @@ begin
       include(fstate,gs_changelock);
       fdatacols.beginchangelock;
      end;
+     if of_movedeltoparent in foptionsfold then begin
+      fdatacols.frowstate.movegrouptoparent(aindex,acount);
+     end;
      fdatacols.deleterow(aindex,acount);
      ffixcols.deleterow(aindex,acount);
      dec(frowcount,acount);
@@ -15131,6 +15136,48 @@ begin
  end;
  result:= int1 - aindex;
 end;
+
+procedure trowstatelist.movegrouptoparent(const aindex: integer;
+                                                const acount: integer);
+var
+ po1,po2: prowstatety;
+ lev1,lev2: integer;
+ int1,int2: integer;
+ by1: byte;
+ bo1: boolean;
+begin
+ if acount > 0 then begin
+  checkindexrange(aindex,acount);
+  normalizering;
+  int1:= aindex+acount-1;
+  po1:= getitempo(int1);
+  bo1:= false;
+  lev1:= 0;
+  for int1:= int1 downto aindex do begin
+   lev2:= po1^.fold and foldlevelmask;
+   po2:= po1;
+   for int2:= int1+1 to fcount -1 do begin
+    inc(pbyte(po2),fsize);
+    by1:= po2^.fold and foldlevelmask;
+    if by1 <= lev2 then begin
+     break;
+    end;    
+    replacebits1(byte(po2^.fold),by1-1,byte(foldlevelmask));
+    bo1:= true;
+   end;
+   if lev2 < lev1 then begin
+    break;
+   end;
+   inc(pbyte(po1),fsize);
+  end;
+  if bo1 then begin
+   checkdirty(aindex);
+   change(-1);
+   fgrid.rowstatechanged(-1);
+  end;
+ end;
+end;
+
 {
 procedure trowstatelist.readstate(const reader; const acount: integer);
 begin

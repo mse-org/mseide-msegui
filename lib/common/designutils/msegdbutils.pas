@@ -286,6 +286,7 @@ type
    fbeforerun: filenamety;
    fstartupbkpt: longword;
    fstartupbkpton: boolean;
+   foverloadsleepus: integer;
    procedure setstoponexception(const avalue: boolean);
    procedure checkactive;
    function checkconnection: gdbresultty;
@@ -296,6 +297,7 @@ type
    procedure setignoreexceptionclasses(const avalue: stringarty);
    function getprocessorname: ansistring;
    procedure setprocessorname(const avalue: ansistring);
+   procedure setoverloadsleepus(const avalue: integer);
   protected
    fpointersize: integer;
    fpointerhexdigits: integer;
@@ -571,6 +573,8 @@ type
    property startupbkpton: boolean read fstartupbkpton write fstartupbkpton;
    property onevent: gdbeventty read fonevent write fonevent;
    property onerror: gdbeventty read fonerror write fonerror;
+   property overloadsleepus: integer read foverloadsleepus 
+                                 write setoverloadsleepus default -1;
  end;
 
 implementation
@@ -736,6 +740,7 @@ begin
  ftargetterminal:= tpseudoterminal.create;
  ftargetterminal.input.oninputavailable:= {$ifdef FPC}@{$endif}targetfrom;
  {$endif}
+ foverloadsleepus:= -1;
  inherited;
 end;
 
@@ -809,7 +814,9 @@ begin
  closegdb;
  fgdbto:= tpipewriter.create;
  fgdbfrom:= tpipereader.create;
+ fgdbfrom.overloadsleepus:= foverloadsleepus;
  fgdberror:= tpipereader.create;
+ fgdberror.overloadsleepus:= foverloadsleepus;
  fgdbfrom.oninputavailable:= {$ifdef FPC}@{$endif}gdbfrom;
  fgdberror.oninputavailable:= {$ifdef FPC}@{$endif}gdberror;
  fconsolesequence:= 0;
@@ -4119,6 +4126,20 @@ begin
    break;
   end;
  end;
+end;
+
+procedure tgdbmi.setoverloadsleepus(const avalue: integer);
+begin
+ foverloadsleepus:= avalue;
+ if fgdbfrom <> nil then begin
+  fgdbfrom.overloadsleepus:= avalue;
+ end;
+ if fgdberror <> nil then begin
+  fgdberror.overloadsleepus:= avalue;
+ end;
+{$ifdef UNIX}
+ ftargetterminal.input.overloadsleepus:= avalue;
+{$endif}
 end;
 
 {$ifdef UNIX}

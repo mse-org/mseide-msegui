@@ -89,11 +89,16 @@ var
  int1: integer;
 begin
  if fbuffer.count > 0 then begin
-  for int1:= 0 to fbuffer.count - 2 do begin
-   terminal.addchars(fbuffer[int1]+lineend);
+  terminal.beginupdate;
+  try
+   for int1:= 0 to fbuffer.count - 2 do begin
+    terminal.addchars(fbuffer[int1]+lineend);
+   end;
+   terminal.addchars(fbuffer[fbuffer.count-1]);
+   fbuffer.clear;
+  finally
+   terminal.endupdate;
   end;
-  terminal.addchars(fbuffer[fbuffer.count-1]);
-  fbuffer.clear;
  end;
 end;
 
