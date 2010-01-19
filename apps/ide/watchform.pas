@@ -142,7 +142,12 @@ begin
        mstr1:= '%'+bintostr(qword(int641),int2);
       end;
       nf_decs: begin
-       mstr1:= inttostr(int641);
+       case fs of
+        ns_8: mstr1:= inttostr(shortint(int641));
+        ns_16: mstr1:= inttostr(smallint(int641));
+        ns_32: mstr1:= inttostr(integer(int641));
+        else mstr1:= inttostr(int641);
+       end;
       end;
       nf_decu: begin
        mstr1:= inttostr(qword(int641));
