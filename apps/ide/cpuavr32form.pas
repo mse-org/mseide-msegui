@@ -62,6 +62,8 @@ type
   private
    fgmbefore: boolean;
   protected
+   procedure updatereadstatvalues; override;
+   procedure updatewritestatvalues; override;
    procedure doirqoff;
    procedure irqrestore;
   public
@@ -254,6 +256,18 @@ end;
 procedure tcpuavr32fo.afterla(const sender: tlayouter);
 begin
  aligny(wam_center,[on,irqoff]);
+end;
+
+procedure tcpuavr32fo.updatereadstatvalues;
+begin
+ irqoff.value:= irqoffvalue;
+ inherited;
+end;
+
+procedure tcpuavr32fo.updatewritestatvalues;
+begin
+ irqoffvalue:= irqoff.value;
+ inherited;
 end;
 
 end.

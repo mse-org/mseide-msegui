@@ -34,7 +34,7 @@ object mainfo: tmainfo
     bounds_x = 0
     bounds_y = 21
     bounds_cx = 429
-    bounds_cy = 132
+    bounds_cy = 148
     anchors = [an_left, an_top, an_right, an_bottom]
     dragdock.optionsdock = [od_acceptsdock, od_splitvert, od_splithorz, od_tabed, od_proportional, od_fixsize, od_background]
     statfile = projectstatfile
@@ -673,6 +673,7 @@ object mainfo: tmainfo
   end
   object projectstatfile: tstatfile
     filename = 'status.sta'
+    onstatbeforeread = statbefread
     left = 16
     top = 56
   end

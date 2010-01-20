@@ -1,13 +1,13 @@
 object cpufo: tcpufo
   optionswidget = [ow_mousefocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_hinton, ow_autoscale]
-  bounds_x = 192
-  bounds_y = 451
-  bounds_cx = 387
-  bounds_cy = 207
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton, go_backgroundbutton]
   frame.dummy = 0
   visible = False
+  bounds_x = 192
+  bounds_y = 451
+  bounds_cx = 387
+  bounds_cy = 207
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
   dragdock.splitter_size = 0
   dragdock.caption = 'CPU'
@@ -51,13 +51,12 @@ object cpufo: tcpufo
     00000000000000BF0000000000000008
   }
   onshow = cpuonshow
+  onstatupdate = updastat
+  onstatafterread = aftread
+  onstatbeforewrite = befwrite
   moduleclassname = 'tdockform'
   object on: tbooleanedit
     Tag = -1
-    bounds_x = 7
-    bounds_y = 9
-    bounds_cx = 59
-    bounds_cy = 16
     frame.caption = 'CPU on'
     frame.dummy = 0
     frame.outerframe = (
@@ -66,6 +65,10 @@ object cpufo: tcpufo
       46
       2
     )
+    bounds_x = 7
+    bounds_y = 9
+    bounds_cx = 59
+    bounds_cy = 16
     onchange = ononchange
     value = True
   end

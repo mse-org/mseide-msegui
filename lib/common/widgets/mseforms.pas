@@ -99,6 +99,8 @@ type
    fonstatread: statreadeventty;
    fonstatafterread: notifyeventty;
    fonstatbeforeread: notifyeventty;
+   fonstatafterwrite: notifyeventty;
+   fonstatbeforewrite: notifyeventty;
    fonstatupdate: statupdateeventty;
    fstatvarname: msestring;
    fonstatwrite: statwriteeventty;
@@ -242,6 +244,10 @@ type
    property onstatbeforeread: notifyeventty read fonstatbeforeread write fonstatbeforeread;
    property onstatafterread: notifyeventty read fonstatafterread write fonstatafterread;
    property onstatwrite: statwriteeventty read fonstatwrite write fonstatwrite;
+   property onstatbeforewrite: notifyeventty read fonstatbeforewrite 
+                                               write fonstatbeforewrite;
+   property onstatafterwrite: notifyeventty read fonstatafterwrite 
+                                               write fonstatafterwrite;
 
    property onwindowactivechanged: activechangeeventty read fonwindowactivechanged write fonwindowactivechanged;
    property onwindowdestroyed: windoweventty read fonwindowdestroyed write fonwindowdestroyed;
@@ -317,6 +323,8 @@ type
    property onstatbeforeread;
    property onstatafterread;
    property onstatwrite;
+   property onstatbeforewrite;
+   property onstatafterwrite;
 
    property onfontheightdelta;
    property onchildscaled;
@@ -441,6 +449,8 @@ type
    property onstatbeforeread;
    property onstatafterread;
    property onstatwrite;
+   property onstatbeforewrite;
+   property onstatafterwrite;
 
    property onfontheightdelta;
    property onchildscaled;
@@ -1239,6 +1249,9 @@ end;
 
 procedure tcustommseform.dostatwrite(const writer: tstatwriter);
 begin
+ if assigned(fonstatbeforewrite) then begin
+  fonstatbeforewrite(self);
+ end;
  if assigned(fonstatupdate) then begin
   fonstatupdate(self,writer);
  end;
@@ -1254,6 +1267,9 @@ begin
     writeboolean('visible',visible);
    end;
   end;
+ end;
+ if assigned(fonstatafterwrite) then begin
+  fonstatafterwrite(self);
  end;
 end;
 

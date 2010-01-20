@@ -141,6 +141,7 @@ type
    procedure viewmemoryonexecute(const sender: TObject);
    procedure runprocdied(const sender: TObject; const prochandle: prochandlety;
                    const execresult: Integer; const data: Pointer);
+   procedure statbefread(const sender: TObject);
   private
    fstartcommand: startcommandty;
    fnoremakecheck: boolean;
@@ -2699,6 +2700,11 @@ begin
    execmse(str1,not((index > high(toolhide)) or toolhide[index]),true);
   end;
  end;
+end;
+
+procedure tmainfo.statbefread(const sender: TObject);
+begin
+ createcpufo;
 end;
 
 end.

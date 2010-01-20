@@ -22,7 +22,7 @@ interface
 
 uses
  classes,msegui,mseclasses,mseforms,msegdbutils,msetypes,msedataedits,
- msegraphics,msegraphedits,mseevent,msemenus;
+ msegraphics,msegraphedits,mseevent,msemenus,msestat;
 
 type
 
@@ -30,18 +30,25 @@ type
    on: tbooleanedit;
    procedure cpuonshow(const sender: TObject);
    procedure ononchange(const sender: TObject);
+   procedure updastat(const sender: TObject; const filer: tstatfiler); virtual;
+   procedure aftread(const sender: TObject);
+   procedure befwrite(const sender: TObject);
   protected
    fflagswidget: tintegeredit;
    fflagswidget64: tint64edit;
    fregisternames: stringarty;
    fedits: array of tdataedit;
+   irqoffvalue: boolean;
    procedure doregsetvalue(const sender: TObject; var avalue: Integer; var accept: Boolean);
    procedure doregset64value(const sender: TObject; var avalue: Int64; var accept: Boolean);
    procedure doflagsetvalue(const sender: TObject;
                    var avalue: Boolean; var accept: Boolean);
    procedure doflagonchange(const sender: TObject);
    function internalrefresh: boolean; virtual;
+   procedure updatereadstatvalues; virtual;
+   procedure updatewritestatvalues; virtual;
   public
+   constructor create(aowner: tcomponent); override;
    procedure refresh; virtual;
    procedure beforecontinue; virtual;
   end;
@@ -286,6 +293,36 @@ end;
 procedure tcpufo.beforecontinue;
 begin
  //dummy
+end;
+
+procedure tcpufo.updastat(const sender: TObject; const filer: tstatfiler);
+begin
+ filer.updatevalue('irqoff',irqoffvalue);
+end;
+
+procedure tcpufo.updatereadstatvalues;
+begin
+ //dummy
+end;
+
+procedure tcpufo.updatewritestatvalues;
+begin
+ //dummy
+end;
+
+procedure tcpufo.aftread(const sender: TObject);
+begin
+ updatereadstatvalues;
+end;
+
+procedure tcpufo.befwrite(const sender: TObject);
+begin
+ updatewritestatvalues;
+end;
+
+constructor tcpufo.create(aowner: tcomponent);
+begin
+ inherited;
 end;
 
 end.
