@@ -404,6 +404,7 @@ type
                    reintroduce; virtual;
    procedure add(const item: tindexpersistent);
    procedure dostatwrite(const writer: tstatwriter);
+   procedure writeorder(const writer: tstatwriter);
    function readorder(const reader: tstatreader): integerarty;
    procedure dostatread(const reader: tstatreader);
    function newident: integer;
@@ -1882,7 +1883,7 @@ begin
  inherited;
 end;
 
-procedure tindexpersistentarrayprop.dostatwrite(const writer: tstatwriter);
+procedure tindexpersistentarrayprop.writeorder(const writer: tstatwriter);
 var
  int1,int2,int3: integer;
  ar1: integerarty;
@@ -1899,15 +1900,15 @@ begin
    end;
    ar1[int1]:= int3;
    int2:= int3;
-   tindexpersistent(fitems[int1]).dostatwrite(writer);
   end;
   if bo1 then begin
    writer.writearray('order',ar1);
   end;
  end;
 end;
-
-function tindexpersistentarrayprop.readorder(const reader: tstatreader): integerarty;
+ 
+function tindexpersistentarrayprop.readorder(
+                                      const reader: tstatreader): integerarty;
 var
  ar1,ar2: integerarty;
  int1: integer;
@@ -1948,6 +1949,16 @@ begin
  finally
   endupdate;
  end;
+end;
+
+procedure tindexpersistentarrayprop.dostatwrite(const writer: tstatwriter);
+var
+ int1: integer;
+begin
+ for int1:= 0 to count -1 do begin
+  tindexpersistent(fitems[int1]).dostatwrite(writer);
+ end;
+ writeorder(writer);
 end;
 
 procedure tindexpersistentarrayprop.add(const item: tindexpersistent);

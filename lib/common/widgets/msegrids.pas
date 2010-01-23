@@ -5551,7 +5551,10 @@ begin
  end;
  if co_savestate in foptions then begin
   mstr1:= inttostr(ident);
-  width:= reader.readinteger('width'+mstr1,fwidth,0);
+  if not (co_fixwidth in foptions) and 
+                   (og_colsizing in fgrid.optionsgrid) then begin
+   width:= reader.readinteger('width'+mstr1,fwidth,0);
+  end;
   bo1:= reader.readboolean('sortdescent'+mstr1,co_sortdescent in foptions);
   if bo1 then begin
    options:= options + [co_sortdescent];
@@ -5573,7 +5576,10 @@ begin
  end;
  if co_savestate in foptions then begin
   mstr1:= inttostr(ident);
-  writer.writeinteger('width'+mstr1,fwidth);
+  if not (co_fixwidth in foptions) and 
+                   (og_colsizing in fgrid.optionsgrid) then begin
+   writer.writeinteger('width'+mstr1,fwidth);
+  end;
   writer.writeboolean('sortdescent'+mstr1,co_sortdescent in foptions);
  end;
 end;
@@ -7195,10 +7201,12 @@ begin
  try
   if og_savestate in fgrid.foptionsgrid then begin
    sortcol:= reader.readinteger('sortcol',sortcol,-1,count-1);
-   ar1:= readorder(reader);
-   if ar1 <> nil then begin
-    fgrid.fixrows.orderdatacols(ar1);
-    fgrid.layoutchanged;
+   if og_colmoving in fgrid.optionsgrid then begin
+    ar1:= readorder(reader);
+    if ar1 <> nil then begin
+     fgrid.fixrows.orderdatacols(ar1);
+     fgrid.layoutchanged;
+    end;
    end;
   end;
   for int1:= 0 to count - 1 do begin
