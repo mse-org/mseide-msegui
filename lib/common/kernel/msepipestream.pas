@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -198,6 +198,7 @@ begin
  result:= dowrite(buffer,count);
 end;
 {$endif}
+
 { tpipereader }
 
 constructor tpipereader.create;
@@ -559,7 +560,8 @@ begin
  bufoffset:= nil;
 end;
 
-function tpipereader.waitforresponse(timeoutusec: integer = 0; resetflag: boolean = true): boolean;
+function tpipereader.waitforresponse(timeoutusec: integer = 0;
+                            resetflag: boolean = true): boolean;
              //false if timeout or error
 begin
  sys_condlock(finputcond);

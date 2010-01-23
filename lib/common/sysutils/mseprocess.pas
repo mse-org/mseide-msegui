@@ -18,6 +18,7 @@ type
  processstatesty = set of processstatety;
  processoptionty = (pro_output,pro_erroroutput,pro_input,
                     pro_tty, //linux only
+                    pro_nowaitforpipeeof,pro_nopipeterminate,
                     pro_inactive,pro_nostdhandle //windows only
                     );
  processoptionsty = set of processoptionty;
@@ -54,6 +55,7 @@ type
    procedure unlisten;
    procedure finalizeexec;
    procedure receiveevent(const event: tobjectevent); override;
+   procedure waitforpipeeof;
    procedure doprocfinished;
 
    //istatfile
@@ -241,24 +243,42 @@ begin
  application.unlock;
 end;
 
-procedure tmseprocess.receiveevent(const event: tobjectevent);
+procedure tmseprocess.waitforpipeeof;
 var
  int1,int2,int3: integer;
+begin
+ if not (pro_nowaitforpipeeof in foptions) then begin
+  int1:= application.unlockall;
+  int2:= foutput.pipereader.overloadsleepus;
+  int3:= ferroroutput.pipereader.overloadsleepus;
+  foutput.pipereader.overloadsleepus:= 0;
+  ferroroutput.pipereader.overloadsleepus:= 0;
+  while not (foutput.pipereader.eof and ferroroutput.pipereader.eof) do begin
+   sleep(100); //wait for last chars
+  end;
+  application.relockall(int1);
+  foutput.pipereader.overloadsleepus:= int2;
+  ferroroutput.pipereader.overloadsleepus:= int3;
+ end;
+end;
+
+procedure tmseprocess.doprocfinished;
+begin
+ if canevent(tmethod(fonprocfinished)) then begin
+  fonprocfinished(self);
+ end;
+ if not (pro_nopipeterminate in foptions) then begin
+  foutput.pipereader.terminate;
+  ferroroutput.pipereader.terminate;
+ end;
+end;
+
+procedure tmseprocess.receiveevent(const event: tobjectevent);
 begin
  if (event.kind = ek_childproc) and (prs_listening in fstate) then begin 
   with tchildprocevent(event) do begin
    if data = pointer(flistenid) then begin
-    int1:= application.unlockall;
-    int2:= foutput.pipereader.overloadsleepus;
-    int3:= ferroroutput.pipereader.overloadsleepus;
-    foutput.pipereader.overloadsleepus:= 0;
-    ferroroutput.pipereader.overloadsleepus:= 0;
-    while not (foutput.pipereader.eof and ferroroutput.pipereader.eof) do begin
-     sleep(100); //wait for last chars
-    end;
-    application.relockall(int1);
-    foutput.pipereader.overloadsleepus:= int2;
-    ferroroutput.pipereader.overloadsleepus:= int3;
+    waitforpipeeof;
     fexitcode:= execresult;
     fprochandle:= invalidprochandle;
     exclude(fstate,prs_listening);
@@ -268,13 +288,6 @@ begin
  end
  else begin
   inherited;
- end;
-end;
-
-procedure tmseprocess.doprocfinished;
-begin
- if canevent(tmethod(fonprocfinished)) then begin
-  fonprocfinished(self);
  end;
 end;
 
@@ -303,22 +316,13 @@ begin
 end;
 
 function tmseprocess.waitforprocess: integer;
-var
- int1: integer;
 begin
  unlisten;
  if running then begin
-  int1:= application.unlockall;
-  try
-   result:= mseprocutils.waitforprocess(fprochandle);
-   fexitcode:= result;
-   fprochandle:= invalidprochandle;
-   while not (foutput.pipereader.eof and ferroroutput.pipereader.eof) do begin
-    sleep(100); //wait for last chars
-   end;
-  finally
-   application.relockall(int1);
-  end;
+  result:= mseprocutils.waitforprocess(fprochandle);
+  fexitcode:= result;
+  fprochandle:= invalidprochandle;
+  waitforpipeeof;
   doprocfinished;
  end;
 end;
