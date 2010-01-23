@@ -132,6 +132,28 @@ end;
    property onpipebroken: pipereadereventty read getonpipebroken write setonpipebroken;
  end;
 
+ tpipereaderpers = class(tpersistent)
+  private
+   fpipereader: tpipereader;
+   function getoninputavailable: pipereadereventty;
+   function getonpipebroken: pipereadereventty;
+   procedure setoninputavailable(const Value: pipereadereventty);
+   procedure setonpipebroken(const Value: pipereadereventty);
+   function getoverloadsleepus: integer;
+   procedure setoverloadsleepus(const avalue: integer);
+  public
+   constructor create;
+   destructor destroy; override;
+   property pipereader: tpipereader read fpipereader;
+  published
+   property overloadsleepus: integer read getoverloadsleepus 
+                  write setoverloadsleepus default -1;
+            //checks application.checkoverload before calling oninputavaliable
+            //if >= 0
+   property oninputavailable: pipereadereventty read getoninputavailable write setoninputavailable;
+   property onpipebroken: pipereadereventty read getonpipebroken write setonpipebroken;
+ end;
+
 implementation
 uses
   {$ifdef UNIX}mselibc, {$else}windows, {$endif}
@@ -609,6 +631,51 @@ begin
 end;
 
 procedure tpipereadercomp.setoverloadsleepus(const avalue: integer);
+begin
+ fpipereader.overloadsleepus:= avalue;
+end;
+
+{ tpipereaderpers }
+
+constructor tpipereaderpers.create;
+begin
+ fpipereader:= tpipereader.create;
+ inherited;
+end;
+
+destructor tpipereaderpers.destroy;
+begin
+ fpipereader.free;
+ inherited;
+end;
+
+function tpipereaderpers.getoninputavailable: pipereadereventty;
+begin
+ result:= fpipereader.foninputavailable;
+end;
+
+function tpipereaderpers.getonpipebroken: pipereadereventty;
+begin
+ result:= fpipereader.fonpipebroken;
+end;
+
+procedure tpipereaderpers.setoninputavailable(
+  const Value: pipereadereventty);
+begin
+ fpipereader.foninputavailable:= value;
+end;
+
+procedure tpipereaderpers.setonpipebroken(const Value: pipereadereventty);
+begin
+ fpipereader.fonpipebroken:= value;
+end;
+
+function tpipereaderpers.getoverloadsleepus: integer;
+begin
+ result:= fpipereader.overloadsleepus;
+end;
+
+procedure tpipereaderpers.setoverloadsleepus(const avalue: integer);
 begin
  fpipereader.overloadsleepus:= avalue;
 end;

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2009 by Martin Schreiber
+{ MSEgui Copyright (c) 2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -25,8 +25,8 @@ type
  tmseprocess = class(tmsecomponent,istatfile)
   private
    finput: tpipewriter;
-   foutput: tpipereadercomp;
-   ferroroutput: tpipereadercomp;
+   foutput: tpipereaderpers;
+   ferroroutput: tpipereaderpers;
    ffilename: filenamety;
    fparameter: msestring;
    fstatfile: tstatfile;
@@ -39,8 +39,8 @@ type
    fexitcode: integer;
    fcommandline: string;
    fcommandline1: string;
-   procedure setoutput(const avalue: tpipereadercomp);
-   procedure seterroroutput(const avalue: tpipereadercomp);
+   procedure setoutput(const avalue: tpipereaderpers);
+   procedure seterroroutput(const avalue: tpipereaderpers);
    function getactive: boolean;
    procedure setactive(const avalue: boolean);
    procedure setstatfile(const avalue: tstatfile);
@@ -77,12 +77,12 @@ type
    destructor destroy; override;
    property filename: filenamety read ffilename write ffilename;
    property parameter: msestring read fparameter write fparameter;
-   property active: boolean read getactive write setactive;
+   property active: boolean read getactive write setactive default false;
    property options: processoptionsty read foptions write foptions default [];
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
-   property output: tpipereadercomp read foutput write setoutput;
-   property erroroutput: tpipereadercomp read ferroroutput write seterroroutput;
+   property output: tpipereaderpers read foutput write setoutput;
+   property erroroutput: tpipereaderpers read ferroroutput write seterroroutput;
    property onprocfinished: notifyeventty read fonprocfinished write fonprocfinished;
  end;
  
@@ -96,10 +96,8 @@ constructor tmseprocess.create(aowner: tcomponent);
 begin
  fprochandle:= invalidprochandle;
  finput:= tpipewriter.create;
- foutput:= tpipereadercomp.create(nil);
- foutput.setsubcomponent(true);
- ferroroutput:= tpipereadercomp.create(nil);
- ferroroutput.setsubcomponent(true);
+ foutput:= tpipereaderpers.create;
+ ferroroutput:= tpipereaderpers.create;
  inherited;
 end;
 
@@ -112,12 +110,12 @@ begin
  ferroroutput.free;
 end;
 
-procedure tmseprocess.setoutput(const avalue: tpipereadercomp);
+procedure tmseprocess.setoutput(const avalue: tpipereaderpers);
 begin
  foutput.assign(avalue);
 end;
 
-procedure tmseprocess.seterroroutput(const avalue: tpipereadercomp);
+procedure tmseprocess.seterroroutput(const avalue: tpipereaderpers);
 begin
  ferroroutput.assign(avalue);
 end;
