@@ -1243,7 +1243,7 @@ begin
  editor1:= fintf.geteditor;
  editor1.dokeydown(info);
  with info do begin
-  if not (es_processed in eventstate) and (shiftstate = []) then begin
+  if not (es_processed in eventstate) and (shiftstate*shiftstatesmask = []) then begin
    case key of
     key_right: begin
      with fdropdownlist do begin
