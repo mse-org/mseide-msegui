@@ -1452,7 +1452,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.dummy = 0
               taborder = 3
               bounds_x = 0
-              bounds_y = 224
+              bounds_y = 225
               bounds_cx = 667
               bounds_cy = 37
               anchors = [an_top]

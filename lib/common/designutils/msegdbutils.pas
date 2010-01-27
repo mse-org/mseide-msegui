@@ -105,6 +105,7 @@ const
 type
  stopinfoty = record
   reason: stopreasonty;
+  time: tdatetime;
   bkptno: integer;
   threadid: integer;
   exitcode: integer;
@@ -287,6 +288,7 @@ type
    fstartupbkpt: longword;
    fstartupbkpton: boolean;
    foverloadsleepus: integer;
+   fstoptime: tdatetime;
    procedure setstoponexception(const avalue: boolean);
    procedure checkactive;
    function checkconnection: gdbresultty;
@@ -552,6 +554,7 @@ type
                      setignoreexceptionclasses;
    property pointersize: integer read fpointersize;
    property pointerhexdigits: integer read fpointerhexdigits;
+   property stoptime: tdatetime read fstoptime;
 
    property progparameters: string read fprogparameters write fprogparameters;
    property workingdirectory: filenamety read fworkingdirectory write fworkingdirectory;
@@ -736,6 +739,7 @@ begin
  fgdb:= invalidprochandle;
  fguiintf:= true;
  fsourcefiles:= thashedmsestrings.create;
+ fstoptime:= emptydatetime;
  {$ifdef UNIX}
  ftargetterminal:= tpseudoterminal.create;
  ftargetterminal.input.oninputavailable:= {$ifdef FPC}@{$endif}targetfrom;
@@ -1093,6 +1097,7 @@ begin
  if event is tgdbevent then begin
   finalize(stopinfo);
   fillchar(stopinfo,sizeof(stopinfo),0);
+  stopinfo.time:= now;
   with tgdbevent(event) do begin
    case eventkind of
     gek_startup: begin
@@ -1101,6 +1106,7 @@ begin
     end;
     gek_stopped: begin
      exclude(fstate,gs_running);
+     fstoptime:= stopinfo.time;
      {$ifdef mswindows}
      if finterruptthreadid <> 0 then begin
       if getthreadidlist(threadids) = gdb_ok then begin
@@ -1189,6 +1195,7 @@ begin
      end;
     end;
     gek_running: begin
+     fstoptime:= emptydatetime;
      include(fstate,gs_running);
     end;
     gek_error,gek_writeerror: begin

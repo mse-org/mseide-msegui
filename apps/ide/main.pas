@@ -848,6 +848,7 @@ procedure tmainfo.gdbonevent(const sender: tgdbmi;
              var eventkind: gdbeventkindty; const values: resultinfoarty;
                    const stopinfo: stopinfoty);
 begin
+ cpufo.stoptime.value:= gdb.stoptime;
  case eventkind of
   gek_stopped: begin
    with stopinfo do begin
@@ -876,7 +877,7 @@ begin
   end;
   gek_running: begin
    resetdebugdisp;
-   setstattext('*** Running ***',mtk_running);
+   setstattext('*** Running ***',mtk_running);   
   end;
   gek_error,gek_writeerror: begin
    setstattext('GDB: '+stopinfo.messagetext,mtk_error);

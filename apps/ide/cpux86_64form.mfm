@@ -3,10 +3,8 @@ inherited cpuc86_64fo: tcpux86_64fo
   bounds_x = 243
   bounds_y = 170
   bounds_cx = 356
-  bounds_cy = 253
+  bounds_cy = 274
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_mousewheel, ow_destroywidgets]
-  container.bounds_cx = 346
-  container.bounds_cy = 253
   container.onchildscaled = cpufoonchildscaled
   onchildscaled = cpufoonchildscaled
   moduleclassname = 'tcpufo'
@@ -14,10 +12,6 @@ inherited cpuc86_64fo: tcpux86_64fo
   end
   object v: tbooleanedit[1]
     Tag = 17
-    bounds_x = 151
-    bounds_y = 0
-    bounds_cx = 11
-    bounds_cy = 29
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -27,19 +21,19 @@ inherited cpuc86_64fo: tcpux86_64fo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
-    taborder = 19
+    taborder = 20
+    bounds_x = 151
+    bounds_y = 1
+    bounds_cx = 11
+    bounds_cy = 28
     onsetvalue = flagsetvalue
   end
   object r: tbooleanedit[2]
     Tag = 16
-    bounds_x = 167
-    bounds_y = 0
-    bounds_cx = 11
-    bounds_cy = 29
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -49,19 +43,19 @@ inherited cpuc86_64fo: tcpux86_64fo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
-    taborder = 20
+    taborder = 21
+    bounds_x = 167
+    bounds_y = 1
+    bounds_cx = 11
+    bounds_cy = 28
     onsetvalue = flagsetvalue
   end
   object rax: tint64edit[3]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 0
-    bounds_y = 32
-    bounds_cx = 163
-    bounds_cy = 21
     frame.levelo = -1
     frame.colorclient = -1879048185
     frame.caption = 'rax'
@@ -71,10 +65,14 @@ inherited cpuc86_64fo: tcpux86_64fo
     frame.outerframe = (
       0
       0
-      22
+      19
       0
     )
     taborder = 1
+    bounds_x = 0
+    bounds_y = 32
+    bounds_cx = 160
+    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale =  1.0000000000000000E+0000
@@ -86,10 +84,6 @@ inherited cpuc86_64fo: tcpux86_64fo
   end
   object rbx: tint64edit[4]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 0
-    bounds_y = 53
-    bounds_cx = 163
-    bounds_cy = 21
     frame.levelo = -1
     frame.colorclient = -1879048185
     frame.caption = 'rbx'
@@ -99,10 +93,14 @@ inherited cpuc86_64fo: tcpux86_64fo
     frame.outerframe = (
       0
       0
-      22
+      19
       0
     )
-    taborder = 2
+    taborder = 3
+    bounds_x = 0
+    bounds_y = 53
+    bounds_cx = 160
+    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale =  1.0000000000000000E+0000
@@ -114,10 +112,6 @@ inherited cpuc86_64fo: tcpux86_64fo
   end
   object rcx: tint64edit[5]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 0
-    bounds_y = 74
-    bounds_cx = 162
-    bounds_cy = 21
     frame.levelo = -1
     frame.colorclient = -1879048185
     frame.caption = 'rcx'
@@ -127,10 +121,14 @@ inherited cpuc86_64fo: tcpux86_64fo
     frame.outerframe = (
       0
       0
-      21
+      18
       0
     )
-    taborder = 3
+    taborder = 4
+    bounds_x = 0
+    bounds_y = 74
+    bounds_cx = 159
+    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale =  1.0000000000000000E+0000
@@ -142,10 +140,6 @@ inherited cpuc86_64fo: tcpux86_64fo
   end
   object rdx: tint64edit[6]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 0
-    bounds_y = 95
-    bounds_cx = 163
-    bounds_cy = 21
     frame.levelo = -1
     frame.colorclient = -1879048185
     frame.caption = 'rdx'
@@ -155,10 +149,14 @@ inherited cpuc86_64fo: tcpux86_64fo
     frame.outerframe = (
       0
       0
-      22
+      19
       0
     )
-    taborder = 4
+    taborder = 5
+    bounds_x = 0
+    bounds_y = 95
+    bounds_cx = 160
+    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale =  1.0000000000000000E+0000
@@ -170,10 +168,6 @@ inherited cpuc86_64fo: tcpux86_64fo
   end
   object rsi: tint64edit[7]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 0
-    bounds_y = 137
-    bounds_cx = 159
-    bounds_cy = 21
     frame.levelo = -1
     frame.colorclient = -1879048185
     frame.caption = 'rsi'
@@ -183,10 +177,14 @@ inherited cpuc86_64fo: tcpux86_64fo
     frame.outerframe = (
       0
       0
-      18
+      17
       0
     )
-    taborder = 6
+    taborder = 7
+    bounds_x = 0
+    bounds_y = 137
+    bounds_cx = 158
+    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale =  1.0000000000000000E+0000
@@ -198,10 +196,6 @@ inherited cpuc86_64fo: tcpux86_64fo
   end
   object rdi: tint64edit[8]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 0
-    bounds_y = 158
-    bounds_cx = 160
-    bounds_cy = 21
     frame.levelo = -1
     frame.colorclient = -1879048185
     frame.caption = 'rdi'
@@ -211,10 +205,14 @@ inherited cpuc86_64fo: tcpux86_64fo
     frame.outerframe = (
       0
       0
-      19
+      17
       0
     )
-    taborder = 7
+    taborder = 8
+    bounds_x = 0
+    bounds_y = 158
+    bounds_cx = 158
+    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale =  1.0000000000000000E+0000
@@ -226,10 +224,6 @@ inherited cpuc86_64fo: tcpux86_64fo
   end
   object rbp: tint64edit[9]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 0
-    bounds_y = 116
-    bounds_cx = 165
-    bounds_cy = 21
     frame.levelo = -1
     frame.colorclient = -1879048185
     frame.caption = 'rbp'
@@ -239,10 +233,14 @@ inherited cpuc86_64fo: tcpux86_64fo
     frame.outerframe = (
       0
       0
-      24
+      21
       0
     )
-    taborder = 5
+    taborder = 6
+    bounds_x = 0
+    bounds_y = 116
+    bounds_cx = 162
+    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale =  1.0000000000000000E+0000
@@ -254,10 +252,6 @@ inherited cpuc86_64fo: tcpux86_64fo
   end
   object rsp: tint64edit[10]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 176
-    bounds_y = 53
-    bounds_cx = 163
-    bounds_cy = 21
     frame.levelo = -1
     frame.colorclient = -1879048185
     frame.caption = 'rsp'
@@ -267,10 +261,14 @@ inherited cpuc86_64fo: tcpux86_64fo
     frame.outerframe = (
       0
       0
-      23
+      21
       0
     )
-    taborder = 9
+    taborder = 10
+    bounds_x = 176
+    bounds_y = 53
+    bounds_cx = 161
+    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale =  1.0000000000000000E+0000
@@ -282,10 +280,6 @@ inherited cpuc86_64fo: tcpux86_64fo
   end
   object rip: tint64edit[11]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 176
-    bounds_y = 74
-    bounds_cx = 159
-    bounds_cy = 21
     frame.levelo = -1
     frame.colorclient = -1879048185
     frame.caption = 'rip'
@@ -295,10 +289,14 @@ inherited cpuc86_64fo: tcpux86_64fo
     frame.outerframe = (
       0
       0
-      19
+      17
       0
     )
-    taborder = 10
+    taborder = 11
+    bounds_x = 176
+    bounds_y = 74
+    bounds_cx = 157
+    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale =  1.0000000000000000E+0000
@@ -310,10 +308,6 @@ inherited cpuc86_64fo: tcpux86_64fo
   end
   object eflags: tint64edit[12]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 176
-    bounds_y = 32
-    bounds_cx = 155
-    bounds_cy = 21
     frame.levelo = -1
     frame.colorclient = -1879048185
     frame.caption = 'rfl'
@@ -323,10 +317,14 @@ inherited cpuc86_64fo: tcpux86_64fo
     frame.outerframe = (
       0
       0
-      15
+      13
       0
     )
-    taborder = 8
+    taborder = 9
+    bounds_x = 176
+    bounds_y = 32
+    bounds_cx = 153
+    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale =  1.0000000000000000E+0000
@@ -339,10 +337,6 @@ inherited cpuc86_64fo: tcpux86_64fo
   end
   object o: tbooleanedit[13]
     Tag = 11
-    bounds_x = 217
-    bounds_y = 0
-    bounds_cx = 11
-    bounds_cy = 29
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -352,19 +346,19 @@ inherited cpuc86_64fo: tcpux86_64fo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
-    taborder = 23
+    taborder = 24
+    bounds_x = 217
+    bounds_y = 1
+    bounds_cx = 11
+    bounds_cy = 28
     onsetvalue = flagsetvalue
   end
   object d: tbooleanedit[14]
     Tag = 10
-    bounds_x = 228
-    bounds_y = 0
-    bounds_cx = 11
-    bounds_cy = 29
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -374,19 +368,19 @@ inherited cpuc86_64fo: tcpux86_64fo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
-    taborder = 24
+    taborder = 25
+    bounds_x = 228
+    bounds_y = 1
+    bounds_cx = 11
+    bounds_cy = 28
     onsetvalue = flagsetvalue
   end
   object i: tbooleanedit[15]
     Tag = 9
-    bounds_x = 239
-    bounds_y = 0
-    bounds_cx = 11
-    bounds_cy = 29
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -396,19 +390,19 @@ inherited cpuc86_64fo: tcpux86_64fo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
-    taborder = 25
+    taborder = 26
+    bounds_x = 239
+    bounds_y = 1
+    bounds_cx = 11
+    bounds_cy = 28
     onsetvalue = flagsetvalue
   end
   object t: tbooleanedit[16]
     Tag = 8
-    bounds_x = 250
-    bounds_y = 0
-    bounds_cx = 11
-    bounds_cy = 29
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -418,19 +412,19 @@ inherited cpuc86_64fo: tcpux86_64fo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
-    taborder = 26
+    taborder = 27
+    bounds_x = 250
+    bounds_y = 1
+    bounds_cx = 11
+    bounds_cy = 28
     onsetvalue = flagsetvalue
   end
   object s: tbooleanedit[17]
     Tag = 7
-    bounds_x = 261
-    bounds_y = 0
-    bounds_cx = 11
-    bounds_cy = 29
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -440,19 +434,19 @@ inherited cpuc86_64fo: tcpux86_64fo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
-    taborder = 27
+    taborder = 28
+    bounds_x = 261
+    bounds_y = 1
+    bounds_cx = 11
+    bounds_cy = 28
     onsetvalue = flagsetvalue
   end
   object z: tbooleanedit[18]
     Tag = 6
-    bounds_x = 272
-    bounds_y = 0
-    bounds_cx = 11
-    bounds_cy = 29
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -462,19 +456,19 @@ inherited cpuc86_64fo: tcpux86_64fo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
-    taborder = 28
+    taborder = 29
+    bounds_x = 272
+    bounds_y = 1
+    bounds_cx = 11
+    bounds_cy = 28
     onsetvalue = flagsetvalue
   end
   object a: tbooleanedit[19]
     Tag = 4
-    bounds_x = 283
-    bounds_y = 0
-    bounds_cx = 11
-    bounds_cy = 29
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -484,19 +478,19 @@ inherited cpuc86_64fo: tcpux86_64fo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
-    taborder = 29
+    taborder = 30
+    bounds_x = 283
+    bounds_y = 1
+    bounds_cx = 11
+    bounds_cy = 28
     onsetvalue = flagsetvalue
   end
   object p: tbooleanedit[20]
     Tag = 2
-    bounds_x = 294
-    bounds_y = 0
-    bounds_cx = 11
-    bounds_cy = 29
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -506,18 +500,18 @@ inherited cpuc86_64fo: tcpux86_64fo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
-    taborder = 30
+    taborder = 31
+    bounds_x = 294
+    bounds_y = 1
+    bounds_cx = 11
+    bounds_cy = 28
     onsetvalue = flagsetvalue
   end
   object c: tbooleanedit[21]
-    bounds_x = 305
-    bounds_y = 0
-    bounds_cx = 11
-    bounds_cy = 29
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -527,19 +521,19 @@ inherited cpuc86_64fo: tcpux86_64fo
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
       0
     )
-    taborder = 31
+    taborder = 32
+    bounds_x = 305
+    bounds_y = 1
+    bounds_cx = 11
+    bounds_cy = 28
     onsetvalue = flagsetvalue
   end
   object nt: tbooleanedit[22]
     Tag = 15
-    bounds_x = 181
-    bounds_y = 0
-    bounds_cx = 18
-    bounds_cy = 29
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -549,19 +543,19 @@ inherited cpuc86_64fo: tcpux86_64fo
     frame.dummy = 0
     frame.outerframe = (
       3
-      18
+      17
       4
       0
     )
-    taborder = 21
+    taborder = 22
+    bounds_x = 181
+    bounds_y = 1
+    bounds_cx = 18
+    bounds_cy = 28
     onsetvalue = flagsetvalue
   end
   object io: tbooleanedit[23]
     Tag = 12
-    bounds_x = 201
-    bounds_y = 0
-    bounds_cx = 14
-    bounds_cy = 29
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -571,19 +565,19 @@ inherited cpuc86_64fo: tcpux86_64fo
     frame.dummy = 0
     frame.outerframe = (
       1
-      18
+      17
       2
       0
     )
-    taborder = 22
+    taborder = 23
+    bounds_x = 201
+    bounds_y = 1
+    bounds_cx = 14
+    bounds_cy = 28
     onsetvalue = flagsetvalue
   end
   object r8: tint64edit[24]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 0
-    bounds_y = 200
-    bounds_cx = 157
-    bounds_cy = 21
     frame.levelo = -1
     frame.colorclient = -1879048185
     frame.caption = 'r8'
@@ -593,10 +587,14 @@ inherited cpuc86_64fo: tcpux86_64fo
     frame.outerframe = (
       0
       0
-      16
+      14
       0
     )
-    taborder = 11
+    taborder = 12
+    bounds_x = 0
+    bounds_y = 200
+    bounds_cx = 155
+    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale =  1.0000000000000000E+0000
@@ -608,10 +606,6 @@ inherited cpuc86_64fo: tcpux86_64fo
   end
   object r9: tint64edit[25]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 0
-    bounds_y = 221
-    bounds_cx = 157
-    bounds_cy = 21
     frame.levelo = -1
     frame.colorclient = -1879048185
     frame.caption = 'r9'
@@ -621,10 +615,14 @@ inherited cpuc86_64fo: tcpux86_64fo
     frame.outerframe = (
       0
       0
-      16
+      14
       0
     )
-    taborder = 12
+    taborder = 13
+    bounds_x = 0
+    bounds_y = 221
+    bounds_cx = 155
+    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale =  1.0000000000000000E+0000
@@ -636,10 +634,6 @@ inherited cpuc86_64fo: tcpux86_64fo
   end
   object r15: tint64edit[26]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 176
-    bounds_y = 221
-    bounds_cx = 165
-    bounds_cy = 21
     frame.levelo = -1
     frame.colorclient = -1879048185
     frame.caption = 'r15'
@@ -649,10 +643,14 @@ inherited cpuc86_64fo: tcpux86_64fo
     frame.outerframe = (
       0
       0
-      24
+      21
       0
     )
-    taborder = 18
+    taborder = 19
+    bounds_x = 176
+    bounds_y = 221
+    bounds_cx = 162
+    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale =  1.0000000000000000E+0000
@@ -664,10 +662,6 @@ inherited cpuc86_64fo: tcpux86_64fo
   end
   object r10: tint64edit[27]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 176
-    bounds_y = 116
-    bounds_cx = 165
-    bounds_cy = 21
     frame.levelo = -1
     frame.colorclient = -1879048185
     frame.caption = 'r10'
@@ -677,10 +671,14 @@ inherited cpuc86_64fo: tcpux86_64fo
     frame.outerframe = (
       0
       0
-      24
+      21
       0
     )
-    taborder = 13
+    taborder = 14
+    bounds_x = 176
+    bounds_y = 116
+    bounds_cx = 162
+    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale =  1.0000000000000000E+0000
@@ -692,10 +690,6 @@ inherited cpuc86_64fo: tcpux86_64fo
   end
   object r11: tint64edit[28]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 176
-    bounds_y = 137
-    bounds_cx = 165
-    bounds_cy = 21
     frame.levelo = -1
     frame.colorclient = -1879048185
     frame.caption = 'r11'
@@ -705,10 +699,14 @@ inherited cpuc86_64fo: tcpux86_64fo
     frame.outerframe = (
       0
       0
-      24
+      21
       0
     )
-    taborder = 14
+    taborder = 15
+    bounds_x = 176
+    bounds_y = 137
+    bounds_cx = 162
+    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale =  1.0000000000000000E+0000
@@ -720,10 +718,6 @@ inherited cpuc86_64fo: tcpux86_64fo
   end
   object r12: tint64edit[29]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 176
-    bounds_y = 158
-    bounds_cx = 165
-    bounds_cy = 21
     frame.levelo = -1
     frame.colorclient = -1879048185
     frame.caption = 'r12'
@@ -733,10 +727,14 @@ inherited cpuc86_64fo: tcpux86_64fo
     frame.outerframe = (
       0
       0
-      24
+      21
       0
     )
-    taborder = 15
+    taborder = 16
+    bounds_x = 176
+    bounds_y = 158
+    bounds_cx = 162
+    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale =  1.0000000000000000E+0000
@@ -748,10 +746,6 @@ inherited cpuc86_64fo: tcpux86_64fo
   end
   object r13: tint64edit[30]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 176
-    bounds_y = 179
-    bounds_cx = 165
-    bounds_cy = 21
     frame.levelo = -1
     frame.colorclient = -1879048185
     frame.caption = 'r13'
@@ -761,10 +755,14 @@ inherited cpuc86_64fo: tcpux86_64fo
     frame.outerframe = (
       0
       0
-      24
+      21
       0
     )
-    taborder = 16
+    taborder = 17
+    bounds_x = 176
+    bounds_y = 179
+    bounds_cx = 162
+    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale =  1.0000000000000000E+0000
@@ -776,10 +774,6 @@ inherited cpuc86_64fo: tcpux86_64fo
   end
   object r14: tint64edit[31]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 176
-    bounds_y = 200
-    bounds_cx = 165
-    bounds_cy = 21
     frame.levelo = -1
     frame.colorclient = -1879048185
     frame.caption = 'r14'
@@ -789,10 +783,14 @@ inherited cpuc86_64fo: tcpux86_64fo
     frame.outerframe = (
       0
       0
-      24
+      21
       0
     )
-    taborder = 17
+    taborder = 18
+    bounds_x = 176
+    bounds_y = 200
+    bounds_cx = 162
+    bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
     font.xscale =  1.0000000000000000E+0000
@@ -801,5 +799,11 @@ inherited cpuc86_64fo: tcpux86_64fo
     base = nb_hex
     max = -1
     reffontheight = 17
+  end
+  inherited stoptime: tdatetimedisp[32]
+    taborder = 2
+    bounds_x = 176
+    bounds_y = 248
+    bounds_cx = 141
   end
 end

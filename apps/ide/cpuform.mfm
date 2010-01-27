@@ -72,4 +72,16 @@ object cpufo: tcpufo
     onchange = ononchange
     value = True
   end
+  object stoptime: tdatetimedisp
+    frame.dummy = 0
+    taborder = 1
+    bounds_x = 80
+    bounds_y = 8
+    bounds_cx = 124
+    bounds_cy = 18
+    textflags = [tf_xcentered, tf_right, tf_ycentered]
+    format = 'yy-mm-dd hh:mm:ss'
+    kind = dtk_datetime
+    reffontheight = 14
+  end
 end
