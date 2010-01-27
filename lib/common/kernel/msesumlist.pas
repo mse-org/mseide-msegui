@@ -493,6 +493,7 @@ begin
  inherited;
  if sender <> nil then begin
   if sender = flinkvalue.source then begin
+   checksourcechange(flinkvalue,flinkvalue.source,index); //restore value
    change(index);
   end
   else begin
