@@ -525,8 +525,10 @@ const
  mask1: optionssumty = [osu_sumsonly,osu_valuesonly];
 begin
  if foptions <> avalue then begin
-  foptions:= optionssumty(setsinglebit(longword(avalue),
-                           longword(foptions),longword(mask1)));
+  foptions:= optionssumty(
+        setsinglebit({$ifdef FPC}longword{$else}byte{$endif}(avalue),
+                      {$ifdef FPC}longword{$else}byte{$endif}(foptions),
+                      {$ifdef FPC}longword{$else}byte{$endif}(mask1)));
   change(-1);
  end;
 end;

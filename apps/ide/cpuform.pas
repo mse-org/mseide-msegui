@@ -323,7 +323,7 @@ end;
 
 constructor tcpufo.create(aowner: tcomponent);
 begin
- inherited;
+ inherited create(aowner);
 end;
 
 end.
