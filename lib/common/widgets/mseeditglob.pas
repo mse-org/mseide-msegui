@@ -13,7 +13,7 @@ unit mseeditglob;
 
 interface
 uses
- mseguiglob,msegui,msetypes,msegraphics;
+ mseglob,mseguiglob,msegui,msetypes,msegraphics;
 
 type
 
@@ -64,7 +64,6 @@ const
                        oe_savevalue,oe_savestate,oe_checkmrcancel];
 
  nullcoord: gridcoordty = (col: 0; row: 0);
- invalidaxis = -bigint;
  invalidcell: gridcoordty = (col: invalidaxis; row: invalidaxis);
  bigcoord: gridcoordty = (col: bigint; row: bigint);
 

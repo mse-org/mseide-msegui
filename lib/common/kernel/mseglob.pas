@@ -11,7 +11,9 @@ unit mseglob;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses 
- classes,mseerr;
+ classes,mseerr,msetypes;
+const
+ invalidaxis = -bigint;
 type
  shortcutty = type word;
  modalresultty = (mr_none,mr_canclose,mr_windowclosed,mr_windowdestroyed,
