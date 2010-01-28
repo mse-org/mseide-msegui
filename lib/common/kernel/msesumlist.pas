@@ -270,11 +270,15 @@ end;
 
 procedure copylevelrowstateissum(const source1,source2,dest: pointer);
 begin
- if pinteger(source2)^ <> 0 then begin
-  prealsumty(dest)^.data.int:= -(prowstatety(source1)^.fold + 1);
- end
- else begin
-  prealsumty(dest)^.data.int:= 0;
+ with prealsumty(dest)^ do begin
+  if pinteger(source2)^ <> 0 then begin
+   data.int:= -(prowstatety(source1)^.fold + 1);
+   issum:= true;
+  end
+  else begin
+   data.int:= 0;
+   issum:= false;
+  end;
  end;
 end;
 {
@@ -330,33 +334,12 @@ var
 begin
  checksourcecopy(flinkvalue,@copyvalue);
  if flinklevel.source is tcustomrowstatelist then begin
-//  if osu_foldsumdown in foptions then begin
-//   if flinkissum.source <> nil then begin
-//    if osu_folddefaultsum in foptions then begin
-//     checksourcecopy2(flinklevel,flinkissum.source,
-//                                         @copylevelrowstateissumdownsum);
-//    end
-//    else begin
-//     checksourcecopy2(flinklevel,flinkissum.source,@copylevelrowstateissumdown);
-//    end;
-//   end
-//   else begin
-//    checksourcecopy(flinklevel,@copylevelrowstatedown);
-//   end;
-//  end
-//  else begin
-   if flinkissum.source <> nil then begin
-//    if osu_folddefaultsum in foptions then begin
-//     checksourcecopy2(flinklevel,flinkissum.source,@copylevelrowstateissumsum);
-//    end
-//    else begin
-     checksourcecopy2(flinklevel,flinkissum.source,@copylevelrowstateissum);
-//    end;
-   end
-   else begin
-    checksourcecopy(flinklevel,@copylevelrowstate);
-   end;
-//  end
+  if flinkissum.source <> nil then begin
+   checksourcecopy2(flinklevel,flinkissum.source,@copylevelrowstateissum);
+  end
+  else begin
+   checksourcecopy(flinklevel,@copylevelrowstate);
+  end;
  end
  else begin
   checksourcecopy(flinklevel,@copylevel);
