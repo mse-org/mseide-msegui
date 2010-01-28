@@ -711,7 +711,7 @@ const
  currentfoldhiddenbit = 6;
  currentfoldhiddenmask = 1 shl currentfoldhiddenbit;
  foldlevelmask = byte(not (foldhiddenmask or currentfoldhiddenmask));
- foldisvaluemask = $01;
+ foldissummask = $01;
 //type
 // foldlevelty = 0..foldlevelmask; //0..63
  
@@ -802,7 +802,7 @@ type
    finfolevel: rowinfolevelty;
    function gethidden(const index: integer): boolean;
    function getfoldlevel(const index: integer): byte;
-   function getfoldisvalue(const index: integer): boolean;
+   function getfoldissum(const index: integer): boolean;
    procedure checkinfolevel(const wantedlevel: rowinfolevelty);
    procedure change(const aindex: integer); override;
    procedure initdirty; virtual;
@@ -7083,9 +7083,9 @@ begin
  result:= items[index].fold and foldlevelmask;
 end;
 
-function tcustomrowstatelist.getfoldisvalue(const index: integer): boolean;
+function tcustomrowstatelist.getfoldissum(const index: integer): boolean;
 begin
- result:= items[index].flags and foldisvaluemask <> 0;
+ result:= items[index].flags and foldissummask <> 0;
 end;
 
 {
