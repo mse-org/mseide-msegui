@@ -1118,7 +1118,7 @@ procedure registerdatalistclass(const adatatype: listdatatypety;
 
 implementation
 uses
- rtlconsts,msestreaming,msesys,msestat,msebits,mseeditglob;
+ rtlconsts,msestreaming,msesys,msestat,msebits{,mseeditglob};
  
 var
  datalistclasses: array[listdatatypety] of datalistclassty = 

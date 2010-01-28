@@ -62,7 +62,7 @@ begin
  while tapplication1(application).eventlist.count = 0 do begin
   with linuxsemty(sempo^) do begin
    application.unlock;
-   sem_wait(sema);
+   sem_wait(d.sema);
    application.lock;
    checkevents;
   end;
@@ -80,19 +80,19 @@ end;
 procedure sigtimer(SigNum: Integer); cdecl;
 begin
  timerevent:= true;
- sem_post(linuxsemty(sempo^).sema);
+ sem_post(linuxsemty(sempo^).d.sema);
 end;
 
 procedure sigterminate(SigNum: Integer); cdecl;
 begin
  terminated:= true;
- sem_post(linuxsemty(sempo^).sema);
+ sem_post(linuxsemty(sempo^).d.sema);
 end;
 
 procedure sigchild(SigNum: Integer); cdecl;
 begin
  childevent:= true;
- sem_post(linuxsemty(sempo^).sema);
+ sem_post(linuxsemty(sempo^).d.sema);
 end;
 
 procedure nogui_init(const asempo: psemty);
