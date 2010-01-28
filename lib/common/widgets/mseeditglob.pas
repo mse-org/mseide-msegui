@@ -13,7 +13,7 @@ unit mseeditglob;
 
 interface
 uses
- mseguiglob,msegui,msetypes,msegraphics;
+ mseglob,mseguiglob,msegui,msetypes,msegraphics;
 
 type
 
