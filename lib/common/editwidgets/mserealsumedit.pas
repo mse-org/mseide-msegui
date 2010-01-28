@@ -82,7 +82,7 @@ var
 begin
  if foptions <> avalue then begin
   optionsbefore:= foptions;
-  foptions:= avalue;
+  inherited;
   if osu_foldsum in 
          optionssumty({$ifdef FPC}longword{$else}byte{$endif}(avalue) xor
          {$ifdef FPC}longword{$else}byte{$endif}(optionsbefore)) then begin
@@ -150,13 +150,14 @@ function trealsumedit.internaldatatotext(const data): msestring;
 var
  po1: prealsumty;
 begin
- if (fdatalist <> nil) and 
-        (osu_sumsonly in tgridrealsumlist(fdatalist).options) then begin
+ if (fdatalist <> nil) and ([osu_sumsonly,osu_valuesonly] * 
+                   tgridrealsumlist(fdatalist).options <> []) then begin
   po1:= @data;
   if (po1 = nil) then begin
    po1:= fgridintf.getrowdatapo;
   end;   
-  if (po1 <> nil) and (po1^.data.int = 0) then begin
+  if (po1 <> nil) and ((po1^.data.int = 0) xor 
+             (osu_valuesonly in tgridrealsumlist(fdatalist).options)) then begin
    result:= '';
    exit;
   end;

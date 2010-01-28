@@ -29,7 +29,7 @@ type
  end;
  psumprop = ^tsumprop;
 
- optionsumty = (osu_sumsonly,
+ optionsumty = (osu_sumsonly,osu_valuesonly,
                 osu_foldsum{,osu_foldsumdown,osu_folddefaultsum});
  optionssumty = set of optionsumty;
  
@@ -115,7 +115,7 @@ end;
  
 implementation
 uses
- msereal;
+ msereal,msebits;
  
 { trealsumlist }
 
@@ -144,6 +144,7 @@ end;
 
 procedure trealsumlist.listdestroyed(const sender: tdatalist);
 begin
+ inherited;
  checklistdestroyed(flinkvalue,sender);
  checklistdestroyed(flinklevel,sender);
  checklistdestroyed(flinkissum,sender);
@@ -534,9 +535,12 @@ begin
 end;
 
 procedure trealsumlist.setoptions(const avalue: optionssumty);
+const
+ mask1: optionssumty = [osu_sumsonly,osu_valuesonly];
 begin
  if foptions <> avalue then begin
-  foptions:= avalue;
+  foptions:= optionssumty(setsinglebit(longword(avalue),
+                           longword(foptions),longword(mask1)));
   change(-1);
  end;
 end;
