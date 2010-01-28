@@ -34,20 +34,14 @@ type
  
  tterminal = class(tcustomtextedit)
   private
-//   foutput: tpipewriter;
-//   finput: tpipereader;
-//   ferrorinput: tpipereader;
-//   fprochandle: integer;
-//   fexitcode: integer;
    foninputpipebroken: notifyeventty;
    fonerrorpipebroken: notifyeventty;
-//   fonprocfinished: notifyeventty;
    finputcolindex: integer;
    fonsendtext: sendtexteventty;
    fonreceivetext: receivetexteventty;
    foptions: terminaloptionsty;
    fmaxchars: integer;
-//   flistenid: ptruint;
+   fupdatingcount: integer;
    function getinputfd: integer;
    procedure setinoutfd(const Value: integer);
    procedure setoptions(const avalue: terminaloptionsty);
@@ -70,12 +64,6 @@ type
    procedure docellevent(const ownedcol: boolean; 
                                      var info: celleventinfoty); override;
    procedure updateeditpos;
-//   procedure listen;
-//   procedure unlisten;
-//   procedure finalizeexec;
-   
-//   procedure receiveevent(const event: tobjectevent); override;
-//   procedure doprocfinished;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -94,6 +82,8 @@ type
    property inputfd: integer read getinputfd write setinoutfd;
    property outputfd: integer read getoutputfd write setoutputfd;
    property errorfd: integer read geterrorfd write seterrorfd;
+   procedure beginupdate; override;
+   procedure endupdate;  override;
   published
    property tabulators;
    property font;
@@ -284,7 +274,7 @@ procedure tterminal.updateeditpos;
 var
  int1: integer;
 begin
- if fgridintf <> nil then begin
+ if (fgridintf <> nil) and (fupdatingcount = 0) then begin
   int1:= datalist.count-1;
   if int1 >= 0 then begin
    finputcolindex:= length(datalist[int1]);
@@ -519,6 +509,24 @@ end;
 procedure tterminal.setoptionsprocess(const avalue: processoptionsty);
 begin
  fprocess.options:= avalue;
+end;
+
+procedure tterminal.beginupdate;
+begin
+ inc(fupdatingcount);
+ inherited;
+end;
+
+procedure tterminal.endupdate;
+begin
+ try
+  inherited;
+ finally
+  dec(fupdatingcount);
+  if fupdatingcount = 0 then begin
+   updateeditpos;
+  end;
+ end;
 end;
 
 end.

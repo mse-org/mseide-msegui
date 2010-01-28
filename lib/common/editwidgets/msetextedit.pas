@@ -177,8 +177,8 @@ type
    procedure savetostream(const stream: ttextstream; const resetmodified: boolean);
    procedure savetofile(const afilename: filenamety = '');
                        //afilename = '' -> actual filename
-   procedure beginupdate;
-   procedure endupdate;
+   procedure beginupdate; virtual;
+   procedure endupdate;  virtual;
    procedure clear;
    function filename: filenamety;
 
