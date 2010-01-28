@@ -1158,6 +1158,7 @@ type
    procedure counthidden(var aindex: integer);
    procedure sethidden(const index: integer; const avalue: boolean);
    procedure setfoldlevel(const index: integer; const avalue: byte);
+   procedure setfoldisvalue(const index: integer; const avalue: boolean);
    procedure setfolded(const avalue: boolean);
    function getrowheight(const index: integer): integer;
    procedure setrowheight(const index: integer; const avalue: integer);
@@ -1224,6 +1225,8 @@ type
    property hidden[const index: integer]: boolean read gethidden write sethidden;
    property foldlevel[const index: integer]: byte read getfoldlevel 
                                                   write setfoldlevel; //0..127
+   property foldisvalue[const index: integer]: boolean read getfoldisvalue 
+                                                  write setfoldisvalue;
    property rowheight[const index: integer]: integer read getrowheight 
                                                             write setrowheight;
    function currentrowheight(const index: integer): integer;
@@ -1627,6 +1630,8 @@ type
    procedure setrowhidden(index: integer; const avalue: boolean);
    function getrowfoldlevel(index: integer): byte;
    procedure setrowfoldlevel(index: integer; const avalue: byte);
+   function getrowfoldisvalue(index: integer): boolean;
+   procedure setrowfoldisvalue(index: integer; const avalue: boolean);
    function getrowheight(index: integer): integer;
    procedure setrowheight(index: integer; avalue: integer);
 
@@ -1997,6 +2002,8 @@ type
                         write setrowhidden;
    property rowfoldlevel[index: integer]: byte read getrowfoldlevel
                         write setrowfoldlevel;
+   property rowfoldisvalue[index: integer]: boolean read getrowfoldisvalue
+                        write setrowfoldisvalue;
    function rowfoldinfo: prowfoldinfoty; //nil if focused row not visible
    property rowheight[index: integer]: integer read getrowheight
                                                           write setrowheight;
@@ -12958,6 +12965,23 @@ begin
  end;
 end;
 
+function tcustomgrid.getrowfoldisvalue(index: integer): boolean;
+begin
+ if checkrowindex(index) then begin
+  result:= fdatacols.frowstate.foldisvalue[index];
+ end
+ else begin
+  result:= false;
+ end;
+end;
+
+procedure tcustomgrid.setrowfoldisvalue(index: integer; const avalue: boolean);
+begin
+ if checkrowindex(index) then begin
+  fdatacols.frowstate.foldisvalue[index]:= avalue;
+ end;
+end;
+
 function tcustomgrid.getrowheight(index: integer): integer;
 begin
  if checkrowindex(index) then begin
@@ -14309,6 +14333,27 @@ begin
  end;
 end;
 
+procedure trowstatelist.setfoldisvalue(const index: integer;
+               const avalue: boolean);
+var
+ po1: prowstatety;
+ bo1: boolean;
+begin
+ po1:= getitempo(index);
+ bo1:= po1^.flags and foldisvaluemask <> 0;
+ if bo1 xor avalue then begin
+  if avalue then begin
+   po1^.flags:= po1^.flags or foldisvaluemask;
+  end
+  else begin
+   po1^.flags:= po1^.flags and not foldisvaluemask;
+  end;
+  checkdirty(index);
+  change(index);
+  fgrid.rowstatechanged(index);
+ end;
+end;
+
 procedure trowstatelist.fillfoldlevel(const index: integer; 
                              const acount: integer; const avalue: byte);
 var
@@ -14858,7 +14903,7 @@ var
  int1: integer;
 begin
  with prowstaterowheightty(inherited getitempo(index))^ do begin
-  result:= inttostr(normal.fold);
+  result:= inttostr(normal.fold + normal.flags shl 8);
   if finfolevel >= ril_colmerge then begin
    result:= result + ' ' + inttostr(colmerge.merged);
   end;
@@ -14877,11 +14922,14 @@ procedure trowstatelist.setstatdata(const index: integer;
                const value: msestring);
 var
  ar1: msestringarty;
+ int1: integer;
 begin
  splitstring(value,ar1,msechar(' '));
  if high(ar1) >= 0 then begin
   with prowstaterowheightty(inherited getitempo(index))^ do begin
-   normal.fold:= strtoint(ar1[0]);
+   int1:= strtoint(ar1[0]);
+   normal.fold:= int1 and $ff;
+   normal.flags:= (int1 shr 8) and $ff;
    if (finfolevel >= ril_colmerge) and (high(ar1) > 0) then begin
     colmerge.merged:= strtoint(ar1[1]);
    end;

@@ -260,11 +260,14 @@ end;
 
 procedure copylevelrowstate(const source,dest: pointer);
 begin
- if prealsumty(dest)^.issum then begin
-  prealsumty(dest)^.data.int:= -(prowstatety(source)^.fold + 1);
- end
- else begin
-  prealsumty(dest)^.data.int:= 0
+ with prowstatety(source)^ do begin
+  prealsumty(dest)^.issum:= flags and foldisvaluemask = 0;
+  if prealsumty(dest)^.issum then begin
+   prealsumty(dest)^.data.int:= -(fold + 1);
+  end
+  else begin
+   prealsumty(dest)^.data.int:= 0
+  end;
  end;
 end;
 

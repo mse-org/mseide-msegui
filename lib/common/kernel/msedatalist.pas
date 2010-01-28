@@ -711,6 +711,7 @@ const
  currentfoldhiddenbit = 6;
  currentfoldhiddenmask = 1 shl currentfoldhiddenbit;
  foldlevelmask = byte(not (foldhiddenmask or currentfoldhiddenmask));
+ foldisvaluemask = $01;
 //type
 // foldlevelty = 0..foldlevelmask; //0..63
  
@@ -734,7 +735,7 @@ type
   font: byte;  //index in rowfonts, 0 = none, 1 = rowfonts[0]
   fold: byte;  // hc nnnnnn  h = hidden c = current hidden,
                //    nnnnnn = fold level, 0 -> top
-  dummy: byte;
+  flags: byte; // 0000000v v = isvalue
  end;
  prowstatety = ^rowstatety;
  rowstateaty = array[0..0] of rowstatety;
@@ -801,6 +802,7 @@ type
    finfolevel: rowinfolevelty;
    function gethidden(const index: integer): boolean;
    function getfoldlevel(const index: integer): byte;
+   function getfoldisvalue(const index: integer): boolean;
    procedure checkinfolevel(const wantedlevel: rowinfolevelty);
    procedure change(const aindex: integer); override;
    procedure initdirty; virtual;
@@ -7080,6 +7082,12 @@ function tcustomrowstatelist.getfoldlevel(const index: integer): byte;
 begin
  result:= items[index].fold and foldlevelmask;
 end;
+
+function tcustomrowstatelist.getfoldisvalue(const index: integer): boolean;
+begin
+ result:= items[index].flags and foldisvaluemask <> 0;
+end;
+
 {
 procedure tcustomrowstatelist.assign(source: tpersistent);
 begin
