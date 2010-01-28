@@ -22,12 +22,13 @@ interface
 
 uses
  classes,msegui,mseclasses,mseforms,msegdbutils,msetypes,msedataedits,
- msegraphics,msegraphedits,mseevent,msemenus,msestat;
+ msegraphics,msegraphedits,mseevent,msemenus,msestat,msedispwidgets;
 
 type
 
  tcpufo = class(tdockform)
    on: tbooleanedit;
+   stoptime: tdatetimedisp;
    procedure cpuonshow(const sender: TObject);
    procedure ononchange(const sender: TObject);
    procedure updastat(const sender: TObject; const filer: tstatfiler); virtual;

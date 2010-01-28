@@ -63,11 +63,11 @@ function formatfloatmse(const value: double; const format: msestring;
    // 0.0E
    //
    //    + engeneering notation with 'e', exponent = n*3
-   //    |++ fract digits
-   // 0.0f00
+   //    |
+   // 0.0f
    //
-   //     +++++ mantissa - 1 digits
-   // 0.0f#####
+   //   +++++ mantissa - 1 digits
+   // 0.#####f
    //
    //    + engeneering notation with 'E', exponent = n*3
    // 0.0F

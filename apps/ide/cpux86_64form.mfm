@@ -802,7 +802,7 @@ inherited cpuc86_64fo: tcpux86_64fo
   end
   inherited stoptime: tdatetimedisp[32]
     taborder = 2
-    bounds_x = 176
+    bounds_x = 0
     bounds_y = 248
     bounds_cx = 141
   end

@@ -11,7 +11,7 @@ inherited cpuavr32fo: tcpuavr32fo
   end
   object tlayouter1: tlayouter[1]
     frame.dummy = 0
-    taborder = 22
+    taborder = 23
     bounds_x = 0
     bounds_y = 33
     bounds_cx = 110
@@ -281,7 +281,7 @@ inherited cpuavr32fo: tcpuavr32fo
   end
   object tlayouter2: tlayouter[2]
     frame.dummy = 0
-    taborder = 23
+    taborder = 24
     bounds_x = 113
     bounds_y = 33
     bounds_cx = 114
@@ -558,7 +558,7 @@ inherited cpuavr32fo: tcpuavr32fo
       0
       0
     )
-    taborder = 2
+    taborder = 3
     bounds_x = 12
     bounds_y = 1
     bounds_cx = 11
@@ -580,7 +580,7 @@ inherited cpuavr32fo: tcpuavr32fo
       0
       0
     )
-    taborder = 3
+    taborder = 4
     bounds_x = 23
     bounds_y = 1
     bounds_cx = 11
@@ -602,7 +602,7 @@ inherited cpuavr32fo: tcpuavr32fo
       0
       0
     )
-    taborder = 4
+    taborder = 5
     bounds_x = 34
     bounds_y = 1
     bounds_cx = 11
@@ -624,7 +624,7 @@ inherited cpuavr32fo: tcpuavr32fo
       0
       0
     )
-    taborder = 5
+    taborder = 6
     bounds_x = 47
     bounds_y = 1
     bounds_cx = 11
@@ -646,7 +646,7 @@ inherited cpuavr32fo: tcpuavr32fo
       0
       0
     )
-    taborder = 6
+    taborder = 7
     bounds_x = 58
     bounds_y = 1
     bounds_cx = 11
@@ -668,7 +668,7 @@ inherited cpuavr32fo: tcpuavr32fo
       0
       0
     )
-    taborder = 11
+    taborder = 12
     bounds_x = 115
     bounds_y = 1
     bounds_cx = 11
@@ -690,7 +690,7 @@ inherited cpuavr32fo: tcpuavr32fo
       0
       0
     )
-    taborder = 10
+    taborder = 11
     bounds_x = 104
     bounds_y = 1
     bounds_cx = 11
@@ -712,7 +712,7 @@ inherited cpuavr32fo: tcpuavr32fo
       0
       0
     )
-    taborder = 8
+    taborder = 9
     bounds_x = 80
     bounds_y = 1
     bounds_cx = 11
@@ -734,7 +734,7 @@ inherited cpuavr32fo: tcpuavr32fo
       0
       0
     )
-    taborder = 7
+    taborder = 8
     bounds_x = 69
     bounds_y = 1
     bounds_cx = 11
@@ -756,7 +756,7 @@ inherited cpuavr32fo: tcpuavr32fo
       0
       0
     )
-    taborder = 14
+    taborder = 15
     bounds_x = 153
     bounds_y = 1
     bounds_cx = 11
@@ -778,7 +778,7 @@ inherited cpuavr32fo: tcpuavr32fo
       0
       0
     )
-    taborder = 16
+    taborder = 17
     bounds_x = 177
     bounds_y = 1
     bounds_cx = 11
@@ -800,7 +800,7 @@ inherited cpuavr32fo: tcpuavr32fo
       0
       0
     )
-    taborder = 13
+    taborder = 14
     bounds_x = 137
     bounds_y = 1
     bounds_cx = 11
@@ -822,7 +822,7 @@ inherited cpuavr32fo: tcpuavr32fo
       0
       0
     )
-    taborder = 15
+    taborder = 16
     bounds_x = 164
     bounds_y = 1
     bounds_cx = 11
@@ -844,7 +844,7 @@ inherited cpuavr32fo: tcpuavr32fo
       0
       0
     )
-    taborder = 12
+    taborder = 13
     bounds_x = 126
     bounds_y = 1
     bounds_cx = 11
@@ -866,7 +866,7 @@ inherited cpuavr32fo: tcpuavr32fo
       0
       0
     )
-    taborder = 17
+    taborder = 18
     bounds_x = 188
     bounds_y = 1
     bounds_cx = 11
@@ -888,7 +888,7 @@ inherited cpuavr32fo: tcpuavr32fo
       0
       0
     )
-    taborder = 18
+    taborder = 19
     bounds_x = 199
     bounds_y = 1
     bounds_cx = 11
@@ -910,7 +910,7 @@ inherited cpuavr32fo: tcpuavr32fo
       0
       0
     )
-    taborder = 19
+    taborder = 20
     bounds_x = 210
     bounds_y = 1
     bounds_cx = 11
@@ -932,7 +932,7 @@ inherited cpuavr32fo: tcpuavr32fo
       0
       0
     )
-    taborder = 20
+    taborder = 21
     bounds_x = 221
     bounds_y = 1
     bounds_cx = 11
@@ -953,7 +953,7 @@ inherited cpuavr32fo: tcpuavr32fo
       0
       0
     )
-    taborder = 21
+    taborder = 22
     bounds_x = 232
     bounds_y = 1
     bounds_cx = 11
@@ -975,7 +975,7 @@ inherited cpuavr32fo: tcpuavr32fo
       0
       0
     )
-    taborder = 9
+    taborder = 10
     bounds_x = 93
     bounds_y = 1
     bounds_cx = 11
@@ -984,8 +984,8 @@ inherited cpuavr32fo: tcpuavr32fo
   end
   object exceptstack: tbutton[24]
     optionswidget1 = [ow1_autowidth, ow1_autoheight]
-    taborder = 25
-    bounds_x = 8
+    taborder = 26
+    bounds_x = 136
     bounds_y = 227
     bounds_cx = 113
     bounds_cy = 20
@@ -1002,12 +1002,17 @@ inherited cpuavr32fo: tcpuavr32fo
       37
       2
     )
-    taborder = 24
+    taborder = 25
     hint = 'Set global interrupt mask while stepping'
     bounds_x = 121
     bounds_y = 205
     bounds_cx = 50
     bounds_cy = 16
     onsetvalue = irqoffset
+  end
+  inherited stoptime: tdatetimedisp[26]
+    taborder = 2
+    bounds_x = 0
+    bounds_y = 228
   end
 end
