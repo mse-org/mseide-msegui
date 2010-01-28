@@ -195,6 +195,7 @@ type
    fexceptionactive: integer;
    fexceptioncount: longword;
    fonexception: exceptioneventty;
+   finiting: integer;
    function dolock: boolean;
    function internalunlock(count: integer): boolean;
    function getterminated: boolean;
@@ -218,6 +219,8 @@ type
    procedure doafterrun; virtual;
    procedure dowakeup(sender: tobject);
    property eventlist: teventlist read feventlist;
+   procedure internalinitialize; virtual;
+   procedure internaldeinitialize;  virtual;
   public
    {$ifdef mse_debug_mutex}
    function getmutexaddr: pointer;
@@ -226,6 +229,10 @@ type
    {$endif}
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   
+   procedure initialize;
+   procedure deinitialize;
+   
    function procid: procidty;
    procedure createdatamodule(instanceclass: msecomponentclassty; var reference);
    procedure run;
@@ -892,11 +899,13 @@ begin
  sys_mutexcreate(fmutex);
  sys_mutexcreate(feventlock);
  classes.wakemainthread:= {$ifdef FPC}@{$endif}dowakeup;
+ initialize;
 end;
 
 destructor tcustomapplication.destroy;
 begin
  inherited;
+ deinitialize;
  fonidlelist.free;
  fonterminatedlist.free;
  fonterminatequerylist.free;
@@ -1358,6 +1367,43 @@ end;
 function tcustomapplication.procid: procidty;
 begin
  result:= sys_getpid;
+end;
+
+procedure tcustomapplication.internalinitialize;
+begin
+ //dummy
+end;
+
+procedure tcustomapplication.internaldeinitialize;
+begin
+ //dummy
+end;
+
+procedure tcustomapplication.initialize;
+begin
+ if not (aps_inited in fstate) and (finiting = 0) then begin
+  inc(finiting);
+  fstate:= [];
+  try
+   internalinitialize;
+  finally
+   dec(finiting);
+  end;
+  include(fstate,aps_inited);
+ end;   
+end;
+
+procedure tcustomapplication.deinitialize;
+begin
+ if aps_inited in fstate then begin
+  include(fstate,aps_deinitializing);
+  try
+   internaldeinitialize;
+  finally
+   exclude(fstate,aps_deinitializing);
+  end;
+  exclude(fstate,aps_inited);
+ end;
 end;
 
 { tactivatorcontroller }

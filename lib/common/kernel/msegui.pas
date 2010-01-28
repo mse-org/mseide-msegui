@@ -2057,7 +2057,6 @@ type
  
  tguiapplication = class(tcustomapplication)
   private
-   finiting: integer;
    fwindows: windowarty;
    fgroupzorder: windowarty;
    factivewindow: twindow;
@@ -2131,6 +2130,8 @@ type
    procedure exitloop;  //used in win32 cancelshutdown
    procedure receiveevent(const event: tobjectevent); override;
    procedure doafterrun; override;
+   procedure internalinitialize; override;
+   procedure internaldeinitialize;  override;
   public
    constructor create(aowner: tcomponent); override;
    procedure langchanged; override;
@@ -2138,8 +2139,6 @@ type
    function findwindow(aid: winidty; out window: twindow): boolean;
    procedure checkwindowrect(winid: winidty; var rect: rectty);
                         //callback from win32 wm_sizing
-   procedure initialize;
-   procedure deinitialize;
 
    procedure createform(instanceclass: widgetclassty; var reference);
    procedure invalidate; //invalidates all registered forms
@@ -13147,7 +13146,7 @@ end;
 constructor tinternalapplication.create(aowner: tcomponent);
 begin
  appinst:= self;
- inherited;
+// inherited;
  fdblclicktime:= defaultdblclicktime;
 // inherited;
  fonkeypresslist:= tonkeyeventlist.create;
@@ -13163,7 +13162,8 @@ begin
  fmouse:= tmouse.create(imouse(self));
  fhinttimer:= tsimpletimer.create(0,{$ifdef FPC}@{$endif}hinttimer,false);
  fmouseparktimer:= tsimpletimer.create(0,{$ifdef FPC}@{$endif}mouseparktimer,false);
- initialize;
+ inherited;
+// initialize;
 end;
 
 destructor tinternalapplication.destroy;
@@ -13174,7 +13174,7 @@ begin
  fhintwidget.free;
  freeandnil(fcaret);
  fmouse.free;
- deinitialize;
+// deinitialize;
  inherited;
 // fwindows.free;
  fonkeypresslist.free;
@@ -14525,49 +14525,33 @@ begin
  inherited;
 end;
 
-procedure tguiapplication.initialize;
+procedure tguiapplication.internalinitialize;
 begin
  with tinternalapplication(self) do begin
-  if not (aps_inited in fstate) and (finiting = 0) then begin
-   inc(finiting);
-   try
-    fdesigning:= false;
-    fstate:= [];
-    guierror(gui_init,self);
-    msetimer.init;
-    msegraphics.init;
-    include(fstate,aps_inited);
-   finally
-    dec(finiting);
-   end;
-  end;
+  fdesigning:= false;
+  guierror(gui_init,self);
+  msetimer.init;
+  msegraphics.init;
  end;
 end;
 
-procedure tguiapplication.deinitialize;
+procedure tguiapplication.internaldeinitialize;
 begin
  with tinternalapplication(self) do begin
-  if aps_inited in fstate then begin
-   include(fstate,aps_deinitializing);
-   try
-    if fcaret <> nil then begin
-     fcaret.link(nil,nullpoint,nullrect);
-    end;
-    msegraphics.deinit;
-    lock;
-    gui_flushgdi;
-    flusheventbuffer;
-    getevents;
-    eventlist.clear;
-    unlock;
-    gui_deinit;
-    msetimer.deinit;
-    exclude(fstate,aps_inited);
-   finally
-    exclude(fstate,aps_deinitializing);
-   end;
+  if fcaret <> nil then begin
+   fcaret.link(nil,nullpoint,nullrect);
   end;
+  msegraphics.deinit;
+  lock;
+  gui_flushgdi;
+  flusheventbuffer;
+  getevents;
+  eventlist.clear;
+  unlock;
+  gui_deinit;
+  msetimer.deinit;
  end;
+ inherited;
 end;
 
 procedure tguiapplication.destroyforms;

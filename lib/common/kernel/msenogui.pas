@@ -22,8 +22,8 @@ type
    function nextevent: tevent;
    procedure dobeforerun; override;
    procedure doafterrun; override;
-   procedure initialize;
-   procedure deinitialize;
+   procedure internalinitialize; override;
+   procedure internaldeinitialize; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -45,7 +45,7 @@ function application: tnoguiapplication;
 begin
  if appinst = nil then begin
   tnoguiapplication.create(nil);
-  appinst.initialize;
+//  appinst.initialize;
  end;
  result:= appinst;
 end;
@@ -54,15 +54,15 @@ end;
 
 constructor tnoguiapplication.create(aowner: tcomponent);
 begin
+ appinst:= self;
  sys_semcreate(feventsem,0);
  inherited;
- appinst:= self;
 end;
 
 destructor tnoguiapplication.destroy;
 begin
  inherited;
- deinitialize;
+// deinitialize;
  sys_semdestroy(feventsem);
 end;
 
@@ -148,13 +148,13 @@ begin
  end;
 end;
 
-procedure tnoguiapplication.initialize;
+procedure tnoguiapplication.internalinitialize;
 begin
  nogui_init(@feventsem); 
  msetimer.init;
 end;
 
-procedure tnoguiapplication.deinitialize;
+procedure tnoguiapplication.internaldeinitialize;
 begin
  msetimer.deinit;
  nogui_deinit; 
