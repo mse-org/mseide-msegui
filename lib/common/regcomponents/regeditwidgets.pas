@@ -82,6 +82,18 @@ type
    function gettag: integer; override;
  end;
 
+ trowstatelistsourcefoldlevelpropertyeditor = 
+                   class(tdatalistsourcepropertyeditor)
+  protected
+   function gettag: integer; override;
+ end;
+
+ trowstatelistsourceissumpropertyeditor = 
+                   class(tdatalistsourcepropertyeditor)
+  protected
+   function gettag: integer; override;
+ end;
+
  toptionswidgetpropertyeditor = class(tsetpropertyeditor)
   protected
    function getinvisibleitems: tintegerset; override;
@@ -122,6 +134,10 @@ begin
                                       tsumlistsourceissumpropertyeditor);
  registerpropertyeditor(typeinfo(optionswidgetty),nil,'',
                                            toptionswidgetpropertyeditor);
+ registerpropertyeditor(typeinfo(string),trowstatelist,'sourcefoldlevel',
+                                 trowstatelistsourcefoldlevelpropertyeditor);
+ registerpropertyeditor(typeinfo(string),trowstatelist,'sourceissum',
+                                 trowstatelistsourceissumpropertyeditor);
 end;
 
 { tdropdowncolpropertyeditor }
@@ -262,6 +278,20 @@ end;
 function toptionswidgetpropertyeditor.getinvisibleitems: tintegerset;
 begin
  result:= [ord(ow_autosize),ord(ow_autosizeanright),ord(ow_autosizeanbottom)]; 
+end;
+
+{ trowstatelistsourcefoldlevelpropertyeditor }
+
+function trowstatelistsourcefoldlevelpropertyeditor.gettag: integer;
+begin
+ result:= rowstatefoldleveltag;
+end;
+
+{ trowstatelistsourceissumpropertyeditor }
+
+function trowstatelistsourceissumpropertyeditor.gettag: integer;
+begin
+ result:= rowstateissumtag;
 end;
 
 initialization

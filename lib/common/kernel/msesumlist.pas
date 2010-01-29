@@ -60,7 +60,6 @@ type
    procedure setisfoldsum(index: integer; const avalue: boolean);
    procedure setsumsup(const avalue: tsumuparrayprop);
    procedure setsumsdown(const avalue: tsumdownarrayprop);
-   function getlinkdatatypes(const atag: integer): listdatatypesty; override;
   protected
    fdirtyup: integer;
    fdirtydown: integer;
@@ -79,20 +78,21 @@ type
    procedure getgriddata(index: integer; var dest); override;
    procedure setgriddata(index: integer; const source); override;
    function getdefault: pointer; override;
+   function getlinkdatatypes(const atag: integer): listdatatypesty; override;
   public
    constructor create; override;
    destructor destroy; override;
    procedure change(const index: integer); override;
    procedure sourcechange(const sender: tdatalist; 
                                          const index: integer); override;
-   function getsourcenamecount: integer; override;
-   function getsourcename(const atag: integer): string; override;
+   function getsourcecount: integer; override;
+   function getsourceinfo(const atag: integer): plistlinkinfoty; override;
+   procedure linksource(const source: tdatalist; const atag: integer); override;
+
    procedure clearmemberitem(const subitem: integer; 
                                     const index: integer); override;
    procedure setmemberitem(const subitem: integer; 
                          const index: integer; const avalue: integer); override;
-   procedure linksource(const source: tdatalist; const atag: integer); override;
-
    property sumlevel[index: integer]: integer read getsumlevel 
                             write setsumlevel;
              //0 -> no sum > 0 top down, < 0 bottom up, not used for osu_foldsum
@@ -284,49 +284,7 @@ begin
   end;
  end;
 end;
-{
-procedure copylevelrowstateissumsum(const source1,source2,dest: pointer);
-begin
- if pinteger(source2)^ = 0 then begin
-  prealsumty(dest)^.data.int:= -(prowstatety(source1)^.fold + 1);
- end
- else begin
-  prealsumty(dest)^.data.int:= 0;
- end;
-end;
-}
-{
-procedure copylevelrowstatedown(const source,dest: pointer);
-begin
- if prealsumty(dest)^.issum then begin
-  prealsumty(dest)^.data.int:= prowstatety(source)^.fold + 1;
- end
- else begin
-  prealsumty(dest)^.data.int:= 0;
- end;
-end;
 
-procedure copylevelrowstateissumdown(const source1,source2,dest: pointer);
-begin
- if pinteger(source2)^ <> 0 then begin
-  prealsumty(dest)^.data.int:= (prowstatety(source1)^.fold + 1);
- end
- else begin
-  prealsumty(dest)^.data.int:= 0;
- end;
-end;
-}
-{
-procedure copylevelrowstateissumdownsum(const source1,source2,dest: pointer);
-begin
- if pinteger(source2)^ = 0 then begin
-  prealsumty(dest)^.data.int:= (prowstatety(source1)^.fold + 1);
- end
- else begin
-  prealsumty(dest)^.data.int:= 0;
- end;
-end;
-}
 procedure trealsumlist.clean(const start,stop: integer);
 var
  po1: prealsumty;
@@ -566,25 +524,25 @@ begin
  end;
 end;
 
-function trealsumlist.getsourcenamecount: integer;
+function trealsumlist.getsourcecount: integer;
 begin
  result:= 3;
 end;
 
-function trealsumlist.getsourcename(const atag: integer): string;
+function trealsumlist.getsourceinfo(const atag: integer): plistlinkinfoty;
 begin
  case atag of
   0: begin
-   result:= flinkvalue.name;
+   result:= @flinkvalue;
   end;
   sumleveltag: begin
-   result:= flinklevel.name;
+   result:= @flinklevel;
   end;
   sumissumtag: begin
-   result:= flinkissum.name;
+   result:= @flinkissum;
   end
   else begin
-   result:= '';
+   result:= nil;
   end;
  end;
 end;

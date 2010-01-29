@@ -301,6 +301,7 @@ type
   published
    property optionsgrid;
    property optionsfold;
+   property rowstatelist;
    property fixcols;
    property fixrows;
    property rowcount;
@@ -1685,30 +1686,15 @@ begin
    if str1 <> '' then begin
     datalist1:= fgrid.datacols.datalistbyname(str1);
    end;
-//   else begin
-//    if (atag = sumleveltag) and (osu_foldsum in trealsumlist(fdata).options) then begin
-//     datalist1:= fgrid.datacols.rowstate;
-//    end;
-//   end;
    fdata.linksource(datalist1,atag);
   end
   else begin
-   for int1:= 0 to fdata.getsourcenamecount-1 do begin
-    str1:= fdata.getsourcename(int1);
+   for int1:= 0 to fdata.getsourcecount-1 do begin
+    str1:= fdata.getsourcename(int1);  //link all source lists
     datalist1:= nil;
-//    if str1 = foldlevelsumname then begin
-//     datalist1:= fgrid.datacols.rowstate;
-//    end
-//    else begin
     if str1 <> '' then begin
      datalist1:= fgrid.datacols.datalistbyname(str1);
     end;
-//     else begin
-//      if (int1 = sumleveltag) and (osu_foldsum in trealsumlist(fdata).options) then begin
-//       datalist1:= fgrid.datacols.rowstate;
-//      end;
-//     end;
-//    end;
     fdata.linksource(datalist1,int1);
    end;
   end;

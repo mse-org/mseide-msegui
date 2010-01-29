@@ -66,6 +66,7 @@ type
   dirtystart,dirtystop: integer;
   source: tdatalist;
  end;
+ plistlinkinfoty = ^listlinkinfoty;
 
  tdatalist = class(tnullinterfacedpersistent)
   private
@@ -166,6 +167,7 @@ type
    function checksourcecopy2(var ainfo: listlinkinfoty;
                 const source2: tdatalist; const copyproc: copy2procty): boolean;
    procedure internalrearange(arangelist: pinteger; const acount: integer);
+   function islinked(const asource: tdatalist): boolean;
   public
    constructor create; override;
    destructor destroy; override;
@@ -174,8 +176,9 @@ type
    procedure listdestroyed(const sender: tdatalist); virtual;
    procedure sourcechange(const sender: tdatalist; const index: integer); virtual;
 
-   function getsourcenamecount: integer; virtual;
-   function getsourcename(const atag: integer): string; virtual;
+   function getsourcecount: integer; virtual;
+   function getsourceinfo(const atag: integer): plistlinkinfoty; virtual;
+   function getsourcename(const atag: integer): string;
    procedure linksource(const source: tdatalist; const atag: integer); virtual;
    function canlink(const asource: tdatalist;
                                         const atag: integer): boolean; virtual;
@@ -712,10 +715,6 @@ const
  currentfoldhiddenmask = 1 shl currentfoldhiddenbit;
  foldlevelmask = byte(not (foldhiddenmask or currentfoldhiddenmask));
  foldissummask = $01;
-//type
-// foldlevelty = 0..foldlevelmask; //0..63
- 
-const
  rowstatemask = $7f;
 
  selectedcolmax = 30; //32 bitset, bit31 -> whole row
@@ -735,7 +734,7 @@ type
   font: byte;  //index in rowfonts, 0 = none, 1 = rowfonts[0]
   fold: byte;  // hc nnnnnn  h = hidden c = current hidden,
                //    nnnnnn = fold level, 0 -> top
-  flags: byte; // 0000000v v = isvalue
+  flags: byte; // 0000000s s = issum
  end;
  prowstatety = ^rowstatety;
  rowstateaty = array[0..0] of rowstatety;
@@ -2718,11 +2717,30 @@ begin
 // checksourcechange(flinksource,sender,index,fsourcedirtystart,fsourcedirtystop);
 end;
 
+function tdatalist.islinked(const asource: tdatalist): boolean;
+var
+ int1: integer;
+ po1: plistlinkinfoty;
+begin
+ result:= asource = self; 
+ if not result then begin
+  for int1:= 0 to getsourcecount - 1 do begin
+   po1:= getsourceinfo(int1);
+   if (po1 <> nil) and (po1^.source <> nil) then begin
+    result:= po1^.source.islinked(asource);
+    if result then begin
+     break;
+    end;
+   end;
+  end;
+ end;
+end;
+
 function tdatalist.canlink(const asource: tdatalist;
                                         const atag: integer): boolean;
 begin
  result:= (asource <> nil) and (asource.datatype in getlinkdatatypes(atag)) and 
-               (asource <> self);
+               not asource.islinked(self);
 end;
 
 function tdatalist.checksourcecopy(var ainfo: listlinkinfoty;
@@ -4159,19 +4177,27 @@ begin
  //dummy
 end;
 
-function tdatalist.getsourcenamecount: integer;
+function tdatalist.getsourcecount: integer;
 begin
  result:= 0;
 end;
 
-function tdatalist.getsourcename(const atag: integer): string;
+function tdatalist.getsourceinfo(const atag: integer): plistlinkinfoty;
 begin
- result:= '';
- {
- if atag = 0 then begin
-  result:= fsourcename;
+ result:= nil;
+end;
+
+function tdatalist.getsourcename(const atag: integer): string;
+var
+ po1: plistlinkinfoty;
+begin
+ po1:= getsourceinfo(atag);
+ if po1 <> nil then begin
+  result:= po1^.name;
+ end
+ else begin
+  result:= '';
  end;
- }
 end;
 
 function tdatalist.getlinkdatatypes(const atag: integer): listdatatypesty;
