@@ -1150,6 +1150,7 @@ type
    ftopypos: integer;
    flinkfoldlevel: listlinkinfoty;
    flinkissum: listlinkinfoty;
+   ffoldlevelsourcelock: integer;
    procedure cleanfolding(arow: integer; visibleindex: integer);
    function isvisible(const arow: integer): boolean;
    procedure counthidden(var aindex: integer);
@@ -1519,7 +1520,8 @@ type
  cellselectmodety = (csm_select,csm_deselect,csm_reverse);
  selectcellmodety = (scm_cell,scm_row,scm_col);
  
- optionfoldty = (of_insertsamelevel,of_deletetree,of_movedeltoparent);
+ optionfoldty = (of_insertsamelevel,of_deletetree,of_shiftdeltoparent,
+                 of_shiftchildren);
  optionsfoldty = set of optionfoldty;
 
  gridnotifyeventty = procedure(const sender: tcustomgrid) of object;
@@ -12072,7 +12074,7 @@ begin
       include(fstate,gs_changelock);
       fdatacols.beginchangelock;
      end;
-     if of_movedeltoparent in foptionsfold then begin
+     if of_shiftdeltoparent in foptionsfold then begin
       fdatacols.frowstate.movegrouptoparent(aindex,acount);
      end;
      fdatacols.deleterow(aindex,acount);
@@ -14344,13 +14346,38 @@ end;
 procedure trowstatelist.setfoldlevel(const index: integer;
                const avalue: byte);
 var
- po1: prowstatety;
+ po1,po2: prowstatety;
+ by1,by2: byte;
+ delta: integer;
+ int1: integer;
 begin
- po1:= getitempo(index);
- if replacebits1(byte(po1^.fold),byte(avalue),byte(foldlevelmask)) then begin
-  checkdirty(index);
-  change(index);
-  fgrid.rowstatechanged(index);
+ if of_shiftchildren in fgrid.foptionsfold then begin
+  normalizering;
+  po1:= getitempo(index);
+  po2:= po1;
+  by1:= po1^.fold and foldlevelmask;  
+  delta:= integer(avalue) - integer(by1);
+  if delta <> 0 then begin
+   for int1:= index to fcount-1 do begin
+    by2:= po1^.fold and foldlevelmask;
+    if (by2 <= by1) and (int1 <> index) then begin
+     break;
+    end;
+    by2:= by2 + delta;
+    po1^.fold:= po1^.fold and not foldlevelmask or by2 and foldlevelmask;
+    inc(pbyte(po1),fsize);
+   end;
+   checkdirty(index);
+   checksyncfoldlevelsource(index,(pbyte(po1)-pbyte(po2)) div fsize);
+  end;
+ end
+ else begin
+  po1:= getitempo(index);
+  if replacebits1(byte(po1^.fold),byte(avalue),byte(foldlevelmask)) then begin
+   checkdirty(index);
+   change(index);
+   fgrid.rowstatechanged(index);
+  end;
  end;
 end;
 
@@ -14382,24 +14409,37 @@ var
  po2: pinteger;
  int1: integer;
 begin
- with flinkfoldlevel.source do begin
-  if acount > 1 then begin
-   self.normalizering;
-   normalizering;
-  end;
-  po1:= self.getitempo(index);
-  po2:= getitempo(index);
-  for int1:= 0 to acount-1 do begin
-   po2^:= po1^.fold and foldlevelmask;
-   inc(pchar(po1),self.size);
-   inc(pchar(po2),size);
+ inc(ffoldlevelsourcelock);
+ try
+  with flinkfoldlevel.source do begin
+   if acount > 1 then begin
+    self.normalizering;
+    normalizering;
+   end;
+   po1:= self.getitempo(index);
+   po2:= getitempo(index);
+   for int1:= 0 to acount-1 do begin
+    po2^:= po1^.fold and foldlevelmask;
+    inc(pchar(po1),self.size);
+    inc(pchar(po2),size);
+   end;
+   if acount = 1 then begin
+    change(index);
+   end
+   else begin
+    change(-1);
+   end;
   end;
   if acount = 1 then begin
    change(index);
+   fgrid.rowstatechanged(index);
   end
   else begin
    change(-1);
+   fgrid.rowstatechanged(-1);
   end;
+ finally
+  dec(ffoldlevelsourcelock);
  end;
 end;
 
@@ -14911,23 +14951,23 @@ begin
  result:= arow;
  if rowhidden(arow) then begin
   po1:= datapo;
-  inc(pchar(po1),arow*fsize);
+  inc(pbyte(po1),arow*fsize);
   for int1:= arow to count -1 do begin
    if po1^.fold and foldhiddenmask = 0 then begin
     result:= int1;
     exit;
    end;
-   inc(pchar(po1),fsize);
+   inc(pbyte(po1),fsize);
   end;
   result:= invalidaxis;
   po1:= datapo;
-  inc(pchar(po1),(arow-1)*fsize);
+  inc(pbyte(po1),(arow-1)*fsize);
   for int1:= arow - 1 downto 0 do begin
    if po1^.fold and foldhiddenmask = 0 then begin
     result:= int1;
     exit;
    end;
-   dec(pchar(po1),fsize);
+   dec(pbyte(po1),fsize);
   end;
  end;
 end;
@@ -15109,12 +15149,7 @@ begin
   dec(result);
   if (result = count-1) then begin
    with prowstaterowheightaty(po1)^[result] do begin
-//    int1:= rowheight.ypos + fgrid.fdatarowlinewidth + rowheight.height;
-//    if rowheight.height = 0 then begin
-//     int1:= int1 + fgrid.fdatarowheight;
-//    end;
-//    if aypos >= int1 then begin
-   if aypos >= ftopypos then begin
+    if aypos >= ftopypos then begin
      result:= invalidaxis;
     end;
    end;
@@ -15122,13 +15157,13 @@ begin
   if (result >= 0) and ffolded then begin
    cleanvisible(result);
    int2:= invalidaxis;
-   inc(pchar(po1),result*fsize);
+   inc(pbyte(po1),result*fsize);
    for int1:= result downto 0 do begin
     if po1^.normal.fold and currentfoldhiddenmask = 0 then begin
      int2:= int1;
      break;
     end;
-    dec(po1,fsize);
+    dec(pbyte(po1),fsize);
    end;
    result:= int2;
   end;
@@ -15307,8 +15342,8 @@ begin
    inc(pbyte(po1),fsize);
   end;
   if po4 <> nil then begin
-   checksyncfoldlevelsource((pchar(po4)-datapo) div fsize,
-                        (pchar(po3)-pchar(getitempo(aindex))) div fsize);
+   checksyncfoldlevelsource((pbyte(po4)-pbyte(datapo)) div fsize,
+                        (pbyte(po3)-pbyte(getitempo(aindex))) div fsize);
   end;
  end;
 end;
@@ -15358,11 +15393,16 @@ procedure trowstatelist.sourcechange(const sender: tdatalist;
 begin
  inherited;
  if sender <> nil then begin
-  if sender = flinkfoldlevel.source then begin
+  if (sender = flinkfoldlevel.source) and (ffoldlevelsourcelock = 0) then begin
    if checksourcechange(flinkfoldlevel,sender,index) then begin
-    checkdirty(index);
-    change(index);
-    fgrid.rowstatechanged(index);
+    if (of_shiftchildren in fgrid.optionsfold) and (index >= 0) then begin
+     foldlevel[index]:= pinteger(flinkfoldlevel.source.getitempo(index))^;
+    end
+    else begin
+     checkdirty(index);
+     change(index);
+     fgrid.rowstatechanged(index);
+    end;
    end;
   end
   else begin
