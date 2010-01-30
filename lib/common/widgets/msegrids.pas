@@ -1151,6 +1151,7 @@ type
    flinkfoldlevel: listlinkinfoty;
    flinkissum: listlinkinfoty;
    ffoldlevelsourcelock: integer;
+   fissumsourcelock: integer;
    procedure cleanfolding(arow: integer; visibleindex: integer);
    function isvisible(const arow: integer): boolean;
    procedure counthidden(var aindex: integer);
@@ -1170,6 +1171,9 @@ type
                                          const index: integer); override;
    procedure foldleveltosource(const index: integer; const acount: integer);
    procedure checksyncfoldlevelsource(const index: integer;
+                                 const acount: integer);
+   procedure foldissumtosource(const index: integer; const acount: integer);
+   procedure checksyncfoldissumsource(const index: integer;
                                  const acount: integer);
 
    function totchildrencount(const aindex: integer;
@@ -1804,7 +1808,7 @@ type
    procedure drawfocusedcell(const acanvas: tcanvas); virtual;
    procedure drawcellbackground(const acanvas: tcanvas);
 
-   procedure dopopup(var amenu: tpopupmenu; 
+   procedure updatepopupmenu(var amenu: tpopupmenu; 
                          var mouseinfo: mouseeventinfoty); override;
    function rowatpos(y: integer): integer; //0..rowcount-1, invalidaxis if invalid
    function ystep: integer;
@@ -2190,7 +2194,7 @@ type
    procedure dodeactivate; override;
 
    procedure doselectionchanged; override;
-   procedure dopopup(var amenu: tpopupmenu; 
+   procedure updatepopupmenu(var amenu: tpopupmenu; 
                          var mouseinfo: mouseeventinfoty); override;
   public
    constructor create(aowner: tcomponent); override;
@@ -8633,7 +8637,7 @@ begin
  end;
 end;
 
-procedure tcustomgrid.dopopup(var amenu: tpopupmenu; 
+procedure tcustomgrid.updatepopupmenu(var amenu: tpopupmenu; 
                                     var mouseinfo: mouseeventinfoty);
 var
  bo1: boolean;
@@ -13486,11 +13490,11 @@ begin
  inherited;
 end;
 
-procedure tcustomstringgrid.dopopup(var amenu: tpopupmenu; 
+procedure tcustomstringgrid.updatepopupmenu(var amenu: tpopupmenu; 
                          var mouseinfo: mouseeventinfoty);
 begin
  if isdatacell(ffocusedcell) then begin
-  feditor.dopopup(amenu,popupmenu,mouseinfo,false,fdatacols.hasselection);
+  feditor.updatepopupmenu(amenu,popupmenu,mouseinfo,false,fdatacols.hasselection);
  end;
  inherited;
 end;
@@ -14432,8 +14436,9 @@ begin
    po1^.flags:= po1^.flags and not foldissummask;
   end;
   checkdirty(index);
-  change(index);
-  fgrid.rowstatechanged(index);
+  checksyncfoldissumsource(index,1);
+//  change(index);
+//  fgrid.rowstatechanged(index);
  end;
 end;
 
@@ -14475,6 +14480,52 @@ begin
   end;
  finally
   dec(ffoldlevelsourcelock);
+ end;
+end;
+
+procedure trowstatelist.foldissumtosource(const index: integer;
+                                                    const acount: integer);
+var
+ po1: prowstatety;
+ po2: pinteger;
+ int1: integer;
+begin
+ inc(fissumsourcelock);
+ try
+  with flinkissum.source do begin
+   if acount > 1 then begin
+    self.normalizering;
+    normalizering;
+   end;
+   po1:= self.getitempo(index);
+   po2:= getitempo(index);
+   for int1:= 0 to acount-1 do begin
+    if po1^.flags and foldissummask <> 0 then begin
+     po2^:= longint(longbool(true));
+    end
+    else begin
+     po2^:= 0;
+    end;
+    inc(pchar(po1),self.size);
+    inc(pchar(po2),size);
+   end;
+   if acount = 1 then begin
+    change(index);
+   end
+   else begin
+    change(-1);
+   end;
+  end;
+  if acount = 1 then begin
+   change(index);
+   fgrid.rowstatechanged(index);
+  end
+  else begin
+   change(-1);
+   fgrid.rowstatechanged(-1);
+  end;
+ finally
+  dec(fissumsourcelock);
  end;
 end;
 
@@ -15340,6 +15391,24 @@ begin
  end;
 end;
 
+procedure trowstatelist.checksyncfoldissumsource(const index: integer;
+                                 const acount: integer);
+begin
+ if flinkissum.source <> nil then begin
+  foldissumtosource(index,acount);
+ end
+ else begin
+  if acount = 1 then begin
+   change(index);
+   fgrid.rowstatechanged(index);
+  end
+  else begin
+   change(-1);
+   fgrid.rowstatechanged(-1);
+  end;
+ end;
+end;
+
 procedure trowstatelist.movegrouptoparent(const aindex: integer;
                                                 const acount: integer);
 var
@@ -15441,7 +15510,7 @@ begin
    end;
   end
   else begin
-   if sender = flinkissum.source then begin
+   if (sender = flinkissum.source) and (fissumsourcelock = 0) then begin
     if checksourcechange(flinkissum,sender,index) then begin
      checkdirty(index);
      change(index);

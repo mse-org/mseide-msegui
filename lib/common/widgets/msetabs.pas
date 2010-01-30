@@ -736,7 +736,7 @@ type
    procedure doafterpaint(const canvas: tcanvas); override;
    procedure dofontheightdelta(var delta: integer); override;
    procedure doclosepage(const sender: tobject); virtual;
-   procedure dopopup(var amenu: tpopupmenu; var mouseinfo: mouseeventinfoty); override;
+   procedure updatepopupmenu(var amenu: tpopupmenu; var mouseinfo: mouseeventinfoty); override;
 
    //istatfile
    procedure dostatread(const reader: tstatreader);
@@ -4397,7 +4397,7 @@ begin
  ftabs.tabs[fpopuptab].state:= ftabs.tabs[fpopuptab].state + [ts_invisible];
 end;
 
-procedure tcustomtabwidget.dopopup(var amenu: tpopupmenu;
+procedure tcustomtabwidget.updatepopupmenu(var amenu: tpopupmenu;
                var mouseinfo: mouseeventinfoty);
 begin
  if (tabo_autopopup in options) then begin

@@ -364,7 +364,8 @@ type
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure dokeyup(var info: keyeventinfoty); override;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
-   procedure dopopup(var amenu: tpopupmenu; var mouseinfo: mouseeventinfoty); override;
+   procedure updatepopupmenu(var amenu: tpopupmenu;
+                                      var mouseinfo: mouseeventinfoty); override;
    procedure doactivate; override;
    procedure dodeactivate; override;
    procedure dofocus; override;
@@ -1508,11 +1509,11 @@ begin
  inherited;
 end;
 *)
-procedure tcustomedit.dopopup(var amenu: tpopupmenu;
-                        var mouseinfo: mouseeventinfoty);
+procedure tcustomedit.updatepopupmenu(var amenu: tpopupmenu;
+                                        var mouseinfo: mouseeventinfoty);
 begin
  if oe_autopopupmenu in foptionsedit then begin
-  feditor.dopopup(amenu,popupmenu,mouseinfo,hasselection,cangridcopy);
+  feditor.updatepopupmenu(amenu,popupmenu,mouseinfo,hasselection,cangridcopy);
  end;
  inherited;
 end;

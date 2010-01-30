@@ -167,7 +167,7 @@ type
 
    procedure dokeydown(var kinfo: keyeventinfoty);
    procedure mouseevent(var minfo: mouseeventinfoty);
-   procedure dopopup(var amenu: tpopupmenu; const popupmenu: tpopupmenu; 
+   procedure updatepopupmenu(var amenu: tpopupmenu; const popupmenu: tpopupmenu;
                      var mouseinfo: mouseeventinfoty; 
                      const hasselection, cangridcopy: boolean);
    procedure setfirstclick;
@@ -388,7 +388,7 @@ begin
  pastefromclipboard;
 end;
 
-procedure tinplaceedit.dopopup(var amenu: tpopupmenu; 
+procedure tinplaceedit.updatepopupmenu(var amenu: tpopupmenu; 
                 const popupmenu: tpopupmenu; var mouseinfo: mouseeventinfoty;
                 const hasselection, cangridcopy: boolean);
 var

@@ -682,7 +682,10 @@ type
 
    procedure showhint(var info: hintinfoty); override;
    procedure getpopuppos(var apos: pointty); virtual;
-   procedure dopopup(var amenu: tpopupmenu; var mouseinfo: mouseeventinfoty); virtual;
+   procedure updatepopupmenu(var amenu: tpopupmenu;
+                                   var mouseinfo: mouseeventinfoty); virtual;
+   procedure dopopup(var amenu: tpopupmenu; 
+                                   var mouseinfo: mouseeventinfoty); virtual;
 
    procedure poschanged; override;
    procedure sizechanged; override;
@@ -4193,6 +4196,14 @@ end;
 
 { tactionwidget }
 
+procedure tactionwidget.updatepopupmenu(var amenu: tpopupmenu;
+                                        var mouseinfo: mouseeventinfoty);
+begin
+ if (fpopupmenu <> nil) then begin
+  tpopupmenu.additems(amenu,self,mouseinfo,fpopupmenu);
+ end;
+end;
+
 procedure tactionwidget.dopopup(var amenu: tpopupmenu;
                                         var mouseinfo: mouseeventinfoty);
 var
@@ -4203,9 +4214,7 @@ var
 begin
  menu1:= amenu;
  try
-  if (fpopupmenu <> nil) then begin
-   tpopupmenu.additems(amenu,self,mouseinfo,fpopupmenu);
-  end;
+  updatepopupmenu(amenu,mouseinfo);
   if canevent(tmethod(fonpopup)) then begin
    fonpopup(self,amenu,mouseinfo);
   end;

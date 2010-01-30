@@ -30,6 +30,9 @@ type
    constructor create(owner: twidgetcol); reintroduce;
  end;
 
+ foldeditoptionty = (feo_menulevel,feo_menuissum);
+ foldeditoptionsty = set of foldeditoptionty;
+ 
  tfoldedit = class(tstringedit)
   private
    foncellevent: celleventty;
@@ -51,6 +54,7 @@ type
    fimnr_valuereadonly: integer;
    fimnr_valuesubitems: integer;
    fimagelistvalue: timagelist;
+   foptions: foldeditoptionsty;
    procedure setlevelstep(const avalue: integer);
    procedure setimagesize(const avalue: sizety);
    procedure setimagewidth(const avalue: integer);
@@ -72,6 +76,9 @@ type
    procedure setimnr_valuereadonly(const avalue: integer);
    procedure setimnr_valuesubitems(const avalue: integer);
    procedure setimagelistvalue(const avalue: timagelist);
+   procedure dolevelup(const sender: tobject);
+   procedure doleveldown(const sender: tobject);
+   procedure doissum(const sender: tobject);
   protected
    procedure updatelayout;
    procedure drawimage(const acanvas: tcanvas;
@@ -87,7 +94,6 @@ type
    procedure doonpaint(const acanvas: tcanvas); override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdefaultvalue: pointer; override;
-//   function getinnerframe: framety; override;
    function imageshift(arow: integer): integer;
                     //-1 -> focused row
    procedure setupeditor; override;
@@ -96,6 +102,8 @@ type
    procedure writestatvalue(const writer: tstatwriter); override;
    procedure readstatvalue(const reader: tstatreader); override;
    procedure synctofontheight; override;
+   procedure updatepopupmenu(var amenu: tpopupmenu; 
+                                var mouseinfo: mouseeventinfoty); override;
   public
    constructor create(aowner: tcomponent); override;
    property imagesize: sizety read fimagesize write setimagesize;
@@ -103,16 +111,21 @@ type
                                     read getgridimnr write setgridimnr;
    property gridimnrs: integerarty read getgridimnrs write setgridimnrs;
   published
+   property options: foldeditoptionsty read foptions write foptions default [];
    property oncellevent: celleventty read foncellevent write foncellevent;
    property onclientmouseevent: mouseeventty read fonclientmouseevent 
                            write fonclientmouseevent;
    property levelstep: integer read flevelstep write setlevelstep default 10;
 
    property imnr_base: integer read fimnr_base write setimnr_base default 0;
-   property imnr_expanded: integer read fimnr_expanded write setimnr_expanded default 0;
-   property imnr_selected: integer read fimnr_selected write setimnr_selected default 0;
-   property imnr_readonly: integer read fimnr_readonly write setimnr_readonly default 0;
-   property imnr_subitems: integer read fimnr_subitems write setimnr_subitems default 0;
+   property imnr_expanded: integer read fimnr_expanded 
+                                         write setimnr_expanded default 0;
+   property imnr_selected: integer read fimnr_selected 
+                                         write setimnr_selected default 0;
+   property imnr_readonly: integer read fimnr_readonly 
+                                         write setimnr_readonly default 0;
+   property imnr_subitems: integer read fimnr_subitems 
+                                         write setimnr_subitems default 0;
                       
                       
    property imnr_value: integer read fimnr_value write setimnr_value default -1;
@@ -144,7 +157,7 @@ type
  
 implementation
 uses
- msestockobjects,msesumlist;
+ msestockobjects,msesumlist,mseact;
 
 type
  tdatacols1 = class(tdatacols);
@@ -756,6 +769,49 @@ begin
   paintsize:= size1;
   if fgridintf <> nil then begin
    fgridintf.getcol.grid.datarowheight:= bounds_cy;
+  end;
+ end;
+end;
+
+procedure tfoldedit.dolevelup(const sender: tobject);
+begin
+ with fgridintf.getgrid do begin
+  rowfoldlevel[-1]:= rowfoldlevel[-1] + 1;
+ end;
+end;
+
+procedure tfoldedit.doleveldown(const sender: tobject);
+begin
+ with fgridintf.getgrid do begin
+  rowfoldlevel[-1]:= rowfoldlevel[-1] - 1;
+ end;
+end;
+
+procedure tfoldedit.doissum(const sender: tobject);
+begin
+ with fgridintf.getgrid do begin
+  rowfoldissum[-1]:= not rowfoldissum[-1];
+ end;
+end;
+
+procedure tfoldedit.updatepopupmenu(var amenu: tpopupmenu;
+                                          var mouseinfo: mouseeventinfoty);
+var
+ state1: actionstatesty;
+begin
+ inherited;
+ if fgridintf <> nil then begin
+  if feo_menulevel in foptions then begin
+   tpopupmenu.additems(amenu,self,mouseinfo,['Levelup','Leveldown'],
+              [],[],[@dolevelup,@doleveldown]);
+  end;
+  if feo_menuissum in foptions then begin
+   state1:= [];
+   if fgridintf.getgrid.rowfoldissum[-1] then begin
+    state1:= [as_checked];
+   end;
+   tpopupmenu.additems(amenu,self,mouseinfo,['Issum'],
+              [[mao_checkbox]],[state1],[@doissum],false);
   end;
  end;
 end;
