@@ -1155,7 +1155,7 @@ type
    function isvisible(const arow: integer): boolean;
    procedure counthidden(var aindex: integer);
    procedure sethidden(const index: integer; const avalue: boolean);
-   procedure setfoldlevel(const index: integer; const avalue: byte);
+   procedure setfoldlevel(const index: integer; avalue: byte);
    procedure setfoldissum(const index: integer; const avalue: boolean);
    procedure setfolded(const avalue: boolean);
    function getrowheight(const index: integer): integer;
@@ -1521,7 +1521,7 @@ type
  selectcellmodety = (scm_cell,scm_row,scm_col);
  
  optionfoldty = (of_insertsamelevel,of_deletetree,of_shiftdeltoparent,
-                 of_shiftchildren);
+                 of_shiftchildren,of_validatelevel);
  optionsfoldty = set of optionfoldty;
 
  gridnotifyeventty = procedure(const sender: tcustomgrid) of object;
@@ -14344,13 +14344,33 @@ begin
 end;
 
 procedure trowstatelist.setfoldlevel(const index: integer;
-               const avalue: byte);
+               avalue: byte);
 var
  po1,po2: prowstatety;
  by1,by2: byte;
  delta: integer;
  int1: integer;
+ bo1: boolean;
 begin
+ bo1:= of_validatelevel in fgrid.foptionsfold;
+ if bo1 then begin
+  if index = 0 then begin
+   if avalue = 0 then begin
+    bo1:= false;
+   end;
+   avalue:= 0;
+  end
+  else begin
+   by1:= (getitempo(index-1)^.fold and foldlevelmask) + 1;
+   if avalue > by1 then begin
+    avalue:= by1;
+   end
+   else begin
+    bo1:= false;
+   end;
+  end;
+ end;
+ 
  if of_shiftchildren in fgrid.foptionsfold then begin
   normalizering;
   po1:= getitempo(index);
@@ -14369,6 +14389,11 @@ begin
    end;
    checkdirty(index);
    checksyncfoldlevelsource(index,(pbyte(po1)-pbyte(po2)) div fsize);
+  end
+  else begin
+   if bo1 then begin
+    checksyncfoldlevelsource(index,1);
+   end;
   end;
  end
  else begin
@@ -14376,7 +14401,17 @@ begin
   if replacebits1(byte(po1^.fold),byte(avalue),byte(foldlevelmask)) then begin
    checkdirty(index);
    change(index);
-   fgrid.rowstatechanged(index);
+   if bo1 then begin
+    checksyncfoldlevelsource(index,1);
+   end
+   else begin
+    fgrid.rowstatechanged(index);
+   end;
+  end
+  else begin
+   if bo1 then begin
+    checksyncfoldlevelsource(index,1);
+   end;
   end;
  end;
 end;
