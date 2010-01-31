@@ -23,42 +23,43 @@ interface
 uses
  classes,msegui,mseclasses,mseforms,msegdbutils,msetypes,msedataedits,
  msegraphics,msegraphedits,cpuform,msegraphutils,mseguiglob,msemenus,
- msesimplewidgets,msewidgets,mseedit,msestrings;
+ msesimplewidgets,msewidgets,mseedit,msestrings,msesplitter;
 
 type
 
  tcpux86_64fo = class(tcpufo)
-   rax: tint64edit;
-   rbx: tint64edit;
-   rcx: tint64edit;
-   rdx: tint64edit;
-   rsi: tint64edit;
-   rdi: tint64edit;
-   rbp: tint64edit;
-   rsp: tint64edit;
-   rip: tint64edit;
-   eflags: tint64edit;
-   o: tbooleanedit;
-   d: tbooleanedit;
-   i: tbooleanedit;
-   t: tbooleanedit;
-   s: tbooleanedit;
-   r: tbooleanedit;
-   nt: tbooleanedit;
-   io: tbooleanedit;
-   v: tbooleanedit;
-   z: tbooleanedit;
-   a: tbooleanedit;
-   p: tbooleanedit;
-   c: tbooleanedit;
-   r8: tint64edit;
-   r9: tint64edit;
-   r15: tint64edit;
-   r10: tint64edit;
-   r11: tint64edit;
-   r12: tint64edit;
-   r13: tint64edit;
+   tspacer1: tspacer;
    r14: tint64edit;
+   r13: tint64edit;
+   r12: tint64edit;
+   r11: tint64edit;
+   r10: tint64edit;
+   r15: tint64edit;
+   r9: tint64edit;
+   r8: tint64edit;
+   io: tbooleanedit;
+   nt: tbooleanedit;
+   c: tbooleanedit;
+   p: tbooleanedit;
+   a: tbooleanedit;
+   z: tbooleanedit;
+   s: tbooleanedit;
+   t: tbooleanedit;
+   i: tbooleanedit;
+   d: tbooleanedit;
+   o: tbooleanedit;
+   eflags: tint64edit;
+   rip: tint64edit;
+   rsp: tint64edit;
+   rbp: tint64edit;
+   rdi: tint64edit;
+   rsi: tint64edit;
+   rdx: tint64edit;
+   rcx: tint64edit;
+   rbx: tint64edit;
+   rax: tint64edit;
+   r: tbooleanedit;
+   v: tbooleanedit;
    procedure flagonchange(const sender: TObject);
    procedure flagsetvalue(const sender: TObject; var avalue: Boolean; var accept: Boolean);
 //   procedure ononchange(const sender: TObject);

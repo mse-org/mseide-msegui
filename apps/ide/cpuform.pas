@@ -48,6 +48,7 @@ type
    function internalrefresh: boolean; virtual;
    procedure updatereadstatvalues; virtual;
    procedure updatewritestatvalues; virtual;
+   procedure updatelayout(const dsender: twidget); override;
   public
    constructor create(aowner: tcomponent); override;
    procedure refresh; virtual;
@@ -324,6 +325,12 @@ end;
 constructor tcpufo.create(aowner: tcomponent);
 begin
  inherited create(aowner);
+end;
+
+procedure tcpufo.updatelayout(const dsender: twidget);
+begin
+ aligny(wam_center,[stoptime,on]);
+ inherited;
 end;
 
 end.

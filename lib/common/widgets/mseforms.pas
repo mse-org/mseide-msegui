@@ -57,6 +57,7 @@ type
   protected
    procedure setoptionswidget(const avalue: optionswidgetty); override;
    procedure defineproperties(filer: tfiler); override;
+   procedure dochildscaled(const sender: twidget); override;
   public
    constructor create(aowner: tcustommseform); reintroduce;
   published
@@ -191,6 +192,8 @@ type
    function getplacementrect: rectty;
    function getminimizedsize(out apos: captionposty): sizety;
    procedure doafterload; override;
+   procedure updatelayout(const sender: twidget); virtual; 
+                               //called from scrollbox.onchildscaled
    //iificommand
    {$ifdef mse_with_ifi}
    procedure executeificommand(var acommand: ificommandcodety); override;
@@ -654,6 +657,12 @@ begin
                                  {$ifdef FPC}@{$endif}writedummy,false);
  filer.defineproperty('anchors',{$ifdef FPC}@{$endif}readdummy,
                                  {$ifdef FPC}@{$endif}writedummy,false);
+end;
+
+procedure tformscrollbox.dochildscaled(const sender: twidget);
+begin
+ tcustommseform(owner).updatelayout(sender);
+ inherited;
 end;
 
 { tdockformscrollbox }
@@ -1638,6 +1647,11 @@ begin
 end;
 
 procedure tcustommseform.aftercreate;
+begin
+ //dummy
+end;
+
+procedure tcustommseform.updatelayout(const sender: twidget);
 begin
  //dummy
 end;

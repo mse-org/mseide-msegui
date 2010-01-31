@@ -21,41 +21,43 @@ unit cpui386form;
 interface
 
 uses
- classes,msegui,mseclasses,mseforms,msegdbutils,msetypes,msedataedits,msegraphics,
- msegraphedits,cpuform;
+ classes,msegui,mseclasses,mseforms,msegdbutils,msetypes,msedataedits,
+ msegraphics,msegraphedits,cpuform,mseguiglob,msemenus,msesplitter,mseedit,
+ msestrings;
 
 type
 
  tcpui386fo = class(tcpufo)
-   eax: tintegeredit;
-   ebx: tintegeredit;
-   ecx: tintegeredit;
-   edx: tintegeredit;
-   esi: tintegeredit;
-   edi: tintegeredit;
-   ebp: tintegeredit;
-   esp: tintegeredit;
-   eip: tintegeredit;
-   eflags: tintegeredit;
-   cs: tintegeredit;
-   ds: tintegeredit;
-   es: tintegeredit;
-   fs: tintegeredit;
-   gs: tintegeredit;
-   ss: tintegeredit;
-   o: tbooleanedit;
-   d: tbooleanedit;
-   i: tbooleanedit;
-   t: tbooleanedit;
-   s: tbooleanedit;
-   r: tbooleanedit;
-   nt: tbooleanedit;
-   io: tbooleanedit;
-   v: tbooleanedit;
-   z: tbooleanedit;
-   a: tbooleanedit;
-   p: tbooleanedit;
+   tspacer1: tspacer;
    c: tbooleanedit;
+   p: tbooleanedit;
+   a: tbooleanedit;
+   z: tbooleanedit;
+   s: tbooleanedit;
+   t: tbooleanedit;
+   i: tbooleanedit;
+   d: tbooleanedit;
+   o: tbooleanedit;
+   io: tbooleanedit;
+   nt: tbooleanedit;
+   r: tbooleanedit;
+   v: tbooleanedit;
+   ss: tintegeredit;
+   gs: tintegeredit;
+   fs: tintegeredit;
+   es: tintegeredit;
+   ds: tintegeredit;
+   cs: tintegeredit;
+   eflags: tintegeredit;
+   eip: tintegeredit;
+   esp: tintegeredit;
+   ebp: tintegeredit;
+   edi: tintegeredit;
+   esi: tintegeredit;
+   edx: tintegeredit;
+   ecx: tintegeredit;
+   ebx: tintegeredit;
+   eax: tintegeredit;
    procedure flagonchange(const sender: TObject);
    procedure flagsetvalue(const sender: TObject; var avalue: Boolean; var accept: Boolean);
 //   procedure ononchange(const sender: TObject);
@@ -67,7 +69,7 @@ type
 
 implementation
 uses
- cpui386form_mfm,main,sysutils,mseformatstr,msebits,msestrings,msegraphutils;
+ cpui386form_mfm,main,sysutils,mseformatstr,msebits,msegraphutils;
 
 { tcpui386fo }
 

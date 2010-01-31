@@ -1,1018 +1,1027 @@
 inherited cpuavr32fo: tcpuavr32fo
   bounds_x = 174
   bounds_y = 158
-  bounds_cx = 267
-  bounds_cy = 257
+  bounds_cx = 261
+  bounds_cy = 280
+  caption = 'CPU AVR32'
   left = 2
   moduleclassname = 'tcpufo'
   inherited on: tbooleanedit
-    bounds_x = 184
-    bounds_y = 204
+    bounds_x = 152
+    bounds_y = 3
   end
-  object tlayouter1: tlayouter[1]
-    frame.dummy = 0
-    taborder = 23
+  inherited stoptime: tdatetimedisp
     bounds_x = 0
-    bounds_y = 33
-    bounds_cx = 110
-    bounds_cy = 189
+    bounds_y = 0
+  end
+  object tspacer1: tspacer[2]
+    taborder = 2
+    visible = True
+    bounds_x = 0
+    bounds_y = 18
+    bounds_cx = 243
+    bounds_cy = 254
     optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
-    font.name = 'stf_default'
-    font.xscale =  1.0000000000000000E+0000
-    font.dummy = 0
-    linkright = tlayouter2
-    linkbottom = exceptstack
-    dist_right = 3
-    dist_bottom = 5
-    optionslayout = [lao_placey]
-    place_mindist = 0
-    place_maxdist = 0
-    object r1: tintegeredit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    linktop = stoptime
+    object tbooleanedit16: tbooleanedit
+      color = -2147483645
       frame.levelo = -1
       frame.colorclient = -1879048185
-      frame.caption = 'r1'
-      frame.captionpos = cp_right
+      frame.caption = 'C'
+      frame.captionpos = cp_top
       frame.localprops = [frl_levelo, frl_colorclient]
       frame.dummy = 0
       frame.outerframe = (
-        0
-        0
-        14
-        0
-      )
-      taborder = 1
-      bounds_x = 0
-      bounds_y = 21
-      bounds_cx = 107
-      bounds_cy = 21
-      font.height = 14
-      font.name = 'stf_fixed'
-      font.xscale =  1.0000000000000000E+0000
-      font.dummy = 0
-      onsetvalue = regsetvalue
-      base = nb_hex
-      max = -1
-      reffontheight = 17
-    end
-    object r0: tintegeredit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-      frame.levelo = -1
-      frame.colorclient = -1879048185
-      frame.caption = 'r0'
-      frame.captionpos = cp_right
-      frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
-      frame.outerframe = (
-        0
-        0
-        14
-        0
-      )
-      bounds_x = 0
-      bounds_y = 0
-      bounds_cx = 107
-      bounds_cy = 21
-      font.height = 14
-      font.name = 'stf_fixed'
-      font.xscale =  1.0000000000000000E+0000
-      font.dummy = 0
-      onsetvalue = regsetvalue
-      base = nb_hex
-      max = -1
-      reffontheight = 17
-    end
-    object r4: tintegeredit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-      frame.levelo = -1
-      frame.colorclient = -1879048185
-      frame.caption = 'r4'
-      frame.captionpos = cp_right
-      frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
-      frame.outerframe = (
-        0
-        0
-        14
-        0
-      )
-      taborder = 4
-      bounds_x = 0
-      bounds_y = 84
-      bounds_cx = 107
-      bounds_cy = 21
-      font.height = 14
-      font.name = 'stf_fixed'
-      font.xscale =  1.0000000000000000E+0000
-      font.dummy = 0
-      onsetvalue = regsetvalue
-      base = nb_hex
-      max = -1
-      reffontheight = 17
-    end
-    object r3: tintegeredit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-      frame.levelo = -1
-      frame.colorclient = -1879048185
-      frame.caption = 'r3'
-      frame.captionpos = cp_right
-      frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
-      frame.outerframe = (
-        0
-        0
-        14
-        0
-      )
-      taborder = 3
-      bounds_x = 0
-      bounds_y = 63
-      bounds_cx = 107
-      bounds_cy = 21
-      font.height = 14
-      font.name = 'stf_fixed'
-      font.xscale =  1.0000000000000000E+0000
-      font.dummy = 0
-      onsetvalue = regsetvalue
-      base = nb_hex
-      max = -1
-      reffontheight = 17
-    end
-    object r2: tintegeredit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-      frame.levelo = -1
-      frame.colorclient = -1879048185
-      frame.caption = 'r2'
-      frame.captionpos = cp_right
-      frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
-      frame.outerframe = (
-        0
-        0
-        14
-        0
-      )
-      taborder = 2
-      bounds_x = 0
-      bounds_y = 42
-      bounds_cx = 107
-      bounds_cy = 21
-      font.height = 14
-      font.name = 'stf_fixed'
-      font.xscale =  1.0000000000000000E+0000
-      font.dummy = 0
-      onsetvalue = regsetvalue
-      base = nb_hex
-      max = -1
-      reffontheight = 17
-    end
-    object r5: tintegeredit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-      frame.levelo = -1
-      frame.colorclient = -1879048185
-      frame.caption = 'r5'
-      frame.captionpos = cp_right
-      frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
-      frame.outerframe = (
-        0
-        0
-        14
-        0
-      )
-      taborder = 5
-      bounds_x = 0
-      bounds_y = 105
-      bounds_cx = 107
-      bounds_cy = 21
-      font.height = 14
-      font.name = 'stf_fixed'
-      font.xscale =  1.0000000000000000E+0000
-      font.dummy = 0
-      onsetvalue = regsetvalue
-      base = nb_hex
-      max = -1
-      reffontheight = 17
-    end
-    object sp: tintegeredit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-      frame.levelo = -1
-      frame.colorclient = -1879048185
-      frame.caption = 'sp'
-      frame.captionpos = cp_right
-      frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
-      frame.outerframe = (
-        0
         0
         17
         0
+        0
       )
-      taborder = 6
-      bounds_x = 0
-      bounds_y = 126
-      bounds_cx = 110
-      bounds_cy = 21
-      font.height = 14
-      font.name = 'stf_fixed'
-      font.xscale =  1.0000000000000000E+0000
-      font.dummy = 0
-      onsetvalue = regsetvalue
-      base = nb_hex
-      max = -1
-      reffontheight = 17
+      bounds_x = 232
+      bounds_y = 8
+      bounds_cx = 11
+      bounds_cy = 28
+      onsetvalue = flagssetvalue
     end
-    object lr: tintegeredit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    object tbooleanedit17: tbooleanedit
+      Tag = 1
+      color = -2147483645
       frame.levelo = -1
       frame.colorclient = -1879048185
-      frame.caption = 'lr'
-      frame.captionpos = cp_right
+      frame.caption = 'Z'
+      frame.captionpos = cp_top
       frame.localprops = [frl_levelo, frl_colorclient]
       frame.dummy = 0
       frame.outerframe = (
         0
+        17
         0
-        10
-        0
-      )
-      taborder = 7
-      bounds_x = 0
-      bounds_y = 147
-      bounds_cx = 103
-      bounds_cy = 21
-      font.height = 14
-      font.name = 'stf_fixed'
-      font.xscale =  1.0000000000000000E+0000
-      font.dummy = 0
-      onsetvalue = regsetvalue
-      base = nb_hex
-      max = -1
-      reffontheight = 17
-    end
-    object pc: tintegeredit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-      frame.levelo = -1
-      frame.colorclient = -1879048185
-      frame.caption = 'pc'
-      frame.captionpos = cp_right
-      frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
-      frame.outerframe = (
-        0
-        0
-        16
-        0
-      )
-      taborder = 8
-      bounds_x = 0
-      bounds_y = 168
-      bounds_cx = 109
-      bounds_cy = 21
-      font.height = 14
-      font.name = 'stf_fixed'
-      font.xscale =  1.0000000000000000E+0000
-      font.dummy = 0
-      onsetvalue = regsetvalue
-      base = nb_hex
-      max = -1
-      reffontheight = 17
-    end
-  end
-  object tlayouter2: tlayouter[2]
-    frame.dummy = 0
-    taborder = 24
-    bounds_x = 113
-    bounds_y = 33
-    bounds_cx = 114
-    bounds_cy = 168
-    optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
-    font.name = 'stf_default'
-    font.xscale =  1.0000000000000000E+0000
-    font.dummy = 0
-    linkbottom = on
-    dist_bottom = 3
-    optionslayout = [lao_placey]
-    place_mindist = 0
-    place_maxdist = 0
-    onafterlayout = afterla
-    object r6: tintegeredit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-      frame.levelo = -1
-      frame.colorclient = -1879048185
-      frame.caption = 'r6'
-      frame.captionpos = cp_right
-      frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
-      frame.outerframe = (
-        0
-        0
-        14
-        0
-      )
-      bounds_x = 0
-      bounds_y = 0
-      bounds_cx = 107
-      bounds_cy = 21
-      font.height = 14
-      font.name = 'stf_fixed'
-      font.xscale =  1.0000000000000000E+0000
-      font.dummy = 0
-      onsetvalue = regsetvalue
-      base = nb_hex
-      max = -1
-      reffontheight = 17
-    end
-    object r7: tintegeredit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-      frame.levelo = -1
-      frame.colorclient = -1879048185
-      frame.caption = 'r7'
-      frame.captionpos = cp_right
-      frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
-      frame.outerframe = (
-        0
-        0
-        14
         0
       )
       taborder = 1
-      bounds_x = 0
-      bounds_y = 21
-      bounds_cx = 107
-      bounds_cy = 21
-      font.height = 14
-      font.name = 'stf_fixed'
-      font.xscale =  1.0000000000000000E+0000
-      font.dummy = 0
-      onsetvalue = regsetvalue
-      base = nb_hex
-      max = -1
-      reffontheight = 17
+      bounds_x = 221
+      bounds_y = 8
+      bounds_cx = 11
+      bounds_cy = 28
+      onsetvalue = flagssetvalue
     end
-    object r8: tintegeredit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    object tbooleanedit18: tbooleanedit
+      Tag = 2
+      color = -2147483645
       frame.levelo = -1
       frame.colorclient = -1879048185
-      frame.caption = 'r8'
-      frame.captionpos = cp_right
+      frame.caption = 'N'
+      frame.captionpos = cp_top
       frame.localprops = [frl_levelo, frl_colorclient]
       frame.dummy = 0
       frame.outerframe = (
         0
+        17
         0
-        14
         0
       )
       taborder = 2
-      bounds_x = 0
-      bounds_y = 42
-      bounds_cx = 107
-      bounds_cy = 21
-      font.height = 14
-      font.name = 'stf_fixed'
-      font.xscale =  1.0000000000000000E+0000
-      font.dummy = 0
-      onsetvalue = regsetvalue
-      base = nb_hex
-      max = -1
-      reffontheight = 17
+      bounds_x = 210
+      bounds_y = 8
+      bounds_cx = 11
+      bounds_cy = 28
+      onsetvalue = flagssetvalue
     end
-    object r11: tintegeredit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    object tbooleanedit19: tbooleanedit
+      Tag = 3
+      color = -2147483645
       frame.levelo = -1
       frame.colorclient = -1879048185
-      frame.caption = 'r11'
-      frame.captionpos = cp_right
+      frame.caption = 'V'
+      frame.captionpos = cp_top
       frame.localprops = [frl_levelo, frl_colorclient]
       frame.dummy = 0
       frame.outerframe = (
         0
+        17
         0
-        21
-        0
-      )
-      taborder = 5
-      bounds_x = 0
-      bounds_y = 105
-      bounds_cx = 114
-      bounds_cy = 21
-      font.height = 14
-      font.name = 'stf_fixed'
-      font.xscale =  1.0000000000000000E+0000
-      font.dummy = 0
-      onsetvalue = regsetvalue
-      base = nb_hex
-      max = -1
-      reffontheight = 17
-    end
-    object r10: tintegeredit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-      frame.levelo = -1
-      frame.colorclient = -1879048185
-      frame.caption = 'r10'
-      frame.captionpos = cp_right
-      frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
-      frame.outerframe = (
-        0
-        0
-        21
-        0
-      )
-      taborder = 4
-      bounds_x = 0
-      bounds_y = 84
-      bounds_cx = 114
-      bounds_cy = 21
-      font.height = 14
-      font.name = 'stf_fixed'
-      font.xscale =  1.0000000000000000E+0000
-      font.dummy = 0
-      onsetvalue = regsetvalue
-      base = nb_hex
-      max = -1
-      reffontheight = 17
-    end
-    object r9: tintegeredit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-      frame.levelo = -1
-      frame.colorclient = -1879048185
-      frame.caption = 'r9'
-      frame.captionpos = cp_right
-      frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
-      frame.outerframe = (
-        0
-        0
-        14
         0
       )
       taborder = 3
-      bounds_x = 0
-      bounds_y = 63
-      bounds_cx = 107
-      bounds_cy = 21
-      font.height = 14
-      font.name = 'stf_fixed'
-      font.xscale =  1.0000000000000000E+0000
-      font.dummy = 0
-      onsetvalue = regsetvalue
-      base = nb_hex
-      max = -1
-      reffontheight = 17
+      bounds_x = 199
+      bounds_y = 8
+      bounds_cx = 11
+      bounds_cy = 28
+      onsetvalue = flagssetvalue
     end
-    object r12: tintegeredit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    object tbooleanedit20: tbooleanedit
+      Tag = 4
+      color = -2147483645
       frame.levelo = -1
       frame.colorclient = -1879048185
-      frame.caption = 'r12'
-      frame.captionpos = cp_right
+      frame.caption = 'Q'
+      frame.captionpos = cp_top
       frame.localprops = [frl_levelo, frl_colorclient]
       frame.dummy = 0
       frame.outerframe = (
         0
+        17
         0
-        21
+        0
+      )
+      taborder = 4
+      bounds_x = 188
+      bounds_y = 8
+      bounds_cx = 11
+      bounds_cy = 28
+      onsetvalue = flagssetvalue
+    end
+    object tbooleanedit12: tbooleanedit
+      Tag = 5
+      color = -2147483645
+      frame.levelo = -1
+      frame.colorclient = -1879048185
+      frame.caption = 'L'
+      frame.captionpos = cp_top
+      frame.localprops = [frl_levelo, frl_colorclient]
+      frame.dummy = 0
+      frame.outerframe = (
+        0
+        17
+        0
+        0
+      )
+      taborder = 5
+      bounds_x = 177
+      bounds_y = 8
+      bounds_cx = 11
+      bounds_cy = 28
+      onsetvalue = flagssetvalue
+    end
+    object tbooleanedit14: tbooleanedit
+      Tag = 14
+      color = -2147483645
+      frame.levelo = -1
+      frame.colorclient = -1879048185
+      frame.caption = 'T'
+      frame.captionpos = cp_top
+      frame.localprops = [frl_levelo, frl_colorclient]
+      frame.dummy = 0
+      frame.outerframe = (
+        0
+        17
+        0
         0
       )
       taborder = 6
-      bounds_x = 0
-      bounds_y = 126
-      bounds_cx = 114
-      bounds_cy = 21
-      font.height = 14
-      font.name = 'stf_fixed'
-      font.xscale =  1.0000000000000000E+0000
-      font.dummy = 0
-      onsetvalue = regsetvalue
-      base = nb_hex
-      max = -1
-      reffontheight = 17
+      bounds_x = 164
+      bounds_y = 8
+      bounds_cx = 11
+      bounds_cy = 28
+      onsetvalue = flagssetvalue
     end
-    object sr: tintegeredit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    object tbooleanedit11: tbooleanedit
+      Tag = 15
+      color = -2147483645
       frame.levelo = -1
       frame.colorclient = -1879048185
-      frame.caption = 'sr'
-      frame.captionpos = cp_right
+      frame.caption = 'R'
+      frame.captionpos = cp_top
       frame.localprops = [frl_levelo, frl_colorclient]
       frame.dummy = 0
       frame.outerframe = (
         0
+        17
         0
-        14
         0
       )
       taborder = 7
-      bounds_x = 0
-      bounds_y = 147
-      bounds_cx = 107
-      bounds_cy = 21
-      font.height = 14
-      font.name = 'stf_fixed'
+      bounds_x = 153
+      bounds_y = 8
+      bounds_cx = 11
+      bounds_cy = 28
+      onsetvalue = flagssetvalue
+    end
+    object gm: tbooleanedit
+      Tag = 16
+      color = -2147483645
+      frame.levelo = -1
+      frame.colorclient = -1879048185
+      frame.caption = 'G'
+      frame.captionpos = cp_top
+      frame.localprops = [frl_levelo, frl_colorclient]
+      frame.dummy = 0
+      frame.outerframe = (
+        0
+        17
+        0
+        0
+      )
+      taborder = 8
+      bounds_x = 137
+      bounds_y = 8
+      bounds_cx = 11
+      bounds_cy = 28
+      onsetvalue = flagssetvalue
+    end
+    object tbooleanedit15: tbooleanedit
+      Tag = 17
+      color = -2147483645
+      frame.levelo = -1
+      frame.colorclient = -1879048185
+      frame.caption = '0'
+      frame.captionpos = cp_top
+      frame.localprops = [frl_levelo, frl_colorclient]
+      frame.dummy = 0
+      frame.outerframe = (
+        0
+        17
+        0
+        0
+      )
+      taborder = 9
+      bounds_x = 126
+      bounds_y = 8
+      bounds_cx = 11
+      bounds_cy = 28
+      onsetvalue = flagssetvalue
+    end
+    object tbooleanedit7: tbooleanedit
+      Tag = 18
+      color = -2147483645
+      frame.levelo = -1
+      frame.colorclient = -1879048185
+      frame.caption = '1'
+      frame.captionpos = cp_top
+      frame.localprops = [frl_levelo, frl_colorclient]
+      frame.dummy = 0
+      frame.outerframe = (
+        0
+        17
+        0
+        0
+      )
+      taborder = 10
+      bounds_x = 115
+      bounds_y = 8
+      bounds_cx = 11
+      bounds_cy = 28
+      onsetvalue = flagssetvalue
+    end
+    object tbooleanedit8: tbooleanedit
+      Tag = 19
+      color = -2147483645
+      frame.levelo = -1
+      frame.colorclient = -1879048185
+      frame.caption = '2'
+      frame.captionpos = cp_top
+      frame.localprops = [frl_levelo, frl_colorclient]
+      frame.dummy = 0
+      frame.outerframe = (
+        0
+        17
+        0
+        0
+      )
+      taborder = 11
+      bounds_x = 104
+      bounds_y = 8
+      bounds_cx = 11
+      bounds_cy = 28
+      onsetvalue = flagssetvalue
+    end
+    object tbooleanedit21: tbooleanedit
+      Tag = 20
+      color = -2147483645
+      frame.levelo = -1
+      frame.colorclient = -1879048185
+      frame.caption = 'I'
+      frame.captionpos = cp_top
+      frame.localprops = [frl_levelo, frl_colorclient]
+      frame.dummy = 0
+      frame.outerframe = (
+        0
+        17
+        0
+        0
+      )
+      taborder = 12
+      bounds_x = 93
+      bounds_y = 8
+      bounds_cx = 11
+      bounds_cy = 28
+      onsetvalue = flagssetvalue
+    end
+    object tbooleanedit9: tbooleanedit
+      Tag = 21
+      color = -2147483645
+      frame.levelo = -1
+      frame.colorclient = -1879048185
+      frame.caption = 'E'
+      frame.captionpos = cp_top
+      frame.localprops = [frl_levelo, frl_colorclient]
+      frame.dummy = 0
+      frame.outerframe = (
+        0
+        17
+        0
+        0
+      )
+      taborder = 13
+      bounds_x = 80
+      bounds_y = 8
+      bounds_cx = 11
+      bounds_cy = 28
+      onsetvalue = flagssetvalue
+    end
+    object tbooleanedit10: tbooleanedit
+      Tag = 22
+      color = -2147483645
+      frame.levelo = -1
+      frame.colorclient = -1879048185
+      frame.caption = '0'
+      frame.captionpos = cp_top
+      frame.localprops = [frl_levelo, frl_colorclient]
+      frame.dummy = 0
+      frame.outerframe = (
+        0
+        17
+        0
+        0
+      )
+      taborder = 14
+      bounds_x = 69
+      bounds_y = 8
+      bounds_cx = 11
+      bounds_cy = 28
+      onsetvalue = flagssetvalue
+    end
+    object tbooleanedit6: tbooleanedit
+      Tag = 23
+      color = -2147483645
+      frame.levelo = -1
+      frame.colorclient = -1879048185
+      frame.caption = '1'
+      frame.captionpos = cp_top
+      frame.localprops = [frl_levelo, frl_colorclient]
+      frame.dummy = 0
+      frame.outerframe = (
+        0
+        17
+        0
+        0
+      )
+      taborder = 15
+      bounds_x = 58
+      bounds_y = 8
+      bounds_cx = 11
+      bounds_cy = 28
+      onsetvalue = flagssetvalue
+    end
+    object tbooleanedit5: tbooleanedit
+      Tag = 24
+      color = -2147483645
+      frame.levelo = -1
+      frame.colorclient = -1879048185
+      frame.caption = 'M'
+      frame.captionpos = cp_top
+      frame.localprops = [frl_levelo, frl_colorclient]
+      frame.dummy = 0
+      frame.outerframe = (
+        0
+        17
+        0
+        0
+      )
+      taborder = 16
+      bounds_x = 47
+      bounds_y = 8
+      bounds_cx = 11
+      bounds_cy = 28
+      onsetvalue = flagssetvalue
+    end
+    object tbooleanedit4: tbooleanedit
+      Tag = 25
+      color = -2147483645
+      frame.levelo = -1
+      frame.colorclient = -1879048185
+      frame.caption = 'D'
+      frame.captionpos = cp_top
+      frame.localprops = [frl_levelo, frl_colorclient]
+      frame.dummy = 0
+      frame.outerframe = (
+        0
+        17
+        0
+        0
+      )
+      taborder = 17
+      bounds_x = 34
+      bounds_y = 8
+      bounds_cx = 11
+      bounds_cy = 28
+      onsetvalue = flagssetvalue
+    end
+    object tbooleanedit3: tbooleanedit
+      Tag = 26
+      color = -2147483645
+      frame.levelo = -1
+      frame.colorclient = -1879048185
+      frame.caption = 'M'
+      frame.captionpos = cp_top
+      frame.localprops = [frl_levelo, frl_colorclient]
+      frame.dummy = 0
+      frame.outerframe = (
+        0
+        17
+        0
+        0
+      )
+      taborder = 18
+      bounds_x = 23
+      bounds_y = 8
+      bounds_cx = 11
+      bounds_cy = 28
+      onsetvalue = flagssetvalue
+    end
+    object tbooleanedit2: tbooleanedit
+      Tag = 27
+      color = -2147483645
+      frame.levelo = -1
+      frame.colorclient = -1879048185
+      frame.caption = 'J'
+      frame.captionpos = cp_top
+      frame.localprops = [frl_levelo, frl_colorclient]
+      frame.dummy = 0
+      frame.outerframe = (
+        0
+        17
+        0
+        0
+      )
+      taborder = 19
+      bounds_x = 12
+      bounds_y = 8
+      bounds_cx = 11
+      bounds_cy = 28
+      onsetvalue = flagssetvalue
+    end
+    object c: tbooleanedit
+      Tag = 28
+      color = -2147483645
+      frame.levelo = -1
+      frame.colorclient = -1879048185
+      frame.caption = 'H'
+      frame.captionpos = cp_top
+      frame.localprops = [frl_levelo, frl_colorclient]
+      frame.dummy = 0
+      frame.outerframe = (
+        0
+        17
+        0
+        0
+      )
+      taborder = 20
+      bounds_x = 1
+      bounds_y = 8
+      bounds_cx = 11
+      bounds_cy = 28
+      onsetvalue = flagssetvalue
+    end
+    object irqoff: tbooleanedit
+      frame.caption = 'IRQoff'
+      frame.dummy = 0
+      frame.outerframe = (
+        0
+        1
+        37
+        2
+      )
+      taborder = 21
+      hint = 'Set global interrupt mask while stepping'
+      bounds_x = 17
+      bounds_y = 236
+      bounds_cx = 50
+      bounds_cy = 16
+      onsetvalue = irqoffset
+    end
+    object exceptstack: tbutton
+      optionswidget1 = [ow1_autowidth, ow1_autoheight]
+      taborder = 22
+      bounds_x = 112
+      bounds_y = 234
+      bounds_cx = 113
+      bounds_cy = 20
+      state = [as_disabled, as_localdisabled, as_localcaption, as_localonexecute]
+      caption = 'Check Exceptstack'
+      onexecute = checkexcept
+    end
+    object tlayouter2: tlayouter
+      frame.dummy = 0
+      taborder = 23
+      bounds_x = 113
+      bounds_y = 40
+      bounds_cx = 114
+      bounds_cy = 168
+      optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
+      font.name = 'stf_default'
       font.xscale =  1.0000000000000000E+0000
       font.dummy = 0
-      onchange = flagonchange
-      onsetvalue = regsetvalue
-      base = nb_hex
-      max = -1
-      reffontheight = 17
+      linkbottom = on
+      dist_bottom = 3
+      optionslayout = [lao_placey]
+      place_mindist = 0
+      place_maxdist = 0
+      onafterlayout = afterla
+      object r6: tintegeredit
+        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+        frame.levelo = -1
+        frame.colorclient = -1879048185
+        frame.caption = 'r6'
+        frame.captionpos = cp_right
+        frame.localprops = [frl_levelo, frl_colorclient]
+        frame.dummy = 0
+        frame.outerframe = (
+          0
+          0
+          14
+          0
+        )
+        bounds_x = 0
+        bounds_y = 0
+        bounds_cx = 107
+        bounds_cy = 21
+        font.height = 14
+        font.name = 'stf_fixed'
+        font.xscale =  1.0000000000000000E+0000
+        font.dummy = 0
+        onsetvalue = regsetvalue
+        base = nb_hex
+        max = -1
+        reffontheight = 17
+      end
+      object r7: tintegeredit
+        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+        frame.levelo = -1
+        frame.colorclient = -1879048185
+        frame.caption = 'r7'
+        frame.captionpos = cp_right
+        frame.localprops = [frl_levelo, frl_colorclient]
+        frame.dummy = 0
+        frame.outerframe = (
+          0
+          0
+          14
+          0
+        )
+        taborder = 1
+        bounds_x = 0
+        bounds_y = 21
+        bounds_cx = 107
+        bounds_cy = 21
+        font.height = 14
+        font.name = 'stf_fixed'
+        font.xscale =  1.0000000000000000E+0000
+        font.dummy = 0
+        onsetvalue = regsetvalue
+        base = nb_hex
+        max = -1
+        reffontheight = 17
+      end
+      object r8: tintegeredit
+        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+        frame.levelo = -1
+        frame.colorclient = -1879048185
+        frame.caption = 'r8'
+        frame.captionpos = cp_right
+        frame.localprops = [frl_levelo, frl_colorclient]
+        frame.dummy = 0
+        frame.outerframe = (
+          0
+          0
+          14
+          0
+        )
+        taborder = 2
+        bounds_x = 0
+        bounds_y = 42
+        bounds_cx = 107
+        bounds_cy = 21
+        font.height = 14
+        font.name = 'stf_fixed'
+        font.xscale =  1.0000000000000000E+0000
+        font.dummy = 0
+        onsetvalue = regsetvalue
+        base = nb_hex
+        max = -1
+        reffontheight = 17
+      end
+      object r11: tintegeredit
+        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+        frame.levelo = -1
+        frame.colorclient = -1879048185
+        frame.caption = 'r11'
+        frame.captionpos = cp_right
+        frame.localprops = [frl_levelo, frl_colorclient]
+        frame.dummy = 0
+        frame.outerframe = (
+          0
+          0
+          21
+          0
+        )
+        taborder = 5
+        bounds_x = 0
+        bounds_y = 105
+        bounds_cx = 114
+        bounds_cy = 21
+        font.height = 14
+        font.name = 'stf_fixed'
+        font.xscale =  1.0000000000000000E+0000
+        font.dummy = 0
+        onsetvalue = regsetvalue
+        base = nb_hex
+        max = -1
+        reffontheight = 17
+      end
+      object r10: tintegeredit
+        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+        frame.levelo = -1
+        frame.colorclient = -1879048185
+        frame.caption = 'r10'
+        frame.captionpos = cp_right
+        frame.localprops = [frl_levelo, frl_colorclient]
+        frame.dummy = 0
+        frame.outerframe = (
+          0
+          0
+          21
+          0
+        )
+        taborder = 4
+        bounds_x = 0
+        bounds_y = 84
+        bounds_cx = 114
+        bounds_cy = 21
+        font.height = 14
+        font.name = 'stf_fixed'
+        font.xscale =  1.0000000000000000E+0000
+        font.dummy = 0
+        onsetvalue = regsetvalue
+        base = nb_hex
+        max = -1
+        reffontheight = 17
+      end
+      object r9: tintegeredit
+        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+        frame.levelo = -1
+        frame.colorclient = -1879048185
+        frame.caption = 'r9'
+        frame.captionpos = cp_right
+        frame.localprops = [frl_levelo, frl_colorclient]
+        frame.dummy = 0
+        frame.outerframe = (
+          0
+          0
+          14
+          0
+        )
+        taborder = 3
+        bounds_x = 0
+        bounds_y = 63
+        bounds_cx = 107
+        bounds_cy = 21
+        font.height = 14
+        font.name = 'stf_fixed'
+        font.xscale =  1.0000000000000000E+0000
+        font.dummy = 0
+        onsetvalue = regsetvalue
+        base = nb_hex
+        max = -1
+        reffontheight = 17
+      end
+      object r12: tintegeredit
+        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+        frame.levelo = -1
+        frame.colorclient = -1879048185
+        frame.caption = 'r12'
+        frame.captionpos = cp_right
+        frame.localprops = [frl_levelo, frl_colorclient]
+        frame.dummy = 0
+        frame.outerframe = (
+          0
+          0
+          21
+          0
+        )
+        taborder = 6
+        bounds_x = 0
+        bounds_y = 126
+        bounds_cx = 114
+        bounds_cy = 21
+        font.height = 14
+        font.name = 'stf_fixed'
+        font.xscale =  1.0000000000000000E+0000
+        font.dummy = 0
+        onsetvalue = regsetvalue
+        base = nb_hex
+        max = -1
+        reffontheight = 17
+      end
+      object sr: tintegeredit
+        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+        frame.levelo = -1
+        frame.colorclient = -1879048185
+        frame.caption = 'sr'
+        frame.captionpos = cp_right
+        frame.localprops = [frl_levelo, frl_colorclient]
+        frame.dummy = 0
+        frame.outerframe = (
+          0
+          0
+          14
+          0
+        )
+        taborder = 7
+        bounds_x = 0
+        bounds_y = 147
+        bounds_cx = 107
+        bounds_cy = 21
+        font.height = 14
+        font.name = 'stf_fixed'
+        font.xscale =  1.0000000000000000E+0000
+        font.dummy = 0
+        onchange = flagonchange
+        onsetvalue = regsetvalue
+        base = nb_hex
+        max = -1
+        reffontheight = 17
+      end
     end
-  end
-  object c: tbooleanedit[3]
-    Tag = 28
-    color = -2147483645
-    frame.levelo = -1
-    frame.colorclient = -1879048185
-    frame.caption = 'H'
-    frame.captionpos = cp_top
-    frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
-    frame.outerframe = (
-      0
-      17
-      0
-      0
-    )
-    taborder = 1
-    bounds_x = 1
-    bounds_y = 1
-    bounds_cx = 11
-    bounds_cy = 28
-    onsetvalue = flagssetvalue
-  end
-  object tbooleanedit2: tbooleanedit[4]
-    Tag = 27
-    color = -2147483645
-    frame.levelo = -1
-    frame.colorclient = -1879048185
-    frame.caption = 'J'
-    frame.captionpos = cp_top
-    frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
-    frame.outerframe = (
-      0
-      17
-      0
-      0
-    )
-    taborder = 3
-    bounds_x = 12
-    bounds_y = 1
-    bounds_cx = 11
-    bounds_cy = 28
-    onsetvalue = flagssetvalue
-  end
-  object tbooleanedit3: tbooleanedit[5]
-    Tag = 26
-    color = -2147483645
-    frame.levelo = -1
-    frame.colorclient = -1879048185
-    frame.caption = 'M'
-    frame.captionpos = cp_top
-    frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
-    frame.outerframe = (
-      0
-      17
-      0
-      0
-    )
-    taborder = 4
-    bounds_x = 23
-    bounds_y = 1
-    bounds_cx = 11
-    bounds_cy = 28
-    onsetvalue = flagssetvalue
-  end
-  object tbooleanedit4: tbooleanedit[6]
-    Tag = 25
-    color = -2147483645
-    frame.levelo = -1
-    frame.colorclient = -1879048185
-    frame.caption = 'D'
-    frame.captionpos = cp_top
-    frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
-    frame.outerframe = (
-      0
-      17
-      0
-      0
-    )
-    taborder = 5
-    bounds_x = 34
-    bounds_y = 1
-    bounds_cx = 11
-    bounds_cy = 28
-    onsetvalue = flagssetvalue
-  end
-  object tbooleanedit5: tbooleanedit[7]
-    Tag = 24
-    color = -2147483645
-    frame.levelo = -1
-    frame.colorclient = -1879048185
-    frame.caption = 'M'
-    frame.captionpos = cp_top
-    frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
-    frame.outerframe = (
-      0
-      17
-      0
-      0
-    )
-    taborder = 6
-    bounds_x = 47
-    bounds_y = 1
-    bounds_cx = 11
-    bounds_cy = 28
-    onsetvalue = flagssetvalue
-  end
-  object tbooleanedit6: tbooleanedit[8]
-    Tag = 23
-    color = -2147483645
-    frame.levelo = -1
-    frame.colorclient = -1879048185
-    frame.caption = '1'
-    frame.captionpos = cp_top
-    frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
-    frame.outerframe = (
-      0
-      17
-      0
-      0
-    )
-    taborder = 7
-    bounds_x = 58
-    bounds_y = 1
-    bounds_cx = 11
-    bounds_cy = 28
-    onsetvalue = flagssetvalue
-  end
-  object tbooleanedit7: tbooleanedit[9]
-    Tag = 18
-    color = -2147483645
-    frame.levelo = -1
-    frame.colorclient = -1879048185
-    frame.caption = '1'
-    frame.captionpos = cp_top
-    frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
-    frame.outerframe = (
-      0
-      17
-      0
-      0
-    )
-    taborder = 12
-    bounds_x = 115
-    bounds_y = 1
-    bounds_cx = 11
-    bounds_cy = 28
-    onsetvalue = flagssetvalue
-  end
-  object tbooleanedit8: tbooleanedit[10]
-    Tag = 19
-    color = -2147483645
-    frame.levelo = -1
-    frame.colorclient = -1879048185
-    frame.caption = '2'
-    frame.captionpos = cp_top
-    frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
-    frame.outerframe = (
-      0
-      17
-      0
-      0
-    )
-    taborder = 11
-    bounds_x = 104
-    bounds_y = 1
-    bounds_cx = 11
-    bounds_cy = 28
-    onsetvalue = flagssetvalue
-  end
-  object tbooleanedit9: tbooleanedit[11]
-    Tag = 21
-    color = -2147483645
-    frame.levelo = -1
-    frame.colorclient = -1879048185
-    frame.caption = 'E'
-    frame.captionpos = cp_top
-    frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
-    frame.outerframe = (
-      0
-      17
-      0
-      0
-    )
-    taborder = 9
-    bounds_x = 80
-    bounds_y = 1
-    bounds_cx = 11
-    bounds_cy = 28
-    onsetvalue = flagssetvalue
-  end
-  object tbooleanedit10: tbooleanedit[12]
-    Tag = 22
-    color = -2147483645
-    frame.levelo = -1
-    frame.colorclient = -1879048185
-    frame.caption = '0'
-    frame.captionpos = cp_top
-    frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
-    frame.outerframe = (
-      0
-      17
-      0
-      0
-    )
-    taborder = 8
-    bounds_x = 69
-    bounds_y = 1
-    bounds_cx = 11
-    bounds_cy = 28
-    onsetvalue = flagssetvalue
-  end
-  object tbooleanedit11: tbooleanedit[13]
-    Tag = 15
-    color = -2147483645
-    frame.levelo = -1
-    frame.colorclient = -1879048185
-    frame.caption = 'R'
-    frame.captionpos = cp_top
-    frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
-    frame.outerframe = (
-      0
-      17
-      0
-      0
-    )
-    taborder = 15
-    bounds_x = 153
-    bounds_y = 1
-    bounds_cx = 11
-    bounds_cy = 28
-    onsetvalue = flagssetvalue
-  end
-  object tbooleanedit12: tbooleanedit[14]
-    Tag = 5
-    color = -2147483645
-    frame.levelo = -1
-    frame.colorclient = -1879048185
-    frame.caption = 'L'
-    frame.captionpos = cp_top
-    frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
-    frame.outerframe = (
-      0
-      17
-      0
-      0
-    )
-    taborder = 17
-    bounds_x = 177
-    bounds_y = 1
-    bounds_cx = 11
-    bounds_cy = 28
-    onsetvalue = flagssetvalue
-  end
-  object gm: tbooleanedit[15]
-    Tag = 16
-    color = -2147483645
-    frame.levelo = -1
-    frame.colorclient = -1879048185
-    frame.caption = 'G'
-    frame.captionpos = cp_top
-    frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
-    frame.outerframe = (
-      0
-      17
-      0
-      0
-    )
-    taborder = 14
-    bounds_x = 137
-    bounds_y = 1
-    bounds_cx = 11
-    bounds_cy = 28
-    onsetvalue = flagssetvalue
-  end
-  object tbooleanedit14: tbooleanedit[16]
-    Tag = 14
-    color = -2147483645
-    frame.levelo = -1
-    frame.colorclient = -1879048185
-    frame.caption = 'T'
-    frame.captionpos = cp_top
-    frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
-    frame.outerframe = (
-      0
-      17
-      0
-      0
-    )
-    taborder = 16
-    bounds_x = 164
-    bounds_y = 1
-    bounds_cx = 11
-    bounds_cy = 28
-    onsetvalue = flagssetvalue
-  end
-  object tbooleanedit15: tbooleanedit[17]
-    Tag = 17
-    color = -2147483645
-    frame.levelo = -1
-    frame.colorclient = -1879048185
-    frame.caption = '0'
-    frame.captionpos = cp_top
-    frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
-    frame.outerframe = (
-      0
-      17
-      0
-      0
-    )
-    taborder = 13
-    bounds_x = 126
-    bounds_y = 1
-    bounds_cx = 11
-    bounds_cy = 28
-    onsetvalue = flagssetvalue
-  end
-  object tbooleanedit20: tbooleanedit[18]
-    Tag = 4
-    color = -2147483645
-    frame.levelo = -1
-    frame.colorclient = -1879048185
-    frame.caption = 'Q'
-    frame.captionpos = cp_top
-    frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
-    frame.outerframe = (
-      0
-      17
-      0
-      0
-    )
-    taborder = 18
-    bounds_x = 188
-    bounds_y = 1
-    bounds_cx = 11
-    bounds_cy = 28
-    onsetvalue = flagssetvalue
-  end
-  object tbooleanedit19: tbooleanedit[19]
-    Tag = 3
-    color = -2147483645
-    frame.levelo = -1
-    frame.colorclient = -1879048185
-    frame.caption = 'V'
-    frame.captionpos = cp_top
-    frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
-    frame.outerframe = (
-      0
-      17
-      0
-      0
-    )
-    taborder = 19
-    bounds_x = 199
-    bounds_y = 1
-    bounds_cx = 11
-    bounds_cy = 28
-    onsetvalue = flagssetvalue
-  end
-  object tbooleanedit18: tbooleanedit[20]
-    Tag = 2
-    color = -2147483645
-    frame.levelo = -1
-    frame.colorclient = -1879048185
-    frame.caption = 'N'
-    frame.captionpos = cp_top
-    frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
-    frame.outerframe = (
-      0
-      17
-      0
-      0
-    )
-    taborder = 20
-    bounds_x = 210
-    bounds_y = 1
-    bounds_cx = 11
-    bounds_cy = 28
-    onsetvalue = flagssetvalue
-  end
-  object tbooleanedit17: tbooleanedit[21]
-    Tag = 1
-    color = -2147483645
-    frame.levelo = -1
-    frame.colorclient = -1879048185
-    frame.caption = 'Z'
-    frame.captionpos = cp_top
-    frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
-    frame.outerframe = (
-      0
-      17
-      0
-      0
-    )
-    taborder = 21
-    bounds_x = 221
-    bounds_y = 1
-    bounds_cx = 11
-    bounds_cy = 28
-    onsetvalue = flagssetvalue
-  end
-  object tbooleanedit16: tbooleanedit[22]
-    color = -2147483645
-    frame.levelo = -1
-    frame.colorclient = -1879048185
-    frame.caption = 'C'
-    frame.captionpos = cp_top
-    frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
-    frame.outerframe = (
-      0
-      17
-      0
-      0
-    )
-    taborder = 22
-    bounds_x = 232
-    bounds_y = 1
-    bounds_cx = 11
-    bounds_cy = 28
-    onsetvalue = flagssetvalue
-  end
-  object tbooleanedit21: tbooleanedit[23]
-    Tag = 20
-    color = -2147483645
-    frame.levelo = -1
-    frame.colorclient = -1879048185
-    frame.caption = 'I'
-    frame.captionpos = cp_top
-    frame.localprops = [frl_levelo, frl_colorclient]
-    frame.dummy = 0
-    frame.outerframe = (
-      0
-      17
-      0
-      0
-    )
-    taborder = 10
-    bounds_x = 93
-    bounds_y = 1
-    bounds_cx = 11
-    bounds_cy = 28
-    onsetvalue = flagssetvalue
-  end
-  object exceptstack: tbutton[24]
-    optionswidget1 = [ow1_autowidth, ow1_autoheight]
-    taborder = 26
-    bounds_x = 136
-    bounds_y = 227
-    bounds_cx = 113
-    bounds_cy = 20
-    state = [as_disabled, as_localdisabled, as_localcaption, as_localonexecute]
-    caption = 'Check Exceptstack'
-    onexecute = checkexcept
-  end
-  object irqoff: tbooleanedit[25]
-    frame.caption = 'IRQoff'
-    frame.dummy = 0
-    frame.outerframe = (
-      0
-      1
-      37
-      2
-    )
-    taborder = 25
-    hint = 'Set global interrupt mask while stepping'
-    bounds_x = 121
-    bounds_y = 205
-    bounds_cx = 50
-    bounds_cy = 16
-    onsetvalue = irqoffset
-  end
-  inherited stoptime: tdatetimedisp[26]
-    taborder = 2
-    bounds_x = 0
-    bounds_y = 228
+    object tlayouter1: tlayouter
+      frame.dummy = 0
+      taborder = 24
+      bounds_x = 0
+      bounds_y = 40
+      bounds_cx = 110
+      bounds_cy = 189
+      optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
+      font.name = 'stf_default'
+      font.xscale =  1.0000000000000000E+0000
+      font.dummy = 0
+      linkright = tlayouter2
+      linkbottom = exceptstack
+      dist_right = 3
+      dist_bottom = 5
+      optionslayout = [lao_placey]
+      place_mindist = 0
+      place_maxdist = 0
+      object r1: tintegeredit
+        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+        frame.levelo = -1
+        frame.colorclient = -1879048185
+        frame.caption = 'r1'
+        frame.captionpos = cp_right
+        frame.localprops = [frl_levelo, frl_colorclient]
+        frame.dummy = 0
+        frame.outerframe = (
+          0
+          0
+          14
+          0
+        )
+        taborder = 1
+        bounds_x = 0
+        bounds_y = 21
+        bounds_cx = 107
+        bounds_cy = 21
+        font.height = 14
+        font.name = 'stf_fixed'
+        font.xscale =  1.0000000000000000E+0000
+        font.dummy = 0
+        onsetvalue = regsetvalue
+        base = nb_hex
+        max = -1
+        reffontheight = 17
+      end
+      object r0: tintegeredit
+        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+        frame.levelo = -1
+        frame.colorclient = -1879048185
+        frame.caption = 'r0'
+        frame.captionpos = cp_right
+        frame.localprops = [frl_levelo, frl_colorclient]
+        frame.dummy = 0
+        frame.outerframe = (
+          0
+          0
+          14
+          0
+        )
+        bounds_x = 0
+        bounds_y = 0
+        bounds_cx = 107
+        bounds_cy = 21
+        font.height = 14
+        font.name = 'stf_fixed'
+        font.xscale =  1.0000000000000000E+0000
+        font.dummy = 0
+        onsetvalue = regsetvalue
+        base = nb_hex
+        max = -1
+        reffontheight = 17
+      end
+      object r4: tintegeredit
+        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+        frame.levelo = -1
+        frame.colorclient = -1879048185
+        frame.caption = 'r4'
+        frame.captionpos = cp_right
+        frame.localprops = [frl_levelo, frl_colorclient]
+        frame.dummy = 0
+        frame.outerframe = (
+          0
+          0
+          14
+          0
+        )
+        taborder = 4
+        bounds_x = 0
+        bounds_y = 84
+        bounds_cx = 107
+        bounds_cy = 21
+        font.height = 14
+        font.name = 'stf_fixed'
+        font.xscale =  1.0000000000000000E+0000
+        font.dummy = 0
+        onsetvalue = regsetvalue
+        base = nb_hex
+        max = -1
+        reffontheight = 17
+      end
+      object r3: tintegeredit
+        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+        frame.levelo = -1
+        frame.colorclient = -1879048185
+        frame.caption = 'r3'
+        frame.captionpos = cp_right
+        frame.localprops = [frl_levelo, frl_colorclient]
+        frame.dummy = 0
+        frame.outerframe = (
+          0
+          0
+          14
+          0
+        )
+        taborder = 3
+        bounds_x = 0
+        bounds_y = 63
+        bounds_cx = 107
+        bounds_cy = 21
+        font.height = 14
+        font.name = 'stf_fixed'
+        font.xscale =  1.0000000000000000E+0000
+        font.dummy = 0
+        onsetvalue = regsetvalue
+        base = nb_hex
+        max = -1
+        reffontheight = 17
+      end
+      object r2: tintegeredit
+        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+        frame.levelo = -1
+        frame.colorclient = -1879048185
+        frame.caption = 'r2'
+        frame.captionpos = cp_right
+        frame.localprops = [frl_levelo, frl_colorclient]
+        frame.dummy = 0
+        frame.outerframe = (
+          0
+          0
+          14
+          0
+        )
+        taborder = 2
+        bounds_x = 0
+        bounds_y = 42
+        bounds_cx = 107
+        bounds_cy = 21
+        font.height = 14
+        font.name = 'stf_fixed'
+        font.xscale =  1.0000000000000000E+0000
+        font.dummy = 0
+        onsetvalue = regsetvalue
+        base = nb_hex
+        max = -1
+        reffontheight = 17
+      end
+      object r5: tintegeredit
+        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+        frame.levelo = -1
+        frame.colorclient = -1879048185
+        frame.caption = 'r5'
+        frame.captionpos = cp_right
+        frame.localprops = [frl_levelo, frl_colorclient]
+        frame.dummy = 0
+        frame.outerframe = (
+          0
+          0
+          14
+          0
+        )
+        taborder = 5
+        bounds_x = 0
+        bounds_y = 105
+        bounds_cx = 107
+        bounds_cy = 21
+        font.height = 14
+        font.name = 'stf_fixed'
+        font.xscale =  1.0000000000000000E+0000
+        font.dummy = 0
+        onsetvalue = regsetvalue
+        base = nb_hex
+        max = -1
+        reffontheight = 17
+      end
+      object sp: tintegeredit
+        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+        frame.levelo = -1
+        frame.colorclient = -1879048185
+        frame.caption = 'sp'
+        frame.captionpos = cp_right
+        frame.localprops = [frl_levelo, frl_colorclient]
+        frame.dummy = 0
+        frame.outerframe = (
+          0
+          0
+          17
+          0
+        )
+        taborder = 6
+        bounds_x = 0
+        bounds_y = 126
+        bounds_cx = 110
+        bounds_cy = 21
+        font.height = 14
+        font.name = 'stf_fixed'
+        font.xscale =  1.0000000000000000E+0000
+        font.dummy = 0
+        onsetvalue = regsetvalue
+        base = nb_hex
+        max = -1
+        reffontheight = 17
+      end
+      object lr: tintegeredit
+        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+        frame.levelo = -1
+        frame.colorclient = -1879048185
+        frame.caption = 'lr'
+        frame.captionpos = cp_right
+        frame.localprops = [frl_levelo, frl_colorclient]
+        frame.dummy = 0
+        frame.outerframe = (
+          0
+          0
+          10
+          0
+        )
+        taborder = 7
+        bounds_x = 0
+        bounds_y = 147
+        bounds_cx = 103
+        bounds_cy = 21
+        font.height = 14
+        font.name = 'stf_fixed'
+        font.xscale =  1.0000000000000000E+0000
+        font.dummy = 0
+        onsetvalue = regsetvalue
+        base = nb_hex
+        max = -1
+        reffontheight = 17
+      end
+      object pc: tintegeredit
+        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+        frame.levelo = -1
+        frame.colorclient = -1879048185
+        frame.caption = 'pc'
+        frame.captionpos = cp_right
+        frame.localprops = [frl_levelo, frl_colorclient]
+        frame.dummy = 0
+        frame.outerframe = (
+          0
+          0
+          16
+          0
+        )
+        taborder = 8
+        bounds_x = 0
+        bounds_y = 168
+        bounds_cx = 109
+        bounds_cy = 21
+        font.height = 14
+        font.name = 'stf_fixed'
+        font.xscale =  1.0000000000000000E+0000
+        font.dummy = 0
+        onsetvalue = regsetvalue
+        base = nb_hex
+        max = -1
+        reffontheight = 17
+      end
+    end
   end
 end
