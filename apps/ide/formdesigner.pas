@@ -1321,6 +1321,7 @@ procedure tdesignwindow.dispatchkeyevent(const eventkind: eventkindty;
 var
  po1: pointty;
  widget1: twidget;
+ shiftstate1: shiftstatesty;
 // component1: tcomponent;
 
 begin
@@ -1328,9 +1329,10 @@ begin
   inherited;
   exit;
  end;
+ shiftstate1:= info.shiftstate * keyshiftstatesmask;
  if eventkind = ek_keypress then begin
   with info do begin
-   if shiftstate * keyshiftstatesmask = [] then begin
+   if shiftstate1 = [] then begin
     include(eventstate,es_processed);
     case key of
      key_return: begin
@@ -1380,7 +1382,7 @@ begin
     end;
    end
    else begin
-    if (shiftstate = [ss_ctrl]) or (shiftstate = [ss_shift]) then begin
+    if (shiftstate1 = [ss_ctrl]) or (shiftstate1 = [ss_shift]) then begin
      include(eventstate,es_processed);
      po1:= nullpoint;
      case key of
@@ -1391,7 +1393,7 @@ begin
       else exclude(eventstate,es_processed);
      end;
      if (es_processed in eventstate) then begin
-      if shiftstate = [ss_ctrl] then begin
+      if shiftstate1 = [ss_ctrl] then begin
        fselections.move(po1);
        if fselections.count > 0 then begin
         fselections.updateinfos;

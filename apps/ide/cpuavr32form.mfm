@@ -8,7 +8,7 @@ inherited cpuavr32fo: tcpuavr32fo
   moduleclassname = 'tcpufo'
   inherited on: tbooleanedit
     bounds_x = 152
-    bounds_y = 3
+    bounds_y = 1
   end
   inherited stoptime: tdatetimedisp
     bounds_x = 0
@@ -522,7 +522,6 @@ inherited cpuavr32fo: tcpuavr32fo
       font.name = 'stf_default'
       font.xscale =  1.0000000000000000E+0000
       font.dummy = 0
-      linkbottom = on
       dist_bottom = 3
       optionslayout = [lao_placey]
       place_mindist = 0
