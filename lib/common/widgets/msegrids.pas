@@ -14392,7 +14392,7 @@ begin
     inc(pbyte(po1),fsize);
    end;
    checkdirty(index);
-   checksyncfoldlevelsource(index,(pbyte(po1)-pbyte(po2)) div fsize);
+   checksyncfoldlevelsource(index,(pchar(po1)-pchar(po2)) div fsize);
   end
   else begin
    if bo1 then begin
@@ -15446,8 +15446,8 @@ begin
    inc(pbyte(po1),fsize);
   end;
   if po4 <> nil then begin
-   checksyncfoldlevelsource((pbyte(po4)-pbyte(datapo)) div fsize,
-                        (pbyte(po3)-pbyte(getitempo(aindex))) div fsize);
+   checksyncfoldlevelsource((pchar(po4)-pchar(datapo)) div fsize,
+                        (pchar(po3)-pchar(getitempo(aindex))) div fsize);
   end;
  end;
 end;

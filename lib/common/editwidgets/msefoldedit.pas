@@ -803,7 +803,8 @@ begin
  if fgridintf <> nil then begin
   if feo_menulevel in foptions then begin
    tpopupmenu.additems(amenu,self,mouseinfo,['Levelup','Leveldown'],
-              [],[],[@dolevelup,@doleveldown]);
+              [],[],[{$ifdef FPC}@{$endif}dolevelup,
+              {$ifdef FPC}@{$endif}doleveldown]);
   end;
   if feo_menuissum in foptions then begin
    state1:= [];
@@ -811,7 +812,7 @@ begin
     state1:= [as_checked];
    end;
    tpopupmenu.additems(amenu,self,mouseinfo,['Issum'],
-              [[mao_checkbox]],[state1],[@doissum],false);
+              [[mao_checkbox]],[state1],[{$ifdef FPC}@{$endif}doissum],false);
   end;
  end;
 end;
