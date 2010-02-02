@@ -58,7 +58,7 @@ function gui_settrayhint(var awindow: windowty;
 function gui_creategc(paintdevice: paintdevicety; const akind: gckindty;
                 var gc: gcty; const aprintername: msestring = ''): guierrorty;
 //function gui_destroygc(winid: winidty; var gc: gcty): guierrorty;
-function gui_flushgdi: guierrorty;
+function gui_flushgdi(const synchronize: boolean = false): guierrorty;
 function gui_showwindow(id: winidty): guierrorty;
 function gui_hidewindow(id: winidty): guierrorty;
 function gui_raisewindow(id: winidty): guierrorty;

@@ -2593,6 +2593,7 @@ type
    procedure waitevent;         
     //application must be locked
    procedure checkactivewindow;
+   function focusinpending: boolean;
    procedure checkapplicationactive;
    function winiddestroyed(const aid: winidty): boolean;
    function eventloop(const amodalwindow: twindow; const once: boolean = false): boolean;
@@ -13811,11 +13812,29 @@ begin
  end;
 end;
 
+function tinternalapplication.focusinpending: boolean;
+var
+ po1: ^tevent;
+ int1: integer;
+begin
+ gui_flushgdi(true);
+ getevents;
+ po1:= pointer(eventlist.datapo);
+ result:= false;
+ for int1:= 0 to eventlist.count - 1 do begin
+  if (po1^ <> nil) and (po1^.kind = ek_focusin) then begin
+   result:= true;
+   break;
+  end;
+  inc(po1);
+ end;
+end;
+
 procedure tinternalapplication.checkapplicationactive;
 var
  bo1: boolean;
 begin
- bo1:= (activewindow <> nil);
+ bo1:= (activewindow <> nil) or focusinpending;
  if  bo1 xor (aps_active in fstate) then begin
   fonapplicationactivechangedlist.doevent(bo1);
   if bo1 then begin
@@ -13938,10 +13957,8 @@ begin       //eventloop
         include(fstate,aps_activewindowchecked);
         checkactivewindow;
        end;
-//       if ftimertick then begin
-        ftimertick:= false;
-        msetimer.tick(self);    //tick called in every idle
-//       end;
+       ftimertick:= false;
+       msetimer.tick(self);    //tick called in every idle
       except
        handleexception(self);
       end;

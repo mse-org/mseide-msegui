@@ -5573,9 +5573,14 @@ begin
  xflush(appdisp); 
 end;
 
-function gui_flushgdi: guierrorty;
+function gui_flushgdi(const synchronize: boolean = false): guierrorty;
 begin
- xflush(appdisp);
+ if synchronize then begin
+  xsync(appdisp,false);
+ end
+ else begin
+  xflush(appdisp);
+ end;
  result:= gue_ok;
 end;
 
