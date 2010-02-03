@@ -1891,7 +1891,7 @@ type
                            const nocolwrap: boolean); virtual;
                  //step > 0 -> right, step < 0 left
 
-   function isautoappend: boolean; //true if current row is auto appended
+   function isautoappend: boolean; //true if last row is auto appended
    procedure removeappendedrow;
    function checkreautoappend: boolean; //true if row appended
    
@@ -9548,6 +9548,14 @@ function tcustomgrid.focuscell(cell: gridcoordty;
           const selectmode: selectcellmodety = scm_cell;
           const noshowcell: boolean = false): boolean;
 
+ function isappend(const arow: integer): boolean;
+ begin
+  result:= not (gs_isdb in fstate) and 
+      ((og_autoappend in foptionsgrid) and (arow >= frowcount) and 
+                                                         (frowcount <> 0) or
+       (arow = 0) and (frowcount = 0) and (og_autofirstrow in foptionsgrid));
+ end;
+ 
  procedure doselectaction;
 
   procedure startanchors;
@@ -9743,14 +9751,6 @@ var
   finally
    endupdate(true);
   end;
- end;
-
- function isappend(const arow: integer): boolean;
- begin
-  result:= not (gs_isdb in fstate) and 
-      ((og_autoappend in foptionsgrid) and (arow >= frowcount) and 
-                                                         (frowcount <> 0) or
-       (arow = 0) and (frowcount = 0) and (og_autofirstrow in foptionsgrid));
  end;
 
 var
@@ -10025,11 +10025,10 @@ begin
 end;
 
 function tcustomgrid.isautoappend: boolean; 
-      //true if current row is auto appended
+      //true if last row is auto appended
 begin
  result:= not (gs_isdb in fstate) and (frowcount > 0) and 
- ({(gs_rowappended in fstate) and}
-          (frowcount = 1) and (og_autofirstrow in foptionsgrid) or
+ ((frowcount = 1) and (og_autofirstrow in foptionsgrid) or
       (foptionsgrid * [og_autoappend,og_appendempty] = [og_autoappend])
      ) and fdatacols.rowempty(frowcount - 1);
 end;
@@ -12692,7 +12691,6 @@ begin
    include(fstate,gs_emptyrowremoved);
   end;
  end;
-// exclude(fstate,gs_rowappended);
 end;
 
 function tcustomgrid.internalsort(sortfunc: gridsorteventty;

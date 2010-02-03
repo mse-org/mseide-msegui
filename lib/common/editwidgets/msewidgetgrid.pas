@@ -1623,8 +1623,10 @@ end;
 
 function twidgetcol.nullcheckneeded(const newfocus: twidget): boolean;
 begin
- result:= (tcustomgrid1(fgrid).fnonullcheck = 0) and 
-                       (fgrid.entered or not fgrid.checkdescendent(newfocus));
+ with tcustomgrid1(fgrid) do begin
+  result:= (fnonullcheck = 0) and (entered or not checkdescendent(newfocus)) and
+                       not ((row = rowhigh) and isautoappend);
+ end;
 end;
 
 function twidgetcol.nonullcheck: boolean;
