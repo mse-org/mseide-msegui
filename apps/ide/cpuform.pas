@@ -53,6 +53,7 @@ type
    constructor create(aowner: tcomponent); override;
    procedure refresh; virtual;
    procedure beforecontinue; virtual;
+   function flagedit(const aindex: integer): tcustombooleanedit; virtual;
   end;
 
 var
@@ -249,6 +250,11 @@ begin
  end;
 end;
 
+function tcpufo.flagedit(const aindex: integer): tcustombooleanedit;
+begin
+ result:= nil;
+end;
+
 procedure tcpufo.doflagonchange(const sender: TObject);
 var
  int1: integer;
@@ -259,7 +265,7 @@ begin
  if fflagswidget <> nil then begin
   ca1:= fflagswidget.value;
   for int1:= 0 to 31 do begin
-   ed1:= on.tagitem(int1);
+   ed1:= flagedit(int1);
    if (ed1 <> nil) then begin
     bo1:= bits[int1] and ca1 <> 0;
     if ed1.value <> bo1 then begin

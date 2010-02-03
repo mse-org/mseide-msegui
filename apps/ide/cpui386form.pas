@@ -65,6 +65,7 @@ type
    procedure cpufoonchildscaled(const sender: TObject);
   public
    constructor create(aowner: tcomponent); override;
+   function flagedit(const aindex: integer): tcustombooleanedit; override;
  end;
 
 implementation
@@ -77,6 +78,11 @@ constructor tcpui386fo.create(aowner: tcomponent);
 begin
  inherited create(aowner);
  fflagswidget:= eflags;
+end;
+
+function tcpui386fo.flagedit(const aindex: integer): tcustombooleanedit;
+begin
+ result:= c.tagitem(aindex);
 end;
 
 procedure tcpui386fo.flagonchange(const sender: TObject);
