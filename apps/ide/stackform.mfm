@@ -142,6 +142,7 @@ object stackfo: tstackfo
     bounds_cx = 172
     bounds_cy = 18
     anchors = [an_left, an_top, an_right]
+    textflags = [tf_ycentered, tf_ellipseleft]
     options = [dwo_hintclippedtext]
     reffontheight = 14
   end
