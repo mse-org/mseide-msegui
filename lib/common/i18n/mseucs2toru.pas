@@ -26,7 +26,7 @@ const
   $c7,$cc,$b5,$b6,$b9,$d1,$d2,$cb,$cf,$d0,$ca,$d8,$d7,$ce
     );
 
-function ucs2to866(const avalue: widechar): char;
+function ucs2to866(const avalue: msechar): char;
 var
     i: longword;
 begin
@@ -79,7 +79,7 @@ begin
 end;
 
 
-function ucs2to866(const avalue: widestring): ansistring;
+function ucs2to866(const avalue: msestring): ansistring;
 var
     i,i1: integer;
 begin
