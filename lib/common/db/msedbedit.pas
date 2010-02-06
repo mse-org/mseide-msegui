@@ -1401,7 +1401,8 @@ type
    property optionsgrid;
    property fixcols;
    property fixrows;
-   property font;
+//   property font;
+   property fontempty;
    property gridframecolor;
    property gridframewidth;
    property rowcolors;

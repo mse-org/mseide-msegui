@@ -2079,6 +2079,8 @@ type
   published
    property frame: tgridframe read getframe write setframe;
    property font: twidgetfont read getfont write setfont stored isfontstored;
+   property fontempty: twidgetfontempty read getfontempty 
+                       write setfontempty stored isfontemptystored;
    property onkeydown: keyeventty read fonkeydown write fonkeydown;
    property wheelscrollheight: integer read fwheelscrollheight write
                     fwheelscrollheight default defaultwheelscrollheight;

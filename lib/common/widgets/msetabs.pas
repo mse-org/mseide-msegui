@@ -783,6 +783,8 @@ type
    property optionswidget default defaulttaboptionswidget;
    property options: tabbaroptionsty read getoptions write setoptions default [];
    property font: twidgetfont read getfont write setfont stored isfontstored;
+   property fontempty: twidgetfontempty read getfontempty 
+                                 write setfontempty stored isfontemptystored;
    property tab_frame: tstepboxframe1 read gettab_frame write settab_frame;
    property tab_face: tface read gettab_face write settab_face;
    property tab_color: colorty read gettab_color write settab_color default cl_default;
@@ -862,6 +864,7 @@ type
    property onpageremoved;
    property options;
    property font;
+   property fontempty;
    property tab_font;
    property tab_fonttab;
    property tab_fontactivetab;

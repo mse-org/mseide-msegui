@@ -46,12 +46,12 @@ type
                            var atext: msestring; var accept: boolean) of object;
  dataeditstatety = (des_edited,des_emptytext,des_grayed,des_isdb,des_dbnull);
  dataeditstatesty = set of dataeditstatety;
-
+{
  teditemptyfont = class(tparentfont)
   public
    class function getinstancepo(owner: tobject): pfont; override;
  end;
- 
+}
  tcustomdataedit = class(tcustomedit,igridwidget,istatfile,idragcontroller
                          {$ifdef mse_with_ifi},iifidatalink{$endif})
   private
@@ -65,7 +65,7 @@ type
    fongettext: gettexteventty;
    fonsettext: settexteventty;
    fempty_text: msestring;
-   fempty_font: teditemptyfont;
+//   fempty_font: teditemptyfont;
    fempty_textflags: textflagsty;
    fempty_textcolor: colorty;
    fempty_textcolorbackground: colorty;
@@ -78,16 +78,16 @@ type
    procedure setifilink(const avalue: tifilinkcomp);
    function ifigriddata: tdatalist;
 {$endif}
-   procedure fontemptychanged(const sender: tobject);
+//   procedure fontemptychanged(const sender: tobject);
    procedure emptychanged;
    
    procedure setstatfile(const Value: tstatfile);
    function getreadonly: boolean;
    procedure setreadonly(const avalue: boolean);
    procedure setempty_text(const avalue: msestring);
-   function getempty_font: teditemptyfont;
-   procedure setempty_font(const avalue: teditemptyfont);
-   function isempty_fontstored: boolean;
+//   function getempty_font: teditemptyfont;
+//   procedure setempty_font(const avalue: teditemptyfont);
+//   function isempty_fontstored: boolean;
    procedure setempty_textflags(const avalue: textflagsty);
    procedure setempty_textcolor(const avalue: colorty);
    procedure setempty_textcolorbackground(const avalue: colorty);
@@ -193,8 +193,8 @@ type
    function nullcheckneeded(const newfocus: twidget): boolean; virtual;
   public
    constructor create(aowner: tcomponent); override;
-   destructor destroy; override;
-   procedure createfontempty;
+//   destructor destroy; override;
+//   procedure createfontempty;
    
    procedure initgridwidget; virtual;
    procedure synctofontheight; override;
@@ -217,8 +217,8 @@ type
    property statvarname: msestring read getstatvarname write fstatvarname;
    property empty_color: colorty read fempty_color write setempty_color 
                                            default cl_none;
-   property empty_font: teditemptyfont read getempty_font write setempty_font 
-                                                  stored isempty_fontstored;
+   property empty_font: twidgetfontempty read getfontempty write setfontempty 
+                                                  stored isfontemptystored;
    property empty_textstyle: fontstylesty read fempty_textstyle 
                     write setempty_textstyle default [];
    property empty_textflags: textflagsty read fempty_textflags 
@@ -1224,12 +1224,12 @@ begin
 end;
 
  { teditemptyfont }
- 
+{ 
 class function teditemptyfont.getinstancepo(owner: tobject): pfont;
 begin
  result:= @tcustomdataedit(owner).fempty_font;
 end;
-
+}
 { tcustomdataedit }
 
 constructor tcustomdataedit.create(aowner: tcomponent);
@@ -1240,13 +1240,13 @@ begin
  fempty_color:= cl_none;
  inherited;
 end;
-
+{
 destructor tcustomdataedit.destroy;
 begin
  inherited;
  fempty_font.free;
 end;
-
+}
 function tcustomdataedit.checkvalue(const quiet: boolean = false): boolean;
 begin
  result:= true;
@@ -1435,8 +1435,8 @@ begin
  end;
  feditor.text:= mstr1;
  if force or ((des_emptytext in fstate) xor (des_emptytext in state1)) then begin
-  if (des_emptytext in fstate) and (fempty_font <> nil) then begin
-   feditor.font:= fempty_font;
+  if (des_emptytext in fstate) {and (fempty_font <> nil)} then begin
+   feditor.font:= getfontempty1{fempty_font};
   end
   else begin
    feditor.font:= geteditfont;
@@ -1623,8 +1623,8 @@ end;
 
 function tcustomdataedit.geteditfont: tfont;
 begin
- if (fempty_font <> nil) and (des_emptytext in fstate) then begin
-  result:= fempty_font;
+ if {(fempty_font <> nil) and} (des_emptytext in fstate) then begin
+  result:= getfontempty1{fempty_font};
  end
  else begin
   if (fgridintf <> nil) and (ffont = nil) then begin
@@ -1925,9 +1925,9 @@ begin
    end;
    if mstr1 <> '' then begin
     if bo1 then begin    
-     if fempty_font <> nil then begin
-      canvas.font:= fempty_font;
-     end;
+//     if fempty_font <> nil then begin
+      canvas.font:= getfontempty1{fempty_font};
+//     end;
      atextflags:= fempty_textflags;
      if fempty_textcolor <> cl_none then begin
       canvas.font.color:= fempty_textcolor;
@@ -2209,7 +2209,7 @@ begin
  fempty_text:= avalue;
  formatchanged;
 end;
-
+(*
 procedure tcustomdataedit.createfontempty;
 begin
  if fempty_font = nil then begin
@@ -2243,7 +2243,7 @@ procedure tcustomdataedit.fontemptychanged(const sender: tobject);
 begin
  emptychanged;
 end;
-
+*)
 procedure tcustomdataedit.setempty_textcolor(const avalue: colorty);
 begin
  if avalue <> fempty_textcolor then begin

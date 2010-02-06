@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -1134,6 +1134,12 @@ type
    class function getinstancepo(owner: tobject): pfont; override;
  end;
  widgetfontclassty = class of twidgetfont;
+
+ twidgetfontempty = class(tparentfont)
+  public
+   class function getinstancepo(owner: tobject): pfont; override;
+ end;
+ widgetfontemptyclassty = class of twidgetfontempty;
  
  pdragobject = ^tdragobject;
  tdragobject = class
@@ -1266,6 +1272,7 @@ type
    fframe: tcustomframe;
    fface: tcustomface;
    ffont: twidgetfont;
+   ffontempty: twidgetfontempty;
    fhint: msestring;
    fdefaultfocuschild: twidget;
 
@@ -1352,6 +1359,10 @@ type
    procedure setfont(const avalue: twidgetfont);
    function getfont: twidgetfont;
    function getfont1: twidgetfont; //no getoptionalobject
+   function isfontemptystored: Boolean;
+   procedure setfontempty(const avalue: twidgetfontempty);
+   function getfontempty: twidgetfontempty;
+   function getfontempty1: twidgetfontempty; //no getoptionalobject
    function getframefont: tfont;
    procedure fontchanged; virtual;
    procedure fontcanvaschanged; virtual;
@@ -1468,7 +1479,9 @@ type
    procedure internalcreateframe; virtual;
    procedure internalcreateface; virtual;
    function getfontclass: widgetfontclassty; virtual;
+   function getfontemptyclass: widgetfontemptyclassty; virtual;
    procedure internalcreatefont; virtual;
+   procedure internalcreatefontempty; virtual;
 
    function getclientrect: rectty;
    function windowpo: pwindowty;
@@ -1485,6 +1498,7 @@ type
    procedure createframe;
    procedure createface;
    procedure createfont;
+   procedure createfontempty;
 
    function isloading: boolean;      //checks ws_loadlock and csdestroing too
    function widgetstate: widgetstatesty;                 //iframe
@@ -3273,6 +3287,13 @@ end;
 class function twidgetfont.getinstancepo(owner: tobject): pfont;
 begin
  result:= @twidget(owner).ffont;
+end;
+
+{ twidgetfontempty}
+
+class function twidgetfontempty.getinstancepo(owner: tobject): pfont;
+begin
+ result:= @twidget(owner).ffontempty;
 end;
 
 { tresizeevent }
@@ -6052,6 +6073,7 @@ begin
  end;
  fwindow.Free;
  ffont.free;
+ ffontempty.free;
  fframe.free;
  fface.free;
  inherited;
@@ -6087,6 +6109,13 @@ procedure twidget.createfont;
 begin
  if ffont = nil then begin
   internalcreatefont;
+ end;
+end;
+
+procedure twidget.createfontempty;
+begin
+ if ffontempty = nil then begin
+  internalcreatefontempty;
  end;
 end;
 
@@ -10894,12 +10923,25 @@ begin
  result:= twidgetfont;
 end;
 
+function twidget.getfontemptyclass: widgetfontemptyclassty;
+begin
+ result:= twidgetfontempty;
+end;
+
 procedure twidget.internalcreatefont;
 begin
  if ffont = nil then begin
   ffont:= getfontclass.create;
  end;
  ffont.onchange:= {$ifdef FPC}@{$endif}dofontchanged;
+end;
+
+procedure twidget.internalcreatefontempty;
+begin
+ if ffontempty = nil then begin
+  ffontempty:= getfontemptyclass.create;
+ end;
+ ffontempty.onchange:= {$ifdef FPC}@{$endif}dofontchanged;
 end;
 
 procedure twidget.syncsinglelinefontheight(const lineheight: boolean = false;
@@ -10963,10 +11005,45 @@ begin
  result:= ffont <> nil;
 end;
 
+function twidget.isfontemptystored: Boolean;
+begin
+ result:= ffontempty <> nil;
+end;
+
 procedure twidget.setfont(const avalue: twidgetfont);
 begin
  if avalue <> ffont then begin
   setoptionalobject(avalue,ffont,{$ifdef FPC}@{$endif}internalcreatefont);
+  fontchanged;
+ end;
+end;
+
+function twidget.getfontempty1: twidgetfontempty;
+var
+ widget1: twidget;
+begin
+ widget1:= self;
+ repeat
+  result:= widget1.ffontempty;
+  if result <> nil then begin
+   exit;
+  end;
+  widget1:= widget1.fparentwidget;
+ until widget1 = nil;
+ result:= twidgetfontempty(stockobjects.fonts[stf_empty]);
+end;
+
+function twidget.getfontempty: twidgetfontempty;
+begin
+ getoptionalobject(ffontempty,{$ifdef FPC}@{$endif}internalcreatefontempty);
+ result:= getfontempty1;
+end;
+
+procedure twidget.setfontempty(const avalue: twidgetfontempty);
+begin
+ if avalue <> ffontempty then begin
+  setoptionalobject(avalue,ffontempty,
+                         {$ifdef FPC}@{$endif}internalcreatefontempty);
   fontchanged;
  end;
 end;

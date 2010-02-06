@@ -758,6 +758,7 @@ type
  trecordband = class(tcustomrecordband)
   published
    property font;
+//   property fontempty;
    property tabs;
    property datasource;
    property options;
@@ -925,6 +926,7 @@ type
  tbandgroup = class(tcustombandgroup)
   published
    property font;
+//   property fontempty;
    property tabs;
    property datasource;
    property nextband;
@@ -1081,6 +1083,7 @@ type
  tbandarea = class(tcustombandarea)
   published
    property font;
+//   property fontempty;
    property options;
    property onfirstarea;
    property onlastarea;
@@ -1291,6 +1294,7 @@ type
    property options;
    
    property font;
+//   property fontempty;
    property onfirstarea;
    property onlastarea;
    property onbeforerender;
@@ -1477,6 +1481,7 @@ type
    property face;
    property visible;
    property font;
+//   property fontempty;
    property nextpage;
    property nextpageifempty;
    property nextpageiflast;
@@ -1680,6 +1685,7 @@ type
    property color;
    property ppmm;
    property font;
+//   property fontempty;
    property grid_show;
    property grid_snap;
    property grid_size;

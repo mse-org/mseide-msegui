@@ -392,6 +392,8 @@ type
    procedure initnewcomponent(const ascale: real); override;
    property caption: msestring read getcaption write setcaption;
    property font: twidgetfont read getfont write setfont stored isfontstored;
+   property fontempty: twidgetfontempty read getfontempty 
+                            write setfontempty stored isfontemptystored;
    property textflags: textflagsty read ftextflags write settextflags default 
                              defaultlabeltextflags;
    property options: labeloptionsty read foptions write setoptions default [];

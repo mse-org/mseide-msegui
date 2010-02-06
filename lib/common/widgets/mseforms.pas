@@ -215,6 +215,8 @@ type
    property mainmenu: tmainmenu read fmainmenu write setmainmenu;
    property color default cl_background;
    property font: twidgetfont read getfont write setfont stored isfontstored;
+   property fontempty: twidgetfontempty read getfontempty 
+                  write setfontempty stored isfontemptystored;
    property options: formoptionsty read getoptions write setoptions
                          default defaultformoptions;
 
@@ -277,6 +279,7 @@ type
    property mainmenu;
    property color;
    property font;
+   property fontempty;
    property options;
    property statfile;
    property statvarname;
@@ -404,6 +407,7 @@ type
    property mainmenu;
    property color;
    property font;
+   property fontempty;
    property options;
    property statfile;
    property statvarname;
