@@ -11134,10 +11134,12 @@ begin
    fvisiblerows:= fdatacols.frowstate.visiblerows1(fvisiblerowsbase,
                        fdatarect.cy - fscrollrect.y{ div fdatarowheight + 2});
    int1:= high(fvisiblerows);
-   while fvisiblerows[int1] > flastvisiblerow do begin
-    dec(int1);
+   if int1 >= 0 then begin
+    while fvisiblerows[int1] > flastvisiblerow do begin
+     dec(int1);
+    end;
+    setlength(fvisiblerows,int1+1);
    end;
-   setlength(fvisiblerows,int1+1);
   end;
   if (og_folded in foptionsgrid) then begin
    with fdatacols.frowstate do begin
