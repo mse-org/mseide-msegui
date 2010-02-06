@@ -28,7 +28,8 @@ type
 //               tf_forcealignment, //do not use default alignment for buttons
                tf_clipi,tf_clipo,
                tf_grayed,tf_wordbreak,tf_softhyphen,tf_noselect,
-               tf_ellipseleft,{tf_ellipsemid,}tf_ellipseright,tf_tabtospace);
+               tf_ellipseleft,{tf_ellipsemid,}tf_ellipseright,tf_tabtospace,
+               tf_force);
  textflagsty = set of textflagty;
 const
  ellipsemask: textflagsty = [tf_ellipseleft,{tf_ellipsemid,}tf_ellipseright];

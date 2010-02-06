@@ -400,7 +400,7 @@ begin
     end;
    end;
    registerfontalias(getenumname(typeinfo(stockfontty),ord(fo1)),
-            gui_getdefaultfontnames[fo1],fam_fixnooverwrite,0,0,[],1.0,str1);
+            gui_getdefaultfontnames[fo1],fam_nooverwrite,0,0,[],1.0,str1);
   end;
   ffontaliasregistered:= true;
  end;

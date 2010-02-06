@@ -74,9 +74,10 @@ type
 
    property empty_color;
    property empty_font;
-   property empty_textstyle;
+   property empty_fontstyle;
    property empty_textflags;
    property empty_text;
+   property empty_options;
    property empty_textcolor;
    property empty_textcolorbackground;
    property optionsedit default defaultlookupoptionsedit;

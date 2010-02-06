@@ -52,6 +52,9 @@ type
    class function getinstancepo(owner: tobject): pfont; override;
  end;
 }
+ emptyoptionty = (eo_defaulttext); //use text of tfacecontroller
+ emptyoptionsty = set of emptyoptionty;
+ 
  tcustomdataedit = class(tcustomedit,igridwidget,istatfile,idragcontroller
                          {$ifdef mse_with_ifi},iifidatalink{$endif})
   private
@@ -69,10 +72,11 @@ type
    fempty_textflags: textflagsty;
    fempty_textcolor: colorty;
    fempty_textcolorbackground: colorty;
-   fempty_textstyle: fontstylesty;
+   fempty_fontstyle: fontstylesty;
    fempty_color: colorty;
 {$ifdef mse_with_ifi}
    fifilink: tifilinkcomp;
+   fempty_options: emptyoptionsty;
    procedure ifisetvalue(var avalue; var accept: boolean);
    function getifilinkkind: ptypeinfo;
    procedure setifilink(const avalue: tifilinkcomp);
@@ -91,7 +95,7 @@ type
    procedure setempty_textflags(const avalue: textflagsty);
    procedure setempty_textcolor(const avalue: colorty);
    procedure setempty_textcolorbackground(const avalue: colorty);
-   procedure setempty_textstyle(const avalue: fontstylesty);
+   procedure setempty_fontstyle(const avalue: fontstylesty);
    procedure setempty_color(const avalue: colorty);
   protected
    fgridintf: iwidgetgrid;
@@ -215,12 +219,14 @@ type
    property readonly: boolean read getreadonly write setreadonly;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
+   property empty_options: emptyoptionsty read fempty_options 
+                                           write fempty_options default [];
    property empty_color: colorty read fempty_color write setempty_color 
                                            default cl_none;
    property empty_font: twidgetfontempty read getfontempty write setfontempty 
                                                   stored isfontemptystored;
-   property empty_textstyle: fontstylesty read fempty_textstyle 
-                    write setempty_textstyle default [];
+   property empty_fontstyle: fontstylesty read fempty_fontstyle 
+                    write setempty_fontstyle default [];
    property empty_textflags: textflagsty read fempty_textflags 
                     write setempty_textflags default defaulttextflagsempty;
    property empty_text: msestring read fempty_text write setempty_text;
@@ -240,9 +246,10 @@ type
    property statvarname;
    property empty_color;
    property empty_font;
-   property empty_textstyle;
+   property empty_fontstyle;
    property empty_textflags;
    property empty_text;
+   property empty_options;
    property empty_textcolor;
    property empty_textcolorbackground;
    property optionsedit;
@@ -1435,18 +1442,20 @@ begin
  end;
  feditor.text:= mstr1;
  if force or ((des_emptytext in fstate) xor (des_emptytext in state1)) then begin
-  if (des_emptytext in fstate) {and (fempty_font <> nil)} then begin
+  if des_emptytext in fstate then begin
    feditor.font:= getfontempty1{fempty_font};
+   if fempty_textcolor <> cl_none then begin
+    feditor.fontcolor:= fempty_textcolor;
+   end;
+   if fempty_textcolorbackground <> cl_none then begin
+    feditor.fontcolorbackground:= fempty_textcolorbackground;
+   end;
+   if fempty_fontstyle <> [] then begin
+    feditor.fontstyle:= fempty_fontstyle;
+   end;
   end
   else begin
    feditor.font:= geteditfont;
-  end;
-  if des_emptytext in fstate then begin
-   feditor.fontcolor:= fempty_textcolor;
-   feditor.fontcolorbackground:= fempty_textcolorbackground;
-   feditor.fontstyle:= fempty_textstyle;
-  end
-  else begin
    feditor.fontcolor:= cl_none;
    feditor.fontcolorbackground:= cl_none;
    feditor.fontstyle:= [];
@@ -1904,8 +1913,8 @@ begin
    fongettext(self,mstr1,false);
   end;
   if bo1 then begin    
-   if fempty_textstyle <> [] then begin
-    canvas.font.style:= fempty_textstyle;
+   if fempty_fontstyle <> [] then begin
+    canvas.font.style:= fempty_fontstyle;
    end;
   end;
   if calcautocellsize then begin
@@ -1925,9 +1934,7 @@ begin
    end;
    if mstr1 <> '' then begin
     if bo1 then begin    
-//     if fempty_font <> nil then begin
-      canvas.font:= getfontempty1{fempty_font};
-//     end;
+     canvas.font:= getfontempty1{fempty_font};
      atextflags:= fempty_textflags;
      if fempty_textcolor <> cl_none then begin
       canvas.font.color:= fempty_textcolor;
@@ -2260,10 +2267,10 @@ begin
  end;
 end;
 
-procedure tcustomdataedit.setempty_textstyle(const avalue: fontstylesty);
+procedure tcustomdataedit.setempty_fontstyle(const avalue: fontstylesty);
 begin
- if avalue <> fempty_textstyle then begin
-  fempty_textstyle:= avalue;
+ if avalue <> fempty_fontstyle then begin
+  fempty_fontstyle:= avalue;
   emptychanged;
  end;
 end;

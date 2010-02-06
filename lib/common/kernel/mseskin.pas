@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2008-2009 by Martin Schreiber
+{ MSEgui Copyright (c) 2008-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -13,12 +13,9 @@ interface
 uses
  classes,mseclasses,msegui,msescrollbar,mseedit,msegraphics,msegraphutils,
  msetabs,msetoolbar,msedataedits,msemenus,msearrayprops,msegraphedits,msesimplewidgets,
- msegrids,msewidgets,msetypes,mseglob;
-type
-
-// skinmenuoptionty = (smo_noanim);
-// skinmenuoptionsty = set of skinmenuoptionty;
+ msegrids,msewidgets,msetypes,mseglob,msestrings,msedrawtext,mseguiglob;
  
+type
  scrollbarskininfoty = record
   facebu: tfacecomp;
   faceendbu: tfacecomp;
@@ -110,9 +107,12 @@ type
  end;
  dataeditskininfoty = record
   wi: widgetskininfoty;
-//  color: colorty;
-//  face: tfacecomp;
-//  frame: tframecomp;
+  empty_text: msestring;
+  empty_textflags: textflagsty;
+  empty_textcolor: colorty;
+  empty_textcolorbackground: colorty;
+  empty_fontstyle: fontstylesty;
+  empty_color: colorty;
  end;
  
  tskincolor = class(tvirtualpersistent)
@@ -170,7 +170,8 @@ type
    property name: string read fname write fname;
    property alias: string read falias write falias;
    property ancestor: string read fancestor write fancestor;
-   property mode: fontaliasmodety read fmode write fmode default fam_fixnooverwrite;
+   property mode: fontaliasmodety read fmode write fmode
+                                                      default fam_overwrite;
    property height: integer read fheight write fheight default 0;
    property width: integer read fwidth write fwidth default 0;
    property options: fontoptionsty read foptions write foptions default [];
@@ -208,7 +209,43 @@ type
  end;
 
  skinextenderarty = array of tskinextender;
-   
+
+ tskinfont = class(tpersistent)
+  private
+   fcolor: colorty;
+   fshadow_shiftx: integer;
+   fshadow_shifty: integer;
+   fgloss_color: colorty;
+   fgloss_shiftx: integer;
+   fgloss_shifty: integer;
+   fextraspace: integer;
+   fstyle: fontstylesty;
+   fcolorbackground: colorty;
+   fshadow_color: colorty;
+  public
+   constructor create;
+   procedure updatefont(const adest: tfont);
+  published
+   property color: colorty read fcolor write fcolor default cl_default;
+   property colorbackground: colorty read fcolorbackground 
+                           write fcolorbackground default cl_default;
+   property shadow_color: colorty read fshadow_color
+                                write fshadow_color default cl_default;
+   property shadow_shiftx: integer read fshadow_shiftx write
+                fshadow_shiftx default 1;
+   property shadow_shifty: integer read fshadow_shifty write
+                fshadow_shifty default 1;
+
+   property gloss_color: colorty read fgloss_color
+                 write fgloss_color default cl_default;
+   property gloss_shiftx: integer read fgloss_shiftx write
+                fgloss_shiftx default -1;
+   property gloss_shifty: integer read fgloss_shifty write
+                fgloss_shifty default -1;
+   property extraspace: integer read fextraspace write fextraspace default 0;
+   property style: fontstylesty read fstyle write fstyle default [];
+ end;
+    
  tcustomskincontroller = class(tmsecomponent)
   private
    fonbeforeupdate: beforeskinupdateeventty;
@@ -221,6 +258,7 @@ type
    factive: boolean;
    factivedesign: boolean;
    fisactive: boolean;
+   fskinfonts: array[stockfontty] of tskinfont;
    procedure setactive(const avalue: boolean);
    procedure setcolors(const avalue: tskincolors);
    procedure setfontalias(const avalue: tskinfontaliass);
@@ -230,6 +268,8 @@ type
    procedure writeextendernames(writer: twriter);
    procedure setactivedesign(const avalue: boolean);
    procedure checkactive;
+   function getskinfont(const aindex: integer): tskinfont;
+   procedure setskinfont(const aindex: integer; const avalue: tskinfont);
   protected
    fextendernames: stringarty;
    fextenders: skinextenderarty;
@@ -319,6 +359,17 @@ type
    property ondeactivate: notifyeventty read fondeactivate write fondeactivate;
    property colors: tskincolors read fcolors write setcolors;
    property fontalias: tskinfontaliass read ffontalias write setfontalias;
+   property font_default: tskinfont index 0 read getskinfont write setskinfont;
+   property font_empty: tskinfont index 1 read getskinfont write setskinfont;
+   property font_unicode: tskinfont index 2 read getskinfont write setskinfont;
+   property font_menu: tskinfont index 3 read getskinfont write setskinfont;
+   property font_message: tskinfont index 4 read getskinfont write setskinfont;
+   property font_report: tskinfont index 5 read getskinfont write setskinfont;
+   property font_proportional: tskinfont index 6 read getskinfont write setskinfont;
+   property font_fixed: tskinfont index 7 read getskinfont write setskinfont;
+   property font_helvetica: tskinfont index 8 read getskinfont write setskinfont;
+   property font_roman: tskinfont index 9 read getskinfont write setskinfont;
+   property font_courier: tskinfont index 10 read getskinfont write setskinfont;
  end;
 
  tskincontroller = class(tcustomskincontroller)
@@ -493,15 +544,25 @@ type
                         write fwidget_colorcaptionframe default cl_default;
                         //overrides widget_color for widgets with frame caption
 
-//   property dataedit_color: colorty read fdataedit.color 
-//                        write fdataedit.color default cl_default;
    property dataedit_face: tfacecomp read fdataedit.wi.fa write setdataedit_face;
    property dataedit_frame: tframecomp read fdataedit.wi.fra 
                         write setdataedit_frame;
+   property dataedit_empty_text: msestring read fdataedit.empty_text 
+                                        write fdataedit.empty_text;
+   property dataedit_empty_color: colorty read fdataedit.empty_color
+                                  write fdataedit.empty_color default cl_default;
+   property dataedit_empty_fontstyle: fontstylesty read fdataedit.empty_fontstyle 
+                    write fdataedit.empty_fontstyle default [];
+   property dataedit_empty_textflags: textflagsty read fdataedit.empty_textflags 
+                    write fdataedit.empty_textflags default [];
+   property dataedit_empty_textcolor: colorty read fdataedit.empty_textcolor 
+                                 write fdataedit.empty_textcolor default cl_default;
+   property dataedit_empty_textcolorbackground: colorty 
+                     read fdataedit.empty_textcolorbackground 
+                     write fdataedit.empty_textcolorbackground default cl_default;
                         
-//   property booleanedit_color: colorty read fbooleanedit.color 
-//                        write fbooleanedit.color default cl_default;
-   property booleanedit_face: tfacecomp read fbooleanedit.wi.fa write setbooleanedit_face;
+   property booleanedit_face: tfacecomp read fbooleanedit.wi.fa 
+                                                   write setbooleanedit_face;
    property booleanedit_frame: tframecomp read fbooleanedit.wi.fra 
                         write setbooleanedit_frame;
 
@@ -668,9 +729,11 @@ type
                                  write setmainmenu_popupitemface;
    property mainmenu_popupitemframe: tframecomp read fmainmenu.pop.itemframe 
                                  write setmainmenu_popupitemframe;
-   property mainmenu_popupitemfaceactive: tfacecomp read fmainmenu.pop.itemfaceactive
+   property mainmenu_popupitemfaceactive: tfacecomp 
+                                 read fmainmenu.pop.itemfaceactive
                                  write setmainmenu_popupitemfaceactive;
-   property mainmenu_popupitemframeactive: tframecomp read fmainmenu.pop.itemframeactive 
+   property mainmenu_popupitemframeactive: tframecomp 
+                                 read fmainmenu.pop.itemframeactive 
                                  write setmainmenu_popupitemframeactive;
  end;
 
@@ -679,7 +742,7 @@ function activeskincontrollerdesign: tcustomskincontroller;
   
 implementation
 uses
- msetabsglob,sysutils,mseapplication,msedatalist;
+ msetabsglob,sysutils,mseapplication,msedatalist,msestockobjects;
 type
  twidget1 = class(twidget);
  tcustomframe1 = class(tcustomframe);
@@ -815,26 +878,40 @@ end;
 { tcustomskincontroller }
 
 constructor tcustomskincontroller.create(aowner: tcomponent);
+var
+ fo1: stockfontty;
 begin
  fcolors:= tskincolors.create;
  ffontalias:= tskinfontaliass.create;
+ for fo1:= low(stockfontty) to high(stockfontty) do begin
+  fskinfonts[fo1]:= tskinfont.create;
+ end;
  inherited;
 end;
 
 destructor tcustomskincontroller.destroy;
+var
+ fo1: stockfontty;
 begin
  active:= false;
  inherited;
  fcolors.free;
  ffontalias.free;
+ for fo1:= low(stockfontty) to high(stockfontty) do begin
+  fskinfonts[fo1].free;
+ end;
 end;
 
 procedure tcustomskincontroller.doactivate;
 var
  int1: integer;
+ fo1: stockfontty;
 begin
  fcolors.setcolors;
  ffontalias.setfontalias;
+ for fo1:= low(stockfontty) to high(stockfontty) do begin
+  fskinfonts[fo1].updatefont(stockobjects.fonts[fo1]);
+ end;
  if canevent(tmethod(fonactivate)) then begin
   fonactivate(self);   
  end;
@@ -1154,8 +1231,30 @@ procedure tcustomskincontroller.setdataeditskin(const instance: tdataedit;
                                             const ainfo: dataeditskininfoty);
 begin
  setwidgetskin(instance,ainfo.wi);
-// setwidgetface(instance,ainfo.face);
-// setwidgetframetemplate(instance,ainfo.frame);
+ with instance do begin
+  if (ainfo.empty_text <> '') and (empty_text = '') and 
+         (eo_defaulttext in empty_options) then begin
+   empty_text:= ainfo.empty_text;
+  end;
+  if (ainfo.empty_textflags <> []) and not(tf_force in empty_textflags) then begin
+   empty_textflags:= ainfo.empty_textflags;
+  end;
+  if (ainfo.empty_textcolor <> cl_default) and 
+                               (empty_textcolor = cl_none) then begin
+   empty_textcolor:= ainfo.empty_textcolor;
+  end;
+  if (ainfo.empty_textcolorbackground <> cl_default) and 
+                               (empty_textcolorbackground = cl_none) then begin
+   empty_textcolorbackground:= ainfo.empty_textcolor;
+  end;
+  if (ainfo.empty_fontstyle <> []) and not(fs_force in empty_fontstyle) then begin
+   empty_fontstyle:= ainfo.empty_fontstyle;
+  end;
+  if (ainfo.empty_color <> cl_default) and 
+                               (empty_color = cl_none) then begin
+   empty_color:= ainfo.empty_color;
+  end;
+ end;
 end;
 
 procedure tcustomskincontroller.setgraphdataeditskin(
@@ -1514,6 +1613,17 @@ begin
  inherited;
 end;
 
+function tcustomskincontroller.getskinfont(const aindex: integer): tskinfont;
+begin
+ result:= fskinfonts[stockfontty(aindex)];
+end;
+
+procedure tcustomskincontroller.setskinfont(const aindex: integer;
+               const avalue: tskinfont);
+begin
+ fskinfonts[stockfontty(aindex)].assign(avalue);
+end;
+
 { tskincontroller }
 
 constructor tskincontroller.create(aowner: tcomponent);
@@ -1521,6 +1631,11 @@ begin
  fwidget_color:= cl_default;
  fwidget_colorcaptionframe:= cl_default;
  fstepbutton.co:= cl_default;
+
+ fdataedit.empty_color:= cl_default;
+ fdataedit.empty_textcolor:= cl_default;
+ fdataedit.empty_textcolorbackground:= cl_default;
+
  fbutton.co:= cl_default;
  fdatabutton.co:= cl_default;
  fframebutton.co:= cl_default;
@@ -2121,7 +2236,7 @@ end;
 
 constructor tskinfontalias.create;
 begin
- fmode:= fam_fixnooverwrite;
+ fmode:= fam_overwrite;
  fxscale:= 1;
  inherited;
 end;
@@ -2159,6 +2274,56 @@ procedure tskinextender.updateskin(const ainfo: skininfoty;
                                              var handled: boolean);
 begin
  //dummy
+end;
+
+{ tskinfont }
+
+constructor tskinfont.create;
+begin
+ fcolor:= cl_default;
+ fcolorbackground:= cl_default;
+ fshadow_color:= cl_default;
+ fshadow_shiftx:= 1;
+ fshadow_shifty:= 1;
+ fgloss_color:= cl_default;
+ fgloss_shiftx:= -1;
+ fgloss_shifty:= -1;
+end;
+
+procedure tskinfont.updatefont(const adest: tfont);
+begin
+ with adest do begin
+  if fcolor <> cl_default then begin
+   color:= fcolor;
+  end;
+  if fcolorbackground <> cl_default then begin
+   colorbackground:= fcolorbackground;
+  end;
+  if fshadow_color <> cl_default then begin
+   shadow_color:= fshadow_color;
+  end;
+  if fshadow_shiftx <> 1 then begin
+   shadow_shiftx:= fshadow_shiftx;
+  end;
+  if fshadow_shifty <> 1 then begin
+   shadow_shifty:= fshadow_shifty;
+  end;
+  if fgloss_color <> cl_default then begin
+   gloss_color:= fgloss_color;
+  end;
+  if fgloss_shiftx <> -1 then begin
+   gloss_shiftx:= fgloss_shiftx;
+  end;
+  if fgloss_shifty <> -1 then begin
+   gloss_shifty:= fgloss_shifty;
+  end;
+  if fextraspace <> 0 then begin
+   extraspace:= extraspace;
+  end;
+  if fstyle <> [] then begin
+   style:= fstyle;
+  end;
+ end;
 end;
 
 end.
