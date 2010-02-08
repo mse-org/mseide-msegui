@@ -360,7 +360,8 @@ type
  iochanneleventty = procedure(const sender: tcustomiochannel) of object;
  optioniochty = (oic_releaseondisconnect);
  optionsiochty = set of optioniochty;
- iochannelstatety = (iocs_connecting,iocs_disconnecting,iocs_localsetting);
+ iochannelstatety = (iocs_connecting,iocs_disconnecting,
+                     iocs_localsetting);
  iochannelstatesty = set of iochannelstatety;
    
  tcustomiochannel = class(tactcomponent)
@@ -1260,7 +1261,7 @@ end;
 function tcustomiochannel.checkconnection: boolean;
 begin
  result:= commio;
- if not result then begin
+ if not result and not (csloading in componentstate) then begin
   disconnect;
   if canconnect then begin
    connect;
