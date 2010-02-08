@@ -1619,8 +1619,10 @@ begin
   fprochandle:= execmse2(fserverapp,ftx,frx,nil,false,-1,true,false);
  end
  else begin
-  ftx.handle:= sys_stdout;
-  frx.handle:= sys_stdin;
+  ftx.connect(sys_stdout);
+  frx.connect(sys_stdin);
+//  ftx.handle:= sys_stdout;
+//  frx.handle:= sys_stdin;
  end;
 end;
 

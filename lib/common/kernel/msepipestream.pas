@@ -23,6 +23,7 @@ type
 
  tpipewriter = class(ttextstream)
   private
+   fconnected: boolean;
   protected
    procedure sethandle(value: integer); override;
    function dowrite(const buffer; count: longint): longint; virtual;
@@ -32,10 +33,9 @@ type
 {$ifdef FPC}
    function Write(const Buffer; Count: Longint): Longint; override;
 {$endif}
-
+   procedure connect(const ahandle: integer); //does not own handle
    function releasehandle: integer; virtual;
-   property handle: integer read fhandle write sethandle;
-    //nimmt handle in besitz
+   property handle: integer read fhandle write sethandle; //owns handle
  end;
 
  tpipereader = class;
@@ -182,8 +182,22 @@ begin
 {$endif}
 end;
 
+procedure tpipewriter.connect(const ahandle: integer);
+begin
+ handle:= ahandle;
+ fconnected:= true;
+end;
+
 procedure tpipewriter.sethandle(value: integer);
 begin
+ if fconnected then begin
+ {$ifdef FPC}
+  thandlestreamcracker(self).fhandle:= invalidfilehandle;
+ {$else}
+  fhandle:= invalidfilehandle;
+ {$endif}
+  fconnected:= false;
+ end;
  inherited;
  bufoffset:= nil;
 end;
@@ -192,6 +206,7 @@ function tpipewriter.dowrite(const buffer; count: longint): longint;
 begin
  result:= inherited write(buffer,count);
 end;
+
 {$ifdef FPC}
 function tpipewriter.Write(const Buffer; Count: Longint): Longint;
 begin
