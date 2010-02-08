@@ -407,7 +407,7 @@ end;
 
 procedure streamerror;
 begin
- raise exception.Create('Streamerror!');
+ syserror(syelasterror,'Streamerror: ');
 end;
 
  {$ifdef UNIX}
@@ -416,14 +416,18 @@ var
  int1: integer;
 begin
  int1:= fcntl(handle,f_getfl,0);
- if int1 = -1 then streamerror;
+ if int1 = -1 then begin
+  streamerror;
+ end;
  if value then begin
   int1:= int1 or o_nonblock;
  end
  else begin
   int1:= int1 and not o_nonblock;
  end;
- if fcntl(handle,f_setfl,int1) = -1 then streamerror;
+ if fcntl(handle,f_setfl,int1) = -1 then begin
+  streamerror;
+ end;
 end;
  {$else}
 procedure setfilenonblock(handle: integer; value: boolean);
@@ -830,14 +834,16 @@ end;
 procedure tmsefilestream.sethandle(value: integer);
 begin
  flushbuffer;
- if handle <> invalidfilehandle then begin
-  closehandle(handle);
+ if value <> handle then begin
+  if handle <> invalidfilehandle then begin
+   closehandle(handle);
+  end;
+  {$ifdef FPC}
+  thandlestreamcracker(self).fhandle:= value;
+  {$else}
+  fhandle:= value;
+  {$endif}
  end;
- {$ifdef FPC}
- thandlestreamcracker(self).fhandle:= value;
- {$else}
- fhandle:= value;
- {$endif}
 end;
 
 function tmsefilestream.close: boolean;  //false on commit error
