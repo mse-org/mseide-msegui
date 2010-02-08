@@ -74,9 +74,9 @@ type
    fempty_textcolorbackground: colorty;
    fempty_fontstyle: fontstylesty;
    fempty_color: colorty;
+   fempty_options: emptyoptionsty;
 {$ifdef mse_with_ifi}
    fifilink: tifilinkcomp;
-   fempty_options: emptyoptionsty;
    procedure ifisetvalue(var avalue; var accept: boolean);
    function getifilinkkind: ptypeinfo;
    procedure setifilink(const avalue: tifilinkcomp);
