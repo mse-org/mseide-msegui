@@ -609,8 +609,8 @@ type
    destructor destroy; override;
    property onstep: stepeventty read fonstep write fonstep;
   published
-   property frame: tstepboxframe read getframe write setframe;
    property optionswidget default defaultoptionswidgetnofocus;
+   property frame: tstepboxframe read getframe write setframe;
  end;
 
  tstepbox = class(tcustomstepbox)

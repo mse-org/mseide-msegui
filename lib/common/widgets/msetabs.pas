@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -309,6 +309,7 @@ type
    procedure dopaint(const canvas: tcanvas); override;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure statechanged; override;
+   procedure fontchanged; override;
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
    procedure clientrectchanged; override;
    procedure dofontheightdelta(var delta: integer); override;
@@ -2308,6 +2309,13 @@ begin
  end;
 end;
 
+procedure tcustomtabbar.fontchanged;
+begin
+ inherited;
+ layoutchanged;
+end;
+
+
 procedure tcustomtabbar.synctofontheight;
 var
  int1,int2: integer;
@@ -3967,7 +3975,6 @@ begin
   tab_size:= ftabs.bounds_cy;
  end;
 end;
-
 
 procedure tcustomtabwidget.dofontheightdelta(var delta: integer);
 begin
