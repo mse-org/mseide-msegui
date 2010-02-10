@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -37,7 +37,7 @@ function application: tnoguiapplication;
  
 implementation
 uses
- msesysutils,msesysintf,msetimer,msenoguiintf;
+ msesysutils,msesysintf,msetimer,msenoguiintf,msethread;
 var
  appinst: tnoguiapplication;
  
@@ -116,6 +116,9 @@ begin
      ek_terminate: begin
       terminated:= true;
      end;
+     ek_synchronize: begin
+      tsynchronizeevent(event1).deliver;
+     end;
      else begin
       if event1 is tobjectevent then begin
        with tobjectevent(event1) do begin
@@ -127,7 +130,7 @@ begin
    except
     handleexception(self);
    end;
-   event1.free;
+   event1.free1; //do not destroy synchronizeevent
   end;
  finally
   unlock;
