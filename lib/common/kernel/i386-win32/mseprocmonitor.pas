@@ -88,7 +88,7 @@ end;
 
 function tprocmonitor.execute(thread: tmsethread): integer;
 var
- event: tevent;
+ event: tmseevent;
  int1: integer;
  handles1: handlearty;
  handle1: thandle;

@@ -1202,7 +1202,7 @@ procedure TimerProc(hwnd: hwnd; uMsg: longword; idEvent: longword;
           dwTime: longword); stdcall;
 begin
  killtimer;
- eventlist.add(tevent.create(ek_timer));
+ eventlist.add(tmseevent.create(ek_timer));
 end;
 
 function gui_settimer(us: longword): guierrorty;
@@ -4094,7 +4094,7 @@ begin
 // windows.postthreadmessage(mainthread,wakeupmessage,0,0);
 end;
 
-function gui_postevent(event: tevent): guierrorty;
+function gui_postevent(event: tmseevent): guierrorty;
 //var
 // int1: integer;
 begin
@@ -4208,7 +4208,7 @@ begin
  result:= 1;
  case msg of
   msemessage: begin
-   eventlist.add(tevent(wparam));
+   eventlist.add(tmseevent(wparam));
    exit;
   end;
   wakeupmessage: begin
@@ -4244,7 +4244,7 @@ begin
   end;
   wm_close: begin
    if ahwnd = applicationwindow then begin
-    eventlist.add(tevent.create(ek_terminate));
+    eventlist.add(tmseevent.create(ek_terminate));
    end
    else begin
     eventlist.add(twindowevent.create(ek_close,ahwnd));
@@ -4254,7 +4254,7 @@ begin
   end;
   wm_queryendsession: begin
    canshutdown:= 1;
-   eventlist.add(tevent.create(ek_terminate));
+   eventlist.add(tmseevent.create(ek_terminate));
    tapplication1(application).eventloop;
    result:= canshutdown;
    exit;
@@ -4518,13 +4518,13 @@ begin
  result:= eventlist.count > 0;
 end;
 
-function gui_getevent: tevent;
+function gui_getevent: tmseevent;
 begin
  result:= nil;
  while true do begin
   dispatchevents;
   if eventlist.count > 0 then begin
-   result:= tevent(eventlist.getfirst);
+   result:= tmseevent(eventlist.getfirst);
    break;
   end
   else begin
