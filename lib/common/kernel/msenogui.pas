@@ -17,9 +17,9 @@ type
   private
    feventsem: semty;
   protected
-   procedure dopostevent(const aevent: tevent); override;
+   procedure dopostevent(const aevent: tmseevent); override;
    procedure doeventloop(const once: boolean); override;
-   function nextevent: tevent;
+   function nextevent: tmseevent;
    procedure dobeforerun; override;
    procedure doafterrun; override;
    procedure internalinitialize; override;
@@ -66,7 +66,7 @@ begin
  sys_semdestroy(feventsem);
 end;
 
-procedure tnoguiapplication.dopostevent(const aevent: tevent);
+procedure tnoguiapplication.dopostevent(const aevent: tmseevent);
 begin
  eventlist.add(aevent);
  sys_sempost(feventsem);
@@ -92,7 +92,7 @@ end;
 
 procedure tnoguiapplication.doeventloop(const once: boolean);
 var
- event1: tevent;
+ event1: tmseevent;
 begin
  lock;
  try
@@ -137,11 +137,11 @@ begin
  end;
 end;
 
-function tnoguiapplication.nextevent: tevent;
+function tnoguiapplication.nextevent: tmseevent;
 begin
  nogui_waitevent;
 // sys_semwait(feventsem,0);
- result:= tevent(eventlist.getfirst);
+ result:= tmseevent(eventlist.getfirst);
 end;
 
 procedure tnoguiapplication.dobeforerun;

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -45,11 +45,11 @@ procedure nogui_waitevent;
  begin
   if timerevent then  begin
    timerevent:= false;
-   application.postevent(tevent.create(ek_timer));
+   application.postevent(tmseevent.create(ek_timer));
   end;
   if terminated then  begin
    timerevent:= false;
-   application.postevent(tevent.create(ek_terminate));
+   application.postevent(tmseevent.create(ek_terminate));
   end;
   if childevent then begin
    childevent:= false;
