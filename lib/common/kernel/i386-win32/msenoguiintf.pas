@@ -79,11 +79,11 @@ procedure nogui_waitevent;
  begin
   if timerevent then  begin
    timerevent:= false;
-   application.postevent(tevent.create(ek_timer));
+   application.postevent(tmseevent.create(ek_timer));
   end;
   if terminated then  begin
    timerevent:= false;
-   application.postevent(tevent.create(ek_terminate));
+   application.postevent(tmseevent.create(ek_terminate));
   end;
  end;
 
