@@ -87,12 +87,12 @@ type
                      const afreeonterminate: boolean = false); overload; override;
    destructor destroy; override;
    procedure terminate; override;
-   procedure postevent(event: tevent);
-   function waitevent(noblock: boolean = false): tevent;
+   procedure postevent(event: tmseevent);
+   function waitevent(noblock: boolean = false): tmseevent;
    function eventcount: integer;
  end;
 
- tsynchronizeevent = class(tevent)
+ tsynchronizeevent = class(tmseevent)
   private
    fsem: semty;
    fsuccess: boolean;
@@ -364,7 +364,7 @@ begin
  result:= feventlist.count;
 end;
 
-procedure teventthread.postevent(event: tevent);
+procedure teventthread.postevent(event: tmseevent);
 begin
  feventlist.post(event);
 end;
@@ -372,10 +372,10 @@ end;
 procedure teventthread.terminate;
 begin
  inherited;
- postevent(tevent.create(ek_terminate));
+ postevent(tmseevent.create(ek_terminate));
 end;
 
-function teventthread.waitevent(noblock: boolean = false): tevent;
+function teventthread.waitevent(noblock: boolean = false): tmseevent;
 begin
  result:= feventlist.wait(noblock);
  if (result <> nil) and (result.kind = ek_terminate) then begin

@@ -2394,7 +2394,7 @@ begin
  end;
 end;
 
-function gui_postevent(event: tevent): guierrorty;
+function gui_postevent(event: tmseevent): guierrorty;
 var
  xevent1: xclientmessageevent;
 begin
@@ -2696,7 +2696,7 @@ begin
   with xev.xclient do begin
    if (xtype = clientmessage) and (display = appdisp) and
            (message_type = mseclientmessageatom) then begin
-    tevent(getclientpointer(xev.xclient)).free1;
+    tmseevent(getclientpointer(xev.xclient)).free1;
    end;
   end;
  end;
@@ -5728,7 +5728,7 @@ begin
  repeatkeytime:= 0;
 end;
 
-function gui_getevent: tevent;
+function gui_getevent: tmseevent;
 
 var
  xev,xev2: xevent;
@@ -5763,11 +5763,11 @@ label
 begin
  while true do begin
   if timerevent then begin
-   application.postevent(tevent.create(ek_timer));
+   application.postevent(tmseevent.create(ek_timer));
    timerevent:= false;
   end;
   if terminated then begin
-   application.postevent(tevent.create(ek_terminate));
+   application.postevent(tmseevent.create(ek_terminate));
    terminated:= false;
   end;
   if childevent then begin
@@ -5964,7 +5964,7 @@ eventrestart:
    with xev.xclient do begin
     if display = appdisp then begin
      if message_type = mseclientmessageatom then begin
-      result:= tevent(getclientpointer(xev.xclient));
+      result:= tmseevent(getclientpointer(xev.xclient));
      end
      else begin
       if message_type = wmprotocolsatom then begin

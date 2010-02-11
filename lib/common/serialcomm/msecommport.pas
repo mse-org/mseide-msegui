@@ -206,7 +206,7 @@ type
  commeventty = procedure(const sender: tcommevent) of object;
  tcommthread = class;
 
- tcommevent = class(tevent)
+ tcommevent = class(tmseevent)
   private
    fstate: commstatety;
    fpersistent: boolean;
@@ -1286,7 +1286,7 @@ procedure tcommthread.abort;
 begin
  if running then begin
   fabort := true;
-  inherited postevent(tevent.create(ek_abort));
+  inherited postevent(tmseevent.create(ek_abort));
   if sys_getcurrentthread <> id then begin
    while fabort do begin
     sleep(0);
@@ -1302,7 +1302,7 @@ end;
 
 function tcommthread.execute(thread: tmsethread): integer;
 var
- event: tevent;
+ event: tmseevent;
  abort1: boolean;
 
  procedure freeevent;

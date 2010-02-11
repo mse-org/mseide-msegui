@@ -210,7 +210,7 @@ type
    fonidlelist: tonidlelist;
    procedure flusheventbuffer;
    procedure doidle;
-   procedure dopostevent(const aevent: tevent); virtual; abstract;
+   procedure dopostevent(const aevent: tmseevent); virtual; abstract;
    function getevents: integer; virtual; abstract;
     //application must be locked
     //returns count of queued events
@@ -242,7 +242,7 @@ type
    function idle: boolean; virtual;
    property applicationname: msestring read fapplicationname write fapplicationname;
    
-   procedure postevent(event: tevent);
+   procedure postevent(event: tmseevent);
    function checkoverload(const asleepus: integer = 100000): boolean;
               //true if never idle since last call,
               // unlocks application and calls sleep if not mainthread and asleepus >= 0
@@ -873,7 +873,7 @@ end;
 procedure teventlist.finalizeitem(var item: pointer);
 begin
  if ownsobjects then begin
-  tevent(item).Free1;
+  tmseevent(item).Free1;
   item:= nil;
  end;
 end;
@@ -1151,7 +1151,7 @@ begin
  sys_mutexunlock(feventlock);
 end;
 
-procedure tcustomapplication.postevent(event: tevent);
+procedure tcustomapplication.postevent(event: tmseevent);
 begin
  if csdestroying in componentstate then begin
   event.free1;
@@ -1219,7 +1219,7 @@ end;
 procedure tcustomapplication.wakeupmainthread;
 begin
  if aps_running in fstate then begin
-  postevent(tevent.create(ek_wakeup));
+  postevent(tmseevent.create(ek_wakeup));
  end;
 end;
 

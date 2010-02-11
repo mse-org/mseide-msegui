@@ -49,8 +49,8 @@ type
 
    function lock: boolean;
    procedure unlock;
-   procedure postevent(event: tevent);
-   function waitevent(noblock: boolean = false): tevent;
+   procedure postevent(event: tmseevent);
+   function waitevent(noblock: boolean = false): tmseevent;
 
    property thread: teventthread read getthread;
    property terminated: boolean read getterminated;
@@ -161,12 +161,12 @@ begin
  application.waitforthread(fthread);
 end;
 
-procedure tthreadcomp.postevent(event: tevent);
+procedure tthreadcomp.postevent(event: tmseevent);
 begin
  fthread.postevent(event);
 end;
 
-function tthreadcomp.waitevent(noblock: boolean): tevent;
+function tthreadcomp.waitevent(noblock: boolean): tmseevent;
 begin
  result:= fthread.waitevent(noblock);
 end;

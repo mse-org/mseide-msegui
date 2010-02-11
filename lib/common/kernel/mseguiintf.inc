@@ -17,12 +17,12 @@ function gui_setmainthread: guierrorty; //set mainthread to currentthread
 function gui_grouphideminimizedwindows: boolean; //true for win32
 
 //application has to be locked for all following calls
-function gui_postevent(event: tevent): guierrorty;
+function gui_postevent(event: tmseevent): guierrorty;
 function gui_settimer(us: longword): guierrorty;
                //send et_timer event after delay of us (micro seconds)
 
 function gui_hasevent: boolean;         //false if no event pending
-function gui_getevent: tevent;          //can be nil
+function gui_getevent: tmseevent;          //can be nil
 function gui_escapepressed: boolean;
 procedure gui_resetescapepressed;
 

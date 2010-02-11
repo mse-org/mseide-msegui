@@ -1,15 +1,17 @@
 MSEide+MSEgui version history
 
-20010-02-09
+2010-02-11
  synchronizeprocty -> synchronizeeventty.
  objectprocty -> proceventty.
  tagprocty -> tageventty.
+ tevent -> tmseevent.
+2010-02-09
  ttabs framei direction reversed.
  ttabbar uses ow1_autoheight instead of ow_autoscale.
  ttabwidget.options -> tab_options.
-20010-02-06
+2010-02-06
  tdataedit.empty_textstyle -> empty_fontstyle.
-20010-01-04
+2010-01-04
  Some definitions moved from msegrids.pas to msegridsglob.pas.
 2009-12-15
  Default tcustomframe.colorframe = cl_black.

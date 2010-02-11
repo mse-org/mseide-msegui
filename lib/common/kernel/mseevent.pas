@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -49,7 +49,7 @@ type
                  es_local,es_broadcast,es_modal,es_drag,
                  es_reflected,es_nofocus);
  eventstatesty = set of eventstatety;
- tevent = class(tnullinterfacedobject)
+ tmseevent = class(tnullinterfacedobject)
   private
   protected
    fkind: eventkindty;
@@ -60,11 +60,11 @@ type
    procedure free1; //do nothing for ownedevents
  end;
 
- eventarty = array of tevent;
- eventaty = array[0..0] of tevent;
+ eventarty = array of tmseevent;
+ eventaty = array[0..0] of tmseevent;
  peventaty = ^eventaty;
 
- tstringevent = class(tevent)
+ tstringevent = class(tmseevent)
   private
    fdata: ansistring;
   public
@@ -78,7 +78,7 @@ type
   procedure receiveevent(const event: tobjectevent);
  end;
 
- tobjectevent = class(tevent,iobjectlink)
+ tobjectevent = class(tmseevent,iobjectlink)
   private
    finterface: pointer; //ievent;
    procedure link(const source,dest: iobjectlink; valuepo: pointer = nil;
@@ -128,28 +128,29 @@ type
   public
    constructor create(aownsobjects: boolean);
    destructor destroy; override;
-   procedure post(event: tevent);
-   function wait(noblock: boolean = true): tevent;
+   procedure post(event: tmseevent);
+   function wait(noblock: boolean = true): tmseevent;
  end;
 
 implementation
 uses
  msesysintf;
-{ tevent }
+ 
+{ tmseevent }
 
-constructor tevent.create(const akind: eventkindty);
+constructor tmseevent.create(const akind: eventkindty);
 begin
  fkind:= akind;
 end;
 
-procedure tevent.free1;
+procedure tmseevent.free1;
 begin
  if (self <> nil) then begin
   internalfree1;
  end;
 end;
 
-procedure tevent.internalfree1;
+procedure tmseevent.internalfree1;
 begin
  self.destroy;
 end;
@@ -273,7 +274,7 @@ begin
  inherited;
 end;
 
-procedure teventqueue.post(event: tevent);
+procedure teventqueue.post(event: tmseevent);
 begin
  sys_mutexlock(fmutex);
  if not fdestroying then begin
@@ -283,13 +284,13 @@ begin
  sys_sempost(fsem);
 end;
 
-function teventqueue.wait(noblock: boolean): tevent;
+function teventqueue.wait(noblock: boolean): tmseevent;
 
  procedure get;
  begin
   sys_mutexlock(fmutex);
   if not fdestroying then begin
-   result:= tevent(getfirst);
+   result:= tmseevent(getfirst);
   end;
   sys_mutexunlock(fmutex);
  end;

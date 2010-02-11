@@ -2000,7 +2000,7 @@ type
  winideventty = procedure(const awinid: winidty) of object;
  booleaneventty = procedure(const avalue: boolean) of object;
 
- twindowevent = class(tevent)
+ twindowevent = class(tmseevent)
   private
   public
    fwinid: winidty;
@@ -2138,7 +2138,7 @@ type
   protected  
    procedure sysevent(const awindow: winidty; var aevent: syseventty;
                                                     var handled: boolean);
-   procedure dopostevent(const aevent: tevent); override;
+   procedure dopostevent(const aevent: tmseevent); override;
    procedure eventloop(const once: boolean = false);
                         //used in win32 wm_queryendsession and wm_entersizemove
    procedure exitloop;  //used in win32 cancelshutdown
@@ -2624,7 +2624,7 @@ type
 
    procedure mouseparktimer(const sender: tobject);
   protected
-   procedure dopostevent(const aevent: tevent); override;
+   procedure dopostevent(const aevent: tmseevent); override;
    procedure flushmousemove;
    procedure doterminate(const shutdown: boolean);
    procedure checkshortcut(const sender: twindow; const awidget: twidget;
@@ -13708,12 +13708,12 @@ end;
 procedure tinternalapplication.flushmousemove;
 var
  int1: integer;
- event: tevent;
+ event: tmseevent;
 begin
  gui_flushgdi;
  getevents;
  for int1:= 0 to eventlist.count - 1 do begin
-  event:= tevent(eventlist[int1]);
+  event:= tmseevent(eventlist[int1]);
   if (event <> nil) and (event.kind = ek_mousemove) then begin
    event.free1;
    eventlist[int1]:= nil;
@@ -13724,12 +13724,12 @@ end;
 procedure tinternalapplication.windowdestroyed(aid: winidty);
 var
  int1: integer;
- event : tevent;
+ event : tmseevent;
 begin
  fonwiniddestroyedlist.doevent(aid);
  if not terminated then begin
   for int1:= 0 to getevents - 1 do begin
-   event:= tevent(eventlist[int1]);
+   event:= tmseevent(eventlist[int1]);
    if (event is twindowevent) and (twindowevent(event).fwinid = aid) then begin
    {
     case event.kind of
@@ -13891,7 +13891,7 @@ end;
 
 function tinternalapplication.focusinpending: boolean;
 var
- po1: ^tevent;
+ po1: ^tmseevent;
  int1: integer;
 begin
  gui_flushgdi(true);
@@ -13977,7 +13977,7 @@ function tinternalapplication.eventloop(const amodalwindow: twindow;
  
 var
  modalinfo: modalinfoty;
- event: tevent;
+ event: tmseevent;
  int1: integer;
  bo1: boolean;
  window: twindow;
@@ -14068,7 +14068,7 @@ begin       //eventloop
      break;
     end;
     getevents;
-    event:= tevent(eventlist.getfirst);
+    event:= tmseevent(eventlist.getfirst);
     if event <> nil then begin
      try
       try
@@ -14128,7 +14128,7 @@ begin       //eventloop
         end;
         ek_focusout: begin
          unsetwindowfocus(twindowevent(event).fwinid);
-         postevent(tevent.create(ek_checkapplicationactive));
+         postevent(tmseevent.create(ek_checkapplicationactive));
         end;
         ek_checkapplicationactive: begin
          if checkiflast(ek_checkapplicationactive) then begin
@@ -14595,7 +14595,7 @@ begin
  end;
 end;
 
-procedure tinternalapplication.dopostevent(const aevent: tevent);
+procedure tinternalapplication.dopostevent(const aevent: tmseevent);
 begin
  gui_postevent(aevent);
 end;
@@ -15419,7 +15419,7 @@ end;
 procedure tguiapplication.endwait;
 var
  int1: integer;
- po1: ^tevent;
+ po1: ^tmseevent;
 begin
  lock;
  try
@@ -15749,7 +15749,7 @@ begin
  tinternalapplication(self).fonsyseventlist.doevent(awindow,aevent,handled);
 end;
 
-procedure tguiapplication.dopostevent(const aevent: tevent);
+procedure tguiapplication.dopostevent(const aevent: tmseevent);
 begin
  if feventlooping = 0 then begin
   gui_postevent(aevent);

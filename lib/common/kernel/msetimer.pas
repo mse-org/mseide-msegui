@@ -200,7 +200,7 @@ begin
  end
  else begin
   if later(first^.nexttime,time) then begin
-   application.postevent(tevent.create(ek_timer)); //timerevent is ev. lost
+   application.postevent(tmseevent.create(ek_timer)); //timerevent is ev. lost
   end;
  end;
  sys_mutexunlock(mutex);
