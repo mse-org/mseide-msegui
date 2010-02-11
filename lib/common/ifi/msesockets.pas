@@ -12,7 +12,7 @@ unit msesockets;
 interface
 uses
  classes,mseglob,mseclasses,msesys,msestrings,msepipestream,
- mseapplication,msethread,mseevent,msecryptio;
+ mseapplication,msethread,mseevent,msecryptio,msetypes;
 
 const
  defaultmaxconnections = 16;

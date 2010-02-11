@@ -271,7 +271,6 @@ type
  movedeventty = procedure(const sender: tobject; const curindex: integer;
                                        const newindex: integer) of object;
 
-type
  tcustomtabbar = class(tcustomstepbox)
   private
    flayoutinfo: tabbarlayoutinfoty;
@@ -3642,7 +3641,10 @@ end;
 
 procedure tcustomtabwidget.readoptions(reader: treader);
 begin
- tab_options:= tabbaroptionsty(readset(reader,typeinfo(tabbaroptionsty)));
+ tab_options:= tabbaroptionsty(
+              {$ifndef FPC}word(integer({$endif}
+                readset(reader,typeinfo(tabbaroptionsty))
+              {$ifndef FPC})){$endif});
 end;
 
 procedure tcustomtabwidget.defineproperties(filer: tfiler);
