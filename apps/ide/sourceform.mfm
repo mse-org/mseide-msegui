@@ -97,15 +97,15 @@ object sourcefo: tsourcefo
     popupmenu = formpopup
     onactivepagechanged = tabwidgetonactivepagechanged
     onpageremoved = tabwidgetpageremoved
-    options = [tabo_dragsource, tabo_dragdest, tabo_vertical, tabo_opposite, tabo_tabsizing, tabo_dblclickedtabfirst]
+    tab_options = [tabo_dragsource, tabo_dragdest, tabo_vertical, tabo_opposite, tabo_tabsizing, tabo_dblclickedtabfirst]
     tab_frame.buttonpos = sbp_top
     tab_frame.buttonslast = True
     tab_frame.buttonsvisible = [sk_right, sk_up, sk_left, sk_down, sk_first, sk_last]
     tab_frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
     tab_textflags = [tf_ycentered]
-    tab_size = 104
+    tab_size = 50
     tab_sizemin = 60
-    reffontheight = 14
+    tab_optionswidget1 = []
     object tstockglyphbutton1: tstockglyphbutton
       optionswidget = [ow_destroywidgets, ow_disabledhint, ow_timedhint]
       taborder = 2

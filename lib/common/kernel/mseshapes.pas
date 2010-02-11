@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -1208,7 +1208,7 @@ begin
    if frame <> nil then begin 
     //todo: optimize, move settings to tcustomstepframe updatestate
     rect3:= ca.dim;
-    inflaterect1(ca.dim,frame.framei);
+    deflaterect1(ca.dim,frame.framei);
     canvas.save;
     frame.paintbackground(canvas,info.ca.dim);
     canvas.restore;   

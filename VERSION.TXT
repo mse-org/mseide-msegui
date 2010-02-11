@@ -1,5 +1,8 @@
 MSEide+MSEgui version history
 
+20010-02-09
+ ttabs framei direction reversed.
+ ttabbar uses ow1_autoheight instead of ow_autoscale.
 20010-02-06
  tdataedit.empty_textstyle -> empty_fontstyle.
 20010-01-04

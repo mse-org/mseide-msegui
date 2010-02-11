@@ -657,7 +657,7 @@ end;
 procedure tdocktabwidget.updateoptions;
 begin
  with fcontroller do begin
-  self.options:= ftab_options;
+  self.tab_options:= ftab_options;
   self.tab_color:= ftab_color;
   self.tab_colortab:= ftab_colortab;
   self.tab_coloractivetab:= ftab_coloractivetab;
