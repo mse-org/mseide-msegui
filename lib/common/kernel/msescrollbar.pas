@@ -97,7 +97,7 @@ type
    fframebutton: tframe;
    fframeendbutton1: tframe;
    fframeendbutton2: tframe;
-   fondimchanged: objectprocty;
+   fondimchanged: proceventty;
    fbuttonendlength: integer;
    fstate: scrollbarstatesty;
    fpaintedbutton: scrollbarareaty;
@@ -170,7 +170,7 @@ type
   public
    tag: integer;
    constructor create(intf: iscrollbar; org: originty = org_client;
-              ondimchanged: objectprocty = nil); reintroduce; virtual;
+              ondimchanged: proceventty = nil); reintroduce; virtual;
    destructor destroy; override;
    procedure createfacebutton;
    procedure createfaceendbutton;
@@ -242,7 +242,7 @@ type
    procedure setoptions(const avalue: scrollbaroptionsty); override;
   public
    constructor create(intf: iscrollbar; org: originty = org_client;
-              ondimchanged: objectprocty = nil); override;
+              ondimchanged: proceventty = nil); override;
    property options default defaultscrollbaroptions-[sbo_moveauto];
  end;
 
@@ -278,7 +278,7 @@ type
 { tcustomscrollbar }
 
 constructor tcustomscrollbar.create(intf: iscrollbar; org: originty = org_client;
-              ondimchanged: objectprocty = nil);
+              ondimchanged: proceventty = nil);
 var
  bu1: scrollbarareaty;
 begin
@@ -1350,7 +1350,7 @@ end;
 { tcustomnomoveautoscrollbar }
 
 constructor tcustomnomoveautoscrollbar.create(intf: iscrollbar;
-  org: originty; ondimchanged: objectprocty);
+  org: originty; ondimchanged: proceventty);
 begin
  inherited;
  foptions:= defaultscrollbaroptions-[sbo_moveauto];

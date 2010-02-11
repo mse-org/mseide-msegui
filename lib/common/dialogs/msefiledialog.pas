@@ -118,7 +118,7 @@ type
   private
    fowner: tmsecomponent;
    fgroup: integer;
-   fonchange: objectprocty;
+   fonchange: proceventty;
    ffilenames: filenamearty;
    ffilterlist: tdoublemsestringdatalist;
    ffilter: filenamety;
@@ -151,7 +151,7 @@ type
    foptions: filedialogoptionsty;
   public
    constructor create(const aowner: tmsecomponent = nil; 
-                    const onchange: objectprocty = nil); reintroduce;
+                    const onchange: proceventty = nil); reintroduce;
    destructor destroy; override;
    procedure readstatvalue(const reader: tstatreader);
    procedure readstatstate(const reader: tstatreader);
@@ -1290,7 +1290,7 @@ end;
 { tfiledialogcontroller }
 
 constructor tfiledialogcontroller.create(const aowner: tmsecomponent = nil;
-                                       const onchange: objectprocty = nil);
+                                       const onchange: proceventty = nil);
 begin
  foptions:= defaultfiledialogoptions;
  fhistorymaxcount:= defaulthistorymaxcount;

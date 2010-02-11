@@ -278,7 +278,7 @@ type
    fhintedbutton: integer;
    fonactivetabchange: notifyeventty;
    fupdating: integer;
-   finternaltabchange: objectprocty;
+   finternaltabchange: proceventty;
    fontabmoving: movingeventty;
    fontabmoved: movedeventty;
    fonclientmouseevent: mouseeventty;

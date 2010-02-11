@@ -11668,7 +11668,7 @@ begin
    fdestroyevent:= tdestroywindowevent.create(false);
    tdestroywindowevent(fdestroyevent).fwindowpo:= @fwindow;
    synchronizeevent(tdestroywindowevent(fdestroyevent));
-   fdestroyevent:= nil;
+   freeandnil(fdestroyevent);
   end;
  end;
  fillchar(fwindow,sizeof(fwindow),0);

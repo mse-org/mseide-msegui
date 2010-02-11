@@ -79,7 +79,7 @@ type
   nexttime: longword;
   interval: longword;
   prevpo,nextpo: ptimerinfoty;
-  ontimer: objectprocty;
+  ontimer: proceventty;
  end;
  
 var
@@ -146,7 +146,7 @@ begin
  end;
 end;
 
-procedure killtimertick(aontimer: objectprocty);
+procedure killtimertick(aontimer: proceventty);
 var
  po1: ptimerinfoty;
 begin
@@ -174,7 +174,7 @@ begin
 // end;
 end;
 
-procedure settimertick(ainterval: integer; aontimer: objectprocty);
+procedure settimertick(ainterval: integer; aontimer: proceventty);
 var
  po: ptimerinfoty;
  time: longword;
@@ -214,7 +214,7 @@ var
  time: longword;
  ca1: longword;
  po,po2: ptimerinfoty;
- ontimer: objectprocty;
+ ontimer: proceventty;
  int1: integer;
 begin
  sys_mutexlock(mutex);

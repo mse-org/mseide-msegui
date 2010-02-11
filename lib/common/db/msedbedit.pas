@@ -1324,7 +1324,7 @@ type
    procedure setoptions(const avalue: scrollbaroptionsty); override;
   public
    constructor create(intf: iscrollbar; org: originty = org_client;
-              ondimchanged: objectprocty = nil); override;
+              ondimchanged: proceventty = nil); override;
   published
    property options default defaultdbscrollbaroptions;
    property buttonlength default -1;
@@ -6954,7 +6954,7 @@ end;
 { tdbscrollbar }
 
 constructor tdbscrollbar.create(intf: iscrollbar; org: originty = org_client;
-              ondimchanged: objectprocty = nil);
+              ondimchanged: proceventty = nil);
 begin
  inherited;
  foptions:= defaultdbscrollbaroptions;

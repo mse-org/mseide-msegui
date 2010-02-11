@@ -163,7 +163,7 @@ type
  tscrollboxscrollbar = class(tcustomscrollbar)
   public
    constructor create(intf: iscrollbar; org: originty = org_client;
-              ondimchanged: objectprocty = nil); override;
+              ondimchanged: proceventty = nil); override;
   published
    property options default defaultscrollboxscrollbaroptions;
    property width;
@@ -190,7 +190,7 @@ type
  tthumbtrackscrollbar = class(tcustomnomoveautoscrollbar)
   public
    constructor create(intf: iscrollbar; org: originty = org_client;
-              ondimchanged: objectprocty = nil); override;
+              ondimchanged: proceventty = nil); override;
   published
    property options default defaultthumbtrackscrollbaroptions;
    property width;
@@ -3609,7 +3609,7 @@ end;
 { tscrollboxscrollbar }
 
 constructor tscrollboxscrollbar.create(intf: iscrollbar; org: originty;
-  ondimchanged: objectprocty);
+  ondimchanged: proceventty);
 begin
  inherited;
  foptions:= defaultscrollboxscrollbaroptions;
@@ -3618,7 +3618,7 @@ end;
 { tthumbtrackscrollbar }
 
 constructor tthumbtrackscrollbar.create(intf: iscrollbar; org: originty;
-  ondimchanged: objectprocty);
+  ondimchanged: proceventty);
 begin
  inherited;
  foptions:= defaultthumbtrackscrollbaroptions;

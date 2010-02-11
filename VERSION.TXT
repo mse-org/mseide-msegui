@@ -1,6 +1,9 @@
 MSEide+MSEgui version history
 
 20010-02-09
+ synchronizeprocty -> synchronizeeventty.
+ objectprocty -> proceventty.
+ tagprocty -> tageventty.
  ttabs framei direction reversed.
  ttabbar uses ow1_autoheight instead of ow_autoscale.
  ttabwidget.options -> tab_options.

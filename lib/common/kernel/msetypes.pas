@@ -161,8 +161,8 @@ type
  pobjectaty = ^objectaty;
 
  procty = procedure; 
- objectprocty = procedure of object;
- tagprocty = procedure (const tag: integer) of object;
+ proceventty = procedure of object;
+ tageventtyty = procedure (const tag: integer) of object;
 
  integerararty = array of integerarty;
 

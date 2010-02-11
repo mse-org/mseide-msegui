@@ -115,7 +115,7 @@ type
  end;
 
 function synchronizeevent(const aevent: tsynchronizeevent): boolean;
-          //true if not aborted
+          //true if not aborted, does not free aevent
 
 implementation
 
@@ -123,7 +123,7 @@ uses
  msesysintf,mseapplication;
  
 function synchronizeevent(const aevent: tsynchronizeevent): boolean;
-          //true if not aborted, frees the event
+          //true if not aborted, does not free aevent
 var
  int1: integer;
 begin

@@ -276,7 +276,7 @@ type
 //   function getwidget: twidget;
   public
    constructor create(intf: iscrollbar; org: originty = org_client;
-              ondimchanged: objectprocty = nil); override;
+              ondimchanged: proceventty = nil); override;
    destructor destroy; override;
    procedure paint(const canvas: tcanvas; const acolor: colorty = cl_none); override;
   published
@@ -939,7 +939,7 @@ end;
 { tsliderscrollbar }
 
 constructor tsliderscrollbar.create(intf: iscrollbar; org: originty;
-  ondimchanged: objectprocty);
+  ondimchanged: proceventty);
 begin
  inherited;
  foptions:= defaultsliderscrollbaroptions;
