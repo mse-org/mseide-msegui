@@ -1809,6 +1809,7 @@ type
    ffocuscount: longword; //for recursive setwidgetfocus
    factivecount: longword; //for recursive activate,deactivate
    factivating: integer;
+   fsizeerrorcount: integer;
    fmoving: integer;
    ffocusedwidget: twidget;
    fmodalinfopo: pmodalinfoty;
@@ -1821,6 +1822,7 @@ type
    fscrollnotifylist: tnotifylist;
    fdestroyevent: pointer; //tdestroywindowevent
    fsyscontainer: syswindowty;
+   
    procedure setcaption(const avalue: msestring);
    procedure widgetdestroyed(widget: twidget);
 
@@ -12100,6 +12102,8 @@ begin
 end;
 
 procedure twindow.wmconfigured(const arect: rectty; const aorigin: pointty);
+const
+ maxsizeerrorcount = 4;
 var
  rect1: rectty;
 begin
@@ -12109,19 +12113,22 @@ begin
   addpoint1(rect1.pos,aorigin);
  end;
  if not rectisequal(rect1,fowner.fwidgetrect) then begin
-  fowner.checkwidgetsize(rect1.size);
+  if fsizeerrorcount < maxsizeerrorcount then begin
+   fowner.checkwidgetsize(rect1.size);
+  end;
   fowner.internalsetwidgetrect(rect1,true);
   if pointisequal(arect.pos,fowner.fwidgetrect.pos) then begin
    include(fstate,tws_posvalid);
   end;
   if sizeisequal(arect.size,fowner.fwidgetrect.size) then begin
    include(fstate,tws_sizevalid);
-//   if (rect1.cx <> arect.cx) or (rect1.cy <> arect.cy) then begin
-//    gui_reposwindow(winid,makerect(arect.pos,rect1.size));
-//   end;
+   fsizeerrorcount:= 0;
   end
   else begin
-   gui_reposwindow(fwindow.id,makerect(arect.pos,rect1.size));
+   if fsizeerrorcount < maxsizeerrorcount then begin
+    inc(fsizeerrorcount);
+    gui_reposwindow(fwindow.id,makerect(arect.pos,rect1.size));
+   end;
   end;
  end;
  if not (windowpos in [wp_minimized,wp_maximized,wp_fullscreen]) then begin
