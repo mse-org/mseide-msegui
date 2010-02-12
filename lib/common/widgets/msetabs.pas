@@ -3645,6 +3645,9 @@ begin
               {$ifndef FPC}word(integer({$endif}
                 readset(reader,typeinfo(tabbaroptionsty))
               {$ifndef FPC})){$endif});
+ if tabo_vertical in tab_options then begin
+  tab_optionswidget1:= [];
+ end;
 end;
 
 procedure tcustomtabwidget.defineproperties(filer: tfiler);
@@ -4442,12 +4445,12 @@ begin
   end;
   if not (csloading in componentstate) then begin
    updatesize(nil);
-  end;
-  if tabo_vertical in ftabs.options then begin
-   ftab_size:= ftabs.bounds_cx;
-  end
-  else begin
-   ftab_size:= ftabs.bounds_cy;
+   if tabo_vertical in ftabs.options then begin
+    ftab_size:= ftabs.bounds_cx;
+   end
+   else begin
+    ftab_size:= ftabs.bounds_cy;
+   end;
   end;
  end;
 end;
