@@ -12101,27 +12101,27 @@ end;
 
 procedure twindow.wmconfigured(const arect: rectty; const aorigin: pointty);
 var
- rect1{,rect2}: rectty;
-// id1: winidty;
+ rect1: rectty;
 begin
  exclude(fstate,tws_needsdefaultpos);
  rect1:= arect;
  if not (wo_embedded in foptions) then begin
   addpoint1(rect1.pos,aorigin);
-//  id1:= gui_getparentwindow(fwindow.id);
-//  if id1 <> 0 then begin
-//   if gui_getwindowrect(id1,rect2) = gue_ok then begin
-//    subpoint1(rect1.pos,rect2.pos);
-//   end;
-//  end;
  end;
  if not rectisequal(rect1,fowner.fwidgetrect) then begin
+  fowner.checkwidgetsize(rect1.size);
   fowner.internalsetwidgetrect(rect1,true);
   if pointisequal(arect.pos,fowner.fwidgetrect.pos) then begin
    include(fstate,tws_posvalid);
   end;
   if sizeisequal(arect.size,fowner.fwidgetrect.size) then begin
    include(fstate,tws_sizevalid);
+//   if (rect1.cx <> arect.cx) or (rect1.cy <> arect.cy) then begin
+//    gui_reposwindow(winid,makerect(arect.pos,rect1.size));
+//   end;
+  end
+  else begin
+   gui_reposwindow(fwindow.id,makerect(arect.pos,rect1.size));
   end;
  end;
  if not (windowpos in [wp_minimized,wp_maximized,wp_fullscreen]) then begin
@@ -15272,7 +15272,7 @@ var
 begin
  fmainwindow:= value;
  if value <> nil then begin
-  if value.fowner.isgroupleader then begin
+  if value.fowner.isgroupleader and value.haswinid then begin
    id:= value.winid;
    for int1:= 0 to high(fwindows) do begin
     with fwindows[int1] do begin
