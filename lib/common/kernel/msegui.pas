@@ -57,7 +57,7 @@ type
                    ow_canclosenil,      //canclose calls canclose(nil)
                    ow_mousetransparent,ow_mousewheel,
                    ow_noscroll,ow_nochildpaintclip,
-                   ow_destroywidgets,
+                   ow_destroywidgets,ow_nohidewidgets,
                    ow_hinton,ow_hintoff,ow_disabledhint,ow_multiplehint,
                    ow_timedhint,
                    ow_fontglyphheight, 
@@ -6038,6 +6038,8 @@ begin
 end;
 
 destructor twidget.destroy;
+var
+ widget1: twidget;
 begin
  include(fwidgetstate,ws_destroying);
  if (appinst <> nil) then begin
@@ -6062,7 +6064,11 @@ begin
   end
   else begin
    while length(fwidgets) > 0 do begin
-    fwidgets[high(fwidgets)].parentwidget:= nil;
+    widget1:= fwidgets[high(fwidgets)];
+    if not (ow_nohidewidgets in foptionswidget) then begin
+     widget1.visible:= false;
+    end;    
+    widget1.parentwidget:= nil;
    end;
   end;
   fwidgets:= nil;
