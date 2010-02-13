@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -2071,22 +2071,20 @@ end;
 function tgdbmi.interrupttarget: gdbresultty; //stop for breakpointsetting
 var
  timestamp: longword;
- bo1: boolean;
+ int1: integer;
 begin
  result:= gdb_ok;
  inc(finterruptcount);
  if finterruptcount = 1 then begin
-  timestamp:= timestep(1000000);
+   timestamp:= timestep(1000000);
   if (gs_internalrunning in fstate) then begin
    include(fstate,gs_interrupted);
    interrupt;
-   bo1:= application.unlock;
+   int1:= application.unlockall;
    repeat
-    sleep(0);
+    sleep(10);
    until not (gs_internalrunning in fstate) or timeout(timestamp);
-   if bo1 then begin
-    application.lock;
-   end;
+   application.relockall(int1);
    if (gs_internalrunning in fstate) then begin
     exclude(fstate,gs_interrupted);
     dec(finterruptcount);
