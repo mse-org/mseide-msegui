@@ -2090,7 +2090,7 @@ begin
  result:= gdb_ok;
  inc(finterruptcount);
  if finterruptcount = 1 then begin
-   timestamp:= timestep(5000000);
+   timestamp:= timestep(1000000);
   if (gs_internalrunning in fstate) then begin
    include(fstate,gs_interrupted);
    interrupt;
