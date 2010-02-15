@@ -30,6 +30,7 @@ type
    factive: boolean;
    fdatapo: pointer;
    foptions: threadcompoptionsty;
+   fstacksizekb: integer;
    function getthread: teventthread;
    function getterminated: boolean;
    function threadproc(sender: tmsethread): integer;
@@ -57,6 +58,7 @@ type
 
   published
    property options: threadcompoptionsty read foptions write foptions default [];
+   property stacksizekb: integer read fstacksizekb write fstacksizekb default 0;
    property active: boolean read getactive write setactive default false;
    property onstart: threadcompeventty read fonstart write fonstart;
    property onexecute: threadcompeventty read fonexecute write fonexecute;
@@ -94,7 +96,8 @@ procedure tthreadcomp.run(const adatapo: pointer = nil);
 begin
  terminateandwait;
  fdatapo:= adatapo;
- fthread:= teventthread.create({$ifdef FPC}@{$endif}threadproc);
+ fthread:= teventthread.create({$ifdef FPC}@{$endif}threadproc,false,
+                                      fstacksizekb);
 end;
 
 function tthreadcomp.lock: boolean;

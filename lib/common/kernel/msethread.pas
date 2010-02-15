@@ -41,9 +41,11 @@ type
    function execute(thread: tmsethread): integer; virtual;
   public
    constructor create; overload;
-   constructor create(const afreeonterminate: boolean); overload;
+   constructor create(const afreeonterminate: boolean;
+                      const astacksizekb: integer = 0); overload;
    constructor create(const athreadproc: threadprocty;
-                const afreeonterminate: boolean = false); overload; virtual;
+                const afreeonterminate: boolean = false;
+                const astacksizekb: integer = 0); overload; virtual;
    destructor destroy; override;
    function waitfor: integer; virtual;
    procedure terminate; virtual;
@@ -60,7 +62,8 @@ type
    fmutex: mutexty;
   public
    constructor create(const athreadproc: threadprocty;
-                      const afreeonterminate: boolean = false); override;
+                      const afreeonterminate: boolean = false;
+                      const astacksizekb: integer = 0); override;
    destructor destroy; override;
    function lock: boolean; //true if ok
    procedure unlock;
@@ -71,7 +74,8 @@ type
    fsem: semty;
   public
    constructor create(const athreadproc: threadprocty;
-                      const afreeonterminate: boolean = false); override;
+                      const afreeonterminate: boolean = false;
+                      const astacksizekb: integer = 0); override;
    destructor destroy; override;
    function semwait: boolean; //true if not destroyed
    function sempost: boolean; //true if not destroyed
@@ -84,7 +88,8 @@ type
    feventlist: teventqueue;
   public
    constructor create(const athreadproc: threadprocty;
-                     const afreeonterminate: boolean = false); overload; override;
+                     const afreeonterminate: boolean = false;
+                     const astacksizekb: integer = 0); overload; override;
    destructor destroy; override;
    procedure terminate; override;
    procedure postevent(event: tmseevent);
@@ -210,19 +215,27 @@ begin
  create(false);
 end;
 
-constructor tmsethread.create(const afreeonterminate: boolean);
+constructor tmsethread.create(const afreeonterminate: boolean;
+                                              const astacksizekb: integer = 0);
 begin
- create({$ifdef FPC}@{$endif}execute,afreeonterminate);
+ create({$ifdef FPC}@{$endif}execute,afreeonterminate,astacksizekb);
 end;
 
 constructor tmsethread.create(const athreadproc: threadprocty;
-                                 const afreeonterminate: boolean);
+                                 const afreeonterminate: boolean;
+                                 const astacksizekb: integer = 0);
 begin
  sys_semcreate(fwaitforsem,0);
  fthreadproc:= athreadproc;
  fstate:= [ts_running,ts_started];
  freeonterminate:= afreeonterminate;
  with finfo do begin
+  if astacksizekb = 0 then begin
+   stacksize:= defaultstacksize;
+  end
+  else begin
+   stacksize:= astacksizekb * 1024;
+  end;
   threadproc:= {$ifdef FPC}@{$endif}internalthreadproc;
  end;
  createthread(finfo);
@@ -322,7 +335,8 @@ end;
 { tmutexthread }
 
 constructor tmutexthread.create(const athreadproc: threadprocty;
-                                     const afreeonterminate: boolean = false);
+                               const afreeonterminate: boolean = false;
+                               const astacksizekb: integer = 0);
 begin
  syserror(sys_mutexcreate(fmutex),self);
  inherited;
@@ -347,7 +361,8 @@ end;
 { teventthread }
 
 constructor teventthread.create(const athreadproc: threadprocty;
-                       const afreeonterminate: boolean = false);
+                       const afreeonterminate: boolean = false;
+                       const astacksizekb: integer = 0);
 begin
  feventlist:= teventqueue.create(true);
  inherited;
@@ -386,7 +401,8 @@ end;
 { tsemthread }
 
 constructor tsemthread.create(const athreadproc: threadprocty;
-                               const afreeonterminate: boolean = false);
+                              const afreeonterminate: boolean = false;
+                              const astacksizekb: integer = 0);
 begin
  sys_semcreate(fsem,0);
  inherited;

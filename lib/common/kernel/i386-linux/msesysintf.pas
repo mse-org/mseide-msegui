@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -778,15 +778,17 @@ begin
 end;
  
 function sys_threadcreate(var info: threadinfoty): syserrorty;
-{$ifndef FPC}
 var
+{$ifndef FPC}
  attr: tthreadattr;
+{$else}
+ id1: threadty;
 {$endif}
 begin
  {$ifdef FPC}
  with info do begin
   id:= 0;
-  id:= beginthread(@threadexec,@info);
+  id:= beginthread(@threadexec,@info,id1,info.stacksize);
   if id = 0 then begin
    result:= sye_thread;
   end

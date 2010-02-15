@@ -39,6 +39,7 @@ type
  threadinfoty = record
   id: threadty;
   threadproc: internalthreadprocty;
+  stacksize: ptruint;
   platformdata: array[0..3] of pointer;
  end;
 

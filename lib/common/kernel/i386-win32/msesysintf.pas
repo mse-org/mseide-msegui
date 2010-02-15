@@ -606,7 +606,7 @@ function sys_threadcreate(var info: threadinfoty): syserrorty;
 begin
 {$ifdef FPC}
  with info,win32threadinfoty(platformdata) do begin
-  handle:= beginthread(@threadexec,@info,id);
+  handle:= beginthread(@threadexec,@info,id,stacksize);
   if handle = 0 then begin
    result:= sye_thread;
   end
@@ -617,7 +617,7 @@ begin
 {$else}
  ismultithread:= true;
  with info,win32threadinfoty(platformdata) do begin
-  handle:= windows.CreateThread(nil,0,@threadexec,@info,0,id);
+  handle:= windows.CreateThread(nil,info.stacksize,@threadexec,@info,0,id);
   if handle = 0 then begin
    result:= sye_thread;
    id:= 0;
