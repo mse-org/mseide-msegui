@@ -30,7 +30,8 @@ type
    procedure wakeup;
   public
    constructor create(const athreadproc: threadprocty;
-                    const afreeonterminate: boolean = false); override;
+                    const afreeonterminate: boolean = false;
+                    const astacksizekb: integer = 0); override;
    destructor destroy; override;
    function listentoprocess(const prochandle: prochandlety; const dest: ievent;
                               const data: pointer): boolean;
@@ -65,7 +66,8 @@ end;
 { tprocmonitor }
 
 constructor tprocmonitor.create(const athreadproc: threadprocty;
-                                   const afreeonterminate: boolean = false);
+                                   const afreeonterminate: boolean = false;
+                                   const astacksizekb: integer = 0);
 begin
  fwakeupevent:= createevent(nil,false,false,nil);
  setlength(fhandles,1);

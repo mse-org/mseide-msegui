@@ -17,6 +17,10 @@ uses
  {$ifdef FPC}{$ifdef UNIX}cthreads,{$endif}classes{$else}Classes{$endif},
  {mseclasses,}mselist,mseevent,msesys,msetypes,sysutils;
 
+{$ifndef FPC}
+const
+  DefaultStackSize = 4*1024*1024;
+{$endif}
 type
  tmsethread = class;
 
@@ -53,7 +57,7 @@ type
    property running: boolean read getrunning;
    property terminated: boolean read getterminated;
    property id: threadty read finfo.id;
-   property freeonterminate: boolean read getfreeonterminate write 
+   property freeonterminate: boolean read getfreeonterminate write
                           setfreeonterminate;
  end;
 
@@ -222,7 +226,7 @@ begin
 end;
 
 constructor tmsethread.create(const athreadproc: threadprocty;
-                                 const afreeonterminate: boolean;
+                                 const afreeonterminate: boolean = false;
                                  const astacksizekb: integer = 0);
 begin
  sys_semcreate(fwaitforsem,0);
