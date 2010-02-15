@@ -49,7 +49,10 @@ type
   private
    procedure readdummy(reader: treader);
    procedure writedummy(writer: twriter);
+   procedure readbounds(reader: treader);
+   procedure writebounds(writer: twriter);
   protected
+   fboundsread: boolean;
    procedure setoptionswidget(const avalue: optionswidgetty); override;
    procedure defineproperties(filer: tfiler); override;
   public
@@ -623,6 +626,30 @@ begin
  //dummy
 end;
 
+procedure tformscrollbox.readbounds(reader: treader);
+var
+ rect1: rectty;
+begin
+ reader.readlistbegin;
+ rect1.x:= reader.readinteger;
+ rect1.y:= reader.readinteger;
+ rect1.cx:= reader.readinteger;
+ rect1.cy:= reader.readinteger;
+ reader.readlistend; 
+ widgetrect:= rect1;
+ fboundsread:= true;
+end;
+
+procedure tformscrollbox.writebounds(writer: twriter);
+begin
+ writer.writelistbegin;
+ writer.writeinteger(fwidgetrect.x);
+ writer.writeinteger(fwidgetrect.y);
+ writer.writeinteger(fwidgetrect.cx);
+ writer.writeinteger(fwidgetrect.cy);
+ writer.writelistend; 
+end;
+
 procedure tformscrollbox.defineproperties(filer: tfiler);
 begin
  filer.defineproperty('bounds_x',{$ifdef FPC}@{$endif}readdummy,
@@ -639,6 +666,8 @@ begin
                                  {$ifdef FPC}@{$endif}writedummy,false);
  filer.defineproperty('anchors',{$ifdef FPC}@{$endif}readdummy,
                                  {$ifdef FPC}@{$endif}writedummy,false);
+ filer.defineproperty('bounds',{$ifdef FPC}@{$endif}readbounds,
+                                 {$ifdef FPC}@{$endif}writebounds,true);
 end;
 
 { tdockformscrollbox }
@@ -1256,7 +1285,9 @@ procedure tcustommseform.updatescrollboxrect;
 var
  rect1: rectty;
 begin
- if not (ws_destroying in fwidgetstate) then begin
+ if not (ws_destroying in fwidgetstate) and 
+                       (not (csloading in componentstate) or 
+                        not fscrollbox.fboundsread) then begin
   rect1:= innerwidgetrect;
   if fmainmenuwidget <> nil then begin
    twidget1(fmainmenuwidget).setwidgetrect(
