@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+2010-02-17
+ twidget.optionswidget ow_canclosenil -> optionswidget1 ow1_canclosenil.
 2010-02-11
  synchronizeprocty -> synchronizeeventty.
  objectprocty -> proceventty.

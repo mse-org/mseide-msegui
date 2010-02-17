@@ -1299,7 +1299,9 @@ begin
  if not (csdesigning in componentstate) and 
                         (oe_closequery in foptionsedit) and isenabled then begin
   if (oe_notnull in foptionsedit) and (fnullchecking = 0) and 
-                 nullcheckneeded(newfocus) and isempty(text) then begin
+                 nullcheckneeded(newfocus) and isempty(text) and
+                 (not(ow1_nocancloseifhidden in foptionswidget1) or 
+                                                    showing) then begin
    widget1:= window.focusedwidget;
    result:= checkvalue;
    if not result and (widget1 = window.focusedwidget) then begin

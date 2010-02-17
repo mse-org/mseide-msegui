@@ -54,7 +54,7 @@ type
                      //key_return and key_enter work like key_tab
                    ow_nochildshortcut,  //do not propagate shortcuts to parent
                    ow_noparentshortcut, //do not react to shortcuts from parent
-                   ow_canclosenil,      //canclose calls canclose(nil)
+                   ow_canclosenil,      // don't use, moved to optionswidget1
                    ow_mousetransparent,ow_mousewheel,
                    ow_noscroll,ow_nochildpaintclip,
                    ow_destroywidgets,ow_nohidewidgets,
@@ -72,7 +72,11 @@ type
                    );
  optionswidgetty = set of optionwidgetty;
  optionwidget1ty = (ow1_autowidth,ow1_autoheight,ow1_autosizeanright,
-                    ow1_autosizeanbottom);
+                    ow1_autosizeanbottom,
+                    ow1_canclosenil, //call canclose(nil) on exit
+                    ow1_nocancloseifhidden);
+                                         
+
  optionswidget1ty = set of optionwidget1ty;
  
  optionskinty = (osk_skin,osk_noskin,osk_framebuttononly,
@@ -9145,7 +9149,7 @@ begin
    if needsfocuspaint then begin
     invalidatewidget;
    end;
-   if (ow_canclosenil in foptionswidget) then begin
+   if (ow1_canclosenil in foptionswidget1) then begin
     if not canclose(nil) then begin
      exit;
     end;
@@ -10561,6 +10565,9 @@ begin
   if ow_autosizeanbottom in avalue then begin
    include(opt1,ow1_autosizeanbottom);
   end;
+  if ow_canclosenil in avalue then begin
+   include(opt1,ow1_canclosenil);
+  end;
   optionswidget1:= opt1;
   
   value1:= optionswidgetty(setsinglebit(longword(avalue),
@@ -10569,7 +10576,8 @@ begin
           longword(foptionswidget),longword(mask2)));
   value:= value1 * mask1 + value2 * mask2 + (avalue - (mask1 + mask2));
   delta:= optionswidgetty(longword(value) xor longword(foptionswidget));
-  foptionswidget:= value - [ow_autosize,ow_autosizeanright,ow_autosizeanbottom];
+  foptionswidget:= value - [ow_autosize,ow_autosizeanright,ow_autosizeanbottom,
+                            ow_canclosenil];
                              //remove deprecated flags
   if (delta * [ow_background,ow_top] <> []) then begin
    if fparentwidget <> nil  then begin
@@ -10584,11 +10592,6 @@ begin
   if delta * [ow_fontlineheight,ow_fontglyphheight] <> [] then begin
    updatefontheight;
   end;
-{
-  if (ow_autosize in delta) and (ow_autosize in avalue) then begin
-   checkautosize;
-  end;
-}
  end;
 end;
 

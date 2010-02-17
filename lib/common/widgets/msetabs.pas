@@ -810,6 +810,7 @@ type
  ttabwidget = class(tcustomtabwidget)
   published
    property optionswidget;
+   property optionswidget1;
    property optionsskin default defaulttaboptionsskin;
    property bounds_x;
    property bounds_y;
@@ -3804,6 +3805,7 @@ procedure tcustomtabwidget.setactivepageindex(Value: integer);
 var
  int1: integer;
  parenttabfocus: boolean;
+ widget1,widget2: twidget;
 begin
  if value <> factivepageindex then begin
   if csloading in componentstate then begin
@@ -3821,10 +3823,21 @@ begin
   exclude(foptionswidget,ow_parenttabfocus);
   try
    if factivepageindex >= 0 then begin
+    widget1:= items[factivepageindex];
+    widget2:= widget1;
+    if ow1_canclosenil in widget1.optionswidget1 then begin
+     widget2:= nil;
+    end;
+    if not widget1.canparentclose(widget2) then begin
+     ftabs.tabs[factivepageindex].active:= true;
+     exit;
+    end;
+    {
     if not canparentclose(items[factivepageindex]) then begin
      ftabs.tabs[factivepageindex].active:= true;
      exit;
     end;
+    }
     int1:= factivepageindex;
     factivepageindex:= -1;
     if not (csloading in componentstate) then begin

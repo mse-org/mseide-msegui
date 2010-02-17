@@ -211,12 +211,12 @@ type
    property pagesize: real read fpagesize write setpagesize stored ispagesizestored;
                     //default = defaultpagesize
    property buttonlength: integer read fbuttonlength write setbuttonlength default 0;
-                     //0 -> proportional -1 -> quadratic
+                     //0 -> proportional -1 -> square
    property buttonminlength: integer read fbuttonminlength
                  write setbuttonminlength default defaultbuttonminlength;
    property buttonendlength: integer read fbuttonendlength 
                          write setbuttonendlength default 0;
-                     //0 -> quadratic, -1 -> no endbuttons
+                     //0 -> square, -1 -> no endbuttons
    property facebutton: tface read getfacebutton write setfacebutton;
    property faceendbutton: tface read getfaceendbutton write setfaceendbutton;
    property framebutton: tframe read getframebutton write setframebutton;
