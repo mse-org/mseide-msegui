@@ -85,7 +85,6 @@ type
   procedure statdataread;
   procedure griddatasourcechanged;
   procedure setreadonly(const avalue: boolean);
-  procedure statread;
  end;
 
  twidgetcol = class(tdatacol,iwidgetgrid)
