@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -1192,7 +1192,7 @@ begin
  ftransparentcolor:= cl_default;
  fmaskcolorbackground:= $000000; //max transparent
  fmaskcolorforeground:= $ffffff;
- if monochrome then begin
+ if amonochrome then begin
   include(foptions,bmo_monochrome);
  end;
  inherited;
