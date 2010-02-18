@@ -11298,12 +11298,23 @@ begin
 end;
 
 procedure tcustomgrid.loaded;
+var
+ int1: integer;
+ col1: tdatacol;
 begin
  inherited;
  checkneedsrowheight;
  fdatacols.checkindexrange;
  fdatacols.frowstate.sourcenamechanged(-1);
  checksort;
+ for int1:= 0 to fdatacols.count - 1 do begin
+  col1:= tdatacol(fdatacols.fitems[int1]);
+  with col1 do begin
+   if (fdata <> nil) and canevent(tmethod(fonchange)) then begin
+    fonchange(col1,-1);
+   end;
+  end;
+ end;
  dorowsdatachanged(makegridcoord(invalidaxis,0),frowcount);
 end;
 

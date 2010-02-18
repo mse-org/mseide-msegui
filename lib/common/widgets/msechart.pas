@@ -161,7 +161,7 @@ type
    procedure checkgraphic;
    procedure createitem(const index: integer; var item: tpersistent); override;
   public
-   constructor create(const aowner: tchart); reintroduce;
+   constructor create(const aowner: tcustomchart); reintroduce;
    class function getitemclasstype: persistentclassty; override;
    function itembyname(const aname: string): ttrace;
    procedure assign(source: tpersistent); override;
@@ -762,8 +762,11 @@ begin
     bmp2:= tmaskedbitmap.create(false);
     try
      bmp1.masked:= fimage_list.masked;
-     bmp1.monochrome:= fimage_list.monochrome;
      fimage_list.getimage(finfo.imagenr,bmp1);
+     bmp1.colorforeground:= co1;
+     bmp1.colorbackground:= tcustomchart(fowner).colorchart;
+     bmp1.monochrome:= false;
+     bmp1.colormask:= true;
      bmp2.size:= imagesize;
      bmp1.stretch(bmp2);
      for int1:= finfo.bottommargin to high(finfo.datapoints) - 
@@ -964,7 +967,7 @@ end;
 
 { ttraces }
 
-constructor ttraces.create(const aowner: tchart);
+constructor ttraces.create(const aowner: tcustomchart);
 begin
  fxrange:= 1;
  fyrange:= 1;
@@ -1065,8 +1068,10 @@ var
  int1: integer;
 begin
  fxstart:= avalue;
- for int1:= 0 to high(fitems) do begin
-  ttrace(fitems[int1]).xstart:= avalue;
+ if not (csloading in tcustomchart(fowner).componentstate) then begin
+  for int1:= 0 to high(fitems) do begin
+   ttrace(fitems[int1]).xstart:= avalue;
+  end;
  end;
 end;
 
@@ -1075,8 +1080,10 @@ var
  int1: integer;
 begin
  fystart:= avalue;
- for int1:= 0 to high(fitems) do begin
-  ttrace(fitems[int1]).ystart:= avalue;
+ if not (csloading in tcustomchart(fowner).componentstate) then begin
+  for int1:= 0 to high(fitems) do begin
+   ttrace(fitems[int1]).ystart:= avalue;
+  end;
  end;
 end;
 
@@ -1085,8 +1092,10 @@ var
  int1: integer;
 begin
  fxrange:= avalue;
- for int1:= 0 to high(fitems) do begin
-  ttrace(fitems[int1]).xrange:= avalue;
+ if not (csloading in tcustomchart(fowner).componentstate) then begin
+  for int1:= 0 to high(fitems) do begin
+   ttrace(fitems[int1]).xrange:= avalue;
+  end;
  end;
 end;
 
@@ -1095,8 +1104,10 @@ var
  int1: integer;
 begin
  fyrange:= avalue;
- for int1:= 0 to high(fitems) do begin
-  ttrace(fitems[int1]).yrange:= avalue;
+ if not (csloading in tcustomchart(fowner).componentstate) then begin
+  for int1:= 0 to high(fitems) do begin
+   ttrace(fitems[int1]).yrange:= avalue;
+  end;
  end;
 end;
 
