@@ -1123,7 +1123,8 @@ var
  bo1: boolean;
  rea1: real;
  po1,po2: prectty;
- 
+ po3: psegmentty;
+ horz1: boolean;
 begin
  if not (dis_layoutvalid in fstate) then begin
   canvas1:= fintf.getwidget.getcanvas;
@@ -1132,6 +1133,7 @@ begin
   fsidearc:= nullrect;
   fboxarc:= nullrect;
   farcscale:= 1;
+  horz1:= fdirection in [gd_right,gd_left];
   if fangle <> 0 then begin
    if bo1 then begin
     int2:= findent1;
@@ -1147,7 +1149,7 @@ begin
     else begin
      int1:= int2;
     end;
-    if fdirection in [gd_right,gd_left] then begin
+    if horz1 then begin
      x:= x + int1;
      cx:= cx - 2 * int1;
      foffsr:= y;
@@ -1292,7 +1294,7 @@ begin
   end;
   
   with rect1 do begin
-   if fdirection in [gd_right,gd_left] then begin
+   if horz1 then begin
     boxlines[0].a.x:= x;         
     boxlines[0].b.x:= x + cx;
     boxlines[1].a.x:= boxlines[0].a.x;
@@ -1365,7 +1367,7 @@ begin
       inc(int1);
       system.setlength(ticks,int1);
       system.setlength(ticksreal,int1);
-      if fdirection in [gd_right,gd_left] then begin
+      if horz1 then begin
        step:= rect1.cx * step;
        offs:= rect1.cx * offs;
        if fdirection = gd_left then begin
@@ -1396,6 +1398,37 @@ begin
          b.y:= a.y;
          a.x:= linestart;
          b.x:= lineend;
+        end;
+       end;
+      end;
+      for int1:= 0 to high(ticks) do begin //snap to existing ticks
+       po3:= nil;
+       rea1:= ticksreal[int1];
+       for int2:= int4-1 downto 0 do begin
+        with tdialtick(fticks.fitems[int2]).finfo do begin
+         for int3:= 0 to high(ticks) do begin
+          if abs(rea1-ticksreal[int3]) < 0.1 then begin
+           po3:= @ticks[int3];
+           break;
+          end;
+         end;
+        end;
+        if po3 <> nil then begin
+         break;
+        end;
+       end;
+       if po3 <> nil then begin
+        if horz1 then begin
+         with ticks[int1] do begin
+          a.x:= po3^.a.x;
+          b.x:= a.x;
+         end;
+        end
+        else begin
+         with ticks[int1] do begin
+          a.y:= po3^.a.y;
+          b.y:= a.y;
+         end;
         end;
        end;
       end;

@@ -293,6 +293,7 @@ type
  ppointaty = ^pointaty;
 
  segmentty = record a,b: pointty end;
+ psegmentty = ^segmentty;
  segmentarty = array of segmentty;
 
  graphicvectorty = record
