@@ -1,0 +1,121 @@
+# MSEide syntaxdefinition for IPF format
+
+# Define the textstyles
+STYLES
+ default ''
+ words 'b'
+ comment 'i' cl_dkcyan
+ tag 'b' cl_dkblue
+ tagparams '' cl_dkblue
+ string '' cl_dkblue
+ macro '' cl_dkmagenta
+
+# Add '.'  to the allowed characters in keywords.
+# Default is ['A'..'Z','a'..'z','0'..'9','_']
+ADDKEYWORDCHARS
+ '.'
+
+# Define control keywords
+KEYWORDDEFS control
+ '.br' '.ce' '.nameit'
+
+# Scopes must be defined before they can be referenced
+# Define the scope paramend with no text style
+SCOPE paramend
+ ENDTOKENS
+# Scope terminates imediately
+
+# Define the scope tagparams with the text style tagparams
+SCOPE tagparams tagparams
+ JUMPTOKENS
+# Jump to scope paramend with text style tag
+  '.' paramend tag
+
+# Define the scope tag with text style tag
+SCOPE tag tag
+ ENDTOKENS
+  '.'
+ JUMPTOKENS
+# Space -> tagprams scope
+  ' '  tagparams
+# End of line -> tagprams scope
+  ''  tagparams
+
+SCOPE comment1 comment
+ endtokens
+  ''
+
+SCOPE macro macro
+ endtokens
+  '.'
+
+# Coloring starts with the last scope, the name is irrelevant
+SCOPE main
+
+# Keywords used in ths scope with text style tag
+ KEYWORDS tag
+  control
+
+ CALLTOKENS
+  ':a' tag
+#  ':acviewport' tag
+#  ':artlink' tag
+#  ':artwork' tag
+  ':c' tag
+#  ':caution' tag
+#  ':cgraphic' tag
+#  ':color' tag
+#  ':ctrl' tag
+#  ':ctrldef' tag
+  ':d' tag
+#  ':ddf' tag
+#  ':dl' tag
+#  ':docprof' tag
+  ':e' tag
+  ':f' tag
+#  ':fig' tag
+#  ':figcap' tag
+#  ':font' tag
+#  ':fn' tag
+  ':h' tag
+#  ':h' tag
+#  ':hdref' tag
+#  ':hide' tag
+#  ':hp' tag
+  ':i' tag
+#  ':i' tag
+#  ':icmd' tag
+#  ':isyn' tag
+  ':l' tag
+#  ':li' tag
+#  ':lines' tag
+#  ':link' tag
+#  ':lm' tag
+#  ':lp' tag
+  ':n' tag
+#  ':note' tag
+#  ':nt' tag
+  ':o' tag
+#  ':ol' tag
+  ':p' tag
+#  ':p' tag
+#  ':parml' tag
+#  ':pbutton' tag
+#  ':pd' tag
+#  ':pt' tag
+#  ':rm' tag
+  ':s' tag
+#  ':sl' tag
+  ':t' tag
+#  ':table' tag
+#  ':title' tag
+   ':u' tag
+# ':ul' tag
+# ':userdoc' tag
+  ':w' tag
+#  ':warning' tag
+  ':x' tag
+# ':xmp' tag
+
+  '.*' comment1
+  '&' macro

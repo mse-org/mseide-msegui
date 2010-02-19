@@ -498,9 +498,9 @@ begin
          end;
         end
         else begin  //return on any char
-         if wpo1^ <> #0 then begin
-          inc(wpo1);
-         end;
+//         if wpo1^ <> #0 then begin
+//          inc(wpo1);
+//         end;
          dec(alen);
          dec(keywordlen);
          bo1:= false;
