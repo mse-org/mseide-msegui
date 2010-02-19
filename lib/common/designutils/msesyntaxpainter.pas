@@ -49,6 +49,7 @@ type
   starttokens: starttokenarty;
   endtokens: endtokenarty;
   hasendtokens: boolean;
+  return: boolean;
   fontinfonr: integer;
  end;
  scopeinfopoty = ^scopeinfoty;
@@ -471,7 +472,7 @@ begin
         end;
        end;
        bo1:= true;
-       if scopeinfopo^.hasendtokens then begin
+       if scopeinfopo^.hasendtokens or scopeinfopo^.return then begin
         if (length(scopeinfopo^.endtokens) > 0) then begin
          if (char(wpo1^) in scopeendchars) then begin
                        //endtoken suchen
@@ -498,15 +499,15 @@ begin
          end;
         end
         else begin  //return on any char
-//         if wpo1^ <> #0 then begin
-//          inc(wpo1);
-//         end;
+         if not scopeinfopo^.return and (wpo1^ <> #0) then begin
+          inc(wpo1);
+         end;       //else return immediately
          dec(alen);
          dec(keywordlen);
          bo1:= false;
          popscope;
          changed:= setcharstyle(format,wpo1-startpo,bigint,
-                              charstyles[scopeinfopo^.fontinfonr]) or changed;
+                         charstyles[scopeinfopo^.fontinfonr]) or changed;
         end;
        end;
        if bo1 and (length(scopeinfopo^.starttokens) > 0) and (char(wpo1^) in scopestartchars) then begin
@@ -539,6 +540,9 @@ begin
         dec(keywordlen);
        end;
       until alen < 0;
+      if scopeinfopo^.return then begin
+       popscope;
+      end;
      end;
      if changed then begin
       if assigned(onlinechanged) then begin
@@ -700,7 +704,8 @@ function tsyntaxpainter.readdeffile(stream: ttextstream): integer;
 type
  tokennrty = (tn_styles,tn_caseinsensitive,tn_keywordchars,tn_addkeywordchars,
               tn_keyworddefs,
-              tn_scope,tn_endtokens,tn_keywords,tn_jumptokens,tn_calltokens);
+              tn_scope,tn_endtokens,tn_keywords,tn_jumptokens,tn_calltokens,
+              tn_return);
 const
  tn_canmultiple = [tn_keyworddefs];
 
@@ -708,7 +713,8 @@ const
  tokens: array[tokennrty] of string = (
        'STYLES','CASEINSENSITIVE','KEYWORDCHARS','ADDKEYWORDCHARS',
        'KEYWORDDEFS',
-       'SCOPE','ENDTOKENS','KEYWORDS','JUMPTOKENS','CALLTOKENS');
+       'SCOPE','ENDTOKENS','KEYWORDS','JUMPTOKENS','CALLTOKENS',
+       'RETURN');
  tn_localstart = tn_scope;
 var
  linenr: integer;
@@ -746,6 +752,7 @@ var
 
  function addscoperule(const astarttokens: starttokenarty;
                   const aendtokens: endtokenarty; ahasendtokens: boolean;
+                  areturn: boolean;
                   afontinfonr: integer;
                   const akeywords: keywordinfoarty): integer;
 
@@ -759,6 +766,7 @@ var
     starttokens:= copy(astarttokens);
     endtokens:= copy(aendtokens);
     hasendtokens:= ahasendtokens;
+    return:= areturn;
     fontinfonr:= afontinfonr;
    end;
    updateaktscope;
@@ -921,7 +929,7 @@ begin
          nextword(lstr1,lstr3);
          int1:= findname(stylenames,lstr3);
          updateaktscope;
-         addname(scopenames,lstr2,addscoperule(nil,nil,false,int1,nil));
+         addname(scopenames,lstr2,addscoperule(nil,nil,false,false,int1,nil));
          flags:= [];
         end;
         tn_keywords: begin
@@ -931,13 +939,24 @@ begin
          nextword(lstr1,lstr3);
          aktkeywordfontinfonr:= findname(stylenames,lstr3);
         end;
-        tn_endtokens,tn_calltokens,tn_jumptokens: begin
+        tn_return,tn_endtokens,tn_calltokens,tn_jumptokens: begin
          if length(scopeinfos) = 0 then begin
           noscope;
          end
          else begin
           if akttoken = tn_endtokens then begin
+           if scopeinfos[aktscopeinfo].return then begin
+            invalidtoken;
+           end;
            scopeinfos[aktscopeinfo].hasendtokens:= true;
+          end
+          else begin
+           if akttoken = tn_return then begin
+            if scopeinfos[aktscopeinfo].hasendtokens then begin
+             invalidtoken;
+            end;
+            scopeinfos[aktscopeinfo].return:= true;
+           end;
           end;
          end; 
         end;

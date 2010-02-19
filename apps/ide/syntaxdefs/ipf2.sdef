@@ -7,7 +7,8 @@ STYLES
  comment 'i' cl_dkcyan
  tag 'b' cl_dkblue
  tagparams '' cl_dkblue
- string '' cl_dkblue
+# RGB value
+ string '' $600000
  macro '' cl_dkmagenta
 
 # Add '.'  to the allowed characters in keywords.
@@ -20,13 +21,21 @@ KEYWORDDEFS control
  '.br' '.ce' '.nameit'
 
 # Scopes must be defined before they can be referenced
+
+# Define scope string with text style  string
+scope string string
+ endtokens
+  '''' ''
+
 # Define the scope paramend with no text style
 SCOPE paramend
- ENDTOKENS
-# Scope terminates imediately
+ RETURN
+# No endtokens, scope terminates imediately
 
 # Define the scope tagparams with the text style tagparams
 SCOPE tagparams tagparams
+ CALLTOKENS
+  '''' string
  JUMPTOKENS
 # Jump to scope paramend with text style tag
   '.' paramend tag
@@ -119,3 +128,4 @@ SCOPE main
 
   '.*' comment1
   '&' macro
+
