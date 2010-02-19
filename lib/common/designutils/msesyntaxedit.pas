@@ -50,7 +50,8 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   procedure setsyntaxdef(const sourcefilename: filenamety); overload; //'' for none
+   procedure setsyntaxdef(const sourcefilename: filenamety); overload;
+                      //'' for none
    procedure setsyntaxdef(const handle: integer); overload;
    procedure refreshsyntax(const start,count: integer);
 

@@ -1,0 +1,96 @@
+# MSEide syntaxdefinition for IPF format
+
+STYLES
+ default ''
+ words 'b'
+ comment 'i' cl_dkcyan
+ tag 'b' cl_dkblue
+ string '' cl_dkblue
+ macro '' cl_dkmagenta
+
+ADDKEYWORDCHARS
+ '.'
+
+KEYWORDDEFS control
+ '.br' '.ce' '.nameit'
+
+SCOPE tag tag
+ ENDTOKENS
+  '.'
+
+SCOPE comment1 comment
+ endtokens
+  ''
+
+SCOPE macro macro
+ endtokens
+  '.'
+
+SCOPE main
+
+ KEYWORDS tag
+  control
+
+ CALLTOKENS
+  ':a' tag
+#  ':acviewport' tag
+#  ':artlink' tag
+#  ':artwork' tag
+  ':c' tag
+#  ':caution' tag
+#  ':cgraphic' tag
+#  ':color' tag
+#  ':ctrl' tag
+#  ':ctrldef' tag
+  ':d' tag
+#  ':ddf' tag
+#  ':dl' tag
+#  ':docprof' tag
+  ':e' tag
+  ':f' tag
+#  ':fig' tag
+#  ':figcap' tag
+#  ':font' tag
+#  ':fn' tag
+  ':h' tag
+#  ':h' tag
+#  ':hdref' tag
+#  ':hide' tag
+#  ':hp' tag
+  ':i' tag
+#  ':i' tag
+#  ':icmd' tag
+#  ':isyn' tag
+  ':l' tag
+#  ':li' tag
+#  ':lines' tag
+#  ':link' tag
+#  ':lm' tag
+#  ':lp' tag
+  ':n' tag
+#  ':note' tag
+#  ':nt' tag
+  ':o' tag
+#  ':ol' tag
+  ':p' tag
+#  ':p' tag
+#  ':parml' tag
+#  ':pbutton' tag
+#  ':pd' tag
+#  ':pt' tag
+#  ':rm' tag
+  ':s' tag
+#  ':sl' tag
+  ':t' tag
+#  ':table' tag
+#  ':title' tag
+   ':u' tag
+# ':ul' tag
+# ':userdoc' tag
+  ':w' tag
+#  ':warning' tag
+  ':x' tag
+# ':xmp' tag
+
+  '.*' comment1
+  '&' macro
