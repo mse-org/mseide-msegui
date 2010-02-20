@@ -694,6 +694,7 @@ type
    constructor create(const agrid: tcustomgrid; 
                          const aowner: tgridarrayprop); override;
    destructor destroy; override;
+   function edited: boolean;
    procedure readpipe(const pipe: tpipereader; 
                       const processeditchars: boolean = false;
                       const maxchars: integer = 0); overload;
@@ -2184,6 +2185,7 @@ type
    function locatecurrentindex: integer; //index of current row
    procedure locatesetcurrentindex(const aindex: integer);
    function getkeystring(const aindex: integer): msestring; //locate text
+   function edited: boolean;
 
    procedure rowstatechanged(const arow: integer); override;
    procedure dofocusedcellposchanged; override;
@@ -6020,6 +6022,11 @@ begin
  if fdata <> nil then begin
   tstringcoldatalist(fdata).afterrowcountupdate;
  end;
+end;
+
+function tcustomstringcol.edited: boolean;
+begin
+ result:= gps_edited in fstate;
 end;
 
 { tfixcol }
@@ -14032,6 +14039,11 @@ begin
  if currentdatalist <> nil then begin
   result:= currentdatalist[aindex];
  end;
+end;
+
+function tcustomstringgrid.edited: boolean;
+begin
+ result:= isdatacell(ffocusedcell) and cols[ffocusedcell.col].edited;
 end;
 
 { trowfontarrayprop }

@@ -253,6 +253,7 @@ type
    function locatecount: integer; virtual;        //number of locate values
    function locatecurrentindex: integer; virtual; //index of current row
    procedure locatesetcurrentindex(const aindex: integer);
+   function edited: boolean;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -1549,6 +1550,11 @@ end;
 procedure tcustomlistview.locatesetcurrentindex(const aindex: integer);
 begin
  focuscell(indextocell(aindex));
+end;
+
+function tcustomlistview.edited: boolean;
+begin
+ result:= false;
 end;
 
 function tcustomlistview.getkeystring(const index: integer): msestring;

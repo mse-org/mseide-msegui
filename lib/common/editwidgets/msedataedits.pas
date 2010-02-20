@@ -212,7 +212,7 @@ type
 
    function checkvalue(const quiet: boolean = false): boolean; virtual;
    function canclose(const newfocus: twidget): boolean; override;
-   function edited: boolean;
+   function edited: boolean; override;
    function emptytext: boolean;
    function seteditfocus: boolean;
    

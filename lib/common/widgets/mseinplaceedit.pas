@@ -60,6 +60,7 @@ type
   function locatecurrentindex: integer; //index of current row
   procedure locatesetcurrentindex(const aindex: integer);
   function getkeystring(const aindex: integer): msestring; //locate text
+  function edited: boolean;
  end;
 
  inplaceeditstatety = (ies_focused,ies_poschanging,ies_firstclick,ies_istextedit,
@@ -436,7 +437,8 @@ begin
              '('+encodeshortcutname(sysshortcuts[sho_cut])+')',
      stockobjects.captions[sc_Paste]+sepchar+
              '('+encodeshortcutname(sysshortcuts[sho_paste])+')'],
-    [],states,[{$ifdef FPC}@{$endif}onundo,{$ifdef FPC}@{$endif}oncopy,
+    [[mao_nocandefocus],[mao_nocandefocus],[mao_nocandefocus],[mao_nocandefocus]],
+              states,[{$ifdef FPC}@{$endif}onundo,{$ifdef FPC}@{$endif}oncopy,
     {$ifdef FPC}@{$endif}oncut,{$ifdef FPC}@{$endif}onpaste]);
 end;
 
@@ -832,7 +834,7 @@ end;
 
 function tinplaceedit.canundo: boolean;
 begin
- result:= fbackup <> finfo.text.text;
+ result:= (fbackup <> finfo.text.text) or fintf.edited;
 end;
 
 function tinplaceedit.cancopy: boolean;
@@ -1019,7 +1021,7 @@ begin
        end;
       end;
       key_escape: begin
-       if {canundo and} (oe_undoonesc in opt1) then begin
+       if canundo and (oe_undoonesc in opt1) then begin
         undo;
        end
        else begin
