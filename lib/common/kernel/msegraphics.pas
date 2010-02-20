@@ -756,7 +756,8 @@ type
    procedure drawxorframe(const arect: rectty; const awidth: integer = -1;
                            const abrush: tsimplebitmap = nil); overload;
    procedure drawxorframe(const po1: pointty; const po2: pointty;
-                           const awidth: integer = -1;  const abrush: tsimplebitmap = nil); overload;
+                           const awidth: integer = -1;
+                                 const abrush: tsimplebitmap = nil); overload;
    procedure fillxorrect(const arect: rectty; const abrush: tsimplebitmap = nil);
    procedure drawstring(const atext: msestring; const apos: pointty;
                         const afont: tfont = nil; const grayed: boolean = false;

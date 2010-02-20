@@ -1019,7 +1019,7 @@ begin
        end;
       end;
       key_escape: begin
-       if canundo and (oe_undoonesc in opt1) then begin
+       if {canundo and} (oe_undoonesc in opt1) then begin
         undo;
        end
        else begin
