@@ -2074,7 +2074,13 @@ type
 
  syseventhandlereventty = procedure(const awindow: winidty;
                   var aevent: syseventty; var handled: boolean) of object;
+
+ keyinfoty = record
+  key: keyty;
+  shiftstate: shiftstatesty;
+ end;
  
+ keyinfoarty = array of keyinfoty; 
  tguiapplication = class(tcustomapplication)
   private
    fwindows: windowarty;
@@ -2107,6 +2113,7 @@ type
    fexecuteaction: notifyeventty;
    fidleaction: waitidleeventty;
    feventlooping: integer;
+   fkeyhistory: keyinfoarty;
    flastshiftstate: shiftstatesty;
    flastkey: keyty;
    flastbutton: mousebuttonty;
@@ -2273,7 +2280,9 @@ type
                const fmin,fmax,deltamin,deltamax: real);  
    function mousewheelacceleration(const avalue: real): real; overload;
    function mousewheelacceleration(const avalue: integer): integer; overload;
-   
+
+   procedure clearkeyhistory; //called by matched shortcut sequence
+   property keyhistory: keyinfoarty read fkeyhistory;   
    property lastshiftstate: shiftstatesty read flastshiftstate;
    property lastkey: keyty read flastkey;
    property lastbutton: mousebuttonty read flastbutton;
@@ -2561,7 +2570,11 @@ type
   recursion: boolean;
  end;
  windowstackinfoarty = array of windowstackinfoty;
-
+ 
+const
+ keyhistorylen = 10;
+ 
+type 
  tinternalapplication = class(tguiapplication,imouse)
          //avoid circular interface references
   private
@@ -13667,31 +13680,42 @@ begin
      end;
      flastshiftstate:= shiftstate;
      flastkey:= key;
-     if fkeyboardcapturewidget <> nil then begin
-      window1:= fkeyboardcapturewidget.window;
-      widget1:= fkeyboardcapturewidget;
-     end
-     else begin
-      window1:= factivewindow;
-      if window1 <> nil then begin
-       widget1:= factivewindow.ffocusedwidget;
+     try
+      if fkeyboardcapturewidget <> nil then begin
+       window1:= fkeyboardcapturewidget.window;
+       widget1:= fkeyboardcapturewidget;
       end
       else begin
-       widget1:= nil; //compiler warning
+       window1:= factivewindow;
+       if window1 <> nil then begin
+        widget1:= factivewindow.ffocusedwidget;
+       end
+       else begin
+        widget1:= nil; //compiler warning
+       end;
       end;
+      if window1 <> nil then begin
+       fmouseparkeventinfo.shiftstate:= shiftstatesty(
+          replacebits({$ifdef FPC}longword{$else}byte{$endif}(shiftstate),
+            {$ifdef FPC}longword{$else}byte{$endif}(fmouseparkeventinfo.shiftstate),
+            {$ifdef FPC}longword{$else}byte{$endif}(keyshiftstatesmask)));
+       if kind = ek_keypress then begin
+        fonkeypresslist.dokeyevent(widget1,info);
+       end;
+       if not (es_processed in eventstate) then begin
+        window1.dispatchkeyevent(kind,info);
+       end;
+      end;
+    finally
+     if length(fkeyhistory) < keyhistorylen then begin
+      setlength(fkeyhistory,high(fkeyhistory)+2);
      end;
-     if window1 <> nil then begin
-      fmouseparkeventinfo.shiftstate:= shiftstatesty(
-         replacebits({$ifdef FPC}longword{$else}byte{$endif}(shiftstate),
-           {$ifdef FPC}longword{$else}byte{$endif}(fmouseparkeventinfo.shiftstate),
-           {$ifdef FPC}longword{$else}byte{$endif}(keyshiftstatesmask)));
-      if kind = ek_keypress then begin
-       fonkeypresslist.dokeyevent(widget1,info);
-      end;
-      if not (es_processed in eventstate) then begin
-       window1.dispatchkeyevent(kind,info);
-      end;
+     move(fkeyhistory[0],fkeyhistory[1],high(fkeyhistory)*sizeof(keyinfoty));
+     with fkeyhistory[0] do begin
+      key:= info.key;
+      shiftstate:= info.shiftstate;
      end;
+    end;
     end;
    end;
   end;
@@ -15571,6 +15595,11 @@ end;
 function tguiapplication.mousewheelacceleration(const avalue: integer): integer;
 begin
  result:= round(mousewheelacceleration(avalue*1.0));
+end;
+
+procedure tguiapplication.clearkeyhistory;
+begin
+ fkeyhistory:= nil;
 end;
 
 procedure tguiapplication.invalidate;
