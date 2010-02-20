@@ -539,7 +539,7 @@ function isactionshortcut1stored(const info: actioninfoty): boolean;
 begin
  with info do begin
   result:= (as_localshortcut1 in state) and
-         not ((action = nil) and (shortcut = ord(key_none)));
+         not ((action = nil) and (shortcut1 = ord(key_none)));
  end;
 end;
 
