@@ -1813,6 +1813,7 @@ type
    ffocuscount: longword; //for recursive setwidgetfocus
    factivecount: longword; //for recursive activate,deactivate
    factivating: integer;
+   ffocusing: integer;
    fsizeerrorcount: integer;
    fmoving: integer;
    ffocusedwidget: twidget;
@@ -1855,7 +1856,7 @@ type
                                       //nil if from application
    procedure show(windowevent: boolean);
    procedure hide(windowevent: boolean);
-   procedure setfocusedwidget(widget: twidget);
+   procedure setfocusedwidget(const widget: twidget);
    procedure setmodalresult(const Value: modalresultty);
    function getglobalshortcuts: boolean;
    function getlocalshortcuts: boolean;
@@ -11763,7 +11764,7 @@ begin
   if  activewindowbefore <> self then begin
    if force or (appinst.fmodalwindow = nil) or (appinst.fmodalwindow = self) or 
                          (ftransientfor = appinst.fmodalwindow) then begin
-    if (ffocusedwidget = nil) and fowner.canfocus then begin
+    if (ffocusedwidget = nil) and fowner.canfocus and (ffocusing = 0) then begin
      fowner.setfocus(true);
      exit;
     end;
@@ -12311,7 +12312,7 @@ begin
  end;
 end;
 
-procedure twindow.setfocusedwidget(widget: twidget);
+procedure twindow.setfocusedwidget(const widget: twidget);
 var
  focuscountbefore: longword;
  focusedwidgetbefore: twidget;
@@ -12322,74 +12323,83 @@ var
 begin
  widgetar:= nil; //compiler warning
  if ffocusedwidget <> widget then begin
-  inc(ffocuscount);
-  focuscountbefore:= ffocuscount;
-  focusedwidgetbefore:= ffocusedwidget;
-  widget1:= ffocusedwidget;
-  if widget1 <> nil then begin
-   if not (csdestroying in widget1.componentstate) then begin
-    if not widget1.canclose(widget) then begin
-     exit;
-    end;
-    if (ffocuscount <> focuscountbefore) then begin
-     exit;
-    end;
-    ffocusedwidget:= nil;
-    widget1.internaldodefocus;
-    if ffocuscount <> focuscountbefore then begin
-     exit;
-    end;
-   end
-   else begin
-    ffocusedwidget:= nil;
-   end;
-   while (widget1 <> nil) and (widget1 <> widget) and 
-               not widget1.checkdescendent(widget) do begin
-    if not (csdestroying in widget1.componentstate) then begin
-     widget1.internaldodeactivate;
-     if ffocuscount <> focuscountbefore then begin
-      exit;
-     end;
-     widget1.internaldoexit;
-     if ffocuscount <> focuscountbefore then begin
-      exit;
-     end;
-    end;
-    widget1:= widget1.fparentwidget;
-   end;
-  end;
-  if (widget <> nil) and not widget.canfocus then begin
-   exit;
-  end;
-  ffocusedwidget:= widget;
   if widget <> nil then begin
-   widgetar:= widget.getrootwidgetpath;
-   int2:= length(widgetar);
+   inc(ffocusing);
+  end;
+  try
+   inc(ffocuscount);
+   focuscountbefore:= ffocuscount;
+   focusedwidgetbefore:= ffocusedwidget;
+   widget1:= ffocusedwidget;
    if widget1 <> nil then begin
-    for int1:= 0 to high(widgetar) do begin
-     if widgetar[int1] = widget1 then begin
-      int2:= int1;    //common ancestor
-      break;
+    if not (csdestroying in widget1.componentstate) then begin
+     if not widget1.canclose(widget) then begin
+      exit;
+     end;
+     if (ffocuscount <> focuscountbefore) then begin
+      exit;
+     end;
+     ffocusedwidget:= nil;
+     widget1.internaldodefocus;
+     if ffocuscount <> focuscountbefore then begin
+      exit;
+     end;
+    end
+    else begin
+     ffocusedwidget:= nil;
+    end;
+    while (widget1 <> nil) and (widget1 <> widget) and 
+                not widget1.checkdescendent(widget) do begin
+     if not (csdestroying in widget1.componentstate) then begin
+      widget1.internaldodeactivate;
+      if ffocuscount <> focuscountbefore then begin
+       exit;
+      end;
+      widget1.internaldoexit;
+      if ffocuscount <> focuscountbefore then begin
+       exit;
+      end;
+     end;
+     widget1:= widget1.fparentwidget;
+    end;
+   end;
+   if (widget <> nil) and not widget.canfocus then begin
+    exit;
+   end;
+   ffocusedwidget:= widget;
+   if widget <> nil then begin
+    widgetar:= widget.getrootwidgetpath;
+    int2:= length(widgetar);
+    if widget1 <> nil then begin
+     for int1:= 0 to high(widgetar) do begin
+      if widgetar[int1] = widget1 then begin
+       int2:= int1;    //common ancestor
+       break;
+      end;
      end;
     end;
+ //   bo1:= ws_active in fowner.fwidgetstate;
+    bo1:= appinst.factivewindow = self;
+    for int1:= int2-1 downto 0 do begin
+     widgetar[int1].internaldoenter;
+     if ffocuscount <> focuscountbefore then begin
+      exit;
+     end;
+     if bo1 then begin
+      widgetar[int1].internaldoactivate;
+     end;
+     if ffocuscount <> focuscountbefore then begin
+      exit;
+     end;
+    end;
+    ffocusedwidget.internaldofocus;
    end;
-//   bo1:= ws_active in fowner.fwidgetstate;
-   bo1:= appinst.factivewindow = self;
-   for int1:= int2-1 downto 0 do begin
-    widgetar[int1].internaldoenter;
-    if ffocuscount <> focuscountbefore then begin
-     exit;
-    end;
-    if bo1 then begin
-     widgetar[int1].internaldoactivate;
-    end;
-    if ffocuscount <> focuscountbefore then begin
-     exit;
-    end;
+   fowner.dofocuschanged(focusedwidgetbefore,ffocusedwidget);
+  finally
+   if widget <> nil then begin
+    dec(ffocusing);
    end;
-   ffocusedwidget.internaldofocus;
   end;
-  fowner.dofocuschanged(focusedwidgetbefore,ffocusedwidget);
  end;
 end;
 

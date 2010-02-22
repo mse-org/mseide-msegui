@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2004-2009 by Martin Schreiber
+{ MSEgui Copyright (c) 2004-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -1022,7 +1022,8 @@ type
                                   const statebefore: tdatasetstate) of object;
  masterdataseteventty = procedure(const sender: tdataset;
                                  const master: tdataset) of object;
-
+ epostabort = class(eabort);
+ 
  tdscontroller = class(tactivatorcontroller,idsfieldcontroller)
   private
    ffields: tpersistentfields;
@@ -1111,6 +1112,7 @@ type
    function post: boolean; //calls post if in edit or insert state,
                            //returns false if nothing done
    function posting: boolean; //true if in post procedure
+   procedure postabort; //can be called in BeforePost
    procedure cancel;
    function canceling: boolean;
    function emptyinsert: boolean;
@@ -5499,16 +5501,32 @@ begin
    result:= true;
    include(fstate,dscs_posting);
    try    
-    fintf.inheritedpost;
+    try
+     fintf.inheritedpost;
+    except
+     on e: epostabort do begin
+      result:= false;
+     end
+     else begin
+      raise;
+     end;
+    end;      
    finally
     exclude(fstate,dscs_posting);
    end;
-   self.modified;
+   if result then begin
+    self.modified;
+   end;
   end
   else begin
    result:= false;
   end;
  end;
+end;
+
+procedure tdscontroller.postabort;
+begin
+ raise epostabort.create('Post aborted');
 end;
 
 function tdscontroller.emptyinsert: boolean;
