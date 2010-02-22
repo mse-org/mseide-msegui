@@ -6578,6 +6578,10 @@ begin
  tcustomgrid1(fgrid).beginnonullcheck;
  try 
   if checkvalue then begin
+   if (og_appendempty in fgrid.optionsgrid) and 
+                     (dataset.state = dsinsert) then begin
+    dataset.modified:= true; //force append empty row
+   end;
    inherited;
   end
   else begin
