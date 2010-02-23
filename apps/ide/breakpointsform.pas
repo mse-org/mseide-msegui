@@ -689,7 +689,7 @@ begin
    show;
    if focus then begin
     grid.setfocus;
-    bringtofront;
+    window.bringtofront;
    end;
   end;
  end;

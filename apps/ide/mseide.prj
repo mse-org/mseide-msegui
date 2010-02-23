@@ -11,9 +11,13 @@ order8=0
 order9=0
 order10=0
 order11=0
+order12=0
+order13=0
+order14=0
+order15=0
 [projectoptions]
-projectdir=/home/mse/packs/standard/svn/mse/trunk/apps/ide
-projectfilename=/home/mse/packs/standard/svn/mse/trunk/apps/ide/mseide.prj
+projectdir=/home/mse/packs/standard/svn/mse/trunk2/apps/ide
+projectfilename=/home/mse/packs/standard/svn/mse/trunk2/apps/ide/mseide.prj
 options=83
  [projectoptionsfo.twidgetgrid3]
  propcolwidthref=801
@@ -156,6 +160,7 @@ startupbkpton=0
 gdbsimulator=0
 gdbprocessor=i386
 gdbservercommand=
+gdbservercommandattach=
 gdbserverwait=0
 beforeload=
 afterload=
@@ -227,6 +232,7 @@ toolmenus=0
 toolfiles=0
 toolparams=0
 fontalias=0
+fontancestors=0
 fontnames=0
 fontheights=0
 fontwidths=0
@@ -304,6 +310,7 @@ rightmarginchars=80
 scrollheight=0
 tabstops=4
 spacetabs=0
+tabindent=0
 editfontname=mseide_source
 editfontheight=0
 editfontwidth=0
@@ -312,6 +319,8 @@ editfontantialiased=1
 editmarkbrackets=1
 backupfilecount=2
 encoding=0
+scriptbeforecopy=
+scriptaftercopy=
 newprojectfiles=4
  ${TEMPLATEDIR}default/project.pas
  ${TEMPLATEDIR}default/main.pas
@@ -332,22 +341,67 @@ loadprojectfile=4
  1
  1
  0
-newprogramfile=${TEMPLATEDIR}default/program.pas
-newunitfile=${TEMPLATEDIR}default/unit.pas
-newmainfosource=${TEMPLATEDIR}default/mainform.pas
-newmainfoform=${TEMPLATEDIR}default/mainform.mfm
-newsimplefosource=${TEMPLATEDIR}default/simpleform.pas
-newsimplefoform=${TEMPLATEDIR}default/simpleform.mfm
-newdockingfosource=${TEMPLATEDIR}default/dockingform.pas
-newdockingfoform=${TEMPLATEDIR}default/dockingform.mfm
-newdatamodsource=${TEMPLATEDIR}default/datamodule.pas
-newdatamodform=${TEMPLATEDIR}default/datamodule.mfm
-newsubfosource=${TEMPLATEDIR}default/subform.pas
-newsubfoform=${TEMPLATEDIR}default/subform.mfm
-newreportsource=${TEMPLATEDIR}default/report.pas
-newreportform=${TEMPLATEDIR}default/report.mfm
-newinheritedsource=${TEMPLATEDIR}default/inheritedform.pas
-newinheritedform=${TEMPLATEDIR}default/inheritedform.mfm
+newfinames=3
+ Program
+ Unit
+ Textfile
+newfinfilters=3
+ "*.pas" "*.pp"
+ "*.pas" "*.pp"
+ 
+newfiexts=3
+ pas
+ pas
+ 
+newfisources=3
+ ${TEMPLATEDIR}default/program.pas
+ ${TEMPLATEDIR}default/unit.pas
+ 
+newfonames=8
+ Mainform
+ Simple Form
+ Docking Form
+ Datamodule
+ Subform
+ Report
+ Scriptform
+ Inherited Form
+newfonamebases=8
+ form
+ form
+ form
+ module
+ form
+ report
+ script
+ form
+newinheritedforms=8
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ -1
+newfosources=8
+ ${TEMPLATEDIR}default/mainform.pas
+ ${TEMPLATEDIR}default/simpleform.pas
+ ${TEMPLATEDIR}default/dockingform.pas
+ ${TEMPLATEDIR}default/datamodule.pas
+ ${TEMPLATEDIR}default/subform.pas
+ ${TEMPLATEDIR}default/report.pas
+ ${TEMPLATEDIR}default/pascform.pas
+ ${TEMPLATEDIR}default/inheritedform.pas
+newfoforms=8
+ ${TEMPLATEDIR}default/mainform.mfm
+ ${TEMPLATEDIR}default/simpleform.mfm
+ ${TEMPLATEDIR}default/dockingform.mfm
+ ${TEMPLATEDIR}default/datamodule.mfm
+ ${TEMPLATEDIR}default/subform.mfm
+ ${TEMPLATEDIR}default/report.mfm
+ ${TEMPLATEDIR}default/pascform.mfm
+ ${TEMPLATEDIR}default/inheritedform.mfm
 stoponexception=0
 valuehints=1
 activateonbreak=1
@@ -375,10 +429,10 @@ files=
  a=0,4132,0,Text Files
  )
 [componentstore]
-storedir=/home/mse/test/msegui/apps/ide/compstore/
+storedir=/home/mse/proj/mseguidist/test/msegui/apps/ide/compstore/
 filename=
 [layout]
-windowlayout=392
+windowlayout=393
  [mainfo.openfile]
  filenames=0
  filehistory=2
@@ -390,13 +444,13 @@ windowlayout=392
  splitdir=2
  useroptions=15488
  [mainfo]
- stackedunder=
+ stackedunder=mainfo.panel1
  x=4
  y=24
  cx=286
  cy=74
  wsize=0
- active=1
+ active=0
  visible=1
  [targetconsolefo]
  splitdir=0
@@ -560,7 +614,7 @@ windowlayout=392
  [breakpointsfo]
  splitdir=0
  useroptions=16491
- stackedunder=memoryfo
+ stackedunder=watchpointsfo
  parent=
  mdistate=0
  nx=0
@@ -617,12 +671,12 @@ windowlayout=392
  visible=0
  [watchfo.grid]
  propcolwidthref=105
+ values0=0
  width0=13
  sortdescent0=0
  values1=0
  width1=152
  sortdescent1=0
- values2=0
  values3=0
  width3=12
  sortdescent3=0
@@ -718,7 +772,7 @@ windowlayout=392
  x=0
  y=0
  cx=286
- cy=36
+ cy=38
  [sourcefo]
  splitdir=0
  useroptions=16489
@@ -738,6 +792,7 @@ windowlayout=392
  [actionsmo.bluedotsonact]
  checked=1
  [cpui386fo]
+ irqoff=0
  splitdir=0
  useroptions=16491
  stackedunder=threadsfo
@@ -756,8 +811,8 @@ windowlayout=392
  visible=0
  [mainfo.panel1]
  splitdir=2
- useroptions=32233
- stackedunder=componentpalettefo
+ useroptions=32235
+ stackedunder=
  parent=
  mdistate=0
  nx=0
@@ -769,7 +824,7 @@ windowlayout=392
  cx=734
  cy=491
  wsize=0
- active=0
+ active=1
  visible=1
 [edit]
 hintwidth=0

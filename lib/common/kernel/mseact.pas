@@ -99,8 +99,8 @@ type
   caption1: richstringty;
   state: actionstatesty;
   options: menuactionoptionsty;
-  shortcut: shortcutty;
-  shortcut1: shortcutty;
+  shortcut: shortcutarty;
+  shortcut1: shortcutarty;
   group: integer;
   imagenr: imagenrty; //imagenrty;
   imagenrdisabled: imagenrty; //-2 -> grayed
@@ -413,11 +413,11 @@ begin
       sender.calccaptiontext(info);
      end;
      if not (as_localshortcut in state) then begin
-      shortcut:= 0;
+      shortcut:= nil;
       sender.calccaptiontext(info);
      end;
      if not (as_localshortcut1 in state) then begin
-      shortcut1:= 0;
+      shortcut1:= nil;
      end;
      if not (as_localimagelist in state) then begin
       imagelist:= nil; //do not unink,imagelist is owned by action
@@ -933,13 +933,23 @@ begin
   end;
   if not (as_localshortcut in state) and
               (shortcut <> finfo.shortcut) then begin
-   shortcut:= finfo.shortcut;
+   if high(finfo.shortcut) > 0 then begin
+    shortcut:= nil; //multi key shortcut not supported
+   end
+   else begin
+    shortcut:= finfo.shortcut;
+   end;
    sender.calccaptiontext(po1^);
    bo1:= true;
   end;
   if not (as_localshortcut1 in state) and
               (shortcut1 <> finfo.shortcut1) then begin
-   shortcut1:= finfo.shortcut1;
+   if high(finfo.shortcut1) > 0 then begin
+    shortcut1:= nil; //multi key shortcut not supported
+   end
+   else begin
+    shortcut1:= finfo.shortcut1;
+   end;
    bo1:= true;
   end;
   if not (as_localimagelist in state) and

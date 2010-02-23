@@ -126,7 +126,19 @@ type
   public
    procedure edit; override;
  end;
-
+ 
+ tactionshortcutspropertyeditor = class(tshortcutpropertyeditor)
+  protected
+   fsc1: boolean;
+  public
+   constructor create(const adesigner: idesigner;
+        const amodule: tmsecomponent; const acomponent: tcomponent;
+            const aobjectinspector: iobjectinspector;
+            const aprops: propinstancearty; atypeinfo: ptypeinfo); override;
+   procedure setvalue(const value: msestring); override;
+   function getvalue: msestring; override;
+ end;
+ 
 const   
  datamoduleintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createmsedatamodule);
@@ -165,6 +177,8 @@ begin
  registerpropertyeditor(typeinfo(string),tfont,'name',tfontnamepropertyeditor);
  registerpropertyeditor(typeinfo(actionstatesty),nil,'',tshapestatespropertyeditor);
  registerpropertyeditor(typeinfo(shortcutty),nil,'',tshortcutpropertyeditor);
+ registerpropertyeditor(typeinfo(shortcutty),taction,'',
+                                   tactionshortcutspropertyeditor);
  registerpropertyeditor(typeinfo(imagenrty),nil,'',timagenrpropertyeditor);
  registerpropertyeditor(typeinfo(facenrty),nil,'',tordinalpropertyeditor);
  registerpropertyeditor(typeinfo(tcollection),nil,'',tcollectionpropertyeditor);
@@ -427,6 +441,73 @@ end;
 function tneglevelarrayelementeditor.name: msestring;
 begin
  result:= 'Level ' + inttostr(-(findex+1));
+end;
+
+{ tactionshortcutspropertyeditor }
+
+constructor tactionshortcutspropertyeditor.create(const adesigner: idesigner;
+               const amodule: tmsecomponent; const acomponent: tcomponent;
+               const aobjectinspector: iobjectinspector;
+               const aprops: propinstancearty; atypeinfo: ptypeinfo);
+begin
+ fsc1:=  aprops[0].propinfo^.name = 'shortcut1';
+ inherited;
+end;
+
+procedure tactionshortcutspropertyeditor.setvalue(const value: msestring);
+var
+ ar1: msestringarty;
+ ar2: shortcutarty;
+ int1: integer;
+begin
+ ar1:= splitstring(value,' ');
+ if high(ar1) > 0 then begin
+  setlength(ar2,length(ar1));
+  for int1:= 0 to high(ar1) do begin
+   ar2[int1]:= texttovalue(ar1[int1]);
+  end;
+  for int1:= 0 to high(fprops) do begin
+   if fprops[int1].instance is taction then begin
+    with taction(fprops[int1].instance) do begin
+     if fsc1 then begin
+      shortcuts1:= ar2;
+     end
+     else begin
+      shortcuts:= ar2;
+     end;
+    end;
+   end
+   else begin
+    setordvalue(int1,0);
+   end;
+  end;
+ end
+ else begin
+  inherited;
+ end;
+end;
+
+function tactionshortcutspropertyeditor.getvalue: msestring;
+var
+ ar1: shortcutarty;
+ int1: integer;
+begin
+ result:= '';
+ with taction(fprops[0].instance) do begin
+  if self.fsc1 then begin
+   ar1:= shortcuts1;
+  end
+  else begin
+   ar1:= shortcuts;
+  end;
+ end;
+ result:= '';
+ for int1:= 0 to high(ar1) do begin
+  result:= result + getvaluetext(ar1[int1]) + ' ';
+ end;
+ if result <> '' then begin
+  setlength(result,length(result)-1);
+ end;
 end;
 
 initialization

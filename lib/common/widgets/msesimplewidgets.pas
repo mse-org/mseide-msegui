@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -121,6 +121,8 @@ type
    procedure setimagedist(const avalue: integer);
    procedure setshortcut(const avalue: shortcutty);
    function isshortcutstored: boolean;
+   function getshortcut: shortcutty;
+   function getshortcut1: shortcutty;
    procedure setshortcut1(const avalue: shortcutty);
    function isshortcut1stored: boolean;
    procedure readcaptionpos(reader: treader);
@@ -184,9 +186,9 @@ type
    property imagedist: integer read finfo.ca.imagedist write setimagedist default 0;
    property colorglyph: colorty read factioninfo.colorglyph write setcolorglyph
                       stored iscolorglyphstored default cl_glyph;
-   property shortcut: shortcutty read factioninfo.shortcut write setshortcut
+   property shortcut: shortcutty read getshortcut write setshortcut
                             stored isshortcutstored;
-   property shortcut1: shortcutty read factioninfo.shortcut1 write setshortcut1
+   property shortcut1: shortcutty read getshortcut1 write setshortcut1
                             stored isshortcut1stored;
    property onexecute: notifyeventty read factioninfo.onexecute
                             write setonexecute stored isonexecutestored;
@@ -678,8 +680,8 @@ procedure tcustombutton.doshortcut(var info: keyeventinfoty; const sender: twidg
 begin
  if not (es_processed in info.eventstate) then begin
   if not (csdesigning in componentstate) and 
-    (checkshortcutcode(factioninfo.shortcut,info) or
-     checkshortcutcode(factioninfo.shortcut1,info) or
+    (checkshortcutcode(shortcut,info) or
+     checkshortcutcode(shortcut1,info) or
     (bo_executeonshortcut in options) and not (shs_disabled in finfo.state) and
            msegui.checkshortcut(info,factioninfo.caption1,
            bo_altshortcut in options) or
@@ -865,6 +867,16 @@ end;
 function tcustombutton.isshortcutstored: boolean;
 begin
  result:= isactionshortcutstored(factioninfo);
+end;
+
+function tcustombutton.getshortcut: shortcutty;
+begin
+ result:= getsimpleshortcut(factioninfo);
+end;
+
+function tcustombutton.getshortcut1: shortcutty;
+begin
+ result:= getsimpleshortcut1(factioninfo);
 end;
 
 procedure tcustombutton.setshortcut1(const avalue: shortcutty);

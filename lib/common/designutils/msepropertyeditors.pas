@@ -294,6 +294,9 @@ type
  end;
 
  tshortcutpropertyeditor = class(tenumpropertyeditor)
+  protected
+   function getvaluetext(avalue: shortcutty): msestring;
+   function texttovalue(const atext: msestring): shortcutty;
   public
    procedure setvalue(const value: msestring); override;
    function getvalue: msestring; override;
@@ -1175,33 +1178,36 @@ begin
       end;
      end;
     end;
-   {
+   end
+   else begin
     if typeclasslevel > atypeclasslevel then begin
      savelevel;
     end
     else begin
-     if typeclasslevel = atypeclasslevel then begin
-      if propertyownerclasslevel > apropertyownerclasslevel then begin
+     if typeclasslevel >= atypeclasslevel then begin
+              //do not overwrite exact type match
+      if (propertyownerclasslevel > apropertyownerclasslevel) and 
+                                           (anamelevel = 1) then begin
        savelevel;
       end
       else begin
-       if propertyownerclasslevel = apropertyownerclasslevel then begin
-        if namelevel < anamelevel then begin
-         savelevel;
-        end
-        else begin
-         if (namelevel = anamelevel) and
-          (propertyeditorlevel <= po1^.editorclasslevel) then begin
-          savelevel;
+       if propertyownerclasslevel >= apropertyownerclasslevel then begin
+       if namelevel < anamelevel then begin
+        savelevel;
+       end
+       else begin
+        if namelevel = anamelevel then begin
+          if (typeclasslevel = atypeclasslevel) and
+           (propertyeditorlevel <= po1^.editorclasslevel) then begin
+           savelevel;
+          end;
          end;
         end;
        end;
       end;
      end;
     end;
-    }
-   end
-   else begin
+   {
     if (propertyownerclasslevel > apropertyownerclasslevel) and  (anamelevel = 1) then begin
      savelevel;
     end
@@ -1225,6 +1231,7 @@ begin
       end;
      end;
     end;
+    }
    end;
   end;
   inc(po1);
@@ -4278,13 +4285,13 @@ end;
 
 { tshortcutpropertyeditor }
 
-function tshortcutpropertyeditor.getvalue: msestring;
+function tshortcutpropertyeditor.getvaluetext(avalue: shortcutty): msestring;
 var
  int1,int2: integer;
  keys: integerarty;
  names: msestringarty;
 begin
- int2:= getordvalue;
+ int2:= avalue;
  if int2 = 0 then begin
   result:= '';
  end
@@ -4300,6 +4307,11 @@ begin
  end;
 end;
 
+function tshortcutpropertyeditor.getvalue: msestring;
+begin
+ result:= getvaluetext(getordvalue);
+end;
+
 function tshortcutpropertyeditor.getvalues: msestringarty;
 var
  keys: integerarty;
@@ -4309,7 +4321,7 @@ begin
  result:= names;
 end;
 
-procedure tshortcutpropertyeditor.setvalue(const value: msestring);
+function tshortcutpropertyeditor.texttovalue(const atext: msestring): shortcutty;
 var
  int1: integer;
  keys: integerarty;
@@ -4317,18 +4329,22 @@ var
 begin
  getshortcutlist(keys,names);
  for int1:= 0 to high(names) do begin
-  if value = names[int1] then begin
-   setordvalue(keys[int1]);
+  if atext = names[int1] then begin
+   result:= keys[int1];
    exit;
   end;
  end;
- if value = '' then begin
-  int1:= 0;
+ if atext = '' then begin
+  result:= 0;
  end
  else begin
-  int1:= strtointvalue(value,nb_hex);
+  result:= strtointvalue(atext,nb_hex);
  end;
- setordvalue(int1);
+end;
+
+procedure tshortcutpropertyeditor.setvalue(const value: msestring);
+begin
+ setordvalue(texttovalue(value));
 end;
 
  { tcolorpropertyeditorty}

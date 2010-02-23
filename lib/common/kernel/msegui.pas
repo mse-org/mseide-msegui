@@ -1440,6 +1440,7 @@ type
 
    procedure dokeydown(var info: keyeventinfoty); virtual;
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); virtual;
+                    //called twice, first before dokeydown with 
    function checkfocusshortcut(var info: keyeventinfoty): boolean; virtual;
    procedure dokeydownaftershortcut(var info: keyeventinfoty); virtual;
    procedure dokeyup(var info: keyeventinfoty); virtual;
@@ -2078,6 +2079,7 @@ type
 
  keyinfoty = record
   key: keyty;
+  keynomod: keyty;
   shiftstate: shiftstatesty;
  end;
  
@@ -2282,8 +2284,9 @@ type
    function mousewheelacceleration(const avalue: real): real; overload;
    function mousewheelacceleration(const avalue: integer): integer; overload;
 
-   procedure clearkeyhistory; //called by matched shortcut sequence
+   procedure clearkeyhistory; //called by matching shortcut sequence
    property keyhistory: keyinfoarty read fkeyhistory;   
+                        //does not contain modifier keys
    property lastshiftstate: shiftstatesty read flastshiftstate;
    property lastkey: keyty read flastkey;
    property lastbutton: mousebuttonty read flastbutton;
@@ -2782,7 +2785,7 @@ function checkshortcut(var info: keyeventinfoty; const caption: richstringty;
                          const checkalt: boolean): boolean;
 begin
  with info do begin
-  if (eventstate * [es_processed,es_modal] = []) and 
+  if (eventstate * [es_processed,es_modal,es_preview] = []) and 
     (not checkalt and (shiftstate -[ss_alt] = []) or (shiftstate = [ss_alt])) and
                          (length(info.chars) > 0) then begin
    result:= isshortcut(info.chars[1],caption);
@@ -9698,6 +9701,16 @@ end;
 procedure twidget.internalkeydown(var info: keyeventinfoty);
 begin
  if not (es_processed in info.eventstate) then begin
+  include(info.eventstate,es_preview);
+  include(appinst.fstate,aps_shortcutting);
+  try
+   doshortcut(info,self);
+  finally
+   exclude(info.eventstate,es_preview);
+   exclude(appinst.fstate,aps_shortcutting);
+  end;
+ end;
+ if not (es_processed in info.eventstate) then begin
   exclude(fwidgetstate1,ws1_onkeydowncalled);
   dokeydown(info);
  end;
@@ -12307,6 +12320,12 @@ begin
  end
  else begin
   if eventkind = ek_keypress then begin
+   include(info.eventstate,es_preview);
+   try
+    doshortcut(info,fowner);
+   finally
+    exclude(info.eventstate,es_preview);
+   end;
    doshortcut(info,fowner);
   end;
  end;
@@ -13667,6 +13686,7 @@ var
 begin
  try 
   fkeyeventinfo:= @info;
+  exclude(fstate,aps_clearkeyhistory);
   with event do begin
    if findwindow(fwinid,window1) then begin
     fillchar(info,sizeof(info),0);
@@ -13716,20 +13736,30 @@ begin
         window1.dispatchkeyevent(kind,info);
        end;
       end;
-    finally
-     if length(fkeyhistory) < keyhistorylen then begin
-      setlength(fkeyhistory,high(fkeyhistory)+2);
+     finally
+      if (eventkind = ek_keypress) and (key <> key_shift) and
+                         (key <> key_control) and (key <> key_alt) then begin
+       if length(fkeyhistory) < keyhistorylen then begin
+        setlength(fkeyhistory,high(fkeyhistory)+2);
+       end;
+       if aps_clearkeyhistory in fstate then begin
+        fkeyhistory:= nil;
+       end
+       else begin
+        move(fkeyhistory[0],fkeyhistory[1],high(fkeyhistory)*sizeof(keyinfoty));
+        with fkeyhistory[0] do begin
+         key:= info.key;
+         keynomod:= info.keynomod;
+         shiftstate:= info.shiftstate;
+        end;
+       end;
+      end;
      end;
-     move(fkeyhistory[0],fkeyhistory[1],high(fkeyhistory)*sizeof(keyinfoty));
-     with fkeyhistory[0] do begin
-      key:= info.key;
-      shiftstate:= info.shiftstate;
-     end;
-    end;
     end;
    end;
   end;
  finally
+  exclude(fstate,aps_clearkeyhistory);
   fkeyeventinfo:= nil;
  end;
 end;
@@ -13902,16 +13932,20 @@ var
  int1: integer;
 begin
  include(info.eventstate,es_broadcast);
- for int1:= high(fwindows) downto 0 do begin
-  if fwindows[int1] <> sender then begin
-   fwindows[int1].doshortcut(info,awidget);
-   if (es_processed in info.eventstate) then begin
-    break;
+ try
+  for int1:= high(fwindows) downto 0 do begin
+   if fwindows[int1] <> sender then begin
+    fwindows[int1].doshortcut(info,awidget);
+    if (es_processed in info.eventstate) then begin
+     break;
+    end;
    end;
   end;
- end;
- if not (es_processed in info.eventstate) then begin
-  appinst.fonshortcutlist.dokeyevent(awidget,info);
+  if not (es_processed in info.eventstate) then begin
+   appinst.fonshortcutlist.dokeyevent(awidget,info);
+  end;
+ finally
+  exclude(info.eventstate,es_broadcast);
  end;
 end;
 
@@ -15609,7 +15643,7 @@ end;
 
 procedure tguiapplication.clearkeyhistory;
 begin
- fkeyhistory:= nil;
+ include(fstate,aps_clearkeyhistory);
 end;
 
 procedure tguiapplication.invalidate;

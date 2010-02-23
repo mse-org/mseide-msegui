@@ -169,7 +169,7 @@ type
          aps_invalidated,aps_zordervalid,aps_needsupdatewindowstack,
          aps_focused,aps_activewindowchecked,aps_exitloop,
          aps_active,aps_waiting,aps_terminating,aps_deinitializing,
-         aps_shortcutting,
+         aps_shortcutting,aps_clearkeyhistory,
          aps_waitstarted,aps_waitcanceled,aps_waitterminated,aps_waitok,
          aps_waitidlelock,aps_eventflushing);
  applicationstatesty = set of applicationstatety;

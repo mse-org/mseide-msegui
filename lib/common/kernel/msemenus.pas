@@ -104,6 +104,8 @@ type
    function isshortcutstored: Boolean;
    procedure setshortcut(const avalue: shortcutty);
    function isshortcut1stored: Boolean;
+   function getshortcut: shortcutty;
+   function getshortcut1: shortcutty;
    procedure setshortcut1(const avalue: shortcutty);
    procedure setonexecute(const avalue: notifyeventty);
    procedure setoptions(const avalue: menuactionoptionsty);
@@ -201,9 +203,9 @@ type
                      stored isstatestored default [];
    property options: menuactionoptionsty read finfo.options 
                    write setoptions default defaultmenuactoptions;
-   property shortcut: shortcutty read finfo.shortcut write setshortcut 
+   property shortcut: shortcutty read getshortcut write setshortcut 
                      stored isshortcutstored default 0;
-   property shortcut1: shortcutty read finfo.shortcut1 write setshortcut1 
+   property shortcut1: shortcutty read getshortcut1 write setshortcut1 
                      stored isshortcut1stored default 0;
    property tag: integer read finfo.tag write settag stored istagstored default 0;
    property group: integer read finfo.group write setgroup 
@@ -819,6 +821,16 @@ end;
 function tmenuitem.isshortcut1stored: Boolean;
 begin
  result:= isactionshortcut1stored(finfo);
+end;
+
+function tmenuitem.getshortcut: shortcutty;
+begin
+ result:= getsimpleshortcut(finfo);
+end;
+
+function tmenuitem.getshortcut1: shortcutty;
+begin
+ result:= getsimpleshortcut1(finfo);
 end;
 
 procedure tmenuitem.setshortcut1(const avalue: shortcutty);

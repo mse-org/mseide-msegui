@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -27,22 +27,38 @@ type
  
  taction = class(tcustomaction,iimagelistinfo)
   private
+//   fmultishortcut: integer; //0 = none, 1 = shortcut, 2 = shortcut1
+//   fmultiindex: integer;   //index of current checked char
    procedure setimagelist(const Value: timagelist);
+   function getshortcut: shortcutty;
    procedure setshortcut(const avalue: shortcutty);
+   function getshortcut1: shortcutty;
    procedure setshortcut1(const avalue: shortcutty);
+   procedure setshortcuts(const avalue: shortcutarty);
+   procedure setshortcuts1(const avalue: shortcutarty);
+   procedure readshortcut(reader: treader);
+   procedure readshortcut1(reader: treader);
+   procedure readsc(reader: treader);
+   procedure writesc(writer: twriter);
+   procedure readsc1(reader: treader);
+   procedure writesc1(writer: twriter);
   //iimagelistinfo
    function getimagelist: timagelist;
   protected
    procedure registeronshortcut(const avalue: boolean); override;
-   procedure doshortcut(const sender: twidget; var info: keyeventinfoty);
+   procedure doshortcut(const sender: twidget; var keyinfo: keyeventinfoty);
    procedure doafterunlink; override;
+   procedure defineproperties(filer: tfiler); override;
   public
+//   destructor destroy; override;
+   property shortcuts: shortcutarty read finfo.shortcut write setshortcuts;
+   property shortcuts1: shortcutarty read finfo.shortcut1 write setshortcuts1;
   published
    property imagelist: timagelist read getimagelist write setimagelist;
-   property shortcut: shortcutty read finfo.shortcut write setshortcut
-                                default ord(key_none);
-   property shortcut1: shortcutty read finfo.shortcut1 write setshortcut1
-                                default ord(key_none);
+   property shortcut: shortcutty read getshortcut write setshortcut
+                                stored false default ord(key_none) ;
+   property shortcut1: shortcutty read getshortcut1 write setshortcut1
+                                 stored false default ord(key_none);
    property caption;
    property state;
    property group;
@@ -192,7 +208,13 @@ type
   published 
    property onhelp;
  end;
- 
+
+function issameshortcuts(const a,b: shortcutarty): boolean;
+function getsimpleshortcut(const asource: actioninfoty): shortcutty;
+function getsimpleshortcut1(const asource: actioninfoty): shortcutty;
+procedure setsimpleshortcut(const avalue: shortcutty; var adest: actioninfoty);
+procedure setsimpleshortcut1(const avalue: shortcutty; var adest: actioninfoty);
+
 procedure setactionshortcut(const sender: iactionlink; const value: shortcutty);
 procedure setactionshortcut1(const sender: iactionlink; const value: shortcutty);
 function isactionshortcutstored(const info: actioninfoty): boolean;
@@ -201,12 +223,16 @@ procedure setactionimagelist(const sender: iactionlink; const value: timagelist)
 function isactionimageliststored(const info: actioninfoty): boolean;
  
 procedure getshortcutlist(out keys: integerarty; out names: msestringarty);
-function getshortcutname(key: shortcutty): msestring;
+function getshortcutname(key: shortcutarty): msestring;
 function getsysshortcutdispname(const aitem: sysshortcutty): msestring;
 
 function isvalidshortcut(const ashortcut: shortcutty): boolean;
 function encodeshortcutname(const key: shortcutty): msestring;
-function checkshortcutcode(const shortcut: shortcutty; const info: keyeventinfoty): boolean;
+function checkshortcutcode(const shortcut: shortcutty;
+                    const info: keyeventinfoty;
+                    const apreview: boolean = false): boolean; overload;
+function checkshortcutcode(const shortcut: shortcutty;
+          const info: keyinfoty): boolean; overload;
 function doactionshortcut(const sender: tobject; var info: actioninfoty;
                         var keyinfo: keyeventinfoty): boolean; //true if done
 procedure calccaptiontext(var info: actioninfoty; const aseparator: msechar);
@@ -234,7 +260,7 @@ var
  sysshortcuts1: sysshortcutaty;
 implementation
 uses
- sysutils,mserichstring,msestream,typinfo,mseformatstr;
+ sysutils,mserichstring,msestream,typinfo,mseformatstr,msestreaming;
  
 const   
  letterkeycount = ord('z') - ord('a') + 1;
@@ -244,12 +270,16 @@ const
  cursorkeycount = ord(key_pagedown) - ord(key_home) + 1;
  specialshortcutcount = ord(high(specialshortcutty))+1;
  specialkeycount = misckeycount + specialshortcutcount + cursorkeycount;
+{
  shortcutcount = (letterkeycount + cipherkeycount) * 2 + //ctrl,shiftctrl
                  3 + //space
                  functionkeycount * 4 +              //none,shift,ctrl,shiftctrl
                  specialkeycount * 4;                //none,shift,ctrl,shiftctrl
+}
  baseshortcutcount = letterkeycount + cipherkeycount + 1 + //Space
                      functionkeycount + specialkeycount;
+ shortcutcount = 4 * baseshortcutcount; //none,shift,ctrl,shift+ctrl
+
 var
  shortcutkeys: integerarty;
  shortcutnames: msestringarty;
@@ -263,7 +293,7 @@ begin
                            checkshortcutcode(sysshortcuts1[ashortcut],ainfo);
 end;
 
-procedure getvalues(var bottom: integer; const prefix: msestring;
+procedure getvalues(var bottom: integer; prefix: msestring;
             const modvalue: integer; var keys: integerarty; 
             var names: msestringarty);
 var
@@ -271,38 +301,38 @@ var
  akey: keyty;
 begin
  keys[bottom]:= ord(key_space) + modvalue;
- names[bottom]:= prefix+'+'+spacekeyname;
+ names[bottom]:= prefix+spacekeyname;
  inc(bottom);
  for int1:= bottom to bottom+cipherkeycount-1 do begin
   keys[int1]:= ord(key_0) + int1-bottom + modvalue;
-  names[int1]:= prefix+'+'+msestring(msechar(int1-bottom+ord('0')));
+  names[int1]:= prefix+msestring(msechar(int1-bottom+ord('0')));
  end;
  bottom:= bottom + cipherkeycount;
  for int1:= bottom to bottom+letterkeycount-1 do begin
   keys[int1]:= ord(key_a) + int1-bottom + modvalue;
-  names[int1]:= prefix+'+'+msestring(msechar(int1-bottom+ord('A')));
+  names[int1]:= prefix+msestring(msechar(int1-bottom+ord('A')));
  end;
  bottom:= bottom + letterkeycount;
  for int1:= bottom to bottom + functionkeycount - 1 do begin
   keys[int1]:= (ord(key_f1) + int1-bottom) or modvalue;
-  names[int1]:= prefix+'+F'+inttostr(int1-bottom+1);
+  names[int1]:= prefix+'F'+inttostr(int1-bottom+1);
  end;
  bottom:= bottom+functionkeycount;
  for int1:= bottom to bottom+misckeycount-1 do begin
   akey:= keyty(ord(key_escape) + int1-bottom);
   keys[int1]:= ord(akey)or modvalue;
-  names[int1]:= prefix+'+'+shortmisckeynames[akey];
+  names[int1]:= prefix+shortmisckeynames[akey];
  end;
  bottom:= bottom+misckeycount;
  for int1:= bottom to bottom+specialshortcutcount-1 do begin
   keys[int1]:= ord(specialkeys[specialshortcutty(int1-bottom)]) or modvalue;
-  names[int1]:= prefix+'+'+specialkeynames[specialshortcutty(int1-bottom)];
+  names[int1]:= prefix+specialkeynames[specialshortcutty(int1-bottom)];
  end;
  bottom:= bottom+specialshortcutcount;
  for int1:= bottom to bottom+cursorkeycount-1 do begin
   akey:= keyty(ord(key_home) + int1-bottom);
   keys[int1]:= ord(akey)or modvalue;
-  names[int1]:= prefix+'+'+shortcursorkeynames[akey];
+  names[int1]:= prefix+shortcursorkeynames[akey];
  end;
  bottom:= bottom+cursorkeycount;
 end;
@@ -327,6 +357,7 @@ begin
  names:= shortcutnames;
  if bo1 then begin
   bottom:= 0;
+{
   for int1:= bottom to bottom + functionkeycount - 1 do begin
    keys[int1]:= ord(key_f1) + int1-bottom;
    names[int1]:= 'F'+inttostr(int1-bottom+1);
@@ -373,24 +404,34 @@ begin
    names[int1]:= 'Shift+'+shortcursorkeynames[akey];
   end;
   bottom:= bottom+cursorkeycount;
-  getvalues(bottom,'Ctrl',key_modctrl,keys,names);
-  getvalues(bottom,'Shift+Ctrl',key_modshiftctrl,keys,names);
+}
+  getvalues(bottom,'',0,keys,names);
+  getvalues(bottom,'Shift+',key_modshift,keys,names);
+  getvalues(bottom,'Ctrl+',key_modctrl,keys,names);
+  getvalues(bottom,'Shift+Ctrl+',key_modshiftctrl,keys,names);
  end;
 end;
 
-function getshortcutname(key: shortcutty): msestring;
+function getshortcutname(key: shortcutarty): msestring;
 var
  keys: integerarty;
  names: msestringarty;
- int1,int2: integer;
+ int1,int2,int3: integer;
 begin
- int2:= key;
  result:= '';
- getshortcutlist(keys,names);
- for int1:= 0 to high(keys) do begin
-  if keys[int1] = int2 then begin
-   result:= names[int1];
-   break;
+ if high(key) >= 0 then begin
+  getshortcutlist(keys,names);
+  for int3:= 0 to high(key) do begin
+   int2:= key[int3];
+   for int1:= 0 to high(keys) do begin
+    if keys[int1] = int2 then begin
+     result:= result + names[int1] + ' ';
+     break;
+    end;
+   end;
+  end;
+  if result <> '' then begin
+   setlength(result,length(result)-1);
   end;
  end;
 end;
@@ -462,10 +503,12 @@ begin
  if bo1 then begin
   int1:= 0;
   getvalues(int1,'',0,baseshortcutkeys,baseshortcutnames);
+  {
   for int1:= 0 to high(baseshortcutnames) do begin
    baseshortcutnames[int1]:= copy(baseshortcutnames[int1],2,bigint);
            //remove '+'
   end;
+  }
  end;
  k1:= key and not modmask;
  mstr1:= '';
@@ -503,21 +546,75 @@ var
  str1: msestring;
 begin
  str1:= info.captiontext;
- if (info.shortcut <> 0) and (mao_shortcutcaption in info.options) then begin
+ if (info.shortcut <> nil) and (mao_shortcutcaption in info.options) then begin
   str1:= str1 + aseparator + '('+getshortcutname(info.shortcut)+')';
  end;
  captiontorichstring(str1,info.caption1);
 end;
- 
+
+function issameshortcuts(const a,b: shortcutarty): boolean;
+var
+ int1: integer;
+begin
+ result:= (a = b);
+ if not result then begin 
+  result:=  high(a) = high(b);
+  if result then begin
+   for int1:= 0 to high(a) do begin
+    if a[int1] <> b[int1] then begin
+     result:= false;
+     break;
+    end;
+   end;
+  end;
+ end;
+end;
+   
+function getsimpleshortcut(const asource: actioninfoty): shortcutty;
+begin
+ result:= 0;
+ if asource.shortcut <> nil then begin
+  result:= asource.shortcut[0];
+ end;
+end;
+
+function getsimpleshortcut1(const asource: actioninfoty): shortcutty;
+begin
+ result:= 0;
+ if asource.shortcut1 <> nil then begin
+  result:= asource.shortcut1[0];
+ end;
+end;
+
+procedure setsimpleshortcut(const avalue: shortcutty; var adest: actioninfoty);
+begin
+ if avalue = 0 then begin
+  adest.shortcut:= nil;
+ end
+ else begin
+  setlength(adest.shortcut,1);
+  adest.shortcut[0]:= avalue;
+ end;
+end;
+
+procedure setsimpleshortcut1(const avalue: shortcutty; var adest: actioninfoty);
+begin
+ if avalue = 0 then begin
+  adest.shortcut1:= nil;
+ end
+ else begin
+  setlength(adest.shortcut1,1);
+  adest.shortcut1[0]:= avalue;
+ end;
+end;
+
 procedure setactionshortcut(const sender: iactionlink; const value: shortcutty);
 var
  po1: pactioninfoty;
 begin
  po1:= sender.getactioninfopo;
- with po1^ do begin
-  shortcut:= value;
-  include(state,as_localshortcut);
- end;
+ setsimpleshortcut(value,po1^);
+ include(po1^.state,as_localshortcut);
  calccaptiontext(po1^,sender.shortcutseparator);
  sender.actionchanged;
 end;
@@ -527,11 +624,8 @@ var
  po1: pactioninfoty;
 begin
  po1:= sender.getactioninfopo;
- with po1^ do begin
-  shortcut1:= value;
-  include(state,as_localshortcut1);
- end;
-// calccaptiontext(po1^,sender.shortcutseparator);
+ setsimpleshortcut(value,po1^);
+ include(po1^.state,as_localshortcut1);
  sender.actionchanged;
 end;
 
@@ -539,7 +633,7 @@ function isactionshortcutstored(const info: actioninfoty): boolean;
 begin
  with info do begin
   result:= (as_localshortcut in state) and
-         not ((action = nil) and (shortcut = ord(key_none)));
+         not ((action = nil) and (shortcut = nil));
  end;
 end;
 
@@ -547,7 +641,7 @@ function isactionshortcut1stored(const info: actioninfoty): boolean;
 begin
  with info do begin
   result:= (as_localshortcut1 in state) and
-         not ((action = nil) and (shortcut = ord(key_none)));
+         not ((action = nil) and (shortcut1 = nil));
  end;
 end;
 
@@ -572,25 +666,50 @@ begin
 end;
 
 function checkshortcutcode(const shortcut: shortcutty;
-                             const info: keyeventinfoty): boolean;
+          const info: keyeventinfoty; const apreview: boolean = false): boolean;
 var
  acode: shortcutty;
 begin
  result:= false;
- if shortcut <> 0 then begin
+ if (shortcut <> 0) and 
+                   ((es_preview in info.eventstate) xor not apreview) then begin
   with info do begin
    acode:= 0;
-   if ss_shift in info.shiftstate then begin
+   if ss_shift in shiftstate then begin
     acode:= acode or key_modshift;
    end;
-   if ss_ctrl in info.shiftstate then begin
+   if ss_ctrl in shiftstate then begin
     acode:= acode or key_modctrl;
    end;
-   if ss_alt in info.shiftstate then begin
+   if ss_alt in shiftstate then begin
     acode:= acode or key_modalt;
    end;
-   result:= (acode or ord(info.key) = shortcut) or 
-            (acode or ord(info.keynomod) = shortcut);
+   result:= (acode or ord(key) = shortcut) or 
+            (acode or ord(keynomod) = shortcut);
+  end;
+ end;
+end;
+
+function checkshortcutcode(const shortcut: shortcutty;
+          const info: keyinfoty): boolean;
+var
+ acode: shortcutty;
+begin
+ result:= false;
+ if (shortcut <> 0) then begin
+  with info do begin
+   acode:= 0;
+   if ss_shift in shiftstate then begin
+    acode:= acode or key_modshift;
+   end;
+   if ss_ctrl in shiftstate then begin
+    acode:= acode or key_modctrl;
+   end;
+   if ss_alt in shiftstate then begin
+    acode:= acode or key_modalt;
+   end;
+   result:= (acode or ord(key) = shortcut) or 
+            (acode or ord(keynomod) = shortcut);
   end;
  end;
 end;
@@ -619,19 +738,18 @@ var
 begin
  result:= false;
  with info do begin
-  if not (as_disabled in state) and 
-           not (es_processed in keyinfo.eventstate) and 
-           (not (ss_repeat in keyinfo.shiftstate) or 
+  if not (as_disabled in state) and not (es_processed in keyinfo.eventstate) and 
+        (not (ss_repeat in keyinfo.shiftstate) or 
                 (as_repeatshortcut in info.state)) then begin
-   if shortcut <> 0 then begin
-    if checkshortcutcode(shortcut,keyinfo) then begin
+   if high(shortcut) = 0 then begin
+    if checkshortcutcode(shortcut[0],keyinfo) then begin
      doactionexecute(sender,info,false,false);
      result:= true;
     end;
    end;
    if not result then begin
-    if shortcut1 <> 0 then begin
-     if checkshortcutcode(shortcut1,keyinfo) then begin
+    if high(shortcut1) = 0 then begin
+     if checkshortcutcode(shortcut1[0],keyinfo) then begin
       doactionexecute(sender,info);
       result:= true;
      end;
@@ -664,13 +782,35 @@ begin
  result:= shortcutty(finfo.shortcut);
 end;
 }
+function taction.getshortcut: shortcutty;
+begin
+ result:= getsimpleshortcut(finfo);
+end;
+
 procedure taction.setshortcut(const avalue: shortcutty);
+begin
+ setsimpleshortcut(avalue,finfo);
+ changed;
+end;
+
+function taction.getshortcut1: shortcutty;
+begin
+ result:= getsimpleshortcut1(finfo);
+end;
+
+procedure taction.setshortcut1(const avalue: shortcutty);
+begin
+ setsimpleshortcut1(avalue,finfo);
+ changed;
+end;
+
+procedure taction.setshortcuts(const avalue: shortcutarty);
 begin
  finfo.shortcut:= avalue;
  changed;
 end;
 
-procedure taction.setshortcut1(const avalue: shortcutty);
+procedure taction.setshortcuts1(const avalue: shortcutarty);
 begin
  finfo.shortcut1:= avalue;
  changed;
@@ -686,13 +826,96 @@ begin
  end;
 end;
 
-procedure taction.doshortcut(const sender: twidget; var info: keyeventinfoty);
+procedure taction.doshortcut(const sender: twidget; var keyinfo: keyeventinfoty);
+
+ function check(const anum: integer; out exec: boolean): boolean;
+ var
+  ar1: shortcutarty;
+  int1,int2,int3: integer;
+ begin
+  if anum = 2 then begin
+   ar1:= finfo.shortcut1;
+  end
+  else begin
+   ar1:= finfo.shortcut;
+  end;
+  result:= false;
+  exec:= false;
+  if (high(ar1) > 0) and (es_preview in keyinfo.eventstate) then begin
+   exec:= true;
+   for int1:= high(ar1) downto 0 do begin
+    if checkshortcutcode(ar1[int1],keyinfo,true) then begin
+     result:= true;
+     with application do begin
+      if high(keyhistory) >= int1-1 then begin
+       int3:= 0;
+       if int1 > 0 then begin       
+        for int2:= int1 - 1 downto 0 do begin
+         if not checkshortcutcode(ar1[int2],keyhistory[int3]) then begin
+          result:= false;
+          exec:= false;
+          break;
+         end;
+         inc(int3);
+        end;
+       end
+       else begin
+        exec:= false;
+       end;      
+      end
+      else begin
+       exec:= false;
+       result:= false;
+      end;
+     end;
+     if exec then begin
+      break;
+     end;
+    end
+    else begin
+     exec:= false
+    end;
+   end;
+   if exec then begin
+    application.clearkeyhistory;
+   end;
+  end
+  else begin
+   if high(ar1) >= 0 then begin
+    if checkshortcutcode(ar1[0],keyinfo,false) then begin
+     result:= true;
+     if high(ar1) = 0 then begin
+      exec:= true;
+     end;
+    end;
+   end;
+  end;
+ end; //check
+
+var
+ bo1,bo2: boolean;
 begin
- if not (es_local in info.eventstate) and (ao_globalshortcut in foptions) or 
-        (es_local in info.eventstate) and (ao_localshortcut in foptions) and
+ bo1:= false;  
+ if not (es_local in keyinfo.eventstate) and (ao_globalshortcut in foptions) or 
+        (es_local in keyinfo.eventstate) and (ao_localshortcut in foptions) and
                 (owner <> nil) and issubcomponent(owner,sender) then begin
   doupdate;
-  if doactionshortcut(self,finfo,info) then begin
+  with finfo do begin
+   if not (as_disabled in state) and 
+            not (es_processed in keyinfo.eventstate) and 
+            (not (ss_repeat in keyinfo.shiftstate) or 
+                 (as_repeatshortcut in finfo.state)) then begin
+    bo1:= check(1,bo2);
+    if not bo1 then begin
+     bo1:= check(2,bo2);
+    end;
+   end;
+  end;
+ end;
+ if bo1 then begin
+  include(keyinfo.eventstate,es_processed);
+  if bo2 then begin
+   doactionexecute(sender,finfo,false,false);
    changed;
   end;
  end;
@@ -701,6 +924,53 @@ end;
 procedure taction.doafterunlink;
 begin
  imagelist:= nil;
+end;
+
+procedure taction.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('shortcut',{$ifdef FPC}@{$endif}readshortcut,nil,false);
+ filer.defineproperty('shortcut1',{$ifdef FPC}@{$endif}readshortcut1,nil,false);
+ filer.defineproperty('sc',{$ifdef FPC}@{$endif}readsc,
+                           {$ifdef FPC}@{$endif}writesc,
+       (filer.ancestor = nil) and (shortcuts <> nil) or
+       ((filer.ancestor <> nil) and 
+         not issameshortcuts(shortcuts,taction(filer.ancestor).shortcuts)));
+ filer.defineproperty('sc1',{$ifdef FPC}@{$endif}readsc1,
+                           {$ifdef FPC}@{$endif}writesc1,
+       (filer.ancestor = nil) and (shortcuts1 <> nil) or
+       ((filer.ancestor <> nil) and 
+         not issameshortcuts(shortcuts1,taction(filer.ancestor).shortcuts1)));
+end;
+
+procedure taction.readshortcut(reader: treader);
+begin
+ shortcut:= reader.readinteger;
+end;
+
+procedure taction.readshortcut1(reader: treader);
+begin
+ shortcut1:= reader.readinteger;
+end;
+
+procedure taction.readsc(reader: treader);
+begin
+ finfo.shortcut:= readshortcutarty(reader);
+end;
+
+procedure taction.writesc(writer: twriter);
+begin
+ writeshortcutarty(writer,finfo.shortcut);
+end;
+
+procedure taction.readsc1(reader: treader);
+begin
+ finfo.shortcut1:= readshortcutarty(reader);
+end;
+
+procedure taction.writesc1(writer: twriter);
+begin
+ writeshortcutarty(writer,finfo.shortcut1);
 end;
 
 { tshortcutactions }

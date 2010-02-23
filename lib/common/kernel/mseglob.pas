@@ -16,6 +16,7 @@ const
  invalidaxis = -bigint;
 type
  shortcutty = type word;
+ shortcutarty = array of shortcutty;
  modalresultty = (mr_none,mr_canclose,mr_windowclosed,mr_windowdestroyed,
                   mr_escape,mr_f10, 
                   mr_exception,

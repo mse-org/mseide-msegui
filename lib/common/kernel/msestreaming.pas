@@ -14,8 +14,10 @@ unit msestreaming;
 interface
 
 uses
- {$ifdef FPC}Classes{$else}classes{$endif},msetypes,msegraphutils;
+ {$ifdef FPC}Classes{$else}classes{$endif},msetypes,msegraphutils,mseglob;
 
+function readshortcutarty(const reader: treader): shortcutarty;
+procedure writeshortcutarty(const writer: twriter; const avalue: shortcutarty);
 function readrealty(const reader: treader): realty;
 procedure writerealty(const writer: twriter; const value: realty);
 function readrectty(const reader: treader): rectty;
@@ -40,6 +42,30 @@ uses
 type
  treader1 = class(treader);
  twriter1 = class(twriter);
+
+function readshortcutarty(const reader: treader): shortcutarty;
+var
+ int1: integer;
+begin
+ reader.readlistbegin;
+ setlength(result,reader.readinteger);
+ for int1:= 0 to high(result) do begin
+  result[int1]:= reader.readinteger;
+ end;
+ reader.readlistend;
+end;
+
+procedure writeshortcutarty(const writer: twriter; const avalue: shortcutarty);
+var
+ int1: integer;
+begin
+ writer.writelistbegin;
+ writer.writeinteger(length(avalue));
+ for int1:= 0 to high(avalue) do begin
+  writer.writeinteger(avalue[int1]);
+ end;
+ writer.writelistend;
+end;
 
 function readrealty(const reader: treader): realty;
 begin

@@ -56,6 +56,8 @@ type
    procedure setoptions(const Value: menuactionoptionsty);
    procedure setshortcut(const value: shortcutty);
    function isshortcutstored: boolean;
+   function getshortcut: shortcutty;
+   function getshortcut1: shortcutty;
    procedure setshortcut1(const value: shortcutty);
    function isshortcut1stored: boolean;
    function getenabled: boolean;
@@ -107,9 +109,9 @@ type
    property action: tcustomaction read finfo.action write setaction;
    property state: actionstatesty read getstate write setstate
                              stored isstatestored default [];
-   property shortcut: shortcutty read finfo.shortcut write setshortcut
+   property shortcut: shortcutty read getshortcut write setshortcut
                         stored isshortcutstored default 0;
-   property shortcut1: shortcutty read finfo.shortcut write setshortcut1
+   property shortcut1: shortcutty read getshortcut1 write setshortcut1
                         stored isshortcut1stored default 0;
    property tag: integer read ftag write ftag default 0;
    property options: menuactionoptionsty read finfo.options write setoptions default [];
@@ -354,6 +356,16 @@ end;
 function ttoolbutton.isimageliststored: Boolean;
 begin
  result:= isactionimageliststored(finfo);
+end;
+
+function ttoolbutton.getshortcut: shortcutty;
+begin
+ result:= getsimpleshortcut(finfo);
+end;
+
+function ttoolbutton.getshortcut1: shortcutty;
+begin
+ result:= getsimpleshortcut1(finfo);
 end;
 
 procedure ttoolbutton.setshortcut(const Value: shortcutty);
