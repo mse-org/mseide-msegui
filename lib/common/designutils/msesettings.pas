@@ -38,10 +38,17 @@ const
                 '${MSEDIR}apps/ide/templates/','${MSEDIR}apps/ide/compstore/',
                 'ppc386.exe','gdb.exe','.exe','i386-win32');
  {$else}
- defaultsettingmacros: array[settingsmacroty] of msestring = (
-                '','','','${MSEDIR}lib/common/','${MSEDIR}apps/ide/syntaxdefs/',
-                '${MSEDIR}apps/ide/templates/','${MSEDIR}apps/ide/compstore/',
-                'ppc386','gdb','','i386-linux');
+  {$ifdef CPU64}
+  defaultsettingmacros: array[settingsmacroty] of msestring = (
+                 '','','','${MSEDIR}lib/common/','${MSEDIR}apps/ide/syntaxdefs/',
+                 '${MSEDIR}apps/ide/templates/','${MSEDIR}apps/ide/compstore/',
+                 'ppcx64','gdb','','i386-linux');
+  {$else}
+  defaultsettingmacros: array[settingsmacroty] of msestring = (
+                 '','','','${MSEDIR}lib/common/','${MSEDIR}apps/ide/syntaxdefs/',
+                 '${MSEDIR}apps/ide/templates/','${MSEDIR}apps/ide/compstore/',
+                 'ppc386','gdb','','i386-linux');
+  {$endif}
  {$endif}
                 
 type
