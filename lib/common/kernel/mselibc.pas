@@ -1131,10 +1131,6 @@ type
 
 function nl_langinfo(__item: nl_item):Pchar; cdecl; external clib name 'nl_langinfo';
 
-const
-  __SI_MAX_SIZE = 128;
-  __SI_PAD_SIZE = (__SI_MAX_SIZE div sizeof (Integer)) - 3;
-
 type
    Psched_param = ^sched_param;
    sched_param = record
@@ -1233,18 +1229,27 @@ type
   Psigval = ^sigval;
   sigval = record
       case longint of
-         0 : ( sival_int : longint );
+         0 : ( sival_int : cint );
          1 : ( sival_ptr : pointer );
       end;
   sigval_t = sigval;
   Psigval_t = ^sigval_t;
 
+const 
+ __SI_MAX_SIZE = 128;
+ {$ifdef CPU64}
+ __SI_PAD_SIZE = ((__SI_MAX_SIZE div sizeof (cint)) - 4);
+ {$else}
+ __SI_PAD_SIZE = ((__SI_MAX_SIZE div sizeof (cint)) - 3);
+ {$endif}
+type
+ _si_pad = packed array[0..__SI_PAD_SIZE-1] of cint;
 
  // Borland compatibility types moved here, needed for siginfo
  _si_sigchld = record
     si_pid: __pid_t;
     si_uid: __uid_t;
-    si_status: Integer;
+    si_status: cint;
     si_utime: __clock_t;
     si_stime: __clock_t;
  end;
@@ -1253,13 +1258,13 @@ type
    si_pid: __pid_t;
    si_uid: __uid_t;
  end;
- _si_pad = packed array[0..__SI_PAD_SIZE-1] of Integer;
+
  _si_sigfault = record
    si_addr: Pointer; 
  end;
  _si_sigpoll = record
-   si_band: Longint; 
-   si_fd: Integer;
+   si_band: clong; 
+   si_fd: cint;
  end;
  _si_timer = record
    _timer1: longword;
@@ -1272,9 +1277,9 @@ type
  end;
  Psiginfo = ^siginfo;
  siginfo = record
-      si_signo : longint;
-      si_errno : longint;
-      si_code : longint;
+      si_signo : cint;
+      si_errno : cint;
+      si_code : cint;
       Case integer of 
         0: (_pad: _si_pad);
         1: (_kill: _si_kill);

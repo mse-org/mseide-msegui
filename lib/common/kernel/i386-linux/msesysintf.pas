@@ -961,7 +961,8 @@ end;
 
 function filetimetodatetime(sec: time_t; nsec: longword): tdatetime;
 begin
- result:= sec / (24.0*60.0*60.0) + nsec / (24.0*60.0*60.0*1e9) - datetimeoffset;
+ result:= sec / (double(24.0)*60.0*60.0) + 
+          nsec / (double(24.0)*60.0*60.0*1e9) - datetimeoffset;
 end;
 
 function sys_getcurrentdir: msestring;
