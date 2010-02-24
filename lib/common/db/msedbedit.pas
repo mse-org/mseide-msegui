@@ -7331,7 +7331,7 @@ end;
 procedure tdbstringcol.initeditfocus;
 begin
  with tcustomstringgrid1(fgrid) do begin
-  if ffocusedcell.col = index then begin
+  if (ffocusedcell.col = index) and (ffocusedcell.row >= 0) then begin
    feditor.dofocus;
   end;
  end;
@@ -7339,7 +7339,7 @@ end;
 
 procedure tdbstringcol.updatereadonlystate;
 begin
- if fgrid.col = self.index then begin
+ if (fgrid.col = self.index) and (fgrid.row >= 0) then begin
   tcustomstringgrid1(fgrid).feditor.updatecaret;
  end;
 end;
