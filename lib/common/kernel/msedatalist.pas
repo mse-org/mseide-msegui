@@ -213,7 +213,7 @@ type
                 //anzahl -> count, initialisiert mit defaultwert
    procedure cleardata(index: integer);
    function deleting: boolean;
-   function checkwritedata(const filer: tfiler): boolean;
+   function checkwritedata(const filer: tfiler): boolean; virtual;
 
    procedure rearange(const arangelist: tintegerdatalist); overload;
    procedure rearange(const arangelist: integerarty); overload;
@@ -799,6 +799,7 @@ type
    procedure setmerged(const index: integer; const avalue: longword);
   protected
    finfolevel: rowinfolevelty;
+   function checkwritedata(const filer: tfiler): boolean; override;
    function gethidden(const index: integer): boolean;
    function getfoldlevel(const index: integer): byte;
    function getfoldissum(const index: integer): boolean;
@@ -7280,6 +7281,11 @@ procedure tcustomrowstatelist.assign(source: tpersistent);
 begin
  inherited;
  recalchidden;
+end;
+
+function tcustomrowstatelist.checkwritedata(const filer: tfiler): boolean;
+begin
+ result:= false;
 end;
 
 { tlinindexmse }
