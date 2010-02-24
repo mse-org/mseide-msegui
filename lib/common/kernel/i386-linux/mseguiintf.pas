@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -678,6 +678,7 @@ type
  patomaty = ^atomaty;
 
 const
+ atombits = sizeof(atom)*8;
  mouseeventmask = buttonpressmask or buttonreleasemask or pointermotionmask;
 
 
@@ -952,13 +953,16 @@ var
            longoffset,transferbuffersize,{$ifdef xboolean} true{$else}1{$endif},
           anypropertytype,@acttype,@actformat,@nitems,@bytesafter,@po1) = success then begin
        if (resulttarget = 0) or (acttype = resulttarget) then begin
+        if actformat = 32 then begin
+         actformat:= atombits;
+        end;
         int1:= (actformat div 8) * nitems; //bytecount
         if nitems > 0 then begin
          inc(nitems1,nitems);
          setlength(value1,length(value1) + int1 );
          move(po1^,value1[charoffset],int1);
          inc(charoffset,int1);
-         inc(longoffset,int1 div 4); //32 bit
+         inc(longoffset,int1 div sizeof(atom)); //32/64 bit
          result:= gue_ok;
         end;
        end
@@ -1006,6 +1010,7 @@ begin
     atoms1[1]:= compound_textatom;
     atoms1[2]:= textatom;
     atoms1[3]:= stringatom;
+
     for int2:= low(atoms1) to high(atoms1) do begin
      for int1:= 0 to (length(value1) div sizeof(atom)) - 1 do begin
       if po1^[int1] = atoms1[int2] then begin
