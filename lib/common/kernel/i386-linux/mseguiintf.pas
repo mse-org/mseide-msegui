@@ -737,7 +737,10 @@ var
  wmclientleaderatom: atom;
  wmprotocols: array[wmprotocolty] of atom;
  clipboardatom: atom;
- cardinalatom,windowatom,stringatom,utf8_stringatom,compound_textatom,textatom: atom;
+ cardinalatom,windowatom,stringatom,utf8_stringatom,compound_textatom,
+ textatom,textplainatom: atom;
+ timestampatom: atom;
+ multipleatom: atom;
  targetsatom: atom;
  convertselectionpropertyatom: atom;
 
@@ -833,6 +836,7 @@ var
  lasteventtime: ttime;
 // lastshiftstate: shiftstatesty;
  clipboard: msestring;
+ clipboardtimestamp: ttime; 
  fidnum: integer;
  
 function getidnum: longword;
@@ -876,6 +880,7 @@ end;
 function gui_copytoclipboard(const value: msestring): guierrorty;
 begin
  clipboard:= value;
+ clipboardtimestamp:= lasteventtime;
  xsetselectionowner(appdisp,clipboardatom,appid,lasteventtime);
  result:= gue_ok;
 end;
@@ -885,7 +890,7 @@ begin
  result:= (atime = currenttime) or (lasteventtime = currenttime) or
                            laterorsame(lasteventtime,atime);
 end;
-
+var testvar: array[0..20] of string;
 function gui_pastefromclipboard(out value: msestring): guierrorty;
 const
  transferbuffersize = 1024 div 4; //1kb
@@ -987,7 +992,7 @@ var
 var
  int1,int2: integer; 
  po1: patomaty;
- atoms1: array[0..3] of atom;
+ atoms1: array[0..4] of atom;
  atom1: atom;
  po2: ppchar;
  prop1: xtextproperty;
@@ -1009,8 +1014,11 @@ begin
     atoms1[0]:= utf8_stringatom; //preferred
     atoms1[1]:= compound_textatom;
     atoms1[2]:= textatom;
-    atoms1[3]:= stringatom;
-
+    atoms1[3]:= textplainatom;
+    atoms1[4]:= stringatom;
+for int1:= 0 to (length(value1) div sizeof(atom)) - 1 do begin
+ testvar[int1]:= xgetatomname(appdisp,po1^[int1])
+end;
     for int2:= low(atoms1) to high(atoms1) do begin
      for int1:= 0 to (length(value1) div sizeof(atom)) - 1 do begin
       if po1^[int1] = atoms1[int2] then begin
@@ -1029,7 +1037,7 @@ begin
         value:= utf8tostring(value1);
       end
       else begin
-       if acttype = textatom then begin
+       if (acttype = textatom) or (acttype = textplainatom) then begin
         value:= value1; //current locale
        end
        else begin
@@ -5732,7 +5740,7 @@ begin
  repeatkey:= 0;
  repeatkeytime:= 0;
 end;
-
+var testvar1: string;
 function gui_getevent: tmseevent;
 
 var
@@ -5755,7 +5763,7 @@ var
  shiftstate1: shiftstatesty;
  key1,key2: keyty;
  button1: mousebuttonty;
- atomar: array[0..4] of atom;
+ atomar: array[0..7] of atom;
  textprop: xtextproperty;
  bo1: boolean;
  rect1: rectty;
@@ -5907,57 +5915,74 @@ eventrestart:
       event.xselection.target:= target;
       event.xselection.{$ifdef FPC}_property{$else}xproperty{$endif}:= 
                                {$ifdef FPC}_property{$else}xproperty{$endif};
+testvar1:= xgetatomname(appdisp,target);
+      bo1:= false;
       if target = targetsatom then begin
-       atomar[0]:= utf8_stringatom;
-       atomar[1]:= compound_textatom;
-       atomar[2]:= stringatom;
-       atomar[3]:= textatom;
-       atomar[4]:= targetsatom;
+       atomar[0]:= textplainatom;
+       atomar[1]:= utf8_stringatom;
+       atomar[2]:= compound_textatom;
+       atomar[3]:= stringatom;
+       atomar[4]:= textatom;
+       atomar[5]:= targetsatom;
+       atomar[6]:= timestampatom;
+//       atomar[7]:= multipleatom; //not implemented
        xchangeproperty(appdisp,requestor,
           {$ifdef FPC}_property{$else}xproperty{$endif},atomatom,32,
-                  propmodereplace,@atomar[0],5);
+                  propmodereplace,@atomar[0],7);
       end
       else begin
-       bo1:= true;
-       if target = utf8_stringatom then begin
-         str1:= stringtoutf8(clipboard);
+       if target = timestampatom then begin
+        atomar[0]:=
+        xchangeproperty(appdisp,requestor,
+           {$ifdef FPC}_property{$else}xproperty{$endif},target,32,
+                   propmodereplace,@atomar[0],1);
        end
        else begin
-        if target = stringatom then begin
-         str1:= stringtolatin1(clipboard);
+        bo1:= true;
+        if target = utf8_stringatom then begin
+         str1:= stringtoutf8(clipboard);
         end
         else begin
-         if target =  textatom then begin
-          str1:= clipboard; //current locale
+         if target = stringatom then begin
+          str1:= stringtolatin1(clipboard);
          end
          else begin
-          bo1:= false;
-          if target = compound_textatom then begin
-           if stringtotextproperty(clipboard,xcompoundtextstyle,textprop) then begin
-            with textprop do begin
-             xchangeproperty(appdisp,requestor,
-                   {$ifdef FPC}_property{$else}xproperty{$endif},encoding,format,
-                   propmodereplace,value,nitems);
-             xfree(value);
+          if (target = textatom) or (target = textplainatom) then begin
+           str1:= clipboard; //current locale
+          end
+          else begin
+           bo1:= false;
+           if target = compound_textatom then begin
+            if stringtotextproperty(clipboard,xcompoundtextstyle,textprop) then begin
+             with textprop do begin
+              xchangeproperty(appdisp,requestor,
+                    {$ifdef FPC}_property{$else}xproperty{$endif},encoding,format,
+                    propmodereplace,value,nitems);
+              xfree(value);
+             end;
+            end
+            else begin
+             event.xselection.{$ifdef FPC}_property{$else}xproperty{$endif}:= none;
             end;
            end
            else begin
+//            str1:= clipboard;
+//            bo1:= true;
+//            target:= textplainatom;
             event.xselection.{$ifdef FPC}_property{$else}xproperty{$endif}:= none;
            end;
-          end
-          else begin
-           event.xselection.{$ifdef FPC}_property{$else}xproperty{$endif}:= none;
           end;
          end;
         end;
        end;
-       if bo1 then begin
-        xchangeproperty(appdisp,requestor,
-                 {$ifdef FPC}_property{$else}xproperty{$endif},target,8,
-                  propmodereplace,pbyte(pchar(str1)),length(str1));
-       end;
       end;
-      xsendevent(appdisp,requestor,{$ifdef xboolean}false{$else}0{$endif},0,@event);
+      if bo1 then begin
+       xchangeproperty(appdisp,requestor,
+                {$ifdef FPC}_property{$else}xproperty{$endif},target,8,
+                 propmodereplace,pbyte(pchar(str1)),length(str1));
+      end;
+      xsendevent(appdisp,requestor,{$ifdef xboolean}false{$else}0{$endif},0,
+                               @event);
       exit;
      end;
     end;
@@ -6513,9 +6538,15 @@ begin
            {$ifdef xboolean}false{$else}0{$endif});
  textatom:= xinternatom(appdisp,'TEXT',
            {$ifdef xboolean}false{$else}0{$endif});
+ textplainatom:= xinternatom(appdisp,'text/plain',
+           {$ifdef xboolean}false{$else}0{$endif});
  compound_textatom:= xinternatom(appdisp,'COMPOUND_TEXT',
            {$ifdef xboolean}false{$else}0{$endif});
  utf8_stringatom:= xinternatom(appdisp,'UTF8_STRING',
+           {$ifdef xboolean}false{$else}0{$endif});
+ timestampatom:= xinternatom(appdisp,'TIMESTAMP',
+           {$ifdef xboolean}false{$else}0{$endif});
+ multipleatom:= xinternatom(appdisp,'MULTIPLE',
            {$ifdef xboolean}false{$else}0{$endif});
  targetsatom:= xinternatom(appdisp,'TARGETS',
            {$ifdef xboolean}false{$else}0{$endif});
