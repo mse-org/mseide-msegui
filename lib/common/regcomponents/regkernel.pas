@@ -460,7 +460,7 @@ var
  ar2: shortcutarty;
  int1: integer;
 begin
- ar1:= splitstring(value,' ');
+ ar1:= splitstring(value,widechar(' '));
  if high(ar1) > 0 then begin
   setlength(ar2,length(ar1));
   for int1:= 0 to high(ar1) do begin
