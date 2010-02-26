@@ -890,7 +890,7 @@ begin
  result:= (atime = currenttime) or (lasteventtime = currenttime) or
                            laterorsame(lasteventtime,atime);
 end;
-var testvar: array[0..20] of string;
+
 function gui_pastefromclipboard(out value: msestring): guierrorty;
 const
  transferbuffersize = 1024 div 4; //1kb
@@ -1016,9 +1016,6 @@ begin
     atoms1[2]:= textatom;
     atoms1[3]:= textplainatom;
     atoms1[4]:= stringatom;
-for int1:= 0 to (length(value1) div sizeof(atom)) - 1 do begin
- testvar[int1]:= xgetatomname(appdisp,po1^[int1])
-end;
     for int2:= low(atoms1) to high(atoms1) do begin
      for int1:= 0 to (length(value1) div sizeof(atom)) - 1 do begin
       if po1^[int1] = atoms1[int2] then begin
@@ -5740,7 +5737,7 @@ begin
  repeatkey:= 0;
  repeatkeytime:= 0;
 end;
-var testvar1: string;
+
 function gui_getevent: tmseevent;
 
 var
@@ -5915,7 +5912,7 @@ eventrestart:
       event.xselection.target:= target;
       event.xselection.{$ifdef FPC}_property{$else}xproperty{$endif}:= 
                                {$ifdef FPC}_property{$else}xproperty{$endif};
-testvar1:= xgetatomname(appdisp,target);
+      event.xselection.time:= time;
       bo1:= false;
       if target = targetsatom then begin
        atomar[0]:= textplainatom;
