@@ -544,6 +544,7 @@ type
    procedure setfontactivetab(const avalue: ttabformfontactivetab);
    function isfontactivetabstored: boolean;
   protected
+   class function getmoduleclassname: string; override;
    procedure changed;
    procedure fontchanged1(const sender: tobject);
    procedure visiblechanged; override;
@@ -555,7 +556,7 @@ type
                                      const event: objecteventty); override;
    class function hasresource: boolean; override;
   public
-   constructor create(aowner: tcomponent); override;
+   constructor create(aowner: tcomponent; load: boolean); override;
    destructor destroy; override;
    procedure createfonttab;
    procedure createfontactivetab;
@@ -563,14 +564,15 @@ type
    property tabwidget: tcustomtabwidget read ftabwidget;
    property tabindex: integer read gettabindex write settabindex;
   published
+   property color default cl_default;
    property colortab: colorty read getcolortab
-                  write setcolortab default cl_default;
-   property coloractivetab: colorty read getcolortab
-                  write setcoloractivetab default cl_active;
+                                    write setcolortab default cl_default;
+   property coloractivetab: colorty read getcoloractivetab
+                                    write setcoloractivetab default cl_active;
    property fonttab: ttabformfonttab read getfonttab1 write setfonttab
                                                         stored isfonttabstored;
    property fontactivetab: ttabformfontactivetab read getfontactivetab1 
-                                 write setfontactivetab stored isfonttabstored;
+                                 write setfontactivetab stored isfontactivetabstored;
    property tabhint: msestring read gettabhint write settabhint;
    property imagelist: timagelist read getimagelist write setimagelist;
    property imagenr: imagenrty read getimagenr write setimagenr default -1;
@@ -584,6 +586,8 @@ type
    property optionsskin;
  end;
 
+ tabformclassty = class of ttabform;
+ 
  tpagetab = class(ttab)
   private
    fpageintf: itabpage;
@@ -871,6 +875,9 @@ type
    property statfile;
    property statvarname;
  end;
+
+function createtabform(const aclass: tclass; 
+                   const aclassname: pshortstring): tmsecomponent;
  
 implementation
 uses
@@ -878,7 +885,15 @@ uses
 
 type
  twidget1 = class(twidget);
+ tmsecomponent1 = class(tmsecomponent);
  tcustomframe1 = class(tcustomframe);
+
+function createtabform(const aclass: tclass; 
+                   const aclassname: pshortstring): tmsecomponent;
+begin
+ result:= tabformclassty(aclass).create(nil,false);
+ tmsecomponent1(result).factualclassname:= aclassname;
+end;
 
 procedure calctablayout(var layout: tabbarlayoutinfoty;
                      const canvas: tcanvas; const focused: boolean);
@@ -3103,13 +3118,15 @@ end;
 
 { ttabform }
 
-constructor ttabform.create(aowner: tcomponent);
+constructor ttabform.create(aowner: tcomponent; load: boolean);
 begin
  fcolortab:= cl_default;
  fcoloractivetab:= cl_active;
  fimagenr:= -1;
  fimagenrdisabled:= -2;
- inherited create(aowner);
+ inherited;
+// inherited create(aowner);
+ fcolor:= cl_default;
  exclude(fwidgetstate,ws_visible);
 end;
 
@@ -3142,6 +3159,11 @@ begin
   include(fwidgetstate1,ws1_nodesignvisible);
  end;
  inherited;
+end;
+
+class function ttabform.getmoduleclassname: string;
+begin
+ result:= 'ttabform';
 end;
 
 procedure ttabform.changed;

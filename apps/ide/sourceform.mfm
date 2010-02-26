@@ -14,6 +14,12 @@ object sourcefo: tsourcefo
   container.frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
   container.frame.sbhorz.options = [sbo_moveauto, sbo_showauto]
   container.frame.sbvert.options = [sbo_moveauto, sbo_showauto]
+  container.bounds = (
+    0
+    0
+    423
+    327
+  )
   dragdock.splitter_size = 0
   dragdock.caption = 'Source'
   dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_propsize]
@@ -103,7 +109,7 @@ object sourcefo: tsourcefo
     tab_frame.buttonsvisible = [sk_right, sk_up, sk_left, sk_down, sk_first, sk_last]
     tab_frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
     tab_textflags = [tf_ycentered]
-    tab_size = 50
+    tab_size = 60
     tab_sizemin = 60
     tab_optionswidget1 = []
     object tstockglyphbutton1: tstockglyphbutton

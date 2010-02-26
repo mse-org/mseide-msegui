@@ -113,6 +113,9 @@ const
  subformintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createsubform;
      initnewcomponent: nil; getscale: nil);
+ tabformintf: designmoduleintfty = 
+  (createfunc: {$ifdef FPC}@{$endif}createtabform;
+     initnewcomponent: nil; getscale: nil);
 
 procedure Register;
 begin
@@ -171,6 +174,7 @@ begin
  registerdesignmoduleclass(tmainform,@mainformintf);
  registerdesignmoduleclass(tdockform,@mseformintf);
  registerdesignmoduleclass(tsubform,@subformintf);
+ registerdesignmoduleclass(ttabform,@tabformintf);
 end;
 
 
