@@ -85,15 +85,32 @@ type
  tshortcutaction = class(townedpersistent)
   private
    faction: taction;
-   fshortcutdefault: shortcutty;
-   fshortcut1default: shortcutty;
+   fshortcutsdefault: shortcutarty;
+   fshortcuts1default: shortcutarty;
    fdispname: msestring;
    fhint: msestring;
    procedure setaction(const avalue: taction);
+   procedure readsc(reader: treader);
+   procedure writesc(writer: twriter);
+   procedure readsc1(reader: treader);
+   procedure writesc1(writer: twriter);
+   procedure readshortcut(reader: treader);
+   procedure readshortcut1(reader: treader);
+  protected
+   function getshortcutdefault: shortcutty;
+   procedure setshortcutdefault(const avalue: shortcutty);
+   function getshortcut1default: shortcutty;
+   procedure setshortcut1default(const avalue: shortcutty);
+   procedure defineproperties(filer: tfiler); override;
+  public
+   property shortcutsdefault: shortcutarty read fshortcutsdefault 
+                                           write fshortcutsdefault;
   published
    property action: taction read faction write setaction;
-   property shortcutdefault: shortcutty read fshortcutdefault write fshortcutdefault;
-   property shortcut1default: shortcutty read fshortcut1default write fshortcut1default;
+   property shortcutdefault: shortcutty read getshortcutdefault 
+                                        write setshortcutdefault default 0;
+   property shortcut1default: shortcutty read getshortcut1default 
+                                        write setshortcut1default default 0;
    property dispname: msestring read fdispname write fdispname;
    property hint: msestring read fhint write fhint;
  end;
@@ -210,9 +227,13 @@ type
  end;
 
 function issameshortcuts(const a,b: shortcutarty): boolean;
-function getsimpleshortcut(const asource: actioninfoty): shortcutty;
+function getsimpleshortcut(const asource: shortcutarty): shortcutty; overload;
+function getsimpleshortcut(const asource: actioninfoty): shortcutty; overload;
 function getsimpleshortcut1(const asource: actioninfoty): shortcutty;
-procedure setsimpleshortcut(const avalue: shortcutty; var adest: actioninfoty);
+procedure setsimpleshortcut(const avalue: shortcutty;
+                                          var adest: shortcutarty); overload;
+procedure setsimpleshortcut(const avalue: shortcutty;
+                                          var adest: actioninfoty); overload;
 procedure setsimpleshortcut1(const avalue: shortcutty; var adest: actioninfoty);
 
 procedure setactionshortcut(const sender: iactionlink; const value: shortcutty);
@@ -569,6 +590,14 @@ begin
   end;
  end;
 end;
+
+function getsimpleshortcut(const asource: shortcutarty): shortcutty;
+begin
+ result:= 0;
+ if asource <> nil then begin
+  result:= asource[0];
+ end;
+end;
    
 function getsimpleshortcut(const asource: actioninfoty): shortcutty;
 begin
@@ -583,6 +612,17 @@ begin
  result:= 0;
  if asource.shortcut1 <> nil then begin
   result:= asource.shortcut1[0];
+ end;
+end;
+
+procedure setsimpleshortcut(const avalue: shortcutty; var adest: shortcutarty);
+begin
+ if avalue = 0 then begin
+  adest:= nil;
+ end
+ else begin
+  setlength(adest,1);
+  adest[0]:= avalue;
  end;
 end;
 
@@ -1134,6 +1174,75 @@ begin
    end;
   end;
  end;  
+end;
+
+function tshortcutaction.getshortcutdefault: shortcutty;
+begin
+ result:= getsimpleshortcut(fshortcutsdefault);
+end;
+
+procedure tshortcutaction.setshortcutdefault(const avalue: shortcutty);
+begin
+ setsimpleshortcut(avalue,fshortcutsdefault);
+end;
+
+function tshortcutaction.getshortcut1default: shortcutty;
+begin
+ result:= getsimpleshortcut(fshortcuts1default);
+end;
+
+procedure tshortcutaction.setshortcut1default(const avalue: shortcutty);
+begin
+ setsimpleshortcut(avalue,fshortcuts1default);
+end;
+
+procedure tshortcutaction.readsc(reader: treader);
+begin
+ fshortcutsdefault:= readshortcutarty(reader);
+end;
+
+procedure tshortcutaction.writesc(writer: twriter);
+begin
+ writeshortcutarty(writer,fshortcutsdefault);
+end;
+
+procedure tshortcutaction.readsc1(reader: treader);
+begin
+ fshortcuts1default:= readshortcutarty(reader);
+end;
+
+procedure tshortcutaction.writesc1(writer: twriter);
+begin
+ writeshortcutarty(writer,fshortcuts1default);
+end;
+
+procedure tshortcutaction.readshortcut(reader: treader);
+begin
+ shortcutdefault:= reader.readinteger;
+end;
+
+procedure tshortcutaction.readshortcut1(reader: treader);
+begin
+ shortcut1default:= reader.readinteger;
+end;
+
+procedure tshortcutaction.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('shortcut',{$ifdef FPC}@{$endif}readshortcut,nil,false);
+ filer.defineproperty('shortcut1',{$ifdef FPC}@{$endif}readshortcut1,nil,false);
+ filer.defineproperty('sc',{$ifdef FPC}@{$endif}readsc,
+                           {$ifdef FPC}@{$endif}writesc,
+       (filer.ancestor = nil) and (fshortcutsdefault <> nil) or
+       ((filer.ancestor <> nil) and 
+         not issameshortcuts(fshortcutsdefault,
+                  tshortcutaction(filer.ancestor).shortcutsdefault)));
+ filer.defineproperty('sc1',{$ifdef FPC}@{$endif}readsc1,
+                           {$ifdef FPC}@{$endif}writesc1,
+       (filer.ancestor = nil) and (fshortcuts1default <> nil) or
+       ((filer.ancestor <> nil) and 
+         not issameshortcuts(fshortcuts1default,
+                  tshortcutaction(filer.ancestor).fshortcuts1default)));
 end;
 
 { tsysshortcuts }
