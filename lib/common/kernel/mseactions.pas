@@ -105,6 +105,8 @@ type
   public
    property shortcutsdefault: shortcutarty read fshortcutsdefault 
                                            write fshortcutsdefault;
+   property shortcuts1default: shortcutarty read fshortcuts1default 
+                                           write fshortcuts1default;
   published
    property action: taction read faction write setaction;
    property shortcutdefault: shortcutty read getshortcutdefault 
@@ -158,8 +160,8 @@ type
  
  shortcutstatinfoty = record
   name: ansistring;
-  shortcut: integer;
-  shortcut1: integer;
+  shortcut: shortcutarty;
+  shortcut1: shortcutarty;
  end;
  shortcutstatinfoarty = array of shortcutstatinfoty;
  shortcutcontrollereventty = procedure(
@@ -1066,9 +1068,36 @@ end;
 
 procedure tshortcutcontroller.setactionrecord(const index: integer;
                const avalue: msestring);
+var
+ ar1: msestringarty;
+ int1,int2: integer;
 begin
+ ar1:= splitstring(avalue, ' ');
  with fstatinfos[index] do begin
-  decoderecord(avalue,[@name,@shortcut,@shortcut1],'sii');
+  if high(ar1) >= 0 then begin
+   name:= ar1[0];
+   setlength(shortcut,high(ar1) div 2); 
+   setlength(shortcut1,length(shortcut));
+             //backward compatibilty with single shortcut
+   int2:= 1;
+   for int1:= 0 to high(shortcut) do begin
+    shortcut[int1]:= strtoint(ar1[int2]);
+    inc(int2);
+    shortcut1[int1]:= strtoint(ar1[int2]);
+   end;
+   for int1:= 0 to high(shortcut) do begin
+    if shortcut[int1] = 0 then begin
+     setlength(shortcut,int1);
+     break;
+    end;
+   end;
+   for int1:= 0 to high(shortcut1) do begin
+    if shortcut1[int1] = 0 then begin
+     setlength(shortcut1,int1);
+     break;
+    end;
+   end;
+  end;
  end;
 end;
 
@@ -1081,11 +1110,34 @@ begin
 end;
 
 function tshortcutcontroller.getactionrecord(const index: integer): msestring;
+var
+ int1,int2: integer;
 begin
  with tshortcutaction(factions[index]) do begin
   if action <> nil then begin
-   result:= encoderecord([ownernamepath(action),integer(action.shortcut),
-                       integer(action.shortcut1)]);
+   result:= ownernamepath(action);
+   with action do begin
+    int2:= high(shortcuts);
+    if high(shortcuts1) > int2 then begin
+     int2:= high(shortcuts1)
+    end;
+    for int1:= 0 to int2 do begin
+     if int1 <= high(shortcuts) then begin
+      result:= result + ' '+inttostr(shortcuts[int1]);
+     end
+     else begin
+      result:= result + ' 0';
+     end;
+     if int1 <= high(shortcuts1) then begin
+      result:= result + ' '+inttostr(shortcuts1[int1]);
+     end
+     else begin
+      result:= result + ' 0';
+     end;
+    end;
+   end;
+//   result:= encoderecord([ownernamepath(action),integer(action.shortcut),
+//                       integer(action.shortcut1)]);
   end
   else begin
    result:= '';
@@ -1141,8 +1193,8 @@ begin
  for int1:= 0 to high(fstatinfos) do begin
   with fstatinfos[int1] do begin
    if str1 = name then begin
-    aaction.shortcut:= shortcut;
-    aaction.shortcut1:= shortcut1;
+    aaction.shortcuts:= shortcut;
+    aaction.shortcuts1:= shortcut1;
    end;
   end;
  end;
@@ -1166,8 +1218,8 @@ begin
   setlinkedvar(avalue,tmsecomponent(faction));
   if (avalue <> nil) then begin
    if csdesigning in componentstate then begin
-    shortcutdefault:= avalue.shortcut;
-    shortcut1default:= avalue.shortcut1;
+    shortcutsdefault:= avalue.shortcuts;
+    shortcuts1default:= avalue.shortcuts1;
    end
    else begin
     updateaction(avalue);
