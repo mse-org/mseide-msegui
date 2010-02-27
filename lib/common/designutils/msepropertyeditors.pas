@@ -295,9 +295,14 @@ type
 
  tshortcutpropertyeditor = class(tenumpropertyeditor)
   protected
+   fsc1: boolean;
    function getvaluetext(avalue: shortcutty): msestring;
    function texttovalue(const atext: msestring): shortcutty;
   public
+   constructor create(const adesigner: idesigner;
+        const amodule: tmsecomponent; const acomponent: tcomponent;
+            const aobjectinspector: iobjectinspector;
+            const aprops: propinstancearty; atypeinfo: ptypeinfo); override;
    procedure setvalue(const value: msestring); override;
    function getvalue: msestring; override;
    function getvalues: msestringarty; override;
@@ -4285,6 +4290,15 @@ end;
 
 { tshortcutpropertyeditor }
 
+constructor tshortcutpropertyeditor.create(const adesigner: idesigner;
+               const amodule: tmsecomponent; const acomponent: tcomponent;
+               const aobjectinspector: iobjectinspector;
+               const aprops: propinstancearty; atypeinfo: ptypeinfo);
+begin
+ fsc1:=  pos('shortcut1',aprops[0].propinfo^.name) = 1;
+ inherited;
+end;
+
 function tshortcutpropertyeditor.getvaluetext(avalue: shortcutty): msestring;
 var
  int1,int2: integer;
@@ -4307,9 +4321,68 @@ begin
  end;
 end;
 
-function tshortcutpropertyeditor.getvalue: msestring;
+procedure tshortcutpropertyeditor.setvalue(const value: msestring);
+var
+ ar1: msestringarty;
+ ar2: shortcutarty;
+ int1: integer;
+ intf1: iactionlink;
 begin
- result:= getvaluetext(getordvalue);
+ ar1:= splitstring(value,widechar(' '));
+ setlength(ar2,length(ar1));
+ for int1:= 0 to high(ar1) do begin
+  ar2[int1]:= texttovalue(ar1[int1]);
+ end;
+ for int1:= 0 to high(fprops) do begin
+  if getcorbainterface(fprops[int1].instance,typeinfo(iactionlink),
+                                                             intf1) then begin
+   with intf1.getactioninfopo^ do begin
+    if fsc1 then begin
+     intf1.setshortcuts1(ar2);
+    end
+    else begin
+     intf1.setshortcuts(ar2);
+    end;
+   end;
+   modified;
+  end
+  else begin
+   if high(ar2) = 0 then begin
+    setordvalue(ar2[0]);
+   end
+   else begin
+    setordvalue(int1,0);
+   end;
+  end;
+ end;
+end;
+
+function tshortcutpropertyeditor.getvalue: msestring;
+var
+ ar1: shortcutarty;
+ int1: integer;
+ intf1: iactionlink;
+begin
+ result:= '';
+ if getcorbainterface(fprops[0].instance,typeinfo(iactionlink),intf1) then begin
+  with intf1.getactioninfopo^ do begin
+   if self.fsc1 then begin
+    ar1:= shortcut1;
+   end
+   else begin
+    ar1:= shortcut;
+   end;
+   for int1:= 0 to high(ar1) do begin
+    result:= result + getvaluetext(ar1[int1]) + ' ';
+   end;
+   if result <> '' then begin
+    setlength(result,length(result)-1);
+   end;
+  end;
+ end
+ else begin
+  result:= getvaluetext(getordvalue);
+ end;
 end;
 
 function tshortcutpropertyeditor.getvalues: msestringarty;
@@ -4341,12 +4414,12 @@ begin
   result:= strtointvalue(atext,nb_hex);
  end;
 end;
-
+{
 procedure tshortcutpropertyeditor.setvalue(const value: msestring);
 begin
  setordvalue(texttovalue(value));
 end;
-
+}
  { tcolorpropertyeditorty}
 
 function tcolorpropertyeditor.getdefaultstate: propertystatesty;

@@ -66,6 +66,8 @@ type
    procedure setvisible(const avalue: boolean);
    procedure readbool(reader: treader);
    procedure writebool(writer: twriter);
+   procedure setshortcuts(const avalue: shortcutarty);
+   procedure setshortcuts1(const avalue: shortcutarty);  
   protected
    ftag: integer;
    ftagpointer: pointer;
@@ -91,6 +93,8 @@ type
    property visible: boolean read getvisible write setvisible default true;
    property enabled: boolean read getenabled write setenabled default true;
    property tagpointer: pointer read ftagpointer write ftagpointer;
+   property shortcuts: shortcutarty read finfo.shortcut write setshortcuts;
+   property shortcuts1: shortcutarty read finfo.shortcut1 write setshortcuts1;
   published
    property imagelist: timagelist read getimagelist write setimagelist
                     stored isimageliststored;
@@ -584,6 +588,16 @@ begin
                                 {$ifdef FPC}@{$endif}writebool,false);
  filer.defineproperty('enabled',{$ifdef FPC}@{$endif}readbool,
                                 {$ifdef FPC}@{$endif}writebool,false);
+end;
+
+procedure ttoolbutton.setshortcuts(const avalue: shortcutarty);
+begin
+ setactionshortcuts(iactionlink(self),avalue);
+end;
+
+procedure ttoolbutton.setshortcuts1(const avalue: shortcutarty);
+begin
+ setactionshortcuts1(iactionlink(self),avalue);
 end;
 
 { ttoolbuttons }

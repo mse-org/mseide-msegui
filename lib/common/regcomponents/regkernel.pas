@@ -126,15 +126,9 @@ type
   public
    procedure edit; override;
  end;
- 
+(* 
  tactionshortcutspropertyeditor = class(tshortcutpropertyeditor)
-  protected
-   fsc1: boolean;
   public
-   constructor create(const adesigner: idesigner;
-        const amodule: tmsecomponent; const acomponent: tcomponent;
-            const aobjectinspector: iobjectinspector;
-            const aprops: propinstancearty; atypeinfo: ptypeinfo); override;
    procedure setvalue(const value: msestring); override;
    function getvalue: msestring; override;
  end;
@@ -150,7 +144,7 @@ type
    procedure setvalue(const value: msestring); override;
    function getvalue: msestring; override;
  end;
- 
+ *)
 const   
  datamoduleintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createmsedatamodule);
@@ -189,10 +183,10 @@ begin
  registerpropertyeditor(typeinfo(string),tfont,'name',tfontnamepropertyeditor);
  registerpropertyeditor(typeinfo(actionstatesty),nil,'',tshapestatespropertyeditor);
  registerpropertyeditor(typeinfo(shortcutty),nil,'',tshortcutpropertyeditor);
- registerpropertyeditor(typeinfo(shortcutty),taction,'',
-                                   tactionshortcutspropertyeditor);
- registerpropertyeditor(typeinfo(shortcutty),tshortcutaction,'',
-                                   tshortcutactionitempropertyeditor);
+// registerpropertyeditor(typeinfo(shortcutty),taction,'',
+//                                   tactionshortcutspropertyeditor);
+// registerpropertyeditor(typeinfo(shortcutty),tshortcutaction,'',
+//                                   tshortcutactionitempropertyeditor);
  registerpropertyeditor(typeinfo(imagenrty),nil,'',timagenrpropertyeditor);
  registerpropertyeditor(typeinfo(facenrty),nil,'',tordinalpropertyeditor);
  registerpropertyeditor(typeinfo(tcollection),nil,'',tcollectionpropertyeditor);
@@ -457,6 +451,7 @@ begin
  result:= 'Level ' + inttostr(-(findex+1));
 end;
 
+(*
 { tactionshortcutspropertyeditor }
 
 constructor tactionshortcutspropertyeditor.create(const adesigner: idesigner;
@@ -590,7 +585,7 @@ begin
   setlength(result,length(result)-1);
  end;
 end;
-
+*)
 initialization
  register;
 end.

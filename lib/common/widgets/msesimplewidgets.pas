@@ -127,6 +127,14 @@ type
    function isshortcut1stored: boolean;
    procedure readcaptionpos(reader: treader);
    procedure settextflags(const avalue: textflagsty);
+   procedure setshortcuts(const avalue: shortcutarty);
+   procedure setshortcuts1(const avalue: shortcutarty);  
+   procedure readshortcut(reader: treader);
+   procedure readshortcut1(reader: treader);
+   procedure readsc(reader: treader);
+   procedure writesc(writer: twriter);
+   procedure readsc1(reader: treader);
+   procedure writesc1(writer: twriter);
   protected
    procedure defineproperties(filer: tfiler); override;
    procedure fontchanged; override;
@@ -186,10 +194,12 @@ type
    property imagedist: integer read finfo.ca.imagedist write setimagedist default 0;
    property colorglyph: colorty read factioninfo.colorglyph write setcolorglyph
                       stored iscolorglyphstored default cl_glyph;
-   property shortcut: shortcutty read getshortcut write setshortcut
-                            stored isshortcutstored;
-   property shortcut1: shortcutty read getshortcut1 write setshortcut1
-                            stored isshortcut1stored;
+   property shortcut: shortcutty read getshortcut write setshortcut 
+                                    stored false default 0;
+   property shortcut1: shortcutty read getshortcut1 write setshortcut1 
+                                    stored false default 0;
+   property shortcuts: shortcutarty read factioninfo.shortcut write setshortcuts;
+   property shortcuts1: shortcutarty read factioninfo.shortcut1 write setshortcuts1;
    property onexecute: notifyeventty read factioninfo.onexecute
                             write setonexecute stored isonexecutestored;
    property autosize_cx: integer read fautosize_cx write setautosize_cx default 0;
@@ -622,7 +632,7 @@ type
 
 implementation
 uses
- msekeyboard,sysutils,mseactions;
+ msekeyboard,sysutils,mseactions,msestreaming;
 
 { tcustombutton }
 
@@ -677,6 +687,40 @@ begin
 end;
 
 procedure tcustombutton.doshortcut(var info: keyeventinfoty; const sender: twidget);
+var
+ bo1,bo2: boolean;
+begin
+ if not (es_processed in info.eventstate) and 
+               not (csdesigning in componentstate) and 
+                            not (shs_disabled in finfo.state) then begin
+  if checkfocusshortcut(info) then begin
+   setfocus;
+  end;
+  bo1:= doactionshortcut(self,factioninfo,info);
+  if not bo1 and not (es_preview in info.eventstate) then begin
+   bo2:= es_processed in info.eventstate;
+   exclude(info.eventstate,es_processed);
+   bo1:= (bo_executeonshortcut in options) and 
+    msegui.checkshortcut(info,factioninfo.caption1,bo_altshortcut in options) or
+   (finfo.state * [shs_invisible,shs_disabled,shs_default] = [shs_default]) and
+       ((info.key = key_return) or 
+        (info.key = key_enter) and (bo_executedefaultonenterkey in options)) and
+       (info.shiftstate = []);
+   if bo1 then begin
+    bo2:= true;
+    internalexecute;
+   end;
+   if bo2 then begin
+    include(info.eventstate,es_processed);
+   end;
+  end;
+  if not (es_processed in info.eventstate) then begin
+   inherited;
+  end;
+ end;
+end;
+{
+procedure tcustombutton.doshortcut(var info: keyeventinfoty; const sender: twidget);
 begin
  if not (es_processed in info.eventstate) then begin
   if not (csdesigning in componentstate) and 
@@ -702,7 +746,7 @@ begin
   end;
  end;
 end;
-
+}
 function tcustombutton.getframe: tframe;
 begin
  result:= tframe(fframe);
@@ -736,11 +780,57 @@ begin
  imagepos:= readcaptiontoimagepos(reader);
 end;
 
+procedure tcustombutton.readshortcut(reader: treader);
+begin
+ shortcut:= reader.readinteger;
+end;
+
+procedure tcustombutton.readshortcut1(reader: treader);
+begin
+ shortcut1:= reader.readinteger;
+end;
+
+procedure tcustombutton.readsc(reader: treader);
+begin
+ shortcuts:= readshortcutarty(reader);
+end;
+
+procedure tcustombutton.writesc(writer: twriter);
+begin
+ writeshortcutarty(writer,factioninfo.shortcut);
+end;
+
+procedure tcustombutton.readsc1(reader: treader);
+begin
+ shortcuts1:= readshortcutarty(reader);
+end;
+
+procedure tcustombutton.writesc1(writer: twriter);
+begin
+ writeshortcutarty(writer,factioninfo.shortcut1);
+end;
+
 procedure tcustombutton.defineproperties(filer: tfiler);
 begin
  inherited;
  filer.defineproperty('captionpos',
                              {$ifdef FPC}@{$endif}readcaptionpos,nil,false);
+ filer.defineproperty('shortcut',{$ifdef FPC}@{$endif}readshortcut,nil,false);
+ filer.defineproperty('shortcut1',{$ifdef FPC}@{$endif}readshortcut1,nil,false);
+ filer.defineproperty('sc',{$ifdef FPC}@{$endif}readsc,
+                           {$ifdef FPC}@{$endif}writesc,
+       isactionshortcutstored(factioninfo) and
+       ((filer.ancestor = nil) and (factioninfo.shortcut <> nil) or
+       ((filer.ancestor <> nil) and 
+         not issameshortcuts(factioninfo.shortcut,
+                  tcustombutton(filer.ancestor).shortcuts))));
+ filer.defineproperty('sc1',{$ifdef FPC}@{$endif}readsc1,
+                           {$ifdef FPC}@{$endif}writesc1,
+       isactionshortcut1stored(factioninfo) and
+       ((filer.ancestor = nil) and (factioninfo.shortcut1 <> nil) or
+       ((filer.ancestor <> nil) and 
+         not issameshortcuts(factioninfo.shortcut,
+                  tcustombutton(filer.ancestor).shortcuts))));
 end;
 
 procedure tcustombutton.fontchanged;
@@ -1131,6 +1221,16 @@ begin
   invalidate;
   checkautosize;
  end;
+end;
+
+procedure tcustombutton.setshortcuts(const avalue: shortcutarty);
+begin
+ setactionshortcuts(iactionlink(self),avalue);
+end;
+
+procedure tcustombutton.setshortcuts1(const avalue: shortcutarty);
+begin
+ setactionshortcuts1(iactionlink(self),avalue);
 end;
 
 {

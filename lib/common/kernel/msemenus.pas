@@ -104,6 +104,8 @@ type
    function isshortcutstored: Boolean;
    procedure setshortcut(const avalue: shortcutty);
    function isshortcut1stored: Boolean;
+   procedure setshortcuts(const avalue: shortcutarty);
+   procedure setshortcuts1(const avalue: shortcutarty);  
    function getshortcut: shortcutty;
    function getshortcut1: shortcutty;
    procedure setshortcut1(const avalue: shortcutty);
@@ -143,11 +145,19 @@ type
    procedure setcoloractive(const avalue: colorty);
    function getcheckedtag: integer;
    procedure setcheckedtag(const avalue: integer);
+   procedure readshortcut(reader: treader);
+   procedure readshortcut1(reader: treader);
+   procedure readsc(reader: treader);
+   procedure writesc(writer: twriter);
+   procedure readsc1(reader: treader);
+   procedure writesc1(writer: twriter);
   protected
    finfo: actioninfoty;
    fowner: tcustommenu;
    fsubmenu: tmenuitems;
    procedure updatecaption;
+   procedure defineproperties(filer: tfiler); override;
+
    //iactionlink
    function getactioninfopo: pactioninfoty;
    function loading: boolean;
@@ -192,6 +202,8 @@ type
    property enabled: boolean read getenabled write setenabled;
    property visible: boolean read getvisible write setvisible;
    property tagpointer: pointer read finfo.tagpointer write finfo.tagpointer;
+   property shortcuts: shortcutarty read finfo.shortcut write setshortcuts;
+   property shortcuts1: shortcutarty read finfo.shortcut1 write setshortcuts1;
   published
    property action: tcustomaction read finfo.action write setaction;
    property submenu: tmenuitems read getsubmenu write setsubmenu;
@@ -204,9 +216,9 @@ type
    property options: menuactionoptionsty read finfo.options 
                    write setoptions default defaultmenuactoptions;
    property shortcut: shortcutty read getshortcut write setshortcut 
-                     stored isshortcutstored default 0;
+                     stored false default 0;
    property shortcut1: shortcutty read getshortcut1 write setshortcut1 
-                     stored isshortcut1stored default 0;
+                     stored false default 0;
    property tag: integer read finfo.tag write settag stored istagstored default 0;
    property group: integer read finfo.group write setgroup 
                      stored isgroupstored default 0;
@@ -429,7 +441,7 @@ procedure freetransientmenu(var amenu: tcustommenu);
 implementation
 uses
  sysutils,msestockobjects,rtlconsts,msebits,msemenuwidgets,msedatalist,
- mseactions;
+ mseactions,msestreaming;
 
 procedure freetransientmenu(var amenu: tcustommenu); 
 begin
@@ -831,6 +843,16 @@ end;
 function tmenuitem.getshortcut1: shortcutty;
 begin
  result:= getsimpleshortcut1(finfo);
+end;
+
+procedure tmenuitem.setshortcuts(const avalue: shortcutarty);
+begin
+ setactionshortcuts(iactionlink(self),avalue);
+end;
+
+procedure tmenuitem.setshortcuts1(const avalue: shortcutarty);  
+begin
+ setactionshortcuts1(iactionlink(self),avalue);
 end;
 
 procedure tmenuitem.setshortcut1(const avalue: shortcutty);
@@ -1376,6 +1398,57 @@ begin
    item1:= item1.fparentmenu;
   end;
  end;
+end;
+
+procedure tmenuitem.readshortcut(reader: treader);
+begin
+ shortcut:= reader.readinteger;
+end;
+
+procedure tmenuitem.readshortcut1(reader: treader);
+begin
+ shortcut1:= reader.readinteger;
+end;
+
+procedure tmenuitem.readsc(reader: treader);
+begin
+ shortcuts:= readshortcutarty(reader);
+end;
+
+procedure tmenuitem.writesc(writer: twriter);
+begin
+ writeshortcutarty(writer,finfo.shortcut);
+end;
+
+procedure tmenuitem.readsc1(reader: treader);
+begin
+ shortcuts1:= readshortcutarty(reader);
+end;
+
+procedure tmenuitem.writesc1(writer: twriter);
+begin
+ writeshortcutarty(writer,finfo.shortcut1);
+end;
+
+procedure tmenuitem.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('shortcut',{$ifdef FPC}@{$endif}readshortcut,nil,false);
+ filer.defineproperty('shortcut1',{$ifdef FPC}@{$endif}readshortcut1,nil,false);
+ filer.defineproperty('sc',{$ifdef FPC}@{$endif}readsc,
+                           {$ifdef FPC}@{$endif}writesc,
+       isactionshortcutstored(finfo) and
+       ((filer.ancestor = nil) and (finfo.shortcut <> nil) or
+       ((filer.ancestor <> nil) and 
+         not issameshortcuts(finfo.shortcut,
+                  tmenuitem(filer.ancestor).shortcuts))));
+ filer.defineproperty('sc1',{$ifdef FPC}@{$endif}readsc1,
+                           {$ifdef FPC}@{$endif}writesc1,
+       isactionshortcut1stored(finfo) and
+       ((filer.ancestor = nil) and (finfo.shortcut1 <> nil) or
+       ((filer.ancestor <> nil) and 
+         not issameshortcuts(finfo.shortcut,
+                  tmenuitem(filer.ancestor).shortcuts))));
 end;
 
 procedure tmenuitem.updatecaption;

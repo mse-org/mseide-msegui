@@ -3075,12 +3075,19 @@ function getcorbainterface(const aobject: tobject; const aintf: ptypeinfo;
 var
  intf1: pinterfaceentry;
  typedata1: ptypedata;
+ po1: pshortstring;
 begin
 // result:= getinterface(aintf,obj);
  typedata1:= gettypedata(aintf);
  {$ifdef FPC}
- intf1:= aobject.getinterfaceentrybystr(pshortstring(
-        ptruint(@typedata1^.rawintfunit)+length(typedata1^.rawintfunit)+1)^);
+ po1:= pshortstring(
+        ptruint(@typedata1^.rawintfunit)+length(typedata1^.rawintfunit)+1);
+ if po1^[0] <> #0 then begin
+  intf1:= aobject.getinterfaceentrybystr(po1^);
+ end
+ else begin
+  intf1:= nil;
+ end;
  {$else}
  intf1:= aobject.getinterfaceentry(typedata1^.guid);
  {$endif}

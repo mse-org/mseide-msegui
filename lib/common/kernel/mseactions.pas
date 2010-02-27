@@ -25,7 +25,7 @@ type
  sysshortcutaty = array[sysshortcutty] of shortcutty;
  psysshortcutaty = ^sysshortcutaty;
  
- taction = class(tcustomaction,iimagelistinfo)
+ taction = class(tcustomaction,iimagelistinfo,iactionlink)
   private
 //   fmultishortcut: integer; //0 = none, 1 = shortcut, 2 = shortcut1
 //   fmultiindex: integer;   //index of current checked char
@@ -44,6 +44,11 @@ type
    procedure writesc1(writer: twriter);
   //iimagelistinfo
    function getimagelist: timagelist;
+  //iactionlink
+   function getactioninfopo: pactioninfoty;
+   procedure actionchanged;
+   function shortcutseparator: msechar;
+   procedure calccaptiontext(var ainfo: actioninfoty);
   protected
    procedure registeronshortcut(const avalue: boolean); override;
    procedure doshortcut(const sender: twidget; var keyinfo: keyeventinfoty);
@@ -82,13 +87,14 @@ type
 {$endif}
  end;
 
- tshortcutaction = class(townedpersistent)
+ tshortcutaction = class(townedeventpersistent,iactionlink)
   private
+   finfo: actioninfoty; //as interface to shortcut propertyeditor
    faction: taction;
-   fshortcutsdefault: shortcutarty;
-   fshortcuts1default: shortcutarty;
+//   fshortcutsdefault: shortcutarty;
+//   fshortcuts1default: shortcutarty;
    fdispname: msestring;
-   fhint: msestring;
+//   fhint: msestring;
    procedure setaction(const avalue: taction);
    procedure readsc(reader: treader);
    procedure writesc(writer: twriter);
@@ -96,6 +102,15 @@ type
    procedure writesc1(writer: twriter);
    procedure readshortcut(reader: treader);
    procedure readshortcut1(reader: treader);
+   procedure setshortcuts(const avalue: shortcutarty);
+   procedure setshortcuts1(const avalue: shortcutarty);
+  //iactionlink
+   function getactioninfopo: pactioninfoty;
+  procedure actionchanged;
+  function loading: boolean;
+  function shortcutseparator: msechar;
+  procedure calccaptiontext(var ainfo: actioninfoty);
+
   protected
    function getshortcutdefault: shortcutty;
    procedure setshortcutdefault(const avalue: shortcutty);
@@ -103,10 +118,10 @@ type
    procedure setshortcut1default(const avalue: shortcutty);
    procedure defineproperties(filer: tfiler); override;
   public
-   property shortcutsdefault: shortcutarty read fshortcutsdefault 
-                                           write fshortcutsdefault;
-   property shortcuts1default: shortcutarty read fshortcuts1default 
-                                           write fshortcuts1default;
+   property shortcutsdefault: shortcutarty read finfo.shortcut
+                                           write setshortcuts;
+   property shortcuts1default: shortcutarty read finfo.shortcut1 
+                                           write setshortcuts1;
   published
    property action: taction read faction write setaction;
    property shortcutdefault: shortcutty read getshortcutdefault 
@@ -114,7 +129,7 @@ type
    property shortcut1default: shortcutty read getshortcut1default 
                                         write setshortcut1default default 0;
    property dispname: msestring read fdispname write fdispname;
-   property hint: msestring read fhint write fhint;
+   property hint: msestring read finfo.hint write finfo.hint;
  end;
 
  type
@@ -125,7 +140,7 @@ type
                      end;
 
  tshortcutcontroller = class;
- tshortcutactions = class(townedpersistentarrayprop)
+ tshortcutactions = class(townedeventpersistentarrayprop)
   private
   protected
    function getitems(const index: integer): tshortcutaction;
@@ -238,6 +253,8 @@ procedure setsimpleshortcut(const avalue: shortcutty;
                                           var adest: actioninfoty); overload;
 procedure setsimpleshortcut1(const avalue: shortcutty; var adest: actioninfoty);
 
+procedure setactionshortcuts(const sender: iactionlink; const value: shortcutarty);
+procedure setactionshortcuts1(const sender: iactionlink; const value: shortcutarty);
 procedure setactionshortcut(const sender: iactionlink; const value: shortcutty);
 procedure setactionshortcut1(const sender: iactionlink; const value: shortcutty);
 function isactionshortcutstored(const info: actioninfoty): boolean;
@@ -257,7 +274,8 @@ function checkshortcutcode(const shortcut: shortcutty;
 function checkshortcutcode(const shortcut: shortcutty;
           const info: keyinfoty): boolean; overload;
 function doactionshortcut(const sender: tobject; var info: actioninfoty;
-                        var keyinfo: keyeventinfoty): boolean; //true if done
+                        var keyinfo: keyeventinfoty): boolean; 
+                        //true if executed
 procedure calccaptiontext(var info: actioninfoty; const aseparator: msechar);
 function issysshortcut(const ashortcut: sysshortcutty;
                                   const ainfo: keyeventinfoty): boolean;
@@ -666,7 +684,30 @@ var
  po1: pactioninfoty;
 begin
  po1:= sender.getactioninfopo;
- setsimpleshortcut(value,po1^);
+ setsimpleshortcut1(value,po1^);
+ include(po1^.state,as_localshortcut1);
+ sender.actionchanged;
+end;
+
+procedure setactionshortcuts(const sender: iactionlink;
+                                              const value: shortcutarty);
+var
+ po1: pactioninfoty;
+begin
+ po1:= sender.getactioninfopo;
+ po1^.shortcut:= value;
+ include(po1^.state,as_localshortcut);
+ calccaptiontext(po1^,sender.shortcutseparator);
+ sender.actionchanged;
+end;
+
+procedure setactionshortcuts1(const sender: iactionlink;
+                                             const value: shortcutarty);
+var
+ po1: pactioninfoty;
+begin
+ po1:= sender.getactioninfopo;
+ po1^.shortcut1:= value;
  include(po1^.state,as_localshortcut1);
  sender.actionchanged;
 end;
@@ -772,6 +813,7 @@ begin
  end;
 end;
 
+{
 function doactionshortcut(const sender: tobject; var info: actioninfoty;
                         var keyinfo: keyeventinfoty): boolean;
                           //true if done
@@ -800,6 +842,89 @@ begin
    if result then begin
     include(keyinfo.eventstate,es_processed);
    end;
+  end;
+ end;
+end;
+}
+
+function doactionshortcut(const sender: tobject; var info: actioninfoty;
+                        var keyinfo: keyeventinfoty): boolean; //true if done
+ function check(const anum: integer; out exec: boolean): boolean;
+ var
+  ar1: shortcutarty;
+  int1,int2,int3: integer;
+ begin
+  if anum = 2 then begin
+   ar1:= info.shortcut1;
+  end
+  else begin
+   ar1:= info.shortcut;
+  end;
+  result:= false;
+  exec:= false;
+  if (high(ar1) > 0) and (es_preview in keyinfo.eventstate) then begin
+   exec:= true;
+   for int1:= high(ar1) downto 0 do begin
+    if checkshortcutcode(ar1[int1],keyinfo,true) then begin
+     result:= true;
+     with application do begin
+      if high(keyhistory) >= int1-1 then begin
+       int3:= 0;
+       if int1 > 0 then begin       
+        for int2:= int1 - 1 downto 0 do begin
+         if not checkshortcutcode(ar1[int2],keyhistory[int3]) then begin
+          result:= false;
+          exec:= false;
+          break;
+         end;
+         inc(int3);
+        end;
+       end
+       else begin
+        exec:= false;
+       end;      
+      end
+      else begin
+       exec:= false;
+       result:= false;
+      end;
+     end;
+     if exec then begin
+      break;
+     end;
+    end
+    else begin
+     exec:= false
+    end;
+   end;
+   if exec then begin
+    application.clearkeyhistory;
+   end;
+  end
+  else begin
+   if high(ar1) >= 0 then begin
+    if checkshortcutcode(ar1[0],keyinfo,false) then begin
+     result:= true;
+     if high(ar1) = 0 then begin
+      exec:= true;
+     end;
+    end;
+   end;
+  end;
+ end; //check
+
+var
+ bo1,bo2: boolean;
+begin
+ bo1:= check(1,result);
+ if not bo1 then begin
+  bo1:= check(2,result);
+ end;
+ if bo1 then begin
+  include(keyinfo.eventstate,es_processed);
+  if result then begin
+   doactionexecute(sender,info,false,false);
+//   changed;
   end;
  end;
 end;
@@ -868,6 +993,26 @@ begin
  end;
 end;
 
+procedure taction.doshortcut(const sender: twidget; var keyinfo: keyeventinfoty);
+begin
+ if not (es_local in keyinfo.eventstate) and (ao_globalshortcut in foptions) or 
+        (es_local in keyinfo.eventstate) and (ao_localshortcut in foptions) and
+                (owner <> nil) and issubcomponent(owner,sender) then begin
+  doupdate;
+  with finfo do begin
+   if not (as_disabled in state) and 
+            not (es_processed in keyinfo.eventstate) and 
+            (not (ss_repeat in keyinfo.shiftstate) or 
+                 (as_repeatshortcut in finfo.state)) then begin
+    if doactionshortcut(sender,finfo,keyinfo) then begin
+     changed;
+    end;
+   end;
+  end;
+ end;
+end;
+
+(*
 procedure taction.doshortcut(const sender: twidget; var keyinfo: keyeventinfoty);
 
  function check(const anum: integer; out exec: boolean): boolean;
@@ -962,10 +1107,40 @@ begin
   end;
  end;
 end;
-
+*)
 procedure taction.doafterunlink;
 begin
  imagelist:= nil;
+end;
+
+procedure taction.readshortcut(reader: treader);
+begin
+ shortcut:= reader.readinteger;
+end;
+
+procedure taction.readshortcut1(reader: treader);
+begin
+ shortcut1:= reader.readinteger;
+end;
+
+procedure taction.readsc(reader: treader);
+begin
+ shortcuts:= readshortcutarty(reader);
+end;
+
+procedure taction.writesc(writer: twriter);
+begin
+ writeshortcutarty(writer,finfo.shortcut);
+end;
+
+procedure taction.readsc1(reader: treader);
+begin
+ shortcuts1:= readshortcutarty(reader);
+end;
+
+procedure taction.writesc1(writer: twriter);
+begin
+ writeshortcutarty(writer,finfo.shortcut1);
 end;
 
 procedure taction.defineproperties(filer: tfiler);
@@ -985,34 +1160,24 @@ begin
          not issameshortcuts(shortcuts1,taction(filer.ancestor).shortcuts1)));
 end;
 
-procedure taction.readshortcut(reader: treader);
+function taction.getactioninfopo: pactioninfoty;
 begin
- shortcut:= reader.readinteger;
+ result:= @finfo;
 end;
 
-procedure taction.readshortcut1(reader: treader);
+procedure taction.actionchanged;
 begin
- shortcut1:= reader.readinteger;
+ changed;
 end;
 
-procedure taction.readsc(reader: treader);
+function taction.shortcutseparator: msechar;
 begin
- finfo.shortcut:= readshortcutarty(reader);
+ result:= ' ';
 end;
 
-procedure taction.writesc(writer: twriter);
+procedure taction.calccaptiontext(var ainfo: actioninfoty);
 begin
- writeshortcutarty(writer,finfo.shortcut);
-end;
-
-procedure taction.readsc1(reader: treader);
-begin
- finfo.shortcut1:= readshortcutarty(reader);
-end;
-
-procedure taction.writesc1(writer: twriter);
-begin
- writeshortcutarty(writer,finfo.shortcut1);
+ //dummy
 end;
 
 { tshortcutactions }
@@ -1230,42 +1395,42 @@ end;
 
 function tshortcutaction.getshortcutdefault: shortcutty;
 begin
- result:= getsimpleshortcut(fshortcutsdefault);
+ result:= getsimpleshortcut(finfo.shortcut);
 end;
 
 procedure tshortcutaction.setshortcutdefault(const avalue: shortcutty);
 begin
- setsimpleshortcut(avalue,fshortcutsdefault);
+ setsimpleshortcut(avalue,finfo.shortcut);
 end;
 
 function tshortcutaction.getshortcut1default: shortcutty;
 begin
- result:= getsimpleshortcut(fshortcuts1default);
+ result:= getsimpleshortcut(finfo.shortcut1);
 end;
 
 procedure tshortcutaction.setshortcut1default(const avalue: shortcutty);
 begin
- setsimpleshortcut(avalue,fshortcuts1default);
+ setsimpleshortcut(avalue,finfo.shortcut1);
 end;
 
 procedure tshortcutaction.readsc(reader: treader);
 begin
- fshortcutsdefault:= readshortcutarty(reader);
+ finfo.shortcut:= readshortcutarty(reader);
 end;
 
 procedure tshortcutaction.writesc(writer: twriter);
 begin
- writeshortcutarty(writer,fshortcutsdefault);
+ writeshortcutarty(writer,finfo.shortcut);
 end;
 
 procedure tshortcutaction.readsc1(reader: treader);
 begin
- fshortcuts1default:= readshortcutarty(reader);
+ finfo.shortcut:= readshortcutarty(reader);
 end;
 
 procedure tshortcutaction.writesc1(writer: twriter);
 begin
- writeshortcutarty(writer,fshortcuts1default);
+ writeshortcutarty(writer,finfo.shortcut);
 end;
 
 procedure tshortcutaction.readshortcut(reader: treader);
@@ -1285,16 +1450,49 @@ begin
  filer.defineproperty('shortcut1',{$ifdef FPC}@{$endif}readshortcut1,nil,false);
  filer.defineproperty('sc',{$ifdef FPC}@{$endif}readsc,
                            {$ifdef FPC}@{$endif}writesc,
-       (filer.ancestor = nil) and (fshortcutsdefault <> nil) or
+       (filer.ancestor = nil) and (finfo.shortcut <> nil) or
        ((filer.ancestor <> nil) and 
-         not issameshortcuts(fshortcutsdefault,
+         not issameshortcuts(finfo.shortcut,
                   tshortcutaction(filer.ancestor).shortcutsdefault)));
  filer.defineproperty('sc1',{$ifdef FPC}@{$endif}readsc1,
                            {$ifdef FPC}@{$endif}writesc1,
-       (filer.ancestor = nil) and (fshortcuts1default <> nil) or
+       (filer.ancestor = nil) and (finfo.shortcut1 <> nil) or
        ((filer.ancestor <> nil) and 
-         not issameshortcuts(fshortcuts1default,
-                  tshortcutaction(filer.ancestor).fshortcuts1default)));
+         not issameshortcuts(finfo.shortcut1,
+                  tshortcutaction(filer.ancestor).shortcuts1default)));
+end;
+
+procedure tshortcutaction.setshortcuts(const avalue: shortcutarty);
+begin
+ finfo.shortcut:= avalue;
+end;
+
+procedure tshortcutaction.setshortcuts1(const avalue: shortcutarty);
+begin
+ finfo.shortcut1:= avalue;
+end;
+
+function tshortcutaction.getactioninfopo: pactioninfoty;
+begin
+ result:= @finfo;
+end;
+
+procedure tshortcutaction.actionchanged;
+begin
+ //dummy
+end;
+
+function tshortcutaction.loading: boolean;
+begin
+ result:= csloading in tcomponent(fowner).componentstate;
+end;
+
+function tshortcutaction.shortcutseparator: msechar;
+begin
+end;
+
+procedure tshortcutaction.calccaptiontext(var ainfo: actioninfoty);
+begin
 end;
 
 { tsysshortcuts }

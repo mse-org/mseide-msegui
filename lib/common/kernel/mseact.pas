@@ -115,12 +115,14 @@ type
  end;
  pactioninfoty = ^actioninfoty;
 
- iactionlink = interface(iobjectlink)
+ iactionlink = interface(iobjectlink)['{987D28B5-4245-4672-AF6D-7E8B5D671982}']
   function getactioninfopo: pactioninfoty;
   procedure actionchanged;
   function loading: boolean;
   function shortcutseparator: msechar;
   procedure calccaptiontext(var ainfo: actioninfoty);
+  procedure setshortcuts(const avalue: shortcutarty);
+  procedure setshortcuts1(const avalue: shortcutarty);  
  end;
 
  asynceventty = procedure(const sender: tobject; var atag: integer) of object;
@@ -181,6 +183,7 @@ type
    procedure statreading;
    procedure statread;
    function getstatvarname: msestring;
+
   //iimagelistinfo
 //   function getimagelist: timagelist;
   public
@@ -933,23 +936,13 @@ begin
   end;
   if not (as_localshortcut in state) and
               (shortcut <> finfo.shortcut) then begin
-   if high(finfo.shortcut) > 0 then begin
-    shortcut:= nil; //multi key shortcut not supported
-   end
-   else begin
-    shortcut:= finfo.shortcut;
-   end;
+   shortcut:= finfo.shortcut;
    sender.calccaptiontext(po1^);
    bo1:= true;
   end;
   if not (as_localshortcut1 in state) and
               (shortcut1 <> finfo.shortcut1) then begin
-   if high(finfo.shortcut1) > 0 then begin
-    shortcut1:= nil; //multi key shortcut not supported
-   end
-   else begin
-    shortcut1:= finfo.shortcut1;
-   end;
+   shortcut1:= finfo.shortcut1;
    bo1:= true;
   end;
   if not (as_localimagelist in state) and

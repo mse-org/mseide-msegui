@@ -711,6 +711,14 @@ type
    procedure setaction(const avalue: tcustomaction);
    procedure readcaptionpos(reader: treader);
    procedure settextflags(const avalue: textflagsty);
+   procedure setshortcuts(const avalue: shortcutarty);
+   procedure setshortcuts1(const avalue: shortcutarty);  
+   procedure readshortcut(reader: treader);
+   procedure readshortcut1(reader: treader);
+   procedure readsc(reader: treader);
+   procedure writesc(writer: twriter);
+   procedure readsc1(reader: treader);
+   procedure writesc1(writer: twriter);
   protected
    finfo: shapeinfoty;
    factioninfo: actioninfoty;
@@ -778,9 +786,11 @@ type
    property colorglyph: colorty read factioninfo.colorglyph write setcolorglyph
                       stored iscolorglyphstored default cl_glyph;
    property shortcut: shortcutty read getshortcut write setshortcut
-                            stored isshortcutstored;
+                            stored false default 0;
    property shortcut1: shortcutty read getshortcut1 write setshortcut1
-                            stored isshortcut1stored;
+                            stored false default 0;
+   property shortcuts: shortcutarty read factioninfo.shortcut write setshortcuts;
+   property shortcuts1: shortcutarty read factioninfo.shortcut1 write setshortcuts1;
    property onexecute: notifyeventty read factioninfo.onexecute
                             write setonexecute stored isonexecutestored;
 
@@ -913,7 +923,7 @@ type
 implementation
 uses
  SysUtils,msekeyboard,msebits,msereal,msedispwidgets,mseformatstr,mserichstring,
- mseactions;
+ mseactions,msestreaming;
 
 type
  tcustomframe1 = class(tcustomframe);
@@ -3059,10 +3069,56 @@ begin
  imagepos:= readcaptiontoimagepos(reader);
 end;
 
+procedure tcustomdatabutton.readshortcut(reader: treader);
+begin
+ shortcut:= reader.readinteger;
+end;
+
+procedure tcustomdatabutton.readshortcut1(reader: treader);
+begin
+ shortcut1:= reader.readinteger;
+end;
+
+procedure tcustomdatabutton.readsc(reader: treader);
+begin
+ shortcuts:= readshortcutarty(reader);
+end;
+
+procedure tcustomdatabutton.writesc(writer: twriter);
+begin
+ writeshortcutarty(writer,factioninfo.shortcut);
+end;
+
+procedure tcustomdatabutton.readsc1(reader: treader);
+begin
+ shortcuts1:= readshortcutarty(reader);
+end;
+
+procedure tcustomdatabutton.writesc1(writer: twriter);
+begin
+ writeshortcutarty(writer,factioninfo.shortcut1);
+end;
+
 procedure tcustomdatabutton.defineproperties(filer: tfiler);
 begin
  inherited;
  filer.defineproperty('captionpos',{$ifdef FPC}@{$endif}readcaptionpos,nil,false);
+ filer.defineproperty('shortcut',{$ifdef FPC}@{$endif}readshortcut,nil,false);
+ filer.defineproperty('shortcut1',{$ifdef FPC}@{$endif}readshortcut1,nil,false);
+ filer.defineproperty('sc',{$ifdef FPC}@{$endif}readsc,
+                           {$ifdef FPC}@{$endif}writesc,
+       isactionshortcutstored(factioninfo) and
+       ((filer.ancestor = nil) and (factioninfo.shortcut <> nil) or
+       ((filer.ancestor <> nil) and 
+         not issameshortcuts(factioninfo.shortcut,
+                  tcustombutton(filer.ancestor).shortcuts))));
+ filer.defineproperty('sc1',{$ifdef FPC}@{$endif}readsc1,
+                           {$ifdef FPC}@{$endif}writesc1,
+       isactionshortcut1stored(factioninfo) and
+       ((filer.ancestor = nil) and (factioninfo.shortcut1 <> nil) or
+       ((filer.ancestor <> nil) and 
+         not issameshortcuts(factioninfo.shortcut,
+                  tcustombutton(filer.ancestor).shortcuts))));
 end;
 
 procedure tcustomdatabutton.loaded;
@@ -3078,6 +3134,16 @@ begin
  if ownedcol and (info.eventkind in [cek_mouseenter,cek_mouseleave]) then begin
   fgridintf.getcol.grid.invalidatecell(info.cell);
  end;
+end;
+
+procedure tcustomdatabutton.setshortcuts(const avalue: shortcutarty);
+begin
+ setactionshortcuts(iactionlink(self),avalue);
+end;
+
+procedure tcustomdatabutton.setshortcuts1(const avalue: shortcutarty);
+begin
+ setactionshortcuts1(iactionlink(self),avalue);
 end;
 
 { tstockglyphdatabutton }
