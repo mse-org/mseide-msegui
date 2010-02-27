@@ -722,6 +722,8 @@ type
   protected
    finfo: shapeinfoty;
    factioninfo: actioninfoty;
+   procedure internalexecute;
+   procedure doasyncevent(var atag: integer); override;
    procedure defineproperties(filer: tfiler); override;
    procedure loaded; override;
    procedure setenabled(const avalue: boolean); override;
@@ -743,6 +745,7 @@ type
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure dokeyup(var info: keyeventinfoty); override;
+   procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
    procedure clientrectchanged; override;
    function getframestateflags: framestateflagsty; override;
    procedure paintglyph(const canvas: tcanvas; const acolorglyph: colorty;
@@ -2703,6 +2706,41 @@ begin
  inherited;
 end;
 
+procedure tcustomdatabutton.doshortcut(var info: keyeventinfoty; const sender: twidget);
+var
+ bo1,bo2: boolean;
+begin
+ if not (es_processed in info.eventstate) and 
+               not (csdesigning in componentstate) and 
+                            not (shs_disabled in finfo.state) then begin
+  if checkfocusshortcut(info) then begin
+   setfocus;
+  end;
+  bo1:= doactionshortcut(self,factioninfo,info);
+  if not bo1 and not (es_preview in info.eventstate) then begin
+   bo2:= es_processed in info.eventstate;
+   exclude(info.eventstate,es_processed);
+   bo1:= (bo_executeonshortcut in options) and 
+    msegui.checkshortcut(info,factioninfo.caption1,bo_altshortcut in options) or
+   (finfo.state * [shs_invisible,shs_disabled,shs_default] = [shs_default]) and
+       ((info.key = key_return) or 
+        (info.key = key_enter) and (bo_executedefaultonenterkey in options)) and
+       (info.shiftstate = []);
+   if bo1 then begin
+    bo2:= true;
+    togglevalue;
+//    internalexecute;
+   end;
+   if bo2 then begin
+    include(info.eventstate,es_processed);
+   end;
+  end;
+  if not (es_processed in info.eventstate) then begin
+   inherited;
+  end;
+ end;
+end;
+
 procedure tcustomdatabutton.statechanged;
 begin
  inherited;
@@ -2915,7 +2953,7 @@ procedure tcustomdatabutton.togglevalue;
 begin
  inherited;
 // if window.candefocus and isenabled then begin
- doexecute;
+ internalexecute;
 // end;
 end;
 
@@ -3144,6 +3182,23 @@ end;
 procedure tcustomdatabutton.setshortcuts1(const avalue: shortcutarty);
 begin
  setactionshortcuts1(iactionlink(self),avalue);
+end;
+
+procedure tcustomdatabutton.internalexecute;
+begin
+ if bo_asyncexecute in foptions then begin
+  asyncevent;
+ end
+ else begin
+  doexecute;
+ end;
+end;
+
+procedure tcustomdatabutton.doasyncevent(var atag: integer);
+begin
+ if atag = 0 then begin
+  doexecute;
+ end;
 end;
 
 { tstockglyphdatabutton }
