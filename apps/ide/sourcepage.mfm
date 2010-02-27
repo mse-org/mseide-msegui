@@ -1,7 +1,6 @@
 object sourcepage: tsourcepage
   optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
   optionsskin = [osk_framebuttononly]
-  visible = True
   bounds_x = 192
   bounds_y = 245
   bounds_cx = 311

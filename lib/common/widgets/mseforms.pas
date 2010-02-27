@@ -201,6 +201,8 @@ type
    {$ifdef mse_with_ifi}
    procedure executeificommand(var acommand: ificommandcodety); override;
    {$endif}
+   
+   constructor docreate(aowner: tcomponent); virtual;
   public
    constructor create(aowner: tcomponent); overload; override;
    constructor create(aowner: tcomponent; load: boolean); reintroduce; overload;  virtual;
@@ -743,6 +745,11 @@ end;
 
 { tcustommseform }
 
+constructor tcustommseform.docreate(aowner: tcomponent);
+begin
+ inherited create(aowner);
+end;
+
 constructor tcustommseform.create(aowner: tcomponent; load: boolean);
 
 begin
@@ -751,7 +758,8 @@ begin
  fwidgetrect.x:= 100;
  fwidgetrect.y:= 100;
  options:= defaultformoptions;
- inherited create(aowner);
+ docreate(aowner);
+// inherited create(aowner);
  aftercreate;
  fwidgetrect.cx:= 100;
  fwidgetrect.cy:= 100;

@@ -555,8 +555,8 @@ type
    procedure objectevent(const sender: tobject;
                                      const event: objecteventty); override;
    class function hasresource: boolean; override;
+   constructor docreate(aowner: tcomponent); override;
   public
-   constructor create(aowner: tcomponent; load: boolean); override;
    destructor destroy; override;
    procedure createfonttab;
    procedure createfontactivetab;
@@ -3118,7 +3118,7 @@ end;
 
 { ttabform }
 
-constructor ttabform.create(aowner: tcomponent; load: boolean);
+constructor ttabform.docreate(aowner: tcomponent);
 begin
  fcolortab:= cl_default;
  fcoloractivetab:= cl_active;
