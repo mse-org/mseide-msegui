@@ -14,7 +14,7 @@ uses
  mseglob,mseguiglob,mseapplication,msestat,msemenus,msegui,msegraphics,
  msegraphutils,mseevent,mseclasses,mseforms,msedataedits,mseedit,msegrids,
  msestrings,msetypes,msewidgetgrid,msedatanodes,mselistbrowser,mseactions,
- msesimplewidgets,msewidgets,msegridsglob;
+ msesimplewidgets,msewidgets,msegridsglob,msetimer;
  
 type
  tmseshortcutdialogfo = class(tmseform)
@@ -28,6 +28,7 @@ type
    sced: tstringedit;
    defaultbu: tbutton;
    tpopupmenu1: tpopupmenu;
+   timer: ttimer;
    procedure updaterowvalues(const sender: TObject; const aindex: Integer;
                    const aitem: tlistitem);
    procedure scdikey(const sender: twidget; var info: keyeventinfoty);
@@ -44,8 +45,9 @@ type
    procedure beforedraw1(const sender: tcol; const canvas: tcanvas;
                    var cellinfo: cellinfoty; var processed: Boolean);
    procedure keyhint(const sender: TObject; var info: hintinfoty);
+   procedure keytimeout(const sender: TObject);
   private
-   fkeyentering: boolean;
+//   fkeyentering: boolean;
    frootnodes: treelistedititemarty;
    procedure updateedits;
    procedure checkconflict;
@@ -64,19 +66,19 @@ type
  tshortcutitem = class(ttreelistedititem)
   private
    fisgroup: boolean;
-   fshortcut: shortcutty;
-   fshortcut1: shortcutty;
-   fshortcutdefault: shortcutty;
-   fshortcut1default: shortcutty;
+   fshortcut: shortcutarty;
+   fshortcut1: shortcutarty;
+   fshortcutdefault: shortcutarty;
+   fshortcut1default: shortcutarty;
    fconflict: boolean;
    fconflict1: boolean;
-   procedure setshortcut(const avalue: shortcutty);
-   procedure setshortcut1(const avalue: shortcutty);
+   procedure setshortcut(const avalue: shortcutarty);
+   procedure setshortcut1(const avalue: shortcutarty);
   public
    constructor create(const aitem: tshortcutaction); overload;
    procedure resetconflict;
-   property shortcut: shortcutty read fshortcut write setshortcut;
-   property shortcut1: shortcutty read fshortcut1 write setshortcut1;
+   property shortcut: shortcutarty read fshortcut write setshortcut;
+   property shortcut1: shortcutarty read fshortcut1 write setshortcut1;
  end;
  
  tsysshortcutitem = class(tshortcutitem)
@@ -140,8 +142,8 @@ begin
    acontroller.sysshortcuts1.beginupdate;
    for ss1:= low(ss1) to high(ss1) do begin
     with tsysshortcutitem(no1[ord(ss1)]) do begin
-     acontroller.sysshortcuts[ss1]:= fshortcut;
-     acontroller.sysshortcuts1[ss1]:= fshortcut1;
+     acontroller.sysshortcuts[ss1]:= getsimpleshortcut(fshortcut);
+     acontroller.sysshortcuts1[ss1]:= getsimpleshortcut(fshortcut1);
     end;
    end;
    acontroller.sysshortcuts.endupdate;
@@ -152,8 +154,8 @@ begin
     with tshortcutitem(fo1.sc[int1]) do begin
      if not fisgroup then begin
       with acontroller.actions[int1-int2].action do begin
-       shortcut:= fshortcut;
-       shortcut1:= fshortcut1;
+       shortcuts:= fshortcut;
+       shortcuts1:= fshortcut1;
       end;
      end;
     end;
@@ -174,21 +176,21 @@ begin
   caption:= aitem.dispname;
   fisgroup:= action = nil;
   if action <> nil then begin
-   fshortcut:= action.shortcut;
-   fshortcut1:= action.shortcut1;
-   fshortcutdefault:= shortcutdefault;
-   fshortcut1default:= shortcut1default;
+   fshortcut:= action.shortcuts;
+   fshortcut1:= action.shortcuts1;
+   fshortcutdefault:= shortcutsdefault;
+   fshortcut1default:= shortcuts1default;
   end;
  end;
 end;
 
-procedure tshortcutitem.setshortcut(const avalue: shortcutty);
+procedure tshortcutitem.setshortcut(const avalue: shortcutarty);
 begin
  fshortcut:= avalue;
  change;
 end;
 
-procedure tshortcutitem.setshortcut1(const avalue: shortcutty);
+procedure tshortcutitem.setshortcut1(const avalue: shortcutarty);
 begin
  fshortcut1:= avalue;
  change;
@@ -220,10 +222,10 @@ begin
  inherited create;
  caption:= getsysshortcutdispname(aindex);
  with acontroller do begin
-  fshortcut:= sysshortcuts[aindex];
-  fshortcut1:= sysshortcuts1[aindex];
-  fshortcutdefault:= defaultsysshortcuts[aindex];
-  fshortcut1default:= defaultsysshortcuts1[aindex];
+  setsimpleshortcut(sysshortcuts[aindex],fshortcut);
+  setsimpleshortcut(sysshortcuts1[aindex],fshortcut1);
+  setsimpleshortcut(defaultsysshortcuts[aindex],fshortcutdefault);
+  setsimpleshortcut(defaultsysshortcuts1[aindex],fshortcut1default);
  end;
 end;
 
@@ -260,62 +262,112 @@ begin
  sc1ed.value:= sc1di.value;
 end;
 
+procedure tmseshortcutdialogfo.keytimeout(const sender: TObject);
+begin
+ if sced.focused then begin
+  sced.editor.selectall;
+ end
+ else begin
+  if sc1ed.focused then begin
+   sc1ed.editor.selectall;
+  end;
+ end;
+end;
+
 procedure tmseshortcutdialogfo.scdikey(const sender: twidget;
                var info: keyeventinfoty);
+ function setkey(const akey: shortcutty;
+                          const existing: shortcutarty): shortcutarty;
+ begin
+  result:= nil;
+  if timer.enabled then begin
+   result:= existing;
+  end;
+  if akey and not modmask <> 0 then begin
+   setlength(result,high(result)+2);
+   result[high(result)]:= akey;
+  end;
+ end; //setkey
+ 
 var
  mstr1: msestring;
  sc1: shortcutty;
+ ar1: shortcutarty;
 begin
- mstr1:= '';
- sc1:= 0;
  with info do begin
-  if eventkind = ek_keypress then begin
-   fkeyentering:= true;
-  end;
-  if ss_shift in shiftstate then begin
-   mstr1:= mstr1+'Shift+';
-   sc1:= sc1 + ord(key_modshift);
-  end;   
-  if ss_ctrl in shiftstate then begin
-   mstr1:= mstr1+'Ctrl+';
-   sc1:= sc1 + ord(key_modctrl);
-  end;   
-  if ss_alt in shiftstate then begin
-   mstr1:= mstr1+'Alt+';
-   sc1:= sc1 + ord(key_modalt);
-  end;   
-  case key of
-   key_shift,key_alt,key_control: begin
-    if eventkind = ek_keyrelease then begin
-     if mstr1 = '' then begin
-      fkeyentering:= false;
-      updateedits;
+  with tshortcutitem(sc.item) do begin
+   if sender.tag = 0 then begin
+    ar1:= shortcut;
+   end
+   else begin
+    ar1:= shortcut1;
+   end;
+   if eventkind = ek_keypress then begin
+    sc1:= 0;
+    if not timer.enabled or (sc.item is tsysshortcutitem) then begin
+     ar1:= nil;
+    end;
+    mstr1:= encodeshortcutname(ar1);
+    if mstr1 <> '' then begin
+     mstr1:= mstr1 + ' ';
+    end;
+    if ss_shift in shiftstate then begin
+     mstr1:= mstr1+'Shift+';
+     sc1:= sc1 + ord(key_modshift);
+    end;   
+    if ss_ctrl in shiftstate then begin
+     mstr1:= mstr1+'Ctrl+';
+     sc1:= sc1 + ord(key_modctrl);
+    end;   
+    if ss_alt in shiftstate then begin
+     mstr1:= mstr1+'Alt+';
+     sc1:= sc1 + ord(key_modalt);
+    end;   
+    if (key = key_shift) or (key = key_control) or
+                                            (key = key_alt) then begin
+     sc1:= 0;
+    end;
+    case key of
+     key_shift,key_alt,key_control: begin
+     end
+     else begin
+      sc1:= sc1 + ord(key);
+      if (high(ar1) >= 0) or isvalidshortcut(sc1) or 
+                                        (keyty(sc1) = key_delete) then begin
+       if (high(ar1) < 0) and (keyty(sc1) = key_delete) then begin
+        sc1:= 0;
+        tstringedit(sender).value:= '';
+       end; 
+       ar1:= setkey(sc1,ar1);
+       if sender.tag = 0 then begin
+        shortcut:= ar1;
+       end
+       else begin
+        shortcut1:= ar1;
+       end;
+       include(eventstate,es_processed);
+       if not (sc.item is tsysshortcutitem) then begin
+        timer.enabled:= true;
+        timer.interval:= timer.interval;
+       end;
+      end;
+      checkconflict;
      end;
-    end
-    else begin
+    end;
+    if mstr1 <> '' then begin
      tstringedit(sender).value:= mstr1;
     end;
    end
    else begin
-    if eventkind = ek_keypress then begin
-     fkeyentering:= false;
-     sc1:= sc1 + ord(key);
-     if isvalidshortcut(sc1) or (keyty(sc1) = key_delete) then begin
-      if keyty(sc1) = key_delete then begin
-       sc1:= 0;
-      end; 
-      if sender.tag = 0 then begin
-       tshortcutitem(sc.item).shortcut:= sc1;
-      end
-      else begin
-       tshortcutitem(sc.item).shortcut1:= sc1;
-      end;
-      include(eventstate,es_processed);
-     end;
-     checkconflict;
+    if eventkind = ek_keyrelease then begin
+     tstringedit(sender).value:= encodeshortcutname(ar1);
+     updateedits;
     end;
    end;
   end;
+ end;
+ if timer.enabled then begin
+  tstringedit(sender).editor.clearselection;
  end;
 end;
 
@@ -390,7 +442,7 @@ var
  rootnode1: tshortcutitem;
  rootnode2: tshortcutitem;
  node1: tshortcutitem;
- scut,scut1: shortcutty;
+ scut,scut1: shortcutarty;
  conflict,conflict1: boolean;
 begin
  conflict:= false;
@@ -409,14 +461,14 @@ begin
      for int3:= int2 + 1 to rootnode1.count - 1 do begin
              //leafs in current node
       with tshortcutitem(rootnode1.fitems[int3]) do begin
-       if (scut <> 0) then begin
-        if fshortcut = scut then begin
+       if (scut <> nil) then begin
+        if checkshortcutconflict(fshortcut,scut) then begin
          node1.fconflict:= true;
          rootnode1.fconflict:= true;
          fconflict:= true;
          conflict:= true;
         end;
-        if fshortcut1 = scut then begin
+        if checkshortcutconflict(fshortcut1,scut) then begin
          node1.fconflict:= true;
          conflict:= true;
          rootnode1.fconflict:= true;
@@ -424,15 +476,15 @@ begin
          conflict1:= true;
         end;
        end;       
-       if (scut1 <> 0) then begin
-        if fshortcut = scut1 then begin
+       if (scut1 <> nil) then begin
+        if checkshortcutconflict(fshortcut,scut1) then begin
          node1.fconflict1:= true;
          conflict1:= true;
          rootnode1.fconflict1:= true;
          fconflict:= true;
          conflict:= true;
         end;
-        if fshortcut1 = scut1 then begin
+        if checkshortcutconflict(fshortcut1,scut1) then begin
          node1.fconflict1:= true;
          conflict1:= true;
          rootnode1.fconflict1:= true;
@@ -446,15 +498,15 @@ begin
       rootnode2:= tshortcutitem(frootnodes[int4]);       
       for int3:= 0 to rootnode2.count - 1 do begin
        with tshortcutitem(rootnode2.fitems[int3]) do begin
-        if (scut <> 0) then begin
-         if fshortcut = scut then begin
+        if (scut <> nil) then begin
+         if checkshortcutconflict(fshortcut,scut) then begin
           node1.fconflict:= true;
           conflict:= true;
           rootnode1.fconflict:= true;
           fconflict:= true;
           rootnode2.fconflict:= true;
          end;
-         if fshortcut1 = scut then begin
+         if checkshortcutconflict(fshortcut1,scut) then begin
           node1.fconflict:= true;
           conflict:= true;
           rootnode1.fconflict:= true;
@@ -463,8 +515,8 @@ begin
           rootnode2.fconflict1:= true;
          end;
         end;       
-        if (scut1 <> 0) then begin
-         if fshortcut = scut1 then begin
+        if (scut1 <> nil) then begin
+         if checkshortcutconflict(fshortcut,scut1) then begin
           node1.fconflict1:= true;
           conflict1:= true;
           rootnode1.fconflict1:= true;
@@ -472,7 +524,7 @@ begin
           conflict:= true;
           rootnode2.fconflict:= true;
          end;
-         if fshortcut1 = scut1 then begin
+         if checkshortcutconflict(fshortcut1,scut1) then begin
           node1.fconflict1:= true;
           conflict1:= true;
           rootnode1.fconflict1:= true;
@@ -526,7 +578,7 @@ begin
     cellinfo.color:= errorcolor;
    end
    else begin
-    if fshortcut <> fshortcutdefault then begin
+    if not issameshortcut(fshortcut,fshortcutdefault) then begin
      cellinfo.color:= cl_infobackground;
     end;
    end; 
@@ -544,7 +596,7 @@ begin
     cellinfo.color:= errorcolor;
    end
    else begin
-    if fshortcut1 <> fshortcut1default then begin
+    if not issameshortcut(fshortcut1,fshortcut1default) then begin
      cellinfo.color:= cl_infobackground;
     end;
    end;

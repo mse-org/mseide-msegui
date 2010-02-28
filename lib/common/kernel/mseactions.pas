@@ -125,9 +125,11 @@ type
   published
    property action: taction read faction write setaction;
    property shortcutdefault: shortcutty read getshortcutdefault 
-                                        write setshortcutdefault default 0;
+                                        write setshortcutdefault
+                                                 stored false default 0;
    property shortcut1default: shortcutty read getshortcut1default 
-                                        write setshortcut1default default 0;
+                                        write setshortcut1default 
+                                                 stored false default 0;
    property dispname: msestring read fdispname write fdispname;
    property hint: msestring read finfo.hint write finfo.hint;
  end;
@@ -243,15 +245,17 @@ type
    property onhelp;
  end;
 
-function issameshortcuts(const a,b: shortcutarty): boolean;
+function issameshortcut(const a,b: shortcutarty): boolean;
 function getsimpleshortcut(const asource: shortcutarty): shortcutty; overload;
 function getsimpleshortcut(const asource: actioninfoty): shortcutty; overload;
 function getsimpleshortcut1(const asource: actioninfoty): shortcutty;
+function setsimpleshortcut(const avalue: shortcutty): shortcutarty; overload;
 procedure setsimpleshortcut(const avalue: shortcutty;
                                           var adest: shortcutarty); overload;
 procedure setsimpleshortcut(const avalue: shortcutty;
                                           var adest: actioninfoty); overload;
 procedure setsimpleshortcut1(const avalue: shortcutty; var adest: actioninfoty);
+function checkshortcutconflict(const a,b: shortcutarty): boolean;
 
 procedure setactionshortcuts(const sender: iactionlink; const value: shortcutarty);
 procedure setactionshortcuts1(const sender: iactionlink; const value: shortcutarty);
@@ -263,11 +267,12 @@ procedure setactionimagelist(const sender: iactionlink; const value: timagelist)
 function isactionimageliststored(const info: actioninfoty): boolean;
  
 procedure getshortcutlist(out keys: integerarty; out names: msestringarty);
-function getshortcutname(key: shortcutarty): msestring;
+//function getshortcutname(key: shortcutarty): msestring;
 function getsysshortcutdispname(const aitem: sysshortcutty): msestring;
 
 function isvalidshortcut(const ashortcut: shortcutty): boolean;
-function encodeshortcutname(const key: shortcutty): msestring;
+function encodeshortcutname(const key: shortcutarty): msestring; overload;
+function encodeshortcutname(const key: shortcutty): msestring; overload;
 function checkshortcutcode(const shortcut: shortcutty;
                     const info: keyeventinfoty;
                     const apreview: boolean = false): boolean; overload;
@@ -452,7 +457,7 @@ begin
   getvalues(bottom,'Shift+Ctrl+',key_modshiftctrl,keys,names);
  end;
 end;
-
+{
 function getshortcutname(key: shortcutarty): msestring;
 var
  keys: integerarty;
@@ -476,7 +481,7 @@ begin
   end;
  end;
 end;
-
+}
 //todo: internationalize
 function getsysshortcutdispname(const aitem: sysshortcutty): msestring;
 const
@@ -582,18 +587,31 @@ begin
  end;
 end;
 
+function encodeshortcutname(const key: shortcutarty): msestring;
+var
+ int1: integer;
+begin
+ result:= '';
+ if high(key) >= 0 then begin
+  for int1:= 0 to high(key) do begin
+   result:= result + encodeshortcutname(key[int1]) + ' ';
+  end;
+  setlength(result,length(result)-1);
+ end;
+end;
+
 procedure calccaptiontext(var info: actioninfoty; const aseparator: msechar);
 var
  str1: msestring;
 begin
  str1:= info.captiontext;
  if (info.shortcut <> nil) and (mao_shortcutcaption in info.options) then begin
-  str1:= str1 + aseparator + '('+getshortcutname(info.shortcut)+')';
+  str1:= str1 + aseparator + '('+encodeshortcutname(info.shortcut)+')';
  end;
  captiontorichstring(str1,info.caption1);
 end;
 
-function issameshortcuts(const a,b: shortcutarty): boolean;
+function issameshortcut(const a,b: shortcutarty): boolean;
 var
  int1: integer;
 begin
@@ -646,6 +664,11 @@ begin
  end;
 end;
 
+function setsimpleshortcut(const avalue: shortcutty): shortcutarty;
+begin
+ setsimpleshortcut(avalue,result);
+end;
+
 procedure setsimpleshortcut(const avalue: shortcutty; var adest: actioninfoty);
 begin
  if avalue = 0 then begin
@@ -666,6 +689,36 @@ begin
   setlength(adest.shortcut1,1);
   adest.shortcut1[0]:= avalue;
  end;
+end;
+
+function checkshortcutconflict(const a,b: shortcutarty): boolean;
+ function pos1(const sub,checked:shortcutarty): boolean;
+ var
+  int1,int2: integer;
+ begin
+  result:= sub <> nil;
+  if result then begin
+   result:= sub = checked;
+   if not result and (high(checked) >= high(sub)) then begin
+    for int1:= 0 to high(checked) - high(sub) do begin
+     if checked[int1] = sub[0] then begin
+      result:= true;
+      for int2:= 1 to high(sub) do begin
+       if checked[int1+int2] <> sub[int2] then begin
+        result:= false;
+        break;
+       end;
+      end;
+      if result then begin
+       break;
+      end;
+     end;
+    end;
+   end;
+  end;
+ end; //pos1
+begin
+ result:= pos1(a,b) or pos1(b,a);
 end;
 
 procedure setactionshortcut(const sender: iactionlink; const value: shortcutty);
@@ -1152,12 +1205,12 @@ begin
                            {$ifdef FPC}@{$endif}writesc,
        (filer.ancestor = nil) and (shortcuts <> nil) or
        ((filer.ancestor <> nil) and 
-         not issameshortcuts(shortcuts,taction(filer.ancestor).shortcuts)));
+         not issameshortcut(shortcuts,taction(filer.ancestor).shortcuts)));
  filer.defineproperty('sc1',{$ifdef FPC}@{$endif}readsc1,
                            {$ifdef FPC}@{$endif}writesc1,
        (filer.ancestor = nil) and (shortcuts1 <> nil) or
        ((filer.ancestor <> nil) and 
-         not issameshortcuts(shortcuts1,taction(filer.ancestor).shortcuts1)));
+         not issameshortcut(shortcuts1,taction(filer.ancestor).shortcuts1)));
 end;
 
 function taction.getactioninfopo: pactioninfoty;
@@ -1452,13 +1505,13 @@ begin
                            {$ifdef FPC}@{$endif}writesc,
        (filer.ancestor = nil) and (finfo.shortcut <> nil) or
        ((filer.ancestor <> nil) and 
-         not issameshortcuts(finfo.shortcut,
+         not issameshortcut(finfo.shortcut,
                   tshortcutaction(filer.ancestor).shortcutsdefault)));
  filer.defineproperty('sc1',{$ifdef FPC}@{$endif}readsc1,
                            {$ifdef FPC}@{$endif}writesc1,
        (filer.ancestor = nil) and (finfo.shortcut1 <> nil) or
        ((filer.ancestor <> nil) and 
-         not issameshortcuts(finfo.shortcut1,
+         not issameshortcut(finfo.shortcut1,
                   tshortcutaction(filer.ancestor).shortcuts1default)));
 end;
 

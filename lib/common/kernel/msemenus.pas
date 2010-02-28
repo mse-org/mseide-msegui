@@ -1440,14 +1440,14 @@ begin
        isactionshortcutstored(finfo) and
        ((filer.ancestor = nil) and (finfo.shortcut <> nil) or
        ((filer.ancestor <> nil) and 
-         not issameshortcuts(finfo.shortcut,
+         not issameshortcut(finfo.shortcut,
                   tmenuitem(filer.ancestor).shortcuts))));
  filer.defineproperty('sc1',{$ifdef FPC}@{$endif}readsc1,
                            {$ifdef FPC}@{$endif}writesc1,
        isactionshortcut1stored(finfo) and
        ((filer.ancestor = nil) and (finfo.shortcut1 <> nil) or
        ((filer.ancestor <> nil) and 
-         not issameshortcuts(finfo.shortcut,
+         not issameshortcut(finfo.shortcut,
                   tmenuitem(filer.ancestor).shortcuts))));
 end;
 

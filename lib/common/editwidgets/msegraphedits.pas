@@ -3148,14 +3148,14 @@ begin
        isactionshortcutstored(factioninfo) and
        ((filer.ancestor = nil) and (factioninfo.shortcut <> nil) or
        ((filer.ancestor <> nil) and 
-         not issameshortcuts(factioninfo.shortcut,
+         not issameshortcut(factioninfo.shortcut,
                   tcustombutton(filer.ancestor).shortcuts))));
  filer.defineproperty('sc1',{$ifdef FPC}@{$endif}readsc1,
                            {$ifdef FPC}@{$endif}writesc1,
        isactionshortcut1stored(factioninfo) and
        ((filer.ancestor = nil) and (factioninfo.shortcut1 <> nil) or
        ((filer.ancestor <> nil) and 
-         not issameshortcuts(factioninfo.shortcut,
+         not issameshortcut(factioninfo.shortcut,
                   tcustombutton(filer.ancestor).shortcuts))));
 end;
 

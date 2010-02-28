@@ -192,6 +192,7 @@ type
    procedure clearundo;
    procedure undo;
    procedure selectall;
+   procedure clearselection;
    property forcecaret: boolean read getforcecaret write setforcecaret;
 
    function optionsedit: optionseditty;
@@ -1544,6 +1545,14 @@ begin
   fsellength:= length(finfo.text.text);
   updateselect;
   curindex:= fsellength;
+ end;
+end;
+
+procedure tinplaceedit.clearselection;
+begin
+ if fsellength > 0 then begin
+  fsellength:= 0;
+  updateselect;
  end;
 end;
 

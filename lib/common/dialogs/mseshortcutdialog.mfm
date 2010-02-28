@@ -1,28 +1,25 @@
 object mseshortcutdialogfo: tmseshortcutdialogfo
+  visible = False
   bounds_x = 87
   bounds_y = 222
   bounds_cx = 578
   bounds_cy = 340
-  taborder = 1
-  visible = False
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_mousewheel, ow_destroywidgets, ow_autoscale]
-  container.bounds_x = 0
-  container.bounds_y = 0
-  container.bounds_cx = 578
-  container.bounds_cy = 340
-  container.frame.dummy = 0
+  container.bounds = (
+    0
+    0
+    578
+    340
+  )
   options = [fo_screencentered, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
   caption = 'Shortcuts'
   moduleclassname = 'tmseform'
   object grid: twidgetgrid
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    popupmenu = tpopupmenu1
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 578
     bounds_cy = 286
-    frame.dummy = 0
     anchors = [an_top, an_bottom]
-    popupmenu = tpopupmenu1
     optionsgrid = [og_colsizing, og_focuscellonenter, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
     fixrows.count = 1
     fixrows.items = <    
@@ -63,28 +60,29 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
         onbeforedrawcell = beforedraw
         options = [co_readonly, co_nofocus, co_focusselect, co_rowselect, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         widgetname = 'scdi'
+        dataclass = tgridmsestringdatalist
       end    
       item
         width = 125
         onbeforedrawcell = beforedraw1
         options = [co_readonly, co_nofocus, co_focusselect, co_rowselect, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         widgetname = 'sc1di'
+        dataclass = tgridmsestringdatalist
       end>
     datarowheight = 16
     oncellevent = gridcellevent
     reffontheight = 14
     object sc: ttreeitemedit
       optionsskin = [osk_framebuttononly]
+      frame.levelo = 0
+      frame.colorclient = -2147483645
+      frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+      taborder = 1
+      visible = False
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 321
       bounds_cy = 16
-      frame.levelo = 0
-      frame.colorclient = -2147483645
-      frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
-      frame.dummy = 0
-      taborder = 1
-      visible = False
       optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_locate, oe_keyexecute, oe_savevalue, oe_savestate]
       onupdaterowvalues = updaterowvalues
       options = [teo_treecolnavig]
@@ -93,16 +91,16 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
     object scdi: tstringedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
       optionsskin = [osk_framebuttononly]
-      bounds_x = 322
-      bounds_y = 0
-      bounds_cx = 125
-      bounds_cy = 16
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
       frame.dummy = 0
       taborder = 2
       visible = False
+      bounds_x = 322
+      bounds_y = 0
+      bounds_cx = 125
+      bounds_cy = 16
       optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
       reffontheight = 14
     end
@@ -110,53 +108,45 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
       Tag = 1
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
       optionsskin = [osk_framebuttononly]
-      bounds_x = 448
-      bounds_y = 0
-      bounds_cx = 125
-      bounds_cy = 16
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
       frame.dummy = 0
       taborder = 3
       visible = False
+      bounds_x = 448
+      bounds_y = 0
+      bounds_cx = 125
+      bounds_cy = 16
       optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
       reffontheight = 14
     end
   end
   object tbutton1: tbutton
+    taborder = 1
     bounds_x = 461
     bounds_y = 306
     bounds_cx = 50
     bounds_cy = 20
     anchors = [an_left, an_bottom]
-    taborder = 1
     state = [as_localcaption]
-    autosize_cx = 0
-    autosize_cy = 0
     caption = '&OK'
     modalresult = mr_ok
   end
   object tbutton2: tbutton
+    taborder = 2
     bounds_x = 517
     bounds_y = 306
     bounds_cx = 50
     bounds_cy = 20
     anchors = [an_left, an_bottom]
-    taborder = 2
     state = [as_localcaption]
-    autosize_cx = 0
-    autosize_cy = 0
     caption = '&Cancel'
     modalresult = mr_cancel
   end
   object sc1ed: tstringedit
     Tag = 1
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_multiplehint, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 272
-    bounds_y = 289
-    bounds_cx = 180
-    bounds_cy = 37
     frame.levelo = 0
     frame.framewidth = 1
     frame.colorframe = -1610612734
@@ -170,12 +160,16 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
       0
       0
     )
-    anchors = [an_left, an_bottom]
     taborder = 3
     hint = 'Press the desired key combination.'
     onshowhint = keyhint
     onactivate = edactivate
     ondeactivate = eddeactivate
+    bounds_x = 272
+    bounds_y = 289
+    bounds_cx = 180
+    bounds_cy = 37
+    anchors = [an_left, an_bottom]
     optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
     onkeydown = scdikey
     onkeyup = scdikey
@@ -183,10 +177,6 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
   end
   object sced: tstringedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_multiplehint, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 67
-    bounds_y = 289
-    bounds_cx = 196
-    bounds_cy = 37
     frame.levelo = 0
     frame.framewidth = 1
     frame.colorframe = -1610612734
@@ -200,28 +190,30 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
       0
       0
     )
-    anchors = [an_left, an_bottom]
     taborder = 4
     hint = 'Press the desired key combination.'
     onshowhint = keyhint
     onactivate = edactivate
     ondeactivate = eddeactivate
+    bounds_x = 67
+    bounds_y = 289
+    bounds_cx = 196
+    bounds_cy = 37
+    anchors = [an_left, an_bottom]
     optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
     onkeydown = scdikey
     onkeyup = scdikey
     reffontheight = 14
   end
   object defaultbu: tbutton
+    color = -2147483645
+    taborder = 5
     bounds_x = 8
     bounds_y = 306
     bounds_cx = 50
     bounds_cy = 20
-    color = -2147483645
     anchors = [an_left, an_bottom]
-    taborder = 5
     state = [as_localcaption, as_localcolor, as_localonexecute]
-    autosize_cx = 0
-    autosize_cy = 0
     caption = '&Default'
     onexecute = defaultex
   end
@@ -239,6 +231,12 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
         onexecute = collapseall
       end>
     left = 32
+    top = 64
+  end
+  object timer: ttimer
+    interval = -1500000
+    ontimer = keytimeout
+    left = 160
     top = 64
   end
 end
