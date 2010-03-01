@@ -1033,6 +1033,7 @@ type
    frecnovalid: boolean;
    fscrollsum: integer;
    factiverecordbefore: integer;
+   fbuffercountbefore: integer;
    frecnooffset: integer;
    fmovebylock: boolean;
    fcancelresync: boolean;
@@ -5042,7 +5043,9 @@ begin
    result:= -1;
   end
   else begin
-   if not frecnovalid or tdataset(fowner).filtered then begin
+   if not frecnovalid or tdataset(fowner).filtered or 
+             (fbuffercountbefore <> tdataset1(fowner).buffercount) then begin
+    fbuffercountbefore:= tdataset1(fowner).buffercount;
     if bof then begin
      frecno:= 0;
     end
