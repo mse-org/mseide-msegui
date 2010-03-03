@@ -714,6 +714,7 @@ const
  currentfoldhiddenbit = 6;
  currentfoldhiddenmask = 1 shl currentfoldhiddenbit;
  foldlevelmask = byte(not (foldhiddenmask or currentfoldhiddenmask));
+ foldissumbit = 0;
  foldissummask = $01;
  rowstatemask = $7f;
 
@@ -766,7 +767,8 @@ type
  rowstaterowheightaty = array[0..0] of rowstaterowheightty;
  prowstaterowheightaty  = ^rowstaterowheightaty;
 
- rowstatememberty = (rsm_select,rsm_color,rsm_font,rsm_readonly,rsm_foldlevel,
+ rowstatememberty = (rsm_select,rsm_color,rsm_font,rsm_readonly,
+                     rsm_foldlevel,rsm_foldissum,
                      rsm_hidden,rsm_merged,rsm_height);
 
 const
@@ -803,6 +805,7 @@ type
    function gethidden(const index: integer): boolean;
    function getfoldlevel(const index: integer): byte;
    function getfoldissum(const index: integer): boolean;
+   function getheight(const index: integer): integer;
    procedure checkinfolevel(const wantedlevel: rowinfolevelty);
    procedure change(const aindex: integer); override;
    procedure initdirty; virtual;
@@ -842,6 +845,10 @@ type
                                                             write setreadonly;
    property selected[const index: integer]: longword read getselected 
                                                             write setselected;
+   property hidden[const index: integer]: boolean read gethidden;
+   property foldlevel[const index: integer]: byte read getfoldlevel; //0..127
+   property foldissum[const index: integer]: boolean read getfoldissum;
+   property height[const index: integer]: integer read getheight;
    property merged[const index: integer]: longword read getmerged 
                                                             write setmerged;
    property foldinfoar: bytearty read getfoldinfoar;
@@ -7213,6 +7220,14 @@ procedure tcustomrowstatelist.setmerged(const index: integer;
                const avalue: longword);
 begin
  getitempocolmerge(index)^.colmerge.merged:= avalue;
+end;
+
+function tcustomrowstatelist.getheight(const index: integer): integer;
+begin
+ result:= getitemporowheight(index)^.rowheight.height;
+ if result < 0 then begin
+  result:= 0;
+ end;
 end;
 
 procedure tcustomrowstatelist.checkinfolevel(const wantedlevel: rowinfolevelty);

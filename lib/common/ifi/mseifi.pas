@@ -560,6 +560,8 @@ function ifinametostring(const source: pifinamety; out dest: string): integer;
 function stringtoifiname(const source: string; const dest: pifinamety): integer;
 
 function encodeifinull(const headersize: integer = 0): string;               
+function encodeifidata(const avalue: boolean; 
+                       const headersize: integer = 0): string; overload;
 function encodeifidata(const avalue: integer; 
                        const headersize: integer = 0): string; overload;
 function encodeifidata(const avalue: int64; 
@@ -713,6 +715,18 @@ end;
 function encodeifinull(const headersize: integer = 0): string;               
 begin
  initdataheader(headersize,idk_null,0,result)
+end;
+
+function encodeifidata(const avalue: boolean; 
+                       const headersize: integer = 0): string; overload;
+var
+ int1: integer;
+begin
+ int1:= 0;
+ if avalue then begin
+  int1:= integer(longbool(true));
+ end;
+ pinteger(initdataheader(headersize,idk_integer,0,result))^:= int1;
 end;
 
 function encodeifidata(const avalue: integer; 

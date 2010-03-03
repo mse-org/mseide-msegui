@@ -1160,8 +1160,7 @@ type
    procedure setfoldlevel(const index: integer; avalue: byte);
    procedure setfoldissum(const index: integer; const avalue: boolean);
    procedure setfolded(const avalue: boolean);
-   function getrowheight(const index: integer): integer;
-   procedure setrowheight(const index: integer; const avalue: integer);
+   procedure setheight(const index: integer; const avalue: integer);
    function getrowypos(const index: integer): integer;
    procedure setsourcefoldlevel(const avalue: string);
    procedure setsourceissum(const avalue: string);
@@ -1241,8 +1240,8 @@ type
                                                   write setfoldlevel; //0..127
    property foldissum[const index: integer]: boolean read getfoldissum 
                                                   write setfoldissum;
-   property rowheight[const index: integer]: integer read getrowheight 
-                                                            write setrowheight;
+   property height[const index: integer]: integer read getheight 
+                                                            write setheight;
    function currentrowheight(const index: integer): integer;
    property rowypos[const index: integer]: integer read getrowypos;
    function rowindex(const aypos: integer): integer;
@@ -13030,7 +13029,7 @@ end;
 function tcustomgrid.getrowheight(index: integer): integer;
 begin
  if checkrowindex(index) then begin
-  result:= fdatacols.frowstate.rowheight[index];
+  result:= fdatacols.frowstate.height[index];
  end
  else begin
   result:= 0;
@@ -13048,7 +13047,7 @@ begin
     avalue:= fdatarowheightmax;
    end;
   end; 
-  fdatacols.frowstate.rowheight[index]:= avalue;
+  fdatacols.frowstate.height[index]:= avalue;
  end;
 end;
 
@@ -15160,15 +15159,7 @@ begin
  end;
 end;
 
-function trowstatelist.getrowheight(const index: integer): integer;
-begin
- result:= getitemporowheight(index)^.rowheight.height;
- if result < 0 then begin
-  result:= 0;
- end;
-end;
-
-procedure trowstatelist.setrowheight(const index: integer;
+procedure trowstatelist.setheight(const index: integer;
                const avalue: integer);
 begin
  with getitemporowheight(index)^ do begin
@@ -15309,6 +15300,9 @@ begin
   rsm_foldlevel: begin
    fgrid.rowfoldlevel[index]:= 0;
   end;
+  rsm_foldissum: begin
+   fgrid.rowfoldissum[index]:= false;
+  end;
   rsm_hidden: begin
    if folded then begin
     fgrid.rowhidden[index]:= false;
@@ -15347,6 +15341,9 @@ begin
   end;
   rsm_foldlevel: begin
    fgrid.rowfoldlevel[index]:= avalue;
+  end;
+  rsm_foldissum: begin
+   fgrid.rowfoldissum[index]:= avalue <> 0;
   end;
   rsm_hidden: begin
    if folded then begin

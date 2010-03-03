@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2009 by Martin Schreiber
+{ MSEgui Copyright (c) 2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -17,9 +17,11 @@ type
  tdbrxwidgetgrid = class;
 
  bindnamesty = array[rowstatememberty] of string;
+// rowstatebindingty = array[rowstatememberty] of integer;
   
  tifidbwidgetgridcontroller = class(tifiwidgetgridcontroller)
   private
+//   frowstatebinding: rowstatebindingty;
    fcolbinding: subdatainfoarty;
    fnames: bindnamesty;
   protected
@@ -37,6 +39,8 @@ type
                                            write fnames[rsm_readonly];
    property name_foldlevel: string read fnames[rsm_foldlevel] 
                                            write fnames[rsm_foldlevel];
+   property name_foldissum: string read fnames[rsm_foldissum] 
+                                           write fnames[rsm_foldissum];
    property name_hidden: string read fnames[rsm_hidden] 
                                            write fnames[rsm_hidden];
    property name_merged: string read fnames[rsm_merged]
@@ -48,6 +52,8 @@ type
   private
    function getifi1: tifidbwidgetgridcontroller;
    procedure setifi1(const avalue: tifidbwidgetgridcontroller);
+  protected
+   procedure rowstatechanged(const arow: integer); override;
   public
    constructor create(aowner: tcomponent); override;
   published
@@ -95,6 +101,7 @@ begin
      if decodefielddefs(pfdefdataty(adatapo),fielddefs1,int1) then begin
       inc(adatapo,int1);
       with tdbrxwidgetgrid(fowner) do begin
+//       fillchar(frowstatebinding,sizeof(frowstatebinding),0);
        fcolbinding:= nil;
        setlength(fcolbinding,fielddefs1.count);
        for int1:= 0 to high(fcolbinding) do begin
@@ -192,6 +199,23 @@ end;
 procedure tdbrxwidgetgrid.setifi1(const avalue: tifidbwidgetgridcontroller);
 begin
  setifi(avalue);
+end;
+
+procedure tdbrxwidgetgrid.rowstatechanged(const arow: integer);
+var
+ rsm1: rowstatememberty; 
+begin
+ with tifidbwidgetgridcontroller(fifi) do begin
+  if cancommandsend(igo_coldata) then begin
+   for rsm1:= low(rowstatememberty) to high(rowstatememberty) do begin
+    if fnames[rsm1] <> '' then begin
+     senditem(ik_coldatachange,[encodecolchangedata(fnames[rsm1],arow,
+                    fdatacols.rowstate,rsm1)]);
+    end;
+   end;
+  end;
+ end;
+ inherited;
 end;
 
 end.

@@ -574,10 +574,13 @@ type
   private
    procedure sethidden(const index: integer; const avalue: boolean);
    procedure setfoldlevel(const index: integer; const avalue: byte);
+   procedure setfoldissum(const index: integer; const avalue: boolean);
   public
    property hidden[const index: integer]: boolean read gethidden write sethidden;
    property foldlevel[const index: integer]: byte read getfoldlevel 
                                   write setfoldlevel;   //0..63
+   property foldissum[const index: integer]: boolean read getfoldissum 
+                                  write setfoldissum;
  end;
     
  tifidatacols = class(tindexpersistentarrayprop)
@@ -699,6 +702,8 @@ type
    procedure setrowhidden(const index: integer; const avalue: boolean);
    function getrowfoldlevel(const index: integer): byte;
    procedure setrowfoldlevel(const index: integer; const avalue: byte);
+   function getrowfoldissum(const index: integer): boolean;
+   procedure setrowfoldissum(const index: integer; const avalue: boolean);
   protected
    procedure setselected(const cell: gridcoordty; const avalue: boolean);
   public
@@ -723,6 +728,8 @@ type
                         write setrowhidden;
    property rowfoldlevel[const index: integer]: byte read getrowfoldlevel 
                         write setrowfoldlevel;
+   property rowfoldissum[const index: integer]: boolean read getrowfoldissum 
+                        write setrowfoldissum;
   published
    property ifi: ttxdatagridcontroller read fifi write setifi;
    property datacols: tifidatacols read fdatacols write setdatacols;
@@ -755,7 +762,10 @@ function encodegridcommanddata(const akind: gridcommandkindty;
 function decodegridcommanddata(const adata: pchar; out akind: gridcommandkindty;
                                out asource,adest,acount: integer): integer;
 function encodecolchangedata(const acolname: string; const arow: integer;
-                                     const alist: tdatalist): string;
+                                     const alist: tdatalist): string; overload;
+function encodecolchangedata(const acolname: string; const arow: integer;
+                            const alist: tcustomrowstatelist;
+                            const subindex: rowstatememberty): string; overload;
 function encoderowstatedata(const arow: integer; 
                                             const astate: rowstatety): string;
 function encoderowstatedata(const arow: integer; 
@@ -809,6 +819,55 @@ function encodecolchangedata(const acolname: string; const arow: integer;
                                      const alist: tdatalist): string;
 begin
  result:= encodeifidata(alist,arow,sizeof(colitemheaderty)+length(acolname));
+ if result <> '' then begin
+  with pcolitemdataty(result)^.header do begin
+   row:= arow;
+   stringtoifiname(acolname,@name);
+  end;
+ end;
+end;
+
+function encodecolchangedata(const acolname: string; const arow: integer;
+                            const alist: tcustomrowstatelist;
+                            const subindex: rowstatememberty): string;
+var
+ int1: integer;
+begin
+ result:= '';
+ int1:= sizeof(colitemheaderty)+length(acolname);
+ case subindex of
+  rsm_select: begin
+   result:= encodeifidata(alist.selected[arow],int1);
+  end;
+  rsm_color: begin
+   result:= encodeifidata(alist.color[arow],int1);
+  end;
+  rsm_font: begin
+   result:= encodeifidata(alist.font[arow],int1);
+  end;
+  rsm_readonly: begin
+   result:= encodeifidata(alist.readonly[arow],int1);
+  end;
+  rsm_foldlevel: begin
+   result:= encodeifidata(alist.foldlevel[arow],int1);
+  end;
+  rsm_foldissum: begin
+   result:= encodeifidata(alist.foldissum[arow],int1);
+  end;
+  rsm_hidden: begin
+   result:= encodeifidata(alist.foldissum[arow],int1);
+  end;
+  rsm_merged: begin
+   if alist.infolevel >= ril_colmerge then begin
+    result:= encodeifidata(alist.merged[arow],int1);
+   end;
+  end;
+  rsm_height: begin
+   if alist.infolevel >= ril_rowheight then begin
+    result:= encodeifidata(alist.height[arow],int1);
+   end;
+  end;
+ end;
  if result <> '' then begin
   with pcolitemdataty(result)^.header do begin
    row:= arow;
@@ -3085,6 +3144,17 @@ begin
  fdatacols.frowstate.foldlevel[index]:= avalue;
 end;
 
+function ttxdatagrid.getrowfoldissum(const index: integer): boolean;
+begin
+ result:= fdatacols.frowstate.foldissum[index];
+end;
+
+procedure ttxdatagrid.setrowfoldissum(const index: integer;
+               const avalue: boolean);
+begin
+ fdatacols.frowstate.foldissum[index]:= avalue;
+end;
+
 function ttxdatagrid.getrowhigh: integer;
 begin
  result:= frowcount - 1;
@@ -3784,6 +3854,12 @@ procedure tifirowstatelist.setfoldlevel(const index: integer;
                const avalue: byte);
 begin
  replacebits1(byte(getitempo(index)^.fold),byte(avalue),byte(foldlevelmask));
+end;
+
+procedure tifirowstatelist.setfoldissum(const index: integer;
+               const avalue: boolean);
+begin
+ updatebit(getitempo(index)^.flags,foldissumbit,avalue);
 end;
 
 end.
