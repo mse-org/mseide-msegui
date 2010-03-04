@@ -7487,14 +7487,14 @@ var
 begin
  if ftextflags <> avalue then begin
   avalue:= checktextflags(ftextflags,avalue);
-  mask:= {$ifdef FPC}longword{$else}word{$endif}(avalue) xor
-  {$ifdef FPC}longword{$else}word{$endif}(ftextflags);
+  mask:= {$ifdef FPC}longword{$else}longword{$endif}(avalue) xor
+  {$ifdef FPC}longword{$else}longword{$endif}(ftextflags);
   ftextflags:= avalue;
   if not (csloading in fgrid.componentstate) then begin
    for int1:= 0 to count - 1 do begin
     tstringcol(items[int1]).textflags:=
-         textflagsty(replacebits({$ifdef FPC}longword{$else}word{$endif}(avalue),
-         {$ifdef FPC}longword{$else}word{$endif}(tstringcol(items[int1]).textflags),mask));
+         textflagsty(replacebits({$ifdef FPC}longword{$else}longword{$endif}(avalue),
+         {$ifdef FPC}longword{$else}longword{$endif}(tstringcol(items[int1]).textflags),mask));
    end;
   end;
  end;
@@ -7507,14 +7507,16 @@ var
 begin
  if ftextflagsactive <> avalue then begin
   avalue:= checktextflags(ftextflagsactive,avalue);
-  mask:= {$ifdef FPC}longword{$else}word{$endif}(avalue) xor
-         {$ifdef FPC}longword{$else}word{$endif}(ftextflagsactive);
+  mask:= {$ifdef FPC}longword{$else}longword{$endif}(avalue) xor
+         {$ifdef FPC}longword{$else}longword{$endif}(ftextflagsactive);
   ftextflagsactive := avalue;
   if not (csloading in fgrid.componentstate) then begin
    for int1:= 0 to count - 1 do begin
     tstringcol(items[int1]).textflagsactive:=
-           textflagsty(replacebits({$ifdef FPC}longword{$else}word{$endif}(avalue),
-         {$ifdef FPC}longword{$else}word{$endif}(tstringcol(items[int1]).textflagsactive),mask));
+           textflagsty(replacebits(
+           {$ifdef FPC}longword{$else}longword{$endif}(avalue),
+           {$ifdef FPC}longword{$else}longword{$endif}
+                    (tstringcol(items[int1]).textflagsactive),mask));
    end;
   end;
  end;

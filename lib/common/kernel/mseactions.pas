@@ -1290,7 +1290,7 @@ var
  ar1: msestringarty;
  int1,int2: integer;
 begin
- ar1:= splitstring(avalue, ' ');
+ ar1:= splitstring(avalue, msechar(' '));
  with fstatinfos[index] do begin
   if high(ar1) >= 0 then begin
    name:= ar1[0];

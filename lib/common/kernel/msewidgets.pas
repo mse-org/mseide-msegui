@@ -2140,7 +2140,7 @@ begin
  fstate:= fstate - [fs_cancaptionsyncx,fs_cancaptionsyncy];
  if (finfo.text.text <> '') {and 
              twidget1(icaptionframe(fintf).getwidget).isvisible} then begin
-  updatebit({$ifdef FPC}longword{$else}word{$endif}(finfo.flags),
+  updatebit({$ifdef FPC}longword{$else}longword{$endif}(finfo.flags),
                                       ord(tf_grayed),fs_disabled in fstate);
   canvas:= icaptionframe(fintf).getcanvas;
   canvas.font:= getfont;
@@ -2554,7 +2554,7 @@ var
 begin
  inherited;
  flags1:= finfo.flags;
- updatebit({$ifdef FPC}longword{$else}word{$endif}(finfo.flags),
+ updatebit({$ifdef FPC}longword{$else}longword{$endif}(finfo.flags),
                  ord(tf_grayed),value);
  if finfo.flags <> flags1 then begin
   fintf.invalidatewidget;

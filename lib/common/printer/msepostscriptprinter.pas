@@ -1364,16 +1364,16 @@ begin
   pt1:= dest.pos;
   if tf_rot90 in flags then begin
    if tf_rot180 in flags then begin
-    rea1:= double(pi)*3/2;
+    rea1:= pi*3.0/2.0;
     pt1.x:= pt1.x+dest.cx;
    end
    else begin
-    rea1:= double(pi)/2;
+    rea1:= pi/2.0;
     pt1.y:= pt1.y+dest.cy;
    end;
   end
   else begin
-   rea1:= double(pi);
+   rea1:= pi;
    pt1.x:= pt1.x+dest.cx;
    pt1.y:= pt1.y+dest.cy;
   end;
@@ -1468,8 +1468,8 @@ begin
    ' 1 index '+       //llx,lly,urx
    psrealtostr(foriginy-(rect1.y)*fgcscale)+' '; //llx,lly,urx,ury
  end;
- int1:= {$ifdef FPC}longword{$else}word{$endif}(flags*mask1) or 
-        ({$ifdef FPC}longword{$else}word{$endif}(flags*mask2) shr 1); 
+ int1:= {$ifdef FPC}longword{$else}longword{$endif}(flags*mask1) or
+        ({$ifdef FPC}longword{$else}longword{$endif}(flags*mask2) shr 1); 
         //remove tf_xjustify
  str1:= str1+alignmentsubs[tftopa[int1]];
 {

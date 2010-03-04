@@ -1,6 +1,7 @@
 object sourcepage: tsourcepage
   optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
   optionsskin = [osk_framebuttononly]
+  color = -1879048187
   bounds_x = 192
   bounds_y = 245
   bounds_cx = 311
@@ -11,19 +12,14 @@ object sourcepage: tsourcepage
     0
     0
     311
-    228
-  )
+    228)
   icon.transparentcolor = -2147483648
   oncreate = sourcefooncreate
   oneventloopstart = sourcefoonloaded
   ondestroy = sourcefoondestroy
   onshow = sourcefoonshow
   onhide = sourcefoondeactivate
-  coloractivetab = 15132390
-  fontactivetab.shadow_color = -1610612733
-  fontactivetab.gloss_color = -1610612730
-  fontactivetab.xscale =  1.0000000000000000E+0000
-  fontactivetab.dummy = 0
+  coloractivetab = 15461355
   moduleclassname = 'ttabform'
   object grid: twidgetgrid
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
@@ -40,10 +36,9 @@ object sourcepage: tsourcepage
       14745599
       65535
       16711680
-      -2147483646
-    )
+      -2147483646)
     datacols.count = 2
-    datacols.items = <    
+    datacols.items = <
       item
         linecolor = -1610612732
         width = 15
@@ -51,7 +46,7 @@ object sourcepage: tsourcepage
         oncellevent = icononcellevent
         widgetname = 'dataicon'
         dataclass = tgridintegerdatalist
-      end    
+      end
       item
         width = 2000
         options = [co_leftbuttonfocusonly, co_savestate, co_rowcolor, co_mousescrollrow]
@@ -64,7 +59,7 @@ object sourcepage: tsourcepage
     onrowsinserted = gridonrowsinserted
     onrowsdeleted = gridonrowsdeleted
     oncellevent = gridoncellevent
-    reffontheight = 14
+    reffontheight = 13
     object dataicon: tdataicon
       optionsskin = [osk_framebuttononly]
       taborder = 3
@@ -93,8 +88,7 @@ object sourcepage: tsourcepage
         10
         11
         12
-        13
-      )
+        13)
     end
     object edit: tsyntaxedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontlineheight]
@@ -106,20 +100,19 @@ object sourcepage: tsourcepage
       bounds_cx = 2000
       bounds_cy = 16
       font.name = 'mseide_source'
-      font.xscale =  1.0000000000000000E+0000
+      font.xscale = 1.000000000000000000
       font.dummy = 0
       optionsedit = [oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_linebreak, oe_eatreturn, oe_keyexecute, oe_savestate]
       encoding = ce_locale
       onkeydown = editonkeydown
-      tabulators.ppmm =  3.0000000000000000E+0000
-      tabulators.defaultdist =  0.0000000000000000E+0000
+      tabulators.ppmm = 3.000000000000000000
       onfontchanged = editonfontchanged
       onmodifiedchanged = editonmodifiedchanged
       ontextmouseevent = editontextmouseevent
       oneditnotifcation = editoneditnotification
       oncellevent = editoncellevent
       maxundocount = 10000
-      reffontheight = 19
+      reffontheight = 18
     end
   end
   object linedisp: tstringdisp
@@ -128,12 +121,12 @@ object sourcepage: tsourcepage
     frame.dummy = 0
     taborder = 2
     bounds_x = 0
-    bounds_y = 209
+    bounds_y = 210
     bounds_cx = 68
-    bounds_cy = 18
+    bounds_cy = 17
     anchors = [an_left, an_bottom]
     textflags = [tf_xcentered, tf_ycentered]
-    reffontheight = 14
+    reffontheight = 13
   end
   object pathdisp: tstringdisp
     optionsskin = [osk_framebuttononly]
@@ -141,12 +134,12 @@ object sourcepage: tsourcepage
     frame.dummy = 0
     taborder = 1
     bounds_x = 68
-    bounds_y = 209
+    bounds_y = 210
     bounds_cx = 243
-    bounds_cy = 18
+    bounds_cy = 17
     anchors = [an_left, an_right, an_bottom]
     textflags = [tf_ycentered, tf_ellipseleft]
     options = [dwo_hintclippedtext]
-    reffontheight = 14
+    reffontheight = 13
   end
 end

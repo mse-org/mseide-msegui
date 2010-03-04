@@ -200,15 +200,15 @@ const
  ymask: textflagsty = [tf_ycentered,tf_bottom];
 begin
  result:= new;
- result:= textflagsty(setsinglebit({$ifdef FPC}longword{$else}word{$endif}(result),
-              {$ifdef FPC}longword{$else}word{$endif}(old),
-              {$ifdef FPC}longword{$else}word{$endif}(ymask)));
- result:= textflagsty(setsinglebit({$ifdef FPC}longword{$else}word{$endif}(result),
-              {$ifdef FPC}longword{$else}word{$endif}(old),
-              {$ifdef FPC}longword{$else}word{$endif}(xmask)));
- result:= textflagsty(setsinglebit({$ifdef FPC}longword{$else}word{$endif}(result),
-              {$ifdef FPC}longword{$else}word{$endif}(old),
-              {$ifdef FPC}longword{$else}word{$endif}(ellipsemask)));
+ result:= textflagsty(setsinglebit({$ifdef FPC}longword{$else}longword{$endif}(result),
+              {$ifdef FPC}longword{$else}longword{$endif}(old),
+              {$ifdef FPC}longword{$else}longword{$endif}(ymask)));
+ result:= textflagsty(setsinglebit({$ifdef FPC}longword{$else}longword{$endif}(result),
+              {$ifdef FPC}longword{$else}longword{$endif}(old),
+              {$ifdef FPC}longword{$else}longword{$endif}(xmask)));
+ result:= textflagsty(setsinglebit({$ifdef FPC}longword{$else}longword{$endif}(result),
+              {$ifdef FPC}longword{$else}longword{$endif}(old),
+              {$ifdef FPC}longword{$else}longword{$endif}(ellipsemask)));
 // if tf_default in result then begin
 //  result:= [tf_default];
 // end;
