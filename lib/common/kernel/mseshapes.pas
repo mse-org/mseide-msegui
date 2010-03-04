@@ -347,7 +347,7 @@ begin
      ek_clientmouseleave,ek_mouseleave: begin
       if (eventkind = ek_mouseleave) or not (shs_widgetorg in state) then begin
        state:= state - [shs_mouse,shs_clicked];
-       updateshapemoveclick(infoarpo,false);
+//       updateshapemoveclick(infoarpo,false);
       end;
      end;
      ek_mousemove,ek_mousepark: begin
@@ -414,7 +414,7 @@ begin
       (not(shs_disabled in state) or 
              (widget <> nil) and (csdesigning in widget.componentstate)) 
              and pointinrect(pos,ca.dim) then begin
-       state:= state + [shs_clicked];
+       state:= state + [shs_clicked,shs_moveclick];
        updateshapemoveclick(infoarpo,true);
       end;
      end;
