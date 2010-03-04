@@ -953,13 +953,14 @@ var
  acolorshadow: colorty;
  tab1: tcustomtabulators;
  ar1: richstringarty;
- int1,int2,int3,int4,int5: integer;
+ int1,int2,int3,int4,int5,int6: integer;
  rea1: real;
  flags1,flags2: textflagsty;
  rstr1: richstringty;
  layoutinfo: layoutinfoty;
  rect1,rect2: rectty;
  backup: msestring;
+ lihi: integer;
 label
  endlab;
 begin
@@ -1007,13 +1008,44 @@ begin
      rect1:= dest;
      flags1:= flags;
      flags2:= flags1 - [tf_xcentered,tf_right,tf_xjustify];
-     rect1.cy:= font.lineheight;
-     if tf_ycentered in flags then begin
-      rect1.y:= dest.y + (dest.cy - length(lineinfos) * rect1.cy) div 2;
+     lihi:= font.lineheight;
+     int1:= 0;
+//     int2:= lihi;
+     if reversed then begin
+      lihi:= - lihi;
+      int1:= lihi;
+//      int2:= 0;
+     end;
+     if xyswapped then begin
+      rect1.cx:= font.lineheight;
+      if tf_ycentered in flags then begin
+       rect1.x:= dest.x + (dest.cx - length(lineinfos) * lihi) div 2 + int1;
+      end
+      else begin
+       if tf_bottom in flags then begin
+        if reversed then begin
+         rect1.x:= dest.x - high(lineinfos) * lihi;
+        end
+        else begin
+         rect1.x:= dest.x + dest.cx - length(lineinfos) * lihi;
+        end;
+       end;
+      end;
      end
      else begin
-      if tf_bottom in flags then begin
-       rect1.y:= dest.cy - length(lineinfos) * rect1.cy;
+      rect1.cy:= font.lineheight;
+      if tf_ycentered in flags then begin
+       rect1.y:= dest.y + (dest.cy - length(lineinfos) * lihi) div 2 + int1;
+      end
+      else begin
+       if tf_bottom in flags then begin
+        if reversed then begin
+         rect1.y:= dest.y - high(lineinfos) * lihi;
+        end
+        else begin
+         rect1.y:= dest.y + dest.cy - length(lineinfos) * lihi;
+        end;
+       end;
       end;
      end;
      for int1:= 0 to high(lineinfos) do begin
@@ -1025,8 +1057,14 @@ begin
         rea1:= (dest.cx - liwidth + getstringwidth(' ') * length(justifychars)) /
                          length(justifychars); //gap width
         rect2:= rect1;        //x justify text
-        rect2.cx:= 0;                                    
-        int3:= dest.x;
+        if xyswapped then begin
+         rect2.cy:= 0;                                    
+         int3:= dest.y;
+        end
+        else begin
+         rect2.cx:= 0;                                    
+         int3:= dest.x;
+        end;
         for int2:= liindex - 1 to justifychars[0] - 2 do begin
          inc(int3,charwidths[int2]);            //end of first word
         end;
@@ -1035,7 +1073,13 @@ begin
          for int4:= justifychars[int2] to justifychars[int2+1] - 2 do begin
           inc(int5,charwidths[int4]); //width of actual word
          end;
-         rect2.x:= round(int3 + (int2 + 1) * rea1 + int5 div 2);
+         int6:= round(int3 + (int2 + 1) * rea1 + int5 div 2);
+         if xyswapped then begin
+          rect2.y:= int6;
+         end
+         else begin
+          rect2.x:= int6;
+         end;
          int3:= int3 + int5;
          rstr1:= richcopy(text,justifychars[int2]+1,justifychars[int2+1] - 
                                                          justifychars[int2] - 1);
@@ -1049,7 +1093,12 @@ begin
         rstr1:= richcopy(text,liindex,licount);
         dotextout(rstr1,rect1,flags1,0,acolorshadow);
        end;
-       inc(rect1.y,rect1.cy);
+       if xyswapped then begin
+        inc(rect1.x,lihi);
+       end
+       else begin
+        inc(rect1.y,lihi);
+       end;
       end;
      end;
     end
@@ -1090,7 +1139,8 @@ begin
           rstr1:= richconcat(rstr1,' ');
           rstr1:= richconcat(rstr1,ar1[int2]);
          end;
-         dotextout(rstr1,dest,flags-[tf_right,tf_xcentered],-1,acolorshadow); //print rest of string
+         dotextout(rstr1,dest,flags-[tf_right,tf_xcentered],-1,acolorshadow); 
+                        //print rest of string
          break;
         end;
         flags1:= flags - [tf_xcentered,tf_right];
@@ -1102,7 +1152,8 @@ begin
          if kind = tak_decimal then begin
           int2:= msestrrscan(ar1[int1].text,widechar(decimalseparator));
           if int2 > 0 then begin
-           dotextout(richcopy(ar1[int1],1,int2-1),makerect(round(pos*ppmm),dest.y,0,
+           dotextout(richcopy(ar1[int1],1,int2-1),
+                   makerect(round(pos*ppmm),dest.y,0,
                      dest.cy),flags1,0,acolorshadow); //int
            dotextout(richcopy(ar1[int1],int2,bigint),makerect(0,dest.y,0,
                      dest.cy),flags1-[tf_right],-1,acolorshadow); //frac

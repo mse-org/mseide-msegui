@@ -188,6 +188,16 @@ type
  end;
  
 function psrealtostr(const avalue: real): string;
+procedure pstranslate(var mat: psmatrixty; const dist: pspointty);
+procedure psretranslate(var mat: psmatrixty; const dist: pspointty);
+procedure psrotate(var mat: psmatrixty; const angle: real); //radiant
+function pstransform(const mat: psmatrixty;
+              const apoint: pspointty): pspointty; overload;
+function pstransform(const mat: psmatrixty;
+              const apoint: pointty): pspointty; overload;
+function psdist(const source,dest: pspointty): pspointty; overload;
+//function psdist(const source,dest: pointty): pspointty; overload;
+function pspoint(const apoint: pointty): pspointty;
  
 implementation
 uses
@@ -199,6 +209,69 @@ type
 var
  gdifuncs: pgdifunctionaty;
  
+procedure pstranslate(var mat: psmatrixty; const dist: pspointty);
+begin
+ mat[2,0]:= mat[2,0] + dist.x;
+ mat[2,1]:= mat[2,1] + dist.y;
+end;
+
+procedure psretranslate(var mat: psmatrixty; const dist: pspointty);
+begin
+ mat[2,0]:= mat[2,0] - dist.x;
+ mat[2,1]:= mat[2,1] - dist.y;
+end;
+
+procedure psrotate(var mat: psmatrixty; const angle: real); //radiant
+var
+ si,co: real;
+ m00,m01,m10,m11,m20,m21: real;
+begin
+ si:= sin(angle);
+ co:= cos(angle);
+ m00:= mat[0,0]*co+mat[0,1]*-si;
+ m01:= mat[0,0]*si+mat[0,1]*co;
+ m10:= mat[1,0]*co+mat[1,1]*-si;
+ m11:= mat[1,0]*si+mat[1,1]*co;
+ m20:= mat[2,0]*co+mat[2,1]*-si;
+ m21:= mat[2,0]*si+mat[2,1]*co;
+ mat[0,0]:= m00;
+ mat[0,1]:= m01;
+ mat[1,0]:= m10;
+ mat[1,1]:= m11;
+ mat[2,0]:= m20;
+ mat[2,1]:= m21;
+end;
+
+function pstransform(const mat: psmatrixty; const apoint: pspointty): pspointty;
+begin
+ result.x:= mat[0,0]*apoint.x + mat[1,0]*apoint.y + mat[2,0];
+ result.y:= mat[0,1]*apoint.x + mat[1,1]*apoint.y + mat[2,1];
+end;
+
+function pstransform(const mat: psmatrixty; const apoint: pointty): pspointty;
+begin
+ result.x:= mat[0,0]*apoint.x + mat[1,0]*apoint.y + mat[2,0];
+ result.y:= mat[0,1]*apoint.x + mat[1,1]*apoint.y + mat[2,1];
+end;
+
+function psdist(const source,dest: pspointty): pspointty;
+begin
+ result.x:= dest.x - source.x;
+ result.y:= dest.y - source.y;
+end;
+{
+function psdist(const source,dest: pointty): pspointty;
+begin
+ result.x:= dest.x - source.x;
+ result.y:= dest.y - source.y;
+end;
+}
+function pspoint(const apoint: pointty): pspointty;
+begin
+ result.x:= apoint.x;
+ result.y:= apoint.y;
+end;
+
 const
  pageorientations: array[pageorientationty] of string = ('Portrait','Landscape');
  
@@ -1075,69 +1148,6 @@ begin
  result:= '['+psrealtostr(mat[0,0])+' '+psrealtostr(mat[0,1])+' '+
               psrealtostr(mat[1,0])+' '+psrealtostr(mat[1,1])+' '+
               psrealtostr(mat[2,0])+' '+psrealtostr(mat[2,1])+']';
-end;
-
-procedure pstranslate(var mat: psmatrixty; const dist: pspointty);
-begin
- mat[2,0]:= mat[2,0] + dist.x;
- mat[2,1]:= mat[2,1] + dist.y;
-end;
-
-procedure psretranslate(var mat: psmatrixty; const dist: pspointty);
-begin
- mat[2,0]:= mat[2,0] - dist.x;
- mat[2,1]:= mat[2,1] - dist.y;
-end;
-
-procedure psrotate(var mat: psmatrixty; const angle: real); //radiant
-var
- si,co: real;
- m00,m01,m10,m11,m20,m21: real;
-begin
- si:= sin(angle);
- co:= cos(angle);
- m00:= mat[0,0]*co+mat[0,1]*-si;
- m01:= mat[0,0]*si+mat[0,1]*co;
- m10:= mat[1,0]*co+mat[1,1]*-si;
- m11:= mat[1,0]*si+mat[1,1]*co;
- m20:= mat[2,0]*co+mat[2,1]*-si;
- m21:= mat[2,0]*si+mat[2,1]*co;
- mat[0,0]:= m00;
- mat[0,1]:= m01;
- mat[1,0]:= m10;
- mat[1,1]:= m11;
- mat[2,0]:= m20;
- mat[2,1]:= m21;
-end;
-
-function pstransform(const mat: psmatrixty; const apoint: pspointty): pspointty;
-begin
- result.x:= mat[0,0]*apoint.x + mat[1,0]*apoint.y + mat[2,0];
- result.y:= mat[0,1]*apoint.x + mat[1,1]*apoint.y + mat[2,1];
-end;
-
-function pstransform(const mat: psmatrixty; const apoint: pointty): pspointty;
-begin
- result.x:= mat[0,0]*apoint.x + mat[1,0]*apoint.y + mat[2,0];
- result.y:= mat[0,1]*apoint.x + mat[1,1]*apoint.y + mat[2,1];
-end;
-
-function psdist(const source,dest: pspointty): pspointty;
-begin
- result.x:= dest.x - source.x;
- result.y:= dest.y - source.y;
-end;
-
-function psdist(const source,dest: pointty): pspointty;
-begin
- result.x:= dest.x - source.x;
- result.y:= dest.y - source.y;
-end;
-
-function pspoint(const apoint: pointty): pspointty;
-begin
- result.x:= apoint.x;
- result.y:= apoint.y;
 end;
 
 function tpostscriptcanvas.transrotate(const sourcecenter,destcenter: pointty;
