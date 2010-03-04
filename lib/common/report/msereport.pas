@@ -2546,7 +2546,7 @@ end;
 procedure treptabulators.processvalues(const acanvas: tcanvas;
                const adest: rectty; const apaint: boolean);
 var
- bo1: boolean;
+ saved: boolean;
  bandcx: integer;
  visiblemask: linevisiblesty;
  
@@ -2555,8 +2555,8 @@ var
   rect1: rectty;
   reppage1: tcustomreportpage;
  begin
-  if not bo1 then begin
-   bo1:= true;
+  if not saved then begin
+   saved:= true;
    acanvas.save;
    acanvas.move(makepoint(adest.x,0));
    acanvas.addcliprect(inflaterect(makerect(nullpoint,fband.size),1000));
@@ -2648,7 +2648,7 @@ var
  
 var
  int1,int2,int3,int4: integer;
- bo2: boolean;
+ moved: boolean;
  rstr1: richstringty;
  rect1: rectty;
  isdecimal: boolean;
@@ -2657,7 +2657,8 @@ var
 begin
  fminsize:= nullsize;
  bandcx:= adest.cx;
- bo1:= false;
+ saved:= false;
+ moved:= false;
  if apaint then begin  
   with fband do begin
    cellrect:= adest;
@@ -2839,9 +2840,9 @@ begin
    end;
   end;
  end;
- bo2:= bo1;
- acanvas.remove(makepoint(adest.x,0));
  if apaint then begin
+  moved:= not saved;
+  acanvas.remove(makepoint(adest.x,0));
   bandcx:= fband.clientwidth;
   with flileft do begin
    if widthmm > 0 then begin
@@ -2883,11 +2884,11 @@ begin
    end;
   end;
  end;
- if bo1 then begin
+ if saved then begin
   acanvas.restore;
-  if not bo2 then begin
-   acanvas.move(makepoint(adest.x,0));
-  end;
+ end;
+ if moved then begin
+  acanvas.move(makepoint(adest.x,0));
  end;
  fsizevalid:= true;
 end;

@@ -3966,11 +3966,35 @@ end;
 
 procedure tcanvas.fillrect(const arect: rectty; const acolor: colorty = cl_default;
                            const linecolor: colorty = cl_none);
+var
+ rect1: rectty;
 begin
  if cs_inactive in fstate then exit;
  if checkforeground(acolor,false) then begin
   with fdrawinfo.rect do begin
    rect:= @arect;
+   if (arect.cx < 0) then begin
+    rect:= @rect1;
+    rect1.x:= arect.x + arect.cx + 1;
+    rect1.cx:= -arect.cx;
+    if arect.cy < 0 then begin
+     rect1.y:= arect.y + arect.cy + 1;
+     rect1.cy:= -arect.cy;
+    end
+    else begin
+     rect1.y:= arect.y;
+     rect1.cy:= arect.cy;
+    end;
+   end
+   else begin
+    if arect.cy < 0 then begin
+     rect:= @rect1;
+     rect1.y:= arect.y + arect.cy + 1;
+     rect1.cy:= -arect.cy;
+     rect1.x:= arect.x;
+     rect1.cx:= arect.cx;
+    end;
+   end;
   end;
   gdi(gdi_fillrect);
  end;
@@ -4886,11 +4910,13 @@ end;
 
 procedure tcanvas.move(const dist: pointty);
 begin
- with fvaluepo^ do begin
-  inc(origin.x,dist.x);
-  inc(origin.y,dist.y);
+ if (dist.x <> 0) or (dist.y <> 0) then begin
+  with fvaluepo^ do begin
+   inc(origin.x,dist.x);
+   inc(origin.y,dist.y);
+  end;
+  valuechanged(cs_origin);
  end;
- valuechanged(cs_origin);
 end;
 
 procedure tcanvas.remove(const dist: pointty);

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -500,6 +500,7 @@ function deflaterect(const rect: rectty; const frame: framety): rectty;
 procedure deflaterect1(var rect: rectty; const frame: framety);
 procedure normalizerect1(var arect: rectty);
 function normalizerect(const arect: rectty): rectty;
+procedure swapxy1(var arect: rectty);
 
 function addframe(const a,b: framety): framety;
 procedure addframe1(var dest: framety; const frame: framety);
@@ -1016,6 +1017,20 @@ function normalizerect(const arect: rectty): rectty;
 begin
  result:= arect;
  normalizerect1(result);
+end;
+
+procedure swapxy1(var arect: rectty);
+var
+ int1: integer;
+begin
+ with arect do begin
+  int1:= x;
+  x:= y;
+  y:= int1;
+  int1:= cx;
+  cx:= cy;
+  cy:= int1;
+ end;
 end;
 
 function addframe(const a,b: framety): framety;

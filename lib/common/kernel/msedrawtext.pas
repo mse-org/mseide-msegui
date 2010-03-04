@@ -24,6 +24,7 @@ const
 
 type
  textflagty = (tf_xcentered,tf_right,tf_xjustify,tf_ycentered,tf_bottom, 
+               tf_rot90,tf_rot180,
                  //order fix, used in msepostscriptprinter
 //               tf_forcealignment, //do not use default alignment for buttons
                tf_clipi,tf_clipo,
@@ -121,6 +122,7 @@ type
 
  lineinfoty = record
   liindex,licount: integer;
+  liy: integer;
   listartx: integer;
   liwidth: integer;
   tabchars,justifychars: integerarty;
@@ -135,6 +137,8 @@ type
   underline,strikeout: integer;
   starty: integer;
   height: integer;
+  xyswapped: boolean;
+  reversed: boolean;
  end;
  
 function checktextflags(old,new: textflagsty): textflagsty;
@@ -370,6 +374,7 @@ var
 
 var
  spacewidth: integer;
+ y1,orig1: integer;
    
 begin
  tabs:= nil; //compiler warning
@@ -379,7 +384,9 @@ begin
  try
   gdi_lock;
   with info,tcanvas1(canvas),layoutinfo do begin
-   
+   if tf_rot90 in flags then begin
+    swapxy1(dest);  
+   end;  
    checkgcstate([cs_gc]);
    highresfo:= df_highresfont in fdrawinfo.gc.drawingflags;
    canvas.initdrawinfo(drawinfo);
@@ -575,12 +582,15 @@ begin
      res.y:= res.y + info.dest.cy - height;
     end;
    end;
-   starty:= res.y + ascent; //layoutinfo
+   y1:= res.y + ascent; //layoutinfo
+   starty:= y1;
    res.x:= bigint;
    res.cy:= height;
    res.cx:= 0;
    for int3:= 0 to high(lineinfos) do begin
     with layoutinfo.lineinfos[int3] do begin
+     liy:= y1;
+     y1:= y1 + lineheight;     
      listartx:= info.dest.x;
      if tf_xcentered in flags then begin
       listartx:= listartx + (info.dest.cx - liwidth) div 2;
@@ -641,6 +651,51 @@ begin
       res.x:= dest.x;
       res.cx:= dest.cx;
      end;
+    end;
+   end;
+   underline:= descent div 2 + 1;
+   if underline = 0 then begin
+    underline:= 1;
+   end;
+   if underline >= descent then begin
+    underline:= descent - 1;
+   end;
+   strikeout:= - (ascent div 3);
+   xyswapped:= false;
+   reversed:= false;
+   if flags * [tf_rot90,tf_rot180] <> [] then begin
+    if (tf_rot90 in flags) xor (tf_rot180 in flags) then begin //mirror x
+     orig1:= dest.x + dest.x + dest.cx;
+     res.x:= orig1 - res.x - res.cx;
+     for int1:= 0 to high(lineinfos) do begin
+      with lineinfos[int1] do begin
+       listartx:= orig1-listartx;
+      end;
+     end;
+     for int1:= int1 to high(charwidths) do begin
+      charwidths[int1]:= - charwidths[int1];
+     end;
+    end;
+    reversed:= (tf_rot180 in flags);
+    if reversed then begin //mirror y
+     ascent:= -ascent;
+     descent:= -descent;
+     lineheight:= -lineheight;
+     underline:= -underline;
+     strikeout:= -strikeout;
+     orig1:= dest.y + dest.y + dest.cy;
+     res.y:= orig1 - res.y - res.cy;
+     starty:= orig1 - starty;
+     for int1:= 0 to high(lineinfos) do begin
+      with lineinfos[int1] do begin
+       liy:= orig1-liy;
+      end;
+     end;
+    end;
+    xyswapped:= tf_rot90 in flags;
+    if xyswapped then begin
+     swapxy1(dest);  
+     swapxy1(res);  
     end;
    end;
   end;
@@ -803,6 +858,7 @@ var
  formatactive: boolean;
  endindex: integer;
  ellipsewidthsum: integer;
+ rot: real;
 
  procedure drawsubstring(const row,astart,acount: integer);
  var
@@ -811,12 +867,18 @@ var
   x: integer;
  begin
   if acount > 0 then begin
-   x:= pos.x;
+   if layoutinfo.xyswapped then begin
+    x:= pos.y;
+   end
+   else begin
+    x:= pos.x;
+   end;
    xbefore:= x;
+   
    with info,canvas,layoutinfo,lineinfos[row] do begin
     if {(tabulators = nil) or}
              (tabchars = nil) then begin
-     drawstring(@text.text[astart],acount,pos,nil,grayed);
+     drawstring(@text.text[astart],acount,pos,nil,grayed,rot);
      for int2:= astart - 1 to astart + acount - 2 do begin
       inc(x,charwidths[int2]);
      end;
@@ -831,11 +893,22 @@ var
        end;
        if font.colorbackground <> cl_transparent then begin
         int3:= charwidths[tabchars[int4] - 1];
-        fillrect(makerect(x - int3,pos.y-font.ascent,int3,
+        if xyswapped then begin
+         fillrect(makerect(pos.x-font.ascent,x - int3,
+                      font.ascent+font.descent,int3),font.colorbackground);
+        end
+        else begin
+         fillrect(makerect(x - int3,pos.y-font.ascent,int3,
                       font.ascent+font.descent),font.colorbackground);
+        end;
        end;
        int2:= tabchars[int4];
-       pos.x:= x;
+       if xyswapped then begin
+        pos.y:= x;
+       end
+       else begin
+        pos.x:= x;
+       end;       
       end;
      end;
      int3:= acount - int2 + astart - 1;
@@ -846,15 +919,32 @@ var
     end;
     if not grayed then begin
      if fs_underline in canvas.font.style then begin
-      drawline(makepoint(xbefore,pos.y+underline),
+      if xyswapped then begin
+       drawline(makepoint(pos.x+underline,xbefore),
+                makepoint(pos.x+underline,x-1),font.color);
+      end
+      else begin
+       drawline(makepoint(xbefore,pos.y+underline),
                 makepoint(x-1,pos.y+underline),font.color);
+      end;
      end;
      if fs_strikeout in font.style then begin
-      drawline(makepoint(xbefore,pos.y+layoutinfo.strikeout),
-                makepoint(x-1,pos.y+layoutinfo.strikeout),font.color);
+      if xyswapped then begin
+       drawline(makepoint(pos.x+layoutinfo.strikeout,xbefore),
+                 makepoint(pos.x+layoutinfo.strikeout,x-1),font.color);
+      end
+      else begin
+       drawline(makepoint(xbefore,pos.y+layoutinfo.strikeout),
+                 makepoint(x-1,pos.y+layoutinfo.strikeout),font.color);
+      end;
      end;
     end;
-    pos.x:= x;
+    if layoutinfo.xyswapped then begin
+     pos.y:= x;
+    end
+    else begin
+     pos.x:= x;
+    end;
    end;
   end;
  end;
@@ -931,6 +1021,22 @@ label
 
 begin                  //drawtext
  with info,tcanvas1(canvas) do begin
+  if tf_rot90 in flags then begin
+   if tf_rot180 in flags then begin
+    rot:= 1.5*pi;
+   end
+   else begin
+    rot:= 0.5*pi;
+   end;
+  end
+  else begin
+   if tf_rot180 in flags then begin
+    rot:= pi;
+   end
+   else begin
+    rot:= 0;
+   end;
+  end;
   if tf_tabtospace in flags then begin
    textbackup:= text.text; //backup
    replacechar1(text.text,msechar(c_tab),msechar(' '));
@@ -958,6 +1064,7 @@ begin                  //drawtext
    afontstyle:= fontstylebefore;
    overridefontstyle:= afontstyle * [fs_bold,fs_italic,fs_underline];
    grayed:= tf_grayed in flags;
+{
    with layoutinfo do begin
     underline:= descent div 2 + 1;
     if underline = 0 then begin
@@ -968,7 +1075,8 @@ begin                  //drawtext
     end;
     strikeout:= - (ascent div 3);
    end;
-   pos.y:= layoutinfo.starty;
+}
+//   pos.y:= layoutinfo.starty;
    if info.text.format <> nil then begin
     infoindexbefore:= -1;
     int1:= 0; //format index
@@ -976,7 +1084,14 @@ begin                  //drawtext
     lastover:= false;
     while row <= high(layoutinfo.lineinfos) do begin
      with layoutinfo.lineinfos[row] do begin
-      pos.x:= listartx;
+      if layoutinfo.xyswapped then begin
+       pos.x:= liy;
+       pos.y:= listartx;
+      end
+      else begin
+       pos.y:= liy;
+       pos.x:= listartx;
+      end;
       charindexbefore:= liindex-1;
       endindex:= charindexbefore + licount;
      end;
@@ -1013,17 +1128,24 @@ begin                  //drawtext
       inc(int1);
      end;
      inc(row);
-     inc(pos.y,layoutinfo.lineheight);
+//     inc(pos.y,layoutinfo.lineheight);
     end;
     font.color:= defaultcolor;
     font.colorbackground:= defaultcolorbackground;
     font.style:= fontstylebefore;
    end
    else begin
-    pos.x:= layoutinfo.lineinfos[0].listartx;
+//    pos.x:= layoutinfo.lineinfos[0].listartx;
     for row:= 0 to high(layoutinfo.lineinfos) do begin
      with layoutinfo.lineinfos[row] do begin
-      pos.x:= listartx;
+      if layoutinfo.xyswapped then begin
+       pos.x:= liy;
+       pos.y:= listartx;
+      end
+      else begin
+       pos.y:= liy;
+       pos.x:= listartx;
+      end;
       if (liwidth > dest.cx) and (flags * ellipsemask <> []) then begin
        ellipsewidth:= getstringwidth(textellipse);
        ellipsewidthsum:= liwidth + ellipsewidth;

@@ -5486,7 +5486,8 @@ begin
                    //unreliable!?
       xvalues.foreground:= xftcolorbackground.pixel;
       xchangegc(appdisp,tgc(gc.handle),gcforeground,@xvalues);
-      xfillrectangle(appdisp,paintdevice,tgc(gc.handle),x{-glyphinfo.x},y-xftfont^.ascent,
+      xfillrectangle(appdisp,paintdevice,tgc(gc.handle),
+                                        x{-glyphinfo.x},y-xftfont^.ascent,
               glyphinfo.xoff,xftfont^.ascent+xftfont^.descent);
       xvalues.foreground:= xftcolor.pixel;
       xchangegc(appdisp,tgc(gc.handle),gcforeground,@xvalues);

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -21,7 +21,18 @@ const
  defaultimagecachemaxitemsize = 100000;
 
 type
-  
+ pspointty = record
+              x: real;
+              y: real;
+             end;
+ psmatrixty = array [0..2] of array [0..1] of real;
+
+const
+ psunitymatrix: psmatrixty = ((1,0),  //1 0 0
+                              (0,1),  //0 1 0
+                              (0,0)); //0 0 1
+
+type                 
  tpostscriptcanvas = class;
 
  tpostscriptprinter = class(tstreamprinter,icanvas)
@@ -157,7 +168,11 @@ type
   public
    constructor create(const user: tprinter; const intf: icanvas);
 
+   function devpos(const apos: pointty): pspointty;
    function posstring(const apos: pointty): string;  
+   function matrixstring(const mat: psmatrixty): string;
+   function transrotate(const sourcecenter,destcenter: pointty;
+                                                const angle: real): string;  
    function diststring(const adist: integer): string;
    function rectsizestring(const asize: sizety): string;
    function sizestring(const asize: sizety): string;
@@ -1038,14 +1053,103 @@ begin
   psrealtostr(fgcoffsety-apos.y*fgcscale);
 end;
 
-function tpostscriptcanvas.posstring(const apos: pointty): string;
+function tpostscriptcanvas.devpos(const apos: pointty): pspointty;
 begin
  if not (cs_origin in fstate) then begin
   checkgcstate([cs_origin]);
  end;
- result:= 
-  psrealtostr(apos.x*fgcscale+foriginx)+' '+
-  psrealtostr(foriginy-apos.y*fgcscale);
+ result.x:= apos.x*fgcscale+foriginx;
+ result.y:= foriginy-apos.y*fgcscale;
+end;
+
+function tpostscriptcanvas.posstring(const apos: pointty): string;
+var
+ pt1: pspointty;
+begin
+ pt1:= devpos(apos);
+ result:= psrealtostr(pt1.x)+' '+ psrealtostr(pt1.y);
+end;
+
+function tpostscriptcanvas.matrixstring(const mat: psmatrixty): string;
+begin
+ result:= '['+psrealtostr(mat[0,0])+' '+psrealtostr(mat[0,1])+' '+
+              psrealtostr(mat[1,0])+' '+psrealtostr(mat[1,1])+' '+
+              psrealtostr(mat[2,0])+' '+psrealtostr(mat[2,1])+']';
+end;
+
+procedure pstranslate(var mat: psmatrixty; const dist: pspointty);
+begin
+ mat[2,0]:= mat[2,0] + dist.x;
+ mat[2,1]:= mat[2,1] + dist.y;
+end;
+
+procedure psretranslate(var mat: psmatrixty; const dist: pspointty);
+begin
+ mat[2,0]:= mat[2,0] - dist.x;
+ mat[2,1]:= mat[2,1] - dist.y;
+end;
+
+procedure psrotate(var mat: psmatrixty; const angle: real); //radiant
+var
+ si,co: real;
+ m00,m01,m10,m11,m20,m21: real;
+begin
+ si:= sin(angle);
+ co:= cos(angle);
+ m00:= mat[0,0]*co+mat[0,1]*-si;
+ m01:= mat[0,0]*si+mat[0,1]*co;
+ m10:= mat[1,0]*co+mat[1,1]*-si;
+ m11:= mat[1,0]*si+mat[1,1]*co;
+ m20:= mat[2,0]*co+mat[2,1]*-si;
+ m21:= mat[2,0]*si+mat[2,1]*co;
+ mat[0,0]:= m00;
+ mat[0,1]:= m01;
+ mat[1,0]:= m10;
+ mat[1,1]:= m11;
+ mat[2,0]:= m20;
+ mat[2,1]:= m21;
+end;
+
+function pstransform(const mat: psmatrixty; const apoint: pspointty): pspointty;
+begin
+ result.x:= mat[0,0]*apoint.x + mat[1,0]*apoint.y + mat[2,0];
+ result.y:= mat[0,1]*apoint.x + mat[1,1]*apoint.y + mat[2,1];
+end;
+
+function pstransform(const mat: psmatrixty; const apoint: pointty): pspointty;
+begin
+ result.x:= mat[0,0]*apoint.x + mat[1,0]*apoint.y + mat[2,0];
+ result.y:= mat[0,1]*apoint.x + mat[1,1]*apoint.y + mat[2,1];
+end;
+
+function psdist(const source,dest: pspointty): pspointty;
+begin
+ result.x:= dest.x - source.x;
+ result.y:= dest.y - source.y;
+end;
+
+function psdist(const source,dest: pointty): pspointty;
+begin
+ result.x:= dest.x - source.x;
+ result.y:= dest.y - source.y;
+end;
+
+function pspoint(const apoint: pointty): pspointty;
+begin
+ result.x:= apoint.x;
+ result.y:= apoint.y;
+end;
+
+function tpostscriptcanvas.transrotate(const sourcecenter,destcenter: pointty;
+                                                const angle: real): string;
+var
+ mat1: psmatrixty;
+begin
+ mat1:= psunitymatrix;
+ psrotate(mat1,angle);
+ pstranslate(mat1,psdist(pstransform(mat1,devpos(sourcecenter)),
+                                                devpos(destcenter)));
+ result:= matrixstring(mat1) + ' concat';
 end;
 
 function tpostscriptcanvas.diststring(const adist: integer): string;
@@ -1226,6 +1330,7 @@ var
  colorchanged: boolean;
  style1: fontstylesty;
  lastbreak: integer;
+ rect1: rectty;
  
  procedure addstring(const astring: ansistring);
  begin
@@ -1235,14 +1340,37 @@ var
   end;
   str1:= str1+astring;
  end;
- 
+var
+ pt1: pointty; 
+ rea1: real;
 begin
  if not active {or (text.text = '')} then begin
   exit;
  end;
  colorchanged:= false;
+ str1:= '';
+ if flags * [tf_rot90,tf_rot180] <> [] then begin
+  str1:= 'matrix currentmatrix'+nl; //backup
+  pt1:= dest.pos;
+  if tf_rot90 in flags then begin
+   if tf_rot180 in flags then begin
+    rea1:= double(pi)*3/2;
+    pt1.x:= pt1.x+dest.cx;
+   end
+   else begin
+    rea1:= double(pi)/2;
+    pt1.y:= pt1.y+dest.cy;
+   end;
+  end
+  else begin
+   rea1:= double(pi);
+   pt1.x:= pt1.x+dest.cx;
+   pt1.y:= pt1.y+dest.cy;
+  end;
+  str1:= str1+transrotate(dest.pos,pt1,rea1)+nl;
+ end;
  lastbreak:= 0;
- str1:= '['; 
+ str1:= str1+'['; 
  if (text.format = nil) or (text.text = '') then begin
   addstring(getshowstring(pmsechar(text.text),length(text.text),
                 true,cl_none,cl_none,font.style)+'] ');
@@ -1305,9 +1433,17 @@ begin
   end;
   str1:= str1 + '] ';
  end;
+ if tf_rot90 in flags then begin
+  rect1.pos:= dest.pos;
+  rect1.cx:= dest.cy;
+  rect1.cy:= dest.cx;
+ end
+ else begin
+  rect1:= dest;
+ end;
  if tabdist = 0 then begin
-  str1:= str1 + posstring(makepoint(dest.x,dest.y+dest.cy))+' '+     //lower left
-                posstring(makepoint(dest.x+dest.cx,dest.y))+ ' ';  //upper right
+  str1:= str1 + posstring(makepoint(rect1.x,rect1.y+rect1.cy))+' '+   //lower left
+                posstring(makepoint(rect1.x+rect1.cx,rect1.y))+ ' ';  //upper right
  end
  else begin
   if tabdist < 0 then begin //last pos
@@ -1317,10 +1453,10 @@ begin
    str1:= str1 + psrealtostr(foriginx)+' '+psrealtostr(tabdist) + ' tab ';
                  //tabbedx (llx)
   end;
-  str1:= str1 + psrealtostr(foriginy-(dest.y+dest.cy)*fgcscale)+
+  str1:= str1 + psrealtostr(foriginy-(rect1.y+rect1.cy)*fgcscale)+
                       //llx,lly
    ' 1 index '+       //llx,lly,urx
-   psrealtostr(foriginy-(dest.y)*fgcscale)+' '; //llx,lly,urx,ury
+   psrealtostr(foriginy-(rect1.y)*fgcscale)+' '; //llx,lly,urx,ury
  end;
  int1:= {$ifdef FPC}longword{$else}word{$endif}(flags*mask1) or 
         ({$ifdef FPC}longword{$else}word{$endif}(flags*mask2) shr 1); 
@@ -1336,6 +1472,9 @@ begin
 }
  if colorchanged then begin
   str1:= str1 + ' '+setcolorstring(font.color);
+ end;
+ if flags * [tf_rot90,tf_rot180] <> [] then begin
+  str1:= str1+nl+'setmatrix'; //restore CTM
  end;
  streamwrite(str1+nl);
 end;
