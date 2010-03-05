@@ -1364,7 +1364,7 @@ end;
 procedure tcustomdataedit.synctofontheight;
 begin 
  inherited;
- if fgridintf <> nil then begin
+ if (fgridintf <> nil) and not (tf_rotate90 in textflags) then begin
   fgridintf.getcol.grid.datarowheight:= bounds_cy;
  end;
 end;

@@ -2610,7 +2610,12 @@ end;
 procedure tcustomdatabutton.synctofontheight;
 begin
  inherited;
- bounds_cy:= font.glyphheight + innerclientframewidth.cy + 6;
+ if tf_rotate90 in finfo.ca.textflags then begin
+  bounds_cx:= font.glyphheight + innerclientframewidth.cx + 6;
+ end
+ else begin
+  bounds_cy:= font.glyphheight + innerclientframewidth.cy + 6;
+ end;
 end;
 
 procedure tcustomdatabutton.initnewcomponent(const ascale: real);

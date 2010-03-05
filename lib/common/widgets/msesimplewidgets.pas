@@ -1486,7 +1486,7 @@ end;
 
 procedure tcustomlabel.synctofontheight;
 begin
- syncsinglelinefontheight;
+ syncsinglelinefontheight(false,2,tf_rotate90 in textflags);
 end;
 
 procedure tcustomlabel.updatetextflags;

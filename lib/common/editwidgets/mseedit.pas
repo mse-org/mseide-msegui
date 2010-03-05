@@ -1263,7 +1263,12 @@ var
 begin
  inherited;
  fram1:= getinnerframe;
- syncsinglelinefontheight(false,fram1.top + fram1.bottom);
+ if tf_rotate90 in ftextflags then begin
+  syncsinglelinefontheight(false,fram1.left + fram1.right,true);
+ end
+ else begin
+  syncsinglelinefontheight(false,fram1.top + fram1.bottom,false);
+ end;
 end;
 
 procedure tcustomedit.clientrectchanged;

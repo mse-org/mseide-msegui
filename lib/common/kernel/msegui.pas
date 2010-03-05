@@ -1450,7 +1450,7 @@ type
    procedure postchildscaled;
    procedure dofontheightdelta(var delta: integer); virtual;
    procedure syncsinglelinefontheight(const lineheight: boolean = false;
-                       const space: integer = 2);
+                       const space: integer = 2; const vertical: boolean = false);
 
    procedure setwidgetrect(const Value: rectty);
    procedure internalsetwidgetrect(Value: rectty;
@@ -10983,7 +10983,7 @@ begin
 end;
 
 procedure twidget.syncsinglelinefontheight(const lineheight: boolean = false;
-                                     const space: integer = 2);
+                      const space: integer = 2; const vertical: boolean = false);
 var
  int1: integer;
 begin
@@ -10993,12 +10993,23 @@ begin
  else begin
   int1:= getfont.glyphheight;
  end;
- if fframe = nil then begin
-  bounds_cy:= bounds_cy + int1 + space - paintsize.cy
+ if vertical then begin
+  if fframe = nil then begin
+   bounds_cx:= bounds_cx + int1 + space - paintsize.cx
+  end
+  else begin
+   bounds_cx:= bounds_cx + int1 + fframe.framei_left + 
+              fframe.framei_right - paintsize.cx;
+  end;
  end
  else begin
-  bounds_cy:= bounds_cy + int1 + fframe.framei_top + 
-             fframe.framei_bottom - paintsize.cy;
+  if fframe = nil then begin
+   bounds_cy:= bounds_cy + int1 + space - paintsize.cy
+  end
+  else begin
+   bounds_cy:= bounds_cy + int1 + fframe.framei_top + 
+              fframe.framei_bottom - paintsize.cy;
+  end;
  end;
 end;
 
