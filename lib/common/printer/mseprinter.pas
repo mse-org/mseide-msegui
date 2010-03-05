@@ -1050,7 +1050,7 @@ begin
      end;
      for int1:= 0 to high(lineinfos) do begin
       with lineinfos[int1] do begin
-       if (tf_xjustify in flags) and (high(justifychars) > 0) and 
+       if (tf_xjustify in flags) and (high(justifychars) >= 0) and 
                    (int1 < high(lineinfos)) then begin
         rstr1:= richcopy(text,liindex,justifychars[0]-liindex);
         dotextout(rstr1,rect1,flags2,0,acolorshadow); //first word
