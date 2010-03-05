@@ -672,7 +672,7 @@ begin
        listartx:= orig1-listartx;
       end;
      end;
-     for int1:= int1 to high(charwidths) do begin
+     for int1:= 0 to high(charwidths) do begin
       charwidths[int1]:= - charwidths[int1];
      end;
     end;
@@ -887,7 +887,8 @@ var
      int2:= astart - 1;
      for int4:= 0 to high(tabchars) do begin
       if (tabchars[int4] >= astart) and (tabchars[int4] < astart + acount) then begin
-       drawstring(@text.text[int2+1],tabchars[int4] - int2 - 1,pos,nil,grayed);
+       drawstring(@text.text[int2+1],tabchars[int4] - int2 - 1,pos,nil,
+                                                                  grayed,rot);
        for int2:= int2 to tabchars[int4] - 1 do begin
         inc(x,charwidths[int2]);
        end;
@@ -912,7 +913,7 @@ var
       end;
      end;
      int3:= acount - int2 + astart - 1;
-     drawstring(@text.text[int2+1],int3,pos,nil,grayed);
+     drawstring(@text.text[int2+1],int3,pos,nil,grayed,rot);
      for int2:= int2 to int2 + int3 - 1 do begin
       inc(x,charwidths[int2]);
      end;
