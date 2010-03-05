@@ -164,6 +164,7 @@ type
    procedure getautopaintsize(var asize: sizety); override;
    procedure objectevent(const sender: tobject;
                                      const event: objecteventty); override;
+   function verticalfontheightdelta: boolean; override;
   public
    constructor create(aowner: tcomponent); override;
    procedure synctofontheight; override;
@@ -398,6 +399,7 @@ type
    procedure getautopaintsize(var asize: sizety); override;
    procedure fontchanged; override;
    procedure clientrectchanged; override;
+   function verticalfontheightdelta: boolean; override;
   public
    constructor create(aowner: tcomponent); override;
    procedure synctofontheight; override;
@@ -657,10 +659,20 @@ begin
  end;
 end;
 
+function tcustombutton.verticalfontheightdelta: boolean;
+begin
+ result:= tf_rotate90 in textflags;
+end;
+
 procedure tcustombutton.synctofontheight;
 begin
  inherited;
- bounds_cy:= font.glyphheight + innerclientframewidth.cy + 6;
+ if tf_rotate90 in textflags then begin
+  bounds_cx:= font.glyphheight + innerclientframewidth.cx + 6;
+ end
+ else begin
+  bounds_cy:= font.glyphheight + innerclientframewidth.cy + 6;
+ end;
 end;
 
 procedure tcustombutton.doexecute;
@@ -1484,9 +1496,14 @@ begin
  end;
 end;
 
+function tcustomlabel.verticalfontheightdelta: boolean;
+begin
+ result:= tf_rotate90 in textflags
+end;
+
 procedure tcustomlabel.synctofontheight;
 begin
- syncsinglelinefontheight(false,2,tf_rotate90 in textflags);
+ syncsinglelinefontheight;
 end;
 
 procedure tcustomlabel.updatetextflags;

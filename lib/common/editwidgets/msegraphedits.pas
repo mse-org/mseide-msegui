@@ -755,6 +755,7 @@ type
    function checkfocusshortcut(var info: keyeventinfoty): boolean; override;
    procedure setactualimagenr(const avalue: integer);
    procedure setoptions(const avalue: buttonoptionsty); override;
+   function verticalfontheightdelta: boolean; override;
 
    class function classskininfo: skininfoty; override;
   public
@@ -2607,10 +2608,15 @@ begin
  result.objectkind:= sok_databutton;
 end;
 
+function tcustomdatabutton.verticalfontheightdelta: boolean;
+begin
+ result:= tf_rotate90 in textflags;
+end;
+
 procedure tcustomdatabutton.synctofontheight;
 begin
  inherited;
- if tf_rotate90 in finfo.ca.textflags then begin
+ if tf_rotate90 in textflags then begin
   bounds_cx:= font.glyphheight + innerclientframewidth.cx + 6;
  end
  else begin

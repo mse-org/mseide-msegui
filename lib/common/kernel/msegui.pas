@@ -66,7 +66,8 @@ type
                    ow_fontlineheight, 
                    //track font.linespacing,
                    //create fonthighdelta and childscaled events
-                   ow_autoscale, //synchronizes bounds_cy with fontheightdelta
+                   ow_autoscale, //synchronizes bounds_cy or bonds_cx 
+                                 //with fontheightdelta
                    ow_autosize,ow_autosizeanright,ow_autosizeanbottom 
                            //don't use, moved to optionwidget1
                    );
@@ -1448,9 +1449,10 @@ type
    procedure dofontchanged(const sender: tobject);
    procedure setfontheight;
    procedure postchildscaled;
+   function verticalfontheightdelta: boolean; virtual;
    procedure dofontheightdelta(var delta: integer); virtual;
    procedure syncsinglelinefontheight(const lineheight: boolean = false;
-                       const space: integer = 2; const vertical: boolean = false);
+                                                          const space: integer = 2);
 
    procedure setwidgetrect(const Value: rectty);
    procedure internalsetwidgetrect(Value: rectty;
@@ -10729,15 +10731,30 @@ begin
  end;
 end;
 
+function twidget.verticalfontheightdelta: boolean;
+begin
+ result:= false;
+end;
+
 procedure twidget.dofontheightdelta(var delta: integer);
 begin
  if ow_autoscale in foptionswidget then begin
   with fwidgetrect do begin
-   if fanchors * [an_top,an_bottom] = [an_bottom] then begin
-    setwidgetrect(makerect(x,y-delta,cx,cy+delta));
+   if verticalfontheightdelta then begin
+    if fanchors * [an_left,an_right] = [an_right] then begin
+     setwidgetrect(makerect(x-delta,y,cx+delta,cy));
+    end
+    else begin
+     bounds_cx:= cx + delta;
+    end;
    end
    else begin
-    bounds_cy:= fwidgetrect.cy + delta;
+    if fanchors * [an_top,an_bottom] = [an_bottom] then begin
+     setwidgetrect(makerect(x,y-delta,cx,cy+delta));
+    end
+    else begin
+     bounds_cy:= cy + delta;
+    end;
    end;
   end;
  end;
@@ -10983,7 +11000,7 @@ begin
 end;
 
 procedure twidget.syncsinglelinefontheight(const lineheight: boolean = false;
-                      const space: integer = 2; const vertical: boolean = false);
+                      const space: integer = 2);
 var
  int1: integer;
 begin
@@ -10993,7 +11010,7 @@ begin
  else begin
   int1:= getfont.glyphheight;
  end;
- if vertical then begin
+ if verticalfontheightdelta then begin
   if fframe = nil then begin
    bounds_cx:= bounds_cx + int1 + space - paintsize.cx
   end

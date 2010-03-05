@@ -380,6 +380,7 @@ type
    procedure readpwchar(reader: treader);
    procedure writepwchar(writer: twriter);
    procedure defineproperties(filer: tfiler); override;
+   function verticalfontheightdelta: boolean; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -1256,6 +1257,11 @@ begin
  end;
 end;
 
+function tcustomedit.verticalfontheightdelta: boolean;
+begin
+ result:= tf_rotate90 in textflags;
+end;
+
 procedure tcustomedit.synctofontheight;
 var
  int1: integer;
@@ -1264,10 +1270,10 @@ begin
  inherited;
  fram1:= getinnerframe;
  if tf_rotate90 in ftextflags then begin
-  syncsinglelinefontheight(false,fram1.left + fram1.right,true);
+  syncsinglelinefontheight(false,fram1.left + fram1.right);
  end
  else begin
-  syncsinglelinefontheight(false,fram1.top + fram1.bottom,false);
+  syncsinglelinefontheight(false,fram1.top + fram1.bottom);
  end;
 end;
 

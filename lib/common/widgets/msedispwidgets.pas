@@ -130,6 +130,7 @@ type
    procedure doloaded; override;
    procedure showhint(var info: hintinfoty); override;
    procedure enabledchanged; override;
+   function verticalfontheightdelta: boolean; override;
   public
    constructor create(aowner: tcomponent); override;
    procedure initnewcomponent(const ascale: real); override;
@@ -425,9 +426,14 @@ begin
  inherited;
 end;
 
+function tdispwidget.verticalfontheightdelta: boolean;
+begin
+ result:= tf_rotate90 in textflags;
+end;
+
 procedure tdispwidget.synctofontheight;
 begin
- syncsinglelinefontheight(false,2,tf_rotate90 in textflags);
+ syncsinglelinefontheight;
 end;
 
 procedure tdispwidget.updatetextflags;
