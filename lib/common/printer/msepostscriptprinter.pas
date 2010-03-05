@@ -1359,11 +1359,11 @@ begin
  end;
  colorchanged:= false;
  str1:= '';
- if flags * [tf_rot90,tf_rot180] <> [] then begin
+ if flags * [tf_rotate90,tf_rotate180] <> [] then begin
   str1:= 'matrix currentmatrix'+nl; //backup
   pt1:= dest.pos;
-  if tf_rot90 in flags then begin
-   if tf_rot180 in flags then begin
+  if tf_rotate90 in flags then begin
+   if tf_rotate180 in flags then begin
     rea1:= pi*3.0/2.0;
     pt1.x:= pt1.x+dest.cx;
    end
@@ -1443,7 +1443,7 @@ begin
   end;
   str1:= str1 + '] ';
  end;
- if tf_rot90 in flags then begin
+ if tf_rotate90 in flags then begin
   rect1.pos:= dest.pos;
   rect1.cx:= dest.cy;
   rect1.cy:= dest.cx;
@@ -1483,7 +1483,7 @@ begin
  if colorchanged then begin
   str1:= str1 + ' '+setcolorstring(font.color);
  end;
- if flags * [tf_rot90,tf_rot180] <> [] then begin
+ if flags * [tf_rotate90,tf_rotate180] <> [] then begin
   str1:= str1+nl+'setmatrix'; //restore CTM
  end;
  streamwrite(str1+nl);

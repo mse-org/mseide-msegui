@@ -24,7 +24,7 @@ const
 
 type
  textflagty = (tf_xcentered,tf_right,tf_xjustify,tf_ycentered,tf_bottom, 
-               tf_rot90,tf_rot180,
+               tf_rotate90,tf_rotate180,
                  //order fix, used in msepostscriptprinter
 //               tf_forcealignment, //do not use default alignment for buttons
                tf_clipi,tf_clipo,
@@ -384,7 +384,7 @@ begin
  try
   gdi_lock;
   with info,tcanvas1(canvas),layoutinfo do begin
-   if tf_rot90 in flags then begin
+   if tf_rotate90 in flags then begin
     swapxy1(dest);  
    end;  
    checkgcstate([cs_gc]);
@@ -663,8 +663,8 @@ begin
    strikeout:= - (ascent div 3);
    xyswapped:= false;
    reversed:= false;
-   if flags * [tf_rot90,tf_rot180] <> [] then begin
-    if (tf_rot90 in flags) xor (tf_rot180 in flags) then begin //mirror x
+   if flags * [tf_rotate90,tf_rotate180] <> [] then begin
+    if (tf_rotate90 in flags) xor (tf_rotate180 in flags) then begin //mirror x
      orig1:= dest.x + dest.x + dest.cx;
      res.x:= orig1 - res.x - res.cx;
      for int1:= 0 to high(lineinfos) do begin
@@ -676,7 +676,7 @@ begin
       charwidths[int1]:= - charwidths[int1];
      end;
     end;
-    reversed:= (tf_rot180 in flags);
+    reversed:= (tf_rotate180 in flags);
     if reversed then begin //mirror y
      ascent:= -ascent;
      descent:= -descent;
@@ -692,7 +692,7 @@ begin
       end;
      end;
     end;
-    xyswapped:= tf_rot90 in flags;
+    xyswapped:= tf_rotate90 in flags;
     if xyswapped then begin
      swapxy1(dest);  
      swapxy1(res);  
@@ -1021,8 +1021,8 @@ label
 
 begin                  //drawtext
  with info,tcanvas1(canvas) do begin
-  if tf_rot90 in flags then begin
-   if tf_rot180 in flags then begin
+  if tf_rotate90 in flags then begin
+   if tf_rotate180 in flags then begin
     rot:= 1.5*pi;
    end
    else begin
@@ -1030,7 +1030,7 @@ begin                  //drawtext
    end;
   end
   else begin
-   if tf_rot180 in flags then begin
+   if tf_rotate180 in flags then begin
     rot:= pi;
    end
    else begin
