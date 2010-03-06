@@ -949,6 +949,7 @@ begin
 end;
 
 procedure tcustomprintercanvas.drawtext(var info: drawtextinfoty);
+// colorbackground gap filling not supported.
 var
  acolorshadow: colorty;
  tab1: tcustomtabulators;
