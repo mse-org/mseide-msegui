@@ -74,7 +74,7 @@ const
  fontaliasoptionchars : array[fontoptionty] of char =
                 ('p','P','H','R','S','D','A','a'{,'C','c'});
 type
- fontdatapty = array[0..15] of longword;
+ fontdatapty = array[0..15] of pointer;
  fontdataty = record
   font: fontty;
   fonthighres: fontty;
@@ -294,6 +294,7 @@ type
   colorforeground: pixelty;
   font: fontty;
   fontnum: fontnumty;
+  fontdata: pfontdataty;
   brush: tsimplebitmap;
   brushorigin: pointty;
   rasterop: rasteropty;
@@ -3426,6 +3427,7 @@ begin
     include(values.mask,gvm_font);
     values.fontnum:= afonthandle1;
     po1:= getfontdata(afonthandle1); 
+    values.fontdata:= po1;
     with po1^ do begin
      values.font:= font;
      if (df_highresfont in fdrawinfo.gc.drawingflags) then begin
@@ -4157,17 +4159,8 @@ procedure tcanvas.drawstring(const atext: pmsechar; const acount: integer;
 var
  afontnum: integer;
  po1: pfontinfoty;
- 
-// acolorshadow: colorty;
-// ashadow_shiftx: integer;
-// ashadow_shifty: integer;
-// agloss_color: colorty;
-// agloss_shiftx: integer;
-// agloss_shifty: integer;
-
-// acolor: colorty;
  font1: tfont;
- ev1: notifyeventty;
+ int1: integer;
 begin
  if cs_inactive in fstate then exit;
  with fdrawinfo do begin
@@ -4178,14 +4171,7 @@ begin
     rotation:= arotation;
     afontnum:= gethandleforcanvas(self);
     afonthandle1:= afontnum;
-//    acolor:= color;
     acolorbackground:= colorbackground;
-//    acolorshadow:= colorshadow;
-//    ashadow_shiftx:= shadow_shiftx;
-//    ashadow_shifty:= shadow_shifty;
-//    agloss_colorshadow:= gloss_color;
-//    agloss_shiftx:= gloss_shiftx;
-//    agloss_shifty:= gloss_shifty;
    end;
   end
   else begin
@@ -4194,11 +4180,7 @@ begin
    afonthandle1:= ffont.gethandle;
    po1:= @fvaluepo^.font;
    with fvaluepo^.font do begin
-//    acolor:= color;
     acolorbackground:= colorbackground;
-//    acolorshadow:= colorshadow;
-//    ashadow_shiftx:= shadow_shiftx;
-//    ashadow_shifty:= shadow_shifty;
    end;
   end;
   with fdrawinfo.text16pos do begin
@@ -4254,10 +4236,6 @@ begin
     end;
     checkgcstate([cs_acolorforeground]);
     gdi(gdi_drawstring16);
-//    if grayed then begin
-//     inc(pos^.x);
-//     inc(pos^.y);
-//    end;
    end
    else begin
     acolorforeground:= po1^.color;

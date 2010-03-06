@@ -895,12 +895,24 @@ var
        if font.colorbackground <> cl_transparent then begin
         int3:= charwidths[tabchars[int4] - 1];
         if xyswapped then begin
-         fillrect(makerect(pos.x-font.ascent,x - int3,
-                      font.ascent+font.descent,int3),font.colorbackground);
+         if reversed then begin
+          fillrect(makerect(pos.x-font.descent,x - int3,
+                       font.ascent+font.descent,int3),font.colorbackground);
+         end
+         else begin
+          fillrect(makerect(pos.x-font.ascent,x - int3 - 1,
+                       font.ascent+font.descent,int3),font.colorbackground);
+         end;
         end
         else begin
-         fillrect(makerect(x - int3,pos.y-font.ascent,int3,
+         if reversed then begin
+          fillrect(makerect(x - int3 - 1,pos.y-font.descent,int3,
                       font.ascent+font.descent),font.colorbackground);
+         end
+         else begin
+          fillrect(makerect(x - int3,pos.y-font.ascent,int3,
+                      font.ascent+font.descent),font.colorbackground);
+         end;
         end;
        end;
        int2:= tabchars[int4];
@@ -1065,19 +1077,6 @@ begin                  //drawtext
    afontstyle:= fontstylebefore;
    overridefontstyle:= afontstyle * [fs_bold,fs_italic,fs_underline];
    grayed:= tf_grayed in flags;
-{
-   with layoutinfo do begin
-    underline:= descent div 2 + 1;
-    if underline = 0 then begin
-     underline:= 1;
-    end;
-    if underline >= descent then begin
-     underline:= descent - 1;
-    end;
-    strikeout:= - (ascent div 3);
-   end;
-}
-//   pos.y:= layoutinfo.starty;
    if info.text.format <> nil then begin
     infoindexbefore:= -1;
     int1:= 0; //format index
@@ -1129,14 +1128,12 @@ begin                  //drawtext
       inc(int1);
      end;
      inc(row);
-//     inc(pos.y,layoutinfo.lineheight);
     end;
     font.color:= defaultcolor;
     font.colorbackground:= defaultcolorbackground;
     font.style:= fontstylebefore;
    end
    else begin
-//    pos.x:= layoutinfo.lineinfos[0].listartx;
     for row:= 0 to high(layoutinfo.lineinfos) do begin
      with layoutinfo.lineinfos[row] do begin
       if layoutinfo.xyswapped then begin

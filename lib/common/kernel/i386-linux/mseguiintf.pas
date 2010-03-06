@@ -633,6 +633,22 @@ type
    1: (_bufferspace: windowpty;);
  end;
  
+ fontmatrixmodety = (fmm_fix,fmm_linear,fmm_matrix);
+ x11fontdatadty = record
+  infopo: pxfontstruct;
+  matrixmode: fontmatrixmodety;
+  defaultwidth: integer;
+  xftascent,xftdescent: integer;
+  rowlength: word;
+  xftdirection: graphicdirectionty;
+ end;
+ px11fontdatadty = ^x11fontdatadty;
+ x11fontdataty = record
+  case integer of
+   0: (d: x11fontdatadty;);
+   1: (_bufferspace: fontdatapty;);
+ end;
+
  xftstatety = (xfts_clipregionvalid{,xfts_colorvalid});
  xftstatesty = set of xftstatety;
  x11gcdty = record
@@ -643,7 +659,9 @@ type
   xftcolor: txftcolor;
   xftcolorbackground: txftcolor;
   xftfont: pxftfont;
+  xftfontdata: px11fontdatadty;
   xftstate: xftstatesty;
+ // fontdirection: graphicdirectionty;
  end;
  x11gcty = record
   case integer of
@@ -651,18 +669,6 @@ type
    1: (_bufferspace: gcpty;);
  end;
 
- fontmatrixmodety = (fmm_fix,fmm_linear,fmm_matrix);
- x11fontdatadty = record
-  infopo: pxfontstruct;
-  matrixmode: fontmatrixmodety;
-  defaultwidth: integer;
-  rowlength: word;
- end;
- x11fontdataty = record
-  case integer of
-   0: (d: x11fontdatadty;);
-   1: (_bufferspace: fontdatapty;);
- end;
 {$ifdef FPC}
  Colormap = TXID;
  Atom = type culong;
@@ -3889,8 +3895,10 @@ begin
    xmask:= xmask or gcjoinstyle;
   end;
   if gvm_font in mask then begin
+//   fontdirection:= x11fontdataty(fontdata^.platformdata).d.direction;
    if fhasxft then begin
     xftfont:= pxftfont(font);
+    xftfontdata:= @x11fontdataty(fontdata^.platformdata).d;
    end
    else begin
     xmask:= xmask or gcfont;
@@ -4510,6 +4518,9 @@ begin
    linespacing:= po^.height;
    caretshift:= 0;
    d.infopo:= nil;
+   d.xftascent:= po^.ascent;
+   d.xftdescent:= po^.descent;
+   d.xftdirection:= gd_right;
   end;
  {$ifdef FPC} {$checkpointer default} {$endif}
  end;
@@ -4807,10 +4818,10 @@ var
  po1: pxfontstruct;
  po2: pxftfont;
  fontinfo: fontinfoty;
-// str1: string;
  int1: integer;
  po3,po4: pfcpattern;
  res1: tfcresult;
+ rea1: real;
  {$ifdef mse_debugxft}
  po5: pchar;
  {$endif}
@@ -4833,6 +4844,32 @@ begin
     if po2 <> nil then begin
      result:= true;
      getxftfontdata(po2,drawinfo);
+     if rotation <> 0 then begin //ascent and descent are 0 for rotated fonts
+      fcpatterndestroy(po3);
+      rea1:= rotation;
+      if rea1 <> 0 then begin
+       int1:= round(rea1/(pi/2)) mod 4;
+       if int1 < 0 then begin
+        int1:= int1 + 4;
+       end;
+       x11fontdataty(platformdata).d.xftdirection:= graphicdirectionty(int1); 
+                                          //for xft colorbackground
+      end;
+      rotation:= 0;
+      po3:= buildxftpat(drawinfo.getfont.fontdata^,fontinfo,false);
+      po4:= xftfontmatch(appdisp,xdefaultscreen(appdisp),po3,@res1);
+      if po4 <> nil then begin
+       po2:= xftfontopenpattern(appdisp,po4);
+       if po2 <> nil then begin
+        ascent:= po2^.ascent;
+        descent:= po2^.descent;
+        x11fontdataty(platformdata).d.xftascent:= po2^.ascent;
+        x11fontdataty(platformdata).d.xftdescent:= po2^.descent;
+        xftfontclose(appdisp,po2);
+       end;
+      end;
+      rotation:= rea1;
+     end;
     end;
    end;
    fcpatterndestroy(po3);
@@ -5465,7 +5502,7 @@ begin
    round(startang*angscale),round(extentang*angscale));
  end;
 end;
-
+var testvar: x11gcty;
 procedure gui_drawstring16(var drawinfo: drawinfoty);
 var
  po1: pxchar2b;
@@ -5486,9 +5523,31 @@ begin
                    //unreliable!?
       xvalues.foreground:= xftcolorbackground.pixel;
       xchangegc(appdisp,tgc(gc.handle),gcforeground,@xvalues);
-      xfillrectangle(appdisp,paintdevice,tgc(gc.handle),
-                                        x{-glyphinfo.x},y-xftfont^.ascent,
-              glyphinfo.xoff,xftfont^.ascent+xftfont^.descent);
+testvar:= x11gcty(gc.platformdata);
+      with x11gcty(gc.platformdata).d.xftfontdata^ do begin
+       case xftdirection of
+        gd_right: begin      
+         xfillrectangle(appdisp,paintdevice,tgc(gc.handle),
+                                           x{-glyphinfo.x},y-xftascent,
+                glyphinfo.xoff,xftascent+xftdescent);
+        end;
+        gd_up: begin
+         xfillrectangle(appdisp,paintdevice,tgc(gc.handle),
+                      x-xftascent,y+glyphinfo.yoff,
+                xftascent+xftdescent,-glyphinfo.yoff);
+        end;
+        gd_left: begin
+         xfillrectangle(appdisp,paintdevice,tgc(gc.handle),
+                      x+glyphinfo.xoff{-glyphinfo.x},y-xftdescent,
+                -glyphinfo.xoff,xftascent+xftdescent);
+        end;
+        gd_down: begin
+         xfillrectangle(appdisp,paintdevice,tgc(gc.handle),
+                                           x-xftdescent,y,
+                xftascent+xftdescent,glyphinfo.yoff);
+        end;
+       end;
+      end;
       xvalues.foreground:= xftcolor.pixel;
       xchangegc(appdisp,tgc(gc.handle),gcforeground,@xvalues);
      end;
