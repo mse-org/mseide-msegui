@@ -5502,7 +5502,7 @@ begin
    round(startang*angscale),round(extentang*angscale));
  end;
 end;
-var testvar: x11gcty;
+
 procedure gui_drawstring16(var drawinfo: drawinfoty);
 var
  po1: pxchar2b;
@@ -5523,7 +5523,6 @@ begin
                    //unreliable!?
       xvalues.foreground:= xftcolorbackground.pixel;
       xchangegc(appdisp,tgc(gc.handle),gcforeground,@xvalues);
-testvar:= x11gcty(gc.platformdata);
       with x11gcty(gc.platformdata).d.xftfontdata^ do begin
        case xftdirection of
         gd_right: begin      
