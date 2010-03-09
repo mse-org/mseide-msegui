@@ -365,6 +365,7 @@ begin
      ek_buttonrelease: begin
       if button = mb_left then begin
        updateshapemoveclick(infoarpo,false);
+       exclude(state,shs_moveclick);
        if state * [shs_clicked,shs_checkbox,shs_radiobutton] = 
                                      [shs_clicked,shs_checkbox] then begin
         setchecked(info,not (shs_checked in state),widget);
