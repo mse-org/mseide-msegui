@@ -1948,6 +1948,7 @@ type
    function stackedunder: twindow; //nil if top
    function stackedover: twindow;  //nil if bottom
    function hastransientfor: boolean;
+//   procedure removefocuslock;
 
    procedure capturemouse;
    procedure releasemouse;
@@ -11776,15 +11777,35 @@ procedure twindow.internalactivate(const windowevent: boolean;
                          const force: boolean = false);
 
  procedure setwinfoc;
+ var
+  window1: twindow;
+  focustransientforbefore: twindow;
  begin
+  focustransientforbefore:= appinst.ffocuslocktransientfor;
   if (ftransientfor <> nil) and (force or (appinst.ffocuslockwindow = nil)) and 
                                 (wo_popup in foptions) then begin
    appinst.ffocuslockwindow:= self;
-   appinst.ffocuslocktransientfor:= ftransientfor;
+   window1:= ftransientfor;
+   repeat
+    if window1 = appinst.ffocuslocktransientfor then begin
+     break;
+    end;
+    window1:= window1.ftransientfor;
+   until window1 = nil;
+   if window1 = nil then begin
+    appinst.ffocuslocktransientfor:= ftransientfor;
+   end;
   end;
-  if (appinst.ffocuslockwindow = nil) or 
-                        (appinst.ffocuslockwindow = self) then begin
-   guierror(gui_setwindowfocus(fwindow.id),self);
+  if appinst.ffocuslocktransientfor <> nil then begin
+   if focustransientforbefore <> appinst.ffocuslocktransientfor then begin
+    guierror(gui_setwindowfocus(appinst.ffocuslocktransientfor.winid),self);
+   end;
+  end
+  else begin
+   if (appinst.ffocuslockwindow = nil) or 
+                         (appinst.ffocuslockwindow = self) then begin
+    guierror(gui_setwindowfocus(fwindow.id),self);
+   end;
   end;
  end;
  
@@ -11834,6 +11855,7 @@ begin
       end
       else begin
        appinst.ffocuslockwindow:= nil;
+       appinst.ffocuslocktransientfor:= nil;
       end;
      end;
     end;
@@ -12639,7 +12661,17 @@ function twindow.hastransientfor: boolean;
 begin
  result:= ftransientforcount > 0;
 end;
-
+{
+procedure twindow.removefocuslock;
+begin
+ with appinst do begin
+  if ffocuslockwindow = self then begin
+   ffocuslockwindow:= nil;
+   ffocuslocktransientfor:= nil;
+  end;
+ end;
+end;
+}
 procedure twindow.capturemouse;
 begin
  if appinst.grabpointer(winid) then begin

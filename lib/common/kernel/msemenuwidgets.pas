@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -1284,6 +1284,7 @@ begin
    internalsetactiveitem(0,aclicked,true,false);
   end;
   if (show(true,nil) <> mr_windowdestroyed) and (fprevpopup = nil) then begin
+//   window.removefocuslock;
    flayout.menu.owner.checkexec;
   end;
  end;

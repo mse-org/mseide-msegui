@@ -2287,6 +2287,7 @@ begin
 // xseticfocus(getic(id));
  waitfordecoration(id);
  xsetinputfocus(appdisp,id,reverttoparent,currenttime);
+// xflush(appdisp);
  result:= gue_ok;
 end;
 
