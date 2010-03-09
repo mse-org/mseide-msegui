@@ -11793,11 +11793,17 @@ procedure twindow.internalactivate(const windowevent: boolean;
     window1:= window1.ftransientfor;
    until window1 = nil;
    if window1 = nil then begin
-    appinst.ffocuslocktransientfor:= ftransientfor;
+    if appinst.ffocuslocktransientfor <> ftransientfor then begin
+     appinst.ffocuslocktransientfor:= ftransientfor;
+     exclude(appinst.fstate,aps_restorelocktransientfor);
+    end;
    end;
   end;
-  if appinst.ffocuslocktransientfor <> nil then begin
-   if focustransientforbefore <> appinst.ffocuslocktransientfor then begin
+  if (appinst.ffocuslockwindow <> nil) and 
+                          (appinst.ffocuslocktransientfor <> nil) then begin
+   if (focustransientforbefore <> appinst.ffocuslocktransientfor) or
+          (aps_restorelocktransientfor in appinst.fstate) then begin
+    exclude(appinst.fstate,aps_restorelocktransientfor);
     guierror(gui_setwindowfocus(appinst.ffocuslocktransientfor.winid),self);
    end;
   end
@@ -11854,8 +11860,15 @@ begin
        setwinfoc;
       end
       else begin
-       appinst.ffocuslockwindow:= nil;
-       appinst.ffocuslocktransientfor:= nil;
+       if appinst.ffocuslockwindow <> self then begin
+        appinst.ffocuslockwindow:= nil;
+        appinst.ffocuslocktransientfor:= nil;
+       end
+       else begin
+        if appinst.ffocuslocktransientfor <> nil then begin
+         guierror(gui_setwindowfocus(appinst.ffocuslocktransientfor.winid),self);
+        end;
+       end;
       end;
      end;
     end;
@@ -12135,7 +12148,9 @@ begin
   result:= beginmodal(self);
   if (fmodalwindow = nil) then begin
    if fwantedactivewindow <> nil then begin
-    fwantedactivewindow.activate;
+    if appinst.active then begin
+     fwantedactivewindow.activate;
+    end;
     fwantedactivewindow:= nil;
    end;
   end
@@ -12143,7 +12158,9 @@ begin
    if fmodalwindow = fwantedactivewindow then begin
     fwantedactivewindow:= nil;
    end;
-   fmodalwindow.activate;
+   if appinst.active then begin
+    fmodalwindow.activate;
+   end;
   end;
   if (factivewindow <> nil) and not factivewindow.fowner.releasing then begin
    pt1:= mouse.pos;
@@ -14057,7 +14074,6 @@ var
 begin
  bo1:= (activewindow <> nil) or focusinpending;
  if  bo1 xor (aps_active in fstate) then begin
-  fonapplicationactivechangedlist.doevent(bo1);
   if bo1 then begin
    include(fstate,aps_active);
   end
@@ -14065,6 +14081,7 @@ begin
    exclude(fstate,aps_active);
    hidehint;
   end;
+  fonapplicationactivechangedlist.doevent(bo1);
  end;
 end;
 
@@ -14271,8 +14288,27 @@ begin       //eventloop
          end;
         end;
         ek_focusout: begin
-         unsetwindowfocus(twindowevent(event).fwinid);
-         postevent(tmseevent.create(ek_checkapplicationactive));
+         getevents;
+         po1:= pointer(eventlist.datapo);
+         bo1:= true; 
+         for int1:= 0 to eventlist.count - 1 do begin
+          if po1^ <> nil then begin
+           with po1^ do begin
+            if (kind = ek_focusin) then begin
+             bo1:= false; //ignore the event
+             break;
+            end;
+           end;
+          end;
+          inc(po1);
+         end;
+         if bo1 then begin
+          unsetwindowfocus(twindowevent(event).fwinid);
+          postevent(tmseevent.create(ek_checkapplicationactive));
+         end
+         else begin
+          include(fstate,aps_restorelocktransientfor);
+         end;
         end;
         ek_checkapplicationactive: begin
          if checkiflast(ek_checkapplicationactive) then begin
@@ -14414,7 +14450,9 @@ begin
    lock;
   end;
   if (window1 <> nil) then begin
-   window1.activate;
+   if appinst.active then begin
+    window1.activate;
+   end;
    setlinkedvar(nil,tlinkedobject(window1));
   end;
  end;
