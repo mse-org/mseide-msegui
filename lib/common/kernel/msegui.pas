@@ -11798,6 +11798,11 @@ procedure twindow.internalactivate(const windowevent: boolean;
      exclude(appinst.fstate,aps_restorelocktransientfor);
     end;
    end;
+  end
+  else begin
+   if not (wo_popup in foptions) then begin
+    appinst.ffocuslocktransientfor:= nil;
+   end;
   end;
   if (appinst.ffocuslockwindow <> nil) and 
                           (appinst.ffocuslocktransientfor <> nil) then begin
