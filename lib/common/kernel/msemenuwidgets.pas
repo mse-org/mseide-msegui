@@ -1098,7 +1098,6 @@ var
  pt1,pt2: pointty;
 begin
  with info,flayout do begin
-//  po1:= translatetoscreen(pos);
   itembefore:= activeitem;
   pt1:= translatewidgetpoint(info.pos,self,nil);
   if (mlo_keymode in options) and
@@ -1254,6 +1253,16 @@ begin
      end;
     end;
     capturemouse;
+   end;
+  end
+  else begin
+   if aclicked and (value1 >= 0) then begin
+    with cells[activeitem],buttoninfo do begin
+     if not (shs_clicked in state) then begin
+      include(state,shs_clicked);
+      invalidaterect(dimouter);
+     end;
+    end;
    end;
   end;
   if (activeitem < 0) and (mlo_main in options) and 

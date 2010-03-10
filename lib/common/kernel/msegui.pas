@@ -12171,7 +12171,8 @@ begin
    pt1:= mouse.pos;
    if pointinrect(pt1,factivewindow.fowner.fwidgetrect) then begin
     event1:= tmouseevent.create(factivewindow.winid,false,mb_none,mw_none,
-        subpoint(pt1,factivewindow.fowner.fwidgetrect.pos),[],0,false);
+        subpoint(pt1,factivewindow.fowner.fwidgetrect.pos),
+        appinst.lastshiftstate,0,false);
     try 
      appinst.processmouseevent(event1); //simulate mousemove
     finally
