@@ -75,7 +75,7 @@ type
    function waitforprocess: integer; //returns exitcode
    function exitcode: integer;
    function running: boolean;
-   procedure addchars(const avalue: msestring);
+   procedure addchars(const avalue: msestring); virtual;
    procedure addline(const avalue: msestring); //thread save
    procedure writestr(const atext: string);
    procedure writestrln(const atext: string);
