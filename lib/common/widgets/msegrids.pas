@@ -13204,8 +13204,9 @@ var
 begin
  ar1:= fdatacols.getselectedrows;
  if high(ar1) >= 0 then begin
-  if askok(stockobjects.textgenerators[tg_delete_n_selected_rows]([length(ar1)]),
-           stockobjects.captions[sc_Confirmation]) then begin
+  if askok(stockobjects.textgenerators[tg_delete_n_selected_rows](
+                                       [integer(length(ar1))]),
+                            stockobjects.captions[sc_Confirmation]) then begin
    beginupdate;
    try
     for int1:= high(ar1) downto 0 do begin
