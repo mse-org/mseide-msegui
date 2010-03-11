@@ -5449,12 +5449,14 @@ var
 {$ifdef FPC}{$checkpointer default}{$endif}
  end;
 
- procedure createalphabuffer;
+ procedure createalphabuffer(const amasked: boolean);
  begin
   if falphabuffer = nil then begin
    falphabuffer:= tmaskedbitmap.create(false);
   end;
-  falphabuffer.options:= [bmo_masked,bmo_colormask];
+  if amasked then begin
+   falphabuffer.options:= [bmo_masked,bmo_colormask];
+  end;
   falphabuffer.size:= rect1.size;
   falphabufferdest:= rect1.pos;
   falphabuffer.canvas.copyarea(canvas,rect1,nullpoint);
@@ -5556,7 +5558,7 @@ begin
      bmp.paint(canvas,rect1,[al_stretchx,al_stretchy]);
     end
     else begin
-     createalphabuffer;
+     createalphabuffer(true);
      bmp.paint(falphabuffer.mask.canvas,makerect(nullpoint,rect1.size),
       makerect(nullpoint,bmp.size),[al_stretchx,al_stretchy]);
     end;
@@ -5566,7 +5568,7 @@ begin
   else begin
    if fi.fade_color.count > 0 then begin
     if fi.options * faceoptionsmask <> [] then begin
-     createalphabuffer;
+     createalphabuffer(false);
      falphabuffer.transparency:=
       (longword(colortorgb(tcolorarrayprop1(fi.fade_color).fitems[0])) xor
                 $ffffffff) and $00ffffff;
@@ -5577,7 +5579,7 @@ begin
    end
    else begin
     if fi.options * faceoptionsmask <> [] then begin
-     createalphabuffer;
+     createalphabuffer(false);
      falphabuffer.transparency:=
       (longword(colortorgb(fi.fade_transparency)) xor $ffffffff) and $00ffffff;
     end;
