@@ -767,8 +767,8 @@ begin
   ffilename:= '';
   if openmode in [fm_create,fm_append] then begin
 {$ifdef FPC}
-   raise EFCreateError.CreateFmt(SFCreateError,[mstr1,
-        sys_geterrortext(mselasterror)]);
+   raise EFCreateError.CreateFmt(SFCreateError+lineend+'%s',[mstr1,
+                                       sys_geterrortext(mselasterror)]);
 {$else}
 
  {$if rtlversion > 14.1}
@@ -782,7 +782,8 @@ begin
   end
   else begin
 {$ifdef FPC}
-   raise EFCreateError.CreateFmt(SFopenError,[filepath(filename),sys_geterrortext(sys_getlasterror)]);
+   raise EFCreateError.CreateFmt(SFopenError+lineend+'%s',[mstr1,
+                                               sys_geterrortext(mselasterror)]);
 {$else}
   {$if rtlversion > 14.1}
    raise EFOpenError.CreateResFmt(@SFOpenErrorEx,
