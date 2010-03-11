@@ -1823,69 +1823,30 @@ begin
    str4:= newfonamebases[tmenuitem(sender).tag];
    str2:= newfosources[tmenuitem(sender).tag];
    str3:= newfoforms[tmenuitem(sender).tag];
-{
-   str4:= 'form';
-   case formkindty(tmenuitem(sender).tag) of
-    fok_main: begin
-     str2:= newmainfosource;
-     str3:= newmainfoform;
-    end;
-    fok_simple: begin
-     str2:= newsimplefosource;
-     str3:= newsimplefoform;
-    end;
-    fok_dock: begin
-     str2:= newdockingfosource;
-     str3:= newdockingfoform;
-    end;
-    fok_data: begin
-     str2:= newdatamodsource;
-     str3:= newdatamodform;
-     str4:= 'module';
-    end;
-    fok_subform: begin
-     str2:= newsubfosource;
-     str3:= newsubfoform;
-    end;
-    fok_report: begin
-     str2:= newreportsource;
-     str3:= newreportform;
-     str4:= 'report';
-    end;
-    fok_script: begin
-     str2:= newpascsource;
-     str3:= newpascform;
-     str4:= 'script';
-    end;
-    fok_inherited: begin
-     str2:= newinheritedsource;
-     str3:= newinheritedform;
-    end;
-    else begin
-     str2:= '';
-     str3:= '';
-    end;
-   end;
-}
   end;
-//  selectinheritedmodule(nil,'Select ancestor');
-  if (str2 <> '') and (str3 <> '') then begin
+  if (str2 <> '') {and (str3 <> '')} then begin
    str2:= filepath(str2); //sourcesource
-   str3:= filepath(str3); //formsource
+   if str3 <> '' then begin
+    str3:= filepath(str3); //formsource
+   end;
    splitfilepath(str1,dir,base,ext);
    str4:= getmodulename(base,str4);
    str5:= replacefileext(str1,'mfm');
    copynewfile(str2,str1,false,true,
              ['%UNITNAME%','%FORMNAME%','%ANCESTORUNIT%','%ANCESTORCLASS%'],
             ['${%FILENAMEBASE%}',str4,ancestorunit,ancestorclass]); //source
-   copynewfile(str3,str5,false,true,
+   if str3 <> '' then begin
+    copynewfile(str3,str5,false,true,
             ['%UNITNAME%','%FORMNAME%','%ANCESTORUNIT%','%ANCESTORCLASS%'],
             ['${%FILENAMEBASE%}',str4,ancestorunit,ancestorclass]); //form
+   end;
    sourcefo.openfile(str1,true);
-   openformfile(str5,true,false,false,true);
-   po1:= designer.modules.findmodule(str5);
-   if po1 <> nil then begin
-    po1^.modified:= true; //initial create of ..._mfm.pas
+   if (str3 <> '') then begin
+    openformfile(str5,true,false,false,true);
+    po1:= designer.modules.findmodule(str5);
+    if po1 <> nil then begin
+     po1^.modified:= true; //initial create of ..._mfm.pas
+    end;
    end;
   end
   else begin
