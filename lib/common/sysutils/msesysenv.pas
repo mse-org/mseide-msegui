@@ -966,21 +966,24 @@ var
  po1,po2,start: pmsechar;
  str1,str2,str3: msestring;
  
- function checkmacrostart(const po: pmsechar): pmsechar;
+ function checkmacrostart(po: pmsechar): pmsechar;
  begin
   if mao_curlybraceonly in foptions then begin
-   result:= msestrscan(po,msechar('{'));
-   if result <> nil then begin
-    if (result = start) then begin
-     result:= nil;
-    end
-    else begin
-     dec(result);
-     if result^ <> '$' then begin
+   repeat
+    result:= msestrscan(po,msechar('{'));
+    if result <> nil then begin
+     if (result = start) then begin
       result:= nil;
+     end
+     else begin
+      dec(result);
+      if result^ = '$' then begin
+       break;
+      end;
+      inc(po); //next curlybrace
      end;
     end;
-   end;
+   until result = nil;
   end
   else begin
    result:= msestrscan(po,msechar('$'))
