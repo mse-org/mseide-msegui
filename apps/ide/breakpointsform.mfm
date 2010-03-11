@@ -287,6 +287,9 @@ object breakpointsfo: tbreakpointsfo
       bounds_y = 0
       bounds_cx = 61
       bounds_cy = 16
+      font.name = 'stf_fixed'
+      font.xscale =  1.0000000000000000E+0000
+      font.dummy = 0
       ondataentered = addressentered
       base = nb_hex
       max = -1

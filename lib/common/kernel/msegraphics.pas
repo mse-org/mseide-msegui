@@ -985,6 +985,8 @@ function registerfontalias(const alias,name: string;
 function unregisterfontalias(const alias: string): boolean;
               //false if alias does not exist
 procedure clearfontalias; //removes all alias which are not fam_fix
+function fontaliascount: integer;
+procedure setfontaliascount(const acount: integer);
 function realfontname(const aliasname: string): string;
 function getfontforglyph(const abasefont: fontty; const glyph: unicharty): fontnumty;
 function fontoptioncharstooptions(const astring: string): fontoptionsty;
@@ -1255,6 +1257,16 @@ begin
  end;
 end;
 
+function fontaliascount: integer;
+begin
+ result:= ffontaliaslist.count;
+end;
+
+procedure setfontaliascount(const acount: integer);
+begin
+ ffontaliaslist.count:= acount;
+end;
+
 function getfontdata(font: fontnumty): pfontdataty;
 begin
  dec(font);
@@ -1390,7 +1402,8 @@ var
    data1.rotation:= rotation;
    data1.xscale:= xscale;
   end;
- end;
+ end; //getvalues
+ 
 label
  endlab;
 begin

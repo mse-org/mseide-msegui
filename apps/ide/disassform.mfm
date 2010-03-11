@@ -1,24 +1,23 @@
 object disassfo: tdisassfo
   optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  frame.grip_size = 10
+  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
+  frame.dummy = 0
+  onactivate = act
+  ondeactivate = deact
+  visible = False
   bounds_x = 162
   bounds_y = 502
   bounds_cx = 564
   bounds_cy = 210
-  frame.grip_size = 10
-  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
-  frame.dummy = 0
-  taborder = 1
-  onactivate = act
-  ondeactivate = deact
-  visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
-  container.bounds_x = 0
-  container.bounds_y = 0
-  container.bounds_cx = 554
-  container.bounds_cy = 210
-  container.frame.dummy = 0
+  container.bounds = (
+    0
+    0
+    554
+    210
+  )
   dragdock.splitter_size = 0
-  dragdock.tab_size = 0
   dragdock.caption = 'Assembler'
   dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_propsize]
   options = [fo_savepos, fo_savezorder, fo_savestate]
@@ -93,12 +92,11 @@ object disassfo: tdisassfo
   moduleclassname = 'tdockform'
   object grid: tstringgrid
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    color = -1879048187
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 554
     bounds_cy = 210
-    color = -1879048187
-    frame.dummy = 0
     anchors = []
     onkeydown = keydo
     optionsgrid = [og_colsizing, og_colchangeontabkey, og_wrapcol, og_autopopup]
@@ -113,6 +111,9 @@ object disassfo: tdisassfo
         textflags = [tf_right, tf_ycentered, tf_noselect]
         textflagsactive = [tf_right, tf_ycentered]
         optionsedit = [scoe_eatreturn, scoe_hintclippedtext]
+        font.name = 'stf_fixed'
+        font.xscale =  1.0000000000000000E+0000
+        font.dummy = 0
       end    
       item
         width = 472
@@ -126,8 +127,8 @@ object disassfo: tdisassfo
       14745599
       16777184
     )
-    datarowheight = 17
+    datarowheight = 16
     onscrollrows = scrollrows
-    reffontheight = 15
+    reffontheight = 14
   end
 end

@@ -719,6 +719,9 @@ begin
  expandprmacros1(result);
 end;
 
+var
+ initfontaliascount: integer;
+ 
 procedure expandprojectmacros;
 var
  li: tmacrolist;
@@ -800,7 +803,11 @@ begin
    li.expandmacros(newpascsource);
    li.expandmacros(newpascform);
 }
-   clearfontalias;
+   if initfontaliascount = 0 then begin
+    initfontaliascount:= fontaliascount;
+   end;
+   setfontaliascount(initfontaliascount);
+//   clearfontalias;
    int2:= high(fontalias);
    int1:= high(fontancestors);
    setlength(fontancestors,int2+1); //additional field
