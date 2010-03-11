@@ -206,6 +206,8 @@ type
    property autosize_cx: integer read fautosize_cx write setautosize_cx default 0;
    property autosize_cy: integer read fautosize_cy write setautosize_cy default 0;
   published
+   property visible stored false;
+   property enabled stored false;
    property state: actionstatesty read getstate write setstate
             stored isstatestored  default [];
 //   property visible stored false;
@@ -1006,10 +1008,10 @@ end;
 procedure tcustombutton.setenabled(const avalue: boolean);
 begin
  if avalue then begin
-  exclude(factioninfo.state,as_disabled);
+  setactionstate(iactionlink(self),state - [as_disabled]);
  end
  else begin
-  include(factioninfo.state,as_disabled);
+  setactionstate(iactionlink(self),state + [as_disabled]);
  end;
  inherited;
 end;
@@ -1017,10 +1019,10 @@ end;
 procedure tcustombutton.setvisible(const avalue: boolean);
 begin
  if avalue then begin
-  exclude(factioninfo.state,as_invisible);
+  setactionstate(iactionlink(self),state - [as_invisible]);
  end
  else begin
-  include(factioninfo.state,as_invisible);
+  setactionstate(iactionlink(self),state + [as_invisible]);
  end;
  inherited;
 end;

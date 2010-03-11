@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -138,6 +138,10 @@ begin
                                  trowstatelistsourcefoldlevelpropertyeditor);
  registerpropertyeditor(typeinfo(string),trowstatelist,'sourceissum',
                                  trowstatelistsourceissumpropertyeditor);
+ registerpropertyeditor(typeinfo(boolean),tcustomdatabutton,'visible',
+                           trefreshbooleanpropertyeditor);
+ registerpropertyeditor(typeinfo(boolean),tcustomdatabutton,'enabled',
+                           trefreshbooleanpropertyeditor);
 end;
 
 { tdropdowncolpropertyeditor }

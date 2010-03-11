@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -165,6 +165,11 @@ begin
                                  tchildwidgetpropertyeditor);
 
  registerpropertyeditor(typeinfo(ttraces),nil,'',ttraceseditor);
+ 
+ registerpropertyeditor(typeinfo(boolean),tcustombutton,'visible',
+                           trefreshbooleanpropertyeditor);
+ registerpropertyeditor(typeinfo(boolean),tcustombutton,'enabled',
+                           trefreshbooleanpropertyeditor);
   
  registerunitgroup(['msegrids'],['msegui','msegraphutils','mseclasses']);
  registerunitgroup(['msewidgetgrid'],['msedataedits',

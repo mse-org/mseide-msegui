@@ -814,6 +814,8 @@ type
    property min default -1; 
    property max default 0;
   published
+   property visible stored false;
+   property enabled stored false;
    property state: actionstatesty read factioninfo.state write setstate 
                              stored isstatestored default [];
  end;
@@ -3089,10 +3091,10 @@ end;
 procedure tcustomdatabutton.setenabled(const avalue: boolean);
 begin
  if avalue then begin
-  exclude(factioninfo.state,as_disabled);
+  setactionstate(iactionlink(self),state - [as_disabled]);
  end
  else begin
-  include(factioninfo.state,as_disabled);
+  setactionstate(iactionlink(self),state + [as_disabled]);
  end;
  inherited;
 end;
@@ -3100,10 +3102,10 @@ end;
 procedure tcustomdatabutton.setvisible(const avalue: boolean);
 begin
  if avalue then begin
-  exclude(factioninfo.state,as_invisible);
+  setactionstate(iactionlink(self),state - [as_invisible]);
  end
  else begin
-  include(factioninfo.state,as_invisible);
+  setactionstate(iactionlink(self),state + [as_invisible]);
  end;
  inherited;
 end;

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -251,6 +251,11 @@ type
  end;
  
  tvolatilebooleanpropertyeditor = class(tbooleanpropertyeditor)
+  protected
+   function getdefaultstate: propertystatesty; override;
+ end;
+
+ trefreshbooleanpropertyeditor = class(tbooleanpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
  end;
@@ -5103,6 +5108,13 @@ end;
 function tvolatilebooleanpropertyeditor.getdefaultstate: propertystatesty;
 begin
  result:= inherited getdefaultstate + [ps_volatile];
+end;
+
+{ trefreshbooleanpropertyeditor }
+
+function trefreshbooleanpropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate + [ps_refresh];
 end;
 
 initialization
