@@ -97,36 +97,15 @@ type
   scriptaftercopy: msestring;
   newprojectfiles: filenamearty;
   newprojectfilesdest: filenamearty;
-//  newprogramfile: filenamety;
-//  newunitfile: filenamety;
   newfinames: msestringarty;
   newfifilters: msestringarty;
   newfiexts: msestringarty;
   newfisources: filenamearty;
   
-//  newtextfile: filenamety;
   newfonames: msestringarty;
   newfonamebases: msestringarty;
   newfosources: msestringarty;
   newfoforms: msestringarty;
-{  
-  newmainfosource: filenamety;
-  newmainfoform: filenamety;
-  newsimplefosource: filenamety;
-  newsimplefoform: filenamety;
-  newdockingfosource: filenamety;
-  newdockingfoform: filenamety;
-  newdatamodsource: filenamety;
-  newdatamodform: filenamety;
-  newsubfosource: filenamety;
-  newsubfoform: filenamety;
-  newreportsource: filenamety;
-  newreportform: filenamety;
-  newinheritedsource: filenamety;
-  newinheritedform: filenamety;
-  newpascsource: filenamety;
-  newpascform: filenamety;
- }
 
   progparameters: msestring;
   progworkingdirectory: filenamety;

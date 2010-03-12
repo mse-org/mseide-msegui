@@ -9,13 +9,19 @@
 }
 unit msesyntaxpainter;
 
+{
+COLORS [[[fontcolor [backgroundcolor [statementcolor]]]
+                      cl_default for project options settings
+}
+
 {$ifdef FPC}{$mode objfpc}{$h+}{$GOTO ON}{$endif}
 
 interface
 
 uses
  Classes,msestrings,mserichstring,msedatalist,
- msestream,msehash,msetimer,msestat,msetypes,mseclasses,mseguiglob,mseevent;
+ msestream,msehash,msetimer,msestat,msetypes,mseclasses,mseguiglob,mseevent,
+ msegraphutils;
 
 const
  defaultkeywordchars: set of char = ['A'..'Z','a'..'z','0'..'9','_'];
@@ -54,14 +60,6 @@ type
  end;
  scopeinfopoty = ^scopeinfoty;
  scopeinfoarty = array of scopeinfoty;
-{
- scopestackinfoty = record
-  endtokennr: integer;
-  endtokenpo: endtokenpoty;
- end;
-
- scopestackinfoarty = array of scopestackinfoty;
-}
  charsty = set of char;
  charspoty = ^charsty;
 
@@ -110,6 +108,12 @@ type
  pclientinfoty = ^clientinfoty;
  clientinfoarty = array of clientinfoty;
 
+ syntaxcolorinfoty = record
+  font: colorty;
+  background: colorty;
+  statement: colorty;
+ end;
+ 
  syntaxdefty = record
   defdefsnr: integer; //-1 -> mit readdeffile geladen
   charstyles: tcharstyledatalist;
@@ -120,7 +124,9 @@ type
   scopeendchars,scopestartchars: charsty;
   keywordar: keywordarty;
   keywordnames: thashedstrings;
+  colors: syntaxcolorinfoty;
  end;
+
  syntaxdefpoty = ^syntaxdefty;
  syntaxdefarty = array of syntaxdefty;
 
@@ -149,6 +155,7 @@ type
    procedure deflistchanged(const sender: tobject);
    function getboldchars(index: integer): gridcoordarty;
    procedure setboldchars(index: integer; const avalue: gridcoordarty);
+   function getcolors(index: integer): syntaxcolorinfoty;
   protected
 
   public
@@ -157,7 +164,6 @@ type
    procedure paintsyntax(handle: integer; start,count: halfinteger; //startrow,rowcount
                          background: boolean = false);
                                //-1 = letzte in fscopeinfos
-//   procedure invalidatesyntax(handle: integer; start,count: integer);
    function registerclient(sender: tobject; alist: trichstringdatalist;
                   aonlinechanged: integerchangedeventty = nil;
                   asyntaxdefhandle: integer = 0): integer;
@@ -174,6 +180,7 @@ type
    property defaultsyntax: integer read fdefaultsyntax;
    property boldchars[index: integer]: gridcoordarty read getboldchars 
                                     write setboldchars;
+   property colors[index: integer]: syntaxcolorinfoty read getcolors;
   published
    property linesperslice: integer read flinesperslice write setlinesperslice
                 default defaultlinesperslice;
@@ -190,7 +197,7 @@ type
 
 implementation
 uses
- sysutils,msefileutils,msesys,mseformatstr,msegraphics,msegraphutils;
+ sysutils,msefileutils,msesys,mseformatstr,msegraphics;
 
 procedure markstartchars(const str: msestring; var chars: charsty); overload;
 begin
@@ -307,7 +314,6 @@ begin
   for int1:= 0 to high(keywordar) do begin
    keywordar[int1].Free;
   end;
-//  scopeinfos:= nil;
  end;
  finalize(fsyntaxdefs[handle]);
 end;
@@ -322,6 +328,11 @@ begin
   charstyles.add; //default
   keywordchars:= defaultkeywordchars;
   keywordnames:= thashedstrings.create;
+  with colors do begin
+   font:= cl_default;
+   background:= cl_default;
+   statement:= cl_default;
+  end;
  end;
 end;
 
@@ -575,14 +586,6 @@ endlab:
   end;
  end;
 end;
-{
-procedure tsyntaxpaintermse.checkclienthandle(handle: integer);
-begin
- if (handle < 0) or (handle >= length(fclients)) then begin
-  raise exception.Create('Invalid handle!');
- end;
-end;
-}
 
 procedure tsyntaxpainter.calcrefreshinfo(var info: refreshinfoty; var startscope: integer);
 var
@@ -703,7 +706,7 @@ end;
 function tsyntaxpainter.readdeffile(stream: ttextstream): integer;
 type
  tokennrty = (tn_styles,tn_caseinsensitive,tn_keywordchars,tn_addkeywordchars,
-              tn_keyworddefs,
+              tn_colors,tn_keyworddefs,
               tn_scope,tn_endtokens,tn_keywords,tn_jumptokens,tn_calltokens,
               tn_return);
 const
@@ -712,7 +715,7 @@ const
  nonetoken = 'NONE';
  tokens: array[tokennrty] of string = (
        'STYLES','CASEINSENSITIVE','KEYWORDCHARS','ADDKEYWORDCHARS',
-       'KEYWORDDEFS',
+       'COLORS','KEYWORDDEFS',
        'SCOPE','ENDTOKENS','KEYWORDS','JUMPTOKENS','CALLTOKENS',
        'RETURN');
  tn_localstart = tn_scope;
@@ -819,6 +822,27 @@ var
   error('Invalid string. '''+line+''''+lineinfo);
  end;
 
+ procedure invalidcolor;
+ begin
+  error('Invalid color. '''+line+''''+lineinfo);
+ end;
+
+ function getcolor(var aline: lstringty; out acolor: colorty): boolean;
+ var
+  str1: string;
+ begin
+  result:= false;
+  nextword(aline,str1);
+  if str1 <> '' then begin
+   try
+    acolor:= stringtocolor(str1);
+   except
+    invalidcolor;
+   end;
+  end;
+  result:= true;
+ end;
+ 
  procedure addname(list: thashedstrings; const name: lstringty; nummer: integer);
  var
   str1: string;
@@ -842,7 +866,6 @@ var
   dec(result);
  end;
 
-
 const
  defaultname = 'DEFAULT';
 var
@@ -856,6 +879,7 @@ var
  wstrar1: msestringarty;
  bo1: boolean;
  aktkeywordfontinfonr: integer;
+ 
 
 begin
  result:= -1;
@@ -914,6 +938,14 @@ begin
          setlength(keywordar,length(keywordar)+1);
          keywordar[high(keywordar)]:= thashedmsestrings.create;
          addname(keywordnames,lstr3,length(keywordar));
+        end;
+        tn_colors: begin
+         if getcolor(lstr1,colors.font) then begin
+          if getcolor(lstr1,colors.background) then begin
+           if getcolor(lstr1,colors.statement) then begin
+           end;
+          end;
+         end;
         end;
         tn_addkeywordchars,tn_styles: begin
         end;
@@ -1281,6 +1313,12 @@ procedure tsyntaxpainter.setboldchars(index: integer;
 begin
  checkarrayindex(fclients,index);
  fclients[index].boldchars:= avalue;
+end;
+
+function tsyntaxpainter.getcolors(index: integer): syntaxcolorinfoty;
+begin
+ checkarrayindex(fclients,index);
+ result:= fsyntaxdefs[fclients[index].syntaxdefhandle].colors;
 end;
 
 end.
