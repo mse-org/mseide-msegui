@@ -1058,7 +1058,7 @@ procedure tmainfo.updatetargetenvironment;
 var
  int1: integer;
 begin
- with projectoptions do begin
+ with projectoptions,texp do begin
   gdb.progparameters:= progparameters;
   gdb.workingdirectory:= progworkingdirectory;
   gdb.clearenvvars;
@@ -2344,8 +2344,8 @@ begin
   end;
  end
  else begin
-  with projectoptions do begin
-   mstr1:= texp.runcommand;
+  with projectoptions,texp do begin
+   mstr1:= runcommand;
    if progparameters <> '' then begin
     mstr1:= mstr1 + ' ' + progparameters;
    end;

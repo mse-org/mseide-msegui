@@ -127,6 +127,11 @@ type
   newpascsource: filenamety;
   newpascform: filenamety;
  }
+
+  progparameters: msestring;
+  progworkingdirectory: filenamety;
+  envvarnames: msestringarty;
+  envvarvalues: msestringarty;
  end;
 
  projectoptionsty = record
@@ -212,12 +217,8 @@ type
   usercolorcomment: msestringarty;
 
   //programparameters
-  progparameters: string;
   propgparamhistory: msestringarty;
-  progworkingdirectory: filenamety;
   envvarons: longboolarty;
-  envvarnames: msestringarty;
-  envvarvalues: msestringarty;
   
   //editor
   findreplaceinfo: replaceinfoty;
@@ -803,6 +804,11 @@ begin
    li.expandmacros(newpascsource);
    li.expandmacros(newpascform);
 }
+   li.expandmacros(progparameters);
+   li.expandmacros(progworkingdirectory);
+   li.expandmacros(envvarnames);
+   li.expandmacros(envvarvalues);
+
    if initfontaliascount = 0 then begin
     initfontaliascount:= fontaliascount;
    end;

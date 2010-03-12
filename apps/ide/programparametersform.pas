@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2009 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2010 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ unit programparametersform;
 interface
 uses
  mseforms,msestat,mseglob,msestatfile,msesimplewidgets,msedataedits,msefiledialog,
- msewidgetgrid,msegraphedits,msememodialog;
+ msewidgetgrid,msegraphedits,msememodialog,msegui,msestrings;
 
 type
  tprogramparametersfo = class(tmseform)
@@ -35,6 +35,9 @@ type
    envvarvalue: tmemodialogedit;
    grid: twidgetgrid;
    workingdirectory: tfilenameedit;
+   procedure hintexpandedmacros(const sender: TObject; var info: hintinfoty);
+   procedure expandfilename(const sender: TObject; var avalue: msestring;
+                   var accept: Boolean);
  end;
 
 procedure editprogramparameters;
@@ -42,7 +45,7 @@ procedure updatestat(const filer: tstatfiler);
 
 implementation
 uses
- programparametersform_mfm,projectoptionsform,mseguiglob,msegui;
+ programparametersform_mfm,projectoptionsform,mseguiglob,mseedit;
 
 procedure editprogramparameters;
 var
@@ -50,7 +53,7 @@ var
 begin
  fo:= tprogramparametersfo.create(nil);
  try
-  with projectoptions do begin
+  with projectoptions,t do begin
    fo.parameters.value:= progparameters;
    fo.parameters.dropdown.valuelist.asarray:= propgparamhistory;
    fo.workingdirectory.value:= progworkingdirectory;
@@ -60,7 +63,7 @@ begin
   end;
   if fo.show(true,nil) = mr_ok then begin
    fo.grid.removeappendedrow;
-   with projectoptions do begin
+   with projectoptions,t do begin
     progparameters:= fo.parameters.value;
     propgparamhistory:= fo.parameters.dropdown.valuelist.asarray;
     progworkingdirectory:= fo.workingdirectory.value;
@@ -68,6 +71,7 @@ begin
     envvarnames:= fo.envvarname.gridvalues;
     envvarvalues:= fo.envvarvalue.gridvalues;
    end;
+   expandprojectmacros;
   end;
  finally
   fo.Free;
@@ -77,7 +81,7 @@ end;
 procedure updatestat(const filer: tstatfiler);
 begin
  filer.setsection('progparams');
- with projectoptions do begin
+ with projectoptions,t do begin
   filer.updatevalue('parameters',progparameters);
   filer.updatevalue('progparamhistory',propgparamhistory);
   filer.updatevalue('workingdirectory',progworkingdirectory);
@@ -85,6 +89,20 @@ begin
   filer.updatevalue('envvarnames',envvarnames);
   filer.updatevalue('envvarvalues',envvarvalues);
  end;
+end;
+
+procedure tprogramparametersfo.hintexpandedmacros(const sender: TObject;
+               var info: hintinfoty);
+begin
+ info.caption:= tcustomedit(sender).text;
+ expandprmacros1(info.caption);
+ include(info.flags,hfl_show); //show empty caption
+end;
+
+procedure tprogramparametersfo.expandfilename(const sender: TObject;
+               var avalue: msestring; var accept: Boolean);
+begin
+ expandprmacros1(avalue);
 end;
 
 end.

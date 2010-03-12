@@ -6,9 +6,15 @@ object programparametersfo: tprogramparametersfo
   bounds_cx = 328
   bounds_cy = 348
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_mousewheel, ow_destroywidgets, ow_autoscale]
+  container.bounds = (
+    0
+    0
+    328
+    348
+  )
   options = [fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder]
   statfile = statfile1
-  caption = 'Target environment'
+  caption = 'Target Environment'
   moduleclassname = 'tmseform'
   object workingdirectory: tfilenameedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
@@ -22,6 +28,7 @@ object programparametersfo: tprogramparametersfo
       0
     )
     taborder = 1
+    onshowhint = hintexpandedmacros
     bounds_x = 2
     bounds_y = 9
     bounds_cx = 324
@@ -29,6 +36,7 @@ object programparametersfo: tprogramparametersfo
     anchors = [an_left, an_top, an_right]
     controller.options = [fdo_directory]
     controller.captionopen = 'Select program working directory'
+    controller.ongetfilename = expandfilename
     reffontheight = 14
   end
   object ok: tbutton
@@ -65,6 +73,7 @@ object programparametersfo: tprogramparametersfo
       0
     )
     taborder = 2
+    onshowhint = hintexpandedmacros
     bounds_x = 2
     bounds_y = 57
     bounds_cx = 324
@@ -168,6 +177,7 @@ object programparametersfo: tprogramparametersfo
       frame.button.color = -2147483646
       frame.button.imagenr = 17
       taborder = 3
+      onshowhint = hintexpandedmacros
       visible = False
       bounds_x = 125
       bounds_y = 0
