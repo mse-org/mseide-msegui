@@ -5469,104 +5469,118 @@ var
 
 begin
  if intersectrect(rect,canvas.clipbox,rect1) then begin
-  if fi.fade_color.count > 1 then begin
-   with tcolorarrayprop1(fi.fade_color) do begin
-    setlength(rgbs,length(fitems));
-    for int1:= 0 to high(rgbs) do begin
-     rgbs[int1]:= colortorgb(fintf.translatecolor(fitems[int1]));
-    end;
-   end;
-   case fi.fade_direction of
-    gd_up,gd_down: begin
-     a:= (rect1.y - rect.y) / rect.cy;
-     b:= (rect1.y + rect1.cy - rect.y) / rect.cy;
-     pixelscale:= rect.cy;
-     vert:= true;
-     imax:= rect1.cy;
-    end
-    else begin //gd_right,gd_left
-     a:= (rect1.x - rect.x) / rect.cx;
-     b:= (rect1.x + rect1.cx - rect.x) / rect.cx;
-     pixelscale:= rect.cx;
-     vert:= false;
-     imax:= rect1.cx;
-    end;
-   end;
-   if fi.fade_direction in [gd_up,gd_left] then begin
-    reverse:= true;
-    rea1:= 1 - b;
-    b:= 1 - a;
-    a:= rea1;
-   end
-   else begin
-    reverse:= false;
-   end;
-   first:= 0;
-   last:= fi.fade_color.count - 1;
-   with trealarrayprop1(fi.fade_pos) do begin
-    for int1:= 1 to last do begin
-     if fitems[int1] < a then begin
-      first:= int1;
-     end;
-     if trealarrayprop1(fi.fade_pos).fitems[int1] >= b then begin
-      last:= int1;
-      break;
+  if fi.fade_color.count > 0 then begin
+   if (fi.fade_color.count > 1) or 
+                (fi.fade_transparency <> cl_none) and 
+                               (fi.options * faceoptionsmask = []) then begin
+    with tcolorarrayprop1(fi.fade_color) do begin
+     setlength(rgbs,length(fitems));
+     for int1:= 0 to high(rgbs) do begin
+      rgbs[int1]:= colortorgb(fintf.translatecolor(fitems[int1]));
      end;
     end;
-    if (first < high(fitems))  then begin
-     col1:= scalecolor(calcscale(a,fitems[first],fitems[first+1]),
-                           rgbs[first],rgbs[first+1]);
-    end
-    else begin
-     col1:= rgbs[high(fitems)];
-    end;
-    col2:= scalecolor(calcscale(b,fitems[last-1],fitems[last]),
-                           rgbs[last-1],rgbs[last]);
-    rgbs[first]:= col1;
-    rgbs[last]:= col2;
-    poss:= copy(fitems);
-    poss[first]:= a;
-    poss[last]:= b;
-    for int1:= first to last do begin
-     poss[int1]:= poss[int1] - a;
-    end;
-    bmp:= tbitmap.create(false);
-    if vert then begin
-     bmp.size:= makesize(1,rect1.cy);
-    end
-    else begin
-     bmp.size:= makesize(rect1.cx,1);
-    end;
-    fade:= bmp.scanline[0];
-    if reverse then begin
-     if vert then begin
-      ipos:= rect1.cy-1;
+    case fi.fade_direction of
+     gd_up,gd_down: begin
+      a:= (rect1.y - rect.y) / rect.cy;
+      b:= (rect1.y + rect1.cy - rect.y) / rect.cy;
+      pixelscale:= rect.cy;
+      vert:= true;
+      imax:= rect1.cy;
      end
-     else begin
-      ipos:= rect1.cx-1;
+     else begin //gd_right,gd_left
+      a:= (rect1.x - rect.x) / rect.cx;
+      b:= (rect1.x + rect1.cx - rect.x) / rect.cx;
+      pixelscale:= rect.cx;
+      vert:= false;
+      imax:= rect1.cx;
      end;
+    end;
+    if fi.fade_direction in [gd_up,gd_left] then begin
+     reverse:= true;
+     rea1:= 1 - b;
+     b:= 1 - a;
+     a:= rea1;
     end
     else begin
      reverse:= false;
-     ipos:= 0;
     end;
-    for int1:= first to last-1 do begin
-     interpolate(int1);
+    with trealarrayprop1(fi.fade_pos) do begin
+     if count > 1 then begin
+      first:= 0;
+      last:= count - 1;
+      for int1:= 1 to last do begin
+       if fitems[int1] < a then begin
+        first:= int1;
+       end;
+       if trealarrayprop1(fi.fade_pos).fitems[int1] >= b then begin
+        last:= int1;
+        break;
+       end;
+      end;
+      if (first < high(fitems))  then begin
+       col1:= scalecolor(calcscale(a,fitems[first],fitems[first+1]),
+                             rgbs[first],rgbs[first+1]);
+      end
+      else begin
+       col1:= rgbs[high(fitems)];
+      end;
+      col2:= scalecolor(calcscale(b,fitems[last-1],fitems[last]),
+                             rgbs[last-1],rgbs[last]);
+      rgbs[first]:= col1;
+      rgbs[last]:= col2;
+      poss:= copy(fitems);
+      poss[first]:= a;
+      poss[last]:= b;
+      for int1:= first to last do begin
+       poss[int1]:= poss[int1] - a;
+      end;
+     end;
+     bmp:= tbitmap.create(false);
+     if vert then begin
+      bmp.size:= makesize(1,rect1.cy);
+     end
+     else begin
+      bmp.size:= makesize(rect1.cx,1);
+     end;
+     if count > 1 then begin
+      fade:= bmp.scanline[0];
+      if reverse then begin
+       if vert then begin
+        ipos:= rect1.cy-1;
+       end
+       else begin
+        ipos:= rect1.cx-1;
+       end;
+      end
+      else begin
+       reverse:= false;
+       ipos:= 0;
+      end;
+      for int1:= first to last-1 do begin
+       interpolate(int1);
+      end;
+     end
+     else begin //count = 1
+      if vert then begin
+       bmp.canvas.drawline(nullpoint,makepoint(0,rect1.cy-1),fi.fade_color[0]);
+      end
+      else begin
+       bmp.canvas.drawline(nullpoint,makepoint(rect1.cx-1,0),fi.fade_color[0]);
+      end;
+     end;
+     if fi.options * faceoptionsmask = [] then begin
+      bmp.transparency:= fi.fade_transparency;
+      bmp.paint(canvas,rect1,[al_stretchx,al_stretchy]);
+     end
+     else begin
+      createalphabuffer(true);
+      bmp.paint(falphabuffer.mask.canvas,makerect(nullpoint,rect1.size),
+       makerect(nullpoint,bmp.size),[al_stretchx,al_stretchy]);
+     end;
+     bmp.Free;
     end;
-    if fi.options * faceoptionsmask = [] then begin
-     bmp.transparency:= fi.fade_transparency;
-     bmp.paint(canvas,rect1,[al_stretchx,al_stretchy]);
-    end
-    else begin
-     createalphabuffer(true);
-     bmp.paint(falphabuffer.mask.canvas,makerect(nullpoint,rect1.size),
-      makerect(nullpoint,bmp.size),[al_stretchx,al_stretchy]);
-    end;
-    bmp.Free;
-   end;
-  end
-  else begin
-   if fi.fade_color.count > 0 then begin
+   end
+   else begin //fade_color.count = 1
     if fi.options * faceoptionsmask <> [] then begin
      createalphabuffer(false);
      falphabuffer.transparency:=
@@ -5576,13 +5590,13 @@ begin
     else begin
      canvas.fillrect(rect1,tcolorarrayprop1(fi.fade_color).fitems[0]);
     end;
-   end
-   else begin
-    if fi.options * faceoptionsmask <> [] then begin
-     createalphabuffer(false);
-     falphabuffer.transparency:=
-      (longword(colortorgb(fi.fade_transparency)) xor $ffffffff) and $00ffffff;
-    end;
+   end;
+  end
+  else begin //fade_color.count = 0
+   if fi.options * faceoptionsmask <> [] then begin
+    createalphabuffer(false);
+    falphabuffer.transparency:=
+     (longword(colortorgb(fi.fade_transparency)) xor $ffffffff) and $00ffffff;
    end;
   end;
   if fi.image.hasimage then begin
