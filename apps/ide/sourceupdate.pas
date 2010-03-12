@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2010 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -118,13 +118,15 @@ type
                           const interfaceonly: boolean); overload;
    function composeproceduretext(const name: string; const info: methodparaminfoty;
                                  const withdefault: boolean): string; overload;
-   function composeprocedureheader(const name: string; const info: methodparaminfoty;
-                                   const withdefault: boolean): string; overload;
+   function composeprocedureheader(const name: string;
+                 const info: methodparaminfoty; const withdefault: boolean;
+                                       const classproc: boolean): string; overload;
    function composeprocedureheader(const infopo: pprocedureinfoty;
                                  const classinfopo: pclassinfoty;
                                  const withdefault: boolean): string; overload;
    function composeprocedureheader(const name: string; const typeinfo: ptypeinfo;
-                                 const withdefault: boolean): string; overload;
+                                 const withdefault: boolean;
+                                 const classproc: boolean): string; overload;
    procedure createmethodbody(const unitinfopo: punitinfoty;
                 const classinfopo: pclassinfoty; const aname: string;
                 const atype: ptypeinfo; beforeitem: integer);
@@ -191,7 +193,7 @@ type
    function composeproceduretext(const infopo: pprocedureinfoty;
                      const withdefault: boolean): string; overload;
    function composeprocedureheader(const infopo: pprocedureinfoty;
-                     const withdefault: boolean): string; overload;
+                                   const withdefault: boolean): string; overload;
    function gettype(const adef: pdefinfoty): stringarty;
    function finddef(const infopo: punitinfoty;
                    const apos: sourceposty): pdefinfoty; overload;
@@ -1203,7 +1205,7 @@ function tsourceupdater.composeprocedureheader(const infopo: pprocedureinfoty;
               const withdefault: boolean): string;
 begin
  with infopo^ do begin
-  result:= composeprocedureheader(name,params,withdefault);
+  result:= composeprocedureheader(name,params,withdefault,classproc);
  end;
 end;
 
@@ -1258,7 +1260,7 @@ begin
   str1:= lineend;
  end;
  str1:= str1 + limitlinelength(
-                 composeprocedureheader(classinfopo^.name+'.'+aname,atype,false),
+          composeprocedureheader(classinfopo^.name+'.'+aname,atype,false,false),
                                       fmaxlinelength,';',14) + lineend;
  str1:= str1 + 'begin' + lineend + 'end;' + lineend;
  if bo1 then begin
@@ -1543,7 +1545,7 @@ begin
   end;
   if not isemptysourcepos(pos1) then begin
    createmethodbody(po1,po2,aname,atype,posindex);
-   str1:= composeprocedureheader(aname,atype,false);
+   str1:= composeprocedureheader(aname,atype,false,false);
    replacetext(po1,pos1,pos1,limitlinelength(
              '   ' + str1,fmaxlinelength,';',18)+lineend);
   end;
@@ -1651,20 +1653,25 @@ begin
 end;
 
 function tsourceupdater.composeprocedureheader(const name: string;
-            const info: methodparaminfoty; const withdefault: boolean): string;
+            const info: methodparaminfoty; const withdefault: boolean;
+            const classproc: boolean): string;
 begin
+ result:= '';
+ if classproc then begin
+  result:= 'class ';
+ end;
  case info.kind of 
   mkfunction: begin
-   result:= 'function ';
+   result:= result + 'function ';
   end;
   mkconstructor: begin
-   result:= 'constructor ';
+   result:= result + 'constructor ';
   end;
   mkdestructor: begin
-   result:= 'destructor ';
+   result:= result + 'destructor ';
   end;
   else begin
-   result:= 'procedure ';
+   result:= result + 'procedure ';
   end;
  end;
  result:= result + composeproceduretext(name,info,withdefault);
@@ -1682,18 +1689,19 @@ begin
   else begin
    str1:= name;
   end;
-  result:= composeprocedureheader(str1,params,withdefault);
+  result:= composeprocedureheader(str1,params,withdefault,infopo^.classproc);
  end;
 end;
 
 function tsourceupdater.composeprocedureheader(const name: string;
                                  const typeinfo: ptypeinfo;
-                                 const withdefault: boolean): string;
+                                 const withdefault: boolean;
+                                 const classproc: boolean): string;
 var
  info: methodparaminfoty;
 begin
  getmethodparaminfo(typeinfo,info);
- result:= composeprocedureheader(name,info,withdefault);
+ result:= composeprocedureheader(name,info,withdefault,classproc);
 end;
 
 constructor tsourceupdater.create(const adesigner: tdesigner);

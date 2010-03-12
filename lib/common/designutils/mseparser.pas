@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -333,9 +333,9 @@ type
   'overload',
   'packed','procedure','program','property','raise','record','repeat',
   'resourcestring','set','shl','shr','then','threadvar','to',
-  'try','type','unit','until','uses','var','while','with','xor',
+  'try','type','unit','until','uses','var','while','with','xor', //default
 
-  'abstract','inherited','override','reintroduce','virtual',
+  'abstract','inherited','override','reintroduce','virtual',     //class
   'private','protected','public','published','automated',
   
   'read','write','stored','default','nodefault');

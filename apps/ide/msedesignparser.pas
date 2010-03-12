@@ -122,6 +122,7 @@ type
    impheaderendpos: sourceposty;
    impendpos: sourceposty;
    managed: boolean;
+   classproc: boolean;
   end;
   pprocedureinfoty = ^procedureinfoty;
   procedureinfoarty = array of procedureinfoty;

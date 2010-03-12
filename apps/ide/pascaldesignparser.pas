@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2009 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2010 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -474,12 +474,25 @@ var
  po1: pprocedureinfoty;
  token1: tokenidty;
  pos1,pos2: sourceposty;
-
+ bo1: boolean;
 begin
+ bo1:= atoken = pid_class;
+ if bo1 then begin
+  if getident(ord(atoken)) then begin
+   if  not ((atoken = pid_function) or (atoken = pid_procedure)) then begin
+    lasttoken;
+    exit;
+   end;
+  end
+  else begin
+   exit;
+  end;
+ end;
  with classinfopo^ do begin
   po1:= procedurelist.newitem;
   token1:= acttoken;
   po1^.managed:= managed;
+  po1^.classproc:= bo1;
   result:= parseprocedureheader(atoken,po1);
   pos2:= sourcepos;
   if result then begin
@@ -648,7 +661,7 @@ begin
          break;
         end;
        end;
-       pid_procedure,pid_function,pid_constructor,pid_destructor: begin
+       pid_class,pid_procedure,pid_function,pid_constructor,pid_destructor: begin
         if isemptysourcepos(privatefieldend) and 
                      not isemptysourcepos(privatestart) and 
                      isemptysourcepos(privateend) then begin
@@ -660,7 +673,6 @@ begin
        else begin
         pos1:= sourcepos;
         ar1:= getorignamelist;
-//        if getorigname(lstr1) then begin
         if high(ar1) >= 0 then begin
          if isemptysourcepos(managedend) and (ident1 <> pid_property) then begin
           pc:= componentlist.newitem; //managed component
