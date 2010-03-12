@@ -1110,8 +1110,10 @@ var
 begin
  if edit <> nil then begin
   projectoptionstofont(edit.font);
-  grid.datarowheight:= edit.font.lineheight;
   with projectoptions do begin
+   grid.frame.colorclient:= editbkcolor;
+   grid.rowcolors[0]:= statementcolor;
+   grid.datarowheight:= edit.font.lineheight;
    int1:= edit.getcanvas.getstringwidth('oo') div 2;
    if rightmarginon then begin
     edit.marginlinecolor:= cl_gray;

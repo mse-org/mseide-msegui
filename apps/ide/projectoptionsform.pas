@@ -170,6 +170,10 @@ type
   editfontheight: integer;
   editfontwidth: integer;
   editfontextraspace: integer;
+  editfontcolor: integer;
+  editbkcolor: integer;
+  statementcolor: integer;
+  
   editfontantialiased: boolean;
   editmarkbrackets: boolean;
   backupfilecount: integer;
@@ -385,8 +389,6 @@ type
    dispgrid: twidgetgrid;
    fontdisp: ttextedit;
    tlayouter12: tlayouter;
-   editmarkbrackets: tbooleanedit;
-   editfontantialiased: tbooleanedit;
    editfontextraspace: tintegeredit;
    editfontwidth: tintegeredit;
    editfontheight: tintegeredit;
@@ -439,6 +441,11 @@ type
    newfiext: tstringedit;
    tabindent: tbooleanedit;
    fontancestors: tstringedit;
+   editfontcolor: tcoloredit;
+   editbkcolor: tcoloredit;
+   editfontantialiased: tbooleanedit;
+   editmarkbrackets: tbooleanedit;
+   statementcolor: tcoloredit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -638,6 +645,7 @@ begin
   else begin
    options:= options + [foo_nonantialiased];
   end;
+  color:= editfontcolor;
  end;
 end;
 
@@ -1045,6 +1053,9 @@ begin
   editfontheight:= 0;
   editfontwidth:= 0;
   editfontextraspace:= 0;
+  editfontcolor:= cl_text;
+  editbkcolor:= cl_foreground;
+  statementcolor:= $E0FFFF;
   editfontantialiased:= true;
   editmarkbrackets:= true;
   backupfilecount:= 2;
@@ -1409,6 +1420,9 @@ begin
   updatevalue('editfontheight',editfontheight);
   updatevalue('editfontwidth',editfontwidth);
   updatevalue('editfontextraspace',editfontextraspace);
+  updatevalue('editfontcolor',editfontcolor);
+  updatevalue('editbkcolor',editbkcolor);
+  updatevalue('statementcolor',statementcolor);
   updatevalue('editfontantialiased',editfontantialiased);
   updatevalue('editmarkbrackets',editmarkbrackets);
   updatevalue('backupfilecount',backupfilecount,0,10);
@@ -1584,6 +1598,9 @@ begin
   fo.editfontheight.value:= editfontheight;
   fo.editfontwidth.value:= editfontwidth;
   fo.editfontextraspace.value:= editfontextraspace;
+  fo.editfontcolor.value:= editfontcolor;
+  fo.editbkcolor.value:= editbkcolor;
+  fo.statementcolor.value:= statementcolor;
   fo.editfontantialiased.value:= editfontantialiased;
   fo.editmarkbrackets.value:= editmarkbrackets;
   fo.backupfilecount.value:= backupfilecount;
@@ -1793,6 +1810,9 @@ begin
   editfontheight:= fo.editfontheight.value;
   editfontwidth:= fo.editfontwidth.value;
   editfontextraspace:= fo.editfontextraspace.value;
+  editfontcolor:= fo.editfontcolor.value;
+  editbkcolor:= fo.editbkcolor.value;
+  statementcolor:= fo.statementcolor.value;
   editfontantialiased:= fo.editfontantialiased.value;
   editmarkbrackets:= fo.editmarkbrackets.value;
   backupfilecount:= fo.backupfilecount.value;
@@ -2105,6 +2125,8 @@ begin
   height:= editfontheight.value;
   width:= editfontwidth.value;
   extraspace:= editfontextraspace.value;
+  color:= editfontcolor.value;
+  dispgrid.frame.colorclient:= editbkcolor.value;
   if editfontantialiased.value then begin
    options:= options + [foo_antialiased];
   end
