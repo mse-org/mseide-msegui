@@ -1026,9 +1026,9 @@ begin
    case ainfo.objectkind of 
     sok_widget: begin
      handlewidget(ainfo);
-     if sko_container in ainfo.options then begin
-      handlecontainer(ainfo);
-     end;
+//     if sko_container in ainfo.options then begin
+//      handlecontainer(ainfo);
+//     end;
     end;
     sok_edit: begin
      handleedit(ainfo);
@@ -1069,6 +1069,10 @@ begin
     sok_user: begin
      handleuserobject(ainfo);
     end;
+   end;
+   if (sko_container in ainfo.options) and 
+                              (ainfo.instance is twidget) then begin
+    handlecontainer(ainfo);
    end;
   end;
 endlab:
