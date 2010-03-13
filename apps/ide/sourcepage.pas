@@ -302,25 +302,10 @@ begin
 end;
 
 procedure tsourcepage.setsyntaxdef(const value: filenamety);
-var
- colors: syntaxcolorinfoty;
 begin
  try
   edit.setsyntaxdef(value);
-  if edit.syntaxpainterhandle >= 0 then begin
-   colors:= edit.syntaxpainter.colors[edit.syntaxpainterhandle];
-   with colors do begin
-    if font <> cl_default then begin
-     edit.font.color:= font;
-    end;
-    if background <> cl_default then begin
-     grid.frame.colorclient:= background;
-    end;
-    if statement <> cl_default then begin
-     grid.rowcolors[0]:= statement;
-    end;
-   end;
-  end;
+  updatestatvalues;
  except
   on e: exception do begin
    handleerror(e,'Syntaxdeffile:');
@@ -1123,6 +1108,7 @@ end;
 procedure tsourcepage.updatestatvalues;
 var
  int1: integer;
+ colors: syntaxcolorinfoty;
 begin
  if edit <> nil then begin
   projectoptionstofont(edit.font);
@@ -1157,6 +1143,20 @@ begin
     end;
    end;
    grid.wheelscrollheight:= scrollheight;
+   if edit.syntaxpainterhandle >= 0 then begin
+    colors:= edit.syntaxpainter.colors[edit.syntaxpainterhandle];
+    with colors do begin
+     if font <> cl_default then begin
+      edit.font.color:= font;
+     end;
+     if background <> cl_default then begin
+      grid.frame.colorclient:= background;
+     end;
+     if statement <> cl_default then begin
+      grid.rowcolors[0]:= statement;
+     end;
+    end;
+   end;
   end;
  end;
 end;

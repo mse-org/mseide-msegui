@@ -2123,6 +2123,8 @@ begin
     'Ascent: '+inttostr(ascent)+' Descent: '+inttostr(descent)+
     ' Linespacing: '+inttostr(lineheight);
  end;
+ dispgrid.rowcolorstate[1]:= 0;
+ dispgrid.rowcolors[0]:= statementcolor.value;
 end;
 
 procedure tprojectoptionsfo.makepageonchildscaled(const sender: TObject);
