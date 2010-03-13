@@ -92,7 +92,7 @@ object projectoptionsfo: tprojectoptionsfo
       frame.dummy = 0
       anchors = [an_top, an_bottom]
       taborder = 1
-      activepageindex = 2
+      activepageindex = 0
       tab_frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
       tab_frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
       tab_color = -2147483645
@@ -105,6 +105,7 @@ object projectoptionsfo: tprojectoptionsfo
         frame.localprops = [frl_fibottom, frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
         taborder = 5
+        visible = True
         bounds_x = 1
         bounds_y = 19
         bounds_cx = 640
@@ -210,20 +211,20 @@ object projectoptionsfo: tprojectoptionsfo
             object editfontextraspace: tintegeredit
               optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
               color = -2147483645
-              frame.caption = 'Extra Space'
+              frame.caption = 'Extra Sp.'
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
               frame.dummy = 0
               frame.outerframe = (
                 0
                 17
-                31
+                14
                 0
               )
               taborder = 3
               bounds_x = 263
               bounds_y = 0
-              bounds_cx = 67
+              bounds_cx = 50
               bounds_cy = 37
               ondataentered = fontondataentered
               min = -1000
@@ -479,7 +480,7 @@ object projectoptionsfo: tprojectoptionsfo
               value = True
             end
             object statementcolor: tcoloredit
-              frame.caption = 'Statem. Color'
+              frame.caption = 'Statem. Col.'
               frame.button.color = -2147483646
               frame.buttonellipse.color = -2147483646
               frame.buttonellipse.imagenr = 17
@@ -2019,7 +2020,6 @@ object projectoptionsfo: tprojectoptionsfo
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
         taborder = 6
-        visible = True
         bounds_x = 1
         bounds_y = 19
         bounds_cx = 640

@@ -1156,11 +1156,11 @@ begin
 //  newunitfile:= '${TEMPLATEDIR}default/unit.pas';
 //  newtextfile:= '';
 
-  setlength(newfonames,8);
-  setlength(newfonamebases,8);
-  setlength(newinheritedforms,8);
-  setlength(newfosources,8);
-  setlength(newfoforms,8);
+  setlength(newfonames,9);
+  setlength(newfonamebases,9);
+  setlength(newinheritedforms,9);
+  setlength(newfosources,9);
+  setlength(newfoforms,9);
 
   newfonames[0]:= 'Mainform';
   newfonamebases[0]:= 'form';
@@ -1191,24 +1191,30 @@ begin
   newinheritedforms[4]:= false;
   newfosources[4]:= '${TEMPLATEDIR}default/subform.pas';
   newfoforms[4]:= '${TEMPLATEDIR}default/subform.mfm';
- 
-  newfonames[5]:= 'Report';
-  newfonamebases[5]:= 'report';
-  newinheritedforms[5]:= false;
-  newfosources[5]:= '${TEMPLATEDIR}default/report.pas';
-  newfoforms[5]:= '${TEMPLATEDIR}default/report.mfm';
- 
-  newfonames[6]:= 'Scriptform';
-  newfonamebases[6]:= 'script';
-  newinheritedforms[6]:= false;
-  newfosources[6]:= '${TEMPLATEDIR}default/pascform.pas';
-  newfoforms[6]:= '${TEMPLATEDIR}default/pascform.mfm';
 
-  newfonames[7]:= 'Inherited Form';
-  newfonamebases[7]:= 'form';
-  newinheritedforms[7]:= true;
-  newfosources[7]:= '${TEMPLATEDIR}default/inheritedform.pas';
-  newfoforms[7]:= '${TEMPLATEDIR}default/inheritedform.mfm';
+  newfonames[5]:= 'Tabform';
+  newfonamebases[5]:= 'form';
+  newinheritedforms[5]:= false;
+  newfosources[5]:= '${TEMPLATEDIR}default/tabform.pas';
+  newfoforms[5]:= '${TEMPLATEDIR}default/tabform.mfm';
+ 
+  newfonames[6]:= 'Report';
+  newfonamebases[6]:= 'report';
+  newinheritedforms[6]:= false;
+  newfosources[6]:= '${TEMPLATEDIR}default/report.pas';
+  newfoforms[6]:= '${TEMPLATEDIR}default/report.mfm';
+ 
+  newfonames[7]:= 'Scriptform';
+  newfonamebases[7]:= 'script';
+  newinheritedforms[7]:= false;
+  newfosources[7]:= '${TEMPLATEDIR}default/pascform.pas';
+  newfoforms[7]:= '${TEMPLATEDIR}default/pascform.mfm';
+
+  newfonames[8]:= 'Inherited Form';
+  newfonamebases[8]:= 'form';
+  newinheritedforms[8]:= true;
+  newfosources[8]:= '${TEMPLATEDIR}default/inheritedform.pas';
+  newfoforms[8]:= '${TEMPLATEDIR}default/inheritedform.mfm';
  
  end;
  

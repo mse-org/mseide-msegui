@@ -1597,26 +1597,6 @@ begin
   str2:= removefileext(filename(aname));
   str3:= str2;
   str2:= getmodulename(str2,namebase);
-{
-  case kind of
-   fok_dock: begin
-    ancestor:= 'tdockform';
-    str2:= getmodulename(str2,'form');
-   end;
-   fok_data: begin
-    ancestor:= 'tmsedatamodule';
-    str2:= getmodulename(str2,'module');
-   end;
-   fok_subform: begin
-    ancestor:= 'tsubform';
-    str2:= getmodulename(str2,'subform');
-   end;
-   else begin
-    ancestor:= 'tmseform';
-    str2:= getmodulename(str2,'form');
-   end;
-  end;
-}
   stream1:= ttextstream.create(aname,fm_create);
   try
    formskeleton(stream1,filename(str3),str2,ancestor);
