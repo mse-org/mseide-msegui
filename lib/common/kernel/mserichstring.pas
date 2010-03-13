@@ -1085,7 +1085,7 @@ var
  int1: integer;
  s1: integer;
 begin
- newbuffer(length(data));
+ newbuffer(length(data),true,true);
  po1:= pointer(fdatapo);
  s1:= size;
  for int1:= 0 to fcount - 1 do begin

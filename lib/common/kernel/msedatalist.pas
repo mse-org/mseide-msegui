@@ -99,7 +99,8 @@ type
    function assigndata(const source: tpersistent): boolean;
                        //false if not possible
    procedure assigntodata(const dest: tdatalist);
-   procedure newbuffer(const acount: integer);
+   procedure newbuffer(const acount: integer; const noinit: boolean;
+                              const fillnull: boolean);
    procedure setcount(const value: integer); virtual;
    property nochange: integer read fnochange;
    procedure internalgetasarray(const adatapo: pointer; const asize: integer);
@@ -3128,7 +3129,7 @@ var
  s0,s1,s2: integer;
 begin
  with dest do begin
-  newbuffer(self.count);
+  newbuffer(self.count,true,size < self.size);
   if size = self.size then begin
    move(self.datapo^,fdatapo^,fcount*fsize);
   end
@@ -3191,17 +3192,21 @@ procedure tdatalist.internalsetasarray(const source: pointer;
 var
  int1: integer;
  po1,po2: pointer;
- s1,s2: integer;
+ s1,s2,s3: integer;
 begin
- newbuffer(acount);
+ newbuffer(acount,true,size > asize);
  if fcount > 0 then begin
-  if size > asize then begin
+  if size <> asize then begin
    po1:= fdatapo;
    po2:= source;
    s1:= size;
    s2:= asize;
+   s3:= size;
+   if s3 > asize then begin
+    s3:= asize;
+   end;
    for int1:= 0 to fcount - 1 do begin
-    move(po2^,po1^,s2);
+    move(po2^,po1^,s3);
     inc(pchar(po1),s1);
     inc(pchar(po2),s2);
    end;
@@ -3605,7 +3610,8 @@ begin
  end;
 end;
 
-procedure tdatalist.newbuffer(const acount: integer);
+procedure tdatalist.newbuffer(const acount: integer; const noinit: boolean;
+                                                       const fillnull: boolean);
 begin
  clearbuffer;
  fcount:= acount;
@@ -3613,7 +3619,12 @@ begin
   fcount:= fmaxcount;
  end;
  setcapacity(fcount);
- initdata1(false,0,fcount);
+ if not noinit then begin
+  initdata1(false,0,fcount);
+ end
+ else begin
+  fillchar(fdatapo^,fcount*fsize,0);
+ end;
 end;
 
 procedure tdatalist.Setcount(const Value: integer);
@@ -4948,7 +4959,7 @@ var
 begin
  if dest is trealdatalist then begin
   with trealdatalist(dest) do begin
-   newbuffer(count);
+   newbuffer(count,true,dest.size > sizeof(real));
    po1:= self.datapo;
    po2:= pointer(fdatapo);
    s1:= self.size;
@@ -5161,7 +5172,7 @@ begin
  if not assigndata(source) then begin
   if source is tstringlist then begin
    with tstringlist(source) do begin
-    self.newbuffer(count);
+    self.newbuffer(count,false,true);
     po1:= self.datapo;
     s1:= self.size;
     for int1:= 0 to self.fcount - 1 do begin
@@ -5183,7 +5194,7 @@ var
  int1: integer;
  s1: integer;
 begin
- newbuffer(length(data));
+ newbuffer(length(data),true,true);
  po1:= pointer(fdatapo);
  s1:= size;
  for int1:= 0 to fcount - 1 do begin
@@ -5437,7 +5448,7 @@ var
  s1: integer;
  int1: integer;
 begin
- newbuffer(length(avalue));
+ newbuffer(length(avalue),true,true);
  po1:= pointer(fdatapo);
  s1:= size;
  for int1:= 0 to high(avalue) do begin
@@ -5671,7 +5682,7 @@ begin
  if not assigndata(source) then begin
   if source is tansistringdatalist then begin
    with tansistringdatalist(source) do begin
-    self.newbuffer(count);
+    self.newbuffer(count,true,true);
     po3:= datapo;
     po1:= self.datapo;
     s1:= self.size;
@@ -5923,7 +5934,7 @@ var
  int1: integer;
  s1: integer;
 begin
- newbuffer(length(data));
+ newbuffer(length(data),true,true);
  po1:= pointer(fdatapo);
  s1:= size;
  for int1:= 0 to high(data) do begin
@@ -5939,7 +5950,7 @@ var
  s1: integer;
  int1: integer;
 begin
- newbuffer(length(data));
+ newbuffer(length(data),true,true);
  po1:= datapo;
  s1:= size;
  for int1:= 0 to high(data) do begin
@@ -6525,7 +6536,7 @@ var
 begin
  if dest is tintegerdatalist then begin
   with tintegerdatalist(dest) do begin
-   newbuffer(self.count);
+   newbuffer(self.count,true,dest.size > sizeof(integer));
    po1:= self.datapo;
    po2:= pointer(fdatapo);
    s1:= self.size;
@@ -6818,7 +6829,7 @@ var
 begin
  if dest is tintegerdatalist then begin
   with tintegerdatalist(dest) do begin
-   newbuffer(self.count);
+   newbuffer(self.count,true,dest.size > sizeof(integer));
    po1:= self.datapo;
    po2:= pointer(fdatapo);
    s1:= self.size;
