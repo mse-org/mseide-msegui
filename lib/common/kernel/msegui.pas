@@ -1311,11 +1311,11 @@ type
    function updateopaque(const children: boolean): boolean;
                    //true if widgetregionchanged called
    procedure dragstarted; virtual; //called by tapplication.dragstarted
-  //idragcontroller
+    //idragcontroller
    function getdragrect(const apos: pointty): rectty; virtual;
-  //iface
+    //iface
    procedure widgetregioninvalid;
-  //iframe
+    //iframe
    procedure setframeinstance(instance: tcustomframe); virtual;
    procedure setstaticframe(value: boolean);
    function getstaticframe: boolean;
@@ -1323,7 +1323,7 @@ type
    function getcomponentstate: tcomponentstate;
 
    function getframestateflags: framestateflagsty; virtual;
-  //igridcomp,itabwidget
+    //igridcomp,itabwidget
    function getwidget: twidget;
 
    function getframe: tcustomframe;
@@ -7185,12 +7185,9 @@ var
  clientorig: pointty;
  pt1: pointty;
 begin
-// result.cx:= -bigint;
-// result.cy:= -bigint;
  result:= nullsize;
  if fframe <> nil then begin
   indent:= fframe.fi.innerframe;
-//  clientorig:= subpoint(fframe.fpaintrect.pos,fframe.fclientrect.pos);
   clientorig.x:= -fframe.fpaintrect.x-fframe.fclientrect.x;
   clientorig.y:= -fframe.fpaintrect.y-fframe.fclientrect.y;
  end
@@ -7258,30 +7255,11 @@ begin
 end;
 
 procedure twidget.parentclientrectchanged;
-(*
- function agetsize: sizety;
- begin
- {
-  if ws_loadedproc in fwidgetstate then begin
-   result:= fparentclientsize;
-  end
-  else begin
-  }
-   if fparentwidget = nil then begin
-    result:= fwidgetrect.size;
-   end
-   else begin
-    result:= fparentwidget.minclientsize;
-   end;
-//  end;
- end;
-*)
 var
  size1,delta: sizety;
  anch: anchorsty;
  rect1: rectty;
  int1: integer;
-// bo1: boolean;
 
 begin
  if not (csloading in componentstate) and (fparentwidget <> nil) and
@@ -7292,7 +7270,6 @@ begin
   else begin
    int1:= 0; //loopcount
    repeat
- //   size1:= agetsize;
     size1:= fparentwidget.minclientsize;
     rect1:= fwidgetrect;
     delta:= subsize(size1,fparentclientsize);
@@ -7432,7 +7409,6 @@ begin
   colorbefore:= canvas.color;
   canvas.color:= actualcolor;
   fframe.paintbackground(canvas,makerect(nullpoint,fwidgetrect.size));
-//  fframe.paint(canvas,makerect(nullpoint,fwidgetrect.size));
   canvas.color:= colorbefore;
  end;
  face1:= getactface;
@@ -7446,13 +7422,6 @@ begin
    face1.paint(canvas,makerect(nullpoint,fwidgetrect.size));
   end;
  end;
- {
- if (fframe <> nil) and (fframe.image_list <> nil) then begin
-  fframe.paintoverlay(canvas,makerect(-fframe.fpaintrect.x,
-                 -fframe.fpaintrect.y,
-                 fwidgetrect.cx,fwidgetrect.cy));
- end
- }
  doonpaintbackground(canvas);
 end;
 
@@ -7683,8 +7652,6 @@ begin
   updateroot;
   if ws_isvisible in fwidgetstate then begin
    rect1:= paintrect;
-//   rect1.size:= fwidgetrect.size;
-//   rect1.pos:= nullpoint;
    for int1:= 0 to widgetcount - 1 do begin
     widget:= twidget(fwidgets[int1]);
     if ws_opaque in widget.fwidgetstate then begin
@@ -7817,14 +7784,12 @@ end;
 function twidget.getscreenpos: pointty;
 begin
  updateroot;
-// result:= addpoint(frootpos,fwindow.fowner.fwidgetrect.pos);
  result:= addpoint(frootpos,fwindow.screenpos);
 end;
 
 procedure twidget.setscreenpos(const avalue: pointty);
 begin
  updateroot;
-// fwindow.fowner.pos:= subpoint(avalue,frootpos);
  fwindow.screenpos:= subpoint(avalue,frootpos);
 end;
 
@@ -7865,19 +7830,12 @@ begin
  result:= fparentwidget;
  if (fparentwidget <> nil) then begin
   widget1:= fparentwidget.fparentwidget;
-//  if (widget1 <> nil) and (widget1.container = result) then begin
   if (widget1 <> nil) and not (ws_iswidget in result.fwidgetstate) then begin
    result:= widget1;
   end;
  end;
 end;
 
-{
-function twidget.canpaint: boolean;
-begin
- result:= (app <> nil) and visible and window.fcanvas.active;
-end;
-}
 function twidget.calcframewidth(arect: prectty): sizety;
 begin
  if fframe <> nil then begin
@@ -8224,37 +8182,6 @@ begin
  end;
 end;
 
-{
-procedure twidget.invalidatesiblings(arect: rectty);
-var
- rect1: rectty;
- int1: integer;
- bo1: boolean;
- widget1: twidget;
-begin
- if fparentwidget <> nil then begin
-  if not (ws_opaque in fwidgetstate) then begin
-   invalidaterect(arect,org_widget);
-  end
-  else begin
-   updateroot;
-   addpoint1(arect.pos,fwidgetrect.pos);
-   for int1:= high(fparentwidget.fwidgets) downto 0 do begin
-    widget1:= fparentwidget.fwidgets[int1];
-    if widget1 = self then begin
-     break;
-    end;
-    if intersectrect(widget1.fwidgetrect,arect,rect1) then begin
-     inc(rect1.x,fparentwidget.frootpos.x);
-     inc(rect1.y,fparentwidget.frootpos.y);
-     fwindow.invalidaterect(rect1,self);
-    end; 
-   end;
-   fparentwidget.invalidatesiblings(arect);
-  end;
- end;
-end;
-}
 function twidget.hasoverlappingsiblings(arect: rectty): boolean;
 var
  int1: integer;
@@ -8537,7 +8464,6 @@ begin
     end;
    end
    else begin
-//    exclude(fwidgetstate,ws_mouseinclient);
     appinst.setclientmousewidget(nil);
     result:= false;
    end;

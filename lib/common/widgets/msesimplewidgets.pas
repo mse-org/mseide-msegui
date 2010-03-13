@@ -1691,10 +1691,10 @@ begin
       end;
      end;
      rect1.pos:= fwidgetrect.pos;
-     if an_right in fanchors then begin
+     if fanchors*[an_right,an_left] = [an_right]{an_right in fanchors} then begin
       dec(rect1.x,rect1.cx);
      end;
-     if an_bottom in fanchors then begin
+     if fanchors*[an_bottom,an_top] = [an_bottom]{an_bottom in fanchors} then begin
       dec(rect1.y,rect1.cy);
      end;
      addsize1(rect1.size,fwidgetrect.size);
