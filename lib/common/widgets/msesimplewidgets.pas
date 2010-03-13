@@ -468,6 +468,7 @@ type
    procedure poschanged; override;
    procedure sizechanged; override;
    procedure visiblepropchanged; override;
+   function getminshrinksize: sizety; override;
   public
    procedure writestate(writer: twriter); override;
    procedure dochildscaled(const sender: twidget); override;
@@ -1627,7 +1628,6 @@ begin
      size2:= paintsize;
      box:= false;
      boy:= false;
-//     bo1:= not (visible or (csdesigning in componentstate));
      if (osc_invisishrinkx in foptionsscale) then begin
       if bo1 then begin
        if fsizebefore.cx = 0 then begin
@@ -1706,6 +1706,23 @@ begin
      dec(fscaling)
     end;
    end;
+  end;
+ end;
+end;
+
+function tcustomscalingwidget.getminshrinksize: sizety;
+var
+ size1: sizety;
+begin
+ result:= inherited getminshrinksize;
+ if foptionsscale * [osc_expandx,osc_expandy] <> [] then begin
+  size1:= minscrollsize;
+  addsize1(size1,framewidth);
+  if (osc_expandx in foptionsscale) and (result.cx < size1.cx) then begin
+   result.cx:= size1.cx;
+  end;
+  if (osc_expandy in foptionsscale) and (result.cy < size1.cy) then begin
+   result.cy:= size1.cy;
   end;
  end;
 end;

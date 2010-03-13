@@ -114,7 +114,7 @@ type
  widgetstatesty = set of widgetstatety;
  widgetstate1ty = (ws1_childscaled,{ws1_fontheightlock,}ws1_scaling,
                    ws1_widgetregionvalid,ws1_rootvalid,
-                   ws1_anchorsizing,ws1_parentclientsizeinited,
+                   ws1_anchorsizing,ws1_anchorsetting,ws1_parentclientsizeinited,
                    ws1_parentupdating, //set while setparentwidget
                    ws1_isstreamed,     //used by ttabwidget
                    ws1_scaled,         //used in tcustomscalingwidget
@@ -1189,6 +1189,7 @@ type
    ftaborder: integer;
    fminsize,fmaxsize: sizety;
    fminclientsize: sizety;
+   fminscrollsize: sizety;
    ffocusedchild,ffocusedchildbefore: twidget;
    ffontheight: integer;
    fsetwidgetrectcount: integer; //for recursive setpos
@@ -1474,6 +1475,8 @@ type
 
    function getmintopleft: pointty; virtual;
    function calcminscrollsize: sizety; virtual;
+   function minscrollsize: sizety; //uses cache
+   function getminshrinksize: sizety; virtual;
    function getcontainer: twidget; virtual;
    function getchildwidgets(const index: integer): twidget; virtual;
 
@@ -6670,10 +6673,11 @@ end;
 function twidget.minclientsize: sizety;
 begin
  if not (ws_minclientsizevalid in fwidgetstate) then begin
+  fminscrollsize:= calcminscrollsize;
+  fminclientsize:= fminscrollsize;
   if fframe <> nil then begin
    with fframe do begin
     checkstate;
-    fminclientsize:= calcminscrollsize;
     if fminclientsize.cx < fpaintrect.cx then begin
      fminclientsize.cx:= fpaintrect.cx;
     end;
@@ -6688,6 +6692,19 @@ begin
   include(fwidgetstate,ws_minclientsizevalid);
  end;
  result:= fminclientsize;
+end;
+
+function twidget.minscrollsize: sizety;
+begin
+ if not (ws_minclientsizevalid in fwidgetstate) then begin
+  minclientsize;
+ end;
+ result:= fminscrollsize;
+end;
+
+function twidget.getminshrinksize: sizety;
+begin
+ result:= fminsize;
 end;
 
 procedure twidget.internalsetwidgetrect(Value: rectty; const windowevent: boolean);
@@ -7184,6 +7201,7 @@ var
  indent: framety;
  clientorig: pointty;
  pt1: pointty;
+ minsi: sizety;
 begin
  result:= nullsize;
  if fframe <> nil then begin
@@ -7201,16 +7219,17 @@ begin
                                   (csdesigning in componentstate) then begin
     pt1:= getmintopleft;
     anch:= fanchors * [an_left,an_right];
+    minsi:= getminshrinksize;
     if anch = [an_right] then begin
      int2:= fparentclientsize.cx - fwidgetrect.x + indent.left + clientorig.x;
     end
     else begin
      if anch = [] then begin
-      int2:= fminsize.cx;
+      int2:= minsi.cx;
      end
      else begin
       if anch = [an_left,an_right] then begin
-       int2:= fparentclientsize.cx - cx + fminsize.cx;
+       int2:= fparentclientsize.cx - cx + minsi.cx;
       end
       else begin //[an_left]
        int2:= clientorig.x + pt1.x + cx + indent.right;
@@ -7227,11 +7246,11 @@ begin
     end
     else begin
      if anch = [] then begin
-      int2:= fminsize.cy;
+      int2:= minsi.cy;
      end
      else begin
       if anch = [an_top,an_bottom] then begin
-       int2:= fparentclientsize.cy - cy + fminsize.cy;
+       int2:= fparentclientsize.cy - cy + minsi.cy;
       end
       else begin //[an_top]
        int2:= clientorig.y + pt1.y + cy + indent.bottom;
@@ -7273,6 +7292,10 @@ begin
     size1:= fparentwidget.minclientsize;
     rect1:= fwidgetrect;
     delta:= subsize(size1,fparentclientsize);
+    if ws1_anchorsetting in fwidgetstate1 then begin
+     delta:= nullsize;
+     exclude(fwidgetstate1,ws1_anchorsetting);
+    end;
     anch:= fanchors * [an_left,an_right];
     if anch <> [an_left] then begin
      if (anch = [an_left,an_right]) then begin
@@ -10896,10 +10919,15 @@ end;
 procedure twidget.setanchors(const Value: anchorsty);
 begin
  if fanchors <> value then begin
-  fanchors := Value;
+  fanchors:= Value;
   if not (csloading in componentstate) then begin
    invalidateparentminclientsize;
-   parentclientrectchanged;
+   include(fwidgetstate1,ws1_anchorsetting);
+   try
+    parentclientrectchanged;
+   finally
+    exclude(fwidgetstate1,ws1_anchorsetting);
+   end;
   end;
  end;
 end;

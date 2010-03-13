@@ -248,7 +248,6 @@ type
    procedure childclientrectchanged(const sender: twidget); override;
    procedure childautosizechanged(const sender: twidget); override;
    procedure clientrectchanged; override;
-//   procedure sizechanged; override;
    function calcminscrollsize: sizety; override;
    procedure registerchildwidget(const child: twidget); override;
    procedure unregisterchildwidget(const child: twidget); override;
@@ -265,7 +264,8 @@ type
    property align_leader: twidget read falign_leader write setalign_leader;
    property align_glue: widgetalignmodety read falign_glue write setalign_glue
                                  default wam_none;
-   property place_mindist: integer read fplace_mindist write setplace_mindist;
+   property place_mindist: integer read fplace_mindist 
+                                           write setplace_mindist default 0;
    property place_maxdist: integer read fplace_maxdist write setplace_maxdist
                                      default bigint;
    property place_mode: widgetalignmodety read fplace_mode write setplace_mode 
