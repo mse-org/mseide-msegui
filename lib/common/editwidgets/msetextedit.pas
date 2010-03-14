@@ -19,9 +19,13 @@ uses
  msemenus,msepointer,msegridsglob;
 
 const
- defaulttexteditoptions =  (defaultoptionsedit + [oe_linebreak]) -
+ defaulttexteditoptions =  (defaultoptionsedit + 
+              [oe_linebreak,oe_nofirstarrownavig]) -
               [oe_autoselect,oe_autoselectonfirstclick,oe_endonenter,
-               oe_resetselectonexit,oe_undoonesc,oe_shiftreturn];
+               oe_resetselectonexit,oe_undoonesc,oe_shiftreturn,
+               oe_trimleft,oe_trimright,oe_uppercase,oe_lowercase,
+               oe_autopopupmenu];
+
  texteditminimalframe: framety = (left: 1; top: 0; right: 1; bottom: 0);
  defaulttexteditwidgetoptions = 
          (defaulteditwidgetoptions - [ow_fontglyphheight]) + [ow_fontlineheight];
@@ -48,7 +52,7 @@ type
   public
    constructor create(owner: twidgetcol); reintroduce;
  end;
- 
+  
  tcustomtextedit = class(tcustomedit,igridwidget,istatfile)
   private
    fstatfile: tstatfile;
