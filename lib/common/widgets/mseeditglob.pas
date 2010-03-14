@@ -19,7 +19,7 @@ type
 
  optioneditty = (oe_readonly,oe_undoonesc,
                     oe_closequery,oe_checkmrcancel,
-                    oe_exitoncursor,oe_nogray,
+                    oe_nogray,
                     oe_linebreak, 
                        // if oe_shiftreturn -> shift key_return inserts linebreak
                        // else         -> key_return inserts linebreak
@@ -32,6 +32,8 @@ type
                     oe_resetselectonexit,
 
                     //same layout as strincoleditoptionty
+                    oe_exitoncursor,
+                    oe_nofirstarrownavig,
                     oe_endonenter,
                     oe_homeonenter,
                     oe_autoselect, //selectall bei widget enter
@@ -48,7 +50,7 @@ type
                     oe_notnull,
  //                   oe_autopost,  //deprecated, moved to optiondeditdbty
                     oe_autopopupmenu,
-                    oe_keyexecute, //shift+down-key starts dialog
+                    oe_keyexecute, //alt+down-key starts dialog
                     oe_checkvaluepaststatread,
                     oe_savevalue,oe_savestate,oe_saveoptions
                     );

@@ -21,7 +21,7 @@ const
  defaultscrollbarwidth = 15;
  defaultpagesizeconst = 0.1;
  defaultpagesize: real = defaultpagesizeconst;
- defaultbuttonminlength = 8;
+ defaultbuttonminlength = 11;//8;
  repeatdelaytime = 500000; //0.5s
  repeatrepeattime = 100000; //0.1 s
 

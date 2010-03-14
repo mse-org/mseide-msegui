@@ -64,7 +64,7 @@ type
  end;
 
  inplaceeditstatety = (ies_focused,ies_poschanging,ies_firstclick,ies_istextedit,
-                       ies_forcecaret,ies_textrectvalid);
+                       ies_forcecaret,ies_textrectvalid,ies_touched);
  inplaceeditstatesty = set of inplaceeditstatety;
 
  tinplaceedit = class
@@ -890,6 +890,7 @@ begin
   updateselect;
   curindex:= curindexbackup;
   invalidatetext(false,false);
+  exclude(fstate,ies_touched);
  end;
 end;
 
@@ -1110,10 +1111,6 @@ begin
        finished:= false;
        nochars:= true;
       end;
-//      key_space: begin          //nochars with modifier
-//       finished:= false;
-//       nochars:= shiftstate1 <> [];
-//      end;
       key_home: begin
        if locating and (shiftstate1 = []) then begin
         filtertext:= '';
@@ -1131,12 +1128,16 @@ begin
        end;
       end;
       key_left: begin
-       if (fsellength = length(finfo.text.text)) and (shiftstate1 <> [ss_shift]) or
-           (fcurindex = 0) and 
+       if not(oe_nofirstarrownavig in opt1) and (shiftstate1 <> [ss_shift]) and
+             ((fsellength = length(finfo.text.text)) or 
+              not(ies_touched in fstate) and 
+              (fcurindex = length(finfo.text.text))
+             ) or
+          (fcurindex = 0) and 
              ((fsellength = 0) or (shiftstate1 <> [ss_shift]) or
               (ies_istextedit in fstate)
              ) or
-           (opt1 * [oe_readonly,oe_caretonreadonly] =
+          (opt1 * [oe_readonly,oe_caretonreadonly] =
                    [oe_readonly]) then begin
         actioninfo.dir:= gd_left;
         if checkaction(actioninfo) then begin
@@ -1155,7 +1156,11 @@ begin
        end;
       end;
       key_right: begin
-       if (fsellength = length(finfo.text.text)) and (shiftstate1 <> [ss_shift]) or
+       if not(oe_nofirstarrownavig in opt1) and (shiftstate1 <> [ss_shift]) and
+              ((fsellength = length(finfo.text.text)) or 
+               not(ies_touched in fstate) and 
+               (fcurindex = 0)
+              ) or
          (fcurindex = length(finfo.text.text)) and 
            ((shiftstate1 <> [ss_shift]) or (fsellength = 0) or 
             (ies_istextedit in fstate) or
@@ -1166,7 +1171,10 @@ begin
                   [oe_readonly]) then begin
         actioninfo.dir:= gd_right;
         if checkaction(actioninfo) then begin
-         if not(oe_exitoncursor in opt1) then begin
+         if not(oe_exitoncursor in opt1) or
+             (fsellength = length(finfo.text.text)) and 
+             (shiftstate1 <> [ss_shift]) and 
+             (oe_nofirstarrownavig in opt1) then begin
           if shiftstate1 <> [ss_shift] then begin
            sellength:= 0;
           end;
@@ -1361,7 +1369,8 @@ begin
  end;
 end;
 
-procedure tinplaceedit.moveindex(newindex: integer; shift: boolean; donotify: boolean);
+procedure tinplaceedit.moveindex(newindex: integer; shift: boolean;
+                                                         donotify: boolean);
       //cursor verschieben
 var
  anchor: integer;
@@ -1370,6 +1379,7 @@ var
  int1: integer;
 
 begin
+ include(fstate,ies_touched);
  selstartbefore:= fselstart;
  sellengthbefore:= fsellength;
  if newindex > length(finfo.text.text) then begin
@@ -1405,11 +1415,6 @@ begin
              (selstartbefore <> fselstart) and (fsellength <> 0)   then begin
   updateselect;
  end;
- {
- if shift then begin
-  doselectstart;
- end;
- }
  int1:= fcurindex;
  curindex:= newindex;
  if (fcurindex > newindex) and (int1 > newindex) then begin
@@ -1429,19 +1434,18 @@ procedure tinplaceedit.setcurindex(const Value: integer);
 var
  int1: integer;
 begin
-// if fcurindex <> value then begin
-  int1:= value;
-  if int1 > length(finfo.text.text) then begin
-   int1:= length(finfo.text.text);
-  end
-  else begin
-   if int1 < 0 then begin
-    int1:= 0;
-   end;
+ include(fstate,ies_touched);
+ int1:= value;
+ if int1 > length(finfo.text.text) then begin
+  int1:= length(finfo.text.text);
+ end
+ else begin
+  if int1 < 0 then begin
+   int1:= 0;
   end;
-  fcurindex := int1;
-  internalupdatecaret(ies_forcecaret in fstate);
-// end;
+ end;
+ fcurindex := int1;
+ internalupdatecaret(ies_forcecaret in fstate);
 end;
 
 procedure tinplaceedit.setsellength(const Value: halfinteger);
@@ -1550,6 +1554,7 @@ end;
 
 procedure tinplaceedit.clearselection;
 begin
+ include(fstate,ies_touched);
  if fsellength > 0 then begin
   fsellength:= 0;
   updateselect;
@@ -1591,6 +1596,7 @@ begin
   end;
  end;
  clearundo;
+ exclude(fstate,ies_touched);
 end;
 
 procedure tinplaceedit.dofocus;

@@ -100,6 +100,8 @@ type
 //                    scoe_autorowheight,
 
                     //same layout as editoptionty
+                    scoe_exitoncursor,
+                    scoe_nofirstarrownavig,
                     scoe_endonenter,
                     scoe_homeonenter,
                     scoe_autoselect, //selectall bei enter
@@ -118,6 +120,8 @@ type
 
 const
  stringcoloptionseditmask: optionseditty = [
+                    oe_exitoncursor,
+                    oe_nofirstarrownavig,
                     oe_endonenter,
                     oe_homeonenter,
                     oe_autoselect, //selectall bei enter
@@ -130,7 +134,8 @@ const
                     oe_hintclippedtext,
                     oe_locate,
                     oe_casesensitive];
- stringcoloptionseditshift = ord(oe_endonenter) - ord(scoe_endonenter);
+ stringcoloptionseditshift = ord(oe_exitoncursor) - 
+                            ord(scoe_exitoncursor);
 
  gridvaluevarname = 'values';
  pickobjectstep = integer(high(pickobjectkindty)) + 1;
@@ -154,7 +159,7 @@ const
  defaultdatacoloptions = [{co_selectedcolor,}co_savestate,co_savevalue,
                           co_rowfont,co_rowcolor,co_zebracolor,co_mousescrollrow];
  defaultfixcoltextflags = [tf_ycentered,tf_xcentered];
- defaultstringcoleditoptions = [scoe_undoonesc,scoe_autoselect,
+ defaultstringcoleditoptions = [scoe_exitoncursor,scoe_undoonesc,scoe_autoselect,
                                   scoe_autoselectonfirstclick,scoe_eatreturn];
 // defaultcolheadertextflags = [tf_ycentered,tf_xcentered];
 
