@@ -20,7 +20,7 @@ interface
 uses
  msewidgets,msemenus,msegraphics,mseapplication,msegui,msegraphutils,mseevent,
  msetypes,msestrings,mseglob,mseguiglob,mseguiintf,
- msemenuwidgets,msestat,msestatfile,mseclasses,Classes,msedock,
+ msemenuwidgets,msestat,msestatfile,mseclasses,Classes,msedock,msesimplewidgets,
  msebitmap{$ifdef mse_with_ifi},mseifiglob{$endif};
 
 type
@@ -497,14 +497,29 @@ type
    constructor create(aowner: tcomponent; load: boolean); 
                                      reintroduce; overload; virtual;
  end;
- 
+
  subformclassty = class of tsubform;
+
+ tscrollboxform = class(tscrollbox)
+  protected
+   class function getmoduleclassname: string; override;
+   class function hasresource: boolean; override;
+   procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
+  public
+   constructor create(aowner: tcomponent); overload; override;
+   constructor create(aowner: tcomponent; load: boolean); 
+                                     reintroduce; overload; virtual;
+ end;
+ 
+ scrollboxformclassty = class of tscrollboxform;
  
 function createmseform(const aclass: tclass; 
                    const aclassname: pshortstring): tmsecomponent;
 function createmainform(const aclass: tclass; 
                    const aclassname: pshortstring): tmsecomponent;
 function createsubform(const aclass: tclass; 
+                   const aclassname: pshortstring): tmsecomponent;
+function createscrollboxform(const aclass: tclass; 
                    const aclassname: pshortstring): tmsecomponent;
 function simulatemodalresult(const awidget: twidget;
                               const amodres: modalresultty): boolean;
@@ -587,6 +602,13 @@ function createsubform(const aclass: tclass;
                     const aclassname: pshortstring): tmsecomponent;
 begin
  result:= subformclassty(aclass).create(nil,false);
+ tmsecomponent1(result).factualclassname:= aclassname;
+end;
+
+function createscrollboxform(const aclass: tclass; 
+                    const aclassname: pshortstring): tmsecomponent;
+begin
+ result:= scrollboxformclassty(aclass).create(nil,false);
  tmsecomponent1(result).factualclassname:= aclassname;
 end;
 
@@ -1989,6 +2011,53 @@ begin
 end;
 
 procedure tsubform.getchildren(proc: tgetchildproc; root: tcomponent);
+var
+ int1: integer;
+ comp1: tcomponent;
+begin
+ inherited;
+ if root = self then begin
+  for int1:= 0 to componentcount - 1 do begin
+   comp1:= components[int1];
+   if not comp1.hasparent then begin
+    proc(comp1);
+   end;
+  end;
+ end;
+end;
+
+{ tscrollboxform }
+
+constructor tscrollboxform.create(aowner: tcomponent);
+begin
+ create(aowner,not (cs_noload in fmsecomponentstate));
+end;
+
+constructor tscrollboxform.create(aowner: tcomponent; load: boolean);
+begin
+ include(fmsecomponentstate,cs_ismodule);
+ fwidgetrect.x:= 100;
+ fwidgetrect.y:= 100;
+ inherited create(aowner);
+ fwidgetrect.cx:= 100;
+ fwidgetrect.cy:= 100;
+ if load and not (csdesigning in componentstate) and
+          (cs_ismodule in fmsecomponentstate) then begin
+  loadmsemodule(self,tscrollboxform);
+ end;
+end;
+
+class function tscrollboxform.getmoduleclassname: string;
+begin
+ result:= 'tscrollboxform';
+end;
+
+class function tscrollboxform.hasresource: boolean;
+begin
+ result:= self <> tscrollboxform;
+end;
+
+procedure tscrollboxform.getchildren(proc: tgetchildproc; root: tcomponent);
 var
  int1: integer;
  comp1: tcomponent;

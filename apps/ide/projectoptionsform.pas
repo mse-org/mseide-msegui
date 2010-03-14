@@ -1156,11 +1156,11 @@ begin
 //  newunitfile:= '${TEMPLATEDIR}default/unit.pas';
 //  newtextfile:= '';
 
-  setlength(newfonames,9);
-  setlength(newfonamebases,9);
-  setlength(newinheritedforms,9);
-  setlength(newfosources,9);
-  setlength(newfoforms,9);
+  setlength(newfonames,10);
+  setlength(newfonamebases,10);
+  setlength(newinheritedforms,10);
+  setlength(newfosources,10);
+  setlength(newfoforms,10);
 
   newfonames[0]:= 'Mainform';
   newfonamebases[0]:= 'form';
@@ -1192,29 +1192,35 @@ begin
   newfosources[4]:= '${TEMPLATEDIR}default/subform.pas';
   newfoforms[4]:= '${TEMPLATEDIR}default/subform.mfm';
 
-  newfonames[5]:= 'Tabform';
+  newfonames[5]:= 'Scrollboxform';
   newfonamebases[5]:= 'form';
   newinheritedforms[5]:= false;
-  newfosources[5]:= '${TEMPLATEDIR}default/tabform.pas';
-  newfoforms[5]:= '${TEMPLATEDIR}default/tabform.mfm';
- 
-  newfonames[6]:= 'Report';
-  newfonamebases[6]:= 'report';
-  newinheritedforms[6]:= false;
-  newfosources[6]:= '${TEMPLATEDIR}default/report.pas';
-  newfoforms[6]:= '${TEMPLATEDIR}default/report.mfm';
- 
-  newfonames[7]:= 'Scriptform';
-  newfonamebases[7]:= 'script';
-  newinheritedforms[7]:= false;
-  newfosources[7]:= '${TEMPLATEDIR}default/pascform.pas';
-  newfoforms[7]:= '${TEMPLATEDIR}default/pascform.mfm';
+  newfosources[5]:= '${TEMPLATEDIR}default/scrollboxform.pas';
+  newfoforms[5]:= '${TEMPLATEDIR}default/scrollboxform.mfm';
 
-  newfonames[8]:= 'Inherited Form';
-  newfonamebases[8]:= 'form';
-  newinheritedforms[8]:= true;
-  newfosources[8]:= '${TEMPLATEDIR}default/inheritedform.pas';
-  newfoforms[8]:= '${TEMPLATEDIR}default/inheritedform.mfm';
+  newfonames[6]:= 'Tabform';
+  newfonamebases[6]:= 'form';
+  newinheritedforms[6]:= false;
+  newfosources[6]:= '${TEMPLATEDIR}default/tabform.pas';
+  newfoforms[6]:= '${TEMPLATEDIR}default/tabform.mfm';
+ 
+  newfonames[7]:= 'Report';
+  newfonamebases[7]:= 'report';
+  newinheritedforms[7]:= false;
+  newfosources[7]:= '${TEMPLATEDIR}default/report.pas';
+  newfoforms[7]:= '${TEMPLATEDIR}default/report.mfm';
+ 
+  newfonames[8]:= 'Scriptform';
+  newfonamebases[8]:= 'script';
+  newinheritedforms[8]:= false;
+  newfosources[8]:= '${TEMPLATEDIR}default/pascform.pas';
+  newfoforms[8]:= '${TEMPLATEDIR}default/pascform.mfm';
+
+  newfonames[9]:= 'Inherited Form';
+  newfonamebases[9]:= 'form';
+  newinheritedforms[9]:= true;
+  newfosources[9]:= '${TEMPLATEDIR}default/inheritedform.pas';
+  newfoforms[9]:= '${TEMPLATEDIR}default/inheritedform.mfm';
  
  end;
  

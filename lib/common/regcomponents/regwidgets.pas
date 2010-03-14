@@ -113,6 +113,9 @@ const
  subformintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createsubform;
      initnewcomponent: nil; getscale: nil);
+ scrollboxformintf: designmoduleintfty = 
+  (createfunc: {$ifdef FPC}@{$endif}createscrollboxform;
+     initnewcomponent: nil; getscale: nil);
  tabformintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createtabform;
      initnewcomponent: nil; getscale: nil);
@@ -179,6 +182,7 @@ begin
  registerdesignmoduleclass(tmainform,@mainformintf);
  registerdesignmoduleclass(tdockform,@mseformintf);
  registerdesignmoduleclass(tsubform,@subformintf);
+ registerdesignmoduleclass(tscrollboxform,@scrollboxformintf);
  registerdesignmoduleclass(ttabform,@tabformintf);
 end;
 
