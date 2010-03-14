@@ -87,6 +87,7 @@ type
   published
    property tabulators;
    property font;
+   property optionsedit default defaultterminaleditoptions;
    property maxchars: integer read fmaxchars write fmaxchars default 0;
    property oninputpipebroken: notifyeventty read foninputpipebroken 
                                                    write foninputpipebroken;

@@ -23,8 +23,8 @@ const
               [oe_linebreak,oe_nofirstarrownavig]) -
               [oe_autoselect,oe_autoselectonfirstclick,oe_endonenter,
                oe_resetselectonexit,oe_undoonesc,oe_shiftreturn,
-               oe_trimleft,oe_trimright,oe_uppercase,oe_lowercase,
-               oe_autopopupmenu];
+               oe_trimleft,oe_trimright,oe_uppercase,oe_lowercase{,
+               oe_autopopupmenu}];
 
  texteditminimalframe: framety = (left: 1; top: 0; right: 1; bottom: 0);
  defaulttexteditwidgetoptions = 
@@ -625,7 +625,7 @@ end;
 procedure tcustomtextedit.setoptionsedit(const avalue: optionseditty);
 begin
  inherited setoptionsedit(avalue - [oe_trimleft,oe_trimright,oe_uppercase,
-        oe_lowercase,oe_autopopupmenu]);
+        oe_lowercase{,oe_autopopupmenu}]);
 end;
 
 procedure tcustomtextedit.dokeydown(var info: keyeventinfoty);
