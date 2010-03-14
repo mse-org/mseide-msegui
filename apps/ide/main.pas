@@ -76,14 +76,10 @@ type
    viewmenu: tframecomp;
    runprocmon: tprocessmonitor;
    procedure newfileonexecute(const sender: tobject);
-//   procedure newprogramonexecute(const sender: TObject);
-//   procedure newunitonexecute(const sender: TObject);
    procedure newformonexecute(const sender: TObject);
-//   procedure newtextfileonexecute(const sender: TObject);
 
    procedure mainfooncreate(const sender: tobject);
    procedure mainfoondestroy(const sender: tobject);
-//   procedure mainfoonclosequery(const sender: tcustommseform; var modalresult: modalresultty);
    procedure mainstatfileonupdatestat(const sender: tobject; const filer: tstatfiler);
    procedure mainfoonterminate(var terminate: Boolean);
    procedure mainonloaded(const sender: TObject);
@@ -125,7 +121,7 @@ type
    procedure aboutonexecute(const sender: TObject);
    procedure configureexecute(const sender: TObject);
    
-   //debugger
+    //debugger
    procedure startgdbonexecute(const sender: tobject);
    procedure runexec(const sender: tobject);
    procedure gdbonevent(const sender: tgdbmi; var eventkind: gdbeventkindty;
@@ -169,7 +165,7 @@ type
                          var action: modalresultty);
    procedure dofindmodulebytype(const atypename: string);
 
-  //idesignnotification
+    //idesignnotification
    procedure ItemDeleted(const ADesigner: IDesigner;
                    const amodule: tmsecomponent; const AItem: tcomponent);
    procedure ItemInserted(const ADesigner: IDesigner;
@@ -214,7 +210,6 @@ type
                             const macronames: array of msestring;
                             const macrovalues: array of msestring): boolean;
                             //true if ok
-//   procedure createform(const aname: filenamety; const kind: formkindty);
    procedure createform(const aname: filenamety; const namebase: string;
                         const ancestor: string);
    procedure removemodulemenuitem(const amodule: pmoduleinfoty);
@@ -251,7 +246,6 @@ type
    function openproject(const aname: filenamety;
                              const ascopy: boolean = false): boolean;
    procedure saveproject(aname: filenamety; const ascopy: boolean = false);
-//   procedure makefinished(const exitcode: integer);
    procedure sourcechanged(const sender: tsourcepage);
    function opensource(const filekind: filekindty; const addtoproject: boolean;
                         const aactivate: boolean = true): boolean;
@@ -1586,12 +1580,9 @@ end;
 
 procedure tmainfo.createform(const aname: filenamety; const namebase: string;
                         const ancestor: string);
-//procedure tmainfo.createform(const aname: filenamety; const kind: integer{formkindty});
-
 var
  stream1: ttextstream;
  str1,str2,str3: string;
-// ancestor: string;
  po1: pmoduleinfoty;
 begin
   str2:= removefileext(filename(aname));

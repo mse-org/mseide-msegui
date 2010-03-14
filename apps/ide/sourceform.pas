@@ -74,7 +74,6 @@ type
    procedure setbmexec(const sender: TObject);
    procedure findbmexec(const sender: TObject);
    procedure insguiexec(const sender: TObject);
-//   procedure togglebreakpointexe(const sender: TObject);
    procedure convpasex(const sender: TObject);
   private
    fasking: boolean;
@@ -144,9 +143,9 @@ type
    property items[const index: integer]: tsourcepage read getitems; default;
    property naviglist: tnaviglist read fnaviglist;
    function findbookmark(const bookmarknum: integer): boolean;
+                                                 //true if found
    procedure setbookmark(const apage: tsourcepage; const arow: integer;
                             const bookmarknum: integer);
-    //true if found
 
    function gettextstream(const filename: filenamety; forwrite: boolean): ttextstream;
    function getfiletext(const filename: filenamety;
