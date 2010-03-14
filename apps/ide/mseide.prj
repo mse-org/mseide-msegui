@@ -43,8 +43,8 @@ options=93
  width4=309
  sortdescent4=0
  sortcol=-1
- col=-1073741823
- row=-1073741823
+ col=2
+ row=6
  rowheight=16
  [projectoptionsfo.newfile]
  firsttab=0
@@ -370,27 +370,30 @@ newfisources=3
  ${TEMPLATEDIR}default/program.pas
  ${TEMPLATEDIR}default/unit.pas
  
-newfonames=9
+newfonames=10
  Mainform
  Simple Form
  Docking Form
  Datamodule
  Subform
+ Scrollboxform
  Tabform
  Report
  Scriptform
  Inherited Form
-newfonamebases=9
+newfonamebases=10
  form
  form
  form
  module
  form
  form
+ form
  report
  script
  form
-newinheritedforms=9
+newinheritedforms=10
+ 0
  0
  0
  0
@@ -400,22 +403,24 @@ newinheritedforms=9
  0
  0
  -1
-newfosources=9
+newfosources=10
  ${TEMPLATEDIR}default/mainform.pas
  ${TEMPLATEDIR}default/simpleform.pas
  ${TEMPLATEDIR}default/dockingform.pas
  ${TEMPLATEDIR}default/datamodule.pas
  ${TEMPLATEDIR}default/subform.pas
+ ${TEMPLATEDIR}default/scrollboxform.pas
  ${TEMPLATEDIR}default/tabform.pas
  ${TEMPLATEDIR}default/report.pas
  ${TEMPLATEDIR}default/pascform.pas
  ${TEMPLATEDIR}default/inheritedform.pas
-newfoforms=9
+newfoforms=10
  ${TEMPLATEDIR}default/mainform.mfm
  ${TEMPLATEDIR}default/simpleform.mfm
  ${TEMPLATEDIR}default/dockingform.mfm
  ${TEMPLATEDIR}default/datamodule.mfm
  ${TEMPLATEDIR}default/subform.mfm
+ ${TEMPLATEDIR}default/scrollboxform.mfm
  ${TEMPLATEDIR}default/tabform.mfm
  ${TEMPLATEDIR}default/report.mfm
  ${TEMPLATEDIR}default/pascform.mfm
@@ -462,13 +467,13 @@ windowlayout=393
  splitdir=2
  useroptions=15488
  [mainfo]
- stackedunder=mainfo.panel1
+ stackedunder=
  x=4
  y=24
  cx=286
  cy=74
  wsize=0
- active=0
+ active=1
  visible=1
  [targetconsolefo]
  splitdir=0
@@ -505,7 +510,7 @@ windowlayout=393
  [memoryfo]
  splitdir=0
  useroptions=16507
- stackedunder=projecttreefo
+ stackedunder=cpui386fo
  parent=
  mdistate=0
  nx=0
@@ -547,7 +552,7 @@ windowlayout=393
  [findinfilefo]
  splitdir=0
  useroptions=16491
- stackedunder=componentpalettefo
+ stackedunder=watchfo
  parent=
  mdistate=0
  nx=0
@@ -722,7 +727,7 @@ windowlayout=393
  [componentstorefo]
  splitdir=0
  useroptions=24675
- stackedunder=cpui386fo
+ stackedunder=findinfilefo
  parent=
  mdistate=0
  nx=0
@@ -761,7 +766,7 @@ windowlayout=393
  [componentpalettefo]
  splitdir=0
  useroptions=24683
- stackedunder=mainfo
+ stackedunder=mainfo.panel1
  parent=
  mdistate=0
  nx=0
@@ -813,7 +818,7 @@ windowlayout=393
  irqoff=0
  splitdir=0
  useroptions=16491
- stackedunder=watchfo
+ stackedunder=projecttreefo
  parent=
  mdistate=0
  nx=0
@@ -830,7 +835,7 @@ windowlayout=393
  [mainfo.panel1]
  splitdir=2
  useroptions=32235
- stackedunder=
+ stackedunder=mainfo
  parent=
  mdistate=0
  nx=0
@@ -842,7 +847,7 @@ windowlayout=393
  cx=734
  cy=491
  wsize=0
- active=1
+ active=0
  visible=1
 [edit]
 hintwidth=0
