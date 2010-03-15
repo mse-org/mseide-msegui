@@ -1302,6 +1302,7 @@ begin
     shortcut[int1]:= strtoint(ar1[int2]);
     inc(int2);
     shortcut1[int1]:= strtoint(ar1[int2]);
+    inc(int2);
    end;
    for int1:= 0 to high(shortcut) do begin
     if shortcut[int1] = 0 then begin
