@@ -109,23 +109,21 @@ implementation
 uses
  msesysutils,mseprocutils,msewidgets,msetypes,mseprocmonitor,
  msekeyboard,sysutils,msesysintf,rtlconsts;
-
+type
+ tinplaceedit1 = class(tinplaceedit);
+ 
 { tterminal }
 
 constructor tterminal.create(aowner: tcomponent);
 begin
-// fprochandle:= invalidprochandle;
  foptions:= defaultterminaloptions;
  inherited;
  optionsedit:= defaultterminaleditoptions;
  fprocess:= tmseprocess.create(nil);
  fprocess.options:= defaultoptionsprocess;
-// foutput:= tpipewriter.create;
-// finput:= tpipereader.create;
  with fprocess do begin
   output.oninputavailable:= {$ifdef FPC}@{$endif}doinputavailable;
   output.onpipebroken:= {$ifdef FPC}@{$endif}dopipebroken;
- // ferrorinput:= tpipereader.create;
   erroroutput.oninputavailable:= {$ifdef FPC}@{$endif}doinputavailable;
   erroroutput.onpipebroken:= {$ifdef FPC}@{$endif}dopipebroken;
   output.overloadsleepus:= 50000;
@@ -137,51 +135,9 @@ end;
 destructor tterminal.destroy;
 begin
  fprocess.free;
-// finalizeexec;
-// foutput.Free;
-// finput.Free;
-// ferrorinput.Free;
  inherited;
 end;
-{
-procedure tterminal.listen;
-begin
- application.lock;
- if not (ts_listening in fstate) and (fprochandle <> invalidprochandle) then begin
-  inc(flistenid);
-  pro_listentoprocess(fprochandle,ievent(self),pointer(flistenid));
-  include(fstate,ts_listening);
- end;
- application.unlock;
-end;
 
-procedure tterminal.unlisten;
-begin
- application.lock;
- try
-  if ts_listening in fstate then begin
-   pro_unlistentoprocess(fprochandle,ievent(self));   
-  end;
-  exclude(fstate,ts_listening);
- finally
-  application.unlock;
- end;
-end;
-
-procedure tterminal.finalizeexec;
-begin
- foutput.close;
- finput.terminateandwait;
- ferrorinput.terminateandwait;
- application.lock;
- unlisten;
- if fprochandle <> invalidprochandle then begin
-  pro_killzombie(fprochandle);
-  fprochandle:= invalidprochandle;
- end;
- application.unlock;
-end;
-}
 procedure tterminal.docellevent(const ownedcol: boolean; var info: celleventinfoty);
 begin
  case info.eventkind of
@@ -202,6 +158,9 @@ procedure tterminal.editnotification(var info: editnotificationinfoty);
 var
  mstr1: msestring;
  bo1: boolean;
+ ar1: msestringarty;
+ co1: gridcoordty;
+ int1: integer;
 begin
  if fgridintf <> nil then begin
   with fgridintf.getcol.grid do begin
@@ -238,6 +197,21 @@ begin
       end;
       updateeditpos;
      end;
+    end;
+    ea_pasteselection: begin
+     if msewidgets.pastefromclipboard(mstr1) then begin
+      clearselection;
+      ar1:= breaklines(mstr1);
+      if high(ar1) >= 0 then begin
+       datalist[rowhigh]:= datalist[rowhigh] + ar1[0];
+       for int1:= 1 to high(ar1) do begin
+        tinplaceedit1(editor).checkaction(ea_textentered);
+        datalist[rowhigh]:= ar1[int1];
+       end;
+      end;
+      editpos:= makegridcoord(length(datalist[rowhigh]),rowhigh);
+     end;
+     info.action:= ea_none;
     end;
    end;
    if info.action <> ea_none then begin
@@ -288,7 +262,6 @@ procedure tterminal.doinputavailable(const sender: tpipereader);
 var
  str1: string;
 begin
-// application.checkoverload;
  try
   str1:= sender.readdatastring;
   if not (csdestroying in componentstate) then begin
@@ -346,14 +319,6 @@ begin
   active:= true;
   result:= prochandle;
  end;
-{ 
- finalizeexec;
- result:= execmse2(commandline,foutput,finput,ferrorinput,false,-1,true,false,
-                      teo_tty in foptions);
- fprochandle:= result;
- listen;
- }
-// include(fstate,ts_running);
 end;
 
 function tterminal.getinputfd: integer;
@@ -375,34 +340,6 @@ function tterminal.waitforprocess: integer;
 begin
  result:= fprocess.waitforprocess;
 end;
-(*
-function tterminal.waitforprocess: integer;
-var
- int1: integer;
-begin
-{
- while running do begin
-  application.processmessages;
- end;
- result:= fexitcode;
-}
- unlisten;
- if running then begin
-  int1:= application.unlockall;
-  try
-   result:= mseprocutils.waitforprocess(fprochandle);
-   fexitcode:= result;
-   fprochandle:= invalidprochandle;
-   while not (finput.eof and ferrorinput.eof) do begin
-    sleep(100); //wait for last chars
-   end;
-  finally
-   application.relockall(int1);
-  end;
-  doprocfinished;
- end;
-end;
-*)
 
 function tterminal.exitcode: integer;
 begin
@@ -446,7 +383,6 @@ procedure tterminal.writestr(const atext: string);
 begin
  if sys_write(outputfd,pointer(atext),length(atext)) <> length(atext) then begin
   syserror(syelasterror);
-//  raise ewriteerror.create(swriteerror);
  end;
 end;
 
@@ -454,34 +390,7 @@ procedure tterminal.writestrln(const atext: string);
 begin
  writestr(atext+lineend);
 end;
-{
-procedure tterminal.receiveevent(const event: tobjectevent);
-begin
- if (event.kind = ek_childproc) and (ts_listening in fstate) then begin 
-  with tchildprocevent(event) do begin
-   if data = pointer(flistenid) then begin
-    while not (finput.eof and ferrorinput.eof) do begin
-     sleep(100); //wait for last chars
-    end;
-    fexitcode:= execresult;
-    fprochandle:= invalidprochandle;
-    exclude(fstate,ts_listening);
-    doprocfinished;
-   end;
-  end;
- end
- else begin
-  inherited;
- end;
-end;
 
-procedure tterminal.doprocfinished;
-begin
- if canevent(tmethod(fonprocfinished)) then begin
-  fonprocfinished(self);
- end;
-end;
-}
 function tterminal.getonprocfinished: notifyeventty;
 begin
  result:= fprocess.onprocfinished;
