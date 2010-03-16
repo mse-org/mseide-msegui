@@ -77,6 +77,7 @@ type
 {$endif}
 
 const
+ MAPVK_VK_TO_VSC = 0;
  flagsoffs =       0*sizeof(integer); //for setwindowlong
  stylebackupoffs = 1*sizeof(integer);
 // loffs =           2*sizeof(integer);
@@ -132,6 +133,11 @@ const
   VK_LWIN = 91;
   VK_RWIN = 92;
  {$endif}
+
+  VK_OEM_PLUS = $BB;    // '+' any country
+  VK_OEM_COMMA = $BC;   // ',' any country
+  VK_OEM_MINUS = $BD;   // '-' any country
+  VK_OEM_PERIOD = $BE;  // '.' any coun {$endif}
 
  standardcursors: array[cursorshapety] of pchar{makeintresource} =
                      (idc_arrow,idc_arrow,idc_arrow,idc_cross,idc_wait,idc_ibeam,
@@ -3736,9 +3742,14 @@ function pointtowinmousepos(pos: pointty): longword;
 begin
  result:= word(pos.x) + (word(pos.y) shl 16);
 end;
-
-function winkeytokey(key: longword; shift: shiftstatesty): keyty;
+var testvar: integer; testvar1: integer;
+function winkeytokey(key: longword; lparam: longword;
+                                       var shift: shiftstatesty): keyty;
+var
+ second: boolean;
 begin
+ second:= mapvirtualkey(key,mapvk_vk_to_vsc) <> (lparam shr 16) and $ff;
+
  case key of
   vk_back: result:= key_backspace;
   vk_tab: begin
@@ -3749,11 +3760,26 @@ begin
     result:= key_tab;
    end;
   end;
-//  vk_clear: result:= key_clear;
+  vk_clear: result:= key_clear;
   vk_return: result:= key_return;
-  vk_shift: result:= key_shift;
-  vk_control: result:= key_control;
-  vk_menu: result:= key_alt;
+  vk_shift: begin
+   result:= key_shift;
+   if second then begin
+    include(shiftstate,ss_second);
+   end;
+  end;
+  vk_control: begin
+   result:= key_control;
+   if second then begin
+    include(shiftstate,ss_second);
+   end;
+  end;
+  vk_menu: begin
+   result:= key_alt;
+   if second then begin
+    include(shiftstate,ss_second);
+   end;
+  end;
   vk_pause: result:= key_pause;
   vk_capital: result:= key_capslock;
   vk_escape: result:= key_escape;
@@ -3766,7 +3792,7 @@ begin
   vk_up: result:= key_up;
   vk_right: result:= key_right;
   vk_down: result:= key_down;
-//  vk_select: result:= key_select;
+ //  vk_select: result:= key_select;
   vk_execute: result:= key_sysreq;
   vk_snapshot: result:= key_print;
   vk_insert: result:= key_insert;
@@ -3777,13 +3803,38 @@ begin
   vk_lwin: result:= key_super_l;
   vk_rwin: result:= key_super_r;
   vk_apps: result:= key_menu;
-  vk_numpad0..vk_numpad9: result:= keyty(longword(key_0) + key - vk_numpad0);
-  vk_add: result:= key_plus;
-  vk_separator: result:= key_comma;
-  vk_subtract: result:= key_minus;
-  vk_decimal: result:= key_period;
-  vk_multiply: result:= key_multiply;
-  vk_divide: result:= key_slash;
+  vk_oem_plus: result:= key_plus;
+  vk_oem_comma: result:= key_comma;
+  vk_oem_minus: result:= key_minus;
+  vk_oem_period: result:= key_period;
+  vk_numpad0..vk_numpad9: begin
+   result:= keyty(longword(key_0) + key - vk_numpad0);
+   include(shiftstate,ss_second);
+  end;
+  vk_add: begin
+   result:= key_plus;
+   include(shiftstate,ss_second);
+  end;
+  vk_separator: begin
+   result:= key_comma;
+   include(shiftstate,ss_second);
+  end;
+  vk_subtract: begin
+   result:= key_minus;
+   include(shiftstate,ss_second);
+  end;
+  vk_decimal: begin
+   result:= key_period;
+   include(shiftstate,ss_second);
+  end;
+  vk_multiply: begin
+   result:= key_asterisk;
+   include(shiftstate,ss_second);
+  end;
+  vk_divide: begin
+   result:= key_slash;
+   include(shiftstate,ss_second);
+  end;
   vk_f1..vk_f24: result:= keyty(longword(key_f1) + key - vk_f1);
   vk_numlock: result:= key_numlock;
   vk_scroll: result:= key_scrolllock;
@@ -4382,7 +4433,7 @@ begin
    if lparam and $40000000 <> 0 then begin
     include(shiftstate,ss_repeat);
    end;
-   key1:= winkeytokey(wparam,shiftstate);
+   key1:= winkeytokey(wparam,lparam,shiftstate);
    if key1 = key_escape then begin
     escapepressed:= true;
    end;
@@ -4392,7 +4443,7 @@ begin
   end;
   wm_keyup,wm_syskeyup: begin
    shiftstate:= winkeystatetoshiftstate(lparam);
-   key1:= winkeytokey(wparam,shiftstate);
+   key1:= winkeytokey(wparam,lparam,shiftstate);
    if charbuffer <> '' then begin
     eventlist.add(tkeyevent.create(ahwnd,false,key_none,key_none,shiftstate,
                                     charbuffer,timestamp));

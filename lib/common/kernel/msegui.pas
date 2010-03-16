@@ -3231,7 +3231,7 @@ end;
 function isenterkey(const awidget: twidget; const key: keyty): boolean;
 begin
  result:= ((awidget = nil) or not (ow_keyreturntaborder in awidget.optionswidget)) and 
-          ((key = key_enter) or (key = key_return));
+          ({(key = key_enter) or} (key = key_return));
 end;
 
 procedure destroyregion(var region: regionty);
@@ -9608,8 +9608,8 @@ begin
  with info do begin
   if not (es_processed in eventstate) then begin
    if (ow_keyreturntaborder in foptionswidget) and 
-      ((key = key_enter) or (key = key_return)) and 
-      (shiftstate - [ss_shift] =  []) then begin
+      ({(key = key_enter) or} (key = key_return)) and 
+      (shiftstate - [ss_shift,ss_second] =  []) then begin
     include(eventstate,es_processed);
     widget1:= nexttaborder(ss_shift in shiftstate);
     if widget1 <> nil then begin
@@ -13779,9 +13779,9 @@ begin
       end;
       if window1 <> nil then begin
        fmouseparkeventinfo.shiftstate:= shiftstatesty(
-          replacebits({$ifdef FPC}longword{$else}byte{$endif}(shiftstate),
-            {$ifdef FPC}longword{$else}byte{$endif}(fmouseparkeventinfo.shiftstate),
-            {$ifdef FPC}longword{$else}byte{$endif}(keyshiftstatesmask)));
+          replacebits({$ifdef FPC}longword{$else}word{$endif}(shiftstate),
+            {$ifdef FPC}longword{$else}word{$endif}(fmouseparkeventinfo.shiftstate),
+            {$ifdef FPC}longword{$else}word{$endif}(keyshiftstatesmask)));
        if kind = ek_keypress then begin
         fonkeypresslist.dokeyevent(widget1,info);
        end;

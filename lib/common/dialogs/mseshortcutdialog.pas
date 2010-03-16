@@ -323,6 +323,10 @@ begin
      mstr1:= mstr1+'Alt+';
      sc1:= sc1 + ord(key_modalt);
     end;   
+    if ss_second in shiftstate then begin
+     mstr1:= mstr1+'Pad+';
+     sc1:= sc1 + ord(key_modpad);
+    end;   
     if (key = key_shift) or (key = key_control) or
                                             (key = key_alt) then begin
      sc1:= 0;
@@ -331,7 +335,7 @@ begin
      key_shift,key_alt,key_control: begin
      end
      else begin
-      sc1:= sc1 + ord(key);
+      sc1:= sc1 or (ord(key) and not modmask);
       if (high(ar1) >= 0) or isvalidshortcut(sc1) or 
                                         (keyty(sc1) = key_delete) then begin
        if (high(ar1) < 0) and (keyty(sc1) = key_delete) then begin

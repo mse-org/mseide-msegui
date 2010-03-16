@@ -475,10 +475,12 @@ var
  token1: tokenidty;
  pos1,pos2: sourceposty;
  bo1: boolean;
+ int1: integer;
 begin
  bo1:= atoken = pid_class;
  if bo1 then begin
-  if getident(ord(atoken)) then begin
+  if getident(int1) then begin
+   atoken:= pascalidentty(int1);
    if  not ((atoken = pid_function) or (atoken = pid_procedure)) then begin
     lasttoken;
     exit;

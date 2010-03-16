@@ -2773,7 +2773,7 @@ begin
 
    xk_kp_space: result:= key_space;
    xk_kp_tab: result:= key_tab;
-   xk_kp_enter: result:= key_enter;
+   xk_kp_enter: result:= key_return;
    xk_kp_f1: result:= key_f1;
    xk_kp_f2: result:= key_f2;
    xk_kp_f3: result:= key_f3;

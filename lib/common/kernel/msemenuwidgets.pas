@@ -1424,7 +1424,7 @@ begin
    include(eventstate,es_processed);
    beginkeymode;
    case key of
-    key_return,key_enter,key_space: begin
+    key_return,{key_enter,}key_space: begin
      selectmenu(true);
     end;
     key_up: begin

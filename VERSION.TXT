@@ -1,5 +1,8 @@
 MSEide+MSEgui version history
 
+2010-03-16
+ key_* $10xx -> $01xx.
+ key_enter -> key_return.
 2010-02-17
  twidget.optionswidget ow_canclosenil -> optionswidget1 ow1_canclosenil.
 2010-02-11

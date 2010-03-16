@@ -1402,12 +1402,12 @@ end;
 
 procedure tmenuitem.readshortcut(reader: treader);
 begin
- shortcut:= reader.readinteger;
+ shortcut:= translateshortcut(reader.readinteger);
 end;
 
 procedure tmenuitem.readshortcut1(reader: treader);
 begin
- shortcut1:= reader.readinteger;
+ shortcut1:= translateshortcut(reader.readinteger);
 end;
 
 procedure tmenuitem.readsc(reader: treader);

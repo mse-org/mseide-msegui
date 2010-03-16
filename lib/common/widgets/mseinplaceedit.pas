@@ -1002,7 +1002,7 @@ begin
   if shiftstate1 <> [ss_ctrl] then begin
    finished:= true;
    bo1:= true;
-   if (key = key_return) or (key = key_enter) then  begin
+   if (key = key_return) {or (key = key_enter)} then  begin
     removechar1(chars,c_return);
     removechar1(chars,c_linefeed);
     if (shiftstate1 - [ss_shift] = []) and (oe_linebreak in opt1) and 
@@ -1017,7 +1017,7 @@ begin
    if bo1 then begin
     if (shiftstate1 = []) then begin
      case key of
-      key_return,key_enter: begin
+      key_return{,key_enter}: begin
        if checkaction(ea_textentered) then begin
         exclude(eventstate,es_processed);
        end;

@@ -2422,7 +2422,7 @@ begin
   include(dest,oe_eatreturn);
  end;
  dest:= optionseditty(replacebits(
-               longword({$ifdef FPC}longword{$else}word{$endif}(source)) 
+               longword({$ifdef FPC}longword{$else}longword{$endif}(source))
                             shl stringcoloptionseditshift,
                longword(dest),longword(stringcoloptionseditmask)));
 end;
@@ -7534,14 +7534,14 @@ var
 begin
 // exclude(avalue,scoe_autopost);
  if foptionsedit <> avalue then begin
-  mask:= {$ifdef FPC}longword{$else}word{$endif}(avalue) xor
-  {$ifdef FPC}longword{$else}word{$endif}(foptionsedit);
+  mask:= {$ifdef FPC}longword{$else}longword{$endif}(avalue) xor
+  {$ifdef FPC}longword{$else}longword{$endif}(foptionsedit);
   foptionsedit := avalue;
   if not (csloading in fgrid.componentstate) then begin
    for int1:= 0 to count - 1 do begin
     tstringcol(items[int1]).optionsedit:= stringcoleditoptionsty(
-                   replacebits({$ifdef FPC}longword{$else}word{$endif}(avalue),
-    {$ifdef FPC}longword{$else}word{$endif}
+                   replacebits({$ifdef FPC}longword{$else}longword{$endif}(avalue),
+    {$ifdef FPC}longword{$else}longword{$endif}
                                (tstringcol(items[int1]).optionsedit),mask));
    end;
   end;
@@ -11037,7 +11037,7 @@ begin
                                 (ffocusedcell.col >= 0) then begin
     include(info.eventstate,es_processed);
     case info.key of
-     key_return,key_enter: begin
+     key_return{,key_enter}: begin
       if (og_colchangeonreturnkey in foptionsgrid) and 
                  (shiftstate = []) then begin
        colstep(fca_focusin,1,true,false);

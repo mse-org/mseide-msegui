@@ -2736,9 +2736,10 @@ begin
    bo1:= (bo_executeonshortcut in options) and 
     msegui.checkshortcut(info,factioninfo.caption1,bo_altshortcut in options) or
    (finfo.state * [shs_invisible,shs_disabled,shs_default] = [shs_default]) and
-       ((info.key = key_return) or 
-        (info.key = key_enter) and (bo_executedefaultonenterkey in options)) and
-       (info.shiftstate = []);
+      (info.key = key_return) and
+      ((info.shiftstate = []) or 
+       (bo_executedefaultonenterkey in options) and 
+       (info.shiftstate = [ss_second]));
    if bo1 then begin
     bo2:= true;
     togglevalue;
@@ -3122,12 +3123,12 @@ end;
 
 procedure tcustomdatabutton.readshortcut(reader: treader);
 begin
- shortcut:= reader.readinteger;
+ shortcut:= translateshortcut(reader.readinteger);
 end;
 
 procedure tcustomdatabutton.readshortcut1(reader: treader);
 begin
- shortcut1:= reader.readinteger;
+ shortcut1:= translateshortcut(reader.readinteger);
 end;
 
 procedure tcustomdatabutton.readsc(reader: treader);

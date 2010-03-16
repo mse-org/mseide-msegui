@@ -37,7 +37,7 @@ procedure assigncomponent(source,dest: tcomponent);
 
 implementation
 uses
- sysutils,msereal;
+ sysutils,msereal,mseact;
  
 type
  treader1 = class(treader);
@@ -51,6 +51,7 @@ begin
  setlength(result,reader.readinteger);
  for int1:= 0 to high(result) do begin
   result[int1]:= reader.readinteger;
+  translateshortcut1(result[int1]);
  end;
  reader.readlistend;
 end;

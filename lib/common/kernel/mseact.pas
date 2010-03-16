@@ -297,12 +297,27 @@ procedure initactioninfo(var info: actioninfoty; aoptions: menuactionoptionsty =
 procedure actionstatestoshapestates(const source: actioninfoty; var dest: shapestatesty);
 procedure shapestatestoactionstates(source: shapestatesty;
               var dest: actionstatesty; const mask: actionstatesty = actionshapestatesconst);
-//function getshortcutname(key: shortcutty): msestring;
-//procedure calccaptiontext(var info: actioninfoty; const aseparator: msechar);
+function translateshortcut(const akey: shortcutty): shortcutty;
+procedure translateshortcut1(var akey: shortcutty); 
+           //update for new modifier layout
+
 
 implementation
 uses
  msebits,sysutils,msekeyboard;
+
+procedure translateshortcut1(var akey: shortcutty);
+begin
+ if akey and $1000 <> 0 then begin    //update for new modifier layout
+  akey:= akey and not $1000 or $0100;
+ end;
+end;
+
+function translateshortcut(const akey: shortcutty): shortcutty;
+begin
+ result:= akey;
+ translateshortcut1(result);
+end;
 
 function doactionexecute(const sender: tobject; var info: actioninfoty;
                          const nocheckbox: boolean = false;

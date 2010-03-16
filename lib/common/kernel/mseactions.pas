@@ -169,6 +169,7 @@ type
    procedure dochange(const aindex: integer); override;
    procedure dostatread(const varname: string; const reader: tstatreader);
    procedure dostatwrite(const varname: string; const writer: tstatwriter);
+   procedure readitem(const index: integer; reader: treader); override;
   public
    constructor create(const aowner: tcomponent; const adatapo: psysshortcutaty);
    property items[const index: sysshortcutty]: shortcutty read getitems 
@@ -284,11 +285,14 @@ function doactionshortcut(const sender: tobject; var info: actioninfoty;
 procedure calccaptiontext(var info: actioninfoty; const aseparator: msechar);
 function issysshortcut(const ashortcut: sysshortcutty;
                                   const ainfo: keyeventinfoty): boolean;
+
 const
  shift = ord(key_modshift);
  ctrl = ord(key_modctrl);
  alt = ord(key_modalt);
- modmask = shift or ctrl or alt;
+ pad = ord(key_modpad);
+ 
+ modmask = shift or ctrl or alt or $1000 or pad;
 
  defaultsysshortcuts: sysshortcutaty = 
 //sho_copy,            sho_paste,                 sho_cut,   
@@ -316,6 +320,7 @@ const
  cursorkeycount = ord(key_pagedown) - ord(key_home) + 1;
  specialshortcutcount = ord(high(specialshortcutty))+1;
  specialkeycount = misckeycount + specialshortcutcount + cursorkeycount;
+ padcharkeycount = ord(key_slash)-ord(key_asterisk) + 1;
 {
  shortcutcount = (letterkeycount + cipherkeycount) * 2 + //ctrl,shiftctrl
                  3 + //space
@@ -324,7 +329,8 @@ const
 }
  baseshortcutcount = letterkeycount + cipherkeycount + 1 + //Space
                      functionkeycount + specialkeycount;
- shortcutcount = 4 * baseshortcutcount; //none,shift,ctrl,shift+ctrl
+ shortcutcount = 4 * (baseshortcutcount + padcharkeycount + cipherkeycount);
+                              //none,shift,ctrl,shift+ctrl
 
 var
  shortcutkeys: integerarty;
@@ -383,6 +389,26 @@ begin
  bottom:= bottom+cursorkeycount;
 end;
 
+procedure getpadvalues(var bottom: integer; prefix: msestring;
+            const modvalue: integer; var keys: integerarty; 
+            var names: msestringarty);
+var
+ int1: integer;
+ akey: keyty;
+begin
+ for int1:= bottom to bottom+cipherkeycount-1 do begin
+  keys[int1]:= ord(key_0) + int1-bottom + modvalue;
+  names[int1]:= prefix+msestring(msechar(int1-bottom+ord('0')));
+ end;
+ bottom:= bottom + cipherkeycount;
+ for int1:= bottom to bottom + padcharkeycount - 1 do begin
+  akey:= keyty(ord(key_asterisk) + int1-bottom);
+  keys[int1]:= ord(akey) or modvalue;
+  names[int1]:= prefix+padcharkeynames[akey];
+ end;
+ bottom:= bottom+padcharkeycount;
+end;
+
 procedure getshortcutlist(out keys: integerarty; out names: msestringarty);
 var
  int1: integer;
@@ -403,58 +429,14 @@ begin
  names:= shortcutnames;
  if bo1 then begin
   bottom:= 0;
-{
-  for int1:= bottom to bottom + functionkeycount - 1 do begin
-   keys[int1]:= ord(key_f1) + int1-bottom;
-   names[int1]:= 'F'+inttostr(int1-bottom+1);
-  end;
-  bottom:= bottom+functionkeycount;
-  for int1:= bottom to bottom+misckeycount-1 do begin
-   akey:= keyty(ord(key_escape) + int1-bottom);
-   keys[int1]:= ord(akey);
-   names[int1]:= shortmisckeynames[akey];
-  end;
-  bottom:= bottom+misckeycount;
-  for int1:= bottom to bottom+specialshortcutcount-1 do begin
-   keys[int1]:= ord(specialkeys[specialshortcutty(int1-bottom)]);
-   names[int1]:= specialkeynames[specialshortcutty(int1-bottom)];
-  end;
-  for int1:= bottom to bottom+cursorkeycount-1 do begin
-   akey:= keyty(ord(key_home) + int1-bottom);
-   keys[int1]:= ord(akey);
-   names[int1]:= shortcursorkeynames[akey];
-  end;
-  bottom:= bottom+cursorkeycount;
-  for int1:= bottom to bottom + functionkeycount - 1 do begin
-   keys[int1]:= (ord(key_f1) + int1-bottom) or key_modshift;
-   names[int1]:= 'Shift+F'+inttostr(int1-bottom+1);
-  end;
-  bottom:= bottom+functionkeycount;
-  keys[bottom]:= ord(key_space) or key_modshift;
-  names[bottom]:= 'Shift+'+spacekeyname;
-  inc(bottom);
-  for int1:= bottom to bottom+misckeycount-1 do begin
-   akey:= keyty(ord(key_escape) + int1-bottom);
-   keys[int1]:= ord(akey)or key_modshift;
-   names[int1]:= 'Shift+'+shortmisckeynames[akey];
-  end;
-  bottom:= bottom+misckeycount;
-  for int1:= bottom to bottom+specialshortcutcount-1 do begin
-   keys[int1]:= ord(specialkeys[specialshortcutty(int1-bottom)]) or key_modshift;
-   names[int1]:= 'Shift+'+specialkeynames[specialshortcutty(int1-bottom)];
-  end;
-  bottom:= bottom+specialshortcutcount;
-  for int1:= bottom to bottom+cursorkeycount-1 do begin
-   akey:= keyty(ord(key_home) + int1-bottom);
-   keys[int1]:= ord(akey)or key_modshift;
-   names[int1]:= 'Shift+'+shortcursorkeynames[akey];
-  end;
-  bottom:= bottom+cursorkeycount;
-}
   getvalues(bottom,'',0,keys,names);
   getvalues(bottom,'Shift+',key_modshift,keys,names);
   getvalues(bottom,'Ctrl+',key_modctrl,keys,names);
   getvalues(bottom,'Shift+Ctrl+',key_modshiftctrl,keys,names);
+  getpadvalues(bottom,'Pad+',key_modpad,keys,names);
+  getpadvalues(bottom,'Shift+Pad+',key_modpadshift,keys,names);
+  getpadvalues(bottom,'Ctrl+Pad+',key_modpadctrl,keys,names);
+  getpadvalues(bottom,'Shift+Ctrl+Pad+',key_modpadshiftctrl,keys,names);
  end;
 end;
 {
@@ -495,14 +477,15 @@ function isnormalkey(const akey: shortcutty): boolean;
 begin
  result:= (akey >= ord(key_0)) and (akey <= ord(key_9)) or
           (akey >= ord(key_a)) and (akey <= ord(key_z)) or
+          (akey >= ord(key_asterisk)) and (akey <= ord(key_slash)) or
           (akey = ord(key_left)) or
           (akey = ord(key_right)) or
           (akey = ord(key_up)) or
           (akey = ord(key_down)) or
           (akey = ord(key_tab)) or
           (akey = ord(key_space)) or
-          (akey = ord(key_return)) or
-          (akey = ord(key_enter));
+          (akey = ord(key_return)){ or
+          (akey = ord(key_enter))};
 end;
 
 function isnormalshiftkey(const akey: shortcutty): boolean;
@@ -517,9 +500,9 @@ var
  key: word;
 begin
  key:= ashortcut and not modmask;
- result:= key <> 0;
+ result:= (key <> 0) and (key <> word(not modmask));
  if result then begin
-  if ashortcut and modmask = 0 then begin
+  if ashortcut and (modmask and not pad) = 0 then begin
    result:= not isnormalkey(key);
   end
   else begin
@@ -549,12 +532,6 @@ begin
  if bo1 then begin
   int1:= 0;
   getvalues(int1,'',0,baseshortcutkeys,baseshortcutnames);
-  {
-  for int1:= 0 to high(baseshortcutnames) do begin
-   baseshortcutnames[int1]:= copy(baseshortcutnames[int1],2,bigint);
-           //remove '+'
-  end;
-  }
  end;
  k1:= key and not modmask;
  mstr1:= '';
@@ -582,6 +559,9 @@ begin
   end;
   if (key and ctrl) <> 0 then begin
    result:= result + 'Ctrl+';
+  end;
+  if (key and pad) <> 0 then begin
+   result:= result + 'Pad+';
   end;
   result:= result + mstr1;
  end;
@@ -820,6 +800,9 @@ begin
    if ss_alt in shiftstate then begin
     acode:= acode or key_modalt;
    end;
+   if ss_second in shiftstate then begin
+    acode:= acode or key_modpad;
+   end;
    result:= (acode or ord(key) = shortcut) or 
             (acode or ord(keynomod) = shortcut);
   end;
@@ -843,6 +826,9 @@ begin
    end;
    if ss_alt in shiftstate then begin
     acode:= acode or key_modalt;
+   end;
+   if ss_second in shiftstate then begin
+    acode:= acode or key_modpad;
    end;
    result:= (acode or ord(key) = shortcut) or 
             (acode or ord(keynomod) = shortcut);
@@ -1168,12 +1154,12 @@ end;
 
 procedure taction.readshortcut(reader: treader);
 begin
- shortcut:= reader.readinteger;
+ shortcut:= translateshortcut(reader.readinteger);
 end;
 
 procedure taction.readshortcut1(reader: treader);
 begin
- shortcut1:= reader.readinteger;
+ shortcut1:= translateshortcut(reader.readinteger);
 end;
 
 procedure taction.readsc(reader: treader);
@@ -1299,9 +1285,9 @@ begin
              //backward compatibilty with single shortcut
    int2:= 1;
    for int1:= 0 to high(shortcut) do begin
-    shortcut[int1]:= strtoint(ar1[int2]);
+    shortcut[int1]:= translateshortcut(strtoint(ar1[int2]));
     inc(int2);
-    shortcut1[int1]:= strtoint(ar1[int2]);
+    shortcut1[int1]:= translateshortcut(strtoint(ar1[int2]));
     inc(int2);
    end;
    for int1:= 0 to high(shortcut) do begin
@@ -1489,12 +1475,12 @@ end;
 
 procedure tshortcutaction.readshortcut(reader: treader);
 begin
- shortcutdefault:= reader.readinteger;
+ shortcutdefault:= translateshortcut(reader.readinteger);
 end;
 
 procedure tshortcutaction.readshortcut1(reader: treader);
 begin
- shortcut1default:= reader.readinteger;
+ shortcut1default:= translateshortcut(reader.readinteger);
 end;
 
 procedure tshortcutaction.defineproperties(filer: tfiler);
@@ -1621,6 +1607,7 @@ begin
            {$ifdef FPC}@{$endif}setshortcutrecord);
  for int1:= 0 to high(fshortcuts) do begin
   with fshortcuts[int1] do begin
+   value:= translateshortcut(value);
    int2:= getenumvalue(typeinfo(sysshortcutty),name);
    if int2 >= 0 then begin
     items[sysshortcutty(int2)]:= value;
@@ -1640,6 +1627,12 @@ procedure tsysshortcuts.dostatwrite(const varname: string;
 begin
  writer.writerecordarray(varname,count,
                                {$ifdef FPC}@{$endif}getshortcutrecord);
+end;
+
+procedure tsysshortcuts.readitem(const index: integer; reader: treader);
+begin
+ inherited;
+ fitems[index]:= translateshortcut(fitems[index]);
 end;
 
 { tcustomhelpcontroller }
