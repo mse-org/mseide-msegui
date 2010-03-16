@@ -252,11 +252,11 @@ type
         key_F33 =                $0150,
         key_F34 =                $0151,
         key_F35 =                $0152,
-        key_Super_L =            $0153,           // extra keys
-        key_Super_R =            $0154,
+        key_Super =              $0153,           // extra keys
+//        key_Super_R =            $0154,
         key_Menu =               $0155,
-        key_Hyper_L =            $0156,
-        key_Hyper_R =            $0157,
+        key_Hyper =              $0156,
+//        key_Hyper_R =            $0157,
         key_Help =               $0158,
 
 //        key_wheelup =            $1800,

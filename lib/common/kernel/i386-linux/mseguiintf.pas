@@ -496,7 +496,7 @@ implementation
 
 uses
  msebits,msekeyboard,sysutils,msesysutils,msefileutils,msedatalist
- {$ifdef with_sm},sm,ice{$endif},msesonames,msegui;
+ {$ifdef with_sm},sm,ice{$endif},msesonames,msegui,mseactions;
 
 const
  highresfontshift = 6;  //64
@@ -2878,34 +2878,40 @@ begin
    xk_f1..xk_f35: result:= keyty(longword(key_f1) + key - xk_f1);
 
    xk_shift_l: result:= key_shift;
-   xk_shift_r: result:= key_shift;
+   xk_shift_r: begin
+    result:= key_shift;
+    include(shiftstate,ss_second);
+   end;
    xk_control_l: result:= key_control;
-   xk_control_r: result:= key_control;
+   xk_control_r: begin
+    result:= key_control;
+    include(shiftstate,ss_second);
+   end;
    xk_caps_lock: result:= key_capslock;
 //   xk_shift_lock: result:= key_shift_lock;
 
-   xk_meta_l: begin
+   xk_meta_l: result:= key_meta;
+   xk_meta_r: begin
     result:= key_meta;
     include(shiftstate,ss_second);
    end;
-   xk_meta_r: result:= key_meta;
-   xk_alt_l: begin
+   xk_alt_l: result:= key_alt;
+   xk_alt_r: begin
     result:= key_alt;
     include(shiftstate,ss_second);
    end;
-   xk_alt_r: result:= key_alt;
-   xk_super_l: begin
-    result:= key_super_l;
+   xk_super_l: result:= key_super;
+   xk_super_r: begin
+    result:= key_super;
     include(shiftstate,ss_second);
    end;
-   xk_super_r: result:= key_super_r;
-   xk_hyper_l: begin
-    result:= key_hyper_l;
+   xk_hyper_l: result:= key_hyper;
+   xk_hyper_r: begin
+    result:= key_hyper;
     include(shiftstate,ss_second);
    end;
-   xk_hyper_r: result:= key_hyper_r;
 
-   else result:= keyty(key);
+   else result:= keyty(key and not modmask);
   end;
  end;
 end;
@@ -6225,6 +6231,7 @@ eventrestart:
     lasteventtime:= time;
     int1:= keycode;
     xlookupstring(@xev.xkey,nil,0,@akey,nil);
+    shiftstate1:= [];
     key1:= xkeytokey(akey,shiftstate1);
     key2:= getkeynomod(xev.xkey);
     shiftstate1:= shiftstate1 + xtoshiftstate(state,key1,mb_none,true);
