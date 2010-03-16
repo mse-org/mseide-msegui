@@ -3742,7 +3742,7 @@ function pointtowinmousepos(pos: pointty): longword;
 begin
  result:= word(pos.x) + (word(pos.y) shl 16);
 end;
-var testvar: integer; testvar1: integer;
+
 function winkeytokey(key: longword; lparam: longword;
                                        var shift: shiftstatesty): keyty;
 var

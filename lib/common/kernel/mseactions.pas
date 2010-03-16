@@ -337,6 +337,8 @@ var
  shortcutnames: msestringarty;
  baseshortcutkeys: integerarty;
  baseshortcutnames: msestringarty;
+ padcharshortcutkeys: integerarty;
+ padcharshortcutnames: msestringarty;
 
 function issysshortcut(const ashortcut: sysshortcutty;
                                  const ainfo: keyeventinfoty): boolean;
@@ -387,6 +389,21 @@ begin
   names[int1]:= prefix+shortcursorkeynames[akey];
  end;
  bottom:= bottom+cursorkeycount;
+end;
+
+procedure getpadcharvalues(var bottom: integer; prefix: msestring;
+            const modvalue: integer; var keys: integerarty; 
+            var names: msestringarty);
+var
+ int1: integer;
+ akey: keyty;
+begin
+ for int1:= bottom to bottom + padcharkeycount - 1 do begin
+  akey:= keyty(ord(key_asterisk) + int1-bottom);
+  keys[int1]:= ord(akey) or modvalue;
+  names[int1]:= prefix+padcharkeynames[akey];
+ end;
+ bottom:= bottom+padcharkeycount;
 end;
 
 procedure getpadvalues(var bottom: integer; prefix: msestring;
@@ -529,16 +546,34 @@ begin
   setlength(baseshortcutnames,baseshortcutcount);
   bo1:= true;
  end;
+ if padcharshortcutkeys = nil then begin
+  setlength(padcharshortcutkeys,padcharkeycount);
+  bo1:= true;
+ end;
+ if padcharshortcutnames = nil then begin
+  setlength(padcharshortcutnames,padcharkeycount);
+  bo1:= true;
+ end;
  if bo1 then begin
   int1:= 0;
   getvalues(int1,'',0,baseshortcutkeys,baseshortcutnames);
+  int1:= 0;
+  getpadcharvalues(int1,'',0,padcharshortcutkeys,padcharshortcutnames);
  end;
- k1:= key and not modmask;
  mstr1:= '';
+ k1:= key and not modmask;
  for int1:= 0 to high(baseshortcutkeys) do begin
   if baseshortcutkeys[int1] = k1 then begin
    mstr1:= baseshortcutnames[int1];
    break;
+  end;
+ end;
+ if mstr1 = '' then begin
+  for int1:= 0 to high(padcharshortcutkeys) do begin
+   if padcharshortcutkeys[int1] = k1 then begin
+    mstr1:= padcharshortcutnames[int1];
+    break;
+   end;
   end;
  end;
  if mstr1 = '' then begin

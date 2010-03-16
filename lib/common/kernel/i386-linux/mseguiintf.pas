@@ -2726,7 +2726,7 @@ begin
  gdi_unlock;
 end;
 
-function xkeytokey(key: keysym): keyty;
+function xkeytokey(key: keysym; var shiftstate: shiftstatesty): keyty;
 begin
  if (key >= $61) and (key <= $7a) then begin //a..z
   result:= keyty(key - $20); //A..Z
@@ -2771,34 +2771,109 @@ begin
 //   xk_script_switch: result:= key_scriptswitch;
    xk_num_lock: result:= key_numlock;
 
-   xk_kp_space: result:= key_space;
-   xk_kp_tab: result:= key_tab;
-   xk_kp_enter: result:= key_return;
-   xk_kp_f1: result:= key_f1;
-   xk_kp_f2: result:= key_f2;
-   xk_kp_f3: result:= key_f3;
-   xk_kp_f4: result:= key_f4;
-   xk_kp_home: result:= key_home;
-   xk_kp_left: result:= key_left;
-   xk_kp_up: result:= key_up;
-   xk_kp_right: result:= key_right;
-   xk_kp_down: result:= key_down;
+   xk_kp_space: begin
+    result:= key_space;
+    include(shiftstate,ss_second);
+   end;
+   xk_kp_tab: begin
+    result:= key_tab;
+    include(shiftstate,ss_second);
+   end;
+   xk_kp_enter: begin
+    result:= key_return;
+    include(shiftstate,ss_second);
+   end;
+   xk_kp_f1: begin
+    result:= key_f1;
+    include(shiftstate,ss_second);
+   end;
+   xk_kp_f2: begin
+    result:= key_f2;
+    include(shiftstate,ss_second);
+   end;
+   xk_kp_f3: begin
+    result:= key_f3;
+    include(shiftstate,ss_second);
+   end;
+   xk_kp_f4: begin
+    result:= key_f4;
+    include(shiftstate,ss_second);
+   end;
+   xk_kp_home: begin
+    result:= key_home;
+    include(shiftstate,ss_second);
+   end;
+   xk_kp_left: begin
+    result:= key_left;
+    include(shiftstate,ss_second);
+   end;
+   xk_kp_up: begin
+    result:= key_up;
+    include(shiftstate,ss_second);
+   end;
+   xk_kp_right: begin
+    result:= key_right;
+    include(shiftstate,ss_second);
+   end;
+   xk_kp_down: begin
+    result:= key_down;
+    include(shiftstate,ss_second);
+   end;
 //   xk_kp_prior: result:= key_prior;
-   xk_kp_page_up: result:= key_pageup;
+   xk_kp_page_up: begin
+    result:= key_pageup;
+    include(shiftstate,ss_second);
+   end;
 //   xk_kp_next: result:= key_next;
-   xk_kp_page_down: result:= key_pagedown;
-   xk_kp_end: result:= key_end;
+   xk_kp_page_down: begin
+    result:= key_pagedown;
+    include(shiftstate,ss_second);
+   end;
+   xk_kp_end: begin
+    result:= key_end;
+    include(shiftstate,ss_second);
+   end;
 //   xk_kp_begin: result:= key_begin;
-   xk_kp_insert: result:= key_insert;
-   xk_kp_delete: result:= key_delete;
-   xk_kp_equal: result:= key_equal;
-   xk_kp_multiply: result:= key_asterisk;
-   xk_kp_add: result:= key_plus;
-   xk_kp_separator: result:= key_comma;
-   xk_kp_subtract: result:= key_minus;
-   xk_kp_decimal: result:= key_period;
-   xk_kp_divide: result:= key_slash;
-   xk_kp_0..xk_kp_9: result:= keyty(longword(key_0) + key - xk_kp_0);
+   xk_kp_insert: begin
+    result:= key_insert;
+    include(shiftstate,ss_second);
+   end;
+   xk_kp_delete: begin
+    result:= key_delete;
+    include(shiftstate,ss_second);
+   end;
+   xk_kp_equal: begin
+    result:= key_equal;
+    include(shiftstate,ss_second);
+   end;
+   xk_kp_multiply: begin
+    result:= key_asterisk;
+    include(shiftstate,ss_second);
+   end;
+   xk_kp_add: begin
+    result:= key_plus;
+    include(shiftstate,ss_second);
+   end;
+   xk_kp_separator: begin
+    result:= key_comma;
+    include(shiftstate,ss_second);
+   end;
+   xk_kp_subtract: begin
+    result:= key_minus;
+    include(shiftstate,ss_second);
+   end;
+   xk_kp_decimal: begin
+    result:= key_period;
+    include(shiftstate,ss_second);
+   end;
+   xk_kp_divide: begin
+    result:= key_slash;
+    include(shiftstate,ss_second);
+   end;
+   xk_kp_0..xk_kp_9: begin
+    result:= keyty(longword(key_0) + key - xk_kp_0);
+    include(shiftstate,ss_second);
+   end;
 
    xk_f1..xk_f35: result:= keyty(longword(key_f1) + key - xk_f1);
 
@@ -2809,13 +2884,25 @@ begin
    xk_caps_lock: result:= key_capslock;
 //   xk_shift_lock: result:= key_shift_lock;
 
-   xk_meta_l: result:= key_meta;
+   xk_meta_l: begin
+    result:= key_meta;
+    include(shiftstate,ss_second);
+   end;
    xk_meta_r: result:= key_meta;
-   xk_alt_l: result:= key_alt;
+   xk_alt_l: begin
+    result:= key_alt;
+    include(shiftstate,ss_second);
+   end;
    xk_alt_r: result:= key_alt;
-   xk_super_l: result:= key_super_l;
+   xk_super_l: begin
+    result:= key_super_l;
+    include(shiftstate,ss_second);
+   end;
    xk_super_r: result:= key_super_r;
-   xk_hyper_l: result:= key_hyper_l;
+   xk_hyper_l: begin
+    result:= key_hyper_l;
+    include(shiftstate,ss_second);
+   end;
    xk_hyper_r: result:= key_hyper_r;
 
    else result:= keyty(key);
@@ -5774,13 +5861,15 @@ function getkeynomod(const xev: {$ifdef FPC}txkeyevent{$else}
 var
  keysym1: pkeysym;
  int1,int2: integer;
+ ss1: shiftstatesty;
 begin
  result:= key_none;
  {$ifdef fpc} {$checkpointer off} {$endif}
  inc(xlockerror);
+ ss1:= [];
  keysym1:= xgetkeyboardmapping(appdisp,xev.keycode,1,@int1);
  if keysym1 <> nil then begin
-  result:= xkeytokey(keysym1^);
+  result:= xkeytokey(keysym1^,ss1);
   xfree(keysym1);
  end;
  dec(xlockerror);
@@ -6116,11 +6205,12 @@ eventrestart:
      xlookupchars: akey:= 0;
      xlookupkeysym_: chars:= '';
     end;
-    key1:= xkeytokey(akey);
+    shiftstate1:= [];
+    key1:= xkeytokey(akey,shiftstate1);
     if key1 = key_escape then begin
      escapepressed:= true;
     end;
-    shiftstate1:= xtoshiftstate(state,key1,mb_none,false);
+    shiftstate1:= shiftstate1 + xtoshiftstate(state,key1,mb_none,false);
     if (keycode = repeatkey) and (time = repeatkeytime) then begin
      include(shiftstate1,ss_repeat);
      resetrepeatkey;
@@ -6135,9 +6225,9 @@ eventrestart:
     lasteventtime:= time;
     int1:= keycode;
     xlookupstring(@xev.xkey,nil,0,@akey,nil);
-    key1:= xkeytokey(akey);
+    key1:= xkeytokey(akey,shiftstate1);
     key2:= getkeynomod(xev.xkey);
-    shiftstate1:= xtoshiftstate(state,key1,mb_none,true);
+    shiftstate1:= shiftstate1 + xtoshiftstate(state,key1,mb_none,true);
     if xpending(appdisp) > 0 then begin
      xpeekevent(appdisp,@xev);
      if (xev.xtype = keypress) and (time - lasteventtime < 10) and 

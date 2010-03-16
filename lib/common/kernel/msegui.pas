@@ -9604,21 +9604,23 @@ var
  naviginfo: naviginfoty;
  widget1: twidget;
  bo1: boolean;
+ shiftstate1: shiftstatesty;
 begin
  with info do begin
+  shiftstate1:= shiftstate * shiftstatesmask;
   if not (es_processed in eventstate) then begin
    if (ow_keyreturntaborder in foptionswidget) and 
       ({(key = key_enter) or} (key = key_return)) and 
-      (shiftstate - [ss_shift,ss_second] =  []) then begin
+      (shiftstate1 - [ss_shift] =  []) then begin
     include(eventstate,es_processed);
-    widget1:= nexttaborder(ss_shift in shiftstate);
+    widget1:= nexttaborder(ss_shift in shiftstate1);
     if widget1 <> nil then begin
      widget1.setfocus;
     end;
    end
    else begin
-    if (shiftstate = []) or
-         (shiftstate = [ss_shift]) and (key = key_backtab) then begin
+    if (shiftstate1 = []) or
+         (shiftstate1 = [ss_shift]) and (key = key_backtab) then begin
      include(eventstate,es_processed);
      with naviginfo do begin
       direction:= gd_none;
