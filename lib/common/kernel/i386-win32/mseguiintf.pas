@@ -3800,8 +3800,11 @@ begin
   vk_help: result:= key_help;
   longword('0')..longword('9'): result:= keyty(key);
   longword('A')..longword('Z'): result:= keyty(key);
-  vk_lwin: result:= key_super_l;
-  vk_rwin: result:= key_super_r;
+  vk_lwin: result:= key_super;
+  vk_rwin: begin
+   result:= key_super;
+   include(shiftstate,ss_second);
+  end;
   vk_apps: result:= key_menu;
   vk_oem_plus: result:= key_plus;
   vk_oem_comma: result:= key_comma;
