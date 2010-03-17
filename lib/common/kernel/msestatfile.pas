@@ -355,7 +355,7 @@ begin
       floadedfile:= filepath(ar1[0],ffilename);
      end
      else begin
-      floadedfile:= ffilename;
+      floadedfile:= filepath(ffilename);
      end;
     end;
     if (sfo_createpath in foptions) and not findfile(floadedfile) then begin

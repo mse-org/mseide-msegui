@@ -42,8 +42,8 @@ type
  mousewheelty = (mw_none,mw_up,mw_down);
 
  shiftstatety = (ss_shift,ss_alt,ss_ctrl,ss_left,ss_right,ss_middle,ss_double,
-                 ss_repeat,       //repeat keydown
-                 ss_second);   //right shift, ctrl, alt, numpad
+                 ss_repeat,    //repeat keydown
+                 ss_second);   //right modifier keys, numpad
  shiftstatesty = set of shiftstatety;
 
 const
