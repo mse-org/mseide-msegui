@@ -629,24 +629,27 @@ begin
 end;
 
 procedure tcustomtextedit.dokeydown(var info: keyeventinfoty);
+var
+ shiftstate1: shiftstatesty;
 begin
  with info do begin
+  shiftstate1:= shiftstate * shiftstatesmask;
   if (fgridintf <> nil) then begin
-   if ((shiftstate = [ss_shift,ss_ctrl]) or (shiftstate = [ss_ctrl])) then begin
+   if ((shiftstate1 = [ss_shift,ss_ctrl]) or (shiftstate1 = [ss_ctrl])) then begin
     if key = key_home then begin
-     seteditpos(makegridcoord(0,0),ss_shift in shiftstate);
+     seteditpos(makegridcoord(0,0),ss_shift in shiftstate1);
      include(eventstate,es_processed);
     end
     else begin
      if key = key_end then begin
-      seteditpos(makegridcoord(bigint,bigint),ss_shift in shiftstate);
+      seteditpos(makegridcoord(bigint,bigint),ss_shift in shiftstate1);
       include(eventstate,es_processed);
      end;
     end;
    end;
-   if isenterkey(self,info.key) and (shiftstate - [ss_shift] = []) and
+   if isenterkey(self,info.key) and (shiftstate1 - [ss_shift] = []) and
           (foptionsedit * [oe_readonly,oe_linebreak] = [oe_linebreak]) and
-         ((ss_shift in shiftstate) xor not (oe_shiftreturn in foptionsedit))
+         ((ss_shift in shiftstate1) xor not (oe_shiftreturn in foptionsedit))
                                              then begin
     insertlinebreak;
     include(eventstate,es_processed);
@@ -1486,7 +1489,8 @@ begin
  inherited;
 end;
 }
-procedure tcustomtextedit.docellevent(const ownedcol: boolean; var info: celleventinfoty);
+procedure tcustomtextedit.docellevent(const ownedcol: boolean; 
+                                                        var info: celleventinfoty);
 var
  textinfo: textmouseeventinfoty;
  bo1: boolean;

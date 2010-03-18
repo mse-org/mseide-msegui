@@ -736,6 +736,7 @@ var
  screenrenderpictformat,bitmaprenderpictformat,
                              alpharenderpictformat: pxrenderpictformat;
 
+ numlockstate: cuint;
  rootid: winidty;
  atomatom: atom;
  mseclientmessageatom,{timeratom,wakeupatom,}
@@ -5862,14 +5863,24 @@ begin
  escapepressed:= false;
 end;
 
-function getkeynomod(const xev: {$ifdef FPC}txkeyevent{$else}
+function getkeynomod(var xev: {$ifdef FPC}txkeyevent{$else}
                                                   xkeyevent{$endif}): keyty;
 var
- keysym1: pkeysym;
+// keysym1: pkeysym;
  int1,int2: integer;
  ss1: shiftstatesty;
+ po1: pcuint;
+ statebefore: cuint;
+ keysym1: cuint;
 begin
  result:= key_none;
+ statebefore:= xev.state;
+ xev.state:= numlockstate;
+ xlookupstring(@xev,nil,0,@keysym1,nil);
+ xev.state:= statebefore;
+ ss1:= [];
+ result:= xkeytokey(keysym1,ss1);
+ (*
  {$ifdef fpc} {$checkpointer off} {$endif}
  inc(xlockerror);
  ss1:= [];
@@ -5880,6 +5891,7 @@ begin
  end;
  dec(xlockerror);
  {$ifdef fpc} {$checkpointer default} {$endif}
+*)
 end;
 
 var
@@ -6503,6 +6515,9 @@ var
  clientid: pchar;
  smerror: array[0..255] of char;
 {$endif}
+ po2: pkeycode;
+ modmap: pxmodifierkeymap;
+ numlockcode: cuint;
  
 begin
  resetrepeatkey;
@@ -6757,6 +6772,26 @@ begin
           @netatomnames[net_wm_state_fullscreen],
            {$ifdef xboolean}false{$else}0{$endif});      //fake
  end; 
+
+ numlockstate:= 0;
+ numlockcode:= xkeysymtokeycode(appdisp,xk_num_lock);
+ if numlockcode <> nosymbol then begin  //return numlock state
+  modmap:= xgetmodifiermapping(appdisp);
+  po2:= modmap^.modifiermap;
+  for int1:= 0 to 7 do begin
+   for int2:= 0 to modmap^.max_keypermod - 1 do begin
+    if po2^ = numlockcode then begin
+     numlockstate:= 1 shl int1;
+     break;
+    end;
+    inc(po2);
+   end;
+   if numlockstate <> 0 then begin
+    break;
+   end;
+  end;
+  xfreemodifiermap(modmap);
+ end;
 
  result:= gue_ok;
  {$ifdef mse_flushgdi}

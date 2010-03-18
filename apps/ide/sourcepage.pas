@@ -1176,6 +1176,7 @@ procedure tsourcepage.gridoncellevent(const sender: TObject;
 var
  shiftstate1: shiftstatesty;
 begin
+{
  if (info.eventkind = cek_keydown) then begin
   with info.keyeventinfopo^ do begin
    shiftstate1:= shiftstate * shiftstatesmask;
@@ -1194,6 +1195,7 @@ begin
    end;     
   end;
  end;
+}
 end;
 
 function tsourcepage.findbookmark(const bookmarknum: integer): integer;

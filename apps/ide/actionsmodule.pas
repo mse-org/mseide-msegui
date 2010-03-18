@@ -20,7 +20,8 @@ unit actionsmodule;
 
 interface
 uses
- mseclasses,mseact,mseactions,msebitmap,msestrings,msegui,msedatamodules,mseglob;
+ mseclasses,mseact,mseactions,msebitmap,msestrings,msegui,msedatamodules,
+ mseglob,msestat;
  
 type
  tactionsmo = class(tmsedatamodule)
@@ -86,6 +87,27 @@ type
    download: taction;
    helpact: taction;
    attachtarget: taction;
+   setbm0: taction;
+   findbm0: taction;
+   findbm1: taction;
+   setbm1: taction;
+   findbm2: taction;
+   setbm2: taction;
+   findbm3: taction;
+   setbm3: taction;
+   findbm4: taction;
+   setbm4: taction;
+   findbm5: taction;
+   setbm5: taction;
+   findbm6: taction;
+   setbm6: taction;
+   findbm7: taction;
+   setbm7: taction;
+   findbm8: taction;
+   setbm8: taction;
+   findbm9: taction;
+   setbm9: taction;
+   setbmnone: taction;
    procedure findinfileonexecute(const sender: tobject);
 
    //file
@@ -143,6 +165,8 @@ type
    procedure downloadexe(const sender: TObject);
    procedure helpex(const sender: TObject);
    procedure onattachtarget(const sender: TObject);
+   procedure setbmexec(const sender: TObject);
+   procedure findbmexec(const sender: TObject);
  end;
 
 var
@@ -526,6 +550,16 @@ end;
 procedure tactionsmo.helpex(const sender: TObject);
 begin
  application.help(application.activewidget);
+end;
+
+procedure tactionsmo.setbmexec(const sender: TObject);
+begin
+ sourcefo.setbmexec(sender); 
+end;
+
+procedure tactionsmo.findbmexec(const sender: TObject);
+begin
+ sourcefo.findbmexec(sender);
 end;
 
 end.

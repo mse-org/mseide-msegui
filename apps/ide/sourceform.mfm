@@ -385,79 +385,37 @@ object sourcefo: tsourcefo
         submenu.count = 11
         submenu.items = <        
           item
-            caption = 'Bookmark &0'
-            state = [as_localcaption, as_localshortcut, as_localonexecute]
-            shortcut = 24624
-            onexecute = setbmexec
+            action = actionsmo.setbm0
           end        
           item
-            caption = 'Bookmark &1'
-            state = [as_localcaption, as_localshortcut, as_localtag, as_localonexecute]
-            shortcut = 24625
-            tag = 1
-            onexecute = setbmexec
+            action = actionsmo.setbm1
           end        
           item
-            caption = 'Bookmark &2'
-            state = [as_localcaption, as_localshortcut, as_localtag, as_localonexecute]
-            shortcut = 24626
-            tag = 2
-            onexecute = setbmexec
+            action = actionsmo.setbm2
           end        
           item
-            caption = 'Bookmark &3'
-            state = [as_localcaption, as_localshortcut, as_localtag, as_localonexecute]
-            shortcut = 24627
-            tag = 3
-            onexecute = setbmexec
+            action = actionsmo.setbm3
           end        
           item
-            caption = 'Bookmark &4'
-            state = [as_localcaption, as_localshortcut, as_localtag, as_localonexecute]
-            shortcut = 24628
-            tag = 4
-            onexecute = setbmexec
+            action = actionsmo.setbm4
           end        
           item
-            caption = 'Bookmark &5'
-            state = [as_localcaption, as_localshortcut, as_localtag, as_localonexecute]
-            shortcut = 24629
-            tag = 5
-            onexecute = setbmexec
+            action = actionsmo.setbm5
           end        
           item
-            caption = 'Bookmark &6'
-            state = [as_localcaption, as_localshortcut, as_localtag, as_localonexecute]
-            shortcut = 24630
-            tag = 6
-            onexecute = setbmexec
+            action = actionsmo.setbm6
           end        
           item
-            caption = 'Bookmark &7'
-            state = [as_localcaption, as_localshortcut, as_localtag, as_localonexecute]
-            shortcut = 24631
-            tag = 7
-            onexecute = setbmexec
+            action = actionsmo.setbm7
           end        
           item
-            caption = 'Bookmark &8'
-            state = [as_localcaption, as_localshortcut, as_localtag, as_localonexecute]
-            shortcut = 24632
-            tag = 8
-            onexecute = setbmexec
+            action = actionsmo.setbm8
           end        
           item
-            caption = 'Bookmark &9'
-            state = [as_localcaption, as_localshortcut, as_localtag, as_localonexecute]
-            shortcut = 24633
-            tag = 9
-            onexecute = setbmexec
+            action = actionsmo.setbm9
           end        
           item
-            caption = 'none'
-            state = [as_localcaption, as_localtag, as_localonexecute]
-            tag = -1
-            onexecute = setbmexec
+            action = actionsmo.setbmnone
           end>
         caption = 'Set Bookmark'
         name = 'setbm'
@@ -467,63 +425,34 @@ object sourcefo: tsourcefo
         submenu.count = 10
         submenu.items = <        
           item
-            caption = 'Bookmark &0 (Ctrl+0)'
-            state = [as_localcaption, as_localonexecute]
-            onexecute = findbmexec
+            action = actionsmo.findbm0
           end        
           item
-            caption = 'Bookmark &1 (Ctrl+1)'
-            state = [as_localcaption, as_localtag, as_localonexecute]
-            tag = 1
-            onexecute = findbmexec
+            action = actionsmo.findbm1
           end        
           item
-            caption = 'Bookmark &2 (Ctrl+2)'
-            state = [as_localcaption, as_localtag, as_localonexecute]
-            tag = 2
-            onexecute = findbmexec
+            action = actionsmo.findbm2
           end        
           item
-            caption = 'Bookmark &3 (Ctrl+3)'
-            state = [as_localcaption, as_localtag, as_localonexecute]
-            tag = 3
-            onexecute = findbmexec
+            action = actionsmo.findbm3
           end        
           item
-            caption = 'Bookmark &4 (Ctrl+4)'
-            state = [as_localcaption, as_localtag, as_localonexecute]
-            tag = 4
-            onexecute = findbmexec
+            action = actionsmo.findbm4
           end        
           item
-            caption = 'Bookmark &5 (Ctrl+5)'
-            state = [as_localcaption, as_localtag, as_localonexecute]
-            tag = 5
-            onexecute = findbmexec
+            action = actionsmo.findbm5
           end        
           item
-            caption = 'Bookmark &6 (Ctrl+6)'
-            state = [as_localcaption, as_localtag, as_localonexecute]
-            tag = 6
-            onexecute = findbmexec
+            action = actionsmo.findbm6
           end        
           item
-            caption = 'Bookmark &7 (Ctrl+7)'
-            state = [as_localcaption, as_localtag, as_localonexecute]
-            tag = 7
-            onexecute = findbmexec
+            action = actionsmo.findbm7
           end        
           item
-            caption = 'Bookmark &8 (Ctrl+8)'
-            state = [as_localcaption, as_localtag, as_localonexecute]
-            tag = 8
-            onexecute = findbmexec
+            action = actionsmo.findbm8
           end        
           item
-            caption = 'Bookmark &9 (Ctrl+9)'
-            state = [as_localcaption, as_localtag, as_localonexecute]
-            tag = 9
-            onexecute = findbmexec
+            action = actionsmo.findbm9
           end>
         caption = 'Find Bookmark'
         state = [as_localcaption]

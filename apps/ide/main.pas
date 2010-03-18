@@ -1281,6 +1281,28 @@ begin
   actionsmo.toggleformunit.enabled:= (flastform <> nil) or
                                             (designer.modules.count > 0);
   if (sourcefo.activepage <> nil) and sourcefo.activepage.activeentered then begin
+   setbm0.enabled:= true;
+   setbm1.enabled:= true;
+   setbm2.enabled:= true;
+   setbm3.enabled:= true;
+   setbm4.enabled:= true;
+   setbm5.enabled:= true;
+   setbm6.enabled:= true;
+   setbm7.enabled:= true;
+   setbm8.enabled:= true;
+   setbm8.enabled:= true;
+   setbm9.enabled:= true;
+   setbmnone.enabled:= true;
+   findbm0.enabled:= true;
+   findbm1.enabled:= true;
+   findbm2.enabled:= true;
+   findbm3.enabled:= true;
+   findbm4.enabled:= true;
+   findbm5.enabled:= true;
+   findbm6.enabled:= true;
+   findbm7.enabled:= true;
+   findbm8.enabled:= true;
+   findbm9.enabled:= true;
    print.enabled:= true;
    with sourcefo.activepage do begin
     actionsmo.save.enabled:= modified;
@@ -1302,6 +1324,29 @@ begin
    end;
   end
   else begin
+   setbm0.enabled:= false;
+   setbm1.enabled:= false;
+   setbm2.enabled:= false;
+   setbm3.enabled:= false;
+   setbm4.enabled:= false;
+   setbm5.enabled:= false;
+   setbm6.enabled:= false;
+   setbm7.enabled:= false;
+   setbm8.enabled:= false;
+   setbm8.enabled:= false;
+   setbm9.enabled:= false;
+   setbmnone.enabled:= false;
+   findbm0.enabled:= false;
+   findbm1.enabled:= false;
+   findbm2.enabled:= false;
+   findbm3.enabled:= false;
+   findbm4.enabled:= false;
+   findbm5.enabled:= false;
+   findbm6.enabled:= false;
+   findbm7.enabled:= false;
+   findbm8.enabled:= false;
+   findbm9.enabled:= false;
+
    print.enabled:= false;
    save.enabled:= false;
    undo.enabled:= false;

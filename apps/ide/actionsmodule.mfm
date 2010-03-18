@@ -1,23 +1,24 @@
 object actionsmo: tactionsmo
-  Left = 160
-  Top = 145
+  left = 65523
+  top = 158
   moduleclassname = 'tmsedatamodule'
   size = (
     474
-    523)
+    523
+  )
   object makeact: taction
     Tag = 1
     caption = '&Make'
     onexecute = makeactonexecute
-    Left = 168
-    Top = 316
+    left = 168
+    top = 316
   end
   object run: taction
     caption = '&Run'
     imagenr = 0
     hint = 'Run'
-    Left = 320
-    Top = 268
+    left = 368
+    top = 404
   end
   object step: taction
     imagelist = buttonicons
@@ -26,11 +27,12 @@ object actionsmo: tactionsmo
     imagenrdisabled = 18
     hint = 'Step'
     onexecute = stepactonexecute
-    Left = 24
-    Top = 340
+    left = 24
+    top = 340
     sc = (
       1
-      4150)
+      310
+    )
   end
   object next: taction
     imagelist = buttonicons
@@ -39,11 +41,12 @@ object actionsmo: tactionsmo
     imagenrdisabled = 22
     hint = 'Next'
     onexecute = nextactonexecute
-    Left = 24
-    Top = 316
+    left = 24
+    top = 316
     sc = (
       1
-      4151)
+      311
+    )
   end
   object continue: taction
     imagelist = buttonicons
@@ -52,11 +55,12 @@ object actionsmo: tactionsmo
     imagenrdisabled = 17
     hint = 'Continue'
     onexecute = continueactonexecute
-    Left = 24
-    Top = 388
+    left = 24
+    top = 388
     sc = (
       1
-      4152)
+      312
+    )
   end
   object interrupt: taction
     imagelist = buttonicons
@@ -65,8 +69,8 @@ object actionsmo: tactionsmo
     imagenrdisabled = 16
     hint = 'Interrupt'
     onexecute = interruptactonexecute
-    Left = 22
-    Top = 290
+    left = 22
+    top = 290
   end
   object reset: taction
     imagelist = buttonicons
@@ -75,17 +79,18 @@ object actionsmo: tactionsmo
     imagenrdisabled = 15
     hint = 'Reset'
     onexecute = resetactonexecute
-    Left = 17
-    Top = 266
+    left = 17
+    top = 266
   end
   object opensource: taction
     caption = '&Open'
     onexecute = opensourceactonexecute
-    Left = 8
-    Top = 4
+    left = 8
+    top = 4
     sc = (
       1
-      16463)
+      16463
+    )
   end
   object finish: taction
     imagelist = buttonicons
@@ -94,134 +99,146 @@ object actionsmo: tactionsmo
     imagenrdisabled = 20
     hint = 'Finish'
     onexecute = finishactonexecute
-    Left = 24
-    Top = 364
+    left = 24
+    top = 364
     sc = (
       1
-      12342)
+      8502
+    )
   end
   object save: taction
     caption = '&Save'
     onexecute = saveactonexecute
-    Left = 8
-    Top = 28
+    left = 8
+    top = 28
     sc = (
       1
-      16467)
+      16467
+    )
   end
   object close: taction
     caption = '&Close'
     onexecute = closeactonexecute
-    Left = 8
-    Top = 100
+    left = 8
+    top = 100
     sc = (
       1
-      20531)
+      16691
+    )
   end
   object abortmakeact: taction
     caption = '&Abort Make'
     onexecute = abortmakeactonexecute
-    Left = 165
-    Top = 458
+    left = 160
+    top = 402
   end
   object undo: taction
     caption = '&Undo'
     onexecute = undoactonexecute
-    Left = 280
-    Top = 4
+    left = 280
+    top = 4
     sc = (
       1
-      16474)
+      16474
+    )
   end
   object redo: taction
     caption = '&Redo'
     onexecute = redoactonexecute
-    Left = 280
-    Top = 28
+    left = 280
+    top = 20
     sc = (
       1
-      24666)
+      24666
+    )
   end
   object cut: taction
     caption = 'Cu&t'
     onexecute = cutactonexecute
-    Left = 280
-    Top = 52
+    left = 280
+    top = 36
     sc = (
       1
-      16472)
+      16472
+    )
     sc1 = (
       1
-      12295)
+      8455
+    )
   end
   object copy: taction
     caption = '&Copy'
     onexecute = copyactonexecute
-    Left = 280
-    Top = 76
+    left = 280
+    top = 52
     sc = (
       1
-      16451)
+      16451
+    )
   end
   object paste: taction
     caption = '&Paste'
     onexecute = pasteactonexecute
-    Left = 280
-    Top = 100
+    left = 280
+    top = 68
     sc = (
       1
-      16470)
+      16470
+    )
     sc1 = (
       1
-      12294)
+      8454
+    )
   end
   object delete: taction
     caption = '&Delete'
     onexecute = deleteactonexecute
-    Left = 280
-    Top = 124
+    left = 280
+    top = 84
   end
   object saveall: taction
     caption = 'Sa&ve all'
     onexecute = saveallactonexecute
-    Left = 8
-    Top = 52
+    left = 8
+    top = 52
   end
   object find: taction
     caption = '&Find'
     onexecute = findactonexecute
-    Left = 152
-    Top = 36
+    left = 152
+    top = 36
     sc = (
       1
-      16454)
+      16454
+    )
   end
   object repeatfind: taction
     caption = '&Search again'
     onexecute = repeatfindactonexecute
-    Left = 152
-    Top = 60
+    left = 152
+    top = 60
     sc = (
       1
-      4146)
+      306
+    )
   end
   object findinfile: taction
     caption = 'Find in F&iles'
     onexecute = findinfileonexecute
-    Left = 152
-    Top = 84
+    left = 152
+    top = 84
   end
   object closeall: taction
     caption = 'C&lose all'
     onexecute = closeallactonexecute
-    Left = 8
-    Top = 124
+    left = 8
+    top = 124
   end
   object saveas: taction
     caption = 'Save &as'
     onexecute = saveasactonexecute
-    Left = 8
-    Top = 76
+    left = 8
+    top = 76
   end
   object bkptsonact: taction
     imagelist = buttonicons
@@ -230,11 +247,12 @@ object actionsmo: tactionsmo
     imagenr = 7
     hint = 'Breakpoints on/off'
     onexecute = bkptsononexecute
-    Left = 168
-    Top = 236
+    left = 168
+    top = 236
     sc = (
       1
-      16450)
+      16450
+    )
   end
   object watchesonact: taction
     imagelist = buttonicons
@@ -244,46 +262,50 @@ object actionsmo: tactionsmo
     hint = 'Watches on/off'
     statfile = mainfo.projectstatfile
     onexecute = watchesononexecute
-    Left = 168
-    Top = 260
+    left = 168
+    top = 260
     sc = (
       1
-      16471)
+      16471
+    )
   end
   object line: taction
     caption = '&Line'
     onexecute = lineactonexecute
-    Left = 152
-    Top = 12
+    left = 152
+    top = 12
     sc = (
       1
-      16460)
+      16460
+    )
   end
   object togglebkpt: taction
     caption = '&Toggle Breakpoint'
     onexecute = togglebreakpointexe
-    Left = 168
-    Top = 188
+    left = 168
+    top = 188
     sc = (
       1
-      4148)
+      308
+    )
   end
   object togglebkptenable: taction
     caption = 'Toggle Bkpt. &enabled'
     onexecute = togglebkptenableactonexecute
-    Left = 168
-    Top = 212
+    left = 168
+    top = 212
     sc = (
       1
-      12340)
+      8500
+    )
   end
   object buttonicons: timagelist
     width = 24
     height = 24
     colormask = True
     count = 23
-    Left = 160
-    Top = 168
+    left = 160
+    top = 168
     image = {
       00000000060000007800000078000000A43A0000000000000000000000000000
       0000000000000000000000000000000000000000C0C0C018D0D0D0060000BC03
@@ -1212,44 +1234,49 @@ object actionsmo: tactionsmo
       050505010000000F2626260136363601393939013A3A3A010000001426262601
       36363601393939013A3A3A0100000011040404014C4C4C0180808001B3B3B301
       E6E6E602B3B3B301808080014C4C4C01040404010000000D08080801F8F8F801
-      000000150808080100000059}
+      000000150808080100000059
+    }
   end
   object selecteditpage: taction
     caption = 'Select &Edit Page'
     options = [ao_globalshortcut]
     onexecute = selecteditpageonexecute
-    Left = 280
-    Top = 144
+    left = 280
+    top = 104
     sc = (
       1
-      16453)
+      16453
+    )
   end
   object indent: taction
     caption = '&Indent'
     onexecute = indentonexecute
-    Left = 280
-    Top = 176
+    left = 280
+    top = 120
     sc = (
       1
-      16457)
+      16457
+    )
   end
   object unindent: taction
     caption = 'U&nindent'
     onexecute = unindentonexecute
-    Left = 280
-    Top = 200
+    left = 280
+    top = 136
     sc = (
       1
-      16469)
+      16469
+    )
   end
   object toggleformunit: taction
     caption = 'Toggle Form/&Unit'
     onexecute = toggleformunitonexecute
-    Left = 152
-    Top = 112
+    left = 152
+    top = 112
     sc = (
       1
-      4155)
+      315
+    )
   end
   object nexti: taction
     imagelist = buttonicons
@@ -1257,11 +1284,12 @@ object actionsmo: tactionsmo
     imagenr = 13
     imagenrdisabled = 19
     onexecute = nextiactonexecute
-    Left = 80
-    Top = 312
+    left = 80
+    top = 312
     sc = (
       1
-      28727)
+      24887
+    )
   end
   object stepi: taction
     imagelist = buttonicons
@@ -1269,11 +1297,12 @@ object actionsmo: tactionsmo
     imagenr = 12
     imagenrdisabled = 21
     onexecute = stepiactonexecute
-    Left = 80
-    Top = 336
+    left = 80
+    top = 336
     sc = (
       1
-      28726)
+      24886
+    )
   end
   object bluedotsonact: taction
     imagelist = buttonicons
@@ -1283,398 +1312,823 @@ object actionsmo: tactionsmo
     hint = 'Executable lines hint on/off'
     statfile = mainfo.projectstatfile
     onchange = bluedotsononchange
-    Left = 168
-    Top = 280
+    left = 168
+    top = 280
   end
   object replace: taction
     caption = 'Find && &Replace'
     onexecute = replaceactonexecute
-    Left = 208
-    Top = 32
+    left = 208
+    top = 32
     sc = (
       1
-      16466)
+      16466
+    )
   end
   object print: taction
     caption = '&Print'
     onexecute = printactonexecute
-    Left = 80
-    Top = 40
+    left = 80
+    top = 40
   end
   object detachtarget: taction
     caption = 'Detach'
     onexecute = ondetachtarget
-    Left = 8
-    Top = 168
+    left = 8
+    top = 168
   end
   object attachprocess: taction
     caption = 'Attach Process'
     onexecute = onattachprocess
-    Left = 8
-    Top = 192
+    left = 8
+    top = 192
   end
   object lowercase: taction
     caption = 'Lowercase'
     onexecute = lowercaseexecute
     onupdate = enableonselect
-    Left = 360
-    Top = 176
+    left = 360
+    top = 120
   end
   object uppercase: taction
     caption = 'Uppercase'
     onexecute = uppercaseexecute
     onupdate = enableonselect
-    Left = 360
-    Top = 200
+    left = 360
+    top = 136
   end
   object shortcuts: tshortcutcontroller
-    actions.count = 51
-    actions.items = <
+    actions.count = 74
+    actions.items = <    
       item
         dispname = 'File'
-      end
+      end    
       item
         action = opensource
         dispname = 'Open'
         sc = (
           1
-          16463)
-      end
+          16463
+        )
+      end    
       item
         action = save
         dispname = 'Save'
         sc = (
           1
-          16467)
-      end
+          16467
+        )
+      end    
       item
         action = saveall
         dispname = 'Save all'
-      end
+      end    
       item
         action = saveas
         dispname = 'Save as'
-      end
+      end    
       item
         action = close
         dispname = 'Close'
         sc = (
           1
-          20531)
-      end
+          16691
+        )
+      end    
       item
         action = closeall
         dispname = 'Close all'
-      end
+      end    
       item
         action = print
         dispname = 'Print'
-      end
+      end    
       item
         dispname = 'Search'
-      end
+      end    
       item
         action = line
         dispname = 'Line'
         sc = (
           1
-          16460)
-      end
+          16460
+        )
+      end    
       item
         action = find
         dispname = 'Find'
         sc = (
           1
-          16454)
-      end
+          16454
+        )
+      end    
       item
         action = repeatfind
         dispname = 'Repeat Find'
         sc = (
           1
-          4146)
-      end
+          306
+        )
+      end    
       item
         action = replace
         dispname = 'Find and replace'
         sc = (
           1
-          16466)
-      end
+          16466
+        )
+      end    
       item
         action = findinfile
         dispname = 'Findinfile'
-      end
+      end    
       item
         dispname = 'Edit'
-      end
+      end    
       item
         action = undo
         dispname = 'Undo'
         sc = (
           1
-          16474)
-      end
+          16474
+        )
+      end    
       item
         action = redo
         dispname = 'Redo'
         sc = (
           1
-          24666)
-      end
+          24666
+        )
+      end    
       item
         action = selecteditpage
         dispname = 'Select Editpage'
         sc = (
           1
-          16453)
-      end
+          16453
+        )
+      end    
       item
         action = indent
         dispname = 'Indent'
         sc = (
           1
-          16457)
-      end
+          16457
+        )
+      end    
       item
         action = unindent
         dispname = 'Unindent'
         sc = (
           1
-          16469)
-      end
+          16469
+        )
+      end    
       item
         action = lowercase
         dispname = 'Lowercase'
-      end
+      end    
       item
         action = uppercase
         dispname = 'Uppercase'
-      end
+      end    
+      item
+        dispname = 'Set Bookmark'
+      end    
+      item
+        action = setbm0
+        dispname = 'Set Bookmark 0'
+        sc = (
+          1
+          24624
+        )
+      end    
+      item
+        action = setbm1
+        dispname = 'Set Bookmark 1'
+        sc = (
+          1
+          24625
+        )
+      end    
+      item
+        action = setbm2
+        dispname = 'Set Bookmark 2'
+        sc = (
+          1
+          24626
+        )
+      end    
+      item
+        action = setbm3
+        dispname = 'Set Bookmark 3'
+        sc = (
+          1
+          24627
+        )
+      end    
+      item
+        action = setbm4
+        dispname = 'Set Bookmark 4'
+        sc = (
+          1
+          24628
+        )
+      end    
+      item
+        action = setbm5
+        dispname = 'Set Bookmark 5'
+        sc = (
+          1
+          24629
+        )
+      end    
+      item
+        action = setbm6
+        dispname = 'Set Bookmark 6'
+        sc = (
+          1
+          24630
+        )
+      end    
+      item
+        action = setbm7
+        dispname = 'Set Bookmark 7'
+        sc = (
+          1
+          24631
+        )
+      end    
+      item
+        action = setbm8
+        dispname = 'Set Bookmark 8'
+        sc = (
+          1
+          24632
+        )
+      end    
+      item
+        action = setbm9
+        dispname = 'Set Bookmark 9'
+        sc = (
+          1
+          24633
+        )
+      end    
+      item
+        action = setbmnone
+        dispname = 'Clear Bookmarks'
+      end    
+      item
+        dispname = 'Find Bookmark'
+      end    
+      item
+        action = findbm0
+        dispname = 'Find Bookmark 0'
+        sc = (
+          1
+          16432
+        )
+      end    
+      item
+        action = findbm1
+        dispname = 'Find Bookmark 1'
+        sc = (
+          1
+          16433
+        )
+      end    
+      item
+        action = findbm2
+        dispname = 'Find Bookmark 2'
+        sc = (
+          1
+          16434
+        )
+      end    
+      item
+        action = findbm3
+        dispname = 'Find Bookmark 3'
+        sc = (
+          1
+          16435
+        )
+      end    
+      item
+        action = findbm4
+        dispname = 'Find Bookmark 4'
+        sc = (
+          1
+          16436
+        )
+      end    
+      item
+        action = findbm5
+        dispname = 'Find Bookmark 5'
+        sc = (
+          1
+          16437
+        )
+      end    
+      item
+        action = findbm6
+        dispname = 'Find Bookmark 6'
+        sc = (
+          1
+          16438
+        )
+      end    
+      item
+        action = findbm7
+        dispname = 'Find Bookmark 7'
+        sc = (
+          1
+          16439
+        )
+      end    
+      item
+        action = findbm8
+        dispname = 'Find Bookmark 8'
+        sc = (
+          1
+          16440
+        )
+      end    
+      item
+        action = findbm9
+        dispname = 'Find Bookmark 9'
+        sc = (
+          1
+          16441
+        )
+      end    
       item
         dispname = 'Target'
-      end
+      end    
       item
         action = attachprocess
         dispname = 'Attach Process'
-      end
+      end    
       item
         action = detachtarget
         dispname = 'Detach Target'
-      end
+      end    
       item
         action = continue
         dispname = 'Continue'
         sc = (
           1
-          4152)
-      end
+          312
+        )
+      end    
       item
         action = reset
         dispname = 'Reset'
-      end
+      end    
       item
         action = interrupt
         dispname = 'Interrupt'
-      end
+      end    
       item
         action = next
         dispname = 'Next'
         sc = (
           1
-          4151)
-      end
+          311
+        )
+      end    
       item
         action = nexti
         dispname = 'Next Instruction'
         sc = (
           1
-          28727)
-      end
+          24887
+        )
+      end    
       item
         action = step
         dispname = 'Step'
         sc = (
           1
-          4150)
-      end
+          310
+        )
+      end    
       item
         action = stepi
         dispname = 'Step Instruction'
         sc = (
           1
-          28726)
-      end
+          24886
+        )
+      end    
       item
         action = finish
         dispname = 'Finish'
         sc = (
           1
-          12342)
-      end
+          8502
+        )
+      end    
       item
         action = bkptsonact
         dispname = 'Breakpoints on/off'
         sc = (
           1
-          16450)
-      end
+          16450
+        )
+      end    
       item
         action = togglebkpt
         dispname = 'Toggle Breakpoint'
         sc = (
           1
-          4148)
-      end
+          308
+        )
+      end    
       item
         action = togglebkptenable
         dispname = 'Toggle Breakpoint enabled'
         sc = (
           1
-          12340)
-      end
+          8500
+        )
+      end    
       item
         action = watchesonact
         dispname = 'Watches on/off'
         sc = (
           1
-          16471)
-      end
+          16471
+        )
+      end    
       item
         action = bluedotsonact
         dispname = 'Exec Line Hints on/off'
-      end
+      end    
       item
         dispname = 'View'
-      end
+      end    
       item
         action = toggleinspector
         dispname = 'Toggle Form/Object Inspector'
         sc = (
           1
-          4154)
-      end
+          314
+        )
+      end    
       item
         action = toggleformunit
         dispname = 'Toggle Form/Unit'
         sc = (
           1
-          4155)
-      end
+          315
+        )
+      end    
       item
         dispname = 'Project'
-      end
+      end    
       item
         action = makeact
         dispname = 'Make'
-      end
+      end    
       item
         action = buildact
         dispname = 'Build'
-      end
+      end    
       item
         action = make1act
         dispname = 'Make 1'
-      end
+      end    
       item
         action = make2act
         dispname = 'Make 2'
-      end
+      end    
       item
         action = make3act
         dispname = 'Make 3'
-      end
+      end    
       item
         action = make4act
         dispname = 'Make 4'
-      end
+      end    
       item
         action = abortmakeact
         dispname = 'Abort Make'
-      end
+      end    
       item
         dispname = 'Help'
-      end
+      end    
       item
         action = helpact
         dispname = 'Help'
         sc = (
           1
-          4144)
+          304
+        )
       end>
     sysshortcuts.count = 6
     sysshortcuts.items = (
       16451
       16470
       16472
-      20486
-      28678
-      20487)
+      16646
+      24838
+      16647
+    )
     sysshortcuts1.count = 6
     sysshortcuts1.items = (
       0
-      12294
-      12295
+      8454
+      8455
       0
       0
-      0)
+      0
+    )
     statfile = mainfo.mainstatfile
     onafterupdate = updateshortcuts
-    Left = 320
-    Top = 312
+    left = 288
+    top = 368
   end
   object toggleinspector: taction
     caption = 'Toggle Form/Inspector'
-    Left = 152
-    Top = 136
+    left = 152
+    top = 136
     sc = (
       1
-      4154)
+      314
+    )
   end
   object buildact: taction
     onexecute = makeactonexecute
-    Left = 168
-    Top = 336
+    left = 168
+    top = 328
   end
   object make1act: taction
     onexecute = makeactonexecute
-    Left = 168
-    Top = 360
+    left = 168
+    top = 339
   end
   object make2act: taction
     onexecute = makeactonexecute
-    Left = 168
-    Top = 384
+    left = 168
+    top = 352
   end
   object make3act: taction
     onexecute = makeactonexecute
-    Left = 168
-    Top = 408
+    left = 168
+    top = 366
   end
   object make4act: taction
     onexecute = makeactonexecute
-    Left = 168
-    Top = 432
+    left = 168
+    top = 384
   end
   object download: taction
     caption = 'Download'
     onexecute = downloadexe
-    Left = 16
-    Top = 216
+    left = 16
+    top = 216
   end
   object helpact: taction
     options = [ao_globalshortcut]
     onexecute = helpex
-    Left = 320
-    Top = 344
+    left = 288
+    top = 400
     sc = (
       1
-      4144)
+      304
+    )
   end
   object attachtarget: taction
     caption = 'Attach Target'
     onexecute = onattachtarget
-    Left = 8
-    Top = 152
+    left = 8
+    top = 152
+  end
+  object setbm0: taction
+    caption = 'Bookmark &0'
+    onexecute = setbmexec
+    left = 288
+    top = 168
+    sc = (
+      1
+      24624
+    )
+  end
+  object findbm0: taction
+    caption = 'Bookmark &0'
+    onexecute = findbmexec
+    left = 368
+    top = 168
+    sc = (
+      1
+      16432
+    )
+  end
+  object findbm1: taction
+    caption = 'Bookmark &1'
+    tagaction = 1
+    onexecute = findbmexec
+    left = 368
+    top = 184
+    sc = (
+      1
+      16433
+    )
+  end
+  object setbm1: taction
+    caption = 'Bookmark &1'
+    tagaction = 1
+    onexecute = setbmexec
+    left = 288
+    top = 184
+    sc = (
+      1
+      24625
+    )
+  end
+  object findbm2: taction
+    caption = 'Bookmark &2'
+    tagaction = 2
+    onexecute = findbmexec
+    left = 368
+    top = 200
+    sc = (
+      1
+      16434
+    )
+  end
+  object setbm2: taction
+    caption = 'Bookmark &2'
+    tagaction = 2
+    onexecute = setbmexec
+    left = 288
+    top = 200
+    sc = (
+      1
+      24626
+    )
+  end
+  object findbm3: taction
+    caption = 'Bookmark &3'
+    tagaction = 3
+    onexecute = findbmexec
+    left = 368
+    top = 216
+    sc = (
+      1
+      16435
+    )
+  end
+  object setbm3: taction
+    caption = 'Bookmark &3'
+    tagaction = 3
+    onexecute = setbmexec
+    left = 288
+    top = 216
+    sc = (
+      1
+      24627
+    )
+  end
+  object findbm4: taction
+    caption = 'Bookmark &4'
+    tagaction = 4
+    onexecute = findbmexec
+    left = 368
+    top = 232
+    sc = (
+      1
+      16436
+    )
+  end
+  object setbm4: taction
+    caption = 'Bookmark &4'
+    tagaction = 4
+    onexecute = setbmexec
+    left = 288
+    top = 232
+    sc = (
+      1
+      24628
+    )
+  end
+  object findbm5: taction
+    caption = 'Bookmark &5'
+    tagaction = 5
+    onexecute = findbmexec
+    left = 368
+    top = 248
+    sc = (
+      1
+      16437
+    )
+  end
+  object setbm5: taction
+    caption = 'Bookmark &5'
+    tagaction = 5
+    onexecute = setbmexec
+    left = 288
+    top = 248
+    sc = (
+      1
+      24629
+    )
+  end
+  object findbm6: taction
+    caption = 'Bookmark &6'
+    tagaction = 6
+    onexecute = findbmexec
+    left = 368
+    top = 264
+    sc = (
+      1
+      16438
+    )
+  end
+  object setbm6: taction
+    Tag = 6
+    caption = 'Bookmark &6'
+    onexecute = setbmexec
+    left = 288
+    top = 264
+    sc = (
+      1
+      24630
+    )
+  end
+  object findbm7: taction
+    caption = 'Bookmark &7'
+    tagaction = 7
+    onexecute = findbmexec
+    left = 368
+    top = 280
+    sc = (
+      1
+      16439
+    )
+  end
+  object setbm7: taction
+    caption = 'Bookmark &7'
+    tagaction = 6
+    onexecute = setbmexec
+    left = 288
+    top = 280
+    sc = (
+      1
+      24631
+    )
+  end
+  object findbm8: taction
+    caption = 'Bookmark &8'
+    tagaction = 8
+    onexecute = findbmexec
+    left = 368
+    top = 296
+    sc = (
+      1
+      16440
+    )
+  end
+  object setbm8: taction
+    caption = 'Bookmark &8'
+    tagaction = 8
+    onexecute = setbmexec
+    left = 288
+    top = 296
+    sc = (
+      1
+      24632
+    )
+  end
+  object findbm9: taction
+    caption = 'Bookmark &9'
+    tagaction = 9
+    onexecute = findbmexec
+    left = 368
+    top = 312
+    sc = (
+      1
+      16441
+    )
+  end
+  object setbm9: taction
+    caption = 'Bookmark &9'
+    tagaction = 9
+    onexecute = setbmexec
+    left = 288
+    top = 312
+    sc = (
+      1
+      24633
+    )
+  end
+  object setbmnone: taction
+    caption = 'none'
+    tagaction = -1
+    onexecute = setbmexec
+    left = 288
+    top = 328
   end
 end

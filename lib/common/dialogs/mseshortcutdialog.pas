@@ -327,15 +327,15 @@ begin
      mstr1:= mstr1+'Pad+';
      sc1:= sc1 + ord(key_modpad);
     end;   
-    if (key = key_shift) or (key = key_control) or
-                                            (key = key_alt) then begin
+    if (keynomod = key_shift) or (keynomod = key_control) or
+                                            (keynomod = key_alt) then begin
      sc1:= 0;
     end;
     case key of
      key_shift,key_alt,key_control: begin
      end
      else begin
-      sc1:= sc1 or (ord(key) and not modmask);
+      sc1:= sc1 or (ord(keynomod) and not modmask);
       if (high(ar1) >= 0) or isvalidshortcut(sc1) or 
                                         (keyty(sc1) = key_delete) then begin
        if (high(ar1) < 0) and (keyty(sc1) = key_delete) then begin
