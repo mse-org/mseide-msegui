@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -249,11 +249,12 @@ type
    function doclose(const awidget: twidget): boolean;
    procedure setmdistate(const avalue: mdistatety); virtual;
    procedure domdistatechanged(const oldstate,newstate: mdistatety); virtual;
-   procedure dofloat(const adist: pointty); virtual;
-   procedure dodock; virtual;
+   function dofloat(const adist: pointty): boolean; virtual;
+   function dodock: boolean; virtual;
    procedure dochilddock(const awidget: twidget); virtual;
    procedure dochildfloat(const awidget: twidget); virtual;
    function docheckdock(const info: draginfoty): boolean; virtual;
+   function dockdrag(const dragobj: tdockdragobject): boolean;
 
    function getparentcontroller(out acontroller: tdockcontroller): boolean;
    property useroptions: optionsdockty read fuseroptions write setuseroptions
@@ -308,7 +309,6 @@ type
    procedure widgetregionchanged(const sender: twidget);
    procedure beginclientrectchanged;
    procedure endclientrectchanged;
-   property mdistate: mdistatety read fmdistate write setmdistate;
       //istatfile
    procedure dostatread(const reader: tstatreader);
    procedure dostatwrite(const writer: tstatwriter; const bounds: prectty = nil);
@@ -319,9 +319,14 @@ type
    function getitems: widgetarty; //reference count = 1
    function getwidget: twidget;
    function activewidget: twidget; //focused child or active tab
+
+   property mdistate: mdistatety read fmdistate write setmdistate;
    function close: boolean; //simulates mr_windowclosed for owner
    function closeactivewidget: boolean;
                    //simulates mr_windowclosed for active widget, true if ok
+   function float: boolean; //false if canceled
+   function dock(const dest: tdockcontroller; const apos: pointty): boolean;
+
   published
    property dockhandle: tdockhandle read fdockhandle write setdockhandle;
    property splitter_size: integer read fsplitter_size write setsplitter_size default defaultsplittersize;
@@ -1706,9 +1711,12 @@ begin
      widget2:= ftarget;
      ftarget:= nil;
      include(fdockstate,dos_tabedending);
-     widget2.anchors:= ftargetanchors;
-     widget2.parentwidget:= container1;
-     exclude(fdockstate,dos_tabedending);
+     try
+      widget2.anchors:= ftargetanchors;
+      widget2.parentwidget:= container1;
+     finally
+      exclude(fdockstate,dos_tabedending);
+     end;
     end;
    end;
    freeandnil(ftabwidget);
@@ -1853,6 +1861,13 @@ begin
  result:= (od_nofit in foptionsdock) and (fsplitdir in [sd_x,sd_y]);
 end;
 
+function tdockcontroller.dockdrag(const dragobj: tdockdragobject): boolean;
+begin
+ calclayout(tdockdragobject(dragobj),false);
+ updaterefsize;
+ result:= dragobj.fdock.dodock;
+end;
+
 function tdockcontroller.beforedragevent(var info: draginfoty): boolean;
 
 var
@@ -1861,7 +1876,6 @@ var
  rect1: rectty;
  size1: sizety;
  count1: integer;
- x1,y1: integer;
  sd1: splitdirty;
  int1,int2: integer;
  mouseinhandle: boolean;
@@ -1893,6 +1907,7 @@ var
   nofit: boolean;
   rect2: rectty;
   pt1: pointty;
+  x1,y1: integer;
  begin
   with info,tdockdragobject(dragobjectpo^) do begin
    nofit:= (od_nofit in optionsdock) and (fsplitdir in [sd_x,sd_y]);
@@ -1909,29 +1924,33 @@ var
       idockcontroller(fintf).checkdock(info) and
                 docheckdock(info) then begin
     accept:= true;
-    rect1:= makerect(addpoint(pos,subpoint(widget1.screenpos,pickpos)),
-                  widget.size);
+    rect1:= makerect(pos,widget.size);
+    addpoint1(rect1.pos,widget1.clientwidgetpos);
+    addpoint1(rect1.pos,widget1.screenpos);
+    subpoint1(rect1.pos,addpoint(pickpos,widget.clientwidgetpos));
     if not nofit then begin
-     size1:= widget1.clientsize;
+//     size1:= widget1.clientsize;
+     pt1:= addpoint(info.pos,container1.clientpos); //paint origin
+     size1:= container1.paintsize;
      with size1 do begin
       x1:= cx div 8;
       y1:= (cy * 7) div 8;
      end;
      if (od_splitvert in foptionsdock) and
-        (info.pos.x < x1) and (info.pos.y < y1) then begin
+        (pt1.x < x1) and (pt1.y < y1) then begin
       fasplitdir:= sd_x;
      end
      else begin
       if (od_splithorz in foptionsdock) and
-         (info.pos.y > y1) and (info.pos.x > x1) then begin
+         (pt1.y > y1) and (pt1.x > x1) then begin
        fasplitdir:= sd_y;
       end
       else begin
        if (od_tabed in foptionsdock) and
-          (info.pos.x > (size1.cx * 7) div 16) and 
-          (info.pos.x < (size1.cx * 9) div 16) and
-          (info.pos.y > (size1.cy * 7) div 16) and 
-          (info.pos.y < (size1.cy * 9) div 16) then begin
+          (pt1.x > (size1.cx * 7) div 16) and 
+          (pt1.x < (size1.cx * 9) div 16) and
+          (pt1.y > (size1.cy * 7) div 16) and 
+          (pt1.y < (size1.cy * 9) div 16) then begin
         fasplitdir:= sd_tabed;
        end;
       end;
@@ -1960,7 +1979,7 @@ var
        rect1.cy:= size1.cy;
        rect1.cx:= size1.cx div (count1);
        if rect1.cx > 0 then begin
-        findex:= (pos.x div rect1.cx);
+        findex:= (pt1.x div rect1.cx);
         rect1.x:=  findex * rect1.cx +
                 container1.screenpos.x + container1.paintpos.x;
        end;
@@ -1973,7 +1992,7 @@ var
        rect1.cx:= size1.cx;
        rect1.cy:= size1.cy div (count1);
        if rect1.cy > 0 then begin
-        findex:= (pos.y div rect1.cy);
+        findex:= (pt1.y div rect1.cy);
         rect1.y:=  findex * rect1.cy +
                 container1.screenpos.y + container1.paintpos.y;
        end;
@@ -1995,9 +2014,10 @@ var
       end;
      end;
      if fasplitdir = sd_none then begin
-      subpoint1(rect1.pos,widget.paintpos);
+//      subpoint1(rect1.pos,widget.paintpos);
       if widget1 <> container1 then begin
-       addpoint1(rect1.pos,widget1.paintpos);
+//       addpoint1(rect1.pos,subpoint(widget1.paintpos,widget.paintpos));
+//       subpoint1(rect1.pos,container1.pos);
       end;
       setxorwidget(container1,clipinrect(rect1,
         makerect(translatewidgetpoint(container1.clientwidgetpos,
@@ -2043,9 +2063,13 @@ var
             //used incalclayout
     end;
     fsizes:= nil;
+    dockdrag(tdockdragobject(dragobjectpo^));
+ {
     calclayout(tdockdragobject(dragobjectpo^),false);
     updaterefsize;
-    dochilddock(widget);
+    tdockdragobject(dragobjectpo^).fdock.dodock;
+//    dochilddock(widget);
+}
     result:= true;
    end;
   end;
@@ -2114,7 +2138,7 @@ begin
  end;
 end;
 
-procedure tdockcontroller.dodock;
+function tdockcontroller.dodock: boolean;
 var
  widget1: twidget1;
  int1: integer;
@@ -2132,15 +2156,17 @@ begin
    controller1.dochilddock(widget1);
   end;
  end;
+ result:= floatdockcount = int1;
 end;
 
-procedure tdockcontroller.dofloat(const adist: pointty);
+function tdockcontroller.dofloat(const adist: pointty): boolean;
 var
  widget1: twidget1;
  wstr1: msestring;
  int1: integer;
  controller1: tdockcontroller;
 begin
+ result:= false;
  widget1:= twidget1(fintf.getwidget);
  fmdistate:= mds_floating;
  getparentcontroller(controller1);
@@ -2159,6 +2185,36 @@ begin
  if (floatdockcount = int1) and (controller1 <> nil) then begin
   controller1.dochildfloat(widget1);
   widget1.activate;
+ end;
+ result:= floatdockcount = int1;
+end;
+
+function tdockcontroller.float: boolean; 
+                                  //false if canceled
+begin
+ result:= dofloat(nullpoint);
+end;
+
+function tdockcontroller.dock(const dest: tdockcontroller;
+                                        const apos: pointty): boolean;
+var
+ dragobj: tdockdragobject;
+ widget1: twidget;
+begin
+ dragobj:= nil;
+ widget1:= fintf.getwidget;
+ dragobj:= tdockdragobject.create(self,widget1,dragobj,nullpoint);
+ try
+  with dragobj.fxorrect do begin
+   size:= widget1.size;
+   widget1:= dest.fintf.getwidget.container;
+   pos:= translatewidgetpoint(apos,widget1,nil);
+   addpoint1(pos,widget1.clientwidgetpos);
+//  addpoint1(dragobj.fxorrect.pos,dest.fplacementrect.pos);
+   dest.dockdrag(dragobj);
+  end;
+ finally
+  dragobj.free;
  end;
 end;
 
@@ -3056,7 +3112,8 @@ begin
   with fintf.getwidget do begin
    if (componentstate * [csloading,csdesigning] = []) and 
                         not (ws_destroying in widgetstate) and
-     not (ow_noautosizing in sender.optionswidget) then begin
+     not (ow_noautosizing in sender.optionswidget) and 
+                              not(dos_tabedending in fdockstate)then begin
     include(fdockstate,dos_updating3);
     try
      calclayout(nil,not(ws1_parentupdating in sender.widgetstate1));

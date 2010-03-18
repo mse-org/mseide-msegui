@@ -6600,7 +6600,9 @@ begin
    end;
  
    if fparentwidget <> nil then begin
-    subpoint1(newpos,clearparentwidget.clientwidgetpos);
+//    subpoint1(newpos,clearparentwidget.clientwidgetpos);
+//    subpoint1(newpos,clearparentwidget.clientpos);
+    clearparentwidget;
    end;
    if fparentwidget <> nil then begin
     exit;                   //interrupt
