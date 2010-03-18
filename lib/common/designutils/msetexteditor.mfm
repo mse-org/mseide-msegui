@@ -1,17 +1,17 @@
 object msetexteditorfo: tmsetexteditorfo
   optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  visible = False
   bounds_x = 74
   bounds_y = 214
   bounds_cx = 369
   bounds_cy = 268
-  taborder = 1
-  visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
-  container.bounds_x = 0
-  container.bounds_y = 0
-  container.bounds_cx = 369
-  container.bounds_cy = 268
-  container.frame.dummy = 0
+  container.bounds = (
+    0
+    0
+    369
+    268
+  )
   options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
   statfile = tstatfile1
   caption = 'Texteditor'
@@ -23,34 +23,28 @@ object msetexteditorfo: tmsetexteditorfo
     bounds_cy = 22
     anchors = [an_right, an_bottom]
     state = [as_localcaption]
-    autosize_cx = 0
-    autosize_cy = 0
     caption = '&OK'
     modalresult = mr_ok
   end
   object cancel: tbutton
+    taborder = 1
     bounds_x = 312
     bounds_y = 240
     bounds_cx = 50
     bounds_cy = 22
     anchors = [an_right, an_bottom]
-    taborder = 1
     state = [as_localcaption]
-    autosize_cx = 0
-    autosize_cy = 0
     caption = '&Cancel'
     modalresult = mr_cancel
   end
   object grid: twidgetgrid
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    taborder = 2
+    popupmenu = tpopupmenu1
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 369
     bounds_cy = 234
-    frame.dummy = 0
     anchors = [an_top, an_bottom]
-    taborder = 2
-    popupmenu = tpopupmenu1
     optionsgrid = [og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup]
     fixcols.count = 1
     fixcols.items = <    
@@ -66,16 +60,13 @@ object msetexteditorfo: tmsetexteditorfo
         width = 2000
         options = [co_leftbuttonfocusonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         widgetname = 'textedit'
+        dataclass = tgridrichstringdatalist
       end>
     datarowlinewidth = 0
     datarowheight = 14
     reffontheight = 14
     object textedit: tsyntaxedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontlineheight, ow_autoscale]
-      bounds_x = 0
-      bounds_y = 0
-      bounds_cx = 2000
-      bounds_cy = 14
       frame.levelo = 0
       frame.framei_top = 0
       frame.framei_bottom = 0
@@ -83,34 +74,36 @@ object msetexteditorfo: tmsetexteditorfo
       frame.dummy = 0
       taborder = 1
       visible = False
+      bounds_x = 0
+      bounds_y = 0
+      bounds_cx = 2000
+      bounds_cy = 14
       font.xscale =  1.0000000000000000E+0000
       font.dummy = 0
-      optionsedit = [oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_linebreak, oe_eatreturn, oe_keyexecute, oe_savevalue, oe_savestate]
+      optionsedit = [oe_closequery, oe_checkmrcancel, oe_linebreak, oe_eatreturn, oe_exitoncursor, oe_nofirstarrownavig, oe_keyexecute, oe_savevalue, oe_savestate]
       encoding = ce_locale
       oneditnotifcation = editnotify
       reffontheight = 14
     end
   end
   object linedisp: tstringdisp
+    frame.dummy = 0
+    taborder = 4
     bounds_x = 8
     bounds_y = 242
     bounds_cx = 76
-    frame.dummy = 0
     anchors = [an_left, an_bottom]
-    taborder = 4
     textflags = [tf_xcentered, tf_ycentered]
     reffontheight = 14
   end
   object test: tbutton
+    taborder = 3
     bounds_x = 184
     bounds_y = 240
     bounds_cx = 50
     bounds_cy = 22
     anchors = [an_right, an_bottom]
-    taborder = 3
     state = [as_disabled, as_invisible, as_localdisabled, as_localinvisible, as_localcaption, as_localonexecute]
-    autosize_cx = 0
-    autosize_cy = 0
     caption = '&Test'
     onexecute = testexe
   end
@@ -130,22 +123,31 @@ object msetexteditorfo: tmsetexteditorfo
         caption = '&Copy'
         name = 'copy'
         state = [as_localcaption, as_localshortcut, as_localonexecute]
-        shortcut = 16451
         onexecute = copyexe
+        sc = (
+          1
+          16451
+        )
       end    
       item
         caption = 'Cu&t'
         name = 'cut'
         state = [as_localcaption, as_localshortcut, as_localonexecute]
-        shortcut = 16472
         onexecute = cutexe
+        sc = (
+          1
+          16472
+        )
       end    
       item
         caption = '&Paste'
         name = 'paste'
         state = [as_localcaption, as_localshortcut, as_localonexecute]
-        shortcut = 16470
         onexecute = pasteexe
+        sc = (
+          1
+          16470
+        )
       end    
       item
         options = [mao_separator, mao_shortcutcaption]
@@ -178,19 +180,25 @@ object msetexteditorfo: tmsetexteditorfo
     top = 152
   end
   object undoact: taction
-    shortcut = 16474
     caption = '&Undo'
     options = [ao_globalshortcut]
     onexecute = undoexe
     left = 216
     top = 72
+    sc = (
+      1
+      16474
+    )
   end
   object redoact: taction
-    shortcut = 24666
     caption = '&Redo'
     options = [ao_globalshortcut]
     onexecute = redoexe
     left = 216
     top = 112
+    sc = (
+      1
+      24666
+    )
   end
 end

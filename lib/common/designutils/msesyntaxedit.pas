@@ -574,9 +574,11 @@ procedure tsyntaxedit.dokeydown(var info: keyeventinfoty);
 var
  int1,int2: integer;
  co1: gridcoordty;
+ shiftstate1: shiftstatesty;
 begin
  with info do begin
-  if (shiftstate = [ss_ctrl]) or (shiftstate = [ss_ctrl,ss_shift]) then begin
+  shiftstate1:= shiftstate * shiftstatesmask;
+  if (shiftstate1 = [ss_ctrl]) or (shiftstate1 = [ss_ctrl,ss_shift]) then begin
    case key of
     key_left: begin
      repeat
@@ -591,7 +593,7 @@ begin
        if editpos.row > 0 then begin
         co1.row:= editpos.row - 1;
         co1.col:= bigint;
-        seteditpos(co1,ss_shift in shiftstate);
+        seteditpos(co1,ss_shift in shiftstate1);
         if (length(feditor.text) > 0) and 
            not isstopchar(feditor.text[length(feditor.text)]) then begin
          int2:= length(feditor.text);
@@ -601,7 +603,7 @@ begin
      until (int2 > 0) or (editpos.row <= 0);
      co1.row:= editpos.row;
      co1.col:= int2;
-     seteditpos(co1,ss_shift in shiftstate);
+     seteditpos(co1,ss_shift in shiftstate1);
      repeat
       int2:= 0;
       for int1:= feditor.curindex downto 1 do begin
@@ -614,14 +616,14 @@ begin
        if editpos.row > 0 then begin
         co1.row:= editpos.row - 1;
         co1.col:= bigint;
-        seteditpos(co1,ss_shift in shiftstate);
+        seteditpos(co1,ss_shift in shiftstate1);
        end;
       end;
      until (int2 > 0) or (editpos.row <= 0);
      if int2 > 0 then begin
       co1.row:= editpos.row;
       co1.col:= int2;
-      seteditpos(co1,ss_shift in shiftstate);
+      seteditpos(co1,ss_shift in shiftstate1);
      end;
      include(eventstate,es_processed);
     end;
@@ -638,7 +640,7 @@ begin
        if editpos.row < linecount - 1 then begin
         co1.row:= editpos.row + 1;
         co1.col:= 0;
-        seteditpos(co1,ss_shift in shiftstate);
+        seteditpos(co1,ss_shift in shiftstate1);
         if (length(feditor.text) > 0) and 
                     not isstopchar(feditor.text[1]) then begin
          int2:= 0;
@@ -648,7 +650,7 @@ begin
      until (int2 < bigint) or (editpos.row >= linecount - 1);
      co1.row:= editpos.row;
      co1.col:= int2;
-     seteditpos(co1,ss_shift in shiftstate);
+     seteditpos(co1,ss_shift in shiftstate1);
      repeat
       int2:= bigint;
       for int1:= feditor.curindex + 1 to length(feditor.text) do begin
@@ -661,14 +663,14 @@ begin
        if editpos.row < linecount - 1 then begin
         co1.row:= editpos.row + 1;
         co1.col:= 0;
-        seteditpos(co1,ss_shift in shiftstate);
+        seteditpos(co1,ss_shift in shiftstate1);
        end;
       end;
      until (int2 < bigint) or (editpos.row >= linecount - 1);
      if int2 < bigint then begin
       co1.row:= editpos.row;
       co1.col:= int2-1;
-      seteditpos(co1,ss_shift in shiftstate);
+      seteditpos(co1,ss_shift in shiftstate1);
      end;
      include(eventstate,es_processed);
     end;
