@@ -1,6 +1,6 @@
 object actionsmo: tactionsmo
-  left = 65523
-  top = 158
+  left = 7
+  top = 160
   moduleclassname = 'tmsedatamodule'
   size = (
     474
@@ -28,7 +28,7 @@ object actionsmo: tactionsmo
     hint = 'Step'
     onexecute = stepactonexecute
     left = 24
-    top = 340
+    top = 316
     sc = (
       1
       310
@@ -42,7 +42,7 @@ object actionsmo: tactionsmo
     hint = 'Next'
     onexecute = nextactonexecute
     left = 24
-    top = 316
+    top = 300
     sc = (
       1
       311
@@ -56,7 +56,7 @@ object actionsmo: tactionsmo
     hint = 'Continue'
     onexecute = continueactonexecute
     left = 24
-    top = 388
+    top = 348
     sc = (
       1
       312
@@ -70,7 +70,7 @@ object actionsmo: tactionsmo
     hint = 'Interrupt'
     onexecute = interruptactonexecute
     left = 22
-    top = 290
+    top = 282
   end
   object reset: taction
     imagelist = buttonicons
@@ -79,8 +79,8 @@ object actionsmo: tactionsmo
     imagenrdisabled = 15
     hint = 'Reset'
     onexecute = resetactonexecute
-    left = 17
-    top = 266
+    left = 23
+    top = 263
   end
   object opensource: taction
     caption = '&Open'
@@ -100,7 +100,7 @@ object actionsmo: tactionsmo
     hint = 'Finish'
     onexecute = finishactonexecute
     left = 24
-    top = 364
+    top = 332
     sc = (
       1
       8502
@@ -110,7 +110,7 @@ object actionsmo: tactionsmo
     caption = '&Save'
     onexecute = saveactonexecute
     left = 8
-    top = 28
+    top = 20
     sc = (
       1
       16467
@@ -120,7 +120,7 @@ object actionsmo: tactionsmo
     caption = '&Close'
     onexecute = closeactonexecute
     left = 8
-    top = 100
+    top = 68
     sc = (
       1
       16691
@@ -129,7 +129,7 @@ object actionsmo: tactionsmo
   object abortmakeact: taction
     caption = '&Abort Make'
     onexecute = abortmakeactonexecute
-    left = 160
+    left = 168
     top = 402
   end
   object undo: taction
@@ -200,13 +200,13 @@ object actionsmo: tactionsmo
     caption = 'Sa&ve all'
     onexecute = saveallactonexecute
     left = 8
-    top = 52
+    top = 36
   end
   object find: taction
     caption = '&Find'
     onexecute = findactonexecute
     left = 152
-    top = 36
+    top = 28
     sc = (
       1
       16454
@@ -216,7 +216,7 @@ object actionsmo: tactionsmo
     caption = '&Search again'
     onexecute = repeatfindactonexecute
     left = 152
-    top = 60
+    top = 44
     sc = (
       1
       306
@@ -226,19 +226,19 @@ object actionsmo: tactionsmo
     caption = 'Find in F&iles'
     onexecute = findinfileonexecute
     left = 152
-    top = 84
+    top = 60
   end
   object closeall: taction
     caption = 'C&lose all'
     onexecute = closeallactonexecute
     left = 8
-    top = 124
+    top = 84
   end
   object saveas: taction
     caption = 'Save &as'
     onexecute = saveasactonexecute
     left = 8
-    top = 76
+    top = 52
   end
   object bkptsonact: taction
     imagelist = buttonicons
@@ -248,7 +248,7 @@ object actionsmo: tactionsmo
     hint = 'Breakpoints on/off'
     onexecute = bkptsononexecute
     left = 168
-    top = 236
+    top = 220
     sc = (
       1
       16450
@@ -263,7 +263,7 @@ object actionsmo: tactionsmo
     statfile = mainfo.projectstatfile
     onexecute = watchesononexecute
     left = 168
-    top = 260
+    top = 236
     sc = (
       1
       16471
@@ -293,7 +293,7 @@ object actionsmo: tactionsmo
     caption = 'Toggle Bkpt. &enabled'
     onexecute = togglebkptenableactonexecute
     left = 168
-    top = 212
+    top = 204
     sc = (
       1
       8500
@@ -305,7 +305,7 @@ object actionsmo: tactionsmo
     colormask = True
     count = 23
     left = 160
-    top = 168
+    top = 144
     image = {
       00000000060000007800000078000000A43A0000000000000000000000000000
       0000000000000000000000000000000000000000C0C0C018D0D0D0060000BC03
@@ -1272,7 +1272,7 @@ object actionsmo: tactionsmo
     caption = 'Toggle Form/&Unit'
     onexecute = toggleformunitonexecute
     left = 152
-    top = 112
+    top = 80
     sc = (
       1
       315
@@ -1284,8 +1284,8 @@ object actionsmo: tactionsmo
     imagenr = 13
     imagenrdisabled = 19
     onexecute = nextiactonexecute
-    left = 80
-    top = 312
+    left = 96
+    top = 264
     sc = (
       1
       24887
@@ -1297,8 +1297,8 @@ object actionsmo: tactionsmo
     imagenr = 12
     imagenrdisabled = 21
     onexecute = stepiactonexecute
-    left = 80
-    top = 336
+    left = 96
+    top = 280
     sc = (
       1
       24886
@@ -1313,13 +1313,13 @@ object actionsmo: tactionsmo
     statfile = mainfo.projectstatfile
     onchange = bluedotsononchange
     left = 168
-    top = 280
+    top = 256
   end
   object replace: taction
     caption = 'Find && &Replace'
     onexecute = replaceactonexecute
     left = 208
-    top = 32
+    top = 16
     sc = (
       1
       16466
@@ -1328,8 +1328,8 @@ object actionsmo: tactionsmo
   object print: taction
     caption = '&Print'
     onexecute = printactonexecute
-    left = 80
-    top = 40
+    left = 8
+    top = 100
   end
   object detachtarget: taction
     caption = 'Detach'
@@ -1341,7 +1341,7 @@ object actionsmo: tactionsmo
     caption = 'Attach Process'
     onexecute = onattachprocess
     left = 8
-    top = 192
+    top = 184
   end
   object lowercase: taction
     caption = 'Lowercase'
@@ -1578,7 +1578,7 @@ object actionsmo: tactionsmo
       end    
       item
         action = setbmnone
-        dispname = 'Clear Bookmarks'
+        dispname = 'Clear Bookmark'
       end    
       item
         dispname = 'Find Bookmark'
@@ -1853,7 +1853,7 @@ object actionsmo: tactionsmo
   object toggleinspector: taction
     caption = 'Toggle Form/Inspector'
     left = 152
-    top = 136
+    top = 96
     sc = (
       1
       314
@@ -1887,8 +1887,8 @@ object actionsmo: tactionsmo
   object download: taction
     caption = 'Download'
     onexecute = downloadexe
-    left = 16
-    top = 216
+    left = 8
+    top = 200
   end
   object helpact: taction
     options = [ao_globalshortcut]

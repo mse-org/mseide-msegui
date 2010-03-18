@@ -2203,7 +2203,7 @@ var
 begin
  dragobj:= nil;
  widget1:= fintf.getwidget;
- dragobj:= tdockdragobject.create(self,widget1,dragobj,nullpoint);
+ dragobj:= tdockdragobject.create(self,widget1,tdragobject(dragobj),nullpoint);
  try
   with dragobj.fxorrect do begin
    size:= widget1.size;
