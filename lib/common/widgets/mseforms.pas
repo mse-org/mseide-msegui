@@ -40,7 +40,7 @@ const
  defaultmainformoptionswindow = [wo_groupleader];
  
  defaultformwidgetoptions = (defaultoptionswidgetmousewheel - 
-                         [ow_mousefocus,ow_tabfocus]) + [ow_subfocus,ow_hinton];
+                         [ow_mousefocus{,ow_tabfocus}]) + [ow_subfocus,ow_hinton];
  defaultcontaineroptionswidget = defaultoptionswidgetmousewheel + 
                                         [ow_subfocus,ow_mousetransparent];
 

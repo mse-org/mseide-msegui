@@ -392,6 +392,7 @@ type
 
 const
  defaultgripoptions = [go_closebutton];
+ defaultdockpaneloptionswidget = defaultoptionswidget + [ow_subfocus];
 
 type
 
@@ -539,6 +540,7 @@ type
    function getdockcontroller: tdockcontroller;
   published
    property dragdock: tdockcontroller read fdragdock write setdragdock;
+   property optionswidget default defaultdockpaneloptionswidget;
    property optionswindow: windowoptionsty read foptionswindow write foptionswindow default [];
    property frame: tgripframe read getframe write setframe;
    property statfile: tstatfile read fstatfile write setstatfile;
@@ -723,12 +725,6 @@ begin
  if (count = 0) and not application.terminated then begin
   fcontroller.ftabwidget:= nil;
   fcontroller.fsplitterrects:= nil;
-{
-  if not (csdestroying in componentstate) and entered then begin
-   optionswidget:= optionswidget - [ow_tabfocus]; //reject focus
-   nextfocus;
-  end;
-}
   release;
  end;
  fcontroller.dolayoutchanged;
@@ -4465,6 +4461,7 @@ begin
   fdragdock:= tdockcontroller.create(idockcontroller(self));
  end;
  inherited;
+ optionswidget:= defaultdockpaneloptionswidget;
 end;
 
 destructor tdockpanel.destroy;
