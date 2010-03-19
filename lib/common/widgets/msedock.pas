@@ -723,6 +723,12 @@ begin
  if (count = 0) and not application.terminated then begin
   fcontroller.ftabwidget:= nil;
   fcontroller.fsplitterrects:= nil;
+{
+  if not (csdestroying in componentstate) and entered then begin
+   optionswidget:= optionswidget - [ow_tabfocus]; //reject focus
+   nextfocus;
+  end;
+}
   release;
  end;
  fcontroller.dolayoutchanged;
@@ -766,12 +772,26 @@ begin
 end;
 
 procedure tdocktabpage.widgetregionchanged(const sender: twidget);
+var
+ focusedwidgetbefore: twidget;
 begin
  inherited;
  if (sender <> nil) and (sender = ftarget) and not sender.visible and
   (fparentwidget <> nil) and (fparentwidget.parentwidget <> nil) and
             not (csdestroying in sender.componentstate) then begin
-   sender.parentwidget:= fparentwidget.parentwidget;  //remove page
+   optionswidget:= optionswidget - [ow_tabfocus]; //don't accept focus
+   focusedwidgetbefore:= nil;
+   if entered then begin
+    setlinkedvar(window.focusedwidget,focusedwidgetbefore);
+   end;
+   try
+    sender.parentwidget:= fparentwidget.parentwidget;  //remove page
+    if (focusedwidgetbefore <> nil) and (window.focusedwidget = nil) then begin
+     focusedwidgetbefore.parentfocus; //restore focus
+    end;
+   finally
+    setlinkedvar(nil,focusedwidgetbefore);
+   end;   
  end;
 end;
 

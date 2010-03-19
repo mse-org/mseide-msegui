@@ -1529,6 +1529,7 @@ type
                    //newfocus = window.focusedwidget      
    function canfocus: boolean; virtual;
    function setfocus(aactivate: boolean = true): boolean; virtual;//true if ok
+   procedure parentfocus; //sets focus to self or focusable parent
    procedure nextfocus; //sets inputfocus to then next appropriate widget
    function findtabfocus(const ataborder: integer): twidget;
                        //nil if can not focus
@@ -6628,10 +6629,12 @@ begin
     colorchanged;
     enabledchanged; //-> statechanged
     parentchanged;
+    {
     if (fparentwidget <> nil) and fparentwidget.focused and 
             (ow_subfocus in fparentwidget.foptionswidget) and canfocus then begin
      setfocus(fparentwidget.active);
     end;
+    }
    end;
   finally
    if not updatingbefore then begin
@@ -7120,6 +7123,9 @@ begin
 {$ifdef mse_with_ifi}
  ifiwidgetstatechanged;
 {$endif}
+ if (fparentwidget <> nil) and fparentwidget.focused and canfocus then begin
+  fparentwidget.checksubfocus(false);
+ end;
 end;
 
 procedure twidget.enabledchanged;
@@ -8933,6 +8939,7 @@ function twidget.canfocus: boolean;
 begin
  result:= (fwidgetstate * focusstates = focusstates) and
                 (componentstate*[csdesigning,csdestroying] = []) and
+                not releasing and
                 ((fparentwidget = nil) or fparentwidget.canfocus);
 end;
 
@@ -8972,6 +8979,20 @@ begin
  end;
 end;
 
+procedure twidget.parentfocus;
+var
+ widget1: twidget;
+begin
+ widget1:= self;
+ while widget1 <> nil do begin
+  if widget1.canfocus then begin
+   widget1.setfocus(false);
+   break;
+  end;
+  widget1:= widget1.fparentwidget;
+ end;
+end;
+
 function twidget.cantabfocus: boolean;
 var
  int1: integer;
@@ -8981,7 +9002,7 @@ begin
  if result and (ow_subfocus in foptionswidget) then begin
   for int1:= 0 to high(fwidgets) do begin
    if fwidgets[int1].cantabfocus then begin
-    exit;
+    exit; 
    end;
   end;
   result:= false;
