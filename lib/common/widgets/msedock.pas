@@ -778,7 +778,7 @@ begin
    optionswidget:= optionswidget - [ow_tabfocus]; //don't accept focus
    focusedwidgetbefore:= nil;
    if entered then begin
-    setlinkedvar(window.focusedwidget,focusedwidgetbefore);
+    setlinkedvar(window.focusedwidget,tmsecomponent(focusedwidgetbefore));
    end;
    try
     sender.parentwidget:= fparentwidget.parentwidget;  //remove page
@@ -786,7 +786,7 @@ begin
      focusedwidgetbefore.parentfocus; //restore focus
     end;
    finally
-    setlinkedvar(nil,focusedwidgetbefore);
+    setlinkedvar(nil,tmsecomponent(focusedwidgetbefore));
    end;   
  end;
 end;
