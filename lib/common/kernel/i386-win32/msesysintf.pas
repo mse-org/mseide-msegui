@@ -1287,7 +1287,7 @@ procedure winfileinfotofileinfo(const winfo: winfileinfoty; const wsize: winfile
                          var info: fileinfoty);
 begin
  with winfo,info,extinfo1 do begin
-  include(state,fis_extinfo1valid);
+  state:= state + [fis_typevalid,fis_extinfo1valid];
   if filetype = ft_dir then begin
    attributes:= [fa_dir];
   end
@@ -1566,7 +1566,7 @@ begin
   if (include <> []) and not (fa_all in exclude) then begin
    case drivenum of
     -3: begin          //network root
-     info.state:= [fis_extinfo1valid];
+     info.state:= [fis_typevalid,fis_extinfo1valid];
      info.extinfo1.attributes:= [fa_dir];
      if integer(handle) <= high(msestringarty(finddatapo)) then begin
       repeat
@@ -1577,7 +1577,7 @@ begin
      end;
     end;
     -2: begin
-     info.state:= [fis_extinfo1valid];
+     info.state:= [fis_typevalid,fis_extinfo1valid];
      info.extinfo1.attributes:= [fa_dir];
      getmem(po1,sizeof(tnetresource));
      fillchar(po1^,sizeof(tnetresource),0);
@@ -1653,7 +1653,7 @@ begin
     else begin
      ca1:= getlogicaldrives;
      info.extinfo1.filetype:= ft_dir;
-     system.include(info.state,fis_extinfo1valid);
+     info.state:= info.state + [fis_typevalid,fis_extinfo1valid];
      info.extinfo1.attributes:= [fa_dir];
      while (drivenum < 32) and not result do begin
       if ca1 and bits[drivenum] <> 0 then begin

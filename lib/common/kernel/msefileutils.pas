@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -136,11 +136,12 @@ function searchfile(const afilename: filenamety;
             const adirnames: array of filenamety): filenamety; overload;
            //returns directory of last occurence in dirs, '' if none
            //afilename can be path and can have wildchars ('?','*'),
-           //adirnames can have wildchars
+           //adirnames can have wildchars ('?','*','**')
 function searchfile(const afilename: filenamety;
             const adirname: filenamety): filenamety; overload;
+           //returns directory, '' if none
            //afilename must be simple filename and can have wildchars ('?','*'),
-           //adirname can have wildchars
+           //adirname can have wildchars ('?','*','**')
 function dirhasentries(const adirname: filenamety;
                          const ainclude: fileattributesty = [fa_all];
                          const aexclude: fileattributesty = []): boolean;
@@ -273,10 +274,10 @@ begin
  with info do begin
   name:= aname;
   if open then begin
-   state:= [fis_extinfo1valid,fis_diropen];
+   state:= [fis_typevalid,fis_diropen];
   end
   else begin
-   state:= [fis_extinfo1valid];
+   state:= [fis_typevalid];
   end;
   extinfo1.filetype:= ft_dir;
  end;
@@ -645,27 +646,41 @@ begin
 end;
 }
 
-function searchfile(const afilename: filenamety; const adirname: filenamety): filenamety;
+function searchfile(const afilename: filenamety;
+                                     const adirname: filenamety): filenamety;
 var
- ar1: filenamearty;
+ ar1,ar2: filenamearty;
  int1: integer;
  dirstream: dirstreamty;
  fileinfo: fileinfoty;
+ recursive: boolean;
+ fna1: filenamety;
 begin
  result:= '';
  ar1:= nil; //compiler warning
  fillchar(dirstream,sizeof(dirstream),0);
  if hasmaskchars(adirname) then begin
+  recursive:= false;
   ar1:= splitrootpath(adirname);
   for int1:= 0 to high(ar1) do begin
    if hasmaskchars(ar1[int1]) then begin
     with dirstream do begin
-     dirname:= mergerootpath(copy(ar1,0,int1));
+     if int1 > 0 then begin
+      dirname:= mergerootpath(copy(ar1,0,int1));
+     end
+     else begin
+      dirname:= '/';
+     end;
      mask:= copy(ar1,int1,1);
+     if mask[0] = '**' then begin
+      recursive:= true;
+      mask[0]:= '*';
+     end;
      include:= [fa_dir];
      if sys_opendirstream(dirstream) <> sye_ok then begin
       exit;
      end;
+     fna1:= ar1[int1];
      while sys_readdirstream(dirstream,fileinfo) do begin
       if (fileinfo.name <> '.') and (fileinfo.name <> '..') then begin
        ar1[int1]:= fileinfo.name;
@@ -673,8 +688,17 @@ begin
        if result <> '' then begin
         break;
        end;
+       if recursive then begin
+        insertitem(ar1,int1+1,'**');
+        result:= searchfile(afilename,mergerootpath(ar1));
+        if result <> '' then begin
+         break;
+        end;
+        deleteitem(ar1,int1+1);
+       end;
       end;
      end;
+     ar1[int1]:= fna1;
     end;
     sys_closedirstream(dirstream);
     exit;
@@ -736,7 +760,6 @@ begin
  result:= '';
  file1:= trim(afilename);
  if (file1 <> '') and (high(adirnames) < 0) then begin
-//  result:= searchfile(file1,'');
   splitfilepath(afilename,dir1,file1);
   result:= searchfile(file1,dir1);
  end
@@ -761,27 +784,17 @@ function findfile(const filename: filenamety; const dirnames: array of filenamet
             //true if found
 var
  str1: filenamety;
-// ar1: filenamearty;
 begin
+{
  if isrootpath(filename) then begin
   path:= filepath(filename);
   result:= findfile(path);
   if not result then begin
    path:= '';
   end;
- {
-  str1:= unquotefilename(filename);
-  tosysfilepath1(str1);
-  result:= fileexists(str1);
-  if result then begin
-   path:= filepath(filename);
-  end
-  else begin
-   path:= '';
-  end;
- }
  end
  else begin
+ }
   path:= searchfile(filename,dirnames);
   if path <> '' then begin
    path:= path + msefileutils.filename(filename);
@@ -790,7 +803,9 @@ begin
   else begin
    result:= false;
   end;
+{
  end;
+ }
 end;
 
 function findfileordir(const filename: filenamety): boolean;
@@ -978,7 +993,7 @@ procedure tomsefilepath1(var path: filenamety);
    setlength(str1,length(str1)+1);
    move(str1[1],str1[2],(length(str1)-1)*sizeof(msechar)); // 'c:x' -> 'cc:x'
    pmsecharaty(str1)^[0]:= '/'; // /c:
-   pmsecharaty(str1)^[1]:= charuppercase(str1[2]);
+   pmsecharaty(str1)^[1]:= str1[2];//charuppercase(str1[2]);
   end;
   requote(path,str1);
  end;
@@ -1035,6 +1050,11 @@ procedure syncpathdelim(const source: filenamety; var dest: filenamety;
               kind: filekindty);
 begin
  if length(dest) > 0 then begin
+  if (length(dest) >= 3) and (length(dest) <= 4) and 
+                       (dest[1] = '/') and (dest[3] = ':') then begin
+   kind:= fk_dir;      // /a:  -> /a:/
+                       // /a:/ -> /a:/
+  end;
   if kind = fk_default then begin
    if (length(source) > 0) and (source[length(source)] = '/') then begin
     kind:= fk_dir;
@@ -1094,10 +1114,10 @@ begin
     end;
    end
    else begin
-    if relative then begin  //if not relative ignore '..' if rootdir
+//    if relative then begin  //if not relative ignore '..' if rootdir
      ar2[int2]:= ar1[int1];
      inc(int2);
-    end;
+//    end;
    end;
   end
   else begin
@@ -1110,7 +1130,8 @@ begin
  result:= '';
  bo1:= (length(mstr1) > 0) and (mstr1[1] = '/'); //rootpath
  if bo1 and (int2 = 0) then begin
-  inc(int2);
+  result:= '/';
+//  inc(int2);
  end;
  bo1:= not relative or bo1;
  for int1:= 0 to int2 - 1 do begin

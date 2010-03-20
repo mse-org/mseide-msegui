@@ -120,8 +120,9 @@ type
 
  dirstreamlinuxdty = record
   dir: pdirectorystream;
-  needsstat: boolean;
   dirpath: pointer;
+  needsstat: boolean;
+  needstype: boolean;
  end;
  dirstreamlinuxty = record
   case integer of
@@ -1020,6 +1021,10 @@ begin
  end;
 end;
 
+const
+ nameattributes = [fa_hidden];
+ typeattributes = nameattributes + [fa_dir];
+ 
 function sys_opendirstream(var stream: dirstreamty): syserrorty;
 var
  str1: string;
@@ -1031,14 +1036,17 @@ begin
    result:= syelasterror;
   end
   else begin
-   if (infolevel > fil_name) or not (fa_all in include) or
-                         (exclude <> []) then begin
-    d.needsstat:= true;
-    if (str1 <> '') and (str1[length(str1)] <> '/') then begin
-     str1:= str1 + '/';
-    end;
-    string(d.dirpath):= str1; //stat needed
+   if (str1 <> '') and (str1[length(str1)] <> '/') then begin
+    str1:= str1 + '/';
    end;
+   string(d.dirpath):= str1; //for stat
+   d.needsstat:= (infolevel >= fil_ext1) or 
+              not (fa_all in include) and (include-typeattributes <> []) or
+                                                 (exclude-typeattributes <> []);
+   d.needstype:= not d.needsstat and 
+       ((infolevel >= fil_type) or
+             not (fa_all in include) and (include-nameattributes <> []) or
+                                                 (exclude-nameattributes <> []));
    result:= sye_ok;
   end;
  end;
@@ -1065,6 +1073,7 @@ var
  statbuffer: _stat64;
  //stat1: tstatbuf;
  str1: string;
+ error: boolean;
 begin
  result:= false;
  with stream,dirstreamlinuxty(platformdata) do begin
@@ -1076,21 +1085,30 @@ begin
       str1:= dirent.d_name;
       name:= str1;
       if checkfilename(info.name,mask,true) then begin
-       if d.needsstat then begin
-        if stat64(pchar(string(d.dirpath)+str1),
-              @statbuffer) = 0 then begin
-         with extinfo1,extinfo2,statbuffer do begin
-          filetype:= getfiletype(st_mode);
-          attributes:= getfileattributes(st_mode);
-          if (length(name) > 0) and (info.name[1] = '.') then begin
-           system.include(attributes,fa_hidden);
+       if d.needsstat or d.needstype and (dirent.d_type = dt_unknown) then begin
+        error:= stat64(pchar(string(d.dirpath)+str1),@statbuffer) <> 0;
+       end
+       else begin
+        error:= false;
+        statbuffer.st_mode:= dirent.d_type shl 12;
+       end;
+       with extinfo1,extinfo2,statbuffer do begin
+        if not error then begin
+         filetype:= getfiletype(st_mode);
+         attributes:= getfileattributes(st_mode);
+         if (length(name) > 0) and (info.name[1] = '.') then begin
+          system.include(attributes,fa_hidden);
+         end;
+         if filetype = ft_dir then begin
+          system.include(attributes,fa_dir);
+         end;
+         if ((fa_all in include) or (attributes * include <> [])) and
+                ((attributes * exclude) = []) then begin
+          if d.needstype then begin
+           system.include(state,fis_typevalid);
           end;
-          if filetype = ft_dir then begin
-           system.include(attributes,fa_dir);
-          end;
-          if ((fa_all in include) or (attributes * include <> [])) and
-                 ((attributes * exclude) = []) then begin
-           state:= state + [fis_extinfo1valid,fis_extinfo2valid];
+          if d.needsstat then begin
+           state:= state + [fis_typevalid,fis_extinfo1valid,fis_extinfo2valid];
            size:= st_size;
            modtime:= filetimetodatetime(st_mtime,st_mtime_nsec);
            accesstime:= filetimetodatetime(st_atime,st_atime_nsec);
@@ -1098,15 +1116,11 @@ begin
            id:= st_ino;
            owner:= st_uid;
            group:= st_gid;
-           result:= true;
-           break;
           end;
+          result:= true;
+          break;
          end;
         end;
-       end
-       else begin
-        result:= true;
-        break;
        end;
       end;
      end;
@@ -1130,7 +1144,7 @@ begin
   if filetype = ft_dir then begin
    system.include(attributes,fa_dir);
   end;
-  state:= state + [fis_extinfo1valid,fis_extinfo2valid];
+  state:= state + [fis_typevalid,fis_extinfo1valid,fis_extinfo2valid];
   size:= st_size;
   modtime:= filetimetodatetime(st_mtime,st_mtime_nsec);
   accesstime:= filetimetodatetime(st_atime,st_atime_nsec);

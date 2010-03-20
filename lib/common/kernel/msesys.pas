@@ -80,13 +80,15 @@ type
                     fa_suid,fa_sgid,fa_svtx,
                     fa_dir,
                     fa_archive,fa_compressed,fa_encrypted,fa_hidden,
-                    fa_offline,fa_reparsepoint,fa_sparsefile,fa_system,fa_temporary,
+                    fa_offline,fa_reparsepoint,fa_sparsefile,fa_system,
+                    fa_temporary,
                     fa_all);
 
  fileattributesty = set of fileattributety;
   
 type
- fileinfolevelty = (fil_name,fil_ext1,fil_ext2);
+ fileinfolevelty = (fil_name,fil_type, //fa_dir and fa_hidden
+                    fil_ext1,fil_ext2);
 
  dirstreampty = array[0..7] of longword;
  dirstreamty = record
@@ -112,7 +114,8 @@ type
   group: longword;
  end;
 
- fileinfostatety = (fis_extinfo1valid,fis_extinfo2valid,fis_diropen,fis_hasentry);
+ fileinfostatety = (fis_typevalid,fis_extinfo1valid,fis_extinfo2valid,
+                    fis_diropen,fis_hasentry);
  fileinfostatesty = set of fileinfostatety;
 
  fileinfoty = record

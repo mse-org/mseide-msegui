@@ -9272,8 +9272,7 @@ begin
       include(fstate,gs_mouseentered);
      end;
      ek_clientmouseleave: begin
-      if (fmousecell.col <> invalidaxis) and 
-                            (fmousecell.row <> invalidaxis) then begin
+      if isvalidcell(fmousecell) then begin
        cellmouseevent(fmousecell,info,nil,cek_mouseleave);
       end;
       fmousecell:= invalidcell;

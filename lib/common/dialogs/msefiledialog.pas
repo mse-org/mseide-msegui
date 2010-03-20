@@ -404,7 +404,7 @@ begin
  with info do begin
 //  imagelist:= nil;
   imagenr:= -1;
-  if fis_extinfo1valid in state then begin
+  if fis_typevalid in state then begin
    case extinfo1.filetype of
     ft_dir: begin
      if fis_diropen in state then begin
@@ -819,9 +819,9 @@ begin
   defocuscell;
   fdatacols.clearselection;
   ffilelist.clear;
+  ffilecount:= 0;
   if fmaskar = nil then begin
-   ffilelist.adddirectory(fdirectory,fil_ext1,fmaskar,fincludeattrib,fexcludeattrib);
-   ffilecount:= 0;
+   ffilelist.adddirectory(fdirectory,fil_type,fmaskar,fincludeattrib,fexcludeattrib);
    if ffilelist.count > 0 then begin
     po1:= ffilelist.itempo(0);
     for int1:= 0 to ffilelist.count - 1 do begin
@@ -834,15 +834,15 @@ begin
   end
   else begin
    if (fincludeattrib = [fa_all]) or not(fa_dir in fincludeattrib) then begin
-    ffilelist.adddirectory(fdirectory,fil_ext1,nil,[fa_dir],
+    ffilelist.adddirectory(fdirectory,fil_type,nil,[fa_dir],
                fexcludeattrib*[fa_hidden]);
     int1:= ffilelist.count;
-    ffilelist.adddirectory(fdirectory,fil_ext1,fmaskar,fincludeattrib,
+    ffilelist.adddirectory(fdirectory,fil_type,fmaskar,fincludeattrib,
                    fexcludeattrib+[fa_dir]);
     ffilecount:= ffilelist.count - int1;
    end
    else begin
-    ffilelist.adddirectory(fdirectory,fil_ext1,fmaskar,
+    ffilelist.adddirectory(fdirectory,fil_type,fmaskar,
                                fincludeattrib,fexcludeattrib);
     ffilecount:= ffilelist.count;
    end;
