@@ -2271,7 +2271,7 @@ var
 begin
  result:= appic;
  {$ifdef FPC}
- if application.findwindow(awindow,window1) then begin
+ if application.findwindow(awindow,twindow(window1)) then begin
  {$else}
  if application.findwindow(awindow,twindow(window1)) then begin
  {$endif}

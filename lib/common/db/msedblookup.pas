@@ -15,13 +15,14 @@ type
  tlookupdispfielddatalink = class(tdispfielddatalink)
   private
    fowner: tcustomdataedit;
+   function getdatasource1: tdatasource;
    procedure setwidgetdatasource(const avalue: tdatasource);
    procedure griddatasourcechanged;
   public
    constructor create(const aowner: tcustomdataedit; 
                                     const intf: idbdispfieldlink);
   published
-   property datasource read fdatasource write setwidgetdatasource;
+   property datasource: tdatasource read getdatasource1 write setwidgetdatasource;
  end;
  
  tdblookuplb = class(tcustomdataedit,idbdispfieldlink,ilookupbufferfieldinfo)
@@ -371,6 +372,11 @@ begin
  if dso1 <> datasource then begin
   inherited datasource:= dso1;
  end;
+end;
+
+function tlookupdispfielddatalink.getdatasource1: tdatasource;
+begin
+ result:= inherited datasource;
 end;
 
 { tdblookuplb }

@@ -170,7 +170,7 @@ type
    procedure unitchanged(const asourcefilename: filenamety); overload;
    procedure resetunitsearched; //resets all allreadysearchedflags of rootdeflists
 
-   function updateunitinterface(const unitname: string): punitinfoty;
+   function updateunitinterface(const aunitname: string): punitinfoty;
    function updatemodule(const amodule: tmsecomponent): punitinfoty;
    function updateformunit(const aformfilename: filenamety;
                           const interfaceonly: boolean): punitinfoty;
@@ -184,7 +184,7 @@ type
 
    function getmatchingmethods(const amodule: tmsecomponent; const atype: ptypeinfo): msestringarty;
    function parsemodule(const amodule: tmsecomponent): pclassinfoty;
-   function findunitfile(const unitname: msestring): msestring;
+   function findunitfile(const aunitname: msestring): msestring;
    function findmethodpos(const amethod: tmethod; const imp: boolean = false): sourceposty;
    function findcfunctionimplementation(const aname: ansistring;
                       out headerstart,headerstop: sourceposty): boolean;
@@ -971,7 +971,7 @@ begin
  end;
 end;
 
-function tsourceupdater.findunitfile(const unitname: msestring): msestring;
+function tsourceupdater.findunitfile(const aunitname: msestring): msestring;
 
  function dofind(const aname: filenamety): filenamety;
  var
@@ -987,19 +987,19 @@ function tsourceupdater.findunitfile(const unitname: msestring): msestring;
   end;
  end;
 
- function dofind1(const unitname: filenamety): filenamety;
+ function dofind1(const aunitname: filenamety): filenamety;
  var
   str1: msestring;
  begin
-  result:= dofind(unitname);
+  result:= dofind(aunitname);
   if result = '' then begin
-   str1:= mselowercase(unitname);
-   if str1 <> unitname then begin
+   str1:= mselowercase(aunitname);
+   if str1 <> aunitname then begin
     result:= dofind(str1);
    end;
    if result = '' then begin
-    str1:= mseuppercase(unitname);
-    if str1 <> unitname then begin
+    str1:= mseuppercase(aunitname);
+    if str1 <> aunitname then begin
      result:= dofind(str1);
     end;
    end;
@@ -1007,9 +1007,9 @@ function tsourceupdater.findunitfile(const unitname: msestring): msestring;
  end;
 
 begin
- result:= dofind1(unitname+'.pas');
+ result:= dofind1(aunitname+'.pas');
  if result <> '' then exit;
- result:= dofind1(unitname+'.pp');
+ result:= dofind1(aunitname+'.pp');
 end;
 
 function tsourceupdater.findmethodpos(const amethod: tmethod;
@@ -2180,17 +2180,17 @@ begin
  ffilenamelist.add(asourcefilename,result);
 end;
 
-function tsourceupdater.updateunitinterface(const unitname: string): punitinfoty;
+function tsourceupdater.updateunitinterface(const aunitname: string): punitinfoty;
 var
  str1: filenamety;
  int1: integer;
 begin
- result:= funitinfolist.finditembyunitname(unitname);
+ result:= funitinfolist.finditembyunitname(aunitname);
  if result <> nil then begin
   updateunit(result,true);
  end
  else begin
-  str1:= findunitfile(unitname);
+  str1:= findunitfile(aunitname);
   if str1 <> '' then begin
    result:= updatesourceunit(str1,int1,true);
   end

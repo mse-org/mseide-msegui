@@ -1731,7 +1731,7 @@ procedure tiosynchronizer.answerreceived(const asequence: sequencety);
 var
  client1: twaitingclient;
 begin
- if fwaitingclients.find(integer(asequence),client1) then begin
+ if fwaitingclients.find(integer(asequence),tintegeravlnode(client1)) then begin
   client1.answered;
  end;
 end;
@@ -1962,7 +1962,7 @@ procedure tsocketserveriochannel.link(const apipes: tcustomsocketpipes);
 begin
  unlink;
  dobeforeconnect;
- setlinkedvar(apipes,fpipes);
+ setlinkedvar(apipes,tlinkedpersistent(fpipes));
  fpipes.onbeforedisconnect:= @dobeforedisconnect;
  fpipes.rx.oninputavailable:= @doinputavailable;
  doafterconnect; 
@@ -1972,7 +1972,7 @@ end;
 
 procedure tifiiolinkcomponent.setchannel(const avalue: tcustomiochannel);
 begin
- setlinkedvar(avalue,fchannel);
+ setlinkedvar(avalue,tmsecomponent(fchannel));
 // avalue.fsynchronizer.onsynchronize:= @ifidatasynchronize;
 end;
 
@@ -2004,7 +2004,7 @@ end;
 
 procedure tsocketstdiochannel.setcryptio(const avalue: tcryptio);
 begin
- setlinkedvar(avalue,fcryptio);
+ setlinkedvar(avalue,tmsecomponent(fcryptio));
 end;
 {
 procedure tsocketstdiochannel.doafterconnect;

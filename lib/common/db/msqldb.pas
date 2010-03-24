@@ -3781,7 +3781,8 @@ end;
 
 procedure tcustomsqlstatement.settransaction(const avalue: tmdbtransaction);
 begin
- dosettransaction(itransactionclient(self),avalue,ftransaction,false);
+ dosettransaction(itransactionclient(self),avalue,
+                                        tmdbtransaction(ftransaction),false);
 end;
 
 procedure tcustomsqlstatement.settransactionwrite(const avalue: tmdbtransaction);
@@ -3799,7 +3800,7 @@ var
  intf1: idbcontroller;
  bo1: boolean;
 begin
- dosetdatabase(idatabaseclient(self),avalue,fdatabase);
+ dosetdatabase(idatabaseclient(self),avalue,tmdatabase(fdatabase));
  if (avalue <> nil) then begin
   if (ftransaction = nil) then begin
    transaction:= tsqlconnection(avalue).transaction;

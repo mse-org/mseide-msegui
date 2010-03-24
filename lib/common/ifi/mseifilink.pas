@@ -934,7 +934,7 @@ end;
 
 procedure tlinkaction.setaction(const avalue: tcustomaction);
 begin
- setlinkedvar(avalue,faction);
+ setlinkedvar(avalue,tmsecomponent(faction));
 end;
 
 { trxlinkaction }
@@ -2225,7 +2225,7 @@ end;
 
 procedure tificontroller.setchannel(const avalue: tcustomiochannel);
 begin
- setlinkedvar(avalue,fchannel);
+ setlinkedvar(avalue,tmsecomponent(fchannel));
 end;
 
 function tificontroller.senddata(const adata: ansistring; 

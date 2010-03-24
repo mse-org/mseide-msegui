@@ -193,6 +193,7 @@ type
   protected   
    fintf: idbeditfieldlink;
    foptions: optionseditdbty;
+   function getdatasource1: tdatasource;
    procedure dataevent(event: tdataevent; info: ptrint); override;
    procedure activechanged; override;
    procedure editingchanged; override;
@@ -228,8 +229,10 @@ type
  end;
 
  teditwidgetdatalink = class(tcustomeditwidgetdatalink)
+  private
   published
-   property datasource read fdatasource write setwidgetdatasource;
+   property datasource: tdatasource read getdatasource1 
+                                         write setwidgetdatasource;
    property fieldname;
    property options;
    property onbeginedit;
@@ -2804,6 +2807,11 @@ begin
    end;
   end;
  end;
+end;
+
+function tcustomeditwidgetdatalink.getdatasource1: tdatasource;
+begin
+ result:= inherited datasource;
 end;
 
 procedure tcustomeditwidgetdatalink.setwidgetdatasource(const avalue: tdatasource);
@@ -8170,7 +8178,7 @@ end;
 procedure tcustomlbdropdownlistcontroller.setlookupbuffer(
                    const avalue: tcustomlookupbuffer);
 begin
- setlinkedvar(avalue,flookupbuffer);
+ setlinkedvar(avalue,tmsecomponent(flookupbuffer));
 end;
 
 function tcustomlbdropdownlistcontroller.getcols: tlbdropdowncols;

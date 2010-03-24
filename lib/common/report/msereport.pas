@@ -3277,7 +3277,7 @@ begin
    end;
    band1:= band1.ftabs.flinksource;
   end;
-  fband.setlinkedvar(avalue,flinksource);
+  fband.setlinkedvar(avalue,tmsecomponent(flinksource));
   sourcechanged;
  end;
 end;
@@ -4448,23 +4448,23 @@ end;
 
 procedure tcustomrecordband.setnextband(const avalue: tcustomrecordband);
 begin
- setlinkedvar(avalue,fnextband);
+ setlinkedvar(avalue,tmsecomponent(fnextband));
 end;
 
 procedure tcustomrecordband.setnextbandiflastofarea(
                                               const avalue: tcustomrecordband);
 begin
- setlinkedvar(avalue,fnextbandiflastofarea);
+ setlinkedvar(avalue,tmsecomponent(fnextbandiflastofarea));
 end;
 
 procedure tcustomrecordband.setnextbandifempty(const avalue: tcustomrecordband);
 begin
- setlinkedvar(avalue,fnextbandifempty);
+ setlinkedvar(avalue,tmsecomponent(fnextbandifempty));
 end;
 
 procedure tcustomrecordband.setnextbandiflast(const avalue: tcustomrecordband);
 begin
- setlinkedvar(avalue,fnextbandiflast);
+ setlinkedvar(avalue,tmsecomponent(fnextbandiflast));
 end;
 
 procedure tcustomrecordband.registerchildwidget(const child: twidget);
@@ -5750,17 +5750,17 @@ end;
 
 procedure tcustomreportpage.setnextpage(const avalue: tcustomreportpage);
 begin
- setlinkedvar(avalue,fnextpage);
+ setlinkedvar(avalue,tmsecomponent(fnextpage));
 end;
 
 procedure tcustomreportpage.setnextpageifempty(const avalue: tcustomreportpage);
 begin
- setlinkedvar(avalue,fnextpageifempty);
+ setlinkedvar(avalue,tmsecomponent(fnextpageifempty));
 end;
 
 procedure tcustomreportpage.setnextpageiflast(const avalue: tcustomreportpage);
 begin
- setlinkedvar(avalue,fnextpageiflast);
+ setlinkedvar(avalue,tmsecomponent(fnextpageiflast));
 end;
 
 function tcustomreportpage.beginband(const acanvas: tcanvas;

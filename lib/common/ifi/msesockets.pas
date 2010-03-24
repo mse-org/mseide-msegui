@@ -453,7 +453,7 @@ begin
  frx.onpipebroken:= @dopipebroken;
  frx.fonthreadterminate:= @dothreadterminate;
  ftx:= tsocketwriter.create;
- setlinkedvar(aowner.fcryptio,fcryptio);
+ setlinkedvar(aowner.fcryptio,tmsecomponent(fcryptio));
  fcryptioinfo.kind:= acryptkind;
 end;
 
@@ -732,7 +732,7 @@ end;
 
 procedure tcustomsocketcomp.setcryptio(const avalue: tcryptio);
 begin
- setlinkedvar(avalue,fcryptio);
+ setlinkedvar(avalue,tmsecomponent(fcryptio));
 end;
 
 procedure tcustomsocketcomp.loaded;

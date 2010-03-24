@@ -43,8 +43,6 @@ type
    procedure link(const arxfd,atxfd: integer; out ainfo: cryptioinfoty); override;
    class procedure internalunlink(var ainfo: cryptioinfoty); override;
    class procedure internalthreadterminate; override;
-   function waitforio(const aerror: integer; var ainfo: cryptioinfoty; 
-              const atimeoutms: integer; const resultpo: pinteger = nil): boolean;
    class procedure connect(var ainfo: cryptioinfoty; const atimeoutms: integer);  override;
    class procedure accept(var ainfo: cryptioinfoty; const atimeoutms: integer);  override;
    class function write(var ainfo: cryptioinfoty; const buffer: pointer;
@@ -61,6 +59,9 @@ type
    property certfile: filenamety read fcertfile write fcertfile;
    property privkeyfile: filenamety read fprivkeyfile write fprivkeyfile;
  end;
+
+function waitforio(const aerror: integer; var ainfo: cryptioinfoty; 
+              const atimeoutms: integer; const resultpo: pinteger = nil): boolean;
  
 implementation
 uses
@@ -183,7 +184,7 @@ begin
  inherited;
 end;
 
-function tssl.waitforio(const aerror: integer; var ainfo: cryptioinfoty; 
+function {tssl.}waitforio(const aerror: integer; var ainfo: cryptioinfoty; 
        const atimeoutms: integer; const resultpo: pinteger = nil): boolean;
 var
  int1: integer;

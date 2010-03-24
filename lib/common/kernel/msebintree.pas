@@ -662,7 +662,7 @@ var
  n1: tintegeravlnode;
 begin
  n1:= tintegeravlnode.create(akey);
- result:= find(n1,anode);
+ result:= find(n1,tavlnode(anode));
  n1.free;
 end;
 
@@ -720,7 +720,7 @@ var
  n1: tint64avlnode;
 begin
  n1:= tint64avlnode.create(akey);
- result:= find(n1,anode);
+ result:= find(n1,tavlnode(anode));
  n1.free;
 end;
 
@@ -780,7 +780,7 @@ end;
 
 function tcacheavltree.find(const akey: tcachenode; out anode: tcachenode): boolean;
 begin
- result:= inherited find(akey,tint64avlnode(anode));
+ result:= inherited find(akey,tavlnode(anode));
  if result and (anode <> flast) then begin
   if anode.fprev <> nil then begin
    anode.fprev.fnext:= anode.fnext;

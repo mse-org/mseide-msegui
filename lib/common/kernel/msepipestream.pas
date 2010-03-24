@@ -24,6 +24,7 @@ type
  tpipewriter = class(ttextstream)
   private
    fconnected: boolean;
+   function gethandle: integer;
   protected
    procedure sethandle(value: integer); override;
    function dowrite(const buffer; count: longint): longint; virtual;
@@ -35,7 +36,7 @@ type
 {$endif}
    procedure connect(const ahandle: integer); //does not own handle
    function releasehandle: integer; virtual;
-   property handle: integer read fhandle write sethandle; //owns handle
+   property handle: integer read gethandle write sethandle; //owns handle
  end;
 
  tpipereader = class;
@@ -205,6 +206,11 @@ end;
 function tpipewriter.dowrite(const buffer; count: longint): longint;
 begin
  result:= inherited write(buffer,count);
+end;
+
+function tpipewriter.gethandle: integer;
+begin
+ result:= inherited handle;
 end;
 
 {$ifdef FPC}

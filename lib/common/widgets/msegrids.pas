@@ -13392,7 +13392,7 @@ end;
 
 procedure tcustomgrid.setifilink(const avalue: tifigridlinkcomp);
 begin
- mseificomp.setifilinkcomp(iifigridlink(self),avalue,fifilink);
+ mseificomp.setifilinkcomp(iifigridlink(self),avalue,tifilinkcomp(fifilink));
 end;
 
 {$endif}

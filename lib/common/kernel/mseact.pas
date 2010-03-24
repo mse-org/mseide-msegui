@@ -1201,7 +1201,7 @@ end;
 
 procedure tcustomaction.setifilink(const avalue: tifiactionlinkcomp);
 begin
- mseificomp.setifilinkcomp(iifilink(self),avalue,fifilink);
+ mseificomp.setifilinkcomp(iifilink(self),avalue,tifilinkcomp(fifilink));
 end;
 {$endif}
 

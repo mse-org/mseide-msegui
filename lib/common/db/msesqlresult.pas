@@ -999,7 +999,7 @@ end;
 
 procedure tsqlresult.setdatabase(const avalue: tmdatabase);
 begin
- dosetsqldatabase(isqlclient(self),avalue,fcursor,fdatabase);
+ dosetsqldatabase(isqlclient(self),avalue,fcursor,tmdatabase(fdatabase));
 end;
 
 function tsqlresult.getname: ansistring;
@@ -1019,7 +1019,8 @@ end;
 
 procedure tsqlresult.settransaction(const avalue: tmdbtransaction);
 begin
- dosettransaction(itransactionclient(self),avalue,ftransaction,false);
+ dosettransaction(itransactionclient(self),avalue,
+                                       tmdbtransaction(ftransaction),false);
 end;
 
 procedure tsqlresult.settransactionwrite(const avalue: tmdbtransaction);
@@ -1196,12 +1197,12 @@ end;
 
 procedure tsqlresult.setbeforeopen(const avalue: tmsesqlscript);
 begin
- setlinkedvar(avalue,fbeforeopen);
+ setlinkedvar(avalue,tmsecomponent(fbeforeopen));
 end;
 
 procedure tsqlresult.setafteropen(const avalue: tmsesqlscript);
 begin
- setlinkedvar(avalue,fafteropen);
+ setlinkedvar(avalue,tmsecomponent(fafteropen));
 end;
 
 procedure tsqlresult.changed;
@@ -1558,7 +1559,7 @@ end;
 
 procedure tsqllookupbuffer.setsource(const avalue: tsqlresult);
 begin
- setlinkedvar(avalue,fsource);
+ setlinkedvar(avalue,tmsecomponent(fsource));
  invalidatebuffer;
 end;
 

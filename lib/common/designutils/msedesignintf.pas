@@ -300,7 +300,7 @@ type
    constructor create;
    procedure registergroups(const adependents: array of string;
                                       const agroup: array of string);
-   function getneededunits(const unitname: string): stringarty;
+   function getneededunits(const aunitname: string): stringarty;
  end;
  
  createdesignmodulefuncty = function(const aclass: tclass;
@@ -1407,7 +1407,7 @@ begin
  end;
 end;
 
-function tunitgroups.getneededunits(const unitname: string): stringarty;
+function tunitgroups.getneededunits(const aunitname: string): stringarty;
 //todo: optimize
 
  procedure doget(const aname: string; out resnormal,resupper: stringarty);
@@ -1431,7 +1431,7 @@ function tunitgroups.getneededunits(const unitname: string): stringarty;
    inc(po1);
   end;
   setlength(resnormal,high(resnormal)+2);
-  resnormal[high(resnormal)]:= unitname; //add dependent
+  resnormal[high(resnormal)]:= aunitname; //add dependent
   setlength(resupper,length(resnormal));
   for int1:= 0 to high(resnormal) do begin
    resupper[int1]:= struppercase(resnormal[int1]);
@@ -1449,7 +1449,7 @@ var
  
 begin
  setlength(ar4,1);
- ar4[0]:= struppercase(unitname);
+ ar4[0]:= struppercase(aunitname);
  level:= 0;
  repeat
   highbefore:= high(ar4);
