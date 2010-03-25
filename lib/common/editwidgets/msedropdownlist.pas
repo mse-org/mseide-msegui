@@ -258,6 +258,7 @@ type
    fforcecaret: boolean;
    procedure applicationactivechanged(const avalue: boolean); virtual;
    function getbuttonframeclass: dropdownbuttonframeclassty; virtual;
+   procedure updatedropdownbounds(var arect: rectty); virtual;
    procedure updatedropdownpos;
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
    procedure setoptions(const Value: dropdowneditoptionsty); virtual;
@@ -308,6 +309,7 @@ type
    fbounds_cx: integer;
    fdropdownwidget: twidget;
    procedure internaldropdown; override;
+   procedure updatedropdownbounds(var arect: rectty); override;
    procedure receiveevent(const event: tobjectevent); override;
    function getdropdownwidget: twidget; override;
   public
@@ -350,6 +352,7 @@ type
              //-2 -> no selection, -1 -> cancel
    procedure dropdownkeydown(var info: keyeventinfoty);
 
+   procedure updatedropdownbounds(var arect: rectty); override;
    procedure receiveevent(const event: tobjectevent); override;
    function createdropdownlist: tdropdownlist; virtual;
    procedure internaldropdown; override;
@@ -898,6 +901,11 @@ begin
  end;
 end;
 
+procedure tcustomdropdowncontroller.updatedropdownbounds(var arect: rectty);
+begin
+ //dummy
+end;
+
 procedure tcustomdropdowncontroller.updatedropdownpos;
 var
  widget1: twidget;
@@ -906,6 +914,7 @@ begin
  widget1:= getdropdownwidget;
  if widget1 <> nil then begin
   rect1:= widget1.widgetrect;
+  updatedropdownbounds(rect1);
   getdropdownpos(fintf.getwidget,deo_right in foptions,rect1);
   widget1.widgetrect:= rect1;
  end;
@@ -1016,11 +1025,25 @@ begin
  result:= fdropdownwidget;
 end;
 
+procedure tdropdownwidgetcontroller.updatedropdownbounds(var arect: rectty);
+begin
+ if fbounds_cx > 0 then begin
+  arect.cx:= fbounds_cx;
+ end
+ else begin
+  arect.cx:= fintf.getwidget.framesize.cx;
+ end;
+ if fbounds_cy > 0 then begin
+  arect.cy:= fbounds_cy;
+ end;
+end;
+
 procedure tdropdownwidgetcontroller.receiveevent(const event: tobjectevent);
 begin
  inherited;
  if event.kind = ek_dropdown then begin
   if fdropdownwidget <> nil then begin
+  {
    if fbounds_cx > 0 then begin
     fdropdownwidget.bounds_cx:= fbounds_cx;
    end
@@ -1030,6 +1053,7 @@ begin
    if fbounds_cy > 0 then begin
     fdropdownwidget.bounds_cy:= fbounds_cy;
    end;
+   }
    updatedropdownpos;
    fdropdownwidget.window.winid; //update window.options
    if wo_popup in fdropdownwidget.window.options then begin
@@ -1139,6 +1163,16 @@ function tcustomdropdownlistcontroller.createdropdownlist: tdropdownlist;
 begin
  result:= tdropdownlist.create(self,fdropdownitems);
  result.name:= '_dropdownlist'; //debug purposes
+end;
+
+procedure tcustomdropdownlistcontroller.updatedropdownbounds(var arect: rectty);
+begin
+ if fwidth = 0 then begin
+  arect.cx:= fintf.getwidget.framesize.cx;
+ end
+ else begin
+  arect.cx:= fwidth;
+ end;
 end;
 
 procedure tcustomdropdownlistcontroller.receiveevent(const event: tobjectevent);

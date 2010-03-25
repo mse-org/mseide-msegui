@@ -11639,20 +11639,24 @@ begin
     checkrecursivetransientfor(transientfor);
     setlinkedvar(transientfor,tlinkedobject(ftransientfor));
     if transientfor <> nil then begin
+     inc(ftransientfor.ftransientforcount);
      aoptions1.transientfor:= transientfor.winid;
-    end
+    end;
+    {
     else begin
      aoptions1.transientfor:= 0;
     end;
+    }
    end;
    aoptions1.icon:= icon;
    aoptions1.iconmask:= iconmask;
   end;
+  {
   if (aoptions1.transientfor = 0) and (ftransientfor <> nil) then begin
    inc(ftransientfor.ftransientforcount);
    aoptions1.transientfor:= ftransientfor.winid;
   end;
-
+  }
   if (aoptions.groupleader <> nil) and
           aoptions.groupleader.fowner.isgroupleader then begin
    aoptions1.setgroup:= true;
@@ -11994,6 +11998,7 @@ begin
      end;
     end
     else begin
+     include(appinst.fstate,aps_needsupdatewindowstack);
      if (application.fmainwindow = self) and not appinst.terminated then begin
       bo1:= gui_grouphideminimizedwindows;
       gui_flushgdi;
