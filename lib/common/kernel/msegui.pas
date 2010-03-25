@@ -14578,76 +14578,65 @@ begin
 end;
 
 function compwindowzorder(const l,r): integer;
+const
+ backgroundweight = 1;
+ topweight = 1;
+ modalweight = 8;
+ transientforcountweight = 16;
+ transientfornotnilweight = 32;
+ transientforweight = 64;
+ invisibleweight = 128;
 var
  window1: twindow;
 begin
  result:= 0;
  if (tws_windowvisible in twindow(l).fstate) then begin
   if not (tws_windowvisible in twindow(r).fstate) then begin
-   inc(result,64);
+   inc(result,invisibleweight);
   end
  end
  else begin
   if (tws_windowvisible in twindow(r).fstate) then begin
-   dec(result,64);
+   dec(result,invisibleweight);
   end
   else begin
    exit; //both invisible -> no change in order
   end;
  end;
- if ow_background in twindow(l).fowner.foptionswidget then dec(result);
- if ow_top in twindow(l).fowner.foptionswidget then inc(result);
- if ow_background in twindow(r).fowner.foptionswidget then inc(result);
- if ow_top in twindow(r).fowner.foptionswidget then dec(result);
+ if ow_background in twindow(l).fowner.foptionswidget then begin
+  dec(result,backgroundweight);
+ end;
+ if ow_top in twindow(l).fowner.foptionswidget then begin
+  inc(result,topweight);
+ end;
+ if ow_background in twindow(r).fowner.foptionswidget then begin
+  inc(result,backgroundweight);
+ end;
+ if ow_top in twindow(r).fowner.foptionswidget then begin
+  dec(result,topweight);
+ end;
+ if tws_modal in twindow(l).fstate then begin
+  inc(result,modalweight);
+ end;
+ if tws_modal in twindow(r).fstate then begin
+  dec(result,modalweight);
+ end;
  if twindow(l).ftransientfor <> nil then begin
-  inc(result,8);
+  inc(result,transientfornotnilweight);
  end;
  if twindow(r).ftransientfor <> nil then begin
-  dec(result,8);
+  dec(result,transientfornotnilweight);
  end;
  if twindow(l).ftransientforcount > 0 then begin
-  inc(result,4);
+  inc(result,transientforcountweight);
  end;
  if twindow(r).ftransientforcount > 0 then begin
-  dec(result,4);
+  dec(result,transientforcountweight);
  end;
- {
- if twindow(l).ftransientforcount > 0 then begin
-  inc(result,4);
- end;
- if (tws_modal in twindow(l).fstate) or (twindow(l).ftransientfor <> nil)
-            then begin
-  inc(result,16);
-  if twindow(l).ftransientforcount > 0 then begin
-   dec(result,8);
-  end;
- end;
- if twindow(r).ftransientforcount > 0 then begin
-  dec(result,4);
- end;
- if (tws_modal in twindow(r).fstate) or (twindow(r).ftransientfor <> nil)
-            then begin
-  dec(result,16);
-  if twindow(r).ftransientforcount > 0 then begin
-   inc(result,8);
-  end;
- end;
- }
  window1:= twindow(l);
  while window1.ftransientfor <> nil do begin
   if window1.ftransientfor = twindow(r) then begin
-   inc(result,32);
-{
-writeln('+ ',twindow(r).owner.name+' '+window1.owner.name);
-window1:= twindow(r);
-while window1.ftransientfor <> nil do begin
- if window1.ftransientfor = twindow(l) then begin
-  dec(result,32);
-  exit;
- end;
- window1:= window1.ftransientfor;
-end;  
-}
+   inc(result,transientforweight);
    exit;
   end;
   window1:= window1.ftransientfor;
@@ -14655,8 +14644,7 @@ end;
  window1:= twindow(r);
  while window1.ftransientfor <> nil do begin
   if window1.ftransientfor = twindow(l) then begin
-//writeln('- ',twindow(l).owner.name+' '+window1.owner.name);
-   dec(result,32);
+   dec(result,transientforweight);
    exit;
   end;
   window1:= window1.ftransientfor;
