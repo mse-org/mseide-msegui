@@ -658,7 +658,7 @@ var
  end;
  
 begin
- result:= 0; //compilerwarnung;
+ result:= invalidprochandle; //compilerwarnung;
  topipehandles.writedes:= invalidfilehandle;
  topipehandles.readdes:= invalidfilehandle;
  frompipehandles.writedes:= invalidfilehandle;

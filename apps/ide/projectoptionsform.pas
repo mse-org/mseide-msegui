@@ -82,6 +82,8 @@ type
   objpref: msestring;
   targpref: msestring;
   
+  befcommand: msestringarty;
+  aftcommand: msestringarty;
   makeoptions: msestringarty;
   sourcefilemasks: msestringarty;
   syntaxdeffiles: msestringarty;
@@ -167,7 +169,9 @@ type
   modulefilenames: filenamearty;
 
   defaultmake: integer;
+  befcommandon: integerarty;
   makeoptionson: integerarty;
+  aftcommandon: integerarty;
   unitdirson: integerarty;
 
   macroon: integerarty;
@@ -425,6 +429,24 @@ type
    editfontantialiased: tbooleanedit;
    editmarkbrackets: tbooleanedit;
    statementcolor: tcoloredit;
+   ttabpage17: ttabpage;
+   ttabpage18: ttabpage;
+   befcommandgrid: twidgetgrid;
+   befmakeon: tbooleanedit;
+   befbuildon: tbooleanedit;
+   befmake1on: tbooleanedit;
+   befmake2on: tbooleanedit;
+   befmake3on: tbooleanedit;
+   befmake4on: tbooleanedit;
+   befcommand: tmemodialogedit;
+   aftcommandgrid: twidgetgrid;
+   aftmakeon: tbooleanedit;
+   aftbuildon: tbooleanedit;
+   aftmake1on: tbooleanedit;
+   aftmake2on: tbooleanedit;
+   aftmake3on: tbooleanedit;
+   aftmake4on: tbooleanedit;
+   aftcommand: tmemodialogedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -746,6 +768,8 @@ begin
    li.expandmacros(libpref);
    li.expandmacros(objpref);
    li.expandmacros(targpref);
+   li.expandmacros(befcommand);
+   li.expandmacros(aftcommand);
    li.expandmacros(makeoptions);
    li.expandmacros(sourcefilemasks);
    li.expandmacros(syntaxdeffiles);
@@ -994,11 +1018,16 @@ begin
   additem(exceptignore,false);
   ignoreexceptionclasses:= nil;
 
+  befcommand:= nil;
+  aftcommand:= nil;
+  befcommandon:= nil;
+  aftcommandon:= nil;
+  
   makeoptions:= nil;
   additem(makeoptions,'-l -Mobjfpc -Sh');
   additem(makeoptions,'-gl');
   additem(makeoptions,'-B');
-  additem(makeoptions,'-OG2p3 -XX -CX -Xs');
+  additem(makeoptions,'-O2 -XX -CX -Xs');
   setlength(makeoptionson,length(makeoptions));
   for int1:= 0 to high(makeoptionson) do begin
    makeoptionson[int1]:= alloptionson;
@@ -1360,6 +1389,10 @@ begin
   updatevalue('afterload',afterload);
   updatevalue('beforerun',beforerun);
   updatevalue('defaultmake',defaultmake,1,maxdefaultmake+1);
+  updatevalue('befcommand',befcommand);
+  updatevalue('befcommandon',befcommandon);
+  updatevalue('aftcommand',aftcommand);
+  updatevalue('aftcommandon',aftcommandon);
   updatevalue('makeoptions',makeoptions);
   updatevalue('makeoptionson',makeoptionson);
   updatevalue('macroon',macroon);
@@ -1676,6 +1709,33 @@ begin
    fo.make3on.gridupdatetagvalue(int1,makeoptionson[int1]);
    fo.make4on.gridupdatetagvalue(int1,makeoptionson[int1]);
   end;
+
+  fo.befcommand.gridvalues:= befcommand;
+  for int1:= 0 to fo.befcommandgrid.rowhigh do begin
+   if int1 > high(befcommandon) then begin
+    break;
+   end;
+   fo.befmakeon.gridupdatetagvalue(int1,befcommandon[int1]);
+   fo.befbuildon.gridupdatetagvalue(int1,befcommandon[int1]);
+   fo.befmake1on.gridupdatetagvalue(int1,befcommandon[int1]);
+   fo.befmake2on.gridupdatetagvalue(int1,befcommandon[int1]);
+   fo.befmake3on.gridupdatetagvalue(int1,befcommandon[int1]);
+   fo.befmake4on.gridupdatetagvalue(int1,befcommandon[int1]);
+  end;
+
+  fo.aftcommand.gridvalues:= aftcommand;
+  for int1:= 0 to fo.aftcommandgrid.rowhigh do begin
+   if int1 > high(aftcommandon) then begin
+    break;
+   end;
+   fo.aftmakeon.gridupdatetagvalue(int1,aftcommandon[int1]);
+   fo.aftbuildon.gridupdatetagvalue(int1,aftcommandon[int1]);
+   fo.aftmake1on.gridupdatetagvalue(int1,aftcommandon[int1]);
+   fo.aftmake2on.gridupdatetagvalue(int1,aftcommandon[int1]);
+   fo.aftmake3on.gridupdatetagvalue(int1,aftcommandon[int1]);
+   fo.aftmake4on.gridupdatetagvalue(int1,aftcommandon[int1]);
+  end;
+
   fo.unitdirs.gridvalues:= reversearray(unitdirs);
   int2:= high(unitdirs);
   for int1:= 0 to int2 do begin
@@ -1889,6 +1949,24 @@ begin
       fo.make1on.gridvaluetag(int1,0) or fo.make2on.gridvaluetag(int1,0) or
       fo.make3on.gridvaluetag(int1,0) or fo.make4on.gridvaluetag(int1,0);
   end;
+
+  befcommand:= fo.befcommand.gridvalues;
+  setlength(befcommandon,fo.befcommandgrid.rowcount);
+  for int1:= 0 to high(befcommandon) do begin
+   befcommandon[int1]:=
+      fo.befmakeon.gridvaluetag(int1,0) or fo.befbuildon.gridvaluetag(int1,0) or
+      fo.befmake1on.gridvaluetag(int1,0) or fo.befmake2on.gridvaluetag(int1,0) or
+      fo.befmake3on.gridvaluetag(int1,0) or fo.befmake4on.gridvaluetag(int1,0);
+  end;
+  aftcommand:= fo.aftcommand.gridvalues;
+  setlength(aftcommandon,fo.aftcommandgrid.rowcount);
+  for int1:= 0 to high(aftcommandon) do begin
+   aftcommandon[int1]:=
+      fo.aftmakeon.gridvaluetag(int1,0) or fo.aftbuildon.gridvaluetag(int1,0) or
+      fo.aftmake1on.gridvaluetag(int1,0) or fo.aftmake2on.gridvaluetag(int1,0) or
+      fo.aftmake3on.gridvaluetag(int1,0) or fo.aftmake4on.gridvaluetag(int1,0);
+  end;
+
   unitdirs:= reversearray(fo.unitdirs.gridvalues);
   setlength(unitdirson,length(unitdirs));
   for int1:= 0 to high(unitdirson) do begin

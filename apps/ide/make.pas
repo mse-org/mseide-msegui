@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2010 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -50,6 +50,7 @@ type
    fmessagefile: ttextstream;
    fnofilecopy: boolean;
    ffinished: boolean;
+   fsetmakedir: boolean;
   protected
    fcanceled: boolean;
    procid: integer;
@@ -57,6 +58,7 @@ type
    procedure inputavailable(const sender: tpipereader);
    procedure dofinished(const sender: tpipereader); virtual;
    function getcommandline: ansistring; virtual;
+   procedure runprog(const acommandline: string);
   public
    messagepipe: tpipereader;
    constructor create(const aowner: tcomponent;
@@ -79,10 +81,13 @@ type
    property canceled: boolean read fcanceled;
  end;
 
+ makestepty = (maks_before,maks_make,maks_after,maks_finished);
  tmaker = class(tprogrunner)
   private
    ftargettimestamp: tdatetime;
    fmaketag: integer;
+   fstep: makestepty;
+   fscriptnum: integer;
   protected
    procedure doasyncevent(var atag: integer); override;
    procedure dofinished(const sender: tpipereader); override;
@@ -242,12 +247,8 @@ end;
 
 constructor tprogrunner.create(const aowner: tcomponent; 
                               const clearscreen,setmakedir: boolean);
-var
- str3: string;
- wdbefore: filenamety;
 begin
  inherited create(aowner);
- str3:= getcommandline; 
  with projectoptions,texp do begin
   if copymessages and (messageoutputfile <> '') and not fnofilecopy then begin
    fmessagefile:= ttextstream.create(messageoutputfile,fm_create);
@@ -259,25 +260,8 @@ begin
    messagefo.messages.rowcount:= 0;
   end;
   procid:= invalidprochandle;
-  fexitcode:= 1; //defaulterror
-  if setmakedir and (makedir <> '') then begin
-   wdbefore:= getcurrentdir;
-   setcurrentdir(makedir);
-  end;
-  try
-   procid:= execmse2(str3,nil,messagepipe,messagepipe,false,-1,true,false,true);
-  except
-   on e: exception do begin
-    fcanceled:= true;
-    if e is eoserror then begin
-     fexitcode:= eoserror(e).error;
-    end;
-    application.handleexception(nil,'Runerror with "'+str3+'": ');
-   end;
-  end;
-  if setmakedir and (makedir <> '') then begin
-   setcurrentdir(wdbefore);
-  end;
+  fsetmakedir:= setmakedir;
+  runprog(getcommandline);
  end;
 end;
 
@@ -296,6 +280,35 @@ begin
  inherited;
 end;
 
+procedure tprogrunner.runprog(const acommandline: string);
+var
+ wdbefore: string;
+begin
+ fexitcode:= 1; //defaulterror
+ procid:= invalidprochandle;
+ with projectoptions,texp do begin
+  if fsetmakedir and (makedir <> '') then begin
+   wdbefore:= getcurrentdir;
+   setcurrentdir(makedir);
+  end;
+  try
+   procid:= execmse2(acommandline,nil,messagepipe,messagepipe,false,-1,
+                                                            true,false,true);
+  except
+   on e: exception do begin
+    fcanceled:= true;
+    if e is eoserror then begin
+     fexitcode:= eoserror(e).error;
+    end;
+    application.handleexception(nil,'Runerror with "'+acommandline+'": ');
+   end;
+  end;
+  if fsetmakedir and (makedir <> '') then begin
+   setcurrentdir(wdbefore);
+  end;
+ end;
+end;
+
 procedure tprogrunner.doasyncevent(var atag: integer);
 begin
  if not getprocessexitcode(procid,fexitcode,5000000) then begin
@@ -304,8 +317,6 @@ begin
   killprocess(procid);
  end;
  procid:= invalidprochandle;
- messagefo.messages.font.options:= messagefo.messages.font.options +
-             [foo_antialiased] - [foo_nonantialiased];
 end;
 
 procedure tprogrunner.dofinished(const sender: tpipereader);
@@ -345,6 +356,7 @@ end;
 
 constructor tmaker.create(atag: integer);
 begin
+ fstep:= maks_before;
  fmaketag:= atag;
  ftargettimestamp:= getfilemodtime(gettargetfile);
  inherited create(nil,true,true);
@@ -369,13 +381,72 @@ end;
 
 function tmaker.getcommandline: ansistring;
 begin
- result:= buildmakecommandline(fmaketag);
+ result:= '';
+ with projectoptions do begin
+  if fstep = maks_before then begin
+   while fscriptnum <= high(befcommandon) do begin
+    if (befcommandon[fscriptnum] and fmaketag <> 0) and 
+                           (fscriptnum <= high(texp.befcommand)) then begin
+     result:= texp.befcommand[fscriptnum];
+     break;
+    end;
+    inc(fscriptnum);
+   end;
+   if fscriptnum <= high(befcommandon) then begin
+    inc(fscriptnum);
+    exit;
+   end
+   else begin
+    fstep:= maks_make;
+   end;
+  end;
+  if fstep = maks_make then begin
+   result:= buildmakecommandline(fmaketag);
+   fscriptnum:= 0;
+   fstep:= maks_after;
+   exit;
+  end;
+  if fstep = maks_after then begin
+   while fscriptnum <= high(aftcommandon) do begin
+    if (aftcommandon[fscriptnum] and fmaketag <> 0) and 
+                           (fscriptnum <= high(texp.aftcommand)) then begin
+     result:= texp.aftcommand[fscriptnum];
+     break;
+    end;
+    inc(fscriptnum);
+   end;
+   if fscriptnum <= high(aftcommandon) then begin
+    inc(fscriptnum);
+    exit;
+   end
+   else begin
+    fstep:= maks_finished;
+   end;
+  end;
+ end;
 end;
 
 procedure tmaker.doasyncevent(var atag: integer);
+ procedure finished;
+ begin
+  designnotifications.aftermake(idesigner(designer),fexitcode);
+  messagefo.messages.font.options:= messagefo.messages.font.options +
+              [foo_antialiased] - [foo_nonantialiased];
+ end;
+var
+ str1: string;
 begin
  inherited;
- designnotifications.aftermake(idesigner(designer),fexitcode);
+ str1:= getcommandline;
+ if (fstep = maks_finished) or (fexitcode <> 0) then begin
+  finished;
+ end
+ else begin
+  runprog(str1);
+  if procid = invalidprochandle then begin
+   finished;
+  end;
+ end;
 end;
 
 { tloader }
@@ -385,8 +456,8 @@ begin
  inherited create(aowner,false,true);
  if procid <> invalidprochandle then begin
   mainfo.setstattext('Downloading.',mtk_running);
-  messagefo.messages.font.options:= messagefo.messages.font.options -
-               [foo_antialiased] + [foo_nonantialiased];
+//  messagefo.messages.font.options:= messagefo.messages.font.options -
+//               [foo_antialiased] + [foo_nonantialiased];
  end
  else begin
   mainfo.setstattext('Download not running.',mtk_error);
