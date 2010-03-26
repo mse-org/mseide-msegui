@@ -81,6 +81,12 @@ Possible names:
 FPCDIR, FPCLIBDIR, MSEDIR, MSELIBDIR, SYNTAXDEFDIR, TEMPLATEDIR,
 COMPSTOREDIR, COMPILER, DEBUGGER, EXEEXT, TARGET.
 
+MSEide project macros
+*********************
+Predefined projectmacros:
+PROJECTNAME, PROJECTDIR, MAINFILE, TARGFILE, they can be overridden by 
+'Project'-'Options'-'Macros'.
+
 FPC 2.2.2
 *********
 patch_fpc_2_2_2 contains patched FPC files in order to fix FPC Mantis 11774, 

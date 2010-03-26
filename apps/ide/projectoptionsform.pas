@@ -527,6 +527,8 @@ uses
  componentstore,cpuform
  {$ifdef FPC}{$ifndef mse_withoutdb},msedbfieldeditor{$endif}{$endif};
 
+var
+ projectoptionsfo: tprojectoptionsfo;
 type
 
  signalinfoty = record
@@ -608,7 +610,7 @@ end;
 
 function getprojectmacros: macroinfoarty;
 begin
- setlength(result,2);
+ setlength(result,4);
  with projectoptions do begin
   with result[0] do begin
    name:= 'PROJECTNAME';
@@ -617,6 +619,24 @@ begin
   with result[1] do begin
    name:= 'PROJECTDIR';
    value:= tosysfilepath(getcurrentdir)+pathdelim;
+  end;
+  with result[2] do begin
+   name:= 'MAINFILE';
+   if projectoptionsfo = nil then begin
+    value:= t.mainfile;
+   end
+   else begin
+    value:= projectoptionsfo.mainfile.value;
+   end;
+  end;
+  with result[3] do begin
+   name:= 'TARGETFILE';
+   if projectoptionsfo = nil then begin
+    value:= t.targetfile;
+   end
+   else begin
+    value:= projectoptionsfo.targetfile.value;
+   end;
   end;
  end;
 end;
@@ -2064,7 +2084,9 @@ begin
 // fo.debuggerpage.enabled:= not mainfo.gdb.running;
  projectoptionstoform(fo);
  try
+  projectoptionsfo:= fo;
   result:= fo.show(true,nil) = mr_ok;
+  projectoptionsfo:= nil;
   if result then begin
    with mainfo.gdb do begin
     if not started then begin
@@ -2077,6 +2099,7 @@ begin
    projectoptionschanged;
   end;
  finally
+  projectoptionsfo:= nil;
   fo.Free;
  end;
 end;
