@@ -1816,8 +1816,9 @@ begin
   if rect1.cx > 0 then begin
    int1:= -(finfo.dest.x + round(rect1.cx*avalue) - ftextrect.x);
    if int1 <> 0 then begin
-    inc(finfo.dest.x,int1);
+//    inc(finfo.dest.x,int1);
     fowner.scrollrect(makepoint(int1,0),finfo.clip,true);
+    inc(finfo.dest.x,int1);
    end;
   end;   
  end
@@ -1825,8 +1826,9 @@ begin
   if rect1.cy > 0 then begin
    int1:= -(finfo.dest.y + round(rect1.cy*avalue) - ftextrect.y);
    if int1 <> 0 then begin
-    inc(finfo.dest.y,int1);
+//    inc(finfo.dest.y,int1);
     fowner.scrollrect(makepoint(0,int1),finfo.clip,true);
+    inc(finfo.dest.y,int1);
    end;
   end;   
  end;
