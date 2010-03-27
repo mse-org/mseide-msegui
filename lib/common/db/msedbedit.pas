@@ -63,7 +63,7 @@ type
  updaterowdataeventty = procedure(const sender: tcustomgrid; 
                         const arow: integer; const adataset: tdataset)of object;
 
- optiondbty = (odb_copyitems,odb_closedataset);
+ optiondbty = (odb_copyitems,odb_opendataset,odb_closedataset);
  optionsdbty = set of optiondbty;
  
  idbnaviglink = interface(inullinterface)
@@ -5167,7 +5167,7 @@ function tcustomdbdropdownlistcontroller.candropdown: boolean;
 begin
  result:= inherited candropdown and 
            (fdatalink.active or 
-           (odb_closedataset in foptionsdb) and (fdatalink.dataset <> nil));
+           (odb_opendataset in foptionsdb) and (fdatalink.dataset <> nil));
 end;
 
 procedure tcustomdbdropdownlistcontroller.doafterclosedropdown;
