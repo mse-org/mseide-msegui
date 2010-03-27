@@ -63,7 +63,7 @@ type
  updaterowdataeventty = procedure(const sender: tcustomgrid; 
                         const arow: integer; const adataset: tdataset)of object;
 
- optiondbty = (odb_copyitems);
+ optiondbty = (odb_copyitems,odb_closedataset);
  optionsdbty = set of optiondbty;
  
  idbnaviglink = interface(inullinterface)
@@ -1184,6 +1184,7 @@ type
    function  createdropdownlist: tdropdownlist; override;
    function candropdown: boolean; override;
    procedure itemselected(const index: integer; const akey: keyty); override;
+   procedure doafterclosedropdown; override;
   //idbeditinfo
    function getdatasource(const aindex: integer): tdatasource; overload;
    procedure getfieldtypes(out propertynames: stringarty;
@@ -5104,6 +5105,10 @@ var
  ar2: pmsestringaarty;
  bm: string;
 begin
+ datas:= fdatalink.dataset;
+ if (datas <> nil) and (odb_closedataset in foptionsdb) then begin
+  datas.active:= true;
+ end;
  if odb_copyitems in foptionsdb then begin
   fcols.clear;
   datas:= fdatalink.dataset;
@@ -5160,7 +5165,17 @@ end;
 
 function tcustomdbdropdownlistcontroller.candropdown: boolean;
 begin
- result:= inherited candropdown and fdatalink.active;
+ result:= inherited candropdown and 
+           (fdatalink.active or 
+           (odb_closedataset in foptionsdb) and (fdatalink.dataset <> nil));
+end;
+
+procedure tcustomdbdropdownlistcontroller.doafterclosedropdown;
+begin
+ inherited;
+ if (odb_closedataset in foptionsdb) and fdatalink.active then begin
+  fdatalink.dataset.active:= false;
+ end;
 end;
 
 procedure tcustomdbdropdownlistcontroller.itemselected(const index: integer;

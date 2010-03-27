@@ -4389,11 +4389,9 @@ end;
 
 function tmsedatalink.getdataset: tdataset;
 begin
+ result:= nil;
  if datasource <> nil then begin
   result:= datasource.dataset;
- end
- else begin
-  result:= nil;
  end;
 end;
 
