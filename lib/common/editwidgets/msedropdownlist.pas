@@ -767,7 +767,7 @@ end;
 procedure tcustomdropdowncontroller.updatereadonlystate;
 begin
  tcustomdropdownbuttonframe(twidget1(fintf.getwidget).fframe).readonly:=
-                                not fintf.geteditor.canedit;
+                                not fintf.geteditor.canedit or not candropdown;
 end;
 
 function tcustomdropdowncontroller.candropdown: boolean;

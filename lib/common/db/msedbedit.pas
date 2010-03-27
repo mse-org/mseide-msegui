@@ -1177,6 +1177,7 @@ type
    function getkeyfield: string;
    function getcols: tdbdropdowncols;
    procedure setcols(const avalue: tdbdropdowncols);
+   procedure setoptionsdb(const avalue: optionsdbty);
   protected
    procedure valuecolchanged; override;
    function getbuttonframeclass: dropdownbuttonframeclassty; override;
@@ -1198,7 +1199,7 @@ type
    property options default defaultdbdropdownoptions;
    property optionsdatalink: griddatalinkoptionsty read foptionsdatalink 
            write foptionsdatalink default defaultdropdowndatalinkoptions;
-   property optionsdb: optionsdbty read foptionsdb write foptionsdb default [];
+   property optionsdb: optionsdbty read foptionsdb write setoptionsdb default [];
    
    property cols: tdbdropdowncols read getcols write setcols;
   end;
@@ -4773,6 +4774,7 @@ begin
  updatefields;
  inherited;
  updatelookupvalue;
+ fowner.updatereadonlystate;
 end;
 
 procedure tdropdowndatalink.editingchanged;
@@ -5216,6 +5218,16 @@ end;
 function tcustomdbdropdownlistcontroller.getdatasource(const aindex: integer): tdatasource;
 begin
  result:= datasource;
+end;
+
+procedure tcustomdbdropdownlistcontroller.setoptionsdb(const avalue: optionsdbty);
+var
+ optionsbefore: optionsdbty;
+begin
+ if avalue <> foptionsdb then begin
+  foptionsdb:= avalue;
+  updatereadonlystate;
+ end; 
 end;
 
 { tdbenumeditdb }
@@ -8225,6 +8237,7 @@ begin
  {$ifdef FPC} {$checkpointer default} {$endif}
    end;
   end;
+  updatereadonlystate;
  end;
 
 end;
