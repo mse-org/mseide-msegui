@@ -725,6 +725,10 @@ procedure dosetsqldatabase(const sender: isqlclient; const avalue: tmdatabase;
                  var acursor: tsqlcursor; var dest: tmdatabase);
 procedure querytoupdateparams(const source: tsqlquery; const dest: tparams);
 
+function splitsql(const asql: msestring; const term: msechar = ';'): msestringarty;
+
+//function splitsqlstatements(const asqltext: msestring): msestringarty;
+
 implementation
 uses 
  dbconst,strutils,msereal,msestream,msebits,msefileutils;
@@ -923,6 +927,167 @@ begin
         end;
       end;
   end; {case}
+end;
+(*
+function splitsqlstatements(const asqltext: msestring): msestringarty;
+var
+ count: integer;
+ po1,po2: pmsechar;
+ mstr1: msestring;
+begin
+ result:= nil;
+ count:= 0;
+ po1:= pmsechar(asqltext);
+ po2:= po1;
+ while po1^ <> #0 do begin
+  case po1^ of
+   '''': begin // single quote delimited string
+    inc(po1);
+    while (po1^ <> #0) and (po1 <> '''') do begin
+     if po1^ = '\' then begin
+      inc(po1,2) // make sure we handle \' and \\ correct
+     end
+     else begin
+      inc(ppo1);
+     end;
+    end;
+    if po1^ = '''' then begin
+     inc(po1);
+    end; // skip final '
+   end;
+   '"': begin // double quote delimited string
+    inc(po1);
+    while (po1^ <> #0) and (po1 <> '"') do begin
+     if po1^ = '\' then begin
+      inc(po1,2) // make sure we handle \' and \\ correct
+     end
+     else begin
+      inc(po1);
+     end;
+    end;
+    if po1^ = '"' then begin
+     inc(po1);
+    end; // skip final "
+   end;
+   '-': begin// possible start of -- comment
+    inc(po1);
+    if po1^ = '-' then begin// -- comment
+     repeat // skip until at end of line
+      inc(po1);
+     until po1^ = #0 or po1^ = #10;
+    end;
+   end;
+   '/': begin // possible start of /* */ comment
+    inc(po1);
+    if po1^ = '*' then begin // /* */ comment
+     repeat
+      inc(po1);
+      if po1 = '*' then begin// possible end of comment
+       inc(po1);
+       if po1^ = '/' then begin 
+        break;  // end of comment
+       end;
+      end;
+     until po1^ = #0;
+     if po1^ = '/' then begin 
+      inc(p);             // skip final /
+     end;
+    end;
+   end;
+   ';': begin
+    setlength(str1,po1-po2);
+    move(po2^,str1[1],length(str1)*sizeof(msechar));
+    po2:= po1;
+    additem(result,str1,count);
+   end;
+   else begin
+    inc(po1);
+   end;
+  end; {case}
+ end;
+ setlength(result,count);
+end;
+*)
+
+function splitsql(const asql: msestring; const term: msechar = ';'): msestringarty;
+var
+ po1,po2: pmsechar;
+ 
+ procedure addstatement;
+ begin
+  setlength(result,high(result)+2);
+  setlength(result[high(result)],po1-po2);
+  move(po2^,result[high(result)][1],length(result[high(result)])*sizeof(msechar));
+ end;
+ 
+begin
+ result:= nil;
+ po1:= pmsechar(asql);
+ po2:= po1;
+ while po1^ <> #0 do begin          
+  if po1^ = term then begin
+   po1^:= ';';
+   inc(po1);
+   addstatement;
+   (po1-1)^:= term;
+   po2:= po1;
+  end
+  else begin
+   case po1^ of
+    '''': begin
+     inc(po1);
+     while (po1^ <> '''') and (po1^ <> #0) do begin
+      inc(po1);
+     end;
+     if po1^ = '''' then begin
+      inc(po1);
+     end;
+    end;
+    '"': begin
+     inc(po1);
+     while (po1^ <> '"') and (po1^ <> #0) do begin
+      inc(po1);
+     end;
+     if po1^ = '"' then begin
+      inc(po1);
+     end;
+    end;
+    '-': begin// possible start of -- comment
+     inc(po1);
+     if po1^ = '-' then begin // -- comment
+      repeat                  // skip until at end of line
+       inc(po1);
+      until (po1^ = #0) or (po1^ = #10);
+     end;
+    end;
+    '/': begin // possible start of /* */ comment
+     inc(po1);
+     if po1^ = '*' then begin // /* */ comment
+      repeat
+       inc(po1);
+       if po1^ = '*' then begin// possible end of comment
+        inc(po1);
+        if po1^ = '/' then begin 
+         break;  // end of comment
+        end;
+       end;
+      until po1^ = #0;
+      if po1^ = '/' then begin 
+       inc(po1);             // skip final /
+      end;
+     end;
+    end;
+    else begin 
+     inc(po1);
+    end;
+   end;           //case
+  end;
+ end;
+ {
+ if po1 <> po2 then begin //no terminating ';'
+  addstatement;
+ end;
+ }
 end;
 
 procedure querytoupdateparams(const source: tsqlquery; const dest: tparams);
@@ -3870,56 +4035,6 @@ begin
 end;
 
 { tmsesqlscript }
-
-function splitsql(const asql: msestring; const term: msechar = ';'): msestringarty;
-var
- po1,po2: pmsechar;
- 
- procedure addstatement;
- begin
-  setlength(result,high(result)+2);
-  setlength(result[high(result)],po1-po2);
-  move(po2^,result[high(result)][1],length(result[high(result)])*sizeof(msechar));
- end;
- 
-begin
- result:= nil;
- po1:= pmsechar(asql);
- po2:= po1;
- while true do begin            //todo: skip comments
-  if po1^ = term then begin
-   po1^:= ';';
-   inc(po1);
-   addstatement;
-   (po1-1)^:= term;
-   po2:= po1;
-  end
-  else begin
-   case po1^ of
-    #0: begin
-     break;
-    end;
-    '''': begin
-     inc(po1);
-     while (po1^ <> '''') and (po1^ <> #0) do begin
-      inc(po1);
-     end;
-     if po1^ = '''' then begin
-      inc(po1);
-     end;
-    end;
-    else begin
-     inc(po1);
-    end;
-   end;
-  end;
- end;
- {
- if po1 <> po2 then begin
-  addstatement;
- end;
- }
-end;
 
 procedure tmsesqlscript.execute(adatabase: tcustomsqlconnection = nil;
                  atransaction: tsqltransaction = nil);
