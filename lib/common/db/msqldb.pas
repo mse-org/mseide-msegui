@@ -413,6 +413,7 @@ type
    fonerror: sqlstatementerroreventty;
    foptions: sqlstatementoptionsty;
    fterm: msechar;
+   fcharescapement: boolean;
    procedure setsql(const avalue: tsqlstringlist);
    procedure setdatabase1(const avalue: tcustomsqlconnection);
    procedure setparams(const avalue: tmseparams);
@@ -452,6 +453,8 @@ type
    property params : tmseparams read fparams write setparams;
    property sql: tsqlstringlist read fsql write setsql;
    property term: msechar read fterm write fterm default ';';
+   property charescapement: boolean read fcharescapement 
+                                      write fcharescapement default false;
    property database: tcustomsqlconnection read fdatabase write setdatabase1;
    property transaction: tsqltransaction read ftransaction write settransaction1;
                   //can be nil
@@ -725,7 +728,8 @@ procedure dosetsqldatabase(const sender: isqlclient; const avalue: tmdatabase;
                  var acursor: tsqlcursor; var dest: tmdatabase);
 procedure querytoupdateparams(const source: tsqlquery; const dest: tparams);
 
-function splitsql(const asql: msestring; const term: msechar = ';'): msestringarty;
+function splitsql(const asql: msestring; const term: msechar = ';';
+                  const charescapement: boolean = false): msestringarty;
 
 //function splitsqlstatements(const asqltext: msestring): msestringarty;
 
@@ -1009,7 +1013,9 @@ begin
 end;
 *)
 
-function splitsql(const asql: msestring; const term: msechar = ';'): msestringarty;
+function splitsql(const asql: msestring;
+                  const term: msechar = ';';
+                  const charescapement: boolean = false): msestringarty;
 var
  po1,po2: pmsechar;
  
@@ -1018,6 +1024,19 @@ var
   setlength(result,high(result)+2);
   setlength(result[high(result)],po1-po2);
   move(po2^,result[high(result)][1],length(result[high(result)])*sizeof(msechar));
+ end;
+ 
+ procedure checkescape(var apo: pmsechar);
+ begin
+  if charescapement and (apo^ = '\') then begin
+   inc(apo);
+   if (apo^ <> #0) then begin
+    inc(apo);
+   end;
+  end
+  else begin
+   inc(apo);
+  end;
  end;
  
 begin
@@ -1037,7 +1056,8 @@ begin
     '''': begin
      inc(po1);
      while (po1^ <> '''') and (po1^ <> #0) do begin
-      inc(po1);
+      checkescape(po1);
+//      inc(po1);
      end;
      if po1^ = '''' then begin
       inc(po1);
@@ -1046,7 +1066,8 @@ begin
     '"': begin
      inc(po1);
      while (po1^ <> '"') and (po1^ <> #0) do begin
-      inc(po1);
+      checkescape(po1);
+//      inc(po1);
      end;
      if po1^ = '"' then begin
       inc(po1);
@@ -4057,7 +4078,7 @@ begin
  try
   updateparams(fparams,isutf8(adatabase));
   str1:= fsql.text;
-  ar1:= splitsql(str1,fterm);
+  ar1:= splitsql(str1,fterm,fcharescapement);
   if high(ar1) < 0 then begin
    databaseerror(serrnostatement,self);
   end;
