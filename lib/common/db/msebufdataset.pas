@@ -830,7 +830,7 @@ type
    property afterendfilteredit: filterediteventty
                        read fafterendfilteredit write fafterendfilteredit;
    property Active default false;
-   property AutocalcFields default false;
+//   property AutocalcFields default false;
   end;
    
 function getfieldflag(nullmask: pbyte; const x: integer): boolean;
