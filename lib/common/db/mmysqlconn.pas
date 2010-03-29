@@ -200,6 +200,7 @@ Type
                               const fieldnum: integer): ansistring; override;
                               //null based
    function getinsertid(const atransaction: tsqltransaction): int64; override;
+   procedure createdatabase(const asql: ansistring);
    Property ServerInfo : String Read FServerInfo;
    Property HostInfo : String Read FHostInfo;
    property ClientInfo: string read GetClientInfo;
@@ -1738,6 +1739,39 @@ end;
 function tmysqlconnection.identquotechar: ansistring;
 begin
  result:= '`'; //needed for reserved words as fieldnames
+end;
+
+procedure tmysqlconnection.createdatabase(const asql: ansistring);
+var
+ bo1: boolean;
+ po1: pmysql_res;
+begin
+ initializemysql([]);
+ try  
+  bo1:= fmysql1 = nil;
+  if bo1 then begin
+   ConnectMySQL(fmysql1,pchar(hostname),pchar(username),pchar(password));
+  end;
+  try
+   if mysql_real_query(fmysql1,pointer(asql),length(asql)) <> 0 then begin
+    checkerror(serrstarttransaction,fmysql1);
+   end;
+   po1:= mysql_store_result(fmysql1);
+   if po1 <> nil then begin
+    mysql_free_result(po1);
+   end;
+  finally
+   if bo1 then begin
+    closeconnection(fmysql1);
+   end;
+  end;
+ finally  
+  releasemysql;
+ end;  
+end;
+
+procedure createdatabase(const asql: ansistring);
+begin
 end;
 
 { emysqlerror }
