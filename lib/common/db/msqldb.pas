@@ -213,7 +213,8 @@ type
     procedure endupdate; virtual;
     function internalExecuteDirect(const aSQL: mseString;
           ATransaction: TSQLTransaction;
-          const aparams: tmseparams; aparamvars: array of variant): integer;
+          const aparams: tmseparams; aparamvars: array of variant;
+          aisutf8: boolean): integer;
    //idbcontroller
    procedure setinheritedconnected(const avalue: boolean);
    function readsequence(const sequencename: string): string; virtual;
@@ -256,14 +257,17 @@ type
    procedure StartTransaction; override;
    procedure EndTransaction; override;
    property ConnOptions: sqlconnoptionsty read FConnOptions;
-   function executedirect(const asql: msestring): integer; overload;
+   function executedirect(const asql: msestring;
+                   const aisutf8: boolean = false): integer; overload;
               //returns rowsaffected or -1 if not supported
    function executedirect(const asql: msestring;
         atransaction: tsqltransaction;
-        const aparams: tmseparams = nil): integer; overload;
+        const aparams: tmseparams = nil;
+        const aisutf8: boolean = false): integer; overload;
    function ExecuteDirect(const aSQL: mseString;
          ATransaction: TSQLTransaction;
-         const aparams: array of variant): integer; overload;
+         const aparams: array of variant;
+         const aisutf8: boolean = false): integer; overload;
    procedure GetTableNames(List : TStrings; SystemTables : Boolean = false); virtual;
    procedure GetProcedureNames(List : TStrings); virtual;
    procedure GetFieldNames(const TableName : string; List :  TStrings); virtual;
@@ -448,7 +452,7 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    function isutf8: boolean; overload;
-   function isutf8(const adatabase): boolean; overload;
+//   function isutf8(const adatabase): boolean; overload;
   published
    property params : tmseparams read fparams write setparams;
    property sql: tsqlstringlist read fsql write setsql;
@@ -1446,14 +1450,16 @@ begin
     Transaction.EndTransaction;
 end;
 
-function tcustomsqlconnection.executedirect(const asql: msestring): integer;
+function tcustomsqlconnection.executedirect(const asql: msestring;
+                          const aisutf8: boolean = false): integer;
 begin
- result:= executedirect(asql,ftransaction);
+ result:= executedirect(asql,ftransaction,[],aisutf8);
 end;
 
 function tcustomsqlconnection.internalExecuteDirect(const aSQL: mseString;
           ATransaction: TSQLTransaction;
-          const aparams: tmseparams; aparamvars: array of variant): integer;
+          const aparams: tmseparams; aparamvars: array of variant;
+          aisutf8: boolean): integer;
 var 
  Cursor: TSQLCursor;
  params1: tmseparams;
@@ -1491,8 +1497,9 @@ begin
    Cursor.FStatementType := stNone;
    PrepareStatement(cursor,ATransaction,aSQL,params1);
    cursor.ftrans:= atransaction.handle;
+   updateutf8(aisutf8);
    try    
-    execute(cursor,atransaction,params1,isutf8);
+    execute(cursor,atransaction,params1,aisutf8);
     result:= cursor.frowsaffected;
    finally
     UnPrepareStatement(Cursor);
@@ -1509,16 +1516,16 @@ end;
 
 function tcustomsqlconnection.ExecuteDirect(const aSQL: mseString;
           ATransaction: TSQLTransaction;
-          const aparams: tmseparams = nil): integer;
+          const aparams: tmseparams = nil; const aisutf8: boolean = false): integer;
 begin
- result:= internalexecutedirect(asql,atransaction,aparams,[]);
+ result:= internalexecutedirect(asql,atransaction,aparams,[],aisutf8);
 end;
 
 function tcustomsqlconnection.ExecuteDirect(const aSQL: mseString;
           ATransaction: TSQLTransaction;
-          const aparams: array of variant): integer;
+          const aparams: array of variant; const aisutf8: boolean = false): integer;
 begin
- result:= internalexecutedirect(asql,atransaction,nil,aparams);
+ result:= internalexecutedirect(asql,atransaction,nil,aparams,aisutf8);
 end;
 
 procedure tcustomsqlconnection.GetDBInfo(const SchemaType : TSchemaType; 
@@ -4022,12 +4029,12 @@ function tcustomsqlstatement.isutf8: boolean;
 begin
  result:= sso_utf8 in foptions;
 end;
-
+{
 function tcustomsqlstatement.isutf8(const adatabase): boolean;
 begin
  result:= sso_utf8 in foptions;
 end;
-
+}
 procedure tcustomsqlstatement.setoptions(const avalue: sqlstatementoptionsty);
 const
  mask: sqlstatementoptionsty = [sso_autocommit,sso_autocommitret];
@@ -4088,7 +4095,7 @@ begin
   databaseerror(serrdatabasenassigned,self);
  end;
  dobeforeexecute(adatabase,atransaction);
- updateparams(fparams,isutf8(adatabase));
+ updateparams(fparams,isutf8{(adatabase)});
  str1:= fsql.text;
  ar1:= splitsql(str1,fterm,fcharescapement);
  fstatementcount:= length(ar1);
@@ -4101,7 +4108,7 @@ begin
    fonbeforestatement(self);
   end;
   try
-   adatabase.executedirect(ar1[int1],atransaction,fparams);
+   adatabase.executedirect(ar1[int1],atransaction,fparams,isutf8);
   except
    on e: exception do begin  
     bo1:= false;

@@ -1154,7 +1154,8 @@ type
   function sequencecurrvalue(const sequencename: string): string;
   function writesequence(const sequencename: string;
                     const avalue: largeint): string;
-  function ExecuteDirect(const SQL : mseString): integer;
+  function ExecuteDirect(const SQL : mseString;
+               const aisutf8: boolean): integer;
   procedure updateutf8(var autf8: boolean);
  end;
    

@@ -1145,7 +1145,7 @@ procedure tsequencelink.setaslargeint(const avalue: largeint);
 begin
  checkintf;
  fdbintf.executedirect(
-   fdbintf.writesequence(fsequencename,avalue));
+   fdbintf.writesequence(fsequencename,avalue),false);
 end;
 
 function tsequencelink.getasinteger: integer;
