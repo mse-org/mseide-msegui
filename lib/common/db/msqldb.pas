@@ -1,6 +1,6 @@
 {
     Copyright (c) 2004 by Joost van der Sluis
-    Modified 2006-2009 by Martin Schreiber
+    Modified 2006-2010 by Martin Schreiber
 
     SQL database & dataset
 
@@ -466,15 +466,28 @@ type
                                                      write fonafterexecute;
    property onerror: sqlstatementerroreventty read fonerror write fonerror;
  end;
-  
+
+ msesqlscripteventty = procedure(const sender: tmsesqlscript) of object;
+   
  tmsesqlscript = class(tcustomsqlstatement)
   private
    fstatementnr: integer;
+   fstatementcount: integer;
+//   fstatements: msestringarty;
+   fonbeforestatement: msesqlscripteventty;
+   fonafterstatement: msesqlscripteventty;
   protected
   public
    procedure execute(adatabase: tcustomsqlconnection = nil;
                         atransaction: tsqltransaction = nil); overload;
    property statementnr: integer read fstatementnr; //null based
+   property statementcount: integer read fstatementcount;
+//   property fstatements: msestringarty read fstatements;
+  published
+   property onbeforestatement: msesqlscripteventty read fonbeforestatement
+                                                       write fonbeforestatement;
+   property onafterstatement: msesqlscripteventty read fonafterstatement
+                                                       write fonafterstatement;
  end;
 
  tsqlstatement = class(tcustomsqlstatement)
@@ -4075,35 +4088,42 @@ begin
   databaseerror(serrdatabasenassigned,self);
  end;
  dobeforeexecute(adatabase,atransaction);
- try
-  updateparams(fparams,isutf8(adatabase));
-  str1:= fsql.text;
-  ar1:= splitsql(str1,fterm,fcharescapement);
-  if high(ar1) < 0 then begin
-   databaseerror(serrnostatement,self);
+ updateparams(fparams,isutf8(adatabase));
+ str1:= fsql.text;
+ ar1:= splitsql(str1,fterm,fcharescapement);
+ fstatementcount:= length(ar1);
+ if high(ar1) < 0 then begin
+  databaseerror(serrnostatement,self);
+ end;
+ for int1:= 0 to high(ar1) do begin
+  fstatementnr:= int1;
+  if canevent(tmethod(fonbeforestatement)) then begin
+   fonbeforestatement(self);
   end;
-  for int1:= 0 to high(ar1) do begin
-   fstatementnr:= int1;
+  try
    adatabase.executedirect(ar1[int1],atransaction,fparams);
-  end;
-  if sso_autocommit in foptions then begin
-   atransaction.commit;
-  end
-  else begin
-   if sso_autocommitret in foptions then begin
-    atransaction.commitretaining;
+  except
+   on e: exception do begin  
+    bo1:= false;
+    doerror(adatabase,atransaction,e,bo1);
+    if not bo1 then begin
+     raise;
+    end;
    end;
   end;
-  doafterexecute(adatabase,atransaction);
- except
-  on e: exception do begin  
-   bo1:= false;
-   doerror(adatabase,atransaction,e,bo1);
-   if not bo1 then begin
-    raise;
-   end;
+  if canevent(tmethod(fonafterstatement)) then begin
+   fonafterstatement(self);
   end;
  end;
+ if sso_autocommit in foptions then begin
+  atransaction.commit;
+ end
+ else begin
+  if sso_autocommitret in foptions then begin
+   atransaction.commitretaining;
+  end;
+ end;
+ doafterexecute(adatabase,atransaction);
 end;
 
 { tsqlstatement }

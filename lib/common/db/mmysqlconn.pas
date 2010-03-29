@@ -995,6 +995,9 @@ begin
     C.LastInsertID := mysql_insert_id(fconn);
     if C.FNeedData then begin
      C.FRes:= mysql_store_result(fconn);
+//     C.FRes:= mysql_use_result(fconn); 
+           //needs to call mysql_fetch_row() until all data has been fetched ->
+           //not practicable
      c.frowsreturned:= mysql_num_rows(c.fres);
     end
     else begin
