@@ -298,6 +298,7 @@ type
    procedure sortfunc(const l,r; var result: integer); override;
 //   function isempty (const atext: msestring): boolean; override;
    function getdefaultvalue: pointer; override;
+   function checkvalue(const quiet: boolean = false): boolean; override;
 
   public
    procedure dragevent(var info: draginfoty); override;
@@ -2427,6 +2428,19 @@ begin
  if accept then begin
   value:= mstr1;
  end;
+end;
+
+function tcustomstringedit.checkvalue(const quiet: boolean = false): boolean;
+var
+ mstr1: msestring;
+begin
+ if optionsedit * 
+         [oe_trimleft,oe_trimright,oe_uppercase,oe_lowercase] <> [] then begin
+  mstr1:= getvaluetext;
+  updateflagtext(mstr1);
+  text:= mstr1;
+ end;
+ inherited;
 end;
 
 procedure tcustomstringedit.valuetogrid(arow: integer);
