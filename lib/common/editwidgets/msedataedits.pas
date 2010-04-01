@@ -2440,7 +2440,7 @@ begin
   updateflagtext(mstr1);
   text:= mstr1;
  end;
- inherited;
+ result:= inherited checkvalue(quiet);
 end;
 
 procedure tcustomstringedit.valuetogrid(arow: integer);
