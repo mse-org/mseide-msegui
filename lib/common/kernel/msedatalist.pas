@@ -598,9 +598,11 @@ type
    function concatstring(const delim: msestring = '';
                             const separator: msestring = '';
                             const separatornoparagraph: msestring = ''): msestring;
-   procedure loadfromfile(const filename: string);
+   procedure loadfromfile(const filename: string;
+                              const aencoding: charencodingty = ce_locale);
    procedure loadfromstream(const stream: ttextstream);
-   procedure savetofile(const filename: string);
+   procedure savetofile(const filename: string;
+                              const aencoding: charencodingty = ce_locale);
    procedure savetostream(const stream: ttextstream);
    function dataastextstream: ttextstream;
                      //chars truncated to 8bit, not null terminated
@@ -5817,11 +5819,13 @@ begin
  end;
 end;
 
-procedure tpoorstringdatalist.loadfromfile(const filename: string);
+procedure tpoorstringdatalist.loadfromfile(const filename: string;
+                                    const aencoding: charencodingty = ce_locale);
 var
  stream: ttextstream;
 begin
  stream:= ttextstream.Create(filename,fm_read);
+ stream.encoding:= aencoding;
  try
   loadfromstream(stream);
  finally
@@ -5829,11 +5833,13 @@ begin
  end;
 end;
 
-procedure tpoorstringdatalist.savetofile(const filename: string);
+procedure tpoorstringdatalist.savetofile(const filename: string;
+                              const aencoding: charencodingty = ce_locale);
 var
  stream: ttextstream;
 begin
  stream:= ttextstream.Create(filename,fm_create);
+ stream.encoding:= aencoding;
  try
   savetostream(stream);
  finally
