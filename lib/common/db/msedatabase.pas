@@ -196,6 +196,7 @@ type
    procedure DoConnect; override;
    procedure DoDisconnect; override;
    procedure doafterinternalconnect; virtual;
+   procedure executeparams; virtual;
    procedure dobeforeinternaldisconnect; virtual;
    function GetConnected : boolean; override;
 //   Function GetDataset(Index : longint) : TDataset; override;
@@ -372,6 +373,12 @@ end;
 procedure tmdatabase.doafterinternalconnect;
 begin
  fconnected:= true;
+ executeparams;
+end;
+
+procedure tmdatabase.executeparams;
+begin
+ //dummy
 end;
 
 procedure tmdatabase.dobeforeinternaldisconnect;

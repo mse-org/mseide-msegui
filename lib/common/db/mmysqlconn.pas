@@ -13,7 +13,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 }
-{Modified 2006-2009 by Martin Schreiber}
+{Modified 2006-2010 by Martin Schreiber}
 
 unit mmysqlconn;
 
@@ -95,7 +95,7 @@ Type
    procedure freeprepstatement;
   end;
 
-  mysqloptionty = (myo_nopreparedstatements,myo_ssl);
+  mysqloptionty = (myo_nopreparedstatements,myo_storeresult,myo_ssl);
   mysqloptionsty = set of mysqloptionty;
   
   tmysqlconnection = class (TSQLConnection,iblobconnection)
@@ -139,6 +139,7 @@ Type
                         AFieldType: TFieldType;Source, Dest: PChar): Boolean;
     // SQLConnection methods
     procedure DoInternalConnect; override;
+    procedure executeparams; override;
     procedure DoInternalDisconnect; override;
     function GetHandle : pointer; override;
 
@@ -712,6 +713,15 @@ begin
  FHostInfo := strpas(mysql_get_host_info(FMYSQL1));
 end;
 
+procedure tmysqlconnection.executeparams;
+var
+ int1: integer;
+begin
+ for int1:= 0 to params.count-1 do begin
+  executedirect(params[int1]);
+ end;
+end;
+
 procedure tmysqlconnection.DoInternalDisconnect;
 begin
  inherited DoInternalDisconnect;
@@ -959,6 +969,11 @@ begin
    if mysql_stmt_execute(c.fprepstatement) <> 0 then begin
     checkstmterror(serrexecuting,c.fprepstatement);
    end;
+   if myo_storeresult in foptions then begin
+    if mysql_stmt_store_result(c.fprepstatement) <> 0 then begin
+     checkstmterror(serrexecuting,c.fprepstatement);
+    end;
+   end;
   finally
    freebindingbuffers(paramdata);
    freebindings(inputbindings);
@@ -994,10 +1009,13 @@ begin
     C.fRowsAffected := mysql_affected_rows(fconn);
     C.LastInsertID := mysql_insert_id(fconn);
     if C.FNeedData then begin
-     C.FRes:= mysql_store_result(fconn);
-//     C.FRes:= mysql_use_result(fconn); 
-           //needs to call mysql_fetch_row() until all data has been fetched ->
-           //not practicable
+     if myo_storeresult in foptions then begin
+      C.FRes:= mysql_store_result(fconn);
+     end
+     else begin
+      C.FRes:= mysql_use_result(fconn); 
+       //needs to call mysql_fetch_row() until all data has been fetched
+     end;
      c.frowsreturned:= mysql_num_rows(c.fres);
     end
     else begin
@@ -1171,6 +1189,9 @@ begin
  else begin
   C.Row:=MySQL_Fetch_row(C.FRes);
   Result:=(C.Row<>Nil);
+ end;
+ if not result then begin
+  freefldbuffers(cursor);
  end;
 end;
 
@@ -1771,10 +1792,6 @@ begin
  finally  
   releasemysql;
  end;  
-end;
-
-procedure createdatabase(const asql: ansistring);
-begin
 end;
 
 { emysqlerror }
