@@ -150,7 +150,7 @@ If you wish to do it from scratch:
 
 If you want add custom icons to your components:
 
-- Convert 24*24 pixel BMP files with tools/bmp2pas to
+- Convert 24*24 pixel BMP or PNG files with tools/bmp2pas to
   an icon unit ('*_bmp.pas').
 - Add the name of the icon unit to 'uses' in your register unit.
  
