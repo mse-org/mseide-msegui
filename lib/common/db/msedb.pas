@@ -852,8 +852,8 @@ type
   public
    function assql: string;
    function asoldsql: string;
-  published
    property asmsestring: msestring read getasmsestring write setasmsestring;
+  published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
