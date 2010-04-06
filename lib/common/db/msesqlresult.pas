@@ -177,7 +177,15 @@ type
   public
    property value: msestring read getasmsestring;
  end;
- 
+
+ tvariantdbcol = class(tdbcol)
+  private
+  protected
+   function getvariantvar: variant; override;
+  public
+   property value: variant read getvariantvar;
+ end;
+  
 // tgraphicdbcol = class(tdbcol);
  dbcolarty = array of tdbcol;
 
@@ -410,8 +418,8 @@ const
            tdatetimedbcol,tdatetimedbcol,tdatetimedbcol,
 //         ft_binary,ft_bytes,ft_varbytes,
            tdbcol,   tstringdbcol,  tstringdbcol,
-//         ft_bcd,        ft_blob,   ft_memo,   ft_graphic);
-           tcurrencydbcol,tblobdbcol,tmemodbcol,tblobdbcol);
+//         ft_bcd,        ft_blob,   ft_memo,   ft_graphic, ft_variant);
+           tcurrencydbcol,tblobdbcol,tmemodbcol,tblobdbcol,tvariantdbcol);
  SBoolean = 'Boolean';
  SDateTime = 'TDateTime';
  SFloat = 'Float';
@@ -869,6 +877,39 @@ end;
 function tblobdbcol.getassql: msestring;
 begin
  result:= encodesqlblob(asstring);
+end;
+
+{ tnumericdbcol }
+
+function tnumericdbcol.getvariantvar: variant;
+begin
+ result:= asinteger;
+end;
+
+function tnumericdbcol.getassql: msestring;
+begin
+ result:= encodesqlinteger(asinteger);
+end;
+
+{ tmemodbcol }
+
+function tmemodbcol.getvariantvar: variant;
+begin
+ result:= asmsestring;
+end;
+
+function tmemodbcol.getassql: msestring;
+begin
+ result:= encodesqlstring(asmsestring);
+end;
+
+{ tvariantdbcol }
+
+function tvariantdbcol.getvariantvar: variant;
+begin
+ if not loadfield(@result) then begin
+  result:= null;
+ end;
 end;
 
 { tdbcols }
@@ -1824,30 +1865,6 @@ begin
  else begin
   inherited;
  end;
-end;
-
-{ tnumericdbcol }
-
-function tnumericdbcol.getvariantvar: variant;
-begin
- result:= asinteger;
-end;
-
-function tnumericdbcol.getassql: msestring;
-begin
- result:= encodesqlinteger(asinteger);
-end;
-
-{ tmemodbcol }
-
-function tmemodbcol.getvariantvar: variant;
-begin
- result:= asmsestring;
-end;
-
-function tmemodbcol.getassql: msestring;
-begin
- result:= encodesqlstring(asmsestring);
 end;
 
 end.

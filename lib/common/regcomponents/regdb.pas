@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -295,6 +295,7 @@ begin
       tmsebooleanfield,tmsedatetimefield,tmsedatefield,tmsetimefield,
       tmsebinaryfield,tmsebytesfield,tmsevarbytesfield,
       tmsebcdfield,tmseblobfield,tmsememofield,tmsegraphicfield,
+      tmsevariantfield,
       tdblabel,tdbstringdisp,tdbintegerdisp,tdbbooleandisp,
       tdbrealdisp,tdbdatetimedisp,
       tdbstringdisplb,tdbintegerdisplb,tdbrealdisplb,tdbdatetimedisplb

@@ -3,7 +3,7 @@
     Copyright (c) 1999-2000 by Michael Van Canneyt, member of the
     Free Pascal development team
     
-    Rewritten 2006-2009 by Martin Schreiber
+    Rewritten 2006-2010 by Martin Schreiber
     
     BufDataset implementation
 
@@ -209,6 +209,7 @@ type
    procedure writemsestring(const avalue: msestring);
    procedure writeinteger(const avalue: integer);
    procedure writepointer(const avalue: pointer);
+   procedure writevariant(const avalue: variant);
    
    procedure writefielddef(const afielddef: tfielddef);
    procedure writelogbufferheader(const aheader: logbufferheaderty);
@@ -231,6 +232,7 @@ type
    function readmsestring: msestring;
    function readinteger: integer;
    function readpointer: pointer;
+   function readvariant: variant;
    procedure readfielddef(const aowner: tfielddefs);
    function readlogbufferheader(out aheader: logbufferheaderty): boolean;
                     //false if eof or lf_end
@@ -453,12 +455,14 @@ type
    fcalcfieldcount: integer;
    finternalcalcfieldcount: integer;
    fstringpositions: integerarty;
+   fvarpositions: integerarty;
    
    fcalcrecordsize: integer;
    fcalcnullmasksize: integer;
    fcalcfieldbufpositions: integerarty;
    fcalcfieldsizes: integerarty;
    fcalcstringpositions: integerarty;
+   fcalcvarpositions: integerarty;
    
    fbuffercountbefore: integer;
    fonupdateerror: updateerroreventty;
@@ -491,11 +495,11 @@ type
    function getrecordupdatebuffer: boolean;
    procedure setpacketrecords(avalue: integer);
    function  intallocrecord: pintrecordty;    
-   procedure finalizestrings(var header: recheaderty);
-   procedure finalizecalcstrings(var header: recheaderty);
-   procedure finalizechangedstrings(const tocompare: recheaderty; 
-                                      var tofinalize: recheaderty);
-   procedure addrefstrings(var header: recheaderty);
+   procedure finalizevalues(var header: recheaderty);
+   procedure finalizecalcvalues(var header: recheaderty);
+//   procedure finalizechangedvalues(const tocompare: recheaderty; 
+//                                      var tofinalize: recheaderty);
+   procedure addrefvalues(var header: recheaderty);
    procedure intfinalizerecord(const buffer: pintrecordty);
    procedure intfreerecord(var buffer: pintrecordty);
    procedure freeblobcache(const arec: precheaderty; const afield: tfield);
@@ -522,6 +526,9 @@ type
    function getmsestringdata(const sender: tmsestringfield; 
                                out avalue: msestring): boolean;
    procedure setmsestringdata(const sender: tmsestringfield; const avalue: msestring);
+   function getvardata(const sender: tmsevariantfield;
+                                    out avalue: variant): boolean;
+   procedure setvardata(const sender: tmsevariantfield; const avalue: variant);
    procedure setoninternalcalcfields(const avalue: internalcalcfieldseventty);
    procedure checkfilterstate;
    procedure checklogfile;
@@ -852,6 +859,7 @@ const
 type
  tmsestringfield1 = class(tmsestringfield); 
  tmseblobfield1 = class(tmseblobfield);
+ tmsevariantfield1 = class(tmsevariantfield);
   
  TFieldcracker = class(TComponent)
   private
@@ -1084,7 +1092,7 @@ begin
  with fowner.ffieldinfos[aindex].base do begin
   fielddata:= pointer(data) + offset;
   case fieldtype of
-   ftstring,ftfixedchar: begin
+   ftstring,ftfixedchar,ftwidestring,ftfixedwidechar: begin
     writemsestring(msestring(fielddata^));
    end;
    ftmemo,ftblob,ftgraphic: begin
@@ -1093,6 +1101,9 @@ begin
      write(blobinfo.info,sizeof(blobinfo.info));
      writestring(blobinfo.data);
     end;
+   end;
+   ftvariant: begin
+    writevariant(variant(fielddata^));
    end;
    else begin
     write(fielddata^,size);
@@ -1150,6 +1161,52 @@ begin
  write(avalue,sizeof(pointer));
 end;
 
+procedure tbufstreamwriter.writevariant(const avalue: variant);
+var
+ int1,int2: integer;
+begin
+ write(avalue,sizeof(variant));
+ with tvardata(avalue) do begin
+  case vtype of
+   varstring: begin
+    writestring(ansistring(vstring));
+   end;
+   varolestr: begin
+    writemsestring(widestring(pointer(volestr)));
+   end;
+  end;
+  if vtype and vararray <> 0 then begin
+   write(varray^,sizeof(tvararray));
+   with varray^ do begin
+    write((varray+1)^,(dimcount-1)*sizeof(tvararrayboundarray));
+               //additional dims
+    int2:= 1;
+    for int1:= 0 to dimcount-1 do begin
+     int2:= int2 * bounds[int1].elementcount;
+    end;
+    write(data^,elementsize*int2);
+    case vtype and vartypemask of
+     varstring: begin
+      for int1:= 0 to int2 - 1 do begin
+       writestring((pstring(data)+int1)^);
+      end;
+     end;
+     varolestr: begin
+      for int1:= 0 to int2 - 1 do begin
+       writemsestring((pwidestring(data)+int1)^);
+      end;
+     end;
+     varvariant: begin
+      for int1:= 0 to int2 - 1 do begin
+       writevariant((pvariant(data)+int1)^);
+      end;
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
 { tbufstreamreader }
 
 constructor tbufstreamreader.create(const aowner: tmsebufdataset; 
@@ -1202,7 +1259,7 @@ begin
  with fowner.ffieldinfos[aindex].base do begin
   fielddata:= pointer(data) + offset;
   case fieldtype of
-   ftstring,ftfixedchar: begin
+   ftstring,ftfixedchar,ftwidestring,ftfixedwidechar: begin
     msestring(fielddata^):= readmsestring;
    end;
    ftmemo,ftblob,ftgraphic: begin
@@ -1211,6 +1268,9 @@ begin
      blobinfo.data:= readstring;
      fowner.setofflineblob(data,aindex,blobinfo);
     end;
+   end;
+   ftvariant: begin
+    variant(fielddata^):= readvariant;
    end;
    else begin
     readbuffer(fielddata^,size);
@@ -1301,6 +1361,60 @@ begin
  end;
 end;
 
+function tbufstreamreader.readvariant: variant;
+var
+ int1,int2: integer;
+begin
+ readbuffer(result,sizeof(variant));
+ with tvardata(result) do begin
+  case vtype of
+   varstring: begin
+    vtype:= 0;
+    result:= readstring;
+   end;
+   varolestr: begin
+    vtype:= 0;
+    result:= readmsestring;
+   end;
+  end;
+  if vtype and vararray <> 0 then begin
+   varray:= getmem(sizeof(tvararray));
+   read(varray^,sizeof(tvararray));
+   reallocmem(varray,sizeof(tvararray)+
+                   (varray^.dimcount-1)*sizeof(tvararrayboundarray));
+   with varray^ do begin
+    read(pointer(varray+1)^,(dimcount-1)*sizeof(tvararrayboundarray));
+    int2:= 1;
+    for int1:= 0 to dimcount-1 do begin
+     int2:= int2 * bounds[int1].elementcount;
+    end;
+    data:= getmem(elementsize*int2);
+    read(data^,elementsize*int2);
+    case vtype and vartypemask of
+     varstring: begin
+      for int1:= 0 to int2 - 1 do begin
+       (ppointer(data)+int1)^:= nil;
+       (pansistring(data)+int1)^:= readstring;
+      end;
+     end;
+     varolestr: begin
+      for int1:= 0 to int2 - 1 do begin
+       (ppointer(data)+int1)^:= nil;
+       (pwidestring(data)+int1)^:= readmsestring;
+      end;
+     end;
+     varvariant: begin
+      for int1:= 0 to int2 - 1 do begin
+       (pvardata(data)+int1)^.vtype:= 0;
+       (pvariant(data)+int1)^:= readvariant;
+      end;
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
 { tblobbuffer }
 
 constructor tblobbuffer.create(const aowner: tmsebufdataset; const afield: tfield);
@@ -1384,25 +1498,60 @@ begin
  }
 end;
 
-procedure tmsebufdataset.finalizestrings(var header: recheaderty);
+procedure freedbvariant(var avalue: variant);
+begin
+ finalize(avalue);
+{
+ if avariant <> nil then begin
+  finalize(avariant^);
+  freemem(avariant);
+  avariant:= nil;
+ end;
+ }
+end;
+
+procedure addrefdbvariant(var avalue: variant);
+var
+ var1: variant;
+begin
+ move(avalue,var1,sizeof(variant));
+ fillchar(avalue,sizeof(variant),0);
+ avalue:= var1; //deep copy
+{
+ po1:= avariant;
+ if po1 <> nil then begin
+  avariant:= getmem(sizeof(variant));
+  tvardata(avariant^).vtype:= 0;
+  avariant^:= po1^;
+ end;
+ }
+end;
+
+procedure tmsebufdataset.finalizevalues(var header: recheaderty);
 var
  int1: integer;
 begin
  for int1:= high(fstringpositions) downto 0 do begin
   pmsestring(pointer(@header)+fstringpositions[int1])^:= '';
  end;
+ for int1:= high(fvarpositions) downto 0 do begin
+  freedbvariant(pvariant(pointer(@header)+fvarpositions[int1])^);
+ end;
 end;
 
-procedure tmsebufdataset.finalizecalcstrings(var header: recheaderty);
+procedure tmsebufdataset.finalizecalcvalues(var header: recheaderty);
 var
  int1: integer;
 begin
  for int1:= high(fcalcstringpositions) downto 0 do begin
   pmsestring(pointer(@header)+fcalcstringpositions[int1])^:= '';
  end;
+ for int1:= high(fcalcvarpositions) downto 0 do begin
+  freedbvariant(pvariant(pointer(@header)+fcalcvarpositions[int1])^)
+ end;
 end;
-
-procedure tmsebufdataset.finalizechangedstrings(const tocompare: recheaderty; 
+{
+procedure tmsebufdataset.finalizechangedvalues(const tocompare: recheaderty; 
                                       var tofinalize: recheaderty);
 var
  int1: integer;
@@ -1413,21 +1562,30 @@ begin
    pmsestring(pointer(@tofinalize)+fstringpositions[int1])^:= '';
   end;
  end;
+ for int1:= high(fvarpositions) downto 0 do begin
+  if ppointer(pointer(@tocompare)+fvarpositions[int1])^ <>
+     ppointer(pointer(@tofinalize)+fvarpositions[int1])^ then begin
+   freedbvariant(ppvariant(pointer(@tofinalize)+fvarpositions[int1])^);
+  end;
+ end;
 end;
-
-procedure tmsebufdataset.addrefstrings(var header: recheaderty);
+}
+procedure tmsebufdataset.addrefvalues(var header: recheaderty);
 var
  int1: integer;
 begin
  for int1:= high(fstringpositions) downto 0 do begin
   stringaddref(pmsestring(pointer(@header)+fstringpositions[int1])^);
  end;
+ for int1:= high(fvarpositions) downto 0 do begin
+  addrefdbvariant(pvariant(pointer(@header)+fvarpositions[int1])^)
+ end;
 end;
 
 procedure tmsebufdataset.intfinalizerecord(const buffer: pintrecordty);
 begin
  freeblobs(buffer^.header.blobinfo);
- finalizestrings(buffer^.header);
+ finalizevalues(buffer^.header);
 end;
 
 procedure tmsebufdataset.intfreerecord(var buffer: pintrecordty);
@@ -1476,7 +1634,7 @@ begin
     blobinfo:= nil;
    end;
 }
-   finalizecalcstrings(header);
+   finalizecalcvalues(header);
   end;
   reallocmem(buffer,0);
  end;
@@ -1745,9 +1903,11 @@ begin
  
  ffieldinfos:= nil;
  fstringpositions:= nil;
+ fvarpositions:= nil;
  fcalcfieldbufpositions:= nil;
  fcalcfieldsizes:= nil;
  fcalcstringpositions:= nil;
+ fcalcvarpositions:= nil;
  
  bindfields(false);
 end;
@@ -1777,7 +1937,7 @@ end;
 
 procedure tmsebufdataset.internaledit;
 begin
- addrefstrings(pdsrecordty(activebuffer)^.header);
+ addrefvalues(pdsrecordty(activebuffer)^.header);
  fbstate:= fbstate + [bs_startedit,bs_editing];
 // include(fbstate,bs_editing);
  inherited;
@@ -2081,6 +2241,10 @@ begin
   ftmemo,ftblob: begin
    result:= getblobdatasize;
    basetype:= ftblob;
+  end;
+  ftvariant: begin
+   result:= sizeof(variant);
+   basetype:= ftvariant;
   end;
   else begin 
    result:= 0;
@@ -2424,6 +2588,33 @@ begin
  fieldchanged(sender);
 end;
 
+procedure tmsebufdataset.setvardata(const sender: tmsevariantfield;
+               const avalue: variant);
+var
+ po1: pvariant;
+ int1: integer;
+begin
+ sender.validate(@avalue);
+ po1:= getfieldbuffer(sender,false,int1);
+ po1^:= avalue;
+ fieldchanged(sender);
+end;
+
+function tmsebufdataset.getvardata(const sender: tmsevariantfield;
+               out avalue: variant): boolean;
+var
+ po1: pvariant;
+ int1: integer;
+begin
+ result:= getfieldbuffer(sender,po1,int1);
+ if result then begin
+  avalue:= po1^;
+ end
+ else begin
+  avalue:= null;
+ end;
+end;
+
 procedure tmsebufdataset.setfielddata(field: tfield; buffer: pointer;
                                                   nativeformat: boolean);
 begin
@@ -2488,7 +2679,7 @@ begin
   if bookmark.recordpo <> nil then begin
    if updatekind = ukmodify then begin
     freeblobs(bookmark.recordpo^.header.blobinfo);
-    finalizestrings(bookmark.recordpo^.header);
+    finalizevalues(bookmark.recordpo^.header);
     move(oldvalues^.header,bookmark.recordpo^.header,frecordsize);
     freemem(oldvalues); //no finalize
    end
@@ -2659,7 +2850,7 @@ begin
    checkrevert;
   finally
    exclude(fbstate,bs_recapplying);
-   finalizecalcstrings(fnewvaluebuffer^.header);
+   finalizecalcvalues(fnewvaluebuffer^.header);
   end;
  end;
 end;
@@ -2813,7 +3004,7 @@ begin
     if state = dsedit then begin
      oldvalues:= intallocrecord;
      move(bookmark.recordpo^,oldvalues^,frecordsize+intheadersize);
-     addrefstrings(oldvalues^.header);
+     addrefvalues(oldvalues^.header);
      po1:= getintblobpo;
      if po1^ <> nil then begin
       po2:= @oldvalues^.header.blobinfo;
@@ -2877,7 +3068,7 @@ begin
   if bo1 then begin
    fcurrentbuf^.header.blobinfo:= nil; //free old array
   end;
-  finalizestrings(fcurrentbuf^.header);
+  finalizevalues(fcurrentbuf^.header);
   move(header,fcurrentbuf^.header,frecordsize); //get new field values
   if flogger <> nil then begin
    logrecbuffer(flogger,fupdatebuffer[fcurrentupdatebuffer].updatekind,
@@ -2933,7 +3124,7 @@ var
  bo1: boolean;
 begin
  with pdsrecordty(activebuffer)^,header do begin
-  finalizestrings(header);
+  finalizevalues(header);
   bo1:= false;
   for int1:= high(blobinfo) downto 0 do begin
    if blobinfo[int1].new then begin
@@ -2961,6 +3152,9 @@ procedure tmsebufdataset.calcrecordsize;
   with ffieldinfos[aindex] do begin
    base.offset:= frecordsize;
    base.size:= getfieldsize(datatype,asize,ext.basetype);
+   if ext.basetype = ftvariant then begin
+    additem(fvarpositions,frecordsize);
+   end;
    if ext.basetype = ftwidestring then begin
     additem(fstringpositions,frecordsize);
     base.dbfieldsize:= asize;     //max size
@@ -3000,6 +3194,7 @@ begin
  
  setlength(ffieldinfos,int1);
  fstringpositions:= nil;
+ fvarpositions:= nil;
  for int1:= 0 to fielddefs.count - 1 do begin
   with fielddefs[int1] do begin
    field1:= fields.findfield(name);
@@ -3025,6 +3220,7 @@ begin
  setlength(fcalcfieldbufpositions,fcalcfieldcount);
  setlength(fcalcfieldsizes,fcalcfieldcount);
  fcalcstringpositions:= nil;
+ fcalcvarpositions:= nil;
  fcalcrecordsize:= frecordsize;
  fcalcnullmasksize:= (fcalcfieldcount+7) div 8;
  inc(fcalcrecordsize,fcalcnullmasksize);
@@ -3040,6 +3236,9 @@ begin
     fcalcfieldbufpositions[int2]:= fcalcrecordsize;
     if field1 is tmsestringfield then begin
      additem(fcalcstringpositions,fcalcrecordsize);
+    end;
+    if field1 is tmsevariantfield then begin
+     additem(fcalcvarpositions,fcalcrecordsize);
     end;
     fcalcfieldsizes[int2]:= datasize;
     inc(fcalcrecordsize,fcalcfieldsizes[int2]);
@@ -3963,6 +4162,18 @@ begin
     end
     else begin
      tmseblobfield1(field1).fgetblobid:= nil;
+    end;
+   end
+   else begin
+    if field1 is tmsevariantfield then begin
+     if bind then begin
+      tmsevariantfield1(field1).fsetvardata:= @setvardata;
+      tmsevariantfield1(field1).fgetvardata:= @getvardata;
+     end
+     else begin
+      tmsevariantfield1(field1).fsetvardata:= nil;
+      tmsevariantfield1(field1).fgetvardata:= nil;
+     end;
     end;
    end;
   end;

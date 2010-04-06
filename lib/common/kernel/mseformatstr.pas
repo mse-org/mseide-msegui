@@ -92,6 +92,7 @@ function realtostr(const value: double): string;     //immer'.' als separator
 function strtoreal(const s: string): double;   //immer'.' als separator
 function trystrtoreal(const s: string; out value: real): boolean;
                                                //immer'.' als separator
+function wordtostr(const avalue: longword): string;
 
 function bytetohex(const inp: byte): string;
  //wandelt byte in zwei ascii hexzeichen
@@ -1892,6 +1893,11 @@ function bcdtobyte(inp: byte): byte;
  //wandelt bcdbyte in byte
 begin
  result:= (inp shr 4)*10 + inp and $0f;
+end;
+
+function wordtostr(const avalue: longword): string;
+begin
+ str(avalue,result);
 end;
 
 function bytetohex(const inp: byte): string;

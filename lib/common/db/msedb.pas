@@ -819,7 +819,51 @@ type
    property ReadOnly default false;
    property Required default false;
  end;
- 
+
+ tmsevariantfield = class;
+ setvardataty = procedure(const sender: tmsevariantfield;
+                          const avalue: variant) of object;
+ getvardataty = function(const sender: tmsevariantfield;
+                          out avalue: variant): boolean of object;
+ tmsevariantfield = class(tvariantfield)
+  private
+   function getasmsestring: msestring;
+   procedure setasmsestring(const avalue: msestring);
+  protected
+   fgetvardata: getvardataty;
+   fsetvardata: setvardataty;
+   function getdatasize: integer; override;
+   function getasvariant: variant; override;
+   procedure setvarvalue(const avalue: variant); override;
+
+   function getasboolean: boolean; override;
+   function getasinteger: integer; override;
+   function getasdatetime: tdatetime; override;
+   function getasfloat: double; override;
+   function getasstring: string; override;
+   function getaswidestring: widestring; override;
+   
+   function getaslongint: longint; override;
+   procedure setaslongint(avalue: longint); override;
+   function getaslargeint: largeint; override;
+   procedure setaslargeint(avalue: largeint); override;
+   function getascurrency: currency; override;
+   procedure setascurrency(avalue: currency); override;
+  public
+   function assql: string;
+   function asoldsql: string;
+  published
+   property asmsestring: msestring read getasmsestring write setasmsestring;
+   property DataSet stored false;
+   property ProviderFlags default defaultproviderflags;
+   property FieldKind default fkData;
+   property HasConstraints default false;
+   property LookupCache default false;
+   property ReadOnly default false;
+   property Required default false;
+   property DisplayWidth default 15;
+ end;
+  
  tmsedatalink = class(tdatalink)
   private
    function getrecnonullbased: integer;
@@ -932,7 +976,7 @@ type
                      ft_word,ft_autoinc,ft_float,ft_currency,ft_boolean,
                      ft_datetime,ft_date,ft_time,
                      ft_binary,ft_bytes,ft_varbytes,
-                     ft_bcd,ft_blob,ft_memo,ft_graphic);
+                     ft_bcd,ft_blob,ft_memo,ft_graphic,ft_variant);
  fieldclasstypearty = array of fieldclasstypety; 
         
  tmsedatasource = class(tdatasource)
@@ -1263,7 +1307,8 @@ const
            tbooleanfield,
            tdatetimefield,tdatefield,ttimefield,
            tbinaryfield,tbytesfield,tvarbytesfield,
-           tbcdfield,tblobfield,tmemofield,tgraphicfield);
+           tbcdfield,tblobfield,tmemofield,tgraphicfield,
+           tvariantfield);
 
  tfieldtypetotypety: array[tfieldtype] of fieldclasstypety = (
     //ftUnknown, ftString, ftSmallint, ftInteger, ftWord,
@@ -1277,7 +1322,7 @@ const
     //ftWideString, ftLargeint, ftADT, ftArray, ftReference,
       ft_string,ft_largeint,ft_unknown,ft_unknown,ft_unknown,
     //ftDataSet, ftOraBlob, ftOraClob, ftVariant, ftInterface,
-      ft_unknown,ft_unknown,ft_unknown,ft_unknown,ft_unknown,
+      ft_unknown,ft_unknown,ft_unknown,ft_variant,ft_unknown,
     //ftIDispatch, ftGuid, ftTimeStamp, ftFMTBcd
       ft_unknown,ft_unknown,ft_unknown,ft_unknown
       {$ifdef mse_FPC_2_2}
@@ -1345,13 +1390,16 @@ function locaterecord(const adataset: tdataset; const key: integer;
 function encodesqlstring(const avalue: msestring): msestring;
 function encodesqlblob(const avalue: string): msestring;
 function encodesqlinteger(const avalue: integer): msestring;
+function encodesqllongword(const avalue: longword): msestring;
 function encodesqllargeint(const avalue: int64): msestring;
+function encodesqlqword(const avalue: qword): msestring;
 function encodesqldatetime(const avalue: tdatetime): msestring;
 function encodesqldate(const avalue: tdatetime): msestring;
 function encodesqltime(const avalue: tdatetime): msestring;
 function encodesqlfloat(const avalue: real): msestring;
 function encodesqlcurrency(const avalue: currency): msestring;
 function encodesqlboolean(const avalue: boolean): msestring;
+function encodesqlvariant(const avalue: variant): msestring;
 
 procedure regfieldclass(const atype: fieldclasstypety; const aclass: fieldclassty);
 
@@ -1379,8 +1427,10 @@ var
            tmsedatetimefield,tmsedatefield,tmsetimefield,
          //  ft_binary,       ft_bytes,       ft_varbytes,
            tmsebinaryfield,tmsebytesfield,tmsevarbytesfield,
-         //   ft_bcd,     ft_blob,      ft_memo,       ft_graphic);
-           tmsebcdfield,tmseblobfield,tmsememofield,nil{tmsegraphicfield});
+         //   ft_bcd,     ft_blob,      ft_memo,       ft_graphic,
+           tmsebcdfield,tmseblobfield,tmsememofield,nil{tmsegraphicfield},
+         //   ft_variant
+           tmsevariantfield);
            
 type
  {$ifdef mse_FPC_2_2}
@@ -1658,7 +1708,17 @@ begin
  result:= inttostr(avalue);
 end;
 
+function encodesqllongword(const avalue: longword): msestring;
+begin
+ result:= wordtostr(avalue);
+end;
+
 function encodesqllargeint(const avalue: int64): msestring;
+begin
+ result:= inttostr(avalue);
+end;
+
+function encodesqlqword(const avalue: qword): msestring;
 begin
  result:= inttostr(avalue);
 end;
@@ -1697,6 +1757,86 @@ begin
  end
  else begin
   result:= '''f''';
+ end;
+end;
+
+function encodesqlvariant(const avalue: variant): msestring;
+
+ function encode(const atype: word; const abase: pointer): msestring;
+ begin
+  result:= '';
+  case atype of
+   varnull: result:= 'NULL';
+   varsmallint: result:= encodesqlinteger(psmallint(abase)^);
+   varinteger: result:= encodesqlinteger(pinteger(abase)^);
+{$ifndef FPUNONE}
+   varsingle: result:= encodesqlfloat(psingle(abase)^);
+   vardouble: result:= encodesqlfloat(pdouble(abase)^);
+   vardate: result:= encodesqldatetime(pdatetime(abase)^);
+{$endif}
+   varcurrency: result:= encodesqlcurrency(pcurrency(abase)^);
+   varolestr: result:= encodesqlstring(pwidestring(abase)^);
+//   vardispatch = 9;
+//   varerror = 10;
+   varboolean: result:= encodesqlboolean(pwordbool(abase)^);
+   varvariant: result:= encodesqlvariant(pvariant(abase)^);
+//   varunknown = 13;
+//   vardecimal = 14;
+   varshortint: result:= encodesqlinteger(pshortint(abase)^);
+   varbyte: result:= encodesqlinteger(pbyte(abase)^);
+   varword: result:= encodesqlinteger(pword(abase)^);
+   varlongword: result:= encodesqlinteger(plongword(abase)^);
+   varint64: result:= encodesqllargeint(pint64(abase)^);
+   varqword: result:= encodesqlinteger(pinteger(abase)^);
+
+//   varrecord = 36;
+
+//   varstrarg = $48;
+   varstring: result:= encodesqlstring(pansistring(abase)^);
+  end;
+ end; //encode
+
+ procedure handlearray(const bounds: tvararrayboundarray; 
+            const boundsindex: integer;
+            var data: pointer; const atype: word; const elementsize: integer);
+ var
+  int1: integer;
+ begin
+  result:= result + '[';
+  if boundsindex = 0 then begin
+   for int1:= 0 to bounds[boundsindex].elementcount-1 do begin
+    if int1 <> 0 then begin
+     result:= result+',';
+    end;
+    result:= result + encode(atype,data);
+    inc(data,elementsize);     
+   end;
+  end
+  else begin
+   for int1:= 0 to bounds[boundsindex].elementcount-1 do begin
+    if int1 <> 0 then begin
+     result:= result+',';
+    end;
+    handlearray(bounds,boundsindex-1,data,atype,elementsize);
+   end;
+  end;
+  result:= result + ']';
+ end;
+
+var
+ po1: pointer; 
+begin
+ with tvardata(avalue) do begin
+  if vtype and vararray <> 0 then begin
+   result:= 'ARRAY';
+   with varray^ do begin
+    po1:= data;
+    handlearray(bounds,dimcount-1,po1,vtype and vartypemask,elementsize);
+   end;
+  end
+  else begin
+   result:= encode(vtype,@vsmallint);
+  end;
  end;
 end;
 
@@ -1748,6 +1888,9 @@ begin
    end;
    ftboolean: begin
     result:= encodesqlboolean(field.asboolean);
+   end;
+   ftvariant: begin
+    result:= encodesqlvariant(field.asvariant);
    end;
    else begin
     result := field.asstring;
@@ -4335,6 +4478,160 @@ end;
 procedure tmseblobfield.setaswidestring(const avalue: widestring);
 begin
  setasmsestring(avalue);
+end;
+
+{ tmsevariantfield }
+
+function tmsevariantfield.getdatasize: integer;
+begin
+ result:= sizeof(variant);
+end;
+
+function tmsevariantfield.getasvariant: variant;
+begin
+ if assigned(fgetvardata) then begin
+  fgetvardata(self,result);
+ end
+ else begin
+  result:= null;
+ end;
+end;
+
+procedure tmsevariantfield.setvarvalue(const avalue: variant);
+begin
+ if assigned(fsetvardata) then begin
+  fsetvardata(self,avalue);
+ end;
+end;
+
+procedure tmsevariantfield.setasmsestring(const avalue: msestring);
+begin
+ setvarvalue(avalue);
+end;
+
+function tmsevariantfield.getasmsestring: msestring;
+begin
+ if isnull then begin
+  result:= '';
+ end
+ else begin
+  result:= getasvariant;
+ end;
+end;
+
+function tmsevariantfield.getasboolean: boolean;
+begin
+ if isnull then begin
+  result:= false;
+ end
+ else begin
+  result:= getasvariant;
+ end;
+end;
+
+function tmsevariantfield.getasdatetime: tdatetime;
+begin
+ if isnull then begin
+  result:= emptydatetime;
+ end
+ else begin
+  result:= getasvariant;
+ end;
+end;
+
+function tmsevariantfield.getasfloat: double;
+begin
+ if isnull then begin
+  result:= emptyreal;
+ end
+ else begin
+  result:= getasvariant;
+ end;
+end;
+
+function tmsevariantfield.getasinteger: longint;
+begin
+ if isnull then begin
+  result:= 0;
+ end
+ else begin
+  result:= getasvariant;
+ end;
+end;
+
+function tmsevariantfield.getasstring: string;
+begin
+ if isnull then begin
+  result:= '';
+ end
+ else begin
+  result:= getasvariant;
+ end;
+end;
+
+function tmsevariantfield.getaswidestring: widestring;
+begin
+ if isnull then begin
+  result:= '';
+ end
+ else begin
+  result:= getasvariant;
+ end;
+end;
+
+function tmsevariantfield.getaslongint: longint;
+begin
+ if isnull then begin
+  result:= 0;
+ end
+ else begin
+  result:= getasvariant;
+ end;
+end;
+
+procedure tmsevariantfield.setaslongint(avalue: longint);
+begin
+ setvarvalue(avalue);
+end;
+
+function tmsevariantfield.getaslargeint: largeint;
+begin
+ if isnull then begin
+  result:= 0;
+ end
+ else begin
+  result:= getasvariant;
+ end;
+end;
+
+procedure tmsevariantfield.setaslargeint(avalue: largeint);
+begin
+ setvarvalue(avalue);
+end;
+
+function tmsevariantfield.getascurrency: currency;
+begin
+ if isnull then begin
+  result:= 0;
+ end
+ else begin
+  result:= getasvariant;
+ end;
+end;
+
+procedure tmsevariantfield.setascurrency(avalue: currency);
+begin
+ setvarvalue(avalue);
+end;
+
+function tmsevariantfield.assql: string;
+begin
+ result:= fieldtosql(self);
+end;
+
+function tmsevariantfield.asoldsql: string;
+begin
+ result:= fieldtooldsql(self);
 end;
 
 { tdbfieldnamearrayprop }

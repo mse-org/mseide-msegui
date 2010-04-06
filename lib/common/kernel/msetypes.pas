@@ -111,7 +111,8 @@ type
  pqwordarty = ^qwordarty;
   
  pdatetime = ^tdatetime;
-
+ ppvariant = ^pvariant;
+ 
  complexty = record re,im: double; end;
  pcomplexty = ^complexty;
  complexarty = array of complexty;
