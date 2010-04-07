@@ -974,6 +974,9 @@ begin
     if mysql_stmt_store_result(c.fprepstatement) <> 0 then begin
      checkstmterror(serrexecuting,c.fprepstatement);
     end;
+    if myo_storeresult in foptions then begin
+     c.frowsreturned:= mysql_stmt_num_rows(c.fprepstatement);
+    end;
    end;
   finally
    freebindingbuffers(paramdata);
@@ -981,12 +984,6 @@ begin
   end;
   C.fRowsAffected := mysql_stmt_affected_rows(c.fprepstatement);
   C.LastInsertID := mysql_stmt_insert_id(c.fprepstatement);
-  if C.FNeedData then begin
-   c.frowsreturned:= -1; //not available
-  end
-  else begin
-   c.frowsreturned:= 0;
-  end;
  end
  else begin //not prepared
   if Assigned(AParams) and (aparams.count > 0) then begin
@@ -1017,13 +1014,15 @@ begin
       C.FRes:= mysql_use_result(fconn); 
        //needs to call mysql_fetch_row() until all data has been fetched
      end;
-     c.frowsreturned:= mysql_num_rows(c.fres);
-    end
-    else begin
-     c.frowsreturned:= 0;
+     if myo_storeresult in foptions then begin
+      c.frowsreturned:= mysql_num_rows(c.fres);
+     end;
     end;
    end;
   end;
+ end;
+ if not C.FNeedData then begin
+  c.frowsreturned:= 0;
  end;
 end;
 
@@ -1192,7 +1191,7 @@ begin
   Result:=(C.Row<>Nil);
  end;
  if not result then begin
-  freefldbuffers(cursor);
+  freeresultbuffer(c);
  end;
 end;
 
