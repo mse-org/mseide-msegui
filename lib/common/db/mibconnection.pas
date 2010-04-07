@@ -152,7 +152,8 @@ type
    function Fetch(cursor : TSQLCursor) : boolean; override;
    function loadfield(const cursor: tsqlcursor; 
                const datatype: tfieldtype; const fieldnum: integer; //null based
-     const buffer: pointer; var bufsize: integer): boolean; override;
+     const buffer: pointer; var bufsize: integer;
+                                const aisutf8: boolean): boolean; override;
           //if bufsize < 0 -> buffer was to small, should be -bufsize
    function GetTransactionHandle(trans : TSQLHandle): pointer; override;
    function Commit(trans : TSQLHandle) : boolean; override;
@@ -1114,7 +1115,8 @@ end;
 
 function tibconnection.loadfield(const cursor: tsqlcursor;
           const datatype: tfieldtype; const fieldnum: integer; //null based
-      const buffer: pointer; var bufsize: integer): boolean;
+      const buffer: pointer; var bufsize: integer;
+                                const aisutf8: boolean): boolean;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
 var
  VarcharLen: word;
@@ -1495,7 +1497,7 @@ var
  int1: integer;
 begin
  int1:= sizeof(blobid);
- if not loadfield(cursor,ftblob,fieldnum,@blobid,int1) then begin
+ if not loadfield(cursor,ftblob,fieldnum,@blobid,int1,false) then begin
   result:= '';
  end
  else begin

@@ -1388,6 +1388,7 @@ function locaterecord(const adataset: tdataset; const key: integer;
                        const options: locateoptionsty = []): locateresultty;
 
 function encodesqlstring(const avalue: msestring): msestring;
+function encodesqlcstring(const avalue: msestring): msestring;
 function encodesqlblob(const avalue: string): msestring;
 function encodesqlinteger(const avalue: integer): msestring;
 function encodesqllongword(const avalue: longword): msestring;
@@ -1399,7 +1400,7 @@ function encodesqltime(const avalue: tdatetime): msestring;
 function encodesqlfloat(const avalue: real): msestring;
 function encodesqlcurrency(const avalue: currency): msestring;
 function encodesqlboolean(const avalue: boolean): msestring;
-function encodesqlvariant(const avalue: variant): msestring;
+function encodesqlvariant(const avalue: variant; cstyle: boolean): msestring;
 
 procedure regfieldclass(const atype: fieldclasstypety; const aclass: fieldclassty);
 
@@ -1679,6 +1680,44 @@ begin
  setlength(result,po1-pmsechar(result)+1);
 end;
 
+function encodesqlcstring(const avalue: msestring): msestring;
+var
+ po1: pmsechar;
+ innum: boolean;
+begin
+ result:= '"';
+ po1:= pmsechar(avalue);
+ innum:= false;
+ while po1^ <> #0 do begin
+  if (po1^ < #$20) {or (po1^ > #$ff)} or (po1^ = #$7f) then begin
+   innum:= true;
+   if po1^ < #$100 then begin
+    result:= result + '\x'+hextostr(ord(po1^),2);
+   end
+   else begin
+    result:= result + '\x'+hextostr(ord(po1^),4);
+   end;
+  end
+  else begin
+   if po1^ = '"' then begin
+    result:= result + '\"';
+    innum:= false;
+   end
+   else begin
+    if innum then begin
+     result:= result + '" "'+po1^;
+     innum:= false;
+    end
+    else begin
+     result:= result + po1^;
+    end;
+   end;
+  end;
+  inc(po1);
+ end;
+ result:= result + '"';
+end;
+
 function encodesqlblob(const avalue: string): msestring;
 var
  int1: integer;
@@ -1760,7 +1799,8 @@ begin
  end;
 end;
 
-function encodesqlvariant(const avalue: variant): msestring;
+function encodesqlvariant(const avalue: variant;
+                              cstyle: boolean): msestring;
 
  function encode(const atype: word; const abase: pointer): msestring;
  begin
@@ -1775,11 +1815,30 @@ function encodesqlvariant(const avalue: variant): msestring;
    vardate: result:= encodesqldatetime(pdatetime(abase)^);
 {$endif}
    varcurrency: result:= encodesqlcurrency(pcurrency(abase)^);
-   varolestr: result:= encodesqlstring(pwidestring(abase)^);
+   varolestr: begin
+    if cstyle then begin 
+     result:= encodesqlstring(pwidestring(abase)^);
+    end
+    else begin
+     result:= encodesqlcstring(pwidestring(abase)^);
+    end;
+   end;
 //   vardispatch = 9;
 //   varerror = 10;
-   varboolean: result:= encodesqlboolean(pwordbool(abase)^);
-   varvariant: result:= encodesqlvariant(pvariant(abase)^);
+   varboolean: begin
+    if cstyle then begin
+     if pboolean(abase)^ then begin
+      result:= '"t"';
+     end
+     else begin
+      result:= '"f"';
+     end;
+    end
+    else begin
+     result:= encodesqlboolean(pboolean(abase)^);
+    end;
+   end;
+   varvariant: result:= encodesqlvariant(pvariant(abase)^,cstyle);
 //   varunknown = 13;
 //   vardecimal = 14;
    varshortint: result:= encodesqlinteger(pshortint(abase)^);
@@ -1792,7 +1851,14 @@ function encodesqlvariant(const avalue: variant): msestring;
 //   varrecord = 36;
 
 //   varstrarg = $48;
-   varstring: result:= encodesqlstring(pansistring(abase)^);
+   varstring: begin
+    if cstyle then begin 
+     result:= encodesqlstring(pansistring(abase)^);
+    end
+    else begin
+     result:= encodesqlcstring(pansistring(abase)^);
+    end;
+   end;
   end;
  end; //encode
 
@@ -1802,7 +1868,12 @@ function encodesqlvariant(const avalue: variant): msestring;
  var
   int1: integer;
  begin
-  result:= result + '[';
+  if cstyle then begin
+   result:= result + '{';
+  end
+  else begin
+   result:= result + '[';
+  end;
   if boundsindex = 0 then begin
    for int1:= 0 to bounds[boundsindex].elementcount-1 do begin
     if int1 <> 0 then begin
@@ -1820,7 +1891,12 @@ function encodesqlvariant(const avalue: variant): msestring;
     handlearray(bounds,boundsindex-1,data,atype,elementsize);
    end;
   end;
-  result:= result + ']';
+  if cstyle then begin
+   result:= result + '}';
+  end
+  else begin
+   result:= result + ']';
+  end;
  end;
 
 var
@@ -1828,13 +1904,19 @@ var
 begin
  with tvardata(avalue) do begin
   if vtype and vararray <> 0 then begin
-   result:= 'ARRAY';
+   if not cstyle then begin
+    result:= 'ARRAY';
+   end
+   else begin
+    result:= '';
+   end;
    with varray^ do begin
     po1:= data;
     handlearray(bounds,dimcount-1,po1,vtype and vartypemask,elementsize);
    end;
   end
   else begin
+   cstyle:= false;
    result:= encode(vtype,@vsmallint);
   end;
  end;
@@ -1890,7 +1972,7 @@ begin
     result:= encodesqlboolean(field.asboolean);
    end;
    ftvariant: begin
-    result:= encodesqlvariant(field.asvariant);
+    result:= encodesqlvariant(field.asvariant,false);
    end;
    else begin
     result := field.asstring;
@@ -1962,6 +2044,9 @@ begin
     end;
     ftboolean: begin
      result:= encodesqlboolean(asboolean);
+    end;
+    ftvariant: begin
+     result:= encodesqlvariant(value,false);
     end;
     else begin
      result:= asstring;

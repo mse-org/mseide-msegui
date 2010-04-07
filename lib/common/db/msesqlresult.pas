@@ -636,7 +636,7 @@ begin
  int1:= 0;
  result:= not fsqlresult.active or 
             not fsqlresult.fdatabase.loadfield(fsqlresult.fcursor,
-            fdatatype,ffieldnum,nil,int1)
+            fdatatype,ffieldnum,nil,int1,false)
 end;
 
 function tdbcol.loadfield(const buffer: pointer; var bufsize: integer): boolean;
@@ -644,7 +644,7 @@ begin
  result:= fsqlresult.active;
  if result then begin
   result:= fsqlresult.fdatabase.loadfield(fsqlresult.fcursor,
-             fdatatype,ffieldnum,buffer,bufsize);
+             fdatatype,ffieldnum,buffer,bufsize,futf8);
  end;
 end;
 
@@ -656,7 +656,7 @@ begin
  result:= fsqlresult.active;
  if result then begin
   result:= fsqlresult.fdatabase.loadfield(fsqlresult.fcursor,
-             fdatatype,ffieldnum,buffer,int1);
+             fdatatype,ffieldnum,buffer,int1,futf8);
  end;
 end;
 

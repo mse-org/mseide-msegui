@@ -2050,6 +2050,7 @@ object actionsmo: tactionsmo
   object setbm6: taction
     Tag = 6
     caption = 'Bookmark &6'
+    tagaction = 6
     onexecute = setbmexec
     left = 288
     top = 264
@@ -2071,7 +2072,7 @@ object actionsmo: tactionsmo
   end
   object setbm7: taction
     caption = 'Bookmark &7'
-    tagaction = 6
+    tagaction = 7
     onexecute = setbmexec
     left = 288
     top = 280

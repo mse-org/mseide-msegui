@@ -1,6 +1,6 @@
 {
     Copyright (c) 2004 by Joost van der Sluis
-    Modified 2006-2009 by Martin Schreiber
+    Modified 2006-2010 by Martin Schreiber
     
     See the file COPYING.FPC, included in this distribution,
     for details about the copyright.
@@ -52,6 +52,12 @@ type
     property conn: ppgconn read fconn;
   end;
 
+  dbarrayinfoty = record
+   fieldtype: tfieldtype;
+   vartype: word;
+  end;
+  dbarrayinfoarty = array of dbarrayinfoty;
+  
   TPQCursor = Class(TSQLCursor)
    protected
     Statementm : msestring;
@@ -62,6 +68,7 @@ type
     fopen: boolean;
     ParamBinding : TParamBinding;
     ParamReplaceString : mseString;
+    arrayinfo: dbarrayinfoarty;
    public
     procedure close; override;
   end;
@@ -78,7 +85,8 @@ type
    ftransactionconnectionused: boolean;
    flastsqlcode: string;
    flasterrormessage: msestring;
-   function TranslateFldType(Type_Oid : integer) : TFieldType;
+   function TranslateFldType(Type_Oid: integer;
+                              out isarray: boolean; out vartype: word) : TFieldType;
    function geteventinterval: integer;
    procedure seteventinterval(const avalue: integer);
    procedure closeconnection(var aconnection: ppgconn);
@@ -113,7 +121,8 @@ type
    procedure UnPrepareStatement(cursor : TSQLCursor); override;
    function loadfield(const cursor: tsqlcursor;
             const datatype: tfieldtype; const fieldnum: integer; //null based
-              const buffer: pointer; var bufsize: integer): boolean; override;
+              const buffer: pointer; var bufsize: integer;
+              const aisutf8: boolean): boolean; override;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
    function GetTransactionHandle(trans : TSQLHandle): pointer; override;
    function RollBack(trans : TSQLHandle) : boolean; override;
@@ -176,7 +185,8 @@ type
 implementation
 
 uses 
- math,msestream,msetypes,msedatalist,mseformatstr,msedatabase;
+ math,msestream,msetypes,msedatalist,mseformatstr,msedatabase,msectypes,
+ variants,msevariants;
 
 ResourceString
   SErrRollbackFailed = 'Rollback transaction failed';
@@ -189,23 +199,41 @@ ResourceString
   SErrFetchFailed = 'Fetch of data failed';
   SErrPrepareFailed = 'Preparation of query failed.';
 
-const Oid_Bool     = 16;
-      Oid_Text     = 25;
-      Oid_bytea = 17;
-      Oid_Oid      = 26;
-      Oid_Name     = 19;
-      Oid_Int8     = 20;
-      Oid_int2     = 21;
-      Oid_Int4     = 23;
-      Oid_Float4   = 700;
-      Oid_Float8   = 701;
-      Oid_Unknown  = 705;
-      Oid_bpchar   = 1042;
-      Oid_varchar  = 1043;
-      Oid_timestamp = 1114;
-      oid_date      = 1082;
-      oid_time      = 1083;
-      oid_numeric   = 1700;
+const 
+ Oid_Bool         = 16;
+ Oid_Bool_ar      = 1000;
+ Oid_Text         = 25;
+ Oid_Text_ar      = 1009;
+ Oid_bytea        = 17;
+ Oid_bytea_ar     = 1001;
+ Oid_Oid          = 26;
+ Oid_Oid_ar       = 1028;
+ Oid_Name         = 19;
+ Oid_Name_ar      = 1003;
+ Oid_Int8         = 20;
+ Oid_Int8_ar      = 1016;
+ Oid_int2         = 21;
+ Oid_int2_ar      = 1005;
+ Oid_Int4         = 23;
+ Oid_Int4_ar      = 1007;
+ Oid_Float4       = 700;
+ Oid_Float4_ar    = 1021;
+ Oid_Float8       = 701;
+ Oid_Float8_ar    = 1022;
+ Oid_Unknown      = 705;
+ Oid_Unknown_ar   = 0;
+ Oid_bpchar       = 1042;
+ Oid_bpchar_ar    = 1014;
+ Oid_varchar      = 1043;
+ Oid_varchar_ar   = 1015;
+ Oid_timestamp    = 1114;
+ Oid_timestamp_ar = 1115;
+ oid_date         = 1082;
+ oid_date_ar      = 1182;
+ oid_time         = 1083;
+ oid_time_ar      = 1183;
+ oid_numeric      = 1700;
+ oid_numeric_ar   = 1231;
  pg_diag_sqlstate = 'C';
  
  inv_read =  $40000;
@@ -228,6 +256,7 @@ procedure TPQCursor.close;
 begin
  inherited;
  if fopen then begin
+  arrayinfo:= nil;
   fopen:= false;
   if res <> nil then begin
    pqclear(res);
@@ -442,29 +471,125 @@ begin
  end; 
 end;
 
-function TPQConnection.TranslateFldType(Type_Oid : integer) : TFieldType;
+function TPQConnection.TranslateFldType(Type_Oid : integer; 
+                 out isarray: boolean; out vartype: word) : TFieldType;
 
 begin
-  case Type_Oid of
-    Oid_varchar,Oid_bpchar,
-    Oid_name               : Result := ftstring;
-    Oid_text               : Result := ftstring;
-    Oid_bytea              : result := ftBlob;
-    Oid_oid                : Result := ftInteger;
-    Oid_int8               : Result := ftLargeInt;
-    Oid_int4               : Result := ftInteger;
-    Oid_int2               : Result := ftSmallInt;
-    Oid_Float4             : Result := ftFloat;
-    Oid_Float8             : Result := ftFloat;
-    Oid_TimeStamp          : Result := ftDateTime;
-    Oid_Date               : Result := ftDate;
-    Oid_Time               : Result := ftTime;
-    Oid_Bool               : Result := ftBoolean;
-    Oid_Numeric            : Result := ftBCD;
-    Oid_Unknown            : Result := ftUnknown;
-  else
-    Result := ftUnknown;
+ isarray:= false;
+ vartype:= 0;
+ case Type_Oid of
+  Oid_varchar,Oid_bpchar,
+  Oid_name: begin
+    Result:= ftstring;
   end;
+  Oid_varchar_ar,Oid_bpchar_ar,
+  Oid_name_ar: begin
+   Result:= ftstring;
+   isarray:= true;
+   vartype:= varolestr;
+  end;
+  Oid_text: begin
+   Result:= ftstring;
+  end;
+  Oid_text_ar: begin
+   Result:= ftstring;
+   isarray:= true;
+   vartype:= varolestr;
+  end;
+  Oid_bytea: begin
+   result:= ftBlob;
+  end;
+  Oid_bytea_ar: begin
+   result:= ftBlob;
+   isarray:= true;
+  end;
+  Oid_oid: begin
+   Result:= ftInteger;
+  end;
+  Oid_oid_ar: begin
+   Result:= ftInteger;
+   isarray:= true;
+   vartype:= varinteger;
+  end;
+  Oid_int8: begin
+   Result:= ftLargeInt;
+  end;
+  Oid_int8_ar: begin
+   Result:= ftLargeInt;
+   isarray:= true;
+   vartype:= varint64;
+  end;
+  Oid_int4: begin
+   Result:= ftInteger;
+  end;
+  Oid_int4_ar: begin
+   Result:= ftInteger;
+   isarray:= true;
+   vartype:= varinteger;
+  end;
+  Oid_int2: begin
+   Result:= ftSmallInt;
+  end;
+  Oid_int2_ar: begin
+   Result:= ftSmallInt;
+   isarray:= true;
+   vartype:= varinteger;
+  end;
+  Oid_Float4,Oid_Float8: begin
+   Result:= ftFloat;
+  end;
+  Oid_Float4_ar,Oid_Float8_ar: begin
+   Result:= ftFloat;
+   isarray:= true;
+   vartype:= vardouble;
+  end;
+  Oid_TimeStamp: begin
+   Result:= ftDateTime;
+  end;
+  Oid_TimeStamp_ar: begin
+   Result:= ftDateTime;
+   isarray:= true;
+   vartype:= vardate;
+  end;
+  Oid_Date: begin
+   Result:= ftDate;
+  end;
+  Oid_Date_ar: begin
+   Result:= ftDate;
+   isarray:= true;
+   vartype:= vardate;
+  end;
+  Oid_Time: begin
+   Result:= ftTime;
+  end;
+  Oid_Time_ar: begin
+   Result:= ftTime;
+   isarray:= true;
+   vartype:= vardate;
+  end;
+  Oid_Bool: begin
+   Result:= ftBoolean;
+  end;
+  Oid_Bool_ar: begin
+   Result:= ftBoolean;
+   isarray:= true;
+   vartype:= varboolean;
+  end;
+  Oid_Numeric: begin
+   Result:= ftBCD;
+  end;
+  Oid_Numeric_ar: begin
+   Result:= ftBCD;
+   isarray:= true;
+   vartype:= varcurrency;
+  end;
+  Oid_Unknown: begin
+   Result:= ftUnknown;
+  end;
+  else begin
+    Result:= ftUnknown;
+  end;
+ end;
 end;
 
 Function TPQConnection.AllocateCursorHandle(const aowner: icursorclient;
@@ -563,16 +688,23 @@ begin
     if Assigned(AParams) and (AParams.count > 0) then begin
      s:= s + '(';
      for i := 0 to AParams.count-1 do begin
-      if TypeStrings[AParams[i].DataType] <> 'Unknown' then begin
-       s:= s + TypeStrings[AParams[i].DataType] + ','
-      end
-      else begin
-       if AParams[i].DataType = ftUnknown then begin
-        DatabaseErrorFmt(SUnknownParamFieldType,[AParams[i].Name],self);
+      with AParams[i] do begin
+       if datatype = ftvariant then begin
+        s:= s+'unknown,';
        end
        else begin
-        DatabaseErrorFmt(SUnsupportedParameter,
-                     [Fieldtypenames[AParams[i].DataType]],self);
+        if TypeStrings[DataType] <> 'Unknown' then begin
+         s:= s + TypeStrings[DataType] + ','
+        end
+        else begin
+         if DataType = ftUnknown then begin
+          DatabaseErrorFmt(SUnknownParamFieldType,[Name],self);
+         end
+         else begin
+          DatabaseErrorFmt(SUnsupportedParameter,
+                       [Fieldtypenames[DataType]],self);
+         end;
+        end;
        end;
       end;
      end;
@@ -672,6 +804,14 @@ begin
         fttime: s:= formatdatetime('hh:nn:ss',AsDateTime);
         ftfloat,ftcurrency: s:= realtostr(asfloat);
         ftbcd: s:= realtostr(ascurrency);
+        ftvariant: begin
+         if isutf8 then begin
+          s:= stringtoutf8(encodesqlvariant(value,true));
+         end
+         else begin
+          s:= encodesqlvariant(value,true);
+         end;
+        end;
         else begin
          s:= AParams.asdbstring(i);
          if datatype = ftblob then begin
@@ -730,45 +870,54 @@ var
  str1: ansistring;
  int1: integer;
  precision: integer;
+ isarray: boolean;
 begin
  fielddefs.clear;
  with tpqcursor(cursor) do begin
   nFields:= PQnfields(Res);
+  setlength(arrayinfo,nfields);
   for i:= 0 to nFields-1 do begin
-   size:= PQfsize(Res,i);
-   fieldtype:= TranslateFldType(PQftype(Res,i));
-   case fieldtype of
-    ftstring: begin
-     if size = -1 then begin
-      size:= pqfmod(res,i)-4;
-      if size = -5 then begin //text
-       if stringmemo then begin
-        size:= 0;
-       end
-       else begin
-        fieldtype:= ftmemo;
-        size:= blobidsize;
+   fieldtype:= TranslateFldType(PQftype(Res,i),isarray,arrayinfo[i].vartype);
+   arrayinfo[i].fieldtype:= fieldtype;
+   if isarray then begin
+    fieldtype:= ftvariant;
+    size:= 0;
+   end
+   else begin
+    size:= PQfsize(Res,i);
+    case fieldtype of
+     ftstring: begin
+      if size = -1 then begin
+       size:= pqfmod(res,i)-4;
+       if size = -5 then begin //text
+        if stringmemo then begin
+         size:= 0;
+        end
+        else begin
+         fieldtype:= ftmemo;
+         size:= blobidsize;
+        end;
        end;
       end;
      end;
-    end;
-    ftdate: begin
-     size:= sizeof(double);
-    end;
-    ftblob,ftmemo: begin
-     size:= blobidsize;
-    end;
-    ftbcd: begin
-     int1:= PQfmod(Res,i) - varhdrsz; //can be -1 - 4 = -5
-     size:= int1 and $ffff;
-     precision:= int1 and $ffff0000 shr 16;
-     if (dbo_bcdtofloatif in controller.options) and (size > 4) then begin
-                             //for pqfmod = -1 too
-      fieldtype:= ftfloat;
-     end
-     else begin
-      if size > 4 then begin
-       size:= 4;
+     ftdate: begin
+      size:= sizeof(double);
+     end;
+     ftblob,ftmemo: begin
+      size:= blobidsize;
+     end;
+     ftbcd: begin
+      int1:= PQfmod(Res,i) - varhdrsz; //can be -1 - 4 = -5
+      size:= int1 and $ffff;
+      precision:= int1 and $ffff0000 shr 16;
+      if (dbo_bcdtofloatif in controller.options) and (size > 4) then begin
+                              //for pqfmod = -1 too
+       fieldtype:= ftfloat;
+      end
+      else begin
+       if size > 4 then begin
+        size:= 4;
+       end;
       end;
      end;
     end;
@@ -789,7 +938,6 @@ begin
     fd.precision:= precision;
    end;
   end;
-//  CurTuple:= -1; moved to execute
  end;
 end;
 
@@ -810,17 +958,44 @@ begin
     end;
 end;
 
+type
+ arraytypeheaderty = record
+//  size: integer;        // total array size (varlena requirement)
+  ndim: cint;			// # of dimensions
+  flags: cint;          // implementation flags
+                        // flags field is currently unused, always zero.
+  elemtype: oid;		// element type OID
+ end;
+ arraytype = record
+  header: arraytypeheaderty;
+  data: record
+ //dim: array[ndim] of cint;
+                         // size of each array axis (C array of int)
+ //dim_lower: array[ndim] of cint; 
+                         // lower boundary of each dimension (C array of int)
+ //<actual data>         // whatever is the stored data
+  end;
+ end;
+ parraytype = ^arraytype;
+
+ vararrayboundarty = array of tvararraybound;
+
+type
+ TNumericRecord = record
+  Digits : SmallInt;
+  Weight : SmallInt;
+  Sign   : SmallInt;
+  Scale  : Smallint;
+ end;
+ pnumericrecord = ^tnumericrecord;
+  
 function tpqconnection.loadfield(const cursor: tsqlcursor;
       const datatype: tfieldtype; const fieldnum: integer; //null based
-      const buffer: pointer; var bufsize: integer): boolean;
+      const buffer: pointer; var bufsize: integer;
+                             const aisutf8: boolean): boolean;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
 
-type TNumericRecord = record
-       Digits : SmallInt;
-       Weight : SmallInt;
-       Sign   : SmallInt;
-       Scale  : Smallint;
-     end;
+ 
 const
  numericpos = $0000;
  numericneg = $4000;
@@ -828,28 +1003,17 @@ const
  numericsigmask = $c000;
  
 var
-  x,i           : integer;
-  li            : Longint;
+//  x{,i}           : integer;
   CurrBuff      : pchar;
-  tel           : byte;
-  dbl           : pdouble;
-  cur           : currency;
-  NumericRecord : ^TNumericRecord;
- int1: integer;
- lint1: int64;
- sint1: smallint;
- wbo1: wordbool;
- do1: double;
 
- function getnumeric: boolean;
+ function getnumeric(out numericrecord: tnumericrecord): boolean;
  begin
-  NumericRecord := pointer(CurrBuff);
-  NumericRecord^.Digits := BEtoN(NumericRecord^.Digits);
-  NumericRecord^.Scale := BEtoN(NumericRecord^.Scale);
-  NumericRecord^.Weight := BEtoN(NumericRecord^.Weight);
-  numericrecord^.sign:= beton(numericrecord^.sign);
+  NumericRecord.Digits := BEtoN(pNumericRecord(currbuff)^.Digits);
+  NumericRecord.Scale := BEtoN(pNumericRecord(currbuff)^.Scale);
+  NumericRecord.Weight := BEtoN(pNumericRecord(currbuff)^.Weight);
+  numericrecord.sign:= beton(pnumericrecord(currbuff)^.sign);
   inc(pointer(currbuff),sizeof(TNumericRecord));
-  result:= numericrecord^.sign and numericnan = 0;
+  result:= numericrecord.sign and numericnan = 0;
 //          if (NumericRecord^.Digits = 0) and (NumericRecord^.Scale = 0) then 
 // = NaN, which is not supported by Currency-type, so we return NULL 
         //???? 0 in database seems to return digits and scale 0. mse
@@ -868,137 +1032,219 @@ var
   int64(result):= beton(pint64(currbuff)^);
  end;
  
+  procedure handleitem(const adatatype: tfieldtype;{ const currbuff: pointer;}
+               const asize: integer; const atype: integer; var buffer: pchar);
+  var
+   li            : Longint;
+   dbl           : pdouble;
+   cur           : currency;
+   lint1: int64;
+   sint1: smallint;
+   wbo1: wordbool;
+   do1: double;
+   int1: integer;
+   tel: byte;
+   numericrecord: tnumericrecord;
+   str1: string;
+  begin
+   with TPQCursor(cursor) do begin
+    case aDataType of
+     ftInteger,ftSmallint,ftword: begin
+      case asize of               // postgres returns big-endian numbers
+       sizeof(integer): begin
+        int1:= BEtoN(pinteger(CurrBuff)^);
+       end;
+       sizeof(smallint): begin
+        int1:= BEtoN(psmallint(CurrBuff)^);
+       end;
+      end;
+      move(int1,buffer^,sizeof(int1));
+      inc(buffer,sizeof(integer));
+      inc(currbuff,asize);
+     end;
+     ftlargeint: begin
+      lint1:= BEtoN(pint64(CurrBuff)^);
+      move(lint1,buffer^,sizeof(lint1));
+      inc(buffer,sizeof(int64));
+      inc(currbuff,asize);
+     end;
+     ftfloat,ftcurrency: begin
+      if atype = oid_numeric then begin
+       if getnumeric(numericrecord) then begin
+        do1:= 0;
+        for int1 := NumericRecord.Digits - 1 downto 0 do begin
+         do1:= do1 + beton(pword(currbuff)^) * intpower(nbase,int1);
+         inc(pointer(currbuff),2);
+        end;
+        int1:= numericrecord.weight - numericrecord.digits + 1;
+        if int1 < 0 then begin
+         do1:= do1 / intpower(nbase,-int1);
+        end
+        else begin
+         do1:= do1 * intpower(nbase,int1);
+        end;
+        if NumericRecord.Sign <> 0 then begin
+         do1:= -do1;
+        end;
+       end
+       else begin
+        do1:= nan;
+       end;
+      end
+      else begin
+       if atype = oid_float4 then begin
+        do1:= getfloat4;
+       end
+       else begin
+        do1:= getfloat8;
+       end;
+      end;
+      Move(do1, Buffer^, sizeof(do1));
+      inc(buffer,sizeof(do1));
+      inc(currbuff,asize);
+     end;
+     ftString: begin
+      if datatype = ftvariant then begin
+       setlength(str1,asize);
+       move(currbuff^,str1[1],asize);
+       if aisutf8 then begin
+        pwidestring(buffer)^:= utf8tostring(str1);
+       end
+       else begin
+        pwidestring(buffer)^:= str1;
+       end;
+       inc(buffer,sizeof(widestring));
+       inc(currbuff,asize);
+      end
+      else begin
+       li:= pqgetlength(res,curtuple,fieldnum);
+       if bufsize < li then begin
+        bufsize:= -li;
+       end
+       else begin
+        bufsize:= li;
+        Move(CurrBuff^,Buffer^,li);
+       end;
+      end;
+     end;
+     ftblob,ftmemo,ftgraphic: begin
+      li := pqgetlength(res,curtuple,fieldnum);
+      int1:= addblobdata(currbuff,li);
+      move(int1,buffer^,sizeof(int1));
+       //save id
+     end;
+     ftdate: begin
+      do1:= BEtoN(plongint(CurrBuff)^) + 36526;
+      move(do1,buffer^,sizeof(do1));
+      inc(buffer,sizeof(do1));
+      inc(currbuff,asize);
+     end;
+     ftDateTime,fttime: begin
+      do1:= double(BEtoN(pint64(CurrBuff)^));
+      if FIntegerDatetimes then begin
+       do1:= do1/1000000;
+      end;
+      do1:= (do1+3.1558464E+009)/86400;  // postgres counts seconds elapsed since 1-1-2000
+      // Now convert the mathematically-correct datetime to the
+      // illogical windows/delphi/fpc TDateTime:
+      if (do1 <= 0) and (frac(do1)<0) then begin
+       do1:= trunc(do1)-2-frac(do1);
+      end;
+      move(do1,buffer^,sizeof(do1));
+      inc(buffer,sizeof(do1));
+      inc(currbuff,asize);
+     end;
+     ftBCD: begin
+      case atype of
+       oid_float4: begin
+        cur:= getfloat4;
+       end;
+       oid_float8: begin
+        cur:= getfloat8;
+       end;
+       else begin
+        result:= getnumeric(numericrecord);
+        if result then begin
+         cur := 0;
+         for tel := 1 to NumericRecord.Digits  do begin
+           cur := cur + beton(pword(currbuff)^) * intpower(10000,-(tel-1)+
+                                                       NumericRecord.weight);
+           inc(pointer(currbuff),2);
+         end;
+         if NumericRecord.Sign <> 0 then begin
+          cur := -cur;
+         end;
+        end;
+       end;
+      end;
+      Move(Cur, Buffer^, sizeof(cur));
+      inc(buffer,sizeof(cur));
+//      inc(currbuff,asize);
+     end;
+     ftBoolean: begin
+      if datatype = ftvariant then begin
+       pboolean(buffer)^:= CurrBuff[0] <> #0;
+       inc(buffer,sizeof(boolean));
+      end
+      else begin
+       wbo1:= CurrBuff[0] <> #0;
+       move(wbo1,buffer^,sizeof(wbo1));
+       inc(buffer,sizeof(wbo1));
+      end;
+      inc(currbuff,asize);
+     end;
+     else begin
+      result := false;
+     end;
+    end;
+   end;
+  end;
+
+var
+ int1,int2,int3,eltype: integer;   
+ typ1: tfieldtype;
+ ar1: vararrayboundarty;
+ po1: pcint;
+ po2: pointer;
+ 
 begin
 {$ifdef FPC}{$checkpointer off}{$endif}
  with TPQCursor(cursor) do begin
-  x:= fieldnum;
-  if pqgetisnull(res,CurTuple,x)=1 then begin
-   result:= false
+  result:= pqgetisnull(res,CurTuple,fieldnum) = 0;
+  if not result or (buffer = nil) then begin
+   exit;
+  end;
+  CurrBuff := pqgetvalue(res,CurTuple,fieldnum);
+  if datatype = ftvariant then begin
+   with parraytype(currbuff)^,header do begin
+    int1:= pqgetlength(res,curtuple,fieldnum);
+    setlength(ar1,beton(ndim));
+    po1:= @data;
+    int2:= 1;
+    for int1:= 0 to high(ar1) do begin
+     int3:= beton(po1^);
+     ar1[int1].elementcount:= int3; //always null based
+     int2:= int2*int3;
+     inc(po1,2); //skip dim_lower
+    end;
+//    inc(po1,length(ar1)); //skip dim_lower
+    eltype:= beton(elemtype);
+    currbuff:= pointer(po1);
+    typ1:= arrayinfo[fieldnum].fieldtype;
+    pvariant(buffer)^:= msevararraycreate(pointer(ar1),length(ar1),
+                                             arrayinfo[fieldnum].vartype);
+    po2:= pvardata(buffer)^.varray^.data;
+    for int1:= 0 to int2-1 do begin
+     int3:= beton(pinteger(currbuff)^); //alignment?
+     inc(pinteger(currbuff));
+     handleitem(typ1,int3,eltype,po2);
+    end;
+   end;
   end
   else begin
-   result:= true;
-   if buffer = nil then begin
-    exit;
-   end;
-   i:= PQfsize(res, x);
-   CurrBuff := pqgetvalue(res,CurTuple,x);
-   case DataType of
-    ftInteger,ftSmallint,ftword: begin
-     case i of               // postgres returns big-endian numbers
-      sizeof(integer): begin
-       int1:= BEtoN(pinteger(CurrBuff)^);
-      end;
-      sizeof(smallint): begin
-       int1:= BEtoN(psmallint(CurrBuff)^);
-      end;
-     end;
-     move(int1,buffer^,sizeof(int1));
-    end;
-    ftlargeint: begin
-     lint1:= BEtoN(pint64(CurrBuff)^);
-     move(lint1,buffer^,sizeof(lint1));
-    end;
-    ftfloat,ftcurrency: begin
-     if pqftype(res,x) = oid_numeric then begin
-      if getnumeric then begin
-       do1:= 0;
-       for int1 := NumericRecord^.Digits - 1 downto 0 do begin
-        do1:= do1 + beton(pword(currbuff)^) * intpower(nbase,int1);
-        inc(pointer(currbuff),2);
-       end;
-       int1:= numericrecord^.weight - numericrecord^.digits + 1;
-       if int1 < 0 then begin
-        do1:= do1 / intpower(nbase,-int1);
-       end
-       else begin
-        do1:= do1 * intpower(nbase,int1);
-       end;
-       if NumericRecord^.Sign <> 0 then begin
-        do1:= -do1;
-       end;
-      end
-      else begin
-       do1:= nan;
-      end;
-     end
-     else begin
-      if pqftype(res,x) = oid_float4 then begin
-       do1:= getfloat4;
-      end
-      else begin
-       do1:= getfloat8;
-      end;
-     end;
-     Move(do1, Buffer^, sizeof(do1));
-    end;
-    ftString: begin
-     li:= pqgetlength(res,curtuple,x);
-     if bufsize < li then begin
-      bufsize:= -li;
-     end
-     else begin
-      bufsize:= li;
-      Move(CurrBuff^,Buffer^,li);
-     end;
-//         pchar(Buffer + li)^ := #0;
-//         i := pqfmod(res,x)-3;
-    end;
-    ftblob,ftmemo,ftgraphic: begin
-     li := pqgetlength(res,curtuple,x);
-     int1:= addblobdata(currbuff,li);
-     move(int1,buffer^,sizeof(int1));
-      //save id
-    end;
-    ftdate: begin
-     do1:= BEtoN(plongint(CurrBuff)^) + 36526;
-     move(do1,buffer^,sizeof(do1));
-    end;
-    ftDateTime,fttime: begin
-     do1:= double(BEtoN(pint64(CurrBuff)^));
-     if FIntegerDatetimes then begin
-      do1:= do1/1000000;
-     end;
-     do1:= (do1+3.1558464E+009)/86400;  // postgres counts seconds elapsed since 1-1-2000
-     // Now convert the mathematically-correct datetime to the
-     // illogical windows/delphi/fpc TDateTime:
-     if (do1 <= 0) and (frac(do1)<0) then begin
-      do1:= trunc(do1)-2-frac(do1);
-     end;
-     move(do1,buffer^,sizeof(do1));
-    end;
-    ftBCD: begin
-     case pqftype(res,x) of
-      oid_float4: begin
-       cur:= getfloat4;
-      end;
-      oid_float8: begin
-       cur:= getfloat8;
-      end;
-      else begin
-       result:= getnumeric;
-       if result then begin
-        cur := 0;
-        for tel := 1 to NumericRecord^.Digits  do begin
-          cur := cur + beton(pword(currbuff)^) * intpower(10000,-(tel-1)+
-                                                      NumericRecord^.weight);
-          inc(pointer(currbuff),2);
-        end;
-        if NumericRecord^.Sign <> 0 then begin
-         cur := -cur;
-        end;
-       end;
-      end;
-     end;
-     Move(Cur, Buffer^, sizeof(cur));
-    end;
-    ftBoolean: begin
-     wbo1:= CurrBuff[0] <> #0;
-     move(wbo1,buffer^,sizeof(wbo1));
-    end;
-    else begin
-      result := false;
-    end;
-   end;
+   po2:= buffer;
+   handleitem(datatype,{currbuff,}PQfsize(res,fieldnum),pqftype(res,fieldnum),
+                      po2);
   end;
  end;
 {$ifdef FPC}{$checkpointer default}{$endif}

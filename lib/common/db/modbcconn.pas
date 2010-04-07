@@ -105,7 +105,8 @@ type
     function Fetch(cursor:TSQLCursor):boolean; override;
     function loadfield(const cursor: tsqlcursor;
       const datatype: tfieldtype; const fieldnum: integer; //null based
-      const buffer: pointer; var bufsize: integer): boolean; override;
+      const buffer: pointer; var bufsize: integer;
+                                const aisutf8: boolean): boolean; override;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
     function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
                  const acursor: tsqlcursor): TStream; override;
@@ -858,7 +859,8 @@ end;
 
 function todbcconnection.loadfield(const cursor: tsqlcursor;
        const datatype: tfieldtype; const fieldnum: integer; //null based
-       const buffer: pointer; var bufsize: integer): boolean;
+       const buffer: pointer; var bufsize: integer;
+                                const aisutf8: boolean): boolean;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
  
 const

@@ -243,7 +243,8 @@ type
    function Fetch(cursor : TSQLCursor) : boolean; virtual; abstract;
    function loadfield(const cursor: tsqlcursor; 
             const datatype: tfieldtype; const fieldnum: integer; //null based
-     const buffer: pointer; var bufsize: integer): boolean; virtual; abstract;
+     const buffer: pointer; var bufsize: integer;
+                                const aisutf8: boolean): boolean; virtual; abstract;
           //if bufsize < 0 -> buffer was to small, should be -bufsize
           //buffer can be nil
           //false if null
@@ -2591,7 +2592,7 @@ function tsqlquery.loadfield(const afieldno: integer;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
 begin
  result:= tcustomsqlconnection(database).LoadField(FCursor,aFieldtype,
-         afieldno,buffer,bufsize)
+         afieldno,buffer,bufsize,isutf8)
 end;
 
 procedure TSQLQuery.InternalAddRecord(Buffer: Pointer; AAppend: Boolean);
