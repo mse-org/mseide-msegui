@@ -843,9 +843,12 @@ end;
 
 procedure tmysqlconnection.freeresultbuffer(const cursor: tmysqlcursor);
 begin
- If (Cursor.FRes<>Nil) then begin
-  Mysql_free_result(Cursor.FRes);
-  Cursor.FRes:=Nil;
+ if cursor.fres <> nil then begin
+  mysql_free_result(cursor.fres);
+  cursor.fres:= nil;
+ end;
+ if cursor.fprepstatement <> nil then begin
+  mysql_stmt_free_result(cursor.fprepstatement);
  end;
 end;
 
