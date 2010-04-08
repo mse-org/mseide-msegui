@@ -114,7 +114,8 @@ type
    property bounds_cy default 15;
    property anchors default [an_right,an_bottom];
    property color default cl_transparent;
-   property optionswidget default defaultoptionswidget + [ow_top,ow_noautosizing];
+   property optionswidget default defaultoptionswidget + [ow_top{,ow_noautosizing}];
+   property optionswidget1 default defaultoptionswidget1 + [ow1_noautosizing];
  end;
 
  dockstatety = (dos_layoutvalid,dos_updating1,dos_updating2,dos_updating3,
@@ -877,7 +878,7 @@ begin
  needspropref:= false;
  for int1:= 0 to high(ar1) do begin
   with twidget1(ar1[int1]) do begin
-   if not (ow_noautosizing in foptionswidget) and visible then begin
+   if not (ow1_noautosizing in foptionswidget1) and visible then begin
     result[int2]:= ar1[int1];
     if fixend then begin
      isfix[int2]:= true;
@@ -1839,7 +1840,7 @@ begin
      if ftabwidget = nil then begin
       ftabwidget:= tdocktabwidget.create(self,container1);
       ftabwidget.anchors:= [];
-      include(twidget1(ftabwidget).foptionswidget,ow_noautosizing);
+      include(twidget1(ftabwidget).foptionswidget1,ow1_noautosizing);
      end;
      with tdocktabwidget(ftabwidget) do begin
       for int1:= 0 to high(ar1) do begin
@@ -3128,7 +3129,7 @@ begin
   with fintf.getwidget do begin
    if (componentstate * [csloading,csdesigning] = []) and 
                         not (ws_destroying in widgetstate) and
-     not (ow_noautosizing in sender.optionswidget) and 
+     not (ow1_noautosizing in sender.optionswidget1) and 
                               not(dos_tabedending in fdockstate)then begin
     include(fdockstate,dos_updating3);
     try
@@ -4363,7 +4364,8 @@ begin
  fgrip_pos:= cp_bottomright;
  fgrip_grip:= stb_none;
  inherited;
- foptionswidget:= defaultoptionswidget + [ow_top,ow_noautosizing];
+ foptionswidget:= defaultoptionswidget + [ow_top{,ow_noautosizing}];
+ foptionswidget1:= defaultoptionswidget1 + [ow1_noautosizing];
  size:= makesize(15,15);
  anchors:= [an_right,an_bottom];
  color:= cl_transparent;

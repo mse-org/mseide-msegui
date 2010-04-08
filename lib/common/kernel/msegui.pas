@@ -44,7 +44,8 @@ type
                       fso_nofocusrect,fso_nodefaultrect);
  frameskinoptionsty = set of frameskinoptionty;
  
- optionwidgetty = (ow_background,ow_top,ow_noautosizing,{ow_nofocusrect,}
+ optionwidgetty = (ow_background,ow_top,
+                   ow_noautosizing, //don't use, moved to optionswidget1
                    ow_mousefocus,ow_tabfocus,
                    ow_parenttabfocus,ow_arrowfocus,
                    ow_arrowfocusin,ow_arrowfocusout,
@@ -72,12 +73,19 @@ type
                            //don't use, moved to optionwidget1
                    );
  optionswidgetty = set of optionwidgetty;
- optionwidget1ty = (ow1_autowidth,ow1_autoheight,ow1_autosizeanright,
-                    ow1_autosizeanbottom,
+ optionwidget1ty = (ow1_noautosizing,
+                    ow1_autowidth,ow1_autoheight,
+                    ow1_autosizeanright,ow1_autosizeanbottom,
                     ow1_canclosenil, //call canclose(nil) on exit
                     ow1_nocancloseifhidden);
                                          
+const
+ deprecatedoptionswidget= [ow_noautosizing,ow_canclosenil,ow_autosize,
+                           ow_autosizeanright,ow_autosizeanbottom];
+ invisibleoptionswidget = [ord(ow_noautosizing),ord(ow_canclosenil),ord(ow_autosize),
+                           ord(ow_autosizeanright),ord(ow_autosizeanbottom)]; 
 
+type
  optionswidget1ty = set of optionwidget1ty;
  
  optionskinty = (osk_skin,osk_noskin,osk_framebuttononly,
@@ -6750,11 +6758,11 @@ begin
    size1.cy:= 0;
   end;
   inc(value.cx,size1.cx);
-  if (ow_autosizeanright in foptionswidget) and not (an_right in fanchors) then begin
+  if (ow1_autosizeanright in foptionswidget1) and not (an_right in fanchors) then begin
    dec(value.x,size1.cx);
   end;
   inc(value.cy,size1.cy);
-  if (ow_autosizeanbottom in foptionswidget) and not (an_bottom in fanchors) then begin
+  if (ow1_autosizeanbottom in foptionswidget1) and not (an_bottom in fanchors) then begin
    dec(value.y,size1.cy);
   end;
   if not windowevent then begin
@@ -10575,20 +10583,25 @@ var
  opt1: optionswidget1ty;
 begin
  if avalue <> foptionswidget then begin
-  opt1:= optionswidget1;
-  if ow_autosize in avalue then begin  //don't use deprecated flags
-   opt1:= opt1 + [ow1_autowidth,ow1_autoheight];
+  if csreading in componentstate then begin
+   opt1:= optionswidget1;
+   if ow_noautosizing in avalue then begin  //don't use deprecated flags
+    opt1:= opt1 + [ow1_noautosizing];
+   end;
+   if ow_autosize in avalue then begin  //don't use deprecated flags
+    opt1:= opt1 + [ow1_autowidth,ow1_autoheight];
+   end;
+   if ow_autosizeanright in avalue then begin
+    include(opt1,ow1_autosizeanright);
+   end;
+   if ow_autosizeanbottom in avalue then begin
+    include(opt1,ow1_autosizeanbottom);
+   end;
+   if ow_canclosenil in avalue then begin
+    include(opt1,ow1_canclosenil);
+   end;
+   optionswidget1:= opt1;
   end;
-  if ow_autosizeanright in avalue then begin
-   include(opt1,ow1_autosizeanright);
-  end;
-  if ow_autosizeanbottom in avalue then begin
-   include(opt1,ow1_autosizeanbottom);
-  end;
-  if ow_canclosenil in avalue then begin
-   include(opt1,ow1_canclosenil);
-  end;
-  optionswidget1:= opt1;
   
   value1:= optionswidgetty(setsinglebit(longword(avalue),
           longword(foptionswidget),longword(mask1)));
@@ -10596,9 +10609,7 @@ begin
           longword(foptionswidget),longword(mask2)));
   value:= value1 * mask1 + value2 * mask2 + (avalue - (mask1 + mask2));
   delta:= optionswidgetty(longword(value) xor longword(foptionswidget));
-  foptionswidget:= value - [ow_autosize,ow_autosizeanright,ow_autosizeanbottom,
-                            ow_canclosenil];
-                             //remove deprecated flags
+  foptionswidget:= value - deprecatedoptionswidget;
   if (delta * [ow_background,ow_top] <> []) then begin
    if fparentwidget <> nil  then begin
     fparentwidget.sortzorder;

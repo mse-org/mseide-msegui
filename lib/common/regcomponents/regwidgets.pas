@@ -13,7 +13,7 @@ unit regwidgets;
 
 interface
 uses
- msepropertyeditors,msestrings;
+ msepropertyeditors,msestrings,sysutils;
 
 type 
  tgridpropseditor = class(tpersistentarraypropertyeditor)
@@ -36,7 +36,7 @@ type
  
 implementation
 uses
- sysutils,classes,msesimplewidgets,msegrids,msemenus,mseimage,msedispwidgets,
+ classes,msesimplewidgets,msegrids,msemenus,mseimage,msedispwidgets,
  msetoolbar,msetabs,msedesignintf,regwidgets_bmp,mselistbrowser,
  msesplitter,msedock,mseforms,mseclasses,typinfo,msearrayprops,msewidgets,
  msegui,formdesigner,msedial,msemenuwidgets,msewindowwidget,msechart,
@@ -103,6 +103,11 @@ type
   public
  end;
 
+ tcoloptionseditor = class(tsetpropertyeditor)
+  protected
+   function getinvisibleitems: tintegerset; override;
+ end;
+ 
 const
  mseformintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createmseform;
@@ -173,6 +178,8 @@ begin
                            trefreshbooleanpropertyeditor);
  registerpropertyeditor(typeinfo(boolean),tcustombutton,'enabled',
                            trefreshbooleanpropertyeditor);
+ registerpropertyeditor(typeinfo(coloptionsty),nil,'',
+                                           tcoloptionseditor);
   
  registerunitgroup(['msegrids'],['msegui','msegraphutils','mseclasses']);
  registerunitgroup(['msewidgetgrid'],['msedataedits',
@@ -314,6 +321,13 @@ end;
 function ttraceseditor.geteditorclass: propertyeditorclassty;
 begin
  result:= ttraceeditor;
+end;
+
+{ tcoloptionseditor }
+
+function tcoloptionseditor.getinvisibleitems: tintegerset;
+begin
+ result:= invisiblecoloptions;
 end;
 
 initialization

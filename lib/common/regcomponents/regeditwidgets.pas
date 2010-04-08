@@ -281,7 +281,7 @@ end;
 
 function toptionswidgetpropertyeditor.getinvisibleitems: tintegerset;
 begin
- result:= [ord(ow_autosize),ord(ow_autosizeanright),ord(ow_autosizeanbottom)]; 
+ result:= invisibleoptionswidget;
 end;
 
 { trowstatelistsourcefoldlevelpropertyeditor }

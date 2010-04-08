@@ -1,5 +1,11 @@
 MSEide+MSEgui version history
 
+2010-04-08
+ optionswidgetty ow_noautosizing -> optionswidget1ty ow1_noautosizing.
+ coloptions1ty co1_active removed.
+ coloptionsty co_rowfont, co_rowcolor, co_zebracolor, co_rowcoloractive ->
+  coloptions1ty co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcoloractive.
+ Grid coloractive -> colorfocus.
 2010-03-16
  key_* $10xx -> $01xx.
  key_enter -> key_return.

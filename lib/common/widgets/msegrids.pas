@@ -43,8 +43,9 @@ type
                 co_fixwidth,co_fixpos,co_fill,co_proportional,co_nohscroll,
 //                co_autorowheight,
                 co_savevalue,co_savestate,
-                co_rowfont,co_rowcolor,co_zebracolor,
-                co_rowcoloractive,
+                co_rowfont,co_rowcolor,co_zebracolor, //deprecated -> co1_
+                co_rowcoloractive,                    //deprecated -> co1_
+
                 co_nosort,co_sortdescent,co_norearange,
                 co_cancopy,co_canpaste,co_mousescrollrow,co_rowdatachange
                 );
@@ -52,19 +53,33 @@ type
 // celloptionty = (ceo_autorowheight);
 // celloptionsty = set of celloptionty;
  
- coloption1ty = (co1_active, //show coloractive independent of gridfocus
+ coloption1ty = (co1_rowfont,co1_rowcolor,co1_zebracolor,
+                 co1_rowcoloractive,co1_rowcolorfocused,
+//                 co1_active, //not used
                  co1_autorowheight);
  coloptions1ty = set of coloption1ty;
 
+const
+ deprecatedcoloptions = [co_rowfont,co_rowcolor,co_zebracolor,
+                         co_rowcoloractive];
+ invisiblecoloptions  = [ord(co_rowfont),ord(co_rowcolor),ord(co_zebracolor),
+                         ord(co_rowcoloractive)];
+// deprecatedcoloptions1 = [co1_active];
+ 
+type
  fixcoloptionty = (fco_invisible,fco_mousefocus,fco_mouseselect,
-                     fco_rowfont,fco_rowcolor,fco_zebracolor);
+                   fco_rowfont,fco_rowcolor,fco_zebracolor{,
+                   fco_rowcoloractive,fco_rowcolorfocus}{fco_active});
  fixcoloptionsty = set of fixcoloptionty;
  fixrowoptionty = (fro_invisible,fro_mousefocus,fro_mouseselect);
  fixrowoptionsty = set of fixrowoptionty;
  
 const
- fixcoloptionsshift = ord(co_rowfont)-ord(fco_rowfont);
- fixcoloptionsmask:coloptionsty = [co_rowfont,co_rowcolor,co_zebracolor];
+ fixcoloptionsshift = ord(co1_rowfont)-ord(fco_rowfont);
+ fixcoloptionsmask: coloptions1ty = 
+                 [co1_rowfont,co1_rowcolor,co1_zebracolor{,
+                  co1_rowcoloractive,co1_rowcolorfocus}];
+  
  defaultfixcoloptions = [];
  defaultgridskinoptions = [osk_framebuttononly];
  sortglyphwidth = 11;
@@ -140,7 +155,8 @@ const
  gridvaluevarname = 'values';
  pickobjectstep = integer(high(pickobjectkindty)) + 1;
  layoutchangedcoloptions: coloptionsty = [co_fill,co_proportional,co_invisible,
-                              co_nohscroll,co_rowcoloractive];
+                              co_nohscroll{,co_rowcoloractive}];
+ layoutchangedcoloptions1: coloptions1ty = [co1_rowcoloractive,co1_rowcolorfocused];
  notfixcoloptions = [co_fixwidth,co_fixpos,co_fill,co_proportional,co_nohscroll,
                      co_rowdatachange];
  defaultoptionsgrid = [og_autopopup,og_colchangeontabkey,og_focuscellonenter,
@@ -157,7 +173,8 @@ const
 
  defaultselectedcellcolor = cl_active;
  defaultdatacoloptions = [{co_selectedcolor,}co_savestate,co_savevalue,
-                          co_rowfont,co_rowcolor,co_zebracolor,co_mousescrollrow];
+                          {co_rowfont,co_rowcolor,co_zebracolor,}co_mousescrollrow];
+ defaultdatacoloptions1 = [co1_rowfont,co1_rowcolor,co1_zebracolor];
  defaultfixcoltextflags = [tf_ycentered,tf_xcentered];
  defaultstringcoleditoptions = [scoe_exitoncursor,scoe_undoonesc,scoe_autoselect,
                                   scoe_autoselectonfirstclick,scoe_eatreturn];
@@ -304,6 +321,7 @@ type
    procedure setlinecolorfix(const Value: colorty);
    procedure setcolorselect(const Value: colorty);
    procedure setcoloractive(avalue: colorty);
+   procedure setcolorfocused(avalue: colorty);
   protected
    fstate: gridpropstatesty;
    fstart,fend: integer;
@@ -320,6 +338,7 @@ type
    foptions: coloptionsty;
    fcolorselect: colorty;
    fcoloractive: colorty;
+   fcolorfocused: colorty;
    procedure updatelayout; virtual;
    procedure changed; virtual;
    procedure updatecellrect(const aframe: tcustomframe);
@@ -377,6 +396,8 @@ type
                                        default cl_default;
    property coloractive: colorty read fcoloractive write setcoloractive
                                        default cl_none;
+   property colorfocused: colorty read fcolorfocused write setcolorfocused
+                                       default cl_none;
    property tag: integer read ftag write ftag default 0;
  end;
 
@@ -432,6 +453,7 @@ type
    fonafterdrawcell: drawcelleventty;
    frowcoloroffsetselect: integer;
    ffontactivenum: integer;
+   ffontfocusednum: integer;
    function getcolindex: integer;
    procedure setfocusrectdist(const avalue: integer);
    procedure updatepropwidth;
@@ -444,6 +466,7 @@ type
    procedure setfontselect(const Value: tcolselectfont);
 
    procedure setfontactivenum(const avalue: integer);
+   procedure setfontfocusednum(const avalue: integer);
   protected
    foptions1: coloptions1ty;
    fwidth: integer;
@@ -453,6 +476,7 @@ type
    procedure createfontselect;
    function getselected(const row: integer): boolean; virtual;
    procedure setwidth(const Value: integer); virtual;
+   procedure invalidatelayout;
    procedure setoptions(const Value: coloptionsty); virtual;
    procedure setoptions1(const avalue: coloptions1ty); virtual;
    procedure updatelayout; override;
@@ -460,6 +484,8 @@ type
 
    function checkactivecolor(const aindex: integer): boolean;
          //true if coloractive and fontactivenum active
+   function checkfocusedcolor(const aindex: integer): boolean;
+         //true if colorfocus and fontfocusnum active
    function isopaque: boolean; virtual;
    function getdatapo(const arow: integer): pointer; virtual;
    procedure clean(const start,stop: integer); virtual;
@@ -482,7 +508,7 @@ type
                                         default 0;
    function getmerged(const row: integer): boolean; virtual;
    procedure setmerged(const row: integer; const avalue: boolean); virtual;
-   property merged[const row: integer]: boolean read getmerged write setmerged;
+   property merged[const row: integer]: boolean read getmerged write setmerged;   
   public
    constructor create(const agrid: tcustomgrid; 
                         const aowner: tgridarrayprop); override;
@@ -512,7 +538,10 @@ type
                      setfontselect stored isfontselectstored;
    property fontactivenum: integer read ffontactivenum 
                                 write setfontactivenum default -1;
-             //index in grid.rowfonts, uses row active if co_rowcoloractive set
+             //index in grid.rowfonts
+   property fontfocusednum: integer read ffontfocusednum 
+                                write setfontfocusednum default -1;
+             //index in grid.rowfonts
    property onbeforedrawcell: beforedrawcelleventty read fonbeforedrawcell
                                 write fonbeforedrawcell;
    property onafterdrawcell: drawcelleventty read fonafterdrawcell
@@ -624,7 +653,7 @@ type
    property readonly: boolean read getreadonly write setreadonly;
   published
    property options default defaultdatacoloptions;
-   property options1;
+   property options1 default defaultdatacoloptions1;
    property widthmin: integer read fwidthmin write setwidthmin default 1;
    property widthmax: integer read fwidthmax write setwidthmax default 0;
    property name: string read fname write fname;
@@ -1023,12 +1052,14 @@ type
    flinecolorfix: colorty;
    fcolorselect: colorty;
    fcoloractive: colorty;
+   fcolorfocused: colorty;
    finnerframe: framety;
    procedure setlinewidth(const Value: integer);
    procedure setlinecolor(const Value: colorty);
    procedure setlinecolorfix(const Value: colorty);
    procedure setcolorselect(const avalue: colorty);
    procedure setcoloractive(avalue: colorty);
+   procedure setcolorfocused(avalue: colorty);
    procedure setinnerframe(const avalue: framety);
    procedure setinnerframe_left(const avalue: integer);
    procedure setinnerframe_top(const avalue: integer);
@@ -1069,6 +1100,8 @@ type
               default cl_default;
    property coloractive: colorty read fcoloractive write setcoloractive
               default cl_none;
+   property colorfocused: colorty read fcolorfocused write setcolorfocused
+              default cl_none;
    property innerframe_left: integer read finnerframe.left 
                               write setinnerframe_left default 1;
    property innerframe_top: integer read finnerframe.top 
@@ -1091,6 +1124,7 @@ type
    foptions1: coloptions1ty;
    ffocusrectdist: integer;
    ffontactivenum: integer;
+   ffontfocusednum: integer;
    ffontselect: tcolsfont;
    function getcols(const index: integer): tcol;
    procedure setwidth(const value: integer);
@@ -1098,6 +1132,7 @@ type
    procedure setoptions1(const Value: coloptions1ty);
    procedure setfocusrectdist(const avalue: integer);
    procedure setfontactivenum(const avalue: integer);
+   procedure setfontfocusednum(const avalue: integer);
    function getfontselect: tcolsfont;
    function isfontselectstored: Boolean;
    procedure setfontselect(const Value: tcolsfont);
@@ -1138,7 +1173,10 @@ type
                 write setwidth default griddefaultcolwidth;
    property fontactivenum: integer read ffontactivenum 
                                 write setfontactivenum default -1;
-             //index in grid.rowfonts, uses row active if co_rowcoloractive set
+             //index in grid.rowfonts
+   property fontfocusednum: integer read ffontfocusednum 
+                                write setfontfocusednum default -1;
+             //index in grid.rowfonts
  end;
 
  trowstatelist = class(tcustomrowstatelist)
@@ -1360,7 +1398,7 @@ type
                                       //-1 -> actual
    property width;
    property options default defaultdatacoloptions;
-   property options1;
+   property options1 default defaultdatacoloptions1;
    property fontselect;
    property linewidth;
    property linecolor default defaultdatalinecolor;
@@ -2427,6 +2465,23 @@ begin
                longword(dest),longword(stringcoloptionseditmask)));
 end;
 
+procedure transferdeprecatedcoloptions(const source: coloptionsty;
+                                var dest: coloptions1ty);
+begin
+ if co_rowfont in source then begin
+  include(dest,co1_rowfont);
+ end;
+ if co_rowcolor in source then begin
+  include(dest,co1_rowcolor);
+ end;
+ if co_zebracolor in source then begin
+  include(dest,co1_zebracolor);
+ end;
+ if co_rowcoloractive in source then begin
+  include(dest,co1_rowcoloractive);
+ end;
+end;
+
 { tcellframe }
 
 constructor tcellframe.create(const intf: iframe);
@@ -2475,6 +2530,7 @@ begin
  fcolor:= cl_default;
  fcolorselect:= aprop.fcolorselect;
  fcoloractive:= aprop.fcoloractive;
+ fcolorfocused:= aprop.fcolorfocused;
  flinecolor:= aprop.linecolor;
  flinecolorfix:= aprop.linecolorfix;
  flinewidth:= aprop.linewidth;
@@ -2558,6 +2614,18 @@ begin
  end;
  if avalue <> fcoloractive then begin
   fcoloractive:= avalue;
+  fgrid.layoutchanged;
+  changed;
+ end;
+end;
+
+procedure tgridprop.setcolorfocused(avalue: colorty);
+begin
+ if avalue = cl_invalid then begin
+  avalue:= cl_none;
+ end;
+ if avalue <> fcolorfocused then begin
+  fcolorfocused:= avalue;
   fgrid.layoutchanged;
   changed;
  end;
@@ -2849,6 +2917,7 @@ begin
  flinewidth:= tcols(aowner).flinewidth;
  flinecolor:= tcols(aowner).flinecolor;
  ffontactivenum:= tcols(aowner).ffontactivenum;
+ ffontfocusednum:= tcols(aowner).ffontfocusednum;
 end;
 
 destructor tcol.destroy;
@@ -2924,9 +2993,18 @@ end;
 function tcol.checkactivecolor(const aindex: integer): boolean; 
          //true if coloractive and fontactivenum active
 begin
- result:= (fgrid.entered or (co1_active in {tcols(prop).}foptions1)) and 
+ result:= (fgrid.entered {or (co1_active in foptions1)}) and
           (aindex = fgrid.ffocusedcell.row) and 
-          ((gps_fix in fstate) or (co_rowcoloractive in foptions) or 
+          ((gps_fix in fstate) or (co1_rowcoloractive in foptions1) or 
+                               (findex = fgrid.ffocusedcell.col))
+end;
+
+function tcol.checkfocusedcolor(const aindex: integer): boolean; 
+         //true if colorfocus and fontfocusnum active
+begin
+ result:= //(fgrid.entered {or (co1_active in {tcols(prop).}foptions1)}) and 
+          (aindex = fgrid.ffocusedcell.row) and 
+          ((gps_fix in fstate) or (co1_rowcolorfocused in foptions1) or 
                                (findex = fgrid.ffocusedcell.col))
 end;
 
@@ -2940,7 +3018,7 @@ begin
  result:= cl_none;
  if aindex >= 0 then begin
   bo1:= getselected(aindex);
-  if co_rowcolor in foptions then begin
+  if co1_rowcolor in foptions1 then begin
    po1:= fgrid.fdatacols.frowstate.getitempo(aindex);
    by1:= po1^.color;
 //   if by1 <> 0 then begin
@@ -2964,8 +3042,11 @@ begin
   if (result = cl_none) and checkactivecolor(aindex) then begin
    result:= fcoloractive;
   end;
+  if (result = cl_none) and checkfocusedcolor(aindex) then begin
+   result:= fcolorfocused;
+  end;
   if result = cl_none then begin
-   if (co_zebracolor in foptions) then begin
+   if (co1_zebracolor in foptions1) then begin
     with fgrid do begin
      if (fzebra_step > 0) then begin
       int1:= (aindex - getzebrastart) mod fzebra_step;
@@ -3009,7 +3090,7 @@ begin
  result:= nil;
  if aindex >= 0 then begin
   bo1:= getselected(aindex);
-  if co_rowfont in foptions then begin
+  if co1_rowfont in foptions1 then begin
    po1:= fgrid.fdatacols.frowstate.getitempo(aindex);
    by1:= po1^.font;
    if by1 <> 0 then begin
@@ -3036,7 +3117,14 @@ begin
    end;
   end;
   if result = nil then begin
-   result:= actualfont;
+   if (ffontfocusednum >= 0) and (ffontfocusednum < fgrid.frowfonts.count) then begin
+    if checkfocusedcolor(aindex) then begin
+     result:= tfont(fgrid.frowfonts.fitems[ffontactivenum]);
+    end;
+   end;
+   if result = nil then begin
+    result:= actualfont;
+   end;
   end;
  end;
 end;
@@ -3371,25 +3459,34 @@ begin
  end;
 end;
 
+procedure tcol.invalidatelayout;
+var
+ int1: integer;
+begin
+ if not (csreading in fgrid.componentstate) then begin
+  fgrid.layoutchanged;
+  with tgridarrayprop(prop) do begin //grid propewidthref is invalid
+   for int1:= 0 to high(fitems) do begin
+    tcol(fitems[int1]).fpropwidth:= 0;
+   end;
+  end;     
+ end;
+end;
+
 procedure tcol.setoptions(const Value: coloptionsty);
 var
  valuebefore: coloptionsty;
- int1: integer;
 begin
  if foptions <> value then begin
   valuebefore:= foptions;
-  foptions := Value;
-  if bitschanged({$ifdef FPC}longword{$else}longword{$endif}(value),
+  foptions:= value - deprecatedcoloptions;
+  if csreading in fgrid.componentstate then begin
+   transferdeprecatedcoloptions(value,foptions1);
+  end;
+  if bitschanged({$ifdef FPC}longword{$else}longword{$endif}(foptions),
          {$ifdef FPC}longword{$else}longword{$endif}(valuebefore),
          {$ifdef FPC}longword{$else}longword{$endif}(layoutchangedcoloptions)) then begin
-   if not (csreading in fgrid.componentstate) then begin
-    fgrid.layoutchanged;
-    with tgridarrayprop(prop) do begin //grid propewidthref is invalid
-     for int1:= 0 to high(fitems) do begin
-      tcol(fitems[int1]).fpropwidth:= 0;
-     end;
-    end;     
-   end;
+   invalidatelayout;
   end
   else begin
    changed;
@@ -3402,6 +3499,7 @@ var
  optionsbefore: coloptions1ty;
  opt1: coloptions1ty;
 begin
+// avalue:= avalue - deprecatedcoloptions1;
  optionsbefore:= foptions1;
  foptions1:= avalue;
  opt1:= coloptions1ty({$ifdef FPC}longword{$else}byte{$endif}(optionsbefore) xor
@@ -3414,6 +3512,9 @@ begin
    exclude(fstate,gps_needsrowheight);
   end; 
   fgrid.checkneedsrowheight;
+ end;
+ if opt1 * layoutchangedcoloptions1 <> [] then begin
+  invalidatelayout;
  end;
 end;
 
@@ -3523,6 +3624,14 @@ procedure tcol.setfontactivenum(const avalue: integer);
 begin
  if ffontactivenum <> avalue then begin
   ffontactivenum:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcol.setfontfocusednum(const avalue: integer);
+begin
+ if ffontfocusednum <> avalue then begin
+  ffontfocusednum:= avalue;
   invalidate;
  end;
 end;
@@ -4582,6 +4691,7 @@ begin
  flinecolorfix:= defaultfixlinecolor;
  fcolorselect:= cl_default;
  fcoloractive:= cl_none;
+ fcolorfocused:= cl_none;
  finnerframe:= minimalframe;
  inherited create(self,aclasstype);
 end;
@@ -4654,6 +4764,23 @@ begin
   if not (csloading in fgrid.componentstate) then begin
    for int1:= 0 to count - 1 do begin
     tgridprop(items[int1]).coloractive:= avalue;
+   end;
+  end;
+ end;
+end;
+
+procedure tgridarrayprop.setcolorfocused(avalue: colorty);
+var
+ int1: integer;
+begin
+ if avalue = cl_invalid then begin
+  avalue:= cl_none;
+ end;
+ if fcolorfocused <> avalue then begin
+  fcolorfocused:= avalue;
+  if not (csloading in fgrid.componentstate) then begin
+   for int1:= 0 to count - 1 do begin
+    tgridprop(items[int1]).colorfocused:= avalue;
    end;
   end;
  end;
@@ -5022,7 +5149,8 @@ begin
    fgrid.invalidaterow(newcell.row);
   end
   else begin
-   if (co_drawfocus in foptions) or (fcoloractive <> cl_none) then begin
+   if (co_drawfocus in foptions) or (fcoloractive <> cl_none) or 
+                                       (fcolorfocused <> cl_none) then begin
     invalidatecell(newcell.row);
    end;
   end;
@@ -5036,7 +5164,8 @@ begin
    fgrid.invalidaterow(cellbefore.row);
   end
   else begin
-   if (co_drawfocus in foptions) or (fcoloractive <> cl_none) then begin
+   if (co_drawfocus in foptions) or (fcoloractive <> cl_none) or
+                                        (fcolorfocused <> cl_none) then begin
     invalidatecell(cellbefore.row);
    end;
   end;
@@ -5335,7 +5464,9 @@ begin
   dofocusedcellchanged(false,cellbefore,newcell,selectaction);
  end
  else begin
-  if (co1_active in foptions1) and (cellbefore.row >= 0) then begin
+  if ((co1_rowcoloractive in foptions1) or (co1_rowcolorfocused in foptions1) or
+      (ffontactivenum >= 0) or (ffontfocusednum >= 0)) and 
+                                        (cellbefore.row >= 0) then begin
    invalidatecell(cellbefore.row);
   end;
  end;
@@ -6055,22 +6186,30 @@ end;
 
 procedure tfixcol.setoptionsfix(const avalue: fixcoloptionsty);
 var
- opt1: coloptionsty;
+ opt1: coloptions1ty;
 begin
  foptionsfix:= avalue;
- opt1:= coloptionsty(
+ opt1:= coloptions1ty(
                replacebits(longword(
                  {$ifndef FPC}byte({$endif}avalue{$ifndef FPC}){$endif})
                             shl longword(fixcoloptionsshift),
                      longword(foptions),
                      longword(fixcoloptionsmask)));
+ inherited options1:= opt1;
  if fco_invisible in avalue then begin
-  include(opt1,co_invisible);
+  inherited options:= inherited options + [co_invisible];
  end
  else begin
-  exclude(opt1,co_invisible);
+  inherited options:= inherited options - [co_invisible];
  end;
- inherited options:= opt1;
+ {
+ if fco_active in avalue then begin
+  options1:= options1 + [co1_active];
+ end
+ else begin
+  options1:= options1 - [co1_active];
+ end;
+ }
 end;
 
 procedure tfixcol.drawcell(const canvas: tcanvas);
@@ -6218,6 +6357,7 @@ constructor tcols.create(aowner: tcustomgrid; aclasstype: gridpropclassty);
 begin
  fwidth:= griddefaultcolwidth;
  ffontactivenum:= -1;
+ ffontfocusednum:= -1;
  inherited;
 end;
 
@@ -6390,11 +6530,14 @@ var
  mask: longword;
 begin
  if foptions <> value then begin
-  mask:= longword(value) xor longword(foptions);
-  foptions := Value;
+  mask:= longword(value - deprecatedcoloptions) xor longword(foptions);
+  foptions:= Value - deprecatedcoloptions;
+  if csreading in fgrid.componentstate then begin
+   transferdeprecatedcoloptions(value,foptions1);
+  end;
   if not (csloading in fgrid.componentstate) then begin
    for int1:= 0 to count - 1 do begin
-    tcol(items[int1]).options:= coloptionsty(replacebits(longword(value),
+    tcol(items[int1]).options:= coloptionsty(replacebits(longword(foptions),
                    longword(tcol(items[int1]).options),mask));
    end;
   end;
@@ -6409,7 +6552,7 @@ begin
  if foptions1 <> value then begin
   mask:= {$ifdef FPC}longword{$else}byte{$endif}(value) xor
          {$ifdef FPC}longword{$else}byte{$endif}(foptions1);
-  foptions1 := Value;
+  foptions1:= Value;
   if not (csloading in fgrid.componentstate) then begin
    for int1:= 0 to count - 1 do begin
     tcol(items[int1]).options1:= coloptions1ty(
@@ -6432,6 +6575,20 @@ begin
   if not (csloading in fgrid.componentstate) then begin
    for int1:= 0 to count - 1 do begin
     tcol(items[int1]).fontactivenum:= avalue;
+   end;
+  end;
+ end;
+end;
+
+procedure tcols.setfontfocusednum(const avalue: integer);
+var
+ int1: integer;
+begin
+ if ffontfocusednum <> avalue then begin
+  ffontfocusednum:= avalue;
+  if not (csloading in fgrid.componentstate) then begin
+   for int1:= 0 to count - 1 do begin
+    tcol(items[int1]).fontfocusednum:= avalue;
    end;
   end;
  end;
@@ -6554,6 +6711,7 @@ begin
  inherited;
  flinecolor:= defaultdatalinecolor;
  foptions:= defaultdatacoloptions;
+ foptions1:= defaultdatacoloptions1;
 end;
 
 destructor tdatacols.destroy;
@@ -8046,7 +8204,8 @@ begin
    if numstep <> 0 then begin
     include(self.fstate,gs_needszebraoffset);
    end;
-   if (coloractive <> cl_none) or (fontactivenum >= 0) then begin
+   if (coloractive <> cl_none) or (colorfocused <> cl_none) or 
+         (fontactivenum >= 0) or (fontfocusednum >= 0) then begin
     include(self.fstate,gs_hasactiverowcolor);
    end;
   end;
@@ -8055,7 +8214,9 @@ begin
   for int1:= 0 to fdatacols.count -1 do begin
    with tdatacol(fdatacols.items[int1]) do begin
     if ((fcoloractive <> cl_none)  or (fontactivenum >= 0)) and 
-                            (co_rowcoloractive in foptions) then begin
+                            (co1_rowcoloractive in foptions1) or 
+       ((fcolorfocused <> cl_none)  or (fontfocusednum >= 0)) and 
+                            (co1_rowcolorfocused in foptions1) then begin
      include(self.fstate,gs_hasactiverowcolor);
      break;
     end;
