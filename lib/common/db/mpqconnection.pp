@@ -1223,9 +1223,11 @@ begin
     int2:= 1;
     for int1:= 0 to high(ar1) do begin
      int3:= beton(po1^);
-     ar1[int1].elementcount:= int3; //always null based
+     ar1[int1].elementcount:= int3;    //dim
+     inc(po1);
+     ar1[int1].lowbound:= beton(po1^); //dim_lower
      int2:= int2*int3;
-     inc(po1,2); //skip dim_lower
+     inc(po1);
     end;
 //    inc(po1,length(ar1)); //skip dim_lower
     eltype:= beton(elemtype);

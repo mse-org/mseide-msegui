@@ -1817,10 +1817,10 @@ function encodesqlvariant(const avalue: variant;
    varcurrency: result:= encodesqlcurrency(pcurrency(abase)^);
    varolestr: begin
     if cstyle then begin 
-     result:= encodesqlstring(pwidestring(abase)^);
+     result:= encodesqlcstring(pwidestring(abase)^);
     end
     else begin
-     result:= encodesqlcstring(pwidestring(abase)^);
+     result:= encodesqlstring(pwidestring(abase)^);
     end;
    end;
 //   vardispatch = 9;
