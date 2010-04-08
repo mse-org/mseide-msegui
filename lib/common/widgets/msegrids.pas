@@ -3119,7 +3119,7 @@ begin
   if result = nil then begin
    if (ffontfocusednum >= 0) and (ffontfocusednum < fgrid.frowfonts.count) then begin
     if checkfocusedcolor(aindex) then begin
-     result:= tfont(fgrid.frowfonts.fitems[ffontactivenum]);
+     result:= tfont(fgrid.frowfonts.fitems[ffontfocusednum]);
     end;
    end;
    if result = nil then begin
