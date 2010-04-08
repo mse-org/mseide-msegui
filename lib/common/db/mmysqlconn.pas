@@ -951,7 +951,7 @@ begin
                  datetimetomysql_time(datatype,asdatetime);
         end;
         ftstring,ftwidestring,ftblob,ftmemo,ftfixedchar,ftfixedwidechar: begin
-         strings[int1]:= aparams.asdbstring(int1);
+         strings[int1]:= aparams.asdbstring(c.fparambinding[int1]);
          dataty1:= datatype;
          if dataty1 <> ftblob then begin
           dataty1:= ftstring;
