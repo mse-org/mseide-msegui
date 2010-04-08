@@ -618,6 +618,7 @@ type
    procedure updatestate;
    function getintblobpo: pblobinfoarty; //in currentrecbuf
    procedure internalcancel; override;
+   procedure FreeFieldBuffers; override;
    procedure cancelrecupdate(var arec: recupdatebufferty);
    procedure setdatastringvalue(const afield: tfield; const avalue: string);
 //   procedure setcurvalue(const afield: tfield; const avalue: int64);
@@ -1380,6 +1381,7 @@ begin
   if vtype and vararray <> 0 then begin
    varray:= getmem(sizeof(tvararray));
    read(varray^,sizeof(tvararray));
+   varray^.lockcount:= 0;
    reallocmem(varray,sizeof(tvararray)+
                    (varray^.dimcount-1)*sizeof(tvararrayboundarray));
    with varray^ do begin
@@ -1517,6 +1519,7 @@ begin
  move(avalue,var1,sizeof(variant));
  fillchar(avalue,sizeof(variant),0);
  avalue:= var1; //deep copy
+ tvardata(var1).vtype:= 0;
 {
  po1:= avariant;
  if po1 <> nil then begin
@@ -3137,6 +3140,11 @@ begin
   end;
  end;
  fbstate:= fbstate - [bs_editing,bs_append];
+end;
+
+procedure tmsebufdataset.FreeFieldBuffers;
+begin
+ //dummy
 end;
 
 function comparefieldnum(const l,r): integer;
