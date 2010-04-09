@@ -278,7 +278,10 @@ type
   proc: propprocty;
   dochi: boolean;
  end;
- 
+
+ designerstatety = (des_pasting);
+ designerstatesty = set of designerstatety;
+  
  tdesigner = class(tactcomponent,idesigner)
   private
    fselections: tdesignerselections;
@@ -318,6 +321,7 @@ type
    procedure buildmethodtable(const amodule: pmoduleinfoty);
    procedure releasemethodtable(const amodule: pmoduleinfoty);
   protected
+   fstate: designerstatesty;
    procedure forallmethprop(child: tcomponent);
    procedure forallmethodproperties(const ainstance: tobject; const data: pointer;
                  const aproc: propprocty;
@@ -335,6 +339,8 @@ type
 
    procedure begincomponentmodify;
    procedure endcomponentmodify;
+   procedure beginpasting;
+   procedure endpasting;
    
    function beforemake: boolean; //true if ok
    procedure modulechanged(const amodule: pmoduleinfoty);
@@ -2169,6 +2175,9 @@ var
  ar1: componentarty;
  
 begin
+ if (des_pasting in fstate) and (acomponent.name <> '') then begin
+  addpastedcomponentname(acomponent);
+ end;
  with registeredcomponents do begin
   if (acomponent.ComponentState * [csancestor] = []) or
          (acomponent.Owner = nil) or (acomponent.Owner = module) then begin //probaly inline
@@ -2844,6 +2853,16 @@ end;
 procedure tdesigner.endcomponentmodify;
 begin
  dec(fcomponentmodifying);
+end;
+
+procedure tdesigner.beginpasting;
+begin
+ include(fstate,des_pasting);
+end;
+
+procedure tdesigner.endpasting;
+begin
+ exclude(fstate,des_pasting);
 end;
 
 function tdesigner.copycomponent(const source: tmsecomponent;

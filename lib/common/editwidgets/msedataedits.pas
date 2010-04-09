@@ -4981,6 +4981,7 @@ end;
 function tcustomdatetimeedit.internaldatatotext(const data): msestring;
 var
  dat1: tdatetime;
+ mstr1: msestring;
 begin
  if @data = nil then begin
   dat1:= fvalue;
@@ -4988,20 +4989,21 @@ begin
  else begin
   dat1:= tdatetime(data);
  end;
- if fkind = dtk_time then begin
-  if (@data = nil) and focused then begin
-   result:= mseformatstr.timetostring(dat1,fformatedit);
-  end
-  else begin
-   result:= mseformatstr.timetostring(dat1,fformatdisp);
-  end;
+ if (@data = nil) and focused then begin
+  mstr1:= fformatedit;
  end
  else begin
-  if (@data = nil) and focused then begin
-   result:= mseformatstr.datetimetostring(dat1,fformatedit);
-  end
+  mstr1:= fformatdisp;
+ end;
+ case fkind of 
+  dtk_time: begin
+   result:= mseformatstr.timetostring(dat1,mstr1);
+  end;
+  dtk_date: begin
+   result:= mseformatstr.datetostring(dat1,mstr1);
+  end;
   else begin
-   result:= mseformatstr.datetimetostring(dat1,fformatdisp);
+   result:= mseformatstr.datetimetostring(dat1,mstr1);
   end;
  end;
 end;

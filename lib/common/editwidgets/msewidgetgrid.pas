@@ -2529,7 +2529,10 @@ begin
    with twidgetcols(fdatacols)[int1] do begin
     for int2:= 0 to high(ar1) do begin
      if ar1[int2] <> nil then begin
-      str1:= ar1[int2].name;
+      str1:= findpastedcomponentname(ar1[int2]);
+      if str1 = '' then begin
+       str1:= ar1[int2].name;
+      end;
       if str1 <> '' then begin
        if (str1 = fwidgetname) then begin
         ar1[int2].parentwidget:= fcontainer2;

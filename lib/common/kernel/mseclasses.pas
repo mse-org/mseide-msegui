@@ -703,6 +703,10 @@ function getcomponentlist(const acomponent: tcomponent): tlist;
                     //uses tcomponentcracker;
 procedure clearcomponentlist(const acomponent: tcomponent);
                     //uses tcomponentcracker;
+procedure clearpastedcomponents;
+procedure addpastedcomponentname(const acomp: tcomponent);
+function findpastedcomponent(const origname: string): tcomponent;
+function findpastedcomponentname(const comp: tcomponent): string;
 
 implementation
 uses
@@ -858,6 +862,54 @@ end;
 procedure clearcomponentlist(const acomponent: tcomponent);
 begin
  freeandnil(tcomponentcracker(acomponent).fcomponents);
+end;
+
+type
+ pastedcompinfoty = record
+  comp: tcomponent;
+  origname: string;
+ end;
+var
+ pastedcomps: array of pastedcompinfoty;
+ 
+procedure clearpastedcomponents;
+begin
+ pastedcomps:= nil;
+end;
+
+procedure addpastedcomponentname(const acomp: tcomponent);
+begin
+ setlength(pastedcomps,high(pastedcomps)+2);
+ with pastedcomps[high(pastedcomps)] do begin
+  comp:= acomp;
+  origname:= comp.name;
+ end;
+end;
+
+function findpastedcomponent(const origname: string): tcomponent;
+var
+ int1: integer;
+begin
+ result:= nil;
+ for int1:= 0 to high(pastedcomps) do begin
+  if pastedcomps[int1].origname = origname then begin
+   result:= pastedcomps[int1].comp;
+   break;
+  end;
+ end;
+end;
+
+function findpastedcomponentname(const comp: tcomponent): string;
+var
+ int1: integer;
+begin
+ result:= '';
+ for int1:= 0 to high(pastedcomps) do begin
+  if pastedcomps[int1].comp = comp then begin
+   result:= pastedcomps[int1].origname;
+   break;
+  end;
+ end;
 end;
 
 function setloading(const acomponent: tcomponent; const avalue: boolean): boolean;

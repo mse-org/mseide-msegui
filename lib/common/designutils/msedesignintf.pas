@@ -1038,6 +1038,7 @@ begin
  end;
  countbefore:= count;
  try
+  designer.beginpasting;
   fpasteowner:= aowner;
   textstream:= ttextstream.Create;
   comp1:= tcomponent.create(nil);
@@ -1099,6 +1100,7 @@ begin
        end;
       end;
       removefixupreferences(comp1,'');
+      clearpastedcomponents;
       if assigned(initproc) then begin
        for int1:= comp1.componentcount - 1 downto aowner.componentcount do begin
         comp2:= comp1.components[int1]; 
@@ -1113,6 +1115,7 @@ begin
       notifygloballoading;
      finally
       endgloballoading;
+      clearpastedcomponents;
       reader.Free;
      end;
     end;
@@ -1120,6 +1123,7 @@ begin
     binstream.Free;
    end;
   finally
+   designer.endpasting;
    unlockfindglobalcomponent;
    unRegisterFindGlobalComponentProc({$ifdef FPC}@{$endif}getglobalcomponent);
    textstream.Free;
