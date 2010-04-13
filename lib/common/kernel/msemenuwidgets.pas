@@ -79,7 +79,8 @@ type
    procedure deactivatemenu; virtual;
    procedure selectmenu(const keymode: boolean); virtual;
    function rootpopup: tpopupmenuwidget;
-   procedure closepopupstack(aselecteditem: tmenuitem);
+   procedure closepopupstack(aselecteditem: tmenuitem;
+                               const cancelmodal: boolean = false);
    procedure updatepos; virtual;
    procedure beginkeymode;
    procedure dopaint(const canvas: tcanvas); override;
@@ -90,6 +91,9 @@ type
    procedure internalcreateframe; override;
    function activateoptionset: boolean;
    procedure showhint(var info: hintinfoty); override;   
+   function trycancelmodal(const newactive: twindow): boolean; override;
+   
+   procedure release(const acancelmodal: boolean); virtual; overload;
   public
    constructor create(instance: ppopupmenuwidget;
        const amenu: tmenuitem; const transientfor: twindow;
@@ -140,8 +144,8 @@ type
    procedure internalcreateframe; override;
    procedure loaded; override;
    procedure mouseevent(var info: mouseeventinfoty); override;
+   procedure release(const acancelmodal: boolean); override;
   public
-   procedure release; override;
  end;
 
  tframemenuwidget = class(tcustommainmenuwidget)
@@ -195,7 +199,7 @@ function showpopupmenu(const menu: tmenuitem; const transientfor: twidget;
 implementation
 uses
  msedrawtext,mserichstring,msestockobjects,sysutils,msekeyboard,msebits,
- mseact,mseguiintf,msestrings,msebitmap;
+ mseact,mseguiintf,msestrings,msebitmap,msesysutils;
 
 type
  tmenuitem1 = class(tmenuitem);
@@ -1491,7 +1495,8 @@ begin
  end;
 end;
 
-procedure tpopupmenuwidget.closepopupstack(aselecteditem: tmenuitem);
+procedure tpopupmenuwidget.closepopupstack(aselecteditem: tmenuitem;
+                            const cancelmodal: boolean = false);
 var
  widget1: tpopupmenuwidget;
 begin
@@ -1510,7 +1515,7 @@ begin
   end;
  end;
  widget1.fselecteditem:= aselecteditem; //return value for procedure showmenu
- widget1.release;
+ widget1.release(cancelmodal);
 end;
 
 procedure tpopupmenuwidget.objectevent(const sender: tobject;
@@ -1573,6 +1578,40 @@ begin
   end;
   }
  end;
+end;
+
+function tpopupmenuwidget.trycancelmodal(const newactive: twindow): boolean;
+var
+ widget2: tpopupmenuwidget;
+ window1: twindow;
+ int1: integer;
+begin
+ result:= false;
+ if newactive <> nil then begin
+  widget2:= self;
+  int1:= 0;
+  while (widget2 <> nil) do begin
+   if widget2.window = newactive then begin
+    exit;
+   end;
+   if widget2.window.modal then begin
+    inc(int1);
+   end;
+   widget2:= widget2.fprevpopup;
+  end;
+  if application.modallevel = int1 then begin
+   result:= true; //no lower modal window, accept new active window
+{$ifdef mse_debugwindowfocus}
+   debugwriteln('closepopupstack '+inttostr(int1));
+{$endif}
+   closepopupstack(nil,true);
+  end;
+ end; 
+end;
+
+procedure tpopupmenuwidget.release(const acancelmodal: boolean);
+begin
+ release;
 end;
 
 { tcustommainmenuwidget }
@@ -1655,11 +1694,12 @@ begin
  end;
 end;
 
-procedure tcustommainmenuwidget.release;
-//var
-// int1: integer;
+procedure tcustommainmenuwidget.release(const acancelmodal: boolean);
 begin
-// int1:= activeitem;
+ if acancelmodal then begin
+  setlinkedvar(nil,tlinkedobject(factivewindowbefore));
+             //do not restore active window
+ end;  
  setactiveitem(-1);
  releasemouse;
 // activeitem:= int1;
@@ -1817,20 +1857,8 @@ begin
          pointinrect(apos,rootwidget.widgetrect);
  if result then begin
   capturemouse;
-  release;
+  release(false);
  end;
-{
- po1:= translatewidgetpoint(apos,nil,self);
- result:= inherited checkprevpopuparea(po1);
- if not result then begin
-  result:= not pointinrect(po1,fwidgetrect) and
-         pointinrect(po1,rootwidget.widgetrect);
-  if result then begin
-   capturemouse;
-   release;
-  end;
- end;
- }
 end;
 
 { tframemenuwidget }

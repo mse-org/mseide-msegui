@@ -1409,6 +1409,8 @@ type
    function getdefaultfocuschild: twidget; virtual;
                                    //returns first focusable widget
    procedure setdefaultfocuschild(const value: twidget); virtual;
+   function trycancelmodal(const newactive: twindow): boolean; virtual;
+              //called by twindow.internalactivate, true if accepted
    procedure sortzorder;
    procedure clampinview(const arect: rectty; const bottomright: boolean); virtual;
                     //origin paintpos
@@ -1939,6 +1941,8 @@ type
    
    function beginmodal: boolean; //true if window destroyed
    procedure endmodal;
+   function modal: boolean;
+   function modalwindowbefore: twindow;
    procedure activate;
    function active: boolean;
    function deactivateintermediate: boolean; 
@@ -2146,7 +2150,9 @@ type
    fmousewheelaccelerationmax: real;
    flastmousewheeltimestamp: longword;
    flastmousewheeltimestampbefore: longword;
-
+   
+   fmodallevel: integer;
+   
    procedure invalidated;
    function grabpointer(const aid: winidty): boolean;
    function ungrabpointer: boolean;
@@ -2190,6 +2196,7 @@ type
    
    procedure processmessages; override; //handle with care!
    function idle: boolean; override;
+   property modallevel: integer read fmodallevel;
    
    procedure beginwait; override;
    procedure endwait; override;
@@ -2648,7 +2655,8 @@ type
    function focusinpending: boolean;
    procedure checkapplicationactive;
    function winiddestroyed(const aid: winidty): boolean;
-   function eventloop(const amodalwindow: twindow; const once: boolean = false): boolean;
+   function eventloop(const amodalwindow: twindow; 
+                              const once: boolean = false): boolean;
                  //true if actual modalwindow destroyed
    function beginmodal(const sender: twindow): boolean;
                  //true if modalwindow destroyed
@@ -10935,6 +10943,12 @@ begin
  fdefaultfocuschild:= value;
 end;
 
+function twidget.trycancelmodal(const newactive: twindow): boolean;
+              //called by twindow.internalactivate, true if accepted
+begin
+ result:= false; 
+end;
+
 function twidget.parentwidgetindex: integer;
 begin
  if fparentwidget = nil then begin
@@ -11835,7 +11849,19 @@ var
  activewindowbefore: twindow;
  widgetar: widgetarty;
  int1: integer;
+ bo1: boolean;
+ 
 begin
+{$ifdef mse_debugwindowfocus}
+ debugwriteln('********');
+ debugwrite('internalactivate '+fowner.name+' '+hextostr(fwindow.id,8));
+ if appinst.fmodalwindow = nil then begin
+  debugwriteln(' NIL');
+ end
+ else begin
+  debugwriteln(appinst.fmodalwindow.fowner.name);
+ end;
+{$endif}
  inc(factivating);
  try
   if appinst.finactivewindow = self then begin
@@ -11845,10 +11871,14 @@ begin
   show(windowevent);
   widgetar:= nil; //compilerwarning
   if  activewindowbefore <> self then begin
-   if force or (appinst.fmodalwindow = nil) or (appinst.fmodalwindow = self) or 
-                         (ftransientfor = appinst.fmodalwindow) then begin
+   bo1:= force or (appinst.fmodalwindow = nil) or (appinst.fmodalwindow = self) or 
+                         (ftransientfor = appinst.fmodalwindow);
+   if bo1 then begin
     if (ffocusedwidget = nil) and fowner.canfocus and (ffocusing = 0) then begin
      fowner.setfocus(true);
+     if windowevent and force and not active then begin
+      internalactivate(true,true); //call by setfocus was without force
+     end;
      exit;
     end;
     if activewindowbefore <> nil then begin
@@ -11899,6 +11929,9 @@ begin
  finally
   dec(factivating);
  end;
+{$ifdef mse_debugwindowfocus}
+ debugwriteln('++++++++');
+{$endif}
 end;
 
 procedure twindow.noactivewidget;
@@ -12164,7 +12197,7 @@ begin
   result:= beginmodal(self);
   if (fmodalwindow = nil) then begin
    if fwantedactivewindow <> nil then begin
-    if appinst.active then begin
+    if appinst.active and not (aps_cancelloop in appinst.fstate) then begin
      fwantedactivewindow.activate;
     end;
     fwantedactivewindow:= nil;
@@ -12174,9 +12207,12 @@ begin
    if fmodalwindow = fwantedactivewindow then begin
     fwantedactivewindow:= nil;
    end;
-   if appinst.active then begin
+   if appinst.active and not (aps_cancelloop in appinst.fstate) then begin
     fmodalwindow.activate;
    end;
+  end;
+  if appinst.modallevel = 0 then begin
+   exclude(appinst.fstate,aps_cancelloop);
   end;
   if (factivewindow <> nil) and not factivewindow.fowner.releasing then begin
    pt1:= mouse.pos;
@@ -12791,7 +12827,8 @@ end;
 
 function twindow.canactivate: boolean;
 begin
- result:= (appinst <> nil) and (appinst.fmodalwindow = nil) or (appinst.fmodalwindow = self);
+ result:= (appinst <> nil) and (appinst.fmodalwindow = nil) or 
+                                             (appinst.fmodalwindow = self);
 end;
 
 procedure twindow.activate;
@@ -13205,6 +13242,19 @@ begin
   pt1.x:= avalue.x - pt1.x + fowner.bounds_x;
   pt1.y:= avalue.y - pt1.y + fowner.bounds_y;
   fowner.pos:= pt1;
+ end;
+end;
+
+function twindow.modal: boolean;
+begin
+ result:= tws_modal in fstate;
+end;
+
+function twindow.modalwindowbefore: twindow;
+begin
+ result:= nil;
+ if fmodalinfopo <> nil then begin
+  result:= fmodalinfopo^.modalwindowbefore;
  end;
 end;
 
@@ -13928,23 +13978,40 @@ var
 begin
  try
   if findwindow(winid,window) then begin
+{$ifdef mse_debugwindowfocus}
+  debugwriteln('setwindowfocus '+window.fowner.name+' '+hextostr(winid,8));
+{$endif}
    if (fmodalwindow = nil) or (fmodalwindow = window) then begin
     window.activated;
    end
    else begin
     if fmodalwindow.fwindow.id <> 0 then begin
-     if not fmodalwindow.visible then begin
-      gui_showwindow(fmodalwindow.fwindow.id);
-     end;
-     if ffocuslockwindow <> nil then begin //reactivate modal window
-      if ffocuslocktransientfor <> nil then begin
-       gui_setwindowfocus(ffocuslocktransientfor.winid);
-      end;
+{$ifdef mse_debugwindowfocus}
+     debugwriteln('call trycancelmodal '+window.fowner.name+' '+hextostr(winid,8));
+{$endif}
+     if fmodalwindow.fowner.trycancelmodal(window) then begin
+{$ifdef mse_debugwindowfocus}
+      debugwriteln('trycancelmodal true '+window.fowner.name+' '+hextostr(winid,8));
+{$endif}
+      include(appinst.fstate,aps_cancelloop);
+      appinst.ffocuslockwindow:= nil;
+      appinst.ffocuslocktransientfor:= nil;
+      window.internalactivate(true,true); //force focus
      end
      else begin
-      gui_setwindowfocus(fmodalwindow.fwindow.id);
+      if not fmodalwindow.visible then begin
+       gui_showwindow(fmodalwindow.fwindow.id);
+      end;
+      if ffocuslockwindow <> nil then begin //reactivate modal window
+       if ffocuslocktransientfor <> nil then begin
+        gui_setwindowfocus(ffocuslocktransientfor.winid);
+       end;
+      end
+      else begin
+       gui_setwindowfocus(fmodalwindow.fwindow.id);
+      end;
+      gui_raisewindow(fmodalwindow.fwindow.id);
      end;
-     gui_raisewindow(fmodalwindow.fwindow.id);
     end;
    end;
   end;
@@ -13965,6 +14032,9 @@ begin
   tcaret1(fcaret).remove;
  end;
  if findwindow(winid,window) then begin
+{$ifdef mse_debugwindowfocus}
+  debugwriteln('unsetwindowfocus '+window.fowner.name+' '+hextostr(winid,8));
+{$endif}
   if (ffocuslockwindow <> nil) and (factivewindow <> nil) and 
          (window = ffocuslocktransientfor) then begin
    ffocuslockwindow:= nil;
@@ -14186,7 +14256,8 @@ begin       //eventloop
   end;
  
   while not modalinfo.modalend and not terminated and 
-                 not (aps_exitloop in fstate) do begin //main eventloop
+                 (fstate * [aps_exitloop,aps_cancelloop] = []) do begin 
+                                                  //main eventloop
    try
     if getevents = 0 then begin
      checkwindowstack;
@@ -14277,6 +14348,12 @@ begin       //eventloop
          doterminate(true);
         end;
         ek_focusin: begin
+{
+gui_flushgdi(true);
+sys_schedyield;
+gui_flushgdi(true);
+sys_schedyield;
+}
          getevents;
          po1:= pointer(eventlist.datapo);
          bo1:= true;
@@ -14288,7 +14365,8 @@ begin       //eventloop
                             (fwinid = twindowevent(event).fwinid) then begin
              bo1:= false;
             end;
-            if (kind = ek_focusout) and (fwinid = twindowevent(event).fwinid) then begin
+            if (kind = ek_focusout) and 
+                              (fwinid = twindowevent(event).fwinid) then begin
              bo1:= false;
              freeandnil(po1^); 
                 //spurious focus, for instance minimize window group on windows
@@ -14305,6 +14383,12 @@ begin       //eventloop
          end;
         end;
         ek_focusout: begin
+{
+gui_flushgdi(true);
+sys_schedyield;
+gui_flushgdi(true);
+sys_schedyield;
+}
          getevents;
          po1:= pointer(eventlist.datapo);
          bo1:= true; 
@@ -14458,15 +14542,18 @@ begin
   end;
   include(fstate,tws_modal);
  end;
+ exclude(fstate,aps_cancelloop);
  bo1:= ismainthread and unlock;
  try
   sender.activate;  
+  inc(fmodallevel);
   result:= eventloop(sender);
  finally
+  dec(fmodallevel);
   if bo1 then begin
    lock;
   end;
-  if (window1 <> nil) then begin
+  if (window1 <> nil) and not (aps_cancelloop in fstate) then begin
    if appinst.active then begin
     window1.activate;
    end;

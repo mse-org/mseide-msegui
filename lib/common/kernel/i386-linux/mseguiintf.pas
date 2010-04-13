@@ -19,7 +19,7 @@ uses
  msegraphutils,mseevent,msepointer,mseguiglob,msesys,{msestockobjects,}
  msethread{$ifdef FPC},x,xutil,dynlibs{$endif},
  mselibc,msectypes,msesysintf,msegraphics,
- msestrings,xft,xrender;
+ msestrings,xft,xrender{$ifdef mse_debugwindowfocus},mseformatstr{$endif};
 
 {$ifdef FPC}
 {$define xbooleanresult}
@@ -2285,6 +2285,10 @@ end;
 
 function gui_setwindowfocus(id: winidty): guierrorty;
 begin
+{$ifdef mse_debugwindowfocus}
+ debugwriteln('gui_setwindowfocus '+hextostr(id,8));
+{$endif}
+
 // xseticfocus(getic(id));
  waitfordecoration(id);
  xsetinputfocus(appdisp,id,reverttoparent,currenttime);
