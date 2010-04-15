@@ -10,6 +10,12 @@ object objectinspectorfo: tobjectinspectorfo
   bounds_cy = 248
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
   container.onchildscaled = objectinspectoronchildscaled
+  container.bounds = (
+    0
+    0
+    244
+    248
+  )
   dragdock.splitter_size = 0
   dragdock.caption = 'Objectinspector'
   dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_propsize]
@@ -165,7 +171,7 @@ object objectinspectorfo: tobjectinspectorfo
         coloractive = -1879048185
         width = 90
         onbeforedrawcell = befdrawcell
-        options = [co_readonly, co_drawfocus, co_mouseselect, co_keyselect, co_multiselect, co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+        options = [co_readonly, co_drawfocus, co_mouseselect, co_keyselect, co_multiselect, co_proportional, co_savestate]
         onshowhint = col0onshowhint
         onselectionchanged = selchanged
         widgetname = 'props'
@@ -174,7 +180,8 @@ object objectinspectorfo: tobjectinspectorfo
         linecolorfix = -1610612733
         width = 148
         rowfontoffset = 4
-        options = [co_fill, co_savestate, co_rowfont, co_zebracolor]
+        options = [co_fill, co_savestate]
+        options1 = [co1_rowfont, co1_zebracolor]
         oncellevent = valuescellevent
         onshowhint = col1onshowhint
         widgetname = 'values'
@@ -201,7 +208,7 @@ object objectinspectorfo: tobjectinspectorfo
       bounds_y = 0
       bounds_cx = 90
       bounds_cy = 16
-      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_resetselectonexit, oe_locate, oe_savestate]
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_resetselectonexit, oe_exitoncursor, oe_locate, oe_savestate]
       onupdaterowvalues = propupdaterowvalue
       options = [teo_treecolnavig, teo_keyrowmoving]
       oncheckrowmove = propsoncheckrowmove
@@ -232,7 +239,7 @@ object objectinspectorfo: tobjectinspectorfo
       bounds_y = 0
       bounds_cx = 148
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_forcereturncheckvalue, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_forcereturncheckvalue, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
       font.name = 'stf_default'
       font.xscale =  1.0000000000000000E+0000
       font.dummy = 0
