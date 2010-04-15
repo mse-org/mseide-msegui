@@ -13989,10 +13989,12 @@ begin
 {$ifdef mse_debugwindowfocus}
      debugwriteln('call trycancelmodal '+window.fowner.name+' '+hextostr(winid,8));
 {$endif}
-     if fmodalwindow.fowner.trycancelmodal(window) then begin
-{$ifdef mse_debugwindowfocus}
+     if {$ifdef mswindows}false{$else}
+         fmodalwindow.fowner.trycancelmodal(window)
+         {$endif} then begin
+ {$ifdef mse_debugwindowfocus}
       debugwriteln('trycancelmodal true '+window.fowner.name+' '+hextostr(winid,8));
-{$endif}
+ {$endif}
       include(appinst.fstate,aps_cancelloop);
       appinst.ffocuslockwindow:= nil;
       appinst.ffocuslocktransientfor:= nil;

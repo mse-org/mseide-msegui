@@ -93,14 +93,14 @@ type
    procedure showhint(var info: hintinfoty); override;   
    function trycancelmodal(const newactive: twindow): boolean; override;
    
-   procedure release(const acancelmodal: boolean); virtual; overload;
+   procedure release(const acancelmodal: boolean); overload; virtual;
   public
    constructor create(instance: ppopupmenuwidget;
        const amenu: tmenuitem; const transientfor: twindow;
        const aowner: tcomponent = nil; const menucomp: tcustommenu = nil); overload;
    destructor destroy; override;
    procedure menuchanged(const sender: tmenuitem);
-   procedure release; override;
+   procedure release; overload; override;
    procedure updatetemplates;
    procedure assigntemplate(const source: menutemplatety); virtual;
    function showmenu(const aposrect: rectty; aposition: graphicdirectionty;

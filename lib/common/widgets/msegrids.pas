@@ -52,7 +52,7 @@ type
  coloptionsty = set of coloptionty;
 // celloptionty = (ceo_autorowheight);
 // celloptionsty = set of celloptionty;
- 
+
  coloption1ty = (co1_rowfont,co1_rowcolor,co1_zebracolor,
                  co1_rowcoloractive,co1_rowcolorfocused,
 //                 co1_active, //not used
@@ -65,7 +65,7 @@ const
  invisiblecoloptions  = [ord(co_rowfont),ord(co_rowcolor),ord(co_zebracolor),
                          ord(co_rowcoloractive)];
 // deprecatedcoloptions1 = [co1_active];
- 
+
 type
  fixcoloptionty = (fco_invisible,fco_mousefocus,fco_mouseselect,
                    fco_rowfont,fco_rowcolor,fco_zebracolor{,
@@ -73,10 +73,10 @@ type
  fixcoloptionsty = set of fixcoloptionty;
  fixrowoptionty = (fro_invisible,fro_mousefocus,fro_mouseselect);
  fixrowoptionsty = set of fixrowoptionty;
- 
+
 const
- fixcoloptionsshift = ord(co1_rowfont)-ord(fco_rowfont);
- fixcoloptionsmask: coloptions1ty = 
+ fixcoloptionsshift1 = ord(fco_rowfont)-ord(co1_rowfont);
+ fixcoloptionsmask: coloptions1ty =
                  [co1_rowfont,co1_rowcolor,co1_zebracolor{,
                   co1_rowcoloractive,co1_rowcolorfocus}];
   
@@ -6190,11 +6190,20 @@ var
 begin
  foptionsfix:= avalue;
  opt1:= coloptions1ty(
-               replacebits(longword(
+           {$ifndef FPC}byte({$endif}
+               replacebits(
+                 longword(
                  {$ifndef FPC}byte({$endif}avalue{$ifndef FPC}){$endif})
-                            shl longword(fixcoloptionsshift),
+                            shr longword(fixcoloptionsshift1),
                      longword(foptions),
-                     longword(fixcoloptionsmask)));
+                     longword(
+                      {$ifndef FPC}byte({$endif}
+                       fixcoloptionsmask
+                      {$ifndef FPC}){$endif}
+                      )
+                     )
+           {$ifndef FPC}){$endif}
+                      );
  inherited options1:= opt1;
  if fco_invisible in avalue then begin
   inherited options:= inherited options + [co_invisible];
