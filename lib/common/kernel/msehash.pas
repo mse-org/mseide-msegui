@@ -179,6 +179,7 @@ type
 
 // internalhashiteratorprocty = procedure(const aitem: phashdataty) of object;
  hashiteratorprocty = procedure(const aitem: phashdatadataty) of object;
+ internalhashiteratorprocty = procedure(const aitem: phashdataty) of object;
 
  hashliststatety = (hls_needsnull,hls_needsfinalize);
  hashliststatesty = set of hashliststatety;
@@ -192,23 +193,24 @@ type
    fcount: integer;
    fhashtable: ptruintarty;
    fdata: pointer; //first record is a dummy
-//   flist: pointer;
    fassignedroot: ptruint;
    fdeletedroot: ptruint;
+   fdestpo: phashdataty;
    procedure setcapacity(const avalue: integer);
+   procedure moveitem(const aitem: phashdataty);
   protected
    fstate: hashliststatesty;
    function internaladd(const akey): phashdataty;
    procedure internaldeleteitem(const aitem: phashdataty);
    function internaldelete(const akey; const all: boolean): boolean;
    function internalfind(const akey): phashdataty;
-//   function dohash(const aitem: phashdataty): hashvaluety; virtual; abstract;
    function hashkey(const akey): hashvaluety; virtual; abstract;
    function checkkey(const akey; 
                        const aitem: phashdataty): boolean; virtual; abstract;
    procedure rehash;
    procedure grow;
    procedure finalizeitem(const aitem: phashdatadataty); virtual;
+   procedure internaliterate(const aiterator: internalhashiteratorprocty);
   public
    constructor create(const datasize: integer);
    destructor destroy; override;
@@ -1100,9 +1102,22 @@ begin
  inherited;
 end;
 
+procedure thashdatalist.moveitem(const aitem: phashdataty);
+begin
+ move(aitem^.data,fdestpo^.data,frecsize-sizeof(hashheaderty));
+ with fdestpo^.header do begin
+  nextlist:= 0-ptruint(frecsize);
+  prevlist:= nextlist;
+  hash:= aitem^.header.hash;
+ end;
+ dec(pchar(fdestpo),frecsize);
+end;
+
 procedure thashdatalist.setcapacity(const avalue: integer);
 var
  int1: integer;
+ po1: pointer;
+ puint1: ptruint;
 begin
  if avalue <> fcapacity then begin
   if avalue < fcount then begin
@@ -1111,20 +1126,38 @@ begin
   if longword(avalue) >= high(ptruint) div longword(frecsize) then begin
    raise exception.create('Capacity too big.');
   end;
-  {$ifdef FPC}
-  if reallocmem(fdata,(avalue+1)*frecsize) = nil then begin
-   raise exception.create('Out of memory');
-  end;
-  {$else}
-  reallocmem(fdata,(avalue+1)*frecsize);
+  if (avalue < fcapacity) and (fdeletedroot <> 0) and 
+                                    (fcount > 0) then begin //packing necessary
+   po1:= getmem((avalue+1)*frecsize);
+   if po1 = nil then begin
+    raise exception.create('Out of memory.');
+   end;
+   puint1:= frecsize*fcount;
+   fdestpo:= po1 + puint1;
+   internaliterate(@moveitem);
+   freemem(fdata);
+   fdata:= po1;
+   if (hls_needsnull in fstate) and (avalue > fcount) then begin
+    fillchar((pchar(fdata)+puint1+frecsize)^,(avalue-fcount)*frecsize,0);
+   end;
+   fdeletedroot:= 0;
+   fassignedroot:= puint1;
+  end
+  else begin  
+   {$ifdef FPC}
+   if reallocmem(fdata,(avalue+1)*frecsize) = nil then begin
+    raise exception.create('Out of memory.');
+   end;
+   {$else}
+   reallocmem(fdata,(avalue+1)*frecsize);
   {$endif}
-  phashdataty(fdata)^.header.nextlist:= 0; //end marker
-//  flist:= pchar(fdata) + frecsize;
-         //first record is a dummy so offset = 0 -> not assigned
-  if hls_needsnull in fstate then begin
-   fillchar((pchar(fdata)+fcapacity*frecsize+frecsize)^,
-                                       (avalue-fcapacity)*frecsize,0);
+   if (hls_needsnull in fstate) and (avalue > fcapacity) then begin
+    fillchar((pchar(fdata)+fcapacity*frecsize+frecsize)^,
+                                        (avalue-fcapacity)*frecsize,0);
+   end;
   end;
+  phashdataty(fdata)^.header.nextlist:= 0; //end marker
+         //first record is a dummy so offset = 0 -> not assigned
   fcapacity:= avalue;
   int1:= bits[highestbit(avalue)];
   if int1 < avalue then begin
@@ -1141,20 +1174,22 @@ end;
 
 procedure thashdatalist.rehash;
 var
- puint1: ptruint;
+ puint1,puint2: ptruint;
  po1: phashdataty;
  po2: phashvaluety;
 begin
  po1:= fdata + fassignedroot;
  while true do begin
-  puint1:= phashheaderty(po1)^.nextlist;
+  puint1:= po1^.header.nextlist;
   if puint1 = 0 then begin
    break;
   end;
   po2:= phashvaluety(pchar(fhashtable) + 
                        (po1^.header.hash and fmask)*sizeof(hashvaluety));
-  po1^.header.nexthash:= po2^;
+  puint2:= po2^;
+  po1^.header.nexthash:= puint2;
   po2^:= pchar(po1) - fdata;
+  phashdataty(fdata+puint2)^.header.prevhash:= po2^;
   inc(pchar(po1),puint1);
  end;
 end;
@@ -1166,7 +1201,7 @@ end;
 
 function thashdatalist.internaladd(const akey): phashdataty;
 var
- puint1: ptruint;
+ puint1,puint2: ptruint;
  hash1: hashvaluety;
 begin
  if count = capacity then begin
@@ -1186,9 +1221,11 @@ begin
  hash1:= hashkey(akey);
  result^.header.hash:= hash1;
  hash1:= hash1 and fmask;
- result^.header.nexthash:= fhashtable[hash1];
+ puint2:= fhashtable[hash1];
+ result^.header.nexthash:= puint2;
  puint1:= pchar(result) - fdata;
  fhashtable[hash1]:= puint1;
+ phashdataty(fdata+puint2)^.header.prevhash:= puint1;
  inc(fcount);
  result^.header.nextlist:= fassignedroot - puint1;
                          //memory offset to next item
@@ -1281,34 +1318,26 @@ begin
   end;
  end;
 end;
-{
-procedure thashdatalist.iterate(const aiterator: hashiteratorprocty);
-begin
- internaliterate(aiterator,fassignedroot);
-end;
 
-procedure thashdatalist.iteratedeleted(const aiterator: hashiteratorprocty);
-begin
- internaliterate(aiterator,fdeletedroot);
-end;
-}
-{
-procedure thashdatalist.internaliterate(const aiterator: internalhashiteratorprocty);
+procedure thashdatalist.internaliterate(
+                                const aiterator: internalhashiteratorprocty);
 var
  puint1: ptruint;
  po1: phashdataty;
 begin
- po1:= fdata + fassignedroot;
- while true do begin
-  puint1:= phashheaderty(po1)^.nextlist;
-  if puint1 = 0 then begin
-   break;
+ if fcount > 0 then begin
+  po1:= fdata + fassignedroot;
+  while true do begin
+   puint1:= phashheaderty(po1)^.nextlist;
+   if puint1 = 0 then begin
+    break;
+   end;
+   aiterator(po1);
+   inc(pchar(po1),puint1);
   end;
-  aiterator(po1);
-  inc(pchar(po1),puint1);
  end;
 end;
-}
+
 procedure thashdatalist.finalizeitem(const aitem: phashdatadataty);
 begin
  //dummy
