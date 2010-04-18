@@ -183,7 +183,7 @@ function tcustomdialogstringed.iskeyexecute(const info: keyeventinfoty): boolean
 
 begin
  with info do begin
-  result:= (oe_keyexecute in foptionsedit) and (key = key_down) and 
+  result:= not readonly and (oe_keyexecute in foptionsedit) and (key = key_down) and 
            (shiftstate = [ss_alt]);
  end;
 end;

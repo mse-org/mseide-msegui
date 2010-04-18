@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -16,13 +16,14 @@ interface
 implementation
 uses
  Classes,msefiledialog,msedesignintf,regdialogs_bmp,msecolordialog,
- msememodialog;
+ msememodialog,msedialog;
 
 procedure Register;
 begin
  registercomponents('Dialog',[tfilelistview,tfiledialog,
                      tfilenameedit,{thistoryfilenameedit,}
-                     tdirdropdownedit,tcoloredit,tmemodialogedit,
+                     tdirdropdownedit,tcoloredit,
+                     tdialogstringedit,tmemodialogedit,
                      tmemodialoghistoryedit]);
  registercomponenttabhints(['Dialog'],['User Dialogs']);
 end;

@@ -18,7 +18,7 @@ uses
  {$ifdef FPC}classes{$else}Classes{$endif},mseedit,msedataedits,msegraphedits,
  msedataimage,mselistbrowser,msecalendardatetimeedit,
  msewidgetgrid,msetextedit,msedesignintf,regeditwidgets_bmp,msepropertyeditors,
- msedropdownlist,mseterminal,msedrawtext,msedatanodes,msedialog,msestrings,
+ msedropdownlist,mseterminal,msedrawtext,msedatanodes,{msedialog,}msestrings,
  regwidgets,msearrayprops,typinfo,msestockobjects,msefoldedit,msebitmap,mseglob,
  msestream,mserealsumedit,msedatalist,msegui,msegrids,msesumlist,mseclasses,
  sysutils;
@@ -105,7 +105,7 @@ begin
    tbooleanedit,tbooleaneditradio,
    tdatabutton,tstockglyphdatabutton,tdataicon,tdataimage,
    tpointeredit,
-   tstringedit,tdropdownlistedit,thistoryedit,tdialogstringedit,
+   tstringedit,tdropdownlistedit,thistoryedit,
    thexstringedit,tmemoedit,tfoldedit,
    tintegeredit,tint64edit,trealedit,trealspinedit,trealsumedit,tdatetimeedit,
    tcalendardatetimeedit,tkeystringedit,
