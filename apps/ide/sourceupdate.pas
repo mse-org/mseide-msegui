@@ -546,8 +546,13 @@ end;
 
 procedure tunitinfolist.clear;
 begin
- inherited;
- fnamelist.clear;
+ beginfinalizecglobals;
+ try
+  inherited;
+  fnamelist.clear;
+ finally
+  finalizecglobals;
+ end;
 end;
 
 function tunitinfolist.datapo: punitinfoaty;
@@ -2233,6 +2238,16 @@ begin
   mstr1:= sourcefo[int1].filepath;
   if mseuppercase(fileext(mstr1)) = 'C' then begin
    po2:= updatesourceunit(mstr1,int2,false);
+   {
+   po3:= cglobals.findfunction(aname);
+   if po3 <> nil then begin
+    headerstart:= po3^.start;
+    headerstop:= po3^.stop;
+    result:= true;
+    break;
+   end;
+   }
+
    if po2^.proglang = pl_c then begin
     po3:= po2^.c.functions.find(aname);
     if po3 <> nil then begin
@@ -2242,6 +2257,7 @@ begin
      break;
     end;
    end;
+
   end;
  end;
 end;

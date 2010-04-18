@@ -177,9 +177,10 @@ type
  end;
  phashdataty = ^hashdataty;
 
-// internalhashiteratorprocty = procedure(const aitem: phashdataty) of object;
- hashiteratorprocty = procedure(const aitem: phashdatadataty) of object;
+ hashiteratorprocty = procedure(var aitemdata) of object;
  internalhashiteratorprocty = procedure(const aitem: phashdataty) of object;
+ keyhashiteratorprocty = procedure(var aitemdata) of object;
+ findcheckprocty = procedure(const aitemdata; var accept: boolean) of object;
 
  hashliststatety = (hls_needsnull,hls_needsfinalize);
  hashliststatesty = set of hashliststatety;
@@ -204,20 +205,21 @@ type
    procedure internaldeleteitem(const aitem: phashdataty);
    function internaldelete(const akey; const all: boolean): boolean;
    function internalfind(const akey): phashdataty;
+   function internalfind(const akey; const acheckproc: findcheckprocty): phashdataty;
    function hashkey(const akey): hashvaluety; virtual; abstract;
-   function checkkey(const akey; 
-                       const aitem: phashdataty): boolean; virtual; abstract;
+   function checkkey(const akey; const aitemdata): boolean; virtual; abstract;
    procedure rehash;
    procedure grow;
-   procedure finalizeitem(const aitem: phashdatadataty); virtual;
-   procedure internaliterate(const aiterator: internalhashiteratorprocty);
+   procedure finalizeitem(var aitemdata); virtual;
+   procedure internaliterate(const aiterator: internalhashiteratorprocty); overload;
+   procedure iterate(const akey; const aiterator: keyhashiteratorprocty); overload;
   public
    constructor create(const datasize: integer);
    destructor destroy; override;
    procedure clear;{ virtual;}
    property capacity: integer read fcapacity write setcapacity;
    property count: integer read fcount;
-   procedure iterate(const aiterator: hashiteratorprocty);
+   procedure iterate(const aiterator: hashiteratorprocty); overload;
  end;
  
  ptruintdataty = record
@@ -236,8 +238,7 @@ type
   protected
 //   function hash(const key: ptruint): hashvaluety; {$ifdef FPC}inline;{$endif}
    function hashkey(const akey): hashvaluety; override;
-   function checkkey(const akey; 
-                       const aitem: phashdataty): boolean; override;
+   function checkkey(const akey; const aitemdata): boolean; override;
 //   function dohash(const aitem: phashdataty): hashvaluety; override;
   public
    constructor create(const datasize: integer);
@@ -256,15 +257,16 @@ type
   data: stringdataty;
  end;
  pstringhashdataty = ^stringhashdataty;
+ 
+ stringhashiteratorprocty = procedure(var aitem: stringdataty) of object;
 
  tstringhashdatalist = class(thashdatalist)
   private
   protected
 //   function dohash(const aitem: phashdataty): hashvaluety; override;
    function hashkey(const akey): hashvaluety; override;
-   function checkkey(const akey; 
-                       const aitem: phashdataty): boolean; override;
-   procedure finalizeitem(const aitem: phashdatadataty); override;
+   function checkkey(const akey; const aitemdata): boolean; override;
+   procedure finalizeitem(var aitemdata); override;
   public
    constructor create(const datasize: integer);
 //   procedure clear; override;
@@ -273,6 +275,8 @@ type
    function addunique(const akey: ansistring): pointer;
    function delete(const akey: ansistring; 
                          const all: boolean = false): boolean; //true if found
+   procedure iterate(const akey: ansistring;
+                          const aiterator: stringhashiteratorprocty); overload;
  end;
 
  pointerstringdataty = record
@@ -294,6 +298,12 @@ type
    function addunique(const akey: ansistring; const avalue: pointer): boolean;
                    //true if found
  end;
+
+function datahash(const data; len: integer): longword;
+function stringhash(const key: string): longword; overload;
+function stringhash(const key: lstringty): longword; overload;
+function stringhash(const key: msestring): longword; overload;
+function stringhash(const key: lmsestringty): longword; overload;
  
 implementation
 uses
@@ -1241,7 +1251,7 @@ var
 begin
  if aitem <> nil then begin
   if hls_needsfinalize in fstate then begin
-   finalizeitem(phashdatadataty(@aitem^.data));
+   finalizeitem(aitem^.data);
   end;
   puint1:= pchar(aitem) - fdata;
   with aitem^.header do begin
@@ -1250,6 +1260,9 @@ begin
    end;
    if prevhash <> 0 then begin
     phashdataty(fdata+prevhash)^.header.nexthash:= nexthash;
+   end
+   else begin
+    fhashtable[hash and fmask]:= nexthash;
    end;
   
    if puint1 <> fassignedroot then begin //not root
@@ -1313,8 +1326,33 @@ begin
    if puint1 = 0 then begin
     break;
    end;
-   aiterator(phashdatadataty(pchar(po1)+sizeof(hashheaderty)));
+   aiterator(pointer(pchar(po1)+sizeof(hashheaderty))^);
    inc(pchar(po1),puint1);
+  end;
+ end;
+end;
+
+procedure thashdatalist.iterate(const akey; const aiterator: keyhashiteratorprocty);
+var
+ ha1: hashvaluety;
+ uint1: ptruint;
+ po1: phashdataty;
+begin
+ po1:= nil;
+ if count > 0 then begin
+  ha1:= hashkey(akey);
+  uint1:= fhashtable[ha1 and fmask];
+  if uint1 <> 0 then begin
+   po1:= phashdataty(pchar(fdata) + uint1);
+   while true do begin
+    if (po1^.header.hash = ha1) and checkkey(akey,po1^.data) then begin
+     aiterator(pointer(@po1^.data)^);
+    end;
+    if po1^.header.nexthash = 0 then begin
+     break;
+    end;
+    po1:= phashdataty(pchar(fdata) + po1^.header.nexthash);
+   end;
   end;
  end;
 end;
@@ -1338,7 +1376,7 @@ begin
  end;
 end;
 
-procedure thashdatalist.finalizeitem(const aitem: phashdatadataty);
+procedure thashdatalist.finalizeitem(var aitemdata);
 begin
  //dummy
 end;
@@ -1356,8 +1394,40 @@ begin
   if uint1 <> 0 then begin
    po1:= phashdataty(pchar(fdata) + uint1);
    while true do begin
-    if (po1^.header.hash = ha1) and checkkey(akey,po1) then begin
+    if (po1^.header.hash = ha1) and checkkey(akey,po1^.data) then begin
      break;
+    end;
+    if po1^.header.nexthash = 0 then begin
+     po1:= nil;
+     break;
+    end;
+    po1:= phashdataty(pchar(fdata) + po1^.header.nexthash);
+   end;
+  end;
+ end;
+ result:= po1;
+end;
+
+function thashdatalist.internalfind(const akey; const acheckproc: findcheckprocty): phashdataty;
+var
+ ha1: hashvaluety;
+ uint1: ptruint;
+ po1: phashdataty;
+ bo1: boolean;
+begin
+ po1:= nil;
+ if count > 0 then begin
+  ha1:= hashkey(akey);
+  uint1:= fhashtable[ha1 and fmask];
+  if uint1 <> 0 then begin
+   po1:= phashdataty(pchar(fdata) + uint1);
+   bo1:= false;
+   while true do begin
+    if (po1^.header.hash = ha1) and checkkey(akey,po1^.data) then begin
+     acheckproc(pointer(@po1^.data)^,bo1);
+     if bo1 then begin
+      break;
+     end;
     end;
     if po1^.header.nexthash = 0 then begin
      po1:= nil;
@@ -1444,10 +1514,9 @@ begin
  result:= hash(pptruinthashdataty(aitem)^.data.key);
 end;
 }
-function tptruinthashdatalist.checkkey(const akey;
-               const aitem: phashdataty): boolean;
+function tptruinthashdatalist.checkkey(const akey; const aitemdata): boolean;
 begin
- result:= ptruint(akey) = pptruinthashdataty(aitem)^.data.key;
+ result:= ptruint(akey) = ptruinthashdataty(aitemdata).data.key;
 end;
 
 { tstringhashdatalist }
@@ -1458,9 +1527,9 @@ begin
  fstate:= fstate + [hls_needsnull,hls_needsfinalize];
 end;
 
-procedure tstringhashdatalist.finalizeitem(const aitem: phashdatadataty);
+procedure tstringhashdatalist.finalizeitem(var aitemdata);
 begin
- finalize(pstringdataty(aitem)^);
+ finalize(stringdataty(aitemdata));
 end;
 (*
 procedure tstringhashdatalist.clear;
@@ -1533,16 +1602,21 @@ begin
  result:= stringhash(ansistring(akey));
 end;
 
-function tstringhashdatalist.checkkey(const akey;
-               const aitem: phashdataty): boolean;
+function tstringhashdatalist.checkkey(const akey; const aitemdata): boolean;
 begin
- result:= ansistring(akey) = pstringhashdataty(aitem)^.data.key;
+ result:= ansistring(akey) = stringdataty(aitemdata).key;
 end;
 
 function tstringhashdatalist.delete(const akey: ansistring;
                const all: boolean = false): boolean;
 begin
  result:= internaldelete(akey,all);
+end;
+
+procedure tstringhashdatalist.iterate(const akey: ansistring;
+               const aiterator: stringhashiteratorprocty);
+begin
+ iterate(akey,keyhashiteratorprocty(aiterator));
 end;
 
 { tpointerstringhashdatalist }

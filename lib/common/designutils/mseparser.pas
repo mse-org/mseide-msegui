@@ -372,8 +372,8 @@ type
   cid_sizeof,
   cid_switch,cid_while,
 
-  cid_auto,cid_char,cid_const,cid_double,cid_enum,cid_extern,cid_float,
-  cid_int,cid_long,cid_register,cid_short,cid_signed,cid_static,
+  cid_auto,{cid_char,}cid_const,{cid_double,}cid_enum,cid_extern,{cid_float,}
+  {cid_int,cid_long,}cid_register,{cid_short,}cid_signed,cid_static,
   cid_struct,cid_typedef,cid_union,cid_unsigned,cid_volatile);
  const
   firstcident = cid_break;
@@ -384,8 +384,8 @@ type
    'sizeof',
    'switch','while',
 
-   'auto','char','const','double','enum','extern','float',
-   'int','long','register','short','signed','static',
+   'auto',{'char',}'const',{'double',}'enum','extern',{'float',}
+   {'int','long',}'register',{'short',}'signed','static',
    'struct','typedef','union','unsigned','volatile'
   );
   

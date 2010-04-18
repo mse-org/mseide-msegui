@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 2008 by Martin Schreiber
+{ MSEide Copyright (c) 2010 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ unit cdesignparser;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- mseparser,msedesignparser,mselist,msestrings;
+ mseparser,msedesignparser,mselist,msestrings,msehash;
  
 type
 
@@ -50,12 +50,77 @@ type
    procedure parse; override;  
    procedure clear; override;
  end;
+
+ tcfunctions = class(tfunctions)
+ end;
  
+ tcunitinfo = class(tunitinfo)
+  public
+   constructor create;
+   destructor destroy; override;
+ end;
+
+ tcrootdeflist = class(trootdeflist)
+  protected
+   procedure finalizerecord(var item); override;
+ end;
+  
+ cglobfuncinfoty = record
+  list: tcrootdeflist;
+  id: integer;
+ end;
+ pcglobfuncinfoty = ^cglobfuncinfoty;
+ 
+ tcglobals = class(thashdatalist)
+  private
+   fclosing: boolean;
+   flistparam: tcrootdeflist;
+   fidparam: integer;
+   procedure checkfunctioninfo(const aitem; var accept: boolean);
+  protected
+   procedure add(const alist: tcrootdeflist; const aid: integer);
+   function hashkey(const akey): hashvaluety; override;
+   function checkkey(const akey; const aitemdata): boolean; override;
+   procedure delete(const alist: tcrootdeflist; const aid: integer);
+  public
+   property closing: boolean read fclosing;
+   constructor create;
+   function finddef(const aname: ansistring): pdefinfoty;
+ end;
+
+ tcprocdeflist = class(tdeflist)
+ end;
+   
 procedure parsecdef(const adef: pdefinfoty; out atext: string; out scope: tdeflist);
+function cglobals: tcglobals;
+procedure beginfinalizecglobals;
+procedure finalizecglobals;
 
 implementation
 uses
- sourceupdate,msedesigner;
+ sourceupdate,msedesigner,sysutils;
+var
+ fcglobals: tcglobals;
+
+function cglobals: tcglobals;
+begin
+ if fcglobals = nil then begin
+  fcglobals:= tcglobals.create;
+ end;
+ result:= fcglobals;
+end;
+
+procedure finalizecglobals;
+begin
+ freeandnil(fcglobals);
+end;
+
+procedure beginfinalizecglobals;
+begin
+ if fcglobals <> nil then begin
+  fcglobals.fclosing:= true;
+ end;
+end;
 
 procedure parsecdef(const adef: pdefinfoty; out atext: string; out scope: tdeflist);
  //add used identifiers
@@ -244,13 +309,18 @@ begin
      if testoperator('{') then begin
       result:= true;
       str1:= lstringtostring(lstr2);
-      if ffunctionlevel = 1 then begin
-       c.functions.add(str1,pos1,sourcepos);
-      end;      
-      deflist.beginnode(str1,syk_procimp,pos1,sourcepos);
+      with deflist.beginnode(str1,syk_procimp,pos1,sourcepos)^ do begin
                           //new scope
+       if ffunctionlevel = 1 then begin
+        include(symbolflags,syf_global);
+        c.functions.add(str1,pos1,sourcepos);
+       end;      
+      end;
       parseblock;
       deflist.endnode(sourcepos);
+      if ffunctionlevel = 1 then begin
+       cglobals.add(tcrootdeflist(deflist),deflist.infocount-1);
+      end;
      end;
     end;    
    end;
@@ -284,8 +354,10 @@ begin
     ch1:= getoperator;
     case ch1 of
      '(': begin
-      funitinfopo^.deflist.actnode.addident(pos1,lstr1.len);
+      funitinfopo^.deflist.actnode.startident(pos1,lstr1.len);
+//      funitinfopo^.deflist.actnode.addident(pos1,lstr1.len);
       findclosingbracket; //function call
+      funitinfopo^.deflist.actnode.endident(self);
      end;
      '=': begin
       skipstatement;      //assignment
@@ -326,6 +398,9 @@ begin
 end;
 
 procedure tcdesignparser.parse;
+var
+ po1: pfunctioninfoty;
+ int1: integer;
 begin
  inherited;
  if fnoautoparse then begin
@@ -359,4 +434,126 @@ begin
  setidents(cidents);
 end;
 
+{ tcunitinfo }
+
+constructor tcunitinfo.create;
+begin
+ with info do begin
+  proglang:= pl_c;
+  c.functionheaders:= tfunctionheaders.create;
+  c.functions:= tcfunctions.create;
+  if deflist = nil then begin
+   deflist:= tcrootdeflist.create(@info);
+  end;
+ end;
+ inherited;
+end;
+
+destructor tcunitinfo.destroy;
+var
+ int1: integer;
+ po1: pfunctioninfoty;
+begin
+ with info do begin
+ {
+  if (fcglobals <> nil) and not fcglobals.closing then begin
+   with c.functions do begin
+    po1:= datapo;
+    for int1:= count-1 downto 0 do begin
+     fcglobals.delete(po1);
+     inc(po1);
+    end;
+   end;
+  end;
+ }
+  c.functionheaders.free;
+  c.functions.free;
+ end;
+ inherited;
+end;
+
+{ tcglobals }
+
+constructor tcglobals.create;
+begin
+ inherited create(sizeof(cglobfuncinfoty));
+end;
+
+procedure tcglobals.add(const alist: tcrootdeflist; const aid: integer);
+var
+ po1: phashdataty;
+begin
+ with alist.finfos[aid] do begin
+  po1:= internaladd(name);
+ end;
+ with pcglobfuncinfoty(pointer(@(po1^.data)))^ do begin
+  list:= alist;
+  id:= aid;
+ end;
+end;
+
+function tcglobals.hashkey(const akey): hashvaluety;
+begin
+ result:= stringhash(ansistring(akey));
+end;
+
+procedure tcglobals.checkfunctioninfo(const aitem; var accept: boolean);
+begin
+ with cglobfuncinfoty(aitem) do begin
+  accept:= (list = flistparam) and (id = fidparam);
+ end;
+end;
+
+procedure tcglobals.delete(const alist: tcrootdeflist; const aid: integer);
+var
+ po1: phashdataty;
+begin
+ flistparam:= alist;
+ fidparam:= aid;
+ with alist.finfos[aid] do begin
+  po1:= internalfind(name,@checkfunctioninfo);
+ end;
+ if po1 <> nil then begin
+  internaldeleteitem(po1);
+ end;
+end;
+
+function tcglobals.checkkey(const akey; const aitemdata): boolean;
+begin
+ with cglobfuncinfoty(aitemdata) do begin
+  with list.finfos[id] do begin
+   result:= ansistring(akey) = name;
+  end;
+ end;
+end;
+
+function tcglobals.finddef(const aname: ansistring): pdefinfoty;
+var
+ po1: phashdataty;
+begin
+ result:= nil;
+ po1:= internalfind(aname);
+ if po1 <> nil then begin
+  with pcglobfuncinfoty(@po1^.data)^ do begin
+   result:= @list.finfos[id];
+  end;
+ end;
+end;
+
+{ tcrootdeflist }
+
+procedure tcrootdeflist.finalizerecord(var item);
+begin
+ if (fcglobals <> nil) and not fcglobals.closing then begin
+  with finfos[defnamety(item).id] do begin
+   if (kind = syk_procimp) and (syf_global in symbolflags) then begin
+    fcglobals.delete(self,defnamety(item).id);
+   end;
+  end;
+ end;
+ inherited;
+end;
+
+finalization
+ finalizecglobals;
 end.

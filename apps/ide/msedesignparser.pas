@@ -262,12 +262,16 @@ type
   identflagsty = set of identflagty;
   varflagty = (vf_property);
   varflagsty = set of varflagty;
+
+  symbolflagty = (syf_global);
+  symbolflagsty = set of symbolflagty;
   
   definfoty = record
    name: string;      //'' -> statment
    pos,stop1: sourceposty;
    owner: tdeflist;
    deflist: tdeflist; //can be nil
+   symbolflags: symbolflagsty;
    case kind: symbolkindty of
     syk_classdef: (classindex: integer);
     syk_procdef,syk_classprocimp,syk_procimp: (procindex: integer);
@@ -289,7 +293,6 @@ type
     fparentident: string;
     fparentunitindex: integer;
     finfocount: integer;
-    finfos: definfoarty;
     fstart,fstop: sourceposty;
     fkind: symbolkindty;
     fcasesensitive: boolean;
@@ -303,6 +306,7 @@ type
     function internalfinditem(const apos: sourceposty; const firstidentuse,last: boolean;
                            out scope: tdeflist): pdefinfoty;
    protected
+    finfos: definfoarty;
     fparentscope: tdeflist; //class definition
     procedure finalizerecord(var item); override;
     function getcompareproc: compareprocty; override;
@@ -313,7 +317,8 @@ type
    public
     constructor create(const akind: symbolkindty; const acasesensitive: boolean);
     procedure clear; override;
-    procedure startident(const aparser: tparser);
+    procedure startident(const aparser: tparser); overload;
+    procedure startident(const apos: sourceposty; const alen: integer); overload;
     procedure addident(const aparser: tparser); overload;
     procedure addident(const apos: sourceposty; const alen: integer); overload;
     procedure addemptyident(const aparser: tparser);
@@ -345,8 +350,9 @@ type
     property definfopo: pdefinfoty read getdefinfopo;
     property rootlist: trootdeflist read getrootlist;
     property infos: definfoarty read finfos;
+    property infocount: integer read finfocount;
   end;
-
+  
   includestatementarty = array of includestatementty;
   
   proglangty = (pl_pascal,pl_c);      
@@ -406,7 +412,7 @@ type
     procedure clear; override;
     procedure endnode(const apos: sourceposty);
     function beginnode(const aname: string; const akind: symbolkindty;
-                        const apos,astop: sourceposty): pdefinfoty; overload;
+          const apos,astop: sourceposty): pdefinfoty; overload;
     function beginnode(const apos: sourceposty;
                       const aclassinfo: pclassinfoty): tdeflist; overload;
     function add(const aname: string; const akind: symbolkindty;
@@ -472,12 +478,6 @@ type
    destructor destroy; override;
  end;
 
- tcunitinfo = class(tunitinfo)
-  public
-   constructor create;
-   destructor destroy; override;
- end;
-
 function parametersmatch(const a: ptypeinfo; const b: methodparaminfoty): boolean;
 procedure getmethodparaminfo(const atype: ptypeinfo; var info: methodparaminfoty);
 function splitidentpath(const atext: string): stringarty;
@@ -495,7 +495,8 @@ var
  
 implementation
 uses
- {sourceupdate,}sysutils;
+ {sourceupdate,}sysutils,cdesignparser;   
+       //todo: remove cdesignparser, extract c+pascaldesignparser code
 {$ifdef FPC}{$goto on}{$endif}
 type
  tparser1 = class(tparser);
@@ -1171,6 +1172,16 @@ begin
  aparser.nexttoken;
 end;
 
+procedure tdeflist.startident(const apos: sourceposty; const alen: integer); overload;
+begin
+ with add(syk_identuse,apos,emptysourcepos)^ do begin
+  identflags:= [if_first];
+  identlen:= alen;
+  stop1:= pos;
+  inc(stop1.pos.col,alen);
+ end;
+end;
+
 procedure tdeflist.addident(const aparser: tparser);
 begin
  with add(syk_identuse,aparser.sourcepos,emptysourcepos)^ do begin
@@ -1794,23 +1805,24 @@ var
  int1: integer;
  alist: trootdeflist;
  po1: punitinfoty;
+ po2: pdefinfoty;
 begin
  result:= false;
  if high(anamepath) >= 0 then begin
+  alist:= nil;
   if (level in [dsl_normal,dsl_parent]) and (high(anamepath) > 0) then begin
         //check qualified
    if stringicomp(anamepath[0],funitinfopo^.unitname) = 0 then begin
     alist:= self;
    end
    else begin
-    alist:= funitinfopo^.p.interfaceuses.getunitdeflist(anamepath[0]);
-    if alist = nil then begin
-     alist:= funitinfopo^.p.implementationuses.getunitdeflist(anamepath[0]);
+    if funitinfopo^.proglang = pl_pascal then begin
+     alist:= funitinfopo^.p.interfaceuses.getunitdeflist(anamepath[0]);
+     if alist = nil then begin
+      alist:= funitinfopo^.p.implementationuses.getunitdeflist(anamepath[0]);
+     end;
     end;
    end;
-  end
-  else begin
-   alist:= nil;
   end;
   if alist <> nil then begin
    result:= alist.finddef(copy(anamepath,1,bigint),scopes,defs,first,
@@ -1822,26 +1834,38 @@ begin
     allreadysearched:= true;
    end;
    result:= inherited finddef(anamepath,scopes,defs,first,level,afindkind,maxcount);
-   if funitinfopo^.proglang = pl_pascal then begin
-    if (not result or not first) and (level in [dsl_normal,dsl_parent,dsl_parentclass]) then begin
-     for int1:= funitinfopo^.p.implementationuses.count - 1 downto 0 do begin
-      result:= unitsearch(funitinfopo^.p.implementationuses.getunitdeflist(int1)) or result;
-      if result and first then begin
-       flastunitindex:= -int1;
-       exit;
+   case funitinfopo^.proglang of
+    pl_pascal: begin
+     if (not result or not first) and (level in [dsl_normal,dsl_parent,dsl_parentclass]) then begin
+      for int1:= funitinfopo^.p.implementationuses.count - 1 downto 0 do begin
+       result:= unitsearch(funitinfopo^.p.implementationuses.getunitdeflist(int1)) or result;
+       if result and first then begin
+        flastunitindex:= -int1;
+        exit;
+       end;
+      end;
+      for int1:= funitinfopo^.p.interfaceuses.count - 1 downto 0 do begin
+       result:= unitsearch(funitinfopo^.p.interfaceuses.getunitdeflist(int1)) or result;
+       if result and first then begin
+        flastunitindex:= int1+1;
+        exit;
+       end;
+      end;
+      po1:= {sourceupdater.}updateunitinterface('system');
+      if po1 <> nil then begin
+       result:= po1^.deflist.finddef(anamepath,scopes,defs,first,
+                       dsl_unitsearch,afindkind,maxcount) or result;
       end;
      end;
-     for int1:= funitinfopo^.p.interfaceuses.count - 1 downto 0 do begin
-      result:= unitsearch(funitinfopo^.p.interfaceuses.getunitdeflist(int1)) or result;
-      if result and first then begin
-       flastunitindex:= int1+1;
-       exit;
+    end;
+    pl_c: begin
+     if (not result {or not first}) and (level in 
+                                           [dsl_normal,dsl_parent]) then begin
+      po2:= cglobals.finddef(anamepath[high(anamepath)]);
+      if po2 <> nil then begin
+       result:= true;
+       additem(pointerarty(defs),pointer(po2));
       end;
-     end;
-     po1:= {sourceupdater.}updateunitinterface('system');
-     if po1 <> nil then begin
-      result:= po1^.deflist.finddef(anamepath,scopes,defs,first,
-                      dsl_unitsearch,afindkind,maxcount) or result;
      end;
     end;
    end;
@@ -1960,7 +1984,9 @@ end;
 constructor tunitinfo.create;
 begin
  with info do begin
-  deflist:= trootdeflist.create(@info);
+  if deflist = nil then begin
+   deflist:= trootdeflist.create(@info);
+  end;
  end;
 end;
 
@@ -1994,27 +2020,6 @@ begin
   p.classinfolist.Free;
   p.interfaceuses.Free;
   p.implementationuses.Free;
- end;
- inherited;
-end;
-
-{ tcunitinfo }
-
-constructor tcunitinfo.create;
-begin
- with info do begin
-  proglang:= pl_c;
-  c.functionheaders:= tfunctionheaders.create;
-  c.functions:= tfunctions.create;
- end;
- inherited;
-end;
-
-destructor tcunitinfo.destroy;
-begin
- with info do begin
-  c.functionheaders.free;
-  c.functions.free;
  end;
  inherited;
 end;
