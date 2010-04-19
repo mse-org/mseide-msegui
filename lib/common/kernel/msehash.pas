@@ -206,6 +206,8 @@ type
    function internaldelete(const akey; const all: boolean): boolean;
    function internalfind(const akey): phashdataty;
    function internalfind(const akey; const acheckproc: findcheckprocty): phashdataty;
+   function internalfindexact(const akey): phashdataty;
+   procedure checkexact(const aitemdata; var accept: boolean); virtual; abstract;
    function hashkey(const akey): hashvaluety; virtual; abstract;
    function checkkey(const akey; const aitemdata): boolean; virtual; abstract;
    procedure rehash;
@@ -268,7 +270,8 @@ type
    procedure finalizeitem(var aitemdata); override;
   public
    constructor create(const datasize: integer);
-   function add(const akey: ansistring): pointer;
+   function add(const akey: ansistring): pointer; 
+            //returns pointer on ansistringdataty.data
    function find(const akey: ansistring): pointer;
    function addunique(const akey: ansistring): pointer;
    function delete(const akey: ansistring; 
@@ -289,9 +292,15 @@ type
  ppointeransistringhashdataty = ^pointeransistringhashdataty;
 
  tpointeransistringhashdatalist = class(tansistringhashdatalist)
+  private
+   fpointerparam: pointer;
+  protected
+   procedure checkexact(const aitemdata; var accept: boolean); override;
   public
    constructor create;
    procedure add(const akey: ansistring; const avalue: pointer);
+   procedure delete(const akey: ansistring; const avalue: pointer);
+   function find(const akey: ansistring): pointer;
    function find(const akey: ansistring; out avalue: pointer): boolean;
    function addunique(const akey: ansistring; const avalue: pointer): boolean;
                    //true if found
@@ -319,6 +328,7 @@ type
   public
    constructor create(const datasize: integer);
    function add(const akey: msestring): pointer;
+                 //returns pointer on msestringdataty.data
    function find(const akey: msestring): pointer;
    function addunique(const akey: msestring): pointer;
    function delete(const akey: msestring; 
@@ -339,10 +349,16 @@ type
  ppointermsestringhashdataty = ^pointermsestringhashdataty;
 
  tpointermsestringhashdatalist = class(tmsestringhashdatalist)
+  private
+   fpointerparam: pointer;
+  protected
+   procedure checkexact(const aitemdata; var accept: boolean); override;
   public
    constructor create;
    procedure add(const akey: msestring; const avalue: pointer);
-   function find(const akey: msestring; out avalue: pointer): boolean;
+   procedure delete(const akey: msestring; const avalue: pointer);
+   function find(const akey: msestring): pointer; overload;
+   function find(const akey: msestring; out avalue: pointer): boolean; overload;
    function addunique(const akey: msestring; const avalue: pointer): boolean;
                    //true if found
  end;
@@ -1456,7 +1472,8 @@ begin
  result:= po1;
 end;
 
-function thashdatalist.internalfind(const akey; const acheckproc: findcheckprocty): phashdataty;
+function thashdatalist.internalfind(const akey; 
+                             const acheckproc: findcheckprocty): phashdataty;
 var
  ha1: hashvaluety;
  uint1: ptruint;
@@ -1486,6 +1503,11 @@ begin
   end;
  end;
  result:= po1;
+end;
+
+function thashdatalist.internalfindexact(const akey): phashdataty;
+begin
+ result:= internalfind(akey,@checkexact);
 end;
 
 { tptruinthasdatalist }
@@ -1637,7 +1659,7 @@ end;
 procedure tpointeransistringhashdatalist.add(const akey: ansistring;
                                        const avalue: pointer);
 begin
- ppointeransistringdataty(inherited add(akey))^.data:= avalue;
+ ppointer(inherited add(akey))^:= avalue;
 end;
 
 function tpointeransistringhashdatalist.find(const akey: ansistring;
@@ -1667,6 +1689,26 @@ begin
   po1:= inherited add(akey);
  end;
  po1^.data:= avalue;
+end;
+
+procedure tpointeransistringhashdatalist.checkexact(const aitemdata;
+               var accept: boolean);
+begin
+ accept:= pointeransistringdataty(aitemdata).data = fpointerparam;
+end;
+
+procedure tpointeransistringhashdatalist.delete(const akey: ansistring;
+               const avalue: pointer);
+var
+ po1: phashdataty;
+begin
+ fpointerparam:= avalue;
+ internaldeleteitem(internalfindexact(akey));
+end;
+
+function tpointeransistringhashdatalist.find(const akey: ansistring): pointer;
+begin
+ find(akey,result);
 end;
 
 { tmsestringhashdatalist }
@@ -1739,7 +1781,7 @@ end;
 procedure tpointermsestringhashdatalist.add(const akey: msestring;
                                        const avalue: pointer);
 begin
- ppointermsestringdataty(inherited add(akey))^.data:= avalue;
+ ppointer(inherited add(akey))^:= avalue;
 end;
 
 function tpointermsestringhashdatalist.find(const akey: msestring;
@@ -1757,6 +1799,20 @@ begin
  end;
 end;
 
+function tpointermsestringhashdatalist.find(const akey: msestring): pointer;
+begin
+ find(akey,result);
+end;
+
+procedure tpointermsestringhashdatalist.delete(const akey: msestring;
+               const avalue: pointer);
+var
+ po1: phashdataty;
+begin
+ fpointerparam:= avalue;
+ internaldeleteitem(internalfindexact(akey));
+end;
+
 function tpointermsestringhashdatalist.addunique(const akey: msestring;
                                                const avalue: pointer): boolean;
 var
@@ -1771,5 +1827,10 @@ begin
  po1^.data:= avalue;
 end;
 
+procedure tpointermsestringhashdatalist.checkexact(const aitemdata;
+               var accept: boolean);
+begin
+ accept:= pointermsestringdataty(aitemdata).data = fpointerparam;
+end;
 
 end.

@@ -256,7 +256,7 @@ type
                             const itemclass: treelistitemclassty = nil;
                             const defaultstate: nodestatesty = []); overload;
    procedure insert(const aitem: ttreelistitem; const aindex: integer);
-   procedure clear;
+   procedure clear; virtual;
 
    function getnodes(const must: nodestatesty; 
                         const mustnot: nodestatesty;

@@ -23,7 +23,7 @@ uses
  mseforms,msewidgetgrid,mselistbrowser,msedatanodes,msetypes,msemenus,mseevent,
  mseactions,msefiledialog,msestat,msegrids,msedesigner,msedataedits,
  msegraphutils,msegui,msestrings,mseact,mseguiglob,mseclasses,msebitmap,mseedit,
- mseglob,msegraphics,msescrollbar,msesys;
+ mseglob,msegraphics,msescrollbar,msesys,msehash;
 
 type
 
@@ -137,14 +137,22 @@ type
    function getvaluetext: msestring; override;
  end;
 
+ tfilenodehashlist = class(tpointermsestringhashdatalist)
+ end;
+ 
  tfilesnode = class(tprojectrootnode)
+  private
+   fhashlist: tfilenodehashlist;
   protected
    function createsubnode: ttreelistitem; override;
    function createnode(const afilename: filenamety): tfilenode; virtual;
   public
    constructor create;
+   destructor destroy; override;
+   procedure clear; override;
    function addfile(const afilename: filenamety): tfilenode;
    procedure addfiles(const afilenames: filenamearty);
+   procedure removefile(const anode: tfilenode);
    function findfile(const filename: filenamety): tfilenode;
  end;
 
@@ -217,7 +225,8 @@ end;
 
 { tfilenode }
 
-constructor tfilenode.create(const akind: projectnodety; const afilename: filenamety);
+constructor tfilenode.create(const akind: projectnodety; 
+                                             const afilename: filenamety);
 begin
  fkind:= akind;
  inherited create(akind);
@@ -228,6 +237,7 @@ end;
 procedure tfilenode.dostatread(const reader: tstatreader);
 begin
  ffilename:= reader.readmsestring('file',ffilename);
+ tfilesnode(rootnode).fhashlist.add(ffilename,self);
  inherited;
 end;
 
@@ -370,9 +380,16 @@ end;
 
 constructor tfilesnode.create;
 begin
+ fhashlist:= tfilenodehashlist.create;
  inherited create(pnk_files);
  fstate:= fstate + [ns_readonly,ns_drawemptybox];
  caption:= filescaption;
+end;
+
+destructor tfilesnode.destroy;
+begin
+ inherited;
+ fhashlist.free;
 end;
 
 function tfilesnode.addfile(const afilename: filenamety): tfilenode;
@@ -381,6 +398,7 @@ begin
  if result = nil then begin
   result:= createnode(afilename);
   add(ttreelistedititem(result));
+  fhashlist.add(afilename,result);
  end;
 end;
 
@@ -398,17 +416,16 @@ begin
  end;
 end;
 
+procedure tfilesnode.removefile(const anode: tfilenode);
+begin
+ fhashlist.delete(anode.ffilename,anode);
+end;
+
 function tfilesnode.findfile(const filename: filenamety): tfilenode;
 var
  int1: integer;
 begin
- result:= nil;
- for int1:= 0 to fcount - 1 do begin
-  if tfilenode(fitems[int1]).ffilename = filename then begin
-   result:= tfilenode(fitems[int1]);
-   break;
-  end;
- end;
+ result:= tfilenode(fhashlist.find(filename));
 end;
 
 function tfilesnode.createnode(const afilename: filenamety): tfilenode;
@@ -419,6 +436,12 @@ end;
 function tfilesnode.createsubnode: ttreelistitem;
 begin
  result:= tfilenode.create(pnk_none,'');
+end;
+
+procedure tfilesnode.clear;
+begin
+ fhashlist.clear;
+ inherited;
 end;
 
 { tunitsnode }
@@ -725,12 +748,17 @@ end;
 procedure tprojecttreefo.removeunitfileonexecute(const sender: tobject);
 var
  rowbefore: integer;
+ rnode: ttreelistitem;
 begin
  with tfilenode(projectedit.item) do begin
   if askok('Do you wish to remove "'+ ffilename +
             '"?','') then begin
    if sourcefo.closepage(ffilename) then begin
     rowbefore:= grid.row;
+    rnode:= rootnode;
+    if rnode is tfilesnode then begin
+     tfilesnode(rnode).removefile(tfilenode(projectedit.item));
+    end;
     projectedit.item.Free;
     grid.row:= rowbefore;
    end;
