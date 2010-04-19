@@ -167,13 +167,13 @@ object projecttreefo: tprojecttreefo
     top = 88
   end
   object removecmoduleact: taction
-    caption = 'Remove Text File'
+    caption = 'Remove C-File'
     onexecute = removecmoduleonexecute
     left = 112
     top = 112
   end
   object addcmoduleact: taction
-    caption = 'Add Text File'
+    caption = 'Add C-File'
     onexecute = addcmoduleonexecute
     left = 112
     top = 96
