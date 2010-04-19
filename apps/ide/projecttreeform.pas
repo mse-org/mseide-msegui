@@ -18,6 +18,8 @@ unit projecttreeform;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
+//todo: relative path linking
+
 interface
 uses
  mseforms,msewidgetgrid,mselistbrowser,msedatanodes,msetypes,msemenus,mseevent,
@@ -569,21 +571,27 @@ var
  bo1: boolean;
 begin
  if fchangedcount > 0 then begin
-  bo1:= false;
-  for int1:= 0 to count - 1 do begin
-   with tcmodulenode(fitems[int1]) do begin
-    if not fcurrent then begin
-     sourceupdater.updatesourceunit(ffilename,int2,false);
-//     fcurrent:= true;
-//     dec(self.fchangedcount);
+  application.beginwait;
+  try
+   bo1:= false;
+   for int1:= 0 to count - 1 do begin
+    with tcmodulenode(fitems[int1]) do begin
+     if not fcurrent then begin
+      if application.waitescaped then begin
+       break;
+      end;
+      sourceupdater.updatesourceunit(ffilename,int2,false);
+     end;
+    end;
+    if astopcheckproc <> nil then begin
+     astopcheckproc(bo1);
+     if bo1 then begin
+      break;
+     end;
     end;
    end;
-   if astopcheckproc <> nil then begin
-    astopcheckproc(bo1);
-    if bo1 then begin
-     break;
-    end;
-   end;
+  finally
+   application.endwait;
   end;
  end;
 end;
