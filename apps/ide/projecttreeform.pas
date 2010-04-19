@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2009 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2010 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -98,6 +98,7 @@ type
  tfilenode = class(tprojectnode)
   private
    ffilename: filenamety;
+   fcurrent: boolean; //node compiled
    procedure setfilename(const value: filenamety); virtual;
   protected
   public
@@ -109,6 +110,9 @@ type
    property filename: filenamety read ffilename write setfilename;
  end;
 
+ tcmodulenode = class(tfilenode)
+ end;
+ 
  tformnode = class(tfilenode,irecordfield)
   private
    fclasstype: msestring;
@@ -143,6 +147,7 @@ type
  tfilesnode = class(tprojectrootnode)
   private
    fhashlist: tfilenodehashlist;
+   fchangedcount: integer;
   protected
    function createsubnode: ttreelistitem; override;
    function createnode(const afilename: filenamety): tfilenode; virtual;
@@ -173,10 +178,14 @@ type
    function modulefilenames: filenamearty;
  end;
 
+ stopcheckprocty = procedure (var astop: boolean) of object;
  tcmodulesnode = class(tfilesnode)
+  protected
+   function createsubnode: ttreelistitem; override;
+   function createnode(const afilename: filenamety): tfilenode; virtual;
   public
    constructor create;
-   procedure parse;
+   procedure parse(const astopcheckproc: stopcheckprocty = nil);
  end;
  
  tprojecttree = class
@@ -203,7 +212,7 @@ function isformfile(const aname: filenamety): boolean;
 implementation
 uses
  projecttreeform_mfm,msefileutils,sysutils,main,sourceform,msewidgets,
- msedatalist,msedrag;
+ msedatalist,msedrag,sourceupdate;
 const
  unitscaption = 'Pascal Units';
  cmodulescaption = 'C Modules';
@@ -399,6 +408,7 @@ begin
   result:= createnode(afilename);
   add(ttreelistedititem(result));
   fhashlist.add(afilename,result);
+  inc(fchangedcount);
  end;
 end;
 
@@ -418,6 +428,9 @@ end;
 
 procedure tfilesnode.removefile(const anode: tfilenode);
 begin
+ if not anode.fcurrent then begin
+  dec(fchangedcount);
+ end;
  fhashlist.delete(anode.ffilename,anode);
 end;
 
@@ -442,6 +455,7 @@ procedure tfilesnode.clear;
 begin
  fhashlist.clear;
  inherited;
+ fchangedcount:= 0;
 end;
 
 { tunitsnode }
@@ -547,8 +561,36 @@ begin
  caption:= cmodulescaption;
 end;
 
-procedure tcmodulesnode.parse;
+procedure tcmodulesnode.parse(const astopcheckproc: stopcheckprocty);
+var
+ int1,int2: integer;
+ bo1: boolean;
 begin
+ if fchangedcount > 0 then begin
+  bo1:= false;
+  for int1:= 0 to count - 1 do begin
+   with tcmodulenode(fitems[int1]) do begin
+    sourceupdater.updatesourceunit(ffilename,int2,false);
+   end;
+   dec(fchangedcount);
+   if astopcheckproc <> nil then begin
+    astopcheckproc(bo1);
+    if bo1 then begin
+     break;
+    end;
+   end;
+  end;
+ end;
+end;
+
+function tcmodulesnode.createsubnode: ttreelistitem;
+begin
+ result:= tcmodulenode.create(pnk_none,'');
+end;
+
+function tcmodulesnode.createnode(const afilename: filenamety): tfilenode;
+begin
+ result:= tcmodulenode.create(pnk_source,afilename);
 end;
 
 { tprojecttree }
@@ -616,9 +658,18 @@ begin
   end;
  finally
   if not filer.iswriter then begin
-   funits.endupdate;
-   fcmodules.endupdate;
-   ffiles.endupdate;
+   with funits do begin
+    endupdate;
+    fchangedcount:= count;
+   end;
+   with fcmodules do begin
+    endupdate;
+    fchangedcount:= count;
+   end;
+   with ffiles do begin
+    endupdate;
+    fchangedcount:= count;
+   end;
   end;
  end;
 end;
@@ -711,6 +762,7 @@ procedure tprojecttreefo.clear;
 begin
  projecttree.units.clear;
  projecttree.files.clear;
+ projecttree.cmodules.clear;
 end;
 
 procedure tprojecttreefo.projecttreefoondestroy(const sender: tobject);

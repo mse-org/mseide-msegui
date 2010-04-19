@@ -76,7 +76,9 @@ type
    fclosing: boolean;
    flistparam: tcrootdeflist;
    fidparam: integer;
+   fansistringparam: ansistring;
    procedure checkfunctioninfo(const aitem; var accept: boolean);
+   procedure checkfindname(var stop: boolean);
   protected
    procedure add(const alist: tcrootdeflist; const aid: integer);
    function hashkey(const akey): hashvaluety; override;
@@ -518,6 +520,11 @@ begin
  end;
 end;
 
+procedure tcglobals.checkfindname(var stop: boolean);
+begin
+ stop:= internalfind(fansistringparam) <> nil;
+end;
+
 function tcglobals.checkfind(const aname: ansistring): pcglobfuncinfoty;
 var
  po1: phashdataty;
@@ -525,7 +532,8 @@ begin
  result:= nil;
  po1:= internalfind(aname);
  if po1 = nil then begin
-  projecttree.cmodules.parse;
+  fansistringparam:= aname;
+  projecttree.cmodules.parse(@checkfindname);
   po1:= internalfind(aname);
  end;
  if po1 <> nil then begin

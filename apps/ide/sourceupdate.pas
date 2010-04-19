@@ -2179,9 +2179,6 @@ begin
   filenum:= 1;
  end;
  updateunit(result,interfaceonly);
-// if filenum > 1 then begin
-//  updateincludefilenum(result,asourcefilename,filenum);
-// end;
  ffilenamelist.add(asourcefilename,result);
 end;
 
