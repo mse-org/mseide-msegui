@@ -415,6 +415,7 @@ begin
   parsestatement;
  end;
  afterparse(self,funitinfopo^,true);
+ projecttree.cmodules.modulecompiled(funitinfopo^.sourcefilename);
 end;
 
 procedure tcdesignparser.clear;

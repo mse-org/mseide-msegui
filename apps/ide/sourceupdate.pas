@@ -232,7 +232,7 @@ function getimplementationtext(const amodule: tmsecomponent; out aunit: punitinf
 implementation
 uses
  sysutils,msesys,msefileutils,sourceform,sourcepage,projectoptionsform,
- msegui,msedatalist;
+ msegui,msedatalist,projecttreeform;
 
 function findprogramlanguage(const afilename: filenamety): proglangty;
 var
@@ -525,7 +525,15 @@ begin
  ainfo:= find(key);
  if ainfo <> nil then begin
   for int1:= 0 to high(ainfo.funits) do begin
-   ainfo.funits[int1]^.interfacecompiled:= false;
+   with ainfo.funits[int1]^ do begin
+    if interfacecompiled then begin
+     interfacecompiled:= false;
+     if (proglang = pl_c) and (deflist <> nil) then begin
+      deflist.clear; //remove entries in cglobals;
+      projecttree.cmodules.modulechanged(key);
+     end;
+    end;
+   end;
   end;
  end;
 end;

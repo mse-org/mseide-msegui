@@ -186,6 +186,8 @@ type
   public
    constructor create;
    procedure parse(const astopcheckproc: stopcheckprocty = nil);
+   procedure modulechanged(const aname: filenamety);
+   procedure modulecompiled(const aname: filenamety);
  end;
  
  tprojecttree = class
@@ -570,9 +572,12 @@ begin
   bo1:= false;
   for int1:= 0 to count - 1 do begin
    with tcmodulenode(fitems[int1]) do begin
-    sourceupdater.updatesourceunit(ffilename,int2,false);
+    if not fcurrent then begin
+     sourceupdater.updatesourceunit(ffilename,int2,false);
+//     fcurrent:= true;
+//     dec(self.fchangedcount);
+    end;
    end;
-   dec(fchangedcount);
    if astopcheckproc <> nil then begin
     astopcheckproc(bo1);
     if bo1 then begin
@@ -591,6 +596,28 @@ end;
 function tcmodulesnode.createnode(const afilename: filenamety): tfilenode;
 begin
  result:= tcmodulenode.create(pnk_source,afilename);
+end;
+
+procedure tcmodulesnode.modulechanged(const aname: filenamety);
+var
+ node1: tcmodulenode;
+begin
+ node1:= tcmodulenode(fhashlist.find(aname));
+ if (node1 <> nil) and node1.fcurrent then begin
+  node1.fcurrent:= false;
+  inc(fchangedcount);
+ end;
+end;
+
+procedure tcmodulesnode.modulecompiled(const aname: filenamety);
+var
+ node1: tcmodulenode;
+begin
+ node1:= tcmodulenode(fhashlist.find(aname));
+ if (node1 <> nil) and not node1.fcurrent then begin
+  node1.fcurrent:= true;
+  dec(fchangedcount);
+ end;
 end;
 
 { tprojecttree }

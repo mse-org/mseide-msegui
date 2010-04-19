@@ -1665,12 +1665,12 @@ end;
 function tpointeransistringhashdatalist.find(const akey: ansistring;
                                              out avalue: pointer): boolean;
 var
- po1: ppointeransistringdataty;
+ po1: ppointer;
 begin
  po1:= inherited find(akey);
  result:= po1 <> nil;
  if result then begin
-  avalue:= po1^.data;
+  avalue:= po1^;
  end
  else begin
   avalue:= nil;
@@ -1680,7 +1680,7 @@ end;
 function tpointeransistringhashdatalist.addunique(const akey: ansistring;
                                                const avalue: pointer): boolean;
 var
- po1: ppointeransistringdataty;
+ po1: ppointer;
 begin
  result:= true;
  po1:= inherited find(akey);
@@ -1688,7 +1688,7 @@ begin
   result:= false;
   po1:= inherited add(akey);
  end;
- po1^.data:= avalue;
+ po1^:= avalue;
 end;
 
 procedure tpointeransistringhashdatalist.checkexact(const aitemdata;
@@ -1787,12 +1787,12 @@ end;
 function tpointermsestringhashdatalist.find(const akey: msestring;
                                              out avalue: pointer): boolean;
 var
- po1: ppointermsestringdataty;
+ po1: ppointer;
 begin
  po1:= inherited find(akey);
  result:= po1 <> nil;
  if result then begin
-  avalue:= po1^.data;
+  avalue:= po1^;
  end
  else begin
   avalue:= nil;
@@ -1816,7 +1816,7 @@ end;
 function tpointermsestringhashdatalist.addunique(const akey: msestring;
                                                const avalue: pointer): boolean;
 var
- po1: ppointermsestringdataty;
+ po1: ppointer;
 begin
  result:= true;
  po1:= inherited find(akey);
@@ -1824,7 +1824,7 @@ begin
   result:= false;
   po1:= inherited add(akey);
  end;
- po1^.data:= avalue;
+ po1^:= avalue;
 end;
 
 procedure tpointermsestringhashdatalist.checkexact(const aitemdata;
