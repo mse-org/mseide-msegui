@@ -247,55 +247,103 @@ type
    function addunique(const akey: ptruint): pointer;
  end;
 
- stringdataty = record
+ ansistringdataty = record
   key: ansistring;
   data: record end;
  end;
- pstringdataty = ^stringdataty;
- stringhashdataty = record
+ pansistringdataty = ^ansistringdataty;
+ ansistringhashdataty = record
   header: hashheaderty;
-  data: stringdataty;
+  data: ansistringdataty;
  end;
- pstringhashdataty = ^stringhashdataty;
+ pansistringhashdataty = ^ansistringhashdataty;
  
- stringhashiteratorprocty = procedure(var aitem: stringdataty) of object;
+ ansistringhashiteratorprocty = procedure(var aitem: ansistringdataty) of object;
 
- tstringhashdatalist = class(thashdatalist)
+ tansistringhashdatalist = class(thashdatalist)
   private
   protected
-//   function dohash(const aitem: phashdataty): hashvaluety; override;
    function hashkey(const akey): hashvaluety; override;
    function checkkey(const akey; const aitemdata): boolean; override;
    procedure finalizeitem(var aitemdata); override;
   public
    constructor create(const datasize: integer);
-//   procedure clear; override;
    function add(const akey: ansistring): pointer;
    function find(const akey: ansistring): pointer;
    function addunique(const akey: ansistring): pointer;
    function delete(const akey: ansistring; 
                          const all: boolean = false): boolean; //true if found
    procedure iterate(const akey: ansistring;
-                          const aiterator: stringhashiteratorprocty); overload;
+                     const aiterator: ansistringhashiteratorprocty); overload;
  end;
 
- pointerstringdataty = record
+ pointeransistringdataty = record
   key: ansistring;
   data: pointer;
  end;
- ppointerstringdataty = ^pointerstringdataty;
- pointerstringhashdataty = record
+ ppointeransistringdataty = ^pointeransistringdataty;
+ pointeransistringhashdataty = record
   header: hashheaderty;
-  data: pointerstringdataty;
+  data: pointeransistringdataty;
  end;
- ppointerstringhashdataty = ^pointerstringhashdataty;
+ ppointeransistringhashdataty = ^pointeransistringhashdataty;
 
- tpointerstringhashdatalist = class(tstringhashdatalist)
+ tpointeransistringhashdatalist = class(tansistringhashdatalist)
   public
    constructor create;
    procedure add(const akey: ansistring; const avalue: pointer);
    function find(const akey: ansistring; out avalue: pointer): boolean;
    function addunique(const akey: ansistring; const avalue: pointer): boolean;
+                   //true if found
+ end;
+
+ msestringdataty = record
+  key: msestring;
+  data: record end;
+ end;
+ pmsestringdataty = ^msestringdataty;
+ msestringhashdataty = record
+  header: hashheaderty;
+  data: msestringdataty;
+ end;
+ pmsestringhashdataty = ^msestringhashdataty;
+ 
+ msestringhashiteratorprocty = procedure(var aitem: msestringdataty) of object;
+
+ tmsestringhashdatalist = class(thashdatalist)
+  private
+  protected
+   function hashkey(const akey): hashvaluety; override;
+   function checkkey(const akey; const aitemdata): boolean; override;
+   procedure finalizeitem(var aitemdata); override;
+  public
+   constructor create(const datasize: integer);
+   function add(const akey: msestring): pointer;
+   function find(const akey: msestring): pointer;
+   function addunique(const akey: msestring): pointer;
+   function delete(const akey: msestring; 
+                         const all: boolean = false): boolean; //true if found
+   procedure iterate(const akey: msestring;
+                     const aiterator: msestringhashiteratorprocty); overload;
+ end;
+
+ pointermsestringdataty = record
+  key: msestring;
+  data: pointer;
+ end;
+ ppointermsestringdataty = ^pointermsestringdataty;
+ pointermsestringhashdataty = record
+  header: hashheaderty;
+  data: pointermsestringdataty;
+ end;
+ ppointermsestringhashdataty = ^pointermsestringhashdataty;
+
+ tpointermsestringhashdatalist = class(tmsestringhashdatalist)
+  public
+   constructor create;
+   procedure add(const akey: msestring; const avalue: pointer);
+   function find(const akey: msestring; out avalue: pointer): boolean;
+   function addunique(const akey: msestring; const avalue: pointer): boolean;
                    //true if found
  end;
 
@@ -1519,123 +1567,83 @@ begin
  result:= ptruint(akey) = ptruinthashdataty(aitemdata).data.key;
 end;
 
-{ tstringhashdatalist }
+{ tansistringhashdatalist }
 
-constructor tstringhashdatalist.create(const datasize: integer);
+constructor tansistringhashdatalist.create(const datasize: integer);
 begin
- inherited create(datasize + sizeof(stringdataty));
+ inherited create(datasize + sizeof(ansistringdataty));
  fstate:= fstate + [hls_needsnull,hls_needsfinalize];
 end;
 
-procedure tstringhashdatalist.finalizeitem(var aitemdata);
+procedure tansistringhashdatalist.finalizeitem(var aitemdata);
 begin
- finalize(stringdataty(aitemdata));
+ finalize(ansistringdataty(aitemdata));
 end;
-(*
-procedure tstringhashdatalist.clear;
-begin
-// iterate(hashiteratorprocty(@finalizeitem));
- iterate({$ifdef FPC}@{$endif}finalizeitem);
- inherited;
-end;
-*)
-function tstringhashdatalist.add(const akey: ansistring): pointer;
+
+function tansistringhashdatalist.add(const akey: ansistring): pointer;
 var
- po1: pstringhashdataty;
+ po1: pansistringhashdataty;
 begin
- po1:= pstringhashdataty(internaladd(akey));
+ po1:= pansistringhashdataty(internaladd(akey));
  po1^.data.key:= akey;
  result:= @po1^.data.data;
 end;
 
-function tstringhashdatalist.find(const akey: ansistring): pointer;
+function tansistringhashdatalist.find(const akey: ansistring): pointer;
 begin
  result:= internalfind(akey);
  if result <> nil then begin
-  result:= @pstringdataty(result+sizeof(hashheaderty))^.data;
+  result:= @pansistringdataty(result+sizeof(hashheaderty))^.data;
  end;
 end;
 
-{
-function tstringhashdatalist.find(const key: ansistring): pointer;
-var
- uint1: ptruint;
- po1: pstringhashdataty;
-begin
- result:= nil;
- if count > 0 then begin
-  uint1:= fhashtable[stringhash(key) and fmask];
-  if uint1 <> 0 then begin
-   po1:= pstringhashdataty(pchar(fdata) + uint1);
-   while true do begin
-    if po1^.data.key = key then begin
-     break;
-    end;
-    if po1^.header.nexthash = 0 then begin
-     po1:= nil;
-     break;
-    end;
-    po1:= pstringhashdataty(pchar(fdata) + po1^.header.nexthash);
-   end;
-   if po1 <> nil then begin
-    result:= @po1^.data.data;
-   end;
-  end;
- end;
-end;
-}
-function tstringhashdatalist.addunique(const akey: ansistring): pointer;
+function tansistringhashdatalist.addunique(const akey: ansistring): pointer;
 begin
  result:= find(akey);
  if result = nil then begin
   result:= add(akey);
  end;
 end;
-{
-function tstringhashdatalist.dohash(const aitem: phashdataty): hashvaluety;
-begin
- result:= stringhash(pstringhashdataty(aitem)^.data.key);
-end;
-}
-function tstringhashdatalist.hashkey(const akey): hashvaluety;
+
+function tansistringhashdatalist.hashkey(const akey): hashvaluety;
 begin
  result:= stringhash(ansistring(akey));
 end;
 
-function tstringhashdatalist.checkkey(const akey; const aitemdata): boolean;
+function tansistringhashdatalist.checkkey(const akey; const aitemdata): boolean;
 begin
- result:= ansistring(akey) = stringdataty(aitemdata).key;
+ result:= ansistring(akey) = ansistringdataty(aitemdata).key;
 end;
 
-function tstringhashdatalist.delete(const akey: ansistring;
+function tansistringhashdatalist.delete(const akey: ansistring;
                const all: boolean = false): boolean;
 begin
  result:= internaldelete(akey,all);
 end;
 
-procedure tstringhashdatalist.iterate(const akey: ansistring;
-               const aiterator: stringhashiteratorprocty);
+procedure tansistringhashdatalist.iterate(const akey: ansistring;
+               const aiterator: ansistringhashiteratorprocty);
 begin
  iterate(akey,keyhashiteratorprocty(aiterator));
 end;
 
-{ tpointerstringhashdatalist }
+{ tpointeransistringhashdatalist }
 
-constructor tpointerstringhashdatalist.create;
+constructor tpointeransistringhashdatalist.create;
 begin
  inherited create(sizeof(pointer));
 end;
 
-procedure tpointerstringhashdatalist.add(const akey: ansistring;
+procedure tpointeransistringhashdatalist.add(const akey: ansistring;
                                        const avalue: pointer);
 begin
- ppointerstringdataty(inherited add(akey))^.data:= avalue;
+ ppointeransistringdataty(inherited add(akey))^.data:= avalue;
 end;
 
-function tpointerstringhashdatalist.find(const akey: ansistring;
+function tpointeransistringhashdatalist.find(const akey: ansistring;
                                              out avalue: pointer): boolean;
 var
- po1: ppointerstringdataty;
+ po1: ppointeransistringdataty;
 begin
  po1:= inherited find(akey);
  result:= po1 <> nil;
@@ -1647,10 +1655,10 @@ begin
  end;
 end;
 
-function tpointerstringhashdatalist.addunique(const akey: ansistring;
+function tpointeransistringhashdatalist.addunique(const akey: ansistring;
                                                const avalue: pointer): boolean;
 var
- po1: ppointerstringdataty;
+ po1: ppointeransistringdataty;
 begin
  result:= true;
  po1:= inherited find(akey);
@@ -1660,5 +1668,108 @@ begin
  end;
  po1^.data:= avalue;
 end;
+
+{ tmsestringhashdatalist }
+
+constructor tmsestringhashdatalist.create(const datasize: integer);
+begin
+ inherited create(datasize + sizeof(msestringdataty));
+ fstate:= fstate + [hls_needsnull,hls_needsfinalize];
+end;
+
+procedure tmsestringhashdatalist.finalizeitem(var aitemdata);
+begin
+ finalize(msestringdataty(aitemdata));
+end;
+
+function tmsestringhashdatalist.add(const akey: msestring): pointer;
+var
+ po1: pmsestringhashdataty;
+begin
+ po1:= pmsestringhashdataty(internaladd(akey));
+ po1^.data.key:= akey;
+ result:= @po1^.data.data;
+end;
+
+function tmsestringhashdatalist.find(const akey: msestring): pointer;
+begin
+ result:= internalfind(akey);
+ if result <> nil then begin
+  result:= @pmsestringdataty(result+sizeof(hashheaderty))^.data;
+ end;
+end;
+
+function tmsestringhashdatalist.addunique(const akey: msestring): pointer;
+begin
+ result:= find(akey);
+ if result = nil then begin
+  result:= add(akey);
+ end;
+end;
+
+function tmsestringhashdatalist.hashkey(const akey): hashvaluety;
+begin
+ result:= stringhash(msestring(akey));
+end;
+
+function tmsestringhashdatalist.checkkey(const akey; const aitemdata): boolean;
+begin
+ result:= msestring(akey) = msestringdataty(aitemdata).key;
+end;
+
+function tmsestringhashdatalist.delete(const akey: msestring;
+               const all: boolean = false): boolean;
+begin
+ result:= internaldelete(akey,all);
+end;
+
+procedure tmsestringhashdatalist.iterate(const akey: msestring;
+               const aiterator: msestringhashiteratorprocty);
+begin
+ iterate(akey,keyhashiteratorprocty(aiterator));
+end;
+
+{ tpointermsestringhashdatalist }
+
+constructor tpointermsestringhashdatalist.create;
+begin
+ inherited create(sizeof(pointer));
+end;
+
+procedure tpointermsestringhashdatalist.add(const akey: msestring;
+                                       const avalue: pointer);
+begin
+ ppointermsestringdataty(inherited add(akey))^.data:= avalue;
+end;
+
+function tpointermsestringhashdatalist.find(const akey: msestring;
+                                             out avalue: pointer): boolean;
+var
+ po1: ppointermsestringdataty;
+begin
+ po1:= inherited find(akey);
+ result:= po1 <> nil;
+ if result then begin
+  avalue:= po1^.data;
+ end
+ else begin
+  avalue:= nil;
+ end;
+end;
+
+function tpointermsestringhashdatalist.addunique(const akey: msestring;
+                                               const avalue: pointer): boolean;
+var
+ po1: ppointermsestringdataty;
+begin
+ result:= true;
+ po1:= inherited find(akey);
+ if po1 = nil then begin
+  result:= false;
+  po1:= inherited add(akey);
+ end;
+ po1^.data:= avalue;
+end;
+
 
 end.

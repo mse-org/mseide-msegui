@@ -22,7 +22,8 @@ interface
 uses
  mseforms,msewidgetgrid,mselistbrowser,msedatanodes,msetypes,msemenus,mseevent,
  mseactions,msefiledialog,msestat,msegrids,msedesigner,msedataedits,
- msegraphutils,msegui,msestrings,mseact,mseguiglob;
+ msegraphutils,msegui,msestrings,mseact,mseguiglob,mseclasses,msebitmap,mseedit,
+ mseglob,msegraphics,msescrollbar,msesys;
 
 type
 
@@ -37,6 +38,10 @@ type
    filepopup: tpopupmenu;
    addfileact: taction;
    removefileact: taction;
+   cmodulepopup: tpopupmenu;
+   removecmoduleact: taction;
+   addcmoduleact: taction;
+   cmoduledialog: tfiledialog;
    procedure projecteditonchange(const sender: TObject);
    procedure projecteditonstatreaditem(const sender: TObject; 
                 const reader: tstatreader; var aitem: ttreelistitem);
@@ -74,6 +79,8 @@ type
                    var dragobject: ttreeitemdragobject; var processed: Boolean);
    procedure editoncellevent(const sender: TObject; var info: celleventinfoty);
    procedure removefileonexecute(const sender: TObject);
+   procedure addcmoduleonexecute(const sender: TObject);
+   procedure removecmoduleonexecute(const sender: TObject);
   protected
   public
    procedure clear;
@@ -158,15 +165,23 @@ type
    function modulefilenames: filenamearty;
  end;
 
+ tcmodulesnode = class(tfilesnode)
+  public
+   constructor create;
+   procedure parse;
+ end;
+ 
  tprojecttree = class
   private
    funits: tunitsnode;
+   fcmodules: tcmodulesnode;
    ffiles: tfilesnode;
    procedure docellevent(const projectedit: ttreeitemedit;
                     var info: celleventinfoty);
   public
    constructor create;
    function units: tunitsnode;
+   function cmodules: tcmodulesnode;
    function files: tfilesnode;
    procedure updatestat(const filer: tstatfiler);
  end;
@@ -180,9 +195,10 @@ function isformfile(const aname: filenamety): boolean;
 implementation
 uses
  projecttreeform_mfm,msefileutils,sysutils,main,sourceform,msewidgets,
- msedatalist,msedrag,mseglob;
+ msedatalist,msedrag;
 const
- unitscaption = 'Units';
+ unitscaption = 'Pascal Units';
+ cmodulescaption = 'C Modules';
  filescaption = 'Text Files';
  
 function isformfile(const aname: filenamety): boolean;
@@ -407,15 +423,15 @@ end;
 
 { tunitsnode }
 
-function tunitsnode.addfile(const afilename: filenamety): tunitnode;
-begin
- result:= tunitnode(inherited addfile(afilename));
-end;
-
 constructor tunitsnode.create;
 begin
  inherited create;
  caption:= unitscaption;
+end;
+
+function tunitsnode.addfile(const afilename: filenamety): tunitnode;
+begin
+ result:= tunitnode(inherited addfile(afilename));
 end;
 
 function tunitsnode.createnode(const afilename: filenamety): tfilenode;
@@ -500,11 +516,24 @@ begin
  end;
 end;
 
+{ tcmodulesnode }
+
+constructor tcmodulesnode.create;
+begin
+ inherited;
+ caption:= cmodulescaption;
+end;
+
+procedure tcmodulesnode.parse;
+begin
+end;
+
 { tprojecttree }
 
 constructor tprojecttree.create;
 begin
  funits:= tunitsnode.create;
+ fcmodules:= tcmodulesnode.create;
  ffiles:= tfilesnode.create;
 end;
 
@@ -518,12 +547,19 @@ begin
  result:= funits;
 end;
 
+function tprojecttree.cmodules: tcmodulesnode;
+begin
+ result:= fcmodules;
+end;
+
 procedure tprojecttree.updatestat(const filer: tstatfiler);
 begin
  if not filer.iswriter then begin
   funits.clear;
+  fcmodules.clear;
   ffiles.clear;
   funits.beginupdate;
+  fcmodules.beginupdate;
   ffiles.beginupdate;
  end
  else begin
@@ -545,6 +581,11 @@ begin
   finally
    funits.fstatreading:= false;
   end;
+  if filer.beginlist('cmodules') then begin
+   fcmodules.dostatupdate(filer);
+   filer.endlist;
+   fcmodules.caption:= cmodulescaption;
+  end;
   if filer.beginlist('files') then begin
    ffiles.dostatupdate(filer);
    filer.endlist;
@@ -553,6 +594,7 @@ begin
  finally
   if not filer.iswriter then begin
    funits.endupdate;
+   fcmodules.endupdate;
    ffiles.endupdate;
   end;
  end;
@@ -636,7 +678,9 @@ procedure tprojecttreefo.projecttreefoonloaded(const sender: tobject);
 begin
  projecttree.units.caption:= unitscaption;
  projecttree.files.caption:= filescaption;
+ projecttree.cmodules.caption:= cmodulescaption;
  projectedit.itemlist.add(ttreelistedititem(projecttree.units));
+ projectedit.itemlist.add(ttreelistedititem(projecttree.cmodules));
  projectedit.itemlist.add(ttreelistedititem(projecttree.files));
 end;
 
@@ -663,6 +707,12 @@ begin
    freeandnil(amenu);
    tpopupmenu.additems(amenu,self,mouseinfo,filepopup);
   end
+  else begin
+   if projectedit.item.rootnode = projecttree.cmodules then begin
+    freeandnil(amenu);
+    tpopupmenu.additems(amenu,self,mouseinfo,cmodulepopup);
+   end;
+  end;
  end;
 end;
 
@@ -670,14 +720,6 @@ procedure tprojecttreefo.addunitfileonexecute(const sender: tobject);
 begin
  mainfo.opensource(fk_unit,true,false);
  activate; //windowmanager can activate new form window
-end;
-
-procedure tprojecttreefo.addfileonexecute(const sender: TObject);
-begin
- if filedialog.execute = mr_ok then begin
-  sourcefo.openfile(filedialog.controller.filename);
-  projecttree.files.addfile(filedialog.controller.filename);
- end;
 end;
 
 procedure tprojecttreefo.removeunitfileonexecute(const sender: tobject);
@@ -693,6 +735,27 @@ begin
     grid.row:= rowbefore;
    end;
   end;
+ end;
+end;
+
+procedure tprojecttreefo.addcmoduleonexecute(const sender: TObject);
+begin
+ if cmoduledialog.execute = mr_ok then begin
+  sourcefo.openfile(cmoduledialog.controller.filename);
+  projecttree.cmodules.addfile(cmoduledialog.controller.filename);
+ end;
+end;
+
+procedure tprojecttreefo.removecmoduleonexecute(const sender: TObject);
+begin
+ removeunitfileonexecute(sender);
+end;
+
+procedure tprojecttreefo.addfileonexecute(const sender: TObject);
+begin
+ if filedialog.execute = mr_ok then begin
+  sourcefo.openfile(filedialog.controller.filename);
+  projecttree.files.addfile(filedialog.controller.filename);
  end;
 end;
 

@@ -201,8 +201,8 @@ type
                    const typename: string): pdefinfoty; overload;
    function getitemtext(const aitem: sourceitemty): string;
    function getdefinfotext(const adef: pdefinfoty): string;
-   property maxlinelength: integer read fmaxlinelength write fmaxlinelength default 80;
-   
+   property maxlinelength: integer read fmaxlinelength 
+                                    write fmaxlinelength default 80;
  end;
 
 var
@@ -2228,37 +2228,16 @@ function tsourceupdater.findcfunctionimplementation(const aname: ansistring;
                out headerstop: sourceposty): boolean;
 var
  int1: integer;
- po2: punitinfoty;
  po3: pfunctioninfoty;
  int2: integer;
  mstr1: filenamety;
 begin
  result:= false;
- for int1:= 0 to sourcefo.count - 1 do begin
-  mstr1:= sourcefo[int1].filepath;
-  if mseuppercase(fileext(mstr1)) = 'C' then begin
-   po2:= updatesourceunit(mstr1,int2,false);
-   {
-   po3:= cglobals.findfunction(aname);
-   if po3 <> nil then begin
-    headerstart:= po3^.start;
-    headerstop:= po3^.stop;
-    result:= true;
-    break;
-   end;
-   }
-
-   if po2^.proglang = pl_c then begin
-    po3:= po2^.c.functions.find(aname);
-    if po3 <> nil then begin
-     headerstart:= po3^.start;
-     headerstop:= po3^.stop;
-     result:= true;
-     break;
-    end;
-   end;
-
-  end;
+ po3:= cglobals.findfunction(aname);
+ if po3 <> nil then begin
+  headerstart:= po3^.start;
+  headerstop:= po3^.stop;
+  result:= true;
  end;
 end;
 

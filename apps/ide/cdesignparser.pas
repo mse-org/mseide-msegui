@@ -82,10 +82,12 @@ type
    function hashkey(const akey): hashvaluety; override;
    function checkkey(const akey; const aitemdata): boolean; override;
    procedure delete(const alist: tcrootdeflist; const aid: integer);
+   function checkfind(const aname: ansistring): pcglobfuncinfoty;
   public
    property closing: boolean read fclosing;
    constructor create;
    function finddef(const aname: ansistring): pdefinfoty;
+   function findfunction(const aname: ansistring): pfunctioninfoty;
  end;
 
  tcprocdeflist = class(tdeflist)
@@ -98,7 +100,7 @@ procedure finalizecglobals;
 
 implementation
 uses
- sourceupdate,msedesigner,sysutils;
+ sourceupdate,msedesigner,sysutils,projecttreeform;
 var
  fcglobals: tcglobals;
 
@@ -455,17 +457,6 @@ var
  po1: pfunctioninfoty;
 begin
  with info do begin
- {
-  if (fcglobals <> nil) and not fcglobals.closing then begin
-   with c.functions do begin
-    po1:= datapo;
-    for int1:= count-1 downto 0 do begin
-     fcglobals.delete(po1);
-     inc(po1);
-    end;
-   end;
-  end;
- }
   c.functionheaders.free;
   c.functions.free;
  end;
@@ -527,7 +518,35 @@ begin
  end;
 end;
 
+function tcglobals.checkfind(const aname: ansistring): pcglobfuncinfoty;
+var
+ po1: phashdataty;
+begin
+ result:= nil;
+ po1:= internalfind(aname);
+ if po1 = nil then begin
+  projecttree.cmodules.parse;
+  po1:= internalfind(aname);
+ end;
+ if po1 <> nil then begin
+  result:= pcglobfuncinfoty(@po1^.data);
+ end;
+end;
+
 function tcglobals.finddef(const aname: ansistring): pdefinfoty;
+var
+ po1: pcglobfuncinfoty;
+begin
+ result:= nil;
+ po1:= checkfind(aname);
+ if po1 <> nil then begin
+  with po1^ do begin
+   result:= @list.finfos[id];
+  end;
+ end;
+end;
+
+function tcglobals.findfunction(const aname: ansistring): pfunctioninfoty;
 var
  po1: phashdataty;
 begin
@@ -535,7 +554,11 @@ begin
  po1:= internalfind(aname);
  if po1 <> nil then begin
   with pcglobfuncinfoty(@po1^.data)^ do begin
-   result:= @list.finfos[id];
+   with list.unitinfopo^ do begin
+    if proglang = pl_c then begin
+     result:= c.functions.find(aname);
+    end;
+   end;
   end;
  end;
 end;

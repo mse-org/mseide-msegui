@@ -481,7 +481,7 @@ type
  end;
 
 var
- griddatalists: tpointerstringhashdatalist;
+ griddatalists: tpointeransistringhashdatalist;
  
 procedure defaultinitgridwidget(const awidget: twidget; 
                                          const agridintf: iwidgetgrid);
@@ -3007,7 +3007,7 @@ begin
 end;
 
 initialization
- griddatalists:= tpointerstringhashdatalist.create;
+ griddatalists:= tpointeransistringhashdatalist.create;
  registergriddatalistclass(tgridmsestringdatalist.classname,
                      {$ifdef FPC}@{$endif}createtgridmsestringdatalist);
  registergriddatalistclass(tgridansistringdatalist.classname,

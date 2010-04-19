@@ -1,22 +1,21 @@
 object projecttreefo: tprojecttreefo
   optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  frame.grip_size = 10
+  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton, go_backgroundbutton]
+  frame.dummy = 0
+  visible = False
   bounds_x = 263
   bounds_y = 431
   bounds_cx = 286
   bounds_cy = 201
-  frame.grip_size = 10
-  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton, go_backgroundbutton]
-  frame.dummy = 0
-  taborder = 1
-  visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
-  container.bounds_x = 0
-  container.bounds_y = 0
-  container.bounds_cx = 276
-  container.bounds_cy = 201
-  container.frame.dummy = 0
+  container.bounds = (
+    0
+    0
+    276
+    201
+  )
   dragdock.splitter_size = 0
-  dragdock.tab_size = 0
   dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_propsize]
   options = [fo_savepos, fo_savezorder, fo_savestate]
   statfile = mainfo.projectstatfile
@@ -32,7 +31,6 @@ object projecttreefo: tprojecttreefo
     bounds_y = 0
     bounds_cx = 276
     bounds_cy = 201
-    frame.dummy = 0
     anchors = []
     optionsgrid = [og_colsizing, og_focuscellonenter, og_colchangeontabkey, og_wrapcol, og_autopopup]
     datacols.count = 2
@@ -47,25 +45,24 @@ object projecttreefo: tprojecttreefo
       item
         linecolorfix = -1610612733
         width = 129
-        options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        options = [co_fill, co_savevalue, co_savestate, co_mousescrollrow]
         widgetname = 'edit'
       end>
     datarowheight = 16
     reffontheight = 14
     object projectedit: ttreeitemedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-      bounds_x = 0
-      bounds_y = 0
-      bounds_cx = 141
-      bounds_cy = 16
       color = -1879048185
       frame.levelo = 0
       frame.colorclient = -2147483646
       frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
       taborder = 1
       onpopup = projecteditonpopup
       visible = False
+      bounds_x = 0
+      bounds_y = 0
+      bounds_cx = 141
+      bounds_cy = 16
       optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_exitoncursor, oe_locate, oe_savevalue, oe_savestate]
       onchange = projecteditonchange
       itemlist.onstatreaditem = projecteditonstatreaditem
@@ -80,18 +77,17 @@ object projecttreefo: tprojecttreefo
     end
     object edit: trecordfieldedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-      bounds_x = 142
-      bounds_y = 0
-      bounds_cx = 129
-      bounds_cy = 16
       color = -1879048185
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
       taborder = 2
       visible = False
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+      bounds_x = 142
+      bounds_y = 0
+      bounds_cx = 129
+      bounds_cy = 16
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
       textflags = [tf_ycentered, tf_clipo, tf_noselect, tf_ellipseleft]
       oncellevent = editoncellevent
       reffontheight = 14
@@ -108,27 +104,27 @@ object projecttreefo: tprojecttreefo
       item
         action = removeunitfileact
       end>
-    left = 32
-    top = 40
+    left = 8
+    top = 8
   end
   object addunitfileact: taction
     caption = '&Add Unit'
     onexecute = addunitfileonexecute
-    left = 32
-    top = 72
+    left = 112
+    top = 8
   end
   object filedialog: tfiledialog
     controller.options = [fdo_checkexist, fdo_savelastdir]
     controller.historymaxcount = 0
     dialogkind = fdk_none
-    left = 144
-    top = 40
+    left = 8
+    top = 168
   end
   object removeunitfileact: taction
     caption = '&Remove Unit'
     onexecute = removeunitfileonexecute
-    left = 32
-    top = 96
+    left = 112
+    top = 24
   end
   object filepopup: tpopupmenu
     onupdate = filepopuponupdate
@@ -141,19 +137,58 @@ object projecttreefo: tprojecttreefo
         action = removefileact
       end>
     menu.state = [as_localhint]
-    left = 32
-    top = 128
+    left = 8
+    top = 56
   end
   object addfileact: taction
     caption = 'Add Text File'
     onexecute = addfileonexecute
-    left = 136
-    top = 128
+    left = 112
+    top = 56
   end
   object removefileact: taction
     caption = 'Remove Text File'
     onexecute = removefileonexecute
-    left = 136
-    top = 152
+    left = 112
+    top = 72
+  end
+  object cmodulepopup: tpopupmenu
+    onupdate = filepopuponupdate
+    menu.submenu.count = 2
+    menu.submenu.items = <    
+      item
+        action = addcmoduleact
+      end    
+      item
+        action = removecmoduleact
+      end>
+    menu.state = [as_localhint]
+    left = 8
+    top = 88
+  end
+  object removecmoduleact: taction
+    caption = 'Remove Text File'
+    onexecute = removecmoduleonexecute
+    left = 112
+    top = 112
+  end
+  object addcmoduleact: taction
+    caption = 'Add Text File'
+    onexecute = addcmoduleonexecute
+    left = 112
+    top = 96
+  end
+  object cmoduledialog: tfiledialog
+    controller.filterlist.data = (
+      (
+        'C-Source (*.c)'
+        '"*.c"'
+      )
+    )
+    controller.options = [fdo_checkexist, fdo_savelastdir]
+    controller.historymaxcount = 0
+    dialogkind = fdk_none
+    left = 120
+    top = 168
   end
 end
