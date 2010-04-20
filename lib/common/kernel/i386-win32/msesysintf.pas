@@ -1344,6 +1344,25 @@ begin
 end;
 
 //todo: network errormessages
+function networkerror(const aerror: longword): syserrorty;
+var
+ wo1,wo2: longword;
+ buffer1,buffer2: array[0..1024] of msechar;
+begin 
+ if aerror = error_extended_error then begin
+  wo1:= wnetgetlasterrorw(@wo2,@buffer1,1024,@buffer2,1024);
+  if wo1 = no_error then begin
+   result:= syesetextendederror(pmsechar(@buffer2)+': '+
+                                         pmsechar(@buffer1));
+  end
+  else begin
+   result:= sye_network;
+  end;
+ end
+ else begin
+  result:= syeseterror(aerror);
+ end;
+end;
 
 function findservers(const resource: pnetresource; var names: msestringarty): syserrorty;
 var
@@ -1355,6 +1374,7 @@ begin
  result:= sye_network;
  wo1:= wnetopenenum(resource_globalnet,resourcetype_disk,0,resource,handle);
  if wo1 <> no_error then begin
+  result:= networkerror(wo1);
   exit;
  end;
  getmem(po1,sizeof(tnetresource));
@@ -1386,6 +1406,9 @@ begin
      end;
     end
    end;
+  end
+  else begin
+   result:= networkerror(wo1);
   end;
  until wo1 <> no_error;
  wnetcloseenum(handle);
@@ -1405,6 +1428,7 @@ begin
  wo1:= wnetopenenum(resource_globalnet,resourcetype_disk,0,resource,handle);
  resource:= nil;
  if wo1 <> no_error then begin
+  result:= networkerror(wo1);
   exit;
  end;
  getmem(po1,sizeof(tnetresource));
@@ -1434,6 +1458,9 @@ begin
      result:= findserver(name,resource);
     end
    end;
+  end
+  else begin
+   result:= networkerror(wo1);
   end;
  until (wo1 <> no_error) or (result = sye_ok);
  wnetcloseenum(handle);
@@ -1444,11 +1471,8 @@ end;
 
 function sys_opendirstream(var stream: dirstreamty): syserrorty;
 var
- wo1,wo2: longword;
+ wo1: longword;
  int1: integer;
- buffer1,buffer2: array[0..1024] of msechar;
- po1,po2: pmsechar;
-// ar1: msestringarty;
 begin
  with stream,dirstreamwin32ty(platformdata) do begin
   result:= sye_ok;
@@ -1483,19 +1507,7 @@ begin
        wo1:= wnetopenenum(resource_globalnet,resourcetype_disk,0,
                     pnetresource(finddatapo),handle);
        if wo1 <> no_error then begin
-        if wo1 = error_extended_error then begin
-         wo1:= wnetgetlasterrorw(@wo2,@buffer1,1024,@buffer2,1024);
-         if wo1 = no_error then begin
-          result:= syesetextendederror(pmsechar(@buffer2)+': '+
-                                                pmsechar(@buffer1));
-         end
-         else begin
-          result:= sye_dirstream;
-         end;
-        end
-        else begin
-         result:= syeseterror(wo1);
-        end;
+        result:= networkerror(wo1);       
        end;
        freemem(finddatapo);
       end;
