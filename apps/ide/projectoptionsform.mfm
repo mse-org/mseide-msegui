@@ -160,11 +160,11 @@ object projectoptionsfo: tprojectoptionsfo
             )
             datacols.count = 1
             datacols.linewidth = 0
-            datacols.options = [co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+            datacols.options = [co_fill, co_savestate]
             datacols.items = <            
               item
                 width = 622
-                options = [co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                options = [co_fill, co_savestate]
                 widgetname = 'fontdisp'
                 dataclass = tgridrichstringdatalist
                 data = (
@@ -811,15 +811,15 @@ object projectoptionsfo: tprojectoptionsfo
               anchors = []
               optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
               datacols.count = 2
-              datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+              datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
               datacols.items = <              
                 item
                   width = 112
-                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                 end              
                 item
                   width = 494
-                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                 end>
               fixcols.count = 1
               fixcols.items = <              
@@ -872,7 +872,7 @@ object projectoptionsfo: tprojectoptionsfo
               anchors = []
               optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_autopopup, og_mousescrollcol]
               datacols.count = 2
-              datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+              datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
               datacols.items = <              
                 item
                   width = 219
@@ -883,7 +883,7 @@ object projectoptionsfo: tprojectoptionsfo
                 end              
                 item
                   width = 387
-                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste]
+                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_cancopy, co_canpaste]
                   datalist.data = (
                     '"*.pas" "*.pp" "*.inc"'
                   )
@@ -1024,7 +1024,7 @@ object projectoptionsfo: tprojectoptionsfo
               anchors = []
               optionsgrid = [og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_wrapcol, og_autopopup]
               datacols.count = 1
-              datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste]
+              datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste]
               datacols.items = <              
                 item
                   linecolorfix = -1610612733
@@ -1102,13 +1102,13 @@ object projectoptionsfo: tprojectoptionsfo
               datacols.items = <              
                 item
                   width = 22
-                  options = [co_drawfocus, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                  options = [co_drawfocus, co_savevalue, co_savestate]
                   widgetname = 'defon'
                   dataclass = tgridintegerdatalist
                 end              
                 item
                   width = 612
-                  options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                  options = [co_fill, co_savevalue, co_savestate]
                   onshowhint = colonshowhint
                   widgetname = 'def'
                   dataclass = tgridmsestringdatalist
@@ -1199,34 +1199,34 @@ object projectoptionsfo: tprojectoptionsfo
                     end>
                 end>
               datacols.count = 5
-              datacols.options = [co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_nosort]
+              datacols.options = [co_savestate, co_nosort]
               datacols.items = <              
                 item
                   width = 32
-                  options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_nosort]
+                  options = [co_drawfocus, co_savestate, co_nosort]
                   widgetname = 'sigstop'
                   dataclass = tgridintegerdatalist
                 end              
                 item
                   width = 43
-                  options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_nosort]
+                  options = [co_drawfocus, co_savestate, co_nosort]
                   widgetname = 'sighandle'
                   dataclass = tgridintegerdatalist
                 end              
                 item
-                  options = [co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_nosort]
+                  options = [co_savevalue, co_savestate, co_nosort]
                   widgetname = 'signum'
                   dataclass = tgridintegerdatalist
                 end              
                 item
                   width = 39
-                  options = [co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_nosort]
+                  options = [co_savevalue, co_savestate, co_nosort]
                   widgetname = 'signumto'
                   dataclass = tgridintegerdatalist
                 end              
                 item
                   width = 467
-                  options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_nosort]
+                  options = [co_fill, co_savevalue, co_savestate, co_nosort]
                   widgetname = 'signame'
                   dataclass = tgridenumdatalist
                 end>
@@ -1348,13 +1348,13 @@ object projectoptionsfo: tprojectoptionsfo
               datacols.items = <              
                 item
                   width = 47
-                  options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                  options = [co_drawfocus, co_savestate]
                   widgetname = 'exceptignore'
                   dataclass = tgridintegerdatalist
                 end              
                 item
                   width = 587
-                  options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                  options = [co_fill, co_savevalue, co_savestate]
                   widgetname = 'exceptclassnames'
                   dataclass = tgridmsestringdatalist
                 end>
@@ -2325,47 +2325,47 @@ object projectoptionsfo: tprojectoptionsfo
                     end>
                 end>
               datacols.count = 7
-              datacols.options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+              datacols.options = [co_drawfocus, co_savestate]
               datacols.items = <              
                 item
                   width = 13
-                  options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                  options = [co_drawfocus, co_savestate]
                   widgetname = 'befmakeon'
                   dataclass = tgridintegerdatalist
                 end              
                 item
                   width = 13
-                  options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                  options = [co_drawfocus, co_savestate]
                   widgetname = 'befbuildon'
                   dataclass = tgridintegerdatalist
                 end              
                 item
                   width = 13
-                  options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                  options = [co_drawfocus, co_savestate]
                   widgetname = 'befmake1on'
                   dataclass = tgridintegerdatalist
                 end              
                 item
                   width = 13
-                  options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                  options = [co_drawfocus, co_savestate]
                   widgetname = 'befmake2on'
                   dataclass = tgridintegerdatalist
                 end              
                 item
                   width = 13
-                  options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                  options = [co_drawfocus, co_savestate]
                   widgetname = 'befmake3on'
                   dataclass = tgridintegerdatalist
                 end              
                 item
                   width = 13
-                  options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                  options = [co_drawfocus, co_savestate]
                   widgetname = 'befmake4on'
                   dataclass = tgridintegerdatalist
                 end              
                 item
                   width = 551
-                  options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                  options = [co_fill, co_savevalue, co_savestate]
                   widgetname = 'befcommand'
                   dataclass = tgridmsestringdatalist
                 end>
@@ -2521,47 +2521,47 @@ object projectoptionsfo: tprojectoptionsfo
                     end>
                 end>
               datacols.count = 7
-              datacols.options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+              datacols.options = [co_drawfocus, co_savestate]
               datacols.items = <              
                 item
                   width = 13
-                  options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                  options = [co_drawfocus, co_savestate]
                   widgetname = 'makeon'
                   dataclass = tgridintegerdatalist
                 end              
                 item
                   width = 13
-                  options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                  options = [co_drawfocus, co_savestate]
                   widgetname = 'buildon'
                   dataclass = tgridintegerdatalist
                 end              
                 item
                   width = 13
-                  options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                  options = [co_drawfocus, co_savestate]
                   widgetname = 'make1on'
                   dataclass = tgridintegerdatalist
                 end              
                 item
                   width = 13
-                  options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                  options = [co_drawfocus, co_savestate]
                   widgetname = 'make2on'
                   dataclass = tgridintegerdatalist
                 end              
                 item
                   width = 13
-                  options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                  options = [co_drawfocus, co_savestate]
                   widgetname = 'make3on'
                   dataclass = tgridintegerdatalist
                 end              
                 item
                   width = 13
-                  options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                  options = [co_drawfocus, co_savestate]
                   widgetname = 'make4on'
                   dataclass = tgridintegerdatalist
                 end              
                 item
                   width = 551
-                  options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                  options = [co_fill, co_savevalue, co_savestate]
                   onshowhint = colonshowhint
                   widgetname = 'makeoptions'
                   dataclass = tgridmsestringdatalist
@@ -2738,35 +2738,35 @@ object projectoptionsfo: tprojectoptionsfo
                 end>
               datacols.count = 11
               datacols.width = 13
-              datacols.options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+              datacols.options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate]
               datacols.items = <              
                 item
                   width = 13
-                  options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                  options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate]
                   widgetname = 'dmakeon'
                   dataclass = tgridintegerdatalist
                 end              
                 item
                   width = 13
-                  options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                  options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate]
                   widgetname = 'dbuildon'
                   dataclass = tgridintegerdatalist
                 end              
                 item
                   width = 13
-                  options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                  options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate]
                   widgetname = 'dmake1on'
                   dataclass = tgridintegerdatalist
                 end              
                 item
                   width = 13
-                  options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                  options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate]
                   widgetname = 'dmake2on'
                   dataclass = tgridintegerdatalist
                 end              
                 item
                   width = 13
-                  options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                  options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate]
                   widgetname = 'dmake3on'
                   dataclass = tgridintegerdatalist
                 end              
@@ -2774,38 +2774,38 @@ object projectoptionsfo: tprojectoptionsfo
                   linewidth = 2
                   linecolorfix = -1610612733
                   width = 13
-                  options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                  options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate]
                   widgetname = 'dmake4on'
                   dataclass = tgridintegerdatalist
                 end              
                 item
                   width = 13
-                  options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                  options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate]
                   widgetname = 'duniton'
                   dataclass = tgridintegerdatalist
                 end              
                 item
                   width = 13
-                  options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                  options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate]
                   widgetname = 'dincludeon'
                   dataclass = tgridintegerdatalist
                 end              
                 item
                   width = 13
-                  options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                  options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate]
                   widgetname = 'dlibon'
                   dataclass = tgridintegerdatalist
                 end              
                 item
                   width = 13
-                  options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                  options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate]
                   widgetname = 'dobjon'
                   dataclass = tgridintegerdatalist
                 end              
                 item
                   linecolorfix = -1610612733
                   width = 494
-                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste]
+                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savevalue, co_savestate, co_cancopy, co_canpaste]
                   onshowhint = colonshowhint
                   widgetname = 'unitdirs'
                   dataclass = tgridmsestringdatalist
@@ -3090,47 +3090,47 @@ object projectoptionsfo: tprojectoptionsfo
                     end>
                 end>
               datacols.count = 7
-              datacols.options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+              datacols.options = [co_drawfocus, co_savestate]
               datacols.items = <              
                 item
                   width = 13
-                  options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                  options = [co_drawfocus, co_savestate]
                   widgetname = 'aftmakeon'
                   dataclass = tgridintegerdatalist
                 end              
                 item
                   width = 13
-                  options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                  options = [co_drawfocus, co_savestate]
                   widgetname = 'aftbuildon'
                   dataclass = tgridintegerdatalist
                 end              
                 item
                   width = 13
-                  options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                  options = [co_drawfocus, co_savestate]
                   widgetname = 'aftmake1on'
                   dataclass = tgridintegerdatalist
                 end              
                 item
                   width = 13
-                  options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                  options = [co_drawfocus, co_savestate]
                   widgetname = 'aftmake2on'
                   dataclass = tgridintegerdatalist
                 end              
                 item
                   width = 13
-                  options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                  options = [co_drawfocus, co_savestate]
                   widgetname = 'aftmake3on'
                   dataclass = tgridintegerdatalist
                 end              
                 item
                   width = 13
-                  options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                  options = [co_drawfocus, co_savestate]
                   widgetname = 'aftmake4on'
                   dataclass = tgridintegerdatalist
                 end              
                 item
                   width = 551
-                  options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                  options = [co_fill, co_savevalue, co_savestate]
                   widgetname = 'aftcommand'
                   dataclass = tgridmsestringdatalist
                 end>
@@ -3224,7 +3224,7 @@ object projectoptionsfo: tprojectoptionsfo
           end
         end
         object targpref: tstringedit
-          frame.caption = 'Targ pref (-o)'
+          frame.caption = 'Targ. pref. (-o)'
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
           frame.dummy = 0
@@ -3382,53 +3382,53 @@ object projectoptionsfo: tprojectoptionsfo
             end>
           datacols.count = 8
           datacols.width = 13
-          datacols.options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste]
+          datacols.options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste]
           datacols.items = <          
             item
               width = 13
-              options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste]
+              options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste]
               widgetname = 'e0'
               dataclass = tgridintegerdatalist
             end          
             item
               width = 13
-              options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste]
+              options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste]
               widgetname = 'e1'
               dataclass = tgridintegerdatalist
             end          
             item
               width = 13
-              options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste]
+              options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste]
               widgetname = 'e2'
               dataclass = tgridintegerdatalist
             end          
             item
               width = 13
-              options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste]
+              options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste]
               widgetname = 'e3'
               dataclass = tgridintegerdatalist
             end          
             item
               width = 13
-              options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste]
+              options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste]
               widgetname = 'e4'
               dataclass = tgridintegerdatalist
             end          
             item
               width = 13
-              options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste]
+              options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste]
               widgetname = 'e5'
               dataclass = tgridintegerdatalist
             end          
             item
               width = 146
-              options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste]
+              options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste]
               widgetname = 'macronames'
               dataclass = tgridmsestringdatalist
             end          
             item
               width = 404
-              options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste]
+              options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_cancopy, co_canpaste]
               widgetname = 'macrovalues'
               dataclass = tgridmsestringdatalist
             end>
@@ -3568,7 +3568,7 @@ object projectoptionsfo: tprojectoptionsfo
           datacols.items = <          
             item
               width = 14
-              options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+              options = [co_drawfocus, co_savestate]
               widgetname = 'activemacroselect'
               dataclass = tgridintegerdatalist
               data = (
@@ -3584,7 +3584,7 @@ object projectoptionsfo: tprojectoptionsfo
             end          
             item
               width = 591
-              options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+              options = [co_fill, co_savevalue, co_savestate]
               widgetname = 'groupcomment'
               dataclass = tgridmsestringdatalist
               data = (
@@ -3697,7 +3697,7 @@ object projectoptionsfo: tprojectoptionsfo
             end          
             item
               width = 261
-              options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+              options = [co_fill, co_savevalue, co_savestate]
               widgetname = 'fontname'
               dataclass = tgridmsestringdatalist
             end          
@@ -3884,23 +3884,23 @@ object projectoptionsfo: tprojectoptionsfo
                 end>
             end>
           datacols.count = 3
-          datacols.options = [co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+          datacols.options = [co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate, co_mousescrollrow]
           datacols.items = <          
             item
               width = 22
-              options = [co_readonly, co_nofocus, co_drawfocus, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+              options = [co_readonly, co_nofocus, co_drawfocus, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate, co_mousescrollrow]
               widgetname = 'coldi'
               dataclass = tgridpointerdatalist
             end          
             item
               width = 97
-              options = [co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+              options = [co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
               widgetname = 'usercolors'
               dataclass = tgridenumdatalist
             end          
             item
               width = 433
-              options = [co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+              options = [co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
               widthmin = 100
               widgetname = 'usercolorcomment'
               dataclass = tgridmsestringdatalist
@@ -4033,30 +4033,30 @@ object projectoptionsfo: tprojectoptionsfo
                     end>
                 end>
               datacols.count = 4
-              datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+              datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
               datacols.items = <              
                 item
                   width = 18
-                  options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste]
+                  options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste]
                   widgetname = 'loadprojectfile'
                   dataclass = tgridintegerdatalist
                 end              
                 item
                   width = 18
-                  options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste]
+                  options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste]
                   widgetname = 'expandprojectfilemacros'
                   dataclass = tgridintegerdatalist
                 end              
                 item
                   width = 319
-                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste]
+                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savevalue, co_savestate, co_cancopy, co_canpaste]
                   onshowhint = colonshowhint
                   widgetname = 'newprojectfiles'
                   dataclass = tgridmsestringdatalist
                 end              
                 item
                   width = 277
-                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste]
+                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savevalue, co_savestate, co_cancopy, co_canpaste]
                   onshowhint = colonshowhint
                   widgetname = 'newprojectfilesdest'
                   dataclass = tgridmsestringdatalist
@@ -4226,31 +4226,31 @@ object projectoptionsfo: tprojectoptionsfo
                     end>
                 end>
               datacols.count = 4
-              datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+              datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
               datacols.items = <              
                 item
                   width = 87
-                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   onshowhint = colonshowhint
                   widgetname = 'newfiname'
                   dataclass = tgridmsestringdatalist
                 end              
                 item
                   width = 110
-                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   onshowhint = colonshowhint
                   widgetname = 'newfifilter'
                   dataclass = tgridmsestringdatalist
                 end              
                 item
-                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   onshowhint = colonshowhint
                   widgetname = 'newfiext'
                   dataclass = tgridmsestringdatalist
                 end              
                 item
                   width = 355
-                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   onshowhint = colonshowhint
                   widgetname = 'newfisource'
                   dataclass = tgridmsestringdatalist
@@ -4368,38 +4368,38 @@ object projectoptionsfo: tprojectoptionsfo
                     end>
                 end>
               datacols.count = 5
-              datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+              datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
               datacols.items = <              
                 item
                   width = 96
-                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   onshowhint = colonshowhint
                   widgetname = 'newformname'
                   dataclass = tgridmsestringdatalist
                 end              
                 item
                   width = 13
-                  options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+                  options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   widgetname = 'newinheritedform'
                   dataclass = tgridintegerdatalist
                 end              
                 item
                   width = 73
-                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   onshowhint = colonshowhint
                   widgetname = 'newformnamebase'
                   dataclass = tgridmsestringdatalist
                 end              
                 item
                   width = 207
-                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   onshowhint = colonshowhint
                   widgetname = 'newformsourcefile'
                   dataclass = tgridmsestringdatalist
                 end              
                 item
                   width = 216
-                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   onshowhint = colonshowhint
                   widgetname = 'newformformfile'
                   dataclass = tgridmsestringdatalist
@@ -4562,11 +4562,11 @@ object projectoptionsfo: tprojectoptionsfo
                 end>
             end>
           datacols.count = 6
-          datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+          datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
           datacols.items = <          
             item
               width = 13
-              options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+              options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
               widthmin = 13
               widthmax = 13
               widgetname = 'toolsave'
@@ -4574,7 +4574,7 @@ object projectoptionsfo: tprojectoptionsfo
             end          
             item
               width = 13
-              options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+              options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
               widthmin = 13
               widthmax = 13
               widgetname = 'toolparse'
@@ -4582,7 +4582,7 @@ object projectoptionsfo: tprojectoptionsfo
             end          
             item
               width = 13
-              options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+              options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
               widthmin = 13
               widthmax = 13
               widgetname = 'toolhide'
@@ -4590,19 +4590,19 @@ object projectoptionsfo: tprojectoptionsfo
             end          
             item
               width = 108
-              options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+              options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
               widgetname = 'toolmenu'
               dataclass = tgridmsestringdatalist
             end          
             item
               width = 216
-              options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+              options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
               widgetname = 'toolfile'
               dataclass = tgridmsestringdatalist
             end          
             item
               width = 248
-              options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+              options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
               widgetname = 'toolparam'
               dataclass = tgridmsestringdatalist
             end>
