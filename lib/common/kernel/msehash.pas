@@ -206,8 +206,9 @@ type
    function internaladd(const akey): phashdataty;
    procedure internaldeleteitem(const aitem: phashdataty);
    function internaldelete(const akey; const all: boolean): boolean;
-   function internalfind(const akey): phashdataty;
-   function internalfind(const akey; const acheckproc: findcheckprocty): phashdataty;
+   function internalfind(const akey): phashdataty; overload;
+   function internalfind(const akey;
+               const acheckproc: findcheckprocty): phashdataty; overload;
    function internalfindexact(const akey): phashdataty;
    procedure checkexact(const aitemdata; var accept: boolean); virtual; abstract;
    function hashkey(const akey): hashvaluety; virtual; abstract;
@@ -311,8 +312,8 @@ type
    function addunique(const akey: ansistring; const avalue: pointer): boolean;
                    //true if found
    procedure delete(const akey: ansistring; const avalue: pointer);
-   function find(const akey: ansistring): pointer;
-   function find(const akey: ansistring; out avalue: pointer): boolean;
+   function find(const akey: ansistring): pointer; overload;
+   function find(const akey: ansistring; out avalue: pointer): boolean; overload;
    function first: ppointeransistringdataty;
    function next: ppointeransistringdataty;
    procedure iterate(const akey: ansistring;
@@ -1224,13 +1225,13 @@ begin
   end;
   if (avalue < fcapacity) and (fdeletedroot <> 0) and 
                                     (fcount > 0) then begin //packing necessary
-   po1:= getmem((avalue+1)*frecsize);
+   getmem(po1,(avalue+1)*frecsize);
    if po1 = nil then begin
     raise exception.create('Out of memory.');
    end;
    puint1:= frecsize*fcount;
-   fdestpo:= po1 + puint1;
-   internaliterate(@moveitem);
+   fdestpo:= pointer(pchar(po1) + puint1);
+   internaliterate({$ifdef FPC}@{$endif}moveitem);
    freemem(fdata);
    fdata:= po1;
    if (hls_needsnull in fstate) and (avalue > fcount) then begin
@@ -1274,7 +1275,7 @@ var
  po1: phashdataty;
  po2: phashvaluety;
 begin
- po1:= fdata + fassignedroot;
+ po1:= pointer(pchar(fdata) + fassignedroot);
  while true do begin
   puint1:= po1^.header.nextlist;
   if puint1 = 0 then begin
@@ -1285,7 +1286,7 @@ begin
   puint2:= po2^;
   po1^.header.nexthash:= puint2;
   po2^:= pchar(po1) - fdata;
-  phashdataty(fdata+puint2)^.header.prevhash:= po2^;
+  phashdataty(pchar(fdata)+puint2)^.header.prevhash:= po2^;
   inc(pchar(po1),puint1);
  end;
 end;
@@ -1304,7 +1305,7 @@ begin
   grow;
  end;
  if fdeletedroot <> 0 then begin
-  result:= phashdataty(fdata+fdeletedroot);
+  result:= phashdataty(pchar(fdata)+fdeletedroot);
   inc(fdeletedroot,result^.header.nextlist);
   if hls_needsnull in fstate then begin
    fillchar(result^.data,frecsize-sizeof(hashheaderty),0);
@@ -1321,7 +1322,7 @@ begin
  result^.header.nexthash:= puint2;
  puint1:= pchar(result) - fdata;
  fhashtable[hash1]:= puint1;
- phashdataty(fdata+puint2)^.header.prevhash:= puint1;
+ phashdataty(pchar(fdata)+puint2)^.header.prevhash:= puint1;
  inc(fcount);
  result^.header.nextlist:= fassignedroot - puint1;
                          //memory offset to next item
@@ -1345,10 +1346,10 @@ begin
   puint1:= pchar(aitem) - fdata;
   with aitem^.header do begin
    if nexthash <> 0 then begin
-    phashdataty(fdata+nexthash)^.header.prevhash:= prevhash;
+    phashdataty(pchar(fdata)+nexthash)^.header.prevhash:= prevhash;
    end;
    if prevhash <> 0 then begin
-    phashdataty(fdata+prevhash)^.header.nexthash:= nexthash;
+    phashdataty(pchar(fdata)+prevhash)^.header.nexthash:= nexthash;
    end
    else begin
     fhashtable[hash and fmask]:= nexthash;
@@ -1409,7 +1410,7 @@ var
  po1: phashdataty;
 begin
  if fcount > 0 then begin
-  po1:= fdata + fassignedroot;
+  po1:= pointer(pchar(fdata) + fassignedroot);
   while true do begin
    puint1:= phashheaderty(po1)^.nextlist;
    if puint1 = 0 then begin
@@ -1454,7 +1455,7 @@ var
  po1: phashdataty;
 begin
  if fcount > 0 then begin
-  po1:= fdata + fassignedroot;
+  po1:= pointer(pchar(fdata) + fassignedroot);
   while true do begin
    puint1:= phashheaderty(po1)^.nextlist;
    if puint1 = 0 then begin
@@ -1533,7 +1534,7 @@ end;
 
 function thashdatalist.internalfindexact(const akey): phashdataty;
 begin
- result:= internalfind(akey,@checkexact);
+ result:= internalfind(akey,{$ifdef FPC}@{$endif}checkexact);
 end;
 
 function thashdatalist.internalfirst: phashdatadataty;
@@ -1671,7 +1672,7 @@ function tansistringhashdatalist.find(const akey: ansistring): pointer;
 begin
  result:= internalfind(akey);
  if result <> nil then begin
-  result:= @pansistringdataty(result+sizeof(hashheaderty))^.data;
+  result:= @pansistringdataty(pchar(result)+sizeof(hashheaderty))^.data;
  end;
 end;
 
@@ -1819,7 +1820,7 @@ function tmsestringhashdatalist.find(const akey: msestring): pointer;
 begin
  result:= internalfind(akey);
  if result <> nil then begin
-  result:= @pmsestringdataty(result+sizeof(hashheaderty))^.data;
+  result:= @pmsestringdataty(pchar(result)+sizeof(hashheaderty))^.data;
  end;
 end;
 

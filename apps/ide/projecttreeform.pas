@@ -583,7 +583,7 @@ begin
       sourceupdater.updatesourceunit(ffilename,int2,false);
      end;
     end;
-    if astopcheckproc <> nil then begin
+    if {$ifndef FPC}@{$endif}astopcheckproc <> nil then begin
      astopcheckproc(bo1);
      if bo1 then begin
       break;

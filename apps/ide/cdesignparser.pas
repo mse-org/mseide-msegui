@@ -505,7 +505,7 @@ begin
  flistparam:= alist;
  fidparam:= aid;
  with alist.finfos[aid] do begin
-  po1:= internalfind(name,@checkfunctioninfo);
+  po1:= internalfind(name,{$ifdef FPC}@{$endif}checkfunctioninfo);
  end;
  if po1 <> nil then begin
   internaldeleteitem(po1);
@@ -534,7 +534,7 @@ begin
  po1:= internalfind(aname);
  if po1 = nil then begin
   fansistringparam:= aname;
-  projecttree.cmodules.parse(@checkfindname);
+  projecttree.cmodules.parse({$ifdef FPC}@{$endif}checkfindname);
   po1:= internalfind(aname);
  end;
  if po1 <> nil then begin
@@ -585,7 +585,7 @@ begin
  end;
  inherited;
 end;
-
+initialization
 finalization
  finalizecglobals;
 end.

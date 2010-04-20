@@ -1172,7 +1172,7 @@ begin
  aparser.nexttoken;
 end;
 
-procedure tdeflist.startident(const apos: sourceposty; const alen: integer); overload;
+procedure tdeflist.startident(const apos: sourceposty; const alen: integer);
 begin
  with add(syk_identuse,apos,emptysourcepos)^ do begin
   identflags:= [if_first];
