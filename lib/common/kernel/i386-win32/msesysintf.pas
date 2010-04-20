@@ -1582,6 +1582,7 @@ begin
     -3: begin          //network root
      info.state:= [fis_typevalid,fis_extinfo1valid];
      info.extinfo1.attributes:= [fa_dir];
+     info.extinfo1.filetype:= ft_dir;
      if integer(handle) <= high(msestringarty(finddatapo)) then begin
       repeat
        info.name:= msestringarty(finddatapo)[handle];
@@ -1590,9 +1591,10 @@ begin
       until result or (integer(handle) > high(msestringarty(finddatapo)));
      end;
     end;
-    -2: begin
+    -2: begin       //network share
      info.state:= [fis_typevalid,fis_extinfo1valid];
      info.extinfo1.attributes:= [fa_dir];
+     info.extinfo1.filetype:= ft_dir;
      getmem(po1,sizeof(tnetresource));
      fillchar(po1^,sizeof(tnetresource),0);
      ca2:= sizeof(tnetresource);
