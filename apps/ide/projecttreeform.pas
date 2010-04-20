@@ -731,7 +731,7 @@ begin
     end;
    end
    else begin
-    if node2 = ffiles then begin
+    if (node2 = ffiles) or (node2 = fcmodules) then begin
      with tfilenode(node1) do begin
       sourcefo.openfile(ffilename,true);
      end;
