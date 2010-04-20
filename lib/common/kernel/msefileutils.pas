@@ -1256,8 +1256,13 @@ begin
     filename:= copy(str1,2,bigint);
    end
    else begin
-    directory:= directory + '/';
-    filename:= copy(str1,length(directory)+1,bigint);
+    if directory = '//' then begin //unc root
+     filename:= copy(str1,3,bigint);
+    end
+    else begin
+     directory:= directory + '/';
+     filename:= copy(str1,length(directory)+1,bigint);
+    end;
    end;
   end
   else begin

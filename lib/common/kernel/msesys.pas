@@ -126,7 +126,8 @@ type
  end;
  pfileinfoty = ^fileinfoty;
 
- syserrorty = (sye_ok,sye_lasterror,sye_busy,sye_dirstream,sye_network,
+ syserrorty = (sye_ok,sye_lasterror,sye_extendederror,sye_busy,sye_dirstream,
+                sye_network,
                 sye_thread,sye_mutex,sye_semaphore,sye_cond,sye_timeout,
                 sye_copyfile,sye_createdir,sye_noconsole,sye_notimplemented,
                 sye_sockaddr,sye_socket,sye_isdir
@@ -202,7 +203,8 @@ procedure syserror(const error: syserrorty;
 function syelasterror: syserrorty; //returns sye_lasterror, sets mselasterror
 function syeseterror(aerror: integer): syserrorty;
           //if aerror <> 0 -> returns sye_lasterror, sets mselasterror,
-          //                  returns sye_ok othrewise
+          //                  returns sye_ok otherwise
+function syesetextendederror(const aerrormessage: msestring): syserrorty;
 function getcommandlinearguments: stringarty;
                  //refcount of result = 1
 function getcommandlineargument(const index: integer): string;
@@ -238,6 +240,7 @@ function getexceptiontext(obj: tobject; addr: pointer; framecount: longint;
 {$endif}
 threadvar
  mselasterror: integer;
+ mselasterrormessage: msestring;
 
 procedure saveformatsettings;
 procedure initdefaultformatsettings;
@@ -374,7 +377,7 @@ end;
 
 const
  errortexts: array[syserrorty] of string =
-  ('','','Busy','Dirstream','Network error',
+  ('','','','Busy','Dirstream','Network error',
      'Thread error',
     'Mutex error',
     'Semaphore error',
@@ -437,6 +440,12 @@ begin
  end;
 end;
 
+function syesetextendederror(const aerrormessage: msestring): syserrorty;
+begin
+ mselasterrormessage:= aerrormessage;
+ result:= sye_extendederror;
+end;
+
 function syelasterror: syserrorty; //returns sye_lasterror, sets mselasterror
 begin
  result:= sye_lasterror;
@@ -449,10 +458,15 @@ begin
   exit;
  end;
  if error = sye_lasterror then begin
-  raise esys.create(error,text+sys_geterrortext(mselasterror));
+  raise esys.create(error,text + sys_geterrortext(mselasterror));
  end
  else begin
-  raise esys.create(error,text);
+  if error = sye_extendederror then begin
+   raise esys.create(error,text + mselasterrormessage);
+  end
+  else begin
+   raise esys.create(error,text);
+  end;
  end;
 end;
 

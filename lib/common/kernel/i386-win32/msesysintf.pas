@@ -1444,8 +1444,10 @@ end;
 
 function sys_opendirstream(var stream: dirstreamty): syserrorty;
 var
- wo1: longword;
+ wo1,wo2: longword;
  int1: integer;
+ buffer1,buffer2: array[0..1024] of msechar;
+ po1,po2: pmsechar;
 // ar1: msestringarty;
 begin
  with stream,dirstreamwin32ty(platformdata) do begin
@@ -1481,7 +1483,19 @@ begin
        wo1:= wnetopenenum(resource_globalnet,resourcetype_disk,0,
                     pnetresource(finddatapo),handle);
        if wo1 <> no_error then begin
-        result:= sye_dirstream;
+        if wo1 = error_extended_error then begin
+         wo1:= wnetgetlasterrorw(@wo2,@buffer1,1024,@buffer2,1024);
+         if wo1 = no_error then begin
+          result:= syesetextendederror(pmsechar(@buffer2)+': '+
+                                                pmsechar(@buffer1));
+         end
+         else begin
+          result:= sye_dirstream;
+         end;
+        end
+        else begin
+         result:= syeseterror(wo1);
+        end;
        end;
        freemem(finddatapo);
       end;
