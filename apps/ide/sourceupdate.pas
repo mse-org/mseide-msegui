@@ -379,54 +379,61 @@ begin
  result:= false;
  definition:= '';
  with sourceupdater do begin
-  po1:= updatesourceunit(edit.filename,apos.filenum,false);
-  if updateline(po1,apos) then begin
-   po2:= findsourceitem(po1,apos);
-   if po2 <> nil then begin
-    case po2^.kind of
-     sik_uses: begin
-      coord1:= edit.wordatpos(apos.pos,str1,defaultdelimchars + ',;{}/',[]);
-      if str1 <> '' then begin
-       definition:= str1;
-       str1:= findunitfile(str1);
-       if str1 <> '' then begin
-        result:= true;
-        apos.filename:= designer.designfiles.add(str1);
+  application.beginwait;
+  try
+   if not application.waitcanceled then begin
+    po1:= updatesourceunit(edit.filename,apos.filenum,false);
+    if updateline(po1,apos) then begin
+     po2:= findsourceitem(po1,apos);
+     if po2 <> nil then begin
+      case po2^.kind of
+       sik_uses: begin
+        coord1:= edit.wordatpos(apos.pos,str1,defaultdelimchars + ',;{}/',[]);
+        if str1 <> '' then begin
+         definition:= str1;
+         str1:= findunitfile(str1);
+         if str1 <> '' then begin
+          result:= true;
+          apos.filename:= designer.designfiles.add(str1);
+          apos.pos.col:= 0;
+          apos.pos.row:= 0;
+         end;
+        end;
+       end;
+       sik_include: begin
+        apos.filename:=
+            designer.designfiles.find(po1^.includestatements[po2^.index].filename);
+        definition:= designer.designfiles.getname(apos.filename);
         apos.pos.col:= 0;
         apos.pos.row:= 0;
+        result:= true;
        end;
       end;
-     end;
-     sik_include: begin
-      apos.filename:=
-          designer.designfiles.find(po1^.includestatements[po2^.index].filename);
-      definition:= designer.designfiles.getname(apos.filename);
-      apos.pos.col:= 0;
-      apos.pos.row:= 0;
-      result:= true;
-     end;
-    end;
-   end
-   else begin
-    po3:= finddef(po1,apos);
-    if po3 <> nil then begin
-     if po3^.deflist <> nil then begin
-      definition:= po3^.deflist.rootnamepath;
      end
      else begin
-      definition:= po3^.owner.rootnamepath+'.'+uppercase(po3^.name);
-     end;
-     if po3^.kind in [syk_procdef,syk_procimp] then begin
-      int1:= findchar(definition,'$');
-      if int1> 0 then begin
-       setlength(definition,int1-1);
+      po3:= finddef(po1,apos);
+      if po3 <> nil then begin
+       if po3^.deflist <> nil then begin
+        definition:= po3^.deflist.rootnamepath;
+       end
+       else begin
+        definition:= po3^.owner.rootnamepath+'.'+uppercase(po3^.name);
+       end;
+       if po3^.kind in [syk_procdef,syk_procimp] then begin
+        int1:= findchar(definition,'$');
+        if int1> 0 then begin
+         setlength(definition,int1-1);
+        end;
+       end;
+       apos.filename:= po3^.pos.filename;
+       apos.pos:= po3^.pos.pos;
+       result:= true;
       end;
      end;
-     apos.filename:= po3^.pos.filename;
-     apos.pos:= po3^.pos.pos;
-     result:= true;
     end;
    end;
+  finally
+   application.endwait;
   end;
  end;
 end;

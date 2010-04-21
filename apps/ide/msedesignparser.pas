@@ -1859,6 +1859,11 @@ begin
      end;
     end;
     pl_c: begin
+     if result and first and (defs[0]^.kind = syk_procdef) then begin
+      result:= false;
+      scopes:= nil;
+      defs:= nil;
+     end;
      if (not result {or not first}) and (level in 
                                            [dsl_normal,dsl_parent]) then begin
       po2:= cglobals.finddef(anamepath[high(anamepath)]);

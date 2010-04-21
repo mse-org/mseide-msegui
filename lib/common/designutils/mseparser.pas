@@ -210,6 +210,7 @@ type
    procedure nexttoken;
    procedure nextnonwhitetoken;
    procedure lasttoken;
+   procedure lastnonwhitetoken;
 
    function gettoken: string;
    function getorigtoken: string;   //original case
@@ -1110,6 +1111,21 @@ begin
    internalerror;
   end;
  end;
+end;
+
+procedure tparser.lastnonwhitetoken;
+begin
+ repeat
+  if ftokennum > 0 then begin
+   dec(ftokennum);
+   fto:= @fscanner.ftokens[ftokennum];
+  end
+  else begin
+   if not exitinclude then begin
+    break;
+   end;
+  end;
+ until fto^.kind <> tk_whitespace;
 end;
 
 procedure tparser.mark;

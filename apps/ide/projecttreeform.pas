@@ -854,10 +854,16 @@ begin
 end;
 
 procedure tprojecttreefo.addcmoduleonexecute(const sender: TObject);
+var
+ int1: integer;
 begin
  if cmoduledialog.execute = mr_ok then begin
-  sourcefo.openfile(cmoduledialog.controller.filename);
-  projecttree.cmodules.addfile(cmoduledialog.controller.filename);
+  with cmoduledialog.controller do begin
+   for int1:= 0 to high(filenames) do begin
+//    sourcefo.openfile(filenames[int1]);
+    projecttree.cmodules.addfile(filenames[int1]);
+   end;
+  end;
  end;
 end;
 
@@ -867,10 +873,16 @@ begin
 end;
 
 procedure tprojecttreefo.addfileonexecute(const sender: TObject);
+var
+ int1: integer;
 begin
  if filedialog.execute = mr_ok then begin
-  sourcefo.openfile(filedialog.controller.filename);
-  projecttree.files.addfile(filedialog.controller.filename);
+  with filedialog.controller do begin
+   for int1:= 0 to high(filenames) do begin
+//    sourcefo.openfile(filenames[int1]);
+    projecttree.files.addfile(filenames[int1]);
+   end;
+  end;
  end;
 end;
 

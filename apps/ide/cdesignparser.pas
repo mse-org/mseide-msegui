@@ -284,7 +284,7 @@ begin
  end;
 end;
 
-function tcdesignparser.parsefunction: boolean;
+function tcdesignparser.parsefunction: boolean; //todo: optimize
 var
  lstr1,lstr2: lstringty;
  str1: string;
@@ -293,6 +293,7 @@ var
  po1: pfunctioninfoty;
  po2: pfunctionheaderinfoty;
  static: boolean;
+ bo1: boolean;
 begin
  inc(ffunctionlevel);
  result:= false;
@@ -301,6 +302,7 @@ begin
  pos1:= sourcepos;
  with funitinfopo^ do begin
   static:= false;
+  bo1:= false;
   while not eof do begin
    case fto^.kind of
     tk_name: begin
@@ -313,9 +315,13 @@ begin
     end;
     tk_operator: begin
      if fto^.op = '(' then begin
+      bo1:= true;
       break;
      end
      else begin
+      if fto^.op = ';' then begin
+       break;
+      end;
       nexttoken;
      end;
     end;
@@ -324,8 +330,8 @@ begin
     end;
    end;
   end;
-  if not eof then begin
-   lasttoken;
+  if bo1 then begin
+   lastnonwhitetoken;
    if getorigname(lstr2) then begin //function name
     if parsefunctionparams then begin
      if (ffunctionlevel = 1) and testoperator(';') then begin
