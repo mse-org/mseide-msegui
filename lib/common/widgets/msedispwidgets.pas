@@ -684,11 +684,16 @@ end;
 
 function tcustomdatetimedisp.getvaluetext: msestring;
 begin
- if fkind = dtk_time then begin
-  result:= mseformatstr.timetostring(fvalue,fformat);
- end
- else begin
-  result:= mseformatstr.datetimetostring(fvalue,fformat);
+ case fkind of 
+  dtk_time: begin
+   result:= mseformatstr.timetostring(fvalue,fformat);
+  end;
+  dtk_date: begin
+   result:= mseformatstr.datetostring(fvalue,fformat);
+  end;
+  else begin
+   result:= mseformatstr.datetimetostring(fvalue,fformat);
+  end;
  end;
 end;
 
