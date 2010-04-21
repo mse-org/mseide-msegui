@@ -292,6 +292,7 @@ var
  pos1: sourceposty;
  po1: pfunctioninfoty;
  po2: pfunctionheaderinfoty;
+ static: boolean;
 begin
  inc(ffunctionlevel);
  result:= false;
@@ -299,34 +300,60 @@ begin
  mark;
  pos1:= sourcepos;
  with funitinfopo^ do begin
-  skipidents;
-  if getorigname(lstr1) and getorigname(lstr2) then begin
-   if parsefunctionparams then begin
-    if (ffunctionlevel = 1) and testoperator(';') then begin
-     po2:= c.functionheaders.newitem;
-     po2^.name:= lstringtostring(lstr2);
-     deflist.add(pos1,sourcepos,po2);
-     nexttoken;
-     result:= true;  //header
-    end
-    else begin
-     if testoperator('{') then begin
-      result:= true;
-      str1:= lstringtostring(lstr2);
-      with deflist.beginnode(str1,syk_procimp,pos1,sourcepos)^ do begin
-                          //new scope
-       if ffunctionlevel = 1 then begin
-        include(symbolflags,syf_global);
-        c.functions.add(str1,pos1,sourcepos);
-       end;      
-      end;
-      parseblock;
-      deflist.endnode(sourcepos);
-      if ffunctionlevel = 1 then begin
-       cglobals.add(tcrootdeflist(deflist),deflist.infocount-1);
-      end;
+  static:= false;
+  while not eof do begin
+   case fto^.kind of
+    tk_name: begin
+     if checkident(ord(cid_static)) then begin
+      static:= true;
+     end
+     else begin
+      nexttoken;
      end;
-    end;    
+    end;
+    tk_operator: begin
+     if fto^.op = '(' then begin
+      break;
+     end
+     else begin
+      nexttoken;
+     end;
+    end;
+    else begin
+     nexttoken;
+    end;
+   end;
+  end;
+  if not eof then begin
+   lasttoken;
+   if getorigname(lstr2) then begin //function name
+    if parsefunctionparams then begin
+     if (ffunctionlevel = 1) and testoperator(';') then begin
+      po2:= c.functionheaders.newitem;
+      po2^.name:= lstringtostring(lstr2);
+      deflist.add(pos1,sourcepos,po2);
+      nexttoken;
+      result:= true;  //header
+     end
+     else begin
+      if testoperator('{') then begin
+       result:= true;
+       str1:= lstringtostring(lstr2);
+       with deflist.beginnode(str1,syk_procimp,pos1,sourcepos)^ do begin
+                           //new scope
+        if ffunctionlevel = 1 then begin
+         include(symbolflags,syf_global);
+         c.functions.add(str1,pos1,sourcepos);
+        end;      
+       end;
+       parseblock;
+       deflist.endnode(sourcepos);
+       if not static and (ffunctionlevel = 1) then begin
+        cglobals.add(tcrootdeflist(deflist),deflist.infocount-1);
+       end;
+      end;
+     end;    
+    end;
    end;
   end;
  end;
