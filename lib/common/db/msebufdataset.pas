@@ -915,6 +915,11 @@ type
     FDisableControlsState : TDatasetState;
   end;  
  }  
+function compdummy(const a,b): integer;
+begin
+ result:= 0;
+end;
+
 function compblobcache(const a,b): integer;
 var
  lint1: int64;
@@ -5990,36 +5995,38 @@ begin
  result:= 0;
  for int1:= 0 to alastindex do begin
   with findexfieldinfos[int1] do begin
-   if not getfieldflag(@l^.header.fielddata.nullmask,fieldindex) then begin
-    if not getfieldflag(@r^.header.fielddata.nullmask,fieldindex) then begin
-     continue;
+   if fieldinstance <> nil then begin //check for nameless field
+    if not getfieldflag(@l^.header.fielddata.nullmask,fieldindex) then begin
+     if not getfieldflag(@r^.header.fielddata.nullmask,fieldindex) then begin
+      continue;
+     end
+     else begin
+      dec(result);
+     end;
     end
     else begin
-     dec(result);
+     if not getfieldflag(@r^.header.fielddata.nullmask,fieldindex) then begin
+      inc(result);
+     end
+     else begin    
+      result:= comparefunc((pointer(l)+recoffset)^,(pointer(r)+recoffset)^);
+     end;
     end;
-   end
-   else begin
-    if not getfieldflag(@r^.header.fielddata.nullmask,fieldindex) then begin
-     inc(result);
-    end
-    else begin    
-     result:= comparefunc((pointer(l)+recoffset)^,(pointer(r)+recoffset)^);
+    if desc then begin
+     result:= -result;
     end;
-   end;
-   if desc then begin
-    result:= -result;
-   end;
-   if result <> 0 then begin
-    if apartialstring and canpartialstring and (int1 = alastindex) and
-     (caseinsensitive and 
-        mseissametextlen(pmsestring(pointer(l)+recoffset)^,
-                pmsestring(pointer(r)+recoffset)^) or
-      not caseinsensitive and 
-        mseissamestrlen(pmsestring(pointer(l)+recoffset)^,
-                pmsestring(pointer(r)+recoffset)^)) then begin
-     result:= 0;
-    end;               
-    break;
+    if result <> 0 then begin
+     if apartialstring and canpartialstring and (int1 = alastindex) and
+      (caseinsensitive and 
+         mseissametextlen(pmsestring(pointer(l)+recoffset)^,
+                 pmsestring(pointer(r)+recoffset)^) or
+       not caseinsensitive and 
+         mseissamestrlen(pmsestring(pointer(l)+recoffset)^,
+                 pmsestring(pointer(r)+recoffset)^)) then begin
+      result:= 0;
+     end;               
+     break;
+    end;
    end;
   end;
  end;
@@ -6181,43 +6188,49 @@ begin
  with tmsebufdataset(fowner) do begin
   for int1:= 0 to high(findexfieldinfos) do begin
    with ffields.items[int1],findexfieldinfos[int1] do begin
-    field1:= findfield(fieldname);
-    if field1 = nil then begin
-     databaseerror('Index field "'+fieldname+'" not found.',
-                                                   tmsebufdataset(self.fowner));
-    end;
-    fieldinstance:= field1;
-    with field1 do begin
-     if not(fieldkind in [fkdata,fkinternalcalc]) or 
-                      not (datatype in indexfieldtypes) then begin
-      databaseerror('Invalid index field "'+fieldname+'".',
-                                                   tmsebufdataset(self.fowner));
+    if fieldname = '' then begin
+     finalize(findexfieldinfos[int1]);
+     fillchar(findexfieldinfos[int1],sizeof(indexfieldinfoty),0);
+    end
+    else begin
+     field1:= findfield(fieldname);
+     if field1 = nil then begin
+      databaseerror('Index field "'+fieldname+'" not found.',
+                                                    tmsebufdataset(self.fowner));
      end;
-     for kind1:= low(fieldcomparekindty) to high(fieldcomparekindty) do begin
-      with comparefuncs[kind1] do begin
-       if datatype in datatypes then begin
-        vtype:= cvtype;
-        if ifo_caseinsensitive in options then begin
-         comparefunc:= compfunci;
-        end
-        else begin
-         comparefunc:= compfunc;
+     fieldinstance:= field1;
+     with field1 do begin
+      if not(fieldkind in [fkdata,fkinternalcalc]) or 
+                       not (datatype in indexfieldtypes) then begin
+       databaseerror('Invalid index field "'+fieldname+'".',
+                                                    tmsebufdataset(self.fowner));
+      end;
+      for kind1:= low(fieldcomparekindty) to high(fieldcomparekindty) do begin
+       with comparefuncs[kind1] do begin
+        if datatype in datatypes then begin
+         vtype:= cvtype;
+         if ifo_caseinsensitive in options then begin
+          comparefunc:= compfunci;
+         end
+         else begin
+          comparefunc:= compfunc;
+         end;
+         break;
         end;
-        break;
        end;
       end;
+      fieldindex:= fieldno - 1;
+      if fieldindex >= 0 then begin
+       recoffset:= ffieldinfos[fieldindex].base.offset+
+                           intheadersize;
+      end
+      else begin
+       recoffset:= offset; //calc field
+      end;
+      desc:= ifo_desc in foptions;
+      caseinsensitive:= ifo_caseinsensitive in foptions;
+      canpartialstring:= vtype = vtwidestring;
      end;
-     fieldindex:= fieldno - 1;
-     if fieldindex >= 0 then begin
-      recoffset:= ffieldinfos[fieldindex].base.offset+
-                          intheadersize;
-     end
-     else begin
-      recoffset:= offset; //calc field
-     end;
-     desc:= ifo_desc in foptions;
-     caseinsensitive:= ifo_caseinsensitive in foptions;
-     canpartialstring:= vtype = vtwidestring;
     end;
    end;
   end;
@@ -6259,36 +6272,38 @@ begin
  po1:= tmsebufdataset(fowner).intallocrecord;
  for int1:= lastind downto 0 do begin
   with findexfieldinfos[int1],avalues[int1] do begin
-   po2:= pointer(po1) + recoffset;
-   bo1:= false;
-   case vtype of
-    vtinteger: begin
-     pinteger(po2)^:= vinteger;
+   if fieldinstance <> nil then begin //check for nameless field
+    po2:= pointer(po1) + recoffset;
+    bo1:= false;
+    case vtype of
+     vtinteger: begin
+      pinteger(po2)^:= vinteger;
+     end;
+     vtwidestring: begin
+      ppointer(po2)^:= vwidestring;
+      bo1:= vwidestring = nil;
+     end;
+     vtextended: begin
+      pdouble(po2)^:= vextended^;
+      bo1:= isemptyreal(pdouble(po2)^);
+     end;
+     vtcurrency: begin
+      pcurrency(po2)^:= vcurrency^;
+     end;
+     vtboolean: begin
+      pwordbool(po2)^:= vboolean;
+     end;
+     vtint64: begin
+      pint64(po2)^:= vint64^;
+     end;
     end;
-    vtwidestring: begin
-     ppointer(po2)^:= vwidestring;
-     bo1:= vwidestring = nil;
+    if int1 <= high(aisnull) then begin
+     bo1:= aisnull[int1];
     end;
-    vtextended: begin
-     pdouble(po2)^:= vextended^;
-     bo1:= isemptyreal(pdouble(po2)^);
-    end;
-    vtcurrency: begin
-     pcurrency(po2)^:= vcurrency^;
-    end;
-    vtboolean: begin
-     pwordbool(po2)^:= vboolean;
-    end;
-    vtint64: begin
-     pint64(po2)^:= vint64^;
-    end;
+    if not bo1 then begin
+     setfieldflag(@po1^.header.fielddata.nullmask,fieldindex);
+    end; 
    end;
-   if int1 <= high(aisnull) then begin
-    bo1:= aisnull[int1];
-   end;
-   if not bo1 then begin
-    setfieldflag(@po1^.header.fielddata.nullmask,fieldindex);
-   end; 
   end;
  end;
  int1:= findboundary(po1,lastind,abigger);
