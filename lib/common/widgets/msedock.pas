@@ -118,7 +118,8 @@ type
    property optionswidget1 default defaultoptionswidget1 + [ow1_noautosizing];
  end;
 
- dockstatety = (dos_layoutvalid,dos_updating1,dos_updating2,dos_updating3,
+ dockstatety = (dos_layoutvalid,dos_sizing,
+                dos_updating1,dos_updating2,dos_updating3,
                  dos_updating4,dos_updating5,dos_tabedending,
                     dos_closebuttonclicked,dos_maximizebuttonclicked,
                     dos_normalizebuttonclicked,dos_minimizebuttonclicked,
@@ -126,7 +127,7 @@ type
                     dos_topbuttonclicked,dos_backgroundbuttonclicked,
                     dos_lockbuttonclicked,
                     dos_moving,
-                    dos_proprefvalid);
+                    {dos_proprefvalid,}dos_showed);
  dockstatesty = set of dockstatety;
 
  splitdirty = (sd_none,sd_x,sd_y,sd_tabed);
@@ -192,6 +193,7 @@ type
    ftab_facetab: tfacecomp;
    ftab_faceactivetab: tfacecomp;
    fplacementrect: rectty;
+   fhiddensizeref: sizety;
    fbands: bandinfoarty;
    fbandstart: integer;
    fbandgap: integer;
@@ -833,12 +835,12 @@ function tdockcontroller.checksplit(const awidgets: widgetarty;
                  //calculate order and total widths/heights of elements
 var
  ar1: widgetarty;
- int1,int2: integer;
+ int1,int2,int3: integer;
  intf1: idocktarget;
  opt1: optionsdockty;
  fixend: boolean;
  banded: boolean;
- needspropref: boolean;
+// needspropref: boolean;
  dcont1: tdockcontroller;
  widget1: twidget;
  bo1: boolean; 
@@ -875,45 +877,71 @@ begin
  fixsize:= 0;
  fixcount:= 0;
  fixend:= foptionsdock * [od_nofit] <> [];
- needspropref:= false;
+// needspropref:= false;
  for int1:= 0 to high(ar1) do begin
-  with twidget1(ar1[int1]) do begin
-   if not (ow1_noautosizing in foptionswidget1) and visible then begin
-    result[int2]:= ar1[int1];
-    if fixend then begin
-     isfix[int2]:= true;
-     inc(fixcount);
+  widget1:= ar1[int1];
+  with twidget1(widget1) do begin
+   if not (ow1_noautosizing in foptionswidget1) then begin
+    if visible then begin
+     result[int2]:= ar1[int1];
+     if fixend then begin
+      isfix[int2]:= true;
+      inc(fixcount);
+     end
+     else begin
+      if ar1[int1].getcorbainterface(typeinfo(idocktarget),intf1) then begin
+       dcont1:= intf1.getdockcontroller;
+       opt1:= dcont1.foptionsdock;
+//       needspropref:= needspropref or not (dos_proprefvalid in dcont1.fdockstate);
+       dcont1.fdockstate:= dcont1.fdockstate + [{dos_proprefvalid,}dos_showed];
+       bo1:= false; 
+       if dos_sizing in fdockstate then begin
+        if fsplitdir in [sd_x,sd_y] then begin
+         int3:= fr^.si(dcont1.fhiddensizeref);
+         bo1:= int3 > 0; //widget is visible again, restore old size
+         if bo1 and (od_propsize in opt1)  then begin
+          fw^.setsize(widget1,
+               fw^.size(widget1)*fr^.si(fplacementrect.size) div int3);
+                     //adjust to current container size
+         end;
+        end;
+        dcont1.fhiddensizeref:= nullsize;
+       end;
+//       include(dcont1.fdockstate,dos_proprefvalid);
+       if bo1 or not fixedareprop and (od_fixsize in opt1) then begin
+        isfix[int2]:= true;
+        inc(fixcount);
+       end;
+       if not bo1 and ((od_propsize in opt1) and not (od_fixsize in opt1) or 
+                              fixedareprop and (od_fixsize in opt1)) then begin
+        isprop[int2]:= true;
+        propsize:= propsize + fw^.size(ar1[int1]);
+       end
+      end;
+     end;
+     if not isprop[int2] then begin
+      fixsize:= fixsize + fw^.size(ar1[int1]);
+      if not isfix[int2] then begin
+       varsize:= varsize + fw^.size(ar1[int1]);
+      end;
+     end;
+     inc(int2);
     end
     else begin
      if ar1[int1].getcorbainterface(typeinfo(idocktarget),intf1) then begin
       dcont1:= intf1.getdockcontroller;
-      needspropref:= needspropref or not (dos_proprefvalid in dcont1.fdockstate);
-      include(dcont1.fdockstate,dos_proprefvalid);
-      opt1:= dcont1.foptionsdock;
-      if not fixedareprop and (od_fixsize in opt1) then begin
-       isfix[int2]:= true;
-       inc(fixcount);
+      if dos_showed in dcont1.fdockstate then begin
+       exclude(dcont1.fdockstate,dos_showed);
+       dcont1.fhiddensizeref:= fplacementrect.size;
       end;
-      if (od_propsize in opt1) and not (od_fixsize in opt1) or 
-                             fixedareprop and (od_fixsize in opt1) then begin
-       isprop[int2]:= true;
-       propsize:= propsize + fw^.size(ar1[int1]);
-      end
      end;
     end;
-    if not isprop[int2] then begin
-     fixsize:= fixsize + fw^.size(ar1[int1]);
-     if not isfix[int2] then begin
-      varsize:= varsize + fw^.size(ar1[int1]);
-     end;
-    end;
-    inc(int2);
    end;
   end;
  end;
- if needspropref then begin
-  updaterefsize;
- end;
+// if needspropref then begin
+//  updaterefsize;
+// end;
  setlength(result,int2);
  setlength(isprop,int2);
  setlength(isfix,int2);
@@ -1250,7 +1278,7 @@ begin
     end
     else begin
      needsfixscale:= false;
-     fdockstate:= fdockstate + [dos_layoutvalid,dos_updating2];
+     fdockstate:= fdockstate + [dos_layoutvalid,dos_updating2,dos_sizing];
      try
       inc(frecalclevel);
       ar1:= checksplit(awidgets,propsize,int1,fixsize,int2,prop,fix,false);
@@ -1272,7 +1300,7 @@ begin
        end;
       end;
      finally 
-      fdockstate:= fdockstate - [dos_updating1,dos_updating2];
+      fdockstate:= fdockstate - [dos_updating1,dos_updating2,dos_sizing];
       if (not (dos_layoutvalid in fdockstate) or needsfixscale) and 
                         (frecalclevel < 4) then begin
        try
@@ -1476,10 +1504,11 @@ begin
   if (od_banded in foptionsdock) and (foptionsdock * mask2 = []) then begin
    include(foptionsdock,od_aligncenter);
   end;
+  {
   if bo1 xor (od_fixsize in foptionsdock) then begin
    exclude(fdockstate,dos_proprefvalid);
   end;
-  
+  }
   fuseroptions:= foptionsdock;
   if not (od_splitvert in avalue) and (fsplitdir = sd_x) then begin
    fsplitdir:= sd_none;
@@ -1518,24 +1547,31 @@ begin
    else begin
     optionswidget:= optionswidget - [ow_background];
    end;
-   if (splitdirbefore <> fsplitdir) and 
-               not (csloading in componentstate) then begin
-    calclayout(nil,false);
-    with container do begin
-     if fsplitdir = sd_none then begin
-      for int1:= 0 to widgetcount - 1 do begin
-       with widgets[int1] do begin
-        if getcorbainterface(typeinfo(idocktarget),intf1) then begin
-         cont1:= intf1.getdockcontroller;
-         cont1.fmdistate:= mds_normal;
-         anchors:= [an_left,an_top];
-         widgetrect:= cont1.fnormalrect;
+   if not (csloading in componentstate) then begin
+    if (splitdirbefore <> fsplitdir) then begin
+     calclayout(nil,false);
+     with container do begin
+      if fsplitdir = sd_none then begin
+       for int1:= 0 to widgetcount - 1 do begin
+        with widgets[int1] do begin
+         if getcorbainterface(typeinfo(idocktarget),intf1) then begin
+          cont1:= intf1.getdockcontroller;
+          cont1.fmdistate:= mds_normal;
+          anchors:= [an_left,an_top];
+          widgetrect:= cont1.fnormalrect;
+         end;
         end;
        end;
       end;
      end;
+     invalidate;
+    end
+    else begin
+     if bo1 xor (od_fixsize in foptionsdock) then begin
+      updaterefsize;
+//      exclude(fdockstate,dos_proprefvalid);
+     end;
     end;
-    invalidate;
    end;
   end;
  end;
@@ -2200,6 +2236,7 @@ begin
   fonfloat(widget1);
  end;
  if (floatdockcount = int1) and (controller1 <> nil) then begin
+  fhiddensizeref:= nullsize;
   controller1.dochildfloat(widget1);
   widget1.activate;
  end;
@@ -2449,6 +2486,10 @@ begin
     cx:= reader.readinteger('cx',cx,0);
     cy:= reader.readinteger('cy',cy,0);
    end;
+   with fhiddensizeref do begin
+    cx:= reader.readinteger('rcx',cx);
+    cy:= reader.readinteger('rcy',cy);
+   end;
    bo1:= visible;
    if application.findwidget(str1,widget1) then begin
     visible:= false;
@@ -2553,6 +2594,10 @@ begin
    writer.writeinteger('y',bounds_y);
    writer.writeinteger('cx',bounds_cx);
    writer.writeinteger('cy',bounds_cy);
+   with fhiddensizeref do begin
+    writer.writeinteger('rcx',cx);
+    writer.writeinteger('rcy',cy);
+   end;
   end;
   if od_savechildren in foptionsdock then begin
    writer.writerecordarray('children',widgetcount,
