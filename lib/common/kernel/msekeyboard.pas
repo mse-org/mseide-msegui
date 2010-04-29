@@ -145,7 +145,7 @@ type
         key_Ocircumflex =        $00d4,
         key_Otilde =             $00d5,
         key_Odiaeresis =         $00d6,
-//        key_multiply =           $00d7,
+//        key_multiply =           $00d7, -> key_asterisk
         key_Ooblique =           $00d8,
         key_Ugrave =             $00d9,
         key_Uacute =             $00da,
