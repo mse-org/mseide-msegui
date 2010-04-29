@@ -1346,11 +1346,11 @@ end;
 //todo: network errormessages
 function networkerror(const aerror: longword): syserrorty;
 var
- wo1,wo2: longword;
+ wo1,wo2: dword;
  buffer1,buffer2: array[0..1024] of msechar;
-begin 
+begin
  if aerror = error_extended_error then begin
-  wo1:= wnetgetlasterrorw(@wo2,@buffer1,1024,@buffer2,1024);
+  wo1:= wnetgetlasterrorw({$ifdef FPC}@{$endif}wo2,@buffer1,1024,@buffer2,1024);
   if wo1 = no_error then begin
    result:= syesetextendederror(pmsechar(@buffer2)+': '+
                                          pmsechar(@buffer1));
