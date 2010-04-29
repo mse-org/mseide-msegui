@@ -3031,7 +3031,8 @@ begin
                     rasterops3[rop_or]); //combine
         deletedc(dc1);
        end;
-       deleteobject(bmp);
+       gui_freepixmap(bmp);
+//       deleteobject(bmp);
       end;
      end;
     end;
@@ -3189,7 +3190,8 @@ var
  begin
   if maskbmp <> 0 then begin
    if bufferbmp = 0 then begin
-    deleteobject(maskbmp);
+    gui_freepixmap(maskbmp);
+//    deleteobject(maskbmp);
    end;
   end;
   deletedc(destdc);
@@ -3431,9 +3433,9 @@ begin
    end;
    bufferbmpback:= bufferbmp;
    gui_imagetopixmap(destimage,pixmapty(bufferbmp),handle);
-{$ifdef mse_debuggdi}
-   dec(pixmapcount);
-{$endif}
+//{$ifdef mse_debuggdi}
+//   dec(pixmapcount);
+//{$endif}
    gui_freeimagemem(destimage.pixels);
    gui_freeimagemem(sourceimage.pixels);
    if mask <> nil then begin
@@ -3490,7 +3492,8 @@ begin
                  rect1.cy,handle,0,0,srccopy);
    end;
    deletedc(handle);
-   deleteobject(bufferbmp);
+//   deleteobject(bufferbmp);
+   gui_freepixmap(bufferbmp);
    deleteobject(bufferbmpback);
    handle:= destdcbefore;
    destrect^.pos:= destpointbefore;

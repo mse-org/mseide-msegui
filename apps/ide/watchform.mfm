@@ -1,17 +1,22 @@
 object watchfo: twatchfo
   optionswidget = [ow_tabfocus, ow_subfocus, ow_destroywidgets]
-  bounds_x = 291
-  bounds_y = 247
-  bounds_cx = 310
-  bounds_cy = 245
   frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
   frame.dummy = 0
   visible = False
+  bounds_x = 291
+  bounds_y = 247
+  bounds_cx = 310
+  bounds_cy = 245
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
   container.color = -2147483645
   container.frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
+  container.bounds = (
+    0
+    0
+    300
+    245)
   dragdock.splitter_size = 0
   dragdock.caption = 'Watches'
   dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_proportional, od_propsize]
@@ -47,106 +52,108 @@ object watchfo: twatchfo
     D9D9D916FFFFFF017C7C7C01D9D9D916FFFFFF017C7C7C01FFFFFF17D0D0D060
     0000000800000008000000BF00000008FFFFFF00FFFFFF08FFFFFF02FFFFFFC0
     FFFFFF00FFFFFF08FFFFFF00FFFFFF08FFFFFF08FFFFFF08FFFFFFBFFFFFFF08
-    FFFFFF00FFFFFF02FFFFFF08FFFFFF0000000000000000BF0000000000000008
-  }
+    FFFFFF00FFFFFF02FFFFFF08FFFFFF0000000000000000BF0000000000000008}
   moduleclassname = 'tdockform'
   object grid: twidgetgrid
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_hinton, ow_fontglyphheight, ow_autoscale]
+    frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
+    taborder = 1
+    popupmenu = gripopup
     bounds_x = 0
     bounds_y = 24
     bounds_cx = 300
     bounds_cy = 221
-    frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
     anchors = [an_top, an_bottom]
-    taborder = 1
-    popupmenu = gripopup
     optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_wrapcol, og_autopopup]
     fixcols.count = 1
-    fixcols.items = <    
+    fixcols.items = <
       item
         width = 18
         numstart = 1
         numstep = 1
       end>
     fixrows.count = 1
-    fixrows.items = <    
+    fixrows.items = <
       item
-        height = 16
+        height = 15
         captions.count = 6
-        captions.items = <        
+        captions.items = <
           item
             caption = 'A'
             hint = 'Active'
-          end        
+          end
           item
             caption = 'Expression'
-          end        
+          end
           item
             caption = 'Result'
-          end        
+          end
           item
             caption = 'F'
-            hint = 'Display format'#10'B = Binary'#10'D = Decimal signed'#10'U = Decimal unsigned'#10'H = Hex'
-          end        
+            hint = 
+              'Display format'#10'B = Binary'#10'D = Decimal signed'#10'U = Decimal unsigne' +
+              'd'#10'H = Hex'
+          end
           item
-          end        
+          end
           item
           end>
       end>
     rowfonts.count = 1
-    rowfonts.items = <    
+    rowfonts.items = <
       item
         color = -1610612729
         name = 'stf_default'
-        xscale =  1.0000000000000000E+0000
+        xscale = 1.000000000000000000
         dummy = 0
       end>
     datacols.count = 5
-    datacols.items = <    
+    datacols.items = <
       item
         width = 13
-        options = [co_drawfocus, co_savevalue, co_savestate, co_rowcolor, co_zebracolor]
+        options = [co_drawfocus, co_savevalue, co_savestate]
         widgetname = 'watchon'
         dataclass = tgridintegerdatalist
-      end    
+      end
       item
         width = 152
         options = [co_savevalue, co_savestate]
+        options1 = [co1_rowfont, co1_zebracolor]
         widgetname = 'expression'
         dataclass = tgridmsestringdatalist
-      end    
+      end
       item
         width = 82
-        options = [co_fill, co_rowfont]
+        options = [co_fill]
         widthmin = 50
         oncellevent = resultcellevent
         widgetname = 'expresult'
         dataclass = tgridmsestringdatalist
-      end    
+      end
       item
         color = -2147483646
         coloractive = -1879048185
         width = 12
         widgetname = 'formatcode'
         dataclass = tgridintegerdatalist
-      end    
+      end
       item
         width = 13
-        options = [co_invisible, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        options = [co_invisible, co_savevalue, co_savestate, co_mousescrollrow]
         widgetname = 'sizecode'
         dataclass = tgridintegerdatalist
       end>
-    datarowheight = 16
+    datarowheight = 15
     statfile = mainfo.projectstatfile
-    reffontheight = 14
+    reffontheight = 13
     object watchon: tbooleanedit
       optionsskin = [osk_framebuttononly]
+      taborder = 1
       bounds_x = 0
       bounds_y = 0
-      bounds_cy = 16
-      taborder = 1
+      bounds_cy = 15
       statfile = mainfo.projectstatfile
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savevalue, oe_savestate]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savevalue, oe_savestate]
       ondataentered = expressionondataentered
       visible = False
       value = True
@@ -155,39 +162,39 @@ object watchfo: twatchfo
     object expression: tstringedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
       optionsskin = [osk_framebuttononly]
+      taborder = 2
+      visible = False
       bounds_x = 14
       bounds_y = 0
       bounds_cx = 152
-      bounds_cy = 16
-      taborder = 2
-      visible = False
+      bounds_cy = 15
       statfile = mainfo.projectstatfile
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_forcereturncheckvalue, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_forcereturncheckvalue, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
       ondataentered = expressionondataentered
-      reffontheight = 14
+      reffontheight = 13
     end
     object expresult: tstringedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_autoscale]
       optionsskin = [osk_framebuttononly]
+      taborder = 3
+      visible = False
       bounds_x = 167
       bounds_y = 0
       bounds_cx = 82
-      bounds_cy = 16
-      taborder = 3
-      visible = False
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+      bounds_cy = 15
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savestate]
       onsetvalue = expresultonsetvalue
     end
     object formatcode: tdatabutton
       optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
-      bounds_x = 250
-      bounds_y = 0
-      bounds_cx = 12
-      bounds_cy = 16
       frame.optionsskin = [fso_nofocusrect, fso_nodefaultrect]
       frame.localprops = [frl_optionsskin]
       frame.dummy = 0
       taborder = 4
+      bounds_x = 250
+      bounds_y = 0
+      bounds_cx = 12
+      bounds_cy = 15
       ondataentered = formatent
       state = [as_invisible, as_localimagelist]
       imagelist = timagelist1
@@ -197,8 +204,7 @@ object watchfo: twatchfo
         0
         1
         2
-        3
-      )
+        3)
       value = 0
       valuedefault = 0
       min = 0
@@ -207,35 +213,34 @@ object watchfo: twatchfo
     object sizecode: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
       optionsskin = [osk_framebuttononly]
-      bounds_x = 263
-      bounds_y = 0
-      bounds_cx = 13
-      bounds_cy = 16
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
       frame.dummy = 0
       taborder = 5
       visible = False
-      reffontheight = 14
+      bounds_x = 263
+      bounds_y = 0
+      bounds_cx = 13
+      bounds_cy = 15
+      reffontheight = 13
     end
   end
   object watcheson: tbooleanedit
-    bounds_x = 8
-    bounds_y = 4
-    bounds_cx = 81
-    bounds_cy = 16
     frame.caption = 'Watches on'
     frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
     frame.dummy = 0
     frame.outerframe = (
       0
       1
-      68
-      2
-    )
+      61
+      1)
+    bounds_x = 8
+    bounds_y = 4
+    bounds_cx = 74
+    bounds_cy = 15
     statfile = mainfo.projectstatfile
-    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
     onchange = watchesononchange
     onsetvalue = watchesononsetvalue
     value = True
@@ -243,86 +248,86 @@ object watchfo: twatchfo
   object gripopup: tpopupmenu
     onupdate = popupdate
     menu.submenu.count = 21
-    menu.submenu.items = <    
+    menu.submenu.items = <
       item
         caption = 'Delete all'
         state = [as_localcaption, as_localonexecute]
         onexecute = deletallexecute
-      end    
+      end
       item
         options = [mao_separator, mao_shortcutcaption]
-      end    
+      end
       item
         caption = 'Add Watchpoint'
         state = [as_localcaption, as_localonexecute]
         onexecute = addwatchpoint
-      end    
+      end
       item
         caption = 'Address Watchpoint 8'
         state = [as_localcaption, as_localonexecute]
         onexecute = addresswatch
-      end    
+      end
       item
         caption = 'Address Watchpoint 16'
         state = [as_localcaption, as_localtag, as_localonexecute]
         tag = 1
         onexecute = addresswatch
-      end    
+      end
       item
         caption = 'Address Watchpoint 32'
         state = [as_localcaption, as_localtag, as_localonexecute]
         tag = 2
         onexecute = addresswatch
-      end    
+      end
       item
         caption = 'Address Watchpoint 64'
         state = [as_localcaption, as_localtag, as_localonexecute]
         tag = 3
         onexecute = addresswatch
-      end    
+      end
       item
         options = [mao_separator, mao_shortcutcaption]
-      end    
+      end
       item
         caption = '&Format default'
         name = 'format'
         state = [as_checked, as_localchecked, as_localcaption, as_localonexecute]
         options = [mao_radiobutton, mao_shortcutcaption]
         onexecute = formatexecute
-      end    
+      end
       item
         caption = '&Binary'
         state = [as_localcaption, as_localtag, as_localonexecute]
         options = [mao_radiobutton, mao_shortcutcaption]
         tag = 1
         onexecute = formatexecute
-      end    
+      end
       item
         caption = 'D&ecimal signed'
         state = [as_localcaption, as_localtag, as_localonexecute]
         options = [mao_radiobutton, mao_shortcutcaption]
         tag = 2
         onexecute = formatexecute
-      end    
+      end
       item
         caption = 'Decimal &unsigned'
         state = [as_localcaption, as_localtag, as_localonexecute]
         options = [mao_radiobutton, mao_shortcutcaption]
         tag = 3
         onexecute = formatexecute
-      end    
+      end
       item
         caption = '&Hex'
         state = [as_localcaption, as_localtag, as_localonexecute]
         options = [mao_radiobutton, mao_shortcutcaption]
         tag = 4
         onexecute = formatexecute
-      end    
+      end
       item
         state = [as_localcaption, as_localtag, as_localonexecute]
         options = [mao_separator, mao_shortcutcaption]
         tag = 4
-      end    
+      end
       item
         caption = '&Size default'
         name = 'size'
@@ -330,7 +335,7 @@ object watchfo: twatchfo
         options = [mao_radiobutton, mao_shortcutcaption]
         group = 1
         onexecute = sizeexecute
-      end    
+      end
       item
         caption = '&8 Bit'
         state = [as_localcaption, as_localtag, as_localgroup, as_localonexecute]
@@ -338,7 +343,7 @@ object watchfo: twatchfo
         tag = 1
         group = 1
         onexecute = sizeexecute
-      end    
+      end
       item
         caption = '&16 Bit'
         state = [as_localcaption, as_localtag, as_localgroup, as_localonexecute]
@@ -346,7 +351,7 @@ object watchfo: twatchfo
         tag = 2
         group = 1
         onexecute = sizeexecute
-      end    
+      end
       item
         caption = '&32 Bit'
         state = [as_localcaption, as_localtag, as_localgroup, as_localonexecute]
@@ -354,7 +359,7 @@ object watchfo: twatchfo
         tag = 3
         group = 1
         onexecute = sizeexecute
-      end    
+      end
       item
         caption = '&64 Bit'
         name = '&64 Bit'
@@ -363,10 +368,10 @@ object watchfo: twatchfo
         tag = 4
         group = 1
         onexecute = sizeexecute
-      end    
+      end
       item
         options = [mao_separator, mao_shortcutcaption]
-      end    
+      end
       item
         caption = '&Reset Formats'
         state = [as_localcaption, as_localonexecute]
@@ -375,15 +380,15 @@ object watchfo: twatchfo
     menu.name = 'gridpopup'
     menu.state = [as_localonexecute]
     menu.onexecute = deletallexecute
-    left = 96
-    top = 112
+    Left = 96
+    Top = 112
   end
   object timagelist1: timagelist
     width = 10
     height = 18
     count = 4
-    left = 96
-    top = 152
+    Left = 96
+    Top = 152
     image = {
       00000000020000001400000024000000CC010000000000000000000000000000
       0000000000000000000000000000000000000000FFFFFF6700000003FFFFFF07
@@ -405,7 +410,6 @@ object watchfo: twatchfo
       38209108482001004820D1BF4820110838E09008000020080000D0BF00000008
       000000000000900800008005000000C000000000000090080000000048201108
       48209108482091084820D1BF48E0010848200100482081053020014000000000
-      00000000000000000000000000000000
-    }
+      00000000000000000000000000000000}
   end
 end

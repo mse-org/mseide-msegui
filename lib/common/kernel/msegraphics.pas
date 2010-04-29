@@ -1973,6 +1973,7 @@ begin
    bmp.releasehandle;
    bmp.Free;
    handle:= ahandle;
+   acquirehandle;
   end;
  end;
 end;
