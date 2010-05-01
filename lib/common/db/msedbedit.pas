@@ -277,7 +277,8 @@ type
    property maxlength;
    property onsetvalue;
  end;
-
+ 
+{
  tdbdialogstringedit = class(tcustomdialogstringedit,idbeditfieldlink,ireccontrol)
   private
    fdatalink: tstringeditwidgetdatalink;
@@ -295,6 +296,7 @@ type
 
    function getrowdatapo(const info: cellinfoty): pointer; override;
    function getnulltext: msestring; override;
+
   //idbeditfieldlink
    procedure valuetofield;
    procedure fieldtovalue;
@@ -311,7 +313,7 @@ type
    property onsetvalue;
    property onexecute;
  end;
- 
+}
  tcustomdbdropdownlistedit = class(tcustomdropdownlistedit,idbeditfieldlink,ireccontrol)
   private
    fdatalink: tstringeditwidgetdatalink;
@@ -2970,8 +2972,7 @@ begin
  inherited;
 end;
 
-{ tdbdialogstringedit }
-
+{
 constructor tdbdialogstringedit.create(aowner: tcomponent);
 begin
  fdatalink:= tstringeditwidgetdatalink.Create(idbeditfieldlink(self));
@@ -3075,6 +3076,7 @@ begin
  fdatalink.dataentered;
  inherited;
 end;
+}
 
 { tcustomdbdropdownlistedit }
 
@@ -8239,7 +8241,6 @@ begin
   end;
   updatereadonlystate;
  end;
-
 end;
 
 procedure tcustomlbdropdownlistcontroller.dropdown;

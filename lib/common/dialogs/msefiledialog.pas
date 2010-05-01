@@ -236,14 +236,23 @@ type
                                   default defaultfiledialogoptionsedit;
  end;
 
+ tcustomfilenameedit = class;
+ tfilenameeditcontroller = class(tstringdialogcontroller)
+  protected
+   function execute(var avalue: msestring): boolean; override;
+  public
+   constructor create(const aowner: tcustomfilenameedit);
+ end;
+ 
  tcustomfilenameedit = class(tcustomdialogstringed)
   private
    fcontroller: tfiledialogcontroller;
 //   fdialogkind: filedialogkindty;
    procedure setcontroller(const avalue: tfiledialogcontroller);
   protected
+   function createdialogcontroller: tstringdialogcontroller; override;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
-   function execute(var avalue: msestring): boolean; override;
+//   function execute(var avalue: msestring): boolean; override;
    procedure updatedisptext(var avalue: msestring); override;
    function getvaluetext: msestring; override;
    procedure readstatvalue(const reader: tstatreader); override;
@@ -1717,6 +1726,20 @@ begin
  inherited;
 end;
 
+{ tfilenameeditcontroller }
+
+constructor tfilenameeditcontroller.create(const aowner: tcustomfilenameedit);
+begin
+ inherited create(aowner);
+end;
+
+function tfilenameeditcontroller.execute(var avalue: msestring): boolean;
+begin
+ with tcustomfilenameedit(fowner) do begin
+  result:= fcontroller.execute(avalue);
+ end;
+end;
+
 { tcustomfilenameedit }
 
 constructor tcustomfilenameedit.create(aowner: tcomponent);
@@ -1730,12 +1753,12 @@ begin
  inherited;
  fcontroller.Free;
 end;
-
+{
 function tcustomfilenameedit.execute(var avalue: msestring): boolean;
 begin
  result:= fcontroller.execute(avalue);
 end;
-
+}
 procedure tcustomfilenameedit.setcontroller(const avalue: tfiledialogcontroller);
 begin
  fcontroller.assign(avalue);
@@ -1844,6 +1867,11 @@ procedure tcustomfilenameedit.updatepastefromclipboard(var atext: msestring);
 begin
  tomsefilepath1(atext);
  inherited;
+end;
+
+function tcustomfilenameedit.createdialogcontroller: tstringdialogcontroller;
+begin
+ result:= tfilenameeditcontroller.create(self);
 end;
 
 { tdirdropdownedit }

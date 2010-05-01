@@ -14,7 +14,7 @@ unit msecalendardatetimeedit;
 interface
 uses
  classes,msedataedits,msepopupcalendar,msedropdownlist,msetypes,msegraphutils,
- mseguiglob,mseinplaceedit,mseedit,msestrings,msegui,mseevent,msemenus;
+ mseguiglob,mseinplaceedit,mseedit,msestrings,msegui,mseevent,msemenus,mseeditglob;
  
 type
  tcustomcalendardatetimeedit = class(tcustomdatetimeedit,idropdowncalendar)
@@ -24,12 +24,12 @@ type
    function getframe: tdropdownbuttonframe;
   protected
    function getcellframe: framety; override;
-   procedure internalcreateframe; override;
-   procedure dokeydown(var info: keyeventinfoty); override;
-   procedure domousewheelevent(var info: mousewheeleventinfoty); override;
-   procedure mouseevent(var info: mouseeventinfoty); override;
-   procedure editnotification(var info: editnotificationinfoty); override;
-   procedure updatereadonlystate; override;
+//   procedure internalcreateframe; override;
+//   procedure dokeydown(var info: keyeventinfoty); override;
+//   procedure domousewheelevent(var info: mousewheeleventinfoty); override;
+//   procedure mouseevent(var info: mouseeventinfoty); override;
+//   procedure editnotification(var info: editnotificationinfoty); override;
+//   procedure updatereadonlystate; override;
   //idropdownwidget
    procedure buttonaction(var action: buttonactionty; const buttonindex: integer);
    procedure dobeforedropdown;
@@ -68,6 +68,7 @@ constructor tcustomcalendardatetimeedit.create(aowner: tcomponent);
 begin
  inherited;
  fdropdown:= tcalendarcontroller.create(idropdowncalendar(self));
+ fcontrollerintf:= idataeditcontroller(fdropdown);
 end;
 
 destructor tcustomcalendardatetimeedit.destroy;
@@ -85,7 +86,7 @@ function tcustomcalendardatetimeedit.getframe: tdropdownbuttonframe;
 begin
  result:= tdropdownbuttonframe(inherited getframe);
 end;
-
+{
 procedure tcustomcalendardatetimeedit.internalcreateframe;
 begin
  fdropdown.createframe;
@@ -113,7 +114,7 @@ begin
  tcustombuttonframe(fframe).mouseevent(info);
  inherited;
 end;
-
+}
 procedure tcustomcalendardatetimeedit.buttonaction(var action: buttonactionty;
                const buttonindex: integer);
 begin
@@ -158,7 +159,7 @@ function tcustomcalendardatetimeedit.getdropdowntext(const awidget: twidget): ms
 begin
  result:= text;
 end;
-
+{
 procedure tcustomcalendardatetimeedit.editnotification(var info: editnotificationinfoty);
 begin
  if fdropdown <> nil then begin
@@ -166,7 +167,8 @@ begin
  end;
  inherited;
 end;
-
+}
+{
 procedure tcustomcalendardatetimeedit.updatereadonlystate;
 begin
  inherited;
@@ -174,7 +176,7 @@ begin
   fdropdown.updatereadonlystate;
  end;
 end;
-
+}
 function tcustomcalendardatetimeedit.getcellframe: framety;
 begin
  result:= fframe.cellframe;

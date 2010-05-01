@@ -23,7 +23,9 @@ begin
  registercomponents('Dialog',[tfilelistview,tfiledialog,
                      tfilenameedit,{thistoryfilenameedit,}
                      tdirdropdownedit,tcoloredit,
-                     tdialogstringedit,tmemodialogedit,
+                     tdialogstringedit,tdialogintegeredit,
+                     tdialogrealedit,tdialogdatetimeedit,
+                     tmemodialogedit,
                      tmemodialoghistoryedit]);
  registercomponenttabhints(['Dialog'],['User Dialogs']);
 end;

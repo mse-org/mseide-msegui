@@ -54,7 +54,7 @@ type
 }
  emptyoptionty = (eo_defaulttext); //use text of tfacecontroller
  emptyoptionsty = set of emptyoptionty;
- 
+
  tcustomdataedit = class(tcustomedit,igridwidget,istatfile,idragcontroller
                          {$ifdef mse_with_ifi},iifidatalink{$endif})
   private
@@ -100,6 +100,7 @@ type
   protected
    fgridintf: iwidgetgrid;
    fdatalist: tdatalist;
+   fcontrollerintf: idataeditcontroller;
    procedure setisdb;
    procedure updateedittext(const force: boolean);
    function getgridintf: iwidgetgrid;
@@ -111,7 +112,6 @@ type
    procedure internalfillcol(const value);
    procedure internalassigncol(const value);
    function getinnerframe: framety; override;
-   procedure editnotification(var info: editnotificationinfoty); override;
    procedure valuechanged; virtual;
    procedure modified; virtual; //for dbedits
    procedure checktext(var atext: msestring; var accept: boolean);
@@ -137,13 +137,21 @@ type
                 const canceled: boolean; const akey: keyty): boolean;
    procedure initeditfocus;
 
-  //iedit
+    //mirrored to fcontrollerintf
+   procedure mouseevent(var info: mouseeventinfoty); override;
+   procedure dokeydown(var info: keyeventinfoty); override;
+   procedure internalcreateframe; override;
+   procedure updatereadonlystate; override;
+   procedure editnotification(var info: editnotificationinfoty); override;
+   procedure domousewheelevent(var info: mousewheeleventinfoty); override;
+
+    //iedit
    function locatecount: integer; override;        //number of locate values
    function locatecurrentindex: integer; override; //index of current row
    procedure locatesetcurrentindex(const aindex: integer); override;
    function getkeystring(const aindex: integer): msestring; override; //locate text
                    
-  //igridwidget
+    //igridwidget
    procedure setfirstclick;
    function createdatalist(const sender: twidgetcol): tdatalist; virtual; abstract;
    function getdatatype: listdatatypety; virtual; abstract;
@@ -423,16 +431,16 @@ type
    procedure setframe(const avalue: tdropdownbuttonframe);
   protected
    fdropdown: tcustomdropdowncontroller;
-   procedure internalcreateframe; override;
-   procedure dokeydown(var info: keyeventinfoty); override;
-   procedure domousewheelevent(var info: mousewheeleventinfoty); override;
-   procedure mouseevent(var info: mouseeventinfoty); override;
-   procedure editnotification(var info: editnotificationinfoty); override;
+//   procedure internalcreateframe; override;
+//   procedure dokeydown(var info: keyeventinfoty); override;
+//   procedure domousewheelevent(var info: mousewheeleventinfoty); override;
+//   procedure mouseevent(var info: mouseeventinfoty); override;
+//   procedure editnotification(var info: editnotificationinfoty); override;
    function createdropdowncontroller: tcustomdropdowncontroller; virtual;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
-   function getcellframe: framety; override;
+//   function getcellframe: framety; override;
    procedure dohide; override;
-   procedure updatereadonlystate; override;
+//   procedure updatereadonlystate; override;
   //idropdown
    procedure buttonaction(var action: buttonactionty; const buttonindex: integer); virtual;
    procedure dobeforedropdown; virtual;
@@ -586,6 +594,7 @@ type
   {$endif}
   protected
    fisnull: boolean; //used in tdbintegeredit
+   function gettextvalue(var accept: boolean; const quiet: boolean): integer;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    function internaldatatotext(const data): msestring; override;
    procedure texttodata(const atext: msestring; var data); override;
@@ -1145,6 +1154,7 @@ type
    procedure setifilink(const avalue: tifidatetimelinkcomp);
   {$endif}
   protected
+   function gettextvalue(var accept: boolean; const quiet: boolean): tdatetime;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    function internaldatatotext(const data): msestring; override;
    procedure texttodata(const atext: msestring; var data); override;
@@ -1516,58 +1526,6 @@ begin
  end
  else begin
   result:= inherited getinnerframe;
- end;
-end;
-
-procedure tcustomdataedit.editnotification(var info: editnotificationinfoty);
-var
- bo1: boolean;
-begin
- case info.action of
-  ea_textentered: begin
-   bo1:= true;
-   if (des_edited in fstate) or 
-                       (oe_forcereturncheckvalue in foptionsedit) then begin
-    bo1:= checkvalue;
-    if not bo1 or (oe_eatreturn in foptionsedit) then begin
-     info.action:= ea_none;
-    end;
-   end;
-   if bo1 then begin
-    if (fgridintf <> nil) and 
-       (og_colchangeonreturnkey in fgridintf.getcol.grid.optionsgrid)then begin
-     info.action:= ea_none;    
-      fgridintf.getcol.grid.colstep(fca_focusin,1,true,false);
-    end;
-   end;
-  end;
-  ea_textedited: begin
-   include(fstate,des_edited);
-   modified;
-   inherited;
-  end;
-  ea_undo: begin
-   exclude(fstate,des_edited);
-  end;
-  ea_caretupdating: begin
-   if (fgridintf <> nil) and focused then begin
-    fgridintf.showcaretrect(info.caretrect,fframe);
-   end;
-  end;
-  ea_copyselection: begin
-   if (fgridintf <> nil) and (feditor.sellength = 0) then begin
-    if fgridintf.getcol.grid.copyselection then begin
-     info.action:= ea_none;
-    end;
-   end;
-  end;
-  ea_pasteselection: begin
-   if fgridintf <> nil then begin
-    if fgridintf.getcol.grid.pasteselection then begin
-     info.action:= ea_none;
-    end;
-   end;
-  end;
  end;
 end;
 
@@ -2333,6 +2291,108 @@ begin
  //dummy
 end;
 
+procedure tcustomdataedit.mouseevent(var info: mouseeventinfoty);
+begin
+ if fcontrollerintf <> nil then begin
+  fcontrollerintf.mouseevent(info);
+ end;
+ inherited;
+end;
+
+procedure tcustomdataedit.domousewheelevent(var info: mousewheeleventinfoty);
+begin
+ if fcontrollerintf <> nil then begin
+  fcontrollerintf.domousewheelevent(info);
+ end;
+ if not (es_processed in info.eventstate) then begin
+  inherited;
+ end;
+end;
+
+
+procedure tcustomdataedit.dokeydown(var info: keyeventinfoty);
+begin
+ if fcontrollerintf <> nil then begin
+  fcontrollerintf.dokeydown(info);
+ end;
+ if not (es_processed in info.eventstate) then begin
+  inherited;
+ end;
+end;
+
+procedure tcustomdataedit.updatereadonlystate;
+begin
+ inherited;
+ if fcontrollerintf <> nil then begin
+  fcontrollerintf.updatereadonlystate;
+ end;
+end;
+
+procedure tcustomdataedit.internalcreateframe;
+begin
+ if (fframe = nil) and (fcontrollerintf <> nil) then begin
+  fcontrollerintf.internalcreateframe;
+ end;
+ if fframe = nil then begin
+  inherited;
+ end;
+end;
+
+procedure tcustomdataedit.editnotification(var info: editnotificationinfoty);
+var
+ bo1: boolean;
+begin
+ if fcontrollerintf <> nil then begin
+  fcontrollerintf.editnotification(info);
+ end;
+ case info.action of
+  ea_textentered: begin
+   bo1:= true;
+   if (des_edited in fstate) or 
+                       (oe_forcereturncheckvalue in foptionsedit) then begin
+    bo1:= checkvalue;
+    if not bo1 or (oe_eatreturn in foptionsedit) then begin
+     info.action:= ea_none;
+    end;
+   end;
+   if bo1 then begin
+    if (fgridintf <> nil) and 
+       (og_colchangeonreturnkey in fgridintf.getcol.grid.optionsgrid)then begin
+     info.action:= ea_none;    
+      fgridintf.getcol.grid.colstep(fca_focusin,1,true,false);
+    end;
+   end;
+  end;
+  ea_textedited: begin
+   include(fstate,des_edited);
+   modified;
+   inherited;
+  end;
+  ea_undo: begin
+   exclude(fstate,des_edited);
+  end;
+  ea_caretupdating: begin
+   if (fgridintf <> nil) and focused then begin
+    fgridintf.showcaretrect(info.caretrect,fframe);
+   end;
+  end;
+  ea_copyselection: begin
+   if (fgridintf <> nil) and (feditor.sellength = 0) then begin
+    if fgridintf.getcol.grid.copyselection then begin
+     info.action:= ea_none;
+    end;
+   end;
+  end;
+  ea_pasteselection: begin
+   if fgridintf <> nil then begin
+    if fgridintf.getcol.grid.pasteselection then begin
+     info.action:= ea_none;
+    end;
+   end;
+  end;
+ end;
+end;
+
 {$ifdef mse_with_ifi}
 function tcustomdataedit.getifilinkkind: ptypeinfo;
 begin
@@ -2972,6 +3032,7 @@ constructor tcustomdropdownedit.create(aowner: tcomponent);
 begin
  inherited;
  fdropdown:= createdropdowncontroller;
+ fcontrollerintf:= idataeditcontroller(fdropdown);
 end;
 
 destructor tcustomdropdownedit.destroy;
@@ -2979,7 +3040,7 @@ begin
  inherited;
  fdropdown.Free;
 end;
-
+{
 procedure tcustomdropdownedit.editnotification(var info: editnotificationinfoty);
 begin
  if fdropdown <> nil then begin
@@ -2987,7 +3048,8 @@ begin
  end;
  inherited;
 end;
-
+}
+{
 procedure tcustomdropdownedit.dokeydown(var info: keyeventinfoty);
 begin
  fdropdown.dokeydown(info);
@@ -2995,7 +3057,8 @@ begin
   inherited;
  end;
 end;
-
+}
+{
 procedure tcustomdropdownedit.domousewheelevent(var info: mousewheeleventinfoty);
 begin
  fdropdown.domousewheelevent(info);
@@ -3003,7 +3066,7 @@ begin
   inherited;
  end;
 end;
-
+}
 function tcustomdropdownedit.createdropdowncontroller: tcustomdropdowncontroller;
 begin
  result:= tdropdowncontroller.create(idropdown(self));
@@ -3028,13 +3091,13 @@ procedure tcustomdropdownedit.buttonaction(var action: buttonactionty;
 begin
  //dummy
 end;
-
+{
 procedure tcustomdropdownedit.mouseevent(var info: mouseeventinfoty);
 begin
  tcustombuttonframe(fframe).mouseevent(info);
  inherited;
 end;
-
+}
 procedure tcustomdropdownedit.texttovalue(var accept: boolean;
                        const quiet: boolean);
 begin
@@ -3052,12 +3115,12 @@ begin
   inherited;
  end;
 end;
-
+{
 function tcustomdropdownedit.getcellframe: framety;
 begin
  result:= fframe.cellframe;
 end;
-
+}
 function tcustomdropdownedit.getframe: tdropdownbuttonframe;
 begin
  result:= tdropdownbuttonframe(inherited getframe);
@@ -3067,18 +3130,18 @@ procedure tcustomdropdownedit.setframe(const avalue: tdropdownbuttonframe);
 begin
  inherited setframe(avalue);
 end;
-
+{
 procedure tcustomdropdownedit.internalcreateframe;
 begin
  fdropdown.createframe;
 end;
-
+}
 procedure tcustomdropdownedit.dohide;
 begin
  fdropdown.canceldropdown;
  inherited;
 end;
-
+{
 procedure tcustomdropdownedit.updatereadonlystate;
 begin
  inherited;
@@ -3086,7 +3149,7 @@ begin
   fdropdown.updatereadonlystate;
  end;
 end;
-
+}
 function tcustomdropdownedit.getvalueempty: integer;
 begin
  result:= -1;
@@ -3345,11 +3408,37 @@ begin
  valuechanged;
 end;
 
-procedure tcustomintegeredit.texttovalue(var accept: boolean; const quiet: boolean);
+function tcustomintegeredit.gettextvalue(var accept: boolean;
+                                            const quiet: boolean): integer;
 var
  int1: integer;
  mstr1: msestring;
 begin
+ if fisnull then begin
+  result:= 0;
+ end
+ else begin
+  try
+   mstr1:= feditor.text;
+   checktext(mstr1,accept);
+   if not accept then begin
+    exit;
+   end;
+   int1:= strtointvalue(mstr1,fbase);
+  except
+   formaterror(quiet);
+   accept:= false
+  end;
+ end;
+end;
+
+procedure tcustomintegeredit.texttovalue(var accept: boolean; const quiet: boolean);
+var
+ int1: integer;
+// mstr1: msestring;
+begin
+ int1:= gettextvalue(accept,quiet);
+{
  if fisnull then begin
   int1:= 0;
  end
@@ -3366,6 +3455,7 @@ begin
    accept:= false
   end;
  end;
+}
  if accept then begin
   if not fisnull then begin
    if fmax < fmin then begin //unsigned
@@ -4900,12 +4990,43 @@ begin
  end;
 end;
 
+function tcustomdatetimeedit.gettextvalue(var accept: boolean; 
+                                             const quiet: boolean): tdatetime;
+var
+ mstr1: msestring;
+begin
+ try
+  mstr1:= feditor.text;
+  checktext(mstr1,accept);
+  if not accept then begin
+   result:= emptydatetime; //compiler warning
+   exit;
+  end;
+  case fkind of
+   dtk_time: begin
+    result:= stringtotime(mstr1);
+   end;
+   dtk_date: begin
+    result:= stringtodate(mstr1);
+   end;
+   else begin
+    result:= stringtodatetime(mstr1);
+   end;
+  end;
+ except
+  formaterror(quiet);
+  accept:= false
+ end;
+end;
+
 procedure tcustomdatetimeedit.texttovalue(var accept: boolean; 
                                                  const quiet: boolean);
 var
  dat1: tdatetime;
  mstr1: msestring;
 begin
+ dat1:= gettextvalue(accept,quiet);
+ {
  try
   mstr1:= feditor.text;
   checktext(mstr1,accept);
@@ -4922,8 +5043,9 @@ begin
   formaterror(quiet);
   accept:= false
  end;
+ }
  if accept then begin
-  dat1:= checkkind(dat1);
+//  dat1:= checkkind(dat1);
   if not ((des_isdb in fstate) and isemptydatetime(dat1)) then begin
    if fkind = dtk_time then begin
     if isemptydatetime(fmax) and not isemptydatetime(dat1) or

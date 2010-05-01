@@ -17,7 +17,7 @@ uses
  classes,mseguiglob,msefiledialog,db,mseinplaceedit,msedbedit,msegui,
  msewidgetgrid,
  msedatalist,mseeditglob,msegrids,msetypes,msedb,msemenus,mseedit,
- msedataedits,mseevent,msestrings,msecolordialog,msegraphutils;
+ msedataedits,mseevent,msestrings,msecolordialog,msegraphutils,msedialog;
  
 type
  tdbfilenameedit = class(tcustomfilenameedit,idbeditfieldlink,ireccontrol)
@@ -87,7 +87,74 @@ type
    property onsetvalue;
    property frame;
  end;
- 
+
+ tdbdialogstringedit = class(tdbstringedit)
+  private
+   function getframe: tellipsebuttonframe;
+   procedure setframe(const avalue: tellipsebuttonframe);
+   function getonexecute: stringdialogexeceventty;
+   procedure setonexecute(const avalue: stringdialogexeceventty);
+  protected
+   fcontroller: tstringdialogcontroller;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+  published
+   property frame: tellipsebuttonframe read getframe write setframe;
+   property onexecute: stringdialogexeceventty read getonexecute write setonexecute;
+ end;
+
+ tdbdialogrealedit = class(tdbrealedit)
+  private
+   function getframe: tellipsebuttonframe;
+   procedure setframe(const avalue: tellipsebuttonframe);
+   function getonexecute: realdialogexeceventty;
+   procedure setonexecute(const avalue: realdialogexeceventty);
+  protected
+   fdialogcontroller: trealdialogcontroller;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+  published
+   property frame: tellipsebuttonframe read getframe write setframe;
+   property onexecute: realdialogexeceventty read getonexecute 
+                                                        write setonexecute;
+ end;
+
+ tdbdialogdatetimeedit = class(tdbdatetimeedit)
+  private
+   function getframe: tellipsebuttonframe;
+   procedure setframe(const avalue: tellipsebuttonframe);
+   function getonexecute: datetimedialogexeceventty;
+   procedure setonexecute(const avalue: datetimedialogexeceventty);
+  protected
+   fdialogcontroller: tdatetimedialogcontroller;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+  published
+   property frame: tellipsebuttonframe read getframe write setframe;
+   property onexecute: datetimedialogexeceventty read getonexecute 
+                                                        write setonexecute;
+ end;
+
+ tdbdialogintegeredit = class(tdbintegeredit)
+  private
+   function getframe: tellipsebuttonframe;
+   procedure setframe(const avalue: tellipsebuttonframe);
+   function getonexecute: integerdialogexeceventty;
+   procedure setonexecute(const avalue: integerdialogexeceventty);
+  protected
+   fdialogcontroller: tintegerdialogcontroller;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+  published
+   property frame: tellipsebuttonframe read getframe write setframe;
+   property onexecute: integerdialogexeceventty read getonexecute 
+                                                        write setonexecute;
+ end;
+  
 implementation
 uses
  typinfo; 
@@ -328,6 +395,150 @@ begin
  else begin
   result:= inherited internaldatatotext1(avalue);
  end;
+end;
+
+{ tdbdialogstringedit }
+
+constructor tdbdialogstringedit.create(aowner: tcomponent);
+begin
+ inherited;
+ if fcontroller = nil then begin
+  fcontroller:= tstringdialogcontroller.create(self);
+ end;
+end;
+
+destructor tdbdialogstringedit.destroy;
+begin
+ inherited;
+ fcontroller.free;
+end;
+
+function tdbdialogstringedit.getframe: tellipsebuttonframe;
+begin
+ result:= tellipsebuttonframe(inherited getframe);
+end;
+
+procedure tdbdialogstringedit.setframe(const avalue: tellipsebuttonframe);
+begin
+ inherited setframe(avalue);
+end;
+
+function tdbdialogstringedit.getonexecute: stringdialogexeceventty;
+begin
+ result:= fcontroller.onexecute;
+end;
+
+procedure tdbdialogstringedit.setonexecute(const avalue: stringdialogexeceventty);
+begin
+ fcontroller.onexecute:= avalue;
+end;
+
+{ tdbdialogrealedit }
+
+constructor tdbdialogrealedit.create(aowner: tcomponent);
+begin
+ inherited;
+ if fdialogcontroller = nil then begin
+  fdialogcontroller:= trealdialogcontroller.create(self);
+ end;
+end;
+
+destructor tdbdialogrealedit.destroy;
+begin
+ inherited;
+ fdialogcontroller.free;
+end;
+
+function tdbdialogrealedit.getframe: tellipsebuttonframe;
+begin
+ result:= tellipsebuttonframe(inherited getframe);
+end;
+
+procedure tdbdialogrealedit.setframe(const avalue: tellipsebuttonframe);
+begin
+ inherited setframe(avalue);
+end;
+
+function tdbdialogrealedit.getonexecute: realdialogexeceventty;
+begin
+ result:= fdialogcontroller.onexecute;
+end;
+
+procedure tdbdialogrealedit.setonexecute(const avalue: realdialogexeceventty);
+begin
+ fdialogcontroller.onexecute:= avalue;
+end;
+
+{ tdbdialogdatetimeedit }
+
+constructor tdbdialogdatetimeedit.create(aowner: tcomponent);
+begin
+ inherited;
+ if fdialogcontroller = nil then begin
+  fdialogcontroller:= tdatetimedialogcontroller.create(self);
+ end;
+end;
+
+destructor tdbdialogdatetimeedit.destroy;
+begin
+ inherited;
+ fdialogcontroller.free;
+end;
+
+function tdbdialogdatetimeedit.getframe: tellipsebuttonframe;
+begin
+ result:= tellipsebuttonframe(inherited getframe);
+end;
+
+procedure tdbdialogdatetimeedit.setframe(const avalue: tellipsebuttonframe);
+begin
+ inherited setframe(avalue);
+end;
+
+function tdbdialogdatetimeedit.getonexecute: datetimedialogexeceventty;
+begin
+ result:= fdialogcontroller.onexecute;
+end;
+
+procedure tdbdialogdatetimeedit.setonexecute(const avalue: datetimedialogexeceventty);
+begin
+ fdialogcontroller.onexecute:= avalue;
+end;
+
+{ tdbdialogintegeredit }
+
+constructor tdbdialogintegeredit.create(aowner: tcomponent);
+begin
+ inherited;
+ if fdialogcontroller = nil then begin
+  fdialogcontroller:= tintegerdialogcontroller.create(self);
+ end;
+end;
+
+destructor tdbdialogintegeredit.destroy;
+begin
+ inherited;
+ fdialogcontroller.free;
+end;
+
+function tdbdialogintegeredit.getframe: tellipsebuttonframe;
+begin
+ result:= tellipsebuttonframe(inherited getframe);
+end;
+
+procedure tdbdialogintegeredit.setframe(const avalue: tellipsebuttonframe);
+begin
+ inherited setframe(avalue);
+end;
+
+function tdbdialogintegeredit.getonexecute: integerdialogexeceventty;
+begin
+ result:= fdialogcontroller.onexecute;
+end;
+
+procedure tdbdialogintegeredit.setonexecute(const avalue: integerdialogexeceventty);
+begin
+ fdialogcontroller.onexecute:= avalue;
 end;
 
 end.

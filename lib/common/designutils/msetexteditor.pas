@@ -5,7 +5,7 @@ uses
  msegui,mseglob,mseguiglob,mseclasses,mseforms,
  msesimplewidgets,msewidgetgrid,msesyntaxedit,
  msemenus,msefiledialog,msestat,msestatfile,msesyntaxpainter,msedispwidgets,
- mseinplaceedit,mseact,mseactions;
+ mseinplaceedit,mseact,mseactions,mseeditglob;
 
 const
  texteditorstatname =  'texteditor.sta';

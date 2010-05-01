@@ -24,28 +24,6 @@ const
  defaultglobalcaretwith = -300; //30% of 'o'
 
 type
- editactionty = (ea_none,ea_beforechange,ea_textchanged,ea_textedited,
-                 ea_textentered,ea_undo,
-                 ea_indexmoved,{ea_selectindexmoved,}ea_delchar,
-                 {ea_selectstart,ea_selectend,}ea_clearselection,
-                 ea_deleteselection,ea_copyselection,ea_pasteselection,
-                 ea_selectall,ea_exit,ea_caretupdating);
-
- editactionstatety = (eas_shift,eas_delete);
- editactionstatesty = set of editactionstatety;
-
- editnotificationinfoty = record
-  state: editactionstatesty;
-  case action: editactionty of
-   ea_exit:(
-    dir: graphicdirectionty;
-   );
-   ea_caretupdating:(
-    caretrect: rectty;
-    showrect: rectty;
-   )
- end;
-
  editnotificationeventty = procedure(const sender: tobject;
           var info: editnotificationinfoty) of object;
 

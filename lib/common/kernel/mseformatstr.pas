@@ -208,6 +208,7 @@ function timetostring(const avalue: tdatetime;
                           const format: msestring = 't'): msestring;
 function datetostring(const avalue: tdatetime;
                           const format: msestring = 'c'): msestring;
+function stringtodate(const avalue: msestring): tdatetime;
 function datetimetostring(const avalue: tdatetime;
                           const format: msestring = 'c'): msestring;
 function stringtodatetime(const avalue: msestring): tdatetime;
@@ -1330,6 +1331,16 @@ begin
   else begin
    result:= formatdatetimemse(format,avalue,defaultformatsettingsmse);
   end;
+ end;
+end;
+
+function stringtodate(const avalue: msestring): tdatetime;
+begin
+ if avalue = '' then begin
+  result:= emptydatetime;
+ end
+ else begin
+  result:= trunc(stringtodatetime(avalue));
  end;
 end;
 

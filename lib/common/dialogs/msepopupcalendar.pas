@@ -26,9 +26,9 @@ type
  tcalendarcontroller = class(tdropdownwidgetcontroller)
   protected
    procedure dropdownkeydown(var info: keyeventinfoty);
+   procedure editnotification(var info: editnotificationinfoty); override;
   public
    constructor create(const intf: idropdowncalendar);
-   procedure editnotification(var info: editnotificationinfoty); override;
   published
    property bounds_cx default popupcalendarwidth;
  end;

@@ -16,7 +16,7 @@ uses
  mseclasses,mseedit,mseevent,mseglob,mseguiglob,msegrids,msedatalist,msegui,
  mseinplaceedit,msearrayprops,classes,msegraphics,msedrawtext,msegraphutils,
  msetimer,mseforms,msetypes,msestrings,msestockobjects,msescrollbar,
- msekeyboard,msegridsglob;
+ msekeyboard,msegridsglob,mseeditglob;
 
 const
  defaultdropdowncoloptions = [co_fill,co_readonly,co_focusselect,co_mousemovefocus,co_rowselect];
@@ -245,9 +245,11 @@ type
    property activebutton;
  end;
 
- tcustomdropdowncontroller = class(teventpersistent,ibutton,ievent,idropdowncontroller)
+ tcustomdropdowncontroller = class(teventpersistent,ibutton,ievent,
+                                   idropdowncontroller,idataeditcontroller)
   private
   protected
+   fowner: twidget;
    fdataselected: boolean;
    fcolor: colorty;
    fcolorclient: colorty;
@@ -274,19 +276,22 @@ type
    procedure selectnone(const akey: keyty); virtual;
    //ibutton
    procedure buttonaction(var action: buttonactionty; const buttonindex: integer);
+   
+    //idataeditcontroller
+   procedure mouseevent(var info: mouseeventinfoty);
+   procedure dokeydown(var info: keyeventinfoty);
+   procedure internalcreateframe; virtual;
+   procedure updatereadonlystate;
+   procedure domousewheelevent(var info: mousewheeleventinfoty);
+   procedure editnotification(var info: editnotificationinfoty); virtual;
   public
    constructor create(const intf: idropdown); reintroduce;
    destructor destroy; override;
    procedure dropdown; virtual;
    procedure canceldropdown;
-   procedure createframe; virtual;
    procedure dropdownactivated;
    procedure dropdowndeactivated;
-   procedure dokeydown(var info: keyeventinfoty);
-   procedure domousewheelevent(var info: mousewheeleventinfoty);
-   procedure editnotification(var info: editnotificationinfoty); virtual;
    function dataselected: boolean;
-   procedure updatereadonlystate;
    property options: dropdowneditoptionsty read foptions write setoptions
                  default defaultdropdownoptionsedit;
   published
@@ -356,10 +361,10 @@ type
    procedure receiveevent(const event: tobjectevent); override;
    function createdropdownlist: tdropdownlist; virtual;
    procedure internaldropdown; override;
+   procedure editnotification(var info: editnotificationinfoty); override;
   public
    constructor create(const intf: idropdownlist);
    destructor destroy; override;
-   procedure editnotification(var info: editnotificationinfoty); override;
    function valuelist: tmsestringdatalist;
    property cols: tdropdowncols read fcols write setcols;
    property valuecol: integer read fvaluecol write setvaluecol default 0;
@@ -406,7 +411,7 @@ type
 
 implementation
 uses
- sysutils,msewidgets,mseeditglob,mseguiintf,rtlconsts;
+ sysutils,msewidgets,mseguiintf,rtlconsts;
 
 type
  twidget1 = class(twidget);
@@ -727,11 +732,12 @@ end;
 constructor tcustomdropdowncontroller.create(const intf: idropdown);
 begin
  fintf:= intf;
+ fowner:= intf.getwidget;
  foptions:= defaultdropdownoptionsedit;
  fcolor:= cl_default;
  fcolorclient:= cl_default;
  inherited create;
- createframe;
+ internalcreateframe;
 end;
 
 destructor tcustomdropdowncontroller.destroy;
@@ -747,7 +753,7 @@ begin
  result:= tcustomdropdownbuttonframe;
 end;
 
-procedure tcustomdropdowncontroller.createframe;
+procedure tcustomdropdowncontroller.internalcreateframe;
 var
  widget: twidget;
 begin
@@ -837,6 +843,11 @@ begin
   end;
  end;
 end;                                    
+
+procedure tcustomdropdowncontroller.mouseevent(var info: mouseeventinfoty);
+begin
+ tcustombuttonframe( twidget1(fowner).fframe).mouseevent(info);
+end;
 
 procedure tcustomdropdowncontroller.dokeydown(var info: keyeventinfoty);
 begin
@@ -1081,7 +1092,7 @@ begin
 end;
 
 procedure tdropdownwidgetcontroller.editnotification(
-  var info: editnotificationinfoty);
+                                    var info: editnotificationinfoty);
 begin
  inherited;
  case info.action of
@@ -1122,7 +1133,7 @@ begin
 end;
 
 procedure tcustomdropdownlistcontroller.editnotification(
-                  var info: editnotificationinfoty);
+                                        var info: editnotificationinfoty);
 begin
  inherited;
  case info.action of

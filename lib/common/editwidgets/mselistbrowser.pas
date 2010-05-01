@@ -524,10 +524,10 @@ type
    function getframe: tdropdownbuttonframe;
    procedure setframe(const Value: tdropdownbuttonframe);
    function getdropdowncontrollerclass: dropdownlistcontrollerclassty; virtual;
-   procedure dokeydown(var info: keyeventinfoty); override;
-   procedure internalcreateframe; override;
+//   procedure dokeydown(var info: keyeventinfoty); override;
+//   procedure internalcreateframe; override;
 
-   procedure editnotification(var info: editnotificationinfoty); override;
+//   procedure editnotification(var info: editnotificationinfoty); override;
   //idropdown
    procedure dobeforedropdown; virtual;
    procedure doafterclosedropdown; virtual;
@@ -2827,6 +2827,7 @@ constructor tdropdownitemedit.create(aowner: tcomponent);
 begin
  inherited;
  fdropdown:= getdropdowncontrollerclass.create(idropdownlist(self));
+ fcontrollerintf:= idataeditcontroller(fdropdown);
 end;
 
 destructor tdropdownitemedit.destroy;
@@ -2839,12 +2840,12 @@ function tdropdownitemedit.getdropdowncontrollerclass: dropdownlistcontrollercla
 begin
  result:= tdropdownlistcontroller;
 end;
-
+{
 procedure tdropdownitemedit.internalcreateframe;
 begin
  fdropdown.createframe;
 end;
-
+}
 function tdropdownitemedit.getframe: tdropdownbuttonframe;
 begin
  result:= tdropdownbuttonframe(inherited getframe);
@@ -2875,7 +2876,7 @@ begin
   fonafterclosedropdown(self);
  end;
 end;
-
+{
 procedure tdropdownitemedit.editnotification(var info: editnotificationinfoty);
 begin
  if fdropdown <> nil then begin
@@ -2883,14 +2884,14 @@ begin
  end;
  inherited;
 end;
-
+}
 procedure tdropdownitemedit.dobeforedropdown;
 begin
  if canevent(tmethod(fonbeforedropdown)) then begin
   fonbeforedropdown(self);
  end;
 end;
-
+{
 procedure tdropdownitemedit.dokeydown(var info: keyeventinfoty);
 begin
  fdropdown.dokeydown(info);
@@ -2898,7 +2899,7 @@ begin
   inherited;
  end;
 end;
-
+}
 function tdropdownitemedit.getdropdownitems: tdropdowncols;
 begin
  result:= nil;

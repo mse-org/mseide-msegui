@@ -13,7 +13,7 @@ unit mseeditglob;
 
 interface
 uses
- mseglob,mseguiglob,msegui,msetypes,msegraphics;
+ mseglob,mseguiglob,msegui,msetypes,msegraphics,msegraphutils;
 
 type
 
@@ -56,6 +56,38 @@ type
                     );
 
  optionseditty = set of optioneditty;
+
+ editactionty = (ea_none,ea_beforechange,ea_textchanged,ea_textedited,
+                 ea_textentered,ea_undo,
+                 ea_indexmoved,{ea_selectindexmoved,}ea_delchar,
+                 {ea_selectstart,ea_selectend,}ea_clearselection,
+                 ea_deleteselection,ea_copyselection,ea_pasteselection,
+                 ea_selectall,ea_exit,ea_caretupdating);
+
+ editactionstatety = (eas_shift,eas_delete);
+ editactionstatesty = set of editactionstatety;
+
+ editnotificationinfoty = record
+  state: editactionstatesty;
+  case action: editactionty of
+   ea_exit:(
+    dir: graphicdirectionty;
+   );
+   ea_caretupdating:(
+    caretrect: rectty;
+    showrect: rectty;
+   )
+ end;
+
+ idataeditcontroller = interface (inullinterface)
+  procedure dokeydown(var info: keyeventinfoty);
+  procedure updatereadonlystate;
+  procedure internalcreateframe;
+  procedure mouseevent(var info: mouseeventinfoty);
+  procedure domousewheelevent(var info: mousewheeleventinfoty);
+  procedure editnotification(var info: editnotificationinfoty);
+ end;
+  
 const
  defaultoptionsedit = [oe_undoonesc,oe_closequery,oe_exitoncursor,
                        oe_shiftreturn,oe_eatreturn,

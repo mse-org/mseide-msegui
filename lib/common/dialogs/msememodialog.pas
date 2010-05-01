@@ -8,10 +8,17 @@ uses
  msedropdownlist;
  
 type
-
- tmemodialogedit = class(tcustomdialogstringed)
+ tmemodialogcontroller = class(tstringdialogcontroller)
   protected
    function execute(var avalue: msestring): boolean; override;
+ end;
+ 
+ tmemodialogedit = class(tcustomdialogstringed)
+  protected
+   function createdialogcontroller: tstringdialogcontroller; override;
+//   function execute(var avalue: msestring): boolean; override;
+//  public
+//   constructor create(aowner: tcomponent); override;
  end;
  
  tmsememodialogfo = class(tmseform)
@@ -83,13 +90,27 @@ begin
  end;
 end;
 
-{ tmemodialogedit }
+{ tmemodialogcontroller }
 
-function tmemodialogedit.execute(var avalue: msestring): boolean;
+function tmemodialogcontroller.execute(var avalue: msestring): boolean;
 begin
  result:= memodialog(avalue) = mr_ok;
 end;
 
+{ tmemodialogedit }
+
+function tmemodialogedit.createdialogcontroller: tstringdialogcontroller;
+begin
+ result:= tmemodialogcontroller.create(self);
+end;
+
+
+{
+function tmemodialogedit.execute(var avalue: msestring): boolean;
+begin
+ result:= memodialog(avalue) = mr_ok;
+end;
+}
 { tmemodialoghistoryedit }
 
 constructor tmemodialoghistoryedit.create(aowner: tcomponent);
