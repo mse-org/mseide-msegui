@@ -63,9 +63,11 @@ begin
    dec(refcount);
   end
   else begin
-   if unloadlibrary(libhandle) then begin
-    dec(refcount);
-    libhandle:= nilhandle;
+   if refcount = 1 then begin //not initialized otherwise
+    if unloadlibrary(libhandle) then begin
+     dec(refcount);
+     libhandle:= nilhandle;
+    end;
    end;
   end;
  end;

@@ -52,6 +52,8 @@ type
   { TODBCEnvironment }
 
   TODBCEnvironment = class
+  private
+   finitialized: boolean;
   protected
     FENVHandle:SQLHENV; // ODBC Environment Handle
   public
@@ -263,7 +265,7 @@ const
  maxstrlen = 3000;
  maxprecision = 18; 
   DefaultEnvironment:TODBCEnvironment = nil;
-  ODBCLoadCount:integer = 0; // ODBC is loaded when > 0; modified by TODBCEnvironment.Create/Destroy
+//  ODBCLoadCount:integer = 0; // ODBC is loaded when > 0; modified by TODBCEnvironment.Create/Destroy
 
 { Generic ODBC helper functions }
 
@@ -1486,9 +1488,8 @@ end;
 constructor TODBCEnvironment.Create;
 begin
   // make sure odbc is loaded
-  if ODBCLoadCount=0 then InitialiseOdbc;
-  Inc(ODBCLoadCount);
-
+  initializeodbc([]);
+  finitialized:= true;
   // allocate environment handle
   if SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, FENVHandle)=SQL_Error then
     raise EODBCException.Create('Could not allocate ODBC Environment handle'); // we can't retrieve any more information, because we don't have a handle for the SQLGetDiag* functions
@@ -1505,14 +1506,19 @@ var
   Res:SQLRETURN;
 begin
   // free environment handle
-  Res:=SQLFreeHandle(SQL_HANDLE_ENV, FENVHandle);
-  if Res=SQL_ERROR then
-    ODBCCheckResult(Res,SQL_HANDLE_ENV, FENVHandle,
-     'Could not free ODBC Environment handle.');
-
-  // free odbc if not used by any TODBCEnvironment object anymore
-  Dec(ODBCLoadCount);
-  if ODBCLoadCount=0 then ReleaseOdbc;
+  if FENVHandle <> nil then begin //otherwise exception in create
+   Res:=SQLFreeHandle(SQL_HANDLE_ENV, FENVHandle);
+   if Res=SQL_ERROR then
+     ODBCCheckResult(Res,SQL_HANDLE_ENV, FENVHandle,
+      'Could not free ODBC Environment handle.');
+ 
+   // free odbc if not used by any TODBCEnvironment object anymore
+  end;
+//  Dec(ODBCLoadCount);
+//  if ODBCLoadCount=0 then ReleaseOdbc;
+ if finitialized then begin
+  releaseodbc;
+ end;
 end;
 
 { TODBCCursor }
