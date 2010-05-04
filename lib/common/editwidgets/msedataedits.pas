@@ -3411,7 +3411,6 @@ end;
 function tcustomintegeredit.gettextvalue(var accept: boolean;
                                             const quiet: boolean): integer;
 var
- int1: integer;
  mstr1: msestring;
 begin
  if fisnull then begin
@@ -3424,7 +3423,7 @@ begin
    if not accept then begin
     exit;
    end;
-   int1:= strtointvalue(mstr1,fbase);
+   result:= strtointvalue(mstr1,fbase);
   except
    formaterror(quiet);
    accept:= false
