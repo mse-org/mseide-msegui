@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2010 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -145,6 +145,24 @@ type
     property items[const index: integer]: pprocedureinfoty read getitempo; default;
   end;
 
+  interfaceinfoty = record
+   b: browserlistitemty;
+   name,uppername: string;
+  end;
+  pinterfaceinfoty = ^interfaceinfoty;
+
+  tinterfaceinfolist = class(tbrowserlist)
+   private
+   protected
+    procedure finalizerecord(var item); override;
+    function getitempo(const index: integer): pinterfaceinfoty;
+   public
+    constructor create;
+    function finditembyname(const aname: string): pinterfaceinfoty;
+    function finditembyuppername(const aname: lstringty): pinterfaceinfoty;
+    property items[const index: integer]: pinterfaceinfoty read getitempo; default;
+  end;
+  
   classinfoty = record
    b: browserlistitemty;
    deflist: tdeflist;
@@ -249,7 +267,7 @@ type
   end;
   symbolkindty = (syk_none,syk_nopars,syk_substr,syk_deleted,syk_root,syk_classdef,
                   syk_procdef,syk_procimp,syk_classprocimp,
-                  syk_vardef,syk_constdef,syk_typedef,syk_identuse);
+                  syk_vardef,syk_constdef,syk_typedef,syk_interfacedef,syk_identuse);
   defnamety = record
    name: string;
    id: nameidty;
@@ -367,6 +385,7 @@ type
 
   pascalunitinfoty = record
    procedurelist: tprocedureinfolist;
+   interfacelist: tinterfaceinfolist;
    classinfolist: tclassinfolist;
    interfaceuses,implementationuses: tusesinfolist;
    implementationstart: sourceposty;
@@ -520,6 +539,7 @@ begin
   case proglang of
    pl_pascal: begin
     p.procedurelist.clear;
+    p.interfacelist.clear;
     p.classinfolist.clear;
     p.interfaceuses.clear;
     p.implementationuses.clear;
@@ -1010,6 +1030,59 @@ begin
  setlength(result,length(ar1));
  for int1:= 0 to high(ar1) do begin
   result[int1]:= getitempo(ar1[int1])^.name;
+ end;
+end;
+
+{ tinterfaceinfolist }
+
+constructor tinterfaceinfolist.create;
+begin
+ inherited create(sizeof(interfaceinfoty),[rels_needsfinalize]);
+end;
+
+procedure tinterfaceinfolist.finalizerecord(var item);
+begin
+ finalize(interfaceinfoty(item));
+end;
+
+function tinterfaceinfolist.getitempo(
+  const index: integer): pinterfaceinfoty;
+begin
+ result:= pinterfaceinfoty(inherited getitempo(index));
+end;
+
+function tinterfaceinfolist.finditembyname(const aname: string): pinterfaceinfoty;
+var
+ po1: pinterfaceinfoty;
+ int1: integer;
+ str1: string;
+begin
+ result:= nil;
+ po1:= datapo;
+ str1:= struppercase(aname);
+ for int1:= 0 to fcount - 1 do begin
+  if str1 = po1^.uppername then begin
+   result:= po1;
+   break;
+  end;
+  inc(po1);
+ end;
+end;
+
+function tinterfaceinfolist.finditembyuppername(
+                                    const aname: lstringty): pinterfaceinfoty;
+var
+ po1: pinterfaceinfoty;
+ int1: integer;
+begin
+ result:= nil;
+ po1:= datapo;
+ for int1:= 0 to fcount - 1 do begin
+  if  lstringcomp(aname,po1^.uppername) = 0 then begin
+   result:= po1;
+   break;
+  end;
+  inc(po1);
  end;
 end;
 
@@ -2012,6 +2085,7 @@ begin
  with info do begin
   proglang:= pl_pascal;
   p.procedurelist:= tprocedureinfolist.create;
+  p.interfacelist:= tinterfaceinfolist.create;
   p.classinfolist:= tclassinfolist.create;
   p.interfaceuses:= tusesinfolist.create(false);
   p.implementationuses:= tusesinfolist.create(true);
@@ -2022,6 +2096,7 @@ destructor tpascalunitinfo.destroy;
 begin
  with info do begin
   p.procedurelist.Free;
+  p.interfacelist.Free;
   p.classinfolist.Free;
   p.interfaceuses.Free;
   p.implementationuses.Free;

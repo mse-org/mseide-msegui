@@ -561,6 +561,7 @@ function tpascaldesignparser.parseinterfacetype: boolean;
 var
  value: lstringty;
  ident1: pascalidentty;
+ intfinfopo: pinterfaceinfoty;
 begin
  result:= getorignamenoident(value) and checkoperator('=') and
       checkident(integer(pid_interface));
@@ -568,7 +569,15 @@ begin
   while not eof do begin
    ident1:= pascalidentty(getident);
    case ident1 of
-    pid_end,pid_implementation: begin
+    pid_end: begin
+     intfinfopo:= funitinfopo^.p.interfacelist.newitem;
+     with intfinfopo^ do begin
+      name:= lstringtostring(value);
+      uppername:= uppercase(name);
+     end;
+     break;
+    end;
+    pid_implementation: begin
      break;
     end;
     pid_procedure,pid_function: begin
@@ -833,6 +842,8 @@ begin
        acttoken:= statementstart;
        if parseinterfacetype then begin
         pop;
+        funitinfopo^.deflist.add(lstringtostring(lstr1),syk_interfacedef,
+                   getsourcepos(statementstart),sourcepos);
        end
        else begin
         back;
