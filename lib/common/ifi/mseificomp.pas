@@ -376,6 +376,7 @@ type
  tifilinkcomparrayprop = class(tmsecomponentarrayprop)
   public 
    constructor create;
+   class function getitemclasstype: persistentclassty; override;
  end;
 
  tgridclientcontroller = class(tificlientcontroller)
@@ -1939,6 +1940,11 @@ end;
 constructor tifilinkcomparrayprop.create;
 begin
  inherited create(tificolitem);
+end;
+
+class function tifilinkcomparrayprop.getitemclasstype: persistentclassty;
+begin
+ result:= tificolitem;
 end;
 
 { tgridclientcontroller }

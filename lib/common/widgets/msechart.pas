@@ -239,6 +239,7 @@ type
    function getitemclass: dialcontrollerclassty; override;
    procedure createitem(const index: integer; var item: tpersistent); override;
   public
+   class function getitemclasstype: persistentclassty; override;
    property items[const aindex: integer]: tchartdialhorz read getitems write setitems; default;
  end;
 
@@ -250,6 +251,7 @@ type
    function getitemclass: dialcontrollerclassty; override;
    procedure createitem(const index: integer; var item: tpersistent); override;
   public
+   class function getitemclasstype: persistentclassty; override;
    property items[const aindex: integer]: tchartdialvert read getitems write setitems; default;
  end;
 
@@ -1612,6 +1614,11 @@ begin
  end;
 end;
 
+class function tchartdialshorz.getitemclasstype: persistentclassty;
+begin
+ result:= tchartdialhorz;
+end;
+
 { tchartdialsvert }
 
 function tchartdialsvert.getitemclass: dialcontrollerclassty;
@@ -1638,6 +1645,11 @@ begin
   start:= ichartdialcontroller(fintf).getystart;
   range:= ichartdialcontroller(fintf).getyrange;
  end;
+end;
+
+class function tchartdialsvert.getitemclasstype: persistentclassty;
+begin
+ result:= tchartdialvert;
 end;
 
 { tchartdials }

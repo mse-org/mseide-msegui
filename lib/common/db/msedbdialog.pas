@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -17,7 +17,8 @@ uses
  classes,mseguiglob,msefiledialog,db,mseinplaceedit,msedbedit,msegui,
  msewidgetgrid,
  msedatalist,mseeditglob,msegrids,msetypes,msedb,msemenus,mseedit,
- msedataedits,mseevent,msestrings,msecolordialog,msegraphutils,msedialog;
+ msedataedits,mseevent,msestrings,msecolordialog,msegraphutils,msedialog,
+ mseglob;
  
 type
  tdbfilenameedit = class(tcustomfilenameedit,idbeditfieldlink,ireccontrol)

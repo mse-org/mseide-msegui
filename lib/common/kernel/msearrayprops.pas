@@ -323,6 +323,7 @@ type
    procedure createitem(const index: integer; var item: tpersistent); override;
   public
    constructor create(const aitemclasstype: msecomponentitemclassty);
+   class function getitemclasstype: persistentclassty; override;
    property items[const index: integer]: tmsecomponent read getitems 
                                                    write setitems; default;
  end;
@@ -2035,6 +2036,11 @@ procedure tmsecomponentarrayprop.createitem(const index: integer;
 begin
  inherited;
  tmsecomponentitem(item).fprop:= self; 
+end;
+
+class function tmsecomponentarrayprop.getitemclasstype: persistentclassty;
+begin
+ result:= tmsecomponent;
 end;
 
 end.

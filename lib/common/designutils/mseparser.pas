@@ -1891,11 +1891,13 @@ begin
        if str1 <> '' then begin
         fdefines.add(str1);
        end;
+       skiprest;
       end;
       pskw_undef: begin
        if getname(lstr1) then begin
         fdefines.delete(lstr1);
        end;
+       skiprest;
       end;
      end;
     end;
