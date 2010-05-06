@@ -597,7 +597,8 @@ begin
       end;
      end;
     end;
-    ftstring,ftfixedchar: begin
+    ftstring,ftfixedchar
+         {$ifndef mswindows},ftwidestring,ftfixedwidechar{$endif}: begin
      if isnull then begin
       bindnull(i,SQL_C_CHAR,SQL_CHAR);
      end
@@ -614,6 +615,7 @@ begin
       end;
      end;
     end;
+    {$ifdef mswindows}
     ftwidestring,ftfixedwidechar: begin
      if isnull then begin
       bindnull(i,SQL_C_WCHAR,SQL_WCHAR);
@@ -633,6 +635,7 @@ begin
  //     bindstr(i,SQL_C_WCHAR,SQL_WCHAR,buf,buflen,buflen);
      end;
     end;
+    {$endif}
     else begin
      if isnull then begin
       bindnull(i,SQL_C_CHAR,SQL_CHAR); //dummy
