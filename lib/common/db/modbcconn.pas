@@ -293,7 +293,7 @@ procedure ODBCCheckResult(LastReturnCode:SQLRETURN; HandleType:SQLSMALLINT;
                                     AHandle: SQLHANDLE; ErrorMsg: string); overload;
 
   // check return value from SQLGetDiagField/Rec function itself
-  procedure CheckSQLGetDiagResult(const Res:SQLRETURN);
+  procedure Check(const Res:SQLRETURN);
   begin
     case Res of
       SQL_INVALID_HANDLE:
@@ -306,40 +306,44 @@ procedure ODBCCheckResult(LastReturnCode:SQLRETURN; HandleType:SQLSMALLINT;
   end;
 
 var
-  NativeError:SQLINTEGER;
+  NativeError: SQLINTEGER;
+  reccount: sqlinteger;
   TextLength:SQLSMALLINT;
   Res:SQLRETURN;
   SqlState,MessageText,TotalMessage:string;
   RecNumber:SQLSMALLINT;
 begin
   // check result
-  if ODBCSucces(LastReturnCode) then
+  if ODBCSucces(LastReturnCode) then begin
     Exit; // no error; all is ok
+  end;
 
   // build TotalMessage for exception to throw
   TotalMessage:=Format('%s ODBC error details:',[ErrorMsg]);
   // retrieve status records
+  check(sqlgetdiagfield(handletype,ahandle,0,SQL_DIAG_NUMBER,@reccount,
+                                  sizeof(reccount),textlength));
+             //unixODBC crashes with too big rec number
   SetLength(SqlState,5); // SqlState buffer
-  RecNumber:=1;
-  repeat
+  for RecNumber:=1 to reccount do begin
     // dummy call to get correct TextLength
-    Res:=SQLGetDiagRec(HandleType,AHandle,RecNumber,@(SqlState[1]),NativeError,@(SqlState[1]),0,TextLength);
-    if Res=SQL_NO_DATA then
+    Res:=SQLGetDiagRec(HandleType,AHandle,RecNumber,@(SqlState[1]),
+                                          NativeError,nil,0,TextLength);
+    if Res=SQL_NO_DATA then begin
       Break; // no more status records
-    CheckSQLGetDiagResult(Res);
-    if TextLength>0 then // if TextLength=0 we don't need another call; also our string buffer would not point to a #0, but be a nil pointer
-    begin
+    end;
+    Check(Res);
+    if TextLength>0 then begin// if TextLength=0 we don't need another call; also our string buffer would not point to a #0, but be a nil pointer
       // allocate large enough buffer
       SetLength(MessageText,TextLength); // note: ansistrings of Length>0 are always terminated by a #0 character, so this is safe
       // actual call
-      Res:=SQLGetDiagRec(HandleType,AHandle,RecNumber,@(SqlState[1]),NativeError,@(MessageText[1]),Length(MessageText)+1,TextLength);
-      CheckSQLGetDiagResult(Res);
+      check(SQLGetDiagRec(HandleType,AHandle,RecNumber,@(SqlState[1]),
+              NativeError,@(MessageText[1]),Length(MessageText)+1,TextLength));
     end;
     // add to TotalMessage
     TotalMessage:=TotalMessage + Format(' Record %d: SqlState: %s; NativeError: %d; Message: %s;',[RecNumber,SqlState,NativeError,MessageText]);
     // incement counter
-    Inc(RecNumber);
-  until false;
+  end;
   // raise error
   raise EODBCException.Create(TotalMessage);
 end;
