@@ -726,6 +726,7 @@ begin
   Res:=SQLFreeHandle(SQL_HANDLE_DBC, FDBCHandle);
   if Res=SQL_ERROR then
     ODBCCheckResult(Res,SQL_HANDLE_DBC,FDBCHandle,'Could not free connection handle.');
+  fdbchandle:= nil;
 end;
 
 function TODBCConnection.AllocateCursorHandle(const aowner: icursorclient;

@@ -2611,7 +2611,7 @@ procedure tsqlquery.freequery;
 begin
  if not (bs_refreshing in fbstate) then begin
   if ({not }IsPrepared) and (assigned(database)) and (assigned(FCursor)) then begin
-        (database as tcustomsqlconnection).UnPrepareStatement(FCursor);
+        tcustomsqlconnection(database).UnPrepareStatement(FCursor);
   end;
   if ftransactionwrite = nil then begin
    freemodifyqueries;
@@ -2626,6 +2626,9 @@ begin
    fcursor.close;
   end;
   freequery;
+  if not (bs_refreshing in fbstate) then begin
+   database.deallocatecursorhandle(fcursor);
+  end;
   exclude(fbstate,bs_connected);
  end;
 end;
