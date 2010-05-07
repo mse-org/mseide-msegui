@@ -7,7 +7,7 @@
  *  Description: ODBC SQLDB unit                                              *
  *  License:     (modified) LGPL                                              *
  *                                                                            *
- *  Modified 2006-2008 by Martin Schreiber                                    *
+ *  Modified 2006-2010 by Martin Schreiber                                    *
  ******************************************************************************)
 
 unit modbcconn;
@@ -697,8 +697,8 @@ begin
   // connect
   ConnectionString:=CreateConnectionString;
   SetLength(OutConnectionString,BufferLength-1); // allocate completed connection string buffer (using the ansistring #0 trick)
-  ODBCCheckResult(
-    SQLDriverConnect(FDBCHandle,               // the ODBC connection handle
+  try
+   ODBCCheckResult(SQLDriverConnect(FDBCHandle,               // the ODBC connection handle
                      nil,                      // no parent window (would be required for prompts)
                      PChar(ConnectionString),  // the connection string
                      Length(ConnectionString), // connection string length
@@ -708,7 +708,12 @@ begin
                      SQL_DRIVER_NOPROMPT),     // don't prompt for password etc.
     SQL_HANDLE_DBC,FDBCHandle,
     'Could not connect with connection string "%s".',[ConnectionString]
-  );
+   );
+  except
+   SQLFreeHandle(SQL_HANDLE_DBC, FDBCHandle);
+   fdbchandle:= nil;
+   raise;
+  end;
 
 // commented out as the OutConnectionString is not used further at the moment
 //  if ActualLength<BufferLength-1 then
