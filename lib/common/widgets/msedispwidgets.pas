@@ -20,7 +20,9 @@ interface
 uses
  classes,msegui,mseguiglob,msewidgets,msegraphics,msedrawtext,msegraphutils,
  msemenus,msetypes,msestrings,mseformatstr,mseevent
- {$ifdef mse_with_ifi},mseifiglob{$endif};
+ {$ifdef mse_with_ifi}
+  ,mseificomp,mseifiglob,mseificompglob,typinfo,msedatalist
+ {$endif};
 
 const
  defaultdisptextflags = [tf_ycentered];
@@ -109,12 +111,19 @@ type
  dispwidgetoptionty = (dwo_hintclippedtext,dwo_nogray);
  dispwidgetoptionsty = set of dispwidgetoptionty;
  
- tdispwidget = class(tpublishedwidget)
+ tdispwidget = class(tpublishedwidget{$ifdef mse_with_ifi},iifidatalink{$endif})
   private
    finfo: drawtextinfoty;
    ftext: msestring;
    foptions: dispwidgetoptionsty;
    ftextflags: textflagsty;
+{$ifdef mse_with_ifi}
+   fifilink: tifilinkcomp;
+//   procedure ifisetvalue(var avalue; var accept: boolean);
+   function getifilinkkind: ptypeinfo;
+   procedure setifilink(const avalue: tifilinkcomp);
+   function ifigriddata: tdatalist;
+{$endif}
    procedure updatetextflags;
    procedure settextflags(const value: textflagsty);
    procedure setoptions(const avalue: dispwidgetoptionsty);
@@ -152,6 +161,10 @@ type
    fvalue: msestring;
    fonchange: changestringeventty;
    procedure setvalue(const Value: msestring);
+  {$ifdef mse_with_ifi}
+   function getifilink: tifistringlinkcomp;
+   procedure setifilink(const avalue: tifistringlinkcomp);
+  {$endif}
   protected
    function getvaluetext: msestring; override;
    procedure valuechanged; override;
@@ -159,6 +172,9 @@ type
    property value: msestring read fvalue write setvalue;
   published
    property onchange: changestringeventty read fonchange write fonchange;
+{$ifdef mse_with_ifi}
+   property ifilink: tifistringlinkcomp read getifilink write setifilink;
+{$endif}
  end;
 
  tstringdisp = class(tcustomstringdisp)
@@ -205,6 +221,10 @@ type
    procedure setvalue(const Value: integer);
    procedure setbase(const Value: numbasety);
    procedure setbitcount(const Value: integer);
+  {$ifdef mse_with_ifi}
+   function getifilink: tifiintegerlinkcomp;
+   procedure setifilink(const avalue: tifiintegerlinkcomp);
+  {$endif}
   protected
    function getvaluetext: msestring; override;
    procedure valuechanged; override;
@@ -215,6 +235,9 @@ type
    property base: numbasety read fbase write setbase default nb_dec;
    property bitcount: integer read fbitcount write setbitcount default 32;
    property onchange: changeintegereventty read fonchange write fonchange;
+{$ifdef mse_with_ifi}
+   property ifilink: tifiintegerlinkcomp read getifilink write setifilink;
+{$endif}
  end;
 
  tintegerdisp = class(tcustomintegerdisp)
@@ -234,6 +257,10 @@ type
    procedure setformat(const avalue: msestring);
    procedure setvaluerange(const avalue: real);
    procedure readvaluescale(reader: treader);
+  {$ifdef mse_with_ifi}
+   function getifilink: tifireallinkcomp;
+   procedure setifilink(const avalue: tifireallinkcomp);
+  {$endif}
   protected
    procedure valuechanged; override;
    function getvaluetext: msestring; override;
@@ -245,6 +272,9 @@ type
    property valuerange: real read fvaluerange write setvaluerange;
    property format: msestring read fformat write setformat;
    property onchange: changerealeventty read fonchange write fonchange;
+{$ifdef mse_with_ifi}
+   property ifilink: tifireallinkcomp read getifilink write setifilink;
+{$endif}
  end;
 
  trealdisp = class(tcustomrealdisp)
@@ -263,6 +293,10 @@ type
    procedure setkind(const avalue: datetimekindty);
    procedure readvalue(reader: treader);
    procedure writevalue(writer: twriter);
+  {$ifdef mse_with_ifi}
+   function getifilink: tifidatetimelinkcomp;
+   procedure setifilink(const avalue: tifidatetimelinkcomp);
+  {$endif}
   protected
    procedure valuechanged; override;
    function getvaluetext: msestring; override;
@@ -274,6 +308,9 @@ type
    property format: msestring read fformat write setformat;
    property onchange: changedatetimeeventty read fonchange write fonchange;
    property kind: datetimekindty read fkind write setkind default dtk_date;
+{$ifdef mse_with_ifi}
+   property ifilink: tifidatetimelinkcomp read getifilink write setifilink;
+{$endif}
  end;
 
  tdatetimedisp = class(tcustomdatetimedisp)
@@ -403,6 +440,24 @@ begin
 {$endif}
 end;
 
+{$ifdef mse_with_ifi}
+function tdispwidget.getifilinkkind: ptypeinfo;
+begin
+ result:= typeinfo(iifidatalink);
+end;
+
+procedure tdispwidget.setifilink(const avalue: tifilinkcomp);
+begin
+ mseificomp.setifilinkcomp(iifidatalink(self),avalue,fifilink);
+end;
+
+function tdispwidget.ifigriddata: tdatalist;
+begin
+ result:= nil;
+end;
+
+{$endif}
+
 procedure tdispwidget.formatchanged;
 begin
  if ftext = '' then begin
@@ -465,6 +520,19 @@ begin
 end;
 
 { tcustomstringdisp }
+
+{$ifdef mse_with_ifi}
+
+function tcustomstringdisp.getifilink: tifistringlinkcomp;
+begin
+ result:= tifistringlinkcomp(fifilink);
+end;
+
+procedure tcustomstringdisp.setifilink(const avalue: tifistringlinkcomp);
+begin
+ inherited;
+end;
+{$endif}
 
 function tcustomstringdisp.getvaluetext: msestring;
 begin
@@ -541,6 +609,19 @@ begin
  fbitcount:= 32;
  inherited;
 end;
+
+{$ifdef mse_with_ifi}
+
+function tcustomintegerdisp.getifilink: tifiintegerlinkcomp;
+begin
+ result:= tifiintegerlinkcomp(fifilink);
+end;
+
+procedure tcustomintegerdisp.setifilink(const avalue: tifiintegerlinkcomp);
+begin
+ inherited;
+end;
+{$endif}
 
 function tcustomintegerdisp.getvaluetext: msestring;
 begin
@@ -632,6 +713,19 @@ begin
  end;
 end;
 
+{$ifdef mse_with_ifi}
+
+function tcustomrealdisp.getifilink: tifireallinkcomp;
+begin
+ result:= tifireallinkcomp(fifilink);
+end;
+
+procedure tcustomrealdisp.setifilink(const avalue: tifireallinkcomp);
+begin
+ inherited;
+end;
+{$endif}
+
 procedure tcustomrealdisp.valuechanged;
 begin
  if canevent(tmethod(fonchange)) then begin
@@ -673,6 +767,18 @@ begin
  fformat := avalue;
  formatchanged;
 end;
+
+{$ifdef mse_with_ifi}
+function tcustomdatetimedisp.getifilink: tifidatetimelinkcomp;
+begin
+ result:= tifidatetimelinkcomp(fifilink);
+end;
+
+procedure tcustomdatetimedisp.setifilink(const avalue: tifidatetimelinkcomp);
+begin
+ inherited;
+end;
+{$endif}
 
 procedure tcustomdatetimedisp.valuechanged;
 begin
