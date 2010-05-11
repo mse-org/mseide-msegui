@@ -1280,7 +1280,7 @@ type
    procedure setupfoldinfo(asource: pbyte; const acount: integer);
    property hidden[const index: integer]: boolean read gethidden write sethidden;
    property foldlevel[const index: integer]: byte read getfoldlevel 
-                                                  write setfoldlevel; //0..127
+                                                  write setfoldlevel; //0..63
    property foldissum[const index: integer]: boolean read getfoldissum 
                                                   write setfoldissum;
    property height[const index: integer]: integer read getheight 
@@ -1651,6 +1651,8 @@ type
 //   procedure ifisetvalue(var avalue; var accept: boolean);
    function getifilinkkind: ptypeinfo;
    procedure setifilink(const avalue: tifigridlinkcomp);
+    //iifigridlink
+   function getrowstate: tcustomrowstatelist;
 {$endif}
    procedure setframe(const avalue: tgridframe);
    function getframe: tgridframe;
@@ -1868,13 +1870,13 @@ type
                              const selectaction: focuscellactionty); virtual;
    function wheelheight: integer;
    
-  //idragcontroller
+    //idragcontroller
    function getdragrect(const apos: pointty): rectty; override;
-  //iscrollbar
+    //iscrollbar
    procedure scrollevent(sender: tcustomscrollbar; event: scrolleventty); virtual;
 
-  //idragcontroller
-  //iobjectpicker
+    //idragcontroller
+    //iobjectpicker
    function getcursorshape(const apos: pointty;  const shiftstate: shiftstatesty;
                                     var shape: cursorshapety): boolean;
    procedure getpickobjects(const rect: rectty;  const shiftstate: shiftstatesty;
@@ -1889,7 +1891,7 @@ type
    procedure focusrow(const arow: integer; const action: focuscellactionty;
                         const selectmode: selectcellmodety = scm_cell);
 
-  //istatfile
+    //istatfile
    procedure dostatread(const reader: tstatreader); virtual;
    procedure dostatwrite(const writer: tstatwriter); virtual;
    procedure statreading;
@@ -13560,6 +13562,11 @@ begin
  result:= typeinfo(iifigridlink);
 end;
 
+function tcustomgrid.getrowstate: tcustomrowstatelist;
+begin
+ result:= fdatacols.frowstate;
+end;
+
 procedure tcustomgrid.setifilink(const avalue: tifigridlinkcomp);
 begin
  mseificomp.setifilinkcomp(iifigridlink(self),avalue,tifilinkcomp(fifilink));
@@ -15574,18 +15581,16 @@ end;
 
 procedure trowstatelist.checksyncfoldlevelsource(const index: integer;
                                  const acount: integer);
+var
+ int1: integer;
 begin
  if flinkfoldlevel.source <> nil then begin
   foldleveltosource(index,acount);
  end
  else begin
-  if acount = 1 then begin
-   change(index);
-   fgrid.rowstatechanged(index);
-  end
-  else begin
-   change(-1);
-   fgrid.rowstatechanged(-1);
+  for int1:= index to index + acount - 1 do begin
+   change(int1);
+   fgrid.rowstatechanged(int1);
   end;
  end;
 end;

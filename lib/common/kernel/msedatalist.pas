@@ -187,6 +187,7 @@ type
    property size: integer read fsize;
    function datapo: pointer; //calls normalizering,
              //do not use in copyinstance,initinstance,freedata
+   function datahighpo: pointer; //points to last item
    function getitempo(index: integer): pointer;
              //invalid after capacity change
    procedure assign(sender: tpersistent); override;
@@ -244,6 +245,8 @@ type
                      write setmaxcount default bigint; //for ring buffer
    property sorted: boolean read fsorted write setsorted;
  end;
+ 
+ pdatalist = ^tdatalist;
  
  subdatainfoty = record
   list: tdatalist;
@@ -4178,6 +4181,14 @@ function tdatalist.datapo: pointer;
 begin
  normalizering;
  result:= fdatapo;
+end;
+
+function tdatalist.datahighpo: pointer;
+begin
+ result:= nil;
+ if fcount > 0 then begin
+  result:= pchar(datapo) + (fcount-1)*fsize;
+ end;
 end;
 
 function tdatalist.getitempo(index: integer): pointer;

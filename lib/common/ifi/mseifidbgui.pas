@@ -207,10 +207,15 @@ var
 begin
  with tifidbwidgetgridcontroller(fifi) do begin
   if cancommandsend(igo_coldata) then begin
-   for rsm1:= low(rowstatememberty) to high(rowstatememberty) do begin
-    if fnames[rsm1] <> '' then begin
-     senditem(ik_coldatachange,[encodecolchangedata(fnames[rsm1],arow,
-                    fdatacols.rowstate,rsm1)]);
+   if arow < 0 then begin
+    //todo
+   end
+   else begin
+    for rsm1:= low(rowstatememberty) to high(rowstatememberty) do begin
+     if fnames[rsm1] <> '' then begin
+      senditem(ik_coldatachange,[encodecolchangedata(fnames[rsm1],arow,
+                     fdatacols.rowstate,rsm1)]);
+     end;
     end;
    end;
   end;

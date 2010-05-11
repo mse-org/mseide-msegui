@@ -43,6 +43,7 @@ type
  
  iifigridlink = interface(iifilink)
   function appendrow(const checkautoappend: boolean = false): integer;
+  function getrowstate: tcustomrowstatelist;
  end;
 
  iifigridserver = interface(iifiserver)
