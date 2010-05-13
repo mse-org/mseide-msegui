@@ -104,6 +104,8 @@ type
   protected
    procedure readdata;
    function findvar(const name: msestring; var value: msestring): boolean; //true if ok
+   function findvar(const name: msestring; var value: msestring;
+                         out isarray: boolean): boolean; //true if ok
   public
    constructor create(const astream: ttextstream); overload;
    constructor create(const filename: filenamety;
@@ -124,6 +126,8 @@ type
                const min: real = -bigreal; const max: real = bigreal): realty;
    function readstring(const name: msestring; const default: string): string;
    function readmsestring(const name: msestring; const default: msestring): msestring;
+   function readmsestrings(const name: msestring; const default: msestring): msestring;
+                         //handles linebreaks, 'ar' is multiline name extension
    procedure readdatalist(const name: msestring; const value: tdatalist);
    function readarray(const name: msestring; const default: stringarty): stringarty; overload;
    function readarray(const name: msestring; const default: msestringarty): msestringarty; overload;
@@ -170,6 +174,8 @@ type
    procedure writereal(const name: msestring; const value: real);
    procedure writestring(const name: msestring; const value: string);
    procedure writemsestring(const name: msestring; const value: msestring);
+   procedure writemsestrings(const name: msestring; const value: msestring);
+                       //handles linebreaks, 'ar' is multiline name extension
    procedure writedatalist(const name: msestring; const value: tdatalist);
    procedure writearray(const name: msestring; const value: stringarty); overload;
    procedure writearray(const name: msestring; const value: msestringarty); overload;
@@ -619,6 +625,21 @@ begin
  end;
 end;
 
+function tstatreader.findvar(const name: msestring; var value: msestring;
+                                                out isarray: boolean): boolean;
+begin
+ result:= findvar(name,value);
+ isarray:= false;
+ if result then begin
+  with factsection^ do begin
+   if (factitem < count - 1) and (length(values[factitem+1]) > flistlevel) and
+              (values[factitem+1][flistlevel+1] = ' ') then begin
+    isarray:= true;
+   end;
+  end;
+ end;
+end;
+
 function tstatreader.checkvar(const name: msestring): boolean;
 begin
  result:= (factsection <> nil) and (factsection^.names.find(name) <> nil);
@@ -775,6 +796,20 @@ begin
  result:= ''; //compilerwarning
  if not findvar(name,result) then begin
   result:= default;
+ end;
+end;
+
+function tstatreader.readmsestrings(const name: msestring;
+  const default: msestring): msestring;
+var
+ ar1: msestringarty;
+begin
+ ar1:= readarray(name+'ar',ar1);
+ if high(ar1) >= 0 then begin
+  result:= concatstrings(ar1,lineend);
+ end
+ else begin
+  result:= readmsestring(name,default);
  end;
 end;
 
@@ -1209,6 +1244,20 @@ procedure tstatwriter.writemsestring(const name: msestring;
   const value: msestring);
 begin
  writeval(name,value);
+end;
+
+procedure tstatwriter.writemsestrings(const name: msestring;
+  const value: msestring);
+var
+ ar1: msestringarty;
+begin
+ ar1:= breaklines(value);
+ if high(ar1) > 0 then begin
+  writearray(name+'ar',ar1);
+ end
+ else begin
+  writeval(name,value);
+ end;
 end;
 
 procedure tstatwriter.writerecord(const name: msestring;

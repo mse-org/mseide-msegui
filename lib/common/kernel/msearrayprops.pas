@@ -317,15 +317,15 @@ type
  
  tmsecomponentarrayprop = class(tpersistentarrayprop)
   private
-   function getitems(const index: integer): tmsecomponent;
-   procedure setitems(const index: integer; const avalue: tmsecomponent);
+//   function getitems(const index: integer): tmsecomponent;
+//   procedure setitems(const index: integer; const avalue: tmsecomponent);
   protected
    procedure createitem(const index: integer; var item: tpersistent); override;
   public
    constructor create(const aitemclasstype: msecomponentitemclassty);
    class function getitemclasstype: persistentclassty; override;
-   property items[const index: integer]: tmsecomponent read getitems 
-                                                   write setitems; default;
+//   property items[const index: integer]: tmsecomponent read getitems 
+//                                                   write setitems; default;
  end;
  
  
@@ -2019,7 +2019,7 @@ constructor tmsecomponentarrayprop.create(
 begin
  inherited create(aitemclasstype);
 end;
-
+{
 function tmsecomponentarrayprop.getitems(const index: integer): tmsecomponent;
 begin
  result:= tmsecomponent(inherited getitems(index));
@@ -2030,7 +2030,7 @@ procedure tmsecomponentarrayprop.setitems(const index: integer;
 begin
  inherited;
 end;
-
+}
 procedure tmsecomponentarrayprop.createitem(const index: integer;
                var item: tpersistent);
 begin
@@ -2040,7 +2040,8 @@ end;
 
 class function tmsecomponentarrayprop.getitemclasstype: persistentclassty;
 begin
- result:= tmsecomponent;
+ result:= tmsecomponentitem;
+// result:= tmsecomponent;
 end;
 
 end.

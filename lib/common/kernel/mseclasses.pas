@@ -125,6 +125,10 @@ type
 
  objectlinkprocty = procedure(const info: linkinfoty) of object;
  objectlinkintfprocty = procedure(const alink: pointer) of object;
+ objectlinkfirstprocty = procedure(const info: linkinfoty;
+                                                var handled: boolean) of object;
+ objectlinkintffirstprocty = procedure(const alink: pointer;
+                                                var handled: boolean) of object;
 
  tobjectlinker = class(trecordlist)
   private
@@ -171,6 +175,10 @@ type
    procedure forall(const proc: objectlinkprocty; 
                             const ainterfacetype: pointer); overload;
    procedure forall(const proc: objectlinkintfprocty;
+                            const ainterfacetype: pointer); overload;
+   procedure forfirst(const proc: objectlinkfirstprocty; 
+                            const ainterfacetype: pointer); overload;
+   procedure forfirst(const proc: objectlinkintffirstprocty;
                             const ainterfacetype: pointer); overload;
  end;
 
@@ -2630,6 +2638,56 @@ begin
    if (po1^.dest <> nil) and odd(ptruint(po1^.source)) and 
                              (ainterfacetype = po1^.interfacetype) then begin
     proc(po1^.dest);
+   end;
+  end;
+ finally
+  dec(fnopack);
+ end;
+end;
+
+procedure tobjectlinker.forfirst(const proc: objectlinkfirstprocty; 
+                                              const ainterfacetype: pointer);
+var
+ po1: plinkinfoty;
+ int1: integer;
+ bo1: boolean;
+begin
+ inc(fnopack);
+ try
+  bo1:= false;
+  for int1:= 0 to fcount - 1 do begin
+   po1:= @plinkinfoaty(fdata)^[int1];
+   if (po1^.dest <> nil) and odd(ptruint(po1^.source)) and 
+                             (ainterfacetype = po1^.interfacetype) then begin
+    proc(po1^,bo1);
+    if bo1 then begin
+     break;
+    end;
+   end;
+  end;
+ finally
+  dec(fnopack);
+ end;
+end;
+
+procedure tobjectlinker.forfirst(const proc: objectlinkintffirstprocty; 
+                                              const ainterfacetype: pointer);
+var
+ po1: plinkinfoty;
+ int1: integer;
+ bo1: boolean;
+begin
+ inc(fnopack);
+ try
+  bo1:= false;
+  for int1:= 0 to fcount - 1 do begin
+   po1:= @plinkinfoaty(fdata)^[int1];
+   if (po1^.dest <> nil) and odd(ptruint(po1^.source)) and 
+                             (ainterfacetype = po1^.interfacetype) then begin
+    proc(po1^.dest,bo1);
+    if bo1 then begin
+     break;
+    end;
    end;
   end;
  finally

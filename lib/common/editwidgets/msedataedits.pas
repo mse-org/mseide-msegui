@@ -185,7 +185,7 @@ type
    procedure doafterpaint(const canvas: tcanvas); override;
    function needsfocuspaint: boolean; override;
 
-  //istatfile
+    //istatfile
    procedure dostatread(const reader: tstatreader); virtual;
    procedure dostatwrite(const writer: tstatwriter); virtual;
    procedure statreading;
@@ -304,7 +304,6 @@ type
    procedure readstatvalue(const reader: tstatreader); override;
    procedure writestatvalue(const writer: tstatwriter); override;
    procedure sortfunc(const l,r; var result: integer); override;
-//   function isempty (const atext: msestring): boolean; override;
    function getdefaultvalue: pointer; override;
    function checkvalue(const quiet: boolean = false): boolean; override;
 
@@ -384,6 +383,9 @@ type
    property frame;
    property textflags;
    property textflagsactive;
+{$ifdef mse_with_ifi}
+   property ifilink;
+{$endif}
  end;
   
  thexstringedit = class(tdataedit)
@@ -2515,33 +2517,33 @@ begin
 end;
 
 procedure tcustomstringedit.readstatvalue(const reader: tstatreader);
-var
- ar1: msestringarty;
+//var
+// ar1: msestringarty;
 begin
- ar1:= nil; //compiler warning
- if fgridintf = nil then begin
-  ar1:= nil;
-  ar1:= reader.readarray(valuevarname+'ar',ar1);
-  if high(ar1) >= 0 then begin
-   value:= concatstrings(ar1,lineend);
-  end
-  else begin
-   value:= reader.readmsestring(valuevarname,value);
-  end;
- end;
+// ar1:= nil; //compiler warning
+// if fgridintf = nil then begin
+//  ar1:= nil;
+//  ar1:= reader.readarray(valuevarname+'ar',ar1);
+//  if high(ar1) >= 0 then begin
+//   value:= concatstrings(ar1,lineend);
+//  end
+//  else begin
+   value:= reader.readmsestrings(valuevarname,value);
+//  end;
+// end;
 end;
 
 procedure tcustomstringedit.writestatvalue(const writer: tstatwriter);
-var
- ar1: msestringarty;
+//var
+// ar1: msestringarty;
 begin
- ar1:= breaklines(value);
- if high(ar1) > 0 then begin
-  writer.writearray(valuevarname+'ar',ar1);
- end
- else begin
-  writer.writemsestring(valuevarname,value);
- end;
+// ar1:= breaklines(value);
+// if high(ar1) > 0 then begin
+//  writer.writearray(valuevarname+'ar',ar1);
+// end
+// else begin
+  writer.writemsestrings(valuevarname,value);
+// end;
 end;
 
 procedure tcustomstringedit.dragevent(var info: draginfoty);
@@ -3005,9 +3007,9 @@ end;
 
 procedure thexstringedit.readstatvalue(const reader: tstatreader);
 begin
- if fgridintf = nil then begin
+// if fgridintf = nil then begin
   value:= reader.readstring(valuevarname,value);
- end;
+// end;
 end;
 
 procedure thexstringedit.writestatvalue(const writer: tstatwriter);
@@ -3501,19 +3503,19 @@ end;
 
 procedure tcustomintegeredit.readstatvalue(const reader: tstatreader);
 begin
- if fgridintf <> nil then begin
-  with fgridintf.getcol do begin
-   with tintegerdatalist(datalist) do begin
-    min:= fmin;
-    max:= fmax;
-   end;
-   dostatread(reader);
-  end;
+// if fgridintf <> nil then begin
+//  with fgridintf.getcol do begin
+//   with tintegerdatalist(datalist) do begin
+//    min:= fmin;
+//    max:= fmax;
+//   end;
+//   dostatread(reader);
+//  end;
 //  reader.readintegerdatalist(valuevarname,tintegerdatalist(fgridintf.getcol.datalist),fmin,fmax);
- end
- else begin
+// end
+// else begin
   value:= reader.readinteger(valuevarname,value,fmin,fmax);
- end;
+// end;
 end;
 
 procedure tcustomintegeredit.writestatvalue(const writer: tstatwriter);
@@ -3709,19 +3711,19 @@ end;
 
 procedure tcustomint64edit.readstatvalue(const reader: tstatreader);
 begin
- if fgridintf <> nil then begin
-  with fgridintf.getcol do begin
-   with tint64datalist(datalist) do begin
-    min:= fmin;
-    max:= fmax;
-   end;
-   dostatread(reader);
-  end;
+// if fgridintf <> nil then begin
+//  with fgridintf.getcol do begin
+//   with tint64datalist(datalist) do begin
+//    min:= fmin;
+//    max:= fmax;
+//   end;
+//   dostatread(reader);
+//  end;
 //  reader.readintegerdatalist(valuevarname,tintegerdatalist(fgridintf.getcol.datalist),fmin,fmax);
- end
- else begin
+// end
+// else begin
   value:= reader.readint64(valuevarname,value,fmin,fmax);
- end;
+// end;
 end;
 
 procedure tcustomint64edit.writestatvalue(const writer: tstatwriter);
@@ -4166,10 +4168,10 @@ procedure tcustomenuedit.readstatvalue(const reader: tstatreader);
 var
  min1,max1: integer;
 begin
- if fgridintf <> nil then begin
-  fgridintf.getcol.dostatread(reader);
- end
- else begin
+// if fgridintf <> nil then begin
+//  fgridintf.getcol.dostatread(reader);
+// end
+// else begin
   if enums <> nil then begin
    min1:= fmin;
    max1:= fmax;
@@ -4186,7 +4188,7 @@ begin
    end;
   end;
   value:= reader.readinteger(valuevarname,value,min1,max1);
- end;
+// end;
 end;
 
 procedure tcustomenuedit.writestatvalue(const writer: tstatwriter);
@@ -4629,19 +4631,19 @@ end;
 
 procedure tcustomrealedit.readstatvalue(const reader: tstatreader);
 begin
- if fgridintf <> nil then begin
-  with fgridintf.getcol do begin
-   with trealdatalist(datalist) do begin
-    min:= fmin;
-    max:= fmax;
-   end;
-   dostatread(reader);
-  end;
+// if fgridintf <> nil then begin
+//  with fgridintf.getcol do begin
+//   with trealdatalist(datalist) do begin
+//    min:= fmin;
+//    max:= fmax;
+//   end;
+//   dostatread(reader);
+//  end;
 //  reader.readrealdatalist(valuevarname,trealdatalist(fgridintf.getcol.datalist),fmin,fmax);
- end
- else begin
+// end
+// else begin
   value:= reader.readreal(valuevarname,value,fmin,fmax)
- end;
+// end;
 end;
 
 procedure tcustomrealedit.writestatvalue(const writer: tstatwriter);
@@ -5152,18 +5154,18 @@ end;
 
 procedure tcustomdatetimeedit.readstatvalue(const reader: tstatreader);
 begin
- if fgridintf <> nil then begin
-  with fgridintf.getcol do begin
-   with trealdatalist(datalist) do begin
-    min:= fmin;
-    max:= fmax;
-   end;
-   dostatread(reader);
-  end;
- end
- else begin
+// if fgridintf <> nil then begin
+//  with fgridintf.getcol do begin
+//   with trealdatalist(datalist) do begin
+//    min:= fmin;
+//    max:= fmax;
+//   end;
+//   dostatread(reader);
+//  end;
+// end
+// else begin
   value:= reader.readreal(valuevarname,value,fmin,fmax)
- end;
+// end;
 end;
 
 procedure tcustomdatetimeedit.writestatvalue(const writer: tstatwriter);

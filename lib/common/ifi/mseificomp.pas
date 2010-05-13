@@ -16,10 +16,11 @@ unit mseificomp;
 interface
 uses
  classes,mseclasses,msegui,mseifiglob,mseglob,typinfo,msestrings,msetypes,
- mseificompglob,msearrayprops,msedatalist;
+ mseificompglob,msearrayprops,msedatalist,msestat,msestatfile;
 
 type
  tifilinkcomp = class;
+ tifivaluelinkcomp = class;
  
  ificlienteventty = procedure(const sender: tobject;
                              const alink: iificlient) of object;
@@ -34,13 +35,15 @@ type
  ifivaluelinkstatety = (ivs_linking,ivs_valuesetting,ivs_loadedproc);
  ifivaluelinkstatesty = set of ifivaluelinkstatety;
 
- tcustomificlientcontroller = class(tlinkedpersistent,iifiserver)
+ tcustomificlientcontroller = class(tlinkedpersistent,iifiserver,istatfile)
   private
    fonclientvaluechanged: ificlienteventty;
    fonclientexecute: ificlienteventty;
    fonclientstatechanged: ificlientstateeventty;
    fonclientmodalresult: ificlientmodalresulteventty;
    fowner: tmsecomponent;
+   fstatfile: tstatfile;
+   fstatvarname: msestring;
    function getintegerpro(const aname: string): integer;
    procedure setintegerpro(const aname: string; const avalue: integer);
    function getmsestringpro(const aname: string): msestring;
@@ -51,6 +54,7 @@ type
    procedure setrealtypro(const aname: string; const avalue: realty);
    function getdatetimepro(const aname: string): tdatetime;
    procedure setdatetimepro(const aname: string; const avalue: tdatetime);
+   procedure setstatfile(const avalue: tstatfile);
   protected
    fkind: ttypekind;
    fstate: ifivaluelinkstatesty;
@@ -119,6 +123,12 @@ type
                                             var accept: boolean); virtual;
    procedure sendmodalresult(const sender: iificlient; 
                              const amodalresult: modalresultty); virtual;
+    //istatfile
+   procedure dostatread(const reader: tstatreader); virtual;
+   procedure dostatwrite(const writer: tstatwriter); virtual;
+   procedure statreading;
+   procedure statread;
+   function getstatvarname: msestring;
   public
    constructor create(const aowner: tmsecomponent; const akind: ttypekind);
    function canconnect(const acomponent: tcomponent): boolean; virtual;
@@ -133,7 +143,8 @@ type
                                                        write setrealtypro;
    property datetimeprop[const aname: string]: tdatetime read getdatetimepro 
                                                        write setdatetimepro;
-
+   property statfile: tstatfile read fstatfile write setstatfile;
+   property statvarname: msestring read fstatvarname write fstatvarname;
    property onclientvaluechanged: ificlienteventty read fonclientvaluechanged 
                                                     write fonclientvaluechanged;
    property onclientstatechanged: ificlientstateeventty 
@@ -148,6 +159,8 @@ type
   public
    constructor create(const aowner: tmsecomponent); virtual; overload;
   published
+   property statfile;
+   property statvarname;
    property onclientvaluechanged;
    property onclientstatechanged;
    property onclientmodalresult;
@@ -161,11 +174,11 @@ type
    function canconnect(const acomponent: tcomponent): boolean; override;
  end;
 
- valarsetterty = procedure(const alink: pointer) of object; 
- valargetterty = procedure(const alink: pointer) of object;
+ valarsetterty = procedure(const alink: pointer; var handled: boolean) of object; 
+ valargetterty = procedure(const alink: pointer; var handled: boolean) of object;
 
- itemsetterty = procedure(const alink: pointer) of object; 
- itemgetterty = procedure(const alink: pointer) of object;
+ itemsetterty = procedure(const alink: pointer; var handled: boolean) of object; 
+ itemgetterty = procedure(const alink: pointer; var handled: boolean) of object;
   
  tvalueclientcontroller = class(tificlientcontroller)
   private
@@ -176,36 +189,39 @@ type
    function getifilinkkind: ptypeinfo; override;
    function canconnect(const acomponent: tcomponent): boolean; override;
 
-   procedure getdatalist1(const alink: pointer);
+   procedure getdatalist1(const alink: pointer; var handled: boolean);
    function getdatalist: tdatalist;
    
-   procedure setmsestringvalar(const alink: pointer);
-   procedure getmsestringvalar(const alink: pointer);
-   procedure setintegervalar(const alink: pointer);
-   procedure getintegervalar(const alink: pointer);
-   procedure setrealtyvalar(const alink: pointer);
-   procedure getrealtyvalar(const alink: pointer);
-   procedure setdatetimevalar(const alink: pointer);
-   procedure getdatetimevalar(const alink: pointer);
-   procedure setbooleanvalar(const alink: pointer);
-   procedure getbooleanvalar(const alink: pointer);
+   procedure setmsestringvalar(const alink: pointer; var handled: boolean);
+   procedure getmsestringvalar(const alink: pointer; var handled: boolean);
+   procedure setintegervalar(const alink: pointer; var handled: boolean);
+   procedure getintegervalar(const alink: pointer; var handled: boolean);
+   procedure setrealtyvalar(const alink: pointer; var handled: boolean);
+   procedure getrealtyvalar(const alink: pointer; var handled: boolean);
+   procedure setdatetimevalar(const alink: pointer; var handled: boolean);
+   procedure getdatetimevalar(const alink: pointer; var handled: boolean);
+   procedure setbooleanvalar(const alink: pointer; var handled: boolean);
+   procedure getbooleanvalar(const alink: pointer; var handled: boolean);
    procedure getvalar(const agetter: valargetterty; var avalue);
    procedure setvalar(const asetter: valarsetterty; const avalue);
 
-   procedure setmsestringitem(const alink: pointer);
-   procedure getmsestringitem(const alink: pointer);
-   procedure setintegeritem(const alink: pointer);
-   procedure getintegeritem(const alink: pointer);
-   procedure setrealtyitem(const alink: pointer);
-   procedure getrealtyitem(const alink: pointer);
-   procedure setdatetimeitem(const alink: pointer);
-   procedure getdatetimeitem(const alink: pointer);
-   procedure setbooleanitem(const alink: pointer);
-   procedure getbooleanitem(const alink: pointer);
+   procedure setmsestringitem(const alink: pointer; var handled: boolean);
+   procedure getmsestringitem(const alink: pointer; var handled: boolean);
+   procedure setintegeritem(const alink: pointer; var handled: boolean);
+   procedure getintegeritem(const alink: pointer; var handled: boolean);
+   procedure setrealtyitem(const alink: pointer; var handled: boolean);
+   procedure getrealtyitem(const alink: pointer; var handled: boolean);
+   procedure setdatetimeitem(const alink: pointer; var handled: boolean);
+   procedure getdatetimeitem(const alink: pointer; var handled: boolean);
+   procedure setbooleanitem(const alink: pointer; var handled: boolean);
+   procedure getbooleanitem(const alink: pointer; var handled: boolean);
    procedure getitem(const index: integer; const agetter: itemgetterty;
                                                                  var avalue);
    procedure setitem(const index: integer; const asetter: itemsetterty;
                                                                  const avalue);
+
+   procedure statreadlist(const alink: pointer);
+   procedure statwritelist(const alink: pointer; var handled: boolean);
  end;
  
  tstringclientcontroller = class(tvalueclientcontroller)
@@ -223,6 +239,9 @@ type
    procedure clienttovalues(const alink: pointer); override;
    procedure setvalue(const sender: iificlient;
                               var avalue; var accept: boolean); override;
+    //istatfile
+   procedure dostatread(const reader: tstatreader); override;
+   procedure dostatwrite(const writer: tstatwriter); override;
   public
    constructor create(const aowner: tmsecomponent); override;
    property griddata: tmsestringdatalist read getgriddata;
@@ -254,6 +273,9 @@ type
    procedure clienttovalues(const alink: pointer); override;
    procedure setvalue(const sender: iificlient;
                               var avalue; var accept: boolean); override;
+    //istatfile
+   procedure dostatread(const reader: tstatreader); override;
+   procedure dostatwrite(const writer: tstatwriter); override;
   public
    constructor create(const aowner: tmsecomponent); override;
    property griddata: tintegerdatalist read getgriddata;
@@ -283,6 +305,9 @@ type
    procedure clienttovalues(const alink: pointer); override;
    procedure setvalue(const sender: iificlient;
                               var avalue; var accept: boolean); override;
+    //istatfile
+   procedure dostatread(const reader: tstatreader); override;
+   procedure dostatwrite(const writer: tstatwriter); override;
   public
    constructor create(const aowner: tmsecomponent); override;
    property griddata: tintegerdatalist read getgriddata;
@@ -321,6 +346,9 @@ type
    procedure setvalue(const sender: iificlient;
                               var avalue; var accept: boolean); override;
    procedure defineproperties(filer: tfiler); override;
+    //istatfile
+   procedure dostatread(const reader: tstatreader); override;
+   procedure dostatwrite(const writer: tstatwriter); override;
   public
    constructor create(const aowner: tmsecomponent); override;
    property griddata: trealdatalist read getgriddata;
@@ -361,6 +389,9 @@ type
    procedure setvalue(const sender: iificlient;
                               var avalue; var accept: boolean); override;
    procedure defineproperties(filer: tfiler); override;
+    //istatfile
+   procedure dostatread(const reader: tstatreader); override;
+   procedure dostatwrite(const writer: tstatwriter); override;
   public
    constructor create(const aowner: tmsecomponent); override;
    property griddata: tdatetimedatalist read getgriddata;
@@ -380,16 +411,19 @@ type
 
  tificolitem = class(tmsecomponentitem)
   private
-   function getlink: tifilinkcomp;
-   procedure setlink(const avalue: tifilinkcomp);
+   function getlink: tifivaluelinkcomp;
+   procedure setlink(const avalue: tifivaluelinkcomp);
   published
-   property link: tifilinkcomp read getlink write setlink;
+   property link: tifivaluelinkcomp read getlink write setlink;
  end;
  
  tifilinkcomparrayprop = class(tmsecomponentarrayprop)
+  private
+   function getitems(const index: integer): tificolitem;
   public 
    constructor create;
    class function getitemclasstype: persistentclassty; override;
+   property items[const index: integer]: tificolitem read getitems; default;
  end;
 
  tgridclientcontroller = class(tificlientcontroller)
@@ -398,16 +432,21 @@ type
    foncellevent: ificelleventty;
    fdatacols: tifilinkcomparrayprop;
    fcheckautoappend: boolean;
-   flistpo: pdatalist;
+   fitempo: pointer;
    procedure setrowcount(const avalue: integer);
    procedure setdatacols(const avalue: tifilinkcomparrayprop);
    function getrowstate: tcustomrowstatelist;
+   procedure statreadrowstate(const alink: pointer);
+   procedure statwriterowstate(const alink: pointer; var handled: boolean);
   protected
    function getifilinkkind: ptypeinfo; override;
    procedure valuestoclient(const alink: pointer); override;
    procedure clienttovalues(const alink: pointer); override;
    procedure itemappendrow(const alink: pointer);
-   procedure getrowstate1(const alink: pointer);
+   procedure getrowstate1(const alink: pointer; var handled: boolean);
+
+   procedure dostatread(const reader: tstatreader); override;
+   procedure dostatwrite(const writer: tstatwriter); override;
   public
    constructor create(const aowner: tmsecomponent); override;
    destructor destroy; override;
@@ -438,7 +477,14 @@ type
   published
  end;
  
- tifistringlinkcomp = class(tifilinkcomp)
+ tifivaluelinkcomp = class(tifilinkcomp)
+  private
+   function getcontroller: tvalueclientcontroller;
+  public
+   property controller: tvalueclientcontroller read getcontroller;
+ end;
+ 
+ tifistringlinkcomp = class(tifivaluelinkcomp)
   private
    function getcontroller: tstringclientcontroller;
    procedure setcontroller(const avalue: tstringclientcontroller);
@@ -449,7 +495,7 @@ type
                                                          write setcontroller;
  end;
 
- tifiintegerlinkcomp = class(tifilinkcomp)
+ tifiintegerlinkcomp = class(tifivaluelinkcomp)
   private
    function getcontroller: tintegerclientcontroller;
    procedure setcontroller(const avalue: tintegerclientcontroller);
@@ -460,7 +506,7 @@ type
                                                          write setcontroller;
  end;
 
- tifibooleanlinkcomp = class(tifilinkcomp)
+ tifibooleanlinkcomp = class(tifivaluelinkcomp)
   private
    function getcontroller: tbooleanclientcontroller;
    procedure setcontroller(const avalue: tbooleanclientcontroller);
@@ -471,7 +517,7 @@ type
                                                          write setcontroller;
  end;
 
- tifireallinkcomp = class(tifilinkcomp)
+ tifireallinkcomp = class(tifivaluelinkcomp)
   private
    function getcontroller: trealclientcontroller;
    procedure setcontroller(const avalue: trealclientcontroller);
@@ -482,7 +528,7 @@ type
                                                          write setcontroller;
  end;
 
- tifidatetimelinkcomp = class(tifilinkcomp)
+ tifidatetimelinkcomp = class(tifivaluelinkcomp)
   private
    function getcontroller: tdatetimeclientcontroller;
    procedure setcontroller(const avalue: tdatetimeclientcontroller);
@@ -520,7 +566,12 @@ procedure setifilinkcomp(const alink: iifilink;
 implementation
 uses
  sysutils,mseapplication,msereal,msestreaming;
- 
+
+const
+ valuevarname = 'value';
+// arvaluevarname = 'arvalue';
+ rowstatevarname = '_rowstate';
+  
 type
  tmsecomponent1 = class(tmsecomponent);
  
@@ -1051,6 +1102,45 @@ begin
  result:= typeinfo(iifilink);
 end;
 
+procedure tcustomificlientcontroller.setstatfile(const avalue: tstatfile);
+begin
+ setstatfilevar(istatfile(self),avalue,fstatfile);
+end;
+
+procedure tcustomificlientcontroller.dostatread(const reader: tstatreader);
+begin
+ //dummy
+end;
+
+procedure tcustomificlientcontroller.dostatwrite(const writer: tstatwriter);
+begin
+ //dummy
+end;
+
+procedure tcustomificlientcontroller.statreading;
+begin
+ //dummy
+end;
+
+procedure tcustomificlientcontroller.statread;
+begin
+ //dummy
+end;
+
+function tcustomificlientcontroller.getstatvarname: msestring;
+begin
+ if fstatvarname = '' then begin
+  result:= ownernamepath(fowner);
+  if result = '' then begin
+   result:= '.'; //dummy, statfiler can not get componentname because 
+                 //self is no tcomponent
+  end;
+ end
+ else begin
+  result:= fstatvarname;
+ end;
+end;
+
 { tifilinkcomp }
 
 constructor tifilinkcomp.create(aowner: tcomponent);
@@ -1101,7 +1191,8 @@ begin
  result:= typeinfo(iifidatalink);
 end;
 
-procedure tvalueclientcontroller.getdatalist1(const alink: pointer);
+procedure tvalueclientcontroller.getdatalist1(const alink: pointer;
+                                                   var handled: boolean);
 var
  datalist: tdatalist;
 begin
@@ -1115,106 +1206,126 @@ function tvalueclientcontroller.getdatalist: tdatalist;
 begin
  result:= nil;
  fitempo:= @result;
- tmsecomponent1(fowner).getobjectlinker.forall(@getdatalist1,self); 
+ tmsecomponent1(fowner).getobjectlinker.forfirst(@getdatalist1,self); 
 end;
 
-procedure tvalueclientcontroller.setmsestringvalar(const alink: pointer);
+procedure tvalueclientcontroller.setmsestringvalar(const alink: pointer;
+                                                      var handled: boolean);
 var
  datalist: tdatalist;
 begin
  datalist:= iifidatalink(alink).ifigriddata;
  if datalist is tmsestringdatalist then begin
   tmsestringdatalist(datalist).asarray:= pmsestringarty(fvalarpo)^;
+  handled:= true;
  end;
 end;
 
-procedure tvalueclientcontroller.getmsestringvalar(const alink: pointer);
+procedure tvalueclientcontroller.getmsestringvalar(const alink: pointer;
+                                                      var handled: boolean);
 var
  datalist: tdatalist;
 begin
  datalist:= iifidatalink(alink).ifigriddata;
  if datalist is tmsestringdatalist then begin
   pmsestringarty(fvalarpo)^:= tmsestringdatalist(datalist).asarray;
+  handled:= true;
  end;
 end;
 
-procedure tvalueclientcontroller.setintegervalar(const alink: pointer);
+procedure tvalueclientcontroller.setintegervalar(const alink: pointer;
+                                                      var handled: boolean);
 var
  datalist: tdatalist;
 begin
  datalist:= iifidatalink(alink).ifigriddata;
  if datalist is tintegerdatalist then begin
   tintegerdatalist(datalist).asarray:= pintegerarty(fvalarpo)^;
+  handled:= true;
  end;
 end;
 
-procedure tvalueclientcontroller.getintegervalar(const alink: pointer);
+procedure tvalueclientcontroller.getintegervalar(const alink: pointer;
+                                                      var handled: boolean);
 var
  datalist: tdatalist;
 begin
  datalist:= iifidatalink(alink).ifigriddata;
  if datalist is tintegerdatalist then begin
   pintegerarty(fvalarpo)^:= tintegerdatalist(datalist).asarray;
+  handled:= true;
  end;
 end;
 
-procedure tvalueclientcontroller.setrealtyvalar(const alink: pointer);
+procedure tvalueclientcontroller.setrealtyvalar(const alink: pointer;
+                                                      var handled: boolean);
 var
  datalist: tdatalist;
 begin
  datalist:= iifidatalink(alink).ifigriddata;
  if datalist is trealdatalist then begin
   trealdatalist(datalist).asarray:= prealarty(fvalarpo)^;
+  handled:= true;
  end;
 end;
 
-procedure tvalueclientcontroller.getrealtyvalar(const alink: pointer);
+procedure tvalueclientcontroller.getrealtyvalar(const alink: pointer;
+                                                      var handled: boolean);
 var
  datalist: tdatalist;
 begin
  datalist:= iifidatalink(alink).ifigriddata;
  if datalist is trealdatalist then begin
   prealarty(fvalarpo)^:= trealdatalist(datalist).asarray;
+  handled:= true;
  end;
 end;
 
-procedure tvalueclientcontroller.setdatetimevalar(const alink: pointer);
+procedure tvalueclientcontroller.setdatetimevalar(const alink: pointer;
+                                                      var handled: boolean);
 var
  datalist: tdatalist;
 begin
  datalist:= iifidatalink(alink).ifigriddata;
  if datalist is trealdatalist then begin
   trealdatalist(datalist).asarray:= pdatetimearty(fvalarpo)^;
+  handled:= true;
  end;
 end;
 
-procedure tvalueclientcontroller.getdatetimevalar(const alink: pointer);
+procedure tvalueclientcontroller.getdatetimevalar(const alink: pointer;
+                                                      var handled: boolean);
 var
  datalist: tdatalist;
 begin
  datalist:= iifidatalink(alink).ifigriddata;
  if datalist is trealdatalist then begin
   prealarty(fvalarpo)^:= trealdatalist(datalist).asarray;
+  handled:= true;
  end;
 end;
 
-procedure tvalueclientcontroller.setbooleanvalar(const alink: pointer);
+procedure tvalueclientcontroller.setbooleanvalar(const alink: pointer;
+                                                      var handled: boolean);
 var
  datalist: tdatalist;
 begin
  datalist:= iifidatalink(alink).ifigriddata;
  if datalist is tintegerdatalist then begin
   tintegerdatalist(datalist).asarray:= pintegerarty(fvalarpo)^;
+  handled:= true;
  end;
 end;
 
-procedure tvalueclientcontroller.getbooleanvalar(const alink: pointer);
+procedure tvalueclientcontroller.getbooleanvalar(const alink: pointer;
+                                                      var handled: boolean);
 var
  datalist: tdatalist;
 begin
  datalist:= iifidatalink(alink).ifigriddata;
  if datalist is tintegerdatalist then begin
   pintegerarty(fvalarpo)^:= tintegerdatalist(datalist).asarray;
+  handled:= true;
  end;
 end;
 
@@ -1222,17 +1333,18 @@ procedure tvalueclientcontroller.getvalar(const agetter: valargetterty;
                        var avalue);
 begin
  fvalarpo:= @avalue;
- tmsecomponent1(fowner).getobjectlinker.forall(agetter,self); 
+ tmsecomponent1(fowner).getobjectlinker.forfirst(agetter,self); 
 end;
 
 procedure tvalueclientcontroller.setvalar(const asetter: valarsetterty;
                         const avalue);
 begin
  fvalarpo:= @avalue;
- tmsecomponent1(fowner).getobjectlinker.forall(asetter,self); 
+ tmsecomponent1(fowner).getobjectlinker.forfirst(asetter,self); 
 end;
 
-procedure tvalueclientcontroller.setmsestringitem(const alink: pointer);
+procedure tvalueclientcontroller.setmsestringitem(const alink: pointer;
+                                                      var handled: boolean);
 var
  datalist: tdatalist;
  int1: integer;
@@ -1244,20 +1356,24 @@ begin
    int1:= datalist.count - 1;
   end;
   tmsestringdatalist(datalist)[int1]:= pmsestring(fitempo)^;
+  handled:= true;
  end;
 end;
 
-procedure tvalueclientcontroller.getmsestringitem(const alink: pointer);
+procedure tvalueclientcontroller.getmsestringitem(const alink: pointer;
+                                                      var handled: boolean);
 var
  datalist: tdatalist;
 begin
  datalist:= iifidatalink(alink).ifigriddata;
  if datalist is tmsestringdatalist then begin
   pmsestring(fitempo)^:= tmsestringdatalist(datalist)[fitemindex];
+  handled:= true;
  end;
 end;
 
-procedure tvalueclientcontroller.setintegeritem(const alink: pointer);
+procedure tvalueclientcontroller.setintegeritem(const alink: pointer;
+                                                      var handled: boolean);
 var
  datalist: tdatalist;
  int1: integer;
@@ -1269,20 +1385,24 @@ begin
    int1:= datalist.count - 1;
   end;
   tintegerdatalist(datalist)[int1]:= pinteger(fitempo)^;
+  handled:= true;
  end;
 end;
 
-procedure tvalueclientcontroller.getintegeritem(const alink: pointer);
+procedure tvalueclientcontroller.getintegeritem(const alink: pointer;
+                                                      var handled: boolean);
 var
  datalist: tdatalist;
 begin
  datalist:= iifidatalink(alink).ifigriddata;
  if datalist is tintegerdatalist then begin
   pinteger(fitempo)^:= tintegerdatalist(datalist)[fitemindex];
+  handled:= true;
  end;
 end;
 
-procedure tvalueclientcontroller.setrealtyitem(const alink: pointer);
+procedure tvalueclientcontroller.setrealtyitem(const alink: pointer;
+                                                      var handled: boolean);
 var
  datalist: tdatalist;
  int1: integer;
@@ -1294,20 +1414,24 @@ begin
    int1:= datalist.count - 1;
   end;
   trealdatalist(datalist)[int1]:= prealty(fitempo)^;
+  handled:= true;
  end;
 end;
 
-procedure tvalueclientcontroller.getrealtyitem(const alink: pointer);
+procedure tvalueclientcontroller.getrealtyitem(const alink: pointer;
+                                                      var handled: boolean);
 var
  datalist: tdatalist;
 begin
  datalist:= iifidatalink(alink).ifigriddata;
  if datalist is trealdatalist then begin
   prealty(fitempo)^:= trealdatalist(datalist)[fitemindex];
+  handled:= true;
  end;
 end;
 
-procedure tvalueclientcontroller.setdatetimeitem(const alink: pointer);
+procedure tvalueclientcontroller.setdatetimeitem(const alink: pointer;
+                                                      var handled: boolean);
 var
  datalist: tdatalist;
  int1: integer;
@@ -1319,20 +1443,24 @@ begin
    int1:= datalist.count - 1;
   end;
   trealdatalist(datalist)[int1]:= pdatetime(fitempo)^;
+  handled:= true;
  end;
 end;
 
-procedure tvalueclientcontroller.getdatetimeitem(const alink: pointer);
+procedure tvalueclientcontroller.getdatetimeitem(const alink: pointer;
+                                                      var handled: boolean);
 var
  datalist: tdatalist;
 begin
  datalist:= iifidatalink(alink).ifigriddata;
  if datalist is trealdatalist then begin
   pdatetime(fitempo)^:= trealdatalist(datalist)[fitemindex];
+  handled:= true;
  end;
 end;
 
-procedure tvalueclientcontroller.setbooleanitem(const alink: pointer);
+procedure tvalueclientcontroller.setbooleanitem(const alink: pointer;
+                                                      var handled: boolean);
 var
  datalist: tdatalist;
  int1: integer;
@@ -1349,16 +1477,19 @@ begin
   else begin
    tintegerdatalist(datalist)[int1]:= longint(longbool(true));
   end;
+  handled:= true;
  end;
 end;
 
-procedure tvalueclientcontroller.getbooleanitem(const alink: pointer);
+procedure tvalueclientcontroller.getbooleanitem(const alink: pointer;
+                                                      var handled: boolean);
 var
  datalist: tdatalist;
 begin
  datalist:= iifidatalink(alink).ifigriddata;
  if datalist is tintegerdatalist then begin
   pintegerarty(fitempo)^:= tintegerdatalist(datalist).asarray;
+  handled:= true
  end;
 end;
 
@@ -1367,7 +1498,7 @@ procedure tvalueclientcontroller.getitem(const index: integer;
 begin
  fitempo:= @avalue;
  fitemindex:= index;
- tmsecomponent1(fowner).getobjectlinker.forall(agetter,self); 
+ tmsecomponent1(fowner).getobjectlinker.forfirst(agetter,self); 
 end;
 
 procedure tvalueclientcontroller.setitem(const index: integer; 
@@ -1375,7 +1506,29 @@ procedure tvalueclientcontroller.setitem(const index: integer;
 begin
  fitempo:= @avalue;
  fitemindex:= index;
- tmsecomponent1(fowner).getobjectlinker.forall(asetter,self); 
+ tmsecomponent1(fowner).getobjectlinker.forfirst(asetter,self); 
+end;
+
+procedure tvalueclientcontroller.statreadlist(const alink: pointer);
+var
+ datalist: tdatalist;
+begin
+ datalist:= iifidatalink(alink).ifigriddata;
+ if datalist <> nil then begin
+  tstatreader(fitempo).readdatalist(getstatvarname,datalist);
+ end;
+end;
+
+procedure tvalueclientcontroller.statwritelist(const alink: pointer;
+                                                      var handled: boolean);
+var
+ datalist: tdatalist;
+begin
+ datalist:= iifidatalink(alink).ifigriddata;
+ if datalist <> nil then begin
+  tstatwriter(fitempo).writedatalist(getstatvarname,datalist);
+  handled:= true;
+ end;
 end;
 
 { tstringclientcontroller }
@@ -1443,6 +1596,18 @@ end;
 function tstringclientcontroller.getgriddata: tmsestringdatalist;
 begin
  result:= tmsestringdatalist(getdatalist);
+end;
+
+procedure tstringclientcontroller.dostatread(const reader: tstatreader);
+begin
+ inherited;
+ value:= reader.readmsestrings(valuevarname,value);
+end;
+
+procedure tstringclientcontroller.dostatwrite(const writer: tstatwriter);
+begin
+ inherited;
+ writer.writemsestrings(valuevarname,value);
 end;
 
 { tintegerclientcontroller }
@@ -1521,6 +1686,18 @@ begin
  result:= tintegerdatalist(getdatalist);
 end;
 
+procedure tintegerclientcontroller.dostatread(const reader: tstatreader);
+begin
+ inherited;
+ value:= reader.readinteger(valuevarname,value);
+end;
+
+procedure tintegerclientcontroller.dostatwrite(const writer: tstatwriter);
+begin
+ inherited;
+ writer.writeinteger(valuevarname,value);
+end;
+
 { tbooleanclientcontroller }
 
 constructor tbooleanclientcontroller.create(const aowner: tmsecomponent);
@@ -1580,6 +1757,18 @@ end;
 function tbooleanclientcontroller.getgriddata: tintegerdatalist;
 begin
  result:= tintegerdatalist(getdatalist);
+end;
+
+procedure tbooleanclientcontroller.dostatread(const reader: tstatreader);
+begin
+ inherited;
+ value:= reader.readboolean(valuevarname,value);
+end;
+
+procedure tbooleanclientcontroller.dostatwrite(const writer: tstatwriter);
+begin
+ inherited;
+ writer.writeboolean(valuevarname,value);
 end;
 
 { trealclientcontroller }
@@ -1718,6 +1907,18 @@ begin
  result:= trealdatalist(getdatalist);
 end;
 
+procedure trealclientcontroller.dostatread(const reader: tstatreader);
+begin
+ inherited;
+ value:= reader.readreal(valuevarname,value);
+end;
+
+procedure trealclientcontroller.dostatwrite(const writer: tstatwriter);
+begin
+ inherited;
+ writer.writereal(valuevarname,value);
+end;
+
 { tdatetimeclientcontroller }
 
 constructor tdatetimeclientcontroller.create(const aowner: tmsecomponent);
@@ -1852,6 +2053,18 @@ end;
 function tdatetimeclientcontroller.getgriddata: tdatetimedatalist;
 begin
  result:= tdatetimedatalist(getdatalist);
+end;
+
+procedure tdatetimeclientcontroller.dostatread(const reader: tstatreader);
+begin
+ inherited;
+ value:= reader.readreal(valuevarname,value);
+end;
+
+procedure tdatetimeclientcontroller.dostatwrite(const writer: tstatwriter);
+begin
+ inherited;
+ writer.writereal(valuevarname,value);
 end;
 
 { tifistringlinkcomp }
@@ -2006,6 +2219,11 @@ begin
  result:= tificolitem;
 end;
 
+function tifilinkcomparrayprop.getitems(const index: integer): tificolitem;
+begin
+ result:= tificolitem(inherited getitems(index));
+end;
+
 { tgridclientcontroller }
 
 constructor tgridclientcontroller.create(const aowner: tmsecomponent);
@@ -2018,6 +2236,66 @@ destructor tgridclientcontroller.destroy;
 begin
  fdatacols.free;
  inherited;
+end;
+
+procedure tgridclientcontroller.statreadrowstate(const alink: pointer);
+var
+ list1: tcustomrowstatelist;
+begin
+ list1:= iifigridlink(alink).getrowstate;
+ if list1 <> nil then begin
+  tstatreader(fitempo).readdatalist(rowstatevarname,list1);
+ end;
+end;
+
+procedure tgridclientcontroller.dostatread(const reader: tstatreader);
+var
+ int1: integer;
+ lico: tifivaluelinkcomp;
+begin
+ inherited;
+ fitempo:= reader;
+ tmsecomponent1(fowner).getobjectlinker.forall(@statreadrowstate,self);
+ for int1:= 0 to datacols.count - 1 do begin
+  lico:= datacols[int1].link;
+  if lico <> nil then begin
+   with lico.controller do begin
+    fitempo:= reader;
+    tmsecomponent1(fowner).getobjectlinker.forall(@statreadlist,lico.controller); 
+   end;
+  end;
+ end;
+end;
+
+procedure tgridclientcontroller.statwriterowstate(const alink: pointer;
+                                           var handled: boolean);
+var
+ list1: tcustomrowstatelist;
+begin
+ list1:= iifigridlink(alink).getrowstate;
+ if list1 <> nil then begin
+  tstatwriter(fitempo).writedatalist(rowstatevarname,list1);
+  handled:= true;
+ end;
+end;
+
+procedure tgridclientcontroller.dostatwrite(const writer: tstatwriter);
+var
+ int1: integer;
+ lico: tifivaluelinkcomp;
+begin
+ inherited;
+ fitempo:= writer;
+ tmsecomponent1(fowner).getobjectlinker.forfirst(@statwriterowstate,self);
+ for int1:= 0 to datacols.count - 1 do begin
+  lico:= datacols[int1].link;
+  if lico <> nil then begin
+   with lico.controller do begin
+    fitempo:= writer;
+    tmsecomponent1(fowner).getobjectlinker.forfirst(@statwritelist,lico.controller); 
+   end;
+  end;
+ end;
 end;
 
 procedure tgridclientcontroller.setrowcount(const avalue: integer);
@@ -2060,21 +2338,23 @@ begin
  iifigridlink(alink).appendrow(fcheckautoappend);
 end;
 
-procedure tgridclientcontroller.getrowstate1(const alink: pointer);
+procedure tgridclientcontroller.getrowstate1(const alink: pointer;
+                                                  var handled: boolean);
 var
  list1: tcustomrowstatelist;
 begin
  list1:= iifigridlink(alink).getrowstate;
  if list1 <> nil then begin
-  flistpo^:= list1;
+  handled:= true;
+  pdatalist(fitempo)^:= list1;
  end;
 end;
 
 function tgridclientcontroller.getrowstate: tcustomrowstatelist;
 begin
  result:= nil;
- flistpo:= @result;
- tmsecomponent1(fowner).getobjectlinker.forall(@getrowstate1,self);
+ fitempo:= @result;
+ tmsecomponent1(fowner).getobjectlinker.forfirst(@getrowstate1,self);
 end;
 
 procedure tgridclientcontroller.appendrow(const avalues: array of const;
@@ -2157,14 +2437,21 @@ end;
 
 { tificolitem }
 
-function tificolitem.getlink: tifilinkcomp;
+function tificolitem.getlink: tifivaluelinkcomp;
 begin
- result:= tifilinkcomp(item);
+ result:= tifivaluelinkcomp(item);
 end;
 
-procedure tificolitem.setlink(const avalue: tifilinkcomp);
+procedure tificolitem.setlink(const avalue: tifivaluelinkcomp);
 begin
  item:= avalue;
+end;
+
+{ tifivaluelinkcomp }
+
+function tifivaluelinkcomp.getcontroller: tvalueclientcontroller;
+begin
+ result:= tvalueclientcontroller(fcontroller);
 end;
 
 end.
