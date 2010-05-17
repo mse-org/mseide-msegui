@@ -129,6 +129,7 @@ type
    procedure loaded; override;
    procedure fontchanged; override;
    procedure dofontheightdelta(var delta: integer); override;
+   procedure initnewwidget(const ascale: real); override;
    function geteditfont: tfont; override;
    class function classskininfo: skininfoty; override;
    procedure dopaintbackground(const canvas: tcanvas); override;
@@ -2395,6 +2396,15 @@ begin
  end;
 end;
 
+procedure tcustomdataedit.initnewwidget(const ascale: real);
+begin
+ if fgridintf <> nil then begin
+  fgridintf.getcol.options:= fgridintf.getcol.grid.datacols.options;
+               //restore default options
+ end;
+ inherited;
+end;
+
 {$ifdef mse_with_ifi}
 function tcustomdataedit.getifilinkkind: ptypeinfo;
 begin
@@ -2417,6 +2427,7 @@ begin
   fifiserverintf.setvalue(iifidatalink(self),avalue,accept);
  end;
 end;
+
 {$endif}
 
 { tcustomstringedit }

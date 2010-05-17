@@ -148,6 +148,7 @@ type
    
    procedure updatereadonlystate; virtual;
    procedure initeditfocus;
+   procedure initnewwidget(const ascale: real); override;
    
    //igridwidget
    procedure setfirstclick;
@@ -1431,6 +1432,15 @@ end;
 procedure tgraphdataedit.initeditfocus;
 begin
  //dummy
+end;
+
+procedure tgraphdataedit.initnewwidget(const ascale: real);
+begin
+ if fgridintf <> nil then begin
+  fgridintf.getcol.options:= fgridintf.getcol.grid.datacols.options;
+               //restore default options
+ end;
+ inherited;
 end;
 
 function tgraphdataedit.actualcolor: colorty;
