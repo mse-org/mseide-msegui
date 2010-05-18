@@ -281,12 +281,20 @@ object sourcefo: tsourcefo
     onexecute = navigforward
     left = 32
     top = 16
+    sc = (
+      1
+      24648
+    )
   end
   object navigbackact: taction
     state = [as_disabled]
     onexecute = navigback
     left = 32
     top = 40
+    sc = (
+      1
+      16456
+    )
   end
   object formpopup: tpopupmenu
     onupdate = popupmonupdate

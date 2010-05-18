@@ -227,6 +227,10 @@ object actionsmo: tactionsmo
     onexecute = findinfileonexecute
     left = 152
     top = 60
+    sc = (
+      1
+      24646
+    )
   end
   object closeall: taction
     caption = 'C&lose all'
@@ -1358,7 +1362,7 @@ object actionsmo: tactionsmo
     top = 136
   end
   object shortcuts: tshortcutcontroller
-    actions.count = 75
+    actions.count = 77
     actions.items = <    
       item
         dispname = 'File'
@@ -1440,7 +1444,7 @@ object actionsmo: tactionsmo
       end    
       item
         action = findinfile
-        dispname = 'Findinfile'
+        dispname = 'Find in File'
       end    
       item
         dispname = 'Edit'
@@ -1499,6 +1503,22 @@ object actionsmo: tactionsmo
         sc = (
           1
           24643
+        )
+      end    
+      item
+        action = sourcefo.navigbackact
+        dispname = 'Navigate Back'
+        sc = (
+          1
+          16456
+        )
+      end    
+      item
+        action = sourcefo.navigforwardact
+        dispname = 'Navigate Forward'
+        sc = (
+          1
+          24648
         )
       end    
       item
