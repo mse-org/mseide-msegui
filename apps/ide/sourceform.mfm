@@ -485,5 +485,9 @@ object sourcefo: tsourcefo
     onexecute = completeclassexecute
     left = 32
     top = 208
+    sc = (
+      1
+      24643
+    )
   end
 end

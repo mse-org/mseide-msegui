@@ -1358,7 +1358,7 @@ object actionsmo: tactionsmo
     top = 136
   end
   object shortcuts: tshortcutcontroller
-    actions.count = 74
+    actions.count = 75
     actions.items = <    
       item
         dispname = 'File'
@@ -1492,6 +1492,14 @@ object actionsmo: tactionsmo
       item
         action = uppercase
         dispname = 'Uppercase'
+      end    
+      item
+        action = sourcefo.completeclassact
+        dispname = 'Complete Class'
+        sc = (
+          1
+          24643
+        )
       end    
       item
         dispname = 'Set Bookmark'
