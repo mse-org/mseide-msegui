@@ -1445,6 +1445,10 @@ object actionsmo: tactionsmo
       item
         action = findinfile
         dispname = 'Find in File'
+        sc = (
+          1
+          24646
+        )
       end    
       item
         dispname = 'Edit'
