@@ -294,6 +294,7 @@ type
    procedure add(const item: tpersistent);
    function indexof(const aitem: tpersistent): integer; //-1 if not found
    class function getitemclasstype: persistentclassty; virtual; abstract;
+               //used in dumpunitgroups
    property itemclasstype: virtualpersistentclassty read fitemclasstype;
    property items[const index: integer]: tpersistent read getitems; default;
  end;

@@ -487,6 +487,10 @@ type
   private
    procedure setdropdown(const avalue: tdropdownlistcontroller);
    function getdropdown: tdropdownlistcontroller;
+  {$ifdef mse_with_ifi}
+   function getifilink: tifidropdownlistlinkcomp;
+   procedure setifilink(const avalue: tifidropdownlistlinkcomp);
+  {$endif}
   protected
   //idropdownlist
    function getdropdownitems: tdropdowncols; virtual;
@@ -495,6 +499,9 @@ type
   public
    procedure sort(const acol: integer = 0);
    property dropdown: tdropdownlistcontroller read getdropdown write setdropdown;
+{$ifdef mse_with_ifi}
+   property ifilink: tifidropdownlistlinkcomp read getifilink write setifilink;
+{$endif}
  end;
 
  tdropdownlistedit = class(tcustomdropdownlistedit)
@@ -506,6 +513,9 @@ type
    property dropdown;
    property onbeforedropdown;
    property onafterclosedropdown;
+{$ifdef mse_with_ifi}
+   property ifilink;
+{$endif}
  end;
 
 const
@@ -3256,6 +3266,16 @@ end;
 procedure tcustomdropdownlistedit.sort(const acol: integer);
 begin
  internalsort(acol,nil);
+end;
+
+function tcustomdropdownlistedit.getifilink: tifidropdownlistlinkcomp;
+begin
+ result:= tifidropdownlistlinkcomp(fifilink);
+end;
+
+procedure tcustomdropdownlistedit.setifilink(const avalue: tifidropdownlistlinkcomp);
+begin
+ inherited;
 end;
 
 { thistorycontroller }

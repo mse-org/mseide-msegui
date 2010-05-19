@@ -12,11 +12,18 @@ type
    function filtercomponent(const acomponent: tcomponent): boolean; override;
  end;
  
+ tifidropdowncolpropertyeditor = class(tarraypropertyeditor)
+  protected
+   function geteditorclass: propertyeditorclassty; override;
+ end;
+
+ 
 procedure register;
 begin
  registercomponents('Ifi',[tifiactionlinkcomp,tifiintegerlinkcomp,
        tifibooleanlinkcomp,
        tifireallinkcomp,tifidatetimelinkcomp,tifistringlinkcomp,
+       tifidropdownlistlinkcomp,
        tifigridlinkcomp]); 
  registercomponenttabhints(['Ifi'],
    ['MSEifi Components (experimental).'+lineend+
@@ -26,6 +33,8 @@ begin
 // registerpropertyeditor(typeinfo(tcomponent),tcustomificlientcontroller,
 //                                                      'widget',tifiwidgeteditor);
  registercomponenteditor(tifilinkcomp,tifilinkcompeditor);
+ registerpropertyeditor(typeinfo(tifidropdowncols),nil,'',
+                                          tifidropdowncolpropertyeditor);
 end;
 
 { tifiwidgeteditor }
@@ -36,6 +45,13 @@ var
 begin
 // result:= tcustomifivaluewidgetcontroller(
 //                    fprops[0].instance).canconnect(acomponent);
+end;
+
+{ tifidropdowncolpropertyeditor }
+
+function tifidropdowncolpropertyeditor.geteditorclass: propertyeditorclassty;
+begin
+ result:= tmsestringdatalistpropertyeditor;
 end;
 
 initialization

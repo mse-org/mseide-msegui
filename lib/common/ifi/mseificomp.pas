@@ -254,6 +254,44 @@ type
                 read fonclientsetvalue write fonclientsetvalue;
  end;
 
+ tifidropdowncol = class(tmsestringdatalist)
+ end;
+
+ tifidropdownlistcontroller = class;
+ 
+ tifidropdowncols = class(townedpersistentarrayprop)
+  private
+   function getitems(const index: integer): tifidropdowncol;
+  protected
+   procedure createitem(const index: integer; var item: tpersistent); override;
+  public
+   class function getitemclasstype: persistentclassty; override;
+   constructor create(const aowner: tifidropdownlistcontroller); reintroduce;
+   property items[const index: integer]: tifidropdowncol read getitems; default;
+ end;
+ 
+ tifidropdownlistcontroller = class(teventpersistent)
+  private
+   fcols: tifidropdowncols;
+   procedure setcols(const avalue: tifidropdowncols);
+  public
+   constructor create; override;
+   destructor destroy; override;
+  published
+   property cols: tifidropdowncols read fcols write setcols;
+ end;
+ 
+ tdropdownlistclientcontroller = class(tstringclientcontroller)
+  private
+   fdropdown: tifidropdownlistcontroller;
+   procedure setdropdown(const avalue: tifidropdownlistcontroller);
+  public
+   constructor create(const aowner: tmsecomponent); override;
+   destructor destroy; override;
+  published
+   property dropdown: tifidropdownlistcontroller read fdropdown write setdropdown;
+ end;
+ 
  tintegerclientcontroller = class(tvalueclientcontroller)
   private
    fvalue: integer;
@@ -495,6 +533,17 @@ type
                                                          write setcontroller;
  end;
 
+ tifidropdownlistlinkcomp = class(tifistringlinkcomp)
+  private
+   function getcontroller: tdropdownlistclientcontroller;
+   procedure setcontroller(const avalue: tdropdownlistclientcontroller);
+  protected
+   function getcontrollerclass: ificlientcontrollerclassty; override;
+  published
+   property controller: tdropdownlistclientcontroller read getcontroller
+                                                         write setcontroller;
+ end;
+ 
  tifiintegerlinkcomp = class(tifivaluelinkcomp)
   private
    function getcontroller: tintegerclientcontroller;
@@ -2084,6 +2133,24 @@ begin
  inherited setcontroller(avalue);
 end;
 
+{ tifidropdownlistlinkcomp }
+
+function tifidropdownlistlinkcomp.getcontroller: tdropdownlistclientcontroller;
+begin
+ result:= tdropdownlistclientcontroller(inherited controller);
+end;
+
+procedure tifidropdownlistlinkcomp.setcontroller(
+                                 const avalue: tdropdownlistclientcontroller);
+begin
+ inherited setcontroller(avalue);
+end;
+
+function tifidropdownlistlinkcomp.getcontrollerclass: ificlientcontrollerclassty;
+begin
+ result:= tdropdownlistclientcontroller;
+end;
+
 { tifiintegerlinkcomp }
 
 function tifiintegerlinkcomp.getcontrollerclass: ificlientcontrollerclassty;
@@ -2435,6 +2502,13 @@ begin
  end;
 end;
 
+{ tifivaluelinkcomp }
+
+function tifivaluelinkcomp.getcontroller: tvalueclientcontroller;
+begin
+ result:= tvalueclientcontroller(fcontroller);
+end;
+
 { tificolitem }
 
 function tificolitem.getlink: tifivaluelinkcomp;
@@ -2447,11 +2521,67 @@ begin
  item:= avalue;
 end;
 
-{ tifivaluelinkcomp }
+{ tifidropdowncols }
 
-function tifivaluelinkcomp.getcontroller: tvalueclientcontroller;
+constructor tifidropdowncols.create(const aowner: tifidropdownlistcontroller);
 begin
- result:= tvalueclientcontroller(fcontroller);
+ inherited create(aowner,nil);
+end;
+
+class function tifidropdowncols.getitemclasstype: persistentclassty;
+begin
+ result:= tifidropdowncol;
+end;
+
+procedure tifidropdowncols.createitem(const index: integer;
+               var item: tpersistent);
+begin
+ item:= tifidropdowncol.create;
+end;
+
+function tifidropdowncols.getitems(const index: integer): tifidropdowncol;
+begin
+ result:= tifidropdowncol(inherited getitems(index));
+end;
+
+{ tifidropdownlistcontroller }
+
+constructor tifidropdownlistcontroller.create;
+begin
+ fcols:= tifidropdowncols.create(self);
+ inherited;
+end;
+
+destructor tifidropdownlistcontroller.destroy;
+begin
+ inherited;
+ fcols.free;
+end;
+
+procedure tifidropdownlistcontroller.setcols(const avalue: tifidropdowncols);
+begin
+ fcols.assign(avalue);
+end;
+
+
+{ tdropdownlistclientcontroller }
+
+constructor tdropdownlistclientcontroller.create(const aowner: tmsecomponent);
+begin
+ fdropdown:= tifidropdownlistcontroller.create;
+ inherited;
+end;
+
+destructor tdropdownlistclientcontroller.destroy;
+begin
+ inherited;
+ fdropdown.free;
+end;
+
+procedure tdropdownlistclientcontroller.setdropdown(
+                                 const avalue: tifidropdownlistcontroller);
+begin
+ fdropdown.assign(avalue);
 end;
 
 end.
