@@ -487,8 +487,8 @@ type
    property onafterclosedropdown;
  end;
 
- tcustomdropdownlistedit = class(tcustomdropdownedit,idropdownlist,
-                                                    iifidropdownlistdatalink)
+ tcustomdropdownlistedit = class(tcustomdropdownedit,idropdownlist
+                {$ifdef mse_with_ifi},iifidropdownlistdatalink{$endif})
   private
    procedure setdropdown(const avalue: tdropdownlistcontroller);
    function getdropdown: tdropdownlistcontroller;
@@ -3283,6 +3283,7 @@ begin
  internalsort(acol,nil);
 end;
 
+{$ifdef mse_with_ifi}
 function tcustomdropdownlistedit.getifilink: tifidropdownlistlinkcomp;
 begin
  result:= tifidropdownlistlinkcomp(fifilink);
@@ -3302,6 +3303,7 @@ function tcustomdropdownlistedit.getifilinkkind: ptypeinfo;
 begin
  result:= typeinfo(iifidropdownlistdatalink);
 end;
+{$endif}
 
 { thistorycontroller }
 
