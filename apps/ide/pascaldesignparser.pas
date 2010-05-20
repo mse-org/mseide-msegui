@@ -40,6 +40,7 @@ type
     function parseclasstype: boolean;
     function parseinterfacetype: boolean;
     function parserecord: boolean;
+    function parseobject: boolean;
     function parseprocparams(const akind: tmethodkind;
                             var params: paraminfoarty): boolean;
     function parseclassprocedureheader(atoken: pascalidentty;
@@ -793,6 +794,35 @@ begin
  end;
 end;
 
+function tpascaldesignparser.parseobject: boolean;
+                //todo: parse subitems
+var
+ ident1: pascalidentty;
+ blocklevel: integer;
+begin
+ result:= true;
+ blocklevel:= 1;
+ while not eof and (blocklevel > 0) do begin
+  ident1:= pascalidentty(getident);
+  case ident1 of
+   pid_end: begin
+    dec(blocklevel);
+    nexttoken;
+   end;
+   pid_begin,pid_record: begin
+    inc(blocklevel);
+    nexttoken;
+   end;
+   pid_procedure,pid_function: begin
+    skipprocedureheader(ident1);
+   end;
+   else begin
+    nexttoken;
+   end;
+  end;
+ end;
+end;
+
 procedure tpascaldesignparser.parselabel;
 var
  ident1: pascalidentty;
@@ -858,6 +888,11 @@ begin
        else begin
         back;
        end;
+      end;
+      pid_object: begin
+       parseobject;
+       funitinfopo^.deflist.add(lstringtostring(lstr1),syk_typedef,
+                  getsourcepos(statementstart),sourcepos);
       end;
       pid_record: begin
        parserecord;
