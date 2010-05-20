@@ -430,7 +430,8 @@ const
 
 type
 
- tcustomdropdownedit = class(tcustomstringedit,idropdown)
+ tcustomdropdownedit = class(tcustomstringedit,idropdown
+                 {$ifdef mse_with_ifi},iifidropdownlistdatalink{$endif})
   private
    fonbeforedropdown: notifyeventty;
    fonafterclosedropdown: notifyeventty;
@@ -438,17 +439,15 @@ type
    procedure setframe(const avalue: tdropdownbuttonframe);
   protected
    fdropdown: tcustomdropdowncontroller;
-//   procedure internalcreateframe; override;
-//   procedure dokeydown(var info: keyeventinfoty); override;
-//   procedure domousewheelevent(var info: mousewheeleventinfoty); override;
-//   procedure mouseevent(var info: mouseeventinfoty); override;
-//   procedure editnotification(var info: editnotificationinfoty); override;
    function createdropdowncontroller: tcustomdropdowncontroller; virtual;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
-//   function getcellframe: framety; override;
    procedure dohide; override;
-//   procedure updatereadonlystate; override;
-  //idropdown
+   {$ifdef mse_with_ifi}
+   function getifidatalinkintf: iifidatalink; override;
+    //iifidropdownlistdatalink
+   procedure ifidropdownlistchanged(const acols: tifidropdowncols);
+   {$endif}
+    //idropdown
    procedure buttonaction(var action: buttonactionty; const buttonindex: integer); virtual;
    procedure dobeforedropdown; virtual;
    procedure doafterclosedropdown; virtual;
@@ -469,7 +468,7 @@ type
    procedure setdropdown(const avalue: tdropdownwidgetcontroller);
   protected
    function createdropdowncontroller: tcustomdropdowncontroller; override;
-  //idropdownwidget
+    //idropdownwidget
    procedure createdropdownwidget(const atext: msestring;
                         out awidget: twidget); virtual; abstract;
    function getdropdowntext(const awidget: twidget): msestring; virtual; abstract;
@@ -495,6 +494,7 @@ type
   {$ifdef mse_with_ifi}
    function getifilink: tifidropdownlistlinkcomp;
    procedure setifilink(const avalue: tifidropdownlistlinkcomp);
+   procedure ifidropdownlistchanged(const acols: tifidropdowncols);
   {$endif}
   protected
   {$ifdef mse_with_ifi}
@@ -2433,7 +2433,7 @@ end;
 
 procedure tcustomdataedit.setifilink(const avalue: tifilinkcomp);
 begin
- mseificomp.setifilinkcomp(iifidatalink(self),avalue,fifilink);
+ mseificomp.setifilinkcomp(getifidatalinkintf,avalue,fifilink);
 end;
 
 function tcustomdataedit.ifigriddata: tdatalist;
@@ -3193,6 +3193,16 @@ begin
  result:= -1;
 end;
 
+{$ifdef mse_with_ifi}
+function tcustomdropdownedit.getifidatalinkintf: iifidatalink;
+begin
+ result:= iifidropdownlistdatalink(self);
+end;
+
+procedure tcustomdropdownedit.ifidropdownlistchanged(const acols: tifidropdowncols);
+begin
+end;
+{$endif}
 
 {
 function tcustomdropdownedit.getbutton: tdropdownbutton;
@@ -3303,6 +3313,13 @@ function tcustomdropdownlistedit.getifilinkkind: ptypeinfo;
 begin
  result:= typeinfo(iifidropdownlistdatalink);
 end;
+
+procedure tcustomdropdownlistedit.ifidropdownlistchanged(
+                                   const acols: tifidropdowncols);
+begin
+ dropdown.cols.assign(acols);
+end;
+
 {$endif}
 
 { thistorycontroller }

@@ -265,18 +265,26 @@ type
    function getitems(const index: integer): tifidropdowncol;
   protected
    procedure createitem(const index: integer; var item: tpersistent); override;
+   procedure colchanged(const sender: tobject);
+   procedure dochange(const index: integer); override;
   public
    class function getitemclasstype: persistentclassty; override;
    constructor create(const aowner: tifidropdownlistcontroller); reintroduce;
    property items[const index: integer]: tifidropdowncol read getitems; default;
  end;
- 
+
+ iifidropdownlistdatalink = interface(iifidatalink)
+  procedure ifidropdownlistchanged(const acols: tifidropdowncols);
+ end;
+  
  tifidropdownlistcontroller = class(teventpersistent)
   private
    fcols: tifidropdowncols;
+   fowner: tvalueclientcontroller;
    procedure setcols(const avalue: tifidropdowncols);
+   procedure valuestoclient(const alink: pointer);
   public
-   constructor create; override;
+   constructor create(const aowner: tvalueclientcontroller);
    destructor destroy; override;
   published
    property cols: tifidropdowncols read fcols write setcols;
@@ -288,6 +296,7 @@ type
    procedure setdropdown(const avalue: tifidropdownlistcontroller);
   protected
    function getifilinkkind: ptypeinfo; override;
+   procedure valuestoclient(const alink: pointer); override;
   public
    constructor create(const aowner: tmsecomponent); override;
    destructor destroy; override;
@@ -2545,6 +2554,7 @@ procedure tifidropdowncols.createitem(const index: integer;
                var item: tpersistent);
 begin
  item:= tifidropdowncol.create;
+ tifidropdowncol(item).onchange:= @colchanged;
 end;
 
 function tifidropdowncols.getitems(const index: integer): tifidropdowncol;
@@ -2552,12 +2562,24 @@ begin
  result:= tifidropdowncol(inherited getitems(index));
 end;
 
+procedure tifidropdowncols.colchanged(const sender: tobject);
+begin
+ change(-1);
+end;
+
+procedure tifidropdowncols.dochange(const index: integer);
+begin
+ tifidropdownlistcontroller(fowner).fowner.change(nil); 
+end;
+
 { tifidropdownlistcontroller }
 
-constructor tifidropdownlistcontroller.create;
+constructor tifidropdownlistcontroller.create(
+                                      const aowner: tvalueclientcontroller);
 begin
+ fowner:= aowner;
  fcols:= tifidropdowncols.create(self);
- inherited;
+ inherited create;
 end;
 
 destructor tifidropdownlistcontroller.destroy;
@@ -2571,12 +2593,16 @@ begin
  fcols.assign(avalue);
 end;
 
+procedure tifidropdownlistcontroller.valuestoclient(const alink: pointer);
+begin
+ iifidropdownlistdatalink(alink).ifidropdownlistchanged(fcols);
+end;
 
 { tdropdownlistclientcontroller }
 
 constructor tdropdownlistclientcontroller.create(const aowner: tmsecomponent);
 begin
- fdropdown:= tifidropdownlistcontroller.create;
+ fdropdown:= tifidropdownlistcontroller.create(self);
  inherited;
 end;
 
@@ -2595,6 +2621,12 @@ end;
 function tdropdownlistclientcontroller.getifilinkkind: ptypeinfo;
 begin
  result:= typeinfo(iifidropdownlistdatalink);
+end;
+
+procedure tdropdownlistclientcontroller.valuestoclient(const alink: pointer);
+begin
+ fdropdown.valuestoclient(alink);
+ inherited;
 end;
 
 end.

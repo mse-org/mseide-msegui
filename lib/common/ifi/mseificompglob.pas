@@ -41,9 +41,6 @@ type
   function ifigriddata: tdatalist;
  end;
  
- iifidropdownlistdatalink = interface(iifidatalink)
- end;
- 
  iifigridlink = interface(iifilink)
   function appendrow(const checkautoappend: boolean = false): integer;
   function getrowstate: tcustomrowstatelist;
