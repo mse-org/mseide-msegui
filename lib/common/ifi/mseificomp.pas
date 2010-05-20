@@ -76,6 +76,7 @@ type
    procedure finalizelinks;
    procedure loaded; virtual;
    function errorname(const ainstance: tobject): string;
+   procedure interfaceerror;
    function getifilinkkind: ptypeinfo; virtual;
    function checkcomponent(const aintf: iifilink): pointer;
               //returns interface info, exception if link invalid
@@ -285,6 +286,8 @@ type
   private
    fdropdown: tifidropdownlistcontroller;
    procedure setdropdown(const avalue: tifidropdownlistcontroller);
+  protected
+   function getifilinkkind: ptypeinfo; override;
   public
    constructor create(const aowner: tmsecomponent); override;
    destructor destroy; override;
@@ -654,12 +657,17 @@ begin
  inherited create;
 end;
 
+procedure tcustomificlientcontroller.interfaceerror;
+begin
+ raise exception.create(fowner.name+' wrong iificlient interface.');
+            //todo: better error message
+end;
+
 function tcustomificlientcontroller.checkcomponent(
           const aintf: iifilink): pointer;
 begin
  if not isinterface(aintf.getifilinkkind,getifilinkkind) then begin
-  raise exception.create(fowner.name+' wrong iificlient interface.');
-            //todo: better error message
+  interfaceerror;
  end;
  result:= self;
 end;
@@ -2582,6 +2590,11 @@ procedure tdropdownlistclientcontroller.setdropdown(
                                  const avalue: tifidropdownlistcontroller);
 begin
  fdropdown.assign(avalue);
+end;
+
+function tdropdownlistclientcontroller.getifilinkkind: ptypeinfo;
+begin
+ result:= typeinfo(iifidropdownlistdatalink);
 end;
 
 end.

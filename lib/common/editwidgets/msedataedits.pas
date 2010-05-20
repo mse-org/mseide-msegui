@@ -77,8 +77,10 @@ type
    fempty_options: emptyoptionsty;
 {$ifdef mse_with_ifi}
    fifilink: tifilinkcomp;
+   function getifidatalinkintf: iifidatalink; virtual;
+    //iifidatalink
    procedure ifisetvalue(var avalue; var accept: boolean);
-   function getifilinkkind: ptypeinfo;
+   function getifilinkkind: ptypeinfo; virtual;
    procedure setifilink(const avalue: tifilinkcomp);
    function ifigriddata: tdatalist;
 {$endif}
@@ -137,6 +139,8 @@ type
    function setdropdowntext(const avalue: msestring; const docheckvalue: boolean;
                 const canceled: boolean; const akey: keyty): boolean;
    procedure initeditfocus;
+   {$ifdef mse_with_ifi}
+   {$endif}
 
     //mirrored to fcontrollerintf
    procedure mouseevent(var info: mouseeventinfoty); override;
@@ -483,7 +487,8 @@ type
    property onafterclosedropdown;
  end;
 
- tcustomdropdownlistedit = class(tcustomdropdownedit,idropdownlist)
+ tcustomdropdownlistedit = class(tcustomdropdownedit,idropdownlist,
+                                                    iifidropdownlistdatalink)
   private
    procedure setdropdown(const avalue: tdropdownlistcontroller);
    function getdropdown: tdropdownlistcontroller;
@@ -492,7 +497,12 @@ type
    procedure setifilink(const avalue: tifidropdownlistlinkcomp);
   {$endif}
   protected
-  //idropdownlist
+  {$ifdef mse_with_ifi}
+   function getifidatalinkintf: iifidatalink; override;
+    //iifidatalink
+   function getifilinkkind: ptypeinfo; override;
+  {$endif}
+    //idropdownlist
    function getdropdownitems: tdropdowncols; virtual;
    function createdropdowncontroller: tcustomdropdowncontroller; override;
    procedure internalsort(const acol: integer; const sortlist: tintegerdatalist); virtual;
@@ -2431,10 +2441,15 @@ begin
  result:= fdatalist;
 end;
 
+function tcustomdataedit.getifidatalinkintf: iifidatalink;
+begin
+ result:= iifidatalink(self);
+end;
+
 procedure tcustomdataedit.ifisetvalue(var avalue; var accept: boolean);
 begin
  if accept and (fifiserverintf <> nil) then begin
-  fifiserverintf.setvalue(iifidatalink(self),avalue,accept);
+  fifiserverintf.setvalue(getifidatalinkintf,avalue,accept);
  end;
 end;
 
@@ -3276,6 +3291,16 @@ end;
 procedure tcustomdropdownlistedit.setifilink(const avalue: tifidropdownlistlinkcomp);
 begin
  inherited;
+end;
+
+function tcustomdropdownlistedit.getifidatalinkintf: iifidatalink;
+begin
+ result:= iifidropdownlistdatalink(self);
+end;
+
+function tcustomdropdownlistedit.getifilinkkind: ptypeinfo;
+begin
+ result:= typeinfo(iifidropdownlistdatalink);
 end;
 
 { thistorycontroller }
