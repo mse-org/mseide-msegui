@@ -571,8 +571,8 @@ begin
          if not scopeinfopo^.return and (wpo1^ <> #0) then begin
           inc(wpo1);
          end;       //else return immediately
-         dec(alen);
-         dec(keywordlen);
+//         dec(alen);
+//         dec(keywordlen);
          bo1:= false;
          popscope;
          changed:= setcharstyle(format,wpo1-startpo,bigint,
