@@ -103,9 +103,10 @@ type
    procedure checkint64range(var value: int64; const min,max: int64);
   protected
    procedure readdata;
-   function findvar(const name: msestring; var value: msestring): boolean; //true if ok
+   function findvar(const name: msestring; var value: msestring): boolean;
+                                                overload; //true if ok
    function findvar(const name: msestring; var value: msestring;
-                         out isarray: boolean): boolean; //true if ok
+                        out isarray: boolean): boolean; overload; //true if ok
   public
    constructor create(const astream: ttextstream); overload;
    constructor create(const filename: filenamety;
