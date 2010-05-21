@@ -125,11 +125,28 @@ end;
 
 procedure tsyntaxedit.objectevent(const sender: tobject;
   const event: objecteventty);
+var
+ int1,int2: integer;
+ po1: prichstringty;
 begin
  inherited;
  if sender = fsyntaxpainter then begin
-  if event = oe_destroyed then begin
+  if event in [oe_destroyed,oe_disconnect] then begin
    fsyntaxpainterhandle:= -1;
+   if flines <> nil then begin
+    with flines do begin
+     int2:= size;
+     po1:= datapo;
+     for int1:= count-1 downto 0 do begin
+      po1^.format:= nil;
+      inc(pchar(po1),int2);
+     end;
+    end;
+   end;
+   feditor.format:= nil;
+   if fgridintf <> nil then begin
+    fgridintf.changed;
+   end;
 //   fsyntaxpainter:= nil;
   end;
  end;

@@ -161,6 +161,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure clear;
    procedure paintsyntax(handle: integer; start,count: halfinteger; //startrow,rowcount
                          background: boolean = false);
                                //-1 = letzte in fscopeinfos
@@ -197,7 +198,7 @@ type
 
 implementation
 uses
- sysutils,msefileutils,msesys,mseformatstr,msegraphics;
+ sysutils,msefileutils,msesys,mseformatstr,msegraphics,mseglob;
 
 procedure markstartchars(const str: msestring; var chars: charsty); overload;
 begin
@@ -291,17 +292,29 @@ begin
 end;
 
 destructor tsyntaxpainter.destroy;
-var
- int1: integer;
 begin
- for int1:= 0 to high(fsyntaxdefs) do begin
-  clearsyntaxdef(int1);
- end;
+ clear;
  inherited;
  ftimer.Free;
  frefreshlist.Free;
  fdefdefs.free;
  fdeftext.free;
+end;
+
+procedure tsyntaxpainter.clear;
+var
+ int1: integer;
+begin
+ frefreshlist.clear;
+ for int1:= 0 to high(fclients) do begin
+  if fclients[int1].client <> nil then begin
+   unregisterclient(int1);
+  end;
+ end;
+ for int1:= 0 to high(fsyntaxdefs) do begin
+  clearsyntaxdef(int1);
+ end;
+ sendchangeevent(oe_disconnect); 
 end;
 
 procedure tsyntaxpainter.clearsyntaxdef(handle: integer);
@@ -334,6 +347,51 @@ begin
    statement:= cl_default;
   end;
  end;
+end;
+
+function tsyntaxpainter.registerclient(sender: tobject; alist: trichstringdatalist;
+   aonlinechanged: integerchangedeventty = nil; asyntaxdefhandle: integer = 0): integer;
+
+ procedure initclient(var info: clientinfoty);
+ begin
+  info.client:= sender;
+  info.syntaxdefhandle:= asyntaxdefhandle;
+  info.list:= alist;
+  info.onlinechanged:= aonlinechanged;
+ end;
+
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fclients) do begin
+  if fclients[int1].client = nil then begin
+   initclient(fclients[int1]);
+   result:= int1;
+   exit;
+  end;
+ end;
+ setlength(fclients,length(fclients)+1);
+ initclient(fclients[high(fclients)]);
+ result:= high(fclients);
+end;
+
+procedure tsyntaxpainter.unregisterclient(handle: integer);
+            //eintreage mit alist loeschen
+var
+ int1: integer;
+begin
+ checkarrayindex(fclients,handle);
+ int1:= 0;
+ while int1 < frefreshlist.count do begin
+  if frefreshlist[int1].handle = handle then begin
+   frefreshlist.deletedata(int1);
+  end
+  else begin
+   inc(int1);
+  end;
+ end;
+ finalize(fclients[handle]);
+ fillchar(fclients[handle],sizeof(clientinfoty),0);
 end;
 
 procedure tsyntaxpainter.setlinesperslice(const Value: integer);
@@ -1136,51 +1194,6 @@ begin
  finally
   stream1.free;
  end;
-end;
-
-function tsyntaxpainter.registerclient(sender: tobject; alist: trichstringdatalist;
-   aonlinechanged: integerchangedeventty = nil; asyntaxdefhandle: integer = 0): integer;
-
- procedure initclient(var info: clientinfoty);
- begin
-  info.client:= sender;
-  info.syntaxdefhandle:= asyntaxdefhandle;
-  info.list:= alist;
-  info.onlinechanged:= aonlinechanged;
- end;
-
-var
- int1: integer;
-begin
- for int1:= 0 to high(fclients) do begin
-  if fclients[int1].client = nil then begin
-   initclient(fclients[int1]);
-   result:= int1;
-   exit;
-  end;
- end;
- setlength(fclients,length(fclients)+1);
- initclient(fclients[high(fclients)]);
- result:= high(fclients);
-end;
-
-procedure tsyntaxpainter.unregisterclient(handle: integer);
-            //eintreage mit alist loeschen
-var
- int1: integer;
-begin
- checkarrayindex(fclients,handle);
- int1:= 0;
- while int1 < frefreshlist.count do begin
-  if frefreshlist[int1].handle = handle then begin
-   frefreshlist.deletedata(int1);
-  end
-  else begin
-   inc(int1);
-  end;
- end;
- finalize(fclients[handle]);
- fillchar(fclients[handle],sizeof(clientinfoty),0);
 end;
 
 procedure tsyntaxpainter.syntaxchanged;

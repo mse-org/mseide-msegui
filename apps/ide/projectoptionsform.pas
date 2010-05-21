@@ -879,9 +879,9 @@ begin
    if sourceupdater <> nil then begin
     sourceupdater.maxlinelength:= rightmarginchars;
    end;
-   for int1:= 0 to sourcefo.count - 1 do begin
-    sourcefo.items[int1].updatestatvalues;
-   end;
+//   for int1:= 0 to sourcefo.count - 1 do begin
+//    sourcefo.items[int1].updatestatvalues;
+//   end;
    fontaliasnames:= fontalias;
    with sourcefo.syntaxpainter do begin
     bo1:= not cmparray(defdefs.asarraya,texp.sourcefilemasks) or
@@ -889,10 +889,14 @@ begin
     defdefs.asarraya:= texp.sourcefilemasks;
     defdefs.asarrayb:= texp.syntaxdeffiles;
     if bo1 then begin
+     sourcefo.syntaxpainter.clear;
      for int1:= 0 to sourcefo.count - 1 do begin
       sourcefo.items[int1].edit.setsyntaxdef(sourcefo.items[int1].edit.filename);
      end;
     end;
+   end;
+   for int1:= 0 to sourcefo.count - 1 do begin
+    sourcefo.items[int1].updatestatvalues;
    end;
    with mainfo.openfile.controller.filterlist do begin
     asarraya:= filemasknames;
