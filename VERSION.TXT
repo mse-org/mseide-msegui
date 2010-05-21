@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+2010-05-21
+ No indirection for richstrinty format colors.
 2010-04-08
  optionswidgetty ow_noautosizing -> optionswidget1ty ow1_noautosizing.
  coloptions1ty co1_active removed.

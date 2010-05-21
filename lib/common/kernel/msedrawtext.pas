@@ -988,35 +988,35 @@ var
      font.colorbackground:= cl_selectedtextbackground;
     end
     else begin
-     if style.fontcolor = nil then begin
+     if style.fontcolor = 0 then begin
       font.color:= defaultcolor;
      end
      else begin
-      font.color:= style.fontcolor^;
+      font.color:= not style.fontcolor;
      end;
-     if style.colorbackground = nil then begin
+     if style.colorbackground = 0 then begin
       font.colorbackground:= defaultcolorbackground;
      end
      else begin
-      font.colorbackground:= style.colorbackground^;
+      font.colorbackground:= not style.colorbackground;
      end;
     end;
    end;
    if not (fs_selected in style.fontstyle) then begin
     if ni_fontcolor in newinfos then begin
-     if style.fontcolor = nil then begin
+     if style.fontcolor = 0 then begin
       font.color:= defaultcolor;
      end
      else begin
-      font.color:= style.fontcolor^;
+      font.color:= not style.fontcolor;
      end;
     end;
     if ni_colorbackground in newinfos then begin
-     if style.colorbackground = nil then begin
+     if style.colorbackground = 0 then begin
       font.colorbackground:= defaultcolorbackground;
      end
      else begin
-      font.colorbackground:= style.colorbackground^;
+      font.colorbackground:= not style.colorbackground;
      end;
     end;
    end;

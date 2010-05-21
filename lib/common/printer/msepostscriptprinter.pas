@@ -1419,21 +1419,21 @@ begin
     int2:= int3 - index;
     if int2 > 0 then begin
      if ni_fontcolor in newinfos then begin
-      if style.fontcolor = nil then begin
+      if style.fontcolor = 0 then begin
        co1:= font.color;
        colorchanged:= false;
       end
       else begin
-       co1:= style.fontcolor^;
+       co1:= not style.fontcolor;
        colorchanged:= true;
       end;
      end;
      if ni_colorbackground in newinfos then begin
-      if style.colorbackground = nil then begin
+      if style.colorbackground = 0 then begin
        co2:= cl_none;
       end
       else begin
-       co2:= style.colorbackground^;
+       co2:= not style.colorbackground;
       end;
      end;
      addstring(getshowstring(pmsechar(pointer(text.text))+index,int2,true,co1,co2,

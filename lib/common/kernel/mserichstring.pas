@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -36,7 +36,7 @@ const
 
 type
  charstylety = record
-  fontcolor,colorbackground: pcolorty;
+  fontcolor,colorbackground: colorty; //bits inversed, 0 -> not set
   fontstyle: fontstylesty;
  end;
  pcharstylety = ^charstylety;
@@ -115,7 +115,7 @@ type
 
  tcharstyledatalist = class(tdatalist)
   private
-   fcolors: colorarty;
+//   fcolors: colorarty;
    function Getitems(index: integer): charstylety;
    procedure Setitems(index: integer; const Value: charstylety);
   public
@@ -131,13 +131,15 @@ type
 
 
 function setfontcolor(var formats: formatinfoarty; aindex: integer; len: halfinteger;
-                    colorpo: pcolorty): boolean;
+                              color: colorty): boolean;
                                  //true if changed
-function setcolorbackground(var formats: formatinfoarty; aindex: integer; len: halfinteger;
-                    colorpo: pcolorty): boolean;
+function setcolorbackground(var formats: formatinfoarty; aindex: integer;
+                              len: halfinteger;
+                              color: colorty): boolean;
                                  //true if changed
 
-function updatefontstyle(var formats: formatinfoarty; aindex: integer; len: halfinteger;
+function updatefontstyle(var formats: formatinfoarty; aindex: integer;
+                              len: halfinteger;
                               astyle: fontstylety; aset: boolean): boolean;
                                  //true if changed
 function setcharstyle(var formats: formatinfoarty; aindex,len: halfinteger;
@@ -383,13 +385,13 @@ end;
 procedure packfontformats(var formats: formatinfoarty);
 var
  int1,int2: integer;
- focopo,bacopo: pcolorty;
+ focopo,bacopo: colorty;
  fontstyles,fontstylesdelta: fontstylesty;
 begin
  int2:= 0;
  int1:= 0;
- focopo:= nil;
- bacopo:= nil;
+ focopo:= 0;
+ bacopo:= 0;
  fontstyles:= [];
  while int1 < length(formats) do begin
   with formats[int1] do begin
@@ -485,23 +487,25 @@ begin
  result:= result and not (isempty and (length(formats) = 0));
 end;
 
-function setfontcolor(var formats: formatinfoarty; aindex: integer; len: halfinteger;
-                                        colorpo: pcolorty): boolean;
+function setfontcolor(var formats: formatinfoarty; aindex: integer;
+                             len: halfinteger;
+                             color: colorty): boolean;
      //true if changed
 var
  style: charstylety;
 begin
- style.fontcolor:= colorpo;
+ style.fontcolor:= not color;
  result:= setfontinfolen(formats,aindex,len,style,[ni_fontcolor]);
 end;
 
-function setcolorbackground(var formats: formatinfoarty; aindex: integer; len: halfinteger;
-                                        colorpo: pcolorty): boolean;
+function setcolorbackground(var formats: formatinfoarty; aindex: integer;
+                                  len: halfinteger;
+                                  color: colorty): boolean;
      //true if changed
 var
  style: charstylety;
 begin
- style.colorbackground:= colorpo;
+ style.colorbackground:= not color;
  result:= setfontinfolen(formats,aindex,len,style,[ni_colorbackground]);
 end;
 
@@ -725,8 +729,8 @@ begin
   if length(res.format) > 0 then begin
    with res.format[0] do begin
     newinfos:= [];
-    if style.fontcolor <> nil then include(newinfos,ni_fontcolor);
-    if style.colorbackground <> nil then include(newinfos,ni_colorbackground);
+    if style.fontcolor <> 0 then include(newinfos,ni_fontcolor);
+    if style.colorbackground <> 0 then include(newinfos,ni_colorbackground);
     if fs_bold in style.fontstyle then include(newinfos,ni_bold);
     if fs_italic in style.fontstyle then include(newinfos,ni_italic);
     if fs_underline in style.fontstyle then include(newinfos,ni_underline);
@@ -815,23 +819,36 @@ var
  value: charstylety;
 begin
  value.fontstyle:= style;
- value.fontcolor:= fontcolor;
- value.colorbackground:= colorbackground;
+ if fontcolor = nil then begin
+  value.fontcolor:= 0;
+ end
+ else begin
+  value.fontcolor:= not fontcolor^;
+ end;
+ if colorbackground = nil then begin
+  value.colorbackground:= 0;
+ end
+ else begin
+  value.colorbackground:= not colorbackground^;
+ end;
+// value.colorbackground:= colorbackground;
  result:= add(value);
 end;
 
 function tcharstyledatalist.add(const value: string): integer;
 
- function getcolor(const name: string): pcolorty;
+ function getcolor(const name: string): colorty;
  var
   col1: colorty;
   int1,int2: integer;
   po1: pcolorty;
  begin
   if name = '' then begin
-   result:= nil;
+   result:= 0;
   end
   else begin
+   result:= not stringtocolor(name);
+   (*
    col1:= stringtocolor(name);
    for int1:= 0 to high(fcolors) do begin
     if fcolors[int1] = col1 then begin
@@ -870,6 +887,7 @@ function tcharstyledatalist.add(const value: string): integer;
    end;
    fcolors[high(fcolors)]:= col1;
    result:= @fcolors[high(fcolors)];
+   *)
   end;
  end;
 
@@ -918,7 +936,7 @@ end;
 procedure tcharstyledatalist.clear;
 begin
  inherited;
- fcolors:= nil;
+// fcolors:= nil;
 end;
 
 { trichstringdatalist }
