@@ -140,6 +140,7 @@ type
                 const canceled: boolean; const akey: keyty): boolean;
    procedure initeditfocus;
    {$ifdef mse_with_ifi}
+   procedure setifilink0(const avalue: tifilinkcomp);
    {$endif}
 
     //mirrored to fcontrollerintf
@@ -493,7 +494,7 @@ type
    function getdropdown: tdropdownlistcontroller;
   {$ifdef mse_with_ifi}
    function getifilink: tifidropdownlistlinkcomp;
-   procedure setifilink(const avalue: tifidropdownlistlinkcomp);
+   procedure setifilink1(const avalue: tifidropdownlistlinkcomp);
    procedure ifidropdownlistchanged(const acols: tifidropdowncols);
   {$endif}
   protected
@@ -510,7 +511,7 @@ type
    procedure sort(const acol: integer = 0);
    property dropdown: tdropdownlistcontroller read getdropdown write setdropdown;
 {$ifdef mse_with_ifi}
-   property ifilink: tifidropdownlistlinkcomp read getifilink write setifilink;
+   property ifilink: tifidropdownlistlinkcomp read getifilink write setifilink1;
 {$endif}
  end;
 
@@ -793,6 +794,10 @@ type
    procedure setbase(const avalue: numbasety);
    procedure setbitcount(const avalue: integer);
    procedure setvalueoffset(avalue: integer);
+  {$ifdef mse_with_ifi}
+   function getifilink: tifienumlinkcomp;
+   procedure setifilink1(const avalue: tifienumlinkcomp);
+  {$endif}
   protected
    fonsetvalue1: setintegereventty;
    fvalue1: integer;
@@ -835,6 +840,9 @@ type
         read getgridvalue write setgridvalue; default;
    property gridvalues: integerarty read getgridvalues write setgridvalues;
    property onsetvalue: setintegereventty read fonsetvalue1 write fonsetvalue1;
+{$ifdef mse_with_ifi}
+   property ifilink: tifienumlinkcomp read getifilink write setifilink1;
+{$endif}
  end;
 
  tcustomenumedit = class;
@@ -864,6 +872,9 @@ type
    property onbeforedropdown;
    property onafterclosedropdown;
    property oninit;
+{$ifdef mse_with_ifi}
+   property ifilink;
+{$endif}
  end;
  
  tenumtypeedit = class;
@@ -2431,9 +2442,14 @@ begin
  result:= typeinfo(iifidatalink);
 end;
 
-procedure tcustomdataedit.setifilink(const avalue: tifilinkcomp);
+procedure tcustomdataedit.setifilink0(const avalue: tifilinkcomp);
 begin
  mseificomp.setifilinkcomp(getifidatalinkintf,avalue,fifilink);
+end;
+
+procedure tcustomdataedit.setifilink(const avalue: tifilinkcomp);
+begin
+ setifilink0(avalue);
 end;
 
 function tcustomdataedit.ifigriddata: tdatalist;
@@ -3299,9 +3315,9 @@ begin
  result:= tifidropdownlistlinkcomp(fifilink);
 end;
 
-procedure tcustomdropdownlistedit.setifilink(const avalue: tifidropdownlistlinkcomp);
+procedure tcustomdropdownlistedit.setifilink1(const avalue: tifidropdownlistlinkcomp);
 begin
- inherited;
+ setifilink0(avalue);
 end;
 
 function tcustomdropdownlistedit.getifidatalinkintf: iifidatalink;
@@ -4350,6 +4366,16 @@ end;
 function tcustomenuedit.getvalueempty: integer;
 begin
  result:= fvalueempty;
+end;
+
+function tcustomenuedit.getifilink: tifienumlinkcomp;
+begin
+ result:= tifienumlinkcomp(fifilink);
+end;
+
+procedure tcustomenuedit.setifilink1(const avalue: tifienumlinkcomp);
+begin
+ setifilink0(avalue);
 end;
 
 { tenumdropdowncontroller }

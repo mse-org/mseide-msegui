@@ -23,7 +23,7 @@ begin
  registercomponents('Ifi',[tifiactionlinkcomp,tifiintegerlinkcomp,
        tifibooleanlinkcomp,
        tifireallinkcomp,tifidatetimelinkcomp,tifistringlinkcomp,
-       tifidropdownlistlinkcomp,
+       tifidropdownlistlinkcomp,tifienumlinkcomp,
        tifigridlinkcomp]); 
  registercomponenttabhints(['Ifi'],
    ['MSEifi Components (experimental).'+lineend+

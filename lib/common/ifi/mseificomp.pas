@@ -7,7 +7,7 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-   experimental user - business logic connection components.
+   experimental user <-> business logic connection components.
    Warning: works with RTTI and is therefore slow.
 }
 unit mseificomp;
@@ -340,6 +340,22 @@ type
                 read fonclientsetvalue write fonclientsetvalue;
  end;
 
+ tenumclientcontroller = class(tintegerclientcontroller)
+  private
+   fdropdown: tifidropdownlistcontroller;
+   procedure setdropdown(const avalue: tifidropdownlistcontroller);
+  protected
+   function getifilinkkind: ptypeinfo; override;
+   procedure valuestoclient(const alink: pointer); override;
+  public
+   constructor create(const aowner: tmsecomponent); override;
+   destructor destroy; override;
+  published
+   property dropdown: tifidropdownlistcontroller read fdropdown write setdropdown;
+   property value default -1;
+   property min default -1;
+ end;
+ 
  tbooleanclientcontroller = class(tvalueclientcontroller)
   private
    fvalue: boolean;
@@ -564,6 +580,17 @@ type
    function getcontrollerclass: ificlientcontrollerclassty; override;
   published
    property controller: tintegerclientcontroller read getcontroller
+                                                         write setcontroller;
+ end;
+
+ tifienumlinkcomp = class(tifiintegerlinkcomp)
+  private
+   function getcontroller: tenumclientcontroller;
+   procedure setcontroller(const avalue: tenumclientcontroller);
+  protected
+   function getcontrollerclass: ificlientcontrollerclassty; override;
+  published
+   property controller: tenumclientcontroller read getcontroller
                                                          write setcontroller;
  end;
 
@@ -2627,6 +2654,57 @@ procedure tdropdownlistclientcontroller.valuestoclient(const alink: pointer);
 begin
  fdropdown.valuestoclient(alink);
  inherited;
+end;
+
+{ tenumclientcontroller }
+
+constructor tenumclientcontroller.create(const aowner: tmsecomponent);
+begin
+ fdropdown:= tifidropdownlistcontroller.create(self);
+ inherited;
+ fmin:= -1;
+ fvalue:= -1;
+end;
+
+destructor tenumclientcontroller.destroy;
+begin
+ inherited;
+ fdropdown.free;
+end;
+
+procedure tenumclientcontroller.setdropdown(
+                                 const avalue: tifidropdownlistcontroller);
+begin
+ fdropdown.assign(avalue);
+end;
+
+function tenumclientcontroller.getifilinkkind: ptypeinfo;
+begin
+ result:= typeinfo(iifidropdownlistdatalink);
+end;
+
+procedure tenumclientcontroller.valuestoclient(const alink: pointer);
+begin
+ fdropdown.valuestoclient(alink);
+ inherited;
+end;
+
+{ tifienumlinkcomp }
+
+function tifienumlinkcomp.getcontroller: tenumclientcontroller;
+begin
+ result:= tenumclientcontroller(inherited controller);
+end;
+
+procedure tifienumlinkcomp.setcontroller(
+                                 const avalue: tenumclientcontroller);
+begin
+ inherited setcontroller(avalue);
+end;
+
+function tifienumlinkcomp.getcontrollerclass: ificlientcontrollerclassty;
+begin
+ result:= tenumclientcontroller;
 end;
 
 end.
