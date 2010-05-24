@@ -4,13 +4,13 @@ object settaborderfo: tsettaborderfo
   bounds_y = 402
   bounds_cx = 292
   bounds_cy = 205
-  taborder = 1
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
-  container.bounds_x = 0
-  container.bounds_y = 0
-  container.bounds_cx = 292
-  container.bounds_cy = 205
-  container.frame.dummy = 0
+  container.bounds = (
+    0
+    0
+    292
+    205
+  )
   options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos]
   statfile = statfile1
   caption = 'Set Tab Order'
@@ -25,7 +25,6 @@ object settaborderfo: tsettaborderfo
     bounds_cx = 290
     bounds_cy = 150
     bounds_cymin = 100
-    frame.dummy = 0
     anchors = [an_left, an_top, an_right, an_bottom]
     optionsgrid = [og_rowmoving, og_keyrowmoving, og_focuscellonenter, og_colchangeontabkey, og_autopopup]
     fixcols.count = 1
@@ -33,6 +32,7 @@ object settaborderfo: tsettaborderfo
       item
         width = 32
         numstep = 1
+        options = [fco_mousefocus]
       end>
     datacols.count = 2
     datacols.items = <    
@@ -41,10 +41,12 @@ object settaborderfo: tsettaborderfo
         width = 201
         options = [co_readonly, co_focusselect, co_fill, co_savevalue, co_savestate]
         widgetname = 'wname'
+        dataclass = tgridmsestringdatalist
       end    
       item
         options = [co_invisible, co_savevalue, co_savestate]
         widgetname = 'windex'
+        dataclass = tgridintegerdatalist
       end>
     datarowheight = 16
     onrowsmoved = gridonrowsmoved
@@ -52,10 +54,6 @@ object settaborderfo: tsettaborderfo
     reffontheight = 14
     object wname: tstringedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-      bounds_x = 0
-      bounds_y = 0
-      bounds_cx = 201
-      bounds_cy = 16
       color = -1879048185
       frame.levelo = 0
       frame.colorclient = -2147483646
@@ -63,84 +61,88 @@ object settaborderfo: tsettaborderfo
       frame.dummy = 0
       taborder = 1
       visible = False
-      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+      bounds_x = 0
+      bounds_y = 0
+      bounds_cx = 201
+      bounds_cy = 16
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
       reffontheight = 14
     end
     object windex: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-      bounds_x = 202
-      bounds_y = 0
-      bounds_cx = 50
-      bounds_cy = 16
       frame.levelo = 0
       frame.colorclient = -2147483646
       frame.localprops = [frl_levelo, frl_colorclient]
       frame.dummy = 0
       taborder = 2
       visible = False
+      bounds_x = 202
+      bounds_y = 0
+      bounds_cx = 50
+      bounds_cy = 16
       reffontheight = 14
     end
   end
   object ok: tbutton
+    taborder = 4
     bounds_x = 37
     bounds_y = 183
     bounds_cx = 47
     bounds_cy = 20
     anchors = [an_left, an_bottom]
-    taborder = 4
     state = [as_default, as_localdefault, as_localcaption]
     caption = 'OK'
     modalresult = mr_ok
   end
   object cancel: tbutton
+    taborder = 5
     bounds_x = 92
     bounds_y = 183
     bounds_cx = 47
     bounds_cy = 20
     anchors = [an_left, an_bottom]
-    taborder = 5
     state = [as_localcaption]
     caption = 'Cancel'
     modalresult = mr_cancel
   end
   object mousetaborder: tintegeredit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    frame.captionpos = cp_right
+    frame.dummy = 0
+    taborder = 1
     bounds_x = 3
     bounds_y = 4
     bounds_cx = 60
     bounds_cy = 18
-    frame.captionpos = cp_right
-    frame.dummy = 0
-    taborder = 1
     onsetvalue = mousetaborderonsetvalue
     reffontheight = 14
   end
   object start: tbutton
+    taborder = 2
     bounds_x = 69
     bounds_y = 4
     bounds_cx = 50
     bounds_cy = 20
-    taborder = 2
     state = [as_localcaption, as_localonexecute]
     caption = '&Start'
     onexecute = startexecute
   end
   object stop: tbutton
+    taborder = 3
     bounds_x = 125
     bounds_y = 4
     bounds_cx = 48
     bounds_cy = 20
-    taborder = 3
     state = [as_disabled, as_localdisabled, as_localcaption, as_localonexecute]
     caption = 'St&op'
     onexecute = stopexecute
   end
   object tlabel1: tlabel
+    taborder = 6
     bounds_x = 176
     bounds_y = 5
     bounds_cx = 64
     bounds_cy = 14
-    taborder = 6
     caption = 'Mouse click'
     reffontheight = 14
   end

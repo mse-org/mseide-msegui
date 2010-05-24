@@ -9404,9 +9404,19 @@ var
 
 begin
  inherited;
- fobjectpicker.mouseevent(info);
+// fobjectpicker.mouseevent(info);
  if not (es_processed in info.eventstate) then begin
-  fdragcontroller.clientmouseevent(info);
+  fobjectpicker.mouseevent(info);
+  if (info.eventkind = ek_buttonpress) and 
+             not(csdesigning in componentstate) and
+            (fobjectpicker.objects <> nil) and
+            (pickobjectkindty(fobjectpicker.objects[0] mod pickobjectstep) in 
+                                      [pok_datacol,pok_datarow]) then begin
+   exclude(info.eventstate,es_processed); //allow mouse row selecting
+  end;
+  if not (es_processed in info.eventstate) then begin
+   fdragcontroller.clientmouseevent(info);
+  end;
  end;
  if not(csdesigning in componentstate) then begin
   if es_processed in info.eventstate then begin
