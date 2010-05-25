@@ -188,6 +188,7 @@ type
    function lasttextclipped: boolean; //result of last drawing
    function textclipped: boolean;
    function mousepostotextindex(const apos: pointty): integer;
+   function textindextomousepos(const aindex: integer): pointty;
 
    property textflags: textflagsty read ftextflags write settextflags;
    property textflagsactive: textflagsty read ftextflagsactive write settextflagsactive;
@@ -578,7 +579,8 @@ begin
    wstr1:= finfo.text.text;
    finfo.text.text:= stringfromchar(fpasswordchar,length(wstr1));
   end;
-  fcaretpos:= textindextopos(canvas,finfo,fcurindex); 
+//  fcaretpos:= textindextopos(canvas,finfo,fcurindex); 
+  fcaretpos:= textindextomousepos(fcurindex); 
              //updates finfo.res
 
   int1:= finfo.dest.x + finfo.res.cx;
@@ -838,8 +840,33 @@ begin
 end;
 
 function tinplaceedit.mousepostotextindex(const apos: pointty): integer;
+var
+ mstr1: msestring;
 begin
- postotextindex(getfontcanvas,finfo,apos,result);
+ if fpasswordchar <> #0 then begin
+  mstr1:= finfo.text.text;
+  finfo.text.text:= stringfromchar(fpasswordchar,length(mstr1));
+  postotextindex(getfontcanvas,finfo,apos,result);
+  finfo.text.text:= mstr1;
+ end
+ else begin
+  postotextindex(getfontcanvas,finfo,apos,result);
+ end;
+end;
+
+function tinplaceedit.textindextomousepos(const aindex: integer): pointty;
+var
+ mstr1: msestring;
+begin
+ if fpasswordchar <> #0 then begin
+  mstr1:= finfo.text.text;
+  finfo.text.text:= stringfromchar(fpasswordchar,length(mstr1));
+  result:= textindextopos(getfontcanvas,finfo,aindex);
+  finfo.text.text:= mstr1;
+ end
+ else begin
+  result:= textindextopos(getfontcanvas,finfo,aindex);
+ end;
 end;
 
 procedure tinplaceedit.deleteselection;
@@ -1210,18 +1237,18 @@ procedure tinplaceedit.mouseevent(var minfo: mouseeventinfoty);
 var
  po1: pointty;
  int1: integer;
- canvas1: tcanvas;
+// canvas1: tcanvas;
 begin
  with minfo do begin
   case eventkind of
    ek_buttonpress: begin
     if (minfo.button = mb_left) and pointinrect(pos,finfo.clip) then begin
-     canvas1:= getfontcanvas;
+//     canvas1:= getfontcanvas;
      if not fowner.focused and fowner.canfocus and
                 (ow_mousefocus in fowner.optionswidget) then begin
       include(fstate,ies_firstclick);
       include(minfo.eventstate,es_processed);
-      postotextindex(canvas1,finfo,pos,int1);
+      int1:= mousepostotextindex(pos);
       moveindex(int1,false);
       internalupdatecaret(true);
       po1:= fcaretpos;
@@ -1232,7 +1259,7 @@ begin
       end;
       if oe_autoselectonfirstclick in fintf.getoptionsedit then begin
        selectall;
-       subpoint1(po1,textindextopos(canvas1,finfo,int1));
+       subpoint1(po1,textindextomousepos(int1));
       end
       else begin
        moveindex(int1,false);
@@ -1240,8 +1267,8 @@ begin
       end;
      end
      else begin
-      postotextindex(canvas1,finfo,pos,int1);
-      po1:= textindextopos(canvas1,finfo,int1);
+      int1:= mousepostotextindex(pos);
+      po1:= textindextomousepos(int1);
       if (ies_firstclick in fstate) then begin
        finfo.flags:= ftextflagsactive;
        if (oe_autoselectonfirstclick in fintf.getoptionsedit) then begin
@@ -1255,7 +1282,7 @@ begin
       else begin
        moveindex(int1,ss_shift in shiftstate);
       end;
-      subpoint1(po1,textindextopos(canvas1,finfo,int1));
+      subpoint1(po1,textindextomousepos(int1));
      end;
      subpoint1(pos,po1);
      po1:= subpoint(ftextrect.pos,pos);
@@ -1307,11 +1334,8 @@ begin
 end;
 
 procedure tinplaceedit.movemouseindex(const sender: tobject);
-var
- int1: integer;
 begin
- postotextindex(getfontcanvas,finfo,fmousemovepos,int1);
- moveindex(int1,true);
+ moveindex(mousepostotextindex(fmousemovepos),true);
 end;
 
 function tinplaceedit.invalidatepos: integer;

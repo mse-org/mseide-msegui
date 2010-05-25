@@ -1684,6 +1684,10 @@ type
    procedure setrowfonts(const Value: trowfontarrayprop);
    function getrowcolorstate(index: integer): rowstatenumty;
    procedure setrowcolorstate(index: integer; const Value: rowstatenumty);
+   function getrowlinecolorstate(index: integer): rowstatenumty;
+   procedure setrowlinecolorstate(index: integer; const Value: rowstatenumty);
+   function getrowfixlinecolorstate(index: integer): rowstatenumty;
+   procedure setrowfixlinecolorstate(index: integer; const Value: rowstatenumty);
    function getrowfontstate(index: integer): rowstatenumty;
    procedure setrowfontstate(index: integer; const Value: rowstatenumty);
    procedure appinsrow(index: integer);
@@ -2059,6 +2063,11 @@ type
    property rowcolors: tcolorarrayprop read frowcolors write setrowcolors;
    property rowcolorstate[index: integer]: rowstatenumty read getrowcolorstate 
                         write setrowcolorstate; //default = -1
+   property rowlinecolorstate[index: integer]: rowstatenumty read getrowlinecolorstate 
+                        write setrowlinecolorstate; //default = -1
+   property rowfixlinecolorstate[index: integer]: rowstatenumty 
+                        read getrowfixlinecolorstate 
+                        write setrowfixlinecolorstate; //default = -1
    property rowfonts: trowfontarrayprop read frowfonts write setrowfonts;
    property rowfontstate[index: integer]: rowstatenumty read getrowfontstate 
                         write setrowfontstate;  //default = -1
@@ -13116,6 +13125,45 @@ procedure tcustomgrid.setrowcolorstate(index: integer; const Value: rowstatenumt
 begin
  if checkrowindex(index) then begin
   fdatacols.frowstate.color[index]:= value;
+  rowchanged(index);
+  rowstatechanged(index);
+ end;
+end;
+
+function tcustomgrid.getrowlinecolorstate(index: integer): rowstatenumty;
+begin
+ if checkrowindex(index) then begin
+  result:= fdatacols.frowstate.linecolor[index];
+ end
+ else begin
+  result:= -1;
+ end;
+end;
+
+procedure tcustomgrid.setrowlinecolorstate(index: integer; const Value: rowstatenumty);
+begin
+ if checkrowindex(index) then begin
+  fdatacols.frowstate.linecolor[index]:= value;
+  rowchanged(index);
+  rowstatechanged(index);
+ end;
+end;
+
+function tcustomgrid.getrowfixlinecolorstate(index: integer): rowstatenumty;
+begin
+ if checkrowindex(index) then begin
+  result:= fdatacols.frowstate.fixlinecolor[index];
+ end
+ else begin
+  result:= -1;
+ end;
+end;
+
+procedure tcustomgrid.setrowfixlinecolorstate(index: integer;
+                                              const Value: rowstatenumty);
+begin
+ if checkrowindex(index) then begin
+  fdatacols.frowstate.fixlinecolor[index]:= value;
   rowchanged(index);
   rowstatechanged(index);
  end;

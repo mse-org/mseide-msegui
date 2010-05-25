@@ -1894,6 +1894,9 @@ begin
  with cellinfoty(canvas.drawinfopo^) do begin
   if datapo <> nil then begin
    mstr1:= internaldatatotext(datapo^);
+   if passwordchar <> #0 then begin
+    mstr1:= charstring(passwordchar,length(mstr1));
+   end;
    if not (des_isdb in fstate) and (mstr1 = '') and 
                                    (fempty_text <> '') then begin
     bo1:= true;
