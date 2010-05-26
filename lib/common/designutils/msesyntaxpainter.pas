@@ -503,7 +503,7 @@ begin
       repeat
        if keywordlen <= 0 then begin
         lstr1.po:= wpo1;
-        while char(wpo1^) in keywordchars do begin
+        while char(byte(wpo1^)) in keywordchars do begin
          inc(wpo1);
         end;
         lstr1.len:= wpo1-lstr1.po;
@@ -543,7 +543,7 @@ begin
        bo1:= true;
        if scopeinfopo^.hasendtokens or scopeinfopo^.return then begin
         if (length(scopeinfopo^.endtokens) > 0) then begin
-         if (char(wpo1^) in scopeendchars) then begin
+         if (char(byte(wpo1^)) in scopeendchars) then begin
                        //endtoken suchen
           for int1:= 0 to high(scopeinfopo^.endtokens) do begin
            with scopeinfopo^.endtokens[int1] do begin
@@ -579,7 +579,8 @@ begin
                          charstyles[scopeinfopo^.fontinfonr]) or changed;
         end;
        end;
-       if bo1 and (length(scopeinfopo^.starttokens) > 0) and (char(wpo1^) in scopestartchars) then begin
+       if bo1 and (length(scopeinfopo^.starttokens) > 0) and 
+               (char(byte(wpo1^)) in scopestartchars) then begin
                        //starttoken suchen
         for int1:= 0 to high(scopeinfopo^.starttokens) do begin
          if msestartsstr(pointer(scopeinfopo^.starttokens[int1].token),wpo1) then begin

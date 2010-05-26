@@ -186,9 +186,12 @@ type
    fvalarpo: pointer;
    fitempo: pointer;
    fitemindex: integer;
+   fonclientdataentered: notifyeventty;
   protected
    function getifilinkkind: ptypeinfo; override;
    function canconnect(const acomponent: tcomponent): boolean; override;
+   procedure setvalue(const sender: iificlient; var avalue;
+                                            var accept: boolean); override;
 
    procedure getdatalist1(const alink: pointer; var handled: boolean);
    function getdatalist: tdatalist;
@@ -223,13 +226,16 @@ type
 
    procedure statreadlist(const alink: pointer);
    procedure statwritelist(const alink: pointer; var handled: boolean);
+  published 
+   property onclientdataentered: notifyeventty read fonclientdataentered 
+                                  write fonclientdataentered;
  end;
  
  tstringclientcontroller = class(tvalueclientcontroller)
   private
    fvalue: msestring;
    fonclientsetvalue: setstringeventty;
-   procedure setvalue(const avalue: msestring);
+   procedure setvalue1(const avalue: msestring);
    function getgridvalues: msestringarty;
    procedure setgridvalues(const avalue: msestringarty);
    function getgridvalue(const index: integer): msestring;
@@ -250,7 +256,7 @@ type
    property gridvalue[const index: integer]: msestring read getgridvalue 
                                                              write setgridvalue;
   published
-   property value: msestring read fvalue write setvalue;
+   property value: msestring read fvalue write setvalue1;
    property onclientsetvalue: setstringeventty 
                 read fonclientsetvalue write fonclientsetvalue;
  end;
@@ -310,7 +316,7 @@ type
    fmin: integer;
    fmax: integer;
    fonclientsetvalue: setintegereventty;
-   procedure setvalue(const avalue: integer);
+   procedure setvalue1(const avalue: integer);
    procedure setmin(const avalue: integer);
    procedure setmax(const avalue: integer);
    function getgridvalues: integerarty;
@@ -333,7 +339,7 @@ type
    property gridvalue[const index: integer]: integer read getgridvalue 
                                                              write setgridvalue;
   published
-   property value: integer read fvalue write setvalue default 0;
+   property value: integer read fvalue write setvalue1 default 0;
    property min: integer read fmin write setmin default 0;
    property max: integer read fmax write setmax default maxint;
    property onclientsetvalue: setintegereventty 
@@ -360,7 +366,7 @@ type
   private
    fvalue: boolean;
    fonclientsetvalue: setbooleaneventty;
-   procedure setvalue(const avalue: boolean);
+   procedure setvalue1(const avalue: boolean);
    function getgridvalues: longboolarty;
    procedure setgridvalues(const avalue: longboolarty);
    function getgridvalue(const index: integer): boolean;
@@ -381,7 +387,7 @@ type
    property gridvalue[const index: integer]: boolean read getgridvalue 
                                                              write setgridvalue;
   published
-   property value: boolean read fvalue write setvalue default false;
+   property value: boolean read fvalue write setvalue1 default false;
    property onclientsetvalue: setbooleaneventty 
                 read fonclientsetvalue write fonclientsetvalue;
  end;
@@ -392,7 +398,7 @@ type
    fmin: realty;
    fmax: realty;
    fonclientsetvalue: setrealeventty;
-   procedure setvalue(const avalue: realty);
+   procedure setvalue1(const avalue: realty);
    procedure setmin(const avalue: realty);
    procedure setmax(const avalue: realty);
    procedure readvalue(reader: treader);
@@ -422,7 +428,7 @@ type
    property gridvalue[const index: integer]: real read getgridvalue 
                                                              write setgridvalue;
   published
-   property value: realty read fvalue write setvalue stored false;
+   property value: realty read fvalue write setvalue1 stored false;
    property min: realty read fmin write setmin stored false;
    property max: realty read fmax write setmax stored false;
    property onclientsetvalue: setrealeventty 
@@ -435,7 +441,7 @@ type
    fmin: tdatetime;
    fmax: tdatetime;
    fonclientsetvalue: setrealeventty;
-   procedure setvalue(const avalue: tdatetime);
+   procedure setvalue1(const avalue: tdatetime);
    procedure setmin(const avalue: tdatetime);
    procedure setmax(const avalue: tdatetime);
    procedure readvalue(reader: treader);
@@ -465,7 +471,7 @@ type
    property gridvalue[const index: integer]: tdatetime read getgridvalue 
                                                              write setgridvalue;
   published
-   property value: tdatetime read fvalue write setvalue stored false;
+   property value: tdatetime read fvalue write setvalue1 stored false;
    property min: tdatetime read fmin write setmin stored false;
    property max: tdatetime read fmax write setmax stored false;
    property onclientsetvalue: setrealeventty 
@@ -1624,6 +1630,15 @@ begin
  end;
 end;
 
+procedure tvalueclientcontroller.setvalue(const sender: iificlient; var avalue;
+               var accept: boolean);
+begin
+ inherited;
+ if accept and fowner.canevent(tmethod(fonclientdataentered)) then begin
+  fonclientdataentered(fowner);
+ end;
+end;
+
 { tstringclientcontroller }
 
 constructor tstringclientcontroller.create(const aowner: tmsecomponent);
@@ -1631,7 +1646,7 @@ begin
  inherited create(aowner,msestringtypekind);
 end;
 
-procedure tstringclientcontroller.setvalue(const avalue: msestring);
+procedure tstringclientcontroller.setvalue1(const avalue: msestring);
 begin
  fvalue:= avalue;
  change;
@@ -1661,6 +1676,7 @@ begin
  if fowner.canevent(tmethod(fonclientsetvalue)) then begin
   fonclientsetvalue(self,msestring(avalue),accept);
  end;
+ inherited;
 end;
 
 function tstringclientcontroller.getgridvalues: msestringarty;
@@ -1711,7 +1727,7 @@ begin
  inherited create(aowner,tkinteger);
 end;
 
-procedure tintegerclientcontroller.setvalue(const avalue: integer);
+procedure tintegerclientcontroller.setvalue1(const avalue: integer);
 begin
  fvalue:= avalue;
  change;
@@ -1737,6 +1753,7 @@ begin
  if fowner.canevent(tmethod(fonclientsetvalue)) then begin
   fonclientsetvalue(self,integer(avalue),accept);
  end;
+ inherited;
 end;
 
 procedure tintegerclientcontroller.setmin(const avalue: integer);
@@ -1798,7 +1815,7 @@ begin
  inherited create(aowner,tkbool);
 end;
 
-procedure tbooleanclientcontroller.setvalue(const avalue: boolean);
+procedure tbooleanclientcontroller.setvalue1(const avalue: boolean);
 begin
  fvalue:= avalue;
  change;
@@ -1822,6 +1839,7 @@ begin
  if fowner.canevent(tmethod(fonclientsetvalue)) then begin
   fonclientsetvalue(self,boolean(avalue),accept);
  end;
+ inherited;
 end;
 
 function tbooleanclientcontroller.getgridvalues: longboolarty;
@@ -1874,7 +1892,7 @@ begin
  inherited create(aowner,tkfloat);
 end;
 
-procedure trealclientcontroller.setvalue(const avalue: realty);
+procedure trealclientcontroller.setvalue1(const avalue: realty);
 begin
  fvalue:= avalue;
  change;
@@ -1900,6 +1918,7 @@ begin
  if fowner.canevent(tmethod(fonclientsetvalue)) then begin
   fonclientsetvalue(self,realty(avalue),accept);
  end;
+ inherited;
 end;
 
 procedure trealclientcontroller.setmin(const avalue: realty);
@@ -2022,7 +2041,7 @@ begin
  inherited create(aowner,tkfloat);
 end;
 
-procedure tdatetimeclientcontroller.setvalue(const avalue: tdatetime);
+procedure tdatetimeclientcontroller.setvalue1(const avalue: tdatetime);
 begin
  fvalue:= avalue;
  change;
@@ -2048,6 +2067,7 @@ begin
  if fowner.canevent(tmethod(fonclientsetvalue)) then begin
   fonclientsetvalue(self,tdatetime(avalue),accept);
  end;
+ inherited;
 end;
 
 procedure tdatetimeclientcontroller.setmin(const avalue: tdatetime);

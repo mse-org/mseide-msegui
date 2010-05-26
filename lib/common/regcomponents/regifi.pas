@@ -66,13 +66,6 @@ begin
  result:= tmsestringdatalistpropertyeditor;
 end;
 
-{ tifilinkcomparraypropertyeditor }
-
-function tifilinkcomparraypropertyeditor.geteditorclass: propertyeditorclassty;
-begin
- result:= tificolitempropertyeditor;
-end;
-
 { tificolitempropertyeditor }
 
 function tificolitempropertyeditor.getvalue: msestring;
@@ -84,6 +77,13 @@ begin
  if (obj1 <> nil) and (obj1.link <> nil) then begin
   result:= '<'+obj1.link.name+'>';
  end;
+end;
+
+{ tifilinkcomparraypropertyeditor }
+
+function tifilinkcomparraypropertyeditor.geteditorclass: propertyeditorclassty;
+begin
+ result:= tificolitempropertyeditor;
 end;
 
 initialization
