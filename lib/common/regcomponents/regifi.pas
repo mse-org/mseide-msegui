@@ -17,6 +17,15 @@ type
    function geteditorclass: propertyeditorclassty; override;
  end;
 
+ tificolitempropertyeditor = class(tclasselementeditor)
+  protected
+   function getvalue: msestring; override;
+ end;
+ 
+ tifilinkcomparraypropertyeditor = class(tpersistentarraypropertyeditor)
+  protected
+   function geteditorclass: propertyeditorclassty; override;
+ end;
  
 procedure register;
 begin
@@ -31,15 +40,18 @@ begin
    'in order to install MSEifi remote components,'+lineend+
    'compile with -dmse_with_pascalscript for PascalScript components.']);
 // registerpropertyeditor(typeinfo(tcomponent),tcustomificlientcontroller,
-//                                                      'widget',tifiwidgeteditor);
+//                                               'widget',tifiwidgeteditor);
  registercomponenteditor(tifilinkcomp,tifilinkcompeditor);
  registerpropertyeditor(typeinfo(tifidropdowncols),nil,'',
                                           tifidropdowncolpropertyeditor);
+ registerpropertyeditor(typeinfo(tifilinkcomparrayprop),nil,'',
+                                          tifilinkcomparraypropertyeditor);
 end;
 
 { tifiwidgeteditor }
 
-function tifiwidgeteditor.filtercomponent(const acomponent: tcomponent): boolean;
+function tifiwidgeteditor.filtercomponent(
+                                    const acomponent: tcomponent): boolean;
 var
  intf1: pointer;
 begin
@@ -52,6 +64,26 @@ end;
 function tifidropdowncolpropertyeditor.geteditorclass: propertyeditorclassty;
 begin
  result:= tmsestringdatalistpropertyeditor;
+end;
+
+{ tifilinkcomparraypropertyeditor }
+
+function tifilinkcomparraypropertyeditor.geteditorclass: propertyeditorclassty;
+begin
+ result:= tificolitempropertyeditor;
+end;
+
+{ tificolitempropertyeditor }
+
+function tificolitempropertyeditor.getvalue: msestring;
+var
+ obj1: tificolitem;
+begin
+ result:= '<nil>';
+ obj1:= tificolitem(getpointervalue);
+ if (obj1 <> nil) and (obj1.link <> nil) then begin
+  result:= '<'+obj1.link.name+'>';
+ end;
 end;
 
 initialization

@@ -2893,7 +2893,7 @@ var
  indexbefore: integer;
 begin
  if not (es_processed in info.eventstate) then begin
-  if info.shiftstate - [ss_shift] = [] then begin
+  if info.shiftstate * shiftstatesmask - [ss_shift] = [] then begin
    include(info.eventstate,es_processed);
    with feditor do begin
     int2:= fxpos;
