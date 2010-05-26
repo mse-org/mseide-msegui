@@ -1204,6 +1204,7 @@ type
    procedure setfoldissum(const index: integer; const avalue: boolean);
    procedure setfolded(const avalue: boolean);
    procedure setheight(const index: integer; const avalue: integer);
+   procedure setlinewidth(const index: integer; const avalue: integer);
    function getrowypos(const index: integer): integer;
    procedure setsourcefoldlevel(const avalue: string);
    procedure setsourceissum(const avalue: string);
@@ -1285,6 +1286,8 @@ type
                                                   write setfoldissum;
    property height[const index: integer]: integer read getheight 
                                                             write setheight;
+   property linewidth[const index: integer]: integer read getlinewidth 
+                                                            write setlinewidth;
    function currentrowheight(const index: integer): integer;
    property rowypos[const index: integer]: integer read getrowypos;
    function rowindex(const aypos: integer): integer;
@@ -1686,8 +1689,8 @@ type
    procedure setrowcolorstate(index: integer; const Value: rowstatenumty);
    function getrowlinecolorstate(index: integer): rowstatenumty;
    procedure setrowlinecolorstate(index: integer; const Value: rowstatenumty);
-   function getrowfixlinecolorstate(index: integer): rowstatenumty;
-   procedure setrowfixlinecolorstate(index: integer; const Value: rowstatenumty);
+   function getrowlinecolorfixstate(index: integer): rowstatenumty;
+   procedure setrowlinecolorfixstate(index: integer; const Value: rowstatenumty);
    function getrowfontstate(index: integer): rowstatenumty;
    procedure setrowfontstate(index: integer; const Value: rowstatenumty);
    procedure appinsrow(index: integer);
@@ -1711,6 +1714,8 @@ type
    procedure setsorted(const avalue: boolean);
    function getrowstatelist: trowstatelist;
    procedure setrowstatelist(const avalue: trowstatelist);
+   function getrowlinewidth(index: integer): integer;
+   procedure setrowlinewidth(index: integer; const avalue: integer);
   protected
    fupdating: integer;
    ffocuscount: integer;
@@ -2062,12 +2067,19 @@ type
                       //rowproperties index = -1 -> focused row
    property rowcolors: tcolorarrayprop read frowcolors write setrowcolors;
    property rowcolorstate[index: integer]: rowstatenumty read getrowcolorstate 
+
                         write setrowcolorstate; //default = -1
    property rowlinecolorstate[index: integer]: rowstatenumty read getrowlinecolorstate 
-                        write setrowlinecolorstate; //default = -1
-   property rowfixlinecolorstate[index: integer]: rowstatenumty 
-                        read getrowfixlinecolorstate 
-                        write setrowfixlinecolorstate; //default = -1
+                        write setrowlinecolorstate; 
+                               //default = -1, og_rowheight must be set
+   property rowlinecolorfixstate[index: integer]: rowstatenumty 
+                        read getrowlinecolorfixstate 
+                        write setrowlinecolorfixstate; 
+                               //default = -1, og_rowheight must be set
+   property rowlinewidth[index: integer]: integer read getrowlinewidth 
+                                       write setrowlinewidth;
+                               //default = -1, og_rowheight must be set
+
    property rowfonts: trowfontarrayprop read frowfonts write setrowfonts;
    property rowfontstate[index: integer]: rowstatenumty read getrowfontstate 
                         write setrowfontstate;  //default = -1
@@ -2082,6 +2094,7 @@ type
    function rowfoldinfo: prowfoldinfoty; //nil if focused row not visible
    property rowheight[index: integer]: integer read getrowheight
                                                           write setrowheight;
+                                //og_rowheight must be set
    property rowstatelist: trowstatelist read getrowstatelist 
                                                write setrowstatelist;
 {$ifdef mse_with_ifi}
@@ -3215,6 +3228,10 @@ begin
 //       end;
 //       heightextend:= int2 - rect.cy;
        heightextend:= rowstatelist.internalheight(row1) - rect.cy;
+       int2:= rowstatelist.linewidth[row1];
+       if int2 > 0 then begin
+        heightextend:= heightextend - int2 + fgrid.fdatarowlinewidth;
+       end;
        inc(rect.cy,heightextend);      
        inc(innerrect.cy,heightextend);      
        inc(frameinnerrect.cy,heightextend);
@@ -8414,13 +8431,18 @@ var
  arowinfo: rowspaintinfoty;
  colinfo: colpaintinfoty;
  lines: segmentarty;
- int1,int2,int3: integer;
+ int1,int2,int3,int4,int5: integer;
  adatarect: rectty;
  reg: regionty;
  saveindex: integer;
  linewidthbefore: integer;
  rowheight1: boolean;
  rowstate1: trowstatelist;
+ lineinfos: array of record
+  lcolor: colorty;
+  lcolorfix: colorty;
+  lwidth: integer;
+ end;
 
 begin
  inherited;
@@ -8537,15 +8559,46 @@ begin
                       tframe1(fframe).fi.innerframe.top+ffixrows.ffirstsize+fscrollrect.y));
       end;
       linewidthbefore:= acanvas.linewidth;
-      if fdatarowlinewidth > 0 then begin
-       if fdatarowlinewidth > 0 then begin
-        acanvas.linewidth:= fdatarowlinewidth;
+      if (fdatarowlinewidth > 0) or rowheight1 then begin
+       acanvas.linewidth:= fdatarowlinewidth;
+       int1:= endrow-startrow+1;
+       setlength(lines,int1);
+       if rowheight1 then begin
+        setlength(lineinfos,int1);
+        int2:= ystart;
+       end
+       else begin
+        int2:= ystart - (fdatarowlinewidth + 1) div 2;
        end;
-       setlength(lines,endrow-startrow+1);
-       int2:= ystart - (fdatarowlinewidth + 1) div 2;
        int3:= tframe1(fframe).finnerclientrect.cx{ - 1};
+       int5:= rowcolors.count;
+       int4:= 0;
        for int1:= 0 to high(lines) do begin
         if rowheight1 then begin
+         with rowstate1.getitemporowheight(fvisiblerows[int1+startrow])^.rowheight,
+              lineinfos[int1] do begin
+          int4:= (linecolor and rowstatemask) - 1;
+          if (int4 < 0) or (int4 >= int5) then begin
+           lcolor:= fdatarowlinecolor;
+          end
+          else begin
+           lcolor:= rowcolors[int4];
+          end;
+          int4:= (linecolorfix and rowstatemask) - 1;
+          if (int4 < 0) or (int4 >= int5) then begin
+           lcolorfix:= fdatarowlinecolorfix;
+          end
+          else begin
+           lcolorfix:= rowcolors[int4];
+          end;
+          if linewidth = 0 then begin
+           lwidth:= fdatarowlinewidth;
+          end
+          else begin
+           lwidth:= linewidth;
+          end;
+          int4:= (lwidth + 1) div 2;
+         end;
          inc(int2,rowstate1.internalystep(fvisiblerows[int1+startrow]));
         end
         else begin
@@ -8553,16 +8606,26 @@ begin
         end;
         with lines[int1] do begin
          a.x:= 0;
-         a.y:= int2;
+         a.y:= int2-int4;
          b.x:= int3;
-         b.y:= int2;
+         b.y:= int2-int4;
         end;
        end;
        if ffixcols.count > 0 then begin   //draw horz lines fixcols
         reg:= acanvas.copyclipregion;
         acanvas.subcliprect(adatarect);
         if not acanvas.clipregionisempty then begin
-         acanvas.drawlinesegments(lines,fdatarowlinecolorfix);
+         if rowheight1 then begin
+          for int1:= 0 to high(lines) do begin
+           with lines[int1],lineinfos[int1] do begin
+            acanvas.linewidth:= lwidth;
+            acanvas.drawline(a,b,lcolorfix);
+           end;
+          end;
+         end
+         else begin
+          acanvas.drawlinesegments(lines,fdatarowlinecolorfix);
+         end;
         end;
         acanvas.clipregion:= reg;
        end;
@@ -8590,7 +8653,17 @@ begin
           b.x:= int2;
          end;
         end;
-        acanvas.drawlinesegments(lines,fdatarowlinecolor);
+        if rowheight1 then begin
+         for int1:= 0 to high(lines) do begin
+          with lines[int1],lineinfos[int1] do begin
+           acanvas.linewidth:= lwidth;
+           acanvas.drawline(a,b,lcolor);
+          end;
+         end;
+        end
+        else begin
+         acanvas.drawlinesegments(lines,fdatarowlinecolor);
+        end;
        end;
        if ffirstnohscroll > 0 then begin
         acanvas.intersectcliprect(
@@ -10166,18 +10239,18 @@ begin     //focuscell
      focuscell(cell,selectaction);
      exit;
     end;
-   end
-   else begin
-    if (gs_hasactiverowcolor in fstate) and 
-             (ffocusedcell.row <> cellbefore.row) then begin
-     if cellbefore.row >= 0 then begin
-      invalidaterow(cellbefore.row);
-     end;
-     if ffocusedcell.row >= 0 then begin
-      invalidaterow(ffocusedcell.row);
-     end;
+   end;
+//   else begin
+   if (gs_hasactiverowcolor in fstate) and 
+            (ffocusedcell.row <> cellbefore.row) then begin
+    if cellbefore.row >= 0 then begin
+     invalidaterow(cellbefore.row);
+    end;
+    if ffocusedcell.row >= 0 then begin
+     invalidaterow(ffocusedcell.row);
     end;
    end;
+//   end;
   end
   else begin
    cellbefore:= ffocusedcell;
@@ -13149,23 +13222,40 @@ begin
  end;
 end;
 
-function tcustomgrid.getrowfixlinecolorstate(index: integer): rowstatenumty;
+function tcustomgrid.getrowlinecolorfixstate(index: integer): rowstatenumty;
 begin
  if checkrowindex(index) then begin
-  result:= fdatacols.frowstate.fixlinecolor[index];
+  result:= fdatacols.frowstate.linecolorfix[index];
  end
  else begin
   result:= -1;
  end;
 end;
 
-procedure tcustomgrid.setrowfixlinecolorstate(index: integer;
+procedure tcustomgrid.setrowlinecolorfixstate(index: integer;
                                               const Value: rowstatenumty);
 begin
  if checkrowindex(index) then begin
-  fdatacols.frowstate.fixlinecolor[index]:= value;
+  fdatacols.frowstate.linecolorfix[index]:= value;
   rowchanged(index);
   rowstatechanged(index);
+ end;
+end;
+
+function tcustomgrid.getrowlinewidth(index: integer): integer;
+begin
+ if checkrowindex(index) then begin
+  result:= fdatacols.frowstate.linewidth[index];
+ end
+ else begin
+  result:= fdatarowlinewidth;
+ end;
+end;
+
+procedure tcustomgrid.setrowlinewidth(index: integer; const avalue: integer);
+begin
+ if checkrowindex(index) then begin
+  fdatacols.frowstate.linewidth[index]:= avalue;
  end;
 end;
 
@@ -15017,8 +15107,6 @@ begin
   ftopypos:= 0;
   if count > 0 then begin
    needsrowheightupdate:= gs_needsrowheight in fgrid.fstate;  
-   int4:= fgrid.fdatarowlinewidth;
-   int2:= fgrid.fdatarowheight + int4;
    po1:= dataporowheight;
    inc(pchar(po1),fdirtyrowheight*fsize);
    int3:= po1^.rowheight.ypos;
@@ -15027,6 +15115,13 @@ begin
     po2:= fvisiblerowmap.datapo;
    end;
    for int1:= fdirtyrowheight to aindex do begin
+    if po1^.rowheight.linewidth = 0 then begin
+     int4:= fgrid.fdatarowlinewidth;
+    end
+    else begin
+     int4:= po1^.rowheight.linewidth;
+    end;
+    int2:= fgrid.fdatarowheight + int4;
     po1^.rowheight.ypos:= int3;
     if not folded or (po1^.normal.fold and currentfoldhiddenmask = 0) then begin
      if po1^.rowheight.height <= 0 then begin
@@ -15407,6 +15502,20 @@ begin
  with getitemporowheight(index)^ do begin
   if avalue <> rowheight.height then begin
    rowheight.height:= avalue;
+   if index < fdirtyrowheight then begin
+    fdirtyrowheight:= index;
+    fgrid.layoutchanged;
+   end;
+  end;
+ end;
+end;
+
+procedure trowstatelist.setlinewidth(const index: integer;
+               const avalue: integer);
+begin
+ with getitemporowheight(index)^ do begin
+  if avalue <> rowheight.linewidth then begin
+   rowheight.linewidth:= avalue;
    if index < fdirtyrowheight then begin
     fdirtyrowheight:= index;
     fgrid.layoutchanged;

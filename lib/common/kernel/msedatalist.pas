@@ -765,7 +765,7 @@ type
   ypos: integer;
   linewidth: byte; //0 -> default, 1 -> 0, 2 -> 1...
   linecolor: byte; //index in rowcolors, 0 = none, 1 = rowcolors[0]
-  fixlinecolor: byte; //index in rowcolors, 0 = none, 1 = rowcolors[0]
+  linecolorfix: byte; //index in rowcolors, 0 = none, 1 = rowcolors[0]
  end;
  rowstaterowheightty = packed record
   normal: rowstatety;
@@ -808,11 +808,11 @@ type
    procedure setselected(const index: integer; const avalue: longword);
    function getmerged(const index: integer): longword;
    procedure setmerged(const index: integer; const avalue: longword);
-   function getlineheight(const index: integer): integer;
+   function getlinewidth(const index: integer): integer;
    function getlinecolor(const index: integer): rowstatenumty;
    procedure setlinecolor(const index: integer; const avalue: rowstatenumty);
-   function getfixlinecolor(const index: integer): rowstatenumty;
-   procedure setfixlinecolor(const index: integer; const avalue: rowstatenumty);
+   function getlinecolorfix(const index: integer): rowstatenumty;
+   procedure setlinecolorfix(const index: integer; const avalue: rowstatenumty);
   protected
    finfolevel: rowinfolevelty;
    function checkwritedata(const filer: tfiler): boolean; override;
@@ -865,10 +865,10 @@ type
    property height[const index: integer]: integer read getheight;
    property merged[const index: integer]: longword read getmerged 
                                                             write setmerged;
-   property lineheight[const index: integer]: integer 
-                                  read getlineheight{ write setlineheight};
-   property fixlinecolor[const index: integer]: rowstatenumty 
-                                  read getfixlinecolor write setfixlinecolor;
+   property linewidth[const index: integer]: integer 
+                                  read getlinewidth{ write setlineheight};
+   property linecolorfix[const index: integer]: rowstatenumty 
+                                  read getlinecolorfix write setlinecolorfix;
    property linecolor[const index: integer]: rowstatenumty 
                                   read getlinecolor write setlinecolor;
    property foldinfoar: bytearty read getfoldinfoar;
@@ -7206,17 +7206,17 @@ begin
  end;
 end;
 
-function tcustomrowstatelist.getfixlinecolor(const index: integer): rowstatenumty;
+function tcustomrowstatelist.getlinecolorfix(const index: integer): rowstatenumty;
 begin
- result:= (getitemporowheight(index)^.rowheight.fixlinecolor and
+ result:= (getitemporowheight(index)^.rowheight.linecolorfix and
                                                           rowstatemask) - 1;
 end;
 
-procedure tcustomrowstatelist.setfixlinecolor(const index: integer;
+procedure tcustomrowstatelist.setlinecolorfix(const index: integer;
                                             const avalue: rowstatenumty);
 begin
  with getitemporowheight(index)^.rowheight do begin
-  fixlinecolor:= replacebits(avalue + 1,fixlinecolor,rowstatemask);
+  linecolorfix:= replacebits(avalue + 1,linecolorfix,rowstatemask);
  end;
 end;
 
@@ -7299,9 +7299,9 @@ begin
  end;
 end;
 
-function tcustomrowstatelist.getlineheight(const index: integer): integer;
+function tcustomrowstatelist.getlinewidth(const index: integer): integer;
 begin
- result:= getitemporowheight(index)^.rowheight.linewidth - 1;
+ result:= getitemporowheight(index)^.rowheight.linewidth;
 end;
 
 procedure tcustomrowstatelist.checkinfolevel(const wantedlevel: rowinfolevelty);

@@ -1021,7 +1021,7 @@ const
 type
  fontdatarecty = record
   refcount: integer;
-  data: fontdataty;
+  data: pfontdataty;
  end;
  fontdatarecpoty = ^fontdatarecty;
 
@@ -1274,7 +1274,7 @@ begin
   result:= nil;
  end
  else begin
-  result:= @fonts[font].data;
+  result:= fonts[font].data;
  end;
 end;
 
@@ -1285,8 +1285,8 @@ begin
  result:= nil;
  for int1:= 0 to high(fonts) do begin
   with fonts[int1] do begin
-   if (refcount > 0) and (data.font = afont) then begin
-    result:= @fonts[int1].data;
+   if (refcount > 0) and (data^.font = afont) then begin
+    result:= fonts[int1].data;
     break;
    end;
   end;
@@ -1296,15 +1296,32 @@ end;
 procedure freefont(index: integer);
 begin
  with fonts[index] do begin
-  data.name:= '';
-  data.charset:= '';
+  data^.name:= '';
+  data^.charset:= '';
   gdi_lock;
-  gui_freefontdata(data);
+  gui_freefontdata(data^);
   gdi_unlock;
   refcount:= 0;
  end;
 end;
 
+type
+ fontmatrixmodety = (fmm_fix,fmm_linear,fmm_matrix);
+ x11fontdatadty = record
+  infopo: pointer;
+  matrixmode: fontmatrixmodety;
+  defaultwidth: integer;
+  xftascent,xftdescent: integer;
+  rowlength: word;
+  xftdirection: graphicdirectionty;
+ end;
+ px11fontdatadty = ^x11fontdatadty;
+ x11fontdataty = record
+  case integer of
+   0: (d: x11fontdatadty;);
+   1: (_bufferspace: fontdatapty;);
+ end;
+ 
 function registerfont(var fontdata: fontdataty): fontnumty;
 
  procedure reusefont(startindex: integer);
@@ -1332,8 +1349,12 @@ begin //registerfont
  if result = 0 then begin
   result:= length(fonts)+1;
   setlength(fonts,result);
+  with fonts[high(fonts)] do begin
+   getmem(data,sizeof(fontdataty));
+   fillchar(data^,sizeof(fontdataty),0);
+  end;
  end;
- fonts[result-1].data:= fontdata;
+ fonts[result-1].data^:= fontdata;
  fonts[result-1].refcount:= 1;
 end;
 
@@ -1413,18 +1434,18 @@ begin
   for int1:= 0 to high(fonts) do begin
    with fonts[int1] do begin
     if (refcount >= 0) and
-     (data.glyph = glyph) and           //unicode substitutes
-     (data.height = height) and
-     (data.width = width)  and
-     (data.pitchoptions = options * fontpitchmask) and
-     (data.familyoptions = options * fontfamilymask) and
-     (data.antialiasedoptions = options * fontantialiasedmask) and
+     (data^.glyph = glyph) and           //unicode substitutes
+     (data^.height = height) and
+     (data^.width = width)  and
+     (data^.pitchoptions = options * fontpitchmask) and
+     (data^.familyoptions = options * fontfamilymask) and
+     (data^.antialiasedoptions = options * fontantialiasedmask) and
 //     (data.xcoreoptions = options * fontxcoremask) and
-     ({$ifdef FPC}longword{$else}byte{$endif}(data.style) = style1) and
-     (name = data.name) and
-     (charset = data.charset) and
-     (rotation = data.rotation) and
-     (xscale = data.xscale) then begin
+     ({$ifdef FPC}longword{$else}byte{$endif}(data^.style) = style1) and
+     (name = data^.name) and
+     (charset = data^.charset) and
+     (rotation = data^.rotation) and
+     (xscale = data^.xscale) then begin
      inc(refcount);
      result:= int1 + 1;
      goto endlab
@@ -1460,7 +1481,7 @@ begin
  info.fonthasglyph.unichar:= glyph;  
  gdi_lock;
  for int1:= 0 to high(fonts) do begin
-  with fonts[int1],data do begin
+  with fonts[int1],data^ do begin
    if (refcount >= 0) and (basefont = abasefont) then begin
     info.fonthasglyph.font:= font;
     gui_getgdifuncs^[gdi_fonthasglyph](info);    
@@ -1746,8 +1767,11 @@ begin
  if inited then begin
   msestockobjects.deinit;
   for int1:= 0 to high(fonts) do begin
-   fonts[int1].refcount:= 1;
-   freefont(int1);
+   with fonts[int1] do begin
+    refcount:= 1;
+    freefont(int1);
+    freemem(data);
+   end;
   end;
  end;
  freeandnil(ffontaliaslist);
