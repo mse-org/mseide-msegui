@@ -4,7 +4,7 @@ interface
 implementation
 uses
  classes,mseificomp,msedesignintf,regifi_bmp,msepropertyeditors,mseclasses,
- msecomponenteditors,mseificomponenteditors,msestrings; 
+ msecomponenteditors,mseificomponenteditors,msestrings,msedatalist,mseifidbcomp; 
     
 type
  tifiwidgeteditor = class(tcomponentpropertyeditor)
@@ -26,14 +26,27 @@ type
   protected
    function geteditorclass: propertyeditorclassty; override;
  end;
- 
+
+ tififieldnamepropertyeditor = class(tstringpropertyeditor)
+  protected
+   function getdefaultstate: propertystatesty; override;
+   function getvalues: msestringarty; override;
+ end;
+  
+ tifisourcefieldnamepropertyeditor = class(tstringpropertyeditor)
+  protected
+   function getdefaultstate: propertystatesty; override;
+   function getvalues: msestringarty; override;
+ end;
+  
 procedure register;
 begin
  registercomponents('Ifi',[tifiactionlinkcomp,tifiintegerlinkcomp,
        tifibooleanlinkcomp,
        tifireallinkcomp,tifidatetimelinkcomp,tifistringlinkcomp,
        tifidropdownlistlinkcomp,tifienumlinkcomp,
-       tifigridlinkcomp]); 
+       tifigridlinkcomp,
+       tifidatasource,tifisqldatasource]); 
  registercomponenttabhints(['Ifi'],
    ['MSEifi Components (experimental).'+lineend+
    'Compile MSEide with -dmse_with_ifirem '+
@@ -46,6 +59,10 @@ begin
                                           tifidropdowncolpropertyeditor);
  registerpropertyeditor(typeinfo(tifilinkcomparrayprop),nil,'',
                                           tifilinkcomparraypropertyeditor);
+ registerpropertyeditor(typeinfo(ififieldnamety),nil,'',
+                                          tififieldnamepropertyeditor);
+ registerpropertyeditor(typeinfo(ifisourcefieldnamety),nil,'',
+                                          tifisourcefieldnamepropertyeditor);
 end;
 
 { tifiwidgeteditor }
@@ -84,6 +101,50 @@ end;
 function tifilinkcomparraypropertyeditor.geteditorclass: propertyeditorclassty;
 begin
  result:= tificolitempropertyeditor;
+end;
+
+{ tififieldnamepropertyeditor }
+
+function tififieldnamepropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate + [ps_valuelist,ps_sortlist];
+end;
+
+function tififieldnamepropertyeditor.getvalues: msestringarty;
+var
+ intf1: iififieldinfo;
+ intf2: iififieldsource;
+ dataso: tifidatasource;
+ types: listdatatypesty;
+begin
+ result:= nil;
+ if getcorbainterface(fprops[0].instance,typeinfo(iififieldinfo),intf1) then begin
+  dataso:= nil;
+  types:= [];
+  intf1.getfieldinfo(fname,dataso,types);
+  if (dataso <> nil) and getcorbainterface(dataso,typeinfo(iififieldsource),
+           intf2) then begin
+   result:= intf2.getfieldnames(types);
+  end;
+ end;
+end;
+
+{ tifisourcefieldnamepropertyeditor }
+
+function tifisourcefieldnamepropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate + [ps_valuelist,ps_sortlist];
+end;
+
+function tifisourcefieldnamepropertyeditor.getvalues: msestringarty;
+var
+ intf1: iififieldlinksource;
+begin
+ result:= nil;
+ if getcorbainterface(fprops[0].instance,
+                                typeinfo(iififieldlinksource),intf1) then begin
+  result:= intf1.getfieldnames(fname);
+ end;
 end;
 
 initialization

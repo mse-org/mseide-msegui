@@ -307,7 +307,7 @@ type
 
  tcustomitemlist = class(tobjectdatalist,iobjectlink)
   private
-   fobjectlinker: tobjectlinker;
+//   fobjectlinker: tobjectlinker;
    fonstatreaditem: statreaditemeventty;
    fonstatreadtreeitem: statreadtreeitemeventty;
    procedure setimnr_base(const Value: integer);
@@ -316,8 +316,9 @@ type
    procedure setimnr_readonly(const Value: integer);
    procedure setimnr_checked(const Value: integer);
    procedure setimnr_subitems(const Value: integer);
-   function getobjectlinker: tobjectlinker;
-   procedure objectevent(const sender: tobject; const event: objecteventty);
+//   function getobjectlinker: tobjectlinker;
+   procedure objectevent(const sender: tobject;
+                          const event: objecteventty); override;
    procedure setimagelist(const Value: timagelist);
    procedure setoptions(const Value: nodeoptionsty);
    procedure setcaptionpos(const Value: captionposty);
@@ -338,7 +339,7 @@ type
    fcaptionpos: captionposty;
    fstate: itemliststatesty;
    function getitems1(const index: integer): tlistitem;
-   procedure setitems(const index: integer; const Value: tlistitem);
+   procedure setitems(const index: integer; const Value: tlistitem); 
    procedure freedata(var data); override;
    procedure change(const item: tlistitem); reintroduce; overload;
    procedure nodenotification(const sender: tlistitem;
@@ -352,11 +353,11 @@ type
                     var aitem: tlistitem); virtual;
    procedure statreadtreeitem(const reader: tstatreader; const parent: ttreelistitem;
                     var aitem: ttreelistitem); virtual;
-   procedure link(const source,dest: iobjectlink; valuepo: pointer = nil;
-                       ainterfacetype: pointer = nil; once: boolean = false);
-   procedure unlink(const source,dest: iobjectlink; valuepo: pointer = nil);
-   procedure objevent(const sender: iobjectlink; const event: objecteventty);
-   function getinstance: tobject;
+//   procedure link(const source,dest: iobjectlink; valuepo: pointer = nil;
+//                       ainterfacetype: pointer = nil; once: boolean = false);
+//   procedure unlink(const source,dest: iobjectlink; valuepo: pointer = nil);
+//   procedure objevent(const sender: iobjectlink; const event: objecteventty);
+//   function getinstance: tobject;
 
    procedure writestate(const writer; const name: msestring); override;
    procedure readstate(const reader; const acount: integer); override;
@@ -970,19 +971,21 @@ procedure tcustomitemlist.setitems(const index: integer;
 begin
  inherited items[index]:= value;
 end;
-
+(*
 function tcustomitemlist.getobjectlinker: tobjectlinker;
 begin
  createobjectlinker(self,{$ifdef FPC}@{$endif}objectevent,
               fobjectlinker);
  result:= fobjectlinker;
 end;
-
-procedure tcustomitemlist.objectevent(const sender: tobject; const event: objecteventty);
+*)
+procedure tcustomitemlist.objectevent(const sender: tobject;
+                                                const event: objecteventty);
 var
  int1: integer;
  po1: plistitem;
 begin
+ inherited;
  if event <> oe_connect then begin
   normalizering;
   po1:= plistitem(fdatapo);
@@ -1165,7 +1168,7 @@ begin
   end;
  end;
 end;
-
+{
 procedure tcustomitemlist.link(const source,dest: iobjectlink; valuepo: pointer = nil;
                     ainterfacetype: pointer = nil; once: boolean = false);
 begin
@@ -1186,7 +1189,7 @@ function tcustomitemlist.getinstance: tobject;
 begin
  result:= self;
 end;
-
+}
 function tcustomitemlist.nodezone(const point: pointty): cellzonety;
 begin
  result:= cz_default;

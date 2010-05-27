@@ -68,7 +68,7 @@ type
  end;
  plistlinkinfoty = ^listlinkinfoty;
 
- tdatalist = class(tnullinterfacedpersistent)
+ tdatalist = class(tlinkedpersistent)
   private
    fbytelength: integer;   //pufferlaenge
    fsortio: boolean;
@@ -808,7 +808,6 @@ type
    procedure setselected(const index: integer; const avalue: longword);
    function getmerged(const index: integer): longword;
    procedure setmerged(const index: integer; const avalue: longword);
-   function getlinewidth(const index: integer): integer;
    function getlinecolor(const index: integer): rowstatenumty;
    procedure setlinecolor(const index: integer; const avalue: rowstatenumty);
    function getlinecolorfix(const index: integer): rowstatenumty;
@@ -820,6 +819,7 @@ type
    function getfoldlevel(const index: integer): byte;
    function getfoldissum(const index: integer): boolean;
    function getheight(const index: integer): integer;
+   function getlinewidth(const index: integer): integer;
    procedure checkinfolevel(const wantedlevel: rowinfolevelty);
    procedure change(const aindex: integer); override;
    procedure initdirty; virtual;

@@ -261,7 +261,32 @@ type
                 read fonclientsetvalue write fonclientsetvalue;
  end;
 
- tifidropdowncol = class(tmsestringdatalist)
+ tifidatasource = class;
+ ififieldnamety = type ansistring;       //type for property editor
+ ifisourcefieldnamety = type ansistring; //type for property editor
+ 
+ iififieldinfo = interface(inullinterface)
+                        ['{28CC1F64-BFD1-44E9-862E-1BD5A1F1D654}']
+  procedure getfieldinfo(const apropname: ififieldnamety; 
+                         var adatasource: tifidatasource;
+                         var atypes: listdatatypesty);
+ end;
+  
+ tifidropdowncol = class(tmsestringdatalist,iififieldinfo)
+  private
+   fdatasource: tifidatasource;
+   fdatafield: ififieldnamety;
+   procedure setdatasource(const avalue: tifidatasource);
+   procedure setdatafield(const avalue: ififieldnamety);
+  protected
+   procedure bindingchanged;
+    //iififieldinfo
+   procedure getfieldinfo(const apropname: ififieldnamety; 
+                         var adatasource: tifidatasource;
+                         var atypes: listdatatypesty);
+  published
+   property datasource: tifidatasource read fdatasource write setdatasource;
+   property datafield: ififieldnamety read fdatafield write setdatafield;
  end;
 
  tifidropdownlistcontroller = class;
@@ -654,7 +679,79 @@ type
    property controller: tgridclientcontroller read getcontroller
                                                          write setcontroller;
  end;
-   
+ 
+ iififieldsource = interface(inullinterface)
+                       ['{EB7DB698-8CE7-42A4-9D46-C6C70A101692}']
+  function getfieldnames(const atypes: listdatatypesty): msestringarty;
+ end;
+
+ iififieldlinksource = interface(inullinterface)
+                       ['{05C4CF92-10B8-40B0-85F4-6885EBF42FF5}']
+  function getfieldnames(const apropname: ifisourcefieldnamety): msestringarty;
+ end;
+  
+ tififield = class(tvirtualpersistent)
+  private
+   ffieldname: ansistring;
+   fdatatype: listdatatypety;
+  public
+  published
+   property fieldname: ansistring read ffieldname write ffieldname;
+   property datatype: listdatatypety read fdatatype write fdatatype;
+ end;
+ ififieldclassty = class of tififield;
+ 
+ tififields = class(tpersistentarrayprop,iififieldsource)
+  protected
+   function getififieldclass: ififieldclassty; virtual;
+  public
+   constructor create;
+    //iififieldsource
+   function getfieldnames(const atypes: listdatatypesty): msestringarty;
+ end;
+
+ tififieldlinks = class;
+ 
+ tififieldlink = class(tififield,iififieldlinksource)
+  private
+   fsourcefieldname: ifisourcefieldnamety;
+  protected
+   fowner: tififieldlinks;
+   function getfieldnames(
+                  const appropname: ifisourcefieldnamety): msestringarty;
+  public
+  published
+   property sourcefieldname: ifisourcefieldnamety read fsourcefieldname 
+                         write fsourcefieldname;
+ end;
+ ififieldlinkclassty = class of tififieldlink;
+ 
+ tififieldlinks = class(tififields)
+  protected
+   function getififieldclass: ififieldlinkclassty; virtual; reintroduce;
+   procedure createitem(const index: integer; var item: tpersistent); override;
+   function getfieldnames(const adatatype: listdatatypety): msestringarty; virtual;
+  public
+ end;
+ 
+ tifidatasource = class(tmsecomponent,iififieldsource)
+  private
+//   ffieldsourceintf: iififieldsource;
+   procedure setfields(const avalue: tififields);
+//   property fieldsurceintf: iififieldsource read ffieldsourceintf 
+//                                              implements iififieldsource;
+         //not working in PFC 2.4
+  protected
+   ffields: tififields;
+    //iififieldsource
+   function getfieldnames(const atypes: listdatatypesty): msestringarty;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+  published
+   property fields: tififields read ffields write setfields;
+ end;
+    
 procedure setifilinkcomp(const alink: iifilink;
                       const alinkcomp: tifilinkcomp; var dest: tifilinkcomp);
 implementation
@@ -2725,6 +2822,118 @@ end;
 function tifienumlinkcomp.getcontrollerclass: ificlientcontrollerclassty;
 begin
  result:= tenumclientcontroller;
+end;
+
+{ tifidropdowncol }
+
+procedure tifidropdowncol.setdatasource(const avalue: tifidatasource);
+begin
+ if avalue <> fdatasource then begin
+  setlinkedvar(avalue,tmsecomponent(fdatasource));
+  bindingchanged;
+ end;
+end;
+
+procedure tifidropdowncol.setdatafield(const avalue: ififieldnamety);
+begin
+ if avalue <> fdatafield then begin
+  fdatafield:= avalue;
+  bindingchanged;
+ end;
+end;
+
+procedure tifidropdowncol.bindingchanged;
+begin
+end;
+
+procedure tifidropdowncol.getfieldinfo(const apropname: ififieldnamety;
+               var adatasource: tifidatasource; var atypes: listdatatypesty);
+begin
+ adatasource:= fdatasource;
+ atypes:= [dl_msestring,dl_ansistring];
+end;
+
+{ tifidatasource }
+
+constructor tifidatasource.create(aowner: tcomponent);
+begin
+ if ffields = nil then begin
+  ffields:= tififields.create;
+ end;
+// ffieldsourceintf:= iififieldsource(ffields);
+ inherited;
+end;
+
+destructor tifidatasource.destroy;
+begin
+ inherited;
+ ffields.free;
+end;
+
+procedure tifidatasource.setfields(const avalue: tififields);
+begin
+ ffields.assign(avalue);
+end;
+
+function tifidatasource.getfieldnames(const atypes: listdatatypesty): msestringarty;
+begin
+ result:= ffields.getfieldnames(atypes);
+end;
+
+{ tififield }
+
+{ tififields }
+
+constructor tififields.create;
+begin
+ inherited create(getififieldclass);
+end;
+
+function tififields.getififieldclass: ififieldclassty;
+begin
+ result:= tififield;
+end;
+
+function tififields.getfieldnames(const atypes: listdatatypesty): msestringarty;
+var
+ int1,int2: integer;
+begin
+ setlength(result,count);
+ int2:= 0;
+ for int1:= 0 to count - 1 do begin
+  with tififield(fitems[int1]) do begin
+   if datatype in atypes then begin
+    result[int2]:= fieldname;
+    inc(int2);
+   end;
+  end;
+ end;
+ setlength(result,int2);
+end;
+
+{ tififieldlink }
+
+function tififieldlink.getfieldnames(const appropname: ifisourcefieldnamety): msestringarty;
+begin
+ result:= fowner.getfieldnames(datatype);
+end;
+
+{ tififieldlinks }
+
+function tififieldlinks.getififieldclass: ififieldlinkclassty;
+begin
+ result:= tififieldlink;
+end;
+
+procedure tififieldlinks.createitem(const index: integer; var item: tpersistent);
+begin
+ item:= getififieldclass.create;
+ tififieldlink(item).fowner:= self;
+end;
+
+function tififieldlinks.getfieldnames(const adatatype: listdatatypety): msestringarty;
+begin
+ result:= nil;
 end;
 
 end.
