@@ -1336,6 +1336,7 @@ const
  blobfcomp = [ftblob,ftgraphic,ftmemo];
  memofcomp = [ftmemo];
  longintfcomp = [ftboolean,ftsmallint,ftinteger,ftword];
+ largeintfcomp = longintfcomp + [ftlargeint];
  stringfcomp = [ftstring,ftfixedchar,ftwidestring,ftfixedwidechar,ftwidememo];
  booleanfcomp = [ftboolean,ftsmallint,ftinteger,ftword];
       

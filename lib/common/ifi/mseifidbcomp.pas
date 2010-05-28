@@ -14,7 +14,7 @@ unit mseifidbcomp;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- mseificomp,msesqlresult,mseclasses,classes,msedatalist,msestrings,db;
+ mseificomp,msesqlresult,mseclasses,classes,msedatalist,msestrings,db,msedb;
 type
  tifisqldatasource = class;
  
@@ -37,6 +37,20 @@ type
  
 implementation
 
+const
+ listtypecompatibledbtypes: array[listdatatypety] of fieldtypesty =
+  (
+//dl_none,dl_integer,  dl_int64,                 dl_currency,
+   [],    longintfcomp,largeintfcomp+[ftlargeint],realfcomp,
+//dl_real,  dl_realint,dl_realsum,
+  realfcomp,realfcomp, realfcomp,
+//dl_datetime,
+  datetimefcomp,
+//dl_ansistring,dl_msestring,dl_doublemsestring,dl_msestringint,
+  stringfcomp,  stringfcomp, stringfcomp,       stringfcomp,
+//dl_complex,dl_rowstate,dl_custom
+   [],        [],         []);       
+
 function matchfielddatatypes(const afielddefs: tfielddefs;
                           const atype: listdatatypety): msestringarty;
 var
@@ -47,9 +61,11 @@ begin
   int2:= 0;
   setlength(result,afielddefs.count);
   for int1:= 0 to afielddefs.count-1 do begin
-   if true then begin
-    result[int2]:= afielddefs[int1].name;
-    inc(int2);
+   with afielddefs[int1] do begin
+    if datatype in listtypecompatibledbtypes[atype] then begin
+     result[int2]:= name;
+     inc(int2);
+    end;
    end;
   end;
   setlength(result,int2);
@@ -58,7 +74,8 @@ end;
 
 { tifisqlfieldlinks }
 
-function tifisqlfieldlinks.getfieldnames(const adatatype: listdatatypety): msestringarty;
+function tifisqlfieldlinks.getfieldnames(
+                               const adatatype: listdatatypety): msestringarty;
 begin
  result:= matchfielddatatypes(fowner.fsource.fielddefs,adatatype);
 end;
