@@ -29,6 +29,8 @@ type
   private
    fsource: tsqlresult;
    procedure setsource(const avalue: tsqlresult);
+  protected
+   procedure open; override;
   public
    constructor create(aowner: tcomponent); override;
   published
@@ -94,6 +96,12 @@ end;
 procedure tifisqldatasource.setsource(const avalue: tsqlresult);
 begin
  setlinkedvar(avalue,tmsecomponent(fsource));
+end;
+
+procedure tifisqldatasource.open;
+begin
+ inherited;
+ afteropen;
 end;
 
 end.

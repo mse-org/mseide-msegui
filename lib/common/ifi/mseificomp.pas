@@ -16,7 +16,7 @@ unit mseificomp;
 interface
 uses
  classes,mseclasses,msegui,mseifiglob,mseglob,typinfo,msestrings,msetypes,
- mseificompglob,msearrayprops,msedatalist,msestat,msestatfile;
+ mseificompglob,msearrayprops,msedatalist,msestat,msestatfile,mseapplication;
 
 type
  tifilinkcomp = class;
@@ -733,30 +733,53 @@ type
    function getfieldnames(const adatatype: listdatatypety): msestringarty; virtual;
   public
  end;
- 
- tifidatasource = class(tmsecomponent,iififieldsource)
+//{$define usedelegation} not working in FPC 2.4
+ tifidatasource = class(tactcomponent,iififieldsource)
   private
-//   ffieldsourceintf: iififieldsource;
+  {$ifdef usedelegation}
+   ffieldsourceintf: iififieldsource;
+  {$endif}
+   fopenafterread: boolean;
+
+   fonbeforeopen: notifyeventty;
+   fonafteropen: notifyeventty;
    procedure setfields(const avalue: tififields);
-//   property fieldsurceintf: iififieldsource read ffieldsourceintf 
-//                                              implements iififieldsource;
+  {$ifdef usedelegation}
+   property fieldsurceintf: iififieldsource read ffieldsourceintf 
+                                              implements iififieldsource;
          //not working in PFC 2.4
+  {$endif}
+   procedure setactive(const avalue: boolean);
   protected
+   factive: boolean;
    ffields: tififields;
+   procedure open; virtual;
+   procedure afteropen;
+   procedure close; virtual;
+   procedure loaded; override;
+   procedure doactivated; override;
+   procedure dodeactivated; override;
+{$ifndef usedelegation}
     //iififieldsource
    function getfieldnames(const atypes: listdatatypesty): msestringarty;
+{$endif}
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   
   published
    property fields: tififields read ffields write setfields;
+   property active: boolean read factive write setactive default false;
+   property activator;
+   property onbeforeopen: notifyeventty read fonbeforeopen write fonbeforeopen;
+   property onafteropen: notifyeventty read fonafteropen write fonafteropen;
  end;
     
 procedure setifilinkcomp(const alink: iifilink;
                       const alinkcomp: tifilinkcomp; var dest: tifilinkcomp);
 implementation
 uses
- sysutils,mseapplication,msereal,msestreaming;
+ sysutils,msereal,msestreaming;
 
 const
  valuevarname = 'value';
@@ -2860,7 +2883,9 @@ begin
  if ffields = nil then begin
   ffields:= tififields.create;
  end;
-// ffieldsourceintf:= iififieldsource(ffields);
+{$ifdef usedelegation}
+ ffieldsourceintf:= iififieldsource(ffields);
+{$endif}
  inherited;
 end;
 
@@ -2874,10 +2899,67 @@ procedure tifidatasource.setfields(const avalue: tififields);
 begin
  ffields.assign(avalue);
 end;
-
+{$ifndef usedelegation}
 function tifidatasource.getfieldnames(const atypes: listdatatypesty): msestringarty;
 begin
  result:= ffields.getfieldnames(atypes);
+end;
+{$endif}
+
+procedure tifidatasource.open;
+begin
+ if canevent(tmethod(fonbeforeopen)) then begin
+  fonbeforeopen(self);
+ end;
+end;
+
+procedure tifidatasource.afteropen;
+begin
+ factive:= true;
+ if canevent(tmethod(fonafteropen)) then begin
+  fonafteropen(self);
+ end;
+end;
+
+procedure tifidatasource.close;
+begin
+ factive:= false;
+end;
+
+procedure tifidatasource.setactive(const avalue: boolean);
+begin
+ if csreading in componentstate then begin
+  fopenafterread:= avalue;
+ end
+ else begin
+  if factive <> avalue then begin
+   if avalue then begin
+    open;
+   end
+   else begin
+    fopenafterread:= false;
+    close;
+   end;
+  end;
+ end;
+end;
+
+procedure tifidatasource.loaded;
+begin
+ inherited;
+ if fopenafterread then begin
+  active:= true;
+ end;
+end;
+
+procedure tifidatasource.doactivated;
+begin
+ active:= true;
+end;
+
+procedure tifidatasource.dodeactivated;
+begin
+ active:= false;
 end;
 
 { tififield }

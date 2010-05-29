@@ -118,12 +118,13 @@ var
  types: listdatatypesty;
 begin
  result:= nil;
- if getcorbainterface(fprops[0].instance,typeinfo(iififieldinfo),intf1) then begin
+ if getcorbainterface(fprops[0].instance,typeinfo(iififieldinfo),
+                                                              intf1) then begin
   dataso:= nil;
   types:= [];
   intf1.getfieldinfo(fname,dataso,types);
   if (dataso <> nil) and getcorbainterface(dataso,typeinfo(iififieldsource),
-           intf2) then begin
+                                                              intf2) then begin
    result:= intf2.getfieldnames(types);
   end;
  end;

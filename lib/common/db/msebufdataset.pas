@@ -17,13 +17,17 @@
  **********************************************************************}
  
 unit msebufdataset;
- 
-{$ifdef VER2_1_5} {$define mse_FPC_2_2} {$endif}
-{$ifdef VER2_2} {$define mse_FPC_2_2} {$endif}
-{$ifdef VER2_3} {$define mse_FPC_2_2} {$endif}
-{$ifdef VER2_4} {$define mse_FPC_2_2} {$endif}
-{$ifdef VER2_5} {$define mse_FPC_2_2} {$endif}
-{$ifdef FPC}{$mode objfpc}{$h+}{$GOTO ON}{$interfaces corba}{$endif}
+{$ifdef FPC}
+            //{$if xxx} makes compiling with delphi7 impossible
+ {$ifdef VER2_1_5} {$define mse_FPC_2_2} {$endif}
+ {$ifdef VER2_2} {$define mse_FPC_2_2} {$endif}
+ {$ifdef VER2_3} {$define mse_FPC_2_2} {$endif}
+ {$ifdef VER2_4} {$define mse_FPC_2_2} {$endif}
+ {$ifdef VER2_5} {$define mse_FPC_2_2} {$endif}
+ {$ifdef VER2_6} {$define mse_FPC_2_2} {$endif}
+ {$ifdef VER2_7} {$define mse_FPC_2_2} {$endif}
+ {$mode objfpc}{$h+}{$GOTO ON}{$interfaces corba}
+{$endif}
 
 interface 
 

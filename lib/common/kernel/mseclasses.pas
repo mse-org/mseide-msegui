@@ -24,7 +24,14 @@ uses
 { $define debugobjectlink}
 
 {$ifdef FPC}
- 
+            //{$if xxx} makes compiling with delphi7 impossible
+ {$ifdef VER2_4} {$define mse_FPC_2_4} {$endif}
+ {$ifdef VER2_5} {$define mse_FPC_2_4} {$endif}
+ {$ifdef VER2_6} {$define mse_FPC_2_4} {$endif}
+ {$ifdef VER2_7} {$define mse_FPC_2_4} {$endif}
+ {$ifdef mse_FPC_2_4}
+  {$define hascorbagetinterface}
+ {$endif}
 const
  s_ok = 0;
 {$endif}
@@ -3180,6 +3187,27 @@ end;
 
 {$endif FPC}
 
+{$ifdef hascorbagetinterface}
+function getcorbainterface(const aobject: tobject; const aintf: ptypeinfo;
+                                   out obj) : boolean;
+var
+ typedata1: ptypedata;
+ po1: pshortstring;
+begin
+ typedata1:= gettypedata(aintf);
+ po1:= pshortstring(
+        ptruint(@typedata1^.rawintfunit)+length(typedata1^.rawintfunit)+1);
+ if po1^[0] <> #0 then begin
+  result:= aobject.getinterfacebystr(po1^,obj); //works in FPC 2.4+
+ end
+ else begin
+  pointer(obj):= nil;
+  result:= false;
+ end;
+end;
+
+{$else}
+
 function getcorbainterface(const aobject: tobject; const aintf: ptypeinfo;
                                    out obj) : boolean;
 var
@@ -3214,6 +3242,7 @@ begin
   result:= false;
  end;
 end;
+{$endif} //hascorbagetinterface
 
 //function tmsecomponent.getcorbainterface(const aintf: tguid; out obj) : boolean;
 function tmsecomponent.getcorbainterface(const aintf: ptypeinfo; out obj) : boolean;
