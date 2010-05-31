@@ -115,7 +115,7 @@ type
    function getdatetimeval(const alink: iificlient; const aname: string;
                                  var avalue: tdatetime): boolean;
                                     //true if found
-  //iifiserver
+    //iifiserver
    procedure execute(const sender: iificlient); virtual;
    procedure valuechanged(const sender: iificlient); virtual;
    procedure statechanged(const sender: iificlient;
@@ -271,16 +271,26 @@ type
                          var adatasource: tifidatasource;
                          var atypes: listdatatypesty);
  end;
+
+ iifidatasourceclient = interface(iobjectlink)
+  function getobjectlinker: tobjectlinker;
+  procedure bindingchanged;
+  function ifigriddata: tdatalist;
+  function ififieldname: string;
+ end;
   
- tifidropdowncol = class(tmsestringdatalist,iififieldinfo)
+ tifidropdowncol = class(tmsestringdatalist,iififieldinfo,iifidatasourceclient)
   private
    fdatasource: tifidatasource;
    fdatafield: ififieldnamety;
    procedure setdatasource(const avalue: tifidatasource);
    procedure setdatafield(const avalue: ififieldnamety);
   protected
+    //iifidatasourceclient
    procedure bindingchanged;
-    //iififieldinfo
+   function ifigriddata: tdatalist;
+   function ififieldname: string;
+     //iififieldinfo
    procedure getfieldinfo(const apropname: ififieldnamety; 
                          var adatasource: tifidatasource;
                          var atypes: listdatatypesty);
@@ -706,6 +716,7 @@ type
    function getififieldclass: ififieldclassty; virtual;
   public
    constructor create;
+//   function destdatalists: datalistarty;
     //iififieldsource
    function getfieldnames(const atypes: listdatatypesty): msestringarty;
  end;
@@ -732,11 +743,14 @@ type
    procedure createitem(const index: integer; var item: tpersistent); override;
    function getfieldnames(const adatatype: listdatatypety): msestringarty; virtual;
   public
- end;
- 
+   function sourcefieldnames: stringarty;
+end;
+
  iifidataconnection = interface(inullinterface)
                              ['{E7E71EEA-C3F7-4677-A3C0-9E27D02717F9}']
-  procedure fetchdata(const acols: array of tdatalist);
+  procedure fetchdata(const acolnames: array of string; 
+                                                  acols: array of tdatalist);
+  function getfieldnames(const adatatype: listdatatypety): msestringarty;
  end;
  
 //{$define usedelegation} not working in FPC 2.4
@@ -749,25 +763,27 @@ type
 
    fonbeforeopen: notifyeventty;
    fonafteropen: notifyeventty;
-   fconnection: tmsecomponent;
+   findex: integer;
+   fnamear: stringarty;
+   flistar: datalistarty;
    procedure setfields(const avalue: tififields);
   {$ifdef usedelegation}
    property fieldsurceintf: iififieldsource read ffieldsourceintf 
                                               implements iififieldsource;
-         //not working in PFC 2.4
+         //not working in FPC 2.4
   {$endif}
    procedure setactive(const avalue: boolean);
-   procedure setconnection(const avalue: tmsecomponent);
+   procedure getbindinginfo(const alink: pointer); 
   protected
    factive: boolean;
    ffields: tififields;
-   fconnectionintf: iifidataconnection;
    procedure open; virtual;
    procedure afteropen;
    procedure close; virtual;
    procedure loaded; override;
    procedure doactivated; override;
    procedure dodeactivated; override;
+   function destdatalists: datalistarty;
 {$ifndef usedelegation}
     //iififieldsource
    function getfieldnames(const atypes: listdatatypesty): msestringarty;
@@ -775,18 +791,46 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   
   published
    property fields: tififields read ffields write setfields;
    property active: boolean read factive write setactive default false;
    property activator;
-   property connection: tmsecomponent read fconnection write setconnection;
    property onbeforeopen: notifyeventty read fonbeforeopen write fonbeforeopen;
    property onafteropen: notifyeventty read fonafteropen write fonafteropen;
+ end;
+
+ tconnectedifidatasource = class;
+ tificonnectedfields = class(tififieldlinks)
+  protected
+   fowner: tconnectedifidatasource;
+   function getfieldnames(const adatatype: listdatatypety): msestringarty; override;
+  public
+   constructor create(const aowner: tconnectedifidatasource);
+ end;
+  
+ tconnectedifidatasource = class(tifidatasource)
+  private
+   fconnection: tmsecomponent;
+   procedure setconnection(const avalue: tmsecomponent);
+   function getfields: tificonnectedfields;
+   procedure setfields(const avalue: tificonnectedfields);
+  protected
+   fconnectionintf: iifidataconnection;
+   function getfieldnames(const adatatype: listdatatypety): msestringarty;
+   procedure open; override;
+   procedure checkconnection;
+  public
+   constructor create(aowner: tcomponent); override;
+  published
+   property connection: tmsecomponent read fconnection write setconnection;
+   property fields: tificonnectedfields read getfields write setfields;
  end;
  
 procedure setifilinkcomp(const alink: iifilink;
                       const alinkcomp: tifilinkcomp; var dest: tifilinkcomp);
+procedure setifidatasource(const aintf: iifidatasourceclient;
+           const source: tifidatasource; var dest: tifidatasource);
+
 implementation
 uses
  sysutils,msereal,msestreaming;
@@ -817,6 +861,13 @@ begin
   alink.setifiserverintf(iifiserver(dest.fcontroller));
   dest.fcontroller.change(alink);
  end;
+end;
+
+procedure setifidatasource(const aintf: iifidatasourceclient;
+           const source: tifidatasource; var dest: tifidatasource);
+begin
+ aintf.getobjectlinker.setlinkedvar(aintf,source,dest,source);
+ aintf.bindingchanged;
 end;
 
 { tcustomificlientcontroller}
@@ -1428,6 +1479,7 @@ begin
  datalist:= iifidatalink(alink).ifigriddata;
  if datalist <> nil then begin
   pdatalist(fitempo)^:= datalist;
+  handled:= true;
  end;
 end;
 
@@ -2858,12 +2910,11 @@ begin
 end;
 
 { tifidropdowncol }
-
+ 
 procedure tifidropdowncol.setdatasource(const avalue: tifidatasource);
 begin
  if avalue <> fdatasource then begin
-  setlinkedvar(avalue,tmsecomponent(fdatasource));
-  bindingchanged;
+  setifidatasource(iifidatasourceclient(self),avalue,fdatasource);
  end;
 end;
 
@@ -2884,6 +2935,16 @@ procedure tifidropdowncol.getfieldinfo(const apropname: ififieldnamety;
 begin
  adatasource:= fdatasource;
  atypes:= [dl_msestring,dl_ansistring];
+end;
+
+function tifidropdowncol.ifigriddata: tdatalist;
+begin
+ result:= self;
+end;
+
+function tifidropdowncol.ififieldname: string;
+begin
+ result:= fdatafield;
 end;
 
 { tifidatasource }
@@ -2981,12 +3042,42 @@ begin
  active:= false;
 end;
 
-procedure tifidatasource.setconnection(const avalue: tmsecomponent);
+procedure tifidatasource.getbindinginfo(const alink: pointer);
 begin
- if avalue <> nil then begin
-  checkcorbainterface(self,avalue,typeinfo(iifidataconnection),fconnectionintf);
+ with iifidatasourceclient(alink) do begin
+  fnamear[findex]:= ififieldname;
+  flistar[findex]:= ifigriddata;
  end;
- setlinkedvar(avalue,fconnection);
+ inc(findex);
+end;
+
+function tifidatasource.destdatalists: datalistarty;
+var
+ int1,int2: integer;
+begin
+ with getobjectlinker do begin
+  setlength(fnamear,count);
+  setlength(flistar,count);
+  findex:= 0;
+  forall(@getbindinginfo,self);
+ end;
+ with ffields do begin 
+  result:= nil;
+  setlength(result,count);
+  for int1:= 0 to high(result) do begin
+   for int2:= 0 to high(fitems) do begin
+    if (fnamear[int1] <> '') and (fnamear[int1] = 
+                              tififield(fitems[int2]).ffieldname) then begin
+     result[int2]:= flistar[int1];
+     break;
+    end;
+   end;
+  end;
+ end;
+ fnamear:= nil;
+ flistar:= nil;
+// for int1:= 0 to high(result) do begin
+// end;
 end;
 
 { tififield }
@@ -3043,6 +3134,83 @@ end;
 function tififieldlinks.getfieldnames(const adatatype: listdatatypety): msestringarty;
 begin
  result:= nil;
+end;
+
+function tififieldlinks.sourcefieldnames: stringarty;
+var
+ int1: integer;
+begin
+ setlength(result,count);
+ for int1:= 0 to high(result) do begin
+  result[int1]:= tififieldlink(fitems[int1]).sourcefieldname;
+ end;
+end;
+
+{ tificonnectedfields }
+
+constructor tificonnectedfields.create(const aowner: tconnectedifidatasource);
+begin
+ inherited create;
+ fowner:= aowner;
+end;
+
+function tificonnectedfields.getfieldnames(const adatatype: listdatatypety): msestringarty;
+begin
+ result:= fowner.getfieldnames(adatatype);
+end;
+
+{ tconnectedifidatasource }
+
+constructor tconnectedifidatasource.create(aowner: tcomponent);
+begin
+ if ffields = nil then begin
+  ffields:= tificonnectedfields.create(self);
+ end;
+ inherited;
+end;
+
+procedure tconnectedifidatasource.setconnection(const avalue: tmsecomponent);
+begin
+ if avalue <> nil then begin
+  checkcorbainterface(self,avalue,typeinfo(iifidataconnection),fconnectionintf);
+ end;
+ setlinkedvar(avalue,fconnection);
+end;
+
+function tconnectedifidatasource.getfields: tificonnectedfields;
+begin
+ result:= tificonnectedfields(inherited fields);
+end;
+
+procedure tconnectedifidatasource.setfields(const avalue: tificonnectedfields);
+begin
+ inherited;
+end;
+
+function tconnectedifidatasource.getfieldnames(const adatatype: listdatatypety): msestringarty;
+begin
+ if fconnectionintf <> nil then begin
+  result:= fconnectionintf.getfieldnames(adatatype);
+ end;
+end;
+
+procedure tconnectedifidatasource.open;
+var
+ ar1: stringarty;
+ ar2: datalistarty;
+begin
+ inherited;
+ checkconnection;
+ ar2:= destdatalists;
+ fconnectionintf.fetchdata(tificonnectedfields(ffields).sourcefieldnames,ar2);
+ afteropen;
+end;
+
+procedure tconnectedifidatasource.checkconnection;
+begin
+ if fconnectionintf = nil then begin
+  raise exception.create(name+': No connection.');
+ end;
 end;
 
 end.

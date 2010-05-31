@@ -200,9 +200,11 @@ type
   public
    constructor create(const agetname: getnamefuncty);
    function findcol(const aname: ansistring): tdbcol;   
+   function findcolindex(const aname: ansistring): integer;
    function colbyname(const aname: ansistring): tdbcol;
    function colsbyname(const anames: array of ansistring): dbcolarty;
               //invalid after close!
+   function colsindexbyname(const anames: array of ansistring): integerarty;
    property items[const index: integer]: tdbcol read getitems; default;
  end;
 
@@ -271,6 +273,7 @@ type
    function getsqltransactionwrite: tsqltransaction;
    procedure setsqltransactionwrite(const avalue: tsqltransaction);
    procedure refreshtransaction;
+   procedure internalloaddatalists(const datalists: array of tdatalist);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -953,6 +956,23 @@ begin
  result:= nil;
 end;
 
+function tdbcols.findcolindex(const aname: ansistring): integer;
+var
+ str1: ansistring;
+ int1: integer;
+begin
+ result:= -1;
+ str1:= uppercase(aname);
+ for int1:= 0 to high(fitems) do begin
+  with tdbcol(fitems[int1]) do begin
+   if fuppername = str1 then begin
+    result:= int1;   
+    exit;
+   end;
+  end;
+ end;
+end;
+
 function tdbcols.colbyname(const aname: ansistring): tdbcol;
 begin
  result:= findcol(aname);
@@ -968,6 +988,19 @@ begin
  setlength(result,high(anames)+1);
  for int1:= 0 to high(result) do begin
   result[int1]:= colbyname(anames[int1]);
+ end;
+end;
+
+function tdbcols.colsindexbyname(const anames: array of ansistring): integerarty;
+var
+ int1: integer;
+begin
+ setlength(result,high(anames)+1);
+ for int1:= 0 to high(result) do begin
+  result[int1]:= FINDCOLINDEX(anames[int1]);
+  if result[int1] < 0 then begin
+   raise edatabaseerror.create(fgetname()+': col "'+anames[int1]+'" not found.');
+  end;
  end;
 end;
 
@@ -1421,14 +1454,14 @@ begin
  end;
 end;
 
-procedure tsqlresult.loaddatalists(const datalists: array of tdatalist);
-            //todo: optimize
+procedure tsqlresult.internalloaddatalists(const datalists: array of tdatalist);
+            //todo: optimize, use rowsreturned and internal list grow
 var
  int1,int2,int3: integer;
  proc1: datagetprocarty;
  col1: dbcolarty;
 begin
- refresh;
+// refresh;
  int2:= cols.count;
  if int2 > length(datalists) then begin
   int2:= length(datalists);
@@ -1436,37 +1469,41 @@ begin
  setlength(proc1,int2);
  dec(int2);
  for int1:= 0 to int2 do begin
-  case datalists[int1].datatype of
-   dl_integer: begin
-    proc1[int1]:= @getintegerdata;
-   end;
-   dl_int64: begin
-    proc1[int1]:= @getint64data;
-   end;
-   dl_currency: begin
-    proc1[int1]:= @getcurrencydata;
-   end;
-   dl_real: begin
-    proc1[int1]:= @getrealdata;
-   end;
-   dl_datetime: begin
-    proc1[int1]:= @getdatetimedata;
-   end;
-   dl_ansistring: begin
-    proc1[int1]:= @getansistringdata;
-   end;
-   dl_msestring: begin
-    proc1[int1]:= @getmsestringdata;
-   end;
-   else begin
-    raise exception.create('tsqlresult.loaddatalists(): Invalid datalist.');
+  if datalists[int1] <> nil then begin
+   case datalists[int1].datatype of
+    dl_integer: begin
+     proc1[int1]:= @getintegerdata;
+    end;
+    dl_int64: begin
+     proc1[int1]:= @getint64data;
+    end;
+    dl_currency: begin
+     proc1[int1]:= @getcurrencydata;
+    end;
+    dl_real: begin
+     proc1[int1]:= @getrealdata;
+    end;
+    dl_datetime: begin
+     proc1[int1]:= @getdatetimedata;
+    end;
+    dl_ansistring: begin
+     proc1[int1]:= @getansistringdata;
+    end;
+    dl_msestring: begin
+     proc1[int1]:= @getmsestringdata;
+    end;
+    else begin
+     raise exception.create('tsqlresult.loaddatalists(): Invalid datalist.');
+    end;
    end;
   end;
  end;
  for int1:= 0 to int2 do begin
-  with datalists[int1] do begin
-   beginupdate;
-   count:= 0;
+  if datalists[int1] <> nil then begin
+   with datalists[int1] do begin
+    beginupdate;
+    count:= 0;
+   end;
   end;
  end;
  try
@@ -1474,9 +1511,11 @@ begin
   col1:= dbcolarty(fcols.fitems);
   while not eof do begin
    for int1:= 0 to int2 do begin
-    with datalists[int1] do begin
-     count:= int3 + 1;
-     proc1[int1](col1[int1],getitempo(int3));
+    if datalists[int1] <> nil then begin
+     with datalists[int1] do begin
+      count:= int3 + 1;
+      proc1[int1](col1[int1],getitempo(int3));
+     end;
     end;
    end;
    inc(int3);
@@ -1484,15 +1523,23 @@ begin
   end;
  finally
   for int1:= 0 to high(datalists) do begin
-   with datalists[int1] do begin
-    try
-     endupdate;
-    except
-     application.handleexception;
+   if datalists[int1] <> nil then begin
+    with datalists[int1] do begin
+     try
+      endupdate;
+     except
+      application.handleexception;
+     end;
     end;
    end;
   end;
  end;
+end;
+
+procedure tsqlresult.loaddatalists(const datalists: array of tdatalist);
+begin
+ refresh;
+ internalloaddatalists(datalists);
 end;
 
 function tsqlresult.rowsreturned: integer;

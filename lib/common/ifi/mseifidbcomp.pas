@@ -14,10 +14,11 @@ unit mseifidbcomp;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- mseificomp,msesqlresult,mseclasses,classes,msedatalist,msestrings,db,msedb;
+ mseificomp,msesqlresult,mseclasses,classes,msedatalist,msestrings,db,msedb,
+ msetypes;
 type
+{ 
  tifisqldatasource = class;
- 
  tifisqlfieldlinks = class(tififieldlinks)
   protected
    fowner: tifisqldatasource;
@@ -38,11 +39,13 @@ type
   published
    property source: tsqlresult read fsource write setsource;
  end;
-
+}
  tifisqlresult = class(tsqlresult,iifidataconnection)
   protected
     //iifidataconnection
-   procedure iifidataconnection.fetchdata = loaddatalists;
+   procedure fetchdata(const acolnames: array of string; 
+                                                  acols: array of tdatalist);
+   function getfieldnames(const adatatype: listdatatypety): msestringarty;
   public
  end;
   
@@ -82,7 +85,7 @@ begin
   setlength(result,int2);
  end;
 end;
-
+(*
 { tifisqlfieldlinks }
 
 function tifisqlfieldlinks.getfieldnames(
@@ -128,6 +131,32 @@ procedure tifisqldatasource.refresh;
 begin
  inherited close;
  open;
+end;
+*)
+{ tifisqlresult }
+
+function tifisqlresult.getfieldnames(const adatatype: listdatatypety): msestringarty;
+begin
+ result:= matchfielddatatypes(fielddefs,adatatype);
+end;
+
+procedure tifisqlresult.fetchdata(const acolnames: array of string;
+               acols: array of tdatalist);
+var
+ ar1: datalistarty;
+ ar2: integerarty;
+ int1: integer;
+begin
+ refresh;
+ ar2:= cols.colsindexbyname(acolnames);
+ if high(ar2) > high(acols) then begin
+  setlength(ar2,length(acols));
+ end;
+ setlength(ar1,cols.count);
+ for int1:= 0 to high(ar2) do begin
+  ar1[ar2[int1]]:= acols[int1];
+ end;
+ internalloaddatalists(acols);
 end;
 
 end.

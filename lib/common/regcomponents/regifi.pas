@@ -53,7 +53,7 @@ begin
        tifireallinkcomp,tifidatetimelinkcomp,tifistringlinkcomp,
        tifidropdownlistlinkcomp,tifienumlinkcomp,
        tifigridlinkcomp,
-       tifidatasource,tifisqldatasource,tifisqlresult]); 
+       tconnectedifidatasource,{tifisqldatasource,}tifisqlresult]); 
  registercomponenttabhints(['Ifi'],
    ['MSEifi Components (experimental).'+lineend+
    'Compile MSEide with -dmse_with_ifirem '+
