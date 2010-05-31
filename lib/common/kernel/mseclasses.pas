@@ -685,8 +685,14 @@ procedure unlockfindglobalcomponent; //switch on findglobalcomponent
 function findglobalcomponentlocked: boolean;
 
 function getenumnames(const atypeinfo: ptypeinfo): msestringarty;
+
+procedure nosupportfor(const sender: tcomponent; const avalue: tcomponent;
+                          const ainterface: ptypeinfo);
 function getcorbainterface(const aobject: tobject; const aintf: ptypeinfo;
                                                   out obj) : boolean;
+procedure checkcorbainterface(const sender: tcomponent;
+                           const avalue: tcomponent;
+                           const ainterface: ptypeinfo; out obj);
 function isinterface(const actual: ptypeinfo; const wanted: ptypeinfo): boolean;
 
 function checkcanevent(const acomponent: tcomponent; const event: tmethod): boolean;
@@ -3243,6 +3249,22 @@ begin
  end;
 end;
 {$endif} //hascorbagetinterface
+
+procedure nosupportfor(const sender: tcomponent; const avalue: tcomponent;
+                          const ainterface: ptypeinfo);
+begin
+ raise exception.create(sender.name+': '+avalue.name+' does not provide '+
+                             ainterface^.name+'.');
+end;
+
+procedure checkcorbainterface(const sender: tcomponent;
+                           const avalue: tcomponent;
+                           const ainterface: ptypeinfo; out obj);
+begin
+ if not getcorbainterface(avalue,ainterface,obj) then begin
+  nosupportfor(sender,avalue,ainterface);
+ end;  
+end;
 
 //function tmsecomponent.getcorbainterface(const aintf: tguid; out obj) : boolean;
 function tmsecomponent.getcorbainterface(const aintf: ptypeinfo; out obj) : boolean;

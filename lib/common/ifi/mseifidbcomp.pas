@@ -31,12 +31,21 @@ type
    procedure setsource(const avalue: tsqlresult);
   protected
    procedure open; override;
+   procedure close; override;
   public
    constructor create(aowner: tcomponent); override;
+   procedure refresh;
   published
    property source: tsqlresult read fsource write setsource;
  end;
- 
+
+ tifisqlresult = class(tsqlresult,iifidataconnection)
+  protected
+    //iifidataconnection
+   procedure iifidataconnection.fetchdata = loaddatalists;
+  public
+ end;
+  
 implementation
 
 const
@@ -101,7 +110,24 @@ end;
 procedure tifisqldatasource.open;
 begin
  inherited;
+ if fsource <> nil then begin
+  fsource.refresh;
+ end;
  afteropen;
+end;
+
+procedure tifisqldatasource.close;
+begin
+ if fsource <> nil then begin
+  fsource.active:= false;
+ end;
+ inherited;
+end;
+
+procedure tifisqldatasource.refresh;
+begin
+ inherited close;
+ open;
 end;
 
 end.

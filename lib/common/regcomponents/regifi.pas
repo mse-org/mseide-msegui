@@ -4,14 +4,16 @@ interface
 implementation
 uses
  classes,mseificomp,msedesignintf,regifi_bmp,msepropertyeditors,mseclasses,
- msecomponenteditors,mseificomponenteditors,msestrings,msedatalist,mseifidbcomp; 
+ msecomponenteditors,mseificomponenteditors,msestrings,msedatalist,mseifidbcomp,
+ typinfo; 
     
 type
+{
  tifiwidgeteditor = class(tcomponentpropertyeditor)
   protected
    function filtercomponent(const acomponent: tcomponent): boolean; override;
  end;
- 
+}
  tifidropdowncolpropertyeditor = class(tarraypropertyeditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
@@ -38,7 +40,12 @@ type
    function getdefaultstate: propertystatesty; override;
    function getvalues: msestringarty; override;
  end;
-  
+
+ tifidataconnectionpropertyeditor = class(tcomponentinterfacepropertyeditor)
+  protected
+   function getintfinfo: ptypeinfo; override;
+ end;
+ 
 procedure register;
 begin
  registercomponents('Ifi',[tifiactionlinkcomp,tifiintegerlinkcomp,
@@ -46,7 +53,7 @@ begin
        tifireallinkcomp,tifidatetimelinkcomp,tifistringlinkcomp,
        tifidropdownlistlinkcomp,tifienumlinkcomp,
        tifigridlinkcomp,
-       tifidatasource,tifisqldatasource]); 
+       tifidatasource,tifisqldatasource,tifisqlresult]); 
  registercomponenttabhints(['Ifi'],
    ['MSEifi Components (experimental).'+lineend+
    'Compile MSEide with -dmse_with_ifirem '+
@@ -63,10 +70,12 @@ begin
                                           tififieldnamepropertyeditor);
  registerpropertyeditor(typeinfo(ifisourcefieldnamety),nil,'',
                                           tifisourcefieldnamepropertyeditor);
+ registerpropertyeditor(typeinfo(tmsecomponent),tifidatasource,'connection',
+                                 tifidataconnectionpropertyeditor);
 end;
 
 { tifiwidgeteditor }
-
+{
 function tifiwidgeteditor.filtercomponent(
                                     const acomponent: tcomponent): boolean;
 var
@@ -75,7 +84,7 @@ begin
 // result:= tcustomifivaluewidgetcontroller(
 //                    fprops[0].instance).canconnect(acomponent);
 end;
-
+}
 { tifidropdowncolpropertyeditor }
 
 function tifidropdowncolpropertyeditor.geteditorclass: propertyeditorclassty;
@@ -146,6 +155,13 @@ begin
                                 typeinfo(iififieldlinksource),intf1) then begin
   result:= intf1.getfieldnames(fname);
  end;
+end;
+
+{ tifidataconnectionpropertyeditor }
+
+function tifidataconnectionpropertyeditor.getintfinfo: ptypeinfo;
+begin
+ result:= typeinfo(iifidataconnection);
 end;
 
 initialization

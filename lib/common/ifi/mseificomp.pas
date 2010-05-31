@@ -733,6 +733,12 @@ type
    function getfieldnames(const adatatype: listdatatypety): msestringarty; virtual;
   public
  end;
+ 
+ iifidataconnection = interface(inullinterface)
+                             ['{E7E71EEA-C3F7-4677-A3C0-9E27D02717F9}']
+  procedure fetchdata(const acols: array of tdatalist);
+ end;
+ 
 //{$define usedelegation} not working in FPC 2.4
  tifidatasource = class(tactcomponent,iififieldsource)
   private
@@ -743,6 +749,7 @@ type
 
    fonbeforeopen: notifyeventty;
    fonafteropen: notifyeventty;
+   fconnection: tmsecomponent;
    procedure setfields(const avalue: tififields);
   {$ifdef usedelegation}
    property fieldsurceintf: iififieldsource read ffieldsourceintf 
@@ -750,9 +757,11 @@ type
          //not working in PFC 2.4
   {$endif}
    procedure setactive(const avalue: boolean);
+   procedure setconnection(const avalue: tmsecomponent);
   protected
    factive: boolean;
    ffields: tififields;
+   fconnectionintf: iifidataconnection;
    procedure open; virtual;
    procedure afteropen;
    procedure close; virtual;
@@ -771,10 +780,11 @@ type
    property fields: tififields read ffields write setfields;
    property active: boolean read factive write setactive default false;
    property activator;
+   property connection: tmsecomponent read fconnection write setconnection;
    property onbeforeopen: notifyeventty read fonbeforeopen write fonbeforeopen;
    property onafteropen: notifyeventty read fonafteropen write fonafteropen;
  end;
-    
+ 
 procedure setifilinkcomp(const alink: iifilink;
                       const alinkcomp: tifilinkcomp; var dest: tifilinkcomp);
 implementation
@@ -2948,7 +2958,16 @@ procedure tifidatasource.loaded;
 begin
  inherited;
  if fopenafterread then begin
-  active:= true;
+  try
+   active:= true;
+  except
+   if csdesigning in componentstate then begin
+    application.handleexception;
+   end
+   else begin
+    raise;
+   end;
+  end;
  end;
 end;
 
@@ -2960,6 +2979,14 @@ end;
 procedure tifidatasource.dodeactivated;
 begin
  active:= false;
+end;
+
+procedure tifidatasource.setconnection(const avalue: tmsecomponent);
+begin
+ if avalue <> nil then begin
+  checkcorbainterface(self,avalue,typeinfo(iifidataconnection),fconnectionintf);
+ end;
+ setlinkedvar(avalue,fconnection);
 end;
 
 { tififield }

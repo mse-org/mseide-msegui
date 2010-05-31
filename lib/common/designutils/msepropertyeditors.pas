@@ -374,6 +374,15 @@ type
    function getvalues: msestringarty; override;
  end;
 
+ tcomponentinterfacepropertyeditor = class(tcomponentpropertyeditor)
+  private
+   fintfinfo: ptypeinfo;
+  protected
+   procedure updatedefaultvalue; override;
+   function filtercomponent(const acomponent: tcomponent): boolean; override;
+   function getintfinfo: ptypeinfo; virtual; abstract;
+ end;
+ 
  tsisterwidgetpropertyeditor = class(tcomponentpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
@@ -5115,6 +5124,21 @@ end;
 function trefreshbooleanpropertyeditor.getdefaultstate: propertystatesty;
 begin
  result:= inherited getdefaultstate + [ps_refresh];
+end;
+
+{ tcomponentinterfacepropertyeditor }
+
+function tcomponentinterfacepropertyeditor.filtercomponent(
+                                      const acomponent: tcomponent): boolean;
+var
+ po1: pointer;
+begin
+ result:= getcorbainterface(acomponent,fintfinfo,po1);
+end;
+
+procedure tcomponentinterfacepropertyeditor.updatedefaultvalue;
+begin
+ fintfinfo:= getintfinfo;
 end;
 
 initialization
