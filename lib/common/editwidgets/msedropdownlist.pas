@@ -467,7 +467,7 @@ begin
  with tdropdowncol(item) do begin
   onitemchange:= {$ifdef FPC}@{$endif}itemchanged;
   if fnostreaming then begin
-   include(finternaloptions,ilo_nostreaming);
+   include(fstate,dls_nostreaming);
   end;
 //  if index = 0 then begin
 //   foptions:= foptions + [co_fill];
@@ -483,12 +483,12 @@ begin
   fnostreaming:= avalue;
   if avalue then begin
    for int1:= 0 to count - 1 do begin
-    include(tdropdowncol(items[int1]).finternaloptions,ilo_nostreaming);
+    include(tdropdowncol(items[int1]).fstate,dls_nostreaming);
    end;
   end
   else begin
    for int1:= 0 to count - 1 do begin
-    exclude(tdropdowncol(items[int1]).finternaloptions,ilo_nostreaming);
+    exclude(tdropdowncol(items[int1]).fstate,dls_nostreaming);
    end;
   end;
  end;

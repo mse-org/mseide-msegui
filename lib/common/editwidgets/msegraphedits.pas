@@ -110,6 +110,7 @@ type
    function getifilinkkind: ptypeinfo;
    procedure setifilink(const avalue: tifilinkcomp);
    function ifigriddata: tdatalist;
+   procedure updateifigriddata(const alist: tdatalist);
 {$endif}
    procedure setcolorglyph(const Value: colorty);
    procedure setstatfile(const Value: tstatfile);
@@ -1839,6 +1840,14 @@ begin
   result:= fgridintf.getcol.datalist;
  end;
 end;
+
+procedure tgraphdataedit.updateifigriddata(const alist: tdatalist);
+begin
+ if fgridintf <> nil then begin
+  fgridintf.updateifigriddata(alist);
+ end;
+end;
+
 {$endif}
 
 { ttogglegraphdataedit}

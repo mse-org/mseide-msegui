@@ -366,7 +366,7 @@ constructor tgridrichstringdatalist.create(owner: twidgetcol);
 begin
  fowner:= owner;
  inherited create;
- include(finternaloptions,ilo_nostreaming);
+ include(fstate,dls_nostreaming);
 end;
 
 function tgridrichstringdatalist.getdefault: pointer;

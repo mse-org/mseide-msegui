@@ -234,8 +234,8 @@ type
   procedure setselectstart(const selectstartpos: gridcoordty);
  end;
 
- undoliststatety = (uls_forcenew);
- undoliststatesty = set of undoliststatety;
+// undoliststatety = (uls_forcenew);
+// undoliststatesty = set of undoliststatety;
 
  ttextundolist = class(tdynamicdatalist)
   private
@@ -245,7 +245,7 @@ type
    flinked: integer;
    fmaxsize: integer;
    fbuffersize: integer;
-   fstate: undoliststatesty;
+//   fstate: undoliststatesty;
    function getitems(const index: integer): pundoinfoty;
    function checkrecord(atype: undotypety; const astartpos,aendpos: gridcoordty;
               selected: boolean; backwards: boolean; alink: boolean;
@@ -1978,7 +1978,7 @@ var
  forcednew: boolean;
 begin
  alink:= alink or (flinked > 0);
- forcednew:= (uls_forcenew in fstate);
+ forcednew:= (dls_forcenew in fstate);
  if (fcount = 0) then begin
   newrecord;
   undocount:= fundopo-1;
@@ -2027,7 +2027,7 @@ begin
   end;
  end;
  result^.link:= alink;
- exclude(fstate,uls_forcenew);
+ exclude(fstate,dls_forcenew);
 end;
 
 procedure ttextundolist.setpos(const endpos: gridcoordty; selected: boolean;
@@ -2181,7 +2181,7 @@ begin
  if flock = 0 then begin
   if (flinked = 0) then begin
    if forcenew then begin
-    include(fstate,uls_forcenew);
+    include(fstate,dls_forcenew);
    end;
    if (fundopo > 0) then begin
     po1:= items[fundopo-1];
@@ -2200,7 +2200,7 @@ begin
   dec(flinked);
   if flinked = 0 then begin
    if forcenew then begin
-    include(fstate,uls_forcenew);
+    include(fstate,dls_forcenew);
    end;
    if fundopo > 0 then begin
     items[fundopo-1]^.link:= false;

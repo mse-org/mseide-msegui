@@ -337,7 +337,7 @@ type
    fintf: iitemlist;
    foptions: nodeoptionsty;
    fcaptionpos: captionposty;
-   fstate: itemliststatesty;
+   fitemstate: itemliststatesty;
    function getitems1(const index: integer): tlistitem;
    procedure setitems(const index: integer; const Value: tlistitem); 
    procedure freedata(var data); override;
@@ -462,7 +462,7 @@ destructor tlistitem.destroy;
 begin
  if not (ns1_destroying in fstate1) then begin
   include(fstate1,ns1_destroying);
-  if (fowner <> nil) and not(ils_destroying in fowner.fstate) then begin
+  if (fowner <> nil) and not(ils_destroying in fowner.fitemstate) then begin
    checkaction(na_destroying);
   end;
  end;
@@ -923,7 +923,7 @@ end;
 
 destructor tcustomitemlist.destroy;
 begin
- include(fstate,ils_destroying);
+ include(fitemstate,ils_destroying);
  inherited;
  fobjectlinker.free;
 end;
@@ -1413,7 +1413,7 @@ destructor ttreelistitem.destroy;
 begin
  if not (ns1_destroying in fstate1) then begin
   include(fstate1,ns1_destroying);
-  if (fowner <> nil) and not (ils_destroying in fowner.fstate) then begin
+  if (fowner <> nil) and not (ils_destroying in fowner.fitemstate) then begin
    checkaction(na_destroying);
   end;
  end;

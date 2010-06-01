@@ -2061,7 +2061,7 @@ begin
  fowner:= owner;
  inherited create(intf);
  fitemclass:= tlistedititem;
- include(finternaloptions,ilo_nogridstreaming);
+ include(fstate,dls_nogridstreaming);
 end;
 
 procedure tcustomitemeditlist.setcolorglyph(const Value: colorty);
@@ -2079,9 +2079,9 @@ var
 begin
  beginupdate;
  try
-  exclude(fstate,ils_subnodecountupdating); //free nodes
+  exclude(fitemstate,ils_subnodecountupdating); //free nodes
   clear;
-  include(fstate,ils_subnodecountupdating);
+  include(fitemstate,ils_subnodecountupdating);
   capacity:= length(aitems);
   fcount:= length(aitems);
   if fcount > 0 then begin
@@ -3131,7 +3131,7 @@ var
  int1: integer;
  po1: ptreelistitem;
 begin
- if not (ils_freelock in fstate) then begin
+ if not (ils_freelock in fitemstate) then begin
   if pointer(data) <> nil then begin
    with ttreelistitem1(data) do begin
     if fowner <> nil then begin
@@ -3145,7 +3145,7 @@ begin
       end;
       po1^:= nil;
      end;
-     if not (ils_subnodecountupdating in self.fstate) then begin
+     if not (ils_subnodecountupdating in self.fitemstate) then begin
       inherited; //free node
      end;
     end
@@ -3200,9 +3200,9 @@ begin
   if int1 >= 0 then begin
    beginupdate;
    try
-    exclude(fstate,ils_subnodecountupdating); //free nodes
+    exclude(fitemstate,ils_subnodecountupdating); //free nodes
     clear;
-    include(fstate,ils_subnodecountupdating);
+    include(fitemstate,ils_subnodecountupdating);
     count:= int1;
     setlength(expanded,count);
     po1:= datapo;
@@ -3385,11 +3385,11 @@ begin
         }
         int2:= ainfo.treeheightbefore;
         if int2 > 0 then begin
-         include(self.fstate,ils_freelock);
+         include(self.fitemstate,ils_freelock);
          try
           self.fowner.fgridintf.getcol.grid.deleterow(int1,int2);
          finally
-          exclude(self.fstate,ils_freelock);
+          exclude(self.fitemstate,ils_freelock);
          end;
         end;
        end;
@@ -3405,19 +3405,19 @@ begin
      end;
     end
     else begin
-     include(fstate,ils_subnodecountinvalid);
+     include(fitemstate,ils_subnodecountinvalid);
     end;
    end;
    na_expand: begin
-    if not (ils_subnodecountupdating in fstate) then begin
+    if not (ils_subnodecountupdating in fitemstate) then begin
      expand;
     end
     else begin
-     include(fstate,ils_subnodecountinvalid);
+     include(fitemstate,ils_subnodecountinvalid);
     end;
    end;
    na_collapse: begin
-    if not (ils_subnodecountupdating in fstate) then begin
+    if not (ils_subnodecountupdating in fitemstate) then begin
      with ttreeitemedit(fowner) do begin
       fgridintf.getcol.grid.deleterow(sender.index+1,ttreelistitem(sender).treeheight);
       if fvalue = sender then begin
@@ -3426,7 +3426,7 @@ begin
      end;
     end
     else begin
-     include(fstate,ils_subnodecountinvalid);
+     include(fitemstate,ils_subnodecountinvalid);
     end;
    end;
   end;
@@ -3543,7 +3543,7 @@ end;
 procedure ttreeitemeditlist.beginupdate;
 begin
  if nochange = 0 then begin
-  include(fstate,ils_subnodecountupdating);
+  include(fitemstate,ils_subnodecountupdating);
  end;
  inherited;
 end;
@@ -3554,17 +3554,17 @@ var
 begin
  ar1:= nil; //compilerwarning
  if (nochange = 1) then begin
-  if (ils_subnodecountinvalid in fstate) then begin
-   exclude(fstate,ils_subnodecountinvalid);
+  if (ils_subnodecountinvalid in fitemstate) then begin
+   exclude(fitemstate,ils_subnodecountinvalid);
    ar1:= toplevelnodes;
-   include(fstate,ils_subnodecountupdating);
+   include(fitemstate,ils_subnodecountupdating);
    fowner.fgridintf.getcol.grid.rowcount:= 0;
    clear;
-   exclude(fstate,ils_subnodecountupdating);
+   exclude(fitemstate,ils_subnodecountupdating);
    add(ar1);
   end
   else begin
-   exclude(fstate,ils_subnodecountupdating);
+   exclude(fitemstate,ils_subnodecountupdating);
   end;
  end;
  inherited;
@@ -4225,7 +4225,7 @@ begin
    if pa <> nil then begin
     fitemlist.beginupdate;
     bo1:= (item.owner = fitemlist) and 
-                   not (ils_subnodecountinvalid in fitemlist.fstate);
+                   not (ils_subnodecountinvalid in fitemlist.fitemstate);
     sourcer:= item.index;
     pa.insert(item,de.parentindex);
     if bo1 then begin
@@ -4234,7 +4234,7 @@ begin
       destr:= destr + de.rowheight - 1;
      end;
      fgridintf.getcol.grid.moverow(sourcer,destr,item.rowheight);
-     exclude(fitemlist.fstate,ils_subnodecountinvalid);
+     exclude(fitemlist.fitemstate,ils_subnodecountinvalid);
     end;
     fitemlist.endupdate;
    end;

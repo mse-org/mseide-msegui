@@ -12299,7 +12299,7 @@ begin
     if of_insertsamelevel in foptionsfold then begin
      with fdatacols.frowstate do begin
       if folded then begin
-       if (gs_appending in fstate) or (aindex+acount >= frowcount) then begin
+       if (gs_appending in self.fstate) or (aindex+acount >= frowcount) then begin
         if (aindex > 0) then begin
          fillfoldlevel(aindex,acount,foldlevel[aindex-1]);
         end;

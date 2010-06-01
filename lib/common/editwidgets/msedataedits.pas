@@ -83,6 +83,7 @@ type
    function getifilinkkind: ptypeinfo; virtual;
    procedure setifilink(const avalue: tifilinkcomp);
    function ifigriddata: tdatalist;
+   procedure updateifigriddata(const alist: tdatalist);
 {$endif}
 //   procedure fontemptychanged(const sender: tobject);
    procedure emptychanged;
@@ -2460,6 +2461,13 @@ begin
  result:= fdatalist;
 end;
 
+procedure tcustomdataedit.updateifigriddata(const alist: tdatalist);
+begin
+ if fgridintf <> nil then begin
+  fgridintf.updateifigriddata(alist);
+ end;
+end;
+
 function tcustomdataedit.getifidatalinkintf: iifidatalink;
 begin
  result:= iifidatalink(self);
@@ -4370,7 +4378,7 @@ function tcustomenuedit.getvalueempty: integer;
 begin
  result:= fvalueempty;
 end;
-
+{$ifdef mse_with_ifi}
 function tcustomenuedit.getifilink: tifienumlinkcomp;
 begin
  result:= tifienumlinkcomp(fifilink);
@@ -4380,6 +4388,7 @@ procedure tcustomenuedit.setifilink1(const avalue: tifienumlinkcomp);
 begin
  setifilink0(avalue);
 end;
+{$endif}
 
 { tenumdropdowncontroller }
 

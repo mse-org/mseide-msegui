@@ -50,7 +50,7 @@ constructor tgridrealsumlist.create(owner: twidgetcol);
 begin
  fowner:= owner;
  inherited create;
- finternaloptions:= finternaloptions + [ilo_nostreaming,ilo_propertystreaming];
+ fstate:= fstate + [dls_nostreaming,dls_propertystreaming];
 end;
 
 function tgridrealsumlist.getdefault: pointer;

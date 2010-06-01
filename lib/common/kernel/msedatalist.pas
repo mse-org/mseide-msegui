@@ -37,11 +37,12 @@ type
  pdoublemsestringty = ^doublemsestringty;
  doublemsestringarty = array of doublemsestringty;
  dataprocty = procedure(var data) of object;
+{
  internallistoptionty = (ilo_needsfree,ilo_needscopy,ilo_needsinit,
                          ilo_nostreaming,ilo_nogridstreaming,
                          ilo_propertystreaming);
  internallistoptionsty = set of internallistoptionty;
-
+}
  tdatalist = class;
  tintegerdatalist = class;
 
@@ -70,12 +71,21 @@ type
 
  idatalistclient = interface(iobjectlink)
  end;
- 
+ dataliststatety = (
+                    dls_needsfree,dls_needscopy,dls_needsinit,
+                    dls_nostreaming,dls_nogridstreaming,
+                    dls_propertystreaming,
+                    dls_sorted,dls_sortio,
+                    dls_forcenew, //used in tudolist
+                    dls_remote    //used in ificomp datalist
+                    );
+ dataliststatesty = set of dataliststatety;
+  
  tdatalist = class(tlinkedpersistent)
   private
    fbytelength: integer;   //pufferlaenge
-   fsortio: boolean;
-   fsorted: boolean;
+//   fsortio: boolean;
+//   fsorted: boolean;
    Fcapacity: integer;
    fonchange: notifyeventty;
    fonitemchange: indexeventty;
@@ -90,14 +100,16 @@ type
    procedure setmaxcount(const Value: integer);
    procedure internalfreedata(index,anzahl: integer); //gibt daten frei falls notwendig
    procedure internalcopyinstance(index,anzahl: integer);
+   function getsorted: boolean;
    procedure setsorted(const Value: boolean); //datenkopieren
    procedure internalcleardata(const index: integer);
   protected
    fdatapo: pchar;
    fsize: integer;
-   finternaloptions: internallistoptionsty;
+//   finternaloptions: internallistoptionsty;
    fcount: integer;
    flinkdest: datalistarty;
+   fstate: dataliststatesty;
    function checkassigncompatibility(const source: tpersistent): boolean; virtual;
    function assigndata(const source: tpersistent): boolean;
                        //false if not possible
@@ -188,6 +200,7 @@ type
                                         const atag: integer): boolean; virtual;
  
    property size: integer read fsize;
+   property state: dataliststatesty read fstate;
    function datapo: pointer; //calls normalizering,
              //do not use in copyinstance,initinstance,freedata
    function datahighpo: pointer; //points to last item
@@ -246,7 +259,7 @@ type
 
    property maxcount: integer read fmaxcount
                      write setmaxcount default bigint; //for ring buffer
-   property sorted: boolean read fsorted write setsorted;
+   property sorted: boolean read getsorted write setsorted;
  end;
  
  pdatalist = ^tdatalist;
@@ -2955,12 +2968,12 @@ begin
   arangelist.number(0,1);
   quicksort(pintegeraty(arangelist.datapo)^,0,arangelist.count-1);
   if result and dorearange then begin
-   fsortio:= true;
+   include(fstate,dls_sortio);
    rearange(arangelist);
   end;
  end
  else begin
-  fsortio:= true;
+  include(fstate,dls_sorted);
  end;
 end;
 
@@ -3023,7 +3036,7 @@ begin
   end;
   po1:= fdatapo + int1*fsize;
   move(quelle,po1^,fsize);
-  if (ilo_needscopy in finternaloptions) and docopy then begin
+  if (dls_needscopy in fstate) and docopy then begin
    copyinstance(po1^);
   end;
  finally
@@ -3198,7 +3211,7 @@ begin
   else begin
    move(fdatapo^,adatapo^,fcount*fsize);
   end;
-  if ilo_needscopy in finternaloptions then begin
+  if dls_needscopy in fstate then begin
    po1:= adatapo;
    s1:= asize;
    for int1:= 0 to fcount - 1 do begin
@@ -3267,12 +3280,12 @@ var
  po1: pointer;
 begin
  checkindex(index);
- if ilo_needsfree in finternaloptions then begin
+ if dls_needsfree in fstate then begin
   freedata(dest);
  end;  
  po1:= fdatapo+index*fsize;
  move(po1^,dest,fsize);
- if ilo_needscopy in finternaloptions then begin
+ if dls_needscopy in fstate then begin
   copyinstance(dest);
  end;
 end;
@@ -3290,11 +3303,11 @@ begin
  int1:= index;
  checkindex(index);
  po1:= fdatapo+index*fsize;
- if ilo_needsfree in finternaloptions then begin
+ if dls_needsfree in fstate then begin
   freedata(po1^);
  end;
  move(quelle,po1^,fsize);
- if ilo_needscopy in finternaloptions then begin
+ if dls_needscopy in fstate then begin
   copyinstance(po1^);
  end;
  change(int1);
@@ -3407,7 +3420,7 @@ begin
    end
    else begin
     move(quelle,(fdatapo+int1)^,fsize);
-    if (ilo_needscopy in finternaloptions) and docopy then begin
+    if (dls_needscopy in fstate) and docopy then begin
      copyinstance((fdatapo+int1)^);
     end;
    end;
@@ -3455,7 +3468,7 @@ begin
  if default = nil then begin
   if int1 >= index then begin
    fillchar((fdatapo+index*fsize)^,acount*fsize,0);
-   if ilo_needsinit in finternaloptions then begin
+   if dls_needsinit in fstate then begin
     for int2:= index to index + acount - 1 do begin
      initinstance((fdatapo+int2*fsize)^);
     end;
@@ -3464,7 +3477,7 @@ begin
   else begin
    fillchar((fdatapo)^,int1*fsize,0);
    fillchar((fdatapo+index*fsize)^,(fmaxcount-index)*fsize,0);
-   if ilo_needsinit in finternaloptions then begin
+   if dls_needsinit in fstate then begin
     for int2:= 0 to int1 - 1 do begin
      initinstance((fdatapo+int2*fsize)^);
     end;
@@ -3482,7 +3495,7 @@ begin
     move(default^,po^,fsize);
     inc(po,fsize);
    end;
-   if ilo_needscopy in finternaloptions then begin
+   if dls_needscopy in fstate then begin
     for int2:= index to index + acount - 1 do begin
      copyinstance((fdatapo+int2*fsize)^);
     end;
@@ -3498,7 +3511,7 @@ begin
     move(default^,po^,fsize);
     inc(po,fsize);
    end;
-   if ilo_needscopy in finternaloptions then begin
+   if dls_needscopy in fstate then begin
     for int2:= 0 to int1 - 1 do begin
      copyinstance((fdatapo+int2*fsize)^);
     end;
@@ -3514,7 +3527,7 @@ procedure tdatalist.getdefaultdata(var dest);
 var
  po: pointer;
 begin
- if ilo_needsfree in finternaloptions then begin
+ if dls_needsfree in fstate then begin
   freedata(dest);
  end;
  po:= getdefault;
@@ -3523,7 +3536,7 @@ begin
  end
  else begin
   move(po^,dest,fsize);
-  if ilo_needscopy in finternaloptions then begin
+  if dls_needscopy in fstate then begin
    copyinstance(dest);
   end;
  end;
@@ -3539,7 +3552,7 @@ var
  default,po1: pointer;
 begin
  po1:= fdatapo+index*fsize;
- if ilo_needsfree in finternaloptions then begin
+ if dls_needsfree in fstate then begin
   freedata(po1^);
  end;
  default:= getdefault;
@@ -3684,7 +3697,7 @@ begin
   count:= anzahl;
   normalizering;
   po1:= fdatapo;
-  if ilo_needsfree in finternaloptions then begin
+  if dls_needsfree in fstate then begin
    for int1:= 0 to fcount - 1 do begin
     freedata(po1^);
     inc(po1,fsize);
@@ -3695,7 +3708,7 @@ begin
   end
   else begin
    po1:= fdatapo;
-   if ilo_needscopy in finternaloptions then begin
+   if dls_needscopy in fstate then begin
     for int1:= 0 to fcount - 1 do begin
      move(wert,po1^,fsize);
      copyinstance(po1^);
@@ -3918,7 +3931,7 @@ begin
  inherited;
  filer.defineproperty('data',
   {$ifdef FPC}@{$endif}readdata,{$ifdef FPC}@{$endif}writedata,
-           not (ilo_nostreaming in finternaloptions) and checkwritedata(filer));
+           not (dls_nostreaming in fstate) and checkwritedata(filer));
 end;
 
 procedure tdatalist.freedata(var data);
@@ -3928,7 +3941,7 @@ end;
 
 procedure tdatalist.internalfreedata(index, anzahl: integer);
 begin
- if ilo_needsfree in finternaloptions then begin
+ if dls_needsfree in fstate then begin
   forall(index,anzahl,{$ifdef FPC}@{$endif}freedata);
  end;
 end;
@@ -3945,7 +3958,7 @@ end;
 
 procedure tdatalist.internalcopyinstance(index, anzahl: integer);
 begin
- if ilo_needscopy in finternaloptions then begin
+ if dls_needscopy in fstate then begin
   forall(index,anzahl,{$ifdef FPC}@{$endif}copyinstance);
  end;
 end;
@@ -3968,10 +3981,10 @@ procedure tdatalist.change(const index: integer);
 var
  int1: integer;
 begin
- fsortio:= false;
+ exclude(fstate,dls_sorted);
  if fnochange = 0 then begin
   doitemchange(index);
-  if fsorted then begin
+  if sorted then begin
    sort;
   end;
   dochange;
@@ -4154,12 +4167,20 @@ begin if count > 0 then begin
  end;
 end;
 
+function tdatalist.getsorted: boolean;
+begin
+ result:= dls_sorted in fstate;
+end;
+
 procedure tdatalist.setsorted(const Value: boolean);
 begin
- if fsorted <> value then begin
-  fsorted := Value;
-  if fsorted then begin
+ if sorted <> value then begin
+  if value then begin
+   include(fstate,dls_sorted);
    sort;
+  end
+  else begin
+   exclude(fstate,dls_sorted);
   end;
  end;
 end;
@@ -5139,7 +5160,7 @@ end;
 constructor tdynamicdatalist.create;
 begin
  inherited;
- finternaloptions:= finternaloptions + [ilo_needsfree,ilo_needscopy];
+ fstate:= fstate + [dls_needsfree,dls_needscopy];
 end;
 {
 destructor tdynamicdatalistmse.destroy;
@@ -7504,7 +7525,7 @@ end;
 constructor tobjectdatalist.create;
 begin
  inherited;
- finternaloptions:= (finternaloptions - [ilo_needscopy]) + [ilo_needsinit];
+ fstate:= (fstate - [dls_needscopy]) + [dls_needsinit];
 end;
 
 procedure tobjectdatalist.checkitemclass(const aitem: tobject);

@@ -51,6 +51,9 @@ type
   function nonullcheck: boolean;
   function nocheckvalue: boolean;
   property grid: tcustomwidgetgrid read getgrid;
+ {$ifdef mse_with_ifi}
+  procedure updateifigriddata(const alist: tdatalist);
+ {$endif}
  end;
 
  igridwidget = interface(inullinterface) ['{CB4BC9B0-A6C2-4929-9E5F-92406B6617B4}']
@@ -125,6 +128,9 @@ type
    function nullcheckneeded(const newfocus: twidget): boolean;
    function nonullcheck: boolean;
    function nocheckvalue: boolean;
+  {$ifdef mse_with_ifi}
+   procedure updateifigriddata(const alist: tdatalist);
+  {$endif}
 
    procedure checkcanclose(var accepted: boolean);
    procedure dofocusedcellchanged(enter: boolean;
@@ -541,7 +547,7 @@ constructor tgridmsestringdatalist.create(owner: twidgetcol);
 begin
  fowner:= owner;
  inherited create;
- include(finternaloptions,ilo_nostreaming);
+ include(fstate,dls_nostreaming);
 end;
 
 function tgridmsestringdatalist.getdefault: pointer;
@@ -576,7 +582,7 @@ constructor tgridansistringdatalist.create(owner: twidgetcol);
 begin
  fowner:= owner;
  inherited create;
- include(finternaloptions,ilo_nostreaming);
+ include(fstate,dls_nostreaming);
 end;
 
 function tgridansistringdatalist.getdefault: pointer;
@@ -595,7 +601,7 @@ constructor tgridpointerdatalist.create(owner: twidgetcol);
 begin
  fowner:= owner;
  inherited create;
- include(finternaloptions,ilo_nostreaming);
+ include(fstate,dls_nostreaming);
 end;
 
 { tgridintegerdatalist }
@@ -604,7 +610,7 @@ constructor tgridintegerdatalist.create(owner: twidgetcol);
 begin
  fowner:= owner;
  inherited create;
- include(finternaloptions,ilo_nostreaming);
+ include(fstate,dls_nostreaming);
 end;
 
 function tgridintegerdatalist.getdefault: pointer;
@@ -623,7 +629,7 @@ constructor tgridint64datalist.create(owner: twidgetcol);
 begin
  fowner:= owner;
  inherited create;
- include(finternaloptions,ilo_nostreaming);
+ include(fstate,dls_nostreaming);
 end;
 
 function tgridint64datalist.getdefault: pointer;
@@ -642,7 +648,7 @@ constructor tgridenumdatalist.create(owner: twidgetcol);
 begin
  fowner:= owner;
  inherited create({$ifdef FPC}@{$endif}getdefaultenum);
- include(finternaloptions,ilo_nostreaming);
+ include(fstate,dls_nostreaming);
 end;
 
 function tgridenumdatalist.getdefaultenum: integer;
@@ -662,7 +668,7 @@ constructor tgridenum64datalist.create(owner: twidgetcol);
 begin
  fowner:= owner;
  inherited create({$ifdef FPC}@{$endif}getdefaultenum);
- include(finternaloptions,ilo_nostreaming);
+ include(fstate,dls_nostreaming);
 end;
 
 function tgridenum64datalist.getdefaultenum: int64;
@@ -682,7 +688,7 @@ constructor tgridrealdatalist.create(owner: twidgetcol);
 begin
  fowner:= owner;
  inherited create;
- include(finternaloptions,ilo_nostreaming);
+ include(fstate,dls_nostreaming);
 end;
 
 function tgridrealdatalist.getdefault: pointer;
@@ -1158,8 +1164,8 @@ begin
                    {$ifdef FPC}@{$endif}writefixwidgetnames,
                    needswidgetnamewriting(ffixrowwidgets));
  bo1:= false;
- if (fdata <> nil) and not (ilo_nogridstreaming in 
-        tdatalist1(fdata).finternaloptions) then begin
+ if (fdata <> nil) and not (dls_nogridstreaming in 
+        tdatalist1(fdata).fstate) then begin
   col1:= twidgetcol(filer.ancestor);
   if col1 <> nil then begin
    bo1:= (col1.fdata = nil) or (fdata.datatype <> col1.fdata.datatype);
@@ -1170,8 +1176,8 @@ begin
  end;
  filer.defineproperty('dataclass',{$ifdef FPC}@{$endif}readdataclass,
                        {$ifdef FPC}@{$endif}writedataclass,
-                              (fdata <> nil) and not (ilo_nogridstreaming in 
-                               tdatalist1(fdata).finternaloptions));
+                              (fdata <> nil) and not (dls_nogridstreaming in 
+                               tdatalist1(fdata).fstate));
  filer.defineproperty('data',{$ifdef FPC}@{$endif}readdata,
                        {$ifdef FPC}@{$endif}writedata,bo1);
 // filer.defineproperty('datatype',{$ifdef FPC}@{$endif}readdatatype,
@@ -1179,9 +1185,9 @@ begin
 // filer.defineproperty('dataprops',{$ifdef FPC}@{$endif}readdataprops,
 //                       {$ifdef FPC}@{$endif}writedataprops,
 //                (fdata <> nil) and 
-//                (ilo_propertystreaming in tdatalist1(fdata).finternaloptions));
- if (fdata <> nil) and (ilo_propertystreaming in 
-        tdatalist1(fdata).finternaloptions) and (filer is twriter) then begin
+//                (ilo_propertystreaming in tdatalist1(fdata).fstate));
+ if (fdata <> nil) and (dls_propertystreaming in 
+        tdatalist1(fdata).fstate) and (filer is twriter) then begin
   with twriter1(filer) do begin
    str1:= getfproppath(twriter(filer));
    if str1 = '' then begin
@@ -1640,6 +1646,12 @@ begin
   result:= (fnocheckvalue > 0) or (gs_rowremoving in fstate);
  end;
 end;
+
+{$ifdef mse_with_ifi}
+procedure twidgetcol.updateifigriddata(const alist: tdatalist);
+begin
+end;
+{$endif}
 
 function twidgetcol.getgrid: tcustomwidgetgrid;
 begin

@@ -860,7 +860,7 @@ end;
  end;
  
 procedure setifilinkcomp(const alink: iifilink;
-                      const alinkcomp: tifilinkcomp; var dest: tifilinkcomp);
+               const alinkcomp: tifilinkcomp; var dest: tifilinkcomp);
 procedure setifidatasource(const aintf: iifidatasourceclient;
            const source: tifidatasource; var dest: tifidatasource);
 
@@ -875,6 +875,7 @@ const
   
 type
  tmsecomponent1 = class(tmsecomponent);
+ tdatalist1 = class(tdatalist);
  
 procedure setifilinkcomp(const alink: iifilink;
                       const alinkcomp: tifilinkcomp; var dest: tifilinkcomp);
@@ -892,6 +893,10 @@ begin
  alink.getobjectlinker.setlinkedvar(alink,alinkcomp,tmsecomponent(dest),po1);
  if dest <> nil then begin
   alink.setifiserverintf(iifiserver(dest.fcontroller));
+  if alinkcomp is tifivaluelinkcomp then begin
+   iifidatalink(alink).updateifigriddata(
+        tifivaluelinkcomp(alinkcomp).controller.fdatalist);
+  end;
   dest.fcontroller.change(alink);
  end;
 end;
@@ -1888,6 +1893,7 @@ procedure tvalueclientcontroller.optionsvaluechanged;
 begin
  if vco_datalist in foptionsvalue then begin
   fdatalist:= createdatalist;
+  include(tdatalist1(fdatalist).fstate,dls_remote);
  end
  else begin
   freeandnil(fdatalist);

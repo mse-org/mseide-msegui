@@ -10,7 +10,12 @@
 
 unit msedbedit;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
+{$ifdef FPC}
+ {$ifndef mse_no_ifi}
+  {$define mse_with_ifi}
+ {$endif}
+ {$mode objfpc}{$h+}{$interfaces corba}
+{$endif}
 
 interface
 uses
@@ -1592,7 +1597,9 @@ type
    function getgrid: tcustomwidgetgrid;
    function getdatapo(const arow: integer): pointer;
    function getrowdatapo: pointer;
-   
+  {$ifdef mse_with_ifi}
+   procedure updateifigriddata(const alist: tdatalist);
+  {$endif}   
    procedure setoptions(const avalue: dbstringgridoptionsty);
    procedure checkautofields;
    procedure setfieldnamedisplayfixrow(const avalue: integer);
@@ -7999,6 +8006,12 @@ function tcustomdbstringgrid.getrowdatapo: pointer;
 begin
  result:= nil;
 end;
+{$ifdef mse_with_ifi}
+procedure tcustomdbstringgrid.updateifigriddata(const alist: tdatalist);
+begin
+ //dummy
+end;
+{$endif}
 
 procedure tcustomdbstringgrid.beforefocuscell(const cell: gridcoordty;
                              const selectaction: focuscellactionty);
