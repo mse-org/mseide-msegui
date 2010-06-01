@@ -180,22 +180,64 @@ type
 
  itemsetterty = procedure(const alink: pointer; var handled: boolean) of object; 
  itemgetterty = procedure(const alink: pointer; var handled: boolean) of object;
+
+ valueclientoptionty = (vco_datalist);
+ valueclientoptionsty = set of valueclientoptionty;
+   
+ tifidatasource = class;
+ ififieldnamety = type ansistring;       //type for property editor
+ ifisourcefieldnamety = type ansistring; //type for property editor
+ 
+ iififieldinfo = interface(inullinterface)
+                        ['{28CC1F64-BFD1-44E9-862E-1BD5A1F1D654}']
+  procedure getfieldinfo(const apropname: ififieldnamety; 
+                         var adatasource: tifidatasource;
+                         var atypes: listdatatypesty);
+ end;
+
+ iifidatasourceclient = interface(iobjectlink)
+  function getobjectlinker: tobjectlinker;
+  procedure bindingchanged;
+  function ifigriddata: tdatalist;
+  function ififieldname: string;
+ end;
   
- tvalueclientcontroller = class(tificlientcontroller)
+ tvalueclientcontroller = class(tificlientcontroller,
+                                         iififieldinfo,iifidatasourceclient)
   private
    fvalarpo: pointer;
    fitempo: pointer;
    fitemindex: integer;
    fonclientdataentered: notifyeventty;
+   foptionsvalue: valueclientoptionsty;
+   fdatasource: tifidatasource;
+   fdatafield: ififieldnamety;
+   procedure setoptionsvalue(const avalue: valueclientoptionsty);
+   procedure setdatasource(const avalue: tifidatasource);
+   procedure setdatafield(const avalue: ififieldnamety);
   protected
+   fdatalist: tdatalist;
+    //iifidatasourceclient
+   procedure bindingchanged;
+   function ifigriddata: tdatalist;
+   function ififieldname: string;
+    //iififieldinfo
+   procedure getfieldinfo(const apropname: ififieldnamety; 
+                         var adatasource: tifidatasource;
+                         var atypes: listdatatypesty);
+
    function getifilinkkind: ptypeinfo; override;
    function canconnect(const acomponent: tcomponent): boolean; override;
    procedure setvalue(const sender: iificlient; var avalue;
                                             var accept: boolean); override;
 
    procedure getdatalist1(const alink: pointer; var handled: boolean);
-   function getdatalist: tdatalist;
-   
+   function getfirstdatalist1: tdatalist;
+   function getfirstdatalist: tdatalist;
+   procedure optionsvaluechanged; virtual;
+   function createdatalist: tdatalist; virtual; abstract;
+   function getlistdatatypes: listdatatypesty; virtual; abstract;
+      
    procedure setmsestringvalar(const alink: pointer; var handled: boolean);
    procedure getmsestringvalar(const alink: pointer; var handled: boolean);
    procedure setintegervalar(const alink: pointer; var handled: boolean);
@@ -226,9 +268,15 @@ type
 
    procedure statreadlist(const alink: pointer);
    procedure statwritelist(const alink: pointer; var handled: boolean);
+  public
+   destructor destroy; override;
   published 
    property onclientdataentered: notifyeventty read fonclientdataentered 
                                   write fonclientdataentered;
+   property optionsvalue: valueclientoptionsty read foptionsvalue 
+                                           write setoptionsvalue default [];
+   property datasource: tifidatasource read fdatasource write setdatasource;
+   property datafield: ififieldnamety read fdatafield write setdatafield;
  end;
  
  tstringclientcontroller = class(tvalueclientcontroller)
@@ -261,24 +309,6 @@ type
                 read fonclientsetvalue write fonclientsetvalue;
  end;
 
- tifidatasource = class;
- ififieldnamety = type ansistring;       //type for property editor
- ifisourcefieldnamety = type ansistring; //type for property editor
- 
- iififieldinfo = interface(inullinterface)
-                        ['{28CC1F64-BFD1-44E9-862E-1BD5A1F1D654}']
-  procedure getfieldinfo(const apropname: ififieldnamety; 
-                         var adatasource: tifidatasource;
-                         var atypes: listdatatypesty);
- end;
-
- iifidatasourceclient = interface(iobjectlink)
-  function getobjectlinker: tobjectlinker;
-  procedure bindingchanged;
-  function ifigriddata: tdatalist;
-  function ififieldname: string;
- end;
-  
  tifidropdowncol = class(tmsestringdatalist,iififieldinfo,iifidatasourceclient)
   private
    fdatasource: tifidatasource;
@@ -290,7 +320,7 @@ type
    procedure bindingchanged;
    function ifigriddata: tdatalist;
    function ififieldname: string;
-     //iififieldinfo
+    //iififieldinfo
    procedure getfieldinfo(const apropname: ififieldnamety; 
                          var adatasource: tifidatasource;
                          var atypes: listdatatypesty);
@@ -364,6 +394,9 @@ type
    procedure clienttovalues(const alink: pointer); override;
    procedure setvalue(const sender: iificlient;
                               var avalue; var accept: boolean); override;
+   function createdatalist: tdatalist; override;
+   function getlistdatatypes: listdatatypesty; override;
+   
     //istatfile
    procedure dostatread(const reader: tstatreader); override;
    procedure dostatwrite(const writer: tstatwriter); override;
@@ -866,7 +899,8 @@ end;
 procedure setifidatasource(const aintf: iifidatasourceclient;
            const source: tifidatasource; var dest: tifidatasource);
 begin
- aintf.getobjectlinker.setlinkedvar(aintf,source,dest,source);
+ aintf.getobjectlinker.setlinkedvar(aintf,source,dest,
+                         typeinfo(iifidatasourceclient));
  aintf.bindingchanged;
 end;
 
@@ -1454,6 +1488,12 @@ end;
 
 { tvalueclientcontroller }
 
+destructor tvalueclientcontroller.destroy;
+begin
+ freeandnil(fdatalist);
+ inherited;
+end;
+
 function tvalueclientcontroller.canconnect(const acomponent: tcomponent): boolean;
 var
  intf1: pointer;
@@ -1483,11 +1523,25 @@ begin
  end;
 end;
 
-function tvalueclientcontroller.getdatalist: tdatalist;
+function tvalueclientcontroller.getfirstdatalist1: tdatalist;
 begin
- result:= nil;
- fitempo:= @result;
- tmsecomponent1(fowner).getobjectlinker.forfirst(@getdatalist1,self); 
+ result:= fdatalist;
+ if result = nil then begin
+  fitempo:= @result;
+  tmsecomponent1(fowner).getobjectlinker.forfirst(@getdatalist1,
+                                  self); 
+  if result = nil then begin
+   raise exception.create('No datalist.');
+  end;
+ end;
+end;
+
+function tvalueclientcontroller.getfirstdatalist: tdatalist;
+begin
+ result:= getfirstdatalist1;
+ if result = nil then begin
+  raise exception.create('No datalist.');
+ end;
 end;
 
 procedure tvalueclientcontroller.setmsestringvalar(const alink: pointer;
@@ -1821,6 +1875,61 @@ begin
  end;
 end;
 
+procedure tvalueclientcontroller.setoptionsvalue(
+                                          const avalue: valueclientoptionsty);
+begin
+ if foptionsvalue <> avalue then begin
+  foptionsvalue:= avalue;
+  optionsvaluechanged;
+ end;
+end;
+
+procedure tvalueclientcontroller.optionsvaluechanged;
+begin
+ if vco_datalist in foptionsvalue then begin
+  fdatalist:= createdatalist;
+ end
+ else begin
+  freeandnil(fdatalist);
+ end;
+end;
+
+procedure tvalueclientcontroller.setdatasource(const avalue: tifidatasource);
+begin
+ if avalue <> fdatasource then begin
+  setifidatasource(iifidatasourceclient(self),avalue,fdatasource);
+ end;
+end;
+
+procedure tvalueclientcontroller.setdatafield(const avalue: ififieldnamety);
+begin
+ if avalue <> fdatafield then begin
+  fdatafield:= avalue;
+  bindingchanged;
+ end;
+end;
+
+procedure tvalueclientcontroller.bindingchanged;
+begin
+end;
+
+function tvalueclientcontroller.ifigriddata: tdatalist;
+begin
+ result:= getfirstdatalist1;
+end;
+
+function tvalueclientcontroller.ififieldname: string;
+begin
+ result:= fdatafield;
+end;
+
+procedure tvalueclientcontroller.getfieldinfo(const apropname: ififieldnamety;
+               var adatasource: tifidatasource; var atypes: listdatatypesty);
+begin
+ adatasource:= fdatasource;
+ atypes:= getlistdatatypes;
+end;
+
 { tstringclientcontroller }
 
 constructor tstringclientcontroller.create(const aowner: tmsecomponent);
@@ -1886,7 +1995,7 @@ end;
 
 function tstringclientcontroller.getgriddata: tmsestringdatalist;
 begin
- result:= tmsestringdatalist(getdatalist);
+ result:= tmsestringdatalist(getfirstdatalist);
 end;
 
 procedure tstringclientcontroller.dostatread(const reader: tstatreader);
@@ -1975,7 +2084,7 @@ end;
 
 function tintegerclientcontroller.getgriddata: tintegerdatalist;
 begin
- result:= tintegerdatalist(getdatalist);
+ result:= tintegerdatalist(getfirstdatalist);
 end;
 
 procedure tintegerclientcontroller.dostatread(const reader: tstatreader);
@@ -1988,6 +2097,16 @@ procedure tintegerclientcontroller.dostatwrite(const writer: tstatwriter);
 begin
  inherited;
  writer.writeinteger(valuevarname,value);
+end;
+
+function tintegerclientcontroller.createdatalist: tdatalist;
+begin
+ result:= tintegerdatalist.create;
+end;
+
+function tintegerclientcontroller.getlistdatatypes: listdatatypesty;
+begin
+ result:= [dl_integer];
 end;
 
 { tbooleanclientcontroller }
@@ -2049,7 +2168,7 @@ end;
 
 function tbooleanclientcontroller.getgriddata: tintegerdatalist;
 begin
- result:= tintegerdatalist(getdatalist);
+ result:= tintegerdatalist(getfirstdatalist);
 end;
 
 procedure tbooleanclientcontroller.dostatread(const reader: tstatreader);
@@ -2198,7 +2317,7 @@ end;
 
 function trealclientcontroller.getgriddata: trealdatalist;
 begin
- result:= trealdatalist(getdatalist);
+ result:= trealdatalist(getfirstdatalist);
 end;
 
 procedure trealclientcontroller.dostatread(const reader: tstatreader);
@@ -2347,7 +2466,7 @@ end;
 
 function tdatetimeclientcontroller.getgriddata: tdatetimedatalist;
 begin
- result:= tdatetimedatalist(getdatalist);
+ result:= tdatetimedatalist(getfirstdatalist);
 end;
 
 procedure tdatetimeclientcontroller.dostatread(const reader: tstatreader);
@@ -3059,7 +3178,7 @@ begin
   setlength(fnamear,count);
   setlength(flistar,count);
   findex:= 0;
-  forall(@getbindinginfo,self);
+  forall(@getbindinginfo,typeinfo(iifidatasourceclient));
  end;
  with ffields do begin 
   result:= nil;

@@ -68,6 +68,9 @@ type
  end;
  plistlinkinfoty = ^listlinkinfoty;
 
+ idatalistclient = interface(iobjectlink)
+ end;
+ 
  tdatalist = class(tlinkedpersistent)
   private
    fbytelength: integer;   //pufferlaenge
