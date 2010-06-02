@@ -1532,6 +1532,8 @@ type
                       //true if valid toplevelwindow with assigned winid
    function updaterect: rectty; //invalidated area, origin = clientpos
 
+   procedure beforeclosequery(var amodalresult: modalresultty); virtual;
+                   //called on top level window
    function canclose(const newfocus: twidget = nil): boolean; virtual;
    function canparentclose(const newfocus: twidget): boolean; overload;
                    //window.focusedwidget is first checked of it is descendant
@@ -10683,6 +10685,12 @@ begin
  end;
 end;
 
+procedure twidget.beforeclosequery(var amodalresult: modalresultty);
+                   //called on top level window
+begin
+ //dummy
+end;
+
 function twidget.canclose(const newfocus: twidget = nil): boolean;
 var
  int1: integer;
@@ -12642,7 +12650,8 @@ begin
  if fmodalresult = mr_none then begin
   fmodalresult:= mr_windowclosed;
  end;
- result:= fowner.canparentclose(nil);
+ fowner.beforeclosequery(fmodalresult);
+ result:= (fmodalresult <> mr_none) and fowner.canparentclose(nil);
  if result then begin
   deactivate;
   fowner.hide;

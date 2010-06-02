@@ -25,6 +25,7 @@ uses
 
 type
  formoptionty = (fo_main,fo_terminateonclose,fo_freeonclose,
+               fo_windowclosecancel,
                fo_defaultpos,fo_screencentered,fo_modal,
                fo_minimized,fo_maximized,fo_fullscreen,
                fo_closeonesc,fo_cancelonesc,fo_closeonenter,fo_closeonf10,
@@ -89,6 +90,7 @@ type
    fondestroyed: notifyeventty;
    foneventloopstart: notifyeventty;
    fondestroy: notifyeventty;
+   fonbeforeclosequery: closequeryeventty;
    fonclosequery: closequeryeventty;
    fonclose: notifyeventty;
    fonidle: idleeventty;
@@ -211,6 +213,7 @@ type
    procedure dochildscaled(const sender: twidget); override;
    function childrencount: integer; override;
 
+   procedure beforeclosequery(var amodalresult: modalresultty); override;
    function canclose(const newfocus: twidget): boolean; override;
    function close(const amodalresult: modalresultty = mr_windowclosed): boolean; 
               //true if ok
@@ -237,7 +240,10 @@ type
                                    write foneventloopstart;
    property ondestroy: notifyeventty read fondestroy write fondestroy;
    property ondestroyed: notifyeventty read fondestroyed write fondestroyed;
-   property onclosequery: closequeryeventty read fonclosequery write fonclosequery;
+   property onbeforeclosequery: closequeryeventty read fonbeforeclosequery 
+                                        write fonbeforeclosequery;
+   property onclosequery: closequeryeventty read fonclosequery 
+                                        write fonclosequery;
    property onclose: notifyeventty read fonclose write fonclose;
    property onidle: idleeventty read fonidle write fonidle;
    property onterminatequery: terminatequeryeventty read fonterminatequery 
@@ -296,6 +302,7 @@ type
    property oneventloopstart;
    property ondestroy;
    property ondestroyed;
+   property onbeforeclosequery;
    property onclosequery;
    property onclose;
    property onidle;
@@ -872,6 +879,18 @@ begin
  end;
 end;
 {$endif}
+
+procedure tcustommseform.beforeclosequery(var amodalresult: modalresultty);
+begin
+ inherited;
+ if canevent(tmethod(fonbeforeclosequery)) then begin
+  fonbeforeclosequery(self,amodalresult);
+ end;
+ if (amodalresult = mr_windowclosed) and 
+                              (fo_windowclosecancel in foptions) then begin
+  amodalresult:= mr_cancel;
+ end;
+end;
 
 function tcustommseform.canclose(const newfocus: twidget): boolean;
 var
