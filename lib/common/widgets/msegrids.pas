@@ -5136,7 +5136,9 @@ end;
 
 destructor tdatacol.destroy;
 begin
- fdata.Free;
+ if (fdata <> nil) and not (dls_remote in fdata.state) then begin
+  fdata.destroy;
+ end;
  inherited;
 end;
 
@@ -5744,8 +5746,9 @@ var
  bo1: boolean;
  mstr1: msestring;
 begin
- if (fdata <> nil) and (co_savevalue in foptions) and 
-            not (gs_isdb in fgrid.fstate) then begin
+ if (fdata <> nil) and not (dls_remote in fdata.state) and
+                                (co_savevalue in foptions) and 
+                                 not (gs_isdb in fgrid.fstate) then begin
   reader.readdatalist(getdatastatname,fdata);
  end;
  if co_savestate in foptions then begin
@@ -5769,8 +5772,9 @@ var
  mstr1: msestring;
 begin
  inherited;
- if (fdata <> nil) and (co_savevalue in foptions) and 
-           not (gs_isdb in fgrid.fstate) then begin
+ if (fdata <> nil) and not (dls_remote in fdata.state) and
+                         (co_savevalue in foptions) and 
+                         not (gs_isdb in fgrid.fstate) then begin
   writer.writedatalist(getdatastatname,fdata);
  end;
  if co_savestate in foptions then begin

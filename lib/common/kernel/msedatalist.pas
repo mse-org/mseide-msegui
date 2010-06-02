@@ -70,13 +70,16 @@ type
  plistlinkinfoty = ^listlinkinfoty;
 
  idatalistclient = interface(iobjectlink)
+  function getobjectlinker: tobjectlinker;
+  procedure itemchanged(const sender: tdatalist; const aindex: integer);
  end;
+
  dataliststatety = (
                     dls_needsfree,dls_needscopy,dls_needsinit,
                     dls_nostreaming,dls_nogridstreaming,
                     dls_propertystreaming,
                     dls_sorted,dls_sortio,
-                    dls_forcenew, //used in tudolist
+                    dls_forcenew, //used in tundolist
                     dls_remote    //used in ificomp datalist
                     );
  dataliststatesty = set of dataliststatety;
@@ -103,6 +106,7 @@ type
    function getsorted: boolean;
    procedure setsorted(const Value: boolean); //datenkopieren
    procedure internalcleardata(const index: integer);
+   procedure remoteitemchange(const alink: pointer);
   protected
    fdatapo: pchar;
    fsize: integer;
@@ -110,6 +114,7 @@ type
    fcount: integer;
    flinkdest: datalistarty;
    fstate: dataliststatesty;
+   fintparam: integer;
    function checkassigncompatibility(const source: tpersistent): boolean; virtual;
    function assigndata(const source: tpersistent): boolean;
                        //false if not possible
@@ -1153,11 +1158,15 @@ procedure writestringar(const writer: twriter; const avalue: stringarty);
 type
  getintegeritemfuncty = function(const index: integer): integer of object;
  
-function newidentnum(const count: integer; getfunc: getintegeritemfuncty): integer;
- //returns lowest not used value
+function newidentnum(const count: integer;
+                                  getfunc: getintegeritemfuncty): integer;
+                        //returns lowest not used value
 function getdatalistclass(const adatatype: listdatatypety): datalistclassty;
 procedure registerdatalistclass(const adatatype: listdatatypety;
                                     const aclass: datalistclassty);
+
+procedure setremotedatalist(const aintf: idatalistclient;
+                    const source: tdatalist; var dest: tdatalist);
 
 implementation
 uses
@@ -1179,6 +1188,16 @@ var
   tcomplexdatalist,tcustomrowstatelist,
 //dl_custom
   nil);
+
+procedure setremotedatalist(const aintf: idatalistclient;
+                    const source: tdatalist; var dest: tdatalist);
+begin
+ aintf.getobjectlinker.setlinkedvar(aintf,source,dest,
+                                               typeinfo(idatalistclient));
+ if dest <> nil then begin
+  include(dest.fstate,dls_remote);
+ end;
+end;
 
 function getdatalistclass(const adatatype: listdatatypety): datalistclassty;
 begin
@@ -2973,7 +2992,7 @@ begin
   end;
  end
  else begin
-  include(fstate,dls_sorted);
+  include(fstate,dls_sortio);
  end;
 end;
 
@@ -3963,10 +3982,21 @@ begin
  end;
 end;
 
+procedure tdatalist.remoteitemchange(const alink: pointer);
+begin
+ with idatalistclient(alink) do begin
+  itemchanged(self,fintparam);
+ end;
+end;
+
 procedure tdatalist.doitemchange(const index: integer);
 begin
  if assigned(fonitemchange) then begin
   fonitemchange(self,index);
+ end;
+ fintparam:= index;
+ if (dls_remote in fstate) and (fobjectlinker <> nil) then begin
+  fobjectlinker.forall(@remoteitemchange,typeinfo(idatalistclient));
  end;
 end;
 
@@ -3981,7 +4011,7 @@ procedure tdatalist.change(const index: integer);
 var
  int1: integer;
 begin
- exclude(fstate,dls_sorted);
+ exclude(fstate,dls_sortio);
  if fnochange = 0 then begin
   doitemchange(index);
   if sorted then begin

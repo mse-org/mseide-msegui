@@ -93,7 +93,7 @@ type
  {$endif}  
  end;
 
- twidgetcol = class(tdatacol,iwidgetgrid)
+ twidgetcol = class(tdatacol,iwidgetgrid,idatalistclient)
   private
    fwidgetname: string;
    ffixrowwidgets: widgetarty;
@@ -1167,8 +1167,8 @@ begin
                    {$ifdef FPC}@{$endif}writefixwidgetnames,
                    needswidgetnamewriting(ffixrowwidgets));
  bo1:= false;
- if (fdata <> nil) and not (dls_nogridstreaming in 
-        tdatalist1(fdata).fstate) then begin
+ if (fdata <> nil) and ([dls_nogridstreaming,dls_remote] * 
+                                   tdatalist1(fdata).fstate = []) then begin
   col1:= twidgetcol(filer.ancestor);
   if col1 <> nil then begin
    bo1:= (col1.fdata = nil) or (fdata.datatype <> col1.fdata.datatype);
@@ -1179,8 +1179,8 @@ begin
  end;
  filer.defineproperty('dataclass',{$ifdef FPC}@{$endif}readdataclass,
                        {$ifdef FPC}@{$endif}writedataclass,
-                              (fdata <> nil) and not (dls_nogridstreaming in 
-                               tdatalist1(fdata).fstate));
+                              (fdata <> nil) and 
+           ([dls_nogridstreaming,dls_remote] * fdata.state = []));
  filer.defineproperty('data',{$ifdef FPC}@{$endif}readdata,
                        {$ifdef FPC}@{$endif}writedata,bo1);
 // filer.defineproperty('datatype',{$ifdef FPC}@{$endif}readdatatype,
@@ -1289,6 +1289,9 @@ begin
   end
   else begin
    fintf:= nil;
+   if (dl1 <> nil) and (dls_remote in dl1.state) then begin
+    dl1:= nil; //no free
+   end;
   end;
  finally
   dl1.free;
@@ -1674,6 +1677,11 @@ end;
 {$ifdef mse_with_ifi}
 procedure twidgetcol.updateifigriddata(const alist: tdatalist);
 begin
+ if (fdata <> nil) and not (dls_remote in fdata.state) and 
+                                               (alist <> nil) then begin
+  freeandnil(fdata); //free internal datalist
+ end;
+ setremotedatalist(idatalistclient(self),alist,fdata);
 end;
 {$endif}
 
