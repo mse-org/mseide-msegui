@@ -8,12 +8,17 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 unit msedataimage;
-{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$ifdef FPC}
+ {$ifndef mse_no_ifi}
+  {$define mse_with_ifi}
+ {$endif}
+ {$mode objfpc}{$h+}{$interfaces corba}
+{$endif}
 interface
 uses
  classes,mseguiglob,msegui,mseimage,msewidgetgrid,msegrids,msedatalist,msegraphutils,
  msegraphics,mseclasses,mseeditglob,msebitmap,msemenus,mseevent,msestrings,
- msepointer,msegridsglob;
+ msepointer,msegridsglob{$ifdef mse_with_ifi},mseificomp{$endif};
  
 type
  tcustomdataimage = class(timage,igridwidget)
@@ -66,6 +71,9 @@ type
    procedure updatecoloptions(const aoptions: coloptionsty);
    procedure statdataread; virtual;
    procedure griddatasourcechanged; virtual;
+   {$ifdef mse_with_ifi}
+   function getifilink: tifilinkcomp;
+   {$endif}
   public
    constructor create(aowner: tcomponent); override;
    function seteditfocus: boolean;
@@ -301,6 +309,13 @@ procedure tcustomdataimage.griddatasourcechanged;
 begin
  //dummy
 end;
+
+{$ifdef mse_with_ifi}
+function tcustomdataimage.getifilink: tifilinkcomp;
+begin
+ result:= nil;
+end;
+{$endif}
 
 function tcustomdataimage.getoptionsedit: optionseditty;
 begin

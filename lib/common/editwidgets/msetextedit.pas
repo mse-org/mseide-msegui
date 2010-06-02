@@ -9,14 +9,19 @@
 }
 unit msetextedit;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$ifdef FPC}
+ {$ifndef mse_no_ifi}
+  {$define mse_with_ifi}
+ {$endif}
+ {$mode objfpc}{$h+}{$interfaces corba}
+{$endif}
 
 interface
 uses
  mseeditglob,mseedit,msewidgetgrid,classes,msedatalist,msegraphics,msestream,
  msetypes,mserichstring,msestat,msestatfile,mseclasses,mseinplaceedit,msegrids,
  mseevent,mseguiglob,msegui,msegraphutils,msestrings,msedrawtext,msearrayprops,
- msemenus,msepointer,msegridsglob;
+ msemenus,msepointer,msegridsglob{$ifdef mse_with_ifi},mseificomp{$endif};
 
 const
  defaulttexteditoptions =  (defaultoptionsedit + 
@@ -153,6 +158,9 @@ type
    procedure updatecoloptions(const aoptions: coloptionsty);
    procedure statdataread; virtual;
    procedure griddatasourcechanged;
+   {$ifdef mse_with_ifi}
+   function getifilink: tifilinkcomp;
+   {$endif}
 
    //istatfile
    procedure dostatread(const reader: tstatreader);
@@ -621,6 +629,13 @@ procedure tcustomtextedit.griddatasourcechanged;
 begin
  //dummy
 end;
+
+{$ifdef mse_with_ifi}
+function tcustomtextedit.getifilink: tifilinkcomp;
+begin
+ result:= nil;
+end;
+{$endif}
 
 procedure tcustomtextedit.setoptionsedit(const avalue: optionseditty);
 begin

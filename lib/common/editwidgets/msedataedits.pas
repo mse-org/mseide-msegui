@@ -184,6 +184,9 @@ type
    procedure setoptionsedit(const avalue: optionseditty); override;
    procedure statdataread; virtual;
    procedure griddatasourcechanged; virtual;
+  {$ifdef mse_with_ifi}
+   function getifilink: tifilinkcomp;
+  {$endif}
 
    procedure formaterror(const quiet: boolean);
    procedure rangeerror(const min,max; const quiet: boolean);
@@ -2480,7 +2483,12 @@ begin
  end;
 end;
 
-{$endif}
+function tcustomdataedit.getifilink: tifilinkcomp;
+begin
+ result:= fifilink;
+end;
+
+{$endif mse_with_ifi}
 
 { tcustomstringedit }
 

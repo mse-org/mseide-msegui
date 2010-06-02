@@ -231,13 +231,13 @@ type
    procedure setvalue(const sender: iificlient; var avalue;
                                             var accept: boolean); override;
 
-   procedure getdatalist1(const alink: pointer; var handled: boolean);
-   function getfirstdatalist1: tdatalist;
-   function getfirstdatalist: tdatalist;
+//   procedure getdatalist1(const alink: pointer; var handled: boolean);
+//   function getfirstdatalist1: tdatalist;
+//   function getfirstdatalist: tdatalist;
    procedure optionsvaluechanged; virtual;
    function createdatalist: tdatalist; virtual; abstract;
    function getlistdatatypes: listdatatypesty; virtual; abstract;
-      
+{      
    procedure setmsestringvalar(const alink: pointer; var handled: boolean);
    procedure getmsestringvalar(const alink: pointer; var handled: boolean);
    procedure setintegervalar(const alink: pointer; var handled: boolean);
@@ -265,11 +265,12 @@ type
                                                                  var avalue);
    procedure setitem(const index: integer; const asetter: itemsetterty;
                                                                  const avalue);
-
+}
    procedure statreadlist(const alink: pointer);
    procedure statwritelist(const alink: pointer; var handled: boolean);
   public
    destructor destroy; override;
+   property datalist: tdatalist read fdatalist;
   published 
    property onclientdataentered: notifyeventty read fonclientdataentered 
                                   write fonclientdataentered;
@@ -284,10 +285,10 @@ type
    fvalue: msestring;
    fonclientsetvalue: setstringeventty;
    procedure setvalue1(const avalue: msestring);
-   function getgridvalues: msestringarty;
-   procedure setgridvalues(const avalue: msestringarty);
-   function getgridvalue(const index: integer): msestring;
-   procedure setgridvalue(const index: integer; const avalue: msestring);
+//   function getgridvalues: msestringarty;
+//   procedure setgridvalues(const avalue: msestringarty);
+//   function getgridvalue(const index: integer): msestring;
+//   procedure setgridvalue(const index: integer; const avalue: msestring);
    function getgriddata: tmsestringdatalist;
   protected
    procedure valuestoclient(const alink: pointer); override;
@@ -300,9 +301,9 @@ type
   public
    constructor create(const aowner: tmsecomponent); override;
    property griddata: tmsestringdatalist read getgriddata;
-   property gridvalues: msestringarty read getgridvalues write setgridvalues;
-   property gridvalue[const index: integer]: msestring read getgridvalue 
-                                                             write setgridvalue;
+//   property gridvalues: msestringarty read getgridvalues write setgridvalues;
+//   property gridvalue[const index: integer]: msestring read getgridvalue 
+//                                                             write setgridvalue;
   published
    property value: msestring read fvalue write setvalue1;
    property onclientsetvalue: setstringeventty 
@@ -384,10 +385,10 @@ type
    procedure setvalue1(const avalue: integer);
    procedure setmin(const avalue: integer);
    procedure setmax(const avalue: integer);
-   function getgridvalues: integerarty;
-   procedure setgridvalues(const avalue: integerarty);
-   function getgridvalue(const index: integer): integer;
-   procedure setgridvalue(const index: integer; const avalue: integer);
+//   function getgridvalues: integerarty;
+//   procedure setgridvalues(const avalue: integerarty);
+//   function getgridvalue(const index: integer): integer;
+//   procedure setgridvalue(const index: integer; const avalue: integer);
    function getgriddata: tintegerdatalist;
   protected
    procedure valuestoclient(const alink: pointer); override;
@@ -403,9 +404,9 @@ type
   public
    constructor create(const aowner: tmsecomponent); override;
    property griddata: tintegerdatalist read getgriddata;
-   property gridvalues: integerarty read getgridvalues write setgridvalues;
-   property gridvalue[const index: integer]: integer read getgridvalue 
-                                                             write setgridvalue;
+//   property gridvalues: integerarty read getgridvalues write setgridvalues;
+//   property gridvalue[const index: integer]: integer read getgridvalue 
+//                                                             write setgridvalue;
   published
    property value: integer read fvalue write setvalue1 default 0;
    property min: integer read fmin write setmin default 0;
@@ -435,10 +436,10 @@ type
    fvalue: boolean;
    fonclientsetvalue: setbooleaneventty;
    procedure setvalue1(const avalue: boolean);
-   function getgridvalues: longboolarty;
-   procedure setgridvalues(const avalue: longboolarty);
-   function getgridvalue(const index: integer): boolean;
-   procedure setgridvalue(const index: integer; const avalue: boolean);
+//   function getgridvalues: longboolarty;
+//   procedure setgridvalues(const avalue: longboolarty);
+//   function getgridvalue(const index: integer): boolean;
+//   procedure setgridvalue(const index: integer; const avalue: boolean);
    function getgriddata: tintegerdatalist;
   protected
    procedure valuestoclient(const alink: pointer); override;
@@ -451,9 +452,9 @@ type
   public
    constructor create(const aowner: tmsecomponent); override;
    property griddata: tintegerdatalist read getgriddata;
-   property gridvalues: longboolarty read getgridvalues write setgridvalues;
-   property gridvalue[const index: integer]: boolean read getgridvalue 
-                                                             write setgridvalue;
+//   property gridvalues: longboolarty read getgridvalues write setgridvalues;
+//   property gridvalue[const index: integer]: boolean read getgridvalue 
+//                                                             write setgridvalue;
   published
    property value: boolean read fvalue write setvalue1 default false;
    property onclientsetvalue: setbooleaneventty 
@@ -475,10 +476,10 @@ type
    procedure writemin(writer: twriter);
    procedure readmax(reader: treader);
    procedure writemax(writer: twriter);
-   function getgridvalues: realarty;
-   procedure setgridvalues(const avalue: realarty);
-   function getgridvalue(const index: integer): real;
-   procedure setgridvalue(const index: integer; const avalue: real);
+//   function getgridvalues: realarty;
+//   procedure setgridvalues(const avalue: realarty);
+//   function getgridvalue(const index: integer): real;
+//   procedure setgridvalue(const index: integer; const avalue: real);
    function getgriddata: trealdatalist;
   protected
    procedure valuestoclient(const alink: pointer); override;
@@ -492,9 +493,9 @@ type
   public
    constructor create(const aowner: tmsecomponent); override;
    property griddata: trealdatalist read getgriddata;
-   property gridvalues: realarty read getgridvalues write setgridvalues;
-   property gridvalue[const index: integer]: real read getgridvalue 
-                                                             write setgridvalue;
+//   property gridvalues: realarty read getgridvalues write setgridvalues;
+//   property gridvalue[const index: integer]: real read getgridvalue 
+//                                                             write setgridvalue;
   published
    property value: realty read fvalue write setvalue1 stored false;
    property min: realty read fmin write setmin stored false;
@@ -518,10 +519,10 @@ type
    procedure writemin(writer: twriter);
    procedure readmax(reader: treader);
    procedure writemax(writer: twriter);
-   function getgridvalues: datetimearty;
-   procedure setgridvalues(const avalue: datetimearty);
-   function getgridvalue(const index: integer): tdatetime;
-   procedure setgridvalue(const index: integer; const avalue: tdatetime);
+//   function getgridvalues: datetimearty;
+//   procedure setgridvalues(const avalue: datetimearty);
+//   function getgridvalue(const index: integer): tdatetime;
+//   procedure setgridvalue(const index: integer; const avalue: tdatetime);
    function getgriddata: tdatetimedatalist;
   protected
    procedure valuestoclient(const alink: pointer); override;
@@ -535,9 +536,9 @@ type
   public
    constructor create(const aowner: tmsecomponent); override;
    property griddata: tdatetimedatalist read getgriddata;
-   property gridvalues: datetimearty read getgridvalues write setgridvalues;
-   property gridvalue[const index: integer]: tdatetime read getgridvalue 
-                                                             write setgridvalue;
+//   property gridvalues: datetimearty read getgridvalues write setgridvalues;
+//   property gridvalue[const index: integer]: tdatetime read getgridvalue 
+//                                                             write setgridvalue;
   published
    property value: tdatetime read fvalue write setvalue1 stored false;
    property min: tdatetime read fmin write setmin stored false;
@@ -1515,15 +1516,15 @@ function tvalueclientcontroller.getifilinkkind: ptypeinfo;
 begin
  result:= typeinfo(iifidatalink);
 end;
-
+{
 procedure tvalueclientcontroller.getdatalist1(const alink: pointer;
                                                    var handled: boolean);
 var
- datalist: tdatalist;
+ datalist1: tdatalist;
 begin
- datalist:= iifidatalink(alink).ifigriddata;
- if datalist <> nil then begin
-  pdatalist(fitempo)^:= datalist;
+ datalist1:= iifidatalink(alink).ifigriddata;
+ if datalist1 <> nil then begin
+  pdatalist(fitempo)^:= datalist1;
   handled:= true;
  end;
 end;
@@ -1548,13 +1549,14 @@ begin
   raise exception.create('No datalist.');
  end;
 end;
-
+}
+{
 procedure tvalueclientcontroller.setmsestringvalar(const alink: pointer;
                                                       var handled: boolean);
-var
- datalist: tdatalist;
+//var
+// datalist: tdatalist;
 begin
- datalist:= iifidatalink(alink).ifigriddata;
+// datalist:= iifidatalink(alink).ifigriddata;
  if datalist is tmsestringdatalist then begin
   tmsestringdatalist(datalist).asarray:= pmsestringarty(fvalarpo)^;
   handled:= true;
@@ -1848,12 +1850,12 @@ begin
  fitemindex:= index;
  tmsecomponent1(fowner).getobjectlinker.forfirst(asetter,self); 
 end;
-
+}
 procedure tvalueclientcontroller.statreadlist(const alink: pointer);
-var
- datalist: tdatalist;
+//var
+// datalist: tdatalist;
 begin
- datalist:= iifidatalink(alink).ifigriddata;
+// datalist:= iifidatalink(alink).ifigriddata;
  if datalist <> nil then begin
   tstatreader(fitempo).readdatalist(getstatvarname,datalist);
  end;
@@ -1861,10 +1863,10 @@ end;
 
 procedure tvalueclientcontroller.statwritelist(const alink: pointer;
                                                       var handled: boolean);
-var
- datalist: tdatalist;
+//var
+// datalist: tdatalist;
 begin
- datalist:= iifidatalink(alink).ifigriddata;
+// datalist:= iifidatalink(alink).ifigriddata;
  if datalist <> nil then begin
   tstatwriter(fitempo).writedatalist(getstatvarname,datalist);
   handled:= true;
@@ -1921,7 +1923,11 @@ end;
 
 function tvalueclientcontroller.ifigriddata: tdatalist;
 begin
- result:= getfirstdatalist1;
+ result:= fdatalist;
+ if result = nil then begin
+  raise exception.create('No datalist, activate optionsvalue vco_datalist.');
+ end;
+// result:= getfirstdatalist1;
 end;
 
 function tvalueclientcontroller.ififieldname: string;
@@ -1975,7 +1981,7 @@ begin
  end;
  inherited;
 end;
-
+{
 function tstringclientcontroller.getgridvalues: msestringarty;
 begin
  result:= nil;
@@ -1998,10 +2004,10 @@ procedure tstringclientcontroller.setgridvalue(const index: integer;
 begin
  setitem(index,@setmsestringitem,avalue);
 end;
-
+}
 function tstringclientcontroller.getgriddata: tmsestringdatalist;
 begin
- result:= tmsestringdatalist(getfirstdatalist);
+ result:= tmsestringdatalist(ifigriddata);
 end;
 
 procedure tstringclientcontroller.dostatread(const reader: tstatreader);
@@ -2064,7 +2070,7 @@ begin
  fmax:= avalue;
  change;
 end;
-
+{
 function tintegerclientcontroller.getgridvalues: integerarty;
 begin
  result:= nil;
@@ -2087,10 +2093,10 @@ procedure tintegerclientcontroller.setgridvalue(const index: integer;
 begin
  setitem(index,@setintegeritem,avalue);
 end;
-
+}
 function tintegerclientcontroller.getgriddata: tintegerdatalist;
 begin
- result:= tintegerdatalist(getfirstdatalist);
+ result:= tintegerdatalist(ifigriddata);
 end;
 
 procedure tintegerclientcontroller.dostatread(const reader: tstatreader);
@@ -2148,7 +2154,7 @@ begin
  end;
  inherited;
 end;
-
+{
 function tbooleanclientcontroller.getgridvalues: longboolarty;
 begin
  result:= nil;
@@ -2171,10 +2177,10 @@ procedure tbooleanclientcontroller.setgridvalue(const index: integer;
 begin
  setitem(index,@setbooleanitem,avalue);
 end;
-
+}
 function tbooleanclientcontroller.getgriddata: tintegerdatalist;
 begin
- result:= tintegerdatalist(getfirstdatalist);
+ result:= tintegerdatalist(ifigriddata);
 end;
 
 procedure tbooleanclientcontroller.dostatread(const reader: tstatreader);
@@ -2297,7 +2303,7 @@ begin
  filer.DefineProperty('ma',{$ifdef FPC}@{$endif}readmax,
           {$ifdef FPC}@{$endif}writemax,bo3);
 end;
-
+{
 function trealclientcontroller.getgridvalues: realarty;
 begin
  result:= nil;
@@ -2320,10 +2326,10 @@ procedure trealclientcontroller.setgridvalue(const index: integer;
 begin
  setitem(index,@setrealtyitem,avalue);
 end;
-
+}
 function trealclientcontroller.getgriddata: trealdatalist;
 begin
- result:= trealdatalist(getfirstdatalist);
+ result:= trealdatalist(ifigriddata);
 end;
 
 procedure trealclientcontroller.dostatread(const reader: tstatreader);
@@ -2446,7 +2452,7 @@ begin
  filer.DefineProperty('ma',{$ifdef FPC}@{$endif}readmax,
           {$ifdef FPC}@{$endif}writemax,bo3);
 end;
-
+{
 function tdatetimeclientcontroller.getgridvalues: datetimearty;
 begin
  result:= nil;
@@ -2469,10 +2475,10 @@ procedure tdatetimeclientcontroller.setgridvalue(const index: integer;
 begin
  setitem(index,@setdatetimeitem,avalue);
 end;
-
+}
 function tdatetimeclientcontroller.getgriddata: tdatetimedatalist;
 begin
- result:= tdatetimedatalist(getfirstdatalist);
+ result:= tdatetimedatalist(ifigriddata);
 end;
 
 procedure tdatetimeclientcontroller.dostatread(const reader: tstatreader);
@@ -2814,56 +2820,100 @@ begin
     case vtype of
      vtstring: begin
       if comp1 is tifistringlinkcomp then begin
-       tifistringlinkcomp(comp1).controller.gridvalue[maxint]:= vstring^;
+       with tifistringlinkcomp(comp1).controller do begin
+        if fdatalist <> nil then begin
+         griddata[fdatalist.count-1]:= vstring^;
+        end;
+       end;
       end;
      end;
      vtansistring: begin
       if comp1 is tifistringlinkcomp then begin
-       tifistringlinkcomp(comp1).controller.gridvalue[maxint]:= ansistring(vansistring);
+       with tifistringlinkcomp(comp1).controller do begin
+        if fdatalist <> nil then begin
+         griddata[fdatalist.count-1]:= ansistring(vansistring);
+        end;
+       end;
       end;
      end;
      vtwidestring: begin
       if comp1 is tifistringlinkcomp then begin
-       tifistringlinkcomp(comp1).controller.gridvalue[maxint]:= widestring(vwidestring);
+       with tifistringlinkcomp(comp1).controller do begin
+        if fdatalist <> nil then begin
+         griddata[fdatalist.count-1]:= widestring(vwidestring);
+        end;
+       end;
       end;
      end;
      vtpchar: begin
       if comp1 is tifistringlinkcomp then begin
-       tifistringlinkcomp(comp1).controller.gridvalue[maxint]:= msestring(ansistring(vpchar));
+       with tifistringlinkcomp(comp1).controller do begin
+        if fdatalist <> nil then begin
+         griddata[fdatalist.count-1]:= msestring(ansistring(vpchar));
+        end;
+       end;
       end;
      end;
      vtpwidechar: begin
       if comp1 is tifistringlinkcomp then begin
-       tifistringlinkcomp(comp1).controller.gridvalue[maxint]:= msestring(vpwidechar);
+       with tifistringlinkcomp(comp1).controller do begin
+        if fdatalist <> nil then begin
+         griddata[fdatalist.count-1]:= msestring(vpwidechar);
+        end;
+       end;
       end;
      end;
      vtchar: begin
       if comp1 is tifistringlinkcomp then begin
-       tifistringlinkcomp(comp1).controller.gridvalue[maxint]:= vchar;
+       with tifistringlinkcomp(comp1).controller do begin
+        if fdatalist <> nil then begin
+         griddata[fdatalist.count-1]:= vchar;
+        end;
+       end;
       end;
      end;
      vtwidechar: begin
       if comp1 is tifistringlinkcomp then begin
-       tifistringlinkcomp(comp1).controller.gridvalue[maxint]:= vwidechar;
+       with tifistringlinkcomp(comp1).controller do begin
+        if fdatalist <> nil then begin
+         griddata[fdatalist.count-1]:= vwidechar;
+        end;
+       end;
       end;
      end;
      vtboolean: begin
       if comp1 is tifibooleanlinkcomp then begin
-       tifibooleanlinkcomp(comp1).controller.gridvalue[maxint]:= vboolean;
+       with tifibooleanlinkcomp(comp1).controller do begin
+        if fdatalist <> nil then begin
+         griddata[fdatalist.count-1]:= longint(longbool(vboolean));
+        end;
+       end;
       end;
      end;
      vtinteger: begin
       if comp1 is tifiintegerlinkcomp then begin
-       tifiintegerlinkcomp(comp1).controller.gridvalue[maxint]:= vinteger;
+       with tifiintegerlinkcomp(comp1).controller do begin
+        if fdatalist <> nil then begin
+         griddata[fdatalist.count-1]:= vinteger;
+        end;
+       end;
       end;
      end;
      vtextended: begin
       if comp1 is tifireallinkcomp then begin
-       tifireallinkcomp(comp1).controller.gridvalue[maxint]:= vextended^;
+       with tifireallinkcomp(comp1).controller do begin
+        if fdatalist <> nil then begin
+         griddata[fdatalist.count-1]:= vextended^;
+        end;
+       end;
       end
       else begin
        if comp1 is tifidatetimelinkcomp then begin
-        tifidatetimelinkcomp(comp1).controller.gridvalue[maxint]:= vextended^;
+        with tifidatetimelinkcomp(comp1).controller do begin
+         if fdatalist <> nil then begin
+          griddata[fdatalist.count-1]:= vextended^;
+         end;
+        end;
        end;
       end;
      end;

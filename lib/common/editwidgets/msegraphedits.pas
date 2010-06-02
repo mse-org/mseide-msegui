@@ -109,6 +109,7 @@ type
    procedure ifisetvalue(var avalue; var accept: boolean);
    function getifilinkkind: ptypeinfo;
    procedure setifilink(const avalue: tifilinkcomp);
+   function getifilink: tifilinkcomp;
    function ifigriddata: tdatalist;
    procedure updateifigriddata(const alist: tdatalist);
 {$endif}
@@ -1821,6 +1822,11 @@ begin
  result:= typeinfo(iifidatalink);
 end;
 
+function tgraphdataedit.getifilink: tifilinkcomp;
+begin
+ result:= fifilink;
+end;
+
 procedure tgraphdataedit.setifilink(const avalue: tifilinkcomp);
 begin
  mseificomp.setifilinkcomp(iifidatalink(self),avalue,fifilink);
@@ -1848,7 +1854,7 @@ begin
  end;
 end;
 
-{$endif}
+{$endif mse_with_ifi}
 
 { ttogglegraphdataedit}
 

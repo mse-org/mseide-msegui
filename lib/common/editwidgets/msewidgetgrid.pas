@@ -21,7 +21,7 @@ uses
  mseclasses,msegrids,msegui,msegraphutils,mseglob,mseguiglob,mseeditglob,
  Classes,msemenus,
  msegraphics,mseevent,msedatalist,msetypes,msepointer,msestrings,
- msegridsglob;
+ msegridsglob{$ifdef mse_with_ifi},mseificomp{$endif};
 
 type
 
@@ -88,6 +88,9 @@ type
   procedure statdataread;
   procedure griddatasourcechanged;
   procedure setreadonly(const avalue: boolean);
+ {$ifdef mse_with_ifi}
+  function getifilink: tifilinkcomp;
+ {$endif}  
  end;
 
  twidgetcol = class(tdatacol,iwidgetgrid)
@@ -1214,20 +1217,28 @@ procedure twidgetcol.setwidget(const awidget: twidget);
 var
  po1: pointer;
  dl1: tdatalist;
+{$ifdef mse_with_ifi}
+ ifilink1: tifilinkcomp;
+{$endif}
 begin
  dl1:= fdata;
  fdata:= nil;
+{$ifdef mse_with_ifi}
+ ifilink1:= nil;
+{$endif}
  try
   if fintf <> nil then begin
    if fdata <> nil then begin
     fdata.linksource(nil,0);
    end;
    fintf.setgridintf(nil);
+  {$ifdef mse_with_ifi}
+   updateifigriddata(nil);
+  {$endif}
   end;
   if awidget <> nil then begin
    awidget.visible:= false;
    awidget.getcorbainterface(typeinfo(igridwidget),fintf);
- //  awidget.getcorbainterface(igridwidget,fintf);
    if not (gps_datalistvalid in fstate) then begin
     fdata:= fintf.createdatalist(self);
    end
@@ -1236,27 +1247,40 @@ begin
    end;
    fintf.setgridintf(iwidgetgrid(self));
    options:= foptions; //call updatecoloptions;
-   po1:= fintf.getdefaultvalue;
-   if fdata <> nil then begin
-    if dl1 <> nil then begin //from streaming
-     if dl1 <> fdata then begin
-      fdata.assign(dl1);
-     end
-     else begin
-      dl1:= nil;
-     end;
-    end
-    else begin
-     if po1 <> nil then begin
-      tdatalist1(fdata).internalfill(fgrid.rowcount,po1^);
-     end
-     else begin
-      fdata.count:= fgrid.rowcount;
-     end;
+  {$ifdef mse_with_ifi}
+   ifilink1:= fintf.getifilink;
+   if ifilink1 is tifivaluelinkcomp then begin
+    if fdata = dl1 then begin
+     dl1:= nil; //no double free
+     updateifigriddata(tifivaluelinkcomp(ifilink1).controller.datalist);
     end;
-    fdata.maxcount:= fgrid.rowcountmax;
-    fdata.onitemchange:= {$ifdef FPC}@{$endif}itemchanged;
+   end
+   else begin
+  {$endif}
+    po1:= fintf.getdefaultvalue;
+    if fdata <> nil then begin
+     if dl1 <> nil then begin //from streaming
+      if dl1 <> fdata then begin
+       fdata.assign(dl1);
+      end
+      else begin
+       dl1:= nil;
+      end;
+     end
+     else begin
+      if po1 <> nil then begin
+       tdatalist1(fdata).internalfill(fgrid.rowcount,po1^);
+      end
+      else begin
+       fdata.count:= fgrid.rowcount;
+      end;
+     end;
+     fdata.maxcount:= fgrid.rowcountmax;
+     fdata.onitemchange:= {$ifdef FPC}@{$endif}itemchanged;
+    end;
+  {$ifdef mse_with_ifi}
    end;
+  {$endif}
    if gs_isdb in tcustomgrid1(fgrid).fstate then begin
     datasourcechanged;
    end;
