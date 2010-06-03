@@ -232,6 +232,10 @@ type
    procedure setvalue(const sender: iificlient; var avalue;
                                             var accept: boolean); override;
    procedure loaded; override;
+   procedure statreadvalue(const reader: tstatreader); virtual;
+   procedure statwritevalue(const reader: tstatwriter); virtual;
+   procedure dostatread(const reader: tstatreader); override;
+   procedure dostatwrite(const writer: tstatwriter); override;
 
 //   procedure getdatalist1(const alink: pointer; var handled: boolean);
 //   function getfirstdatalist1: tdatalist;
@@ -299,8 +303,8 @@ type
    procedure setvalue(const sender: iificlient;
                               var avalue; var accept: boolean); override;
     //istatfile
-   procedure dostatread(const reader: tstatreader); override;
-   procedure dostatwrite(const writer: tstatwriter); override;
+   procedure statreadvalue(const reader: tstatreader); override;
+   procedure statwritevalue(const writer: tstatwriter); override;
   public
    constructor create(const aowner: tmsecomponent); override;
    property griddata: tmsestringdatalist read getgriddata;
@@ -402,8 +406,8 @@ type
    function getlistdatatypes: listdatatypesty; override;
    
     //istatfile
-   procedure dostatread(const reader: tstatreader); override;
-   procedure dostatwrite(const writer: tstatwriter); override;
+   procedure statreadvalue(const reader: tstatreader); override;
+   procedure statwritevalue(const writer: tstatwriter); override;
   public
    constructor create(const aowner: tmsecomponent); override;
    property griddata: tintegerdatalist read getgriddata;
@@ -450,8 +454,8 @@ type
    procedure setvalue(const sender: iificlient;
                               var avalue; var accept: boolean); override;
     //istatfile
-   procedure dostatread(const reader: tstatreader); override;
-   procedure dostatwrite(const writer: tstatwriter); override;
+   procedure statreadvalue(const reader: tstatreader); override;
+   procedure statwritevalue(const writer: tstatwriter); override;
   public
    constructor create(const aowner: tmsecomponent); override;
    property griddata: tintegerdatalist read getgriddata;
@@ -491,8 +495,8 @@ type
                               var avalue; var accept: boolean); override;
    procedure defineproperties(filer: tfiler); override;
     //istatfile
-   procedure dostatread(const reader: tstatreader); override;
-   procedure dostatwrite(const writer: tstatwriter); override;
+   procedure statreadvalue(const reader: tstatreader); override;
+   procedure statwritevalue(const writer: tstatwriter); override;
   public
    constructor create(const aowner: tmsecomponent); override;
    property griddata: trealdatalist read getgriddata;
@@ -534,8 +538,8 @@ type
                               var avalue; var accept: boolean); override;
    procedure defineproperties(filer: tfiler); override;
     //istatfile
-   procedure dostatread(const reader: tstatreader); override;
-   procedure dostatwrite(const writer: tstatwriter); override;
+   procedure statreadvalue(const reader: tstatreader); override;
+   procedure statwritevalue(const writer: tstatwriter); override;
   public
    constructor create(const aowner: tmsecomponent); override;
    property griddata: tdatetimedatalist read getgriddata;
@@ -873,7 +877,8 @@ uses
  sysutils,msereal,msestreaming;
 
 const
- valuevarname = 'value';
+ valuevarname = '_value';
+ listvarname = '_list';
 // arvaluevarname = 'arvalue';
  rowstatevarname = '_rowstate';
   
@@ -1973,6 +1978,38 @@ begin
  atypes:= getlistdatatypes;
 end;
 
+procedure tvalueclientcontroller.dostatread(const reader: tstatreader);
+begin
+ inherited;
+ if fdatalist = nil then begin
+  statreadvalue(reader);
+ end
+ else begin
+  reader.readdatalist(listvarname,fdatalist);
+ end;
+end;
+
+procedure tvalueclientcontroller.dostatwrite(const writer: tstatwriter);
+begin
+ inherited;
+ if fdatalist = nil then begin
+  statwritevalue(writer);
+ end
+ else begin
+  writer.writedatalist(listvarname,fdatalist);
+ end;
+end;
+
+procedure tvalueclientcontroller.statreadvalue(const reader: tstatreader);
+begin
+ //dummy
+end;
+
+procedure tvalueclientcontroller.statwritevalue(const reader: tstatwriter);
+begin
+ //dummy
+end;
+
 { tstringclientcontroller }
 
 constructor tstringclientcontroller.create(const aowner: tmsecomponent);
@@ -2041,13 +2078,13 @@ begin
  result:= tmsestringdatalist(ifigriddata);
 end;
 
-procedure tstringclientcontroller.dostatread(const reader: tstatreader);
+procedure tstringclientcontroller.statreadvalue(const reader: tstatreader);
 begin
  inherited;
  value:= reader.readmsestrings(valuevarname,value);
 end;
 
-procedure tstringclientcontroller.dostatwrite(const writer: tstatwriter);
+procedure tstringclientcontroller.statwritevalue(const writer: tstatwriter);
 begin
  inherited;
  writer.writemsestrings(valuevarname,value);
@@ -2130,13 +2167,13 @@ begin
  result:= tintegerdatalist(ifigriddata);
 end;
 
-procedure tintegerclientcontroller.dostatread(const reader: tstatreader);
+procedure tintegerclientcontroller.statreadvalue(const reader: tstatreader);
 begin
  inherited;
  value:= reader.readinteger(valuevarname,value);
 end;
 
-procedure tintegerclientcontroller.dostatwrite(const writer: tstatwriter);
+procedure tintegerclientcontroller.statwritevalue(const writer: tstatwriter);
 begin
  inherited;
  writer.writeinteger(valuevarname,value);
@@ -2214,13 +2251,13 @@ begin
  result:= tintegerdatalist(ifigriddata);
 end;
 
-procedure tbooleanclientcontroller.dostatread(const reader: tstatreader);
+procedure tbooleanclientcontroller.statreadvalue(const reader: tstatreader);
 begin
  inherited;
  value:= reader.readboolean(valuevarname,value);
 end;
 
-procedure tbooleanclientcontroller.dostatwrite(const writer: tstatwriter);
+procedure tbooleanclientcontroller.statwritevalue(const writer: tstatwriter);
 begin
  inherited;
  writer.writeboolean(valuevarname,value);
@@ -2363,13 +2400,13 @@ begin
  result:= trealdatalist(ifigriddata);
 end;
 
-procedure trealclientcontroller.dostatread(const reader: tstatreader);
+procedure trealclientcontroller.statreadvalue(const reader: tstatreader);
 begin
  inherited;
  value:= reader.readreal(valuevarname,value);
 end;
 
-procedure trealclientcontroller.dostatwrite(const writer: tstatwriter);
+procedure trealclientcontroller.statwritevalue(const writer: tstatwriter);
 begin
  inherited;
  writer.writereal(valuevarname,value);
@@ -2512,13 +2549,13 @@ begin
  result:= tdatetimedatalist(ifigriddata);
 end;
 
-procedure tdatetimeclientcontroller.dostatread(const reader: tstatreader);
+procedure tdatetimeclientcontroller.statreadvalue(const reader: tstatreader);
 begin
  inherited;
  value:= reader.readreal(valuevarname,value);
 end;
 
-procedure tdatetimeclientcontroller.dostatwrite(const writer: tstatwriter);
+procedure tdatetimeclientcontroller.statwritevalue(const writer: tstatwriter);
 begin
  inherited;
  writer.writereal(valuevarname,value);
@@ -2735,8 +2772,11 @@ begin
   lico:= datacols[int1].link;
   if lico <> nil then begin
    with lico.controller do begin
-    fitempo:= reader;
-    tmsecomponent1(fowner).getobjectlinker.forall(@statreadlist,lico.controller); 
+    if fstatfile = nil then begin
+     dostatread(reader);
+//     fitempo:= reader;
+//     tmsecomponent1(fowner).getobjectlinker.forall(@statreadlist,lico.controller); 
+    end;
    end;
   end;
  end;
@@ -2766,8 +2806,12 @@ begin
   lico:= datacols[int1].link;
   if lico <> nil then begin
    with lico.controller do begin
-    fitempo:= writer;
-    tmsecomponent1(fowner).getobjectlinker.forfirst(@statwritelist,lico.controller); 
+    if fstatfile = nil then begin
+     dostatwrite(writer);
+//     fitempo:= writer;
+//     tmsecomponent1(fowner).getobjectlinker.forfirst(
+//                                        @statwritelist,lico.controller); 
+    end;
    end;
   end;
  end;
