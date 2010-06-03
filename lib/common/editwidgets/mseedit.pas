@@ -312,8 +312,8 @@ type
    fontextedited: texteditedeventty;
    ftextflags: textflagsty;
    ftextflagsactive: textflagsty;
-   fonkeydown: keyeventty;
-   fonkeyup: keyeventty;
+//   fonkeydown: keyeventty;
+//   fonkeyup: keyeventty;
    foncopytoclipboard: updatestringeventty;
    fonpastefromclipboard: updatestringeventty;
    function getmaxlength: integer;
@@ -360,10 +360,9 @@ type
    function getkeystring(const aindex: integer): msestring; virtual; //locate text
    function edited: boolean; virtual;
 
-   procedure doonkeydown(var info: keyeventinfoty);
                //interface to inplaceedit
    procedure dokeydown(var info: keyeventinfoty); override;
-   procedure dokeyup(var info: keyeventinfoty); override;
+//   procedure dokeyup(var info: keyeventinfoty); override;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure updatepopupmenu(var amenu: tpopupmenu;
                                       var mouseinfo: mouseeventinfoty); override;
@@ -409,8 +408,8 @@ type
    property caretwidth: integer read getcaretwidth write setcaretwidth default defaultcaretwidth;
    property onchange: notifyeventty read fonchange write fonchange;
    property ontextedited: texteditedeventty read fontextedited write fontextedited;
-   property onkeydown: keyeventty read fonkeydown write fonkeydown;
-   property onkeyup: keyeventty read fonkeyup write fonkeyup;
+//   property onkeydown: keyeventty read fonkeydown write fonkeydown;
+//   property onkeyup: keyeventty read fonkeyup write fonkeyup;
   published
    property optionswidget default defaulteditwidgetoptions; //first!
    property cursor default cr_ibeam;
@@ -1115,16 +1114,6 @@ begin
  inherited;
 end;
 
-procedure tcustomedit.doonkeydown(var info: keyeventinfoty);
-begin
- if not (ws1_onkeydowncalled in fwidgetstate1) then begin
-  include(fwidgetstate1,ws1_onkeydowncalled);
-  if canevent(tmethod(fonkeydown)) then begin
-   fonkeydown(self,info);
-  end;
- end;
-end;
-
 procedure tcustomedit.dokeydown(var info: keyeventinfoty);
 begin
  doonkeydown(info);
@@ -1135,7 +1124,7 @@ begin
   end;
  end;
 end;
-
+{
 procedure tcustomedit.dokeyup(var info: keyeventinfoty);
 begin
  if canevent(tmethod(fonkeyup)) then begin
@@ -1145,7 +1134,7 @@ begin
   inherited;
  end;
 end;
-
+}
 procedure tcustomedit.clientmouseevent(var info: mouseeventinfoty);
 begin
  feditor.mouseevent(info);

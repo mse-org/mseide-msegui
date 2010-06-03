@@ -703,6 +703,7 @@ type
    procedure dohide; override;
    procedure doshow; override;
 
+   procedure doonkeydown(var info: keyeventinfoty);
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure dokeyup(var info: keyeventinfoty); override;
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
@@ -4339,13 +4340,23 @@ begin
  end;
 end;
 
+procedure tactionwidget.doonkeydown(var info: keyeventinfoty);
+begin
+ if not (ws1_onkeydowncalled in fwidgetstate1) then begin
+  include(fwidgetstate1,ws1_onkeydowncalled);
+  if canevent(tmethod(fonkeydown)) then begin
+   fonkeydown(self,info);
+  end;
+ end;
+end;
+
 procedure tactionwidget.dokeydown(var info: keyeventinfoty);
 var
  dummy: tpopupmenu;
  mouseinfo: mouseeventinfoty;
 begin
- if not (es_processed in info.eventstate) and canevent(tmethod(fonkeydown)) then begin
-  fonkeydown(self,info);
+ if not (es_processed in info.eventstate) then begin
+  doonkeydown(info);
  end;
  with info do begin
   if (key = key_menu) and (shiftstate = []) and
