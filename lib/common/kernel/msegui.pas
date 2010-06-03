@@ -1836,6 +1836,7 @@ type
    fsizeerrorcount: integer;
    fmoving: integer;
    ffocusedwidget: twidget;
+   fcaller: twidget; //used in twidget.doshortcut
    fmodalinfopo: pmodalinfoty;
    foptions: windowoptionsty;
    ftransientfor: twindow;
@@ -9714,6 +9715,7 @@ begin
  if not (es_processed in info.eventstate) then begin
   include(info.eventstate,es_preview);
   include(appinst.fstate,aps_shortcutting);
+  window.fcaller:= nil;
   try
    doshortcut(info,self);
   finally
@@ -9894,6 +9896,7 @@ procedure twidget.doshortcut(var info: keyeventinfoty; const sender: twidget);
                  //sender = nil -> broadcast top down
 var
  int1,int2: integer;
+ caller1: twidget;
 begin
  if not (es_processed in info.eventstate) then begin
   if (sender <> nil) and (sender.fparentwidget = self) then begin
@@ -9916,14 +9919,17 @@ begin
   end
   else begin
      //children
+   caller1:= window.fcaller;
    for int1:= 0 to widgetcount - 1 do begin
-    with widgets[int1] do begin
-     if not (ow_noparentshortcut in foptionswidget) then begin
-      doshortcut(info,nil);
+    if widgets[int1] <> caller1 then begin
+     with widgets[int1] do begin
+      if not (ow_noparentshortcut in foptionswidget) then begin
+       doshortcut(info,nil);
+      end;
      end;
-    end;
-    if (es_processed in info.eventstate) then begin
-     break;
+     if (es_processed in info.eventstate) then begin
+      break;
+     end;
     end;
    end;
   end;
@@ -9931,6 +9937,7 @@ begin
     //parent
    if (fparentwidget <> nil) and 
                     not (ow_nochildshortcut in foptionswidget) then begin
+    fwindow.fcaller:= self;
     fparentwidget.doshortcut(info,sender);
    end
    else begin
