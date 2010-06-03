@@ -1249,7 +1249,8 @@ begin
    options:= foptions; //call updatecoloptions;
   {$ifdef mse_with_ifi}
    ifilink1:= fintf.getifilink;
-   if ifilink1 is tifivaluelinkcomp then begin
+   if (ifilink1 <> nil) and not(csloading in ifilink1.componentstate) and
+                                     (ifilink1 is tifivaluelinkcomp) then begin
     if fdata = dl1 then begin
      dl1:= nil; //no double free
      updateifigriddata(tifivaluelinkcomp(ifilink1).controller.datalist);

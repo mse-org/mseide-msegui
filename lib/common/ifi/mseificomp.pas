@@ -215,6 +215,7 @@ type
    procedure setoptionsvalue(const avalue: valueclientoptionsty);
    procedure setdatasource(const avalue: tifidatasource);
    procedure setdatafield(const avalue: ififieldnamety);
+   procedure linkdatalist1(const alink: pointer);
   protected
    fdatalist: tdatalist;
     //iifidatasourceclient
@@ -230,10 +231,12 @@ type
    function canconnect(const acomponent: tcomponent): boolean; override;
    procedure setvalue(const sender: iificlient; var avalue;
                                             var accept: boolean); override;
+   procedure loaded; override;
 
 //   procedure getdatalist1(const alink: pointer; var handled: boolean);
 //   function getfirstdatalist1: tdatalist;
 //   function getfirstdatalist: tdatalist;
+   procedure linkdatalist;
    procedure optionsvaluechanged; virtual;
    function createdatalist: tdatalist; virtual; abstract;
    function getlistdatatypes: listdatatypesty; virtual; abstract;
@@ -894,7 +897,8 @@ begin
  alink.getobjectlinker.setlinkedvar(alink,alinkcomp,tmsecomponent(dest),po1);
  if dest <> nil then begin
   alink.setifiserverintf(iifiserver(dest.fcontroller));
-  if alinkcomp is tifivaluelinkcomp then begin
+  if (alinkcomp is tifivaluelinkcomp) and 
+                        not (csloading in alinkcomp.componentstate) then begin
    iifidatalink(alink).updateifigriddata(
         tifivaluelinkcomp(alinkcomp).controller.fdatalist);
   end;
@@ -1891,15 +1895,42 @@ begin
  end;
 end;
 
+procedure tvalueclientcontroller.linkdatalist1(const alink: pointer);
+begin
+ iifidatalink(alink).updateifigriddata(fdatalist);
+end;
+
+procedure tvalueclientcontroller.linkdatalist;
+begin
+ with tmsecomponent1(fowner) do begin
+  if fobjectlinker <> nil then begin
+   fobjectlinker.forall(@self.linkdatalist1,self);
+  end;
+ end;
+end;
+
 procedure tvalueclientcontroller.optionsvaluechanged;
 begin
- if vco_datalist in foptionsvalue then begin
-  fdatalist:= createdatalist;
-  include(tdatalist1(fdatalist).fstate,dls_remote);
- end
- else begin
-  freeandnil(fdatalist);
+ if (vco_datalist in foptionsvalue) xor (fdatalist <> nil) then begin
+  if vco_datalist in foptionsvalue then begin
+   fdatalist:= createdatalist;
+   include(tdatalist1(fdatalist).fstate,dls_remote);
+   if not (csloading in fowner.componentstate) then begin
+    linkdatalist;
+   end;
+  end
+  else begin
+   freeandnil(fdatalist);
+  end;
  end;
+end;
+
+procedure tvalueclientcontroller.loaded;
+begin
+ if fdatalist <> nil then begin 
+  linkdatalist;
+ end;
+ inherited;
 end;
 
 procedure tvalueclientcontroller.setdatasource(const avalue: tifidatasource);
