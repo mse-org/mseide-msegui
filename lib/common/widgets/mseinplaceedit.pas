@@ -117,6 +117,7 @@ type
    function checkaction(const aaction: editactionty): boolean; overload;
    function checkaction(var info: editnotificationinfoty): boolean; overload;
    procedure enterchars(const chars: msestring); virtual;
+   function locating: boolean;
 
    procedure onundo(const sender: tobject);
    procedure oncopy(const sender: tobject);
@@ -462,6 +463,12 @@ begin
  freeandnil(frepeater);
 end;
 
+function tinplaceedit.locating: boolean;
+begin
+ result:= iedit(fintf).getoptionsedit * [oe_locate,oe_readonly] = 
+                                           [oe_locate,oe_readonly];
+end;
+
 procedure tinplaceedit.setup(const text: msestring;
               cursorindex: integer; shift: boolean;
               const atextrect, aclientrect: rectty;
@@ -470,9 +477,14 @@ procedure tinplaceedit.setup(const text: msestring;
               const font: tfont = nil;
               noinvalidate: boolean = false);
 begin
- ffiltertext:= '';
  finfo.text.text:= text;
- fcurindex:= cursorindex;
+ ffiltertext:= '';
+ if locating then begin
+  fcurindex:= 0;
+ end
+ else begin
+  fcurindex:= cursorindex;
+ end;
  ftextrect := atextrect;
  finfo.dest:= atextrect;
  finfo.clip:= aclientrect;
@@ -957,7 +969,7 @@ var
  actioninfo: editnotificationinfoty;
  bo1: boolean;
  opt1: optionseditty;
- locating: boolean;
+ locating1: boolean;
  shiftstate1: shiftstatesty;
 
 begin
@@ -967,7 +979,7 @@ begin
    exit;
   end;
   opt1:= iedit(fintf).getoptionsedit;
-  locating:= opt1 * [oe_locate,oe_readonly] = [oe_locate,oe_readonly];
+  locating1:= opt1 * [oe_locate,oe_readonly] = [oe_locate,oe_readonly];
   include(eventstate,es_processed);
   nochars:= true;
   finished:= true;
@@ -1039,7 +1051,7 @@ begin
        insertstate:= not insertstate;
       end;
       key_backspace: begin
-       if locating then begin
+       if locating1 then begin
         filtertext:= copy(filtertext,1,length(filtertext)-1);
        end
        else begin
@@ -1117,7 +1129,7 @@ begin
        nochars:= true;
       end;
       key_home: begin
-       if locating and (shiftstate1 = []) then begin
+       if locating1 and (shiftstate1 = []) then begin
         filtertext:= '';
        end
        else begin
@@ -1125,7 +1137,7 @@ begin
        end;
       end;
       key_end: begin
-       if locating and (shiftstate1 = []) then begin
+       if locating1 and (shiftstate1 = []) then begin
         filtertext:= finfo.text.text;
        end
        else begin
@@ -1211,7 +1223,7 @@ begin
    exclude(eventstate,es_processed);
   end;
   if not (es_processed in eventstate) and not nochars and (chars <> '') then begin
-   if locating then begin
+   if locating1 then begin
     filtertext:= filtertext + chars;
     include(eventstate,es_processed);
    end
@@ -1237,13 +1249,16 @@ procedure tinplaceedit.mouseevent(var minfo: mouseeventinfoty);
 var
  po1: pointty;
  int1: integer;
-// canvas1: tcanvas;
+ opt1: optionseditty;
+ autoselect1: boolean;
 begin
  with minfo do begin
+  opt1:= fintf.getoptionsedit;
+  autoselect1:= (oe_autoselectonfirstclick in opt1) and 
+              (opt1 * [oe_locate,oe_readonly] <> [oe_locate,oe_readonly]);
   case eventkind of
    ek_buttonpress: begin
     if (minfo.button = mb_left) and pointinrect(pos,finfo.clip) then begin
-//     canvas1:= getfontcanvas;
      if not fowner.focused and fowner.canfocus and
                 (ow_mousefocus in fowner.optionswidget) then begin
       include(fstate,ies_firstclick);
@@ -1257,7 +1272,7 @@ begin
        exclude(fstate,ies_firstclick);
        exit;
       end;
-      if oe_autoselectonfirstclick in fintf.getoptionsedit then begin
+      if autoselect1 then begin
        selectall;
        subpoint1(po1,textindextomousepos(int1));
       end
@@ -1271,7 +1286,7 @@ begin
       po1:= textindextomousepos(int1);
       if (ies_firstclick in fstate) then begin
        finfo.flags:= ftextflagsactive;
-       if (oe_autoselectonfirstclick in fintf.getoptionsedit) then begin
+       if autoselect1 then begin
         selectall;
        end
        else begin
@@ -1311,8 +1326,7 @@ begin
    end;
    ek_mousemove: begin
     if fowner.clicked and
-      not ((ies_firstclick in fstate) and
-            (oe_autoselectonfirstclick in fintf.getoptionsedit)) then begin
+      not ((ies_firstclick in fstate) and autoselect1) then begin
      fmousemovepos:= minfo.pos;
      if ies_istextedit in fstate then begin
       fmousemovepos.y:= ftextrect.y + ftextrect.cy div 2;
@@ -1583,18 +1597,25 @@ begin
  resetoffset;
  invalidatetextrect(-bigint,bigint);
  opt1:= iedit(fintf).getoptionsedit;
- if (oe_autoselect in opt1) and not (opt1 * [oe_locate,oe_readonly] = 
-                                              [oe_locate,oe_readonly]) then begin
-  selectall;
+ if opt1 * [oe_locate,oe_readonly] = [oe_locate,oe_readonly] then begin
+  curindex:= 0;
+  fselstart:= 0;
+  fsellength:= 0;
+  updateselect;
  end
  else begin
-  if oe_endonenter in opt1 then begin
-   moveindex(bigint,false,false);
+  if (oe_autoselect in opt1) then begin
+   selectall;
   end
   else begin
-   if oe_homeonenter in opt1 then begin
-    moveindex(0,false,false);
+   if oe_endonenter in opt1 then begin
+    moveindex(bigint,false,false);
    end
+   else begin
+    if oe_homeonenter in opt1 then begin
+     moveindex(0,false,false);
+    end
+   end;
   end;
  end;
  clearundo;
@@ -1902,6 +1923,7 @@ begin
     ffiltertext:= avalue;
     fselstart:= 0;
     fsellength:= length(ffiltertext);
+    curindex:= fselstart+fsellength;
     updateselect;    
    end;
   end;
@@ -1910,6 +1932,7 @@ begin
   ffiltertext:= '';
   fselstart:= 0;
   fsellength:= 0;
+  curindex:= 0;
   updateselect;    
  end;
 end;
