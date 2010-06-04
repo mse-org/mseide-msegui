@@ -130,6 +130,7 @@ type
    procedure beginupdate;
    procedure endupdate;
 
+   function empty: boolean; virtual;
    procedure change;
    procedure updatecellzone(const pos: pointty; var zone: cellzonety); virtual;
    procedure drawimage(const acanvas: tcanvas); virtual;
@@ -375,6 +376,7 @@ type
    procedure add(const aitems: msestringarty); overload;
    procedure add(const aitems: array of msestring); overload;
 
+   function empty(const index: integer): boolean; override;
    function indexof(const aitem: tlistitem): integer;
    function nodezone(const point: pointty): cellzonety;
    function getitems(const must: nodestatesty; 
@@ -910,6 +912,11 @@ begin
  end;
 end;
 
+function tlistitem.empty: boolean;
+begin
+ result:= fcaption = '';
+end;
+
 { tcustomitemlist }
 
 constructor tcustomitemlist.create(const intf: iitemlist);
@@ -1390,6 +1397,14 @@ end;
 function tcustomitemlist.getcheckeditems: listitemarty;
 begin
  result:= getitems([ns_checked],[]);
+end;
+
+function tcustomitemlist.empty(const index: integer): boolean;
+var
+ item1: tlistitem;
+begin
+ item1:= items[index];
+ result:= (item1 = nil) or item1.empty;
 end;
 
 { ttreelistitem }
