@@ -96,6 +96,7 @@ type
    fdeleting: integer;
    fmaxcount: integer;
    fringpointer: integer;
+   fcheckeditem: integer;
    procedure clearbuffer; //buffer release
    procedure setcapacity(value: integer);
    procedure internalsetcount(value: integer; nochangeandinit: boolean);
@@ -107,6 +108,7 @@ type
    procedure setsorted(const Value: boolean); //datenkopieren
    procedure internalcleardata(const index: integer);
    procedure remoteitemchange(const alink: pointer);
+   procedure setcheckeditem(const avalue: integer);
   protected
    fdatapo: pchar;
    fsize: integer;
@@ -143,8 +145,10 @@ type
    function getstatdata(const index: integer): msestring; virtual;
    procedure setstatdata(const index: integer; const value: msestring); virtual;
    procedure writestate(const writer; const name: msestring); virtual;
-                      //recursive interface
+                      //typeless because of recursive interface
    procedure readstate(const reader; const acount: integer); virtual;
+   procedure writeappendix(const writer; const aname: msestring); virtual;
+   procedure readappendix(const reader; const aname: msestring); virtual;
 
    function poptopdata(var ziel): boolean;    //top of stack, false if empty
    function popbottomdata(var ziel): boolean; //bottom of stack, false if empty
@@ -189,6 +193,10 @@ type
                 const source2: tdatalist; const copyproc: copy2procty): boolean;
    procedure internalrearange(arangelist: pinteger; const acount: integer);
    function islinked(const asource: tdatalist): boolean;
+   procedure datadeleted(const aindex: integer; const acount: integer);
+   procedure datainserted(const aindex: integer; const acount: integer);
+   procedure datamoved(const fromindex: integer; const toindex: integer;
+                                  const acount: integer); virtual;
   public
    constructor create; override;
    destructor destroy; override;
@@ -265,6 +273,8 @@ type
    property maxcount: integer read fmaxcount
                      write setmaxcount default bigint; //for ring buffer
    property sorted: boolean read getsorted write setsorted;
+   property checkeditem: integer read fcheckeditem write setcheckeditem; 
+                           //-1 if none
  end;
  
  pdatalist = ^tdatalist;
@@ -289,6 +299,8 @@ type
    procedure compare(const l,r; var result: integer); override;
    procedure setstatdata(const index: integer; const value: msestring); override;
    function getstatdata(const index: integer): msestring; override;
+   procedure writeappendix(const writer; const aname: msestring); override;
+   procedure readappendix(const reader; const aname: msestring); override;
   public
    min: integer;
    max: integer;
@@ -3097,6 +3109,7 @@ begin
   end;
  end;
  fcount:= fcount-1;
+ datadeleted(index,1);
  change(-1);
 end;
 
@@ -3117,6 +3130,7 @@ begin
    blockcopymovedata(index+acount,index,fcount-index-acount,bcm_none);
    fcount:= fcount-acount;
    checkcapacity;
+   datadeleted(index,acount);
    change(-1);
   finally
    dec(fdeleting);
@@ -3147,6 +3161,7 @@ begin
   dec(index,acount+countbefore-fcount); //adjust for maxcount
   blockcopymovedata(index,index+acount,fcount-index-acount,bcm_none);
   initdata1(false,index,acount);
+  datainserted(index,acount);
   change(-1);
  {
   capacity:= fcount + acount;
@@ -3384,6 +3399,16 @@ begin
    endupdate;
   end;
  end;
+end;
+
+procedure tdatalist.writeappendix(const writer; const aname: msestring);
+begin
+ //dummy
+end;
+
+procedure tdatalist.readappendix(const reader; const aname: msestring);
+begin
+ //dummy 
 end;
 
 function tdatalist.popbottomdata(var ziel): boolean;
@@ -3661,6 +3686,9 @@ begin
     checkcapacity;
    end;
   end;
+  if countvorher > value then begin
+   datadeleted(count,countvorher-count);
+  end;
   if not nochangeandinit and (countvorher <> value) then begin
    change(-1);
   end;
@@ -3760,6 +3788,7 @@ begin
    internalgetdata(fromindex,po1^);
    internaldeletedata(fromindex,false);
    internalinsertdata(toindex,po1^,false);
+   datamoved(fromindex,toindex,1);
   finally
    freemem(po1);
    endupdate;
@@ -3872,6 +3901,7 @@ begin
   end
   else begin
    blockcopymovedata(fromindex,toindex,count,bcm_rotate);
+   datamoved(fromindex,toindex,count);
    change(-1);
   end;
  end;
@@ -4346,6 +4376,55 @@ begin
  //dummy
 end;
 
+procedure tdatalist.setcheckeditem(const avalue: integer);
+begin
+ if (avalue < 0) or (avalue > fcount) then begin
+  fcheckeditem:= -1;
+ end
+ else begin
+  fcheckeditem:= avalue;
+ end;
+end;
+
+procedure tdatalist.datadeleted(const aindex: integer; const acount: integer);
+begin
+ if fcheckeditem >= 0 then begin
+  if fcheckeditem >= aindex then begin
+   if fcheckeditem < aindex + acount then begin
+    fcheckeditem:= -1;
+   end
+   else begin
+    fcheckeditem:= fcheckeditem - acount;
+    if fcheckeditem < 0 then begin
+     fcheckeditem:= -1;
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure tdatalist.datainserted(const aindex: integer; const acount: integer);
+begin
+ if (fcheckeditem >= 0) and (fcheckeditem >= aindex) then begin
+  fcheckeditem:= fcheckeditem + acount;
+  if fcheckeditem >= fcount then begin
+   fcheckeditem:= -1;
+  end;
+ end;
+end;
+
+procedure tdatalist.datamoved(const fromindex: integer; const toindex: integer;
+               const acount: integer);
+begin
+ if (fcheckeditem >= 0) and (fcheckeditem >= fromindex) and 
+                        (fcheckeditem < fromindex+acount) then begin
+  fcheckeditem:= fcheckeditem + toindex - fromindex;
+  if (fcheckeditem < 0) or (fcheckeditem >= fcount) then begin
+   fcheckeditem:= -1;
+  end;
+ end;
+end;
+
 { tintegerdatalist }
 
 constructor tintegerdatalist.create;
@@ -4354,6 +4433,7 @@ begin
  fsize:= sizeof(integer);
  min:= minint;
  max:= maxint;
+ fcheckeditem:= -1;
 end;
 
 procedure tintegerdatalist.number(const start,step: integer);
@@ -4470,6 +4550,20 @@ begin
   end;
  end;
  setdata(index,int1);
+end;
+
+procedure tintegerdatalist.writeappendix(const writer; const aname: msestring);
+begin
+ with tstatwriter(writer) do begin
+  writeinteger(aname+'_ci',fcheckeditem);
+ end; 
+end;
+
+procedure tintegerdatalist.readappendix(const reader; const aname: msestring);
+begin
+ with tstatreader(reader) do begin
+  fcheckeditem:= readinteger(aname+'_ci',fcheckeditem,-1,count-1);
+ end;
 end;
 
 procedure tintegerdatalist.readitem(const reader: treader; var value);

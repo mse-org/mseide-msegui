@@ -22,7 +22,7 @@ uses
  msegraphutils,mseevent,mseclasses,mseforms,msedock,mseact,mseactions,
  msestrings,msedataedits,mseedit,msegrids,msetypes,msewidgetgrid,msedatanodes,
  mselistbrowser,msewidgets,msestatfile,msebitmap,msefiledialog,msesys,msedialog,
- msememodialog,msesimplewidgets,msegridsglob;
+ msememodialog,msesimplewidgets,msegridsglob,msegraphedits;
 
 type
  storedcomponentinfoty = record
@@ -82,6 +82,7 @@ type
    groupfiledialog: tfiledialog;
    addfileact: taction;
    compfiledialog: tfiledialog;
+   sel: tdatabutton;
    procedure docreate(const sender: TObject);
    procedure dopastecomponent(const sender: TObject);
    procedure dostatread(const sender: TObject; const reader: tstatreader);
@@ -126,6 +127,9 @@ type
    procedure nodeexit(const sender: TObject);
    procedure doupdatecomponent(const sender: TObject);
    procedure doaddfile(const sender: TObject);
+   procedure setval(const sender: TObject; var avalue: Integer;
+                   var accept: Boolean);
+//   procedure selcha(const sender: tdatacol; const aindex: Integer);
   private
 //   frootnode: tstoredcomponent;
    far1: storedcomponentarty;
@@ -146,9 +150,13 @@ type
    function readstoregroup(const afilename: filenamety): boolean;
                     //false if file not found
    procedure pasteoradd(const apaste: boolean);
+   function copycomponent: string;
   public
    procedure updatestat(afiler: tstatfiler);
    function saveall(const quiet: boolean): modalresultty;
+   procedure resetselected;
+   function hasselection: boolean;
+   function copyselected: string;
  end;
 
 var
@@ -157,7 +165,7 @@ var
 implementation
 uses
  componentstore_mfm,msestream,storedcomponentinfodialog,msedatalist,msefileutils,
- sysutils,projectoptionsform;
+ sysutils,projectoptionsform,componentpaletteform;
 const
  storecaption = 'Component Store';
 type
@@ -426,18 +434,23 @@ begin
  end;
 end;
 
-procedure tcomponentstorefo.docopycomponent(const sender: TObject);
+function tcomponentstorefo.copycomponent: string;
 var
  stream1: ttextstream;
 begin
  with tstoredcomponent(node.item) do begin
   stream1:= ttextstream.create(filepath);
   try
-   copytoclipboard(stream1.readdatastring);
+   result:= stream1.readdatastring;
   finally
    stream1.free;
   end;
  end;
+end;
+
+procedure tcomponentstorefo.docopycomponent(const sender: TObject);
+begin
+ copytoclipboard(copycomponent);
 end;
 
 procedure tcomponentstorefo.dostatread(const sender: TObject;
@@ -718,6 +731,9 @@ procedure tcomponentstorefo.docellevent(const sender: TObject;
 var
  bo1: boolean;
 begin
+ if isrowexit(info) then begin
+  resetselected;
+ end;
  case info.eventkind of
   cek_enter: begin
    with tstoredcomponent(node.item) do begin
@@ -1000,4 +1016,48 @@ begin
  pastecompact.shortcut:= 0;
 end;
 
+procedure tcomponentstorefo.setval(const sender: TObject; var avalue: Integer;
+               var accept: Boolean);
+begin
+ if not iscomp and (avalue <> -1) then begin
+  accept:= false;
+ end
+ else begin
+  if avalue >= 0 then begin
+   componentpalettefo.resetselected;
+  end;
+ end;
+end;
+
+procedure tcomponentstorefo.resetselected;
+begin
+ sel.value:= -1;
+end;
+
+function tcomponentstorefo.copyselected: string;
+begin
+ result:= '';
+ if sel.checkedrow >= 0 then begin
+  result:= copycomponent;
+  resetselected;
+ end;
+end;
+
+function tcomponentstorefo.hasselection: boolean;
+begin
+ result:= sel.checkedrow >= 0;
+end;
+{
+procedure tcomponentstorefo.selcha(const sender: tdatacol;
+               const aindex: Integer);
+begin
+ if aindex >= 0 then begin
+  if tstoredcomponent(node[aindex]).fisnode then begin
+   if sel[aindex] <> -1 then begin //no recursion
+    sel[aindex]:= -1;
+   end;
+  end;
+ end;
+end;
+}
 end.

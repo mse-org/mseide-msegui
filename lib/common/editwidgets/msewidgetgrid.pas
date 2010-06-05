@@ -338,6 +338,7 @@ type
    property statfile;
    property statvarname;
 
+   property onbeforeupdatelayout;
    property onlayoutchanged;
    property onrowcountchanged;
    property onrowdatachanged;

@@ -473,20 +473,29 @@ type
  ttogglegraphdataedit = class(tgraphdataedit)
   private
    foptions: buttonoptionsty;
+   function getcheckedrow: integer;
+   procedure setcheckedrow(const avalue: integer);
   protected
    fcheckcaption: boolean;
    fclickedrow: integer;
    procedure setoptions(const avalue: buttonoptionsty); virtual;
    procedure togglevalue; virtual; abstract;
    procedure togglegridvalue(const index: integer); virtual; abstract;
+   procedure resetgridvalue(const index: integer); virtual; abstract;
+   procedure checkgridvalue(const index: integer); virtual; abstract;
+   function gridvaluechecked(const aindex: integer): boolean; virtual; abstract;
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure dokeyup(var info: keyeventinfoty); override;
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
    procedure statechanged; override;
    procedure docellevent(const ownedcol: boolean; 
                        var info: celleventinfoty); override;
- public
+   procedure modified; override;
+   procedure checkradiorow(aindex: integer);
+  public
    constructor create(aowner: tcomponent); override;
+   property checkedrow: integer read getcheckedrow write setcheckedrow; 
+          //needs bo_radiotemcol, -1 if none
   published
    property options: buttonoptionsty read foptions write setoptions
                default defaultbuttonoptions;
@@ -521,6 +530,9 @@ type
    function getdefaultvalue: pointer; override;
    procedure valuetogrid(arow: integer); override;
    procedure gridtovalue(arow: integer); override;
+   procedure resetgridvalue(const index: integer); override;
+   procedure checkgridvalue(const index: integer); override;
+   function gridvaluechecked(const aindex: integer): boolean; override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatype: listdatatypety; override;
    procedure togglevalue; override;
@@ -639,6 +651,9 @@ type
    function getdefaultvalue: pointer; override;
    procedure valuetogrid(arow: integer); override;
    procedure gridtovalue(arow: integer); override;
+   procedure resetgridvalue(const index: integer); override;
+   procedure checkgridvalue(const index: integer); override;
+   function gridvaluechecked(const aindex: integer): boolean; override;
    procedure internalcheckvalue(var avalue; var accept: boolean); override;
    procedure readstatvalue(const reader: tstatreader); override;
    procedure writestatvalue(const writer: tstatwriter); override;
@@ -1909,6 +1924,10 @@ var
  clickedrowbefore: integer;
 begin
  inherited;
+ if (bo_resetcheckedonrowexit in foptions) and isrowchange(info) and 
+           (info.newcell.row <> checkedrow) then begin
+  checkedrow:= -1;
+ end;
  if ownedcol and (info.eventkind in 
              [cek_buttonpress,cek_buttonrelease,cek_mouseleave]) then begin
   clickedrowbefore:= fclickedrow;
@@ -1927,6 +1946,7 @@ begin
    cek_buttonrelease: begin
     if {not info.processed and} not focused and (fclickedrow >= 0) then begin
      togglegridvalue(fclickedrow);
+     checkradiorow(fclickedrow);
     end;
     fclickedrow:= -1;
    end;
@@ -1948,6 +1968,73 @@ end;
 procedure ttogglegraphdataedit.setoptions(const avalue: buttonoptionsty);
 begin
  foptions:= avalue;
+end;
+
+procedure ttogglegraphdataedit.checkradiorow(aindex: integer);
+var
+ datalist1: tdatalist;
+ int1: integer;
+begin
+ if (fgridintf <> nil) and (bo_radioitemcol in foptions) then begin
+  if aindex < 0 then begin
+   aindex:= fgridintf.grid.row;
+  end;
+  datalist1:= fgridintf.getcol.datalist;
+  int1:= datalist1.checkeditem;
+  if gridvaluechecked(aindex) then begin
+   if (int1 >= 0) and (int1 <> aindex) then begin
+    resetgridvalue(int1);
+   end;
+   datalist1.checkeditem:= aindex;
+  end
+  else begin
+   if (int1 >= 0) and (int1 = aindex) then begin
+    datalist1.checkeditem:= -1;
+   end;
+  end;
+ end;
+end;
+
+procedure ttogglegraphdataedit.modified;
+begin
+ checkradiorow(-1);
+ inherited;
+end;
+
+function ttogglegraphdataedit.getcheckedrow: integer;
+var
+ datalist1: tdatalist;
+begin
+ result:= -1;
+ if (fgridintf <> nil) and (bo_radioitemcol in foptions) then begin
+  datalist1:= fgridintf.getcol.datalist;
+  if datalist1 <> nil then begin
+   result:= datalist1.checkeditem;
+  end;
+ end;  
+end;
+
+procedure ttogglegraphdataedit.setcheckedrow(const avalue: integer);
+var
+ datalist1: tdatalist;
+begin
+ if checkedrow <> avalue then begin
+  if (fgridintf <> nil) and (bo_radioitemcol in foptions) then begin
+   datalist1:= fgridintf.getcol.datalist;
+   if datalist1 <> nil then begin
+    if avalue < 0 then begin
+     if datalist1.checkeditem >= 0 then begin
+      resetgridvalue(datalist1.checkeditem);
+      datalist1.checkeditem:= -1;
+     end;
+    end    
+    else begin
+     checkgridvalue(avalue);
+     checkradiorow(avalue);
+    end;
+   end;
+  end; 
+ end;
 end;
 
 { tcustombooleanedit }
@@ -1974,6 +2061,11 @@ begin
  bo1:= not fvalue;
  fedited:= true;
  docheckvalue(bo1);
+end;
+
+procedure tcustombooleanedit.togglegridvalue(const index: integer);
+begin
+ gridvalue[index]:= not gridvalue[index];
 end;
 
 constructor tcustombooleanedit.create(aowner: tcomponent);
@@ -2080,11 +2172,6 @@ end;
 function tcustombooleanedit.checkvalue: boolean;
 begin
  result:= docheckvalue(fvalue);
-end;
-
-procedure tcustombooleanedit.togglegridvalue(const index: integer);
-begin
- gridvalue[index]:= not gridvalue[index];
 end;
 
 function tcustombooleanedit.getgridvalue(const index: integer): longbool;
@@ -2301,6 +2388,21 @@ procedure tcustombooleanedit.setifilink(const avalue: tifibooleanlinkcomp);
 begin
  inherited;
 end;
+
+procedure tcustombooleanedit.resetgridvalue(const index: integer);
+begin
+ gridvalue[index]:= false;
+end;
+
+procedure tcustombooleanedit.checkgridvalue(const index: integer);
+begin
+ gridvalue[index]:= true;
+end;
+
+function tcustombooleanedit.gridvaluechecked(const aindex: integer): boolean;
+begin
+ result:= gridvalue[aindex];
+end;
 {$endif}
 
 { tcustombooleaneditradio }
@@ -2507,9 +2609,12 @@ begin
 end;
 
 procedure tcustomintegergraphdataedit.togglevalue;
+var
+ int1: integer;
 begin
- doinc(fvalue);
- checkvalue;
+ int1:= fvalue;
+ doinc(int1);
+ docheckvalue(int1);
 end;
 
 procedure tcustomintegergraphdataedit.togglegridvalue(const index: integer);
@@ -2570,6 +2675,31 @@ begin
   fdatalist:= nil;
  end;
  inherited;
+end;
+
+procedure tcustomintegergraphdataedit.resetgridvalue(const index: integer);
+begin
+ gridvalue[index]:= valuedefault;
+end;
+
+procedure tcustomintegergraphdataedit.checkgridvalue(const index: integer);
+var
+ int1: integer;
+begin
+ int1:= fvaluedefault + 1;
+ if int1 > fmax then begin
+  int1:= int1 -2;
+  if int1 < fmin then begin
+   int1:= fmin;
+  end;
+ end;
+ gridvalue[index]:= int1;
+end;
+
+function tcustomintegergraphdataedit.gridvaluechecked(
+                                      const aindex: integer): boolean;
+begin
+ result:= gridvalue[aindex] <> valuedefault;
 end;
 
 { tvaluefacearrayprop }

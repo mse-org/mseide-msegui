@@ -35,6 +35,7 @@ type
    procedure foonreadstat(const sender: TObject; const reader: tstatreader);
   public
    procedure updatecomponentpalette(init: boolean);
+   procedure resetselected;
  end;
 
 var
@@ -43,7 +44,7 @@ var
 implementation
 uses
  componentpaletteform_mfm,main,projectoptionsform,msedesignintf,mseshapes,
- mseactions,classes,mseact;
+ mseactions,classes,mseact,componentstore;
 
 procedure tcomponentpalettefo.componentpalettedragdrop(const sender: TObject;
       const apos: pointty; var dragobject: tdragobject; var processed: boolean);
@@ -68,6 +69,7 @@ begin
     selectedclass:= nil;
    end;
    if as_checked in button.state then begin
+    componentstorefo.resetselected;
     selectedclass:= tcomponentclass(button.tagpointer);
    end;
   end;
@@ -84,6 +86,7 @@ var
  int1,int2: integer;
  ar1: comppagearty;
 begin
+ resetselected;
  if init then begin
   with componentpages do begin
    beginupdate;
@@ -139,6 +142,11 @@ procedure tcomponentpalettefo.foonreadstat(const sender: TObject;
                                                   const reader: tstatreader);
 begin
  updatecomponentpalette(true);
+end;
+
+procedure tcomponentpalettefo.resetselected;
+begin
+ componentpalette.buttons.resetradioitems(0);
 end;
 
 end.

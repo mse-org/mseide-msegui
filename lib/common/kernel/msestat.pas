@@ -836,13 +836,16 @@ end;
 procedure tstatreader.readdatalist(const name: msestring;  const value: tdatalist);
 var
  str1: msestring;
-// wstr1: msestring;
-// int1,int2: integer;
-// rea1: realty;
 begin
  if findvar(name,str1) then begin
   try
-   tdatalist1(value).readstate(self,strtoint(str1));
+   value.beginupdate;
+   try
+    tdatalist1(value).readstate(self,strtoint(str1));
+    tdatalist1(value).readappendix(self,name);
+   finally
+    value.endupdate;
+   end;
   except
   end;
  end;
@@ -1312,6 +1315,7 @@ end;
 procedure tstatwriter.writedatalist(const name: msestring; const value: tdatalist);
 begin
  tdatalist1(value).writestate(self,name);
+ tdatalist1(value).writeappendix(self,name);
 end;
 
 procedure tstatwriter.writearray(const name: msestring; const value: msestringarty);

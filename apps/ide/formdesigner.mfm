@@ -7,6 +7,12 @@ object formdesignerfo: tformdesignerfo
   bounds_cy = 300
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
   container.oncalcminscrollsize = calcscrollsize
+  container.bounds = (
+    0
+    0
+    287
+    300
+  )
   optionswindow = [wo_notaskbar]
   icon.transparentcolor = -2147483642
   icon.image = {
@@ -104,31 +110,43 @@ object formdesignerfo: tformdesignerfo
         caption = 'Copy Component(s)'
         name = 'copy'
         state = [as_localcaption, as_localshortcut, as_localonexecute]
-        shortcut = 16451
         onexecute = copyexe
+        sc = (
+          1
+          16451
+        )
       end    
       item
         caption = 'Cut Component(s)'
         name = 'cut'
         state = [as_localcaption, as_localshortcut, as_localonexecute]
         options = [mao_shortcutcaption, mao_asyncexecute]
-        shortcut = 16472
         onexecute = cutexe
+        sc = (
+          1
+          16472
+        )
       end    
       item
         caption = 'Paste Component(s)'
         name = 'paste'
         state = [as_localcaption, as_localshortcut, as_localonexecute]
-        shortcut = 16470
         onexecute = pasteexe
+        sc = (
+          1
+          16470
+        )
       end    
       item
         caption = 'Delete Component(s)'
         name = 'delete'
         state = [as_localcaption, as_localshortcut, as_localonexecute]
         options = [mao_shortcutcaption, mao_asyncexecute]
-        shortcut = 4103
         onexecute = deleteexe
+        sc = (
+          1
+          263
+        )
       end    
       item
         caption = 'Undelete Component(s)'

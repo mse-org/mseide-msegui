@@ -215,7 +215,7 @@ type
    procedure setgridsizey(const avalue: integer);
    procedure doundelete;
    procedure dodelete;
-   procedure dopaste(const usemousepos: boolean);
+   procedure dopaste(const usemousepos: boolean; const adata: string);
    procedure docopy(const noclear: boolean);
    procedure docut;
    procedure recalcclientsize;
@@ -315,7 +315,7 @@ uses
  formdesigner_mfm,mselist,msekeyboard,msepointer,msebits,sysutils,
  msestockobjects,msedrawtext,selectsubmoduledialogform,mseshapes,settaborderform,
  msedatalist,objectinspector,projectoptionsform,main,msedatamodules,msetypes,
- setcreateorderform,mseactions;
+ setcreateorderform,mseactions,componentstore;
 
 type
  tcomponent1 = class(tcomponent);
@@ -1233,7 +1233,8 @@ begin
  dodelete;
 end;
 
-procedure tdesignwindow.dopaste(const usemousepos: boolean);
+procedure tdesignwindow.dopaste(const usemousepos: boolean;
+                                                  const adata: string);
 var
  widget1: twidget;
 begin
@@ -1250,7 +1251,12 @@ begin
        finitcompsoffset:= subpoint(dosnaptogrid(fmousepos),widget1.rootpos);
       end;
       clear;
-      pastefromclipboard(module,widget1,{$ifdef FPC}@{$endif}doinitcomponent);
+      if adata <> '' then begin
+       pastefromobjecttext(adata,module,widget1,{$ifdef FPC}@{$endif}doinitcomponent);
+      end
+      else begin
+       pastefromclipboard(module,widget1,{$ifdef FPC}@{$endif}doinitcomponent);
+      end;
       updateselections;
      end;
     end;
@@ -1258,7 +1264,12 @@ begin
   end
   else begin
    fselections.clear;
-   fselections.pastefromclipboard(module,module,{$ifdef FPC}@{$endif}doinitcomponent);
+   if adata <> '' then begin
+    fselections.pastefromobjecttext(adata,module,module,{$ifdef FPC}@{$endif}doinitcomponent);
+   end
+   else begin
+    fselections.pastefromclipboard(module,module,{$ifdef FPC}@{$endif}doinitcomponent);
+   end;
    updateselections;
    //todo
   end;
@@ -1428,7 +1439,7 @@ begin
      end
      else begin
       if issysshortcut(sho_paste,info) then begin
-       dopaste(false);
+       dopaste(false,'');
        include(eventstate,es_processed);
       end;
      end;
@@ -1710,7 +1721,8 @@ begin
     area1:= fselections.getareainfo(pos,int1);
     if ((area1 < firsthandle) or (area1 > lasthandle)) and
        ((factarea < firsthandle) or (factarea > lasthandle)) and 
-       not (fdesigner.hascurrentcomponent and (eventkind = ek_buttonpress) and 
+       not ((fdesigner.hascurrentcomponent or componentstorefo.hasselection) and 
+                     (eventkind = ek_buttonpress) and 
        (button = mb_left) and (ss1 = [ss_left])) and 
        not ((area1 = ar_component) and 
            not(fselections[int1] is twidget)) and 
@@ -1736,6 +1748,9 @@ begin
      if ss1 = [ss_left] then begin
       if isinpaintrect then begin
        component:= fdesigner.createcurrentcomponent(module);
+       if (component = nil) and componentstorefo.hasselection then begin
+        dopaste(true,componentstorefo.copyselected);
+       end;
       end;
       if component <> nil then begin
        tformdesignerfo(fowner).placecomponent(component,pos);
@@ -2725,7 +2740,7 @@ end;
 
 procedure tformdesignerfo.pasteexe(const sender: TObject);
 begin
- tdesignwindow(twidget(tmenuitem(sender).owner.owner).window).dopaste(true);
+ tdesignwindow(twidget(tmenuitem(sender).owner.owner).window).dopaste(true,'');
 end;
 
 procedure tformdesignerfo.deleteexe(const sender: TObject);

@@ -1,21 +1,20 @@
 object componentstorefo: tcomponentstorefo
   optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  frame.grip_size = 10
+  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
+  frame.dummy = 0
+  visible = False
   bounds_x = 305
   bounds_y = 101
   bounds_cx = 445
   bounds_cy = 354
-  frame.grip_size = 10
-  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
-  frame.dummy = 0
-  taborder = 1
-  visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
-  container.bounds_x = 0
-  container.bounds_y = 0
-  container.bounds_cx = 435
-  container.bounds_cy = 354
-  container.frame.dummy = 0
-  dragdock.tab_size = 0
+  container.bounds = (
+    0
+    0
+    435
+    354
+  )
   dragdock.caption = 'Component Store'
   dragdock.optionsdock = [od_savepos, od_savezorder, od_canfloat, od_candock, od_proportional, od_propsize]
   options = [fo_savepos, fo_savezorder, fo_savestate]
@@ -89,23 +88,24 @@ object componentstorefo: tcomponentstorefo
   oncreate = docreate
   moduleclassname = 'tdockform'
   object grid: twidgetgrid
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    popupmenu = tpopupmenu1
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 435
     bounds_cy = 354
-    frame.dummy = 0
     anchors = []
-    popupmenu = tpopupmenu1
     optionsgrid = [og_colsizing, og_focuscellonenter, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
     fixrows.count = 1
     fixrows.items = <    
       item
         height = 16
-        captions.count = 3
+        captions.count = 4
         captions.items = <        
           item
             caption = 'Name'
+          end        
+          item
+            caption = 'Sel'
           end        
           item
             caption = 'Description'
@@ -114,44 +114,82 @@ object componentstorefo: tcomponentstorefo
             caption = 'File'
           end>
       end>
-    datacols.count = 3
-    datacols.options = [co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+    datacols.count = 4
+    datacols.options = [co_proportional, co_savestate, co_mousescrollrow]
     datacols.items = <    
       item
         width = 111
-        options = [co_drawfocus, co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        options = [co_drawfocus, co_proportional, co_savestate, co_mousescrollrow]
         widgetname = 'node'
       end    
       item
-        width = 157
-        options = [co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
-        widgetname = 'compdesc'
+        color = -2147483646
+        width = 19
+        options = [co_fixwidth, co_proportional, co_savestate, co_mousescrollrow]
+        widthmin = 19
+        widthmax = 19
+        widgetname = 'sel'
+        dataclass = tgridintegerdatalist
       end    
       item
-        width = 160
-        options = [co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        width = 112
+        options = [co_fill, co_savestate, co_mousescrollrow]
+        widgetname = 'compdesc'
+        dataclass = tgridmsestringdatalist
+      end    
+      item
+        width = 185
+        options = [co_proportional, co_savestate, co_mousescrollrow]
         widgetname = 'filepath'
+        dataclass = tgridmsestringdatalist
       end>
     datarowheight = 16
     statfile = mainfo.projectstatfile
     oncellevent = docellevent
     drag.onbeforedragbegin = beforedrag
     reffontheight = 14
+    object sel: tdatabutton
+      optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
+      optionsskin = [osk_framebuttononly]
+      taborder = 1
+      bounds_x = 112
+      bounds_y = 0
+      bounds_cx = 19
+      bounds_cy = 16
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+      options = [bo_executeonclick, bo_executeonkey, bo_executeonshortcut, bo_executedefaultonenterkey, bo_radioitemcol]
+      state = [as_invisible, as_localinvisible]
+      valuefaces.count = 1
+      valuefaces.items = <      
+        item
+          fade_pos.count = 2
+          fade_pos.items = (
+             0.0000000000000000E+0000
+             1.0000000000000000E+0000
+          )
+          fade_color.count = 2
+          fade_color.items = (
+            -1610612729
+            16741965
+          )
+          dummy = 0
+        end>
+      onsetvalue = setval
+    end
     object node: ttreeitemedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+      frame.levelo = 0
+      frame.colorclient = -2147483645
+      frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+      taborder = 2
+      onenter = nodeenter
+      onexit = nodeexit
+      visible = False
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 111
       bounds_cy = 16
-      frame.levelo = 0
-      frame.colorclient = -2147483645
-      frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
-      frame.dummy = 0
-      taborder = 1
-      onenter = nodeenter
-      onexit = nodeexit
-      visible = False
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_hintclippedtext, oe_locate, oe_keyexecute, oe_savestate]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_hintclippedtext, oe_locate, oe_keyexecute, oe_savestate]
       ondataentered = datent
       itemlist.imnr_expanded = 1
       itemlist.imagelist = filedialogres.images
@@ -167,38 +205,36 @@ object componentstorefo: tcomponentstorefo
     end
     object compdesc: tmemodialogedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
-      bounds_x = 112
-      bounds_y = 0
-      bounds_cx = 157
-      bounds_cy = 16
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
       frame.button.color = -2147483646
       frame.button.imagenr = 17
-      frame.dummy = 0
-      taborder = 2
+      taborder = 3
       visible = False
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+      bounds_x = 132
+      bounds_y = 0
+      bounds_cx = 112
+      bounds_cy = 16
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savestate]
       ondataentered = datent
       onsetvalue = compdescsetva
       reffontheight = 14
     end
     object filepath: tfilenameedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
-      bounds_x = 270
-      bounds_y = 0
-      bounds_cx = 160
-      bounds_cy = 16
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
       frame.button.color = -1879048187
       frame.button.imagenr = 17
-      frame.dummy = 0
-      taborder = 3
+      taborder = 4
       visible = False
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+      bounds_x = 245
+      bounds_y = 0
+      bounds_cx = 185
+      bounds_cy = 16
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savestate]
       textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
       ondataentered = datent
       onsetvalue = filenamesetva

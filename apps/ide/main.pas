@@ -538,7 +538,7 @@ end;
 procedure Tmainfo.ItemInserted(const ADesigner: IDesigner;
                const amodule: tmsecomponent; const AItem: tcomponent);
 begin
- componentpalettefo.componentpalette.buttons.resetradioitems(0);
+ componentpalettefo.resetselected;
 end;
 
 procedure tmainfo.moduleactivated(const adesigner: idesigner; const amodule: tmsecomponent);

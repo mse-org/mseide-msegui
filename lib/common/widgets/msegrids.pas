@@ -1619,6 +1619,7 @@ type
    fonrowsdeleted: gridblockeventty;
    fonrowcountchanged: gridnotifyeventty;
    fonlayoutchanged: gridnotifyeventty;
+   fonbeforeupdatelayout: gridnotifyeventty;
    fonsort: gridsorteventty;
 
    fdatarowlinewidth: integer;
@@ -2109,6 +2110,8 @@ type
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
 
+   property onbeforeupdatelayout: gridnotifyeventty 
+                read fonbeforeupdatelayout write fonbeforeupdatelayout;
    property onlayoutchanged: gridnotifyeventty read fonlayoutchanged
               write fonlayoutchanged;
    property oncolmoved: gridblockmovedeventty read foncolmoved
@@ -2196,6 +2199,7 @@ type
    property statfile;
    property statvarname;
 
+   property onbeforeupdatelayout;
    property onlayoutchanged;
    property onrowcountchanged;
    property onrowsdatachanged;
@@ -2313,6 +2317,7 @@ type
    property statfile;
    property statvarname;
 
+   property onbeforeupdatelayout;
    property onlayoutchanged;
    property onrowsmoved;
    property onrowsdatachanged;
@@ -2346,6 +2351,7 @@ function iscellclick(const info: celleventinfoty;
                         restrictions: cellclickrestrictionsty = []): boolean;
 function isrowenter(const info: celleventinfoty): boolean;
 function isrowexit(const info: celleventinfoty): boolean;
+function isrowchange(const info: celleventinfoty): boolean;
 function cellkeypress(const info: celleventinfoty): keyty;
 
 implementation
@@ -2448,6 +2454,13 @@ function isrowexit(const info: celleventinfoty): boolean;
 begin
  with info do begin
   result:= (eventkind = cek_exit) and (cellbefore.row <> newcell.row);
+ end;
+end;
+
+function isrowchange(const info: celleventinfoty): boolean;
+begin
+ with info do begin
+  result:= (eventkind = cek_focusedcellchanged) and (cellbefore.row <> newcell.row);
  end;
 end;
 
@@ -8410,6 +8423,9 @@ begin
              not (csdestroying in componentstate) and 
              (force or (fupdating = 0)) then begin
   bo1:= not (gs_layoutupdating in fstate);
+  if bo1 and canevent(tmethod(fonbeforeupdatelayout)) then begin
+   fonbeforeupdatelayout(self);
+  end;
   try
    fstate:= fstate + [gs_layoutvalid,gs_layoutupdating];
    updatelayout;

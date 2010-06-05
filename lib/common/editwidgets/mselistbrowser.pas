@@ -27,12 +27,13 @@ const
  defaultitemedittextflagsactive = defaulttextflagsactive + [tf_clipo];
 
 type
- listviewoptionty = (
+ listviewoptionty = ( //matched with coloptionty
           lvo_readonly,lvo_mousemoving,lvo_keymoving,lvo_horz,
           lvo_drawfocus,lvo_mousemovefocus,lvo_leftbuttonfocusonly,
           lvo_noctrlmousefocus,
           lvo_focusselect,lvo_mouseselect,lvo_keyselect,
           lvo_multiselect,lvo_resetselectonexit,{lvo_noresetselect,}
+          lvo_fill,
           lvo_locate,lvo_casesensitive,lvo_savevalue,lvo_hintclippedtext
                      );
  listviewoptionsty = set of listviewoptionty;
@@ -181,8 +182,6 @@ type
  tcustomlistview = class(tcellgrid,iedit)
   private
    feditor: tinplaceedit;
-   fonafterupdatelayout: notifyeventty;
-   fonbeforeupdatelayout: notifyeventty;
    fonitemevent: itemeventty;
    fcellwidthmax: integer;
    fcellwidthmin: integer;
@@ -195,6 +194,7 @@ type
    fcellframe: tcellframe;
    foncopytoclipboard: updatestringeventty;
    fonpastefromclipboard: updatestringeventty;
+//   fcellheight: integer;
    procedure createcellframe;
    function getcellframe: tcellframe;
    procedure setcellframe(const avalue: tcellframe);
@@ -225,11 +225,19 @@ type
    procedure setonselectionchanged(const avalue: listvieweventty);
    function getonlayoutchanged: listvieweventty;
    procedure setonlayoutchanged(const avalue: listvieweventty);
+   function getcellheight: integer;
+   procedure setcellheight(const avalue: integer);
+   function getonbeforeupdatelayout: listvieweventty;
+   procedure setonbeforeupdatelayout(const avalue: listvieweventty);
+   function getcellheightmin: integer;
+   procedure setcellheightmin(const avalue: integer);
+   function getcellheightmax: integer;
+   procedure setcellheightmax(const avalue: integer);
   protected
    fitemlist: titemviewlist;
    procedure setframeinstance(instance: tcustomframe); override;
 
-   procedure setoptions(const Value: listviewoptionsty); virtual;
+   procedure setoptions(const avalue: listviewoptionsty); virtual;
    procedure rootchanged; override;
    procedure doitemchange(index: integer);
    procedure doitemevent(const index: integer;
@@ -281,8 +289,12 @@ type
                                     write setcolorglyph default cl_black;
    property cellwidth: integer read fcellwidth write setcellwidth
                    default defaultcellwidth;
-   property cellheight: integer read fdatarowheight write setdatarowheight
+   property cellheight: integer read getcellheight write setcellheight
                    default defaultcellheight;
+   property cellheightmin: integer read getcellheightmin write setcellheightmin
+                   default 1;
+   property cellheightmax: integer read getcellheightmax write setcellheightmax
+                   default maxint;
    property cellwidthmin: integer read fcellwidthmin 
                          write setcellwidthmin default defaultcellwidthmin;
    property cellwidthmax: integer read fcellwidthmax 
@@ -298,10 +310,6 @@ type
                     write setdatacollinewidth default defaultgridlinewidth;
    property datacollinecolor: colorty read getdatacollinecolor
                     write setdatacollinecolor default defaultdatalinecolor;
-   property onbeforeupdatelayout: notifyeventty read fonbeforeupdatelayout
-                  write fonbeforeupdatelayout;
-   property onafterupdatelayout: notifyeventty read fonafterupdatelayout
-                  write fonafterupdatelayout;
    property onitemevent: itemeventty read fonitemevent write fonitemevent;
 
    property onitemsmoved: gridblockmovedeventty read fonitemsmoved
@@ -309,6 +317,8 @@ type
    property optionsgrid default defaultlistviewoptionsgrid;
    property onselectionchanged: listvieweventty read getonselectionchanged 
                                 write setonselectionchanged;
+   property onbeforeupdatelayout: listvieweventty read getonbeforeupdatelayout 
+                                write setonbeforeupdatelayout;
    property onlayoutchanged: listvieweventty read getonlayoutchanged 
                                 write setonlayoutchanged;
    property oncopytoclipboard: updatestringeventty read foncopytoclipboard 
@@ -334,12 +344,17 @@ type
    property fixrows;
    property optionsgrid;
    property options;
+   property gridframewidth;
+   property gridframecolor;
    property itemlist;
    property cellwidthmin;
    property cellwidthmax;
+   property cellheightmin;
+   property cellheightmax;
    property statvarname;
    property statfile;
    property onselectionchanged;
+   property onbeforeupdatelayout;
    property onlayoutchanged;
    property onitemevent;
    property drag;
@@ -1404,23 +1419,36 @@ var
  bo1: boolean;
  indexbefore: integer;
  cell1: gridcoordty;
+ width1,height1: integer;
 begin
  indexbefore:= celltoindex(ffocusedcell,true);
- if (fcellwidthmin <> 0) and (fcellwidthmin > fcellwidth) then begin
-  fcellwidth:= fcellwidthmin;
- end;
- if (fcellwidthmax <> 0) and (fcellwidthmax < fcellwidth) then begin
-  fcellwidth:= fcellwidthmax;
- end;
  fitemlist.updatelayout;
+ width1:= fcellwidth;
+ height1:= datarowheight;
+ if lvo_fill in foptions then begin
+  inherited;
+  if lvo_horz in foptions then begin
+   width1:= finnerdatarect.cx - datacollinewidth;
+  end
+  else begin
+   height1:= finnerdatarect.cy - datarowlinewidth;
+  end;
+ end;
+ if (width1 <> 0) and (fcellwidthmin > width1) then begin
+  width1:= fcellwidthmin;
+ end;
+ if (fcellwidthmax <> 0) and (fcellwidthmax < width1) then begin
+  width1:= fcellwidthmax;
+ end;
+ datarowheight:= height1;
  for int1:= 0 to fdatacols.count-1 do begin
-  fdatacols[int1].width:= fcellwidth;
+  fdatacols[int1].width:= width1;
  end;
  repeat
   inherited;
   bo1:= false;
   if lvo_horz in foptions then begin
-   int1:=  tlistcol.defaultstep(fcellwidth);
+   int1:=  tlistcol.defaultstep(width1);
    if int1 = 0 then begin
     int1:= 1;
    end;
@@ -1475,7 +1503,7 @@ end;
 procedure tcustomlistview.setcellwidthmax(const Value: integer);
 begin
  if fcellwidthmax <> value then begin
-  fcellwidthmax := Value;
+  fcellwidthmax:= Value;
   layoutchanged;
  end;
 end;
@@ -1513,11 +1541,20 @@ begin
  end;
 end;
 
-procedure tcustomlistview.setoptions(const Value: listviewoptionsty);
+procedure tcustomlistview.setoptions(const avalue: listviewoptionsty);
+const
+ mask: listviewoptionsty = [lvo_horz,lvo_fill];
+var
+ optbefore: listviewoptionsty;
 begin
- if foptions <> value then begin
-  foptions:= Value;
+ if foptions <> avalue then begin
+  optbefore:= foptions;
+  foptions:= avalue;
   updatecoloptions;
+  if (longword(foptions) xor longword(optbefore)) and 
+                                         longword(mask) <> 0 then begin
+   layoutchanged;
+  end;
  end;
 end;
 
@@ -1676,9 +1713,25 @@ end;
 procedure tcustomlistview.setcellwidth(const Value: integer);
 begin
  if fcellwidth <> value then begin
-  fcellwidth := Value;
+  fcellwidth:= Value;
   layoutchanged;
  end;
+end;
+
+function tcustomlistview.getcellheight: integer;
+begin
+ result:= datarowheight;
+end;
+
+procedure tcustomlistview.setcellheight(const avalue: integer);
+begin
+ datarowheight:= avalue;
+{
+ if fcellheight <> avalue then begin
+  fcellheight:= avalue;
+  layoutchanged;
+ end;
+}
 end;
 
 procedure tcustomlistview.rootchanged;
@@ -2051,6 +2104,36 @@ end;
 procedure tcustomlistview.setonlayoutchanged(const avalue: listvieweventty);
 begin
  inherited onlayoutchanged:= gridnotifyeventty(avalue);
+end;
+
+function tcustomlistview.getonbeforeupdatelayout: listvieweventty;
+begin
+ result:= listvieweventty(inherited onbeforeupdatelayout);
+end;
+
+procedure tcustomlistview.setonbeforeupdatelayout(const avalue: listvieweventty);
+begin
+ inherited onbeforeupdatelayout:= gridnotifyeventty(avalue);
+end;
+
+function tcustomlistview.getcellheightmin: integer;
+begin
+ result:= datarowheightmin;
+end;
+
+procedure tcustomlistview.setcellheightmin(const avalue: integer);
+begin
+ datarowheightmin:= avalue;
+end;
+
+function tcustomlistview.getcellheightmax: integer;
+begin
+ result:= datarowheightmax;
+end;
+
+procedure tcustomlistview.setcellheightmax(const avalue: integer);
+begin
+ datarowheightmax:= avalue;
 end;
 
 { tcustomitemeditlist }
