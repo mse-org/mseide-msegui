@@ -731,9 +731,9 @@ procedure tcomponentstorefo.docellevent(const sender: TObject;
 var
  bo1: boolean;
 begin
- if isrowexit(info) then begin
-  resetselected;
- end;
+// if isrowexit(info) then begin
+//  resetselected;
+// end;
  case info.eventkind of
   cek_enter: begin
    with tstoredcomponent(node.item) do begin

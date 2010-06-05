@@ -148,40 +148,12 @@ object componentstorefo: tcomponentstorefo
     oncellevent = docellevent
     drag.onbeforedragbegin = beforedrag
     reffontheight = 14
-    object sel: tdatabutton
-      optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
-      optionsskin = [osk_framebuttononly]
-      taborder = 1
-      bounds_x = 112
-      bounds_y = 0
-      bounds_cx = 19
-      bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
-      options = [bo_executeonclick, bo_executeonkey, bo_executeonshortcut, bo_executedefaultonenterkey, bo_radioitemcol]
-      state = [as_invisible, as_localinvisible]
-      valuefaces.count = 1
-      valuefaces.items = <      
-        item
-          fade_pos.count = 2
-          fade_pos.items = (
-             0.0000000000000000E+0000
-             1.0000000000000000E+0000
-          )
-          fade_color.count = 2
-          fade_color.items = (
-            -1610612729
-            16741965
-          )
-          dummy = 0
-        end>
-      onsetvalue = setval
-    end
     object node: ttreeitemedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
-      taborder = 2
+      taborder = 1
       onenter = nodeenter
       onexit = nodeexit
       visible = False
@@ -202,6 +174,35 @@ object componentstorefo: tcomponentstorefo
       onupdaterowvalues = doupdaterowvalues
       options = [teo_treecolnavig, teo_keyrowmoving]
       reffontheight = 14
+    end
+    object sel: tdatabutton
+      optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
+      taborder = 2
+      bounds_x = 112
+      bounds_y = 0
+      bounds_cx = 19
+      bounds_cy = 16
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+      options = [bo_executeonclick, bo_executeonkey, bo_executeonshortcut, bo_executedefaultonenterkey, bo_radioitemcol, bo_resetcheckedonrowexit]
+      state = [as_invisible, as_localinvisible]
+      valuefaces.count = 1
+      valuefaces.items = <      
+        item
+          fade_pos.count = 2
+          fade_pos.items = (
+             0.0000000000000000E+0000
+             1.0000000000000000E+0000
+          )
+          fade_color.count = 2
+          fade_color.items = (
+            -1610612729
+            16768903
+          )
+          fade_direction = gd_down
+          localprops = [fal_fadirection]
+          dummy = 0
+        end>
+      onsetvalue = setval
     end
     object compdesc: tmemodialogedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
