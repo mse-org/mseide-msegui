@@ -1443,7 +1443,8 @@ type
    property cols[const index: integer]: tstringcol read getcols; default; //last!
   published
    property focusrectdist;
-   property textflags: textflagsty read ftextflags write settextflags default defaultcoltextflags;
+   property textflags: textflagsty read ftextflags write settextflags 
+                                                   default defaultcoltextflags;
    property textflagsactive: textflagsty read ftextflagsactive
              write settextflagsactive default defaultactivecoltextflags;
    property optionsedit: stringcoleditoptionsty read foptionsedit
@@ -1868,6 +1869,7 @@ type
    procedure doafterpaint(const canvas: tcanvas); override;
    procedure drawfocusedcell(const acanvas: tcanvas); virtual;
    procedure drawcellbackground(const acanvas: tcanvas);
+   procedure drawcelloverlay(const acanvas: tcanvas);
 
    procedure updatepopupmenu(var amenu: tpopupmenu; 
                          var mouseinfo: mouseeventinfoty); override;
@@ -2291,7 +2293,8 @@ type
    function pasteselection: boolean; override;
    property items[const cell: gridcoordty]: msestring read getitems write setitems;
    property datacols: tstringcols read getdatacols write setdatacols;
-   property caretwidth: integer read getcaretwidth write setcaretwidth default defaultcaretwidth;
+   property caretwidth: integer read getcaretwidth write setcaretwidth 
+                                                    default defaultcaretwidth;
  end;
 
  tstringgrid = class(tcustomstringgrid)
@@ -2826,13 +2829,15 @@ end;
 procedure tgridprop.drawcellbackground(const acanvas: tcanvas;
                 const aframe: tcustomframe; const aface: tcustomface);
 begin
- acanvas.fillrect(fcellinfo.rect,fcellinfo.color);
+ acanvas.fillrect(fcellrect,fcellinfo.color);
  if aframe <> nil then begin
-  aframe.paintbackground(acanvas,fcellinfo.rect);
+//  aframe.paintbackground(acanvas,fcellinfo.rect);
+  aframe.paintbackground(acanvas,fcellrect);
  end;
  acanvas.rootbrushorigin:= fgrid.fbrushorigin;
  if aface <> nil then begin
-  aface.paint(acanvas,fcellinfo.rect);
+//  aface.paint(acanvas,fcellinfo.rect);
+  aface.paint(acanvas,makerect(nullpoint,fcellinfo.rect.size));
  end;
 end;
 
@@ -3253,6 +3258,7 @@ begin
        if int2 > 0 then begin
         heightextend:= heightextend - int2 + fgrid.fdatarowlinewidth;
        end;
+       inc(fcellrect.cy,heightextend);      
        inc(rect.cy,heightextend);      
        inc(innerrect.cy,heightextend);      
        inc(frameinnerrect.cy,heightextend);
@@ -3273,6 +3279,7 @@ begin
        end;
       end;
       with fcellinfo do begin
+       inc(fcellrect.cx,widthextend);      
        inc(rect.cx,widthextend);      
        inc(innerrect.cx,widthextend);      
        inc(frameinnerrect.cx,widthextend);
@@ -3295,7 +3302,8 @@ begin
                                 (fgrid.fmousecell.row = row1);
       saveindex:= canvas.save;
       fcellinfo.color:= rowcolor(row1);
-      canvas.intersectcliprect(makerect(nullpoint,fcellinfo.rect.size));
+//      canvas.intersectcliprect(makerect(nullpoint,fcellinfo.rect.size));
+      canvas.intersectcliprect(fcellrect);
       bo2:= false;
       if canbeforedrawcell then begin
        fonbeforedrawcell(self,canvas,fcellinfo,bo2);
@@ -3333,6 +3341,7 @@ begin
      finally
       if heightextend <> 0 then begin
        with fcellinfo do begin  //restore original values
+        dec(fcellrect.cy,heightextend);      
         dec(rect.cy,heightextend);      
         dec(innerrect.cy,heightextend);      
         dec(frameinnerrect.cy,heightextend);
@@ -3340,6 +3349,7 @@ begin
       end;
       if widthextend <> 0 then begin
        with fcellinfo do begin  //restore original values
+        dec(fcellrect.cx,widthextend);      
         dec(rect.cx,widthextend);      
         dec(innerrect.cx,widthextend);      
         dec(frameinnerrect.cx,widthextend);
@@ -5596,12 +5606,16 @@ end;
 
 procedure tdatacol.doactivate;
 begin
- //dummy
+ if (co_drawfocus in foptions) and (fgrid.row >= 0) then begin
+  invalidatecell(fgrid.row);
+ end;
 end;
 
 procedure tdatacol.dodeactivate;
 begin
- //dummy
+ if (co_drawfocus in foptions) and (fgrid.row >= 0) then begin
+  invalidatecell(fgrid.row);
+ end;
 end;
 
 procedure tdatacol.setwidthmax(const Value: integer);
@@ -11020,6 +11034,13 @@ procedure tcustomgrid.drawcellbackground(const acanvas: tcanvas);
 begin
  with fdatacols[ffocusedcell.col] do begin
   drawcellbackground(acanvas,fframe,fface);
+ end;
+end;
+
+procedure tcustomgrid.drawcelloverlay(const acanvas: tcanvas);
+begin
+ with fdatacols[ffocusedcell.col] do begin
+  drawcelloverlay(acanvas,fframe);
  end;
 end;
 

@@ -985,7 +985,7 @@ begin
  with twidgetgrid(fgrid) do begin
   focuscount:= ffocuscount;
   activewidgetbefore:= factivewidget;
-  if not enter then begin
+  if not enter and (selectaction <> fca_exitgrid) then begin
    factivewidget:= nil;
    bo1:= true;
    checkcanclose(bo1);
@@ -1441,7 +1441,11 @@ end;
 procedure twidgetcol.widgetpainted(const canvas: tcanvas);
 begin
  if co_drawfocus in foptions then begin
-  drawfocusrect(canvas,inflaterect(fintf.getwidget.clientrect,ffocusrectdist));
+  with fintf.getwidget do begin
+   if active then begin
+    drawfocusrect(canvas,inflaterect(paintrect,ffocusrectdist));
+   end;
+  end;
  end;
 end;
 

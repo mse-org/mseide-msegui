@@ -808,11 +808,13 @@ procedure titemviewlist.updatelayout;
 begin
  with flistview do begin
   if fcellframe = nil then  begin
-   tlistitem.calcitemlayout(makesize(cellwidth,cellheight),minimalframe,self,flayoutinfo);
+   tlistitem.calcitemlayout(makesize(cellwidth,cellheight),minimalframe,
+                                                             self,flayoutinfo);
   end
   else begin
-   tlistitem.calcitemlayout(subsize(makesize(cellwidth,cellheight),fcellframe.paintframewidth),
-             tframe1(fcellframe).fi.innerframe,self,flayoutinfo);
+   tlistitem.calcitemlayout(subsize(makesize(cellwidth,cellheight),
+                                       fcellframe.paintframewidth),
+                           tframe1(fcellframe).fi.innerframe,self,flayoutinfo);
   end;
   layoutchanged;
  end;
@@ -824,7 +826,8 @@ begin
  result:= flistview.fcolorglyph;
 end;
 
-procedure titemviewlist.updateitemvalues(const index: integer; const acount: integer);
+procedure titemviewlist.updateitemvalues(const index: integer;
+                                                      const acount: integer);
 begin
  //dummy
 end;
@@ -1534,6 +1537,7 @@ var
  po1: pointty;
  item1: tlistitem1;
 begin
+ canvas.save;
  drawcellbackground(canvas);
  item1:= tlistitem1(focuseditem);
  if item1 <> nil then begin
@@ -1549,6 +1553,8 @@ begin
    exclude(item1.fstate1,ns1_captionclipped);   
   end;
  end;
+ canvas.restore;
+ drawcelloverlay(canvas);
 end;
 
 procedure tcustomlistview.setoptions(const avalue: listviewoptionsty);
@@ -2481,10 +2487,12 @@ procedure titemedit.updatelayout;
 begin
  if fgridintf <> nil then begin
   if fframe <> nil then begin
-   getitemclass.calcitemlayout(paintrect.size,tframe1(fframe).fi.innerframe,fitemlist,flayoutinfo);
+   getitemclass.calcitemlayout(paintrect.size,tframe1(fframe).fi.innerframe,
+                                                        fitemlist,flayoutinfo);
   end
   else begin
-   getitemclass.calcitemlayout(paintrect.size,minimalframe,fitemlist,flayoutinfo);
+   getitemclass.calcitemlayout(paintrect.size,minimalframe,fitemlist,
+                                                                  flayoutinfo);
   end;
   invalidate;
   if not fitemlist.updating then begin
