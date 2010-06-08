@@ -44,7 +44,7 @@ const
  waitignoreevents = [ek_keypress,ek_buttonpress,ek_mousewheel];
  
 type
- eventstatety = (es_processed,es_child,es_preview,
+ eventstatety = (es_processed,es_child,es_preview,es_client,
                  es_transientfor, //mousewheel from upper modal window
                  es_local,es_broadcast,es_modal,es_drag,
                  es_reflected,es_nofocus);

@@ -316,6 +316,7 @@ type
 //   fonkeyup: keyeventty;
    foncopytoclipboard: updatestringeventty;
    fonpastefromclipboard: updatestringeventty;
+   fcursorreadonly: cursorshapety;
    function getmaxlength: integer;
    function getpasswordchar: msechar;
    procedure setmaxlength(const Value: integer);
@@ -326,8 +327,8 @@ type
    procedure settextflags(const value: textflagsty);
    procedure settextflagsactive(const value: textflagsty);
    function getcaretwidth: integer;
-   procedure setcaretwidth(const Value: integer);
-   
+   procedure setcaretwidth(const Value: integer);   
+   procedure setcursorreadonly(const avalue: cursorshapety);
   protected
    feditor: tinplaceedit;
    foptionsedit: optionseditty;
@@ -343,6 +344,7 @@ type
    procedure fontchanged; override;
    procedure enabledchanged; override;
    procedure dragstarted; override;
+   function actualcursor(const apos: pointty): cursorshapety; override;
 
    class function classskininfo: skininfoty; override;
   //iedit
@@ -413,6 +415,8 @@ type
   published
    property optionswidget default defaulteditwidgetoptions; //first!
    property cursor default cr_ibeam;
+   property cursorreadonly: cursorshapety read fcursorreadonly 
+                                write setcursorreadonly default cr_default;
    property oncopytoclipboard: updatestringeventty read foncopytoclipboard 
                   write foncopytoclipboard;
    property onpastefromclipboard: updatestringeventty read fonpastefromclipboard 
@@ -1067,6 +1071,7 @@ constructor tcustomedit.create(aowner: tcomponent);
 begin
  inherited;
  cursor:= cr_ibeam;
+ fcursorreadonly:= cr_default;
  optionsedit:= defaultoptionsedit;
  fwidgetrect.cx:= defaulteditwidgetwidth;
  fwidgetrect.cy:= defaulteditwidgetheight;
@@ -1564,6 +1569,7 @@ begin
  if feditor <> nil then begin
   feditor.updatecaret;
  end;
+ cursorchanged;
 end;
 
 function tcustomedit.hasselection: boolean;
@@ -1589,6 +1595,24 @@ procedure tcustomedit.dragstarted;
 begin
  feditor.dragstarted;
  inherited;
+end;
+
+procedure tcustomedit.setcursorreadonly(const avalue: cursorshapety);
+begin
+ if fcursorreadonly <> avalue then begin
+  fcursorreadonly:= avalue;
+  cursorchanged;
+ end;
+end;
+
+function tcustomedit.actualcursor(const apos: pointty): cursorshapety;
+begin
+ if oe_readonly in foptionsedit then begin
+  result:= fcursorreadonly;
+ end
+ else begin
+  result:= inherited actualcursor(apos);
+ end;
 end;
 
 end.

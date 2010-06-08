@@ -1380,7 +1380,7 @@ type
    function getframefont: tfont;
    procedure fontchanged; virtual;
    procedure fontcanvaschanged; virtual;
-   procedure updatecursorshape{(force: boolean = false)};
+   procedure updatecursorshape(apos: pointty){(force: boolean = false)};
 
    procedure parentclientrectchanged; virtual;
    procedure parentwidgetregionchanged(const sender: twidget); virtual;
@@ -1391,6 +1391,7 @@ type
    procedure ifiwidgetstatechanged;
    function getifiwidgetstate: ifiwidgetstatesty; virtual;
  {$endif}                     
+   procedure cursorchanged;
    procedure statechanged; virtual; //enabled,active,visible
    procedure enabledchanged; virtual;
    procedure activechanged; virtual;
@@ -1666,6 +1667,7 @@ type
    //origin = paintrect.pos
    function isleftbuttondown(const info: mouseeventinfoty;
                       const akeyshiftstate: shiftstatesty): boolean; overload;
+   function widgetmousepos(const ainfo: mouseeventinfoty): pointty; //transaltes to widgetpos if necessary
 
    function rootpos: pointty;
    property screenpos: pointty read getscreenpos write setscreenpos;
@@ -1796,7 +1798,8 @@ type
                  write setoptionswidget1 default defaultoptionswidget1;
    property optionsskin: optionsskinty read foptionsskin 
                                             write setoptionsskin default [];
-   function actualcursor: cursorshapety; virtual;
+   function actualcursor(const apos: pointty): cursorshapety; virtual;
+                             //origin = pos
    property cursor: cursorshapety read fcursor write setcursor default cr_default;
    property color: colorty read fcolor write setcolor default defaultwidgetcolor;
    property visible: boolean read getvisible write setvisible default true;
@@ -2119,6 +2122,7 @@ type
    fcaret: tcaret;
    fmousecapturewidget: twidget;
    fmousewidget: twidget;
+   fmousewidgetpos: pointty; //last mousepos sent to widget
    fmousehintwidget: twidget;
    fkeyboardcapturewidget: twidget;
    fclientmousewidget: twidget;
@@ -8532,6 +8536,16 @@ begin
 end;
        
 procedure twidget.mouseevent(var info: mouseeventinfoty);
+ procedure doclientmouseevent;
+ begin
+  include(info.eventstate,es_client);
+  try
+   clientmouseevent(info);
+  finally
+   exclude(info.eventstate,es_client);
+  end;    
+ end;
+ 
 var
  clientoffset: pointty;
 begin
@@ -8554,13 +8568,13 @@ begin
    case eventkind of
     ek_mousemove,ek_mousepark: begin
      if isclientmouseevent(info) then begin
-      clientmouseevent(info);
+      doclientmouseevent;
       clientoffset:= getclientoffset;
      end;
     end;
     ek_mousecaptureend: begin
      if ws_clientmousecaptured in fwidgetstate then begin
-      clientmouseevent(info);
+      doclientmouseevent;
      end;
     end;
     ek_clientmouseleave: begin
@@ -8578,13 +8592,14 @@ begin
      end;
      if appinst.fmousewidget = self then begin
       if fparentwidget <> nil then begin
-       fparentwidget.updatecursorshape{(true)};
+       fparentwidget.updatecursorshape(addpoint(appinst.fmousewidgetpos,
+                          fparentwidget.fwidgetrect.pos)) {(true)};
       end
       else begin
        appinst.widgetcursorshape:= cr_default;
       end;
      end;
-     clientmouseevent(info);
+     doclientmouseevent;
     end;
     ek_clientmouseenter: begin
      if (fframe <> nil) then begin
@@ -8599,8 +8614,8 @@ begin
        end;
       end;
      end;
-     updatecursorshape{(true)};
-     clientmouseevent(info);
+     updatecursorshape(info.pos){(true)};
+     doclientmouseevent;
     end;
     ek_buttonpress: begin
      if button = mb_left then begin
@@ -8621,7 +8636,7 @@ begin
      appinst.capturemouse(self,true);
      if isclientmouseevent(info) then begin
       include(fwidgetstate,ws_clientmousecaptured);
-      clientmouseevent(info);
+      doclientmouseevent;
       clientoffset:= getclientoffset;
      end;
      if wantmousefocus(info) then begin
@@ -8642,7 +8657,7 @@ begin
       end;
      end;
      if isclientmouseevent(info) then begin
-      clientmouseevent(info);
+      doclientmouseevent;
       clientoffset:= getclientoffset;
      end;
     end;
@@ -9754,14 +9769,15 @@ begin
  end;
 end;
 
-procedure twidget.updatecursorshape;
+procedure twidget.updatecursorshape(apos: pointty);
 var
  widget: twidget;
  cursor1: cursorshapety;
 begin
  widget:= self;
  repeat
-  cursor1:= widget.actualcursor;
+  cursor1:= widget.actualcursor(apos);
+  addpoint1(apos,widget.fwidgetrect.pos);
   widget:= widget.fparentwidget;
  until (cursor1 <> cr_default) or (widget = nil);
  if (widget = nil) and (cursor1 = cr_default) then begin
@@ -9770,18 +9786,23 @@ begin
  appinst.fwidgetcursorshape:= cursor1;
 end;
 
+procedure twidget.cursorchanged;
+begin
+ if not (csloading in componentstate) and (appinst <> nil) and 
+        checkdescendent(appinst.fclientmousewidget) then begin
+  appinst.fclientmousewidget.updatecursorshape(appinst.fmousewidgetpos);
+ end;
+end;
+
 procedure twidget.setcursor(const avalue: cursorshapety);
 begin
  if fcursor <> avalue then begin
   fcursor:= avalue;
-  if not (csloading in componentstate) and (appinst <> nil) and 
-         checkdescendent(appinst.fclientmousewidget) then begin
-   appinst.fclientmousewidget.updatecursorshape;
-  end;
+  cursorchanged;
  end;
 end;
 
-function twidget.actualcursor: cursorshapety;
+function twidget.actualcursor(const apos: pointty): cursorshapety;
 begin
  result:= fcursor;
 end;
@@ -9860,6 +9881,15 @@ begin
   result:= (eventkind = ek_buttonpress) and
               (button = mb_left) and pointinrect(pos,clientrect) and (
               shiftstate*keyshiftstatesmask = akeyshiftstate);
+ end;
+end;
+
+function twidget.widgetmousepos(const ainfo: mouseeventinfoty): pointty;
+                                  //transaltes to widgetpos if necessary
+begin
+ result:= ainfo.pos;
+ if es_client in ainfo.eventstate then begin
+  addpoint1(result,clientwidgetpos);
  end;
 end;
 
@@ -12405,6 +12435,7 @@ begin
   with capture do begin
    subpoint1(info.mouse.pos,rootpos);
    posbefore:= info.mouse.pos;
+   appinst.fmousewidgetpos:= posbefore;
    appinst.fdelayedmouseshift:= nullpoint;
    if info.mouse.eventkind = ek_mousewheel then begin
     mousewheelevent(info.wheel);
@@ -15660,7 +15691,7 @@ end;
 procedure tguiapplication.updatecursorshape; //restores cursorshape of mousewidget
 begin
  if fclientmousewidget <> nil then begin
-  fclientmousewidget.updatecursorshape{(true)};
+  fclientmousewidget.updatecursorshape(fmousewidgetpos){(true)};
  end
  else begin
   widgetcursorshape:= cr_default;
@@ -15689,7 +15720,7 @@ begin
  if fwidgetcursorshape <> avalue then begin
   fwidgetcursorshape:= avalue;
   if (avalue = cr_default) and (fclientmousewidget <> nil) then begin
-   fclientmousewidget.updatecursorshape;
+   fclientmousewidget.updatecursorshape(fmousewidgetpos);
   end;
  end;
 end;

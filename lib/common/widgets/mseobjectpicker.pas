@@ -116,7 +116,9 @@ var
  begin
     endmoving;
     fintf.endpickmove(info.pos,info.shiftstate,fpickoffset,fobjects);
-    shape:= fintf.getwidget.actualcursor;
+    with fintf.getwidget do begin
+     shape:= actualcursor(widgetmousepos(info));
+    end;
     fintf.getcursorshape(info.pos,info.shiftstate,shape);
     application.widgetcursorshape:= shape;
            //restore pick cursor
@@ -161,7 +163,9 @@ begin
     include(info.eventstate,es_processed);
    end
    else begin
-    shape:= fintf.getwidget.actualcursor;
+    with fintf.getwidget do begin
+     shape:= actualcursor(widgetmousepos(info));
+    end;
     if fintf.getcursorshape(info.pos,info.shiftstate,shape) then begin
      include(info.eventstate,es_processed);
 //     include(fstate,ops_cursorchanged);

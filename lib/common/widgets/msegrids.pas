@@ -322,6 +322,7 @@ type
    procedure setcolorselect(const Value: colorty);
    procedure setcoloractive(avalue: colorty);
    procedure setcolorfocused(avalue: colorty);
+//   procedure setcursor(const avalue: cursorshapety);
   protected
    fstate: gridpropstatesty;
    fstart,fend: integer;
@@ -330,6 +331,7 @@ type
    flinecolor: colorty;
    flinecolorfix: colorty;
    fcolor: colorty;
+   fcursor: cursorshapety;
    ffont: tgridpropfont;
    fgrid: tcustomgrid;
    fframe: tcellframe;
@@ -385,6 +387,7 @@ type
    property innerframe: framety read getinnerframe;
   published
    property color: colorty read fcolor write setcolor default cl_default;
+   property cursor: cursorshapety read fcursor write fcursor default cr_default;
    property frame: tcellframe read getframe write setframe;
    property face: tcellface read getface write setface;
    property linewidth: integer read flinewidth write setlinewidth 
@@ -1054,6 +1057,7 @@ type
    fcoloractive: colorty;
    fcolorfocused: colorty;
    finnerframe: framety;
+   fcursor: cursorshapety;
    procedure setlinewidth(const Value: integer);
    procedure setlinecolor(const Value: colorty);
    procedure setlinecolorfix(const Value: colorty);
@@ -1065,6 +1069,7 @@ type
    procedure setinnerframe_top(const avalue: integer);
    procedure setinnerframe_right(const avalue: integer);
    procedure setinnerframe_bottom(const avalue: integer);
+   procedure setcursor(const avalue: cursorshapety);
   protected
    freversedorder: boolean;
    fgrid: tcustomgrid;
@@ -1090,6 +1095,7 @@ type
    property oppositecount: integer read foppositecount write setoppositecount default 0;
    property innerframe: framety read finnerframe write setinnerframe;
   published
+   property cursor: cursorshapety read fcursor write setcursor default cr_default;
    property linewidth: integer read flinewidth
                 write setlinewidth default defaultgridlinewidth;
    property linecolor: colorty read flinecolor
@@ -1789,7 +1795,7 @@ type
    procedure error(aerror: griderrorty; text: string = '');
    procedure indexerror(row: boolean; index: integer; text: string = '');
 
-   function actualcursor: cursorshapety; override;
+   function actualcursor(const apos: pointty): cursorshapety; override;
    function getdisprect: rectty; override;
    procedure dofontheightdelta(var delta: integer); override;
    procedure fontchanged; override;
@@ -1949,7 +1955,8 @@ type
    function isautoappend: boolean; //true if last row is auto appended
    procedure removeappendedrow;
    function checkreautoappend: boolean; //true if row appended
-   
+
+   function gridprop(const coord: gridcoordty): tgridprop;  //nil if none
    function isdatacell(const coord: gridcoordty): boolean;
    function isvalidcell(const coord: gridcoordty): boolean;
    function isfixrow(const coord: gridcoordty): boolean;
@@ -2565,6 +2572,7 @@ constructor tgridprop.create(const agrid: tcustomgrid;
 begin
  fgrid:= agrid;
  fcolor:= cl_default;
+ fcursor:= aprop.fcursor;
  fcolorselect:= aprop.fcolorselect;
  fcoloractive:= aprop.fcoloractive;
  fcolorfocused:= aprop.fcolorfocused;
@@ -4733,8 +4741,23 @@ begin
  fcolorselect:= cl_default;
  fcoloractive:= cl_none;
  fcolorfocused:= cl_none;
+ fcursor:= cr_default;
  finnerframe:= minimalframe;
  inherited create(self,aclasstype);
+end;
+
+procedure tgridarrayprop.setcursor(const avalue: cursorshapety);
+var
+ int1: integer;
+begin
+ if fcursor <> avalue then begin
+  fcursor := avalue;
+  if not (csloading in fgrid.componentstate) then begin
+   for int1:= 0 to count - 1 do begin
+    tgridprop(items[int1]).cursor:= avalue;
+   end;
+  end;
+ end;
 end;
 
 procedure tgridarrayprop.setlinewidth(const Value: integer);
@@ -5735,7 +5758,8 @@ end;
 function tdatacol.getcursor(const arow: integer;
                           const actcellzone: cellzonety): cursorshapety;
 begin
- result:= cr_arrow;
+ result:= cursor;
+// result:= cr_arrow;
 end;
 
 function tdatacol.getdatastatname: msestring;
@@ -6046,11 +6070,11 @@ end;
 function tcustomstringcol.getcursor(const arow: integer;
                         const actcellzone: cellzonety): cursorshapety;
 begin
- if not isreadonly{(co_readonly in foptions)} then begin
-  result:= cr_ibeam;
- end
- else begin
-  result:= inherited getcursor(arow,actcellzone);
+ result:= inherited getcursor(arow,actcellzone);
+ if result = cr_default then begin
+  if not isreadonly{(co_readonly in foptions)} then begin
+   result:= cr_ibeam;
+  end
  end;
 end;
 
@@ -9279,14 +9303,24 @@ begin
  inherited;
 end;
 
-function tcustomgrid.actualcursor: cursorshapety;
+function tcustomgrid.actualcursor(const apos: pointty): cursorshapety;
+var
+ prop1: tgridprop;
 begin
+ prop1:= gridprop(fmousecell);
+ if prop1 <> nil then begin
+  result:= prop1.cursor;
+  if result <> cr_default then begin
+   exit;
+  end;
+ end;
+  
  with fmousecell do begin
   if (row >= 0) and (col >= 0) and (col < datacols.count) then begin
    result:= datacols[fmousecell.col].getcursor(fmousecell.row,flastcellzone);
   end
   else begin
-   result:= inherited actualcursor;
+   result:= inherited actualcursor(apos);
   end;
  end;
 end;
@@ -10329,6 +10363,33 @@ begin
  ((frowcount = 1) and (og_autofirstrow in foptionsgrid) or
       (foptionsgrid * [og_autoappend,og_appendempty] = [og_autoappend])
      ) and fdatacols.rowempty(frowcount - 1);
+end;
+
+function tcustomgrid.gridprop(const coord: gridcoordty): tgridprop;  //nil if none
+begin
+ result:= nil;
+ with coord do begin
+  if row < 0 then begin
+   if row >= - ffixrows.count then begin
+    result:= tgridprop(ffixrows.fitems[-1-row]);
+    exit;
+   end;
+  end;
+  if {(row = invalidaxis) or} (row >= 0) and (row < frowcount) then begin
+   if col < 0 then begin
+    if col >= -fixcols.count then begin
+     result:= tgridprop(ffixcols.fitems[-1-col]);
+     exit;
+    end;
+   end
+   else begin
+    if col < fdatacols.count then begin
+     result:= tgridprop(fdatacols.fitems[col]);
+     exit;
+    end;
+   end;
+  end;
+ end;
 end;
 
 function tcustomgrid.isdatacell(const coord: gridcoordty): boolean;

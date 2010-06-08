@@ -195,6 +195,7 @@ type
    foncopytoclipboard: updatestringeventty;
    fonpastefromclipboard: updatestringeventty;
 //   fcellheight: integer;
+   fcellcursor: cursorshapety;
    procedure createcellframe;
    function getcellframe: tcellframe;
    procedure setcellframe(const avalue: tcellframe);
@@ -233,6 +234,7 @@ type
    procedure setcellheightmin(const avalue: integer);
    function getcellheightmax: integer;
    procedure setcellheightmax(const avalue: integer);
+   procedure setcellcursor(const avalue: cursorshapety);
   protected
    fitemlist: titemviewlist;
    procedure setframeinstance(instance: tcustomframe); override;
@@ -300,6 +302,9 @@ type
    property cellwidthmax: integer read fcellwidthmax 
                          write setcellwidthmax default 0;
    property cellframe: tcellframe read getcellframe write setcellframe;
+   property cellcursor: cursorshapety read fcellcursor write setcellcursor 
+                                                           default cr_default;
+   
    property itemlist: titemviewlist read fitemlist write setitemlist;
    property options: listviewoptionsty read foptions write setoptions
                             default defaultlistviewoptions;
@@ -339,6 +344,7 @@ type
    property cellwidth;
    property cellheight;
    property cellframe;
+   property cellcursor;
    property cellfocusrectdist;
    property fixcols;
    property fixrows;
@@ -453,6 +459,7 @@ type
                          const acellzone: cellzonety): cursorshapety; override;
    procedure updatecellzone(const row: integer; const apos: pointty;
                             var result: cellzonety); override;
+   function actualcursor(const apos: pointty): cursorshapety; override;
   //iedit
    function locatecount: integer; override;        //number of locate values
    function getkeystring(const index: integer): msestring; override;
@@ -766,6 +773,7 @@ type
  tdatacol1 = class(tdatacol);
  tframe1 = class(tcustomframe);
  twidgetcol1 = class(twidgetcol);
+ tdatacols1 = class(tdatacols);
 
 { titemviewlist }
 
@@ -1185,6 +1193,7 @@ constructor tcustomlistview.create(aowner: tcomponent);
 begin
  foptions:= defaultlistviewoptions;
  fcolorglyph:= cl_black;
+ fcellcursor:= cr_default;
  if fitemlist = nil then begin
   fitemlist:= titemviewlist.create(self);
  end;
@@ -1443,6 +1452,7 @@ begin
  datarowheight:= height1;
  for int1:= 0 to fdatacols.count-1 do begin
   fdatacols[int1].width:= width1;
+  fdatacols[int1].cursor:= fcellcursor;
  end;
  repeat
   inherited;
@@ -2057,6 +2067,21 @@ begin
  fdatacols.linewidth:= value;
 end;
 
+procedure tcustomlistview.setcellcursor(const avalue: cursorshapety);
+var
+ int1: integer;
+begin
+ if avalue <> fcellcursor then begin
+  fcellcursor:= avalue;
+  with tdatacols1(fdatacols) do begin
+   cursor:= avalue;
+   for int1:= 0 to count-1 do begin
+    tdatacol(fitems[int1]).cursor:= avalue;
+   end;
+  end;
+ end;
+end;
+
 function tcustomlistview.getonselectionchanged: listvieweventty;
 begin
  result:= listvieweventty(inherited onselectionchanged);
@@ -2486,14 +2511,17 @@ var
  zone1: cellzonety;
 begin
  if (fvalue <> nil) and (info.eventkind in mouseposevents) then begin
-  if readonly then begin
-   application.widgetcursorshape:= cr_arrow;
+  zone1:= cz_default;
+  fvalue.updatecellzone(info.pos,zone1);
+  application.widgetcursorshape:= getcellcursor(-1,zone1);
+ {
+  if not editing then begin
+   application.widgetcursorshape:= cursorreadonly;
   end
   else begin
-   zone1:= cz_default;
-   fvalue.updatecellzone(info.pos,zone1);
    application.widgetcursorshape:= getcellcursor(-1,zone1);
   end;
+ }
  end;
  if canevent(tmethod(fonclientmouseevent)) then begin
   fonclientmouseevent(self,info);
@@ -2845,8 +2873,13 @@ begin
    fediting:= false;
   end;
  end;
- if not fediting and (application.clientmousewidget = self) then begin
-  application.widgetcursorshape:= cr_arrow;
+ if application.clientmousewidget = self then begin
+  if not fediting then begin
+   application.widgetcursorshape:= cursorreadonly;
+  end
+  else begin
+   application.widgetcursorshape:= cursor;
+  end;
  end;
 end;
 
@@ -2880,7 +2913,14 @@ begin
   result:= cursor;
  end
  else begin
-  result:= cr_arrow;
+  if (acellzone = cz_caption) and 
+                       (foptionsedit * [oe_locate,oe_readonly] <> []) then begin
+   result:= cursorreadonly;
+  end
+  else begin
+//   result:= cr_arrow;
+   result:= cr_default;
+  end;
  end;
 end;
 
@@ -2890,6 +2930,22 @@ begin
  inherited;
  if fitemlist <> nil then begin
   fitemlist[row].updatecellzone(apos,result);
+ end;
+end;
+
+function titemedit.actualcursor(const apos: pointty): cursorshapety;
+var
+ zone1: cellzonety;
+ int1: integer;
+begin
+ if fgridintf <> nil then begin 
+  zone1:= cz_default;
+  int1:= fgridintf.grid.row;
+  updatecellzone(int1,widgetpostoclientpos(apos),zone1);
+  result:= getcellcursor(int1,zone1);
+ end
+ else begin
+  result:= inherited actualcursor(apos);
  end;
 end;
 

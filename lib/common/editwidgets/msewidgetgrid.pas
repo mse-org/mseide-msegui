@@ -1641,11 +1641,10 @@ end;
 function twidgetcol.getcursor(const arow: integer; 
                             const actcellzone: cellzonety): cursorshapety;
 begin
- if (fintf <> nil) and not (co_readonly in foptions) then begin
+ result:= inherited getcursor(arow,actcellzone);
+ if (result = cr_default) and (fintf <> nil) and 
+                         not (co_readonly in foptions) then begin
   result:= fintf.getcellcursor(arow,actcellzone);
- end
- else begin
-  result:= inherited getcursor(arow,actcellzone);
  end;
 end;
 
