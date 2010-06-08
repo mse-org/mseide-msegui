@@ -1204,7 +1204,7 @@ var
 procedure setremotedatalist(const aintf: idatalistclient;
                     const source: tdatalist; var dest: tdatalist);
 begin
- aintf.getobjectlinker.setlinkedvar(aintf,source,dest,
+ aintf.getobjectlinker.setlinkedvar(aintf,source,tlinkedpersistent(dest),
                                                typeinfo(idatalistclient));
  if dest <> nil then begin
   include(dest.fstate,dls_remote);
@@ -4029,7 +4029,8 @@ begin
  end;
  fintparam:= index;
  if (dls_remote in fstate) and (fobjectlinker <> nil) then begin
-  fobjectlinker.forall(@remoteitemchange,typeinfo(idatalistclient));
+  fobjectlinker.forall({$ifdef FPC}@{$endif}remoteitemchange,
+                                               typeinfo(idatalistclient));
  end;
 end;
 

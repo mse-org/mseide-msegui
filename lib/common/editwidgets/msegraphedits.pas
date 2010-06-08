@@ -2389,6 +2389,8 @@ begin
  inherited;
 end;
 
+{$endif}
+
 procedure tcustombooleanedit.resetgridvalue(const index: integer);
 begin
  gridvalue[index]:= false;
@@ -2403,7 +2405,6 @@ function tcustombooleanedit.gridvaluechecked(const aindex: integer): boolean;
 begin
  result:= gridvalue[aindex];
 end;
-{$endif}
 
 { tcustombooleaneditradio }
 
