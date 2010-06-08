@@ -2949,12 +2949,13 @@ begin
  if fgridintf <> nil then begin 
   zone1:= cz_default;
   int1:= fgridintf.grid.row;
-  updatecellzone(int1,widgetpostoclientpos(apos),zone1);
-  result:= getcellcursor(int1,zone1);
- end
- else begin
-  result:= inherited actualcursor(apos);
+  if int1 >= 0 then begin
+   updatecellzone(int1,widgetpostoclientpos(apos),zone1);
+   result:= getcellcursor(int1,zone1);
+   exit;
+  end;
  end;
+ result:= inherited actualcursor(apos);
 end;
 
 {

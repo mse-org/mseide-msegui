@@ -1874,6 +1874,7 @@ type
    procedure settransientfor(const Value: twindow; const windowevent: boolean);
    procedure sizeconstraintschanged;
    procedure createwindow;
+   procedure checkwindowid;
    procedure checkwindow(windowevent: boolean);
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); virtual;
                                       //nil if from application
@@ -8082,7 +8083,7 @@ end;
 
 function twidget.windowpo: pwindowty;
 begin
- window.checkwindow(false);
+ window.checkwindowid;
  result:= @fwindow.fwindow;
 end;
 
@@ -11820,6 +11821,16 @@ begin
  destroywindow;
 end;
 
+procedure twindow.checkwindowid;
+begin
+ checkwindow(false);
+ {
+ if fwindow.id = 0 then begin
+  createwindow;
+ end
+ }
+end;
+
 procedure twindow.checkwindow(windowevent: boolean);
 begin
  if (appinst <> nil) and (aps_inited in appinst.fstate) then begin
@@ -12315,10 +12326,10 @@ begin
    fowner.checkwidgetsize(rect1.size);
   end;
   fowner.internalsetwidgetrect(rect1,true);
-  if pointisequal(arect.pos,fowner.fwidgetrect.pos) then begin
+  if pointisequal(rect1.pos,fowner.fwidgetrect.pos) then begin
    include(fstate,tws_posvalid);
   end;
-  if sizeisequal(arect.size,fowner.fwidgetrect.size) then begin
+  if sizeisequal(rect1.size,fowner.fwidgetrect.size) then begin
    include(fstate,tws_sizevalid);
    fsizeerrorcount:= 0;
   end
@@ -12847,7 +12858,7 @@ end;
 
 function twindow.winid: winidty;
 begin
- checkwindow(false);
+ checkwindowid;
  result:= fwindow.id;
 end;
 
