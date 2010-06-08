@@ -914,7 +914,7 @@ end;
 procedure setifidatasource(const aintf: iifidatasourceclient;
            const source: tifidatasource; var dest: tifidatasource);
 begin
- aintf.getobjectlinker.setlinkedvar(aintf,source,dest,
+ aintf.getobjectlinker.setlinkedvar(aintf,source,tmsecomponent(dest),
                          typeinfo(iifidatasourceclient));
  aintf.bindingchanged;
 end;
