@@ -152,7 +152,7 @@ type
    property imageheight: integer read fimagesize.cy write setimageheight default 0;
    property textflags default defaultfoldedittextflags;
    property textflagsactive default defaultfoldedittextflagsactive;
-   property cursor default cr_default;
+//   property cursor default cr_default;
  end;
  
 implementation
@@ -189,7 +189,7 @@ begin
  fdefault.int:= -1;
  fimnr_value:= -1;
  inherited;
- cursor:= cr_default;
+// cursor:= cr_default;
  textflags:=  defaultfoldedittextflags;
  textflagsactive:=  defaultfoldedittextflagsactive;
 end;

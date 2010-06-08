@@ -414,7 +414,7 @@ type
 //   property onkeyup: keyeventty read fonkeyup write fonkeyup;
   published
    property optionswidget default defaulteditwidgetoptions; //first!
-   property cursor default cr_ibeam;
+//   property cursor default cr_ibeam;
    property cursorreadonly: cursorshapety read fcursorreadonly 
                                 write setcursorreadonly default cr_default;
    property oncopytoclipboard: updatestringeventty read foncopytoclipboard 
@@ -1070,7 +1070,7 @@ end;
 constructor tcustomedit.create(aowner: tcomponent);
 begin
  inherited;
- cursor:= cr_ibeam;
+// cursor:= cr_ibeam;
  fcursorreadonly:= cr_default;
  optionsedit:= defaultoptionsedit;
  fwidgetrect.cx:= defaulteditwidgetwidth;
@@ -1612,6 +1612,9 @@ begin
  end
  else begin
   result:= inherited actualcursor(apos);
+  if result = cr_default then begin
+   result:= cr_ibeam;
+  end;
  end;
 end;
 

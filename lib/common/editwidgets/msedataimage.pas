@@ -201,7 +201,7 @@ end;
 function tcustomdataimage.getcellcursor(const arow: integer;
                                   const acellzone: cellzonety): cursorshapety;
 begin
- result:= cursor;
+ result:= actualcursor(nullpoint);
 end;
 
 procedure tcustomdataimage.updatecellzone(const row: integer; const apos: pointty;

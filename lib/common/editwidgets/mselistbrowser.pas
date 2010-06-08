@@ -2918,8 +2918,8 @@ begin
    result:= cursorreadonly;
   end
   else begin
-//   result:= cr_arrow;
-   result:= cr_default;
+   result:= cr_arrow;
+//   result:= cr_default;
   end;
  end;
 end;

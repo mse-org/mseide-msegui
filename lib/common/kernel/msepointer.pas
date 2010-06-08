@@ -20,7 +20,7 @@ const
  defaultsizingmargin = 3;
 type
 
- cursorshapety = (cr_default,
+ cursorshapety = (cr_default,cr_parent,
              cr_none,cr_arrow,cr_cross,cr_wait,cr_ibeam,
              cr_sizever,cr_sizehor,cr_sizebdiag,cr_sizefdiag,cr_sizeall,
              cr_splitv,cr_splith,cr_pointinghand,cr_forbidden,cr_drag,

@@ -1822,7 +1822,7 @@ end;
 function tgraphdataedit.getcellcursor(const arow: integer;
                               const acellzone: cellzonety): cursorshapety;
 begin
- result:= cursor;
+ result:= actualcursor(nullpoint);
 end;
 
 procedure tgraphdataedit.updatecellzone(const arow: integer;

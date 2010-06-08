@@ -9776,11 +9776,14 @@ var
 begin
  widget:= self;
  repeat
-  cursor1:= widget.actualcursor(apos);
+  cursor1:= widget.fcursor;
+  if cursor1 = cr_default then begin
+   cursor1:= widget.actualcursor(apos);
+  end;
   addpoint1(apos,widget.fwidgetrect.pos);
   widget:= widget.fparentwidget;
- until (cursor1 <> cr_default) or (widget = nil);
- if (widget = nil) and (cursor1 = cr_default) then begin
+ until not (cursor1 in [cr_default,cr_parent]) or (widget = nil);
+ if (widget = nil) and (cursor1 in [cr_default,cr_parent]) then begin
   cursor1:= cr_arrow;
  end;
  appinst.fwidgetcursorshape:= cursor1;

@@ -700,7 +700,8 @@ const
   }
  defaultshape = xc_left_ptr;
  standardcursors: array[cursorshapety] of longword = (
-      defaultshape,defaultshape,xc_left_ptr,xc_crosshair,xc_watch,xc_xterm,
+      defaultshape,defaultshape,defaultshape,
+      xc_left_ptr,xc_crosshair,xc_watch,xc_xterm,
       xc_sb_v_double_arrow,xc_sb_h_double_arrow,xc_top_right_corner,xc_bottom_right_corner,xc_fleur,
       xc_sb_v_double_arrow,xc_sb_h_double_arrow,xc_hand2,xc_circle,xc_sailboat,
       xc_top_left_corner,xc_bottom_left_corner,

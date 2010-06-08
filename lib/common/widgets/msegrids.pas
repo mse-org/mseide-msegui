@@ -6074,7 +6074,7 @@ begin
  if result = cr_default then begin
   if not isreadonly{(co_readonly in foptions)} then begin
    result:= cr_ibeam;
-  end
+  end;
  end;
 end;
 
