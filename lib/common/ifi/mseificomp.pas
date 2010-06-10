@@ -386,6 +386,7 @@ type
  tintegerclientcontroller = class(tvalueclientcontroller)
   private
    fvalue: integer;
+   fvaluedefault: integer;
    fmin: integer;
    fmax: integer;
    fonclientsetvalue: setintegereventty;
@@ -416,6 +417,8 @@ type
 //                                                             write setgridvalue;
   published
    property value: integer read fvalue write setvalue1 default 0;
+   property valuedefault: integer read fvaluedefault 
+                                        write fvaluedefault default 0;
    property min: integer read fmin write setmin default 0;
    property max: integer read fmax write setmax default maxint;
    property onclientsetvalue: setintegereventty 
@@ -435,6 +438,7 @@ type
   published
    property dropdown: tifidropdownlistcontroller read fdropdown write setdropdown;
    property value default -1;
+   property valuedefault default -1;
    property min default -1;
  end;
  
@@ -866,7 +870,15 @@ end;
    property connection: tmsecomponent read fconnection write setconnection;
    property fields: tificonnectedfields read getfields write setfields;
  end;
- 
+
+ tifiintegerdatalist = class(tintegerdatalist)
+  protected
+   fowner: tintegerclientcontroller;
+   function getdefault: pointer; override;
+  public
+   constructor create(const aowner: tintegerclientcontroller);
+ end;
+  
 procedure setifilinkcomp(const alink: iifilink;
                const alinkcomp: tifilinkcomp; var dest: tifilinkcomp);
 procedure setifidatasource(const aintf: iifidatasourceclient;
@@ -2181,7 +2193,7 @@ end;
 
 function tintegerclientcontroller.createdatalist: tdatalist;
 begin
- result:= tintegerdatalist.create;
+ result:= tifiintegerdatalist.create(self);
 end;
 
 function tintegerclientcontroller.getlistdatatypes: listdatatypesty;
@@ -3116,6 +3128,7 @@ begin
  inherited;
  fmin:= -1;
  fvalue:= -1;
+ fvaluedefault:= -1;
 end;
 
 destructor tenumclientcontroller.destroy;
@@ -3461,6 +3474,19 @@ begin
  if fconnectionintf = nil then begin
   raise exception.create(name+': No connection.');
  end;
+end;
+
+{ tifiintegerdatalist }
+
+constructor tifiintegerdatalist.create(const aowner: tintegerclientcontroller);
+begin
+ fowner:= aowner;
+ inherited create;
+end;
+
+function tifiintegerdatalist.getdefault: pointer;
+begin
+ result:= @fowner.valuedefault;
 end;
 
 end.

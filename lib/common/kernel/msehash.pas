@@ -1261,7 +1261,9 @@ begin
    int1:= int1 * 2;
   end;
   if int1 <> length(fhashtable) then begin
-   fillchar(pointer(fhashtable)^,length(fhashtable)*sizeof(fhashtable[0]),0);
+   if fhashtable <> nil then begin
+    fillchar(pointer(fhashtable)^,length(fhashtable)*sizeof(fhashtable[0]),0);
+   end;
    setlength(fhashtable,int1); //additional length nulled by setlength
    fmask:= int1 - 1;
    rehash;

@@ -1682,8 +1682,8 @@ end;
 {$ifdef mse_with_ifi}
 procedure twidgetcol.updateifigriddata(const alist: tdatalist);
 begin
- if (fdata <> nil) and not (dls_remote in fdata.state) and 
-                                               (alist <> nil) then begin
+ if (fdata <> nil) and not (dls_remote in fdata.state) {and 
+                                               (alist <> nil)} then begin
   freeandnil(fdata); //free internal datalist
  end;
  setremotedatalist(idatalistclient(self),alist,fdata);

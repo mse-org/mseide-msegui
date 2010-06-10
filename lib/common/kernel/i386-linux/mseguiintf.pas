@@ -6782,6 +6782,7 @@ begin
  numlockcode:= xkeysymtokeycode(appdisp,xk_num_lock);
  if numlockcode <> nosymbol then begin  //return numlock state
   modmap:= xgetmodifiermapping(appdisp);
+{$ifdef FPC} {$checkpointer off} {$endif}
   po2:= modmap^.modifiermap;
   for int1:= 0 to 7 do begin
    for int2:= 0 to modmap^.max_keypermod - 1 do begin
@@ -6796,6 +6797,7 @@ begin
    end;
   end;
   xfreemodifiermap(modmap);
+{$ifdef FPC} {$checkpointer default} {$endif}
  end;
 
  result:= gue_ok;

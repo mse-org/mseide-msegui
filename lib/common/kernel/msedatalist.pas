@@ -97,7 +97,6 @@ type
    fmaxcount: integer;
    fringpointer: integer;
    fcheckeditem: integer;
-   procedure clearbuffer; //buffer release
    procedure setcapacity(value: integer);
    procedure internalsetcount(value: integer; nochangeandinit: boolean);
    procedure checkcapacity; //ev. reduktion des memory
@@ -123,6 +122,7 @@ type
    procedure assigntodata(const dest: tdatalist);
    procedure newbuffer(const acount: integer; const noinit: boolean;
                               const fillnull: boolean);
+   procedure clearbuffer; virtual; //buffer release
    procedure setcount(const value: integer); virtual;
    property nochange: integer read fnochange;
    procedure internalgetasarray(const adatapo: pointer; const asize: integer);

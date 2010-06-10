@@ -1231,7 +1231,8 @@ type
    procedure movegrouptoparent(const aindex: integer; const acount: integer); 
                  //called before deleting of rows
    procedure updatedeletedrows(const index: integer; const acount: integer);
-   procedure setcount(const value: integer); override;
+//   procedure setcount(const value: integer); override;
+//   procedure clearbuffer; override;   
    procedure internalshow(var aindex: integer);
    procedure internalhide(var aindex: integer);
    procedure show(const aindex: integer);
@@ -7555,7 +7556,7 @@ var
 begin
  result:= true;
  for int1:= 0 to count - 1 do begin
-  if not cols[int1].isempty(arow) then begin
+  if not tdatacol(fitems[int1]).isempty(arow) then begin
    result:= false;
    break;
   end;
@@ -15151,6 +15152,9 @@ begin                  //todo: optimize
   if int2 <= arow then begin
    inc(int1);
    visirow1^:= int1;
+   if int1 > high(fvisiblerows) then begin //?????
+    setlength(fvisiblerows,high(fvisiblerows)+2);
+   end;
    fvisiblerows[int1]:= int2;
    rowstat1^.fold:= rowstat1^.fold and not currentfoldhiddenmask;
    inc(int2);
@@ -15444,15 +15448,30 @@ begin
   end;
  end;
 end;
-
+{
 procedure trowstatelist.setcount(const value: integer);
+var
+ bo1: boolean;
 begin
- inherited;
  if ffolded then begin
-  setlength(fvisiblerows,count);
+  bo1:= value < fcount;
+  setlength(fvisiblerows,count); //?????
+  inherited;
+  if bo1 then begin
+   setlength(fvisiblerows,count); //?????
+  end;
+ end
+ else begin
+  inherited;
  end;
 end;
 
+procedure trowstatelist.clearbuffer;
+begin
+ fvisiblerows:= nil;
+ inherited;
+end;
+}
 procedure trowstatelist.updatedeletedrows(const index: integer;
                                                   const acount: integer);
 var

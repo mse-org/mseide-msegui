@@ -1689,9 +1689,11 @@ begin
  fgridintf:= intf;
  if fgridintf <> nil then begin
 {$ifdef mse_with_ifi}
+{
   if (fifilink <> nil) and (fifilink.controller.datalist <> nil) then begin
    updateifigriddata(fifilink.controller.datalist);
   end;
+}
 {$endif}
   fdatalist:= fgridintf.getcol.datalist;
   fgridintf.updateeditoptions(foptionsedit);

@@ -1374,11 +1374,13 @@ procedure tgraphdataedit.setgridintf(const intf: iwidgetgrid);
 begin
  fgridintf:= intf;
  {$ifdef mse_with_ifi}
+{
  if fgridintf <> nil then begin
   if (fifilink <> nil) and (fifilink.controller.datalist <> nil) then begin
    updateifigriddata(fifilink.controller.datalist);
   end;
  end;
+}
 {$endif}
 
 end;
