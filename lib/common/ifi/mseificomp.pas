@@ -23,14 +23,14 @@ type
  tifivaluelinkcomp = class;
  
  ificlienteventty = procedure(const sender: tobject;
-                             const alink: iificlient) of object;
+                              const alink: iificlient) of object;
  ificlientstateeventty = procedure(const sender: tobject;
                            const alink: iificlient;
                            const astate: ifiwidgetstatesty;
                            const achangedstate: ifiwidgetstatesty) of object;
  ificlientmodalresulteventty = procedure(const sender: tobject;
-                             const link: iificlient; 
-                             const amodalresult: modalresultty) of object;
+                                   const link: iificlient; 
+                                   const amodalresult: modalresultty) of object;
 
  ifivaluelinkstatety = (ivs_linking,ivs_valuesetting,ivs_loadedproc);
  ifivaluelinkstatesty = set of ifivaluelinkstatety;

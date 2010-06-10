@@ -76,7 +76,7 @@ type
    fempty_color: colorty;
    fempty_options: emptyoptionsty;
 {$ifdef mse_with_ifi}
-   fifilink: tifilinkcomp;
+   fifilink: tifivaluelinkcomp;
    function getifidatalinkintf: iifidatalink; virtual;
     //iifidatalink
    procedure ifisetvalue(var avalue; var accept: boolean);
@@ -1688,6 +1688,11 @@ procedure tcustomdataedit.setgridintf(const intf: iwidgetgrid);
 begin
  fgridintf:= intf;
  if fgridintf <> nil then begin
+{$ifdef mse_with_ifi}
+  if (fifilink <> nil) and (fifilink.controller.datalist <> nil) then begin
+   updateifigriddata(fifilink.controller.datalist);
+  end;
+{$endif}
   fdatalist:= fgridintf.getcol.datalist;
   fgridintf.updateeditoptions(foptionsedit);
   if (ow_autoscale in foptionswidget) and
@@ -2468,6 +2473,7 @@ procedure tcustomdataedit.updateifigriddata(const alist: tdatalist);
 begin
  if fgridintf <> nil then begin
   fgridintf.updateifigriddata(alist);
+  fdatalist:= alist;
  end;
 end;
 
